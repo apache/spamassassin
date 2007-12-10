@@ -54,7 +54,7 @@ sub safe_lock {
 
   $max_retries ||= 30;
   $mode ||= 0600;
-  $mode = oct $mode if $mode =~ /^0/;   # accept number or string
+  $mode = oct $mode;
 
   my $lock_file = "$path.mutex";
   my $umask = umask(~$mode);

@@ -1,5 +1,5 @@
-opts_weekly="--net --cache --cachedir=/tmpfs/aicache_nightly --restart=500 --after="15552000" --tail=15000 --net -j 8 -f /home/bbmass/mc-nightly/targets.fredt"
-opts_nightly="--cache --cachedir=/tmpfs/aicache_nightly --restart=500 --after="15552000" --tail=15000 -f /home/bbmass/mc-nightly/targets.fredt"
+opts_weekly="--net --cache --cachedir=/tmpfs/aicache_nightly --cs_schedule_cache --cs_cachedir=/export/home/bbmass/cache --restart=500 --after="15552000" --tail=15000 --net -j 8 -f /home/bbmass/mc-nightly/targets.fredt"
+opts_nightly="--cache --cachedir=/tmpfs/aicache_nightly --cs_schedule_cache --cs_cachedir=/export/home/bbmass/cache --restart=500 --after="15552000" --tail=15000 -f /home/bbmass/mc-nightly/targets.fredt"
 tmp=$HOME/tmp
 tree=$HOME/svn
 prefs_weekly=$HOME/user_prefs.weekly

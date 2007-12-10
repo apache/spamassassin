@@ -128,6 +128,9 @@
 /* Jan 16, 2007 jm: get markup headers from spamd */
 #define SPAMC_HEADERS         (1<<15)
 
+/* December 5, 2007 duncf: send log messages to callback */
+#define SPAMC_LOG_TO_CALLBACK (1<<14)
+
 #define SPAMC_MESSAGE_CLASS_SPAM 1
 #define SPAMC_MESSAGE_CLASS_HAM  2
 
@@ -292,6 +295,11 @@ void message_cleanup(struct message *m);
 int process_message(struct transport *tp, char *username,
 		    int max_size, int in_fd, int out_fd,
 		    const int check_only, const int safe_fallback);
+
+void register_spamc_header_callback(const struct message *m, void (*func)(struct message *m, int flags, char *buf, int len));
+void register_spamd_header_callback(const struct message *m, void (*func)(struct message *m, int flags, const char *buf, int len));
+
+void register_libspamc_log_callback(void (*function)(int flags, int level, char *msg, va_list args));
 
 void libspamc_log(int flags, int level, char *msg, ...);
 

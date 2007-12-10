@@ -435,10 +435,12 @@ sub query_domain {
     $single_dnsbl = 1;
   }
 
+  my $rhsblrules = $scanner->{uridnsbl_active_rules_rhsbl};
+  my $reviprules = $scanner->{uridnsbl_active_rules_revipbl};
+
   if ($single_dnsbl) {
     # look up the domain in the RHSBL subset
-    my $cf = $scanner->{uridnsbl_active_rules_rhsbl};
-    foreach my $rulename (keys %{$cf}) {
+    foreach my $rulename (keys %{$rhsblrules}) {
       my $rulecf = $scanner->{conf}->{uridnsbls}->{$rulename};
       $self->lookup_single_dnsbl($scanner, $obj, $rulename,
 				 $dom, $rulecf->{zone}, $rulecf->{type});
@@ -447,8 +449,9 @@ sub query_domain {
       $scanner->register_async_rule_start($rulename);
     }
 
-    # perform NS, A lookups to look up the domain in the non-RHSBL subset
-    if ($dom !~ /^\d+\.\d+\.\d+\.\d+$/) {
+    # perform NS, A lookups to look up the domain in the non-RHSBL subset,
+    # but only if there are active reverse-IP-URIBL rules
+    if ($dom !~ /^\d+\.\d+\.\d+\.\d+$/ && (scalar keys %{$reviprules})) {
       $self->lookup_domain_ns($scanner, $obj, $dom);
     }
   }
@@ -456,8 +459,7 @@ sub query_domain {
   # note that these rules are now underway.   important: unless the
   # rule hits, in the current design, these will not be considered
   # "finished" until harvest_dnsbl_queries() completes
-  my $cf = $scanner->{uridnsbl_active_rules_revipbl};
-  foreach my $rulename (keys %{$cf}) {
+  foreach my $rulename (keys %{$reviprules}) {
     $scanner->register_async_rule_start($rulename);
   }
 }
@@ -471,7 +473,7 @@ sub lookup_domain_ns {
   return if $scanner->{async}->get_lookup($key);
 
   # dig $dom ns
-  my $ent = $self->start_lookup($scanner, 'NS',
+  my $ent = $self->start_lookup($scanner, $dom, 'NS',
                                 $self->res_bgsend($scanner, $dom, 'NS', $key),
                                 $key);
   $ent->{obj} = $obj;
@@ -517,7 +519,7 @@ sub lookup_a_record {
   return if $scanner->{async}->get_lookup($key);
 
   # dig $hname a
-  my $ent = $self->start_lookup($scanner, 'A',
+  my $ent = $self->start_lookup($scanner, $hname, 'A',
                                 $self->res_bgsend($scanner, $hname, 'A', $key),
                                 $key);
   $ent->{obj} = $obj;
@@ -562,7 +564,7 @@ sub lookup_single_dnsbl {
   my $item = $lookupstr.".".$dnsbl;
 
   # dig $ip txt
-  my $ent = $self->start_lookup($scanner, 'DNSBL',
+  my $ent = $self->start_lookup($scanner, $item, 'DNSBL',
                               $self->res_bgsend($scanner, $item, $qtype, $key),
                               $key);
   $ent->{obj} = $obj;
@@ -650,11 +652,11 @@ sub got_dnsbl_hit {
 # ---------------------------------------------------------------------------
 
 sub start_lookup {
-  my ($self, $scanner, $type, $id, $key) = @_;
+  my ($self, $scanner, $zone, $type, $id, $key) = @_;
 
   my $ent = {
     key => $key,
-    timeout_initial => $scanner->{conf}->{rbl_timeout},
+    zone => $zone,  # serves to fetch other per-zone settings
     type => "URI-".$type,
     id => $id,
     completed_callback => sub {

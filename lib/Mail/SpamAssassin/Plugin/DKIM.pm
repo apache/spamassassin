@@ -37,13 +37,17 @@ for that module.
 
 =head1 TAGS
 
-The following tag is added to the set available for use in reports, headers,
-other plugins, etc.:
+The following tags are added to the set, available for use in reports,
+headers, other plugins, etc.:
 
-  _DKIMIDENTITY_    verified signing identity (the 'i' tag) from a signature;
-                    Note there may be more than one signature in a message,
-                    currently they are all provided as a space-separated list,
-                    although this behaviour is likely to be changed.
+  _DKIMIDENTITY_  signing identities (the 'i' tag) from valid signatures;
+  _DKIMDOMAIN_    signing domains (the 'd' tag) from valid signatures;
+
+Identities and domains from signatures which failed verification are not
+included in these tags. Duplicates are eliminated (e.g. when there are two or
+more valid signatures from the same signer, only one copy makes it into a tag).
+Note that there may be more than one signature in a message - currently they
+are provided as a space-separated list, although this behaviour may change.
 
 =head1 SEE ALSO
 
@@ -214,10 +218,11 @@ sub check_dkim_signed {
   return $scan->{dkim_signed};
 }
 
+# mosnomer, should be check_dkim_valid, keep for compatibility
 sub check_dkim_verified {
   my ($self, $scan) = @_;
   $self->_check_dkim_signature($scan) unless $scan->{dkim_checked_signature};
-  return $scan->{dkim_verified};
+  return $scan->{dkim_valid};
 }
 
 sub check_dkim_signsome {
@@ -267,7 +272,7 @@ sub _check_dkim_signature {
 
   $scan->{dkim_checked_signature} = 1;
   $scan->{dkim_signed} = 0;
-  $scan->{dkim_verified} = 0;
+  $scan->{dkim_valid} = 0;
   $scan->{dkim_key_testing} = 0;
 
   my $timemethod = $self->{main}->time_method("check_dkim_signature");
@@ -309,7 +314,13 @@ sub _check_dkim_signature {
         ($scan->{dkim_address} ? $scan->{dkim_address} : 'none'));
 
     $scan->{dkim_signatures} = [];
-    foreach my $signature (grep { defined } ($message->signature) ) {
+
+    # versions before 0.29 only provided a public interface to fetch one
+    # signature, new versions allow access to all signatures of a message
+    my @signatures = Mail::DKIM->VERSION >= 0.29 ? $message->signatures
+                                                 : $message->signature;
+    @signatures = grep { defined } @signatures;  # just in case
+    foreach my $signature (@signatures) {
       # i=  Identity of the user or agent (e.g., a mailing list manager) on
       #     behalf of which this message is signed (dkim-quoted-printable;
       #     OPTIONAL, default is an empty local-part followed by an "@"
@@ -318,19 +329,22 @@ sub _check_dkim_signature {
       dbg("dkim: signing identity: %s, d=%s, a=%s, c=%s",
           $identity, $signature->domain,
           $signature->algorithm, scalar($signature->canonicalization));
-      if ($identity eq '') {  # just in case
+      if (!defined $identity || $identity eq '') {  # just in case
         $identity = '@' . $signature->domain;
         $signature->identity($identity);
       } elsif ($identity !~ /\@/) {  # just in case
         $identity = '@' . $identity;
         $signature->identity($identity);
       }
-      push(@{$scan->{dkim_signatures}}, $signature);
     }
-    $scan->set_tag('DKIMIDENTITY',
-      join(" ", map  { $_->identity }
-                grep { $_->result eq 'pass' } @{$scan->{dkim_signatures}}) );
-
+    $scan->{dkim_signatures} = \@signatures;
+    { my (%seen1,%seen2);
+      my @v_sign = grep { $_->result eq 'pass' } @signatures;
+      $scan->set_tag('DKIMIDENTITY',
+              join(" ", grep { !$seen1{$_}++ } map { $_->identity } @v_sign));
+      $scan->set_tag('DKIMDOMAIN',
+              join(" ", grep { !$seen2{$_}++ } map { $_->domain } @v_sign));
+    }
     my $result = $message->result();
     my $detail = $message->result_detail();
     # let the result stand out more clearly in the log, use uppercase
@@ -340,7 +354,7 @@ sub _check_dkim_signature {
     # extract the actual lookup results
     if ($result eq 'pass') {
       $scan->{dkim_signed} = 1;
-      $scan->{dkim_verified} = 1;
+      $scan->{dkim_valid} = 1;
     }
     elsif ($result eq 'fail') {
       $scan->{dkim_signed} = 1;
@@ -382,13 +396,13 @@ sub _check_dkim_policy {
     dbg("dkim: policy: dkim object not available (programming error?)");
   } elsif (!$scan->is_dns_available()) {
     dbg("dkim: policy: not retrieved, no DNS resolving available");
-  } elsif ($scan->{dkim_verified}) {  # no need to fetch policy when verifies
+  } elsif ($scan->{dkim_valid}) {  # no need to fetch policy when valid
     # draft-allman-dkim-ssp-02: If the message contains a valid Originator
     # Signature, no Sender Signing Practices check need be performed:
     # the Verifier SHOULD NOT look up the Sender Signing Practices
     # and the message SHOULD be considered non-Suspicious.
 
-    dbg("dkim: policy: not retrieved, signature does verify");
+    dbg("dkim: policy: not retrieved, signature is valid");
 
   } else {
     my $timeout = $scan->{conf}->{dkim_timeout};
@@ -467,17 +481,17 @@ sub _check_dkim_whitelist {
   my($any_match_at_all, $any_match_by_wl_ref) =
     _wlcheck_list($self, $scan, \@acceptable_identity_tuples);
 
-  my(@verif,@fail);
+  my(@valid,@fail);
   foreach my $wl (keys %$any_match_by_wl_ref) {
     my $match = $any_match_by_wl_ref->{$wl};
     if (defined $match) {
       $scan->{"match_in_$wl"} = 1  if $match;
-      if ($match) { push(@verif,$wl) } else { push(@fail,$wl) }
+      if ($match) { push(@valid,$wl) } else { push(@fail,$wl) }
     }
   }
-  if (@verif) {
+  if (@valid) {
     dbg("dkim: originator %s, WHITELISTED by %s",
-         $originator, join(", ",@verif));
+         $originator, join(", ",@valid));
   } elsif (@fail) {
     dbg("dkim: originator %s, found in %s BUT IGNORED",
          $originator, join(", ",@fail));
@@ -522,14 +536,14 @@ sub _wlcheck_list {
 
   my %any_match_by_wl;
   my $any_match_at_all = 0;
-  my $expiration_supported = Mail::DKIM->VERSION > 0.28 ? 1 : 0;
+  my $expiration_supported = Mail::DKIM->VERSION >= 0.29 ? 1 : 0;
   my $originator = $scan->{dkim_address};  # address in a 'From' header field
 
   # walk through all signatures present in a message
   foreach my $signature (@{$scan->{dkim_signatures}}) {
     local ($1,$2);
 
-    my $verified = $signature->result eq 'pass';
+    my $valid = $signature->result eq 'pass';
 
     my $expiration_time;
     $expiration_time = $signature->expiration  if $expiration_supported;
@@ -547,7 +561,7 @@ sub _wlcheck_list {
     }
 
     my $info = '';  # summary info string to be used for logging
-    $info .= ($verified ? 'VERIFIED' : 'FAILED').($expired ? ' EXPIRED' : '');
+    $info .= ($valid ? 'VALID' : 'FAILED') . ($expired ? ' EXPIRED' : '');
     $info .= lc $identity eq lc $originator_matching_part ? ' originator'
                                                           : ' third-party';
     $info .= " signature by id " . $identity;
@@ -583,20 +597,20 @@ sub _wlcheck_list {
           $matches = 1  if lc $identity eq lc $acceptable_identity;
         } else {  # any local part in signing identity is acceptable
                   # as long as domain matches or is a subdomain
-          $matches = 1  if $identity_dom =~ /(^|\.)\Q$accept_id_dom\Q/i;
+          $matches = 1  if $identity_dom =~ /(^|\.)\Q$accept_id_dom\E\z/i;
         }
       }
       if ($matches) {
         dbg("dkim: $info, originator $originator, MATCHES $wl $re");
-        # a defined value indicates at least a match, not necessarily verified
+        # a defined value indicates at least a match, not necessarily valid
         $any_match_by_wl{$wl} = 0  if !exists $any_match_by_wl{$wl};
       }
       # only valid signature can cause whitelisting
-      $matches = 0  if !$verified || $expired;
+      $matches = 0  if !$valid || $expired;
 
       $any_match_by_wl{$wl} = $any_match_at_all = 1  if $matches;
     }
-    dbg("dkim: $info, originator $originator, no verified matches")
+    dbg("dkim: $info, originator $originator, no valid matches")
       if !$any_match_at_all;
   }
   return ($any_match_at_all, \%any_match_by_wl);

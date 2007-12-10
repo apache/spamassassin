@@ -1,0 +1,55 @@
+#!/bin/sh
+#
+# a basic backup script for the stuff on the zone; we can't check it all
+# in due to (a) volume and (b) embedded rsync passwords in .corpus files etc.
+#
+# run as root, a la
+#
+#    sudo /home/automc/svn/spamassassin/build/backup/backup_zone
+
+bupdir=/home/jm/backups/spamassassin.zones.apache.org
+
+###########################################################################
+
+die () {
+  echo "$*" 1>&2
+  exit 1
+}
+
+tarup () {
+  dir="$1"
+  name=$2
+
+  tar=tar; [ -x /usr/sfw/bin/gtar ] && tar=/usr/sfw/bin/gtar
+  excludedir=`dirname $0`
+
+  : > $name.tgz
+  : > $name.log
+  chmod 600 $name.tgz $name.log
+
+  (
+    nice -20 $tar --create --file=-  \
+        --sparse --exclude-from=$excludedir/excludes   \
+        --label="Backup of $dir at `date`"  \
+        "$dir" | nice -20 gzip -2
+
+  ) > $name.tgz 2>$name.log
+}
+
+###########################################################################
+
+mkdir -p $bupdir 2>/dev/null
+cd $bupdir || die "failed to cd to $bupdir"
+
+tarup /export/home/automc        export-home-automc
+tarup /export/home/bbmass        export-home-bbmass
+tarup /export/home/buildbot      export-home-buildbot
+tarup /export/home/release       export-home-release
+tarup /export/home/updatesd      export-home-updatesd
+tarup /export/home/corpus-rsync  export-home-corpus-rsync
+tarup /usr/local                 usr-local
+tarup /opt                       opt
+tarup /etc                       etc
+
+ls -l $bupdir/*.tgz
+exit 0

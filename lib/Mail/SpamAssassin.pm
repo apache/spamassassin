@@ -35,6 +35,7 @@ Mail::SpamAssassin - Spam detector and markup engine
 
   $status->finish();
   $mail->finish();
+  $spamtest->finish();
 
 =head1 DESCRIPTION
 
@@ -241,6 +242,35 @@ found in the SpamAssassin B<rules> directory.
 If set to 1, no tests that require internet access will be performed. (default:
 0)
 
+=item need_tags
+
+The option provides a way to avoid more expensive processing when it is known
+in advance that some information will not be needed by a caller.
+
+A value of the option can either be a string (a comma-delimited list of tag
+names), or a reference to a list of individual tag names. A caller may provide
+the list in advance, specifying his intention to later collect the information
+through $pms->get_tag() calls. If a name of a tag starts with a 'NO' (case
+insensitive), it shows that a caller will not be interested in such tag,
+although there is no guarantee it would save any resources, nor that a tag
+value will be empty. Currently no built-in tags start with 'NO'. A later
+entry overrides previous one, e.g. ASN,NOASN,ASN,TIMING,NOASN is equivalent
+to TIMING,NOASN.
+
+For backwards compatibility, all tags available as of version 3.2.4 will
+be available by default (unless disabled by NOtag), even if not requested
+through need_tags option. Future versions may provide new tags conditionally
+available.
+
+Currently the only tag that needs to be explicitly requested is 'TIMING'.
+Not requesting it can save a millisecond or two - it mostly serves to
+illustrate the usage of need_tags.
+
+Example:
+  need_tags =>    'TIMING,noLANGUAGES,RELAYCOUNTRY,ASN,noASNCIDR',
+or:
+  need_tags => [qw(TIMING noLANGUAGES RELAYCOUNTRY ASN noASNCIDR)],
+
 =item ignore_site_cf_files
 
 If set to 1, any rule files found in the C<site_rules_filename> directory will
@@ -339,6 +369,17 @@ sub new {
   $self->{DEF_RULES_DIR}	||= '@@DEF_RULES_DIR@@';
   $self->{LOCAL_RULES_DIR}	||= '@@LOCAL_RULES_DIR@@';
   $self->{LOCAL_STATE_DIR}	||= '@@LOCAL_STATE_DIR@@';
+
+  $self->{needed_tags} = {};
+  { my $ntags = $self->{need_tags};
+    if (defined $ntags) {
+      for my $t (ref $ntags ? @$ntags : split(/[, \s]+/,$ntags)) {
+        $self->{needed_tags}->{$2} = !defined($1)  if $t =~ /^(NO)?(.+)\z/si;
+      }
+    }
+  }
+  $self->timer_enable()  if would_log('dbg', 'timing');
+  $self->timer_enable()  if $self->{needed_tags}->{TIMING};
 
   $self->{conf} ||= new Mail::SpamAssassin::Conf ($self);
   $self->{plugins} = Mail::SpamAssassin::PluginHandler->new ($self);
@@ -457,7 +498,7 @@ sub check {
   $self->init(1);
   my $msg = Mail::SpamAssassin::PerMsgStatus->new($self, $mail_obj);
   $msg->check();
-  dbg("timing: " . $self->timer_report())  if would_log('dbg', 'timing');
+  dbg("timing: " . $self->timer_report())  if $self->{timer_enabled};
   $msg;
 }
 
@@ -1361,7 +1402,7 @@ sub lint_rules {
   $self->{syntax_errors} += $status->{rule_errors};
   $status->finish();
   $mail->finish();
-  dbg("timing: " . $self->timer_report())  if would_log('dbg', 'timing');
+  dbg("timing: " . $self->timer_report())  if $self->{timer_enabled};
   return ($self->{syntax_errors});
 }
 
@@ -1399,6 +1440,18 @@ sub finish {
 ###########################################################################
 # timers: bug 5356
 
+sub timer_enable {
+  my ($self) = @_;
+  dbg("config: timing enabled")  if !$self->{timer_enabled};
+  $self->{timer_enabled} = 1;
+}
+
+sub timer_disable {
+  my ($self) = @_;
+  dbg("config: timing disabled")  if $self->{timer_enabled};
+  $self->{timer_enabled} = 0;
+}
+
 # discard all timers, start afresh
 sub timer_reset {
   my ($self) = @_;
@@ -1409,10 +1462,8 @@ sub timer_reset {
 sub timer_start {
   my ($self, $name) = @_;
 
-# return unless (would_log('dbg', 'timing'));
-# if (would_log('dbg', 'timing') > 1) {
-#   dbg("timing: '$name' starting");
-# }
+  return unless $self->{timer_enabled};
+# dbg("timing: '$name' starting");
 
   if (!exists $self->{timers}->{$name}) {
     push @{$self->{timers_order}}, $name;
@@ -1425,7 +1476,7 @@ sub timer_start {
 
 sub timer_end {
   my ($self, $name) = @_;
-# return unless (would_log('dbg', 'timing'));
+  return unless $self->{timer_enabled};
 
   my $t = $self->{timers}->{$name};
   $t->{end} = time;
@@ -1442,15 +1493,11 @@ sub timer_end {
   $dt = 0  if $dt < 0;  # tolerate clock jumps, just in case
   if (defined $t->{elapsed}) { $t->{elapsed} += $dt }
   else { $t->{elapsed} = $dt }
-
-# if (would_log('dbg', 'timing') > 1) {
-#   dbg("timing: '%s' ended after %.0f ms", $name, $t->{elapsed} * 1000);
-# }
 }
 
 sub time_method {
   my ($self, $name) = @_;
-# return unless (would_log('dbg', 'timing'));
+  return unless $self->{timer_enabled};
   return Mail::SpamAssassin::Util::ScopedTimer->new($self, $name);
 }
 

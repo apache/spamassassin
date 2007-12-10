@@ -5,6 +5,9 @@ echo "Using ssh-nightly-slave settings from $HOME/.corpus"
 
 host="$1"
 
+host=`echo "$1" | perl -ne 's/:-j(\S+)$//;print'`
+opts=`echo "$1" | perl -ne 's/:-j(\S+)$// and print "-j $1"'`
+
 # use $PERL from env if unset
 [ "x${PERL:-}" = x ] && PERL=perl
 set -x
@@ -22,10 +25,16 @@ $tar cfz $tmp/tf \
 
 [ "$clienttree" = "" ] && clienttree=tree
 
+# a rather rough-and-ready way to ensure any hangover mass-checks
+# from the previous set are killed, before we start these ones;
+# ||true ensures we carry on even if this fails
 ssh $host \
-    rm -rf $clienttree \; \
-    mkdir $clienttree \; \
-    cd $clienttree \; \
+    killall perl || true
+
+ssh $host \
+    rm -rf $clienttree/code \; \
+    mkdir -p $clienttree/code \; \
+    cd $clienttree/code \; \
     tar xfz - < $tmp/tf 
 
 # source /etc/profile to get a full $PATH, including /usr/local/bin
@@ -33,15 +42,20 @@ ssh $host \
 # rebuild to compile the blib modules for this platform.
 
 ssh $host \
-    cd $clienttree \; \
+    cd $clienttree/code \; \
     . /etc/profile \; \
     perl Makefile.PL \; \
     make clean \; \
     perl Makefile.PL \; \
     make < /dev/null > $tmp/remote_build.$host.log
 
+# use a cs_cache in $clienttree/cs_cache -- this is not removed
+# with the above "rm -rf" command
 ssh -f $host \
-    cd $clienttree/masses \; \
+    cd $clienttree/code/masses \; \
     . /etc/profile \; \
-    TZ=UTC perl mass-check --cs_ssl --cs_verbose --client $serverhost &
+    TZ=UTC perl mass-check \
+        --cs_ssl --cs_verbose --cs_schedule_cache --cs_cachedir=../../cs_cache \
+        $opts \
+        --client $serverhost &
 

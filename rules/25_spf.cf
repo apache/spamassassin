@@ -57,8 +57,15 @@ describe SPF_HELO_NEUTRAL	SPF: HELO does not match SPF record (neutral)
 describe SPF_HELO_FAIL		SPF: HELO does not match SPF record (fail)
 describe SPF_HELO_SOFTFAIL	SPF: HELO does not match SPF record (softfail)
 
-tflags SPF_PASS			nice userconf
-tflags SPF_HELO_PASS		nice userconf
+# these are "userconf" so that scores are set by hand
+tflags SPF_PASS			nice userconf net
+tflags SPF_HELO_PASS		nice userconf net
+tflags SPF_NEUTRAL		net
+tflags SPF_FAIL		        net
+tflags SPF_SOFTFAIL		net
+tflags SPF_HELO_NEUTRAL	        net
+tflags SPF_HELO_FAIL		net
+tflags SPF_HELO_SOFTFAIL	net
 
 # rules from earlier than current release that can be reused
 #reuse SPF_PASS
@@ -67,9 +74,7 @@ tflags SPF_HELO_PASS		nice userconf
 #reuse SPF_HELO_PASS
 #reuse SPF_HELO_FAIL
 #reuse SPF_HELO_SOFTFAIL
-
-# new in 3.1, cannot be reused until 3.2
-# SPF_NEUTRAL
-# SPF_HELO_NEUTRAL
+#reuse SPF_NEUTRAL
+#reuse SPF_HELO_NEUTRAL
 
 endif   # Mail::SpamAssassin::Plugin::SPF

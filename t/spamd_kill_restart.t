@@ -15,6 +15,10 @@ exit unless TEST_ENABLED;
 my $pid_file = "log/spamd.pid";
 my($pid1, $pid2);
 
+tstlocalrules("
+    use_auto_whitelist 0
+  ");
+
 dbgprint "Starting spamd...\n";
 start_spamd("-L -r ${pid_file}");
 sleep 1;

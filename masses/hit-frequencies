@@ -205,7 +205,10 @@ if ($opt_t && $rules_pl_unparseable) {
 }
 
 foreach my $key (keys %rules) {
-  next if ($key eq '_scoreset');
+  if ($key eq '_scoreset') {
+    delete $rules{$key}; # bug 5683
+    next;
+  }
 
   if ( ($opt_L && !$rules{$key}->{lang}) ||
        ($rules{$key}->{lang} &&

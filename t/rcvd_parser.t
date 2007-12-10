@@ -18,7 +18,7 @@ if (-e 'test_dir') {            # running from test directory, not ..
 
 use lib '.'; use lib 't';
 use SATest; sa_t_init("rcvd_parser");
-use Test; BEGIN { plan tests => 130 };
+use Test; BEGIN { plan tests => 131 };
 use strict;
 
 # format is:
@@ -415,6 +415,9 @@ my %data = (
 
   'from dslb-082-083-045-064.pools.arcor-ip.net (EHLO homepc) [82.83.45.64] by mail.gmx.net (mp010) with SMTP; 03 Feb 2007 13:13:47 +0100' =>
   '[ ip=82.83.45.64 rdns=dslb-082-083-045-064.pools.arcor-ip.net helo=homepc by=mail.gmx.net ident= envfrom= intl=0 id= auth= msa=0 ]',
+
+  'from [86.122.158.69] by mta2.iomartmail.com; Thu, 2 Aug 2007 21:50:04 -0200' =>
+  '[ ip=86.122.158.69 rdns= helo=!86.122.158.69! by=mta2.iomartmail.com ident= envfrom= id= auth= msa=0 ]',
 
   'from p5498acaa.dip0.t-ipconnect.de (HELO JIMBOBSPC) (user@84.152.172.1) by msa.example.com with ESMTPA; 23 May 2007 15:05:04 -0000' =>
   '[ ip=84.152.172.1 rdns=p5498acaa.dip0.t-ipconnect.de helo=JIMBOBSPC by=msa.example.com ident=user envfrom= id= auth=ESMTPA msa=0 ]',

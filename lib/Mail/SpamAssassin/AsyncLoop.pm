@@ -45,8 +45,15 @@ our @ISA = qw();
 
 # Load Time::HiRes if it's available
 BEGIN {
-  eval { require Time::HiRes };
-  Time::HiRes->import( qw(time) ) unless $@;
+  use vars qw($timer_resolution);
+  eval {
+    require Time::HiRes or die "Error loading Time::HiRes: $@, $!";
+    Time::HiRes->import( qw(time CLOCK_REALTIME) );
+    $timer_resolution = Time::HiRes::clock_getres(CLOCK_REALTIME());
+    1;
+  } or do {
+    $timer_resolution = 1;  # Perl's builtin timer ticks at one second
+  };
 }
 
 #############################################################################
@@ -123,27 +130,34 @@ $ent->{status} may be examined for a string 'ABORTING' or 'FINISHED'.
 
 The code reference will be called with one argument, the C<$ent> object.
 
+=item zone (optional)
+
+A zone specification (typically a DNS zone name - e.g. host, domain, or RBL)
+which may be used as a key to look up per-zone settings. No semantics on this
+parameter is imposed by this module. Currently used to fetch by-zone timeouts.
+
 =item timeout_initial (optional)
 
 An initial value of elapsed time for which we are willing to wait for a
 response (time in seconds, floating point value is allowed). When elapsed
 time since a query started exceeds the timeout value and there are no other
-queries to wait for, the query is aborted. The actual timeout value may
-shrink dynamically by some factor from a timeout_initial value, the factor
-is derived from a number of queries that have already completed, but the
-value can not fall below timeout_min (see next parameter).
+queries to wait for, the query is aborted. The actual timeout value ranges
+from timeout_initial and gradually approaches timeout_min (see next parameter)
+as the number of already completed queries approaches the number of all
+queries started.
 
 If a caller does not explicitly provide this parameter or its value is
 undefined, a default initial timeout value is settable by a configuration
 variable rbl_timeout.
 
-If value of the timeout_initial parameter is already below timeout_min,
-it is pushed up to timeout_min.
+If a value of the timeout_initial parameter is below timeout_min, the initial
+timeout is set to timeout_min.
 
 =item timeout_min (optional)
 
-A lower bound (in seconds) below which the timeout value can not be
-reduced by a dynamic timeout shrinkage formula.  Defaults to 1 second.
+A lower bound (in seconds) to which the actual timeout approaches as the
+number of queries completed approaches the number of all queries started.
+Defaults to 0.2 * timeout_initial.
 
 =back
 
@@ -164,11 +178,40 @@ sub start_lookup {
   $ent->{status} = 'STARTED';
   $ent->{start_time} = $now  if !defined $ent->{start_time};
 
-  $ent->{timeout_min} = 1  if !defined $ent->{timeout_min};  # limits shrinkage
-  my $timeout = $ent->{timeout_initial};
-  $timeout = $self->{main}->{conf}->{rbl_timeout}  if !defined $timeout;
-  $timeout = $ent->{timeout_min}  if $timeout < $ent->{timeout_min};
-  $ent->{timeout_initial} = $timeout;
+  # are there any applicable per-zone settings?
+  my $zone = $ent->{zone};
+  my $settings;  # a ref to a by-zone or to global settings
+  my $conf_by_zone = $self->{main}->{conf}->{by_zone};
+  if (defined $zone && $conf_by_zone) {
+  # dbg("async: searching for by_zone settings for $zone");
+    $zone =~ s/^\.//;  $zone =~ s/\.\z//;  # strip leading and trailing dot
+    for (;;) {  # 2.10.example.com, 10.example.com, example.com, com, ''
+      if (exists $conf_by_zone->{$zone}) {
+        $settings = $conf_by_zone->{$zone};
+        dbg("async: applying by_zone settings for $zone");
+        last;
+      } elsif ($zone eq '') {
+        last;
+      } else {  # strip one level, careful with address literals
+        $zone = ($zone =~ /^( (?: [^.] | \[ (?: \\. | [^\]\\] )* \] )* )
+                            \. (.*) \z/xs) ? $2 : '';
+      }
+    }
+  }
+
+  my $t_init = $ent->{timeout_initial};  # application-specified has precedence
+  $t_init = $settings->{rbl_timeout}  if $settings && !defined $t_init;
+  $t_init = $self->{main}->{conf}->{rbl_timeout}  if !defined $t_init;
+  $t_init = 0  if !defined $t_init;      # last-resort default, just in case
+
+  my $t_end = $ent->{timeout_min};       # application-specified has precedence
+  $t_end = $settings->{rbl_timeout_min}  if $settings && !defined $t_end;
+  $t_end = 0.2 * $t_init  if !defined $t_end;
+  $t_end = 0  if $t_end < 0;  # just in case
+
+  $t_init = $t_end  if $t_init < $t_end;
+  $ent->{timeout_initial} = $t_init;
+  $ent->{timeout_min} = $t_end;
 
   $ent->{display_id} =  # identifies entry in debug logging and similar
     join(", ", grep { defined }
@@ -265,28 +308,30 @@ sub complete_lookups {
   if (defined $timeout && $timeout > 0 &&
       %$pending && $self->{total_queries_started} > 0)
   {
-    # shrink 'select' timeout if a caller specified unnecessarily long
-    # value, beyond the latest deadline of any outstanding request;
+    # shrink a 'select' timeout if a caller specified unnecessarily long
+    # value beyond the latest deadline of any outstanding request;
     # can save needless wait time (up to 1 second in harvest_dnsbl_queries)
-    my $timeout_shrink_factor =
-           1 - 0.7 * ( ($self->{total_queries_completed} /
-                        $self->{total_queries_started}) ** 2 );
+    my $r = $self->{total_queries_completed} / $self->{total_queries_started};
+    my $r2 = $r * $r;  # 0..1
     my $max_deadline;
     while (my($key,$ent) = each %$pending) {
-      my $dt = $ent->{timeout_initial} * $timeout_shrink_factor;
-      # don't shrink below a timeout's lower bound
-      $dt = $ent->{timeout_min}  if $dt < $ent->{timeout_min};
+      my $t_init = $ent->{timeout_initial};
+      my $dt = $t_init - ($t_init - $ent->{timeout_min}) * $r2;
       my $deadline = $ent->{start_time} + $dt;
-      if (!defined $max_deadline || $deadline > $max_deadline) {
-        $max_deadline = $deadline;
-      }
+      $max_deadline = $deadline  if !defined $max_deadline ||
+                                    $deadline > $max_deadline;
     }
-    my $sufficient_timeout = $max_deadline - $now;
-    $sufficient_timeout = 0  if $sufficient_timeout < 0;
-    if (defined $max_deadline && $timeout > $sufficient_timeout) {
-      dbg("async: reducing select timeout from %.1f to %.1f s",
-          $timeout, $sufficient_timeout);
-      $timeout = $sufficient_timeout;
+    if (defined $max_deadline) {
+      # adjust to timer resolution, only deals with 1s and with fine resolution
+      $max_deadline = 1 + int $max_deadline
+        if $timer_resolution == 1 && $max_deadline > int $max_deadline;
+      my $sufficient_timeout = $max_deadline - $now;
+      $sufficient_timeout = 0  if $sufficient_timeout < 0;
+      if ($timeout > $sufficient_timeout) {
+        dbg("async: reducing select timeout from %.1f to %.1f s",
+            $timeout, $sufficient_timeout);
+        $timeout = $sufficient_timeout;
+      }
     }
   }
 
@@ -334,18 +379,16 @@ sub complete_lookups {
     }
 
     if (%$pending) {  # still any requests outstanding? are they expired?
-      my $timeout_shrink_factor =
+      my $r =
         !$allow_aborting_of_expired || !$self->{total_queries_started} ? 1.0
-          :  1 - 0.7 * ( ($self->{total_queries_completed} /
-                          $self->{total_queries_started}) ** 2 );
-      dbg("async: timeout shrink factor: %.2f",
-          $timeout_shrink_factor)  if $timeout_shrink_factor != 1;
-
+        : $self->{total_queries_completed} / $self->{total_queries_started};
+      my $r2 = $r * $r;  # 0..1
       while (my($key,$ent) = each %$pending) {
         $typecount{$ent->{type}}++;
-        my $dt = $ent->{timeout_initial} * $timeout_shrink_factor;
-        # don't shrink below a timeout's lower bound
-        $dt = $ent->{timeout_min}  if $dt < $ent->{timeout_min};
+        my $t_init = $ent->{timeout_initial};
+        my $dt = $t_init - ($t_init - $ent->{timeout_min}) * $r2;
+        # adjust to timer resolution, only deals with 1s and fine resolution
+        $dt = 1 + int $dt  if $timer_resolution == 1 && $dt > int $dt;
         $allexpired = 0  if $now <= $ent->{start_time} + $dt;
       }
       dbg("async: queries completed: %d, started: %d",

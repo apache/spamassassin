@@ -485,13 +485,14 @@ sub start_spamd {
                     );
   unlink ($spamd_stdout, $spamd_stderr, $spamd_stdlog);
   print ("\t${spamd_cmd}\n");
+  my $startat = time;
   system ($spamd_cmd);
 
   # now find the PID
   $spamd_pid = 0;
   # note that the wait period increases the longer it takes,
   # 20 retries works out to a total of 60 seconds
-  my $retries = 20;
+  my $retries = 30;
   my $wait = 0;
   while ($spamd_pid <= 0) {
     my $spamdlog = '';
@@ -514,9 +515,11 @@ sub start_spamd {
     }
 
     sleep (int($wait++ / 4) + 1) if $retries > 0;
+
     if ($retries-- <= 0) {
       warn "spamd start failed: log: $spamdlog";
-      warn "\n\nMaybe you need to kill a running spamd process?\n\n";
+      warn "\n\nMaybe you need to kill a running spamd process?\n";
+      warn "started at $startat, gave up at ".time."\n\n";
       return 0;
     }
   }
@@ -575,7 +578,17 @@ sub create_saobj {
 
   return $sa;
 }
-  
+
+sub create_clientobj {
+  my $args = shift;
+
+  # We'll assume that the test has setup INC correctly
+  require Mail::SpamAssassin::Client;
+
+  my $client = Mail::SpamAssassin::Client->new($args);
+
+  return $client;
+}
 
 # ---------------------------------------------------------------------------
 

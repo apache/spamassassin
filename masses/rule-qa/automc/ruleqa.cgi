@@ -21,7 +21,7 @@ our %FREQS_FILENAMES = (
     'OVERLAP.new' => 'set 0, overlaps between rules',
 );
 
-my $refresh_cache = ($ARGV[0] eq '-refresh');
+my $refresh_cache = ($ARGV[0] and $ARGV[0] eq '-refresh');
 
 my $self = Mail::SpamAssassin::CGI::RuleQaApp->new();
 $self->ui_parse_url_base();
@@ -985,7 +985,6 @@ sub get_freqs_for_rule {
 
     if ($srcpath) {    # bug 4984
       @rules = grep {
-           # !$md->{$_} or !$md->{$_}->{src} or
           $md->{$_}->{src} and
              ($md->{$_}->{src} =~ /\Q$srcpath\E/);
          } @rules;
@@ -994,7 +993,6 @@ sub get_freqs_for_rule {
     if ($mtime) {      # bug 4985
       my $target = $self->{now} - ($mtime * 24 * 60 * 60);
       @rules = grep {
-           # !$md->{$_} or !$md->{$_}->{srcmtime} or
           $md->{$_}->{srcmtime} and
              ($md->{$_}->{srcmtime} >= $target);
          } @rules;
@@ -1219,19 +1217,98 @@ sub output_freqs_data_line {
 
   # add scoremap using the FREQS_EXTRA_TEMPLATE if it's present
   if ($obj->{scoremap}) {
-    my $ovl = $obj->{scoremap} || '';
+    my $smap = $obj->{scoremap} || '';
     #   scoremap spam: 16  12.11%  777 ****
 
     $self->process_template(\$FREQS_EXTRA_TEMPLATE, {
-        EXTRA => $ovl,
+        EXTRA => $smap,
     }, \$out);
+
+    $self->generate_scoremap_chart($smap, \$out);
   }
 
   # add overlap using the FREQS_EXTRA_TEMPLATE if it's present
   if ($obj->{overlap}) {
-    my $ovl = $obj->{overlap} || '';
+    $self->process_template(\$FREQS_EXTRA_TEMPLATE, {
+        EXTRA => $self->format_overlap($obj->{overlap} || '')
+    }, \$out);
+  }
 
-    $ovl =~ s{^(\s+overlap\s+(?:ham|spam):\s+\d+% )(\S.+?)$}{
+  return $out;
+}
+
+sub generate_scoremap_chart {
+  my ($self, $smap, $outref) = @_;
+
+  my %chart;
+  foreach my $l (split (/^/m, $smap)) {
+    #   scoremap spam: 16  12.11%  777 ****
+    $l =~ /^\s*scoremap\s+(\S+):\s+(\S+)\s+(\S+)\%\s+\d+/
+            or $$outref .= "chart: failed to parse scoremap line: $l<br>";
+
+    my ($type, $idx, $pc) = ($1,$2,$3);
+    next unless $type;
+
+    $chart{$type}{$idx} = $pc;
+  }
+
+  my %uniq=();
+  my $max_y = 0;
+  for my $i (keys %{$chart{'spam'}}, keys %{$chart{'ham'}}) {
+    next if exists $uniq{$i}; undef $uniq{$i};
+    if (($chart{'spam'}{$i}||0) > $max_y) { $max_y = $chart{'spam'}{$i}; }
+    if (($chart{'ham'}{$i}||0)  > $max_y) { $max_y = $chart{'ham'}{$i}; }
+  }
+  $max_y ||= 0.001;
+
+  my @idxes = sort { $a <=> $b } keys %uniq;
+  my $max_x;
+  if (!scalar @idxes) {
+    $max_x = 1; @idxes = ( 0 );
+  } else {
+    $max_x = $idxes[scalar(@idxes) - 1];
+  }
+  my $min_x = $idxes[0];
+  
+  # normalize to [0,100] and set default to 0
+  my @ycoords_s = map { sprintf "%.2f", (100/$max_y) * ($chart{'spam'}{$_}||0) } @idxes;
+  my @ycoords_h = map { sprintf "%.2f", (100/$max_y) * ($chart{'ham'}{$_}||0) } @idxes;
+  my @xcoords   = map { sprintf "%.2f", (100/$max_x) * $_ } @idxes;
+
+  my $thresh_x;
+  foreach my $i (@xcoords) {
+    if ($i >= 5) { $thresh_x = $i; last; }
+  }
+
+  # http://code.google.com/apis/chart/ , woo
+  my $chartsetup = 
+      "cht=lxy"             # line chart with x- and y-axis coords
+      ."\&amp;chs=400x200"
+      ."\&amp;chd=t:".join(",", @xcoords)."|".join(",", @ycoords_h)
+                 ."|".join(",", @xcoords)."|".join(",", @ycoords_s)
+      ."\&amp;chts=ff0000,18"
+      ."\&amp;chdl=Ham|Spam"
+      ."\&amp;chco=ff0000,0000ff,00ff00"
+      ."\&amp;chls=3,1,0"
+      ."\&amp;chm=V,00ff00,0,$thresh_x,1"
+      ."\&amp;chxl=0:|$min_x+points|$max_x+points|1:|0\%|$max_y\%"
+      ."\&amp;chxt=x,y";
+
+  $$outref .= "<p><img src='http://chart.apis.google.com/chart?$chartsetup' 
+		width='400' height='200' align='right' /></p>\n";
+}
+
+sub format_overlap {
+  my ($self, $ovl) = @_;
+
+  # list the subrules last; they're noisy and typically nonuseful
+  my $out_fullrules = '';
+  my $out_subrules = '';
+
+  foreach my $line (split(/^/m, $ovl)) {
+    my $issubrule = ($line =~ /\d+\%\s+of __/);
+
+    $line =~ s{^(\s+overlap\s+(?:ham|spam):\s+\d+% )(\S.+?)$}{
         my $str = "$1";
         foreach my $rule (split(' ', $2)) {
           if ($rule =~ /^(?:[a-z]{1,6}|\d+\%)$/) {    # "of", "hits" etc.
@@ -1243,12 +1320,15 @@ sub output_freqs_data_line {
         $str;
       }gem;
 
-    $self->process_template(\$FREQS_EXTRA_TEMPLATE, {
-        EXTRA => $ovl,
-    }, \$out);
+    if ($issubrule) {
+      $out_subrules .= $line;
+    } else {
+      $out_fullrules .= $line;
+    }
   }
 
-  return $out;
+  return "OVERLAP WITH FULL RULES:\n".$out_fullrules."\n".
+        "OVERLAP WITH SUBRULES:\n".$out_subrules;
 }
 
 # get rid of slow, overengineered Template::Toolkit.  This replacement

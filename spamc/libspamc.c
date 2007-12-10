@@ -27,6 +27,7 @@
 #include "libspamc.h"
 #include "utils.h"
 
+#include <stdarg.h>
 #include <stdlib.h>
 #include <assert.h>
 #include <stdio.h>
@@ -149,7 +150,12 @@ struct libspamc_private_message
 {
     int flags;			/* copied from "flags" arg to message_read() */
     int alloced_size;           /* allocated space for the "out" buffer */
+
+    void (*spamc_header_callback)(struct message *m, int flags, char *buf, int len);
+    void (*spamd_header_callback)(struct message *m, int flags, const char *buf, int len);
 };
+
+void (*libspamc_log_callback)(int flags, int level, char *msg, va_list args) = NULL;
 
 int libspamc_timeout = 0;
 
@@ -458,7 +464,7 @@ static int _try_to_connect_tcp(const struct transport *tp, int *sockptr)
     if (connect_retries == 0) {
       connect_retries = 3;
     }
-    if (retry_sleep == 0) {
+    if (retry_sleep < 0) {
       retry_sleep = 1;
     }
 
@@ -751,6 +757,8 @@ int message_read(int fd, int flags, struct message *m)
     }
     m->priv->flags = flags;
     m->priv->alloced_size = 0;
+    m->priv->spamc_header_callback = 0;
+    m->priv->spamd_header_callback = 0;
 
     if (flags & SPAMC_PING) {
       _clear_message(m);
@@ -1025,6 +1033,8 @@ _handle_spamd_header(struct message *m, int flags, char *buf, int len,
 	  *didtellflags |= SPAMC_REMOVE_REMOTE;
 	}
     }
+    else if (m->priv->spamd_header_callback != NULL)
+      m->priv->spamd_header_callback(m, flags, buf, len);
 
     return EX_OK;
 }
@@ -1038,6 +1048,10 @@ _zlib_compress (char *m_msg, int m_msg_len,
 
 #ifndef HAVE_LIBZ
 
+    UNUSED_VARIABLE(m_msg);
+    UNUSED_VARIABLE(m_msg_len);
+    UNUSED_VARIABLE(zlib_buf);
+    UNUSED_VARIABLE(zlib_bufsiz);
     UNUSED_VARIABLE(rc);
     UNUSED_VARIABLE(len);
     UNUSED_VARIABLE(totallen);
@@ -1188,6 +1202,9 @@ int message_filter(struct transport *tp, const char *username,
     }
 
     m->is_spam = EX_TOOBIG;
+
+    if (m->outbuf != NULL)
+        free(m->outbuf);
     m->priv->alloced_size = m->max_len + EXPANSION_ALLOWANCE + 1;
     if ((m->outbuf = malloc(m->priv->alloced_size)) == NULL) {
 	failureval = EX_OSERR;
@@ -1376,7 +1393,7 @@ int message_filter(struct transport *tp, const char *username,
 	}
 
 
-	if (len + m->out_len > (m->priv->alloced_size-1)) {
+	if ((int) len + (int) m->out_len > (m->priv->alloced_size - 1)) {
 	    failureval = EX_TOOBIG;
 	    goto failure;
 	}
@@ -1501,6 +1518,9 @@ int message_tell(struct transport *tp, const char *username, int flags,
     }
 
     m->is_spam = EX_TOOBIG;
+
+    if (m->outbuf != NULL)
+        free(m->outbuf);
     m->priv->alloced_size = m->max_len + EXPANSION_ALLOWANCE + 1;
     if ((m->outbuf = malloc(m->priv->alloced_size)) == NULL) {
 	failureval = EX_OSERR;
@@ -1582,6 +1602,12 @@ int message_tell(struct transport *tp, const char *username, int flags,
 	return EX_DATAERR;
     }
     len += sprintf(buf + len, "Content-length: %d\r\n\r\n", (int) m->msg_len);
+
+    if (m->priv->spamc_header_callback != NULL) {
+      char buf2[1024];
+      m->priv->spamc_header_callback(m, flags, buf2, 1024);
+      strncat(buf, buf2, bufsiz - len);
+    }
 
     libspamc_timeout = m->timeout;
 
@@ -1727,6 +1753,7 @@ void transport_init(struct transport *tp)
     tp->type = TRANSPORT_LOCALHOST;
     tp->port = 783;
     tp->flags = 0;
+    tp->retry_sleep = -1;
 }
 
 /*
@@ -2038,6 +2065,36 @@ void transport_cleanup(struct transport *tp)
 
 }
 
+/*
+* register_libspamc_log_callback()
+*
+* Register a callback handler for libspamc_log to replace the default behaviour.
+*/
+
+void register_libspamc_log_callback(void (*function)(int flags, int level, char *msg, va_list args)) {
+  libspamc_log_callback = function;
+}
+
+/*
+* register_spamc_header_callback()
+*
+* Register a callback handler to generate spamc headers for a given message
+*/
+
+void register_spamc_header_callback(const struct message *m, void (*func)(struct message *m, int flags, char *buf, int len)) {
+  m->priv->spamc_header_callback = func;
+}
+
+/*
+* register_spamd_header_callback()
+*
+* Register a callback handler to generate spamd headers for a given message
+*/
+
+void register_spamd_header_callback(const struct message *m, void (*func)(struct message *m, int flags, const char *buf, int len)) {
+  m->priv->spamd_header_callback = func;
+}
+
 /* --------------------------------------------------------------------------- */
 
 #define LOG_BUFSIZ      1023
@@ -2051,7 +2108,10 @@ libspamc_log (int flags, int level, char *msg, ...)
 
     va_start(ap, msg);
 
-    if ((flags & SPAMC_LOG_TO_STDERR) != 0) {
+    if ((flags & SPAMC_LOG_TO_CALLBACK) != 0 && libspamc_log_callback != NULL) {
+      libspamc_log_callback(flags, level, msg, ap);
+    }
+    else if ((flags & SPAMC_LOG_TO_STDERR) != 0) {
         /* create a log-line buffer */
         len = snprintf(buf, LOG_BUFSIZ, "spamc: ");
         len += vsnprintf(buf+len, LOG_BUFSIZ-len, msg, ap);

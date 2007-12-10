@@ -77,7 +77,18 @@ usage: mass-check [options] target ...
   --cs_ssl      use SSL to encrypt on-the-wire client-server traffic
                 (requires IO::Socket::SSL, see
                 http://wiki.apache.org/spamassassin/SslMassCheck for more)
-  --cs_verbose  Log network bandwidth utilization figures
+  --cs_verbose  Log network bandwidth utilization figures and other statistics
+  --cs_schedule_cache
+                Distribute messages so that they are checked on clients who
+                have the messages in their local message cache, implies
+                --cs_cache; if --cs_schedule_cache is not enabled, but
+                --cs_cache is, clients running in --cs_paths_only mode will
+                opportunistically use the messages from their local cache
+  --cs_cache	in client mode, enable the local message cache
+                in server mode, allows the clients to use cached messages
+                and/or add to their local caches
+  --cs_cachedir=dir
+                write cache info for --cs_cache in this directory tree
 
   log options
   -o            write all logs to stdout
@@ -140,8 +151,11 @@ use vars qw($opt_c $opt_p $opt_f $opt_j $opt_n $opt_o $opt_all $opt_bayes
 	    $total_messages $statusevery $opt_cachedir $opt_scanprob
 	    $opt_client $opt_cs_conn_retries $opt_cs_max $opt_cs_timeout
 	    $opt_cs_paths_only $opt_server %postdata %real $svn_revision
-            $opt_cs_ssl $opt_run_post_scan $opt_cs_verbose
-	    $tmpfd %reuse %orig_conf %reuse_conf $reuse_rules_loaded_p);
+            $opt_cs_ssl $opt_run_post_scan $opt_cs_verbose %client_caches
+            %server_caches @cache_tmp_files %min_other_caches
+            %unique_cache_completed $opt_cs_schedule_cache $opt_cs_cache
+            $opt_cs_cachedir
+	    $tmpfd %rules %reuse %orig_conf %reuse_conf $reuse_rules_loaded_p);
 
 use FindBin;
 
@@ -162,11 +176,14 @@ use File::Copy;
 use File::Spec;
 use Getopt::Long;
 use POSIX qw(strftime);
+use Fcntl qw(O_RDWR O_CREAT);;
+use Config; 
+
 use constant HAS_TIME_PARSEDATE => eval { require Time::ParseDate; };
 use constant HAS_IO_ZLIB => eval { require IO::Zlib; };
 use constant HAS_IO_SOCKET_SSL => eval { require IO::Socket::SSL; };
-use Config; 
 use constant HAS_TIME_HI_RES => eval { require Time::HiRes; };
+use constant HAS_SDBM_FILE => eval { require SDBM_File; };
 
 
 # default settings
@@ -184,6 +201,11 @@ $opt_cf = [];
 
 my $rcvd_bytes = 0;
 my $sent_bytes = 0;
+my $t_first_msg = 0;
+my $t_last_msg = 0;
+my $msgs_processed = 0;
+my $cache_hits = 0;
+my $client_id = 0;
 
 my @ORIG_ARGV = @ARGV;
 GetOptions("c=s", "p=s", "f=s", "j=i", "n", "o", "all", "bayes", "debug:s",
@@ -194,6 +216,7 @@ GetOptions("c=s", "p=s", "f=s", "j=i", "n", "o", "all", "bayes", "debug:s",
            "cachedir=s", "noisy", "scanprob=f",
 	   "server=s", "cs_max=i", "cs_timeout=i", "cs_conn_retries=i",
 	   "cs_paths_only", "client=s", "cs_ssl", "cs_verbose",
+           "cs_schedule_cache", "cs_cache", "cs_cachedir=s",
 	   "before=s" => \&deal_with_before_after,
 	   "after=s" => \&deal_with_before_after,
            'cf=s' => \@{$opt_cf},
@@ -215,15 +238,19 @@ if ($opt_cs_ssl && ! HAS_IO_SOCKET_SSL ) {
 
 # rules.pl is for the --reuse option, score set doesn't matter
 if ($opt_reuse) {
-  my $rules_path = "$FindBin::Bin/tmp/rules.pl";
-  if (! -f $rules_path) {
-    # some people specify paths relatively, whereas this needs an absolute path,
-    # so "do the right thing"(tm).
-    my $abs_opt_c = File::Spec->rel2abs($opt_c);
-    system("cd $FindBin::Bin; perl ../build/parse-rules-for-masses -d $abs_opt_c");
+  my $rules_path = "$FindBin::Bin/tmp/rules$$.pl";
+  # some people specify paths relatively, whereas this needs an absolute path,
+  # so "do the right thing"(tm).
+  my $abs_opt_c = File::Spec->rel2abs($opt_c);
+  system("cd $FindBin::Bin; perl ../build/parse-rules-for-masses -d $abs_opt_c -o $rules_path");
+
+  unless (-s $rules_path > 130) {
+    die '--reuse configuration error detected; rules.pl file size is too small'.
+        ' ('.(-s $rules_path)." bytes)\nrules.pl path: $rules_path\n";
   }
 
   require $rules_path;
+  unlink $rules_path;
 }
 
 if ($opt_noisy) {
@@ -232,7 +259,36 @@ if ($opt_noisy) {
 
 $opt_debug ||= 'all' if defined $opt_debug;
 
+if ($opt_cs_schedule_cache) {
+  $opt_cs_cache = 1;        # implies --cs_cache
+}
+
+if ($opt_client && $opt_cs_cache && !$opt_cs_cachedir) {
+  warn "You must specify a local message cache directory with --cs_cachedir\n".
+       "when using the --cs_cache option.\n";
+  exit;
+}  
+
+if ($opt_server && $opt_cs_schedule_cache && !$opt_n) {
+  warn '*'x74 ."\n";
+  warn '*'. ' 'x72 ."*\n";
+  warn "*   Corpus will be run un-sorted but with date stamp loggging which is   *\n";
+  warn "*   needed for score generation log selection but is not available when  *\n";
+  warn "*   using the -n option.  This may affect the results of any bayes and   *\n";
+  warn "*   AWL tests run during this mass-check.                                *\n";
+  warn '*'. ' 'x72 ."*\n";
+  warn '*'x74 ."\n";
+}
+
+if ($opt_cs_schedule_cache && !HAS_SDBM_FILE) {
+  warn "--cs_schedule_cache requires the Perl module SDBM_File.\n";
+  exit;
+}
+
 my $user_prefs = "$opt_p/user_prefs";
+
+# either --net or --reuse means we should use set1/set3
+my $use_net_rules = $opt_net || $opt_reuse;
 
 # --lint
 # In theory we could probably use the same spamtest object as below,
@@ -247,7 +303,7 @@ if ($opt_lint) {
     'userstate_dir'     			=> "$opt_p",
     'save_pattern_hits'  			=> $opt_loghits,
     'dont_copy_prefs'   			=> 1,
-    'local_tests_only'   			=> $opt_net ? 0 : 1,
+    'local_tests_only'   			=> $use_net_rules ? 0 : 1,
     'only_these_rules'   			=> $opt_rules,
     'ignore_safety_expire_timeout'		=> 1,
     'post_config_text'                          => join("\n", @{$opt_cf})."\n",
@@ -276,6 +332,30 @@ if (!$opt_client) {
   usage(1) if !@targets;
 }
 
+if ($opt_reuse) {
+  # if we have --reuse, don't bother testing DNS; we shouldn't be hitting
+  # the wire at all, and in fact we may be running without a net connection
+  push @{$opt_cf}, "dns_available yes\n";
+
+  # --reuse without --net means we need to just zero ALL net rules; skip net
+  # lookups entirely except for the reused ones.  Do this before constructing
+  # the Mail::SpamAssassin object to ensure no network-rules stuff is compiled
+  # in compile_now().  (This config is for the reuse=no case.  We create a
+  # reuse=yes config after compile_now().)
+  if (!$opt_net) {
+    my @zero = (sort grep {
+          (ref($rules{$_}) eq 'HASH')
+                && $rules{$_}->{tflags}
+                && $rules{$_}->{tflags} =~ /\bnet\b/; 
+        } keys %rules);
+
+    foreach my $r (@zero) {
+      push @{$opt_cf}, "score $r 0\n";
+      # warn "--reuse/!--net zeroed $r";
+    }
+  }
+}
+
 my $spamtest = new Mail::SpamAssassin ({
   'debug'              			=> $opt_debug,
   'rules_filename'     			=> $opt_c,
@@ -284,7 +364,7 @@ my $spamtest = new Mail::SpamAssassin ({
   'userstate_dir'     			=> "$opt_p",
   'save_pattern_hits'  			=> $opt_loghits,
   'dont_copy_prefs'   			=> 1,
-  'local_tests_only'   			=> $opt_net ? 0 : 1,
+  'local_tests_only'   			=> $use_net_rules ? 0 : 1,
   'only_these_rules'   			=> $opt_rules,
   'ignore_safety_expire_timeout'	=> 1,
   'post_config_text'                    => join("\n", @{$opt_cf})."\n",
@@ -293,7 +373,7 @@ my $spamtest = new Mail::SpamAssassin ({
   LOCAL_RULES_DIR      			=> '',
 });
 
-$spamtest->compile_now(1);
+$spamtest->compile_now(0);      # 0 since we will be reading more configs
 $spamtest->read_scoreonly_config("$FindBin::Bin/mass-check.cf");
 
 # generated user_prefs
@@ -301,18 +381,28 @@ if ($opt_reuse) {
   # copy current prefs if it exists
   $spamtest->copy_config(undef, \%orig_conf);
 
-  # zeroed scores to mass_prefs
-  my @zero = sort grep { defined $reuse{$_}->{skip} } keys %reuse;
-  open(PREFS, "> $opt_p/mass_prefs") || die "Unable to open $opt_p/mass_prefs: $!\nNeeded for --reuse to work properly";
-  for my $zero (@zero) {
-    print PREFS "score $zero 0\n";
-  }
-  close(PREFS);
-
-  $spamtest->read_scoreonly_config("$opt_p/mass_prefs");
+  # zeroed scores to reuse_prefs
+  my @zero = (sort grep {
+          defined $reuse{$_}->{skip} 
+        } keys %reuse);
+  zero_rule_scores(@zero);
 
   $spamtest->copy_config(undef, \%reuse_conf);
   $reuse_rules_loaded_p = 1;
+}
+
+sub zero_rule_scores {
+  my @zero = @_;
+
+  my $pfile = "$FindBin::Bin/tmp/reuse_prefs";
+  open(PREFS, ">$pfile") or die "Unable to open $pfile: $!\n".
+            "Needed for --reuse to work properly";
+  for my $rule (@zero) {
+    print PREFS "score $rule 0\n";
+  }
+  close PREFS or die "failed to write $pfile";
+  $spamtest->read_scoreonly_config($pfile);
+  unlink $pfile;
 }
 
 my $who = `id -un 2>/dev/null`;
@@ -436,6 +526,65 @@ if (!$opt_client) {
     die "mass-check: no messages to process\n";
   }
 
+  if ($opt_cs_schedule_cache) {
+    # create a tied hash database for the server to use for matching against
+    # client hashes
+
+    # while we're at it, count the total number of messages for ourself
+    # I suspect that AI gets it wrong sometimes, somehow
+    $total_messages = 0;
+
+    # get a temp file for the server database on messages to process
+    my ($dbpath, $dbfd) = Mail::SpamAssassin::Util::secure_tmpfile();
+    close $dbfd;
+    unlink $dbpath;
+    push @cache_tmp_files, $dbpath;
+
+    {
+      no strict; # SDBM_File is optional, avoid strict subs warnings
+      tie %{$server_caches{'to_process'}}, "SDBM_File", $dbpath,
+        O_RDWR|O_CREAT, 0600 ||
+          die "Cannot tie hash to file $dbpath: $!";
+    }
+
+    # get a temp file for the server DB of messages that are not cached anywhere
+    ($dbpath, $dbfd) = Mail::SpamAssassin::Util::secure_tmpfile();
+    close $dbfd;
+    unlink $dbpath;
+    push @cache_tmp_files, $dbpath;
+  
+    {
+      no strict; # SDBM_File is optional, avoid strict subs warnings
+      tie %{$server_caches{'not_cached'}}, "SDBM_File", $dbpath,
+        O_RDWR|O_CREAT, 0600 ||
+          die "Cannot tie hash to file $dbpath: $!";
+    }
+
+    # get a temp file for the server database of cache hit counts per message
+    ($dbpath, $dbfd) = Mail::SpamAssassin::Util::secure_tmpfile();
+    close $dbfd;
+    unlink $dbpath;
+    push @cache_tmp_files, $dbpath;
+
+    {
+      no strict; # SDBM_File is optional, avoid strict subs warnings
+      tie %{$server_caches{'cache_count'}}, "SDBM_File", $dbpath,
+        O_RDWR|O_CREAT, 0600 ||
+          die "Cannot tie hash to file $dbpath: $!";
+    }
+
+    # dump the server's list of messages to process to the DB_HASHes
+    while (my $msg = read_line($tmpfd)) {
+      my @d = Mail::SpamAssassin::ArchiveIterator::_index_unpack($msg);
+      $server_caches{'to_process'}{$d[3]} = $msg;
+      $server_caches{'not_cached'}{$d[3]} = undef;
+      $total_messages++;
+    }
+    # and back to the first message (although we currently never use it again)
+    seek($tmpfd, 0, 0);
+    read_line($tmpfd);
+  }
+
   showdots_finish();
   status("completed scan stage, $total_messages messages") if ($opt_progress);
 }
@@ -455,7 +604,9 @@ else {
     server_mode();
   }
   else {
+    $t_first_msg = time;
     run_through_messages();
+    $t_last_msg = time;
   }
 
   status('completed run stage') if ($opt_progress);
@@ -471,8 +622,17 @@ if (defined $opt_rewrite) {
 
 $spamtest->finish();
 
-if (($opt_client || $opt_server) && $opt_cs_verbose) {
-  warn "network I/O: sent=$sent_bytes, received=$rcvd_bytes\n";
+if ($opt_cs_verbose) {
+  if ($opt_client || $opt_server) {
+    warn "network I/O: sent=$sent_bytes, received=$rcvd_bytes\n";
+  }
+  $t_last_msg++ if $t_last_msg == $t_first_msg;
+  warn "processed $msgs_processed messages in ".($t_last_msg - $t_first_msg).
+       ' seconds ('.(sprintf("%.1f", ($msgs_processed / ($t_last_msg - $t_first_msg) * 3.6))).
+       " kmsgs/hr)\n";
+  $msgs_processed ||= 1;
+  warn "cache hits: $cache_hits ("
+    .(sprintf("%.1f", ($cache_hits / $msgs_processed * 100)))."%)\n" if $opt_cs_cache;
 }
 
 # exit status: did we check at least one message correctly?
@@ -567,18 +727,12 @@ sub wanted {
   # that the information needed to do the run is different than the
   # information that goes into the results.
   if ($opt_client) {
-    if ($opt_cs_paths_only) {
-      # the server message number
-      $origid = $real{$id};
-    }
-    else {
-      # if we're a non-paths_only client, change the format and id to the real
-      # version, make sure to remember the server's message number
-      $origid=$id;
-      $origid =~ s/^.+?(\d+)$/$1/;
-      $format = $real{$id}->[2];
-      $id = $real{$id}->[3];
-    }
+    # change the format and id to the real version, make sure to remember
+    # the server's message number
+    # note: pop/push makes it work regardless of any changes to M::SA::AI
+    $origid = pop @{$real{$id}};
+    $format = $real{$id}->[2];
+    $id = $real{$id}->[3];
   }
 
   memory_track_start() if ($opt_logmem);
@@ -586,36 +740,39 @@ sub wanted {
   # parse the message, and force it to complete
   my $ma = $spamtest->parse($dataref, 1);
 
-  # remove SpamAssassin markup, if present and the mail was spam
-  my $header = $ma->get_header("Received");
+  # get X-Spam-Status: header for rule hit resue
   my $x_spam_status;
   if ($opt_reuse) {
-    # get X-Spam-Status: header for rule hit resue
     $x_spam_status = $ma->get_header("X-Spam-Status");
+    $x_spam_status and $x_spam_status =~ s/,\s+/,/gs;
   }
-  # previous hits
-  my @previous;
-  if ($x_spam_status) {
-    $x_spam_status =~ s/,\s+/,/gs;
-    if ($x_spam_status =~ m/tests=(\S*)/
+  my @previous; # previous hits, only set if $opt_reuse
+
+  if ($opt_reuse) {
+    if ($x_spam_status
+        && $x_spam_status =~ m/tests=(\S*)/
         && $x_spam_status !~ /\bshortcircuit=(?:ham|spam|default)\b/)
     {
       push @previous, split(/,/, $1);
 
       # we found previous tests, so move the reuse config into place
       unless ($reuse_rules_loaded_p) {
-	$spamtest->copy_config(\%reuse_conf, undef);
-	$reuse_rules_loaded_p = 1;
+        $spamtest->copy_config(\%reuse_conf, undef);
+        $reuse_rules_loaded_p = 1;
+        dbg "mass-check: reusing hits";
+      }
+    }
+    else {
+      if ($reuse_rules_loaded_p) {
+        $spamtest->copy_config(\%orig_conf, undef);
+        $reuse_rules_loaded_p = 0;
+        dbg "mass-check: not reusing hits";
       }
     }
   }
-  elsif ($opt_reuse) {
-    if ($reuse_rules_loaded_p) {
-      $spamtest->copy_config(\%orig_conf, undef);
-      $reuse_rules_loaded_p = 0;
-    }
-  }
 
+  # remove SpamAssassin markup, if present and the mail was spam
+  my $header = $ma->get_header("Received");
   if ($header && $header =~ /\bwith SpamAssassin\b/) {
     if (!$opt_deencap || message_should_be_deencapped($ma)) {
       my $new_ma = $spamtest->parse($spamtest->remove_spamassassin_markup($ma), 1);
@@ -719,9 +876,17 @@ sub wanted {
 
   if ($reuse_rules_loaded_p) {
     push(@extra, "reuse=yes");
-  }
-  else {
+  } else {
     push(@extra, "reuse=no");
+  }
+
+  # log the scoreset we're in
+  {
+    my $set = 0;
+    if ($opt_net) { $set |= 1; }
+    if ($reuse_rules_loaded_p) { $set |= 1; }
+    if ($status && defined $status->{bayes_score}) { $set |= 2; }
+    push(@extra, "set=".$set);
   }
 
   if ($opt_client) {
@@ -746,7 +911,7 @@ sub wanted {
     my @tests;
     push @tests, split(/,/, $status->get_names_of_tests_hit());
     push @tests, split(/,/, $status->get_names_of_subtests_hit());
-    # hit reuse
+    # hit reuse; $opt_reuse
     if ($x_spam_status) {
       # generate mapping of hits to remove hits that are marked as skip
       @tests = grep { !$reuse{$_}->{skip} } @tests;
@@ -1054,6 +1219,7 @@ sub handle_http_request {
   # read in the request (POST / HTTP/1.0)
   my $line = $socket->getline();
   $line ||= '';
+  $rcvd_bytes += length($line);
   $line =~ s/\r\n$//;
 
   my ($type, $URI, $VERS) = $line =~ /^([a-zA-Z]+)\s+(\S+)(?:\s*(\S+))/;
@@ -1070,6 +1236,7 @@ sub handle_http_request {
   do {
     $line = $socket->getline();
     last unless defined $line;
+    $rcvd_bytes += length($line);
     $line =~ s/\r\n$//;
 
     if ($line) {
@@ -1079,24 +1246,89 @@ sub handle_http_request {
   } while ($line !~ /^$/);
 
   # if this is a POST request w/ content-length, there'll be a payload, deal
-  # with it.
+  # with it.  we only support compressed payloads.
+  my $postheader;
   if ($type eq 'POST' && $headers->{'content-length'}) {
-    my $pd;
-    $socket->read($pd, $headers->{'content-length'});
-    $pd =~ s/[\r\n]+$//; # a hack for manual requests/telnet/etc
+    $rcvd_bytes += $headers->{'content-length'};
+    my $pd = '';
+    if ($headers->{'content-encoding'} eq 'x-gzip') {
+      # assign an id to the client if it doesn't already have one
+      $headers->{'client-id'} ||= ++$client_id;
 
-    # key1=value1&key2=value2...
-    %{$postdata} = map {
-      my($k,$v) = split(/=/, $_, 2);
+      my ($gzpath, $gzfd) = Mail::SpamAssassin::Util::secure_tmpfile();
+      die "Can't make tempfile, exiting" unless $gzpath;
 
-      # we need to decode the key and value
-      $k =~ s/\%([0-9a-fA-F]{2})/sprintf "%c", hex($1)/eg;
-      $v =~ s/\%([0-9a-fA-F]{2})/sprintf "%c", hex($1)/eg;
+      # TODO: don't read in the entire thing at once to avoid memory bloat
+      my $rd;
+      $socket->read($rd, $headers->{'content-length'}) || die "mass-check: error reading in data from client\n";
+      print $gzfd $rd;
+      $gzfd->close;
 
-      $k => $v;
-    } split(/\&/, $pd);
+      my $fd = IO::Zlib->new($gzpath, "rb");
+      die "Can't open temp result file: $!" unless $fd;
+
+      if ($headers->{'action'}) {
+        # different types of POST contents are packed different ways
+        if ($headers->{'action'} eq 'sending cache') {
+
+          if ($opt_cs_schedule_cache) {
+            # save the client cache to a tied hash
+
+            # get a temp file for the client cache database
+            my ($dbpath, $dbfd) = Mail::SpamAssassin::Util::secure_tmpfile();
+            close $dbfd;
+            unlink $dbpath;
+            push @cache_tmp_files, $dbpath;
+
+            {
+              no strict; # SDBM_File is optional, avoid strict subs warnings
+              tie %{$client_caches{$headers->{'client-id'}}}, "SDBM_File", $dbpath,
+                O_RDWR|O_CREAT, 0600 ||
+                  die "Cannot tie hash to file $dbpath: $!\n";
+            }
+
+            # dump the client's list of cached message paths to the DB_HASH
+            my $client_cache = 0;
+            my $client_cache_hits = 0;
+            while (my $msg = read_line($fd)) {
+              my @d = Mail::SpamAssassin::ArchiveIterator::_index_unpack($msg);
+              $client_cache++;
+              if (exists $server_caches{'to_process'}{$d[3]}) {
+                $client_caches{$headers->{'client-id'}}{$d[3]} = undef;
+                $server_caches{'cache_count'}{$d[3]}++;
+                delete $server_caches{'not_cached'}{$d[3]};
+                # log this client's cache hit rate
+                $client_cache_hits++;
+              }
+            }
+            status("client $headers->{'client-id'} has $client_cache msgs cached ($client_cache_hits usable)");
+            status("client $headers->{'client-id'} has ".(sprintf("%.1f", ($client_cache_hits / $total_messages * 100))).'% of required messages');
+          }
+        }
+        elsif ($headers->{'action'} eq 'sending results') {
+          # process the results
+          $pd = read_line($fd);
+
+          # key1=value1&key2=value2...
+          %{$postdata} = map {
+            my($k,$v) = split(/=/, $_, 2);
+
+            # we need to decode the key and value
+            $k =~ s/\%([0-9a-fA-F]{2})/sprintf "%c", hex($1)/eg;
+            $v =~ s/\%([0-9a-fA-F]{2})/sprintf "%c", hex($1)/eg;
+
+            $k => $v;
+          } split(/\&/, $pd);
+
+        }
+      }
+
+      $fd->close;
+      undef $fd;
+      $gzfd->close;
+      unlink $gzpath;
+    }
   }
-
   return($type, $URI, $headers, $postdata);
 }
 
@@ -1119,7 +1351,7 @@ sub handle_http_request {
 # Returns: scalar path to gzip file
 #
 sub generate_messages {
-  my($msgs, $timestamps, $msgsout, $paths_only) = @_;
+  my($msgs, $timestamps, $msgsout, $paths_only, $client_id) = @_;
 
   # Hold the message numbers we'll be sending out
   my @tosend = ();
@@ -1152,25 +1384,121 @@ sub generate_messages {
     last if (@tosend == $msgs);
   }
 
-  # if we still have the temp file with the input messages open, we'll fillup
-  # out message output queue with messages from there.
-  if ($tmpfd) {
-    while (@tosend < $msgs) {
-      my $msg = read_line($tmpfd);
+  if (!$opt_cs_schedule_cache) {
+    # if we still have the temp file with the input messages open, we'll fillup
+    # out message output queue with messages from there.
+    if ($tmpfd) {
+      while (@tosend < $msgs) {
+        my $msg = read_line($tmpfd);
 
-      # no more messages from the temp file, close it out
-      unless ($msg) {
-        delete $msgsout->{'curnum'};
-	close $tmpfd;
-	undef $tmpfd;
-	last;
+        # no more messages from the temp file, close it out
+        unless ($msg) {
+          delete $msgsout->{'curnum'};
+          close $tmpfd;
+          undef $tmpfd;
+          last;
+        }
+
+        # we got a result, so assign it a number (curnum) and store the data
+        # appropriately, then add the new number to the queue.
+        my $num = ++$msgsout->{'curnum'};
+        $msgsout->{$num}->{'data'} = $msg;
+        push(@tosend, $num);
+      }
+    }
+  }
+  else {
+    if ($msgs_processed != $total_messages) {
+      # select messages based on what the client*s* have cached
+ 
+      # if the client hasn't sent cache data, fake it
+      unless (exists $client_caches{$client_id}) {
+        %{$client_caches{$client_id}} = ();
+        $unique_cache_completed{$client_id} = 1;
       }
 
-      # we got a result, so assign it a number (curnum) and store the data
-      # appropriately, then add the new number to the queue.
-      my $num = $msgsout->{'curnum'}++;
-      $msgsout->{$num}->{'data'} = $msg;
-      push(@tosend, $num);
+      # first: select messages that only the current client has cached
+      MESSAGE: while (!$unique_cache_completed{$client_id} &&
+                 @tosend < $msgs &&
+                 (my($path, undef) = each %{$client_caches{$client_id}})) {
+        # check that no other clients have it cached
+        next MESSAGE if $server_caches{'cache_count'}{$path} > 1; 
+
+        # we got a result, so assign it a number (curnum) and store the data
+        # appropriately, then add the new number to the queue.
+        my $num = ++$msgsout->{'curnum'};
+        $msgsout->{$num}->{'data'} = $server_caches{'to_process'}{$path};
+        push(@tosend, [ $num, 1 ]);
+        delete $server_caches{'to_process'}{$path};
+        delete $server_caches{'cache_count'}{$path};
+        delete $client_caches{$client_id}{$path};
+        $cache_hits++;
+      }
+      if (@tosend < $msgs) {
+        $unique_cache_completed{$client_id} = 1;
+      }
+
+      # second: hand out messages that no clients have cached
+      while (@tosend < $msgs && 
+             (my($path, undef) = each %{$server_caches{'not_cached'}})) {
+        # we got a result, so assign it a number (curnum) and store the data
+        # appropriately, then add the new number to the queue.
+        my $num = ++$msgsout->{'curnum'};
+        $msgsout->{$num}->{'data'} = $server_caches{'to_process'}{$path};
+        push(@tosend, [ $num, 0 ]);
+        delete $server_caches{'to_process'}{$path};
+        delete $server_caches{'cache_count'}{$path};
+        delete $server_caches{'not_cached'}{$path};
+      }
+
+      # third: hand out messages in the client's cache regardless of how many
+      #        other clients have them cached; smart scheduling takes too long
+      while (@tosend < $msgs &&
+             (my($path, undef) = each %{$client_caches{$client_id}})) {
+        # we got a result, so assign it a number (curnum) and store the data
+        # appropriately, then add the new number to the queue.
+        my $num = ++$msgsout->{'curnum'};
+        $msgsout->{$num}->{'data'} = $server_caches{'to_process'}{$path};
+        push(@tosend, [ $num, 1 ]);
+        delete $server_caches{'to_process'}{$path};
+        delete $server_caches{'cache_count'}{$path};
+        $cache_hits++;
+
+        # testing with 5 clients, this seems to be faster (in msgs/hr) than
+        # deleting from each other clients' cache when we go to get their
+        # messages; of course it's more I/O on the server this way
+        my $cache_count = $server_caches{'cache_count'}{$path};
+        foreach my $cc (keys %client_caches) {
+          delete $client_caches{$cc}{$path};
+          last unless --$cache_count;
+        }     
+      }
+
+      # fourth: hand out messages that other clients have cached without
+      #         regard for how many clients have cached them; smart
+      #         scheduling takes too long (at least when using DBM)
+      while (@tosend < $msgs &&
+             (my($path, $msg) = each %{$server_caches{'to_process'}})) {
+        # we got a result, so assign it a number (curnum) and store the data
+        # appropriately, then add the new number to the queue.
+        my $num = ++$msgsout->{'curnum'};
+        $msgsout->{$num}->{'data'} = $server_caches{'to_process'}{$path};
+        push(@tosend, [ $num, 0 ]);
+        delete $server_caches{'to_process'}{$path};
+        delete $server_caches{'cache_count'}{$path};
+
+        my $cache_count = $server_caches{'cache_count'}{$path};
+        foreach my $cc (keys %client_caches) {
+          delete $client_caches{$cc}{$path};
+          last unless --$cache_count;
+        }
+      }
+    }
+    else {
+      # close the tmpfd, etc so that the main loop knows we're done
+      delete $msgsout->{'curnum'};
+      close $tmpfd;
+      undef $tmpfd;
     }
   }
 
@@ -1189,31 +1517,41 @@ sub generate_messages {
 
   # Generate an archive in the temp file
   foreach my $num (@tosend) {
-    # Archive format, gzip compressed file w/ 3 parts per message:
+    my $in_cache = 0;
+    if (ref($num) eq 'ARRAY') {
+      $in_cache = $num->[1];
+      $num = $num->[0];
+    }
+    # Archive format, gzip compressed file w/ 4 parts per message:
     # 1- server message number in text format
     # 2- server index string, binary packed format
-    # 3- message content -- unless paths_only
+    # 3- a 1 if the message is included, 0 otherwise -- unless paths_only
+    # 4- message content -- unless paths_only or #3 is 0
     my $data = $msgsout->{$num}->{'data'};
     if (!$paths_only) {
-      my $msg = ($iter->_run_message($data))[4];
-      if ($msg) {
+      unless ($in_cache) {
+        my $msg = ($iter->_run_message($data))[4];
+        if ($msg) {
+          send_line($gzfd, $num) || die "mass-check: error when writing to gz temp file\n";
+          send_line($gzfd, $data) || die "mass-check: error when writing to gz temp file\n";
+          send_line($gzfd, '1') || die "mass-check: error when writing to gz temp file\n";
+          send_line($gzfd, (defined $msg ? join('', @{$msg}) : '')) ||
+            die "mass-check: error when writing to gz temp file\n";
+          push @sent, $num;
+        } else {
+          # if the message has an error (probably due to it being removed sometime during the
+          # run) we send a message number of 0 to indicate to the client that the server had an
+          # error retrieving the message; we need to do this since we have already added the
+          # line telling the client how many messages to expect
+          send_line($gzfd, 0) || die "mass-check: error when writing to gz temp file\n";
+          delete $msgsout->{$num};
+          $msgs_processed++ if $opt_cs_schedule_cache;
+        }
+      } else {
         send_line($gzfd, $num) || die "mass-check: error when writing to gz temp file\n";
         send_line($gzfd, $data) || die "mass-check: error when writing to gz temp file\n";
-        send_line($gzfd, (defined $msg ? join('', @{$msg}) : '')) ||
-          die "mass-check: error when writing to gz temp file\n";
+        send_line($gzfd, '0') || die "mass-check: error when writing to gz temp file\n";
         push @sent, $num;
-      } else {
-        # if the message has an error (probably due to it being removed sometime during the
-        # run) we need to send a blank message (that we'll ignore the results for due to the
-        # bogus message number (0) in its place since we have already added the line telling
-        # the client how many messages to expect
-        # NOTE: for some reason the client doesn't seem to even scan these messages (which is
-        # fine)... if it were to it probably wouldn't be great for bayes enabled mass-checks
-        send_line($gzfd, 0) || die "mass-check: error when writing to gz temp file\n";
-        send_line($gzfd, 'msg-error') || die "mass-check: error when writing to gz temp file\n";
-        send_line($gzfd, 'empty-message-will-cause-client-to-hang') ||
-          die "mass-check: error when writing to gz temp file\n";
-        delete $msgsout->{$num};
       }
     } else {
       send_line($gzfd, $num) || die "mass-check: error when writing to gz temp file\n";
@@ -1233,10 +1571,10 @@ sub generate_messages {
   # with Time::HiRes we'll check anyway since we'll waste less time checking
   # for uniqueness than one of us will waste debugging a report of mass-check
   # not completing due to someone's wacky clock (some (non-para-)virtualized
-  # servers will have their clocks go forward and backward
+  # servers will have their clocks go forward and backward)
   while (exists $timestamps->{$ts}) {
     if (HAS_TIME_HI_RES) {
-      $ts = time;
+      $ts = Time::HiRes::time();
     } else {
       $ts += 0.01;
     }
@@ -1286,6 +1624,8 @@ sub handle_post_results {
       # prep to get rid of the cached entries
       $timestamps{$msgsout->{$k}->{'timestamp'}}->{$k} = 1;
       delete $msgsout->{$k};
+
+      $msgs_processed++;
     }
   }
 
@@ -1322,6 +1662,7 @@ sub run_through_messages {
       }
       $total_count++;
     }
+    $msgs_processed += $total_count;
   }
   # more than one process or one process with restarts
   else {
@@ -1407,6 +1748,7 @@ sub run_through_messages {
         start_children($opt_j, \@child, \@pid, $select);
       }
     }
+    $msgs_processed += $total_count;
 
     # reap children
     reap_children($opt_j, \@child, \@pid);
@@ -1418,28 +1760,55 @@ sub run_through_messages {
 sub http_response {
   my($socket, $result, $headers, $data) = @_;
 
+  $headers->{'Content-Length'} = length $data;
+  $headers->{'Cache-Usage'} = $opt_cs_cache ? 'allowed' : 'disallowed';
+
   print $socket
     "HTTP/1.0 $result\r\n",
     "Pragma: no-cache\r\n",
     "Server: mass-check/$svn_revision\r\n",
-    map { "$_: ".$headers->{$_}."\r\n" } keys %{$headers};
-  print $socket "\r\n";
+    (map { "$_: ".$headers->{$_}."\r\n" } keys %{$headers}), "\r\n";
   print $socket $data;
+
+  if ($opt_cs_verbose) {
+    $sent_bytes += length(
+      "HTTP/1.0 $result\r\n".
+      "Pragma: no-cache\r\n".
+      "Server: mass-check/$svn_revision\r\n");
+    # length of a map output isn't what the other end claims to see
+    while (my($f,$v) = each %{$headers}) {
+      $sent_bytes += length($f) + length($v) + 4;
+    }
+    $sent_bytes += 2 + length($data);
+  }
 }
 
 # the client needs to make a request to the server on a given socket.
 sub http_make_request {
   my($socket, $type, $uri, $headers, $data) = @_;
 
+  $headers->{'Content-Length'} = length $data;
+
   print $socket
     "$type $uri HTTP/1.0\r\n",
     "User-Agent: mass-check/$svn_revision\r\n",
-    map { "$_: ".$headers->{$_}."\r\n" } keys %{$headers};
-  print $socket "\r\n";
+    (map { "$_: ".$headers->{$_}."\r\n" } keys %{$headers}), "\r\n";
   print $socket $data;
+
+  if ($opt_cs_verbose) {
+    $sent_bytes += length(
+      "$type $uri HTTP/1.0\r\n".
+      "User-Agent: mass-check/$svn_revision\r\n");
+    # length of a map output isn't what the other end claims to see
+    while (my($f,$v) = each %{$headers}) {
+      $sent_bytes += length($f) + length($v) + 4;
+    }
+    $sent_bytes += 2 + length($data);
+  }
 
   # parse the response that the server sends us
   my $line = $socket->getline() || '';
+  $rcvd_bytes += length($line);
   my(undef, $code, $string) = split(/\s+/, $line, 3);
   return unless $code == 200;
 
@@ -1447,6 +1816,7 @@ sub http_make_request {
   do {
     $line = $socket->getline();
     last unless defined $line;
+    $rcvd_bytes += length($line);
     $line =~ s/\r\n$//;
 
     if ($line) {
@@ -1454,13 +1824,18 @@ sub http_make_request {
       $headers{lc $k} = $v;
     }
   } while ($line !~ /^$/);
+  $rcvd_bytes += $headers{'content-length'} if $headers{'content-length'};
+  $client_id ||= $headers{'client-id'} if $headers{'client-id'};
+
+  # disable cache-usage if the server disallows cache usage
+  $opt_cs_cache = 0 if $headers{'cache-usage'} eq 'disallowed';
 
   # the server has sent us notification that it's going to exit, so let's
   # follow suit.
   return 'finished' if ($headers{'finished'});
 
   my $gzpath = '';
-  if ($headers{'content-length'}) {
+  if ($headers{'content-type'} eq 'application/x-gzip') {
     my $gzfd;
     ($gzpath, $gzfd) = Mail::SpamAssassin::Util::secure_tmpfile();
     die "Can't make tempfile, exiting" unless $gzpath;
@@ -1526,7 +1901,6 @@ sub read_line {
   # read in the rest of the single message
   $fd->read($msg, $length) || return;
 
-  $rcvd_bytes += $length + 4;
   return $msg;
 }
 
@@ -1535,7 +1909,6 @@ sub send_line {
   foreach ( @_ ) {
     my $length = pack("V", length $_);
     $fd->print($length.$_) || return 0;
-    $sent_bytes += (length $_) + 4;
   }
 
   return 1;
@@ -1640,12 +2013,13 @@ sub server_mode {
 	      status('client requested '.$postdata->{'max_messages'}.' messages');
 	    }
 
-	    $messages = generate_messages($msgnum, $timestamps, $msgsout, $postdata->{'paths_only'});
+	    $messages = generate_messages($msgnum, $timestamps, $msgsout, $postdata->{'paths_only'}, $headers->{'client-id'});
 	  }
 
           # $messages will contain the path to the gzip file if there are
 	  # messages to send out.
           if ($messages && open(MSG, $messages)) {
+	    $t_first_msg = time unless $t_first_msg;
 	    binmode(MSG);
 	    local $/ = undef;  # go go slurp mode
 
@@ -1653,7 +2027,7 @@ sub server_mode {
 	    http_response($socket, "200 OK", {
 	      'Content-Type' => 'application/x-gzip',
 	      'Content-Encoding' => 'x-gzip',
-	      "Content-Length" => (-s $messages),
+              'Client-ID'    => $headers->{'client-id'},
 	      },
 	      scalar <MSG>);
 
@@ -1667,14 +2041,17 @@ sub server_mode {
 	    # messages to process is empty, so tell the client to exit.
 	    http_response($socket, "200 OK", {
               "Content-type" => "text/plain",
+              'Client-ID'    => $headers->{'client-id'},
 	      "Finished" => 1,
 	      },
 	      'We are all done');
+            $t_last_msg = time;
 	  }
 	  else {
 	    # when in doubt, treat this like a GET
 	    http_response($socket, "200 OK", {
               "Content-type" => "text/plain",
+              'Client-ID'    => $headers->{'client-id'},
 	      },
               "Your POST request (sans max_messages) came from IP Address: ".$socket->peerhost."\n");
 	  }
@@ -1695,13 +2072,23 @@ sub server_mode {
               scalar(keys %{$msgsout})).' messages outstanding');
     }
 
-
 #print "msgs waiting: ".join(" ", keys %{$msgsout})."\n";
 #print "tmpfd defined? ".(defined $tmpfd ? "yes" : "no")."\n";
 
     # we're not awaiting responses and we've exhausted the input file, so
     # drop the server socket. :)
     $select->remove($serv_socket) if (!keys %{$msgsout} && !defined $tmpfd);
+  }
+
+  # remove the server and client message cache temp files
+  foreach my $tied_hash (keys %server_caches) {
+    undef $tied_hash;
+  }
+  foreach my $tied_hash (keys %client_caches) {
+    undef $tied_hash;
+  }
+  foreach my $tmp_file (@cache_tmp_files) {
+    unlink $tmp_file;
   }
 }
 
@@ -1750,15 +2137,38 @@ sub client_mode {
 
   # keep going until something stops us.
   while (1) {
-    # if the number of messages to request is too much, bring it down
-    $msgnum = $opt_cs_max if ($msgnum > $opt_cs_max);
+    # send cache data if this is the first connect
+    # do this before creating the connection so we don't waste all the other
+    # clients' time, once we've connected, by monopolizing the single server
+    my ($gzpath, $gzfd, $action);
+    if (!$made_conn_once && $opt_cs_schedule_cache) {
+      # we need to find out what messages we have in our client cache so that we
+      # can tell the server what we've got so that it can optimize our cache hit
+      # rate by requesting us to scan messages that are already in our cache
+      $action = 'sending cache';
+      $gzpath = scan_client_cache();
+    }
+    else {
+      $action = 'sending results';
+      # if the number of messages to request is too much, bring it down
+      $msgnum = $opt_cs_max if ($msgnum > $opt_cs_max);
 
-    # prep the POST request
-    $postdata{'max_messages'} = $msgnum;
-    $postdata{'paths_only'} = 1 if ($opt_cs_paths_only);
+      # prep the POST request
+      $postdata{'max_messages'} = $msgnum;
+      $postdata{'paths_only'} = 1 if ($opt_cs_paths_only);
 
-    # the actual POST data string
-    my $POSTDATA = join('&', map { post_encode($_) . '=' . post_encode($postdata{$_}) } keys %postdata);
+      # compress the results
+      ($gzpath, $gzfd) = Mail::SpamAssassin::Util::secure_tmpfile();
+      die "Can't make tempfile, exiting" unless $gzpath;
+      $gzfd->close;
+      $gzfd = IO::Zlib->new($gzpath, 'wb') || die "Can't create temp gzip file: $!";
+
+      # the actual POST data string
+      send_line($gzfd, join('&', map { post_encode($_) . '=' . post_encode($postdata{$_}) } keys %postdata)) || 
+        die "mass-check: error when writing to gz temp file\n";
+      $gzfd->close;
+      %postdata = ();
+    }
 
     # connect to server
     my $socket;
@@ -1779,6 +2189,8 @@ sub client_mode {
     }
 
     if (!$socket) {
+      unlink $gzpath;
+      undef $gzfd;
       # if we haven't yet made a connection, keep retrying;
       # this is probably the server still in "scan stage"
       if (!$made_conn_once) {
@@ -1800,15 +2212,37 @@ sub client_mode {
     status("requesting $msgnum messages from server") if ($opt_noisy);
 
     # make request, include and then drop results if there are any
+    my $POSTDATA = '';
+    if ($gzpath) {
+      if (open(RESULTS, $gzpath)) {
+        binmode(RESULTS);
+        {
+          # slurp here, rather than into an anonymous variable in the
+          # http_make_request call so that we don't end up slurping the
+          # response from the server too
+          local $/ = undef; # slurp
+          $POSTDATA = scalar <RESULTS>;
+        }
+        close(RESULTS);
+        unlink $gzpath;
+        undef $gzfd;
+      } else {
+        die "Can't open tempfile, exiting" unless $gzpath;
+      }
+    }
+
     my $result = http_make_request($socket, 'POST', $uri, {
       'Host'		=> $host,
       'Content-Type'	=> 'application/x-www-form-urlencoded',
-      'Content-Length'	=> length($POSTDATA),
+      'Content-Encoding' => 'x-gzip',
+      'Action'		=> $action,
+      'Client-ID'	=> ($client_id || '')
       },
       $POSTDATA
     );
-    %postdata = ();
     undef $POSTDATA;
+
+    $t_last_msg = time;
 
     # If we received messages to run through, go ahead and do it.
     # otherwise, just sleep for the timeout length and try again
@@ -1830,6 +2264,7 @@ sub client_mode {
     else {
       # we got messages, so deal with them.
       my $time_start = time;
+      $t_first_msg = $time_start unless $t_first_msg;
 
       # postdata will hold our results, real will hold the original message
       # data from the server's scan mode.
@@ -1850,10 +2285,11 @@ sub client_mode {
       # if we have a temp directory, clean it out for this run
       clean_dir($tmpdir) if ($tmpdir);
 
-      # Archive format, gzip compressed file w/ 3 parts per message:
+      # Archive format, gzip compressed file w/ 4 parts per message:
       # 1- server message number in text format
       # 2- server index string, binary packed format
-      # 3- message content, if not doing paths_only
+      # 3- a 1 if the message is included, 0 otherwise -- unless paths_only
+      # 4- message content -- unless paths_only or #3 is 0
 
       # number of messages
       $msgnum = $total_messages = read_line($gzfd) || die "mass-check: error reading from gzip message file\n";
@@ -1865,40 +2301,143 @@ sub client_mode {
         my $num = read_line($gzfd);
 	last unless defined $num;
 
+        next unless $num; # a message number of 0 indicates a msg-error on the server
+
         my $index = read_line($gzfd);
 	last unless defined $index;
 
+	my @d = Mail::SpamAssassin::ArchiveIterator::_index_unpack($index);
+
 	# if we're doing paths_only, there'll be no message content
 	if (!$opt_cs_paths_only) {
-	  my $msg = read_line($gzfd);
-	  last unless defined $msg;
+          my $msg_included = read_line($gzfd);
+          last unless defined $msg_included;
 
-	  # it's going to be a dir of file formatted messages
-	  if (open(OUT, ">$tmpdir/$num")) {
-	    print OUT $msg;
-	    close(OUT);
+	  my $msg;
+          if ($msg_included == 1) {
+            $msg = read_line($gzfd);
+            last unless defined $msg;
+          }
 
-	    # this is a little tricky -- we need to process the files in the
-	    # path and format we've created, but the original data is needed
-	    # to create a proper result later, so deal with that here.
-	    my @d = Mail::SpamAssassin::ArchiveIterator::_index_unpack($index);
-	    $real{"$tmpdir/$num"} = \@d;
-            send_line($tmpfd,
-	      Mail::SpamAssassin::ArchiveIterator::_index_pack($d[0], $d[1], 'f', "$tmpdir/$num")) ||
-	        die "mass-check: error writing out temp file in client mode\n";
-	  }
-	  else {
-	    warn "Can't create/write $tmpdir/$num: $!";
-	  }
+          # permanently cache the message on the client
+          my $cache_success = 0;
+          if ($opt_cs_cache) {
+            unless (-f "$opt_cs_cachedir/$d[3]") {
+              umask 0077; # prevent others on the system from reading corpus messages
+                          # TODO: the entire mass-check script should probably use umask 0077;
+
+              mkdir $opt_cs_cachedir; # mkdir won't bitch if it already exists, that's ok
+              if (-d $opt_cs_cachedir && $d[3] =~ m{^/?(.*(?![^\\]\\)/)?(.+)$}) {
+                my ($path, $filename) = ($1, $2);
+                my $dir = '';
+                $path ||= '';
+                while ($path =~ m#((?![^\\]\\)[^/]+/)#gc) {
+                  $dir .= $1;
+                  mkdir "$opt_cs_cachedir/$dir";
+                }
+                if (-d "$opt_cs_cachedir/$dir") {
+                  if (open(OUT, ">$opt_cs_cachedir/$dir$filename")) {
+                    print OUT $msg;
+                    close $msg;
+
+                    $cache_success = 1;
+                  }
+                  else {
+                    warn "Can't create/write message cache file $opt_cs_cachedir/$dir$filename: $!";
+                  }
+                }
+              }
+            }
+            else {
+              $cache_success = 1;
+              $cache_hits++;
+            }
+            if ($cache_success) {
+              # this is a little tricky -- we need to process the files in the
+              # path and format we've created, but the original data is needed
+              # to create a proper result later, so deal with that here.
+              $real{"$opt_cs_cachedir/$d[3]"} = \@d;
+              push @{$real{"$opt_cs_cachedir/$d[3]"}}, $num;
+              send_line($tmpfd,
+                Mail::SpamAssassin::ArchiveIterator::_index_pack($d[0], $d[1], 'f', "$opt_cs_cachedir/$d[3]")) ||
+                  die "mass-check: error writing out temp file in client mode\n";
+            }
+          }
+
+          # if the cache failed try a temp file instead
+          if (!$opt_cs_cache || !$cache_success) {
+            next unless defined $msg;
+ 	    # it's going to be a dir of file formatted messages
+	    if (open(OUT, ">$tmpdir/$num")) {
+	      print OUT $msg;
+	      close(OUT);
+
+              # this is a little tricky -- we need to process the files in the
+              # path and format we've created, but the original data is needed
+              # to create a proper result later, so deal with that here.
+              $real{"$tmpdir/$num"} = \@d;
+              push @{$real{"$tmpdir/$num"}}, $num;
+              send_line($tmpfd,
+                Mail::SpamAssassin::ArchiveIterator::_index_pack($d[0], $d[1], 'f', "$tmpdir/$num")) ||
+                  die "mass-check: error writing out temp file in client mode\n";
+	    }
+	    else {
+	      warn "Can't create/write message temp file $tmpdir/$num: $!";
+	    }
+          }
 	}
+        # paths_only_mode
 	else {
-	  # in paths_only mode, there's no kluging between formats since we're
-	  # reading the same corpus, however we do still need to track server
-	  # message number to message data so our results will be useable.
-	  my @d = Mail::SpamAssassin::ArchiveIterator::_index_unpack($index);
-	  $real{$d[3]} = $num;
-	  send_line($tmpfd, $index) ||
+          # permanently cache the message on the client
+          my $cache_success = 0;
+          if ($opt_cs_cache) {
+            unless (-f "$opt_cs_cachedir/$d[3]") {
+              umask 0077; # prevent others on the system from reading corpus messages
+                          # TODO: the entire mass-check script should probably use umask 0077;
+
+              mkdir $opt_cs_cachedir; # mkdir won't bitch if it already exists, that's ok
+              if (-d $opt_cs_cachedir && $d[3] =~ m{^/?(.*(?![^\\]\\)/)?(.+)$}) {
+                my ($path, $filename) = ($1, $2);
+                my $dir = '';
+                $path ||= '';
+                while ($path =~ m#((?![^\\]\\)[^/]+/)#gc) {
+                  $dir .= $1;
+                  mkdir "$opt_cs_cachedir/$dir";
+                }
+                if (-d "$opt_cs_cachedir/$dir") {
+                  # copy the file to the local cache for use next (and this) time
+                  if (copy($d[3], "$opt_cs_cachedir/$d[3]")) {
+                    $cache_success = 1;
+                  }
+                }
+              }
+            }
+            else {
+              $cache_success = 1;
+              $cache_hits++;
+            }
+            if ($cache_success) {
+              # this is a little tricky -- we need to process the files in the
+              # path and format we've created, but the original data is needed
+              # to create a proper result later, so deal with that here.
+              $real{"$opt_cs_cachedir/$d[3]"} = \@d;
+              push @{$real{"$opt_cs_cachedir/$d[3]"}}, $num;
+              send_line($tmpfd,
+                Mail::SpamAssassin::ArchiveIterator::_index_pack($d[0], $d[1], 'f', "$opt_cs_cachedir/$d[3]")) ||
+                  die "mass-check: error writing out temp file in client mode\n";
+            }
+          }
+
+          # if the messages isn't in our cache use the supplied path instead
+          if (!$opt_cs_cache || !$cache_success) {
+	    # in paths_only mode, there's no kluging between formats since we're
+	    # reading the same corpus, however we do still need to track server
+	    # message number to message data so our results will be useable.
+            $real{$d[3]} = \@d;
+            push @{$real{$d[3]}}, $num;
+	    send_line($tmpfd, $index) ||
 	        die "mass-check: error writing out temp file in client mode\n";
+          }
 	}
       }
 
@@ -1942,6 +2481,57 @@ sub client_mode {
   }
 }
 
+# scan the client's cache and return a path to a gzip archive of AI output
+sub scan_client_cache {
+  status('starting cache scan stage') if ($opt_progress);
+
+  # make sure the cachedir exists so that AI doesn't bail out
+  mkdir $opt_cs_cachedir unless -e $opt_cs_cachedir;
+
+  # Make a temp file and delete it
+  my $tmpf;
+  ($tmpf, $tmpfd) = Mail::SpamAssassin::Util::secure_tmpfile();
+  die 'mass-check: failed to create temp file' unless $tmpf;
+  unlink $tmpf or die "mass-check: unlink '$tmpf': $!";
+
+  my @targets = ("h:dir:$opt_cs_cachedir");
+  generate_queue(\@targets, $tmpfd);
+
+  # we now have a temporary file with the messages to process
+  seek($tmpfd, 0, 0);
+  # the first line is the number of messages
+  $total_messages = read_line($tmpfd);
+  showdots_finish();
+  status("completed cache scan stage, $total_messages messages") if ($opt_progress);
+
+  unless ($tmpfd) {
+    status('cache scan failed');
+    return;
+  }
+  status('compressing cache data') if ($opt_progress);
+
+  # create a temp file for compression
+  my($gzpath, $gzfd) = Mail::SpamAssassin::Util::secure_tmpfile();
+  die "Can't make tempfile, exiting" unless $gzpath;
+  $gzfd->close;
+  $gzfd = IO::Zlib->new($gzpath, 'wb') || die "Can't create temp gzip file: $!";
+
+  while (my $msg = read_line($tmpfd)) {
+    $msg =~ s/\r?\n$//;
+    my @d = Mail::SpamAssassin::ArchiveIterator::_index_unpack($msg);
+    $d[3] =~ s/^$opt_cs_cachedir//;
+
+    send_line($gzfd, Mail::SpamAssassin::ArchiveIterator::_index_pack($d[0], $d[1], $d[2], $d[3])) ||
+      die "mass-check: error writing out temp file in client mode\n";
+  }
+  close $tmpfd;
+  undef $tmpfd;
+  $gzfd->close;
+  status('cache data compressed to '.(-s $gzpath).' bytes') if ($opt_progress);
+
+  return $gzpath;
+}
+
 ############################################################################
 
 # in server mode, just return the ref to the message data
@@ -1976,6 +2566,12 @@ sub result_client {
   }
   else {
     warn ">> WTH!?  result is not in the correct format: $result\n";
+    # 20071114: bit of a hack
+    # prevent malformed cs_client message result lines from preventing the
+    # cs_server running in cs_schedule cache mode from completing
+    # TODO: find out how result lines get malformed (malformed result lines
+    # will still hang any cs_server not running with cs_schedule_cache)
+    $msgs_processed++ if $opt_cs_schedule_cache;
   }
 }
 
@@ -2034,8 +2630,10 @@ sub generate_queue {
     # for ease of memory, we'll play with pointers
     $messages = $iter->{s};
     undef $iter->{s};
-    push(@{$messages}, @{$iter->{h}});
-    undef $iter->{h};
+    if ($iter->{h}) {
+      push(@{$messages}, @{$iter->{h}});
+      undef $iter->{h};
+    }
   }
   else {
     # OPT_N == 0 means sort on message receive date

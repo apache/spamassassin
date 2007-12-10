@@ -18,7 +18,7 @@ if (-e 'test_dir') {            # running from test directory, not ..
 
 use lib '.'; use lib 't';
 use SATest; sa_t_init("trust_path");
-use Test; BEGIN { plan tests => 69 };
+use Test; BEGIN { plan tests => 81 };
 use IO::File;
 
 use strict;
@@ -425,6 +425,77 @@ Untrusted:
 
 # ---------------------------------------------------------------------------
 
+# bug 5680: 'X-Originating-IP'
+q{
+
+  trusted_networks 1/8
+  Received: from sender.net (1.1.1.1) by receiver.net
+              with SMTP; 10 Nov 2005 00:00:00 -0000
+  X-Originating-IP: 2.2.2.2
+
+} => q{
+
+Trusted: [ ip=1.1.1.1 rdns=sender.net helo=sender.net by=receiver.net ident= envfrom= intl=1 id= auth= msa=0 ]
+Untrusted: [ ip=2.2.2.2 rdns= helo= by= ident= envfrom= intl=0 id= auth= msa=0 ]
+
+},
+
+# ---------------------------------------------------------------------------
+
+# bug 5680: 'X-Originating-IP', trusted
+q{
+
+  trusted_networks 1/8 2/8
+  internal_networks 1/8
+  Received: from sender.net (1.1.1.1) by receiver.net
+              with SMTP; 10 Nov 2005 00:00:00 -0000
+  X-Originating-IP: 2.2.2.2
+
+} => q{
+
+Trusted: [ ip=1.1.1.1 rdns=sender.net helo=sender.net by=receiver.net ident= envfrom= intl=1 id= auth= msa=0 ] [ ip=2.2.2.2 rdns= helo= by= ident= envfrom= intl=0 id= auth= msa=0 ]
+Untrusted: 
+
+},
+
+# ---------------------------------------------------------------------------
+
+# bug 5680: 'X-Originating-IP', msa
+q{
+
+  trusted_networks 1/8
+  msa_networks 1/8
+  Received: from sender.net (1.1.1.1) by receiver.net
+              with SMTP; 10 Nov 2005 00:00:00 -0000
+  X-Originating-IP: 2.2.2.2
+
+} => q{
+
+Trusted: [ ip=1.1.1.1 rdns=sender.net helo=sender.net by=receiver.net ident= envfrom= intl=1 id= auth= msa=1 ] [ ip=2.2.2.2 rdns= helo= by= ident= envfrom= intl=1 id= auth= msa=0 ]
+Untrusted: 
+
+},
+
+# ---------------------------------------------------------------------------
+
+# bug 5680: 'X-Originating-IP', internal
+q{
+
+  trusted_networks 1/8 2/8
+  internal_networks 1/8 2/8
+  Received: from sender.net (1.1.1.1) by receiver.net
+              with SMTP; 10 Nov 2005 00:00:00 -0000
+  X-Originating-IP: 2.2.2.2
+
+} => q{
+
+Trusted: [ ip=1.1.1.1 rdns=sender.net helo=sender.net by=receiver.net ident= envfrom= intl=1 id= auth= msa=0 ] [ ip=2.2.2.2 rdns= helo= by= ident= envfrom= intl=1 id= auth= msa=0 ]
+Untrusted: 
+
+},
+
+# ---------------------------------------------------------------------------
+
 # test to make sure netset is detecting overlap correctly when using short CIDR notations
 q{
 
@@ -497,7 +568,7 @@ while (1) {
   }
 
   my $msg = $hdrs."\n\n[no body]\n";
-  $msg =~ s/^\s+Received: /Received: /gm;
+  $msg =~ s/^\s+(Received|X-\S+): /$1: /gm;
   my $status = $sa->check_message_text ($msg);
   my $result = $status->rewrite_mail();
 

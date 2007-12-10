@@ -1023,7 +1023,7 @@ sub _tokenize_line {
     # tokens, so the SQL BayesStore returns undef.  I really want a way
     # of optimizing that out, but I haven't come up with anything yet.
     #
-    next if ( defined $magic_re && /$magic_re/ );
+    next if ( defined $magic_re && $token =~ /$magic_re/ );
 
     # *do* keep 3-byte tokens; there's some solid signs in there
     my $len = length($token);

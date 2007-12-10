@@ -124,7 +124,7 @@ sub extract_set_pri {
 
   my $progress;
   $self->{show_progress} and $progress = Mail::SpamAssassin::Util::Progress->new({
-                total => scalar keys %{$rules},
+                total => (scalar keys %{$rules} || 1),
                 itemtype => 'rules',
               });
 
@@ -270,7 +270,7 @@ NO:
 
   $count = 0;
   $self->{show_progress} and $progress = Mail::SpamAssassin::Util::Progress->new({
-                total => scalar @good_bases,
+                total => (scalar @good_bases || 1),
                 itemtype => 'bases',
               });
 
@@ -508,7 +508,7 @@ sub extract_hints {
       }
     }
   }
-  print $tmpfh "m".$quos.$rule.$quos.$mods;
+  print $tmpfh "use bytes; m".$quos.$rule.$quos.$mods;
   close $tmpfh or die "cannot write to $tmpf";
 
   my $perl = $self->get_perl();
@@ -611,7 +611,11 @@ sub extract_hints {
       if (!$spcs && $item =~ /^EXACT/ && $args =~ /<(.*)>/)
       {
         $buf .= $1;
-        if (length $1 >= 55 && $buf =~ s/\.\.\.$//) {
+        if ($buf =~ s/\\x\{[0-9a-fA-F]{4,}\}.*$//) {
+          # a high Unicode codepoint, interpreted by perl 5.8.x.  cut and stop
+          $add_candidate->();
+        }
+        if ($1 && length $1 >= 55 && $buf =~ s/\.\.\.$//) {
           # perl 5.8.x truncates with a "..." here!  cut and stop
           $add_candidate->();
         }

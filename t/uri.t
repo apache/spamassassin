@@ -23,7 +23,7 @@ use Mail::SpamAssassin;
 use Mail::SpamAssassin::HTML;
 use Mail::SpamAssassin::Util;
 
-plan tests => 89;
+plan tests => 91;
 
 ##############################################
 
@@ -242,6 +242,19 @@ ok(try_canon([
    'http://127.0.0.1',
    ]));
 
+ok(try_canon([
+   'http://0xcc.0xf.0x50.0x89/',
+   ], [
+   'http://0xcc.0xf.0x50.0x89/',
+   'http://204.15.80.137/',
+       ]));
+
+ok(try_canon([
+   'http://0xcc.0x50.0x89.0xf/',
+   ], [
+   'http://0xcc.0x50.0x89.0xf/',
+   'http://204.80.137.15/',
+       ]));
 
 ##############################################
 

@@ -1,5 +1,5 @@
-opts_weekly="--net --cache --cachedir=/tmpfs/aicache_nightly --restart=500 ham:detect:/home/bbmass/rawcor/jm/ham/* --after="15552000" --tail=25000 --scanprob=0.3 spam:detect:/home/bbmass/rawcor/jm/spam/*"
-opts_nightly="--cache --cachedir=/tmpfs/aicache_nightly --restart=500 ham:detect:/home/bbmass/rawcor/jm/ham/* --after="15552000" --tail=25000 --scanprob=0.3 spam:detect:/home/bbmass/rawcor/jm/spam/*"
+opts_weekly="--net --cache --cachedir=/tmpfs/aicache_nightly --cs_schedule_cache --cs_cachedir=/export/home/bbmass/cache --restart=500 ham:detect:/home/bbmass/rawcor/jm/ham/* --after="15552000" --tail=25000 --scanprob=0.3 spam:detect:/home/bbmass/rawcor/jm/spam/*"
+opts_nightly="--cache --cachedir=/tmpfs/aicache_nightly --cs_schedule_cache --cs_cachedir=/export/home/bbmass/cache --restart=500 ham:detect:/home/bbmass/rawcor/jm/ham/* --after="15552000" --tail=25000 --scanprob=0.3 spam:detect:/home/bbmass/rawcor/jm/spam/*"
 tmp=$HOME/tmp
 tree=$HOME/svn
 prefs_weekly=$HOME/user_prefs.weekly

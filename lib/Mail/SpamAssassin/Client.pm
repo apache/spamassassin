@@ -24,9 +24,18 @@ NOTE: This interface is alpha at best, and almost guaranteed to change
 
 =head1 SYNOPSIS
 
-  my $client = new Mail::SpamAssassin::Client({port => 783,
-                                               host => 'localhost',
-                                               username => 'someuser'});
+  my $client = new Mail::SpamAssassin::Client({
+                                port => 783,
+                                host => 'localhost',
+                                username => 'someuser'});
+  or
+
+  my $client = new Mail::SpamAssassin::Client({
+                                socketpath => '/path/to/socket',
+                                username => 'someuser'});
+
+  Optionally takes timeout, which is applied to IO::Socket for the
+  initial connection.  If not supplied, it defaults to 30 seconds.
 
   if ($client->ping()) {
     print "Ping is ok\n";
@@ -84,6 +93,10 @@ sub new {
     $self->{username} = $args->{username};
   }
 
+  if ($args->{timeout}) {
+    $self->{timeout} = $args->{timeout} || 30;
+  }
+
   bless($self, $class);
 
   $self;
@@ -91,11 +104,10 @@ sub new {
 
 =head2 process
 
-public instance (\%) process (String $msg, Boolean $is_check_p)
+public instance (\%) process (String $msg)
 
 Description:
-This method makes a call to the spamd server and depending on the value of
-C<$is_check_p> either calls PROCESS or CHECK.
+This method calls the spamd server with the PROCESS command.
 
 The return value is a hash reference containing several pieces of information,
 if available:
@@ -115,59 +127,14 @@ message
 sub process {
   my ($self, $msg, $is_check_p) = @_;
 
-  my %data;
+  my $command = 'PROCESS';
 
-  my $command = $is_check_p ? 'CHECK' : 'PROCESS';
-
-  $self->_clear_errors();
-
-  my $remote = $self->_create_connection();
-
-  return 0 unless ($remote);
-
-  my $msgsize = length($msg.$EOL);
-
-  print $remote "$command $PROTOVERSION$EOL";
-  print $remote "Content-length: $msgsize$EOL";
-  print $remote "User: $self->{username}$EOL" if ($self->{username});
-  print $remote "$EOL";
-  print $remote $msg;
-  print $remote "$EOL";
-
-  my $line = <$remote>;
-  return undef unless (defined $line);
-
-  my ($version, $resp_code, $resp_msg) = $self->_parse_response_line($line);
-
-  $self->{resp_code} = $resp_code;
-  $self->{resp_msg} = $resp_msg;
-
-  return undef unless ($resp_code == 0);
-
-  while ($line = <$remote>) {
-    if ($line =~ /Content-length: (\d+)/) {
-      $data{content_length} = $1;
-    }
-    elsif ($line =~ m!Spam: (\S+) ; (\S+) / (\S+)!) {
-      $data{isspam} = $1;
-      $data{score} = $2 + 0;
-      $data{threshold} = $3 + 0;
-    }
-    elsif ($line =~ /^${EOL}$/) {
-      last;
-    }
+  if ($is_check_p) {
+    warn "Passing in \$is_check_p is deprecated, just call the check method instead.\n";
+    $command = 'CHECK';
   }
 
-  my $return_msg;
-  while(<$remote>) {
-    $return_msg .= $_;
-  }
-
-  $data{message} = $return_msg if ($return_msg);
-
-  close $remote;
-
-  return \%data;
+  return $self->_filter($msg, $command);
 }
 
 =head2 check
@@ -177,10 +144,6 @@ public instance (\%) check (String $msg)
 Description:
 The method implements the check call.
 
-Since check and process are so similar, we simply pass this
-call along to the process method with a flag to indicate
-to actually make the CHECK call.
-
 See the process method for the return value.
 
 =cut
@@ -188,7 +151,24 @@ See the process method for the return value.
 sub check {
   my ($self, $msg) = @_;
 
-  return $self->process($msg, 1);
+  return $self->_filter($msg, 'CHECK');
+}
+
+=head2 headers
+
+public instance (\%) headers (String $msg)
+
+Description:
+This method implements the headers call.
+
+See the process method for the return value.
+
+=cut
+
+sub headers {
+  my ($self, $msg) = @_;
+
+  return $self->_filter($msg, 'HEADERS');
 }
 
 =head2 learn
@@ -252,8 +232,8 @@ sub learn {
 
   return undef unless ($resp_code == 0);
 
-  my $did_set;
-  my $did_remove;
+  my $did_set = '';
+  my $did_remove = '';
 
   while ($line = <$remote>) {
     if ($line =~ /DidSet: (.*)/i) {
@@ -443,12 +423,14 @@ sub _create_connection {
   if ($self->{socketpath}) {
     $remote = IO::Socket::UNIX->new( Peer => $self->{socketpath},
 				     Type => SOCK_STREAM,
+				     Timeout => $self->{timeout},
 				   );
   }
   else {
     $remote = IO::Socket::INET->new( Proto     => "tcp",
 				     PeerAddr  => $self->{host},
 				     PeerPort  => $self->{port},
+				     Timeout   => $self->{timeout},
 				   );
   }
 
@@ -494,6 +476,86 @@ sub _clear_errors {
 
   $self->{resp_code} = undef;
   $self->{resp_msg} = undef;
+}
+
+=head2 _filter
+
+private instance (\%) _filter (String $msg, String $command)
+
+Description:
+Makes the actual call to the spamd server for the various filter method
+(ie PROCESS, CHECK, HEADERS, etc).  The command that is passed in is
+sent to the spamd server.
+
+The return value is a hash reference containing several pieces of information,
+if available:
+
+content_length
+
+isspam
+
+score
+
+threshold
+
+message (if available)
+
+=cut
+
+sub _filter {
+  my ($self, $msg, $command) = @_;
+
+  my %data;
+
+  $self->_clear_errors();
+
+  my $remote = $self->_create_connection();
+
+  return 0 unless ($remote);
+
+  my $msgsize = length($msg.$EOL);
+
+  print $remote "$command $PROTOVERSION$EOL";
+  print $remote "Content-length: $msgsize$EOL";
+  print $remote "User: $self->{username}$EOL" if ($self->{username});
+  print $remote "$EOL";
+  print $remote $msg;
+  print $remote "$EOL";
+
+  my $line = <$remote>;
+  return undef unless (defined $line);
+
+  my ($version, $resp_code, $resp_msg) = $self->_parse_response_line($line);
+  
+  $self->{resp_code} = $resp_code;
+  $self->{resp_msg} = $resp_msg;
+
+  return undef unless ($resp_code == 0);
+
+  while ($line = <$remote>) {
+    if ($line =~ /Content-length: (\d+)/) {
+      $data{content_length} = $1;
+    }
+    elsif ($line =~ m!Spam: (\S+) ; (\S+) / (\S+)!) {
+      $data{isspam} = $1;
+      $data{score} = $2 + 0;
+      $data{threshold} = $3 + 0;
+    }
+    elsif ($line =~ /^${EOL}$/) {
+      last;
+    }
+  }
+
+  my $return_msg;
+  while(<$remote>) {
+    $return_msg .= $_;
+  }
+
+  $data{message} = $return_msg if ($return_msg);
+
+  close $remote;
+
+  return \%data;
 }
 
 1;
