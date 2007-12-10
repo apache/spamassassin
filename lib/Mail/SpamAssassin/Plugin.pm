@@ -919,11 +919,6 @@ subset of the tokens to dump.
 
 =back
 
-=item $plugin->learner_get_implementation ()
-
-Get the implementing Plugin object for the learner; used to support some
-self-test APIs in the test suite.   (You don't need to implement this.)
-
 =item $plugin->learner_close ()
 
 Close any open databases.

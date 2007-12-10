@@ -250,15 +250,9 @@ sub finish {
 # Plugin hook.
 # Return this implementation object, for callers that need to know
 # it.  TODO: callers shouldn't *need* to know it! 
+# used only in test suite to get access to {store}, internal APIs.
 #
-# used in test suite to get access to {store}, internal APIs;
-# used in Mail::SpamAssassin::PerMsgStatus for the
-# compute_declassification_distance() call.
-#
-sub learner_get_implementation {      
-  my ($self) = @_;
-  return $self;
-}
+sub learner_get_implementation { return shift; }
 
 ###########################################################################
 
@@ -815,12 +809,40 @@ skip:
     $self->{store}->untie_db();
   }
 
-  $permsgstatus->{tag_data}{BAYESTCHAMMY} = 
-                        ($tinfo_hammy ? scalar @{$tinfo_hammy} : 0);
-  $permsgstatus->{tag_data}{BAYESTCSPAMMY} = 
-                        ($tinfo_spammy ? scalar @{$tinfo_spammy} : 0);
-  $permsgstatus->{tag_data}{BAYESTCLEARNED} = $tcount_learned;
-  $permsgstatus->{tag_data}{BAYESTC} = $tcount_total;
+  $permsgstatus->set_tag ('BAYESTCHAMMY',
+                        ($tinfo_hammy ? scalar @{$tinfo_hammy} : 0));
+  $permsgstatus->set_tag ('BAYESTCSPAMMY',
+                        ($tinfo_spammy ? scalar @{$tinfo_spammy} : 0));
+  $permsgstatus->set_tag ('BAYESTCLEARNED', $tcount_learned);
+  $permsgstatus->set_tag ('BAYESTC', $tcount_total);
+
+  $permsgstatus->set_tag ('HAMMYTOKENS', sub {
+              $self->bayes_report_make_list
+                ($permsgstatus, $permsgstatus->{bayes_token_info_hammy}, shift);
+            });
+
+  $permsgstatus->set_tag ('SPAMMYTOKENS', sub {
+              $self->bayes_report_make_list
+                ($permsgstatus, $permsgstatus->{bayes_token_info_spammy}, shift);
+            });
+
+  $permsgstatus->set_tag ('TOKENSUMMARY', sub {
+              if( defined $self->{tag_data}{BAYESTC} )
+                {
+                  my $tcount_neutral = $permsgstatus->{tag_data}{BAYESTCLEARNED}
+                                    - $permsgstatus->{tag_data}{BAYESTCSPAMMY}
+                                    - $permsgstatus->{tag_data}{BAYESTCHAMMY};
+                  my $tcount_new = $permsgstatus->{tag_data}{BAYESTC}
+                                    - $permsgstatus->{tag_data}{BAYESTCLEARNED};
+                  "Tokens: new, $tcount_new; "
+                    ."hammy, $permsgstatus->{tag_data}{BAYESTCHAMMY}; "
+                    ."neutral, $tcount_neutral; "
+                    ."spammy, $permsgstatus->{tag_data}{BAYESTCSPAMMY}."
+                } else {
+                  "Bayes not run.";
+                }
+            });
+
 
   return $score;
 }
@@ -1375,8 +1397,6 @@ sub _compute_prob_for_token {
 # fear that might require the solution to a cubic equation, and I
 # just don't have the time for that now.
 
-# TODO!  this needs to be made public somehow
-
 sub compute_declassification_distance {
   my ($self, $Ns, $Nn, $ns, $nn, $prob) = @_;
 
@@ -1475,6 +1495,50 @@ sub learner_new {
   }
 
   $self;
+}
+
+###########################################################################
+
+sub bayes_report_make_list {
+  my ($self, $pms, $info, $param) = @_;
+  return "Tokens not available." unless defined $info;
+
+  my ($limit,$fmt_arg,$more) = split /,/, ($param || '5');
+
+  my %formats = (
+      short => '$t',
+      Short => 'Token: \"$t\"',
+      compact => '$p-$D--$t',
+      Compact => 'Probability $p -declassification distance $D (\"+\" means > 9) --token: \"$t\"',
+      medium => '$p-$D-$N--$t',
+      long => '$p-$d--${h}h-${s}s--${a}d--$t',
+      Long => 'Probability $p -declassification distance $D --in ${h} ham messages -and ${s} spam messages --${a} days old--token:\"$t\"'
+    );
+
+  my $raw_fmt = (!$fmt_arg ? '$p-$D--$t' : $formats{$fmt_arg});
+
+  return "Invalid format, must be one of: ".join(",",keys %formats)
+    unless defined $raw_fmt;
+
+  my $fmt = '"'.$raw_fmt.'"';
+  my $amt = $limit < @$info ? $limit : @$info;
+  return "" unless $amt;
+
+  my $ns = $pms->{bayes_nspam};
+  my $nh = $pms->{bayes_nham};
+  my $digit = sub { $_[0] > 9 ? "+" : $_[0] };
+  my $now = time;
+
+  join ', ', map {
+    my($t,$prob,$s,$h,$u) = @$_;
+    my $a = int(($now - $u)/(3600 * 24));
+    my $d = $self->compute_declassification_distance($ns,$nh,$s,$h,$prob);
+    my $p = sprintf "%.3f", $prob;
+    my $n = $s + $h;
+    my ($c,$o) = $prob < 0.5 ? ($h,$s) : ($s,$h);
+    my ($D,$S,$H,$C,$O,$N) = map &$digit($_), ($d,$s,$h,$c,$o,$n);
+    eval $fmt;  ## no critic
+  } @{$info}[0..$amt-1];
 }
 
 1;
