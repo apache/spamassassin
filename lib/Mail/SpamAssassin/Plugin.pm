@@ -886,11 +886,17 @@ If it is C<undef>, one will be generated.  It should be unique to that message.
 Tell the classifier to 'sync' any pending changes against the current 
 user's training database.  This is called by C<sa-learn --sync>.
 
+If you do not need to implement these for your classifier, create an
+implementation that just contains C<return 1>.
+
 =item $plugin->learner_expire_old_training ()
 
 Tell the classifier to perform infrequent, time-consuming cleanup of
 the current user's training database.  This is called by C<sa-learn
 --force-expire>.
+
+If you do not need to implement these for your classifier, create an
+implementation that just contains C<return 1>.
 
 =item $plugin->learner_is_scan_available ()
 
