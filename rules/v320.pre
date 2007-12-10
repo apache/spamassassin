@@ -34,7 +34,7 @@ loadplugin Mail::SpamAssassin::Plugin::URIDetail
 
 # Plugins which used to be EvalTests.pm
 # broken out into separate plugins
-# loadplugin Mail::SpamAssassin::Plugin::Bayes #OSBF development
+loadplugin Mail::SpamAssassin::Plugin::Bayes
 loadplugin Mail::SpamAssassin::Plugin::BodyEval
 loadplugin Mail::SpamAssassin::Plugin::DNSEval
 loadplugin Mail::SpamAssassin::Plugin::HTMLEval
