@@ -1280,8 +1280,9 @@ servers when there are many spamd workers.
 
 =item use_learner ( 0 | 1 )		(default: 1)
 
-Whether to use any machine-learning classifiers with SpamAssassin.  Turning
-this off will disable use of all human-trained classifiers.
+Whether to use any machine-learning classifiers with SpamAssassin, such as the
+default 'BAYES_*' rules.  Setting this to 0 will disable use of any and all
+human-trained classifiers.
 
 =cut
 
@@ -1484,7 +1485,7 @@ syncing will not occur.
     type => $CONF_TYPE_NUMERIC
   });
 
-=item bayes_expiry_max_db_size		(default: 500000)
+=item bayes_expiry_max_db_size		(default: 150000)
 
 What should be the maximum size of the Bayes tokens database?  When expiry
 occurs, the Bayes system will keep either 75% of the maximum value, or
@@ -1495,7 +1496,7 @@ equivalent to a 8Mb database file.
 
   push (@cmds, {
     setting => 'bayes_expiry_max_db_size',
-    default => 500000,
+    default => 150000,
     type => $CONF_TYPE_NUMERIC
   });
 
@@ -2642,76 +2643,76 @@ module.
     }
   });
 
-=item osbf_path /path/filename	(default: ~/.spamassassin/osbf)
-
-This is the directory and filename for Bayes databases.  Several databases
-will be created, with this as the base directory and filename, with C<_toks>,
-C<_seen>, etc. appended to the base.  The default setting results in files
-called C<~/.spamassassin/osbf_seen>, C<~/.spamassassin/osbf_toks>, etc.
-
-By default, each user has their own in their C<~/.spamassassin> directory with
-mode 0700/0600.  For system-wide SpamAssassin use, you may want to reduce disk
-space usage by sharing this across all users.  However, Bayes appears to be
-more effective with individual user databases.
-
-=cut
-
-  push (@cmds, {
-    setting => 'osbf_path',
-    is_admin => 1,
-    default => '__userstate__/osbf',
-    code => sub {
-      my ($self, $key, $value, $line) = @_;
-      unless (defined $value && $value !~ /^$/) {
-	return $MISSING_REQUIRED_VALUE;
-      }
-      if (-d $value) {
-	return $INVALID_VALUE;
-      }
-     $self->{osbf_path} = $value;
-    }
-  });
-
-=item osbf_file_mode		(default: 0700)
-
-The file mode bits used for the Bayesian filtering database files.
-
-Make sure you specify this using the 'x' mode bits set, as it may also be used
-to create directories.  However, if a file is created, the resulting file will
-not have any execute bits set (the umask is set to 111). The argument is a
-string of octal digits, it is converted to a numeric value internally.
-
-=cut
-
-  push (@cmds, {
-    setting => 'osbf_file_mode',
-    is_admin => 1,
-    default => '0700',
-    type => $CONF_TYPE_NUMERIC
-  });
-
-=item osbf_store_module Name::Of::BayesStore::Module
-
-If this option is set, the module given will be used as an alternate
-to the default osbf storage mechanism.  It must conform to the
-published storage specification (see
-Mail::SpamAssassin::BayesStore). For example, set this to
-Mail::SpamAssassin::BayesStore::SQL to use the generic SQL storage
-module.
-
-=cut
-
-  push (@cmds, {
-    setting => 'osbf_store_module',
-    is_admin => 1,
-    default => '',
-    code => sub {
-      my ($self, $key, $value, $line) = @_;
-      local ($1);
-      if ($value !~ /^([_A-Za-z0-9:]+)$/) { return $INVALID_VALUE; }
-      $self->{osbf_store_module} = $1;
-    }
-  });
+##OSBF##=item osbf_path /path/filename	(default: ~/.spamassassin/osbf)
+##OSBF##
+##OSBF##This is the directory and filename for Bayes databases.  Several databases
+##OSBF##will be created, with this as the base directory and filename, with C<_toks>,
+##OSBF##C<_seen>, etc. appended to the base.  The default setting results in files
+##OSBF##called C<~/.spamassassin/osbf_seen>, C<~/.spamassassin/osbf_toks>, etc.
+##OSBF##
+##OSBF##By default, each user has their own in their C<~/.spamassassin> directory with
+##OSBF##mode 0700/0600.  For system-wide SpamAssassin use, you may want to reduce disk
+##OSBF##space usage by sharing this across all users.  However, Bayes appears to be
+##OSBF##more effective with individual user databases.
+##OSBF##
+##OSBF##=cut
+##OSBF##
+##OSBF##  push (@cmds, {
+##OSBF##    setting => 'osbf_path',
+##OSBF##    is_admin => 1,
+##OSBF##    default => '__userstate__/osbf',
+##OSBF##    code => sub {
+##OSBF##      my ($self, $key, $value, $line) = @_;
+##OSBF##      unless (defined $value && $value !~ /^$/) {
+##OSBF##	return $MISSING_REQUIRED_VALUE;
+##OSBF##      }
+##OSBF##      if (-d $value) {
+##OSBF##	return $INVALID_VALUE;
+##OSBF##      }
+##OSBF##     $self->{osbf_path} = $value;
+##OSBF##    }
+##OSBF##  });
+##OSBF##
+##OSBF##=item osbf_file_mode		(default: 0700)
+##OSBF##
+##OSBF##The file mode bits used for the Bayesian filtering database files.
+##OSBF##
+##OSBF##Make sure you specify this using the 'x' mode bits set, as it may also be used
+##OSBF##to create directories.  However, if a file is created, the resulting file will
+##OSBF##not have any execute bits set (the umask is set to 111). The argument is a
+##OSBF##string of octal digits, it is converted to a numeric value internally.
+##OSBF##
+##OSBF##=cut
+##OSBF##
+##OSBF##  push (@cmds, {
+##OSBF##    setting => 'osbf_file_mode',
+##OSBF##    is_admin => 1,
+##OSBF##    default => '0700',
+##OSBF##    type => $CONF_TYPE_NUMERIC
+##OSBF##  });
+##OSBF##
+##OSBF##=item osbf_store_module Name::Of::BayesStore::Module
+##OSBF##
+##OSBF##If this option is set, the module given will be used as an alternate
+##OSBF##to the default osbf storage mechanism.  It must conform to the
+##OSBF##published storage specification (see
+##OSBF##Mail::SpamAssassin::BayesStore). For example, set this to
+##OSBF##Mail::SpamAssassin::BayesStore::SQL to use the generic SQL storage
+##OSBF##module.
+##OSBF##
+##OSBF##=cut
+##OSBF##
+##OSBF##  push (@cmds, {
+##OSBF##    setting => 'osbf_store_module',
+##OSBF##    is_admin => 1,
+##OSBF##    default => '',
+##OSBF##    code => sub {
+##OSBF##      my ($self, $key, $value, $line) = @_;
+##OSBF##      local ($1);
+##OSBF##      if ($value !~ /^([_A-Za-z0-9:]+)$/) { return $INVALID_VALUE; }
+##OSBF##      $self->{osbf_store_module} = $1;
+##OSBF##    }
+##OSBF##  });
 
 =item bayes_sql_dsn DBI::databasetype:databasename:hostname:port
 
