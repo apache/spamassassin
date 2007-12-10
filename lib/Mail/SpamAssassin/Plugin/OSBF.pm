@@ -252,17 +252,9 @@ sub check_osbf {
 ###########################################################################
 
 # Plugin hook.
-sub sanity_check_bayes_is_untied {
+sub learner_close {
   my ($self, $params) = @_;
-  my $quiet = $params->{quiet};
-
-  # do a sanity check here.  Wierd things happen if we remain tied
-  # after compiling; for example, spamd will never see that the
-  # number of messages has reached the bayes-scanning threshold.
-  if ($self->{store}->db_readable()) {
-    warn "osbf: oops! still tied to bayes DBs, untying\n" unless $quiet;
-    $self->{store}->untie_db();
-  }
+  if ($self->{store}->db_readable()) { $self->{store}->untie_db(); }
 }
 
 ###########################################################################

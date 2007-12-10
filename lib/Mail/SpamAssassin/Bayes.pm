@@ -73,10 +73,14 @@ sub finish {
 
 ###########################################################################
 
-sub sanity_check_is_untied {
+# force the Bayes dbs to be closed, if they haven't already been; called
+# at the end of scan operation, or when switching between user IDs,
+# or when C<Mail::SpamAssassin::finish_learner()> is called.
+#
+sub force_close {
   my $self = shift;
   my $quiet = shift;
-  $self->{main}->call_plugins("sanity_check_bayes_is_untied", { quiet => $quiet });
+  $self->{main}->call_plugins("learner_close", { quiet => $quiet });
 }
 
 ###########################################################################

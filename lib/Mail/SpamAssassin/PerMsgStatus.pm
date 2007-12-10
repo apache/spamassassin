@@ -244,7 +244,7 @@ sub learn {
     $self->{main}->finish_learner();        # for now
 
     if (exists $self->{main}->{bayes_scanner}) {
-      $self->{main}->{bayes_scanner}->sanity_check_is_untied();
+      $self->{main}->{bayes_scanner}->force_close();
     }
     1;
   } or do {

@@ -294,7 +294,7 @@ sub check_bayes {
 ###########################################################################
 
 # Plugin hook.
-sub sanity_check_bayes_is_untied {
+sub learner_close {
   my ($self, $params) = @_;
   my $quiet = $params->{quiet};
 
