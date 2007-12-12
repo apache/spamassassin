@@ -1306,7 +1306,8 @@ sub format_overlap {
   my $out_subrules = '';
 
   foreach my $line (split(/^/m, $ovl)) {
-    my $issubrule = ($line =~ /\d+\%\s+of __/);
+    my $issubrule = ($line =~ /\d+\%\s+of __/
+                    || $line =~ /\(meta rule and subrule\)/);
 
     $line =~ s{^(\s+overlap\s+(?:ham|spam):\s+\d+% )(\S.+?)$}{
         my $str = "$1";
