@@ -1,14 +1,7 @@
 #!/bin/sh
 
-BBMHOME=/export/home/bbmass
-
-# clean up our temporary dir
-cd $BBMHOME/tmp
-find . -type d -mtime +7 -print | xargs rm -rf
-
 # clean out old copies of mass-check logs
 # 180 days = ~6 months
 cd /home/automc/corpus/html
-find . -mtime +180 -name '*.log.gz' > $BBMHOME/tmp/o
-xargs rm -f < $BBMHOME/tmp/o
+find . -mtime +180 -name '*.log.gz' | xargs rm -f
 
