@@ -1,0 +1,14 @@
+#!/bin/sh
+
+echo "Using ssh-nightly-slave settings from $HOME/.corpus"
+. $HOME/.corpus
+
+host=`echo "$1" | perl -ne 's/:-j(\S+)$//;print'`
+
+set -x
+
+# a rather rough-and-ready way to ensure any hangover mass-checks
+# from the previous set are killed, before we start these ones;
+ssh $host \
+    killall perl
+

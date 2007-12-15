@@ -77,6 +77,9 @@ else
   # will exit when the server mass-check does (they "phone home"
   # to the specified server host/port and exit if that disappears
   # for a long time)
+
+  # just to be sure, though: run a 'stop' script in case that fails
+  ./rule-qa/nightly-slaves-stop $clienthosts
 fi
 
 date | tee test.end
