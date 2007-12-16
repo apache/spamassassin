@@ -31,6 +31,8 @@ use Mail::SpamAssassin::Plugin;
 use Mail::SpamAssassin::Logger;
 use Mail::SpamAssassin::Util::Progress;
 
+use Data::Dumper;
+
 use strict;
 use warnings;
 use bytes;
@@ -103,7 +105,7 @@ sub extract_set_pri {
   my @failed = ();
   my $yes = 0;
   my $no = 0;
-
+  my $count = 0;
   my $start = time;
   $self->{main} = $conf->{main};	# for use in extract_hints()
   info ("extracting from rules of type $ruletype");
@@ -115,21 +117,51 @@ sub extract_set_pri {
   # require this many chars in a base string for it to be viable
   my $min_chars = 3;
 
-  my $count = 0;
   my $progress;
-
   $self->{show_progress} and $progress = Mail::SpamAssassin::Util::Progress->new({
                 total => scalar keys %{$rules},
                 itemtype => 'rules',
               });
 
+  my $cached = { };
+  my $cachefile;
+
+  if ($self->{main}->{bases_cache_dir}) {
+    $cachefile = $self->{main}->{bases_cache_dir}."/rules.$ruletype";
+    $cached = $self->read_cachefile($cachefile);
+  }
+
+NEXT_RULE:
   foreach my $name (keys %{$rules}) {
-    my $rule = $rules->{$name};
     $self->{show_progress} and $progress->update(++$count);
+
+    my $rule = $rules->{$name};
+    my $cachekey = join "#", $name, $rule;
+
+    my $cent = $cached->{rule_bases}->{$cachekey};
+    if (defined $cent) {
+      if (defined $cent->{g}) {
+        dbg("zoom: YES (cached) $rule");
+        foreach my $ent (@{$cent->{g}}) {
+          # note: we have to copy these, since otherwise later
+          # modifications corrupt the cached data
+          push @good_bases, {
+            base => $ent->{base}, orig => $ent->{orig}, name => $ent->{name}
+          };
+        }
+        $yes++;
+      }
+      else {
+        dbg("zoom: NO (cached) $rule");
+        push @failed, { orig => $rule };    # no need to cache this
+        $no++;
+      }
+      next NEXT_RULE;
+    }
 
     # ignore ReplaceTags rules
     # TODO: need cleaner way to do this
-    next if ($conf->{rules_to_replace}->{$name});
+    goto NO if ($conf->{rules_to_replace}->{$name});
 
     my ($qr, $mods) = $self->simplify_and_qr_regexp($rule);
 
@@ -163,15 +195,21 @@ sub extract_set_pri {
         }
       }
 
+      my @forcache = ();
+
       foreach my $base (@bases) {
         next if $subsumed{$base};
         push @good_bases, { base => $base, orig => $rule, name => $name };
+        # *separate* copies for cache -- we modify the @good_bases entry
+        push @forcache, { base => $base, orig => $rule, name => $name };
       }
+      $cached->{rule_bases}->{$cachekey} = { g => \@forcache };
       $yes++;
     }
     else {
       dbg("zoom: NO $rule");
       push @failed, { orig => $rule };
+      $cached->{rule_bases}->{$cachekey} = { };
       $no++;
     }
   }
@@ -224,44 +262,69 @@ sub extract_set_pri {
                 itemtype => 'bases',
               });
 
+  # this bit is annoyingly O(N^2).  Rewrite the data -- the @good_bases
+  # array -- into a more efficient format, using arrays and with a little
+  # bit of precomputation, to go (quite a bit) faster
+
+  my @rewritten = ();
+  foreach my $set1 (@good_bases) {
+    my $base = $set1->{base};
+    next if (!$base || !$set1->{name});
+    push @rewritten, [
+      $base,                # 0
+      $set1->{name},        # 1
+      $set1->{orig},        # 2
+      length $base,         # 3
+      qr/\Q$base\E/,        # 4
+      0                     # 5, has_multiple flag
+    ];
+  }
+  @good_bases = @rewritten;
+
   foreach my $set1 (@good_bases) {
     $self->{show_progress} and $progress->update(++$count);
 
-    my $base1 = $set1->{base};
-    my $orig1 = $set1->{orig};
-    my $name1 = $set1->{name};
-    next if ($base1 eq '' or $name1 eq '');
-
+    my $base1 = $set1->[0]; next unless $base1;
+    my $name1 = $set1->[1];
+    my $orig1 = $set1->[2];
     $conf->{base_orig}->{$ruletype}->{$name1} = $orig1;
+    my $len1 = $set1->[3];
 
     foreach my $set2 (@good_bases) {
       next if ($set1 == $set2);
 
-      my $base2 = $set2->{base};
-      my $name2 = $set2->{name};
+      my $base2 = $set2->[0]; next unless $base2;
+      my $name2 = $set2->[1];
 
       # clobber exact dups; this can happen if a regexp outputs the 
       # same base string multiple times
-      if ($orig1 eq $set2->{orig} &&
-          $base1 eq $base2 &&
-          $name1 eq $name2)
+      if ($base1 eq $base2 &&
+          $name1 eq $name2 &&
+          $orig1 eq $set2->[2])
       {
-        $set2->{name} = '';       # clobber
-        $set2->{base} = '';
+        $set2->[0] = '';       # clobber
+        next;
       }
 
+      # skip if it's too short to contain the other base string
+      next if ($len1 < $set2->[3]);
+
       # skip if either already contains the other rule's name
-      next if ($name1 =~ /\b\Q$name2\E\b/);
-      next if ($name2 =~ /\b\Q$name1\E\b/);
+      # optimize: this can only happen if the base has more than
+      # one rule already attached, ie [5]
+      next if ($set2->[5] && $name2 =~ /(?: |^)\Q$name1\E(?: |$)/);
 
-      next if ($base2 eq '');
-      next if (length $base1 < length $base2);
-      next if ($base1 !~ /\Q$base2\E/);
+      # don't use $name1 here, since another base in the set2 loop
+      # may have added $name2 since we set that
+      next if ($set1->[5] && $set1->[1] =~ /(?: |^)\Q$name2\E(?: |$)/);
 
-      $set1->{name} .= " ".$name2;
+      # and finally check to see if it *does* contain the other base string
+      next if ($base1 !~ $set2->[4]);
 
       # base2 is just a subset of base1
-      # dbg("zoom: subsuming '$base2' into '$base1': $set1->{name}");
+      # dbg("zoom: subsuming '$base2' ($name2) into '$base1': [1]=$set1->[1] [5]=$set1->[5]");
+      $set1->[1] .= " ".$name2;
+      $set1->[5] = 1;
     }
   }
 
@@ -270,30 +333,30 @@ sub extract_set_pri {
   # the above search hasn't found.  Collapse them here with a hash
   my %bases = ();
   foreach my $set (@good_bases) {
-    my $base = $set->{base};
+    my $base = $set->[0];
     next unless $base;
+
     if (defined $bases{$base}) {
-      $bases{$base} .= " ".$set->{name};
+      $bases{$base} .= " ".$set->[1];
     } else {
-      $bases{$base} = $set->{name};
+      $bases{$base} = $set->[1];
     }
   }
+  undef @good_bases;
 
   foreach my $base (keys %bases) {
     # uniq the list, since there are probably dup rules listed
-    my @list = split (' ', $bases{$base});
-    my @uniqed;
-
-    {
-      my %u=(); @uniqed = grep {defined} map {
-        if (exists $u{$_}) { undef; } else { $u{$_}=undef;$_; }
-      } @list; undef %u;
+    my %u = ();
+    for my $i (split ' ', $bases{$base}) {
+      next if exists $u{$i}; undef $u{$i}; 
     }
-
-    my $key  = join ' ', sort @uniqed;
-    $conf->{base_string}->{$ruletype}->{$base} = $key;
+    $conf->{base_string}->{$ruletype}->{$base} = join ' ', sort keys %u;
   }
   $self->{show_progress} and $progress->final();
+
+  if ($cachefile) {
+    $self->write_cachefile ($cachefile, $cached);
+  }
 
   my $elapsed = time - $start;
   info ("$ruletype: ".
@@ -879,5 +942,34 @@ sub get_perl {
 }
 
 ###########################################################################
+
+sub read_cachefile {
+  my ($self, $cachefile) = @_;
+  if (open(IN, "<".$cachefile)) {
+    my $str = join("", <IN>);
+    close IN;
+    $str =~ /^(.*)$/s;
+    my $untainted = $1;
+
+    my $VAR1;                 # Data::Dumper
+    if (eval $untainted) {
+      return $VAR1;        # Data::Dumper's naming
+    }
+  }
+  return { };
+}
+
+sub write_cachefile {
+  my ($self, $cachefile, $cached) = @_;
+
+  my $dump = Data::Dumper->new ([ $cached ]);
+  $dump->Deepcopy(1);
+  $dump->Purity(1);
+  $dump->Indent(1);
+  mkdir ($self->{main}->{bases_cache_dir});
+  open (CACHE, ">$cachefile") or warn "cannot write to $cachefile";
+  print CACHE $dump->Dump, ";1;";
+  close CACHE or warn "cannot close $cachefile";
+}
 
 1;

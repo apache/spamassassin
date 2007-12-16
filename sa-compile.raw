@@ -132,6 +132,7 @@ $opt{'debug'} ||= 'info';
 # ensure the body-rule base extractor plugin is loaded, we use that
 my $post_config = q(
   loadplugin Mail::SpamAssassin::Plugin::BodyRuleBaseExtractor
+
 ).join("\n", @{$opt{'cf'}})."\n";
 
 my $spamtest = new Mail::SpamAssassin(
@@ -171,6 +172,9 @@ if ((!defined $opt{'list'})
 {
   die "sa-compile: cannot write to $installdir, aborting\n";
 }
+
+$spamtest->{bases_cache_dir} = $spamtest->get_and_create_userstate_dir()
+                        ."/sa-compile.cache";
 
 $spamtest->init(1);
 my $conf = $spamtest->{conf};
