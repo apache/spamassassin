@@ -68,6 +68,7 @@ Mail::SpamAssassin::Util::untaint_var( \%ENV );
 
 # testing purposes only
 my $fixup_re_test;
+#$fixup_re_test = 1; fixup_re("fr()|\\\\|"); die;
 #$fixup_re_test = 1; fixup_re("\\x{1b}\$b"); die;
 #$fixup_re_test = 1; fixup_re("\\33\$b"); die;
 #$fixup_re_test = 1; fixup_re("[link]"); die;
@@ -601,6 +602,8 @@ sub fixup_re {
       my $esc = $1;
       if ($esc eq '"') {
         $output .= '"\\""';
+      } elsif ($esc eq '\\') {
+        $output .= '"**BACKSLASH**"';   # avoid hairy escape-parsing
       } elsif ($esc =~ /^x\{(\S+)\}$/) {
         $output .= '"'.chr(hex($1)).'"';
       } elsif ($esc =~ /^\d+/) {
@@ -625,6 +628,7 @@ sub fixup_re {
   $output =~ s/^""/"/;  # protect start and end quotes
   $output =~ s/(?<!\\)""$/"/;
   $output =~ s/(?<!\\)""//g; # strip empty strings, or turn "abc""def" -> "abcdef"
+  $output =~ s/\*\*BACKSLASH\*\*/\\\\/gs;
 
   $fixup_re_test and print "OUTPUT: $output\n";
   return $output;
