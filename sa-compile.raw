@@ -24,6 +24,7 @@ my $LOCAL_STATE_DIR = '@@LOCAL_STATE_DIR@@';    # substituted at 'make' time
 use lib '@@INSTALLSITELIB@@';                   # substituted at 'make' time
 
 use File::Spec;
+use Config;
 
 BEGIN {                          # see comments in "spamassassin.raw" for doco
   my @bin = File::Spec->splitpath($0);
@@ -404,6 +405,8 @@ EOT
     }
   }
 
+  my $ccopt = $Config{optimize};      # typically "-O2"
+
   open(FILE, ">Makefile.PL") || die "write Makefile.PL: $!";
   print FILE <<"EOT";
     use ExtUtils::MakeMaker;
@@ -413,10 +416,11 @@ EOT
 	'VERSION_FROM' => '$PMFILE',
 	'ABSTRACT_FROM' => '$PMFILE',
 	'OBJECT' => '\$(O_FILES)',
-	'OPTIMIZE' => '-O2',
+	'OPTIMIZE' => '$ccopt',
 	'AUTHOR' => 'A. U. Tomated <automated\@example.com>',
     );
 EOT
+  close FILE or die "write Makefile.PL: $!";
 
   open(FILE, ">MANIFEST.SKIP") || die "write MANIFEST.SKIP: $!";
   print FILE <<'EOT';
@@ -437,12 +441,23 @@ CVS/.*
 ^pm_to_blib$
 ~$
 EOT
+  close FILE or die "write MANIFEST.SKIP: $!";
 
   open(my $re, ">$XSFILE") || die "write $XSFILE: $!";
   print $re <<"EOT";
 #include "EXTERN.h"
 #include "perl.h"
 #include "XSUB.h"
+
+  /* bug 5556: newSVpvn_share() is not a defined API in perl 5.6.x.
+   * Thankfully we can use newSVpvn() without much harm, losing only
+   * a tiny bit of performance (I'd reckon ;).
+   */
+#ifdef newSVpvn_share
+#define my_newSVpvn_share(x,y,z)    newSVpvn_share(x,y,z)
+#else
+#define my_newSVpvn_share(x,y,z)    newSVpvn(x,y)
+#endif
 
   /* split single-space-separated result string */
   static void
@@ -453,12 +468,12 @@ EOT
       for (cp = wordstart = match; *cp != (unsigned char) 0; cp++) {
 	if (*cp == ' ') {
 	  av_push(results,
-	      newSVpvn_share(wordstart, cp-wordstart, (U32)0));
+	      my_newSVpvn_share(wordstart, cp-wordstart, (U32)0));
 	  wordstart = cp + 1;
 	}
       }
       av_push(results,
-	      newSVpvn_share(wordstart, cp-wordstart, (U32)0));
+	      my_newSVpvn_share(wordstart, cp-wordstart, (U32)0));
   }
 
 EOT
@@ -574,7 +589,7 @@ EOT
 
   $str =~ s/^fnord//gm;
   print FILE $str;
-
+  close FILE or die "write $PMFILE: $!";
 }
 
 sub fixup_re {
