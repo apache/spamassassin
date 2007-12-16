@@ -192,7 +192,7 @@ header  __RDNS_STATIC         X-Spam-Relays-Untrusted =~ /^[^\]]+ rdns=\S*(?:sta
 # bug 5586:
 header __CGATE_RCVD       Received =~ /by \S+ \(CommuniGate Pro/
 
-header RDNS_NONE    X-Spam-Relays-Untrusted =~ /^[^\]]+ rdns= /
+header __RDNS_NONE    X-Spam-Relays-Untrusted =~ /^[^\]]+ rdns= /
 
 ###########################################################################
 
