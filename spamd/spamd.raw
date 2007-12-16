@@ -2038,18 +2038,15 @@ sub handle_user_setuid_basic {
   # If $opt{'username'} in use, then look up userinfo for that uid;
   # otherwise use what was passed via $username
   #
-  my $userid = '';
+  my $suidto = $username;
   if ( $opt{'username'} ) {
-    $userid = $opt{'username'};
+    $suidto = $opt{'username'};
   }
-  else {
-    $userid = $username;
-  }
-  my ($name, $pwd, $uid, $gid, $quota, $comment, $gcos, $dir, $etc) =
-      getpwnam($userid);
+  my ($name, $pwd, $uid, $gid, $quota, $comment, $gcos, $suiddir, $etc) =
+      getpwnam($suidto);
 
   if (!defined $uid) {
-      my $errmsg = "spamd: handle_user unable to find user: '$userid'\n";
+      my $errmsg = "spamd: handle_user unable to find user: '$suidto'\n";
       die $errmsg if $spamtest->{'paranoid'};
       # if we are given a username, but can't look it up, maybe name
       # services are down?  let's break out here to allow them to get
@@ -2063,22 +2060,46 @@ sub handle_user_setuid_basic {
     $> = $uid;                        # change eUID
     if ( !defined($uid) || ( $> != $uid and $> != ( $uid - 2**32 ) ) ) {
       # make it fatal to avoid security breaches
-      die("spamd: fatal error: setuid to $username failed");
+      die("spamd: fatal error: setuid to $suidto failed");
     }
     else {
-      info("spamd: setuid to $username succeeded");
+      info("spamd: setuid to $suidto succeeded");
     }
   }
 
-  if ($opt{'user-config'}) {
-    handle_user_set_user_prefs($dir, $username);
+  my $userdir;
+
+  # if $opt{'user-config'} is in use, read user prefs from the remote
+  # username's home dir (if it exists): bug 5611
+  if ( $opt{'user-config'} ) {
+    my $prefsfrom = $username;  # the one passed, NOT $opt{username}
+
+    if ($prefsfrom eq $suidto) {
+      $userdir = $suiddir;      # reuse the already-looked-up info
+    } else {
+      $userdir = (getpwnam($prefsfrom))[7];
+    }
+
+    # we *still* die if this can't be found
+    if (!defined $userdir) {
+        my $errmsg = "spamd: handle_user unable to find user: '$prefsfrom'\n";
+        die $errmsg if $spamtest->{'paranoid'};
+        # if we are given a username, but can't look it up, maybe name
+        # services are down?  let's break out here to allow them to get
+        # 'defaults' when we are not running paranoid
+        info($errmsg);
+        return 0;
+    }
   }
+
+  # call this anyway, regardless of --user-config, so that
+  # signal_user_changed() is called
+  handle_user_set_user_prefs($userdir, $username);
 }
 
 sub handle_user_set_user_prefs {
   my ($dir, $username) = @_;
 
-  #
   # If vpopmail config enabled then set $dir to virtual homedir
   #
   if ( $opt{'vpopmail'} ) {
@@ -2097,10 +2118,15 @@ sub handle_user_set_user_prefs {
     }
     chomp($dir);
   }
-  my $cf_file = $dir . "/.spamassassin/user_prefs";
 
-  create_default_cf_if_needed( $cf_file, $username, $dir );
-  $spamtest->read_scoreonly_config($cf_file);
+  # don't do this if we weren't passed a directory
+  if ($dir) {
+    my $cf_file = $dir . "/.spamassassin/user_prefs";
+    create_default_cf_if_needed( $cf_file, $username, $dir );
+    $spamtest->read_scoreonly_config($cf_file);
+  }
+
+  # signal_user_changed will ignore undef user_dirs, so this is ok
   $spamtest->signal_user_changed(
     {
       username => $username,
@@ -2921,9 +2947,9 @@ given to --username is used.
 
 =item B<-x>, B<--nouser-config>, B<--user-config>
 
-Turn off(on) reading of per-user configuration files (user_prefs) from the
+Turn off (on) reading of per-user configuration files (user_prefs) from the
 user's home directory.  The default behaviour is to read per-user
-configuration from the user's home directory.
+configuration from the user's home directory (B<--user-config>).
 
 This option does not disable or otherwise influence the SQL, LDAP or
 Virtual Config Dir settings.
