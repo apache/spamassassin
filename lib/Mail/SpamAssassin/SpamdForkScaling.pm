@@ -187,6 +187,12 @@ sub child_error_kill {
     $sock->close;
   }
 
+  delete $self->{kids}->{$pid};       # remove from list
+
+  # ensure we recompute, so that we don't try to tell that child to
+  # accept a request, only to find that it's died in the meantime.
+  $self->compute_lowest_child_pid();
+
   warn "prefork: killed child $pid\n";
 }
 
