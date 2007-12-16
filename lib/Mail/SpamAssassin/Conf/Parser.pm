@@ -532,7 +532,8 @@ sub lint_check {
 
     while ( my($sk) = each %{$conf->{scores}} ) {
       if (!exists $conf->{tests}->{$sk}) {
-        $self->lint_warn("config: warning: score set for non-existent rule $sk\n", $sk);
+        # bug 5514: not a lint warning any more
+        dbg("config: warning: score set for non-existent rule $sk");
       }
     }
   }
