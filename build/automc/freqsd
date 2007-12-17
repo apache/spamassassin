@@ -196,7 +196,7 @@ sub run {
   system ($cmd);
 
   if (!$ignoreexit) {
-    die "command '$cmd' failed with status $?" if (($? >> 8) != 0);
+    warn "command '$cmd' failed with status $?" if (($? >> 8) != 0);
   }
 }
 
