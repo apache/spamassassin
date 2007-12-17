@@ -1,22 +1,23 @@
 #!/bin/sh
+# 
+# symlinked from 
+# lrwxrwxrwx   1 root     root          60 Dec  2 10:03 /etc/init.d/freqsd -> /home/automc/svn/spamassassin/build/automc/etc-init.d-freqsd*
 
 . /etc/profile
 prog=freqsd
 
-HOME=/home/automc
+HOME=/export/home/automc
 export HOME
 
 start() {
     echo "Starting $prog: " 
 
-    cd /export/home/automc/svn/spamassassin
-    rm /export/home/automc/freqsd/log
+    cd $HOME/svn/spamassassin
+    rm $HOME/freqsd/log.1
+    mv $HOME/freqsd/log $HOME/freqsd/log.1
 
-    HOME=/export/home/automc
-    export HOME
-
-    su automc -c "./build/automc/freqsd -pidfile /export/home/automc/freqsd/pid" \
-	> /export/home/automc/freqsd/log 2>&1 \
+    su automc -c "./build/automc/freqsd -pidfile $HOME/freqsd/pid" \
+	> $HOME/freqsd/log 2>&1 \
 	< /dev/null &
 
     echo
@@ -24,11 +25,9 @@ start() {
 }
 
 stop() {
-    cd /export/home/automc/svn/spamassassin
-    su automc -c "./build/automc/freqsd -pidfile /export/home/automc/freqsd/pid -kill"
+    cd $HOME/svn/spamassassin
+    su automc -c "./build/automc/freqsd -pidfile $HOME/freqsd/pid -kill"
 
-    # sleep 1
-    # pkill -15 -f automc/freqsd            # just in case
     sleep 1
     pkill -15 -u automc
 }
