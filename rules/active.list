@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: bb-fredt bb-zmi dos jm; day 2: bb-fredt bb-zmi dos jm; day 3: bb-jm cthielen jm theo zmi
+# with results from: day 1: bb-fredt bb-zmi dos jm; day 2: bb-fredt bb-zmi dos jm; day 3: bb-fredt bb-zmi dos jm
 
 # tflags userconf
 ALL_TRUSTED
@@ -55,6 +55,9 @@ CHARSET_FARAWAY_HEADER
 # tflags userconf
 CORRUPT_FROM_LINE_IN_HDRS
 
+# good enough
+DEAR_WINNER
+
 # tflags net
 DIGEST_MULTIPLE
 
@@ -84,6 +87,9 @@ DOS_OUTLOOK_TO_MX
 
 # good enough
 DRUGS_STOCK_MIMEOLE
+
+# good enough
+DVLABS_GOZI_PDF
 
 # good enough
 DYN_RDNS_AND_INLINE_IMAGE
@@ -179,7 +185,13 @@ FH_HOST_EQ_PACBELL_D
 FH_HOST_EQ_VERIZON_P
 
 # good enough
+FH_HOST_IN_ADDRARPA
+
+# good enough
 FH_MSGID_XXX
+
+# good enough
+FM_LOTTO_YOU_WON
 
 # good enough
 FM_MULTI_LUX_GIFTS
@@ -200,10 +212,19 @@ FRAGMENTED_MESSAGE
 FRT_PENIS1
 
 # good enough
+FRT_PHARMAC
+
+# good enough
+FRT_PRICE
+
+# good enough
 FRT_SEXUAL
 
 # good enough
 FR_ALMOST_VIAG2
+
+# good enough
+FR_WATCHES_HTTP
 
 # good enough
 FS_ABIGGER
@@ -234,6 +255,9 @@ FS_REPLICAWATCH
 
 # good enough
 FS_WILL_HELP
+
+# good enough
+FU_LONG_QUERY3
 
 # tflags userconf
 GTUBE
@@ -286,6 +310,9 @@ HELO_OEM
 # tflags userconf
 HIGH_CODEPAGE_URI
 
+# good enough
+HS_INDEX_PARAM
+
 # tflags userconf
 HTML_CHARSET_FARAWAY
 
@@ -308,6 +335,9 @@ JM_SOUGHT_1
 JM_SOUGHT_2
 
 # good enough
+JM_SOUGHT_3
+
+# good enough
 JM_TORA_XM
 
 # good enough
@@ -321,6 +351,12 @@ KAM_STOCKOTC
 
 # tflags publish
 KAM_STOCKTIP15
+
+# good enough
+KB_DATE_CONTAINS_TAB
+
+# good enough
+KB_FAKED_THE_BAT
 
 # tflags userconf
 MIME_CHARSET_FARAWAY
@@ -593,6 +629,9 @@ SUBJECT_IN_WHITELIST
 TT_OBSCURED_VIAGRA
 
 # good enough
+TVD_PP_PHISH
+
+# good enough
 TVD_QUAL_MEDS
 
 # good enough
@@ -606,6 +645,12 @@ DOS_FORGED_RCVD_QUADS
 
 # good enough
 FB_REPLICA_ROLEX
+
+# good enough
+FRT_ADULT2
+
+# good enough
+IMG_ALT_HSPACE_CID_ALIGN
 
 # tflags net
 RCVD_IN_DSBL
