@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: bb-fredt bb-zmi dos jm; day 2: bb-fredt bb-zmi dos jm; day 3: bb-fredt bb-zmi dos jm
+# with results from: day 1: bb-fredt bb-jm bb-zmi cthielen dos jm theo zmi; day 2: cthielen theo zmi; day 3: bb-fredt bb-zmi dos jm
 
 # tflags userconf
 ALL_TRUSTED
@@ -55,9 +55,6 @@ CHARSET_FARAWAY_HEADER
 # tflags userconf
 CORRUPT_FROM_LINE_IN_HDRS
 
-# good enough
-DEAR_WINNER
-
 # tflags net
 DIGEST_MULTIPLE
 
@@ -77,6 +74,9 @@ DNS_FROM_RFC_BOGUSMX
 DNS_FROM_RFC_DSN
 
 # good enough
+DOS_FORGED_RCVD_QUADS
+
+# good enough
 DOS_OE_TO_MX
 
 # good enough
@@ -87,9 +87,6 @@ DOS_OUTLOOK_TO_MX
 
 # good enough
 DRUGS_STOCK_MIMEOLE
-
-# good enough
-DVLABS_GOZI_PDF
 
 # good enough
 DYN_RDNS_AND_INLINE_IMAGE
@@ -158,9 +155,6 @@ FH_DATE_PAST_20XX
 FH_FAKE_RCVD_LINE
 
 # good enough
-FH_FROM_CASH
-
-# good enough
 FH_HELO_ALMOST_IP
 
 # good enough
@@ -185,13 +179,7 @@ FH_HOST_EQ_PACBELL_D
 FH_HOST_EQ_VERIZON_P
 
 # good enough
-FH_HOST_IN_ADDRARPA
-
-# good enough
 FH_MSGID_XXX
-
-# good enough
-FM_LOTTO_YOU_WON
 
 # good enough
 FM_MULTI_LUX_GIFTS
@@ -212,19 +200,10 @@ FRAGMENTED_MESSAGE
 FRT_PENIS1
 
 # good enough
-FRT_PHARMAC
-
-# good enough
-FRT_PRICE
-
-# good enough
 FRT_SEXUAL
 
 # good enough
 FR_ALMOST_VIAG2
-
-# good enough
-FR_WATCHES_HTTP
 
 # good enough
 FS_ABIGGER
@@ -255,9 +234,6 @@ FS_REPLICAWATCH
 
 # good enough
 FS_WILL_HELP
-
-# good enough
-FU_LONG_QUERY3
 
 # tflags userconf
 GTUBE
@@ -310,9 +286,6 @@ HELO_OEM
 # tflags userconf
 HIGH_CODEPAGE_URI
 
-# good enough
-HS_INDEX_PARAM
-
 # tflags userconf
 HTML_CHARSET_FARAWAY
 
@@ -329,13 +302,7 @@ JM_GMT_RCVD
 JM_NICE_GIRL
 
 # good enough
-JM_SOUGHT_1
-
-# good enough
 JM_SOUGHT_2
-
-# good enough
-JM_SOUGHT_3
 
 # good enough
 JM_TORA_XM
@@ -351,12 +318,6 @@ KAM_STOCKOTC
 
 # tflags publish
 KAM_STOCKTIP15
-
-# good enough
-KB_DATE_CONTAINS_TAB
-
-# good enough
-KB_FAKED_THE_BAT
 
 # tflags userconf
 MIME_CHARSET_FARAWAY
@@ -619,6 +580,9 @@ STOCK_IMG_HDR_FROM
 # good enough
 STOCK_IMG_HTML
 
+# good enough
+STOX_REPLY_TYPE_WITHOUT_QUOTES
+
 # tflags userconf
 SUBJECT_IN_BLACKLIST
 
@@ -629,9 +593,6 @@ SUBJECT_IN_WHITELIST
 TT_OBSCURED_VIAGRA
 
 # good enough
-TVD_PP_PHISH
-
-# good enough
 TVD_QUAL_MEDS
 
 # good enough
@@ -640,17 +601,23 @@ TVD_RCVD_IP
 # good enough
 TVD_RCVD_IP4
 
-# good enough
-DOS_FORGED_RCVD_QUADS
+# tflags publish
+DOS_ANAL_SPAM_MAILER
 
 # good enough
-FB_REPLICA_ROLEX
+DOS_OUTLOOK_TO_MX_IMAGE
 
 # good enough
-FRT_ADULT2
+GAMES
 
 # good enough
 IMG_ALT_HSPACE_CID_ALIGN
+
+# good enough
+JM_SOUGHT_3
+
+# good enough
+LOTTERY_PH_004470
 
 # tflags net
 RCVD_IN_DSBL
@@ -663,9 +630,6 @@ RCVD_IN_SORBS_DUL
 
 # tflags net
 RCVD_IN_XBL
-
-# good enough
-STOX_REPLY_TYPE_WITHOUT_QUOTES
 
 # tflags net
 WHOIS_MONIKER_ROLE
