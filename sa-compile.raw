@@ -692,8 +692,12 @@ Options:
 
 =head1 DESCRIPTION
 
-sa-compile uses C<re2c> to compile the SpamAssassin ruleset. This is then used
-by the C<Mail::SpamAssassin::Plugin::Rule2XSBody> plugin to speed up
+sa-compile uses C<re2c> to compile the site-wide parts of the SpamAssassin
+ruleset. No part of user_prefs or any files included from user_prefs can be
+built into the compiled set.
+
+This compiled set is then used by the 
+C<Mail::SpamAssassin::Plugin::Rule2XSBody> plugin to speed up
 SpamAssassin's operation, where possible, and when that plugin is loaded.
 
 C<re2c> can match strings much faster than perl code, by constructing a DFA to
