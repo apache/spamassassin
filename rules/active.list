@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: cthielen dos jm theo zmi; day 2: bb-fredt bb-jm bb-zmi cthielen dos jm theo zmi; day 3: cthielen theo zmi
+# with results from: day 1: bb-fredt cthielen dos jm theo zmi; day 2: bb-jm cthielen dos jm theo zmi; day 3: bb-fredt bb-jm bb-zmi cthielen dos jm theo zmi
 
 # tflags userconf
 ALL_TRUSTED
@@ -318,6 +318,9 @@ FS_WILL_HELP
 
 # good enough
 FUZZY_MERIDIA
+
+# good enough
+FU_LONG_QUERY3
 
 # good enough
 GAMES
@@ -761,7 +764,7 @@ FB_REPLICA_ROLEX
 FB_YOUR_WOMAN
 
 # good enough
-FM_MORTGAGE3PLUS
+FH_HOST_IN_ADDRARPA
 
 # good enough
 JM_HPGI
@@ -778,6 +781,12 @@ JM_SOUGHT_1
 # good enough
 JM_STORM_ECARD
 
+# good enough
+KB_DATE_CONTAINS_TAB
+
+# good enough
+KB_FAKED_THE_BAT
+
 # tflags net
 RCVD_IN_DSBL
 
@@ -789,9 +798,6 @@ RCVD_IN_SORBS_DUL
 
 # tflags net
 RCVD_IN_XBL
-
-# good enough
-TVD_FW_GRAPHIC_ID1
 
 # good enough
 TVD_UNDER_VALUED
@@ -1011,9 +1017,6 @@ XMAILER_MIMEOLE_OL_3AC1D
 
 # good enough
 XMAILER_MIMEOLE_OL_3D61D
-
-# good enough
-XMAILER_MIMEOLE_OL_465CD
 
 # good enough
 XMAILER_MIMEOLE_OL_4B815
