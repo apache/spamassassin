@@ -348,6 +348,8 @@ for(my $elem = 0; $elem <= $#targets; $elem++) {
 
 ###########################################################################
 
+setup_sig_handlers();
+
 # Everything below here needs ArchiveIterator ...
 my $iter = new Mail::SpamAssassin::ArchiveIterator(
   {
@@ -408,10 +410,12 @@ sub result {
 
 ###########################################################################
 
+my $mail;       # global, so signal handler can clean it up; bug 5626
+
 # make sure it only returns false values so that result_sub() isn't called...
 sub wanted {
   my $dataref = $_[3];
-  my $mail    = $spamtest->parse($dataref);
+  $mail       = $spamtest->parse($dataref);
   $count++;
 
   # This is a short cut -- doing white/black-list?  Do it and return quickly.
@@ -430,6 +434,7 @@ sub wanted {
     }
 
     $mail->finish();
+    $mail = undef;
     return 1;
   }
 
@@ -440,6 +445,7 @@ sub wanted {
     if ( !$opt{'test-mode'} ) {
       print $spamtest->remove_spamassassin_markup ($mail);
       $mail->finish();
+      $mail = undef;
       return 1;
     }
     else {
@@ -450,6 +456,7 @@ sub wanted {
       #
       my $new_mail =
         $spamtest->parse( $spamtest->remove_spamassassin_markup($mail) );
+
       $mail->finish();
       $mail = $new_mail;
     }
@@ -462,13 +469,14 @@ sub wanted {
     my $new_mail =
       $spamtest->parse( $spamtest->remove_spamassassin_markup($mail) );
     $mail->finish();
+    $mail = $new_mail;
 
     my $failed;
-    if ( $opt{'report'} && !$spamtest->report_as_spam($new_mail) ) {
+    if ( $opt{'report'} && !$spamtest->report_as_spam($mail) ) {
       $failed = 'report';
     }
 
-    if ( $opt{'revoke'} && !$spamtest->revoke_as_spam($new_mail) ) {
+    if ( $opt{'revoke'} && !$spamtest->revoke_as_spam($mail) ) {
       $failed = 'revoke';
     }
 
@@ -477,7 +485,8 @@ sub wanted {
       warn "spamassassin: for more information, re-run with -D option to see debug output\n";
     }
 
-    $new_mail->finish();
+    $mail->finish();
+    $mail = undef;
     return 1;
   }
 
@@ -498,9 +507,30 @@ sub wanted {
 
   # clean up after ourselves
   $mail->finish();
+  $mail = undef;
+
   $status->finish();
 
   return 1;
+}
+
+###########################################################################
+
+sub setup_sig_handlers {
+  $SIG{HUP}  = \&kill_handler;
+  $SIG{INT}  = \&kill_handler;
+  $SIG{TERM} = \&kill_handler;
+  $SIG{PIPE} = \&kill_handler;
+}
+
+sub kill_handler {
+  my ($sig) = @_;
+  warn "spamassassin: killed by SIG$sig\n";
+  if ($mail) {
+    $mail->finish();      # bug 5626: remove temp files etc.
+    $mail = undef;
+  }
+  exit 0;
 }
 
 # ---------------------------------------------------------------------------
