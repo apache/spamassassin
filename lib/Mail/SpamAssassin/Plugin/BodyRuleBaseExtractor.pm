@@ -610,12 +610,13 @@ sub extract_hints {
       # we can do both, since we canonicalize to lc.
       if (!$spcs && $item =~ /^EXACT/ && $args =~ /<(.*)>/)
       {
-        $buf .= $1;
+        my $str = $1;
+        $buf .= $str;
         if ($buf =~ s/\\x\{[0-9a-fA-F]{4,}\}.*$//) {
           # a high Unicode codepoint, interpreted by perl 5.8.x.  cut and stop
           $add_candidate->();
         }
-        if ($1 && length $1 >= 55 && $buf =~ s/\.\.\.$//) {
+        if (length $str >= 55 && $buf =~ s/\.\.\.$//) {
           # perl 5.8.x truncates with a "..." here!  cut and stop
           $add_candidate->();
         }
