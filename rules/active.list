@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: bb-fredt cthielen dos jm theo zmi; day 2: bb-jm cthielen dos jm theo zmi; day 3: bb-fredt bb-jm bb-zmi cthielen dos jm theo zmi
+# with results from: day 1: bb-fredt bb-jm cthielen dos jm theo zmi; day 2: bb-fredt cthielen dos jm theo zmi; day 3: bb-jm cthielen dos jm theo zmi
 
 # tflags userconf
 ALL_TRUSTED
@@ -101,6 +101,9 @@ DOS_OUTLOOK_TO_MX
 DOS_OUTLOOK_TO_MX_IMAGE
 
 # good enough
+DOS_REMOVE_DOMAIN_DOT
+
+# good enough
 DOS_STOCK_BAT
 
 # good enough
@@ -143,6 +146,9 @@ FAKE_REPLY_C
 FB_ACHIEVE_BACH
 
 # good enough
+FB_CASINO
+
+# good enough
 FB_CIALIS_LEO3
 
 # good enough
@@ -176,10 +182,10 @@ FB_SMALL_PEN
 FB_SOFTTABS
 
 # good enough
-FB_TO_STOP_DISTRO
+FB_YOUR_REFI
 
 # good enough
-FB_YOUR_REFI
+FB_YOUR_WOMAN
 
 # good enough
 FH_BAD_OEV1441
@@ -404,13 +410,28 @@ JM_FAKE_PSMTP_RCVD
 JM_GMT_RCVD
 
 # good enough
+JM_HPGI
+
+# good enough
 JM_NICE_GIRL
+
+# good enough
+JM_PPYH
+
+# good enough
+JM_PPYH_2
+
+# good enough
+JM_SOUGHT_1
 
 # good enough
 JM_SOUGHT_2
 
 # good enough
 JM_SOUGHT_3
+
+# good enough
+JM_STORM_ECARD
 
 # good enough
 JM_TORA_XM
@@ -746,40 +767,16 @@ TVD_RCVD_SINGLE
 TVD_STOCK1
 
 # good enough
+TVD_UNDER_VALUED
+
+# good enough
 TVD_VISIT_PHARMA
-
-# good enough
-DOS_REMOVE_DOMAIN_DOT
-
-# good enough
-FB_CASINO
-
-# good enough
-FB_MED1CAT
-
-# good enough
-FB_REPLICA_ROLEX
-
-# good enough
-FB_YOUR_WOMAN
 
 # good enough
 FH_HOST_IN_ADDRARPA
 
 # good enough
-JM_HPGI
-
-# good enough
-JM_PPYH
-
-# good enough
-JM_PPYH_2
-
-# good enough
-JM_SOUGHT_1
-
-# good enough
-JM_STORM_ECARD
+IMG_CID_PART1
 
 # good enough
 KB_DATE_CONTAINS_TAB
@@ -798,9 +795,6 @@ RCVD_IN_SORBS_DUL
 
 # tflags net
 RCVD_IN_XBL
-
-# good enough
-TVD_UNDER_VALUED
 
 # tflags net
 WHOIS_MONIKER_ROLE
