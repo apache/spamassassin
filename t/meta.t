@@ -20,7 +20,7 @@ use SATest; sa_t_init("meta");
 use Test;
 use Mail::SpamAssassin;
 
-use vars qw( %rules %scores );
+use vars qw( %rules %scores $perl_path);
 
 # "parse-rules-for-masses" requires Data::Dumper
 use constant HAS_DATADUMPER => eval 'use Data::Dumper; 1;';
@@ -39,7 +39,7 @@ for (my $scoreset = 0; $scoreset < 4; $scoreset++) {
   unlink $output || die;
   %rules = ();
   %scores = ();
-  if (system("$prefix/build/parse-rules-for-masses -o $output -d \"$prefix/rules\" -s $scoreset -x")) {
+  if (system("$perl_path $prefix/build/parse-rules-for-masses -o $output -d \"$prefix/rules\" -s $scoreset -x")) {
     warn "parse-rules-for-masses failed!";
   }
   eval {
