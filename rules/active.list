@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: bb-fredt bb-jm cthielen dos jm theo zmi; day 2: bb-fredt cthielen dos jm theo zmi; day 3: bb-jm cthielen dos jm theo zmi
+# with results from: day 1: bb-fredt bb-jm cthielen dos jm theo zmi; day 2: bb-fredt bb-jm cthielen dos jm theo zmi; day 3: bb-fredt cthielen dos jm theo zmi
 
 # tflags userconf
 ALL_TRUSTED
@@ -227,6 +227,9 @@ FH_HOST_EQ_PACBELL_D
 FH_HOST_EQ_VERIZON_P
 
 # good enough
+FH_HOST_IN_ADDRARPA
+
+# good enough
 FH_MSGID_000000
 
 # good enough
@@ -261,6 +264,9 @@ FM_XMAIL_F_OUT
 
 # tflags userconf
 FRAGMENTED_MESSAGE
+
+# good enough
+FRT_BIGGERMEM1
 
 # good enough
 FRT_DISCOUNT
@@ -447,6 +453,12 @@ KAM_STOCKOTC
 
 # tflags publish
 KAM_STOCKTIP15
+
+# good enough
+KB_DATE_CONTAINS_TAB
+
+# good enough
+KB_FAKED_THE_BAT
 
 # good enough
 LOTTERY_PH_004470
@@ -773,16 +785,7 @@ TVD_UNDER_VALUED
 TVD_VISIT_PHARMA
 
 # good enough
-FH_HOST_IN_ADDRARPA
-
-# good enough
 IMG_CID_PART1
-
-# good enough
-KB_DATE_CONTAINS_TAB
-
-# good enough
-KB_FAKED_THE_BAT
 
 # tflags net
 RCVD_IN_DSBL
@@ -795,6 +798,9 @@ RCVD_IN_SORBS_DUL
 
 # tflags net
 RCVD_IN_XBL
+
+# good enough
+TVD_FW_GRAPHIC_ID1
 
 # tflags net
 WHOIS_MONIKER_ROLE
