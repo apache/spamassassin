@@ -23,8 +23,8 @@ Mail::SpamAssassin::Plugin::DKIM - perform DKIM verification tests
 
  loadplugin Mail::SpamAssassin::Plugin::DKIM [/path/to/DKIM.pm]
 
- full DKIM_VALID            eval:check_dkim_valid()
- full DKIM_VALID_AUTHOR_SIG eval:check_dkim_valid_author_sig()
+ full DKIM_VALID     eval:check_dkim_valid()
+ full DKIM_VALID_AU  eval:check_dkim_valid_author_sig()
 
 (for compatibility, a check_dkim_verified is a synonym for check_dkim_valid)
 
@@ -90,8 +90,9 @@ sub new {
   bless ($self, $class);
 
   $self->register_eval_rule ("check_dkim_signed");
-  $self->register_eval_rule ("check_dkim_valid");
   $self->register_eval_rule ("check_dkim_verified");  # old synonym for _valid
+  $self->register_eval_rule ("check_dkim_valid");
+  $self->register_eval_rule ("check_dkim_valid_author_sig");
   $self->register_eval_rule ("check_dkim_signsome");
   $self->register_eval_rule ("check_dkim_testing");
   $self->register_eval_rule ("check_dkim_signall");
