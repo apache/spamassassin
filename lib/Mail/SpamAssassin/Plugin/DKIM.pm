@@ -335,10 +335,13 @@ sub _check_dkim_signature {
 
     my $author = $verifier->message_originator;
     $author = !$author ? '' : $author->address();
+    # Mail::DKIM sometimes leaves leading or trailing whitespace in address
+    $author =~ s/^[ \t]+//s;  $author =~ s/[ \t]+\z//s;  # trim
     if ($author ne $scan->{dkim_author_address}) {
-      info("dkim: author parsing inconsistency?  SA:<%s>, DKIM:<%s>",
-            $author, $scan->{dkim_author_address});
-      $scan->{dkim_author_address} = $author;
+      dbg("dkim: author parsing inconsistency, SA: <%s>, DKIM: <%s>",
+           $author, $scan->{dkim_author_address});
+    # currently SpamAssassin's parsing is better than Mail::Address parsing
+    # $scan->{dkim_author_address} = $author;
     }
 
     $scan->{dkim_signatures} = [];
