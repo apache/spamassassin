@@ -326,8 +326,12 @@ sub rule2xs {
   my $modname;
   my $force = 1;
   my $FILE = shift;
+  my $fh;
 
-  open(my $fh, "sort $FILE |") || die "open($FILE): $!";
+  {
+      local $ENV{LC_ALL} = "C";
+      open($fh, "sort $FILE |") || die "open($FILE): $!";
+  }
 # read ruleset name from the first line in the file
   my $ruleset_name;
   $_ = <$fh>;
