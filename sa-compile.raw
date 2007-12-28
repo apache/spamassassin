@@ -327,14 +327,15 @@ sub rule2xs {
   my $force = 1;
   my $FILE = shift;
   my $fh;
+  my @sfh;
 
-  {
-      local $ENV{LC_ALL} = "C";
-      open($fh, "sort $FILE |") || die "open($FILE): $!";
-  }
+  open($fh, $FILE) || die "open($FILE): $!";
+  @sfh = <$fh>;
+  close $fh;
+  @sfh = sort(@sfh);
 # read ruleset name from the first line in the file
   my $ruleset_name;
-  $_ = <$fh>;
+  $_ = shift(@sfh);
   local ($1);
   if (/^name\s+(\S+)/) {
     $ruleset_name = untaint_var($1);
@@ -362,7 +363,7 @@ sub rule2xs {
   my $numscans = 0;
   my $has_rules = '';
 
-  while (!eof($fh)) {
+  while (@sfh) {
     $numscans++;
 
     open(my $re, ">scanner${numscans}.re") || die "open(>scanner{$numscans}.re): $!";
@@ -388,7 +389,7 @@ EOT
 
     my $line = 0;
     my $rulecount = 0;
-    while (<$fh>) {
+    while ($_ = shift(@sfh)) {
       next if /^#/;
 
       local ($1,$2);
