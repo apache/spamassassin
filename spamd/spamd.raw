@@ -888,10 +888,6 @@ my $spamtest = Mail::SpamAssassin->new(
   }
 );
 
-$spamtest->init_learner({
-  opportunistic_expire_check_only => 1,
-});
-
 # if $clients_per_child == 1, there's no point in copying configs around
 unless ($clients_per_child > 1) {
   # unset $copy_config_p so we don't bother trying to copy things back
@@ -912,6 +908,11 @@ setup_parent_sig_handlers();
 # should be done post-daemonize such that any files created by this
 # process are written with the right ownership and everything.
 preload_modules_with_tmp_homedir();
+
+# this must be after preload_modules_with_tmp_homedir(), for bug 5606
+$spamtest->init_learner({
+  opportunistic_expire_check_only => 1,
+});
 
 # bayes DBs may still be tied() at this point, so untie them and such.
 $spamtest->finish_learner();
