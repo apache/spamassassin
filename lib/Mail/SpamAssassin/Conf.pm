@@ -2569,7 +2569,7 @@ not have any execute bits set (the umask is set to 111).
     setting => 'bayes_file_mode',
     is_admin => 1,
     default => '0700',
-    type => $CONF_TYPE_NUMERIC
+    type => $CONF_TYPE_STRING
   });
 
 =item bayes_store_module Name::Of::BayesStore::Module
