@@ -57,6 +57,7 @@ use Mail::SpamAssassin::Util::RegistrarBoundaries;
 
 use Config;
 use File::Spec;
+use File::Basename;
 use Time::Local;
 use Sys::Hostname (); # don't import hostname() into this namespace!
 use Fcntl;
@@ -1547,6 +1548,32 @@ sub get_my_locales {
   $lang ||= $ENV{'LANG'};
   push (@locales, $lang) if defined($lang);
   return @locales;
+}
+
+###########################################################################
+
+# bug 5612: work around for bugs in Berkeley db 4.2
+#
+# on 4.2 having the __db.[DBNAME] file will cause an loop that will never finish
+# on 4.3+ the loop will timeout after 301 open attempts, but we will still
+# be unable to open the database.  This workaround solves both problems. 
+#
+sub avoid_db_file_locking_bug {
+  my ($path) = @_;
+
+  my $db_tmpfile = untaint_file_path(File::Spec->catfile(dirname($path),
+                        '__db.'.basename($path)));
+
+  # delete "__db.[DBNAME]" and "__db.[DBNAME].*"
+  foreach my $tfile ($db_tmpfile, <$db_tmpfile.*>) {
+    my $file = untaint_file_path($tfile);
+    next unless (-e $file);
+
+    dbg("Berkeley DB bug work-around: cleaning tmp file $file");
+    if (!unlink($file)) {
+      die "cannot remove Berkeley DB tmp file $file: $!\n";
+    }
+  }
 }
 
 ###########################################################################
