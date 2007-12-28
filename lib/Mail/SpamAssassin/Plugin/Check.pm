@@ -154,6 +154,18 @@ sub check_main {
   $pms->learn();
   $self->{main}->call_plugins ("check_post_learn", { permsgstatus => $pms });
 
+  # track user_rules recompilations; each scanned message is 1 tick on this counter
+  if ($self->{done_user_rules}) {
+    my $counters = $pms->{conf}->{want_rebuild_for_type};
+    foreach my $type (keys %{$self->{done_user_rules}}) {
+      if ($counters->{$type} > 0) {
+        $counters->{$type}--;
+      }
+      dbg("rules: user rules done; ticking want_rebuild counter for type $type to ".
+                    $counters->{$type});
+    }
+  }
+
   return 1;
 }
 
@@ -212,7 +224,8 @@ sub run_generic_tests {
   $pms->{test_log_msgs} = ();        # clear test state
 
   my $conf = $pms->{conf};
-  my $doing_user_rules = $conf->{user_rules_to_compile}->{$opts{consttype}};
+  my $doing_user_rules = $conf->{want_rebuild_for_type}->{$opts{consttype}};
+  if ($doing_user_rules) { $self->{done_user_rules}->{$opts{consttype}}++; }
 
   # clean up priority value so it can be used in a subroutine name
   my $clean_priority;
@@ -835,7 +848,8 @@ sub run_eval_tests {
                                         { permsgstatus => $pms });
 
   my $conf = $pms->{conf};
-  my $doing_user_rules = $conf->{user_rules_to_compile}->{$testtype};
+  my $doing_user_rules = $conf->{want_rebuild_for_type}->{$testtype};
+  if ($doing_user_rules) { $self->{done_user_rules}->{$testtype}++; }
 
   # clean up priority value so it can be used in a subroutine name 
   my $clean_priority;

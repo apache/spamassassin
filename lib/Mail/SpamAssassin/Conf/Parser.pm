@@ -1054,8 +1054,21 @@ sub add_test {
     $conf->{if_stack}->{$name} = $self->get_if_stack_as_string();
   }
 
+  # if we found this rule in a user_prefs file, it's a user rule -- note that
+  # we may need to recompile the rule code for this type (if they've already
+  # been compiled, e.g. in spamd).
+  #
+  # Note: the want_rebuild_for_type 'flag' is actually a counter; it is decremented
+  # after each scan.  This ensures that we always recompile at least once more;
+  # once to *define* the rule, and once afterwards to *undefine* the rule in the
+  # compiled ruleset again.
+  #
+  # If two consecutive scans use user rules, that's ok -- the second one will
+  # reset the counter, and we'll still recompile just once afterwards to undefine
+  # the rule again.
+  #
   if ($self->{scoresonly}) {
-    $conf->{user_rules_to_compile}->{$type} = 1;
+    $conf->{want_rebuild_for_type}->{$type} = 2;
     $conf->{user_defined_rules}->{$name} = 1;
   }
 }
