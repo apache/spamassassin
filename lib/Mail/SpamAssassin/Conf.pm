@@ -1247,6 +1247,28 @@ time in number of seconds will tell SpamAssassin how often to retest for working
     }
   });
 
+=item dns_options rotate    (default: empty)
+
+If set to 'rotate', this causes SpamAssassin to choose a DNS server at random
+from all servers listed in C</etc/resolv.conf> every 'dns_test_interval'
+seconds, effectively spreading the load over all currently available DNS
+servers when there are many spamd workers. 
+
+=cut
+
+  push (@cmds, {
+    setting => 'dns_options',
+    code => sub {
+      my ($self, $key, $value, $line) = @_;
+      my $allowed_opts = "rotate";
+      
+      foreach my $option (split (/\s+/, $value)) {
+        if ($allowed_opts !~ /^$option$/) { return $INVALID_VALUE; }
+        else { $self->{dns_options}->{$option} = 1; }
+      }
+    }
+  });
+
 =back
 
 =head2 LEARNING OPTIONS
