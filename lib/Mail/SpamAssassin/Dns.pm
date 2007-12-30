@@ -632,12 +632,6 @@ sub is_dns_available {
   # DNS if we're only supposed to be looking at local tests.
   goto done if ($self->{main}->{local_tests_only});
 
-  if ($dnsopt eq "yes") {
-    $IS_DNS_AVAILABLE = 1;
-    dbg("dns: dns_available set to yes in config file, skipping test");
-    return $IS_DNS_AVAILABLE;
-  }
-
   # Check version numbers - runtime check only
   if (defined $Net::DNS::VERSION) {
     if (Mail::SpamAssassin::Util::am_running_on_windows()) {
@@ -657,6 +651,22 @@ sub is_dns_available {
   $self->clear_resolver();
   goto done unless $self->load_resolver();
 
+  my @nameservers = $self->{resolver}->nameservers();
+
+  # optionally shuffle the list of nameservers to distribute the load
+  if ($self->{conf}->{dns_options}->{rotate}) {
+    Mail::SpamAssassin::Util::fisher_yates_shuffle(\@nameservers);
+    dbg("dns: shuffled NS list: ".join(", ", @nameservers));
+    $self->{resolver}->nameservers(@nameservers);
+    $self->{resolver}->connect_sock();
+  }
+
+  if ($dnsopt eq "yes") {
+    $IS_DNS_AVAILABLE = 1;
+    dbg("dns: dns_available set to yes in config file, skipping test");
+    return $IS_DNS_AVAILABLE;
+  }
+
   if ($dnsopt =~ /test:\s+(.+)$/) {
     my $servers=$1;
     dbg("dns: servers: $servers");
@@ -667,15 +677,10 @@ sub is_dns_available {
     @domains = @EXISTING_DOMAINS;
   }
 
-  # TODO: retry every now and again if we get this far, but the
-  # next test fails?  could be because the ethernet cable has
-  # simply fallen out ;)
-
   # Net::DNS::Resolver scans a list of nameservers when it does a foreground
   # query but only uses the first in a background query like we use.
   # Try the different nameservers here in case the first one is not working
-  
-  my @nameservers = $self->{resolver}->nameservers();
+
   my @good_nameservers = ();
   dbg("dns: testing resolver nameservers: " . join(", ", @nameservers));
   my $ns;
@@ -710,9 +715,6 @@ sub is_dns_available {
 
   if ($IS_DNS_AVAILABLE == 1)
   {
-    if ($self->{conf}->{dns_options}->{rotate}) {
-      Mail::SpamAssassin::Util::fisher_yates_shuffle(\@good_nameservers);
-    }
     dbg("dns: NS list: ".join(", ", @good_nameservers));
     $self->{resolver}->nameservers(@good_nameservers);
     $self->{resolver}->connect_sock();
