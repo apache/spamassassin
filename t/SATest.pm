@@ -602,6 +602,11 @@ sub checkfile {
 
 sub pattern_to_re {
   my $pat = shift;
+
+  if ($pat =~ /^\/(.*)\/$/) {
+    return $1;
+  }
+
   $pat = quotemeta($pat);
 
   # make whitespace irrelevant; match any amount as long as the
