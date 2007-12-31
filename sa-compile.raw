@@ -308,7 +308,7 @@ sub rule2xs {
   my $force = 1;
   my $FILE = shift;
 
-  open(my $fh, "sort $FILE |") || die "open($FILE): $!";
+  open(my $fh, $FILE) || die "open($FILE): $!";
 # read ruleset name from the first line in the file
   my $ruleset_name;
   $_ = <$fh>;
