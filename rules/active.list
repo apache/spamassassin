@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: bb-jm cthielen dos jm theo zmi; day 2: bb-jm cthielen dos jm theo zmi; day 3: bb-jm cthielen dos jm theo zmi
+# with results from: day 1: bb-jm bb-zmi cthielen dos jm theo zmi; day 2: bb-jm cthielen dos jm theo zmi; day 3: bb-jm cthielen dos jm theo zmi
 
 # tflags userconf
 ALL_TRUSTED
@@ -294,6 +294,9 @@ FS_GET_LAID
 
 # good enough
 FS_MORE_CONFIDENT
+
+# good enough
+FS_NO_SCRIP
 
 # good enough
 FS_OBFU_PRMCY
@@ -774,9 +777,6 @@ RCVD_IN_SORBS_DUL
 
 # tflags net
 RCVD_IN_XBL
-
-# good enough
-TVD_FW_GRAPHIC_ID1
 
 # tflags net
 WHOIS_MONIKER_ROLE
