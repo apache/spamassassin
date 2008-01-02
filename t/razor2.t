@@ -22,7 +22,7 @@ exit unless (TEST_ENABLED && HAS_RAZOR2);
 
 my $ident = $ENV{'HOME'}.'/.razor/identity';
 if (! -r $ident) {
-  $razor_not_available = "razor-register has not been run, or $ident is unreadable.";
+  $razor_not_available = "razor-register / razor-admin -register has not been run, or $ident is unreadable.";
 }
 
 %patterns = (
