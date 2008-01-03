@@ -49,9 +49,9 @@ BEGIN {
   eval {
     require Time::HiRes or die "Error loading Time::HiRes: $@, $!";
     Time::HiRes->import( qw(time) );
-    $timer_resolution =
-      Time::HiRes->VERSION < 1.77 ? 0.001  # wild guess, assume better than 1s
-        : Time::HiRes::clock_getres(Time::HiRes::CLOCK_REALTIME());
+    $timer_resolution = Time::HiRes->can('clock_getres')
+      ? Time::HiRes::clock_getres(Time::HiRes::CLOCK_REALTIME())
+      : 0.001;  # wild guess, assume resolution is better than 1s
     1;
   } or do {
     $timer_resolution = 1;  # Perl's builtin timer ticks at one second
