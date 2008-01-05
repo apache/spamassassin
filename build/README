@@ -168,14 +168,6 @@ SPAMASSASSIN RELEASE PROCEDURE
 
 - take a copy of the MD5sum line output.
 
-- by default, they're written to ~/site/released/ .
-  Copy them to wherever you want, yourself:
-
-    mkdir -p ~/public_html/devel
-    mv ~/site/released/Mail-SpamAssassin-3.2.0-rc2.* ~/public_html/devel
-
-  (For me, "~/public_html/devel" is http://people.apache.org/~jm/devel/ .)
-
 - test the tar.gz and zip files!  redo until they work!! ;)
 
 - Write the release announcement mail!  This is a simple matter of copying
