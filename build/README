@@ -122,6 +122,10 @@ SPAMASSASSIN RELEASE PROCEDURE
 
     svn commit -m "preparing to release X.Y.Z"
 
+  (If you are privately preparing a security release, and don't wish to
+  perform commits to public SVN repos, you can defer this step until
+  later.)
+
 - SVN tag the release files.  This is done using "svn copy".
   For a maintainance release (x.y.1, x.y.2):
 
@@ -151,6 +155,10 @@ SPAMASSASSIN RELEASE PROCEDURE
   a branch really) of whatever the latest branch revision to be the new
   base of the tag release.
 
+  (If you are privately preparing a security release, and don't wish to
+  perform commits to public SVN repos, you can defer this step until
+  later.)
+
 
 - In your checkout on people.apache.org (may be read-only):
 
@@ -161,10 +169,18 @@ SPAMASSASSIN RELEASE PROCEDURE
     svn co $repo/tags/spamassassin_release_3_2_0_pre_2 ~/relbuild
     cd ~/relbuild
 
+  (If you are privately preparing a security release, you will need
+  to ensure that the code in this build directory matches up using
+  some other mechanism, since SVN is public.)
+
 - run "./build/update_stable" to build the tar.gz files.
 
     PATH=$HOME/sabuildtools/perl584/bin:$HOME/sabuildtools/bin:$PATH
     ./build/update_stable
+
+  if you get "gpg-agent" errors about not connecting to the PIN entry
+  module, you didn't update your $PATH.
+
 
 - take a copy of the MD5sum line output.
 
@@ -174,6 +190,10 @@ SPAMASSASSIN RELEASE PROCEDURE
   the previous release's announcement, updating the version numbers and
   links, fixing the MD5 and SHA1 checksums in this mail, and summarising
   the important changes from the Changes file.
+
+  Warning: you must send this using a "From:" address @apache.org,
+  otherwise it will be silently discarded at the ASF instead of being
+  delivered to the announce list.
 
     cp build/announcements/3.1.7.txt build/announcements/3.1.8.txt
     svn add !$
@@ -191,6 +211,9 @@ SPAMASSASSIN RELEASE PROCEDURE
 - (for a full release) You need 3 +1's from PMC members. The release
   manager (that's you) may vote as well.  Once there are three or more +1
   votes, you may proceed.
+
+- If you've been doing some steps in private, for a security release,
+  now's the time to perform them publicly; tagging etc.
 
 - Edit lib/Mail/SpamAssassin.pm, and uncomment the $IS_DEVEL_BUILD line.
   SVN commit it (and the release announcement file from above, if
@@ -349,6 +372,10 @@ SPAMASSASSIN RELEASE PROCEDURE
 
 - announce on the users, dev, and announce mailing lists using the
   previously-prepared release announcement.
+
+  NOTE: you must send this mail with a "From:" address @apache.org,
+  otherwise it'll be bounced by the ASF's custom spam filtering
+  rules.
 
 - Before doing the next step, run through the release summary mail, and
   write up a really short summary of the important changes in
