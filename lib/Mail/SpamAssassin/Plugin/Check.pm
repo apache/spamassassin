@@ -91,29 +91,41 @@ sub check_main {
       $pms->{resolver}->finish_socket() if $pms->{resolver};
     }
 
+    $pms->harvest_completed_queries();
     # allow other, plugin-defined rule types to be called here
     $self->{main}->call_plugins ("check_rules_at_priority",
         { permsgstatus => $pms, priority => $priority, checkobj => $self });
 
     # do head tests
     $self->do_head_tests($pms, $priority);
+    $pms->harvest_completed_queries();
     $self->do_head_eval_tests($pms, $priority);
+    $pms->harvest_completed_queries();
 
     $self->do_body_tests($pms, $priority, $decoded);
+    $pms->harvest_completed_queries();
     $self->do_uri_tests($pms, $priority, @uris);
+    $pms->harvest_completed_queries();
     $self->do_body_eval_tests($pms, $priority, $decoded);
+    $pms->harvest_completed_queries();
   
     $self->do_rawbody_tests($pms, $priority, $bodytext);
+    $pms->harvest_completed_queries();
     $self->do_rawbody_eval_tests($pms, $priority, $bodytext);
+    $pms->harvest_completed_queries();
   
     $self->do_full_tests($pms, $priority, \$fulltext);
+    $pms->harvest_completed_queries();
     $self->do_full_eval_tests($pms, $priority, \$fulltext);
+    $pms->harvest_completed_queries();
 
     $self->do_meta_tests($pms, $priority);
+    $pms->harvest_completed_queries();
 
     # we may need to call this more often than once through the loop, but
     # it needs to be done at least once, either at the beginning or the end.
     $self->{main}->call_plugins ("check_tick", { permsgstatus => $pms });
+    $pms->harvest_completed_queries();
   }
 
   # sanity check, it is possible that no rules >= HARVEST_DNSBL_PRIORITY ran so the harvest
@@ -141,6 +153,18 @@ sub check_main {
   # auto-learning
   $pms->learn();
   $self->{main}->call_plugins ("check_post_learn", { permsgstatus => $pms });
+
+  # track user_rules recompilations; each scanned message is 1 tick on this counter
+  if ($self->{done_user_rules}) {
+    my $counters = $pms->{conf}->{want_rebuild_for_type};
+    foreach my $type (keys %{$self->{done_user_rules}}) {
+      if ($counters->{$type} > 0) {
+        $counters->{$type}--;
+      }
+      dbg("rules: user rules done; ticking want_rebuild counter for type $type to ".
+                    $counters->{$type});
+    }
+  }
 
   return 1;
 }
@@ -200,7 +224,8 @@ sub run_generic_tests {
   $pms->{test_log_msgs} = ();        # clear test state
 
   my $conf = $pms->{conf};
-  my $doing_user_rules = $conf->{user_rules_to_compile}->{$opts{consttype}};
+  my $doing_user_rules = $conf->{want_rebuild_for_type}->{$opts{consttype}};
+  if ($doing_user_rules) { $self->{done_user_rules}->{$opts{consttype}}++; }
 
   # clean up priority value so it can be used in a subroutine name
   my $clean_priority;
@@ -823,7 +848,8 @@ sub run_eval_tests {
                                         { permsgstatus => $pms });
 
   my $conf = $pms->{conf};
-  my $doing_user_rules = $conf->{user_rules_to_compile}->{$testtype};
+  my $doing_user_rules = $conf->{want_rebuild_for_type}->{$testtype};
+  if ($doing_user_rules) { $self->{done_user_rules}->{$testtype}++; }
 
   # clean up priority value so it can be used in a subroutine name 
   my $clean_priority;

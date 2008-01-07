@@ -473,7 +473,9 @@ sub lookup_domain_ns {
   return if $scanner->{async}->get_lookup($key);
 
   # dig $dom ns
-  my $ent = $self->start_lookup ($scanner, 'NS', $self->res_bgsend($scanner, $dom, 'NS'), $key);
+  my $ent = $self->start_lookup($scanner, $dom, 'NS',
+                                $self->res_bgsend($scanner, $dom, 'NS', $key),
+                                $key);
   $ent->{obj} = $obj;
 }
 
@@ -481,7 +483,7 @@ sub complete_ns_lookup {
   my ($self, $scanner, $ent, $dom) = @_;
 
   my $packet = $ent->{response_packet};
-  my @answer = $packet->answer;
+  my @answer = !defined $packet ? () : $packet->answer;
 
   my $IPV4_ADDRESS = IPV4_ADDRESS;
   my $IP_PRIVATE = IP_PRIVATE;
@@ -517,14 +519,18 @@ sub lookup_a_record {
   return if $scanner->{async}->get_lookup($key);
 
   # dig $hname a
-  my $ent = $self->start_lookup ($scanner, 'A', $self->res_bgsend($scanner, $hname, 'A'), $key);
+  my $ent = $self->start_lookup($scanner, $hname, 'A',
+                                $self->res_bgsend($scanner, $hname, 'A', $key),
+                                $key);
   $ent->{obj} = $obj;
 }
 
 sub complete_a_lookup {
   my ($self, $scanner, $ent, $hname) = @_;
 
-  foreach my $rr ($ent->{response_packet}->answer) {
+  my $packet = $ent->{response_packet};
+  my @answer = !defined $packet ? () : $packet->answer;
+  foreach my $rr (@answer) {
     my $str = $rr->string;
     $self->log_dns_result ("A for NS $hname: $str");
 
@@ -558,8 +564,9 @@ sub lookup_single_dnsbl {
   my $item = $lookupstr.".".$dnsbl;
 
   # dig $ip txt
-  my $ent = $self->start_lookup ($scanner, 'DNSBL',
-        $self->res_bgsend($scanner, $item, $qtype), $key);
+  my $ent = $self->start_lookup($scanner, $item, 'DNSBL',
+                              $self->res_bgsend($scanner, $item, $qtype, $key),
+                              $key);
   $ent->{obj} = $obj;
   $ent->{rulename} = $rulename;
   $ent->{zone} = $dnsbl;
@@ -574,7 +581,7 @@ sub complete_dnsbl_lookup {
   my $rulecf = $conf->{uridnsbls}->{$rulename};
 
   my $packet = $ent->{response_packet};
-  my @answer = $packet->answer;
+  my @answer = !defined $packet ? () : $packet->answer;
 
   my $uridnsbl_subs = $conf->{uridnsbl_subs}->{$ent->{zone}};
   foreach my $rr (@answer)
@@ -645,15 +652,18 @@ sub got_dnsbl_hit {
 # ---------------------------------------------------------------------------
 
 sub start_lookup {
-  my ($self, $scanner, $type, $id, $key) = @_;
+  my ($self, $scanner, $zone, $type, $id, $key) = @_;
 
   my $ent = {
     key => $key,
+    zone => $zone,  # serves to fetch other per-zone settings
     type => "URI-".$type,
     id => $id,
     completed_callback => sub {
       my $ent = shift;
-      $self->completed_lookup_callback ($scanner, $ent);
+      if (defined $ent->{response_packet}) {  # not aborted or empty
+        $self->completed_lookup_callback ($scanner, $ent);
+      }
     }
   };
   $scanner->{async}->start_lookup($ent);
@@ -674,21 +684,17 @@ sub completed_lookup_callback {
   }
   elsif ($type eq 'URI-DNSBL') {
     $self->complete_dnsbl_lookup ($scanner, $ent, $val);
-    my $totalsecs = (time - $ent->{obj}->{querystart});
-    dbg("uridnsbl: query for ".$ent->{obj}->{dom}." took ".
-              $totalsecs." seconds to look up ($val)");
   }
 }
 
 # ---------------------------------------------------------------------------
 
 sub res_bgsend {
-  my ($self, $scanner, $host, $type) = @_;
+  my ($self, $scanner, $host, $type, $key) = @_;
 
   return $self->{main}->{resolver}->bgsend($host, $type, undef, sub {
-        my $pkt = shift;
-        my $id = shift;
-        $scanner->{async}->set_response_packet($id, $pkt);
+        my ($pkt, $id, $timestamp) = @_;
+        $scanner->{async}->set_response_packet($id, $pkt, $key, $timestamp);
       });
 }
 

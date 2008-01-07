@@ -494,12 +494,15 @@ elsif ($log_facility eq 'file') {
 # run with -u
 # we're not root
 # doing --vpopmail or --virtual-config-dir
-# we disable user-config
+# using --sql-config or --ldap-config
+# (unless we're also using --setuid-with-sql or --setuid-with-ldap)
 my $setuid_to_user = (
-	$opt{'username'} ||
-	$> != 0 ||
-	$opt{'vpopmail'} ||
-	$opt{'virtual-config-dir'}
+        $opt{'username'} ||
+        $> != 0 ||
+        $opt{'vpopmail'} ||
+        $opt{'virtual-config-dir'} ||
+        ($opt{'sql-config'} && !$opt{'setuid-with-sql'}) ||
+        ($opt{'ldap-config'} && !$opt{'setuid-with-ldap'})
       ) ? 0 : 1;
 
 dbg("spamd: will perform setuids? $setuid_to_user");
@@ -513,6 +516,18 @@ if ( $opt{'vpopmail'} ) {
 if ( $opt{'virtual-config-dir'} ) {
   if ( !$opt{'username'} ) {
     die "spamd: cannot use --virtual-config-dir without -u\n";
+  }
+}
+
+if ($opt{'sql-config'} && !$opt{'setuid-with-sql'}) {
+  if ( !$opt{'username'} ) {
+    die "spamd: cannot use --sql-config without -u\n";
+  }
+}
+
+if ($opt{'ldap-config'} && !$opt{'setuid-with-ldap'}) {
+  if ( !$opt{'username'} ) {
+    die "spamd: cannot use --ldap-config without -u\n";
   }
 }
 
@@ -873,10 +888,6 @@ my $spamtest = Mail::SpamAssassin->new(
   }
 );
 
-$spamtest->init_learner({
-  opportunistic_expire_check_only => 1,
-});
-
 # if $clients_per_child == 1, there's no point in copying configs around
 unless ($clients_per_child > 1) {
   # unset $copy_config_p so we don't bother trying to copy things back
@@ -897,6 +908,11 @@ setup_parent_sig_handlers();
 # should be done post-daemonize such that any files created by this
 # process are written with the right ownership and everything.
 preload_modules_with_tmp_homedir();
+
+# this must be after preload_modules_with_tmp_homedir(), for bug 5606
+$spamtest->init_learner({
+  opportunistic_expire_check_only => 1,
+});
 
 # bayes DBs may still be tied() at this point, so untie them and such.
 $spamtest->finish_learner();
@@ -2023,18 +2039,15 @@ sub handle_user_setuid_basic {
   # If $opt{'username'} in use, then look up userinfo for that uid;
   # otherwise use what was passed via $username
   #
-  my $userid = '';
+  my $suidto = $username;
   if ( $opt{'username'} ) {
-    $userid = $opt{'username'};
+    $suidto = $opt{'username'};
   }
-  else {
-    $userid = $username;
-  }
-  my ($name, $pwd, $uid, $gid, $quota, $comment, $gcos, $dir, $etc) =
-      getpwnam($userid);
+  my ($name, $pwd, $uid, $gid, $quota, $comment, $gcos, $suiddir, $etc) =
+      getpwnam($suidto);
 
   if (!defined $uid) {
-      my $errmsg = "spamd: handle_user unable to find user: '$userid'\n";
+      my $errmsg = "spamd: handle_user unable to find user: '$suidto'\n";
       die $errmsg if $spamtest->{'paranoid'};
       # if we are given a username, but can't look it up, maybe name
       # services are down?  let's break out here to allow them to get
@@ -2048,22 +2061,46 @@ sub handle_user_setuid_basic {
     $> = $uid;                        # change eUID
     if ( !defined($uid) || ( $> != $uid and $> != ( $uid - 2**32 ) ) ) {
       # make it fatal to avoid security breaches
-      die("spamd: fatal error: setuid to $username failed");
+      die("spamd: fatal error: setuid to $suidto failed");
     }
     else {
-      info("spamd: setuid to $username succeeded");
+      info("spamd: setuid to $suidto succeeded");
     }
   }
 
-  if ($opt{'user-config'}) {
-    handle_user_set_user_prefs($dir, $username);
+  my $userdir;
+
+  # if $opt{'user-config'} is in use, read user prefs from the remote
+  # username's home dir (if it exists): bug 5611
+  if ( $opt{'user-config'} ) {
+    my $prefsfrom = $username;  # the one passed, NOT $opt{username}
+
+    if ($prefsfrom eq $suidto) {
+      $userdir = $suiddir;      # reuse the already-looked-up info
+    } else {
+      $userdir = (getpwnam($prefsfrom))[7];
+    }
+
+    # we *still* die if this can't be found
+    if (!defined $userdir) {
+        my $errmsg = "spamd: handle_user unable to find user: '$prefsfrom'\n";
+        die $errmsg if $spamtest->{'paranoid'};
+        # if we are given a username, but can't look it up, maybe name
+        # services are down?  let's break out here to allow them to get
+        # 'defaults' when we are not running paranoid
+        info($errmsg);
+        return 0;
+    }
   }
+
+  # call this anyway, regardless of --user-config, so that
+  # signal_user_changed() is called
+  handle_user_set_user_prefs($userdir, $username);
 }
 
 sub handle_user_set_user_prefs {
   my ($dir, $username) = @_;
 
-  #
   # If vpopmail config enabled then set $dir to virtual homedir
   #
   if ( $opt{'vpopmail'} ) {
@@ -2082,10 +2119,15 @@ sub handle_user_set_user_prefs {
     }
     chomp($dir);
   }
-  my $cf_file = $dir . "/.spamassassin/user_prefs";
 
-  create_default_cf_if_needed( $cf_file, $username, $dir );
-  $spamtest->read_scoreonly_config($cf_file);
+  # don't do this if we weren't passed a directory
+  if ($dir) {
+    my $cf_file = $dir . "/.spamassassin/user_prefs";
+    create_default_cf_if_needed( $cf_file, $username, $dir );
+    $spamtest->read_scoreonly_config($cf_file);
+  }
+
+  # signal_user_changed will ignore undef user_dirs, so this is ok
   $spamtest->signal_user_changed(
     {
       username => $username,
@@ -2749,7 +2791,6 @@ If the B<--ssl> switch is used, and B<--ssl-port> is set, then unencrypted
 connections will be accepted on the B<--port> at the same time as encrypted
 connections are accepted at B<--ssl-port>.
 
-
 =item B<-q>, B<--sql-config>
 
 Turn on SQL lookups even when per-user config files have been disabled
@@ -2760,10 +2801,17 @@ database.
 If your spamc client does not support sending the C<User:> header,
 like C<exiscan>, then the SQL username used will always be B<nobody>.
 
+This inhibits the setuid() behavior, so the C<-u> option is
+required. If you want the setuid() behaviour, use C<-Q> or
+C<--setuid-with-sql> instead.
+
 =item B<--ldap-config>
 
 Turn on LDAP lookups. This is completely analog to C<--sql-config>,
 only it is using an LDAP server.
+
+Like C<--sql-config>, this disables the setuid behavior, and requires
+C<-u>. If you want it, use C<--setuid-with-ldap> instead.
 
 =item B<-Q>, B<--setuid-with-sql>
 
@@ -2900,9 +2948,9 @@ given to --username is used.
 
 =item B<-x>, B<--nouser-config>, B<--user-config>
 
-Turn off(on) reading of per-user configuration files (user_prefs) from the
+Turn off (on) reading of per-user configuration files (user_prefs) from the
 user's home directory.  The default behaviour is to read per-user
-configuration from the user's home directory.
+configuration from the user's home directory (B<--user-config>).
 
 This option does not disable or otherwise influence the SQL, LDAP or
 Virtual Config Dir settings.

@@ -212,13 +212,19 @@ sub parsed_metadata {
   
     # do the DNS query, have the callback process the result rather than poll for them later
     my $zone_index = $index;
-    my $id = $scanner->{main}->{resolver}->bgsend("${reversed_ip_quad}.$entry->{zone}", 'TXT', undef, sub {
-      my $pkt = shift;
+    my $zone = $reversed_ip_quad . '.' . $entry->{zone};
+    my $key = "asnlookup-${zone_index}-$entry->{zone}";
+    my $id = $scanner->{main}->{resolver}->bgsend($zone, 'TXT', undef, sub {
+      my ($pkt, $id, $timestamp) = @_;
+      $scanner->{async}->set_response_packet($id, $pkt, $key, $timestamp);
       $self->process_dns_result($scanner, $pkt, $zone_index);
     });
-
-    $scanner->{async}->start_lookup({ key=>"asnlookup-${zone_index}-$entry->{zone}", id=>$id, type=>'TXT' });
-    dbg("asn: launched DNS TXT query for ${reversed_ip_quad}.$entry->{zone} in background");
+    my $ent = {
+      key=>$key, id=>$id, type=>'TXT',
+      zone => $zone,  # serves to fetch other per-zone settings
+    };
+    $scanner->{async}->start_lookup($ent);
+    dbg("asn: launched DNS TXT query for $reversed_ip_quad.$entry->{zone} in background");
 
     $index++;
   }
@@ -233,7 +239,7 @@ sub process_dns_result {
   my $asn_tag = $conf->{asnlookups}[$zone_index]->{asn_tag};
   my $route_tag = $conf->{asnlookups}[$zone_index]->{route_tag};
 
-  my @answer = $response->answer;
+  my @answer = !defined $response ? () : $response->answer;
 
   foreach my $rr (@answer) {
     dbg("asn: $zone: lookup result packet: '".$rr->string."'");

@@ -524,12 +524,6 @@ sub finish {
   # Clean ourself up
   $self->finish_metadata();
 
-  # delete temporary files
-  if ($self->{'tmpfiles'}) {
-    unlink @{$self->{'tmpfiles'}};
-    delete $self->{'tmpfiles'};
-  }
-
   # These will only be in the root Message node
   delete $self->{'mime_boundary_state'};
   delete $self->{'mbox_sep'};
@@ -543,6 +537,11 @@ sub finish {
 
   # Go ahead and clean up all of the Message::Node parts
   while (my $part = shift @toclean) {
+    # bug 5557: windows requires tmp file be closed before it can be rm'd
+    if (ref $part->{'raw'} eq 'GLOB') {
+      close ($part->{'raw'});
+    }
+
     delete $part->{'headers'};
     delete $part->{'raw_headers'};
     delete $part->{'header_order'};
@@ -559,6 +558,12 @@ sub finish {
       push(@toclean, @{$part->{'body_parts'}});
       delete $part->{'body_parts'};
     }
+  }
+
+  # delete temporary files
+  if ($self->{'tmpfiles'}) {
+    unlink @{$self->{'tmpfiles'}};
+    delete $self->{'tmpfiles'};
   }
 }
 

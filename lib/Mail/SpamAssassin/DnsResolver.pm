@@ -49,6 +49,12 @@ use constant HAS_SOCKET_INET6 => eval { require IO::Socket::INET6; };
 
 our @ISA = qw();
 
+# Load Time::HiRes if it's available
+BEGIN {
+  eval { require Time::HiRes };
+  Time::HiRes->import( qw(time) ) unless $@;
+}
+
 ###########################################################################
 
 sub new {
@@ -293,13 +299,14 @@ sub new_dns_packet {
 
     # a bit noisy, so commented by default...
     #dbg("dns: new DNS packet time=".time()." host=$host type=$type id=".$packet->id);
-  };
-
-  if ($@) {
+    1;
+  } or do {
+    my $eval_stat = $@ ne '' ? $@ : "errno=$!";  chomp $eval_stat;
     # this can happen if Net::DNS isn't available -- but in this
     # case this function should never be called!
-    warn "dns: cannot create Net::DNS::Packet, but new_dns_packet() was called: $@ $!";
-  }
+    warn "dns: cannot create Net::DNS::Packet, but new_dns_packet() was called: $eval_stat";
+  };
+
   return $packet;
 }
 
@@ -338,18 +345,19 @@ sub reference C<$cb> will be called.
 Note that C<$type> and C<$class> may be C<undef>, in which case they
 will default to C<A> and C<IN>, respectively.
 
-The callback sub will be called with two arguments -- the packet that was
-delivered and an id string that fingerprints the query packet and the expected reply.
-It is expected that a closure callback be used, like so:
+The callback sub will be called with three arguments -- the packet that was
+delivered, and an id string that fingerprints the query packet and the expected
+reply. The third argument is a timestamp (Unix time, floating point), captured
+at the time the packet was collected. It is expected that a closure callback
+be used, like so:
 
   my $id = $self->{resolver}->bgsend($host, $type, undef, sub {
-        my $reply = shift;
-        my $reply_id = shift;
+        my ($reply, $reply_id, $timestamp) = @_;
         $self->got_a_reply ($reply, $reply_id);
       });
 
-The callback can ignore the reply as an invalid packet sent to the listening port
-if the reply id does not match the return value from bgsend.
+The callback can ignore the reply as an invalid packet sent to the listening
+port if the reply id does not match the return value from bgsend.
 
 =cut
 
@@ -384,46 +392,53 @@ sub poll_responses {
   my ($self, $timeout) = @_;
   return if $self->{no_resolver};
   return if !$self->{sock};
+  my $cnt = 0;
+  my $waiting_time = 0;
 
   my $rin = $self->{sock_as_vec};
   my $rout;
-  my ($nfound, $timeleft) = select($rout=$rin, undef, undef, $timeout);
 
-  if (!defined $nfound || $nfound < 0) {
-    warn "dns: select failed: $!";
-    return;
-  }
-
-  if ($nfound == 0) {
-    return 0;           # nothing's ready yet
-  }
-
-  my $packet = $self->{res}->bgread($self->{sock});
-  my $err = $self->{res}->errorstring;
-
-  if (defined $packet &&
-      defined $packet->header &&
-      defined $packet->question &&
-      defined $packet->answer)
-  {
-    my $id = $self->_packet_id($packet);
-
-    my $cb = delete $self->{id_to_callback}->{$id};
-    if (!$cb) {
-      dbg("dns: no callback for id: $id, ignored; packet: ".
-                    ($packet ? $packet->string : "undef"));
-      return 0;
+  for (;;) {
+    my $now_before = time;
+    my ($nfound, $timeleft) = select($rout=$rin, undef, undef, $timeout);
+    if (!defined $nfound || $nfound < 0) {
+      warn "dns: select failed: $!";
+      return;
     }
 
-    $cb->($packet, $id);
-    return 1;
-  }
-  else {
-    dbg("dns: no packet! err=$err packet=".
-                    ($packet ? $packet->string : "undef"));
+    my $now = time;
+    if ($now > $now_before && (!defined($timeout) || $timeout > 0)) {
+      $waiting_time += $now - $now_before;
+    }
+    $timeout = 0;  # next time around collect whatever is available, then exit
+    last  if $nfound == 0;
+
+    my $packet = $self->{res}->bgread($self->{sock});
+    my $err = $self->{res}->errorstring;
+
+    if (defined $packet &&
+        defined $packet->header &&
+        defined $packet->question &&
+        defined $packet->answer)
+    {
+      my $id = $self->_packet_id($packet);
+
+      my $cb = delete $self->{id_to_callback}->{$id};
+      if (!$cb) {
+        dbg("dns: no callback for id: %s, ignored; packet: %s",
+            $id,  $packet ? $packet->string : "undef" );
+      } else {
+        $cb->($packet, $id, $now);
+        $cnt++;
+      }
+    }
+    else {
+      dbg("dns: no packet! err=%s packet=%s",
+          $err,  $packet ? $packet->string : "undef" );
+    }
   }
 
-  return 0;
+  return wantarray ? ($cnt, $waiting_time) : $cnt;
 }
 
 ###########################################################################
@@ -457,6 +472,7 @@ sub send {
   my $retries = $self->{retry};
   my $timeout = $retrans;
   my $answerpkt;
+  my $answerpkt_avail = 0;
   for (my $i = 0;
        (($i < $retries) && !defined($answerpkt));
        ++$i, $retrans *= 2, $timeout = $retrans) {
@@ -464,18 +480,18 @@ sub send {
     $timeout = 1 if ($timeout < 1);
     # note nifty use of a closure here.  I love closures ;)
     $self->bgsend($name, $type, $class, sub {
-      $answerpkt = shift;
+      my ($reply, $reply_id, $timestamp) = @_;
+      $answerpkt = $reply; $answerpkt_avail = 1;
     });
 
     my $now = time;
     my $deadline = $now + $timeout;
 
-    while (($now < $deadline) && (!defined($answerpkt))) {
+    while (!$answerpkt_avail) {
+      if ($now >= $deadline) { $self->{send_timed_out} = 1; last }
       $self->poll_responses(1);
-      last if defined $answerpkt;
       $now = time;
     }
-    $self->{send_timed_out} = 1 unless ($now < $deadline);
   }
   return $answerpkt;
 }
@@ -539,8 +555,11 @@ sub fhs_to_vec {
   my $rin = '';
   foreach my $sock (@fhlist) {
     my $fno = fileno($sock);
-    warn "dns: oops! fileno now undef for $sock" unless defined($fno);
-    vec ($rin, $fno, 1) = 1;
+    if (!defined $fno) {
+      warn "dns: oops! fileno now undef for $sock";
+    } else {
+      vec ($rin, $fno, 1) = 1;
+    }
   }
   return $rin;
 }

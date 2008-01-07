@@ -24,6 +24,7 @@ my $LOCAL_STATE_DIR = '@@LOCAL_STATE_DIR@@';    # substituted at 'make' time
 use lib '@@INSTALLSITELIB@@';                   # substituted at 'make' time
 
 use File::Spec;
+use Config;
 
 BEGIN {                          # see comments in "spamassassin.raw" for doco
   my @bin = File::Spec->splitpath($0);
@@ -68,6 +69,7 @@ Mail::SpamAssassin::Util::untaint_var( \%ENV );
 
 # testing purposes only
 my $fixup_re_test;
+#$fixup_re_test = 1; fixup_re("fr()|\\\\|"); die;
 #$fixup_re_test = 1; fixup_re("\\x{1b}\$b"); die;
 #$fixup_re_test = 1; fixup_re("\\33\$b"); die;
 #$fixup_re_test = 1; fixup_re("[link]"); die;
@@ -130,6 +132,7 @@ $opt{'debug'} ||= 'info';
 # ensure the body-rule base extractor plugin is loaded, we use that
 my $post_config = q(
   loadplugin Mail::SpamAssassin::Plugin::BodyRuleBaseExtractor
+
 ).join("\n", @{$opt{'cf'}})."\n";
 
 my $spamtest = new Mail::SpamAssassin(
@@ -169,6 +172,9 @@ if ((!defined $opt{'list'})
 {
   die "sa-compile: cannot write to $installdir, aborting\n";
 }
+
+$spamtest->{bases_cache_dir} = $spamtest->get_and_create_userstate_dir()
+                        ."/sa-compile.cache";
 
 $spamtest->init(1);
 my $conf = $spamtest->{conf};
@@ -302,7 +308,7 @@ sub rule2xs {
   my $force = 1;
   my $FILE = shift;
 
-  open(my $fh, "sort $FILE |") || die "open($FILE): $!";
+  open(my $fh, $FILE) || die "open($FILE): $!";
 # read ruleset name from the first line in the file
   my $ruleset_name;
   $_ = <$fh>;
@@ -403,6 +409,8 @@ EOT
     }
   }
 
+  my $ccopt = $Config{optimize};      # typically "-O2"
+
   open(FILE, ">Makefile.PL") || die "write Makefile.PL: $!";
   print FILE <<"EOT";
     use ExtUtils::MakeMaker;
@@ -412,10 +420,11 @@ EOT
 	'VERSION_FROM' => '$PMFILE',
 	'ABSTRACT_FROM' => '$PMFILE',
 	'OBJECT' => '\$(O_FILES)',
-	'OPTIMIZE' => '-O2',
+	'OPTIMIZE' => '$ccopt',
 	'AUTHOR' => 'A. U. Tomated <automated\@example.com>',
     );
 EOT
+  close FILE or die "write Makefile.PL: $!";
 
   open(FILE, ">MANIFEST.SKIP") || die "write MANIFEST.SKIP: $!";
   print FILE <<'EOT';
@@ -436,12 +445,23 @@ CVS/.*
 ^pm_to_blib$
 ~$
 EOT
+  close FILE or die "write MANIFEST.SKIP: $!";
 
   open(my $re, ">$XSFILE") || die "write $XSFILE: $!";
   print $re <<"EOT";
 #include "EXTERN.h"
 #include "perl.h"
 #include "XSUB.h"
+
+  /* bug 5556: newSVpvn_share() is not a defined API in perl 5.6.x.
+   * Thankfully we can use newSVpvn() without much harm, losing only
+   * a tiny bit of performance (I'd reckon ;).
+   */
+#ifdef newSVpvn_share
+#define my_newSVpvn_share(x,y,z)    newSVpvn_share(x,y,z)
+#else
+#define my_newSVpvn_share(x,y,z)    newSVpvn(x,y)
+#endif
 
   /* split single-space-separated result string */
   static void
@@ -452,12 +472,12 @@ EOT
       for (cp = wordstart = match; *cp != (unsigned char) 0; cp++) {
 	if (*cp == ' ') {
 	  av_push(results,
-	      newSVpvn_share(wordstart, cp-wordstart, (U32)0));
+	      my_newSVpvn_share(wordstart, cp-wordstart, (U32)0));
 	  wordstart = cp + 1;
 	}
       }
       av_push(results,
-	      newSVpvn_share(wordstart, cp-wordstart, (U32)0));
+	      my_newSVpvn_share(wordstart, cp-wordstart, (U32)0));
   }
 
 EOT
@@ -573,7 +593,7 @@ EOT
 
   $str =~ s/^fnord//gm;
   print FILE $str;
-
+  close FILE or die "write $PMFILE: $!";
 }
 
 sub fixup_re {
@@ -601,6 +621,8 @@ sub fixup_re {
       my $esc = $1;
       if ($esc eq '"') {
         $output .= '"\\""';
+      } elsif ($esc eq '\\') {
+        $output .= '"**BACKSLASH**"';   # avoid hairy escape-parsing
       } elsif ($esc =~ /^x\{(\S+)\}$/) {
         $output .= '"'.chr(hex($1)).'"';
       } elsif ($esc =~ /^\d+/) {
@@ -625,6 +647,7 @@ sub fixup_re {
   $output =~ s/^""/"/;  # protect start and end quotes
   $output =~ s/(?<!\\)""$/"/;
   $output =~ s/(?<!\\)""//g; # strip empty strings, or turn "abc""def" -> "abcdef"
+  $output =~ s/\*\*BACKSLASH\*\*/\\\\/gs;
 
   $fixup_re_test and print "OUTPUT: $output\n";
   return $output;
@@ -669,8 +692,12 @@ Options:
 
 =head1 DESCRIPTION
 
-sa-compile uses C<re2c> to compile the SpamAssassin ruleset. This is then used
-by the C<Mail::SpamAssassin::Plugin::Rule2XSBody> plugin to speed up
+sa-compile uses C<re2c> to compile the site-wide parts of the SpamAssassin
+ruleset. No part of user_prefs or any files included from user_prefs can be
+built into the compiled set.
+
+This compiled set is then used by the 
+C<Mail::SpamAssassin::Plugin::Rule2XSBody> plugin to speed up
 SpamAssassin's operation, where possible, and when that plugin is loaded.
 
 C<re2c> can match strings much faster than perl code, by constructing a DFA to

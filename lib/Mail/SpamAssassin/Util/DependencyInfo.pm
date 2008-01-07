@@ -139,8 +139,9 @@ my @OPTIONAL_MODULES = (
 {
   module => 'Time::HiRes',
   version => '0.00',
-  desc => 'If this module is installed, the processing times are logged/reported
-  more precisely in spamd.',
+  desc => 'If this module is installed, asynchronous DNS lookup timeouts operate
+  with subsecond precision and the processing times are logged/reported
+  more accurately. Other modules and plugins may benefit too.',
 },
 {
   module => 'Mail::DomainKeys',

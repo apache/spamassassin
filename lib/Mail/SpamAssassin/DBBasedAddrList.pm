@@ -82,15 +82,19 @@ sub new_checker {
 
     dbg("auto-whitelist: tie-ing to DB file of type $dbm_module $mod1 in $path");
 
+    ($self->{is_locked} && $dbm_module eq 'DB_File') and 
+            Mail::SpamAssassin::Util::avoid_db_file_locking_bug ($path);
+
     if (! tie %{ $self->{accum} }, $dbm_module, $path, $mod2,
-      oct($main->{conf}->{auto_whitelist_file_mode}) ) {
-        my $err = $!;   # might get overwritten later
-        if ($self->{is_locked}) {
-          $self->{main}->{locker}->safe_unlock($self->{locked_file});
-          $self->{is_locked} = 0;
-        }
-        die "auto-whitelist: cannot open auto_whitelist_path $path: $err\n";
+            oct($main->{conf}->{auto_whitelist_file_mode}) )
+    {
+      my $err = $!;   # might get overwritten later
+      if ($self->{is_locked}) {
+        $self->{main}->{locker}->safe_unlock($self->{locked_file});
+        $self->{is_locked} = 0;
       }
+      die "auto-whitelist: cannot open auto_whitelist_path $path: $err\n";
+    }
   }
 
   bless ($self, $class);

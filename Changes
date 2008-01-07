@@ -1,4 +1,235 @@
 ------------------------------------------------------------------------
+r608672 | mmartinec | 2008-01-03 23:28:38 +0000 (Thu, 03 Jan 2008) | 1 line
+
+AsyncLoop: call clock_getres only if Time::HiRes makes it available
+------------------------------------------------------------------------
+r607918 | jm | 2008-01-01 21:15:44 +0000 (Tue, 01 Jan 2008) | 1 line
+
+preparing to release 3.2.4
+------------------------------------------------------------------------
+r607910 | jm | 2008-01-01 20:59:55 +0000 (Tue, 01 Jan 2008) | 1 line
+
+preparing for 3.2.4 release
+------------------------------------------------------------------------
+r607761 | sidney | 2007-12-31 18:08:46 +0000 (Mon, 31 Dec 2007) | 1 line
+
+bug 5748: fix locale problem with use of external sort by not sorting because the sort was not needed anyway
+------------------------------------------------------------------------
+r607612 | sidney | 2007-12-30 23:21:25 +0000 (Sun, 30 Dec 2007) | 1 line
+
+Bug 5599: implement DNS server load distribution
+------------------------------------------------------------------------
+r607590 | jm | 2007-12-30 21:07:41 +0000 (Sun, 30 Dec 2007) | 1 line
+
+bug 5673: 'ALL' header was including spurious extra spaces between header names and values.  fix
+------------------------------------------------------------------------
+r607589 | jm | 2007-12-30 21:04:39 +0000 (Sun, 30 Dec 2007) | 1 line
+
+bug 5715: allow for more than one sa-update MIRRORED.BY file host in DNS, for redundancy
+------------------------------------------------------------------------
+r607297 | mmartinec | 2007-12-28 17:31:23 +0000 (Fri, 28 Dec 2007) | 1 line
+
+bug 5662: recognize author signature and multiple signatures for whitelisting (with Mail::DKIM 0.29); disable useless "check_dkim_signsome"; new eval rules "check_dkim_valid_author_sig" and "check_dkim_valid" (an alias for a "check_dkim_verified" misnomer); new tags _DKIMIDENTITY_ and _DKIMDOMAIN_; updated terminology; verification speedup with Mail::DKIM 0.30 (or its pre-releases)
+------------------------------------------------------------------------
+r607239 | jm | 2007-12-28 13:17:26 +0000 (Fri, 28 Dec 2007) | 1 line
+
+bug 5696: cut regexp base strings at Unicode high codepoints, to avoid corruption of patterns containing UTF-8
+------------------------------------------------------------------------
+r607236 | jm | 2007-12-28 13:15:46 +0000 (Fri, 28 Dec 2007) | 1 line
+
+bug 5637: bayes_file_mode is handled incorrectly when creating bayes.mutex, resulting in incorrect permissions on that file; fix by Mihaly Barasz
+------------------------------------------------------------------------
+r607235 | jm | 2007-12-28 13:14:06 +0000 (Fri, 28 Dec 2007) | 1 line
+
+bug 5612: DB_File version 4.2.x has a bug that loops infinitely if files named '__db.{filename}' are present; work around.  thanks to J. Nick Koston for the report and fix
+------------------------------------------------------------------------
+r607233 | jm | 2007-12-28 13:12:14 +0000 (Fri, 28 Dec 2007) | 1 line
+
+bug 5606: too-early init_learner() call causes root's user prefs file to be read when spamd is started; this is inappropriate. fix
+------------------------------------------------------------------------
+r607232 | jm | 2007-12-28 13:10:16 +0000 (Fri, 28 Dec 2007) | 1 line
+
+bug 4179: if allow_user_rules is 1, user rules are not unique to each user; one user's user rules can appear in later scans for other users that are run using the same spamd process. fix
+------------------------------------------------------------------------
+r607225 | jm | 2007-12-28 12:37:13 +0000 (Fri, 28 Dec 2007) | 1 line
+
+note that dkim.t has been broken by external changes, annoyingly
+------------------------------------------------------------------------
+r606498 | sidney | 2007-12-22 21:43:27 +0000 (Sat, 22 Dec 2007) | 1 line
+
+bug 5705: use the correct perl binary to lint parse-rules-for-masses in the meta tests
+------------------------------------------------------------------------
+r606150 | jm | 2007-12-21 09:57:22 +0000 (Fri, 21 Dec 2007) | 1 line
+
+bug 5680: ALL_TRUSTED can fire if a trusted MSA or webmail system receives the message from an untrusted X-Originating-IP: header
+------------------------------------------------------------------------
+r606149 | jm | 2007-12-21 09:53:24 +0000 (Fri, 21 Dec 2007) | 1 line
+
+bug 5626: in the 'spamassassin' script, install a signal handler for SIGHUP, SIGINT, SIGTERM and SIGPIPE to ensure that temporary files are removed
+------------------------------------------------------------------------
+r605203 | jm | 2007-12-18 13:05:54 +0000 (Tue, 18 Dec 2007) | 1 line
+
+bug 3811: silence noise emitted during 'perl Makefile.PL' caused by ExtUtils::MakeMaker and/or CPAN.pm bugs
+------------------------------------------------------------------------
+r605054 | sidney | 2007-12-18 00:29:39 +0000 (Tue, 18 Dec 2007) | 1 line
+
+bug 5608 - more correct wording in POD documentation
+------------------------------------------------------------------------
+r604716 | jm | 2007-12-16 21:40:14 +0000 (Sun, 16 Dec 2007) | 1 line
+
+bug 5594: several major sa-compile fixes.  major increase in overall speed; cache results between runs to further increase speed; and fix a danger of massive memory usage
+------------------------------------------------------------------------
+r604715 | jm | 2007-12-16 21:33:52 +0000 (Sun, 16 Dec 2007) | 1 line
+
+bug 5557: some temporary files are left not cleaned up on Windows; fix
+------------------------------------------------------------------------
+r604713 | jm | 2007-12-16 21:30:05 +0000 (Sun, 16 Dec 2007) | 1 line
+
+bug 5661: speed up Bayes SQL queries by allowing the use of indexes when expiring
+------------------------------------------------------------------------
+r604711 | jm | 2007-12-16 21:27:57 +0000 (Sun, 16 Dec 2007) | 1 line
+
+bug 5611: support 'spamd --nouser-config -u username', which setuids to 'username' but does not read user_prefs files from anywhere
+------------------------------------------------------------------------
+r604710 | jm | 2007-12-16 21:26:37 +0000 (Sun, 16 Dec 2007) | 1 line
+
+bug 5577: spamc on win32 reports corrupt error messages if spamd host is unresolveable or unconnectable.  fix
+------------------------------------------------------------------------
+r604709 | jm | 2007-12-16 21:25:32 +0000 (Sun, 16 Dec 2007) | 1 line
+
+bug 5556: fix a variety of sa-compile portability issues, and support for 5.6.x perls
+------------------------------------------------------------------------
+r604708 | jm | 2007-12-16 21:22:28 +0000 (Sun, 16 Dec 2007) | 1 line
+
+bug 5514: make 'score set for a non-existent rule' a debug message, instead of a lint warning, since it's a very frequent FAQ
+------------------------------------------------------------------------
+r604707 | jm | 2007-12-16 21:21:18 +0000 (Sun, 16 Dec 2007) | 1 line
+
+bug 5493: sa-compile fails to correctly deal with escaped backslashes.  fix
+------------------------------------------------------------------------
+r604706 | jm | 2007-12-16 21:19:59 +0000 (Sun, 16 Dec 2007) | 1 line
+
+bug 5665: spamd may fail to notice that a child has completed exiting, and keeps in the child list in state 'K', eventually filling up the child list with 'ghost' children.  fix
+------------------------------------------------------------------------
+r604705 | jm | 2007-12-16 21:18:11 +0000 (Sun, 16 Dec 2007) | 1 line
+
+bug 5677: update TLD list in RegistrarBoundaries with latest feedback from Alex, Jeff and Dallas
+------------------------------------------------------------------------
+r604555 | sidney | 2007-12-16 05:56:36 +0000 (Sun, 16 Dec 2007) | 1 line
+
+remove score for DRUG_RA_PRICE because the rule no longer exists
+------------------------------------------------------------------------
+r604549 | sidney | 2007-12-16 03:40:59 +0000 (Sun, 16 Dec 2007) | 1 line
+
+bug 5586: fix typo in the fix that was checked in to branch 3.2
+------------------------------------------------------------------------
+r604547 | sidney | 2007-12-16 03:05:48 +0000 (Sun, 16 Dec 2007) | 1 line
+
+test case number was not incrememnted last time a test case was added
+------------------------------------------------------------------------
+r600712 | duncf | 2007-12-03 22:20:13 +0000 (Mon, 03 Dec 2007) | 2 lines
+
+bug 5735: spamc should allow retry_sleep 0
+
+------------------------------------------------------------------------
+r599208 | duncf | 2007-11-28 23:58:28 +0000 (Wed, 28 Nov 2007) | 1 line
+
+bug 5728: require -u with --sql-config or --ldap-config
+------------------------------------------------------------------------
+r590056 | jm | 2007-10-30 13:05:54 +0000 (Tue, 30 Oct 2007) | 1 line
+
+bug 5682: remove FH_HOST_ALMOST_IP, FH_HOST_EQ_D_D_D_D, due to false positives and redundancy with RDNS_DYNAMIC; remove FH_HOST_EQ_D_D_D_DB due to no hits
+------------------------------------------------------------------------
+r586471 | jm | 2007-10-19 14:21:07 +0000 (Fri, 19 Oct 2007) | 1 line
+
+backport changes to SVN-only build/mkrules script from trunk, to support new rulesrc/scores dir
+------------------------------------------------------------------------
+r586009 | jm | 2007-10-18 15:37:51 +0000 (Thu, 18 Oct 2007) | 1 line
+
+bug 5681: look up IP addresses found in 'X-Yahoo-Post-IP' and 'X-SenderIP' headers, too, thanks to Martin Blapp
+------------------------------------------------------------------------
+r586008 | jm | 2007-10-18 15:36:50 +0000 (Thu, 18 Oct 2007) | 1 line
+
+bug 5492: use get_pristine_body() API instead of more complex get_pristine() usage in VBounce plugin, thanks to Henrik Krohns
+------------------------------------------------------------------------
+r585950 | mmartinec | 2007-10-18 12:52:52 +0000 (Thu, 18 Oct 2007) | 1 line
+
+Unhelpful diagnostics when site rules directory is inaccessible, Bug 5507
+------------------------------------------------------------------------
+r585895 | mmartinec | 2007-10-18 08:16:27 +0000 (Thu, 18 Oct 2007) | 1 line
+
+Another unparsed Received line, Bug 5583, including a test case
+------------------------------------------------------------------------
+r585580 | mmartinec | 2007-10-17 17:16:16 +0000 (Wed, 17 Oct 2007) | 1 line
+
+Bug 5589: Refined async events handling and DNS lookup completions
+------------------------------------------------------------------------
+r585506 | jm | 2007-10-17 13:48:50 +0000 (Wed, 17 Oct 2007) | 1 line
+
+bug 5527: add AOL WebMail received header support, thanks to Steve Freegard
+------------------------------------------------------------------------
+r585501 | jm | 2007-10-17 13:44:44 +0000 (Wed, 17 Oct 2007) | 1 line
+
+bug 5672: remove DNS_FROM_SECURITYSAGE (DNSBL lookups against securitysage.com) due to unreliability
+------------------------------------------------------------------------
+r585434 | jm | 2007-10-17 10:11:01 +0000 (Wed, 17 Oct 2007) | 1 line
+
+bug 5687:  fix bug where duplicate loadplugin line results in eval rule method registered with invalid $self object
+------------------------------------------------------------------------
+r583975 | jm | 2007-10-11 22:12:28 +0000 (Thu, 11 Oct 2007) | 1 line
+
+bug 5568: ensure read-receipt messages are not tagged with BOUNCE_MESSAGE
+------------------------------------------------------------------------
+r583857 | jm | 2007-10-11 15:41:23 +0000 (Thu, 11 Oct 2007) | 1 line
+
+bug 5676: trivial fix to POD documentation; the topic is 'whitelist_bounce_relays', not 'whitelist_from'
+------------------------------------------------------------------------
+r582914 | jm | 2007-10-08 17:52:03 +0000 (Mon, 08 Oct 2007) | 1 line
+
+backport score changes to 3.2.0, to match rules deleted from sandboxes
+------------------------------------------------------------------------
+r581301 | jm | 2007-10-02 16:54:20 +0000 (Tue, 02 Oct 2007) | 3 lines
+
+bug 5476: update Bonded Sender (now Sender Score
+Certified) rules, and add a rule for their strictly-confirmed-opt-in-required
+zone
+------------------------------------------------------------------------
+r578929 | jm | 2007-09-24 19:37:37 +0000 (Mon, 24 Sep 2007) | 1 line
+
+remove localized descriptions for FORGED_AOL_TAGS and FORGED_MUA_AOL_FROM
+------------------------------------------------------------------------
+r578885 | jm | 2007-09-24 17:34:43 +0000 (Mon, 24 Sep 2007) | 1 line
+
+bug 5538: remove FORGED_MUA_AOL_FROM and FORGED_AOL_TAGSentirely; they're obsolete, given the current capabilities of AOL mail user agents
+------------------------------------------------------------------------
+r578787 | jm | 2007-09-24 12:31:20 +0000 (Mon, 24 Sep 2007) | 1 line
+
+remove score for nonexistent rules; forgotten backport from 3.2.x rule updates SVN dir
+------------------------------------------------------------------------
+r578785 | jm | 2007-09-24 12:27:30 +0000 (Mon, 24 Sep 2007) | 1 line
+
+bug 5632: remove all completewhois.com DNSBL lookups, site seems to have disappeared without warning
+------------------------------------------------------------------------
+r578778 | jm | 2007-09-24 12:17:05 +0000 (Mon, 24 Sep 2007) | 1 line
+
+bug 5586: RDNS_NONE has false positives if the MTA doesn't put the hostname in the Received header, like Communigate Pro. add an exception for this
+------------------------------------------------------------------------
+r564346 | jm | 2007-08-09 19:32:45 +0000 (Thu, 09 Aug 2007) | 1 line
+
+3.2.4 devel cycle started
+------------------------------------------------------------------------
+r564345 | jm | 2007-08-09 19:32:15 +0000 (Thu, 09 Aug 2007) | 1 line
+
+3.2.3 RELEASED
+------------------------------------------------------------------------
+r563875 | jm | 2007-08-08 13:38:40 +0000 (Wed, 08 Aug 2007) | 1 line
+
+doc: minor fixes to build procedure doc
+------------------------------------------------------------------------
+r563848 | jm | 2007-08-08 13:16:52 +0000 (Wed, 08 Aug 2007) | 1 line
+
+preparing to release 3.2.3
+------------------------------------------------------------------------
 r563591 | jm | 2007-08-07 17:49:55 +0000 (Tue, 07 Aug 2007) | 1 line
 
 bug 5107: change default user_scores_ldap_username to be the null string, allowing anonymous binding; fix 'schema' syntax error in LDAP config support

@@ -194,9 +194,10 @@ sub info {
 
 # remember to avoid deep recursion, my friend
 sub _log {
-  my ($level, $message) = @_;
+  my ($level, $message, @args) = @_;
 
   my $facility = "generic";
+  local ($1,$2);
   if ($message =~ /^(\S+?): (.*)/s) {
     $facility = $1;
     $message = $2;
@@ -209,6 +210,7 @@ sub _log {
 		   $LOG_SA{facility}->{$facility});
   }
 
+  if (@args && index($message,'%') >= 0) { $message = sprintf($message,@args) }
   $message =~ s/\n+$//s;
   $message =~ s/^/${facility}: /mg;
 

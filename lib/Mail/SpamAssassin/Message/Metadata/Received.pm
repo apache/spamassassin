@@ -106,10 +106,24 @@ sub parse_received_headers {
     }
   }
 
+  my $IP_ADDRESS = IP_ADDRESS;
   my $IP_PRIVATE = IP_PRIVATE;
   my $LOCALHOST = LOCALHOST;
 
-  foreach my $line ( $msg->get_header('Received') ) {
+  my @hdrs = $msg->get_header('Received');
+
+  # Now add the single line headers like X-Originating-IP. (bug 5680)
+  # we convert them into synthetic "Received" headers so we can share
+  # code below.
+  for my $header ('X-Yahoo-Post-IP', 'X-Originating-IP',
+                    'X-Apparently-From', 'X-SenderIP')
+  {
+    my $str = $msg->get_header($header);
+    next unless ($str && $str =~ m/($IP_ADDRESS)/);
+    push @hdrs, "from X-Originating-IP: $1\n";
+  }
+
+  foreach my $line ( @hdrs ) {
 
     # qmail-scanner support hack: we may have had one of these set from the
     # previous (read: more recent) Received header.   if so, add it on to this
@@ -288,6 +302,7 @@ sub parse_received_headers {
 sub parse_received_line {
   my ($self) = shift;
   local ($_) = shift;
+  local ($1,$2,$3,$4,$5,$6);
 
   s/\s+/ /g;
   s/^ //;
@@ -333,7 +348,8 @@ sub parse_received_line {
 
   # Received: from virtual-access.org by bolero.conactive.com ; Thu, 20 Feb 2003 23:32:58 +0100
   # Received: FROM ca-ex-bridge1.nai.com BY scwsout1.nai.com ; Fri Feb 07 10:18:12 2003 -0800
-  if (/^from \S+ by [^\s;]+ ?;/i) { return 0; }
+  # but not: Received: from [86.122.158.69] by mta2.iomartmail.com; Thu, 2 Aug 2007 21:50:04 -0200
+  if (/^from (\S+) by [^\s;]+ ?;/i && $1 !~ /^\[[\d.]+\]$/) { return 0; }
 
 # ---------------------------------------------------------------------------
 
@@ -401,6 +417,14 @@ sub parse_received_line {
     if (/ \(SquirrelMail authenticated user /) {
       dbg("received-header: ignored SquirrelMail injection: $_");
       return 0;
+    }
+
+    # AOL WebMail headers
+    if (/aol\.com/ && /with HTTP \(WebMailUI\)/) {
+      # Received: from 82.135.198.129 by FWM-M18.sysops.aol.com (64.12.168.82) with HTTP (WebMailUI); Tue, 19 Jun 2007 11:16:54 -0400
+      if(/(${IP_ADDRESS}) by (\S+) \(${IP_ADDRESS}\) with HTTP \(WebMailUI\)/) {
+        $ip = $1; $by = $2; goto enough;
+      }
     }
 
     # catch MS-ish headers here
@@ -1011,6 +1035,12 @@ sub parse_received_line {
 	$rdns = $1;
       }
       goto enough;
+    }
+
+    # a synthetic header, generated internally:
+    # Received: X-Originating-IP: 1.2.3.4
+    if (/^X-Originating-IP: (\S+)$/) {
+      $ip = $1; $by = ''; goto enough;
     }
 
     ## STUFF TO IGNORE ##

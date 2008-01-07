@@ -1247,6 +1247,28 @@ time in number of seconds will tell SpamAssassin how often to retest for working
     }
   });
 
+=item dns_options rotate    (default: empty)
+
+If set to 'rotate', this causes SpamAssassin to choose a DNS server at random
+from all servers listed in C</etc/resolv.conf> every 'dns_test_interval'
+seconds, effectively spreading the load over all currently available DNS
+servers when there are many spamd workers. 
+
+=cut
+
+  push (@cmds, {
+    setting => 'dns_options',
+    code => sub {
+      my ($self, $key, $value, $line) = @_;
+      my $allowed_opts = "rotate";
+      
+      foreach my $option (split (/\s+/, $value)) {
+        if ($allowed_opts !~ /^$option$/) { return $INVALID_VALUE; }
+        else { $self->{dns_options}->{$option} = 1; }
+      }
+    }
+  });
+
 =back
 
 =head2 LEARNING OPTIONS
@@ -2411,25 +2433,35 @@ general running of SpamAssassin.
     }
   });
 
-=item rbl_timeout n		(default: 15)
+=item rbl_timeout t [t_min] [zone]		(default: 15 3)
 
-All DNS queries are made at the beginning of a check and we try to read the
-results at the end.  This value specifies the maximum period of time to wait
-for an DNS query.  If most of the DNS queries have succeeded for a particular
-message, then SpamAssassin will not wait for the full period to avoid wasting
-time on unresponsive server(s).  For the default 15 second timeout, here is a
-chart of queries remaining versus the effective timeout in seconds:
+All DNS queries are made at the beginning of a check and we try to read
+the results at the end.  This value specifies the maximum period of time
+(in seconds) to wait for an DNS query.  If most of the DNS queries have
+succeeded for a particular message, then SpamAssassin will not wait for
+the full period to avoid wasting time on unresponsive server(s), but will
+shrink the timeout according to a percentage of queries already completed.
+As the number of queries remaining approaches 0, the timeout value will
+gradually approach a t_min value, which is an optional second parameter
+and defaults to 0.2 * t.  If t is smaller than t_min, the initial timeout
+is set to t_min.  Here is a chart of queries remaining versus the timeout
+in seconds, for the default 15 second / 3 second timeout setting:
 
-  queries left    100%  90%  80%  70%  60%  50%  40%  30%  20%  10%  0%
-  timeout          15   15   14   14   13   11   10    8    5    3   0
+  queries left  100%  90%  80%  70%  60%  50%  40%  30%  20%  10%   0%
+  timeout        15   14.9 14.5 13.9 13.1 12.0 10.7  9.1  7.3  5.3  3
 
-In addition, whenever the effective timeout is lowered due to additional query
-results returning, the remaining queries are always given at least one more
-second before timing out, but the wait time will never exceed rbl_timeout.
+For example, if 20 queries are made at the beginning of a message check
+and 16 queries have returned (leaving 20%), the remaining 4 queries should
+finish within 7.3 seconds since their query started or they will be timed out.
+Note that timed out queries are only aborted when there is nothing else left
+for SpamAssassin to do - long evaluation of other rules may grant queries
+additional time.
 
-For example, if 20 queries are made at the beginning of a message check and 16
-queries have returned (leaving 20%), the remaining 4 queries must finish
-within 5 seconds of the beginning of the check or they will be timed out.
+If a parameter 'zone' is specified (it must end with a letter, which
+distinguishes it from other numeric parametrs), then the setting only
+applies to DNS queries against the specified DNS domain (host, domain or
+RBL (sub)zone).  Matching is case-insensitive, the actual domain may be a
+subdomain of the specified zone.
 
 =cut
 
@@ -2437,7 +2469,29 @@ within 5 seconds of the beginning of the check or they will be timed out.
     setting => 'rbl_timeout',
     is_admin => 1,
     default => 15,
-    type => $CONF_TYPE_NUMERIC
+    code => sub {
+      my ($self, $key, $value, $line) = @_;
+      unless (defined $value && $value !~ /^$/) {
+	return $MISSING_REQUIRED_VALUE;
+      }
+      local ($1,$2,$3);
+      unless ($value =~ /^        ( [+-]? \d+ (?: \. \d*)? )
+                          (?: \s+ ( [+-]? \d+ (?: \. \d*)? ) )?
+                          (?: \s+ (\S* [a-zA-Z]) )? $/xs) {
+	return $INVALID_VALUE;
+      }
+      my $zone = $3;
+      if (!defined $zone) {  # a global setting
+        $self->{rbl_timeout}     = $1+0;
+        $self->{rbl_timeout_min} = $2+0  if defined $2;
+      }
+      else {  # per-zone settings
+        $zone =~ s/^\.//;  $zone =~ s/\.$//;  # strip leading and trailing dot
+        $zone = lc $zone;
+        $self->{by_zone}{$zone}{rbl_timeout}     = $1+0;
+        $self->{by_zone}{$zone}{rbl_timeout_min} = $2+0  if defined $2;
+      }
+    }
   });
 
 =item util_rb_tld tld1 tld2 ...
@@ -2537,7 +2591,7 @@ not have any execute bits set (the umask is set to 111).
     setting => 'bayes_file_mode',
     is_admin => 1,
     default => '0700',
-    type => $CONF_TYPE_NUMERIC
+    type => $CONF_TYPE_STRING
   });
 
 =item bayes_store_module Name::Of::BayesStore::Module
@@ -3127,7 +3181,7 @@ sub new {
   $self->{regression_tests} = { };
 
   $self->{rewrite_header} = { };
-  $self->{user_rules_to_compile} = { };
+  $self->{want_rebuild_for_type} = { };
   $self->{user_defined_rules} = { };
   $self->{headers_spam} = { };
   $self->{headers_ham} = { };
@@ -3485,10 +3539,13 @@ sub clone {
     $dest = $self;
   }
 
-  # keys that should not be copied in ->clone()
+  # keys that should not be copied in ->clone().
+  # bug 4179: include want_rebuild_for_type, so that if a user rule
+  # is defined, its method will be recompiled for future scans in
+  # order to *remove* the generated method calls
   my @NON_COPIED_KEYS = qw(
     main eval_plugins plugins_loaded registered_commands sed_path_cache parser
-    scoreset scores
+    scoreset scores want_rebuild_for_type
   );
 
   # keys that should can be copied using a ->clone() method, in ->clone()
@@ -3507,6 +3564,26 @@ sub clone {
 
   foreach my $var (@NON_COPIED_KEYS) {
     $done{$var} = undef;
+  }
+
+  # bug 4179: be smarter about cloning the rule-type structures;
+  # some are like this: $self->{type}->{priority}->{name} = 'value';
+  # which is an extra level that the below code won't deal with
+  foreach my $t (@rule_types) {
+    foreach my $k (keys %{$source->{$t}}) {
+      my $v = $source->{$t}->{$k};
+      my $i = ref $v;
+      if ($i eq 'HASH') {
+        %{$dest->{$t}->{$k}} = %{$v};
+      }
+      elsif ($i eq 'ARRAY') {
+        @{$dest->{$t}->{$k}} = @{$v};
+      }
+      else {
+        $dest->{$t}->{$k} = $v;
+      }
+    }
+    $done{$t} = undef;
   }
 
   # and now, copy over all the rest -- the less complex cases.

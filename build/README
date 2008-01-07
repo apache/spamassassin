@@ -126,6 +126,7 @@ SPAMASSASSIN RELEASE PROCEDURE
   For a maintainance release (x.y.1, x.y.2):
 
     repo=https://svn.apache.org/repos/asf/spamassassin
+    svn delete -m "replaced" $repo/tags/spamassassin_release_3_1_7
     svn copy -m "creating tag for release 3.1.7" \
 	$repo/branches/3.1 \
 	$repo/tags/spamassassin_release_3_1_7
@@ -133,6 +134,7 @@ SPAMASSASSIN RELEASE PROCEDURE
   For a trunk release (x.y.0):
 
     repo=https://svn.apache.org/repos/asf/spamassassin
+    svn delete -m "replaced" $repo/tags/spamassassin_release_3_0_0
     svn copy -m "creating tag for release 3.0.0" \
 	$repo/trunk \
 	$repo/tags/spamassassin_release_3_0_0
@@ -140,6 +142,7 @@ SPAMASSASSIN RELEASE PROCEDURE
   For a trunk pre-release (x.y.0-preZ):
 
     repo=https://svn.apache.org/repos/asf/spamassassin
+    svn delete -m "replaced" $repo/tags/spamassassin_release_3_2_0_pre_2
     svn copy -m "creating tag for release 3.2.0-pre2" \
 	$repo/trunk \
 	$repo/tags/spamassassin_release_3_2_0_pre_2
@@ -147,14 +150,6 @@ SPAMASSASSIN RELEASE PROCEDURE
   This will do a completely server-side tagging (which is the same as
   a branch really) of whatever the latest branch revision to be the new
   base of the tag release.
-
-  Note that if you have to re-run this command later to fix a broken
-  release in progress, you need to "svn delete" the previous copy of the
-  tag, otherwise it'll create a subdirectory instead of overwriting:
-
-    svn delete -m "removing previous, broken tag" \
-        $repo/tags/spamassassin_release_3_2_0_rc_1
-
 
 
 - In your checkout on people.apache.org (may be read-only):
@@ -178,6 +173,8 @@ SPAMASSASSIN RELEASE PROCEDURE
 
     mkdir -p ~/public_html/devel
     mv ~/site/released/Mail-SpamAssassin-3.2.0-rc2.* ~/public_html/devel
+
+  (For me, "~/public_html/devel" is http://people.apache.org/~jm/devel/ .)
 
 - test the tar.gz and zip files!  redo until they work!! ;)
 

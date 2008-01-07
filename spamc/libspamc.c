@@ -458,7 +458,7 @@ static int _try_to_connect_tcp(const struct transport *tp, int *sockptr)
     if (connect_retries == 0) {
       connect_retries = 3;
     }
-    if (retry_sleep == 0) {
+    if (retry_sleep < 0) {
       retry_sleep = 1;
     }
 
@@ -530,6 +530,10 @@ static int _try_to_connect_tcp(const struct transport *tp, int *sockptr)
 	    addrbuf.sin_addr = tp->hosts[hostix];
 	    
 	    ipaddr = inet_ntoa(addrbuf.sin_addr);
+
+            /* make a copy in host, for logging (bug 5577) */
+            strncpy (host, ipaddr, sizeof(host) - 1);
+
 #ifdef DO_CONNECT_DEBUG_SYSLOGS
 	    libspamc_log(tp->flags, LOG_DEBUG,
 			 "dbg: connect(AF_INET) to spamd at %s (try #%d of %d)",
@@ -1729,6 +1733,7 @@ void transport_init(struct transport *tp)
     tp->type = TRANSPORT_LOCALHOST;
     tp->port = 783;
     tp->flags = 0;
+    tp->retry_sleep = -1;
 }
 
 /*

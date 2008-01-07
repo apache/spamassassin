@@ -240,7 +240,7 @@ sub calculate_expire_delta {
   my $sql = "SELECT count(*)
                FROM bayes_token
               WHERE id = ?
-                AND (? - atime) > ?";
+                AND atime < ?";
 
   my $sth = $self->{_dbh}->prepare_cached($sql);
     
@@ -250,7 +250,7 @@ sub calculate_expire_delta {
   }
 
   for (my $i = 1; $i <= $max_expire_mult; $i<<=1) {
-    my $rc = $sth->execute($self->{_userid}, $newest_atime, $start * $i);
+    my $rc = $sth->execute($self->{_userid}, $newest_atime - $start * $i);
 
     unless ($rc) {
       dbg("bayes: calculate_expire_delta: SQL error: ".$self->{_dbh}->errstr());

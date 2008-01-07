@@ -415,7 +415,7 @@ foreach my $channel (@channels) {
   my $DNSQ = "$RevSAVersion.$channel";
 
   my $newV;
-  my $dnsV = do_txt_query($DNSQ);
+  my $dnsV = join(' ', do_txt_query($DNSQ));
   if (defined $dnsV && $dnsV =~ /^(\d+)/) {
     $newV = $1 if (!defined $newV || $1 > $newV);
     dbg("dns: $DNSQ => $dnsV, parsed as $1");
@@ -477,12 +477,20 @@ foreach my $channel (@channels) {
   else {
     # We don't currently have the list of mirrors, so go grab it.
     dbg("channel: no MIRRORED.BY file available");
-    my $mirror = do_txt_query("mirrors.$channel");
-    unless ($mirror) {
+    my @mirrors = do_txt_query("mirrors.$channel");
+    unless (@mirrors) {
       warn "error: no mirror data available for channel $channel\n";
       channel_failed("channel: MIRRORED.BY file location was not in DNS");
+      next;
     }
-    $mirby = http_get($mirror);
+    foreach my $mirror (@mirrors) {
+      $mirby = http_get($mirror);
+      unless ($mirby) {
+        dbg("channel: no mirror data available for channel $channel from $mirror");
+        next;
+      }
+      last;
+    }
     unless ($mirby) {
       warn "error: no mirror data available for channel $channel\n";
       channel_failed("channel: MIRRORED.BY contents were missing");
@@ -1012,25 +1020,20 @@ sub do_txt_query {
   my($query) = shift;
 
   my $RR = $res->query($query, 'TXT');
-  my $result = '';
+  my @result;
 
   if ($RR) {
     foreach my $rr ($RR->answer) {
       my $text = $rr->rdatastr;
       $text =~ /^"(.*)"$/;
-      if (length $result) {
-	$result .= " $1";
-      }
-      else {
-        $result = $1;
-      }
+      push @result, $1;
     }
   }
   else {
     dbg("dns: query failed: $query => " . $res->errorstring);
   }
 
-  return $result;
+  return @result;
 }
 
 ##############################################################################
