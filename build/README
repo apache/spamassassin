@@ -181,7 +181,6 @@ SPAMASSASSIN RELEASE PROCEDURE
   if you get "gpg-agent" errors about not connecting to the PIN entry
   module, you didn't update your $PATH.
 
-
 - take a copy of the MD5sum line output.
 
 - test the tar.gz and zip files!  redo until they work!! ;)
@@ -190,10 +189,6 @@ SPAMASSASSIN RELEASE PROCEDURE
   the previous release's announcement, updating the version numbers and
   links, fixing the MD5 and SHA1 checksums in this mail, and summarising
   the important changes from the Changes file.
-
-  Warning: you must send this using a "From:" address @apache.org,
-  otherwise it will be silently discarded at the ASF instead of being
-  delivered to the announce list.
 
     cp build/announcements/3.1.7.txt build/announcements/3.1.8.txt
     svn add !$
@@ -204,7 +199,14 @@ SPAMASSASSIN RELEASE PROCEDURE
   of the website, but included in the vote mail) and request a vote on the
   development mailing list to make the release.  Post the URL,
   md5sums/sha1sums, and proposed release announcement mail to the dev
-  list. 
+  list.  The default location -- ~/public_html/devel/ , or
+  http://people.apache.org/~jm/devel/ , qualifies as "discreet".
+  
+  While doing this, also upload a copy of the proposed release
+  announcement to the website:
+
+    version=3.2.4
+    cp build/announcements/$version.txt ~/public_html/devel/PROPOSED-$version.txt
 
   Pre-releases and RCs require just lazy consensus -- ie. no objections.
 
