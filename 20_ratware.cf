@@ -62,7 +62,8 @@ header __OE_MUA			X-Mailer =~ /\bOutlook Express [456]\./
 header __OE_MSGID_1		MESSAGEID =~ /^<[A-Za-z0-9-]{7}[A-Za-z0-9]{20}\@hotmail\.com>$/m
 header __OE_MSGID_2		MESSAGEID =~ /^<(?:[0-9a-f]{8}|[0-9a-f]{12})\$[0-9a-f]{8}\$[0-9a-f]{8}\@\S+>$/m
 header __OE_MSGID_3		MESSAGEID =~ /^<BAY\d+-DAV\d+[A-Z0-9]{25}\@phx\.gbl>$/m
-meta __FORGED_OE		(__OE_MUA && !__OE_MSGID_1 && !__OE_MSGID_2 && !__OE_MSGID_3 && !__UNUSABLE_MSGID)
+header __OE_MSGID_4		MESSAGEID =~ /^<BAYC\d+-PASMTP\d+[A-Z0-9]{25}\@CEZ\.ICE>$/m
+meta __FORGED_OE		(__OE_MUA && !__OE_MSGID_1 && !__OE_MSGID_2 && !__OE_MSGID_3 && !__OE_MSGID_4 && !__UNUSABLE_MSGID)
 
 # Outlook versions that usually use "dollar signs"
 header __OUTLOOK_DOLLARS_MUA	X-Mailer =~ /^Microsoft Outlook(?: 8| CWS, Build 9|, Build 10)\./
