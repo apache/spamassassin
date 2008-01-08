@@ -668,17 +668,21 @@ sub display_text {
 
   if ($display{whitespace}) {
     # trim trailing whitespace from previous element if it was not whitespace
+    # and it was not invisible
     if (@{ $self->{text} } &&
 	(!defined $self->{text_whitespace} ||
-	 !vec($self->{text_whitespace}, $#{$self->{text}}, 1)))
+	 !vec($self->{text_whitespace}, $#{$self->{text}}, 1)) &&
+	(!defined $self->{text_invisible} ||
+	 !vec($self->{text_invisible}, $#{$self->{text}}, 1)))
     {
       $self->{text}->[-1] =~ s/ $//;
     }
   }
   else {
     $text =~ s/[ \t\n\r\f\x0b\xa0]+/ /g;
-    # trim leading whitespace if previous element was whitespace
-    if (@{ $self->{text} } &&
+    # trim leading whitespace if previous element was whitespace 
+    # and current element is not invisible
+    if (@{ $self->{text} } && !$display{invisible} &&
 	defined $self->{text_whitespace} &&
 	vec($self->{text_whitespace}, $#{$self->{text}}, 1))
     {
