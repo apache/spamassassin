@@ -482,6 +482,7 @@ sub dccifd_lookup {
     dbg("dcc: dccifd check failed - no X-DCC returned: $response");
     return 0;
   }
+  $response =~ s/[ \t]\z//;  # strip trailing whitespace
 
   if ($response =~ /^X-DCC-(.*)-Metrics: (.*)$/) {
     $permsgstatus->{tag_data}->{DCCB} = $1;
