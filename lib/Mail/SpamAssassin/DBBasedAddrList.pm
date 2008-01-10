@@ -26,6 +26,7 @@ use Fcntl;
 use Mail::SpamAssassin::PersistentAddrList;
 use Mail::SpamAssassin::Util;
 use Mail::SpamAssassin::Logger;
+use Mail::SpamAssassin::Timeout;
 
 use vars qw{
   @ISA
@@ -83,13 +84,22 @@ sub new_checker {
 
     dbg("auto-whitelist: tie-ing to DB file of type $dbm_module $mod1 in $path");
 
-    ($self->{is_locked} && $dbm_module eq 'DB_File') and 
-            Mail::SpamAssassin::Util::avoid_db_file_locking_bug ($path);
+    # bug 5731: something in DB_File appears to hang on tie() on gutsy
+    my $timer = Mail::SpamAssassin::Timeout->new({ secs => 60 });
+    my $tied = $timer->run_and_catch(sub {
 
-    if (! tie %{ $self->{accum} }, $dbm_module, $path, $mod2,
-            oct($main->{conf}->{auto_whitelist_file_mode}) )
-    {
+      ($self->{is_locked} && $dbm_module eq 'DB_File') and 
+              Mail::SpamAssassin::Util::avoid_db_file_locking_bug ($path);
+
+      return tie %{ $self->{accum} }, $dbm_module, $path, $mod2,
+              oct($main->{conf}->{auto_whitelist_file_mode});
+    });
+
+    if ($timer->timed_out() || !$tied) {
       my $err = $!;   # might get overwritten later
+
+      if ($timer->timed_out()) { $err = "timed out"; }
+
       if ($self->{is_locked}) {
         $self->{main}->{locker}->safe_unlock($self->{locked_file});
         $self->{is_locked} = 0;
