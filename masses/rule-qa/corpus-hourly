@@ -603,18 +603,24 @@ sub start_freqs {
   my ($rev, $args) = @_;
 
   $rev ||= 'HEAD';
-  print "setting up hit-frequencies for r$rev\n";
+  my $hfdir = "$opt{tmp}/hfdir/r$rev";
+
+  print "setting up hit-frequencies for r$rev in $hfdir\n";
 
   (-d "$opt{tmp}/hfdir") or system("mkdir $opt{tmp}/hfdir");
-
-  my $hfdir = "$opt{tmp}/hfdir/r$rev";
   if (!-d $hfdir) {
     system ("cp -pr $opt{tree} $hfdir");
     ($?>>8 != 0) and die "cp $opt{tree}/masses $hfdir failed";
   }
 
   chdir "$hfdir" or die "cannot chdir $hfdir";
-  system("svn up -r$rev && make");
+  system("svn up -r$rev; svn up -r$rev rulesrc");
+
+  # ensure these are rebuilt
+  system("rm -f rules/70_sandbox.cf rules/72_active.cf");
+
+  # do this twice in case Makefile.PL is rebuilt
+  system ("( make build_rules; make build_rules ) < /dev/null");
 
   chdir "$hfdir/masses" or die "cannot chdir $hfdir/masses";
   open (FREQS, "./hit-frequencies -TxpaP $args |")
