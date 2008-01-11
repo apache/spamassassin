@@ -81,19 +81,21 @@ sub new_checker {
     dbg("auto-whitelist: tie-ing to DB file of type $dbm_module $mod1 in $path");
 
     # bug 5731: something in DB_File appears to hang on tie() on gutsy
+    my $err;
+    my $tied;
     my $timer = Mail::SpamAssassin::Timeout->new({ secs => 60 });
-    my $tied = $timer->run_and_catch(sub {
+    $timer->run_and_catch(sub {
 
       ($self->{is_locked} && $dbm_module eq 'DB_File') and 
               Mail::SpamAssassin::Util::avoid_db_file_locking_bug ($path);
 
-      return tie %{ $self->{accum} }, $dbm_module, $path, $mod2,
+      $tied = tie %{ $self->{accum} }, $dbm_module, $path, $mod2,
               oct($main->{conf}->{auto_whitelist_file_mode});
+      $err = $!;
+
     });
 
     if ($timer->timed_out() || !$tied) {
-      my $err = $!;   # might get overwritten later
-
       if ($timer->timed_out()) { $err = "timed out"; }
 
       if ($self->{is_locked}) {
