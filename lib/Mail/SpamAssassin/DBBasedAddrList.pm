@@ -28,11 +28,7 @@ use Mail::SpamAssassin::Util;
 use Mail::SpamAssassin::Logger;
 use Mail::SpamAssassin::Timeout;
 
-use vars qw{
-  @ISA
-};
-
-@ISA = qw(Mail::SpamAssassin::PersistentAddrList);
+our @ISA = qw(Mail::SpamAssassin::PersistentAddrList);
 
 ###########################################################################
 
