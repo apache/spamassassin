@@ -96,7 +96,10 @@ sub new_checker {
     });
 
     if ($timer->timed_out() || !$tied) {
-      if ($timer->timed_out()) { $err = "timed out"; }
+      if ($timer->timed_out()) {
+        warn "auto-whitelist: DB_File tie() call timed out after 60 seconds";
+        $err = "timed out";
+      }
 
       if ($self->{is_locked}) {
         $self->{main}->{locker}->safe_unlock($self->{locked_file});
