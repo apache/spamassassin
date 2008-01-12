@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: bb-jm bb-zmi cthielen jm theo zmi; day 2: bb-jm bb-zmi cthielen dos jm theo zmi; day 3: bb-jm bb-zmi cthielen dos jm theo zmi
+# with results from: day 1: bb-jm cthielen dos jm theo zmi; day 2: bb-jm bb-zmi cthielen jm theo zmi; day 3: bb-jm bb-zmi cthielen dos jm theo zmi
 
 # tflags userconf
 ALL_TRUSTED
@@ -76,6 +76,9 @@ DNS_FROM_RFC_BOGUSMX
 # tflags net
 DNS_FROM_RFC_DSN
 
+# tflags publish
+DOS_ANAL_SPAM_MAILER
+
 # good enough
 DOS_FORGED_RCVD_QUADS
 
@@ -144,6 +147,9 @@ FM_FAKE_HELO_VERIZON
 
 # good enough
 FM_SCHOOLING
+
+# good enough
+FM_SCHOOL_DIPLOMA
 
 # tflags userconf
 FRAGMENTED_MESSAGE
@@ -244,6 +250,9 @@ JM_GMT_RCVD
 # good enough
 JM_HPGI
 
+# tflags publish
+JM_I_FEEL_LUCKY
+
 # good enough
 JM_NICE_GIRL
 
@@ -255,6 +264,9 @@ JM_SOUGHT_1
 
 # good enough
 JM_SOUGHT_2
+
+# good enough
+JM_SOUGHT_3
 
 # good enough
 JM_STORM_ECARD
@@ -270,9 +282,6 @@ KAM_STOCKOTC
 
 # tflags publish
 KAM_STOCKTIP15
-
-# good enough
-LOTTERY_PH_004470
 
 # good enough
 MID_DEGREES
@@ -548,22 +557,40 @@ SUBJECT_IN_WHITELIST
 TT_OBSCURED_VIAGRA
 
 # good enough
+TVD_GOOG_LUCKY
+
+# good enough
 TVD_QUAL_MEDS
 
 # good enough
 TVD_VISIT_PHARMA
 
-# tflags publish
-DOS_ANAL_SPAM_MAILER
-
-# tflags publish
-JM_I_FEEL_LUCKY
+# good enough
+DOS_OE_TO_MX
 
 # good enough
-JM_PPYH
+DOS_OE_TO_MX_IMAGE
 
 # good enough
-JM_SOUGHT_3
+DOS_OUTLOOK_TO_MX
+
+# good enough
+FB_B0NUS
+
+# good enough
+FB_MED1CAT
+
+# good enough
+FB_REPLICA_ROLEX
+
+# good enough
+FB_SMALL_PEN
+
+# good enough
+FM_MORTGAGE3PLUS
+
+# good enough
+FS_LOWER_YOUR
 
 # tflags net
 RCVD_IN_DSBL
@@ -578,7 +605,10 @@ RCVD_IN_SORBS_DUL
 RCVD_IN_XBL
 
 # good enough
-TVD_GOOG_LUCKY
+STOX_REPLY_TYPE_WITHOUT_QUOTES
+
+# good enough
+TVD_FW_GRAPHIC_ID1
 
 # tflags userconf
 UNPARSEABLE_RELAY
