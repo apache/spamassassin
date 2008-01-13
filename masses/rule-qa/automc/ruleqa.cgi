@@ -1474,7 +1474,7 @@ sub add_cgi_path_param {
     $self->{cgi_params}{$k} = "$k=$v";
     push (@{$self->{cgi_param_order}}, $k);
   }
-  $self->{q}->param(-name=>$k, -value=>$v);
+  $self->{q}->param(-name=>$k, -value=>uri_unescape($v));
 }
 
 sub get_params_except {
