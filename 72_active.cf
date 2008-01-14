@@ -30,24 +30,24 @@ header		APOSTROPHE_FROM	From:addr =~ /'/
 describe	APOSTROPHE_FROM	From address contains an apostrophe
 ##} APOSTROPHE_FROM
 
-##{ AXB_RCVD_ZOOBSEND
-header		AXB_RCVD_ZOOBSEND		Received =~ /\(\ssendmail\b/
-##} AXB_RCVD_ZOOBSEND
-
 ##{ AXB_XMID_1212
-header    	AXB_XMID_1212   		Message-Id =~ /^<[0-9]{12}\.[0-9]{12}\@/
+header          AXB_XMID_1212                   Message-Id =~ /^<[0-9]{12}\.[0-9]{12}\@/
+describe        AXB_XMID_1212                   Barbera Fingerprint
 ##} AXB_XMID_1212
 
 ##{ AXB_XMID_1510
-header     	AXB_XMID_1510    		Message-Id =~ /<[0-9A-F]{15}\.[0-9A-F]{10}\@/
+header          AXB_XMID_1510                   Message-Id =~ /<[0-9A-F]{15}\.[0-9A-F]{10}\@/
+describe        AXB_XMID_1510                   Brunello Fingerprint
 ##} AXB_XMID_1510
 
 ##{ AXB_XMID_OEGOESNULL
-header    	AXB_XMID_OEGOESNULL     	Message-ID =~ /^<[0-9-a-f]{12}\$[0-9-a-f]{8}\$[0]{8}\@/
+header          AXB_XMID_OEGOESNULL             Message-ID =~ /^<[0-9-a-f]{12}\$[0-9-a-f]{8}\$[0]{8}\@/
+describe        AXB_XMID_OEGOESNULL             Amarone Fingerprint
 ##} AXB_XMID_OEGOESNULL
 
 ##{ AXB_XM_SENDMAIL_NOT
-header  	AXB_XM_SENDMAIL_NOT    		Received =~ /\([123456790]{1,2}\.[0-9]{1,2}\.[0-9]{1}\/[0-9]{1,2}\.[0-9]{2}\.[0-9]{1}\)/
+header          AXB_XM_SENDMAIL_NOT             Received =~ /\([123456790]{1,2}\.[0-9]{1,2}\.[0-9]{1}\/[0-9]{1,2}\.[0-9]{2}\.[0-9]{1}\)/
+describe        AXB_XM_SENDMAIL_NOT             Nebbiolo fingerprint
 ##} AXB_XM_SENDMAIL_NOT
 
 ##{ AXB_XR_STULDAP
@@ -55,7 +55,8 @@ header  AXB_XR_STULDAP     Received =~ /\(8\.12\.3 da nor stuldap\/8\.12\.3\)/
 ##} AXB_XR_STULDAP
 
 ##{ AXB_XTIDX_CHAIN
-header    	AXB_XTIDX_CHAIN     		Thread-Index =~ /(?:\*|\<\>|\)|\()/
+header          AXB_XTIDX_CHAIN                 Thread-Index =~ /(?:\*|\<\>|\)|\()/
+describe        AXB_XTIDX_CHAIN                 Montepulciano Fingerprint
 ##} AXB_XTIDX_CHAIN
 
 ##{ BANKING_LAWS
@@ -77,19 +78,15 @@ body BASE64_LENGTH_79_INF	eval:check_base64_length('79')
 endif
 ##} BASE64_LENGTH_79_INF
 
-##{ BROKEN_RATWARE_BOM
-body BROKEN_RATWARE_BOM     /^\xEF\xBB\xBFMessage-ID:/
-##} BROKEN_RATWARE_BOM
-
 ##{ CORRUPT_FROM_LINE_IN_HDRS
 meta CORRUPT_FROM_LINE_IN_HDRS (MISSING_HEADERS && __BODY_STARTS_WITH_FROM_LINE && MISSING_DATE && NO_RELAYS)
 describe CORRUPT_FROM_LINE_IN_HDRS Informational: message is corrupt, with a From line in its headers
 tflags CORRUPT_FROM_LINE_IN_HDRS userconf publish
-score CORRUPT_FROM_LINE_IN_HDRS 0.001
+#score CORRUPT_FROM_LINE_IN_HDRS 0.001
 ##} CORRUPT_FROM_LINE_IN_HDRS
 
 ##{ CTYPE_001C_A
-header CTYPE_001C_A Content-Type =~ /multipart.{0,200}boundary=\"----=_NextPart_000_0001_01C[0-9A-F]{5}\.[0-9A-F]{7}0\"/
+meta CTYPE_001C_A  (0)      # obsolete
 ##} CTYPE_001C_A
 
 ##{ CTYPE_001C_B
@@ -108,17 +105,9 @@ endif
 body CURR_PRICE         /\bCurrent Price:/
 ##} CURR_PRICE
 
-##{ DEAR_HOMEOWNER
-meta DEAR_HOMEOWNER         (__DEAR_HOMEOWNER+__APPROVAL_MGR+__YOUR_MONTHLY == 3)
-##} DEAR_HOMEOWNER
-
 ##{ DEAR_WINNER
 body DEAR_WINNER /\bdear.{1,20}winner/i
 ##} DEAR_WINNER
-
-##{ DIV_CENTER_A_HREF
-full DIV_CENTER_A_HREF  /<DIV align=3Dcenter><A href=3D=\n/
-##} DIV_CENTER_A_HREF
 
 ##{ DNS_FROM_DOB
 
@@ -148,13 +137,13 @@ describe DOS_LET_GO_JOB	Let go from their job and now makes lots of dough!
 ##{ DOS_PROVISION4
 body DOS_PROVISION4	/\bProvisionfor income taxes\b/
 describe DOS_PROVISION4	Provision for income taxes
-score DOS_PROVISION4	1.5
+#score DOS_PROVISION4	1.5
 ##} DOS_PROVISION4
 
 ##{ DOS_REPORT_FIN_INC
 body DOS_REPORT_FIN_INC		/\bReport of financial income\b/
 describe DOS_REPORT_FIN_INC	Report of financial income
-score DOS_REPORT_FIN_INC	0.5
+#score DOS_REPORT_FIN_INC	0.5
 ##} DOS_REPORT_FIN_INC
 
 ##{ DOS_STOCK_BAT
@@ -169,13 +158,13 @@ meta		DOS_STOCK_BAT2		DOS_STOCK_BAT && (__DOS_FIN_ADVANTAGE + __DOS_STRONG_CF + 
 ##{ DOS_STOCK_CDYV_GENERIC
 body DOS_STOCK_CDYV_GENERIC	/(?:Lookup|Sym8oL|Search for|Promoting sym|S\.umbol|Target sym|Campaign for): [A-Z]{4},?.{1,50}\b[Pp]rice/
 describe DOS_STOCK_CDYV_GENERIC	Pump and dump stock spam
-score DOS_STOCK_CDYV_GENERIC	2.5
+#score DOS_STOCK_CDYV_GENERIC	2.5
 ##} DOS_STOCK_CDYV_GENERIC
 
 ##{ DOS_STOCK_INCOME_STATEMENT
 meta DOS_STOCK_INCOME_STATEMENT		DOS_REPORT_FIN_INC && DOS_PROVISION4 && __DOS_SYMBOL_4 && __DOS_HEADLINES
 describe DOS_STOCK_INCOME_STATEMENT	Pump and dump stock income statement spam
-score DOS_STOCK_INCOME_STATEMENT	1.5
+#score DOS_STOCK_INCOME_STATEMENT	1.5
 ##} DOS_STOCK_INCOME_STATEMENT
 
 ##{ DOS_URI_ASTERISK
@@ -196,10 +185,6 @@ header DRUGS_HDIA	Subject =~ /\bhoodia\b/i
 meta DRUGS_STOCK_MIMEOLE (__MIMEOLE_1106 && __MAILER_OL_5510)
 describe DRUGS_STOCK_MIMEOLE Stock-spam forged headers found (5510)
 ##} DRUGS_STOCK_MIMEOLE
-
-##{ DRUG_RA_PRICE
-meta DRUG_RA_PRICE (__DRUG_RA_PRICE1 && __DRUG_RA_PRICE2)
-##} DRUG_RA_PRICE
 
 ##{ DYN_RDNS_AND_INLINE_IMAGE
 meta DYN_RDNS_AND_INLINE_IMAGE     (RDNS_DYNAMIC && __ANY_IMAGE_ATTACH)
@@ -358,6 +343,7 @@ describe FB_LOWER_PAYM		Phrase: lower your monthly payments
 ##{ FB_MED1CAT
 body     FB_MED1CAT		/\bmed1cat/i
 describe FB_MED1CAT		Phrase: Med1cat
+score FB_MED1CAT                     1.000 0.000 0.000 0.000
 ##} FB_MED1CAT
 
 ##{ FB_MEDS_PERCENT
@@ -695,11 +681,6 @@ header   FH_XMAIL_RND_833	X-Mailer =~ /^[a-z]{3}\sv8\.3\.3\./
 describe FH_XMAIL_RND_833	Special X-Mailer Version
 ##} FH_XMAIL_RND_833
 
-##{ FM_DDDD_TIMES_2
-meta     FM_DDDD_TIMES_2	(FH_HELO_EQ_D_D_D_D && FH_HOST_EQ_D_D_D_D)
-describe FM_DDDD_TIMES_2	Dual helo + host eq d_d_d_d
-##} FM_DDDD_TIMES_2
-
 ##{ FM_DOESNT_SAY_STOCK
 meta     FM_DOESNT_SAY_STOCK	(__FB_S_SYMBOL && __FM_MY_PRICE && !__FB_S_STOCK && !__FS_S_TRADE)
 describe FM_DOESNT_SAY_STOCK	It's a stock spam but doesn't say stock
@@ -804,11 +785,6 @@ describe FM_SCHOOL_TYPES	Meta Combo Phrase for Schooling
 meta     FM_SEX_HELODDDD	(__SEX_WRDS && FH_HELO_EQ_D_D_D_D)
 describe FM_SEX_HELODDDD	Sex words + helo = dddd
 ##} FM_SEX_HELODDDD
-
-##{ FM_SEX_HOSTDDDD
-meta     FM_SEX_HOSTDDDD	(__SEX_WRDS && FH_HOST_EQ_D_D_D_D)
-describe FM_SEX_HOSTDDDD	Sex words + host = dddd
-##} FM_SEX_HOSTDDDD
 
 ##{ FM_SUBJ_APPROVE
 meta     FM_SUBJ_APPROVE	(__EXCLAIM_SUBJ && __SUBJ_APPROVE)
@@ -1133,6 +1109,7 @@ describe FS_LARGE_PERCENT2	Larger than 100% in subj.
 ##{ FS_LOWER_YOUR
 header   FS_LOWER_YOUR		Subject =~ /lower your/i
 describe FS_LOWER_YOUR		Phrase: lower your
+score FS_LOWER_YOUR                  1.000 0.000 0.000 0.000
 ##} FS_LOWER_YOUR
 
 ##{ FS_LOW_RATES
@@ -1359,11 +1336,6 @@ body HS_MEETUP_FOR_SEX m'(?:meet ?up|see eachother|get together) for (?:some )?(
 describe HS_MEETUP_FOR_SEX Talks about meeting up for sex.
 ##} HS_MEETUP_FOR_SEX
 
-##{ HS_PHARMA_1
-meta HS_PHARMA_1 HS_INDEX_PARAM && HS_SUBJ_ONLINE_PHARMACEUTICAL
-describe HS_PHARMA_1 Message has a tracker in a link and subject of online pharmaceutical.
-##} HS_PHARMA_1
-
 ##{ HS_SUBJ_NEW_SOFTWARE
 header HS_SUBJ_NEW_SOFTWARE Subject =~ /^New software uploaded by/
 describe HS_SUBJ_NEW_SOFTWARE Subject starts with 'New software uploaded by'
@@ -1373,11 +1345,6 @@ describe HS_SUBJ_NEW_SOFTWARE Subject starts with 'New software uploaded by'
 header HS_SUBJ_ONLINE_PHARMACEUTICAL Subject =~ /\bOnline Pharmaceutical/i
 describe HS_SUBJ_ONLINE_PHARMACEUTICAL Subject contains the phrase 'Online pharmaceutical'
 ##} HS_SUBJ_ONLINE_PHARMACEUTICAL
-
-##{ HS_UPLOADED_SOFTWARE
-meta HS_UPLOADED_SOFTWARE HS_SUBJ_NEW_SOFTWARE && HS_BODY_UPLOADED_SOFTWARE
-describe HS_UPLOADED_SOFTWARE Meta: Has subject and body from uploaded software spam.
-##} HS_UPLOADED_SOFTWARE
 
 ##{ HTTPS_HTTP_MISMATCH
 
@@ -1397,19 +1364,21 @@ meta JM_TORA_XM     (__MAILER_OL_6626 && __MOLE_2962 && __NAKED_TO)
 ##{ KAM_LOTTO1
 meta            KAM_LOTTO1      (__KAM_LOTTO1 + __KAM_LOTTO2 + __KAM_LOTTO3 + __KAM_LOTTO4 + __KAM_LOTTO5 + __KAM_LOTTO6 + __KAM_LOTTO7 >= 3)
 describe        KAM_LOTTO1      Likely to be a e-Lotto Scam Email
-score           KAM_LOTTO1      0.5
+#score           KAM_LOTTO1      0.5
+score KAM_LOTTO1                     2.207 2.192 0.000 0.000
 ##} KAM_LOTTO1
 
 ##{ KAM_LOTTO2
 meta            KAM_LOTTO2      (__KAM_LOTTO1 + __KAM_LOTTO2 + __KAM_LOTTO3 + __KAM_LOTTO4 + __KAM_LOTTO5 + __KAM_LOTTO6 + __KAM_LOTTO7 >= 4)
 describe        KAM_LOTTO2      Highly Likely to be a e-Lotto Scam Email
-score           KAM_LOTTO2      1.0
+#score           KAM_LOTTO2      1.0
+score KAM_LOTTO2                     1.000 1.759 0.000 0.000
 ##} KAM_LOTTO2
 
 ##{ KAM_LOTTO3
 meta            KAM_LOTTO3      (__KAM_LOTTO1 + __KAM_LOTTO2 + __KAM_LOTTO3 + __KAM_LOTTO4 + __KAM_LOTTO5 + __KAM_LOTTO6 + __KAM_LOTTO7 >= 5)
 describe        KAM_LOTTO3      Almost certain to be a e-Lotto Scam Email
-score           KAM_LOTTO3      2.0
+#score           KAM_LOTTO3      2.0
 ##} KAM_LOTTO3
 
 ##{ KAM_STOCKOTC
@@ -1475,13 +1444,6 @@ meta MSOE_MID_WRONG_CASE  (__XM_OUTLOOK_EXPRESS && __MSOE_MID_WRONG_CASE && !__M
 full NULL_IN_BODY	/\x00/
 describe NULL_IN_BODY   Message has NUL (ASCII 0) byte in message
 ##} NULL_IN_BODY
-
-##{ OEBOUND
-
-ifplugin Mail::SpamAssassin::Plugin::MIMEHeader
-mimeheader OEBOUND   Content-Type =~ /boundary=.----=_1OEBOUND;./
-endif
-##} OEBOUND
 
 ##{ OUTLOOK_3416
 header OUTLOOK_3416     X-Mailer =~ /^Microsoft Outlook, Build 10\.0\.3416$/
@@ -1815,7 +1777,7 @@ body SHORT_TERM_PRICE /short\W+term\W+(target|projected)(\W+price)?/i
 ##} SHORT_TERM_PRICE
 
 ##{ SPAMMY_XMAILER
-meta SPAMMY_XMAILER (__XM_OL_29196700||__XM_OL_48071700||__XM_OL_28001441||__XM_OL_29196600||__XM_OL_49631700||__XM_OL_48072300||__XM_OL_28004682||__XM_OL_10_0_4115||__XM_OL_4_72_2106_4)
+meta SPAMMY_XMAILER (__XM_OL_28001441||__XM_OL_48072300||__XM_OL_28004682||__XM_OL_10_0_4115||__XM_OL_4_72_2106_4)
 describe SPAMMY_XMAILER X-Mailer string is common in spam and not in ham
 ##} SPAMMY_XMAILER
 
@@ -1846,10 +1808,6 @@ meta STOCK_PRICES (SHORT_TERM_PRICE && LONG_TERM_PRICE)
 ##{ STOX_AND_PRICE
 meta STOX_AND_PRICE     CURR_PRICE && STOX_REPLY_TYPE
 ##} STOX_AND_PRICE
-
-##{ STOX_RCVD_N_NN_N
-header STOX_RCVD_N_NN_N  Received =~ / by \d+\.\d+\.\d+\.\d+ \(\d\.\d\d\.\d\/\d\.\d\d\.\d\) with SMTP id [\dA-Za-z]+\;/
-##} STOX_RCVD_N_NN_N
 
 ##{ STOX_REPLY_TYPE
 header STOX_REPLY_TYPE  Content-Type =~ /text\/plain; .* reply-type=original/
@@ -1890,6 +1848,10 @@ body TVD_ACT_193		/\bact of (?:193|nineteen thirty)/i
 ##{ TVD_APPROVED
 body TVD_APPROVED		/you.{1,2}re .{0,20}approved/i
 ##} TVD_APPROVED
+
+##{ TVD_APP_LOAN
+body TVD_APP_LOAN		/approved .{0,20}loan/i
+##} TVD_APP_LOAN
 
 ##{ TVD_DEAR_HOMEOWNER
 body TVD_DEAR_HOMEOWNER		/^dear homeowner/i
@@ -2042,7 +2004,7 @@ body TVD_SECTION		/\bSection (?:27A|21B)/i
 ##} TVD_SECTION
 
 ##{ TVD_SILLY_URI_OBFU
-body TVD_SILLY_URI_OBFU	m!https?://[a-z0-9-]+\.[a-z0-9-]*\.?[^a-z0-9.:/\s"'\@?\)>-]+[a-z0-9.-]*[a-z]{3}(?:\s|$)!i
+body TVD_SILLY_URI_OBFU		m!https?://[a-z0-9-]+\.[a-z0-9-]*\.?[^a-z0-9.:/\s"'\@?\)>-]+[a-z0-9.-]*[a-z]{3}(?:\s|$)!i
 ##} TVD_SILLY_URI_OBFU
 
 ##{ TVD_SPACED_SUBJECT_WORD3
@@ -2088,41 +2050,15 @@ mimeheader T_TVD_FW_GRAPHIC_ID1	Content-Id =~ /<[0-9a-f]{12}(?:\$[0-9a-f]{8}){2}
 endif
 ##} T_TVD_FW_GRAPHIC_ID1
 
-##{ T_WHOIS_MONIKER_ROLS
-
-ifplugin Mail::SpamAssassin::Plugin::URIDNSBL
-tflags          T_WHOIS_MONIKER_ROLS  net
-endif
-##} T_WHOIS_MONIKER_ROLS
-
-##{ URIBL_RHS_ABUSE
-
-ifplugin Mail::SpamAssassin::Plugin::URIDNSBL
-urirhssub       URIBL_RHS_ABUSE fulldom.rfc-ignorant.org.       A       127.0.0.4
-body            URIBL_RHS_ABUSE eval:check_uridnsbl('URIBL_RHS_ABUSE')
-describe        URIBL_RHS_ABUSE Contains an URI listed in abuse.rfc-ignorant.org
-tflags          URIBL_RHS_ABUSE net
-endif
-##} URIBL_RHS_ABUSE
-
 ##{ URIBL_RHS_AHBL
 
 ifplugin Mail::SpamAssassin::Plugin::URIDNSBL
 body            URIBL_RHS_AHBL  eval:check_uridnsbl('URIBL_RHS_AHBL')
 describe        URIBL_RHS_AHBL  Contains an URI listed in rhsbl.ahbl.org.
 tflags          URIBL_RHS_AHBL  net
+#score URIBL_RHS_AHBL                 0.000 0.001 0.000 0.000
 endif
 ##} URIBL_RHS_AHBL
-
-##{ URIBL_RHS_BOGUSMX
-
-ifplugin Mail::SpamAssassin::Plugin::URIDNSBL
-urirhssub       URIBL_RHS_BOGUSMX       fulldom.rfc-ignorant.org.       A       127.0.0.8
-body            URIBL_RHS_BOGUSMX       eval:check_uridnsbl('URIBL_RHS_BOGUSMX')
-describe        URIBL_RHS_BOGUSMX       Contains an URI listed in bogusmx.rfc-ignorant.org
-tflags          URIBL_RHS_BOGUSMX       net
-endif
-##} URIBL_RHS_BOGUSMX
 
 ##{ URIBL_RHS_DOB
 
@@ -2133,59 +2069,6 @@ describe URIBL_RHS_DOB          Contains an URI of a new domain (Day Old Bread)
 tflags URIBL_RHS_DOB            net
 endif
 ##} URIBL_RHS_DOB
-
-##{ URIBL_RHS_DSN
-
-ifplugin Mail::SpamAssassin::Plugin::URIDNSBL
-urirhssub       URIBL_RHS_DSN   fulldom.rfc-ignorant.org.       A       127.0.0.2
-body            URIBL_RHS_DSN   eval:check_uridnsbl('URIBL_RHS_DSN')
-describe        URIBL_RHS_DSN   Contains an URI listed in dsn.rfc-ignorant.org
-tflags          URIBL_RHS_DSN   net
-endif
-##} URIBL_RHS_DSN
-
-##{ URIBL_RHS_POST
-
-ifplugin Mail::SpamAssassin::Plugin::URIDNSBL
-urirhssub       URIBL_RHS_POST  fulldom.rfc-ignorant.org.       A       127.0.0.3
-body            URIBL_RHS_POST  eval:check_uridnsbl('URIBL_RHS_POST')
-describe        URIBL_RHS_POST  Contains an URI in postmaster.rfc-ignorant.org
-tflags          URIBL_RHS_POST  net
-endif
-##} URIBL_RHS_POST
-
-##{ URIBL_RHS_TLD_WHOIS
-
-ifplugin Mail::SpamAssassin::Plugin::URIDNSBL
-urirhssub       URIBL_RHS_TLD_WHOIS     fulldom.rfc-ignorant.org.       A       127.0.0.7
-body            URIBL_RHS_TLD_WHOIS     eval:check_uridnsbl('URIBL_RHS_TLD_WHOIS')
-describe        URIBL_RHS_TLD_WHOIS     Contains an URI TLD in whois.rfc-ignorant.org
-tflags          URIBL_RHS_TLD_WHOIS     net
-endif
-##} URIBL_RHS_TLD_WHOIS
-
-##{ URIBL_RHS_WHOIS
-
-ifplugin Mail::SpamAssassin::Plugin::URIDNSBL
-urirhssub       URIBL_RHS_WHOIS fulldom.rfc-ignorant.org.       A       127.0.0.5
-body            URIBL_RHS_WHOIS eval:check_uridnsbl('URIBL_RHS_WHOIS')
-describe        URIBL_RHS_WHOIS Contains an URI listed in whois.rfc-ignorant.org
-tflags          URIBL_RHS_WHOIS net
-endif
-##} URIBL_RHS_WHOIS
-
-##{ URIBL_XS_SURBL
-
-ifplugin Mail::SpamAssassin::Plugin::URIDNSBL
-body            URIBL_XS_SURBL          eval:check_uridnsbl('URIBL_XS_SURBL')
-describe        URIBL_XS_SURBL          URL listed in XS SURBL - TEsting
-tflags          URIBL_XS_SURBL          net
-endif
-##} URIBL_XS_SURBL
-
-##{ URI_L_PHP
-uri URI_L_PHP   /\/l\.php\?\d/
-##} URI_L_PHP
 
 ##{ WHOIS_1AND1PR
 
@@ -2649,10 +2532,6 @@ meta XMAILER_MIMEOLE_OL_58CB5  (__XM_OL_58CB5 && __MO_OL_58CB5)
 meta XMAILER_MIMEOLE_OL_5B79A  (__XM_OL_5B79A && __MO_OL_5B79A)
 ##} XMAILER_MIMEOLE_OL_5B79A
 
-##{ XMAILER_MIMEOLE_OL_5E7ED
-meta XMAILER_MIMEOLE_OL_5E7ED  (__XM_OL_5E7ED && __MO_OL_5E7ED)
-##} XMAILER_MIMEOLE_OL_5E7ED
-
 ##{ XMAILER_MIMEOLE_OL_6554A
 meta XMAILER_MIMEOLE_OL_6554A  (__XM_OL_6554A && __MO_OL_6554A)
 ##} XMAILER_MIMEOLE_OL_6554A
@@ -2721,10 +2600,6 @@ meta XMAILER_MIMEOLE_OL_BC7E6  (__XM_OL_BC7E6 && __MO_OL_BC7E6)
 meta XMAILER_MIMEOLE_OL_C65FA  (__XM_OL_C65FA && __MO_OL_C65FA)
 ##} XMAILER_MIMEOLE_OL_C65FA
 
-##{ XMAILER_MIMEOLE_OL_C7C33
-meta XMAILER_MIMEOLE_OL_C7C33  (__XM_OL_C7C33 && __MO_OL_C7C33)
-##} XMAILER_MIMEOLE_OL_C7C33
-
 ##{ XMAILER_MIMEOLE_OL_C9068
 meta XMAILER_MIMEOLE_OL_C9068  (__XM_OL_C9068 && __MO_OL_C9068)
 ##} XMAILER_MIMEOLE_OL_C9068
@@ -2736,10 +2611,6 @@ meta XMAILER_MIMEOLE_OL_CAC8F  (__XM_OL_CAC8F && __MO_OL_CAC8F)
 ##{ XMAILER_MIMEOLE_OL_CF0C0
 meta XMAILER_MIMEOLE_OL_CF0C0  (__XM_OL_CF0C0 && __MO_OL_CF0C0)
 ##} XMAILER_MIMEOLE_OL_CF0C0
-
-##{ XMAILER_MIMEOLE_OL_D03AB
-meta XMAILER_MIMEOLE_OL_D03AB  (__XM_OL_D03AB && __MO_OL_D03AB)
-##} XMAILER_MIMEOLE_OL_D03AB
 
 ##{ XMAILER_MIMEOLE_OL_EF20B
 meta XMAILER_MIMEOLE_OL_EF20B  (__XM_OL_EF20B && __MO_OL_EF20B)
@@ -2765,14 +2636,6 @@ meta XMAILER_MIMEOLE_OL_F6D01  (__XM_OL_F6D01 && __MO_OL_F6D01)
 meta XMAILER_MIMEOLE_OL_FF5C8  (__XM_OL_FF5C8 && __MO_OL_FF5C8)
 ##} XMAILER_MIMEOLE_OL_FF5C8
 
-##{ X_LIBRARY
-header X_LIBRARY    X-Library =~ /^Indy/
-##} X_LIBRARY
-
-##{ YOUR_CRD_RATING
-body YOUR_CRD_RATING        /Your cr[d\.]* (?:scor|rat)ing doesn.t matter/
-##} YOUR_CRD_RATING
-
 ##{ ifplugin Mail::SpamAssassin::Plugin::DNSEval _sandbox
 
 ifplugin Mail::SpamAssassin::Plugin::DNSEval
@@ -2785,9 +2648,6 @@ endif
 ##{ ifplugin Mail::SpamAssassin::Plugin::ReplaceTags _sandbox
 
 ifplugin Mail::SpamAssassin::Plugin::ReplaceTags
-replace_rules	T_FUZZY_STOCK
-test		T_FUZZY_STOCK	fail Stock
-test		T_FUZZY_STOCK	ok St0ck
 replace_rules __FRT_GOLD
 replace_rules __FRT_SILVER
 replace_tag	A	[gra\@\xc0\xc1\xc2\xc3\xc4\xc5\xc6\xe4\xe3\xe2\xe0\xe1\xe2\xe3\xe4\xe5\xe60o]
@@ -2916,17 +2776,18 @@ endif
 ##{ ifplugin Mail::SpamAssassin::Plugin::URIDNSBL _sandbox
 
 ifplugin Mail::SpamAssassin::Plugin::URIDNSBL
-urirhsbl        URIBL_RHS_AHBL  rhsbl.ahbl.org.                 A
-urirhsbl        URIBL_XS_SURBL          xs.surbl.org.   A
+urirhsbl        URIBL_RHS_AHBL  rhsbl.ahbl.org. A
 endif
 ##} ifplugin Mail::SpamAssassin::Plugin::URIDNSBL _sandbox
 
 ##{ redirector_pattern_sandbox
 redirector_pattern m'/(?:index.php)?\?.*(?<=[?&])URL=(.*?)(?:$|[&\#])'i
 redirector_pattern m'^http:/*(?:\w+\.)?google(?:\.\w{2,3}){1,2}/url\?.*?(?<=[?&])q=(.*?)(?:$|[&\#])'i
-redirector_pattern m'^http:/*(?:\w+\.)?google(?:\.\w{2,3}){1,2}/search\?.*?(?<=[?&])q=[^&]*?(?<=%20|..[=+\s])site:(.*?)(?:$|%20|[\s+&\#])'i
+redirector_pattern m'^http:/*(?:\w+\.)?google(?:\.\w{2,3}){1,2}/search\?.*?(?<=[?&])q=[^&]*?(?<=%20|..[=+\s])(?:site|inurl):(.*?)(?:$|%20|[\s+&\#])'i
 redirector_pattern m'^http:/*(?:\w+\.)?google(?:\.\w{2,3}){1,2}/search\?.*?(?<=[?&])q=[^&]*?(?<=%20|..[=+\s])(?:"|%22)(.*?)(?:$|%22|["\s+&\#])'i
 redirector_pattern m'^http:/*(?:\w+\.)?google(?:\.\w{2,3}){1,2}/translate\?.*?(?<=[?&])u=(.*?)(?:$|[&\#])'i
+redirector_pattern m'^http:/*(?:\w+\.)?aol\.com/redir\.adp\?.*(?<=[?&])_url=(.*?)(?:$|[&\#])'i
+redirector_pattern m'^http:/*rd\.yahoo\.co\.jp/\*(.*)'i
 ##} redirector_pattern_sandbox
 
 
@@ -2934,7 +2795,6 @@ ifplugin Mail::SpamAssassin::Plugin::MIMEHeader
 mimeheader __ANY_IMAGE_ATTACH Content-Type =~ /image\/(?:gif|jpeg|png)/
 endif
 body     __APPROVALFVGT		/approval/i
-body __APPROVAL_MGR         /\bApproval Manager\b/
 body     __BACHELORS		/Bachelor/i
 body     __BIGDOLLARSFVGT	/\$\d{2,3},\d{3}/
 body __BODY_STARTS_WITH_FROM_LINE /^From \S+ \S\S\S \S\S\S .. ..:..:.. \S+\s+\S+\: /s
@@ -2946,7 +2806,6 @@ mimeheader __CTYPE_ONETAB_GIF Content-Type:raw =~ /^image\/gif;\n\tname=\".+?\"$
 endif
 header   __DATE_700		Date =~ /-0700/
 body __DBLCLAIM     /avoid double claiming/
-body __DEAR_HOMEOWNER         /\bDear Home Owner\b/
 body     __DIPLOMA		/diploma/i
 body	__DOS_BODY_FRI	/\bfri(?:day)?\b/i
 body	__DOS_BODY_MON	/\bmon(?:day)?\b/i
@@ -2988,8 +2847,6 @@ body		__DOS_STRONG_CF		/\bstrong cash flow/i
 body __DOS_SYMBOL_4	/\bSymbol [A-Z]{4}\b/
 body __DOS_TAKING_HOME	/Taking home \d (?:digit level|figures) in \d{1,2} months/
 body	__DOS_WRITE_ME_AT		/[Ww].?r.?i.?t.?e me at/
-body __DRUG_RA_PRICE1 /\S{3,}ra \D{0,4}3\D{0,4}35\b/
-body __DRUG_RA_PRICE2 / remove \"/i
 header   __EXCLAIM_SUBJ		Subject =~ /\!/
 body     __FB_BA		/\bBA\b/
 body     __FB_BCs		/\bBSc\b/
@@ -3091,7 +2948,6 @@ header __MO_OL_4EEDB  X-MimeOLE =~ /Produced\ By\ Microsoft\ MimeOLE\ V5\.50\.49
 header __MO_OL_4F240  X-MimeOLE =~ /Produced\ By\ Microsoft\ MimeOLE\ V6\.00\.2800\.1158/
 header __MO_OL_58CB5  X-MimeOLE =~ /Produced\ By\ Microsoft\ MimeOLE\ V5\.50\.4133\.2400/
 header __MO_OL_5B79A  X-MimeOLE =~ /Produced\ By\ Microsoft\ MimeOLE\ V6\.00\.3790\.1830/
-header __MO_OL_5E7ED  X-MimeOLE =~ /Produced\ By\ Microsoft\ MimeOLE\ V6\.00\.2900\.2962/
 header __MO_OL_6554A  X-MimeOLE =~ /Produced\ By\ Microsoft\ MimeOLE\ V6\.00\.2900\.2905/
 header __MO_OL_72641  X-MimeOLE =~ /Produced\ By\ Microsoft\ MimeOLE\ V6\.00\.2800\.1441/
 header __MO_OL_7533E  X-MimeOLE =~ /Produced\ By\ Microsoft\ MimeOLE\ V5\.50\.4963\.1700/
@@ -3109,11 +2965,9 @@ header __MO_OL_B4B40  X-MimeOLE =~ /Produced\ By\ Microsoft\ MimeOLE\ V5\.50\.41
 header __MO_OL_B9B11  X-MimeOLE =~ /Produced\ By\ Microsoft\ MimeOLE\ V6\.00\.2462\.0000/
 header __MO_OL_BC7E6  X-MimeOLE =~ /Produced\ By\ Microsoft\ MimeOLE\ V5\.50\.4927\.1200/
 header __MO_OL_C65FA  X-MimeOLE =~ /Produced\ By\ Microsoft\ MimeOLE\ V5\.50\.4807\.1700/
-header __MO_OL_C7C33  X-MimeOLE =~ /Produced\ By\ Microsoft\ MimeOLE\ V6\.00\.2900\.2962/
 header __MO_OL_C9068  X-MimeOLE =~ /Produced\ By\ Microsoft\ MimeOLE\ V6\.00\.2800\.1807/
 header __MO_OL_CAC8F  X-MimeOLE =~ /Produced\ By\ Microsoft\ MimeOLE\ V4\.71\.1712\.3/
 header __MO_OL_CF0C0  X-MimeOLE =~ /Produced\ By\ Microsoft\ MimeOLE\ V5\.50\.4807\.2300/
-header __MO_OL_D03AB  X-MimeOLE =~ /Produced\ By\ Microsoft\ MimeOLE\ V6\.00\.2900\.2869/
 header __MO_OL_EF20B  X-MimeOLE =~ /Produced\ By\ Microsoft\ MimeOLE\ V6\.00\.2900\.2180/
 header __MO_OL_EF222  X-MimeOLE =~ /Produced\ By\ Microsoft\ MimeOLE\ V6\.00\.2900\.2873/
 header __MO_OL_F3B05  X-MimeOLE =~ /Produced\ By\ Microsoft\ MimeOLE\ V6\.00\.2800\.1437/
@@ -3144,8 +2998,8 @@ body     __PHD			/PhD/i
 body     __PREAPPROVEDFVGT	/pre-approved/i
 
 ifplugin Mail::SpamAssassin::Plugin::DNSEval
-header  __RCVD_IN_DNSWL         eval:check_rbl('dnswl-firsttrusted', 'list.dnswl.org.')
-tflags  __RCVD_IN_DNSWL         nice net
+header	__RCVD_IN_DNSWL		eval:check_rbl('dnswl-firsttrusted', 'list.dnswl.org.')
+tflags	__RCVD_IN_DNSWL		nice net
 endif
 
 ifplugin Mail::SpamAssassin::Plugin::DNSEval
@@ -3212,16 +3066,12 @@ header __XM_OL_22B61  X-Mailer =~ /Microsoft\ Outlook\ Express\ 6\.00\.2800\.115
 header __XM_OL_25340  X-Mailer =~ /Microsoft\ Office\ Outlook\,\ Build\ 11\.0\.6353/
 header __XM_OL_28001441    X-Mailer =~ /^Microsoft Outlook Express 6.00.2800.1441$/
 header __XM_OL_28004682    X-Mailer =~ /^Microsoft Outlook Express 6.00.2800.4682$/
-header __XM_OL_29196600    X-Mailer =~ /^Microsoft Outlook Express 5.00.2919.6600$/
-header __XM_OL_29196700    X-Mailer =~ /^Microsoft Outlook Express 5.00.2919.6700$/
 header __XM_OL_32D97  X-Mailer =~ /Microsoft\ Outlook\ IMO\,\ Build\ 9\.0\.2416\ \(9\.0\.2910\.0\)/
 header __XM_OL_3857F  X-Mailer =~ /Microsoft\ Office\ Outlook\,\ Build\ 11\.0\.6353/
 header __XM_OL_3AC1D  X-Mailer =~ /Microsoft\ Outlook\ Express\ 5\.00\.2919\.6700/
 header __XM_OL_3D61D  X-Mailer =~ /Microsoft\ Outlook\ Express\ 4\.71\.2244\.8/
 header __XM_OL_465CD  X-Mailer =~ /Microsoft\ Outlook\,\ Build\ 10\.0\.3416/
-header __XM_OL_48071700    X-Mailer =~ /^Microsoft Outlook Express 5.50.4807.1700$/
 header __XM_OL_48072300    X-Mailer =~ /^Microsoft Outlook Express 5.50.4807.2300$/
-header __XM_OL_49631700    X-Mailer =~ /^Microsoft Outlook Express 5.50.4963.1700$/
 header __XM_OL_4B815  X-Mailer =~ /Microsoft\ Outlook\ Express\ 4\.71\.2730\.2/
 header __XM_OL_4BF4C  X-Mailer =~ /Microsoft\ Office\ Outlook\,\ Build\ 11\.0\.5510/
 header __XM_OL_4EEDB  X-Mailer =~ /Microsoft\ Office\ Outlook\,\ Build\ 11\.0\.5510/
@@ -3229,7 +3079,6 @@ header __XM_OL_4F240  X-Mailer =~ /Microsoft\ Office\ Outlook\,\ Build\ 11\.0\.6
 header __XM_OL_4_72_2106_4  X-Mailer =~ /^Microsoft Outlook Express 4.72.2106.4$/
 header __XM_OL_58CB5  X-Mailer =~ /Microsoft\ Office\ Outlook\,\ Build\ 11\.0\.6353/
 header __XM_OL_5B79A  X-Mailer =~ /Microsoft\ Office\ Outlook\,\ Build\ 11\.0\.5510/
-header __XM_OL_5E7ED  X-Mailer =~ /Microsoft\ Outlook\ Express\ 6\.00\.2900\.2180/
 header __XM_OL_6554A  X-Mailer =~ /Microsoft\ Office\ Outlook\,\ Build\ 11\.0\.6353/
 header __XM_OL_72641  X-Mailer =~ /Microsoft\ Outlook\ Express\ 6\.00\.2800\.1441/
 header __XM_OL_7533E  X-Mailer =~ /Microsoft\ Outlook\ Express\ 5\.50\.4963\.1700/
@@ -3247,11 +3096,9 @@ header __XM_OL_B4B40  X-Mailer =~ /Microsoft\ Office\ Outlook\,\ Build\ 11\.0\.5
 header __XM_OL_B9B11  X-Mailer =~ /Microsoft\ Outlook\ Express\ 6\.00\.2462\.0000/
 header __XM_OL_BC7E6  X-Mailer =~ /Microsoft\ Office\ Outlook\,\ Build\ 11\.0\.5510/
 header __XM_OL_C65FA  X-Mailer =~ /Microsoft\ Office\ Outlook\,\ Build\ 11\.0\.6353/
-header __XM_OL_C7C33  X-Mailer =~ /Microsoft\ Outlook\ Express\ 6\.00\.2800\.1478/
 header __XM_OL_C9068  X-Mailer =~ /Microsoft\ Outlook\ Express\ 6\.00\.2800\.1478/
 header __XM_OL_CAC8F  X-Mailer =~ /Microsoft\ Outlook\ Express\ 4\.71\.1712\.3/
 header __XM_OL_CF0C0  X-Mailer =~ /Microsoft\ Office\ Outlook\,\ Build\ 11\.0\.6353/
-header __XM_OL_D03AB  X-Mailer =~ /Microsoft\ Outlook\ Express\ 6\.00\.2900\.2180/
 header __XM_OL_EF20B  X-Mailer =~ /Microsoft\ Outlook\ Express\ 6\.00\.2800\.1478/
 header __XM_OL_EF222  X-Mailer =~ /Microsoft\ Outlook\ Express\ 6\.00\.2900\.2873/
 header __XM_OL_F3B05  X-Mailer =~ /Microsoft\ Office\ Outlook\,\ Build\ 11\.0\.5510/
@@ -3263,4 +3110,3 @@ header   __XM_SKYRI		X-Mailer =~ /^SKYRiXgreen/
 header   __XM_WWWMAIL		X-Mailer =~ /^WWW-Mail \d/
 body     __YOUR_ACCOUNT		/your account/i
 body     __YOUR_CREDITFVGT	/your credit/i
-body __YOUR_MONTHLY         /\byour monthly payments by\b/
