@@ -83,7 +83,8 @@ sub new_checker {
     # bug 5731: something in DB_File appears to hang on tie() on gutsy
     my $err;
     my $tied;
-    my $timer = Mail::SpamAssassin::Timeout->new({ secs => 60 });
+    dbg("starting tie timeout at ".(scalar localtime time));
+    my $timer = Mail::SpamAssassin::Timeout->new({ secs => 30 });
     $timer->run_and_catch(sub {
 
       ($self->{is_locked} && $dbm_module eq 'DB_File') and 
@@ -93,11 +94,13 @@ sub new_checker {
               oct($main->{conf}->{auto_whitelist_file_mode});
       $err = $!;
 
+      dbg("tie returned: ".(scalar localtime time));
     });
+    dbg("timer returned: ".(scalar localtime time));
 
     if ($timer->timed_out() || !$tied) {
       if ($timer->timed_out()) {
-        warn "auto-whitelist: DB_File tie() call timed out after 60 seconds";
+        warn "auto-whitelist: DB_File tie() call timed out after 30 seconds";
         $err = "timed out";
       }
 
