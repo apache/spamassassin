@@ -54,6 +54,6 @@ ssh -f $host \
     . /etc/profile \; \
     TZ=UTC perl mass-check \
         --cs_ssl --cs_verbose --cs_schedule_cache --cs_cachedir=../../cs_cache \
-        $opts \
+        --reuse $opts \
         --client $serverhost &
 
