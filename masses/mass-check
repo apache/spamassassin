@@ -127,6 +127,7 @@ usage: mass-check [options] target ...
   options used during score generation process
   --learn=N     learn N% of messages as spam or ham
   --reuse       reuse network checks if X-Spam-Status: is present in messages
+                (note: both clients and servers in c/s mode need this)
 
   non-option arguments are used as target names (mail files and folders),
   the target format is: <class>:<format>:<location>
