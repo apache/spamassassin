@@ -857,8 +857,8 @@ sub _print_overlap_ratios {
 
       } else {
         printf "  overlap %4s: %3d%% of %s hits also hit %s; %3d%% of %s hits also hit %s%s\n",
-                    $type, $ratio, $r2, $r1,
-                    $reverse_ratio, $r1, $r2,
+                    $type, $ratio, $r1, $r2,
+                    $reverse_ratio, $r2, $r1,
                     ($is_subrule ? ' (meta rule and subrule)' : '');
       }
     }
