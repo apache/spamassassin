@@ -1,11 +1,11 @@
-opts_weekly="--net --cache --cachedir=/tmpfs/aicache_nightly --cs_schedule_cache --cs_cachedir=/export/home/bbmass/cache --restart=500 --after="15552000" --tail=15000 --net -j 8 -f /home/bbmass/mc-nightly/targets.zmi"
-opts_nightly="--cache --cachedir=/tmpfs/aicache_nightly --cs_schedule_cache --cs_cachedir=/export/home/bbmass/cache --restart=500 --after="15552000" --tail=15000 -f /home/bbmass/mc-nightly/targets.zmi"
+opts_weekly="--net -j 8 --reuse --cache --cachedir=/tmpfs/aicache_nightly --cs_schedule_cache --cs_cachedir=/export/home/bbmass/cache --restart=500 ham:detect:/export/home/bbmass/rawcor/zmi/ham/* --after="15552000" --tail=25000 spam:detect:/export/home/bbmass/rawcor/zmi/spam/*"
+opts_nightly=" --reuse --cache --cachedir=/tmpfs/aicache_nightly --cs_schedule_cache --cs_cachedir=/export/home/bbmass/cache --restart=500 ham:detect:/export/home/bbmass/rawcor/zmi/ham/* --after="15552000" --tail=25000 spam:detect:/export/home/bbmass/rawcor/zmi/spam/*"
 tmp=$HOME/tmp
 tree=$HOME/svn
 prefs_weekly=$HOME/user_prefs.weekly
 prefs_nightly=$HOME/user_prefs.nightly
 username=bb-zmi
 password=__RSYNC_PASSWORD__
-serverhost=spamassassin.zones.apache.org:38894
+serverhost=spamassassin.zones.apache.org.:38894
 clienthosts=__CLIENTHOSTS__
 clienttree=nightlymc_zmi

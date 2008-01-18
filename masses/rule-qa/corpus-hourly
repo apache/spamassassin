@@ -22,7 +22,7 @@ $opt_tag ||= 'n';       # nightly is the default
 use File::Path;
 use File::Copy;
 use Time::ParseDate;
-use Cwd 'abs_path';
+use Cwd qw(abs_path);
 use POSIX qw(nice strftime);
 
 use constant WEEK => 7*60*60*24;
@@ -422,7 +422,6 @@ sub gen_class {
         return;
       }
 
-      chdir "$opt{tree}/masses" or die "cannot chdir $opt{tree}/masses";
       for my $user (sort keys %spam) {
         next unless $ham{$user};
 
@@ -431,12 +430,13 @@ sub gen_class {
         time_filter_fileset([ "$corpusdir/$spam{$user}" ],
                 "$opt{tmp}/spam.log.$$", $OLDEST_SPAM_WEEKS, undef);
 
-        open(IN, "./hit-frequencies -TxpaP $flags $opt{tmp}/spam.log.$$ $opt{tmp}/ham.log.$$ |");
-        while(<IN>) {
+        start_freqs($rev, "$flags $opt{tmp}/spam.log.$$ $opt{tmp}/ham.log.$$");
+
+        while(<FREQS>) {
           chomp;
           push @output, "$_:$user\n";
         }
-        close(IN);
+        close(FREQS);
 
         system("cat $opt{tmp}/ham.log.$$ >> $opt{tmp}/hamall.log.$$");
         system("cat $opt{tmp}/spam.log.$$ >> $opt{tmp}/spamall.log.$$");
@@ -447,12 +447,13 @@ sub gen_class {
         return;     # we'll try again later
       }
 
-      open(IN, "./hit-frequencies -TxpaP $flags $opt{tmp}/spamall.log.$$ $opt{tmp}/hamall.log.$$ |");
-      while(<IN>) {
+      start_freqs($rev, "$flags $opt{tmp}/spamall.log.$$ $opt{tmp}/hamall.log.$$");
+
+      while(<FREQS>) {
         /\s0\s+0\s+0.500\s+0.00\s+0.00\s+\(all messages\)/ and $no_msgs = 1;
         push @output, $_;
       }
-      close(IN);
+      close(FREQS);
 
       for (sort sort_all @output) { print OUT; }
     }
@@ -467,13 +468,13 @@ sub gen_class {
         time_filter_fileset(\@spam, "$opt{tmp}/spam.log.$$", $after, $before);
 
         # print out by age
-        chdir "$opt{tree}/masses" or die "cannot chdir $opt{tree}/masses";
-        open(IN, "./hit-frequencies -TxpaP $flags $opt{tmp}/spam.log.$$ $opt{tmp}/ham.log.$$ |");
-        while(<IN>) {
+        start_freqs($rev, "$flags $opt{tmp}/spam.log.$$ $opt{tmp}/ham.log.$$");
+        
+        while(<FREQS>) {
           chomp;
           push @output, "$_:$which\n";
         }
-        close(IN);
+        close(FREQS);
       }
       for (sort sort_all @output) { print OUT; }
     }
@@ -487,13 +488,13 @@ sub gen_class {
         return;     # we'll try again later
       }
 
-      chdir "$opt{tree}/masses" or die "cannot chdir $opt{tree}/masses";
-      open(IN, "./hit-frequencies -TxpaP $flags $opt{tmp}/spam.log.$$ $opt{tmp}/ham.log.$$ |");
-      while(<IN>) {
+      start_freqs($rev, "$flags $opt{tmp}/spam.log.$$ $opt{tmp}/ham.log.$$");
+
+      while(<FREQS>) {
         /\s0\s+0\s+0.500\s+0.00\s+0.00\s+\(all messages\)/ and $no_msgs = 1;
         print(OUT);
       }
-      close(IN);
+      close(FREQS);
     }
 
     $bytes = (-s OUT);
@@ -597,3 +598,32 @@ sub get_rulemetadata_for_revision {
     warn "'$cmd' failed";
   }
 }
+
+sub start_freqs {
+  my ($rev, $args) = @_;
+
+  $rev ||= 'HEAD';
+  my $hfdir = "$opt{tmp}/hfdir/r$rev";
+
+  print "setting up hit-frequencies for r$rev in $hfdir\n";
+
+  (-d "$opt{tmp}/hfdir") or system("mkdir $opt{tmp}/hfdir");
+  if (!-d $hfdir) {
+    system ("cp -pr $opt{tree} $hfdir");
+    ($?>>8 != 0) and die "cp $opt{tree}/masses $hfdir failed";
+  }
+
+  chdir "$hfdir" or die "cannot chdir $hfdir";
+  system("svn up -r$rev; svn up -r$rev rulesrc");
+
+  # ensure these are rebuilt
+  system("rm -f rules/70_sandbox.cf rules/72_active.cf");
+
+  # do this twice in case Makefile.PL is rebuilt
+  system ("( make build_rules; make build_rules ) < /dev/null");
+
+  chdir "$hfdir/masses" or die "cannot chdir $hfdir/masses";
+  open (FREQS, "./hit-frequencies -TxpaP $args |")
+            or die "cannot run ./hit-frequencies $args |";
+}
+

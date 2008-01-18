@@ -192,6 +192,7 @@ my $num_spam = 0;
 my $num_ham = 0;
 my %ranking = ();
 my $ok_lang = '';
+my %meta_subrule_pairs = ();
 
 my %rule_times = ();
 
@@ -200,8 +201,8 @@ readscores($cffile);
 $ok_lang = lc ($opt_l || $opt_L || '');
 if ($ok_lang eq 'all') { $ok_lang = '.'; }
 
-if ($opt_t && $rules_pl_unparseable) {
-  die "-t requires rules.pl to be parseable";
+if (($opt_t || $opt_o) && $rules_pl_unparseable) {
+  die "-t/-o require rules.pl to be parseable";
 }
 
 foreach my $key (keys %rules) {
@@ -843,6 +844,9 @@ sub _print_overlap_ratios {
       my $reverse_ratio = $1 || 0;
       next unless defined $r2;
 
+      my $is_subrule = ($meta_subrule_pairs{"$r1.$r2"}
+                      || $meta_subrule_pairs{"$r2.$r1"});
+
       if ($opt_d) {
         print qq{
           <overlappair>
@@ -852,9 +856,10 @@ sub _print_overlap_ratios {
         };
 
       } else {
-        printf "  overlap %4s: %3d%% of %s hits also hit %s; %3d%% of %s hits also hit %s\n",
-                    $type, $ratio, $r2, $r1,
-                    $reverse_ratio, $r1, $r2;
+        printf "  overlap %4s: %3d%% of %s hits also hit %s; %3d%% of %s hits also hit %s%s\n",
+                    $type, $ratio, $r1, $r2,
+                    $reverse_ratio, $r2, $r1,
+                    ($is_subrule ? ' (meta rule and subrule)' : '');
       }
     }
   }
@@ -865,8 +870,7 @@ sub _print_overlap_ratios {
 }
 
 sub _prettify_overlap_rules {
-  my $rule = shift;
-  my $str = shift;
+  my ($rule, $str) = @_;
 
   my @rules = sort split(' ', $str);
   if ($rules{$rule} && $rules{$rule}->{type} eq 'meta') {
@@ -879,12 +883,15 @@ sub _prettify_overlap_rules {
     @rules = grep {
       my $tmp = $_;
       $tmp =~ s/\[.*\]$//;
-      $code !~ /\b\Q${tmp}\E\b/;
+      if ($code =~ /\b\Q${tmp}\E\b/) {
+        $meta_subrule_pairs{"$rule.$tmp"} = 1;
+        0;
+      } else {
+        1;
+      }
     } @rules;
   }
-
-  my $s = join (' ', @rules);
-  return $s;
+  return join (' ', @rules);
 }
 
 sub _hmap_to_overlap_ratio {

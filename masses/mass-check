@@ -127,6 +127,7 @@ usage: mass-check [options] target ...
   options used during score generation process
   --learn=N     learn N% of messages as spam or ham
   --reuse       reuse network checks if X-Spam-Status: is present in messages
+                (note: both clients and servers in c/s mode need this)
 
   non-option arguments are used as target names (mail files and folders),
   the target format is: <class>:<format>:<location>
@@ -285,40 +286,23 @@ if ($opt_cs_schedule_cache && !HAS_SDBM_FILE) {
   exit;
 }
 
-my $user_prefs = "$opt_p/user_prefs";
-
 # either --net or --reuse means we should use set1/set3
 my $use_net_rules = $opt_net || $opt_reuse;
 
 # --lint
-# In theory we could probably use the same spamtest object as below,
-# but since it's probably not expecting that, and we don't want
-# strange things happening, create a local object.
 if ($opt_lint) {
-  my $spamlint = new Mail::SpamAssassin ({
-    'debug'              			=> $opt_debug,
-    'rules_filename'     			=> $opt_c,
-    'userprefs_filename' 			=> $user_prefs,
-    'site_rules_filename'			=> "$opt_p/local.cf",
-    'userstate_dir'     			=> "$opt_p",
-    'save_pattern_hits'  			=> $opt_loghits,
-    'dont_copy_prefs'   			=> 1,
-    'local_tests_only'   			=> $use_net_rules ? 0 : 1,
-    'only_these_rules'   			=> $opt_rules,
-    'ignore_safety_expire_timeout'		=> 1,
-    'post_config_text'                          => join("\n", @{$opt_cf})."\n",
-    PREFIX					=> '',
-    DEF_RULES_DIR        			=> $opt_c,
-    # TODO: it would be nicer for mass-check to not have to specify
-    # this, or to use the same compiler as spamassassin, sa-update etc.
-    LOCAL_RULES_DIR      			=> '',
-  });
-
+  # In theory we could probably use the same spamtest object as below,
+  # but since it's probably not expecting that, and we don't want
+  # strange things happening, create a local object.
+  my $spamlint = create_spamtest();
   $spamlint->debug_diagnostics();
   my $res = $spamlint->lint_rules();
   $spamlint->finish();
-  warn "lint: $res issues detected, please rerun with debug enabled for more information\n" if ($res);
-  exit 1 if $res;
+  if ($res) {
+    warn "lint: $res issues detected, ".
+        "please rerun with debug enabled for more information\n";
+    exit 1;
+  }
 }
 
 # test messages for the mass-check
@@ -356,25 +340,31 @@ if ($opt_reuse) {
   }
 }
 
-my $spamtest = new Mail::SpamAssassin ({
-  'debug'              			=> $opt_debug,
-  'rules_filename'     			=> $opt_c,
-  'userprefs_filename' 			=> $user_prefs,
-  'site_rules_filename'			=> "$opt_p/local.cf",
-  'userstate_dir'     			=> "$opt_p",
-  'save_pattern_hits'  			=> $opt_loghits,
-  'dont_copy_prefs'   			=> 1,
-  'local_tests_only'   			=> $use_net_rules ? 0 : 1,
-  'only_these_rules'   			=> $opt_rules,
-  'ignore_safety_expire_timeout'	=> 1,
-  'post_config_text'                    => join("\n", @{$opt_cf})."\n",
-  PREFIX				=> '',
-  DEF_RULES_DIR        			=> $opt_c,
-  LOCAL_RULES_DIR      			=> '',
-});
+my $user_prefs = "$opt_p/user_prefs";
 
+sub create_spamtest {
+  return new Mail::SpamAssassin ({
+    'debug'              		=> $opt_debug,
+    'rules_filename'     		=> $opt_c,
+    'site_rules_filename'		=> "$opt_p/local.cf",
+    'userprefs_filename'		=> $user_prefs,
+    'userstate_dir'     		=> $opt_p,
+    'save_pattern_hits'  		=> $opt_loghits,
+    'dont_copy_prefs'   		=> 1,
+    'local_tests_only'   		=> $use_net_rules ? 0 : 1,
+    'only_these_rules'   		=> $opt_rules,
+    'ignore_safety_expire_timeout'	=> 1,
+    'post_config_text'                  => join("\n", @{$opt_cf})."\n",
+    PREFIX				=> '',
+    DEF_RULES_DIR        		=> $opt_c,
+    LOCAL_RULES_DIR      		=> '',
+  });
+}
+
+my $spamtest = create_spamtest();
 $spamtest->compile_now(0);      # 0 since we will be reading more configs
 $spamtest->read_scoreonly_config("$FindBin::Bin/mass-check.cf");
+$spamtest->read_scoreonly_config($user_prefs);
 
 # generated user_prefs
 if ($opt_reuse) {

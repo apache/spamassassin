@@ -414,7 +414,8 @@ sub dccifd_lookup {
   my $right;
   my $timeout = $self->{main}->{conf}->{dcc_timeout};
   my $sockpath = $self->{main}->{conf}->{dcc_dccifd_path};
-  my @opts = split(' ',$self->{main}->{conf}->{dcc_options});
+  my $opts = $self->{main}->{conf}->{dcc_options};
+  my @opts = !defined $opts ? () : split(' ',$opts);
 
   $count{body} = 0;
   $count{fuz1} = 0;
@@ -481,6 +482,7 @@ sub dccifd_lookup {
     dbg("dcc: dccifd check failed - no X-DCC returned: $response");
     return 0;
   }
+  $response =~ s/[ \t]\z//;  # strip trailing whitespace
 
   if ($response =~ /^X-DCC-(.*)-Metrics: (.*)$/) {
     $permsgstatus->{tag_data}->{DCCB} = $1;
@@ -538,7 +540,8 @@ sub dccproc_lookup {
     # note: not really tainted, this came from system configuration file
     my $path = Mail::SpamAssassin::Util::untaint_file_path($self->{main}->{conf}->{dcc_path});
 
-    my @opts = split(' ',$self->{main}->{conf}->{dcc_options}||'');
+    my $opts = $self->{main}->{conf}->{dcc_options};
+    my @opts = !defined $opts ? () : split(' ',$opts);
     untaint_var(\@opts);
 
     unshift(@opts, "-a",
@@ -693,7 +696,8 @@ sub dccifd_report {
   my $timeout = $self->{main}->{conf}->{dcc_timeout};
   my $sockpath = $self->{main}->{conf}->{dcc_dccifd_path};
   # instead of header use whatever the report option is
-  my @opts = split(' ',$self->{main}->{conf}->{dcc_options});
+  my $opts = $self->{main}->{conf}->{dcc_options};
+  my @opts = !defined $opts ? () : split(' ',$opts);
 
   $options->{report}->enter_helper_run_mode();
   my $timer = Mail::SpamAssassin::Timeout->new({ secs => $timeout });
@@ -749,7 +753,8 @@ sub dcc_report {
 
   # note: not really tainted, this came from system configuration file
   my $path = Mail::SpamAssassin::Util::untaint_file_path($options->{report}->{conf}->{dcc_path});
-  my @opts = split(' ',$self->{main}->{conf}->{dcc_options});
+  my $opts = $self->{main}->{conf}->{dcc_options};
+  my @opts = !defined $opts ? () : split(' ',$opts);
   untaint_var(\@opts);
 
   # get the metadata from the message so we can pass the external relay info

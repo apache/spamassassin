@@ -306,6 +306,7 @@ sub decode {
       seek $fd, 0, 0;
       local $/ = undef;
       $raw = <$fd>;
+      $raw = ''  if !defined $raw;
     }
     else {
       # create a new scalar from the raw array in memory

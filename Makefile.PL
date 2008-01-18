@@ -5,7 +5,18 @@ use strict;
 use warnings;
 use Config;
 
-use ExtUtils::MakeMaker 5.45;
+use ExtUtils::MakeMaker;
+
+# Store the version for later use
+my $mm_version = $ExtUtils::MakeMaker::VERSION;
+
+# avoid stupid 'Argument "6.30_01" isn't numeric in numeric ge (>=)' warnings;
+# strip off the beta subversion noise that causes the trouble.
+$mm_version =~ s/_\S+$//;      # "6.30_01" => "6.30"
+
+if ($mm_version+0 < 5.45) {
+  die "SpamAssassin Makefile.PL requires at least ExtUtils::MakeMaker v5.45";
+}
 
 use constant RUNNING_ON_WINDOWS => ($^O =~ /^(mswin|dos|os2)/oi);
 use constant HAS_DBI => eval { require DBI; };
@@ -120,15 +131,11 @@ ARGV: foreach (@ARGV) {
 
 # Gather some information about what EU::MM offers and/or needs
 my(
-  $mm_version,
   $mm_knows_destdir,
   $mm_has_destdir,
   $mm_has_good_destdir,
   $mm_needs_destdir,
 );
-
-# Store the version for later use
-$mm_version          = $ExtUtils::MakeMaker::VERSION;
 
 # MakeMaker prior to 6.11 doesn't support DESTDIR which is needed for
 # packaging with builddir!=destdir. See bug 2388.

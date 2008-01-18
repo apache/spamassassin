@@ -1253,20 +1253,22 @@ sub generate_scoremap_chart {
   }
 
   my %uniq=();
+  my $max_x = 0;
   my $max_y = 0;
   for my $i (keys %{$chart{'spam'}}, keys %{$chart{'ham'}}) {
     next if exists $uniq{$i}; undef $uniq{$i};
     if (($chart{'spam'}{$i}||0) > $max_y) { $max_y = $chart{'spam'}{$i}; }
     if (($chart{'ham'}{$i}||0)  > $max_y) { $max_y = $chart{'ham'}{$i}; }
+    if ($i > $max_x) { $max_x = $i; }
   }
   $max_y ||= 0.001;
 
+  # ensure 0 .. $max_x are always set
+  foreach my $i (0 .. $max_x) { $uniq{$i} = undef; }
+
   my @idxes = sort { $a <=> $b } keys %uniq;
-  my $max_x;
   if (!scalar @idxes) {
     $max_x = 1; @idxes = ( 0 );
-  } else {
-    $max_x = $idxes[scalar(@idxes) - 1];
   }
   my $min_x = $idxes[0];
   
@@ -1275,10 +1277,8 @@ sub generate_scoremap_chart {
   my @ycoords_h = map { sprintf "%.2f", (100/$max_y) * ($chart{'ham'}{$_}||0) } @idxes;
   my @xcoords   = map { sprintf "%.2f", (100/$max_x) * $_ } @idxes;
 
-  my $thresh_x;
-  foreach my $i (@xcoords) {
-    if ($i >= 5) { $thresh_x = $i; last; }
-  }
+  my $xgrid = (100/$max_x) * 5;
+  my $ygrid = (100/$max_y) * 10;
 
   # http://code.google.com/apis/chart/ , woo
   my $chartsetup = 
@@ -1289,13 +1289,14 @@ sub generate_scoremap_chart {
       ."\&amp;chts=ff0000,18"
       ."\&amp;chdl=Ham|Spam"
       ."\&amp;chco=ff0000,0000ff,00ff00"
-      ."\&amp;chls=3,1,0"
-      ."\&amp;chm=V,00ff00,0,$thresh_x,1"
+      ."\&amp;chg=$xgrid,$ygrid"
       ."\&amp;chxl=0:|$min_x+points|$max_x+points|1:|0\%|$max_y\%"
       ."\&amp;chxt=x,y";
 
-  $$outref .= "<p><img src='http://chart.apis.google.com/chart?$chartsetup' 
-		width='400' height='200' align='right' /></p>\n";
+  $$outref .= "<div style='scoremap_chart'>
+       <img src='http://chart.apis.google.com/chart?$chartsetup'
+         style='scoremap_chart' width='400' height='200' align='right'
+       /></div>\n";
 }
 
 sub format_overlap {
@@ -1306,7 +1307,8 @@ sub format_overlap {
   my $out_subrules = '';
 
   foreach my $line (split(/^/m, $ovl)) {
-    my $issubrule = ($line =~ /\d+\%\s+of __/);
+    my $issubrule = ($line =~ /\d+\%\s+of __/
+                    || $line =~ /\(meta rule and subrule\)/);
 
     $line =~ s{^(\s+overlap\s+(?:ham|spam):\s+\d+% )(\S.+?)$}{
         my $str = "$1";
@@ -1472,7 +1474,7 @@ sub add_cgi_path_param {
     $self->{cgi_params}{$k} = "$k=$v";
     push (@{$self->{cgi_param_order}}, $k);
   }
-  $self->{q}->param(-name=>$k, -value=>$v);
+  $self->{q}->param(-name=>$k, -value=>uri_unescape($v));
 }
 
 sub get_params_except {

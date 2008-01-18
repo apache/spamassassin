@@ -13,6 +13,12 @@ use constant HAS_MODULES => eval { require Mail::DKIM; require Mail::DKIM::Verif
 # use constant AM_ROOT    => $< == 0;
 
 # Since the plugin is disabled by default, so are the tests
+
+# Dec 28 2007 jm: as Daryl notes at
+# http://issues.apache.org/SpamAssassin/show_bug.cgi?id=5662#c25 , this test is
+# broken, since dkim.org have removed the "testing1234" selector from their
+# DNS.  TODO: we need working DKIM tests :(
+
 use constant DO_RUN     => TEST_ENABLED && HAS_MODULES && 0;
 
 BEGIN {

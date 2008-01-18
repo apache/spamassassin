@@ -27,6 +27,7 @@ use Mail::SpamAssassin;
 use Mail::SpamAssassin::Util qw(untaint_var);
 use Mail::SpamAssassin::BayesStore;
 use Mail::SpamAssassin::Logger;
+use Mail::SpamAssassin::Timeout;
 use Digest::SHA1 qw(sha1);
 use File::Basename;
 use File::Spec;
@@ -169,23 +170,41 @@ sub tie_db_readonly {
     my $db_var = 'db_'.$dbname;
     dbg("bayes: tie-ing to DB file R/O $name");
 
-    # untie %{$self->{$db_var}} if (tied %{$self->{$db_var}});
-    if (!tie %{$self->{$db_var}},$self->DBM_MODULE, $name, O_RDONLY,
-		 (oct($main->{conf}->{bayes_file_mode}) & 0666))
-    {
-      # bug 2975: it's acceptable for the db_seen to not be present,
-      # to allow it to be recycled.  if that's the case, just create
-      # a new, empty one. we don't need to lock it, since we won't
-      # be writing to it; let the R/W api deal with that case.
+    # bug 5731: something in DB_File appears to hang on tie() on gutsy
+    my $err;
+    dbg("starting tie timeout at ".(scalar localtime time));
+    my $timer = Mail::SpamAssassin::Timeout->new({ secs => 30 });
+    $timer->run_and_catch(sub {
 
-      if ($dbname eq 'seen') {
-        tie %{$self->{$db_var}},$self->DBM_MODULE, $name, O_RDWR|O_CREAT,
-                    (oct($main->{conf}->{bayes_file_mode}) & 0666)
-          or goto failed_to_tie;
+      # untie %{$self->{$db_var}} if (tied %{$self->{$db_var}});
+      if (!tie %{$self->{$db_var}},$self->DBM_MODULE, $name, O_RDONLY,
+                  (oct($main->{conf}->{bayes_file_mode}) & 0666))
+      {
+        # bug 2975: it's acceptable for the db_seen to not be present,
+        # to allow it to be recycled.  if that's the case, just create
+        # a new, empty one. we don't need to lock it, since we won't
+        # be writing to it; let the R/W api deal with that case.
+
+        if ($dbname eq 'seen') {
+          tie %{$self->{$db_var}},$self->DBM_MODULE, $name, O_RDWR|O_CREAT,
+                      (oct($main->{conf}->{bayes_file_mode}) & 0666)
+            or $err++;
+        }
+        else {
+          $err++;
+        }
       }
-      else {
-        goto failed_to_tie;
-      }
+
+      dbg("tie returned: ".(scalar localtime time));
+    });
+    dbg("timer returned: ".(scalar localtime time));
+
+    if ($timer->timed_out()) {
+      warn "bayes: DB_File tie() call timed out after 30 seconds";
+      goto failed_to_tie;
+    }
+    if ($err) {
+      goto failed_to_tie;
     }
   }
 
@@ -281,12 +300,30 @@ sub tie_db_writable {
     my $db_var = 'db_'.$dbname;
     dbg("bayes: tie-ing to DB file R/W $name");
 
-    ($self->DBM_MODULE eq 'DB_File') and
-         Mail::SpamAssassin::Util::avoid_db_file_locking_bug ($name);
+    # bug 5731: something in DB_File appears to hang on tie() on gutsy
+    my $err;
+    dbg("starting tie timeout at ".(scalar localtime time));
+    my $timer = Mail::SpamAssassin::Timeout->new({ secs => 30 });
+    $timer->run_and_catch(sub {
 
-    tie %{$self->{$db_var}},$self->DBM_MODULE, $name, O_RDWR|O_CREAT,
-		 (oct($main->{conf}->{bayes_file_mode}) & 0666)
-       or goto failed_to_tie;
+      ($self->DBM_MODULE eq 'DB_File') and
+          Mail::SpamAssassin::Util::avoid_db_file_locking_bug ($name);
+
+      tie %{$self->{$db_var}},$self->DBM_MODULE, $name, O_RDWR|O_CREAT,
+                  (oct($main->{conf}->{bayes_file_mode}) & 0666)
+        or $err++;
+
+      dbg("tie returned: ".(scalar localtime time));
+    });
+    dbg("timer returned: ".(scalar localtime time));
+
+    if ($timer->timed_out()) {
+      warn "bayes: DB_File tie() call timed out after 30 seconds";
+      goto failed_to_tie;
+    }
+    if ($err) {
+      goto failed_to_tie;
+    }
   }
   umask $umask;
 

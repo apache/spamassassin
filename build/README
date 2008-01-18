@@ -123,7 +123,7 @@ SPAMASSASSIN RELEASE PROCEDURE
     svn commit -m "preparing to release X.Y.Z"
 
   (If you are privately preparing a security release, and don't wish to
-  perform commits to public SVN repos, you can omit this step until
+  perform commits to public SVN repos, you can defer this step until
   later.)
 
 - SVN tag the release files.  This is done using "svn copy".
@@ -156,7 +156,7 @@ SPAMASSASSIN RELEASE PROCEDURE
   base of the tag release.
 
   (If you are privately preparing a security release, and don't wish to
-  perform commits to public SVN repos, you can omit this step until
+  perform commits to public SVN repos, you can defer this step until
   later.)
 
 
@@ -183,24 +183,12 @@ SPAMASSASSIN RELEASE PROCEDURE
 
 - take a copy of the MD5sum line output.
 
-- by default, they're written to ~/site/released/ .
-  Copy them to wherever you want, yourself:
-
-    mkdir -p ~/public_html/devel
-    mv ~/site/released/Mail-SpamAssassin-3.2.0-rc2.* ~/public_html/devel
-
-  (For me, "~/public_html/devel" is http://people.apache.org/~jm/devel/ .)
-
 - test the tar.gz and zip files!  redo until they work!! ;)
 
 - Write the release announcement mail!  This is a simple matter of copying
   the previous release's announcement, updating the version numbers and
   links, fixing the MD5 and SHA1 checksums in this mail, and summarising
-  the important changes from the Changes file.  
-  
-  Warning: you must send this using a "From:" address @apache.org,
-  otherwise it will be silently discarded at the ASF instead of being
-  delivered to the announce list.
+  the important changes from the Changes file.
 
     cp build/announcements/3.1.7.txt build/announcements/3.1.8.txt
     svn add !$
@@ -211,7 +199,14 @@ SPAMASSASSIN RELEASE PROCEDURE
   of the website, but included in the vote mail) and request a vote on the
   development mailing list to make the release.  Post the URL,
   md5sums/sha1sums, and proposed release announcement mail to the dev
-  list. 
+  list.  The default location -- ~/public_html/devel/ , or
+  http://people.apache.org/~jm/devel/ , qualifies as "discreet".
+  
+  While doing this, also upload a copy of the proposed release
+  announcement to the website:
+
+    version=3.2.4
+    cp build/announcements/$version.txt ~/public_html/devel/PROPOSED-$version.txt
 
   Pre-releases and RCs require just lazy consensus -- ie. no objections.
 
@@ -274,12 +269,18 @@ SPAMASSASSIN RELEASE PROCEDURE
   make it clear that this is an unofficial "test build" by placing it
   in your public_html dir:
 
-        http://people.apache.org/~jm/devel/
+        http://people.apache.org/~jm/rc/
+
+  this command will do it:
+
+        version=X.Y.Z
+        cp -p ~/public_html/devel/Mail-SpamAssassin-$version.* \
+            ~/public_html/rc/
 
   (for full release builds) copy the tarballs to www.apache.org/dist:
 
         version=X.Y.Z
-        cp -p ~/site/released/Mail-SpamAssassin-$version.* \
+        cp -p ~/public_html/devel/Mail-SpamAssassin-$version.* \
             /www/www.apache.org/dist/spamassassin/source
 
         cd /www/www.apache.org/dist/spamassassin
@@ -295,7 +296,7 @@ SPAMASSASSIN RELEASE PROCEDURE
 
         cd /www/www.apache.org/dist/spamassassin
         prev=X.Y.notZ
-        rm -f source/Mail-SpamAssassin-$prev.*
+        rm -f source/Mail-SpamAssassin-$prev.* Mail-SpamAssassin-$prev.*
         rm -f binaries/*/Mail-SpamAssassin-$prev.*
 
   (Archive copies are automatically kept on archive.apache.org/dist/ .)
@@ -312,6 +313,7 @@ SPAMASSASSIN RELEASE PROCEDURE
 
 - rebuild the SpamAssassin website with webmake:
 
+        PATH=$HOME/sabuildtools/perl584/bin:$HOME/sabuildtools/bin:$PATH
         cd /www/spamassassin.apache.org
         webmake -F
 
@@ -341,10 +343,8 @@ SPAMASSASSIN RELEASE PROCEDURE
 - Release a new rules update matching the released code:
 
     ssh spamassassin.zones.apache.org
-    sudo -H -u updatesd \
-        /home/updatesd/svn/spamassassin/build/mkupdates/run_nightly
-    sudo -H -u updatesd \
-        /home/updatesd/svn/spamassassin/build/mkupdates/run_part2
+    cd /home/updatesd/svn/spamassassin/build/mkupdates
+    sudo -H -u updatesd ./update-rules 3.2
 
 - update the tag used to point to "current release":
 
@@ -394,5 +394,6 @@ SPAMASSASSIN RELEASE PROCEDURE
 - Add the new version to the Bugzilla versions list:
 
         http://issues.apache.org/SpamAssassin/editversions.cgi?product=Spamassassin&action=add
+
 
 // vim:tw=74:
