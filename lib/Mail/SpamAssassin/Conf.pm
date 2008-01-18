@@ -1278,6 +1278,20 @@ servers when there are many spamd workers.
 
 =over 4
 
+=item use_learner ( 0 | 1 )		(default: 1)
+
+Whether to use any machine-learning classifiers with SpamAssassin, such as the
+default 'BAYES_*' rules.  Setting this to 0 will disable use of any and all
+human-trained classifiers.
+
+=cut
+
+  push (@cmds, {
+    setting => 'use_learner',
+    default => 1,
+    type => $CONF_TYPE_BOOL
+  });
+
 =item use_bayes ( 0 | 1 )		(default: 1)
 
 Whether to use the naive-Bayesian-style classifier built into

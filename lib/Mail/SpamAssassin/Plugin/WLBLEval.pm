@@ -121,6 +121,8 @@ sub check_from_in_list {
   return 0;
 }
 
+# TODO: this should be moved to a utility module off PerMsgStatus,
+# rather than a plugin API; it's used in Bayes.pm as a utility
 sub check_wb_list {
   my ($self, $params) = @_;
 

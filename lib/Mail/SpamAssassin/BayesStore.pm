@@ -17,12 +17,12 @@
 
 =head1 NAME
 
-Mail::SpamAssassin::BayesStore - Bayesian Storage Module
+Mail::SpamAssassin::BayesStore - Storage Module for default Bayes classifier
 
 =head1 DESCRIPTION
 
 This is the public API for the Bayesian store methods.  Any implementation of
-the storage module must implement these methods.
+the storage module for the default Bayes classifier must implement these methods.
 
 =cut
 
@@ -43,12 +43,12 @@ use Mail::SpamAssassin::Logger;
 
 =item new
 
-public class (Mail::SpamAssassin::BayesStore) new (Mail::SpamAssassin::Bayes $bayes)
+public class (Mail::SpamAssassin::BayesStore) new (Mail::SpamAssassin::Plugin::Bayes $bayes)
 
 Description:
 This method creates a new instance of the Mail::SpamAssassin::BayesStore
-object.  You must pass in an instance of the Mail::SpamAssassin:Bayes object,
-which is stashed for use throughout the module.
+object.  You must pass in an instance of the Mail::SpamAssassin::Plugin::Bayes
+object, which is stashed for use throughout the module.
 
 =cut
 
@@ -89,7 +89,7 @@ public instance () read_db_configs ()
 
 Description:
 This method reads any needed config variables from the configuration
-object and then calls the Mail::SpamAssassin::Bayes read_db_configs method.
+object and then calls the Mail::SpamAssassin::Plugin::Plugin::Bayes read_db_configs method.
 
 =cut
 

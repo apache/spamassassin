@@ -31,9 +31,12 @@ my $sa = create_saobj();
 
 $sa->init();
 
+sub getimpl {
+  return $sa->call_plugins("learner_get_implementation");
+}
 ok($sa);
 
-ok($sa->{bayes_scanner});
+ok ($sa->{bayes_scanner} && getimpl);
 
 ok(!$sa->{bayes_scanner}->is_scan_available());
 
@@ -51,15 +54,15 @@ my $mail = $sa->parse( $raw_message );
 
 ok($mail);
 
-my $body = $sa->{bayes_scanner}->get_body_from_msg($mail);
+my $body = getimpl->get_body_from_msg($mail);
 
 ok($body);
 
-my $toks = $sa->{bayes_scanner}->tokenize($mail, $body);
+my $toks = getimpl->tokenize($mail, $body);
 
 ok(scalar(keys %{$toks}) > 0);
 
-my($msgid,$msgid_hdr) = $sa->{bayes_scanner}->get_msgid($mail);
+my($msgid,$msgid_hdr) = getimpl->get_msgid($mail);
 
 # $msgid is the generated hash messageid
 # $msgid_hdr is the Message-Id header
@@ -67,34 +70,34 @@ ok($msgid eq 'ce33e4a8bc5798c65428d6018380bae346c7c126@sa_generated')
     or warn "got: [$msgid]";
 ok($msgid_hdr eq '9PS291LhupY');
 
-ok($sa->{bayes_scanner}->{store}->tie_db_writable());
+ok(getimpl->{store}->tie_db_writable());
 
-ok(!$sa->{bayes_scanner}->{store}->seen_get($msgid));
+ok(!getimpl->{store}->seen_get($msgid));
 
-$sa->{bayes_scanner}->{store}->untie_db();
+getimpl->{store}->untie_db();
 
 ok($sa->{bayes_scanner}->learn(1, $mail));
 
 ok(!$sa->{bayes_scanner}->learn(1, $mail));
 
-ok($sa->{bayes_scanner}->{store}->tie_db_writable());
+ok(getimpl->{store}->tie_db_writable());
 
-ok($sa->{bayes_scanner}->{store}->seen_get($msgid) eq 's');
+ok(getimpl->{store}->seen_get($msgid) eq 's');
 
-$sa->{bayes_scanner}->{store}->untie_db();
+getimpl->{store}->untie_db();
 
-ok($sa->{bayes_scanner}->{store}->tie_db_writable());
+ok(getimpl->{store}->tie_db_writable());
 
 my $tokerror = 0;
 foreach my $tok (keys %{$toks}) {
-  my ($spam, $ham, $atime) = $sa->{bayes_scanner}->{store}->tok_get($tok);
+  my ($spam, $ham, $atime) = getimpl->{store}->tok_get($tok);
   if ($spam == 0 || $ham > 0) {
     $tokerror = 1;
   }
 }
 ok(!$tokerror);
 
-my $tokens = $sa->{bayes_scanner}->{store}->tok_get_all(keys %{$toks});
+my $tokens = getimpl->{store}->tok_get_all(keys %{$toks});
 
 ok($tokens);
 
@@ -107,36 +110,36 @@ foreach my $tok (@{$tokens}) {
 }
 ok(!$tokerror);
 
-$sa->{bayes_scanner}->{store}->untie_db();
+getimpl->{store}->untie_db();
 
 ok($sa->{bayes_scanner}->learn(0, $mail));
 
-ok($sa->{bayes_scanner}->{store}->tie_db_writable());
+ok(getimpl->{store}->tie_db_writable());
 
-ok($sa->{bayes_scanner}->{store}->seen_get($msgid) eq 'h');
+ok(getimpl->{store}->seen_get($msgid) eq 'h');
 
-$sa->{bayes_scanner}->{store}->untie_db();
+getimpl->{store}->untie_db();
 
-ok($sa->{bayes_scanner}->{store}->tie_db_writable());
+ok(getimpl->{store}->tie_db_writable());
 
 $tokerror = 0;
 foreach my $tok (keys %{$toks}) {
-  my ($spam, $ham, $atime) = $sa->{bayes_scanner}->{store}->tok_get($tok);
+  my ($spam, $ham, $atime) = getimpl->{store}->tok_get($tok);
   if ($spam  > 0 || $ham == 0) {
     $tokerror = 1;
   }
 }
 ok(!$tokerror);
 
-$sa->{bayes_scanner}->{store}->untie_db();
+getimpl->{store}->untie_db();
 
 ok($sa->{bayes_scanner}->forget($mail));
 
-ok($sa->{bayes_scanner}->{store}->tie_db_writable());
+ok(getimpl->{store}->tie_db_writable());
 
-ok(!$sa->{bayes_scanner}->{store}->seen_get($msgid));
+ok(!getimpl->{store}->seen_get($msgid));
 
-$sa->{bayes_scanner}->{store}->untie_db();
+getimpl->{store}->untie_db();
 
 undef $sa;
 
@@ -213,13 +216,13 @@ close(MAIL);
 
 $mail = $sa->parse( $raw_message );
 
-$body = $sa->{bayes_scanner}->get_body_from_msg($mail);
+$body = getimpl->get_body_from_msg($mail);
 
 my $msgstatus = Mail::SpamAssassin::PerMsgStatus->new($sa, $mail);
 
 ok($msgstatus);
 
-my $score = $sa->{bayes_scanner}->scan($msgstatus, $mail, $body);
+my $score = getimpl->scan($msgstatus, $mail, $body);
 
 # Pretty much we can't count on the data returned with such little training
 # so just make sure that the score wasn't equal to .5 which is the default
@@ -238,11 +241,11 @@ close(MAIL);
 
 $mail = $sa->parse( $raw_message );
 
-$body = $sa->{bayes_scanner}->get_body_from_msg($mail);
+$body = getimpl->get_body_from_msg($mail);
 
 $msgstatus = Mail::SpamAssassin::PerMsgStatus->new($sa, $mail);
 
-$score = $sa->{bayes_scanner}->scan($msgstatus, $mail, $body);
+$score = getimpl->scan($msgstatus, $mail, $body);
 
 # Pretty much we can't count on the data returned with such little training
 # so just make sure that the score wasn't equal to .5 which is the default
@@ -252,7 +255,7 @@ ok($score =~ /\d/ && $score <= 1.0 && $score != .5);
 
 }
 
-ok($sa->{bayes_scanner}->{store}->clear_database());
+ok(getimpl->{store}->clear_database());
 
 ok(!-e 'log/user_state/bayes_journal');
 ok(!-e 'log/user_state/bayes_seen');

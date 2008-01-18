@@ -48,7 +48,7 @@ use constant HAS_DBI => eval { require DBI; };
 
 =head2 new
 
-public class (Mail::SpamAssassin::BayesStore::SQL) new (Mail::Spamassassin::Bayes $bayes)
+public class (Mail::SpamAssassin::BayesStore::SQL) new (Mail::Spamassassin::Plugin::Bayes $bayes)
 
 Description:
 This methods creates a new instance of the Mail::SpamAssassin::BayesStore::SQL
@@ -648,7 +648,7 @@ sub dump_db_toks {
   }  
 
   while (my ($token, $spam_count, $ham_count, $atime) = $sth->fetchrow_array()) {
-    my $prob = $self->{bayes}->compute_prob_for_token($token, $vars[1], $vars[2],
+    my $prob = $self->{bayes}->_compute_prob_for_token($token, $vars[1], $vars[2],
 						      $spam_count, $ham_count);
     $prob ||= 0.5;
 

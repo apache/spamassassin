@@ -671,7 +671,7 @@ Finish learning.
 
 sub finish_learner {
   my $self = shift;
-  $self->{bayes_scanner}->sanity_check_is_untied(1) if $self->{bayes_scanner};
+  $self->{bayes_scanner}->force_close(1) if $self->{bayes_scanner};
   1;
 }
 
@@ -1325,7 +1325,7 @@ sub compile_now {
   }
 
   # make sure things are ready for scanning
-  $self->{bayes_scanner}->sanity_check_is_untied() if $self->{bayes_scanner};
+  $self->{bayes_scanner}->force_close() if $self->{bayes_scanner};
   $self->call_plugins("compile_now_finish",
 		      { use_user_prefs => $use_user_prefs,
 			keep_userstate => $deal_with_userstate});
