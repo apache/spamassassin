@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: bb-jm bb-zmi dos jm theo zmi; day 2: bb-jm bb-zmi cthielen dos jm theo zmi; day 3: bb-jm bb-zmi cthielen dos jm theo zmi
+# with results from: day 1: bb-jm bb-zmi cthielen dos jm theo zmi; day 2: bb-jm bb-zmi dos jm theo zmi; day 3: bb-jm bb-zmi cthielen dos jm theo zmi
 
 # tflags userconf
 ALL_TRUSTED
@@ -740,9 +740,6 @@ TT_OBSCURED_VIAGRA
 TVD_FINGER_02
 
 # good enough
-TVD_FW_GRAPHIC_ID1
-
-# good enough
 TVD_GOOG_LUCKY
 
 # good enough
@@ -774,9 +771,6 @@ RCVD_IN_SORBS_DUL
 
 # tflags net
 RCVD_IN_XBL
-
-# good enough
-YAHOO_RDS_REDIR
 
 # tflags userconf
 UNPARSEABLE_RELAY
@@ -1080,6 +1074,9 @@ XMAILER_MIMEOLE_OL_F6D01
 
 # good enough
 XMAILER_MIMEOLE_OL_FF5C8
+
+# good enough
+YAHOO_RDS_REDIR
 
 # tflags net
 __DNS_FROM_RFC_ABUSE
