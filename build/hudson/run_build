@@ -1,10 +1,11 @@
-#!/bin/sh -x
+#!/bin/sh -xe
 
 . /export/home/jm/tools/setenvs
 
 # clean everything first
-make distclean < /dev/null
-rm -rf t/log t/log.make_test t/log.make_disttest t/log.make_test_p561
+make distclean < /dev/null || true
+rm -rf t/log t/log.make_test \
+    t/log.make_disttest t/log.make_test_p561 || true
 
 # generate 't/log.make_test'
 perl Makefile.PL < /dev/null
@@ -16,8 +17,8 @@ mv t/log t/log.make_test
 make disttest < /dev/null
 mv Mail-SpamAssassin*/t/log t/log.make_disttest
 
-and 't/log.make_test_p561'
-make distclean < /dev/null
+# and 't/log.make_test_p561'
+make distclean < /dev/null || true
 /home/jm/tools/perl561/bin/perl Makefile.PL < /dev/null
 make
 make test
