@@ -4,12 +4,13 @@
 
 # clean everything first
 make distclean < /dev/null || true
-rm -rf t/log t/log.make_test \
-    t/log.make_disttest t/log.make_test_p561 || true
+rm -rf t/log t/log.* || true
 
-# generate 't/log.make_test'
 perl Makefile.PL < /dev/null
 make
+make distcheck
+
+# generate 't/log.make_test'
 make test
 mv t/log t/log.make_test
 
@@ -23,5 +24,3 @@ make distclean < /dev/null || true
 make
 make test
 mv t/log t/log.make_test_p561
-
-make distcheck
