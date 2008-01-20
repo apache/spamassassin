@@ -3,8 +3,8 @@
 . /export/home/jm/tools/setenvs
 
 # clean everything first
-make distclean < /dev/null || true
 rm -rf t/log t/log.* artifacts || true
+make distclean < /dev/null || true
 mkdir artifacts
 
 perl Makefile.PL < /dev/null
@@ -12,17 +12,20 @@ make
 make distcheck
 
 # generate 't/log.make_test'
-make test
+make test \
+    2>&1 | tee artifacts/make_test.log
 mv t/log artifacts/t.log.make_test
 
 # generate 't/log.make_disttest'
-make disttest < /dev/null
+make disttest < /dev/null \
+    2>&1 | tee artifacts/make_disttest.log
 mv Mail-SpamAssassin*/t/log artifacts/t.log.make_disttest
 
 # and 't/log.make_test_p561'
 make distclean < /dev/null || true
 /home/jm/tools/perl561/bin/perl Makefile.PL < /dev/null
 make
-make test
+make test \
+    2>&1 | tee artifacts/make_test_p561.log
 mv t/log artifacts/t.log.make_test_p561
 
