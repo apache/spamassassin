@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: bb-jm bb-zmi cthielen dos jm theo zmi; day 2: bb-jm bb-zmi cthielen dos jm theo zmi; day 3: bb-jm bb-zmi dos jm theo zmi
+# with results from: day 1: bb-jm bb-zmi cthielen dos jm theo zmi; day 2: bb-jm bb-zmi cthielen dos jm theo zmi; day 3: bb-jm bb-zmi cthielen dos jm theo zmi
 
 # tflags userconf
 ALL_TRUSTED
@@ -761,6 +761,9 @@ TVD_RCVD_SINGLE
 TVD_STOCK1
 
 # good enough
+TVD_SUBJ_FINGER_07
+
+# good enough
 TVD_VISIT_PHARMA
 
 # tflags net
@@ -776,7 +779,7 @@ RCVD_IN_SORBS_DUL
 RCVD_IN_XBL
 
 # good enough
-TVD_SUBJ_FINGER_07
+TVD_FW_GRAPHIC_ID1
 
 # tflags userconf
 UNPARSEABLE_RELAY
