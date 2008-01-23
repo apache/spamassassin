@@ -67,7 +67,7 @@ sub check_main {
 
   foreach my $priority (sort { $a <=> $b } keys %{$pms->{conf}->{priorities}}) {
     # no need to run if there are no priorities at this level.  This can
-    # happen in Conf.pm when we switch a rules from one priority to another
+    # happen in Conf.pm when we switch a rule from one priority to another
     next unless ($pms->{conf}->{priorities}->{$priority} > 0);
 
     my $timer = $self->{main}->time_method("tests_pri_".$priority);
@@ -79,6 +79,9 @@ sub check_main {
 
     # only harvest the dnsbl queries once priority HARVEST_DNSBL_PRIORITY
     # has been reached and then only run once
+    #
+    # TODO: is this block still needed here? is HARVEST_DNSBL_PRIORITY used?
+    #
     if ($priority >= HARVEST_DNSBL_PRIORITY
         && $needs_dnsbl_harvest_p
         && !$self->{main}->call_plugins("have_shortcircuited",
