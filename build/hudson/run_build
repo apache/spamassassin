@@ -30,7 +30,10 @@ make test TEST_VERBOSE=1 \
 mv t/log artifacts/t.log.make_test_p561
 
 # generate XML test reports
-./build/hudson/tap-to-junit-xml < artifacts/make_test.log > testxml/make_test.xml
-./build/hudson/tap-to-junit-xml < artifacts/make_disttest.log > testxml/make_disttest.xml
-./build/hudson/tap-to-junit-xml < artifacts/make_test_p561.log > testxml/make_test_p561.xml
+perl ./build/hudson/tap-to-junit-xml \
+    < artifacts/make_test.log > testxml/make_test.xml
+perl ./build/hudson/tap-to-junit-xml \
+    < artifacts/make_disttest.log > testxml/make_disttest.xml
+perl ./build/hudson/tap-to-junit-xml \
+    < artifacts/make_test_p561.log > testxml/make_test_p561.xml
 
