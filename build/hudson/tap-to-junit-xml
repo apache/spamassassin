@@ -23,7 +23,7 @@ exit;
 
 sub _get_junit_xml {
     my ( $xmlgen, $properties, $test_results ) = @_;
-    my $xml = "<?xml version='1.0' ?>\n" . 
+    my $xml = "<?xml version='1.0' encoding='UTF-8' ?>\n" . 
             $xmlgen->testsuites( @$test_results );
     return $xml;
 }
@@ -185,12 +185,14 @@ sub _finish_test_block {
 
   my $testsuite = {
       'time'         => $elapsed_time,
-      'name'         => $ctx->{test_name},
-      'package'      => $ctx->{test_name},
+      # 'name'         => $ctx->{test_name},
+      # 'package'      => $ctx->{test_name},
+      'name'         => "footest",
+      'package'      => "test.tap.foo",
       tests          => $ctx->{case_tests},
-      errors         => 0,
       failures       => $ctx->{case_failures},
       'id'           => $ctx->{case_id},
+      errors         => 0,
   };
   my $system_out = 'system-out';
   my $system_err = 'system-err';
