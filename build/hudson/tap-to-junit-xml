@@ -209,10 +209,14 @@ sub _finish_test_block {
   my $elapsed_time = 0;     # TODO
   #my $elapsed_time = tv_interval( $ctx->{start_time}, [gettimeofday] );
 
+  # clean it up to valid Java packagename format
+  my $name = $suitename.": ".$ctx->{test_name};
+  $name =~ s/[^-_A-Za-z0-9]+/_/gs;
+
   my $testsuite = {
       'time'         => $elapsed_time,
-      'name'         => $ctx->{test_name},
-      'package'      => $ctx->{test_name},
+      'name'         => $name,
+      'package'      => $name,
       tests          => $ctx->{case_tests},
       failures       => $ctx->{case_failures},
       'id'           => $ctx->{case_id},
