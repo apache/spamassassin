@@ -185,6 +185,7 @@ sub _finish_test_block {
 
   my $testsuite = {
       'time'         => $elapsed_time,
+      'package'      => $ctx->{test_name},
       tests          => $ctx->{case_tests},
       errors         => 0,
       failures       => $ctx->{case_failures},
