@@ -210,7 +210,7 @@ sub _finish_test_block {
   #my $elapsed_time = tv_interval( $ctx->{start_time}, [gettimeofday] );
 
   # clean it up to valid Java packagename format
-  my $name = $suitename.": ".$ctx->{test_name};
+  my $name = $suite_name.": ".$ctx->{test_name};
   $name =~ s/[^-_A-Za-z0-9]+/_/gs;
 
   my $testsuite = {
