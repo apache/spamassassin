@@ -3,6 +3,14 @@
 use strict;
 use warnings;
 
+my $opt_multifile = 0;
+my $opt_mfprefix;
+
+if (defined $ARGV[0]) {
+  $opt_multifile = 1;
+  $opt_mfprefix = $ARGV[0];
+}
+
 use TAP::Parser;
 use Time::HiRes qw(gettimeofday tv_interval);
 use XML::Generator qw(:noimport);
@@ -15,155 +23,171 @@ my $xmlgen = XML::Generator->new( ':pretty', ':std');
 my @properties = _get_properties($xmlgen);
 my $test_results = _parse_tests( $tap, $xmlgen );
 
-my $xml = _get_junit_xml( $xmlgen, \@properties, $test_results );
-print "$xml\n";
+if ($opt_multifile) {
+  _gen_junit_multifile_xml( $xmlgen, \@properties, $test_results );
+} else {
+  print STDOUT _get_junit_xml( $xmlgen, \@properties, $test_results );
+}
 exit;
 
 #-------------------------------------------------------------------------------
 
 sub _get_junit_xml {
-    my ( $xmlgen, $properties, $test_results ) = @_;
-    my $xml = "<?xml version='1.0' encoding='UTF-8' ?>\n" . 
-            $xmlgen->testsuites({
-                name => $suite_name,
-              }, @$test_results );
-    return $xml;
+  my ( $xmlgen, $properties, $test_results ) = @_;
+  my $xml = "<?xml version='1.0' encoding='UTF-8' ?>\n" . 
+          $xmlgen->testsuites({
+              name => $suite_name,
+            }, @$test_results );
+  return $xml;
+}
+
+sub _gen_junit_multifile_xml {
+  my ( $xmlgen, $properties, $test_results ) = @_;
+  my $count = 1;
+  foreach my $testsuite (@$test_results) {
+    open OUT, ">${opt_mfprefix}.${count}.xml"
+          or die "cannot write ${opt_mfprefix}-${count}.xml";
+    print OUT "<?xml version='1.0' encoding='UTF-8' ?>\n";
+    print OUT $testsuite;
+    close OUT;
+    $count++;
+  }
 }
 
 sub _parse_tests {
-    my ( $parser, $xmlgen ) = @_;
+  my ( $parser, $xmlgen ) = @_;
 
-    my $ctx = {
-      testsuites => [ ],
-      test_name => 'unknown',
-      plan_ntests => 0,
-      case_id => 0,
-    };
+  my $ctx = {
+    testsuites => [ ],
+    test_name => 'unknown',
+    plan_ntests => 0,
+    case_id => 0,
+  };
 
-    _new_ctx($ctx);
+  _new_ctx($ctx);
 
-    my $lastunk = '';
+  my $lastunk = '';
 
-    # unknown t/basic_lint.........
-    # plan 1..1
-    # comment # Running under perl version 5.008008 for linux
-    # comment # Current time local: Thu Jan 24 17:44:30 2008
-    # comment # Current time GMT:   Thu Jan 24 17:44:30 2008
-    # comment # Using Test.pm version 1.25
-    # unknown     /usr/bin/perl -T -w ../spamassassin.raw -C log/test_rules_copy  --siteconfigpath log/localrules.tmp -p log/test_default.cf  -L --lint
-    # unknown     Checking anything
-    # test ok 1
-    # test ok 2
-    # unknown t/basic_meta.........
-    # plan 1..2
-    # comment # Running under perl version 5.008008 for linux
-    # comment # Current time local: Thu Jan 24 17:44:31 2008
-    # comment # Current time GMT:   Thu Jan 24 17:44:31 2008
-    # comment # Using Test.pm version 1.25
-    # test not ok 1
-    # comment # Failed test 1 in t/basic_meta.t at line 91
-    # test ok 2
-    # unknown  Failed 1/2 subtests
-    # unknown t/basic_obj_api......
-    # plan 1..4
-    # comment # Running under perl version 5.008008 for linux
-    # comment # Current time local: Thu Jan 24 17:44:33 2008
-    # comment # Current time GMT:   Thu Jan 24 17:44:33 2008
-    # comment # Using Test.pm version 1.25
-    # test ok 1
-    # test ok 2
-    # test ok 3
-    # test ok 4
-    # test ok 9
-    # unknown
-    # unknown Test Summary Report
-    # unknown -------------------
-    # unknown t/basic_meta.t   (Wstat: 0 Tests: 2 Failed: 1)
-    # unknown   Failed test:  1
-    # unknown Files=3, Tests=7,  6 wallclock secs ( 0.01 usr  0.00 sys +  4.39 cusr  0.23 csys =  4.63 CPU)
-    # unknown Result: FAIL
-    # unknown Failed 1/3 test programs. 1/7 subtests failed.
-    # unknown make: *** [test_dynamic] Error 255
+  # unknown t/basic_lint.........
+  # plan 1..1
+  # comment # Running under perl version 5.008008 for linux
+  # comment # Current time local: Thu Jan 24 17:44:30 2008
+  # comment # Current time GMT:   Thu Jan 24 17:44:30 2008
+  # comment # Using Test.pm version 1.25
+  # unknown     /usr/bin/perl -T -w ../spamassassin.raw -C log/test_rules_copy  --siteconfigpath log/localrules.tmp -p log/test_default.cf  -L --lint
+  # unknown     Checking anything
+  # test ok 1
+  # test ok 2
+  # unknown t/basic_meta.........
+  # plan 1..2
+  # comment # Running under perl version 5.008008 for linux
+  # comment # Current time local: Thu Jan 24 17:44:31 2008
+  # comment # Current time GMT:   Thu Jan 24 17:44:31 2008
+  # comment # Using Test.pm version 1.25
+  # test not ok 1
+  # comment # Failed test 1 in t/basic_meta.t at line 91
+  # test ok 2
+  # unknown  Failed 1/2 subtests
+  # unknown t/basic_obj_api......
+  # plan 1..4
+  # comment # Running under perl version 5.008008 for linux
+  # comment # Current time local: Thu Jan 24 17:44:33 2008
+  # comment # Current time GMT:   Thu Jan 24 17:44:33 2008
+  # comment # Using Test.pm version 1.25
+  # test ok 1
+  # test ok 2
+  # test ok 3
+  # test ok 4
+  # test ok 9
+  # unknown
+  # unknown Test Summary Report
+  # unknown -------------------
+  # unknown t/basic_meta.t   (Wstat: 0 Tests: 2 Failed: 1)
+  # unknown   Failed test:  1
+  # unknown Files=3, Tests=7,  6 wallclock secs ( 0.01 usr  0.00 sys +  4.39 cusr  0.23 csys =  4.63 CPU)
+  # unknown Result: FAIL
+  # unknown Failed 1/3 test programs. 1/7 subtests failed.
+  # unknown make: *** [test_dynamic] Error 255
 
-    while ( my $r = $parser->next ) {
-      my $t = $r->type;
-      my $s = $r->as_string; $s =~ s/\s+$//;
+  while ( my $r = $parser->next ) {
+    my $t = $r->type;
+    my $s = $r->as_string; $s =~ s/\s+$//;
 
-      if ($t eq 'unknown') {
-        $lastunk = $s;
+    if ($t eq 'unknown') {
+      $lastunk = $s;
 
-        # PERL_DL_NONLAZY=1 /usr/bin/perl "-MExtUtils::Command::MM" "-e" "test_harness(1, 'blib/lib', 'blib/arch')" t/basic_*
-        if ($s =~ /test_harness\(.*?\)" (.+)$/) {
-          $suite_name = $1;
-        }
-        elsif ($s =~ /^Test Summary Report$/) {
-          # create a <testsuite> block for the summary
-          $ctx->{plan_ntests} = 0;
-          $ctx->{test_name} = "Test Summary Report";
-          $ctx->{case_tests} = 1;
-          _finish_test_block($ctx);
-        }
-        elsif ($s =~ /^Result: FAIL$/) {
-          $ctx->{case_tests}++;
-          $ctx->{case_failures}++;
-          my $test_case = {
-              classname => $ctx->{test_name},
-              name      => $ctx->{test_name},
-              'time'    => 0,
-          };
-          my $failure = $xmlgen->failure({
-            type => "OverallTestsFailed",
-            message => $s
-          }, $s);
-          push @{$ctx->{test_cases}}, $xmlgen->testcase($test_case, $failure);
-        }
+      # PERL_DL_NONLAZY=1 /usr/bin/perl "-MExtUtils::Command::MM" "-e" "test_harness(1, 'blib/lib', 'blib/arch')" t/basic_*
+      if ($s =~ /test_harness\(.*?\)" (.+)$/) {
+        $suite_name = $1;
       }
-      elsif ($t eq 'plan') {
-        if ($ctx->{plan_ntests}) {       # only if there have been tests planned
-          _finish_test_block($ctx);
-        }
-
+      elsif ($s =~ /^Test Summary Report$/) {
+        # create a <testsuite> block for the summary
         $ctx->{plan_ntests} = 0;
-        $s =~ /(\d+)$/ and $ctx->{plan_ntests} = $1+0;
-
-        $ctx->{test_name} = $lastunk;
-        $ctx->{test_name} =~ s/\.*\s*$//gs;
-        $ctx->{test_name} .= ".t";
+        $ctx->{test_name} = "Test Summary Report";
+        $ctx->{case_tests} = 1;
+        _finish_test_block($ctx);
       }
-      elsif ($t eq 'test') {
-        my $ntest = 0;
-        if ($s =~ /(?:not |)\S+ (\d+)/) { $ntest = $1+0; }
-
-        if ($ntest > $ctx->{plan_ntests}) {
-          # jump in test numbers, more than planned; this is probably TAP::Parser's wierdness.
-          # (when it sees the "ok" line at the end of a test case with no number,
-          # it outputs the current total number of tests so far.)
-          next;
-        }
-
+      elsif ($s =~ /^Result: FAIL$/) {
+        $ctx->{case_tests}++;
+        $ctx->{case_failures}++;
         my $test_case = {
             classname => $ctx->{test_name},
-            name      => "$ctx->{test_name}: $ntest",
+            name      => $ctx->{test_name},
             'time'    => 0,
         };
-
-        $ctx->{case_tests}++;
-        my $failure = undef;
-        if ($s =~ /^not /i) {
-          $ctx->{case_failures}++;
-          $failure = $xmlgen->failure({
-            type => "TAPTestFailed",
-            message => $s
-          }, $s);
-        }
+        my $failure = $xmlgen->failure({
+          type => "OverallTestsFailed",
+          message => $s
+        }, $s);
         push @{$ctx->{test_cases}}, $xmlgen->testcase($test_case, $failure);
       }
-        
-      $ctx->{sysout} .= $s."\n";
     }
+    elsif ($t eq 'plan') {
+      if ($ctx->{plan_ntests}) {       # only if there have been tests planned
+        _finish_test_block($ctx);
+      }
 
-    _finish_test_block($ctx);
-    return $ctx->{testsuites};
+      $ctx->{plan_ntests} = 0;
+      $s =~ /(\d+)$/ and $ctx->{plan_ntests} = $1+0;
+
+      $ctx->{test_name} = $lastunk;
+      $ctx->{test_name} =~ s/\.*\s*$//gs;
+      $ctx->{test_name} .= ".t";
+    }
+    elsif ($t eq 'test') {
+      my $ntest = 0;
+      if ($s =~ /(?:not |)\S+ (\d+)/) { $ntest = $1+0; }
+
+      if ($ntest > $ctx->{plan_ntests}) {
+        # jump in test numbers, more than planned; this is probably TAP::Parser's wierdness.
+        # (when it sees the "ok" line at the end of a test case with no number,
+        # it outputs the current total number of tests so far.)
+        next;
+      }
+
+      my $test_case = {
+          classname => $ctx->{test_name},
+          name      => "$ctx->{test_name}: $ntest",
+          'time'    => 0,
+      };
+
+      $ctx->{case_tests}++;
+      my $failure = undef;
+      if ($s =~ /^not /i) {
+        $ctx->{case_failures}++;
+        $failure = $xmlgen->failure({
+          type => "TAPTestFailed",
+          message => $s
+        }, $s);
+      }
+      push @{$ctx->{test_cases}}, $xmlgen->testcase($test_case, $failure);
+    }
+      
+    $ctx->{sysout} .= $s."\n";
+  }
+
+  _finish_test_block($ctx);
+  return $ctx->{testsuites};
 }
 
 sub _new_ctx {
