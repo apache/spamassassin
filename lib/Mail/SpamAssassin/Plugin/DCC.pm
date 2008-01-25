@@ -23,6 +23,9 @@ Mail::SpamAssassin::Plugin::DCC - perform DCC check of messages
 
   loadplugin     Mail::SpamAssassin::Plugin::DCC
 
+  full DCC_CHECK        eval:check_dcc()
+  full DCC_CHECK_50_79  eval:check_dcc_reputation_range('50','79')
+
 =head1 DESCRIPTION
 
 The DCC or Distributed Checksum Clearinghouse is a system of servers
@@ -38,6 +41,18 @@ open source.  See the DCC license for more details.
 
 See http://www.rhyolite.com/anti-spam/dcc/ for more information about
 DCC.
+
+=head1 TAGS
+
+The following tags are added to the set, available for use in reports,
+header fields, other plugins, etc.:
+
+  _DCCB_    DCC server ID in a response
+  _DCCR_    response from DCC - header field body in X-DCC-*-Metrics
+  _DCCREP_  response from DCC - DCC reputation in percents (0..100)
+
+Tag _DCCREP_ provides a nonempty value only with commercial DCC systems.
+This is the percentage of spam vs. ham sent from the first untrusted relay.
 
 =cut
 
@@ -75,6 +90,7 @@ sub new {
   }
 
   $self->register_eval_rule("check_dcc");
+  $self->register_eval_rule("check_dcc_reputation_range");
 
   $self->set_config($mailsaobject->{conf});
 
@@ -116,6 +132,12 @@ this to a relatively high value, e.g. C<999999> (this is DCC's MANY count).
 
 The default is C<999999> for all these options.
 
+=item dcc_rep_percent NUMBER
+
+Only commercial DCC systems provide DCC reputation information. This is the
+percentage of spam vs. ham sent from the first untrusted relay.  It will hit
+on new spam from spam sources.  Default is C<90>.
+
 =cut
 
   push (@cmds, {
@@ -131,6 +153,11 @@ The default is C<999999> for all these options.
   {
     setting => 'dcc_fuz2_max',
     default => 999999,
+    type => $Mail::SpamAssassin::Conf::CONF_TYPE_NUMERIC
+  },
+  {
+    setting => 'dcc_rep_percent',
+    default => 90,
     type => $Mail::SpamAssassin::Conf::CONF_TYPE_NUMERIC
   });
 
@@ -362,64 +389,127 @@ sub get_dcc_interface {
   }
 }
 
-sub check_dcc {
+sub dcc_query {
   my ($self, $permsgstatus, $full) = @_;
 
-  # short-circuit if there's already a X-DCC header with value of
-  # "bulk" from an upstream DCC check
-  if ($permsgstatus->get('ALL') =~ /^X-DCC-([^:]{1,80})?-?Metrics:.*bulk/m) {
-    $permsgstatus->{tag_data}->{DCCB} = $1;
-    $permsgstatus->{tag_data}->{DCCR} = "bulk";
-    return 1;
-  }
-
-  my $timer = $self->{main}->time_method("check_dcc");
+  $permsgstatus->{dcc_checked} = 1;
 
   # initialize valid tags
   $permsgstatus->{tag_data}->{DCCB} = "";
   $permsgstatus->{tag_data}->{DCCR} = "";
+  $permsgstatus->{tag_data}->{DCCREP} = "";
 
-  $self->get_dcc_interface();
-  return 0 if $self->{dcc_disabled};
-
-  if ($$full eq '') {
-    dbg("dcc: empty message, skipping dcc check");
-    return 0;
+  # short-circuit if there's already a X-DCC header with value of
+  # "bulk" from an upstream DCC check
+  if ($permsgstatus->get('ALL') =~
+      /^(X-DCC-([^:]{1,80})?-?Metrics:.*bulk.*)$/m) {
+    $permsgstatus->{dcc_response} = $1;
+    return;
   }
 
-  my $client = $permsgstatus->{relays_external}->[0]->{ip};
-  if ($self->{dccifd_available}) {
+  my $timer = $self->{main}->time_method("check_dcc");
+
+  $self->get_dcc_interface();
+  my $result;
+  if ($self->{dcc_disabled}) {
+    $result = 0;
+  } elsif ($$full eq '') {
+    dbg("dcc: empty message, skipping dcc check");
+    $result = 0;
+  } elsif ($self->{dccifd_available}) {
+    my $client = $permsgstatus->{relays_external}->[0]->{ip};
     my $clientname = $permsgstatus->{relays_external}->[0]->{rdns};
     my $helo = $permsgstatus->{relays_external}->[0]->{helo} || "";
     if ($client) {
-      if ($clientname) {
-        $client = $client . "\r" . $clientname;
-      }
+      $client = $client . "\r" . $clientname  if $clientname;
     } else {
       $client = "0.0.0.0";
     }
-    return $self->dccifd_lookup($permsgstatus, $full, $client, $clientname, $helo);
+    $self->dccifd_lookup($permsgstatus, $full, $client, $clientname, $helo);
+  } else {
+    my $client = $permsgstatus->{relays_external}->[0]->{ip};
+    $self->dccproc_lookup($permsgstatus, $full, $client);
   }
-  else {
-    return $self->dccproc_lookup($permsgstatus, $full, $client);
+}
+
+sub check_dcc {
+  my ($self, $permsgstatus, $full) = @_;
+  $self->dcc_query($permsgstatus, $full)  if !$permsgstatus->{dcc_checked};
+
+  my $response = $permsgstatus->{dcc_response};
+  return 0  if !defined $response || $response eq '';
+
+  local($1,$2);
+  if ($response =~ /^X-DCC-(.*)-Metrics: (.*)$/) {
+    $permsgstatus->{tag_data}->{DCCB} = $1;
+    $permsgstatus->{tag_data}->{DCCR} = $2;
+  }
+  $response =~ s/many/999999/ig;
+  $response =~ s/ok\d?/0/ig;
+
+  my %count = (body => 0, fuz1 => 0, fuz2 => 0, rep => 0);
+  if ($response =~ /\bBody=(\d+)/) {
+    $count{body} = $1+0;
+  }
+  if ($response =~ /\bFuz1=(\d+)/) {
+    $count{fuz1} = $1+0;
+  }
+  if ($response =~ /\bFuz2=(\d+)/) {
+    $count{fuz2} = $1+0;
+  }
+  if ($response =~ /\brep=(\d+)/) {
+    $count{rep}  = $1+0;
+  }
+  if ($count{body} >= $self->{main}->{conf}->{dcc_body_max} ||
+      $count{fuz1} >= $self->{main}->{conf}->{dcc_fuz1_max} ||
+      $count{fuz2} >= $self->{main}->{conf}->{dcc_fuz2_max} ||
+      $count{rep}  >= $self->{main}->{conf}->{dcc_rep_percent})
+  {
+    dbg(sprintf("dcc: listed: BODY=%s/%s FUZ1=%s/%s FUZ2=%s/%s REP=%s/%s",
+                map { defined $_ ? $_ : 'undef' } (
+		  $count{body}, $self->{main}->{conf}->{dcc_body_max},
+		  $count{fuz1}, $self->{main}->{conf}->{dcc_fuz1_max},
+		  $count{fuz2}, $self->{main}->{conf}->{dcc_fuz2_max},
+		  $count{rep},  $self->{main}->{conf}->{dcc_rep_percent})
+                ));
+    return 1;
+  }
+  return 0;
+}
+
+sub check_dcc_reputation_range {
+  my ($self, $permsgstatus, $full, $min, $max) = @_;
+  $self->dcc_query($permsgstatus, $full)  if !$permsgstatus->{dcc_checked};
+
+  my $response = $permsgstatus->{dcc_response};
+  return 0  if !defined $response || $response eq '';
+
+  $min = 0   if !defined $min;
+  $max = 999 if !defined $max;
+
+  local $1;
+  my $dcc_rep;
+  $dcc_rep = $1+0  if defined $response && $response =~ /\brep=(\d+)/;
+  if (defined $dcc_rep) {
+    $dcc_rep = int($dcc_rep);  # just in case, rule ranges are integer percents
+    my $result = $dcc_rep >= $min && $dcc_rep <= $max ? 1 : 0;
+    dbg("dcc: dcc_rep %s, min %s, max %s => result=%s",
+        $dcc_rep, $min, $max, $result?'YES':'no');
+    $permsgstatus->{tag_data}->{DCCREP} = $dcc_rep;
+    return $dcc_rep >= $min && $dcc_rep <= $max ? 1 : 0;
   }
   return 0;
 }
 
 sub dccifd_lookup {
   my ($self, $permsgstatus, $fulltext, $client, $clientname, $helo) = @_;
-  my $response = "";
-  my %count;
+  my $response;
   my $left;
   my $right;
   my $timeout = $self->{main}->{conf}->{dcc_timeout};
   my $sockpath = $self->{main}->{conf}->{dcc_dccifd_path};
   my $opts = $self->{main}->{conf}->{dcc_options};
   my @opts = !defined $opts ? () : split(' ',$opts);
-
-  $count{body} = 0;
-  $count{fuz1} = 0;
-  $count{fuz2} = 0;
 
   $permsgstatus->enter_helper_run_mode();
 
@@ -469,62 +559,29 @@ sub dccifd_lookup {
 
   if ($timer->timed_out()) {
     dbg("dcc: dccifd check timed out after $timeout secs.");
-    return 0;
+    return;
   }
 
   if ($err) {
     chomp $err;
     warn("dcc: dccifd -> check skipped: $! $err");
-    return 0;
+    return;
   }
 
   if (!defined $response || $response !~ /^X-DCC/) {
     dbg("dcc: dccifd check failed - no X-DCC returned: $response");
-    return 0;
+    return;
   }
+
   $response =~ s/[ \t]\z//;  # strip trailing whitespace
-
-  if ($response =~ /^X-DCC-(.*)-Metrics: (.*)$/) {
-    $permsgstatus->{tag_data}->{DCCB} = $1;
-    $permsgstatus->{tag_data}->{DCCR} = $2;
-  }
-
-  $response =~ s/many/999999/ig;
-  $response =~ s/ok\d?/0/ig;
-
-  if ($response =~ /Body=(\d+)/) {
-    $count{body} = $1+0;
-  }
-  if ($response =~ /Fuz1=(\d+)/) {
-    $count{fuz1} = $1+0;
-  }
-  if ($response =~ /Fuz2=(\d+)/) {
-    $count{fuz2} = $1+0;
-  }
-
-  if ($count{body} >= $self->{main}->{conf}->{dcc_body_max} ||
-      $count{fuz1} >= $self->{main}->{conf}->{dcc_fuz1_max} ||
-      $count{fuz2} >= $self->{main}->{conf}->{dcc_fuz2_max})
-  {
-    dbg(sprintf("dcc: listed: BODY=%s/%s FUZ1=%s/%s FUZ2=%s/%s",
-		$count{body}, $self->{main}->{conf}->{dcc_body_max},
-		$count{fuz1}, $self->{main}->{conf}->{dcc_fuz1_max},
-		$count{fuz2}, $self->{main}->{conf}->{dcc_fuz2_max}));
-    return 1;
-  }
-  
-  return 0;
+  $permsgstatus->{dcc_response} = $response;
 }
 
 sub dccproc_lookup {
   my ($self, $permsgstatus, $fulltext, $client) = @_;
-  my $response = undef;
-  my %count;
+  my $response;
+  my %count = (body => 0, fuz1 => 0, fuz2 => 0, rep => 0);
   my $timeout = $self->{main}->{conf}->{dcc_timeout};
-
-  $count{body} = 0;
-  $count{fuz1} = 0;
-  $count{fuz2} = 0;
 
   $permsgstatus->enter_helper_run_mode();
 
@@ -593,7 +650,7 @@ sub dccproc_lookup {
 
   if ($timer->timed_out()) {
     dbg("dcc: check timed out after $timeout seconds");
-    return 0;
+    return;
   }
 
   if ($err) {
@@ -605,45 +662,16 @@ sub dccproc_lookup {
     } else {
       warn("dcc: check failed: $err\n");
     }
-    return 0;
+    return;
   }
 
   if (!defined($response) || $response !~ /^X-DCC/) {
     $response ||= '';
     dbg("dcc: check failed: no X-DCC returned (did you create a map file?): $response");
-    return 0;
+    return;
   }
 
-  if ($response =~ /^X-DCC-(.*)-Metrics: (.*)$/) {
-    $permsgstatus->{tag_data}->{DCCB} = $1;
-    $permsgstatus->{tag_data}->{DCCR} = $2;
-  }
-
-  $response =~ s/many/999999/ig;
-  $response =~ s/ok\d?/0/ig;
-
-  if ($response =~ /Body=(\d+)/) {
-    $count{body} = $1+0;
-  }
-  if ($response =~ /Fuz1=(\d+)/) {
-    $count{fuz1} = $1+0;
-  }
-  if ($response =~ /Fuz2=(\d+)/) {
-    $count{fuz2} = $1+0;
-  }
-
-  if ($count{body} >= $self->{main}->{conf}->{dcc_body_max} ||
-      $count{fuz1} >= $self->{main}->{conf}->{dcc_fuz1_max} ||
-      $count{fuz2} >= $self->{main}->{conf}->{dcc_fuz2_max})
-  {
-    dbg(sprintf("dcc: listed: BODY=%s/%s FUZ1=%s/%s FUZ2=%s/%s",
-		$count{body}, $self->{main}->{conf}->{dcc_body_max},
-		$count{fuz1}, $self->{main}->{conf}->{dcc_fuz1_max},
-		$count{fuz2}, $self->{main}->{conf}->{dcc_fuz2_max}));
-    return 1;
-  }
-
-  return 0;
+  $permsgstatus->{dcc_response} = $response;
 }
 
 # only supports dccproc right now
