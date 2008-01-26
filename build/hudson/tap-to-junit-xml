@@ -3,6 +3,7 @@
 use strict;
 use warnings;
 
+my $opt_suitename = shift @ARGV;
 my $opt_multifile = 0;
 my $opt_mfprefix;
 
@@ -15,7 +16,7 @@ use TAP::Parser;
 use Time::HiRes qw(gettimeofday tv_interval);
 use XML::Generator qw(:noimport);
 
-my $suite_name = 'make test';
+my $suite_name = $opt_suitename || 'make test';
 
 my $tout = join("", <STDIN>);
 my $tap     = TAP::Parser->new( { tap => $tout } );
@@ -117,10 +118,10 @@ sub _parse_tests {
       $lastunk = $s;
 
       # PERL_DL_NONLAZY=1 /usr/bin/perl "-MExtUtils::Command::MM" "-e" "test_harness(1, 'blib/lib', 'blib/arch')" t/basic_*
-      if ($s =~ /test_harness\(.*?\)" (.+)$/) {
-        $suite_name = $1;
-      }
-      elsif ($s =~ /^Test Summary Report$/) {
+      # if ($s =~ /test_harness\(.*?\)" (.+)$/) {
+      # $suite_name = $1;
+      # }
+      if ($s =~ /^Test Summary Report$/) {
         # create a <testsuite> block for the summary
         $ctx->{plan_ntests} = 0;
         $ctx->{test_name} = "Test Summary Report";
@@ -210,8 +211,8 @@ sub _finish_test_block {
   #my $elapsed_time = tv_interval( $ctx->{start_time}, [gettimeofday] );
 
   # clean it up to valid Java packagename format
-  my $name = $suite_name.": ".$ctx->{test_name};
-  $name =~ s/[^-_A-Za-z0-9]+/_/gs;
+  my $name = $suite_name.":".$ctx->{test_name};
+  $name =~ s/[^-:_A-Za-z0-9]+/_/gs;
 
   my $testsuite = {
       'time'         => $elapsed_time,
