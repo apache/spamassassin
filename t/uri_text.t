@@ -24,7 +24,7 @@ use Mail::SpamAssassin;
 use vars qw(%patterns %anti_patterns);
 
 # settings
-plan tests => 104;
+plan tests => 134;
 
 # initialize SpamAssassin
 my $sa = create_saobj({'dont_copy_prefs' => 1});
@@ -133,11 +133,15 @@ www.zai6Vuwi.com.bar	!zai6Vuwi
 .www.kuiH5sai.com	www.kuiH5sai.com
 
 a=www.zaiNgoo7.com	www.zaiNgoo7.com
-b@www.vohWais0.com	mailto:b@www.vohWais0.com !http://www.vohWais0.com
+b@www.vohWais0.com	mailto:b@www.vohWais0.com	!http://www.vohWais0.com
 c.www.moSaoga8.com	www.moSaoga8.com
 
-foo @ cae8kaip.com	mailto:foo@cae8kaip.com
 xyz..geifoza0.com	!geifoza0
+xyz.geifoza1.com/..xyz	xyz.geifoza1.com	!xyz.geifoza1.com/..xyz
+xyz.geifoza2.CoM	xyz.geifoza2.CoM
+http://xyz..geifoza3.com	!geifoza3
+http://xyz.geifoza4.com/..xyz	xyz.geifoza4.com/..xyz
+http://xyz.geifoza5.CoM	xyz.geifoza5.CoM
 
 joe@koja3fui.koja3fui	!koja3fui
 
@@ -219,44 +223,33 @@ mailto:baeb1fai@quo6puyo.com	mailto:baeb1fai@quo6puyo.com
 http://www.luzoop5k.com		http://www.luzoop5k.com
 https://www.luzoop5k.com	https://www.luzoop5k.com
 ftp://www.luzoop5k.com		ftp://www.luzoop5k.com
-mailto:www.luzoop5k.com		mailto:www.luzoop5k.com
-file://www.luzoop5k.com		file://www.luzoop5k.com
+mailto:www.luzoop5k.com		!mailto:www.luzoop5k.com
+# no longer accept file: scheme
+file://www.luzoop5k.com		!file://www.luzoop5k.com
 
 # //<user>:<password>@<host>:<port>/<url-path>
 http://user:pass@jiefeet4.com:80/x/y	http://user:pass@jiefeet4.com:80/x/y
 
-liy8quei:80			!liy8quei
-veibi6cu:443			!veibi6cu
-puahi8si.com:80			puahi8si.com:80
-chop8tan.com:443		chop8tan.com:443
+www.liy8quei:80				!liy8quei
+www.veibi6cu:443			!veibi6cu
+puahi8si.com:80				!puahi8si.com:80
+chop8tan.com:443			!chop8tan.com:443
+www.puahi9si.com:80		puahi9si.com:80
+www.chop9tan.com:443	chop9tan.com:443
 
 ftp://name@su5queib.ca//etc/motd	ftp://name@su5queib.ca//etc/motd
-ftp://name@faikaj4t.dom/%2Fetc/motd	ftp://name@faikaj4t.dom//etc/motd
+ftp://name@faikaj4t.dom/%2Fetc/motd	!ftp://name@faikaj4t.dom//etc/motd
+ftp://name@faikaj4t.com/%2Fetc/motd	ftp://name@faikaj4t.com//etc/motd
 
 keyword:sportscar		!sportscar
 
 # questionable tests
-
 mailto://cah3neun@thaihe4d.com		mailto://cah3neun@thaihe4d.com
-mailto://jicu8vah@another@jicu8vah	jicu8vah@another@jicu8vah
+
+mailto://jicu8vah@another@jicu8vah	!jicu8vah@another@jicu8vah
 baeb1fai@@example.com			!baeb1fai@@example.com
-
-#mailto://yie6xuna		!yie6xuna
-
-#http://425EE622		http://66.94.230.34
-#gopher://www.luzoop5k.com	gopher://www.luzoop5k.com
-#nntp://www.luzoop5k.com	nntp://www.luzoop5k.com
-#telnet://www.luzoop5k.com	telnet://www.luzoop5k.com
-#wais://www.luzoop5k.com	wais://www.luzoop5k.com
-#prospero://www.luzoop5k.com	prospero://www.luzoop5k.com
-#nfs://www.luzoop5k.com		nfs://www.luzoop5k.com
-#pop://www.luzoop5k.com		pop://www.luzoop5k.com
-#tel://www.luzoop5k.com		tel://www.luzoop5k.com
-#fax://www.luzoop5k.com		fax://www.luzoop5k.com
-#modem://www.luzoop5k.com	modem://www.luzoop5k.com
-#ldap://www.luzoop5k.com	ldap://www.luzoop5k.com
-#im://www.luzoop5k.com		im://www.luzoop5k.com
-#snmp://www.luzoop5k.com	snmp://www.luzoop5k.com
+mailto://yie6xuna		!yie6xuna
+mailto://yie6xuna@nottld		!yie6xuna@nottld
 
 <sentto-4934-foo=addr.com@verper.com>	!^http://.*addr.com@verper.com
 <sentto-4934-foo=addr.com@verper.com>	mailto:sentto-4934-foo=addr.com@verper.com
@@ -265,3 +258,23 @@ http://foo23498.com/{ESC}(B	^http://foo23498.com/$
 {ESC}(Bhttp://foo23499.com/	^http://foo23499.com/$
 http://foo23500.com{ESC}(B/	^http://foo23500.com(?:/?)$
 
+M0"-AE/9Y.KN:_0D2F:95^H*:I,8	!9Y\.KN
+>delimtest1.com	http://delimtest1.com
+<delimtest2.com	http://delimtest2.com
+"delimtest3.com	http://delimtest3.com
+\delimtest4.com	http://delimtest4.com
+'delimtest5.com	http://delimtest5.com
+`delimtest6.com	http://delimtest6.com
+,delimtest7.com	http://delimtest7.com
+{delimtest8.com	http://delimtest8.com
+[delimtest9.com	http://delimtest9.com
+(delimtest10.com	http://delimtest10.com
+|delimtest11.com	http://delimtest11.com
+ delimtest12.com	http://delimtest12.com
+ignorethishttp://delimtest13.org	http://delimtest13.org
+donotignorethiswww.delimtest14.com	donotignorethiswww.delimtest14.com
+<www.delimtest15.com/foo-~!@#^&*()_+=:;'?,.xyz-~!@#^&*()_+=:;'?,.>	^http://www.delimtest15.com/foo-~!@#\^&\*\(\)_\+=:;'\?,\.xyz$
+.....www.delimtest16.com..........	^http://www.delimtest16.com$
+-----www.delimtest17.com----------	^http://www.delimtest17.com$
+.....http://www.delimtest18.com..........	^http://www.delimtest18.com$
+-----http://www.delimtest19.com----------	^http://www.delimtest19.com$

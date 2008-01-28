@@ -46,7 +46,7 @@ ok ($urimap{'http://66.92.69.221/'});
 ok ($urimap{'http://66.92.69.222/'});
 ok ($urimap{'http://66.92.69.223/'});
 ok ($urimap{'http://66.92.69.224/'});
-ok ($urimap{'spamassassin.org'});
+ok ($urimap{'http://spamassassin.org'});
 ok (!$urimap{'CUMSLUTS.'});
 ok (!$urimap{'CUMSLUTS..VIRGIN'});
 
@@ -58,9 +58,11 @@ sub try_domains {
 
   # undef is valid in some situations, so deal with it...
   if (!defined $expect) {
+    warn("try_domains: failed! expect: undefined got: '$result'\n") if (defined $result);
     return !defined $result;
   }
   elsif (!defined $result) {
+    warn "try_domains: failed! expect: '$expect' got: undefined\n";
     return 0;
   }
 

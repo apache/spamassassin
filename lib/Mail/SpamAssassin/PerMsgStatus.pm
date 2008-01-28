@@ -1580,7 +1580,7 @@ sub _get {
       # strip out the (comments)
       $result =~ s/\s*\(.*?\)//g;
       # strip out the "quoted text"
-      $result =~ s/(?<!<)"[^"]*"(?!@)//g;
+      $result =~ s/(?<!<)"[^"]*"(?!@)//g;   #" emacs
       # Foo Blah <jm@xxx> or <jm@xxx>
       $result =~ s/^[^<]*?<(.*?)>.*$/$1/;
       # multiple addresses on one line? remove all but first
@@ -1625,16 +1625,44 @@ sub get {
 
 ###########################################################################
 
-# Taken from URI and URI::Find
-my $reserved   = q(;/?:@&=+$,[]\#|);
-my $mark       = q(-_.!~*'());                                    #'; emacs
-my $unreserved = "A-Za-z0-9\Q$mark\E\x00-\x08\x0b\x0c\x0e-\x1a\x1c-\x1f";
-my $uricSet = quotemeta($reserved) . $unreserved . "%";
+# uri parsing from plain text:
+# The goals are to find URIs in plain text spam that are intended to be clicked on or copy/pasted, but
+# ignore random strings that might look like URIs, for example in uuencoded files, and to ignore
+# URIs that spammers might seed in spam in ways not visible or clickable to add work to spam filters.
+# When we extract a domain and look it up in an RBL, an FP on decding that the text is a URI is not much
+# of a problem, as the only cost is an extra RBL lookup. The same FP is worse if the URI is used in matching rule
+# because it could lead to a rule FP, as in bug 5780 with WIERD_PORT matching random uuencoded strings.
+# The principles of the following code are 1) if ThunderBird or Outlook Express would linkify a string,
+# then we should attempt to parse it as a URI; 2) Where TBird and OE parse differently, choose to do what is most
+# likely to find a domain for the RBL tests; 3) If it begins with a scheme or www\d*\. or ftp\. assume that
+# it is a URI; 4) If it does not then require that the start of the string looks like a FQDN with a valid TLD;
+# 5) Reject strings that after parsing, URLDecoding, and redirection processing don't have a valid TLD
+#
+# We get the entire URI that would be linkified before dealing with it, in order to do the right thing
+# with URI-encodings and redirecting URIs.
+#
+# The delimiters for start of a URI in TBird are @(`{|[\"'<>,\s   in OE they are ("<\s
+#
+# Tbird allows .,?';-! in a URI but ignores [.,?';-!]* at the end.
+# TBird's end delimiters are )`{}|[]"<>\s but ) is only an end delmiter if there is no ( in the URI
+# OE only uses space as a delimiter, but ignores [~!@#^&*()_+`-={}|[]:";'<>?,.]* at the end.
+#
+# Both TBird and OE decide that a URI is an email address when there is '@' character embedded in it.
+# TBird has some additional restrictions on email URIs: They cannot contain non-ASCII characters and their end
+# delimiters include ( and '
+#
+# bug 4522: ISO2022 format mail, most commonly Japanese SHIFT-JIS, inserts a three character escape sequence  ESC ( .
 
-my $schemeRE = qr/(?:https?|ftp|mailto|javascript|file)/i;
+# a hybrid of tbird and oe's  version of uri parsing
+my $tbirdstartdelim = '><"\'`,{[(|\s'  . "\x1b";  # The \x1b as per bug 4522
+my $iso2022shift = "\x1b" . '\(.';  # bug 4522
+my $tbirdenddelim = '><"`}\]{[|\s' . "\x1b";  # The \x1b as per bug 4522
+my $oeignoreatend = '-~!@#^&*()_+=:;\'?,.';
+my $nonASCII    = '\x80-\xff';
+my $tbirdenddelimemail = $tbirdenddelim . '(\'' . $nonASCII;  # tbird ignores non-ASCII mail addresses for now, until RFC changes
+my $tbirdenddelimplusat = $tbirdenddelimemail . '@';
 
-my $uricCheat = $uricSet;
-$uricCheat =~ tr/://d;
+# regexps for finding plain text non-scheme hostnames with valid TLDs.
 
 # the list from %VALID_TLDS in Util/RegistrarBoundaries.pm, as a
 # Regexp::Optimize optimized regexp ;)  accurate as of 20050318
@@ -1649,57 +1677,15 @@ my $tldsRE = qr/
       |t[cdfghjklmnoprtvwz]|u[agkmsyz]|v[aceginu]|w[fs]|xxx|y[etu]|z[amw]|ed?u|qa
     )/ix;
 
-# from RFC 1035, but allowing domains starting with numbers:
-#   $label = q/[A-Za-z\d](?:[A-Za-z\d-]{0,61}[A-Za-z\d])?/;
-#   $domain = qq<$label(?:\.$label)*>;
-#   length($host) <= 255 && $host =~ /^($domain)$/
-# changes:
-#   massively simplified from grammar, only matches known TLDs, a single
-#   dot at end of TLD works
-# negative look-behinds:
-#   (?<![a-z\d][.-]) = don't let there be more hostname behind, but
-#                      don't miss ".....www.bar.com" or "-----www.foo.com"
-#   (?<!.\@) = this will be caught by the email address regular expression
-my $schemelessRE = qr/(?<![a-z\d][._-])(?<!.\@)\b[a-z\d]
-                      [a-z\d._-]{0,251}
-                      \.${tldsRE}\.?\b
-                      (?![a-z\d._-])
-                      /ix;
-
-my $uriRe = qr/\b(?:$schemeRE:[$uricCheat]|$schemelessRE)[$uricSet#]*/o;
-
-# Taken from Email::Find (thanks Tatso!)
-# This is the BNF from RFC 822
-my $esc         = '\\\\';
-my $period      = '\.';
-my $space       = '\040';
-my $open_br     = '\[';
-my $close_br    = '\]';
-my $nonASCII    = '\x80-\xff';
-my $ctrl        = '\000-\037';
-my $cr_list     = '\n\015';
-my $qtext       = qq/[^$esc$nonASCII$cr_list\"]/; #"
-my $dtext       = qq/[^$esc$nonASCII$cr_list$open_br$close_br]/;
-my $quoted_pair = qq<$esc>.qq<[^$nonASCII]>;
-my $atom_char   = qq/[^($space)<>\@,;:\".$esc$open_br$close_br$ctrl$nonASCII]/;
-#"
-my $atom        = qq{(?>$atom_char+)};
-my $quoted_str  = qq<\"$qtext*(?:$quoted_pair$qtext*)*\">; #"
-my $word        = qq<(?:$atom|$quoted_str)>;
-my $local_part  = qq<$word(?:$period$word)*>;
-
-# This is a combination of the domain name BNF from RFC 1035 plus the
-# domain literal definition from RFC 822, but allowing domains starting
-# with numbers.
-my $label       = q/[A-Za-z\d](?:[A-Za-z\d-]*[A-Za-z\d])?/;
-my $domain_ref  = qq<$label(?:$period$label)*>;
-my $domain_lit  = qq<$open_br(?:$dtext|$quoted_pair)*$close_br>;
-my $domain      = qq<(?:$domain_ref|$domain_lit)>;
-
-# Finally, the address-spec regex (more or less)
-my $Addr_spec_re   = qr<$local_part\s*\@\s*$domain>o;
-
-# TVD: This really belongs in metadata
+# knownscheme regexp looks for either a https?: or ftp: scheme, or www\d*\. or ftp\. prefix, i.e., likely to start a URL
+# schemeless regexp looks for a valid TLD at the end of what may be a FQDN, followed by optional ., optional :portnum, optional /rest_of_uri
+my $urischemeless = qr/[a-z\d][a-z\d._-]{0,251}\.${tldsRE}\.?(?::\d{1,5})?(?:\/[^$tbirdenddelim]{1,251})?/io;
+my $uriknownscheme = qr/(?:(?:(?:(?:https?)|(?:ftp)):(?:\/\/)?)|(?:(?:www\d{0,2}|ftp)\.))[^$tbirdenddelim]{1,251}/io;
+my $urimailscheme = qr/(?:mailto:)?[^$tbirdenddelimplusat]{1,251}@[^$tbirdenddelimemail]{1,251}/io;
+my $tbirdurire = qr/(?:\b|(?<=$iso2022shift)|(?<=[$tbirdstartdelim]))
+                    (?:(?:($uriknownscheme)(?=[$tbirdenddelim])) |
+                       (?:($urimailscheme)(?=[$tbirdenddelimemail])) |
+                       (?:\b($urischemeless)(?=[$tbirdenddelim])))/xo;
 
 =item $status->get_uri_list ()
 
@@ -1895,6 +1881,7 @@ sub _get_parsed_uri_list {
     # also, if we allow $textary to be passed in, we need to invalidate
     # the cache first. fyi.
     my $textary = $self->get_decoded_stripped_body_text_array();
+    my $redirector_patterns = $self->{conf}->{redirector_patterns};
 
     my ($rulename, $pat, @uris);
     local ($_);
@@ -1903,50 +1890,61 @@ sub _get_parsed_uri_list {
 
     for (@$textary) {
       # NOTE: do not modify $_ in this loop
-      while (/($uriRe)/igo) {
-        my $uri = $1;
+      while (/$tbirdurire/igo) {
+        my $rawuri = $1||$2||$3;
+        $rawuri =~ s/(^[^(]*)\).*$/$1/;  # as per ThunderBird, ) is an end delimiter if there is no ( preceeding it
+        $rawuri =~ s/[$oeignoreatend]*$//; # remove trailing string of punctuations that TBird ignores
+        # skip if there is '..' in the hostname portion of the URI, something we can't catch in the general URI regexp
+        next if $rawuri =~ /^(?:(?:https?|ftp|mailto):(?:\/\/)?)?[a-z\d.-]*\.\./i;
 
-        # skip mismatches from URI regular expression
-        next if $uri =~ /^[a-z\d.-]*\.\./i;	# skip ".."
-
-        $uri =~ s/^<(.*)>$/$1/;
-        $uri =~ s/[\]\)>#]$//;
-
-        if ($uri !~ /^${schemeRE}:/io) {
-          # If it's a hostname that was just sitting out in the
-          # open, without a protocol, and not inside of an HTML tag,
-          # the we should add the proper protocol in front, rather
-          # than using the base URI.
+        # If it's a hostname that was just sitting out in the
+        # open, without a protocol, and not inside of an HTML tag,
+        # the we should add the proper protocol in front, rather
+        # than using the base URI.
+        my $uri = $rawuri;
+        my $rblonly;
+        if ($uri !~ /^(?:https?|ftp|mailto|javascript|file):/i) {
           if ($uri =~ /^ftp\./i) {
-            push (@uris, $uri);
             $uri = "ftp://$uri";
           }
-          if ($uri =~ /\@/) {
-            push (@uris, $uri);
+          elsif ($uri =~ /^www\d{0,2}\./i) {
+            $uri = "http://$uri";
+          }
+          elsif ($uri =~ /\@/) {
             $uri = "mailto:$uri";
           }
-          else # if ($uri =~ /^www\d*\./i)
-          {
+          else {
             # some spammers are using unschemed URIs to escape filters
-            push (@uris, $uri);
+            $rblonly = 1;    # flag that this is a URI that MUAs don't linkify so only use for RBLs
             $uri = "http://$uri";
           }
         }
 
-        # warn("uri: got URI: $uri\n");
-        push @uris, $uri;
-      }
-      while (/($Addr_spec_re)/igo) {
-        my $uri = $1;
+        if ($uri =~ /^mailto:/) {
+          # skip a mail link that does not have a valid TLD or other than one @ after decoding any URLEncoded characters
+          $uri = Mail::SpamAssassin::Util::url_encode($uri) if ($uri =~ /\%(?:2[1-9a-fA-F]|[3-6][0-9a-fA-f]|7[0-9a-eA-E])/);
+          next if ($uri !~ /^[^@]+@[^@]+$/);
+          my $domuri = Mail::SpamAssassin::Util::uri_to_domain($uri);
+          next unless $domuri;
+          push (@uris, $rawuri);
+          push (@uris, $uri) unless ($rawuri eq $uri);
+        }
 
-        # skip mismatches from email address regular expression
-        next unless $uri =~ /\.${tldsRE}\W*$/io;	# skip non-TLDs
+        next unless ($uri =~/^(?:https?|ftp):/);  # at this point only valid if one or the other of these
 
-        $uri =~ s/\s*\@\s*/@/;	# remove spaces around the '@'
-        $uri = "mailto:$uri";	# prepend mailto:
-
-        #warn("uri: got URI: $uri\n");
-        push @uris, $uri;
+        my @tmp = Mail::SpamAssassin::Util::uri_list_canonify($redirector_patterns, $uri);
+        my $goodurifound = 0;
+        foreach my $cleanuri (@tmp) {
+          my $domain = Mail::SpamAssassin::Util::uri_to_domain($cleanuri);
+          if ($domain) {
+            # bug 5780: Stop after domain to avoid FP, but do that after all deobfuscation of urlencoding and redirection
+            $cleanuri =~ s/^(https?:\/\/[^:\/]+).*$/$1/ if $rblonly;
+            push (@uris, $cleanuri);
+            $goodurifound = 1;
+          }
+        }
+        next unless $goodurifound;
+        push @uris, $rawuri unless $rblonly;
       }
     }
 
