@@ -76,7 +76,7 @@ describe FORGED_MUA_OUTLOOK	Forged mail pretending to be from MS Outlook
 
 # Outlook IMO (Internet Mail Only)
 header __OIMO_MUA		X-Mailer =~ /Outlook IMO/
-header __OIMO_MSGID		MESSAGEID =~ /^<[A-P]{26}A[ABC]\.[-\w.]+\@\S+>$/m
+header __OIMO_MSGID		MESSAGEID =~ /^<[A-P]{28}\.[-\w.]+\@\S+>$/m
 meta FORGED_MUA_OIMO		(__OIMO_MUA && !__OIMO_MSGID && !__OE_MSGID_2 && !__UNUSABLE_MSGID)
 describe FORGED_MUA_OIMO	Forged mail pretending to be from MS Outlook IMO
 
