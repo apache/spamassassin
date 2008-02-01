@@ -5,6 +5,7 @@ use SATest; sa_t_init("spamd_maxsize");
 use Test; BEGIN { plan tests => ($SKIP_SPAMD_TESTS ? 0 : 1) };
 
 exit if $SKIP_SPAMD_TESTS;
+exit if (-f "/home/jm/capture_spamd_straces");  # TODO JMD remove once DB_File bug is fixed
 
 # ---------------------------------------------------------------------------
 
