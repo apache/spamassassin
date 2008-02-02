@@ -1,8 +1,11 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: bb-fredt cthielen dos jm theo zmi; day 2: cthielen dos jm theo zmi; day 3: bb-fredt cthielen dos jm theo zmi
+# with results from: day 1: bb-fredt cthielen dos jm theo zmi; day 2: bb-fredt cthielen dos jm theo zmi; day 3: cthielen dos jm theo zmi
 
 # tflags userconf
 ALL_TRUSTED
+
+# good enough
+APOSTROPHE_FROM
 
 # tflags userconf
 AWL
@@ -203,9 +206,6 @@ FH_DATE_PAST_20XX
 FH_FAKE_RCVD_LINE
 
 # good enough
-FH_FROMEML_NOTLD
-
-# good enough
 FH_HAS_XID
 
 # good enough
@@ -273,6 +273,9 @@ FRT_BIGGERMEM1
 
 # good enough
 FRT_DISCOUNT
+
+# good enough
+FRT_LEVITRA
 
 # good enough
 FRT_PENIS1
@@ -971,9 +974,6 @@ XMAILER_MIMEOLE_OL_20C99
 XMAILER_MIMEOLE_OL_22B61
 
 # good enough
-XMAILER_MIMEOLE_OL_3857F
-
-# good enough
 XMAILER_MIMEOLE_OL_3AC1D
 
 # good enough
@@ -984,9 +984,6 @@ XMAILER_MIMEOLE_OL_465CD
 
 # good enough
 XMAILER_MIMEOLE_OL_4B815
-
-# good enough
-XMAILER_MIMEOLE_OL_4BF4C
 
 # good enough
 XMAILER_MIMEOLE_OL_4F240
@@ -1001,9 +998,6 @@ XMAILER_MIMEOLE_OL_72641
 XMAILER_MIMEOLE_OL_7533E
 
 # good enough
-XMAILER_MIMEOLE_OL_812FF
-
-# good enough
 XMAILER_MIMEOLE_OL_83BF7
 
 # good enough
@@ -1014,9 +1008,6 @@ XMAILER_MIMEOLE_OL_91287
 
 # good enough
 XMAILER_MIMEOLE_OL_ADFF7
-
-# good enough
-XMAILER_MIMEOLE_OL_B30D1
 
 # good enough
 XMAILER_MIMEOLE_OL_B9B11
