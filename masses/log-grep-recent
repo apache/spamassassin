@@ -1,11 +1,12 @@
 #!/usr/bin/perl
 #
 # log-grep-recent - select only recent messages from a mass-check log
+#                   [optionally only select messages with set=x]
 
 
                                                         sub usage { die "
 
-usage: log-grep-recent --months num_months < full.log > recent.log
+usage: log-grep-recent --months num_months [--set x] < full.log > recent.log
 
                                                         \n"; }
 
@@ -30,9 +31,11 @@ use strict;
 use warnings;
 
 my $months = 0;
+my $set;
 use Getopt::Long qw(:config bundling auto_help);
 GetOptions(
-           "m|months=f" => \$months
+           "m|months=f" => \$months,
+           "s|set=f"    => \$set
          ) or usage();
 
 usage() unless ($months > 0);
@@ -44,8 +47,13 @@ my $cutoff = $now - (($roughly1month * $months) + ($roughly1month - 1));
 my %buckets = ();
 
 while (<>) {
-  if (/^[Y\.]\s+-?\d+.*\btime=(\d+)\b/) {
+  if (/^[Y\.]\s+-?\d+.*?\btime=(\d+)\b.*?\bset=(\d)\b/) {
     my $t = $1;
+    my $s = $2;
+
+    if (defined $set && $set != $s) {
+      next;
+    }
 
     my $monthsago = int (($now - $t) / $roughly1month);
     $buckets{$monthsago}++;
