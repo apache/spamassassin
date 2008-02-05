@@ -1,0 +1,224 @@
+#!/bin/bash
+
+# generate-new-scores - generate scores for rules promoted after initial
+#                       release mass-check scoring run
+#
+# usage: generate-new-scores (0|1|2|3)
+#
+# <@LICENSE>
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to you under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at:
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# </@LICENSE>
+
+SCORESET=$1
+
+# load rsync credentials from RSYNC-CREDS file
+# RSYNC_USERNAME="username"
+# RSYNC_PASSWORD="password"
+. RSYNC-CREDS
+export RSYNC_PASSWORD
+
+if [ ! $SCORESET ]; then
+  echo "Missing scoreset number parameter"
+  exit
+fi
+
+# prep current nightly mass-check logs
+if [ ! -e corpus ]; then
+  echo "[ creating corpus directory ]"
+  mkdir corpus || exit $?
+fi
+
+date
+echo "[ rsyncing logs ]"
+
+rsync -artvz $RSYNC_USERNAME@rsync.spamassassin.org::corpus/*.log corpus/. || exit $?
+
+date
+echo "[ selecting log files to use for scoreset $SCORESET ]"
+
+# select a usable corpus (it'll use all available logs for the wanted score set
+# with the most recent revision found among logs for that score set)
+rm -rf corpus/usable-corpus-set$SCORESET
+mkdir corpus/usable-corpus-set$SCORESET || exit $?
+
+if [ $SCORESET -eq 3 ]; then
+  for FILE in `find corpus -type f -name "*am-bayes-net-*"`;
+  do
+    FILE=`echo $FILE | cut -d"/" -f2-`
+    ln corpus/$FILE corpus/usable-corpus-set${SCORESET}/$FILE || exit $?
+  done
+elif [ $SCORESET -eq 2 ]; then
+  for FILE in `find corpus -type f -name "*am-bayes-*" | grep -v net-`;
+  do
+    FILE=`echo $FILE | cut -d"/" -f2-`
+    ln corpus/$FILE corpus/usable-corpus-set${SCORESET}/$FILE || exit $?
+  done
+elif [ $SCORESET -eq 1 ]; then
+  for FILE in `find corpus -type f -name "*am-net-*"`;
+  do
+    FILE=`echo $FILE | cut -d"/" -f2-`
+    ln corpus/$FILE corpus/usable-corpus-set${SCORESET}/$FILE || exit $?
+  done
+elif [ $SCORESET -eq 0 ]; then
+  for FILE in `find corpus -type f -name "*am-*" | grep -v net- | grep -v bayes-`;
+  do
+    FILE=`echo $FILE | cut -d"/" -f2-`
+    ln corpus/$FILE corpus/usable-corpus-set${SCORESET}/$FILE || exit $?
+  done
+else
+  echo "Unknown score set: $SCORESET"
+  exit
+fi
+  
+# cthielen's ham logs seem to have a shitload of spam in them
+rm -f corpus/usable-corpus-set${SCORESET}/*cthielen.log
+
+REVISION=`head corpus/usable-corpus-set${SCORESET}/* | grep "SVN revision" | cut -d" " -f4 | sort -rn | head -1`
+if [ "$REVISION" == "" ]; then
+  echo "No logs for scoreset"
+  exit 1
+fi
+
+for FILE in `find corpus/usable-corpus-set$SCORESET -type f`;
+do
+  head $FILE | grep "SVN revision: $REVISION" || rm $FILE
+done
+
+date
+echo "[ checking out code from svn repository ]"
+
+# make note of what logs we are going to use
+echo "# Using score set $SCORESET logs for revision $REVISION from:" > scores-set$SCORESET
+echo "#" `ls corpus/usable-corpus-set$SCORESET` >> scores-set$SCORESET
+echo >> scores-set$SCORESET
+
+# prep the ruleset checkout
+rm -rf trunk-new-rules-set$SCORESET
+
+svn co -r $REVISION http://svn.apache.org/repos/asf/spamassassin/trunk trunk-new-rules-set$SCORESET || exit $?
+svn co http://svn.apache.org/repos/asf/spamassassin/tags/spamassassin_release_3_2_0_rc_2/rules trunk-new-rules-set$SCORESET/rules-base || exit $?
+svn co http://svn.apache.org/repos/asf/spamassassin/trunk/rules trunk-new-rules-set$SCORESET/rules-current || exit $?
+
+svn up -r $REVISION trunk-new-rules-set${SCORESET}/rulesrc/ || exit $?
+
+cd trunk-new-rules-set${SCORESET}/masses
+patch < ../../masses-Makefile.patch || exit $?
+cd ../..
+
+# copy the support scripts to masses/ of the scoreset's checkout; this lets us
+# contain all the new score generation scripts in their own directory and keeps
+# us from having to pass the checkout path as an argument to each of the scripts
+cp lock-scores trunk-new-rules-set$SCORESET/masses/lock-scores
+cp extract-new-scores trunk-new-rules-set$SCORESET/masses/extract-new-scores
+cp add-hitless-active-to-freqs trunk-new-rules-set$SCORESET/masses/add-hitless-active-to-freqs
+
+date
+echo "[ generating active ruleset via make ]"
+
+cd trunk-new-rules-set$SCORESET
+perl Makefile.PL < /dev/null || exit $?
+make || exit $?
+
+# strip scores from new rules so that the garescorer can set them
+grep -v ^score rules/72_active.cf > rules/72_active.cf-scoreless
+mv -f rules/72_active.cf-scoreless rules/72_active.cf
+
+date
+echo "[ running log-grep-recent ]"
+
+# only use recent spam to generate scores; use a lot of ham history to avoid FPs
+masses/log-grep-recent -m 38 ../corpus/usable-corpus-set$SCORESET/ham-*.log > masses/ham-full.log
+masses/log-grep-recent -m 2 ../corpus/usable-corpus-set$SCORESET/spam-*.log > masses/spam-full.log
+
+# set config to chosen scoreset
+cp masses/config.set$SCORESET masses/config
+. masses/config
+NAME="set$SCORESET"
+LOGDIR="gen-$NAME-$HAM_PREFERENCE-$THRESHOLD-$EPOCHS-ga"
+
+date
+echo "[ running make freqs ]"
+
+# generate new ruleset
+cd masses
+
+make clean || exit $?
+rm -rf ORIG NSBASE SPBASE ham-validate.log spam-validate.log ham.log spam.log
+ln -s ham-full.log ham.log
+ln -s spam-full.log spam.log
+make freqs SCORESET=$SCORESET || exit $?
+
+cp freqs freqs.full	# probably not needed for anything - someday I'll look to see
+make > make.out 2>&1 || exit $?
+
+rm -rf ORIG NSBASE SPBASE ham-validate.log spam-validate.log ham.log spam.log
+mkdir ORIG
+for CLASS in ham spam ; do
+  ln $CLASS-full.log ORIG/$CLASS.log
+  for I in 0 1 2 3 ; do
+    ln -s $CLASS.log ORIG/$CLASS-set$I.log
+  done
+done
+
+date
+echo "[ starting runGA ]"
+
+# generate the new scores
+./runGA || exit $?
+
+date
+echo "[ generating fp-fn-statistics ]"
+
+# generate stats on the old rules to compare against the new rules and their scores
+./fp-fn-statistics --ham ham-test.log --spam spam-test.log --scoreset $SCORESET \
+	--cffile=../rules-base --fnlog $LOGDIR/false_negatives_original \
+	--fplog $LOGDIR/false_positives_original > $LOGDIR/stats-set$SCORESET-original-test
+
+./fp-fn-statistics --ham ham.log --spam spam.log --scoreset $SCORESET \
+	--cffile=../rules-base --fnlog $LOGDIR/false_negatives_original \
+	--fplog $LOGDIR/false_positives_original > $LOGDIR/stats-set$SCORESET-original-full
+
+date
+echo "[ extracting new scores ]"
+
+# extract the new scores
+./extract-new-scores
+cat $LOGDIR/scores-new >> ../../scores-set$SCORESET
+
+# new active.list rules that didn't hit enough get zeroed... add the zero scores
+# for them, otherwise SA will assign 1.0 defaults (or use whatever was in the sandbox)
+if [ -s scores-active-zeroed ]; then
+  echo "# in active.list but have no hits in recent corpus" >> ../../scores-set$SCORESET
+  cat scores-active-zeroed >> ../../scores-set$SCORESET
+fi
+
+cd ../..
+./merge-scoresets $SCORESET
+echo
+cat scores
+
+# collect some stats
+echo "##### WITH NEW RULES AND SCORES #####" > stats-set$SCORESET
+head -10 trunk-new-rules-set$SCORESET/masses/$LOGDIR/scores >> stats-set$SCORESET
+cat trunk-new-rules-set$SCORESET/masses/$LOGDIR/test >> stats-set$SCORESET
+echo >> stats-set$SCORESET
+echo "##### WITHOUT NEW RULES AND SCORES #####" >> stats-set$SCORESET
+cat trunk-new-rules-set$SCORESET/masses/$LOGDIR/stats-set$SCORESET-original-full >> stats-set$SCORESET
+cat trunk-new-rules-set$SCORESET/masses/$LOGDIR/stats-set$SCORESET-original-test >> stats-set$SCORESET
+
+date
+echo "[ completed ]"
+

@@ -1,0 +1,257 @@
+#!/usr/bin/perl
+
+# ifpluginize-scores
+#
+# determine each rule's required ifplugin line (if any) and insert the ifplugin
+# line (or move the score line inside an existing ifplugin line) into the score
+# file, dumping the altered score file on STDOUT
+#
+# usage: ifpluginize-scores rules/ rules/50_scores.cf > rules/50_scores.cf.new
+#        ifpluginize-scores rules/ rules/72_scores.cf > rules/72_scores.cf.new
+#
+# <@LICENSE>
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to you under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at:
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# </@LICENSE>
+#
+# note: this only supports one ifplugin line per rule (no nested ifplugins)
+#       and it might not work on Windows due to line ending differences
+#
+# TODO: this is a quick hack to fix the currently broken 3.2.0 updates that
+#       currently have 102 scores missing ifplugin lines in the base release
+#       50_scores.cf and 2 scores missing ifplugin lines in 72_scores.cf
+#
+#       ideally this should be done way before now, like in whatever that
+#       combine-scores script is called
+#
+#       also, after using and inserting any ifplugin lines that we are aware
+#       of in the actual rule cf files, we should probably brute force the
+#       detection of missing ifplugin lines by disabling one plugin at a time
+#       to see if anything breaks... fixing this case in the update
+#       automatically would be do-able, but it's probably better fixed in the
+#       sandbox/wherever (and just aborting the update)
+
+use strict;
+use warnings;
+
+# parameters:  /path/to/rules/dir  /path/to/scores.cf
+my $rulesDir = shift @ARGV;
+my $scoreFile = shift @ARGV;
+
+# find out what plugins we need for each rule based on the rule files
+my %ruleIfPlugins = ();
+opendir(RULESDIR, $rulesDir) or die "Cannot open rules directory: $!\n";
+while (my $file = readdir(RULESDIR)) {
+  next unless $file =~ /\.cf$/;
+  open(RULEFILE, "$rulesDir/$file") or die "Cannot open rule file: $!\n";
+
+  my $currentPlugin;
+  while(<RULEFILE>) {
+    $_ =~ s/\015\012//;
+    chomp $_;
+
+    $_ =~ s/^lang\s+\S+\s+//;		# strip lang whatever describe to just describe
+
+    next if ($_ =~ /^\s*(?:#.*)?$/);	# comments
+    next if ($_ =~ /^shortcircuit\b/);	# not handled, easiest to catch this sort of stuff by brute force (unload plugins and lint)
+
+    if ($_ =~ /^(ifplugin\s+\S+)$/) {
+      $currentPlugin = $1;
+    } elsif ($_ =~ /^endif(?:$|\b)/) {
+      $currentPlugin = undef;
+    } elsif (defined $currentPlugin && $_ =~ /^\S+\s+(\S+)\s+/) {
+      if (exists $ruleIfPlugins{$1}) {
+        next if $ruleIfPlugins{$1} eq $currentPlugin;
+        warn "more than one ifplugin per rule not supported by this script!\n".
+             "rule: $1 requires $ruleIfPlugins{$1} and\n".
+             "$_\n";
+      } else {
+        $ruleIfPlugins{$1} = $currentPlugin;
+      }
+    }
+  }
+  close RULEFILE;
+}
+close RULESDIR;
+
+# load the score file into memory
+open(SCOREFILE, $scoreFile) or die "Cannot open score file: $scoreFile: $!\n";
+my @sf;
+while (<SCOREFILE>) {
+  $_ =~ s/\015\012//;
+  chomp $_;
+  push (@sf, $_);
+}
+close SCOREFILE;
+
+# find any rules needing ifplugin lines and move them inside existing ifplugin
+# lines for the required plugin, pay attention to mutable flags for fun
+my %rulesNeedingNewIfplugins = ();
+my %rulesNeedingNewIfpluginsIsMutable = ();
+RULE: foreach my $rule (sort keys %ruleIfPlugins) {
+  # some vars to track where a score line appears
+  # note that we assume that when there are both ifplugin and gen:mutable lines
+  # around a rule that the ifplugin lines will enclose the gen:mutable lines
+  my $insideIfplugin = 0;
+  my $ifpluginStartLine = 0;
+  my $ifpluginEndLine = 0;
+  my $insideGenMutable = 0;
+  my $genMutableStartLine = 0;
+  my $genMutableEndLine = 0;
+  my $ruleIsMutable = 0;
+  my $ruleAtLine = 0;
+  my $line = 0;
+  foreach my $cfLine (@sf) {
+    $line++; # line is at array index + 1 so that we can be lazy and use 0 in the above vars
+
+    # handle rules that fall in existing ifplugin lines, we'll handle new ifplugin lines later
+    if ($ruleAtLine && $ifpluginStartLine && $ifpluginEndLine) {
+      if ($ruleIsMutable) {
+        if ($genMutableStartLine && $genMutableEndLine) {
+          # existing ifplugin + mutable flags, just move the rule
+          moveRule(\@sf, $rule, $ruleAtLine-1, $genMutableStartLine, $genMutableEndLine-2);
+        } else {
+          # mutable rule, but no existing mutable flags, we'll add them
+          moveRule(\@sf, $rule, $ruleAtLine-1, $ifpluginStartLine-1, $ifpluginStartLine-1, 1);
+        }
+      } else {
+        if ($genMutableStartLine && $genMutableEndLine) {
+          # existing ifplugin + mutable flags, but the rule isn't mutable so we'll move the
+          # rule to just after the closing mutable flag but still inside the ifplugin
+          moveRule(\@sf, $rule, $ruleAtLine-1, $genMutableEndLine, $ifpluginEndLine-2);
+        } else {
+          # existing ifplugin and no mutable flags, just move the rule
+          moveRule(\@sf, $rule, $ruleAtLine-1, $ifpluginStartLine, $ifpluginEndLine-2);
+        }
+      }
+      # once we move the rule we move to the next one, reseting the tracking vars (above)
+      next RULE;
+    }
+
+    # determine where we are (inside ifplugin, gen:mutable)
+    # again, we assume that if there's ifplugin lines any gen:mutable lines will be inside the ifplugin
+    if ($cfLine =~ /^$ruleIfPlugins{$rule}\b/) { # only looks for the ifplugin line we need
+      $insideIfplugin = 1;
+      $ifpluginStartLine = $line;
+    } elsif ($cfLine =~ /^endif/) {
+      $ifpluginEndLine = $line if $insideIfplugin;
+      $insideIfplugin = 0;
+    } elsif ($cfLine =~ /<gen:mutable>/) {
+      $insideGenMutable = 1;
+      $genMutableStartLine = $line if $insideIfplugin;
+    } elsif ($cfLine =~ /<\/gen:mutable>/) {
+      $insideGenMutable = 0;
+      $genMutableEndLine = $line if $insideIfplugin;
+    } elsif ($cfLine =~ /^score $rule\b/) {
+      $ruleAtLine = $line;
+      $ruleIsMutable = $insideGenMutable;
+      if ($insideIfplugin) {
+        # great, the rule is inside the ifplugin line it needs, check the next rule
+        #delete $ruleIfPlugins{$rule};	# careful, we're looping! just for debug anyway
+        next RULE;
+      }
+    }
+  }
+  # if we couldn't find somewhere to move the rule we'll add it to the end of the file later
+  $rulesNeedingNewIfplugins{$rule} = $ruleAtLine-1 if $ruleAtLine;
+  $rulesNeedingNewIfpluginsIsMutable{$rule} = $ruleIsMutable;
+
+  #print "$rule : $ruleAtLine : $ifpluginStartLine : $ifpluginEndLine : $ruleIsMutable : $genMutableStartLine : $genMutableEndLine\n"; # if $ruleAtLine;
+}
+
+# move any rules that require ifplugin lines that weren't already in the score
+# file to the end of the score file and wrap them in their own ifplugin lines
+my $i = 0;
+foreach my $rule (sort { $rulesNeedingNewIfplugins{$a} <=> $rulesNeedingNewIfplugins{$b} } keys %rulesNeedingNewIfplugins) {
+  #print "rule: $rule at line: $rulesNeedingNewIfplugins{$rule} needs '$ruleIfPlugins{$rule}'\n";
+
+  my $line = $sf[$rulesNeedingNewIfplugins{$rule}-$i];
+  splice(@sf, $rulesNeedingNewIfplugins{$rule}-$i, 1);
+
+  if ($rulesNeedingNewIfpluginsIsMutable{$rule}) {
+    push (@sf, ("", "$ruleIfPlugins{$rule}", "# <gen:mutable>", $line, "# </gen:mutable>", "endif"));
+  } else {
+    push (@sf, ("", "$ruleIfPlugins{$rule}", $line, "endif"));
+  }
+  $i++;
+}
+
+# output the result
+foreach (@sf) {
+  print $_, "\n";
+}
+
+
+
+# move rules around in the array reference passed
+# add mutable flags where appropriate
+sub moveRule {
+  my ($aref, $rule, $current, $toStart, $toEnd, $addGenMutable) = @_;
+  $addGenMutable ||= 0;
+
+#  warn "debug moveRule: $rule : $current : $toStart : $toEnd\n";
+
+  if ($current < $toStart) {
+    # add first, then delete
+    my $added = 0;
+    for (my $i = $toStart; $i <= $toEnd; $i++) {
+      next if $sf[$i] !~ /^score (\S+)\b/;
+
+      if (($1 cmp $rule) == 1) {
+        splice(@{$aref}, $i, 0, @{$aref}[$current]);
+        if ($addGenMutable) {
+          splice(@{$aref}, $i, 0, "# <gen:mutable>");
+          splice(@{$aref}, $i+2, 0, "# </gen:mutable>");
+        }
+        $added = 1;
+        last;
+      }
+    }
+    unless ($added) {
+      splice(@{$aref}, $toEnd+1, 0, @{$aref}[$current]);
+      if ($addGenMutable) {
+        splice(@{$aref}, $toEnd+1, 0, "# <gen:mutable>");
+        splice(@{$aref}, $toEnd+3, 0, "# </gen:mutable>");
+      }
+    }
+    splice(@{$aref}, $current, 1); 
+
+  } else {
+    # delete first, then add
+    my $line = splice(@{$aref}, $current, 1); 
+
+    my $added = 0;
+    for (my $i = $toStart; $i <= $toEnd; $i++) {
+      next if $sf[$i] !~ /^score (\S+)\b/;
+
+      if (($1 cmp $rule) == 1) {
+        splice(@{$aref}, $i, 0, @{$aref}[$current]);
+        if ($addGenMutable) {
+          splice(@{$aref}, $i, 0, "# <gen:mutable>");
+          splice(@{$aref}, $i+2, 0, "# </gen:mutable>");
+        }
+        $added = 1;
+        last;
+      }
+    }
+    unless ($added) {
+      splice(@{$aref}, $toEnd+1, 0, $line);
+      if ($addGenMutable) {
+        splice(@{$aref}, $toEnd+1, 0, "# <gen:mutable>");
+        splice(@{$aref}, $toEnd+3, 0, "# </gen:mutable>");
+      }
+    }
+  }
+}

@@ -1,0 +1,46 @@
+Steps for generating scores for rules promoted post 3.2.0 release
+(you only need to do the first three steps once):
+
+ - checkout the directory this README file is in
+
+ - create an RSYNC-CREDS file containing your nightly mass-check rsync creds
+   (don't do something silly like 'svn add' this file):
+
+    RSYNC_USERNAME="username"
+    RSYNC_PASSWORD="passowrd"
+
+ - protect those creds from others
+
+    chmod 600 RSYNC-CREDS
+
+ - if the newest mass-check logs are set0 logs run this:
+
+    ./generate-new-scores 1
+    ./generate-new-scores 0
+
+ - if the newest mass-check logs are set1 logs run this:
+
+    ./generate-new-scores 0
+    ./generate-new-scores 1
+
+
+
+Steps for using set0 scores for set2 and set1 scores for set3
+(until we start enabling bayes on nightly mass-checks):
+
+  - generate the set0 and set1 scores as above
+
+  - run this:
+
+    cp scores-set0 scores-set2
+    cp scores-set1 scores-set3
+    ./merge-scoresets
+
+
+
+The "do-nightly-rescore-example" script is what I currently use to generate
+and commit updates each day.
+
+ (less sparse documentation goes here)
+
+EOF
