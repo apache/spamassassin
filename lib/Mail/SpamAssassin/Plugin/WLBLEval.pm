@@ -50,6 +50,7 @@ sub new {
   $self->register_eval_rule("check_forged_in_whitelist");
   $self->register_eval_rule("check_from_in_default_whitelist");
   $self->register_eval_rule("check_forged_in_default_whitelist");
+  $self->register_eval_rule("check_mailfrom_matches_rcvd");
 
   return $self;
 }
@@ -229,6 +230,59 @@ sub _check_from_in_default_whitelist {
 
   $pms->{from_in_default_whitelist} = $found_match;
   return;
+}
+
+###########################################################################
+
+# check if domain name of an envelope sender address matches a domain name
+# of the first untrusted relay (if any), or any trusted relay otherwise
+sub check_mailfrom_matches_rcvd {
+  my ($self, $pms) = @_;
+  my $sender = $pms->get("EnvelopeFrom:addr");
+  return 0  if !defined $sender || $sender eq '';
+  return $self->_check_addr_matches_rcvd($pms,$sender);
+}
+
+# check if domain name of a supplied e-mail address matches a domain name
+# of the first untrusted relay (if any), or any trusted relay otherwise
+sub _check_addr_matches_rcvd {
+  my ($self, $pms, $addr) = @_;
+
+  local $1;
+  return 0  if $addr !~ / \@ ( [^\@]+ \. [^\@]+ ) \z/x;
+  my $addr_domain = lc $1;
+
+  my @relays;
+  if ($pms->{num_relays_untrusted} > 0) {
+    # check against the first untrusted, if present
+    @relays = $pms->{relays_untrusted}->[0];
+  } elsif ($pms->{num_relays_trusted} > 0) {
+    # otherwise try all trusted ones, but only do so
+    # if there are no untrusted relays to avoid forgery
+    push(@relays, @{$pms->{relays_trusted}});
+  }
+  return 0  if !@relays;
+
+  my($adrh,$adrd) =
+    Mail::SpamAssassin::Util::RegistrarBoundaries::split_domain($addr_domain);
+  my $match = 0;
+  my $any_tried = 0;
+  foreach my $rly (@relays) {
+    my $relay_rdns = $rly->{lc_rdns};
+    next  if !defined $relay_rdns || $relay_rdns eq '';
+    my($rlyh,$rlyd) =
+      Mail::SpamAssassin::Util::RegistrarBoundaries::split_domain($relay_rdns);
+    $any_tried = 1;
+    if ($adrd eq $rlyd) {
+      dbg("rules: $addr MATCHES relay $relay_rdns ($adrd)");
+      $match = 1; last;
+    }
+  }
+  if ($any_tried && !$match) {
+    dbg("rules: %s does NOT match relay(s) %s",
+        $addr, join(', ', map { $_->{lc_rdns} } @relays));
+  }
+  return $match;
 }
 
 ###########################################################################
