@@ -6,15 +6,18 @@ use SATest; sa_t_init("dns");
 use constant TEST_ENABLED => conf_bool('run_net_tests');
 use constant HAS_NET_DNS => eval { require Net::DNS; };
 # bug 3806:
-# Do not run this test on non-Linux unices as root, due to a bug
-# in Sys::Hostname::Long (which Net::DNS uses.)
+# Do not run this test with version of Sys::Hostname::Long older than 1.4
+# on non-Linux unices as root, due to a bug in Sys::Hostname::Long
+# (which is used by Net::DNS and by Mail::SPF::Query)
 use constant IS_LINUX   => $^O eq 'linux';
 use constant IS_WINDOWS => ($^O =~ /^(mswin|dos|os2)/oi);
 use constant AM_ROOT    => $< == 0;
+use constant HAS_SAFE_HOSTNAME =>
+  eval { require Sys::Hostname::Long; Sys::Hostname::Long->VERSION(1.4) };
 
-use constant DO_RUN     => TEST_ENABLED && HAS_NET_DNS &&
-                                        !(AM_ROOT &&
-                                          !(IS_LINUX || IS_WINDOWS));
+use constant DO_RUN =>
+  TEST_ENABLED && HAS_NET_DNS &&
+  (HAS_SAFE_HOSTNAME || !AM_ROOT || IS_LINUX || IS_WINDOWS);
 
 use Test;
 
