@@ -280,8 +280,9 @@ donotignorethiswww.delimtest14.com	donotignorethiswww.delimtest14.com
 -----http://www.delimtest19.com----------	^http://www.delimtest19.com$
 
 # check all the TLDs (might as well be thorough)
+# the inactive TLDs have negative checks
 
-# first confirm that it will fail on not a TLD
+# first confirm that it will not match on not a TLD
 example.foo	!^http://example.foo$
 example.xxx	!^http://example.xxx$
 
@@ -322,7 +323,7 @@ example.bo	^http://example.bo$
 example.br	^http://example.br$
 example.bs	^http://example.bs$
 example.bt	^http://example.bt$
-example.bv	^http://example.bv$
+example.bv	!^http://example.bv$
 example.bw	^http://example.bw$
 example.by	^http://example.by$
 example.bz	^http://example.bz$
@@ -368,7 +369,7 @@ example.fm	^http://example.fm$
 example.fo	^http://example.fo$
 example.fr	^http://example.fr$
 example.ga	^http://example.ga$
-example.gb	^http://example.gb$
+example.gb	!^http://example.gb$
 example.gd	^http://example.gd$
 example.ge	^http://example.ge$
 example.gf	^http://example.gf$
@@ -480,7 +481,7 @@ example.pg	^http://example.pg$
 example.ph	^http://example.ph$
 example.pk	^http://example.pk$
 example.pl	^http://example.pl$
-example.pm	^http://example.pm$
+example.pm	!^http://example.pm$
 example.pn	^http://example.pn$
 example.pr	^http://example.pr$
 example.pro	^http://example.pro$
@@ -502,12 +503,12 @@ example.se	^http://example.se$
 example.sg	^http://example.sg$
 example.sh	^http://example.sh$
 example.si	^http://example.si$
-example.sj	^http://example.sj$
+example.sj	!^http://example.sj$
 example.sk	^http://example.sk$
 example.sl	^http://example.sl$
 example.sm	^http://example.sm$
 example.sn	^http://example.sn$
-example.so	^http://example.so$
+example.so	!^http://example.so$
 example.sr	^http://example.sr$
 example.st	^http://example.st$
 example.su	^http://example.su$
@@ -536,7 +537,7 @@ example.tz	^http://example.tz$
 example.ua	^http://example.ua$
 example.ug	^http://example.ug$
 example.uk	^http://example.uk$
-example.um	^http://example.um$
+example.um	!^http://example.um$
 example.us	^http://example.us$
 example.uy	^http://example.uy$
 example.uz	^http://example.uz$
@@ -550,7 +551,7 @@ example.vu	^http://example.vu$
 example.wf	^http://example.wf$
 example.ws	^http://example.ws$
 example.ye	^http://example.ye$
-example.yt	^http://example.yt$
+example.yt	!^http://example.yt$
 example.yu	^http://example.yu$
 example.za	^http://example.za$
 example.zm	^http://example.zm$
@@ -598,7 +599,7 @@ www.example.bo	^http://www.example.bo$
 www.example.br	^http://www.example.br$
 www.example.bs	^http://www.example.bs$
 www.example.bt	^http://www.example.bt$
-www.example.bv	^http://www.example.bv$
+www.example.bv	!^http://www.example.bv$
 www.example.bw	^http://www.example.bw$
 www.example.by	^http://www.example.by$
 www.example.bz	^http://www.example.bz$
@@ -644,7 +645,7 @@ www.example.fm	^http://www.example.fm$
 www.example.fo	^http://www.example.fo$
 www.example.fr	^http://www.example.fr$
 www.example.ga	^http://www.example.ga$
-www.example.gb	^http://www.example.gb$
+www.example.gb	!^http://www.example.gb$
 www.example.gd	^http://www.example.gd$
 www.example.ge	^http://www.example.ge$
 www.example.gf	^http://www.example.gf$
@@ -756,7 +757,7 @@ www.example.pg	^http://www.example.pg$
 www.example.ph	^http://www.example.ph$
 www.example.pk	^http://www.example.pk$
 www.example.pl	^http://www.example.pl$
-www.example.pm	^http://www.example.pm$
+www.example.pm	!^http://www.example.pm$
 www.example.pn	^http://www.example.pn$
 www.example.pr	^http://www.example.pr$
 www.example.pro	^http://www.example.pro$
@@ -778,12 +779,12 @@ www.example.se	^http://www.example.se$
 www.example.sg	^http://www.example.sg$
 www.example.sh	^http://www.example.sh$
 www.example.si	^http://www.example.si$
-www.example.sj	^http://www.example.sj$
+www.example.sj	!^http://www.example.sj$
 www.example.sk	^http://www.example.sk$
 www.example.sl	^http://www.example.sl$
 www.example.sm	^http://www.example.sm$
 www.example.sn	^http://www.example.sn$
-www.example.so	^http://www.example.so$
+www.example.so	!^http://www.example.so$
 www.example.sr	^http://www.example.sr$
 www.example.st	^http://www.example.st$
 www.example.su	^http://www.example.su$
@@ -812,7 +813,7 @@ www.example.tz	^http://www.example.tz$
 www.example.ua	^http://www.example.ua$
 www.example.ug	^http://www.example.ug$
 www.example.uk	^http://www.example.uk$
-www.example.um	^http://www.example.um$
+www.example.um	!^http://www.example.um$
 www.example.us	^http://www.example.us$
 www.example.uy	^http://www.example.uy$
 www.example.uz	^http://www.example.uz$
@@ -826,7 +827,7 @@ www.example.vu	^http://www.example.vu$
 www.example.wf	^http://www.example.wf$
 www.example.ws	^http://www.example.ws$
 www.example.ye	^http://www.example.ye$
-www.example.yt	^http://www.example.yt$
+www.example.yt	!^http://www.example.yt$
 www.example.yu	^http://www.example.yu$
 www.example.za	^http://www.example.za$
 www.example.zm	^http://www.example.zm$
