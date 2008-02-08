@@ -31,28 +31,22 @@ use vars qw (
 
 # The list of currently-valid TLDs for the DNS system.
 #
-# http://www.iana.org/cctld/cctld-whois.htm
-# "su" Extra from http://www.iana.org/root-whois/
-# http://www.iana.org/gtld/gtld.htm
-# http://www.iana.org/arpa-dom/
+# http://data.iana.org/TLD/tlds-alpha-by-domain.txt
+# Version 2008020601, Last Updated Thu Feb  7 09:07:00 2008 UTC
 foreach (qw/
-  ac ad ae af ag ai al am an ao aq ar as at au aw az ax ba bb bd be bf bg bh bi 
-  bj bm bn bo br bs bt bv bw by bz ca cc cd cf cg ch ci ck cl cm cn co cr cs cu 
-  cv cx cy cz de dj dk dm do dz ec ee eg eh er es et fi fj fk fm fo fr ga gb gd 
-  ge gf gg gh gi gl gm gn gp gq gr gs gt gu gw gy hk hm hn hr ht hu id ie il im 
-  in io iq ir is it je jm jo jp ke kg kh ki km kn kp kr kw ky kz la lb lc li lk 
-  lr ls lt lu lv ly ma mc md mg mh mk ml mm mn mo mp mq mr ms mt mu mv mw mx my 
-  mz na nc ne nf ng ni nl no np nr nu nz om pa pe pf pg ph pk pl pm pn pr ps pt 
-  pw py qa re ro ru rw sa sb sc sd se sg sh si sj sk sl sm sn so sr st sv sy sz 
-  tc td tf tg th tj tk tl tm tn to tp tr tt tv tw tz ua ug uk um us uy uz va vc 
-  ve vg vi vn vu wf ws ye yt yu za zm zw 
-  su
-  aero biz com coop info museum name net org pro gov edu mil int
-  arpa
-  eu
-  jobs travel
-  xxx
-  mobi asia cat tel
+  ac ad ae aero af ag ai al am an ao aq ar arpa as asia at au aw ax az
+  ba bb bd be bf bg bh bi biz bj bm bn bo br bs bt bv bw by bz ca cat cc
+  cd cf cg ch ci ck cl cm cn co com coop cr cu cv cx cy cz de dj dk dm
+  do dz ec edu ee eg er es et eu fi fj fk fm fo fr ga gb gd ge gf gg gh
+  gi gl gm gn gov gp gq gr gs gt gu gw gy hk hm hn hr ht hu id ie il im
+  in info int io iq ir is it je jm jo jobs jp ke kg kh ki km kn kp kr kw
+  ky kz la lb lc li lk lr ls lt lu lv ly ma mc md me mg mh mil mk ml mm
+  mn mo mobi mp mq mr ms mt mu museum mv mw mx my mz na name nc ne net
+  nf ng ni nl no np nr nu nz om org pa pe pf pg ph pk pl pm pn pr pro ps
+  pt pw py qa re ro rs ru rw sa sb sc sd se sg sh si sj sk sl sm sn so
+  sr st su sv sy sz tc td tel tf tg th tj tk tl tm tn to tp tr travel tt
+  tv tw tz ua ug uk um us uy uz va vc ve vg vi vn vu wf ws ye yt yu za
+  zm zw
   /) { 
   $VALID_TLDS{$_} = 1;
 }
