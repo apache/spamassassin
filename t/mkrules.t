@@ -2,7 +2,7 @@
 
 use lib '.'; use lib 't';
 use SATest; sa_t_init("mkrules");
-use Test; BEGIN { plan tests => 89 };
+use Test; BEGIN { plan tests => 97 };
 use File::Copy;
 use File::Path;
 
@@ -391,6 +391,40 @@ write_file("$tdir/rulesrc/sandbox/foo/20_bbb.cf", [
 
 ok (mkrun ("--src $tdir/rulesrc --out $tdir/rules --manifest $tdir/MANIFEST --manifestskip $tdir/MANIFEST.SKIP --active $tdir/rules/active.list 2>&1", \&patterns_run_cb));
 checkfile("$tdir/rules/72_active.cf", \&patterns_run_cb);
+ok ok_all_patterns();
+save_tdir();
+
+# ---------------------------------------------------------------------------
+print " nested conditionals\n\n";
+
+%patterns = (
+  '72_active.cf: WARNING: not listed in manifest file' => manif_found,
+  "body GOOD /foo/"   => rule_line_1,
+  "describe GOOD desc_found"  => rule_line_2,
+  "ifplugin Mail::SpamAssassin::Plugin::DKIM" => ifplugin,
+  "if (version >= 3.002000)" => ifversion,
+);
+%anti_patterns = (
+  "describe T_GOOD desc_found"  => rule_line_2,
+);
+
+mkpath ([ "$tdir/rulesrc/sandbox/foo", "$tdir/rules" ]);
+
+write_file("$tdir/MANIFEST", [ ]);
+write_file("$tdir/MANIFEST.SKIP", [ "foo2\n" ]);
+write_file("$tdir/rules/active.list", [ "GOOD\n" ]);
+write_file("$tdir/rulesrc/sandbox/foo/20_foo.cf", [
+  "ifplugin Mail::SpamAssassin::Plugin::DKIM\n",
+  "if (version >= 3.002000)\n",
+  "body GOOD /foo/\n",
+  "describe GOOD desc_found\n",
+  "endif\n",
+  "endif\n",
+]);
+
+ok (mkrun ("--src $tdir/rulesrc --out $tdir/rules --manifest $tdir/MANIFEST --manifestskip $tdir/MANIFEST.SKIP --active $tdir/rules/active.list 2>&1", \&patterns_run_cb));
+checkfile("$tdir/rules/72_active.cf", \&patterns_run_cb);
+checkfile("$tdir/rules/70_sandbox.cf", \&patterns_run_cb);
 ok ok_all_patterns();
 save_tdir();
 
