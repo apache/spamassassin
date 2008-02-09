@@ -60,10 +60,10 @@ foreach (qw/
 #  perl -e '$/=undef; $_=<>; foreach(split) { ($a,$b) = split(/\./, $_, 2); $t{$b}->{$_}=1; } foreach (sort keys %t) { print "  ",join(" ", sort keys %{$t{$_}}),"\n" }'
 #
 # http://www.neustar.us/policies/docs/rfc_1480.txt
-# data from http://spamcheck.freeapp.net/two-level-tlds , in turn from
-# http://www.bestregistrar.com/help/ccTLD.htm
-# http://www.hkdnr.net.hk/instructions/new_domain.html
-# bug 5677
+# data originally from http://spamcheck.freeapp.net/two-level-tlds
+# The freeapp.net site now says that information on the site is obsolete
+# See discussion and sources in comments of bug 5677
+# updated as per bug 5815
 foreach(qw/
 
   com.ac edu.ac gov.ac mil.ac net.ac org.ac
@@ -203,6 +203,7 @@ foreach(qw/
   com.qa edu.qa gov.qa net.qa org.qa
   asso.re com.re nom.re
   arts.ro com.ro firm.ro info.ro nom.ro nt.ro org.ro rec.ro store.ro tm.ro www.ro
+  ac.rs co.rs edu.rs gov.rs in.rs org.rs
   ac.ru adygeya.ru altai.ru amur.ru amursk.ru arkhangelsk.ru astrakhan.ru baikal.ru bashkiria.ru belgorod.ru bir.ru bryansk.ru buryatia.ru cbg.ru chel.ru chelyabinsk.ru chita.ru chukotka.ru chuvashia.ru cmw.ru com.ru dagestan.ru dudinka.ru e-burg.ru edu.ru fareast.ru gov.ru grozny.ru int.ru irkutsk.ru ivanovo.ru izhevsk.ru jamal.ru jar.ru joshkar-ola.ru k-uralsk.ru kalmykia.ru kaluga.ru kamchatka.ru karelia.ru kazan.ru kchr.ru kemerovo.ru khabarovsk.ru khakassia.ru khv.ru kirov.ru kms.ru koenig.ru komi.ru kostroma.ru krasnoyarsk.ru kuban.ru kurgan.ru kursk.ru kustanai.ru kuzbass.ru lipetsk.ru magadan.ru magnitka.ru mari-el.ru mari.ru marine.ru mil.ru mordovia.ru mosreg.ru msk.ru murmansk.ru mytis.ru nakhodka.ru nalchik.ru net.ru nkz.ru nnov.ru norilsk.ru nov.ru novosibirsk.ru nsk.ru omsk.ru orenburg.ru org.ru oryol.ru oskol.ru palana.ru penza.ru perm.ru pp.ru pskov.ru ptz.ru pyatigorsk.ru rnd.ru rubtsovsk.ru ryazan.ru sakhalin.ru samara.ru saratov.ru simbirsk.ru smolensk.ru snz.ru spb.ru stavropol.ru stv.ru surgut.ru syzran.ru tambov.ru tatarstan.ru test.ru tom.ru tomsk.ru tsaritsyn.ru tsk.ru tula.ru tuva.ru tver.ru tyumen.ru udm.ru udmurtia.ru ulan-ude.ru vdonsk.ru vladikavkaz.ru vladimir.ru vladivostok.ru volgograd.ru vologda.ru voronezh.ru vrn.ru vyatka.ru yakutia.ru yamal.ru yaroslavl.ru yekaterinburg.ru yuzhno-sakhalinsk.ru zgrad.ru
   ac.rw co.rw com.rw edu.rw gouv.rw gov.rw int.rw mil.rw net.rw
   com.sa edu.sa gov.sa med.sa net.sa org.sa pub.sa sch.sa
