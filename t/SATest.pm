@@ -15,12 +15,11 @@ BEGIN {
   #   <http://www.mail-archive.com/dev%40perl.apache.org/msg05466.html>
   #  -- mss, 2004-01-13
   our $RUNNING_ON_WINDOWS = ($^O =~ /^(mswin|dos|os2)/oi);
-  our $SKIP_SPAMD_TESTS = $RUNNING_ON_WINDOWS; 
+  our $SKIP_SPAMD_TESTS = ($RUNNING_ON_WINDOWS || ($ENV{'SPAMD_HOST'} && ($ENV{'SPAMD_HOST'} ne '127.0.0.1')));
   our $NO_SPAMC_EXE;
   our $SKIP_SPAMC_TESTS;
   our $SSL_AVAILABLE;
   our $SKIP_SETUID_NOBODY_TESTS = 0;
-
 }
 
 # Set up for testing. Exports (as global vars):
@@ -30,12 +29,6 @@ BEGIN {
 #
 sub sa_t_init {
   my $tname = shift;
-
-  # optimisation -- don't setup spamd test parameters unless we're
-  # called "spamd_something" or "spamc_foo"
-  if ($tname !~ /spam[cd]/) {
-    $NO_SPAMD_REQUIRED = 1;
-  }
 
   if ($config{PERL_PATH}) {
     $perl_path = $config{PERL_PATH};
@@ -63,10 +56,20 @@ sub sa_t_init {
   $salearn = $ENV{'SALEARN_SCRIPT'};
   $salearn ||= "$perl_cmd ../sa-learn.raw";
 
+  $spamdlocalhost = $ENV{'SPAMD_LOCALHOST'};
+  $spamdlocalhost ||= '127.0.0.1';
   $spamdhost = $ENV{'SPAMD_HOST'};
-  $spamdhost ||= "127.0.0.1";
+  $spamdhost ||= $spamdlocalhost;
   $spamdport = $ENV{'SPAMD_PORT'};
   $spamdport ||= probably_unused_spamd_port();
+
+  # optimisation -- don't setup spamd test parameters unless we're
+  # not skipping all spamd tests and this particular test is called
+  # called "spamd_something" or "spamc_foo"
+  # We still run spamc tests when there is an external SPAMD_HOST, but don't have to set up the spamd parameters for it
+  if ($SKIP_SPAMD_TESTS or ($tname !~ /spam[cd]/)) {
+    $NO_SPAMD_REQUIRED = 1;
+  }
 
   $spamd_cf_args = "-C log/test_rules_copy";
   $spamd_localrules_args = " --siteconfigpath log/localrules.tmp";
@@ -415,8 +418,8 @@ sub recreate_outputdir_tmp {
 
 # out: $spamd_stderr
 sub start_spamd {
-  die "NO_SPAMD_REQUIRED in start_spamd! oops" if $NO_SPAMD_REQUIRED;
   return if $SKIP_SPAMD_TESTS;
+  die "NO_SPAMD_REQUIRED in start_spamd! oops" if $NO_SPAMD_REQUIRED;
 
   my $spamd_extra_args = shift;
 
@@ -453,7 +456,7 @@ sub start_spamd {
   }
   if ($spamd_extra_args !~ /(?:--socketpath)/) {
     push(@spamd_args,
-      qq{-A}, $spamdhost,
+      qq{-A}, $spamdhost, qq(-i), $spamdhost
     );
   }
 
@@ -536,8 +539,8 @@ sub start_spamd {
 }
 
 sub stop_spamd {
-  die "NO_SPAMD_REQUIRED in stop_spamd! oops" if $NO_SPAMD_REQUIRED;
   return 0 if ( defined($spamd_already_killed) || $SKIP_SPAMD_TESTS);
+  die "NO_SPAMD_REQUIRED in stop_spamd! oops" if $NO_SPAMD_REQUIRED;
 
   $spamd_pid ||= 0;
   if ( $spamd_pid <= 1) {
