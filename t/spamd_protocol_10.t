@@ -55,7 +55,7 @@ sub run_symbols {
   my($data, $proto10) = @_;
 
   $socket = new IO::Socket::INET(
-                  PeerAddr => '127.0.0.1',
+                  PeerAddr => $spamdhost,
                   PeerPort => $spamdport,
                   Proto    => "tcp",
                   Type     => SOCK_STREAM
