@@ -534,6 +534,10 @@ sub kill_handler {
     $mail->finish();      # bug 5626: remove temp files etc.
     $mail = undef;
   }
+  if (defined $tempfile) {      # bug 5557: additional paranoia about tmpfiles
+    unlink $tempfile;
+    $tempfile = undef;
+  }
   exit 0;
 }
 
