@@ -1316,7 +1316,9 @@ sub format_overlap {
           if ($rule =~ /^(?:[a-z]{1,6}|\d+\%)$/) {    # "of", "hits" etc.
             $str .= $rule." ";
           } else {
-            $str .= $self->gen_rule_link($rule,$rule)." ";
+            my $post = '';
+            $rule =~ s/(\;\s*)$/ and $post = $1;
+            $str .= $self->gen_rule_link($rule,$rule).$post." ";
           }
         }
         $str;
