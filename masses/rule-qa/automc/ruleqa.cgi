@@ -1317,7 +1317,7 @@ sub format_overlap {
             $str .= $rule." ";
           } else {
             my $post = '';
-            $rule =~ s/(\;\s*)$/ and $post = $1;
+            $rule =~ s/(\;\s*)$// and $post = $1;
             $str .= $self->gen_rule_link($rule,$rule).$post." ";
           }
         }
