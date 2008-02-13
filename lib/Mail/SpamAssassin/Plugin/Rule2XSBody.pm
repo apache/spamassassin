@@ -232,8 +232,7 @@ sub run_body_fast_scan {
         $alreadydone{$ruleandflags} = undef;
 
         my $rulename = $ruleandflags;
-        $rulename =~ s/,\[(.*?)\]$//;
-        my $flags = $1;
+        my $flags = ($rulename =~ s/,\[(.*?)\]$//)?$1:'';
 
         # ignore 0-scored rules, of course
         next unless $scoresptr->{$rulename};
