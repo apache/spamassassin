@@ -8,7 +8,7 @@ use constant HAS_NET_DNS => eval { require Net::DNS; };
 # bug 3806:
 # Do not run this test with version of Sys::Hostname::Long older than 1.4
 # on non-Linux unices as root, due to a bug in Sys::Hostname::Long
-# (which is used by Net::DNS and by Mail::SPF::Query)
+# (which is used by Net::DNS)
 use constant IS_LINUX   => $^O eq 'linux';
 use constant IS_WINDOWS => ($^O =~ /^(mswin|dos|os2)/oi);
 use constant AM_ROOT    => $< == 0;
