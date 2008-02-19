@@ -89,6 +89,9 @@ usage: mass-check [options] target ...
                 and/or add to their local caches
   --cs_cachedir=dir
                 write cache info for --cs_cache in this directory tree
+  --cs_max_tries=N
+                maximum number of attempts to have a client scan a message
+                defaults to 3
 
   log options
   -o            write all logs to stdout
@@ -155,7 +158,7 @@ use vars qw($opt_c $opt_p $opt_f $opt_j $opt_n $opt_o $opt_all $opt_bayes
             $opt_cs_ssl $opt_run_post_scan $opt_cs_verbose %client_caches
             %server_caches @cache_tmp_files %min_other_caches
             %unique_cache_completed $opt_cs_schedule_cache $opt_cs_cache
-            $opt_cs_cachedir
+            $opt_cs_cachedir $opt_cs_max_tries
 	    $tmpfd %rules %reuse %orig_conf %reuse_conf $reuse_rules_loaded_p);
 
 use FindBin;
@@ -217,7 +220,7 @@ GetOptions("c=s", "p=s", "f=s", "j=i", "n", "o", "all", "bayes", "debug:s",
            "cachedir=s", "noisy", "scanprob=f",
 	   "server=s", "cs_max=i", "cs_timeout=i", "cs_conn_retries=i",
 	   "cs_paths_only", "client=s", "cs_ssl", "cs_verbose",
-           "cs_schedule_cache", "cs_cache", "cs_cachedir=s",
+           "cs_schedule_cache", "cs_cache", "cs_cachedir=s", "cs_max_tries=i",
 	   "before=s" => \&deal_with_before_after,
 	   "after=s" => \&deal_with_before_after,
            'cf=s' => \@{$opt_cf},
@@ -1355,19 +1358,34 @@ sub generate_messages {
     # the timeout value, the rest will be too, so stop looking.
     last if ($_ > $tooold);
 
+    # messages that might be eligible for retry
+    my @toretry = ();
+
     # how many messages do we still need to fulfill the request?
     my $wanted = $msgs - @tosend;
 
     if (@{$timestamps->{$_}} > $wanted) {
       # there are more entries in the timestamp list than we want, so just
       # grab that many off the list.
-      push(@tosend, splice @{$timestamps->{$_}}, 0, $wanted);
+      push(@toretry, splice @{$timestamps->{$_}}, 0, $wanted);
     }
     else {
       # there are just enough, or not enough entries on the timestamp list to
       # satisfy our request, so take them all and we'll loop around.
-      push(@tosend, @{$timestamps->{$_}});
+      push(@toretry, @{$timestamps->{$_}});
       delete $timestamps->{$_};
+    }
+
+    # limit retries
+    foreach my $num (@toretry) {
+      if ($msgsout->{$num}->{'count'} < $opt_cs_max_tries) {
+        $msgsout->{$num}->{'count'}++;
+        push @tosend, $num;
+      } else {
+        warn "skipping message num $num after $opt_cs_max_tries attempts, index: ".
+          (Mail::SpamAssassin::ArchiveIterator::_index_unpack($msgsout->{$num}->{'data'}))[3]."\n";
+        delete $msgsout->{$num};
+      }
     }
 
     # Ok, we have enough messages so we can stop now.
@@ -1393,6 +1411,7 @@ sub generate_messages {
         # appropriately, then add the new number to the queue.
         my $num = ++$msgsout->{'curnum'};
         $msgsout->{$num}->{'data'} = $msg;
+        $msgsout->{$num}->{'count'}++;
         push(@tosend, $num);
       }
     }
@@ -1418,6 +1437,7 @@ sub generate_messages {
         # appropriately, then add the new number to the queue.
         my $num = ++$msgsout->{'curnum'};
         $msgsout->{$num}->{'data'} = $server_caches{'to_process'}{$path};
+        $msgsout->{$num}->{'count'}++;
         push(@tosend, [ $num, 1 ]);
         delete $server_caches{'to_process'}{$path};
         delete $server_caches{'cache_count'}{$path};
@@ -1435,6 +1455,7 @@ sub generate_messages {
         # appropriately, then add the new number to the queue.
         my $num = ++$msgsout->{'curnum'};
         $msgsout->{$num}->{'data'} = $server_caches{'to_process'}{$path};
+        $msgsout->{$num}->{'count'}++;
         push(@tosend, [ $num, 0 ]);
         delete $server_caches{'to_process'}{$path};
         delete $server_caches{'cache_count'}{$path};
@@ -1449,6 +1470,7 @@ sub generate_messages {
         # appropriately, then add the new number to the queue.
         my $num = ++$msgsout->{'curnum'};
         $msgsout->{$num}->{'data'} = $server_caches{'to_process'}{$path};
+        $msgsout->{$num}->{'count'}++;
         push(@tosend, [ $num, 1 ]);
         delete $server_caches{'to_process'}{$path};
         delete $server_caches{'cache_count'}{$path};
@@ -1473,6 +1495,7 @@ sub generate_messages {
         # appropriately, then add the new number to the queue.
         my $num = ++$msgsout->{'curnum'};
         $msgsout->{$num}->{'data'} = $server_caches{'to_process'}{$path};
+        $msgsout->{$num}->{'count'}++;
         push(@tosend, [ $num, 0 ]);
         delete $server_caches{'to_process'}{$path};
         delete $server_caches{'cache_count'}{$path};
@@ -1913,6 +1936,7 @@ sub send_line {
 sub server_mode {
   $opt_cs_max ||= 1000;
   $opt_cs_timeout ||= 60 * 5;
+  $opt_cs_max_tries ||= 3;
 
   # IO::Socket::SSL isn't that smart
   $opt_server =~ s/:(\d+)$//;
