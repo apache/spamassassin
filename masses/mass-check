@@ -531,40 +531,31 @@ if (!$opt_client) {
     my ($dbpath, $dbfd) = Mail::SpamAssassin::Util::secure_tmpfile();
     close $dbfd;
     unlink $dbpath;
-    push @cache_tmp_files, $dbpath;
+    push @cache_tmp_files, $dbpath.'.pag';
+    push @cache_tmp_files, $dbpath.'.dir';
 
-    {
-      no strict; # SDBM_File is optional, avoid strict subs warnings
-      tie %{$server_caches{'to_process'}}, "SDBM_File", $dbpath,
-        O_RDWR|O_CREAT, 0600 ||
-          die "Cannot tie hash to file $dbpath: $!";
-    }
+    tie %{$server_caches{'to_process'}}, "SDBM_File", $dbpath,
+      O_RDWR|O_CREAT, 0600 || die "Cannot tie hash to file $dbpath: $!";
 
     # get a temp file for the server DB of messages that are not cached anywhere
     ($dbpath, $dbfd) = Mail::SpamAssassin::Util::secure_tmpfile();
     close $dbfd;
     unlink $dbpath;
-    push @cache_tmp_files, $dbpath;
+    push @cache_tmp_files, $dbpath.'.pag';
+    push @cache_tmp_files, $dbpath.'.dir';
   
-    {
-      no strict; # SDBM_File is optional, avoid strict subs warnings
-      tie %{$server_caches{'not_cached'}}, "SDBM_File", $dbpath,
-        O_RDWR|O_CREAT, 0600 ||
-          die "Cannot tie hash to file $dbpath: $!";
-    }
+    tie %{$server_caches{'not_cached'}}, "SDBM_File", $dbpath,
+      O_RDWR|O_CREAT, 0600 || die "Cannot tie hash to file $dbpath: $!";
 
     # get a temp file for the server database of cache hit counts per message
     ($dbpath, $dbfd) = Mail::SpamAssassin::Util::secure_tmpfile();
     close $dbfd;
     unlink $dbpath;
-    push @cache_tmp_files, $dbpath;
+    push @cache_tmp_files, $dbpath.'.pag';
+    push @cache_tmp_files, $dbpath.'.dir';
 
-    {
-      no strict; # SDBM_File is optional, avoid strict subs warnings
-      tie %{$server_caches{'cache_count'}}, "SDBM_File", $dbpath,
-        O_RDWR|O_CREAT, 0600 ||
-          die "Cannot tie hash to file $dbpath: $!";
-    }
+    tie %{$server_caches{'cache_count'}}, "SDBM_File", $dbpath,
+      O_RDWR|O_CREAT, 0600 || die "Cannot tie hash to file $dbpath: $!";
 
     # dump the server's list of messages to process to the DB_HASHes
     while (my $msg = read_line($tmpfd)) {
@@ -1271,14 +1262,11 @@ sub handle_http_request {
             my ($dbpath, $dbfd) = Mail::SpamAssassin::Util::secure_tmpfile();
             close $dbfd;
             unlink $dbpath;
-            push @cache_tmp_files, $dbpath;
+            push @cache_tmp_files, $dbpath.'.pag';
+            push @cache_tmp_files, $dbpath.'.dir';
 
-            {
-              no strict; # SDBM_File is optional, avoid strict subs warnings
-              tie %{$client_caches{$headers->{'client-id'}}}, "SDBM_File", $dbpath,
-                O_RDWR|O_CREAT, 0600 ||
-                  die "Cannot tie hash to file $dbpath: $!\n";
-            }
+            tie %{$client_caches{$headers->{'client-id'}}}, "SDBM_File", $dbpath,
+              O_RDWR|O_CREAT, 0600 || die "Cannot tie hash to file $dbpath: $!\n";
 
             # dump the client's list of cached message paths to the DB_HASH
             my $client_cache = 0;
