@@ -109,7 +109,7 @@ meta FORGED_MUA_EUDORA          (__EUDORA_MUA && !__EUDORA_MSGID && !__UNUSABLE_
 describe FORGED_MUA_EUDORA	Forged mail pretending to be from Eudora
   
 # From private mail with developers.  Some top tips here!
-header __THEBAT_MUA		X-Mailer =~ /The Bat!/
+header __THEBAT_MUA		X-Mailer =~ /^The Bat!/
 header __THEBAT_MUA_V1		X-Mailer =~ /^The Bat! \(v1\./
 #header __THEBAT_MUA_V2		X-Mailer =~ /^The Bat! \(v2\./
 #header __THEBAT_MUA_V3		X-Mailer =~ /^The Bat! \(v3\./
