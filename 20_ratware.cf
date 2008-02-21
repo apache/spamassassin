@@ -180,7 +180,7 @@ meta __USER_AGENT_APPLEMAIL	!__CTYPE_HTML && __X_MAILER_APPLEMAIL && (__MSGID_AP
 # some useful meta rule sub-elements
 header __CTYPE_HTML		Content-Type =~ /text\/html/i
 header __ANY_IMS_MUA		X-Mailer =~ /^Internet Mail Service\b/
-header __ANY_OUTLOOK_MUA	X-Mailer =~ /^Microsoft Outlook\b/
+header __ANY_OUTLOOK_MUA	X-Mailer =~ /^Microsoft (?:Office )?Outlook\b/
 
 header __ANY_QUALCOMM_MUA       X-Mailer =~ /\bQUALCOMM\b/
 meta FORGED_QUALCOMM_TAGS	(__ANY_QUALCOMM_MUA && __MIME_HTML && !__TAG_EXISTS_HTML)
