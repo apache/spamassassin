@@ -1098,7 +1098,8 @@ sub get_decoded_body_text_array {
     next if ($parts[$pt]->{'type'} eq 'text/calendar');
 
     push(@{$self->{text_decoded}}, "\n") if ( @{$self->{text_decoded}} );
-    push(@{$self->{text_decoded}}, $parts[$pt]->decode());
+    push(@{$self->{text_decoded}},
+         split_into_array_of_short_paragraphs($parts[$pt]->decode()));
   }
 
   return $self->{text_decoded};
@@ -1118,6 +1119,28 @@ sub split_into_array_of_short_lines {
     }
     push (@result, $line);
   }
+  @result;
+}
+
+# ---------------------------------------------------------------------------
+
+# split a text into array of paragraphs of sizes between
+# $chunk_size and 2 * $chunk_size, returning the resulting array
+
+sub split_into_array_of_short_paragraphs {
+  my @result;
+  my $chunk_size = 1024;
+  my $text_l = length($_[0]);
+  my($j,$ofs);
+  for ($ofs = 0;  $text_l - $ofs > 2 * $chunk_size;  $ofs = $j+1) {
+    $j = index($_[0], "\n", $ofs+$chunk_size);
+    if ($j < 0) {
+      $j = index($_[0], " ", $ofs+$chunk_size);
+      if ($j < 0) { $j = $ofs+$chunk_size }
+    }
+    push(@result, substr($_[0], $ofs, $j-$ofs+1));
+  }
+  push(@result, substr($_[0], $ofs))  if $ofs < $text_l;
   @result;
 }
 

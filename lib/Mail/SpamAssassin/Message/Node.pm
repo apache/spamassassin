@@ -333,7 +333,6 @@ sub decode {
         $self->{'decoded'} = Mail::SpamAssassin::Util::base64_decode($raw);
       }
 
-      # If it's a type text or message, split it into an array of lines
       if ( $self->{'type'} =~ m@^(?:text|message)\b/@i ) {
         $self->{'decoded'} =~ s/\015\012/\012/gs;
       }
