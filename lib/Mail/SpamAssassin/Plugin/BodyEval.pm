@@ -241,27 +241,34 @@ sub _check_stock_info {
   my ($type, $rnd) = $part->rendered();
   return unless $type;
 
-  foreach ( $rnd =~ /^\s*([^:\s][^:\n]{2,29})\s*:\s*\S/mg ) {
-    my $str = lc $_;
-    $str =~ tr/a-z//cd;
-    #$str =~ s/([a-z])0([a-z])/$1o$2/g;
+  # bug 5644,5717: avoid pathological cases where a regexp takes massive amount
+  # of time by applying the regexp to limited-size text chunks, one at a time
 
-    if ($str =~ /(
-      ^trad(?:e|ing)date|
-      company(?:name)?|
-      s\w?(?:t\w?o\w?c\w?k|y\w?m(?:\w?b\w?o\w?l)?)|
-      t(?:arget|icker)|
-      (?:opening|current)p(?:rice)?|
-      p(?:rojected|osition)|
-      expectations|
-      weeks?high|
-      marketperformance|
-      (?:year|week|month|day|price)(?:target|estimates?)|
-      sector|
-      r(?:ecommendation|ating)
-    )$/x) {
-      $hits{$1}++;
-      dbg("eval: stock info hit: $1");
+  foreach my $rnd_chunk (
+    Mail::SpamAssassin::Message::split_into_array_of_short_paragraphs($rnd))
+  {
+    foreach ( $rnd_chunk =~ /^\s*([^:\s][^:\n]{2,29})\s*:\s*\S/mg ) {
+      my $str = lc $_;
+      $str =~ tr/a-z//cd;
+      #$str =~ s/([a-z])0([a-z])/$1o$2/g;
+
+      if ($str =~ /(
+        ^trad(?:e|ing)date|
+        company(?:name)?|
+        s\w?(?:t\w?o\w?c\w?k|y\w?m(?:\w?b\w?o\w?l)?)|
+        t(?:arget|icker)|
+        (?:opening|current)p(?:rice)?|
+        p(?:rojected|osition)|
+        expectations|
+        weeks?high|
+        marketperformance|
+        (?:year|week|month|day|price)(?:target|estimates?)|
+        sector|
+        r(?:ecommendation|ating)
+      )$/x) {
+        $hits{$1}++;
+        dbg("eval: stock info hit: $1");
+      }
     }
   }
 
