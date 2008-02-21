@@ -487,12 +487,10 @@ sub start_spamd {
                        qq{&},
                     );
 
-  # bug 5731: DEBUG instrumentation to trace spamd processes on vmsa, to try to isolate
-  # what's causing DB_File to hang.  TODO: remove once bug is fixed
-  if (-f "/home/jm/capture_spamd_straces") {
-    # $spamd_cmd = "ltrace -ttt -fo log/d.$testname/spamd.strace.${Test::ntest} $spamd_cmd";
-    $spamd_cmd = "strace -ttt -fo log/d.$testname/spamd.strace.${Test::ntest} $spamd_cmd";
-  }
+  # DEBUG instrumentation to trace spamd processes. See bug 5731 for history
+  # if (-f "/home/jm/capture_spamd_straces") {
+  # $spamd_cmd = "strace -ttt -fo log/d.$testname/spamd.strace.${Test::ntest} $spamd_cmd";
+  # }
 
   unlink ($spamd_stdout, $spamd_stderr, $spamd_stdlog);
   print ("\t${spamd_cmd}\n");
