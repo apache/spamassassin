@@ -401,8 +401,8 @@ print " nested conditionals\n\n";
   '72_active.cf: WARNING: not listed in manifest file' => manif_found,
   "body GOOD /foo/"   => rule_line_1,
   "describe GOOD desc_found"  => rule_line_2,
-  "ifplugin Mail::SpamAssassin::Plugin::DKIM" => ifplugin,
-  "if (version >= 3.002000)" => ifversion,
+  "ifplugin Mail::SpamAssassin::Plugin::DKIM" => 'ifplugin',
+  "if (version >= 3.002000)" => 'ifversion',
 );
 %anti_patterns = (
   "describe T_GOOD desc_found"  => rule_line_2,
