@@ -156,7 +156,7 @@ use Mail::SPF::Query instead.
     type => $Mail::SpamAssassin::Conf::CONF_TYPE_BOOL,
   });
 
-=item do_not_use_mail_spq_query (0|1)	(default: 0)
+=item do_not_use_mail_spf_query (0|1)	(default: 0)
 
 As above, but instead stop the plugin from trying to use Mail::SPF::Query and
 cause it to only try to use Mail::SPF.
