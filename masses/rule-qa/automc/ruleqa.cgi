@@ -522,8 +522,8 @@ sub show_default_view {
 
     # urgh.  this could have been cleaner if it wasn't for the tricky SVN external
     my $srchref = "http://svn.apache.org/viewvc/spamassassin/trunk/$src";
-    if ($src =~ s{^rulesrc/}{}) {
-      $srchref = "http://svn.apache.org/viewvc/spamassassin/rules/trunk/$src";
+    if ($src =~ m{^rulesrc/(.*)$}) {
+      $srchref = "http://svn.apache.org/viewvc/spamassassin/rules/trunk/$1";
     }
 
     # ensure it's <pre>-safe
