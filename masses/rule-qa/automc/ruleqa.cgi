@@ -535,6 +535,7 @@ sub show_default_view {
     print qq{
 
       <h3 class='freqs_title'>Source</h3>
+      <br clear="all"/>
       <p class='showfreqslink'><a
         <a name='$titleplinknew' href='$titleplinkhref' class='title_permalink'>(#)</a>
       </p>
