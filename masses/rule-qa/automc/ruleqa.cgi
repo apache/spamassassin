@@ -521,19 +521,26 @@ sub show_default_view {
     my $src = eval { $md->{rulemds}->{$self->{rule}}->{src} } || '(not found)';
 
     # urgh.  this could have been cleaner if it wasn't for the tricky SVN external
-    my $srchref = "http://svn.apache.org/viewvc/spamassassin/trunk/$src#rev$rev";
+    my $srchref = "http://svn.apache.org/viewvc/spamassassin/trunk/$src";
     if ($src =~ s{^rulesrc/}{}) {
-      $srchref = "http://svn.apache.org/viewvc/spamassassin/rules/trunk/$src#rev$rev";
+      $srchref = "http://svn.apache.org/viewvc/spamassassin/rules/trunk/$src";
     }
 
     # ensure it's <pre>-safe
     $code =~ s/<\/pre>/<\/DEFANGED_by_ruleqa.pre>/i;
 
+    my $titleplinknew = "source";
+    my $titleplinkhref = $self->gen_this_url()."#".$titleplinknew;
+
     print qq{
 
       <h3 class='freqs_title'>Source</h3>
+      <p class='showfreqslink'><a
+        <a name='$titleplinknew' href='$titleplinkhref' class='title_permalink'>(#)</a>
+      </p>
+
+      <p>From <a href="$srchref">$src</a>:</p>
       <pre>$code</pre>
-      <p>(from <a href="$srchref">$src</a>)</p>
 
     };
   }
