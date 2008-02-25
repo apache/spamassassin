@@ -26,10 +26,14 @@ sub usage {
   die "build/mkrules [--src srcdir] [--exit_on_no_src] [--out outputdir]\n";
 }
 
-my $RULE_KEYWORDS_RE = qr{
+my $RULE_DEFINE_KEYWORDS_RE = qr{
         header|rawbody|body|full|uri
-        |meta|mimeheader|describe|tflags
-        |reuse|score|urirhssub|uridnsbl
+        |meta|mimeheader|urirhssub|uridnsbl
+    }x;
+
+my $RULE_KEYWORDS_RE = qr{
+        ${RULE_DEFINE_KEYWORDS_RE}|
+        describe|tflags|reuse|score
     }x;
 
 use strict;
@@ -459,11 +463,9 @@ sub rule_file_compile {
       # note if we found the rule defn or not.  if we did not,
       # that means the rule was a code-tied rule, which should always
       # have its descriptions/scores/etc. published in "active".
-      if ($type =~ /^
-          (?:header|rawbody|body|full|uri|meta|mimeheader)
-        $/x)
-      {
+      if ($type =~ /^${RULE_DEFINE_KEYWORDS_RE}$/x) {
         $rules->{$name}->{found_definition} = 1;
+        $rules->{$name}->{code} = $orig;
       }
       elsif ($type eq 'tflags') {
         # userconf rules are always published in "active"
@@ -925,6 +927,7 @@ sub get_rulemetadata_string {
 
   my $mod = 0;
   my $srcfile = '';
+  my $code = '';
 
   if ($rules->{$rule}->{found_definition}) {
     $srcfile = $rules->{$rule}->{srcfile} || '';
@@ -934,6 +937,8 @@ sub get_rulemetadata_string {
         $mod = $s[9];
       }
     }
+    $code = $rules->{$rule}->{code} || '';
+    $code =~ s/\]\]>/\](defanged by mkrules)\]>/gs;     # ensure it's CDATA-safe
   }
 
   my $tf = $rules->{$rule}->{tflags} || '';
@@ -942,6 +947,7 @@ sub get_rulemetadata_string {
             "<name>$rule</name>".
             "<src>$srcfile</src>".
             "<srcmtime>$mod</srcmtime>".
+            "<code><![CDATA[$code]]></code>".
             "<tf>$tf</tf>".
           "</rulemetadata>\n";
 }

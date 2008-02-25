@@ -279,8 +279,6 @@ sub show_view {
   }
   else {
     print $self->{q}->header();
-
-    # $self->get_rule_metadata(428771);
     $self->show_default_view();
   }
 }
@@ -513,39 +511,63 @@ sub show_default_view {
        "-->\n";
   }
 
+  my $single_rule_displayed = ($self->{s}{detail} && !($self->{rules_all} || $self->{rules_grep}));
+
+  # only display code if it's a single rule page
+  if ($single_rule_displayed) {
+    my $rev = $self->get_rev_for_daterev($self->{daterev});
+    my $md = $self->get_rule_metadata($rev);
+    my $code = eval { $md->{rulemds}->{$self->{rule}}->{code} } || '(not found)';
+    my $src = eval { $md->{rulemds}->{$self->{rule}}->{src} } || '(not found)';
+
+    # urgh.  this could have been cleaner if it wasn't for the tricky SVN external
+    my $srchref = "http://svn.apache.org/viewvc/spamassassin/trunk/$src#rev$rev";
+    if ($src =~ s{^rulesrc/}{}) {
+      $srchref = "http://svn.apache.org/viewvc/spamassassin/rules/trunk/$src#rev$rev";
+    }
+
+    # ensure it's <pre>-safe
+    $code =~ s/<\/pre>/<\/DEFANGED_by_ruleqa.pre>/i;
+
+    print qq{
+
+      <h3 class='freqs_title'>Source</h3>
+      <pre>$code</pre>
+      <p>(from <a href="$srchref">$src</a>)</p>
+
+    };
+  }
+
   $self->show_all_sets_for_daterev($self->{daterev}, $self->{daterev});
 
-# don't show "graph" link unless only a single rule is being displayed
-  if ($self->{s}{detail} && !($self->{rules_all} || $self->{rules_grep}))
-  {
-    {
-      my $graph_on = qq{
+  # don't show "graph" link unless only a single rule is being displayed
+  if ($single_rule_displayed) {
+    my $graph_on = qq{
 
-        <p><a id="over_time_anchor"></a><a id="overtime" 
-          href="}.$self->gen_switch_url("s_g_over_time", "0").qq{#overtime"
-          >Hide Graph</a></p>
-        <img src="}.$self->gen_switch_url("graph", "over_time").qq{" 
-          width='800' height='815' />
+      <p><a id="over_time_anchor"></a><a id="overtime" 
+        href="}.$self->gen_switch_url("s_g_over_time", "0").qq{#overtime"
+        >Hide Graph</a></p>
+      <img src="}.$self->gen_switch_url("graph", "over_time").qq{" 
+        width='800' height='815' />
 
-      };
+    };
 
-      my $graph_off = qq{
+    my $graph_off = qq{
 
-        <p><a id="over_time_anchor"></a><a id="overtime" 
-          href="}.$self->gen_switch_url("s_g_over_time", "1").qq{#overtime"
-          >Show Graph</a></p>
+      <p><a id="over_time_anchor"></a><a id="overtime" 
+        href="}.$self->gen_switch_url("s_g_over_time", "1").qq{#overtime"
+        >Show Graph</a></p>
 
-      };
+    };
 
-      print qq{
+    print qq{
 
-        <h3 class='graph_title'>Graph, hit-rate over time</h3>
-        }.($self->{s}{g_over_time} ? $graph_on : $graph_off).qq{
+      <h3 class='graph_title'>Graph, hit-rate over time</h3>
+      }.($self->{s}{g_over_time} ? $graph_on : $graph_off).qq{
 
-        </ul>
+      </ul>
 
-      };
-    }
+    };
 
     my @parms = $self->get_params_except(qw(
             rule s_age s_overlap s_all s_detail
