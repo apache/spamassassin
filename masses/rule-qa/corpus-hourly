@@ -510,7 +510,7 @@ sub gen_class {
     # compress for certain classes
     if ($class eq "OVERLAP") {
       $fname =~ s/'//gs;
-      system ("gzip '$fname'"); 
+      system ("rm '$fname.gz'; gzip '$fname'"); 
       # takes care of keeping the original around so we don't have to
       if ($? >> 8 != 0) { warn "gzip '$fname' failed"; }
     }
