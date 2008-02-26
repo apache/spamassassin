@@ -974,8 +974,7 @@ sub get_freqs_for_rule {
       <th>RANK</th>
       <th>SCORE</th>
       <th>NAME</th>
-      <th>WHO</th>
-      <th>AGE</th>
+      <th>WHO/AGE</th>
     </tr>
 
   };
@@ -1054,7 +1053,7 @@ sub get_freqs_for_rule {
     else {
       $comment .= $self->rule_anchor($key,$rule);
       $comment .= "
-      <tr><td colspan=9>
+      <tr><td colspan=8>
         (no data found)
       </td></tr>
       ";
@@ -1094,8 +1093,7 @@ sub set_freqs_templates {
     <td>[% RANK %]</td>
     <td>[% SCORE %]</td>
     <td style='text-align: left'><a href="[% NAMEREF %]">[% NAME %]</a></td>
-    <td>[% USERNAME %]</td>
-    <td>[% AGE %]</td>
+    <td>[% USERNAME %][% AGE %]</td>
     <!--
       <rule><test>[% NAME %]</test><promo>[% PROMO %]</promo> <spc>[% SPAMPC %]</spc><hpc>[% HAMPC %]</hpc><so>[% SO %]</so> <detailhref esc='1'>[% NAMEREFENCD %]</detailhref></rule>
     -->
@@ -1106,7 +1104,7 @@ sub set_freqs_templates {
   $FREQS_LINE_TEXT_TEMPLATE =
        qq{[% MSECS %]  [% SPAMPC %]  [% HAMPC %]  }.
        qq{[% SO %]  [% RANK %]  [% SCORE %]  }.
-       qq{[% NAME %] [% USERNAME %] [% AGE %] }.
+       qq{[% NAME %] [% USERNAME %][% AGE %] }.
        "\n";
 
   $FREQS_EXTRA_TEMPLATE = qq{

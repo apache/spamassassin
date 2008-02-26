@@ -452,7 +452,6 @@ sub rule_file_compile {
       $rules->{$name}->{origname} = $origname;
       $rules->{$name}->{cond} ||= $current_conditional;
       $rules->{$name}->{text} .= $current_comments . $orig;
-      $rules->{$name}->{srcfile} = $f;
 
       # note if the conditional is a plugin reference, as we need to
       # ensure that "loadplugin" lines stay in the same place
@@ -465,6 +464,7 @@ sub rule_file_compile {
       # have its descriptions/scores/etc. published in "active".
       if ($type =~ /^${RULE_DEFINE_KEYWORDS_RE}$/x) {
         $rules->{$name}->{found_definition} = 1;
+        $rules->{$name}->{srcfile} = $f;
         $rules->{$name}->{code} = $orig;
       }
       elsif ($type eq 'tflags') {
@@ -686,15 +686,27 @@ sub read_output_file {
       $lang = $1;
     }
 
-    # right now, we only read tflags from output files
-    if (/^tflags\s+(\S+)\s+(.*)$/) {
-      my $name = $1;
-      my $val = $2;
-      $val =~ s/\s+/ /gs;
-      if ($rules->{$name}->{tflags}) {
-        $rules->{$name}->{tflags} .= ' '.$val;
-      } else {
-        $rules->{$name}->{tflags} = $val;
+    if (/^(${RULE_KEYWORDS_RE})\s+(\S+)\s+(.*)$/) {
+      # rule definitions
+      my $type = $1;
+      my $name = $2;
+      my $val = $3;
+
+      # note: we only want to do this if --rulemetadata is in use!
+      if (!$rules->{$name}) { $rules->{$name} = rule_entry_create(); }
+
+      if ($type eq 'tflags') {
+        $val =~ s/\s+/ /gs;
+        if ($rules->{$name}->{tflags}) {
+          $rules->{$name}->{tflags} .= ' '.$val;
+        } else {
+          $rules->{$name}->{tflags} = $val;
+        }
+      }
+
+      if ($type =~ /^${RULE_DEFINE_KEYWORDS_RE}$/x) {
+        $rules->{$name}->{srcfile} = $file;
+        $rules->{$name}->{code} = $orig;
       }
     }
   }
@@ -884,13 +896,13 @@ sub compile_output_files {
 
   # output the known rules that are not meta subrules.
   foreach my $rule (@rulenames) {
-    next if ($rule =~ /^__/);
+    $rulemd .= get_rulemetadata_string($rule);      # all metadata strings
 
+    next if ($rule =~ /^__/);
     my $pubfile = $rules->{$rule}->{output_file};
     my $text    = $rules->{$rule}->{output_text};
     next unless defined ($text);
 
-    $rulemd .= get_rulemetadata_string($rule);
     $output_file_text->{$pubfile} .= "##{ $rule\n".
                             $text.
                             "##} ".$rule."\n\n";
@@ -902,7 +914,6 @@ sub compile_output_files {
     my $pubfile = $rules->{$rule}->{output_file};
     my $text    = $rules->{$rule}->{output_text};
     next unless defined ($text);
-    $rulemd .= get_rulemetadata_string($rule);
     $output_file_text->{$pubfile} .= $text;
   }
 
@@ -928,20 +939,27 @@ sub get_rulemetadata_string {
   my $mod = 0;
   my $srcfile = '';
   my $code = '';
+  my $name = $rule;
 
-  if ($rules->{$rule}->{found_definition}) {
-    $srcfile = $rules->{$rule}->{srcfile} || '';
+  # if we found a rule definition with a T_ prefix, use that data
+  if (!$rules->{$name}->{srcfile} && $rules->{"T_".$name}->{srcfile}) {
+    $name = "T_".$name;
+  }
+
+  if ($rules->{$name}->{srcfile}) {
+    $srcfile = $rules->{$name}->{srcfile};
     if ($srcfile) {
       my @s = stat $srcfile;
-      if (@s) {
-        $mod = $s[9];
-      }
+      if (@s) { $mod = $s[9]; }
     }
-    $code = $rules->{$rule}->{code} || '';
+  }
+
+  if ($rules->{$name}->{code}) {
+    $code = $rules->{$name}->{code};
     $code =~ s/\]\]>/\](defanged by mkrules)\]>/gs;     # ensure it's CDATA-safe
   }
 
-  my $tf = $rules->{$rule}->{tflags} || '';
+  my $tf = $rules->{$name}->{tflags} || '';
 
   return "<rulemetadata>".
             "<name>$rule</name>".
