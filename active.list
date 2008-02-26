@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: bb-fredt cthielen dos jm theo zmi; day 2: bb-fredt cthielen dos jm theo zmi; day 3: cthielen dos jm theo zmi
+# with results from: day 1: bb-jm bb-zmi cthielen dos jm theo zmi; day 2: bb-jm bb-zmi cthielen dos jm theo zmi; day 3: bb-jm bb-zmi cthielen dos jm theo zmi
 
 # tflags userconf
 ALL_TRUSTED
@@ -71,9 +71,6 @@ DIGEST_MULTIPLE
 DNS_FROM_AHBL_RHSBL
 
 # tflags net
-DNS_FROM_DOB
-
-# tflags net
 DNS_FROM_OPENWHOIS
 
 # tflags net
@@ -101,7 +98,7 @@ DOS_OUTLOOK_TO_MX
 DOS_OUTLOOK_TO_MX_IMAGE
 
 # good enough
-DOS_REMOVE_DOMAIN_DOT
+DRUGS_HDIA
 
 # good enough
 DRUGS_STOCK_MIMEOLE
@@ -164,9 +161,6 @@ FB_GVR
 FB_INCREASE_VOL
 
 # good enough
-FB_LOWER_PAYM
-
-# good enough
 FB_MED1CAT
 
 # good enough
@@ -192,6 +186,9 @@ FB_SOFTTABS
 
 # good enough
 FB_YOUR_REFI
+
+# good enough
+FB_YOUR_WOMAN
 
 # good enough
 FH_BAD_OEV1441
@@ -248,9 +245,6 @@ FM_FAKE_HELO_HOTMAIL
 FM_FAKE_HELO_VERIZON
 
 # good enough
-FM_MORTGAGE3PLUS
-
-# good enough
 FM_MULTI_LUX_GIFTS
 
 # good enough
@@ -258,6 +252,9 @@ FM_SCHOOL_DIPLOMA
 
 # good enough
 FM_SEX_HELODDDD
+
+# good enough
+FM_SUBJ_APPROVE
 
 # good enough
 FM_VEGAS_CASINO
@@ -273,9 +270,6 @@ FRT_BIGGERMEM1
 
 # good enough
 FRT_DISCOUNT
-
-# good enough
-FRT_LEVITRA
 
 # good enough
 FRT_PENIS1
@@ -296,6 +290,9 @@ FRT_SEXUAL
 FRT_VALIUM1
 
 # good enough
+FRT_XANAX2
+
+# good enough
 FR_ALMOST_VIAG2
 
 # good enough
@@ -309,9 +306,6 @@ FS_EJACULA
 
 # good enough
 FS_ERECTION
-
-# good enough
-FS_GET_LAID
 
 # good enough
 FS_LOWER_YOUR
@@ -330,9 +324,6 @@ FS_REPLICAWATCH
 
 # good enough
 FS_START_DOYOU2
-
-# good enough
-FS_WILL_HELP
 
 # good enough
 FU_LONG_QUERY3
@@ -401,9 +392,6 @@ IMG_ALT_HSPACE_CID_ALIGN
 IMG_CID_PART1
 
 # good enough
-JM_0800_GMT
-
-# good enough
 JM_FAKE_PSMTP_RCVD
 
 # good enough
@@ -422,16 +410,10 @@ JM_SOUGHT_1
 JM_SOUGHT_2
 
 # good enough
-JM_SOUGHT_3
-
-# good enough
 JM_TORA_XM
 
 # good enough
 KAM_LOTTO1
-
-# good enough
-KAM_LOTTO2
 
 # tflags publish
 KAM_STOCKOTC
@@ -478,6 +460,9 @@ OUTLOOK_3416
 # good enough
 PART_CID_STOCK
 
+# good enough
+PART_CID_STOCK_LESS
+
 # tflags net
 PYZOR_CHECK
 
@@ -492,6 +477,9 @@ RAZOR2_CF_RANGE_E8_51_100
 
 # tflags net
 RAZOR2_CHECK
+
+# good enough
+RCVD_BAD_ID
 
 # good enough
 RCVD_FORGED_WROTE
@@ -516,9 +504,6 @@ RCVD_IN_DNSWL_LOW
 
 # tflags net
 RCVD_IN_DNSWL_MED
-
-# tflags net
-RCVD_IN_DOB
 
 # tflags net
 RCVD_IN_DSBL
@@ -722,6 +707,12 @@ STOCK_IMG_HDR_FROM
 STOCK_IMG_HTML
 
 # good enough
+STOCK_IMG_OUTLOOK
+
+# good enough
+STOX_REPLY_TYPE
+
+# good enough
 STOX_REPLY_TYPE_WITHOUT_QUOTES
 
 # tflags userconf
@@ -737,10 +728,16 @@ SUBJ_RE_NUM
 TT_OBSCURED_VIAGRA
 
 # good enough
+TVD_ENVFROM_APOST
+
+# good enough
 TVD_FINGER_02
 
 # good enough
 TVD_GOOG_LUCKY
+
+# good enough
+TVD_PH_SUBJ_URGENT
 
 # good enough
 TVD_QUAL_MEDS
@@ -750,6 +747,9 @@ TVD_RCVD_IP
 
 # good enough
 TVD_RCVD_IP4
+
+# good enough
+TVD_RCVD_SINGLE
 
 # good enough
 TVD_STOCK1
@@ -764,7 +764,37 @@ TVD_SUBJ_WIPE_DEBT
 TVD_VISIT_PHARMA
 
 # good enough
-FB_YOUR_WOMAN
+DOS_RCVD_IP_TWICE_B
+
+# good enough
+DOS_RCVD_IP_TWICE_C
+
+# good enough
+FB_STRONGER_EJ
+
+# good enough
+FM_DEBT_HELP
+
+# good enough
+FORGED_RELAY_MUA_TO_MX_A
+
+# good enough
+FORGED_RELAY_MUA_TO_MX_B
+
+# good enough
+FORGED_RELAY_MUA_TO_MX_C
+
+# good enough
+FRT_COCK
+
+# good enough
+FRT_ERECTION
+
+# good enough
+FS_CAILIS
+
+# good enough
+KB_RATWARE_MSGID
 
 # tflags net
 RCVD_IN_DSBL
@@ -777,6 +807,21 @@ RCVD_IN_SORBS_DUL
 
 # tflags net
 RCVD_IN_XBL
+
+# good enough
+RP_LASTNAME
+
+# good enough
+RP_MATCHES_RCVD
+
+# good enough
+RP_MINUS
+
+# good enough
+RP_UNDERLINE
+
+# tflags net
+URIBL_XBL
 
 # tflags userconf
 UNPARSEABLE_RELAY
@@ -986,12 +1031,6 @@ XMAILER_MIMEOLE_OL_465CD
 XMAILER_MIMEOLE_OL_4B815
 
 # good enough
-XMAILER_MIMEOLE_OL_4F240
-
-# good enough
-XMAILER_MIMEOLE_OL_6554A
-
-# good enough
 XMAILER_MIMEOLE_OL_72641
 
 # good enough
@@ -1005,15 +1044,6 @@ XMAILER_MIMEOLE_OL_8627E
 
 # good enough
 XMAILER_MIMEOLE_OL_91287
-
-# good enough
-XMAILER_MIMEOLE_OL_ADFF7
-
-# good enough
-XMAILER_MIMEOLE_OL_B9B11
-
-# good enough
-XMAILER_MIMEOLE_OL_C65FA
 
 # good enough
 XMAILER_MIMEOLE_OL_CAC8F
@@ -1035,9 +1065,6 @@ __DNS_FROM_RFC_WHOIS
 
 # tflags net
 __RCVD_IN_DNSWL
-
-# tflags net
-__RCVD_IN_DOB
 
 # tflags net
 __RCVD_IN_IADB
