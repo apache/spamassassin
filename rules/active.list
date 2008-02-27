@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: bb-jm bb-zmi cthielen dos jm theo zmi; day 2: bb-jm bb-zmi cthielen dos jm theo zmi; day 3: bb-jm bb-zmi cthielen dos jm theo zmi
+# with results from: day 1: bb-jm cthielen dos jm theo zmi; day 2: bb-jm bb-zmi cthielen dos jm theo zmi; day 3: bb-jm bb-zmi cthielen dos jm theo zmi
 
 # tflags userconf
 ALL_TRUSTED
@@ -410,6 +410,9 @@ JM_SOUGHT_1
 JM_SOUGHT_2
 
 # good enough
+JM_SOUGHT_3
+
+# good enough
 JM_TORA_XM
 
 # good enough
@@ -426,9 +429,6 @@ KB_DATE_CONTAINS_TAB
 
 # good enough
 KB_FAKED_THE_BAT
-
-# good enough
-LOTTERY_PH_004470
 
 # good enough
 MID_DEGREES
@@ -737,9 +737,6 @@ TVD_FINGER_02
 TVD_GOOG_LUCKY
 
 # good enough
-TVD_PH_SUBJ_URGENT
-
-# good enough
 TVD_QUAL_MEDS
 
 # good enough
@@ -820,8 +817,14 @@ RP_MINUS
 # good enough
 RP_UNDERLINE
 
+# good enough
+TVD_PCT_OFF
+
 # tflags net
 URIBL_XBL
+
+# good enough
+X_MAILER_CME_6543_MSN
 
 # tflags userconf
 UNPARSEABLE_RELAY
