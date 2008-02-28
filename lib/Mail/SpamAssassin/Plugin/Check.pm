@@ -968,6 +968,7 @@ sub run_eval_tests {
       eval {
         $result = $self->' . $function . ' (@extraevalargs '. $argstr .' );  1;
       } or do {
+        $result = 0;
         $self->handle_eval_rule_errors($rulename);
       };
 
