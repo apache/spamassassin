@@ -16,6 +16,8 @@ FLAG=NO
 if [ "`svn status -uq build/mkupdates/run_nightly | head -1 | cut -b8`" = "*" ]; then
   FLAG=YES
 fi
+
+svn cleanup     # paranoia
 svn update || exit $?
 
 # Do the restart if we need to ...
@@ -61,4 +63,13 @@ cat /home/updatesd/LATEST
 # create a list of "bad" rules in the current sandboxes, updated daily
 $PERL masses/rule-qa/list-bad-rules \
     > /var/www/ruleqa.spamassassin.org/reports/badrules.txt 2>&1
+
+if [ `date +%w` = 3 ] ; then
+  (
+    echo "From: nobody@spamassassin.apache.org (Rules Report Cron)"
+    echo "Subject: [auto] bad sandbox rules report"
+    echo
+    cat /var/www/ruleqa.spamassassin.org/reports/badrules.txt
+  ) | /usr/sbin/sendmail -oi dev@spamassassin.apache.org
+fi
 
