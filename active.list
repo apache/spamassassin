@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: bb-jm cthielen dos jm theo zmi; day 2: bb-jm bb-zmi cthielen dos jm theo zmi; day 3: bb-jm bb-zmi cthielen dos jm theo zmi
+# with results from: day 1: bb-jm bb-zmi cthielen dos jm theo zmi; day 2: bb-jm cthielen dos jm theo zmi; day 3: bb-jm bb-zmi cthielen dos jm theo zmi
 
 # tflags userconf
 ALL_TRUSTED
@@ -98,6 +98,12 @@ DOS_OUTLOOK_TO_MX
 DOS_OUTLOOK_TO_MX_IMAGE
 
 # good enough
+DOS_RCVD_IP_TWICE_B
+
+# good enough
+DOS_RCVD_IP_TWICE_C
+
+# good enough
 DRUGS_HDIA
 
 # good enough
@@ -185,6 +191,9 @@ FB_SMALL_PEN
 FB_SOFTTABS
 
 # good enough
+FB_STRONGER_EJ
+
+# good enough
 FB_YOUR_REFI
 
 # good enough
@@ -236,6 +245,9 @@ FH_HOST_IN_ADDRARPA
 FH_MSGID_XXX
 
 # good enough
+FM_DEBT_HELP
+
+# good enough
 FM_DOESNT_SAY_STOCK
 
 # good enough
@@ -262,6 +274,15 @@ FM_VEGAS_CASINO
 # good enough
 FM_XMAIL_F_OUT
 
+# good enough
+FORGED_RELAY_MUA_TO_MX_A
+
+# good enough
+FORGED_RELAY_MUA_TO_MX_B
+
+# good enough
+FORGED_RELAY_MUA_TO_MX_C
+
 # tflags userconf
 FRAGMENTED_MESSAGE
 
@@ -269,7 +290,13 @@ FRAGMENTED_MESSAGE
 FRT_BIGGERMEM1
 
 # good enough
+FRT_COCK
+
+# good enough
 FRT_DISCOUNT
+
+# good enough
+FRT_ERECTION
 
 # good enough
 FRT_PENIS1
@@ -299,6 +326,9 @@ FR_ALMOST_VIAG2
 FS_ABIGGER
 
 # good enough
+FS_CAILIS
+
+# good enough
 FS_DOLLAR_BONUS
 
 # good enough
@@ -324,6 +354,9 @@ FS_REPLICAWATCH
 
 # good enough
 FS_START_DOYOU2
+
+# good enough
+FS_WILL_HELP
 
 # good enough
 FU_LONG_QUERY3
@@ -410,9 +443,6 @@ JM_SOUGHT_1
 JM_SOUGHT_2
 
 # good enough
-JM_SOUGHT_3
-
-# good enough
 JM_TORA_XM
 
 # good enough
@@ -429,6 +459,9 @@ KB_DATE_CONTAINS_TAB
 
 # good enough
 KB_FAKED_THE_BAT
+
+# good enough
+KB_RATWARE_MSGID
 
 # good enough
 MID_DEGREES
@@ -668,6 +701,18 @@ ROUND_THE_WORLD
 ROUND_THE_WORLD_LOCAL
 
 # good enough
+RP_LASTNAME
+
+# good enough
+RP_MATCHES_RCVD
+
+# good enough
+RP_MINUS
+
+# good enough
+RP_UNDERLINE
+
+# good enough
 SHORT_HELO_AND_INLINE_IMAGE
 
 # good enough
@@ -761,37 +806,7 @@ TVD_SUBJ_WIPE_DEBT
 TVD_VISIT_PHARMA
 
 # good enough
-DOS_RCVD_IP_TWICE_B
-
-# good enough
-DOS_RCVD_IP_TWICE_C
-
-# good enough
-FB_STRONGER_EJ
-
-# good enough
-FM_DEBT_HELP
-
-# good enough
-FORGED_RELAY_MUA_TO_MX_A
-
-# good enough
-FORGED_RELAY_MUA_TO_MX_B
-
-# good enough
-FORGED_RELAY_MUA_TO_MX_C
-
-# good enough
-FRT_COCK
-
-# good enough
-FRT_ERECTION
-
-# good enough
-FS_CAILIS
-
-# good enough
-KB_RATWARE_MSGID
+JM_SOUGHT_3
 
 # tflags net
 RCVD_IN_DSBL
@@ -806,22 +821,7 @@ RCVD_IN_SORBS_DUL
 RCVD_IN_XBL
 
 # good enough
-RP_LASTNAME
-
-# good enough
-RP_MATCHES_RCVD
-
-# good enough
-RP_MINUS
-
-# good enough
-RP_UNDERLINE
-
-# good enough
 TVD_PCT_OFF
-
-# tflags net
-URIBL_XBL
 
 # good enough
 X_MAILER_CME_6543_MSN
@@ -864,6 +864,9 @@ URIBL_SC_SURBL
 
 # tflags net
 URIBL_WS_SURBL
+
+# tflags net
+URIBL_XBL
 
 # tflags userconf
 USER_IN_ALL_SPAM_TO
