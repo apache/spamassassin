@@ -41,6 +41,11 @@ use URI::Escape;
 use Time::Local;
 use POSIX qw();
 
+# require XML::Parser; it avoids the awful "balloon to 4GB of RAM in an
+# infinite loop" XML/UTF-8 bug that Daryl found
+use XML::Parser;
+$XML::Simple::PREFERRED_PARSER = "XML::Parser";
+
 # daterevs -- e.g. "20060429/r239832-r" -- are aligned to just before
 # the time of day when the mass-check tagging occurs; that's 0850 GMT,
 # so align the daterev to 0800 GMT.
