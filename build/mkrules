@@ -116,6 +116,7 @@ my $newest_src_mtime = 0;
 my $newest_out_mtime = 0;
 
 my $default_file_header = join('', <DATA>);
+compile_utf8ify_function();
 
 foreach my $src (@opt_srcs) {
   if (!-d $src) {
@@ -926,8 +927,22 @@ sub compile_output_files {
   if ($opt_rulemetadata) {
     open (RULEMD, ">".$opt_rulemetadata)
             or die "cannot write rulemd to $opt_rulemetadata";
-    print RULEMD "<rulemds>", $rulemd, "</rulemds>\n";
+    print RULEMD "<?xml version='1.0' encoding='UTF-8'?>\n",
+                    "<rulemds>", $rulemd, "</rulemds>\n";
     close RULEMD or die "cannot close rulemd to $opt_rulemetadata";
+  }
+}
+
+# conditionally build a method to UTF-8-encode a string.  this is only required
+# for the rulemetadata XML output, so don't make it mandatory!
+sub compile_utf8ify_function {
+  if (!eval '
+      sub utf8ify { use Encode; return Encode::encode("UTF-8", $_[0]); } 1;
+    ')
+  {
+    eval '
+      sub utf8ify { die "unimplemented -- Encode module required!" } 1;
+    '
   }
 }
 
@@ -957,6 +972,8 @@ sub get_rulemetadata_string {
   if ($rules->{$name}->{code}) {
     $code = $rules->{$name}->{code};
     $code =~ s/\]\]>/\](defanged by mkrules)\]>/gs;     # ensure it's CDATA-safe
+    $code = utf8ify($code);
+
   }
 
   my $tf = $rules->{$name}->{tflags} || '';
