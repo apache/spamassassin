@@ -6,7 +6,6 @@ my $automcdir = "/home/automc/svn/spamassassin/masses/rule-qa/automc";
 
 use strict;
 use warnings;
-use bytes;
 
 my $PERL_INTERP = $^X;
 
@@ -291,7 +290,10 @@ sub show_default_header {
   # replaced with use of main, off-zone host:
   # <!-- <link href="/ruleqa.css" rel="stylesheet" type="text/css"> <script src="http://ruleqa.spamassassin.org/sorttable.js"></script> --> 
 
-  my $hdr = q{<html><head>
+  my $hdr = q{<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"
+                    "http://www.w3.org/TR/html4/strict.dtd">
+  <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+  <head><meta http-equiv="Content-type" content="text/html; charset=utf-8">
   <title>}.$title.q{</title>
 
   <link href="http://SpamAssassin.apache.org/ruleqa/ruleqa.css" rel="stylesheet" type="text/css">
