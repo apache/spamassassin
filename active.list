@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: bb-jm cthielen dos jm theo zmi; day 2: bb-jm cthielen jm theo zmi; day 3: bb-jm cthielen dos jm theo zmi
+# with results from: day 1: bb-jm bb-zmi cthielen dos jm theo zmi; day 2: bb-jm cthielen dos jm theo zmi; day 3: bb-jm cthielen jm theo zmi
 
 # tflags userconf
 ALL_TRUSTED
@@ -268,6 +268,9 @@ FM_VEGAS_CASINO
 # good enough
 FM_XMAIL_F_OUT
 
+# good enough
+FORGED_RELAY_MUA_TO_MX
+
 # tflags userconf
 FRAGMENTED_MESSAGE
 
@@ -279,6 +282,9 @@ FRT_DISCOUNT
 
 # good enough
 FRT_ERECTION
+
+# good enough
+FRT_PACKAGE
 
 # good enough
 FRT_PENIS1
@@ -420,6 +426,9 @@ JM_SOUGHT_1
 
 # good enough
 JM_SOUGHT_2
+
+# good enough
+JM_SOUGHT_3
 
 # good enough
 JM_TORA_XM
@@ -788,22 +797,10 @@ TVD_SUBJ_WIPE_DEBT
 TVD_VISIT_PHARMA
 
 # good enough
-FB_INCREASE_VOL
+FS_WE_WANT
 
 # good enough
-FH_HOST_IN_ADDRARPA
-
-# good enough
-FORGED_RELAY_MUA_TO_MX
-
-# good enough
-FRT_COCK
-
-# good enough
-FRT_PACKAGE
-
-# good enough
-JM_SOUGHT_3
+FS_YOUR_PRESCRIP
 
 # tflags userconf
 UNPARSEABLE_RELAY
