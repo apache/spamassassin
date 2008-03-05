@@ -109,6 +109,18 @@ if ( defined $opt{'version'} ) {
   exit 0;
 }
 
+# Check for some dependencies and provide useful error messages if they aren't
+# present
+eval("use ExtUtils::MakeMaker");
+if ($@) {
+  print "$0 requires ExtUtils::MakeMaker for proper operation.\n";
+  exit 1;
+}
+unless (qx(re2c -V)) {
+  print "$0 requires re2c for proper operation.\n";
+  exit 1;
+}
+
 sub usage {
   my ( $exitval, $message ) = @_;
   $exitval ||= 64;
