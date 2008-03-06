@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: bb-jm bb-zmi cthielen dos jm theo zmi; day 2: bb-jm bb-zmi cthielen dos jm theo zmi; day 3: bb-jm cthielen dos jm theo zmi
+# with results from: day 1: bb-jm cthielen dos theo zmi; day 2: bb-jm bb-zmi cthielen dos jm theo zmi; day 3: bb-jm bb-zmi cthielen dos jm theo zmi
 
 # tflags userconf
 ALL_TRUSTED
@@ -83,16 +83,10 @@ DNS_FROM_RFC_DSN
 DOS_ANAL_SPAM_MAILER
 
 # good enough
-DOS_FORGED_RCVD_QUADS
-
-# good enough
 DOS_OE_TO_MX
 
 # good enough
 DOS_OE_TO_MX_IMAGE
-
-# good enough
-DOS_OUTLOOK_TO_MX
 
 # good enough
 DOS_OUTLOOK_TO_MX_IMAGE
@@ -161,9 +155,6 @@ FB_EXTRA_INCHES
 FB_GVR
 
 # good enough
-FB_INCREASE_VOL
-
-# good enough
 FB_MED1CAT
 
 # good enough
@@ -195,9 +186,6 @@ FB_YOUR_MED
 
 # good enough
 FB_YOUR_REFI
-
-# good enough
-FB_YOUR_WOMAN
 
 # good enough
 FH_BAD_OEV1441
@@ -237,9 +225,6 @@ FH_HOST_EQ_PACBELL_D
 
 # good enough
 FH_HOST_EQ_VERIZON_P
-
-# good enough
-FH_HOST_IN_ADDRARPA
 
 # good enough
 FH_MSGID_XXX
@@ -285,9 +270,6 @@ FRAGMENTED_MESSAGE
 
 # good enough
 FRT_BIGGERMEM1
-
-# good enough
-FRT_COCK
 
 # good enough
 FRT_DISCOUNT
@@ -362,7 +344,7 @@ FS_START_DOYOU2
 FS_WILL_HELP
 
 # good enough
-FU_LONG_QUERY3
+FS_YOUR_PRESCRIP
 
 # tflags userconf
 GTUBE
@@ -800,9 +782,6 @@ TVD_RCVD_IP
 TVD_RCVD_IP4
 
 # good enough
-TVD_RCVD_SINGLE
-
-# good enough
 TVD_STOCK1
 
 # good enough
@@ -815,7 +794,13 @@ TVD_SUBJ_WIPE_DEBT
 TVD_VISIT_PHARMA
 
 # good enough
-FS_YOUR_PRESCRIP
+FB_INCREASE_VOL
+
+# good enough
+FH_HOST_IN_ADDRARPA
+
+# good enough
+FRT_COCK
 
 # tflags userconf
 UNPARSEABLE_RELAY
