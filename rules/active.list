@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: bb-jm cthielen dos theo zmi; day 2: bb-jm bb-zmi cthielen dos jm theo zmi; day 3: bb-jm bb-zmi cthielen dos jm theo zmi
+# with results from: day 1: bb-jm bb-zmi cthielen dos jm theo zmi; day 2: bb-jm cthielen dos theo zmi; day 3: bb-jm bb-zmi cthielen dos jm theo zmi
 
 # tflags userconf
 ALL_TRUSTED
@@ -155,6 +155,9 @@ FB_EXTRA_INCHES
 FB_GVR
 
 # good enough
+FB_INCREASE_VOL
+
+# good enough
 FB_MED1CAT
 
 # good enough
@@ -227,6 +230,9 @@ FH_HOST_EQ_PACBELL_D
 FH_HOST_EQ_VERIZON_P
 
 # good enough
+FH_HOST_IN_ADDRARPA
+
+# good enough
 FH_MSGID_XXX
 
 # good enough
@@ -270,6 +276,9 @@ FRAGMENTED_MESSAGE
 
 # good enough
 FRT_BIGGERMEM1
+
+# good enough
+FRT_COCK
 
 # good enough
 FRT_DISCOUNT
@@ -426,9 +435,6 @@ JM_SOUGHT_1
 
 # good enough
 JM_SOUGHT_2
-
-# good enough
-JM_SOUGHT_3
 
 # good enough
 JM_TORA_XM
@@ -794,13 +800,13 @@ TVD_SUBJ_WIPE_DEBT
 TVD_VISIT_PHARMA
 
 # good enough
-FB_INCREASE_VOL
+DOS_FORGED_RCVD_QUADS
 
 # good enough
-FH_HOST_IN_ADDRARPA
+DOS_OUTLOOK_TO_MX
 
 # good enough
-FRT_COCK
+FB_YOUR_WOMAN
 
 # tflags userconf
 UNPARSEABLE_RELAY
