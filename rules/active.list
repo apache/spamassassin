@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: bb-jm bb-zmi cthielen dos jm theo zmi; day 2: bb-jm bb-zmi cthielen dos jm theo zmi; day 3: bb-jm cthielen dos theo zmi
+# with results from: day 1: bb-jm cthielen dos jm theo zmi; day 2: bb-jm bb-zmi cthielen dos jm theo zmi; day 3: bb-jm bb-zmi cthielen dos jm theo zmi
 
 # tflags userconf
 ALL_TRUSTED
@@ -451,9 +451,6 @@ KB_FAKED_THE_BAT
 # good enough
 KB_RATWARE_MSGID
 
-# good enough
-MID_DEGREES
-
 # tflags userconf
 MIME_CHARSET_FARAWAY
 
@@ -782,6 +779,9 @@ TVD_RCVD_IP
 TVD_RCVD_IP4
 
 # good enough
+TVD_RCVD_SINGLE
+
+# good enough
 TVD_STOCK1
 
 # good enough
@@ -794,7 +794,16 @@ TVD_SUBJ_WIPE_DEBT
 TVD_VISIT_PHARMA
 
 # good enough
-JM_SOUGHT_3
+DOS_FORGED_RCVD_QUADS
+
+# good enough
+DOS_OUTLOOK_TO_MX
+
+# good enough
+FB_MORE_SEMEN
+
+# good enough
+FB_YOUR_WOMAN
 
 # tflags userconf
 UNPARSEABLE_RELAY
