@@ -534,9 +534,7 @@ sub show_default_view {
     }
 
     print qq{
-
-      <p>Source: <a href="$srchref">$src</a></p>
-
+      <p class="srcinfo">Rule: <b>$self->{rule}</b> from file <a href="$srchref">$src</a></p>
     };
   }
 
