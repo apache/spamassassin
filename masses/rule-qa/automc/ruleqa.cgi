@@ -299,7 +299,7 @@ sub show_default_header {
                     "http://www.w3.org/TR/html4/strict.dtd">
   <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
   <head><meta http-equiv="Content-type" content="text/html; charset=utf-8">
-  <title>}.$title.q{ - SpamAssassin Rule QA</title>
+  <title>}.$title.q{: SpamAssassin Rule QA</title>
 
   <link href="http://SpamAssassin.apache.org/ruleqa/ruleqa.css" rel="stylesheet" type="text/css">
   <script src="http://SpamAssassin.apache.org/ruleqa/sorttable.js"></script>
@@ -314,7 +314,7 @@ sub show_default_header {
 
   </head><body>
 
-       <h1>}.$title.q{</h1>
+       <h1>SpamAssassin Rule QA: }.$title.q{</h1>
        <p>
          <a href="http://bbmass.spamassassin.org:8011/">View
          preflight mass-checks</a>
