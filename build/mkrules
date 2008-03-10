@@ -973,7 +973,6 @@ sub get_rulemetadata_string {
     $code = $rules->{$name}->{code};
     $code =~ s/\]\]>/\](defanged by mkrules)\]>/gs;     # ensure it's CDATA-safe
     $code = utf8ify($code);
-
   }
 
   my $tf = $rules->{$name}->{tflags} || '';
@@ -982,7 +981,9 @@ sub get_rulemetadata_string {
             "<name>$rule</name>".
             "<src>$srcfile</src>".
             "<srcmtime>$mod</srcmtime>".
-            "<code><![CDATA[$code]]></code>".
+            # don't include <code> blocks; they bloat up the XML badly (to 800KB)
+            # and make it very slow to parse later
+            # "<code><![CDATA[$code]]></code>".
             "<tf>$tf</tf>".
           "</rulemetadata>\n";
 }
