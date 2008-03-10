@@ -314,14 +314,16 @@ sub show_default_header {
 
   </head><body>
 
-       <h1>SpamAssassin Rule QA</h1>
-       <h2>}.$title.q{</h2>
-       <p>
-         <a href="http://bbmass.spamassassin.org:8011/">View
-         preflight mass-checks</a>
-        &nbsp;|&nbsp;
-         <a href="http://wiki.apache.org/spamassassin/RuleQaApp">help</a>
-       </p>
+        <table> <tr> <td valign=top>
+          <h1>SpamAssassin Rule QA</h1>
+        </td> <td valign=top>
+          <p>
+            <a href="http://bbmass.spamassassin.org:8011/">View
+            preflight mass-checks</a>
+            <br>
+            <a href="http://wiki.apache.org/spamassassin/RuleQaApp">help</a>
+          </p>
+        </td> </tr> </table>
 
   };
   return $hdr;
