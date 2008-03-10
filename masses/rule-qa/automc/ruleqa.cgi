@@ -524,31 +524,18 @@ sub show_default_view {
   if ($single_rule_displayed) {
     my $rev = $self->get_rev_for_daterev($self->{daterev});
     my $md = $self->get_rule_metadata($rev);
-    my $code = eval { $md->{rulemds}->{$self->{rule}}->{code} } || '(not found)';
     my $src = eval { $md->{rulemds}->{$self->{rule}}->{src} } || '(not found)';
 
     # urgh.  this could have been cleaner if it wasn't for the tricky SVN external
-    my $srchref = "http://svn.apache.org/viewvc/spamassassin/trunk/$src";
+    my $srchref = "http://svn.apache.org/viewvc/spamassassin/trunk/$src?revision=$rev\&view=markup";
     if ($src =~ m{^rulesrc/(.*)$}) {
-      $srchref = "http://svn.apache.org/viewvc/spamassassin/rules/trunk/$1";
+      # http://svn.apache.org/viewvc/spamassassin/rules/trunk/sandbox/jm/20_basic.cf?revision=635196&view=markup
+      $srchref = "http://svn.apache.org/viewvc/spamassassin/rules/trunk/$1?revision=$rev\&view=markup";
     }
-
-    # ensure it's <pre>-safe
-    $code =~ s/<\/pre>/<\/DEFANGED_by_ruleqa.pre>/i;
-
-    my $titleplinknew = "source";
-    my $titleplinkhref = $self->gen_this_url()."#".$titleplinknew;
 
     print qq{
 
-      <h3 class='freqs_title'>Source</h3>
-      <br clear="all"/>
-      <p class='showfreqslink'><a
-        <a name='$titleplinknew' href='$titleplinkhref' class='title_permalink'>(#)</a>
-      </p>
-
-      <p>From <a href="$srchref">$src</a>:</p>
-      <pre>$code</pre>
+      <p>Source: <a href="$srchref">$src</a></p>
 
     };
   }
