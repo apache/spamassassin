@@ -314,7 +314,8 @@ sub show_default_header {
 
   </head><body>
 
-       <h1>SpamAssassin Rule QA: }.$title.q{</h1>
+       <h1>SpamAssassin Rule QA</h1>
+       <h2>}.$title.q{</h2>
        <p>
          <a href="http://bbmass.spamassassin.org:8011/">View
          preflight mass-checks</a>
