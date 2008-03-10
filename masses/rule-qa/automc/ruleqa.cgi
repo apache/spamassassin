@@ -299,7 +299,7 @@ sub show_default_header {
                     "http://www.w3.org/TR/html4/strict.dtd">
   <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
   <head><meta http-equiv="Content-type" content="text/html; charset=utf-8">
-  <title>}.$title.q{</title>
+  <title>}.$title.q{ - SpamAssassin Rule QA</title>
 
   <link href="http://SpamAssassin.apache.org/ruleqa/ruleqa.css" rel="stylesheet" type="text/css">
   <script src="http://SpamAssassin.apache.org/ruleqa/sorttable.js"></script>
@@ -314,13 +314,10 @@ sub show_default_header {
 
   </head><body>
 
-       <h1> SpamAssassin Rule QA</h1>
+       <h1>}.$title.q{</h1>
        <p>
          <a href="http://bbmass.spamassassin.org:8011/">View
          preflight mass-checks</a>
-        &nbsp;|&nbsp;
-         <a href="http://buildbot.spamassassin.org:8010/">View
-        'make test' buildbots</a>
         &nbsp;|&nbsp;
          <a href="http://wiki.apache.org/spamassassin/RuleQaApp">help</a>
        </p>
@@ -334,9 +331,9 @@ sub show_default_view {
 
   my $title;
   if ($self->{s}{detail}) {
-    $title = "Rule QA: details for $self->{nicerule} (in $self->{daterev})";
+    $title = "Details for $self->{nicerule} in mass-check $self->{daterev}";
   } else {
-    $title = "Rule QA: overview of all rules (in $self->{daterev})";
+    $title = "Overview of all rules in mass-check $self->{daterev}";
   }
   print $self->show_default_header($title);
 
