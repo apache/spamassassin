@@ -534,17 +534,17 @@ sub show_default_view {
     }
 
     my $lastmod = eval {
-          POSIX::strftime "%Y-%m-%d-T%H:%M:%SZ", gmtime $md->{rulemds}->{$self->{rule}}->{srcmtime}
+          POSIX::strftime "%Y-%m-%d %H:%M:%S UTC", gmtime $md->{rulemds}->{$self->{rule}}->{srcmtime}
         } || '(unknown)';
 
     my $tflags = eval {
           $md->{rulemds}->{$self->{rule}}->{tf}
         } || '';
-    $tflags = ($tflags =~ /\S/) ? "(tflags $tflags)" : "";
+    $tflags = ($tflags =~ /\S/) ? "tflags $tflags," : "";
 
     print qq{
       <p class="srcinfo">Rule: <b>$self->{rule}</b> $tflags from file <a href="$srchref">$src</a>,
-      file was last modified on $lastmod.</p>
+      $tflags file was last modified on $lastmod.</p>
     };
   }
 
