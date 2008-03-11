@@ -542,9 +542,14 @@ sub show_default_view {
         } || '';
     $tflags = ($tflags =~ /\S/) ? "tflags $tflags," : "";
 
+    my $plinkhref = $self->gen_this_url()."#rulemetadata";
+
     print qq{
-      <p class="srcinfo">Rule: <b>$self->{rule}</b> from file <a href="$srchref">$src</a>,
-      $tflags source file was last modified on $lastmod.</p>
+      <p class="srcinfo">
+        Rule: <a id="rulemetadata"></a><a href="$plinkhref"><b>$self->{rule}</b></a>
+        from file <a href="$srchref">$src</a>, $tflags
+        source file was last modified on $lastmod.
+      </p>
     };
   }
 
