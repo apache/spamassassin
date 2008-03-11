@@ -543,8 +543,8 @@ sub show_default_view {
     $tflags = ($tflags =~ /\S/) ? "tflags $tflags," : "";
 
     print qq{
-      <p class="srcinfo">Rule: <b>$self->{rule}</b> $tflags from file <a href="$srchref">$src</a>,
-      $tflags file was last modified on $lastmod.</p>
+      <p class="srcinfo">Rule: <b>$self->{rule}</b> from file <a href="$srchref">$src</a>,
+      $tflags source file was last modified on $lastmod.</p>
     };
   }
 
