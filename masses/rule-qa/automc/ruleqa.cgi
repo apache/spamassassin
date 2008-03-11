@@ -533,8 +533,18 @@ sub show_default_view {
       $srchref = "http://svn.apache.org/viewvc/spamassassin/rules/trunk/$1?revision=$rev\&view=markup";
     }
 
+    my $lastmod = eval {
+          POSIX::strftime "%Y-%m-%d-T%H:%M:%SZ", gmtime $md->{rulemds}->{$self->{rule}}->{srcmtime}
+        } || '(unknown)';
+
+    my $tflags = eval {
+          $md->{rulemds}->{$self->{rule}}->{tf}
+        } || '';
+    $tflags = ($tflags =~ /\S/) ? "(tflags $tflags)" : "";
+
     print qq{
-      <p class="srcinfo">Rule: <b>$self->{rule}</b> from file <a href="$srchref">$src</a></p>
+      <p class="srcinfo">Rule: <b>$self->{rule}</b> $tflags from file <a href="$srchref">$src</a>,
+      file was last modified on $lastmod.</p>
     };
   }
 
