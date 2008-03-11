@@ -540,15 +540,16 @@ sub show_default_view {
     my $tflags = eval {
           $md->{rulemds}->{$self->{rule}}->{tf}
         } || '';
-    $tflags = ($tflags =~ /\S/) ? "tflags $tflags," : "";
+    $tflags = ($tflags =~ /\S/) ? ", tflags $tflags" : "";
 
     my $plinkhref = $self->gen_this_url()."#rulemetadata";
 
     print qq{
       <p class="srcinfo">
-        Rule: <a id="rulemetadata"></a><a href="$plinkhref"><b>$self->{rule}</b></a>
-        from file <a href="$srchref">$src</a>, $tflags
-        source file was last modified on $lastmod.
+        Detailed results for rule
+        <a id="rulemetadata"></a><a href="$plinkhref"><b>$self->{rule}</b></a>,
+        from source file <a href="$srchref">$src</a>$tflags.
+        Source file was last modified on $lastmod.
       </p>
     };
   }
