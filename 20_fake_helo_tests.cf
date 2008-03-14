@@ -129,28 +129,3 @@ describe HELO_DYNAMIC_CHELLO_NL Relay HELO'd using suspicious hostname (Chello.n
 header HELO_DYNAMIC_HOME_NL  X-Spam-Relays-Untrusted =~ /^[^\]]+ helo=[a-z]{2}\d+-\S\.\S+\d\.[a-z]{2}\.home\.nl[^]]+ auth= /i
 describe HELO_DYNAMIC_HOME_NL Relay HELO'd using suspicious hostname (Home.nl)
 
-###########################################################################
-
-ifplugin Mail::SpamAssassin::Plugin::RelayEval
-
-# these perform a lookup_ptr(), hence 'tflags net'
-header FAKE_HELO_MSN		eval:check_for_rdns_helo_mismatch("msn\.com","msn\.com")
-describe FAKE_HELO_MSN		Host HELO did not match rDNS: msn.com
-tflags FAKE_HELO_MSN		net
-header FAKE_HELO_MAIL_COM	eval:check_for_rdns_helo_mismatch("mail\.com","mail\.com")
-describe FAKE_HELO_MAIL_COM	Host HELO did not match rDNS: mail.com
-tflags FAKE_HELO_MAIL_COM	net
-header FAKE_HELO_EMAIL_COM	eval:check_for_rdns_helo_mismatch("email\.com","email\.com")
-describe FAKE_HELO_EMAIL_COM	Host HELO did not match rDNS: email.com
-tflags FAKE_HELO_EMAIL_COM	net
-header FAKE_HELO_EXCITE		eval:check_for_rdns_helo_mismatch("excite\S*","excite\.com")
-describe FAKE_HELO_EXCITE	Host HELO did not match rDNS: excite.com
-tflags FAKE_HELO_EXCITE	        net
-header FAKE_HELO_LYCOS		eval:check_for_rdns_helo_mismatch("lycos\S*","lycos\.com")
-describe FAKE_HELO_LYCOS	Host HELO did not match rDNS: lycos.com
-tflags FAKE_HELO_LYCOS	        net
-header FAKE_HELO_YAHOO_CA	eval:check_for_rdns_helo_mismatch("yahoo\.ca","yahoo\.ca")
-describe FAKE_HELO_YAHOO_CA	Host HELO did not match rDNS: yahoo.ca
-tflags FAKE_HELO_YAHOO_CA	net
-
-endif
