@@ -22,6 +22,7 @@ use strict;
 use warnings;
 use bytes;
 use re 'taint';
+use NetAddr::IP;
 
 use Mail::SpamAssassin::Util;
 use Mail::SpamAssassin::Logger;
@@ -53,40 +54,40 @@ sub add_cidr {
   $self->{nets} ||= [ ];
   my $numadded = 0;
 
-  foreach (@nets) {
-    my $exclude = s/^\s*!// ? 1 : 0;
-    my ($ip, $bits) = m#^\s*
-			((?:(?:1\d\d|2[0-4]\d|25[0-5]|\d\d|\d)\.){0,3}
-			    (?:1\d\d|2[0-4]\d|25[0-5]|\d\d|\d)?) (?:(?<!\.)/(\d+))?
-		      \s*$#x;
+  foreach my $cidr (@nets) {
+    my $exclude = ($cidr =~ s/^\s*!//) ? 1 : 0;
 
-    my $err = "netset: illegal network address given: '$_'\n";
+    my $is_ip4 = 0;
+    if ($cidr =~ /^\d+[\.\/]/) {
+      if ($cidr =~ /^(\d+)\.(\d+)\.(\d+)\.$/) { $cidr = "$1.$2.$3.0/24"; }
+      elsif ($cidr =~ /^(\d+)\.(\d+)\.$/) { $cidr = "$1.$2.0.0/16"; }
+      elsif ($cidr =~ /^(\d+)\.$/) { $cidr = "$1.0.0.0/8"; }
+      $is_ip4 = 1;
+    }
+
+    my $ip = NetAddr::IP->new($cidr);
     if (!defined $ip) {
-      warn $err;
+      warn "netset: illegal network address given: '$cidr'\n";
       next;
     }
-    elsif ($ip =~ /\.$/) {
-      # just use string matching; much simpler than doing smart stuff with arrays ;)
-      if ($ip =~ /^(\d+)\.(\d+)\.(\d+)\.$/) { $ip = "$1.$2.$3.0"; $bits = 24; }
-      elsif ($ip =~ /^(\d+)\.(\d+)\.$/) { $ip = "$1.$2.0.0"; $bits = 16; }
-      elsif ($ip =~ /^(\d+)\.$/) { $ip = "$1.0.0.0"; $bits = 8; }
-      else {
-	warn $err;
-	next;
-      }
+
+    # if this is an IPv4 address, create an IPv6 representation, too
+    my ($ip4, $ip6);
+    if ($is_ip4) {
+      $ip4 = $ip;
+      $ip6 = $self->_convert_ipv4_cidr_to_ipv6($cidr);
+    } else {
+      $ip6 = $ip;
     }
 
-    $bits = 32 if (!defined $bits);
+    next if ($self->is_net_declared($ip4, $ip6, $exclude, 0));
 
-    next if ($self->is_net_declared($ip, $bits, $exclude, 0));
-
-    my $mask = 0xFFffFFff ^ ((2 ** (32-$bits)) - 1);
-
+    # note: it appears a NetAddr::IP object takes up about 279 bytes
     push @{$self->{nets}}, {
-      mask    => $mask,
       exclude => $exclude,
-      ip      => (Mail::SpamAssassin::Util::my_inet_aton($ip) & $mask),
-      as_string => $_
+      ip4     => $ip4,
+      ip6     => $ip6,
+      as_string => $cidr
     };
     $numadded++;
   }
@@ -101,21 +102,41 @@ sub get_num_nets {
   return scalar @{$self->{nets}};
 }
 
+sub _convert_ipv4_cidr_to_ipv6 {
+  my ($self, $cidr) = @_;
+
+  # only do this for IPv4 addresses
+  return undef unless ($cidr =~ /^\d+[.\/]/);
+
+  if ($cidr !~ /\//) {      # no mask
+    return NetAddr::IP->new6("::ffff:".$cidr);
+  }
+
+  # else we have a CIDR mask specified. use new6() to do this
+  #
+  my $ip6 = ""+(NetAddr::IP->new6($cidr));
+  # 127.0.0.1 -> 0:0:0:0:0:0:7F00:0001/128
+  # 127/8 -> 0:0:0:0:0:0:7F00:0/104
+
+  # now, move that from 0:0:0:0:0:0: space to 0:0:0:0:0:ffff: space
+  if (!defined $ip6 || $ip6 !~ /^0:0:0:0:0:0:(.*)$/) {
+    warn "oops! unparseable IPv6 address for $cidr: $ip6";
+    return undef;
+  }
+
+  return NetAddr::IP->new6("::ffff:$1");
+}
+
 sub _nets_contains_network {
-  my ($self, $network, $mask, $exclude, $quiet, $netname, $declared) = @_;
+  my ($self, $net4, $net6, $exclude, $quiet, $netname, $declared) = @_;
 
   return 0 unless (defined $self->{nets});
 
-  $exclude = 0 if (!defined $exclude);
-  $quiet = 0 if (!defined $quiet);
-  $declared = 0 if (!defined $declared);
-
   foreach my $net (@{$self->{nets}}) {
-    # a net can not be contained by a (smaller) net with a larger mask
-    next if ($net->{mask} > $mask);
-
     # check to see if the new network is contained by the old network
-    if (($network & $net->{mask}) == $net->{ip}) {
+    my $in4 = defined $net4 && defined $net->{ip4} && $net->{ip4}->contains($net4);
+    my $in6 = defined $net6 && defined $net->{ip6} && $net->{ip6}->contains($net6);
+    if ($in4 || $in6) {
       warn "netset: cannot " . ($exclude ? "exclude" : "include") 
 	 . " $netname as it has already been "
 	 . ($net->{exclude} ? "excluded" : "included") . "\n" unless $quiet;
@@ -130,35 +151,38 @@ sub _nets_contains_network {
 }
 
 sub is_net_declared {
-  my ($self, $network, $bits, $exclude, $quiet) = @_;
-
-  my $mask = 0xFFffFFff ^ ((2 ** (32-$bits)) - 1);
-  my $aton = Mail::SpamAssassin::Util::my_inet_aton($network);
-
-  return $self->_nets_contains_network($aton, $mask, $exclude,
-                $quiet, "$network/$bits", 1);
+  my ($self, $net4, $net6, $exclude, $quiet) = @_;
+  return $self->_nets_contains_network($net4, $net6, $exclude,
+                $quiet, $net4 || $net6, 1);
 }
 
 sub contains_ip {
   my ($self, $ip) = @_;
 
   if (!defined $self->{nets}) { return 0; }
-  if ($ip !~ m/^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/) { return 0; }
 
-  $ip = Mail::SpamAssassin::Util::my_inet_aton($ip);
-  foreach my $net (@{$self->{nets}}) {
-    return !$net->{exclude} if (($ip & $net->{mask}) == $net->{ip});
+  my ($ip4, $ip6);
+  if ($ip =~ /^\d+\./) {
+    $ip4 = NetAddr::IP->new($ip);
+    $ip6 = $self->_convert_ipv4_cidr_to_ipv6($ip);
+  } else {
+    $ip6 = NetAddr::IP->new($ip);
   }
-  0;
+
+  foreach my $net (@{$self->{nets}}) {
+    return !$net->{exclude} if
+        ((defined $ip4 && defined $net->{ip4} && $net->{ip4}->contains($ip4))
+        || (defined $ip6 && defined $net->{ip6} && $net->{ip6}->contains($ip6)));
+  }
+  return 0;
 }
 
 sub contains_net {
   my ($self, $net) = @_;
-  my $mask    = $net->{mask};
   my $exclude = $net->{exclude};
-  my $network = $net->{ip};
-
-  return $self->_nets_contains_network($network, $mask, $exclude, 1, "", 0);
+  my $net4 = $net->{ip4};
+  my $net6 = $net->{ip6};
+  return $self->_nets_contains_network($net4, $net6, $exclude, 1, "", 0);
 }
 
 sub clone {

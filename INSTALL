@@ -198,6 +198,13 @@ installed:
       - version 0.34 or higher on Unix systems
       - version 0.46 or higher on Windows systems
 
+  - NetAddr::IP (from CPAN)
+
+    Used to parse IP addresses and IP address ranges for
+    "trusted_networks".
+
+    Debian/Ubuntu: apt-get install libnetaddr-ip-perl
+
   - LWP (aka libwww-perl) (from CPAN)
 
     This set of modules will include both the LWP::UserAgent and

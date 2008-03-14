@@ -80,23 +80,96 @@ use constant DUMP_BACKUP => 8;
 #   3330  = <ftp://ftp.rfc-editor.org/in-notes/rfc3330.txt>
 #   CYMRU = <http://www.cymru.com/Documents/bogon-list.html>
 #
-# Last update
-#   2005-01-10 Daniel Quinlan - reduced to standard private IP addresses
+# This also includes IPv6 link-local space, fe80::/10, the IPv4
+# spaces mapped in IPv6, and the IPv6 host-local address, ::1.
 #
 use constant IP_PRIVATE => qr{^(?:
-  10|				   # 10/8:             Private Use (3330)
-  127|				   # 127/8:            Private Use (localhost)
-  169\.254|			   # 169.254/16:       Private Use (APIPA)
-  172\.(?:1[6-9]|2[0-9]|3[01])|	   # 172.16-172.31/16: Private Use (3330)
-  192\.168			   # 192.168/16:       Private Use (3330)
-)\.}ox;
+  (?:   # IPv4 addresses
+    10|				    # 10/8:             Private Use (3330)
+    127|                            # 127/8:            Private Use (localhost)
+    169\.254|			    # 169.254/16:       Private Use (APIPA)
+    172\.(?:1[6-9]|2[0-9]|3[01])|   # 172.16-172.31/16: Private Use (3330)
+    192\.168 			    # 192.168/16:       Private Use (3330)
+    )\..*
+|
+  (?:   # IPv6 addresses
+    # don't use \b here, it hits on :'s
+    (?:IPv6:    # with optional prefix
+      | (?<![a-f0-9:])
+    )
+    (?:
+      # IPv4 mapped in IPv6
+      # note the colon after the 12th byte in each here
+      (?:
+        # first 6 (12 bytes) non-zero
+        (?:0{1,4}:){5}		ffff:
+        |
+        # leading zeros omitted (note {0,5} not {1,5})
+        ::(?:0{1,4}:){0,4}		ffff:
+        |
+        # trailing zeros (in the first 6) omitted
+        (?:0{1,4}:){1,4}:		ffff:
+        |
+        # 0000 in second up to (including) fifth omitted
+        0{1,4}::(?:0{1,4}:){1,3}	ffff:
+        |
+        # 0000 in third up to (including) fifth omitted
+        (?:0{1,4}:){2}:0{1,2}:	ffff:
+        |
+        # 0000 in fourth up to (including) fifth omitted
+        (?:0{1,4}:){3}:0:		ffff:
+        |
+        # 0000 in fifth omitted
+        (?:0{1,4}:){4}:		ffff:
+      )
+      # and the IPv4 address appended to all of the 12 bytes above
+      (?:
+        10|
+        127|			    
+        169\.254|			    
+        172\.(?:1[6-9]|2[0-9]|3[01])|   
+        192\.168
+      )\..*
+
+    | # or IPv6 link-local address space, fe80::/10
+      fe[89ab][0-9a-f]:.*
+
+    | # or the host-local ::1 addr, as a pure IPv6 address
+
+      # all 8 (16 bytes) of them present
+      (?:0{1,4}:){7}			0{0,3}1
+      |
+      # leading zeros omitted
+      :(?::0{1,4}){0,6}:		0{0,3}1
+      |
+      # 0000 in second up to (including) seventh omitted
+      0{1,4}:(?::0{1,4}){0,5}:	0{0,3}1
+      |
+      # 0000 in third up to (including) seventh omitted
+      (?:0{1,4}:){2}(?::0{1,4}){0,4}:	0{0,3}1
+      |
+      # 0000 in fouth up to (including) seventh omitted
+      (?:0{1,4}:){3}(?::0{1,4}){0,3}:	0{0,3}1
+      |
+      # 0000 in fifth up to (including) seventh omitted
+      (?:0{1,4}:){4}(?::0{1,4}){0,2}:	0{0,3}1
+      |
+      # 0000 in sixth up to (including) seventh omitted
+      (?:0{1,4}:){5}(?::0{1,4}){0,1}:	0{0,3}1
+      |
+      # 0000 in seventh omitted
+      (?:0{1,4}:){6}:			0{0,3}1
+    )
+    (?![a-f0-9:])
+  )
+)}oxi;
 
 # backward compatibility
 use constant IP_IN_RESERVED_RANGE => IP_PRIVATE;
 
 # ---------------------------------------------------------------------------
 # match the various ways of saying "localhost".
-# 
+
 use constant LOCALHOST => qr/
 		    (?:
 		      # as a string

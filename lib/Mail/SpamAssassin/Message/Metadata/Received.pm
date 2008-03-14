@@ -1210,12 +1210,6 @@ enough:
     dbg("received-header: could not parse IP address from: $_");
   }
 
-  $ip = Mail::SpamAssassin::Util::extract_ipv4_addr_from_string ($ip);
-  if (!$ip) {
-    dbg("received-header: could not parse IPv4 address, assuming IPv6");
-    return 0;   # ignore IPv6 handovers
-  }
-
   # DISABLED: if we cut out localhost-to-localhost SMTP handovers,
   # we will give FPs on SPF checks -- since the SMTP "MAIL FROM" addr
   # will be recorded, but we won't have the relays handover recorded
@@ -1231,6 +1225,14 @@ enough:
   if ($rdns =~ /^unknown$/i) {
     $rdns = '';		# some MTAs seem to do this
   }
+  
+  $ip =~ s/^\[//; $ip =~ s/\]$//;
+
+  $ip =~ s/^ipv6://i;   # remove optional "IPv6:" prefix
+
+  # remove "::ffff:" prefix from IPv4-mapped-in-IPv6 addresses,
+  # so we can treat them as simply IPv4 addresses
+  $ip =~ s/^0*:0*:(?:0*:)*ffff:(\d+\.\d+\.\d+\.\d+)$/$1/i;
 
   $envfrom =~ s/^\s*<*//gs; $envfrom =~ s/>*\s*$//gs;
   $by =~ s/\;$//;
