@@ -56,8 +56,6 @@ sub new {
   $self->register_eval_rule("similar_recipients");
   $self->register_eval_rule("check_for_missing_to_header");
   $self->register_eval_rule("check_for_forged_gw05_received_headers");
-  $self->register_eval_rule("check_for_round_the_world_received_helo");
-  $self->register_eval_rule("check_for_round_the_world_received_revdns");
   $self->register_eval_rule("check_for_shifted_date");
   $self->register_eval_rule("subject_is_all_caps");
   $self->register_eval_rule("check_for_to_in_subject");
@@ -673,72 +671,6 @@ sub check_for_forged_gw05_received_headers {
   }
 
   0;
-}
-
-sub _check_for_round_the_world_received {
-  my ($self, $pms) = @_;
-  my ($relayer, $relayerip, $relay);
-
-  $pms->{round_the_world_revdns} = 0;
-  $pms->{round_the_world_helo} = 0;
-  my $rcvd = $pms->get('Received');
-  my $IPV4_ADDRESS = IPV4_ADDRESS;
-
-  # TODO: use new Received header parser
-
-  # trad sendmail/postfix fmt:
-  # Received: from hitower.parkgroup.ru (unknown [212.107.207.26]) by
-  #     mail.netnoteinc.com (Postfix) with ESMTP id B8CAC11410E for
-  #     <me@netnoteinc.com>; Fri, 30 Nov 2001 02:42:05 +0000 (Eire)
-  # Received: from fmx1.freemail.hu ([212.46.197.200]) by hitower.parkgroup.ru
-  #     (Lotus Domino Release 5.0.8) with ESMTP id 2001113008574773:260 ;
-  #     Fri, 30 Nov 2001 08:57:47 +1000
-  if ($rcvd =~ /
-  	\nfrom\b.{0,20}\s(\S+\.${CCTLDS_WITH_LOTS_OF_OPEN_RELAYS})\s\(.{0,200}
-  	\nfrom\b.{0,20}\s([-_A-Za-z0-9.]+)\s.{0,30}\[($IPV4_ADDRESS)\]
-  /osix) { $relay = $1; $relayer = $2; $relayerip = $3; goto gotone; }
-
-  return 0;
-
-gotone:
-  my $revdns = $pms->lookup_ptr ($relayerip);
-  if (!defined $revdns) { $revdns = '(unknown)'; }
-
-  dbg("eval: round-the-world: mail relayed through $relay by ".	
-  	"$relayerip (HELO $relayer, rev DNS says $revdns)");
-
-  if ($revdns =~ /\.${ROUND_THE_WORLD_RELAYERS}$/oi) {
-    dbg("eval: round-the-world: yep, I think so (from rev dns)");
-    $pms->{round_the_world_revdns} = 1;
-    return;
-  }
-
-  if ($relayer =~ /\.${ROUND_THE_WORLD_RELAYERS}$/oi) {
-    dbg("eval: round-the-world: yep, I think so (from HELO)");
-    $pms->{round_the_world_helo} = 1;
-    return;
-  }
-
-  dbg("eval: round-the-world: probably not");
-  return;
-}
-
-sub check_for_round_the_world_received_helo {
-  my ($self, $pms) = @_;
-  if (!defined $pms->{round_the_world_helo}) {
-    $self->_check_for_round_the_world_received($pms);
-  }
-  if ($pms->{round_the_world_helo}) { return 1; }
-  return 0;
-}
-
-sub check_for_round_the_world_received_revdns {
-  my ($self, $pms) = @_;
-  if (!defined $pms->{round_the_world_revdns}) {
-    $self->_check_for_round_the_world_received($pms);
-  }
-  if ($pms->{round_the_world_revdns}) { return 1; }
-  return 0;
 }
 
 ###########################################################################

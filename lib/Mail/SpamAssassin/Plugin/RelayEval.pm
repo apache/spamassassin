@@ -42,7 +42,6 @@ sub new {
   # the important bit!
   $self->register_eval_rule("check_for_numeric_helo");
   $self->register_eval_rule("check_for_illegal_ip");
-  $self->register_eval_rule("check_for_rdns_helo_mismatch");
   $self->register_eval_rule("check_all_trusted");
   $self->register_eval_rule("check_no_relays");
   $self->register_eval_rule("check_relays_unparseable");
@@ -117,75 +116,6 @@ sub sent_by_applemail {
   return 0 unless ($pms->get("Message-Id") =~
 		   /^<[A-F0-9]+(?:-[A-F0-9]+){4}\@\S+.\S+>$/);
   return 1;
-}
-
-sub check_for_rdns_helo_mismatch {	# T_FAKE_HELO_*
-  my ($self, $pms, $rdns, $helo) = @_;
-
-  # oh for ghod's sake.  Apple's Mail.app HELO's as the right-hand
-  # side of the From address.  So "HELO jmason.org" in my case.
-  # This is (obviously) considered forgery, since it's exactly
-  # what ratware does too.
-  return 0 if $self->sent_by_applemail($pms);
-
-  # the IETF's list-management system mangles Received headers,
-  # "faking" a HELO, resulting in FPs.  So if we received the
-  # mail from the IETF's outgoing SMTP server, skip it.
-  if ($pms->{relays_untrusted_str} =~ /^\[ [^\]]*
-		  ip=132\.151\.1\.\S+\s+ rdns=\S*ietf\.org /x)
-  {
-    return 0;
-  }
-
-  my $firstuntrusted = 1;
-  foreach my $relay (@{$pms->{relays_untrusted}}) {
-    my $wasfirst = $firstuntrusted;
-    $firstuntrusted = 0;
-
-    # did the machine HELO as a \S*something\.com machine?
-    if ($relay->{helo} !~ /(?:\.|^)${helo}$/) { next; }
-
-    my $claimed = $relay->{rdns};
-    my $claimedmatches = ($claimed =~ /(?:\.|^)${rdns}$/);
-    if ($claimedmatches && $wasfirst) {
-      # the first untrusted Received: hdr is inserted by a trusted MTA.
-      # so if the rDNS pattern matches, we're good, skip it
-      next;
-    }
-
-    if ($claimedmatches && !$wasfirst) {
-      # it's a possibly-forged rDNS lookup.  Do a verification lookup
-      # to ensure the host really does match what the rDNS lookup
-      # claims it is.
-      if ($pms->is_dns_available()) {
-	my $vrdns = $pms->lookup_ptr ($relay->{ip});
-	if (defined $vrdns && $vrdns ne $claimed) {
-	  dbg2("eval: rdns/helo mismatch: helo=$relay->{helo} ".	
-		"claimed-rdns=$claimed true-rdns=$vrdns");
-	  return 1;
-	  # TODO: instead, we should set a flag and check it later for
-	  # another test; but that relies on complicated test ordering
-	}
-      }
-    }
-
-    if (!$claimedmatches) {
-      if (!$pms->is_dns_available()) { 
-	if ($relay->{rdns_not_in_headers}) {
-	  # that's OK then; it's just the MTA which picked it up,
-	  # is not configured to perform lookups, and we're offline
-	  # so we couldn't either.
-	  return 0;
-	}
-      }
-
-      # otherwise there *is* a mismatch
-      dbg2("eval: rdns/helo mismatch: helo=$relay->{helo} rdns=$claimed");
-      return 1;
-    }
-  }
-
-  0;
 }
 
 # note using IPv4 addresses for now due to empty strings matching IP_ADDRESS
