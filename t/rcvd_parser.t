@@ -18,7 +18,7 @@ if (-e 'test_dir') {            # running from test directory, not ..
 
 use lib '.'; use lib 't';
 use SATest; sa_t_init("rcvd_parser");
-use Test; BEGIN { plan tests => 131 };
+use Test; BEGIN { plan tests => 132 };
 use strict;
 
 # format is:
@@ -54,7 +54,7 @@ my %data = (
   '',
 
   'from rc3.isc.org (rc3.isc.org [IPv6:2001:4f8:3:bb::25])       (using TLSv1 with cipher DHE-RSA-AES256-SHA (256/256 bits))        (No client certificate requested)  by sf1.isc.org (Postfix) with ESMTP id C986F284EE       for <jm@jmason.org>; Sat, 16 Oct 2004 21:30:02 +0000 (UTC) (envelope-from bind-users-bounce@isc.org)' =>
-  '',
+  '[ ip=2001:4f8:3:bb::25 rdns=rc3.isc.org helo=rc3.isc.org by=sf1.isc.org ident= envfrom=bind-users-bounce@isc.org id=C986F284EE auth= msa=0 ]',
 
   'from ausisaps301-dmz.aus.amer.dell.com ([143.166.226.16]) (SquirrelMail authenticated user hoolis); by www.penguintowne.org with HTTP; Mon, 22 Mar 2004 12:54:13 -0600 (CST)' =>
   '',
@@ -421,6 +421,10 @@ my %data = (
 
   'from p5498acaa.dip0.t-ipconnect.de (HELO JIMBOBSPC) (user@84.152.172.1) by msa.example.com with ESMTPA; 23 May 2007 15:05:04 -0000' =>
   '[ ip=84.152.172.1 rdns=p5498acaa.dip0.t-ipconnect.de helo=JIMBOBSPC by=msa.example.com ident=user envfrom= id= auth=ESMTPA msa=0 ]',
+
+  # bug 5512
+  'from ([89.79.20.16]) by pop3.m80.net with MailEnable ESMTP; Tue, 20 Feb 2007 09:26:17 -0500' =>
+  '[ ip=89.79.20.16 rdns= helo= by=pop3.m80.net ident= envfrom= id= auth= msa=0 ]'
 
 );
 

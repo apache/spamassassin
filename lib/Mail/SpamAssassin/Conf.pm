@@ -987,13 +987,15 @@ the single IP address specified is used, as if the mask was C</32>.
 If a network or host address is prefaced by a C<!> the network or host will be
 excluded (or included) in a first listed match fashion.
 
-Note: 127/8 is always included in trusted_networks, regardless of your config.
+Note: 127/8 and ::1 are always included in trusted_networks, regardless of
+your config.
 
 Examples:
 
    trusted_networks 192.168/16            # all in 192.168.*.*
    trusted_networks 212.17.35.15          # just that host
    trusted_networks !10.0.1.5 10.0.1/24   # all in 10.0.1.* but not 10.0.1.5
+   trusted_networks DEAD:BEEF::/32        # all in that ipv6 prefix
 
 This operates additively, so a C<trusted_networks> line after another one
 will append new entries to the list of trusted networks.  To clear out the
@@ -1079,7 +1081,8 @@ SpamAssassin is running will be considered external.
 Every entry in C<internal_networks> must appear in C<trusted_networks>; in
 other words, C<internal_networks> is always a subset of the trusted set.
 
-Note: 127/8 is always included in internal_networks, regardless of your config.
+Note: 127/8 and ::1 are always included in internal_networks, regardless of
+your config.
 
 =cut
 
@@ -3684,6 +3687,7 @@ sub new_netset {
   my ($self) = @_;
   my $set = Mail::SpamAssassin::NetSet->new();
   $set->add_cidr ('127/8');
+  $set->add_cidr ('::1');
   return $set;
 }
 

@@ -18,7 +18,7 @@ if (-e 'test_dir') {            # running from test directory, not ..
 
 use lib '.'; use lib 't';
 use SATest; sa_t_init("trust_path");
-use Test; BEGIN { plan tests => 81 };
+use Test; BEGIN { plan tests => 96 };
 use IO::File;
 
 use strict;
@@ -512,6 +512,83 @@ Untrusted: [ ip=1.1.1.1 rdns=sender.net helo=sender.net by=receiver.net ident= e
 },
 
 # ---------------------------------------------------------------------------
+# IPv6
+
+q{
+
+  trusted_networks DEAD:BEEF:0000:0102:0304:0506:0708:0a0b
+  Received: from sender.net (sender.net [DEAD:BEEF:0000:0102:0304:0506:0708:0a0b])
+        by receiver.net (Postfix) with ESMTP id A96E18BD97
+
+} => q{
+
+Trusted: [ ip=DEAD:BEEF:0000:0102:0304:0506:0708:0a0b rdns=sender.net helo=sender.net by=receiver.net ident= envfrom= intl=1 id=A96E18BD97 auth= msa=0 ]
+Untrusted:
+
+},
+
+# ---------------------------------------------------------------------------
+# bug 4503
+
+q{
+
+  trusted_networks DEAD:BEEF:0000:0102:0304:0506:0708:0a0b
+  Received: from sender.net (sender.net [IPv6:2002:abcd:ef10::1])
+        by receiver.net (Postfix) with ESMTP id A96E18BD97
+
+} => q{
+
+Trusted: 
+Untrusted: [ ip=2002:abcd:ef10::1 rdns=sender.net helo=sender.net by=receiver.net ident= envfrom= intl=0 id=A96E18BD97 auth= msa=0 ]
+
+},
+
+# ---------------------------------------------------------------------------
+
+# ::1 implicitly trusted as default
+q{
+
+  Received: from sender.net (::1) by receiver.net
+              with SMTP; 10 Nov 2005 00:00:00 -0000
+
+} => q{
+
+Trusted: [ ip=::1 rdns=sender.net helo=sender.net by=receiver.net ident= envfrom= intl=1 id= auth= msa=0 ]
+Untrusted: 
+
+},
+
+# ---------------------------------------------------------------------------
+
+q{
+
+  trusted_networks DEAD:BEEF:0000:0102:0304:0506:0708:0000/108
+  Received: from sender.net (sender.net [DEAD:BEEF:0000:0102:0304:0506:0708:0a0b])
+        by receiver.net (Postfix) with ESMTP id A96E18BD97
+
+} => q{
+
+Trusted: [ ip=DEAD:BEEF:0000:0102:0304:0506:0708:0a0b rdns=sender.net helo=sender.net by=receiver.net ident= envfrom= intl=1 id=A96E18BD97 auth= msa=0 ]
+Untrusted:
+
+},
+
+# ---------------------------------------------------------------------------
+
+q{
+
+  trusted_networks DEAD:BEEF:0000:0102:0304:0506:0708:0a0c
+  Received: from sender.net (sender.net [DEAD:BEEF:0000:0102:0304:0506:0708:0a0b])
+        by receiver.net (Postfix) with ESMTP id A96E18BD97
+
+} => q{
+
+Trusted:
+Untrusted: [ ip=DEAD:BEEF:0000:0102:0304:0506:0708:0a0b rdns=sender.net helo=sender.net by=receiver.net ident= envfrom= intl=0 id=A96E18BD97 auth= msa=0 ]
+
+},
+
+# ---------------------------------------------------------------------------
 
 );
 
@@ -552,7 +629,10 @@ while (1) {
     print "[netset warning expected here...]\n";
   }
 
-  my $sa = create_saobj({ userprefs_filename => "log/tst.cf" });
+  my $sa = create_saobj({
+              userprefs_filename => "log/tst.cf",
+              # debug => 1
+            });
   ok($sa);
 
   $sa->{lint_callback} = sub {
