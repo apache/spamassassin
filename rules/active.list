@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: bb-jm bb-zmi cthielen dos jm theo zmi; day 2: bb-jm bb-zmi cthielen dos jm theo zmi; day 3: bb-jm bb-zmi cthielen dos jm theo zmi
+# with results from: day 1: bb-jm cthielen dos theo zmi; day 2: bb-jm bb-zmi cthielen dos jm theo zmi; day 3: bb-jm bb-zmi cthielen dos jm theo zmi
 
 # tflags userconf
 ALL_TRUSTED
@@ -78,9 +78,6 @@ DNS_FROM_RFC_DSN
 
 # tflags publish
 DOS_ANAL_SPAM_MAILER
-
-# good enough
-DOS_FORGED_RCVD_QUADS
 
 # good enough
 DOS_OE_TO_MX
@@ -233,6 +230,9 @@ FM_FAKE_HELO_HOTMAIL
 FM_FAKE_HELO_VERIZON
 
 # good enough
+FM_LIKE_STOCKS
+
+# good enough
 FM_SCHOOLING
 
 # good enough
@@ -276,9 +276,6 @@ FRT_PACKAGE
 
 # good enough
 FRT_PENIS1
-
-# good enough
-FRT_PRICE
 
 # good enough
 FRT_REFINANCE1
@@ -413,7 +410,7 @@ JM_NICE_GIRL
 JM_SOUGHT_1
 
 # good enough
-JM_SOUGHT_3
+JM_SOUGHT_2
 
 # good enough
 JM_TORA_XM
@@ -758,9 +755,6 @@ TVD_RCVD_IP
 TVD_RCVD_IP4
 
 # good enough
-TVD_RCVD_SINGLE
-
-# good enough
 TVD_STOCK1
 
 # good enough
@@ -771,9 +765,6 @@ TVD_SUBJ_WIPE_DEBT
 
 # good enough
 TVD_VISIT_PHARMA
-
-# good enough
-JM_SOUGHT_2
 
 # tflags userconf
 UNPARSEABLE_RELAY
