@@ -124,6 +124,7 @@ use constant MIRBY_DOWNLOADED => -1;
 my %opt = ();
 @{$opt{'gpgkey'}} = ();
 @{$opt{'channel'}} = ();
+@{$opt{'install'}} = ();
 my $GPG_ENABLED = 1;
 
 $opt{'gpghomedir'} = File::Spec->catfile($LOCAL_RULES_DIR, 'sa-update-keys');
@@ -142,6 +143,7 @@ GetOptions(
   'gpghomedir=s'			=> \$opt{'gpghomedir'},
   'channel=s'				=> $opt{'channel'},
 
+  'install=s'                           => $opt{'install'},
   'import=s'			        => \$opt{'import'},
   'gpgkeyfile=s'			=> \$opt{'gpgkeyfile'},
   'channelfile=s'			=> \$opt{'channelfile'},
@@ -352,12 +354,16 @@ for(my $ind = 0; $ind < @channels; $ind++) {
   }
 }
 
-my $res = Net::DNS::Resolver->new();
+my ($res, $ua);
 
-my $ua = LWP::UserAgent->new();
-$ua->agent("sa-update/$VERSION/$SAVersion");
-$ua->timeout(60);      # a good long timeout; 10 is too short for Coral!
-$ua->env_proxy;
+if (!$opt{'install'}) {
+  $res = Net::DNS::Resolver->new();
+
+  $ua = LWP::UserAgent->new();
+  $ua->agent("sa-update/$VERSION/$SAVersion");
+  $ua->timeout(60);      # a good long timeout; 10 is too short for Coral!
+  $ua->env_proxy;
+}
 
 # Generate a temporary file to put channel content in for later use ...
 my ($content_file, $tfh) = Mail::SpamAssassin::Util::secure_tmpfile();
@@ -391,6 +397,12 @@ foreach my $channel (@channels) {
   dbg("channel: channel cf file $CFFile");
   dbg("channel: channel pre file $PREFile");
 
+  my $instfile;
+  if ($opt{'install'}) {
+    $instfile = shift @{$opt{'install'}};
+    dbg("channel: installing from file $instfile");
+  }
+
   my($mirby, $mirby_time);
   my $mirby_path = File::Spec->catfile($UPDDir, "MIRRORED.BY");
 
@@ -411,35 +423,50 @@ foreach my $channel (@channels) {
     close(CF);
   }
 
-  # Setup the channel version DNS query
-  my $DNSQ = "$RevSAVersion.$channel";
-
   my $newV;
-  my $dnsV = join(' ', do_txt_query($DNSQ));
-  if (defined $dnsV && $dnsV =~ /^(\d+)/) {
-    $newV = $1 if (!defined $newV || $1 > $newV);
-    dbg("dns: $DNSQ => $dnsV, parsed as $1");
-  }
+  if (!$instfile) {
+    # Setup the channel version DNS query
+    my $DNSQ = "$RevSAVersion.$channel";
 
-  # Not getting a response isn't a failure, there may just not be any updates
-  # for this SA version yet.
-  unless (defined $newV) {
-    dbg("channel: no updates available, skipping channel");
-    next;
-  }
+    my $dnsV = join(' ', do_txt_query($DNSQ));
+    if (defined $dnsV && $dnsV =~ /^(\d+)/) {
+      $newV = $1 if (!defined $newV || $1 > $newV);
+      dbg("dns: $DNSQ => $dnsV, parsed as $1");
+    }
 
-  # If this channel hasn't been installed before, or it's out of date,
-  # keep going.  Otherwise, skip it.
-  if ($currentV >= $newV) {
-    dbg("channel: current version is $currentV, new version is $newV, skipping channel");
-    next;
-  }
+    # Not getting a response isn't a failure, there may just not be any updates
+    # for this SA version yet.
+    unless (defined $newV) {
+      dbg("channel: no updates available, skipping channel");
+      next;
+    }
 
-  # If we are only checking for update availability, exit now
-  if ( defined $opt{'checkonly'} ) {            
-    dbg("channel: $channel: update available, not downloading in checkonly mode");
-    $exit = 0;
-    next;
+    # If this channel hasn't been installed before, or it's out of date,
+    # keep going.  Otherwise, skip it.
+    if ($currentV >= $newV) {
+      dbg("channel: current version is $currentV, new version is $newV, skipping channel");
+      next;
+    }
+
+    # If we are only checking for update availability, exit now
+    if ( defined $opt{'checkonly'} ) {            
+      dbg("channel: $channel: update available, not downloading in checkonly mode");
+      $exit = 0;
+      next;
+    }
+
+  } else {  # $instfile
+    if ($instfile !~ /(\d{6,})/) {
+      # this is a requirement
+      die "channel: $channel: --install file $instfile does not contain a 6-digit version number!\n";
+    }
+    $newV = $1;
+
+    if ( defined $opt{'checkonly'} ) {            
+      dbg("channel: $channel: --install and --checkonly, claiming update available");
+      $exit = 0;
+      next;
+    }
   }
 
   # we need a directory we control that we can use to aviod loading any rules
@@ -466,119 +493,127 @@ foreach my $channel (@channels) {
     $site_pre_linted = 1;
   }
 
-  # Read in the MIRRORED.BY file if it exists
-  if (open(MIRBY, $mirby_path)) {
-    local $/ = undef;
-    $mirby = <MIRBY>;
-    close(MIRBY);
-
-    $mirby_time = (stat $mirby_path)[9];
-  }
-  else {
-    # We don't currently have the list of mirrors, so go grab it.
-    dbg("channel: no MIRRORED.BY file available");
-    my @mirrors = do_txt_query("mirrors.$channel");
-    unless (@mirrors) {
-      warn "error: no mirror data available for channel $channel\n";
-      channel_failed("channel: MIRRORED.BY file location was not in DNS");
-      next;
-    }
-    foreach my $mirror (@mirrors) {
-      $mirby = http_get($mirror);
-      unless ($mirby) {
-        dbg("channel: no mirror data available for channel $channel from $mirror");
-        next;
-      }
-      last;
-    }
-    unless ($mirby) {
-      warn "error: no mirror data available for channel $channel\n";
-      channel_failed("channel: MIRRORED.BY contents were missing");
-      next;
-    }
-    $mirby_time = MIRBY_DOWNLOADED;
-
-    dbg("channel: MIRRORED.BY file retrieved");
-  }
-
-  # Read in the list of mirrors
-  dbg("channel: reading MIRRORED.BY file");
-  my %mirrors = ();
-  my @mirrors = split(/^/, $mirby);
-  while(my $mirror = shift @mirrors) {
-    chomp $mirror;
-
-    $mirror =~ s/#.*$//;   # remove comments
-    $mirror =~ s/^\s+//;   # remove leading whitespace
-    $mirror =~ s/\s+$//;   # remove tailing whitespace
-    next unless ($mirror); # skip empty lines
-
-    # We only support HTTP right now
-    if ($mirror !~ m@^http://@i) {
-      dbg("channel: skipping non-HTTP mirror: $mirror");
-      next;
-    }
-
-    my @data;
-
-    dbg("channel: found mirror $mirror");
-
-    ($mirror,@data) = split(/\s+/, $mirror);
-    $mirror =~ s@/+$@@; # http://example.com/updates/ -> .../updates
-    $mirrors{$mirror}->{weight} = 1;
-    foreach (@data) {
-      my($k,$v) = split(/=/, $_, 2);
-      $mirrors{$mirror}->{$k} = $v;
-    }
-  }
-
-  unless (keys %mirrors) {
-    warn "error: no mirrors available for channel $channel\n";
-    channel_failed("channel: no mirrors available");
-    next;
-  }
-
-  # Now that we've laid the foundation, go grab the appropriate files
-  #
   my $content;
   my $SHA1;
   my $GPG;
+  if (!$instfile) {
+    # Read in the MIRRORED.BY file if it exists
+    if (open(MIRBY, $mirby_path)) {
+      local $/ = undef;
+      $mirby = <MIRBY>;
+      close(MIRBY);
 
-  # Loop through all available mirrors, choose from them randomly
-  # if the archive get fails, choose another mirror,
-  # if the get for the sha1 or gpg signature files, the channel fails
-  while (my $mirror = choose_mirror(\%mirrors)) {
-    # Grab the data hash for this mirror, then remove it from the list
-    my $mirror_info = $mirrors{$mirror};
-    delete $mirrors{$mirror};
+      $mirby_time = (stat $mirby_path)[9];
+    }
+    else {
+      # We don't currently have the list of mirrors, so go grab it.
+      dbg("channel: no MIRRORED.BY file available");
+      my @mirrors = do_txt_query("mirrors.$channel");
+      unless (@mirrors) {
+        warn "error: no mirror data available for channel $channel\n";
+        channel_failed("channel: MIRRORED.BY file location was not in DNS");
+        next;
+      }
+      foreach my $mirror (@mirrors) {
+        $mirby = http_get($mirror);
+        unless ($mirby) {
+          dbg("channel: no mirror data available for channel $channel from $mirror");
+          next;
+        }
+        last;
+      }
+      unless ($mirby) {
+        warn "error: no mirror data available for channel $channel\n";
+        channel_failed("channel: MIRRORED.BY contents were missing");
+        next;
+      }
+      $mirby_time = MIRBY_DOWNLOADED;
 
-    dbg("channel: selected mirror $mirror");
-
-    # Actual archive file
-    $content = http_get("$mirror/$newV.tar.gz");
-    next unless $content;
-
-    # SHA1 of the archive file
-    $SHA1 = http_get("$mirror/$newV.tar.gz.sha1");
-    last unless $SHA1;
-
-    # if GPG is enabled, the GPG detached signature of the archive file
-    if ($GPG_ENABLED) {
-      $GPG = http_get("$mirror/$newV.tar.gz.asc");
-      last unless $GPG;
+      dbg("channel: MIRRORED.BY file retrieved");
     }
 
-    # try to update our list of mirrors.
-    # a failure here doesn't cause channel failure.
-    if ($mirby_time != MIRBY_DOWNLOADED) {
-      my $mirby_tmp = http_get("$mirror/MIRRORED.BY", $mirby_time);
-      if ($mirby_tmp) {
-        $mirby = $mirby_tmp;
-        $mirby_time = MIRBY_DOWNLOADED;
+    # Read in the list of mirrors
+    dbg("channel: reading MIRRORED.BY file");
+    my %mirrors = ();
+    my @mirrors = split(/^/, $mirby);
+    while(my $mirror = shift @mirrors) {
+      chomp $mirror;
+
+      $mirror =~ s/#.*$//;   # remove comments
+      $mirror =~ s/^\s+//;   # remove leading whitespace
+      $mirror =~ s/\s+$//;   # remove tailing whitespace
+      next unless ($mirror); # skip empty lines
+
+      # We only support HTTP right now
+      if ($mirror !~ m@^http://@i) {
+        dbg("channel: skipping non-HTTP mirror: $mirror");
+        next;
+      }
+
+      my @data;
+
+      dbg("channel: found mirror $mirror");
+
+      ($mirror,@data) = split(/\s+/, $mirror);
+      $mirror =~ s@/+$@@; # http://example.com/updates/ -> .../updates
+      $mirrors{$mirror}->{weight} = 1;
+      foreach (@data) {
+        my($k,$v) = split(/=/, $_, 2);
+        $mirrors{$mirror}->{$k} = $v;
       }
     }
 
-    last;
+    unless (keys %mirrors) {
+      warn "error: no mirrors available for channel $channel\n";
+      channel_failed("channel: no mirrors available");
+      next;
+    }
+
+    # Now that we've laid the foundation, go grab the appropriate files
+    #
+
+    # Loop through all available mirrors, choose from them randomly
+    # if the archive get fails, choose another mirror,
+    # if the get for the sha1 or gpg signature files, the channel fails
+    while (my $mirror = choose_mirror(\%mirrors)) {
+      # Grab the data hash for this mirror, then remove it from the list
+      my $mirror_info = $mirrors{$mirror};
+      delete $mirrors{$mirror};
+
+      dbg("channel: selected mirror $mirror");
+
+      # Actual archive file
+      $content = http_get("$mirror/$newV.tar.gz");
+      next unless $content;
+
+      # SHA1 of the archive file
+      $SHA1 = http_get("$mirror/$newV.tar.gz.sha1");
+      last unless $SHA1;
+
+      # if GPG is enabled, the GPG detached signature of the archive file
+      if ($GPG_ENABLED) {
+        $GPG = http_get("$mirror/$newV.tar.gz.asc");
+        last unless $GPG;
+      }
+
+      # try to update our list of mirrors.
+      # a failure here doesn't cause channel failure.
+      if ($mirby_time != MIRBY_DOWNLOADED) {
+        my $mirby_tmp = http_get("$mirror/MIRRORED.BY", $mirby_time);
+        if ($mirby_tmp) {
+          $mirby = $mirby_tmp;
+          $mirby_time = MIRBY_DOWNLOADED;
+        }
+      }
+
+      last;
+    }
+
+  } else {      # $instfile
+    dbg("channel: using --install files $instfile\{,.sha1,.asc\}");
+    $content = read_install_file($instfile);
+    $SHA1 = read_install_file($instfile.".sha1");
+    $GPG = read_install_file($instfile.".asc");
   }
 
   unless ($content && $SHA1 && (!$GPG_ENABLED || $GPG)) {
@@ -801,6 +836,11 @@ ENDOFVALIDATIONERR
 
     {
       'try' => sub {
+        if ($instfile) {
+          dbg("channel: not creating MIRRORED.BY file due to --install");
+          return 1;
+        }
+
         # Write out the mirby file, not fatal if it doesn't work
         dbg("channel: creating MIRRORED.BY file");
         if (open(MBY, ">$mirby_path")) {
@@ -926,6 +966,16 @@ foreach ( $content_file, $UPDTmp ) {
 
 dbg("diag: updates complete, exiting with code $exit");
 exit $exit;
+
+##############################################################################
+
+sub read_install_file {
+  my ($file) = @_;
+  open (IN, "<$file") or die "cannot open $file\n";
+  my $all = join('', <IN>);
+  close IN;
+  return $all;
+}
 
 ##############################################################################
 
@@ -1315,6 +1365,8 @@ Options:
                           Use multiple times for multiple channels
   --channelfile file      Retrieve updates from the channels in the file
   --checkonly             Check for update availability, do not install
+  --install filename      Install updates directly from this file. Signature
+                          verification will use "file.asc" and "file.sha1"
   --allowplugins          Allow updates to load plugin code
   --gpgkey key            Trust the key id to sign releases
                           Use multiple times for multiple keys
@@ -1373,6 +1425,16 @@ lot of additional channels.
 
 Only check if an update is available, don't actually download and install it.
 The exit code will be C<0> or C<1> as described below.
+
+=item B<--install>
+
+Install updates from the named tar.gz file, instead of performing DNS lookups
+and HTTP invocations.  Files named B<file>.sha1 and B<file>.asc will be used
+for the SHA-1 and GPG signature, respectively.  The filename provided must
+contain a version number of at least 6 digits.
+
+Multiple B<--install> switches can be provided, with each matching one
+B<--channel>.
 
 =item B<--allowplugins>
 
