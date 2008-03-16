@@ -53,6 +53,12 @@ my @MODULES = (
   - version 0.34 or higher on Unix systems
   - version 0.46 or higher on Windows systems',
 },
+{
+  'module' => 'NetAddr::IP',
+  'version' => '0.00',
+  'desc' => "Used in determining which DNS tests are to be done for each of
+  the header's received fields.",
+},
 );
 
 my @OPTIONAL_MODULES = (
