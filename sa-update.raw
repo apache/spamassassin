@@ -356,7 +356,7 @@ for(my $ind = 0; $ind < @channels; $ind++) {
 
 my ($res, $ua);
 
-if (!$opt{'install'}) {
+if (!@{$opt{'install'}}) {
   $res = Net::DNS::Resolver->new();
 
   $ua = LWP::UserAgent->new();
@@ -398,7 +398,7 @@ foreach my $channel (@channels) {
   dbg("channel: channel pre file $PREFile");
 
   my $instfile;
-  if ($opt{'install'}) {
+  if (@{$opt{'install'}}) {
     $instfile = shift @{$opt{'install'}};
     dbg("channel: installing from file $instfile");
   }
