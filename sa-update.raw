@@ -456,9 +456,11 @@ foreach my $channel (@channels) {
     }
 
   } else {  # $instfile
-    if ($instfile !~ /(\d{6,})/) {
+    # the /.*/ ensures we use the 3-digit string nearest to the end of string, otherwise
+    # we might pick up something from the middle of the directory path
+    if ($instfile !~ /(?:.*\D|^)(\d{3,})/) {        
       # this is a requirement
-      die "channel: $channel: --install file $instfile does not contain a 6-digit version number!\n";
+      die "channel: $channel: --install file $instfile does not contain a 3-digit version number!\n";
     }
     $newV = $1;
 
@@ -1431,7 +1433,7 @@ The exit code will be C<0> or C<1> as described below.
 Install updates from the named tar.gz file, instead of performing DNS lookups
 and HTTP invocations.  Files named B<file>.sha1 and B<file>.asc will be used
 for the SHA-1 and GPG signature, respectively.  The filename provided must
-contain a version number of at least 6 digits.
+contain a version number of at least 3 digits.
 
 Multiple B<--install> switches can be provided, with each matching one
 B<--channel>.
