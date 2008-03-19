@@ -6,8 +6,6 @@ echo "Using ssh-nightly-slave settings from $HOME/.corpus"
 host=`echo "$1" | perl -ne 's/:-j(\S+)$//;print'`
 opts=`echo "$1" | perl -ne 's/:-j(\S+)$// and print "-j $1"'`
 
-# use $PERL from env if unset
-[ "x${PERL:-}" = x ] && PERL=perl
 set -x
 set -e
 
@@ -35,13 +33,16 @@ ssh $host \
     cd $clienttree/code \; \
     tar xfz - < $tmp/tf 
 
-# source /etc/profile to get a full $PATH, including /usr/local/bin
-# (some hosts need to use /usr/local/bin/perl instead of /usr/bin/perl).
+# source $HOME/envs to get whatever $PATH we need to use the correct perl.
+# (some hosts need to use /usr/local/bin/perl or $HOME/perl588/bin/perl
+# instead of /usr/bin/perl).  Host admins: if your host needs a custom
+# perl, here's where to prepend that to the $PATH!
+
 # rebuild to compile the blib modules for this platform.
 
 ssh $host \
+    . envs \; \
     cd $clienttree/code \; \
-    . /etc/profile \; \
     perl Makefile.PL \; \
     make clean \; \
     perl Makefile.PL \; \
@@ -50,8 +51,8 @@ ssh $host \
 # use a cs_cache in $clienttree/cs_cache -- this is not removed
 # with the above "rm -rf" command
 ssh -f $host \
+    . envs \; \
     cd $clienttree/code/masses \; \
-    . /etc/profile \; \
     TZ=UTC perl mass-check \
         --cs_ssl --cs_verbose --cs_schedule_cache --cs_cachedir=../../cs_cache \
         --reuse $opts \
