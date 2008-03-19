@@ -124,7 +124,6 @@ use constant MIRBY_DOWNLOADED => -1;
 my %opt = ();
 @{$opt{'gpgkey'}} = ();
 @{$opt{'channel'}} = ();
-@{$opt{'install'}} = ();
 my $GPG_ENABLED = 1;
 
 $opt{'gpghomedir'} = File::Spec->catfile($LOCAL_RULES_DIR, 'sa-update-keys');
@@ -143,7 +142,7 @@ GetOptions(
   'gpghomedir=s'			=> \$opt{'gpghomedir'},
   'channel=s'				=> $opt{'channel'},
 
-  'install=s'                           => $opt{'install'},
+  'install=s'                           => \$opt{'install'},
   'import=s'			        => \$opt{'import'},
   'gpgkeyfile=s'			=> \$opt{'gpgkeyfile'},
   'channelfile=s'			=> \$opt{'channelfile'},
@@ -160,7 +159,8 @@ if ( defined $opt{'help'} ) {
 if ( defined $opt{'version'} ) {            
   print_version();
   exit(0);
-} 
+}
+
 
 # Figure out what version of SpamAssassin we're using, and also figure out the
 # reverse of it for the DNS query.  Handle x.yyyzzz as well as x.yz.
@@ -356,7 +356,12 @@ for(my $ind = 0; $ind < @channels; $ind++) {
 
 my ($res, $ua);
 
-if (!@{$opt{'install'}}) {
+if ($opt{'install'}) {
+  if (scalar @channels > 1) {
+    die "fatal: --install cannot be used with multiple --channel switches.\n";
+  }
+
+} else {
   $res = Net::DNS::Resolver->new();
 
   $ua = LWP::UserAgent->new();
@@ -398,8 +403,8 @@ foreach my $channel (@channels) {
   dbg("channel: channel pre file $PREFile");
 
   my $instfile;
-  if (@{$opt{'install'}}) {
-    $instfile = shift @{$opt{'install'}};
+  if ($opt{'install'}) {
+    $instfile = $opt{'install'};
     dbg("channel: installing from file $instfile");
   }
 
@@ -1430,13 +1435,20 @@ The exit code will be C<0> or C<1> as described below.
 
 =item B<--install>
 
-Install updates from the named tar.gz file, instead of performing DNS lookups
-and HTTP invocations.  Files named B<file>.sha1 and B<file>.asc will be used
-for the SHA-1 and GPG signature, respectively.  The filename provided must
-contain a version number of at least 3 digits.
+Install updates "offline", from the named tar.gz file, instead of performing
+DNS lookups and HTTP invocations.
 
-Multiple B<--install> switches can be provided, with each matching one
-B<--channel>.
+Files named B<file>.sha1 and B<file>.asc will be used for the SHA-1 and GPG
+signature, respectively.  The filename provided must contain a version number
+of at least 3 digits, which will be used as the channel's update version
+number.
+
+Multiple B<--channel> switches cannot be used with B<--install>.  To install
+multiple channels from tarballs, run C<sa-update> multiple times with different
+B<--channel> and B<--install> switches, e.g.:
+
+        sa-update --channel foo.example.com --install foo-34958.tgz
+        sa-update --channel bar.example.com --install bar-938455.tgz
 
 =item B<--allowplugins>
 
