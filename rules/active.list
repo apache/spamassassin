@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: dos jm theo; day 2: dos theo; day 3: dos jm theo
+# with results from: day 1: dos jm; day 2: dos jm theo; day 3: dos theo
 
 # tflags userconf
 ALL_TRUSTED
@@ -21,9 +21,6 @@ AXB_XMID_DIGDOTSHRT
 
 # good enough
 BASE64_LENGTH_78_79
-
-# good enough
-BASE64_LENGTH_79_INF
 
 # tflags learn
 BAYES_00
@@ -89,9 +86,6 @@ DOS_OE_TO_MX_IMAGE
 DOS_OUTLOOK_TO_MX
 
 # good enough
-DOS_OUTLOOK_TO_MX_IMAGE
-
-# good enough
 DOS_RCVD_IP_TWICE_B
 
 # good enough
@@ -113,19 +107,10 @@ DYN_RDNS_SHORT_HELO_IMAGE
 ENV_AND_HDR_SPF_MATCH
 
 # good enough
-FAKE_REPLY_C
-
-# good enough
 FB_ACHIEVE_BACH
 
 # good enough
 FB_ADD_INCHES
-
-# good enough
-FB_B0NUS
-
-# good enough
-FB_CASINO
 
 # good enough
 FB_CIALIS_LEO3
@@ -155,9 +140,6 @@ FB_REPLICA_ROLEX
 FB_REPLIC_CAP
 
 # good enough
-FB_SMALL_PEN
-
-# good enough
 FB_SOFTTABS
 
 # good enough
@@ -167,9 +149,6 @@ FB_STRONGER_EJ
 FB_YOUR_MED
 
 # good enough
-FB_YOUR_REFI
-
-# good enough
 FH_BAD_OEV1441
 
 # good enough
@@ -177,12 +156,6 @@ FH_DATE_IS_19XX
 
 # good enough
 FH_DATE_PAST_20XX
-
-# good enough
-FH_FAKE_RCVD_LINE
-
-# good enough
-FH_HAS_XID
 
 # good enough
 FH_HELO_ALMOST_IP
@@ -215,18 +188,6 @@ FH_HOST_IN_ADDRARPA
 FH_MSGID_XXX
 
 # good enough
-FM_DEBT_HELP
-
-# good enough
-FM_DOESNT_SAY_STOCK
-
-# good enough
-FM_FAKE_HELO_HOTMAIL
-
-# good enough
-FM_FAKE_HELO_VERIZON
-
-# good enough
 FM_LIKE_STOCKS
 
 # good enough
@@ -237,15 +198,6 @@ FM_SCHOOL_DIPLOMA
 
 # good enough
 FM_SEX_HELODDDD
-
-# good enough
-FM_SUBJ_APPROVE
-
-# good enough
-FM_VEGAS_CASINO
-
-# good enough
-FM_XMAIL_F_OUT
 
 # good enough
 FORGED_RELAY_MUA_TO_MX
@@ -275,34 +227,13 @@ FRT_PACKAGE
 FRT_PENIS1
 
 # good enough
-FRT_PRICE
-
-# good enough
-FRT_REFINANCE1
-
-# good enough
 FRT_ROLEX
 
 # good enough
 FRT_SEXUAL
 
 # good enough
-FRT_VALIUM1
-
-# good enough
-FRT_VALIUM2
-
-# good enough
-FRT_XANAX2
-
-# good enough
-FR_ALMOST_VIAG2
-
-# good enough
 FS_ABIGGER
-
-# good enough
-FS_CAILIS
 
 # good enough
 FS_DOLLAR_BONUS
@@ -314,25 +245,13 @@ FS_EJACULA
 FS_ERECTION
 
 # good enough
-FS_LOWER_YOUR
-
-# good enough
 FS_NO_SCRIP
-
-# good enough
-FS_OBFU_PRMCY
 
 # good enough
 FS_REPLICA
 
 # good enough
 FS_REPLICAWATCH
-
-# good enough
-FS_START_DOYOU2
-
-# good enough
-FS_YOUR_PRESCRIP
 
 # tflags userconf
 GTUBE
@@ -385,14 +304,8 @@ HELO_OEM
 # tflags userconf
 HIGH_CODEPAGE_URI
 
-# good enough
-HS_FORGED_OE_FW
-
 # tflags userconf
 HTML_CHARSET_FARAWAY
-
-# good enough
-IMG_ALT_HSPACE_CID_ALIGN
 
 # good enough
 JM_FAKE_PSMTP_RCVD
@@ -411,9 +324,6 @@ JM_SOUGHT_1
 
 # good enough
 JM_SOUGHT_3
-
-# good enough
-JM_TORA_XM
 
 # good enough
 KAM_LOTTO1
@@ -452,9 +362,6 @@ NO_RECEIVED
 NO_RELAYS
 
 # good enough
-NULL_IN_BODY
-
-# good enough
 OUTLOOK_3416
 
 # good enough
@@ -477,9 +384,6 @@ RAZOR2_CF_RANGE_E8_51_100
 
 # tflags net
 RAZOR2_CHECK
-
-# good enough
-RCVD_BAD_ID
 
 # good enough
 RCVD_FORGED_WROTE
@@ -659,12 +563,6 @@ RCVD_IN_SSC_TRUSTED_COI
 RCVD_IN_XBL
 
 # good enough
-RCVD_MAIL_COM
-
-# good enough
-RP_LASTNAME
-
-# good enough
 RP_MATCHES_RCVD
 
 # good enough
@@ -728,9 +626,6 @@ SUBJECT_IN_BLACKLIST
 SUBJECT_IN_WHITELIST
 
 # good enough
-SUBJ_RE_NUM
-
-# good enough
 TT_OBSCURED_VIAGRA
 
 # good enough
@@ -755,16 +650,10 @@ TVD_RCVD_IP
 TVD_RCVD_IP4
 
 # good enough
-TVD_SUBJ_FINGER_07
-
-# good enough
 TVD_SUBJ_WIPE_DEBT
 
 # good enough
 TVD_VISIT_PHARMA
-
-# good enough
-JM_SOUGHT_2
 
 # tflags userconf
 UNPARSEABLE_RELAY
