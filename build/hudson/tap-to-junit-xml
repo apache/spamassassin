@@ -1,4 +1,57 @@
 #!/usr/bin/perl
+=head1 NAME
+
+tap-to-junit-xml - convert perl-style TAP test output to JUnit-style XML
+
+=head1 SYNOPSIS
+
+tap-to-junit-xml "test suite name" [ outputprefix ] < tap_output.log
+
+=head1 DESCRIPTION
+
+Parse test suite output in TAP (Test Anything Protocol,
+C<http://testanything.org/>) format, and produce XML output in a similar format
+to that produced by the <junit> ant task.
+
+C<"test suite name"> is a descriptive string used as the B<name> attribute on the
+top-level <testsuites> node of the output XML.
+
+If C<outputprefix> is specified, multi-file output will be generated, with
+multiple XML files created using C<outputprefix> as their start of their
+filenames. This prefix may contain slashes, in which case the files will be
+placed into a directory hierarchy accordingly (although care should be taken to
+ensure these directories exist in advance).
+
+If C<outputprefix> is not specified, a single XML file will be generated on
+STDOUT.
+
+=head1 DEPENDENCIES
+
+ TAP::Parser
+ Time::HiRes
+ XML::Generator 
+
+=head1 BUGS
+
+  - Doesn't do anything with the STDERR from tests.
+  - Doesn't fill in the 'errors' attribute in the  <testsuite> element.
+  - Doesn't handle "todo" or "skip"
+  - Doesn't get the elapsed time for each 'test' (i.e. assertion.)
+
+=head1 AUTHOR
+
+original, junit_xml.pl, by Matisse Enzer <matisse at matisse.net>; see
+C<http://twoalpha.blogspot.com/2007/01/junit-style-xml-from-perl-test-files.html>.
+
+pretty much entirely rewritten by Justin Mason <junit at jmason.org>, Feb 2008.
+
+=head1 COPYRIGHT & LICENSE
+
+Copyright (c) 2007 Matisse Enzer. All Rights Reserved.
+
+This program is free software; you can redistribute it and/or modify it
+under the same terms as Perl itself.
+=cut
 
 use strict;
 use warnings;
@@ -18,7 +71,13 @@ use XML::Generator qw(:noimport);
 
 my $suite_name = $opt_suitename || 'make test';
 
+# TODO: it'd be nice to respect 'Universal desirable behavior #1' from
+# http://testanything.org/wiki/index.php/TAP_Consumers -- 'Should work on the
+# TAP as a stream (ie. as each line is received) rather than wait until all the
+# TAP is received'.   But it seems TAP::Parser itself doesn't support it!
+# maybe when TAP::Parser does that, we'll do it too.
 my $tout = join("", <STDIN>);
+
 my $tap     = TAP::Parser->new( { tap => $tout } );
 my $xmlgen = XML::Generator->new( ':pretty', ':std');
 my @properties = _get_properties($xmlgen);
@@ -113,6 +172,8 @@ sub _parse_tests {
   while ( my $r = $parser->next ) {
     my $t = $r->type;
     my $s = $r->as_string; $s =~ s/\s+$//;
+
+    # warn "JMD $t $s";
 
     if ($t eq 'unknown') {
       $lastunk = $s;
@@ -210,7 +271,8 @@ sub _finish_test_block {
   my $elapsed_time = 0;     # TODO
   #my $elapsed_time = tv_interval( $ctx->{start_time}, [gettimeofday] );
 
-  # clean it up to valid Java packagename format
+  # clean it up to valid Java packagename format (or at least something Hudson will
+  # consume)
   my $name = $suite_name.":".$ctx->{test_name};
   $name =~ s/[^-:_A-Za-z0-9]+/_/gs;
 
@@ -245,46 +307,5 @@ sub _get_properties {
 
 __END__
 
-=head1 NAME
-
-junit_xml.pl - Run Perl tests and get JUnit-style XML output
-
-=head1 SYNOPSIS
-
-   junit_xml.pl < file1
-
-=head1 DESCRIPTION
-
-Experimental script to run perl test files and produce the same XML output as
-produced by the <junit> ant task.
-
-=head1 DEPENDENCIES
-
- TAP::Parser
- Time::HiRes
- XML::Generator 
-
-=head1 BUGS
-
-  - Doesn't do anything with the STDERR from tests.
-  - Doesn't fill in the 'errors' attribute in the  <testsuite> element.
-  - Doesn't handle "todo" or "skip"
-  - Doesn't get the elapsed time for each 'test' (i.e. assertion.)
-
-
-=head1 AUTHOR
-
-original by Matisse Enzer <matisse@matisse.net>
-entirely rewritten by Justin Mason <junit@jmason.org>
-
-=head1 COPYRIGHT & LICENSE
-
-Copyright (c) 2007 Matisse Enzer. All Rights Reserved.
-
-This program is free software; you can redistribute it and/or modify it
-under the same terms as Perl itself.
-=cut
-
 # JUnit references:
 # see http://www.nabble.com/JUnit-4-XML-schematized--td13946472.html
-
