@@ -29,11 +29,19 @@ make test TEST_VERBOSE=1 \
     2>&1 | tee artifacts/make_test_p561.log
 mv t/log artifacts/t.log.make_test_p561
 
-# generate XML test reports
+# generate XML test reports (multifile)
+# perl ./build/hudson/tap-to-junit-xml \
+    # "make test" testxml/make_test < artifacts/make_test.log
+# perl ./build/hudson/tap-to-junit-xml \
+    # "make disttest" testxml/make_disttest < artifacts/make_disttest.log
+# perl ./build/hudson/tap-to-junit-xml \
+    # "make test p561" testxml/make_test_p561 < artifacts/make_test_p561.log
+
+# generate XML test reports (single file)
 perl ./build/hudson/tap-to-junit-xml \
-    "make test" testxml/make_test < artifacts/make_test.log
+    "make test" < artifacts/make_test.log
 perl ./build/hudson/tap-to-junit-xml \
-    "make disttest" testxml/make_disttest < artifacts/make_disttest.log
+    "make disttest" < artifacts/make_disttest.log
 perl ./build/hudson/tap-to-junit-xml \
-    "make test p561" testxml/make_test_p561 < artifacts/make_test_p561.log
+    "make test p561" < artifacts/make_test_p561.log
 
