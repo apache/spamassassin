@@ -2382,7 +2382,7 @@ sub child_handler {
       if ($sock) { $sock->close(); }
     }
 
-    unless ($$Mail::SpamAssassin::Logger::LOG_SA{INHIBIT_LOGGING_IN_SIGCHLD_HANDLER}) {
+    unless ($Mail::SpamAssassin::Logger::LOG_SA{INHIBIT_LOGGING_IN_SIGCHLD_HANDLER}) {
       info("spamd: handled cleanup of child pid $pid ".
                 ((defined $sig) ? "due to SIG$sig" : ""));
     }
