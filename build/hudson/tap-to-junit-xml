@@ -11,7 +11,8 @@ tap-to-junit-xml "test suite name" [ outputprefix ] < tap_output.log
 
 Parse test suite output in TAP (Test Anything Protocol,
 C<http://testanything.org/>) format, and produce XML output in a similar format
-to that produced by the <junit> ant task.
+to that produced by the <junit> ant task.  This is useful for consumption by
+continuous-integration systems like Hudson (C<https://hudson.dev.java.net/>).
 
 C<"test suite name"> is a descriptive string used as the B<name> attribute on the
 top-level <testsuites> node of the output XML.
@@ -33,6 +34,7 @@ STDOUT.
 
 =head1 BUGS
 
+  - Output is optimized for Hudson, and may not look quite as good in other UIs.
   - Doesn't do anything with the STDERR from tests.
   - Doesn't fill in the 'errors' attribute in the  <testsuite> element.
   - Doesn't handle "todo" or "skip"
@@ -44,6 +46,10 @@ original, junit_xml.pl, by Matisse Enzer <matisse at matisse.net>; see
 C<http://twoalpha.blogspot.com/2007/01/junit-style-xml-from-perl-test-files.html>.
 
 pretty much entirely rewritten by Justin Mason <junit at jmason.org>, Feb 2008.
+
+=head1 VERSION
+
+Mar 27 2008 jm 
 
 =head1 COPYRIGHT & LICENSE
 
@@ -69,7 +75,12 @@ use TAP::Parser;
 use Time::HiRes qw(gettimeofday tv_interval);
 use XML::Generator qw(:noimport);
 
+# should the 'Test Summary Report' at the end of a test suite be displayed
+# as if it was a testcase?  in my opinion, no
+my $HIDE_TEST_SUMMARY_REPORT = 1;
+
 my $suite_name = $opt_suitename || 'make test';
+my $safe_suite_name = $suite_name; $safe_suite_name =~ s/[^-:_A-Za-z0-9]+/_/gs;
 
 # TODO: it'd be nice to respect 'Universal desirable behavior #1' from
 # http://testanything.org/wiki/index.php/TAP_Consumers -- 'Should work on the
@@ -80,6 +91,7 @@ my $tout = join("", <STDIN>);
 
 my $tap     = TAP::Parser->new( { tap => $tout } );
 my $xmlgen = XML::Generator->new( ':pretty', ':std');
+my $xmlgenunescaped = XML::Generator->new( ':pretty', ':std', 'escape' => 'unescaped');
 my @properties = _get_properties($xmlgen);
 my $test_results = _parse_tests( $tap, $xmlgen );
 
@@ -97,7 +109,7 @@ sub _get_junit_xml {
   my $xml = "<?xml version='1.0' encoding='UTF-8' ?>\n" . 
           $xmlgen->testsuites({
               name => $suite_name,
-            }, @$test_results );
+            }, @$test_results);
   return $xml;
 }
 
@@ -119,7 +131,7 @@ sub _parse_tests {
 
   my $ctx = {
     testsuites => [ ],
-    test_name => 'unknown',
+    test_name => 'notest',
     plan_ntests => 0,
     case_id => 0,
   };
@@ -193,15 +205,30 @@ sub _parse_tests {
         $ctx->{case_tests}++;
         $ctx->{case_failures}++;
         my $test_case = {
-            classname => $ctx->{test_name},
-            name      => $ctx->{test_name},
+            classname => test_name_to_classname($ctx->{test_name}),
+            name      => 'result',
             'time'    => 0,
         };
         my $failure = $xmlgen->failure({
           type => "OverallTestsFailed",
           message => $s
-        }, $s);
-        push @{$ctx->{test_cases}}, $xmlgen->testcase($test_case, $failure);
+        }, "__FAILUREMESSAGETODO__");
+
+        if (!$HIDE_TEST_SUMMARY_REPORT) {
+          push @{$ctx->{test_cases}}, $xmlgen->testcase($test_case, $failure);
+        }
+      }
+      elsif ($s =~ /^(\S+?)\.\.\.+1\.\.(\d+?)\s*$/) {
+        # perl 5.6.x "Test" format plan line
+        # unknown t/basic_lint....................1..1
+
+        my ($name, $nt) = ($1,$2);
+        if ($ctx->{plan_ntests}) {       # only if there have been tests planned
+          _finish_test_block($ctx);
+        }
+
+        $ctx->{plan_ntests} = $nt+0;
+        $ctx->{test_name} = "$name.t";
       }
     }
     elsif ($t eq 'plan') {
@@ -227,9 +254,12 @@ sub _parse_tests {
         next;
       }
 
+      # clean this up in a Hudson-compatible way; ":" and "/" are out, "." also causes
+      # trouble by creating an extra "directory" in the results
+
       my $test_case = {
-          classname => $ctx->{test_name},
-          name      => "$ctx->{test_name}: $ntest",
+          classname => test_name_to_classname($ctx->{test_name}),
+          name      => sprintf("test %6d", $ntest), # space-padding ensures ordering
           'time'    => 0,
       };
 
@@ -240,12 +270,28 @@ sub _parse_tests {
         $failure = $xmlgen->failure({
           type => "TAPTestFailed",
           message => $s
-        }, $s);
+        }, "__FAILUREMESSAGETODO__");
+        push @{$ctx->{test_cases}}, $xmlgen->testcase($test_case, $failure);
       }
-      push @{$ctx->{test_cases}}, $xmlgen->testcase($test_case, $failure);
+      else {
+        push @{$ctx->{test_cases}}, $xmlgen->testcase($test_case);
+      }
     }
       
     $ctx->{sysout} .= $s."\n";
+  }
+
+  if (scalar(@{$ctx->{test_cases}}) == 0 &&
+      scalar(@{$ctx->{testsuites}}) == 0)
+  { 
+    # no tests found! create a <testsuite> block containing *something* at least
+    $ctx->{case_tests}++;
+    my $test_case = {
+        classname => test_name_to_classname($ctx->{test_name}),
+        name      => 'result',
+        'time'    => 0,
+    };
+    push @{$ctx->{test_cases}}, $xmlgen->testcase($test_case);
   }
 
   _finish_test_block($ctx);
@@ -273,28 +319,43 @@ sub _finish_test_block {
 
   # clean it up to valid Java packagename format (or at least something Hudson will
   # consume)
-  my $name = $suite_name.":".$ctx->{test_name};
+  my $name = $ctx->{test_name};
   $name =~ s/[^-:_A-Za-z0-9]+/_/gs;
+  $name = "$safe_suite_name.$name";      # a "directory" for the suite name
 
   my $testsuite = {
       'time'         => $elapsed_time,
       'name'         => $name,
-      'package'      => $name,
       tests          => $ctx->{case_tests},
       failures       => $ctx->{case_failures},
       'id'           => $ctx->{case_id},
       errors         => 0,
   };
-  my $system_out = 'system-out';
-  my $system_err = 'system-err';
 
-  push @{$ctx->{testsuites}}, $xmlgen->testsuite($testsuite,
-          @{$ctx->{test_cases}},
-          $xmlgen->$system_out($ctx->{sysout}),
-          $xmlgen->$system_err());
+  my @fixedcases = ();
+  foreach my $tc (@{$ctx->{test_cases}}) {
+    if ($tc =~ s/__FAILUREMESSAGETODO__/ cdata($ctx->{sysout}) /ges) {
+      push @fixedcases, \$tc;       # inhibits escaping!
+    } else {
+      push @fixedcases, $tc;
+    }
+  }
+
+  # use "unescaped"; we have already fixed escaping on these strings.
+  # note that a reference means 'this is unescaped', bizarrely.
+  push @{$ctx->{testsuites}}, $xmlgenunescaped->testsuite($testsuite,
+          @fixedcases,
+          \("<system-out>\n".cdata($ctx->{sysout})."\n</system-out>"),
+          \("<system-err />"));
 
   _new_ctx($ctx);
 };
+
+sub cdata {
+  my $s = shift;
+  $s =~ s/\]\]>/\](warning: defanged by tap-to-junit-xml)\]>/gs;
+  return '<![CDATA['.$s.']]>';
+}
 
 sub _get_properties {
     my $xmlgen = shift;
@@ -305,7 +366,20 @@ sub _get_properties {
     return @props;
 }
 
+sub test_name_to_classname {
+  my $safe = shift;
+  $safe =~ s/[^-:_A-Za-z0-9]+/_/gs;
+  $safe = "$safe_suite_name.$safe";      # a "directory" for the suite name
+  $safe;
+}
+
 __END__
 
 # JUnit references:
-# see http://www.nabble.com/JUnit-4-XML-schematized--td13946472.html
+# http://www.nabble.com/JUnit-4-XML-schematized--td13946472.html
+# http://jra1mw.cvs.cern.ch:8180/cgi-bin/jra1mw.cgi/org.glite.testing.unit/config/JUnitXSchema.xsd?view=markup
+# skipped tests:
+# https://hudson.dev.java.net/issues/show_bug.cgi?id=1251
+# Hudson source:
+# http://fisheye5.cenqua.com/browse/hudson/hudson/main/core/src/main/java/hudson/tasks/junit/CaseResult.java
+
