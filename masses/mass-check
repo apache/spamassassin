@@ -208,6 +208,7 @@ my $sent_bytes = 0;
 my $t_first_msg = 0;
 my $t_last_msg = 0;
 my $msgs_processed = 0;
+my $failed_msgs = 0;
 my $cache_hits = 0;
 my $client_id = 0;
 
@@ -611,7 +612,7 @@ if ($opt_cs_verbose) {
     warn "network I/O: sent=$sent_bytes, received=$rcvd_bytes\n";
   }
   $t_last_msg++ if $t_last_msg == $t_first_msg;
-  warn "processed $msgs_processed messages in ".($t_last_msg - $t_first_msg).
+  warn "processed $msgs_processed messages (failed to scan $failed_msgs) in ".($t_last_msg - $t_first_msg).
        ' seconds ('.(sprintf("%.1f", ($msgs_processed / ($t_last_msg - $t_first_msg) * 3.6))).
        " kmsgs/hr)\n";
   $msgs_processed ||= 1;
@@ -1373,6 +1374,7 @@ sub generate_messages {
         warn "skipping message num $num after $opt_cs_max_tries attempts, index: ".
           (Mail::SpamAssassin::ArchiveIterator::_index_unpack($msgsout->{$num}->{'data'}))[3]."\n";
         delete $msgsout->{$num};
+        $failed_msgs++;
       }
     }
 
@@ -1405,7 +1407,7 @@ sub generate_messages {
     }
   }
   else {
-    if ($msgs_processed != $total_messages) {
+    if (($msgs_processed + $failed_msgs) != $total_messages) {
       # select messages based on what the client*s* have cached
  
       # if the client hasn't sent cache data, fake it
@@ -1546,7 +1548,7 @@ sub generate_messages {
           # line telling the client how many messages to expect
           send_line($gzfd, 0) || die "mass-check: error when writing to gz temp file\n";
           delete $msgsout->{$num};
-          $msgs_processed++ if $opt_cs_schedule_cache;
+          $failed_msgs++;
         }
       } else {
         send_line($gzfd, $num) || die "mass-check: error when writing to gz temp file\n";
@@ -2573,7 +2575,7 @@ sub result_client {
     # cs_server running in cs_schedule cache mode from completing
     # TODO: find out how result lines get malformed (malformed result lines
     # will still hang any cs_server not running with cs_schedule_cache)
-    $msgs_processed++ if $opt_cs_schedule_cache;
+    $failed_msgs++;
   }
 }
 
