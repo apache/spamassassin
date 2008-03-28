@@ -299,6 +299,7 @@ sub show_default_header {
                     "http://www.w3.org/TR/html4/strict.dtd">
   <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
   <head><meta http-equiv="Content-type" content="text/html; charset=utf-8">
+  <link rel="icon" href="http://spamassassin.apache.org/images/favicon.ico">
   <title>}.$title.q{: SpamAssassin Rule QA</title>
 
   <link href="http://SpamAssassin.apache.org/ruleqa/ruleqa.css" rel="stylesheet" type="text/css">
