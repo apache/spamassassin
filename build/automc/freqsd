@@ -153,8 +153,8 @@ sub child_loop {
 
   # add switches
   if ($job && $job->{metadata}->{dir}) {
-    logit "starting buildbot-requested slow reports";
-    run_corpus_hourly($child_reports, "--tag=b --dir ".$job->{metadata}->{dir});
+    logit "not running buildbot-requested slow reports; they're too slow!";
+    # run_corpus_hourly($child_reports, "--tag=b --dir ".$job->{metadata}->{dir});
   }
   else {
     # create slow reports
