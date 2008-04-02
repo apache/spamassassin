@@ -178,6 +178,7 @@ installed:
 
     Debian: apt-get install libdigest-sha1-perl
     Gentoo: emerge dev-perl/Digest-SHA1
+    Fedora: yum install perl-Digest-SHA1
 
   - HTML::Parser >= 3.43 (from CPAN)
 
@@ -186,6 +187,7 @@ installed:
 
     Debian: apt-get install libhtml-parser-perl
     Gentoo: emerge dev-perl/HTML-Parser
+    Fedora: yum install perl-HTML-Parser
 
   - Net::DNS (from CPAN)
 
@@ -198,17 +200,23 @@ installed:
       - version 0.34 or higher on Unix systems
       - version 0.46 or higher on Windows systems
 
+    Debian/Ubuntu: apt-get install libnet-dns-perl
+    Fedora: yum install perl-Net-DNS
+
   - NetAddr::IP (from CPAN)
 
     Used to parse IP addresses and IP address ranges for
     "trusted_networks".
 
     Debian/Ubuntu: apt-get install libnetaddr-ip-perl
+    Fedora: yum install perl-NetAddr-IP
 
   - LWP (aka libwww-perl) (from CPAN)
 
     This set of modules will include both the LWP::UserAgent and
     HTTP::Date modules, used by sa-update to retrieve update archives.
+
+    Fedora: yum install perl-libwww-perl
 
   - HTTP::Date (from CPAN)
 
@@ -219,10 +227,14 @@ installed:
     Used by sa-update to uncompress update archives.
     Version 1.04 or later is required.
 
+    Fedora: yum install perl-IO-Zlib
+
   - Archive::Tar (from CPAN)
 
     Used by sa-update to expand update archives.
     Version 1.23 or later is required.
+
+    Fedora: yum install perl-Archive-Tar
 
 
 Optional Modules
@@ -294,6 +306,8 @@ version is too low for them to be used.
     configuration or /etc/resolv.conf file is available only via an IPv6
     address.
 
+    Fedora: yum install perl-IO-Socket-INET6
+
 
   - IO::Socket::SSL (from CPAN)
 
@@ -303,6 +317,8 @@ version is too low for them to be used.
     ENABLE_SSL="yes" argument to Makefile.PL to build and run an SSL
     compatibile spamc.)
 
+    Fedora: yum install perl-IO-Socket-SSL
+
 
   - Compress::Zlib (from CPAN)
 
@@ -310,6 +326,8 @@ version is too low for them to be used.
     between spamc and spamd (the -z option to spamc), useful for
     long-distance use of spamc over the internet, you need to install
     this module.
+
+    Fedora: yum install perl-Compress-Zlib
 
 
   - Time::HiRes (from CPAN)
