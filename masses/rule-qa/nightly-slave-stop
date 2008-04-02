@@ -4,6 +4,7 @@ echo "Using ssh-nightly-slave settings from $HOME/.corpus"
 . $HOME/.corpus
 
 host=`echo "$1" | perl -ne 's/:-j(\S+)$//;print'`
+[ "$clienttree" = "" ] && clienttree=tree
 
 set -x
 
@@ -11,4 +12,12 @@ set -x
 # from the previous set are killed, before we start these ones;
 ssh $host \
     killall perl
+
+# and clean out the client-side caches of old cached mail
+ssh $host \
+  cd $clienttree/cs_cache \; find . -type f -mtime +180 -print \|
+  xargs rm
+ssh $host \
+  cd $clienttree/cs_cache \; find . -depth -type d -empty -print \|
+  xargs rmdir
 
