@@ -42,6 +42,18 @@ sub sa_t_init {
   }
 
   $perl_cmd  = $perl_path;
+
+  # propagate $PERL5OPT; seems to be necessary, at least for the common idiom of
+  # "PERL5OPT=-MFoo::Bar ./test.t"
+  if ($ENV{'PERL5OPT'}) {
+    my $o = $ENV{'PERL5OPT'};
+    if ($o =~ /(Devel::Cover)/) {
+      warn "# setting TEST_PERL_TAINT=no to avoid lack of taint-safety in $1\n";
+      $ENV{'TEST_PERL_TAINT'} = 'no';
+    }
+    $perl_cmd .= " \"$o\"";
+  }
+
   $perl_cmd .= " -T" if !defined($ENV{'TEST_PERL_TAINT'}) or $ENV{'TEST_PERL_TAINT'} ne 'no';
   $perl_cmd .= " -w" if !defined($ENV{'TEST_PERL_WARN'})  or $ENV{'TEST_PERL_WARN'}  ne 'no';
 

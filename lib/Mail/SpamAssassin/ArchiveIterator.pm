@@ -489,7 +489,7 @@ sub _scan_targets {
       my $method;
 
       # for this location only; 'detect' means they can differ for each location
-      my $thisformat = $format;     
+      my $thisformat = $format;
 
       if ($format eq 'detect') {
 	# detect the format
