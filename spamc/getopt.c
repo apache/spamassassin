@@ -247,7 +247,7 @@ spamc_getopt_long(int argc, char * const argv[],
          longoptlen -= strlen(bp);
       }
 
-      for(i=1; ; i++) {
+      for(i=0; ; i++) {
          if((longopts[i].name == NULL) || (longopts[i].name == 0))
             return(longoptiserr(argc, argv, spamc_optind-1, OPTERRNF));
          if((memcmp(longopt+2, longopts[i].name, longoptlen)) == 0) {
