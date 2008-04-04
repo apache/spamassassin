@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: bb-jm dos jm theo zmi; day 2: jm zmi; day 3: bb-jm dos jm theo zmi
+# with results from: day 1: dos jm theo zmi; day 2: bb-jm dos jm theo zmi; day 3: jm zmi
 
 # tflags userconf
 ALL_TRUSTED
@@ -74,6 +74,9 @@ DNS_FROM_RFC_DSN
 DOS_ANAL_SPAM_MAILER
 
 # good enough
+DOS_FORGED_RCVD_QUADS
+
+# good enough
 DOS_OE_TO_MX
 
 # good enough
@@ -105,6 +108,9 @@ FB_ACHIEVE_BACH
 
 # good enough
 FB_ADD_INCHES
+
+# good enough
+FB_EXTRA_INCHES
 
 # good enough
 FB_NO_SCRIP_NEEDED
@@ -213,6 +219,9 @@ FS_START_DOYOU2
 
 # good enough
 FS_WILL_HELP
+
+# good enough
+FU_LONG_QUERY3
 
 # tflags userconf
 GTUBE
@@ -638,6 +647,9 @@ FRT_COCK
 FRT_PACKAGE
 
 # good enough
+FR_WATCHES_HTTP
+
+# good enough
 FS_ABIGGER
 
 # good enough
@@ -660,9 +672,6 @@ RP_LASTNAME
 
 # good enough
 RP_MATCHES_RCVD
-
-# good enough
-TVD_FW_GRAPHIC_ID1
 
 # good enough
 TVD_PCT_OFF
