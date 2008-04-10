@@ -60,6 +60,25 @@ Example:
  body            URIBL_SBLXBL    eval:check_uridnsbl('URIBL_SBLXBL')
  describe        URIBL_SBLXBL    Contains a URL listed in the SBL/XBL blocklist
 
+=item uridnssub NAME_OF_RULE dnsbl_zone lookuptype subtest
+
+Specify a DNSBL-style domain lookup with a sub-test.  C<NAME_OF_RULE> is the
+name of the rule to be used, C<dnsbl_zone> is the zone to look up IPs in,
+and C<lookuptype> is the type of lookup (B<TXT> or B<A>).
+
+C<subtest> is the sub-test to run against the returned data.  The sub-test may
+either be an IPv4 dotted address for DNSBLs that return multiple A records or a
+non-negative decimal number to specify a bitmask for DNSBLs that return a
+single A record containing a bitmask of results.
+
+Note that, as with C<uridnsbl>, you must also define a body-eval rule calling
+C<check_uridnsbl()> to use this.
+
+Example:
+
+  uridnssub   URIBL_DNSBL_4    dnsbl.example.org.   A    127.0.0.4
+  uridnssub   URIBL_DNSBL_8    dnsbl.example.org.   A    8
+
 =item urirhsbl NAME_OF_RULE rhsbl_zone lookuptype
 
 Specify a RHSBL-style domain lookup.  C<NAME_OF_RULE> is the name of the rule
@@ -315,6 +334,32 @@ sub set_config {
 	  zone => $zone, type => $type,
           is_rhsbl => 0
         };
+      }
+      elsif ($value =~ /^$/) {
+        return $Mail::SpamAssassin::Conf::MISSING_REQUIRED_VALUE;
+      }
+      else {
+        return $Mail::SpamAssassin::Conf::INVALID_VALUE;
+      }
+    }
+  });
+
+  push (@cmds, {
+    setting => 'uridnssub',
+    is_priv => 1,
+    code => sub {
+      my ($self, $key, $value, $line) = @_;
+      if ($value =~ /^(\S+)\s+(\S+)\s+(\S+)\s+(\d{1,10}|\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})$/) {
+        my $rulename = $1;
+        my $zone = $2;
+        my $type = $3;
+        my $subrule = $4;
+        $self->{uridnsbls}->{$rulename} = {
+         zone => $zone, type => $type,
+          is_rhsbl => 0, is_subrule => 1
+        };
+        $self->{uridnsbl_subs}->{$zone} ||= { };
+        push (@{$self->{uridnsbl_subs}->{$zone}->{$subrule}->{rulenames}}, $rulename);
       }
       elsif ($value =~ /^$/) {
         return $Mail::SpamAssassin::Conf::MISSING_REQUIRED_VALUE;
