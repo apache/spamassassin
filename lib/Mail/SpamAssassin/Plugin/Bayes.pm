@@ -146,6 +146,7 @@ $IGNORED_HDRS = qr{(?: (?:X-)?Sender    # misc noise
 # hapaxen they generate.
 $MARK_PRESENCE_ONLY_HDRS = qr{(?: X-Face
   |X-(?:Gnu-?PG|PGP|GPG)(?:-Key)?-Fingerprint
+  |D(?:KIM|omainKey)-Signature
 )}ix;
 
 # tweaks tested as of Nov 18 2002 by jm: see SpamAssassin-devel list archives
