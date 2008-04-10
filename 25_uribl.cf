@@ -33,7 +33,7 @@ ifplugin Mail::SpamAssassin::Plugin::URIDNSBL
 ###########################################################################
 ## SBL
 
-uridnsbl	URIBL_SBL	sbl.spamhaus.org.	TXT
+uridnssub	URIBL_SBL	zen.spamhaus.org.	A   127.0.0.2
 body		URIBL_SBL	eval:check_uridnsbl('URIBL_SBL')
 describe	URIBL_SBL	Contains an URL listed in the SBL blocklist
 tflags		URIBL_SBL	net
