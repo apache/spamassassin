@@ -363,7 +363,7 @@ sub _run_mailbox {
   }
   seek(INPUT,$offset,0);
   while (<INPUT>) {
-    last if (substr($_,0,5) eq "From " && @msg);
+    last if (substr($_,0,5) eq "From " && @msg && /^From \S+  ?\S\S\S \S\S\S .\d .\d:\d\d:\d\d \d{4}/);
     push (@msg, $_);
 
     # skip too-big mails
@@ -800,7 +800,7 @@ sub _scan_mailbox {
 	      $header .= $_;
 	    }
 	  }
-	  if (substr($_,0,5) eq "From ") {
+	  if (substr($_,0,5) eq "From " && /^From \S+  ?\S\S\S \S\S\S .\d .\d:\d\d:\d\d \d{4}/) {
 	    $in_header = 1;
 	    $first = $_;
 	    $start = $where;
