@@ -3497,6 +3497,16 @@ sub finish_parsing {
 
 ###########################################################################
 
+sub found_any_rules {
+  my ($self) = @_;
+  if (!defined $self->{found_any_rules}) {
+    $self->{found_any_rules} = (scalar keys %{$self->{tests}} > 0);
+  }
+  return $self->{found_any_rules};
+}
+
+###########################################################################
+
 sub get_description_for_rule {
   my ($self, $rule) = @_;
   return $self->{descriptions}->{$rule};
