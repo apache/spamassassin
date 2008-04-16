@@ -1,0 +1,43 @@
+#!/bin/sh
+
+user="$1"
+[ "$user" != "" ] || echo "usage: run_one_nightly username"
+[ "$user" != "" ] || exit 99
+
+# where the $HOMEs are:
+dir="/export/home/bbmass/mc-nightly/$user"
+
+echo "Starting corpus-nightly for $user ($dir): $dir/corpus-nightly.log"
+exec 2>&1 | tee "$dir/corpus-nightly.log"
+
+. /etc/profile
+
+# ensure we use the user-wide SVN permissions and server identities,
+# otherwise we won't be able to perform noninteractive SVN ops
+rm -rf $dir/.subversion 
+ln -s /export/home/bbmass/.subversion $dir/.subversion 
+
+# oh Solaris, you really suck
+HOME=$dir
+PERL=/local/perl586/bin/perl
+TMPDIR=/tmpfs
+
+export HOME PERL TMPDIR
+
+# create the .corpus file, keeping the rsync password secret;
+# the string __RSYNC_PASSWORD__ will be replaced with the
+# contents of /export/home/bbmass/mc-nightly/USERNAME/rsync_password
+perl -pe '
+  s{__RSYNC_PASSWORD__}{ incfile("rsync_password") }eg;
+  s{__CLIENTHOSTS__}{ incfile("svn/build/nightlymc/clienthosts") }eg;
+
+  sub incfile {
+    my $file = shift;
+    my $new=`cat '"$dir"'/$file`; chop $new; $new =~ s/\s+/ /gs;
+    return "\"".$new."\"";
+  }
+' $dir/svn/build/nightlymc/corpus.$user > $dir/.corpus
+
+# use bash to work around Solaris breakage
+exec nice bash $dir/svn/masses/rule-qa/corpus-nightly
+

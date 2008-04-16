@@ -13,10 +13,6 @@ nightly_users="
   traps
 "
 
-# and where the $HOMEs are:
-nightly_trees="/export/home/bbmass/mc-nightly"
-
-
 # Ensure we're running after 0900 UTC; complex due to daylight savings. If
 # we're running in the 08xx UTC hour-space, sleep for 1 hour; when we wake, we
 # will be in 09xx.  By doing it this way, we'll work both for (a) mass-checks
@@ -30,52 +26,13 @@ nightly_trees="/export/home/bbmass/mc-nightly"
   fi
 )
 
-. /etc/profile
-
 # create the targets files:
 /export/home/automc/svn/spamassassin/build/automc/populate_cor_nightly
 
 echo "run_nightly starting at" ; date
-realhome=/export/home/bbmass
 
 # and run each mass-check using "corpus-nightly"
 for user in $nightly_users ; do
-  dir="$nightly_trees/$user"
-
-  echo "Starting corpus-nightly for $user ($dir)"
-
-  (
-    HOME=$dir
-
-    # ensure we use the user-wide SVN permissions and server identities,
-    # otherwise we won't be able to perform noninteractive SVN ops
-    rm -rf $dir/.subversion 
-    ln -s $realhome/.subversion $dir/.subversion 
-
-    # oh Solaris, you really suck
-    PERL=/local/perl586/bin/perl
-    TMPDIR=/tmpfs
-
-    export HOME PERL TMPDIR
-
-    # create the .corpus file, keeping the rsync password secret;
-    # the string __RSYNC_PASSWORD__ will be replaced with the
-    # contents of /export/home/bbmass/mc-nightly/USERNAME/rsync_password
-    perl -pe '
-      s{__RSYNC_PASSWORD__}{ incfile("rsync_password") }eg;
-      s{__CLIENTHOSTS__}{ incfile("svn/build/nightlymc/clienthosts") }eg;
-
-      sub incfile {
-        my $file = shift;
-        my $new=`cat '"$dir"'/$file`; chop $new; $new =~ s/\s+/ /gs;
-        return "\"".$new."\"";
-      }
-    ' $dir/svn/build/nightlymc/corpus.$user > $dir/.corpus
-
-    # use bash to work around Solaris breakage
-    nice bash $dir/svn/masses/rule-qa/corpus-nightly
-
-  ) 2>&1 | tee "$dir/corpus-nightly.log"
-
+  /export/home/automc/svn/spamassassin/build/automc/run_one_nightly $user
 done
 
