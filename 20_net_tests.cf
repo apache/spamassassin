@@ -32,16 +32,11 @@
 
 require_version @@VERSION@@
 
-# ---------------------------------------------------------------------------
-# Message digest tests
-
 # bug 2220. nice results
 meta DIGEST_MULTIPLE		RAZOR2_CHECK + DCC_CHECK + PYZOR_CHECK > 1
 describe DIGEST_MULTIPLE	Message hits more than one network digest check
 tflags DIGEST_MULTIPLE		net
 #reuse DIGEST_MULTIPLE
-
-###########################################################################
 
 ifplugin Mail::SpamAssassin::Plugin::DNSEval
 
@@ -51,3 +46,4 @@ tflags NO_DNS_FOR_FROM		net
 #reuse NO_DNS_FOR_FROM
 
 endif
+
