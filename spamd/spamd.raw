@@ -93,7 +93,6 @@ use Mail::SpamAssassin::Util qw(untaint_var);
 use Mail::SpamAssassin::Timeout;
 
 use Getopt::Long;
-use Pod::Usage;
 use POSIX qw(:sys_wait_h);
 use POSIX qw(setsid sigprocmask _exit);
 use Errno;
@@ -164,6 +163,9 @@ sub print_usage_and_exit {
     print_version();
     print("\n");
   }
+
+  require Pod::Usage;
+  import Pod::Usage;
   pod2usage(
     -verbose => 0,
     -message => $message,
