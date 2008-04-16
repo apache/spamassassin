@@ -788,6 +788,8 @@ sub finish_parsing {
     $conf->{main}->call_plugins("user_conf_parsing_end", { conf => $conf });
   }
 
+  $conf->found_any_rules();     # before we might delete {tests}
+
   if (!$conf->{allow_user_rules}) {
     # free up stuff we no longer need
     delete $conf->{tests};

@@ -229,6 +229,11 @@ override of config files.
 If set to 1, DNS tests will not attempt to use IPv6. Use if the existing tests
 for IPv6 availablity produce incorrect results or crashes.
 
+=item require_rules
+
+If set to 1, init() will die if no valid rules could be loaded. This is the
+default behaviour when called by C<spamassassin> or C<spamd>.
+
 =item languages_filename
 
 If you want to be able to use the language-guessing rule
@@ -1578,7 +1583,11 @@ sub init {
     }
 
     if ($sysrules) {
-      $self->{config_text} .= $self->read_cf($sysrules, 'default rules dir');
+      my $cftext = $self->read_cf($sysrules, 'default rules dir');
+      if ($self->{require_rules} && $cftext !~ /\S/) {
+        die "config: no rules were found!  Do you need to run 'sa-update'?\n";
+      }
+      $self->{config_text} .= $cftext;
     }
 
     if (!$self->{languages_filename}) {
@@ -1613,7 +1622,12 @@ sub init {
   $self->{config_text} .= $self->{post_config_text} if ($self->{post_config_text});
 
   if ($self->{config_text} !~ /\S/) {
-    warn "config: no configuration text or files found! please check your setup\n";
+    my $m = "config: no configuration text or files found! do you need to run 'sa-update'?\n";
+    if ($self->{require_rules}) {
+      die $m;
+    } else {
+      warn $m;
+    }
   }
 
   # Go and parse the config!
@@ -1627,6 +1641,10 @@ sub init {
 
   undef $self->{config_text};   # ensure it's actually freed
   delete $self->{config_text};
+
+  if ($self->{require_rules} && !$self->{conf}->found_any_rules()) {
+    die "config: no rules were found!  Do you need to run 'sa-update'?\n";
+  }
 
   # Initialize the Bayes subsystem
   if ($self->{conf}->{use_bayes}) {
