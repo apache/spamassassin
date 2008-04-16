@@ -585,18 +585,18 @@ package $modname;
 use strict;
 use vars qw(\$VERSION \@ISA \@EXPORT_OK);
 
-use DynaLoader ();
+use XSLoader ();
 
 BEGIN {
 \$VERSION = '1.0';
-\@ISA = qw(DynaLoader);
+\@ISA = qw(XSLoader);
 \@EXPORT_OK = qw();
 
 our \$HAS_RULES = {
   $has_rules
 };
 
-bootstrap $modname \$VERSION;
+XSLoader::load '$modname', \$VERSION;
 }
 
 1;
