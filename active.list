@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: dos jm theo zmi; day 2: dos jm theo zmi; day 3: dos jm theo zmi
+# with results from: day 1: dos; day 2: dos jm theo zmi; day 3: dos jm theo zmi
 
 # tflags userconf
 ALL_TRUSTED
@@ -11,19 +11,7 @@ APOSTROPHE_FROM
 AWL
 
 # good enough
-AXB_RCVD_ZOOBSEND
-
-# good enough
-AXB_RCVD_ZOONAT
-
-# good enough
 AXB_XMID_DIGDOTSHRT
-
-# good enough
-BASE64_LENGTH_78_79
-
-# good enough
-BASE64_LENGTH_79_INF
 
 # tflags learn
 BAYES_00
@@ -80,19 +68,10 @@ DNS_FROM_RFC_DSN
 DOS_ANAL_SPAM_MAILER
 
 # good enough
-DOS_FORGED_RCVD_QUADS
-
-# good enough
 DOS_OE_TO_MX
 
 # good enough
 DOS_OE_TO_MX_IMAGE
-
-# good enough
-DOS_OUTLOOK_TO_MX_IMAGE
-
-# good enough
-DOS_RCVD_IP_TWICE_B
 
 # good enough
 DOS_RCVD_IP_TWICE_C
@@ -119,9 +98,6 @@ FB_ACHIEVE_BACH
 FB_ADD_INCHES
 
 # good enough
-FB_CASINO
-
-# good enough
 FB_CIALIS_LEO3
 
 # good enough
@@ -135,9 +111,6 @@ FB_MORE_SEMEN
 
 # good enough
 FB_NO_SCRIP_NEEDED
-
-# good enough
-FB_P1LL
 
 # good enough
 FB_QUALITY_REPLICA
@@ -161,9 +134,6 @@ FB_STRONGER_EJ
 FB_YOUR_MED
 
 # good enough
-FB_YOUR_REFI
-
-# good enough
 FH_BAD_OEV1441
 
 # good enough
@@ -173,16 +143,7 @@ FH_DATE_IS_19XX
 FH_DATE_PAST_20XX
 
 # good enough
-FH_FAKE_RCVD_LINE
-
-# good enough
-FH_HAS_XID
-
-# good enough
 FH_HELO_ALMOST_IP
-
-# good enough
-FH_HELO_ENDS_DOT
 
 # good enough
 FH_HELO_EQ_610HEX
@@ -209,15 +170,6 @@ FH_HOST_IN_ADDRARPA
 FH_MSGID_XXX
 
 # good enough
-FM_DEBT_HELP
-
-# good enough
-FM_FAKE_HELO_HOTMAIL
-
-# good enough
-FM_FAKE_HELO_VERIZON
-
-# good enough
 FM_LIKE_STOCKS
 
 # good enough
@@ -230,25 +182,10 @@ FM_SCHOOL_DIPLOMA
 FM_SEX_HELODDDD
 
 # good enough
-FM_SUBJ_APPROVE
-
-# good enough
-FM_VEGAS_CASINO
-
-# good enough
-FM_XMAIL_F_OUT
-
-# good enough
 FORGED_RELAY_MUA_TO_MX
 
 # tflags userconf
 FRAGMENTED_MESSAGE
-
-# good enough
-FRT_APPROV
-
-# good enough
-FRT_BIGGERMEM1
 
 # good enough
 FRT_DISCOUNT
@@ -257,40 +194,19 @@ FRT_DISCOUNT
 FRT_ERECTION
 
 # good enough
-FRT_INTEREST
-
-# good enough
 FRT_LEVITRA
 
 # good enough
 FRT_PACKAGE
 
 # good enough
-FRT_PAYMENT
-
-# good enough
 FRT_PENIS1
-
-# good enough
-FRT_REFINANCE1
 
 # good enough
 FRT_ROLEX
 
 # good enough
 FRT_SEXUAL
-
-# good enough
-FRT_TODAY2
-
-# good enough
-FRT_VALIUM1
-
-# good enough
-FRT_XANAX1
-
-# good enough
-FRT_XANAX2
 
 # good enough
 FR_WATCHES_HTTP
@@ -311,16 +227,10 @@ FS_EJACULA
 FS_ERECTION
 
 # good enough
-FS_LOWER_YOUR
-
-# good enough
 FS_MAKE_MONEY
 
 # good enough
 FS_NO_SCRIP
-
-# good enough
-FS_OBFU_PRMCY
 
 # good enough
 FS_REPLICA
@@ -329,13 +239,7 @@ FS_REPLICA
 FS_REPLICAWATCH
 
 # good enough
-FS_START_DOYOU2
-
-# good enough
 FS_WILL_HELP
-
-# good enough
-FS_YOUR_PRESCRIP
 
 # good enough
 FU_LONG_QUERY3
@@ -392,7 +296,13 @@ HELO_OEM
 HIGH_CODEPAGE_URI
 
 # good enough
-HS_FORGED_OE_FW
+HS_BOBAX_MID_1
+
+# good enough
+HS_BOBAX_MID_2
+
+# good enough
+HS_OUTLOOK_MID_NOBRK
 
 # good enough
 HS_VPXL
@@ -401,13 +311,7 @@ HS_VPXL
 HTML_CHARSET_FARAWAY
 
 # good enough
-IMG_ALT_HSPACE_CID_ALIGN
-
-# good enough
 JM_FAKE_PSMTP_RCVD
-
-# good enough
-JM_GMT_RCVD
 
 # tflags publish
 JM_I_FEEL_LUCKY
@@ -418,20 +322,11 @@ JM_NICE_GIRL
 # good enough
 JM_REACTOR_MAILER
 
-# good enough
-KAM_LOTTO1
-
 # tflags publish
 KAM_STOCKOTC
 
 # tflags publish
 KAM_STOCKTIP15
-
-# good enough
-KB_DATE_CONTAINS_TAB
-
-# good enough
-KB_FAKED_THE_BAT
 
 # good enough
 KB_RATWARE_MSGID
@@ -453,9 +348,6 @@ NO_RECEIVED
 
 # tflags userconf
 NO_RELAYS
-
-# good enough
-NULL_IN_BODY
 
 # good enough
 OUTLOOK_3416
@@ -480,9 +372,6 @@ RAZOR2_CF_RANGE_E8_51_100
 
 # tflags net
 RAZOR2_CHECK
-
-# good enough
-RCVD_BAD_ID
 
 # good enough
 RCVD_FORGED_WROTE
@@ -662,12 +551,6 @@ RCVD_IN_SSC_TRUSTED_COI
 RCVD_IN_XBL
 
 # good enough
-RCVD_MAIL_COM
-
-# good enough
-RP_LASTNAME
-
-# good enough
 RP_MATCHES_RCVD
 
 # good enough
@@ -731,9 +614,6 @@ SUBJECT_IN_BLACKLIST
 SUBJECT_IN_WHITELIST
 
 # good enough
-SUBJ_RE_NUM
-
-# good enough
 TT_OBSCURED_VIAGRA
 
 # good enough
@@ -741,9 +621,6 @@ TVD_ENVFROM_APOST
 
 # good enough
 TVD_FINGER_02
-
-# good enough
-TVD_FW_GRAPHIC_ID1
 
 # good enough
 TVD_GOOG_LUCKY
@@ -758,34 +635,10 @@ TVD_PCT_OFF
 TVD_QUAL_MEDS
 
 # good enough
-TVD_RCVD_IP
-
-# good enough
-TVD_RCVD_IP4
-
-# good enough
-TVD_SUBJ_FINGER_07
-
-# good enough
-TVD_SUBJ_WIPE_DEBT
-
-# good enough
 TVD_VISIT_PHARMA
 
 # good enough
-FB_YOU_CAN_BECOME
-
-# good enough
 FR_TEST_BASE64_BAD
-
-# good enough
-HS_BOBAX_MID_1
-
-# good enough
-HS_BOBAX_MID_2
-
-# good enough
-HS_OUTLOOK_MID_NOBRK
 
 # tflags userconf
 UNPARSEABLE_RELAY
@@ -989,9 +842,6 @@ XMAILER_MIMEOLE_OL_3AC1D
 XMAILER_MIMEOLE_OL_3D61D
 
 # good enough
-XMAILER_MIMEOLE_OL_465CD
-
-# good enough
 XMAILER_MIMEOLE_OL_4B815
 
 # good enough
@@ -1011,9 +861,6 @@ XMAILER_MIMEOLE_OL_91287
 
 # good enough
 XMAILER_MIMEOLE_OL_CAC8F
-
-# good enough
-XMAILER_MIMEOLE_OL_EF20B
 
 # good enough
 X_MAILER_CME_6543_MSN
