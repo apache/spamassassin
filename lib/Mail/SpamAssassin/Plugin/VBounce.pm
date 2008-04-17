@@ -106,7 +106,7 @@ sub check_whitelist_bounce_relays {
 
   # check the plain-text body, first
   foreach my $line (@{$body}) {
-    next unless ($line =~ /^Received:/i);
+    next unless ($line =~ /^[> ]*Received:/i);
     while ($line =~ / (\S+\.\S+) /g) {
       return 1 if $self->_relay_is_in_whitelist_bounce_relays($pms, $1);
     }
@@ -118,7 +118,7 @@ sub check_whitelist_bounce_relays {
 
   my $pristine = $pms->{msg}->get_pristine_body();
   foreach my $line ($pristine =~ /^(.*)$/gm) {
-    next unless $line && ($line =~ /^Received:/i);
+    next unless $line && ($line =~ /^[> ]*Received:/i);
     while ($line =~ / (\S+\.\S+) /g) {
       return 1 if $self->_relay_is_in_whitelist_bounce_relays($pms, $1);
     }
