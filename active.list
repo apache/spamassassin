@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: dos; day 2: dos jm theo zmi; day 3: dos jm theo zmi
+# with results from: day 1: dos jm theo zmi; day 2: dos; day 3: dos jm theo zmi
 
 # tflags userconf
 ALL_TRUSTED
@@ -134,6 +134,9 @@ FB_STRONGER_EJ
 FB_YOUR_MED
 
 # good enough
+FB_YOU_CAN_BECOME
+
+# good enough
 FH_BAD_OEV1441
 
 # good enough
@@ -207,6 +210,9 @@ FRT_ROLEX
 
 # good enough
 FRT_SEXUAL
+
+# good enough
+FR_TEST_BASE64_BAD
 
 # good enough
 FR_WATCHES_HTTP
@@ -623,6 +629,9 @@ TVD_ENVFROM_APOST
 TVD_FINGER_02
 
 # good enough
+TVD_FW_GRAPHIC_ID1
+
+# good enough
 TVD_GOOG_LUCKY
 
 # good enough
@@ -636,9 +645,6 @@ TVD_QUAL_MEDS
 
 # good enough
 TVD_VISIT_PHARMA
-
-# good enough
-FR_TEST_BASE64_BAD
 
 # tflags userconf
 UNPARSEABLE_RELAY
@@ -675,9 +681,6 @@ URIBL_SC_SURBL
 
 # tflags net
 URIBL_WS_SURBL
-
-# tflags net
-URIBL_XBL
 
 # tflags userconf
 USER_IN_ALL_SPAM_TO
