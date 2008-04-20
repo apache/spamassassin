@@ -24,6 +24,10 @@ TMPDIR=/tmpfs
 
 export HOME PERL TMPDIR
 
+# attempt to ensure the raw .corpus file is up to date (don't
+# worry about tags etc. just yet)
+( cd $dir/svn ; svn cleanup ; svn up build/nightlymc ) < /dev/null
+
 # create the .corpus file, keeping the rsync password secret;
 # the string __RSYNC_PASSWORD__ will be replaced with the
 # contents of /export/home/bbmass/mc-nightly/USERNAME/rsync_password
