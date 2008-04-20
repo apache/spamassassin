@@ -100,6 +100,7 @@ sub check_whitelist_bounce_relays {
 
   my $body = $pms->get_decoded_stripped_body_text_array();
   my $res;
+  my $found_received;
 
   # catch lines like:
   # Received: by dogma.boxhost.net (Postfix, from userid 1007)
@@ -107,6 +108,7 @@ sub check_whitelist_bounce_relays {
   # check the plain-text body, first
   foreach my $line (@{$body}) {
     next unless ($line =~ /^[> ]*Received:/i);
+    $found_received++;
     while ($line =~ / (\S+\.\S+) /g) {
       return 1 if $self->_relay_is_in_whitelist_bounce_relays($pms, $1);
     }
@@ -119,12 +121,17 @@ sub check_whitelist_bounce_relays {
   my $pristine = $pms->{msg}->get_pristine_body();
   foreach my $line ($pristine =~ /^(.*)$/gm) {
     next unless $line && ($line =~ /^[> ]*Received:/i);
+    $found_received++;
     while ($line =~ / (\S+\.\S+) /g) {
       return 1 if $self->_relay_is_in_whitelist_bounce_relays($pms, $1);
     }
   }
 
-  return 0;
+  if ($found_received) {
+    return 0;
+  } else {
+    return 1;
+  }
 }
 
 sub _relay_is_in_whitelist_bounce_relays {
