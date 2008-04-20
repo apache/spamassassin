@@ -1,14 +1,14 @@
 #!/bin/sh
 
 user="$1"
-[ "$user" != "" ] || echo "usage: run_one_nightly username"
-[ "$user" != "" ] || exit 99
+[ "$user" = "" ] && echo "usage: run_one_nightly username"
+[ "$user" = "" ] && exit 99
 
 # where the $HOMEs are:
 dir="/export/home/bbmass/mc-nightly/$user"
 
+(
 echo "Starting corpus-nightly for $user ($dir): $dir/corpus-nightly.log"
-exec 2>&1 | tee "$dir/corpus-nightly.log"
 
 . /etc/profile
 
@@ -41,3 +41,4 @@ perl -pe '
 # use bash to work around Solaris breakage
 exec nice bash $dir/svn/masses/rule-qa/corpus-nightly
 
+) 2>&1 | tee "$dir/corpus-nightly.log"
