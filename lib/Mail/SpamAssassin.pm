@@ -1925,14 +1925,13 @@ sub _get_cf_pre_files_in_dir {
     my @cfs;
 
     # use "eval" to avoid loading File::Find unless this is specified
-    eval {
-      use File::Find qw();
+    eval ' use File::Find qw();
       File::Find::find(
         sub {
           return unless (/\.${type}$/i && -f $_);
           push @cfs, $File::Find::name;
         }, $dir);
-    };
+    ';
     return sort { $a cmp $b } @cfs;
 
     die "oops! $@";     # should never get here
