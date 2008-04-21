@@ -15,10 +15,10 @@ ssh $host \
 
 # and clean out the client-side caches of old cached mail
 ssh $host \
-  cd $clienttree/cs_cache \&\& find . -type f -mtime +180 -print \| xargs rm \
-  || true
+    find $clienttree/cs_cache/. -type f -mtime +180 -print > o
+[ -s o ] && ssh $host xargs rm < o
 
 ssh $host \
-  cd $clienttree/cs_cache \&\& find . -depth -type d -empty -print \| xargs rmdir \
-  || true
+    find $clienttree/cs_cache/. -depth -type d -empty -print > o
+[ -s o ] && ssh $host xargs rmdir < o
 
