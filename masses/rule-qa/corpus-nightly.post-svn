@@ -79,7 +79,7 @@ else
   # for a long time)
 
   # just to be sure, though: run a 'stop' script in case that fails
-  ./rule-qa/nightly-slaves-stop $clienthosts
+  ./rule-qa/nightly-slaves-stop $clienthosts || true
 fi
 
 date | tee test.end
