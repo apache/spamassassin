@@ -111,7 +111,7 @@ a C<count> key and a C<totscore> key.
 =cut 
 
 sub get_addr_entry {
-  my ($self, $addr) = @_;
+  my ($self, $addr, $signedby) = @_;
   my $entry = { };
   die "auto-whitelist: unimplemented base method";	# override this
   return $entry;

@@ -115,7 +115,7 @@ sub finish {
 ###########################################################################
 
 sub get_addr_entry {
-  my ($self, $addr) = @_;
+  my ($self, $addr, $signedby) = @_;
 
   my $entry = {
 	addr			=> $addr,
@@ -126,6 +126,13 @@ sub get_addr_entry {
 
   dbg("auto-whitelist: db-based $addr scores ".$entry->{count}.'/'.$entry->{totscore});
   return $entry;
+}
+
+###########################################################################
+
+sub get_signer_reputation {
+  my ($self, $addr, $signedby) = @_;
+  return undef;
 }
 
 ###########################################################################

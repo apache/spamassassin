@@ -164,6 +164,22 @@ or group based auto-whitelist databases.
 		type => $Mail::SpamAssassin::Conf::CONF_TYPE_STRING
 	       });
 
+=item auto_whitelist_distinguish_signed
+
+If this option is set the SQLBasedAddrList module will keep separate
+database entries for DKIM-validated e-mail addresses and for non-validated
+ones. A pre-requisite when setting this option is that a field awl.signedby
+exists in a SQL table, otherwise SQL operations will fail. A plugin DKIM
+should also be enabled, as otherwise turning on this option makes no sense.
+
+=cut
+
+  push (@cmds, {
+		setting => 'auto_whitelist_distinguish_signed',
+		default => 0,
+		type => $Mail::SpamAssassin::Conf::CONF_TYPE_BOOL
+	       });
+
 =back
 
 =head1 ADMINISTRATOR SETTINGS
@@ -320,10 +336,10 @@ sub check_from_in_auto_whitelist {
 
     return 0 unless ($pms->{conf}->{use_auto_whitelist});
 
-    my $timer = $self->{main}->time_method("check_awl");
+    my $timer = $self->{main}->time_method("total_awl");
 
-    local $_ = lc $pms->get('From:addr');
-    return 0 unless /\S/;
+    my $from = lc $pms->get('From:addr');
+    return 0 unless $from =~ /\S/;
 
     # find the earliest usable "originating IP".  ignore private nets
     my $origip;
@@ -338,6 +354,8 @@ sub check_from_in_auto_whitelist {
     my $scores = $pms->{conf}->{scores};
     my $tflags = $pms->{conf}->{tflags};
     my $points = 0;
+    my $signedby = $pms->get_tag('DKIMIDENTITY');
+    $signedby = undef  if defined $signedby && $signedby eq '';
 
     foreach my $test (@{$pms->{test_names_hit}}) {
       # ignore tests with 0 score in this scoreset,
@@ -355,18 +373,48 @@ sub check_from_in_auto_whitelist {
     eval {
       $whitelist = Mail::SpamAssassin::AutoWhitelist->new($pms->{main});
 
-      # check
-      my $meanscore = $whitelist->check_address($_, $origip);
+      my $meanscore;
+      { # check
+        my $timer = $self->{main}->time_method("check_awl");
+        $meanscore = $whitelist->check_address($from, $origip, $signedby);
+      }
       my $delta = 0;
-    
-      dbg("auto-whitelist: AWL active, pre-score: $pms->{score}, autolearn score: $awlpoints, ".
-	  "mean: ". ($meanscore || 'undef') .", IP: ". ($origip || 'undef'));
+      my $signeravg;
 
-      if (defined ($meanscore)) {
-	$delta = ($meanscore - $awlpoints) * $pms->{main}->{conf}->{auto_whitelist_factor};
+    ### commented out to avoid additional load on a SQL server for the time being;
+    ### the average score (reputation) is still there and is accessible offline
+    #
+    # if (defined $signedby) {
+    #   my $timer = $self->{main}->time_method("check_awl_reput");
+    #   $signeravg = $whitelist->check_signer_reputation($from, $signedby);
+    # }
+    
+      dbg("auto-whitelist: AWL active, pre-score: %s, autolearn score: %s, ".
+	  "mean: %s%s, IP: %s, address: %s %s",
+          $pms->{score}, $awlpoints, $meanscore || 'undef',
+          !defined $signeravg ? '' : sprintf(", signer_avg: %.2f",$signeravg),
+          $origip || 'undef',
+          $from,  $signedby ? "SIGNED by $signedby" : '(not signed)');
+
+      if (defined $signeravg) {
+	$pms->set_tag('AWLSIGNERMEAN', sprintf("%2.1f", $signeravg));
+      }
+      if (defined $meanscore || defined $signeravg) {
+	my $past_avg;
+        if (defined $meanscore && defined $signeravg) {
+	  $past_avg = ($meanscore + $signeravg) / 2;
+        } elsif (defined $meanscore) {
+	  $past_avg = $meanscore;
+        } else {
+	  $past_avg = $signeravg;
+	}
+	$delta = $past_avg - $awlpoints;
+	$delta *= $pms->{main}->{conf}->{auto_whitelist_factor};
       
 	$pms->set_tag('AWL', sprintf("%2.1f",$delta));
-	$pms->set_tag('AWLMEAN', sprintf("%2.1f", $meanscore));
+        if (defined $meanscore) {
+	  $pms->set_tag('AWLMEAN', sprintf("%2.1f", $meanscore));
+	}
 	$pms->set_tag('AWLCOUNT', sprintf("%2.1f", $whitelist->count()));
 	$pms->set_tag('AWLPRESCORE', sprintf("%2.1f", $pms->{score}));
       }
@@ -375,6 +423,7 @@ sub check_from_in_auto_whitelist {
       # early high-scoring messages are reinforced compared to
       # later ones.  http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=159704
       if (!$pms->{disable_auto_learning}) {
+        my $timer = $self->{main}->time_method("update_awl");
 	$whitelist->add_score($awlpoints);
       }
 
@@ -397,7 +446,7 @@ sub check_from_in_auto_whitelist {
       return 0;
     };
 
-    dbg("auto-whitelist: post auto-whitelist score: ".$pms->{score});
+    dbg("auto-whitelist: post auto-whitelist score: %.3f", $pms->{score});
 
     # test hit is above
     return 0;
@@ -419,7 +468,7 @@ sub blacklist_address {
   eval {
     $whitelist = Mail::SpamAssassin::AutoWhitelist->new($self->{main});
 
-    if ($whitelist->add_known_bad_address($args->{address})) {
+    if ($whitelist->add_known_bad_address($args->{address}, $args->{signedby})) {
       print "SpamAssassin auto-whitelist: adding address to blacklist: " . $args->{address} . "\n";
       $status = 0;
     }
@@ -455,7 +504,7 @@ sub whitelist_address {
   eval {
     $whitelist = Mail::SpamAssassin::AutoWhitelist->new($self->{main});
 
-    if ($whitelist->add_known_good_address($args->{address})) {
+    if ($whitelist->add_known_good_address($args->{address}, $args->{signedby})) {
       print "SpamAssassin auto-whitelist: adding address to whitelist: " . $args->{address} . "\n";
       $status = 1;
     }
@@ -492,7 +541,7 @@ sub remove_address {
   eval {
     $whitelist = Mail::SpamAssassin::AutoWhitelist->new($self->{main});
 
-    if ($whitelist->remove_address($args->{address})) {
+    if ($whitelist->remove_address($args->{address}, $args->{signedby})) {
       print "SpamAssassin auto-whitelist: removing address: " . $args->{address} . "\n";
       $status = 1;
     }

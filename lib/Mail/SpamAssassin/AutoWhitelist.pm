@@ -106,7 +106,7 @@ sub new {
 
 ###########################################################################
 
-=item $meanscore = awl->check_address($addr, $originating_ip);
+=item $meanscore = awl->check_address($addr, $originating_ip, $signedby);
 
 This method will return the mean score of all messages associated with the
 given address, or undef if the address hasn't been seen before.
@@ -116,7 +116,7 @@ If B<$originating_ip> is supplied, it will be used in the lookup.
 =cut
 
 sub check_address {
-  my ($self, $addr, $origip) = @_;
+  my ($self, $addr, $origip, $signedby) = @_;
 
   if (!defined $self->{checker}) {
     return undef;		# no factory defined; we can't check
@@ -125,14 +125,14 @@ sub check_address {
   $self->{entry} = undef;
 
   my $fulladdr = $self->pack_addr ($addr, $origip);
-  $self->{entry} = $self->{checker}->get_addr_entry ($fulladdr);
+  $self->{entry} = $self->{checker}->get_addr_entry ($fulladdr, $signedby);
 
   if (!defined $self->{entry}->{count} || $self->{entry}->{count} == 0) {
     # no entry found
     if (defined $origip) {
       # try upgrading a default entry (probably from "add-addr-to-foo")
       my $noipaddr = $self->pack_addr ($addr, undef);
-      my $noipent = $self->{checker}->get_addr_entry ($noipaddr);
+      my $noipent = $self->{checker}->get_addr_entry ($noipaddr, $signedby);
 
       if (defined $noipent->{count} && $noipent->{count} > 0) {
 	dbg("auto-whitelist: found entry w/o IP address for $addr: replacing with $origip");
@@ -149,6 +149,23 @@ sub check_address {
   if ($self->{entry}->{count} == 0) { return undef; }
 
   return $self->{entry}->{totscore}/$self->{entry}->{count};
+}
+
+###########################################################################
+
+=item $meanscore = awl->check_signer_reputation($addr, $signedby);
+
+This method will return a mean score of all messages signed by the
+given signing identity, or undef if no such entries exist.
+
+=cut
+
+sub check_signer_reputation {
+  my ($self, $addr, $signedby) = @_;
+
+  return undef if !defined $self->{checker};
+  return undef if !$self->{checker}->UNIVERSAL::can("get_signer_reputation");
+  return $self->{checker}->get_signer_reputation($addr, $signedby);
 }
 
 ###########################################################################
@@ -197,9 +214,9 @@ This method will add a score of -100 to the given address -- effectively
 =cut
 
 sub add_known_good_address {
-  my ($self, $addr) = @_;
+  my ($self, $addr, $signedby) = @_;
 
-  return $self->modify_address($addr, -100);
+  return $self->modify_address($addr, -100, $signedby);
 }
 
 
@@ -213,30 +230,30 @@ This method will add a score of 100 to the given address -- effectively
 =cut
 
 sub add_known_bad_address {
-  my ($self, $addr) = @_;
+  my ($self, $addr, $signedby) = @_;
 
-  return $self->modify_address($addr, 100);
+  return $self->modify_address($addr, 100, $signedby);
 }
 
 ###########################################################################
 
 sub remove_address {
-  my ($self, $addr) = @_;
+  my ($self, $addr, $signedby) = @_;
 
-  return $self->modify_address($addr, undef);
+  return $self->modify_address($addr, undef, $signedby);
 }
 
 ###########################################################################
 
 sub modify_address {
-  my ($self, $addr, $score) = @_;
+  my ($self, $addr, $score, $signedby) = @_;
 
   if (!defined $self->{checker}) {
     return undef;		# no factory defined; we can't check
   }
 
   my $fulladdr = $self->pack_addr ($addr, undef);
-  my $entry = $self->{checker}->get_addr_entry ($fulladdr);
+  my $entry = $self->{checker}->get_addr_entry ($fulladdr, $signedby);
 
   # remove any old entries (will remove per-ip entries as well)
   # always call this regardless, as the current entry may have 0
@@ -247,7 +264,7 @@ sub modify_address {
   if (!defined($score)) { return 1; }
 
   # else add score. get a new entry first
-  $entry = $self->{checker}->get_addr_entry ($fulladdr);
+  $entry = $self->{checker}->get_addr_entry ($fulladdr, $signedby);
   $self->{checker}->add_score($entry, $score);
 
   return 1;

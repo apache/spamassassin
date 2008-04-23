@@ -77,9 +77,21 @@ setting: "awl") with at least these fields:
   ip    varchar(10)       # this is the ip key
   count int(11)           # this is the message counter
   totscore float          # this is the total calculated score
+  signedby varchar(255)   # a DKIM or DomainKeys signing id
 
-You can add as many other fields you wish as long as the above fields
-are contained in the table.
+You can add as many other fields you wish as long as the above fields are
+contained in the table.
+
+The 'signedby' field was introduced in version 3.3 and is only needed
+if auto_whitelist_distinguish_signed is true, e.g. (in local.cf):
+  auto_whitelist_distinguish_signed 1
+and is only useful if a plugin DKIM is enabled. If the setting is off
+the field is not used, but it does no harm to have it in a table.
+The new field makes AWL keep separate records for author addresses with
+valid DKIM or DomainKeys signatures, and separate records for unsigned mail,
+which does a good job for popular domains such as gmail.com and yahoo.com
+where most of the spam claiming to be from such domain does not come from
+a freemail provider and therefore can not carry a valid signature.
 
 Included is a default table that can be safely used in your own setup.  To use
 the default table, you must first create a database, and a username/password
@@ -95,16 +107,34 @@ This will create the following table:
 
 CREATE TABLE awl (
   username varchar(100) NOT NULL default '',
-  email varchar(200) NOT NULL default '',
+  email varchar(255) NOT NULL default '',
   ip varchar(10) NOT NULL default '',
-  count int(11) default '0',
-  totscore float default '0',
-  PRIMARY KEY  (username,email,ip)
+  count int(11) NOT NULL default '0',
+  totscore float NOT NULL default '0',
+  signedby varchar(255) NOT NULL default '',
+  PRIMARY KEY (username,email,signedby,ip)
 ) TYPE=MyISAM;
 
 For PostgreSQL, use the following:
 
 psql -U <username> -f awl_pg.sql <databasename>
+
+
+To add a field 'signedby' to an existing table and to modify a primary key:
+under MySQL:
+  ALTER TABLE awl
+    DROP PRIMARY KEY,
+    ADD signedby varchar(255) NOT NULL DEFAULT '',
+    ADD PRIMARY KEY (username,email,signedby,ip);
+under PostgreSQL:
+  DROP INDEX awl_pkey;
+  ALTER TABLE awl
+    ADD signedby varchar(255) NOT NULL DEFAULT '',
+    ADD PRIMARY KEY (username,email,signedby,ip);
+then add the following to local.cf to let SpamAssassin start using the
+newly added field 'signedby' :
+  auto_whitelist_distinguish_signed 1
+
 
 Once you have created the database and added the table, just add the required
 lines to your global configuration file (local.cf).  Note that you
