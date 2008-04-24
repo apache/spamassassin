@@ -541,6 +541,10 @@ sub show_default_view {
     my $tflags = eval {
           $md->{rulemds}->{$self->{rule}}->{tf}
         } || '';
+
+    # a missing string is now represented as {}, annoyingly
+    if (ref $tflags =~ /HASH/) { $tflags = ''; }
+
     $tflags = ($tflags =~ /\S/) ? ", tflags $tflags" : "";
 
     my $plinkhref = $self->gen_this_url()."#rulemetadata";
