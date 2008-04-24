@@ -108,8 +108,9 @@ sub svn_and_build {
   # the amount of work that has to be done to "svn up" to the
   # correct revision, hopefully.
   my $cmd;
-  $cmd = "cd $tmpdir; ".
-        "cp -pr $conf{tree}/. .; ".
+  $cmd = "cd $tmpdir && ".
+        "cp -pr $conf{tree}/. . && ".
+        "rm -rf rules rulesrc && ".
         "svn update --non-interactive -r$opt_rev < /dev/null";
 
   print "[$cmd]\n";
