@@ -180,9 +180,12 @@ header __CRBOUNCE_EXI   X-ExiSpam =~ /ExiSpam/
 header __CRBOUNCE_UNVERIF   Subject =~ /^Unverified email to /
 header __CRBOUNCE_BLOCKED   Subject =~ /^\*\*Message you sent blocked by our bulk email filter\*\*$/
 
-meta CRBOUNCE_MESSAGE       !__MY_SERVERS_FOUND && (__CRBOUNCE_UOL || __CRBOUNCE_VERIF || __CRBOUNCE_RP || __CRBOUNCE_VANQ || __CRBOUNCE_HEADER || __CRBOUNCE_QURB || __CRBOUNCE_0SPAM || __CRBOUNCE_GETRESP || __CRBOUNCE_TMDA || __CRBOUNCE_ASK || __CRBOUNCE_EXI || __CRBOUNCE_PREC_SPAM || __CRBOUNCE_SZ || __CRBOUNCE_SPAMLION || __CRBOUNCE_MIB || __CRBOUNCE_SI || __CRBOUNCE_UNVERIF || __CRBOUNCE_RP_2 || __CRBOUNCE_BLOCKED)
+meta __CHALLENGE_RESPONSE     __CRBOUNCE_UOL || __CRBOUNCE_VERIF || __CRBOUNCE_RP || __CRBOUNCE_VANQ || __CRBOUNCE_HEADER || __CRBOUNCE_QURB || __CRBOUNCE_0SPAM || __CRBOUNCE_GETRESP || __CRBOUNCE_TMDA || __CRBOUNCE_ASK || __CRBOUNCE_EXI || __CRBOUNCE_PREC_SPAM || __CRBOUNCE_SZ || __CRBOUNCE_SPAMLION || __CRBOUNCE_MIB || __CRBOUNCE_SI || __CRBOUNCE_UNVERIF || __CRBOUNCE_RP_2 || __CRBOUNCE_BLOCKED
+meta CHALLENGE_RESPONSE      __MY_SERVERS_FOUND && __CHALLENGE_RESPONSE
+describe CHALLENGE_RESPONSE  Challenge-Response message for mail you sent
 
-describe CRBOUNCE_MESSAGE   Challenge-response bounce message
+meta CRBOUNCE_MESSAGE       !__MY_SERVERS_FOUND && __CHALLENGE_RESPONSE
+describe CRBOUNCE_MESSAGE   Challenge-Response bounce message
 
 # ---------------------------------------------------------------------------
 # "Virus found in your mail" bounces
