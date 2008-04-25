@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: bb-jm dos jm theo zmi; day 2: bb-jm dos theo zmi; day 3: dos jm theo zmi
+# with results from: day 1: bb-jm bb-traps dos jm theo zmi; day 2: bb-jm bb-traps dos jm theo zmi; day 3: bb-jm dos theo zmi
 
 # tflags userconf
 ALL_TRUSTED
@@ -155,9 +155,6 @@ FB_STRONGER_EJ
 FB_YOUR_MED
 
 # good enough
-FB_YOUR_REFI
-
-# good enough
 FB_YOU_CAN_BECOME
 
 # good enough
@@ -197,6 +194,9 @@ FH_HOST_EQ_PACBELL_D
 FH_HOST_EQ_VERIZON_P
 
 # good enough
+FH_HOST_IN_ADDRARPA
+
+# good enough
 FH_MSGID_XXX
 
 # good enough
@@ -216,6 +216,9 @@ FM_SCHOOLING
 
 # good enough
 FM_SCHOOL_DIPLOMA
+
+# good enough
+FM_SCHOOL_TYPES
 
 # good enough
 FM_SEX_HELODDDD
@@ -309,6 +312,9 @@ FS_ERECTION
 
 # good enough
 FS_LOWER_YOUR
+
+# good enough
+FS_MAKE_MONEY
 
 # good enough
 FS_NO_SCRIP
@@ -768,12 +774,6 @@ TVD_SUBJ_WIPE_DEBT
 
 # good enough
 TVD_VISIT_PHARMA
-
-# good enough
-FH_HOST_IN_ADDRARPA
-
-# good enough
-TVD_FW_GRAPHIC_ID1
 
 # tflags userconf
 UNPARSEABLE_RELAY
