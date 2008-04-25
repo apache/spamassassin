@@ -1107,6 +1107,12 @@ score CRBOUNCE_MESSAGE   0.1
 score VBOUNCE_MESSAGE    0.1
 score ANY_BOUNCE_MESSAGE 0.1
 
+# another informational rule: this is for C/R responses to mail the user
+# really did sent -- the opposite of CRBOUNCE_MESSAGE.  some users might
+# like to block all C/R bounces, or filter them separately.
+#
+score CHALLENGE_RESPONSE 0.1
+
 # It's still quite common for non-spam senders to send mail from hosts with
 # no rDNS, or "dynamic-looking" rDNS.  Lock these down to low values;
 # some sites can increase them as a matter of local policy, and they
