@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: dos jm theo zmi; day 2: dos jm theo zmi; day 3: dos zmi
+# with results from: day 1: dos jm theo zmi; day 2: dos jm theo zmi; day 3: dos jm theo zmi
 
 # tflags userconf
 ALL_TRUSTED
@@ -12,6 +12,9 @@ AWL
 
 # good enough
 AXB_XMID_DIGDOTSHRT
+
+# good enough
+BASE64_LENGTH_79_INF
 
 # tflags learn
 BAYES_00
@@ -107,7 +110,13 @@ FB_CIALIS_LEO3
 FB_EXTRA_INCHES
 
 # good enough
+FB_GVR
+
+# good enough
 FB_NO_SCRIP_NEEDED
+
+# good enough
+FB_P1LL
 
 # good enough
 FB_QUALITY_REPLICA
@@ -125,6 +134,9 @@ FB_SOFTTABS
 FB_STAMINA_IN_BED
 
 # good enough
+FB_STRONGER_EJ
+
+# good enough
 FB_YOU_CAN_BECOME
 
 # good enough
@@ -137,7 +149,19 @@ FH_DATE_IS_19XX
 FH_DATE_PAST_20XX
 
 # good enough
+FH_FAKE_RCVD_LINE
+
+# good enough
+FH_HAS_XID
+
+# good enough
 FH_HELO_ALMOST_IP
+
+# good enough
+FH_HELO_ENDS_DOT
+
+# good enough
+FH_HELO_EQ_610HEX
 
 # good enough
 FH_HELO_EQ_CHARTER
@@ -161,6 +185,15 @@ FH_HOST_IN_ADDRARPA
 FH_MSGID_XXX
 
 # good enough
+FM_DEBT_HELP
+
+# good enough
+FM_FAKE_HELO_HOTMAIL
+
+# good enough
+FM_FAKE_HELO_VERIZON
+
+# good enough
 FM_LIKE_STOCKS
 
 # good enough
@@ -170,7 +203,19 @@ FM_SCHOOLING
 FM_SCHOOL_DIPLOMA
 
 # good enough
+FM_SCHOOL_TYPES
+
+# good enough
 FM_SEX_HELODDDD
+
+# good enough
+FM_SUBJ_APPROVE
+
+# good enough
+FM_VEGAS_CASINO
+
+# good enough
+FM_XMAIL_F_OUT
 
 # good enough
 FORGED_RELAY_MUA_TO_MX
@@ -179,22 +224,58 @@ FORGED_RELAY_MUA_TO_MX
 FRAGMENTED_MESSAGE
 
 # good enough
+FRT_BIGGERMEM1
+
+# good enough
 FRT_DISCOUNT
+
+# good enough
+FRT_ERECTION
 
 # good enough
 FRT_LEVITRA
 
 # good enough
+FRT_PENIS1
+
+# good enough
 FRT_ROLEX
 
 # good enough
+FRT_SEXUAL
+
+# good enough
 FRT_STRONG2
+
+# good enough
+FRT_TODAY2
+
+# good enough
+FRT_VALIUM1
+
+# good enough
+FRT_VALIUM2
+
+# good enough
+FRT_WEIGHT2
+
+# good enough
+FRT_XANAX1
+
+# good enough
+FRT_XANAX2
+
+# good enough
+FR_ALMOST_VIAG2
 
 # good enough
 FR_TEST_BASE64_BAD
 
 # good enough
 FR_WATCHES_HTTP
+
+# good enough
+FS_ABIGGER
 
 # good enough
 FS_CAILIS
@@ -206,10 +287,10 @@ FS_EJACULA
 FS_ERECTION
 
 # good enough
-FS_MAKE_MONEY
+FS_NO_SCRIP
 
 # good enough
-FS_NO_SCRIP
+FS_OBFU_PRMCY
 
 # good enough
 FS_REPLICA
@@ -218,7 +299,13 @@ FS_REPLICA
 FS_REPLICAWATCH
 
 # good enough
+FS_START_DOYOU2
+
+# good enough
 FS_WEIGHT_LOSS
+
+# good enough
+FS_WILL_HELP
 
 # good enough
 FU_LONG_QUERY3
@@ -281,6 +368,9 @@ HS_BOBAX_MID_1
 HS_BOBAX_MID_2
 
 # good enough
+HS_FORGED_OE_FW
+
+# good enough
 HS_OUTLOOK_MID_NOBRK
 
 # good enough
@@ -288,6 +378,9 @@ HS_VPXL
 
 # tflags userconf
 HTML_CHARSET_FARAWAY
+
+# good enough
+IMG_ALT_HSPACE_CID_ALIGN
 
 # good enough
 JM_FAKE_PSMTP_RCVD
@@ -306,6 +399,12 @@ KAM_STOCKOTC
 
 # tflags publish
 KAM_STOCKTIP15
+
+# good enough
+KB_DATE_CONTAINS_TAB
+
+# good enough
+KB_FAKED_THE_BAT
 
 # good enough
 KB_RATWARE_MSGID
@@ -329,7 +428,16 @@ NO_RECEIVED
 NO_RELAYS
 
 # good enough
+NULL_IN_BODY
+
+# good enough
 OUTLOOK_3416
+
+# good enough
+PART_CID_STOCK
+
+# good enough
+PART_CID_STOCK_LESS
 
 # tflags net
 PYZOR_CHECK
@@ -345,6 +453,9 @@ RAZOR2_CF_RANGE_E8_51_100
 
 # tflags net
 RAZOR2_CHECK
+
+# good enough
+RCVD_FORGED_WROTE
 
 # good enough
 RCVD_FORGED_WROTE2
@@ -521,6 +632,9 @@ RCVD_IN_SSC_TRUSTED_COI
 RCVD_IN_XBL
 
 # good enough
+RCVD_MAIL_COM
+
+# good enough
 RP_MATCHES_RCVD
 
 # good enough
@@ -569,6 +683,12 @@ STOCK_IMG_HDR_FROM
 STOCK_IMG_HTML
 
 # good enough
+STOCK_IMG_OUTLOOK
+
+# good enough
+STOX_REPLY_TYPE
+
+# good enough
 STOX_REPLY_TYPE_WITHOUT_QUOTES
 
 # tflags userconf
@@ -576,6 +696,9 @@ SUBJECT_IN_BLACKLIST
 
 # tflags userconf
 SUBJECT_IN_WHITELIST
+
+# good enough
+SUBJ_RE_NUM
 
 # good enough
 TT_OBSCURED_VIAGRA
@@ -596,34 +719,49 @@ TVD_PCT_OFF
 TVD_QUAL_MEDS
 
 # good enough
+TVD_RCVD_IP
+
+# good enough
+TVD_RCVD_IP4
+
+# good enough
+TVD_SUBJ_FINGER_07
+
+# good enough
 TVD_SUBJ_WIPE_DEBT
 
 # good enough
 TVD_VISIT_PHARMA
 
 # good enough
-FB_STRONGER_EJ
+DOS_FORGED_RCVD_QUADS
 
 # good enough
-FM_DEBT_HELP
+DOS_OUTLOOK_TO_MX_IMAGE
 
 # good enough
-FRT_ERECTION
+FB_CASINO
 
 # good enough
-FS_ABIGGER
+FB_MED1CAT
 
 # good enough
-IMG_ALT_HSPACE_CID_ALIGN
+FB_YOUR_MED
 
 # good enough
-KB_DATE_CONTAINS_TAB
+FRT_APPROV
 
 # good enough
-KB_FAKED_THE_BAT
+FRT_EXPERIENCE
 
 # good enough
-TVD_SUBJ_FINGER_07
+FRT_INTEREST
+
+# good enough
+FRT_PAYMENT
+
+# good enough
+FS_YOUR_PRESCRIP
 
 # tflags userconf
 UNPARSEABLE_RELAY
@@ -812,6 +950,9 @@ WHOIS_WHOISPROT
 XMAILER_MIMEOLE_OL_09BB4
 
 # good enough
+XMAILER_MIMEOLE_OL_1ECD5
+
+# good enough
 XMAILER_MIMEOLE_OL_20C99
 
 # good enough
@@ -840,6 +981,12 @@ XMAILER_MIMEOLE_OL_8627E
 
 # good enough
 XMAILER_MIMEOLE_OL_91287
+
+# good enough
+XMAILER_MIMEOLE_OL_ADFF7
+
+# good enough
+XMAILER_MIMEOLE_OL_B9B11
 
 # good enough
 XMAILER_MIMEOLE_OL_CAC8F
