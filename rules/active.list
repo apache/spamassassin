@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: dos jm theo zmi; day 2: dos jm theo zmi; day 3: dos jm theo zmi
+# with results from: day 1: jm theo zmi; day 2: dos jm theo zmi; day 3: dos jm theo zmi
 
 # tflags userconf
 ALL_TRUSTED
@@ -84,9 +84,6 @@ DOS_RCVD_IP_TWICE_B
 
 # good enough
 DOS_RCVD_IP_TWICE_C
-
-# good enough
-DRUGS_HDIA
 
 # good enough
 DYN_RDNS_AND_INLINE_IMAGE
@@ -191,9 +188,6 @@ FH_HOST_EQ_PACBELL_D
 FH_HOST_EQ_VERIZON_P
 
 # good enough
-FH_HOST_IN_ADDRARPA
-
-# good enough
 FH_MSGID_XXX
 
 # good enough
@@ -269,9 +263,6 @@ FRT_ROLEX
 FRT_SEXUAL
 
 # good enough
-FRT_STRONG2
-
-# good enough
 FRT_TODAY2
 
 # good enough
@@ -333,9 +324,6 @@ FS_WILL_HELP
 
 # good enough
 FS_YOUR_PRESCRIP
-
-# good enough
-FU_LONG_QUERY3
 
 # tflags userconf
 GTUBE
@@ -453,9 +441,6 @@ NO_RECEIVED
 
 # tflags userconf
 NO_RELAYS
-
-# good enough
-NULL_IN_BODY
 
 # good enough
 OUTLOOK_3416
@@ -759,6 +744,12 @@ TVD_SUBJ_WIPE_DEBT
 
 # good enough
 TVD_VISIT_PHARMA
+
+# good enough
+DOS_FORGED_RCVD_QUADS
+
+# good enough
+TVD_FW_GRAPHIC_ID1
 
 # tflags userconf
 UNPARSEABLE_RELAY
