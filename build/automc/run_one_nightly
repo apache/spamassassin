@@ -27,10 +27,12 @@ export HOME PERL TMPDIR
 # attempt to ensure the "build" dir and raw .corpus file is up to date 
 # (don't worry about tags etc. just yet)
 (
-  cd $dir/svn
-  rm -rf build
-  svn co http://svn.apache.org/repos/asf/spamassassin/trunk/build
-  svn cleanup
+  cd $dir
+  rm -rf svn
+  svn co http://svn.apache.org/repos/asf/spamassassin/trunk svn ||
+    svn co http://svn.apache.org/repos/asf/spamassassin/trunk svn ||
+    svn co http://svn.apache.org/repos/asf/spamassassin/trunk svn
+
 ) < /dev/null
 
 # create the .corpus file, keeping the rsync password secret;
