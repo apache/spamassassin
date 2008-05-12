@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: jm theo zmi; day 2: dos jm theo zmi; day 3: dos jm theo zmi
+# with results from: day 1: dos theo zmi; day 2: jm theo zmi; day 3: dos jm theo zmi
 
 # tflags userconf
 ALL_TRUSTED
@@ -77,9 +77,6 @@ DOS_OE_TO_MX
 DOS_OE_TO_MX_IMAGE
 
 # good enough
-DOS_OUTLOOK_TO_MX_IMAGE
-
-# good enough
 DOS_RCVD_IP_TWICE_B
 
 # good enough
@@ -143,6 +140,9 @@ FB_STAMINA_IN_BED
 FB_STRONGER_EJ
 
 # good enough
+FB_ULTRA_ALLURE
+
+# good enough
 FB_YOUR_MED
 
 # good enough
@@ -159,9 +159,6 @@ FH_DATE_PAST_20XX
 
 # good enough
 FH_FAKE_RCVD_LINE
-
-# good enough
-FH_HAS_XID
 
 # good enough
 FH_HELO_ALMOST_IP
@@ -269,19 +266,10 @@ FRT_TODAY2
 FRT_VALIUM1
 
 # good enough
-FRT_VALIUM2
-
-# good enough
 FRT_WEIGHT2
 
 # good enough
-FRT_XANAX1
-
-# good enough
 FRT_XANAX2
-
-# good enough
-FR_ALMOST_VIAG2
 
 # good enough
 FR_TEST_BASE64_BAD
@@ -746,7 +734,7 @@ TVD_SUBJ_WIPE_DEBT
 TVD_VISIT_PHARMA
 
 # good enough
-DOS_FORGED_RCVD_QUADS
+FH_HOST_IN_ADDRARPA
 
 # tflags userconf
 UNPARSEABLE_RELAY
@@ -978,6 +966,9 @@ XMAILER_MIMEOLE_OL_B9B11
 
 # good enough
 XMAILER_MIMEOLE_OL_CAC8F
+
+# good enough
+XMAILER_MIMEOLE_OL_F475E
 
 # good enough
 X_MAILER_CME_6543_MSN
