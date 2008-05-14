@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: dos theo zmi; day 2: dos theo zmi; day 3: jm theo zmi
+# with results from: day 1: bb-traps dos jm theo zmi; day 2: dos theo zmi; day 3: dos theo zmi
 
 # tflags userconf
 ALL_TRUSTED
@@ -83,6 +83,9 @@ DOS_RCVD_IP_TWICE_B
 DOS_RCVD_IP_TWICE_C
 
 # good enough
+DRUGS_HDIA
+
+# good enough
 DYN_RDNS_AND_INLINE_IMAGE
 
 # good enough
@@ -108,9 +111,6 @@ FB_CIALIS_LEO3
 
 # good enough
 FB_EXTRA_INCHES
-
-# good enough
-FB_GVR
 
 # good enough
 FB_MED1CAT
@@ -185,13 +185,13 @@ FH_HOST_EQ_PACBELL_D
 FH_HOST_EQ_VERIZON_P
 
 # good enough
+FH_HOST_IN_ADDRARPA
+
+# good enough
 FH_MSGID_XXX
 
 # good enough
 FM_DEBT_HELP
-
-# good enough
-FM_FAKE_HELO_HOTMAIL
 
 # good enough
 FM_FAKE_HELO_VERIZON
@@ -260,6 +260,9 @@ FRT_ROLEX
 FRT_SEXUAL
 
 # good enough
+FRT_STRONG2
+
+# good enough
 FRT_TODAY2
 
 # good enough
@@ -312,6 +315,9 @@ FS_WILL_HELP
 
 # good enough
 FS_YOUR_PRESCRIP
+
+# good enough
+FU_LONG_QUERY3
 
 # tflags userconf
 GTUBE
@@ -429,6 +435,9 @@ NO_RECEIVED
 
 # tflags userconf
 NO_RELAYS
+
+# good enough
+NULL_IN_BODY
 
 # good enough
 OUTLOOK_3416
@@ -734,10 +743,7 @@ TVD_SUBJ_WIPE_DEBT
 TVD_VISIT_PHARMA
 
 # good enough
-FH_HOST_IN_ADDRARPA
-
-# good enough
-TVD_FROM_1
+DOS_FORGED_RCVD_QUADS
 
 # tflags userconf
 UNPARSEABLE_RELAY
