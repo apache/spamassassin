@@ -7,6 +7,9 @@ user="$1"
 # where the $HOMEs are:
 dir="/export/home/bbmass/mc-nightly/$user"
 
+# keep one day's logs around
+mv "$dir/corpus-nightly.log" "$dir/corpus-nightly.log.1"
+
 (
 echo "Starting corpus-nightly for $user ($dir): $dir/corpus-nightly.log"
 
