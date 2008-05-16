@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: dos jm theo zmi; day 2: bb-traps dos jm theo zmi; day 3: dos theo zmi
+# with results from: day 1: dos jm theo; day 2: dos jm theo zmi; day 3: bb-traps dos jm theo zmi
 
 # tflags userconf
 ALL_TRUSTED
@@ -161,6 +161,9 @@ FH_DATE_PAST_20XX
 FH_FAKE_RCVD_LINE
 
 # good enough
+FH_HAS_XID
+
+# good enough
 FH_HELO_ALMOST_IP
 
 # good enough
@@ -242,9 +245,6 @@ FRT_ERECTION
 FRT_EXPERIENCE
 
 # good enough
-FRT_INTEREST
-
-# good enough
 FRT_LEVITRA
 
 # good enough
@@ -269,7 +269,13 @@ FRT_TODAY2
 FRT_VALIUM1
 
 # good enough
+FRT_VALIUM2
+
+# good enough
 FRT_WEIGHT2
+
+# good enough
+FRT_XANAX1
 
 # good enough
 FRT_XANAX2
@@ -387,9 +393,6 @@ HS_VPXL
 
 # tflags userconf
 HTML_CHARSET_FARAWAY
-
-# good enough
-IMG_ALT_HSPACE_CID_ALIGN
 
 # good enough
 JM_FAKE_PSMTP_RCVD
@@ -741,6 +744,12 @@ TVD_SUBJ_WIPE_DEBT
 
 # good enough
 TVD_VISIT_PHARMA
+
+# good enough
+TVD_FROM_1
+
+# good enough
+TVD_FW_GRAPHIC_ID1
 
 # tflags userconf
 UNPARSEABLE_RELAY
