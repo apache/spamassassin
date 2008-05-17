@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: dos jm theo; day 2: dos jm theo zmi; day 3: bb-traps dos jm theo zmi
+# with results from: day 1: bb-jm bb-traps dos jm theo zmi; day 2: dos jm theo; day 3: dos jm theo zmi
 
 # tflags userconf
 ALL_TRUSTED
@@ -159,9 +159,6 @@ FH_DATE_PAST_20XX
 
 # good enough
 FH_FAKE_RCVD_LINE
-
-# good enough
-FH_HAS_XID
 
 # good enough
 FH_HELO_ALMOST_IP
@@ -745,12 +742,6 @@ TVD_SUBJ_WIPE_DEBT
 # good enough
 TVD_VISIT_PHARMA
 
-# good enough
-TVD_FROM_1
-
-# good enough
-TVD_FW_GRAPHIC_ID1
-
 # tflags userconf
 UNPARSEABLE_RELAY
 
@@ -935,7 +926,7 @@ WHOIS_WHOISGUARD
 WHOIS_WHOISPROT
 
 # good enough
-XMAILER_MIMEOLE_OL_015D5
+XMAILER_MIMEOLE_OL_07794
 
 # good enough
 XMAILER_MIMEOLE_OL_09BB4
@@ -963,6 +954,9 @@ XMAILER_MIMEOLE_OL_4B815
 
 # good enough
 XMAILER_MIMEOLE_OL_4F240
+
+# good enough
+XMAILER_MIMEOLE_OL_5B79A
 
 # good enough
 XMAILER_MIMEOLE_OL_6554A
@@ -1002,6 +996,9 @@ XMAILER_MIMEOLE_OL_F475E
 
 # good enough
 XMAILER_MIMEOLE_OL_F6D01
+
+# good enough
+XMAILER_MIMEOLE_OL_FF5C8
 
 # good enough
 X_MAILER_CME_6543_MSN
