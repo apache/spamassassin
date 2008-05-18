@@ -1440,11 +1440,6 @@ full NULL_IN_BODY	/\x00/
 describe NULL_IN_BODY   Message has NUL (ASCII 0) byte in message
 ##} NULL_IN_BODY
 
-##{ OUTLOOK_3416
-header OUTLOOK_3416     X-Mailer =~ /^Microsoft Outlook, Build 10\.0\.3416$/
-describe OUTLOOK_3416   Claims to be sent by an unusual build of Outlook (3416)
-##} OUTLOOK_3416
-
 ##{ PART_CID_STOCK
 
 ifplugin Mail::SpamAssassin::Plugin::MIMEHeader
