@@ -180,6 +180,11 @@ sub do_it {
     $perl_version = sprintf("%i.%03i%03i", $v[0] || 0, $v[1] || 0, $v[2] || 0);
   }
 
+  $defines{PERL_MAJOR_VER} = sub {
+    $] =~ /^(\d\.\d\d\d)/ or die "bad perl ver $]";
+    return $1;
+  };
+
   $defines{PLUGIN_POD} = sub {
 
     # Grab active plugin list
