@@ -639,7 +639,11 @@ sub parse_body {
       # If it's not multipart, go ahead and just deal with it.
       $self->_parse_normal($toparse);
 
-      if ($toparse->[0]->{'type'} =~ /^message\b/i && ($toparse->[3] > 0)) {
+      # bug 5041: exclude message/partial messages, however
+      if ($toparse->[0]->{'type'} =~ /^message\b/i &&
+          $toparse->[0]->{'type'} !~ /^message\/partial$/i &&
+            ($toparse->[3] > 0))
+      {
         # Just decode the part, but we don't care about the result here.
         $toparse->[0]->decode(0);
 
