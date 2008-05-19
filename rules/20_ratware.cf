@@ -83,9 +83,14 @@ meta __FORGED_OE		(__OE_MUA && !__OE_MSGID_1 && !__OE_MSGID_2 && !__UNUSABLE_MSG
 header __OUTLOOK_DOLLARS_MUA	X-Mailer =~ /^Microsoft Outlook(?: 8| CWS, Build 9|, Build 10)\./
 header __OUTLOOK_DOLLARS_OTHER	MESSAGEID =~ /^<\!\~\!/m
 meta __FORGED_OUTLOOK_DOLLARS	(__OUTLOOK_DOLLARS_MUA && !__OE_MSGID_2 && !__OUTLOOK_DOLLARS_OTHER && !__VISTA_MSGID && !__IMS_MSGID && !__UNUSABLE_MSGID)
-
 # use new meta rules to implement FORGED_MUA_OUTLOOK rule from 2.60
-meta FORGED_MUA_OUTLOOK		(__FORGED_OE || __FORGED_OUTLOOK_DOLLARS)
+
+# bug 5496: avoid some FPs
+header __FMO_EXCL_O3416   X-Mailer =~ /^Microsoft Outlook, Build 10.0.3416$/
+header __FMO_EXCL_OE3790  X-Mailer =~ /^Microsoft Outlook Express 6.00.3790.3959$/
+# bug 5910: __VISTA_MSGID also now used by Outlook Express from XP SP3
+#
+meta FORGED_MUA_OUTLOOK         ((__FORGED_OE || __FORGED_OUTLOOK_DOLLARS) && !__FMO_EXCL_O3416 && !__FMO_EXCL_OE3790 && !__VISTA_MSGID)
 describe FORGED_MUA_OUTLOOK	Forged mail pretending to be from MS Outlook
 
 # Outlook IMO (Internet Mail Only)
