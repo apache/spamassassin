@@ -102,7 +102,7 @@ header __BOUNCE_OOO_H3   Subject =~ / \(away from the office\)$/
 body  __BOUNCE_NEVER_SEE  /\bThis is an autoresponder. I'll never see your message\b/i
 body  __BOUNCE_NONWORKING  /\bYou have reached a non.?working address.  Please check\b/i
 
-header   __BOUNCE_UNDELIVERABLE Subject =~ /^Undeliverable: /
+header   __BOUNCE_UNDELIVERABLE Subject =~ /^Undeliverable(?: -|:) /
 header   __BOUNCE_UNDELIVERABLE_ML Subject =~ /^Undeliver(?:able|ed) Mail\b/
 header   __BOUNCE_NOTDEL Subject =~ /^MESSAGE NOT DELIVERED: /
 header   __BOUNCE_ADDR_ERR Subject =~ /^e-mail addressing error \(/
