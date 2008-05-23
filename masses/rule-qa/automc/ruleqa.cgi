@@ -1318,8 +1318,8 @@ sub generate_scoremap_chart {
   my @ycoords_h = map { sprintf "%.2f", (100/$max_y) * ($chart{'ham'}{$_}||0) } @idxes;
   my @xcoords   = map { sprintf "%.2f", (100/$max_x) * $_ } @idxes;
 
-  my $xgrid = (100/$max_x) * 5;
-  my $ygrid = (100/$max_y) * 10;
+  my $xgrid = (100/($max_x||0.0001)) * 5;
+  my $ygrid = (100/($max_y||0.0001)) * 10;
 
   # http://code.google.com/apis/chart/ , woo
   my $chartsetup = 
