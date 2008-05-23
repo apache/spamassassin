@@ -542,6 +542,12 @@ sub finish {
       close ($part->{'raw'});
     }
 
+    # bug 5858: avoid memory leak with deep MIME structure
+    if (defined ($part->{metadata})) {
+      $part->{metadata}->finish();
+      delete $part->{metadata};
+    }
+
     delete $part->{'headers'};
     delete $part->{'raw_headers'};
     delete $part->{'header_order'};
