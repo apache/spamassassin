@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: bb-jm bb-traps dos jm theo zmi; day 2: bb-jm bb-traps dos jm theo zmi; day 3: bb-jm dos jm theo zmi
+# with results from: day 1: bb-jm bb-traps dos theo zmi; day 2: bb-jm bb-traps dos jm theo zmi; day 3: bb-jm bb-traps dos jm theo zmi
 
 # tflags userconf
 ALL_TRUSTED
@@ -167,9 +167,6 @@ FH_DATE_PAST_20XX
 FH_FAKE_RCVD_LINE
 
 # good enough
-FH_HAS_XID
-
-# good enough
 FH_HELO_ALMOST_IP
 
 # good enough
@@ -242,9 +239,6 @@ FRT_APPROV
 FRT_DISCOUNT
 
 # good enough
-FRT_ERECTION
-
-# good enough
 FRT_EXPERIENCE
 
 # good enough
@@ -272,13 +266,7 @@ FRT_TODAY2
 FRT_VALIUM1
 
 # good enough
-FRT_VALIUM2
-
-# good enough
 FRT_WEIGHT2
-
-# good enough
-FRT_XANAX1
 
 # good enough
 FRT_XANAX2
@@ -312,9 +300,6 @@ FS_REPLICA
 
 # good enough
 FS_REPLICAWATCH
-
-# good enough
-FS_START_DOYOU2
 
 # good enough
 FS_WEIGHT_LOSS
@@ -722,6 +707,9 @@ TVD_ENVFROM_APOST
 TVD_FINGER_02
 
 # good enough
+TVD_FROM_1
+
+# good enough
 TVD_NOT_SATISFIED
 
 # good enough
@@ -746,7 +734,10 @@ TVD_SUBJ_WIPE_DEBT
 TVD_VISIT_PHARMA
 
 # good enough
-TVD_FROM_1
+DOS_FORGED_RCVD_QUADS
+
+# good enough
+TVD_PH_SUBJ_ACCOUNTS_PRE
 
 # tflags userconf
 UNPARSEABLE_RELAY
@@ -950,6 +941,9 @@ XMAILER_MIMEOLE_OL_20C99
 XMAILER_MIMEOLE_OL_22B61
 
 # good enough
+XMAILER_MIMEOLE_OL_25340
+
+# good enough
 XMAILER_MIMEOLE_OL_3857F
 
 # good enough
@@ -960,6 +954,9 @@ XMAILER_MIMEOLE_OL_3D61D
 
 # good enough
 XMAILER_MIMEOLE_OL_4B815
+
+# good enough
+XMAILER_MIMEOLE_OL_4BF4C
 
 # good enough
 XMAILER_MIMEOLE_OL_4EEDB
