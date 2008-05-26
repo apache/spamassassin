@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: bb-jm bb-traps dos theo zmi; day 2: bb-jm bb-traps dos jm theo zmi; day 3: bb-jm bb-traps dos jm theo zmi
+# with results from: day 1: bb-jm bb-traps dos theo zmi; day 2: bb-jm bb-traps dos theo zmi; day 3: bb-jm bb-traps dos jm theo zmi
 
 # tflags userconf
 ALL_TRUSTED
@@ -69,6 +69,9 @@ DNS_FROM_RFC_DSN
 
 # tflags publish
 DOS_ANAL_SPAM_MAILER
+
+# good enough
+DOS_FORGED_RCVD_QUADS
 
 # good enough
 DOS_OE_TO_MX
@@ -246,9 +249,6 @@ FRT_LEVITRA
 
 # good enough
 FRT_PAYMENT
-
-# good enough
-FRT_PENIS1
 
 # good enough
 FRT_ROLEX
@@ -716,6 +716,9 @@ TVD_NOT_SATISFIED
 TVD_PCT_OFF
 
 # good enough
+TVD_PH_SUBJ_ACCOUNTS_PRE
+
+# good enough
 TVD_QUAL_MEDS
 
 # good enough
@@ -734,10 +737,7 @@ TVD_SUBJ_WIPE_DEBT
 TVD_VISIT_PHARMA
 
 # good enough
-DOS_FORGED_RCVD_QUADS
-
-# good enough
-TVD_PH_SUBJ_ACCOUNTS_PRE
+FRT_INTEREST
 
 # tflags userconf
 UNPARSEABLE_RELAY
@@ -999,6 +999,9 @@ XMAILER_MIMEOLE_OL_ADFF7
 
 # good enough
 XMAILER_MIMEOLE_OL_B30D1
+
+# good enough
+XMAILER_MIMEOLE_OL_B4B40
 
 # good enough
 XMAILER_MIMEOLE_OL_B9B11
