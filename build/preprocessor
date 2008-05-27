@@ -178,6 +178,9 @@ sub do_it {
     $perl_version = sprintf("%i.%03i%03i", $v[0] || 0, $v[1] || 0, $v[2] || 0);
   }
 
+  $] =~ /^(\d\.\d\d\d)/ or die "bad perl ver $]";
+  $defines{PERL_MAJOR_VER} = $1;
+
   # Grab active plugin list
   my @plugin_pod = ();
   if (open(INIT, "rules/init.pre")) {
