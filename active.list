@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: bb-jm bb-traps dos jm theo zmi; day 2: bb-jm bb-traps dos jm theo zmi; day 3: bb-jm bb-traps dos theo zmi
+# with results from: day 1: bb-jm dos jm theo; day 2: bb-jm bb-traps dos jm theo zmi; day 3: bb-jm bb-traps dos jm theo zmi
 
 # tflags userconf
 ALL_TRUSTED
@@ -71,9 +71,6 @@ DNS_FROM_RFC_DSN
 DOS_ANAL_SPAM_MAILER
 
 # good enough
-DOS_FORGED_RCVD_QUADS
-
-# good enough
 DOS_OE_TO_MX
 
 # good enough
@@ -138,6 +135,9 @@ FB_REPLICA_ROLEX
 
 # good enough
 FB_REPLIC_CAP
+
+# good enough
+FB_SMALL_PEN
 
 # good enough
 FB_SOFTTABS
@@ -266,6 +266,9 @@ FRT_TODAY2
 FRT_VALIUM1
 
 # good enough
+FRT_VALIUM2
+
+# good enough
 FRT_WEIGHT2
 
 # good enough
@@ -303,6 +306,9 @@ FS_REPLICA
 
 # good enough
 FS_REPLICAWATCH
+
+# good enough
+FS_START_DOYOU2
 
 # good enough
 FS_WEIGHT_LOSS
@@ -740,7 +746,7 @@ TVD_SUBJ_WIPE_DEBT
 TVD_VISIT_PHARMA
 
 # good enough
-FB_SMALL_PEN
+FRT_ERECTION
 
 # tflags userconf
 UNPARSEABLE_RELAY
