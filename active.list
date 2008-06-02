@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: bb-jm bb-traps dos jm theo zmi; day 2: bb-jm dos jm theo zmi; day 3: bb-jm dos jm theo
+# with results from: day 1: bb-jm bb-traps jm theo zmi; day 2: bb-jm bb-traps dos jm theo zmi; day 3: bb-jm dos jm theo zmi
 
 # tflags userconf
 ALL_TRUSTED
@@ -119,6 +119,9 @@ FB_INCREASE_VOL
 FB_MED1CAT
 
 # good enough
+FB_MEEDS
+
+# good enough
 FB_NOT_SEXUAL
 
 # good enough
@@ -191,9 +194,6 @@ FH_HOST_EQ_PACBELL_D
 FH_HOST_EQ_VERIZON_P
 
 # good enough
-FH_HOST_IN_ADDRARPA
-
-# good enough
 FH_MSGID_XXX
 
 # good enough
@@ -245,6 +245,9 @@ FRT_ERECTION
 FRT_EXPERIENCE
 
 # good enough
+FRT_HEALTH
+
+# good enough
 FRT_INTEREST
 
 # good enough
@@ -258,9 +261,6 @@ FRT_ROLEX
 
 # good enough
 FRT_SEXUAL
-
-# good enough
-FRT_STRONG2
 
 # good enough
 FRT_TODAY2
@@ -288,9 +288,6 @@ FR_WATCHES_HTTP
 
 # good enough
 FS_ABIGGER
-
-# good enough
-FS_CAILIS
 
 # good enough
 FS_EJACULA
@@ -745,15 +742,6 @@ TVD_SUBJ_WIPE_DEBT
 # good enough
 TVD_VISIT_PHARMA
 
-# good enough
-DOS_FORGED_RCVD_QUADS
-
-# good enough
-FB_MEEDS
-
-# good enough
-FRT_HEALTH
-
 # tflags userconf
 UNPARSEABLE_RELAY
 
@@ -957,9 +945,6 @@ XMAILER_MIMEOLE_OL_22B61
 
 # good enough
 XMAILER_MIMEOLE_OL_25340
-
-# good enough
-XMAILER_MIMEOLE_OL_3857F
 
 # good enough
 XMAILER_MIMEOLE_OL_3AC1D
