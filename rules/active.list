@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: bb-jm bb-traps dos jm theo zmi; day 2: bb-jm bb-traps jm theo zmi; day 3: bb-jm bb-traps dos jm theo zmi
+# with results from: day 1: bb-jm bb-traps dos jm theo zmi; day 2: bb-jm bb-traps dos jm theo zmi; day 3: bb-jm bb-traps jm theo zmi
 
 # tflags userconf
 ALL_TRUSTED
@@ -171,6 +171,9 @@ FH_DATE_PAST_20XX
 
 # good enough
 FH_FAKE_RCVD_LINE
+
+# good enough
+FH_HAS_XID
 
 # good enough
 FH_HELO_ALMOST_IP
@@ -744,6 +747,12 @@ TVD_SUBJ_WIPE_DEBT
 
 # good enough
 TVD_VISIT_PHARMA
+
+# good enough
+FH_HOST_IN_ADDRARPA
+
+# good enough
+FS_CAILIS
 
 # tflags userconf
 UNPARSEABLE_RELAY
