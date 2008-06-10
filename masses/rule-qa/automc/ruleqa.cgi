@@ -1053,7 +1053,7 @@ sub get_freqs_for_rule {
     $FREQS_LINE_TEMPLATE =~ s/<!--\s+<rule>.*?-->//gs;
   }
 
-  my $texts = "MSECS      SPAM%     HAM%   S/O      RANK   SCORE  NAME  WHO/AGE\n";
+  my $texts = "MSECS      SPAM%     HAM%     S/O    RANK   SCORE  NAME WHO/AGE\n";
              # 0.00000   0.0216   0.0763   0.221    0.52    2.84  X_IP  
   
   foreach my $rule (@rules) {
