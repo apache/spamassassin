@@ -315,14 +315,13 @@ sub show_default_header {
 
   </head><body>
 
-        <table> <tr> <td valign=top>
+        <table width="100%"> <tr> <td valign=top>
           <h1>SpamAssassin Rule QA</h1>
         </td> <td valign=top>
-          <p>
-            <a href="http://bbmass.spamassassin.org:8011/">View
-            preflight mass-checks</a>
-            <br>
+          <p align="right">
             <a href="http://wiki.apache.org/spamassassin/RuleQaApp">help</a>
+            <br>
+            <a href="http://bbmass.spamassassin.org:8011/">preflight mass-check progress</a>
           </p>
         </td> </tr> </table>
 
@@ -519,6 +518,8 @@ sub show_default_view {
        "-->\n";
   }
 
+  $|=1;                # turn off buffering from now on
+
   my $single_rule_displayed = ($self->{s}{detail} && !($self->{rules_all} || $self->{rules_grep}));
 
   # only display code if it's a single rule page
@@ -543,7 +544,7 @@ sub show_default_view {
         } || '';
 
     # a missing string is now represented as {}, annoyingly
-    if (ref $tflags =~ /HASH/) { $tflags = ''; }
+    if (ref $tflags =~ /HASH/ || $tflags =~ /^HASH/) { $tflags = ''; }
 
     $tflags = ($tflags =~ /\S/) ? ", tflags $tflags" : "";
 
@@ -1052,7 +1053,7 @@ sub get_freqs_for_rule {
     $FREQS_LINE_TEMPLATE =~ s/<!--\s+<rule>.*?-->//gs;
   }
 
-  my $texts = "MSECS     SPAM%    HAM%     S/O      RANK   SCORE  NAME   WHO/AGE\n";
+  my $texts = "MSECS      SPAM%     HAM%   S/O      RANK   SCORE  NAME  WHO/AGE\n";
              # 0.00000   0.0216   0.0763   0.221    0.52    2.84  X_IP  
   
   foreach my $rule (@rules) {
