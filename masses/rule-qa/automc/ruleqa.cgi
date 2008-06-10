@@ -983,7 +983,7 @@ sub get_freqs_for_rule {
       <th>MSECS</th>
       <th>SPAM%</th>
       <th>HAM%</th>
-      <th>S/O%</th>
+      <th>S/O</th>
       <th>RANK</th>
       <th>SCORE</th>
       <th>NAME</th>
@@ -1052,7 +1052,9 @@ sub get_freqs_for_rule {
     $FREQS_LINE_TEMPLATE =~ s/<!--\s+<rule>.*?-->//gs;
   }
 
-  my $texts = '';
+  my $texts = "MSECS     SPAM%    HAM%     S/O      RANK   SCORE  NAME   WHO/AGE\n";
+             # 0.00000   0.0216   0.0763   0.221    0.52    2.84  X_IP  
+  
   foreach my $rule (@rules) {
     if ($rule && defined $self->{freqs_data}{$key}{$rule}) {
       $comment .= $self->rule_anchor($key,$rule);
