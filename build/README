@@ -395,4 +395,13 @@ SPAMASSASSIN RELEASE PROCEDURE
 
         http://issues.apache.org/SpamAssassin/editversions.cgi?product=Spamassassin&action=add
 
+- Add a milestone for the next version to the Bugzilla milestones list:
+
+        https://issues.apache.org/SpamAssassin/editmilestones.cgi?action=add&product=Spamassassin
+        (use a sortkey of "0")
+
+- Change the sortkey for the previous release's milestone from "0" to "10":
+
+        https://issues.apache.org/SpamAssassin/editmilestones.cgi?product=Spamassassin
+
 // vim:tw=74:
