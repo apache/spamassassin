@@ -63,7 +63,7 @@ sub finish_parsing_end {
   my $conf = $params->{conf};
 
   my $instdir = $conf->{main}->sed_path
-			('__local_state_dir__/compiled/__version__');
+                ('__local_state_dir__/compiled/__perl_major_ver__/__version__');
   unshift @INC, $instdir, "$instdir/auto";
   dbg "zoom: loading compiled ruleset from $instdir";
 

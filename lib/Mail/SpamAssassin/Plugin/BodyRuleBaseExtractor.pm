@@ -207,6 +207,7 @@ NEXT_RULE:
       $yes++;
     }
     else {
+NO:
       dbg("zoom: NO $rule");
       push @failed, { orig => $rule };
       $cached->{rule_bases}->{$cachekey} = { };

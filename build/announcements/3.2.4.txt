@@ -1,0 +1,98 @@
+To: users, dev, announce
+From: [don't forget to use your @apache.org address]
+Subject: ANNOUNCE: Apache SpamAssassin 3.2.4 available
+
+Apache SpamAssassin 3.2.4 is now available!  This is a maintenance
+release of the 3.2.x branch.
+
+Downloads are available from:
+  http://spamassassin.apache.org/downloads.cgi
+
+The release file will also be available via CPAN in the near future.
+
+  md5sum of archive files:
+  2081c24c8b9064f9dd220e4f41e1d299  Mail-SpamAssassin-3.2.4.tar.bz2
+  81ec227d4d63aba08563ee868af9fbeb  Mail-SpamAssassin-3.2.4.tar.gz
+  a30aefb67a2db87b0fd2dac31116026c  Mail-SpamAssassin-3.2.4.zip
+
+  sha1sum of archive files:
+  876fc328a2b6192fa0bb8d7f6926214716178417  Mail-SpamAssassin-3.2.4.tar.bz2
+  5c0e01831256518b27139507a4ded38e582d8649  Mail-SpamAssassin-3.2.4.tar.gz
+  387e5a8cd2c0602bc6b5ff9cf582d4ce367a8fc1  Mail-SpamAssassin-3.2.4.zip
+
+
+The release files also have a .asc file accompanying them.  The file serves as
+an external GPG signature for the given release file.  The signing key is
+available via the wwwkeys.pgp.net key server, as well as at:
+http://spamassassin.apache.org/released/GPG-SIGNING-KEY
+
+The key information is:
+
+pub 1024D/265FA05B 2003-06-09 SpamAssassin Signing Key <release@spamassassin.org>
+    Key fingerprint = 26C9 00A4 6DD4 0CD5 AD24  F6D7 DEE0 1987 265F A05B
+
+
+3.2.4 is a major bug-fix release, with a few minor new features.  Summary of
+changes:
+
+- bug 5599: allow load distribution of SA nameserver queries across all nameservers listed in resolv.conf, using 'dns_options rotate'. thanks to Pawel Sasin <hannibal /at/ wp-sa.pl>
+
+- bug 5673: 'ALL' header was including spurious extra spaces between header names and values.  fix
+
+- bug 5594: several major sa-compile fixes.  major increase in overall speed; cache results between runs to further increase speed; and fix a danger of massive memory usage
+
+- bug 5556: fix a variety of sa-compile portability issues, and support for 5.6.x perls
+
+- bug 5514: make 'score set for a non-existent rule' a debug message, instead of a lint warning, since it's a very frequent FAQ
+
+- bug 5493: sa-compile fails to correctly deal with escaped backslashes.  fix
+
+- bug 5672: remove DNS_FROM_SECURITYSAGE (DNSBL lookups against securitysage.com) due to unreliability
+
+- bug 5476: update Bonded Sender (now Sender Score Certified) rules, and add a rule for their strictly-confirmed-opt-in-required zone
+
+- bug 5538: remove FORGED_MUA_AOL_FROM and FORGED_AOL_TAGS entirely; they're obsolete, given the current capabilities of AOL mail user agents
+
+- bug 5632: remove all completewhois.com DNSBL lookups, site seems to have disappeared without warning
+
+- bug 5715: allow for more than one sa-update MIRRORED.BY file host in DNS, for redundancy
+
+- bug 5662: DKIM changes: recognize author signature and multiple signatures for whitelisting (with Mail::DKIM 0.29); disable useless "check_dkim_signsome"; new eval rules "check_dkim_valid_author_sig" and "check_dkim_valid" (an alias for a "check_dkim_verified" misnomer); new tags _DKIMIDENTITY_ and _DKIMDOMAIN_; updated terminology; verification speedup with Mail::DKIM 0.30 (or its pre-releases)
+
+- bug 5696: sa-compile: cut regexp base strings at Unicode high codepoints, to avoid corruption of patterns containing UTF-8
+
+- bug 5637: bayes_file_mode is handled incorrectly when creating bayes.mutex, resulting in incorrect permissions on that file; fix by Mihaly Barasz
+
+- bug 5612: DB_File version 4.2.x has a bug that loops infinitely if files named '__db.{filename}' are present; work around.  thanks to J. Nick Koston for the report and fix
+
+- bug 5606: too-early init_learner() call causes root's user prefs file to be read when spamd is started; this is inappropriate. fix
+
+- bug 4179: if allow_user_rules is 1, user rules are not unique to each user; one user's user rules can appear in later scans for other users that are run using the same spamd process. fix
+
+- bug 5680: ALL_TRUSTED can fire if a trusted MSA or webmail system receives the message from an untrusted X-Originating-IP: header. fix
+
+- bug 5626: in the 'spamassassin' script, install a signal handler for SIGHUP, SIGINT, SIGTERM and SIGPIPE to ensure that temporary files are removed
+
+- bug 5557: some temporary files are left not cleaned up on Windows; fix
+
+- bug 5661: speed up Bayes SQL queries by allowing the use of indexes when expiring
+
+- bug 5611: support 'spamd --nouser-config -u username', which setuids to 'username' but does not read user_prefs files from anywhere
+
+- bug 5665: spamd may fail to notice that a child has completed exiting, and keeps in the child list in state 'K', eventually filling up the child list with 'ghost' children.  fix
+
+- bug 5735: spamc should allow retry_sleep 0
+
+- bug 5728: spamd: require -u with --sql-config or --ldap-config
+
+- bug 5682: remove FH_HOST_ALMOST_IP, FH_HOST_EQ_D_D_D_D, due to false positives and redundancy with RDNS_DYNAMIC; remove FH_HOST_EQ_D_D_D_DB due to no hits
+
+- bug 5681: look up IP addresses found in 'X-Yahoo-Post-IP' and 'X-SenderIP' headers, too, thanks to Martin Blapp
+
+- Bug 5589: Refined async events handling and DNS lookup completions
+
+- bug 5586: RDNS_NONE has false positives if the MTA doesn't put the hostname in the Received header, like Communigate Pro. add an exception for this
+
+- bug 5748: fix locale problem with use of external sort in sa-compile
+
+

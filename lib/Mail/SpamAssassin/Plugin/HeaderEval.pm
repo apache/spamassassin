@@ -66,6 +66,7 @@ sub new {
   $self->register_eval_rule("check_unresolved_template");
   $self->register_eval_rule("check_ratware_name_id");
   $self->register_eval_rule("check_ratware_envelope_from");
+  $self->register_eval_rule("gated_through_received_hdr_remover");
 
   return $self;
 }

@@ -163,7 +163,7 @@ if (defined $opt{'updatedir'}) {
   $opt{'updatedir'} = Mail::SpamAssassin::Util::untaint_file_path($opt{'updatedir'});
 }
 else {
-  $opt{'updatedir'} = $spamtest->sed_path('__local_state_dir__/compiled/__version__');
+  $opt{'updatedir'} = $spamtest->sed_path('__local_state_dir__/compiled/__perl_major_ver__/__version__');
 }
 my $installdir = $opt{'updatedir'};
 if ((!defined $opt{'list'})
@@ -684,7 +684,7 @@ Options:
   --siteconfigpath=path         Path for site configs
                                 (default: /etc/mail/spamassassin)
   --updatedir=path              Directory to place updates
-                      (default: /var/lib/spamassassin/compiled/<version>)
+                      (default: /var/lib/spamassassin/compiled/<perlversion>/<version>)
   --cf='config line'            Additional line of configuration
   -D, --debug [area=n,...]	Print debugging messages
   -V, --version			Print version
@@ -725,7 +725,7 @@ the C extension code.
 =item B<--sudo>
 
 Use C<sudo(8)> to run code as 'root' when writing files to the compiled-rules
-storage area (which is C<@@LOCAL_STATE_DIR@@/compiled/@@VERSION@@> by default).
+storage area (which is C<@@LOCAL_STATE_DIR@@/compiled/@@PERL_MAJOR_VER@@/@@VERSION@@> by default).
 
 =item B<--keep-tmps>
 
@@ -746,7 +746,7 @@ the default directories (usually C</etc/mail/spamassassin> or similar).
 
 By default, C<sa-compile> will use the system-wide rules update directory:
 
-        @@LOCAL_STATE_DIR@@/spamassassin/compiled/@@VERSION@@
+        @@LOCAL_STATE_DIR@@/spamassassin/compiled/@@PERL_MAJOR_VER@@/@@VERSION@@
 
 If the updates should be stored in another location, specify it here.
 

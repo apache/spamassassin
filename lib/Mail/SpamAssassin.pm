@@ -95,7 +95,7 @@ use vars qw{
   @site_rules_path
 };
 
-$VERSION = "3.002004";      # update after release (same format as perl $])
+$VERSION = "3.002005";      # update after release (same format as perl $])
 # $IS_DEVEL_BUILD = 1;        # change for release versions
 
 # Used during the prerelease/release-candidate part of the official release
@@ -1706,12 +1706,19 @@ sub sed_path {
   $path =~ s/__def_rules_dir__/$self->{DEF_RULES_DIR} || ''/ges;
   $path =~ s{__prefix__}{$self->{PREFIX} || $Config{prefix} || '/usr'}ges;
   $path =~ s{__userstate__}{$self->get_and_create_userstate_dir() || ''}ges;
+  $path =~ s{__perl_major_ver__}{$self->get_perl_major_version()}ges;
   $path =~ s/__version__/${VERSION}/gs;
   $path =~ s/^\~([^\/]*)/$self->expand_name($1)/es;
 
   $path = Mail::SpamAssassin::Util::untaint_file_path ($path);
   $self->{conf}->{sed_path_cache}->{$orig_path} = $path;
   return $path;
+}
+
+sub get_perl_major_version {
+  my $self = shift;
+  $] =~ /^(\d\.\d\d\d)/ or die "bad perl ver $]";
+  return $1;
 }
 
 sub first_existing_path {

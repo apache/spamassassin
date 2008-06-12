@@ -333,7 +333,8 @@ sub _check_dkim_signature {
     $verifier->CLOSE();      # the action happens here
 
     my $author = $verifier->message_originator;
-    $author = !$author ? '' : $author->address();
+    $author = $author->address()  if $author;
+    $author = '' if !defined $author;  # when a From header field is missing
     # Mail::DKIM sometimes leaves leading or trailing whitespace in address
     $author =~ s/^[ \t]+//s;  $author =~ s/[ \t]+\z//s;  # trim
     if ($author ne $scan->{dkim_author_address}) {

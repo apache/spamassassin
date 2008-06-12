@@ -528,7 +528,11 @@ sub rule_file_compile {
         \s+(.*?)$
       /x)
     {
-      $current_conditional = $orig;
+      if ($current_conditional) {
+        $current_conditional .= "#|#".$orig;
+      } else {
+        $current_conditional = $orig;
+      }
     }
     elsif (/^endif\b/x)
     {
@@ -605,7 +609,7 @@ sub rule_file_compile {
 
       my $cond;
       if ($current_conditional) {
-        $name = $current_conditional; $name =~ s/\s+/ /gs;
+        $name = $current_conditional; $name =~ s/\#\|\#/ /gs; $name =~ s/\s+/ /gs;
         $cond = $current_conditional;
       }
 
@@ -744,7 +748,14 @@ sub copy_to_output_buffers {
         $rules->{$ifplugin_text_name}->{output_file} = $pubfile;
       }
 
-      $rules->{$name}->{output_text} = "\n".$cond.$text."endif\n";
+      # ensure we produce enough "endif"s to match however many
+      # nested conditions there are
+      my $endifs = "endif\n";
+      while ($cond =~ s/\#\|\#//) {
+        $endifs .= "endif\n";
+      }
+
+      $rules->{$name}->{output_text} = "\n".$cond.$text.$endifs;
 
     } else {
       $rules->{$name}->{output_text} = $text;

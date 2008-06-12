@@ -542,6 +542,12 @@ sub finish {
       close ($part->{'raw'});
     }
 
+    # bug 5858: avoid memory leak with deep MIME structure
+    if (defined ($part->{metadata})) {
+      $part->{metadata}->finish();
+      delete $part->{metadata};
+    }
+
     delete $part->{'headers'};
     delete $part->{'raw_headers'};
     delete $part->{'header_order'};
@@ -639,7 +645,11 @@ sub parse_body {
       # If it's not multipart, go ahead and just deal with it.
       $self->_parse_normal($toparse);
 
-      if ($toparse->[0]->{'type'} =~ /^message\b/i && ($toparse->[3] > 0)) {
+      # bug 5041: exclude message/partial messages, however
+      if ($toparse->[0]->{'type'} =~ /^message\b/i &&
+          $toparse->[0]->{'type'} !~ /^message\/partial$/i &&
+            ($toparse->[3] > 0))
+      {
         # Just decode the part, but we don't care about the result here.
         $toparse->[0]->decode(0);
 

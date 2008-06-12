@@ -729,7 +729,7 @@ sub tok_touch_allold {
 
   my $tokenarray = join(",", map { '"' . _quote_bytea($_) . '"' } sort @{$tokens});
 
-  my $sth = $self->{_dbh}->prepare("select touch_tokens($self->{_userid}, '{$tokenarray}', $atime)");
+  my $sth = $self->{_dbh}->prepare("select touch_tokens($self->{_userid}, $self->{_esc_prefix}'{$tokenarray}', $atime)");
 
   unless (defined($sth)) {
     dbg("bayes: tok_touch_all: SQL error: ".$self->{_dbh}->errstr());
@@ -890,6 +890,12 @@ sub _connect_db {
     dbg("bayes: database connection established");
   }
 
+  if ( $dbh->{pg_server_version} >= 80100 ) {
+    $self->{_esc_prefix} = 'E';
+  } else {
+    $self->{_esc_prefix} = '';
+  }
+
   $self->{_dbh} = $dbh;
 
  return 1;
@@ -933,7 +939,7 @@ sub _put_token {
   }
 
   my $escaped_token = _quote_bytea($token);
-  my $sth = $self->{_dbh}->prepare("select put_tokens($self->{_userid},'{$escaped_token}',
+  my $sth = $self->{_dbh}->prepare("select put_tokens($self->{_userid},$self->{_esc_prefix}'{$escaped_token}',
                                                       $spam_count,$ham_count,$atime)");
 
   unless (defined($sth)) {
@@ -997,7 +1003,7 @@ sub _put_tokens {
 
   my $tokenarray = join(",", map { '"' . _quote_bytea($_) . '"' } sort keys %{$tokens});
 
-  my $sth = $self->{_dbh}->prepare("select put_tokens($self->{_userid}, '{$tokenarray}',
+  my $sth = $self->{_dbh}->prepare("select put_tokens($self->{_userid}, $self->{_esc_prefix}'{$tokenarray}',
                                                      $spam_count, $ham_count, $atime)");
 
   unless (defined($sth)) {

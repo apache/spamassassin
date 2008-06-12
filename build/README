@@ -122,6 +122,10 @@ SPAMASSASSIN RELEASE PROCEDURE
 
     svn commit -m "preparing to release X.Y.Z"
 
+  (If you are privately preparing a security release, and don't wish to
+  perform commits to public SVN repos, you can defer this step until
+  later.)
+
 - SVN tag the release files.  This is done using "svn copy".
   For a maintainance release (x.y.1, x.y.2):
 
@@ -151,6 +155,10 @@ SPAMASSASSIN RELEASE PROCEDURE
   a branch really) of whatever the latest branch revision to be the new
   base of the tag release.
 
+  (If you are privately preparing a security release, and don't wish to
+  perform commits to public SVN repos, you can defer this step until
+  later.)
+
 
 - In your checkout on people.apache.org (may be read-only):
 
@@ -161,20 +169,19 @@ SPAMASSASSIN RELEASE PROCEDURE
     svn co $repo/tags/spamassassin_release_3_2_0_pre_2 ~/relbuild
     cd ~/relbuild
 
+  (If you are privately preparing a security release, you will need
+  to ensure that the code in this build directory matches up using
+  some other mechanism, since SVN is public.)
+
 - run "./build/update_stable" to build the tar.gz files.
 
     PATH=$HOME/sabuildtools/perl584/bin:$HOME/sabuildtools/bin:$PATH
     ./build/update_stable
 
+  if you get "gpg-agent" errors about not connecting to the PIN entry
+  module, you didn't update your $PATH.
+
 - take a copy of the MD5sum line output.
-
-- by default, they're written to ~/site/released/ .
-  Copy them to wherever you want, yourself:
-
-    mkdir -p ~/public_html/devel
-    mv ~/site/released/Mail-SpamAssassin-3.2.0-rc2.* ~/public_html/devel
-
-  (For me, "~/public_html/devel" is http://people.apache.org/~jm/devel/ .)
 
 - test the tar.gz and zip files!  redo until they work!! ;)
 
@@ -192,13 +199,23 @@ SPAMASSASSIN RELEASE PROCEDURE
   of the website, but included in the vote mail) and request a vote on the
   development mailing list to make the release.  Post the URL,
   md5sums/sha1sums, and proposed release announcement mail to the dev
-  list. 
+  list.  The default location -- ~/public_html/devel/ , or
+  http://people.apache.org/~jm/devel/ , qualifies as "discreet".
+  
+  While doing this, also upload a copy of the proposed release
+  announcement to the website:
+
+    version=3.2.4
+    cp build/announcements/$version.txt ~/public_html/devel/PROPOSED-$version.txt
 
   Pre-releases and RCs require just lazy consensus -- ie. no objections.
 
 - (for a full release) You need 3 +1's from PMC members. The release
   manager (that's you) may vote as well.  Once there are three or more +1
   votes, you may proceed.
+
+- If you've been doing some steps in private, for a security release,
+  now's the time to perform them publicly; tagging etc.
 
 - Edit lib/Mail/SpamAssassin.pm, and uncomment the $IS_DEVEL_BUILD line.
   SVN commit it (and the release announcement file from above, if
@@ -252,12 +269,18 @@ SPAMASSASSIN RELEASE PROCEDURE
   make it clear that this is an unofficial "test build" by placing it
   in your public_html dir:
 
-        http://people.apache.org/~jm/devel/
+        http://people.apache.org/~jm/rc/
+
+  this command will do it:
+
+        version=X.Y.Z
+        cp -p ~/public_html/devel/Mail-SpamAssassin-$version.* \
+            ~/public_html/rc/
 
   (for full release builds) copy the tarballs to www.apache.org/dist:
 
         version=X.Y.Z
-        cp -p ~/site/released/Mail-SpamAssassin-$version.* \
+        cp -p ~/public_html/devel/Mail-SpamAssassin-$version.* \
             /www/www.apache.org/dist/spamassassin/source
 
         cd /www/www.apache.org/dist/spamassassin
@@ -273,7 +296,7 @@ SPAMASSASSIN RELEASE PROCEDURE
 
         cd /www/www.apache.org/dist/spamassassin
         prev=X.Y.notZ
-        rm -f source/Mail-SpamAssassin-$prev.*
+        rm -f source/Mail-SpamAssassin-$prev.* Mail-SpamAssassin-$prev.*
         rm -f binaries/*/Mail-SpamAssassin-$prev.*
 
   (Archive copies are automatically kept on archive.apache.org/dist/ .)
@@ -290,6 +313,7 @@ SPAMASSASSIN RELEASE PROCEDURE
 
 - rebuild the SpamAssassin website with webmake:
 
+        PATH=$HOME/sabuildtools/perl584/bin:$HOME/sabuildtools/bin:$PATH
         cd /www/spamassassin.apache.org
         webmake -F
 
@@ -319,10 +343,8 @@ SPAMASSASSIN RELEASE PROCEDURE
 - Release a new rules update matching the released code:
 
     ssh spamassassin.zones.apache.org
-    sudo -H -u updatesd \
-        /home/updatesd/svn/spamassassin/build/mkupdates/run_nightly
-    sudo -H -u updatesd \
-        /home/updatesd/svn/spamassassin/build/mkupdates/run_part2
+    cd /home/updatesd/svn/spamassassin/build/mkupdates
+    sudo -H -u updatesd ./update-rules 3.2
 
 - update the tag used to point to "current release":
 
@@ -352,6 +374,10 @@ SPAMASSASSIN RELEASE PROCEDURE
 
 - announce on the users, dev, and announce mailing lists using the
   previously-prepared release announcement.
+
+  NOTE: you must send this mail with a "From:" address @apache.org,
+  otherwise it'll be bounced by the ASF's custom spam filtering
+  rules.
 
 - Before doing the next step, run through the release summary mail, and
   write up a really short summary of the important changes in

@@ -42,6 +42,7 @@ use bytes;
 use Mail::SpamAssassin;
 use Mail::SpamAssassin::Logger;
 
+use Socket;
 use IO::Socket::INET;
 use Errno qw(EADDRINUSE EACCES);
 
@@ -238,6 +239,26 @@ sub connect_sock {
     warn "Can't create a DNS resolver socket: $errno";
     goto no_sock;
   }
+
+  eval {
+    my($bufsiz,$newbufsiz);
+    $bufsiz = $sock->sockopt(Socket::SO_RCVBUF)
+      or die "Can't get a resolver socket rx buffer size: $!";
+    if ($bufsiz >= 32*1024) {
+      dbg("dns: resolver socket rx buffer size is %d bytes", $bufsiz);
+    } else {
+      $sock->sockopt(Socket::SO_RCVBUF, 32*1024)
+        or die "Can't set a resolver socket rx buffer size: $!";
+      $newbufsiz = $sock->sockopt(Socket::SO_RCVBUF)
+        or die "Can't get a resolver socket rx buffer size: $!";
+      dbg("dns: resolver socket rx buffer size changed from %d to %d bytes",
+          $bufsiz, $newbufsiz);
+    }
+    1;
+  } or do {
+    my $eval_stat = $@ ne '' ? $@ : "errno=$!";  chomp $eval_stat;
+    info("dns: socket buffer size error: $eval_stat");
+  };
 
   $self->{sock} = $sock;
   $self->{sock_as_vec} = $self->fhs_to_vec($self->{sock});

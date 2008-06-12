@@ -951,9 +951,11 @@ sub run_eval_tests {
     $evalstr .= '
 
       eval {
-        $result = $self->' . $function . ' (@extraevalargs '. $argstr .' );
+        $result = $self->' . $function . ' (@extraevalargs '. $argstr .' );  1;
+      } or do {
+        $result = 0;
+        $self->handle_eval_rule_errors($rulename);
       };
-      if ($@) { $self->handle_eval_rule_errors($rulename); }
 
     ';
 

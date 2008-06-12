@@ -39,6 +39,8 @@ describe REMOVE_BEFORE_LINK	Removal phrase right before a link
 # CLICK rules
 # note HTML_LINK_CLICK* rules in HTML parser section
 
+# dummy for rule that was removed so as not to break scores and metas still referring ot it
+meta HG_HORMONE  (0)
 
 body GUARANTEED_100_PERCENT	/100% GUARANTEED/i
 describe GUARANTEED_100_PERCENT	One hundred percent guaranteed
@@ -134,20 +136,6 @@ describe FIN_FREE 		Freedom of a financial nature
 
 body FORWARD_LOOKING	        /\bcontains forward-looking statements\b/i
 describe FORWARD_LOOKING	Stock Disclaimer Statement
-
-
-# Avoid an FP noted by NISHIJIMA Takanori: 'Japanese string sequence:
-# "Su" "Ku" "Na"  "I" "Ko" "Su" "To" "De" "Yo" "Ri" ...
-# (This string means, "More ...(ex. "productive" or "effective")
-# with less cost", and is a popular phrase but have no relations
-# with human growth hormone, of course. :-)
-# Encoded byte sequence: "$9" "$/" "$J" "$$" "%3" "%9" "%H" "$G" "$h" "$j"'
-# note FP:                                              ^^^^^^^^^^^^
-body __HG_HORMONE		/\b(?:human growth hormone|(?-i:HGH)|H.G.H)\b/i
-meta HG_HORMONE			(!__ISO_2022_JP_DELIM && __HG_HORMONE)
-describe HG_HORMONE		Talks about hormones for human growth
-
-
 
 body ONE_TIME			/\bone\W+time (?:charge|investment|offer|promotion)/i
 describe ONE_TIME		One Time Rip Off
