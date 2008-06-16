@@ -145,11 +145,6 @@ meta FORGED_THEBAT_HTML		(__THEBAT_MUA_V1 && MIME_HTML_ONLY)
 describe FORGED_THEBAT_HTML	The Bat! can't send HTML message only
 
 # bug 2513
-header __REPTO_OVERQUOTE	Reply-To =~ /"[\w. -]+"\s*\</
-meta REPTO_OVERQUOTE_THEBAT	__REPTO_OVERQUOTE && __THEBAT_MUA
-describe REPTO_OVERQUOTE_THEBAT	The Bat! doesn't do quoting like this
-
-# bug 2513
 header __REPTO_QUOTE		Reply-To =~ /".*"\s*\</
 meta REPTO_QUOTE_AOL		__REPTO_QUOTE && __AOL_MUA
 describe REPTO_QUOTE_AOL	AOL doesn't do quoting like this
