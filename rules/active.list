@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: bb-jm bb-traps dos jm theo zmi; day 2: bb-jm bb-traps dos jm theo zmi; day 3: bb-jm bb-traps dos jm theo zmi
+# with results from: day 1: bb-jm dos jm theo zmi; day 2: bb-jm bb-traps dos jm theo zmi; day 3: bb-jm bb-traps dos jm theo zmi
 
 # tflags userconf
 ALL_TRUSTED
@@ -66,9 +66,6 @@ DNS_FROM_RFC_DSN
 
 # tflags publish
 DOS_ANAL_SPAM_MAILER
-
-# good enough
-DOS_FORGED_RCVD_QUADS
 
 # good enough
 DOS_OE_TO_MX
@@ -422,15 +419,6 @@ MIME_CHARSET_FARAWAY
 MISSING_HB_SEP
 
 # good enough
-MSHTML_6_00_2900_3199_A
-
-# good enough
-MSHTML_6_00_2900_3199_B
-
-# good enough
-MSHTML_6_00_2900_3199_C
-
-# good enough
 MSOE_MID_WRONG_CASE
 
 # tflags net
@@ -656,9 +644,6 @@ RP_MINUS
 RP_UNDERLINE
 
 # good enough
-SHORT_HELO_AND_INLINE_IMAGE
-
-# good enough
 SPAMMY_XMAILER
 
 # tflags net
@@ -744,6 +729,9 @@ TVD_SUBJ_WIPE_DEBT
 
 # good enough
 TVD_VISIT_PHARMA
+
+# good enough
+THEBAT_UNREG
 
 # tflags userconf
 UNPARSEABLE_RELAY
