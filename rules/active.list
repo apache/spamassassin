@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: bb-jm dos jm theo zmi; day 2: bb-jm bb-traps dos jm theo zmi; day 3: bb-jm bb-traps dos jm theo zmi
+# with results from: day 1: bb-jm bb-traps dos jm theo zmi; day 2: bb-jm dos jm theo zmi; day 3: bb-jm bb-traps dos jm theo zmi
 
 # tflags userconf
 ALL_TRUSTED
@@ -695,6 +695,9 @@ SUBJECT_IN_BLACKLIST
 SUBJECT_IN_WHITELIST
 
 # good enough
+THEBAT_UNREG
+
+# good enough
 TT_OBSCURED_VIAGRA
 
 # good enough
@@ -729,9 +732,6 @@ TVD_SUBJ_WIPE_DEBT
 
 # good enough
 TVD_VISIT_PHARMA
-
-# good enough
-THEBAT_UNREG
 
 # tflags userconf
 UNPARSEABLE_RELAY
