@@ -153,6 +153,8 @@ uri __CRBOUNCE_0SPAM1    /^http:\/\/www\.0spam\.com\/v/
 header __CRBOUNCE_0SPAM2 From:addr =~ /^verify\@0spam.com$/
 meta __CRBOUNCE_0SPAM    (__CRBOUNCE_0SPAM1 && __CRBOUNCE_0SPAM2)
 
+header __CRBOUNCE_SPAMARREST exists:X-Spamarrest-noauth
+
 # http://mailinblack.com , a French C/R system with no other reliable
 # signatures.  annoying!
 header __CRBOUNCE_MIB    Content-Type =~ /mUlTiPaRtBoUnDaRy_MailInBlack/
@@ -182,7 +184,7 @@ header __CRBOUNCE_EXI   X-ExiSpam =~ /ExiSpam/
 header __CRBOUNCE_UNVERIF   Subject =~ /^Unverified email to /
 header __CRBOUNCE_BLOCKED   Subject =~ /^\*\*Message you sent blocked by our bulk email filter\*\*$/
 
-meta __CHALLENGE_RESPONSE     __CRBOUNCE_UOL || __CRBOUNCE_VERIF || __CRBOUNCE_RP || __CRBOUNCE_VANQ || __CRBOUNCE_HEADER || __CRBOUNCE_QURB || __CRBOUNCE_0SPAM || __CRBOUNCE_GETRESP || __CRBOUNCE_TMDA || __CRBOUNCE_ASK || __CRBOUNCE_EXI || __CRBOUNCE_PREC_SPAM || __CRBOUNCE_SZ || __CRBOUNCE_SPAMLION || __CRBOUNCE_MIB || __CRBOUNCE_SI || __CRBOUNCE_UNVERIF || __CRBOUNCE_RP_2 || __CRBOUNCE_BLOCKED
+meta __CHALLENGE_RESPONSE     __CRBOUNCE_UOL || __CRBOUNCE_VERIF || __CRBOUNCE_RP || __CRBOUNCE_VANQ || __CRBOUNCE_HEADER || __CRBOUNCE_QURB || __CRBOUNCE_0SPAM || __CRBOUNCE_GETRESP || __CRBOUNCE_TMDA || __CRBOUNCE_ASK || __CRBOUNCE_EXI || __CRBOUNCE_PREC_SPAM || __CRBOUNCE_SZ || __CRBOUNCE_SPAMLION || __CRBOUNCE_MIB || __CRBOUNCE_SI || __CRBOUNCE_UNVERIF || __CRBOUNCE_RP_2 || __CRBOUNCE_BLOCKED || __CRBOUNCE_SPAMARREST
 meta CHALLENGE_RESPONSE      __MY_SERVERS_FOUND && __CHALLENGE_RESPONSE
 describe CHALLENGE_RESPONSE  Challenge-Response message for mail you sent
 
