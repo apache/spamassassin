@@ -2084,6 +2084,18 @@ sub handle_user_setuid_basic {
 
     if ($prefsfrom eq $suidto) {
       $userdir = $suiddir;      # reuse the already-looked-up info
+    } elsif ( $opt{'vpopmail'} ) {
+      #
+      # If vpopmail config enabled then set $userdir to virtual homedir
+      #
+      no re 'taint';
+      my $username_untainted = ( $username =~ /^([-:,.=+A-Za-z0-9_@~]+)$/ ? $1 : undef );
+      use re 'taint';
+      my $vpopdir = $suiddir; # This should work with common vpopmail setups
+      $userdir = `$vpopdir/bin/vuserinfo -d \Q$username_untainted\E`;
+      if ($? != 0) {
+        $userdir = handle_user_vpopmail($username_untainted,$vpopdir);
+      }
     } else {
       $userdir = (getpwnam($prefsfrom))[7];
     }
@@ -2105,27 +2117,43 @@ sub handle_user_setuid_basic {
   handle_user_set_user_prefs($userdir, $username);
 }
 
+sub handle_user_vpopmail {
+  #
+  # If vuserinfo failed $username could be an alias
+  # As the alias could be an alias itself we'll try to resolve it recursively
+  # Because we're mistrusting vpopmail we'll set off an alarm
+  #
+  my $username = shift;
+  my $vpopdir = shift;
+  my $userdir;
+  my $vpoptimeout = 5;
+  my $vptimer = Mail::SpamAssassin::Timeout->new({ secs => $vpoptimeout });
+
+  $vptimer->run(sub {
+    my $vpopusername = $username;
+    do {
+      my $vpopusername_tainted = `$vpopdir/bin/valias \Q$vpopusername\E`;
+      no re 'taint';
+      if ($vpopusername_tainted =~ /.+ -> &?(.+)/) {
+        $vpopusername = $1;
+      } else {
+        die "failed to resolve vpopmail user/alias '$username' using vuserinfo/valias";
+      }
+    } until (($userdir = `$vpopdir/bin/vuserinfo -d \Q$vpopusername\E`) && $? == 0);
+    $userdir =~ s,.+ -> (/.+)/Maildir/,$1,;
+  });
+
+  if ($vptimer->timed_out()) {
+    undef $userdir;
+    die "failed to resolve vpopmail user/alias '$username' in time ($vpoptimeout seconds)";
+  } else {
+    chomp($userdir);
+  }
+  return $userdir;
+}
+
 sub handle_user_set_user_prefs {
   my ($dir, $username) = @_;
-
-  # If vpopmail config enabled then set $dir to virtual homedir
-  #
-  if ( $opt{'vpopmail'} ) {
-    my $vpopdir = $dir;
-    $dir = `$vpopdir/bin/vuserinfo -d \Q$username\E`;
-    if ($? != 0) {
-      #
-      # If vuserinfo failed $username could be an alias
-      #
-      $dir = `$vpopdir/bin/valias \Q$username\E`;
-      if ($? == 0 && $dir !~ /.+ -> &/) {
-        $dir =~ s,.+ -> (/.+)/Maildir/,$1,;
-      } else {
-        undef($dir);
-      }
-    }
-    chomp($dir);
-  }
 
   # don't do this if we weren't passed a directory
   if ($dir) {
