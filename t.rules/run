@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 #
-# usage: t.rules/run [--verbose] [--tests=BOUNCE_MESSAGE,FOO,BAR]
+# usage: t.rules/run [--verbose] [--tests=BOUNCE_MESSAGE,FOO,BAR] [file ...]
 #
 # TODO: Generate TAP output
 
@@ -22,49 +22,66 @@ GetOptions(
 );
 
 my $verbose = $opt{'verbose'};
-$opt{'tests'} ||= <t.rules/*>;
+$opt{'tests'} ||= join " ", <t.rules/*>;
+my $testsfailed = 0;
+if (@ARGV) {
+  foreach my $f (@ARGV) {
+    test_msg($f, $1);
+  }
+} else {
+  main();
+}
+exit $testsfailed;
 
-foreach my $rule (split(/[\s,]/, $opt{'tests'})) {
-  $rule =~ s/^t.rules\///;
-  chomp $rule;
-  my $ruledir="t.rules/$rule";
-  next unless -d $ruledir;
-  warn "\nRunning tests for $rule:\n" if $verbose;
+sub main {
+  foreach my $rule (split(/[\s,]/, $opt{'tests'})) {
+    $rule =~ s/^t.rules\///;
+    chomp $rule;
 
-  foreach my $f (<$ruledir/*>) {
-    next unless (-f $f);
+    my $ruledir="t.rules/$rule";
+    next unless -d $ruledir;
 
-    # if the filename starts with "fp", we want a _miss_ for the named rule
-    my $want_hit = 1;
-    if ($f =~ /\/fp/i) {
-      $want_hit = 0;
+    warn "\nRunning tests for $rule:\n" if $verbose;
+    foreach my $f (<$ruledir/*>) {
+      (-f $f) and test_msg($f);
     }
+  }
+}
 
-    my $testsline;
-    open (IN,
-        "./spamassassin --cf='use_bayes 0' --cf='use_awl 0' -D -Lt < $f 2>&1 |")
-            or warn "sa failed";
-    open (LOG, ">o.log") or die;
-    while (<IN>) {
-      print LOG;
-      /check: tests=(.*)$/ and $testsline = $1;
-      /check: subtests=(.*)$/ and $testsline .= ",$1";
-    }
-    close IN;
-    close LOG;
+sub test_msg {
+  my ($f) = @_;
+  ($f =~ /\/([^\/]+)\/[^\/]+$/) or warn "cannot find rule in '$f'";
 
-    if ($testsline =~ /(?:[ ,]|^)\Q$rule\E(?:[ ,]|$)/) {
-      if ($want_hit) {
-        pass($rule, $f, "$testsline");
-      } else {
-        fail($rule, $f, "want=n got=y: $testsline");
-      }
+  # if the filename starts with "fp", we want a _miss_ for the named rule
+  my $want_hit = 1;
+  if ($f =~ /\/fp/i) {
+    $want_hit = 0;
+  }
+
+  my $testsline;
+  open (IN,
+      "./spamassassin --cf='use_bayes 0' --cf='use_awl 0' -D -Lt < $f 2>&1 |")
+          or warn "sa failed";
+  open (LOG, ">o.log") or die;
+  while (<IN>) {
+    print LOG;
+    /check: tests=(.*)$/ and $testsline = $1;
+    /check: subtests=(.*)$/ and $testsline .= ",$1";
+  }
+  close IN;
+  close LOG;
+
+  if ($testsline =~ /(?:[ ,]|^)\Q$rule\E(?:[ ,]|$)/) {
+    if ($want_hit) {
+      pass($rule, $f, "$testsline");
     } else {
-      if ($want_hit) {
-        fail($rule, $f, "want=y got=n: $testsline");
-      } else {
-        pass($rule, $f, "$testsline");
-      }
+      fail($rule, $f, "want=n got=y: $testsline");
+    }
+  } else {
+    if ($want_hit) {
+      fail($rule, $f, "want=y got=n: $testsline");
+    } else {
+      pass($rule, $f, "$testsline");
     }
   }
 }
@@ -72,6 +89,7 @@ foreach my $rule (split(/[\s,]/, $opt{'tests'})) {
 sub fail {
   my ($rule, $f, $err) = @_;
   print "NOT ok on $f for $rule: $err\n";
+  $testsfailed++;
 }
 
 sub pass {
