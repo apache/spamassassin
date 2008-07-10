@@ -51,6 +51,7 @@ sub main {
 sub test_msg {
   my ($f) = @_;
   ($f =~ /\/([^\/]+)\/[^\/]+$/) or warn "cannot find rule in '$f'";
+  my $rule = $1;
 
   # if the filename starts with "fp", we want a _miss_ for the named rule
   my $want_hit = 1;
