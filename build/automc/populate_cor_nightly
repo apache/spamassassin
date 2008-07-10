@@ -10,7 +10,7 @@ my $SADIR="/export/home/automc/svn/spamassassin";
 
 # both of these must be writable
 my $TGTS_DIR = "/export/home/bbmass/mc-nightly";
-my $RAWCOR_DIR = "/export/home/bbmass/rawcor";
+my $RAWCOR_DIR = "/export/home/bbmass/uploadedcorpora";
 
 if (!-d $TGTS_DIR) {
   mkdir ($TGTS_DIR) or die "cannot create $TGTS_DIR";
