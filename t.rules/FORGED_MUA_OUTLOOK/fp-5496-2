@@ -1,0 +1,419 @@
+Received: from ax7.axolotl.com ([10.1.8.24])
+          by ax1.axolotl.com (Lotus Domino Release 7.0.2FP1)
+          with ESMTP id 2007061413352069-42153 ;
+          Thu, 14 Jun 2007 13:35:20 -0700 
+Received: from lists.hl7.org ([152.160.212.236])
+          by ax7.axolotl.com (Lotus Domino Release 7.0.2FP1)
+          with SMTP id 2007061413351873-33867 ;
+          Thu, 14 Jun 2007 13:35:18 -0700 
+Received-SPF: notyetresolved (lists.hl7.org: front2.acsu.buffalo.edu [128.205.4.140] <ceusters@buffalo.edu>)
+Message-ID: <LYRIS-500088-1927631-2007.06.14-16.24.22--nradov#axolotl.com@lists.hl7.org>
+From: "Werner Ceusters" <ceusters@buffalo.edu>
+To: "Dan Russler" <dan.russler@oracle.com>, "Gary Dickinson" <gary.dickinson@ehr-standards.com>
+Cc: "List EHR" <ehr@lists.hl7.org>, "Lloyd McKenzie" <lloyd@lmckenzie.com>
+Subject: Re: DRAFT EHR Lifecycle Model - Review and Comment Requested
+Date: Thu, 14 Jun 2007 16:21:41 -0400
+MIME-Version: 1.0
+X-Priority: 3 (Normal)
+X-MSMail-Priority: Normal
+X-Mailer: Microsoft Outlook Express 6.00.2900.3138
+X-MimeOLE: Produced By Microsoft MimeOLE V6.00.2900.3138
+X-UB-Relay: (ub-vpn-245-184.cc.buffalo.edu)
+X-PM-EL-Spam-Prob: : 8%
+List-Unsubscribe: <mailto:leave-ehr-500088B@lists.hl7.org>
+Reply-To: "Werner Ceusters" <ceusters@buffalo.edu>
+precedence:bulk
+x-precedence:bulk
+Sender: owner-ehr@lists.hl7.org
+X-MIMETrack: Itemize by SMTP Server on AX7/ACHQ(Release 7.0.2FP1|January 10, 2007) at 06/14/2007
+ 01:35:19 PM,
+		 Serialize by Router on AX7/ACHQ(Release 7.0.2FP1|January 10, 2007) at 06/14/2007
+ 01:35:20 PM,
+		 Serialize complete at 06/14/2007 01:35:20 PM,
+		 Itemize by SMTP Server on AX1/ACHQ(Release 7.0.2FP1|January 10, 2007) at 06/14/2007
+ 01:35:20 PM,
+		 Itemize by Router on AX1/ACHQ(Release 7.0.2FP1|January 10, 2007) at 06/14/2007
+ 01:36:01 PM,
+		 Serialize by Notes Client on Nick Radov/ACHQ(Build V80_M5_05202007|May 20, 2007) at
+ 06/14/2007 02:52:45 PM,
+		 Serialize complete at 06/14/2007 02:52:45 PM
+Content-Type: multipart/alternative; boundary="----=_NextPart_000_0108_01C7AEA0.17932C70"
+
+This is a multi-part message in MIME format.
+
+------=_NextPart_000_0108_01C7AEA0.17932C70
+Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain;
+		 charset="iso-8859-1"
+
+I have 2 remarks to start with.
+
+I'm flabbergasted by the statement that "acts do not have physical location=
+s". If I understand this right, then docters and nurses work "nowhere". What=
+ about that as a justification for their salary ?!  :-)
+I think you all agree that if Dr X gives patient Y an injection (in the nor=
+mal non-science fiction way), then that act takes place in the room where th=
+e docter and the patient are. If he does it by using a robot guided over the=
+ internet while he being in Paris and the patient in the US, then the act ha=
+ppened for sure on planet Earth. I do agree that determining where "the act"=
+ happened in situations like the latter is not trivial, the problem not bein=
+g that much the localisation, but rather what THE act IS. Although we would =
+still use the word "injection" for the latter, it is obviously something com=
+pletely different than the former, despite the fact that parts of the acts a=
+re similar (e.g. the needle being brought into the patient's body).
+This said, I have no problem with the fact that the statement that "an Act =
+occurs at a specific physical location" be removed from the document however=
+: it is not because you don't state "X" in a document, that "not X" should b=
+e true.
+
+Another point that I want to raise is the statement "An Act is documented b=
+y an Act Record instance". It should be specified what "instance" refers to =
+in this case, precisely in the light of what happens when that "instance" is=
+ copied into other systems. Thus if act X is injecting patient U by physicia=
+n V with product W in place P at time T, then Act Record instance AR1 might =
+be the documentation of it by V (thus the Dr registered what he did) and Act=
+ Record instance AR2 might be that the nurse who was in the room documented =
+act X. Thus we have 2 instances documenting act X. If this information gets =
+transfered and copied to other systems in persistent records, then I believe=
+ "copies" of these Act Record instances are created, and not new instances. =
+Otherwise, act X would be claimed to be documented by 2, 4, 6, 8 .... instan=
+ces, which is actually not true.
+
+I know, the RIM being based on a Kantian philosophy makes it hard to deal w=
+ith (and for some even to see) this problem, but I think it is important. An=
+d oh, you want for sure a "use case" for this: well suppose that there is so=
+me legal argument about whether or not the injection was actually given. Are=
+ ten copies of the same documentation instance more proof than just one ?   =
+(note for Charlie: you can use this paragraph to build further on your file =
+to document my "inability to productively collaborate with the community at =
+large" and "Dr. Cuesters [sic] prefers to intermittently send sarcastic emai=
+ls to various list servers".)
+
+Note that may objection is not in the use of the word instance in that part=
+icular sentence. In fact, I believe it is good practice, even that the state=
+ment should read "An Act instance is documented by an Act Record instance", =
+and even that the entire document should be checked whether "instance" shoul=
+d not be used more often (I believe it does).
+But even then, it should be specified what "instance" means in each case, e=
+.g. a particular act in physical reality or an entry in a database which doc=
+uments that act.
+
+kind regards,
+
+Werner
+  ----- Original Message -----=20
+  From: Dan Russler=20
+  To: Gary Dickinson=20
+  Cc: List EHR ; Lloyd McKenzie=20
+  Sent: Thursday, June 14, 2007 8:52 AM
+  Subject: Re: DRAFT EHR Lifecycle Model - Review and Comment Requested
+
+
+  Hi Gary,
+
+  I like this work a lot.
+
+  On quick review, I encountered this line which I think should be deleted.
+
+  "An Act occurs at a specific physical location"
+
+  In the past, our discussions in modeling specifically excluded this state=
+ment. The use cases that were discussed included healthcare delivered over t=
+he internet. If the patient is in one location, the physician in another loc=
+ation, the nurse in a third location, and the EHR is in a fourth location, w=
+here did the Act occur? For example, in telemedicine, the patient may be in =
+one location and the physician is listening on a remote stethescope in anoth=
+er location? Or observation is being performed via camera? Or the surgery is=
+ being performed via a robot over the internet (as accomplished between US a=
+nd Paris)?
+
+  We came to the conclusion that participants have physical locations, but =
+that acts do not have physical locations.
+
+  In review of the rest of the document, I did not see that anything else n=
+eeded to be changed because the "physical location of an act" comment was de=
+leted.
+
+  Also, in M&M, a dynamic model discussion is occurring. This document shou=
+ld be sent to M&M for review before the dynamic model work is completed to m=
+ake sure that M&M work and the EHR work are consistent.
+
+  Thanks, Dan
+
+
+  Gary Dickinson wrote:
+
+Dear EHR TC Members,
+
+Within the EHR Interoperability project team, we have spent the past =20
+several months working to develop and refine a model for the =20
+lifecycle of EHR "Act Records", expanding and refining record =20
+lifecycle events specified in Section 3.19 of the EHR =20
+Interoperability Model and in ISO 21089, "Trusted End-to-End =20
+Information Flows".  This effort has resulted in our Draft HL7 EHR =20
+Lifecycle Model (now v0.13, dated 23 May 2007).
+
+Per discussions on the last EHR TC teleconference, I'm distributing =20
+the current Draft EHR/LM for review and comment (within the EHR TC).  =20
+Also attached is an initial proposal from Ann Wrightson (HL7-UK) for =20
+additional EHR lifecycle events related to the interim progression of =20
+EHR records.  This proposal is awaiting UK consensus and will be =20
+considered in the next EHR/LM update.
+
+Please take an early opportunity to review these documents and offer =20
+your suggestions (not later than 15 July).  Submit comments on the =20
+draft EHR/LM to Gary Dickinson (gary.dickinson@ehr-standards.com) and =20
+on the UK proposal to Ann Wrightson (Ann.Wrightson@csw.co.uk).
+
+Thank you for your consideration.
+
+Regards,
+
+Gary
+
+
+
+************************************************
+To access the Archives of this or other lists or change your list settings =
+and information, go to: http://www.hl7.org/listservice----------------------=
+------------------------------------------------------
+
+
+ =20
+
+  ************************************************=20
+  To access the Archives of this or other lists or change your list setting=
+s and information, go to: http://www.hl7.org/listservice=20
+
+************************************************
+To access the Archives of this or other lists or change your list settings =
+and information, go to: http://www.hl7.org/listservice
+------=_NextPart_000_0108_01C7AEA0.17932C70
+Content-Transfer-Encoding: quoted-printable
+Content-Type: text/html;
+		 charset="iso-8859-1"
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<HTML><HEAD><TITLE></TITLE>
+<META http-equiv=3DContent-Type content=3Dtext/html;charset=3DISO-8859-1>
+<META content=3D"MSHTML 6.00.2900.3132" name=3DGENERATOR>
+<STYLE></STYLE>
+</HEAD>
+<BODY text=3D#000000 bgColor=3D#ffffff>
+<DIV><FONT face=3DArial size=3D2>I have 2 remarks to start with.</FONT></DI=
+V>
+<DIV><FONT face=3DArial size=3D2></FONT>&nbsp;</DIV>
+<DIV><FONT face=3DArial size=3D2>I'm flabbergasted by the statement that "a=
+cts do=20
+not have physical locations". If I understand this right, then docters and=
+=20
+nurses work "nowhere". What about that as a justification for their salary=
+=20
+?!&nbsp; :-)</FONT></DIV>
+<DIV><FONT face=3DArial size=3D2>I think you all agree that if Dr X gives p=
+atient Y=20
+an injection (in the normal non-science fiction way), then that act takes p=
+lace=20
+in the room where the docter and the patient are. If he does it by using a =
+robot=20
+guided over the internet while he being in Paris and the patient in the US,=
+ then=20
+the act happened for sure on planet Earth. I do agree that determining wher=
+e=20
+"the act" happened in situations like the latter is not trivial, the proble=
+m not=20
+being that much the localisation, but rather what&nbsp;THE act IS. Although=
+ we=20
+would still use the word "injection" for the latter, it is obviously someth=
+ing=20
+completely different than the former, despite the fact that parts of the ac=
+ts=20
+are similar (e.g. the needle being brought into the patient's=20
+body).</FONT></DIV>
+<DIV><FONT face=3DArial size=3D2>This said, I have no problem with the fact=
+ that the=20
+statement that "an Act occurs at a specific physical location" be removed f=
+rom=20
+the document however: it is not because you don't state "X" in a document, =
+that=20
+"not X" should be true.</FONT></DIV>
+<DIV><FONT face=3DArial size=3D2></FONT>&nbsp;</DIV>
+<DIV><FONT face=3DArial size=3D2>Another point that I want to raise is the =
+statement=20
+"An Act is documented by an Act Record instance". It should be specified wh=
+at=20
+"instance" refers to in this case, precisely in the light of what happens w=
+hen=20
+that "instance" is copied into other systems.&nbsp;Thus if act X=20
+is&nbsp;injecting patient U by physician V with product W&nbsp;in place P a=
+t=20
+time T, then&nbsp;Act Record&nbsp;instance AR1 might be the documentation o=
+f it=20
+by V (thus the Dr registered what he did) and Act Record instance AR2 might=
+ be=20
+that the nurse who was in the room&nbsp;documented act X. Thus we have 2=20
+instances documenting act X. If this information gets&nbsp;transfered and c=
+opied=20
+to other systems&nbsp;in persistent records, then I believe "copies" of the=
+se=20
+Act Record instances are created, and not new instances. Otherwise, act X w=
+ould=20
+be claimed to be documented by 2, 4, 6, 8 .... instances, which is actually=
+ not=20
+true.</FONT></DIV>
+<DIV><FONT face=3DArial size=3D2></FONT>&nbsp;</DIV>
+<DIV><FONT face=3DArial size=3D2>I know, the RIM being based on a Kantian p=
+hilosophy=20
+makes it hard to deal with (and for some even to see) this problem, but I t=
+hink=20
+it is important. And o</FONT><FONT face=3DArial size=3D2>h, you want for su=
+re a "use=20
+case" for this: well suppose that there is some legal argument about whethe=
+r or=20
+not the injection was actually given. Are ten copies of the same documentat=
+ion=20
+instance more proof than just one ?&nbsp;&nbsp; (note&nbsp;for Charlie: you=
+ can=20
+use this paragraph to build further on your file to document my "<FONT=20
+face=3D"Times New Roman" size=3D3>inability to productively collaborate wit=
+h the=20
+community at large" and "Dr. Cuesters [sic] prefers to intermittently send=
+=20
+sarcastic emails to various list servers".)</FONT></FONT></DIV>
+<DIV><FONT face=3DArial size=3D2></FONT>&nbsp;</DIV>
+<DIV><FONT face=3DArial size=3D2>Note that may objection is not in the use =
+of the=20
+word instance in that particular sentence. In fact, I believe it is good=20
+practice, even that the statement should read "An Act instance is documente=
+d by=20
+an Act Record instance", and even that the entire document should be checke=
+d=20
+whether "instance" should not be used more often (I believe it=20
+does).</FONT></DIV>
+<DIV><FONT face=3DArial size=3D2>But even then, it should be specified what=
+=20
+"instance" means in each case, e.g. a particular act in physical reality or=
+ an=20
+entry in a database which documents that act.</FONT></DIV>
+<DIV><FONT face=3DArial size=3D2></FONT>&nbsp;</DIV>
+<DIV><FONT face=3DArial size=3D2>kind regards,</FONT></DIV>
+<DIV><FONT face=3DArial size=3D2></FONT>&nbsp;</DIV>
+<DIV><FONT face=3DArial size=3D2>Werner</FONT></DIV>
+<BLOCKQUOTE=20
+style=3D"PADDING-RIGHT: 0px; PADDING-LEFT: 5px; MARGIN-LEFT: 5px; BORDER-LE=
+FT: #000000 2px solid; MARGIN-RIGHT: 0px">
+  <DIV style=3D"FONT: 10pt arial">----- Original Message ----- </DIV>
+  <DIV=20
+  style=3D"BACKGROUND: #e4e4e4; FONT: 10pt arial; font-color: black"><B>Fro=
+m:</B>=20
+  <A title=3Ddan.russler@oracle.com href=3D"mailto:dan.russler@oracle.com">=
+Dan=20
+  Russler</A> </DIV>
+  <DIV style=3D"FONT: 10pt arial"><B>To:</B> <A=20
+  title=3Dgary.dickinson@ehr-standards.com=20
+  href=3D"mailto:gary.dickinson@ehr-standards.com">Gary Dickinson</A> </DIV=
+>
+  <DIV style=3D"FONT: 10pt arial"><B>Cc:</B> <A title=3Dehr@lists.hl7.org=
+=20
+  href=3D"mailto:ehr@lists.hl7.org">List EHR</A> ; <A title=3Dlloyd@lmckenz=
+ie.com=20
+  href=3D"mailto:lloyd@lmckenzie.com">Lloyd McKenzie</A> </DIV>
+  <DIV style=3D"FONT: 10pt arial"><B>Sent:</B> Thursday, June 14, 2007 8:52=
+=20
+  AM</DIV>
+  <DIV style=3D"FONT: 10pt arial"><B>Subject:</B> Re: DRAFT EHR Lifecycle M=
+odel -=20
+  Review and Comment Requested</DIV>
+  <DIV><BR></DIV>Hi Gary,<BR><BR>I like this work a lot.<BR><BR>On quick re=
+view,=20
+  I encountered this line which I think should be deleted.<BR><BR>"<SPAN=20
+  style=3D"FONT-SIZE: 12pt; FONT-FAMILY: Arial">An Act occurs at a specific=
+=20
+  physical location"<BR><BR>In the past, our discussions in modeling=20
+  specifically excluded this statement. The use cases that were discussed=
+=20
+  included healthcare delivered over the internet. If the patient is in one=
+=20
+  location, the physician in another location, the nurse in a third locatio=
+n,=20
+  and the EHR is in a fourth location, where did the Act occur? For example=
+, in=20
+  telemedicine, the patient may be in one location and the physician is=20
+  listening on a remote stethescope in another location? Or observation is =
+being=20
+  performed via camera? Or the surgery is being performed via a robot over =
+the=20
+  internet (as accomplished between US and Paris)?<BR><BR>We came to the=20
+  conclusion that participants have physical locations, but that acts do no=
+t=20
+  have physical locations.<BR><BR>In review of the rest of the document, I =
+did=20
+  not see that anything else needed to be changed because the "physical loc=
+ation=20
+  of an act" comment was deleted.<BR><BR>Also, in M&amp;M, a dynamic model=
+=20
+  discussion is occurring. This document should be sent to M&amp;M for revi=
+ew=20
+  before the dynamic model work is completed to make sure that M&amp;M work=
+ and=20
+  the EHR work are consistent.<BR><BR>Thanks, Dan<BR><BR></SPAN><BR>Gary=20
+  Dickinson wrote:<BR>
+  <BLOCKQUOTE=20
+  cite=3DmidLYRIS-390383-1922690-2007.06.13-17.25.18--dan.russler%23oracle.=
+com@lists.hl7.org=20
+  type=3D"cite"><PRE wrap=3D"">Dear EHR TC Members,
+
+Within the EHR Interoperability project team, we have spent the past =20
+several months working to develop and refine a model for the =20
+lifecycle of EHR "Act Records", expanding and refining record =20
+lifecycle events specified in Section 3.19 of the EHR =20
+Interoperability Model and in ISO 21089, "Trusted End-to-End =20
+Information Flows".  This effort has resulted in our Draft HL7 EHR =20
+Lifecycle Model (now v0.13, dated 23 May 2007).
+
+Per discussions on the last EHR TC teleconference, I'm distributing =20
+the current Draft EHR/LM for review and comment (within the EHR TC).  =20
+Also attached is an initial proposal from Ann Wrightson (HL7-UK) for =20
+additional EHR lifecycle events related to the interim progression of =20
+EHR records.  This proposal is awaiting UK consensus and will be =20
+considered in the next EHR/LM update.
+
+Please take an early opportunity to review these documents and offer =20
+your suggestions (not later than 15 July).  Submit comments on the =20
+draft EHR/LM to Gary Dickinson (<A class=3Dmoz-txt-link-abbreviated href=3D=
+"mailto:gary.dickinson@ehr-standards.com">gary.dickinson@ehr-standards.com</=
+A>) and =20
+on the UK proposal to Ann Wrightson (<A class=3Dmoz-txt-link-abbreviated hr=
+ef=3D"mailto:Ann.Wrightson@csw.co.uk">Ann.Wrightson@csw.co.uk</A>).
+
+Thank you for your consideration.
+
+Regards,
+
+Gary
+
+
+
+************************************************
+To access the Archives of this or other lists or change your list settings =
+and information, go to: <A class=3Dmoz-txt-link-freetext href=3D"http://www.=
+hl7.org/listservice">http://www.hl7.org/listservice</A></PRE><PRE wrap=3D"">=
+<HR width=3D"90%" SIZE=3D4>
+
+
+  </PRE></BLOCKQUOTE><BR><BR>**********************************************=
+**=20
+  <BR>To access the Archives of this or other lists or change your list set=
+tings=20
+  and information, go to: http://www.hl7.org/listservice=20
+</BLOCKQUOTE><BR>
+=0D<BR>
+************************************************=0D<BR>
+To access the Archives of this or other lists or change your list settings =
+and information, go to: http://www.hl7.org/listservice
+</BODY></HTML>
+
+------=_NextPart_000_0108_01C7AEA0.17932C70--
+
+
+
