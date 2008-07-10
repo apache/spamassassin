@@ -1,5 +1,5 @@
-opts_weekly="--net -j 8 --reuse --cache --cachedir=/tmpfs/aicache_nightly --cs_schedule_cache --cs_cachedir=/export/home/bbmass/cache --restart=500 ham:detect:/home/bbmass/rawcor/jm/ham/* --after="-15552000" --tail=40000 --scanprob=0.3 spam:detect:/home/bbmass/rawcor/jm/spam/*"
-opts_nightly="--reuse --cache --cachedir=/tmpfs/aicache_nightly --cs_schedule_cache --cs_cachedir=/export/home/bbmass/cache --restart=500 ham:detect:/home/bbmass/rawcor/jm/ham/* --after="-15552000" --tail=40000 --scanprob=0.3 spam:detect:/home/bbmass/rawcor/jm/spam/*"
+opts_weekly="--net -j 8 --reuse --cache --cachedir=/tmpfs/aicache_nightly --cs_schedule_cache --cs_cachedir=/export/home/bbmass/cache --restart=500 ham:detect:/home/bbmass/uploadedcorpora/jm/ham/* --after="-15552000" --tail=40000 --scanprob=0.3 spam:detect:/home/bbmass/uploadedcorpora/jm/spam/*"
+opts_nightly="--reuse --cache --cachedir=/tmpfs/aicache_nightly --cs_schedule_cache --cs_cachedir=/export/home/bbmass/cache --restart=500 ham:detect:/home/bbmass/uploadedcorpora/jm/ham/* --after="-15552000" --tail=40000 --scanprob=0.3 spam:detect:/home/bbmass/uploadedcorpora/jm/spam/*"
 tmp=$HOME/tmp
 tree=$HOME/svn
 prefs_weekly=$HOME/user_prefs.weekly

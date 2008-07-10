@@ -111,8 +111,8 @@ run "/local/bbmasstools/masschroot $perl ".
     "--cachedir=/tmpfs/aicache_bbmass ".
     "--after='6 months ago' ".
     $mass_check_args{$slavename}." ".
-    "ham:detect:/export/home/bbmass/rawcor/*/ham/* ".
-    "spam:detect:/export/home/bbmass/rawcor/*/spam/*";
+    "ham:detect:/export/home/bbmass/uploadedcorpora/*/ham/* ".
+    "spam:detect:/export/home/bbmass/uploadedcorpora/*/spam/*";
 
 
 exit;
