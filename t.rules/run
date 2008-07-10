@@ -1,0 +1,85 @@
+#!/usr/bin/perl
+#
+# usage: t.rules/run [--verbose] [--tests=BOUNCE_MESSAGE,FOO,BAR]
+#
+# TODO: Generate TAP output
+
+use strict;
+use warnings;
+
+use Getopt::Long;
+Getopt::Long::Configure(
+  qw(bundling no_getopt_compat
+    permute no_auto_abbrev no_ignore_case)
+);
+
+my %opt = (
+);
+
+GetOptions(
+  'tests|t=s' => \$opt{'tests'},
+  'verbose|v' => \$opt{'verbose'},
+);
+
+my $verbose = $opt{'verbose'};
+$opt{'tests'} ||= <t.rules/*>;
+
+foreach my $rule (split(/[\s,]/, $opt{'tests'})) {
+  $rule =~ s/^t.rules\///;
+  chomp $rule;
+  my $ruledir="t.rules/$rule";
+  next unless -d $ruledir;
+  warn "\nRunning tests for $rule:\n" if $verbose;
+
+  foreach my $f (<$ruledir/*>) {
+    next unless (-f $f);
+
+    # if the filename starts with "fp", we want a _miss_ for the named rule
+    my $want_hit = 1;
+    if ($f =~ /\/fp/i) {
+      $want_hit = 0;
+    }
+
+    my $testsline;
+    open (IN,
+        "./spamassassin --cf='use_bayes 0' --cf='use_awl 0' -D -Lt < $f 2>&1 |")
+            or warn "sa failed";
+    open (LOG, ">o.log") or die;
+    while (<IN>) {
+      print LOG;
+      /check: tests=(.*)$/ and $testsline = $1;
+      /check: subtests=(.*)$/ and $testsline .= ",$1";
+    }
+    close IN;
+    close LOG;
+
+    if ($testsline =~ /(?:[ ,]|^)\Q$rule\E(?:[ ,]|$)/) {
+      if ($want_hit) {
+        pass($rule, $f, "$testsline");
+      } else {
+        fail($rule, $f, "want=n got=y: $testsline");
+      }
+    } else {
+      if ($want_hit) {
+        fail($rule, $f, "want=y got=n: $testsline");
+      } else {
+        pass($rule, $f, "$testsline");
+      }
+    }
+  }
+}
+
+sub fail {
+  my ($rule, $f, $err) = @_;
+  print "NOT ok on $f for $rule: $err\n";
+}
+
+sub pass {
+  my ($rule, $f, $err) = @_;
+  if (!$verbose) {
+    print "ok on $f\n"
+  } else {
+    print "ok on $f for $rule: $err\n"
+  }
+}
+
