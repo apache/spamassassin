@@ -582,6 +582,14 @@ sub parse_received_line {
       }
     }
 
+    elsif (/ \(Lotus Domino /) {
+      # it seems Domino never records the rDNS: bug 5926
+      if (/^(\S+) \(\[(${IP_ADDRESS})\]\) by (\S+) \(Lotus/) {
+        $mta_looked_up_dns = 0;
+	$helo = $1; $ip = $2; $by = $3; goto enough;
+      }
+    }
+
     # Received: from 217.137.58.28 ([217.137.58.28])
     # by webmail.ukonline.net (IMP) with HTTP
     # for <anarchyintheuk@localhost>; Sun, 11 Apr 2004 00:31:07 +0100
