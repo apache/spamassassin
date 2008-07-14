@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: dos jm theo zmi; day 2: bb-jm dos jm theo zmi; day 3: bb-jm bb-traps dos jm zmi
+# with results from: day 1: dos jm theo zmi; day 2: dos jm theo zmi; day 3: bb-jm dos jm theo zmi
 
 # tflags userconf
 ALL_TRUSTED
@@ -12,6 +12,9 @@ AWL
 
 # good enough
 AXB_XMID_DIGDOTSHRT
+
+# good enough
+BASE64_LENGTH_79_INF
 
 # tflags learn
 BAYES_00
@@ -101,7 +104,13 @@ FB_ADD_INCHES
 FB_CASINO
 
 # good enough
+FB_CIALIS_LEO3
+
+# good enough
 FB_EXTRA_INCHES
+
+# good enough
+FB_GVR
 
 # good enough
 FB_INCREASE_VOL
@@ -111,6 +120,9 @@ FB_MED1CAT
 
 # good enough
 FB_NO_SCRIP_NEEDED
+
+# good enough
+FB_P1LL
 
 # good enough
 FB_QUALITY_REPLICA
@@ -128,6 +140,9 @@ FB_SOFTTABS
 FB_STAMINA_IN_BED
 
 # good enough
+FB_ULTRA_ALLURE
+
+# good enough
 FH_BAD_OEV1441
 
 # good enough
@@ -137,10 +152,19 @@ FH_DATE_IS_19XX
 FH_DATE_PAST_20XX
 
 # good enough
+FH_FAKE_RCVD_LINE
+
+# good enough
+FH_HAS_XID
+
+# good enough
 FH_HELO_ALMOST_IP
 
 # good enough
 FH_HELO_ENDS_DOT
+
+# good enough
+FH_HELO_EQ_610HEX
 
 # good enough
 FH_HELO_EQ_CHARTER
@@ -164,6 +188,9 @@ FH_HOST_IN_ADDRARPA
 FH_MSGID_XXX
 
 # good enough
+FM_FAKE_HELO_VERIZON
+
+# good enough
 FM_FRM_RN_L_BRACK
 
 # good enough
@@ -174,6 +201,12 @@ FM_SCHOOL_TYPES
 
 # good enough
 FM_SEX_HELODDDD
+
+# good enough
+FM_SUBJ_APPROVE
+
+# good enough
+FM_VEGAS_CASINO
 
 # good enough
 FORGED_RELAY_MUA_TO_MX
@@ -203,7 +236,25 @@ FRT_ROLEX
 FRT_SEXUAL
 
 # good enough
+FRT_TODAY2
+
+# good enough
+FRT_VALIUM1
+
+# good enough
+FRT_VALIUM2
+
+# good enough
 FRT_WEIGHT2
+
+# good enough
+FRT_XANAX1
+
+# good enough
+FRT_XANAX2
+
+# good enough
+FR_ALMOST_VIAG2
 
 # good enough
 FR_TEST_BASE64_BAD
@@ -221,10 +272,19 @@ FS_EJACULA
 FS_ERECTION
 
 # good enough
+FS_NO_SCRIP
+
+# good enough
+FS_OBFU_PRMCY
+
+# good enough
 FS_REPLICA
 
 # good enough
 FS_REPLICAWATCH
+
+# good enough
+FS_START_LOSE
 
 # good enough
 FS_WEIGHT_LOSS
@@ -293,6 +353,12 @@ HS_BOBAX_MID_1
 HS_BOBAX_MID_2
 
 # good enough
+HS_DRUG_DOLLAR_1
+
+# good enough
+HS_FORGED_OE_FW
+
+# good enough
 HS_OUTLOOK_MID_NOBRK
 
 # good enough
@@ -337,6 +403,9 @@ MIME_CHARSET_FARAWAY
 # tflags userconf
 MISSING_HB_SEP
 
+# good enough
+MSOE_MID_WRONG_CASE
+
 # tflags net
 NO_DNS_FOR_FROM
 
@@ -347,10 +416,19 @@ NO_RECEIVED
 NO_RELAYS
 
 # good enough
+NULL_IN_BODY
+
+# good enough
 OPERA_MID_NON_OP
 
 # good enough
 OPERA_MID_NO_DIGIT
+
+# good enough
+PART_CID_STOCK
+
+# good enough
+PART_CID_STOCK_LESS
 
 # good enough
 PQRTW_4
@@ -546,6 +624,9 @@ RCVD_IN_SSC_TRUSTED_COI
 
 # tflags net
 RCVD_IN_XBL
+
+# good enough
+RCVD_MAIL_COM
 
 # good enough
 REPLYTO_WITHOUT_TO_CC
@@ -989,6 +1070,9 @@ STOCK_IMG_HDR_FROM
 STOCK_IMG_HTML
 
 # good enough
+STOX_REPLY_TYPE
+
+# good enough
 STOX_REPLY_TYPE_WITHOUT_QUOTES
 
 # tflags userconf
@@ -1025,10 +1109,61 @@ TVD_RCVD_IP
 TVD_RCVD_IP4
 
 # good enough
+TVD_SECTION
+
+# good enough
 TVD_SUBJ_WIPE_DEBT
 
 # good enough
 TVD_VISIT_PHARMA
+
+# good enough
+FB_MEEDS
+
+# good enough
+FB_NOT_SEXUAL
+
+# good enough
+FM_DEBT_HELP
+
+# good enough
+FRT_PAYMENT
+
+# good enough
+FRT_PHARMAC
+
+# good enough
+FS_NUDE
+
+# good enough
+FS_YOUR_PRESCRIP
+
+# good enough
+SANE_29466e3bbdb72fcad000bf00469b265c
+
+# good enough
+SANE_55a2e1f9afe27d0ecb210aded5350671
+
+# good enough
+SANE_9f754392a8c622a3eb2ef735b6b00c3b
+
+# good enough
+SANE_a348ed32eed4ec927e4e6fc579da7586
+
+# good enough
+SANE_b74c14c03c2502118c8807a607a5744a
+
+# good enough
+SANE_c9867f8f421f5cc77866438bcbcd0564
+
+# good enough
+TVD_FINGER_01
+
+# good enough
+TVD_NOT_SATISFIED
+
+# good enough
+TVD_PCT_OFF
 
 # tflags userconf
 UNPARSEABLE_RELAY
