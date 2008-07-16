@@ -46,6 +46,7 @@ usage: seek-phrases-in-log [--reqhitrate n] [--reqpatlength n]
 use warnings;
 use strict;
 use Getopt::Long qw(:config no_ignore_case);
+use Data::Dumper;
 sub logmsg;
 
 my %opt = ();
@@ -66,12 +67,13 @@ GetOptions(
         "reqpatlength=s" => \$opt{reqpatlength},
         "ruletype=s" => \$opt{ruletype},
         "maxtextread=s" => \$opt{maxtextread},
+        "phase2=s" => \$opt{phase2},
         "ham=s" => \$fh,
         "spam=s" => \$fs,
         'help' => \&usage
 ) or usage();
 
-usage() unless ($fs && $fh);
+usage() unless (($fs && $fh) || $opt{phase2});
 
 my @hitratethresholds = ();
 if ($opt{reqhitrate} =~ /\S\s+\S/) {        # multiple values
@@ -80,43 +82,60 @@ if ($opt{reqhitrate} =~ /\S\s+\S/) {        # multiple values
   # @hitratethresholds is now sorted, highest to lowest
 }
 
+# n-gram reading state
 my %word2sym = ('' => '');
 my %sym2word = ('' => '');
 my $sym_acc = 'a';      # symbols are represented using IDs from this counter
 my $msgcount = 0;
 
+# these are shared with the assembly stage (via $asmstate)
 my @text_string = ();
 my %ngram_count = ();
 my %msg_subset_hit = ();
+my $asmstate;
 
-logmsg "reading $fs...\n";
-open IN, "<$fs" or die "cannot open spam log $fs";
-while (<IN>) {
-  /^text: (.*)$/ and proc_text_spam($1);
+if ($opt{phase2}) {
+  $asmstate = load_state($opt{phase2});
+} 
+else {
+  logmsg "reading $fs...";
+  open IN, "<$fs" or die "cannot open spam log $fs";
+  while (<IN>) {
+    /^text: (.*)$/ and proc_text_spam($1);
+  }
+  close IN;
+
+  # only do this if we have read enough spam messages, otherwise we could
+  # discard tokens for which reqhitrate has been achieved
+  if ($msgcount > 2 * (100 / $opt{reqhitrate})) {
+    discard_hapaxes();
+  }
+
+  logmsg "n-grams active: ".(scalar keys %ngram_count);
+
+  logmsg "reading $fh...";
+  open IN, "<$fh" or die "cannot open ham log $fh";
+  while (<IN>) {
+    /^text: (.*)$/ and proc_text_ham($1);
+  }
+  close IN;
+  logmsg "n-grams active: ".(scalar keys %ngram_count);
+
+  # move onto the next step; assembly.  free stuff we no longer need here
+  undef %word2sym;     # free this, no longer needed
+  # create the assembly state object
+  $asmstate = { };
+
+  filter_into_message_subsets();
+  undef %sym2word;     # no longer needed after that
+  write_state($asmstate, "assemble.state");
 }
-close IN;
 
-# only do this if we have read enough spam messages, otherwise we could
-# discard tokens for which reqhitrate has been achieved
-if ($msgcount > 2 * (100 / $opt{reqhitrate})) {
-  discard_hapaxes();
-}
-
-logmsg "n-grams active: ".(scalar keys %ngram_count)."\n";
-
-logmsg "reading $fh...\n";
-open IN, "<$fh" or die "cannot open ham log $fh";
-while (<IN>) {
-  /^text: (.*)$/ and proc_text_ham($1);
-}
-close IN;
-logmsg "n-grams active: ".(scalar keys %ngram_count)."\n";
-
-undef %word2sym;     # free this, no longer needed
-
-summarise();
+assemble_regexps();
 exit;
 
+# ---------------------------------------------------------------------------
+# PHASE 1: PARSING, NGRAM PROBABILITIES
 
 sub proc_text_spam {
   my ($text) = @_;
@@ -182,7 +201,7 @@ sub discard_hapaxes {
   }
   my $after = (scalar keys %ngram_count);
   my $killed = ($before - $after);
-  logmsg "shrunk dbs: $killed hapaxes killed, kept $after entries\n";
+  logmsg "shrunk dbs: $killed hapaxes killed, kept $after entries";
 }
 
 sub proc_text_ham {
@@ -221,8 +240,10 @@ sub proc_text_ham {
   }
 }
 
-sub summarise {
-  logmsg "summarizing...\n";
+sub filter_into_message_subsets {
+  logmsg "filtering into message subsets...";
+
+  $asmstate = { };
 
   # hash all msg_subset_hit lists; we don't need the full data, so this
   # saves space
@@ -231,10 +252,10 @@ sub summarise {
   }
 
   # note: we don't care about stuff that hits *any* ham at all
-  my $msg_count_spam = scalar @text_string;
-  $msg_count_spam ||= 0.000001;
+  $asmstate->{msg_count_spam} = scalar @text_string;
+  $asmstate->{msg_count_spam} ||= 0.000001;
 
-  my %all_patterns_for_set = ();
+  $asmstate->{all_patterns_for_set} = { };
 
   foreach my $id (keys %ngram_count) {
     my $count = $ngram_count{$id};
@@ -245,7 +266,7 @@ sub summarise {
       $bad++;
     }
     # require N% spam hits
-    elsif (($count*100) / $msg_count_spam < $opt{reqhitrate}) {
+    elsif (($count*100) / $asmstate->{msg_count_spam} < $opt{reqhitrate}) {
       $bad++;
     }
 
@@ -257,15 +278,65 @@ sub summarise {
     }
 
     my $set = $msg_subset_hit{$id};
-    $all_patterns_for_set{$set} ||= [];
-    push @{$all_patterns_for_set{$set}}, decode_sym2words($id);
+    push @{$asmstate->{all_patterns_for_set}->{$set}}, decode_sym2words($id);
   }
 
-  logmsg "message subsets found: ".(scalar keys %all_patterns_for_set)."\n";
+  logmsg "message subsets found: ".(scalar
+				keys %{$asmstate->{all_patterns_for_set}});
 
+  $asmstate->{ngram_count} = \%ngram_count;
+  $asmstate->{msg_subset_hit} = \%msg_subset_hit;
+  $asmstate->{text_string} = \@text_string;
+}
+
+sub decode_sym2words {
+  my $ids = shift;
+  my $r;
+  if ($ids =~ /^([^.]*)\.([^.]*)\.([^.]*)$/) {
+    $r = "$sym2word{$1} $sym2word{$2} $sym2word{$3}";
+  }
+  elsif ($ids =~ /^([^.]*)\.([^.]*)$/) {
+    $r = "$sym2word{$1} $sym2word{$2}";
+  }
+  else {
+    warn "bad decode_sym2words format: '$ids'";
+  }
+  $r =~ s/^\s+//;
+  return $r;
+}
+
+sub write_state {
+  my ($state, $statefile) = @_;
+  my $dump = Data::Dumper->new ([ $state ]);
+  $dump->Deepcopy(1);
+  $dump->Purity(1);
+  $dump->Indent(1);
+  my $text = $dump->Dump.";1;";
+  open (OUT, ">$statefile") or die "cannot write $statefile";
+  print OUT $text;
+  close OUT or die "cannot write $statefile";
+}
+
+# ---------------------------------------------------------------------------
+# PHASE 2: REGEXP ASSEMBLY
+
+sub load_state {
+  my $file = shift;
+  if (open(IN, "<".$file)) {
+    my $str = join("", <IN>); close IN;
+    my $VAR1;                 # Data::Dumper
+    if (eval $str) {
+      return $VAR1;        # Data::Dumper's naming
+    }
+  }
+  die "failed to load state from $file";
+}
+
+sub assemble_regexps {
   my %done_set = ();
   my @done_pats = ();
 
+  logmsg "deduping and assembling regexps...";
   if (!$opt{rules}) {
     printf ("%6s  %6s  %6s   %s\n", "RATIO", "SPAM%", "HAM%", "DATA");
   }
@@ -274,21 +345,21 @@ sub summarise {
   my $count = 0;
   my $count_out = 0;
   foreach my $id (sort {
-                      $ngram_count{$b} <=> $ngram_count{$a}
-                  } keys %ngram_count)
+	      $asmstate->{ngram_count}->{$b} <=> $asmstate->{ngram_count}->{$a}
+	  } keys %{$asmstate->{ngram_count}})
   {
-    my $set = $msg_subset_hit{$id};
+    my $set = $asmstate->{msg_subset_hit}->{$id};
     next if $done_set{$set}; $done_set{$set}++;
 
     if ($count++ % 200 == 0) {
-      logmsg "working on message subset $count ($count_out)...\n";
+      logmsg "working on message subset $count ($count_out)...";
     }
 
     # we now have several patterns.  see if we can expand them sideways
     # to make the pattern bigger, and collapse into a smaller number of
     # pats at the same time
-    my @pats = collapse_pats($all_patterns_for_set{$set});
-    # my @pats = @{$all_patterns_for_set{$set}};
+    my @pats = collapse_pats($asmstate->{all_patterns_for_set}->{$set});
+    # my @pats = @{$asmstate->{all_patterns_for_set}->{$set}};
 
     @pats = quote_all_metas(@pats);
     @pats = subsume_with_dotstars(@pats);
@@ -308,8 +379,8 @@ sub summarise {
 					{ $subsumed=1; last; }
 	# or one pattern contains the other (but interpreted as a regexp!)
 	# this deals with /foo.{0,10} bar/ vs /foo ish bar/
-	if ($pat =~ /$done/) { $subsumed=1; last; }
-	if ($done =~ /$pat/) { $subsumed=1; last; }
+        if ($pat =~ /$done/) { $subsumed=1; last; }
+        if ($done =~ /$pat/) { $subsumed=1; last; }
       }
       next if $subsumed;
 
@@ -323,8 +394,15 @@ sub summarise {
     # if we have no non-subsumed pats at this stage, skip this set
     next unless @pats;
 
+    if (($asmstate->{ngram_count}->{$id}*100) / $asmstate->{msg_count_spam} <
+            $opt{reqhitrate})
+    {
+      # quit if we hit the final hitrate threshold
+      return;
+    }
+
     if (defined($hitratethresholds[0]) &&
-        ($ngram_count{$id}*100) / $msg_count_spam < $hitratethresholds[0])
+        ($asmstate->{ngram_count}->{$id}*100) / $asmstate->{msg_count_spam} < $hitratethresholds[0])
     {
       print "# passed hit-rate threshold: $hitratethresholds[0]\n";
       shift @hitratethresholds;
@@ -332,7 +410,7 @@ sub summarise {
 
     if ($opt{rules}) {
       printf "# %6.3f  %6.3f  %6.3f\n",
-        1.0, ($ngram_count{$id}*100) / $msg_count_spam, 0;
+        1.0, ($asmstate->{ngram_count}->{$id}*100) / $asmstate->{msg_count_spam}, 0;
 
       # sort, to ensure ordering always remains the same
       foreach my $pat (sort @pats) {
@@ -352,26 +430,10 @@ sub summarise {
     } else {
       my $pats = '/'.join ('/, /', map { s/\//\\\//gs; $_; } @pats).'/';
       printf "%6.3f  %6.3f  %6.3f  %s\n",
-        1.0, ($ngram_count{$id}*100) / $msg_count_spam, 0, $pats;
+        1.0, ($asmstate->{ngram_count}->{$id}*100) / $asmstate->{msg_count_spam}, 0, $pats;
       $count_out++;
     }
   }
-}
-
-sub decode_sym2words {
-  my $ids = shift;
-  my $r;
-  if ($ids =~ /^([^.]*)\.([^.]*)\.([^.]*)$/) {
-    $r = "$sym2word{$1} $sym2word{$2} $sym2word{$3}";
-  }
-  elsif ($ids =~ /^([^.]*)\.([^.]*)$/) {
-    $r = "$sym2word{$1} $sym2word{$2}";
-  }
-  else {
-    warn "bad decode_sym2words format: '$ids'";
-  }
-  $r =~ s/^\s+//;
-  return $r;
 }
 
 sub collapse_pats {
@@ -385,10 +447,12 @@ sub collapse_pats {
     # warn "JMD $pat";
     $pat =~ s/^\s+//;
 
-    my @hits = grep /\Q$pat\E/, @text_string;
+    # TODO: optimise, second-slowest line
+    my @hits = grep /\Q$pat\E/, @{$asmstate->{text_string}};
+
     if (scalar @hits == 0) {
       warn "supposed pattern /$pat/ is 0-hitter";
-      warn "JMD strings:\n  ".join("\n  ", @text_string)."\n";
+      warn "JMD strings:\n  ".join("\n  ", @{$asmstate->{text_string}})."\n";
       push @ret, "[BROKEN: 0 hitter]$pat";
       next;
     }
@@ -414,7 +478,12 @@ sub collapse_pats {
 
       # give up if there are a differing number of hits for the new pat
       my $newpat = $found.$pat;
-      if (scalar (grep /\Q$newpat\E/, @text_string) != scalar @hits) { last; }
+
+      # note: we can search just in @hits, instead of in
+      # @{$asmstate->{text_string}}, because there's no way we can
+      # *increase* the hitrate in the corpus; we can only reduce it.
+      # this is double-checked after these 2 expansion loops anyway
+      if (scalar (grep /\Q$newpat\E/, @hits) != scalar @hits) { last; }
 
       $pat = $newpat;     # and carry on
     }
@@ -431,9 +500,15 @@ sub collapse_pats {
       }
 
       my $newpat = $pat.$1;
-      if (scalar (grep /\Q$newpat\E/, @text_string) != scalar @hits) { last; }
+      if (scalar (grep /\Q$newpat\E/, @hits) != scalar @hits) { last; }
 
       $pat = $newpat;     # and carry on
+    }
+
+    # double-check to ensure we haven't somehow INCREASED our hitrate
+    # beyond the initial pattern
+    if (scalar (grep /\Q$pat\E/, @{$asmstate->{text_string}}) != scalar @hits) {
+      die "oops! went too far";
     }
 
     # now remove subsumed patterns
@@ -470,7 +545,9 @@ sub subsume_with_dotstars {
     my $p1 = shift(@working);
     last unless defined($p1);
 
-    my @hits = grep /$p1/, @text_string;
+    # TODO: optimise, 4th-slowest line
+    my @hits = grep /$p1/, @{$asmstate->{text_string}};
+
     if (scalar @hits == 0) {
       warn "supposed pattern /$p1/ is 0-hitter";
       push @ret, "[BROKEN: 0 hitter]$p1";
@@ -492,7 +569,7 @@ sub subsume_with_dotstars {
           next DOTLOOP if ($t !~ /$newpatcapture/);
           next DOTLOOP if ($1 =~ /\[p\]/);
         }
-        next if (scalar (grep /$newpat/, @text_string) != scalar @hits);
+        next if (scalar (grep /$newpat/, @{$asmstate->{text_string}}) != scalar @hits);
 
         # it works! yay
 
@@ -519,7 +596,9 @@ sub expand_with_dots {
     my $p1 = shift(@working);
     last unless defined($p1);
 
-    my @hits = grep /$p1/, @text_string;
+    # TODO: optimise, 5th-slowest line
+    my @hits = grep /$p1/, @{$asmstate->{text_string}};
+
     if (scalar @hits == 0) {
       warn "supposed pattern /$p1/ is 0-hitter";
       push @ret, "[BROKEN: 0 hitter]$p1";
@@ -536,7 +615,9 @@ sub expand_with_dots {
       {
         my $extn = $1; quote_all_metas($extn);
         my $newpat = $p1.$extn;
-        if (scalar (grep /$newpat/, @text_string) == scalar @hits) {
+
+        # TODO: optimise, 3rd-slowest line
+        if (scalar (grep /$newpat/, @{$asmstate->{text_string}}) == scalar @hits) {
           $p1 = $newpat; next;
         }
       }
@@ -545,7 +626,7 @@ sub expand_with_dots {
       {
         my $extn = $1; quote_all_metas($extn);
         my $newpat = $p1.".".$extn;
-        if (scalar (grep /$newpat/, @text_string) == scalar @hits) {
+        if (scalar (grep /$newpat/, @{$asmstate->{text_string}}) == scalar @hits) {
           $p1 = $newpat; next;
         }
       }
@@ -554,7 +635,7 @@ sub expand_with_dots {
       {
         my $extn = $1; quote_all_metas($extn);
         my $newpat = $p1."..".$extn;
-        if (scalar (grep /$newpat/, @text_string) == scalar @hits) {
+        if (scalar (grep /$newpat/, @{$asmstate->{text_string}}) == scalar @hits) {
           $p1 = $newpat; next;
         }
       }
@@ -586,6 +667,9 @@ sub generate_rule_name {
   $str =~ s/[^A-Z0-9]/_/gs;
   return $str;
 }
+
+# ---------------------------------------------------------------------------
+# used by all phases
 
 sub logmsg {
   warn "".(scalar localtime time).": $_[0]\n";
