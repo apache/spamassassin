@@ -1,8 +1,6 @@
 #!/usr/bin/perl
 
 my $BBMHOME   = '/export/home/bbmass';
-my $BYMAILLOG = '/export/home/bbmass/bymail/extract.log';
-my $BYMAILCF  = '/export/home/bbmass/bymail/latest.cf';
 my $RULEQAURL = 'http://ruleqa.spamassassin.org/';
 
   # where do the reporting scripts get run from?
@@ -47,26 +45,6 @@ sub do_start {
   # --non-interactive not on the zone yet.  duh!
   # system ("svn info --non-interactive > masses/svninfo.tmp");
   system ("svn info > masses/svninfo.tmp < /dev/null");
-
-  # mass-check-by-mail support
-  # only use files that are < 1 hour old
-  #
-  if (-f $BYMAILCF && -M $BYMAILCF < (1/24)) {
-    print "\nFound recent rules-by-mail rules file, will mass-check:\n\n";
-    system ("ls -l $BYMAILCF");
-    system ("cp $BYMAILCF masses/mailed.cf");
-    print "".("-" x 75)."\n";
-    system ("cat masses/mailed.cf");
-    print "".("-" x 75)."\n";
-
-    if (-f $BYMAILLOG) {
-      print "\nRules-by-mail extraction log:\n\n";
-      system ("ls -l $BYMAILLOG");
-      system ("cat $BYMAILLOG");
-    }
-  } else {
-    unlink "masses/mailed.cf";
-  }
 
   # if (!perform_singleton_actions()) {
     # # give the "winning" slave time to do the work we also need done
