@@ -5,7 +5,7 @@ user="$1"
 [ "$user" = "" ] && exit 99
 
 # where the $HOMEs are:
-dir="/export/home/bbmass/mc-nightly/$user"
+dir="/export/home/nitemc/$user"
 
 # keep one day's logs around
 mv "$dir/corpus-nightly.log" "$dir/corpus-nightly.log.1"
@@ -40,7 +40,7 @@ export HOME PERL TMPDIR
 
 # create the .corpus file, keeping the rsync password secret;
 # the string __RSYNC_PASSWORD__ will be replaced with the
-# contents of /export/home/bbmass/mc-nightly/USERNAME/rsync_password
+# contents of /export/home/nitemc/USERNAME/rsync_password
 perl -pe '
   s{__RSYNC_PASSWORD__}{ incfile("rsync_password") }eg;
   s{__CLIENTHOSTS__}{ incfile("svn/build/nightlymc/clienthosts") }eg;
