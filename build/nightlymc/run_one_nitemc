@@ -18,7 +18,7 @@ echo "Starting corpus-nightly for $user ($dir): $dir/corpus-nightly.log"
 # ensure we use the user-wide SVN permissions and server identities,
 # otherwise we won't be able to perform noninteractive SVN ops
 rm -rf $dir/.subversion 
-ln -s /export/home/bbmass/.subversion $dir/.subversion 
+ln -s /export/home/nitemc/.subversion $dir/.subversion 
 
 # oh Solaris, you really suck
 HOME=$dir
