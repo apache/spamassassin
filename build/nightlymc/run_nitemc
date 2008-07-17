@@ -26,10 +26,13 @@ nightly_users="
   fi
 )
 
-nitedir=/export/home/automc/svn/spamassassin/build/nightlymc
-
-$nitedir/gen_targets_files
 echo "run_nightly starting at" ; date
+
+pkill -15 -f -u nitemc perl
+pkill -15 -f -u nitemc ssh
+
+nitedir=/export/home/automc/svn/spamassassin/build/nightlymc
+$nitedir/gen_targets_files
 
 # run each mass-check using "corpus-nightly"
 for user in $nightly_users ; do
