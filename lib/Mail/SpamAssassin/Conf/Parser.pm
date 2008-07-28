@@ -923,7 +923,7 @@ sub pack_eval_method {
   my ($self, $function, $args, $name, $text) = @_;
 
   my @args;
-  if ($args) {
+  if (defined $args) {
     # bug 4419: Parse quoted strings, unquoted alphanumerics/floats and
     # both unquoted IPv4 and IPv6 addresses.  s// is used so that we can
     # determine whether or not we successfully parsed ALL arguments.
@@ -937,7 +937,7 @@ sub pack_eval_method {
     }
   }
 
-  if ($args) {
+  if ($args ne '') {
     $self->lint_warn("syntax error (unparsable argument: $args) for eval function: $name: $text", $name);
     return;
   }
