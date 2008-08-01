@@ -52,7 +52,6 @@ header __DOS_HAS_LIST_ID	exists:List-ID
 header __DOS_HAS_LIST_UNSUB	exists:List-Unsubscribe
 header __DOS_HAS_MAILING_LIST	exists:Mailing-List
 header __DOS_RELAYED_EXT	ALL-EXTERNAL =~ /(?:^|\n)[Rr][eE][cC][eE][iI][vV][eE][dD]:\s.+\n[Rr][eE][cC][eE][iI][vV][eE][dD]:\s/s
-header __DOS_SINGLE_EXT_RELAY	X-Spam-Relays-External =~ /^\[ [^\]]+ \]$/
 
 ifplugin Mail::SpamAssassin::Plugin::MIMEHeader
 
