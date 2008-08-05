@@ -3688,7 +3688,7 @@ sub free_uncompiled_rule_source {
         !$self->{allow_user_rules})
   {
     delete $self->{if_stack};
-    delete $self->{source_file};
+    #delete $self->{source_file};
     delete $self->{meta_dependencies};
   }
 }
