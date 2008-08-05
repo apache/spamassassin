@@ -3689,7 +3689,7 @@ sub free_uncompiled_rule_source {
   {
     delete $self->{if_stack};
     #delete $self->{source_file};
-    delete $self->{meta_dependencies};
+    #delete $self->{meta_dependencies};
   }
 }
 
