@@ -903,6 +903,7 @@ unless ($clients_per_child > 1) {
 
 ## DAEMONIZE! ##
 
+my $originalparent = $$;
 $opt{'daemonize'} and daemonize();
 
 # bug 3443: setup signal handlers before the kids since we may have to
@@ -964,6 +965,7 @@ if (defined $opt{'pidfile'}) {
 # now allow waiting processes to connect, if they're watching the log.
 # The test suite does this!
 info("spamd: server pid: $$\n");
+kill("USR1",$originalparent) if ($opt{'daemonize'});
 
 # Fork off our children.
 for ( 1 .. $childlimit ) {
@@ -2469,6 +2471,12 @@ sub backtrace_handler {
         "most recent message: $current_msgid\n");
 }
 
+my  $serverstarted = 0;
+
+sub serverstarted {
+  $serverstarted = 1;
+}
+
 sub daemonize {
   # Pretty command line in ps
   $0 = join (' ', $ORIG_ARG0, @ORIG_ARGV) unless would_log("dbg");
@@ -2485,8 +2493,18 @@ sub daemonize {
   Mail::SpamAssassin::Logger::remove('stderr');
 
   # Here we go...
+  $SIG{USR1} = \&serverstarted;
   defined( my $pid = fork ) or die "spamd: cannot fork: $!\n";
-  exit if $pid;
+  if ($pid) {
+    for (my $retry=30, my $waited=0; ($retry>0) && !$serverstarted && ($waited != $pid); $retry--) {
+      warn ("waitpid failed: $waited $!") if ($waited);
+      sleep 1;
+      $waited=waitpid($pid, WNOHANG);
+    }
+    die "child process exited or timed out without signaling production of a PID file" unless $serverstarted;
+    exit;
+  }
+  delete  $SIG{USR1};
   setsid or die "spamd: cannot start new session: $!\n";
 
   # Now we can redirect the errors, too.
