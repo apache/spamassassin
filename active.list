@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: bb-jm dos jm; day 2: bb-jm bb-traps dos jm theo; day 3: bb-jm bb-traps dos jm
+# with results from: day 1: bb-jm bb-traps dos jm theo; day 2: bb-jm dos jm; day 3: bb-jm bb-traps dos jm theo
 
 # tflags userconf
 ALL_TRUSTED
@@ -75,6 +75,9 @@ DOS_OE_TO_MX
 
 # good enough
 DOS_OE_TO_MX_IMAGE
+
+# good enough
+DOS_OUTLOOK_TO_MX
 
 # good enough
 DOS_RCVD_IP_TWICE_B
@@ -983,7 +986,7 @@ TVD_SUBJ_WIPE_DEBT
 TVD_VISIT_PHARMA
 
 # good enough
-DOS_OUTLOOK_TO_MX
+FB_CONSOL_YOUR
 
 # tflags userconf
 UNPARSEABLE_RELAY
