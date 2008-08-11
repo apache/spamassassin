@@ -573,6 +573,9 @@ sub finish {
 # temporary files are deleted even if the finish() method is omitted
 sub DESTROY {
   my $self = shift;
+  # best practices: prevent potential calls to eval and to system routines
+  # in code of a DESTROY method from clobbering global variables $@ and $! 
+  local($@,$!);  # keep outer error handling unaffected by DESTROY
   if ($self->{'tmpfiles'}) {
     unlink @{$self->{'tmpfiles'}};
   }
