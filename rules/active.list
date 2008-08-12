@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: bb-jm bb-traps dos jm theo; day 2: bb-jm bb-traps dos jm theo; day 3: bb-jm dos jm
+# with results from: day 1: bb-jm bb-traps dos jm theo; day 2: bb-jm bb-traps dos jm theo; day 3: bb-jm bb-traps dos jm theo
 
 # tflags userconf
 ALL_TRUSTED
@@ -15,6 +15,9 @@ AXB_XMID_DIGDOTSHRT
 
 # good enough
 BASE64_LENGTH_78_79
+
+# good enough
+BASE64_LENGTH_79_INF
 
 # tflags learn
 BAYES_00
@@ -137,6 +140,9 @@ FB_SOFTTABS
 FB_STAMINA_IN_BED
 
 # good enough
+FB_ULTRA_ALLURE
+
+# good enough
 FH_BAD_OEV1441
 
 # good enough
@@ -146,7 +152,19 @@ FH_DATE_IS_19XX
 FH_DATE_PAST_20XX
 
 # good enough
+FH_FAKE_RCVD_LINE
+
+# good enough
+FH_HAS_XID
+
+# good enough
 FH_HELO_ALMOST_IP
+
+# good enough
+FH_HELO_ENDS_DOT
+
+# good enough
+FH_HELO_EQ_610HEX
 
 # good enough
 FH_HELO_EQ_CHARTER
@@ -170,6 +188,12 @@ FH_HOST_IN_ADDRARPA
 FH_MSGID_XXX
 
 # good enough
+FM_FAKE_HELO_VERIZON
+
+# good enough
+FM_SCHOOL_DIPLOMA
+
+# good enough
 FM_SCHOOL_TYPES
 
 # good enough
@@ -182,10 +206,31 @@ FORGED_RELAY_MUA_TO_MX
 FRAGMENTED_MESSAGE
 
 # good enough
+FRT_DISCOUNT
+
+# good enough
 FRT_ERECTION
 
 # good enough
+FRT_LEVITRA
+
+# good enough
 FRT_ROLEX
+
+# good enough
+FRT_SEXUAL
+
+# good enough
+FRT_VALIUM1
+
+# good enough
+FRT_VALIUM2
+
+# good enough
+FRT_WEIGHT2
+
+# good enough
+FRT_XANAX2
 
 # good enough
 FR_WATCHES_HTTP
@@ -206,13 +251,22 @@ FS_ERECTION
 FS_MAKE_MONEY
 
 # good enough
+FS_NO_SCRIP
+
+# good enough
 FS_NUDE
+
+# good enough
+FS_OBFU_PRMCY
 
 # good enough
 FS_REPLICA
 
 # good enough
 FS_REPLICAWATCH
+
+# good enough
+FS_START_LOSE
 
 # good enough
 FS_WEIGHT_LOSS
@@ -279,6 +333,9 @@ HIGH_CODEPAGE_URI
 
 # good enough
 HS_BOBAX_MID_2
+
+# good enough
+HS_FORGED_OE_FW
 
 # good enough
 HS_OUTLOOK_MID_NOBRK
@@ -378,6 +435,9 @@ RAZOR2_CF_RANGE_E8_51_100
 
 # tflags net
 RAZOR2_CHECK
+
+# good enough
+RCVD_BAD_ID
 
 # good enough
 RCVD_FORGED_WROTE
@@ -555,6 +615,9 @@ RCVD_IN_SSC_TRUSTED_COI
 
 # tflags net
 RCVD_IN_XBL
+
+# good enough
+RCVD_MAIL_COM
 
 # good enough
 REPLYTO_WITHOUT_TO_CC
@@ -938,6 +1001,9 @@ STOCK_IMG_HDR_FROM
 STOCK_IMG_HTML
 
 # good enough
+STOCK_IMG_OUTLOOK
+
+# good enough
 STOX_REPLY_TYPE
 
 # good enough
@@ -977,7 +1043,13 @@ TVD_PH_SUBJ_SEC_MEASURES
 TVD_QUAL_MEDS
 
 # good enough
+TVD_RCVD_IP
+
+# good enough
 TVD_RCVD_IP4
+
+# good enough
+TVD_SECTION
 
 # good enough
 TVD_SUBJ_FINGER_07
@@ -989,10 +1061,76 @@ TVD_SUBJ_WIPE_DEBT
 TVD_VISIT_PHARMA
 
 # good enough
+FB_INCREASE_VOL
+
+# good enough
+FB_MEEDS
+
+# good enough
+FB_NOT_SEXUAL
+
+# good enough
+FM_DEBT_HELP
+
+# good enough
+FRT_APPROV
+
+# good enough
+FRT_HEALTH
+
+# good enough
+FRT_PHARMAC
+
+# good enough
+FR_TEST_BASE64_BAD
+
+# good enough
+HS_BOBAX_MID_1
+
+# good enough
+JM_EXIM_462
+
+# good enough
+KAM_LOTTO1
+
+# good enough
+SANE_0b71b2414f60460dc5ce8b38f77afc84
+
+# good enough
+SANE_2b173a7fb7518c75ac8a2d294d773fd8
+
+# good enough
+SANE_4b127090f1ed198ef8007d8512cb0891
+
+# good enough
+SANE_55a2e1f9afe27d0ecb210aded5350671
+
+# good enough
+SANE_5df29067745223c48001d8db1ac686ab
+
+# good enough
 SANE_77540077455aeadd911f2a12a5b5eaf5
 
 # good enough
+SANE_9f754392a8c622a3eb2ef735b6b00c3b
+
+# good enough
+SANE_a348ed32eed4ec927e4e6fc579da7586
+
+# good enough
+SANE_ba47ac876ecf9d9434a099876632b22b
+
+# good enough
+SANE_c9867f8f421f5cc77866438bcbcd0564
+
+# good enough
+SANE_d0d2b0f6373bf91253d66dd74c594b87
+
+# good enough
 SANE_db753c9fabc9457efd8a9e6bcc485803
+
+# good enough
+SANE_ec474d58454de0340f7e1ceae041b069
 
 # good enough
 SANE_m614d8dba879f47d3fe5ffbde4aa8d8a7
