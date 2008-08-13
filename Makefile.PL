@@ -391,7 +391,9 @@ use lib 'lib';
 use Mail::SpamAssassin::Util::DependencyInfo;
 if (Mail::SpamAssassin::Util::DependencyInfo::long_diagnostics() != 0) {
   # missing required module?  die!
-  exit 1;
+  # bug 5908: http://cpantest.grango.org/wiki/CPANAuthorNotes says
+  # we should exit with a status of 0, but without creating Makefile
+  exit 0;
 }
 
 foreach my $file (@FILES_THAT_MUST_EXIST) {
