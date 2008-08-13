@@ -1000,7 +1000,7 @@ sub check_unresolved_template {
   for my $header (split(/\n/, $all)) {
     # slightly faster to test in this order
     if ($header =~ /%[A-Z][A-Z_-]/ &&
-	$header !~ /^(?:X-UIDL|X-Face|To|Cc|From|Subject|References|In-Reply-To|(?:X-|Resent-|X-Original-)?Message-Id):/i)
+	$header !~ /^(?:X-VMS-To|X-UIDL|X-Face|To|Cc|From|Subject|References|In-Reply-To|(?:X-|Resent-|X-Original-)?Message-Id):/i)
     {
       return 1;
     }
