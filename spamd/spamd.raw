@@ -2095,7 +2095,9 @@ sub handle_user_setuid_basic {
       use re 'taint';
       my $vpopdir = $suiddir; # This should work with common vpopmail setups
       $userdir = `$vpopdir/bin/vuserinfo -d \Q$username_untainted\E`;
-      if ($? != 0) {
+      if ($? == 0) {
+        chomp($userdir);
+      } else {
         $userdir = handle_user_vpopmail($username_untainted,$vpopdir);
       }
     } else {
