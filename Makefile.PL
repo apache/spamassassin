@@ -275,10 +275,7 @@ my %makefile = (
 
     # bug 5074: perl 5.6.1 (with ExtUtils::MakeMaker 5.45) attempts to
     # recurse anyway unless this is explicitly specified
-    'DIR' => [ ],
-
-    # Don't add META.yml to the MANIFEST for god's sake!
-    'NO_META' => 1,
+    'DIR' => [ ]
 );
 
 # rules/72_active.cf is built from "rulesrc", but *must* exist before
