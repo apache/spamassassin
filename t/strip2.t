@@ -4,6 +4,11 @@ use lib '.'; use lib 't';
 use SATest; sa_t_init("strip2");
 use Test;
 
+use constant TEST_ENABLED => conf_bool('run_long_tests');
+
+BEGIN { plan tests => TEST_ENABLED ? 98 : 0 };
+exit unless TEST_ENABLED;
+
 # ---------------------------------------------------------------------------
 
 use File::Copy;
@@ -21,8 +26,6 @@ my @files = qw(
 	data/spam/017
 	);
 my $input;
-
-plan tests => 98;
 
 # Make sure all the files can do "report_safe 0" and "report_safe 1"
 foreach $input (@files) {

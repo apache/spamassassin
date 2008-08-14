@@ -3,7 +3,11 @@
 use lib '.'; use lib 't';
 use SATest; sa_t_init("whitelist_addrs");
 
-use Test; BEGIN { plan tests => 5; }
+use constant TEST_ENABLED => conf_bool('run_long_tests');
+
+use Test;
+BEGIN { plan tests => TEST_ENABLED ? 5 : 0 };
+exit unless TEST_ENABLED;
 
 # ---------------------------------------------------------------------------
 

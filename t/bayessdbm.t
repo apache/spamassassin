@@ -5,7 +5,8 @@ use lib '.'; use lib 't';
 use SATest; sa_t_init("bayes");
 use Test;
 
-use constant HAS_SDBM_FILE => eval { require SDBM_File; };
+use constant TEST_ENABLED => conf_bool('run_long_tests') &&
+                            eval { require SDBM_File; };
 
 BEGIN { 
   if (-e 't/test_dir') {
@@ -16,10 +17,10 @@ BEGIN {
     unshift(@INC, '../blib/lib');
   }
 
-  plan tests => (HAS_SDBM_FILE ? 52 : 0);
+  plan tests => (TEST_ENABLED ? 52 : 0);
 };
 
-exit unless HAS_SDBM_FILE;
+exit unless TEST_ENABLED;
 
 tstlocalrules ("
         bayes_store_module Mail::SpamAssassin::BayesStore::SDBM

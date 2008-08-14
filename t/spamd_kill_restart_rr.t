@@ -2,7 +2,9 @@
 
 use lib '.'; use lib 't';
 use SATest; sa_t_init("spamd_kill_restart_rr");
-use constant TEST_ENABLED => !$SKIP_SPAMD_TESTS && !$RUNNING_ON_WINDOWS;
+
+use constant TEST_ENABLED => conf_bool('run_long_tests') &&
+                                !$SKIP_SPAMD_TESTS && !$RUNNING_ON_WINDOWS;
 
 use Test; BEGIN { plan tests => (TEST_ENABLED? 93 : 0) };
 

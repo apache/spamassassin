@@ -20,7 +20,12 @@ use SATest; sa_t_init("debug");
 use Test;
 use Mail::SpamAssassin;
 
-plan tests => 3;
+use constant TEST_ENABLED => conf_bool('run_long_tests');
+
+BEGIN { 
+  plan tests => (TEST_ENABLED ? 3 : 0);
+};
+exit unless TEST_ENABLED;
 
 # list of known debug facilities
 my %facility = map {; $_ => 1 }

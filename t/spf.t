@@ -4,7 +4,7 @@ use lib '.'; use lib 't';
 use SATest; sa_t_init("spf");
 use Test;
 
-use constant TEST_ENABLED => conf_bool('run_net_tests');
+use constant TEST_ENABLED => conf_bool('run_long_tests') && conf_bool('run_net_tests');
 use constant HAS_SPFQUERY => eval { require Mail::SPF::Query; };
 use constant HAS_MAILSPF => eval { require Mail::SPF; };
 # bug 3806:

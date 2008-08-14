@@ -18,9 +18,14 @@ if (-e 'test_dir') {            # running from test directory, not ..
 
 use lib '.'; use lib 't';
 use SATest; sa_t_init("trust_path");
-use Test; BEGIN { plan tests => 96 };
-use IO::File;
 
+use constant TEST_ENABLED => conf_bool('run_long_tests');
+use Test;
+
+BEGIN { plan tests => TEST_ENABLED ? 96 : 0 };
+exit unless TEST_ENABLED;
+
+use IO::File;
 use strict;
 
 # make a _copy_ of the STDERR file descriptor

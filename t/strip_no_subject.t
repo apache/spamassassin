@@ -2,7 +2,12 @@
 
 use lib '.'; use lib 't';
 use SATest; sa_t_init("strip_no_subject");
-use Test; BEGIN { plan tests => 4 };
+use Test;
+
+use constant TEST_ENABLED => conf_bool('run_long_tests');
+
+BEGIN { plan tests => TEST_ENABLED ? 4 : 0 };
+exit unless TEST_ENABLED;
 
 # ---------------------------------------------------------------------------
 
