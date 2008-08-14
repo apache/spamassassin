@@ -22,15 +22,14 @@ GetOptions(
   'debug|D' => \$opt{'debug'},
 );
 
-my $USE_EXTERNAL_SA = 0;
-
 my $spamtest;
-if (!$USE_EXTERNAL_SA) {
-  use lib 'lib';
-  use lib 'blib/lib';
-  use Mail::SpamAssassin;
-  create_spamtest();
-}
+my $lastconfigtext = '';
+my $configtext = '';
+
+use lib 'lib';
+use lib 'blib/lib';
+use Mail::SpamAssassin;
+create_spamtest();
 
 my $verbose = $opt{'verbose'};
 $opt{'tests'} ||= join " ", <t.rules/*>;
@@ -43,10 +42,7 @@ if (@ARGV) {
   main();
 }
 
-if (!$USE_EXTERNAL_SA) {
-  $spamtest->finish();
-}
-
+$spamtest->finish();
 exit $testsfailed;
 
 # ---------------------------------------------------------------------------
@@ -61,6 +57,7 @@ sub main {
 
     warn "\nRunning tests for $rule:\n" if $verbose;
     foreach my $f (<$ruledir/*>) {
+      next if ($f =~ /\.cf$/i);
       (-f $f) and test_msg($f);
     }
   }
@@ -79,33 +76,21 @@ sub test_msg {
     $want_hit = 0;
   }
 
-  # TODO: read file, find "Config: " synthetic headers, add them to --cf or
-  # recreate $spamtest object with those in place.
+  $configtext = '';
+  if (-f "$f.cf") {
+    open (CF, "<$f.cf") or warn "cannot open $f.cf";
+    $configtext = join("", <CF>);
+    close CF;
+  }
+  recreate_spamtest_if_config_differs();
 
-  my $testsline;
-  if ($USE_EXTERNAL_SA) {
-    my $dbg = ''; $opt{debug} and $dbg = '-D';
-    open (IN,
-        "./spamassassin --cf='use_bayes 0' --cf='use_awl 0' $dbg -Lt < $f 2>&1 |")
-            or warn "sa failed";
-    open (LOG, ">o.log") or die;
-    while (<IN>) {
-      print LOG;
-      /check: tests=(.*)$/ and $testsline = $1;
-      /check: subtests=(.*)$/ and $testsline .= ",$1";
-    }
-    close IN;
-    close LOG;
-  }
-  else {
-    open (STDIN, "<$f") or warn "cannot open $f";
-    my $mail = $spamtest->parse();
-    my $status = $spamtest->check($mail);
-    $testsline = $status->get_names_of_tests_hit().",".$status->get_names_of_subtests_hit();
-    $mail->finish();
-    $status->finish();
-    close STDIN;
-  }
+  open (STDIN, "<$f") or warn "cannot open $f";
+  my $mail = $spamtest->parse();
+  my $status = $spamtest->check($mail);
+  my $testsline = $status->get_names_of_tests_hit().",".$status->get_names_of_subtests_hit();
+  $mail->finish();
+  $status->finish();
+  close STDIN;
 
   if ($testsline =~ /(?:[ ,]|^)\Q$rule\E(?:[ ,]|$)/) {
     if ($want_hit) {
@@ -151,11 +136,19 @@ sub create_spamtest {
       local_tests_only    => 1,
       debug               => $opt{debug},
       dont_copy_prefs     => 1,
-      post_config_text    => "use_learner 0\nuse_auto_whitelist 0\n",
+      post_config_text    => "use_learner 0\nuse_auto_whitelist 0\n".$configtext,
       require_rules       => 1,
     }
   );
   $spamtest->init(1);
+}
+
+sub recreate_spamtest_if_config_differs {
+  if ($configtext eq $lastconfigtext) {
+    return;
+  }
+  $lastconfigtext = $configtext;
+  create_spamtest();
 }
 
 # ---------------------------------------------------------------------------
