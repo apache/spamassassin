@@ -18,9 +18,11 @@ if (-e 'test_dir') {            # running from test directory, not ..
 
 use lib '.'; use lib 't';
 use SATest; sa_t_init("spamd_client");
+
+use constant TEST_ENABLED => conf_bool('run_long_tests');
 use constant HAS_SDBM_FILE => eval { require SDBM_File; };
 
-our $DO_RUN = !$SKIP_SPAMD_TESTS;
+our $DO_RUN = !$SKIP_SPAMD_TESTS && TEST_ENABLED;
 
 my $num_tests = 18;
 

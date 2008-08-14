@@ -3,7 +3,7 @@
 use lib '.'; use lib 't';
 use SATest; sa_t_init("uribl");
 
-use constant TEST_ENABLED => conf_bool('run_net_tests');
+use constant TEST_ENABLED => conf_bool('run_net_tests') && conf_bool('run_long_tests');
 use constant HAS_NET_DNS => eval { require Net::DNS; };
 # bug 3806:
 # Do not run this test with version of Sys::Hostname::Long older than 1.4

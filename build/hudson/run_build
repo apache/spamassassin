@@ -11,6 +11,13 @@ perl Makefile.PL < /dev/null
 make
 make distcheck
 
+# select the tests we want
+echo "
+run_spamd_prefork_stress_test=y
+run_net_tests=y
+run_long_tests=y
+" > t/config
+
 # generate 't/log.make_test'
 make test TEST_VERBOSE=1 \
     2>&1 | tee artifacts/make_test.log

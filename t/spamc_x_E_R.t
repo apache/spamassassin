@@ -3,10 +3,10 @@
 use lib '.'; use lib 't';
 use SATest; sa_t_init("spamc_x_E_R");
 
-our $DO_RUN = !$SKIP_SPAMD_TESTS;
+use constant TEST_ENABLED => conf_bool('run_long_tests');
+our $DO_RUN = !$SKIP_SPAMD_TESTS && TEST_ENABLED;
 
 use Test; plan tests => ($DO_RUN ? 49 : 0);
-
 exit unless $DO_RUN;
 
 # ---------------------------------------------------------------------------

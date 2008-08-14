@@ -2,7 +2,13 @@
 
 use lib '.'; use lib 't';
 use SATest; sa_t_init("line_endings");
-use Test; BEGIN { plan tests => 26 };
+
+use constant TEST_ENABLED => conf_bool('run_long_tests');
+
+use Test; BEGIN {
+  plan tests => (TEST_ENABLED ? 26 : 0);
+};
+exit unless TEST_ENABLED;
 
 # ---------------------------------------------------------------------------
 

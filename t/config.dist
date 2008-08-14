@@ -2,6 +2,12 @@
 # Please copy this file to 'config' and edit to your taste.
 
 # ---------------------------------------------------------------------------
+# Run time-consuming tests during 'make test'.  (These tests take longer
+# than 10 seconds each on a reasonably fast box.)
+
+run_long_tests=n
+
+# ---------------------------------------------------------------------------
 # Run network rule tests during 'make test'.
 # test scripts may fail due to network problems)
 
@@ -9,7 +15,6 @@ run_net_tests=n
 
 # Run DCC Tests
 run_dcc_tests=n
-
 
 # ---------------------------------------------------------------------------
 # Run SQL-based user pref tests during 'make test' REQUIRES DBD::SQLite

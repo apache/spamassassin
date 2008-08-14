@@ -5,15 +5,15 @@ use SATest; sa_t_init("spamd_prefork_stress_4");
 use Test;
 
 our $RUN_THIS_TEST;
-
 BEGIN {
-  $RUN_THIS_TEST = conf_bool('run_spamd_prefork_stress_test');
+  $RUN_THIS_TEST = conf_bool('run_spamd_prefork_stress_test') &&
+                        conf_bool('run_long_tests');
   plan tests => ($SKIP_SPAMD_TESTS || !$RUN_THIS_TEST ? 0 : 43)
 };
-
 exit if $SKIP_SPAMD_TESTS;
 
-print "NOTE: this test requires 'run_spamd_prefork_stress_test' set to 'y'.\n";
+print "NOTE: this test requires both 'run_spamd_prefork_stress_test'\n".
+    "and 'run_long_tests' set to 'y'.\n";
 exit unless $RUN_THIS_TEST;
 
 # ---------------------------------------------------------------------------

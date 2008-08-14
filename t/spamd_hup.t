@@ -2,12 +2,12 @@
 
 use lib '.'; use lib 't';
 use SATest; sa_t_init("spamd_hup");
-use constant TEST_ENABLED => !$SKIP_SPAMD_TESTS && !$RUNNING_ON_WINDOWS;
-
-use Test; BEGIN { plan tests => (TEST_ENABLED? 110 : 0) };
-
 use File::Spec;
 
+use constant TEST_ENABLED => conf_bool('run_long_tests') &&
+                                !$SKIP_SPAMD_TESTS && !$RUNNING_ON_WINDOWS;
+
+use Test; BEGIN { plan tests => (TEST_ENABLED ? 110 : 0) };
 exit unless TEST_ENABLED;
 
 # ---------------------------------------------------------------------------
