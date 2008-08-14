@@ -74,9 +74,6 @@ use warnings;
 use bytes;
 use re 'taint';
 
-# Have to do this so that RPM doesn't find these as required perl modules.
-BEGIN { require Mail::DKIM; require Mail::DKIM::Verifier; }
-
 use vars qw(@ISA);
 @ISA = qw(Mail::SpamAssassin::Plugin);
 
@@ -288,8 +285,36 @@ sub check_for_def_dkim_whitelist_from {
 
 # ---------------------------------------------------------------------------
 
+sub _dkim_load_modules {
+  my ($self) = @_;
+
+  return $self->{tried_loading} if defined $self->{tried_loading};
+  $self->{tried_loading} = 0;
+
+  my $timemethod = $self->{main}->time_method("dkim_load_modules");
+  my $eval_stat;
+  eval {
+    # Have to do this so that RPM doesn't find these as required perl modules.
+    { require Mail::DKIM; require Mail::DKIM::Verifier; }
+  } or do {
+    $eval_stat = $@ ne '' ? $@ : "errno=$!";  chomp $eval_stat;
+  };
+
+  if (!defined($eval_stat)) {
+    dbg("dkim: using Mail::DKIM for DKIM checks");
+    $self->{tried_loading} = 1;
+  } else {
+    dbg("dkim: cannot load Mail::DKIM module, DKIM checks disabled: $eval_stat");
+  }
+}
+
+# ---------------------------------------------------------------------------
+
 sub _check_dkim_signature {
   my ($self, $scan) = @_;
+
+  return unless $self->_dkim_load_modules();
+  my $timemethod = $self->{main}->time_method("check_dkim_signature");
 
   $scan->{dkim_checked_signature} = 1;
   $scan->{dkim_signed} = 0;
@@ -298,8 +323,6 @@ sub _check_dkim_signature {
   $scan->{dkim_key_testing} = 0;
   $scan->{dkim_author_address} =
     $scan->get('from:addr')  if !defined $scan->{dkim_author_address};
-
-  my $timemethod = $self->{main}->time_method("check_dkim_signature");
 
 # my $verifier = Mail::DKIM::Verifier->new();         # per new docs
   my $verifier = Mail::DKIM::Verifier->new_object();  # old style???
@@ -434,6 +457,8 @@ sub _check_dkim_policy {
   $scan->{dkim_author_address} =
     $scan->get('from:addr')  if !defined $scan->{dkim_author_address};
 
+  return unless $self->_dkim_load_modules();
+
   # must check the message first to obtain signer, domain, and verif. status
   $self->_check_dkim_signature($scan) unless $scan->{dkim_checked_signature};
   my $verifier = $scan->{dkim_object};
@@ -501,6 +526,7 @@ sub _check_dkim_whitelist {
   my ($self, $scan) = @_;
 
   $scan->{whitelist_checked} = 1;
+  return unless $self->_dkim_load_modules();
   return unless $scan->is_dns_available();
 
   my $author = $scan->{dkim_author_address};
