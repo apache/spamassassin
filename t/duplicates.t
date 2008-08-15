@@ -41,6 +41,8 @@ tstprefs (qq{
 
    $default_cf_lines
 
+   loadplugin Mail::SpamAssassin::Plugin::Test
+
    body FOO1 /click here and e= nter your/i
    body FOO2 /click here and e= nter your/i
 
