@@ -197,7 +197,8 @@ The filename/directory to load spam-identifying rules from. (optional)
 
 =item site_rules_filename
 
-The directory to load site-specific spam-identifying rules from. (optional)
+The filename/directory to load site-specific spam-identifying rules from.
+(optional)
 
 =item userprefs_filename
 
