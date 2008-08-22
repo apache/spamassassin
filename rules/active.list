@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: dos; day 2: bb-jm bb-traps dos jm theo; day 3: bb-jm bb-traps dos jm theo
+# with results from: day 1: bb-jm bb-traps dos jm; day 2: dos; day 3: bb-jm bb-traps dos jm theo
 
 # tflags userconf
 ALL_TRUSTED
@@ -42,6 +42,9 @@ BAYES_95
 
 # tflags learn
 BAYES_99
+
+# good enough
+BBC_RCVD_NCHAR_RAW
 
 # tflags userconf
 CHARSET_FARAWAY
@@ -203,6 +206,9 @@ FRAGMENTED_MESSAGE
 FRT_ERECTION
 
 # good enough
+FRT_GUARANTEE1
+
+# good enough
 FRT_ROLEX
 
 # good enough
@@ -304,6 +310,9 @@ JM_EXIM_462
 # good enough
 JM_FAKE_PSMTP_RCVD
 
+# good enough
+JM_HOODIA
+
 # tflags publish
 JM_I_FEEL_LUCKY
 
@@ -349,6 +358,9 @@ MIME_CHARSET_FARAWAY
 # tflags userconf
 MISSING_HB_SEP
 
+# good enough
+MSNBC_HDR_ORDER
+
 # tflags net
 NO_DNS_FOR_FROM
 
@@ -381,9 +393,6 @@ RAZOR2_CF_RANGE_E8_51_100
 
 # tflags net
 RAZOR2_CHECK
-
-# good enough
-RCVD_FORGED_WROTE
 
 # good enough
 RCVD_FORGED_WROTE2
@@ -608,9 +617,6 @@ SANE_1bcdb8d4cae5f7cfefe310b3fce37407
 SANE_1c4f3286fa4aed6424ced88bfaf8b09c
 
 # good enough
-SANE_1e4a68ee6f864251df2bd2c2820805ea
-
-# good enough
 SANE_2025b95f6cbbedc5b8ecc73c754b3ecd
 
 # good enough
@@ -627,9 +633,6 @@ SANE_241cd925b00cea31560e3a0a88292867
 
 # good enough
 SANE_26a68f03f5905d9a620f0c60593598d2
-
-# good enough
-SANE_29466e3bbdb72fcad000bf00469b265c
 
 # good enough
 SANE_3325b1231e51c0ba56c4034e2d775e02
@@ -965,13 +968,7 @@ TVD_QUAL_MEDS
 TVD_VISIT_PHARMA
 
 # good enough
-BBC_RCVD_NCHAR_RAW
-
-# good enough
-JM_HOODIA
-
-# good enough
-MSNBC_HDR_ORDER
+THREAD_INDEX_HEX
 
 # tflags userconf
 UNPARSEABLE_RELAY
