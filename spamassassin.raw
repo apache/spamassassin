@@ -275,14 +275,13 @@ if ($opt{'remove-addr-from-whitelist'} ||
   $spamtest->init(1);
 
   if ( $opt{'add-addr-to-whitelist'} ) {
-    $spamtest->add_address_to_whitelist( $opt{'add-addr-to-whitelist'} );
+    $spamtest->add_address_to_whitelist($opt{'add-addr-to-whitelist'}, 1);
   }
   elsif ( $opt{'remove-addr-from-whitelist'} ) {
-    $spamtest->remove_address_from_whitelist(
-      $opt{'remove-addr-from-whitelist'} );
+    $spamtest->remove_address_from_whitelist($opt{'remove-addr-from-whitelist'}, 1);
   }
   elsif ( $opt{'add-addr-to-blacklist'} ) {
-    $spamtest->add_address_to_blacklist( $opt{'add-addr-to-blacklist'} );
+    $spamtest->add_address_to_blacklist($opt{'add-addr-to-blacklist'}, 1);
   }
   else {
     die "spamassassin: oops! unhandled whitelist operation";
@@ -426,13 +425,13 @@ sub wanted {
   # This is a short cut -- doing white/black-list?  Do it and return quickly.
   if ($doing_whitelist_operation) {
     if ( $opt{'add-to-whitelist'} ) {
-      $spamtest->add_all_addresses_to_whitelist($mail);
+      $spamtest->add_all_addresses_to_whitelist($mail, 1);
     }
     elsif ( $opt{'remove-from-whitelist'} ) {
-      $spamtest->remove_all_addresses_from_whitelist($mail);
+      $spamtest->remove_all_addresses_from_whitelist($mail, 1);
     }
     elsif ( $opt{'add-to-blacklist'} ) {
-      $spamtest->add_all_addresses_to_blacklist($mail);
+      $spamtest->add_all_addresses_to_blacklist($mail, 1);
     }
     else {
       warn "spamassassin: oops! unhandled whitelist operation";

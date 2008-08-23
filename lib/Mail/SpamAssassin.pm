@@ -870,96 +870,113 @@ sub revoke_as_spam {
 
 ###########################################################################
 
-=item $f->add_address_to_whitelist ($addr)
+=item $f->add_address_to_whitelist ($addr, $cli_p)
 
 Given a string containing an email address, add it to the automatic
 whitelist database.
 
+If $cli_p is set then underlying plugin may give visual feedback on additions/failures.
+
 =cut
 
 sub add_address_to_whitelist {
-  my ($self, $addr) = @_;
+  my ($self, $addr, $cli_p) = @_;
 
-  $self->call_plugins("whitelist_address", { address => $addr });
+  $self->call_plugins("whitelist_address", { address => $addr,
+                                             cli_p => $cli_p });
 }
 
 ###########################################################################
 
-=item $f->add_all_addresses_to_whitelist ($mail)
+=item $f->add_all_addresses_to_whitelist ($mail, $cli_p)
 
 Given a mail message, find as many addresses in the usual headers (To, Cc, From
 etc.), and the message body, and add them to the automatic whitelist database.
 
+If $cli_p is set then underlying plugin may give visual feedback on additions/failures.
+
 =cut
 
 sub add_all_addresses_to_whitelist {
-  my ($self, $mail_obj) = @_;
+  my ($self, $mail_obj, $cli_p) = @_;
 
   foreach my $addr ($self->find_all_addrs_in_mail ($mail_obj)) {
-    $self->call_plugins("whitelist_address", { address => $addr });
+    $self->call_plugins("whitelist_address", { address => $addr,
+                                               cli_p => $cli_p });
   }
 }
 
 ###########################################################################
 
-=item $f->remove_address_from_whitelist ($addr)
+=item $f->remove_address_from_whitelist ($addr, $cli_p)
 
 Given a string containing an email address, remove it from the automatic
 whitelist database.
 
+If $cli_p is set then underlying plugin may give visual feedback on additions/failures.
+
 =cut
 
 sub remove_address_from_whitelist {
-  my ($self, $addr) = @_;
+  my ($self, $addr, $cli_p) = @_;
 
-  $self->call_plugins("remove_address", { address => $addr });
+  $self->call_plugins("remove_address", { address => $addr,
+                                          cli_p => $cli_p });
 }
 
 ###########################################################################
 
-=item $f->remove_all_addresses_from_whitelist ($mail)
+=item $f->remove_all_addresses_from_whitelist ($mail, $cli_p)
 
 Given a mail message, find as many addresses in the usual headers (To, Cc, From
 etc.), and the message body, and remove them from the automatic whitelist
 database.
 
+If $cli_p is set then underlying plugin may give visual feedback on additions/failures.
+
 =cut
 
 sub remove_all_addresses_from_whitelist {
-  my ($self, $mail_obj) = @_;
+  my ($self, $mail_obj, $cli_p) = @_;
 
   foreach my $addr ($self->find_all_addrs_in_mail ($mail_obj)) {
-    $self->call_plugins("remove_address", { address => $addr });
+    $self->call_plugins("remove_address", { address => $addr,
+                                            cli_p => $cli_p });
   }
 }
 
 ###########################################################################
 
-=item $f->add_address_to_blacklist ($addr)
+=item $f->add_address_to_blacklist ($addr, $cli_p)
 
 Given a string containing an email address, add it to the automatic
 whitelist database with a high score, effectively blacklisting them.
 
+If $cli_p is set then underlying plugin may give visual feedback on additions/failures.
+
 =cut
 
 sub add_address_to_blacklist {
-  my ($self, $addr) = @_;
-  $self->call_plugins("blacklist_address", { address => $addr });
+  my ($self, $addr, $cli_p) = @_;
+  $self->call_plugins("blacklist_address", { address => $addr,
+                                             cli_p => $cli_p });
 }
 
 ###########################################################################
 
-=item $f->add_all_addresses_to_blacklist ($mail)
+=item $f->add_all_addresses_to_blacklist ($mail, $cli_p)
 
 Given a mail message, find addresses in the From headers and add them to the
 automatic whitelist database with a high score, effectively blacklisting them.
 
 Note that To and Cc addresses are not used.
 
+If $cli_p is set then underlying plugin may give visual feedback on additions/failures.
+
 =cut
 
 sub add_all_addresses_to_blacklist {
-  my ($self, $mail_obj) = @_;
+  my ($self, $mail_obj, $cli_p) = @_;
 
   $self->init(1);
 
@@ -970,7 +987,8 @@ sub add_all_addresses_to_blacklist {
   }
 
   foreach my $addr (@addrlist) {
-    $self->call_plugins("blacklist_address", { address => $addr });
+    $self->call_plugins("blacklist_address", { address => $addr,
+                                               cli_p => $cli_p });
   }
 
 }

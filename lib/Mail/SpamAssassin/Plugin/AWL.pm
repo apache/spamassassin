@@ -458,7 +458,8 @@ sub blacklist_address {
   return 0 unless ($self->{main}->{conf}->{use_auto_whitelist});
 
   unless ($args->{address}) {
-    print "SpamAssassin auto-whitelist: failed to add address to blacklist\n";
+    print "SpamAssassin auto-whitelist: failed to add address to blacklist\n" if ($args->{cli_p});
+    dbg("auto-whitelist: failed to add address to blacklist");
     return;
   }
   
@@ -469,11 +470,13 @@ sub blacklist_address {
     $whitelist = Mail::SpamAssassin::AutoWhitelist->new($self->{main});
 
     if ($whitelist->add_known_bad_address($args->{address}, $args->{signedby})) {
-      print "SpamAssassin auto-whitelist: adding address to blacklist: " . $args->{address} . "\n";
+      print "SpamAssassin auto-whitelist: adding address to blacklist: " . $args->{address} . "\n" if ($args->{cli_p});
+      dbg("auto-whitelist: adding address to blacklist: " . $args->{address});
       $status = 0;
     }
     else {
-      print "SpamAssassin auto-whitelist: error adding address to blacklist\n";
+      print "SpamAssassin auto-whitelist: error adding address to blacklist\n" if ($args->{cli_p});
+      dbg("auto-whitelist: error adding address to blacklist");
       $status = 1;
     }
     $whitelist->finish();
@@ -494,7 +497,8 @@ sub whitelist_address {
   return 0 unless ($self->{main}->{conf}->{use_auto_whitelist});
 
   unless ($args->{address}) {
-    print "SpamAssassin auto-whitelist: failed to add address to whitelist\n";
+    print "SpamAssassin auto-whitelist: failed to add address to whitelist\n" if ($args->{cli_p});
+    dbg("auto-whitelist: failed to add address to whitelist");
     return 0;
   }
 
@@ -505,11 +509,13 @@ sub whitelist_address {
     $whitelist = Mail::SpamAssassin::AutoWhitelist->new($self->{main});
 
     if ($whitelist->add_known_good_address($args->{address}, $args->{signedby})) {
-      print "SpamAssassin auto-whitelist: adding address to whitelist: " . $args->{address} . "\n";
+      print "SpamAssassin auto-whitelist: adding address to whitelist: " . $args->{address} . "\n" if ($args->{cli_p});
+      dbg("auto-whitelist: adding address to whitelist: " . $args->{address});
       $status = 1;
     }
     else {
-      print "SpamAssassin auto-whitelist: error adding address to whitelist\n";
+      print "SpamAssassin auto-whitelist: error adding address to whitelist\n" if ($args->{cli_p});
+      dbg("auto-whitelist: error adding address to whitelist");
       $status = 0;
     }
 
@@ -531,7 +537,8 @@ sub remove_address {
   return 0 unless ($self->{main}->{conf}->{use_auto_whitelist});
 
   unless ($args->{address}) {
-    print "SpamAssassin auto-whitelist: failed to remove address\n";
+    print "SpamAssassin auto-whitelist: failed to remove address\n" if ($args->{cli_p});
+    dbg("auto-whitelist: failed to remove address");
     return 0;
   }
 
@@ -542,11 +549,13 @@ sub remove_address {
     $whitelist = Mail::SpamAssassin::AutoWhitelist->new($self->{main});
 
     if ($whitelist->remove_address($args->{address}, $args->{signedby})) {
-      print "SpamAssassin auto-whitelist: removing address: " . $args->{address} . "\n";
+      print "SpamAssassin auto-whitelist: removing address: " . $args->{address} . "\n" if ($args->{cli_p});
+      dbg("auto-whitelist: removing address: " . $args->{address});
       $status = 1;
     }
     else {
-      print "SpamAssassin auto-whitelist: error removing address\n";
+      print "SpamAssassin auto-whitelist: error removing address\n" if ($args->{cli_p});
+      dbg("auto-whitelist: error removing address");
       $status = 0;
     }
   
