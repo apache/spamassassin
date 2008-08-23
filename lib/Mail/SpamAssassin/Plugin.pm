@@ -771,6 +771,10 @@ persistent address list.
 
 Address you wish to add.
 
+=item cli_p
+
+Indicate if the call is being made from a command line interface.
+
 =back
 
 =item $plugin->blacklist_address( { options ... } )
@@ -784,6 +788,10 @@ persistent address list.
 
 Address you wish to add.
 
+=item cli_p
+
+Indicate if the call is being made from a command line interface.
+
 =back
 
 =item $plugin->remove_address( { options ... } )
@@ -796,6 +804,10 @@ persistent address list.
 =item address
 
 Address you wish to remove.
+
+=item cli_p
+
+Indicate if the call is being made from a command line interface.
 
 =back
 
