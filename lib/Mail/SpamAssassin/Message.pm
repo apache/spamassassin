@@ -149,7 +149,8 @@ sub new {
     # if we get here, it means that the input was null, so fake the message
     # content as a single newline...
     @message = ("\n");
-  } elsif ($message[0] =~ /^From\s/) {
+  } elsif ($message[0] =~ /^From\s+(?!:)/) {
+    # careful not to confuse with obsolete syntax which allowed WSP before ':'
     # mbox formated mailbox
     $self->{'mbox_sep'} = shift @message;
   } elsif ($message[0] =~ MBX_SEPARATOR) {
@@ -189,14 +190,13 @@ sub new {
     dbg("message: line ending changed to CRLF");
   }
 
-  # Go through all the headers of the message
-  my $header = '';
-  while ( my $current = shift @message ) {
-    unless ($self->{'missing_head_body_separator'}) {
-      $self->{'pristine_headers'} .= $current;
-    }
+  # Go through all the header fields of the message
+  my $header;
+  for (;;) {
+    # make sure not to lose the last header field when there is no body
+    my $eof = !@message;
+    my $current = $eof ? "\n" : shift @message;
 
-    # NB: Really need to figure out special folding rules here!
     if ( $current =~ /^[ \t]/ ) {
       # This wasn't useful in terms of a rule, but we may want to treat it
       # specially at some point.  Perhaps ignore it?
@@ -204,14 +204,13 @@ sub new {
       #  $self->{'obsolete_folding_whitespace'} = 1;
       #}
 
-      # append continuations if there's a header in process
-      if ($header) {
-        $header .= $current;
-      }
+      $header = ''  if !defined $header;  # header starts with a continuation!?
+      $header .= $current;  # append continuations, no matter what
+      $self->{'pristine_headers'} .= $current;
     }
-    else {
+    else {  # not a continuation
       # Ok, there's a header here, let's go ahead and add it in.
-      if ($header) {
+      if (defined $header) {  # deal with a previous header field
         my ($key, $value) = split (/:/s, $header, 2);
 
         # If it's not a valid header (aka: not in the form "foo: bar"), skip it.
@@ -229,31 +228,26 @@ sub new {
         }
       }
 
-      # not a continuation...
-      $header = $current;
-    }
-
-    if ($header) {
-      if ($header =~ /^\r?$/) {
+      if ($current =~ /^\r?$/) {  # a regular end of header section
+        $self->{'pristine_headers'} .= $current  if !$eof;
         last;
-      }
-      else {
-        # Check for missing head/body separator
+
+      } elsif ($current !~ /^[\041-\071\073-\176]+[ \t]*:/ ||
+	       $current =~ /^--/) {  # mime boundary
+        # obsolete header field syntax allowed WSP before a colon;
+	# Check for missing head/body separator
 	# RFC 2822, s2.2:
 	# A field name MUST be composed of printable US-ASCII characters
-	# (i.e., characters that have values between 33 (041) and 126 (176), inclusive),
-	# except colon (072).
-	# FOR THIS NEXT PART: list off the valid REs for what can be next:
-	#	Header, header continuation, blank line
-        if (!@message || $message[0] !~ /^(?:[\041-\071\073-\176]+:|[ \t]|\r?$)/ || $message[0] =~ /^--/) {
-	  # No body or no separator before mime boundary is invalid
-          $self->{'missing_head_body_separator'} = 1;
-	  
-	  # we *have* to go back through again to make sure we catch the last
-	  # header, so fake a separator and loop again.
-	  unshift(@message, "\n");
-        }
+	# (i.e., characters that have values between 33 (041) and 126 (176),
+	# inclusive), except colon (072).
+
+	$self->{'missing_head_body_separator'} = 1;
+        last;
       }
+
+      # start collecting a new header field
+      $header = $current;
+      $self->{'pristine_headers'} .= $current;
     }
   }
   undef $header;
