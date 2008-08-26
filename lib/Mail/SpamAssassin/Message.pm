@@ -229,11 +229,15 @@ sub new {
       }
 
       if ($current =~ /^\r?$/) {  # a regular end of header section
-        $self->{'pristine_headers'} .= $current  if !$eof;
+        if ($eof) {
+          $self->{'missing_head_body_separator'} = 1;
+        } else {
+          $self->{'pristine_headers'} .= $current;
+        }
         last;
-
-      } elsif ($current !~ /^[\041-\071\073-\176]+[ \t]*:/ ||
-	       $current =~ /^--/) {  # mime boundary
+      }
+      elsif ($current !~ /^[\041-\071\073-\176]+[ \t]*:/ ||
+	     $current =~ /^--/) {  # mime boundary
         # obsolete header field syntax allowed WSP before a colon;
 	# Check for missing head/body separator
 	# RFC 2822, s2.2:
@@ -242,6 +246,7 @@ sub new {
 	# inclusive), except colon (072).
 
 	$self->{'missing_head_body_separator'} = 1;
+        unshift(@message, $current);
         last;
       }
 
