@@ -1546,16 +1546,13 @@ sub _get {
   }
   # a conventional header
   else {
-    if ($getraw) {
-      $result = join('', $self->{msg}->raw_header($request));
-    } else {
-      $result = join('', $self->{msg}->get_header($request));
-    }
-
-    # metadata
-    if (!$result) {
+    my @results = $getraw ? $self->{msg}->raw_header($request)
+                          : $self->{msg}->get_header($request);
+    if (@results) {
+      $result = join('', @results);
+    } else {  # metadata
       $result = $self->{msg}->get_metadata($request);
-      $result = undef if !$result;
+    # undef $result  if defined $result && $result eq '';  # needed?
     }
   }
       
@@ -1620,7 +1617,7 @@ sub get {
 
   # if the requested header wasn't found, we should return either
   # a default value as specified by the caller, or the blank string ''
-  return $_[2] || '';
+  return defined $_[2] ? $_[2] : '';
 }
 
 ###########################################################################

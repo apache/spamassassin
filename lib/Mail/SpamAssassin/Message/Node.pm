@@ -98,7 +98,7 @@ sub find_parts {
   my ($self, $re, $onlyleaves, $recursive) = @_;
 
   # Didn't pass an RE?  Just abort.
-  return () unless $re;
+  return () unless defined $re && $re ne '';
 
   $onlyleaves = 0 unless defined $onlyleaves;
 
@@ -152,7 +152,7 @@ sub header {
   my $self   = shift;
   my $rawkey = shift;
 
-  return unless ( defined $rawkey );
+  return unless defined $rawkey;
 
   # we're going to do things case insensitively
   my $key    = lc($rawkey);
@@ -581,7 +581,7 @@ sub __decode_header {
 sub _decode_header {
   my($self, $header) = @_;
 
-  return '' unless $header;
+  return '' unless defined $header && $header ne '';
 
   # deal with folding and cream the newlines and such
   $header =~ s/\n[ \t]+/\n /g;
