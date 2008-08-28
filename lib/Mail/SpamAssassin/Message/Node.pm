@@ -629,12 +629,12 @@ sub get_header {
   my @hdrs;
   if ( $raw ) {
     if (@hdrs = $self->raw_header($hdr)) {
-      @hdrs = map { s/\015?\012\s+/ /gs; $_; } @hdrs;
+      s/\015?\012\s+/ /gs  for @hdrs;
     }
   }
   else {
     if (@hdrs = $self->header($hdr)) {
-      @hdrs = map { "$_\n" } @hdrs;
+      $_ .= "\n"  for @hdrs;
     }
   }
 
@@ -642,7 +642,7 @@ sub get_header {
     return @hdrs;
   }
   else {
-     return @hdrs ? $hdrs[-1] : undef;
+    return @hdrs ? $hdrs[-1] : undef;
   }
 }
 

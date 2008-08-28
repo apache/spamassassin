@@ -361,7 +361,8 @@ sub _check_dkim_signature {
     $author = '' if !defined $author;  # when a From header field is missing
     # Mail::DKIM sometimes leaves leading or trailing whitespace in address
     $author =~ s/^[ \t]+//s;  $author =~ s/[ \t]+\z//s;  # trim
-    if ($author ne $scan->{dkim_author_address}) {
+    if (defined($scan->{dkim_author_address}) &&
+        $author ne $scan->{dkim_author_address}) {
       dbg("dkim: author parsing inconsistency, SA: <%s>, DKIM: <%s>",
            $author, $scan->{dkim_author_address});
     # currently SpamAssassin's parsing is better than Mail::Address parsing
@@ -618,6 +619,7 @@ sub _wlcheck_list {
   my $any_match_at_all = 0;
   my $expiration_supported = Mail::DKIM->VERSION >= 0.29 ? 1 : 0;
   my $author = $scan->{dkim_author_address};  # address in a From header field
+  $author = ''  if !defined $author;
 
   # walk through all signatures present in a message
   foreach my $signature (@{$scan->{dkim_signatures}}) {

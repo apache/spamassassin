@@ -2119,7 +2119,7 @@ name.
         }
       }
       elsif ($value =~ /^(\S+)\s+exists:(.*)$/) {
-        $self->{parser}->add_test ($1, "$2 =~ /./", $TYPE_HEAD_TESTS);
+        $self->{parser}->add_test ($1, "defined($2)", $TYPE_HEAD_TESTS);
         $self->{descriptions}->{$1} = "Found a $2 header";
       }
       else {
