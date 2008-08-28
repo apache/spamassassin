@@ -981,7 +981,7 @@ sub add_all_addresses_to_blacklist {
   $self->init(1);
 
   my @addrlist;
-  my @hdrs = $mail_obj->get_header ('From');
+  my @hdrs = $mail_obj->get_header('From');
   if ($#hdrs >= 0) {
     push (@addrlist, $self->find_all_addrs_in_line (join (" ", @hdrs)));
   }
@@ -2003,14 +2003,14 @@ sub find_all_addrs_in_mail {
   foreach my $header (qw(To From Cc Reply-To Sender
   				Errors-To Mail-Followup-To))
   {
-    my @hdrs = $mail_obj->get_header ($header);
+    my @hdrs = $mail_obj->get_header($header);
     if ($#hdrs < 0) { next; }
-    push (@addrlist, $self->find_all_addrs_in_line (join (" ", @hdrs)));
+    push (@addrlist, $self->find_all_addrs_in_line(join (" ", @hdrs)));
   }
 
   # find addrs in body, too
   foreach my $line (@{$mail_obj->get_body()}) {
-    push (@addrlist, $self->find_all_addrs_in_line ($line));
+    push (@addrlist, $self->find_all_addrs_in_line($line));
   }
 
   my @ret;

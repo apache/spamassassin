@@ -112,7 +112,7 @@ sub check_subject_in_whitelist {
 
   my $subject = $permsgstatus->get('Subject');
 
-  return 0 unless $subject;
+  return 0 unless defined $subject && $subject ne '';
 
   return $self->_check_subject($permsgstatus->{conf}->{whitelist_subject}, $subject);
 }
@@ -122,7 +122,7 @@ sub check_subject_in_blacklist {
 
   my $subject = $permsgstatus->get('Subject');
 
-  return 0 unless $subject;
+  return 0 unless defined $subject && $subject ne '';
 
   return $self->_check_subject($permsgstatus->{conf}->{blacklist_subject}, $subject);
 }

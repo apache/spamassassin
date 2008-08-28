@@ -44,12 +44,12 @@ sub detect_mailing_list {
 # List-Subscribe: <mailto:[a-zA-Z\.-]+-subscribe@
 sub detect_ml_ezmlm {
     my ($self) = @_;
-    return 0 unless $self->get('mailing-list') =~ /ezmlm$/;
-    return 0 unless $self->get('precedence') eq "bulk\n";
-    return 0 unless $self->get('list-post') =~ /^<mailto:/;
-    return 0 unless $self->get('list-help') =~ /^<mailto:/;
-    return 0 unless $self->get('list-unsubscribe') =~ /<mailto:[a-zA-Z\.-]+-unsubscribe\@/;
-    return 0 unless $self->get('list-subscribe') =~ /<mailto:[a-zA-Z\.-]+-subscribe\@/;
+    return 0 unless $self->get('mailing-list','') =~ /ezmlm$/;
+    return 0 unless $self->get('precedence','') eq "bulk\n";
+    return 0 unless $self->get('list-post','') =~ /^<mailto:/;
+    return 0 unless $self->get('list-help','') =~ /^<mailto:/;
+    return 0 unless $self->get('list-unsubscribe','') =~ /<mailto:[a-zA-Z\.-]+-unsubscribe\@/;
+    return 0 unless $self->get('list-subscribe','') =~ /<mailto:[a-zA-Z\.-]+-subscribe\@/;
     return 1; # assume ezmlm then.
 }
 
@@ -75,23 +75,23 @@ sub detect_ml_ezmlm {
 #  X-BeenThere: 
 sub detect_ml_mailman {
     my ($self) = @_;
-    return 0 unless $self->get('x-mailman-version') =~ /^\d/;
-    return 0 unless $self->get('precedence') =~ /^(?:bulk|list)$/;
+    return 0 unless $self->get('x-mailman-version','') =~ /^\d/;
+    return 0 unless $self->get('precedence','') =~ /^(?:bulk|list)$/;
 
-    if ($self->get('x-list-administrivia') =~ /yes/ ||
-        $self->get('subject') =~ /mailing list memberships reminder$/)
+    if ($self->get('x-list-administrivia','') =~ /yes/ ||
+        $self->get('subject','') =~ /mailing list memberships reminder$/)
     {
         return 0 unless $self->get('errors-to');
         return 0 unless $self->get('x-beenthere');
-        return 0 unless $self->get('x-no-archive') =~ /yes/;
+        return 0 unless $self->get('x-no-archive','') =~ /yes/;
         return 1;
     }
 
     return 0 unless $self->get('list-id');
-    return 0 unless $self->get('list-help') =~ /^<mailto:/;
-    return 0 unless $self->get('list-post') =~ /^<mailto:/;
-    return 0 unless $self->get('list-subscribe') =~ /<mailto:.*=subscribe>/;
-    return 0 unless $self->get('list-unsubscribe') =~ /<mailto:.*=unsubscribe>/;
+    return 0 unless $self->get('list-help','') =~ /^<mailto:/;
+    return 0 unless $self->get('list-post','') =~ /^<mailto:/;
+    return 0 unless $self->get('list-subscribe','') =~ /<mailto:.*=subscribe>/;
+    return 0 unless $self->get('list-unsubscribe','') =~ /<mailto:.*=unsubscribe>/;
     return 1; # assume this is a valid mailman list
 }
 
@@ -123,11 +123,11 @@ sub detect_ml_lyris {
 # sub detect_ml_listbuilder {
 #   my ($self, $full) = @_;
 # 
-#   my $reply = $self->get ('Reply-To:addr');
+#   my $reply = $self->get('Reply-To:addr','');
 #   if ($reply !~ /\@lb.bcentral.com/) { return 0; }
 # 
 #   # Received: from unknown (HELO lbrout14.listbuilder.com) (204.71.191.9)
-#   my $rcvd = $self->get('received');
+#   my $rcvd = $self->get('received','');
 #   return 0 unless ($rcvd =~ /\blbrout\d+\.listbuilder\.com\b/i);
 #   return 0 unless ($rcvd =~ /\b204\.71\.191\.\d+\b/);
 # 

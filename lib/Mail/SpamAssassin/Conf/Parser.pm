@@ -1047,9 +1047,13 @@ sub add_test {
   }
   if ($type == $Mail::SpamAssassin::Conf::TYPE_HEAD_TESTS)
   {
-    my ($pat) = ($text =~ /^\s*\S+\s*(?:\=|\!)\~\s*(\S.*?\S)\s*$/);
-    if ($pat) { $pat =~ s/\s+\[if-unset:\s+(.+)\]\s*$//; }
-    return unless $self->is_delimited_regexp_valid($name, $pat);
+    if ($text =~ /^!?defined\([A-Za-z][A-Za-z0-9-]*\)$/) {
+      # fine, implements 'exists:'
+    } else {
+      my ($pat) = ($text =~ /^\s*\S+\s*(?:\=|\!)\~\s*(\S.*?\S)\s*$/);
+      if ($pat) { $pat =~ s/\s+\[if-unset:\s+(.+)\]\s*$//; }
+      return unless $self->is_delimited_regexp_valid($name, $pat);
+    }
   }
   elsif ($type == $Mail::SpamAssassin::Conf::TYPE_META_TESTS)
   {

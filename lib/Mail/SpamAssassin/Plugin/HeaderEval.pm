@@ -85,7 +85,8 @@ sub check_for_fake_aol_relay_in_rcvd {
   my ($self, $pms) = @_;
   local ($_);
 
-  $_ = $pms->get('Received'); s/\s/ /gs;
+  $_ = $pms->get('Received','');
+  s/\s/ /gs;
 
   # this is the hostname format used by AOL for their relays. Spammers love 
   # forging it.  Don't make it more specific to match aol.com only, though --
@@ -121,7 +122,7 @@ sub check_for_faraway_charset_in_headers {
   return 0 if grep { $_ eq "all" } @locales;
 
   for my $h (qw(From Subject)) {
-    my @hdrs = $pms->get("$h:raw");
+    my @hdrs = $pms->get("$h:raw");  # ??? get() returns a scalar ???
     if ($#hdrs >= 0) {
       $hdr = join(" ", @hdrs);
     } else {
@@ -138,7 +139,7 @@ sub check_for_faraway_charset_in_headers {
 sub check_for_unique_subject_id {
   my ($self, $pms) = @_;
   local ($_);
-  $_ = lc $pms->get('Subject');
+  $_ = lc $pms->get('Subject','');
   study;
 
   my $id = 0;
@@ -265,7 +266,7 @@ sub check_illegal_chars {
 
   $header .= ":raw" unless ($header eq "ALL" || $header =~ /:raw$/);
   my $str = $pms->get($header);
-  return 0 unless $str;
+  return 0 unless defined $str && $str ne '';
 
   # avoid overlap between tests
   if ($header eq "ALL") {
@@ -295,8 +296,8 @@ sub gated_through_received_hdr_remover {
 
   my $txt = $pms->get("Mailing-List");
   if (defined $txt && $txt =~ /^contact \S+\@\S+\; run by ezmlm$/) {
-    my $dlto = $pms->get("Delivered-To");
-    my $rcvd = $pms->get("Received");
+    my $dlto = $pms->get("Delivered-To",'');
+    my $rcvd = $pms->get("Received",'');
 
     # ensure we have other indicative headers too
     if ($dlto =~ /^mailing list \S+\@\S+/ &&
@@ -306,13 +307,14 @@ sub gated_through_received_hdr_remover {
     }
   }
 
-  if ($pms->get("Received") !~ /\S/) {
+  my $rcvd = $pms->get("Received");
+  if (!defined $rcvd || $rcvd !~ /\S/) {
     # we have no Received headers!  These tests cannot run in that case
     return 1;
   }
 
   # MSN groups removes Received lines. thanks MSN
-  if ($pms->get("Received") =~ /from groups\.msn\.com \(\S+\.msn\.com /) {
+  if ($rcvd =~ /from groups\.msn\.com \(\S+\.msn\.com /) {
     return 1;
   }
 
@@ -328,7 +330,7 @@ sub _check_for_forged_hotmail_received_headers {
   $pms->{hotmail_addr_with_forged_hotmail_received} = 0;
   $pms->{hotmail_addr_but_no_hotmail_received} = 0;
 
-  my $rcvd = $pms->get('Received');
+  my $rcvd = $pms->get('Received','');
   $rcvd =~ s/\s+/ /gs;		# just spaces, simplify the regexp
 
   return if ($rcvd =~
@@ -340,7 +342,7 @@ sub _check_for_forged_hotmail_received_headers {
   my $ip = $pms->get('X-Originating-Ip');
   my $IP_ADDRESS = IP_ADDRESS;
 
-  if ($ip =~ /$IP_ADDRESS/) { $ip = 1; } else { $ip = 0; }
+  if (defined $ip && $ip =~ /$IP_ADDRESS/) { $ip = 1; } else { $ip = 0; }
 
   # Hotmail formats its received headers like this:
   # Received: from hotmail.com (f135.law8.hotmail.com [216.33.241.135])
@@ -363,7 +365,7 @@ sub _check_for_forged_hotmail_received_headers {
   } else {
     # check to see if From claimed to be @hotmail.com
     my $from = $pms->get('From:addr');
-    if ($from !~ /hotmail.com/) { return; }
+    if (!defined $from || $from !~ /\bhotmail\.com$/i) { return; }
     $pms->{hotmail_addr_but_no_hotmail_received} = 1;
   }
 }
@@ -386,21 +388,22 @@ sub check_for_no_hotmail_received_headers {
 sub check_for_msn_groups_headers {
   my ($self, $pms) = @_;
 
-  return 0 unless ($pms->get('To') =~ /<(\S+)\@groups\.msn\.com>/i);
+  my $to = $pms->get('To');
+  return 0 unless defined $to && $to =~ /<(\S+)\@groups\.msn\.com>/i;
   my $listname = $1;
 
-  # from Theo Van Dinter, see
-  # http://www.hughes-family.org/bugzilla/show_bug.cgi?id=591
+  # from Theo Van Dinter, see bug 591
   # Updated by DOS, based on messages from Bob Menschel, bug 4301
 
-  return 0 unless $pms->get('Received') =~ /from mail pickup service by ((?:p\d\d\.)groups\.msn\.com)\b/;
+  return 0 unless $pms->get('Received','') =~
+                 /from mail pickup service by ((?:p\d\d\.)groups\.msn\.com)\b/;
   my $server = $1;
 
   if ($listname =~ /^notifications$/) {
-    return 0 unless $pms->get('Message-Id') =~ /^<\S+\@$server>/;
+    return 0 unless $pms->get('Message-Id','') =~ /^<\S+\@$server>/;
   } else {
-    return 0 unless $pms->get('Message-Id') =~ /^<$listname-\S+\@groups\.msn\.com>/;
-    return 0 unless $pms->get('EnvelopeFrom:addr') =~ /$listname-bounce\@groups\.msn\.com/;
+    return 0 unless $pms->get('Message-Id','') =~ /^<$listname-\S+\@groups\.msn\.com>/;
+    return 0 unless $pms->get('EnvelopeFrom:addr','') =~ /$listname-bounce\@groups\.msn\.com/;
   }
   return 1;
 
@@ -453,14 +456,14 @@ sub check_for_forged_eudoramail_received_headers {
   my ($self, $pms) = @_;
 
   my $from = $pms->get('From:addr');
-  if ($from !~ /eudoramail.com/) { return 0; }
+  if (!defined $from || $from !~ /\beudoramail\.com$/i) { return 0; }
 
-  my $rcvd = $pms->get('Received');
+  my $rcvd = $pms->get('Received','');
   $rcvd =~ s/\s+/ /gs;		# just spaces, simplify the regexp
 
   my $ip = $pms->get('X-Sender-Ip');
   my $IP_ADDRESS = IP_ADDRESS;
-  if ($ip =~ /$IP_ADDRESS/) { $ip = 1; } else { $ip = 0; }
+  if (defined $ip && $ip =~ /$IP_ADDRESS/) { $ip = 1; } else { $ip = 0; }
 
   # Eudoramail formats its received headers like this:
   # Received: from Unknown/Local ([?.?.?.?]) by shared1-mail.whowhere.com;
@@ -483,13 +486,13 @@ sub check_for_forged_yahoo_received_headers {
   my ($self, $pms) = @_;
 
   my $from = $pms->get('From:addr');
-  if ($from !~ /yahoo\.com$/) { return 0; }
+  if (!defined $from || $from !~ /\byahoo\.com$/i) { return 0; }
 
-  my $rcvd = $pms->get('Received');
+  my $rcvd = $pms->get('Received','');
   
-  if ($pms->get("Resent-From") && $pms->get("Resent-To")) {
+  if ($pms->get("Resent-From",'') ne '' && $pms->get("Resent-To",'') ne '') {
     my $xrcvd = $pms->get("X-Received");
-    $rcvd = $xrcvd if $xrcvd;
+    $rcvd = $xrcvd  if defined $xrcvd && $xrcvd ne '';
   }
   $rcvd =~ s/\s+/ /gs;		# just spaces, simplify the regexp
 
@@ -526,7 +529,7 @@ sub check_for_forged_yahoo_received_headers {
   # <http://xent.com/pipermail/fork/> for an example.
   #
   if ($rcvd =~ /\bmailer\d+\.bulk\.scd\.yahoo\.com\b/
-                && $from =~ /\@reply\.yahoo\.com$/) { return 0; }
+                && $from =~ /\@reply\.yahoo\.com$/i) { return 0; }
 
   if ($rcvd =~ /by \w+\.\w+\.yahoo\.com \(\d+\.\d+\.\d+\/\d+\.\d+\.\d+\)(?: with ESMTP)? id \w+/) {
       # possibly sent from "mail this story to a friend"
@@ -540,16 +543,17 @@ sub check_for_forged_juno_received_headers {
   my ($self, $pms) = @_;
 
   my $from = $pms->get('From:addr');
-  if($from !~ /\bjuno.com/) { return 0; }
+  if(!defined $from || $from !~ /\bjuno\.com$/i) { return 0; }
 
   if($self->gated_through_received_hdr_remover($pms)) { return 0; }
 
-  my $xmailer = $pms->get('X-Mailer');
   my $xorig = $pms->get('X-Originating-IP');
-  my $rcvd = $pms->get('Received');
+  my $xmailer = $pms->get('X-Mailer','');
+  my $rcvd = $pms->get('Received','');
   my $IP_ADDRESS = IP_ADDRESS;
 
-  if (!$xorig) {  # New style Juno has no X-Originating-IP header, and other changes
+  if (defined $xorig && $xorig ne '') {
+    # New style Juno has no X-Originating-IP header, and other changes
     if($rcvd !~ /from.*\b(?:juno|untd)\.com.*[\[\(]$IP_ADDRESS[\]\)].*by/
         && $rcvd !~ / cookie\.(?:juno|untd)\.com /) { return 1; }
     if($xmailer !~ /Juno /) { return 1; }
@@ -570,7 +574,7 @@ sub check_for_forged_juno_received_headers {
 sub check_for_matching_env_and_hdr_from {
   my ($self, $pms) =@_;
   # two blank headers match so don't bother checking
-  return (lc $pms->get('EnvelopeFrom:addr') eq lc $pms->get('From:addr'));
+  return (lc $pms->get('EnvelopeFrom:addr','') eq lc $pms->get('From:addr',''));
 }
 
 sub sorted_recipients {
@@ -604,7 +608,7 @@ sub _check_recipients {
 
   # ToCc: pseudo-header works best, but sometimes Bcc: is better
   for ('ToCc', 'Bcc') {
-    my $to = $pms->get($_);	# get recipients
+    my $to = $pms->get($_,'');	# get recipients
     $to =~ s/\(.*?\)//g;	# strip out the (comments)
     push(@inputs, ($to =~ m/([\w.=-]+\@\w+(?:[\w.-]+\.)+\w+)/g));
     last if scalar(@inputs) >= TOCC_SIMILAR_COUNT;
@@ -648,8 +652,8 @@ sub check_for_missing_to_header {
   my ($self, $pms) = @_;
 
   my $hdr = $pms->get('To');
-  $hdr ||= $pms->get('Apparently-To');
-  return 1 if ($hdr eq '');
+  $hdr = $pms->get('Apparently-To')  if !defined $hdr || $hdr eq '';
+  return 1  if !defined $hdr || $hdr eq '';
 
   return 0;
 }
@@ -658,7 +662,7 @@ sub check_for_forged_gw05_received_headers {
   my ($self, $pms) = @_;
   local ($_);
 
-  my $rcv = $pms->get('Received');
+  my $rcv = $pms->get('Received','');
 
   # e.g.
   # Received: from mail3.icytundra.com by gw05 with ESMTP; Thu, 21 Jun 2001 02:28:32 -0400
@@ -737,7 +741,7 @@ sub _get_received_header_times {
 
   my (@received);
   my $received = $pms->get('Received');
-  if (defined($received) && length($received)) {
+  if (defined $received && $received ne '') {
     @received = grep {$_ =~ m/\S/} (split(/\n/,$received));
   }
   # if we have no Received: headers, chances are we're archived mail
@@ -886,7 +890,7 @@ sub _check_date_diff {
 
 sub subject_is_all_caps {
    my ($self, $pms) = @_;
-   my $subject = $pms->get('Subject');
+   my $subject = $pms->get('Subject','');
 
    $subject =~ s/^\s+//;
    $subject =~ s/\s+$//;
@@ -897,7 +901,7 @@ sub subject_is_all_caps {
    # now, check to see if the subject is encoded using a non-ASCII charset.
    # If so, punt on this test to avoid FPs.  We just list the known charsets
    # this test will FP on, here.
-   my $subjraw = $pms->get('Subject:raw');
+   my $subjraw = $pms->get('Subject:raw','');
    my $CLTFAC = Mail::SpamAssassin::Constants::CHARSETS_LIKELY_TO_FP_AS_CAPS;
    if ($subjraw =~ /=\?${CLTFAC}\?/i) {
      return 0;
@@ -910,9 +914,9 @@ sub check_for_to_in_subject {
   my ($self, $pms, $test) = @_;
 
   my $full_to = $pms->get('To:addr');
-  return 0 unless $full_to;
+  return 0 unless defined $full_to && $full_to ne '';
 
-  my $subject = $pms->get('Subject');
+  my $subject = $pms->get('Subject','');
 
   if ($test eq "address") {
     return $subject =~ /\b\Q$full_to\E\b/i;	# "user@domain.com"
@@ -939,7 +943,8 @@ sub check_outlook_message_id {
   local ($_);
 
   my $id = $pms->get('MESSAGEID');
-  return 0 if $id !~ /^<[0-9a-f]{4}([0-9a-f]{8})\$[0-9a-f]{8}\$[0-9a-f]{8}\@/;
+  return 0 if !defined $id ||
+              $id !~ /^<[0-9a-f]{4}([0-9a-f]{8})\$[0-9a-f]{8}\$[0-9a-f]{8}\@/;
 
   my $timetoken = hex($1);
   my $x = 0.0023283064365387;
@@ -947,13 +952,13 @@ sub check_outlook_message_id {
 
   my $fudge = 250;
 
-  $_ = $pms->get('Date');
+  $_ = $pms->get('Date','');
   $_ = Mail::SpamAssassin::Util::parse_rfc822_date($_) || 0;
   my $expected = int (($_ * $x) + $y);
   my $diff = $timetoken - $expected;
   return 0 if (abs($diff) < $fudge);
 
-  $_ = $pms->get('Received');
+  $_ = $pms->get('Received','');
   /(\s.?\d+ \S\S\S \d+ \d+:\d+:\d+ \S+).*?$/;
   $_ = Mail::SpamAssassin::Util::parse_rfc822_date($_) || 0;
   $expected = int(($_ * $x) + $y);
@@ -967,14 +972,14 @@ sub check_messageid_not_usable {
   local ($_);
 
   # Lyris eats message-ids.  also some ezmlm, I think :(
-  $_ = $pms->get("List-Unsubscribe");
+  $_ = $pms->get("List-Unsubscribe",'');
   return 1 if (/<mailto:(?:leave-\S+|\S+-unsubscribe)\@\S+>$/);
 
   # ezmlm again
   if($self->gated_through_received_hdr_remover($pms)) { return 1; }
 
   # Allen notes this as 'Wacky sendmail version?'
-  $_ = $pms->get("Received");
+  $_ = $pms->get("Received",'');
   return 1 if /\/CWT\/DCE\)/;
 
   # Apr  2 2003 jm: iPlanet rewrites lots of stuff, including Message-IDs
@@ -994,7 +999,7 @@ sub check_header_count_range {
 sub check_unresolved_template {
   my ($self, $pms) = @_;
 
-  my $all = $pms->get('ALL');	# cached access
+  my $all = $pms->get('ALL','');  # cached access
   $all =~ s/\n[ \t]+/ /gs;	# fix continuation lines
   
   for my $header (split(/\n/, $all)) {
@@ -1011,8 +1016,8 @@ sub check_unresolved_template {
 sub check_ratware_name_id {
   my ($self, $pms) = @_;
 
-  my $mid = $pms->get('MESSAGEID');
-  my $from = $pms->get('From');
+  my $mid = $pms->get('MESSAGEID','');
+  my $from = $pms->get('From','');
   if ($mid =~ m/<[A-Z]{28}\.([^>]+?)>/) {
      if ($from =~ m/\"[^\"]+\"\s*<\Q$1\E>/) {
        return 1;
@@ -1027,8 +1032,9 @@ sub check_ratware_envelope_from {
   my $to = $pms->get('To:addr');
   my $from = $pms->get('EnvelopeFrom:addr');
 
-  return 0 unless ($to && $from);
-  return 0 if ($from =~ /^SRS\d=/);
+  return 0 unless defined $from && $from ne '';
+  return 0 unless defined $to   && $to   ne '';
+  return 0 if $from =~ /^SRS\d=/;
 
   if ($to =~ /^([^@]+)@(.+)$/) {
     my($user,$dom) = ($1,$2);

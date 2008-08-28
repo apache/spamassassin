@@ -75,7 +75,7 @@ sub check_for_faraway_charset {
 
   return 0 if grep { $_ eq "all" } @locales;
 
-  $type = get_charset_from_ct_line ($type);
+  $type = get_charset_from_ct_line($type)  if defined $type;
 
   if (defined $type &&
     !Mail::SpamAssassin::Locales::is_charset_ok_for_locales
@@ -428,10 +428,8 @@ sub body_charset_is_likely_to_fp {
   $self->_check_attachments($pms) unless exists $pms->{mime_checked_attachments};
   my @charsets;
   my $type = $pms->get('Content-Type');
-  $type = get_charset_from_ct_line ($type);
-  if (defined $type) {
-    push (@charsets, $type);
-  }
+  $type = get_charset_from_ct_line($type)  if defined $type;
+  push (@charsets, $type)  if defined $type;
   if (defined $pms->{mime_html_charsets}) {
     push (@charsets, split(' ', $pms->{mime_html_charsets}));
   }
@@ -447,6 +445,7 @@ sub body_charset_is_likely_to_fp {
 
 sub get_charset_from_ct_line {
   my $type = shift;
+  if (!defined $type) { return undef; }
   if ($type =~ /charset="([^"]+)"/i) { return $1; }
   if ($type =~ /charset='([^']+)'/i) { return $1; }
   if ($type =~ /charset=(\S+)/i) { return $1; }

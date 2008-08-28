@@ -308,7 +308,7 @@ sub _check_spf {
     $scanner->{checked_for_received_spf_header} = 1;
     dbg("spf: checking to see if the message has a Received-SPF header that we can use");
 
-    my @internal_hdrs = split("\n", $scanner->get('ALL-INTERNAL'));
+    my @internal_hdrs = split("\n", $scanner->get('ALL-INTERNAL',''));
     unless ($scanner->{conf}->{use_newest_received_spf_header}) {
       # look for the LAST (earliest in time) header, it'll be the most accurate
       @internal_hdrs = reverse(@internal_hdrs);
@@ -658,7 +658,7 @@ sub _get_sender {
     # from the Return-Path, X-Envelope-From, or whatever header.
     # it's better to get it from Received though, as that is updated
     # hop-by-hop.
-    $sender = $scanner->get ("EnvelopeFrom:addr");
+    $sender = $scanner->get("EnvelopeFrom:addr",'');
   }
 
   if (!$sender) {

@@ -116,12 +116,12 @@ sub message_accreditor_tag {
   my ($self, $pms) = @_;
   my %acctags;
 
-  if ($pms->get('EnvelopeFrom:addr') =~ /[@.]a--([a-z0-9]{3,})\./i) {
+  if ($pms->get('EnvelopeFrom:addr','') =~ /[@.]a--([a-z0-9]{3,})\./i) {
     (my $tag = $1) =~ tr/A-Z/a-z/;
     $acctags{$tag} = -1;
   }
   my $accreditor_field = $pms->get('Accreditor');
-  if (defined($accreditor_field)) {
+  if (defined $accreditor_field) {
     my @accreditors = split(/,/, $accreditor_field);
     foreach my $accreditor (@accreditors) {
       my @terms = split(' ', $accreditor);
@@ -171,7 +171,7 @@ sub check_rbl_backend {
   my @originating;
   for my $header ('X-Yahoo-Post-IP', 'X-Originating-IP', 'X-Apparently-From', 'X-SenderIP') {
     my $str = $pms->get($header);
-    next unless $str;
+    next unless defined $str && $str ne '';
     push (@originating, ($str =~ m/($IP_ADDRESS)/g));
   }
 
@@ -310,7 +310,7 @@ sub _check_rbl_addresses {
 
   my %hosts;
   for my $address (@addresses) {
-    if ($address =~ m/\@(\S+\.\S+)/) {
+    if (defined $address && $address =~ m/ \@ ( [^\@\s]+ \. [^\@\s]+ )/x) {
       $hosts{lc($1)} = 1;
     }
   }
@@ -338,7 +338,7 @@ sub check_dns_sender {
     next unless defined $from;
 
     $from =~ tr/././s;		# bug 3366
-    if ($from =~ /\@(\S+\.\S+)/) {
+    if ($from =~ m/ \@ ( [^\@\s]+ \. [^\@\s]+ )/x ) {
       $host = lc($1);
       last;
     }

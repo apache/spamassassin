@@ -464,7 +464,10 @@ sub do_head_tests {
   my ($self, $pms, $priority) = @_;
   # hash to hold the rules, "header\tdefault value" => rulename
   my %ordered;
-  my %testcode;
+  my %testcode;  # tuples: [op_type, op, arg]
+     # op_type: 1=infix, 0:prefix/function
+     # op: operator, e.g. '=~', '!~', or a function like 'defined'
+     # arg: additional argument like a regexp for a patt matching op
 
   $self->run_generic_tests ($pms, $priority,
     consttype => $Mail::SpamAssassin::Conf::TYPE_HEAD_TESTS,
@@ -474,23 +477,30 @@ sub do_head_tests {
     loop_body => sub
   {
     my ($self, $pms, $conf, $rulename, $rule, %opts) = @_;
-    my $def = '';
+    my $def;
     $rule = untaint_var($rule);  # presumably checked
-    my ($hdrname, $testtype, $pat) =
-        $rule =~ /^\s*(\S+)\s*(\=|\!)\~\s*(\S.*?\S)\s*$/;
-
-    if (!defined $pat) {
-      warn "rules: invalid rule: $rulename\n";
+    my ($hdrname, $op, $op_infix, $pat);
+    if ($rule =~ /^\s* (\S+) \s* ([=!]~) \s* (\S .*? \S) \s*$/x) {
+      ($hdrname, $op, $pat) = ($1,$2,$3);  # e.g.: Subject =~ /patt/
+      $op_infix = 1;
+      if (!defined $pat) {
+        warn "rules: invalid rule: $rulename\n";
+        $pms->{rule_errors}++;
+        next;
+      }
+      if ($pat =~ s/\s+\[if-unset:\s+(.+)\]\s*$//) { $def = $1 }
+    } elsif ($rule =~ /^\s* (\S+) \s* \( \s* (\S+) \s* \) \s*$/x) {
+      # implements exists:name_of_header (and similar function or prefix ops)
+      ($hdrname, $op) = ($2,$1);  # e.g.: !defined(Subject)
+      $op_infix = 0;
+    } else {
+      warn "rules: unrecognized rule: $rulename\n";
       $pms->{rule_errors}++;
       next;
     }
 
-    if ($pat =~ s/\s+\[if-unset:\s+(.+)\]\s*$//) { $def = $1; }
-
-    $hdrname =~ s/#/[HASH]/g;                # avoid probs with eval below
-    $def =~ s/#/[HASH]/g;
-
-    push(@{$ordered{"$hdrname\t$def"}}, $rulename);
+    push(@{ $ordered{$hdrname . (!defined $def ? '' : "\t".$def)} },
+         $rulename);
 
     next if ($opts{doing_user_rules} &&
             !$self->is_user_rule_sub($rulename.'_head_test'));
@@ -498,25 +508,33 @@ sub do_head_tests {
     # caller can set this member of the Mail::SpamAssassin object to
     # override this; useful for profiling rule runtimes, although I think
     # the HitFreqsRuleTiming.pm plugin is probably better nowadays anyway
-      if ($self->{main}->{use_rule_subs}) {
+    if ($self->{main}->{use_rule_subs}) {
+      my $expr;
+      if ($op =~ /^!?[A-Za-z_]+$/) {  # function or its negation
+        $expr = $op . '($text)';
+      } else {  # infix operator
+        $expr = '$text ' . $op . ' ' . $pat;
+        $expr .= 'g'  if $op eq '=~' || $op eq '!~';
+      }
       $self->add_temporary_method ($rulename.'_head_test', '{
           my($self,$text) = @_;
           '.$self->hash_line_for_rule($pms, $rulename).'
-	    while ($text '.$testtype.'~ '.$pat.'g) {
-            $self->got_hit(q#'.$rulename.'#, "", ruletype => "header");
+	    while ('.$expr.') {
+            $self->got_hit(q{'.$rulename.'}, "", ruletype => "header");
             '. $self->hit_rule_plugin_code($pms, $rulename, "header", "last") . '
             }
         }');
     }
     else {
       # store for use below
-      $testcode{$rulename} = $testtype.'~ '.$pat;
+      $testcode{$rulename} = [$op_infix, $op, $pat];
     }
   },
     pre_loop_body => sub
   {
     my ($self, $pms, $conf, %opts) = @_;
     $self->add_evalstr ('
+      no warnings q(uninitialized);
       my $hval;
     ');
   },
@@ -527,38 +545,50 @@ sub do_head_tests {
     while(my($k,$v) = each %ordered) {
       my($hdrname, $def) = split(/\t/, $k, 2);
       $self->add_evalstr ('
-        $hval = $self->get(q#'.$hdrname.'#, q#'.$def.'#);
+        $hval = $self->get(q{'.$hdrname.'}' .
+                           (!defined($def) ? '' : ', q{'.$def.'}') . ');
       ');
       foreach my $rulename (@{$v}) {
         if ($self->{main}->{use_rule_subs}) {
           $self->add_evalstr ('
-            if ($scoresptr->{q#'.$rulename.'#}) {
+            if ($scoresptr->{q{'.$rulename.'}}) {
               '.$rulename.'_head_test($self, $hval);
               '.$self->ran_rule_plugin_code($rulename, "header").'
             }
           ');
         }
         else {
-          my $testcode = $testcode{$rulename};
+          my $tc_ref = $testcode{$rulename};
+          my ($op_infix, $op, $pat);
+          ($op_infix, $op, $pat) = @$tc_ref  if defined $tc_ref;
 
           my $posline = '';
           my $ifwhile = 'if';
           my $hitdone = '';
           my $matchg = '';
-          if (($conf->{tflags}->{$rulename}||'') =~ /\bmultiple\b/)
-          {
-            $posline = 'pos $hval = 0;';
-            $ifwhile = 'while';
-            $hitdone = 'last';
-            $matchg = 'g';
+
+          my $expr;
+          if (!$op_infix) {  # function or its negation
+            $expr = $op . '($hval)';
+          }
+          else {  # infix operator
+            if ( ($conf->{tflags}->{$rulename}||'') =~ /\bmultiple\b/ &&
+                 ($op eq '=~' || $op eq '!~') )  # a pattern matching operator
+            {
+              $posline = 'pos $hval = 0;';
+              $ifwhile = 'while';
+              $hitdone = 'last';
+              $matchg = 'g';
+            }
+            $expr = '$hval ' . $op . ' ' . $pat . $matchg;
           }
 
           $self->add_evalstr ('
-          if ($scoresptr->{q#'.$rulename.'#}) {
+          if ($scoresptr->{q{'.$rulename.'}}) {
             '.$posline.'
             '.$self->hash_line_for_rule($pms, $rulename).'
-            '.$ifwhile.' ($hval '.$testcode.$matchg.') {
-              $self->got_hit(q#'.$rulename.'#, "", ruletype => "header");
+            '.$ifwhile.' ('.$expr.') {
+              $self->got_hit(q{'.$rulename.'}, "", ruletype => "header");
               '.$self->hit_rule_plugin_code($pms, $rulename, "header", $hitdone).'
             }
             '.$self->ran_rule_plugin_code($rulename, "header").'

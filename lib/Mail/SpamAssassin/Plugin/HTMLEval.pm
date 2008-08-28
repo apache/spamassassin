@@ -148,7 +148,7 @@ sub html_title_subject_ratio {
   my ($self, $pms, undef, $ratio) = @_;
 
   my $subject = $pms->get('Subject');
-  if (! $subject) {
+  if (!defined $subject || $subject eq '') {
     return 0;
   }
   my $max = 0;

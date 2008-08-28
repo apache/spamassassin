@@ -401,7 +401,7 @@ sub dcc_query {
 
   # short-circuit if there's already a X-DCC header with value of
   # "bulk" from an upstream DCC check
-  if ($permsgstatus->get('ALL') =~
+  if ($permsgstatus->get('ALL','') =~
       /^(X-DCC-([^:]{1,80})?-?Metrics:.*bulk.*)$/m) {
     $permsgstatus->{dcc_response} = $1;
     return;
