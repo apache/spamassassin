@@ -111,9 +111,9 @@ sub check_for_illegal_ip {
 sub sent_by_applemail {
   my ($self, $pms) = @_;
 
-  return 0 unless ($pms->get("MIME-Version",'') =~ /Apple Message framework/);
-  return 0 unless ($pms->get("X-Mailer",'') =~ /^Apple Mail \(\d+\.\d+\)/);
-  return 0 unless ($pms->get("Message-Id",'') =~
+  return 0 unless ($pms->get("MIME-Version") =~ /Apple Message framework/);
+  return 0 unless ($pms->get("X-Mailer") =~ /^Apple Mail \(\d+\.\d+\)/);
+  return 0 unless ($pms->get("Message-Id") =~
 		   /^<[A-F0-9]+(?:-[A-F0-9]+){4}\@\S+.\S+>$/);
   return 1;
 }
@@ -209,7 +209,7 @@ sub check_for_from_domain_in_received_headers {
   }
 
   my $from = $pms->get('From:addr');
-  if (!defined $from || $from !~ /\b\Q$domain\E/i) {
+  if ($from !~ /\b\Q$domain\E/i) {
       # '0e0' is Perl idiom for "true but zero":
       $pms->{from_domain_in_received}->{$domain} = '0e0';
       return 0;

@@ -239,7 +239,7 @@ sub _check_from_in_default_whitelist {
 sub check_mailfrom_matches_rcvd {
   my ($self, $pms) = @_;
   my $sender = $pms->get("EnvelopeFrom:addr");
-  return 0  if !defined $sender || $sender eq '';
+  return 0  if $sender eq '';
   return $self->_check_addr_matches_rcvd($pms,$sender);
 }
 

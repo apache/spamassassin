@@ -116,11 +116,11 @@ sub message_accreditor_tag {
   my ($self, $pms) = @_;
   my %acctags;
 
-  if ($pms->get('EnvelopeFrom:addr','') =~ /[@.]a--([a-z0-9]{3,})\./i) {
+  if ($pms->get('EnvelopeFrom:addr') =~ /[@.]a--([a-z0-9]{3,})\./i) {
     (my $tag = $1) =~ tr/A-Z/a-z/;
     $acctags{$tag} = -1;
   }
-  my $accreditor_field = $pms->get('Accreditor');
+  my $accreditor_field = $pms->get('Accreditor',undef);
   if (defined $accreditor_field) {
     my @accreditors = split(/,/, $accreditor_field);
     foreach my $accreditor (@accreditors) {
@@ -170,7 +170,7 @@ sub check_rbl_backend {
   my $IP_ADDRESS = IP_ADDRESS;
   my @originating;
   for my $header ('X-Yahoo-Post-IP', 'X-Originating-IP', 'X-Apparently-From', 'X-SenderIP') {
-    my $str = $pms->get($header);
+    my $str = $pms->get($header,undef);
     next unless defined $str && $str ne '';
     push (@originating, ($str =~ m/($IP_ADDRESS)/g));
   }
@@ -299,7 +299,7 @@ sub check_rbl_from_host {
 # this only checks the address host name and not the domain name because
 # using the domain name had much worse results for dsn.rfc-ignorant.org
 sub check_rbl_envfrom {
-  _check_rbl_addresses(@_, $_[1]->get('EnvelopeFrom:addr'));
+  _check_rbl_addresses(@_, $_[1]->get('EnvelopeFrom:addr',undef));
 }
 
 sub _check_rbl_addresses {
@@ -334,7 +334,7 @@ sub check_dns_sender {
   my ($self, $pms, $rule) = @_;
 
   my $host;
-  for my $from ($pms->get('EnvelopeFrom:addr')) {
+  for my $from ($pms->get('EnvelopeFrom:addr',undef)) {
     next unless defined $from;
 
     $from =~ tr/././s;		# bug 3366

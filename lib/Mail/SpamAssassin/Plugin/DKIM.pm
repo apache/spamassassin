@@ -322,7 +322,7 @@ sub _check_dkim_signature {
   $scan->{dkim_valid_author_sig} = 0;
   $scan->{dkim_key_testing} = 0;
   $scan->{dkim_author_address} =
-    $scan->get('from:addr')  if !defined $scan->{dkim_author_address};
+    $scan->get('from:addr',undef)  if !defined $scan->{dkim_author_address};
 
 # my $verifier = Mail::DKIM::Verifier->new();         # per new docs
   my $verifier = Mail::DKIM::Verifier->new_object();  # old style???
@@ -456,7 +456,7 @@ sub _check_dkim_policy {
   $scan->{dkim_signall} = 0;
   $scan->{dkim_policy_testing} = 0;
   $scan->{dkim_author_address} =
-    $scan->get('from:addr')  if !defined $scan->{dkim_author_address};
+    $scan->get('from:addr',undef)  if !defined $scan->{dkim_author_address};
 
   return unless $self->_dkim_load_modules();
 
@@ -532,7 +532,7 @@ sub _check_dkim_whitelist {
 
   my $author = $scan->{dkim_author_address};
   if (!defined $author) {
-    $scan->{dkim_author_address} = $author = $scan->get('from:addr');
+    $scan->{dkim_author_address} = $author = $scan->get('from:addr',undef);
   }
   if (!defined $author || $author eq '') {
     dbg("dkim: check_dkim_whitelist: could not find author address");

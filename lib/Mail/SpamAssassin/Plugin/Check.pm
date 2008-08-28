@@ -545,8 +545,8 @@ sub do_head_tests {
     while(my($k,$v) = each %ordered) {
       my($hdrname, $def) = split(/\t/, $k, 2);
       $self->add_evalstr ('
-        $hval = $self->get(q{'.$hdrname.'}' .
-                           (!defined($def) ? '' : ', q{'.$def.'}') . ');
+        $hval = $self->get(q{'.$hdrname.'}, ' .
+                           (!defined($def) ? 'undef' : 'q{'.$def.'}') . ');
       ');
       foreach my $rulename (@{$v}) {
         if ($self->{main}->{use_rule_subs}) {

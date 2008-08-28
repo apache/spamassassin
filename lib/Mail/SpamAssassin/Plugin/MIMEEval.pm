@@ -69,7 +69,7 @@ sub are_more_high_bits_set {
 sub check_for_faraway_charset {
   my ($self, $pms, $body) = @_;
 
-  my $type = $pms->get('Content-Type');
+  my $type = $pms->get('Content-Type',undef);
 
   my @locales = Mail::SpamAssassin::Util::get_my_locales($self->{main}->{conf}->{ok_locales});
 
@@ -106,7 +106,7 @@ sub check_for_mime_html {
   my ($self, $pms) = @_;
 
   my $ctype = $pms->get('Content-Type');
-  return 1 if (defined($ctype) && $ctype =~ m@^text/html@i);
+  return 1 if $ctype =~ m{^text/html}i;
 
   $self->_check_attachments($pms) unless exists $pms->{mime_body_html_count};
   return ($pms->{mime_body_html_count} > 0);
@@ -117,7 +117,7 @@ sub check_for_mime_html_only {
   my ($self, $pms) = @_;
 
   my $ctype = $pms->get('Content-Type');
-  return 1 if (defined($ctype) && $ctype =~ m@^text/html@i);
+  return 1 if $ctype =~ m{^text/html}i;
 
   $self->_check_attachments($pms) unless exists $pms->{mime_body_html_count};
   return ($pms->{mime_body_html_count} > 0 &&
@@ -427,7 +427,7 @@ sub body_charset_is_likely_to_fp {
   #
   $self->_check_attachments($pms) unless exists $pms->{mime_checked_attachments};
   my @charsets;
-  my $type = $pms->get('Content-Type');
+  my $type = $pms->get('Content-Type',undef);
   $type = get_charset_from_ct_line($type)  if defined $type;
   push (@charsets, $type)  if defined $type;
   if (defined $pms->{mime_html_charsets}) {
