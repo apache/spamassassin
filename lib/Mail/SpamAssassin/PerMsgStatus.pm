@@ -982,7 +982,7 @@ sub _replace_tags {
 	my $full = $1;
         my $tag = $2;
         my $result = $self->_get_tag($tag,$3);
-        (defined $result) ? $result : $full;
+        defined $result ? $result : $full;
       }ge;
 
   return $text;
@@ -1119,7 +1119,7 @@ sub _get_tag {
 
   # tag data also comes from $self->{tag_data}->{TAG}
 
-  $tag = "" unless defined $tag; # can be "0", so use defined test
+  $tag = "" unless defined $tag; # can be "0", so use a defined test
 
   %tags = ( YESNO     => sub {    $self->_get_tag_value_for_yesno() },
   
@@ -1214,7 +1214,7 @@ sub _get_tag {
 
 	    HEADER => sub {
 	      my $hdr = shift || return;
-	      return $self->get($hdr);
+	      return $self->get($hdr,undef);
 	    },
 
             TIMING => sub {
@@ -1616,9 +1616,10 @@ sub get {
     $cache->{$_[1]} = $found;
   }
   # if the requested header wasn't found, we should return a default value
-  # as specified by the caller; if defval argument is present it represents
-  # a default value even if undef
-  return (defined $found ? $found : $_[2]);
+  # as specified by the caller: if defval argument is present it represents
+  # a default value even if undef; if defval argument is absent a default
+  # value is an empty string for upwards compatibility
+  return (defined $found ? $found : @_ > 2 ? $_[2] : '');
 }
 
 ###########################################################################
@@ -1781,8 +1782,8 @@ sub get_uri_detail_list {
   my %parsed = map { $_ => 'parsed' } $self->_get_parsed_uri_list();
 
   # Look for the domain in DK/DKIM headers
-  my $dk = join(" ", grep {defined} ( $self->get('DomainKey-Signature'),
-                                      $self->get('DKIM-Signature') ));
+  my $dk = join(" ", grep {defined} ( $self->get('DomainKey-Signature',undef),
+                                      $self->get('DKIM-Signature',undef) ));
   while ($dk =~ /\bd\s*=\s*([^;]+)/g) {
     my $dom = $1;
     $dom =~ s/\s+//g;
@@ -2244,7 +2245,7 @@ sub get_envelope_from {
   # This will prevent us falling through and picking up inappropriate headers.
   if (defined $self->{conf}->{envelope_sender_header}) {
     # make sure we get the most recent copy - there can be only one EnvelopeSender.
-    $envf = $self->get($self->{conf}->{envelope_sender_header}.":addr");
+    $envf = $self->get($self->{conf}->{envelope_sender_header}.":addr",undef);
     # ok if it contains an "@" sign, or is "" (ie. "<>" without the < and >)
     goto ok if defined $envf && ($envf =~ /\@/ || $envf =~ /^$/);
     # Warn them if it's configured, but not there or not usable.
@@ -2289,8 +2290,8 @@ sub get_envelope_from {
   # lines, we cannot trust any Envelope-From headers, since they're likely to
   # be incorrect fetchmail guesses.
 
-  if ($self->get("X-Sender",'') =~ /\@/) {
-    my $rcvd = join(' ', $self->get("Received",''));
+  if ($self->get("X-Sender") =~ /\@/) {
+    my $rcvd = join(' ', $self->get("Received"));
     if ($rcvd =~ /\(fetchmail/) {
       dbg("message: X-Sender and fetchmail signatures found, cannot trust envelope-from");
       return;
@@ -2298,10 +2299,10 @@ sub get_envelope_from {
   }
 
   # procmailrc notes this (we now recommend adding it to Received instead)
-  if ($envf = $self->get("X-Envelope-From",'')) {
+  if ($envf = $self->get("X-Envelope-From")) {
     # heuristic: this could have been relayed via a list which then used
     # a *new* Envelope-from.  check
-    if ($self->get("ALL",'') =~ /(?:^|\n)Received:\s.*\nX-Envelope-From:\s/s) {
+    if ($self->get("ALL") =~ /(?:^|\n)Received:\s.*\nX-Envelope-From:\s/s) {
       dbg("message: X-Envelope-From header found after 1 or more Received lines, cannot trust envelope-from");
       return;
     } else {
@@ -2310,10 +2311,10 @@ sub get_envelope_from {
   }
 
   # qmail, new-inject(1)
-  if ($envf = $self->get("Envelope-Sender",'')) {
+  if ($envf = $self->get("Envelope-Sender")) {
     # heuristic: this could have been relayed via a list which then used
     # a *new* Envelope-from.  check
-    if ($self->get("ALL",'') =~ /(?:^|\n)Received:\s.*\nEnvelope-Sender:\s/s) {
+    if ($self->get("ALL") =~ /(?:^|\n)Received:\s.*\nEnvelope-Sender:\s/s) {
       dbg("message: Envelope-Sender header found after 1 or more Received lines, cannot trust envelope-from");
     } else {
       goto ok;
@@ -2327,10 +2328,10 @@ sub get_envelope_from {
   #   data.  This use of return-path is required; mail systems MUST support
   #   it.  The return-path line preserves the information in the <reverse-
   #   path> from the MAIL command.
-  if ($envf = $self->get("Return-Path",'')) {
+  if ($envf = $self->get("Return-Path")) {
     # heuristic: this could have been relayed via a list which then used
     # a *new* Envelope-from.  check
-    if ($self->get("ALL",'') =~ /(?:^|\n)Received:\s.*\nReturn-Path:\s/s) {
+    if ($self->get("ALL") =~ /(?:^|\n)Received:\s.*\nReturn-Path:\s/s) {
       dbg("message: Return-Path header found after 1 or more Received lines, cannot trust envelope-from");
     } else {
       goto ok;
@@ -2370,7 +2371,7 @@ sub get_all_hdrs_in_rcvd_index_range {
 
   my $cur_rcvd_index = -1;  # none found yet
   my $result = '';
-  foreach my $hdr (split("\n", $self->get('ALL',''))) {
+  foreach my $hdr (split("\n", $self->get('ALL'))) {
     if ($hdr =~ /^received: /i) {
       $cur_rcvd_index++;
       next if (defined $start_rcvd && !$include_start_rcvd &&
@@ -2451,7 +2452,7 @@ sub all_from_addrs {
   my @addrs;
 
   # Resent- headers take priority, if present. see bug 672
-  my $resent = $self->get('Resent-From');
+  my $resent = $self->get('Resent-From',undef);
   if (defined $resent && $resent =~ /\S/) {
     @addrs = $self->{main}->find_all_addrs_in_line ($resent);
   }
@@ -2465,7 +2466,7 @@ sub all_from_addrs {
     # bug 3366: some addresses come in as 'foo@bar...', which is invalid.
     # so deal with the multiple periods.
     ## no critic
-    @addrs = map { tr/././s; $_ } grep { defined($_) && $_ ne '' }
+    @addrs = map { tr/././s; $_ } grep { $_ ne '' }
         ($self->get('From:addr'),		# std
          $self->get('Envelope-Sender:addr'),	# qmail: new-inject(1)
          $self->get('Resent-Sender:addr'),	# procmailrc manpage
@@ -2491,8 +2492,7 @@ sub all_to_addrs {
   my @addrs;
 
   # Resent- headers take priority, if present. see bug 672
-  my $resent = join('', grep {defined} ($self->get('Resent-To'),
-                                        $self->get('Resent-Cc')));
+  my $resent = join('', $self->get('Resent-To'), $self->get('Resent-Cc'));
   if ($resent =~ /\S/) {
     @addrs = $self->{main}->find_all_addrs_in_line($resent);
   } else {
@@ -2501,7 +2501,7 @@ sub all_to_addrs {
     # since it does not add a helpful header like exim, qmail
     # or Postfix do.
     #
-    my $rcvd = $self->get('Received','');
+    my $rcvd = $self->get('Received');
     $rcvd =~ s/\n[ \t]+/ /gs;
     $rcvd =~ s/\n+/\n/gs;
 
@@ -2512,7 +2512,7 @@ sub all_to_addrs {
     }
 
     @addrs = $self->{main}->find_all_addrs_in_line (
-       join('', grep { defined($_) && $_ ne '' } (
+       join('',
 	 join(" ", @rcvdaddrs)."\n",
          $self->get('To'),			# std 
   	 $self->get('Apparently-To'),		# sendmail, from envelope
@@ -2525,7 +2525,7 @@ sub all_to_addrs {
 	 $self->get('X-Original-To'),		# procmail quick start
 	 $self->get('X-Rcpt-To'),		# procmail quick start
 	 $self->get('X-Real-To'),		# procmail quick start
-	 $self->get('Cc'))));			# std
+	 $self->get('Cc')));			# std
     # those are taken from various sources; thanks to Nancy McGough, who
     # noted some in <http://www.ii.com/internet/robots/procmail/qs/#envelope>
   }

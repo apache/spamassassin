@@ -339,7 +339,7 @@ sub check_from_in_auto_whitelist {
     my $timer = $self->{main}->time_method("total_awl");
 
     my $from = lc $pms->get('From:addr');
-    return 0 unless defined $from && $from =~ /\S/;
+    return 0 unless $from =~ /\S/;
 
     # find the earliest usable "originating IP".  ignore private nets
     my $origip;
