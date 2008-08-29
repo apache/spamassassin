@@ -1285,18 +1285,6 @@ sub compile_now {
   my ($self, $use_user_prefs, $deal_with_userstate) = @_;
 
   my $timer = $self->time_method("compile_now");
-  # tell plugins we are here
-  $self->call_plugins("compile_now_start",
-		      { use_user_prefs => $use_user_prefs,
-			keep_userstate => $deal_with_userstate});
-
-  # note: this may incur network access. Good.  We want to make sure
-  # as much as possible is preloaded!
-  my @testmsg = ("From: ignore\@compiling.spamassassin.taint.org\n", 
-    "Message-Id:  <".time."\@spamassassin_spamd_init>\n", "\n",
-    "I need to make this message body somewhat long so TextCat preloads\n"x20);
-
-  dbg("ignore: test message to precompile patterns and load modules");
 
   # Backup default values which deal with userstate.
   # This is done so we can create any new files in, presumably, a temp dir.
@@ -1322,6 +1310,19 @@ sub compile_now {
       $self->{conf}->{$k} = $backup;
     }
   }
+
+  dbg("ignore: test message to precompile patterns and load modules");
+
+  # tell plugins we are about to send a message for compiling purposes
+  $self->call_plugins("compile_now_start",
+		      { use_user_prefs => $use_user_prefs,
+			keep_userstate => $deal_with_userstate});
+
+  # note: this may incur network access. Good.  We want to make sure
+  # as much as possible is preloaded!
+  my @testmsg = ("From: ignore\@compiling.spamassassin.taint.org\n", 
+    "Message-Id:  <".time."\@spamassassin_spamd_init>\n", "\n",
+    "I need to make this message body somewhat long so TextCat preloads\n"x20);
 
   my $mail = $self->parse(\@testmsg, 1);
   my $status = Mail::SpamAssassin::PerMsgStatus->new($self, $mail,
