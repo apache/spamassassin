@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: bb-jm bb-traps jm theo zmi; day 2: bb-jm bb-traps dos jm theo zmi; day 3: bb-jm bb-traps jm theo zmi
+# with results from: day 1: bb-jm bb-traps dos jm theo zmi; day 2: bb-jm bb-traps jm theo zmi; day 3: bb-jm bb-traps dos jm theo zmi
 
 # tflags userconf
 ALL_TRUSTED
@@ -128,9 +128,6 @@ ENV_AND_HDR_DKIM_MATCH
 ENV_AND_HDR_SPF_MATCH
 
 # good enough
-FAKE_REPLY_C
-
-# good enough
 FB_ADD_INCHES
 
 # good enough
@@ -156,9 +153,6 @@ FB_NOT_SEXUAL
 
 # good enough
 FB_NO_SCRIP_NEEDED
-
-# good enough
-FB_P1LL
 
 # good enough
 FB_QUALITY_REPLICA
@@ -245,9 +239,6 @@ FORGED_RELAY_MUA_TO_MX
 FRAGMENTED_MESSAGE
 
 # good enough
-FRT_APPROV
-
-# good enough
 FRT_DISCOUNT
 
 # good enough
@@ -266,9 +257,6 @@ FRT_LEVITRA
 FRT_OFFER2
 
 # good enough
-FRT_PENIS1
-
-# good enough
 FRT_PHARMAC
 
 # good enough
@@ -279,9 +267,6 @@ FRT_SEXUAL
 
 # good enough
 FRT_VALIUM1
-
-# good enough
-FRT_VALIUM2
 
 # good enough
 FRT_WEIGHT2
@@ -489,12 +474,6 @@ OPERA_MID_NON_OP
 
 # good enough
 OPERA_MID_NO_DIGIT
-
-# good enough
-PART_CID_STOCK
-
-# good enough
-PART_CID_STOCK_LESS
 
 # good enough
 PQRTW_4
@@ -743,9 +722,6 @@ SANE_1bcdb8d4cae5f7cfefe310b3fce37407
 SANE_1c4f3286fa4aed6424ced88bfaf8b09c
 
 # good enough
-SANE_1e4a68ee6f864251df2bd2c2820805ea
-
-# good enough
 SANE_2025b95f6cbbedc5b8ecc73c754b3ecd
 
 # good enough
@@ -762,9 +738,6 @@ SANE_241cd925b00cea31560e3a0a88292867
 
 # good enough
 SANE_26a68f03f5905d9a620f0c60593598d2
-
-# good enough
-SANE_29466e3bbdb72fcad000bf00469b265c
 
 # good enough
 SANE_2b173a7fb7518c75ac8a2d294d773fd8
@@ -822,9 +795,6 @@ SANE_57eb6fb7217efcb7a706124454426ee6
 
 # good enough
 SANE_59f473392e226ff5636e7567e8330f90
-
-# good enough
-SANE_5b5adce1bd3865823ba98acc250e9ce6
 
 # good enough
 SANE_5df29067745223c48001d8db1ac686ab
@@ -953,13 +923,7 @@ SANE_b74c14c03c2502118c8807a607a5744a
 SANE_be5d4555e028d1b8bc3c17415b5fce95
 
 # good enough
-SANE_c256beae85d9b81958cd20ce9d24fe7b
-
-# good enough
 SANE_c51de255d6cba77d524cf655d5bcee17
-
-# good enough
-SANE_c5e5a37703662e0ddb9ade84fbec87a0
 
 # good enough
 SANE_c627ae8d03f8c3d579345970e652142c
@@ -1124,9 +1088,6 @@ TVD_FINGER_02
 TVD_FROM_1
 
 # good enough
-TVD_PH_SUBJ_ACCOUNTS_PRE
-
-# good enough
 TVD_QUAL_MEDS
 
 # good enough
@@ -1134,9 +1095,6 @@ TVD_RCVD_IP
 
 # good enough
 TVD_RCVD_IP4
-
-# good enough
-TVD_RCVD_SINGLE
 
 # good enough
 TVD_SECTION
@@ -1151,49 +1109,13 @@ TVD_SUBJ_WIPE_DEBT
 TVD_VISIT_PHARMA
 
 # good enough
-DOS_FORGED_RCVD_QUADS
-
-# good enough
-FAKE_REPLY_A1
-
-# good enough
 FB_WITHOUT_PRESC
 
 # good enough
-FS_SINGLE_LETTER_J
+FROM_UC_UNBAL
 
 # good enough
-IMG_ALT_HSPACE_CID_ALIGN
-
-# good enough
-NOTVALID_YAHOO
-
-# good enough
-SANE_0b71b2414f60460dc5ce8b38f77afc84
-
-# good enough
-SANE_ba47ac876ecf9d9434a099876632b22b
-
-# good enough
-SANE_c2e7be51eecf941517f318ee39150b12
-
-# good enough
-SANE_d0d2b0f6373bf91253d66dd74c594b87
-
-# good enough
-SANE_dbcae43bbc8bcf65efc826c058a76954
-
-# good enough
-SANE_ec474d58454de0340f7e1ceae041b069
-
-# good enough
-SANE_m614d8dba879f47d3fe5ffbde4aa8d8a7
-
-# good enough
-TVD_FW_GRAPHIC_ID1
-
-# good enough
-TVD_NOT_SATISFIED
+FROM_UNBAL1
 
 # tflags userconf
 UNPARSEABLE_RELAY
