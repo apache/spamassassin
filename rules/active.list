@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: bb-jm bb-traps dos jm theo zmi; day 2: bb-jm bb-traps jm theo zmi; day 3: bb-jm bb-traps dos jm theo zmi
+# with results from: day 1: bb-jm bb-traps dos jm theo zmi; day 2: bb-jm bb-traps dos jm theo zmi; day 3: bb-jm bb-traps jm theo zmi
 
 # tflags userconf
 ALL_TRUSTED
@@ -173,6 +173,9 @@ FB_STAMINA_IN_BED
 FB_ULTRA_ALLURE
 
 # good enough
+FB_WITHOUT_PRESC
+
+# good enough
 FH_BAD_OEV1441
 
 # good enough
@@ -237,6 +240,12 @@ FORGED_RELAY_MUA_TO_MX
 
 # tflags userconf
 FRAGMENTED_MESSAGE
+
+# good enough
+FROM_UC_UNBAL
+
+# good enough
+FROM_UNBAL1
 
 # good enough
 FRT_DISCOUNT
@@ -731,9 +740,6 @@ SANE_20d820d8f491476ca39941979ab139dd
 SANE_211b07d6a6bbd0d831c37df3ac112238
 
 # good enough
-SANE_22fd419db2276a962b097aec535f2714
-
-# good enough
 SANE_241cd925b00cea31560e3a0a88292867
 
 # good enough
@@ -1107,15 +1113,6 @@ TVD_SUBJ_WIPE_DEBT
 
 # good enough
 TVD_VISIT_PHARMA
-
-# good enough
-FB_WITHOUT_PRESC
-
-# good enough
-FROM_UC_UNBAL
-
-# good enough
-FROM_UNBAL1
 
 # tflags userconf
 UNPARSEABLE_RELAY
