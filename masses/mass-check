@@ -402,7 +402,7 @@ sub zero_rule_scores {
 my $who = `id -un 2>/dev/null`;
 my $where = `uname -n 2>/dev/null`;
 my $when = `date -u`;
-my $host = $ENV{'HOSTNAME'} || $ENV{'HOST'} || `hostname` || 'localhost';
+my $host = $ENV{'HOSTNAME'} || $ENV{'HOST'} || $where || `hostname` || 'localhost';
 chomp $who;
 chomp $where;
 chomp $when;
