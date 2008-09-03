@@ -80,7 +80,7 @@ sub do_stop {
 
   my $hname = `uname -n`;
 
-  if ($hname =~ /vmsa/) {
+  if ($hname =~ /spamassassin2/) {
     # need to transfer the logs (using ssh+tar+gz), then run script
     run ("( cd $BBMHOME ; ".
         "tar cfz - tmp/logs-r$rev | ".
