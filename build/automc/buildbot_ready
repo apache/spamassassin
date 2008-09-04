@@ -83,7 +83,7 @@ sub do_stop {
   if ($hname =~ /spamassassin2/) {
     # need to transfer the logs (using ssh+tar+gz), then run script
     run ("( cd $BBMHOME ; ".
-        "tar cfz - tmp/logs-r$rev | ".
+        "/usr/sfw/bin/gtar cfz - tmp/logs-r$rev | ".
         "ssh bbmass\@spamassassin.zones.apache.org /usr/sfw/bin/gtar xvfz - )");
 
     run ("ssh bbmass\@spamassassin.zones.apache.org ".
