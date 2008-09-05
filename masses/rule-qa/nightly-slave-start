@@ -23,11 +23,14 @@ $tar cfz $tmp/tf \
 
 # a rather rough-and-ready way to ensure any hangover mass-checks
 # from the previous set are killed, before we start these ones;
-# ||true ensures we carry on even if this fails
-ssh $host \
-    killall perl || true
+# ||true ensures we carry on even if this fails.  ". envs" allows
+# host-specific aliases/paths to workaround platform issues
+ssh $host . envs \; \
+    pkill -15 -f perl || true
+ssh $host . envs \; \
+    pkill -9 -f perl || true
 
-ssh $host \
+ssh $host . envs \; \
     rm -rf $clienttree/code \; \
     mkdir -p $clienttree/code \; \
     cd $clienttree/code \; \
@@ -40,8 +43,7 @@ ssh $host \
 
 # rebuild to compile the blib modules for this platform.
 
-ssh $host \
-    . envs \; \
+ssh $host . envs \; \
     cd $clienttree/code \; \
     perl Makefile.PL \; \
     make clean \; \
@@ -50,8 +52,7 @@ ssh $host \
 
 # use a cs_cache in $clienttree/cs_cache -- this is not removed
 # with the above "rm -rf" command
-ssh -f $host \
-    . envs \; \
+ssh $host . envs \; \
     cd $clienttree/code/masses \; \
     TZ=UTC perl mass-check \
         --cs_ssl --cs_verbose --cs_schedule_cache --cs_cachedir=../../cs_cache \
