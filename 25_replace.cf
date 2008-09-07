@@ -81,7 +81,7 @@ header SUBJECT_FUZZY_CHEAP	Subject =~ /<inter W2><post P3>\b(?!cheap)<C><H><E><A
 describe SUBJECT_FUZZY_CHEAP	Attempt to obfuscate words in Subject:
 replace_rules SUBJECT_FUZZY_CHEAP
 
-header SUBJECT_FUZZY_PENIS	Subject =~ /<inter W3><post P3>\b(?!penis)<P><E><N><I><S>/i
+header SUBJECT_FUZZY_PENIS	Subject =~ /<inter W3><post P3>\b(?!(pen(is|ny)))<P><E><N><I><S>\b/i
 describe SUBJECT_FUZZY_PENIS	Attempt to obfuscate words in Subject:
 replace_rules SUBJECT_FUZZY_PENIS
 
