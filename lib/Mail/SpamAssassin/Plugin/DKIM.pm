@@ -383,16 +383,10 @@ sub _check_dkim_signature {
       #     OPTIONAL, default is an empty local-part followed by an "@"
       #     followed by the domain from the "d=" tag).
       my $identity = $signature->identity;
-      dbg("dkim: signing identity: %s, d=%s, a=%s, c=%s",
-          $identity, $signature->domain,
+      would_log("dbg","dkim") &&
+        dbg("dkim: signing identity: %s, d=%s, a=%s, c=%s",
+          defined $identity ? $identity : 'UNDEF',  $signature->domain,
           $signature->algorithm, scalar($signature->canonicalization));
-      if (!defined $identity || $identity eq '') {  # just in case
-        $identity = '@' . $signature->domain;
-        $signature->identity($identity);
-      } elsif ($identity !~ /\@/) {  # just in case
-        $identity = '@' . $identity;
-        $signature->identity($identity);
-      }
       if ($signature->result eq 'pass') {
         local ($1);  # check if we have a valid first-party signature
         if ($identity =~ /.\@[^@]*\z/s) {  # identity has a localpart
@@ -407,9 +401,11 @@ sub _check_dkim_signature {
     { my (%seen1,%seen2);
       my @valid_s = grep { $_->result eq 'pass' } @signatures;
       $scan->set_tag('DKIMIDENTITY',
-              join(" ", grep { !$seen1{$_}++ } map { $_->identity } @valid_s));
+              join(" ", grep { defined($_) && $_ ne '' && !$seen1{$_}++ }
+                         map { $_->identity } @valid_s));
       $scan->set_tag('DKIMDOMAIN',
-              join(" ", grep { !$seen2{$_}++ } map { $_->domain } @valid_s));
+              join(" ", grep { defined($_) && $_ ne '' && !$seen2{$_}++ }
+                         map { $_->domain } @valid_s));
     }
     # corresponds to 'best' result in case of multiple signatures
     my $result = $verifier->result();
@@ -569,7 +565,7 @@ sub _check_dkim_whitelist {
     my $match = $any_match_by_wl_ref->{$wl};
     if (defined $match) {
       $scan->{"dkim_match_in_$wl"} = 1  if $match;
-      if ($match) { push(@valid,$wl) } else { push(@fail,$wl) }
+      push(@{$match ? \@valid : \@fail}, "$wl/$match");
     }
   }
   if (@valid) {
@@ -633,6 +629,13 @@ sub _wlcheck_list {
                   $expiration_time =~ /^\d{1,12}\z/ && time > $expiration_time;
 
     my $identity = $signature->identity;
+    if (!defined $identity || $identity eq '') {
+      $identity = '@' . $signature->domain;
+      dbg("dkim: identity empty, setting to %s", $identity);
+    } elsif ($identity !~ /\@/) {  # just in case
+      $identity = '@' . $identity;
+      dbg("dkim: identity with no domain, setting to %s", $identity);
+    }
     # split identity into local part and domain
     $identity =~ /^ (.*?) \@ ([^\@]*) $/xs;
     my($identity_mbx, $identity_dom) = ($1,$2);
@@ -686,12 +689,15 @@ sub _wlcheck_list {
       if ($matches) {
         dbg("dkim: $info, author $author, MATCHES $wl $re");
         # a defined value indicates at least a match, not necessarily valid
-        $any_match_by_wl{$wl} = 0  if !exists $any_match_by_wl{$wl};
+        $any_match_by_wl{$wl} = ''  if !exists $any_match_by_wl{$wl};
       }
       # only valid signature can cause whitelisting
       $matches = 0  if !$valid || $expired;
 
-      $any_match_by_wl{$wl} = $any_match_at_all = 1  if $matches;
+      if ($matches) {
+        $any_match_at_all = 1;
+        $any_match_by_wl{$wl} = $identity;  # value used for debug logging
+      }
     }
     dbg("dkim: $info, author $author, no valid matches") if !$any_match_at_all;
   }
