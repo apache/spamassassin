@@ -687,17 +687,17 @@ sub patterns_run_cb {
 
 sub ok_all_patterns {
   my ($dont_ok) = shift;
-
+  my (undef, $file, $line) = caller();
   my $wasfailure = 0;
   foreach my $pat (sort keys %patterns) {
     my $type = $patterns{$pat};
     print "\tChecking $type\n";
     if (defined $found{$type}) {
       if (!$dont_ok) {
-        ok ($found{$type} == 1) or warn "Found more than once: $type\n";
+        ok ($found{$type} == 1) or warn "Found more than once: $type at $file line $line.\n";
       }
     } else {
-      warn "\tNot found: $type = $pat\n";
+      warn "\tNot found: $type = $pat at $file line $line.\n";
       if (!$dont_ok) {
         ok (0);                     # keep the right # of tests
       }
@@ -706,9 +706,9 @@ sub ok_all_patterns {
   }
   foreach my $pat (sort keys %anti_patterns) {
     my $type = $anti_patterns{$pat};
-    print "\tChecking for anti-pattern $type\n";
+    print "\tChecking for anti-pattern $type at $file line $line.\n";
     if (defined $found_anti{$type}) {
-      warn "\tFound anti-pattern: $type = $pat\n";
+      warn "\tFound anti-pattern: $type = $pat at $file line $line.\n";
       if (!$dont_ok) { ok (0); }
       $wasfailure++;
     }
@@ -728,17 +728,18 @@ sub ok_all_patterns {
 
 sub skip_all_patterns {
   my $skip = shift;
+  my (undef, $file, $line) = caller();
   foreach my $pat (sort keys %patterns) {
     my $type = $patterns{$pat};
     print "\tChecking $type\n";
     if (defined $found{$type}) {
-      skip ($skip, $found{$type} == 1) or warn "Found more than once: $type\n";
-      warn "\tThis test should have been skipped: $skip\n" if $skip;
+      skip ($skip, $found{$type} == 1) or warn "Found more than once: $type at $file line $line.\n";
+      warn "\tThis test should have been skipped: $skip at $file line $line.\n" if $skip;
     } else {
       if ($skip) {
-        warn "\tTest skipped: $skip\n";
+        warn "\tTest skipped: $skip at $file line $line.\n";
       } else {
-        warn "\tNot found: $type = $pat\n";
+        warn "\tNot found: $type = $pat at $file line $line.\n";
       }
       skip ($skip, 0);                     # keep the right # of tests
     }
@@ -747,7 +748,7 @@ sub skip_all_patterns {
     my $type = $anti_patterns{$pat};
     print "\tChecking for anti-pattern $type\n";
     if (defined $found_anti{$type}) {
-      warn "\tFound anti-pattern: $type = $pat\n";
+      warn "\tFound anti-pattern: $type = $pat at $file line $line.\n";
       skip ($skip, 0);
     }
     else
