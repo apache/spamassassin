@@ -98,7 +98,7 @@ sub load_resolver {
                                          Proto     => 'udp',
                                          );
       if ($sock6) {
-        $sock6->close();
+        $sock6->close()  or die "error closing inet6 socket: $!";
         1;
       }
     } ||
@@ -110,7 +110,7 @@ sub load_resolver {
                                          Proto     => 'udp',
                                          );
       if ($sock6) {
-        $sock6->close();
+        $sock6->close()  or die "error closing inet4 socket: $!";
         1;
       }
     };
@@ -186,7 +186,9 @@ sub connect_sock {
 
   return if $self->{no_resolver};
 
-  $self->{sock}->close() if $self->{sock};
+  if ($self->{sock}) {
+    $self->{sock}->close()  or die "error closing socket: $!";
+  }
   my $sock;
   my $errno;
 
@@ -235,26 +237,26 @@ sub connect_sock {
     } elsif ($! == EADDRINUSE || $! == EACCES) {  # in use, let's try another source port
       dbg("dns: UDP port %s already in use, trying another port", $lport);
     } else {
-      warn "Error creating a DNS resolver socket: $errno";
+      warn "error creating a DNS resolver socket: $errno";
       goto no_sock;
     }
   }
   if (!defined $sock) {
-    warn "Can't create a DNS resolver socket: $errno";
+    warn "cannot create a DNS resolver socket: $errno";
     goto no_sock;
   }
 
   eval {
     my($bufsiz,$newbufsiz);
     $bufsiz = $sock->sockopt(Socket::SO_RCVBUF)
-      or die "Can't get a resolver socket rx buffer size: $!";
+      or die "cannot get a resolver socket rx buffer size: $!";
     if ($bufsiz >= 32*1024) {
       dbg("dns: resolver socket rx buffer size is %d bytes", $bufsiz);
     } else {
       $sock->sockopt(Socket::SO_RCVBUF, 32*1024)
-        or die "Can't set a resolver socket rx buffer size: $!";
+        or die "cannot set a resolver socket rx buffer size: $!";
       $newbufsiz = $sock->sockopt(Socket::SO_RCVBUF)
-        or die "Can't get a resolver socket rx buffer size: $!";
+        or die "cannot get a resolver socket rx buffer size: $!";
       dbg("dns: resolver socket rx buffer size changed from %d to %d bytes",
           $bufsiz, $newbufsiz);
     }
@@ -553,7 +555,7 @@ Reset socket when done with it.
 sub finish_socket {
   my ($self) = @_;
   if ($self->{sock}) {
-    $self->{sock}->close();
+    $self->{sock}->close()  or die "error closing socket: $!";
     delete $self->{sock};
   }
 }

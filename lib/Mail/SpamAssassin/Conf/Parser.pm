@@ -1121,7 +1121,9 @@ sub is_meta_valid {
   my $lexer = ARITH_EXPRESSION_LEXER;
   my @tokens = ($rule =~ m/$lexer/g);
   if (length($name) == 1) {
-    print "$name $_\n " for @tokens;
+    for (@tokens) {
+      print "$name $_\n "  or die "Error writing token: $!";
+    }
   }
   # Go through each token in the meta rule
   foreach my $token (@tokens) {

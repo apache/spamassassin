@@ -654,7 +654,8 @@ sub dump_db_toks {
 
     my $encoded_token = unpack("H*", $token);
     
-    printf $template,$prob,$spam_count,$ham_count,$atime,$encoded_token;
+    printf $template,$prob,$spam_count,$ham_count,$atime,$encoded_token
+      or die "Error writing tokens: $!";
   }
 
   $sth->finish();
@@ -1332,9 +1333,10 @@ sub backup_database {
   my $num_spam = $vars[1] || 0;
   my $num_ham = $vars[2] || 0;
 
-  print "v\t$vars[6]\tdb_version # this must be the first line!!!\n";
-  print "v\t$num_spam\tnum_spam\n";
-  print "v\t$num_ham\tnum_nonspam\n";
+  print "v\t$vars[6]\tdb_version # this must be the first line!!!\n"
+                                      or die "Error writing: $!";
+  print "v\t$num_spam\tnum_spam\n"    or die "Error writing: $!";
+  print "v\t$num_ham\tnum_nonspam\n"  or die "Error writing: $!";
 
   my $token_select = $self->_token_select_string();
 
@@ -1363,7 +1365,8 @@ sub backup_database {
 
   while (my @values = $sth->fetchrow_array()) {
     $values[3] = unpack("H*", $values[3]);
-    print "t\t" . join("\t", @values) . "\n";
+    print "t\t" . join("\t", @values) . "\n"
+      or die "Error writing: $!";
   }
 
   $sth->finish();
@@ -1383,7 +1386,7 @@ sub backup_database {
   }
 
   while (my @values = $sth->fetchrow_array()) {
-    print "s\t" . join("\t",@values) . "\n";
+    print "s\t" . join("\t",@values) . "\n"  or die "Error writing: $!";
   }
 
   $sth->finish();
@@ -1439,6 +1442,7 @@ sub restore_database {
   my $line_count = 0;
 
   my $line = <DUMPFILE>;
+  defined $line  or die "Error reading dump file: $!";
   $line_count++;
   # We require the database version line to be the first in the file so we can
   # figure out how to properly deal with the file.  If it is not the first
@@ -1459,7 +1463,7 @@ sub restore_database {
   my $token_error_count = 0;
   my $seen_error_count = 0;
 
-  while (my $line = <DUMPFILE>) {
+  for ($!=0; defined($line=<DUMPFILE>); $!=0) {
     chomp($line);
     $line_count++;
 
@@ -1568,7 +1572,8 @@ sub restore_database {
       return 0;
     }
   }
-  close(DUMPFILE);
+  defined $line || $!==0  or die "Error reading dump file: $!";
+  close(DUMPFILE) or die "Can't close dump file: $!";
 
   print STDERR "\n" if ($showdots);
 

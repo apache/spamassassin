@@ -868,18 +868,36 @@ sub learner_dump_database {
   my $template = '%3.3f %10u %10u %10u  %s'."\n";
 
   if ( $magic ) {
-    printf ($template, 0.0, 0, $bv, 0, 'non-token data: bayes db version');
-    printf ($template, 0.0, 0, $ns, 0, 'non-token data: nspam');
-    printf ($template, 0.0, 0, $nh, 0, 'non-token data: nham');
-    printf ($template, 0.0, 0, $nt, 0, 'non-token data: ntokens');
-    printf ($template, 0.0, 0, $oa, 0, 'non-token data: oldest atime');
-    printf ($template, 0.0, 0, $na, 0, 'non-token data: newest atime') if ( $bv >= 2 );
-    printf ($template, 0.0, 0, $sb, 0, 'non-token data: current scan-count') if ( $bv < 2 );
-    printf ($template, 0.0, 0, $js, 0, 'non-token data: last journal sync atime') if ( $bv >= 2 );
-    printf ($template, 0.0, 0, $le, 0, 'non-token data: last expiry atime');
+    printf($template, 0.0, 0, $bv, 0, 'non-token data: bayes db version')
+      or die "Error writing: $!";
+    printf($template, 0.0, 0, $ns, 0, 'non-token data: nspam')
+      or die "Error writing: $!";
+    printf($template, 0.0, 0, $nh, 0, 'non-token data: nham')
+      or die "Error writing: $!";
+    printf($template, 0.0, 0, $nt, 0, 'non-token data: ntokens')
+      or die "Error writing: $!";
+    printf($template, 0.0, 0, $oa, 0, 'non-token data: oldest atime')
+      or die "Error writing: $!";
     if ( $bv >= 2 ) {
-      printf ($template, 0.0, 0, $ad, 0, 'non-token data: last expire atime delta');
-      printf ($template, 0.0, 0, $er, 0, 'non-token data: last expire reduction count');
+      printf($template, 0.0, 0, $na, 0, 'non-token data: newest atime')
+        or die "Error writing: $!";
+    }
+    if ( $bv < 2 ) {
+      printf($template, 0.0, 0, $sb, 0, 'non-token data: current scan-count')
+        or die "Error writing: $!";
+    }
+    if ( $bv >= 2 ) {
+      printf($template, 0.0, 0, $js, 0, 'non-token data: last journal sync atime')
+        or die "Error writing: $!";
+    }
+    printf($template, 0.0, 0, $le, 0, 'non-token data: last expiry atime')
+      or die "Error writing: $!";
+    if ( $bv >= 2 ) {
+      printf($template, 0.0, 0, $ad, 0, 'non-token data: last expire atime delta')
+        or die "Error writing: $!";
+
+      printf($template, 0.0, 0, $er, 0, 'non-token data: last expire reduction count')
+        or die "Error writing: $!";
     }
   }
 

@@ -222,7 +222,8 @@ sub learn {
   print $remote $msg;
   print $remote "$EOL";
 
-  my $line = <$remote>;
+  $! = 0; my $line = <$remote>;
+  defined $line || $!==0  or die "error reading from spamd: $!";
   return undef unless (defined $line);
 
   my ($version, $resp_code, $resp_msg) = $self->_parse_response_line($line);
@@ -235,7 +236,7 @@ sub learn {
   my $did_set = '';
   my $did_remove = '';
 
-  while ($line = <$remote>) {
+  for ($!=0; defined($line=<$remote>); $!=0) {
     if ($line =~ /DidSet: (.*)/i) {
       $did_set = $1;
     }
@@ -246,8 +247,9 @@ sub learn {
       last;
     }
   }
+  defined $line || $!==0  or die "error reading from spamd: $!";
 
-  close $remote;
+  close $remote  or die "error closing socket: $!";
 
   if ($learntype == 0 || $learntype == 1) {
     return $did_set =~ /local/;
@@ -286,7 +288,8 @@ sub report {
   print $remote $msg;
   print $remote "$EOL";
 
-  my $line = <$remote>;
+  $! = 0; my $line = <$remote>;
+  defined $line || $!==0  or die "error reading from spamd: $!";
   return undef unless (defined $line);
 
   my ($version, $resp_code, $resp_msg) = $self->_parse_response_line($line);
@@ -298,7 +301,7 @@ sub report {
 
   my $reported_p = 0;
 
-  while (($line = <$remote>)) {
+  for ($!=0; defined($line=<$remote>); $!=0) {
     if ($line =~ /DidSet:\s+.*remote/i) {
       $reported_p = 1;
       last;
@@ -307,8 +310,9 @@ sub report {
       last;
     }
   }
+  defined $line || $!==0  or die "error reading from spamd: $!";
 
-  close $remote;
+  close $remote  or die "error closing socket: $!";
 
   return $reported_p;
 }
@@ -343,7 +347,8 @@ sub revoke {
   print $remote $msg;
   print $remote "$EOL";
 
-  my $line = <$remote>;
+  $! = 0; my $line = <$remote>;
+  defined $line || $!==0  or die "error reading from spamd: $!";
   return undef unless (defined $line);
 
   my ($version, $resp_code, $resp_msg) = $self->_parse_response_line($line);
@@ -355,7 +360,7 @@ sub revoke {
 
   my $revoked_p = 0;
 
-  while (!$revoked_p && ($line = <$remote>)) {
+  for ($!=0; defined($line=<$remote>); $!=0) {
     if ($line =~ /DidRemove:\s+remote/i) {
       $revoked_p = 1;
       last;
@@ -364,8 +369,9 @@ sub revoke {
       last;
     }
   }
+  defined $line || $!==0  or die "error reading from spamd: $!";
 
-  close $remote;
+  close $remote  or die "error closing socket: $!";
 
   return $revoked_p;
 }
@@ -391,8 +397,9 @@ sub ping {
   print $remote "PING $PROTOVERSION$EOL";
   print $remote "$EOL";
 
-  my $line = <$remote>;
-  close $remote;
+  $! = 0; my $line = <$remote>;
+  defined $line || $!==0  or die "error reading from spamd: $!";
+  close $remote  or die "error closing socket: $!";
   return undef unless (defined $line);
 
   my ($version, $resp_code, $resp_msg) = $self->_parse_response_line($line);
@@ -522,7 +529,8 @@ sub _filter {
   print $remote $msg;
   print $remote "$EOL";
 
-  my $line = <$remote>;
+  $! = 0; my $line = <$remote>;
+  defined $line || $!==0  or die "error reading from spamd: $!";
   return undef unless (defined $line);
 
   my ($version, $resp_code, $resp_msg) = $self->_parse_response_line($line);
@@ -532,7 +540,7 @@ sub _filter {
 
   return undef unless ($resp_code == 0);
 
-  while ($line = <$remote>) {
+  for ($!=0; defined($line=<$remote>); $!=0) {
     if ($line =~ /Content-length: (\d+)/) {
       $data{content_length} = $1;
     }
@@ -545,15 +553,17 @@ sub _filter {
       last;
     }
   }
+  defined $line || $!==0  or die "error reading from spamd: $!";
 
   my $return_msg;
-  while(<$remote>) {
+  for ($!=0; <$remote>; $!=0) {
     $return_msg .= $_;
   }
+  defined $_ || $!==0  or die "error reading from spamd: $!";
 
   $data{message} = $return_msg if ($return_msg);
 
-  close $remote;
+  close $remote  or die "error closing socket: $!";
 
   return \%data;
 }

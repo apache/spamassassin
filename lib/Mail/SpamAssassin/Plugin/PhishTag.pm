@@ -105,7 +105,7 @@ sub read_configfile{
 
   my $target;
   open(F, '<', $pms->{conf}->{trigger_config});
-  while(<F>){
+  for($!=0; <F>; $!=0){
       #each entry is separated by blank lines
       undef($target) if(!/\S/);
 
@@ -125,7 +125,8 @@ sub read_configfile{
 	  push @$target, $_;
       }
   }
-  close(F);
+  defined $_ || $!==0  or die "error reading config file: $!";
+  close(F)  or die "error closing config file: $!";
 }
 
 sub hit_rule {

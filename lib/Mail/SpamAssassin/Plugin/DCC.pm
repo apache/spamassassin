@@ -29,7 +29,7 @@ Mail::SpamAssassin::Plugin::DCC - perform DCC check of messages
 =head1 DESCRIPTION
 
 The DCC or Distributed Checksum Clearinghouse is a system of servers
-collecting and counting checksums of millions of mail messages. The
+collecting and counting checksums of millions of mail messages. TheSpamAssassin.pm
 counts can be used by SpamAssassin to detect and reject or filter spam.
 
 Because simplistic checksums of spam can be easily defeated, the main
@@ -66,7 +66,9 @@ use re 'taint';
 use Mail::SpamAssassin::Plugin;
 use Mail::SpamAssassin::Logger;
 use Mail::SpamAssassin::Timeout;
-use Mail::SpamAssassin::Util qw(untaint_var);
+use Mail::SpamAssassin::Util qw(untaint_var untaint_file_path
+                                proc_status_ok exit_status_str);
+use Errno qw(ENOENT EACCES);
 use IO::Socket;
 
 use vars qw(@ISA);
@@ -200,9 +202,12 @@ interface that instead of C<dccproc>.
       if (!defined $value || !length $value) {
 	return $Mail::SpamAssassin::Conf::MISSING_REQUIRED_VALUE;
       }
-      $value = Mail::SpamAssassin::Util::untaint_file_path($value);
-      if (!-d $value) {
-	info("config: dcc_home \"$value\" isn't a directory");
+      $value = untaint_file_path($value);
+      my $stat_errn = stat($value) ? 0 : 0+$!;
+      if ($stat_errn != 0 || !-d _) {
+        my $msg = $stat_errn == ENOENT ? "does not exist"
+                  : !-d _ ? "is not a directory" : "not accessible: $!";
+	info("config: dcc_home \"$value\" $msg");
 	return $Mail::SpamAssassin::Conf::INVALID_VALUE;
       }
 
@@ -227,7 +232,7 @@ C<dccproc>.
       if (!defined $value || !length $value) {
 	return $Mail::SpamAssassin::Conf::MISSING_REQUIRED_VALUE;
       }
-      $value = Mail::SpamAssassin::Util::untaint_file_path($value);
+      $value = untaint_file_path($value);
       if (!-S $value) {
 	info("config: dcc_dccifd_path \"$value\" isn't a socket");
 	return $Mail::SpamAssassin::Conf::INVALID_VALUE;
@@ -255,7 +260,7 @@ use this, as the current PATH will have been cleared.
       if (!defined $value || !length $value) {
 	return $Mail::SpamAssassin::Conf::MISSING_REQUIRED_VALUE;
       }
-      $value = Mail::SpamAssassin::Util::untaint_file_path($value);
+      $value = untaint_file_path($value);
       if (!-x $value) {
 	info("config: dcc_path \"$value\" isn't an executable");
 	return $Mail::SpamAssassin::Conf::INVALID_VALUE;
@@ -323,11 +328,11 @@ sub is_dccifd_available {
   my $dcchome = $self->{main}->{conf}->{dcc_home} || '';
   my $dccifd = $self->{main}->{conf}->{dcc_dccifd_path} || '';
 
-  if (!$dccifd && ($dcchome && -S "$dcchome/dccifd")) {
+  if ($dccifd eq '' && ($dcchome ne '' && -S "$dcchome/dccifd")) {
     $dccifd = "$dcchome/dccifd";
   }
 
-  unless ($dccifd && -S $dccifd && -w _ && -r _) {
+  unless ($dccifd ne '' && -S $dccifd && -w _ && -r _) {
     dbg("dcc: dccifd is not available: no r/w dccifd socket found");
     return 0;
   }
@@ -351,14 +356,14 @@ sub is_dccproc_available {
   my $dcchome = $self->{main}->{conf}->{dcc_home} || '';
   my $dccproc = $self->{main}->{conf}->{dcc_path} || '';
 
-  if (!$dccproc && ($dcchome && -x "$dcchome/bin/dccproc")) {
-    $dccproc  = "$dcchome/bin/dccproc";
+  if ($dccproc eq '' && ($dcchome ne '' && -x "$dcchome/bin/dccproc")) {
+    $dccproc = "$dcchome/bin/dccproc";
   }
-  unless ($dccproc) {
+  if ($dccproc eq '') {
     $dccproc = Mail::SpamAssassin::Util::find_executable_in_env_path('dccproc');
   }
 
-  unless ($dccproc && -x $dccproc) {
+  unless ($dccproc ne '' && -x $dccproc) {
     dbg("dcc: dccproc is not available: no dccproc executable found");
     return 0;
   }
@@ -529,7 +534,7 @@ sub dccifd_lookup {
     $sock->print("unknown\r\n") || dbg("dcc: failed write") && die; # recipients
     $sock->print("\n") || dbg("dcc: failed write") && die; # recipients
 
-    $sock->print($$fulltext);
+    $sock->print($$fulltext) || dbg("dcc: failed write") && die;
 
     $sock->shutdown(1) || dbg("dcc: failed socket shutdown: $!") && die;
 
@@ -595,7 +600,7 @@ sub dccproc_lookup {
     local $SIG{PIPE} = sub { die "__brokenpipe__ignore__\n" };
 
     # note: not really tainted, this came from system configuration file
-    my $path = Mail::SpamAssassin::Util::untaint_file_path($self->{main}->{conf}->{dcc_path});
+    my $path = untaint_file_path($self->{main}->{conf}->{dcc_path});
 
     my $opts = $self->{main}->{conf}->{dcc_options};
     my @opts = !defined $opts ? () : split(' ',$opts);
@@ -611,9 +616,12 @@ sub dccproc_lookup {
              $tmpf, 1, $path, "-H", "-x", "0", @opts);
     $pid or die "$!\n";
 
-    my @null = <DCC>;
-    close DCC
-      or dbg(sprintf("dcc: [%s] finished: %s exit=0x%04x",$pid,$!,$?));
+    $! = 0; my @null = <DCC>;
+    $!==0  or die "error reading from pipe: $!";
+
+    my $errno = 0;  close DCC or $errno = $!;
+    proc_status_ok($?,$errno)
+      or info("dcc: [%s] finished: %s", $pid, exit_status_str($?,$errno));
 
     if (!@null) {
       # no facility prefix on this
@@ -643,8 +651,9 @@ sub dccproc_lookup {
       if (kill('TERM',$pid)) { dbg("dcc: killed stale helper [$pid]") }
       else { dbg("dcc: killing helper application [$pid] failed: $!") }
     }
-    close DCC
-      or dbg(sprintf("dcc: [%s] terminated: %s exit=0x%04x",$pid,$!,$?));
+    my $errno = 0;  close(DCC) or $errno = $!;
+    proc_status_ok($?,$errno)
+      or info("dcc: [%s] terminated: %s", $pid, exit_status_str($?,$errno));
   }
   $permsgstatus->leave_helper_run_mode();
 
@@ -745,7 +754,7 @@ sub dccifd_report {
     $sock->print("unknown\r\n") || dbg("report: dccifd failed write") && die; # recipients
     $sock->print("\n") || dbg("report: dccifd failed write") && die; # recipients
 
-    $sock->print($$fulltext);
+    $sock->print($$fulltext) || dbg("report: dccifd failed write") && die;
 
     $sock->shutdown(1) || dbg("report: dccifd failed socket shutdown: $!") && die;
 
@@ -780,7 +789,7 @@ sub dcc_report {
   my $timeout = $options->{report}->{conf}->{dcc_timeout};
 
   # note: not really tainted, this came from system configuration file
-  my $path = Mail::SpamAssassin::Util::untaint_file_path($options->{report}->{conf}->{dcc_path});
+  my $path = untaint_file_path($options->{report}->{conf}->{dcc_path});
   my $opts = $self->{main}->{conf}->{dcc_options};
   my @opts = !defined $opts ? () : split(' ',$opts);
   untaint_var(\@opts);
@@ -803,11 +812,16 @@ sub dcc_report {
     my $pid = Mail::SpamAssassin::Util::helper_app_pipe_open(*DCC,
                 $tmpf, 1, $path, "-H", "-t", "many", "-x", "0", @opts);
     $pid or die "$!\n";
+    $! = 0; my @ignored = <DCC>;
+    $!==0  or die "error reading from pipe: $!";
+    dbg("dcc: empty response")  if !@ignored;
 
-    my @ignored = <DCC>;
-    $options->{report}->close_pipe_fh(\*DCC);
-    waitpid ($pid, 0);
-  
+    my $errno = 0;  close DCC or $errno = $!;
+    # closing a pipe also waits for the process executing on the pipe to
+    # complete, no need to explicitly call waitpid
+    # my $child_stat = waitpid($pid,0) > 0 ? $? : undef;
+    proc_status_ok($?,$errno)
+      or die "dcc: reporter error: ".exit_status_str($?,$errno)."\n";
   });
   $options->{report}->leave_helper_run_mode();
 

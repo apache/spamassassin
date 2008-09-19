@@ -32,6 +32,7 @@ use Mail::SpamAssassin::Logger;
 use Mail::SpamAssassin::Util qw(untaint_var);
 use Mail::SpamAssassin::Util::Progress;
 
+use Errno qw(ENOENT EACCES EEXIST);
 use Data::Dumper;
 
 use strict;
@@ -508,14 +509,19 @@ sub extract_hints {
       }
     }
   }
-  print $tmpfh "use bytes; m".$quos.$rule.$quos.$mods;
-  close $tmpfh or die "cannot write to $tmpf";
+  print $tmpfh "use bytes; m".$quos.$rule.$quos.$mods
+    or die "error writing to $tmpf: $!";
+  close $tmpfh  or die "error closing $tmpf: $!";
 
   my $perl = $self->get_perl();
-  open (IN, "$perl -c -Mre=debug $tmpf 2>&1 |") or die "cannot run $perl";
-  my $fullstr = join('', <IN>);
-  close IN;
-  unlink $tmpf;
+  open (IN, "$perl -c -Mre=debug $tmpf 2>&1 |")  or die "cannot run $perl";
+
+  my $fullstr;
+  { local $/ = undef; $! = 0; $fullstr = <IN> }
+  defined $fullstr || $!==0  or die "error reading from pipe: $!";
+  close IN      or die "error closing pipe: $!";
+  unlink $tmpf  or die "cannot unlink $tmpf: $!";
+  defined $fullstr  or warn "empty result from a pipe";
 
   # now parse the -Mre=debug output.
   # perl 5.10 format
@@ -947,11 +953,11 @@ sub test_split_alt {
   }
 
   if ($failed) {
-    print "want: /".join('/ /', @want)."/\n";
-    print "got:  /".join('/ /', @got)."/\n";
+    print "want: /".join('/ /', @want)."/\n"  or die "error writing: $!";
+    print "got:  /".join('/ /', @got)."/\n"   or die "error writing: $!";
     return 0;
   } else {
-    print "ok\n";
+    print "ok\n"  or die "error writing: $!";
     return 1;
   }
 }
@@ -985,8 +991,12 @@ sub get_perl {
 sub read_cachefile {
   my ($self, $cachefile) = @_;
   if (open(IN, "<".$cachefile)) {
-    my $str = join("", <IN>);
-    close IN;
+    my $str;
+    { local $/ = undef; $! = 0; $str = <IN> }
+    defined $str || $!==0  or die "error reading from $cachefile: $!";
+    close IN  or die "error closing $cachefile: $!";
+    defined $str  or warn "empty $cachefile";
+
     my $untainted = untaint_var($str);
 
     my $VAR1;                 # Data::Dumper
@@ -1004,10 +1014,16 @@ sub write_cachefile {
   $dump->Deepcopy(1);
   $dump->Purity(1);
   $dump->Indent(1);
-  mkdir ($self->{main}->{bases_cache_dir});
-  open (CACHE, ">$cachefile") or warn "cannot write to $cachefile";
-  print CACHE $dump->Dump, ";1;";
-  close CACHE or warn "cannot close $cachefile";
+  if (mkdir($self->{main}->{bases_cache_dir})) {
+    # successfully created
+  } elsif ($! == EEXIST) {
+    dbg("zoom: ok, cache directory already existed");
+  } else {
+    warn "cannot create a directory: $!";
+  }
+  open(CACHE, ">$cachefile")  or warn "cannot write to $cachefile";
+  print CACHE ($dump->Dump, ";1;")  or die "error writing: $!";
+  close CACHE  or die "error closing $cachefile: $!";
 }
 
 1;

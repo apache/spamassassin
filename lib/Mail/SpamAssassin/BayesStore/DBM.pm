@@ -1122,6 +1122,7 @@ sub cleanup {
   # touches missed.
   my $write_failure = 0;
   my $original_point = tell OUT;
+  $original_point >= 0  or die "Can't obtain file position: $!";
   my $len;
   do {
     $len = syswrite (OUT, $self->{string_to_journal}, $nbytes);
@@ -1268,7 +1269,7 @@ sub _sync_journal_trapped {
 
 
     # Read the journal
-    while (<JOURNAL>) {
+    for ($!=0; defined($_=<JOURNAL>); $!=0) {
       $total_count++;
 
       if (/^t (\d+) (.+)$/) { # Token timestamp update, cache resultant entries
@@ -1293,7 +1294,8 @@ sub _sync_journal_trapped {
 	warn "bayes: gibberish entry found in journal: $_";
       }
     }
-    close JOURNAL;
+    defined $_ || $!==0  or die "Error reading journal file: $!";
+    close(JOURNAL) or die "Can't close journal file: $!";
 
     # Now that we've determined what tokens we need to update and their
     # final values, update the DB.  Should be much smaller than the full
@@ -1430,9 +1432,9 @@ sub perform_upgrade {
     my $dir = dirname($path);
 
     # make temporary copy since old dbm and new dbm may have same name
-    opendir(DIR, $dir) || die "bayes: can't opendir $dir: $!";
+    opendir(DIR, $dir) or die "bayes: can't opendir $dir: $!";
     my @files = grep { /^bayes_(?:seen|toks)(?:\.\w+)?$/ } readdir(DIR);
-    closedir(DIR);
+    closedir(DIR) or die "bayes: can't close directory $dir: $!";
     if (@files < 2 || !grep(/bayes_seen/,@files) || !grep(/bayes_toks/,@files))
     {
       die "bayes: unable to find bayes_toks and bayes_seen, stopping\n";
@@ -1645,6 +1647,7 @@ sub restore_database {
   my $oldest_token_age = time() + 100000;
 
   my $line = <DUMPFILE>;
+  defined $line  or die "Error reading dump file: $!";
   $line_count++;
 
   # We require the database version line to be the first in the file so we can
@@ -1673,7 +1676,7 @@ sub restore_database {
     return 0;
   }
 
-  while (my $line = <DUMPFILE>) {
+  for ($!=0; defined($line=<DUMPFILE>); $!=0) {
     chomp($line);
     $line_count++;
 
@@ -1770,7 +1773,8 @@ sub restore_database {
       next;
     }
   }
-  close(DUMPFILE);
+  defined $line || $!==0  or die "Error reading dump file: $!";
+  close(DUMPFILE) or die "Can't close dump file: $!";
 
   print STDERR "\n" if ($showdots);
 

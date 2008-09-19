@@ -112,7 +112,8 @@ my %resphash = (
 
 sub print_version {
   print "SpamAssassin version " . Mail::SpamAssassin::Version() . "\n"
-      . "  running on Perl version " . join(".", map { $_||=0; $_*1 } ($] =~ /(\d)\.(\d{3})(\d{3})?/ )) . "\n";
+      . "  running on Perl version " . join(".", map { $_||=0; $_*1 } ($] =~ /(\d)\.(\d{3})(\d{3})?/ )) . "\n"
+    or die "error writing: $!";
 }
 
 sub print_usage_and_exit {
@@ -121,7 +122,7 @@ sub print_usage_and_exit {
 
   if ($respnam eq 'EX_OK' ) {
     print_version();
-    print("\n");
+    print("\n")  or die "error writing: $!";
   }
   pod2usage(
     -verbose => 0,
@@ -138,7 +139,7 @@ sub usage {
   my ( $verbose, $message ) = @_;
   my $ver = Mail::SpamAssassin::Version();
 
-  print "SpamAssassin version $ver\n";
+  print "SpamAssassin version $ver\n"  or die "error writing: $!";
   pod2usage( -verbose => $verbose, -message => $message, -exitval => 64, -input => "spamassassin-run.pod", -pathlist => \@INC );
 
 }
@@ -235,8 +236,8 @@ if (defined $opt{'debug'}) {
 }
 
 if (Mail::SpamAssassin::Util::am_running_on_windows()) {
-  binmode(STDIN);       # bug 4363
-  binmode(STDOUT);
+  binmode(STDIN)  or die "cannot set binmode on STDIN: $!";  # bug 4363
+  binmode(STDOUT) or die "cannot set binmode on STDOUT: $!";
 }
 
 # bug 5048: --lint should not cause network accesses
@@ -265,6 +266,9 @@ if ($opt{'lint'}) {
   $spamtest->debug_diagnostics();
   my $res = $spamtest->lint_rules();
   warn "lint: $res issues detected, please rerun with debug enabled for more information\n" if ($res);
+  # make sure we notice any write errors while flushing output buffer
+  close STDOUT  or die "error closing STDOUT: $!";
+  close STDIN   or die "error closing STDIN: $!";
   exit $res ? 1 : 0;
 }
 
@@ -288,6 +292,9 @@ if ($opt{'remove-addr-from-whitelist'} ||
   }
 
   $spamtest->finish();
+  # make sure we notice any write errors while flushing output buffer
+  close STDOUT  or die "error closing STDOUT: $!";
+  close STDIN   or die "error closing STDIN: $!";
   exit(0);
 }
 
@@ -329,12 +336,15 @@ for(my $elem = 0; $elem <= $#targets; $elem++) {
     }
     else {
       my $handle;
-
-      local $/ = undef;    # go into slurp mode
       ( $tempfile, $handle ) = Mail::SpamAssassin::Util::secure_tmpfile();
-      binmode $handle;
-      print {$handle} <STDIN>;
-      close $handle;
+      binmode $handle  or die "cannot set binmode on file $tempfile: $!";
+
+      # avoid slurping the whole file into memory, copy chunk by chunk
+      my($inbuf,$nread);
+      while ( $nread=sysread(STDIN,$inbuf,16384) )
+        { print {$handle} $inbuf  or die "error writing to $tempfile: $!" }
+      defined $nread  or die "error reading from STDIN: $!";
+      close $handle   or die "cannot close $tempfile: $!";
 
       # re-aim the targets at the tempfile instead of STDIN
       $targets[$elem] =~ s/-$/$tempfile/;
@@ -366,26 +376,35 @@ $iter->set_functions( \&wanted, \&result );
 # bug 4930: use a temp variable since "||=" decides whether or not to set the
 # value before the RHS is actually run, so if the RHS separately sets the LHS
 # variable, things don't work right.  Stupid global variables. ;)
-eval { my $runreturn = !$iter->run(@targets);  $exitvalue ||= $runreturn; };
+my $eval_stat;
+eval {
+  my $runreturn = !$iter->run(@targets);  $exitvalue ||= $runreturn;  1;
+} or do {
+  $eval_stat = $@ ne '' ? $@ : "errno=$!";  chomp $eval_stat;
+};
 
 $progress->final() if ($opt{progress} && $progress);
 
 # If we needed to make a tempfile, go delete it now.
-if ( defined $tempfile ) {
-  unlink $tempfile;
+if (defined $tempfile) {
+  unlink $tempfile  or die "cannot unlink temporary file $tempfile: $!";
+  undef $tempfile;
 }
 
 # Let folks know how many messages were handled, as long as the handling
 # didn't produce output (ala: check, test, or remove_markup ...)
 if ( $opt{'report'} || $opt{'revoke'} || $doing_whitelist_operation ) {
-  print "$count message(s) examined.\n";
+  print "$count message(s) examined.\n"  or die "error writing: $!";
 }
 
 # if the eval died from something, report it here and return an error.
-if ($@) { die $@; }
+if (defined $eval_stat) { die $eval_stat; }
 
 $spamtest->finish()  if $spamtest;
 
+# make sure we notice any write errors while flushing output buffer
+close STDOUT  or die "error closing STDOUT: $!";
+close STDIN   or die "error closing STDIN: $!";
 # Ok, exit!
 exit( $exitvalue || 0 );
 
@@ -496,11 +515,11 @@ sub wanted {
 
   # OK, do checks and put out the message.
   my $status = $spamtest->check($mail);
-  print $status->rewrite_mail ();
+  print $status->rewrite_mail()  or die "error writing: $!";
 
   if ( $opt{'test-mode'} ) {
     use bytes;
-    print $status->get_report();
+    print $status->get_report()  or die "error writing: $!";
   }
 
   # if this message was spam, set the exit value appropriately.
@@ -524,7 +543,8 @@ sub setup_sig_handlers {
   $SIG{HUP}  = \&kill_handler;
   $SIG{INT}  = \&kill_handler;
   $SIG{TERM} = \&kill_handler;
-  $SIG{PIPE} = \&kill_handler;
+# $SIG{PIPE} = \&kill_handler;
+  $SIG{PIPE} = 'IGNORE';
 }
 
 sub kill_handler {
@@ -535,9 +555,10 @@ sub kill_handler {
     $mail = undef;
   }
   if (defined $tempfile) {      # bug 5557: additional paranoia about tmpfiles
-    unlink $tempfile;
-    $tempfile = undef;
+    unlink $tempfile  or warn "cannot unlink temporary file $tempfile: $!";
+    undef $tempfile;
   }
+  close STDOUT; close STDIN;  # ignoring status
   exit 0;
 }
 

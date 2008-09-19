@@ -37,6 +37,8 @@ package Mail::SpamAssassin::Plugin::Pyzor;
 use Mail::SpamAssassin::Plugin;
 use Mail::SpamAssassin::Logger;
 use Mail::SpamAssassin::Timeout;
+use Mail::SpamAssassin::Util qw(untaint_file_path
+                                proc_status_ok exit_status_str);
 use strict;
 use warnings;
 use bytes;
@@ -181,7 +183,7 @@ you should use this, as the current PATH will have been cleared.
       if (!defined $value || !length $value) {
 	return $Mail::SpamAssassin::Conf::MISSING_REQUIRED_VALUE;
       }
-      $value = Mail::SpamAssassin::Util::untaint_file_path($value);
+      $value = untaint_file_path($value);
       if (!-x $value) {
 	info("config: pyzor_path \"$value\" isn't an executable");
 	return $Mail::SpamAssassin::Conf::INVALID_VALUE;
@@ -260,7 +262,7 @@ sub pyzor_lookup {
   my $tmpf = $permsgstatus->create_fulltext_tmpfile($fulltext);
 
   # note: not really tainted, this came from system configuration file
-  my $path = Mail::SpamAssassin::Util::untaint_file_path($self->{main}->{conf}->{pyzor_path});
+  my $path = untaint_file_path($self->{main}->{conf}->{pyzor_path});
 
   my $opts = $self->{main}->{conf}->{pyzor_options} || '';
 
@@ -277,9 +279,12 @@ sub pyzor_lookup {
 	$tmpf, 1, $path, split(' ', $opts), "check");
     $pid or die "$!\n";
 
-    @response = <PYZOR>;
-    close PYZOR
-      or dbg(sprintf("pyzor: [%s] finished: %s exit=0x%04x",$pid,$!,$?));
+    $! = 0; @response = <PYZOR>;
+    $!==0  or die "error reading from pipe: $!";
+
+    my $errno = 0;  close PYZOR or $errno = $!;
+    proc_status_ok($?,$errno)
+      or info("pyzor: [%s] finished: %s", $pid, exit_status_str($?,$errno));
 
     if (!@response) {
       # this exact string is needed below
@@ -300,8 +305,9 @@ sub pyzor_lookup {
       if (kill('TERM',$pid)) { dbg("pyzor: killed stale helper [$pid]") }
       else { dbg("pyzor: killing helper application [$pid] failed: $!") }
     }
-    close PYZOR
-      or dbg(sprintf("pyzor: [%s] terminated: %s exit=0x%04x",$pid,$!,$?));
+    my $errno = 0;  close PYZOR or $errno = $!;
+    proc_status_ok($?,$errno)
+      or info("pyzor: [%s] terminated: %s", $pid, exit_status_str($?,$errno));
   }
   $permsgstatus->leave_helper_run_mode();
 
@@ -377,7 +383,7 @@ sub pyzor_report {
   my ($self, $options, $tmpf) = @_;
 
   # note: not really tainted, this came from system configuration file
-  my $path = Mail::SpamAssassin::Util::untaint_file_path($options->{report}->{conf}->{pyzor_path});
+  my $path = untaint_file_path($options->{report}->{conf}->{pyzor_path});
 
   my $opts = $options->{report}->{conf}->{pyzor_options} || '';
   my $timeout = $self->{main}->{conf}->{pyzor_timeout};
@@ -395,10 +401,16 @@ sub pyzor_report {
 	$tmpf, 1, $path, split(' ', $opts), "report");
     $pid or die "$!\n";
 
-    my @ignored = <PYZOR>;
-    $options->{report}->close_pipe_fh(\*PYZOR);
+    $! = 0; my @ignored = <PYZOR>;
+    $!==0  or die "error reading from pipe: $!";
+    dbg("pyzor: empty response")  if !@ignored;
 
-    waitpid ($pid, 0);
+    my $errno = 0;  close PYZOR or $errno = $!;
+    # closing a pipe also waits for the process executing on the pipe to
+    # complete, no need to explicitly call waitpid
+    # my $child_stat = waitpid($pid,0) > 0 ? $? : undef;
+    proc_status_ok($?,$errno)
+      or die "pyzor: reporter error: ".exit_status_str($?,$errno)."\n";
   });
 
   $options->{report}->leave_helper_run_mode();

@@ -230,15 +230,16 @@ sub word_is_in_dictionary {
     }
 
     if (!open (TRIPLETS, "<$filename")) {
-      dbg("eval: failed to open '$filename', cannot check dictionary");
+      dbg("eval: failed to open '$filename', cannot check dictionary: $!");
       return 1;
     }
 
-    while(<TRIPLETS>) {
+    for($!=0; <TRIPLETS>; $!=0) {
       chomp;
       $triplets{$_} = 1;
     }
-    close(TRIPLETS);
+    defined $_ || $!==0  or die "error reading from $filename: $!";
+    close(TRIPLETS)  or die "error closing $filename: $!";
 
     $triplets_loaded = 1;
   } # if (!$triplets_loaded)

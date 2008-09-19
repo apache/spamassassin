@@ -271,8 +271,10 @@ sub raw {
   if (ref $self->{'raw'} eq 'GLOB') {
     my @array;
     my $fd = $self->{'raw'};
-    seek $fd, 0, 0;
-    @array = <$fd>;
+    seek($fd, 0, 0)  or die "message: cannot rewind file: $!";
+    $! = 0; @array = <$fd>;
+    $!==0  or die "message: error reading: $!";
+    dbg("message: empty message read")  if !@array;
     return \@array;
   }
 
@@ -303,10 +305,15 @@ sub decode {
     # if the part is held in a temp file, read it into the scalar
     if (ref $self->{'raw'} eq 'GLOB') {
       my $fd = $self->{'raw'};
-      seek $fd, 0, 0;
+      seek($fd, 0, 0)  or die "message: cannot rewind file: $!";
       local $/ = undef;
-      $raw = <$fd>;
-      $raw = ''  if !defined $raw;
+      $! = 0; $raw = <$fd>;
+      defined $raw || $!==0
+        or die "message: error reading from a temp file: $!";
+      if (!defined $raw) {
+        dbg("message: empty message read from a temp file");
+        $raw = '';
+      }
     }
     else {
       # create a new scalar from the raw array in memory

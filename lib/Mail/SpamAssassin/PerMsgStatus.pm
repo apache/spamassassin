@@ -2420,8 +2420,8 @@ sub create_fulltext_tmpfile {
   }
 
   my ($tmpf, $tmpfh) = Mail::SpamAssassin::Util::secure_tmpfile();
-  print $tmpfh $$fulltext;
-  close $tmpfh;
+  print $tmpfh $$fulltext  or die "error writing to $tmpf: $!";
+  close $tmpfh  or die "error closing $tmpf: $!";
 
   $self->{fulltext_tmpfile} = $tmpf;
 
@@ -2438,7 +2438,8 @@ temporary file and uncaches the filename.
 sub delete_fulltext_tmpfile {
   my ($self) = @_;
   if (defined $self->{fulltext_tmpfile}) {
-    unlink $self->{fulltext_tmpfile};
+    unlink $self->{fulltext_tmpfile}
+      or die "cannot unlink ".$self->{fulltext_tmpfile}.": $!";
     $self->{fulltext_tmpfile} = undef;
   }
 }

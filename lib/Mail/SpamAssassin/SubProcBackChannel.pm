@@ -87,11 +87,12 @@ sub setup_backchannel_parent_post_fork {
 
   my $fh = $self->{latest_kid_fh};
 
-  close $self->{parent};    # because it's us!
+  close $self->{parent}    # because it's us!
+    or die "backchannel: error closing parent side of the pipe: $!";
 
   # disable caching for parent<->child relations
   my ($old) = select($fh);
-  $|++;
+  $| = 1;   # turn off buffering
   select($old);
 
   $self->{kids}->{$pid} = $fh;
@@ -151,7 +152,8 @@ sub delete_socket_for_child {
 sub setup_backchannel_child_post_fork {
   my ($self) = @_;
 
-  close $self->{latest_kid_fh}; # because it's us!
+  close $self->{latest_kid_fh}  # because it's us!
+    or die "backchannel: error closing child side of the pipe: $!";
 
   my $old = select($self->{parent});
   $| = 1;   # print to parent by default, turn off buffering

@@ -79,14 +79,17 @@ sub init {
 sub log_message {
   my ($self, $level, $msg) = @_;
 
-  syswrite(STDLOG, sprintf("%s [%s] %s: %s\n",
+  my($nwrite) = syswrite(STDLOG, sprintf("%s [%s] %s: %s\n",
 			   scalar localtime, $$, $level, $msg));
+  defined $nwrite  or warn "error writing to log file: $!";
 }
 
 sub close_log {
   my ($self) = @_;
 
-  close(STDLOG) if defined $self->{filename};
+  if (defined $self->{filename}) {
+    close(STDLOG)  or die "error closing log file: $!";
+  }
 }
 
 1;
