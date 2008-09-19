@@ -4,6 +4,7 @@
 # script so that, if SVN updates it, changes will take effect in this
 # mass-check
 
+. /etc/profile
 . $HOME/.corpus
 
 RSYNC_PASSWORD=$password ; export RSYNC_PASSWORD
