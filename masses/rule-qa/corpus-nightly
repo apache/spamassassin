@@ -4,6 +4,7 @@
 
 echo "Using corpus-nightly settings from $HOME/.corpus at"
 date
+. /etc/profile
 . $HOME/.corpus
 
 # use $PERL from env if unset
