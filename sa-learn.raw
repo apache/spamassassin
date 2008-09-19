@@ -69,6 +69,8 @@ use Mail::SpamAssassin::Util::Progress;
 
 ###########################################################################
 
+$SIG{PIPE} = 'IGNORE';
+
 # used to be CmdLearn::cmd_run() ...
 
 %opt = (
@@ -229,8 +231,8 @@ $spamtest = new Mail::SpamAssassin(
 $spamtest->init(1);
 
 if (Mail::SpamAssassin::Util::am_running_on_windows()) {
-  binmode(STDIN);       # bug 4363
-  binmode(STDOUT);
+  binmode(STDIN)  or die "cannot set binmode on STDIN: $!";  # bug 4363
+  binmode(STDOUT) or die "cannot set binmode on STDOUT: $!";
 }
 
 if ( defined $opt{'dump'} ) {
@@ -257,12 +259,18 @@ if ( defined $opt{'dump'} ) {
   }
 
   $spamtest->finish_learner();
+  # make sure we notice any write errors while flushing output buffer
+  close STDOUT  or die "error closing STDOUT: $!";
+  close STDIN   or die "error closing STDIN: $!";
   exit 0;
 }
 
 if ( defined $opt{'import'} ) {
   my $ret = $spamtest->{bayes_scanner}->{store}->perform_upgrade();
   $spamtest->finish_learner();
+  # make sure we notice any write errors while flushing output buffer
+  close STDOUT  or die "error closing STDOUT: $!";
+  close STDIN   or die "error closing STDIN: $!";
   exit( !$ret );
 }
 
@@ -273,6 +281,9 @@ if (defined $opt{'clear'}) {
   }
 
   $spamtest->finish_learner();
+  # make sure we notice any write errors while flushing output buffer
+  close STDOUT  or die "error closing STDOUT: $!";
+  close STDIN   or die "error closing STDIN: $!";
   exit 0;
 }
 
@@ -283,6 +294,9 @@ if (defined $opt{'backup'}) {
   }
 
   $spamtest->finish_learner();
+  # make sure we notice any write errors while flushing output buffer
+  close STDOUT  or die "error closing STDOUT: $!";
+  close STDIN   or die "error closing STDIN: $!";
   exit 0;
 }
 
@@ -301,6 +315,9 @@ if (defined $opt{'restore'}) {
   }
 
   $spamtest->finish_learner();
+  # make sure we notice any write errors while flushing output buffer
+  close STDOUT  or die "error closing STDOUT: $!";
+  close STDIN   or die "error closing STDIN: $!";
   exit 0;
 }
 
@@ -328,6 +345,9 @@ if ($synconly) {
     }
   );
   $spamtest->finish_learner();
+  # make sure we notice any write errors while flushing output buffer
+  close STDOUT  or die "error closing STDOUT: $!";
+  close STDIN   or die "error closing STDIN: $!";
   exit 0;
 }
 
@@ -351,12 +371,13 @@ my $exit_status = 0;
 # run this lot in an eval block, so we can catch die's and clear
 # up the dbs.
 eval {
+  $SIG{HUP}  = \&killed;
   $SIG{INT}  = \&killed;
   $SIG{TERM} = \&killed;
 
   if ( $opt{folders} ) {
-    open( F, $opt{folders} ) || die $!;
-    while (<F>) {
+    open( F, $opt{folders} )  or die "cannot open $opt{folders}: $!";
+    for ($!=0; <F>; $!=0) {
       chomp;
       next unless ($_);
       if (/^(?:ham|spam):\w*:/) {
@@ -366,7 +387,8 @@ eval {
         target($_);
       }
     }
-    close(F);
+    defined $_ || $!==0  or die "error reading from $opt{folders}: $!";
+    close(F)  or die "error closing $opt{folders}: $!";
   }
 
   ###########################################################################
@@ -389,11 +411,15 @@ eval {
       }
       else {
         my $handle;
-
-        local $/ = undef;    # go into slurp mode
         ( $tempfile, $handle ) = Mail::SpamAssassin::Util::secure_tmpfile();
-        print {$handle} <STDIN>;
-        close $handle;
+        binmode $handle  or die "cannot set binmode on file $tempfile: $!";
+
+        # avoid slurping the whole file into memory, copy chunk by chunk
+        my($inbuf,$nread);
+        while ( $nread=sysread(STDIN,$inbuf,16384) )
+          { print {$handle} $inbuf  or die "error writing to $tempfile: $!" }
+        defined $nread  or die "error reading from STDIN: $!";
+          close $handle  or die "error closing $tempfile: $!";
 
         # re-aim the targets at the tempfile instead of STDIN
         $targets[$elem] =~ s/-$/$tempfile/;
@@ -436,20 +462,23 @@ eval {
   print "$phrase tokens from $learnedcount message(s) ($messagecount message(s) examined)\n";
 
   # If we needed to make a tempfile, go delete it.
-  if ( defined $tempfile ) {
-    unlink $tempfile;
+  if (defined $tempfile) {
+    unlink $tempfile  or die "cannot unlink temporary file $tempfile: $!";
+    undef $tempfile;
   }
 
   if ($@) { die $@ unless ( $@ =~ /HITLIMIT/ ); }
+  1;
+} or do {
+  my $eval_stat = $@ ne '' ? $@ : "errno=$!";  chomp $eval_stat;
+  $spamtest->finish_learner();
+  die $eval_stat;
 };
 
-if ($@) {
-  my $failure = $@;
-  $spamtest->finish_learner();
-  die $failure;
-}
-
 $spamtest->finish_learner();
+# make sure we notice any write errors while flushing output buffer
+close STDOUT  or die "error closing STDOUT: $!";
+close STDIN   or die "error closing STDIN: $!";
 exit $exit_status;
 
 ###########################################################################

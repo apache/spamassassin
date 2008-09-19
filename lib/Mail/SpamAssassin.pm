@@ -1173,12 +1173,19 @@ sub read_scoreonly_config {
     return;
   }
 
-  my $text = "file start $filename\n"
-        . join ('', <IN>)
-        # add an extra \n in case file did not end in one.
-        . "\nfile end $filename\n";
+  my $text;
+  { local $/ = undef; $! = 0; $text = <IN> }
+  defined $text || $!==0  or die "error reading $filename: $!";
+  close IN or die "error closing $filename: $!";
 
-  close IN;
+  if (!defined $text) {
+    dbg("config: read_scoreonly_config: empty file");
+    $text = '';
+  }
+
+  $text = "file start $filename\n" . $text;
+  # add an extra \n in case file did not end in one.
+  $text .= "\nfile end $filename\n";
 
   $self->{conf}->{main} = $self;
   $self->{conf}->parse_scores_only ($text);
@@ -1630,7 +1637,14 @@ sub init {
         # just use the last entry in the array as the default path.
         $fname ||= $self->sed_path($default_userprefs_path[-1]);
 
-	if (!-f $fname && !$self->create_default_prefs($fname)) {
+        my $stat_errn = stat($fname) ? 0 : 0+$!;
+        if ($stat_errn == 0 && -f _) {
+          # exists and is a regular file, nothing to do
+        } elsif ($stat_errn == 0) {
+          warn "config: default user preference file $fname is not a regular file\n";
+        } elsif ($stat_errn != ENOENT) {
+          warn "config: default user preference file $fname not accessible: $!\n";
+        } elsif (!$self->create_default_prefs($fname)) {
           warn "config: failed to create default user preference file $fname\n";
         }
       }
@@ -1706,12 +1720,16 @@ sub _read_cf_pre {
   {
     dbg("config: using \"$path\" for $desc");
 
-    if (-d $path) {
+    my $stat_errn = stat($path) ? 0 : 0+$!;
+    if ($stat_errn == ENOENT) {
+      # no file or directory
+    } elsif ($stat_errn != 0) {
+      dbg("config: file or directory $path not accessible: $!");
+    } elsif (-d _) {
       foreach my $file ($self->$filelistmethod($path)) {
         $txt .= read_cf_file($file);
       }
-
-    } elsif (-f $path && -s _ && -r _) {
+    } elsif (-f _ && -s _ && -r _) {
       $txt .= read_cf_file($path);
     }
   }
@@ -1725,11 +1743,20 @@ sub read_cf_file {
   my $txt = '';
 
   if (open (IN, "<".$path)) {
-    $txt = "file start $path\n";
-    $txt .= join ('', <IN>);
+
+    { local $/; undef $/; $! = 0; $txt = <IN> }
+    defined $txt || $!==0  or die "error reading $path: $!";
+    close IN or die "error closing $path: $!";
+
+    if (!defined $txt) {
+      dbg("config: read_cf_file: empty file $path");
+      $txt = '';
+    }
+
+    $txt = "file start $path\n" . $txt;
     # add an extra \n in case file did not end in one.
     $txt .= "\nfile end $path\n";
-    close IN;
+
     dbg("config: read file $path");
   }
   else {
@@ -1766,7 +1793,12 @@ sub get_and_create_userstate_dir {
     dbg("config: using \"$fname\" for user state dir");
   }
 
-  if (!-d $fname) {
+  my $stat_errn = stat($fname) ? 0 : 0+$!;
+  if ($stat_errn == 0 && !-d _) {
+    die "config: $fname exists but is not a directory\n";
+  } elsif ($stat_errn != 0 && $stat_errn != ENOENT) {
+    die "config: error accessing $fname: $!\n";
+  } else {  # does not exist, create it
     # not being able to create the *dir* is not worth a warning at all times
     eval {
       mkpath($fname, 0, 0700);  1;
@@ -1822,7 +1854,8 @@ sub create_default_prefs {
 #    warn "config: hooray! user_dirs don't match! '$userdir' vs '$self->{user_dir}'\n";
 #  }
 
-  if (!-f $fname)
+  my $stat_errn = stat($fname) ? 0 : 0+$!;
+  if ($stat_errn == ENOENT)
   {
     # Pass on the value of $userdir for virtual users in vpopmail
     # otherwise it is empty and the user's normal homedir is used
@@ -1834,12 +1867,13 @@ sub create_default_prefs {
     if (defined $defprefs && open (IN, "<$defprefs")) {
       $fname = Mail::SpamAssassin::Util::untaint_file_path($fname);
       if (open (OUT, ">$fname")) {
-        while (<IN>) {
+        for ($!=0; <IN>; $!=0) {
           /^\#\* / and next;
-          print OUT;
+          print OUT  or die "cannot write to $fname: $!";
         }
-        close OUT;
-        close IN;
+        defined $_ || $!==0  or die "error reading from $defprefs: $!";
+        close OUT or die "error closing $fname: $!";
+        close IN  or die "error closing $defprefs: $!";
 
         if (($< == 0) && ($> == 0) && defined($user)) { # chown it
           my ($uid,$gid) = (getpwnam($user))[2,3];
@@ -1851,7 +1885,7 @@ sub create_default_prefs {
         return(1);
       }
       else {
-        warn "config: cannot write to $fname: $!\n";
+        warn "config: cannot create $fname: $!\n";
       }
     }
     elsif (defined $defprefs) {
@@ -1965,7 +1999,8 @@ sub _get_cf_pre_files_in_dir {
   }
   else {
     opendir(SA_CF_DIR, $dir) or warn "config: cannot opendir $dir: $!\n";
-    my @cfs = grep { /\.${type}$/i && -f "$dir/$_" } readdir(SA_CF_DIR);
+    my @cfs = grep { $_ ne '.' && $_ ne '..' &&
+                     /\.${type}$/i && -f "$dir/$_" } readdir(SA_CF_DIR);
     closedir SA_CF_DIR;
 
     return map { "$dir/$_" } sort { $a cmp $b } @cfs;

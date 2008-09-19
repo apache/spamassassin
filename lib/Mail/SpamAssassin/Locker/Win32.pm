@@ -59,7 +59,8 @@ sub safe_lock {
 
   if (-e $lock_file && -M $lock_file > (LOCK_MAX_AGE / 86400)) {
     dbg("locker: safe_lock: breaking stale lock: $lock_file");
-    unlink($lock_file) || warn "locker: safe_lock: unlink of lock file $lock_file failed: $!\n";
+    unlink($lock_file)
+      or warn "locker: safe_lock: unlink of lock file $lock_file failed: $!\n";
   }
   for (my $retries = 0; $retries < $max_retries; $retries++) {
     if ($retries > 0) {
@@ -67,19 +68,24 @@ sub safe_lock {
       # TODO: $self->jittery_one_second_sleep();?
     }
     dbg("locker: safe_lock: trying to get lock on $path with $retries retries");
-    if (sysopen(LOCKFILE, $lock_file, O_RDWR|O_CREAT|O_EXCL)) {
+    if (!defined sysopen(LOCKFILE, $lock_file, O_RDWR|O_CREAT|O_EXCL)) {
+      dbg("locker: safe_lock: failed to create lock tmpfile $lock_file: $!");
+    } else {
       dbg("locker: safe_lock: link to $lock_file: sysopen ok");
-      close(LOCKFILE);
+      close(LOCKFILE)  or warn "error closing a lock file: $!";
       return 1;
     }
     my @stat = stat($lock_file);
+    @stat  or warn "locker: error accessing $lock_file: $!";
+
     # check age of lockfile ctime
     my $age = ($#stat < 11 ? undef : $stat[10]);
     if ((!defined($age) && $retries > $max_retries / 2) ||
 	(defined($age) && (time - $age > LOCK_MAX_AGE)))
     {
       dbg("locker: safe_lock: breaking stale lock: $lock_file");
-      unlink ($lock_file) || warn "locker: safe_lock: unlink of lock file $lock_file failed: $!\n";
+      unlink($lock_file)
+        or warn "locker: safe_lock: unlink of lock file $lock_file failed: $!\n";
     }
   }
   return 0;
@@ -90,7 +96,8 @@ sub safe_lock {
 sub safe_unlock {
   my ($self, $path) = @_;
 
-  unlink ("$path.lock") || warn "locker: safe_unlock: unlink failed: $path.lock\n";
+  unlink("$path.lock")
+    or warn "locker: safe_unlock: unlink failed: $path.lock\n";
   dbg("locker: safe_unlock: unlink $path.lock");
 }
 

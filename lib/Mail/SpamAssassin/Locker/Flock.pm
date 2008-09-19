@@ -82,7 +82,9 @@ sub safe_lock {
     $oldalarm = alarm $max_retries;
 
     # HELLO!?! IO::File doesn't have a flock() method?!
-    if (flock ($fh, LOCK_EX)) {
+    if (!flock($fh, LOCK_EX)) {
+      warn "locker: safe_lock: cannot obtain a lock on log file: $!";
+    } else {
       alarm $oldalarm;
       $unalarmed = 1; # avoid calling alarm(0) twice
 
@@ -90,8 +92,8 @@ sub safe_lock {
       $is_locked = 1;
 
       # just to be nice: let people know when it was locked
-      $fh->print ("$$\n");
-      $fh->flush ();
+      $fh->print("$$\n")  or die "error writing to lock file: $!";
+      $fh->flush  or die "cannot flush lock file: $!";
 
       # keep the FD around - we need to keep the lockfile open or the lock
       # is unlocked!
@@ -129,8 +131,8 @@ sub safe_unlock {
   my $fh = $self->{lock_fhs}->{$path};
   delete $self->{lock_fhs}->{$path};
 
-  flock ($fh, LOCK_UN);
-  $fh->close();
+  flock($fh, LOCK_UN)  or die "cannot unlock a log file: $!";
+  $fh->close  or die "error closing a lock file: $!";
 
   dbg("locker: safe_unlock: unlocked $path.mutex");
 
@@ -163,8 +165,8 @@ sub refresh_lock {
   }
 
   my $fh = $self->{lock_fhs}->{$path};
-  $fh->print ("$$\n");
-  $fh->flush ();
+  $fh->print("$$\n")  or die "error writing to lock file: $!";
+  $fh->flush  or die "cannot flush lock file: $!";
 
   dbg("locker: refresh_lock: refresh $path.mutex");
 }

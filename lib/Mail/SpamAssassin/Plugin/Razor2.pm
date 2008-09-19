@@ -245,7 +245,9 @@ sub razor2_access {
             last;
           }
         }
-        close $rc->{logref}->{fd} if ($untie);
+        if ($untie) {
+          close($rc->{logref}->{fd})  or die "error closing log: $!";
+        }
       }
 
       if ($type eq 'check') {

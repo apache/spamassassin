@@ -132,7 +132,9 @@ sub new {
   }
   elsif (ref $message eq 'GLOB' || ref $message eq 'IO::File') {
     if (defined fileno $message) {
-      @message = <$message>;
+      $! = 0; @message = <$message>;
+      $!==0  or die "error reading: $!";
+      dbg("message: empty message read from a file")  if !@message;
     }
   }
   elsif (ref $message) {
@@ -534,7 +536,7 @@ sub finish {
   while (my $part = shift @toclean) {
     # bug 5557: windows requires tmp file be closed before it can be rm'd
     if (ref $part->{'raw'} eq 'GLOB') {
-      close ($part->{'raw'});
+      close($part->{'raw'})  or die "error closing input file: $!";
     }
 
     # bug 5858: avoid memory leak with deep MIME structure
@@ -563,7 +565,9 @@ sub finish {
 
   # delete temporary files
   if ($self->{'tmpfiles'}) {
-    unlink @{$self->{'tmpfiles'}};
+    for my $fn (@{$self->{'tmpfiles'}}) {
+      unlink($fn) or warn "cannot unlink $fn: $!";
+    }
     delete $self->{'tmpfiles'};
   }
 }
@@ -576,7 +580,9 @@ sub DESTROY {
   # in code of a DESTROY method from clobbering global variables $@ and $! 
   local($@,$!);  # keep outer error handling unaffected by DESTROY
   if ($self->{'tmpfiles'}) {
-    unlink @{$self->{'tmpfiles'}};
+    for my $fn (@{$self->{'tmpfiles'}}) {
+      unlink($fn) or dbg("message: cannot unlink $fn: $!");
+    }
   }
 }
 
@@ -680,7 +686,8 @@ sub parse_body {
 	  # will have that data)
 	  if (ref $toparse->[0]->{'raw'} eq 'GLOB') {
 	    # Make sure we close it if it's a temp file -- Bug 5166
-	    close ($toparse->[0]->{'raw'});
+	    close($toparse->[0]->{'raw'})
+	      or die "error closing input file: $!";
 	  }
 
 	  delete $toparse->[0]->{'raw'};
@@ -922,7 +929,7 @@ sub _parse_normal {
       # we cannot just delete immediately in the POSIX idiom, as this is
       # unportable (to win32 at least)
       push @{$self->{tmpfiles}}, $filepath;
-      $msg->{'raw'}->print(@{$body});
+      $msg->{'raw'}->print(@{$body})  or die "error writing to $filepath: $!";
     }
   }
 

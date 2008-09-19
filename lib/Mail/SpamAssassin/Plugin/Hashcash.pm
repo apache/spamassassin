@@ -93,6 +93,7 @@ use Mail::SpamAssassin::Logger;
 use Mail::SpamAssassin::Util qw(untaint_var);
 
 use Digest::SHA1 qw(sha1);
+use Errno qw(ENOENT EACCES);
 use Fcntl;
 use File::Path;
 use File::Basename;
@@ -281,7 +282,10 @@ sub was_hashcash_token_double_spent {
 
   my $path = $main->sed_path ($main->{conf}->{hashcash_doublespend_path});
   my $parentdir = dirname ($path);
-  if (!-d $parentdir) {
+  my $stat_errn = stat($parentdir) ? 0 : 0+$!;
+  if ($stat_errn == 0 && !-d _) {
+    dbg("hashcash: parent dir $parentdir exists but is not a directory");
+  } elsif ($stat_errn == ENOENT) {
     # run in an eval(); if mkpath has no perms, it calls die()
     eval {
       mkpath ($parentdir, 0, (oct ($main->{conf}->{hashcash_doublespend_file_mode}) & 0777));

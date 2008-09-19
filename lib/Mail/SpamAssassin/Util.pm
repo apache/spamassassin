@@ -57,7 +57,8 @@ BEGIN {
 
   @ISA = qw(Exporter);
   @EXPORT = ();
-  @EXPORT_OK = qw(&local_tz &base64_decode &untaint_var);
+  @EXPORT_OK = qw(&local_tz &base64_decode &untaint_var &untaint_file_path
+                  &exit_status_str &proc_status_ok);
 }
 
 use Mail::SpamAssassin;
@@ -69,8 +70,9 @@ use File::Basename;
 use Time::Local;
 use Sys::Hostname (); # don't import hostname() into this namespace!
 use Fcntl;
-use POSIX (); # don't import anything unless we ask explicitly!
-use Errno qw(EEXIST);
+use Errno qw(ENOENT EACCES EEXIST);
+use POSIX qw(:sys_wait_h WIFEXITED WIFSIGNALED WIFSTOPPED WEXITSTATUS
+             WTERMSIG WSTOPSIG);
 
 ###########################################################################
 
@@ -144,7 +146,7 @@ use constant RUNNING_ON_WINDOWS => ($^O =~ /^(?:mswin|dos|os2)/oi);
 	next;
       }
       elsif (!(@stat=stat($dir))) {
-	dbg("util: PATH included '$dir', which doesn't exist, dropping");
+	dbg("util: PATH included '$dir', which is unusable, dropping: $!");
 	next;
       }
       elsif (!-d _) {
@@ -182,7 +184,7 @@ sub am_running_in_taint_mode {
     for my $d ((File::Spec->curdir, File::Spec->rootdir, File::Spec->tmpdir)) {
       opendir(TAINT, $d) || next;
       $blank = readdir(TAINT);
-      closedir(TAINT);
+      closedir(TAINT)  or die "error closing directory $d: $!";
       last;
     }
     if (!(defined $blank && $blank)) {
@@ -306,6 +308,46 @@ sub taint_var {
   # $^X is apparently "always tainted".
   # Concatenating an empty tainted string taints the result.
   return $v . substr($^X, 0, 0);
+}
+
+###########################################################################
+
+# map process termination status number to an informative string, and
+# append optional mesage (dual-valued errno or a string or a number),
+# returning the resulting string
+#
+sub exit_status_str($;$) {
+  my($stat,$errno) = @_;
+  my $str;
+  if (WIFEXITED($stat)) {
+    $str = sprintf("exit %d", WEXITSTATUS($stat));
+  } elsif (WIFSTOPPED($stat)) {
+    $str = sprintf("stopped, signal %d", WSTOPSIG($stat));
+  } else {
+    my $sig = WTERMSIG($stat);
+    $str = $sig == 2 ? 'INTERRUPTED' : $sig == 6 ? 'ABORTED'
+           : sprintf("DIED on signal %d (%04x)", $sig,$stat);
+  }
+  if (defined $errno) {  # deal with dual-valued and plain variables
+    $str .= ', '.$errno  if (0+$errno) != 0 || ($errno ne '' && $errno ne '0');
+  }
+  return $str;
+}
+
+###########################################################################
+
+# check errno to be 0 and a process exit status to be in the list of success
+# status codes, returning true if both are ok, and false otherwise
+#
+sub proc_status_ok($;$@) {
+  my($exit_status,$errno,@success) = @_;
+  my $ok = 0;
+  if ((!defined $errno || $errno == 0) && WIFEXITED($exit_status)) {
+    my $j = WEXITSTATUS($exit_status);
+    if (!@success) { $ok = $j==0 }  # empty list implies only status 0 is good
+    elsif (grep {$_ == $j} @success) { $ok = 1 }
+  }
+  return $ok;
 }
 
 ###########################################################################
@@ -986,7 +1028,7 @@ sub secure_tmpfile {
     # instead, we require O_EXCL|O_CREAT to guarantee us proper
     # ownership of our file, read the open(2) man page
     if (sysopen($tmpfile, $reportfile, O_RDWR|O_CREAT|O_EXCL, 0600)) {
-      binmode $tmpfile;
+      binmode $tmpfile  or die "cannot set $reportfile to binmode: $!";
       last;
     }
 
@@ -1000,7 +1042,7 @@ sub secure_tmpfile {
 
     # ensure the file handle is not semi-open in some way
     if ($tmpfile) {
-      close $tmpfile;
+      close $tmpfile  or info("error closing $reportfile: $!");
     }
   }
 
@@ -1433,7 +1475,7 @@ sub helper_app_pipe_open_unix {
     }
 
     my $f = fileno(STDIN);
-    close STDIN;
+    close STDIN  or die "error closing STDIN: $!";
 
     # sanity: was that the *real* STDIN? if not, close that one too ;)
     if ($f != 0) {
@@ -1462,7 +1504,7 @@ sub helper_app_pipe_open_unix {
 
     if ($duperr2out) {             # 2>&1
       my $f = fileno(STDERR);
-      close STDERR;
+      close STDERR  or die "error closing STDERR: $!";
 
       # sanity: was that the *real* STDERR? if not, close that one too ;)
       if ($f != 2) {
@@ -1589,12 +1631,11 @@ sub avoid_db_file_locking_bug {
   # delete "__db.[DBNAME]" and "__db.[DBNAME].*"
   foreach my $tfile ($db_tmpfile, <$db_tmpfile.*>) {
     my $file = untaint_file_path($tfile);
-    next unless (-e $file);
+    my $stat_errn = stat($file) ? 0 : 0+$!;
+    next if $stat_errn == ENOENT;
 
     dbg("Berkeley DB bug work-around: cleaning tmp file $file");
-    if (!unlink($file)) {
-      die "cannot remove Berkeley DB tmp file $file: $!\n";
-    }
+    unlink($file) or warn "cannot remove Berkeley DB tmp file $file: $!\n";
   }
 }
 

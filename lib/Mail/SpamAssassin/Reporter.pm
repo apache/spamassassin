@@ -23,7 +23,6 @@ use strict;
 use warnings;
 use bytes;
 use re 'taint';
-use POSIX ":sys_wait_h";
 use Mail::SpamAssassin::Logger;
 
 use vars qw{
@@ -91,28 +90,6 @@ sub revoke {
   }
 
   return $self->{revoke_return};
-}
-
-###########################################################################
-# non-public methods.
-
-# Close an fh piped to a process, possibly exiting if the process
-# returned nonzero.  thanks to nix /at/ esperi.demon.co.uk for this.
-sub close_pipe_fh {
-  my ($self, $fh) = @_;
-
-  return if close ($fh);
-
-  my $exitstatus = $?;
-  dbg("reporter: raw exit code: $exitstatus");
-
-  if (WIFEXITED ($exitstatus) && (WEXITSTATUS ($exitstatus))) {
-    die "reporter: exited with non-zero exit code " . WEXITSTATUS($exitstatus) . "\n";
-  }
-
-  if (WIFSIGNALED ($exitstatus)) {
-    die "reporter: exited due to signal " . WTERMSIG($exitstatus) . "\n";
-  }
 }
 
 ###########################################################################

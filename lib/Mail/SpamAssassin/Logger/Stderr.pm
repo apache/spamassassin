@@ -50,7 +50,8 @@ sub new {
 sub log_message {
   my ($self, $level, $msg) = @_;
 
-  print STDERR "[$$] $level: $msg\n";
+  print STDERR "[$$] $level: $msg\n"
+    or warn "Error writing to log file: $!";
 }
 
 sub close_log {

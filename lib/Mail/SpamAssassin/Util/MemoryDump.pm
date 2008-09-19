@@ -47,6 +47,7 @@ our $COUNTER = 0;
 
 use Devel::Peek qw();
 use Devel::Size qw(size total_size);
+use Mail::SpamAssassin::Util qw(proc_status_ok exit_status_str);
 eval q{ use Devel::Gladiator; };
 
 ###########################################################################
@@ -73,8 +74,9 @@ sub census_arena {
   # do this in a subprocess, since it leaks refs to all objects!
   my $pid = fork();
   if ($pid) {
-    waitpid ($pid, 0);
-    if ($?>>8 != 0) { warn "census subproc died: $?"; }
+    my $child_stat = waitpid($pid,0) > 0 ? $? : undef;
+    proc_status_ok($child_stat)
+      or warn "census subproc: ".exit_status_str($child_stat);
     return;
   }
 
@@ -193,7 +195,9 @@ sub dump_obj {
 
 sub new_dump_filename {
   my $type = shift;
-  if (!-d "dumps") { mkdir("dumps", 0777); }
+  if (!-d "dumps") {
+    mkdir("dumps", 0777)  or warn "dump: cannot create a directory: $!";
+  }
 
   my ($e, $filename, $line, $f) = caller(2);
   $filename =~ s/^.*[\/\\]//gs;

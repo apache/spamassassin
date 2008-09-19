@@ -39,6 +39,7 @@ my %MACRO_VALUES = (
 );
 
 # Standard perl modules
+use Errno qw(ENOENT EACCES);
 use File::Spec;
 use File::Path;
 use Getopt::Long;
@@ -885,6 +886,7 @@ ENDOFVALIDATIONERR
 
         my @files = ();
         while(my $file = readdir(DIR)) {
+	  next if $file eq '.' || $file eq '..';
 	  local ($1);	# avoid random taint flagging of $1
           $file =~ /^(.+)$/;       # untaint
           $file = $1;
@@ -958,9 +960,14 @@ if ($UPDTmp) {
 
 # clear out the temp files if they still exist
 foreach ( $content_file, $UPDTmp ) {
-  next unless (defined $_ && -e $_);
+  next unless defined $_;
+  my $stat_errn = stat($_) ? 0 : 0+$!;
+  next if $stat_errn == ENOENT;
 
-  if (-d _) {
+  if ($stat_errn != 0) {
+    warn "error: can't access $_: $!\n";
+  }
+  elsif (-d _) {
     rmdir $_ || warn "error: can't remove directory $_: $!\n";
   }
   elsif (-f _) {
@@ -1303,6 +1310,7 @@ sub clean_update_dir {
     return;
   }
   while(my $file = readdir(DIR)) {
+    next if $file eq '.' || $file eq '..';
     local ($1); # bug 5216: prevent random taint flagging of $1
     $file =~ /^(.+)$/;       # untaint
     $file = $1;

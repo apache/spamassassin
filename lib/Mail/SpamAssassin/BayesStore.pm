@@ -382,9 +382,11 @@ sub expire_old_tokens_trapped {
   if ($opts->{verbose}) {
     my $hapax_pc = ($num_hapaxes * 100) / $kept;
     my $lowfreq_pc = ($num_lowfreq * 100) / $kept;
-    print "$msg\n$msg2\n";
-    printf "token frequency: 1-occurrence tokens: %3.2f%%\n", $hapax_pc;
-    printf "token frequency: less than 8 occurrences: %3.2f%%\n", $lowfreq_pc;
+    print "$msg\n$msg2\n"  or die "Error writing: $!";
+    printf "token frequency: 1-occurrence tokens: %3.2f%%\n", $hapax_pc
+      or die "Error writing: $!";
+    printf "token frequency: less than 8 occurrences: %3.2f%%\n", $lowfreq_pc
+      or die "Error writing: $!";
   }
   else {
     dbg("bayes: $msg: $msg2");

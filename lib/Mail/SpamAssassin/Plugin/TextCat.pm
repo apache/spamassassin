@@ -359,9 +359,12 @@ sub load_models {
     return;
   }
 
-  local $/ = undef;
-  @lm = split(/\n/, <LM>);
-  close(LM);
+  { local $/ = undef;  local $_;
+    $! = 0; $_ = <LM>;
+    defined $_ || $!==0  or die "error reading from $languages_filename: $!";
+    @lm = split(/\n/, $_)  if defined $_;
+  }
+  close(LM)  or die "error closing $languages_filename: $!";
   # create language ngram maps once
   for (@lm) {
     # look for end delimiter

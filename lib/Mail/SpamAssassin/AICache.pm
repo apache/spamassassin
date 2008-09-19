@@ -70,7 +70,9 @@ sub new {
                 File::Spec->rel2abs($self->{path}),
                 '.spamassassin_cache');
 
-    $self->{cache_mtime} = (stat($self->{cache_file}))[9] || 0;
+    my @stat = stat($self->{cache_file});
+    @stat  or warn "AIcache: no access to $self->{cache_file}: $!";
+    $self->{cache_mtime} = $stat[9] || 0;
   }
   else {
     my @split = File::Spec->splitpath($self->{path});
@@ -79,24 +81,34 @@ sub new {
                 File::Spec->rel2abs($split[1]),
                 join('_', '.spamassassin_cache', $self->{type}, $split[2]));
 
-    $self->{cache_mtime} = (stat($self->{cache_file}))[9] || 0;
+    my @stat = stat($self->{cache_file});
+    @stat  or warn "AIcache: no access to $self->{cache_file}: $!";
+    $self->{cache_mtime} = $stat[9] || 0;
 
     # for mbox and mbx, verify whether mtime on cache file is >= mtime of
     # messages file.  if it is, use it, otherwise don't.
-    if ((stat($self->{path}))[9] > $self->{cache_mtime}) {
+    @stat = stat($self->{path});
+    @stat  or warn "AIcache: no access to $self->{path}: $!";
+    if ($stat[9] > $self->{cache_mtime}) {
       $use_cache = 0;
     }
   }
   $self->{cache_file} = File::Spec->canonpath($self->{cache_file});
 
   # go ahead and read in the cache information
-  if ($use_cache && open(CACHE, $self->{cache_file})) {
-    while(defined($_=<CACHE>)) {
+  if (!$use_cache) {
+    # not in use
+  } elsif (!open(CACHE, $self->{cache_file})) {
+    die "cannot open AI cache file (".$self->{cache_file}."): $!";
+  } else {
+    for ($!=0; defined($_=<CACHE>); $!=0) {
       my($k,$v) = split(/\t/, $_);
       next unless (defined $k && defined $v);
       $self->{cache}->{$k} = $v;
     }
-    close(CACHE);
+    defined $_ || $!==0  or die "error reading from AI cache file: $!";
+    close CACHE
+      or die "error closing AI cache file (".$self->{cache_file}."): $!";
   }
 
   bless($self,$class);
@@ -148,7 +160,7 @@ sub finish {
     1;
   } or do {
     my $eval_stat = $@ ne '' ? $@ : "errno=$!";  chomp $eval_stat;
-    warn "Can't mkpath for AI cache file ($self->{cache_file}): $eval_stat\n";
+    warn "cannot mkpath for AI cache file ($self->{cache_file}): $eval_stat\n";
   };
 
   my $towrite = '';
@@ -163,13 +175,14 @@ sub finish {
 
     if (!open(CACHE, ">".$self->{cache_file}))
     {
-      warn "open AI cache file failed (".$self->{cache_file}."): $!";
+      warn "creating AI cache file failed (".$self->{cache_file}."): $!";
       # TODO: should we delete it/clean it up?
     }
     else {
-      print CACHE $towrite;
+      print CACHE $towrite
+        or die "error writing to AI cache file: $!";
       close CACHE
-            or warn "close AI cache file failed (".$self->{cache_file}."): $!";
+        or die "error closing AI cache file (".$self->{cache_file}."): $!";
     }
   }
 

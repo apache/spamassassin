@@ -185,7 +185,7 @@ sub child_error_kill {
   }
 
   if ($sock) {
-    $sock->close;
+    $sock->close or info("prefork: error closing socket: $!");
   }
 
   delete $self->{kids}->{$pid};       # remove from list
@@ -435,7 +435,7 @@ sub read_one_message_from_child_socket {
     my $fno = $sock->fileno;
     if (defined $fno) {
       $self->{backchannel}->remove_from_selector($sock);
-      $sock->close();
+      $sock->close or info("prefork: error closing socket: $!");
     }
 
     return PFSTATE_ERROR;

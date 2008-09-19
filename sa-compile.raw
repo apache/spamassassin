@@ -56,7 +56,7 @@ BEGIN {                          # see comments in "spamassassin.raw" for doco
 }
 
 use Mail::SpamAssassin;
-use Mail::SpamAssassin::Util qw(untaint_var);
+use Mail::SpamAssassin::Util qw(untaint_var exit_status_str);
 use Getopt::Long;
 use File::Copy;
 use File::Path;
@@ -65,7 +65,7 @@ use Data::Dumper;
 
 use vars qw( %opt );
 Mail::SpamAssassin::Util::clean_path_in_taint_mode();
-Mail::SpamAssassin::Util::untaint_var( \%ENV );
+untaint_var( \%ENV );
 
 ##############################################################################
 
@@ -105,7 +105,8 @@ if ( defined $opt{'help'} ) {
   usage( 0, "For more information read the manual page" );
 }
 if ( defined $opt{'version'} ) {
-  print "SpamAssassin version " . Mail::SpamAssassin::Version() . "\n";
+  print "SpamAssassin version " . Mail::SpamAssassin::Version() . "\n"
+    or die "error writing: $!";
   exit 0;
 }
 
@@ -113,11 +114,13 @@ if ( defined $opt{'version'} ) {
 # present
 eval("use ExtUtils::MakeMaker");
 if ($@) {
-  print "$0 requires ExtUtils::MakeMaker for proper operation.\n";
+  print "$0 requires ExtUtils::MakeMaker for proper operation.\n"
+    or die "error writing: $!";
   exit 1;
 }
 unless (qx(re2c -V)) {
-  print "$0 requires re2c for proper operation.\n";
+  print "$0 requires re2c for proper operation.\n"
+    or die "error writing: $!";
   exit 1;
 }
 
@@ -127,7 +130,7 @@ sub usage {
 
   if ($exitval == 0) {
     print_version();
-    print("\n");
+    print("\n")  or die "error writing: $!";
   }
   pod2usage(
     -verbose => 0,
@@ -213,6 +216,11 @@ else {
 }
 
 $spamtest->finish();
+
+# make sure we notice any write errors while flushing output buffer
+close STDOUT  or die "error closing STDOUT: $!";
+close STDIN   or die "error closing STDIN: $!";
+
 exit;
 
 ##############################################################################
@@ -261,20 +269,25 @@ sub compile_base_strings {
     my $basespath = "bases_$ruletype.in";
     $basespath =~ s/[^A-Za-z0-9_\.]/_/gs;
     open OUT, ">$dirpath/$basespath"
-          or die "cannot write to $dirpath/$basespath";
-    print OUT dump_base_strings($ruletype);
-    close OUT or die "cannot write to $dirpath/$basespath";
+      or die "cannot create $dirpath/$basespath: $!";
+    print OUT dump_base_strings($ruletype)
+      or die "error writing to $dirpath/$basespath: $!";
+    close OUT
+      or die "error closing $dirpath/$basespath: $!";
 
     # compile it...
 
-    chdir $dirpath; 
-    $quiet or print "cd $dirpath\n";
+    chdir $dirpath  or die "cannot chdir to $dirpath: $!";
+    if (!$quiet) { print "cd $dirpath\n"  or die "error writing: $!" }
+
     rule2xs($basespath);
 
     my $log = "";
     if ($quiet) {
       $log = ">>$dirpath/log";
-      open (ZERO, ">$dirpath/log"); close ZERO; # empty it
+      # empty it
+      open(ZERO, ">$dirpath/log")  or die "cannot create $dirpath/log: $!";
+      close ZERO  or die "error closing $dirpath/log: $!";
     }
 
     run(get_perl()." Makefile.PL ".
@@ -287,35 +300,41 @@ sub compile_base_strings {
 
     my $plpath = "bases_$ruletype.pl";
     $plpath =~ s/[^A-Za-z0-9_\.]/_/gs;
-    open OUT, ">$dirpath/$plpath"
-          or die "cannot write to $dirpath/$plpath";
-    print OUT dump_as_perl($ruletype);
-    close OUT or die "cannot write to $dirpath/$plpath";
+    open(OUT, ">$dirpath/$plpath")
+      or die "cannot create $dirpath/$plpath: $!";
+    print OUT dump_as_perl($ruletype)
+      or die "error writing to $dirpath/$plpath: $!";
+    close OUT
+      or die "error closing $dirpath/$plpath: $!";
 
     run($sudo."cp $dirpath/$plpath $installdir/$plpath");
   }
 
   if (!$opt{'keep-tmps'}) {
     chdir '/'; 
-    $quiet or print "cd /\n";      # saves trouble on MacOS, possibly
+    if (!$quiet) {
+      # saves trouble on MacOS, possibly
+      print "cd /\n"  or die "error writing: $!";
+    }
     run($sudo."rm -rf $dirpath");       # cleanup
   }
   else {
-    print "temporary dir left due to --keep-tmps: $dirpath\n";
+    print "temporary dir left due to --keep-tmps: $dirpath\n"
+      or die "error writing: $!";
   }
 }
 
 sub run {
   my @cmd = @_;
-  $quiet or print join(' ',@cmd)."\n";
-  system(@cmd);
-  if ($?>>8 != 0) {
-    if ($quiet) {
-      die "command '".join(' ',@cmd)."' failed!";
-    } else {
-      die "command failed!";
-    }
+  if (!$quiet) { print join(' ',@cmd)."\n"  or die "error writing: $!" }
+  if (system(@cmd) != 0) {
+    my $msg = $? == -1 ? "failed to execute: $!"
+                       : "failed: ".exit_status_str($?);
+    if (!$quiet) { die "command ".$msg."\n" }
+    else { die "command '".join(' ',@cmd)."' ".$msg."\n" }
+    return 0;
   }
+  return 1;
 }
 
 sub get_perl {
@@ -339,10 +358,11 @@ sub rule2xs {
   my $force = 1;
   my $FILE = shift;
 
-  open(my $fh, $FILE) || die "open($FILE): $!";
+  open(my $fh, $FILE)  or die "cannot open $FILE: $!";
 # read ruleset name from the first line in the file
   my $ruleset_name;
   $_ = <$fh>;
+  defined $_  or die "error reading $FILE: $!";
   local ($1);
   if (/^name\s+(\S+)/) {
     $ruleset_name = untaint_var($1);
@@ -363,7 +383,7 @@ sub rule2xs {
   $force and rmtree $PATH;
   mkdir $PATH or (!$force and die "mkdir($PATH): $!");
   chdir $PATH;
-  $quiet or print "cd $PATH\n";
+  if (!$quiet) { print "cd $PATH\n" or die "error writing: $!" }
 
   my $cprefix = $modname; $cprefix =~ s/[^A-ZA-z0-9]+/_/gs;
 
@@ -373,9 +393,10 @@ sub rule2xs {
   while (!eof($fh)) {
     $numscans++;
 
-    open(my $re, ">scanner${numscans}.re") || die "open(>scanner{$numscans}.re): $!";
+    open(my $re, ">scanner${numscans}.re")
+      or die "cannot create scanner${numscans}.re: $!";
 
-    print $re <<EOT;
+    print $re <<EOT  or die "error writing: $!";
 #define NULL            ((char*) 0)
 #define YYCTYPE         unsigned char
 #define YYCURSOR        *p
@@ -388,7 +409,7 @@ sub rule2xs {
 #define RET(x)          { YYCURSOR = YYMARKER; return (x); }
 EOT
 
-    print $re <<EOT;
+    print $re <<EOT  or die "error writing: $!";
 char *${cprefix}_scan${numscans}(unsigned char **p){
 unsigned char *q;
 /*!re2c
@@ -396,7 +417,7 @@ EOT
 
     my $line = 0;
     my $rulecount = 0;
-    while (<$fh>) {
+    for ($!=0; <$fh>; $!=0) {
       next if /^#/;
 
       local ($1,$2);
@@ -414,14 +435,18 @@ EOT
       die "no 'r REGEXP:REASON' in $_" unless defined $regexp;
 
       eval {
-	print $re "\t", fixup_re($regexp), "            {RET(\"$reason\");}\n";
-	$line++;
+	print $re "\t", fixup_re($regexp), "            {RET(\"$reason\");}\n"
+          or die "error writing: $!";
+	$line++; 1;
+      } or do {
+        my $eval_stat = $@ ne '' ? $@ : "errno=$!";  chomp $eval_stat;
+        handle_fixup_error($eval_stat, $regexp, $reason);
       };
-      $@ and handle_fixup_error($@, $regexp, $reason);
       last if $line == MAX_RULES_PER_C_FILE;
     }
+    defined $_ || $!==0  or die "error reading from $FILE: $!";
 
-    print $re <<EOT;
+    print $re <<EOT  or die "error writing: $!";
   [\\000-\\377]        { return NULL; }
 */
 }
@@ -431,11 +456,9 @@ EOT
 
   for (1..$numscans) {
     my $cmd = "re2c -i -b -o scanner$_.c scanner$_.re";
-    run($cmd);
-
-    # this must be fatal; it can result in corrupt output modules missing
-    # scannerN() functions
-    if ($? >> 8 != 0) {
+    if (!run($cmd)) {
+      # this must be fatal; it can result in corrupt output modules missing
+      # scannerN() functions
       my $cwd = `pwd`; chop $cwd;
       die "'$cmd' failed, dying!\n".
           "Have you got a sufficiently-recent version of re2c?\n".
@@ -445,8 +468,8 @@ EOT
 
   my $ccopt = $Config{optimize};      # typically "-O2"
 
-  open(FILE, ">Makefile.PL") || die "write Makefile.PL: $!";
-  print FILE <<"EOT";
+  open(FILE, ">Makefile.PL")  or die "cannot create Makefile.PL: $!";
+  print FILE <<"EOT"  or die "error writing to Makefile.PL: $!";
     use ExtUtils::MakeMaker;
 
     WriteMakefile(
@@ -458,10 +481,10 @@ EOT
 	'AUTHOR' => 'A. U. Tomated <automated\@example.com>',
     );
 EOT
-  close FILE or die "write Makefile.PL: $!";
+  close FILE  or die "error closing Makefile.PL: $!";
 
-  open(FILE, ">MANIFEST.SKIP") || die "write MANIFEST.SKIP: $!";
-  print FILE <<'EOT';
+  open(FILE, ">MANIFEST.SKIP")  or die "cannot create MANIFEST.SKIP: $!";
+  print FILE <<'EOT'  or die "error writing to MANIFEST.SKIP: $!";
 CVS/.*
 \.bak$
 \.sw[a-z]$
@@ -479,10 +502,10 @@ CVS/.*
 ^pm_to_blib$
 ~$
 EOT
-  close FILE or die "write MANIFEST.SKIP: $!";
+  close FILE  or die "error closing MANIFEST.SKIP: $!";
 
-  open(my $re, ">$XSFILE") || die "write $XSFILE: $!";
-  print $re <<"EOT";
+  open(my $re, ">$XSFILE")  or die "cannot create $XSFILE: $!";
+  print $re <<"EOT"  or die "error writing to $XSFILE: $!";
 #include "EXTERN.h"
 #include "perl.h"
 #include "XSUB.h"
@@ -567,17 +590,17 @@ EOT
 
   }
 
-  print $re $xscode;
-  print $re <<EOT;
+  print $re $xscode  or die "error writing: $!";
+  print $re <<EOT  or die "error writing: $!";;
 	  RETVAL = newRV((SV *) results);
       OUTPUT:
 	  RETVAL
 
 EOT
 
-  close($re);
+  close($re)  or die "error closing $XSFILE: $!";
 
-  open(FILE, ">$PMFILE") || die "write $PMFILE: $!";
+  open(FILE, ">$PMFILE")  or die "cannot create $PMFILE: $!";
   my $str =<<"EOT";
 
 package $modname;
@@ -625,14 +648,14 @@ fnord=cut
 EOT
 
   $str =~ s/^fnord//gm;
-  print FILE $str;
-  close FILE or die "write $PMFILE: $!";
+  print FILE $str  or die "error writing to $PMFILE: $!";
+  close FILE  or die "error closing $PMFILE: $!";
 }
 
 sub fixup_re {
   my $re = shift;
   
-  $fixup_re_test and print "INPUT: /$re/\n";
+  if ($fixup_re_test) { print "INPUT: /$re/\n"  or die "error writing: $!" }
   
   my $output = "";
   my $TOK = qr([\"\\]);
@@ -666,7 +689,7 @@ sub fixup_re {
       }
     }
     else {
-      print "PRE: $pre\nTOK: $tok\n";
+      print "PRE: $pre\nTOK: $tok\n"  or die "error writing: $!";
     }
   }
   
@@ -683,7 +706,7 @@ sub fixup_re {
   $output =~ s/(?<!\\)""//g; # strip empty strings, or turn "abc""def" -> "abcdef"
   $output =~ s/\*\*BACKSLASH\*\*/\\\\/gs;
 
-  $fixup_re_test and print "OUTPUT: $output\n";
+  if ($fixup_re_test) { print "OUTPUT: $output\n"  or die "error writing: $!" }
   return $output;
 }
 
