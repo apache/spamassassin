@@ -329,15 +329,46 @@ sub _run_file {
     return;
   }
 
-  # skip too-big mails
-  if (! $self->{opt_all} && -s INPUT > BIG_BYTES) {
+  my $stat_errn = stat(INPUT) ? 0 : 0+$!;
+  if ($stat_errn == ENOENT) {
+    dbg("archive-iterator: no such input ($where)");
+    return;
+  }
+  elsif ($stat_errn != 0) {
+    warn "archive-iterator: no access to input ($where): $!";
+    return;
+  }
+  elsif (!-f _ && !-c _) {
+    warn "archive-iterator: not a plain file or char.spec. file ($where)";
+    return;
+  }
+
+  my $must_check_size = 0;
+  if ($self->{opt_all}) {
+    # process any size
+  } elsif (-f _ && -s _ > BIG_BYTES) {
+    # skip too-big mails
+    # note that -s can only deal with files, it returns 0 on STDIN (-c _)
     info("archive-iterator: skipping large message\n");
     close INPUT  or die "error closing input file: $!";
     return;
   }
+  else {
+    $must_check_size = 1;
+  }
+
   my @msg;
   my $header;
+  my $len = 0;
   for ($!=0; <INPUT>; $!=0) {
+    if ($must_check_size) {
+      $len += length($_);
+      if ($len > BIG_BYTES) {
+        info("archive-iterator: skipping large message\n");
+        close INPUT  or die "error closing input file: $!";
+        return;
+      }
+    }
     push(@msg, $_);
     if (!defined $header && /^\015?$/) {
       $header = $#msg;
@@ -653,7 +684,7 @@ sub _index_unpack {
 sub _scan_directory {
   my ($self, $class, $folder, $bkfunc) = @_;
 
-  my @files;
+  my(@files,@subdirs);
 
   opendir(DIR, $folder)
     or die "archive-iterator: can't open '$folder' dir: $!\n";
@@ -669,7 +700,7 @@ sub _scan_directory {
   }
   closedir(DIR)  or die "error closing directory $folder: $!";
 
-  @files = map { "$folder/$_" } @files;
+  $_ = "$folder/$_"  for @files;
 
   if (!@files) {
     # this is not a problem; no need to warn about it
@@ -679,11 +710,6 @@ sub _scan_directory {
 
   $self->_create_cache('dir', $folder);
 
-  foreach my $mail (@files) {
-    $self->_scan_file($class, $mail, $bkfunc);
-  }
-
-  # recurse into directories
   foreach my $file (@files) {
     my $stat_errn = stat($file) ? 0 : 0+$!;
     if ($stat_errn == ENOENT) {
@@ -692,9 +718,21 @@ sub _scan_directory {
     elsif ($stat_errn != 0) {
       warn "archive-iterator: no access to $file: $!";
     }
-    elsif (-d _) {
-      $self->_scan_directory($class, $file, $bkfunc);
+    elsif (-f _ || -c _) {
+      $self->_scan_file($class, $file, $bkfunc);
     }
+    elsif (-d _) {
+      push(@subdirs, $file);
+    }
+    else {
+      warn "archive-iterator: $file is not a plain file or directory: $!";
+    }
+  }
+  @files = ();  # release storage
+
+  # recurse into directories
+  foreach my $dir (@subdirs) {
+    $self->_scan_directory($class, $dir, $bkfunc);
   }
 
   if (defined $AICache) {
@@ -800,7 +838,7 @@ sub _scan_mailbox {
     closedir(DIR)  or die "error closing directory $folder: $!";
   }
   else {
-    warn "archive-iterator: $folder is not a regular file or directory: $!";
+    warn "archive-iterator: $folder is not a plain file or directory: $!";
   }
 
   foreach my $file (@files) {
@@ -929,7 +967,7 @@ sub _scan_mbx {
     closedir(DIR)  or die "error closing directory $folder: $!";
   }
   else {
-    warn "archive-iterator: $folder is not a regular file or directory: $!";
+    warn "archive-iterator: $folder is not a plain file or directory: $!";
   }
 
   foreach my $file (@files) {
