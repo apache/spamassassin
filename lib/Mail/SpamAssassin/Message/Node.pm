@@ -269,11 +269,15 @@ sub raw {
   # NOTE: that "ref undef" works, so don't bother checking for a defined var
   # first.
   if (ref $self->{'raw'} eq 'GLOB') {
-    my @array;
     my $fd = $self->{'raw'};
     seek($fd, 0, 0)  or die "message: cannot rewind file: $!";
-    $! = 0; @array = <$fd>;
-    $!==0  or die "message: error reading: $!";
+    $! = 0;
+    my @array = <$fd>;
+    if ($! != 0) {
+      if (!$fd->eof()) {        # bug 5985: avoid spurious 'bad fd' error
+        die "message: error reading: $!";
+      }
+    }
     dbg("message: empty message read")  if !@array;
     return \@array;
   }
