@@ -338,40 +338,43 @@ sub _run_file {
     warn "archive-iterator: no access to input ($where): $!";
     return;
   }
-  elsif (!-f _ && !-c _) {
-    warn "archive-iterator: not a plain file or char.spec. file ($where)";
+  elsif (!-f _ && !-c _ && !-p _) {
+    warn "archive-iterator: not a plain file (or char.spec. or pipe) ($where)";
     return;
   }
 
   my $must_check_size = 0;
   if ($self->{opt_all}) {
     # process any size
-  } elsif (-f _ && -s _ > BIG_BYTES) {
+  } elsif (!-f _) {
+    $must_check_size = 1;
+  } elsif (-s _ > BIG_BYTES) {
     # skip too-big mails
-    # note that -s can only deal with files, it returns 0 on STDIN (-c _)
+    # note that -s can only deal with files, it returns 0 on char.spec. STDIN
     info("archive-iterator: skipping large message\n");
     close INPUT  or die "error closing input file: $!";
     return;
-  }
-  else {
-    $must_check_size = 1;
   }
 
   my @msg;
   my $header;
   my $len = 0;
-  for ($!=0; <INPUT>; $!=0) {
-    if ($must_check_size) {
+  if (!$must_check_size) {
+    for ($!=0; <INPUT>; $!=0) {
+      push(@msg, $_);
+      if (!defined $header && /^\015?$/) { $header = $#msg }
+    }
+  }
+  else {  # file size not known ahead of time, must check while reading
+    for ($!=0; <INPUT>; $!=0) {
       $len += length($_);
       if ($len > BIG_BYTES) {
         info("archive-iterator: skipping large message\n");
         close INPUT  or die "error closing input file: $!";
         return;
       }
-    }
-    push(@msg, $_);
-    if (!defined $header && /^\015?$/) {
-      $header = $#msg;
+      push(@msg, $_);
+      if (!defined $header && /^\015?$/) { $header = $#msg }
     }
   }
   defined $_ || $!==0  or die "error reading: $!";
@@ -718,7 +721,7 @@ sub _scan_directory {
     elsif ($stat_errn != 0) {
       warn "archive-iterator: no access to $file: $!";
     }
-    elsif (-f _ || -c _) {
+    elsif (-f _ || -c _ || -p _) {
       $self->_scan_file($class, $file, $bkfunc);
     }
     elsif (-d _) {
