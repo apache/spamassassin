@@ -271,14 +271,13 @@ sub raw {
   if (ref $self->{'raw'} eq 'GLOB') {
     my $fd = $self->{'raw'};
     seek($fd, 0, 0)  or die "message: cannot rewind file: $!";
-    $! = 0;
-    my @array = <$fd>;
-    if ($! != 0) {
-      if (!$fd->eof()) {        # bug 5985: avoid spurious 'bad fd' error
-        die "message: error reading: $!";
-      }
-    }
-    dbg("message: empty message read")  if !@array;
+
+    my($inbuf,$nread,$raw_str); $raw_str = '';
+    while ( $nread=sysread($fd,$inbuf,16384) ) { $raw_str .= $inbuf }
+    defined $nread  or die "error reading: $!";
+    my @array = split(/^/m, $raw_str, -1);
+
+    dbg("message: empty message read")  if $raw_str eq '';
     return \@array;
   }
 
@@ -310,14 +309,12 @@ sub decode {
     if (ref $self->{'raw'} eq 'GLOB') {
       my $fd = $self->{'raw'};
       seek($fd, 0, 0)  or die "message: cannot rewind file: $!";
-      local $/ = undef;
-      $! = 0; $raw = <$fd>;
-      defined $raw || $!==0
-        or die "message: error reading from a temp file: $!";
-      if (!defined $raw) {
-        dbg("message: empty message read from a temp file");
-        $raw = '';
-      }
+
+      my($inbuf,$nread,$raw_str); $raw = '';
+      while ( $nread=sysread($fd,$inbuf,16384) ) { $raw .= $inbuf }
+      defined $nread  or die "error reading: $!";
+
+      dbg("message: empty message read from a temp file")  if $raw eq '';
     }
     else {
       # create a new scalar from the raw array in memory

@@ -132,16 +132,27 @@ sub new {
   }
   elsif (ref $message eq 'GLOB' || ref $message eq 'IO::File') {
     if (defined fileno $message) {
-      $! = 0; @message = <$message>;
-      $!==0  or die "error reading: $!";
-      dbg("message: empty message read from a file")  if !@message;
+
+      # $! = 0; @message = <$message>;
+      # $!==0  or die "error reading: $!";
+
+      # sysread+split avoids a Perl I/O bug (Bug 5985)
+      # and is faster than (<$message>) by 10..25 %
+      # (a drawback is a short-term double storage of a text in $raw_str)
+      #
+      my($inbuf,$nread,$raw_str); $raw_str = '';
+      while ( $nread=sysread($message,$inbuf,16384) ) { $raw_str .= $inbuf }
+      defined $nread  or die "error reading: $!";
+      @message = split(/^/m, $raw_str, -1);
+
+      dbg("message: empty message read")  if $raw_str eq '';
     }
   }
   elsif (ref $message) {
     dbg("message: Input is a reference of unknown type!");
   }
   elsif (defined $message) {
-    @message = split ( /^/m, $message );
+    @message = split(/^/m, $message, -1);
   }
 
   # Pull off mbox and mbx separators
