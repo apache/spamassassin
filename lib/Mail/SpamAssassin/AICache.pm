@@ -38,6 +38,7 @@ package Mail::SpamAssassin::AICache;
 use File::Spec;
 use File::Path;
 use File::Basename;
+use Mail::SpamAssassin::Logger;
 
 use strict;
 use warnings;
@@ -71,7 +72,7 @@ sub new {
                 '.spamassassin_cache');
 
     my @stat = stat($self->{cache_file});
-    @stat  or warn "AIcache: no access to $self->{cache_file}: $!";
+    @stat  or dbg("AIcache: no access to %s: %s", $self->{cache_file}, $!);
     $self->{cache_mtime} = $stat[9] || 0;
   }
   else {
@@ -82,13 +83,13 @@ sub new {
                 join('_', '.spamassassin_cache', $self->{type}, $split[2]));
 
     my @stat = stat($self->{cache_file});
-    @stat  or warn "AIcache: no access to $self->{cache_file}: $!";
+    @stat  or dbg("AIcache: no access to %s: %s", $self->{cache_file}, $!);
     $self->{cache_mtime} = $stat[9] || 0;
 
     # for mbox and mbx, verify whether mtime on cache file is >= mtime of
     # messages file.  if it is, use it, otherwise don't.
     @stat = stat($self->{path});
-    @stat  or warn "AIcache: no access to $self->{path}: $!";
+    @stat  or dbg("AIcache: no access to %s: %s", $self->{path}, $!);
     if ($stat[9] > $self->{cache_mtime}) {
       $use_cache = 0;
     }
@@ -99,14 +100,14 @@ sub new {
   if (!$use_cache) {
     # not in use
   } elsif (!open(CACHE, $self->{cache_file})) {
-    die "cannot open AI cache file (".$self->{cache_file}."): $!";
+    die dbg("cannot open AI cache file (%s): %s", $self->{cache_file},$!);
   } else {
     for ($!=0; defined($_=<CACHE>); $!=0) {
       my($k,$v) = split(/\t/, $_);
       next unless (defined $k && defined $v);
       $self->{cache}->{$k} = $v;
     }
-    defined $_ || $!==0  or die "error reading from AI cache file: $!";
+    defined $_ || $!==0  or warn "error reading from AI cache file: $!";
     close CACHE
       or die "error closing AI cache file (".$self->{cache_file}."): $!";
   }
@@ -180,9 +181,9 @@ sub finish {
     }
     else {
       print CACHE $towrite
-        or die "error writing to AI cache file: $!";
+        or warn "error writing to AI cache file: $!";
       close CACHE
-        or die "error closing AI cache file (".$self->{cache_file}."): $!";
+        or warn "error closing AI cache file (".$self->{cache_file}."): $!";
     }
   }
 
