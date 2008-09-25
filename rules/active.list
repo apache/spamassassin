@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: jm; day 2: bb-traps zmi; day 3: bb-traps jm zmi
+# with results from: day 1: bb-jm bb-traps jm zmi; day 2: jm; day 3: bb-traps zmi
 
 # tflags userconf
 ALL_TRUSTED
@@ -167,16 +167,10 @@ FS_EJACULA
 FS_ERECTION
 
 # good enough
-FS_HOT_TEEN
-
-# good enough
 FS_NUDE
 
 # good enough
 FS_REPLICAWATCH
-
-# good enough
-FS_TIGHT_TEEN
 
 # tflags userconf
 GTUBE
@@ -254,9 +248,6 @@ JM_I_FEEL_LUCKY
 JM_REACTOR_MAILER
 
 # good enough
-JM_SOUGHT_FRAUD_2
-
-# good enough
 KAM_LOTTO1
 
 # tflags publish
@@ -264,9 +255,6 @@ KAM_STOCKOTC
 
 # tflags publish
 KAM_STOCKTIP15
-
-# good enough
-KB_DATE_CONTAINS_TAB
 
 # good enough
 KB_FAKED_THE_BAT
@@ -527,9 +515,6 @@ SANE_2025b95f6cbbedc5b8ecc73c754b3ecd
 SANE_350e3965f0c4efe66a6c43cfbe754b95
 
 # good enough
-SANE_3a4b6d0e824e4ba2b01bef041a9f77e5
-
-# good enough
 SANE_3b92eda751c992f230f215fb7eb36844
 
 # good enough
@@ -614,9 +599,6 @@ THEBAT_UNREG
 THREAD_INDEX_BAD
 
 # good enough
-TVD_FINGER_01
-
-# good enough
 TVD_FINGER_02
 
 # good enough
@@ -624,6 +606,9 @@ TVD_FROM_1
 
 # good enough
 TVD_PH_SUBJ_META
+
+# good enough
+TVD_PH_SUBJ_SEC_MEASURES
 
 # good enough
 TVD_RCVD_IP
@@ -635,31 +620,103 @@ TVD_RCVD_IP4
 TVD_SUBJ_WIPE_DEBT
 
 # good enough
+DOS_OE_TO_MX_IMAGE
+
+# good enough
+DOS_RCVD_IP_TWICE_B
+
+# good enough
+FB_CASINO
+
+# good enough
+FB_GREAT_BEST_SEX
+
+# good enough
+FB_STAMINA_IN_BED
+
+# good enough
 FM_LOTTO_YOU_WON
 
 # good enough
 FS_LOW_INTMOR
 
 # good enough
+HS_BOBAX_MID_1
+
+# good enough
+JM_HOODIA
+
+# good enough
 JM_SOUGHT_FRAUD_1
+
+# good enough
+JM_SOUGHT_FRAUD_2
 
 # good enough
 KAM_LOTTO2
 
 # good enough
-LOTTERY_PH_004470
+KB_DATE_CONTAINS_TAB
 
 # good enough
-RATWARE_HELO_DM
+LOTTERY_PH_004470
+
+# tflags net
+RCVD_IN_BRBL
+
+# tflags net
+RCVD_IN_BRBL_LASTEXT
+
+# good enough
+SANE_0e2fd237a2457014b4a604fb11e12351
+
+# good enough
+SANE_0efc520389d9917a40993e4547f8df6e
+
+# good enough
+SANE_241cd925b00cea31560e3a0a88292867
+
+# good enough
+SANE_3a4b6d0e824e4ba2b01bef041a9f77e5
+
+# good enough
+SANE_540b82f6e96d62e32e5ecf2cd638d9d0
+
+# good enough
+SANE_57eb6fb7217efcb7a706124454426ee6
+
+# good enough
+SANE_75491b468ec2e117e50f9842d32abfab
 
 # good enough
 SANE_8f9d40cc4e21b11c7171a7d6b3eea4c1
 
 # good enough
+SANE_ce7a8ca9858b4f0806b3bbca7bdc595c
+
+# good enough
+SANE_daa623cb11d766d49327b6af6dced27e
+
+# good enough
 SANE_db753c9fabc9457efd8a9e6bcc485803
 
 # good enough
+SANE_e4fa59cc2a88295a3bd2c84e67564be7
+
+# good enough
+SANE_e5950fd6cd9b53a17ba2cb7883181772
+
+# good enough
+SANE_e9470267063d9892fd9da5697e7fdd5f
+
+# good enough
+SANE_efde2712b85bfb5e8597b36b4485ebef
+
+# good enough
 STOX_BOUND_090909_B
+
+# good enough
+TVD_FINGER_01
 
 # good enough
 TVD_PH_BODY_META
@@ -908,9 +965,6 @@ XMAILER_MIMEOLE_OL_CAC8F
 XMAILER_MIMEOLE_OL_CF0C0
 
 # good enough
-XMAILER_MIMEOLE_OL_F6D01
-
-# good enough
 X_MAILER_CME_6543_MSN
 
 # tflags net
@@ -924,6 +978,9 @@ __DNS_FROM_RFC_WHOIS
 
 # tflags net
 __DS_DEEP_RCVD_IN_SBLXBL
+
+# tflags net
+__RCVD_IN_BRBL
 
 # tflags net
 __RCVD_IN_DNSWL
