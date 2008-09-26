@@ -117,6 +117,9 @@ sub do_one_line_body_tests {
 
     }
 
+    return if ($opts{doing_user_rules} &&
+                  !$self->is_user_rule_sub($rulename.'_one_line_body_test'));
+
     $self->add_temporary_method ($rulename.'_one_line_body_test', '{'.$sub.'}');
   },
     pre_loop_body => sub
