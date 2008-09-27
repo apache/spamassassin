@@ -100,7 +100,7 @@ sub new {
   if (!$use_cache) {
     # not in use
   } elsif (!open(CACHE, $self->{cache_file})) {
-    die dbg("cannot open AI cache file (%s): %s", $self->{cache_file},$!);
+    dbg("cannot open AI cache file (%s): %s", $self->{cache_file},$!);
   } else {
     for ($!=0; defined($_=<CACHE>); $!=0) {
       my($k,$v) = split(/\t/, $_);
