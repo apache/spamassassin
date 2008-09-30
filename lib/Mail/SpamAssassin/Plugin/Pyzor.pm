@@ -283,8 +283,13 @@ sub pyzor_lookup {
     $!==0  or die "error reading from pipe: $!";
 
     my $errno = 0;  close PYZOR or $errno = $!;
-    proc_status_ok($?,$errno)
-      or info("pyzor: [%s] finished: %s", $pid, exit_status_str($?,$errno));
+    if (proc_status_ok($?,$errno)) {
+      dbg("pyzor: [%s] finished successfully", $pid);
+    } elsif (proc_status_ok($?,$errno, 0,1)) {  # sometimes it exits with 1
+      dbg("pyzor: [%s] finished: %s", $pid, exit_status_str($?,$errno));
+    } else {
+      info("pyzor: [%s] error: %s", $pid, exit_status_str($?,$errno));
+    }
 
     if (!@response) {
       # this exact string is needed below
@@ -294,8 +299,7 @@ sub pyzor_lookup {
     dbg("pyzor: got response: " . join("\\n", @response));
 
     if ($response[0] =~ /^Traceback/) {
-      # this exact string is needed below
-      die("internal error\n");
+      die("internal error, python traceback seen in response\n");
     }
 
   });
@@ -307,7 +311,7 @@ sub pyzor_lookup {
     }
     my $errno = 0;  close PYZOR or $errno = $!;
     proc_status_ok($?,$errno)
-      or info("pyzor: [%s] terminated: %s", $pid, exit_status_str($?,$errno));
+      or info("pyzor: [%s] error: %s", $pid, exit_status_str($?,$errno));
   }
   $permsgstatus->leave_helper_run_mode();
 
@@ -409,8 +413,12 @@ sub pyzor_report {
     # closing a pipe also waits for the process executing on the pipe to
     # complete, no need to explicitly call waitpid
     # my $child_stat = waitpid($pid,0) > 0 ? $? : undef;
-    proc_status_ok($?,$errno)
-      or die "pyzor: reporter error: ".exit_status_str($?,$errno)."\n";
+    if (proc_status_ok($?,$errno, 0)) {
+      dbg("pyzor: [%s] reporter finished successfully", $pid);
+    } else {
+      info("pyzor: [%s] reporter error: %s", $pid, exit_status_str($?,$errno));
+    }
+
   });
 
   $options->{report}->leave_helper_run_mode();

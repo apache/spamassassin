@@ -325,8 +325,10 @@ sub exit_status_str($;$) {
     $str = sprintf("stopped, signal %d", WSTOPSIG($stat));
   } else {
     my $sig = WTERMSIG($stat);
-    $str = $sig == 2 ? 'INTERRUPTED' : $sig == 6 ? 'ABORTED'
-           : sprintf("DIED on signal %d (%04x)", $sig,$stat);
+    $str = sprintf("%s, signal %d (%04x)",
+             $sig == 2 ? 'INTERRUPTED' : $sig == 6 ? 'ABORTED' :
+             $sig == 9 ? 'KILLED' : $sig == 15 ? 'TERMINATED' : 'DIED',
+             $sig, $stat);
   }
   if (defined $errno) {  # deal with dual-valued and plain variables
     $str .= ', '.$errno  if (0+$errno) != 0 || ($errno ne '' && $errno ne '0');
