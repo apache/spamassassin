@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: bb-jm bb-traps dos jm zmi; day 2: bb-jm bb-traps dos jm zmi; day 3: bb-jm bb-traps jm zmi
+# with results from: day 1: bb-jm dos jm zmi; day 2: bb-jm bb-traps dos jm zmi; day 3: bb-jm bb-traps dos jm zmi
 
 # tflags userconf
 ALL_TRUSTED
@@ -95,7 +95,7 @@ DNS_FROM_RFC_DSN
 DOS_ANAL_SPAM_MAILER
 
 # good enough
-DOS_FORGED_RCVD_QUADS
+DOS_LIVE_SPACES_CID
 
 # good enough
 DOS_OE_TO_MX
@@ -108,6 +108,12 @@ DOS_RCVD_IP_TWICE_B
 
 # good enough
 DOS_RCVD_IP_TWICE_C
+
+# good enough
+DRUGS_HDIA
+
+# good enough
+DRUGS_STOCK_MIMEOLE
 
 # good enough
 DYN_RDNS_AND_INLINE_IMAGE
@@ -144,6 +150,9 @@ FB_GET_MEDS
 
 # good enough
 FB_GVR
+
+# good enough
+FB_HG_H_CAP
 
 # good enough
 FB_QUALITY_REPLICA
@@ -206,6 +215,9 @@ FM_SCHOOLING
 FM_SEX_HELODDDD
 
 # good enough
+FM_VEGAS_CASINO
+
+# good enough
 FORGED_RELAY_MUA_TO_MX
 
 # tflags userconf
@@ -248,6 +260,9 @@ FS_ABIGGER
 FS_CAILIS
 
 # good enough
+FS_DOLLAR_BONUS
+
+# good enough
 FS_EJACULA
 
 # good enough
@@ -255,6 +270,9 @@ FS_ERECTION
 
 # good enough
 FS_HOT_TEEN
+
+# good enough
+FS_LARGE_PERCENT2
 
 # good enough
 FS_LOW_INTMOR
@@ -275,7 +293,13 @@ FS_REPLICA
 FS_REPLICAWATCH
 
 # good enough
+FS_TEEN_BAD
+
+# good enough
 FS_WILL_HELP
+
+# good enough
+FU_LONG_QUERY3
 
 # good enough
 GMD_R_DOT_HTML
@@ -332,13 +356,7 @@ HELO_OEM
 HIGH_CODEPAGE_URI
 
 # good enough
-HS_BOBAX_MID_1
-
-# good enough
 HS_BOBAX_MID_2
-
-# good enough
-HS_FORGED_OE_FW
 
 # good enough
 HS_INDEX_PARAM
@@ -357,6 +375,9 @@ JM_EXIM_462
 
 # good enough
 JM_FAKE_PSMTP_RCVD
+
+# good enough
+JM_HOODIA
 
 # tflags publish
 JM_I_FEEL_LUCKY
@@ -662,6 +683,9 @@ SANE_15127c727eaa11887f10cbec9ac59c24
 SANE_17534cea3ba620589af299f2dac174c4
 
 # good enough
+SANE_17a1b160af7209e41df5c25be75d4f60
+
+# good enough
 SANE_1c4f3286fa4aed6424ced88bfaf8b09c
 
 # good enough
@@ -681,9 +705,6 @@ SANE_3325b1231e51c0ba56c4034e2d775e02
 
 # good enough
 SANE_350e3965f0c4efe66a6c43cfbe754b95
-
-# good enough
-SANE_3a4b6d0e824e4ba2b01bef041a9f77e5
 
 # good enough
 SANE_3b92eda751c992f230f215fb7eb36844
@@ -806,6 +827,9 @@ SANE_b10b847773f344411d84aee4433f9930
 SANE_b258019fe5a5c7a088f62b12c2ffc65a
 
 # good enough
+SANE_b55928166b7dd86d82e1a0675ca2b1d0
+
+# good enough
 SANE_be5d4555e028d1b8bc3c17415b5fce95
 
 # good enough
@@ -822,9 +846,6 @@ SANE_ce7a8ca9858b4f0806b3bbca7bdc595c
 
 # good enough
 SANE_d5ee9290870fd33fde2ec65ebd06034c
-
-# good enough
-SANE_daa623cb11d766d49327b6af6dced27e
 
 # good enough
 SANE_df300736ee1d0723e9e9361846d6350e
@@ -974,16 +995,43 @@ TVD_SUBJ_WIPE_DEBT
 TVD_VISIT_PHARMA
 
 # good enough
-DOS_LIVE_SPACES_CID
+DOS_FAKE_SQUIRREL
 
 # good enough
-JM_HOODIA
+FB_MED1CAT
 
 # good enough
-SANE_17a1b160af7209e41df5c25be75d4f60
+FB_REFI
 
 # good enough
-SANE_b55928166b7dd86d82e1a0675ca2b1d0
+FH_HOST_IN_ADDRARPA
+
+# good enough
+FS_GANGBANG
+
+# good enough
+FS_GET_LAID
+
+# good enough
+FS_TIGHT_TEEN
+
+# good enough
+FS_WEIGHT_LOSS
+
+# good enough
+JM_SOUGHT_FRAUD_2
+
+# good enough
+SANE_1bcdb8d4cae5f7cfefe310b3fce37407
+
+# good enough
+SANE_237c2b0099548ddbfa5a37f07e0687ab
+
+# good enough
+SANE_b12099b9ad9b0db25d01e61276fefab5
+
+# good enough
+TVD_PH_7
 
 # tflags userconf
 UNPARSEABLE_RELAY
@@ -1181,28 +1229,25 @@ XMAILER_MIMEOLE_OL_015D5
 XMAILER_MIMEOLE_OL_07794
 
 # good enough
-XMAILER_MIMEOLE_OL_09BB4
-
-# good enough
-XMAILER_MIMEOLE_OL_20C99
-
-# good enough
 XMAILER_MIMEOLE_OL_22B61
 
 # good enough
 XMAILER_MIMEOLE_OL_25340
 
 # good enough
+XMAILER_MIMEOLE_OL_3857F
+
+# good enough
 XMAILER_MIMEOLE_OL_3AC1D
 
 # good enough
-XMAILER_MIMEOLE_OL_3D61D
-
-# good enough
-XMAILER_MIMEOLE_OL_4B815
-
-# good enough
 XMAILER_MIMEOLE_OL_4BF4C
+
+# good enough
+XMAILER_MIMEOLE_OL_4EEDB
+
+# good enough
+XMAILER_MIMEOLE_OL_4F240
 
 # good enough
 XMAILER_MIMEOLE_OL_58CB5
@@ -1220,6 +1265,9 @@ XMAILER_MIMEOLE_OL_72641
 XMAILER_MIMEOLE_OL_7533E
 
 # good enough
+XMAILER_MIMEOLE_OL_812FF
+
+# good enough
 XMAILER_MIMEOLE_OL_8627E
 
 # good enough
@@ -1229,10 +1277,10 @@ XMAILER_MIMEOLE_OL_91287
 XMAILER_MIMEOLE_OL_9B90B
 
 # good enough
-XMAILER_MIMEOLE_OL_A50F8
+XMAILER_MIMEOLE_OL_ADFF7
 
 # good enough
-XMAILER_MIMEOLE_OL_ADFF7
+XMAILER_MIMEOLE_OL_B30D1
 
 # good enough
 XMAILER_MIMEOLE_OL_B4B40
@@ -1242,9 +1290,6 @@ XMAILER_MIMEOLE_OL_BC7E6
 
 # good enough
 XMAILER_MIMEOLE_OL_C65FA
-
-# good enough
-XMAILER_MIMEOLE_OL_CAC8F
 
 # good enough
 XMAILER_MIMEOLE_OL_CF0C0
