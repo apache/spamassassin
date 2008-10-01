@@ -616,8 +616,11 @@ sub dccproc_lookup {
              $tmpf, 1, $path, "-H", "-x", "0", @opts);
     $pid or die "$!\n";
 
-    $! = 0; my @null = <DCC>;
-    $!==0  or die "error reading from pipe: $!";
+    # read+split avoids a Perl I/O bug (Bug 5985)
+    my($inbuf,$nread,$resp); $resp = '';
+    while ( $nread=read(DCC,$inbuf,8192) ) { $resp .= $inbuf }
+    defined $nread  or die "error reading from pipe: $!";
+    my @null = split(/^/m, $resp, -1);  undef $resp;
 
     my $errno = 0;  close DCC or $errno = $!;
     proc_status_ok($?,$errno)
@@ -812,9 +815,13 @@ sub dcc_report {
     my $pid = Mail::SpamAssassin::Util::helper_app_pipe_open(*DCC,
                 $tmpf, 1, $path, "-H", "-t", "many", "-x", "0", @opts);
     $pid or die "$!\n";
-    $! = 0; my @ignored = <DCC>;
-    $!==0  or die "error reading from pipe: $!";
-    dbg("dcc: empty response")  if !@ignored;
+
+    my($inbuf,$nread,$nread_all); $nread_all = 0;
+    # response is ignored, just check its existence
+    while ( $nread=read(DCC,$inbuf,8192) ) { $nread_all += $nread }
+    defined $nread  or die "error reading from pipe: $!";
+
+    dbg("dcc: empty response")  if $nread_all < 1;
 
     my $errno = 0;  close DCC or $errno = $!;
     # closing a pipe also waits for the process executing on the pipe to
