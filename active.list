@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: bb-jm bb-traps dos jm zmi; day 2: bb-jm dos jm zmi; day 3: bb-jm bb-traps dos jm zmi
+# with results from: day 1: bb-jm bb-traps dos jm zmi; day 2: bb-jm bb-traps dos jm zmi; day 3: bb-jm dos jm zmi
 
 # tflags userconf
 ALL_TRUSTED
@@ -95,6 +95,9 @@ DNS_FROM_RFC_DSN
 DOS_ANAL_SPAM_MAILER
 
 # good enough
+DOS_FAKE_SQUIRREL
+
+# good enough
 DOS_LIVE_SPACES_CID
 
 # good enough
@@ -120,9 +123,6 @@ DYN_RDNS_AND_INLINE_IMAGE
 
 # good enough
 DYN_RDNS_SHORT_HELO_HTML
-
-# good enough
-DYN_RDNS_SHORT_HELO_IMAGE
 
 # tflags userconf
 ENV_AND_HDR_DKIM_MATCH
@@ -153,6 +153,9 @@ FB_GVR
 
 # good enough
 FB_QUALITY_REPLICA
+
+# good enough
+FB_REFI
 
 # good enough
 FB_REPLICA_ROLEX
@@ -198,6 +201,9 @@ FH_HOST_EQ_PACBELL_D
 
 # good enough
 FH_HOST_EQ_VERIZON_P
+
+# good enough
+FH_HOST_IN_ADDRARPA
 
 # good enough
 FH_MSGID_XXX
@@ -269,6 +275,12 @@ FS_EJACULA
 FS_ERECTION
 
 # good enough
+FS_GANGBANG
+
+# good enough
+FS_GET_LAID
+
+# good enough
 FS_HOT_TEEN
 
 # good enough
@@ -276,9 +288,6 @@ FS_LARGE_PERCENT2
 
 # good enough
 FS_LOW_INTMOR
-
-# good enough
-FS_MAKE_MONEY
 
 # good enough
 FS_NUDE
@@ -294,6 +303,12 @@ FS_REPLICAWATCH
 
 # good enough
 FS_TEEN_BAD
+
+# good enough
+FS_TIGHT_TEEN
+
+# good enough
+FS_WEIGHT_LOSS
 
 # good enough
 FS_WILL_HELP
@@ -381,6 +396,9 @@ JM_I_FEEL_LUCKY
 
 # good enough
 JM_REACTOR_MAILER
+
+# good enough
+JM_SOUGHT_FRAUD_2
 
 # good enough
 KAM_LOTTO1
@@ -650,6 +668,9 @@ REPLYTO_WITHOUT_TO_CC
 RP_MATCHES_RCVD
 
 # good enough
+RP_MINUS
+
+# good enough
 RP_UNDERLINE
 
 # good enough
@@ -690,6 +711,9 @@ SANE_2025b95f6cbbedc5b8ecc73c754b3ecd
 
 # good enough
 SANE_20d820d8f491476ca39941979ab139dd
+
+# good enough
+SANE_237c2b0099548ddbfa5a37f07e0687ab
 
 # good enough
 SANE_241cd925b00cea31560e3a0a88292867
@@ -819,6 +843,9 @@ SANE_a995172edaf283f69547eab5551dcc00
 
 # good enough
 SANE_b10b847773f344411d84aee4433f9930
+
+# good enough
+SANE_b12099b9ad9b0db25d01e61276fefab5
 
 # good enough
 SANE_b258019fe5a5c7a088f62b12c2ffc65a
@@ -971,6 +998,12 @@ TVD_FINGER_02
 TVD_FROM_1
 
 # good enough
+TVD_PH_7
+
+# good enough
+TVD_PH_SUBJ_ACCOUNTS_POST
+
+# good enough
 TVD_PH_SUBJ_META
 
 # good enough
@@ -992,40 +1025,25 @@ TVD_SUBJ_WIPE_DEBT
 TVD_VISIT_PHARMA
 
 # good enough
-DOS_FAKE_SQUIRREL
+DOS_FORGED_RCVD_QUADS
 
 # good enough
-FB_REFI
+FB_SMALL_PEN
 
 # good enough
-FH_HOST_IN_ADDRARPA
+HS_BOBAX_MID_1
 
 # good enough
-FS_GANGBANG
+SANE_3a4b6d0e824e4ba2b01bef041a9f77e5
 
 # good enough
-FS_GET_LAID
+SANE_a0f55c2936d8123b36954e9ee7de0a28
 
 # good enough
-FS_TIGHT_TEEN
+SANE_b58d7945d89b7afc9e2753c83b00ab44
 
 # good enough
-FS_WEIGHT_LOSS
-
-# good enough
-JM_SOUGHT_FRAUD_2
-
-# good enough
-RP_MINUS
-
-# good enough
-SANE_237c2b0099548ddbfa5a37f07e0687ab
-
-# good enough
-SANE_b12099b9ad9b0db25d01e61276fefab5
-
-# good enough
-TVD_PH_7
+SANE_daa623cb11d766d49327b6af6dced27e
 
 # tflags userconf
 UNPARSEABLE_RELAY
