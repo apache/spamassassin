@@ -24,7 +24,7 @@ use warnings;
 use bytes;
 use re 'taint';
 
-use Errno qw(ENOENT EACCES);
+use Errno qw(ENOENT EACCES EBADF);
 use Mail::SpamAssassin::Util;
 use Mail::SpamAssassin::Constants qw(:sa);
 use Mail::SpamAssassin::Logger;
@@ -343,11 +343,10 @@ sub _run_file {
     return;
   }
 
-  my $must_check_size = 0;
   if ($self->{opt_all}) {
     # process any size
   } elsif (!-f _) {
-    $must_check_size = 1;
+    # must check size while reading
   } elsif (-s _ > BIG_BYTES) {
     # skip too-big mails
     # note that -s can only deal with files, it returns 0 on char.spec. STDIN
@@ -359,25 +358,23 @@ sub _run_file {
   my @msg;
   my $header;
   my $len = 0;
-  if (!$must_check_size) {
-    for ($!=0; <INPUT>; $!=0) {
-      push(@msg, $_);
-      if (!defined $header && /^\015?$/) { $header = $#msg }
+  my $str = '';
+  my($inbuf,$nread);
+  while ( $nread=read(INPUT,$inbuf,16384) ) {
+    $len += $nread;
+    if ($len > BIG_BYTES) {
+      info("archive-iterator: skipping large message\n");
+      close INPUT  or die "error closing input file: $!";
+      return;
     }
+    $str .= $inbuf;
   }
-  else {  # file size not known ahead of time, must check while reading
-    for ($!=0; <INPUT>; $!=0) {
-      $len += length($_);
-      if ($len > BIG_BYTES) {
-        info("archive-iterator: skipping large message\n");
-        close INPUT  or die "error closing input file: $!";
-        return;
-      }
-      push(@msg, $_);
-      if (!defined $header && /^\015?$/) { $header = $#msg }
-    }
+  defined $nread  or die "error reading: $!";
+  undef $inbuf;
+  @msg = split(/^/m, $str, -1);  undef $str;
+  for my $j (0..$#msg) {
+    if ($msg[$j] =~ /^\015?$/) { $header = $j; last }
   }
-  defined $_ || $!==0  or die "error reading: $!";
   close INPUT  or die "error closing input file: $!";
 
   if ($date == AI_TIME_UNKNOWN && $self->{determine_receive_date}) {
@@ -413,7 +410,9 @@ sub _run_mailbox {
       $header = $#msg;
     }
   }
-  defined $_ || $!==0  or die "error reading: $!";
+  defined $_ || $!==0  or
+    $!==EBADF ? dbg("archive-iterator: error reading: $!")
+              : die "error reading: $!";
   close INPUT  or die "error closing input file: $!";
 
   if ($date == AI_TIME_UNKNOWN && $self->{determine_receive_date}) {
@@ -452,7 +451,9 @@ sub _run_mbx {
       $header = $#msg;
     }
   }
-  defined $_ || $!==0  or die "error reading: $!";
+  defined $_ || $!==0  or
+    $!==EBADF ? dbg("archive-iterator: error reading: $!")
+              : die "error reading: $!";
   close INPUT  or die "error closing input file: $!";
 
   if ($date == AI_TIME_UNKNOWN && $self->{determine_receive_date}) {
@@ -779,7 +780,9 @@ sub _scan_file {
         last if /^\015?$/s;
         $header .= $_;
       }
-      defined $_ || $!==0  or die "error reading: $!";
+      defined $_ || $!==0  or
+        $!==EBADF ? dbg("archive-iterator: error reading: $!")
+                  : die "error reading: $!";
       close INPUT  or die "error closing input file: $!";
 
       return if ($self->{opt_skip_empty_messages} && $header eq '');
@@ -902,7 +905,9 @@ sub _scan_mailbox {
 	  $where = tell INPUT;
           $where >= 0  or die "cannot obtain file position: $!";
         }
-        defined $_ || $!==0  or die "error reading: $!";
+        defined $_ || $!==0  or
+          $!==EBADF ? dbg("archive-iterator: error reading: $!")
+                    : die "error reading: $!";
         if ($header ne '') {
         # next if ($self->{opt_skip_empty_messages} && $header eq '');
           $self->_bump_scan_progress();
@@ -1005,7 +1010,9 @@ sub _scan_mbx {
 
       # check the mailbox is in mbx format
       $! = 0; $fp = <INPUT>;
-      defined $fp || $!==0  or die "error reading: $!";
+      defined $fp || $!==0  or
+        $!==EBADF ? dbg("archive-iterator: error reading: $!")
+                  : die "error reading: $!";
       if (!defined $fp) {
         die "archive-iterator: error: mailbox not in mbx format - empty!\n";
       } elsif ($fp !~ /\*mbx\*/) {
@@ -1028,8 +1035,9 @@ sub _scan_mbx {
             last if (/^\015?$/s);
 	    $header .= $_;
 	  }
-          defined $_ || $!==0  or die "error reading: $!";
-
+          defined $_ || $!==0  or
+            $!==EBADF ? dbg("archive-iterator: error reading: $!")
+                      : die "error reading: $!";
           if (!($self->{opt_skip_empty_messages} && $header eq '')) {
             $self->_bump_scan_progress();
             $info->{$offset} = Mail::SpamAssassin::Util::receive_date($header);
@@ -1043,7 +1051,9 @@ sub _scan_mbx {
 	  die "archive-iterator: error: failure to read message body!\n";
         }
       }
-      defined $_ || $!==0  or die "error reading: $!";
+      defined $_ || $!==0  or
+        $!==EBADF ? dbg("archive-iterator: error reading: $!")
+                  : die "error reading: $!";
       close INPUT  or die "error closing input file: $!";
     }
 

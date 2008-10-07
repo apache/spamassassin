@@ -133,9 +133,6 @@ sub new {
   elsif (ref $message eq 'GLOB' || ref $message eq 'IO::File') {
     if (defined fileno $message) {
 
-      # $! = 0; @message = <$message>;
-      # $!==0  or die "error reading: $!";
-
       # sysread+split avoids a Perl I/O bug (Bug 5985)
       # and is faster than (<$message>) by 10..25 %
       # (a drawback is a short-term double storage of a text in $raw_str)

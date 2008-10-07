@@ -21,6 +21,7 @@ package Mail::SpamAssassin::Plugin::PhishTag;
 
 use strict;
 use warnings;
+use Errno qw(EBADF);
 use Mail::SpamAssassin;
 use Mail::SpamAssassin::Logger;
 
@@ -104,8 +105,9 @@ sub read_configfile{
   my $targets= $pms->{PHISHTAG}->{targets};
 
   my $target;
+  local *F;
   open(F, '<', $pms->{conf}->{trigger_config});
-  for($!=0; <F>; $!=0){
+  for ($!=0; <F>; $!=0) {
       #each entry is separated by blank lines
       undef($target) if(!/\S/);
 
@@ -125,7 +127,9 @@ sub read_configfile{
 	  push @$target, $_;
       }
   }
-  defined $_ || $!==0  or die "error reading config file: $!";
+  defined $_ || $!==0  or
+    $!==EBADF ? dbg("PHISHTAG: error reading config file: $!")
+              : die "error reading config file: $!";
   close(F)  or die "error closing config file: $!";
 }
 

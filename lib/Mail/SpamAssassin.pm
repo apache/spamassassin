@@ -1167,21 +1167,18 @@ sub read_scoreonly_config {
   my ($self, $filename) = @_;
 
   my $timer = $self->time_method("read_scoreonly_config");
+  local *IN;
   if (!open(IN,"<$filename")) {
     # the file may not exist; this should not be verbose
     dbg("config: read_scoreonly_config: cannot open \"$filename\": $!");
     return;
   }
 
-  my $text;
-  { local $/ = undef; $! = 0; $text = <IN> }
-  defined $text || $!==0  or die "error reading $filename: $!";
-  close IN or die "error closing $filename: $!";
-
-  if (!defined $text) {
-    dbg("config: read_scoreonly_config: empty file");
-    $text = '';
-  }
+  my($inbuf,$nread,$text); $text = '';
+  while ( $nread=read(IN,$inbuf,16384) ) { $text .= $inbuf }
+  defined $nread  or die "error reading $filename: $!";
+  close IN  or die "error closing $filename: $!";
+  undef $inbuf;
 
   $text = "file start $filename\n" . $text;
   # add an extra \n in case file did not end in one.
@@ -1742,16 +1739,14 @@ sub read_cf_file {
   my($path) = @_;
   my $txt = '';
 
+  local *IN;
   if (open (IN, "<".$path)) {
 
-    { local $/; undef $/; $! = 0; $txt = <IN> }
-    defined $txt || $!==0  or die "error reading $path: $!";
-    close IN or die "error closing $path: $!";
-
-    if (!defined $txt) {
-      dbg("config: read_cf_file: empty file $path");
-      $txt = '';
-    }
+    my($inbuf,$nread); $txt = '';
+    while ( $nread=read(IN,$inbuf,16384) ) { $txt .= $inbuf }
+    defined $nread  or die "error reading $path: $!";
+    close IN  or die "error closing $path: $!";
+    undef $inbuf;
 
     $txt = "file start $path\n" . $txt;
     # add an extra \n in case file did not end in one.
@@ -1864,14 +1859,19 @@ sub create_default_prefs {
     # copy in the default one for later editing
     my $defprefs = $self->first_existing_path (@Mail::SpamAssassin::default_prefs_path);
 
+    local(*IN,*OUT);
     if (defined $defprefs && open (IN, "<$defprefs")) {
       $fname = Mail::SpamAssassin::Util::untaint_file_path($fname);
       if (open (OUT, ">$fname")) {
-        for ($!=0; <IN>; $!=0) {
-          /^\#\* / and next;
-          print OUT  or die "cannot write to $fname: $!";
+
+        # former code skipped lines beginning with '#* ', the following copy
+        # procedure no longer does so, as it avoids reading line-by-line
+        my($inbuf,$nread);
+        while ( $nread=read(IN,$inbuf,16384) ) {
+          print OUT $inbuf  or die "cannot write to $fname: $!";
         }
-        defined $_ || $!==0  or die "error reading from $defprefs: $!";
+        defined $nread  or die "error reading $defprefs: $!";
+        undef $inbuf;
         close OUT or die "error closing $fname: $!";
         close IN  or die "error closing $defprefs: $!";
 
