@@ -514,11 +514,14 @@ sub extract_hints {
   close $tmpfh  or die "error closing $tmpf: $!";
 
   my $perl = $self->get_perl();
-  open (IN, "$perl -c -Mre=debug $tmpf 2>&1 |")  or die "cannot run $perl";
+  local *IN;
+  open (IN, "$perl -c -Mre=debug $tmpf 2>&1 |")
+    or die "cannot run $perl: ".exit_status_str($?,$!);
 
-  my $fullstr;
-  { local $/ = undef; $! = 0; $fullstr = <IN> }
-  defined $fullstr || $!==0  or die "error reading from pipe: $!";
+  my($inbuf,$nread,$fullstr); $fullstr = '';
+  while ( $nread=read(IN,$inbuf,16384) ) { $fullstr .= $inbuf }
+  defined $nread  or die "error reading from pipe: $!";
+
   close IN      or die "error closing pipe: $!";
   unlink $tmpf  or die "cannot unlink $tmpf: $!";
   defined $fullstr  or warn "empty result from a pipe";
@@ -990,17 +993,16 @@ sub get_perl {
 
 sub read_cachefile {
   my ($self, $cachefile) = @_;
+  local *IN;
   if (open(IN, "<".$cachefile)) {
-    my $str;
-    { local $/ = undef; $! = 0; $str = <IN> }
-    defined $str || $!==0  or die "error reading from $cachefile: $!";
+    my($inbuf,$nread,$str); $str = '';
+    while ( $nread=read(IN,$inbuf,16384) ) { $str .= $inbuf }
+    defined $nread  or die "error reading from $cachefile: $!";
     close IN  or die "error closing $cachefile: $!";
-    defined $str  or warn "empty $cachefile";
 
-    my $untainted = untaint_var($str);
-
-    my $VAR1;                 # Data::Dumper
-    if (eval $untainted) {
+    untaint_var(\$str);
+    my $VAR1;              # Data::Dumper
+    if (eval $str) {
       return $VAR1;        # Data::Dumper's naming
     }
   }

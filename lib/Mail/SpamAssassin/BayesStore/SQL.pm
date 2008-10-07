@@ -33,10 +33,11 @@ use strict;
 use warnings;
 use bytes;
 use re 'taint';
+use Errno qw(EBADF);
+use Digest::SHA1 qw(sha1);
 
 use Mail::SpamAssassin::BayesStore;
 use Mail::SpamAssassin::Logger;
-use Digest::SHA1 qw(sha1);
 
 use vars qw( @ISA );
 
@@ -1411,6 +1412,7 @@ could causes the database to be inconsistent for the given user.
 sub restore_database {
   my ($self, $filename, $showdots) = @_;
 
+  local *DUMPFILE;
   if (!open(DUMPFILE, '<', $filename)) {
     dbg("bayes: unable to open backup file $filename: $!");
     return 0;
@@ -1572,7 +1574,9 @@ sub restore_database {
       return 0;
     }
   }
-  defined $line || $!==0  or die "Error reading dump file: $!";
+  defined $line || $!==0  or
+    $!==EBADF ? dbg("bayes: error reading dump file: $!")
+              : die "error reading dump file: $!";
   close(DUMPFILE) or die "Can't close dump file: $!";
 
   print STDERR "\n" if ($showdots);

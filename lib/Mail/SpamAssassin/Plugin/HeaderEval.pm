@@ -17,15 +17,16 @@
 
 package Mail::SpamAssassin::Plugin::HeaderEval;
 
-use Mail::SpamAssassin::Plugin;
-use Mail::SpamAssassin::Locales;
-use Mail::SpamAssassin::Logger;
-use Mail::SpamAssassin::Constants qw(:sa :ip);
-
 use strict;
 use warnings;
 use bytes;
 use re 'taint';
+use Errno qw(EBADF);
+
+use Mail::SpamAssassin::Plugin;
+use Mail::SpamAssassin::Locales;
+use Mail::SpamAssassin::Logger;
+use Mail::SpamAssassin::Constants qw(:sa :ip);
 
 use vars qw(@ISA);
 @ISA = qw(Mail::SpamAssassin::Plugin);
@@ -229,16 +230,18 @@ sub word_is_in_dictionary {
       return 1;
     }
 
+    local *TRIPLETS;
     if (!open (TRIPLETS, "<$filename")) {
       dbg("eval: failed to open '$filename', cannot check dictionary: $!");
       return 1;
     }
-
     for($!=0; <TRIPLETS>; $!=0) {
       chomp;
       $triplets{$_} = 1;
     }
-    defined $_ || $!==0  or die "error reading from $filename: $!";
+    defined $_ || $!==0  or
+      $!==EBADF ? dbg("eval: error reading from $filename: $!")
+                : die "error reading from $filename: $!";
     close(TRIPLETS)  or die "error closing $filename: $!";
 
     $triplets_loaded = 1;

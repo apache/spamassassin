@@ -354,16 +354,18 @@ sub load_models {
   my $rang = 1;
   dbg("textcat: loading languages file...");
 
+  local *LM;
   if (!open(LM, $languages_filename)) {
-    warn "textcat: cannot open languages file: $!\n";
+    warn "textcat: cannot open languages file $languages_filename: $!\n";
     return;
   }
 
-  { local $/ = undef;  local $_;
-    $! = 0; $_ = <LM>;
-    defined $_ || $!==0  or die "error reading from $languages_filename: $!";
-    @lm = split(/\n/, $_)  if defined $_;
+  { my($inbuf,$nread,$text); $text = '';
+    while ( $nread=read(LM,$inbuf,16384) ) { $text .= $inbuf }
+    defined $nread  or die "error reading $languages_filename: $!";
+    @lm = split(/\n/, $text, -1);
   }
+
   close(LM)  or die "error closing $languages_filename: $!";
   # create language ngram maps once
   for (@lm) {

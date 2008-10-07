@@ -20,17 +20,19 @@ package Mail::SpamAssassin::BayesStore::DBM;
 use strict;
 use warnings;
 use bytes;
-use Fcntl;
 use re 'taint';
+
+use Fcntl;
+use Errno qw(EBADF);
+use Digest::SHA1 qw(sha1);
+use File::Basename;
+use File::Spec;
+use File::Path;
 
 use Mail::SpamAssassin;
 use Mail::SpamAssassin::Util qw(untaint_var);
 use Mail::SpamAssassin::BayesStore;
 use Mail::SpamAssassin::Logger;
-use Digest::SHA1 qw(sha1);
-use File::Basename;
-use File::Spec;
-use File::Path;
 
 use constant MAGIC_RE    => qr/^\015\001\007\011\003/;
 
@@ -1262,6 +1264,7 @@ sub _sync_journal_trapped {
     }
 
     # now read the retired journal
+    local *JOURNAL;
     if (!open (JOURNAL, "<$retirepath")) {
       warn "bayes: cannot open read $retirepath\n";
       return 0;
@@ -1294,7 +1297,9 @@ sub _sync_journal_trapped {
 	warn "bayes: gibberish entry found in journal: $_";
       }
     }
-    defined $_ || $!==0  or die "Error reading journal file: $!";
+    defined $_ || $!==0  or
+      $!==EBADF ? dbg("bayes: error reading journal file: $!")
+                : die "error reading journal file: $!";
     close(JOURNAL) or die "Can't close journal file: $!";
 
     # Now that we've determined what tokens we need to update and their
@@ -1592,6 +1597,7 @@ sub backup_database {
 sub restore_database {
   my ($self, $filename, $showdots) = @_;
 
+  local *DUMPFILE;
   if (!open(DUMPFILE, '<', $filename)) {
     dbg("bayes: unable to open backup file $filename: $!");
     return 0;

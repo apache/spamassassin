@@ -43,6 +43,7 @@ use Mail::SpamAssassin::Logger;
 use strict;
 use warnings;
 use re 'taint';
+use Errno qw(EBADF);
 
 =item new()
 
@@ -97,17 +98,20 @@ sub new {
   $self->{cache_file} = File::Spec->canonpath($self->{cache_file});
 
   # go ahead and read in the cache information
+  local *CACHE;
   if (!$use_cache) {
     # not in use
   } elsif (!open(CACHE, $self->{cache_file})) {
-    dbg("cannot open AI cache file (%s): %s", $self->{cache_file},$!);
+    dbg("AIcache: cannot open AI cache file (%s): %s", $self->{cache_file},$!);
   } else {
     for ($!=0; defined($_=<CACHE>); $!=0) {
       my($k,$v) = split(/\t/, $_);
       next unless (defined $k && defined $v);
       $self->{cache}->{$k} = $v;
     }
-    defined $_ || $!==0  or warn "error reading from AI cache file: $!";
+    defined $_ || $!==0  or
+      $!==EBADF ? dbg("AIcache: error reading from AI cache file: $!")
+                : warn "error reading from AI cache file: $!";
     close CACHE
       or die "error closing AI cache file (".$self->{cache_file}."): $!";
   }
