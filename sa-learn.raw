@@ -19,6 +19,7 @@
 use strict;
 use bytes;
 
+use Errno qw(EBADF);
 use Getopt::Long;
 use Pod::Usage;
 use File::Spec;
@@ -66,6 +67,7 @@ use Mail::SpamAssassin::ArchiveIterator;
 use Mail::SpamAssassin::Message;
 use Mail::SpamAssassin::PerMsgLearner;
 use Mail::SpamAssassin::Util::Progress;
+use Mail::SpamAssassin::Logger;
 
 ###########################################################################
 
@@ -379,7 +381,7 @@ eval {
     open( F, $opt{folders} )  or die "cannot open $opt{folders}: $!";
     for ($!=0; <F>; $!=0) {
       chomp;
-      next unless ($_);
+      next if /^\s*$/;
       if (/^(?:ham|spam):\w*:/) {
         push ( @targets, $_ );
       }
@@ -387,7 +389,9 @@ eval {
         target($_);
       }
     }
-    defined $_ || $!==0  or die "error reading from $opt{folders}: $!";
+    defined $_ || $!==0  or
+      $!==EBADF ? dbg("error reading from $opt{folders}: $!")
+                : die "error reading from $opt{folders}: $!";
     close(F)  or die "error closing $opt{folders}: $!";
   }
 

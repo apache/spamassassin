@@ -27,6 +27,7 @@ use strict;
 use warnings;
 use re 'taint';
 
+use Errno qw(EBADF);
 use File::Spec;
 use Config;
 
@@ -57,6 +58,7 @@ BEGIN {                          # see comments in "spamassassin.raw" for doco
 
 use Mail::SpamAssassin;
 use Mail::SpamAssassin::Util qw(untaint_var exit_status_str);
+use Mail::SpamAssassin::Logger;
 use Getopt::Long;
 use File::Copy;
 use File::Path;
@@ -444,7 +446,9 @@ EOT
       };
       last if $line == MAX_RULES_PER_C_FILE;
     }
-    defined $_ || $!==0  or die "error reading from $FILE: $!";
+    defined $_ || $!==0  or
+      $!==EBADF ? dbg("error reading from $FILE: $!")
+                : die "error reading from $FILE: $!";
 
     print $re <<EOT  or die "error writing: $!";
   [\\000-\\377]        { return NULL; }
