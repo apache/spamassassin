@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: bb-jm bb-traps dos jm theo zmi; day 2: bb-jm bb-traps dos jm zmi; day 3: bb-jm bb-traps dos jm theo zmi
+# with results from: day 1: bb-jm dos jm theo zmi; day 2: bb-jm bb-traps dos jm theo zmi; day 3: bb-jm bb-traps dos jm zmi
 
 # tflags userconf
 ALL_TRUSTED
@@ -98,9 +98,6 @@ DOS_ANAL_SPAM_MAILER
 DOS_FAKE_SQUIRREL
 
 # good enough
-DOS_FORGED_RCVD_QUADS
-
-# good enough
 DOS_LIVE_SPACES_CID
 
 # good enough
@@ -117,9 +114,6 @@ DOS_RCVD_IP_TWICE_C
 
 # good enough
 DRUGS_HDIA
-
-# good enough
-DRUGS_STOCK_MIMEOLE
 
 # good enough
 DYN_RDNS_AND_INLINE_IMAGE
@@ -293,9 +287,6 @@ FS_REPLICA
 FS_REPLICAWATCH
 
 # good enough
-FS_TIGHT_TEEN
-
-# good enough
 FS_WILL_HELP
 
 # good enough
@@ -426,6 +417,9 @@ MIME_CHARSET_FARAWAY
 
 # tflags userconf
 MISSING_HB_SEP
+
+# good enough
+MSGID_NOFQDN1
 
 # good enough
 MSNBC_HDR_ORDER
@@ -1008,9 +1002,6 @@ TVD_SUBJ_WIPE_DEBT
 
 # good enough
 TVD_VISIT_PHARMA
-
-# good enough
-MSGID_NOFQDN1
 
 # tflags userconf
 UNPARSEABLE_RELAY
