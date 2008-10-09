@@ -127,6 +127,9 @@ $PERL build/sha1sum.pl $tmpdir/update.tgz > $tmpdir/update.tgz.sha1  || exit $?
 tagstamp=`date "+%Y%m%d%H%M%S"`
 tagurl=https://svn.apache.org/repos/asf/spamassassin/tags/sa-update_${version}_${tagstamp}
 
+# this svn copy is critical, to ensure each version's tarball has a different
+# rev#.  if you remove it, we need to prefix the version# to the svnrev# in
+# the filenames instead so each version doesn't clobber others.
 svn up
 svn copy -m 'promotions validated' . $tagurl < /dev/null
 
@@ -155,9 +158,6 @@ if [ "$svnrev" -lt 1 ] ; then
   cat $tmpdir/svn
   exit 5
 fi
-
-# TODO: if we were maintaining multiple versions, these would be
-# copied into a path specific to the version
 
 mv $tmpdir/update.tgz      $stagedir/$svnrev.tar.gz            || exit $?
 mv $tmpdir/update.tgz.sha1 $stagedir/$svnrev.tar.gz.sha1       || exit $?
