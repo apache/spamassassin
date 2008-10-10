@@ -2087,6 +2087,12 @@ sub _handle_hit {
       return;
     }
 
+    # this should not happen; warn about NaN
+    if ($score != $score) {
+      warn "rules: score '$score' for rule '$rule' in '$area' '$desc'";
+      return;
+    }
+
     # Add the rule hit to the score
     $self->{score} += $score;
 
