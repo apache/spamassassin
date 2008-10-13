@@ -125,9 +125,10 @@ sub check_address {
   $self->{entry} = undef;
 
   my $fulladdr = $self->pack_addr ($addr, $origip);
-  $self->{entry} = $self->{checker}->get_addr_entry ($fulladdr, $signedby);
+  my $entry = $self->{checker}->get_addr_entry ($fulladdr, $signedby);
+  $self->{entry} = $entry;
 
-  if (!defined $self->{entry}->{count} || $self->{entry}->{count} == 0) {
+  if (!defined $entry->{count} || $entry->{count} == 0) {
     # no entry found
     if (defined $origip) {
       # try upgrading a default entry (probably from "add-addr-to-foo")
@@ -140,15 +141,23 @@ sub check_address {
         # Now assign proper entry the count and totscore values of the no ip entry
         # instead of assigning the whole value to avoid wiping out any information added
         # to the previous entry.
-	$self->{entry}->{count} = $noipent->{count};
-	$self->{entry}->{totscore} = $noipent->{totscore};
+	$entry->{count} = $noipent->{count};
+	$entry->{totscore} = $noipent->{totscore};
       }
     }
   }
 
-  if ($self->{entry}->{count} == 0) { return undef; }
+  if ($entry->{count} == 0) {
+    return undef;
+  } elsif ($entry->{totscore} != $entry->{totscore}) {
+    warn "auto-whitelist: totscore for ($addr, $origip) is a NaN, ignored\n";
+    return undef;
+  } elsif ($entry->{count} != $entry->{count}) {
+    warn "auto-whitelist: count for ($addr, $origip) is a NaN, ignored\n";
+    return undef;
+  }
 
-  return $self->{entry}->{totscore}/$self->{entry}->{count};
+  return $entry->{totscore} / $entry->{count};
 }
 
 ###########################################################################
@@ -198,6 +207,10 @@ sub add_score {
 
   if (!defined $self->{checker}) {
     return undef;		# no factory defined; we can't check
+  }
+  if ($score != $score) {
+    warn "auto-whitelist: attempt to add a $score to AWL entry ignored\n";
+    return undef;		# don't try to add a NaN, just in case
   }
 
   $self->{entry}->{count} ||= 0;
@@ -261,7 +274,8 @@ sub modify_address {
   $self->{checker}->remove_entry($entry);
 
   # remove address only, no new score to add
-  if (!defined($score)) { return 1; }
+  if (!defined $score)  { return 1; }
+  if ($score != $score) { return 1; }  # don't try to add a NaN, just in case
 
   # else add score. get a new entry first
   $entry = $self->{checker}->get_addr_entry ($fulladdr, $signedby);

@@ -381,7 +381,7 @@ sub check_from_in_auto_whitelist {
       my $delta = 0;
       my $signeravg;
 
-    ### commented out to avoid additional load on a SQL server for the time being;
+    ### commented out to avoid additional load on a SQL server for now;
     ### the average score (reputation) is still there and is accessible offline
     #
     # if (defined $signedby) {
