@@ -1246,6 +1246,7 @@ sub _pre_chew_content_type {
   # hopefully this will retain good bits without too many hapaxen
   if ($val =~ s/boundary=[\"\'](.*?)[\"\']/ /ig) {
     my $boundary = $1;
+    $boundary = ''  if !defined $boundary;  # avoid a warning
     $boundary =~ s/[a-fA-F0-9]/H/gs;
     # break up blocks of separator chars so they become their own tokens
     $boundary =~ s/([-_\.=]+)/ $1 /gs;
