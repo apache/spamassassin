@@ -2087,7 +2087,7 @@ sub _handle_hit {
       return;
     }
 
-    # this should not happen; warn about NaN
+    # this should not happen; warn about NaN (bug 3364)
     if ($score != $score) {
       warn "rules: score '$score' for rule '$rule' in '$area' '$desc'";
       return;
