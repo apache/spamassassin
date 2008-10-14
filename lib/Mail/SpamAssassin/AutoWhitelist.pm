@@ -147,15 +147,16 @@ sub check_address {
     }
   }
 
-  if ($entry->{count} == 0) {
-    return undef;
-  } elsif ($entry->{totscore} != $entry->{totscore}) {
-    warn "auto-whitelist: totscore for ($addr, $origip) is a NaN, ignored\n";
-    return undef;
-  } elsif ($entry->{count} != $entry->{count}) {
-    warn "auto-whitelist: count for ($addr, $origip) is a NaN, ignored\n";
-    return undef;
+  if ($entry->{count} < 0 ||
+      $entry->{count} != $entry->{count} ||  # test for NaN
+      $entry->{totscore} != $entry->{totscore})
+  {
+    warn "auto-whitelist: resetting bad data for ($addr, $origip), ".
+         "count: $entry->{count}, totscore: $entry->{totscore}\n";
+    $entry->{count} = $entry->{totscore} = 0;
   }
+
+  if ($entry->{count} == 0) { return undef }
 
   return $entry->{totscore} / $entry->{count};
 }
@@ -210,7 +211,7 @@ sub add_score {
   }
   if ($score != $score) {
     warn "auto-whitelist: attempt to add a $score to AWL entry ignored\n";
-    return undef;		# don't try to add a NaN, just in case
+    return undef;		# don't try to add a NaN
   }
 
   $self->{entry}->{count} ||= 0;
@@ -275,7 +276,7 @@ sub modify_address {
 
   # remove address only, no new score to add
   if (!defined $score)  { return 1; }
-  if ($score != $score) { return 1; }  # don't try to add a NaN, just in case
+  if ($score != $score) { return 1; }  # don't try to add a NaN
 
   # else add score. get a new entry first
   $entry = $self->{checker}->get_addr_entry ($fulladdr, $signedby);
