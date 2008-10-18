@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: bb-jm dos jm zmi; day 2: bb-jm dos jm zmi; day 3: dos jm theo zmi
+# with results from: day 1: bb-jm dos jm theo zmi; day 2: bb-jm dos jm zmi; day 3: bb-jm dos jm zmi
 
 # tflags userconf
 ALL_TRUSTED
@@ -12,9 +12,6 @@ AWL
 
 # good enough
 AXB_XMID_DIGDOTSHRT
-
-# good enough
-BASE64_LENGTH_78_79
 
 # tflags learn
 BAYES_00
@@ -111,9 +108,6 @@ DOS_RCVD_IP_TWICE_B
 
 # good enough
 DOS_RCVD_IP_TWICE_C
-
-# good enough
-DRUGS_STOCK_MIMEOLE
 
 # good enough
 DYN_RDNS_AND_INLINE_IMAGE
@@ -396,9 +390,6 @@ MIME_CHARSET_FARAWAY
 
 # tflags userconf
 MISSING_HB_SEP
-
-# good enough
-MSNBC_HDR_ORDER
 
 # tflags net
 NO_DNS_FOR_FROM
@@ -953,7 +944,7 @@ SUBJECT_IN_WHITELIST
 THEBAT_UNREG
 
 # good enough
-THREAD_INDEX_HEX
+TT_MSGID_TRUNC
 
 # good enough
 TT_OBSCURED_VIAGRA
@@ -987,6 +978,9 @@ TVD_SUBJ_WIPE_DEBT
 
 # good enough
 TVD_VISIT_PHARMA
+
+# good enough
+FB_DDDD_BUCKS
 
 # tflags userconf
 UNPARSEABLE_RELAY
