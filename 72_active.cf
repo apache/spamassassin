@@ -1487,15 +1487,6 @@ tflags RCVD_IN_DNSWL_MED	nice net
 endif
 ##} RCVD_IN_DNSWL_MED
 
-##{ RCVD_IN_DOB
-
-ifplugin Mail::SpamAssassin::Plugin::DNSEval
-header RCVD_IN_DOB              eval:check_rbl_sub('dob', '127.0.0.2')
-describe RCVD_IN_DOB            Received via relay in new domain (Day Old Bread)
-tflags RCVD_IN_DOB              net
-endif
-##} RCVD_IN_DOB
-
 ##{ RCVD_IN_IADB_DK
 
 ifplugin Mail::SpamAssassin::Plugin::DNSEval
@@ -2983,11 +2974,6 @@ header	__RCVD_IN_DNSWL		eval:check_rbl('dnswl-firsttrusted', 'list.dnswl.org.')
 tflags	__RCVD_IN_DNSWL		nice net
 endif
 
-ifplugin Mail::SpamAssassin::Plugin::DNSEval
-header __RCVD_IN_DOB            eval:check_rbl('dob', 'dob.sibl.support-intelligence.net.', '255')
-describe __RCVD_IN_DOB          Received via relay in new domain (Day Old Bread)
-tflags __RCVD_IN_DOB            net
-endif
 meta     __SEX_WRDS		(__WORD_SEX || __WORD_CUM || __WORD_SPERM || __WORD_SLUTS || __WORD_RAPED)
 header   __SUBJ_3DIGIT		Subject =~ /\b\d{3}[^0-9]/
 header   __SUBJ_APPROVE		Subject =~ /Approve/i
