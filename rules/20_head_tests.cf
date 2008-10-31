@@ -380,9 +380,11 @@ describe UNCLOSED_BRACKET	Headers contain an unclosed bracket
 
 header FROM_DOMAIN_NOVOWEL	From =~ /\@\S*[bcdfgjklmnpqrstvwxz]{7}/i
 describe FROM_DOMAIN_NOVOWEL	From: domain has series of non-vowel letters
+tflags FROM_DOMAIN_NOVOWEL userconf     # lock scores low
 
 header FROM_LOCAL_NOVOWEL	From =~ /[bcdfgjklmnpqrstvwxz]{7}\S*\@/i
 describe FROM_LOCAL_NOVOWEL	From: localpart has series of non-vowel letters
+tflags FROM_LOCAL_NOVOWEL userconf     # lock scores low
 
 header FROM_LOCAL_HEX		From =~ /[0-9a-f]{11}\S*\@/i
 describe FROM_LOCAL_HEX		From: localpart has long hexadecimal sequence
