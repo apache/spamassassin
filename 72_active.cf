@@ -109,15 +109,6 @@ body CURR_PRICE         /\bCurrent Price:/
 body DEAR_WINNER /\bdear.{1,20}winner/i
 ##} DEAR_WINNER
 
-##{ DNS_FROM_DOB
-
-ifplugin Mail::SpamAssassin::Plugin::DNSEval
-header DNS_FROM_DOB             eval:check_rbl_envfrom('dob','dob.sibl.support-intelligence.net.')
-describe DNS_FROM_DOB           Sender from new domain (Day Old Bread)
-tflags DNS_FROM_DOB             net
-endif
-##} DNS_FROM_DOB
-
 ##{ DNS_FROM_OPENWHOIS
 header          DNS_FROM_OPENWHOIS  eval:check_rbl_envfrom('openwhois', 'bl.open-whois.org.')
 describe        DNS_FROM_OPENWHOIS  Envelope sender listed in bl.open-whois.org.

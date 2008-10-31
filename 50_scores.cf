@@ -643,7 +643,6 @@ endif
 
 ifplugin Mail::SpamAssassin::Plugin::DNSEval
 # <gen:mutable>
-score DNS_FROM_DOB 0 0.341 0 0.732 # n=0 n=2
 score RCVD_IN_BL_SPAMCOP_NET 0 2.188 0 1.960 # n=0 n=2
 score RCVD_IN_DOB 0 0.835 0 1.103 # n=0 n=2
 score RCVD_IN_IADB_DK 0 # n=1 n=2 n=3
