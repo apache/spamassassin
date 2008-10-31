@@ -378,10 +378,10 @@ describe FAKE_OUTBLAZE_RCVD	Received header contains faked 'mr.outblaze.com'
 header UNCLOSED_BRACKET		ALL =~ /\[\d+\r?\n/s
 describe UNCLOSED_BRACKET	Headers contain an unclosed bracket
 
-header FROM_DOMAIN_NOVOWEL	From =~ /\@\S*[bcdfghjklmnpqrstvwxz]{7}/i
+header FROM_DOMAIN_NOVOWEL	From =~ /\@\S*[bcdfgjklmnpqrstvwxz]{7}/i
 describe FROM_DOMAIN_NOVOWEL	From: domain has series of non-vowel letters
 
-header FROM_LOCAL_NOVOWEL	From =~ /[bcdfghjklmnpqrstvwxz]{7}\S*\@/i
+header FROM_LOCAL_NOVOWEL	From =~ /[bcdfgjklmnpqrstvwxz]{7}\S*\@/i
 describe FROM_LOCAL_NOVOWEL	From: localpart has series of non-vowel letters
 
 header FROM_LOCAL_HEX		From =~ /[0-9a-f]{11}\S*\@/i

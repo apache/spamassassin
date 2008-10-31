@@ -99,7 +99,7 @@ describe SPOOF_NET2COM 	URI contains ".net" or ".org", then ".com"
 uri URI_HEX		m%^https?://[^/?]*\b[0-9a-f]{6,}\b%i
 describe URI_HEX	URI hostname has long hexadecimal sequence
 
-uri URI_NOVOWEL		m%^https?://[^/?]*[bcdfghjklmnpqrstvwxz]{7}%i
+uri URI_NOVOWEL		m%^https?://[^/?]*[bcdfgjklmnpqrstvwxz]{7}%i
 describe URI_NOVOWEL	URI hostname has long non-vowel sequence
 
 uri URI_UNSUBSCRIBE		/\b(?:gone|opened|out)\.php/i
