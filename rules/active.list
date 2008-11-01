@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: bb-jm dos jm zmi; day 2: bb-jm dos jm zmi; day 3: bb-jm dos jm zmi
+# with results from: day 1: bb-jm dos jm zmi; day 2: bb-jm dos jm theo zmi; day 3: bb-jm dos jm zmi
 
 # tflags userconf
 ALL_TRUSTED
@@ -146,9 +146,6 @@ FB_EXTRA_INCHES
 FB_GVR
 
 # good enough
-FB_P1LL
-
-# good enough
 FB_PIPEDOLLAR
 
 # good enough
@@ -220,6 +217,12 @@ FORGED_RELAY_MUA_TO_MX
 # tflags userconf
 FRAGMENTED_MESSAGE
 
+# tflags userconf
+FROM_DOMAIN_NOVOWEL
+
+# tflags userconf
+FROM_LOCAL_NOVOWEL
+
 # good enough
 FRT_DISCOUNT
 
@@ -273,6 +276,9 @@ FS_REPLICA
 
 # good enough
 FS_REPLICAWATCH
+
+# good enough
+FS_START_LOSE
 
 # good enough
 FS_TEEN_BAD
@@ -336,6 +342,12 @@ HELO_OEM
 
 # tflags userconf
 HIGH_CODEPAGE_URI
+
+# good enough
+HS_BOBAX_MID_1
+
+# good enough
+HS_BOBAX_MID_2
 
 # good enough
 HS_OUTLOOK_MID_NOBRK
@@ -938,9 +950,6 @@ STOCK_IMG_OUTLOOK
 STOX_BOUND_090909_B
 
 # good enough
-STOX_REPLY_TYPE
-
-# good enough
 STOX_REPLY_TYPE_WITHOUT_QUOTES
 
 # tflags userconf
@@ -971,9 +980,6 @@ TVD_FINGER_02
 TVD_FROM_1
 
 # good enough
-TVD_FW_GRAPHIC_ID1
-
-# good enough
 TVD_PH_7
 
 # good enough
@@ -993,12 +999,6 @@ TVD_SUBJ_WIPE_DEBT
 
 # good enough
 TVD_VISIT_PHARMA
-
-# good enough
-HS_BOBAX_MID_1
-
-# good enough
-HS_BOBAX_MID_2
 
 # tflags userconf
 UNPARSEABLE_RELAY
@@ -1035,6 +1035,9 @@ URIBL_SC_SURBL
 
 # tflags net
 URIBL_WS_SURBL
+
+# tflags userconf
+URI_NOVOWEL
 
 # tflags userconf
 USER_IN_ALL_SPAM_TO
