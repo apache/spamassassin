@@ -151,12 +151,8 @@ sub ui_get_url_switches {
   # "?q=FOO" is a shortcut for "?rule=FOO&s_detail=1"; good for shortcuts
   my $q = $self->{q}->param("q");
   if ($q) {
-    $self->{q}->param(-name=>"rule", -value=>$q);
-
-    # ensure links from here include this
-    $self->{cgi_params}{"rule"} = "rule=".uri_escape($q);
-    push @{$self->{cgi_param_order}}, "rule";
-
+    $self->add_cgi_param("rule", $q);
+    $self->add_cgi_param("s_detail", 1);
     $self->{s}{detail} = 1;
   }
 
@@ -1523,13 +1519,23 @@ sub precache_params {
   }
 }
 
-sub add_cgi_path_param {
-  my ($self, $k, $v) = @_;
+sub add_cgi_path_param {        # assumes already escaped unless $not_escaped
+  my ($self, $k, $v, $not_escaped) = @_;
   if (!defined $self->{cgi_params}{$k}) {
-    $self->{cgi_params}{$k} = "$k=$v";
     push (@{$self->{cgi_param_order}}, $k);
   }
-  $self->{q}->param(-name=>$k, -value=>uri_unescape($v));
+  if ($not_escaped) {
+    $self->{cgi_params}{$k} = $k."=".uri_escape($v);
+    $self->{q}->param(-name=>$k, -value=>$v);
+  } else {
+    $self->{cgi_params}{$k} = $k."=".$v;
+    $self->{q}->param(-name=>$k, -value=>uri_unescape($v));
+  }
+}
+
+sub add_cgi_param {     # a variant for unescaped data
+  my ($self, $k, $v) = @_;
+  return $self->add_cgi_path_param($k, $v, 1);
 }
 
 sub get_params_except {
