@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: bb-jm dos jm zmi; day 2: bb-jm dos jm zmi; day 3: bb-jm dos jm theo zmi
+# with results from: day 1: bb-jm dos jm zmi; day 2: bb-jm dos jm zmi; day 3: bb-jm dos jm zmi
 
 # tflags userconf
 ALL_TRUSTED
@@ -12,6 +12,9 @@ AWL
 
 # good enough
 AXB_XMID_DIGDOTSHRT
+
+# good enough
+BASE64_LENGTH_78_79
 
 # tflags learn
 BAYES_00
@@ -95,6 +98,9 @@ DOS_ANAL_SPAM_MAILER
 DOS_FAKE_SQUIRREL
 
 # good enough
+DOS_HIGH_BAT_TO_MX
+
+# good enough
 DOS_LIVE_SPACES_CID
 
 # good enough
@@ -102,6 +108,9 @@ DOS_OE_TO_MX
 
 # good enough
 DOS_OE_TO_MX_IMAGE
+
+# good enough
+DOS_PHISH_WWW_COM_BIZ
 
 # good enough
 DOS_RCVD_IP_TWICE_B
@@ -164,6 +173,9 @@ FB_SMALL_PEN
 FB_SOFTTABS
 
 # good enough
+FB_STAMINA_IN_BED
+
+# good enough
 FH_BAD_OEV1441
 
 # good enough
@@ -174,6 +186,9 @@ FH_DATE_PAST_20XX
 
 # good enough
 FH_FAKE_RCVD_LINE
+
+# good enough
+FH_FROM_CASH
 
 # good enough
 FH_FROM_HOODIA
@@ -206,6 +221,9 @@ FH_MSGID_XXX
 FM_DEBT_HELP
 
 # good enough
+FM_SCHOOLING
+
+# good enough
 FM_SEX_HELODDDD
 
 # good enough
@@ -234,6 +252,9 @@ FRT_ERECTION
 
 # good enough
 FRT_LEVITRA
+
+# good enough
+FRT_PAYMENT
 
 # good enough
 FRT_PENIS1
@@ -272,7 +293,13 @@ FS_ERECTION
 FS_GANGBANG
 
 # good enough
+FS_GET_LAID
+
+# good enough
 FS_HOT_TEEN
+
+# good enough
+FS_LARGE_PERCENT2
 
 # good enough
 FS_LOW_INTMOR
@@ -299,7 +326,13 @@ FS_TEEN_BAD
 FS_TIGHT_TEEN
 
 # good enough
+FS_WEIGHT_LOSS
+
+# good enough
 FS_WILL_HELP
+
+# good enough
+FU_LONG_QUERY3
 
 # good enough
 GMD_R_DOT_HTML
@@ -360,6 +393,9 @@ HS_BOBAX_MID_1
 
 # good enough
 HS_BOBAX_MID_2
+
+# good enough
+HS_INDEX_PARAM
 
 # good enough
 HS_OUTLOOK_MID_NOBRK
@@ -971,6 +1007,9 @@ SUBJECT_IN_BLACKLIST
 SUBJECT_IN_WHITELIST
 
 # good enough
+SUBJECT_NEEDS_ENCODING
+
+# good enough
 THEBAT_UNREG
 
 # good enough
@@ -1010,6 +1049,9 @@ TVD_QUAL_MEDS
 TVD_RCVD_IP
 
 # good enough
+TVD_RCVD_IP4
+
+# good enough
 TVD_RCVD_SINGLE
 
 # good enough
@@ -1019,22 +1061,16 @@ TVD_SUBJ_WIPE_DEBT
 TVD_VISIT_PHARMA
 
 # good enough
-DOS_HIGH_BAT_TO_MX
+FB_REFI
 
 # good enough
-DOS_PHISH_WWW_COM_BIZ
+FM_LOTTO_YOU_WON
 
 # good enough
-FB_STAMINA_IN_BED
+THREAD_INDEX_BAD
 
 # good enough
-FRT_PAYMENT
-
-# good enough
-FS_GET_LAID
-
-# good enough
-FS_WEIGHT_LOSS
+TVD_PH_BODY_META
 
 # tflags userconf
 UNPARSEABLE_RELAY
