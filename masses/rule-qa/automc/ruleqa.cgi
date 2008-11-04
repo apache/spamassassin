@@ -152,6 +152,11 @@ sub ui_get_url_switches {
   my $q = $self->{q}->param("q");
   if ($q) {
     $self->{q}->param(-name=>"rule", -value=>$q);
+
+    # ensure links from here include this
+    $self->{cgi_params}{"rule"} = "rule=".uri_escape($q);
+    push @{$self->{cgi_param_order}}, "rule";
+
     $self->{s}{detail} = 1;
   }
 
@@ -1201,6 +1206,7 @@ sub create_mclog_link {
   my $href = $self->assemble_url(
             "mclog=".(($isspam ? "spam" : "ham")."-".$who),
             "rule=".$line->{name},
+           "daterev=".$self->{daterev},
             $self->get_params_except(qw( mclog rule s_detail )));
 
   return qq{
@@ -1423,7 +1429,10 @@ sub gen_switch_url {
   my @parms =  $self->get_params_except($switch);
   $newval ||= '';
   if (!defined $switch) { warn "switch '$switch'='$newval' undef value"; }
-  push (@parms, $switch."=".$newval);
+  push (@parms,
+        $switch."=".$newval,
+        "daterev=".$self->{daterev}
+       );
   return $self->assemble_url(@parms);
 }
 
