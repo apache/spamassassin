@@ -1988,11 +1988,15 @@ sub _get_cf_pre_files_in_dir {
     # use "eval" to avoid loading File::Find unless this is specified
     eval ' use File::Find qw();
       File::Find::find(
-        sub {
-          return unless (/\.${type}$/i && -f $_);
-          push @cfs, $File::Find::name;
-        }, $dir);
-    ';
+        { untaint => 1,
+          follow => 1,
+          wanted =>
+            sub { push(@cfs, $File::Find::name) if /\.\Q$type\E$/i && -f $_ }
+        }, $dir); 1;
+    ' or do {
+      my $eval_stat = $@ ne '' ? $@ : "errno=$!";  chomp $eval_stat;
+      die "_get_cf_pre_files_in_dir error: $eval_stat";
+    };
     return sort { $a cmp $b } @cfs;
 
     die "oops! $@";     # should never get here
