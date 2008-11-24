@@ -125,7 +125,7 @@ $IGNORED_HDRS = qr{(?: (?:X-)?Sender    # misc noise
   |X-Original[Aa]rrival[Tt]ime
 
   # Annotations from IMAP, POP, and MH:
-  |(?:X-)?Status |X-Flags |Replied |Forwarded
+  |(?:X-)?Status |X-Flags |X-Keywords |Replied |Forwarded
   |Lines |Content-Length
   |X-UIDL? |X-IMAPbase
 

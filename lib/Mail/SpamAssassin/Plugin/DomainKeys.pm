@@ -478,7 +478,7 @@ sub sanitize_header_for_dk {
 
             # IMAP or POP additions
             |X-Keywords
-            |(?:X-)?Status |X-Flags |Replied |Forwarded
+            |(?:X-)?Status |X-Flags |X-Keywords |Replied |Forwarded
             |Lines |Content-Length
             |X-UIDL? |X-IMAPbase
 
