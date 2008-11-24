@@ -26,7 +26,7 @@ use bytes;
 use re 'taint';
 
 use vars qw (
-  @ISA %TWO_LEVEL_DOMAINS %US_STATES %VALID_TLDS
+  @ISA %TWO_LEVEL_DOMAINS %THREE_LEVEL_DOMAINS %US_STATES %VALID_TLDS
 );
 
 # The list of currently-valid TLDs for the DNS system.
@@ -250,7 +250,7 @@ foreach(qw/
 }
 
 # This is required because the .us domain is nuts. See $THREE_LEVEL_DOMAINS
-# and $FOUR_LEVEL_DOMAINS below.
+# below.
 #
 foreach (qw/
   ak al ar az ca co ct dc de fl ga gu hi ia id il in ks ky la ma md me mi 
@@ -258,6 +258,12 @@ foreach (qw/
   vt wa wi wv wy
   /) {
   $US_STATES{$_} = 1;
+}
+
+foreach (qw/
+  demon.co.uk esc.edu.ar lkd.co.im plc.co.im
+ /) {
+  $THREE_LEVEL_DOMAINS{$_} = 1;
 }
 
 ###########################################################################
@@ -307,14 +313,13 @@ sub split_domain {
 	# demon.co.uk
 	# esc.edu.ar
 	# [^\.]+\.${US_STATES}\.us
-	if ($domparts[2] eq 'uk' || $domparts[2] eq 'ar' || $domparts[2] eq 'im') {
-	  my $temp = join('.', @domparts);
-	  last if ($temp eq 'demon.co.uk' || $temp eq 'esc.edu.ar' ||
-	  	   $temp eq 'lkd.co.im' || $temp eq 'plc.co.im');
-	}
-	elsif ($domparts[2] eq 'us') {
+	if ($domparts[2] eq 'us') {
           last if ($US_STATES{$domparts[1]});
 	}
+        else {
+          my $temp = join(".", @domparts);
+          last if ($THREE_LEVEL_DOMAINS{$temp});
+        }
       }
       elsif (@domparts == 2) {
 	# co.uk, etc.
