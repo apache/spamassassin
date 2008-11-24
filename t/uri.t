@@ -23,12 +23,22 @@ use Mail::SpamAssassin;
 use Mail::SpamAssassin::HTML;
 use Mail::SpamAssassin::Util;
 
-plan tests => 91;
+plan tests => 95;
 
 ##############################################
 
+
+tstlocalrules ('
+
+  util_rb_2tld live.com
+  util_rb_3tld three.3ldlive.com
+
+');
+
 # initialize SpamAssassin
-my $sa = create_saobj({'dont_copy_prefs' => 1});
+my $sa = create_saobj({'dont_copy_prefs' => 1,
+        # 'debug' => 1
+});
 
 $sa->init(0); # parse rules
 
@@ -319,4 +329,10 @@ ok(try($base, "g?y/../x", "http://a/b/c/g?y/../x"));
 ok(try($base, "g#s/./x", "http://a/b/c/g#s/./x"));
 ok(try($base, "g#s/../x", "http://a/b/c/g#s/../x"));
 ok(try($base, "http:g", "http://a/b/c/g"));
+
+# uses the util_rb_*tld lines above
+ok(try_domains('WWW.LIVE.com', 'www.live.com'));
+ok(try_domains('WWW.foo.LIVE.com', 'foo.live.com'));
+ok(try_domains('WWW.three.3ldLIVE.com', 'www.three.3ldlive.com'));
+ok(try_domains('WWW.foo.basicLIVE.com', 'basiclive.com'));
 
