@@ -74,7 +74,7 @@ setting: "awl") with at least these fields:
 
   username varchar(100)	  # this is the username whose e-mail is being filtered
   email varchar(200)      # this is the address key
-  ip    varchar(10)       # this is the ip key
+  ip    varchar(45)       # this is the ip key (IPv4 or IPv6)
   count int(11)           # this is the message counter
   totscore float          # this is the total calculated score
   signedby varchar(255)   # a DKIM or DomainKeys signing id
@@ -108,7 +108,7 @@ This will create the following table:
 CREATE TABLE awl (
   username varchar(100) NOT NULL default '',
   email varchar(255) NOT NULL default '',
-  ip varchar(10) NOT NULL default '',
+  ip varchar(45) NOT NULL default '',
   count int(11) NOT NULL default '0',
   totscore float NOT NULL default '0',
   signedby varchar(255) NOT NULL default '',

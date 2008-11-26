@@ -302,15 +302,23 @@ sub pack_addr {
   $addr = lc $addr;
   $addr =~ s/[\000\;\'\"\!\|]/_/gs;	# paranoia
 
+  local $1;
   if (!defined $origip) {
     # could not find an IP address to use, could be localhost mail or from
     # the user running "add-addr-to-*".
     $origip = 'none';
+  } elsif ($origip =~ /^ (\d{1,3} \. \d{1,3}) \. \d{1,3} \. \d{1,3} $/xs) {
+    $origip = $1;
+  } elsif ($origip =~ /:/  &&
+           $origip =~
+           /^ [0-9a-f]{0,4} (?: : [0-9a-f]{0,4} | \. [0-9]{1,3} ){2,9} $/xsi) {
+    # looks like an IPv6 address;  TODO: put it into a canonical form
+    $origip = uc($origip);
   } else {
-    $origip =~ s/\.\d{1,3}\.\d{1,3}$//gs;
+    $origip =~ s/[^0-9A-Fa-f:.]/_/gs;	# paranoia
+    $origip = 'junk-' . $origip;
   }
-
-  $origip =~ s/[^0-9\.noe]/_/gs;	# paranoia
+  $origip = substr($origip,0,45)  if length($origip) > 45;  # awl.ip field
   $addr."|ip=".$origip;
 }
 
