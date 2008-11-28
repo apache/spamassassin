@@ -577,7 +577,9 @@ sub query_domain {
 
     # perform NS, A lookups to look up the domain in the non-RHSBL subset,
     # but only if there are active reverse-IP-URIBL rules
-    if ($dom !~ /^\d+\.\d+\.\d+\.\d+$/ && (scalar keys %{$reviprules})) {
+    if ($dom !~ /^\d+\.\d+\.\d+\.\d+$/ && 
+                (scalar keys %{$reviprules} || scalar keys %{$nsrhsblrules}))
+    {
       $self->lookup_domain_ns($scanner, $obj, $dom);
     }
   }
