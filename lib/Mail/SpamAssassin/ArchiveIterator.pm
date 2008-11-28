@@ -690,19 +690,35 @@ sub _scan_directory {
 
   my(@files,@subdirs);
 
-  opendir(DIR, $folder)
-    or die "archive-iterator: can't open '$folder' dir: $!\n";
-  if (-f "$folder/cyrus.header") {
+  if (-d "$folder/new" && -d "$folder/cur" && -d "$folder/tmp") {
+    # Maildir format: bug 3003
+    for my $sub ("new", "cur") {
+      opendir (DIR, "$folder/$sub")
+            or die "Can't open '$folder/$sub' dir: $!\n";
+      # Don't learn from messages marked as deleted
+      # Or files starting with a leading dot
+      push @files, map { $_ = "$sub/$_"; } grep { !/^\.|:2,.*T/ } readdir(DIR);
+      closedir(DIR)  or die "error closing directory $folder: $!";
+    } 
+  }
+  elsif (-f "$folder/cyrus.header") {
+    opendir(DIR, $folder)
+      or die "archive-iterator: can't open '$folder' dir: $!\n";
+
     # cyrus metadata: http://unix.lsa.umich.edu/docs/imap/imap-lsa-srv_3.html
     @files = grep { $_ ne '.' && $_ ne '..' &&
                     /^\S+$/ && !/^cyrus\.(?:index|header|cache|seen)/ }
 		  readdir(DIR);
+    closedir(DIR)  or die "error closing directory $folder: $!";
   }
   else {
+    opendir(DIR, $folder)
+      or die "archive-iterator: can't open '$folder' dir: $!\n";
+
     # ignore ,234 (deleted or refiled messages) and MH metadata dotfiles
     @files = grep { !/^[,.]/ } readdir(DIR);
+    closedir(DIR)  or die "error closing directory $folder: $!";
   }
-  closedir(DIR)  or die "error closing directory $folder: $!";
 
   $_ = "$folder/$_"  for @files;
 
