@@ -1702,7 +1702,14 @@ sub run_through_messages {
 
 	  # if messages remain, and we don't need to restart, send message
 	  if (($total_messages > $total_count) && !$needs_restart) {
-	    send_line($socket, read_line($tmpfd));
+	    my $line = read_line($tmpfd);
+	    unless ($line) {
+	      warn "mass-check: found short message list ($total_messages, $total_count)\n";
+	      $select->remove($socket);
+	      next;
+	    }
+
+            send_line($socket, $line);
 	    $total_count++;
 	    aidbg "mass-check: $total_messages $total_count\n";
 	  }
@@ -2298,7 +2305,8 @@ sub client_mode {
       # number of messages
       $msgnum = $total_messages = read_line($gzfd) || die "mass-check: error reading from gzip message file\n";
 
-      status("server gave us $total_messages messages") if ($opt_progress);
+      status("server says it gave us $total_messages messages") if ($opt_progress);
+      my $actual_messages = 0;
 
       # loop through and prep all of the messages the server sent
       for(my $i = 0 ; $i < $total_messages; $i++ ) {
@@ -2365,6 +2373,7 @@ sub client_mode {
               send_line($tmpfd,
                 Mail::SpamAssassin::ArchiveIterator::_index_pack($d[0], $d[1], 'f', "$opt_cs_cachedir/$d[3]")) ||
                   die "mass-check: error writing out temp file in client mode\n";
+              $actual_messages++;
             }
           }
 
@@ -2384,6 +2393,7 @@ sub client_mode {
               send_line($tmpfd,
                 Mail::SpamAssassin::ArchiveIterator::_index_pack($d[0], $d[1], 'f', "$tmpdir/$num")) ||
                   die "mass-check: error writing out temp file in client mode\n";
+              $actual_messages++;
 	    }
 	    else {
 	      warn "Can't create/write message temp file $tmpdir/$num: $!";
@@ -2429,6 +2439,7 @@ sub client_mode {
               send_line($tmpfd,
                 Mail::SpamAssassin::ArchiveIterator::_index_pack($d[0], $d[1], 'f', "$opt_cs_cachedir/$d[3]")) ||
                   die "mass-check: error writing out temp file in client mode\n";
+              $actual_messages++;
             }
           }
 
@@ -2441,12 +2452,20 @@ sub client_mode {
             push @{$real{$d[3]}}, $num;
 	    send_line($tmpfd, $index) ||
 	        die "mass-check: error writing out temp file in client mode\n";
+            $actual_messages++;
           }
 	}
       }
 
       $gzfd->close;
       unlink $result;
+
+      # if the server tries to give us messages, but some are errored,
+      # we need to know that so we don't try to process them all.
+      if ($total_messages != $actual_messages) {
+        status("server actually gave us $actual_messages messages") if ($opt_progress);
+        $total_messages = $actual_messages;
+      }
 
       if ($opt_progress) {
         status('starting run stage');
