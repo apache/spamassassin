@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: bb-jm dos jm zmi; day 2: bb-jm dos jm zmi; day 3: bb-jm jm zmi
+# with results from: day 1: bb-jm dos jm zmi; day 2: bb-jm dos jm zmi; day 3: bb-jm dos jm zmi
 
 # tflags userconf
 ALL_TRUSTED
@@ -122,6 +122,9 @@ DOS_RCVD_IP_TWICE_C
 DRUGS_HDIA
 
 # good enough
+DRUGS_STOCK_MIMEOLE
+
+# good enough
 DYN_RDNS_AND_INLINE_IMAGE
 
 # good enough
@@ -152,10 +155,19 @@ FB_GET_MEDS
 FB_GVR
 
 # good enough
+FB_NO_SCRIP_NEEDED
+
+# good enough
+FB_PIPEDOLLAR
+
+# good enough
 FB_QUALITY_REPLICA
 
 # good enough
 FB_REPLICA_ROLEX
+
+# good enough
+FB_REPLIC_CAP
 
 # good enough
 FB_SAVE_PERSC
@@ -179,6 +191,12 @@ FH_DATE_PAST_20XX
 FH_FAKE_RCVD_LINE
 
 # good enough
+FH_FROMEML_NOTLD
+
+# good enough
+FH_FROM_CASH
+
+# good enough
 FH_FROM_HOODIA
 
 # good enough
@@ -194,10 +212,16 @@ FH_HELO_EQ_D_D_D_D
 FH_HOST_EQ_DYNAMICIP
 
 # good enough
+FH_HOST_EQ_PACBELL_D
+
+# good enough
 FH_HOST_EQ_VERIZON_P
 
 # good enough
 FH_MSGID_XXBLAH
+
+# good enough
+FH_MSGID_XXX
 
 # good enough
 FM_DEBT_HELP
@@ -210,6 +234,9 @@ FM_SCHOOLING
 
 # good enough
 FM_SEX_HELODDDD
+
+# good enough
+FM_VEGAS_CASINO
 
 # good enough
 FORGED_RELAY_MUA_TO_MX
@@ -230,6 +257,9 @@ FRT_DISCOUNT
 FRT_DOLLAR
 
 # good enough
+FRT_LEVITRA
+
+# good enough
 FRT_PAYMENT
 
 # good enough
@@ -239,10 +269,16 @@ FRT_PENIS1
 FRT_PRICE
 
 # good enough
+FRT_ROLEX
+
+# good enough
 FRT_SEXUAL
 
 # good enough
 FRT_TODAY2
+
+# good enough
+FR_ALMOST_VIAG2
 
 # good enough
 FS_CAILIS
@@ -260,16 +296,25 @@ FS_LARGE_PERCENT2
 FS_NUDE
 
 # good enough
+FS_REPLICA
+
+# good enough
 FS_REPLICAWATCH
 
 # good enough
 FS_START_LOSE
 
 # good enough
+FS_TEEN_BAD
+
+# good enough
 FS_WEIGHT_LOSS
 
 # good enough
 FS_WILL_HELP
+
+# good enough
+FU_LONG_QUERY3
 
 # tflags userconf
 GTUBE
@@ -668,6 +713,9 @@ SANE_7d8e92a09f27d49fafe09a1dbd5cac10
 SANE_8cca0f3f45dd31497217734a18dc2ab2
 
 # good enough
+SANE_8f9d40cc4e21b11c7171a7d6b3eea4c1
+
+# good enough
 SANE_91eb43f705d25c804374a746d7519660
 
 # good enough
@@ -684,6 +732,9 @@ SANE_daa623cb11d766d49327b6af6dced27e
 
 # good enough
 SANE_e5950fd6cd9b53a17ba2cb7883181772
+
+# good enough
+SHORT_HELO_AND_INLINE_IMAGE
 
 # good enough
 SPAMMY_XMAILER
@@ -761,9 +812,6 @@ TVD_FINGER_02
 TVD_FROM_1
 
 # good enough
-TVD_FW_GRAPHIC_ID1
-
-# good enough
 TVD_PH_SUBJ_ACCOUNTS_POST
 
 # good enough
@@ -788,7 +836,145 @@ TVD_SUBJ_WIPE_DEBT
 TVD_VISIT_PHARMA
 
 # good enough
-SANE_8f9d40cc4e21b11c7171a7d6b3eea4c1
+FB_MED1CAT
+
+# good enough
+FH_HOST_IN_ADDRARPA
+
+# good enough
+FRT_ERECTION
+
+# good enough
+FRT_HEALTH
+
+# good enough
+FRT_PACKAGE
+
+# good enough
+FR_WATCHES_HTTP
+
+# good enough
+FS_GANGBANG
+
+# good enough
+FS_HOT_TEEN
+
+# good enough
+FS_TIGHT_TEEN
+
+# good enough
+HS_BOBAX_MID_1
+
+# good enough
+HS_BOBAX_MID_2
+
+# good enough
+RP_MINUS
+
+# good enough
+SANE_059b23f04690d144449b7c99a6c6cd4b
+
+# good enough
+SANE_0c64855d6ff8427a5506a57eaa7f23e4
+
+# good enough
+SANE_0ca06ee38f5fa72293cb01412fd1366d
+
+# good enough
+SANE_0de5cadd0badbd3e70f22a3ae31951fb
+
+# good enough
+SANE_15127c727eaa11887f10cbec9ac59c24
+
+# good enough
+SANE_17a1b160af7209e41df5c25be75d4f60
+
+# good enough
+SANE_2025b95f6cbbedc5b8ecc73c754b3ecd
+
+# good enough
+SANE_20d820d8f491476ca39941979ab139dd
+
+# good enough
+SANE_22fd419db2276a962b097aec535f2714
+
+# good enough
+SANE_3325b1231e51c0ba56c4034e2d775e02
+
+# good enough
+SANE_3d1f8fc21841dac2a36473f1107539a3
+
+# good enough
+SANE_429d184419724f2bb2dbfbb404c297f4
+
+# good enough
+SANE_4f80b2832a0be0bcdf2fa8ea2db52b83
+
+# good enough
+SANE_57eb6fb7217efcb7a706124454426ee6
+
+# good enough
+SANE_59f473392e226ff5636e7567e8330f90
+
+# good enough
+SANE_625f77feaf525ad9ee0f7590649d4453
+
+# good enough
+SANE_73d004f5ed3490d977cdcdbe924a5bf6
+
+# good enough
+SANE_767b5516127c9ea7beef8ae90de854a6
+
+# good enough
+SANE_7fc237f66e3978374a82bd42e3282c5d
+
+# good enough
+SANE_98cad0aed53b13a2e01a9f8b55a91599
+
+# good enough
+SANE_9ccf63bd21526610a1e5766b4a5a66df
+
+# good enough
+SANE_a0f2975dc1eba66becd2edb6b9b570de
+
+# good enough
+SANE_a0f55c2936d8123b36954e9ee7de0a28
+
+# good enough
+SANE_a6b4228229a0cbfe4e08052606f0222b
+
+# good enough
+SANE_b58d7945d89b7afc9e2753c83b00ab44
+
+# good enough
+SANE_c97e4079b46b2915d66cea44b79f17c5
+
+# good enough
+SANE_df300736ee1d0723e9e9361846d6350e
+
+# good enough
+SANE_e1dda269f3dd1d78c4d0e6d154e2c76c
+
+# good enough
+SANE_e2ae2c84e02091f07fa6f6fa5fbf5f56
+
+# good enough
+SANE_eab2266c69bb04051617e2559fd196d9
+
+# good enough
+SANE_ec20496617c80edc5fea24737f73bdc7
+
+# good enough
+SANE_ef36779acd8a23f6576af6a431c00cca
+
+# good enough
+SANE_fac0031ae2a816e3f81394b40b5cb44f
+
+# good enough
+SANE_m150552353f7eaba57a4da76c2a82098d
+
+# good enough
+TVD_PH_7
 
 # tflags userconf
 UNPARSEABLE_RELAY
@@ -1016,6 +1202,9 @@ XMAILER_MIMEOLE_OL_4B815
 XMAILER_MIMEOLE_OL_4BF4C
 
 # good enough
+XMAILER_MIMEOLE_OL_4EEDB
+
+# good enough
 XMAILER_MIMEOLE_OL_4F240
 
 # good enough
@@ -1059,6 +1248,9 @@ XMAILER_MIMEOLE_OL_B4B40
 
 # good enough
 XMAILER_MIMEOLE_OL_BC7E6
+
+# good enough
+XMAILER_MIMEOLE_OL_C65FA
 
 # good enough
 XMAILER_MIMEOLE_OL_CAC8F
