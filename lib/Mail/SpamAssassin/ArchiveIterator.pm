@@ -362,7 +362,7 @@ sub _run_file {
   my($inbuf,$nread);
   while ( $nread=read(INPUT,$inbuf,16384) ) {
     $len += $nread;
-    if ($len > BIG_BYTES) {
+    if (($len > BIG_BYTES) && !$self->{opt_all}) {
       info("archive-iterator: skipping large message\n");
       close INPUT  or die "error closing input file: $!";
       return;
