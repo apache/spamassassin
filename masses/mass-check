@@ -1546,6 +1546,8 @@ sub generate_messages {
           # run) we send a message number of 0 to indicate to the client that the server had an
           # error retrieving the message; we need to do this since we have already added the
           # line telling the client how many messages to expect
+          my $filename = (Mail::SpamAssassin::ArchiveIterator::_index_unpack($data))[3];
+          warn qq/mass-check: ArchiveIterator returned error for "$filename"\n/;
           send_line($gzfd, 0) || die "mass-check: error when writing to gz temp file\n";
           delete $msgsout->{$num};
           $failed_msgs++;
