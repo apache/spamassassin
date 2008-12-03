@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: bb-jm bb-traps dos jm theo zmi; day 2: bb-jm dos jm zmi; day 3: bb-jm dos jm zmi
+# with results from: day 1: bb-jm bb-traps dos jm theo zmi; day 2: bb-jm bb-traps dos jm theo zmi; day 3: bb-jm dos jm zmi
 
 # tflags userconf
 ALL_TRUSTED
@@ -185,6 +185,9 @@ FH_FROM_HOODIA
 FH_HELO_ALMOST_IP
 
 # good enough
+FH_HELO_ENDS_DOT
+
+# good enough
 FH_HELO_EQ_CHARTER
 
 # good enough
@@ -198,6 +201,9 @@ FH_HOST_EQ_PACBELL_D
 
 # good enough
 FH_HOST_EQ_VERIZON_P
+
+# good enough
+FH_HOST_IN_ADDRARPA
 
 # good enough
 FH_MSGID_XXBLAH
@@ -230,7 +236,16 @@ FRT_DISCOUNT
 FRT_DOLLAR
 
 # good enough
+FRT_ERECTION
+
+# good enough
+FRT_HEALTH
+
+# good enough
 FRT_LEVITRA
+
+# good enough
+FRT_PACKAGE
 
 # good enough
 FRT_PAYMENT
@@ -261,6 +276,9 @@ FS_EJACULA
 
 # good enough
 FS_ERECTION
+
+# good enough
+FS_HOT_TEEN
 
 # good enough
 FS_NUDE
@@ -333,6 +351,12 @@ HELO_OEM
 
 # tflags userconf
 HIGH_CODEPAGE_URI
+
+# good enough
+HS_BOBAX_MID_1
+
+# good enough
+HS_BOBAX_MID_2
 
 # good enough
 HS_OUTLOOK_MID_NOBRK
@@ -632,19 +656,52 @@ REPLYTO_WITHOUT_TO_CC
 RP_MATCHES_RCVD
 
 # good enough
+RP_MINUS
+
+# good enough
 RP_UNDERLINE
 
 # good enough
 SANE_04e8bf28eb445199a7f11b943c44d209
 
 # good enough
+SANE_059b23f04690d144449b7c99a6c6cd4b
+
+# good enough
 SANE_06c7a4732c1f84900776ed70b0c46622
+
+# good enough
+SANE_0c64855d6ff8427a5506a57eaa7f23e4
+
+# good enough
+SANE_0ca06ee38f5fa72293cb01412fd1366d
+
+# good enough
+SANE_0de5cadd0badbd3e70f22a3ae31951fb
+
+# good enough
+SANE_15127c727eaa11887f10cbec9ac59c24
 
 # good enough
 SANE_17534cea3ba620589af299f2dac174c4
 
 # good enough
+SANE_17a1b160af7209e41df5c25be75d4f60
+
+# good enough
 SANE_1c4f3286fa4aed6424ced88bfaf8b09c
+
+# good enough
+SANE_2025b95f6cbbedc5b8ecc73c754b3ecd
+
+# good enough
+SANE_20d820d8f491476ca39941979ab139dd
+
+# good enough
+SANE_22fd419db2276a962b097aec535f2714
+
+# good enough
+SANE_3325b1231e51c0ba56c4034e2d775e02
 
 # good enough
 SANE_350e3965f0c4efe66a6c43cfbe754b95
@@ -656,10 +713,31 @@ SANE_3a4b6d0e824e4ba2b01bef041a9f77e5
 SANE_3b92eda751c992f230f215fb7eb36844
 
 # good enough
+SANE_3d1f8fc21841dac2a36473f1107539a3
+
+# good enough
+SANE_429d184419724f2bb2dbfbb404c297f4
+
+# good enough
 SANE_4ef8302546bf270a19baf98508afacc4
 
 # good enough
+SANE_4f80b2832a0be0bcdf2fa8ea2db52b83
+
+# good enough
 SANE_5154384729a0aa1b7a92cae237ceed80
+
+# good enough
+SANE_57eb6fb7217efcb7a706124454426ee6
+
+# good enough
+SANE_59f473392e226ff5636e7567e8330f90
+
+# good enough
+SANE_625f77feaf525ad9ee0f7590649d4453
+
+# good enough
+SANE_73d004f5ed3490d977cdcdbe924a5bf6
 
 # good enough
 SANE_7429530a7398f43f1f1b795f9420714e
@@ -668,7 +746,13 @@ SANE_7429530a7398f43f1f1b795f9420714e
 SANE_75491b468ec2e117e50f9842d32abfab
 
 # good enough
+SANE_767b5516127c9ea7beef8ae90de854a6
+
+# good enough
 SANE_7d8e92a09f27d49fafe09a1dbd5cac10
+
+# good enough
+SANE_7fc237f66e3978374a82bd42e3282c5d
 
 # good enough
 SANE_8cca0f3f45dd31497217734a18dc2ab2
@@ -677,19 +761,64 @@ SANE_8cca0f3f45dd31497217734a18dc2ab2
 SANE_91eb43f705d25c804374a746d7519660
 
 # good enough
+SANE_98cad0aed53b13a2e01a9f8b55a91599
+
+# good enough
 SANE_9badf470c25849aa9a77d89b21f84d5e
+
+# good enough
+SANE_9ccf63bd21526610a1e5766b4a5a66df
+
+# good enough
+SANE_a0f2975dc1eba66becd2edb6b9b570de
+
+# good enough
+SANE_a0f55c2936d8123b36954e9ee7de0a28
 
 # good enough
 SANE_a1315779e96aedc845566b1f41f4e424
 
 # good enough
+SANE_a6b4228229a0cbfe4e08052606f0222b
+
+# good enough
+SANE_b58d7945d89b7afc9e2753c83b00ab44
+
+# good enough
 SANE_c627ae8d03f8c3d579345970e652142c
+
+# good enough
+SANE_c97e4079b46b2915d66cea44b79f17c5
 
 # good enough
 SANE_daa623cb11d766d49327b6af6dced27e
 
 # good enough
+SANE_df300736ee1d0723e9e9361846d6350e
+
+# good enough
+SANE_e1dda269f3dd1d78c4d0e6d154e2c76c
+
+# good enough
+SANE_e2ae2c84e02091f07fa6f6fa5fbf5f56
+
+# good enough
 SANE_e5950fd6cd9b53a17ba2cb7883181772
+
+# good enough
+SANE_eab2266c69bb04051617e2559fd196d9
+
+# good enough
+SANE_ec20496617c80edc5fea24737f73bdc7
+
+# good enough
+SANE_ef36779acd8a23f6576af6a431c00cca
+
+# good enough
+SANE_fac0031ae2a816e3f81394b40b5cb44f
+
+# good enough
+SANE_m150552353f7eaba57a4da76c2a82098d
 
 # good enough
 SHORT_HELO_AND_INLINE_IMAGE
@@ -764,7 +893,7 @@ TVD_FINGER_02
 TVD_FROM_1
 
 # good enough
-TVD_FW_GRAPHIC_ID1
+TVD_PH_7
 
 # good enough
 TVD_PH_SUBJ_ACCOUNTS_POST
@@ -788,133 +917,7 @@ TVD_SUBJ_WIPE_DEBT
 TVD_VISIT_PHARMA
 
 # good enough
-FH_HOST_IN_ADDRARPA
-
-# good enough
-FRT_ERECTION
-
-# good enough
-FRT_HEALTH
-
-# good enough
-FRT_PACKAGE
-
-# good enough
-FS_HOT_TEEN
-
-# good enough
-HS_BOBAX_MID_1
-
-# good enough
-HS_BOBAX_MID_2
-
-# good enough
-RP_MINUS
-
-# good enough
-SANE_059b23f04690d144449b7c99a6c6cd4b
-
-# good enough
-SANE_0c64855d6ff8427a5506a57eaa7f23e4
-
-# good enough
-SANE_0ca06ee38f5fa72293cb01412fd1366d
-
-# good enough
-SANE_0de5cadd0badbd3e70f22a3ae31951fb
-
-# good enough
-SANE_15127c727eaa11887f10cbec9ac59c24
-
-# good enough
-SANE_17a1b160af7209e41df5c25be75d4f60
-
-# good enough
-SANE_2025b95f6cbbedc5b8ecc73c754b3ecd
-
-# good enough
-SANE_20d820d8f491476ca39941979ab139dd
-
-# good enough
-SANE_22fd419db2276a962b097aec535f2714
-
-# good enough
-SANE_3325b1231e51c0ba56c4034e2d775e02
-
-# good enough
-SANE_3d1f8fc21841dac2a36473f1107539a3
-
-# good enough
-SANE_429d184419724f2bb2dbfbb404c297f4
-
-# good enough
-SANE_4f80b2832a0be0bcdf2fa8ea2db52b83
-
-# good enough
-SANE_57eb6fb7217efcb7a706124454426ee6
-
-# good enough
-SANE_59f473392e226ff5636e7567e8330f90
-
-# good enough
-SANE_625f77feaf525ad9ee0f7590649d4453
-
-# good enough
-SANE_73d004f5ed3490d977cdcdbe924a5bf6
-
-# good enough
-SANE_767b5516127c9ea7beef8ae90de854a6
-
-# good enough
-SANE_7fc237f66e3978374a82bd42e3282c5d
-
-# good enough
-SANE_98cad0aed53b13a2e01a9f8b55a91599
-
-# good enough
-SANE_9ccf63bd21526610a1e5766b4a5a66df
-
-# good enough
-SANE_a0f2975dc1eba66becd2edb6b9b570de
-
-# good enough
-SANE_a0f55c2936d8123b36954e9ee7de0a28
-
-# good enough
-SANE_a6b4228229a0cbfe4e08052606f0222b
-
-# good enough
-SANE_b58d7945d89b7afc9e2753c83b00ab44
-
-# good enough
-SANE_c97e4079b46b2915d66cea44b79f17c5
-
-# good enough
-SANE_df300736ee1d0723e9e9361846d6350e
-
-# good enough
-SANE_e1dda269f3dd1d78c4d0e6d154e2c76c
-
-# good enough
-SANE_e2ae2c84e02091f07fa6f6fa5fbf5f56
-
-# good enough
-SANE_eab2266c69bb04051617e2559fd196d9
-
-# good enough
-SANE_ec20496617c80edc5fea24737f73bdc7
-
-# good enough
-SANE_ef36779acd8a23f6576af6a431c00cca
-
-# good enough
-SANE_fac0031ae2a816e3f81394b40b5cb44f
-
-# good enough
-SANE_m150552353f7eaba57a4da76c2a82098d
-
-# good enough
-TVD_PH_7
+STOX_BOUND_090909_B
 
 # tflags userconf
 UNPARSEABLE_RELAY
