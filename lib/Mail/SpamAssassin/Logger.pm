@@ -62,6 +62,7 @@ my %log_level = (
 
 # global shared object
 our %LOG_SA;
+our $LOG_ENTERED;  # to avoid recursion on die or warn from within logging
 
 # defaults
 $LOG_SA{level} = WARNING;       # log info, warnings and errors
@@ -165,6 +166,9 @@ sub log_message {
 		       $caller[0] =~ m#^Mail::SpamAssassin(?:$|::)#);
   }
 
+  return if $LOG_ENTERED;  # avoid recursion on die or warn from within logging
+  $LOG_ENTERED = 1;  # no 'returns' from this point on, must clear the flag
+
   my $message = join(" ", @message);
   $message =~ s/[\r\n]+$//;		# remove any trailing newlines
 
@@ -178,6 +182,7 @@ sub log_message {
       $object->log_message($level, $line);
     }
   }
+  $LOG_ENTERED = 0;
 }
 
 =item dbg("facility: message")
