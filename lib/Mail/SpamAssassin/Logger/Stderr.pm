@@ -50,7 +50,6 @@ sub new {
 sub log_message {
   my ($self, $level, $msg) = @_;
 
-  local $SIG{PIPE} = 'IGNORE';  # don't signal on a failed write to a pipe
   print STDERR "[$$] $level: $msg\n"
     or warn "Error writing to log file: $!";
 }
