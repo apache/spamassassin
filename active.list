@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: dos theo zmi; day 2: dos zmi; day 3: dos zmi
+# with results from: day 1: dos jm theo zmi; day 2: dos theo zmi; day 3: dos zmi
 
 # tflags userconf
 ALL_TRUSTED
@@ -90,6 +90,9 @@ DNS_FROM_RFC_DSN
 
 # tflags publish
 DOS_ANAL_SPAM_MAILER
+
+# good enough
+DOS_HIGHBIT_HDRS_BODY
 
 # good enough
 DOS_HIGH_BAT_TO_MX
@@ -689,9 +692,6 @@ SANE_a0f55c2936d8123b36954e9ee7de0a28
 SANE_a1315779e96aedc845566b1f41f4e424
 
 # good enough
-SANE_b58d7945d89b7afc9e2753c83b00ab44
-
-# good enough
 SANE_c627ae8d03f8c3d579345970e652142c
 
 # good enough
@@ -791,109 +791,10 @@ TVD_SUBJ_WIPE_DEBT
 TVD_VISIT_PHARMA
 
 # good enough
-DOS_HIGHBIT_HDRS_BODY
+SANE_ef00ce28cfa5ed6e4c405ed37ff36d46
 
 # good enough
-FM_DEBT_HELP
-
-# good enough
-FRT_ERECTION
-
-# good enough
-FRT_PAYMENT
-
-# good enough
-KB_DATE_CONTAINS_TAB
-
-# good enough
-KB_FAKED_THE_BAT
-
-# good enough
-SANE_059b23f04690d144449b7c99a6c6cd4b
-
-# good enough
-SANE_0c64855d6ff8427a5506a57eaa7f23e4
-
-# good enough
-SANE_0ca06ee38f5fa72293cb01412fd1366d
-
-# good enough
-SANE_0de5cadd0badbd3e70f22a3ae31951fb
-
-# good enough
-SANE_15127c727eaa11887f10cbec9ac59c24
-
-# good enough
-SANE_2025b95f6cbbedc5b8ecc73c754b3ecd
-
-# good enough
-SANE_3325b1231e51c0ba56c4034e2d775e02
-
-# good enough
-SANE_350e3965f0c4efe66a6c43cfbe754b95
-
-# good enough
-SANE_3d1f8fc21841dac2a36473f1107539a3
-
-# good enough
-SANE_429d184419724f2bb2dbfbb404c297f4
-
-# good enough
-SANE_4f80b2832a0be0bcdf2fa8ea2db52b83
-
-# good enough
-SANE_59f473392e226ff5636e7567e8330f90
-
-# good enough
-SANE_625f77feaf525ad9ee0f7590649d4453
-
-# good enough
-SANE_73d004f5ed3490d977cdcdbe924a5bf6
-
-# good enough
-SANE_767b5516127c9ea7beef8ae90de854a6
-
-# good enough
-SANE_7fc237f66e3978374a82bd42e3282c5d
-
-# good enough
-SANE_98cad0aed53b13a2e01a9f8b55a91599
-
-# good enough
-SANE_9ccf63bd21526610a1e5766b4a5a66df
-
-# good enough
-SANE_b258019fe5a5c7a088f62b12c2ffc65a
-
-# good enough
-SANE_c97e4079b46b2915d66cea44b79f17c5
-
-# good enough
-SANE_df300736ee1d0723e9e9361846d6350e
-
-# good enough
-SANE_e2ae2c84e02091f07fa6f6fa5fbf5f56
-
-# good enough
-SANE_eab2266c69bb04051617e2559fd196d9
-
-# good enough
-SANE_ec20496617c80edc5fea24737f73bdc7
-
-# good enough
-SANE_ef36779acd8a23f6576af6a431c00cca
-
-# good enough
-SANE_f71a6e07c3f770cd68f363db8526de0b
-
-# good enough
-SANE_fac0031ae2a816e3f81394b40b5cb44f
-
-# good enough
-SANE_m150552353f7eaba57a4da76c2a82098d
-
-# good enough
-TVD_FINGER_01
+TVD_PCT_OFF
 
 # tflags userconf
 UNPARSEABLE_RELAY
