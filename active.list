@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: jm theo zmi; day 2: jm theo zmi; day 3: dos jm theo zmi
+# with results from: day 1: dos jm theo zmi; day 2: jm theo zmi; day 3: jm theo zmi
 
 # tflags userconf
 ALL_TRUSTED
@@ -101,16 +101,13 @@ DOS_HIGHBIT_HDRS_BODY
 DOS_HIGH_BAT_TO_MX
 
 # good enough
-DOS_LIVE_SPACES_CID
-
-# good enough
 DOS_OE_TO_MX
 
 # good enough
 DOS_OE_TO_MX_IMAGE
 
 # good enough
-DOS_PHISH_WWW_COM_BIZ
+DOS_OUTLOOK_TO_MX
 
 # good enough
 DOS_RCVD_IP_TWICE_B
@@ -165,9 +162,6 @@ FB_NOT_CREDIT
 
 # good enough
 FB_NO_SCRIP_NEEDED
-
-# good enough
-FB_P1LL
 
 # good enough
 FB_PIPEDOLLAR
@@ -463,12 +457,6 @@ KB_RATWARE_OUTLOOK_16
 # good enough
 KB_RATWARE_OUTLOOK_MID
 
-# good enough
-LIVEFILESTORE
-
-# good enough
-LIVEFILESTORE_HTML
-
 # tflags userconf
 MIME_CHARSET_FARAWAY
 
@@ -489,9 +477,6 @@ NO_RELAYS
 
 # good enough
 NULL_IN_BODY
-
-# good enough
-OPERA_MID_NO_DIGIT
 
 # good enough
 PART_CID_STOCK
@@ -719,12 +704,6 @@ SANE_059b23f04690d144449b7c99a6c6cd4b
 SANE_06c7a4732c1f84900776ed70b0c46622
 
 # good enough
-SANE_0b71b2414f60460dc5ce8b38f77afc84
-
-# good enough
-SANE_0c64855d6ff8427a5506a57eaa7f23e4
-
-# good enough
 SANE_0ca06ee38f5fa72293cb01412fd1366d
 
 # good enough
@@ -758,9 +737,6 @@ SANE_3a4b6d0e824e4ba2b01bef041a9f77e5
 SANE_3b92eda751c992f230f215fb7eb36844
 
 # good enough
-SANE_3d1f8fc21841dac2a36473f1107539a3
-
-# good enough
 SANE_429d184419724f2bb2dbfbb404c297f4
 
 # good enough
@@ -779,13 +755,7 @@ SANE_57eb6fb7217efcb7a706124454426ee6
 SANE_59f473392e226ff5636e7567e8330f90
 
 # good enough
-SANE_60499b33deab95fe4907732e43073be5
-
-# good enough
 SANE_625f77feaf525ad9ee0f7590649d4453
-
-# good enough
-SANE_73d004f5ed3490d977cdcdbe924a5bf6
 
 # good enough
 SANE_7429530a7398f43f1f1b795f9420714e
@@ -842,16 +812,10 @@ SANE_ba47ac876ecf9d9434a099876632b22b
 SANE_c627ae8d03f8c3d579345970e652142c
 
 # good enough
-SANE_c97e4079b46b2915d66cea44b79f17c5
-
-# good enough
 SANE_d5ee9290870fd33fde2ec65ebd06034c
 
 # good enough
 SANE_daa623cb11d766d49327b6af6dced27e
-
-# good enough
-SANE_db753c9fabc9457efd8a9e6bcc485803
 
 # good enough
 SANE_df300736ee1d0723e9e9361846d6350e
@@ -866,13 +830,7 @@ SANE_e2ae2c84e02091f07fa6f6fa5fbf5f56
 SANE_e5950fd6cd9b53a17ba2cb7883181772
 
 # good enough
-SANE_eab2266c69bb04051617e2559fd196d9
-
-# good enough
 SANE_eb8833b51aa54190f3a7dc22d67a9189
-
-# good enough
-SANE_ec20496617c80edc5fea24737f73bdc7
 
 # good enough
 SANE_ec474d58454de0340f7e1ceae041b069
@@ -891,9 +849,6 @@ SANE_f7d3274e8932068e2fa1d892c1dc28f8
 
 # good enough
 SANE_fac0031ae2a816e3f81394b40b5cb44f
-
-# good enough
-SANE_m150552353f7eaba57a4da76c2a82098d
 
 # good enough
 SHORT_HELO_AND_INLINE_IMAGE
@@ -936,9 +891,6 @@ STOCK_IMG_HTML
 
 # good enough
 STOCK_IMG_OUTLOOK
-
-# good enough
-STOX_BOUND_090909_B
 
 # good enough
 STOX_REPLY_TYPE_WITHOUT_QUOTES
@@ -987,12 +939,6 @@ TVD_SUBJ_WIPE_DEBT
 
 # good enough
 TVD_VISIT_PHARMA
-
-# good enough
-DOS_OUTLOOK_TO_MX
-
-# good enough
-TVD_FW_GRAPHIC_ID1
 
 # tflags userconf
 UNPARSEABLE_RELAY
