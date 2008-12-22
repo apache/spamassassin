@@ -22,7 +22,7 @@ use constant DO_RUN =>
 use Test;
 
 BEGIN {
-  plan tests => (DO_RUN ? 4 : 0),
+  plan tests => (DO_RUN ? 5 : 0),
 };
 
 exit unless (DO_RUN);
@@ -33,6 +33,7 @@ exit unless (DO_RUN);
  q{ X_URIBL_A } => 'A',
  q{ X_URIBL_B } => 'B',
  q{ X_URIBL_NS } => 'NS',
+ q{ X_URIBL_FULL_NS } => 'FULL_NS',
 );
 
 tstlocalrules(q{
@@ -50,6 +51,10 @@ tstlocalrules(q{
   urinsrhssub X_URIBL_NS  dnsbltest.spamassassin.org.  A 8
   body       X_URIBL_NS  eval:check_uridnsbl('X_URIBL_NS')
   tflags     X_URIBL_NS  net
+
+  urifullnsrhssub X_URIBL_FULL_NS  dnsbltest.spamassassin.org.  A 8
+  body       X_URIBL_FULL_NS  eval:check_uridnsbl('X_URIBL_FULL_NS')
+  tflags     X_URIBL_FULL_NS  net
 
   add_header all RBL _RBL_
 
