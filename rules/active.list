@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: dos jm theo zmi; day 2: jm theo zmi; day 3: jm theo zmi
+# with results from: day 1: dos jm theo zmi; day 2: dos jm theo zmi; day 3: jm theo zmi
 
 # tflags userconf
 ALL_TRUSTED
@@ -197,6 +197,9 @@ FH_FAKE_RCVD_LINE
 FH_FAKE_RCVD_LINE_B
 
 # good enough
+FH_FROMEML_NOTLD
+
+# good enough
 FH_HELO_ALMOST_IP
 
 # good enough
@@ -272,9 +275,6 @@ FRT_PAYMENT
 FRT_PENIS1
 
 # good enough
-FRT_PHARMAC
-
-# good enough
 FRT_PRICE
 
 # good enough
@@ -324,6 +324,9 @@ FS_REPLICA
 
 # good enough
 FS_REPLICAWATCH
+
+# good enough
+FS_START_DOYOU2
 
 # good enough
 FS_START_LOSE
@@ -839,9 +842,6 @@ SANE_ec474d58454de0340f7e1ceae041b069
 SANE_ef36779acd8a23f6576af6a431c00cca
 
 # good enough
-SANE_efde2712b85bfb5e8597b36b4485ebef
-
-# good enough
 SANE_f71a6e07c3f770cd68f363db8526de0b
 
 # good enough
@@ -917,9 +917,6 @@ TVD_FINGER_01
 TVD_FINGER_02
 
 # good enough
-TVD_FW_GRAPHIC_ID1
-
-# good enough
 TVD_PCT_OFF
 
 # good enough
@@ -942,6 +939,21 @@ TVD_SUBJ_WIPE_DEBT
 
 # good enough
 TVD_VISIT_PHARMA
+
+# good enough
+DOS_LIVE_SPACES_CID
+
+# good enough
+DOS_PHISH_WWW_COM_BIZ
+
+# good enough
+LIVEFILESTORE
+
+# good enough
+LIVEFILESTORE_HTML
+
+# good enough
+TVD_FROM_1
 
 # tflags userconf
 UNPARSEABLE_RELAY
