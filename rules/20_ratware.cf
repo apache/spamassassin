@@ -47,7 +47,7 @@ describe RATWARE_MPOP_WEBMAIL	Bulk email fingerprint (mPOP Web-Mail)
 
 # first define situations where servers rewrite message id so we can't use message id to detect forgeries
 
-header __HOTMAIL_BAYDAV_MSGID		MESSAGEID =~ /^<BAY\d+-DAV\d+[A-Z0-9]{25}\@phx\.gbl>$/m
+header __HOTMAIL_BAYDAV_MSGID		MESSAGEID =~ /^<[A-Z]{3}\d+-(?:DAV|SMTP)\d+[A-Z0-9]{25}\@phx\.gbl>$/m
 
 header __IPLANET_MESSAGING_SERVER Received =~ /iPlanet Messaging Server/
 
