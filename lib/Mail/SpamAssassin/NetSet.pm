@@ -80,9 +80,12 @@ sub add_cidr {
       $ip6 = $ip;
     }
 
-    # bug 5931: this is O(n^2).  bad if there are lots of nets, and
-    # it's harmless to have duplicates anyway
-    # next if ($self->is_net_declared($ip4, $ip6, $exclude, 0));
+    # bug 5931: this is O(n^2).  bad if there are lots of nets. There are  good
+    # reasons to keep it for linting purposes, though, so don't start skipping
+    # it until we have over 200 nets in our list
+    if (scalar @{$self->{nets}} < 200) {
+      next if ($self->is_net_declared($ip4, $ip6, $exclude, 0));
+    }
 
     # note: it appears a NetAddr::IP object takes up about 279 bytes
     push @{$self->{nets}}, {
