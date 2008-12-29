@@ -1,8 +1,18 @@
 #!/usr/bin/perl
 #
-# usage: t.rules/run [--verbose] [--tests=BOUNCE_MESSAGE,FOO,BAR] [file ...]
-#
 # TODO: Generate TAP output
+
+sub usage {
+  die "
+usage: t.rules/run [options] [file_or_dir ...]
+
+options:
+--verbose       Verbose output
+--tests=BOUNCE_MESSAGE,FOO,BAR   
+                Select tests to run, instead of selecting from
+                the specified files/dirs
+  ";
+}
 
 use strict;
 use warnings;
@@ -20,7 +30,7 @@ GetOptions(
   'tests|t=s' => \$opt{'tests'},
   'verbose|v' => \$opt{'verbose'},
   'debug|D' => \$opt{'debug'},
-);
+) or usage();
 
 my $spamtest;
 my $lastconfigtext = '';
@@ -36,7 +46,13 @@ $opt{'tests'} ||= join " ", <t.rules/*>;
 my $testsfailed = 0;
 if (@ARGV) {
   foreach my $f (@ARGV) {
-    test_msg($f, $1);
+    if (-d $f) {    # recurse down 1 level
+      foreach my $subf (<$f/*>) {
+        test_msg($subf);
+      }
+    } else {        # files directly
+      test_msg($f);
+    }
   }
 } else {
   main();
