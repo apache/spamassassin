@@ -185,6 +185,7 @@ sub proc_text_spam {
   }
 
   foreach my $tok (keys %tokens) {
+    #warn "JMD adding $tok => ".decode_sym2words($tok);
     # incr the counter for this token
     $ngram_count{$tok}++;
     $msg_subset_hit{$tok} .= $cp;    # the message subset hit by this tok
@@ -207,37 +208,50 @@ sub discard_hapaxes {
 sub proc_text_ham {
   my ($text) = @_;
 
-  my $w1 = '';
-  my $w2 = '';
-  my $w3 = '';
-
   my %tokens = ();
-  foreach my $w (split(' ', $text)) {
-    $w3 = $w2;
-    $w2 = $w1;
+  foreach my $line (split(/\[p\]/, $text)) {
+    my $w1 = '';
+    my $w2 = '';
+    my $w3 = '';
 
-    $w1 = $word2sym{$w};
-    if (!$w1) {
-      # since we're deleting, there's no need to add new words
-      # to the dictionary; just use the final $sym_acc to mean
-      # "unknown ham word", and don't increment it
-      $w1 = $sym_acc;
+    foreach my $w (split(' ', $line)) {
+      $w3 = $w2;
+      $w2 = $w1;
+
+      $w1 = $word2sym{$w};
+      if (!$w1) {
+        # since we're deleting, there's no need to add new words
+        # to the dictionary; just use the final $sym_acc to mean
+        # "unknown ham word", and don't increment it
+        $w1 = $sym_acc;
+      }
+
+      $tokens{"$w3.$w2.$w1"} = $tokens{"$w3.$w2"} = $tokens{".$w3"} = 1;
     }
-
-    $tokens{"$w3.$w2.$w1"} = $tokens{"$w3.$w2"} = 1;
-  }
-  
-  if ($w2 && $w1) {
-    $tokens{"$w2.$w1"} = 1;
+    
+    # deal with leftovers
+    if ($w2 && $w1) {
+      $tokens{"$w2.$w1"} = 1;
+    }
   }
 
   foreach my $tok (keys %tokens) {
     # we're not tracking hits; we're killing false positives. 
     # as soon as a single FP appears, kill all record of that token,
     # it cannot be used
-    delete $ngram_count{$tok};
-    delete $msg_subset_hit{$tok};
+    remove_fp_ing_token($tok);
   }
+}
+
+sub remove_fp_ing_token {
+  my $tok = shift;
+  #warn "JMD removing $tok => ".decode_sym2words($tok);
+  delete $ngram_count{$tok};
+  delete $msg_subset_hit{$tok};
+  delete $ngram_count{".".$tok};
+  delete $msg_subset_hit{".".$tok};
+  delete $ngram_count{"..".$tok};
+  delete $msg_subset_hit{"..".$tok};
 }
 
 sub filter_into_message_subsets {
@@ -262,7 +276,7 @@ sub filter_into_message_subsets {
     my $bad;
 
     # must occur more than once!
-    if ($count <= 1) {
+    if (!defined $count || $count <= 1) {
       $bad++;
     }
     # require N% spam hits
@@ -272,8 +286,7 @@ sub filter_into_message_subsets {
 
     if ($bad) {
       # we don't need to remember anything about this pattern after here
-      delete $ngram_count{$id};
-      delete $msg_subset_hit{$id};
+      remove_fp_ing_token($id);
       next;
     }
 
@@ -444,7 +457,7 @@ sub collapse_pats {
     my $pat = shift(@{$pataryref});
     last unless defined($pat);
 
-    # warn "JMD $pat";
+    #warn "JMD collapse [$pat]";
     $pat =~ s/^\s+//;
 
     # TODO: optimise, second-slowest line
