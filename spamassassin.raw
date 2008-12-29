@@ -559,7 +559,7 @@ sub kill_handler {
     undef $tempfile;
   }
   close STDOUT; close STDIN;  # ignoring status
-  exit 0;
+  exit 15;
 }
 
 # ---------------------------------------------------------------------------
