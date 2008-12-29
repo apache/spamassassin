@@ -73,7 +73,6 @@ sub main {
 
     warn "\nRunning tests for $rule:\n" if $verbose;
     foreach my $f (<$ruledir/*>) {
-      next if ($f =~ /\.cf$/i);
       (-f $f) and test_msg($f);
     }
   }
@@ -83,6 +82,7 @@ sub main {
 
 sub test_msg {
   my ($f) = @_;
+  return if ($f =~ /\.cf$/i);
   ($f =~ /\/([^\/]+)\/[^\/]+$/) or warn "cannot find rule in '$f'";
   my $rule = $1;
 
