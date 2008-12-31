@@ -808,7 +808,7 @@ endif
 ##{ FRT_BIGGERMEM1
 
 ifplugin Mail::SpamAssassin::Plugin::ReplaceTags
-body     FRT_BIGGERMEM1		/<inter SP2><post P2>(?:<B><I><G><G><E><R>|<L><A><R><G><E><R>).{1,8}(?:<P><E><N><I><S>|<B><R><E><A><S><T>|<M><E><M><B><E><R>)/i
+body     FRT_BIGGERMEM1         /<inter SP2><post P2>(?:<B><IX><GX><GX><E><R>|<L><A><R><GX><E><R>).{1,8}(?:<P><E><N><IX><SX>|<B><R><E><A><SX><TX>|<M><E><M><B><E><R>)/i
 describe FRT_BIGGERMEM1		ReplaceTags: Bigger / Larger, Penis / Member
 endif
 ##} FRT_BIGGERMEM1
@@ -856,7 +856,7 @@ endif
 ##{ FRT_GUARANTEE1
 
 ifplugin Mail::SpamAssassin::Plugin::ReplaceTags
-body     FRT_GUARANTEE1		/<inter SP2><post P2>(?!guarantee)<G><U><A><R><A><N><T><E><E>/i
+body     FRT_GUARANTEE1         /<inter SP2><post P2>(?!guarantee)<GX><U><A><R><A><N><TX><E><E>/i
 describe FRT_GUARANTEE1		ReplaceTags: Guarantee (1)
 endif
 ##} FRT_GUARANTEE1
@@ -880,7 +880,7 @@ endif
 ##{ FRT_MEETING
 
 ifplugin Mail::SpamAssassin::Plugin::ReplaceTags
-body     FRT_MEETING		/<inter SP2><post P2>\b(?!meeting)<M><E><E><T><I><N><G>\b/i
+body     FRT_MEETING            /<inter SP2><post P2>\b(?!meeting)<M><E><E><TX><IX><N><GX>\b/i
 describe FRT_MEETING		ReplaceTags: Meeting
 endif
 ##} FRT_MEETING
@@ -968,7 +968,7 @@ endif
 ##{ FRT_STRONG1
 
 ifplugin Mail::SpamAssassin::Plugin::ReplaceTags
-body     FRT_STRONG1		/<inter SP2><post P2>\b(?!stro\s?ng)<S><T><R><O><N><G>\b/i
+body     FRT_STRONG1            /<inter SP2><post P2>\b(?!stro\s?ng)<SX><TX><R><O><N><GX>\b/i
 describe FRT_STRONG1		ReplaceTags: Strong (1)
 endif
 ##} FRT_STRONG1
@@ -976,7 +976,7 @@ endif
 ##{ FRT_STRONG2
 
 ifplugin Mail::SpamAssassin::Plugin::ReplaceTags
-body     FRT_STRONG2		/<inter W0><post P2>\b(?!strong)<S><T><R><O><N><G>\b/i
+body     FRT_STRONG2            /<inter W0><post P2>\b(?!strong)<SX><TX><R><O><N><GX>\b/i
 describe FRT_STRONG2		ReplaceTags: Strong (2)
 endif
 ##} FRT_STRONG2
@@ -1016,7 +1016,7 @@ endif
 ##{ FRT_WEIGHT2
 
 ifplugin Mail::SpamAssassin::Plugin::ReplaceTags
-body     FRT_WEIGHT2		/<inter W0><post P2>\b(?!weight)<W><E><I><G><H><T>/i
+body     FRT_WEIGHT2            /<inter W0><post P2>\b(?!weight)<WX><E><IX><GX><H><TX>/i
 describe FRT_WEIGHT2		ReplaceTags: Weight (2)
 endif
 ##} FRT_WEIGHT2
@@ -2659,12 +2659,12 @@ replace_post	P2	{1,2}
 replace_post	P3	{1,3}
 replace_inter W0 \w?
 replace_inter SP2 [\s\d_*\$\%(),.:;?!}{\[\]|\/?^\#~\xa1`'+-]?
-replace_tag   G  [gk6]
-replace_tag   Q  [qg]
-replace_tag   S  [sz5\xa6\xa7]
-replace_tag   T  [t|]
-replace_tag   U2 [u\xb5\xd9\xda\xdb\xdc\xfc\xfb\xfa\xf9\xfd]
-replace_tag   W  (?:[wv]|vv)
+replace_tag   GX  [gk6]
+replace_tag   IX  [ilt|!1y?\xcc\xcd\xce\xcf\xec\xed\xee\xef]
+replace_tag   SX  [sz5\xa6\xa7]
+replace_tag   TX  [t|]
+replace_tag   UX [u\xb5\xd9\xda\xdb\xdc\xfc\xfb\xfa\xf9\xfd]
+replace_tag   WX  (?:[wv]|vv)
 replace_rules T_FRT_ABSOLUT
 replace_rules FRT_ADOBE2
 replace_rules T_FRT_ADULT2
