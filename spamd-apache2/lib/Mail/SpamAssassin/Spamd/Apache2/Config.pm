@@ -450,7 +450,7 @@ sub post_config {
       $ENV{HOME} = $tmphome;
       $sa->compile_now(0, 1);
       delete $ENV{HOME};
-      File::Path::rmtree($tmphome);
+      system("rm -rf '$tmphome'");
       $Mail::SpamAssassin::Spamd::Apache2::spamtest = $sa;
       Mail::SpamAssassin::Spamd::backup_config($sa);
     }
