@@ -376,13 +376,14 @@ sub rule2xs {
 
   our $PATH = $modname;
   $PATH =~ s/::/-/g;
+  $PATH =~ s/[^-_A-Za-z0-9\.]/_/g;
   our $PMFILE = $modname;
   $PMFILE =~ s/.*:://;
   $PMFILE .= ".pm";
   our $XSFILE = $PMFILE;
   $XSFILE =~ s/\.pm$/.xs/;
 
-  $force and rmtree $PATH;
+  $force and system("rm -rf $PATH");
   mkdir $PATH or (!$force and die "mkdir($PATH): $!");
   chdir $PATH;
   if (!$quiet) { print "cd $PATH\n" or die "error writing: $!" }
