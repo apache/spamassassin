@@ -20,8 +20,10 @@ exit unless TEST_ENABLED;
 # ---------------------------------------------------------------------------
 
 %patterns = (
-	q{ spam reported to DCC }, 'dcc report',
-            );
+
+  q{ spam reported to DCC }, 'dcc report',
+
+);
 
 tstpre ("
 
@@ -34,8 +36,10 @@ ok sarun ("-t -D info -r < data/spam/gtubedcc.eml 2>&1", \&patterns_run_cb);
 ok_all_patterns();
 
 %patterns = (
-	q{ Listed in DCC }, 'dcc',
-            );
+
+  q{ Listed in DCC }, 'dcc',
+
+);
 
 ok sarun ("-t < data/spam/gtubedcc.eml", \&patterns_run_cb);
 ok_all_patterns();

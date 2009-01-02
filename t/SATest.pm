@@ -147,6 +147,8 @@ sub sa_t_init {
       or warn "cannot copy $file to log/test_rules_copy/$base";
   }
 
+  copy ("data/01_test_rules.pre", "log/test_rules_copy/01_test_rules.pre")
+    or warn "cannot copy data/01_test_rules.cf to log/test_rules_copy/01_test_rules.pre";
   copy ("data/01_test_rules.cf", "log/test_rules_copy/01_test_rules.cf")
     or warn "cannot copy data/01_test_rules.cf to log/test_rules_copy/01_test_rules.cf";
 

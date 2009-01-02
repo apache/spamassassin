@@ -18,6 +18,50 @@
 # limitations under the License.
 # </@LICENSE>
 
+# copied from 10_default_prefs.cf
+clear_report_template
+report Spam detection software, running on the system "_HOSTNAME_", has
+report identified this incoming email as possible spam.  The original message
+report has been attached to this so you can view it (if it isn't spam) or label
+report similar future email.  If you have any questions, see
+report _CONTACTADDRESS_ for details.
+report
+report Content preview:  _PREVIEW_
+report
+report Content analysis details:   (_SCORE_ points, _REQD_ required)
+report
+report " pts rule name              description"
+report  ---- ---------------------- --------------------------------------------------
+report _SUMMARY_
+
+report_contact  @@CONTACT_ADDRESS@@
+
+clear_unsafe_report_template
+unsafe_report The original message was not completely plain text, and may be unsafe to
+unsafe_report open with some email clients; in particular, it may contain a virus,
+unsafe_report or confirm that your address can receive spam.  If you wish to view
+unsafe_report it, it may be safer to save it to a file and open it with an editor.
+
+clear_headers
+add_header all Checker-Version SpamAssassin _VERSION_ (_SUBVERSION_) on _HOSTNAME_
+add_header spam Flag _YESNOCAPS_
+add_header all Level _STARS(*)_
+add_header all Status "_YESNO_, score=_SCORE_ required=_REQD_ tests=_TESTS_ autolearn=_AUTOLEARN_ version=_VERSION_"
+
+required_score           5
+ok_locales              all
+ifplugin Mail::SpamAssassin::Plugin::TextCat
+ok_languages            all
+endif # Mail::SpamAssassin::Plugin::TextCat
+
+ifplugin Mail::SpamAssassin::Plugin::AutoLearnThreshold
+bayes_auto_learn_threshold_nonspam      0.1
+bayes_auto_learn_threshold_spam         12.0
+endif # Mail::SpamAssassin::Plugin::AutoLearnThreshold
+
+bayes_auto_learn                        1
+
+report_safe           1
 
 
 header TEST_NOREALNAME  From =~ /^["\s]*\<?\S+\@\S+\>?\s*$/
@@ -48,4 +92,119 @@ header TEST_INVALID_DATE   Date !~ /^\s*(?:(?i:Mon|Tue|Wed|Thu|Fri|Sat|Sun),\s+)
 describe TEST_INVALID_DATE Invalid Date: header (not RFC 2822)
 score TEST_INVALID_DATE    5
 
+header USER_IN_BLACKLIST    eval:check_from_in_blacklist()
+describe USER_IN_BLACKLIST  From: address is in the user's black-list
+tflags USER_IN_BLACKLIST    userconf noautolearn
+
+header USER_IN_BLACKLIST_TO     eval:check_to_in_blacklist()
+describe USER_IN_BLACKLIST_TO   User is listed in 'blacklist_to'
+tflags USER_IN_BLACKLIST_TO     userconf noautolearn
+
+header TEST_MSGID_OUTLOOK_INVALID    eval:check_outlook_message_id()
+describe TEST_MSGID_OUTLOOK_INVALID  Message-Id is fake (in Outlook Express format)
+score TEST_MSGID_OUTLOOK_INVALID     5
+
+header HASHCASH_20            eval:check_hashcash_value('20', '21')
+header HASHCASH_21            eval:check_hashcash_value('21', '22')
+header HASHCASH_22            eval:check_hashcash_value('22', '23')
+header HASHCASH_23            eval:check_hashcash_value('23', '24')
+header HASHCASH_24            eval:check_hashcash_value('24', '25')
+header HASHCASH_25            eval:check_hashcash_value('25', '26')
+header HASHCASH_HIGH          eval:check_hashcash_value('26', '9999')
+tflags HASHCASH_20            nice userconf
+tflags HASHCASH_21            nice userconf
+tflags HASHCASH_22            nice userconf
+tflags HASHCASH_23            nice userconf
+tflags HASHCASH_24            nice userconf
+tflags HASHCASH_25            nice userconf
+tflags HASHCASH_HIGH          nice userconf
+describe HASHCASH_20          Contains valid Hashcash token (20 bits)
+describe HASHCASH_21          Contains valid Hashcash token (21 bits)
+describe HASHCASH_22          Contains valid Hashcash token (22 bits)
+describe HASHCASH_23          Contains valid Hashcash token (23 bits)
+describe HASHCASH_24          Contains valid Hashcash token (24 bits)
+describe HASHCASH_25          Contains valid Hashcash token (25 bits)
+describe HASHCASH_HIGH        Contains valid Hashcash token (>25 bits)
+header HASHCASH_2SPEND        eval:check_hashcash_double_spend()
+describe HASHCASH_2SPEND      Hashcash token already spent in another mail
+tflags HASHCASH_2SPEND        userconf
+
+header MISSING_HB_SEP            eval:check_msg_parse_flags('missing_head_body_separator')
+describe MISSING_HB_SEP          Missing blank line between message header and body
+tflags MISSING_HB_SEP            userconf
+
+header X_MESSAGE_INFO            exists:X-Message-Info
+describe X_MESSAGE_INFO          Bulk email fingerprint (X-Message-Info) found
+
+header SORTED_RECIPS             eval:sorted_recipients()
+describe SORTED_RECIPS           Recipient list is sorted by address
+
+header SUSPICIOUS_RECIPS eval:similar_recipients('0.65','undef')
+describe SUSPICIOUS_RECIPS       Similar addresses in recipient list
+
+body GTUBE               /XJS\*C4JDBQADN1\.NSBN3\*2IDNEN\*GTUBE-STANDARD-ANTI-UBE-TEST-EMAIL\*C\.34X/
+describe GTUBE           Generic Test for Unsolicited Bulk Email
+score GTUBE              1000
+tflags GTUBE             userconf noautolearn
+
+header USER_IN_WHITELIST  eval:check_from_in_whitelist()
+describe USER_IN_WHITELIST        From: address is in the user's white-list
+tflags USER_IN_WHITELIST  userconf nice noautolearn
+score USER_IN_WHITELIST -100.000
+
+body BAYES_99         eval:check_bayes('0.99', '1.00')
+tflags BAYES_99               learn
+describe BAYES_99     Bayes spam probability is 99 to 100%
+score BAYES_99 0 0 3.5 3.5
+
+header USER_IN_WHITELIST_TO     eval:check_to_in_whitelist()
+describe USER_IN_WHITELIST_TO   User is listed in 'whitelist_to'
+tflags USER_IN_WHITELIST_TO     userconf nice noautolearn
+score USER_IN_WHITELIST_TO -6.000
+
+score SUBJECT_IN_BLACKLIST 100
+header SUBJECT_IN_BLACKLIST      eval:check_subject_in_blacklist()
+describe SUBJECT_IN_BLACKLIST    Subject: contains string in the user's black-list
+tflags SUBJECT_IN_BLACKLIST      userconf noautolearn
+
+score SUBJECT_IN_WHITELIST -100
+header SUBJECT_IN_WHITELIST      eval:check_subject_in_whitelist()
+describe SUBJECT_IN_WHITELIST    Subject: contains string in the user's white-list
+tflags SUBJECT_IN_WHITELIST      userconf nice noautolearn
+
+header __HAS_MSGID               MESSAGEID =~ /\S/
+header __SANE_MSGID              MESSAGEID =~ /^<[^<>\\ \t\n\r\x0b\x80-\xff]+\@[^<>\\ \t\n\r\x0b\x80-\xff]+>\s*$/m
+header __MSGID_COMMENT           MESSAGEID =~ /\(.*\)/m
+meta INVALID_MSGID               __HAS_MSGID && !(__SANE_MSGID || __MSGID_COMMENT)
+describe INVALID_MSGID           Message-Id is not valid, according to RFC 2822
+score INVALID_MSGID              2.999 2.603 2.489 1.900
+
+header TEST_MSGID_SPAM_CAPS      Message-ID =~ /^\s*<?[A-Z]+\@(?!(?:mailcity|whowhere)\.com)/
+score TEST_MSGID_SPAM_CAPS       5
+
+header INVALID_DATE              Date !~ /^\s*(?:(?i:Mon|Tue|Wed|Thu|Fri|Sat|Sun),\s)?\s*(?:[12]\d|3[01]|0?[1-9])\s+(?i:Jan|Feb|Ma[ry]|Apr|Ju[nl]|Aug|Sep|Oct|Nov|Dec)\s+(?:19[7-9]\d|2\d{3})\s+(?:[01]?\d|2[0-3])\:[0-5]\d(?::(?:[0-5]\d|60))?(?:\s+[AP]M)?(?:\s+(?:[+-][0-9]{4}|UT|[A-Z]{2,3}T|0000 GMT|"GMT"))?(?:\s*\(.*\))?\s*$/ [if-unset: Wed, 31 Jul 2002 16:41:57 +0200]
+describe INVALID_DATE            Invalid Date: header (not RFC 2822)
+score INVALID_DATE               2.303 1.651 1.329 1.245
+
+ifplugin Mail::SpamAssassin::Plugin::AWL
+header AWL                   eval:check_from_in_auto_whitelist()
+describe AWL                 From: address is in the auto white-list
+tflags AWL                   userconf noautolearn
+priority AWL                    1000
+endif # Mail::SpamAssassin::Plugin::AWL
+
+redirector_pattern      /^http:\/\/chkpt\.zdnet\.com\/chkpt\/\w+\/(.*)$/i
+redirector_pattern      /^http:\/\/www(?:\d+)?\.nate\.com\/r\/\w+\/(.*)$/i
+redirector_pattern      /^http:\/\/.+\.gov\/(?:.*\/)?externalLink\.jhtml\?.*url=(.*?)(?:&.*)?$/i
+redirector_pattern      /^http:\/\/redir\.internet\.com\/.+?\/.+?\/(.*)$/i
+redirector_pattern      /^http:\/\/(?:.*?\.)?adtech\.de\/.*(?:;|\|)link=(.*?)(?:;|$)/i
+redirector_pattern      m'^http.*?/redirect\.php\?.*(?<=[?&])goto=(.*?)(?:$|[&\#])'i
+redirector_pattern      m'^https?:/*(?:[^/]+\.)?emf\d\.com/r\.cfm.*?&r=(.*)'i
+
+ifplugin Mail::SpamAssassin::Plugin::DCC
+full DCC_CHECK          eval:check_dcc()
+describe DCC_CHECK      Listed in DCC (http://rhyolite.com/anti-spam/dcc/)
+tflags DCC_CHECK        net
+reuse DCC_CHECK
+endif
 
