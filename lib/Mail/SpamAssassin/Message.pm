@@ -98,7 +98,7 @@ sub new {
   $class = ref($class) || $class;
 
   my($opts) = @_;
-  my $message = $opts->{'message'} || \*STDIN;
+  my $message = defined $opts->{'message'} || \*STDIN;
   my $parsenow = $opts->{'parsenow'} || 0;
   my $normalize = $opts->{'normalize'} || 0;
 
@@ -665,13 +665,16 @@ sub parse_body {
         # Just decode the part, but we don't care about the result here.
         $toparse->[0]->decode(0);
 
-	# bug 5051: sometimes message/* parts have no content, and we get
-	# stuck waiting for STDIN, which is bad. :(
-        if ($toparse->[0]->{'decoded'}) {
-	  # Ok, so this part is still semi-recursive, since M::SA::Message calls
-	  # M::SA::Message, but we don't subparse the new message, and pull a
-	  # sneaky "steal our child's queue" maneuver to deal with it on our own
-	  # time.  Reference the decoded array directly since it's faster.
+	# bug 5051, bug 3748: sometimes message/* parts have no content,
+	# and we get stuck waiting for STDIN, which is bad. :(
+        if (defined $toparse->[0]->{'decoded'} &&
+            $toparse->[0]->{'decoded'} ne '')
+	{
+	  # Ok, so this part is still semi-recursive, since M::SA::Message
+	  # calls M::SA::Message, but we don't subparse the new message,
+	  # and pull a sneaky "steal our child's queue" maneuver to deal
+	  # with it on our own time.  Reference the decoded array directly
+	  # since it's faster.
 	  # 
           my $msg_obj = Mail::SpamAssassin::Message->new({
     	    message	=>	$toparse->[0]->{'decoded'},
