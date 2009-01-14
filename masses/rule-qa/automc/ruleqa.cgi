@@ -1321,7 +1321,7 @@ sub generate_scoremap_chart {
   # normalize to [0,100] and set default to 0
   my @ycoords_s = map { sprintf "%.2f", (100/$max_y) * ($chart{'spam'}{$_}||0) } @idxes;
   my @ycoords_h = map { sprintf "%.2f", (100/$max_y) * ($chart{'ham'}{$_}||0) } @idxes;
-  my @xcoords   = map { sprintf "%.2f", (100/$max_x) * $_ } @idxes;
+  my @xcoords   = map { sprintf "%.2f", (100/($max_x||0.0001)) * $_ } @idxes;
 
   my $xgrid = (100/($max_x||0.0001)) * 5;
   my $ygrid = (100/($max_y||0.0001)) * 10;
