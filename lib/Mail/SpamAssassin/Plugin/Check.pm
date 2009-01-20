@@ -242,6 +242,7 @@ sub run_generic_tests {
   if (defined &{$methodname} && !$doing_user_rules) {
     no strict "refs";
 run_compiled_method:
+  # dbg("rules: run_generic_tests - calling %s", $methodname);
     $methodname->($pms, @{$opts{args}});
     use strict "refs";
     return;
@@ -297,7 +298,13 @@ EOT
   delete $self->{evalstr2}; # free up some RAM before we eval()
 
   ## dbg ("rules: eval code to compile: $evalstr");
-  if (!eval($evalstr . '; 1')) {
+  dbg("rules: run_generic_tests - compiling eval code: %s, priority %s",
+      $ruletype, $priority);
+  my $eval_result;
+  { my $timer = $self->{main}->time_method('compile_gen');
+    $eval_result = eval($evalstr . '; 1');
+  }
+  if (!$eval_result) {
     my $eval_stat = $@ ne '' ? $@ : "errno=$!";  chomp $eval_stat;
     warn "rules: failed to compile $ruletype tests, skipping:\n".
          "\t($eval_stat)\n";
@@ -913,6 +920,7 @@ sub run_eval_tests {
   if (defined &{"${package_name}::${methodname}"}
       && !$doing_user_rules)
   {
+  # dbg("rules: run_eval_tests - calling %s", $methodname);
     no strict "refs";
     &{"${package_name}::${methodname}"}($pms,@extraevalargs);
     use strict "refs";
@@ -1050,7 +1058,14 @@ sub run_eval_tests {
 EOT
 
   undef &{$methodname};
-  if (!eval($evalstr . '; 1')) {
+
+  dbg("rules: run_eval_tests - compiling eval code: %s, priority %s",
+       $testtype, $priority);
+  my $eval_result;
+  { my $timer = $self->{main}->time_method('compile_eval');
+    $eval_result = eval($evalstr . '; 1');
+  }
+  if (!$eval_result) {
     my $eval_stat = $@ ne '' ? $@ : "errno=$!";  chomp $eval_stat;
     warn "rules: failed to compile eval tests, skipping some: $eval_stat\n";
     $self->{rule_errors}++;
@@ -1058,6 +1073,7 @@ EOT
   else {
     my $method = "${package_name}::${methodname}";
     push (@TEMPORARY_METHODS, $methodname);
+  # dbg("rules: run_eval_tests - calling %s", $methodname);
     no strict "refs";
     &{$method}($pms,@extraevalargs);
     use strict "refs";
