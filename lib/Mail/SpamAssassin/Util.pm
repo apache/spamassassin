@@ -65,6 +65,7 @@ use Mail::SpamAssassin;
 use Mail::SpamAssassin::Util::RegistrarBoundaries;
 
 use Config;
+use IO::Handle;
 use File::Spec;
 use File::Basename;
 use Time::Local;
@@ -1432,7 +1433,7 @@ sub force_die {
   eval { warn $msg };  # hmm, STDERR may no longer be open
   eval { dbg("util: force_die: $msg") };
 
-  POSIX::_exit(1);  # avoid END and destructor processing 
+  POSIX::_exit(6);  # avoid END and destructor processing 
   kill('KILL',$$);  # still kicking? die! 
 }
 
@@ -1504,6 +1505,8 @@ sub helper_app_pipe_open_unix {
     # die "setuid: oops: fileno(STDOUT) [".fileno(STDOUT)."] != 1";
     # }
 
+    STDOUT->autoflush(1);
+
     if ($duperr2out) {             # 2>&1
       my $f = fileno(STDERR);
       close STDERR  or die "error closing STDERR: $!";
@@ -1514,6 +1517,7 @@ sub helper_app_pipe_open_unix {
       }
 
       open (STDERR, ">&STDOUT") or die "dup STDOUT failed: $!";
+      STDERR->autoflush(1);  # make sure not to lose diagnostics if exec fails
 
       # STDERR must be fd 2 to be useful to subprocesses! (bug 3649)
       if (fileno(STDERR) != 2) {
