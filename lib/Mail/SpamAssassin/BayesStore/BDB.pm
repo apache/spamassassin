@@ -87,7 +87,7 @@ initialize anything.
 
 sub tie_db_readonly {
   my($self) = @_;
-  dbg("bayes: tie_db_readonly");
+  #dbg("bayes: tie_db_readonly");
   my $result = ($self->{already_tied} && $self->{is_locked} == 0)
                || $self->_tie_db(0);
   dbg("bayes: tie_db_readonly result is $result");
@@ -107,7 +107,7 @@ begin using the database immediately.
 
 sub tie_db_writable {
   my($self) = @_;
-  dbg("bayes: tie_db_writable");
+  #dbg("bayes: tie_db_writable");
   my $result = ($self->{already_tied} && $self->{is_locked} == 1)
                || $self->_tie_db(1);
   dbg("bayes: tie_db_writable result is $result");
@@ -128,14 +128,16 @@ can begin using the database immediately.
 sub _tie_db {
   my($self, $writeable) = @_;
 
-  dbg("bayes: _tie_db($writeable)");
+  dbg("bayes: _tie_db(%s); BerkeleyDB %s, libdb %s",
+      $writeable ? 'writable' : 'read-only',
+      BerkeleyDB->VERSION, $BerkeleyDB::db_version);
 
   # Always notice state changes
   $self->{is_locked} = $writeable;
 
   return 1 if $self->{already_tied};
 
-  dbg("bayes: not already tied");
+  #dbg("bayes: not already tied");
 
   my $main = $self->{bayes}->{main};
 
@@ -144,12 +146,12 @@ sub _tie_db {
     return 0;
   }
 
-  dbg("bayes: Reading db configs");
+  #dbg("bayes: Reading db configs");
   $self->read_db_configs();
 
   my $path = dirname $main->sed_path($main->{conf}->{bayes_path});
 
-  dbg("bayes: Path is $path");
+  #dbg("bayes: Path is $path");
   # Path must exist or we must be in writeable mode
   if (-d $path) {
     # All is cool
@@ -183,7 +185,7 @@ sub _tie_db {
 
   $flags = $writeable ? DB_CREATE : 0;
 
-  dbg("bayes: Opening vars");
+  #dbg("bayes: Opening vars");
   unless ($self->{handles}->{vars} = BerkeleyDB::Btree->new(
       -Env => $self->{env}, -Filename => "vars.db", -Flags => $flags)) {
     warn("bayes: couldn't open vars.db: $BerkeleyDB::Error");
@@ -191,7 +193,7 @@ sub _tie_db {
     return 0;
   }
 
-  dbg("bayes: Looking for db_version");
+  #dbg("bayes: Looking for db_version");
   unless ($self->{db_version} = $self->_get(vars => "DB_VERSION")) {
     if ($writeable) {
       $self->{db_version} = $self->DB_VERSION;
@@ -214,7 +216,7 @@ sub _tie_db {
     }
   }
 
-  dbg("bayes: Opening tokens");
+  #dbg("bayes: Opening tokens");
   unless ($self->{handles}->{tokens} = BerkeleyDB::Btree->new(
       -Env => $self->{env}, -Filename => "tokens.db",
       -Flags => $flags, -Property => DB_REVSPLITOFF)) {
@@ -223,7 +225,7 @@ sub _tie_db {
     return 0;
   }
 
-  dbg("bayes: Opening atime secondary DB");
+  #dbg("bayes: Opening atime secondary DB");
   unless ($self->{handles}->{atime} = BerkeleyDB::Btree->new(
       -Env => $self->{env}, -Filename => "atime.db",
       -Flags => $flags, -Property => DB_DUP|DB_DUPSORT)) {
@@ -232,7 +234,7 @@ sub _tie_db {
     return 0;
   }
 
-  dbg("bayes: Opening seen DB");
+  #dbg("bayes: Opening seen DB");
   unless ($self->{handles}->{seen} = BerkeleyDB::Btree->new(
       -Env => $self->{env}, -Filename => "seen.db", -Flags => $flags)) {
     warn("bayes: couldn't open tokens.db: $BerkeleyDB::Error");
@@ -248,6 +250,7 @@ sub _tie_db {
 
   $self->{already_tied} = 1;
 
+  dbg("bayes: _tie_db done");
   return 1;
 }
 
