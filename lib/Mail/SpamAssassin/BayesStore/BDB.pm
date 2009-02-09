@@ -680,7 +680,7 @@ sub tok_get {
   #dbg("BDB: Entering tok_get");
   my($self, $token) = @_;
   my $array = $self->tok_get_all ([$token]);
-  return @{$array->[0]};
+  return !@$array ? () : @{$array->[0]};
 }
 
 =head2 tok_get_all
@@ -1436,8 +1436,3 @@ sub _get {
 sub sa_die { Mail::SpamAssassin::sa_die(@_); }
 
 1;
-
-# Local Variables:
-# mode: CPerl
-# cperl-indent-level: 2
-# End:
