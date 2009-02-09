@@ -381,13 +381,13 @@ sub token_expiration {
   # Estimate the number of keys to be deleted
   {
     my $stats = $self->{handles}->{atime}->db_stat(DB_FAST_STAT);
-    dbg("DBD: Stats: " . Dumper $stats);
+    dbg("bayes: Stats: %s", Dumper($stats));
     # Scan if we've never gotten stats before
     $stats = $self->{handles}->{atime}->db_stat if $stats->{bt_ndata} == 0;
-    dbg("DBD: Stats: " . Dumper $stats);
+    dbg("bayes: Stats: %s", Dumper($stats));
     if ($self->{handles}->{atime}->db_key_range(
                             $too_old, my $less, my $equal, my $greater) == 0) {
-      dbg("DBD: less is $less, equal is $equal, greater is $greater");
+      dbg("bayes: less is $less, equal is $equal, greater is $greater");
       $count = $stats->{bt_ndata} - $stats->{bt_ndata} * $greater;
     }
   }
@@ -742,8 +742,8 @@ returns an array ref of arrays spam count, ham acount and last access time.
 =cut
 
 sub tok_get_all {
-  dbg("bayes: Entering tok_get_all");
   my($self, @keys) = @_;
+  dbg("bayes: Entering tok_get_all, %d search keys", scalar(@keys));
 
   my @values;
   for my $token (@keys) {
@@ -752,7 +752,7 @@ sub tok_get_all {
     }
   }
 
-  # dbg("bayes: tok_get_all returning with " . Dump \@values);
+  dbg("bayes: tok_get_all returning with %s", Dumper(\@values));
   return \@values;
 }
 
