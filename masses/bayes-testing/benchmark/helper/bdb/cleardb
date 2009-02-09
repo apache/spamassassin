@@ -1,0 +1,5 @@
+#!/bin/bash
+
+DBDIR=$1/dbdir
+echo "[Removing BDB bayes Database directory - $DBDIR]"
+rm -rf $DBDIR
