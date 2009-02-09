@@ -5,8 +5,9 @@ use lib '.'; use lib 't';
 use SATest; sa_t_init("bayes");
 use Test;
 
-use constant TEST_ENABLED => conf_bool('run_long_tests') &&
-                            eval { require BerkeleyDB; $BerkeleyDB::db_version >= 4.6; };
+use constant TEST_ENABLED => conf_bool('run_long_tests') && eval {
+  require BerkeleyDB; no warnings qw(once); $BerkeleyDB::db_version >= 4.6;
+};
 
 BEGIN { 
   if (-e 't/test_dir') {
@@ -92,7 +93,7 @@ ok(getimpl->{store}->tie_db_writable());
 my $tokerror = 0;
 foreach my $tok (keys %{$toks}) {
   my ($spam, $ham, $atime) = getimpl->{store}->tok_get($tok);
-  if ($spam == 0 || $ham > 0) {
+  if (!defined $spam || $spam == 0 || $ham > 0) {
     $tokerror = 1;
   }
 }
@@ -126,7 +127,7 @@ ok(getimpl->{store}->tie_db_writable());
 $tokerror = 0;
 foreach my $tok (keys %{$toks}) {
   my ($spam, $ham, $atime) = getimpl->{store}->tok_get($tok);
-  if ($spam  > 0 || $ham == 0) {
+  if (!defined $spam || $spam > 0 || $ham == 0) {
     $tokerror = 1;
   }
 }
