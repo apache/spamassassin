@@ -34,7 +34,7 @@ use warnings;
 use bytes;
 use re 'taint';
 use Errno qw(EBADF);
-use Data::Dumper;
+#use Data::Dumper;
 use Digest::SHA1 qw{sha1};
 use File::Basename;
 use File::Path;
@@ -294,8 +294,8 @@ optimum atime for token expiration.
 =cut
 
 sub calculate_expire_delta {
-  dbg("bayes: calculate_expire_delta starting");
   my($self, $newest_atime, $start, $max_expire_mult) = @_;
+  dbg("bayes: calculate_expire_delta starting");
 
   my %delta;    # use a hash since an array is going to be very sparse
 
@@ -344,8 +344,8 @@ the passed in C<$newdelta> and C<@vars>.
 =cut
 
 sub token_expiration {
-  dbg("bayes: Entering token_expiration");
   my($self, $opts, $newdelta, @vars) = @_;
+  dbg("bayes: Entering token_expiration");
 
   my($kept, $deleted, $hapaxes, $lowfreq) = (0, 0, 0, 0);
 
@@ -381,10 +381,10 @@ sub token_expiration {
   # Estimate the number of keys to be deleted
   {
     my $stats = $self->{handles}->{atime}->db_stat(DB_FAST_STAT);
-    dbg("bayes: Stats: %s", Dumper($stats));
+    #dbg("bayes: Stats: %s", Dumper($stats));
     # Scan if we've never gotten stats before
     $stats = $self->{handles}->{atime}->db_stat if $stats->{bt_ndata} == 0;
-    dbg("bayes: Stats: %s", Dumper($stats));
+    #dbg("bayes: Stats: %s", Dumper($stats));
     if ($self->{handles}->{atime}->db_key_range(
                             $too_old, my $less, my $equal, my $greater) == 0) {
       dbg("bayes: less is $less, equal is $equal, greater is $greater");
@@ -484,8 +484,8 @@ is not found.
 =cut
 
 sub seen_get {
-  dbg("bayes: Entering seen_get");
   my($self, $msgid) = @_;
+  dbg("bayes: Entering seen_get");
 
   my $value = $self->_get(seen => $msgid);
 
@@ -503,8 +503,8 @@ of two values 's' for spam and 'h' for ham.
 =cut
 
 sub seen_put {
-  dbg("bayes: Entering seen_put");
   my($self, $msgid, $flag) = @_;
+  dbg("bayes: Entering seen_put");
 
   $self->{handles}->{seen}->db_put($msgid, $flag) == 0
     or die "Couldn't put record: $BerkeleyDB::Error";
@@ -522,8 +522,8 @@ This method removes C<$msgid> from the database.
 =cut
 
 sub seen_delete {
-  dbg("bayes: Entering seen_delete");
   my($self, $msgid) = @_;
+  dbg("bayes: Entering seen_delete");
 
   my $result;
 
@@ -575,8 +575,8 @@ The values returned in the array are in the following order:
 =cut
 
 sub get_storage_variables {
-  dbg("bayes: get_storage_variables starting");
   my($self) = @_;
+  dbg("bayes: get_storage_variables starting");
 
   my @values;
   for my $token (qw{LAST_JOURNAL_SYNC NSPAM NHAM NTOKENS LAST_EXPIRE
@@ -601,9 +601,10 @@ and then printing it out according to the passed in token.
 
 =cut
 
+sub dump_db_toks { dump_tokens(@_) }
 sub dump_tokens {
-  dbg("bayes: dump_tokens starting");
   my($self, $template, $regex, @vars) = @_;
+  dbg("bayes: dump_tokens starting");
 
   my $cursor = $self->{handles}->{tokens}->db_cursor;
   $cursor or die "Couldn't get cursor: $BerkeleyDB::Error";
@@ -611,7 +612,7 @@ sub dump_tokens {
   while ($cursor->c_get($token, $value, $next) == 0) {
     next if defined $regex && $token !~ /$regex/o;
     my($ts, $th, $atime) = _unpack_token($value);
-    my $prob = $self->{bayes}->compute_prob_for_token(
+    my $prob = $self->{bayes}->_compute_prob_for_token(
                                   $token, $vars[1], $vars[2], $ts, $th) || 0.5;
     my $encoded = unpack("H*",$token);
     printf $template, $prob, $ts, $th, $atime, $encoded;
@@ -635,8 +636,8 @@ This method sets the last expire time.
 =cut
 
 sub set_last_expire {
-  dbg("bayes: Entering set_last_expire");
   my($self, $time) = @_;
+  dbg("bayes: Entering set_last_expire");
   $self->{handles}->{vars}->db_put(LAST_EXPIRE => $time) == 0
     or die "Couldn't put record: $BerkeleyDB::Error";
   return 1;
@@ -656,8 +657,8 @@ value.
 =cut
 
 sub get_running_expire_tok {
-  dbg("bayes: Entering get_running_expire_tok");
   my($self) = @_;
+  dbg("bayes: Entering get_running_expire_tok");
 
   my $value = $self->_get(vars => "RUNNING_EXPIRE") || "";
   my $result = $value if $value =~ /^\d+$/;
@@ -725,8 +726,8 @@ and returns it's spam_count, ham_count and last access time.
 =cut
 
 sub tok_get {
-  dbg("bayes: Entering tok_get");
   my($self, $token) = @_;
+  dbg("bayes: Entering tok_get");
   my $array = $self->tok_get_all([$token]);
   return !@$array ? () : @{$array->[0]};
 }
@@ -743,16 +744,18 @@ returns an array ref of arrays spam count, ham acount and last access time.
 
 sub tok_get_all {
   my($self, @keys) = @_;
-  dbg("bayes: Entering tok_get_all, %d search keys", scalar(@keys));
+  #dbg("bayes: Entering tok_get_all");
 
+  my @results = $self->_mget(tokens => \@keys);
   my @values;
   for my $token (@keys) {
-    if (my $value = $self->_get(seen => $token)) {
-      push(@values, [$token, _unpack_token($value)]);
-    }
+    my $value = shift(@results);
+    push(@values, [$token, _unpack_token($value)])  if defined $value;
   }
 
-  dbg("bayes: tok_get_all returning with %s", Dumper(\@values));
+  dbg("bayes: tok_get_all found %d tokens out of %d search keys",
+      scalar(@values), scalar(@keys));
+  #dbg("bayes: tok_get_all returning with %s", Dumper(\@values));
   return \@values;
 }
 
@@ -768,8 +771,8 @@ C<$tok> along with updating C<$tok>s atime with C<$atime>.
 =cut
 
 sub tok_count_change {
-  dbg("bayes: Entering tok_count_change");
   my($self, $dspam, $dham, $token, $newatime) = @_;
+  dbg("bayes: Entering tok_count_change");
   $self->multi_tok_count_change($dspam, $dham, {$token => 1}, $newatime);
 }
 
@@ -800,6 +803,7 @@ sub multi_tok_count_change {
   my $newtokens = 0;
 
   for my $token (keys %{$tokens}) {
+    #dbg("bayes: token %s", $tokens->{$token});
     my $status = $self->{handles}->{tokens}->db_get($token => my $value, $rmw);
 
     if ($status == 0) {
@@ -863,8 +867,8 @@ ham learned.
 =cut
 
 sub nspam_nham_get {
-  dbg("bayes: Entering nspam_nham_get");
   my($self) = @_;
+  dbg("bayes: Entering nspam_nham_get");
   my @vars = $self->get_storage_variables();
   ($vars[1], $vars[2]);
 }
@@ -1029,8 +1033,8 @@ could causes the database to be inconsistent for the given user.
 =cut
 
 sub clear_database {
-  dbg("bayes: Entering clear_database");
   my($self) = @_;
+  dbg("bayes: Entering clear_database");
 
   $self->untie_db();
   dbg("bayes: removing db.");
@@ -1050,8 +1054,8 @@ This method will dump the users database in a machine readable format.
 =cut
 
 sub backup_database {
-  dbg("bayes: Entering backup_database");
   my($self) = @_;
+  dbg("bayes: Entering backup_database");
   return 0 unless $self->tie_db_writable;
   my @vars = $self->get_storage_variables;
 
@@ -1103,8 +1107,8 @@ could causes the database to be inconsistent for the given user.
 =cut
 
 sub restore_database {
-  dbg("bayes: Entering restore_database");
   my ($self, $filename, $showdots) = @_;
+  dbg("bayes: Entering restore_database");
 
   local *DUMPFILE;
   if (!open(DUMPFILE, '<', $filename)) {
@@ -1313,8 +1317,8 @@ readable state.
 =cut
 
 sub db_readable {
-  dbg("bayes: Entering db_readable");
   my($self) = @_;
+  dbg("bayes: Entering db_readable");
   return $self->{already_tied};
 }
 
@@ -1329,8 +1333,8 @@ writable state.
 =cut
 
 sub db_writable {
-  dbg("bayes: Entering db_writeable");
   my($self) = @_;
+  dbg("bayes: Entering db_writeable");
   return($self->{already_tied} and $self->{is_locked});
 }
 
@@ -1348,8 +1352,8 @@ that they can begin using the database immediately.
 =cut
 
 sub _extract_atime {
-  #dbg("bayes: Entering _extract_atime");
   my ($token, $value) = @_;
+  #dbg("bayes: Entering _extract_atime");
   my($ts, $th, $atime) = _unpack_token($value);
   #dbg("bayes: _extract_atime found $atime for $token");
   $_[2] = $atime;
@@ -1366,8 +1370,8 @@ presence of loops.
 =cut
 
 sub _put_token {
-  dbg("bayes: Entering _put_token");
   my($self, $token, $ts, $th, $atime) = @_;
+  dbg("bayes: Entering _put_token");
 
   $ts ||= 0;
   $th ||= 0;
@@ -1497,6 +1501,24 @@ sub _get {
   } else {
     die "Couldn't get record: $BerkeleyDB::Error";
   }
+}
+
+sub _mget {
+  my ($self, $table, $keys, $flags) = @_;
+  my @results;
+
+  $flags |= 0;
+  my $handle = $self->{handles}->{$table};
+
+  for my $key (@$keys) {
+    my $value = "";
+    my $status = $handle->db_get($key => $value, $flags);
+    undef $value  if $status != 0;
+    $status == 0 || $status == DB_NOTFOUND
+      or die "Couldn't get record: $BerkeleyDB::Error";
+    push(@results, $value);
+  }
+  return @results;
 }
 
 sub sa_die { Mail::SpamAssassin::sa_die(@_); }

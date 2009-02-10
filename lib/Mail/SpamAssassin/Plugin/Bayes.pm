@@ -592,6 +592,7 @@ sub learner_expire_old_training {
   my ($self, $params) = @_;
   if (!$self->{conf}->{use_bayes}) { return 0; }
   dbg("bayes: expiry starting");
+  my $timer = $self->{main}->time_method("expire_bayes");
   $self->{store}->expire_old_tokens($params);
   dbg("bayes: expiry completed");
 }
