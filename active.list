@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: dos theo zmi; day 2: dos jm theo zmi; day 3: dos jm theo zmi
+# with results from: day 1: dos jm theo zmi; day 2: dos theo zmi; day 3: dos jm theo zmi
 
 # tflags userconf
 ALL_TRUSTED
@@ -39,9 +39,6 @@ BAYES_95
 
 # tflags learn
 BAYES_99
-
-# good enough
-BBC_RCVD_NCHAR_RAW
 
 # tflags userconf
 CHARSET_FARAWAY
@@ -243,6 +240,9 @@ FRT_APPROV
 
 # good enough
 FRT_DISCOUNT
+
+# good enough
+FRT_ERECTION
 
 # good enough
 FRT_GUARANTEE1
@@ -815,7 +815,13 @@ TVD_RCVD_SINGLE
 TVD_VISIT_PHARMA
 
 # good enough
-FRT_ERECTION
+AXB_XMID_DIGDOTSHRT
+
+# good enough
+LIVEFILESTORE
+
+# good enough
+LIVEFILESTORE_HTML
 
 # tflags userconf
 UNPARSEABLE_RELAY
