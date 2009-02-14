@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: dos jm theo zmi; day 2: dos jm theo zmi; day 3: dos theo zmi
+# with results from: day 1: dos jm theo zmi; day 2: dos jm theo zmi; day 3: dos jm theo zmi
 
 # tflags userconf
 ALL_TRUSTED
@@ -9,6 +9,9 @@ AWL
 
 # good enough
 AXB_XMID_OEGOESNULL
+
+# good enough
+BASE64_LENGTH_78_79
 
 # good enough
 BASE64_LENGTH_79_INF
@@ -239,6 +242,9 @@ FRT_ABSOLUT
 FRT_APPROV
 
 # good enough
+FRT_BIGGERMEM1
+
+# good enough
 FRT_DISCOUNT
 
 # good enough
@@ -423,6 +429,9 @@ MISSING_HB_SEP
 
 # good enough
 MSGID_NOFQDN1
+
+# good enough
+MSOE_MID_WRONG_CASE
 
 # tflags net
 NO_DNS_FOR_FROM
@@ -647,9 +656,6 @@ SANE_04e8bf28eb445199a7f11b943c44d209
 SANE_06c7a4732c1f84900776ed70b0c46622
 
 # good enough
-SANE_0de5cadd0badbd3e70f22a3ae31951fb
-
-# good enough
 SANE_17534cea3ba620589af299f2dac174c4
 
 # good enough
@@ -684,9 +690,6 @@ SANE_60499b33deab95fe4907732e43073be5
 
 # good enough
 SANE_7429530a7398f43f1f1b795f9420714e
-
-# good enough
-SANE_767b5516127c9ea7beef8ae90de854a6
 
 # good enough
 SANE_7d8e92a09f27d49fafe09a1dbd5cac10
@@ -813,6 +816,21 @@ TVD_RCVD_SINGLE
 
 # good enough
 TVD_VISIT_PHARMA
+
+# good enough
+AXB_XMID_DIGDOTSHRT
+
+# good enough
+FB_WITHOUT_PRESC
+
+# good enough
+LIVEFILESTORE
+
+# good enough
+LIVEFILESTORE_HTML
+
+# good enough
+SANE_3ca2a5874272d53ce2ad613e09b71fce
 
 # tflags userconf
 UNPARSEABLE_RELAY
