@@ -28,6 +28,6 @@ ifplugin Mail::SpamAssassin::Plugin::DCC
 full DCC_CHECK		eval:check_dcc()
 describe DCC_CHECK	Listed in DCC (http://rhyolite.com/anti-spam/dcc/)
 tflags DCC_CHECK	net
-#reuse DCC_CHECK
+reuse  DCC_CHECK
 
 endif

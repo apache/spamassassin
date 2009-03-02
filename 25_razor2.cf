@@ -28,7 +28,7 @@ ifplugin Mail::SpamAssassin::Plugin::Razor2
 full RAZOR2_CHECK	eval:check_razor2()
 describe RAZOR2_CHECK	Listed in Razor2 (http://razor.sf.net/)
 tflags RAZOR2_CHECK	net
-#reuse RAZOR2_CHECK
+reuse  RAZOR2_CHECK
 
 lang de describe RAZOR2_CHECK	Gelistet im "Razor2"-System (http://razor.sf.net/)
 lang nl describe RAZOR2_CHECK	Gevonden in Razor2 (http://razor.sf.net/)
@@ -53,17 +53,17 @@ lang pl describe RAZOR2_CHECK	Na li¶cie Razor2 (http://razor.sf.net/)
 
 full    RAZOR2_CF_RANGE_51_100  eval:check_razor2_range('','51','100')
 tflags  RAZOR2_CF_RANGE_51_100	net
-#reuse	RAZOR2_CF_RANGE_51_100
+reuse 	RAZOR2_CF_RANGE_51_100
 describe RAZOR2_CF_RANGE_51_100	Razor2 gives confidence level above 50%
 
 full	RAZOR2_CF_RANGE_E4_51_100	eval:check_razor2_range('4','51','100')
 tflags  RAZOR2_CF_RANGE_E4_51_100	net
-#reuse	RAZOR2_CF_RANGE_E4_51_100
+reuse 	RAZOR2_CF_RANGE_E4_51_100
 describe RAZOR2_CF_RANGE_E4_51_100	Razor2 gives engine 4 confidence level above 50%
 
 full	RAZOR2_CF_RANGE_E8_51_100	eval:check_razor2_range('8','51','100')
 tflags  RAZOR2_CF_RANGE_E8_51_100	net
-#reuse	RAZOR2_CF_RANGE_E8_51_100
+reuse 	RAZOR2_CF_RANGE_E8_51_100
 describe RAZOR2_CF_RANGE_E8_51_100	Razor2 gives engine 8 confidence level above 50%
 
 lang de describe RAZOR2_CF_RANGE_51_100	Razor2 Spam-Bewertung liegt zwischen 51 und 100
