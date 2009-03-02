@@ -68,13 +68,13 @@ tflags SPF_HELO_FAIL		net
 tflags SPF_HELO_SOFTFAIL	net
 
 # rules from earlier than current release that can be reused
-#reuse SPF_PASS
-#reuse SPF_FAIL
-#reuse SPF_SOFTFAIL
-#reuse SPF_HELO_PASS
-#reuse SPF_HELO_FAIL
-#reuse SPF_HELO_SOFTFAIL
-#reuse SPF_NEUTRAL
-#reuse SPF_HELO_NEUTRAL
+reuse  SPF_PASS
+reuse  SPF_FAIL
+reuse  SPF_SOFTFAIL
+reuse  SPF_HELO_PASS
+reuse  SPF_HELO_FAIL
+reuse  SPF_HELO_SOFTFAIL
+reuse  SPF_NEUTRAL
+reuse  SPF_HELO_NEUTRAL
 
 endif   # Mail::SpamAssassin::Plugin::SPF

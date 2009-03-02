@@ -2177,6 +2177,12 @@ new addition in SpamAssassin 3.2.0.
 sub got_hit {
   my ($self, $rule, $area, %params) = @_;
 
+  my $score = $params{score} || $self->{conf}->{scores}->{$rule};
+
+  # adding a hit does nothing if we don't have a score -- we probably
+  # shouldn't have run it in the first place
+  return unless $score;
+
   # ensure that rule values always result in an *increase* of
   # $self->{tests_already_hit}->{$rule}:
   my $value = $params{value}; if (!$value || $value <= 0) { $value = 1; }
@@ -2194,7 +2200,7 @@ sub got_hit {
   $params{ruletype} ||= 'unknown';
 
   $self->_handle_hit($rule,
-            $params{score} || $self->{conf}->{scores}->{$rule},
+            $score,
             $area,
             $params{ruletype},
             $self->{conf}->get_description_for_rule($rule) || $rule);

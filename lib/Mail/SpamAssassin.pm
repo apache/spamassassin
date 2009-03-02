@@ -220,6 +220,11 @@ from files, read them in yourself and set this instead.  As a result, this will
 override the settings for C<rules_filename>, C<site_rules_filename>,
 and C<userprefs_filename>.
 
+=item pre_config_text
+
+Similar to C<config_text>, this text is placed before config_text to allow an
+override of config files.
+
 =item post_config_text
 
 Similar to C<config_text>, this text is placed after config_text to allow an
@@ -1650,7 +1655,12 @@ sub init {
     }
   }
 
-  $self->{config_text} .= $self->{post_config_text} if ($self->{post_config_text});
+  if ($self->{pre_config_text}) {
+    $self->{config_text} = $self->{pre_config_text} . $self->{config_text};
+  }
+  if ($self->{post_config_text}) {
+    $self->{config_text} .= $self->{post_config_text};
+  }
 
   if ($self->{config_text} !~ /\S/) {
     my $m = "config: no configuration text or files found! do you need to run 'sa-update'?\n";

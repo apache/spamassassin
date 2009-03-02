@@ -412,9 +412,6 @@ sub rule_file_compile {
   while (<IN>) {
     my $orig = $_;
 
-    s/^#reuse/reuse/;   # TODO - dirty hack.  we need to fix this to just be
-    # a keyword which the engine ignores, this is absurd! 
-
     s/#.*$//g; s/^\s+//; s/\s+$//;
 
     # drop comments/blank lines from output
@@ -672,9 +669,6 @@ sub read_output_file {
   open (IN, "<$file") or warn "cannot read $file";
   while (<IN>) {
     my $orig = $_;
-
-    s/^#reuse/reuse/;   # TODO - dirty hack.  we need to fix this to just be
-    # a keyword which the engine ignores, this is absurd! 
 
     s/#.*$//g; s/^\s+//; s/\s+$//;
 
