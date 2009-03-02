@@ -102,7 +102,7 @@ use vars qw{
 $TYPE_HEAD_TESTS $TYPE_HEAD_EVALS
 $TYPE_BODY_TESTS $TYPE_BODY_EVALS $TYPE_FULL_TESTS $TYPE_FULL_EVALS
 $TYPE_RAWBODY_TESTS $TYPE_RAWBODY_EVALS $TYPE_URI_TESTS $TYPE_URI_EVALS
-$TYPE_META_TESTS $TYPE_RBL_EVALS
+$TYPE_META_TESTS $TYPE_RBL_EVALS $TYPE_EMPTY_TESTS
 };
 
 @ISA = qw();
@@ -121,6 +121,7 @@ $TYPE_URI_TESTS     = 0x0010;
 $TYPE_URI_EVALS     = 0x0011;
 $TYPE_META_TESTS    = 0x0012;
 $TYPE_RBL_EVALS     = 0x0013;
+$TYPE_EMPTY_TESTS   = 0x0014;
 
 my @rule_types = ("body_tests", "uri_tests", "uri_evals",
                   "head_tests", "head_evals", "body_evals", "full_tests",
@@ -2322,6 +2323,38 @@ ignore these for scoring.
         return $INVALID_VALUE;
       }
       $self->{parser}->add_test (@values, $TYPE_META_TESTS);
+    }
+  });
+
+=item reuse SYMBOLIC_TEST_NAME [ OLD_SYMBOLIC_TEST_NAME_1 ... ]
+
+Defines the name of a test that should be "reused" during the scoring
+process. If a message has an X-Spam-Status header that shows a hit for
+this rule or any of the old rule names given, a hit will be added for
+this rule when B<mass-check --reuse> is used. Examples:
+
+C<reuse SPF_PASS>
+
+C<reuse MY_NET_RULE_V2 MY_NET_RULE_V1>
+
+The actual logic for reuse tests is done by
+B<Mail::SpamAssassin::Plugin::Reuse>.
+
+=cut
+
+  push (@cmds, {
+    setting => 'reuse',
+    is_priv => 1,
+    code => sub {
+      my ($self, $key, $value, $line) = @_;
+      if ($value !~ /\s*(\w+)(?:\s+(?:\w+(?:\s+\w+)*))?\s*$/) {
+        return $Mail::SpamAssassin::Conf::INVALID_VALUE;
+      }
+      my $rule_name = $1;
+      # don't overwrite tests, just define them so scores, priorities work
+      if (!exists $self->{tests}->{$rule_name}) {
+        $self->{parser}->add_test($rule_name, undef, $TYPE_EMPTY_TESTS);
+      }
     }
   });
 

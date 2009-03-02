@@ -36,14 +36,14 @@ require_version @@VERSION@@
 meta DIGEST_MULTIPLE		RAZOR2_CHECK + DCC_CHECK + PYZOR_CHECK > 1
 describe DIGEST_MULTIPLE	Message hits more than one network digest check
 tflags DIGEST_MULTIPLE		net
-#reuse DIGEST_MULTIPLE
+reuse  DIGEST_MULTIPLE
 
 ifplugin Mail::SpamAssassin::Plugin::DNSEval
 
 header NO_DNS_FOR_FROM		eval:check_dns_sender()
 describe NO_DNS_FOR_FROM	Envelope sender has no MX or A DNS records
 tflags NO_DNS_FOR_FROM		net
-#reuse NO_DNS_FOR_FROM
+reuse  NO_DNS_FOR_FROM
 
 endif
 

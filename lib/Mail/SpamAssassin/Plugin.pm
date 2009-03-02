@@ -198,12 +198,62 @@ That can be found as C<$plugin-E<gt>{main}-E<gt>{conf}>, or as "conf" in the
 C<$options> hash reference above.   By storing it on C<conf>, this allows
 per-user and system-wide configuration precedence to be dealt with correctly.
 
+=item $plugin->finish_parsing_start ( { options ... } )
+
+Signals that the system-wide configuration has been completely read,
+but internal data structures are not yet created. It is possible to
+use this hook to dynamically change the configuration already read in
+or add new config options.
+
+C<options> is a reference to a hash containing these options:
+
+=over 4
+
+=item conf
+
+The C<Mail::SpamAssassin::Conf> object on which the configuration
+data should be stored.
+
+=back
+
+Note: there are no guarantees that the internal data structures of
+SpamAssassin will not change from release to release.  In particular to
+this plugin hook, if you modify the rules data structures in a
+third-party plugin, all bets are off until such time that an API is
+present for modifying that configuration data.
+
 =item $plugin->finish_parsing_end ( { options ... } )
 
 Signals that the system-wide configuration parsing has just finished, and
 SpamAssassin is nearly ready to check messages.
 
 C<options> is a reference to a hash containing these options:
+
+=over 4
+
+=item conf
+
+The C<Mail::SpamAssassin::Conf> object on which the configuration
+data should be stored.
+
+=back
+
+Note: there are no guarantees that the internal data structures of
+SpamAssassin will not change from release to release.  In particular to
+this plugin hook, if you modify the rules data structures in a
+third-party plugin, all bets are off until such time that an API is
+present for modifying that configuration data.
+
+=item $plugin->user_conf_parsing_start ( { options ... } )
+
+Signals that the per-user configuration has been completely read, but
+not converted to internal data structures. It is possible to use this
+hook to dynamically change the configuration already read in or add
+new config options.
+
+If C<allow_user_rules> is enabled in the configuration, it is possible
+that additional rules have been added since the C<finish_parsing_start>
+plugin hook invocation was called.
 
 =over 4
 
@@ -237,6 +287,12 @@ The C<Mail::SpamAssassin::Conf> object on which the configuration
 data should be stored.
 
 =back
+
+Note: there are no guarantees that the internal data structures of
+SpamAssassin will not change from release to release.  In particular to
+this plugin hook, if you modify the rules data structures in a
+third-party plugin, all bets are off until such time that an API is
+present for modifying that configuration data.
 
 =item $plugin->signal_user_changed ( { options ... } )
 

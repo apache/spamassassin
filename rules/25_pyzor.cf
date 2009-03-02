@@ -28,6 +28,6 @@ ifplugin Mail::SpamAssassin::Plugin::Pyzor
 full PYZOR_CHECK	eval:check_pyzor()
 describe PYZOR_CHECK	Listed in Pyzor (http://pyzor.sf.net/)
 tflags PYZOR_CHECK	net
-#reuse PYZOR_CHECK
+reuse  PYZOR_CHECK
 
 endif

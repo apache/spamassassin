@@ -44,6 +44,7 @@ usage: mass-check [options] target ...
                 (default = extract all SpamAssassin-encapsulated mails)
   --lint        check rules for syntax before running
   --cf='config line'  Additional line of configuration
+  --pre='config line' Additional line of ".pre" (prepended to configuration)
   --run_post_scan='command'  Run the named command after the 'scan' stage,
                 before starting the 'run' stage
 
@@ -158,8 +159,8 @@ use vars qw($opt_c $opt_p $opt_f $opt_j $opt_n $opt_o $opt_all $opt_bayes
             $opt_cs_ssl $opt_run_post_scan $opt_cs_verbose %client_caches
             %server_caches @cache_tmp_files %min_other_caches
             %unique_cache_completed $opt_cs_schedule_cache $opt_cs_cache
-            $opt_cs_cachedir $opt_cs_max_tries
-	    $tmpfd %rules %reuse %orig_conf %reuse_conf $reuse_rules_loaded_p);
+            $opt_cs_cachedir $opt_cs_max_tries $opt_pre
+	    $tmpfd);
 
 use FindBin;
 
@@ -200,8 +201,8 @@ $opt_net = 0;
 $opt_hamlog = "ham.log";
 $opt_spamlog = "spam.log";
 $opt_learn = 0;
-$reuse_rules_loaded_p = 0;
 $opt_cf = [];
+$opt_pre = [];
 
 my $rcvd_bytes = 0;
 my $sent_bytes = 0;
@@ -224,7 +225,8 @@ GetOptions("c=s", "p=s", "f=s", "j=i", "n", "o", "all", "bayes", "debug:s",
            "cs_schedule_cache", "cs_cache", "cs_cachedir=s", "cs_max_tries=i",
 	   "before=s" => \&deal_with_before_after,
 	   "after=s" => \&deal_with_before_after,
-           'cf=s' => \@{$opt_cf},
+	   "cf=s" => \@{$opt_cf},
+	   "pre=s" => \@{$opt_pre},
 	   "dir" => sub { $opt_format = "dir"; },
 	   "file" => sub { $opt_format = "file"; },
 	   "mbox" => sub { $opt_format = "mbox"; },
@@ -239,23 +241,6 @@ if ( ($opt_client || $opt_server) && ! HAS_IO_ZLIB ) {
 
 if ($opt_cs_ssl && ! HAS_IO_SOCKET_SSL ) {
   die "IO::Socket::SSL required for --cs_ssl!\n";
-}
-
-# rules.pl is for the --reuse option, score set doesn't matter
-if ($opt_reuse) {
-  my $rules_path = "$FindBin::Bin/tmp/rules$$.pl";
-  # some people specify paths relatively, whereas this needs an absolute path,
-  # so "do the right thing"(tm).
-  my $abs_opt_c = File::Spec->rel2abs($opt_c);
-  system("cd $FindBin::Bin; perl ../build/parse-rules-for-masses -d $abs_opt_c -o $rules_path");
-
-  unless (-s $rules_path > 130) {
-    die '--reuse configuration error detected; rules.pl file size is too small'.
-        ' ('.(-s $rules_path)." bytes)\nrules.pl path: $rules_path\n";
-  }
-
-  require $rules_path;
-  unlink $rules_path;
 }
 
 if ($opt_noisy) {
@@ -290,9 +275,6 @@ if ($opt_cs_schedule_cache && !HAS_SDBM_FILE) {
   exit;
 }
 
-# either --net or --reuse means we should use set1/set3
-my $use_net_rules = $opt_net || $opt_reuse;
-
 # --lint
 if ($opt_lint) {
   # In theory we could probably use the same spamtest object as below,
@@ -325,23 +307,9 @@ if ($opt_reuse) {
   # the wire at all, and in fact we may be running without a net connection
   push @{$opt_cf}, "dns_available yes\n";
 
-  # --reuse without --net means we need to just zero ALL net rules; skip net
-  # lookups entirely except for the reused ones.  Do this before constructing
-  # the Mail::SpamAssassin object to ensure no network-rules stuff is compiled
-  # in compile_now().  (This config is for the reuse=no case.  We create a
-  # reuse=yes config after compile_now().)
-  if (!$opt_net) {
-    my @zero = (sort grep {
-          (ref($rules{$_}) eq 'HASH')
-                && $rules{$_}->{tflags}
-                && $rules{$_}->{tflags} =~ /\bnet\b/; 
-        } keys %rules);
+  # need to load M:SA:Plugin:Reuse
+  push @{$opt_pre}, "loadplugin Mail::SpamAssassin::Plugin::Reuse\n";
 
-    foreach my $r (@zero) {
-      push @{$opt_cf}, "score $r 0\n";
-      # warn "--reuse/!--net zeroed $r";
-    }
-  }
 }
 
 my $user_prefs = "$opt_p/user_prefs";
@@ -355,9 +323,10 @@ sub create_spamtest {
     'userstate_dir'     		=> $opt_p,
     'save_pattern_hits'  		=> $opt_loghits,
     'dont_copy_prefs'   		=> 1,
-    'local_tests_only'   		=> $use_net_rules ? 0 : 1,
+    'local_tests_only'   		=> $opt_net ? 0 : 1,
     'only_these_rules'   		=> $opt_rules,
     'ignore_safety_expire_timeout'	=> 1,
+    'pre_config_text'                   => join("\n", @{$opt_pre})."\n",
     'post_config_text'                  => join("\n", @{$opt_cf})."\n",
     PREFIX				=> '',
     DEF_RULES_DIR        		=> $opt_c,
@@ -369,35 +338,6 @@ my $spamtest = create_spamtest();
 $spamtest->compile_now(0);      # 0 since we will be reading more configs
 $spamtest->read_scoreonly_config("$FindBin::Bin/mass-check.cf");
 $spamtest->read_scoreonly_config($user_prefs);
-
-# generated user_prefs
-if ($opt_reuse) {
-  # copy current prefs if it exists
-  $spamtest->copy_config(undef, \%orig_conf);
-
-  # zeroed scores to reuse_prefs
-  my @zero = (sort grep {
-          defined $reuse{$_}->{skip} 
-        } keys %reuse);
-  zero_rule_scores(@zero);
-
-  $spamtest->copy_config(undef, \%reuse_conf);
-  $reuse_rules_loaded_p = 1;
-}
-
-sub zero_rule_scores {
-  my @zero = @_;
-
-  my $pfile = "$FindBin::Bin/tmp/reuse_prefs";
-  open(PREFS, ">$pfile") or die "Unable to open $pfile: $!\n".
-            "Needed for --reuse to work properly";
-  for my $rule (@zero) {
-    print PREFS "score $rule 0\n";
-  }
-  close PREFS or die "failed to write $pfile";
-  $spamtest->read_scoreonly_config($pfile);
-  unlink $pfile;
-}
 
 my $who = `id -un 2>/dev/null`;
 my $where = `uname -n 2>/dev/null`;
@@ -727,33 +667,10 @@ sub wanted {
 
   # get X-Spam-Status: header for rule hit resue
   my $x_spam_status;
+  my $reusing;
   if ($opt_reuse) {
     $x_spam_status = $ma->get_header("X-Spam-Status");
     $x_spam_status and $x_spam_status =~ s/,\s+/,/gs;
-  }
-  my @previous; # previous hits, only set if $opt_reuse
-
-  if ($opt_reuse) {
-    if ($x_spam_status
-        && $x_spam_status =~ m/tests=(\S*)/
-        && $x_spam_status !~ /\bshortcircuit=(?:ham|spam|default)\b/)
-    {
-      push @previous, split(/,/, $1);
-
-      # we found previous tests, so move the reuse config into place
-      unless ($reuse_rules_loaded_p) {
-        $spamtest->copy_config(\%reuse_conf, undef);
-        $reuse_rules_loaded_p = 1;
-        dbg "mass-check: reusing hits";
-      }
-    }
-    else {
-      if ($reuse_rules_loaded_p) {
-        $spamtest->copy_config(\%orig_conf, undef);
-        $reuse_rules_loaded_p = 0;
-        dbg "mass-check: not reusing hits";
-      }
-    }
   }
 
   # remove SpamAssassin markup, if present and the mail was spam
@@ -763,6 +680,17 @@ sub wanted {
       my $new_ma = $spamtest->parse($spamtest->remove_spamassassin_markup($ma), 1);
       $ma->finish();
       $ma = $new_ma;
+    }
+  }
+
+  if ($opt_reuse) {
+    if ($x_spam_status 
+        && $x_spam_status =~ m/tests=(\S*)/
+        && $x_spam_status !~ /\bshortcircuit=(?:ham|spam|default)\b/)
+    {
+      my @previous = split(/,/, $1);
+      $ma->{metadata}->{reuse_tests_hit} = { map {$_ => 1} @previous };
+      $reusing = 1;
     }
   }
 
@@ -859,17 +787,12 @@ sub wanted {
     }
   }
 
-  if ($reuse_rules_loaded_p) {
-    push(@extra, "reuse=yes");
-  } else {
-    push(@extra, "reuse=no");
-  }
+  push(@extra, "reuse=" . ($reusing ? "yes" : "no"));
 
   # log the scoreset we're in
   {
     my $set = 0;
     if ($opt_net) { $set |= 1; }
-    if ($reuse_rules_loaded_p) { $set |= 1; }
     if ($status && defined $status->{bayes_score}) { $set |= 2; }
     push(@extra, "set=".$set);
   }
@@ -896,15 +819,7 @@ sub wanted {
     my @tests;
     push @tests, split(/,/, $status->get_names_of_tests_hit());
     push @tests, split(/,/, $status->get_names_of_subtests_hit());
-    # hit reuse; $opt_reuse
-    if ($x_spam_status) {
-      # generate mapping of hits to remove hits that are marked as skip
-      @tests = grep { !$reuse{$_}->{skip} } @tests;
-      # add hits from previous
-      for (@previous) {
-	push(@tests, $reuse{$_}->{reuse}) if $reuse{$_}->{reuse};
-      }
-    }
+
     $tests = join(",", sort(@tests));
     $extra = join(",", @extra);
   }

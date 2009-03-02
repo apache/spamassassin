@@ -699,6 +699,11 @@ sub finish_parsing {
 
   # note: this function is called once for system-wide configuration
   # with $isuserconf set to 0, then again for user conf with $isuserconf set to 1.
+  if (!$isuserconf) {
+    $conf->{main}->call_plugins("finish_parsing_start", { conf => $conf });
+  } else {
+    $conf->{main}->call_plugins("user_conf_parsing_start", { conf => $conf });
+  }
 
   $self->trace_meta_dependencies();
   $self->fix_priorities();
@@ -773,6 +778,8 @@ sub finish_parsing {
       elsif ($type == $Mail::SpamAssassin::Conf::TYPE_FULL_TESTS) {
         $conf->{full_tests}->{$priority}->{$name} = $text;
       }
+      elsif ($type == $Mail::SpamAssassin::Conf::TYPE_EMPTY_TESTS) {
+      }
       else {
         $self->lint_warn("unknown type $type for $name: $text", $name);
       }
@@ -782,7 +789,6 @@ sub finish_parsing {
   $self->lint_trusted_networks();
 
   if (!$isuserconf) {
-    # named this way just in case we ever want a "finish_parsing_start"
     $conf->{main}->call_plugins("finish_parsing_end", { conf => $conf });
   } else {
     $conf->{main}->call_plugins("user_conf_parsing_end", { conf => $conf });
@@ -880,7 +886,10 @@ sub find_dup_rules {
   my %dups;
   while (my ($name, $text) = each %{$conf->{tests}}) {
     my $type = $conf->{test_types}->{$name};
-    next if ($type & 1); # skip eval tests
+
+    # skip eval and empty tests
+    next if ($type & 1) ||
+      ($type eq $Mail::SpamAssassin::Conf::TYPE_EMPTY_TESTS);
 
     my $tf = ($conf->{tflags}->{$name}||''); $tf =~ s/\s+/ /gs;
     # ensure similar, but differently-typed, rules are not marked as dups;
