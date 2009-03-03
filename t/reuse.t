@@ -23,7 +23,13 @@ use vars qw(%patterns %anti_patterns $perl_path &patterns_run_cb);
 
 use Mail::SpamAssassin;
 
-plan tests => 37;
+if (-e '../masses/mass-check') {
+  plan tests => 37;
+}
+else {
+  plan tests => 0;
+  exit;
+}
 
 # Tests the following cases:
 # - No reuse: no change
