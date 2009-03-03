@@ -79,7 +79,7 @@ while true; do
 
         rm -rf rules lib build rulesrc spamd spamc
         svn cleanup < /dev/null
-        svn co --non-interactive `$svnpath` .
+        svn co --non-interactive $svnpath .
 
         # just 10 times; our SVN repo shouldn't be *that* unreliable!
 	if [ $retry -eq 20 ]; then
