@@ -445,13 +445,11 @@ static int _try_to_connect_tcp(const struct transport *tp, int *sockptr)
     int ret;
 #ifdef SPAMC_HAS_ADDRINFO
     struct addrinfo *res = NULL;
+    char port[SPAMC_MAXSERV-1]; /* port, for logging */
 #else
     int res = PF_INET;
 #endif
-
     char host[SPAMC_MAXHOST-1]; /* hostname, for logging */
-    char port[SPAMC_MAXSERV-1]; /* port, for logging */
-
     int connect_retries, retry_sleep;
 
     assert(tp != 0);
@@ -1837,15 +1835,15 @@ static void _randomize_hosts(struct transport *tp)
 int transport_setup(struct transport *tp, int flags)
 {
 #ifdef SPAMC_HAS_ADDRINFO
-    struct addrinfo hints, *res, *addrp; 
+    struct addrinfo hints, *res, *addrp;
     char port[6];
+    int origerr;
 #else
     struct hostent *hp;
     char **addrp;
 #endif
     char *hostlist, *hostname;
     int errbits;
-    int origerr;
 
 #ifdef _WIN32
     /* Start Winsock up */

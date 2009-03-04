@@ -772,16 +772,16 @@ main(int argc, char *argv[])
         goto finish;
       }
     }
- 
+
     ret = get_current_user(&username);
     if (ret != EX_OK)
         goto finish;
-        
+
     if ((flags & SPAMC_RANDOMIZE_HOSTS) != 0) {
 	/* we don't need strong randomness; this is just so we pick
 	 * a random host for loadbalancing.
 	 */
-	srand(getpid() ^ time(NULL));
+	srand(getpid() ^ (unsigned int)time(NULL));
     }
 
     /**********************************************************************
