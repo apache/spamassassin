@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: dos jm zmi; day 2: zmi; day 3: zmi
+# with results from: day 1: bb-jm dos jm zmi; day 2: zmi; day 3: zmi
 
 # tflags userconf
 ALL_TRUSTED
@@ -118,9 +118,6 @@ FM_LOTTO_YOU_WON
 # good enough
 FM_SCHOOLING
 
-# good enough
-FM_VEGAS_CASINO
-
 # tflags userconf
 FRAGMENTED_MESSAGE
 
@@ -129,9 +126,6 @@ FROM_DOMAIN_NOVOWEL
 
 # tflags userconf
 FROM_LOCAL_NOVOWEL
-
-# good enough
-FS_WEIGHT_LOSS
 
 # tflags userconf
 GTUBE
@@ -515,6 +509,9 @@ SUBJECT_IN_BLACKLIST
 SUBJECT_IN_WHITELIST
 
 # good enough
+TVD_FROM_1
+
+# good enough
 TVD_PH_BODY_META
 
 # good enough
@@ -524,7 +521,82 @@ TVD_PH_SUBJ_META
 TVD_QUAL_MEDS
 
 # good enough
-TVD_FROM_1
+DOS_OE_TO_MX
+
+# good enough
+DOS_OE_TO_MX_IMAGE
+
+# good enough
+DOS_RCVD_IP_TWICE_B
+
+# good enough
+DOS_RCVD_IP_TWICE_C
+
+# good enough
+FB_CONSOL_YOUR
+
+# good enough
+FB_SAVE_PERSC
+
+# good enough
+FH_HOST_IN_ADDRARPA
+
+# good enough
+FORGED_RELAY_MUA_TO_MX
+
+# good enough
+FR_WATCHES_HTTP
+
+# good enough
+FS_CAILIS
+
+# good enough
+FS_MAKE_MONEY
+
+# good enough
+MSGID_NOFQDN1
+
+# good enough
+SANE_04e8bf28eb445199a7f11b943c44d209
+
+# good enough
+SANE_20d820d8f491476ca39941979ab139dd
+
+# good enough
+SANE_237c2b0099548ddbfa5a37f07e0687ab
+
+# good enough
+SANE_3b92eda751c992f230f215fb7eb36844
+
+# good enough
+SANE_7429530a7398f43f1f1b795f9420714e
+
+# good enough
+SANE_98328227b502aa6be6f6fd0e04e6ab34
+
+# good enough
+SANE_e5950fd6cd9b53a17ba2cb7883181772
+
+# good enough
+SANE_ef00ce28cfa5ed6e4c405ed37ff36d46
+
+# good enough
+SANE_fac0031ae2a816e3f81394b40b5cb44f
+
+# good enough
+THEBAT_UNREG
+
+# good enough
+THREAD_INDEX_BAD
+
+# good enough
+TVD_PCT_OFF
+
+# good enough
+TVD_PH_SUBJ_SEC_MEASURES
+
+# good enough
+X_MAILER_CME_6543_MSN
 
 # tflags userconf
 UNPARSEABLE_RELAY
