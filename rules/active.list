@@ -1,17 +1,11 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: bb-jm dos jm zmi; day 2: zmi; day 3: zmi
+# with results from: day 1: dos jm zmi; day 2: bb-jm; day 3: zmi
 
 # tflags userconf
 ALL_TRUSTED
 
 # tflags userconf
 AWL
-
-# good enough
-AXB_XMID_DIGDOTSHRT
-
-# good enough
-BASE64_LENGTH_78_79
 
 # tflags learn
 BAYES_00
@@ -220,12 +214,6 @@ KB_RATWARE_OUTLOOK_16
 # good enough
 KB_RATWARE_OUTLOOK_MID
 
-# good enough
-LIVEFILESTORE
-
-# good enough
-LIVEFILESTORE_HTML
-
 # tflags userconf
 MIME_CHARSET_FARAWAY
 
@@ -243,9 +231,6 @@ NO_RELAYS
 
 # good enough
 PQRTW_4
-
-# good enough
-PR_TD_NOWRAP_BAT
 
 # tflags net
 PYZOR_CHECK
@@ -533,13 +518,7 @@ DOS_RCVD_IP_TWICE_B
 DOS_RCVD_IP_TWICE_C
 
 # good enough
-FB_CONSOL_YOUR
-
-# good enough
 FB_SAVE_PERSC
-
-# good enough
-FH_HOST_IN_ADDRARPA
 
 # good enough
 FORGED_RELAY_MUA_TO_MX
@@ -555,6 +534,9 @@ FS_MAKE_MONEY
 
 # good enough
 MSGID_NOFQDN1
+
+# tflags net
+RCVD_IN_SSBL
 
 # good enough
 SANE_04e8bf28eb445199a7f11b943c44d209
@@ -575,16 +557,7 @@ SANE_7429530a7398f43f1f1b795f9420714e
 SANE_98328227b502aa6be6f6fd0e04e6ab34
 
 # good enough
-SANE_e5950fd6cd9b53a17ba2cb7883181772
-
-# good enough
 SANE_ef00ce28cfa5ed6e4c405ed37ff36d46
-
-# good enough
-SANE_fac0031ae2a816e3f81394b40b5cb44f
-
-# good enough
-THEBAT_UNREG
 
 # good enough
 THREAD_INDEX_BAD
