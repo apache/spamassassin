@@ -166,11 +166,11 @@ sub check_end {
   my $pms = $opts->{permsgstatus};
 
   foreach my $disabled_rule (keys %{$pms->{reuse_old_scores}}) {
-      foreach my $ss (0..3) {
-	next unless exists $pms->{conf}->{scoreset}->[$ss]->{$disabled_rule};
-	$pms->{conf}->{scoreset}->[$ss]->{$disabled_rule} =
-	  $pms->{reuse_old_scores}->{$disabled_rule}->[$ss];
-      }
+    foreach my $ss (0..3) {
+      next unless exists $pms->{conf}->{scoreset}->[$ss]->{$disabled_rule};
+      $pms->{conf}->{scoreset}->[$ss]->{$disabled_rule} =
+        $pms->{reuse_old_scores}->{$disabled_rule}->[$ss];
+    }
   }
 
   delete $pms->{reuse_old_scores};
