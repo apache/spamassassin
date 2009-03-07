@@ -1,11 +1,17 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: bb-jm dos jm zmi; day 2: zmi; day 3: bb-jm
+# with results from: day 1: dos jm zmi; day 2: bb-jm; day 3: zmi
 
 # tflags userconf
 ALL_TRUSTED
 
 # tflags userconf
 AWL
+
+# good enough
+AXB_XMID_DIGDOTSHRT
+
+# good enough
+BASE64_LENGTH_78_79
 
 # tflags learn
 BAYES_00
@@ -241,6 +247,12 @@ KB_RATWARE_OUTLOOK_16
 # good enough
 KB_RATWARE_OUTLOOK_MID
 
+# good enough
+LIVEFILESTORE
+
+# good enough
+LIVEFILESTORE_HTML
+
 # tflags userconf
 MIME_CHARSET_FARAWAY
 
@@ -261,6 +273,9 @@ NO_RELAYS
 
 # good enough
 PQRTW_4
+
+# good enough
+PR_TD_NOWRAP_BAT
 
 # tflags net
 PYZOR_CHECK
@@ -567,24 +582,6 @@ TVD_PH_SUBJ_SEC_MEASURES
 
 # good enough
 TVD_QUAL_MEDS
-
-# good enough
-AXB_XMID_DIGDOTSHRT
-
-# good enough
-FS_WEIGHT_LOSS
-
-# good enough
-LIVEFILESTORE
-
-# good enough
-LIVEFILESTORE_HTML
-
-# good enough
-PR_TD_NOWRAP_BAT
-
-# good enough
-SANE_e5950fd6cd9b53a17ba2cb7883181772
 
 # tflags userconf
 UNPARSEABLE_RELAY
