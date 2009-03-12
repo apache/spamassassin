@@ -1,17 +1,11 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: bb-jm dos jm zmi; day 2: zmi; day 3: bb-jm
+# with results from: day 1: dos jm zmi; day 2: bb-jm; day 3: zmi
 
 # tflags userconf
 ALL_TRUSTED
 
 # tflags userconf
 AWL
-
-# good enough
-AXB_XMID_DIGDOTSHRT
-
-# good enough
-BASE64_LENGTH_78_79
 
 # tflags learn
 BAYES_00
@@ -220,6 +214,12 @@ KB_RATWARE_OUTLOOK_16
 # good enough
 KB_RATWARE_OUTLOOK_MID
 
+# good enough
+LIVEFILESTORE
+
+# good enough
+LIVEFILESTORE_HTML
+
 # tflags userconf
 MIME_CHARSET_FARAWAY
 
@@ -237,6 +237,9 @@ NO_RELAYS
 
 # good enough
 PQRTW_4
+
+# good enough
+PR_TD_NOWRAP_BAT
 
 # tflags net
 PYZOR_CHECK
@@ -431,16 +434,10 @@ RCVD_IN_SSC_TRUSTED_COI
 RCVD_IN_XBL
 
 # good enough
-REPLYTO_WITHOUT_TO_CC
-
-# good enough
 RP_MATCHES_RCVD
 
 # good enough
 SANE_17534cea3ba620589af299f2dac174c4
-
-# good enough
-SANE_1c4f3286fa4aed6424ced88bfaf8b09c
 
 # good enough
 SANE_4ef8302546bf270a19baf98508afacc4
@@ -510,81 +507,6 @@ TVD_PH_SUBJ_META
 
 # good enough
 TVD_QUAL_MEDS
-
-# good enough
-DOS_OE_TO_MX
-
-# good enough
-DOS_OE_TO_MX_IMAGE
-
-# good enough
-DOS_RCVD_IP_TWICE_B
-
-# good enough
-DOS_RCVD_IP_TWICE_C
-
-# good enough
-FB_SAVE_PERSC
-
-# good enough
-FORGED_RELAY_MUA_TO_MX
-
-# good enough
-FR_WATCHES_HTTP
-
-# good enough
-FS_CAILIS
-
-# good enough
-FS_MAKE_MONEY
-
-# good enough
-LIVEFILESTORE
-
-# good enough
-LIVEFILESTORE_HTML
-
-# good enough
-MSGID_NOFQDN1
-
-# good enough
-PR_TD_NOWRAP_BAT
-
-# good enough
-SANE_04e8bf28eb445199a7f11b943c44d209
-
-# good enough
-SANE_20d820d8f491476ca39941979ab139dd
-
-# good enough
-SANE_237c2b0099548ddbfa5a37f07e0687ab
-
-# good enough
-SANE_3b92eda751c992f230f215fb7eb36844
-
-# good enough
-SANE_7429530a7398f43f1f1b795f9420714e
-
-# good enough
-SANE_98328227b502aa6be6f6fd0e04e6ab34
-
-# good enough
-SANE_e5950fd6cd9b53a17ba2cb7883181772
-
-# good enough
-SANE_ef00ce28cfa5ed6e4c405ed37ff36d46
-
-# good enough
-THREAD_INDEX_BAD
-
-# good enough
-TVD_PCT_OFF
-
-# good enough
-TVD_PH_SUBJ_SEC_MEASURES
-
-# good enough
-X_MAILER_CME_6543_MSN
 
 # tflags userconf
 UNPARSEABLE_RELAY
