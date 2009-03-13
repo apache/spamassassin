@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: dos jm zmi; day 2: bb-jm; day 3: zmi
+# with results from: day 1: bb-jm jm zmi; day 2: zmi; day 3: bb-jm
 
 # tflags userconf
 ALL_TRUSTED
@@ -118,9 +118,6 @@ FROM_DOMAIN_NOVOWEL
 # tflags userconf
 FROM_LOCAL_NOVOWEL
 
-# good enough
-FS_WEIGHT_LOSS
-
 # tflags userconf
 GTUBE
 
@@ -225,6 +222,9 @@ MIME_CHARSET_FARAWAY
 
 # tflags userconf
 MISSING_HB_SEP
+
+# good enough
+MSOE_MID_WRONG_CASE
 
 # tflags net
 NO_DNS_FOR_FROM
@@ -434,9 +434,6 @@ RCVD_IN_SSC_TRUSTED_COI
 RCVD_IN_XBL
 
 # good enough
-RP_MATCHES_RCVD
-
-# good enough
 SANE_17534cea3ba620589af299f2dac174c4
 
 # good enough
@@ -465,6 +462,9 @@ SANE_a1315779e96aedc845566b1f41f4e424
 
 # good enough
 SANE_c627ae8d03f8c3d579345970e652142c
+
+# good enough
+SANE_e5950fd6cd9b53a17ba2cb7883181772
 
 # good enough
 SPAMMY_XMAILER
@@ -503,10 +503,25 @@ SUBJECT_IN_WHITELIST
 TVD_PH_BODY_META
 
 # good enough
-TVD_PH_SUBJ_META
+TVD_QUAL_MEDS
 
 # good enough
-TVD_QUAL_MEDS
+DOS_GOOGLE_DOCS
+
+# good enough
+FM_LOTTO_MONEY
+
+# good enough
+FROM_WSP_LEAD
+
+# good enough
+KAM_LOTTO2
+
+# good enough
+LOTTERY_PH_004470
+
+# good enough
+NOTVALID_YAHOO
 
 # tflags userconf
 UNPARSEABLE_RELAY
@@ -702,6 +717,9 @@ WHOIS_WHOISPROT
 
 # good enough
 XMAILER_MIMEOLE_OL_5B79A
+
+# good enough
+XMAILER_MIMEOLE_OL_A50F8
 
 # good enough
 XMAILER_MIMEOLE_OL_ADFF7
