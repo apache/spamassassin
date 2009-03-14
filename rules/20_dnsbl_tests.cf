@@ -242,11 +242,6 @@ describe RCVD_IN_BSP_TRUSTED	Sender is in Sender Score Certified (trusted relay)
 tflags RCVD_IN_BSP_TRUSTED	net nice
 reuse  RCVD_IN_BSP_TRUSTED
 
-header RCVD_IN_BSP_OTHER	eval:check_rbl_txt('bsp-untrusted', 'sa-other.bondedsender.org.', '(?i:bonded)')
-describe RCVD_IN_BSP_OTHER	Sender is in Sender Score Certified (other relay)
-tflags RCVD_IN_BSP_OTHER	net nice
-reuse  RCVD_IN_BSP_OTHER
-
 # confirmed-opt-in list; see bug 5476
 header RCVD_IN_SSC_TRUSTED_COI    eval:check_rbl('ssc-firsttrusted', 'plus.bondedsender.org.')
 describe RCVD_IN_SSC_TRUSTED_COI  Sender is in Sender Score Certified (confirmed opt-in)
@@ -282,10 +277,6 @@ header HABEAS_ACCREDITED_SOI	eval:check_rbl_sub('habeas-firsttrusted', '127\.\d+
 describe HABEAS_ACCREDITED_SOI	Habeas Accredited Opt-In or Better
 tflags HABEAS_ACCREDITED_SOI	net nice
 
-header HABEAS_CHECKED		eval:check_rbl_sub('habeas-firsttrusted', '127\.\d+\.\d+\.[6789]\d')
-describe HABEAS_CHECKED		Habeas Checked
-tflags HABEAS_CHECKED		net nice
-
 # Habeas Accredited Senders, with check for "Accreditor Assertion"
 #	Same Habeas whitelist checks as above, but performed only if the Sender
 #	has specified Habeas as their accreditor in either the EnvelopeFrom or
@@ -300,8 +291,4 @@ tflags HABEAS_CHECKED		net nice
 # describe HABEAS_ACCREDITED_SOI	Habeas Accredited Opt-In or Better
 # tflags HABEAS_ACCREDITED_SOI	net nice
 # 
-# header HABEAS_CHECKED		eval:check_rbl_accreditor('accredit-firsttrusted', 'sa-accredit.habeas.com.', '127\.\d+\.\d+\.[6789]\d', 'habeas')
-# describe HABEAS_CHECKED		Habeas Checked
-# tflags HABEAS_CHECKED		net nice
-
 endif
