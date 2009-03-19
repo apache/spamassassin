@@ -2177,7 +2177,8 @@ new addition in SpamAssassin 3.2.0.
 sub got_hit {
   my ($self, $rule, $area, %params) = @_;
 
-  my $score = $params{score} || $self->{conf}->{scores}->{$rule};
+  my $score = $params{score};
+  $score = $self->{conf}->{scores}->{$rule}  if !defined $score;
 
   # adding a hit does nothing if we don't have a score -- we probably
   # shouldn't have run it in the first place
