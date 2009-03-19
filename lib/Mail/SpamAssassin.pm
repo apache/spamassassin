@@ -449,7 +449,7 @@ sub create_locker {
 
 ###########################################################################
 
-=item parse($message, $parse_now)
+=item parse($message, $parse_now [, $suppl_attrib])
 
 Parse will return a Mail::SpamAssassin::Message object with just the
 headers parsed.  When calling this function, there are two optional
@@ -466,18 +466,37 @@ handy, for instance, when running C<spamassassin -d>, which only
 needs the pristine header and body which is always parsed and stored
 by this function.
 
+The optional last argument I<$suppl_attrib> provides a way for a caller
+to pass additional information about a message to SpamAssassin. It is
+either undef, or a ref to a hash where each key/value pair provides some
+supplementary attribute of the message, typically information that cannot
+be deduced from the message itself, or is hard to do so reliably, or would
+represent unnecessary work for SpamAssassin to obtain it. The argument will
+be stored to a Mail::SpamAssassin::Message object as 'suppl_attrib', thus
+made available to the rest of the code as well as to plugins. The exact list
+of attributes will evolve through time, any unknown attributes should be
+ignored. Possible examples are: SMTP envelope information, a flag indicating
+that a message as supplied by a caller was truncated due to size limit, an
+already verified list of DKIM signature objects, or perhaps a list of rule
+hits predetermined by a caller, which makes another possible way for a
+caller to provide meta information (instead of having to insert made-up
+header fields in order to pass information), or maybe just plain rule hits.
+
 For more information, please see the C<Mail::SpamAssassin::Message>
 and C<Mail::SpamAssassin::Message::Node> POD.
 
 =cut
 
 sub parse {
-  my($self, $message, $parsenow) = @_;
+  my($self, $message, $parsenow, $suppl_attrib) = @_;
   $self->init(1);
 
   my $timer = $self->time_method("parse");
 
-  my $msg = Mail::SpamAssassin::Message->new({message=>$message, parsenow=>$parsenow, normalize=>$self->{conf}->{normalize_charset}});
+  my $msg = Mail::SpamAssassin::Message->new({
+    message=>$message, parsenow=>$parsenow,
+    normalize=>$self->{conf}->{normalize_charset},
+    suppl_attrib=>$suppl_attrib });
 
   # bug 5069: The goal here is to get rendering plugins to do things
   # like OCR, convert doc and pdf to text, etc, though it could be anything
