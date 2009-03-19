@@ -380,6 +380,8 @@ sub new {
   $self->{DEF_RULES_DIR}	||= '@@DEF_RULES_DIR@@';
   $self->{LOCAL_RULES_DIR}	||= '@@LOCAL_RULES_DIR@@';
   $self->{LOCAL_STATE_DIR}	||= '@@LOCAL_STATE_DIR@@';
+  dbg("generic: Perl %s, %s", $], join(", ", map { $_ . '=' . $self->{$_} } 
+      qw(PREFIX DEF_RULES_DIR LOCAL_RULES_DIR LOCAL_STATE_DIR)));
 
   $self->{needed_tags} = {};
   { my $ntags = $self->{need_tags};
