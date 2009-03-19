@@ -48,6 +48,31 @@ sub check_main {
 
   my $pms = $args->{permsgstatus};
 
+  my $suppl_attrib = $pms->{msg}->{suppl_attrib};
+  if (defined $suppl_attrib && ref $suppl_attrib->{rule_hits}) {
+    my @caller_rule_hits = @{$suppl_attrib->{rule_hits}};
+    dbg("check: adding caller rule hits, %d rules", scalar(@caller_rule_hits));
+    my($tflags_ref,$scorset_ref,$descr_ref) =
+      @{$pms->{conf}}{'tflags','scoreset','descriptions'};
+    for my $caller_rule_hit (@caller_rule_hits) {
+      next if ref $caller_rule_hit ne 'HASH';
+      my($rulename, $area, $score, $value, $ruletype, $tflags, $description) =
+        @$caller_rule_hit{qw(rule area score value ruletype tflags descr)};
+      if (defined $description) { $descr_ref->{$rulename} = $description }
+      if (defined $score) {
+        $scorset_ref->[$_]->{$rulename} = $score  for (0..3);
+      }
+      if (defined $tflags) {
+        $_ = join(' ', !defined $_ ? () : split(' '),
+                       split(/[ \t,]+/,$tflags))  for $tflags_ref->{$rulename};
+      }
+      $pms->got_hit($rulename, $area,
+                    !defined $score ? () : (score=>$score),
+                    !defined $value ? () : (value=>$value),
+                    ruletype=>$ruletype);
+    }
+  }
+
   # bug 4353:
   # Do this before the RBL tests are kicked off.  The metadata parsing
   # will figure out the (un)trusted relays and such, which are used in the
