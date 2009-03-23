@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: bb-jm jm zmi; day 2: zmi; day 3: zmi
+# with results from: day 1: bb-jm dos jm zmi; day 2: zmi; day 3: zmi
 
 # tflags userconf
 ALL_TRUSTED
@@ -48,9 +48,6 @@ CHARSET_FARAWAY_HEADER
 
 # tflags userconf
 CORRUPT_FROM_LINE_IN_HDRS
-
-# good enough
-DEAR_WINNER
 
 # tflags net
 DIGEST_MULTIPLE
@@ -101,6 +98,9 @@ ENV_AND_HDR_DKIM_MATCH
 ENV_AND_HDR_SPF_MATCH
 
 # good enough
+FB_EARN_UP_TO
+
+# good enough
 FB_GVR
 
 # good enough
@@ -111,9 +111,6 @@ FB_SOFTTABS
 
 # good enough
 FB_WITHOUT_PRESC
-
-# good enough
-FH_DATE_PAST_20XX
 
 # good enough
 FH_FAKE_RCVD_LINE_B
@@ -223,20 +220,11 @@ KB_RATWARE_OUTLOOK_16
 # good enough
 KB_RATWARE_OUTLOOK_MID
 
-# good enough
-LIVEFILESTORE
-
-# good enough
-LIVEFILESTORE_HTML
-
 # tflags userconf
 MIME_CHARSET_FARAWAY
 
 # tflags userconf
 MISSING_HB_SEP
-
-# good enough
-MSOE_MID_WRONG_CASE
 
 # tflags net
 NO_DNS_FOR_FROM
@@ -518,37 +506,79 @@ TVD_FROM_1
 TVD_PH_BODY_META
 
 # good enough
-TVD_PH_REC
-
-# good enough
 TVD_QUAL_MEDS
 
 # good enough
-DOS_GOOGLE_DOCS
+DOS_OE_TO_MX
 
 # good enough
-FB_EARN_UP_TO
+DOS_OE_TO_MX_IMAGE
 
 # good enough
-FM_LOTTO_MONEY
+DOS_RCVD_IP_TWICE_B
 
 # good enough
-FROM_WSP_LEAD
+DOS_RCVD_IP_TWICE_C
 
 # good enough
-KAM_LOTTO2
+FB_SAVE_PERSC
 
 # good enough
-LOTTERY_PH_004470
+FB_YOUR_MORTGAGE
 
 # good enough
-NOTVALID_YAHOO
+FORGED_RELAY_MUA_TO_MX
 
 # good enough
-RATWARE_HELO_DM
+FRT_ERECTION
 
 # good enough
-SANE_e5950fd6cd9b53a17ba2cb7883181772
+FR_WATCHES_HTTP
+
+# good enough
+FS_MAKE_MONEY
+
+# good enough
+FS_WEIGHT_LOSS
+
+# good enough
+MSGID_NOFQDN1
+
+# good enough
+RP_MATCHES_RCVD
+
+# good enough
+SANE_04e8bf28eb445199a7f11b943c44d209
+
+# good enough
+SANE_20d820d8f491476ca39941979ab139dd
+
+# good enough
+SANE_237c2b0099548ddbfa5a37f07e0687ab
+
+# good enough
+SANE_3b92eda751c992f230f215fb7eb36844
+
+# good enough
+SANE_7429530a7398f43f1f1b795f9420714e
+
+# good enough
+SANE_98328227b502aa6be6f6fd0e04e6ab34
+
+# good enough
+SANE_ef00ce28cfa5ed6e4c405ed37ff36d46
+
+# good enough
+THREAD_INDEX_BAD
+
+# good enough
+TVD_PCT_OFF
+
+# good enough
+TVD_PH_SUBJ_META
+
+# good enough
+TVD_PH_SUBJ_SEC_MEASURES
 
 # tflags userconf
 UNPARSEABLE_RELAY
@@ -744,9 +774,6 @@ WHOIS_WHOISPROT
 
 # good enough
 XMAILER_MIMEOLE_OL_5B79A
-
-# good enough
-XMAILER_MIMEOLE_OL_A50F8
 
 # good enough
 XMAILER_MIMEOLE_OL_ADFF7
