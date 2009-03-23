@@ -23,9 +23,9 @@ Mail::SpamAssassin::Plugin::DKIM - perform DKIM verification tests
 
  loadplugin Mail::SpamAssassin::Plugin::DKIM [/path/to/DKIM.pm]
 
- full   DKIM_SIGNED         eval:check_dkim_signed()
- full   DKIM_VALID          eval:check_dkim_valid()
- full   DKIM_VALID_AU       eval:check_dkim_valid_author_sig()
+ full   DKIM_SIGNED           eval:check_dkim_signed()
+ full   DKIM_VALID            eval:check_dkim_valid()
+ full   DKIM_VALID_AU         eval:check_dkim_valid_author_sig()
 
  header DKIM_ADSP_NXDOMAIN    eval:check_dkim_adsp('N')
  header DKIM_ADSP_ALL         eval:check_dkim_adsp('A')
@@ -40,7 +40,7 @@ Mail::SpamAssassin::Plugin::DKIM - perform DKIM verification tests
 
  describe DKIM_ADSP_NXDOMAIN    No valid author signature and domain not in DNS
  describe DKIM_ADSP_ALL         No valid author signature, domain signs all mail
- describe DKIM_ADSP_DISCARD     No valid author signature, domain signs all mail and suggests unsigned mail be discarded
+ describe DKIM_ADSP_DISCARD     No valid author signature, domain signs all mail and suggests discarding mail with no valid author signature
  describe DKIM_ADSP_CUSTOM_LOW  No valid author signature, adsp_override is CUSTOM_LOW
  describe DKIM_ADSP_CUSTOM_MED  No valid author signature, adsp_override is CUSTOM_MED
  describe DKIM_ADSP_CUSTOM_HIGH No valid author signature, adsp_override is CUSTOM_HIGH
@@ -263,23 +263,27 @@ Example:
   adsp_override *.mydomain.example.com   discardable
   adsp_override *.neversends.example.com discardable
 
-  adsp_override ebay.com       discardable
-  adsp_override *.ebay.com     discardable
-  adsp_override ebay.co.uk     discardable
-  adsp_override *.ebay.co.uk   discardable
-  adsp_override paypal.com     discardable
-  adsp_override *.paypal.com   discardable
-  adsp_override amazon.com     discardable
-  adsp_override alert.bankofamerica.com discardable
-
-  adsp_override google.com     all
-  adsp_override gmail.com      all
-  adsp_override googlemail.com all
-  adsp_override yahoo.com      all
-  adsp_override yahoo.com.au   custom_low
-  adsp_override yahoo.se       custom_low
+  adsp_override ebay.com
+  adsp_override *.ebay.com
+  adsp_override ebay.co.uk
+  adsp_override *.ebay.co.uk
+  adsp_override paypal.com
+  adsp_override *.paypal.com
+  adsp_override amazon.com
+  adsp_override alert.bankofamerica.com
+  adsp_override americangreetings.com
+  adsp_override egreetings.com
+  adsp_override bluemountain.com
+  adsp_override hallmark.com   all
+  adsp_override *.hallmark.com all
   adsp_override youtube.com    custom_high
   adsp_override skype.net      custom_high
+  adsp_override google.com     custom_low
+  adsp_override gmail.com      custom_low
+  adsp_override googlemail.com custom_low
+  adsp_override yahoo.com      custom_low
+  adsp_override yahoo.com.au   custom_low
+  adsp_override yahoo.se       custom_low
 
   adsp_override junkmailerkbw0rr.com nxdomain
   adsp_override junkmailerd2hlsg.com nxdomain
@@ -287,7 +291,7 @@ Example:
   # effectively disables ADSP network DNS lookups for all other domains:
   adsp_override *              unknown
 
-  score DKIM_ADSP_ALL          1.5
+  score DKIM_ADSP_ALL          2.5
   score DKIM_ADSP_DISCARD     25
   score DKIM_ADSP_NXDOMAIN     3
 
@@ -412,7 +416,7 @@ sub check_dkim_verified {
 sub check_dkim_adsp {
   my ($self, $pms, $adsp_char) = @_;
   $self->_check_dkim_signature($pms) unless $pms->{dkim_checked_signature};
-  if (!$pms->{dkim_valid_author_sig}) {
+  if ($pms->{dkim_signatures_ready} && !$pms->{dkim_valid_author_sig}) {
     $self->_check_dkim_adsp($pms)  unless $pms->{dkim_checked_adsp};
     return 1  if $pms->{dkim_adsp} eq $adsp_char;
   }
@@ -489,11 +493,12 @@ sub _dkim_load_modules {
 sub _check_dkim_signature {
   my ($self, $pms) = @_;
 
-  return unless $self->_dkim_load_modules();
-  my $timemethod = $self->{main}->UNIVERSAL::can("time_method") &&
-                   $self->{main}->time_method("check_dkim_signature");
-
-  $pms->{dkim_checked_signature} = 1;
+  my(@signatures,@valid_signatures);
+  $pms->{dkim_checked_signature} = 1; # has this sub already been invoked?
+  $pms->{dkim_signatures_ready} = 0;  # have we obtained & verified signatures?
+  $pms->{dkim_author_sig_tempfailed} = 0;  # DNS timeout verifying author sign.
+  $pms->{dkim_signatures} = \@signatures;
+  $pms->{dkim_valid_signatures} = \@valid_signatures;
   $pms->{dkim_signed} = 0;
   $pms->{dkim_valid} = 0;
   $pms->{dkim_valid_author_sig} = 0;
@@ -501,21 +506,26 @@ sub _check_dkim_signature {
   $pms->{dkim_author_address} =
     $pms->get('from:addr',undef)  if !defined $pms->{dkim_author_address};
 
-  my @signatures;
-  my $signatures_ready = 0;
-
   my $suppl_attrib = $pms->{msg}->{suppl_attrib};
   if (defined $suppl_attrib && exists $suppl_attrib->{dkim_signatures}) {
     # caller of SpamAssassin already supplied DKIM signature objects
     my $provided_signatures = $suppl_attrib->{dkim_signatures};
     @signatures = @$provided_signatures  if ref $provided_signatures;
-    $signatures_ready = 1;
+    $pms->{dkim_signatures_ready} = 1;
     dbg("dkim: signatures provided by the caller, %d signatures",
         scalar(@signatures));
   }
 
-  if (!$signatures_ready) {
+  if ($pms->{dkim_signatures_ready}) {
+    # signatures already available and verified
+  } elsif (!$pms->is_dns_available()) {
+    dbg("dkim: signature verification disabled, DNS resolving not available");
+  } elsif (!$self->_dkim_load_modules()) {
+    # Mail::DKIM module not available
+  } else {
     # signature objects not provided by the caller, must verify for ourselves
+    my $timemethod = $self->{main}->UNIVERSAL::can("time_method") &&
+                     $self->{main}->time_method("check_dkim_signature");
     my $verifier = Mail::DKIM::Verifier->new();
     if (!$verifier) {
       dbg("dkim: cannot create Mail::DKIM::Verifier object");
@@ -552,29 +562,29 @@ sub _check_dkim_signature {
       # signature, new versions allow access to all signatures of a message
       @signatures = Mail::DKIM->VERSION >= 0.29 ? $verifier->signatures
                                                 : $verifier->signature;
-      $signatures_ready = 1;
     });
     if ($timer->timed_out()) {
       dbg("dkim: public key lookup or verification timed out after %s s",
           $timeout );
+      $pms->{dkim_author_sig_tempfailed} = 1;
     } elsif ($err) {
       chomp $err;
       dbg("dkim: public key lookup or verification failed: $err");
     }
+    $pms->{dkim_signatures_ready} = 1;
   }
 
-  if (!$signatures_ready) {
-    $pms->{dkim_signatures} = [];
-    $pms->{dkim_valid_signatures} = [];
-  } else {
+  if ($pms->{dkim_signatures_ready}) {
     @signatures = grep { defined } @signatures;  # just in case
-    my @valid_signatures;
     my $expiration_supported = Mail::DKIM->VERSION >= 0.29 ? 1 : 0;
     my $has_author_sig = 0;
+
+    # ADSP+RFC5321: localpart is case sensitive, domain is case insensitive
     my $author = $pms->{dkim_author_address};
     local($1,$2);
     $author = ''  if !defined $author;
     $author = $1 . lc($2)  if $author =~ /^(.*)(\@[^\@]*)\z/s;
+
     foreach my $signature (@signatures) {
       # i=  Identity of the user or agent (e.g., a mailing list manager) on
       #     behalf of which this message is signed (dkim-quoted-printable;
@@ -588,25 +598,29 @@ sub _check_dkim_signature {
       if ($valid && $expiration_supported) {
         $expired = !$signature->check_expiration;
       }
-      would_log("dbg","dkim") &&
-        dbg("dkim: signing identity: %s, d=%s, a=%s, c=%s, %s%s",
-          defined $identity ? $identity : 'UNDEF',  $signature->domain,
-          $signature->algorithm, scalar($signature->canonicalization),
-          $signature->result, !$expired ? '' : ', expired');
+      # check if we have a potential author signature, valid or not
+      my $id_matches_author = 0;
+      if ($identity =~ /.\@[^\@]*\z/s) {  # identity has a localpart
+        $id_matches_author = 1  if $author eq $identity;
+      } elsif ($author =~ /(\@[^\@]*)?\z/s && $1 eq $identity) {
+        # ignoring localpart if identity doesn't have a localpart
+        $id_matches_author = 1;
+      }
+      if (!$valid && $id_matches_author &&
+        $signature->result_detail =~ /timed out/) {
+        $pms->{dkim_author_sig_tempfailed} = 1;
+      }
       if ($valid && !$expired) {
         push(@valid_signatures, $signature);
-        # ADSP+RFC5321: localpart is case sensitive, domain is case insensitive
-        # check if we have a valid first-party signature
-        if ($identity =~ /.\@[^\@]*\z/s) {  # identity has a localpart
-          $has_author_sig = 1  if $author eq $identity;
-        } elsif ($author =~ /(\@[^\@]*)?\z/s && $1 eq $identity) {
-          # ignoring localpart if identity doesn't have a localpart
-          $has_author_sig = 1;
-        }
+        $has_author_sig = 1  if $id_matches_author;
       }
+      would_log("dbg","dkim") &&
+        dbg("dkim: i=%s, d=%s, a=%s, c=%s, %s%s, %s",
+          defined $identity ? $identity : 'UNDEF',  $signature->domain,
+          $signature->algorithm, scalar($signature->canonicalization),
+          $signature->result, !$expired ? '' : ', expired',
+          $id_matches_author ? 'matches author' : 'does not match author');
     }
-    $pms->{dkim_signatures} = \@signatures;
-    $pms->{dkim_valid_signatures} = \@valid_signatures;
     if (@valid_signatures) {
       $pms->{dkim_signed} = 1;
       $pms->{dkim_valid} = 1;
@@ -668,13 +682,11 @@ sub _check_dkim_adsp {
    ('D' => 'discardable', 'A' => 'all', 'U' => 'unknown', 'N' => 'nxdomain',
     '1' => 'custom_low', '2' => 'custom_med', '3' => 'custom_high');
 
-  return unless $self->_dkim_load_modules();
-
   # must check the message first to obtain signer, domain, and verif. status
   $self->_check_dkim_signature($pms) unless $pms->{dkim_checked_signature};
 
-  if (!$pms->is_dns_available()) {
-    dbg("dkim: adsp: not retrieved, no DNS resolving available");
+  if (!$pms->{dkim_signatures_ready}) {
+    dbg("dkim: adsp not retrieved, signatures not verifiable");
 
   } elsif ($pms->{dkim_valid_author_sig}) {  # don't fetch adsp when valid
     # draft-allman-dkim-ssp: If the message contains a valid Author
@@ -687,26 +699,35 @@ sub _check_dkim_adsp {
     # compliant with any possible ADSP for that domain. [...]
     # implementations SHOULD avoid doing unnecessary DNS lookups
     #
-    dbg("dkim: adsp: not retrieved, author signature is valid");
+    dbg("dkim: adsp not retrieved, author signature is valid");
 
   } elsif ($author_domain eq '') {         # have mercy, don't claim a NXDOMAIN
-    dbg("dkim: adsp: not retrieved, no author domain (empty)");
+    dbg("dkim: adsp not retrieved, no author domain (empty)");
     $pms->{dkim_adsp} = 'U'; $practices_as_string = 'empty domain';
 
   } elsif ($author_domain =~ /^[^.]+$/si) {  # have mercy, don't claim NXDOMAIN
-    dbg("dkim: adsp: not retrieved, author domain not fqdn: $author_domain");
+    dbg("dkim: adsp not retrieved, author domain not fqdn: $author_domain");
     $pms->{dkim_adsp} = 'U'; $practices_as_string = 'not fqdn';
 
   } elsif ($author_domain !~ /.\.[a-z]{2,}\z/si) {
-    dbg("dkim: adsp: not retrieved, author domain not a fqdn: %s (%s)",
+    dbg("dkim: adsp not retrieved, author domain not a fqdn: %s (%s)",
         $author_domain, $pms->{dkim_author_address});
     $pms->{dkim_adsp} = 'N'; $practices_as_string = 'invalid fqdn';
+
+  } elsif ($pms->{dkim_author_sig_tempfailed}) {
+    dbg("dkim: adsp ignored, temporary failure varifying author signature");
 
   } elsif (my($adsp,$key) =
              $self->_lookup_dkim_adsp_override($pms,$author_domain)) {
     $pms->{dkim_adsp} = $adsp;
     $practices_as_string = 'override';
     $practices_as_string .= " by $key"  if $key ne $author_domain;
+
+  } elsif (!$pms->is_dns_available()) {
+    dbg("dkim: adsp not retrieved, DNS resolving not available");
+
+  } elsif (!$self->_dkim_load_modules()) {
+    dbg("dkim: adsp not retrieved, module Mail::DKIM not available");
 
   } else {
     my $timemethod = $self->{main}->UNIVERSAL::can("time_method") &&
@@ -755,8 +776,6 @@ sub _check_dkim_whitelist {
   my ($self, $pms) = @_;
 
   $pms->{whitelist_checked} = 1;
-  return unless $self->_dkim_load_modules();
-  return unless $pms->is_dns_available();
 
   my $author = $pms->{dkim_author_address};
   if (!defined $author) {
@@ -787,6 +806,7 @@ sub _check_dkim_whitelist {
   # trigger a DKIM check so we can get address/identity info;
   # continue if one or more signatures are valid or we want the debug info
   return unless $self->check_dkim_valid($pms) || would_log("dbg","dkim");
+  return unless $pms->{dkim_signatures_ready};
 
   # now do all the matching in one go, against all signatures in a message
   my($any_match_at_all, $any_match_by_wl_ref) =
