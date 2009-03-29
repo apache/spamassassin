@@ -189,66 +189,81 @@ sub check_rbl_backend {
 
   my $trusted = $self->{main}->{conf}->{trusted_networks};
 
-  if (scalar @ips + scalar @originating > 0) {
-    # If name is foo-notfirsthop, check all addresses except for
-    # the originating one.  Suitable for use with dialup lists, like the PDL.
-    # note that if there's only 1 IP in the untrusted set, do NOT pop the
-    # list, since it'd remove that one, and a legit user is supposed to
-    # use their SMTP server (ie. have at least 1 more hop)!
-    # If name is foo-lastexternal, check only the Received header just before
-    # it enters our internal networks; we can trust it and it's the one that
-    # passed mail between networks
-    if ($set =~ /-(notfirsthop|lastexternal)$/)
-    {
-      # use the external IP set, instead of the trusted set; the user may have
-      # specified some third-party relays as trusted.  Also, don't use
-      # @originating; those headers are added by a phase of relaying through
-      # a server like Hotmail, which is not going to be in dialup lists anyway.
-      @ips = $self->ip_list_uniq_and_strip_private(@fullexternal);
-      if ($1 eq "lastexternal") {
-        @ips = (defined $ips[0]) ? ($ips[0]) : ();
-      } else {
+  # If name is foo-notfirsthop, check all addresses except for
+  # the originating one.  Suitable for use with dialup lists, like the PDL.
+  # note that if there's only 1 IP in the untrusted set, do NOT pop the
+  # list, since it'd remove that one, and a legit user is supposed to
+  # use their SMTP server (ie. have at least 1 more hop)!
+  # If name is foo-lastexternal, check only the Received header just before
+  # it enters our internal networks; we can trust it and it's the one that
+  # passed mail between networks
+  if ($set =~ /-(notfirsthop|lastexternal)$/)
+  {
+    # use the external IP set, instead of the trusted set; the user may have
+    # specified some third-party relays as trusted.  Also, don't use
+    # @originating; those headers are added by a phase of relaying through
+    # a server like Hotmail, which is not going to be in dialup lists anyway.
+    @ips = $self->ip_list_uniq_and_strip_private(@fullexternal);
+    if ($1 eq "lastexternal") {
+      @ips = (defined $ips[0]) ? ($ips[0]) : ();
+    } else {
 	pop @ips if (scalar @ips > 1);
-      }
-    }
-    # If name is foo-firsttrusted, check only the Received header just
-    # after it enters our trusted networks; that's the only one we can
-    # trust the IP address from (since our relay added that header).
-    # And if name is foo-untrusted, check any untrusted IP address.
-    elsif ($set =~ /-(first|un)trusted$/)
-    {
-      my @tips;
-      foreach my $ip (@originating) {
-        if ($ip && !$trusted->contains_ip($ip)) {
-          push(@tips, $ip);
-        }
-      }
-      @ips = $self->ip_list_uniq_and_strip_private (@ips, @tips);
-      if ($1 eq "first") {
-        @ips = (defined $ips[0]) ? ($ips[0]) : ();
-      } else {
-        shift @ips;
-      }
-    }
-    else
-    {
-      my @tips;
-      foreach my $ip (@originating) {
-        if ($ip && !$trusted->contains_ip($ip)) {
-          push(@tips, $ip);
-        }
-      }
-      # add originating IPs as untrusted IPs (if they are untrusted)
-      @ips = reverse $self->ip_list_uniq_and_strip_private (@ips, @tips);
-
-      # How many IPs max you check in the received lines
-      my $checklast=$self->{main}->{conf}->{num_check_received};
-
-      if (scalar @ips > $checklast) {
-	splice (@ips, $checklast);	# remove all others
-      }
     }
   }
+  # If name is foo-firsttrusted, check only the Received header just
+  # after it enters our trusted networks; that's the only one we can
+  # trust the IP address from (since our relay added that header).
+  # And if name is foo-untrusted, check any untrusted IP address.
+  elsif ($set =~ /-(first|un)trusted$/)
+  {
+    my @tips;
+    foreach my $ip (@originating) {
+      if ($ip && !$trusted->contains_ip($ip)) {
+        push(@tips, $ip);
+      }
+    }
+    @ips = $self->ip_list_uniq_and_strip_private (@ips, @tips);
+    if ($1 eq "first") {
+      @ips = (defined $ips[0]) ? ($ips[0]) : ();
+    } else {
+      shift @ips;
+    }
+  }
+  else
+  {
+    my @tips;
+    foreach my $ip (@originating) {
+      if ($ip && !$trusted->contains_ip($ip)) {
+        push(@tips, $ip);
+      }
+    }
+
+    # add originating IPs as untrusted IPs (if they are untrusted)
+    @ips = reverse $self->ip_list_uniq_and_strip_private (@ips, @tips);
+  }
+
+  # How many IPs max you check in the received lines
+  my $checklast=$self->{main}->{conf}->{num_check_received};
+
+  if (scalar @ips > $checklast) {
+    splice (@ips, $checklast);	# remove all others
+  }
+
+  my $tflags = $pms->{conf}->{tflags}->{$rule};
+
+  # Trusted relays should only be checked against nice rules (dnswls)
+  if (defined $tflags && $tflags !~ /\bnice\b/) {
+    foreach my $ip (@ips) {
+      last if !$trusted->contains_ip($ip);
+      shift @ips;  # remove trusted hosts from beginning
+    }
+  }
+
+  unless (scalar @ips > 0) {
+    dbg("dns: no untrusted IPs to check");
+    return 0;
+  }
+
   dbg("dns: only inspecting the following IPs: ".join(", ", @ips));
 
   eval {
