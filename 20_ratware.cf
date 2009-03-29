@@ -120,10 +120,10 @@ header __THEBAT_MUA_V1		X-Mailer =~ /^The Bat! \(v1\./
 #header __THEBAT_MUA_V3		X-Mailer =~ /^The Bat! \(v3\./
 header __CTYPE_CHARSET_QUOTED	Content-Type =~ /charset=\"/i
 header __CTYPE_HAS_BOUNDARY	Content-Type =~ /boundary/i
-header __BAT_BOUNDARY		Content-Type =~ /boundary=\"?-{10}/
+header __BAT_BOUNDARY		Content-Type =~ /boundary=\"-{10}[A-F0-9]{4,}\"/
 header __MAILMAN_21             X-Mailman-Version =~ /\d/
 meta FORGED_MUA_THEBAT_CS	(__THEBAT_MUA && __CTYPE_CHARSET_QUOTED && !__MAILMAN_21)
-meta FORGED_MUA_THEBAT_BOUN     (__THEBAT_MUA_V1 && __CTYPE_HAS_BOUNDARY && !__BAT_BOUNDARY && !__MAILMAN_21)
+meta FORGED_MUA_THEBAT_BOUN     (__THEBAT_MUA && __CTYPE_HAS_BOUNDARY && !__BAT_BOUNDARY && !__MAILMAN_21)
 describe FORGED_MUA_THEBAT_CS	Mail pretending to be from The Bat! (charset)
 describe FORGED_MUA_THEBAT_BOUN Mail pretending to be from The Bat! (boundary)
 
