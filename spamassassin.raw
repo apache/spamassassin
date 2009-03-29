@@ -530,7 +530,7 @@ sub kill_handler {
     $mail->finish();      # bug 5626: remove temp files etc.
     $mail = undef;
   }
-  exit 0;
+  exit 15;
 }
 
 # ---------------------------------------------------------------------------
