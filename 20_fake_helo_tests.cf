@@ -141,8 +141,6 @@ header FAKE_HELO_EMAIL_COM	eval:check_for_rdns_helo_mismatch("email\.com","email
 describe FAKE_HELO_EMAIL_COM	Host HELO did not match rDNS: email.com
 header FAKE_HELO_EXCITE		eval:check_for_rdns_helo_mismatch("excite\S*","excite\.com")
 describe FAKE_HELO_EXCITE	Host HELO did not match rDNS: excite.com
-header FAKE_HELO_LYCOS		eval:check_for_rdns_helo_mismatch("lycos\S*","lycos\.com")
-describe FAKE_HELO_LYCOS	Host HELO did not match rDNS: lycos.com
 header FAKE_HELO_YAHOO_CA	eval:check_for_rdns_helo_mismatch("yahoo\.ca","yahoo\.ca")
 describe FAKE_HELO_YAHOO_CA	Host HELO did not match rDNS: yahoo.ca
 
