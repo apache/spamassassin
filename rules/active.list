@@ -1,11 +1,8 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: bb-jm jm zmi; day 2: zmi; day 3: zmi
+# with results from: day 1: bb-jm dos jm zmi; day 2: zmi; day 3: zmi
 
 # tflags userconf
 ALL_TRUSTED
-
-# tflags userconf
-AWL
 
 # good enough
 AXB_XMID_DIGDOTSHRT
@@ -49,9 +46,6 @@ CHARSET_FARAWAY_HEADER
 # tflags userconf
 CORRUPT_FROM_LINE_IN_HDRS
 
-# good enough
-DEAR_WINNER
-
 # tflags net
 DIGEST_MULTIPLE
 
@@ -94,18 +88,6 @@ DOS_ANAL_SPAM_MAILER
 # good enough
 DOS_HIGHBIT_HDRS_BODY
 
-# good enough
-DOS_OE_TO_MX
-
-# good enough
-DOS_OE_TO_MX_IMAGE
-
-# good enough
-DOS_RCVD_IP_TWICE_B
-
-# good enough
-DOS_RCVD_IP_TWICE_C
-
 # tflags userconf
 ENV_AND_HDR_DKIM_MATCH
 
@@ -119,31 +101,19 @@ FB_GVR
 FB_REPLICA_ROLEX
 
 # good enough
-FB_SAVE_PERSC
-
-# good enough
 FB_SOFTTABS
 
 # good enough
 FB_WITHOUT_PRESC
 
 # good enough
-FH_DATE_PAST_20XX
-
-# good enough
 FH_FAKE_RCVD_LINE_B
-
-# good enough
-FM_LOTTO_MONEY
 
 # good enough
 FM_LOTTO_YOU_WON
 
 # good enough
 FM_SCHOOLING
-
-# good enough
-FORGED_RELAY_MUA_TO_MX
 
 # tflags userconf
 FRAGMENTED_MESSAGE
@@ -153,18 +123,6 @@ FROM_DOMAIN_NOVOWEL
 
 # tflags userconf
 FROM_LOCAL_NOVOWEL
-
-# good enough
-FROM_WSP_LEAD
-
-# good enough
-FR_WATCHES_HTTP
-
-# good enough
-FS_MAKE_MONEY
-
-# good enough
-FS_WEIGHT_LOSS
 
 # tflags userconf
 GTUBE
@@ -229,9 +187,6 @@ JM_SOUGHT_FRAUD_3
 # good enough
 KAM_LOTTO1
 
-# good enough
-KAM_LOTTO2
-
 # tflags publish
 KAM_STOCKOTC
 
@@ -259,23 +214,11 @@ KB_RATWARE_OUTLOOK_16
 # good enough
 KB_RATWARE_OUTLOOK_MID
 
-# good enough
-LOTTERY_PH_004470
-
 # tflags userconf
 MIME_CHARSET_FARAWAY
 
 # tflags userconf
 MISSING_HB_SEP
-
-# good enough
-MSGID_NOFQDN1
-
-# good enough
-MSOE_MID_WRONG_CASE
-
-# good enough
-NOTVALID_YAHOO
 
 # tflags net
 NO_DNS_FOR_FROM
@@ -289,11 +232,11 @@ NO_RELAYS
 # good enough
 PQRTW_4
 
+# good enough
+PR_TD_NOWRAP_BAT
+
 # tflags net
 PYZOR_CHECK
-
-# good enough
-RATWARE_HELO_DM
 
 # tflags net
 RAZOR2_CF_RANGE_51_100
@@ -488,28 +431,16 @@ REPLYTO_WITHOUT_TO_CC
 RP_MATCHES_RCVD
 
 # good enough
-SANE_04e8bf28eb445199a7f11b943c44d209
-
-# good enough
 SANE_17534cea3ba620589af299f2dac174c4
 
 # good enough
 SANE_1c4f3286fa4aed6424ced88bfaf8b09c
 
 # good enough
-SANE_20d820d8f491476ca39941979ab139dd
-
-# good enough
-SANE_3b92eda751c992f230f215fb7eb36844
-
-# good enough
 SANE_4ef8302546bf270a19baf98508afacc4
 
 # good enough
 SANE_5154384729a0aa1b7a92cae237ceed80
-
-# good enough
-SANE_7429530a7398f43f1f1b795f9420714e
 
 # good enough
 SANE_7d8e92a09f27d49fafe09a1dbd5cac10
@@ -524,9 +455,6 @@ SANE_8f9d40cc4e21b11c7171a7d6b3eea4c1
 SANE_91eb43f705d25c804374a746d7519660
 
 # good enough
-SANE_98328227b502aa6be6f6fd0e04e6ab34
-
-# good enough
 SANE_9badf470c25849aa9a77d89b21f84d5e
 
 # good enough
@@ -534,12 +462,6 @@ SANE_a1315779e96aedc845566b1f41f4e424
 
 # good enough
 SANE_c627ae8d03f8c3d579345970e652142c
-
-# good enough
-SANE_e5950fd6cd9b53a17ba2cb7883181772
-
-# good enough
-SANE_ef00ce28cfa5ed6e4c405ed37ff36d46
 
 # good enough
 SPAMMY_XMAILER
@@ -575,19 +497,19 @@ SUBJECT_IN_BLACKLIST
 SUBJECT_IN_WHITELIST
 
 # good enough
-THREAD_INDEX_BAD
-
-# good enough
-TVD_PCT_OFF
-
-# good enough
 TVD_PH_BODY_META
 
 # good enough
-TVD_PH_SUBJ_SEC_MEASURES
+FB_EARN_UP_TO
 
 # good enough
-PR_TD_NOWRAP_BAT
+FB_YOUR_MORTGAGE
+
+# good enough
+FRT_ERECTION
+
+# good enough
+TVD_FROM_1
 
 # tflags userconf
 UNPARSEABLE_RELAY
@@ -783,9 +705,6 @@ WHOIS_WHOISPROT
 
 # good enough
 XMAILER_MIMEOLE_OL_5B79A
-
-# good enough
-XMAILER_MIMEOLE_OL_A50F8
 
 # good enough
 XMAILER_MIMEOLE_OL_ADFF7
