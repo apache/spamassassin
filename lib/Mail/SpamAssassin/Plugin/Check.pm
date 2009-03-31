@@ -273,10 +273,6 @@ run_compiled_method:
     return;
   }
 
-  # build up the eval string...
-  $self->{evalstr} = $self->start_rules_plugin_code($ruletype, $priority);
-  $self->{evalstr2} = '';
-
   # use %nopts for named parameter-passing; it's more friendly to future-proof
   # subclassing, since new parameters can be added without breaking third-party
   # subclassed implementations of this plugin.
@@ -287,9 +283,24 @@ run_compiled_method:
     clean_priority => $clean_priority
   );
 
+  # build up the eval string...
+  $self->{evalstr_methodname} = $methodname;
+  $self->{evalstr_chunk_current_methodname} = undef;
+  $self->{evalstr_chunk_methodnames} = [];
+  $self->{evalstr_chunk_prefix} = [];  # stack (array) of source code sections
+  $self->{evalstr} = ''; $self->{evalstr_l} = 0;
+  $self->{evalstr2} = '';
+  $self->begin_evalstr_chunk($pms);
+
+  $self->push_evalstr_prefix($pms, '
+      # start_rules_plugin_code '.$ruletype.' '.$priority.'
+      my $scoresptr = $self->{conf}->{scores};
+  ');
   if (defined $opts{pre_loop_body}) {
     $opts{pre_loop_body}->($self, $pms, $conf, %nopts);
   }
+  $self->add_evalstr($pms,
+                     $self->start_rules_plugin_code($ruletype, $priority) );
   while (my($rulename, $test) = each %{$opts{testhash}->{$priority}}) {
     $opts{loop_body}->($self, $pms, $conf, $rulename, $test, %nopts);
   }
@@ -297,37 +308,46 @@ run_compiled_method:
     $opts{post_loop_body}->($self, $pms, $conf, %nopts);
   }
 
-  # clear out a previous version of this fn
-  undef &{$methodname};
+  $self->flush_evalstr($pms);
   $self->free_ruleset_source($pms, $ruletype, $priority);
 
-  my $evalstr = $self->{evalstr};
+  # clear out a previous version of this method
+  undef &{$methodname};
 
   # generate the loop that goes through each line...
-  $evalstr = <<"EOT";
+  my $evalstr = <<"EOT";
   {
     package $package_name;
 
     $self->{evalstr2}
 
     sub $methodname {
-      my \$self = shift;
-      $evalstr;
+EOT
+
+  for my $chunk_methodname (@{$self->{evalstr_chunk_methodnames}}) {
+    $evalstr .= "      $chunk_methodname(\@_);\n";
+  }
+
+  $evalstr .= <<"EOT";
     }
 
     1;
   }
 EOT
 
-  delete $self->{evalstr};
-  delete $self->{evalstr2}; # free up some RAM before we eval()
+  delete $self->{evalstr};   # free up some RAM before we eval()
+  delete $self->{evalstr2};
+  delete $self->{evalstr_methodname};
+  delete $self->{evalstr_chunk_current_methodname};
+  delete $self->{evalstr_chunk_methodnames};
+  delete $self->{evalstr_chunk_prefix};
 
-  ## dbg ("rules: eval code to compile: $evalstr");
   dbg("rules: run_generic_tests - compiling eval code: %s, priority %s",
       $ruletype, $priority);
+# dbg("rules: eval code to compile: $evalstr");
   my $eval_result;
   { my $timer = $self->{main}->time_method('compile_gen');
-    $eval_result = eval($evalstr . '; 1');
+    $eval_result = eval($evalstr);
   }
   if (!$eval_result) {
     my $eval_stat = $@ ne '' ? $@ : "errno=$!";  chomp $eval_stat;
@@ -341,9 +361,76 @@ EOT
   }
 }
 
+sub begin_evalstr_chunk {
+  my ($self, $pms) = @_;
+  my $n = 0;
+  if ($self->{evalstr_chunk_methodnames}) {
+    $n = scalar(@{$self->{evalstr_chunk_methodnames}});
+  }
+  my $chunk_methodname = sprintf("%s_%d", $self->{evalstr_methodname}, $n+1);
+# dbg("rules: begin_evalstr_chunk %s", $chunk_methodname);
+  undef &{$chunk_methodname};
+  my $package_name = __PACKAGE__;
+  my $evalstr = <<"EOT";
+package $package_name;
+sub $chunk_methodname {
+  my \$self = shift;
+EOT
+  $evalstr .= '  '.$_  for @{$self->{evalstr_chunk_prefix}};
+  $self->{evalstr} = $evalstr;
+  $self->{evalstr_l} = length($evalstr);
+  $self->{evalstr_chunk_current_methodname} = $chunk_methodname;
+}
+
+sub end_evalstr_chunk {
+  my ($self, $pms) = @_;
+# dbg("rules: end_evalstr_chunk");
+  my $evalstr = "}; 1;\n";
+  $self->{evalstr} .= $evalstr;
+  $self->{evalstr_l} += length($evalstr);
+}
+
+sub flush_evalstr {
+  my ($self, $pms) = @_;
+  my $chunk_methodname = $self->{evalstr_chunk_current_methodname};
+  $self->end_evalstr_chunk($pms);
+  dbg("rules: flush_evalstr compiling %d chars of %s",
+      $self->{evalstr_l}, $chunk_methodname);
+# dbg("rules: %s", $self->{evalstr});
+  my $eval_result;
+  { my $timer = $self->{main}->time_method('compile_gen');
+    $eval_result = eval($self->{evalstr});
+  }
+  if (!$eval_result) {
+    my $eval_stat = $@ ne '' ? $@ : "errno=$!";  chomp $eval_stat;
+    warn "rules: failed to compile $chunk_methodname, skipping:\n".
+         "\t($eval_stat)\n";
+    $pms->{rule_errors}++;
+  } else {
+    push(@{$self->{evalstr_chunk_methodnames}}, $chunk_methodname);
+  }
+  $self->{evalstr} = '';  $self->{evalstr_l} = 0;
+  $self->begin_evalstr_chunk($pms);
+}
+
+sub push_evalstr_prefix {
+  my ($self, $pms, $str) = @_;
+  $self->add_evalstr($pms, $str);
+  push(@{$self->{evalstr_chunk_prefix}}, $str);
+}
+
+sub pop_evalstr_prefix {
+  my ($self) = @_;
+  pop(@{$self->{evalstr_chunk_prefix}});
+}
+
 sub add_evalstr {
-  my ($self, $str) = @_;
+  my ($self, $pms, $str) = @_;
+  my $new_code_l = length($str);
+# dbg("rules: add_evalstr %d", $new_code_l);
   $self->{evalstr} .= $str;
+  $self->{evalstr_l} += $new_code_l;
+  if ($self->{evalstr_l} > 60000) { $self->flush_evalstr($pms) }
 }
 
 sub add_evalstr2 {
@@ -419,7 +506,7 @@ sub do_meta_tests {
     pre_loop_body => sub
   {
     my ($self, $pms, $conf, %opts) = @_;
-    $self->add_evalstr ('
+    $self->push_evalstr_prefix($pms, '
       my $r;
       my $h = $self->{tests_already_hit};
     ');
@@ -457,13 +544,13 @@ sub do_meta_tests {
               } split (' ', $conf->{meta_dependencies}->{ $metas[$i] } );
 
         if ($alldeps ne '') {
-          $self->add_evalstr ('
+          $self->add_evalstr($pms, '
             $self->ensure_rules_are_complete(q{'.$metas[$i].'}, qw{'.$alldeps.'});
           ');
         }
 
         # Add this meta rule to the eval line
-        $self->add_evalstr ('
+        $self->add_evalstr($pms, '
           $r = '.$meta{$metas[$i]}.';
           if ($r) { $self->got_hit(q#'.$metas[$i].'#, "", ruletype => "meta", value => $r); }
         ');
@@ -565,7 +652,7 @@ sub do_head_tests {
     pre_loop_body => sub
   {
     my ($self, $pms, $conf, %opts) = @_;
-    $self->add_evalstr ('
+    $self->push_evalstr_prefix($pms, '
       no warnings q(uninitialized);
       my $hval;
     ');
@@ -576,13 +663,13 @@ sub do_head_tests {
     # setup the function to run the rules
     while(my($k,$v) = each %ordered) {
       my($hdrname, $def) = split(/\t/, $k, 2);
-      $self->add_evalstr ('
+      $self->push_evalstr_prefix($pms, '
         $hval = $self->get(q{'.$hdrname.'}, ' .
                            (!defined($def) ? 'undef' : 'q{'.$def.'}') . ');
       ');
       foreach my $rulename (@{$v}) {
         if ($self->{main}->{use_rule_subs}) {
-          $self->add_evalstr ('
+          $self->add_evalstr($pms, '
             if ($scoresptr->{q{'.$rulename.'}}) {
               '.$rulename.'_head_test($self, $hval);
               '.$self->ran_rule_plugin_code($rulename, "header").'
@@ -615,7 +702,7 @@ sub do_head_tests {
             $expr = '$hval ' . $op . ' ' . $pat . $matchg;
           }
 
-          $self->add_evalstr ('
+          $self->add_evalstr($pms, '
           if ($scoresptr->{q{'.$rulename.'}}) {
             '.$posline.'
             '.$self->hash_line_for_rule($pms, $rulename).'
@@ -628,6 +715,7 @@ sub do_head_tests {
           ');
         }
       }
+      $self->pop_evalstr_prefix();
     }
   }
   );
@@ -680,7 +768,7 @@ sub do_body_tests {
     }
 
     if ($self->{main}->{use_rule_subs}) {
-      $self->add_evalstr ('
+      $self->add_evalstr($pms, '
         if ($scoresptr->{q{'.$rulename.'}}) {
           '.$rulename.'_body_test($self,@_); 
           '.$self->ran_rule_plugin_code($rulename, "body").'
@@ -688,7 +776,7 @@ sub do_body_tests {
       ');
     }
     else {
-      $self->add_evalstr ('
+      $self->add_evalstr($pms, '
         if ($scoresptr->{q{'.$rulename.'}}) {
           '.$sub.'
           '.$self->ran_rule_plugin_code($rulename, "body").'
@@ -748,7 +836,7 @@ sub do_uri_tests {
     }
 
     if ($self->{main}->{use_rule_subs}) {
-      $self->add_evalstr ('
+      $self->add_evalstr($pms, '
         if ($scoresptr->{q{'.$rulename.'}}) {
           '.$rulename.'_uri_test($self, @_);
           '.$self->ran_rule_plugin_code($rulename, "uri").'
@@ -756,7 +844,7 @@ sub do_uri_tests {
       ');
     }
     else {
-      $self->add_evalstr ('
+      $self->add_evalstr($pms, '
         if ($scoresptr->{q{'.$rulename.'}}) {
           '.$sub.'
           '.$self->ran_rule_plugin_code($rulename, "uri").'
@@ -819,7 +907,7 @@ sub do_rawbody_tests {
     }
 
     if ($self->{main}->{use_rule_subs}) {
-      $self->add_evalstr ('
+      $self->add_evalstr($pms, '
         if ($scoresptr->{q{'.$rulename.'}}) {
            '.$rulename.'_rawbody_test($self, @_);
            '.$self->ran_rule_plugin_code($rulename, "rawbody").'
@@ -827,7 +915,7 @@ sub do_rawbody_tests {
       ');
     }
     else {
-      $self->add_evalstr ('
+      $self->add_evalstr($pms, '
         if ($scoresptr->{q{'.$rulename.'}}) {
           '.$sub.'
           '.$self->ran_rule_plugin_code($rulename, "rawbody").'
@@ -859,7 +947,7 @@ sub do_full_tests {
     pre_loop_body => sub
   {
     my ($self, $pms, $conf, %opts) = @_;
-    $self->add_evalstr ('
+    $self->push_evalstr_prefix($pms, '
       my $fullmsgref = shift;
     ');
   },
@@ -867,7 +955,7 @@ sub do_full_tests {
   {
     my ($self, $pms, $conf, $rulename, $pat, %opts) = @_;
     $pat = untaint_var($pat);  # presumably checked
-    $self->add_evalstr ('
+    $self->add_evalstr($pms, '
       if ($scoresptr->{q{'.$rulename.'}}) {
         pos $$fullmsgref = 0;
         '.$self->hash_line_for_rule($pms, $rulename).'
@@ -1088,7 +1176,7 @@ EOT
        $testtype, $priority);
   my $eval_result;
   { my $timer = $self->{main}->time_method('compile_eval');
-    $eval_result = eval($evalstr . '; 1');
+    $eval_result = eval($evalstr);
   }
   if (!$eval_result) {
     my $eval_stat = $@ ne '' ? $@ : "errno=$!";  chomp $eval_stat;
@@ -1125,13 +1213,7 @@ sub is_user_rule_sub {
 sub start_rules_plugin_code {
   my ($self, $ruletype, $pri) = @_;
 
-  my $evalstr = '
-
-      # start_rules_plugin_code '.$ruletype.' '.$pri.'
-      my $scoresptr = $self->{conf}->{scores};
-
-  ';
-
+  my $evalstr = '';
   if ($self->{main}->have_plugin("start_rules")) {
     $evalstr .= '
 
