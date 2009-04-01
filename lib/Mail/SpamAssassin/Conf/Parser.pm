@@ -731,24 +731,24 @@ sub finish_parsing {
           # we've already warned about this
         }
         elsif ($type == $Mail::SpamAssassin::Conf::TYPE_BODY_EVALS) {
-          $conf->{body_evals}->{$priority}->{$name} = [$function, @$argsref];
+          $conf->{body_evals}->{$priority}->{$name} = $packed;
         }
         elsif ($type == $Mail::SpamAssassin::Conf::TYPE_HEAD_EVALS) {
-          $conf->{head_evals}->{$priority}->{$name} = [$function, @$argsref];
+          $conf->{head_evals}->{$priority}->{$name} = $packed;
         }
         elsif ($type == $Mail::SpamAssassin::Conf::TYPE_RBL_EVALS) {
           # We don't do priorities for $Mail::SpamAssassin::Conf::TYPE_RBL_EVALS
           # we also use the arrayref instead of the packed string
-          $conf->{rbl_evals}->{$name} = [$function, @$argsref];
+          $conf->{rbl_evals}->{$name} = [ $function, @$argsref ];
         }
         elsif ($type == $Mail::SpamAssassin::Conf::TYPE_RAWBODY_EVALS) {
-          $conf->{rawbody_evals}->{$priority}->{$name} = [$function,@$argsref];
+          $conf->{rawbody_evals}->{$priority}->{$name} = $packed;
         }
         elsif ($type == $Mail::SpamAssassin::Conf::TYPE_FULL_EVALS) {
-          $conf->{full_evals}->{$priority}->{$name} = [$function, @$argsref];
+          $conf->{full_evals}->{$priority}->{$name} = $packed;
         }
         #elsif ($type == $Mail::SpamAssassin::Conf::TYPE_URI_EVALS) {
-        #  $conf->{uri_evals}->{$priority}->{$name} = [$function, @$argsref];
+        #  $conf->{uri_evals}->{$priority}->{$name} = $packed;
         #}
         else {
           $self->lint_warn("unknown type $type for $name: $text", $name);

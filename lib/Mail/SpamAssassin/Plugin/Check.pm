@@ -1017,70 +1017,179 @@ sub run_eval_tests {
   my $doing_user_rules = $conf->{want_rebuild_for_type}->{$testtype};
   if ($doing_user_rules) { $self->{done_user_rules}->{$testtype}++; }
 
-  # look these up once in advance to save repeated lookups in loop below
+  # clean up priority value so it can be used in a subroutine name 
+  my $clean_priority;
+  ($clean_priority = $priority) =~ s/-/neg/;
   my $scoreset = $conf->get_score_set();
+  my $package_name = __PACKAGE__;
+
+  my $methodname = '_eval_tests'.
+    '_type'.$testtype .
+      '_pri'.$clean_priority .
+	'_set'.$scoreset;
+
+  # Some of the rules are scoreset specific, so we need additional
+  # subroutines to handle those
+  if (defined &{"${package_name}::${methodname}"}
+      && !$doing_user_rules)
+  {
+  # dbg("rules: run_eval_tests - calling %s", $methodname);
+    no strict "refs";
+    &{"${package_name}::${methodname}"}($pms,@extraevalargs);
+    use strict "refs";
+    return;
+  }
+
+  # look these up once in advance to save repeated lookups in loop below
   my $tflagsref = $conf->{tflags};
   my $eval_pluginsref = $conf->{eval_plugins};
   my $have_start_rules = $self->{main}->have_plugin("start_rules");
   my $have_ran_rule = $self->{main}->have_plugin("ran_rule");
-  my $scoresptr = $pms->{conf}->{scores};
-  my $do_dbg = 1;  # would_log('dbg');
+
+  # the buffer for the evaluated code 
+  my $evalstr = q{ };
+  $evalstr .= q{ my $function; };
+ 
+  # conditionally include the dbg in the eval str
+  my $dbgstr = q{ };
+  if (would_log('dbg')) {
+    $dbgstr = q{
+      dbg("rules: ran eval rule $rulename ======> got hit ($result)");
+    };
+  }
 
   while (my ($rulename, $test) = each %{$evalhash})  { 
-    my $tflags = $tflagsref->{$rulename};
-    $tflags = ''  if !defined $tflags;
-    if ($tflags ne '') {
+    if ($tflagsref->{$rulename}) {
       # If the rule is a net rule, and we are in a non-net scoreset, skip it.
-      next if ($scoreset & 1) == 0 && $tflags =~ /\bnet\b/;
-      # If the rule is a bayes rule, and we are in a non-bayes scoreset, skip.
-      next if ($scoreset & 2) == 0 && $tflags =~ /\blearn\b/;
+      if ($tflagsref->{$rulename} =~ /\bnet\b/) {
+        next if (($scoreset & 1) == 0);
+      }
+      # If the rule is a bayes rule, and we are in a non-bayes scoreset, skip it.
+      if ($tflagsref->{$rulename} =~ /\blearn\b/) {
+        next if (($scoreset & 2) == 0);
+      }
     }
  
-    my ($function, @args) = @$test;
+    $test = untaint_var($test);  # presumably checked
+    my ($function, $argstr) = ($test,'');
+    if ($test =~ s/^([^,]+)(,.*)$//gs) {
+      ($function, $argstr) = ($1,$2);
+    }
+
     if (!$function) {
       warn "rules: error: no function defined for $rulename";
-    } elsif (!$scoresptr->{$rulename}) {
-      dbg("rules: %s - skipping zero-score rule rule", $rulename);
-    } else {
-      dbg("rules: eval rule %s, %s(%s)%s",
-          $rulename, $function, join(",",@args),
-          ($tflags eq '' ? '' : ', tflags: '.$tflags) )  if $do_dbg;
-      $pms->{test_log_msgs} = ();
+      next;
+    }
  
-      # only need to set current_rule_name for plugin evals
-      if ($eval_pluginsref->{$function}) {
-        # let plugins get the name of the rule that is currently being run,
-        # and ensure their eval functions exist
-        $pms->{current_rule_name} = $rulename;
-        $pms->register_plugin_eval_glue(untaint_var($function));
-      }
+    $evalstr .= '
+    if ($scoresptr->{q#'.$rulename.'#}) {
+      $rulename = q#'.$rulename.'#;
+      $self->{test_log_msgs} = ();
+    ';
+ 
+    # only need to set current_rule_name for plugin evals
+    if ($eval_pluginsref->{$function}) {
+      # let plugins get the name of the rule that is currently being run,
+      # and ensure their eval functions exist
+      $evalstr .= '
 
-      # this stuff is quite slow, and totally superfluous if
-      # no plugin is loaded for those hooks
-      if ($have_start_rules) {
-        $pms->{main}->call_plugins("start_rules",
-          { permsgstatus => $pms, ruletype => "eval", priority => $priority });
-      }
+        $self->{current_rule_name} = $rulename;
+        $self->register_plugin_eval_glue(q#'.$function.'#);
 
-      my $result;
+      ';
+    }
+
+    # this stuff is quite slow, and totally superfluous if
+    # no plugin is loaded for those hooks
+    if ($have_start_rules) {
+      # XXX - should we use helper function here?
+      $evalstr .= '
+
+        $self->{main}->call_plugins("start_rules", {
+                permsgstatus => $self,
+                ruletype => "eval",
+                priority => '.$priority.'
+              });
+
+      ';
+    }
+ 
+    $evalstr .= '
+
       eval {
-        $result = $pms->$function(@extraevalargs,@args);  1;
+        $result = $self->' . $function . ' (@extraevalargs '. $argstr .' );  1;
       } or do {
         $result = 0;
-        $pms->handle_eval_rule_errors($rulename);
+        $self->handle_eval_rule_errors($rulename);
       };
 
-      if ($have_ran_rule) {
-        $pms->{main}->call_plugins("ran_rule",
-          { permsgstatus => $pms, ruletype => "eval", rulename => $rulename });
-      }
+    ';
+
+    if ($have_ran_rule) {
+      # XXX - should we use helper function here?
+      $evalstr .= '
+
+        $self->{main}->call_plugins("ran_rule", {
+            permsgstatus => $self, ruletype => "eval", rulename => $rulename
+          });
+
+      ';
+    }
+
+    $evalstr .= '
+
       if ($result) {
-        $pms->got_hit($rulename, $prepend2desc,
-                      ruletype => "eval", value => $result);
-        dbg("rules: ran eval rule $rulename ======> got hit ($result)")
-          if $do_dbg;
+        $self->got_hit($rulename, $prepend2desc, ruletype => "eval", value => $result);
+        '.$dbgstr.'
       }
     }
+    ';
+  }
+
+  # don't free the eval ruleset here -- we need it in the compiled code!
+
+  # nothing done in the loop, that means no rules 
+  return unless ($evalstr);
+ 
+  $evalstr = <<"EOT";
+{
+  package $package_name;
+
+    sub ${methodname} {
+      my (\$self, \@extraevalargs) = \@_;
+
+      my \$scoresptr = \$self->{conf}->{scores};
+      my \$prepend2desc = q#$prepend2desc#;
+      my \$rulename;
+      my \$result;
+
+      $evalstr
+    }
+
+  1;
+}
+EOT
+
+  undef &{$methodname};
+
+  dbg("rules: run_eval_tests - compiling eval code: %s, priority %s",
+       $testtype, $priority);
+  my $eval_result;
+  { my $timer = $self->{main}->time_method('compile_eval');
+    $eval_result = eval($evalstr);
+  }
+  if (!$eval_result) {
+    my $eval_stat = $@ ne '' ? $@ : "errno=$!";  chomp $eval_stat;
+    warn "rules: failed to compile eval tests, skipping some: $eval_stat\n";
+    $self->{rule_errors}++;
+  }
+  else {
+    my $method = "${package_name}::${methodname}";
+    push (@TEMPORARY_METHODS, $methodname);
+  # dbg("rules: run_eval_tests - calling %s", $methodname);
+    no strict "refs";
+    &{$method}($pms,@extraevalargs);
+    use strict "refs";
   }
 }
 
