@@ -69,9 +69,15 @@ sub new {
   $class = ref($class) || $class;
   my $self = $class->SUPER::new(@_);
   $self->{supported_db_version} = 3;
-  $self->{already_tied} = 0;
-  $self->{is_locked} = 0;
+  $self->{is_really_open} = 0;
+  $self->{is_writable} = 0;
+  $self->{is_officially_open} = 0;
   return $self;
+}
+
+sub DESTROY {
+  my $self = shift;
+  $self->_close_db;
 }
 
 =head2 tie_db_readonly
@@ -80,17 +86,17 @@ public instance (Boolean) tie_db_readonly ();
 
 Description:
 This method ensures that the database connection is properly setup and
-working.  It takes 'read-only' very seriously, and will not try to
-initialize anything.
+working.
 
 =cut
 
 sub tie_db_readonly {
   my($self) = @_;
   #dbg("bayes: tie_db_readonly");
-  my $result = ($self->{already_tied} && $self->{is_locked} == 0)
-               || $self->_tie_db(0);
-  dbg("bayes: tie_db_readonly result is $result");
+# my $result = ($self->{is_really_open} && !$self->{is_writable})
+#              || $self->_open_db(0);
+  my $result = $self->{is_really_open} || $self->_open_db(0);
+  dbg("bayes: tie_db_readonly, result is $result");
   return $result;
 }
 
@@ -108,15 +114,15 @@ begin using the database immediately.
 sub tie_db_writable {
   my($self) = @_;
   #dbg("bayes: tie_db_writable");
-  my $result = ($self->{already_tied} && $self->{is_locked} == 1)
-               || $self->_tie_db(1);
-  dbg("bayes: tie_db_writable result is $result");
+  my $result = ($self->{is_really_open} && $self->{is_writable})
+               || $self->_open_db(1);
+  dbg("bayes: tie_db_writable, result is $result");
   return $result;
 }
 
-=head2 _tie_db
+=head2 _open_db
 
-private instance (Boolean) _tie_db (Boolean $writeable)
+private instance (Boolean) _open_db (Boolean $writable)
 
 Description:
 This method ensures that the database connection is properly setup and
@@ -125,17 +131,18 @@ can begin using the database immediately.
 
 =cut
 
-sub _tie_db {
-  my($self, $writeable) = @_;
+sub _open_db {
+  my($self, $writable) = @_;
 
-  dbg("bayes: _tie_db(%s); BerkeleyDB %s, libdb %s",
-      $writeable ? 'writable' : 'read-only',
+  dbg("bayes: _open_db(%s, %s); BerkeleyDB %s, libdb %s",
+      $writable ? 'for writing' : 'for reading',
+      $self->{is_really_open} ? 'already open' : 'not yet open',
       BerkeleyDB->VERSION, $BerkeleyDB::db_version);
 
   # Always notice state changes
-  $self->{is_locked} = $writeable;
+  $self->{is_writable} = $writable;
 
-  return 1 if $self->{already_tied};
+  return 1 if $self->{is_really_open};
 
   #dbg("bayes: not already tied");
 
@@ -152,10 +159,10 @@ sub _tie_db {
   my $path = dirname $main->sed_path($main->{conf}->{bayes_path});
 
   #dbg("bayes: Path is $path");
-  # Path must exist or we must be in writeable mode
+  # Path must exist or we must be in writable mode
   if (-d $path) {
     # All is cool
-  } elsif ($writeable) {
+  } elsif ($writable) {
     # Create the path
     eval {
       mkpath($path, 0, (oct($main->{conf}->{bayes_file_mode}) & 0777));
@@ -169,33 +176,43 @@ sub _tie_db {
 
   # Now we can set up our environment
   my $flags = DB_INIT_LOCK|DB_INIT_LOG|DB_INIT_MPOOL|DB_INIT_TXN;
-  $flags |= DB_CREATE if $writeable;
+  $flags |= DB_CREATE if $writable;
   # DB_REGISTER|DB_RECOVER|
 
+  # In the Berkeley DB 4.7 release, the logging subsystem is configured
+  # using the DB_ENV->log_set_config method instead of the previously used
+  # DB_ENV->set_flags method. The DB_ENV->set_flags method no longer accepts
+  # flags DB_DIRECT_LOG, DB_DSYNC_LOG, DB_LOG_INMEMORY or DB_LOG_AUTOREMOVE.
+  # Applications should be modified to use the equivalent flags accepted by
+  # the DB_ENV->log_set_config method.
+  #   -SetFlags => DB_LOG_AUTOREMOVE
+
   dbg("bayes: %s environment: %s, 0x%x, %s",
-      $writeable ? 'Creating' : 'Opening existing',
+      $writable ? 'Opening or creating' : 'Opening existing',
       $path, $flags, $main->{conf}->{bayes_file_mode});
   unless ($self->{env} = BerkeleyDB::Env->new(
       -Cachesize => 67108864, -Home => $path, -Flags => $flags,
       -Mode => (oct($main->{conf}->{bayes_file_mode}) & 0666),
-      -SetFlags => DB_LOG_AUTOREMOVE)) {
+  )) {
+
     dbg("bayes: berkeleydb environment couldn't initialize: $BerkeleyDB::Error");
     return 0;
   }
 
-  $flags = $writeable ? DB_CREATE : 0;
+  $flags = $writable ? DB_CREATE : 0;
 
   #dbg("bayes: Opening vars");
   unless ($self->{handles}->{vars} = BerkeleyDB::Btree->new(
       -Env => $self->{env}, -Filename => "vars.db", -Flags => $flags)) {
     warn("bayes: couldn't open vars.db: $BerkeleyDB::Error");
+    delete $self->{handles}->{vars};
     $self->untie_db;
     return 0;
   }
 
   #dbg("bayes: Looking for db_version");
   unless ($self->{db_version} = $self->_get(vars => "DB_VERSION")) {
-    if ($writeable) {
+    if ($writable) {
       $self->{db_version} = $self->DB_VERSION;
       $self->{handles}->{vars}->db_put(DB_VERSION => $self->{db_version}) == 0
         or die "Couldn't put record: $BerkeleyDB::Error";
@@ -221,6 +238,7 @@ sub _tie_db {
       -Env => $self->{env}, -Filename => "tokens.db",
       -Flags => $flags, -Property => DB_REVSPLITOFF)) {
     warn("bayes: couldn't open tokens.db: $BerkeleyDB::Error");
+    delete $self->{handles}->{tokens};
     $self->untie_db;
     return 0;
   }
@@ -230,6 +248,7 @@ sub _tie_db {
       -Env => $self->{env}, -Filename => "atime.db",
       -Flags => $flags, -Property => DB_DUP|DB_DUPSORT)) {
     warn("bayes: couldn't open atime.db: $BerkeleyDB::Error");
+    delete $self->{handles}->{atime};
     $self->untie_db;
     return 0;
   }
@@ -238,6 +257,7 @@ sub _tie_db {
   unless ($self->{handles}->{seen} = BerkeleyDB::Btree->new(
       -Env => $self->{env}, -Filename => "seen.db", -Flags => $flags)) {
     warn("bayes: couldn't open tokens.db: $BerkeleyDB::Error");
+    delete $self->{handles}->{seen};
     $self->untie_db;
     return 0;
   }
@@ -248,9 +268,10 @@ sub _tie_db {
                                          \&_extract_atime)
     or die "Couldn't associate DBs: $BerkeleyDB::Error";
 
-  $self->{already_tied} = 1;
+  $self->{is_really_open} = 1;
+  $self->{is_officially_open} = 1;
 
-  dbg("bayes: _tie_db done");
+  dbg("bayes: _open_db done");
   return 1;
 }
 
@@ -266,17 +287,40 @@ Closes any open db handles.  You can safely call this at any time.
 sub untie_db {
   my $self = shift;
 
-  $self->{is_locked} = 0;
-  $self->{already_tied} = 0;
+  dbg("bayes: pretend to be closing a database");
+  $self->{is_writable} = 0;
+  $self->{is_officially_open} = 0;
+
+  $self->{env}->txn_checkpoint(128, 1)  if $self->{env};
+
+  for my $handle (keys %{$self->{handles}}) {
+    my $handles = $self->{handles};
+    if (defined $handles && $handles->{$handle}) {
+      $handles->{$handle}->db_sync == 0
+        or die "Couldn't sync $handle: $BerkeleyDB::Error";
+    }
+  }
+
+  return undef;
+}
+
+sub _close_db {
+  my $self = shift;
+
+  dbg("bayes: really closing a database");
+  $self->{is_writable} = 0;
+  $self->{is_really_open} = 0;
+  $self->{is_officially_open} = 0;
   $self->{db_version} = undef;
 
   for my $handle (keys %{$self->{handles}}) {
-    # Since we are using transactions, this should be fine
-    $self->{handles}->{$handle}->db_close (DB_NOSYNC);
-    delete $self->{handles}->{$handle};
+    my $handles = $self->{handles};
+    if (defined $handles && $handles->{$handle}) {
+      dbg("bayes: closing database $handle");
+      eval { $handles->{$handle}->db_close };  # ignoring status
+    }
+    delete $handles->{$handle};
   }
-
-  $self->{env}->txn_checkpoint(128, 1) if $self->{env};
 
   delete $self->{env};
   return undef;
@@ -721,7 +765,7 @@ public instance (Integer, Integer, Integer) tok_get (String $token)
 
 Description:
 This method retrieves a specificed token (C<$token>) from the database
-and returns it's spam_count, ham_count and last access time.
+and returns its spam_count, ham_count and last access time.
 
 =cut
 
@@ -1318,13 +1362,13 @@ readable state.
 
 sub db_readable {
   my($self) = @_;
-  dbg("bayes: Entering db_readable");
-  return $self->{already_tied};
+  #dbg("bayes: Entering db_readable");
+  return $self->{is_really_open} && $self->{is_officially_open};
 }
 
 =head2 db_writable
 
-public instance (Boolean) db_writeable()
+public instance (Boolean) db_writable()
 
 Description:
 This method returns a boolean value indicating if the database is in a
@@ -1334,8 +1378,9 @@ writable state.
 
 sub db_writable {
   my($self) = @_;
-  dbg("bayes: Entering db_writeable");
-  return($self->{already_tied} and $self->{is_locked});
+  dbg("bayes: Entering db_writable");
+  return $self->{is_really_open} && $self->{is_officially_open} &&
+         $self->{is_writable};
 }
 
 =head2 _extract_atime
@@ -1357,7 +1402,7 @@ sub _extract_atime {
   my($ts, $th, $atime) = _unpack_token($value);
   #dbg("bayes: _extract_atime found $atime for $token");
   $_[2] = $atime;
-  #dbg("bayes: Leaving db_writeable");
+  #dbg("bayes: Leaving db_writable");
   return 0;
 }
 
