@@ -286,7 +286,6 @@ Example:
   adsp_override hallmark.com   all
   adsp_override *.hallmark.com all
   adsp_override youtube.com    custom_high
-  adsp_override skype.net      custom_high
   adsp_override google.com     custom_low
   adsp_override gmail.com      custom_low
   adsp_override googlemail.com custom_low
@@ -505,6 +504,7 @@ sub _check_dkim_signature {
   my(@signatures,@valid_signatures);
   $pms->{dkim_checked_signature} = 1; # has this sub already been invoked?
   $pms->{dkim_signatures_ready} = 0;  # have we obtained & verified signatures?
+  $pms->{dkim_signatures_provided_by_caller} = 0;
   $pms->{dkim_author_sig_tempfailed} = 0;  # DNS timeout verifying author sign.
   $pms->{dkim_signatures} = \@signatures;
   $pms->{dkim_valid_signatures} = \@valid_signatures;
@@ -522,6 +522,7 @@ sub _check_dkim_signature {
     my $provided_signatures = $suppl_attrib->{dkim_signatures};
     @signatures = @$provided_signatures  if ref $provided_signatures;
     $pms->{dkim_signatures_ready} = 1;
+    $pms->{dkim_signatures_provided_by_caller} = 1;
     dbg("dkim: signatures provided by the caller, %d signatures",
         scalar(@signatures));
   }
@@ -728,6 +729,7 @@ sub _check_dkim_adsp {
     $practices_as_string = 'pub key tempfailed';
 
   } elsif ($pms->{dkim_has_any_author_sig} &&
+          !$pms->{dkim_signatures_provided_by_caller} &&
            $pms->{tests_already_hit}->{'__TRUNCATED'}) {
     # the message did have an author signature but it wasn't valid; we also
     # know the message was truncated just before being passed to SpamAssassin,
