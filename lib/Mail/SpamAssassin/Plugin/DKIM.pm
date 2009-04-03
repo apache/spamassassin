@@ -196,7 +196,7 @@ to be from certain domains which are popular targets for phishing, like
 financial institutions. Unfortunately, as signing practices are seldom
 published or are weak, it is hardly justifiable to look them up in DNS.
 
-To overcome this chicken-and-egg problem, the C<adsp_override> mechanism
+To overcome this chicken-or-the-egg problem, the C<adsp_override> mechanism
 allows recipients using SpamAssassin to override published or defaulted
 ADSP for certain domains. This makes it possible to manually specify a
 stronger (or weaker) signing practices than a signing domain is willing
@@ -226,7 +226,7 @@ specify an C<adsp_override> directive for each sending domain to be overridden.
 
 Its first argument is a domain name. Author's domain is matched against it,
 matching is case insensitive. This is not a regular expression or a file-glob
-style wildcard, but limited wildcarding is still available: if this arguments
+style wildcard, but limited wildcarding is still available: if this argument
 starts by a "*." (or is a sole "*"), author's domain matches if it is a
 subdomain (to one or more levels) of the argument. Otherwise (with no leading
 asterisk) the match must be exact (not a subdomain).
@@ -238,7 +238,7 @@ C<custom_low>, C<custom_med>, C<custom_high>.
 Absence of this second parameter implies C<discardable>. If a domain is not
 listed by a C<adsp_override> directive nor does it explicitly publish any
 ADSP record, then C<unknown> is implied for valid domains, and C<nxdomain>
-for domains not existing in DNS. (Note: domain validity may not be checked
+for domains not existing in DNS. (Note: domain validity may be unchecked
 with current versions of Mail::DKIM, so C<nxdomain> may never turn up.)
 
 The strong setting C<discardable> is useful for domains which are known
@@ -258,6 +258,15 @@ DNS lookup), and can serve as a convenient means of providing a different
 score if scores assigned to DKIM_ADSP_ALL or DKIM_ADSP_DISCARD are not
 considered suitable for some domains.
 
+As a precaution against firing DKIM_ADSP_* rules when there is a known local
+reason for a signature verification failure, the domain's ADSP is considered
+'unknown' when DNS lookups are disabled or a DNS lookup encountered a temporary
+problem on fetching a public key from the author's domain. Similarly, ADSP
+is considered 'unknown' when this plugin did its own signature verification
+(signatures were not passed to SA by a caller) and a metarule __TRUNCATED was
+triggered, indicating the caller intentionally passed a truncated message to
+SpamAssassin, which was a likely reason for a signature verification failure.
+
 Example:
 
   adsp_override *.mydomain.example.com   discardable
@@ -270,7 +279,7 @@ Example:
   adsp_override paypal.com
   adsp_override *.paypal.com
   adsp_override amazon.com
-  adsp_override alert.bankofamerica.com
+  adsp_override ealerts.bankofamerica.com
   adsp_override americangreetings.com
   adsp_override egreetings.com
   adsp_override bluemountain.com
@@ -396,7 +405,7 @@ sub check_dkim_signed {
 sub check_dkim_valid_author_sig {
   my ($self, $pms) = @_;
   $self->_check_dkim_signature($pms) unless $pms->{dkim_checked_signature};
-  return $pms->{dkim_valid_author_sig};
+  return $pms->{dkim_has_valid_author_sig};
 }
 
 sub check_dkim_valid {
@@ -416,7 +425,7 @@ sub check_dkim_verified {
 sub check_dkim_adsp {
   my ($self, $pms, $adsp_char) = @_;
   $self->_check_dkim_signature($pms) unless $pms->{dkim_checked_signature};
-  if ($pms->{dkim_signatures_ready} && !$pms->{dkim_valid_author_sig}) {
+  if ($pms->{dkim_signatures_ready} && !$pms->{dkim_has_valid_author_sig}) {
     $self->_check_dkim_adsp($pms)  unless $pms->{dkim_checked_adsp};
     return 1  if $pms->{dkim_adsp} eq $adsp_char;
   }
@@ -501,7 +510,8 @@ sub _check_dkim_signature {
   $pms->{dkim_valid_signatures} = \@valid_signatures;
   $pms->{dkim_signed} = 0;
   $pms->{dkim_valid} = 0;
-  $pms->{dkim_valid_author_sig} = 0;
+  $pms->{dkim_has_valid_author_sig} = 0;
+  $pms->{dkim_has_any_author_sig} = 0;  # valid or invalid author signature
   $pms->{dkim_key_testing} = 0;
   $pms->{dkim_author_address} =
     $pms->get('from:addr',undef)  if !defined $pms->{dkim_author_address};
@@ -577,7 +587,6 @@ sub _check_dkim_signature {
   if ($pms->{dkim_signatures_ready}) {
     @signatures = grep { defined } @signatures;  # just in case
     my $expiration_supported = Mail::DKIM->VERSION >= 0.29 ? 1 : 0;
-    my $has_author_sig = 0;
 
     # ADSP+RFC5321: localpart is case sensitive, domain is case insensitive
     my $author = $pms->{dkim_author_address};
@@ -606,13 +615,14 @@ sub _check_dkim_signature {
         # ignoring localpart if identity doesn't have a localpart
         $id_matches_author = 1;
       }
-      if (!$valid && $id_matches_author &&
-        $signature->result_detail =~ /timed out/) {
-        $pms->{dkim_author_sig_tempfailed} = 1;
-      }
-      if ($valid && !$expired) {
-        push(@valid_signatures, $signature);
-        $has_author_sig = 1  if $id_matches_author;
+      push(@valid_signatures, $signature)  if $valid && !$expired;
+      if ($id_matches_author) {
+        $pms->{dkim_has_any_author_sig} = 1;
+        if ($valid && !$expired) {
+          $pms->{dkim_has_valid_author_sig} = 1;
+        } elsif ($signature->result_detail =~ /\b(?:timed out|SERVFAIL)\b/i) {
+          $pms->{dkim_author_sig_tempfailed} = 1;
+        }
       }
       would_log("dbg","dkim") &&
         dbg("dkim: i=%s, d=%s, a=%s, c=%s, %s%s, %s",
@@ -624,7 +634,6 @@ sub _check_dkim_signature {
     if (@valid_signatures) {
       $pms->{dkim_signed} = 1;
       $pms->{dkim_valid} = 1;
-      $pms->{dkim_valid_author_sig} = $has_author_sig;
       # let the result stand out more clearly in the log, use uppercase
       dbg("dkim: signature verification result: %s",
           uc($valid_signatures[0]->result_detail));
@@ -688,7 +697,7 @@ sub _check_dkim_adsp {
   if (!$pms->{dkim_signatures_ready}) {
     dbg("dkim: adsp not retrieved, signatures not verifiable");
 
-  } elsif ($pms->{dkim_valid_author_sig}) {  # don't fetch adsp when valid
+  } elsif ($pms->{dkim_has_valid_author_sig}) {  # don't fetch adsp when valid
     # draft-allman-dkim-ssp: If the message contains a valid Author
     # Signature, no Sender Signing Practices check need be performed:
     # the Verifier SHOULD NOT look up the Sender Signing Practices
@@ -701,21 +710,32 @@ sub _check_dkim_adsp {
     #
     dbg("dkim: adsp not retrieved, author signature is valid");
 
-  } elsif ($author_domain eq '') {         # have mercy, don't claim a NXDOMAIN
+  } elsif ($author_domain eq '') {        # have mercy, don't claim a NXDOMAIN
     dbg("dkim: adsp not retrieved, no author domain (empty)");
-    $pms->{dkim_adsp} = 'U'; $practices_as_string = 'empty domain';
+    $practices_as_string = 'empty domain';
 
-  } elsif ($author_domain =~ /^[^.]+$/si) {  # have mercy, don't claim NXDOMAIN
+  } elsif ($author_domain =~ /^[^.]+$/s) {  # have mercy, don't claim NXDOMAIN
     dbg("dkim: adsp not retrieved, author domain not fqdn: $author_domain");
-    $pms->{dkim_adsp} = 'U'; $practices_as_string = 'not fqdn';
+    $practices_as_string = 'not fqdn';
 
-  } elsif ($author_domain !~ /.\.[a-z]{2,}\z/si) {
+  } elsif ($author_domain !~ /.\.[a-z-]{2,}\z/si) {  # keep IDN in mind
     dbg("dkim: adsp not retrieved, author domain not a fqdn: %s (%s)",
         $author_domain, $pms->{dkim_author_address});
     $pms->{dkim_adsp} = 'N'; $practices_as_string = 'invalid fqdn';
 
   } elsif ($pms->{dkim_author_sig_tempfailed}) {
     dbg("dkim: adsp ignored, temporary failure varifying author signature");
+    $practices_as_string = 'pub key tempfailed';
+
+  } elsif ($pms->{dkim_has_any_author_sig} &&
+           $pms->{tests_already_hit}->{'__TRUNCATED'}) {
+    # the message did have an author signature but it wasn't valid; we also
+    # know the message was truncated just before being passed to SpamAssassin,
+    # which is a likely reason for verification failure, so we shouldn't take
+    # it too harsh with ADSP rules - just pretend the ADSP was 'unknown'
+    #
+    dbg("dkim: adsp ignored, message was truncated, invalid author signature");
+    $practices_as_string = 'truncated';
 
   } elsif (my($adsp,$key) =
              $self->_lookup_dkim_adsp_override($pms,$author_domain)) {
@@ -768,7 +788,7 @@ sub _check_dkim_adsp {
   }
 
   dbg("dkim: adsp result: %s (%s), domain %s",
-      $pms->{dkim_valid_author_sig} ? "accept" : $label{$pms->{dkim_adsp}},
+      $pms->{dkim_has_valid_author_sig} ? "accept" : $label{$pms->{dkim_adsp}},
       $practices_as_string, $author_domain);
 }
 
