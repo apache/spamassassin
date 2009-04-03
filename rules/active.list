@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: bb-jm dos zmi; day 2: jm; day 3: zmi
+# with results from: day 1: bb-jm dos jm zmi; day 2: zmi; day 3: jm
 
 # tflags userconf
 ALL_TRUSTED
@@ -85,6 +85,18 @@ DOS_ANAL_SPAM_MAILER
 # good enough
 DOS_HIGHBIT_HDRS_BODY
 
+# good enough
+DOS_OE_TO_MX
+
+# good enough
+DOS_OE_TO_MX_IMAGE
+
+# good enough
+DOS_RCVD_IP_TWICE_B
+
+# good enough
+DOS_RCVD_IP_TWICE_C
+
 # tflags userconf
 ENV_AND_HDR_DKIM_MATCH
 
@@ -98,6 +110,9 @@ FB_EARN_UP_TO
 FB_GVR
 
 # good enough
+FB_SAVE_PERSC
+
+# good enough
 FH_FAKE_RCVD_LINE_B
 
 # good enough
@@ -105,6 +120,9 @@ FM_LOTTO_YOU_WON
 
 # good enough
 FM_SCHOOLING
+
+# good enough
+FORGED_RELAY_MUA_TO_MX
 
 # tflags userconf
 FRAGMENTED_MESSAGE
@@ -114,6 +132,15 @@ FROM_DOMAIN_NOVOWEL
 
 # tflags userconf
 FROM_LOCAL_NOVOWEL
+
+# good enough
+FR_WATCHES_HTTP
+
+# good enough
+FS_MAKE_MONEY
+
+# good enough
+FS_WEIGHT_LOSS
 
 # tflags userconf
 GTUBE
@@ -210,6 +237,9 @@ MIME_CHARSET_FARAWAY
 
 # tflags userconf
 MISSING_HB_SEP
+
+# good enough
+MSGID_NOFQDN1
 
 # tflags net
 NO_DNS_FOR_FROM
@@ -419,6 +449,9 @@ SANE_17534cea3ba620589af299f2dac174c4
 SANE_5154384729a0aa1b7a92cae237ceed80
 
 # good enough
+SANE_7429530a7398f43f1f1b795f9420714e
+
+# good enough
 SANE_7d8e92a09f27d49fafe09a1dbd5cac10
 
 # good enough
@@ -473,43 +506,37 @@ SUBJECT_IN_BLACKLIST
 SUBJECT_IN_WHITELIST
 
 # good enough
+THREAD_INDEX_BAD
+
+# good enough
 TVD_PH_BODY_META
 
 # good enough
-DOS_OE_TO_MX
+AXB_XMID_DIGDOTSHRT
 
 # good enough
-DOS_OE_TO_MX_IMAGE
+FB_REPLICA_ROLEX
 
 # good enough
-DOS_RCVD_IP_TWICE_B
+FB_WITHOUT_PRESC
 
 # good enough
-DOS_RCVD_IP_TWICE_C
+FB_YOUR_MORTGAGE
 
 # good enough
-FB_SAVE_PERSC
+FRT_ERECTION
 
 # good enough
-FORGED_RELAY_MUA_TO_MX
+PR_TD_NOWRAP_BAT
 
 # good enough
-FR_WATCHES_HTTP
+RP_MATCHES_RCVD
 
 # good enough
-FS_MAKE_MONEY
+SANE_1c4f3286fa4aed6424ced88bfaf8b09c
 
 # good enough
-FS_WEIGHT_LOSS
-
-# good enough
-MSGID_NOFQDN1
-
-# good enough
-SANE_7429530a7398f43f1f1b795f9420714e
-
-# good enough
-THREAD_INDEX_BAD
+SANE_4ef8302546bf270a19baf98508afacc4
 
 # tflags userconf
 UNPARSEABLE_RELAY
