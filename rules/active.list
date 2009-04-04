@@ -1,8 +1,11 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: bb-jm dos jm zmi; day 2: zmi; day 3: jm
+# with results from: day 1: bb-jm dos jm zmi; day 2: zmi; day 3: zmi
 
 # tflags userconf
 ALL_TRUSTED
+
+# good enough
+AXB_XMID_DIGDOTSHRT
 
 # good enough
 BASE64_LENGTH_78_79
@@ -85,18 +88,6 @@ DOS_ANAL_SPAM_MAILER
 # good enough
 DOS_HIGHBIT_HDRS_BODY
 
-# good enough
-DOS_OE_TO_MX
-
-# good enough
-DOS_OE_TO_MX_IMAGE
-
-# good enough
-DOS_RCVD_IP_TWICE_B
-
-# good enough
-DOS_RCVD_IP_TWICE_C
-
 # tflags userconf
 ENV_AND_HDR_DKIM_MATCH
 
@@ -110,7 +101,16 @@ FB_EARN_UP_TO
 FB_GVR
 
 # good enough
-FB_SAVE_PERSC
+FB_REPLICA_ROLEX
+
+# good enough
+FB_SOFTTABS
+
+# good enough
+FB_WITHOUT_PRESC
+
+# good enough
+FB_YOUR_MORTGAGE
 
 # good enough
 FH_FAKE_RCVD_LINE_B
@@ -120,9 +120,6 @@ FM_LOTTO_YOU_WON
 
 # good enough
 FM_SCHOOLING
-
-# good enough
-FORGED_RELAY_MUA_TO_MX
 
 # tflags userconf
 FRAGMENTED_MESSAGE
@@ -134,13 +131,7 @@ FROM_DOMAIN_NOVOWEL
 FROM_LOCAL_NOVOWEL
 
 # good enough
-FR_WATCHES_HTTP
-
-# good enough
-FS_MAKE_MONEY
-
-# good enough
-FS_WEIGHT_LOSS
+FRT_ERECTION
 
 # tflags userconf
 GTUBE
@@ -238,9 +229,6 @@ MIME_CHARSET_FARAWAY
 # tflags userconf
 MISSING_HB_SEP
 
-# good enough
-MSGID_NOFQDN1
-
 # tflags net
 NO_DNS_FOR_FROM
 
@@ -252,6 +240,9 @@ NO_RELAYS
 
 # good enough
 PQRTW_4
+
+# good enough
+PR_TD_NOWRAP_BAT
 
 # tflags net
 PYZOR_CHECK
@@ -443,7 +434,16 @@ RCVD_IN_XBL
 REPLYTO_WITHOUT_TO_CC
 
 # good enough
+RP_MATCHES_RCVD
+
+# good enough
 SANE_17534cea3ba620589af299f2dac174c4
+
+# good enough
+SANE_1c4f3286fa4aed6424ced88bfaf8b09c
+
+# good enough
+SANE_4ef8302546bf270a19baf98508afacc4
 
 # good enough
 SANE_5154384729a0aa1b7a92cae237ceed80
@@ -512,31 +512,7 @@ THREAD_INDEX_BAD
 TVD_PH_BODY_META
 
 # good enough
-AXB_XMID_DIGDOTSHRT
-
-# good enough
-FB_REPLICA_ROLEX
-
-# good enough
-FB_WITHOUT_PRESC
-
-# good enough
-FB_YOUR_MORTGAGE
-
-# good enough
-FRT_ERECTION
-
-# good enough
-PR_TD_NOWRAP_BAT
-
-# good enough
-RP_MATCHES_RCVD
-
-# good enough
-SANE_1c4f3286fa4aed6424ced88bfaf8b09c
-
-# good enough
-SANE_4ef8302546bf270a19baf98508afacc4
+TVD_FROM_1
 
 # tflags userconf
 UNPARSEABLE_RELAY
