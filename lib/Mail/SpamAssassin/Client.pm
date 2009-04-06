@@ -1,4 +1,3 @@
-# NOTE: This interface is alpha at best, and almost guaranteed to change
 # <@LICENSE>
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
@@ -19,8 +18,6 @@
 =head1 NAME
 
 Mail::SpamAssassin::Client - Client for spamd Protocol
-
-NOTE: This interface is alpha at best, and almost guaranteed to change
 
 =head1 SYNOPSIS
 
@@ -49,7 +46,7 @@ NOTE: This interface is alpha at best, and almost guaranteed to change
 
 =head1 DESCRIPTION
 
-Mail::SpamAssassin::Client is a module that provides a perl implementation for
+Mail::SpamAssassin::Client is a module which provides a perl implementation of
 the spamd protocol.
 
 =cut
