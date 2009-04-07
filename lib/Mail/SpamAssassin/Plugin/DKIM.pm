@@ -610,7 +610,9 @@ sub _check_dkim_signature {
       }
       # check if we have a potential author signature, valid or not
       my $id_matches_author = 0;
-      if ($identity =~ /.\@[^\@]*\z/s) {  # identity has a localpart
+      if (!defined $identity || $identity eq '') {
+        # identity not provided
+      } elsif ($identity =~ /.\@[^\@]*\z/s) {  # identity has a localpart
         $id_matches_author = 1  if $author eq $identity;
       } elsif ($author =~ /(\@[^\@]*)?\z/s && $1 eq $identity) {
         # ignoring localpart if identity doesn't have a localpart
