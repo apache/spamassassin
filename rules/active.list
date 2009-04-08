@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: bb-jm dos jm zmi; day 2: zmi; day 3: zmi
+# with results from: day 1: bb-jm dos jm; day 2: dos jm; day 3: zmi
 
 # tflags userconf
 ALL_TRUSTED
@@ -107,13 +107,7 @@ FB_SOFTTABS
 FB_WITHOUT_PRESC
 
 # good enough
-FB_YOUR_MORTGAGE
-
-# good enough
 FH_FAKE_RCVD_LINE_B
-
-# good enough
-FM_LOTTO_YOU_WON
 
 # good enough
 FM_SCHOOLING
@@ -126,9 +120,6 @@ FROM_DOMAIN_NOVOWEL
 
 # tflags userconf
 FROM_LOCAL_NOVOWEL
-
-# good enough
-FRT_ERECTION
 
 # tflags userconf
 GTUBE
@@ -225,6 +216,9 @@ MIME_CHARSET_FARAWAY
 
 # tflags userconf
 MISSING_HB_SEP
+
+# good enough
+MSOE_MID_WRONG_CASE
 
 # tflags net
 NO_DNS_FOR_FROM
@@ -443,9 +437,6 @@ SANE_1c4f3286fa4aed6424ced88bfaf8b09c
 SANE_4ef8302546bf270a19baf98508afacc4
 
 # good enough
-SANE_5154384729a0aa1b7a92cae237ceed80
-
-# good enough
 SANE_7429530a7398f43f1f1b795f9420714e
 
 # good enough
@@ -507,6 +498,9 @@ THREAD_INDEX_BAD
 
 # good enough
 TVD_PH_BODY_META
+
+# good enough
+TVD_FROM_1
 
 # tflags userconf
 UNPARSEABLE_RELAY
