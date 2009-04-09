@@ -26,6 +26,7 @@ Mail::SpamAssassin::Plugin::DKIM - perform DKIM verification tests
  full   DKIM_SIGNED           eval:check_dkim_signed()
  full   DKIM_VALID            eval:check_dkim_valid()
  full   DKIM_VALID_AU         eval:check_dkim_valid_author_sig()
+ full   __DKIM_DEPENDABLE     eval:check_dkim_dependable()
 
  header DKIM_ADSP_NXDOMAIN    eval:check_dkim_adsp('N')
  header DKIM_ADSP_ALL         eval:check_dkim_adsp('A')
@@ -37,6 +38,7 @@ Mail::SpamAssassin::Plugin::DKIM - perform DKIM verification tests
  describe DKIM_SIGNED       Message has a DKIM or DK signature, not necessarily valid
  describe DKIM_VALID        Message has at least one valid DKIM or DK signature
  describe DKIM_VALID_AU     Message has a valid DKIM or DK signature from author's domain
+ describe __DKIM_DEPENDABLE A validation failure not attributable to truncation
 
  describe DKIM_ADSP_NXDOMAIN    No valid author signature and domain not in DNS
  describe DKIM_ADSP_ALL         No valid author signature, domain signs all mail
@@ -49,6 +51,14 @@ For compatibility, the following are synonyms:
  OLD: eval:check_dkim_verified = NEW: eval:check_dkim_valid
  OLD: eval:check_dkim_signall  = NEW: eval:check_dkim_adsp('A')
  OLD: eval:check_dkim_signsome = NEW: redundant, semantically always true
+
+The __DKIM_DEPENDABLE eval rule deserves an explanation. The rule yields true
+when signatures are supplied by a caller, OR ELSE when signatures are obtained
+by this plugin AND either there are no signatures OR a rule __TRUNCATED was
+false. In other words: __DKIM_DEPENDABLE is true when failed signatures can
+not be attributed to message truncation when feeding a message to SpamAssassin.
+It can be consulted to prevent false positives on large but truncated messages
+with poor man's implementation of ADSP by hand-crafted rules.
 
 =head1 DESCRIPTION
 
@@ -117,6 +127,7 @@ sub new {
 
   # author domain signing practices
   $self->register_eval_rule("check_dkim_adsp");
+  $self->register_eval_rule("check_dkim_dependable");
 
   # whitelisting
   $self->register_eval_rule("check_for_dkim_whitelist_from");
@@ -413,6 +424,12 @@ sub check_dkim_valid {
   return $pms->{dkim_valid};
 }
 
+sub check_dkim_dependable {
+  my ($self, $pms) = @_;
+  $self->_check_dkim_signature($pms) unless $pms->{dkim_checked_signature};
+  return $pms->{dkim_signatures_dependable};
+}
+
 # mosnomer, old synonym for check_dkim_valid, kept for compatibility
 sub check_dkim_verified {
   my ($self, $pms) = @_;
@@ -425,7 +442,7 @@ sub check_dkim_adsp {
   my ($self, $pms, $adsp_char) = @_;
   $self->_check_dkim_signature($pms) unless $pms->{dkim_checked_signature};
   if ($pms->{dkim_signatures_ready} && !$pms->{dkim_has_valid_author_sig}) {
-    $self->_check_dkim_adsp($pms)  unless $pms->{dkim_checked_adsp};
+    $self->_check_dkim_adsp($pms) unless $pms->{dkim_checked_adsp};
     return 1  if $pms->{dkim_adsp} eq $adsp_char;
   }
   return 0;
@@ -504,7 +521,11 @@ sub _check_dkim_signature {
   my(@signatures,@valid_signatures);
   $pms->{dkim_checked_signature} = 1; # has this sub already been invoked?
   $pms->{dkim_signatures_ready} = 0;  # have we obtained & verified signatures?
-  $pms->{dkim_signatures_provided_by_caller} = 0;
+  $pms->{dkim_signatures_dependable} = 0;
+  # dkim_signatures_dependable =
+  #   (signatures supplied by a caller) or
+  #   ( (signatures obtained by this plugin) and
+  #     (no signatures, or message was not truncated) )
   $pms->{dkim_author_sig_tempfailed} = 0;  # DNS timeout verifying author sign.
   $pms->{dkim_signatures} = \@signatures;
   $pms->{dkim_valid_signatures} = \@valid_signatures;
@@ -522,7 +543,7 @@ sub _check_dkim_signature {
     my $provided_signatures = $suppl_attrib->{dkim_signatures};
     @signatures = @$provided_signatures  if ref $provided_signatures;
     $pms->{dkim_signatures_ready} = 1;
-    $pms->{dkim_signatures_provided_by_caller} = 1;
+    $pms->{dkim_signatures_dependable} = 1;
     dbg("dkim: signatures provided by the caller, %d signatures",
         scalar(@signatures));
   }
@@ -583,6 +604,9 @@ sub _check_dkim_signature {
       dbg("dkim: public key lookup or verification failed: $err");
     }
     $pms->{dkim_signatures_ready} = 1;
+    if (!@signatures || !$pms->{tests_already_hit}->{'__TRUNCATED'}) {
+      $pms->{dkim_signatures_dependable} = 1;
+    }
   }
 
   if ($pms->{dkim_signatures_ready}) {
@@ -698,7 +722,7 @@ sub _check_dkim_adsp {
   $self->_check_dkim_signature($pms) unless $pms->{dkim_checked_signature};
 
   if (!$pms->{dkim_signatures_ready}) {
-    dbg("dkim: adsp not retrieved, signatures not verifiable");
+    dbg("dkim: adsp not retrieved, signatures not obtained");
 
   } elsif ($pms->{dkim_has_valid_author_sig}) {  # don't fetch adsp when valid
     # draft-allman-dkim-ssp: If the message contains a valid Author
@@ -715,31 +739,30 @@ sub _check_dkim_adsp {
 
   } elsif ($author_domain eq '') {        # have mercy, don't claim a NXDOMAIN
     dbg("dkim: adsp not retrieved, no author domain (empty)");
-    $practices_as_string = 'empty domain';
+    $practices_as_string = 'empty domain, ignored';
 
   } elsif ($author_domain =~ /^[^.]+$/s) {  # have mercy, don't claim NXDOMAIN
     dbg("dkim: adsp not retrieved, author domain not fqdn: $author_domain");
-    $practices_as_string = 'not fqdn';
+    $practices_as_string = 'not fqdn, ignored';
 
-  } elsif ($author_domain !~ /.\.[a-z-]{2,}\z/si) {  # keep IDN in mind
+  } elsif ($author_domain !~ /.\.[a-z-]{2,}\z/si) {  # allow '-', think of IDN
     dbg("dkim: adsp not retrieved, author domain not a fqdn: %s (%s)",
         $author_domain, $pms->{dkim_author_address});
-    $pms->{dkim_adsp} = 'N'; $practices_as_string = 'invalid fqdn';
+    $pms->{dkim_adsp} = 'N'; $practices_as_string = 'invalid fqdn, ignored';
 
   } elsif ($pms->{dkim_author_sig_tempfailed}) {
     dbg("dkim: adsp ignored, temporary failure varifying author signature");
-    $practices_as_string = 'pub key tempfailed';
+    $practices_as_string = 'pub key tempfailed, ignored';
 
   } elsif ($pms->{dkim_has_any_author_sig} &&
-          !$pms->{dkim_signatures_provided_by_caller} &&
-           $pms->{tests_already_hit}->{'__TRUNCATED'}) {
+           !$pms->{dkim_signatures_dependable}) {
     # the message did have an author signature but it wasn't valid; we also
-    # know the message was truncated just before being passed to SpamAssassin,
+    # expect the message was truncated just before being passed to SpamAssassin,
     # which is a likely reason for verification failure, so we shouldn't take
     # it too harsh with ADSP rules - just pretend the ADSP was 'unknown'
     #
     dbg("dkim: adsp ignored, message was truncated, invalid author signature");
-    $practices_as_string = 'truncated';
+    $practices_as_string = 'truncated, ignored';
 
   } elsif (my($adsp,$key) =
              $self->_lookup_dkim_adsp_override($pms,$author_domain)) {
