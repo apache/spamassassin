@@ -1,0 +1,200 @@
+#!/local/perl586/bin/perl -w
+
+# settings are located in $HOME/.corpus
+
+use strict;
+use Getopt::Long;
+
+use vars qw(
+    $realcorpusdir
+    $opt_override
+    $opt_tag
+);
+GetOptions(
+    "tag=s" => \$opt_tag,
+    "dir=s" => \$realcorpusdir,
+    "override=s" => \$opt_override,
+);
+
+$opt_override ||= '';
+$opt_tag ||= 'n';       # nightly is the default
+
+use File::Path;
+use File::Copy;
+use Time::ParseDate;
+use Cwd qw(abs_path);
+use POSIX qw(nice strftime);
+
+use constant WEEK => 7*60*60*24;
+nice(15);
+
+# daterevs -- e.g. "20060429/r239832-r" -- are aligned to 0800 UTC, just before
+# the time of day when the mass-check tagging occurs; see
+# http://wiki.apache.org/spamassassin/DateRev for more details.
+use constant DATEREV_ADJ => - (8 * 60 * 60);
+
+# what's the max age of mail we will accept data from? (in weeks)
+# TODO: maybe this should be in ~/.corpus
+my $OLDEST_HAM_WEEKS    = 52 * 5;       # 5 years
+my $OLDEST_SPAM_WEEKS    = 6 * 4;       # 6 months
+
+# ---------------------------------------------------------------------------
+
+my $configuration = "$ENV{HOME}/.corpus";
+my %opt;
+my %revision = ();
+my %filesize = ();
+my %dateline = ();
+my %mtime = ();
+my %logs_by_daterev = ();
+my %is_net_daterev = ();
+my %time = ();
+my @files;
+my @tmps = ();
+my $skip = '';
+my $time_start = time;
+my $output_revpath;
+
+&configure;
+&init;
+
+if (!$realcorpusdir) {
+  $realcorpusdir = $opt{corpus};
+  &update_rsync;
+}
+print "reading logs from '$realcorpusdir'\n";
+
+my $linkdir = "$opt{html}/logs";
+(-d $linkdir) or mkdir $linkdir;
+
+&locate;
+&clean_up;
+exit;
+
+sub configure {
+  # does rough equivalent of source
+  open(C, $configuration) || die "open failed: $configuration: $!\n";
+  my $pwd = Cwd::getcwd;
+
+  # add 'override' options
+  my @lines = (<C>, split(/\|/, $opt_override));
+
+  foreach $_ (@lines) {
+	chomp;
+	s/#.*//;
+	if (/^\s*(.*?)\s*=\s*(.*?)\s*$/) {
+          my ($key, $val) = ($1, $2);
+          $val =~ s/\$PWD/$pwd/gs;
+	  $opt{$key} = $val;
+	}
+  }
+  close(C);
+}
+
+sub clean_up {
+  chdir "/";
+  system "rm -rf $opt{tmp}/*.$$ ".join(' ', @tmps);
+}
+
+sub init {
+  $SIG{INT} = \&clean_up;
+  $SIG{TERM} = \&clean_up;
+
+  $ENV{RSYNC_PASSWORD} = $opt{password};
+  $ENV{TIME} = '%e,%U,%S';
+  $ENV{TZ} = 'UTC';
+}
+
+sub update_rsync {
+  chdir $realcorpusdir;
+
+  # allow non-running of rsync under some circumstances
+  if ($opt{rsync_command}) {
+    system $opt{rsync_command};
+  } else {
+    system "rsync -CPcvuzt --timeout=300 $opt{username}" . '@rsync.spamassassin.org::corpus/*.log .';
+  }
+
+  open(RSYNC, "> rsync.last");
+  close(RSYNC);
+  system "chmod +r *.log";
+}
+
+sub locate {
+  opendir(CORPUS, $realcorpusdir);
+  @files = sort readdir(CORPUS);
+  closedir(CORPUS);
+
+  @files = grep {
+    /^(?:spam|ham)-(?:net-)?[-\w]+\.log$/ && -f "$realcorpusdir/$_" && -M _ < 10 
+  } @files;
+
+  foreach my $file (@files) {
+    my $tag = 0;
+    my $headers = '';
+
+    open(FILE, "$realcorpusdir/$file") or warn "cannot read $realcorpusdir/$file";
+    while (my $line = <FILE>) {
+      last if $line !~ /^#/;
+      $headers .= $line;
+      if ($line =~ /, on (... ... .. )(..)(:..:.. ... ....)/) {
+        my ($datepre, $hh, $datepost) = ($1,$2,$3);
+        
+        my $timet = Time::ParseDate::parsedate($datepre.$hh.$datepost,
+                    GMT => 1, PREFER_PAST => 1);
+
+        $time{$file} = $timet;
+      }
+      elsif ($line =~ m/^# Date:\s*(\S+)/) {
+        # a better way to do the above.  TODO: parse it instead
+        $dateline{$file} = $1;
+      }
+      elsif ($line =~ m/^# SVN revision:\s*(\S+)/) {
+        $revision{$file} = $1;
+      }
+    }
+    close(FILE);
+
+    my @s = stat("$realcorpusdir/$file");
+    $filesize{$file} = $s[7];
+    $mtime{$file} = $s[9];
+
+    if (!defined $time{$file}) {
+      warn "$realcorpusdir/$file: no time found, ignored\n"; next;
+    }
+    if (!defined $revision{$file}) {
+      warn "$realcorpusdir/$file: no revision found, ignored\n"; next;
+    }
+    if ($revision{$file} eq 'unknown') {
+      warn "$realcorpusdir/$file: not tagged with a revision, ignored\n"; next;
+    }
+
+    my $daterev = mk_daterev($time{$file},$revision{$file},$opt_tag);
+
+    $logs_by_daterev{$daterev} ||= [ ];
+    push (@{$logs_by_daterev{$daterev}}, $file);
+
+    if ($file =~ /-net-/) {
+      $is_net_daterev{$daterev} = 1;
+      print "$realcorpusdir/$file: rev=$daterev time=$time{$file} (set 1)\n";
+    }
+    else {
+      print "$realcorpusdir/$file: rev=$daterev time=$time{$file} (set 0)\n";
+    }
+
+    {
+      # /^(?:spam|ham)-(?:net-)?[-\w]+\.log$/
+      my $linkfile = $file;
+      $linkfile =~ s/\.log$/.$daterev.log/i;
+      link ("$realcorpusdir/$file", "$linkdir/$linkfile")
+            or die "cannot ln $realcorpusdir/$file to $linkdir/$linkfile";
+    }
+  }
+}
+
+sub mk_daterev {
+  my ($timet, $rev, $tag) = @_;
+  return strftime("%Y%m%d", gmtime($timet + DATEREV_ADJ)) . "/r$rev-$tag";
+}
+
+
