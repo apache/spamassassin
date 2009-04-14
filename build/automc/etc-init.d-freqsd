@@ -9,6 +9,9 @@ prog=freqsd
 HOME=/export/home/automc
 export HOME
 
+LC_CTYPE=C
+export LC_CTYPE
+
 start() {
     echo "Starting $prog: " 
 
