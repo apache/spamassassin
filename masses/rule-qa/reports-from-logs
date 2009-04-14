@@ -142,7 +142,7 @@ sub locate {
   closedir(CORPUS);
 
   @files = grep {
-    /^(?:spam|ham)-(?:net-)?[-\w]+\.log$/ && -f "$realcorpusdir/$_" && -M _ < 10 
+    /^(?:spam|ham)-(?:net-)?\S+\.log$/ && -f "$realcorpusdir/$_" && -M _ < 10 
   } @files;
 
   foreach my $file (@files) {

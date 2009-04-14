@@ -185,9 +185,10 @@ sub locate {
     {
       # /^(?:spam|ham)-(?:net-)?[-\w]+\.log$/
       my $linkfile = $file;
-      $linkfile =~ s/\.log$/.$daterev.log/i;
-      link ("$realcorpusdir/$file", "$linkdir/$linkfile")
-            or die "cannot ln $realcorpusdir/$file to $linkdir/$linkfile";
+      my $dr = $daterev; $dr =~ s/\//-/gs;
+      $linkfile =~ s/\.log$/.$dr.log/i;
+      print "ln $realcorpusdir/$file $linkdir/$linkfile\n";
+      link "$realcorpusdir/$file", "$linkdir/$linkfile" or die "cannot ln";
     }
   }
 }
