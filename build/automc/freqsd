@@ -127,11 +127,13 @@ sub parent_loop {
     # if a dir was specified, it's always a "b" (buildbot) mass-check;
     # that's the assumption here at least
     logit "starting buildbot-requested faster reports";
-    run_corpus_hourly($parent_reports, "--tag=b --dir ".$job->{metadata}->{dir});
+    run_import_logs($parent_reports, "--tag=b --dir ".$job->{metadata}->{dir});
+    make_reports($parent_reports, "--tag=b");
   }
   else {
     logit "starting rsync faster reports";
-    run_corpus_hourly($parent_reports, "--tag=n");
+    run_import_logs($parent_reports, "--tag=n");
+    make_reports($parent_reports, "--tag=n");
     # may also be weekly.  no way to differentiate currently until
     # AFTER corpus.hourly is run!  TODO?
   }
@@ -154,12 +156,13 @@ sub child_loop {
   # add switches
   if ($job && $job->{metadata}->{dir}) {
     logit "not running buildbot-requested slow reports; they're too slow!";
-    # run_corpus_hourly($child_reports, "--tag=b --dir ".$job->{metadata}->{dir});
+    # run_import_logs($child_reports, "--tag=b --dir ".$job->{metadata}->{dir});
   }
   else {
     # create slow reports
     logit "starting rsync slow reports";
-    run_corpus_hourly($child_reports, "--tag=n");
+    run_import_logs($child_reports, "--tag=n");
+    make_reports($child_reports, "--tag=n");
 
     # recreate the corpus link-farm
     logit "running 'freqsd-infrequent' tasks";
@@ -171,9 +174,16 @@ sub child_loop {
   if ($job) { $job->finish(); }
 }
 
-sub run_corpus_hourly {
+sub run_import_logs {
   my ($reports, $opts) = @_;
-  run ("cd masses/rule-qa ; ./corpus-hourly ".
+  run ("cd masses/rule-qa ; ./import-logs ".
+        "--override='output_classes=$reports' ".
+        "$opts");
+}
+
+sub make_reports {
+  my ($reports, $opts) = @_;
+  run ("cd masses/rule-qa ; ./reports-from-logs ".
         "--override='output_classes=$reports' ".
         "$opts");
 }
