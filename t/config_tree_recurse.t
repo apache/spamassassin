@@ -2,6 +2,7 @@
 #
 # Test that config_tree_recurse works ok in taint mode; bug 6019
 
+delete @ENV{'PATH', 'IFS', 'CDPATH', 'ENV', 'BASH_ENV'};
 $ENV{PATH}='/bin:/usr/bin:/usr/local/bin';
 
 BEGIN {
