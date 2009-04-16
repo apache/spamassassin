@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: bb-jm.20090414-r764714-n dos.20090414-r764714-n jm.20090414-r764714-n zmi.20090414-r764714-n; day 2: zmi.20090413-r764376-n; day 3: dos jm
+# with results from: day 1: bb-jm.20090415-r765087-n dos.20090415-r765087-n jm.20090415-r765087-n zmi.20090415-r765087-n; day 2: bb-jm.20090414-r764714-n dos.20090414-r764714-n jm.20090414-r764714-n zmi.20090414-r764714-n; day 3: zmi.20090413-r764376-n
 
 # tflags userconf
 ALL_TRUSTED
@@ -105,6 +105,9 @@ FB_SOFTTABS
 
 # good enough
 FB_WITHOUT_PRESC
+
+# good enough
+FH_DATE_PAST_20XX
 
 # good enough
 FH_FAKE_RCVD_LINE_B
@@ -504,6 +507,12 @@ TVD_PH_BODY_META
 
 # good enough
 FB_YOUR_MORTGAGE
+
+# good enough
+FM_LOTTO_YOU_WON
+
+# good enough
+FRT_ERECTION
 
 # tflags userconf
 UNPARSEABLE_RELAY
