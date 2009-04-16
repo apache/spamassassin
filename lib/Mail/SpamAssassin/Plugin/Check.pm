@@ -426,11 +426,13 @@ sub pop_evalstr_prefix {
 
 sub add_evalstr {
   my ($self, $pms, $str) = @_;
-  my $new_code_l = length($str);
-# dbg("rules: add_evalstr %d", $new_code_l);
-  $self->{evalstr} .= $str;
-  $self->{evalstr_l} += $new_code_l;
-  if ($self->{evalstr_l} > 60000) { $self->flush_evalstr($pms) }
+  if (defined $str) {
+    my $new_code_l = length($str);
+  # dbg("rules: add_evalstr %d", $new_code_l);
+    $self->{evalstr} .= $str;
+    $self->{evalstr_l} += $new_code_l;
+    if ($self->{evalstr_l} > 60000) { $self->flush_evalstr($pms) }
+  }
 }
 
 sub add_evalstr2 {
