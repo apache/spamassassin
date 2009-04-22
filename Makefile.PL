@@ -209,6 +209,7 @@ my %makefile = (
         'Net::DNS'      => (RUNNING_ON_WINDOWS ? 0.46 : 0.34), # bugs in older revs
         'NetAddr::IP'   => 0,
         'Sys::Hostname' => 0,
+        'Time::HiRes'   => 0,
         'Time::Local'   => 0,
         'Errno'         => 0,
     },
