@@ -38,17 +38,17 @@ use warnings;
 use bytes;
 use re 'taint';
 
+use Time::HiRes qw(time);
+
 use Mail::SpamAssassin;
 use Mail::SpamAssassin::Logger;
 
 our @ISA = qw();
 
-# Load Time::HiRes if it's available
+# obtain timer resolution if possible
 BEGIN {
   use vars qw($timer_resolution);
   eval {
-    require Time::HiRes or die "Error loading Time::HiRes: $@, $!";
-    Time::HiRes->import( qw(time) );
     $timer_resolution = Time::HiRes->can('clock_getres')
       ? Time::HiRes::clock_getres(Time::HiRes::CLOCK_REALTIME())
       : 0.001;  # wild guess, assume resolution is better than 1s

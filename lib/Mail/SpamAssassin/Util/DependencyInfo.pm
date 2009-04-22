@@ -59,6 +59,12 @@ my @MODULES = (
   'desc' => "Used in determining which DNS tests are to be done for each of
   the header's received fields.",
 },
+{
+  module => 'Time::HiRes',
+  version => '0.00',
+  desc => 'Used by asynchronous DNS lookups to operate timeouts with subsecond
+  precision and to report processing times accurately.'
+},
 );
 
 my @OPTIONAL_MODULES = (
@@ -142,13 +148,6 @@ my @OPTIONAL_MODULES = (
   desc => 'If you wish to use the optional zlib compression for communication
   between spamc and spamd (the -z option to spamc), you need to install
   this module.',
-},
-{
-  module => 'Time::HiRes',
-  version => '0.00',
-  desc => 'If this module is installed, asynchronous DNS lookup timeouts operate
-  with subsecond precision and the processing times are logged/reported
-  more accurately. Other modules and plugins may benefit too.',
 },
 {
   module => 'Mail::DomainKeys',

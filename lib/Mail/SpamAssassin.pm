@@ -82,14 +82,9 @@ use File::Basename;
 use File::Path;
 use File::Spec 0.8;
 use File::Copy;
+use Time::HiRes qw(time);
 use Cwd;
 use Config;
-
-# Load Time::HiRes if it's available
-BEGIN {
-  eval { require Time::HiRes };
-  Time::HiRes->import( qw(time) ) unless $@;
-}
 
 use vars qw{
   @ISA $VERSION $SUB_VERSION @EXTRA_VERSION $IS_DEVEL_BUILD $HOME_URL
@@ -1524,9 +1519,9 @@ sub timer_start {
     push @{$self->{timers_order}}, $name;
   }
   
-  $self->{timers}->{$name}->{start} = time;
-  # hopefully Time::HiRes::time().  note that this will reset any
-  # existing, unstopped timer of that name; that's ok
+  $self->{timers}->{$name}->{start} = Time::HiRes::time();
+  # note that this will reset any existing, unstopped timer of that name;
+  # that's ok
 }
 
 sub timer_end {
