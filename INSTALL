@@ -211,6 +211,11 @@ installed:
     Debian/Ubuntu: apt-get install libnetaddr-ip-perl
     Fedora: yum install perl-NetAddr-IP
 
+  - Time::HiRes (from CPAN)
+
+    Used by asynchronous DNS lookups to operate timeouts with subsecond
+    precision and to report processing times accurately.
+
   - LWP (aka libwww-perl) (from CPAN)
 
     This set of modules will include both the LWP::UserAgent and
@@ -328,12 +333,6 @@ version is too low for them to be used.
     this module.
 
     Fedora: yum install perl-Compress-Zlib
-
-
-  - Time::HiRes (from CPAN)
-
-    If this module is installed, the processing times are logged/reported
-    more precisely.
 
 
   - Mail::DKIM (from CPAN)
