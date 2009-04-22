@@ -47,13 +47,9 @@ use warnings;
 use bytes;
 use re 'taint';
 
-use constant HAS_TERM_READKEY => eval { require Term::ReadKey };
+use Time::HiRes qw(time);
 
-# Load Time::HiRes if it's available
-BEGIN {
-  eval { require Time::HiRes };
-  Time::HiRes->import( qw(time) ) unless $@;
-}
+use constant HAS_TERM_READKEY => eval { require Term::ReadKey };
 
 =head2 new
 

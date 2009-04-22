@@ -46,16 +46,11 @@ use Mail::SpamAssassin::Logger;
 use Socket;
 use IO::Socket::INET;
 use Errno qw(EADDRINUSE EACCES);
+use Time::HiRes qw(time);
 
 use constant HAS_SOCKET_INET6 => eval { require IO::Socket::INET6; };
 
 our @ISA = qw();
-
-# Load Time::HiRes if it's available
-BEGIN {
-  eval { require Time::HiRes };
-  Time::HiRes->import( qw(time) ) unless $@;
-}
 
 ###########################################################################
 
