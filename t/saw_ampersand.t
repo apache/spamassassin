@@ -30,7 +30,7 @@ use constant HAS_MODULE => eval { require Devel::SawAmpersand; };
 BEGIN {
   $RUN_THIS_TEST = conf_bool('run_saw_ampersand_test')
                     && HAS_MODULE;
-  plan tests => (!$RUN_THIS_TEST ? 0 : 41) 
+  plan tests => (!$RUN_THIS_TEST ? 0 : 40)
 };
 
 print "NOTE: this test requires 'run_saw_ampersand_test' set to 'y'.\n";
@@ -130,13 +130,6 @@ score RAZOR2_CF_RANGE_51_100 1
 score RAZOR2_CF_RANGE_E4_51_100 1
 score RAZOR2_CF_RANGE_E8_51_100 1
 ");
-
-print "\ntrying net with DK rule plugins\n";
-$plugins .= q{
-  loadplugin Mail::SpamAssassin::Plugin::DomainKeys
-};
-write_plugin_pre($plugins);
-tryone (0, "");
 
 print "\ntrying net with DKIM rule plugins\n";
 $plugins .= q{

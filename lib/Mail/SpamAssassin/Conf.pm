@@ -577,8 +577,7 @@ that it first verifies that the message was sent by an authorized sender for
 the address, before whitelisting.
 
 Authorization is performed using one of the installed sender-authorization
-schemes: SPF (using C<Mail::SpamAssassin::Plugins::SPF>), DomainKeys (using
-C<Mail::SpamAssassin::Plugins::DomainKeys>), or DKIM (using
+schemes: SPF (using C<Mail::SpamAssassin::Plugins::SPF>), or DKIM (using
 C<Mail::SpamAssassin::Plugins::DKIM>).  Note that those plugins must be active,
 and working, for this to operate.
 
