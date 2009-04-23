@@ -342,22 +342,9 @@ version is too low for them to be used.
     present in the message headers.  If Mail::DKIM version 0.20 or later
     is installed, this will also perform Domain Key lookups on
     DomainKey-Signature headers, without requiring the Mail::DomainKeys
-    module.
+    module, which is now obsolete.
     
     Note that the Mail::DKIM module in turn requres the OpenSSL libraries.
-
-
-  - Mail::DomainKeys (from CPAN)
-
-    If this module is installed, and you enable the DomainKeys plugin,
-    SpamAssassin will perform Domain Key lookups when Domain Key
-    information is present in the message headers.
-
-    Note that Mail::DKIM version 0.20 or later will perform Domain Key
-    lookups, so this may be redundant.
-    
-    Note that the Mail::DomainKeys module in turn requres the OpenSSL
-    libraries and the CPAN module Crypt::OpenSSL::Bignum.
 
 
   - DBI *and* DBD driver/modules for your database (from CPAN)
