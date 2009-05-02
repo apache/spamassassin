@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: bb-jm.20090430-r770117-n dos.20090430-r770117-n jm.20090430-r770117-n zmi.20090430-r770117-n; day 2: bb-jm.20090429-r769715-n dos.20090429-r769715-n jm.20090429-r769715-n zmi.20090429-r769715-n; day 3: bb-jm.20090428-r769302-n dos.20090428-r769302-n jm.20090428-r769302-n zmi.20090428-r769302-n
+# with results from: day 1: bb-jm.20090501-r770582-n dos.20090501-r770582-n jm.20090501-r770582-n zmi.20090501-r770582-n; day 2: bb-jm.20090430-r770117-n dos.20090430-r770117-n jm.20090430-r770117-n zmi.20090430-r770117-n; day 3: bb-jm.20090429-r769715-n dos.20090429-r769715-n jm.20090429-r769715-n zmi.20090429-r769715-n
 
 # tflags userconf
 ALL_TRUSTED
@@ -167,9 +167,6 @@ FH_FROMEML_NOTLD
 FH_HELO_ALMOST_IP
 
 # good enough
-FH_HELO_ENDS_DOT
-
-# good enough
 FH_HELO_EQ_CHARTER
 
 # good enough
@@ -237,6 +234,9 @@ FS_LARGE_PERCENT2
 
 # good enough
 FS_MAKE_MONEY
+
+# good enough
+FS_NUDE
 
 # good enough
 FS_REPLICA
@@ -590,6 +590,9 @@ SANE_20d820d8f491476ca39941979ab139dd
 SANE_237c2b0099548ddbfa5a37f07e0687ab
 
 # good enough
+SANE_3a4b6d0e824e4ba2b01bef041a9f77e5
+
+# good enough
 SANE_3b92eda751c992f230f215fb7eb36844
 
 # good enough
@@ -710,13 +713,25 @@ TVD_RCVD_SINGLE
 TVD_VISIT_PHARMA
 
 # good enough
-FS_NUDE
+FSL_GD_ABUSE1
 
 # good enough
-SANE_3a4b6d0e824e4ba2b01bef041a9f77e5
+FSL_GD_ABUSE2
 
 # good enough
-TVD_PH_BODY_META
+FSL_GEO_ABUSE
+
+# good enough
+FSL_HELO_1
+
+# good enough
+FSL_INTERIA_ABUSE
+
+# good enough
+FSL_LSPACES_ABUSE
+
+# good enough
+FSL_YG_ABUSE
 
 # tflags userconf
 UNPARSEABLE_RELAY
