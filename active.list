@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: bb-jm.20090505-r771626-n dos.20090505-r771626-n jm.20090505-r771626-n zmi.20090505-r771626-n; day 2: bb-jm.20090504-r771243-n dos.20090504-r771243-n jm.20090504-r771243-n zmi.20090504-r771243-n; day 3: bb-jm.20090503-r771040-n dos.20090503-r771040-n jm.20090503-r771040-n zmi.20090503-r771040-n
+# with results from: day 1: bb-jm.20090506-r772099-n dos.20090506-r772099-n jm.20090506-r772099-n zmi.20090506-r772099-n; day 2: bb-jm.20090505-r771626-n dos.20090505-r771626-n jm.20090505-r771626-n zmi.20090505-r771626-n; day 3: bb-jm.20090504-r771243-n dos.20090504-r771243-n jm.20090504-r771243-n zmi.20090504-r771243-n
 
 # tflags userconf
 ALL_TRUSTED
@@ -263,6 +263,9 @@ FS_REPLICA
 FS_REPLICAWATCH
 
 # good enough
+FS_SINGLE_LETTER_J
+
+# good enough
 FS_START_LOSE
 
 # good enough
@@ -330,6 +333,9 @@ HS_FORGED_OE_FW
 
 # good enough
 HS_INDEX_PARAM
+
+# good enough
+HS_VPXL
 
 # tflags userconf
 HTML_CHARSET_FARAWAY
@@ -725,10 +731,7 @@ TVD_RCVD_SINGLE
 TVD_VISIT_PHARMA
 
 # good enough
-FS_SINGLE_LETTER_J
-
-# good enough
-HS_VPXL
+TVD_PH_BODY_META
 
 # tflags userconf
 UNPARSEABLE_RELAY
