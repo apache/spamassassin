@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: bb-jm.20090508-r772890-n dos.20090508-r772890-n jm.20090508-r772890-n; day 2: bb-jm.20090508-r772890-n dos.20090508-r772890-n jm.20090508-r772890-n; day 3: bb-jm.20090507-r772554-n dos.20090507-r772554-n jm.20090507-r772554-n zmi.20090507-r772554-n
+# with results from: day 1: bb-jm.20090508-r772890-n dos.20090508-r772890-n jm.20090508-r772890-n; day 2: bb-jm.20090508-r772890-n dos.20090508-r772890-n jm.20090508-r772890-n; day 3: bb-jm.20090508-r772890-n dos.20090508-r772890-n jm.20090508-r772890-n
 
 # tflags userconf
 ALL_TRUSTED
@@ -385,6 +385,9 @@ MISSING_HB_SEP
 # good enough
 MSGID_NOFQDN1
 
+# good enough
+MSOE_MID_WRONG_CASE
+
 # tflags net
 NO_DNS_FOR_FROM
 
@@ -693,6 +696,9 @@ THREAD_INDEX_BAD
 
 # good enough
 TT_MSGID_TRUNC
+
+# good enough
+TVD_ENVFROM_APOST
 
 # good enough
 TVD_FINGER_02
