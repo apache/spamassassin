@@ -20,6 +20,7 @@ GetOptions(
     "kill" => \$opt_kill,
 );
 
+my $INHIBIT_SLOW_REPORTS_FLAG_FILE = "/export/home/automc/freqsd/flag.inhibit_slow_reports";
 my $dq_fast = IPC::DirQueue->new({ dir => "/export/home/automc/freqsd/dq_fast" });
 my $dq_slow = IPC::DirQueue->new({ dir => "/export/home/automc/freqsd/dq_slow" });
 $pidfile ||= "/export/home/automc/freqsd/pid";
@@ -160,9 +161,13 @@ sub child_loop {
   }
   else {
     # create slow reports
-    logit "starting rsync slow reports";
-    run_import_logs($child_reports, "--tag=n");
-    make_reports($child_reports, "--tag=n");
+    if (-f $INHIBIT_SLOW_REPORTS_FLAG_FILE) {
+      logit "inhibited rsync slow reports, $INHIBIT_SLOW_REPORTS_FLAG_FILE exists";
+    } else {
+      logit "starting rsync slow reports";
+      run_import_logs($child_reports, "--tag=n");
+      make_reports($child_reports, "--tag=n");
+    }
 
     # recreate the corpus link-farm
     logit "running 'freqsd-infrequent' tasks";
