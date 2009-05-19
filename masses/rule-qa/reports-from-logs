@@ -39,7 +39,7 @@ my $OLDEST_SPAM_WEEKS    = 6 * 4;       # 6 months
 # ---------------------------------------------------------------------------
 
 my $configuration = "$ENV{HOME}/.corpus";
-my %opt;
+my %cf;
 my %revision = ();
 my %filesize = ();
 my %dateline = ();
@@ -47,22 +47,19 @@ my %mtime = ();
 my %logs_by_daterev = ();
 my %is_net_daterev = ();
 my %time = ();
-my @files;
 my @tmps = ();
-my $skip = '';
 my $time_start = time;
 my $output_revpath;
 
-&configure;
-&init;
+configure();
+init();
 
-my $realcorpusdir = "$opt{html}/logs";
-my $corpusdir = $realcorpusdir;
-print "reading logs from '$realcorpusdir'\n";
+my $logsdir = "$cf{html}/logs";
+print "reading logs from '$logsdir'\n";
 
-&locate;
-&current;
-&clean_up;
+locate();
+current();
+clean_up();
 exit;
 
 sub configure {
@@ -79,7 +76,7 @@ sub configure {
 	if (/^\s*(.*?)\s*=\s*(.*?)\s*$/) {
           my ($key, $val) = ($1, $2);
           $val =~ s/\$PWD/$pwd/gs;
-	  $opt{$key} = $val;
+	  $cf{$key} = $val;
 	}
   }
   close(C);
@@ -87,69 +84,32 @@ sub configure {
 
 sub clean_up {
   chdir "/";
-  system "rm -rf $opt{tmp}/*.$$ ".join(' ', @tmps);
+  system "rm -rf $cf{tmp}/*.$$ ".join(' ', @tmps);
 }
 
 sub init {
   $SIG{INT} = \&clean_up;
   $SIG{TERM} = \&clean_up;
 
-  $ENV{RSYNC_PASSWORD} = $opt{password};
+  $ENV{RSYNC_PASSWORD} = $cf{password};
   $ENV{TIME} = '%e,%U,%S';
   $ENV{TZ} = 'UTC';
 }
 
-sub update_rsync {
-  chdir $realcorpusdir;
-
-  # allow non-running of rsync under some circumstances
-  if ($opt{rsync_command}) {
-    system $opt{rsync_command};
-  } else {
-    system "rsync -CPcvuzt --timeout=300 $opt{username}" . '@rsync.spamassassin.org::corpus/*.log .';
-  }
-
-  # this block is no longer required -- we do sensible things with modtime
-  # comparisons to work it out!
-  if (0 && !$opt{always_update_html}) {
-    if (-f "rsync.last") {
-      open(FIND, "find . -type f -newer rsync.last |");
-      my $files = "";
-      while(<FIND>) {
-        $files .= $_;
-      }
-      close(FIND);
-      if (! $files) {
-        print STDERR "no new corpus files\n";
-        if (rand(24) > 1) {
-          exit 0;
-        }
-        else {
-          print STDERR "updating anyway\n";
-        }
-      }
-    }
-  }
-
-  open(RSYNC, "> rsync.last");
-  close(RSYNC);
-  system "chmod +r *.log";
-}
-
 sub locate {
-  opendir(CORPUS, $realcorpusdir);
-  @files = sort readdir(CORPUS);
+  opendir(CORPUS, $logsdir);
+  my @files = sort readdir(CORPUS);
   closedir(CORPUS);
 
   @files = grep {
-    /^(?:spam|ham)-(?:net-)?\S+\.log$/ && -f "$realcorpusdir/$_" && -M _ < 10 
+    /^(?:spam|ham)-(?:net-)?\S+\.log$/ && -f "$logsdir/$_" && -M _ < 10 
   } @files;
 
   foreach my $file (@files) {
     my $tag = 0;
     my $headers = '';
 
-    open(FILE, "$realcorpusdir/$file") or warn "cannot read $realcorpusdir/$file";
+    open(FILE, "$logsdir/$file") or warn "cannot read $logsdir/$file";
     while (my $line = <FILE>) {
       last if $line !~ /^#/;
       $headers .= $line;
@@ -171,18 +131,18 @@ sub locate {
     }
     close(FILE);
 
-    my @s = stat("$realcorpusdir/$file");
+    my @s = stat("$logsdir/$file");
     $filesize{$file} = $s[7];
     $mtime{$file} = $s[9];
 
     if (!defined $time{$file}) {
-      warn "$realcorpusdir/$file: no time found, ignored\n"; next;
+      warn "$logsdir/$file: no time found, ignored\n"; next;
     }
     if (!defined $revision{$file}) {
-      warn "$realcorpusdir/$file: no revision found, ignored\n"; next;
+      warn "$logsdir/$file: no revision found, ignored\n"; next;
     }
     if ($revision{$file} eq 'unknown') {
-      warn "$realcorpusdir/$file: not tagged with a revision, ignored\n"; next;
+      warn "$logsdir/$file: not tagged with a revision, ignored\n"; next;
     }
 
     my $daterev = mk_daterev($time{$file},$revision{$file},$opt_tag);
@@ -192,10 +152,10 @@ sub locate {
 
     if ($file =~ /-net-/) {
       $is_net_daterev{$daterev} = 1;
-      print "$realcorpusdir/$file: rev=$daterev time=$time{$file} (set 1)\n";
+      print "$logsdir/$file: rev=$daterev time=$time{$file} (set 1)\n";
     }
     else {
-      print "$realcorpusdir/$file: rev=$daterev time=$time{$file} (set 0)\n";
+      print "$logsdir/$file: rev=$daterev time=$time{$file} (set 0)\n";
     }
 
     get_rulemetadata_for_revision($daterev, $revision{$file});
@@ -239,7 +199,7 @@ sub time_filter_fileset {
 
 
 sub current {
-  my $classes = $opt{output_classes};
+  my $classes = $cf{output_classes};
   $classes ||= "DETAILS.new DETAILS.all DETAILS.age NET.new NET.all NET.age";
 
   foreach my $entry (split(' ', $classes)) {
@@ -268,7 +228,7 @@ sub current {
 sub gen_class {
   my ($daterev, $rev, $class, $age) = @_;
 
-  print STDERR "\ngenerating: $opt{html}/$daterev/$class.$age\n";
+  print STDERR "\ngenerating: $cf{html}/$daterev/$class.$age\n";
 
   return if ($class eq "NET" && $age !~ /^(?:new|all|age|7day)$/);
 
@@ -278,7 +238,7 @@ sub gen_class {
   print STDERR "input h: " . join(' ', @ham) . "\n";
   print STDERR "input s: " . join(' ', @spam) . "\n";
 
-  chdir $corpusdir;
+  chdir $logsdir;
 
   # net vs. local
   if ($class eq "NET") {
@@ -316,7 +276,7 @@ sub gen_class {
     foreach my $srcfile (@spam, @ham) {
       my $srcfreshness = (-M $srcfile);
       if ($targetfreshness > $srcfreshness) {     # src is fresher
-        print "$fname is older than $srcfile: $targetfreshness > $srcfreshness\n";
+        print "need rebuild, $fname is older than $srcfile: $targetfreshness > $srcfreshness\n";
         $needsrebuild = 1;
         last;
       }
@@ -363,8 +323,8 @@ sub gen_class {
     $flags = "-t net -s 1" if $class eq "NET";
     $flags = "-o" if $class eq "OVERLAP";
     $flags = "-S" if $class eq "SCOREMAP";
-    if ($opt{rules_dir}) {
-      $flags .= " -c '$opt{rules_dir}'";
+    if ($cf{rules_dir}) {
+      $flags .= " -c '$cf{rules_dir}'";
     }
 
     # are we analyzing --net mass-check logs?  if so, use scoreset 1
@@ -387,8 +347,8 @@ sub gen_class {
       for my $file (@ham) {
         $ham{$1} = $file if ($file =~ m/-(\w[-\w]+)\.log$/);
       }
-      unlink "$opt{tmp}/ham.log.$$";
-      unlink "$opt{tmp}/spam.log.$$";
+      unlink "$cf{tmp}/ham.log.$$";
+      unlink "$cf{tmp}/spam.log.$$";
 
       if (scalar keys %spam <= 0 || scalar keys %ham <= 0) {
         warn "no files found for $class.$age";
@@ -398,12 +358,12 @@ sub gen_class {
       for my $user (sort keys %spam) {
         next unless $ham{$user};
 
-        time_filter_fileset([ "$corpusdir/$ham{$user}" ],
-                "$opt{tmp}/ham.log.$$", $OLDEST_HAM_WEEKS, undef);
-        time_filter_fileset([ "$corpusdir/$spam{$user}" ],
-                "$opt{tmp}/spam.log.$$", $OLDEST_SPAM_WEEKS, undef);
+        time_filter_fileset([ "$logsdir/$ham{$user}" ],
+                "$cf{tmp}/ham.log.$$", $OLDEST_HAM_WEEKS, undef);
+        time_filter_fileset([ "$logsdir/$spam{$user}" ],
+                "$cf{tmp}/spam.log.$$", $OLDEST_SPAM_WEEKS, undef);
 
-        start_freqs($rev, "$flags $opt{tmp}/spam.log.$$ $opt{tmp}/ham.log.$$");
+        start_freqs($rev, "$flags $cf{tmp}/spam.log.$$ $cf{tmp}/ham.log.$$");
 
         while(<FREQS>) {
           chomp;
@@ -411,16 +371,16 @@ sub gen_class {
         }
         close(FREQS);
 
-        system("cat $opt{tmp}/ham.log.$$ >> $opt{tmp}/hamall.log.$$");
-        system("cat $opt{tmp}/spam.log.$$ >> $opt{tmp}/spamall.log.$$");
+        system("cat $cf{tmp}/ham.log.$$ >> $cf{tmp}/hamall.log.$$");
+        system("cat $cf{tmp}/spam.log.$$ >> $cf{tmp}/spamall.log.$$");
       }
 
-      if (-z "$opt{tmp}/hamall.log.$$" && -z "$opt{tmp}/spamall.log.$$") {
+      if (-z "$cf{tmp}/hamall.log.$$" && -z "$cf{tmp}/spamall.log.$$") {
         warn "time_filter_fileset() returned empty logs. not creating freqs!";
         return;     # we'll try again later
       }
 
-      start_freqs($rev, "$flags $opt{tmp}/spamall.log.$$ $opt{tmp}/hamall.log.$$");
+      start_freqs($rev, "$flags $cf{tmp}/spamall.log.$$ $cf{tmp}/hamall.log.$$");
 
       while(<FREQS>) {
         /\s0\s+0\s+0.500\s+0.00\s+0.00\s+\(all messages\)/ and $no_msgs = 1;
@@ -436,12 +396,12 @@ sub gen_class {
       for my $which (("0-1", "1-2", "2-3", "3-6")) {
         my ($before, $after) = split(/-/, $which);
         # get and filter logs
-        chdir $corpusdir;
-        time_filter_fileset(\@ham, "$opt{tmp}/ham.log.$$", $after, $before);
-        time_filter_fileset(\@spam, "$opt{tmp}/spam.log.$$", $after, $before);
+        chdir $logsdir;
+        time_filter_fileset(\@ham, "$cf{tmp}/ham.log.$$", $after, $before);
+        time_filter_fileset(\@spam, "$cf{tmp}/spam.log.$$", $after, $before);
 
         # print out by age
-        start_freqs($rev, "$flags $opt{tmp}/spam.log.$$ $opt{tmp}/ham.log.$$");
+        start_freqs($rev, "$flags $cf{tmp}/spam.log.$$ $cf{tmp}/ham.log.$$");
         
         while(<FREQS>) {
           chomp;
@@ -453,15 +413,15 @@ sub gen_class {
     }
     elsif (@ham && @spam) {
       # get logs
-      time_filter_fileset(\@ham, "$opt{tmp}/ham.log.$$", $OLDEST_HAM_WEEKS, undef);
-      time_filter_fileset(\@spam, "$opt{tmp}/spam.log.$$", $OLDEST_SPAM_WEEKS, undef);
+      time_filter_fileset(\@ham, "$cf{tmp}/ham.log.$$", $OLDEST_HAM_WEEKS, undef);
+      time_filter_fileset(\@spam, "$cf{tmp}/spam.log.$$", $OLDEST_SPAM_WEEKS, undef);
 
-      if (-z "$opt{tmp}/ham.log.$$" && -z "$opt{tmp}/spam.log.$$") {
+      if (-z "$cf{tmp}/ham.log.$$" && -z "$cf{tmp}/spam.log.$$") {
         warn "time_filter_fileset() returned empty logs. not creating freqs!";
         return;     # we'll try again later
       }
 
-      start_freqs($rev, "$flags $opt{tmp}/spam.log.$$ $opt{tmp}/ham.log.$$");
+      start_freqs($rev, "$flags $cf{tmp}/spam.log.$$ $cf{tmp}/ham.log.$$");
 
       while(<FREQS>) {
         /\s0\s+0\s+0.500\s+0.00\s+0.00\s+\(all messages\)/ and $no_msgs = 1;
@@ -493,7 +453,7 @@ sub gen_class {
   print qq{created: $bytes bytes, finished at $when
 URL:
 
-  $opt{ruleqa_url}$output_revpath
+  $cf{ruleqa_url}$output_revpath
 
 };
 
@@ -506,12 +466,12 @@ sub mk_daterev {
 
 sub create_outputdir {
   my ($revpath) = @_;
-  my $dir = $opt{html} .'/'. $revpath;
+  my $dir = $cf{html} .'/'. $revpath;
 
   # print "output dir: $dir\n";
   if (!-d $dir) {
     my $prevu = umask 0;
-    mkpath([$dir], 0, oct($opt{html_mode})) or warn "failed to mkdir $dir";
+    mkpath([$dir], 0, oct($cf{html_mode})) or warn "failed to mkdir $dir";
     umask $prevu;
   }
 
@@ -544,10 +504,10 @@ sub log_metadata_xml {
 
 sub create_rulemetadata_dir {
   my $rev = shift;
-  my $dir = "$opt{html}/rulemetadata/$rev";
+  my $dir = "$cf{html}/rulemetadata/$rev";
   if (!-d $dir) {
     my $prevu = umask 0;
-    mkpath([$dir], 0, oct($opt{html_mode})) or warn "failed to mkdir $dir";
+    mkpath([$dir], 0, oct($cf{html_mode})) or warn "failed to mkdir $dir";
     umask $prevu;
   }
   return $dir;
@@ -561,9 +521,9 @@ sub get_rulemetadata_for_revision {
   # argh.  this is silly; ~bbmass/.corpus specifies "$PWD" in its
   # "tree" path, so we have to ensure we're in the 'masses' dir
   # for this to work!
-  chdir "$opt{tree}/masses" or die "cannot chdir $opt{tree}/masses";
+  chdir "$cf{tree}/masses" or die "cannot chdir $cf{tree}/masses";
 
-  my $cmd = "$opt{tree}/masses/rule-qa/get-rulemetadata-for-revision ".
+  my $cmd = "$cf{tree}/masses/rule-qa/get-rulemetadata-for-revision ".
                     "--rev=$rev --outputdir='$dir'";
 
   system($cmd);
@@ -576,14 +536,14 @@ sub start_freqs {
   my ($rev, $args) = @_;
 
   $rev ||= 'HEAD';
-  my $hfdir = "$opt{tmp}/hfdir/r$rev";
+  my $hfdir = "$cf{tmp}/hfdir/r$rev";
 
   print "setting up hit-frequencies for r$rev in $hfdir\n";
 
-  (-d "$opt{tmp}/hfdir") or system("mkdir $opt{tmp}/hfdir");
+  (-d "$cf{tmp}/hfdir") or system("mkdir $cf{tmp}/hfdir");
   if (!-d $hfdir) {
-    system ("cp -pr $opt{tree} $hfdir");
-    ($?>>8 != 0) and die "cp $opt{tree}/masses $hfdir failed";
+    system ("cp -pr $cf{tree} $hfdir");
+    ($?>>8 != 0) and die "cp $cf{tree}/masses $hfdir failed";
   }
 
   chdir "$hfdir" or die "cannot chdir $hfdir";
