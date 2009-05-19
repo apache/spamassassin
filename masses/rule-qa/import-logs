@@ -117,7 +117,7 @@ sub update_rsync {
 
   open(RSYNC, "> rsync.last");
   close(RSYNC);
-  system "chmod +r *.log";
+  system "chmod +r *.log > /dev/null 2>&1";
 }
 
 sub locate {
