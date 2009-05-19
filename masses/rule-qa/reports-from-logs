@@ -345,14 +345,14 @@ sub gen_class {
         # ham-someuser.log, ham-net-bb-jm.20090518-r775863-n.log
         my $u = $file;
         $u =~ s/\.log$//; $u =~ s/.*\///; $u =~ s/^(h|sp)am-(?:net-)?//;
-        $u =~ s/\.\d{8}-r\d+-?//;       # daterev
+        $u =~ s/\.\d{8}-r\d+-[a-z]//;       # daterev
         $spam{$1} = $u;
         print "username in spam log: $u\n";
       }
       for my $file (@ham) {
         my $u = $file;
         $u =~ s/\.log$//; $u =~ s/.*\///; $u =~ s/^(h|sp)am-(?:net-)?//;
-        $u =~ s/\.\d{8}-r\d+-?//;       # daterev
+        $u =~ s/\.\d{8}-r\d+-[a-z]//;       # daterev
         $ham{$1} = $u;
         print "username in ham log: $u\n";
       }
