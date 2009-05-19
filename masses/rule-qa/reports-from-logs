@@ -57,8 +57,8 @@ init();
 my $logsdir = "$cf{html}/logs";
 print "reading logs from '$logsdir'\n";
 
-locate();
-current();
+locate_input();
+generate_logs();
 clean_up();
 exit;
 
@@ -96,7 +96,7 @@ sub init {
   $ENV{TZ} = 'UTC';
 }
 
-sub locate {
+sub locate_input {
   opendir(CORPUS, $logsdir);
   my @files = sort readdir(CORPUS);
   closedir(CORPUS);
@@ -198,7 +198,7 @@ sub time_filter_fileset {
 }
 
 
-sub current {
+sub generate_logs {
   my $classes = $cf{output_classes};
   $classes ||= "DETAILS.new DETAILS.all DETAILS.age NET.new NET.all NET.age";
 
@@ -209,7 +209,7 @@ sub current {
     if (!$rtype) { warn "no rtype in $entry"; next; }
     if ($class eq 'HTML') { warn "class HTML in $entry obsolete, ignored"; next; }
 
-    foreach my $daterev (sort keys %logs_by_daterev) {
+    foreach my $daterev (reverse sort keys %logs_by_daterev) {
       my $rev;
       if ($daterev !~ /\/r(\d+)/) {
         warn "bad daterev: $daterev"; next;
