@@ -205,8 +205,8 @@ sub current {
   foreach my $entry (split(' ', $classes)) {
     $entry =~ /^(\S+)\.(\S+)$/;
     my $class = $1;
-    my $age = $2;
-    if (!$age) { warn "no age in $entry"; next; }
+    my $rtype = $2;
+    if (!$rtype) { warn "no rtype in $entry"; next; }
     if ($class eq 'HTML') { warn "class HTML in $entry obsolete, ignored"; next; }
 
     foreach my $daterev (sort keys %logs_by_daterev) {
@@ -220,17 +220,17 @@ sub current {
         next unless $is_net_daterev{$daterev};
       }
 
-      gen_class ($daterev, $rev, $class, $age);
+      gen_class ($daterev, $rev, $class, $rtype);
     }
   }
 }
 
 sub gen_class {
-  my ($daterev, $rev, $class, $age) = @_;
+  my ($daterev, $rev, $class, $rtype) = @_;
 
-  print STDERR "\ngenerating: $cf{html}/$daterev/$class.$age\n";
+  print STDERR "\ngenerating: $cf{html}/$daterev/$class.$rtype\n";
 
-  return if ($class eq "NET" && $age !~ /^(?:new|all|age|7day)$/);
+  return if ($class eq "NET" && $rtype !~ /^(?:new|all|age|7day)$/);
 
   my @ham = grep { /^ham/ } @{$logs_by_daterev{$daterev}};
   my @spam = grep { /^spam/ } @{$logs_by_daterev{$daterev}};
@@ -247,7 +247,7 @@ sub gen_class {
   }
 
   # age
-  if ($age =~ /(\d+)day/) {
+  if ($rtype =~ /(\d+)day/) {
     my $mtime = $1;
     @ham = grep { -M $_ < $mtime } @ham;
     @spam = grep { -M $_ < $mtime } @spam;
@@ -260,12 +260,12 @@ sub gen_class {
   # we cannot continue if we have no files that match the criteria...
   # demand at least 1 ham and 1 spam file
   if (scalar @spam <= 0 || scalar @ham <= 0) {
-    warn "not enough files found matching criteria ($daterev $class $age)\n";
+    warn "not enough files found matching criteria ($daterev $class $rtype)\n";
     return;
   }
 
   my $dir = create_outputdir($daterev);
-  my $fname = "$dir/$class.$age";
+  my $fname = "$dir/$class.$rtype";
 
   # now, if the target file already exists, check to see if it's newer
   # than all the sources, make-style; if not, don't re-create it
@@ -313,8 +313,8 @@ sub gen_class {
     my $tmpfname = "$fname.$$";
 
     open(OUT, "> $tmpfname") or warn "cannot write to $tmpfname";
-    print OUT "# ham results used for $daterev $class $age: " . join(" ", @ham) . "\n";
-    print OUT "# spam results used for $daterev $class $age: " . join(" ", @spam) . "\n";
+    print OUT "# ham results used for $daterev $class $rtype: " . join(" ", @ham) . "\n";
+    print OUT "# spam results used for $daterev $class $rtype: " . join(" ", @spam) . "\n";
     print OUT "# ".log_metadata_xml($daterev, @ham, @spam)."\n";
 
     push (@tmps, abs_path($tmpfname));
@@ -336,25 +336,33 @@ sub gen_class {
     # with no log lines included at all
     my $no_msgs = 0;
 
-    if ($age eq "all") {
+    if ($rtype eq "all") {
       my %spam;
       my %ham;
       my @output;
       
       for my $file (@spam) {
-        $spam{$1} = $file if ($file =~ m/-(\w[-\w]+)\.log$/);
+        # ham-someuser.log, ham-net-bb-jm.20090518-r775863-n.log
+        my $u = $file;
+        $u =~ s/\.log$//; $u =~ s/.*\///; $u =~ s/^(h|sp)am-(?:net-)?//;
+        $u =~ s/\.\d{8}-r\d+-?//;       # daterev
+        $spam{$1} = $u;
+        print "username in spam log: $u\n";
       }
       for my $file (@ham) {
-        $ham{$1} = $file if ($file =~ m/-(\w[-\w]+)\.log$/);
+        my $u = $file;
+        $u =~ s/\.log$//; $u =~ s/.*\///; $u =~ s/^(h|sp)am-(?:net-)?//;
+        $u =~ s/\.\d{8}-r\d+-?//;       # daterev
+        $ham{$1} = $u;
+        print "username in ham log: $u\n";
       }
-      unlink "$cf{tmp}/ham.log.$$";
-      unlink "$cf{tmp}/spam.log.$$";
 
       if (scalar keys %spam <= 0 || scalar keys %ham <= 0) {
-        warn "no files found for $class.$age";
+        warn "no files found for $class.$rtype";
         return;
       }
 
+      unlink "$cf{tmp}/ham.log.$$", "$cf{tmp}/spam.log.$$";
       for my $user (sort keys %spam) {
         next unless $ham{$user};
 
@@ -390,7 +398,7 @@ sub gen_class {
 
       for (sort sort_all @output) { print OUT; }
     }
-    elsif ($age eq "age") {
+    elsif ($rtype eq "age") {
       my @output;
 
       for my $which (("0-1", "1-2", "2-3", "3-6")) {
