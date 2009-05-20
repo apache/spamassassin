@@ -770,19 +770,24 @@ sub show_mclog {
   $self->{datadir} = $self->get_datadir_for_daterev($self->{daterev});
 
   # logs are named e.g.
-  # /home/automc/corpus/html/20051028/r328993/LOGS.all-ham-mc-fast.log.gz
+  # .../20051028/r328993-n/LOGS.all-ham-mc-fast-20051028-r328993-n.log.gz
 
   # untaint
   $name =~ /^([-\.a-zA-Z0-9]+)/; my $safename = $1;
   $self->{rule} =~ /([_0-9a-zA-Z]+)/; my $saferule = $1;
   $self->{datadir} =~ /([-\.\,_0-9a-zA-Z\/]+)/; my $safedatadir = $1;
 
+  # logs now include the daterev, too
+  $self->{daterev} =~ /([-\.\,_0-9a-zA-Z\/]+)/; my $safedaterev = $1;
+  $safedaterev =~ s/\//-/gs;
+
   # outright block possibly-hostile stuff here:
   # no "../" path traversal
   die "forbidden: $safedatadir .." if ($safedatadir =~ /\.\./);
+  die "forbidden: $safedaterev .." if ($safedaterev =~ /\.\./);
   die "forbidden: $safename .." if ($safename =~ /\.\./);
 
-  my $gzfile = "$safedatadir/LOGS.all-$safename.log.gz";
+  my $gzfile = "$safedatadir/LOGS.all-$safename.$safedaterev.log.gz";
   if (!-f $gzfile) {
     print "cannot open $gzfile\n";
     die "cannot open $gzfile";
@@ -1200,7 +1205,7 @@ sub create_mclog_link {
   return '' unless $who;
 
   my $href = $self->assemble_url(
-            "mclog=".(($isspam ? "spam" : "ham")."-".$who),
+            "mclog=".(($isspam ? "spam" : "ham")."-$who"),
             "rule=".$line->{name},
            "daterev=".$self->{daterev},
             $self->get_params_except(qw( mclog rule s_detail )));
