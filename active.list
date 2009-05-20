@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: bb-jm.20090508-r772890-n dos.20090508-r772890-n jm.20090508-r772890-n; day 2: bb-jm.20090508-r772890-n dos.20090508-r772890-n jm.20090508-r772890-n; day 3: bb-jm.20090508-r772890-n dos.20090508-r772890-n jm.20090508-r772890-n
+# with results from: day 1: bb-jm.20090519-r776240-n dos.20090519-r776240-n jm.20090519-r776240-n zmi.20090519-r776240-n; day 2: bb-jm.20090518-r775863-n dos.20090518-r775863-n jm.20090518-r775863-n zmi.20090518-r775863-n; day 3: bb-jm.20090517-r775600-n dos.20090517-r775600-n jm.20090517-r775600-n zmi.20090517-r775600-n
 
 # tflags userconf
 ALL_TRUSTED
@@ -146,6 +146,9 @@ FB_SAVE_PERSC
 FB_SOFTTABS
 
 # good enough
+FB_ULTRA_ALLURE
+
+# good enough
 FB_WITHOUT_PRESC
 
 # good enough
@@ -204,9 +207,6 @@ FROM_LOCAL_NOVOWEL
 
 # good enough
 FRT_APPROV
-
-# good enough
-FRT_DISCOUNT
 
 # good enough
 FRT_ROLEX
@@ -698,19 +698,10 @@ THREAD_INDEX_BAD
 TT_MSGID_TRUNC
 
 # good enough
-TVD_ENVFROM_APOST
-
-# good enough
 TVD_FINGER_02
 
 # good enough
 TVD_PCT_OFF
-
-# good enough
-TVD_PH_BODY_META
-
-# good enough
-TVD_PH_SUBJ_SEC_MEASURES
 
 # good enough
 TVD_QUAL_MEDS
@@ -726,6 +717,48 @@ TVD_RCVD_SINGLE
 
 # good enough
 TVD_VISIT_PHARMA
+
+# tflags net
+EMAILBL_TEST_LEM
+
+# good enough
+FB_GREAT_BEST_SEX
+
+# good enough
+FB_MEDS_PERCENT
+
+# good enough
+FH_HAS_X
+
+# good enough
+FS_SINGLE_LETTER_J
+
+# good enough
+FS_YOUR_PRESCRIP
+
+# good enough
+KHOP_SC_CIDR8
+
+# good enough
+KHOP_SC_TOP100
+
+# good enough
+KHOP_SC_TOP200
+
+# good enough
+MIME_IMAGE_ONLY
+
+# good enough
+SANE_237c2b0099548ddbfa5a37f07e0687ab
+
+# good enough
+SANE_daa623cb11d766d49327b6af6dced27e
+
+# good enough
+STOX_REPLY_TYPE_WITHOUT_QUOTES
+
+# good enough
+TVD_FROM_1
 
 # tflags userconf
 UNPARSEABLE_RELAY
