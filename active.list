@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: bb-jm.20090520-r776618-n dos.20090520-r776618-n jm.20090520-r776618-n zmi.20090520-r776618-n; day 2: bb-jm.20090519-r776240-n dos.20090519-r776240-n jm.20090519-r776240-n zmi.20090519-r776240-n; day 3: bb-jm.20090518-r775863-n dos.20090518-r775863-n jm.20090518-r775863-n zmi.20090518-r775863-n
+# with results from: day 1: bb-jm.20090521-r777016-n dos.20090521-r777016-n jm.20090521-r777016-n zmi.20090521-r777016-n; day 2: bb-jm.20090520-r776618-n dos.20090520-r776618-n jm.20090520-r776618-n zmi.20090520-r776618-n; day 3: bb-jm.20090519-r776240-n dos.20090519-r776240-n jm.20090519-r776240-n zmi.20090519-r776240-n
 
 # tflags userconf
 ALL_TRUSTED
@@ -395,9 +395,6 @@ KB_RATWARE_OUTLOOK_16
 KB_RATWARE_OUTLOOK_MID
 
 # good enough
-KHOP_SC_CIDR8
-
-# good enough
 KHOP_SC_TOP100
 
 # good enough
@@ -746,6 +743,9 @@ TVD_FROM_1
 TVD_PCT_OFF
 
 # good enough
+TVD_PH_BODY_META
+
+# good enough
 TVD_QUAL_MEDS
 
 # good enough
@@ -761,7 +761,10 @@ TVD_RCVD_SINGLE
 TVD_VISIT_PHARMA
 
 # good enough
-TVD_PH_BODY_META
+KHOP_SC_CIDR16
+
+# good enough
+KHOP_SC_TOP_CIDR16
 
 # tflags userconf
 UNPARSEABLE_RELAY
