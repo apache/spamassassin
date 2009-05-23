@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: bb-jm.20090521-r777016-n dos.20090521-r777016-n jm.20090521-r777016-n zmi.20090521-r777016-n; day 2: bb-jm.20090520-r776618-n dos.20090520-r776618-n jm.20090520-r776618-n zmi.20090520-r776618-n; day 3: bb-jm.20090519-r776240-n dos.20090519-r776240-n jm.20090519-r776240-n zmi.20090519-r776240-n
+# with results from: day 1: bb-jm.20090522-r777434-n dos.20090522-r777434-n jm.20090522-r777434-n zmi.20090522-r777434-n; day 2: bb-jm.20090521-r777016-n dos.20090521-r777016-n jm.20090521-r777016-n zmi.20090521-r777016-n; day 3: bb-jm.20090520-r776618-n dos.20090520-r776618-n jm.20090520-r776618-n zmi.20090520-r776618-n
 
 # tflags userconf
 ALL_TRUSTED
@@ -153,9 +153,6 @@ FB_SAVE_PERSC
 
 # good enough
 FB_SOFTTABS
-
-# good enough
-FB_ULTRA_ALLURE
 
 # good enough
 FB_WITHOUT_PRESC
@@ -395,10 +392,16 @@ KB_RATWARE_OUTLOOK_16
 KB_RATWARE_OUTLOOK_MID
 
 # good enough
+KHOP_SC_CIDR16
+
+# good enough
 KHOP_SC_TOP100
 
 # good enough
 KHOP_SC_TOP200
+
+# good enough
+KHOP_SC_TOP_CIDR16
 
 # tflags userconf
 MIME_CHARSET_FARAWAY
@@ -423,9 +426,6 @@ NO_RECEIVED
 
 # tflags userconf
 NO_RELAYS
-
-# good enough
-PQRTW_4
 
 # tflags net
 PYZOR_CHECK
@@ -734,6 +734,9 @@ THREAD_INDEX_BAD
 TT_MSGID_TRUNC
 
 # good enough
+TVD_ENVFROM_APOST
+
+# good enough
 TVD_FINGER_02
 
 # good enough
@@ -761,10 +764,7 @@ TVD_RCVD_SINGLE
 TVD_VISIT_PHARMA
 
 # good enough
-KHOP_SC_CIDR16
-
-# good enough
-KHOP_SC_TOP_CIDR16
+FRT_ABSOLUT
 
 # tflags userconf
 UNPARSEABLE_RELAY
