@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: bb-jm.20090522-r777434-n dos.20090522-r777434-n jm.20090522-r777434-n zmi.20090522-r777434-n; day 2: bb-jm.20090521-r777016-n dos.20090521-r777016-n jm.20090521-r777016-n zmi.20090521-r777016-n; day 3: bb-jm.20090520-r776618-n dos.20090520-r776618-n jm.20090520-r776618-n zmi.20090520-r776618-n
+# with results from: day 1: bb-jm.20090524-r778114-n dos.20090524-r778114-n jm.20090524-r778114-n zmi.20090524-r778114-n; day 2: bb-jm.20090522-r777434-n dos.20090522-r777434-n jm.20090522-r777434-n zmi.20090522-r777434-n; day 3: bb-jm.20090521-r777016-n dos.20090521-r777016-n jm.20090521-r777016-n zmi.20090521-r777016-n
 
 # tflags userconf
 ALL_TRUSTED
@@ -215,7 +215,7 @@ FROM_DOMAIN_NOVOWEL
 FROM_LOCAL_NOVOWEL
 
 # good enough
-FRT_APPROV
+FRT_ABSOLUT
 
 # good enough
 FRT_ROLEX
@@ -715,9 +715,6 @@ SPF_SOFTFAIL
 # good enough
 STOCK_IMG_HDR_FROM
 
-# good enough
-STOX_REPLY_TYPE_WITHOUT_QUOTES
-
 # tflags userconf
 SUBJECT_IN_BLACKLIST
 
@@ -764,7 +761,16 @@ TVD_RCVD_SINGLE
 TVD_VISIT_PHARMA
 
 # good enough
-FRT_ABSOLUT
+FB_SMALL_PEN
+
+# good enough
+KHOP_SC_CIDR24
+
+# good enough
+KHOP_SC_TOP_CIDR8
+
+# good enough
+PQRTW_4
 
 # tflags userconf
 UNPARSEABLE_RELAY
