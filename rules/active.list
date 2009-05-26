@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: bb-jm.20090524-r778114-n dos.20090524-r778114-n jm.20090524-r778114-n zmi.20090524-r778114-n; day 2: bb-jm.20090522-r777434-n dos.20090522-r777434-n jm.20090522-r777434-n zmi.20090522-r777434-n; day 3: bb-jm.20090521-r777016-n dos.20090521-r777016-n jm.20090521-r777016-n zmi.20090521-r777016-n
+# with results from: day 1: bb-jm.20090525-r778353-n dos.20090525-r778353-n jm.20090525-r778353-n; day 2: bb-jm.20090524-r778114-n dos.20090524-r778114-n jm.20090524-r778114-n zmi.20090524-r778114-n; day 3: bb-jm.20090522-r777434-n dos.20090522-r777434-n jm.20090522-r777434-n zmi.20090522-r777434-n
 
 # tflags userconf
 ALL_TRUSTED
@@ -150,6 +150,9 @@ FB_REPLICA_ROLEX
 
 # good enough
 FB_SAVE_PERSC
+
+# good enough
+FB_SMALL_PEN
 
 # good enough
 FB_SOFTTABS
@@ -395,6 +398,9 @@ KB_RATWARE_OUTLOOK_MID
 KHOP_SC_CIDR16
 
 # good enough
+KHOP_SC_CIDR24
+
+# good enough
 KHOP_SC_TOP100
 
 # good enough
@@ -402,6 +408,9 @@ KHOP_SC_TOP200
 
 # good enough
 KHOP_SC_TOP_CIDR16
+
+# good enough
+KHOP_SC_TOP_CIDR8
 
 # tflags userconf
 MIME_CHARSET_FARAWAY
@@ -737,9 +746,6 @@ TVD_ENVFROM_APOST
 TVD_FINGER_02
 
 # good enough
-TVD_FROM_1
-
-# good enough
 TVD_PCT_OFF
 
 # good enough
@@ -761,16 +767,10 @@ TVD_RCVD_SINGLE
 TVD_VISIT_PHARMA
 
 # good enough
-FB_SMALL_PEN
+SANE_75491b468ec2e117e50f9842d32abfab
 
 # good enough
-KHOP_SC_CIDR24
-
-# good enough
-KHOP_SC_TOP_CIDR8
-
-# good enough
-PQRTW_4
+STOX_REPLY_TYPE_WITHOUT_QUOTES
 
 # tflags userconf
 UNPARSEABLE_RELAY
