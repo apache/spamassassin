@@ -1,8 +1,11 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: bb-jm.20090525-r778353-n dos.20090525-r778353-n jm.20090525-r778353-n; day 2: bb-jm.20090524-r778114-n dos.20090524-r778114-n jm.20090524-r778114-n zmi.20090524-r778114-n; day 3: bb-jm.20090522-r777434-n dos.20090522-r777434-n jm.20090522-r777434-n zmi.20090522-r777434-n
+# with results from: day 1: bb-jm.20090526-r778623-n dos.20090526-r778623-n jm.20090526-r778623-n zmi.20090526-r778623-n; day 2: bb-jm.20090525-r778353-n dos.20090525-r778353-n jm.20090525-r778353-n; day 3: bb-jm.20090524-r778114-n dos.20090524-r778114-n jm.20090524-r778114-n zmi.20090524-r778114-n
 
 # tflags userconf
 ALL_TRUSTED
+
+# good enough
+APOSTROPHE_FROM
 
 # good enough
 BASE64_LENGTH_78_79
@@ -424,9 +427,6 @@ MISSING_HB_SEP
 # good enough
 MSGID_NOFQDN1
 
-# good enough
-MSOE_MID_WRONG_CASE
-
 # tflags net
 NO_DNS_FOR_FROM
 
@@ -662,6 +662,9 @@ SANE_57eb6fb7217efcb7a706124454426ee6
 SANE_7429530a7398f43f1f1b795f9420714e
 
 # good enough
+SANE_75491b468ec2e117e50f9842d32abfab
+
+# good enough
 SANE_7d8e92a09f27d49fafe09a1dbd5cac10
 
 # good enough
@@ -749,9 +752,6 @@ TVD_FINGER_02
 TVD_PCT_OFF
 
 # good enough
-TVD_PH_BODY_META
-
-# good enough
 TVD_QUAL_MEDS
 
 # good enough
@@ -765,12 +765,6 @@ TVD_RCVD_SINGLE
 
 # good enough
 TVD_VISIT_PHARMA
-
-# good enough
-SANE_75491b468ec2e117e50f9842d32abfab
-
-# good enough
-STOX_REPLY_TYPE_WITHOUT_QUOTES
 
 # tflags userconf
 UNPARSEABLE_RELAY
