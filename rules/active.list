@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: bb-jm.20090529-r779896-n dos.20090529-r779896-n jm.20090529-r779896-n zmi.20090529-r779896-n; day 2: bb-jm.20090528-r779487-n dos.20090528-r779487-n jm.20090528-r779487-n zmi.20090528-r779487-n; day 3: bb-jm.20090527-r779064-n dos.20090527-r779064-n jm.20090527-r779064-n zmi.20090527-r779064-n
+# with results from: day 1: bb-jm.20090531-r780384-n dos.20090531-r780384-n jm.20090531-r780384-n zmi.20090531-r780384-n; day 2: bb-jm.20090529-r779896-n dos.20090529-r779896-n jm.20090529-r779896-n zmi.20090529-r779896-n; day 3: bb-jm.20090528-r779487-n dos.20090528-r779487-n jm.20090528-r779487-n zmi.20090528-r779487-n
 
 # tflags userconf
 ALL_TRUSTED
@@ -210,6 +210,9 @@ FROM_DOMAIN_NOVOWEL
 
 # tflags userconf
 FROM_LOCAL_NOVOWEL
+
+# good enough
+FROM_UNBAL1
 
 # good enough
 FRT_ROLEX
@@ -752,7 +755,10 @@ TVD_RCVD_SINGLE
 TVD_VISIT_PHARMA
 
 # good enough
-FROM_UNBAL1
+FRT_ABSOLUT
+
+# good enough
+TVD_FROM_1
 
 # tflags userconf
 UNPARSEABLE_RELAY
