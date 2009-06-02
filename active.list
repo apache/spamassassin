@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: bb-jm.20090531-r780384-n dos.20090531-r780384-n jm.20090531-r780384-n zmi.20090531-r780384-n; day 2: bb-jm.20090529-r779896-n dos.20090529-r779896-n jm.20090529-r779896-n zmi.20090529-r779896-n; day 3: bb-jm.20090528-r779487-n dos.20090528-r779487-n jm.20090528-r779487-n zmi.20090528-r779487-n
+# with results from: day 1: bb-jm.20090601-r780595-n dos.20090601-r780595-n jm.20090601-r780595-n zmi.20090601-r780595-n; day 2: bb-jm.20090531-r780384-n dos.20090531-r780384-n jm.20090531-r780384-n zmi.20090531-r780384-n; day 3: bb-jm.20090529-r779896-n dos.20090529-r779896-n jm.20090529-r779896-n zmi.20090529-r779896-n
 
 # tflags userconf
 ALL_TRUSTED
@@ -197,6 +197,9 @@ FH_HOST_EQ_VERIZON_P
 FH_HOST_IN_ADDRARPA
 
 # good enough
+FM_SCHOOLING
+
+# good enough
 FM_SEX_HELODDDD
 
 # good enough
@@ -227,13 +230,7 @@ FRT_WEIGHT2
 FR_TITLE_CONS_6
 
 # good enough
-FSL_GD_ABUSE1
-
-# good enough
 FSL_GEO_ABUSE
-
-# good enough
-FSL_HELO_1
 
 # good enough
 FSL_INTERIA_ABUSE
@@ -737,6 +734,9 @@ TVD_ENVFROM_APOST
 TVD_FINGER_02
 
 # good enough
+TVD_FROM_1
+
+# good enough
 TVD_PCT_OFF
 
 # good enough
@@ -755,10 +755,7 @@ TVD_RCVD_SINGLE
 TVD_VISIT_PHARMA
 
 # good enough
-FRT_ABSOLUT
-
-# good enough
-TVD_FROM_1
+SANE_8f9d40cc4e21b11c7171a7d6b3eea4c1
 
 # tflags userconf
 UNPARSEABLE_RELAY
