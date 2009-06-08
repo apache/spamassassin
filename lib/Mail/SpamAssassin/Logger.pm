@@ -133,8 +133,6 @@ sub add_facilities {
   }
 }
 
-=item log_message($level, $message)
-
 =item log_message($level, @message)
 
 Log a message at a specific level.  Levels are specified as strings:
@@ -174,10 +172,17 @@ sub log_message {
 
   # split on newlines and call log_message multiple times; saves
   # the subclasses having to understand multi-line logs
+  my $first = 1;
   foreach my $line (split(/\n/, $message)) {
     # replace control characters with "_", tabs and spaces get
     # replaced with a single space.
     $line =~ tr/\x09\x20\x00-\x1f/  _/s;
+    if ($first) {
+      $first = 0;
+    } else {
+      local $1;
+      $line =~ s/^([^:]+?):/$1: [...]/;
+    }
     while (my ($name, $object) = each %{ $LOG_SA{method} }) {
       $object->log_message($level, $line);
     }
@@ -216,7 +221,7 @@ sub _log {
 
   # it's faster to access this as the $_[1] alias, and not to perform
   # string mods until we're sure we actually want to log anything
-  if ($_[1] =~ /^([^:]+?): /) {
+  if ($_[1] =~ /^([^:]+?):/) {
     $facility = $1;
   } else {
     $facility = "generic";
@@ -231,7 +236,7 @@ sub _log {
   }
 
   my ($level, $message, @args) = @_;
-  $message =~ s/^([^:]+?): //;
+  $message =~ s/^([^:]+?):\s*//;
 
   if (@args && index($message,'%') >= 0) { $message = sprintf($message,@args) }
   $message =~ s/\n+$//s;
