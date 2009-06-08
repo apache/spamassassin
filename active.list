@@ -1,17 +1,8 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: bb-jm.20090605-r781946-n dos.20090605-r781946-n jm.20090605-r781946-n zmi.20090605-r781946-n; day 2: bb-jm.20090604-r781686-n dos.20090604-r781686-n jm.20090604-r781686-n zmi.20090604-r781686-n; day 3: bb-jm.20090603-r781302-n dos.20090603-r781302-n jm.20090603-r781302-n zmi.20090603-r781302-n
+# with results from: day 1: bb-jm.20090607-r782348-n dos.20090607-r782348-n jm.20090607-r782348-n zmi.20090607-r782348-n; day 2: bb-jm.20090605-r781946-n dos.20090605-r781946-n jm.20090605-r781946-n zmi.20090605-r781946-n; day 3: bb-jm.20090604-r781686-n dos.20090604-r781686-n jm.20090604-r781686-n zmi.20090604-r781686-n
 
 # tflags userconf
 ALL_TRUSTED
-
-# good enough
-APOSTROPHE_FROM
-
-# good enough
-BASE64_LENGTH_78_79
-
-# good enough
-BASE64_LENGTH_79_INF
 
 # tflags learn
 BAYES_00
@@ -46,9 +37,6 @@ CHARSET_FARAWAY
 # tflags userconf
 CHARSET_FARAWAY_HEADER
 
-# tflags userconf
-CORRUPT_FROM_LINE_IN_HDRS
-
 # tflags net
 DIGEST_MULTIPLE
 
@@ -76,77 +64,11 @@ DNS_FROM_RFC_BOGUSMX
 # tflags net
 DNS_FROM_RFC_DSN
 
-# good enough
-DRUGS_STOCK_MIMEOLE
-
-# good enough
-DYN_RDNS_AND_INLINE_IMAGE
-
-# good enough
-DYN_RDNS_SHORT_HELO_HTML
-
-# good enough
-DYN_RDNS_SHORT_HELO_IMAGE
-
 # tflags userconf
 ENV_AND_HDR_DKIM_MATCH
 
 # tflags userconf
 ENV_AND_HDR_SPF_MATCH
-
-# good enough
-FB_CIALIS_LEO3
-
-# good enough
-FB_GET_MEDS
-
-# good enough
-FB_GVR
-
-# good enough
-FB_INCREASE_YOUR
-
-# good enough
-FB_NO_SCRIP_NEEDED
-
-# good enough
-FB_QUALITY_REPLICA
-
-# good enough
-FB_SOFTTABS
-
-# good enough
-FH_DATE_PAST_20XX
-
-# good enough
-FH_FAKE_RCVD_LINE
-
-# good enough
-FH_HELO_ALMOST_IP
-
-# good enough
-FH_HELO_EQ_CHARTER
-
-# good enough
-FH_HELO_EQ_D_D_D_D
-
-# good enough
-FH_HOST_EQ_DYNAMICIP
-
-# good enough
-FH_HOST_EQ_PACBELL_D
-
-# good enough
-FH_HOST_EQ_VERIZON_P
-
-# good enough
-FM_SCHOOLING
-
-# good enough
-FM_SCHOOL_DIPLOMA
-
-# good enough
-FM_SEX_HELODDDD
 
 # tflags userconf
 FRAGMENTED_MESSAGE
@@ -156,33 +78,6 @@ FROM_DOMAIN_NOVOWEL
 
 # tflags userconf
 FROM_LOCAL_NOVOWEL
-
-# good enough
-FRT_ROLEX
-
-# good enough
-FRT_TODAY2
-
-# good enough
-FRT_WEIGHT2
-
-# good enough
-FS_EJACULA
-
-# good enough
-FS_LARGE_PERCENT2
-
-# good enough
-FS_REPLICA
-
-# good enough
-FS_REPLICAWATCH
-
-# good enough
-FS_START_LOSE
-
-# good enough
-FS_WILL_HELP
 
 # tflags userconf
 GTUBE
@@ -220,32 +115,11 @@ HASHCASH_HIGH
 # tflags userconf
 HEAD_LONG
 
-# good enough
-HELO_LH_HOME
-
-# good enough
-HELO_LOCALHOST
-
-# good enough
-HELO_OEM
-
 # tflags userconf
 HIGH_CODEPAGE_URI
 
-# good enough
-HS_FORGED_OE_FW
-
-# good enough
-HS_INDEX_PARAM
-
 # tflags userconf
 HTML_CHARSET_FARAWAY
-
-# tflags publish
-KAM_STOCKOTC
-
-# tflags publish
-KAM_STOCKTIP15
 
 # tflags userconf
 MIME_CHARSET_FARAWAY
@@ -352,12 +226,6 @@ RCVD_IN_SSC_TRUSTED_COI
 # tflags net
 RCVD_IN_XBL
 
-# good enough
-SHORT_HELO_AND_INLINE_IMAGE
-
-# good enough
-SPAMMY_XMAILER
-
 # tflags net
 SPF_FAIL
 
@@ -382,41 +250,11 @@ SPF_PASS
 # tflags net
 SPF_SOFTFAIL
 
-# good enough
-STOCK_IMG_HDR_FROM
-
 # tflags userconf
 SUBJECT_IN_BLACKLIST
 
 # tflags userconf
 SUBJECT_IN_WHITELIST
-
-# good enough
-SUBJECT_NEEDS_ENCODING
-
-# good enough
-TT_MSGID_TRUNC
-
-# good enough
-TVD_ENVFROM_APOST
-
-# good enough
-TVD_FINGER_02
-
-# good enough
-TVD_QUAL_MEDS
-
-# good enough
-TVD_RCVD_IP
-
-# good enough
-TVD_RCVD_IP4
-
-# good enough
-TVD_RCVD_SINGLE
-
-# good enough
-TVD_VISIT_PHARMA
 
 # tflags userconf
 UNPARSEABLE_RELAY
@@ -441,9 +279,6 @@ URIBL_PH_SURBL
 
 # tflags net
 URIBL_RED
-
-# tflags net
-URIBL_RHS_DOB
 
 # tflags net
 URIBL_SBL
@@ -489,87 +324,6 @@ USER_IN_WHITELIST
 
 # tflags userconf
 USER_IN_WHITELIST_TO
-
-# good enough
-XMAILER_MIMEOLE_OL_015D5
-
-# good enough
-XMAILER_MIMEOLE_OL_07794
-
-# good enough
-XMAILER_MIMEOLE_OL_22B61
-
-# good enough
-XMAILER_MIMEOLE_OL_25340
-
-# good enough
-XMAILER_MIMEOLE_OL_3857F
-
-# good enough
-XMAILER_MIMEOLE_OL_3AC1D
-
-# good enough
-XMAILER_MIMEOLE_OL_4BF4C
-
-# good enough
-XMAILER_MIMEOLE_OL_4EEDB
-
-# good enough
-XMAILER_MIMEOLE_OL_4F240
-
-# good enough
-XMAILER_MIMEOLE_OL_58CB5
-
-# good enough
-XMAILER_MIMEOLE_OL_5B79A
-
-# good enough
-XMAILER_MIMEOLE_OL_6554A
-
-# good enough
-XMAILER_MIMEOLE_OL_7533E
-
-# good enough
-XMAILER_MIMEOLE_OL_812FF
-
-# good enough
-XMAILER_MIMEOLE_OL_8627E
-
-# good enough
-XMAILER_MIMEOLE_OL_91287
-
-# good enough
-XMAILER_MIMEOLE_OL_9B90B
-
-# good enough
-XMAILER_MIMEOLE_OL_ADFF7
-
-# good enough
-XMAILER_MIMEOLE_OL_B30D1
-
-# good enough
-XMAILER_MIMEOLE_OL_B4B40
-
-# good enough
-XMAILER_MIMEOLE_OL_BC7E6
-
-# good enough
-XMAILER_MIMEOLE_OL_C65FA
-
-# good enough
-XMAILER_MIMEOLE_OL_CF0C0
-
-# good enough
-XMAILER_MIMEOLE_OL_F3B05
-
-# good enough
-XMAILER_MIMEOLE_OL_F475E
-
-# good enough
-XMAILER_MIMEOLE_OL_F6D01
-
-# good enough
-XMAILER_MIMEOLE_OL_FF5C8
 
 # tflags net
 __DNS_FROM_RFC_ABUSE
