@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # gzip old files
-cd /export/home/automc/corpus/html
+cd /export/home/ruleqadb
 find . -mtime +200 -name '*.???' -print | \
         egrep '(age|all|new)$' | \
         xargs gzip -9
