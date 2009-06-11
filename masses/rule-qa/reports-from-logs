@@ -518,6 +518,11 @@ sub gen_report_logs {
                   warn "cannot rename $zf.$$ to $zf";
     $bytes += (-s $zf);
   }
+
+  # this is just so we won't recompress these logs if re-run
+  open TOUCH, ">$fname" or warn "cannot write to $fname";
+  close TOUCH;
+
   return $bytes;
 }
 
