@@ -473,18 +473,29 @@ sub start_hit_frequencies_at_rev {
   my ($rev, $args) = @_;
 
   $rev ||= 'HEAD';
+  (-d "$cf{tmp}/hfdir") or system("mkdir -p $cf{tmp}/hfdir");
   my $hfdir = "$cf{tmp}/hfdir/r$rev";
 
   print "setting up hit-frequencies for r$rev in $hfdir\n";
 
-  (-d "$cf{tmp}/hfdir") or system("mkdir $cf{tmp}/hfdir");
-  if (!-d $hfdir) {
-    system ("cp -pr $cf{tree} $hfdir");
-    ($?>>8 != 0) and die "cp $cf{tree}/masses $hfdir failed";
+  my $needs_checkout = 0;
+  if (-d $hfdir && chdir $hfdir) {
+    system("svn up -r$rev && svn up -r$rev rulesrc");
+    if ($?>>8 != 0) {
+      print "simple 'svn update' failed. performing full checkout instead...\n";
+      $needs_checkout = 1;
+    }
+  } else {
+    $needs_checkout = 1;
   }
 
+  if ($needs_checkout) {
+    my $svnurl = get_svn_url();
+    system("rm -rf $hfdir");
+    system("svn co $svnurl\@$rev $hfdir");
+    if ($?>>8 != 0) { die "svn co failed"; }
+  }
   chdir "$hfdir" or die "cannot chdir $hfdir";
-  system("svn up -r$rev; svn up -r$rev rulesrc");
 
   # ensure these are rebuilt
   system("rm -f rules/70_sandbox.cf rules/72_active.cf");
@@ -497,6 +508,18 @@ sub start_hit_frequencies_at_rev {
             or die "cannot run ./hit-frequencies $args |";
 
   chdir $logsdir;
+}
+
+# ---------------------------------------------------------------------------
+  
+sub get_svn_url {
+  open (SVNINFO, "svn info $cf{tree}|") or die "cannot run svn info";
+  my $svnurl;
+  while (<SVNINFO>) {
+    /URL: (.*)$/ and $svnurl = $1;
+  }
+  close SVNINFO or die "cannot close svn info";
+  return $svnurl;
 }
 
 # ---------------------------------------------------------------------------
