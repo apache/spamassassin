@@ -62,6 +62,8 @@ generate_logs();
 clean_up();
 exit;
 
+# ---------------------------------------------------------------------------
+
 sub configure {
   # does rough equivalent of source
   open(C, $configuration) || die "open failed: $configuration: $!\n";
@@ -70,22 +72,29 @@ sub configure {
   # add 'override' options
   my @lines = (<C>, split(/\|/, $opt_override));
 
-  foreach $_ (@lines) {
-	chomp;
-	s/#.*//;
-	if (/^\s*(.*?)\s*=\s*(.*?)\s*$/) {
-          my ($key, $val) = ($1, $2);
-          $val =~ s/\$PWD/$pwd/gs;
-	  $cf{$key} = $val;
-	}
+  foreach (@lines) {
+    chomp;
+    s/#.*//;
+    if (/^\s*(.*?)\s*=\s*(.*?)\s*$/) {
+      my ($key, $val) = ($1, $2);
+      $val =~ s/\$PWD/$pwd/gs;
+      $cf{$key} = $val;
+    }
   }
   close(C);
+
+  $cf{output_classes} ||=
+            "DETAILS.new DETAILS.all DETAILS.age NET.new NET.all NET.age";
 }
+
+# ---------------------------------------------------------------------------
 
 sub clean_up {
   chdir "/";
   system "rm -rf $cf{tmp}/*.$$ ".join(' ', @tmps);
 }
+
+# ---------------------------------------------------------------------------
 
 sub init {
   $SIG{INT} = \&clean_up;
@@ -95,6 +104,8 @@ sub init {
   $ENV{TIME} = '%e,%U,%S';
   $ENV{TZ} = 'UTC';
 }
+
+# ---------------------------------------------------------------------------
 
 sub locate_input {
   opendir(CORPUS, $logsdir);
@@ -162,6 +173,8 @@ sub locate_input {
   }
 }
 
+# ---------------------------------------------------------------------------
+
 sub sort_all {
   my ($a1, $a2) = ($a =~ m/(\(.*?\)|\S+)(?::(\S+))?$/);
   my ($b1, $b2) = ($b =~ m/(\(.*?\)|\S+)(?::(\S+))?$/);
@@ -178,13 +191,17 @@ sub sort_all {
   return $n;
 }
 
+# ---------------------------------------------------------------------------
+
 sub time_filter_fileset {
   my ($fileary, $outname, $after, $before) = @_;
 
-  my $timet_before = (defined $before ? ($time_start - ($before * WEEK)) : $time_start+1);
-  my $timet_after  = (defined $after ? ($time_start - ($after * WEEK)) : 0);
+  my $timet_before = (defined $before ? 
+            ($time_start - ($before * WEEK)) : $time_start+1);
+  my $timet_after  = (defined $after ? 
+            ($time_start - ($after * WEEK))  : 0);
 
-  open(TMP, "> $outname") or warn "cannot write $outname";
+  open(TMP, ">$outname") or warn "cannot write $outname";
   for my $file (@{$fileary}) {
     open(IN, $file) or warn "cannot read $file";
     while (<IN>) {
@@ -197,12 +214,10 @@ sub time_filter_fileset {
   close TMP or warn "failed to close $outname";
 }
 
+# ---------------------------------------------------------------------------
 
 sub generate_logs {
-  my $classes = $cf{output_classes};
-  $classes ||= "DETAILS.new DETAILS.all DETAILS.age NET.new NET.all NET.age";
-
-  foreach my $entry (split(' ', $classes)) {
+  foreach my $entry (split(' ', $cf{output_classes})) {
     $entry =~ /^(\S+)\.(\S+)$/;
     my $class = $1;
     my $rtype = $2;
@@ -223,36 +238,36 @@ sub generate_logs {
       gen_class ($daterev, $rev, $class, $rtype);
     }
   }
-}
+} 
+
+# ---------------------------------------------------------------------------
+
+my ($tmp_h, $tmp_s, $no_messages_in_freqs, $hf_flags);
 
 sub gen_class {
   my ($daterev, $rev, $class, $rtype) = @_;
-
-  print STDERR "\ngenerating: $cf{html}/$daterev/$class.$rtype\n";
-
   return if ($class eq "NET" && $rtype !~ /^(?:new|all|age|7day)$/);
 
-  my @ham = grep { /^ham/ } @{$logs_by_daterev{$daterev}};
-  my @spam = grep { /^spam/ } @{$logs_by_daterev{$daterev}};
-
-  print STDERR "input h: " . join(' ', @ham) . "\n";
-  print STDERR "input s: " . join(' ', @spam) . "\n";
-
   chdir $logsdir;
+  print STDERR "\ngenerating: $cf{html}/$daterev/$class.$rtype\n";
+
+  my @ham = grep { /^ham/ } @{$logs_by_daterev{$daterev}};
+  print STDERR "input h: " . join(' ', @ham) . "\n";
+
+  my @spam = grep { /^spam/ } @{$logs_by_daterev{$daterev}};
+  print STDERR "input s: " . join(' ', @spam) . "\n";
 
   # net vs. local
   if ($class eq "NET") {
     @ham = grep { /-net-/ } @ham;
     @spam = grep { /-net-/ } @spam;
   }
-
   # age
   if ($rtype =~ /(\d+)day/) {
     my $mtime = $1;
     @ham = grep { -M $_ < $mtime } @ham;
     @spam = grep { -M $_ < $mtime } @spam;
   }
-
 
   print STDERR "selected h: " . join(' ', @ham) . "\n";
   print STDERR "selected s: " . join(' ', @spam) . "\n";
@@ -295,19 +310,7 @@ sub gen_class {
   my $bytes = 0;
 
   if ($class eq 'LOGS') {
-    foreach my $f (@ham, @spam) {
-      $f =~ s/[^-\._A-Za-z0-9]+/_/gs;    # sanitize!
-      my $zf = "$fname-$f.gz";
-
-      system("gzip -c < $f > $zf.$$");
-      if ($? >> 8 != 0) {
-        warn "gzip -c < $f > $zf.$$ failed";
-      }
-
-      rename("$zf.$$", $zf) or
-                    warn "cannot rename $zf.$$ to $zf";
-      $bytes += (-s $zf);
-    }
+    $bytes = gen_report_logs($fname, \@ham, \@spam);
   }
   else {
     my $tmpfname = "$fname.$$";
@@ -319,130 +322,41 @@ sub gen_class {
 
     push (@tmps, abs_path($tmpfname));
 
-    my $flags = "";
-    $flags = "-t net -s 1" if $class eq "NET";
-    $flags = "-o" if $class eq "OVERLAP";
-    $flags = "-S" if $class eq "SCOREMAP";
+    $hf_flags = "";
+    $hf_flags = "-t net -s 1" if $class eq "NET";
+    $hf_flags = "-o" if $class eq "OVERLAP";
+    $hf_flags = "-S" if $class eq "SCOREMAP";
+
     if ($cf{rules_dir}) {
-      $flags .= " -c '$cf{rules_dir}'";
+      $hf_flags .= " -c '$cf{rules_dir}'";
     }
 
     # are we analyzing --net mass-check logs?  if so, use scoreset 1
     if (join(" ", @ham) =~ /-net-/) {
-      $flags .= " -s 1" if $class eq "NET";
+      $hf_flags .= " -s 1" if $class eq "NET";
     }
 
     # catch an odd error condition, where hit-frequencies creates output
     # with no log lines included at all
-    my $no_msgs = 0;
+    $no_messages_in_freqs = 0;
+
+    $tmp_h = "$cf{tmp}/ham.log.$$";
+    $tmp_s = "$cf{tmp}/spam.log.$$";
 
     if ($rtype eq "all") {
-      my %spam;
-      my %ham;
-      my @output;
-      
-      for my $file (@spam) {
-        # ham-someuser.log, ham-net-bb-jm.20090518-r775863-n.log
-        my $u = $file;
-        $u =~ s/\.log$//; $u =~ s/.*\///; $u =~ s/^(h|sp)am-(?:net-)?//;
-        $u =~ s/\.\d{8}-r\d+-[a-z]//;       # daterev
-        $spam{$u} = $file;
-        print "username in spam log: $u\n";
-      }
-      for my $file (@ham) {
-        my $u = $file;
-        $u =~ s/\.log$//; $u =~ s/.*\///; $u =~ s/^(h|sp)am-(?:net-)?//;
-        $u =~ s/\.\d{8}-r\d+-[a-z]//;       # daterev
-        $ham{$u} = $file;
-        print "username in ham log: $u\n";
-      }
-
-      if (scalar keys %spam <= 0 && scalar keys %ham <= 0) {
-        warn "no files found for $class.$rtype";
-        return;
-      }
-
-      unlink "$cf{tmp}/ham.log.$$", "$cf{tmp}/spam.log.$$";
-      for my $user (sort keys %spam) {
-        my $hamfiles = [];
-        if ($ham{$user}) { $hamfiles = [ "$logsdir/$ham{$user}" ]; }
-
-        time_filter_fileset($hamfiles,
-                "$cf{tmp}/ham.log.$$", $OLDEST_HAM_WEEKS, undef);
-        time_filter_fileset([ "$logsdir/$spam{$user}" ],
-                "$cf{tmp}/spam.log.$$", $OLDEST_SPAM_WEEKS, undef);
-
-        start_freqs($rev, "$flags $cf{tmp}/spam.log.$$ $cf{tmp}/ham.log.$$");
-
-        while(<FREQS>) {
-          chomp;
-          push @output, "$_:$user\n";
-        }
-        close(FREQS);
-
-        system("cat $cf{tmp}/ham.log.$$ >> $cf{tmp}/hamall.log.$$");
-        system("cat $cf{tmp}/spam.log.$$ >> $cf{tmp}/spamall.log.$$");
-      }
-
-      if (-z "$cf{tmp}/hamall.log.$$" && -z "$cf{tmp}/spamall.log.$$") {
-        warn "time_filter_fileset() returned empty logs. not creating freqs!";
-        return;     # we'll try again later
-      }
-
-      start_freqs($rev, "$flags $cf{tmp}/spamall.log.$$ $cf{tmp}/hamall.log.$$");
-
-      while(<FREQS>) {
-        /\s0\s+0\s+0.500\s+0.00\s+0.00\s+\(all messages\)/ and $no_msgs = 1;
-        push @output, $_;
-      }
-      close(FREQS);
-
-      for (sort sort_all @output) { print OUT; }
+      gen_report_freqs_all($tmpfname, \@ham, \@spam, $rev);
     }
     elsif ($rtype eq "age") {
-      my @output;
-
-      for my $which (("0-1", "1-2", "2-3", "3-6")) {
-        my ($before, $after) = split(/-/, $which);
-        # get and filter logs
-        chdir $logsdir;
-        time_filter_fileset(\@ham, "$cf{tmp}/ham.log.$$", $after, $before);
-        time_filter_fileset(\@spam, "$cf{tmp}/spam.log.$$", $after, $before);
-
-        # print out by age
-        start_freqs($rev, "$flags $cf{tmp}/spam.log.$$ $cf{tmp}/ham.log.$$");
-        
-        while(<FREQS>) {
-          chomp;
-          push @output, "$_:$which\n";
-        }
-        close(FREQS);
-      }
-      for (sort sort_all @output) { print OUT; }
+      gen_report_freqs_age($tmpfname, \@ham, \@spam, $rev);
     }
     elsif (@ham && @spam) {
-      # get logs
-      time_filter_fileset(\@ham, "$cf{tmp}/ham.log.$$", $OLDEST_HAM_WEEKS, undef);
-      time_filter_fileset(\@spam, "$cf{tmp}/spam.log.$$", $OLDEST_SPAM_WEEKS, undef);
-
-      if (-z "$cf{tmp}/ham.log.$$" && -z "$cf{tmp}/spam.log.$$") {
-        warn "time_filter_fileset() returned empty logs. not creating freqs!";
-        return;     # we'll try again later
-      }
-
-      start_freqs($rev, "$flags $cf{tmp}/spam.log.$$ $cf{tmp}/ham.log.$$");
-
-      while(<FREQS>) {
-        /\s0\s+0\s+0.500\s+0.00\s+0.00\s+\(all messages\)/ and $no_msgs = 1;
-        print(OUT);
-      }
-      close(FREQS);
+      gen_report_freqs_basic($tmpfname, \@ham, \@spam, $rev);
     }
 
     $bytes = (-s OUT);
     close(OUT);
 
-    if ($no_msgs) {
+    if ($no_messages_in_freqs) {
       warn "ERROR: no data in freqs!  aborting, leaving tmp file as $tmpfname";
       return;
     }
@@ -468,10 +382,14 @@ URL:
 
 }
 
+# ---------------------------------------------------------------------------
+
 sub mk_daterev {
   my ($timet, $rev, $tag) = @_;
   return strftime("%Y%m%d", gmtime($timet + DATEREV_ADJ)) . "/r$rev-$tag";
 }
+
+# ---------------------------------------------------------------------------
 
 sub create_outputdir {
   my ($revpath) = @_;
@@ -489,6 +407,8 @@ sub create_outputdir {
 
   return $dir;
 }
+
+# ---------------------------------------------------------------------------
 
 sub log_metadata_xml {
   my ($daterev, @files) = @_;
@@ -511,6 +431,8 @@ sub log_metadata_xml {
   return '<mclogmds>'.$str.'</mclogmds>';
 }
 
+# ---------------------------------------------------------------------------
+
 sub create_rulemetadata_dir {
   my $rev = shift;
   my $dir = "$cf{html}/rulemetadata/$rev";
@@ -521,6 +443,8 @@ sub create_rulemetadata_dir {
   }
   return $dir;
 }
+
+# ---------------------------------------------------------------------------
 
 sub get_rulemetadata_for_revision {
   my ($daterev, $rev) = @_;
@@ -539,9 +463,13 @@ sub get_rulemetadata_for_revision {
   if ($? >> 8 != 0) {
     warn "'$cmd' failed";
   }
+
+  chdir $logsdir;
 }
 
-sub start_freqs {
+# ---------------------------------------------------------------------------
+
+sub start_hit_frequencies_at_rev {
   my ($rev, $args) = @_;
 
   $rev ||= 'HEAD';
@@ -567,5 +495,144 @@ sub start_freqs {
   chdir "$hfdir/masses" or die "cannot chdir $hfdir/masses";
   open (FREQS, "./hit-frequencies -TxpaP $args |")
             or die "cannot run ./hit-frequencies $args |";
+
+  chdir $logsdir;
+}
+
+# ---------------------------------------------------------------------------
+
+sub gen_report_logs {
+  my ($fname, $hamref, $spamref) = @_;
+
+  my $bytes = 0;
+  foreach my $f (@$hamref, @$spamref) {
+    $f =~ s/[^-\._A-Za-z0-9]+/_/gs;    # sanitize!
+    my $zf = "$fname-$f.gz";
+
+    system("gzip -c < $f > $zf.$$");
+    if ($? >> 8 != 0) {
+      warn "gzip -c < $f > $zf.$$ failed";
+    }
+
+    rename("$zf.$$", $zf) or
+                  warn "cannot rename $zf.$$ to $zf";
+    $bytes += (-s $zf);
+  }
+  return $bytes;
+}
+
+# ---------------------------------------------------------------------------
+
+sub gen_report_freqs_all {
+  my ($tmpfname, $hamref, $spamref, $rev) = @_;
+  my %spam;
+  my %ham;
+  my @output;
+  
+  for my $file (@$spamref) {
+    my $u = extract_username_from_log_filename($file);
+    $spam{$u} = $file; print "username in spam log: $u\n";
+  }
+  for my $file (@$hamref) {
+    my $u = extract_username_from_log_filename($file);
+    $ham{$u} = $file; print "username in ham log: $u\n";
+  }
+
+  if (scalar keys %spam <= 0 && scalar keys %ham <= 0) {
+    warn "no files found";
+    return;
+  }
+
+  my $tmp_h_all = "$cf{tmp}/hamall.log.$$";
+  my $tmp_s_all = "$cf{tmp}/spamall.log.$$";
+  unlink $tmp_h_all, $tmp_s_all;
+
+  my %alluserkeys;
+  for my $k (keys %spam, keys %ham) {
+    next if exists $alluserkeys{$k}; undef $alluserkeys{$k};
+  }
+  for my $user (sort keys %alluserkeys) {
+    my $files_h = [];
+    if ($ham{$user}) { $files_h = [ "$logsdir/$ham{$user}" ]; }
+    my $files_s = [];
+    if ($spam{$user}) { $files_s = [ "$logsdir/$spam{$user}" ]; }
+
+    time_filter_fileset($files_h, $tmp_h, $OLDEST_HAM_WEEKS,  undef);
+    time_filter_fileset($files_s, $tmp_s, $OLDEST_SPAM_WEEKS, undef);
+
+    start_hit_frequencies_at_rev($rev, "$hf_flags $tmp_s $tmp_h");
+    while(<FREQS>) {
+      chomp; push @output, "$_:$user\n";
+    }
+    close(FREQS);
+
+    system("cat $tmp_h >> $tmp_h_all");
+    system("cat $tmp_s >> $tmp_s_all");
+  }
+
+  if (-z $tmp_h_all && -z $tmp_s_all) {
+    warn "time_filter_fileset() returned empty logs. not creating freqs!";
+    return;     # we'll try again later
+  }
+
+  start_hit_frequencies_at_rev($rev, "$hf_flags $tmp_s_all $tmp_h_all");
+  while(<FREQS>) {
+    /\s0\s+0\s+0.500\s+0.00\s+0.00\s+\(all messages\)/ and $no_messages_in_freqs = 1;
+    push @output, $_;
+  }
+  close(FREQS);
+  for (sort sort_all @output) { print OUT; }
+}
+
+# ---------------------------------------------------------------------------
+
+sub extract_username_from_log_filename {
+  my $u = shift;
+  # spam-someuser.log, spam-net-bb-jm.20090518-r775863-n.log
+  $u =~ s/\.log$//; $u =~ s/.*\///; $u =~ s/^(h|sp)am-(?:net-)?//;
+  $u =~ s/\.\d{8}-r\d+-[a-z]//;       # daterev
+  return $u;
+}
+
+# ---------------------------------------------------------------------------
+
+sub gen_report_freqs_age {
+  my ($tmpfname, $hamref, $spamref, $rev) = @_;
+  my @output;
+
+  for my $which (("0-1", "1-2", "2-3", "3-6")) {
+    my ($before, $after) = split(/-/, $which);
+    time_filter_fileset($hamref, $tmp_h, $after, $before);
+    time_filter_fileset($spamref, $tmp_s, $after, $before);
+
+    # print out by age
+    start_hit_frequencies_at_rev($rev, "$hf_flags $tmp_s $tmp_h");
+    while(<FREQS>) {
+      chomp; push @output, "$_:$which\n";
+    }
+    close(FREQS);
+  }
+  for (sort sort_all @output) { print OUT; }
+}
+
+# ---------------------------------------------------------------------------
+
+sub gen_report_freqs_basic {
+  my ($tmpfname, $hamref, $spamref, $rev) = @_;
+
+  time_filter_fileset($hamref, $tmp_h, $OLDEST_HAM_WEEKS, undef);
+  time_filter_fileset($spamref, $tmp_s, $OLDEST_SPAM_WEEKS, undef);
+
+  if (-z $tmp_h && -z $tmp_s) {
+    warn "time_filter_fileset() returned empty logs. not creating freqs!";
+    return;     # we'll try again later
+  }
+
+  start_hit_frequencies_at_rev($rev, "$hf_flags $tmp_s $tmp_h");
+  while(<FREQS>) {
+    /\s0\s+0\s+0.500\s+0.00\s+0.00\s+\(all messages\)/ and $no_messages_in_freqs = 1;
+    print(OUT);
+  }
+  close(FREQS);
 }
 
