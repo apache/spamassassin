@@ -1,11 +1,14 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: bb-jm.20090609-r782916-n jm.20090609-r782916-n zmi.20090609-r782916-n; day 2: bb-jm.20090608-r782561-n dos.20090608-r782561-n zmi.20090608-r782561-n; day 3: bb-jm.20090607-r782348-n dos.20090607-r782348-n jm.20090607-r782348-n zmi.20090607-r782348-n
+# with results from: day 1: bb-jm.20090610-r783256-n dos.20090610-r783256-n jm.20090610-r783256-n zmi.20090610-r783256-n; day 2: bb-jm.20090609-r782916-n jm.20090609-r782916-n zmi.20090609-r782916-n; day 3: bb-jm.20090608-r782561-n dos.20090608-r782561-n zmi.20090608-r782561-n
 
 # tflags userconf
 ALL_TRUSTED
 
 # good enough
 APOSTROPHE_FROM
+
+# good enough
+AXB_HELO_LH_HOME
 
 # good enough
 BASE64_LENGTH_78_79
@@ -49,9 +52,6 @@ CHARSET_FARAWAY_HEADER
 # tflags userconf
 CORRUPT_FROM_LINE_IN_HDRS
 
-# good enough
-DEAR_WINNER
-
 # tflags net
 DIGEST_MULTIPLE
 
@@ -68,16 +68,40 @@ DKIM_POLICY_TESTING
 DKIM_SIGNED
 
 # tflags net
+DKIM_VALID
+
+# tflags net
+DKIM_VALID_AU
+
+# tflags net
 DKIM_VERIFIED
 
 # tflags net
 DNS_FROM_AHBL_RHSBL
 
 # tflags net
+DNS_FROM_OPENWHOIS
+
+# tflags net
 DNS_FROM_RFC_BOGUSMX
 
 # tflags net
 DNS_FROM_RFC_DSN
+
+# tflags publish
+DOS_ANAL_SPAM_MAILER
+
+# good enough
+DOS_HIGHBIT_HDRS_BODY
+
+# good enough
+DOS_OE_TO_MX
+
+# good enough
+DOS_RCVD_IP_TWICE_B
+
+# good enough
+DOS_RCVD_IP_TWICE_C
 
 # good enough
 DYN_RDNS_AND_INLINE_IMAGE
@@ -88,6 +112,9 @@ DYN_RDNS_SHORT_HELO_HTML
 # good enough
 DYN_RDNS_SHORT_HELO_IMAGE
 
+# tflags net
+EMAILBL_TEST_LEM
+
 # tflags userconf
 ENV_AND_HDR_DKIM_MATCH
 
@@ -95,37 +122,40 @@ ENV_AND_HDR_DKIM_MATCH
 ENV_AND_HDR_SPF_MATCH
 
 # good enough
-FAKE_REPLY_C
-
-# good enough
-FB_EXTRA_INCHES
+FB_GREAT_BEST_SEX
 
 # good enough
 FB_GVR
 
 # good enough
-FB_HEY_BRO_COMMA
-
-# good enough
 FB_INCREASE_YOUR
-
-# good enough
-FB_INDEPEND_RWD
 
 # good enough
 FB_QUALITY_REPLICA
 
 # good enough
+FB_REPLICA_ROLEX
+
+# good enough
+FB_SAVE_PERSC
+
+# good enough
+FB_SMALL_PEN
+
+# good enough
 FB_SOFTTABS
 
 # good enough
-FH_DATE_IS_19XX
+FB_WITHOUT_PRESC
 
 # good enough
 FH_DATE_PAST_20XX
 
 # good enough
 FH_FAKE_RCVD_LINE
+
+# good enough
+FH_FAKE_RCVD_LINE_B
 
 # good enough
 FH_HELO_ALMOST_IP
@@ -143,13 +173,16 @@ FH_HOST_EQ_DYNAMICIP
 FH_HOST_EQ_VERIZON_P
 
 # good enough
-FM_FAKE_HELO_VERIZON
+FM_LOTTO_YOU_WON
 
 # good enough
 FM_SCHOOLING
 
 # good enough
 FM_SEX_HELODDDD
+
+# good enough
+FORGED_RELAY_MUA_TO_MX
 
 # tflags userconf
 FRAGMENTED_MESSAGE
@@ -161,13 +194,49 @@ FROM_DOMAIN_NOVOWEL
 FROM_LOCAL_NOVOWEL
 
 # good enough
+FROM_UNBAL1
+
+# good enough
+FR_TITLE_CONS_6
+
+# good enough
+FSL_FAKE_GMAIL_RCVD
+
+# good enough
+FSL_FAKE_HOTMAIL_RVCD
+
+# good enough
+FSL_FAKE_YAHOO_RCVD
+
+# good enough
+FSL_GEO_ABUSE
+
+# good enough
+FSL_HELO_BARE_IP_1
+
+# good enough
+FSL_HELO_DEVICE
+
+# good enough
+FSL_HELO_NON_FQDN_1
+
+# good enough
+FSL_INTERIA_ABUSE
+
+# good enough
+FSL_LSPACES_ABUSE
+
+# good enough
+FSL_MIME_NO_TEXT
+
+# good enough
+FSL_Y360_ABUSE
+
+# good enough
+FSL_YG_ABUSE
+
+# good enough
 FS_EJACULA
-
-# good enough
-FS_OBFU_PRMCY
-
-# good enough
-FS_PHARMASUB2
 
 # good enough
 FS_REPLICA
@@ -176,13 +245,19 @@ FS_REPLICA
 FS_REPLICAWATCH
 
 # good enough
-FS_START_DOYOU2
+FS_SINGLE_LETTER_J
 
 # good enough
 FS_START_LOSE
 
 # good enough
+FS_WEIGHT_LOSS
+
+# good enough
 FS_WILL_HELP
+
+# good enough
+FS_YOUR_PRESCRIP
 
 # tflags userconf
 GTUBE
@@ -238,335 +313,11 @@ HS_FORGED_OE_FW
 # good enough
 HS_INDEX_PARAM
 
-# tflags userconf
-HTML_CHARSET_FARAWAY
-
-# tflags publish
-KAM_STOCKOTC
-
-# tflags publish
-KAM_STOCKTIP15
-
-# good enough
-L_SPAM_TOOL_13
-
-# tflags userconf
-MIME_CHARSET_FARAWAY
-
-# tflags userconf
-MISSING_HB_SEP
-
-# good enough
-MSOE_MID_WRONG_CASE
-
-# tflags net
-NO_DNS_FOR_FROM
-
-# tflags userconf
-NO_RECEIVED
-
-# tflags userconf
-NO_RELAYS
-
-# good enough
-PART_CID_STOCK
-
-# tflags net
-PYZOR_CHECK
-
-# tflags net
-RAZOR2_CF_RANGE_51_100
-
-# tflags net
-RAZOR2_CF_RANGE_E4_51_100
-
-# tflags net
-RAZOR2_CF_RANGE_E8_51_100
-
-# tflags net
-RAZOR2_CHECK
-
-# tflags net
-RCVD_IN_BL_SPAMCOP_NET
-
-# tflags net
-RCVD_IN_BSP_TRUSTED
-
-# tflags net
-RCVD_IN_IADB_VOUCHED
-
-# tflags net
-RCVD_IN_MAPS_DUL
-
-# tflags net
-RCVD_IN_MAPS_NML
-
-# tflags net
-RCVD_IN_MAPS_OPS
-
-# tflags net
-RCVD_IN_MAPS_RBL
-
-# tflags net
-RCVD_IN_MAPS_RSS
-
-# tflags net
-RCVD_IN_NJABL_CGI
-
-# tflags net
-RCVD_IN_NJABL_MULTI
-
-# tflags net
-RCVD_IN_NJABL_PROXY
-
-# tflags net
-RCVD_IN_NJABL_RELAY
-
-# tflags net
-RCVD_IN_NJABL_SPAM
-
-# tflags net
-RCVD_IN_PBL
-
-# tflags net
-RCVD_IN_SBL
-
-# tflags net
-RCVD_IN_SORBS_BLOCK
-
-# tflags net
-RCVD_IN_SORBS_DUL
-
-# tflags net
-RCVD_IN_SORBS_HTTP
-
-# tflags net
-RCVD_IN_SORBS_MISC
-
-# tflags net
-RCVD_IN_SORBS_SMTP
-
-# tflags net
-RCVD_IN_SORBS_SOCKS
-
-# tflags net
-RCVD_IN_SORBS_WEB
-
-# tflags net
-RCVD_IN_SORBS_ZOMBIE
-
-# tflags net
-RCVD_IN_SSC_TRUSTED_COI
-
-# tflags net
-RCVD_IN_XBL
-
-# good enough
-SHORT_HELO_AND_INLINE_IMAGE
-
-# good enough
-SPAMMY_XMAILER
-
-# tflags net
-SPF_FAIL
-
-# tflags net
-SPF_HELO_FAIL
-
-# tflags net
-SPF_HELO_NEUTRAL
-
-# tflags userconf
-SPF_HELO_PASS
-
-# tflags net
-SPF_HELO_SOFTFAIL
-
-# tflags net
-SPF_NEUTRAL
-
-# tflags userconf
-SPF_PASS
-
-# tflags net
-SPF_SOFTFAIL
-
-# good enough
-STOCK_IMG_CTYPE
-
-# good enough
-STOCK_IMG_HDR_FROM
-
-# good enough
-STOCK_IMG_OUTLOOK
-
-# tflags userconf
-SUBJECT_IN_BLACKLIST
-
-# tflags userconf
-SUBJECT_IN_WHITELIST
-
-# good enough
-SUBJECT_NEEDS_ENCODING
-
-# good enough
-TT_MSGID_TRUNC
-
-# good enough
-TVD_PH_REC
-
-# good enough
-TVD_QUAL_MEDS
-
-# good enough
-TVD_RCVD_IP
-
-# good enough
-TVD_RCVD_IP4
-
-# good enough
-TVD_RCVD_SINGLE
-
-# good enough
-TVD_VISIT_PHARMA
-
-# good enough
-AXB_HELO_LH_HOME
-
-# good enough
-AXB_XMID_DIGDOTSHRT
-
-# tflags net
-DKIM_VALID
-
-# tflags net
-DKIM_VALID_AU
-
-# tflags net
-DNS_FROM_OPENWHOIS
-
-# tflags publish
-DOS_ANAL_SPAM_MAILER
-
-# good enough
-DOS_HIGHBIT_HDRS_BODY
-
-# good enough
-DOS_HIGH_BAT_TO_MX
-
-# good enough
-DOS_OE_TO_MX
-
-# good enough
-DOS_OE_TO_MX_IMAGE
-
-# good enough
-DOS_RCVD_IP_TWICE_B
-
-# good enough
-DOS_RCVD_IP_TWICE_C
-
-# tflags net
-EMAILBL_TEST_LEM
-
-# good enough
-FAKE_REPLY_A1
-
-# good enough
-FB_GREAT_BEST_SEX
-
-# good enough
-FB_REPLICA_ROLEX
-
-# good enough
-FB_SAVE_PERSC
-
-# good enough
-FB_SMALL_PEN
-
-# good enough
-FB_WITHOUT_PRESC
-
-# good enough
-FH_FAKE_RCVD_LINE_B
-
-# good enough
-FM_LOTTO_MONEY
-
-# good enough
-FM_LOTTO_YOU_WON
-
-# good enough
-FORGED_RELAY_MUA_TO_MX
-
-# good enough
-FRM_SILVER_GOLD
-
-# good enough
-FROM_UNBAL1
-
-# good enough
-FRT_ERECTION
-
-# good enough
-FR_TITLE_CONS_6
-
-# good enough
-FR_WATCHES_HTTP
-
-# good enough
-FSL_FAKE_GMAIL_RCVD
-
-# good enough
-FSL_FAKE_HOTMAIL_RVCD
-
-# good enough
-FSL_FAKE_YAHOO_RCVD
-
-# good enough
-FSL_GEO_ABUSE
-
-# good enough
-FSL_HELO_BARE_IP_1
-
-# good enough
-FSL_HELO_DEVICE
-
-# good enough
-FSL_HELO_NON_FQDN_1
-
-# good enough
-FSL_INTERIA_ABUSE
-
-# good enough
-FSL_LSPACES_ABUSE
-
-# good enough
-FSL_MIME_NO_TEXT
-
-# good enough
-FSL_UA
-
-# good enough
-FSL_Y360_ABUSE
-
-# good enough
-FSL_YG_ABUSE
-
-# good enough
-FS_CAILIS
-
-# good enough
-FS_SINGLE_LETTER_J
-
-# good enough
-FS_WEIGHT_LOSS
-
-# good enough
-FS_YOUR_PRESCRIP
-
 # good enough
 HS_VPXL
+
+# tflags userconf
+HTML_CHARSET_FARAWAY
 
 # good enough
 JM_FAKE_PSMTP_RCVD
@@ -586,8 +337,11 @@ JM_SOUGHT_FRAUD_3
 # good enough
 KAM_LOTTO1
 
-# good enough
-KAM_LOTTO2
+# tflags publish
+KAM_STOCKOTC
+
+# tflags publish
+KAM_STOCKTIP15
 
 # good enough
 KB_DATE_CONTAINS_TAB
@@ -620,22 +374,52 @@ KHOP_SC_TOP_CIDR16
 KHOP_SC_TOP_CIDR8
 
 # good enough
-LOTTERY_PH_004470
+L_SPAM_TOOL_13
+
+# tflags userconf
+MIME_CHARSET_FARAWAY
 
 # good enough
 MIME_IMAGE_ONLY
 
+# tflags userconf
+MISSING_HB_SEP
+
 # good enough
 MSGID_NOFQDN1
 
-# good enough
-PQRTW_4
+# tflags net
+NO_DNS_FOR_FROM
 
-# good enough
-RATWARE_HELO_DM
+# tflags userconf
+NO_RECEIVED
+
+# tflags userconf
+NO_RELAYS
+
+# tflags net
+PYZOR_CHECK
+
+# tflags net
+RAZOR2_CF_RANGE_51_100
+
+# tflags net
+RAZOR2_CF_RANGE_E4_51_100
+
+# tflags net
+RAZOR2_CF_RANGE_E8_51_100
+
+# tflags net
+RAZOR2_CHECK
+
+# tflags net
+RCVD_IN_BL_SPAMCOP_NET
 
 # tflags net
 RCVD_IN_BRBL_LASTEXT
+
+# tflags net
+RCVD_IN_BSP_TRUSTED
 
 # tflags net
 RCVD_IN_DNSWL_HI
@@ -728,7 +512,76 @@ RCVD_IN_IADB_UT_CPR_30
 RCVD_IN_IADB_UT_CPR_MAT
 
 # tflags net
+RCVD_IN_IADB_VOUCHED
+
+# tflags net
+RCVD_IN_MAPS_DUL
+
+# tflags net
+RCVD_IN_MAPS_NML
+
+# tflags net
+RCVD_IN_MAPS_OPS
+
+# tflags net
+RCVD_IN_MAPS_RBL
+
+# tflags net
+RCVD_IN_MAPS_RSS
+
+# tflags net
+RCVD_IN_NJABL_CGI
+
+# tflags net
+RCVD_IN_NJABL_MULTI
+
+# tflags net
+RCVD_IN_NJABL_PROXY
+
+# tflags net
+RCVD_IN_NJABL_RELAY
+
+# tflags net
+RCVD_IN_NJABL_SPAM
+
+# tflags net
+RCVD_IN_PBL
+
+# tflags net
+RCVD_IN_SBL
+
+# tflags net
+RCVD_IN_SORBS_BLOCK
+
+# tflags net
+RCVD_IN_SORBS_DUL
+
+# tflags net
+RCVD_IN_SORBS_HTTP
+
+# tflags net
+RCVD_IN_SORBS_MISC
+
+# tflags net
+RCVD_IN_SORBS_SMTP
+
+# tflags net
+RCVD_IN_SORBS_SOCKS
+
+# tflags net
+RCVD_IN_SORBS_WEB
+
+# tflags net
+RCVD_IN_SORBS_ZOMBIE
+
+# tflags net
 RCVD_IN_SSBL
+
+# tflags net
+RCVD_IN_SSC_TRUSTED_COI
+
+# tflags net
+RCVD_IN_XBL
 
 # good enough
 REPLYTO_WITHOUT_TO_CC
@@ -785,16 +638,10 @@ SANE_91eb43f705d25c804374a746d7519660
 SANE_9badf470c25849aa9a77d89b21f84d5e
 
 # good enough
-SANE_9ec550620e083178d3bcc9d653324939
-
-# good enough
 SANE_a1315779e96aedc845566b1f41f4e424
 
 # good enough
 SANE_c627ae8d03f8c3d579345970e652142c
-
-# good enough
-SANE_e3634fb4bb521c6a312bb1d001c20a1d
 
 # good enough
 SANE_e5950fd6cd9b53a17ba2cb7883181772
@@ -803,22 +650,142 @@ SANE_e5950fd6cd9b53a17ba2cb7883181772
 SANE_ef00ce28cfa5ed6e4c405ed37ff36d46
 
 # good enough
-STOX_REPLY_TYPE_WITHOUT_QUOTES
+SHORT_HELO_AND_INLINE_IMAGE
+
+# good enough
+SPAMMY_XMAILER
+
+# tflags net
+SPF_FAIL
+
+# tflags net
+SPF_HELO_FAIL
+
+# tflags net
+SPF_HELO_NEUTRAL
+
+# tflags userconf
+SPF_HELO_PASS
+
+# tflags net
+SPF_HELO_SOFTFAIL
+
+# tflags net
+SPF_NEUTRAL
+
+# tflags userconf
+SPF_PASS
+
+# tflags net
+SPF_SOFTFAIL
+
+# good enough
+STOCK_IMG_HDR_FROM
+
+# tflags userconf
+SUBJECT_IN_BLACKLIST
+
+# tflags userconf
+SUBJECT_IN_WHITELIST
+
+# good enough
+SUBJECT_NEEDS_ENCODING
 
 # good enough
 THREAD_INDEX_BAD
 
 # good enough
-TVD_ENHANCE
+TT_MSGID_TRUNC
 
 # good enough
 TVD_FROM_1
 
 # good enough
-TVD_PH_BODY_META
+TVD_QUAL_MEDS
 
 # good enough
-TVD_PH_SUBJ_SEC_MEASURES
+TVD_RCVD_IP
+
+# good enough
+TVD_RCVD_IP4
+
+# good enough
+TVD_RCVD_SINGLE
+
+# good enough
+TVD_VISIT_PHARMA
+
+# tflags userconf
+UNPARSEABLE_RELAY
+
+# tflags net
+URIBL_AB_SURBL
+
+# tflags net
+URIBL_BLACK
+
+# tflags net
+URIBL_GREY
+
+# tflags net
+URIBL_JP_SURBL
+
+# tflags net
+URIBL_OB_SURBL
+
+# tflags net
+URIBL_PH_SURBL
+
+# tflags net
+URIBL_RED
+
+# tflags net
+URIBL_RHS_DOB
+
+# tflags net
+URIBL_SBL
+
+# tflags net
+URIBL_SC_SURBL
+
+# tflags net
+URIBL_WS_SURBL
+
+# tflags userconf
+URI_NOVOWEL
+
+# tflags userconf
+USER_IN_ALL_SPAM_TO
+
+# tflags userconf
+USER_IN_BLACKLIST
+
+# tflags userconf
+USER_IN_BLACKLIST_TO
+
+# tflags userconf
+USER_IN_DEF_DKIM_WL
+
+# tflags userconf
+USER_IN_DEF_SPF_WL
+
+# tflags userconf
+USER_IN_DEF_WHITELIST
+
+# tflags userconf
+USER_IN_DKIM_WHITELIST
+
+# tflags userconf
+USER_IN_MORE_SPAM_TO
+
+# tflags userconf
+USER_IN_SPF_WHITELIST
+
+# tflags userconf
+USER_IN_WHITELIST
+
+# tflags userconf
+USER_IN_WHITELIST_TO
 
 # tflags net
 WHOIS_1AND1PR
@@ -941,94 +908,10 @@ WHOIS_WHOISGUARD
 WHOIS_WHOISPROT
 
 # good enough
-X_MAILER_CME_6543_MSN
-
-# tflags userconf
-UNPARSEABLE_RELAY
-
-# tflags net
-URIBL_AB_SURBL
-
-# tflags net
-URIBL_BLACK
-
-# tflags net
-URIBL_GREY
-
-# tflags net
-URIBL_JP_SURBL
-
-# tflags net
-URIBL_OB_SURBL
-
-# tflags net
-URIBL_PH_SURBL
-
-# tflags net
-URIBL_RED
-
-# tflags net
-URIBL_RHS_DOB
-
-# tflags net
-URIBL_SBL
-
-# tflags net
-URIBL_SC_SURBL
-
-# tflags net
-URIBL_WS_SURBL
-
-# tflags userconf
-URI_NOVOWEL
-
-# tflags userconf
-USER_IN_ALL_SPAM_TO
-
-# tflags userconf
-USER_IN_BLACKLIST
-
-# tflags userconf
-USER_IN_BLACKLIST_TO
-
-# tflags userconf
-USER_IN_DEF_DKIM_WL
-
-# tflags userconf
-USER_IN_DEF_SPF_WL
-
-# tflags userconf
-USER_IN_DEF_WHITELIST
-
-# tflags userconf
-USER_IN_DKIM_WHITELIST
-
-# tflags userconf
-USER_IN_MORE_SPAM_TO
-
-# tflags userconf
-USER_IN_SPF_WHITELIST
-
-# tflags userconf
-USER_IN_WHITELIST
-
-# tflags userconf
-USER_IN_WHITELIST_TO
-
-# good enough
 XMAILER_MIMEOLE_OL_015D5
 
 # good enough
 XMAILER_MIMEOLE_OL_07794
-
-# good enough
-XMAILER_MIMEOLE_OL_09BB4
-
-# good enough
-XMAILER_MIMEOLE_OL_1ECD5
-
-# good enough
-XMAILER_MIMEOLE_OL_20C99
 
 # good enough
 XMAILER_MIMEOLE_OL_22B61
@@ -1041,9 +924,6 @@ XMAILER_MIMEOLE_OL_3857F
 
 # good enough
 XMAILER_MIMEOLE_OL_3AC1D
-
-# good enough
-XMAILER_MIMEOLE_OL_4B815
 
 # good enough
 XMAILER_MIMEOLE_OL_4BF4C
@@ -1070,9 +950,6 @@ XMAILER_MIMEOLE_OL_7533E
 XMAILER_MIMEOLE_OL_812FF
 
 # good enough
-XMAILER_MIMEOLE_OL_83BF7
-
-# good enough
 XMAILER_MIMEOLE_OL_8627E
 
 # good enough
@@ -1091,9 +968,6 @@ XMAILER_MIMEOLE_OL_B4B40
 XMAILER_MIMEOLE_OL_BC7E6
 
 # good enough
-XMAILER_MIMEOLE_OL_CAC8F
-
-# good enough
 XMAILER_MIMEOLE_OL_CF0C0
 
 # good enough
@@ -1107,6 +981,9 @@ XMAILER_MIMEOLE_OL_F6D01
 
 # good enough
 XMAILER_MIMEOLE_OL_FF5C8
+
+# good enough
+X_MAILER_CME_6543_MSN
 
 # tflags net
 __DNS_FROM_RFC_ABUSE
