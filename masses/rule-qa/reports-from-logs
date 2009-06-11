@@ -357,16 +357,17 @@ sub gen_class {
         print "username in ham log: $u\n";
       }
 
-      if (scalar keys %spam <= 0 || scalar keys %ham <= 0) {
+      if (scalar keys %spam <= 0 && scalar keys %ham <= 0) {
         warn "no files found for $class.$rtype";
         return;
       }
 
       unlink "$cf{tmp}/ham.log.$$", "$cf{tmp}/spam.log.$$";
       for my $user (sort keys %spam) {
-        next unless $ham{$user};
+        my $hamfiles = [];
+        if ($ham{$user}) { $hamfiles = [ "$logsdir/$ham{$user}" ]; }
 
-        time_filter_fileset([ "$logsdir/$ham{$user}" ],
+        time_filter_fileset($hamfiles,
                 "$cf{tmp}/ham.log.$$", $OLDEST_HAM_WEEKS, undef);
         time_filter_fileset([ "$logsdir/$spam{$user}" ],
                 "$cf{tmp}/spam.log.$$", $OLDEST_SPAM_WEEKS, undef);
