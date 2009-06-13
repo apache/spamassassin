@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: bb-jm.20090611-r783698-n dos.20090611-r783698-n jm.20090611-r783698-n zmi.20090611-r783698-n; day 2: bb-jm.20090610-r783256-n dos.20090610-r783256-n jm.20090610-r783256-n zmi.20090610-r783256-n; day 3: bb-jm.20090609-r782916-n jm.20090609-r782916-n zmi.20090609-r782916-n
+# with results from: day 1: bb-jm.20090612-r784034-n dos.20090612-r784034-n jm.20090612-r784034-n zmi.20090612-r784034-n; day 2: bb-jm.20090611-r783698-n dos.20090611-r783698-n jm.20090611-r783698-n zmi.20090611-r783698-n; day 3: bb-jm.20090610-r783256-n dos.20090610-r783256-n jm.20090610-r783256-n zmi.20090610-r783256-n
 
 # tflags userconf
 ALL_TRUSTED
@@ -49,9 +49,6 @@ CHARSET_FARAWAY
 # tflags userconf
 CHARSET_FARAWAY_HEADER
 
-# tflags userconf
-CORRUPT_FROM_LINE_IN_HDRS
-
 # tflags net
 DIGEST_MULTIPLE
 
@@ -68,28 +65,16 @@ DKIM_POLICY_TESTING
 DKIM_SIGNED
 
 # tflags net
-DKIM_VALID
-
-# tflags net
-DKIM_VALID_AU
-
-# tflags net
 DKIM_VERIFIED
 
 # tflags net
 DNS_FROM_AHBL_RHSBL
 
 # tflags net
-DNS_FROM_OPENWHOIS
-
-# tflags net
 DNS_FROM_RFC_BOGUSMX
 
 # tflags net
 DNS_FROM_RFC_DSN
-
-# tflags publish
-DOS_ANAL_SPAM_MAILER
 
 # good enough
 DOS_HIGHBIT_HDRS_BODY
@@ -104,6 +89,9 @@ DOS_RCVD_IP_TWICE_B
 DOS_RCVD_IP_TWICE_C
 
 # good enough
+DRUGS_STOCK_MIMEOLE
+
+# good enough
 DYN_RDNS_AND_INLINE_IMAGE
 
 # good enough
@@ -112,14 +100,14 @@ DYN_RDNS_SHORT_HELO_HTML
 # good enough
 DYN_RDNS_SHORT_HELO_IMAGE
 
-# tflags net
-EMAILBL_TEST_LEM
-
 # tflags userconf
 ENV_AND_HDR_DKIM_MATCH
 
 # tflags userconf
 ENV_AND_HDR_SPF_MATCH
+
+# good enough
+FB_CIALIS_LEO3
 
 # good enough
 FB_GREAT_BEST_SEX
@@ -129,6 +117,9 @@ FB_GVR
 
 # good enough
 FB_INCREASE_YOUR
+
+# good enough
+FB_NO_SCRIP_NEEDED
 
 # good enough
 FB_QUALITY_REPLICA
@@ -170,13 +161,16 @@ FH_HELO_EQ_D_D_D_D
 FH_HOST_EQ_DYNAMICIP
 
 # good enough
+FH_HOST_EQ_PACBELL_D
+
+# good enough
 FH_HOST_EQ_VERIZON_P
 
 # good enough
-FM_LOTTO_YOU_WON
+FM_SCHOOLING
 
 # good enough
-FM_SCHOOLING
+FM_SCHOOL_DIPLOMA
 
 # good enough
 FM_SEX_HELODDDD
@@ -195,6 +189,12 @@ FROM_LOCAL_NOVOWEL
 
 # good enough
 FROM_UNBAL1
+
+# good enough
+FRT_ROLEX
+
+# good enough
+FRT_TODAY2
 
 # good enough
 FR_TITLE_CONS_6
@@ -237,6 +237,9 @@ FSL_YG_ABUSE
 
 # good enough
 FS_EJACULA
+
+# good enough
+FS_LARGE_PERCENT2
 
 # good enough
 FS_REPLICA
@@ -322,9 +325,6 @@ HTML_CHARSET_FARAWAY
 # good enough
 JM_FAKE_PSMTP_RCVD
 
-# tflags publish
-JM_I_FEEL_LUCKY
-
 # good enough
 JM_SOUGHT_FRAUD_1
 
@@ -336,12 +336,6 @@ JM_SOUGHT_FRAUD_3
 
 # good enough
 KAM_LOTTO1
-
-# tflags publish
-KAM_STOCKOTC
-
-# tflags publish
-KAM_STOCKTIP15
 
 # good enough
 KB_DATE_CONTAINS_TAB
@@ -416,100 +410,7 @@ RAZOR2_CHECK
 RCVD_IN_BL_SPAMCOP_NET
 
 # tflags net
-RCVD_IN_BRBL_LASTEXT
-
-# tflags net
 RCVD_IN_BSP_TRUSTED
-
-# tflags net
-RCVD_IN_DNSWL_HI
-
-# tflags net
-RCVD_IN_DNSWL_LOW
-
-# tflags net
-RCVD_IN_DNSWL_MED
-
-# tflags net
-RCVD_IN_IADB_DK
-
-# tflags net
-RCVD_IN_IADB_DOPTIN
-
-# tflags net
-RCVD_IN_IADB_DOPTIN_GT50
-
-# tflags net
-RCVD_IN_IADB_DOPTIN_LT50
-
-# tflags net
-RCVD_IN_IADB_EDDB
-
-# tflags net
-RCVD_IN_IADB_EPIA
-
-# tflags net
-RCVD_IN_IADB_GOODMAIL
-
-# tflags net
-RCVD_IN_IADB_LISTED
-
-# tflags net
-RCVD_IN_IADB_LOOSE
-
-# tflags net
-RCVD_IN_IADB_MI_CPEAR
-
-# tflags net
-RCVD_IN_IADB_MI_CPR_30
-
-# tflags net
-RCVD_IN_IADB_MI_CPR_MAT
-
-# tflags net
-RCVD_IN_IADB_ML_DOPTIN
-
-# tflags net
-RCVD_IN_IADB_NOCONTROL
-
-# tflags net
-RCVD_IN_IADB_OOO
-
-# tflags net
-RCVD_IN_IADB_OPTIN
-
-# tflags net
-RCVD_IN_IADB_OPTIN_GT50
-
-# tflags net
-RCVD_IN_IADB_OPTIN_LT50
-
-# tflags net
-RCVD_IN_IADB_OPTOUTONLY
-
-# tflags net
-RCVD_IN_IADB_RDNS
-
-# tflags net
-RCVD_IN_IADB_SENDERID
-
-# tflags net
-RCVD_IN_IADB_SPF
-
-# tflags net
-RCVD_IN_IADB_UNVERIFIED_1
-
-# tflags net
-RCVD_IN_IADB_UNVERIFIED_2
-
-# tflags net
-RCVD_IN_IADB_UT_CPEAR
-
-# tflags net
-RCVD_IN_IADB_UT_CPR_30
-
-# tflags net
-RCVD_IN_IADB_UT_CPR_MAT
 
 # tflags net
 RCVD_IN_IADB_VOUCHED
@@ -575,9 +476,6 @@ RCVD_IN_SORBS_WEB
 RCVD_IN_SORBS_ZOMBIE
 
 # tflags net
-RCVD_IN_SSBL
-
-# tflags net
 RCVD_IN_SSC_TRUSTED_COI
 
 # tflags net
@@ -585,9 +483,6 @@ RCVD_IN_XBL
 
 # good enough
 REPLYTO_WITHOUT_TO_CC
-
-# good enough
-RP_MATCHES_RCVD
 
 # good enough
 SANE_04e8bf28eb445199a7f11b943c44d209
@@ -698,6 +593,9 @@ THREAD_INDEX_BAD
 TT_MSGID_TRUNC
 
 # good enough
+TVD_FINGER_02
+
+# good enough
 TVD_QUAL_MEDS
 
 # good enough
@@ -711,6 +609,54 @@ TVD_RCVD_SINGLE
 
 # good enough
 TVD_VISIT_PHARMA
+
+# good enough
+FB_IMAGIRL
+
+# good enough
+FB_MEDS_PERCENT
+
+# good enough
+FH_HAS_X
+
+# good enough
+FH_HOST_IN_ADDRARPA
+
+# good enough
+FREEMAIL_REPLYTO
+
+# good enough
+FSL_GD1_URI
+
+# good enough
+FS_MAKE_MONEY
+
+# good enough
+FS_NUDE
+
+# good enough
+HS_BOBAX_MID_1
+
+# good enough
+HS_BOBAX_MID_2
+
+# good enough
+KHOP_SC_CIDR24
+
+# good enough
+KHOP_SC_TOP100
+
+# good enough
+KHOP_SC_TOP200
+
+# good enough
+SANE_75491b468ec2e117e50f9842d32abfab
+
+# good enough
+TVD_FROM_1
+
+# good enough
+TVD_PCT_OFF
 
 # tflags userconf
 UNPARSEABLE_RELAY
@@ -735,9 +681,6 @@ URIBL_PH_SURBL
 
 # tflags net
 URIBL_RED
-
-# tflags net
-URIBL_RHS_DOB
 
 # tflags net
 URIBL_SBL
@@ -783,126 +726,6 @@ USER_IN_WHITELIST
 
 # tflags userconf
 USER_IN_WHITELIST_TO
-
-# tflags net
-WHOIS_1AND1PR
-
-# tflags net
-WHOIS_AITPRIV
-
-# tflags net
-WHOIS_CONTACTPRIV
-
-# tflags net
-WHOIS_DMNBYPROXY
-
-# tflags net
-WHOIS_DOMESCROW
-
-# tflags net
-WHOIS_DOMPRIVCORP
-
-# tflags net
-WHOIS_DREAMPRIV
-
-# tflags net
-WHOIS_DROA
-
-# tflags net
-WHOIS_DYNADOT
-
-# tflags net
-WHOIS_FINEXE
-
-# tflags net
-WHOIS_GKGPROXY
-
-# tflags net
-WHOIS_IDSHIELD
-
-# tflags net
-WHOIS_IDTHEFTPROT
-
-# tflags net
-WHOIS_KATZ
-
-# tflags net
-WHOIS_LISTINGAG
-
-# tflags net
-WHOIS_LNOA
-
-# tflags net
-WHOIS_MAPNAME
-
-# tflags net
-WHOIS_MONIKER_PRIV
-
-# tflags net
-WHOIS_MONIKER_ROLE
-
-# tflags net
-WHOIS_MYPRIVREG
-
-# tflags net
-WHOIS_NAMEKING
-
-# tflags net
-WHOIS_NAMESECURE
-
-# tflags net
-WHOIS_NETID
-
-# tflags net
-WHOIS_NETSOLPR
-
-# tflags net
-WHOIS_NOLDC
-
-# tflags net
-WHOIS_NOMINET
-
-# tflags net
-WHOIS_PRIVACYPOST
-
-# tflags net
-WHOIS_PRIVDOMAIN
-
-# tflags net
-WHOIS_PRIVPROT
-
-# tflags net
-WHOIS_REGISTER4LESS
-
-# tflags net
-WHOIS_REGISTERFLY
-
-# tflags net
-WHOIS_REGTEK
-
-# tflags net
-WHOIS_SAFENAMES
-
-# tflags net
-WHOIS_SECINFOSERV
-
-# tflags net
-WHOIS_SECUREWHOIS
-
-# tflags net
-WHOIS_SPAMFREE
-
-# tflags net
-WHOIS_SRSPLUS
-
-# tflags net
-WHOIS_UNLISTED
-
-# tflags net
-WHOIS_WHOISGUARD
-
-# tflags net
-WHOIS_WHOISPROT
 
 # good enough
 XMAILER_MIMEOLE_OL_015D5
@@ -953,6 +776,9 @@ XMAILER_MIMEOLE_OL_8627E
 XMAILER_MIMEOLE_OL_91287
 
 # good enough
+XMAILER_MIMEOLE_OL_9B90B
+
+# good enough
 XMAILER_MIMEOLE_OL_ADFF7
 
 # good enough
@@ -963,6 +789,9 @@ XMAILER_MIMEOLE_OL_B4B40
 
 # good enough
 XMAILER_MIMEOLE_OL_BC7E6
+
+# good enough
+XMAILER_MIMEOLE_OL_C65FA
 
 # good enough
 XMAILER_MIMEOLE_OL_CF0C0
@@ -990,12 +819,6 @@ __DNS_FROM_RFC_POST
 
 # tflags net
 __DNS_FROM_RFC_WHOIS
-
-# tflags net
-__RCVD_IN_BRBL
-
-# tflags net
-__RCVD_IN_DNSWL
 
 # tflags net
 __RCVD_IN_IADB
