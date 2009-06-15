@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: bb-jm.20090612-r784034-n dos.20090612-r784034-n jm.20090612-r784034-n zmi.20090612-r784034-n; day 2: bb-jm.20090611-r783698-n dos.20090611-r783698-n jm.20090611-r783698-n zmi.20090611-r783698-n; day 3: bb-jm.20090610-r783256-n dos.20090610-r783256-n jm.20090610-r783256-n zmi.20090610-r783256-n
+# with results from: day 1: bb-jm.20090614-r784528-n dos.20090614-r784528-n jm.20090614-r784528-n zmi.20090614-r784528-n; day 2: bb-jm.20090612-r784034-n dos.20090612-r784034-n jm.20090612-r784034-n zmi.20090612-r784034-n; day 3: bb-jm.20090611-r783698-n dos.20090611-r783698-n jm.20090611-r783698-n zmi.20090611-r783698-n
 
 # tflags userconf
 ALL_TRUSTED
@@ -116,7 +116,13 @@ FB_GREAT_BEST_SEX
 FB_GVR
 
 # good enough
+FB_IMAGIRL
+
+# good enough
 FB_INCREASE_YOUR
+
+# good enough
+FB_MEDS_PERCENT
 
 # good enough
 FB_NO_SCRIP_NEEDED
@@ -149,6 +155,9 @@ FH_FAKE_RCVD_LINE
 FH_FAKE_RCVD_LINE_B
 
 # good enough
+FH_HAS_X
+
+# good enough
 FH_HELO_ALMOST_IP
 
 # good enough
@@ -167,6 +176,9 @@ FH_HOST_EQ_PACBELL_D
 FH_HOST_EQ_VERIZON_P
 
 # good enough
+FH_HOST_IN_ADDRARPA
+
+# good enough
 FM_SCHOOLING
 
 # good enough
@@ -180,6 +192,9 @@ FORGED_RELAY_MUA_TO_MX
 
 # tflags userconf
 FRAGMENTED_MESSAGE
+
+# good enough
+FREEMAIL_REPLYTO
 
 # tflags userconf
 FROM_DOMAIN_NOVOWEL
@@ -207,6 +222,9 @@ FSL_FAKE_HOTMAIL_RVCD
 
 # good enough
 FSL_FAKE_YAHOO_RCVD
+
+# good enough
+FSL_GD1_URI
 
 # good enough
 FSL_GEO_ABUSE
@@ -240,6 +258,12 @@ FS_EJACULA
 
 # good enough
 FS_LARGE_PERCENT2
+
+# good enough
+FS_MAKE_MONEY
+
+# good enough
+FS_NUDE
 
 # good enough
 FS_REPLICA
@@ -311,6 +335,12 @@ HELO_OEM
 HIGH_CODEPAGE_URI
 
 # good enough
+HS_BOBAX_MID_1
+
+# good enough
+HS_BOBAX_MID_2
+
+# good enough
 HS_FORGED_OE_FW
 
 # good enough
@@ -360,6 +390,15 @@ KB_RATWARE_OUTLOOK_MID
 
 # good enough
 KHOP_SC_CIDR16
+
+# good enough
+KHOP_SC_CIDR24
+
+# good enough
+KHOP_SC_TOP100
+
+# good enough
+KHOP_SC_TOP200
 
 # good enough
 KHOP_SC_TOP_CIDR16
@@ -518,6 +557,9 @@ SANE_57eb6fb7217efcb7a706124454426ee6
 SANE_7429530a7398f43f1f1b795f9420714e
 
 # good enough
+SANE_75491b468ec2e117e50f9842d32abfab
+
+# good enough
 SANE_7d8e92a09f27d49fafe09a1dbd5cac10
 
 # good enough
@@ -596,6 +638,9 @@ TT_MSGID_TRUNC
 TVD_FINGER_02
 
 # good enough
+TVD_PCT_OFF
+
+# good enough
 TVD_QUAL_MEDS
 
 # good enough
@@ -609,54 +654,6 @@ TVD_RCVD_SINGLE
 
 # good enough
 TVD_VISIT_PHARMA
-
-# good enough
-FB_IMAGIRL
-
-# good enough
-FB_MEDS_PERCENT
-
-# good enough
-FH_HAS_X
-
-# good enough
-FH_HOST_IN_ADDRARPA
-
-# good enough
-FREEMAIL_REPLYTO
-
-# good enough
-FSL_GD1_URI
-
-# good enough
-FS_MAKE_MONEY
-
-# good enough
-FS_NUDE
-
-# good enough
-HS_BOBAX_MID_1
-
-# good enough
-HS_BOBAX_MID_2
-
-# good enough
-KHOP_SC_CIDR24
-
-# good enough
-KHOP_SC_TOP100
-
-# good enough
-KHOP_SC_TOP200
-
-# good enough
-SANE_75491b468ec2e117e50f9842d32abfab
-
-# good enough
-TVD_FROM_1
-
-# good enough
-TVD_PCT_OFF
 
 # tflags userconf
 UNPARSEABLE_RELAY
