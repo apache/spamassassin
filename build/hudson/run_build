@@ -9,6 +9,14 @@ mkdir artifacts testxml
 
 perl Makefile.PL < /dev/null
 make
+
+rm rules/70_sandbox.cf
+if make build_rules | grep "LINT FAILED" ; then 
+  exit 1
+else
+  true
+fi
+
 make distcheck
 
 # select the tests we want
