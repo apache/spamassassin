@@ -8,7 +8,7 @@ use SATest; sa_t_init("dkim");
 use Test;
 use vars qw(%patterns %anti_patterns);
 
-use constant num_tests => 74;
+use constant num_tests => 80;
 
 use constant TEST_ENABLED => conf_bool('run_net_tests');
 use constant HAS_MODULES => eval { require Mail::DKIM; require Mail::DKIM::Verifier; };
