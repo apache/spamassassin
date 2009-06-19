@@ -155,7 +155,7 @@ sub sa_t_init {
   rmtree ("log/localrules.tmp");
   mkdir ("log/localrules.tmp", 0755);
 
-  for $tainted (<../rules/*.pre>) {
+  for $tainted (<../rules/*.pm>, <../rules/*.pre>) {
     $tainted =~ /(.*)/;
     my $file = $1;
     $base = basename $file;
