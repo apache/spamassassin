@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: bb-jm.20090617-r785514-n dos.20090617-r785514-n jm.20090617-r785514-n zmi.20090617-r785514-n; day 2: bb-jm.20090616-r785115-n dos.20090616-r785115-n jm.20090616-r785115-n zmi.20090616-r785115-n; day 3: bb-jm.20090615-r784692-n dos.20090615-r784692-n jm.20090615-r784692-n zmi.20090615-r784692-n
+# with results from: day 1: bb-jm.20090618-r785959-n dos.20090618-r785959-n jm.20090618-r785959-n zmi.20090618-r785959-n; day 2: bb-jm.20090617-r785514-n dos.20090617-r785514-n jm.20090617-r785514-n zmi.20090617-r785514-n; day 3: bb-jm.20090616-r785115-n dos.20090616-r785115-n jm.20090616-r785115-n zmi.20090616-r785115-n
 
 # tflags userconf
 ALL_TRUSTED
@@ -110,9 +110,6 @@ ENV_AND_HDR_SPF_MATCH
 FB_CIALIS_LEO3
 
 # good enough
-FB_GET_MEDS
-
-# good enough
 FB_GREAT_BEST_SEX
 
 # good enough
@@ -153,6 +150,9 @@ FH_FAKE_RCVD_LINE
 
 # good enough
 FH_FAKE_RCVD_LINE_B
+
+# good enough
+FH_FROMEML_NOTLD
 
 # good enough
 FH_HAS_X
@@ -415,6 +415,12 @@ L_SPAM_TOOL_13
 # tflags userconf
 MIME_CHARSET_FARAWAY
 
+# good enough
+MIME_NO_TEXT
+
+# good enough
+MIME_PHP_NO_TEXT
+
 # tflags userconf
 MISSING_HB_SEP
 
@@ -578,9 +584,6 @@ SANE_a1315779e96aedc845566b1f41f4e424
 SANE_c627ae8d03f8c3d579345970e652142c
 
 # good enough
-SANE_e5950fd6cd9b53a17ba2cb7883181772
-
-# good enough
 SANE_ef00ce28cfa5ed6e4c405ed37ff36d46
 
 # good enough
@@ -635,6 +638,9 @@ TT_MSGID_TRUNC
 TVD_FINGER_02
 
 # good enough
+TVD_FROM_1
+
+# good enough
 TVD_PCT_OFF
 
 # good enough
@@ -651,15 +657,6 @@ TVD_RCVD_SINGLE
 
 # good enough
 TVD_VISIT_PHARMA
-
-# good enough
-MIME_NO_TEXT
-
-# good enough
-MIME_PHP_NO_TEXT
-
-# good enough
-TVD_FROM_1
 
 # tflags userconf
 UNPARSEABLE_RELAY
