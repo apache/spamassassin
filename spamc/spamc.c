@@ -153,8 +153,14 @@ print_usage(void)
     usg("  -t, --timeout timeout\n"
         "                      Timeout in seconds for communications to\n"
         "                      spamd. [default: 600]\n");
+    usg("  --filter-retries retries\n"
+        "                      Retry filtering this many times if the spamd\n"
+        "                      process fails (usually times out) [default: 3]\n");
+    usg("  --filter-retry-sleep sleep\n"
+        "                      Sleep for this time between failed filter\n"
+        "                      attempts, in seconds [default: 1]\n");
     usg("  --connect-retries retries\n"
-        "                      Try connecting to spamd this many times\n"
+        "                      Try connecting to spamd tcp socket this many times\n"
         "                      [default: 3]\n");
     usg("  --retry-sleep sleep Sleep for this time between attempts to\n"
         "                      connect to spamd, in seconds [default: 1]\n");
@@ -226,7 +232,7 @@ read_args(int argc, char **argv,
     int longind = 1;
 
     static struct option longoptions[] = {
-       { "dest" , required_argument, 0, 'd' },
+       { "dest", required_argument, 0, 'd' },
        { "randomize", no_argument, 0, 'H' },
        { "port", required_argument, 0, 'p' },
        { "ssl", optional_argument, 0, 'S' },
@@ -235,6 +241,8 @@ read_args(int argc, char **argv,
        { "timeout", required_argument, 0, 't' },
        { "connect-retries", required_argument, 0, 0 },
        { "retry-sleep", required_argument, 0, 1 },
+       { "filter-retries", required_argument, 0, 3 },
+       { "filter-retry-sleep", required_argument, 0, 4 },
        { "max-size", required_argument, 0, 's' },
        { "username", required_argument, 0, 'u' },
        { "learntype", required_argument, 0, 'L' },
@@ -469,6 +477,16 @@ read_args(int argc, char **argv,
             case 2:
             {
                 flags |= SPAMC_HEADERS;
+                break;
+            }
+            case 3:
+            {
+                ptrn->filter_retries = atoi(spamc_optarg);
+                break;
+            }
+            case 4:
+            {
+                ptrn->filter_retry_sleep = atoi(spamc_optarg);
                 break;
             }
         }

@@ -236,6 +236,10 @@ struct transport
     /* added in SpamAssassin 3.2.0 */
     int connect_retries;
     int retry_sleep;
+
+    /* Added for filterloop */
+    int filter_retries;
+    int filter_retry_sleep;
 };
 
 /* Initialise and setup transport-specific context for the connection
