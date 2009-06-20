@@ -1177,6 +1177,15 @@ int message_filter(struct transport *tp, const char *username,
     int zlib_bufsiz = 0;
     unsigned char *towrite_buf;
     int towrite_len;
+    int filter_retry_count;
+    int filter_retry_sleep;
+    int filter_retries;
+    #ifdef SPAMC_HAS_ADDRINFO
+        struct addrinfo *tmphost;
+    #else
+        struct in_addr tmphost;
+    #endif
+    int nhost_counter;
 
     assert(tp != NULL);
     assert(m != NULL);
@@ -1220,119 +1229,170 @@ int message_filter(struct transport *tp, const char *username,
     m->out = m->outbuf;
     m->out_len = 0;
 
-    /* Build spamd protocol header */
-    if (flags & SPAMC_CHECK_ONLY)
-	strcpy(buf, "CHECK ");
-    else if (flags & SPAMC_REPORT_IFSPAM)
-	strcpy(buf, "REPORT_IFSPAM ");
-    else if (flags & SPAMC_REPORT)
-	strcpy(buf, "REPORT ");
-    else if (flags & SPAMC_SYMBOLS)
-	strcpy(buf, "SYMBOLS ");
-    else if (flags & SPAMC_PING)
-	strcpy(buf, "PING ");
-    else if (flags & SPAMC_HEADERS)
-	strcpy(buf, "HEADERS ");
-    else
-	strcpy(buf, "PROCESS ");
+    /* If the spamd filter takes too long and we timeout, then
+     * retry again.  This gets us around a hung child thread 
+     * in spamd or a problem on a spamd host in a multi-host
+     * setup.  If there is more than one destination host
+     * we move to the next host on each attempt.
+     */
 
-    len = strlen(buf);
-    if (len + strlen(PROTOCOL_VERSION) + 2 >= bufsiz) {
-	_use_msg_for_out(m);
-	return EX_OSERR;
+    /* default values */
+    filter_retry_sleep = tp->filter_retry_sleep;
+    filter_retries = tp->filter_retries;
+    if (filter_retries == 0) {
+        filter_retries = 1;
+    }
+    if (filter_retry_sleep < 0) {
+        filter_retry_sleep = 1;
     }
 
-    strcat(buf, PROTOCOL_VERSION);
-    strcat(buf, "\r\n");
-    len = strlen(buf);
+    /* filterloop - Ensure that we run through this at least
+     * once, and again if there are errors 
+     */
+    filter_retry_count = 0;
+    while ((filter_retry_count==0) || 
+                ((filter_retry_count<tp->filter_retries) && (failureval == EX_IOERR)))
+    {
+        if (filter_retry_count != 0){
+            /* Ensure that the old socket gets closed */
+            if (sock != -1) {
+                closesocket(sock);
+                sock=-1;
+            }
 
-    towrite_buf = (unsigned char *) m->msg;
-    towrite_len = (int) m->msg_len;
-    if (zlib_on) {
-        if (_zlib_compress(m->msg, m->msg_len, &zlib_buf, &zlib_bufsiz, flags) != EX_OK)
-        {
-            _free_zlib_buffer(&zlib_buf, &zlib_bufsiz);
+            /* Move to the next host in the list, if nhosts>1 */
+            if (tp->nhosts > 1) {
+                tmphost = tp->hosts[0];
+
+                /* TODO: free using freeaddrinfo() */
+                for (nhost_counter = 1; nhost_counter < tp->nhosts; nhost_counter++) {
+                    tp->hosts[nhost_counter - 1] = tp->hosts[nhost_counter];
+                }
+        
+                tp->hosts[nhost_counter - 1] = tmphost;
+            }
+
+            /* Now sleep the requested amount */
+            sleep(filter_retry_sleep);
+        }
+
+        filter_retry_count++;
+    
+        /* Build spamd protocol header */
+        if (flags & SPAMC_CHECK_ONLY)
+          strcpy(buf, "CHECK ");
+        else if (flags & SPAMC_REPORT_IFSPAM)
+          strcpy(buf, "REPORT_IFSPAM ");
+        else if (flags & SPAMC_REPORT)
+          strcpy(buf, "REPORT ");
+        else if (flags & SPAMC_SYMBOLS)
+          strcpy(buf, "SYMBOLS ");
+        else if (flags & SPAMC_PING)
+          strcpy(buf, "PING ");
+        else if (flags & SPAMC_HEADERS)
+          strcpy(buf, "HEADERS ");
+        else
+          strcpy(buf, "PROCESS ");
+    
+        len = strlen(buf);
+        if (len + strlen(PROTOCOL_VERSION) + 2 >= bufsiz) {
+            _use_msg_for_out(m);
             return EX_OSERR;
         }
-        towrite_buf = zlib_buf;
-        towrite_len = zlib_bufsiz;
-    }
+    
+        strcat(buf, PROTOCOL_VERSION);
+        strcat(buf, "\r\n");
+        len = strlen(buf);
+    
+        towrite_buf = (unsigned char *) m->msg;
+        towrite_len = (int) m->msg_len;
+        if (zlib_on) {
+            if (_zlib_compress(m->msg, m->msg_len, &zlib_buf, &zlib_bufsiz, flags) != EX_OK)
+            {
+                _free_zlib_buffer(&zlib_buf, &zlib_bufsiz);
+                return EX_OSERR;
+            }
+            towrite_buf = zlib_buf;
+            towrite_len = zlib_bufsiz;
+        }
+    
+        if (!(flags & SPAMC_PING)) {
+          if (username != NULL) {
+              if (strlen(username) + 8 >= (bufsiz - len)) {
+                  _use_msg_for_out(m);
+                  if (zlib_on) {
+                      _free_zlib_buffer(&zlib_buf, &zlib_bufsiz);
+                  }
+                  return EX_OSERR;
+              }
+              strcpy(buf + len, "User: ");
+              strcat(buf + len, username);
+              strcat(buf + len, "\r\n");
+              len += strlen(buf + len);
+          }
+          if (zlib_on) {
+              len += snprintf(buf + len, 8192-len, "Compress: zlib\r\n");
+          }
+          if ((m->msg_len > SPAMC_MAX_MESSAGE_LEN) || ((len + 27) >= (bufsiz - len))) {
+              _use_msg_for_out(m);
+              if (zlib_on) {
+                  _free_zlib_buffer(&zlib_buf, &zlib_bufsiz);
+              }
+              return EX_DATAERR;
+          }
+          len += snprintf(buf + len, 8192-len, "Content-length: %d\r\n\r\n", (int) towrite_len);
+        }
+    
+        libspamc_timeout = m->timeout;
 
-    if (!(flags & SPAMC_PING)) {
-      if (username != NULL) {
-	if (strlen(username) + 8 >= (bufsiz - len)) {
+        if (tp->socketpath)
+          rc = _try_to_connect_unix(tp, &sock);
+        else
+          rc = _try_to_connect_tcp(tp, &sock);
+    
+        if (rc != EX_OK) {
           _use_msg_for_out(m);
-	   if (zlib_on) {
-          _free_zlib_buffer(&zlib_buf, &zlib_bufsiz);
-	   }
-          return EX_OSERR;
-	}
-	strcpy(buf + len, "User: ");
-	strcat(buf + len, username);
-	strcat(buf + len, "\r\n");
-	len += strlen(buf + len);
-      }
-      if (zlib_on) {
-	len += snprintf(buf + len, 8192-len, "Compress: zlib\r\n");
-      }
-      if ((m->msg_len > SPAMC_MAX_MESSAGE_LEN) || ((len + 27) >= (bufsiz - len))) {
-	_use_msg_for_out(m);
-	if (zlib_on) {
-	_free_zlib_buffer(&zlib_buf, &zlib_bufsiz);
-	}
-	return EX_DATAERR;
-      }
-      len += snprintf(buf + len, 8192-len, "Content-length: %d\r\n\r\n", (int) towrite_len);
-    }
-
-    libspamc_timeout = m->timeout;
-
-    if (tp->socketpath)
-	rc = _try_to_connect_unix(tp, &sock);
-    else
-	rc = _try_to_connect_tcp(tp, &sock);
-
-    if (rc != EX_OK) {
-	_use_msg_for_out(m);
-	if (zlib_on) {
-	_free_zlib_buffer(&zlib_buf, &zlib_bufsiz);
-	}
-	return rc;      /* use the error code try_to_connect_*() gave us. */
-    }
-
-    if (flags & SPAMC_USE_SSL) {
+          if (zlib_on) {
+              _free_zlib_buffer(&zlib_buf, &zlib_bufsiz);
+          }
+          return rc;      /* use the error code try_to_connect_*() gave us. */
+        }
+    
+        if (flags & SPAMC_USE_SSL) {
 #ifdef SPAMC_SSL
-	ssl = SSL_new(ctx);
-	SSL_set_fd(ssl, sock);
-	SSL_connect(ssl);
+            ssl = SSL_new(ctx);
+            SSL_set_fd(ssl, sock);
+            SSL_connect(ssl);
 #endif
-    }
-
-    /* Send to spamd */
-    if (flags & SPAMC_USE_SSL) {
+        }
+    
+        /* Send to spamd */
+        if (flags & SPAMC_USE_SSL) {
 #ifdef SPAMC_SSL
-	SSL_write(ssl, buf, len);
-	SSL_write(ssl, towrite_buf, towrite_len);
+            SSL_write(ssl, buf, len);
+            SSL_write(ssl, towrite_buf, towrite_len);
 #endif
-    }
-    else {
-	full_write(sock, 0, buf, len);
-	full_write(sock, 0, towrite_buf, towrite_len);
-	shutdown(sock, SHUT_WR);
-    }
+        }
+        else {
+            full_write(sock, 0, buf, len);
+            full_write(sock, 0, towrite_buf, towrite_len);
+            shutdown(sock, SHUT_WR);
+        }
 
-    /* free zlib buffer
-    * bug 6025: zlib buffer not freed if compression is used
-    */
-    if (zlib_on) {
-    _free_zlib_buffer(&zlib_buf, &zlib_bufsiz);
-    }
+        /* free zlib buffer
+        * bug 6025: zlib buffer not freed if compression is used
+        */
+        if (zlib_on) {
+            _free_zlib_buffer(&zlib_buf, &zlib_bufsiz);
+        }
+    
+        /* ok, now read and parse it.  SPAMD/1.2 line first... */
+        failureval =
+                _spamc_read_full_line(m, flags, ssl, sock, buf, &len, bufsiz);
+    } /* end of filterloop */
 
-    /* ok, now read and parse it.  SPAMD/1.2 line first... */
-    failureval =
-	_spamc_read_full_line(m, flags, ssl, sock, buf, &len, bufsiz);
     if (failureval != EX_OK) {
-	goto failure;
+        goto failure;
     }
 
     if (sscanf(buf, "SPAMD/%18s %d %*s", versbuf, &response) != 2) {
@@ -2045,7 +2105,8 @@ nexthost:
          * the list by a random amount based on the current time.
          * This may later be truncated to a single item. This is
          * meaningful only if we have more than one host.
-         */
+	 */
+
         if ((flags & SPAMC_RANDOMIZE_HOSTS) && tp->nhosts > 1) {
             _randomize_hosts(tp);
         }
