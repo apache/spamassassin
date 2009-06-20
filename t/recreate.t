@@ -42,16 +42,12 @@ $SIG{'__WARN__'} = sub {
 
 my $spamtest = Mail::SpamAssassin->new({
     rules_filename => "$prefix/t/log/test_rules_copy",
-    site_rules_filename => "$prefix/t/log/test_default.cf",
+    site_rules_filename => "$prefix/t/log/localrules.tmp",
     userprefs_filename  => "$prefix/masses/spamassassin/user_prefs",
     local_tests_only    => 1,
     debug             => 0,
     dont_copy_prefs   => 1,
 });
-
-# remove all plugin .pm files.  This should be ok as long as they are
-# being loaded with 'tryplugin' instead of 'loadplugin'
-unlink(<$prefix/t/log/test_rules_copy/*.pm>);
 
 $spamtest->init(0); # parse rules
 ok($spamtest);
@@ -71,7 +67,7 @@ $spamtest->finish();
 
 $spamtest = Mail::SpamAssassin->new({
     rules_filename => "$prefix/t/log/test_rules_copy",
-    site_rules_filename => "$prefix/t/log/test_default.cf",
+    site_rules_filename => "$prefix/t/log/localrules.tmp",
     userprefs_filename  => "$prefix/masses/spamassassin/user_prefs",
     local_tests_only    => 1,
     debug             => 0,
