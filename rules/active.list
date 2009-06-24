@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: bb-jm.20090622-r787168-n dos.20090622-r787168-n jm.20090622-r787168-n zmi.20090622-r787168-n; day 2: bb-jm.20090621-r786953-n dos.20090621-r786953-n jm.20090621-r786953-n zmi.20090621-r786953-n; day 3: bb-jm.20090619-r786415-n dos.20090619-r786415-n jm.20090619-r786415-n zmi.20090619-r786415-n
+# with results from: day 1: bb-jm.20090623-r787586-n dos.20090623-r787586-n jm.20090623-r787586-n zmi.20090623-r787586-n; day 2: bb-jm.20090622-r787168-n dos.20090622-r787168-n jm.20090622-r787168-n zmi.20090622-r787168-n; day 3: bb-jm.20090621-r786953-n dos.20090621-r786953-n jm.20090621-r786953-n zmi.20090621-r786953-n
 
 # tflags userconf
 ALL_TRUSTED
@@ -83,6 +83,9 @@ DOS_HIGHBIT_HDRS_BODY
 DOS_OE_TO_MX
 
 # good enough
+DOS_OE_TO_MX_IMAGE
+
+# good enough
 DOS_RCVD_IP_TWICE_B
 
 # good enough
@@ -120,9 +123,6 @@ FB_INCREASE_YOUR
 
 # good enough
 FB_MEDS_PERCENT
-
-# good enough
-FB_NO_SCRIP_NEEDED
 
 # good enough
 FB_QUALITY_REPLICA
@@ -179,6 +179,9 @@ FH_HOST_EQ_VERIZON_P
 FH_HOST_IN_ADDRARPA
 
 # good enough
+FILL_THIS_FORM_LOAN
+
+# good enough
 FM_SCHOOLING
 
 # good enough
@@ -207,6 +210,9 @@ FROM_UNBAL1
 
 # good enough
 FRT_ABSOLUT
+
+# good enough
+FRT_EXPERIENCE
 
 # good enough
 FRT_ROLEX
@@ -657,18 +663,6 @@ TVD_RCVD_SINGLE
 
 # good enough
 TVD_VISIT_PHARMA
-
-# good enough
-DOS_OE_TO_MX_IMAGE
-
-# good enough
-FILL_THIS_FORM_LOAN
-
-# good enough
-FRT_EXPERIENCE
-
-# good enough
-TVD_FROM_1
 
 # tflags userconf
 UNPARSEABLE_RELAY
