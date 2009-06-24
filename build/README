@@ -18,9 +18,11 @@ SPAMASSASSIN DEVELOPMENT SNAPSHOT PROCEDURE
 
     PATH=$HOME/sabuildtools/perl584/bin:$HOME/sabuildtools/bin:$PATH
 
-- run "./build/update_devel" to build the tar.gz files
+- run "./build/update_devel" to build the tar.gz files.
 
-- by default, they're written to ~/site/devel/ . 
+- next run "./build/update_devel_rules" to build the rules tarball.
+
+- by default, they're written to ~/public_html/devel/ . 
   Copy them to wherever you want, yourself.
 
 
@@ -274,17 +276,17 @@ SPAMASSASSIN RELEASE PROCEDURE
   this command will do it:
 
         version=X.Y.Z
-        cp -p ~/public_html/devel/Mail-SpamAssassin-$version.* \
+        cp -p ~/public_html/devel/Mail-SpamAssassin*-$version.* \
             ~/public_html/rc/
 
   (for full release builds) copy the tarballs to www.apache.org/dist:
 
         version=X.Y.Z
-        cp -p ~/public_html/devel/Mail-SpamAssassin-$version.* \
+        cp -p ~/public_html/devel/Mail-SpamAssassin*-$version.* \
             /www/www.apache.org/dist/spamassassin/source
 
         cd /www/www.apache.org/dist/spamassassin
-        cp -p source/Mail-SpamAssassin-$version.* .
+        cp -p source/Mail-SpamAssassin*-$version.* .
 
         chmod -R g+w /www/www.apache.org/dist/spamassassin
 
@@ -296,8 +298,8 @@ SPAMASSASSIN RELEASE PROCEDURE
 
         cd /www/www.apache.org/dist/spamassassin
         prev=X.Y.notZ
-        rm -f source/Mail-SpamAssassin-$prev.* Mail-SpamAssassin-$prev.*
-        rm -f binaries/*/Mail-SpamAssassin-$prev.*
+        rm -f source/Mail-SpamAssassin*-$prev.* Mail-SpamAssassin*-$prev.*
+        rm -f binaries/*/Mail-SpamAssassin*-$prev.*
 
   (Archive copies are automatically kept on archive.apache.org/dist/ .)
 
@@ -310,6 +312,9 @@ SPAMASSASSIN RELEASE PROCEDURE
   least one variable ("relversion") to the new version number, and
   possibly more, depending on if this is the first release of a new
   release line.
+
+  TODO: for the first 3.3.0 release, we'll need to add a section allowing
+  people to download the rules tarball as well.
 
 - rebuild the SpamAssassin website with webmake:
 

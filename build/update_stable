@@ -9,6 +9,8 @@ set -x
 rm -rf $WEBDIR/doc
 tar cf - --exclude=CVS --exclude='.#*' doc | ( cd $WEBDIR ; tar xf - )
 
+. build/update_devel_rules
+
 set +x
 echo
 
