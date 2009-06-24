@@ -621,7 +621,7 @@ foreach my $channel (@channels) {
     dbg("channel: using --install files $instfile\{,.sha1,.asc\}");
     $content = read_install_file($instfile);
     $SHA1 = read_install_file($instfile.".sha1");
-    $GPG = read_install_file($instfile.".asc");
+    $GPG = read_install_file($instfile.".asc") if $GPG_ENABLED;
   }
 
   unless ($content && $SHA1 && (!$GPG_ENABLED || $GPG)) {
