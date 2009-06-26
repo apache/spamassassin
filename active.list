@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: bb-jm.20090624-r787945-n dos.20090624-r787945-n jm.20090624-r787945-n zmi.20090624-r787945-n; day 2: bb-jm.20090623-r787586-n dos.20090623-r787586-n jm.20090623-r787586-n zmi.20090623-r787586-n; day 3: bb-jm.20090622-r787168-n dos.20090622-r787168-n jm.20090622-r787168-n zmi.20090622-r787168-n
+# with results from: day 1: bb-jm.20090625-r788294-n dos.20090625-r788294-n jm.20090625-r788294-n zmi.20090625-r788294-n; day 2: bb-jm.20090624-r787945-n dos.20090624-r787945-n jm.20090624-r787945-n zmi.20090624-r787945-n; day 3: bb-jm.20090623-r787586-n dos.20090623-r787586-n jm.20090623-r787586-n zmi.20090623-r787586-n
 
 # tflags userconf
 ALL_TRUSTED
@@ -263,6 +263,9 @@ FSL_Y360_ABUSE
 FSL_YG_ABUSE
 
 # good enough
+FS_APPROVE_YOU
+
+# good enough
 FS_EJACULA
 
 # good enough
@@ -270,9 +273,6 @@ FS_LARGE_PERCENT2
 
 # good enough
 FS_MAKE_MONEY
-
-# good enough
-FS_NUDE
 
 # good enough
 FS_REPLICA
@@ -647,9 +647,6 @@ TT_MSGID_TRUNC
 TVD_FINGER_02
 
 # good enough
-TVD_PCT_OFF
-
-# good enough
 TVD_QUAL_MEDS
 
 # good enough
@@ -663,9 +660,6 @@ TVD_RCVD_SINGLE
 
 # good enough
 TVD_VISIT_PHARMA
-
-# good enough
-FS_APPROVE_YOU
 
 # tflags userconf
 UNPARSEABLE_RELAY
