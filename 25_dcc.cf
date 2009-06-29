@@ -25,9 +25,34 @@
 
 ifplugin Mail::SpamAssassin::Plugin::DCC
 
-full DCC_CHECK		eval:check_dcc()
+full     DCC_CHECK	eval:check_dcc()
 describe DCC_CHECK	Listed in DCC (http://rhyolite.com/anti-spam/dcc/)
-tflags DCC_CHECK	net
-reuse  DCC_CHECK
+tflags   DCC_CHECK	net
+reuse    DCC_CHECK
+
+
+# to receive reputation data from DCC servers requires a commercial license
+full     DCC_REPUT_00_12  eval:check_dcc_reputation_range(00,12)
+describe DCC_REPUT_00_12  DCC reputation between 0 and 12 %  (mostly ham)
+tflags   DCC_REPUT_00_12  nice net noautolearn
+
+full     DCC_REPUT_13_19  eval:check_dcc_reputation_range(13,19)
+tflags   DCC_REPUT_13_19  net nice
+
+full     DCC_REPUT_70_89  eval:check_dcc_reputation_range(70,89)
+describe DCC_REPUT_70_89  DCC reputation between 70 and 89 %
+tflags   DCC_REPUT_70_89  net
+
+full     DCC_REPUT_90_94  eval:check_dcc_reputation_range(90,94)
+describe DCC_REPUT_90_94  DCC reputation between 90 and 94 %
+tflags   DCC_REPUT_90_94  net
+
+full     DCC_REPUT_95_98  eval:check_dcc_reputation_range(95,98)
+describe DCC_REPUT_95_98  DCC reputation between 95 and 98 %  (mostly spam)
+tflags   DCC_REPUT_95_98  net
+
+full     DCC_REPUT_99_100 eval:check_dcc_reputation_range(99)
+describe DCC_REPUT_99_100 DCC reputation between 99 % or higher (spam)
+tflags   DCC_REPUT_99_100 net
 
 endif
