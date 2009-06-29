@@ -27,8 +27,8 @@ exit unless (DO_RUN);
 
 # ensure rules will fire
 tstlocalrules ("
-  score DKIM_SIGNED              -0.1
-  score DKIM_VERIFIED            -0.1
+  score DKIM_SIGNED           -0.1
+  score DKIM_VALID            -0.1
 ");
 
 my $dirname = "data/dkim";
@@ -39,7 +39,7 @@ local *DIR;
 # mail samples test-pass* should all pass DKIM validation
 #
 %patterns = (
-  q{ DKIM_SIGNED }, 'DKIM_SIGNED', q{ DKIM_VERIFIED }, 'DKIM_VERIFIED',
+  q{ DKIM_SIGNED }, 'DKIM_SIGNED', q{ DKIM_VALID }, 'DKIM_VALID',
 );
 %anti_patterns = ();
 opendir(DIR, $dirname) or die "Cannot open directory $dirname: $!";
@@ -55,14 +55,14 @@ closedir(DIR) or die "Error closing directory $dirname: $!";
 # this mail sample is special, doesn't have any signature
 #
 %patterns = ();
-%anti_patterns = ( q{ DKIM_VERIFIED }, 'DKIM_VERIFIED' );
+%anti_patterns = ( q{ DKIM_VALID }, 'DKIM_VALID' );
 sarun ("-t < $dirname/test-fail-01.msg", \&patterns_run_cb);
 ok ok_all_patterns();
 
 # mail samples test-fail* should all fail DKIM validation
 #
-%patterns      = ( q{ DKIM_SIGNED },   'DKIM_SIGNED' );
-%anti_patterns = ( q{ DKIM_VERIFIED }, 'DKIM_VERIFIED' );
+%patterns      = ( q{ DKIM_SIGNED }, 'DKIM_SIGNED' );
+%anti_patterns = ( q{ DKIM_VALID },  'DKIM_VALID'  );
 opendir(DIR, $dirname) or die "Cannot open directory $dirname: $!";
 while (defined($fn = readdir(DIR))) {
   next  if $fn eq '.' || $fn eq '..';
