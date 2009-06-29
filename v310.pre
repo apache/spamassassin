@@ -65,10 +65,8 @@ loadplugin Mail::SpamAssassin::Plugin::WhiteListSubject
 
 # DomainKeys - perform DomainKeys verification
 #
-# External modules required for use, see INSTALL for more information.
-# Note that this may be redundant if you also plan to use the DKIM plugin.
-#
-#loadplugin Mail::SpamAssassin::Plugin::DomainKeys
+# This plugin has been removed as of v3.3.0.  Use the DKIM plugin instead,
+# which supports both Domain Keys and DKIM.
 
 # MIMEHeader - apply regexp rules against MIME headers in the message
 #
