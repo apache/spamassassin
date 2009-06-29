@@ -1,0 +1,68 @@
+
+header          AXB_HELO_LH_HOME        X-Spam-Relays-Untrusted =~ /^[^\]]+ helo=\w+\.(lan|home) /i
+describe        AXB_HELO_LH_HOME        HELO from home
+#score          AXB_HELO_LH_HOME        1.0
+
+
+
+##
+header          AXB_XMID_DIGDOTSHRT             Message-ID =~ /\<[0-9]{5}\.[a-z]{2,10}\@/
+describe        AXB_XMID_DIGDOTSHRT             Lambrusco Fingerprint
+#score           AXB_XMID_DIGDOTSHRT            3.5
+
+header          AXB_RCVD_ZOONAT                 Received =~ /\bwith SMTP id [A-Za-z]{14}\.[0-9]{13}\;/
+describe        AXB_RCVD_ZOONAT                 Moscato Fingerprint
+##score         AXB_RCVD_ZOONAT                 1.0
+#counts         AXB_XRCVD_ZOONAT                569s/0h of 38722 corpus (34129s/4593h AxB2) 06/02/07
+
+
+header          AXB_RCVD_ZOOBSEND               Received =~ /\(\ssendmail\b/
+describe        AXB_RCVD_ZOOBSEND               Barolo Fingerprint
+##score         AXB_RCVD_ZOOBSEND               1.0
+#counts         AXB_RCVD_ZOOBSEND               322s/0h of 14842 corpus (10251s/4591h AxB2) 05/02/07
+
+# use the score suggested by 3.2.x rule updates
+score AXB_RCVD_ZOOBSEND 3.577
+
+header          AXB_XTIDX_CHAIN                 Thread-Index =~ /(?:\*|\<\>|\)|\()/
+describe        AXB_XTIDX_CHAIN                 Montepulciano Fingerprint
+##score         AXB_XTIDX_CHAIN                 1.0
+
+header          AXB_XM_SENDMAIL_NOT             Received =~ /\([123456790]{1,2}\.[0-9]{1,2}\.[0-9]{1}\/[0-9]{1,2}\.[0-9]{2}\.[0-9]{1}\)/
+describe        AXB_XM_SENDMAIL_NOT             Nebbiolo fingerprint
+##score         AXB_XM_SENDMAIL_NOT             1.0
+#counts         AXB_XM_SENDMAIL_NOT             10467s/0h of 41392 corpus (36780s/4612h AxB2) 02/17/07
+
+
+ifplugin Mail::SpamAssassin::Plugin::MIMEHeader
+mimeheader      AXB_MIME_IMG830                 Content-ID =~ /^<[0-9a-f]{30}\@/
+describe        AXB_MIME_IMG830                 Valpolicella Fingerprint
+##score         AXB_MIME_IMG830                 1.0
+#counts         AXB_MIME_IMG830                 527s/0h of 27479 corpus (22876s/4603h AxB2) 02/15/07
+#counts         AXB_MIME_IMG830                 3s/0h of 9878 corpus (4619s/5259h AxB) 02/15/07
+endif
+
+header          AXB_XMID_1510                   Message-Id =~ /<[0-9A-F]{15}\.[0-9A-F]{10}\@/
+describe        AXB_XMID_1510                   Brunello Fingerprint
+##score         AXB_XMID_1510                   1.0
+#counts         AXB_XMID_1510                   10s/0h of 98258 corpus (93666s/4592h AxB2) 11/28/06
+
+
+header          AXB_XMID_1212                   Message-Id =~ /^<[0-9]{12}\.[0-9]{12}\@/
+describe        AXB_XMID_1212                   Barbera Fingerprint
+##score         AXB_XMID_1212                   1.0
+# counts        AXB_XMID_1212                   63s/0h of 98258 corpus (93666s/4592h AxB2) 11/28/06
+
+
+header          AXB_XMID_OEGOESNULL             Message-ID =~ /^<[0-9-a-f]{12}\$[0-9-a-f]{8}\$[0]{8}\@/
+describe        AXB_XMID_OEGOESNULL             Amarone Fingerprint
+##score         AXB_XMID_OEGOESNULL             1.0
+#counts         AXB_XMID_OEGOESNULL             14476s/0h of 98258 corpus (93666s/4592h AxB2) 11/28/06
+
+endif
+#EOF
+
+
+
+
+

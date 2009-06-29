@@ -1,0 +1,9 @@
+
+# checking this in on behalf of Matt ;)
+#
+
+ifplugin Mail::SpamAssassin::Plugin::ReplaceTags
+body LFUZ_PWRMALE       /<inter W1><post P2><P><O><W><E><R><M><A><L><E>/i
+replace_rules LFUZ_PWRMALE
+endif   # Mail::SpamAssassin::Plugin::ReplaceTags
+

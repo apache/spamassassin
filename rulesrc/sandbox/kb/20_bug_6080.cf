@@ -1,0 +1,9 @@
+
+ifplugin Mail::SpamAssassin::Plugin::DNSEval
+
+header   RCVD_IN_SSBL  eval:check_rbl('ssbl', 'bl.score.senderscore.com')
+describe RCVD_IN_SSBL  Received via a Relay in Sender Score SSBL
+tflags   RCVD_IN_SSBL  net
+
+endif
+

@@ -1,0 +1,108 @@
+###########################################################################
+#
+# <@LICENSE>
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to you under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at:
+# 
+#     http://www.apache.org/licenses/LICENSE-2.0
+# 
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# </@LICENSE>
+#
+###########################################################################
+
+# Redirector URI patterns
+
+# ExpressionEngine redirector
+# see http://www.pmachine.com/forums/viewthread/29561/
+# e.g. http://www.someEEBasedSite.com/index.php?URL=http://www.NastyPR0nSite.com
+# e.g. http://www.pmachine.com/ee/knowledgeblog/?URL=http://www.google.com
+redirector_pattern m'/(?:index.php)?\?.*(?<=[?&])URL=(.*?)(?:$|[&\#])'i
+
+# Google redirector.
+# Common form:
+# http://www.google.com/url?sa=U&start=4&q=http://urlofspammer 
+#	-> http://urlofspammer
+# Unhandled form:
+# http://www.google.com/url?q=http://urlofspammer/space&q=here
+#	-> http://urlofspammer/space%20here
+#	Redirector gets http://urlofspammer/space
+# http://www.google.com/url?q=http://urlof&q=spammer does not work
+redirector_pattern m'^http:/*(?:\w+\.)?google(?:\.\w{2,3}){1,2}/url\?.*?(?<=[?&])q=(.*?)(?:$|[&\#])'i
+
+# Google site search
+# http://www.google.com/search?q=site:bluevallet.com
+#	-> links to http://www.bluevallet.com/
+# Google inurl search
+# http://google.com//search?hl=en&q=inurl:rnyself.com%2Bvpxl%2Bmade%2Beasy&btnI=RC27
+#       -> searches for 'VXPL made easy' on rnyself.com
+redirector_pattern m'^http:/*(?:\w+\.)?google(?:\.\w{2,3}){1,2}/search\?.*?(?<=[?&])q=[^&]*?(?<=%20|..[=+\s])(?:site|inurl):(.*?)(?:$|%20|[\s+&\#])'i
+
+# Google search for pages that contain the site name
+# http://www.google.com/search?q="bluevallet.com"
+# http://www.google.com/search?q=%22bluevallet.com%22
+#	-> links to search page that probably has http://bluevallet.com
+#	   at the top
+redirector_pattern m'^http:/*(?:\w+\.)?google(?:\.\w{2,3}){1,2}/search\?.*?(?<=[?&])q=[^&]*?(?<=%20|..[=+\s])(?:"|%22)(.*?)(?:$|%22|["\s+&\#])'i
+
+# Google translate
+# http://translate.google.com/translate?u=www.domain.tld&langpair=en%7Cen&hl=en
+#	-> http://www.domain.tld inside a frame
+redirector_pattern m'^http:/*(?:\w+\.)?google(?:\.\w{2,3}){1,2}/translate\?.*?(?<=[?&])u=(.*?)(?:$|[&\#])'i
+
+# Google Ads
+# http://google.com/pagead/iclk?sa=l&ai=nightmare&num=399412020&adurl=http://quilarpe.com?375
+#       -> http://quilarpe.com?375
+redirector_pattern m'^http:/*(?:\w+\.)?google(?:\.\w{2,3}){1,2}/pagead/iclk\?.*?(?<=[?&])adurl=(.*?)(?:$|[&\#])'i
+
+# AOL redirector
+# http://aol.com/redir.adp?_url=http://www.ixp.jp/univac/
+#	-> http://www.ixp.jp/univac/
+redirector_pattern m'^http:/*(?:\w+\.)?aol\.com/redir\.adp\?.*(?<=[?&])_url=(.*?)(?:$|[&\#])'i
+
+# Removed Feb 4, 2008.  jm points out that this redirector pattern is
+# redundant.
+# 
+# Yahoo redirector
+# http://rd.yahoo.co.jp/*http://www.ixp.jp/univac/
+#	-> http://www.ixp.jp/univac/
+# http://rds.yahoo.com/_ylt=3DA0geu4_1hZ9HkDIA7WdXNyoA/SIG=3D=119ei8plu/EXP=3D1201723253/**http%3a/SPAMMERSITE.com/
+# 	-> http://spammersite.com/
+#redirector_pattern m'^http:/*rds?\.yahoo\.co(?:m|\.[a-z]{2})/.*?\*+(.*)'i
+
+uri __HS_GEOCITIES_URI m'^https?:/*(?:[a-z]+\.)*geocities\.(?:com|yahoo\.com)(?:\.[a-z]{2})?(?:$|[/\#?])'i
+uri __HS_TRIPOD_URI m'^https?:/*(?:[a-z]+\.)*tripod\.com(?:$|[/\#?])'i
+uri __HS_MSNSPACES_URI m'^https?:/*spaces.msn.com/[a-z0-9_\-](?:$|[/\#?])'i
+uri __HS_AOL_URI m'^https?:/*(?:members|hometown).aol.com/[a-z0-9_\-](?:$|[/\#?])'i
+meta __HS_FREEHOST_URI __HS_GEOCITIES_URI || __HS_TRIPOD_URI || __HS_MSNSPACES_URI || __HS_AOL_URI
+
+uri HS_EXTRA m'/extra(?:$|[/\#?])'
+describe HS_EXTRA Link contains common spam pattern: '/extra/'
+##score HS_EXTRA 1
+
+uri HS_GETMEOFF m'/get(?:me)?off\.php(?:$|[\#?])'
+describe HS_GETMEOFF Links to common unsubscribe script: 'getmeoff.php'
+##score HS_GETMEOFF 1
+
+uri HS_INDEX_PARAM m'^https?:/*([^/]*/)+(?:index.(?:cgi|html?|php)|default.(?:asp|jsp))?\?(?!(?-i:[A-Z][a-z]{2,}){2,}$)\w+={0,2}$'i
+describe HS_INDEX_PARAM Link contains a common tracker pattern.
+##score HS_INDEX_PARAM 1
+
+uri T_HS_INDEX_PARAM_0 m'^https?:/*([^/]*/)+(?:index.(?:cgi|html?|php)|default.(?:asp|jsp))?\?[^=]+={0,2}$'i
+uri T_HS_INDEX_PARAM_1 m'^https?:/*([^/]*/)+(?:index.(?:cgi|html?|php)|default.(?:asp|jsp))?\?[^=]{8,}={0,2}$'i
+uri T_HS_INDEX_PARAM_2 m'^https?:/*([^/]*/)+\?[^=]+={0,2}$'i
+uri T_HS_INDEX_PARAM_3 m'^https?:/*([^/]*/)+(?:index.(?:cgi|html?|php)|default.(?:asp|jsp))?\?\w+={0,2}$'i
+uri T_HS_INDEX_PARAM_4 m'^https?:/*([^/]*/)+(?:index.(?:cgi|html?|php)|default.(?:asp|jsp))?\?(?!(?-i:[A-Z][a-z]{2,}){2,}$)[^=]+={0,2}$'i
+uri T_HS_INDEX_PARAM_5 m'^https?:/*([^/]*/)+(?:index.(?:cgi|html?|php)|default.(?:asp|jsp))?\?(?!(?-i:[A-Z][a-z]{2,}){2,}$)\w+={0,2}$'i
+
+uri HS_URI_HOOKUP m'^https?:/*[^/]*\bhookup\b'i
+describe HS_URI_HOOKUP Link contains the word 'hookup'
+##score HS_URI_HOOKUP 1

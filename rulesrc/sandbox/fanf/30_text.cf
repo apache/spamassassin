@@ -1,0 +1,7 @@
+# bits of text from spam
+
+body SHORT_TERM_PRICE /short\W+term\W+(target|projected)(\W+price)?/i
+body LONG_TERM_PRICE  /long\W+term\W+(target|projected)(\W+price)?/i
+meta STOCK_PRICES (SHORT_TERM_PRICE && LONG_TERM_PRICE)
+
+rawbody IMG_ALT_BRACKETS /^<img src="cid:7\.1\.0\.9\.[^"]+\.0" width=\d+ height=\d+ alt="[[][]]">/
