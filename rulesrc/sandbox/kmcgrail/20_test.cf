@@ -1,0 +1,131 @@
+# SpamAssassin rules file: kam sandbox
+#
+# Please don't modify this file as your changes will be overwritten with
+# the next update. Use @@LOCAL_RULES_DIR@@/local.cf instead.
+# See 'perldoc Mail::SpamAssassin::Conf' for details.
+#
+# <@LICENSE>
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to you under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at:
+# 
+#     http://www.apache.org/licenses/LICENSE-2.0
+# 
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# </@LICENSE>
+#
+###########################################################################
+
+#LOTTO CRUD     
+body            __KAM_LOTTO1    /(e-?mail address (have emerged a winner|has won|attached to (ticket|reference)|was one of the ten winners)|random selection in our computerized email selection system)/is       
+body            __KAM_LOTTO2    /((ticket|serial|lucky) number|secret pin ?code|batch number|reference number|promotion date)/is
+body            __KAM_LOTTO3    /(won|claim|cash prize|pounds? sterling)/is
+body            __KAM_LOTTO4    /(claims (officer|agent)|lottery coordinator|fiduciary (officer|agent)|fiduaciary claims)/is
+body            __KAM_LOTTO5    /(freelotto group|Royal Heritage Lottery|UK National (Online)? Lottery|U\.?K\.? Grand Promotions|Lottery Department UK|Euromillion Loteria|Luckyday International Lottery|International Lottery)/is
+body            __KAM_LOTTO6    /(Dear Lucky Winner|Winning Notification|Attention:Winner|Dear Winner)/is
+header          __KAM_LOTTO7    Subject =~ /(Your Lucky Day|(Attention:|ONLINE) WINNER)/i
+
+meta            KAM_LOTTO1      (__KAM_LOTTO1 + __KAM_LOTTO2 + __KAM_LOTTO3 + __KAM_LOTTO4 + __KAM_LOTTO5 + __KAM_LOTTO6 + __KAM_LOTTO7 >= 3)
+describe        KAM_LOTTO1      Likely to be a e-Lotto Scam Email
+score           KAM_LOTTO1      0.5
+
+meta            KAM_LOTTO2      (__KAM_LOTTO1 + __KAM_LOTTO2 + __KAM_LOTTO3 + __KAM_LOTTO4 + __KAM_LOTTO5 + __KAM_LOTTO6 + __KAM_LOTTO7 >= 4)
+describe        KAM_LOTTO2      Highly Likely to be a e-Lotto Scam Email
+score           KAM_LOTTO2      1.0
+
+meta            KAM_LOTTO3      (__KAM_LOTTO1 + __KAM_LOTTO2 + __KAM_LOTTO3 + __KAM_LOTTO4 + __KAM_LOTTO5 + __KAM_LOTTO6 + __KAM_LOTTO7 >= 5)
+describe        KAM_LOTTO3      Almost certain to be a e-Lotto Scam Email
+score           KAM_LOTTO3      2.0
+
+#ABOUT YOUR INTERNET ACTIVITIES SPYWARE CRUD
+header          __KAM_ABOUT1    Subject =~ /About your Internet (activities|activity)/i
+body            __KAM_ABOUT2    /Spyware/i
+
+meta            KAM_ABOUT       (__KAM_ABOUT1 + __KAM_ABOUT2 >=2)
+describe        KAM_ABOUT       Email Scam Hawking Anti-Spyware
+score           KAM_ABOUT       1.0
+
+#EMAIL ADVERTISING
+body            __KAM_ADVERT1   /email advertising/is
+body            __KAM_ADVERT2   /instant traffic and sales/is
+body            __KAM_ADVERT3   /Email Ad Broadcast/is
+header          __KAM_ADVERT4   Subject =~ /(get instant sales|get more business|instant traffic, leads and sales|within 24 hours)/i
+meta            KAM_ADVERT      (__KAM_ADVERT1 + __KAM_ADVERT2 + __KAM_ADVERT3 + __KAM_ADVERT4 >= 4)
+describe        KAM_ADVERT      Mailing List Scammers Hawking Their Lists / Services
+score           KAM_ADVERT      2.0
+
+#ADVERTISEMENT
+body            KAM_ADVERT2     /(This is an Advertisement|Continue in your Secure Web Browser|Can't see the images below)/is
+describe        KAM_ADVERT2     This is probably an unwanted commercial email...
+score           KAM_ADVERT2     0.55
+
+#ONE LINE ADVERTISEMENTS
+body            __KAM_1LINE1    /Did you overpay?/is
+header          __KAM_1LINE2    Subject =~ /I need tax savings? tip/i
+
+meta            KAM_1LINE       (__KAM_1LINE1 + __KAM_1LINE2 >= 2)
+describe        KAM_1LINE       One liner spams
+score           KAM_1LINE       2.5
+
+#CAN SPAM
+body            KAM_CANSPAM     /(full compliance with the U.S. Federal-?Can-?Spam-Act|provides CAN-SPAM compliant email)/is
+describe        KAM_CANSPAM     SPAM = Lack of Consent not a Legal Defintion
+score           KAM_CANSPAM     1.0
+
+#GIFT CARDS
+body            __KAM_GIFT1     /(Claim your free \$500 Target Gift Card|complimentary gift-?card|received a Victoria's Secret Giftcard)/is
+body            __KAM_GIFT2     /(unsubscribe from this advertiseme(tn|nt)|exit future communications)/is
+meta            KAM_GIFT        (__KAM_GIFT1 + __KAM_GIFT2 >= 2)
+describe        KAM_GIFT        Gift Card Scams
+score           KAM_GIFT        1.5
+
+#MYSTERY SHOPPER
+body            __KAM_SHOP1     /chosen to participate as a Mystery Shopper/is
+body            __KAM_SHOP2     /Do you like to shop/is
+body            __KAM_SHOP3     /make money while you shop/is
+meta            KAM_SHOP        (__KAM_SHOP1 + __KAM_SHOP2 + __KAM_SHOP3 >= 3)
+describe        KAM_SHOP        Mystery Shopper Scams
+score           KAM_SHOP        2.0
+
+#FAST CASH
+body            __KAM_FAST1     /make fast cash in real estate/is
+meta            KAM_FAST        (__KAM_FAST1 + KAM_ADVERT2 >=2)
+describe        KAM_FAST        Get Rich Quick, Make Money Fast Schemes
+score           KAM_FAST        1.6
+
+#BIZ CARDS FREE!
+body            __KAM_BIZ1      /You always need new cards/is
+header          __KAM_BIZ2      Subject =~ /(do not pay|Stop paying) for business cards/i
+
+meta            KAM_BIZ         (__KAM_BIZ1 + __KAM_BIZ2 >= 1)
+describe        KAM_BIZ         Free Business Card Emails
+score           KAM_BIZ         1.5
+
+#WEIGHT LOSS
+body            __KAM_WEIGHT1   /(extra weight|glutting)/is
+body            __KAM_WEIGHT2   /\d pounds/is
+header          __KAM_WEIGHT3   Subject =~ /(leaner|slimmer)/i
+
+#ANATRIM
+body            __KAM_ANA1      /anatrim/i
+
+meta            KAM_ANA         (__KAM_ANA1 + __KAM_WEIGHT1 + __KAM_WEIGHT2 + __KAM_WEIGHT3 > 3)
+describe        KAM_ANA         Likely Anatrim Weightloss Spam
+score           KAM_ANA         1.5
+
+#REPLACE
+body            __KAM_REP1      /Replace [-!] with \./is
+body            __KAM_REP2      /www\s*[-!]/i
+
+meta            KAM_REPLACE     (__KAM_REP1 + __KAM_REP2 >= 1)
+describe        KAM_REPLACE     Spams that use obfuscated URLs with instructions
+score           KAM_REPLACE     2.0
+
+#EOF

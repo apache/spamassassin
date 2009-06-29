@@ -1,0 +1,139 @@
+# Testing rules
+header __FSL_UA_1 User-Agent =~ /6\.00\.2600\.000/
+header __FSL_UA_2 X-Mailer =~ /6\.00\.2600\.000/
+meta FSL_UA (__FSL_UA_1 || __FSL_UA_2)
+score FSL_UA 3.0
+
+header FSL_UA2 User-Agent =~ /6\.00\.2800\.1081/
+score FSL_UA2 3.0
+
+uri FSL_GG_ABUSE /\/google\.com\/group\/\S+\/web\//
+score FSL_GG_ABUSE 15.0
+
+uri FSL_YG_ABUSE /\/groups\.yahoo\.com\/group\/\S+\/message\/1$/
+score FSL_YG_ABUSE 15.0
+
+uri FSL_INTERIA_ABUSE /\/\S+\.(?:w|eu|fm)\.interia\.pl/
+score FSL_INTERIA_ABUSE 15.0 
+
+uri FSL_GEO_ABUSE /\/geocities\.com\/\S+$/
+score FSL_GEO_ABUSE 3.0
+
+# http://pipes.yahoo.com/pipes/pipe.info?_id=qFf6E18w3hGt3lxD0j6skA
+uri FSL_YPIPES_ABUSE /\/pipes\.yahoo\.com\/pipes\/pipe\.info\?_id=\S+$/
+score FSL_YPIPES_ABUSE 15.0
+
+# http://cid-e4cf8343be6940bb.spaces.live.com/
+uri FSL_LSPACES_ABUSE /cid\-\S+\.spaces\.live\.com/
+score FSL_LSPACES_ABUSE 15.0
+
+uri FSL_FBOOK_PHISH /\/\S+\..+\/facebook\.com/
+score FSL_FBOOK_PHISH 15.0
+
+# http://moorevuvuz28.blogspot.com
+uri FSL_BLOGSPOT_ABUSE /\/\S+\.blogspot\.com/
+score FSL_BLOGSPOT_ABUSE 5.0
+
+uri FSL_GD1_URI /\/\S+\.docs\.google\.com/
+score FSL_GD1_URI 0.01
+
+# http://docs.google.com/Doc?id=dczfbnj9_8fvfs5wc7
+uri FSL_GD2_URI /\/docs\.google\.com\/Doc\?id=\S+/
+score FSL_GD2_URI 0.01
+
+# http://sites.google.com/site/1133445/
+uri FSL_GS_ABUSE /\/sites\.google\.com\/site\//
+score FSL_GS_ABUSE 3.0
+
+# http://blogs.360.yahoo.com/woodbegusug71
+uri FSL_Y360_ABUSE /\.360\.yahoo\.com\//
+score FSL_Y360_ABUSE 3.0
+
+# https://createpdf.adobe.com/cgi-pickup.pl/
+uri FSL_CREATEPDF_ABUSE /http(?:s)?:\/\/createpdf\.adobe\.com\/cgi-pickup.pl\//
+score FSL_CREATEPDF_ABUSE 3.0
+
+# http://tinyurl.com
+uri FSL_HAS_TINYURL /tinyurl\.com\//
+score FSL_HAS_TINYURL 0.01
+
+# Multipart mail with no text parts
+header     __CTYPE_MULTIPART_MIXED Content-Type =~ /multipart\/mixed/i
+
+ifplugin Mail::SpamAssassin::Plugin::MIMEHeader
+mimeheader __ANY_TEXT_ATTACH_DOC     Content-Type =~ /text\/\w+/i
+endif
+
+meta	FSL_MIME_NO_TEXT	(__CTYPE_MULTIPART_MIXED && !__ANY_TEXT_ATTACH_DOC)
+score	FSL_MIME_NO_TEXT	1.50
+
+# Test rule from SA list
+rawbody __TWO_WORD_LINES /^\S+\s+\S+$/
+tflags  __TWO_WORD_LINES multiple
+meta    FSL_STACKED_TEXT (__TWO_WORD_LINES > 10)
+score	FSL_STACKED_TEXT 0.001
+
+uri	__ANY_HTTP_URI	/^http(?:s)?:\/\//
+tflags	__ANY_HTTP_URI	multiple
+meta	FSL_SINGLE_URI	(__ANY_HTTP_URI == 1)
+score	FSL_SINGLE_URI	0.001
+
+header	__HAS_REPLY_TO	exists:Reply-To
+header	__FROM_FREEMAIL	From =~ /\@(?:googlemail|gmail|yahoo|hotmail|msn|aol|aim)\./
+header  __REPLY_FREEMAIL Reply-To =~ /\@(?:googlemail|gmail|yahoo|hotmail|msn|aol|aim)\./
+meta	FSL_FREEMAIL_1 (__HAS_REPLY_TO && __REPLY_FREEMAIL)
+score	FSL_FREEMAIL_1 0.001
+meta	FSL_FREEMAIL_2 (__HAS_REPLY_TO && __REPLY_FREEMAIL && __FROM_FREEMAIL)
+score	FSL_FREEMAIL_2 0.001
+
+header  FSL_HELO_BARE_IP_1      X-Spam-Relays-External =~ /^[^\]]+ helo=\d+\.\d+\.\d+\.\d+ /i
+score   FSL_HELO_BARE_IP_1      0.001
+
+header	FSL_HELO_BARE_IP_2	X-Spam-Relays-External =~ /\bhelo=\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b/i
+score	FSL_HELO_BARE_IP_2	0.001
+
+header  FSL_HELO_NON_FQDN_1     X-Spam-Relays-External =~ /^[^\]]+ helo=[a-zA-Z0-9-_]+ /i
+score   FSL_HELO_NON_FQDN_1     0.001
+
+header	FSL_HELO_NON_FQDN_2	X-Spam-Relays-External =~ /\bhelo=[a-zA-Z0-9-_]+\b/i
+score	FSL_HELO_NON_FQDN_2	0.001
+
+header	FSL_FAKE_HOTMAIL_RVCD	X-Spam-Relays-External =~ /mx[1234]\.hotmail\.com/
+score	FSL_FAKE_HOTMAIL_RCVD	0.001
+
+header	FSL_FAKE_YAHOO_RCVD	X-Spam-Relays-External =~ /mx\.mail\.yahoo.com/
+score   FSL_FAKE_YAHOO_RCVD	0.001
+
+header	FSL_FAKE_GMAIL_RCVD	X-Spam-Relays-External =~ /gmail-smtp-in\.l\.google\.com/
+score	FSL_FAKE_GMAIL_RCVD	0.001
+
+uri	FSL_SPAMWARE_STRING_1	/\{\S+\}/
+score	FSL_SPAMWARE_STRING_1	5.0
+
+header	FSL_RCVD_USER		Received =~ /\bUser\b/i
+score   FSL_RCVD_USER		0.001
+
+header	FSL_HELO_LITERAL	X-Spam-Relays-External =~ /\bhelo=\[\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\]\b/i
+score	FSL_HELO_LITERAL	0.001
+
+header	FSL_HELO_UNKNOWN	X-Spam-Relays-External =~ /\bhelo=unkown\b/i
+score	FSL_HELO_UNKNOWN	0.001
+
+header	FSL_HELO_HOME		X-Spam-Relays-External =~ /\bhelo=\S+\.home\b/i
+score	FSL_HELO_HOME		0.001
+
+header	FSL_HELO_SETUP		X-Spam-Relays-External =~ /\bhelo=\S+\.setup\b/i
+score	FSL_HELO_SETUP		0.001
+
+header	FSL_HELO_FIREWALL	X-Spam-Relays-External =~ /\bhelo=\S+\.firewall\b/i
+score	FSL_HELO_FIREWALL	0.001
+
+header	FSL_HELO_DEVICE		X-Spam-Relays-External =~ /\bhelo=(?:(?:dsl)?device|speedtouch)\.lan\b/i
+score	FSL_HELO_DEVICE		0.001
+
+header	FSL_HELO_FAKE		X-Spam-Relays-External =~ /\bhelo=(?:yandex.ru|(?:hotmail|gmail|google|yahoo|msn|microsoft)\.com)\b/i
+score	FSL_HELO_FAKE		0.001
+
+# Testing
+header	FSL_FAKE_RCVD		Received =~ /^from \S+ by \S+; \S+, \d+ \S+ \d{4} \d+:\d+:\d+ \+\d+$/
+score	FSL_FAKE_RCVD		0.001

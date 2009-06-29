@@ -1,0 +1,163 @@
+# Rules from what was "rules/70_testing.cf", a temporary new home
+#
+# <@LICENSE>
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to you under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at:
+# 
+#     http://www.apache.org/licenses/LICENSE-2.0
+# 
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# </@LICENSE>
+#
+########################################################################
+
+# 0.142   0.1814   0.0085    0.955   0.63    0.01  T_PH_SEC
+# 0.159   0.2061   0.0000    1.000   0.66    0.01  T_PH_REC
+body TVD_PH_SEC		/\byour .{0,40}account .{0,40}security/i
+body TVD_PH_REC		/\byour .{0,40}account .{0,40}record/i
+describe TVD_PH_SEC	Message has a phrase standard for phishing mails
+describe TVD_PH_REC	Message has a phrase standard for phishing mails
+
+# 0.234   0.2997   0.0123    0.961   0.68    0.01  T_PH_TVD_7
+# 0.112   0.1390   0.0012    0.992   0.61    0.01  T_PH_TVD_1
+body TVD_PH_7	/\baccount .{0,20}suspen/i
+body TVD_PH_1	/Dear valued .{1,40}(?:member|customer)/i
+
+# 0.153   0.1964   0.0057    0.972   0.64    0.01  T_PH_TVD_FR5
+header __PH_TVD_FROM2	From:addr =~ /\@.*ebay/i
+meta TVD_PH_FR5 !__ENV_AND_HDR_FROM_MATCH && __PH_TVD_FROM2
+
+# 0.134   0.1736   0.0000    1.000   0.64    0.01  T_PP_PHISH
+# 0.124   0.1608   0.0000    1.000   0.64    0.01  T_EB_PHISH
+header __FROM_PAYPAL	From:addr =~ /\@paypal\.com$/i
+header __FROM_EBAY	From:addr =~ /\@ebay\.com$/i
+meta TVD_PP_PHISH	__FROM_PAYPAL && NORMAL_HTTP_TO_IP
+meta TVD_EB_PHISH	__FROM_EBAY && NORMAL_HTTP_TO_IP
+
+# 0.209   0.2612   0.0033    0.987   0.69    1.00  TVD_SUBJ_ACC_NUM
+header	TVD_SUBJ_ACC_NUM	Subject =~ /\b[a-zA-Z]+ [\#\s]{1,4}\d+[A-Z]+/
+describe TVD_SUBJ_ACC_NUM	Subject has spammy looking monetary reference
+
+# bug 4457
+# this may be dealt with by other/less complex rules
+header __LOCAL_PP_S_UPD		Subject: =~ m'(?:confirm|update) (?:your|the) (?:billing )?(?:records?|information|account)'i
+body __LOCAL_PP_B_UPD		m'(?:confirm|update|verify) (?:your|the) (?:(?:current|billing) )?(?:records?|information|account|identity)'i
+body __LOCAL_PP_PPCGIURL	m'https?://www.paypal.com/cgi-bin/webscr\?'i
+uri __LOCAL_PP_NONPPURL		m'https?://(?:[A-Za-z0-9-_]+)\.(?!paypal\.com)(?:[A-Za-z0-9-_\.]+)'i
+meta T_LOCAL_PP_UPD_BADURL (__FROM_PAYPAL && ((__LOCAL_PP_B_UPD || __LOCAL_PP_S_UPD) || __LOCAL_PP_PPCGIURL) && __LOCAL_PP_NONPPURL)
+describe T_LOCAL_PP_UPD_BADURL paypal account update, but has bad URL
+
+
+ifplugin Mail::SpamAssassin::Plugin::HTTPSMismatch
+
+# bug 4255: with some ideas from Fred Tarasevicius I came up with a rule that
+# performs pretty decently, worthy of a general mass-check:
+# 0.186   0.2273   0.0030    0.987   0.66    0.01  T_HTTPS_HTTP_MISMATCH_1_12
+# 0.186   0.2273   0.0030    0.987   0.66    0.01  T_HTTPS_HTTP_MISMATCH_1_13
+# 0.185   0.2253   0.0015    0.993   0.66    0.01  T_HTTPS_HTTP_MISMATCH_1_10
+# 0.187   0.2280   0.0045    0.981   0.66    0.01  T_HTTPS_HTTP_MISMATCH_1_14
+# 0.186   0.2266   0.0030    0.987   0.66    0.01  T_HTTPS_HTTP_MISMATCH_1_11
+# 0.189   0.2280   0.0119    0.951   0.65    0.01  T_HTTPS_HTTP_MISMATCH_1_15
+# 0.003   0.0013   0.0089    0.129   0.43    0.01  T_HTTPS_HTTP_MISMATCH_11_15
+# 0.019   0.0013   0.0965    0.014   0.33    0.01  T_HTTPS_HTTP_MISMATCH_11_20
+# generally, hams seem to have a lot of links, whereas phishing mails don't.
+# so compare the domains between https? href and https anchor text, and flag
+# if the number of anchors is inside the given range and the domains don't
+# match.
+# FYI: these rules don't overlap HTTPS_IP_MISMATCH as IPs are ignored in the
+# href -- IPs tend not to be used in ham, so don't bother with the overhead of
+# this rule.  though the two rules are very similar and could definitely share
+# code.  if promoted, the two should get merged together to backup both rules.
+
+# used to be T_HTTPS_HTTP_MISMATCH_1_10, has the best results
+body  HTTPS_HTTP_MISMATCH eval:check_https_http_mismatch('1','10')
+
+endif
+
+########################################################################
+
+# Phishing usually comes from official sounding email addresses.  Could
+# potentially be used to lower FPs if necessary.
+
+#header __TVD_PH_FROM_ACCO From:addr =~ /accounts?\@/i
+#header __TVD_PH_FROM_CUST From:addr =~ /customer[^@]*\@/i
+#header __TVD_PH_FROM_SUPP From:addr =~ /support\@/i
+#header __TVD_PH_FROM_SERV From:addr =~ /service\@/i
+#header __TVD_PH_FROM_BILL From:addr =~ /billing\@/i
+#header __TVD_PH_FROM_NOTI From:addr =~ /notice\@/i
+#header __TVD_PH_FROM_ADMI From:addr =~ /admin\@/i
+#header __TVD_PH_FROM_SECU From:addr =~ /secure\@/i
+#
+#meta __TVD_PH_FROM_ANY __TVD_PH_FROM_ACCO || __TVD_PH_FROM_CUST || __TVD_PH_FROM_SUPP || __TVD_PH_FROM_SERV || __TVD_PH_FROM_BILL || __TVD_PH_FROM_NOTI || __TVD_PH_FROM_ADMI || __TVD_PH_FROM_SECU
+#meta T_TVD_PH_FROM_SUBJ_GOOD __TVD_PH_FROM_ANY && T_TVD_PH_SUBJ_GOOD
+#meta T_TVD_PH_FROM_SUBJ_GOOD2 __TVD_PH_FROM_ANY && T_TVD_PH_SUBJ_GOOD2
+
+########################################################################
+
+# Look at subjects for phishing
+
+# 0.214   0.2574   0.0000    1.000   0.93    0.01  T_TVD_PH_SUBJ_ACCOUNTS_POST
+# 0.158   0.1906   0.0000    1.000   1.00    0.01  T_TVD_PH_SUBJ_ACCOUNTS_PRE
+# 0.102   0.1226   0.0000    1.000   0.79    0.01  T_TVD_PH_SUBJ_SEC_MEASURES
+# 0.095   0.1144   0.0000    1.000   0.71    0.01  T_TVD_PH_SUBJ_UPDATE
+# 0.180   0.2165   0.0000    1.000   0.86    0.01  T_TVD_PH_SUBJ_URGENT
+header TVD_PH_SUBJ_ACCOUNTS_PRE		Subject =~ /\baccounts? (?:[a-z_,-]+ )*?(?:record[a-z]*|suspen[a-z]+|notif(?:y|ication)|security|updated?|verifications?|confirm[a-z]+)\b/i
+header TVD_PH_SUBJ_SEC_MEASURES		Subject =~ /\bsecurity (?:[a-z_,-]+ )*?measures?\b/i
+header TVD_PH_SUBJ_UPDATE		Subject =~ /\bupdate (?:[a-z_,-]+ )*?(?:access|credit|records?|info(?:rmation)?)\b/i
+header TVD_PH_SUBJ_URGENT		Subject =~ /^urgent(?:[\s\W]*$|.{1,40}(?:alert|response|assistance|proposal|reply|warning|noti(?:ce|fication)|greeting|matter))/i
+header TVD_PH_SUBJ_ACCOUNTS_POST	Subject =~ /\b(?:(?:re-?)?activat[a-z]*|secure|verify|restore|flagged|limited|unusual|report|notif(?:y|ication)|suspen(?:d|ded|sion)|confirm[a-z]*) (?:[a-z_,-]+ )*?accounts?\b/i
+
+meta TVD_PH_SUBJ_META_ALL	TVD_PH_SUBJ_META || TVD_PH_SUBJ_ACCOUNTS_PRE || TVD_PH_SUBJ_SEC_MEASURES || TVD_PH_SUBJ_UPDATE || TVD_PH_SUBJ_URGENT || TVD_PH_SUBJ_ACCOUNTS_POST
+
+########################################################################
+
+# Look for lesser matched REs and meta them together
+
+# 0.251   0.3023   0.0000    1.000   1.00    0.01  T_TVD_PH_SUBJ_META
+meta TVD_PH_SUBJ_META __TVD_PH_SUBJ_00 || __TVD_PH_SUBJ_02 || __TVD_PH_SUBJ_04 || __TVD_PH_SUBJ_15 || __TVD_PH_SUBJ_17 || __TVD_PH_SUBJ_18 || __TVD_PH_SUBJ_19 || __TVD_PH_SUBJ_29 || __TVD_PH_SUBJ_31 || __TVD_PH_SUBJ_36 || __TVD_PH_SUBJ_37 || __TVD_PH_SUBJ_38 || __TVD_PH_SUBJ_39 || __TVD_PH_SUBJ_41 || __TVD_PH_SUBJ_52 || __TVD_PH_SUBJ_54 || __TVD_PH_SUBJ_56 || __TVD_PH_SUBJ_58 || __TVD_PH_SUBJ_59 || __TVD_PH_SUBJ_ACCESS_POST
+
+header __TVD_PH_SUBJ_00		Subject =~ /\brewards? survey\b/i
+
+header __TVD_PH_SUBJ_02		Subject =~ /\byour payment has been sent\b/i
+header __TVD_PH_SUBJ_04		Subject =~ /\baccounts? profile\b/i
+header __TVD_PH_SUBJ_15		Subject =~ /\binvestment for (?:[a-z_,-]+ )*?to(?:morrow|day)\b/i
+header __TVD_PH_SUBJ_17		Subject =~ /\bremove limitations?\b/i
+header __TVD_PH_SUBJ_18		Subject =~ /\bsecurity (?:[a-z_,-]+ )*?changes\b/i
+header __TVD_PH_SUBJ_19		Subject =~ /\bmessage (?:[a-z_,-]+ )*?bank\b/i
+header __TVD_PH_SUBJ_29		Subject =~ /^notice(?::|[\s\W]*$)/i
+header __TVD_PH_SUBJ_31		Subject =~ /\bsecurity (?:[a-z_,-]+ )*?verification\b/i
+header __TVD_PH_SUBJ_36		Subject =~ /\bconsumer notice\b/i
+header __TVD_PH_SUBJ_37		Subject =~ /\bvalued member[a-z]*\b/i
+header __TVD_PH_SUBJ_38		Subject =~ /\bonline bank[a-z]*\b/i
+header __TVD_PH_SUBJ_39		Subject =~ /\bonline department\b/i
+header __TVD_PH_SUBJ_41		Subject =~ /\bunusual activity\b/i
+header __TVD_PH_SUBJ_52		Subject =~ /\b(?:account|online) profile\b/i
+header __TVD_PH_SUBJ_54		Subject =~ /\bun-?authorized access(?:es)?\b/i
+header __TVD_PH_SUBJ_56		Subject =~ /\brespond now\b/i
+header __TVD_PH_SUBJ_58		Subject =~ /\bbilling service\b/i
+header __TVD_PH_SUBJ_59		Subject =~ /\bquestion from (?:[a-z_,-]+ )*?member\b/i
+header __TVD_PH_SUBJ_ACCESS_POST	Subject =~ /\b(?:(?:re-?)?activat[a-z]*|secure|verify|restore|flagged|limited|unusual|report|notif(?:y|ication)|suspen(?:d|ded|sion)) (?:[a-z_,-]+ )*?access\b/i
+
+########################################################################
+
+meta TVD_PH_BODY_META		__TVD_PH_BODY_01 || __TVD_PH_BODY_02 || __TVD_PH_BODY_03 || __TVD_PH_BODY_04 || __TVD_PH_BODY_05 || __TVD_PH_BODY_06 || __TVD_PH_BODY_07 || __TVD_PH_BODY_08
+meta TVD_PH_BODY_META_ALL	TVD_PH_BODY_META || TVD_PH_BODY_ACCOUNTS_PRE || TVD_PH_BODY_ACCOUNTS_POST
+body __TVD_PH_BODY_01		/\baccount .{0,20}placed? [io]n restricted status/i
+body __TVD_PH_BODY_02		/\brecords (?:[a-z_,-]+ )+?(?:feature|(?:a|re)ward)/i
+body __TVD_PH_BODY_03		/\byou(?:'ve| have) been (?:[a-z_,-]+ )+?payment/i
+body __TVD_PH_BODY_04		/\bfunds? (?!transfer from)(?!from)(?!in)(?!via)(?:[a-z_,-]+ )+?to your (?:[a-z_,-]+ )*?account/i
+body __TVD_PH_BODY_05		/\bthis is (?:[a-z_,-]+ )+?protect (?:[a-z_,-]+ )+?your/i
+body __TVD_PH_BODY_06		/Dear [a-z]+ bank (?:member|customer)/i
+body __TVD_PH_BODY_07		/\bguarantee the safety of your (?:[a-z_,-]+ )*?account/i
+body __TVD_PH_BODY_08		/\bmultiple password failures/i
+
+body TVD_PH_BODY_ACCOUNTS_PRE	/\baccounts? (?:[a-z_,-]+ )+?(?:record[a-z]*|suspen[a-z]+|notif(?:y|ication)|updated|verifications?|credited)\b/i
+body TVD_PH_BODY_ACCOUNTS_POST	/\b(?:(?:re-?)?activat[a-z]*|(?:re-?)?validate|secure|restore|confirm|update|suspend) (?!your)(?:[a-z_,-]+ )+?accounts?\b/i

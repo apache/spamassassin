@@ -1,0 +1,66 @@
+###########################################################################
+#
+# <@LICENSE>
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to you under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at:
+# 
+#     http://www.apache.org/licenses/LICENSE-2.0
+# 
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# </@LICENSE>
+#
+###########################################################################
+
+header HS_SUBJ_ONLINE_PHARMACEUTICAL Subject =~ /\bOnline Pharmaceutical/i
+describe HS_SUBJ_ONLINE_PHARMACEUTICAL Subject contains the phrase 'Online pharmaceutical'
+##score HS_SUBJ_ONLINE_PHARMACEUTICAL 1
+
+header HS_SUBJ_NEW_SOFTWARE Subject =~ /^New software uploaded by/
+describe HS_SUBJ_NEW_SOFTWARE Subject starts with 'New software uploaded by'
+##score HS_SUBJ_NEW_SOFTWARE 2.0
+
+
+# The idea for this rule was borrowed from Emerging Threats, but I clean
+# roomed the implementation.
+#
+# Message-Id: <7853D282.172689.27089@KCEU>
+# Message-Id: <4877D177.755777.73803@MQYA>
+# Message-Id: <8437D382.271192.34444@ORIG>
+# Message-Id: <2170D101.436567.89603@GDLC>
+# Message-Id: <1376D036.447218.78313@OZPK>
+# Message-Id: <6267D425.255314.28096@FGHO>
+# Message-Id: <2831D273.073770.73033@BUJC>
+header HS_BOBAX_MID_1 Message-Id =~ /^<\d{4}D\d{3}\.\d{6}\.\d{5}\@[A-Z]{4}>/
+describe HS_BOBAX_MID_1 Bobax? Message-Id: <0000D000.000000.00000@AAAA>
+##score HS_BOBAX_MID_1 1
+
+# The idea for this rule was borrowed from Emerging Threats, but I clean
+# roomed the implementation.
+#
+# Message-Id: <8IX397EJXVWDA233@braun.com>
+# Message-Id: <4IX990EJXVWDA139@scrawny.com>
+# Message-Id: <6IX562EJXVWDA794@ibiblio.org>
+# Message-Id: <5IX740EJXVWDA279@nationalgeographic.com>
+# Message-Id: <6IX042EJXVWDA700@greenflame.org>
+header HS_BOBAX_MID_2 Message-Id =~ /^<\dIX\d{3}EJXVWDA\d{3}\@[a-z\-]+\.[a-z]+>/
+describe HS_BOBAX_MID_2 Bobax? Message-Id: <0IX000EJXVWDA000@example.com>
+##score HS_BOBAX_MID_2 1
+
+# Joe Stewart pointed this one out to Justin.
+#
+# Message-ID: 053801c89a0e$d2f4b010$6502a8c0@ppc7e52e9e3a4c
+# Message-ID: 1f2bf01c899ad$1afd9f00$3d4e48be@cruz
+# Message-ID: 3bc4a01c899ae$8fb6a4d0$4201a8c0@McGinty
+# Message-ID: 1130501c899b0$00bb2e20$2f01a8c0@yourf78bf48ce2
+header HS_OUTLOOK_MID_NOBRK Message-ID =~ /^[a-f0-9]{12,13}(?:\$[a-f0-9]{8}){2}\@[A-Za-z0-9]+$/
+describe HS_OUTLOOK_MID_NOBRK Outlook-esque message ID with no brackets.
+## score HS_OUTLOOK_MID_NOBRK 1
+

@@ -1,0 +1,27 @@
+# interesting test idea from Clifton Royston
+
+## Subpatterns for obscured subject content, based on observations of actual
+## spam which was bypassing "drug" tests.
+# A = (a|A|\(a\)|4|@) V = (v|V|\\/) I = (i|I|1|\xef|\|) note: \xef = umlaut i
+# O = (o|O|0)  G = (g|G)  M = (m|M|rn)  R = (r|R)  X = (x|X|><)  N = (n|N)
+# S = (s|S|$|5)  L = (l|L|\|) U = (u|U|\(u\)) E = (e|E|3)  T=(t|T|7)
+# Y = (y|Y)  C=(c|C)
+# obscuring punctuation = [:^."%()*\[\\]
+
+header __TT_VIAGRA              Subject =~ /VIAGRA/i
+header __TT_OBSCURED_VIAGRA     Subject =~ /(v|V|\\\/)(i|I|1|\xef|\|)(a|A|\(a\)|4|@)(g|G)(r|R)(a|A|\(a\)|4|@)/
+header __TT_BROKEN_VIAGRA       Subject =~ /V[:^."%()*\[\\]?I[:^."%()*\[\\]?A[:^."%()*\[\\]?G[:^."%()*\[\\]?R[:^."%()*\[\\]?A/i
+meta TT_OBSCURED_VIAGRA         ( __TT_BROKEN_VIAGRA || __TT_OBSCURED_VIAGRA ) && ! __TT_VIAGRA
+describe TT_OBSCURED_VIAGRA     Scora: obscured "VIAGRA" in subject
+
+header __TT_XANAX               Subject =~ /XANAX/i
+header __TT_OBSCURED_XANAX      Subject =~ /(x|X|><)(a|A|\(a\)|4|@)(n|N)(a|A|\(a\)|4|@)(x|X|><)/
+header __TT_BROKEN_XANAX                Subject =~ /X[:^."%()*\[\\]?A[:^."%()*\[\\]?N[:^."%()*\[\\]?A[:^."%()*\[\\]?X/i
+meta TT_OBSCURED_XANAX          ( __TT_BROKEN_XANAX || __TT_OBSCURED_XANAX ) && ! __TT_XANAX
+describe TT_OBSCURED_XANAX      Scora: obscured "XANAX" in subject
+
+header __TT_VALIUM              Subject =~ /VALIUM/i
+header __TT_OBSCURED_VALIUM     Subject =~ /(v|V|\\\/)(a|A|\(a\)|4|@)(l|L|\|)(i|I|1|\xef|\|)(u|U|\(u\))(m|M)/
+header __TT_BROKEN_VALIUM       Subject =~ /V[:^."%()*\[\\]?A[:^."%()*\[\\]?L[:^."%()*\[\\]?I[:^."%()*\[\\]?U[:^."%()*\[\\]?M/i
+meta TT_OBSCURED_VALIUM         ( __TT_BROKEN_VALIUM || __TT_OBSCURED_VALIUM ) && ! __TT_VALIUM
+describe TT_OBSCURED_VALIUM     Scora: obscured "VALIUM" in subject

@@ -1,0 +1,37 @@
+# SpamAssassin rules file: dcc tests
+#
+
+if version >= 3.003000
+ifplugin Mail::SpamAssassin::Plugin::DCC
+
+# to receive reputation data from DCC servers requires a commercial license
+
+full     DCC_REPUT_00_12  eval:check_dcc_reputation_range(00,12)
+describe DCC_REPUT_00_12  DCC reputation between 0 and 12 %  (mostly ham)
+tflags   DCC_REPUT_00_12  nice net
+
+full     DCC_REPUT_70_89  eval:check_dcc_reputation_range(70,89)
+describe DCC_REPUT_70_89  DCC reputation between 70 and 89 %
+tflags   DCC_REPUT_70_89  net
+
+full     DCC_REPUT_90_94  eval:check_dcc_reputation_range(90,94)
+describe DCC_REPUT_90_94  DCC reputation between 90 and 94 %
+tflags   DCC_REPUT_90_94  net
+
+full     DCC_REPUT_95_98  eval:check_dcc_reputation_range(95,98)
+describe DCC_REPUT_95_98  DCC reputation between 95 and 98 %  (mostly spam)
+tflags   DCC_REPUT_95_98  net
+
+full     DCC_REPUT_99_100 eval:check_dcc_reputation_range(99)
+describe DCC_REPUT_99_100 DCC reputation between 99 % or higher (spam)
+tflags   DCC_REPUT_99_100 net
+
+
+#score    DCC_REPUT_00_12  -0.5
+#score    DCC_REPUT_70_89   0.5
+#score    DCC_REPUT_90_94   0.8
+#score    DCC_REPUT_95_98   1.2
+#score    DCC_REPUT_99_100  1.8
+
+endif
+endif

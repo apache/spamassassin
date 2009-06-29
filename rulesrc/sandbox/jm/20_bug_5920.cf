@@ -1,0 +1,7 @@
+
+header __X_IP                   exists:X-IP
+header __GOOGLE_GROUPS_UA       User-Agent =~ /^G2\//
+
+meta T_BUG5920_X_IP             (__X_IP && !__GOOGLE_GROUPS_UA)
+describe T_BUG5920_X_IP         Message has X-IP header
+

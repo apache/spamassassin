@@ -1,0 +1,344 @@
+# ---------------------------------------------------------------------------
+# The good rules!  These all had good freqs last time I checked. Keeping them
+# here in this file anyway (a) to preserve SVN history and (b) since the rules
+# compiler will take care of the hard work of copying them around for me, while
+# they're still working well.
+
+header MID_DEGREES  Message-ID =~ /^<\d{14}\.[A-F0-9]{10}\@[A-Z0-9]+>$/
+## score MID_DEGREES   3
+
+# from Clifton
+# Been seeing broken message IDs for a long time, e.g. Message-Id<KKdj[20
+#  usually/always? associated with an empty message.  Suspect broken spamware.
+header TT_MSGID_TRUNC   Message-Id =~ /^\s*<?[^<>\s]+\[\d+$/
+describe TT_MSGID_TRUNC Scora: Message-Id ends after left-bracket + digits
+
+# testing for Dave Funk (mail of 11/16); compare with AXB_FAKETZ, GMD_FAKETZ.
+# pretty good; less FPs than AXB_FAKETZ, however, same FP level but less 0.01%
+# less hits than GMD_FAKETZ, so that's still better
+header L_SPAM_TOOL_13   Date =~ /\s[+-]\d(?![2358]45)\d[124-9]\d$/
+## score  L_SPAM_TOOL_13   3.0
+
+header JM_RCVD_QMAILV1     Received =~ /by \S+ \(Qmailv1\) with ESMTP/
+
+# ---------------------------------------------------------------------------
+# Informational rules
+
+# define an informational rule, which detects when a message has become
+# corrupt with a header prepended before the From line:
+#
+#   Header: blah
+#   From address@example.com  Mon Jun 19 14:15:23 2006
+#   Header2: blah
+
+body __BODY_STARTS_WITH_FROM_LINE /^From \S+ \S\S\S \S\S\S .. ..:..:.. \S+\s+\S+\: /s
+meta CORRUPT_FROM_LINE_IN_HDRS (MISSING_HEADERS && __BODY_STARTS_WITH_FROM_LINE && MISSING_DATE && NO_RELAYS)
+describe CORRUPT_FROM_LINE_IN_HDRS Informational: message is corrupt, with a From line in its headers
+
+# informational rules don't have to hit spam
+tflags CORRUPT_FROM_LINE_IN_HDRS userconf publish
+score CORRUPT_FROM_LINE_IN_HDRS 0.001
+
+ifplugin Mail::SpamAssassin::Plugin::MIMEHeader
+
+# more general, hits massive amounts of GIF spam
+mimeheader __PART_STOCK_CID Content-ID =~ /^<[a-f0-9]{12}\$[a-f0-9]{8}\$[a-f0-9]{8}\@[^\s\.]+>$/
+mimeheader __ANY_IMAGE_ATTACH Content-Type =~ /image\/(?:gif|jpeg|png)/
+mimeheader __PART_STOCK_CL Content-Location =~ /./
+mimeheader __PART_STOCK_CD_F Content-Disposition =~ /filename/
+
+meta PART_CID_STOCK      (__ANY_IMAGE_ATTACH&&__PART_STOCK_CID&&!__PART_STOCK_CL&&!__PART_STOCK_CD_F)
+describe PART_CID_STOCK  Has a spammy image attachment (by Content-ID)
+## score PART_CID_STOCK     2.0
+
+# more specific, 0 ham hits
+mimeheader __PART_CID_STOCK_LESS    Content-ID =~ /^<00[a-f0-9]{10}\$[a-f0-9]{8}\$[a-f0-9]{8}\@[A-Za-z]+>$/
+meta PART_CID_STOCK_LESS (__ANY_IMAGE_ATTACH&&__PART_CID_STOCK_LESS)
+describe PART_CID_STOCK_LESS Has a spammy image attachment (by Content-ID, more specific)
+## score PART_CID_STOCK_LESS    2.0
+
+endif # Mail::SpamAssassin::Plugin::MIMEHeader
+
+# catches "by jmason.org with esmtp (;4OZ*/H/)>7. 4.2-+*)" gibberish
+header RCVD_FORGED_WROTE    Received =~ / by \S+ with esmtp \([^a-z ]{6,} [^a-z ]{3,}\) id/
+describe RCVD_FORGED_WROTE  Forged 'Received' header found ('wrote:' spam)
+## score RCVD_FORGED_WROTE     2.8
+
+header __MIMEOLE_1106   X-MimeOLE =~ /^Produced By Microsoft MimeOLE V6.00.2800.1106$/
+header __MAILER_OL_5510 X-Mailer =~ /^Microsoft Office Outlook, Build 11.0.5510$/
+meta DRUGS_STOCK_MIMEOLE (__MIMEOLE_1106 && __MAILER_OL_5510)
+describe DRUGS_STOCK_MIMEOLE Stock-spam forged headers found (5510)
+## score DRUGS_STOCK_MIMEOLE   2.0
+
+# Suresh: 'Finding "mail.com", "post.com" etc in a received header is ALWAYS bogus'
+header RCVD_MAIL_COM        Received =~ /[\s\(\[](?:post|mail)\.com[\s\)\]]/is
+describe RCVD_MAIL_COM      Forged Received header (contains post.com or mail.com)
+## score RCVD_MAIL_COM         3.0
+
+ifplugin Mail::SpamAssassin::Plugin::MIMEHeader
+mimeheader CTYPE_8SPACE_GIF Content-Type:raw =~ /^image\/gif;\n {8}name=\".+?\"$/s
+describe CTYPE_8SPACE_GIF   Stock spam image part 'Content-Type' found (8 spc)
+## score CTYPE_8SPACE_GIF      2.0
+endif
+
+header __HELO_NO_DOMAIN   X-Spam-Relays-External =~ /^[^\]]+ helo=[^\.]+ /
+
+meta STOCK_IMG_HDR_FROM  (__ANY_IMAGE_ATTACH&&__ENV_AND_HDR_FROM_MATCH&&TVD_FW_GRAPHIC_ID1&&__HTML_IMG_ONLY)
+describe STOCK_IMG_HDR_FROM Stock spam image part, with distinctive From line
+
+meta STOCK_IMG_HTML  (__ANY_IMAGE_ATTACH&&__ENV_AND_HDR_FROM_MATCH&&__PART_STOCK_CID&&__HTML_IMG_ONLY)
+describe STOCK_IMG_HTML   Stock spam image part, with distinctive HTML
+
+header __XM_MS_IN_GENERAL     X-Mailer =~ /\bMSCRM\b|Microsoft (?:CDO|Outlook|Office Outlook)\b/
+meta STOCK_IMG_OUTLOOK  (__ANY_IMAGE_ATTACH&&__ENV_AND_HDR_FROM_MATCH&&__XM_MS_IN_GENERAL&&__HTML_LENGTH_1536_2048)
+describe STOCK_IMG_OUTLOOK  Stock spam image part, with Outlook-like features
+
+# Spammy X-Mailer version strings; no longer seen in ham, due to MS'
+# auto-updates, but still appearing in plenty of spam template text
+header __XM_OL_28001441    X-Mailer =~ /^Microsoft Outlook Express 6.00.2800.1441$/
+header __XM_OL_48072300    X-Mailer =~ /^Microsoft Outlook Express 5.50.4807.2300$/
+header __XM_OL_28004682    X-Mailer =~ /^Microsoft Outlook Express 6.00.2800.4682$/
+header __XM_OL_10_0_4115    X-Mailer =~ /^Microsoft Outlook, Build 10.0.4115$/
+header __XM_OL_4_72_2106_4  X-Mailer =~ /^Microsoft Outlook Express 4.72.2106.4$/
+meta SPAMMY_XMAILER (__XM_OL_28001441||__XM_OL_48072300||__XM_OL_28004682||__XM_OL_10_0_4115||__XM_OL_4_72_2106_4)
+describe SPAMMY_XMAILER X-Mailer string is common in spam and not in ham
+
+meta SHORT_HELO_AND_INLINE_IMAGE     (__HELO_NO_DOMAIN && __ANY_IMAGE_ATTACH)
+describe SHORT_HELO_AND_INLINE_IMAGE    Short HELO string, with inline image
+
+# backported to here
+# ---------------------------------------------------------------------------
+
+meta DYN_RDNS_AND_INLINE_IMAGE     (RDNS_DYNAMIC && __ANY_IMAGE_ATTACH)
+describe DYN_RDNS_AND_INLINE_IMAGE Contains image, and was sent by dynamic rDNS
+
+meta DYN_RDNS_SHORT_HELO_HTML      (__HELO_NO_DOMAIN && RDNS_DYNAMIC && HTML_MESSAGE)
+describe DYN_RDNS_SHORT_HELO_HTML  Sent by dynamic rDNS, short HELO, and HTML
+
+meta DYN_RDNS_SHORT_HELO_IMAGE       (__HELO_NO_DOMAIN && RDNS_DYNAMIC && __ANY_IMAGE_ATTACH)
+describe DYN_RDNS_SHORT_HELO_IMAGE    Short HELO string, dynamic rDNS, inline image
+
+header __HDR_ORDER_FTSDMCXXXX ALL =~ /\nFrom: .{1,80}?\nTo: .{1,80}?\nSubject: .{1,200}?\nDate: .{1,40}?\nMIME-Version: .{1,40}?\nContent-Type: .{1,120}?\nX-Priority: .{1,40}?\nX-MSMail-Priority: .{1,40}?\nX-Mailer: .{1,80}?\nX-MimeOLE:/s
+header __MID_START_001C   Message-ID =~ /^<000001c/
+
+meta HDR_ORDER_FTSDMCXX_BAT   (__HDR_ORDER_FTSDMCXXXX && __BAT_BOUNDARY)
+describe HDR_ORDER_FTSDMCXX_BAT   Header order similar to spam (FTSDMCXX/boundary variant)
+
+meta HDR_ORDER_FTSDMCXX_001C  (__HDR_ORDER_FTSDMCXXXX && __MID_START_001C)
+describe HDR_ORDER_FTSDMCXX_001C  Header order similar to spam (FTSDMCXX/MID variant)
+
+# "Tora" spam
+header __MAILER_OL_6626 X-Mailer =~ /^Microsoft Outlook, Build 10\.0\.6626$/
+header __MOLE_2962  X-MimeOLE =~ /^Produced\ By\ Microsoft\ MimeOLE\ V6\.00\.2900\.2962$/
+header __NAKED_TO   To =~ /^[^\s<>]+\@[^\s<>]+$/
+meta JM_TORA_XM     (__MAILER_OL_6626 && __MOLE_2962 && __NAKED_TO)
+
+# HELO as localhost.  we should really be rejecting this at MTA, but hey.
+# it seems most of us let these slip through our MTA configs; 3% of spam, no FPs
+header HELO_LOCALHOST   X-Spam-Relays-External =~ /^[^\]]+ helo=localhost /i
+
+header HELO_OEM  X-Spam-Relays-External =~ /^[^\]]+ helo=(?:pc|oem\S*) /i
+
+header HELO_FRIEND  X-Spam-Relays-External =~ /^[^\]]+ helo=friend /i
+
+header MIME_BOUND_EQ_REL    Content-Type =~ /boundary="=====================_\d+==\.REL"/s
+
+body __DBLCLAIM     /avoid double claiming/
+body __CASHPRZ      /cash prize of/
+meta LOTTERY_1      (__DBLCLAIM && __CASHPRZ)
+
+# ---------------------------------------------------------------------------
+# Testing bit
+
+# quite a few FPs for this one: 
+# 9.1138  39580 of 434286 messages    0.0842  84 of 99747 messages    
+ifplugin Mail::SpamAssassin::Plugin::MIMEHeader
+mimeheader __CTYPE_ONETAB_GIF Content-Type:raw =~ /^image\/gif;\n\tname=\".+?\"$/s
+# mimeheader __CONT_LOC_GIF     Content-Location =~ /\.gif$/
+# meta __CTYPE_ONETAB_GIF2      (__CTYPE_ONETAB_GIF && !__CONT_LOC_GIF)
+endif
+
+meta STOCK_IMG_CTYPE (__ANY_IMAGE_ATTACH&&__ENV_AND_HDR_FROM_MATCH&&__CTYPE_ONETAB_GIF&&__HTML_IMG_ONLY)
+describe STOCK_IMG_CTYPE  Stock spam image part, with distinctive Content-Type header
+
+# this is a trick from Spambouncer -- thx Catherine!
+uri __HAS_ANY_URI   /./
+body __HAS_ANY_EMAIL /\w@\S+\.\w/
+meta SB_GIF_AND_NO_URIS (__GIF_ATTACH&&!__HAS_ANY_URI&&!__HAS_ANY_EMAIL)
+
+meta CTYPE_001C_A  (0)      # obsolete
+
+header CTYPE_001C_B Content-Type =~ /multipart.{0,200}boundary=\"----=_NextPart_000_0000_01C[0-9A-F]{5}\.[0-9A-F]{7}0\"/
+
+header __MSOE_MID_WRONG_CASE   ALL =~ /\nMessage-Id: /
+header __XM_OUTLOOK_EXPRESS    X-Mailer =~ /^Microsoft Outlook Express \d/
+meta MSOE_MID_WRONG_CASE  (__XM_OUTLOOK_EXPRESS && __MSOE_MID_WRONG_CASE && !__MIMEOLE_1106)
+
+header STOX_REPLY_TYPE  Content-Type =~ /text\/plain; .* reply-type=original/
+body CURR_PRICE         /\bCurrent Price:/
+meta STOX_AND_PRICE     CURR_PRICE && STOX_REPLY_TYPE
+
+# bug 5224: basic OE multipart/related check.  see what the overlaps
+# are like
+header __MULTIPART_RELATED Content-Type =~ /multipart\/related/
+meta OE_MULTIPART_RELATED (__OE_MUA && __MULTIPART_RELATED)
+tflags OE_MULTIPART_RELATED nopublish
+
+# more trials of bad HELO strings
+header HELO_LH_LD   X-Spam-Relays-External =~ /^[^\]]+ helo=localhost\.localdomain /i
+header HELO_LH_HOME X-Spam-Relays-External =~ /^[^\]]+ helo=\S+\.(?:home|lan) /i
+
+
+# requested experiment: PBL hitrates on URIs
+# reasonably useful:
+# 0.00000   4.9436   0.1641   0.968    0.82    0.00  T_URIBL_PBL
+# however this is NOT a good idea, since the stated aim of PBL and the
+# criteria used for listing are NOT incompatible with running http servers.
+# Disabled.
+#
+## ifplugin Mail::SpamAssassin::Plugin::URIDNSBL
+## uridnsbl        URIBL_PBL       pbl.spamhaus.org.   TXT
+## body            URIBL_PBL       eval:check_uridnsbl('URIBL_PBL')
+## describe        URIBL_PBL       Contains an URL listed in the PBL blocklist
+## tflags          URIBL_PBL       net nopublish
+## endif
+
+
+# interesting template, thanks Jeff
+header TEMPLATE_203_RCVD    Received =~ /from 192.168.0.\d+ \(203-219-/
+
+full    AB_TEST_PDF4    /JVBERi0xLjMKJeLjz9MKMiAwIG9iago8PAovQ3JlYXR/
+
+# good Message-ID pattern for recent stock spam
+header STOX_BOUND_090909_B Content-Type:raw =~ /;\n boundary=\"------------0[0-9]0[0-9]0[0-9]0[0-9]0[0-9]0[0-9]0[0-9]0[0-9]0[0-9]0[0-9]0[0-9]0[0-9]\"$/s
+header STOX_UA  User-Agent =~ /^Thunderbird 1.5.0.12 \(Windows\/20070509\)/
+
+meta STOX_META_5 (STOX_BOUND_090909_B && EMPTY_MESSAGE)
+
+body __CARD_DIRECT_WWW_ADDRESS /card's direct www address below while you are connected to the Internet/
+body __LEGIT_MARLO_CARD /At our Card Pick Up site, enter BOTH the Directory/
+meta CARD_DIRECT_WWW_ADDRESS (__CARD_DIRECT_WWW_ADDRESS && !__LEGIT_MARLO_CARD)
+
+# thanks to Martin Lee for this tip
+body __AFF_004470_NUMBER  /(?:\+|00|011)\W{0,3}44\W{0,3}0?\W{0,3}70/
+body __AFF_LOTTERY        /(?:lottery|winner)/i
+meta LOTTERY_PH_004470  (__AFF_004470_NUMBER && __AFF_LOTTERY)
+
+# Jo Rhett wants this tested
+meta TVD_PDF_FINGER01_JO  (__TVD_MIME_CT_MM && __TVD_MIME_ATT && !__TVD_BODY)
+
+# Received: from [84.255.156.27] by northpro.net.amerion.mail5.psmtp.com; Thu, 34 Sep 2007 10:00:46 +0300
+# Received: from [189.191.12.17] by aon.co.uk.s7a1.psmtp.com; Fri, 5 Oct 2007 05:30:09 +0100
+# (I expect they'll notice "34 Sep" and fix that soon ;)
+header JM_FAKE_PSMTP_RCVD   Received =~ /^from \[\d+\.\d+\.\d+\.\d+\] by \S+\.\S+\.psmtp\.com; /m
+
+
+# use of the "I Feel Lucky" button in Google, thanks LR
+uri JM_I_FEEL_LUCKY         /(?:\&|\?)btnI=ec(?:$|\&)/
+tflags JM_I_FEEL_LUCKY  publish     # low hitrate, but always a good sign
+
+# some auto-discovered header rules
+header JM_0800_GMT      Received =~ / \+0800 \(GMT\)$/
+header JM_GMT_RCVD      ALL =~ /0 \(GMT\)\nReceived: by 192\.168\./s
+
+header JM_EXIM_462  Received =~ /with smtp \(Exim 4.62 \(FreeBSD\)\)/
+
+body JM_REMOVE_FROM_URL     /\.com\/ \(remove \"\S+\" from /i
+
+body JM_NICE_GIRL       /I am nice girl that would like to chat with you\. /
+
+# http://dvlabs.tippingpoint.com/blog/2007/10/26/stopgap-detection-for-the-gozi-pdf-dropper
+full DVLABS_GOZI_PDF    /bWFpbHRvOiUvLi4vLi4vLi4vLi4vLi4vLi4v/
+
+meta STOX_REPLY_TYPE_WITHOUT_QUOTES (STOX_REPLY_TYPE && !(__HS_SUBJ_RE_FW || __HS_QUOTE))
+
+rawbody IMG_CID_PART1   /<img alt=\"\S*\" src=\"cid:part1\.\d/
+
+rawbody IMG_ALT_HSPACE_CID_ALIGN  /<IMG alt="\S*" hspace=0 src=.cid:\S+ align=baseline/
+
+# Joe Stewart at Secureworks identified this pattern last year, in
+# http://www.secureworks.com/research/threats/ronpaul/?threat=ronpaul ;
+# surprisingly, it still seems to catch Reactor Mailer/Trojan.Srizbi output. We
+# catch almost all this output with high scores anyway, esp from network tests,
+# but no harm to add a set0 rule too.
+#
+# - The initial "Received" header is always of the format "from [bot ip] by
+# [nameserver of alleged sender domain]" (this seems to be obsolete)
+#
+# - The Message-ID always begins with three zeros and ends with a random string
+# of lowercase letters (now includes numbers)
+#
+header __JM_REACTOR_MID     Message-ID =~ /^<000\S+\@[a-z0-9]+>$/
+#
+# - The dates in the headers are always shown in GMT time, regardless of the
+# local time zone of the bot
+# 
+header __JM_REACTOR_DATE    Date =~ / \+0000$/
+#
+# - The X-Mailer is always Microsoft Outlook Express 6.00.3790.2663 (this doesn't
+# seem to be the case anymore, now 2900.3138)
+#
+header __JM_REACTOR_XM2900  X-Mailer =~ /^Microsoft Outlook Express 6.00.2900.3138$/
+#
+# - The X-MimeOLE version is always Microsoft MimeOLE V6.00.3790.2757 (ditto)
+#
+header __JM_REACTOR_XMOLE   X-MimeOLE =~ /^Produced By Microsoft MimeOLE V6.00.2900.3198$/
+#
+meta JM_REACTOR_MAILER (__JM_REACTOR_MID && __JM_REACTOR_DATE && __JM_REACTOR_XM2900 && __JM_REACTOR_XMOLE)
+describe JM_REACTOR_MAILER Header patterns indicative of "Reactor Mailer" ratware
+
+# spotted in the SOUGHT rules
+body MSHTML_6_00_2900_3199_A  /> <META content=3D\"MSHTML 6\.00\.2900\.3199\" name=3DGENERATOR> /
+body MSHTML_6_00_2900_3199_B  /> <META content=3D\"MSHTML 6\.00\.2900\.3199\" name=3DGENERATOR> /
+body MSHTML_6_00_2900_3199_C  /<META content=3?D?\"MSHTML 6\.00\.2900\.3199\" name=3?D?GENERATOR>/
+
+# quick tip from Peter Gervai on the users list:
+# 'Just got a report about a false negative, which was caught by
+# ACommercialSpamFilter by using a rule which had high "points" given to the 
+# mail because it has contained a reply-to but neither To nor Cc.'
+header __REPLYTO_EXISTS             exists:Reply-To
+meta REPLYTO_WITHOUT_TO_CC     (__REPLYTO_EXISTS && !__TOCC_EXISTS)
+
+# thanks to Suresh for these tips
+header FAKE_OUTBLAZE_RCVD_168     X-Spam-Relays-External =~ /^[^\]]+168city\./
+header FAKE_OUTBLAZE_RCVD_PURIN   X-Spam-Relays-External =~ /^[^\]]+purinmail\./
+header FAKE_OUTBLAZE_RCVD_168_2   X-Spam-Relays-External =~ /168city\./
+header FAKE_OUTBLAZE_RCVD_PURIN_2 X-Spam-Relays-External =~ /purinmail\./
+
+# some rules from the MSNBC spam run (Rustock trojan)
+header __MSNBC_THREAD_INDEX     ALL =~ /\nthread-index: /s
+header __MSNBC_NOT_EXCH         X-MimeOLE =~ /^Produced By Microsoft Exchange/
+meta MSNBC_THREAD_INDEX (__MSNBC_THREAD_INDEX && !__MSNBC_NOT_EXCH)
+
+header MSNBC_HDR_ORDER          ALL =~ /\nContent-Transfer-Encoding: 7bit\nX-Mailer: Microsoft CDO for Windows 2000\nContent-Class: urn:content-classes:message\nImportance: normal\nPriority: normal\nX-MimeOLE: Produced By Microsoft MimeOLE V6.00.3790.3119\n/s
+header MSNBC_MESSAGEGUID        exists:messageGUID
+
+body JM_HOODIA      /Hoodia has been showned on/
+
+# "BBC news headlines" botnet uses this broken template
+header BBC_RCVD_NCHAR_RAW     Received =~ / with (?:esmtp|ESMTP) \({nChar\[8-12\]} {nChar\[4-6\]}\)/
+
+# thanks to Ray for this tip
+header RATWARE_HELO_DM     X-Spam-Relays-External =~ / helo=DM /
+describe RATWARE_HELO_DM   External host used 'DM' as the HELO name, DarkMailer signature
+
+# thanks to Phil Randal on the users list for this tip
+rawbody __PR_TD_NOWRAP      /<td nowrap>/
+meta PR_TD_NOWRAP_BAT     (__THEBAT_MUA && __PR_TD_NOWRAP)
+
+body LOLLY_419      /\bLolly Stevens\b/
+describe LOLLY_419  Your name is "Lolly"?  _sure_ it is
+
+header DUH_DIKSBJ   Subject =~ /^\$DIKSBJ/
+describe DUH_DIKSBJ Idiot spammer screwed up his templates (DIK variant)
+
+# a test rule for Jeff
+ifplugin Mail::SpamAssassin::Plugin::URIDNSBL
+meta        URIBL_META_SURBL_ANY   (URIBL_AB_SURBL || URIBL_JP_SURBL || URIBL_OB_SURBL || URIBL_PH_SURBL || URIBL_SC_SURBL || URIBL_WS_SURBL)
+tflags      URIBL_META_SURBL_ANY       net nopublish
+endif
+
+uri T_CN_URL      /[^\/]+\.cn(?:$|\/|\?)/i
+describe T_CN_URL Contains a URL in the .cn domain
+score T_CN_URL    0.01
+

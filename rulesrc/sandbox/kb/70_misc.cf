@@ -1,0 +1,114 @@
+
+# Shot in the dark, spotted by coincidence.  Seeing more of these soon?
+
+header  THEBAT_UNREG  X-Mailer =~ /^The Bat! .{0,20} UNREG$/
+
+
+# Bunch of rules to detect Opera MUA fakes.  These seem to just have started.
+# The Message-Id masks used are based on some brief real mail and Opera specs.
+
+header   __OPERA_MUA           User-Agent =~ /^Opera /
+
+header   __OPERA_MID_NO_DIGIT  Message-ID =~ /^<[^0-9]{2,40}\@/
+header   __OPERA_MID_NON_OP    Message-ID =~ /^<[^o][^p]\./
+# header   __OPERA_MID_MASK      Message-ID =~ /^<[a-z0-9]{2}\.[a-z0-9]{14}\@/
+
+meta     OPERA_MID_NO_DIGIT    __OPERA_MUA && __OPERA_MID_NO_DIGIT
+describe OPERA_MID_NO_DIGIT    MUA Opera, Message-Id does not contain digit
+
+meta     OPERA_MID_NON_OP      __OPERA_MUA && __OPERA_MID_NON_OP
+describe OPERA_MID_NON_OP      MUA Opera, Message-Id does not start with op
+
+# meta     OPERA_MID_BAD_MASK    __OPERA_MUA && !__OPERA_MID_MASK
+# describe OPERA_MID_BAD_MASK    MUA Opera, bad Message-Id mask
+
+
+# Some old stuff rotting in a testing env only, that previously was extracted
+# to hit on the low scoring "Real men" spam wave.  The very same pattern seems
+# to be used with changed content, obfuscated, still scoring rather low.
+
+rawbody  __PQRTW_4_A     m,<a name="\#[pqrtw]{4}">\s*</a>,
+rawbody  __PQRTW_4_SPAN  m,<span name="\#[pqrtw]{4}">\s*</span>,
+
+meta     PQRTW_4         __PQRTW_4_A || __PQRTW_4_SPAN
+
+
+# There is a need to upload tiny HTML files to some mass hoster dump?  Right,
+# there is exactly one reason to do so...  Compare the ratios for both, HTML
+# files and all files.  I love shots in the dark.
+
+# livefilestore.com  Domain Status: Registered And No Website
+
+uri  LIVEFILESTORE       m~livefilestore.com/~
+uri  LIVEFILESTORE_HTML  m~livefilestore.com/[^/]{0,100}/[^/]{0,20}\.html?$~
+
+
+# Pretty decent Outlook forgery.  At the very least, they finally start to get
+# the Message-Id correct.  And indeed, the MIME multipart boundary and the
+# Message-Id do share the same format.  However, the timestamps are created
+# *individually*, and there pretty much is no way for a human that these could
+# be identical.  Only a bot can do that.
+
+# A bunch of spam, in particular a couple variants of some rather static
+# German spam recently started avoiding the gross forgery KB_RATWARE_MSGID and
+# FORGED_RELAY_MUA_TO_MX, as well as some blacklists.  An opportunity to look
+# for more forgery.  I don't need your bloody payload, the headers are
+# sufficient to block you.
+
+
+# FIXME  "It is suggested that [...] names have a length of no more than 22
+#        characters, as an informal convention."  -- from M::SA:Conf
+
+#        Evaluate full results first.  mc-fast results are really weird, with
+#        no hits for the full BOT variant.
+
+
+# This variant works just fine locally, but doesn't hit in mass-checks.  Most
+# likely an issue with the multi-line Content-Type: header.
+
+# header  KB_RATWARE_OUTLOOK_BOT  ALL =~ /^Message-Id: <....([0-9a-f]{8})\$([0-9a-f]{8})\$.{100,400}^Content-Type: multipart.[^;]{10,20}; boundary="----=_NextPart_000_...._\1\.\2/msi  # "
+
+
+# Some variants with varying fuzzyness, to investigate accuracy.
+
+header  KB_RATWARE_OUTLOOK_16  ALL =~ /^Message-Id: <....([0-9a-f]{8})\$([0-9a-f]{8})\$.{100,400}boundary="----=_NextPart_000_...._\1\.\2/msi  # "
+
+header  KB_RATWARE_OUTLOOK_12  ALL =~ /^Message-Id: <....([0-9a-f]{8})\$([0-9a-f]{4})[0-9a-f]{4}\$.{100,400}boundary="----=_NextPart_000_...._\1\.\2/msi  # "
+
+header  KB_RATWARE_OUTLOOK_08  ALL =~ /^Message-Id: <....([0-9a-f]{8})\$[0-9a-f]{8}\$.{100,400}boundary="----=_NextPart_000_...._\1\./msi  # "
+
+
+# Slightly stricter Message-Id variant.  Testing.
+
+header  KB_RATWARE_OUTLOOK_MID  ALL =~ /^Message-Id: <....([0-9a-f]{8})\$([0-9a-f]{8})\$[0-9a-f]{8}\@.{100,400}boundary="----=_NextPart_000_...._\1\.\2"/msi
+
+
+# header  __IS_MIME_MSG       exists:MIME-Version
+# header  __IS_MICROSOFT_MUA  X-Mailer =~ /^Microsoft /
+
+# header  __KB_OUTLOOK_MUA    X-Mailer =~ /^Microsoft (?:Office )?Outlook\b/
+
+
+# Explain later. ;)
+
+header THREAD_INDEX_HEX  Thread-Index =~ /^[a-z0-9]{30}/
+
+header __THREAD_INDEX_GOOD  Thread-Index =~ m,^A[a-z0-9][A-Za-z0-9+/]{27}(?:[A-Za-z0-9+/]{20})?(?:[AQgw]==|[A-Za-z0-9+/]{7}|[A-Za-z0-9+/]{13}[AEIMQUYcgkosw048]=)$,
+
+header __HAS_THREAD_INDEX  exists:Thread-Index
+
+meta   THREAD_INDEX_BAD  __HAS_THREAD_INDEX && !__THREAD_INDEX_GOOD
+
+
+# Some sneaky German porn spam, 2008-10-15
+
+header   KB_CTYPE_SPACE   Content-Type =~ /charset="ISO /  # " emacs
+
+header   __KB_UA_MOZ      User-Agent =~ /\bMozilla/
+
+meta     KB_CTYPE_SP_MOZ  ( KB_CTYPE_SPACE && __KB_UA_MOZ )
+describe KB_CTYPE_SP_MOZ  Mozilla does not do that, I hope
+
+header   KB_FORGED_MOZ4   User-Agent =~ /\bMozilla 4/
+describe KB_FORGED_MOZ4   Mozilla 4 uses X-Mailer
+
