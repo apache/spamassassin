@@ -1,0 +1,363 @@
+# Rules from what was "rules/70_testing.cf", a temporary new home
+#
+# <@LICENSE>
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to you under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at:
+# 
+#     http://www.apache.org/licenses/LICENSE-2.0
+# 
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# </@LICENSE>
+#
+########################################################################
+
+#  5.180   6.1536   0.0221    0.996   0.00    0.00  T_INVALID_DATE
+#  5.261   6.1703   0.4419    0.933   0.00    0.00  INVALID_DATE
+# I found a few whitespace issues in the original RE, and I wanted to avoid my
+# two common, but yes invalid, date headers.  specifically / \(GMT\)$/ and
+# / 0000 GMT$/.  dos has / "GMT"$/
+#header INVALID_DATE		Date !~ /^\s*(?:(?i:Mon|Tue|Wed|Thu|Fri|Sat|Sun),\s)?\s*(?:[12]\d|3[01]|0?[1-9])\s+(?i:Jan|Feb|Ma[ry]|Apr|Ju[nl]|Aug|Sep|Oct|Nov|Dec)\s+(?:19[7-9]\d|2\d{3})\s+(?:[01]?\d|2[0-3])\:[0-5]\d(?::(?:[0-5]\d|60))?\s+(?:[AP]M\s+)?(?:[+-][0-9]{4}|UT|[A-Z]{2,3}T)(?:\s+\(.*\))?\s*$/ [if-unset: Wed, 31 Jul 2002 16:41:57 +0200]
+#header T_INVALID_DATE		Date !~ /^\s*(?:(?i:Mon|Tue|Wed|Thu|Fri|Sat|Sun),\s)?\s*(?:[12]\d|3[01]|0?[1-9])\s+(?i:Jan|Feb|Ma[ry]|Apr|Ju[nl]|Aug|Sep|Oct|Nov|Dec)\s+(?:19[7-9]\d|2\d{3})\s+(?:[01]?\d|2[0-3])\:[0-5]\d(?::(?:[0-5]\d|60))?(?:\s+[AP]M)?(?:\s+(?:[+-][0-9]{4}|UT|[A-Z]{2,3}T|0000 GMT))?(?:\s*\(.*\))?\s*$/ [if-unset: Wed, 31 Jul 2002 16:41:57 +0200]
+#header T_INVALID_DATE2		Date !~ /^\s*(?:(?i:Mon|Tue|Wed|Thu|Fri|Sat|Sun),\s)?\s*(?:[12]\d|3[01]|0?[1-9])\s+(?i:Jan|Feb|Ma[ry]|Apr|Ju[nl]|Aug|Sep|Oct|Nov|Dec)\s+(?:19[7-9]\d|2\d{3})\s+(?:[01]?\d|2[0-3])\:[0-5]\d(?::(?:[0-5]\d|60))?(?:\s+[AP]M)?(?:\s+(?:[+-][0-9]{4}|UT|[A-Z]{2,3}T|0000 GMT|"GMT"))?(?:\s*\(.*\))?\s*$/ [if-unset: Wed, 31 Jul 2002 16:41:57 +0200]
+
+#  4.470   5.2627   0.0000    1.000   1.00    0.00  T_TVD_SILLY_URI_OBFU
+# allow the obfuscation around the tld as well
+body TVD_SILLY_URI_OBFU		m!https?://[a-z0-9-]+\.[a-z0-9-]*\.?[^a-z0-9.:/\s"'\@?\)>-]+[a-z0-9.-]*[a-z]{3}(?:\s|$)!i
+# much more generic -- since the current spammer(s) are using com domains,
+# let's specifically just look for when they do something like "example*com"
+# or "example-com", etc.
+#body T_TVD_SILLY_URI_OBFU_COM	m!https?://[^/]+[^.]com(?:[/\s]|$)!i
+
+ifplugin Mail::SpamAssassin::Plugin::ReplaceTags
+
+# 0.446   0.5767   0.0009    0.998   0.78    0.01  T_FUZZY_SPRM
+body FUZZY_SPRM	/<inter W1><post P2><S><P><U><R><M>/i
+replace_rules FUZZY_SPRM
+
+# 0.115   0.1326   0.0000    1.000   0.80    0.01  T_FUZZY_MERIDIA
+body FUZZY_MERIDIA	/<inter W3><post P2>\b(?!meridia)<M><E><R><I><D><I><A>\b/i
+replace_rules FUZZY_MERIDIA
+
+# bug 4773
+body TVD_FUZZY_PHARMACEUTICAL	/<inter W2><post P2>(?!pharmaceutical)<P><H><A><R><M><A><C><E><U><T><I><C><A><L>/i
+replace_rules TVD_FUZZY_PHARMACEUTICAL
+
+body TVD_FUZZY_SYMBOL	/<inter W2><post P2>(?!symbol)<S><Y><M><B><O><L>/i
+replace_rules TVD_FUZZY_SYMBOL
+
+# I think the FPs are small enough to accept the extra spam hit rate, but the
+# other one is still here if we want to get S/O of 1.0.
+# 1.740   2.1249   0.0000    1.000   0.89    1.00  TVD_FUZZY_SECURITIES2
+# 1.912   2.3312   0.0135    0.994   0.88    1.00  TVD_FUZZY_SECURITIES
+body TVD_FUZZY_SECURITIES	/<inter W2><post P2>(?!securities)<S><E><C><U><R><I><T><I><E><S>/i
+replace_rules TVD_FUZZY_SECURITIES
+#body TVD_FUZZY_SECURITIES2	/(?!securities)<S><E><C><U><R><I><T><I><E><S>/i
+#replace_rules TVD_FUZZY_SECURITIES2
+
+body TVD_FUZZY_FINANCE	/(?!finance)<F><I><N><A><N><C><E>/i
+replace_rules TVD_FUZZY_FINANCE
+
+body TVD_FUZZY_FIXED_RATE	/<inter W2><post P2>(?!fixed rate)<F><I><X><E><D>\s+<R><A><T><E>/i
+replace_rules TVD_FUZZY_FIXED_RATE
+
+body TVD_FUZZY_MICROCAP	/<inter W2><post P2>(?!microcap)(?!micro-cap)<M><I><C><R><O>-?<C><A><P>/i
+replace_rules TVD_FUZZY_MICROCAP
+
+body TVD_FUZZY_SECTOR	/(?!sector)<S><E><C><T><O><R>/i
+replace_rules TVD_FUZZY_SECTOR
+
+# 0.318   0.3838   0.0000    1.000   1.00    0.01  TVD_FUZZY_DEGREE
+body TVD_FUZZY_DEGREE	/<inter W1><post P1>\b(?!degree)<D><E><G><R><E><E>\b/i
+replace_rules TVD_FUZZY_DEGREE
+
+endif
+
+########################################################################
+
+# 0.181   0.2347   0.0000    1.000   0.68    0.01  T_DEAR_WINNER
+body DEAR_WINNER /\bdear.{1,20}winner/i
+
+# 18.685  24.1565   0.0671    0.997   0.87    0.01  T_SUBJECT_NEEDS_ENCODING
+meta SUBJECT_NEEDS_ENCODING    (!__SUBJECT_ENCODED_B64 && !__SUBJECT_ENCODED_QP) && __SUBJECT_NEEDS_MIME
+
+# 0.310   0.4008   0.0000    1.000   0.74    0.01  T_DRUGS_HDIA
+header DRUGS_HDIA	Subject =~ /\bhoodia\b/i
+
+# 0.197   0.2525   0.0066    0.974   0.67    0.01  T_TVD_FROM_1
+header TVD_FROM_1	From:addr =~ /[^\@0-9]{2}\d{3}\.(?:com|net|org|info|biz)$/i
+
+# doesn't hit a lot, but seems to hit mostly on phishing mails
+# 0.062   0.0800   0.0000    1.000   0.58    0.01  T_TVD_RATWARE_CB
+header TVD_RATWARE_CB		Content-Type =~ /\bboundary\b.{1,40}qzsoft_directmail_seperator/i
+
+header TVD_SUBJ_WIPE_DEBT	Subject =~ /(?:wipe out|remove|get (?:rid|out) of|eradicate) .{0,20}(?:owe|debt|obligation)/i
+header TVD_SUBJ_APPR_LOAN	Subject =~ /approved? .{0,20}loan/i
+
+header __HEAD_X_KERNEL		exists:X-Kernel
+header __USER_AGENT_MUTT	User-Agent =~ /^Mutt /
+meta TVD_HEAD_KERNEL		__HEAD_X_KERNEL && !__USER_AGENT_MUTT
+
+header TVD_HEAD_EDITION	exists:X-Edition
+header TVD_HEAD_USR		exists:X-Usr
+
+body TVD_ACT_193		/\bact of (?:193|nineteen thirty)/i
+body TVD_APPROVED		/you.{1,2}re .{0,20}approved/i
+body TVD_APP_LOAN		/approved .{0,20}loan/i
+body TVD_COMPANY_PICK		/company .{2,20}hot pick/i
+body TVD_DEAR_HOMEOWNER		/^dear homeowner/i
+body TVD_ENHANCE		/(?:enhanc(?:e(?:ment)?|ing)|improv(?:e|ing)) .{0,20}sexual (?:stamina|performance)/i
+body TVD_GET_STOCK		/(?i:OTC).{2,8}(?:[A-Z]\s*){3,5}\b/
+body TVD_INCREASE_SIZE		/\bsize of .{1,20}(?:penis|dick|manhood)/i
+body TVD_LONG_WORD5		/^(?:(?:\w+,?\s+)\.)+\s*$/
+body TVD_NOT_SATISFIED		/not satisfied .{1,32}(?:lover|size)/i
+body TVD_SECTION		/\bSection (?:27A|21B)/i
+body TVD_UNDER_VALUED		/(?:company|stock) .{1,20}under-?valued/i
+body TVD_VISIT_PHARMA		/Online Ph.rmacy/i
+
+header TVD_SUBJ_OWE Subject =~ /^\s*(?:\w+\s+)+you\s+(?:\w+\s+)*(?:owe|indebted)\s+(?:\w+\s+)+an\s*other/i
+
+#  0.153   0.1870   0.0000    1.000   0.64    0.01  TVD_DOLLARS_US
+body TVD_DOLLARS_US /\s\d[\d.,]+US/
+
+# Ok, I've said in the past that full rules are evil and that we should never
+# use them.  While I do think that they're nasty and are almost always not the
+# most efficient way to go about things, in this case, unfortunately,
+# I think it actually is the most efficient way to do this search.  :(
+# BTW: a raw (non-encoded) NUL char (ASCII 0) is forbidden by RFC2822, though
+# it seems to show up in spams a lot these days.  MTAs -- deny these mails!
+#
+#  2.548   3.0152   0.0000    1.000   1.00    1.00  NULL_IN_BODY
+full NULL_IN_BODY	/\x00/
+describe NULL_IN_BODY   Message has NUL (ASCII 0) byte in message
+
+########################################################################
+
+ifplugin Mail::SpamAssassin::Plugin::MIMEHeader
+
+mimeheader __GIF_ATTACH Content-Type =~ /^image\/gif\b/i
+
+#  5.679   6.6610   0.0203    0.997   0.92    1.00  TVD_FW_GRAPHIC_ID1
+#  0.339   0.3980   0.0000    1.000   0.50    1.00  TVD_FW_GRAPHIC_ID2
+mimeheader TVD_FW_GRAPHIC_ID1	Content-Id =~ /<[0-9a-f]{12}(?:\$[0-9a-f]{8}){2}\@/
+mimeheader TVD_FW_GRAPHIC_ID2	Content-Id =~ /<(?:[0-9A-F]{8}\.){3}[0-9A-F]{8}/
+
+#  0.908   1.0658   0.0000    1.000   1.00    0.01  TVD_FW_GRAPHIC_ID3
+# this appears to be a standard CID for Outlook so it FPs
+# the spams appear to let the MTA create the Message-ID, so I think that's
+# what we need to key off for this...
+mimeheader __TVD_OUTLOOK_IMG	Content-Id =~ /<image\d+\.(?:gif|jpe?g|png)\@/
+
+mimeheader TVD_FW_GRAPHIC_NAME_LONG	Content-Type =~ /\bname="[a-z]{8,}\.gif/
+mimeheader TVD_FW_GRAPHIC_NAME_MID	Content-Type =~ /\bname="[a-z]{6,7}\.gif/
+
+endif
+
+uri __TVD_INT_CID /^cid:/i
+meta TVD_FW_GRAPHIC_ID3 __TVD_OUTLOOK_IMG && __TVD_INT_CID && !__UNUSABLE_MSGID && ! (__OE_MSGID_2 || __IMS_MSGID )
+meta TVD_FW_GRAPHIC_ID3_2 __TVD_OUTLOOK_IMG && !__UNUSABLE_MSGID && ! (__OE_MSGID_2 || __IMS_MSGID )
+
+# 0.353   0.4186   0.0000    1.000   1.00    0.01  TVD_GOT_UR
+# 0.319   0.3774   0.0000    1.000   0.80    0.01  TVD_HAPPY_WITH
+# 0.177   0.2093   0.0000    1.000   0.60    0.01  TVD_VISIT_SITE
+# 0.098   0.1167   0.0000    1.000   0.20    0.01  TVD_FINGER_01
+meta TVD_FINGER_01	__TVD_HAPPY_WITH || __TVD_GOT_UR || __TVD_VISIT_SITE
+body __TVD_HAPPY_WITH	/\b(?:satisfied|glad|complaining|happy|content) with (?:ur?|your (?:thing|unit))\b/i
+body __TVD_GOT_UR	/\bgot ur (?:msg|message|email)/i
+body __TVD_VISIT_SITE	/\bvisit (?:this site|here),? www\./i
+
+# fostering Program V Mail Client 5.0
+# 0.174   0.2059   0.0000    1.000   0.40    0.01  TVD_UA_FOSTERING
+header TVD_UA_FOSTERING		User-Agent =~ /^fostering/i
+
+# holy crap. ;)
+# 4.686   5.5463   0.0000    1.000   1.00    0.01  TVD_SINGLE_SPAN
+#rawbody TVD_SINGLE_SPAN /<\/span>\s*[a-zA-Z]\s*<span\b/i
+#rawbody TVD_SINGLE_SPAN_DIV  /<\/(?:div|span)>\s*[a-zA-Z]+\s*<(?:div|span)\b/i
+rawbody TVD_SINGLE_SPAN_DIV />\s+[a-zA-Z]\s+<\/(?:span|div)\b/i
+
+# 1.150   1.3983   0.0000    1.000   0.87    0.01  T_TVD_FLOAT_GENERAL4
+# 1.140   1.3860   0.0000    1.000   0.87    0.01  T_TVD_FLOAT_GENERAL6
+# 1.100   1.3379   0.0000    1.000   0.87    0.01  T_TVD_FLOAT_GENERAL5
+# was TVD_FLOAT_GENERAL4 ...
+rawbody TVD_FLOAT_GENERAL	/\bstyle\s*=\s*"[^"]*\bfloat\s*:\s*[a-z]+\s*">\s*[a-zA-Z]+\s*</i
+#rawbody T_TVD_FLOAT_GENERAL5	/\bstyle="[^"]*\bfloat\s*:\s*[a-z]+\s*">\s*[a-zA-Z]\s*</i
+#rawbody T_TVD_FLOAT_GENERAL6	/\bstyle="[^"]*\bfloat\s*:\s*[a-z]+\s*">\s*(?-i:[a-z])+\s*</i
+
+# 0.504   0.5982   0.0000    1.000   1.00    0.01  TVD_FINGER_02
+header TVD_FINGER_02	Content-Type =~ /^text\/plain(?:; (?:format=flowed|charset="Windows-1252"|reply-type=original)){3}/i
+
+# 0.238   0.2868   0.0000    1.000   0.98    0.01  TVD_DEAD_JOB
+body TVD_DEAD_JOB /\bTired of working a dead end job\s*\?/i
+
+# 0.425   0.5130   0.0000    1.000   1.00    0.01  TVD_SUBJ_FINGER_03
+header TVD_SUBJ_FINGER_03	Subject =~ /^\s*\*\s+(?:\w+\W+)+\*\s*$/
+
+# Re: VI w AGRA
+# Re: XANAboX
+# 0.197   0.2369   0.0000    1.000   0.50    0.01  TVD_SPACED_SUBJECT_WORD
+# 0.197   0.2369   0.0000    1.000   0.50    0.01  TVD_SPACED_SUBJECT_WORD2
+#header TVD_SPACED_SUBJECT_WORD	Subject =~ /^(?:(?:Re|Fw)[^:]{0,5}: )?[A-Z]+ [a-z] [A-Z]+$/
+#header TVD_SPACED_SUBJECT_WORD2	Subject =~ /^Re: [A-Z]+ [a-z] [A-Z]+$/
+#header TVD_SPACED_SUBJECT_WORD4	Subject =~ /^Re: [A-Z]+[a-z]+[A-Z]+$/
+header TVD_SPACED_SUBJECT_WORD3	Subject =~ /^(?:(?:Re|Fw)[^:]{0,5}: )?[A-Z]+[a-z]+[A-Z]+$/
+header TVD_SPACED_SUBJECT_WORD5	Subject =~ /^(?:(?:Re|Fw)[^:]{0,5}: )?[A-Z]+\s*[a-z]+\s*[A-Z]+$/
+
+# V I A G R i A
+# is that a new drink similar to a sangria?  probably not...
+# 0.221   0.2655   0.0000    1.000   1.00    0.01  TVD_SPACED_WORDS
+body TVD_SPACED_WORDS	/^(?:[A-Z]\s)+[a-z]\s(?:[A-Z]\s)+$/
+
+# this came up on the users list, good results for me:
+# 0.821   0.9903   0.0000    1.000   1.00    1.00  TVD_VIS_HIDDEN
+rawbody TVD_VIS_HIDDEN /<TEXTAREA[^>]+style\s*=\s*"visibility:\s*hidden\b/i
+
+# 0.255   0.3074   0.0000    1.000   1.00    0.01  TVD_RATWARE_MSGID_01
+header TVD_RATWARE_MSGID_01	Message-ID =~ /<[a-z0-9]{2}-/
+
+# 0.776   0.9389   0.0000    1.000   1.00    0.01  T_TVD_SUBJ_FINGER_04
+header TVD_SUBJ_FINGER_04	Subject =~ /^(?:(?:Re|Fw)[^:]{0,5}: )?[A-Z]+[\/a-zA-Z]+[A-Z]+\s+(?i:news)?\s*$/
+
+# 0.091   0.1095   0.0000    1.000   1.00    0.01  T_TVD_RATWARE_CB_2
+# 0.074   0.0892   0.0000    1.000   0.67    0.01  T_TVD_QUAL_MEDS
+# 0.044   0.0527   0.0000    1.000   0.33    0.01  T_TVD_LINK_SAVE
+# 0.044   0.0527   0.0000    1.000   0.33    0.01  T_TVD_SUBJ_END_STAR
+# 0.044   0.0527   0.0000    1.000   0.33    0.01  T_TVD_BODY_END_STAR
+header TVD_SUBJ_END_STAR	Subject =~ /(?:[A-Z0-9]+\*[,\s]+){2}/
+body TVD_BODY_END_STAR		/(?:[A-Z0-9]+\*[,\s]+){2}/
+body TVD_QUAL_MEDS		/\bquality med(?:ication)?s\b/i
+body TVD_LINK_SAVE		/\blink to save\b/i
+header TVD_RATWARE_CB_2		Content-Type =~ /\bboundary\s*=\s*"?-+\d+=+\.MRA/
+
+# 0.650   0.7944   0.0000    1.000   1.00    0.01  TVD_MSGID_LOWERCASE
+# this came up on the irc channel
+header TVD_RATWARE_MSGID_02	Message-ID =~ /^[^<]*<[a-z]+\@/
+
+########################################################################
+#loadplugin Mail::SpamAssassin::Plugin::Sandbox::felicity sandbox-felicity.pm
+#ifplugin Mail::SpamAssassin::Plugin::Sandbox::felicity
+#endif
+########################################################################
+
+ifplugin Mail::SpamAssassin::Plugin::MIMEEval
+
+# It came up on the users@ list that some spammers generate base64 encoded
+# parts with a single or a handful of long lines over the standard length,
+# which hovers around 77 chars on average.
+#  0.798   0.9651   0.0000    1.000   0.86    0.00  BASE64_LENGTH_79_INF
+#  0.170   0.2047   0.0020    0.990   0.69    0.00  BASE64_LENGTH_78_79
+body BASE64_LENGTH_78_79	eval:check_base64_length('78','79')
+body BASE64_LENGTH_79_INF	eval:check_base64_length('79')
+
+# 0.177   0.2037   0.0000    1.000   0.00    0.00  TVD_MIME_EPI
+# with one exception, my FPs are all mails through mailing lists that tack on
+# a footer to all mails, outside the MIME boundary.
+# the one exception is a malformed mail which repeated the text/html
+# part content after the closing boundary.
+#
+body T_TVD_MIME_EPI		eval:check_msg_parse_flags('mime_epilogue_exists')
+body T_TVD_MIME_NO_HEADERS	eval:check_msg_parse_flags('missing_mime_headers')
+
+endif
+
+# these don't have a large enough hitrate to be real rules, but it may be
+# useful to track over time since they are 100% definite obfuscation
+# techniques -- and both HEX and OCT may be used at the same time...
+#
+# 0.029   0.0344   0.0025    0.933   0.50    0.01  T_TVD_IP_HEX
+# 0.014   0.0168   0.0000    1.000   0.48    0.01  T_TVD_IP_SING_HEX
+# 0.007   0.0079   0.0012    0.864   0.46    0.01  T_TVD_IP_OCT
+#
+# http://0x7f000001/
+uri T_TVD_IP_SING_HEX	m@^https?://0x[0-9a-f]+(?:[:/]|$)@i
+# http://0x7f.0.0.1/
+uri T_TVD_IP_HEX	m@^https?://(?:\d+\.){0,3}0x[0-9a-f]{2}@i
+# http://0177.0.0.1/
+uri T_TVD_IP_OCT	m@^https?://(?:(?:0x[0-9a-f]+|\d+)\.){0,3}0+(?:[1-3][0-7]{0,2}|[4-7][0-7]?)(?:\.(?:0x[0-9a-f]+|\d+)){0,3}(?:[:/]|$)@i
+
+# 0.274   0.3212   0.0000    1.000   1.00    1.00  TVD_RCVD_10
+# lots of Received headers seem to have dates in brackets, so just look for a space:
+# Received: from qrx.quickslick.com ([Thu, 28 Dec 2006 11:38:21 +1200])
+# Received: from noetherian.dielectric.pochta.ru ([unix socket])
+#
+# FPs have included:
+# Received: from localhost (localhost [[UNIX: localhost]])
+# Received: .* [ConcentricHost ... ]
+# Received: .* [XMail ... ]
+header TVD_RCVD_SPACE_BRACKET Received =~ /\(\[(?!UNIX:)[^\[\]]*\s/
+
+#  12.405  14.5584   0.0000    1.000   1.00    1.00  TVD_RCVD_IP
+#   6.088   7.1444   0.0000    1.000   0.50    1.00  TVD_RCVD_IP4
+header TVD_RCVD_IP4 Received =~ /^from\s+(?:\d+\.){3}\d+\s/
+header TVD_RCVD_IP  Received =~ /^from\s+(?:\d+[^0-9a-zA-Z\s]){3}\d+[.\s]/
+
+#   1.265   1.4843   0.0000    1.000   1.00    1.00  TVD_RCVD_046
+header TVD_RCVD_SINGLE Received =~ /^from\s+(?!localhost)[^\s.a-z0-9-]+\s/
+
+
+ifplugin Mail::SpamAssassin::Plugin::HeaderEval
+
+#  0.115   0.1333   0.0000    1.000   1.00    1.00  HEADER_COUNT_SUBJECT
+header HEADER_COUNT_SUBJECT	eval:check_header_count_range('Subject','2','999')
+describe HEADER_COUNT_SUBJECT	Multiple Subject headers found
+
+endif
+
+# 13.245  14.9333   0.0000    1.000   1.00    1.00  RCVD_BAD_ID
+header RCVD_BAD_ID      Received =~ /\bid\s+[a-zA-Z0-9_+\/\\,-]+(?:[!"\#\$\%&'()*:<=>?\@\[\]^\`{|}~]|;\S)/
+
+# 8.791  10.1359   0.0000    1.000   1.00    1.00  TVD_ENVFROM_APOST
+header TVD_ENVFROM_APOST	EnvelopeFrom =~ /\'/
+
+ifplugin Mail::SpamAssassin::Plugin::BodyEval
+body TVD_STOCK1    eval:check_stock_info('2')
+endif
+
+# don't use body
+rawbody __TVD_BODY	/\S{4}/
+
+## look for specific content-types
+header __TVD_MIME_CT_MM	Content-Type =~ /^multipart\/mixed/i
+ifplugin Mail::SpamAssassin::Plugin::MIMEEval
+mimeheader __TVD_MIME_ATT_TP	Content-Type =~ /^text\/plain/i
+mimeheader __TVD_MIME_ATT_AP	Content-Type =~ /^application\/pdf/i
+mimeheader __TVD_MIME_ATT_AOPDF	Content-Type =~ /^application\/octet-stream.*\.pdf/i
+endif
+meta __TVD_MIME_ATT __TVD_MIME_ATT_AP || __TVD_MIME_ATT_AOPDF
+
+meta TVD_PDF_FINGER01 __TVD_MIME_CT_MM && __TVD_MIME_ATT_TP && __TVD_MIME_ATT && !__TVD_BODY
+describe TVD_PDF_FINGER01 Mail matches standard pdf spam fingerprint
+
+# I saw someone mention this on the users@ list, does well for my corpus:
+#   2.138   2.3093   0.0000    1.000   0.91  TVD_GOOG_LUCKY
+uri TVD_GOOG_LUCKY /\bgooo?gle\..*&btnI=/i
+
+# 1.598   1.6953   0.0000    1.000   1.00    1.00  TVD_SUBJ_NUM_OBFU2
+# 1.598   1.6953   0.0000    1.000   1.00    1.00  TVD_SUBJ_NUM_OBFU3
+# 1.052   1.1163   0.0000    1.000   0.50    1.00  TVD_SUBJ_NUM_OBFU
+header T_TVD_SUBJ_NUM_OBFU Subject =~ /[a-z]{3,}\d+[a-z]{2,}/i
+header T_TVD_SUBJ_NUM_OBFU2 Subject =~ /[a-z0-9]{2,}[a-z]\d+[a-z][a-z0-9]/i
+header T_TVD_SUBJ_NUM_OBFU3 Subject =~ /[a-z0-9]{2,}[a-z]\d+[a-z0-9]*[a-z][a-z0-9]/i
+
+#  5.550   5.9506   0.0000    1.000   1.00    1.00  TVD_SUBJ_FINGER_07
+#  5.017   5.3791   0.0000    1.000   0.67    1.00  TVD_SUBJ_FINGER_06
+#  0.103   0.1108   0.0000    1.000   0.33    1.00  TVD_SUBJ_FINGER_05
+header T_TVD_SUBJ_FINGER_05          Subject =~ /^(?:[A-Z][a-z]+){2}$/
+header T_TVD_SUBJ_FINGER_06          Subject =~ /^(?:[A-Z][a-z]{3,}){3,}$/
+header TVD_SUBJ_FINGER_07          Subject =~ /^(?:[A-Z][a-z]{2,}){3,}$/
+
+# came up on the users@ list, seems to work pretty well for me...
+# 0.796   0.8523   0.0000    1.000   1.00    1.00  TVD_PCT_OFF
+# 1.225   1.2956   0.2355    0.846   0.50    1.00  TVD_PCT_OFF2
+# 0.787   0.8435   0.0000    1.000   0.50    1.00  TVD_PCT_OFF3
+header TVD_PCT_OFF Subject =~ /(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\S* \d+% OFF/
+header T_TVD_PCT_OFF2 Subject =~ /% OFF/
+header T_TVD_PCT_OFF3 Subject =~ /^(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\S* \d+% OFF/
+

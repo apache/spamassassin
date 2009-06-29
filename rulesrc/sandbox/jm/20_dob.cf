@@ -1,0 +1,11 @@
+# bug 4200: domain age rules
+
+ifplugin Mail::SpamAssassin::Plugin::URIDNSBL
+urirhssub URIBL_RHS_DOB         dob.sibl.support-intelligence.net  A   2
+body URIBL_RHS_DOB              eval:check_uridnsbl('URIBL_RHS_DOB')
+describe URIBL_RHS_DOB          Contains an URI of a new domain (Day Old Bread)
+tflags URIBL_RHS_DOB            net
+#reuse URIBL_RHS_DOB
+endif
+
+

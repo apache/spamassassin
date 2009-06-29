@@ -1,0 +1,11 @@
+# more Received: forgery variants
+
+# same as RCVD_FORGED_WROTE but allowing capitalized host names
+#
+header RCVD_FORGED_WROTE2 Received =~ /from [0-9.]+ \(HELO \S+[A-Za-z]+\) by (\S+) with esmtp \(\S+\s\S+\) id \S{6}-\S{6}-\S\S for \S+@\1;/s
+
+header RCVD_FORGED_WROTE3 Received =~ /from \[[0-9.]+\] \(port=\d+ helo=\S+[A-Za-z]+\) by (\S+) with asmtp id \S{6}-\S{6}-\S\S for \S+@\1;/s
+
+# Another variant a bit like Sendmail instead of Exim...
+#
+header RCVD_FORGED_WROTE4 Received =~ /from [0-9.]+ \(HELO \S+[A-Za-z]+\) by (\S+) with \(8[0-9.]+\/8[0-9.]+\) ESMTP [0-9a-z]{14} for \S+@\1;/s

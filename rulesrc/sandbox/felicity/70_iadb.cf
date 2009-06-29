@@ -1,0 +1,198 @@
+# SpamAssassin rules file: IADB tests
+#
+# Please don't modify this file as your changes will be overwritten with
+# the next update. Use @@LOCAL_RULES_DIR@@/local.cf instead.
+# See 'perldoc Mail::SpamAssassin::Conf' for details.
+#
+# <@LICENSE>
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to you under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at:
+# 
+#     http://www.apache.org/licenses/LICENSE-2.0
+# 
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# </@LICENSE>
+#
+###########################################################################
+
+# via: http://isipp.com/iadbcodes.php
+
+# 127.0.0.1 	Listed in IADB
+# 127.0.0.2 	Listed in IADB (Alternate to 127.0.0.1)
+# 127.0.1.255 	Vouched listing*
+# 127.0.2.1 	Participates in Email Deliverability Database (EDDB)
+# 127.0.2.2 	Is a member of the Email Processing Industry Alliance (EPIA)
+# 127.2.255.1 	Publishes SPF record
+# 127.2.255.2 	Publishes Microsoft "Sender I.D." record
+# 127.2.255.3 	Publishes Domain Keys record
+# 127.2.255.4 	Publishes rDNS
+# 127.2.255.101 	Participates in Habeas program
+# 127.2.255.102 	Participates in Ironport's Bonded Sender program
+# 127.2.255.103 	Is a GoodMail certified sender
+# 127.3.100.0 	Has absolutely no mailing controls in place
+# 127.3.100.1 	Scrapes addresses, pure opt-out only
+# 127.3.100.2 	Accepts unverified sign-ups such as through web page
+# 127.3.100.3 	Accepts unverified sign-ups, gives chance to opt out
+# 127.3.100.4 	Adds only customer and inquirer email addresses to mailing list without opt-in, gives chance to opt out
+# 127.3.100.5 	Has opt-in mechanism available, used less than 50% of the time
+# 127.3.100.6 	Has opt-in mechanism available, used more than 50% of the time
+# 127.3.100.7 	All mailing list mail is opt-in
+# 127.3.100.8 	All mailing list mail is at least opt-in, and has confirmed (double) opt-in mechanism available, used less than 50% of the time
+# 127.3.100.9 	All mailing list mail is at least opt-in, and has confirmed (double) opt-in mechanism available, used more than 50% of the time
+# 127.3.100.10 	All mailing list mail is confirmed (double) opt-in
+# 127.3.100.100 	The only email which comes from this IP address is mailing list email, and that mailing list email is entirely confirmed (double) opt-in
+# 127.3.100.200	The only email which comes from this IP address is one-to-one or transactional email. No bulk email is sent from this IP address
+# 127.101.001.10	Complies with Michigan's Child Protection Email Address Registry law
+# 127.101.002.10 	Complies with Utah's Child Protection Email Address Registry law
+# 127.101.101.10	Has checked mailing lists against the Michigan Child Protective Registry within last 30 days
+# 127.101.102.10	Has checked mailing lists against the Utah Child Protective Registry within last 30 days
+# 127.101.201.10	This IP address sends no material which falls under the Michigan Child Protective Registry law
+# 127.101.202.10	This IP address sends no material which falls under the Utah Child Protective Registry law
+
+###########################################################################
+
+ifplugin Mail::SpamAssassin::Plugin::DNSEval
+
+## IADB support ...
+## these commented sections are already included in 20_dnsbl_tests.cf
+#
+#header __RCVD_IN_IADB		eval:check_rbl('iadb-firsttrusted', 'iadb.isipp.com.')
+#tflags __RCVD_IN_IADB		net nice
+#
+#header RCVD_IN_IADB_VOUCHED	eval:check_rbl_sub('iadb-firsttrusted', '^127.0.1.255$')
+#describe RCVD_IN_IADB_VOUCHED	ISIPP IADB lists as vouched-for sender
+#tflags RCVD_IN_IADB_VOUCHED	net nice
+
+header RCVD_IN_IADB_LISTED		eval:check_rbl_sub('iadb-firsttrusted', '^127.0.0.[12]$')
+describe RCVD_IN_IADB_LISTED		Participates in the IADB system
+tflags RCVD_IN_IADB_LISTED		net nice
+
+###########################################################################
+
+header RCVD_IN_IADB_EDDB		eval:check_rbl_sub('iadb-firsttrusted', '^127.0.2.1$')
+describe RCVD_IN_IADB_EDDB		IADB: Participates in Email Deliverability Database
+tflags RCVD_IN_IADB_EDDB		net nice
+
+header RCVD_IN_IADB_EPIA		eval:check_rbl_sub('iadb-firsttrusted', '^127.0.2.2$')
+describe RCVD_IN_IADB_EPIA		IADB: Member of Email Processing Industry Alliance
+tflags RCVD_IN_IADB_EPIA		net nice
+
+header RCVD_IN_IADB_SPF			eval:check_rbl_sub('iadb-firsttrusted', '^127.2.255.1$')
+describe RCVD_IN_IADB_SPF		IADB: Sender publishes SPF record
+tflags RCVD_IN_IADB_SPF			net nice
+
+header RCVD_IN_IADB_SENDERID		eval:check_rbl_sub('iadb-firsttrusted', '^127.2.255.2$')
+describe RCVD_IN_IADB_SENDERID		IADB: Sender publishes Sender ID record
+tflags RCVD_IN_IADB_SENDERID		net nice
+
+header RCVD_IN_IADB_DK			eval:check_rbl_sub('iadb-firsttrusted', '^127.2.255.3$')
+describe RCVD_IN_IADB_DK		IADB: Sender publishes Domain Keys record
+tflags RCVD_IN_IADB_DK			net nice
+
+header RCVD_IN_IADB_RDNS		eval:check_rbl_sub('iadb-firsttrusted', '^127.2.255.4$')
+describe RCVD_IN_IADB_RDNS		IADB: Sender has reverse DNS record
+tflags RCVD_IN_IADB_RDNS		net nice
+
+# we already check for this
+#header RCVD_IN_IADB_HABEAS		eval:check_rbl_sub('iadb-firsttrusted', '^127.2.255.101$')
+#describe RCVD_IN_IADB_HABEAS		IADB: Sender participates in Habeas program
+#tflags RCVD_IN_IADB_HABEAS		net nice
+
+# we already check for this
+#header RCVD_IN_IADB_BONDEDSENDER	eval:check_rbl_sub('iadb-firsttrusted', '^127.2.255.102$')
+#describe RCVD_IN_AIDB_BONDEDSENDER	IADB: Sender participates in Bonded Sender program
+#tflags RCVD_IN_IADB_BONDEDSENDER	net nice
+
+header RCVD_IN_IADB_GOODMAIL		eval:check_rbl_sub('iadb-firsttrusted', '^127.2.255.103$')
+describe RCVD_IN_IADB_GOODMAIL		IADB: Sender has been certified by GoodMail
+tflags RCVD_IN_IADB_GOODMAIL 		net nice
+
+###########################################################################
+
+header RCVD_IN_IADB_NOCONTROL		eval:check_rbl_sub('iadb-firsttrusted', '^127.3.100.0$')
+describe RCVD_IN_IADB_NOCONTROL		IADB: Has absolutely no mailing controls in place
+tflags RCVD_IN_IADB_NOCONTROL		net nice
+
+header RCVD_IN_IADB_OPTOUTONLY		eval:check_rbl_sub('iadb-firsttrusted', '^127.3.100.1$')
+describe RCVD_IN_IADB_OPTOUTONLY 	IADB: Scrapes addresses, pure opt-out only
+tflags RCVD_IN_IADB_OPTOUTONLY		net nice
+
+header RCVD_IN_IADB_UNVERIFIED_1	eval:check_rbl_sub('iadb-firsttrusted', '^127.3.100.2$')
+describe RCVD_IN_IADB_UNVERIFIED_1	IADB: Accepts unverified sign-ups
+tflags RCVD_IN_IADB_UNVERIFIED_1	net nice
+
+header RCVD_IN_IADB_UNVERIFIED_2	eval:check_rbl_sub('iadb-firsttrusted', '^127.3.100.3$')
+describe RCVD_IN_IADB_UNVERIFIED_2	IADB: Accepts unverified sign-ups, gives chance to opt out
+tflags RCVD_IN_IADB_UNVERIFIED_2	net nice
+
+header RCVD_IN_IADB_LOOSE		eval:check_rbl_sub('iadb-firsttrusted', '^127.3.100.4$')
+describe RCVD_IN_IADB_LOOSE		IADB: Adds relationship addrs w/out opt-in
+tflags RCVD_IN_IADB_LOOSE		net nice
+
+header RCVD_IN_IADB_OPTIN_LT50		eval:check_rbl_sub('iadb-firsttrusted', '^127.3.100.5$')
+describe RCVD_IN_IADB_OPTIN_LT50	IADB: Opt-in used less than 50% of the time
+tflags RCVD_IN_IADB_OPTIN_LT50		net nice
+
+header RCVD_IN_IADB_OPTIN_GT50		eval:check_rbl_sub('iadb-firsttrusted', '^127.3.100.6$')
+describe RCVD_IN_IADB_OPTIN_GT50	IADB: Opt-in used more than 50% of the time
+tflags RCVD_IN_IADB_OPTIN_GT50		net nice
+
+header RCVD_IN_IADB_OPTIN		eval:check_rbl_sub('iadb-firsttrusted', '^127.3.100.7$')
+describe RCVD_IN_IADB_OPTIN		IADB: All mailing list mail is opt-in
+tflags RCVD_IN_IADB_OPTIN		net nice
+
+header RCVD_IN_IADB_DOPTIN_LT50		eval:check_rbl_sub('iadb-firsttrusted', '^127.3.100.8$')
+describe RCVD_IN_IADB_DOPTIN_LT50	IADB: Confirmed opt-in used less than 50% of the time
+tflags RCVD_IN_IADB_DOPTIN_LT50		net nice
+
+header RCVD_IN_IADB_DOPTIN_GT50		eval:check_rbl_sub('iadb-firsttrusted', '^127.3.100.9$')
+describe RCVD_IN_IADB_DOPTIN_GT50	IADB: Confirmed opt-in used more than 50% of the time
+tflags RCVD_IN_IADB_DOPTIN_GT50		net nice
+
+header RCVD_IN_IADB_DOPTIN		eval:check_rbl_sub('iadb-firsttrusted', '^127.3.100.10$')
+describe RCVD_IN_IADB_DOPTIN		IADB: All mailing list mail is confirmed opt-in
+tflags RCVD_IN_IADB_DOPTIN		net nice
+
+header RCVD_IN_IADB_ML_DOPTIN		eval:check_rbl_sub('iadb-firsttrusted', '^127.3.100.100$')
+describe RCVD_IN_IADB_ML_DOPTIN		IADB: Mailing list email only, confirmed opt-in
+tflags RCVD_IN_IADB_ML_DOPTIN		net nice
+
+header RCVD_IN_IADB_OOO			eval:check_rbl_sub('iadb-firsttrusted', '^127.3.100.200$')
+describe RCVD_IN_IADB_OOO		IADB: One-to-one/transactional email only
+tflags RCVD_IN_IADB_OOO			net nice
+
+###########################################################################
+
+header RCVD_IN_IADB_MI_CPEAR		eval:check_rbl_sub('iadb-firsttrusted', '^127.101.1.10$')
+describe RCVD_IN_IADB_MI_CPEAR		IADB: Complies with Michigan's CPEAR law
+tflags RCVD_IN_IADB_MI_CPEAR		net nice
+
+header RCVD_IN_IADB_UT_CPEAR		eval:check_rbl_sub('iadb-firsttrusted', '^127.101.2.10$')
+describe RCVD_IN_IADB_UT_CPEAR		IADB: Complies with Utah's CPEAR law
+tflags RCVD_IN_IADB_UT_CPEAR		net nice
+
+header RCVD_IN_IADB_MI_CPR_30		eval:check_rbl_sub('iadb-firsttrusted', '^127.101.101.10$')
+describe RCVD_IN_IADB_MI_CPR_30		IADB: Checked lists against Michigan's CPR within 30 days
+tflags RCVD_IN_IADB_MI_CPR_30		net nice
+
+header RCVD_IN_IADB_UT_CPR_30		eval:check_rbl_sub('iadb-firsttrusted', '^127.101.102.10$')
+describe RCVD_IN_IADB_UT_CPR_30		IADB: Checked lists against Utah's CPR within 30 days
+tflags RCVD_IN_IADB_UT_CPR_30		net nice
+
+header RCVD_IN_IADB_MI_CPR_MAT		eval:check_rbl_sub('iadb-firsttrusted', '^127.101.201.10$')
+describe RCVD_IN_IADB_MI_CPR_MAT	IADB: Sends no material under Michigan's CPR
+tflags RCVD_IN_IADB_MI_CPR_MAT		net nice
+
+header RCVD_IN_IADB_UT_CPR_MAT		eval:check_rbl_sub('iadb-firsttrusted', '^127.101.202.10$')
+describe RCVD_IN_IADB_UT_CPR_MAT	IADB: Sends no material under Utah's CPR
+tflags RCVD_IN_IADB_UT_CPR_MAT		net nice
+
+endif

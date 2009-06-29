@@ -1,0 +1,47 @@
+# https://issues.apache.org/SpamAssassin/show_bug.cgi?id=5856
+
+header __T_BUG5868_LAST_EXTERNAL_RELAY_NO_AUTH X-Spam-Relays-External =~ /^[^\]]+ auth= /
+header __T_BUG5868_RDNS_DYNAMIC_IPADDR X-Spam-Relays-External =~ /^[^\]]+ rdns=\S*\d+[^\d\s]\d+[^\d\s]\d+[^\d\s]\d+\S*\.\S+\.\S+/i
+header __T_BUG5868_RDNS_DYNAMIC_DHCP X-Spam-Relays-External =~ /^[^\]]+ rdns=\S*(?:cm|catv|docsis|cable|dsl|dhcp|cpe|node)\S*\d+[^\d\s]+\d+/i
+header __T_BUG5868_RDNS_DYNAMIC_HCC   X-Spam-Relays-External =~ /^[^\]]+ rdns=\S*\d+[^\d\s]+\d+\S*\.(?:docsis|cable|dsl|adsl|dhcp|cpe)\./i
+header __T_BUG5868_RDNS_DYNAMIC_ATTBI  X-Spam-Relays-External =~ /^[^\]]+ rdns=\S+\d+\S+\.client2\.attbi\.com/i
+header __T_BUG5868_RDNS_DYNAMIC_ROGERS X-Spam-Relays-External =~ /^[^\]]+ rdns=CPE\d+\S+\.rogers\.com/i
+header __T_BUG5868_RDNS_DYNAMIC_ADELPHIA X-Spam-Relays-External =~ /^[^\]]+ rdns=[a-z]{2}-\S+-\d{1,3}\.[a-z]{3,8}\.adelphia\.net/i
+header __T_BUG5868_RDNS_DYNAMIC_DIALIN X-Spam-Relays-External =~ /^[^\]]+ rdns=[a-z][A-F0-9]+\.dip\./
+header __T_BUG5868_RDNS_DYNAMIC_HEXIP X-Spam-Relays-External =~ /^[^\]]+ rdns=0x[a-f0-9]{8}\./
+header __T_BUG5868_RDNS_DYNAMIC_SPLIT_IP X-Spam-Relays-External =~ /^[^\]]+ rdns=\d+\.\S+\d+[^\d\s]\d+[^\d\s]\d+[^\d\s]/
+header __T_BUG5868_RDNS_DYNAMIC_YAHOOBB X-Spam-Relays-External =~ /^[^\]]+ rdns=YahooBB/i
+header __T_BUG5868_RDNS_DYNAMIC_OOL X-Spam-Relays-External =~ /^[^\]]+ rdns=\S+\.dyn\.optonline\.net/
+header __T_BUG5868_RDNS_DYNAMIC_RR2   X-Spam-Relays-External =~ /^[^\]]+ rdns=[a-z]+-\d{1,3}-\d{1,5}\.roadrunner/i
+header __T_BUG5868_RDNS_DYNAMIC_COMCAST X-Spam-Relays-External =~ /^[^\]]+ rdns=[a-z-]+\d+[a-z]{3}\.[a-z0-9]+\...\.comcast/i
+header __T_BUG5868_RDNS_DYNAMIC_TELIA X-Spam-Relays-External =~ /^[^\]]+ rdns=h\d+n\d+fls\S+\.telia\.com/i
+header __T_BUG5868_RDNS_DYNAMIC_VTR X-Spam-Relays-External =~ /^[^\]]+ rdns=cm-[a-z]+\d+-\d+-\d+\.cm\.vtr/i
+header __T_BUG5868_RDNS_DYNAMIC_CHELLO_NO  X-Spam-Relays-External =~ /^[^\]]+ rdns=\S+\.cm\.chello\.no/i
+header __T_BUG5868_RDNS_DYNAMIC_CHELLO_NL  X-Spam-Relays-External =~ /^[^\]]+ rdns=[a-z]\d+\.upc-[a-z]\.chello\.nl/i
+header __T_BUG5868_RDNS_DYNAMIC_VELOX  X-Spam-Relays-External =~ /^[^\]]+ rdns=[a-z]{2}\d+\.user\.veloxzone\./i
+header __T_BUG5868_RDNS_DYNAMIC_NTL  X-Spam-Relays-External =~ /^[^\]]+ rdns=\S+\d+-\d+-cust\d+\.[a-z]{4,6}\.broadband\.ntl\.com/i
+header __T_BUG5868_RDNS_DYNAMIC_HOME_NL  X-Spam-Relays-External =~ /^[^\]]+ rdns=[a-z]{2}\d+-\S\.\S+\d\.[a-z]{2}\.home\.nl/i
+header __T_BUG5868_RDNS_DYNAMIC_TDS X-Spam-Relays-External =~ /^[^\]]+ rdns=\S+-[a-z]\d+\.[a-z]{6}\.tds\.net/i
+header __T_BUG5868_RDNS_DYNAMIC_VIRTUA  X-Spam-Relays-External =~ /^[^\]]+ rdns=\d+\.cps\./i
+header __T_BUG5868_RDNS_DYNAMIC_SPACELAN X-Spam-Relays-External =~ /^[^\]]+ rdns=\S+-[a-z]\d+-\d+\./i
+header __T_BUG5868_RDNS_INDICATOR_DYN   X-Spam-Relays-External =~ /^[^\]]+ rdns=\S+[\-\.]dyn(?:amic)?[\-\.]/i
+header __T_BUG5868_RDNS_INDICATOR_TYPE  X-Spam-Relays-External =~ /^[^\]]+ rdns=\S+[\-\.](?:dial|modem|isdn|dov|\S?dsl|cable|wireless)[\-\.]/i
+header __T_BUG5868_RDNS_INDICATOR_RES   X-Spam-Relays-External =~ /^[^\]]+ rdns=\S+[\-\.](?:res|resnet|client)[\-\.]/i
+header __T_BUG5868_RDNS_INDICATOR_TYPE2 X-Spam-Relays-External =~ /^[^\]]+ rdns=\S+[\-\.](?:docsis|dhcp|cpe|catv)[\-\.]/i
+header __T_BUG5868_RDNS_DYNAMIC_TTNET   X-Spam-Relays-External =~ /^[^\]]+ rdns=\S+[\-\.]dyn(?:amic)?\d/i
+header  __T_BUG5868_RDNS_STATIC         X-Spam-Relays-External =~ /^[^\]]+ rdns=\S*(?:static|fixip)/i
+header __T_BUG5868_RDNS_NONE    X-Spam-Relays-External =~ /^[^\]]+ rdns= /
+meta T_BUG5868_RDNS_DYNAMIC   (__T_BUG5868_LAST_EXTERNAL_RELAY_NO_AUTH && !__T_BUG5868_RDNS_STATIC && (__T_BUG5868_RDNS_DYNAMIC_IPADDR || __T_BUG5868_RDNS_DYNAMIC_DHCP || __T_BUG5868_RDNS_DYNAMIC_HCC || __T_BUG5868_RDNS_DYNAMIC_ATTBI || __T_BUG5868_RDNS_DYNAMIC_ROGERS || __T_BUG5868_RDNS_DYNAMIC_ADELPHIA || __T_BUG5868_RDNS_DYNAMIC_DIALIN || __T_BUG5868_RDNS_DYNAMIC_HEXIP || __T_BUG5868_RDNS_DYNAMIC_SPLIT_IP || __T_BUG5868_RDNS_DYNAMIC_YAHOOBB || __T_BUG5868_RDNS_DYNAMIC_OOL || __T_BUG5868_RDNS_DYNAMIC_RR2   || __T_BUG5868_RDNS_DYNAMIC_COMCAST || __T_BUG5868_RDNS_DYNAMIC_TELIA || __T_BUG5868_RDNS_DYNAMIC_VTR || __T_BUG5868_RDNS_DYNAMIC_CHELLO_NO  || __T_BUG5868_RDNS_DYNAMIC_CHELLO_NL  || __T_BUG5868_RDNS_DYNAMIC_VELOX  || __T_BUG5868_RDNS_DYNAMIC_NTL  || __T_BUG5868_RDNS_DYNAMIC_HOME_NL  || __T_BUG5868_RDNS_DYNAMIC_TDS || __T_BUG5868_RDNS_DYNAMIC_VIRTUA || __T_BUG5868_RDNS_DYNAMIC_SPACELAN || __T_BUG5868_RDNS_INDICATOR_DYN || __T_BUG5868_RDNS_INDICATOR_RES || __T_BUG5868_RDNS_INDICATOR_TYPE2 || __T_BUG5868_RDNS_DYNAMIC_TTNET))
+meta T_BUG5868_RDNS_NONE      (__T_BUG5868_RDNS_NONE && !__CGATE_RCVD)
+header T_BUG5868_FAKE_HELO_MAIL_COM_DOM  X-Spam-Relays-External =~ /^[^\]]+ helo=(?:\S+\.|)(?:(?:mail|email|iname|cheerful|consultant|europe|mindless|myself|post|techie|usa|writeme|2die4|artlover|bikerider|catlover|cliffhanger|cutey|doglover|gardener|hot-shot|inorbit|loveable|mad\.scientist|playful|poetic|popstar|saintly|seductive|soon|whoever|winning|witty|yours|africamail|arcticmail|asia|australiamail|europe|japan|samerica|usa|berlin|dublin|london|madrid|moscowmail|munich|nycmail|paris|rome|sanfranmail|singapore|tokyo|accountant|adexec|allergist|alumnidirector|archaeologist|chemist|clerk|columnist|comic|consultant|counsellor|deliveryman|diplomats|doctor|dr|engineer|execs|financier|geologist|graphic-designer|insurer|journalist|lawyer|legislator|lobbyist|minister|optician|pediatrician|presidency|priest|publicist|realtyagent|registerednurses|repairman|representative|rescueteam|scientist|sociologist|teacher|techietechnologist|umpire)\.com|(?:programmer|earthling|hairdresser)\.net|musician\.org) /i
+header T_BUG5868_HELO_DYNAMIC_IPADDR X-Spam-Relays-External =~ /^[^\]]+ helo=[a-z]\S*\d+[^\d\s]\d+[^\d\s]\d+[^\d\s]\d+[^\d\s][^\.]*\.\S+\.\S+[^\]]+ auth= /i
+header T_BUG5868_HELO_DYNAMIC_DHCP X-Spam-Relays-External =~ /^[^\]]+ helo=\S*(?:(?<!a)cm|catv|docsis|cable|dsl|dhcp|cpe|node)\S*\d+[^\d\s]+\d+[^\]]+ auth= /i
+header T_BUG5868_HELO_DYNAMIC_HCC   X-Spam-Relays-External =~ /^[^\]]+ helo=\S*\d+[^\d\s]+\d+\S*\.(?:docsis|cable|dsl|adsl|dhcp|cpe)\.[^\]]+ auth= /i
+header T_BUG5868_HELO_DYNAMIC_ROGERS X-Spam-Relays-External =~ /^[^\]]+ helo=CPE\d+\S+\.rogers\.com[^\]]+ auth= /i
+header T_BUG5868_HELO_DYNAMIC_DIALIN X-Spam-Relays-External =~ /^[^\]]+ helo=[a-z][A-F0-9]+\.dip\./
+header T_BUG5868_HELO_DYNAMIC_HEXIP X-Spam-Relays-External =~ /^[^\]]+ helo=0x[a-f0-9]{8}\./
+header T_BUG5868_HELO_DYNAMIC_SPLIT_IP X-Spam-Relays-External =~ /^[^\]]+ helo=\d+\.\S+\d+[^\d\s]\d+[^\d\s]\d+[^\d\s]/
+header T_BUG5868_HELO_DYNAMIC_IPADDR2 X-Spam-Relays-External =~ /^[^\]]+ helo=\d+[^\d\s]\d+[^\d\s]\d+[^\d\s]\d+[^\d\s][^\.]*\.\S+\.\S+[^\]]+ auth= /i
+header T_BUG5868_HELO_DYNAMIC_CHELLO_NL  X-Spam-Relays-External =~ /^[^\]]+ helo=[a-z]\d+\.upc-[a-z]\.chello\.nl[^\]]+ auth= /i
+header T_BUG5868_HELO_DYNAMIC_HOME_NL  X-Spam-Relays-External =~ /^[^\]]+ helo=[a-z]{2}\d+-\S\.\S+\d\.[a-z]{2}\.home\.nl[^]]+ auth= /i
+

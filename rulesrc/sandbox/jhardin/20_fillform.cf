@@ -1,0 +1,83 @@
+
+#
+# Ruleset to match fill-in-this-form body text
+# common in scams and loan spams
+# occasional in phishing
+#
+# Requires multipass ReplaceTags plugin
+#
+# <jhardin@impsec.org>
+# $Id$
+#
+
+ifplugin Mail::SpamAssassin::Plugin::ReplaceTags
+
+  # Repetitive syntactic bits
+  replace_tag FF_LNNO   (?:(?:\d+[)}\]:.,]|\W?\(\d+\)|\W?\{\d+\}|\[\d+\]|\*{1,5}|\#{1,5})\s?)
+  replace_tag FF_YOUR   (?:a?\s?copy\sof\s)?(?:your[\s,:]{1,5})?(?:present\s|current\s|full\s?|complete\s|direct\s|private\s|valid\s){0,3}
+  replace_tag ANDOR     (?:\s?[\/&+,]\s?|\sor\s|\sand\s)
+  replace_tag NUMBER    (?:num(?:ber)?s?|nos?\.|no\b|\#s?|nbrs?\.?)
+  replace_tag FF_SUFFIX (?:\sin\s(?:full|words))?(?:\s?[({][^)}]{1,30}[)}])?
+  replace_tag FF_BLANK1 (?:[\s:;]{0,4}(?:[-_\.,:;*]{3,80}\s?){1,})
+  replace_tag FF_BLANK2 (?:[-_\.,:;*\s]{1,80})
+
+  # Address variations
+  replace_tag FF_A1 (?:(?:address|country|county|states?|city|province|territory|(?:zip|postal)(?:\s?code)?)<ANDOR>?){1,3}(?:\sof\s(?:residence|birth|employment|citizenship))?
+  replace_tag FF_A2 (?:(?:contact|e-?mail|full|home|resident[ia]+l|business|mailing|work|office)<ANDOR>?){0,3}\s?(?:address?(?:es)?|location)
+
+  # Name variations
+  replace_tag FF_N1 (?:company|first|last|all|business)?\s?names?(?:<ANDOR>address)?
+
+  # Telephone variations
+  replace_tag FF_P1 (?:(?:(?:business|contact|fax|voice|cel+(?:ular)?|home|mobile|office|tel+e?(?:\s?phone)?|phone)<ANDOR>?){1,3}(?:\s<NUMBER>)?<ANDOR>?){1,3}
+
+  # Misc personal data
+  replace_tag FF_M1 (?:(?:age|marital\s?statu[se]|sex|gender|male\sor\sfemale|(?:date\sof\s)?birth|religion|nationality|email)<ANDOR>?){1,3}
+
+  # Loan application details
+  replace_tag FF_L1 (?:(?:previous\s)?work(?:ing)\s?experience|employment|profession|occup[ae]tion(?:\/position)?|(?:monthly|annual)?\s?income|annual\sturn\s?over|purpose\sof\sl(?:oa|ao)n|l(?:oa|ao)n\sduration|(?:l(?:oa|ao)n\s|the\s)?amount(?:\sneed(ed)?|\sdesired)?(?:\s(?:as|of)\sloan)?)
+
+  # Financial/ID details (scams and phishing)
+  replace_tag FF_F1 (?:(?:bank|beneficiary|billing|acc(?:oun)?t|a\/c|rout(?:ing)?|swift|receiver|user)<ANDOR>?){1,3}\s(?:(?:name|address?(?:es)?|location|code|details|<NUMBER>)<ANDOR>?){1,3}
+  replace_tag FF_F2 (?:(?:(?:international\s)?driver'?s?\sli[sc]+(:?en[sc]e)?|passport|id(?:entification|entity)(?:\scard)?)<ANDOR>?){1,3}(?:\s<NUMBER>)?
+  replace_tag FF_F3 (?:picture|password|emai?l\sid|test\squestion|answer|amount\swon|(?:inheritance\s)?funds?\svalue|amount\s[\w\s]{0,30}lost[\w\s]{0,15})
+  replace_tag FF_F4 (?:log[-\s]?in|(?:e-?mail\s)?user)\s?names?
+
+  # All variations together
+  replace_tag FF_ALL (?:<FF_A1>|<FF_A2>|<FF_N1>|<FF_P1>|<FF_M1>|<FF_L1>|<FF_F1>|<FF_F2>|<FF_F3>|<FF_F4>)
+
+  # 3+ fields (low reliability, but add a few points anyway)
+  describe FILL_THIS_FORM_SHORT Fill in a form, 3+ questions
+  body     FILL_THIS_FORM_SHORT /(?:<FF_LNNO>?<FF_YOUR><FF_ALL><FF_SUFFIX>(?:<FF_BLANK2>|<ANDOR>)){3,}/i
+  replace_rules   FILL_THIS_FORM_SHORT
+  score    FILL_THIS_FORM_SHORT 0.20
+
+  # 5+ fields (high reliability)
+  describe FILL_THIS_FORM_LONG Fill in a form, 5+ questions
+  body     FILL_THIS_FORM_LONG /(?:<FF_LNNO>?<FF_YOUR><FF_ALL><FF_SUFFIX>(?:<FF_BLANK2>|<ANDOR>)){5,}/i
+  replace_rules   FILL_THIS_FORM_LONG
+  score    FILL_THIS_FORM_LONG 1.80
+
+  # 5+ fields that body paragraph processing didn't paste together
+  body     __FILL_THIS_FORM_PARTIAL /^<FF_LNNO>?<FF_YOUR><FF_ALL><FF_SUFFIX>(?:<FF_BLANK1>|[:;.\s]$)/im
+  replace_rules   __FILL_THIS_FORM_PARTIAL
+  tflags   __FILL_THIS_FORM_PARTIAL multiple
+  describe FILL_THIS_FORM_ML Fill in a form, 5+ questions, multiline
+  meta     FILL_THIS_FORM_ML (__FILL_THIS_FORM_PARTIAL > 4)
+  score    FILL_THIS_FORM_ML 2.00
+
+  # Add to score if loan question is present
+  body     __FILL_THIS_FORM_LOAN /<FF_YOUR><FF_L1><FF_SUFFIX>(?:<FF_BLANK1>|<FF_BLANK2>$)/i
+  replace_rules   __FILL_THIS_FORM_LOAN
+  describe FILL_THIS_FORM_LOAN Answer loan question(s)
+  meta     FILL_THIS_FORM_LOAN  ( FILL_THIS_FORM_LONG || FILL_THIS_FORM_ML ) && __FILL_THIS_FORM_LOAN
+  score    FILL_THIS_FORM_LOAN 0.50
+
+  # Add to score if fraud/phishing question is present
+  body     __FILL_THIS_FORM_FRAUD_PHISH /<FF_YOUR>(?:<FF_F1>|<FF_F2>|<FF_F3>|<FF_F4>)<FF_SUFFIX>/i
+  replace_rules   __FILL_THIS_FORM_FRAUD_PHISH
+  describe FILL_THIS_FORM_FRAUD_PHISH Answer suspicious question(s)
+  meta     FILL_THIS_FORM_FRAUD_PHISH  ( FILL_THIS_FORM_SHORT || FILL_THIS_FORM_LONG || FILL_THIS_FORM_ML ) && __FILL_THIS_FORM_FRAUD_PHISH
+  score    FILL_THIS_FORM_FRAUD_PHISH 1.50
+
+endif   # Mail::SpamAssassin::Plugin::ReplaceTags

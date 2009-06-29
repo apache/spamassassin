@@ -1,0 +1,18 @@
+#testrules
+
+ifplugin Mail::SpamAssassin::Plugin::DNSEval
+
+header __RCVD_IN_BRBL   eval:check_rbl('brbl','bb.barracudacentral.org')
+tflags __RCVD_IN_BRBL   net
+
+# header RCVD_IN_BRBL     eval:check_rbl_sub('brbl','127.0.0.2')
+# describe RCVD_IN_BRBL   Received via a relay in Barracuda BRBL
+# tflags RCVD_IN_BRBL net
+# score RCVD_IN_BRBL 2.0
+
+header RCVD_IN_BRBL_LASTEXT   eval:check_rbl('brbl-lastexternal','bb.barracudacentral.org')
+tflags RCVD_IN_BRBL_LASTEXT   net
+# score RCVD_IN_BRBL_LASTEXT 2.0
+
+endif
+

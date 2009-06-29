@@ -1,0 +1,369 @@
+
+##
+## This file most probably wont be updated often or at all!!
+## Try to download at most once a day, with "wget -N" or such.
+##
+## See: http://sa.hege.li/FreeMail.pm
+##
+## Also see: http://www.rulesemporium.com/rules/90_sare_freemail.cf
+##
+## <sa@hege.li>
+##
+
+ifplugin Mail::SpamAssassin::Plugin::FreeMail
+
+# Initial import from old FreeMail.pm / 090428
+freemail_domains 020.co.uk 123.com 123box.net 123india.com 123mail.cl
+freemail_domains 123mail.org 123qwe.co.uk 138mail.com 141.ro 150mail.com 150ml.com 16mail.com
+freemail_domains 1963chevrolet.com 1963pontiac.com 1netdrive.com 1st-website.com 1stpd.net
+freemail_domains 2-mail.com 20after4.com 21cn.com 24h.co.jp 24horas.com 271soundview.com
+freemail_domains 2die4.com 2mydns.com 2net.us 3000.it 3ammagazine.com 3email.com 3xl.net
+freemail_domains 444.net 4email.com 4email.net 4newyork.com 50mail.com 55mail.cc 5fm.za.com
+freemail_domains 6210.hu 6sens.com 702mail.co.za 7110.hu 8848.net 8m.com 8m.net 8x.com.br
+freemail_domains a-topmail.at about.com abv.bg acceso.or.cr access4less.net accessgcc.com
+freemail_domains accountant.com acmemail.net activist.com adexec.com adiga.com adinet.com.uy
+freemail_domains adres.nl advalvas.be aeiou.pt aeneasmail.com africamail.com afrik.com
+freemail_domains afropoets.com aggies.com ahaa.dk aichi.com aim.com airpost.net aiutamici.com
+freemail_domains aklan.com aknet.kg alabama.usa.com alaska.usa.com alavatotal.com
+freemail_domains albafind.com albawaba.com alburaq.net aldeax.com aldeax.com.ar alex4all.com
+freemail_domains alexandria.cc algeria.com alice.it alinto.com allergist.com allmail.net
+freemail_domains alskens.dk altavista.se altbox.org alternativagratis.com alum.com alumni.com
+freemail_domains alumnidirector.com alunos.unipar.br alvilag.hu amenworld.com america.hm
+freemail_domains americamail.com amnetsal.com amorous.com ananzi.co.za anet.ne.jp anfmail.com
+freemail_domains angelfire.com angelic.com animail.net aniverse.com anjungcafe.com
+freemail_domains another.com antedoonsub.com antwerpen.com anunciador.net anytimenow.com
+freemail_domains aol.* aol.co*.* aon.at apexmail.com apollo.lv approvers.net aprava.com
+freemail_domains apropo.ro archaeologist.com arcor.de arcticmail.com argentina.com
+freemail_domains arizona.usa.com arkansas.usa.com armmail.com army.com arnet.com.ar aroma.com
+freemail_domains arrl.net artlover.com aruba.it asheville.com asia-links.com asia-mail.com
+freemail_domains asia.com asiamail.com assala.com assamesemail.com asurfer.com atheist.com
+freemail_domains atl.lv atlas.cz atlas.sk atozasia.com atreillou.com au.ru aubenin.com
+freemail_domains aufeminin.com aus-city.com aussiemail.com.au australiamail.com axarnet.com
+freemail_domains ayna.com azet.sk babbalu.com badgers.com bakpaka.com bakpaka.net
+freemail_domains balochistan.org baluch.com bama-fan.com bancora.net bankersmail.com
+freemail_domains bankofchina.com barlick.net bartender.net beeebank.com beehive.org
+freemail_domains been-there.com beethoven.com beirut.com belizehome.com belizemail.net
+freemail_domains belizeweb.com bellsouth.net berlin.com berlin.de bestmail.us bflomail.com
+freemail_domains bgnmail.com bharatmail.com big-orange.com bigboss.cz bigfoot.com bigger.com
+freemail_domains bigmailbox.com bigmir.net bigstring.com bikerider.com bip.net birdlover.com
+freemail_domains bitwiser.com biz.by bizhosting.com black-sea.ro blackburnmail.com
+freemail_domains blackglobalnetwork.net blink182.net blue.devils.com bluebottle.com
+freemail_domains bluemail.ch blvds.com boardermail.com bol.com.br bolando.com
+freemail_domains bollywood2000.com bollywoodz.com bolt.com bombka.dyn.pl bonbon.net boom.com
+freemail_domains bootmail.com bostonoffice.com box.az boxbg.com boxemail.com brain.com.pk
+freemail_domains brasilia.net bravanese.com brazilmail.com brazilmail.com.br breathe.com
+freemail_domains brestonline.com brew-master.com brfree.com.br brujula.net btcc.org
+freemail_domains buffaloes.com bulgaria.com bulldogs.com bumerang.ro burntmail.com
+freemail_domains butch-femme.net buzy.com buzzjakkerz.com c-box.cz c3.hu c4.com cadinfo.net
+freemail_domains calcfacil.com.br calcware.org california.usa.com californiamail.com
+freemail_domains callnetuk.com camaroclubsweden.com canada-11.com canada.com canal21.com
+freemail_domains canoemail.com caramail.com cardblvd.com care-mail.com care2.com caress.com
+freemail_domains carioca.net cashette.com casino.com casinomail.com cataloniamail.com
+freemail_domains catalunyamail.com cataz.com catcha.com catholic.org caths.co.uk catlover.com
+freemail_domains caxess.net cbrmail.com cc.lv cemelli.com centoper.it centralpets.com
+freemail_domains centrum.cz centrum.sk cercaziende.it cgac.es chaiyo.com chaiyomail.com
+freemail_domains chance2mail.com channelonetv.com chattown.com checkitmail.at cheerful.com
+freemail_domains chef.net chelny.com chemist.com cheshiremail.com chil-e.com chillimail.com
+freemail_domains china.com chinamail.com christianmail.org ciaoweb.it cine.com ciphercom.net
+freemail_domains circlemail.com cititrustbank1.cjb.net citynetusa.com ciudad.com.ar
+freemail_domains claramail.com classicmail.co.za clerk.com cliffhanger.com clix.pt
+freemail_domains close2you.net cluemail.com clujnapoca.ro collector.org collegeclub.com
+freemail_domains colombia.com colorado.usa.com columnist.com comcast.net comfortable.com
+freemail_domains comic.com compaqnet.fr compuserve.com computer.net computermail.net
+freemail_domains computhouse.com conevyt.org.mx connect4free.net connecticut.usa.com
+freemail_domains consultant.com contractor.net coolgoose.com coolkiwi.com coollist.com
+freemail_domains coolmail.com coolmail.net coolsend.com cooltoad.com cooperation.net
+freemail_domains copacabana.com copticmail.com corporateattorneys.com corporation.net
+freemail_domains correios.net.br correomagico.com cosmo.com cosmosurf.net cougars.com
+freemail_domains counsellor.com count.com countrybass.com couple.com criticalpath.net
+freemail_domains critterpost.com crosspaths.net crosswinds.net cryingmail.com cs.com
+freemail_domains csucsposta.hu cumbriamail.com curio-city.com custmail.com cutey.com
+freemail_domains cwazy.co.uk cwazy.net cww.de cyber-wizard.com cyberaccess.com.pk
+freemail_domains cyberdude.com cybergal.com cybergirls.dk cyberguys.dk cybernet.it cymail.net
+freemail_domains dabsol.net dada.net dadanet.it dailypioneer.com dallasmail.com damuc.org.br
+freemail_domains dansegulvet.com darkhorsefan.net data54.com davegracey.com dayzers.com
+freemail_domains dbzmail.com dcemail.com dcsi.net deacons.com deadlymob.org deal-maker.com
+freemail_domains dearriba.com degoo.com delajaonline.org delaware.usa.com delfi.lv
+freemail_domains delhimail.com deliveryman.com demon.deacons.com desertonline.com
+freemail_domains desidrivers.com deskpilot.com despammed.com detik.com devils.com dexara.net
+freemail_domains dhmail.net di-ve.com didamail.com digitaltrue.com diplomats.com
+freemail_domains direccion.com director-general.com diri.com discardmail.com disciples.com
+freemail_domains discoverymail.net disinfo.net disposable.com djmillenium.com dmailman.com
+freemail_domains dnsmadeeasy.com do.net.ar doctor.com dodgeit.com doglover.com dogmail.co.uk
+freemail_domains doityourself.com domaindiscover.com domainmanager.com doneasy.com
+freemail_domains dontexist.org doramail.com dores.com dostmail.com dot5hosting.com dotcom.fr
+freemail_domains dotnow.com dott.it doubt.com dplanet.ch dr.com dragoncon.net dragonfans.com
+freemail_domains dropzone.com dserver.org dubaiwebcity.com dublin.com dublin.ie dustdevil.com
+freemail_domains dutchmail.com dynamitemail.com dyndns.org e-apollo.lv e-hkma.com
+freemail_domains e-mailanywhere.com e-milio.com e-tapaal.com e-webtec.com earthalliance.com
+freemail_domains earthling.net eastmail.com eastrolog.com easy-pages.com easy.com
+freemail_domains easyinfomail.co.za easypeasy.com echina.com ecn.org ecplaza.net
+freemail_domains edsamail.com.ph educacao.te.pt edumail.co.za eeism.com ego.co.th
+freemail_domains elforotv.com.ar elitemail.org elsitio.com eltimon.com elvis.com elvisfan.com
+freemail_domains email.com email.com.br email.cz email.it email.lu email.lviv.ua email.nu
+freemail_domains email.ro email.si email2me.com emailacc.com emailaccount.com
+freemail_domains emailaddresses.com emailchoice.com emailcorner.net emailengine.net
+freemail_domains emailengine.org emailgaul.com emailgroups.net emailhut.net emailpinoy.com
+freemail_domains emailplanet.com emailplus.org emailuser.net ematic.com embroideryforums.com
+freemail_domains eml.cc emoka.ro emptymail.com enel.net enelpunto.net engineer.com
+freemail_domains england.com englandmail.com enterate.com.ar entryweb.it entusiastisk.com
+freemail_domains enusmail.com epatra.com epix.net epomail.com epost.de eprompter.com eqqu.com
+freemail_domains eramail.co.za eresmas.com eriga.lv esde-s.org esfera.cl estadao.com.br
+freemail_domains etllao.com euromail.net europe.com europemail.com euroseek.com
+freemail_domains euskalmail.com evafan.com everyday.com.kh everymail.net everyone.net
+freemail_domains excite.* excite.co*.* execs.com execs2k.com executivemail.co.za
+freemail_domains expn.com ezilon.com ezrs.com f-m.fm facilmail.com fadrasha.net fadrasha.org
+freemail_domains faithhighway.com faithmail.com familymailbox.com familyroll.com
+freemail_domains familysafeweb.net fan.com fan.net faroweb.com fast-email.com fast-mail.org
+freemail_domains fastem.com fastemail.us fastemailer.com fastermail.com fastest.cc
+freemail_domains fastimap.com fastmail.* fastmail.co*.* fastmailbox.net
+freemail_domains fastmessaging.com fastwebmail.it fawz.net fea.st federalcontractors.com
+freemail_domains fedxmail.com feelings.com female.ru fepg.net ffanet.com fiberia.com
+freemail_domains filipinolinks.com financesource.com financier.com findmail.com fireman.net
+freemail_domains fiscal.net flashmail.com flipcode.com florida.usa.com floridagators.com
+freemail_domains fmail.co.uk fmailbox.com fmgirl.com fmguy.com fnmail.com footballer.com
+freemail_domains forfree.at forsythmissouri.org fortuncity.com forum.dk free.com.pe free.fr
+freemail_domains free.net.nz freeaccess.nl freegates.be freeghana.com freehosting.nl
+freemail_domains freei.co.th freeler.nl freemail.* freemail.*.* freemail.globalsite.com.br
+freemail_domains freemuslim.net freenet.de freenet.kg freeola.net freepgs.com freesbee.fr
+freemail_domains freeserve.co.uk freeservers.com freestart.hu freesurf.ch freesurf.fr
+freemail_domains freesurf.nl freeuk.com freeuk.net freeweb.it freewebemail.com freeyellow.com
+freemail_domains frisurf.no fsmail.net fsnet.co.uk ftml.net fuelie.org
+freemail_domains fun-greetings-jokes.com fun.21cn.com fusemail.com fut.es gala.net
+freemail_domains galmail.co.za gamebox.net gamecocks.com gardener.com gawab.com gay.com
+freemail_domains gaymailbox.com gaza.net gazeta.pl gci.net gdi.net geeklife.com gemari.or.id
+freemail_domains genxemail.com geologist.com geopia.com georgia.usa.com germanymail.com
+freemail_domains ggaweb.ch giga4u.de gjk.dk glay.org glendale.net globalfree.it
+freemail_domains globalpinoy.com globalsite.com.br globalum.com globetrotter.net gmail.com
+freemail_domains gmx.* go-bama.com go-cavs.com go-chargers.com go-dawgs.com go-gators.com
+freemail_domains go-hogs.com go-irish.com go-spartans.com go-tigers.com go.aggies.com
+freemail_domains go.air-force.com go.badgers.com go.big-orange.com go.blue.devils.com
+freemail_domains go.buffaloes.com go.bulldogs.com go.com go.cougars.com go.dores.com
+freemail_domains go.gamecocks.com go.huskies.com go.longhorns.com go.mustangs.com
+freemail_domains go.rebels.com go.ro go.ru go.terrapins.com go.wildcats.com go.wolverines.com
+freemail_domains go.yellow-jackets.com go2net.com go4.it gofree.co.uk golfemail.com
+freemail_domains goliadtexas.com gomail.com.ua gonowmail.com gonuts4free.com googlemail.com
+freemail_domains goplay.com gorontalo.net gotmail.com gotomy.com govzone.com grad.com
+freemail_domains graduate.org graffiti.net graphic-designer.com gratisweb.com gtechnics.com
+freemail_domains guate.net guessmail.com gwalla.com h-mail.us haberx.com hailmail.net
+freemail_domains hairdresser.net halejob.com hamptonroads.com handbag.com happemail.com
+freemail_domains happycounsel.com hawaii.com hawaii.usa.com hayahaya.tg hedgeai.com
+freemail_domains heesun.net heremail.com highveldmail.co.za hilarious.com hildebrands.de
+freemail_domains hingis.org hispavista.com hitmanrecords.com hockeyghiaccio.com
+freemail_domains hockeymail.com holapuravida.com home.no.net home.ro home.se homelocator.com
+freemail_domains homemail.co.za homenetmail.com homestead.com homosexual.net hongkong.com
+freemail_domains hopthu.com hot-shot.com hot.ee hotbot.com hotcoolmail.com hotdak.com
+freemail_domains hotfire.net hotinbox.com hotmail.* hotmail.co*.*
+freemail_domains hotpop.com hotvoice.com hour.com housemail.com howling.com huhmail.com
+freemail_domains humanoid.net humour.com hurra.de hush.ai hush.com hushmail.com huskies.com
+freemail_domains hutchcity.com i-france.com i-p.com i12.com i2828.com ibatam.com ibest.com.br
+freemail_domains ibizdns.com icafe.com ice.is icestorm.com icq.com icqmail.com icrazy.com
+freemail_domains id.ru idaho.usa.com idirect.com idncafe.com ieg.com.br iespalomeras.net
+freemail_domains iespana.es ifrance.com ig.com.br ignazio.it illinois.usa.com ilse.net
+freemail_domains ilse.nl imail.ru imailbox.com imap-mail.com imap.cc imapmail.org imel.org
+freemail_domains in-box.net iname.com inbox.com inbox.ge inbox.lv inbox.net inbox.ru
+freemail_domains incamail.com indexa.fr india.com indiamail.com indiana.usa.com
+freemail_domains indiatimes.com induquimica.org inet.com.ua infinito.it infoapex.com
+freemail_domains infohq.com infomail.es infomart.or.jp infosat.net infovia.com.ar inicia.es
+freemail_domains inmail.sk inmail24.com innocent.com inorbit.com inoutbox.com instruction.com
+freemail_domains instructor.net insurer.com intelnet.net.gt intelnett.com interblod.com
+freemail_domains interfree.it interia.pl interlap.com.ar intermail.hu internet-e-mail.com
+freemail_domains internet-mail.org internet.lu internetegypt.com internetemails.net
+freemail_domains internetmailing.net inwind.it iobox.com iobox.fi iol.it iol.pt iowa.usa.com
+freemail_domains ip3.com ipermitmail.com iqemail.com iran.com irangate.net irelandmail.com
+freemail_domains iscool.net islandmama.com ismart.net isonews2.com isonfire.com isp9.net
+freemail_domains ispey.com israelmail.com italymail.com itelgua.com itloox.com itmom.com
+freemail_domains ivenus.com iwan-fals.com iwon.com ixp.net japan.com jaydemail.com
+freemail_domains jedrzejow.pl jetemail.net jingjo.net jippii.fi jmail.co.za jojomail.com
+freemail_domains journalist.com jovem.te.pt joymail.com jubii.dk jubiipost.dk jumpy.it
+freemail_domains juno.com justemail.net justmailz.com k.ro kaazoo.com kabissa.org kaixo.com
+freemail_domains kalluritimes.com kalpoint.com kansas.usa.com katamail.com kataweb.it
+freemail_domains kayafmmail.co.za keko.com.ar kentucky.usa.com keptprivate.com kittymail.com
+freemail_domains kiwitown.com klik.it klikni.cz koko.com kolozsvar.ro kombud.com
+freemail_domains koreamail.com koreanmail.com kotaksuratku.info krunis.com kukamail.com
+freemail_domains kuronowish.com kyokodate.com kyokofukada.net ladymail.cz lagoon.nc
+freemail_domains lahaonline.com lamalla.net lancsmail.com laposte.net latinmail.com
+freemail_domains lawyer.com lawyersmail.com lawyerzone.com lebanonatlas.com leehom.net
+freemail_domains legislator.com leonardo.it leonlai.net letsjam.com letterbox.org
+freemail_domains letterboxes.org levele.com lexpress.net libero.it liberomail.com
+freemail_domains libertysurf.net libre.net lightwines.org linkmaster.com linuxfreemail.com
+freemail_domains linuxmail.org lionsfan.com.au live.com livedoor.com llandudno.com
+freemail_domains llangollen.com lmxmail.sk lobbyist.com loggain.net loggain.nu lolnetwork.net
+freemail_domains london.com longhorns.com look.com looksmart.co.uk looksmart.com
+freemail_domains looksmart.com.au loteria.net lotonazo.com louisiana.usa.com louiskoo.com
+freemail_domains loveable.com lovemail.com lovingjesus.com lpemail.com luckymail.com luso.pt
+freemail_domains lusoweb.pt luukku.com lycos.* lycos.co*.* lycosmail.com mac.com
+freemail_domains machinecandy.com macmail.com mad.scientist.com madcrazy.com madonnafan.com
+freemail_domains madonno.com madrid.com magicmail.co.za magik-net.com mail-atlas.net
+freemail_domains mail-awu.de mail-box.cz mail-center.com mail-central.com mail-jp.org
+freemail_domains mail-online.dk mail-page.com mail-x-change.com mail.austria.com mail.az
+freemail_domains mail.be mail.bg mail.bulgaria.com mail.co.za mail.com mail.dk mail.ee
+freemail_domains mail.goo.ne.jp mail.gr mail.lawguru.com mail.md mail.mn mail.org mail.pf
+freemail_domains mail.pt mail.ru mail.yahoo.co.jp mail2*.com mail3000.com
+freemail_domains mail8.com mailandftp.com mailandnews.com mailas.com mailasia.com mailbg.com
+freemail_domains mailblocks.com mailbolt.com mailbox.as mailbox.co.za mailbox.gr mailbox.hu
+freemail_domains mailbox.sk mailc.net mailcan.com mailcircuit.com mailclub.fr mailclub.net
+freemail_domains maildozy.com mailfly.com mailforce.net mailftp.com mailglobal.net
+freemail_domains mailhaven.com mailinator.com mailingaddress.org mailingweb.com mailisent.com
+freemail_domains mailite.com mailme.dk mailmight.com mailmij.nl mailnew.com mailops.com
+freemail_domains mailpanda.com mailpersonal.com mailroom.com mailru.com mails.de mailsent.net
+freemail_domains mailserver.dk mailservice.ms mailsnare.net mailsurf.com mailup.net
+freemail_domains mailvault.com mailworks.org maine.usa.com majorana.martina-franca.ta.it
+freemail_domains maktoob.com malayalamtelevision.net malayalapathram.com male.ru manager.de
+freemail_domains manlymail.net mantrafreenet.com mantramail.com mantraonline.com
+freemail_domains marchmail.com marihuana.ro marijuana.nl marketweighton.com maryland.usa.com
+freemail_domains masrawy.com massachusetts.usa.com mauimail.com mbox.com.au mcrmail.com me.by
+freemail_domains medicinatv.com meetingmall.com megamail.pt merseymail.com mesra.net
+freemail_domains messagez.com metacrawler.com mexico.com mexicomail.com miaoweb.net
+freemail_domains michigan.usa.com micro2media.com miesto.sk mighty.co.za milacamn.net
+freemail_domains milmail.com mindless.com mindviz.com minister.com minnesota.usa.com
+freemail_domains mississippi.usa.com missouri.usa.com mixmail.com ml1.net ml2clan.com
+freemail_domains mlanime.com mm.st mmail.com mobimail.mn mobsters.com mobstop.com
+freemail_domains modemnet.net modomail.com moldova.com moldovacc.com monarchy.com
+freemail_domains montana.usa.com montevideo.com.uy moomia.com moose-mail.com mosaicfx.com
+freemail_domains moscowmail.com motormania.com movemail.com mr.outblaze.com mrspender.com
+freemail_domains mscold.com msn.com mundo-r.com munich.com musician.org muslim.com
+freemail_domains muslimsonline.com mustangs.com mxs.de mycabin.com mycity.com mycommail.com
+freemail_domains mycool.com mydomain.com myeweb.com myfastmail.com myfunnymail.com
+freemail_domains mygamingconsoles.com myiris.com myjazzmail.com mymacmail.com mymail.dk
+freemail_domains mymail.ph.inter.net mymail.ro mynet.com mynet.com.tr myotw.net
+freemail_domains myownemail.com mypersonalemail.com myplace.com myrealbox.com myself.com
+freemail_domains myspace.com myway.com mzgchaos.de n2.com n2business.com n2mail.com
+freemail_domains n2software.com nabble.com name.com nameplanet.com nanamail.co.il
+freemail_domains nanaseaikawa.com nandomail.com naseej.com nastything.com national-champs.com
+freemail_domains nativeweb.net naveganas.com nebraska.usa.com nemra1.com nenter.com
+freemail_domains nerdshack.com nervhq.org net.hr net4b.pt net4jesus.com net4you.at
+freemail_domains netbounce.com netcabo.pt netcape.net netcourrier.com netexecutive.com
+freemail_domains netfirms.com netkushi.com netmongol.com netpiper.com netposta.net
+freemail_domains netscape.com netscape.net netscapeonline.co.uk netsquare.com nettaxi.com
+freemail_domains netti.fi networld.com netzero.com netzero.net neustreet.com nevada.usa.com
+freemail_domains newhampshire.usa.com newjersey.usa.com newmail.com newmail.net
+freemail_domains newmail.ok.com newmail.ru newmexico.usa.com newspaperemail.com newyork.com
+freemail_domains newyork.usa.com newyorkcity.com nfmail.com nicegal.com nightimeuk.com
+freemail_domains nightly.com nightmail.com noavar.com noemail.com nonomail.com
+freemail_domains nonpartisan.com noolhar.com northcarolina.usa.com northdakota.usa.com
+freemail_domains nospammail.net nowzer.com null.net ny.com nyc.com nycmail.com nz11.com
+freemail_domains nzoomail.com o2.pl oath.com oceanfree.net ocsnet.net oddpost.com odeon.pl
+freemail_domains odmail.com offshorewebmail.com ofir.dk ohio.usa.com oicexchange.com ok.ru
+freemail_domains oklahoma.usa.com ole.com oleco.net olympist.net omaninfo.com onatoo.com
+freemail_domains ondikoi.com onebox.com onenet.com.ar onet.pl ongc.net oninet.pt online.ie
+freemail_domains online.ru onlinewiz.com onobox.com openbg.com openforyou.com
+freemail_domains opentransfer.com operamail.com oplusnet.com optician.com orangehome.co.uk
+freemail_domains orbitel.bg orcon.net.nz oregon.usa.com oreka.com organizer.net orgio.net
+freemail_domains orthodontist.net orthodox.com osite.com.br oso.com ourbrisbane.com ournet.md
+freemail_domains ourprofile.net ourwest.com outgun.com ownmail.net oxfoot.com ozu.es
+freemail_domains pacer.com pacific-ocean.com pacificwest.com paginasamarillas.com
+freemail_domains pakistanmail.com pandawa.com pando.com pandora.be paris.com parsimail.com
+freemail_domains parspage.com patmail.com pattayacitythailand.com pc4me.us pcpostal.com
+freemail_domains pediatrician.com penguinmaster.com pennsylvania.usa.com peopleweb.com
+freemail_domains personal.ro personales.com peru.com petlover.com petml.com photographer.net
+freemail_domains phreaker.net physicist.net pigeonportal.com pilu.com pimagop.com
+freemail_domains pinoymail.com pipni.cz pisem.net planet-school.de planetaccess.com
+freemail_domains planetout.com plasa.com playersodds.com playful.com pluno.com
+freemail_domains plusmail.com.br pmail.net pnetmail.co.za pobox.ru pobox.sk pochta.ru
+freemail_domains poczta.fm poetic.com pogowave.com polandmail.com polbox.com politician.com
+freemail_domains pop.co.th popmail.com poppymail.com popsmail.com popstar.com portafree.com
+freemail_domains portaldosalunos.com portugalmail.com portugalmail.pt post.com post.cz
+freemail_domains post.expart.ne.jp post.pl post.sk posta.ge postaccesslite.com postiloota.net
+freemail_domains postinbox.com postino.ch postino.it postmaster.co.uk postpro.net praize.com
+freemail_domains presidency.com press.co.jp priest.com primposta.com printesamargareta.ro
+freemail_domains private.21cn.com probemail.com profesional.com profession.freemail.com.br
+freemail_domains programmer.net proinbox.com promessage.com prontomail.com protestant.com
+freemail_domains provincial.net publicaccounting.com publicist.com punkass.com puppy.com.my
+freemail_domains qlmail.com qrio.com qsl.net qudsmail.com queerplaces.com quepasa.com
+freemail_domains quick.cz quickwebmail.com r-o-o-t.com r320.hu raakim.com racingseat.com
+freemail_domains radicalz.com radiojobbank.com radiologist.net ragingbull.com
+freemail_domains raisingadaughter.com rallye-webmail.com ranmamail.com ravearena.com
+freemail_domains ravemail.co.za razormail.com real.ro realemail.net reallyfast.biz
+freemail_domains reallyfast.info realtyagent.com rebels.com reborn.com recife.net recme.net
+freemail_domains rediffmail.com rediffmailpro.com redseven.de redwhitearmy.com reggaefan.com
+freemail_domains registerednurses.com relia.com religious.com repairman.com
+freemail_domains representative.com rescueteam.com revenue.com rexian.com rhodeisland.usa.com
+freemail_domains ritmes.net rn.com roanokemail.com rochester-mail.com rock.com rocketmail.com
+freemail_domains rocketship.com rockfan.com rockinghamgateway.com rojname.com rol.ro
+freemail_domains rollin.com rome.com romymichele.com royal.net rpharmacist.com rt.nl ru.ru
+freemail_domains runbox.com rushpost.com russiamail.com rxpost.net s-mail.com saabnet.com
+freemail_domains sacbeemail.com sacmail.com safe-mail.net safe-mailbox.com safrica.com
+freemail_domains saigonnet.vn saint-mike.org saintly.com salesperson.net samerica.com
+freemail_domains samilan.net sandiego.com sanfranmail.com sanook.com sanriotown.com
+freemail_domains sapibon.com sapo.pt saturnfans.com sayhi.net sbcglobal.com scfn.net
+freemail_domains schweiz.org sci.fi sciaga.pl scientist.com scotlandmail.com
+freemail_domains scrapbookscrapbook.com seapole.com search417.com seark.com sebil.com
+freemail_domains secretary.net secretservices.net secure-jlnet.com seductive.com sendmail.ru
+freemail_domains sendme.cz sent.as sent.at sent.com serga.com.ar sermix.com server4free.de
+freemail_domains serverwench.com sesmail.com sexmagnet.com seznam.cz shadango.com she.com
+freemail_domains shuf.com siamlocalhost.com siamnow.net sify.com sinamail.com singapore.com
+freemail_domains singmail.com siraj.org sirindia.com sirunet.com sister.com
+freemail_domains sistersbrothers.com sizzling.com skim.com slamdunkfan.com slickriffs.co.uk
+freemail_domains slingshot.com slo.net slomusic.net smartemail.co.uk snail-mail.net
+freemail_domains snakebite.com sndt.net sneakemail.com snoopymail.com snowboarding.com
+freemail_domains so-simple.org socamail.com socialworker.net sociologist.com softhome.net
+freemail_domains sol.dk solidmail.com songwriter.net soon.com sos.lv soundvillage.org
+freemail_domains southcarolina.usa.com southdakota.usa.com sp.nl space.com spacetowns.com
+freemail_domains spainmail.com spamex.com spartapiet.com speed-racer.com speedpost.net
+freemail_domains speedymail.org spils.com spinfinder.com sportemail.com spray.net spray.no
+freemail_domains spray.se spymac.com srbbs.com srilankan.net ssan.com ssl-mail.com stade.fr
+freemail_domains stalag13.com stampmail.com starbuzz.com starline.ee starmail.com
+freemail_domains starmail.org starmedia.com starspath.com start.com.au start.no stribmail.com
+freemail_domains strompost.com student.com student.ednet.ns.ca studmail.com sudanmail.net
+freemail_domains sueddeutsche.de suisse.org sunbella.net sunmail1.com sunpoint.net sunrise.ch
+freemail_domains sunumail.sn sunuweb.net suomi24.fi superdada.it supereva.com supereva.it
+freemail_domains supermailbox.com superposta.com surf3.net surfassistant.com surfsupnet.net
+freemail_domains surfy.net surgical.net surimail.com surnet.cl sverige.nu svizzera.org
+freemail_domains sweb.cz swedenmail.com swift-mail.com swissinfo.org swissmail.com
+freemail_domains swissmail.net switzerland.org syom.com syriamail.com t-mail.com t-net.net.ve
+freemail_domains t2mail.com tabasheer.com talk21.com talkcity.com tangmonkey.com tatanova.com
+freemail_domains taxcutadvice.com teachers.org techemail.com techie.com technisamail.co.za
+freemail_domains technologist.com teenmail.co.uk teenmail.co.za tejary.com telebot.com
+freemail_domains telegraf.by teleline.es telinco.net telkom.net telpage.net telstra.com
+freemail_domains telusplanet.net tempting.com tenchiclub.com tennessee.usa.com terra.*
+freemail_domains terra.co*.* terrapins.com texas.usa.com texascrossroads.com tfz.net thai.com
+freemail_domains thaimail.com thaimail.net the-fastest.net the-quickest.com thegame.com
+freemail_domains theinternetemail.com theoffice.net theplate.com thepostmaster.net
+freemail_domains theracetrack.com therapist.net theserverbiz.com thewatercooler.com
+freemail_domains thewebpros.co.uk thinkpost.net thirdage.com thundermail.com tim.it
+freemail_domains timemail.com tin.it tinati.net tiscali.* tiscali.co*.* tiscalinet.it
+freemail_domains tjohoo.se tkcity.com tlcfan.com tlen.pl tmicha.net todito.com todoperros.com
+freemail_domains toke.com tokyo.com toothfairy.com topchat.com topmail.com.ar topmail.dk
+freemail_domains topsurf.com toquedequeda.com torba.com torchmail.com torontomail.com
+freemail_domains totalmail.com totalsurf.com totonline.net tough.com toughguy.net trav.se
+freemail_domains trevas.net tripod-mail.com triton.net trmailbox.com tsamail.co.za
+freemail_domains turbonett.com turkey.com tvnet.lv tvstar.com typemail.com u2club.com uae.ac
+freemail_domains ubbi.com ubbi.com.br uboot.com ugeek.com uk2.net uk2net.com ukr.net
+freemail_domains ukrpost.net uku.co.uk ulimit.com ummah.org umpire.com unbounded.com
+freemail_domains unican.es unicum.de unimail.mn unitedemailsystems.com universal.pt
+freemail_domains universia.cl universia.edu.ve universia.es universia.net.co universia.net.mx
+freemail_domains universia.pr universia.pt universiabrasil.net unofree.it uol.com.ar
+freemail_domains uol.com.br uole.com uolmail.com uomail.com uraniomail.com urbi.com.br
+freemail_domains ureach.com usa.com usanetmail.com userbeam.com utah.usa.com uymail.com
+freemail_domains uyuyuy.com v-sexi.com v3mail.com vegetarisme.be velnet.com velocall.com
+freemail_domains vercorreo.com verizonmail.com vermont.usa.com verticalheaven.com
+freemail_domains veryfast.biz veryspeedy.net vfemail.net vietmedia.com vip.gr virgilio.it
+freemail_domains virgin.net virginia.usa.com virtual-mail.com visitmail.com visto.com
+freemail_domains vivelared.com vjtimail.com vnn.vn voila.fr volkermord.com vosforums.com
+freemail_domains walla.com wallet.com wam.co.za wanadoo.co.uk wanadoo.es wanex.ge wap.hu
+freemail_domains wapda.com wapicode.com wappi.com warpmail.net washington.usa.com wassup.com
+freemail_domains waterloo.com waumail.com wazmail.com wearab.net web-mail.com.ar web.de
+freemail_domains web.nl web2mail.com webaddressbook.com webbworks.com webcity.ca webdream.com
+freemail_domains webemaillist.com webindia123.com webinfo.fi webjump.com webl-3.br.inter.net
+freemail_domains webmail.co.yu webmail.co.za webmails.com webmailv.com webname.com webpim.cc
+freemail_domains webspawner.com webstation.com websurfer.co.za webtopmail.com webtribe.net
+freemail_domains webtv.net weedmail.com weekonline.com weirdness.com westvirginia.usa.com
+freemail_domains whale-mail.com whipmail.com who.net whoever.com wildcats.com wildmail.com
+freemail_domains williams.net.ar winning.com winningteam.com winwinhosting.com
+freemail_domains wisconsin.usa.com witelcom.com witty.com wolverines.com wooow.it worker.com
+freemail_domains workmail.co.za worldcrossing.com worldemail.com worldmedic.com
+freemail_domains worldonline.de wowmail.com wp.pl wprost.pl writeme.com wrongmail.com
+freemail_domains wtonetwork.com wurtele.net www.com www.consulcredit.it wyoming.usa.com
+freemail_domains x-mail.net xasa.com xfreehosting.com xmail.net xmsg.com xoom.com
+freemail_domains xpectmore.com xrea.com xsmail.com xzapmail.com y7mail.com yahala.co.il
+freemail_domains yaho.com yahoo.* yahoo.co*.* yalla.com.lb
+freemail_domains yam.com yamal.info yapost.com yawmail.com yebox.com yehey.com
+freemail_domains yellow-jackets.com yellowstone.net yenimail.com yepmail.net yifan.net
+freemail_domains ymail.com your-mail.com yours.com yourwap.com yyhmail.com z11.com z6.com
+freemail_domains zednet.co.uk zeeman.nl zim.gov.zw ziplip.com zipmail.com.br zipmax.com
+freemail_domains zmail.pt zmail.ru zona-andina.net zonai.com zoneview.net zonnet.nl
+freemail_domains zoomshare.com zoznam.sk zubee.com zuvio.com zwallet.com zworg.com
+freemail_domains zybermail.com zzn.com foxmail.com
+
+endif

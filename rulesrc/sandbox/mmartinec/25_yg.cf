@@ -1,0 +1,48 @@
+# SpamAssassin rules file: Gmail, Yahoo! and similar providers
+
+if version >= 3.002004
+ifplugin Mail::SpamAssassin::Plugin::DKIM
+
+header   __ML1		Precedence =~ m{\b(list|bulk)\b}i
+header   __ML2		exists:List-Id
+header   __ML3		exists:List-Post
+header   __ML4		exists:Mailing-List
+header   __ML5		Return-Path:addr =~ m{^([^\@]+-(request|bounces|admin|owner)|owner-[^\@]+)(\@|\z)}mi
+meta     __VIA_ML	__ML1 || __ML2 || __ML3 || __ML4 || __ML5
+describe __VIA_ML	Mail from a mailing list
+
+header   __AUTH_YAHOO1	From:addr =~ m{[\@.]yahoo\.com$}mi
+header   __AUTH_YAHOO2	From:addr =~ m{\@yahoo\.com\.(ar|au|br|cn|hk|mx|my|ph|sg|tw)$}mi
+header   __AUTH_YAHOO3	From:addr =~ m{\@yahoo\.co\.(id|in|jp|nz|th|uk)$}mi
+header   __AUTH_YAHOO4	From:addr =~ m{\@yahoo\.(ca|cn|de|dk|es|fr|gr|ie|it|no|pl|se)$}mi
+meta     __AUTH_YAHOO	__AUTH_YAHOO1 || __AUTH_YAHOO2 || __AUTH_YAHOO3 || __AUTH_YAHOO4
+describe __AUTH_YAHOO	Author claims to be from Yahoo
+
+header   __AUTH_GMAIL	From:addr =~ m{\@gmail\.com$}mi
+describe __AUTH_GMAIL	Author claims to be from gmail.com
+
+header   __AUTH_PAYPAL	From:addr =~ /[\@.]paypal\.(com|co\.uk)$/mi
+describe __AUTH_PAYPAL	Author claims to be from paypal.com
+
+header   __AUTH_EBAY	From:addr =~ /[\@.]ebay\.(com|at|be|ca|ch|de|ee|es|fr|hu|ie|in|it|nl|ph|pl|pt|se|co\.(kr|uk)|com\.(au|cn|hk|mx|my|sg))$/mi
+describe __AUTH_EBAY	Author claims to be from eBay
+
+meta     NOTVALID_YAHOO	!DKIM_VALID && __AUTH_YAHOO && !__VIA_ML
+priority NOTVALID_YAHOO	500
+describe NOTVALID_YAHOO	Claims to be from Yahoo but is not
+
+meta     NOTVALID_GMAIL	!DKIM_VALID && __AUTH_GMAIL && !__VIA_ML
+priority NOTVALID_GMAIL	500
+describe NOTVALID_GMAIL	Claims to be from gmail.com but is not
+
+meta     NOTVALID_PAY	!DKIM_VALID && (__AUTH_PAYPAL || __AUTH_EBAY)
+priority NOTVALID_PAY	500
+describe NOTVALID_PAY	Claims to be from PayPal or eBay, but is not
+
+
+#score   NOTVALID_YAHOO  2.8
+#score   NOTVALID_GMAIL  2.8
+#score   NOTVALID_PAY    6
+
+endif
+endif

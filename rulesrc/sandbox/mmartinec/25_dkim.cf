@@ -1,0 +1,24 @@
+# SpamAssassin rules file: DKIM
+
+if version >= 3.002004
+ifplugin Mail::SpamAssassin::Plugin::DKIM
+
+# alias to a misnomer DKIM_VERIFIED
+full     DKIM_VALID	eval:check_dkim_valid()
+tflags   DKIM_VALID	net nice
+describe DKIM_VALID	Has a valid DKIM or DK signature
+
+full     DKIM_VALID_AU	eval:check_dkim_valid_author_sig()
+tflags   DKIM_VALID_AU	net nice
+describe DKIM_VALID_AU	Has a valid first-party DKIM or DK signature (i.e. author signature)
+
+#score   DKIM_VALID	     -0.1
+#score   DKIM_VALID_AU	     -0.05
+#score   DKIM_SIGNED          0.01
+#score   DKIM_VERIFIED        0
+#score   DKIM_POLICY_SIGNALL  0
+#score   DKIM_POLICY_SIGNSOME 0
+#score   DKIM_POLICY_TESTING  0
+
+endif
+endif
