@@ -403,6 +403,15 @@ describe X_PRIORITY_CC		Cc: after X-Priority: (bulk email fingerprint)
 header BAD_ENC_HEADER		ALL =~ /=\?[^?\s]+\?[^?\s]\?\s*[^?]+\s(?!\?=)/
 describe BAD_ENC_HEADER		Message has bad MIME encoding in the header
 
+
+header __ML1  Precedence =~ m{\b(list|bulk)\b}i
+header __ML2  exists:List-Id
+header __ML3  exists:List-Post
+header __ML4  exists:Mailing-List
+header __ML5  Return-Path:addr =~ m{^([^\@]+-(request|bounces|admin|owner)|owner-[^\@]+)(\@|\z)}mi
+meta     __VIA_ML  __ML1 || __ML2 || __ML3 || __ML4 || __ML5
+describe __VIA_ML  Mail from a mailing list
+
 ###########################################################################
 
 ifplugin Mail::SpamAssassin::Plugin::HeaderEval
