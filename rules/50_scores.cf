@@ -868,38 +868,31 @@ endif # Mail::SpamAssassin::Plugin::WhiteListSubject
 ifplugin Mail::SpamAssassin::Plugin::DKIM
 score USER_IN_DKIM_WHITELIST -100.000
 score USER_IN_DEF_DKIM_WL -7.500
-score ENV_AND_HDR_DKIM_MATCH -7.500
+score ENV_AND_HDR_DKIM_MATCH -0.1
 endif # Mail::SpamAssassin::Plugin::DKIM
-
-ifplugin Mail::SpamAssassin::Plugin::DomainKeys
-score USER_IN_DK_WHITELIST -100.000
-score USER_IN_DEF_DK_WL -7.500
-score ENV_AND_HDR_DK_MATCH -7.500
-endif # Mail::SpamAssassin::Plugin::DomainKeys
 
 ifplugin Mail::SpamAssassin::Plugin::SPF
 score USER_IN_SPF_WHITELIST -100.000
 score USER_IN_DEF_SPF_WL -7.500
-score ENV_AND_HDR_SPF_MATCH -7.500
+score ENV_AND_HDR_SPF_MATCH -0.5
 endif # Mail::SpamAssassin::Plugin::SPF
 
 # DKIM
 ifplugin Mail::SpamAssassin::Plugin::DKIM
-score DKIM_POLICY_SIGNALL 0.001
-score DKIM_POLICY_SIGNSOME 0.001
-score DKIM_POLICY_TESTING 0.001
 score DKIM_SIGNED 0.001
-score DKIM_VERIFIED -0.001
+score DKIM_VALID -0.001
+score DKIM_VALID_AU -0.005
+score DKIM_ADSP_NXDOMAIN 0.001
+score DKIM_ADSP_DISCARD 2.5
+score DKIM_ADSP_ALL 1.5
+score DKIM_ADSP_CUSTOM_LOW 0.001
+score DKIM_ADSP_CUSTOM_MED 0.001
+score DKIM_ADSP_CUSTOM_HIGH 0.001
+score DKIM_VERIFIED 0
+score DKIM_POLICY_SIGNALL 0
+score DKIM_POLICY_SIGNSOME 0
+score DKIM_POLICY_TESTING 0
 endif # Mail::SpamAssassin::Plugin::DKIM
-
-# DomainKeys
-ifplugin Mail::SpamAssassin::Plugin::DomainKeys
-score DK_POLICY_SIGNALL 0.001
-score DK_POLICY_SIGNSOME 0.001
-score DK_POLICY_TESTING 0.001
-score DK_SIGNED 0.001
-score DK_VERIFIED -0.001
-endif # Mail::SpamAssassin::Plugin::DomainKeys
 
 # Hashcash
 ifplugin Mail::SpamAssassin::Plugin::Hashcash
