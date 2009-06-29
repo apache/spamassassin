@@ -1015,7 +1015,13 @@ endif # Mail::SpamAssassin::Plugin::ReplaceTags
 
 # DCC
 ifplugin Mail::SpamAssassin::Plugin::DCC
-score DCC_CHECK 0 1.37 0 2.17
+score DCC_CHECK        0  1.37 0  2.17
+score DCC_REPUT_00_12  0 -0.4  0 -0.5
+score DCC_REPUT_13_19  0 -0.2  0 -0.2
+score DCC_REPUT_70_89  0  0.3  0  0.5
+score DCC_REPUT_90_94  0  0.4  0  0.8
+score DCC_REPUT_95_98  0  0.6  0  1.2
+score DCC_REPUT_99_100 0  0.8  0  1.6
 endif # Mail::SpamAssassin::Plugin::DCC
 
 # Pyzor
