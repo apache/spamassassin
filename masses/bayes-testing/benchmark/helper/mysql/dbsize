@@ -3,4 +3,4 @@
 DIRNAME=`dirname $0`
 
 echo "[Determining tables size for MySQL tables]"
-/usr/local/mysql4.1/bin/mysql -usauser -psapasswd spamassassin < $DIRNAME/show_table_status.sql
+mysql -usauser -psapasswd spamassassin < $DIRNAME/show_table_status.sql

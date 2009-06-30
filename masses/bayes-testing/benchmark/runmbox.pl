@@ -1,26 +1,22 @@
 #!/usr/bin/perl
 
-use Mail::Box::Manager;
-use File::Basename;
+use strict;
+use warnings;
+use Mail::SpamAssassin::ArchiveIterator;
 
-my $foldername = shift;
+my $iterator = Mail::SpamAssassin::ArchiveIterator->new ({wanted_sub => \&wanted, result_sub => sub {}});
+my @folders = map {"ham:mbox:$_"} @ARGV;
+eval { $iterator->run(@folders); };
+if ($@) { die $@ unless ($@ =~ /HITLIMIT/); }
 
-my $folderbasename = basename($foldername);
+sub wanted {
+    my($class, $filename, $recv_date, $msg_array) = @_;
 
-my $mgr = Mail::Box::Manager->new;
-my $folder = $mgr->open(folder => $foldername,
-			access => 'r');
-my $nummsg = $folder->messages;
+    open MAILOUT, "|/usr/bin/spamc -y -U /tmp/spamd.sock >> /dev/null" or die "Unable to open pipe: $!\n";
+    for (@{$msg_array}) {
+        print MAILOUT;
+    }
+    close MAILOUT;
 
-my $count = 0;
-
-while ($count < $nummsg) {
-  my $msg = $folder->message($count);
-
-  open MAILOUT, "|/usr/bin/spamc -y -U /tmp/spamd.sock >> /dev/null" or
-#  open MAILOUT, "|/usr/bin/spamc -U /tmp/spamd.sock >> $folderbasename.output" or
-    die "Unable to open pipe: $!\n";
-  $msg->print(\*MAILOUT);
-  close MAILOUT;
-  $count++;
+    return 1;
 }
