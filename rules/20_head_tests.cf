@@ -428,7 +428,8 @@ tflags CHARSET_FARAWAY_HEADER	userconf
 # might want to exempt users using languages that don't use Latin
 # alphabets, but do it in the eval
 
-header SUBJ_ILLEGAL_CHARS	eval:check_illegal_chars('Subject','0.00','2')
+header __SUBJ_ILLEGAL_CHARS	eval:check_illegal_chars('Subject','0.00','2')
+meta SUBJ_ILLEGAL_CHARS         (__SUBJ_ILLEGAL_CHARS && !__FROM_YAHOO_COM)
 describe SUBJ_ILLEGAL_CHARS	Subject: has too many raw illegal characters
 
 header FROM_ILLEGAL_CHARS	eval:check_illegal_chars('From','0.20','2')
