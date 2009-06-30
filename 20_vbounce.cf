@@ -68,9 +68,8 @@ header __BOUNCE_RPATH_NULL    Return-Path =~ /<>/
 
 header __BOUNCE_RPATH_MD      Return-Path =~ /(?:mailer-(?:daemon|deamon)|quotaagent|pleaseforward|autoresponder|autoresponse-\S+|devnull\S*)\@/i
 
-# __AUTO_GEN_AS can appear in non-bounce mails with __XM_VBULLETIN,
+# can appear in non-bounce mails with __XM_VBULLETIN,
 # or with X-Cron-Env headers, so exclude those cases
-header __AUTO_GEN_AS    Auto-Submitted =~ /auto-(?:generated|replied)/
 header __XM_VBULLETIN   X-Mailer =~ /^vBulletin Mail/
 header __X_CRON_ENV     X-Cron-Env =~ /^</
 
@@ -81,7 +80,7 @@ header __AUTO_GEN_3     X-MailScanner =~ /generated/
 header __AUTO_GEN_4     X-Mailer =~ /autoresponder/i
 header __AUTO_GEN_XXSP  X-XSP-Msgclass =~ /NOTIFICATION/
 header __AUTO_GEN_PREC  Precedence =~ /auto/
-meta __BOUNCE_AUTO_GENERATED     ((__AUTO_GEN_AS||__AUTO_GEN_MS||__AUTO_GEN_3||__AUTO_GEN_4||__AUTO_GEN_AG||__AUTO_GEN_XXSP ||__AUTO_GEN_CM||__AUTO_GEN_PREC) && !__XM_VBULLETIN && !__X_CRON_ENV)
+meta __BOUNCE_AUTO_GENERATED     ((__AUTO_GEN_MS||__AUTO_GEN_3||__AUTO_GEN_4||__AUTO_GEN_AG||__AUTO_GEN_XXSP ||__AUTO_GEN_CM||__AUTO_GEN_PREC) && !__XM_VBULLETIN && !__X_CRON_ENV)
 
 header __BOUNCE_Y_AUTOGEN     Subject =~ /^Yahoo! Auto Response/
 header __BOUNCE_SYMANTEC      Subject =~ /^Returned mail.{0,5}(?:Error During Delivery|see transcript for details|)$/i
