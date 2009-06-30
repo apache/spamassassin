@@ -186,6 +186,8 @@ without the DCC results.
 =item dcc_home STRING
 
 This option tells SpamAssassin specifically where to find the dcc homedir.
+If not given, it will try to get dcc to specify one, and if that fails it
+will try dcc's own default homedir of '/var/dcc'.
 If C<dcc_path> is not specified, it will default to looking in
 C<dcc_home/bin> for dcc client instead of relying on SpamAssassin to find it
 in the current PATH.  If it isn't found there, it will look in the current
@@ -317,6 +319,46 @@ The default is C<undef>.
   $conf->{parser}->register_commands(\@cmds);
 }
 
+sub find_dcc_home {
+  my ($self) = @_;
+
+  return if ($self->{main}->{conf}->{use_dcc} == 0);
+
+  my $dcchome = $self->{main}->{conf}->{dcc_home} || '';
+
+  # If we're not given the DCC homedir, try getting DCC to tell us it.
+  # If that fails, try the DCC default homedir of '/var/dcc'.
+  unless ($dcchome) {	
+
+    my $cdcc = Mail::SpamAssassin::Util::find_executable_in_env_path('cdcc');
+
+    my $cdcc_home = '';
+    if ($cdcc && -x $cdcc && open (CDCC, "$cdcc home 2>&1|")) {
+      dbg("dcc: dcc_home not set, querying cdcc utility");
+      $cdcc_home = <CDCC> || '';
+      close CDCC;
+
+      chomp $cdcc_home;
+      $cdcc_home =~ s/\s+homedir=//;
+      dbg("dcc: cdcc reports homedir as '" . $cdcc_home . "'");
+    }
+
+    if ($cdcc_home && -d $cdcc_home) {	
+      dbg("dcc: cdcc reported homedir exists, using");
+      $dcchome = $cdcc_home;
+    } elsif (-d '/var/dcc') {			
+      dbg("dcc: dcc_home not set but dcc default homedir /var/dcc exists, using");
+      $dcchome = '/var/dcc';
+    } else {
+      dbg("dcc: unable to get homedir from cdcc and the dcc default homedir was not found");
+    }
+
+    # Remember found homedir path
+    dbg("dcc: using '" . $dcchome . "' as DCC homedir");
+    $self->{main}->{conf}->{dcc_home} = $dcchome;
+  }
+}
+
 sub is_dccifd_available {
   my ($self) = @_;
 
@@ -413,6 +455,8 @@ sub dcc_query {
   }
 
   my $timer = $self->{main}->time_method("check_dcc");
+
+  $self->find_dcc_home();
 
   $self->get_dcc_interface();
   my $result;
