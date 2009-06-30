@@ -80,12 +80,12 @@ describe DKIM_POLICY_SIGNSOME	Domain Keys Identified Mail: policy says domain si
 describe DKIM_POLICY_SIGNALL	Domain Keys Identified Mail: policy says domain signs all mails
 describe DKIM_POLICY_TESTING	Domain Keys Identified Mail: policy says domain is testing DK
 
-meta   ML_ADSP_CUSTOM_LOW   DKIM_ADSP_CUSTOM_LOW  && !__VIA_ML
-meta   ML_ADSP_CUSTOM_MED   DKIM_ADSP_CUSTOM_MED  && !__VIA_ML
-meta   ML_ADSP_CUSTOM_HIGH  DKIM_ADSP_CUSTOM_HIGH && !__VIA_ML
-describe ML_ADSP_CUSTOM_LOW  ADSP custom_low hit, and not from a mailing list
-describe ML_ADSP_CUSTOM_MED  ADSP custom_med hit, and not from a mailing list
-describe ML_ADSP_CUSTOM_HIGH ADSP custom_high hit, and not from a mailing list
+meta   NML_ADSP_CUSTOM_LOW   DKIM_ADSP_CUSTOM_LOW  && !__VIA_ML
+meta   NML_ADSP_CUSTOM_MED   DKIM_ADSP_CUSTOM_MED  && !__VIA_ML
+meta   NML_ADSP_CUSTOM_HIGH  DKIM_ADSP_CUSTOM_HIGH && !__VIA_ML
+describe NML_ADSP_CUSTOM_LOW  ADSP custom_low hit, and not from a mailing list
+describe NML_ADSP_CUSTOM_MED  ADSP custom_med hit, and not from a mailing list
+describe NML_ADSP_CUSTOM_HIGH ADSP custom_high hit, and not from a mailing list
 
 # TODO: whitelist based on DKIM_VERIFIED results
 
