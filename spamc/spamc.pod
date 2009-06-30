@@ -182,6 +182,13 @@ If spamd takes longer than this many seconds to reply to a message, spamc
 will abort the connection and treat this as a failure to connect; in other 
 words the message will be returned unprocessed.  
 
+=item B<-n> I<timeout>, B<--connect-timeout>=I<timeout>
+
+Set the timeout for spamc-to-spamd connection establishment (default: 600, 0
+disables). If spamc takes longer than this many seconds to establish a
+connection to spamd, spamc will abort the connection and treat this as a
+failure to connect; in other words the message will be returned unprocessed.  
+
 =item B<-u> I<username>, B<--username>=I<username>
 
 To have spamd use per-user-config files, run spamc as the user whose config
