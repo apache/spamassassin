@@ -74,10 +74,10 @@ ifplugin Mail::SpamAssassin::Plugin::ReplaceTags
   score    FILL_THIS_FORM_LOAN 0.50
 
   # Add to score if fraud/phishing question is present
-  body     __FILL_THIS_FORM_FRAUD_PHISH /<FF_YOUR>(?:<FF_F1>|<FF_F2>|<FF_F3>|<FF_F4>)<FF_SUFFIX>/i
+  body     __FILL_THIS_FORM_FRAUD_PHISH /<FF_YOUR>(?:<FF_F1>|<FF_F2>|<FF_F3>|<FF_F4>)<FF_SUFFIX>(?:<FF_BLANK1>|<FF_BLANK2>$)/i
   replace_rules   __FILL_THIS_FORM_FRAUD_PHISH
   describe FILL_THIS_FORM_FRAUD_PHISH Answer suspicious question(s)
-  meta     FILL_THIS_FORM_FRAUD_PHISH  ( FILL_THIS_FORM_SHORT || FILL_THIS_FORM_LONG || FILL_THIS_FORM_ML ) && __FILL_THIS_FORM_FRAUD_PHISH
+  meta     FILL_THIS_FORM_FRAUD_PHISH  ( FILL_THIS_FORM_LONG || FILL_THIS_FORM_ML ) && __FILL_THIS_FORM_FRAUD_PHISH
   score    FILL_THIS_FORM_FRAUD_PHISH 1.50
 
 endif   # Mail::SpamAssassin::Plugin::ReplaceTags
