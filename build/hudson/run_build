@@ -2,7 +2,7 @@
 
 . /export/home/jm/tools/setenvs
 
-# clean everything first
+# really clean everything first
 rm -rf t/log t/log.* artifacts testxml Mail-SpamAssassin* || true
 make distclean < /dev/null || true
 mkdir artifacts testxml
@@ -12,7 +12,7 @@ make
 
 rm rules/70_sandbox.cf
 if make build_rules | grep "LINT FAILED" ; then 
-  exit 1
+  exit 1        # this will force a mail to the dev list with "build failed"
 else
   true
 fi
@@ -40,28 +40,34 @@ mv t/log artifacts/t.log.make_test
 )
 mv Mail-SpamAssassin*/t/log artifacts/t.log.make_disttest
 
-# and 't/log.make_test_p561'
-make distclean < /dev/null || true
-/home/jm/tools/perl561/bin/perl Makefile.PL < /dev/null
-make
-make test TEST_VERBOSE=1 \
-    2>&1 | tee artifacts/make_test_p561.log
-mv t/log artifacts/t.log.make_test_p561
-
 # generate XML test reports (multifile)
 perl ./build/hudson/tap-to-junit-xml \
     "make test" testxml/make_test < artifacts/make_test.log
 perl ./build/hudson/tap-to-junit-xml \
     "make disttest" testxml/make_disttest < artifacts/make_disttest.log
-perl ./build/hudson/tap-to-junit-xml \
-    "make test with perl561" testxml/make_test_p561 < artifacts/make_test_p561.log
 
+# -------------------------------------------------------------------------- 
+# generate 't/log.make_test_p561'.  OFF: we're deprecating perl 5.6.x
+
+###make distclean < /dev/null || true
+###/home/jm/tools/perl561/bin/perl Makefile.PL < /dev/null
+###make
+###make test TEST_VERBOSE=1 \
+    ###2>&1 | tee artifacts/make_test_p561.log
+###mv t/log artifacts/t.log.make_test_p561
+###perl ./build/hudson/tap-to-junit-xml \
+    ###"make test with perl561" testxml/make_test_p561 < artifacts/make_test_p561.log
+
+# -------------------------------------------------------------------------- 
 # generate XML test reports (single file, runs into Hudson bug where it
 # cannot read <system-out> correctly)
+
 # perl ./build/hudson/tap-to-junit-xml \
     # "make test" < artifacts/make_test.log > testxml/make_test.xml
 # perl ./build/hudson/tap-to-junit-xml \
     # "make disttest" < artifacts/make_disttest.log > testxml/make_disttest.xml
 # perl ./build/hudson/tap-to-junit-xml \
     # "make test p561" < artifacts/make_test_p561.log > testxml/make_test_p561.xml
+
+# -------------------------------------------------------------------------- 
 
