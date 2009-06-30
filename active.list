@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: bb-jm.20090628-r789076-n dos.20090628-r789076-n jm.20090628-r789076-n zmi.20090628-r789076-n; day 2: bb-jm.20090626-r788636-n dos.20090626-r788636-n jm.20090626-r788636-n zmi.20090626-r788636-n; day 3: bb-jm.20090625-r788294-n dos.20090625-r788294-n jm.20090625-r788294-n zmi.20090625-r788294-n
+# with results from: day 1: bb-jm.20090629-r789262-n dos.20090629-r789262-n jm.20090629-r789262-n zmi.20090629-r789262-n; day 2: bb-jm.20090628-r789076-n dos.20090628-r789076-n jm.20090628-r789076-n zmi.20090628-r789076-n; day 3: bb-jm.20090626-r788636-n dos.20090626-r788636-n jm.20090626-r788636-n zmi.20090626-r788636-n
 
 # tflags userconf
 ALL_TRUSTED
@@ -620,6 +620,9 @@ SPF_PASS
 SPF_SOFTFAIL
 
 # good enough
+STOCK_IMG_CTYPE
+
+# good enough
 STOCK_IMG_HDR_FROM
 
 # good enough
@@ -660,6 +663,9 @@ TVD_RCVD_SINGLE
 
 # good enough
 TVD_VISIT_PHARMA
+
+# tflags publish
+DOS_ANAL_SPAM_MAILER
 
 # tflags userconf
 UNPARSEABLE_RELAY
