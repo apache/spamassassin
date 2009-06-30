@@ -1894,7 +1894,8 @@ Define a test.  C<SYMBOLIC_TEST_NAME> is a symbolic test name, such as
 'Subject', 'To', etc.
 
 Appending C<:raw> to the header name will inhibit decoding of quoted-printable
-or base-64 encoded strings.
+or base-64 encoded strings, and will preserve all whitespace inside the
+header string.
 
 Appending C<:addr> to the header name will cause everything except
 the first email address to be removed from the header.  For example,
@@ -1942,7 +1943,9 @@ There are several special pseudo-headers that can be specified:
 
 =over 4
 
-=item C<ALL> can be used to mean the text of all the message's headers.
+=item C<ALL> can be used to mean the text of all the message's headers.  Note
+that all whitespace inside the headers, at line folds, is currently
+compressed into a single space (' ') character.
 
 =item C<ToCc> can be used to mean the contents of both the 'To' and 'Cc'
 headers.
