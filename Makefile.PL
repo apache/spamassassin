@@ -14,8 +14,8 @@ my $mm_version = $ExtUtils::MakeMaker::VERSION;
 # strip off the beta subversion noise that causes the trouble.
 $mm_version =~ s/_\S+$//;      # "6.30_01" => "6.30"
 
-if ($mm_version+0 < 5.45) {
-  die "SpamAssassin Makefile.PL requires at least ExtUtils::MakeMaker v5.45";
+if ($mm_version+0 < 6.17) {
+  die "SpamAssassin Makefile.PL requires at least ExtUtils::MakeMaker v6.17";
 }
 
 use constant RUNNING_ON_WINDOWS => ($^O =~ /^(mswin|dos|os2)/oi);
@@ -84,7 +84,6 @@ my @ATT_KEYS = (
 
 sub parse_arg {
   my($val, $name) = (@_);
-
   if ($val =~ /^($name)=["']?(.*?)["']?$/) {
     return $2;
   } else {
@@ -109,46 +108,20 @@ sub yesno {
 }
 
 
-
 my %opt = (
-  'build_spamc'        => undef,
+  'build_spamc'     => undef,
   'enable_ssl'      => undef,
   'contact_address' => undef,
   'destdir'         => undef,
 );
 ARGV: foreach (@ARGV) {
   foreach my $key (keys %opt) {
-    my $val;
-
-    $val = parse_arg($_, uc($key));
+    my $val = parse_arg($_, uc($key));
     if (defined $val) {
       $opt{$key} = $val;
       next ARGV;
     }
   }
-}
-
-
-# Gather some information about what EU::MM offers and/or needs
-my(
-  $mm_knows_destdir,
-  $mm_has_destdir,
-  $mm_has_good_destdir,
-  $mm_needs_destdir,
-);
-
-# MakeMaker prior to 6.11 doesn't support DESTDIR which is needed for
-# packaging with builddir!=destdir. See bug 2388.
-$mm_knows_destdir    = $ExtUtils::MakeMaker::Recognized_Att_Keys{DESTDIR};
-$mm_has_good_destdir = $mm_version >= 6.11;
-# Add DESTDIR hack only if it's requested (and necessary)
-$mm_needs_destdir    = $opt{'destdir'} && !$mm_has_good_destdir;
-$mm_has_destdir      = $mm_knows_destdir || $mm_needs_destdir;
-push(@ATT_KEYS, 'DESTDIR') if $mm_needs_destdir;
-
-# Now make EU::MM understand our extended vars
-foreach my $key (@ATT_KEYS) {
-  $ExtUtils::MakeMaker::Recognized_Att_Keys{$key} = 1;
 }
 
 
@@ -264,10 +237,6 @@ my %makefile = (
     # We have only this Makefile.PL and this option keeps MakeMaker from
     # asking all questions twice after a 'make dist*'.
     'NORECURS' => 1,
-
-    # bug 5074: perl 5.6.1 (with ExtUtils::MakeMaker 5.45) attempts to
-    # recurse anyway unless this is explicitly specified
-    'DIR' => [ ]
 );
 
 # rules/72_active.cf is built from "rulesrc", but *must* exist before
@@ -276,56 +245,12 @@ my @FILES_THAT_MUST_EXIST = qw(
         rules/72_active.cf
     );
 
-# That META.yml stuff was introduced with Perl 6.06_03, see
-# <http://archive.develooper.com/makemaker@perl.org/msg00922.html>
-# <http://archive.develooper.com/makemaker@perl.org/msg00984.html>
-delete $makefile{'NO_META'} if $mm_version < 6.06_03;
-
 # make sure certain optional modules are up-to-date if they are installed
 # also see PREREQ_PM above
 my %CURRENT_PM = (
     'Net::DNS' => (RUNNING_ON_WINDOWS ? 0.46 : 0.34),
     'Razor2::Client::Agent' => 2.40,
 );
-
-if ($mm_needs_destdir) {
-  my $error = <<DESTDIR_HACK;
-
-    ***********************************************************************
-    ExtUtils::MakeMaker ${mm_version} doesn't include support for DESTDIR,
-    so if you want to be on the safe side, you might want to upgrade your
-    ExtUtils::MakeMaker to version 6.11 or later. It is available via CPAN.
-
-    You can use either the CPAN shell or go to
-      <http://search.cpan.org/search?module=ExtUtils::MakeMaker>
-    to get an up-to-date version.
-
-    This should only be necessary if you are creating binary packages.
-    ***********************************************************************
-
-DESTDIR_HACK
-  $error =~ s/^ {4}//gm;
-  warn $error;
-}
-elsif ($opt{'destdir'} and !$mm_has_good_destdir) {
-  my $error = <<DESTDIR_BUG;
-
-    ***********************************************************************
-    ExtUtils::MakeMaker ${mm_version} contains bugs that may cause problems
-    in the \"make\" process.  It is recommended that you upgrade
-    ExtUtils::MakeMaker to version 6.11 or later. It is available via CPAN.
-
-    You can use either the CPAN shell or go to
-      <http://search.cpan.org/search?module=ExtUtils::MakeMaker>
-    to get an up-to-date version.
-
-    This should only be necessary if you are creating binary packages.
-    ***********************************************************************
-
-DESTDIR_BUG
-  $error =~ s/^ {4}//gm;
-  warn $error;
-}
 
 
 # All the $(*MAN1*) stuff is empty/zero if Perl was Configured with -Dman1dir=none;
@@ -405,12 +330,9 @@ print "Makefile written by ExtUtils::MakeMaker ${mm_version}\n";
 
 package MY;
 
-
 use vars qw(
   $MY_GLOBALS_ARE_SANE
-
   $RUNNING_ON_WINDOWS
-
   @REPOSITORIES
 
   $MACRO_RE
@@ -900,15 +822,6 @@ sub MY::install {
   foreach (@code) {
     # Add our install targets as a dependency to all top-level install targets
     s/^(install(?:_[a-z]+)?\s*::?\s*.*)$/$1 conf__install data__install/;
-
-    # Now do the DESTDIR hack, if necessary.
-    next if !$mm_needs_destdir;
-    # Write the correct path to perllocal.pod
-    next if /installed into/;
-
-    # Replace all other $(INSTALL*) vars (except $(INSTALLDIRS) of course)
-    # with their $(DESTINSTALL*) counterparts
-    s/\Q$(\E(INSTALL(?!DIRS)${MACRO_RE})\Q)\E/\$(DEST$1)/g;
   }
 
   clean_MY_globals($self);
@@ -950,28 +863,6 @@ sub MY::constants {
         }
       }
     }
-
-    if (line_has_macro_def($line, 'MM_VERSION')) {
-      # These macros are just for debugging purposes.
-      $line = join("\n", $line,
-         macro_def(MM_HAS_DESTDIR      => ::yesno($mm_has_destdir)),
-         macro_def(MM_HAS_GOOD_DESTDIR => ::yesno($mm_has_good_destdir)),
-         macro_def(MM_KNOWS_DESTDIR    => ::yesno($mm_knows_destdir)),
-         macro_def(MM_NEEDS_DESTDIR    => ::yesno($mm_needs_destdir)),
-       );
-    }
-
-    # Add DESTDIR support if necessary
-    if ($mm_needs_destdir) {
-      if (line_has_macro_def($line, 'INSTALLDIRS')) {
-        $line .= "\n" . macro_def('DESTDIR');
-      }
-      elsif (line_has_macro_def($line, qr/INSTALL${MACRO_RE}/)) {
-        my $macro = get_macro_name_from_line($line);
-        $line .= "\n" . macro_def('DEST' . $macro,
-                          macro_ref('DESTDIR') . macro_ref($macro));
-      }
-    }
   }
   push(@code, qq{});
 
@@ -1009,9 +900,7 @@ sub MY::constants {
         # The INSTALL* macros.
         push(@code, macro_def($macro));
         # The DESTINSTALL* macros.
-        push(@code, macro_def('DEST' . $macro,
-                      macro_ref('DESTDIR') . macro_ref($macro)))
-          if $mm_has_destdir;
+        push(@code, macro_def('DEST' . $macro, macro_ref('DESTDIR') . macro_ref($macro)));
       }
     }
   }
@@ -1062,13 +951,8 @@ sub MY::constants {
       push(@code, macro_def('I_' . $macro . 'DIR',
                     macro_ref('INSTALL' . repository($repository, $macro eq 'SCRIPT') . $macro)));
 
-      if ($mm_has_destdir) {
-        push(@code, macro_def('B_' . $macro . 'DIR',
-                      macro_ref('DESTINSTALL' . repository($repository, $macro eq 'SCRIPT') . $macro)));
-      } else {
-        push(@code, macro_def('B_' . $macro . 'DIR',
-                      macro_ref('I_' . $macro . 'DIR')));
-      }
+      push(@code, macro_def('B_' . $macro . 'DIR',
+                    macro_ref('DESTINSTALL' . repository($repository, $macro eq 'SCRIPT') . $macro)));
     }
   }
 
