@@ -24,6 +24,7 @@
 #include <stddef.h>
 
 extern int libspamc_timeout;	/* default timeout in seconds */
+extern int libspamc_connect_timeout;	/* Sep 8, 2008 mrgus: default connect timeout in seconds */
 
 #ifdef SPAMC_SSL
 #include <openssl/crypto.h>

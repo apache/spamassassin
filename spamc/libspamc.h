@@ -159,6 +159,7 @@ struct message
     /* Set before passing the struct on! */
     unsigned int max_len; /* messages larger than this will return EX_TOOBIG */
     int timeout;		/* timeout for read() system calls */
+    int connect_timeout;	/* Sep 8, 2008 mrgus: timeout for opening sockets */
 
     /* Filled in by message_read */
     message_type_t type;

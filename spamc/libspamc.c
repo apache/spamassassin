@@ -158,6 +158,7 @@ struct libspamc_private_message
 void (*libspamc_log_callback)(int flags, int level, char *msg, va_list args) = NULL;
 
 int libspamc_timeout = 0;
+int libspamc_connect_timeout = 0;	/* Sep 8, 2008 mrgus: separate connect timeout */
 
 /*
  * translate_connect_errno()
@@ -1344,6 +1345,7 @@ int message_filter(struct transport *tp, const char *username,
         }
     
         libspamc_timeout = m->timeout;
+        libspamc_connect_timeout = m->connect_timeout;	/* Sep 8, 2008 mrgus: separate connect timeout */
 
         if (tp->socketpath)
           rc = _try_to_connect_unix(tp, &sock);
@@ -1694,6 +1696,7 @@ int message_tell(struct transport *tp, const char *username, int flags,
     }
 
     libspamc_timeout = m->timeout;
+    libspamc_connect_timeout = m->connect_timeout;	/* Sep 8, 2008 mrgus: separate connect timeout */
 
     if (tp->socketpath)
 	rc = _try_to_connect_unix(tp, &sock);

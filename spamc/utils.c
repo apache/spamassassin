@@ -76,15 +76,15 @@ int timeout_connect (int sockfd, const struct sockaddr *serv_addr, size_t addrle
     sigfunc* sig;
 
     sig = sig_catch(SIGALRM, catch_alrm);
-    if (libspamc_timeout > 0) {
-      alarm(libspamc_timeout);
+    if (libspamc_connect_timeout > 0) {
+      alarm(libspamc_connect_timeout);
     }
 #endif
 
     ret = connect(sockfd, serv_addr, addrlen);
 
 #ifndef _WIN32
-    if (libspamc_timeout > 0) {
+    if (libspamc_connect_timeout > 0) {
       alarm(0);
     }
   

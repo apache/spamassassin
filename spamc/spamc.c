@@ -99,6 +99,7 @@ int use_exit_code = 0;
 char **exec_argv;
 
 static int timeout = 600;
+static int connect_timeout = 0;	/* Sep 8, 2008 mrgus: separate connect timeout */
 
 
 void
@@ -152,6 +153,9 @@ print_usage(void)
     usg("  -F, --config path   Use this configuration file.\n");
     usg("  -t, --timeout timeout\n"
         "                      Timeout in seconds for communications to\n"
+        "                      spamd. [default: 600]\n");
+    usg("  -n, --connect-timeout timeout\n"
+        "                      Timeout in seconds when opening a connection to\n"
         "                      spamd. [default: 600]\n");
     usg("  --filter-retries retries\n"
         "                      Retry filtering this many times if the spamd\n"
@@ -223,9 +227,9 @@ read_args(int argc, char **argv,
           struct transport *ptrn)
 {
 #ifndef _WIN32
-    const char *opts = "-BcrRd:e:fyp:t:s:u:L:C:xzSHU:ElhVKF:0:1:2";
+    const char *opts = "-BcrRd:e:fyp:n:t:s:u:L:C:xzSHU:ElhVKF:0:1:2";
 #else
-    const char *opts = "-BcrRd:fyp:t:s:u:L:C:xzSHElhVKF:0:1:2";
+    const char *opts = "-BcrRd:fyp:n:t:s:u:L:C:xzSHElhVKF:0:1:2";
 #endif
     int opt;
     int ret = EX_OK;
@@ -239,6 +243,7 @@ read_args(int argc, char **argv,
        { "socket", required_argument, 0, 'U' },
        { "config", required_argument, 0, 'F' },
        { "timeout", required_argument, 0, 't' },
+       { "connect-timeout", required_argument, 0, 'n'},
        { "connect-retries", required_argument, 0, 0 },
        { "retry-sleep", required_argument, 0, 1 },
        { "filter-retries", required_argument, 0, 3 },
@@ -376,8 +381,16 @@ read_args(int argc, char **argv,
             case 't':
             {
                 timeout = atoi(spamc_optarg);
+		if(!connect_timeout) {
+		    connect_timeout = timeout;	/* Sep 8, 2008 mrgus: default to timeout if not specified */
+		}
                 break;
             }
+	    case 'n':
+	    {
+		connect_timeout = atoi(spamc_optarg);
+		break;
+	    }
             case 'u':
             {
                 *username = spamc_optarg;
@@ -816,6 +829,7 @@ main(int argc, char *argv[])
     m.priv = NULL;
     m.max_len = max_size;
     m.timeout = timeout;
+    m.connect_timeout = connect_timeout;	/* Sep 8, 2008 mrgus: separate connect timeout */
     m.is_spam = EX_NOHOST;	/* default err code if can't reach the daemon */
 #ifdef _WIN32
     setmode(STDIN_FILENO, O_BINARY);
