@@ -276,21 +276,17 @@ version is too low for them to be used.
     Used when manually reporting spam to SpamCop.
 
 
-  - Mail::SPF (from CPAN) or Mail::SPF::Query (from CPAN)
+  - Mail::SPF (from CPAN)
 
     Used to check DNS Sender Policy Framework (SPF) records to fight email
-    address forgery and make it easier to identify spams.
+    address forgery and make it easier to identify spams.  This module
+    makes Mail::SPF::Query obsolete.
 
-    Either of Mail::SPF or Mail::SPF::Query can be used but Mail::SPF is
-    preferred as it is the current reference implementation for RFC 4408.
+    Net::DNS version 0.58 or higher is required.
 
-    Net::DNS version 0.58 or higher is required to use Mail::SPF.
-    Net::DNS version 0.34 or higher is required to use Mail::SPF::Query.
-
-    If using Mail::SPF note that NetAddr::IP (required by Mail::SPF)
-    versions up to and including version 4.006 include a bug that will
-    slow down the entire perl interpreter.  NetAddr::IP version 4.007 or
-    later fixes this.
+    Note that NetAddr::IP (required by Mail::SPF) versions up to and
+    including version 4.006 include a bug that will slow down the entire
+    perl interpreter.  NetAddr::IP version 4.007 or later fixes this.
 
 
   - IP::Country::Fast (from CPAN)

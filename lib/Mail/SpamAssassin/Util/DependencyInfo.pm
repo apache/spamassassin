@@ -91,15 +91,7 @@ my @OPTIONAL_MODULES = (
   module => 'Mail::SPF',
   version => '0.00',
   desc => 'Used to check DNS Sender Policy Framework (SPF) records to fight email
-  address forgery and make it easier to identify spams.  (This is preferred
-  over Mail::SPF::Query.)',
-},
-{
-  module => 'Mail::SPF::Query',
-  version => '0.00',
-  desc => 'Used to check DNS Sender Policy Framework (SPF) records to fight email
-  address forgery and make it easier to identify spams.  (Mail::SPF is
-  preferred instead of this module.)',
+  address forgery and make it easier to identify spams.',
 },
 {
   module => 'IP::Country::Fast',
@@ -154,8 +146,7 @@ my @OPTIONAL_MODULES = (
   version => '0.28',
   desc => 'If this module is installed, and you enable the DKIM plugin,
   SpamAssassin will perform DKIM lookups when a DKIM-Signature
-  header is present in the message headers.  (New versions of this module
-  support both DomainKeys and DKIM, rendering Mail::DomainKeys obsolete.)'
+  header is present in the message headers.'
 },
 {
   module => 'DBI',
