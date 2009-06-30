@@ -1,6 +1,5 @@
 #!/bin/bash
 
 DBDIR=$1/dbdir
-
-echo "[Determining DB_File bayes database size - $DBDIR/bayes*]"
-ls -al $DBDIR/bayes*
+echo "[Determining DB_File bayes database size - $DBDIR]"
+du -sk $DBDIR
