@@ -840,7 +840,7 @@ sub rewrite_no_report_safe {
     $line--;
   }
   my $separator = '';
-  if ($pristine_headers[$#pristine_headers] =~ /^\s*$/) {
+  if (@pristine_headers && $pristine_headers[$#pristine_headers] =~ /^\s*$/) {
     $separator = pop @pristine_headers;
   }
 
