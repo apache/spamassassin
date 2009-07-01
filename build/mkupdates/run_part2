@@ -78,9 +78,7 @@ rm rules/70_sandbox.cf rules/70_inactive.cf
 # and ensure the ruleset lints!
 ./spamassassin --lint                    || exit $?
 
-make install                             || exit $?
-
-rulesdir=$tmpdir/share/spamassassin
+rulesdir=rules
 
 (
   cd $rulesdir 
@@ -105,9 +103,18 @@ mkdir $linttmp
   gunzip -cd < $tmpdir/update.tgz | tar xf - || exit $?
 )
 
+sitetmp=$tmpdir/sitetmp
+rm -rf $sitetmp
+mkdir $sitetmp
+(
+  cp $rulesdir/*.pre $sitetmp
+  cd $sitetmp
+)
+
 # now, ensure the ruleset (entirely as distributed) lints, also.
 # use "-p /dev/null" so any user_prefs data is ignored.
-./spamassassin -x --configpath=$linttmp -p /dev/null --lint \
+./spamassassin -x --configpath=$linttmp --siteconfigpath=$sitetmp \
+		-p /dev/null --lint \
                 || exit $?
 
 # sign and get sums
