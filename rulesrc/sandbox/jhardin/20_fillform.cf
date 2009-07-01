@@ -18,8 +18,8 @@ ifplugin Mail::SpamAssassin::Plugin::ReplaceTags
   replace_tag ANDOR     (?:\s?[\/&+,]\s?|\sor\s|\sand\s)
   replace_tag NUMBER    (?:num(?:ber)?s?|nos?\.|no\b|\#s?|nbrs?\.?)
   replace_tag FF_SUFFIX (?:\sin\s(?:full|words))?(?:\s?[({][^)}]{1,30}[)}])?
-  replace_tag FF_BLANK1 (?:[\s:;]{0,4}(?:[-_\.,:;*]{3,80}\s?){1,})
-  replace_tag FF_BLANK2 (?:[-_\.,:;*\s]{1,80})
+  replace_tag FF_BLANK1 (?:[\s:;]{0,4}(?:[-=_\.,:;*]{3,80}\s?){1,})
+  replace_tag FF_BLANK2 (?:[-=_\.,:;*\s]{1,80})
 
   # Address variations
   replace_tag FF_A1 (?:(?:address|country|county|states?|city|province|territory|(?:zip|postal)(?:\s?code)?)<ANDOR>?){1,3}(?:\sof\s(?:residence|birth|employment|citizenship))?
