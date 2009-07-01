@@ -4,7 +4,7 @@ set -x
 # A whole bunch of variables are defined in that file!
 . build/update_devel
 
-# build/mkrpm
+MAINDISTVNAME=$DISTVNAME
 
 rm -rf $WEBDIR/doc
 tar cf - --exclude=CVS --exclude='.#*' doc | ( cd $WEBDIR ; tar xf - )
@@ -14,9 +14,13 @@ tar cf - --exclude=CVS --exclude='.#*' doc | ( cd $WEBDIR ; tar xf - )
 set +x
 echo
 
-echo "  md5sum of archive files:"
+echo "md5sum of archive files:"
+echo
+cat $RELDIR/$MAINDISTVNAME.*.md5 | sed -e 's/^/  /'
 cat $RELDIR/$DISTVNAME.*.md5 | sed -e 's/^/  /'
 echo
-echo "  sha1sum of archive files:"
+echo "sha1sum of archive files:"
+echo
+cat $RELDIR/$MAINDISTVNAME.*.sha1 | sed -e 's/^/  /'
 cat $RELDIR/$DISTVNAME.*.sha1 | sed -e 's/^/  /'
 

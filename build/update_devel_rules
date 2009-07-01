@@ -2,7 +2,8 @@
 
 umask 002
 
-tmpdir=`pwd`/tmp/rulesdir.$$
+srcdir=`pwd`
+tmpdir=$srcdir/tmp/rulesdir.$$
 rm -rf $tmpdir; mkdir -p $tmpdir         || exit $?
 
 
@@ -43,13 +44,13 @@ rulesdir=rules
   # Use this to include plugin .pm files:
   # tar cvf - *.cf *.pm                  || exit $?
 
-  # or this, to ban code from the updates:
+  # or this, to ban code from the rules:
   tar cvf - [0-9]*.cf                    || exit $?
 
-) | gzip -9 > $tmpdir/update.tgz         || exit $?
+) | gzip -9 > $tmpdir/rules.tgz         || exit $?
 
 # ensure non-empty
-[ -s $tmpdir/update.tgz ] || exit 3
+[ -s $tmpdir/rules.tgz ] || exit 3
 
 linttmp=$tmpdir/lintdir
 rm -rf $linttmp
@@ -57,7 +58,7 @@ mkdir $linttmp
 (
   cd $linttmp
   # check validity of tarball; also extract
-  gunzip -cd < $tmpdir/update.tgz | tar xf - || exit $?
+  gunzip -cd < $tmpdir/rules.tgz | tar xf - || exit $?
 )
 
 sitetmp=$tmpdir/sitetmp
@@ -72,19 +73,23 @@ cp rules/*.pre $sitetmp
                 || exit $?
 
 # sign and get sums
-rm -f $tmpdir/update.*.asc
+rm -f $tmpdir/rules.*.asc
 if [ -d $HOME/sabuildtools/sasigningkey ]; then
   $HOME/sabuildtools/bin/gpg --homedir $HOME/sabuildtools/sasigningkey \
-        -bsa $tmpdir/update.tgz                  || exit $?
+        -bsa $tmpdir/rules.tgz                  || exit $?
 fi
 
-$PERL build/md5sum.pl $tmpdir/update.tgz > $tmpdir/update.tgz.md5    || exit $?
-$PERL build/sha1sum.pl $tmpdir/update.tgz > $tmpdir/update.tgz.sha1  || exit $?
+(
+  cd $tmpdir
+  ln rules.tgz $DISTVNAME.tgz
+  $PERL $srcdir/build/md5sum.pl $DISTVNAME.tgz > rules.tgz.md5    || exit $?
+  $PERL $srcdir/build/sha1sum.pl $DISTVNAME.tgz > rules.tgz.sha1  || exit $?
+)
 
 for ext in tgz tgz.md5 tgz.sha1 tgz.asc ; do
   rm -f $RELDIR/$DISTVNAME.$ext
-  if [ -f $tmpdir/update.$ext ] ; then
-    mv $tmpdir/update.$ext $RELDIR/$DISTVNAME.$ext
+  if [ -f $tmpdir/rules.$ext ] ; then
+    mv $tmpdir/rules.$ext $RELDIR/$DISTVNAME.$ext
     ls -l $RELDIR/$DISTVNAME.$ext
   fi
 done
