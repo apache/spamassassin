@@ -271,16 +271,6 @@ PERL_BIN:
     Building with some weird perl:
     	/local/buildsys/perl-5.6.1/bin/perl Makefile.PL PERL_BIN=/usr/bin/perl
 
-PERL_VERSION:
-  The build system has to know the version of the Perl which will actually
-  call SpamAssassin. Normally the app given by PERL_BIN is executed and asked
-  for its version. If that fails, the version of the perl which called
-  Makefile.PL is used. Sometimes one might have to correct this.
-
-  Sample:
-    Building with Perl 5.8.0 for Perl 5.6.2:
-    	perl-5.8.0 Makefile.PL PERL_VERSION=5.6.2
-
 
 Building with another ExtUtils::MakeMaker
 -----------------------------------------

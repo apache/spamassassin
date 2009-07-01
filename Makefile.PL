@@ -71,7 +71,6 @@ my @ATT_KEYS = (
   'VENDORLOCALSTATEDIR',
 
   'PERL_BIN',         # Sets the Perl interpreter used by the scripts.
-  'PERL_VERSION',     # Some parts in SpamAssassin were dependant on the version
   'PERL_WARN',        # Can be used to disable warnings in the scripts
   'PERL_TAINT',       # "   "  "    "  "    taint mode for the scripts (DON'T)
 
@@ -686,32 +685,6 @@ sub _set_macro_PERL_BIN {
   set_macro('PERL_BIN', macro_ref('FULLPERL'));
 }
 
-# This routine determines the value of the app given in PERL_BIN.
-#
-# There are no parameters.
-#
-# If PERL_VERSION wasn't set at the command line, it will try to call
-# the app given in PERL_BIN and ask it for its version. If that doesn't
-# work for some reason, it will use the version of the current Perl
-# interpreter.
-sub _set_macro_PERL_VERSION {
-
-  return if get_macro('PERL_VERSION');
-
-  my($perl, $ver);
-
-  #
-  $perl = get_expanded_macro('PERL_BIN');
-  if (-x $perl) {
-    $ver = qx{$perl -V:version};
-    $ver =~ s/^version='([0-9.]+).*$/$1/s;
-  }
-
-  $ver = $] unless $ver;
-
-  set_macro('PERL_VERSION', float_to_version($ver));
-}
-
 # This is a helper routine for PERL_WARN and PERL_TAINT.
 #
 # The first parameter must be either 'WARN' or 'TAINT'.
@@ -908,7 +881,6 @@ sub MY::constants {
   # Set the PERL_* stuff
   {
     _set_macro_PERL_BIN;
-    _set_macro_PERL_VERSION;
     _set_macro_PERL_WARN;
     _set_macro_PERL_TAINT;
 
@@ -1113,7 +1085,7 @@ manifest_skip:
 	mv MANIFEST.SKIP.tmp MANIFEST.SKIP
 
 sysreport:
-	$(NOECHO) $(PERL) tools/sysreport CC=$(CC) PERL=$(PERL) PERL_BIN=$(PERL_BIN) PERL_VERSION=$(PERL_VERSION)
+	$(NOECHO) $(PERL) tools/sysreport CC=$(CC) PERL=$(PERL) PERL_BIN=$(PERL_BIN)
 
   EOD
 
