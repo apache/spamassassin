@@ -173,13 +173,6 @@ sub do_it {
     $perl_taint = '';
   }
 
-  # Save the Perl Version
-  my $perl_version = $];
-  if ($defines{PERL_VERSION} && ($defines{PERL_VERSION} ne 'this')) {
-    my @v = split(/[^\d]+/, $defines{PERL_VERSION});
-    $perl_version = sprintf("%i.%03i%03i", $v[0] || 0, $v[1] || 0, $v[2] || 0);
-  }
-
   $defines{PERL_MAJOR_VER} = sub {
     $] =~ /^(\d\.\d\d\d)/ or die "bad perl ver $]";
     return $1;
