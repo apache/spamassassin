@@ -60,9 +60,15 @@ mkdir $linttmp
   gunzip -cd < $tmpdir/update.tgz | tar xf - || exit $?
 )
 
+sitetmp=$tmpdir/sitetmp
+rm -rf $sitetmp
+mkdir $sitetmp
+cp rules/*.pre $sitetmp
+
 # now, ensure the ruleset (entirely as distributed) lints, also.
 # use "-p /dev/null" so any user_prefs data is ignored.
-./spamassassin --debug -x --configpath=$linttmp -p /dev/null --lint \
+./spamassassin -x --configpath=$linttmp --siteconfigpath=$sitetmp \
+               -p /dev/null --lint \
                 || exit $?
 
 # sign and get sums
@@ -83,4 +89,6 @@ for ext in tgz tgz.md5 tgz.sha1 tgz.asc ; do
   fi
 done
 
+chgrp -R spamassassin $RELDIR
 rm -rf $tmpdir
+
