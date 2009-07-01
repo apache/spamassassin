@@ -12,6 +12,8 @@ RELDIR=$HOME/public_html/devel
 mkdir -p $RELDIR
 
 DISTNAME=Mail-SpamAssassin-rules
+make || perl Makefile.PL < /dev/null || exit $?
+make || exit $?
 make version.env || exit $?
 . ./version.env
 
