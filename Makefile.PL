@@ -887,7 +887,7 @@ sub MY::constants {
     # Add it to the Makefile.
     push(@code, qq{});
     push(@code, qq{# Some details about our Perl});
-    foreach my $m (qw(BIN VERSION WARN TAINT)) {
+    foreach my $m (qw(BIN WARN TAINT)) {
       push(@code, macro_def('PERL_' . $m));
     }
   }
