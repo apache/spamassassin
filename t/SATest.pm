@@ -909,6 +909,13 @@ sub read_from_pidfile {
   return $npid;
 }
 
+sub system_or_die {
+  my $cmd = $_[0];
+  print ("\t$cmd\n");
+  system($cmd);
+  ($? >> 8 == 0) or die "'$cmd' failed";
+}
+
 sub dbgprint { print STDOUT "[".time()."] ".$_[0]; }
 
 1;
