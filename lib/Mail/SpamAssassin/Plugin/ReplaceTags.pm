@@ -23,7 +23,7 @@ The plugin allows rules to contain regular expression tags to be used in
 regular expression rules.  The tags make it much easier to maintain
 complicated rules.
 
-Warning: This plugin replies on data structures specific to this version of
+Warning: This plugin relies on data structures specific to this version of
 SpamAssasin; it is not guaranteed to work with other versions of SpamAssassin.
 
 =head1 SYNOPSIS
@@ -86,71 +86,80 @@ sub finish_parsing_end {
   for my $type (qw|body_tests rawbody_tests head_tests full_tests uri_tests|) {
     for my $priority (keys %{$conf->{$type}}) {
       while (my ($rule, $re) = each %{$conf->{$type}->{$priority}}) {
-	# skip if not listed by replace_rules
-	next unless $conf->{rules_to_replace}{$rule};
+        # skip if not listed by replace_rules
+        next unless $conf->{rules_to_replace}{$rule};
 
-	if (would_log('dbg', 'replacetags') > 1) {
-	  dbg("replacetags: replacing $rule: $re");
-	}
-
-	my $pre_name;
-	my $post_name;
-	my $inter_name;
-
-	# get modifier tags
-	if ($re =~ s/${start}pre (.+?)${end}//) {
-	  $pre_name = $1;
-	}
-	if ($re =~ s/${start}post (.+?)${end}//) {
-	  $post_name = $1;
-	}
-	if ($re =~ s/${start}inter (.+?)${end}//) {
-	  $inter_name = $1;
-	}
-
-	# this will produce an array of tags to be replaced
-	# for two adjacent tags, an element of "" will be between the two
-	my @re = split(/(<.+?>)/, $re);
-
-	if ($pre_name) {
-	  my $pre = $conf->{replace_pre}->{$pre_name};
-	  if ($pre) {
-	    @re = map { s|($start.+?$end)|$pre$1|; $_; } @re;
-	  }
-        }
-	if ($post_name) {
-	  my $post = $conf->{replace_post}->{$post_name};
-	  if ($post) {
-	    @re = map { s|($start.+?$end)|$1$post|g; $_; } @re;
-	  }
-	}
-	if ($inter_name) {
-	  my $inter = $conf->{replace_inter}->{$inter_name};
-	  if ($inter) {
-	    @re = map { s|^$|$inter|; $_; } @re;
-	  }
-	}
-	for (my $i = 0; $i < @re; $i++) {
-	  if ($re[$i] =~ m|$start(.+?)$end|g) {
-	    my $tag_name = $1;
-	    # if the tag exists, replace it with the corresponding phrase
-	    if ($tag_name) {
-	      my $replacement = $conf->{replace_tag}->{$tag_name};
-	      if ($replacement) {
-		$re[$i] =~ s|$start$tag_name$end|$replacement|g;
-	      }
-	    }
-	  }
+        if (would_log('dbg', 'replacetags') > 1) {
+          dbg("replacetags: replacing $rule: $re");
         }
 
-        $re = join('', @re);
+        my $passes = 0;
+        my $doagain;
 
-	# do the actual replacement
-	$conf->{$type}->{$priority}->{$rule} = $re;
+        do {
+          my $pre_name;
+          my $post_name;
+          my $inter_name;
+          $doagain = 0;
 
-	if (would_log('dbg', 'replacetags') > 1) {
-	  dbg("replacetags: replaced $rule: $re");
-	}
+          # get modifier tags
+          if ($re =~ s/${start}pre (.+?)${end}//) {
+            $pre_name = $1;
+          }
+          if ($re =~ s/${start}post (.+?)${end}//) {
+            $post_name = $1;
+          }
+          if ($re =~ s/${start}inter (.+?)${end}//) {
+            $inter_name = $1;
+          }
+
+          # this will produce an array of tags to be replaced
+          # for two adjacent tags, an element of "" will be between the two
+          my @re = split(/(<.+?>)/, $re);
+
+          if ($pre_name) {
+            my $pre = $conf->{replace_pre}->{$pre_name};
+            if ($pre) {
+              @re = map { s|($start.+?$end)|$pre$1|; $_; } @re;
+            }
+          }
+          if ($post_name) {
+            my $post = $conf->{replace_post}->{$post_name};
+            if ($post) {
+              @re = map { s|($start.+?$end)|$1$post|g; $_; } @re;
+            }
+          }
+          if ($inter_name) {
+            my $inter = $conf->{replace_inter}->{$inter_name};
+            if ($inter) {
+              @re = map { s|^$|$inter|; $_; } @re;
+            }
+          }
+          for (my $i = 0; $i < @re; $i++) {
+            if ($re[$i] =~ m|$start(.+?)$end|g) {
+              my $tag_name = $1;
+              # if the tag exists, replace it with the corresponding phrase
+              if ($tag_name) {
+                my $replacement = $conf->{replace_tag}->{$tag_name};
+                if ($replacement) {
+                  $re[$i] =~ s|$start$tag_name$end|$replacement|g;
+                  $doagain = 1 if !$doagain && $replacement =~ /<[^>]+>/;
+                }
+              }
+            }
+          }
+
+          $re = join('', @re);
+
+          # do the actual replacement
+          $conf->{$type}->{$priority}->{$rule} = $re;
+
+          if (would_log('dbg', 'replacetags') > 1) {
+            dbg("replacetags: replaced $rule: $re");
+          }
+
+          $passes++;
+        } while $doagain && $passes <= 5;
       }
     }
   }
@@ -170,7 +179,7 @@ sub user_conf_parsing_end {
 
 sub set_config {
   my ($self, $conf) = @_;
-  my @cmds = ();
+  my @cmds;
 
 =head1 RULE DEFINITIONS AND PRIVILEGED SETTINGS
 
