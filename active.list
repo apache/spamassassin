@@ -1,20 +1,14 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: bb-jm.20090629-r789262-n dos.20090629-r789262-n jm.20090629-r789262-n zmi.20090629-r789262-n; day 2: bb-jm.20090628-r789076-n dos.20090628-r789076-n jm.20090628-r789076-n zmi.20090628-r789076-n; day 3: bb-jm.20090626-r788636-n dos.20090626-r788636-n jm.20090626-r788636-n zmi.20090626-r788636-n
+# with results from: day 1: dos.20090702-r790502-n zmi.20090702-r790502-n; day 2: dos.20090701-r790073-n zmi.20090701-r790073-n; day 3: dos.20090630-r789620-n zmi.20090630-r789620-n
 
 # tflags userconf
 ALL_TRUSTED
-
-# good enough
-APOSTROPHE_FROM
 
 # good enough
 AXB_HELO_LH_HOME
 
 # good enough
 BASE64_LENGTH_78_79
-
-# good enough
-BASE64_LENGTH_79_INF
 
 # tflags learn
 BAYES_00
@@ -53,6 +47,24 @@ CHARSET_FARAWAY_HEADER
 DIGEST_MULTIPLE
 
 # tflags net
+DKIM_ADSP_ALL
+
+# tflags net
+DKIM_ADSP_CUSTOM_HIGH
+
+# tflags net
+DKIM_ADSP_CUSTOM_LOW
+
+# tflags net
+DKIM_ADSP_CUSTOM_MED
+
+# tflags net
+DKIM_ADSP_DISCARD
+
+# tflags net
+DKIM_ADSP_NXDOMAIN
+
+# tflags net
 DKIM_POLICY_SIGNALL
 
 # tflags net
@@ -63,6 +75,12 @@ DKIM_POLICY_TESTING
 
 # tflags net
 DKIM_SIGNED
+
+# tflags net
+DKIM_VALID
+
+# tflags net
+DKIM_VALID_AU
 
 # tflags net
 DKIM_VERIFIED
@@ -107,10 +125,10 @@ ENV_AND_HDR_DKIM_MATCH
 ENV_AND_HDR_SPF_MATCH
 
 # good enough
-FB_CIALIS_LEO3
+FB_EXTRA_INCHES
 
 # good enough
-FB_EXTRA_INCHES
+FB_GET_MEDS
 
 # good enough
 FB_GREAT_BEST_SEX
@@ -144,9 +162,6 @@ FB_WITHOUT_PRESC
 
 # good enough
 FH_DATE_PAST_20XX
-
-# good enough
-FH_FAKE_RCVD_LINE
 
 # good enough
 FH_FAKE_RCVD_LINE_B
@@ -196,17 +211,11 @@ FORGED_RELAY_MUA_TO_MX
 # tflags userconf
 FRAGMENTED_MESSAGE
 
-# good enough
-FREEMAIL_REPLYTO
-
 # tflags userconf
 FROM_DOMAIN_NOVOWEL
 
 # tflags userconf
 FROM_LOCAL_NOVOWEL
-
-# good enough
-FROM_UNBAL1
 
 # good enough
 FRT_ABSOLUT
@@ -233,12 +242,6 @@ FSL_FAKE_HOTMAIL_RVCD
 FSL_FAKE_YAHOO_RCVD
 
 # good enough
-FSL_GD1_URI
-
-# good enough
-FSL_GEO_ABUSE
-
-# good enough
 FSL_HELO_BARE_IP_1
 
 # good enough
@@ -249,9 +252,6 @@ FSL_HELO_NON_FQDN_1
 
 # good enough
 FSL_INTERIA_ABUSE
-
-# good enough
-FSL_LSPACES_ABUSE
 
 # good enough
 FSL_MIME_NO_TEXT
@@ -272,9 +272,6 @@ FS_EJACULA
 FS_LARGE_PERCENT2
 
 # good enough
-FS_MAKE_MONEY
-
-# good enough
 FS_NUDE
 
 # good enough
@@ -282,12 +279,6 @@ FS_REPLICA
 
 # good enough
 FS_REPLICAWATCH
-
-# good enough
-FS_SINGLE_LETTER_J
-
-# good enough
-FS_START_LOSE
 
 # good enough
 FS_WEIGHT_LOSS
@@ -375,12 +366,6 @@ JM_SOUGHT_FRAUD_3
 
 # good enough
 KAM_LOTTO1
-
-# good enough
-KB_DATE_CONTAINS_TAB
-
-# good enough
-KB_FAKED_THE_BAT
 
 # good enough
 KB_RATWARE_MSGID
@@ -625,9 +610,6 @@ STOCK_IMG_CTYPE
 # good enough
 STOCK_IMG_HDR_FROM
 
-# good enough
-STOX_REPLY_TYPE_WITHOUT_QUOTES
-
 # tflags userconf
 SUBJECT_IN_BLACKLIST
 
@@ -647,25 +629,22 @@ THREAD_INDEX_BAD
 TT_MSGID_TRUNC
 
 # good enough
-TVD_FINGER_02
-
-# good enough
 TVD_QUAL_MEDS
-
-# good enough
-TVD_RCVD_IP
-
-# good enough
-TVD_RCVD_IP4
-
-# good enough
-TVD_RCVD_SINGLE
 
 # good enough
 TVD_VISIT_PHARMA
 
 # tflags publish
 DOS_ANAL_SPAM_MAILER
+
+# good enough
+FB_INCREASE_VOL
+
+# good enough
+FSL_HELO_FIREWALL
+
+# good enough
+FS_ABIGGER
 
 # tflags userconf
 UNPARSEABLE_RELAY
@@ -782,6 +761,9 @@ XMAILER_MIMEOLE_OL_812FF
 XMAILER_MIMEOLE_OL_8627E
 
 # good enough
+XMAILER_MIMEOLE_OL_9B90B
+
+# good enough
 XMAILER_MIMEOLE_OL_ADFF7
 
 # good enough
@@ -813,6 +795,9 @@ XMAILER_MIMEOLE_OL_FF5C8
 
 # good enough
 X_MAILER_CME_6543_MSN
+
+# tflags net
+__DKIM_DEPENDABLE
 
 # tflags net
 __DNS_FROM_RFC_ABUSE
