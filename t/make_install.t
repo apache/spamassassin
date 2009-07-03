@@ -27,7 +27,7 @@ system("mkdir -p $instbase $builddir");
 
 sub system_or_die;
 system_or_die "cd .. && make tardist";
-system_or_die "cd $builddir && tar xfz $cwd/../Mail-SpamAssassin-*.tar.gz";
+system_or_die "cd $builddir && gunzip -cd $cwd/../Mail-SpamAssassin-*.tar.gz | tar xf -";
 system_or_die "cd $builddir && mv Mail-SpamAssassin-* x";
 
 sub new_instdir {
