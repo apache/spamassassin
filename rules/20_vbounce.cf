@@ -62,7 +62,7 @@ endif
 # ---------------------------------------------------------------------------
 # General bounce messages
 
-header __BOUNCE_FROM_DAEMON   From =~ /(?:(?:daemon|deamon|majordomo|postmaster|automated-response|mailadmin|mailmaster|surfcontrol|You_Got_Spammed|SMTP.gateway)\@|scanner\S*\@|<>)/i
+header __BOUNCE_FROM_DAEMON   From =~ /(?:^(?:mail\S+daemon|d[ae][ae]mon|majordomo|postmaster|automated-response|mailadmin|mailmaster|surfcontrol|You_Got_Spammed|SMTP.gateway)\@|scanner\S*\@|<>)/i
 
 header __BOUNCE_RPATH_NULL    Return-Path =~ /<>/
 header __BOUNCE_READ_NOTIFICATION   Subject =~ /^Read: /
