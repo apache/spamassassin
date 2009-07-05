@@ -19,7 +19,7 @@ ifplugin Mail::SpamAssassin::Plugin::ReplaceTags
   replace_tag NUMBER    (?:num(?:ber)?s?|nos?\.|no\b|\#s?|nbrs?\.?)
   replace_tag FF_SUFFIX (?:\sin\s(?:full|words))?(?:\s?[({][^)}]{1,30}[)}])?
   replace_tag FF_BLANK1 (?:[\s:;]{0,4}(?:[-=_\.,:;*]{3,80}\s?){1,})
-  replace_tag FF_BLANK2 (?:[-=_\.,:;*\s]{1,80})
+  replace_tag FF_BLANK2 (?:[\s\W]{0,3}[-=_\.,:;\*]{1,80}\s?)
 
   # Address variations
   replace_tag FF_A1 (?:(?:address|country|county|states?|city|province|territory|(?:zip|postal)(?:\s?code)?)<ANDOR>?){1,3}(?:\sof\s(?:residence|birth|employment|citizenship))?
@@ -40,7 +40,7 @@ ifplugin Mail::SpamAssassin::Plugin::ReplaceTags
   # Financial/ID details (scams and phishing)
   replace_tag FF_F1 (?:(?:bank|beneficiary|billing|acc(?:oun)?t|a\/c|rout(?:ing)?|swift|receiver|user)<ANDOR>?){1,3}\s(?:(?:name|address?(?:es)?|location|code|details|<NUMBER>)<ANDOR>?){1,3}
   replace_tag FF_F2 (?:(?:(?:international\s)?driver'?s?\sli[sc]+(:?en[sc]e)?|passport|id(?:entification|entity)(?:\scard)?)<ANDOR>?){1,3}(?:\s<NUMBER>)?
-  replace_tag FF_F3 (?:picture|password|emai?l\sid|test\squestion|answer|amount\swon|(?:inheritance\s)?funds?\svalue|amount\s[\w\s]{0,30}lost[\w\s]{0,15})
+  replace_tag FF_F3 (?:picture|(?:e-?mail\s)?password|e-?mai?l\sid|test\squestion|answer|amount\swon|(?:inheritance\s)?funds?\svalue|amount\s[\w\s]{0,30}lost[\w\s]{0,15})
   replace_tag FF_F4 (?:log[-\s]?in|(?:e-?mail\s)?user)\s?names?
 
   # All variations together
