@@ -10,7 +10,7 @@ use Test;
 
 use vars qw(%patterns %anti_patterns);
 
-use constant num_tests => 108;
+use constant num_tests => 100;
 
 use constant TEST_ENABLED => conf_bool('run_net_tests');
 use constant HAS_MODULES => eval { require Mail::DKIM; require Mail::DKIM::Verifier; };
@@ -37,6 +37,7 @@ if (-e 'test_dir') {            # running from test directory, not ..
 }
 
 use IO::File;
+use Mail::DKIM::Verifier;
 use Mail::SpamAssassin;
 
 
@@ -79,11 +80,13 @@ my $spamassassin_obj = Mail::SpamAssassin->new({
   userprefs_filename  => "$prefix/masses/spamassassin/user_prefs",
   dont_copy_prefs   => 1,
   require_rules     => 1,
+# debug             => 'dkim',
 });
 ok($spamassassin_obj);
 $spamassassin_obj->compile_now;  # try to preloaded most modules
 $spamassassin_obj->init(0); # parse rules
 
+printf("Using Mail::DKIM version %s\n", Mail::DKIM::Verifier->VERSION);
 
 # mail samples test-pass* should all pass DKIM validation
 #
@@ -115,8 +118,7 @@ for $fn (sort { $a cmp $b } @test_filenames) {
 # this mail sample is special, doesn't have any signature
 #
 %patterns = ();
-%anti_patterns = ( q{ DKIM_VALID },    'DKIM_VALID',
-                   q{ DKIM_VALID_AU }, 'DKIM_VALID_AU' );
+%anti_patterns = ( q{ DKIM_VALID }, 'DKIM_VALID' );
 $fn = "$dirname/test-fail-01.msg";
 { print "\tTesting sample $fn\n";
   my $spam_report = process_file($spamassassin_obj,$fn);
@@ -138,8 +140,7 @@ while (defined($fn = readdir(DIR))) {
 closedir(DIR) or die "Error closing directory $dirname: $!";
 
 %patterns      = ( q{ DKIM_SIGNED },   'DKIM_SIGNED' );
-%anti_patterns = ( q{ DKIM_VALID },    'DKIM_VALID',
-                   q{ DKIM_VALID_AU }, 'DKIM_VALID_AU' );
+%anti_patterns = ( q{ DKIM_VALID },    'DKIM_VALID'  );
 for $fn (sort { $a cmp $b } @test_filenames) {
   print "\tTesting sample $fn\n";
   my $spam_report = process_file($spamassassin_obj,$fn);

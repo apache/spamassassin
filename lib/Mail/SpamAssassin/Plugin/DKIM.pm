@@ -506,7 +506,8 @@ sub _dkim_load_modules {
   };
 
   if (!defined($eval_stat)) {
-    dbg("dkim: using Mail::DKIM for DKIM checks");
+    dbg("dkim: using Mail::DKIM version %s for DKIM checks",
+        Mail::DKIM::Verifier->VERSION);
     $self->{tried_loading} = 1;
   } else {
     dbg("dkim: cannot load Mail::DKIM module, DKIM checks disabled: $eval_stat");
@@ -518,7 +519,7 @@ sub _dkim_load_modules {
 sub _check_dkim_signature {
   my ($self, $pms) = @_;
 
-  my(@signatures,@valid_signatures);
+  my($verifier, @signatures, @valid_signatures);
   $pms->{dkim_checked_signature} = 1; # has this sub already been invoked?
   $pms->{dkim_signatures_ready} = 0;  # have we obtained & verified signatures?
   $pms->{dkim_signatures_dependable} = 0;
@@ -558,11 +559,13 @@ sub _check_dkim_signature {
     # signature objects not provided by the caller, must verify for ourselves
     my $timemethod = $self->{main}->UNIVERSAL::can("time_method") &&
                      $self->{main}->time_method("check_dkim_signature");
-    my $verifier = Mail::DKIM::Verifier->new();
+    $verifier = Mail::DKIM::Verifier->new();
     if (!$verifier) {
       dbg("dkim: cannot create Mail::DKIM::Verifier object");
       return;
     }
+    $pms->{dkim_verifier} = $verifier;
+    #
     # feed content of a message into verifier, using \r\n endings,
     # required by Mail::DKIM API (see bug 5300)
     # note: bug 5179 comment 28: perl does silly things on non-Unix platforms
@@ -591,9 +594,9 @@ sub _check_dkim_signature {
       # to replace what we already have in $pms->{dkim_author_address}
 
       # versions before 0.29 only provided a public interface to fetch one
-      # signature, new versions allow access to all signatures of a message
-      @signatures = Mail::DKIM->VERSION >= 0.29 ? $verifier->signatures
-                                                : $verifier->signature;
+      # signature, newer versions allow access to all signatures of a message
+      @signatures = $verifier->UNIVERSAL::can("signatures") ?
+                                 $verifier->signatures : $verifier->signature;
     });
     if ($timer->timed_out()) {
       dbg("dkim: public key lookup or verification timed out after %s s",
@@ -610,16 +613,18 @@ sub _check_dkim_signature {
   }
 
   if ($pms->{dkim_signatures_ready}) {
-    @signatures = grep { defined } @signatures;  # just in case
-    my $expiration_supported = Mail::DKIM->VERSION >= 0.29 ? 1 : 0;
-
     # ADSP+RFC5321: localpart is case sensitive, domain is case insensitive
     my $author = $pms->{dkim_author_address};
     local($1,$2);
     $author = ''  if !defined $author;
     $author = $1 . lc($2)  if $author =~ /^(.*)(\@[^\@]*)\z/s;
 
+    my $sig_result_supported;
     foreach my $signature (@signatures) {
+      # old versions of Mail::DKIM would give undef for an invalid signature
+      next if !defined $signature;
+      $sig_result_supported = $signature->UNIVERSAL::can("result_detail");
+      #
       # i=  Identity of the user or agent (e.g., a mailing list manager) on
       #     behalf of which this message is signed (dkim-quoted-printable;
       #     OPTIONAL, default is an empty local-part followed by an "@"
@@ -627,9 +632,10 @@ sub _check_dkim_signature {
       my $identity = $signature->identity;
       $identity = $1 . lc($2)  if defined $identity &&
                                   $identity =~ /^(.*)(\@[^\@]*)\z/s;
-      my $valid = $signature->result eq 'pass';
+      my $valid =
+        ($sig_result_supported ? $signature : $verifier)->result eq 'pass';
       my $expired = 0;
-      if ($valid && $expiration_supported) {
+      if ($valid && $signature->UNIVERSAL::can("check_expiration")) {
         $expired = !$signature->check_expiration;
       }
       # check if we have a potential author signature, valid or not
@@ -647,7 +653,9 @@ sub _check_dkim_signature {
         $pms->{dkim_has_any_author_sig} = 1;
         if ($valid && !$expired) {
           $pms->{dkim_has_valid_author_sig} = 1;
-        } elsif ($signature->result_detail =~ /\b(?:timed out|SERVFAIL)\b/i) {
+        } elsif (
+            ($sig_result_supported ? $signature : $verifier)->result_detail
+            =~ /\b(?:timed out|SERVFAIL)\b/i) {
           $pms->{dkim_author_sig_tempfailed} = 1;
         }
       }
@@ -655,15 +663,17 @@ sub _check_dkim_signature {
         dbg("dkim: i=%s, d=%s, a=%s, c=%s, %s%s, %s",
           defined $identity ? $identity : 'UNDEF',  $signature->domain,
           $signature->algorithm, scalar($signature->canonicalization),
-          $signature->result, !$expired ? '' : ', expired',
+          ($sig_result_supported ? $signature : $verifier)->result,
+          !$expired ? '' : ', expired',
           $id_matches_author ? 'matches author' : 'does not match author');
     }
     if (@valid_signatures) {
       $pms->{dkim_signed} = 1;
       $pms->{dkim_valid} = 1;
       # let the result stand out more clearly in the log, use uppercase
-      dbg("dkim: signature verification result: %s",
-          uc($valid_signatures[0]->result_detail));
+      my $sig = $valid_signatures[0];
+      my $sigres = ($sig_result_supported ? $sig : $verifier)->result_detail;
+      dbg("dkim: signature verification result: %s", uc($sigres));
       my(%seen1,%seen2);
       $pms->set_tag('DKIMIDENTITY',
               join(" ", grep { defined($_) && $_ ne '' && !$seen1{$_}++ }
@@ -673,8 +683,10 @@ sub _check_dkim_signature {
                          map { $_->domain } @valid_signatures));
     } elsif (@signatures) {
       $pms->{dkim_signed} = 1;
-      dbg("dkim: signature verification result: %s",
-          uc($signatures[0]->result_detail));
+      my $sig = $signatures[0];
+      my $sigres =
+        ($sig_result_supported && $sig ? $sig : $verifier)->result_detail;
+      dbg("dkim: signature verification result: %s", uc($sigres));
     } else {
       dbg("dkim: signature verification result: none");
     }
@@ -912,15 +924,20 @@ sub _wlcheck_list {
 
   my %any_match_by_wl;
   my $any_match_at_all = 0;
-  my $expiration_supported = Mail::DKIM->VERSION >= 0.29 ? 1 : 0;
+  my $verifier = $pms->{dkim_verifier};
+  my @signatures = @{$pms->{dkim_signatures}};
   my $author = $pms->{dkim_author_address};  # address in a From header field
   $author = ''  if !defined $author;
 
   # walk through all signatures present in a message
-  foreach my $signature (@{$pms->{dkim_signatures}}) {
-    my $valid = $signature->result eq 'pass';
+  foreach my $signature (@signatures) {
+    # old versions of Mail::DKIM would give undef for an invalid signature
+    next if !defined $signature;
+    my $sig_result_supported = $signature->UNIVERSAL::can("result_detail");
+    my $valid =
+      ($sig_result_supported ? $signature : $verifier)->result eq 'pass';
     my $expired = 0;
-    if ($valid && $expiration_supported) {
+    if ($valid && $signature->UNIVERSAL::can("check_expiration")) {
       $expired = !$signature->check_expiration;
     }
     my $identity = $signature->identity;
