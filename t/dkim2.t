@@ -2,13 +2,15 @@
 
 use strict;
 use warnings;
+use re 'taint';
 use lib '.'; use lib 't';
 
-use SATest; sa_t_init("dkim");
+use SATest; sa_t_init("dkim2");
 use Test;
+
 use vars qw(%patterns %anti_patterns);
 
-use constant num_tests => 80;
+use constant num_tests => 108;
 
 use constant TEST_ENABLED => conf_bool('run_net_tests');
 use constant HAS_MODULES => eval { require Mail::DKIM; require Mail::DKIM::Verifier; };
@@ -16,59 +18,136 @@ use constant HAS_MODULES => eval { require Mail::DKIM; require Mail::DKIM::Verif
 use constant DO_RUN => TEST_ENABLED && HAS_MODULES;
 
 BEGIN {
+  if (-e 't/test_dir') {
+    chdir 't';
+  }
+
+  if (-e 'test_dir') {
+    unshift(@INC, '../blib/lib');
+  }
   
   plan tests => (DO_RUN ? num_tests : 0);
-
 };
 
 exit unless (DO_RUN);
 
+my $prefix = '.';
+if (-e 'test_dir') {            # running from test directory, not ..
+  $prefix = '..';
+}
+
+use IO::File;
+use Mail::SpamAssassin;
+
+
 # ---------------------------------------------------------------------------
+
+sub process_file($$) {
+  my($spamassassin_obj,$fn) = @_;  # file name
+
+  my($mail_obj, $per_msg_status, $spam_report);
+  my $fh = IO::File->new;
+  $fh->open($fn,'<') or die "cannot open file $fn: $!";
+  $mail_obj = $spamassassin_obj->parse($fh,0);
+  if ($mail_obj) {
+    local($1,$2,$3,$4,$5,$6);  # avoid Perl 5.8.x bug, $1 can get tainted
+    $per_msg_status = $spamassassin_obj->check($mail_obj);
+  }
+  if ($per_msg_status) {
+    $spam_report = $per_msg_status->get_tag('REPORT');
+    $per_msg_status->finish;
+  }
+  if ($mail_obj) {
+    $mail_obj->finish;
+  }
+  $fh->close or die "error closing file $fn: $!";
+  return $spam_report;
+}
 
 # ensure rules will fire
 tstlocalrules ("
-  score DKIM_SIGNED           -0.1
-  score DKIM_VALID            -0.1
+  score DKIM_SIGNED   -0.1
+  score DKIM_VALID    -0.1
+  score DKIM_VALID_AU -0.1
 ");
 
 my $dirname = "data/dkim";
-my $fn;
-local *DIR;
+
+my $spamassassin_obj = Mail::SpamAssassin->new({
+  rules_filename      => "$prefix/t/log/test_rules_copy",
+  site_rules_filename => "$prefix/t/log/localrules.tmp",
+  userprefs_filename  => "$prefix/masses/spamassassin/user_prefs",
+  dont_copy_prefs   => 1,
+  require_rules     => 1,
+});
+ok($spamassassin_obj);
+$spamassassin_obj->compile_now;  # try to preloaded most modules
+$spamassassin_obj->init(0); # parse rules
 
 
 # mail samples test-pass* should all pass DKIM validation
 #
-%patterns = (
-  q{ DKIM_SIGNED }, 'DKIM_SIGNED', q{ DKIM_VALID }, 'DKIM_VALID',
-);
-%anti_patterns = ();
+my $fn;
+my @test_filenames;
+local *DIR;
 opendir(DIR, $dirname) or die "Cannot open directory $dirname: $!";
 while (defined($fn = readdir(DIR))) {
   next  if $fn eq '.' || $fn eq '..';
   next  if $fn !~ /^test-pass-\d*\.msg$/;
-  sarun ("-t < $dirname/$fn", \&patterns_run_cb);
-  ok ok_all_patterns();
+  push(@test_filenames, "$dirname/$fn");
 }
 closedir(DIR) or die "Error closing directory $dirname: $!";
 
+%patterns = (
+  q{ DKIM_SIGNED },   'DKIM_SIGNED',
+  q{ DKIM_VALID },    'DKIM_VALID',
+  q{ DKIM_VALID_AU }, 'DKIM_VALID_AU',
+);
+%anti_patterns = ();
+for $fn (sort { $a cmp $b } @test_filenames) {
+  print "\tTesting sample $fn\n";
+  my $spam_report = process_file($spamassassin_obj,$fn);
+  clear_pattern_counters();
+  patterns_run_cb($spam_report);
+  ok ok_all_patterns();
+}
 
 # this mail sample is special, doesn't have any signature
 #
 %patterns = ();
-%anti_patterns = ( q{ DKIM_VALID }, 'DKIM_VALID' );
-sarun ("-t < $dirname/test-fail-01.msg", \&patterns_run_cb);
-ok ok_all_patterns();
+%anti_patterns = ( q{ DKIM_VALID },    'DKIM_VALID',
+                   q{ DKIM_VALID_AU }, 'DKIM_VALID_AU' );
+$fn = "$dirname/test-fail-01.msg";
+{ print "\tTesting sample $fn\n";
+  my $spam_report = process_file($spamassassin_obj,$fn);
+  clear_pattern_counters();
+  patterns_run_cb($spam_report);
+  ok ok_all_patterns();
+}
 
 # mail samples test-fail* should all fail DKIM validation
 #
-%patterns      = ( q{ DKIM_SIGNED }, 'DKIM_SIGNED' );
-%anti_patterns = ( q{ DKIM_VALID },  'DKIM_VALID'  );
+@test_filenames = ();
 opendir(DIR, $dirname) or die "Cannot open directory $dirname: $!";
 while (defined($fn = readdir(DIR))) {
   next  if $fn eq '.' || $fn eq '..';
   next  if $fn !~ /^test-fail-\d*\.msg$/;
   next  if $fn eq "test-fail-01.msg";  # no signature
-  sarun ("-t < $dirname/$fn", \&patterns_run_cb);
-  ok ok_all_patterns();
+  push(@test_filenames, "$dirname/$fn");
 }
 closedir(DIR) or die "Error closing directory $dirname: $!";
+
+%patterns      = ( q{ DKIM_SIGNED },   'DKIM_SIGNED' );
+%anti_patterns = ( q{ DKIM_VALID },    'DKIM_VALID',
+                   q{ DKIM_VALID_AU }, 'DKIM_VALID_AU' );
+for $fn (sort { $a cmp $b } @test_filenames) {
+  print "\tTesting sample $fn\n";
+  my $spam_report = process_file($spamassassin_obj,$fn);
+  clear_pattern_counters();
+  patterns_run_cb($spam_report);
+  ok ok_all_patterns();
+}
+
+END {
+  $spamassassin_obj->finish  if $spamassassin_obj;
+}
