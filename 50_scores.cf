@@ -794,6 +794,7 @@ score RCVD_NUMERIC_HELO 2.599 2.599 2.272 2.067
 # Informational rules about Received header parsing
 score NO_RELAYS -0.001
 score UNPARSEABLE_RELAY 0.001
+score HELO_STATIC_HOST -0.001
 
 # immutable (due to tflags userconf), see bug 5544
 score ALL_TRUSTED -1.360 -1.440 -1.665 -1.800
