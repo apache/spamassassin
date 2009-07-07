@@ -725,7 +725,8 @@ sub ok_all_patterns {
   }
 
   if ($wasfailure) {
-    warn "Output can be examined in: ".join(' ', @files_checked)."\n";
+    warn "Output can be examined in: ".
+         join(' ', @files_checked)."\n"  if @files_checked;
     return 0;
   } else {
     return 1;
