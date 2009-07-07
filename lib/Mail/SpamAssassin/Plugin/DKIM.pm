@@ -649,7 +649,7 @@ sub _check_dkim_signature {
         # identity not provided
       } elsif ($identity =~ /.\@[^\@]*\z/s) {  # identity has a localpart
         $id_matches_author = 1  if $author eq $identity;
-      } elsif ($author =~ /(\@[^\@]*)?\z/s && $1 eq $identity) {
+      } elsif ($author =~ /(\@[^\@]*)?\z/s && defined $1 && $1 eq $identity) {
         # ignoring localpart if identity doesn't have a localpart
         $id_matches_author = 1;
       }
