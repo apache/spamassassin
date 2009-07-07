@@ -10,7 +10,7 @@ use Test;
 
 use vars qw(%patterns %anti_patterns);
 
-use constant num_tests => 100;
+use constant num_tests => 84;
 
 use constant TEST_ENABLED => conf_bool('run_net_tests');
 use constant HAS_MODULES => eval { require Mail::DKIM; require Mail::DKIM::Verifier; };
@@ -62,14 +62,22 @@ sub process_file($$) {
     $mail_obj->finish;
   }
   $fh->close or die "error closing file $fn: $!";
+  $spam_report =~ s/\A(\s*\n)+//s;
+# print "\t$spam_report\n";
   return $spam_report;
 }
 
 # ensure rules will fire
 tstlocalrules ("
-  score DKIM_SIGNED   -0.1
-  score DKIM_VALID    -0.1
-  score DKIM_VALID_AU -0.1
+  score DKIM_SIGNED          -0.1
+  score DKIM_VALID           -0.1
+  score DKIM_VALID_AU        -0.1
+  score DKIM_ADSP_NXDOMAIN    0.1
+  score DKIM_ADSP_DISCARD     0.1
+  score DKIM_ADSP_ALL         0.1
+  score DKIM_ADSP_CUSTOM_LOW  0.1
+  score DKIM_ADSP_CUSTOM_MED  0.1
+  score DKIM_ADSP_CUSTOM_HIGH 0.1
 ");
 
 my $dirname = "data/dkim";
@@ -99,7 +107,7 @@ while (defined($fn = readdir(DIR))) {
   push(@test_filenames, "$dirname/$fn");
 }
 closedir(DIR) or die "Error closing directory $dirname: $!";
-
+#
 %patterns = (
   q{ DKIM_SIGNED },   'DKIM_SIGNED',
   q{ DKIM_VALID },    'DKIM_VALID',
@@ -107,11 +115,12 @@ closedir(DIR) or die "Error closing directory $dirname: $!";
 );
 %anti_patterns = ();
 for $fn (sort { $a cmp $b } @test_filenames) {
-  print "\tTesting sample $fn\n";
+  print "Testing sample $fn\n";
   my $spam_report = process_file($spamassassin_obj,$fn);
   clear_pattern_counters();
   patterns_run_cb($spam_report);
-  ok ok_all_patterns();
+  my $status = ok_all_patterns();
+  printf("\nTest on file %s failed:\n%s\n", $fn,$spam_report)  if !$status;
 }
 
 # this mail sample is special, doesn't have any signature
@@ -119,11 +128,12 @@ for $fn (sort { $a cmp $b } @test_filenames) {
 %patterns = ();
 %anti_patterns = ( q{ DKIM_VALID }, 'DKIM_VALID' );
 $fn = "$dirname/test-fail-01.msg";
-{ print "\tTesting sample $fn\n";
+{ print "Testing sample $fn\n";
   my $spam_report = process_file($spamassassin_obj,$fn);
   clear_pattern_counters();
   patterns_run_cb($spam_report);
-  ok ok_all_patterns();
+  my $status = ok_all_patterns();
+  printf("\nTest on file %s failed:\n%s\n", $fn,$spam_report)  if !$status;
 }
 
 # mail samples test-fail* should all fail DKIM validation
@@ -137,15 +147,45 @@ while (defined($fn = readdir(DIR))) {
   push(@test_filenames, "$dirname/$fn");
 }
 closedir(DIR) or die "Error closing directory $dirname: $!";
-
-%patterns      = ( q{ DKIM_SIGNED },   'DKIM_SIGNED' );
-%anti_patterns = ( q{ DKIM_VALID },    'DKIM_VALID'  );
+#
+%patterns      = ( q{ DKIM_SIGNED }, 'DKIM_SIGNED' );
+%anti_patterns = ( q{ DKIM_VALID },  'DKIM_VALID'  );
 for $fn (sort { $a cmp $b } @test_filenames) {
-  print "\tTesting sample $fn\n";
+  print "Testing sample $fn\n";
   my $spam_report = process_file($spamassassin_obj,$fn);
   clear_pattern_counters();
   patterns_run_cb($spam_report);
-  ok ok_all_patterns();
+  my $status = ok_all_patterns();
+  printf("\nTest on file %s failed:\n%s\n", $fn,$spam_report)  if !$status;
+}
+
+# mail samples test-adsp* should all fail DKIM validation, testing ADSP
+#
+@test_filenames = ();
+opendir(DIR, $dirname) or die "Cannot open directory $dirname: $!";
+while (defined($fn = readdir(DIR))) {
+  next  if $fn eq '.' || $fn eq '..';
+  next  if $fn !~ /^test-adsp-\d*\.msg$/;
+  push(@test_filenames, "$dirname/$fn");
+}
+closedir(DIR) or die "Error closing directory $dirname: $!";
+#
+my @patterns_list = (
+  {},
+  { q{ DKIM_ADSP_NXDOMAIN }, 'DKIM_ADSP_NXDOMAIN' },
+  { q{ DKIM_ADSP_ALL },      'DKIM_ADSP_ALL'      },
+  { q{ DKIM_ADSP_DISCARD },  'DKIM_ADSP_DISCARD'  },
+  { q{ DKIM_ADSP_DISCARD },  'DKIM_ADSP_DISCARD'  },
+);
+%anti_patterns = ( q{ DKIM_VALID }, 'DKIM_VALID' );
+for $fn (sort { $a cmp $b } @test_filenames) {
+  my $pat_ref = shift @patterns_list; %patterns = %$pat_ref;
+  print "Testing sample $fn\n";
+  my $spam_report = process_file($spamassassin_obj,$fn);
+  clear_pattern_counters();
+  patterns_run_cb($spam_report);
+  my $status = ok_all_patterns();
+  printf("\nTest on file %s failed:\n%s\n", $fn,$spam_report)  if !$status;
 }
 
 END {

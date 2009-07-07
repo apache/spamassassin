@@ -500,7 +500,9 @@ sub _dkim_load_modules {
   eval {
     # Have to do this so that RPM doesn't find these as required perl modules.
     { require Mail::DKIM; require Mail::DKIM::Verifier;
-      require Mail::DKIM::DkimPolicy; }
+      require Mail::DKIM::DkimPolicy;
+      eval { require Mail::DKIM::AuthorDomainPolicy }; # since Mail::DKIM 0.34
+    }
   } or do {
     $eval_stat = $@ ne '' ? $@ : "errno=$!";  chomp $eval_stat;
   };
@@ -800,26 +802,39 @@ sub _check_dkim_adsp {
     my $timeout = $pms->{conf}->{dkim_timeout};
     my $timer = Mail::SpamAssassin::Timeout->new({ secs => $timeout });
     my $err = $timer->run_and_catch(sub {
-      dbg("dkim: adsp: performing lookup for %s", $author_domain);
       my $practices;  # author domain signing practices
       eval {
-        $practices = Mail::DKIM::DkimPolicy->fetch(
-                       Protocol => "dns", Domain => $author_domain);
+        if (Mail::DKIM::AuthorDomainPolicy->UNIVERSAL::can("fetch")) {
+          dbg("dkim: adsp: performing _adsp lookup on %s", $author_domain);
+          # _adsp._domainkey.domain
+          $practices = Mail::DKIM::AuthorDomainPolicy->fetch(
+                         Protocol => "dns", Domain => $author_domain);
+        } else {  # fall back to pre-ADSP style
+          dbg("dkim: adsp: performing _policy lookup on %s", $author_domain);
+          # _policy._domainkey.domain
+          $practices = Mail::DKIM::DkimPolicy->fetch(
+                         Protocol => "dns", Domain => $author_domain);
+        }
         1;
       } or do {
         # fetching/parsing adsp record may throw error, ignore such practices
         my $eval_stat = $@ ne '' ? $@ : "errno=$!";  chomp $eval_stat;
-        dbg("dkim: adsp: fetch or parse failed: $eval_stat");
+        dbg("dkim: adsp: fetch or parse on domain %s failed: %s",
+            $author_domain,$eval_stat);
         undef $practices;
       };
       if (!$practices) {
         dbg("dkim: signing practices: none");
       } else {
         # ADSP: unknown / all / discardable
-        # extract the flags we expose, from the practices record
         $practices_as_string = $practices->as_string;
-        $pms->{dkim_adsp} = $practices->signall_strict ? 'D'
-                          : $practices->signall ? 'A' : 'U';
+        my $sp = $practices->policy;
+        $pms->{dkim_adsp} = $sp eq "unknown"      ? 'U'  # most common
+                          : $sp eq "all"          ? 'A'
+                          : $sp eq "discardable"  ? 'D'  # ADSP
+                          : $sp eq "strict"       ? 'D'  # old style SSP
+                          : uc($sp) eq "NXDOMAIN" ? 'N'
+                                                  : 'U';
       }
     });
 
