@@ -3571,7 +3571,11 @@ sub found_any_rules {
 
 sub get_description_for_rule {
   my ($self, $rule) = @_;
-  return $self->{descriptions}->{$rule};
+  # as silly as it looks, localized $1 here prevents an outer $1 from getting
+  # tainted by the expression or assignment in the next line, bug 6148
+  local($1);
+  my $rule_descr = $self->{descriptions}->{$rule};
+  return $rule_descr;
 }
 
 ###########################################################################
