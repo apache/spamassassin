@@ -84,7 +84,6 @@ my $spamassassin_obj = Mail::SpamAssassin->new({
 });
 ok($spamassassin_obj);
 $spamassassin_obj->compile_now;  # try to preloaded most modules
-$spamassassin_obj->init(0); # parse rules
 
 printf("Using Mail::DKIM version %s\n", Mail::DKIM::Verifier->VERSION);
 
