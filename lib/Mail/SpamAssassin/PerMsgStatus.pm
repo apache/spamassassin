@@ -2200,11 +2200,13 @@ sub got_hit {
   # default ruletype, if not specified:
   $params{ruletype} ||= 'unknown';
 
+  my $rule_descr = $self->{conf}->get_description_for_rule($rule);
+  $rule_descr = $rule  if !defined $rule_descr || $rule_descr eq '';
   $self->_handle_hit($rule,
             $score,
             $area,
             $params{ruletype},
-            $self->{conf}->get_description_for_rule($rule) || $rule);
+            $rule_descr);
 
   # take care of duplicate rules, too (bug 5206)
   my $dups = $self->{conf}->{duplicate_rules}->{$rule};

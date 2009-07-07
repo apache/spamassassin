@@ -47,6 +47,7 @@ use Pod::Usage;
 use Config;
 use strict;
 use warnings;
+use re 'taint';
 
 BEGIN {                          # see comments in "spamassassin.raw" for doco
   my @bin = File::Spec->splitpath($0);
@@ -221,10 +222,7 @@ $SA->finish();
 # we're not a setuid script, we trust them
 foreach my $optkey (keys %opt) {
   next if ref $opt{$optkey};
-  my $untaint = $opt{$optkey};
-  next unless defined $untaint;
-  $untaint =~ /^(.*)$/;
-  $opt{$optkey} = $1;
+  Mail::SpamAssassin::Util::untaint_var(\$opt{$optkey});
 }
 
 ##############################################################################
@@ -344,9 +342,9 @@ if (defined $opt{'channelfile'}) {
 
 # untaint the channel listing
 for(my $ind = 0; $ind < @channels; $ind++) {
-  local ($1); # bug 5061: prevent random taint flagging of $1
+  local($1); # bug 5061: prevent random taint flagging of $1
   if ($channels[$ind] =~ /^([a-zA-Z0-9._-]+)$/) {
-    $channels[$ind] = $1;
+    Mail::SpamAssassin::Util::untaint_var(\$channels[$ind]);
   }
   else {
     dbg("channel: skipping invalid channel: $channels[$ind]");
@@ -416,6 +414,7 @@ foreach my $channel (@channels) {
   my $currentV = -1;
   if (open(CF, $CFFile)) {
     while(<CF>) {
+      local($1,$2);
       last unless /^# UPDATE\s+([A-Za-z]+)\s+(\S+)/;
       my($type, $value) = (lc $1,$2);
 
@@ -435,6 +434,7 @@ foreach my $channel (@channels) {
     my $DNSQ = "$RevSAVersion.$channel";
 
     my $dnsV = join(' ', do_txt_query($DNSQ));
+    local($1);
     if (defined $dnsV && $dnsV =~ /^(\d+)/) {
       $newV = $1 if (!defined $newV || $1 > $newV);
       dbg("dns: $DNSQ => $dnsV, parsed as $1");
@@ -464,6 +464,7 @@ foreach my $channel (@channels) {
   } else {  # $instfile
     # the /.*/ ensures we use the 3-digit string nearest to the end of string, otherwise
     # we might pick up something from the middle of the directory path
+    local($1);
     if ($instfile !~ /(?:.*\D|^)(\d{3,})/) {        
       # this is a requirement
       die "channel: $channel: --install file $instfile does not contain a 3-digit version number!\n";
@@ -632,8 +633,10 @@ foreach my $channel (@channels) {
   # Validate the SHA1 signature before going forward with more complicated
   # operations.
   # The SHA1 file may be "signature filename" ala sha1sum, just use the signature
-  $SHA1 =~ /^([a-fA-F0-9]{40})/;
-  $SHA1 = $1 || 'INVALID';
+  { local($1);
+    $SHA1 =~ /^([a-fA-F0-9]{40})/;
+    $SHA1 = $1 || 'INVALID';
+  }
   my $digest = sha1_hex($content);
   dbg("sha1: verification wanted: $SHA1");
   dbg("sha1: verification result: $digest");
@@ -690,6 +693,7 @@ foreach my $channel (@channels) {
         warn $GNUPG."\n";        # report bad news
       }
 
+      local($1);
       if ($GNUPG =~ /^\Q[GNUPG:]\E NO_PUBKEY \S+(\S{8})$/) {
         $missingkeys .= $1." ";
       }
@@ -887,9 +891,7 @@ ENDOFVALIDATIONERR
         my @files = ();
         while(my $file = readdir(DIR)) {
 	  next if $file eq '.' || $file eq '..';
-	  local ($1);	# avoid random taint flagging of $1
-          $file =~ /^(.+)$/;       # untaint
-          $file = $1;
+          Mail::SpamAssassin::Util::untaint_var(\$file);
           my $path = File::Spec->catfile($UPDDir, $file);
           next unless (-f $path);   # shouldn't ever happen
           push(@files, $file);
@@ -1039,6 +1041,7 @@ sub taint_safe_archive_extract {
   foreach my $file (@files) {
     next if ($file =~ /^\/$/);  # ignore dirs
 
+    local($1);
     $file =~ /^([-\.\,\/a-zA-Z0-9_]+)$/;
     my $outfname = $1;
     $outfname =~ s/\.\.\//__\//gs;      # avoid "../" dir traversal attacks
@@ -1050,6 +1053,7 @@ sub taint_safe_archive_extract {
 
       if ($outfname =~ /\.(?:pre|cf)$/) {
         # replace macros in the update files if it's a .pre or .cf
+        local($1);
         $content =~ s/\@\@([^\@]+)\@\@/$MACRO_VALUES{$1} || "\@\@$1\@\@"/ge;
 
         # also, if --allowplugins is not specified, comment out
@@ -1089,6 +1093,7 @@ sub do_txt_query {
   if ($RR) {
     foreach my $rr ($RR->answer) {
       my $text = $rr->rdatastr;
+      local($1);
       $text =~ /^"(.*)"$/;
       push @result, $1;
     }
@@ -1311,9 +1316,7 @@ sub clean_update_dir {
   }
   while(my $file = readdir(DIR)) {
     next if $file eq '.' || $file eq '..';
-    local ($1); # bug 5216: prevent random taint flagging of $1
-    $file =~ /^(.+)$/;       # untaint
-    $file = $1;
+    Mail::SpamAssassin::Util::untaint_var(\$file);
 
     my $path = File::Spec->catfile($dir, $file);
     next unless (-f $path);
