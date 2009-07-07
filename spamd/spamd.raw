@@ -1198,6 +1198,7 @@ sub accept_a_conn {
   $client->autoflush(1);
 
   # keep track of start time
+  $spamtest->timer_reset;
   my $start = time;
 
   my ($remote_hostname, $remote_hostaddr);
