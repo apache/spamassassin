@@ -506,8 +506,13 @@ sub _dkim_load_modules {
   };
 
   if (!defined($eval_stat)) {
-    dbg("dkim: using Mail::DKIM version %s for DKIM checks",
-        Mail::DKIM::Verifier->VERSION);
+    my $version = Mail::DKIM::Verifier->VERSION;
+    if ($version >= 0.31) {
+      dbg("dkim: using Mail::DKIM version $version for DKIM checks");
+    } else {
+      warn("dkim: Mail::DKIM $version is older than the required ".
+           "minimal version 0.31, suggested upgrade to 0.35 or later!\n");
+    }
     $self->{tried_loading} = 1;
   } else {
     dbg("dkim: cannot load Mail::DKIM module, DKIM checks disabled: $eval_stat");
