@@ -386,8 +386,9 @@ sub new {
       }
     }
   }
-  $self->timer_enable()  if would_log('dbg', 'timing');
-  $self->timer_enable()  if $self->{needed_tags}->{TIMING};
+  if (would_log('dbg','timing') || $self->{needed_tags}->{TIMING}) {
+    $self->timer_enable();
+  }
 
   $self->{conf} ||= new Mail::SpamAssassin::Conf ($self);
   $self->{plugins} = Mail::SpamAssassin::PluginHandler->new ($self);
