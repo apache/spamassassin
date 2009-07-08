@@ -414,7 +414,7 @@ EOT
 
     print $re <<EOT  or die "error writing: $!";
 char *${cprefix}_scan${numscans}(unsigned char **p){
-unsigned char *q = *p;
+unsigned char *q = 1 + *p;
 /*!re2c
 EOT
 
