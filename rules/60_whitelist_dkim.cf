@@ -50,8 +50,39 @@ tflags ENV_AND_HDR_DKIM_MATCH	userconf nice noautolearn net
 # Please do not add unmoderated public mailing lists here.  They are
 # too easily abused by spammers.
 
+def_whitelist_from_dkim  *@ebay.com
+def_whitelist_from_dkim  *@*.ebay.com
+def_whitelist_from_dkim  *@ebay.co.uk
+def_whitelist_from_dkim  *@*.ebay.co.uk
+def_whitelist_from_dkim  *@ebay.at
+def_whitelist_from_dkim  *@ebay.ca
+def_whitelist_from_dkim  *@ebay.de
+def_whitelist_from_dkim  *@ebay.fr
+def_whitelist_from_dkim  *@paypal.com
+def_whitelist_from_dkim  *@*.paypal.com
+def_whitelist_from_dkim  *@*			paypal.com
+def_whitelist_from_dkim  *@*.paypal.co.uk
+def_whitelist_from_dkim  *@*.paypal.be
+def_whitelist_from_dkim  *@*.paypal.nl
+def_whitelist_from_dkim  *@amazon.com
+def_whitelist_from_dkim  *@springer.delivery.net
+def_whitelist_from_dkim  *@skype.net
+def_whitelist_from_dkim  *@*.skype.net
+def_whitelist_from_dkim  *@cisco.com
+def_whitelist_from_dkim  *@alert.bankofamerica.com
+def_whitelist_from_dkim  *@cnn.com
+def_whitelist_from_dkim  *@*.cnn.com
+def_whitelist_from_dkim  *@skype.net
+def_whitelist_from_dkim  *@*.skype.com		skype.com
+def_whitelist_from_dkim  *@welcome.skype.com
+def_whitelist_from_dkim  *@cc.yahoo-inc.com	yahoo-inc.com
+def_whitelist_from_dkim  *@cc.yahoo-inc.com
+def_whitelist_from_dkim  googlealerts-noreply@google.com
+def_whitelist_from_dkim  *@cnn.com
+def_whitelist_from_dkim  *@*.cnn.com
 
-# add whitelisted by default domains using DKIM here
-
+#def_whitelist_from_dkim *@yousendit.com
+#def_whitelist_from_dkim *@meetup.com
+#def_whitelist_from_dkim dailyhoroscope@astrology.com
 
 endif # Mail::SpamAssassin::Plugin::DKIM
