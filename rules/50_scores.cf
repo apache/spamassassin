@@ -869,7 +869,6 @@ endif # Mail::SpamAssassin::Plugin::WhiteListSubject
 ifplugin Mail::SpamAssassin::Plugin::DKIM
 score USER_IN_DKIM_WHITELIST -100.000
 score USER_IN_DEF_DKIM_WL -7.500
-score ENV_AND_HDR_DKIM_MATCH -0.1
 endif # Mail::SpamAssassin::Plugin::DKIM
 
 ifplugin Mail::SpamAssassin::Plugin::SPF
