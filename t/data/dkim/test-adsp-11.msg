@@ -1,4 +1,4 @@
-X-Test: ADSP test, unknown
+X-Test: ADSP override test, unknown
 From: SpamAssassin Test <test@sa-test-unk.spamassassin.org>
 To: undisclosed-recipients:;
 Subject: test message (should fail) 11
