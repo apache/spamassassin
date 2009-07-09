@@ -10,7 +10,7 @@ use Test;
 
 use vars qw(%patterns %anti_patterns);
 
-use constant num_tests => 84;
+use constant num_tests => 95;
 
 use constant TEST_ENABLED => conf_bool('run_net_tests');
 use constant HAS_MODULES => eval { require Mail::DKIM; require Mail::DKIM::Verifier; };
@@ -47,6 +47,7 @@ sub process_file($$) {
   my($spamassassin_obj,$fn) = @_;  # file name
 
   my($mail_obj, $per_msg_status, $spam_report);
+  $spamassassin_obj->timer_reset;
   my $fh = IO::File->new;
   $fh->open($fn,'<') or die "cannot open file $fn: $!";
   $mail_obj = $spamassassin_obj->parse($fh,0);
@@ -67,8 +68,8 @@ sub process_file($$) {
   return $spam_report;
 }
 
-# ensure rules will fire
-tstlocalrules ("
+# ensure rules will fire, and disable some expensive ones
+tstlocalrules("
   score DKIM_SIGNED          -0.1
   score DKIM_VALID           -0.1
   score DKIM_VALID_AU        -0.1
@@ -78,6 +79,10 @@ tstlocalrules ("
   score DKIM_ADSP_CUSTOM_LOW  0.1
   score DKIM_ADSP_CUSTOM_MED  0.1
   score DKIM_ADSP_CUSTOM_HIGH 0.1
+  score RAZOR2_CHECK 0
+  score RAZOR2_CF_RANGE_51_100 0
+  score RAZOR2_CF_RANGE_E4_51_100 0
+  score RAZOR2_CF_RANGE_E8_51_100 0
 ");
 
 my $dirname = "data/dkim";
@@ -88,7 +93,7 @@ my $spamassassin_obj = Mail::SpamAssassin->new({
   userprefs_filename  => "$prefix/masses/spamassassin/user_prefs",
   dont_copy_prefs   => 1,
   require_rules     => 1,
-# debug             => 'dkim',
+# debug             => 'dkim,timing',
 });
 ok($spamassassin_obj);
 $spamassassin_obj->compile_now;  # try to preloaded most modules
@@ -171,11 +176,18 @@ while (defined($fn = readdir(DIR))) {
 closedir(DIR) or die "Error closing directory $dirname: $!";
 #
 my @patterns_list = (
-  {},
-  { q{ DKIM_ADSP_NXDOMAIN }, 'DKIM_ADSP_NXDOMAIN' },
-  { q{ DKIM_ADSP_ALL },      'DKIM_ADSP_ALL'      },
-  { q{ DKIM_ADSP_DISCARD },  'DKIM_ADSP_DISCARD'  },
-  { q{ DKIM_ADSP_DISCARD },  'DKIM_ADSP_DISCARD'  },
+  {},							# test-adsp-11.msg
+  { q{ DKIM_ADSP_NXDOMAIN }, 'DKIM_ADSP_NXDOMAIN' },	# test-adsp-12.msg
+  { q{ DKIM_ADSP_ALL },      'DKIM_ADSP_ALL'      },	# test-adsp-13.msg
+  { q{ DKIM_ADSP_DISCARD },  'DKIM_ADSP_DISCARD'  },	# test-adsp-14.msg
+  { q{ DKIM_ADSP_DISCARD },  'DKIM_ADSP_DISCARD'  },	# test-adsp-15.msg
+  {},							# test-adsp-16.msg foo
+  {},							# test-adsp-17.msg unk
+  { q{ DKIM_ADSP_ALL },      'DKIM_ADSP_ALL'      },	# test-adsp-18.msg all
+  { q{ DKIM_ADSP_DISCARD },  'DKIM_ADSP_DISCARD'  },	# test-adsp-19.msg dis
+  { q{ DKIM_ADSP_DISCARD },  'DKIM_ADSP_DISCARD'  },	# test-adsp-20.msg di2
+  { q{ DKIM_ADSP_DISCARD },  'DKIM_ADSP_DISCARD'  },	# test-adsp-21.msg nxd
+  {},							# test-adsp-22.msg xxx
 );
 %anti_patterns = ( q{ DKIM_VALID }, 'DKIM_VALID' );
 for $fn (sort { $a cmp $b } @test_filenames) {

@@ -1,4 +1,4 @@
-X-Test: ADSP test, nxdomain
+X-Test: ADSP override test, nxdomain
 From: SpamAssassin Test <test@sa-test-nxd.spamassassin.org>
 To: undisclosed-recipients:;
 Subject: test message (should fail) 12

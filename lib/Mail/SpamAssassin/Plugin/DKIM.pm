@@ -827,7 +827,6 @@ sub _check_dkim_adsp {
         dbg("dkim: signing practices: none");
       } else {
         # ADSP: unknown / all / discardable
-        $practices_as_string = $practices->as_string;
         my $sp = $practices->policy;
         $pms->{dkim_adsp} = $sp eq "unknown"      ? 'U'  # most common
                           : $sp eq "all"          ? 'A'
@@ -835,6 +834,7 @@ sub _check_dkim_adsp {
                           : $sp eq "strict"       ? 'D'  # old style SSP
                           : uc($sp) eq "NXDOMAIN" ? 'N'
                                                   : 'U';
+        $practices->UNIVERSAL::can("as_string") ? $practices->as_string : $sp;
       }
     });
 
