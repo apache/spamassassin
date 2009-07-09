@@ -10,7 +10,7 @@ use Test;
 
 use vars qw(%patterns %anti_patterns);
 
-use constant num_tests => 95;
+use constant num_tests => 124;
 
 use constant TEST_ENABLED => conf_bool('run_net_tests');
 use constant HAS_MODULES => eval { require Mail::DKIM; require Mail::DKIM::Verifier; };
@@ -42,10 +42,10 @@ use Mail::SpamAssassin;
 
 
 # ---------------------------------------------------------------------------
+my $spamassassin_obj;
 
-sub process_file($$) {
-  my($spamassassin_obj,$fn) = @_;  # file name
-
+sub process_sample_file($) {
+  my($fn) = @_;  # file name
   my($mail_obj, $per_msg_status, $spam_report);
   $spamassassin_obj->timer_reset;
   my $fh = IO::File->new;
@@ -68,6 +68,23 @@ sub process_file($$) {
   return $spam_report;
 }
 
+sub test_samples($$) {
+  my($test_filenames, $patt_antipatt_list) = @_;
+  for my $fn (sort { $a cmp $b } @$test_filenames) {
+    my $el = @$patt_antipatt_list > 1 ? shift @$patt_antipatt_list
+                                      : $patt_antipatt_list->[0];
+    my($patt,$anti) = split(m{\s* / \s*}x, $el, 2);
+    %patterns      = map { (" $_ ", $_) } split(' ',$patt);
+    %anti_patterns = map { (" $_ ", $_) } split(' ',$anti);
+    print "Testing sample $fn\n";
+    my $spam_report = process_sample_file($fn);
+    clear_pattern_counters();
+    patterns_run_cb($spam_report);
+    my $status = ok_all_patterns();
+    printf("\nTest on file %s failed:\n%s\n", $fn,$spam_report)  if !$status;
+  }
+}
+
 # ensure rules will fire, and disable some expensive ones
 tstlocalrules("
   score DKIM_SIGNED          -0.1
@@ -87,13 +104,13 @@ tstlocalrules("
 
 my $dirname = "data/dkim";
 
-my $spamassassin_obj = Mail::SpamAssassin->new({
+$spamassassin_obj = Mail::SpamAssassin->new({
   rules_filename      => "$prefix/t/log/test_rules_copy",
   site_rules_filename => "$prefix/t/log/localrules.tmp",
   userprefs_filename  => "$prefix/masses/spamassassin/user_prefs",
   dont_copy_prefs   => 1,
   require_rules     => 1,
-# debug             => 'dkim,timing',
+# debug             => 'dkim',
 });
 ok($spamassassin_obj);
 $spamassassin_obj->compile_now;  # try to preloaded most modules
@@ -101,9 +118,7 @@ $spamassassin_obj->compile_now;  # try to preloaded most modules
 printf("Using Mail::DKIM version %s\n", Mail::DKIM::Verifier->VERSION);
 
 # mail samples test-pass* should all pass DKIM validation
-#
-my $fn;
-my @test_filenames;
+my($fn, @test_filenames, @patt_antipatt_list);
 local *DIR;
 opendir(DIR, $dirname) or die "Cannot open directory $dirname: $!";
 while (defined($fn = readdir(DIR))) {
@@ -112,37 +127,14 @@ while (defined($fn = readdir(DIR))) {
   push(@test_filenames, "$dirname/$fn");
 }
 closedir(DIR) or die "Error closing directory $dirname: $!";
-#
-%patterns = (
-  q{ DKIM_SIGNED },   'DKIM_SIGNED',
-  q{ DKIM_VALID },    'DKIM_VALID',
-  q{ DKIM_VALID_AU }, 'DKIM_VALID_AU',
-);
-%anti_patterns = ();
-for $fn (sort { $a cmp $b } @test_filenames) {
-  print "Testing sample $fn\n";
-  my $spam_report = process_file($spamassassin_obj,$fn);
-  clear_pattern_counters();
-  patterns_run_cb($spam_report);
-  my $status = ok_all_patterns();
-  printf("\nTest on file %s failed:\n%s\n", $fn,$spam_report)  if !$status;
-}
+@patt_antipatt_list = ( 'DKIM_SIGNED DKIM_VALID DKIM_VALID_AU /' );
+test_samples(\@test_filenames, \@patt_antipatt_list);
 
 # this mail sample is special, doesn't have any signature
-#
-%patterns = ();
-%anti_patterns = ( q{ DKIM_VALID }, 'DKIM_VALID' );
-$fn = "$dirname/test-fail-01.msg";
-{ print "Testing sample $fn\n";
-  my $spam_report = process_file($spamassassin_obj,$fn);
-  clear_pattern_counters();
-  patterns_run_cb($spam_report);
-  my $status = ok_all_patterns();
-  printf("\nTest on file %s failed:\n%s\n", $fn,$spam_report)  if !$status;
-}
+@patt_antipatt_list = ( '/ DKIM_SIGNED DKIM_VALID' );
+test_samples(["$dirname/test-fail-01.msg"], \@patt_antipatt_list);
 
 # mail samples test-fail* should all fail DKIM validation
-#
 @test_filenames = ();
 opendir(DIR, $dirname) or die "Cannot open directory $dirname: $!";
 while (defined($fn = readdir(DIR))) {
@@ -152,20 +144,10 @@ while (defined($fn = readdir(DIR))) {
   push(@test_filenames, "$dirname/$fn");
 }
 closedir(DIR) or die "Error closing directory $dirname: $!";
-#
-%patterns      = ( q{ DKIM_SIGNED }, 'DKIM_SIGNED' );
-%anti_patterns = ( q{ DKIM_VALID },  'DKIM_VALID'  );
-for $fn (sort { $a cmp $b } @test_filenames) {
-  print "Testing sample $fn\n";
-  my $spam_report = process_file($spamassassin_obj,$fn);
-  clear_pattern_counters();
-  patterns_run_cb($spam_report);
-  my $status = ok_all_patterns();
-  printf("\nTest on file %s failed:\n%s\n", $fn,$spam_report)  if !$status;
-}
+@patt_antipatt_list = ( 'DKIM_SIGNED / DKIM_VALID' );
+test_samples(\@test_filenames, \@patt_antipatt_list);
 
 # mail samples test-adsp* should all fail DKIM validation, testing ADSP
-#
 @test_filenames = ();
 opendir(DIR, $dirname) or die "Cannot open directory $dirname: $!";
 while (defined($fn = readdir(DIR))) {
@@ -174,31 +156,21 @@ while (defined($fn = readdir(DIR))) {
   push(@test_filenames, "$dirname/$fn");
 }
 closedir(DIR) or die "Error closing directory $dirname: $!";
-#
-my @patterns_list = (
-  {},							# test-adsp-11.msg
-  { q{ DKIM_ADSP_NXDOMAIN }, 'DKIM_ADSP_NXDOMAIN' },	# test-adsp-12.msg
-  { q{ DKIM_ADSP_ALL },      'DKIM_ADSP_ALL'      },	# test-adsp-13.msg
-  { q{ DKIM_ADSP_DISCARD },  'DKIM_ADSP_DISCARD'  },	# test-adsp-14.msg
-  { q{ DKIM_ADSP_DISCARD },  'DKIM_ADSP_DISCARD'  },	# test-adsp-15.msg
-  {},							# test-adsp-16.msg foo
-  {},							# test-adsp-17.msg unk
-  { q{ DKIM_ADSP_ALL },      'DKIM_ADSP_ALL'      },	# test-adsp-18.msg all
-  { q{ DKIM_ADSP_DISCARD },  'DKIM_ADSP_DISCARD'  },	# test-adsp-19.msg dis
-  { q{ DKIM_ADSP_DISCARD },  'DKIM_ADSP_DISCARD'  },	# test-adsp-20.msg di2
-  { q{ DKIM_ADSP_DISCARD },  'DKIM_ADSP_DISCARD'  },	# test-adsp-21.msg nxd
-  {},							# test-adsp-22.msg xxx
+@patt_antipatt_list = (
+  ' / DKIM_VALID DKIM_ADSP_NXDOMAIN DKIM_ADSP_DISCARD DKIM_ADSP_ALL', # 11
+  'DKIM_ADSP_NXDOMAIN / DKIM_VALID DKIM_ADSP_DISCARD  DKIM_ADSP_ALL', # 12
+  'DKIM_ADSP_ALL  / DKIM_VALID DKIM_ADSP_NXDOMAIN DKIM_ADSP_DISCARD', # 13
+  'DKIM_ADSP_DISCARD  / DKIM_VALID DKIM_ADSP_NXDOMAIN DKIM_ADSP_ALL', # 14
+  'DKIM_ADSP_DISCARD  / DKIM_VALID DKIM_ADSP_NXDOMAIN DKIM_ADSP_ALL', # 15
+  ' / DKIM_VALID DKIM_ADSP_NXDOMAIN DKIM_ADSP_DISCARD DKIM_ADSP_ALL', # 16 foo
+  ' / DKIM_VALID DKIM_ADSP_NXDOMAIN DKIM_ADSP_DISCARD DKIM_ADSP_ALL', # 17 unk
+  'DKIM_ADSP_ALL  / DKIM_VALID DKIM_ADSP_NXDOMAIN DKIM_ADSP_DISCARD', # 18 all
+  'DKIM_ADSP_DISCARD  / DKIM_VALID DKIM_ADSP_NXDOMAIN DKIM_ADSP_ALL', # 19 dis
+  'DKIM_ADSP_DISCARD  / DKIM_VALID DKIM_ADSP_NXDOMAIN DKIM_ADSP_ALL', # 20 di2
+  'DKIM_ADSP_DISCARD  / DKIM_VALID DKIM_ADSP_NXDOMAIN DKIM_ADSP_ALL', # 21 nxd
+  ' / DKIM_VALID DKIM_ADSP_NXDOMAIN DKIM_ADSP_DISCARD DKIM_ADSP_ALL', # 22 xxx
 );
-%anti_patterns = ( q{ DKIM_VALID }, 'DKIM_VALID' );
-for $fn (sort { $a cmp $b } @test_filenames) {
-  my $pat_ref = shift @patterns_list; %patterns = %$pat_ref;
-  print "Testing sample $fn\n";
-  my $spam_report = process_file($spamassassin_obj,$fn);
-  clear_pattern_counters();
-  patterns_run_cb($spam_report);
-  my $status = ok_all_patterns();
-  printf("\nTest on file %s failed:\n%s\n", $fn,$spam_report)  if !$status;
-}
+test_samples(\@test_filenames, \@patt_antipatt_list);
 
 END {
   $spamassassin_obj->finish  if $spamassassin_obj;
