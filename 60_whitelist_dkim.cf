@@ -103,6 +103,7 @@ def_whitelist_from_dkim  *@*.milesandmore.com
 def_whitelist_from_dkim  *@mail.hotels.com
 def_whitelist_from_dkim  *@email.hotels.com
 def_whitelist_from_dkim  *@alert.bankofamerica.com
+def_whitelist_from_dkim  *@ealerts.bankofamerica.com
 def_whitelist_from_dkim  *@cc.yahoo-inc.com	yahoo-inc.com
 def_whitelist_from_dkim  *@cc.yahoo-inc.com
 def_whitelist_from_dkim  googlealerts-noreply@google.com
@@ -118,7 +119,13 @@ def_whitelist_from_dkim  *@ealert.nature.com
 def_whitelist_from_dkim  *@gateways.nature.com
 def_whitelist_from_dkim  *@information.nature.com
 def_whitelist_from_dkim  *@newsdesk.world-nuclear-news.org
+def_whitelist_from_dkim  *@biocompare.com
+def_whitelist_from_dkim  *@dentalcompare.com
+def_whitelist_from_dkim  *@medcompare.com
+def_whitelist_from_dkim  *@itbusinessedge.com
+def_whitelist_from_dkim  *@nl.reuters.com
 def_whitelist_from_dkim  *@email.washingtonpost.com
+def_whitelist_from_dkim  *@washingtontimesmail.com
 def_whitelist_from_dkim  *@info-aaas.org
 def_whitelist_from_dkim  *@*.newsmax.com
 def_whitelist_from_dkim  *@zdnet.online.com
@@ -132,9 +139,6 @@ def_whitelist_from_dkim  *@*.skype.com		skype.com
 def_whitelist_from_dkim  *@facebookmail.com
 def_whitelist_from_dkim  *@linkedin.com
 def_whitelist_from_dkim  *@bounce.linkedin.com
-def_whitelist_from_dkim  *@twitter.com
-def_whitelist_from_dkim  *@*.twitter.com
-def_whitelist_from_dkim  *@*.twitter.com	twitter.com
 def_whitelist_from_dkim  service@youtube.com
 
 #consider also:
@@ -145,5 +149,8 @@ def_whitelist_from_dkim  service@youtube.com
 # def_whitelist_from_dkim  *@meetup.com
 # def_whitelist_from_dkim  *@astrology.com
 # def_whitelist_from_dkim  *@google.com
+# def_whitelist_from_dkim  *@twitter.com
+# def_whitelist_from_dkim  *@*.twitter.com
+# def_whitelist_from_dkim  *@*.twitter.com	twitter.com
 
 endif # Mail::SpamAssassin::Plugin::DKIM
