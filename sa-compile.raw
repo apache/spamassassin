@@ -686,9 +686,6 @@ sub fixup_re {
       } elsif ($esc eq '\\') {
         $output .= '"**BACKSLASH**"';   # avoid hairy escape-parsing
       } elsif ($esc =~ /^x\{(\S+)\}$/) {
-        if ($1 eq '00') {
-          die "not making rule containing NULs due to bug 6143 risk";
-        }
         $output .= '"'.chr(hex($1)).'"';
       } elsif ($esc =~ /^\d+/) {
         $output .= '"'.chr(oct($esc)).'"';
