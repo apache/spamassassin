@@ -1,7 +1,7 @@
 #!/bin/sh
 #
 # driver for nightly mass-checks on the zone. run from cron as:
-# 10 9 * * * /export/home/automc/svn/spamassassin/build/nightlymc/run_nitemc
+# 0 9 * * * /export/home/svn-trunk/backend/nitemc/run_nitemc
 #
 # details: http://wiki.apache.org/spamassassin/NightlyMassCheck
 
@@ -31,7 +31,7 @@ echo "run_nightly starting at" ; date
 pkill -15 -f -u nitemc perl
 pkill -15 -f -u nitemc ssh
 
-nitedir=/export/home/automc/svn/spamassassin/build/nightlymc
+nitedir=/export/home/svn-trunk/backend/nitemc
 $nitedir/gen_targets_files
 
 # run each mass-check using "corpus-nightly"
