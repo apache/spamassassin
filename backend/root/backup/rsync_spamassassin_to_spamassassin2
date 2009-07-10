@@ -1,12 +1,12 @@
 #!/bin/sh
 
 fromdir=/zonestorage/spamassassin/backup
-todir=/zonestorage/spamassassin2/remote_backup
-user=rbackup@spamassassin2.zones.apache.org
+todir=rbackup@spamassassin2.zones.apache.org:/zonestorage/spamassassin2/remote_backup
 
 mv $fromdir/rbackup.log $fromdir/rbackup.log.1
 exec rsync -vre 'ssh -v -i /export/home/rbackup/rsync-key' \
+        --rsync-path=/opt/csw/bin/rsync \
 	$fromdir/. \
-	$user:$todir \
+	$todir \
 	> $fromdir/rbackup.log 2>&1
 
