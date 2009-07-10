@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: dos.20090708-r792071-n wtogami.20090708-r792071-n zmi.20090708-r792071-n; day 2: dos.20090707-r791754-n wtogami.20090707-r791754-n zmi.20090707-r791754-n; day 3: dos.20090706-r791412-n zmi.20090706-r791412-n
+# with results from: day 1: dos.20090709-r792454-n wtogami.20090709-r792454-n zmi.20090709-r792454-n; day 2: dos.20090708-r792071-n wtogami.20090708-r792071-n zmi.20090708-r792071-n; day 3: dos.20090707-r791754-n wtogami.20090707-r791754-n zmi.20090707-r791754-n
 
 # tflags userconf
 ALL_TRUSTED
@@ -272,6 +272,9 @@ FS_REPLICA
 FS_REPLICAWATCH
 
 # good enough
+FS_SINGLE_LETTER_J
+
+# good enough
 FS_WEIGHT_LOSS
 
 # good enough
@@ -327,9 +330,6 @@ HELO_OEM
 
 # tflags userconf
 HIGH_CODEPAGE_URI
-
-# good enough
-HS_BOBAX_MID_1
 
 # good enough
 HS_BOBAX_MID_2
@@ -543,9 +543,6 @@ SANE_91eb43f705d25c804374a746d7519660
 
 # good enough
 SANE_9badf470c25849aa9a77d89b21f84d5e
-
-# good enough
-SANE_c627ae8d03f8c3d579345970e652142c
 
 # good enough
 SANE_ef00ce28cfa5ed6e4c405ed37ff36d46
