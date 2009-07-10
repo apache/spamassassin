@@ -827,14 +827,18 @@ sub _check_dkim_adsp {
         dbg("dkim: signing practices: none");
       } else {
         # ADSP: unknown / all / discardable
-        my $sp = $practices->policy;
-        $pms->{dkim_adsp} = $sp eq "unknown"      ? 'U'  # most common
-                          : $sp eq "all"          ? 'A'
-                          : $sp eq "discardable"  ? 'D'  # ADSP
-                          : $sp eq "strict"       ? 'D'  # old style SSP
-                          : uc($sp) eq "NXDOMAIN" ? 'N'
-                                                  : 'U';
-        $practices->UNIVERSAL::can("as_string") ? $practices->as_string : $sp;
+        my($sp) = $practices->policy;
+        if (!defined $sp || $sp eq '') {  # SERVFAIL or a timeout
+          dbg("dkim: signing practices: unavailable");
+        } else {
+          $pms->{dkim_adsp} = $sp eq "unknown"      ? 'U'  # most common
+                            : $sp eq "all"          ? 'A'
+                            : $sp eq "discardable"  ? 'D'  # ADSP
+                            : $sp eq "strict"       ? 'D'  # old style SSP
+                            : uc($sp) eq "NXDOMAIN" ? 'N'
+                                                    : 'U';
+          $practices_as_string = $sp;
+        }
       }
     });
 
