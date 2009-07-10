@@ -8,6 +8,7 @@
 #    sudo /export/home/svn-trunk/backend/root/backup/backup_zone
 
 bupdir=/zonestorage/spamassassin/backup
+[ `uname -n` = spamassassin2 ] && bupdir=/zonestorage/spamassassin2/backup
 
 ###########################################################################
 
