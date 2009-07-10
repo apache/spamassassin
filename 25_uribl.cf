@@ -11,9 +11,9 @@
 # The ASF licenses this file to you under the Apache License, Version 2.0
 # (the "License"); you may not use this file except in compliance with
 # the License.  You may obtain a copy of the License at:
-# 
+#
 #     http://www.apache.org/licenses/LICENSE-2.0
-# 
+#
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -33,71 +33,71 @@ ifplugin Mail::SpamAssassin::Plugin::URIDNSBL
 ###########################################################################
 ## SBL
 
-uridnssub	URIBL_SBL	zen.spamhaus.org.	A   127.0.0.2
-body		URIBL_SBL	eval:check_uridnsbl('URIBL_SBL')
-describe	URIBL_SBL	Contains an URL listed in the SBL blocklist
-tflags		URIBL_SBL	net
-reuse 		URIBL_SBL
+uridnssub       URIBL_SBL       zen.spamhaus.org.       A   127.0.0.2
+body            URIBL_SBL       eval:check_uridnsbl('URIBL_SBL')
+describe        URIBL_SBL       Contains an URL listed in the SBL blocklist
+tflags          URIBL_SBL       net
+reuse           URIBL_SBL
 
 ###########################################################################
 ## SURBL
 
-urirhssub	URIBL_SC_SURBL	multi.surbl.org.	A   2
-body		URIBL_SC_SURBL	eval:check_uridnsbl('URIBL_SC_SURBL')
-describe	URIBL_SC_SURBL	Contains an URL listed in the SC SURBL blocklist
-tflags		URIBL_SC_SURBL	net
-reuse 		URIBL_SC_SURBL
+urirhssub       URIBL_SC_SURBL  multi.surbl.org.        A   2
+body            URIBL_SC_SURBL  eval:check_uridnsbl('URIBL_SC_SURBL')
+describe        URIBL_SC_SURBL  Contains an URL listed in the SC SURBL blocklist
+tflags          URIBL_SC_SURBL  net
+reuse           URIBL_SC_SURBL
 
-urirhssub	URIBL_WS_SURBL	multi.surbl.org.	A   4
-body		URIBL_WS_SURBL	eval:check_uridnsbl('URIBL_WS_SURBL')
-describe	URIBL_WS_SURBL	Contains an URL listed in the WS SURBL blocklist
-tflags		URIBL_WS_SURBL	net
-reuse 		URIBL_WS_SURBL
+urirhssub       URIBL_WS_SURBL  multi.surbl.org.        A   4
+body            URIBL_WS_SURBL  eval:check_uridnsbl('URIBL_WS_SURBL')
+describe        URIBL_WS_SURBL  Contains an URL listed in the WS SURBL blocklist
+tflags          URIBL_WS_SURBL  net
+reuse           URIBL_WS_SURBL
 
-urirhssub	URIBL_PH_SURBL	multi.surbl.org.	A   8
-body		URIBL_PH_SURBL	eval:check_uridnsbl('URIBL_PH_SURBL')
-describe	URIBL_PH_SURBL	Contains an URL listed in the PH SURBL blocklist
-tflags		URIBL_PH_SURBL	net
-reuse 		URIBL_PH_SURBL
+urirhssub       URIBL_PH_SURBL  multi.surbl.org.        A   8
+body            URIBL_PH_SURBL  eval:check_uridnsbl('URIBL_PH_SURBL')
+describe        URIBL_PH_SURBL  Contains an URL listed in the PH SURBL blocklist
+tflags          URIBL_PH_SURBL  net
+reuse           URIBL_PH_SURBL
 
-urirhssub	URIBL_OB_SURBL	multi.surbl.org.	A   16
-body		URIBL_OB_SURBL	eval:check_uridnsbl('URIBL_OB_SURBL')
-describe	URIBL_OB_SURBL	Contains an URL listed in the OB SURBL blocklist
-tflags		URIBL_OB_SURBL	net
-reuse 		URIBL_OB_SURBL
+urirhssub       URIBL_OB_SURBL  multi.surbl.org.        A   16
+body            URIBL_OB_SURBL  eval:check_uridnsbl('URIBL_OB_SURBL')
+describe        URIBL_OB_SURBL  Contains an URL listed in the OB SURBL blocklist
+tflags          URIBL_OB_SURBL  net
+reuse           URIBL_OB_SURBL
 
-urirhssub	URIBL_AB_SURBL	multi.surbl.org.	A   32
-body		URIBL_AB_SURBL	eval:check_uridnsbl('URIBL_AB_SURBL')
-describe	URIBL_AB_SURBL	Contains an URL listed in the AB SURBL blocklist
-tflags		URIBL_AB_SURBL	net
-reuse 		URIBL_AB_SURBL
+urirhssub       URIBL_AB_SURBL  multi.surbl.org.        A   32
+body            URIBL_AB_SURBL  eval:check_uridnsbl('URIBL_AB_SURBL')
+describe        URIBL_AB_SURBL  Contains an URL listed in the AB SURBL blocklist
+tflags          URIBL_AB_SURBL  net
+reuse           URIBL_AB_SURBL
 
-urirhssub	URIBL_JP_SURBL	multi.surbl.org.	A   64
-body		URIBL_JP_SURBL	eval:check_uridnsbl('URIBL_JP_SURBL')
-describe	URIBL_JP_SURBL	Contains an URL listed in the JP SURBL blocklist
-tflags		URIBL_JP_SURBL	net
-reuse 		URIBL_JP_SURBL
+urirhssub       URIBL_JP_SURBL  multi.surbl.org.        A   64
+body            URIBL_JP_SURBL  eval:check_uridnsbl('URIBL_JP_SURBL')
+describe        URIBL_JP_SURBL  Contains an URL listed in the JP SURBL blocklist
+tflags          URIBL_JP_SURBL  net
+reuse           URIBL_JP_SURBL
 
 ###########################################################################
 ## URIBL
 
-urirhssub	URIBL_BLACK	multi.uribl.com.        A   2
-body		URIBL_BLACK	eval:check_uridnsbl('URIBL_BLACK')
-describe	URIBL_BLACK	Contains an URL listed in the URIBL blacklist
-tflags		URIBL_BLACK	net
-reuse 		URIBL_BLACK
+urirhssub       URIBL_BLACK     multi.uribl.com.        A   2
+body            URIBL_BLACK     eval:check_uridnsbl('URIBL_BLACK')
+describe        URIBL_BLACK     Contains an URL listed in the URIBL blacklist
+tflags          URIBL_BLACK     net
+reuse           URIBL_BLACK
 
-urirhssub	URIBL_GREY	multi.uribl.com.        A   4
-body		URIBL_GREY	eval:check_uridnsbl('URIBL_GREY')
-describe	URIBL_GREY	Contains an URL listed in the URIBL greylist
-tflags		URIBL_GREY	net
-reuse 		URIBL_GREY
+urirhssub       URIBL_GREY      multi.uribl.com.        A   4
+body            URIBL_GREY      eval:check_uridnsbl('URIBL_GREY')
+describe        URIBL_GREY      Contains an URL listed in the URIBL greylist
+tflags          URIBL_GREY      net
+reuse           URIBL_GREY
 
-urirhssub	URIBL_RED	multi.uribl.com.        A   8
-body		URIBL_RED	eval:check_uridnsbl('URIBL_RED')
-describe	URIBL_RED	Contains an URL listed in the URIBL redlist
-tflags		URIBL_RED	net
-reuse 		URIBL_RED
+urirhssub       URIBL_RED       multi.uribl.com.        A   8
+body            URIBL_RED       eval:check_uridnsbl('URIBL_RED')
+describe        URIBL_RED       Contains an URL listed in the URIBL redlist
+tflags          URIBL_RED       net
+reuse           URIBL_RED
 
 ###########################################################################
 ## DOMAINS TO SKIP (KNOWN GOOD)
@@ -156,5 +156,6 @@ uridnsbl_skip_domain web.de webshots.com webtv.net wsj.com
 uridnsbl_skip_domain xmr3.com yahoo.ca yahoo.co.kr yahoo.co.uk
 uridnsbl_skip_domain yahoo.com yahoo.com.br yahoogroups.com yimg.com
 uridnsbl_skip_domain yopi.de yourfreedvds.com yoursite.com zdnet.com
+uridnsbl_skip_domain openxmlformats.org passport.com xmlsoap.org
 
-endif	# Mail::SpamAssassin::Plugin::URIDNSBL
+endif   # Mail::SpamAssassin::Plugin::URIDNSBL
