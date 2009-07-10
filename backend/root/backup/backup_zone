@@ -24,8 +24,7 @@ tarup () {
   tar=tar; [ -x /usr/sfw/bin/gtar ] && tar=/usr/sfw/bin/gtar
   excludedir=`dirname $0`
 
-  : > $name.tgz
-  : > $name.log
+  touch $name.tgz $name.log
   chmod 600 $name.tgz $name.log
 
   (
