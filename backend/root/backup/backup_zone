@@ -45,7 +45,7 @@ cd $bupdir || die "failed to cd to $bupdir"
 for dir in `ls /export/home` ; do
 
   [ "$dir" = "OBSOLETE" ] && continue
-  tarup /export/home/$dir        export-home-dir
+  tarup /export/home/$dir        export-home-$dir
 
 done
 
