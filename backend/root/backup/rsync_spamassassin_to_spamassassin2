@@ -1,0 +1,12 @@
+#!/bin/sh
+
+fromdir=/zonestorage/spamassassin/backup
+todir=/zonestorage/spamassassin2/remote_backup
+user=rbackup@spamassassin2.zones.apache.org
+
+mv $fromdir/rbackup.log $fromdir/rbackup.log.1
+exec rsync -vre 'ssh -v -i /export/home/rbackup/rsync-key' \
+	$fromdir/. \
+	$user:$todir \
+	> $fromdir/rbackup.log 2>&1
+
