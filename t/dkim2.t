@@ -10,7 +10,7 @@ use Test;
 
 use vars qw(%patterns %anti_patterns);
 
-use constant num_tests => 124;
+use constant num_tests => 122;
 
 use constant TEST_ENABLED => conf_bool('run_net_tests');
 use constant HAS_MODULES => eval { require Mail::DKIM; require Mail::DKIM::Verifier; };
@@ -167,8 +167,8 @@ closedir(DIR) or die "Error closing directory $dirname: $!";
   'DKIM_ADSP_ALL  / DKIM_VALID DKIM_ADSP_NXDOMAIN DKIM_ADSP_DISCARD', # 18 all
   'DKIM_ADSP_DISCARD  / DKIM_VALID DKIM_ADSP_NXDOMAIN DKIM_ADSP_ALL', # 19 dis
   'DKIM_ADSP_DISCARD  / DKIM_VALID DKIM_ADSP_NXDOMAIN DKIM_ADSP_ALL', # 20 di2
-  'DKIM_ADSP_DISCARD  / DKIM_VALID DKIM_ADSP_NXDOMAIN DKIM_ADSP_ALL', # 21 nxd
-  ' / DKIM_VALID DKIM_ADSP_NXDOMAIN DKIM_ADSP_DISCARD DKIM_ADSP_ALL', # 22 xxx
+  'DKIM_ADSP_DISCARD  / DKIM_VALID DKIM_ADSP_ALL',                    # 21 nxd
+  '                   / DKIM_VALID DKIM_ADSP_DISCARD DKIM_ADSP_ALL',  # 22 xxx
 );
 test_samples(\@test_filenames, \@patt_antipatt_list);
 
