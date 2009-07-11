@@ -53,7 +53,12 @@ the spamd protocol.
 
 package Mail::SpamAssassin::Client;
 
+use strict;
+use warnings;
+use re 'taint';
+
 use IO::Socket;
+use Errno qw(EBADF);
 
 my $EOL = "\015\012";
 my $BLANK = $EOL x 2;
@@ -220,7 +225,10 @@ sub learn {
   print $remote "$EOL";
 
   $! = 0; my $line = <$remote>;
-  defined $line || $!==0  or die "error reading from spamd: $!";
+  # deal gracefully with a Perl I/O bug which may return status EBADF at eof
+  defined $line || $!==0  or
+    $!==EBADF ? dbg("error reading from spamd (1): $!")
+              : die "error reading from spamd (1): $!";
   return undef unless (defined $line);
 
   my ($version, $resp_code, $resp_msg) = $self->_parse_response_line($line);
@@ -234,6 +242,7 @@ sub learn {
   my $did_remove = '';
 
   for ($!=0; defined($line=<$remote>); $!=0) {
+    local $1;
     if ($line =~ /DidSet: (.*)/i) {
       $did_set = $1;
     }
@@ -244,8 +253,9 @@ sub learn {
       last;
     }
   }
-  defined $line || $!==0  or die "error reading from spamd: $!";
-
+  defined $line || $!==0  or
+    $!==EBADF ? dbg("error reading from spamd (2): $!")
+              : die "error reading from spamd (2): $!";
   close $remote  or die "error closing socket: $!";
 
   if ($learntype == 0 || $learntype == 1) {
@@ -286,7 +296,9 @@ sub report {
   print $remote "$EOL";
 
   $! = 0; my $line = <$remote>;
-  defined $line || $!==0  or die "error reading from spamd: $!";
+  defined $line || $!==0  or
+    $!==EBADF ? dbg("error reading from spamd (3): $!")
+              : die "error reading from spamd (3): $!";
   return undef unless (defined $line);
 
   my ($version, $resp_code, $resp_msg) = $self->_parse_response_line($line);
@@ -307,8 +319,9 @@ sub report {
       last;
     }
   }
-  defined $line || $!==0  or die "error reading from spamd: $!";
-
+  defined $line || $!==0  or
+    $!==EBADF ? dbg("error reading from spamd (4): $!")
+              : die "error reading from spamd (4): $!";
   close $remote  or die "error closing socket: $!";
 
   return $reported_p;
@@ -345,7 +358,9 @@ sub revoke {
   print $remote "$EOL";
 
   $! = 0; my $line = <$remote>;
-  defined $line || $!==0  or die "error reading from spamd: $!";
+  defined $line || $!==0  or
+    $!==EBADF ? dbg("error reading from spamd (5): $!")
+              : die "error reading from spamd (5): $!";
   return undef unless (defined $line);
 
   my ($version, $resp_code, $resp_msg) = $self->_parse_response_line($line);
@@ -366,8 +381,9 @@ sub revoke {
       last;
     }
   }
-  defined $line || $!==0  or die "error reading from spamd: $!";
-
+  defined $line || $!==0  or
+    $!==EBADF ? dbg("error reading from spamd (6): $!")
+              : die "error reading from spamd (6): $!";
   close $remote  or die "error closing socket: $!";
 
   return $revoked_p;
@@ -395,7 +411,9 @@ sub ping {
   print $remote "$EOL";
 
   $! = 0; my $line = <$remote>;
-  defined $line || $!==0  or die "error reading from spamd: $!";
+  defined $line || $!==0  or
+    $!==EBADF ? dbg("error reading from spamd (7): $!")
+              : die "error reading from spamd (7): $!";
   close $remote  or die "error closing socket: $!";
   return undef unless (defined $line);
 
@@ -527,7 +545,9 @@ sub _filter {
   print $remote "$EOL";
 
   $! = 0; my $line = <$remote>;
-  defined $line || $!==0  or die "error reading from spamd: $!";
+  defined $line || $!==0  or
+    $!==EBADF ? dbg("error reading from spamd (8): $!")
+              : die "error reading from spamd (8): $!";
   return undef unless (defined $line);
 
   my ($version, $resp_code, $resp_msg) = $self->_parse_response_line($line);
@@ -538,6 +558,7 @@ sub _filter {
   return undef unless ($resp_code == 0);
 
   for ($!=0; defined($line=<$remote>); $!=0) {
+    local($1,$2,$3);
     if ($line =~ /Content-length: (\d+)/) {
       $data{content_length} = $1;
     }
@@ -550,13 +571,17 @@ sub _filter {
       last;
     }
   }
-  defined $line || $!==0  or die "error reading from spamd: $!";
+  defined $line || $!==0  or
+    $!==EBADF ? dbg("error reading from spamd (9): $!")
+              : die "error reading from spamd (9): $!";
 
   my $return_msg;
-  for ($!=0; <$remote>; $!=0) {
-    $return_msg .= $_;
+  for ($!=0; defined($line=<$remote>); $!=0) {
+    $return_msg .= $line;
   }
-  defined $_ || $!==0  or die "error reading from spamd: $!";
+  defined $line || $!==0  or
+    $!==EBADF ? dbg("error reading from spamd (10): $!")
+              : die "error reading from spamd (10): $!";
 
   $data{message} = $return_msg if ($return_msg);
 
