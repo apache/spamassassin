@@ -43,14 +43,14 @@ export HOME PERL TMPDIR
 # contents of /export/home/nitemc/USERNAME/rsync_password
 perl -pe '
   s{__RSYNC_PASSWORD__}{ incfile("rsync_password") }eg;
-  s{__CLIENTHOSTS__}{ incfile("svn/build/nightlymc/clienthosts") }eg;
+  s{__CLIENTHOSTS__}{ incfile("svn/backend/nitemc/clienthosts") }eg;
 
   sub incfile {
     my $file = shift;
     my $new=`cat '"$dir"'/$file`; chop $new; $new =~ s/\s+/ /gs;
     return "\"".$new."\"";
   }
-' $dir/svn/build/nightlymc/corpus.$user > $dir/.corpus
+' $dir/svn/backend/nitemc/corpus.$user > $dir/.corpus
 
 # use bash to work around Solaris breakage
 exec nice bash $dir/svn/masses/rule-qa/corpus-nightly
