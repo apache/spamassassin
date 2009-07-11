@@ -1,3 +1,3 @@
 
-header INVALID_DATE_TZ_ABSURD_BUG6152    Date =~ /[+-](?:[2-9]\d\d\d|1[3-9]\d\d|\d\d[2|5-9]\d|\d\d[1|4][0-4|6-9]|\d\d0[1-9])/
+header INVALID_DATE_TZ_ABSURD_BUG6152    Date =~ /[-+](?!(?:0\d|1[0-4])(?:[03]0|[14]5))\d{4}$/
 
