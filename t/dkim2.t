@@ -13,7 +13,11 @@ use vars qw(%patterns %anti_patterns);
 use constant num_tests => 122;
 
 use constant TEST_ENABLED => conf_bool('run_net_tests');
-use constant HAS_MODULES => eval { require Mail::DKIM; require Mail::DKIM::Verifier; };
+use constant HAS_MODULES => eval {
+  require Mail::DKIM;
+  require Mail::DKIM::Verifier;
+  $Mail::DKIM::VERSION >= 0.31;
+};
 
 use constant DO_RUN => TEST_ENABLED && HAS_MODULES;
 
