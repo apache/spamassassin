@@ -39,15 +39,6 @@ echo Command: $SVN export --non-interactive \
 $SVN export --non-interactive \
         -r $REV $REPO_URL $RSYNC_DIR/$subdir
 
-# normally we'd use --ignore-externals, if we had a newer svn build
-rm -rf $RSYNC_DIR/$subdir/rulesrc
-
-# and the "svn external" for rulesrc, separately due to svn export bug:
-echo Command: $SVN export --non-interactive \
-        -r $REV $REPO2_URL $RSYNC_DIR/$subdir/rulesrc
-$SVN export --non-interactive \
-        -r $REV $REPO2_URL $RSYNC_DIR/$subdir/rulesrc
-
 cd $RSYNC_DIR/$subdir
 $PERL build/mkrules --out rules > /dev/null
 
@@ -55,6 +46,6 @@ $PERL build/mkrules --out rules > /dev/null
 # we assume that the current directory was updated via cron to the correct
 # revision, so just info it. (can't do remote info with the svn version
 # installed on the zones machine, nor will it accept "--non-interactive")
-$SVN info $HOME/versions/cvshead \
+$SVN info $HOME/versions/trunk \
     > $RSYNC_DIR/$subdir/masses/svninfo.tmp \
     < /dev/null
