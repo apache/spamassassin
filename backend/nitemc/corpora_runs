@@ -3,7 +3,7 @@
 # Cron script for "release".  see "backend/nitemc/crontab.txt"
 
 TZ=UTC; export TZ
-DIR=/export/home/svn-trunk
+DIR=$HOME/versions/trunk
 SVN=/opt/subversion-current/bin/svn
 SVNVERS=/opt/subversion-current/bin/svnversion
 
