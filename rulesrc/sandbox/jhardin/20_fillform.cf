@@ -23,7 +23,7 @@ ifplugin Mail::SpamAssassin::Plugin::ReplaceTags
 
   # Address variations
   replace_tag FF_A1 (?:(?:address|country|county|states?|city|province|territory|(?:zip|postal)(?:\s?code)?)<ANDOR>?){1,3}(?:\sof\s(?:residence|birth|employment|citizenship))?
-  replace_tag FF_A2 (?:(?:contact|e-?mail|full|home|resident[ia]+l|business|mailing|work|office)<ANDOR>?){0,3}\s?(?:address?(?:es)?|location)
+  replace_tag FF_A2 (?:(?:contact|e-?mail|full|home|resident[ia]+l|business|mailing|work|office|delivery|shipping)<ANDOR>?){0,3}\s?(?:address?(?:es)?|location)
 
   # Name variations
   replace_tag FF_N1 (?:company|first|last|all|business|legal)?\s?names?(?:<ANDOR>address)?
