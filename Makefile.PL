@@ -178,6 +178,7 @@ my %makefile = (
         'File::Copy'    => 2.02,          # this version is shipped with 5.005_03, the oldest version known to work
         'Pod::Usage'    => 1.10,          # all versions prior to this do seem to be buggy
         'HTML::Parser'  => 3.43,          # the HTML code is based on this parser, older versions have utf-8 bugs
+        'Archive::Tar'  => 1.23,          # for sa-update
         'Net::DNS'      => (RUNNING_ON_WINDOWS ? 0.46 : 0.34), # bugs in older revs
         'NetAddr::IP'   => 0,
         'Sys::Hostname' => 0,

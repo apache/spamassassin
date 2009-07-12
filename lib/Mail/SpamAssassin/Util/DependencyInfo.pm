@@ -60,6 +60,12 @@ my @MODULES = (
   the header's received fields.",
 },
 {
+  module => 'Archive::Tar',
+  version => '1.23',
+  desc => 'The "sa-update" program requires this module to access tar update
+  archive files.',
+},
+{
   module => 'Time::HiRes',
   version => '0.00',
   desc => 'Used by asynchronous DNS lookups to operate timeouts with subsecond
@@ -175,12 +181,6 @@ my @OPTIONAL_MODULES = (
   version => '0.00',
   desc => 'The "sa-update" program requires this module to make HTTP
   If-Modified-Since GET requests.',
-},
-{
-  module => 'Archive::Tar',
-  version => '1.23',
-  desc => 'The "sa-update" program requires this module to access tar update
-  archive files.',
 },
 {
   module => 'IO::Zlib',
