@@ -18,8 +18,8 @@ ifplugin Mail::SpamAssassin::Plugin::ReplaceTags
   replace_tag ANDOR     (?:\s?[\/&+,]\s?|\sor\s|\sand\s)
   replace_tag NUMBER    (?:num(?:ber)?s?|nos?\.|no\b|\#s?|nbrs?\.?)
   replace_tag FF_SUFFIX (?:\sin\s(?:full|words))?:?(?:\s?[({][^)}]{1,30}[)}])?
-  replace_tag FF_BLANK1 (?:[\s:;]{0,4}(?:[-=_\.,:;*]{3,80}\s?){1,})
-  replace_tag FF_BLANK2 (?:[\s\W]{0,3}[-=_\.,:;*]{1,80}\s?)
+  replace_tag FF_BLANK1 (?:[\s:;]{0,4}(?:[-=_.,:;*]{3,80}\s?){1,})
+  replace_tag FF_BLANK2 (?:[\s\W]{0,3}[-=_.,:;*]{1,80}\s?)
 
   # Address variations
   replace_tag FF_A1 (?:(?:address|country|county|states?|city|province|territory|(?:zip|postal)(?:\s?code)?)<ANDOR>?){1,3}(?:\sof\s(?:residence|birth|employment|citizenship))?
@@ -59,7 +59,7 @@ ifplugin Mail::SpamAssassin::Plugin::ReplaceTags
   score    FILL_THIS_FORM_LONG 1.80
 
   # 5+ fields that body paragraph processing didn't paste together
-  rawbody  __FILL_THIS_FORM_PARTIAL /^<FF_LNNO>?<FF_YOUR><FF_ALL><FF_SUFFIX>(?:<FF_BLANK1>|[-=_\.,:;*\s]$)/im
+  rawbody  __FILL_THIS_FORM_PARTIAL /^<FF_LNNO>?<FF_YOUR><FF_ALL><FF_SUFFIX>(?:<FF_BLANK1>|(?:[-=_.,:;*\s]|=20){1,3}$)/im
   replace_rules   __FILL_THIS_FORM_PARTIAL
   tflags   __FILL_THIS_FORM_PARTIAL multiple
   describe FILL_THIS_FORM_ML Fill in a form, 5+ questions, multiline
