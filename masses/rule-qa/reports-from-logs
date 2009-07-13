@@ -501,7 +501,8 @@ sub start_hit_frequencies_at_rev {
   system("rm -f rules/70_sandbox.cf rules/72_active.cf");
 
   # do this twice in case Makefile.PL is rebuilt
-  system ("( make build_rules; make build_rules ) < /dev/null");
+  my $perl = $^X;
+  system ("( make build_rules || $perl Makefile.PL; make build_rules ) < /dev/null");
 
   chdir "$hfdir/masses" or die "cannot chdir $hfdir/masses";
   open (FREQS, "./hit-frequencies -TxpaP $args |")
