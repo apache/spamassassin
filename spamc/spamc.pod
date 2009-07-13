@@ -166,6 +166,18 @@ Retry connecting to spamd I<retries> times.  The default is 3 times.
 Sleep for I<sleep> seconds between attempts to connect to spamd.
 The default is 1 second.
 
+=item B<--filter-retries>=I<retries>
+
+Retry filtering I<retries> times if the spamd process fails (usually times
+out).  This differs from B<--connect-retries> in that it times out the
+transaction after the TCP connection has been established successfully.
+The default is 1 time (ie. one attempt and no retries).
+
+=item B<--filter-retry-sleep>=I<sleep>
+
+Sleep for I<sleep> seconds between failed spamd filtering attempts.
+The default is 1 second.
+
 =item B<-S>, B<--ssl>, B<--ssl>=I<sslversion>
 
 If spamc was built with support for SSL, encrypt data to and from the

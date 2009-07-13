@@ -159,7 +159,7 @@ print_usage(void)
         "                      spamd. [default: 600]\n");
     usg("  --filter-retries retries\n"
         "                      Retry filtering this many times if the spamd\n"
-        "                      process fails (usually times out) [default: 3]\n");
+        "                      process fails (usually times out) [default: 1]\n");
     usg("  --filter-retry-sleep sleep\n"
         "                      Sleep for this time between failed filter\n"
         "                      attempts, in seconds [default: 1]\n");
