@@ -65,6 +65,7 @@ for dir in `ls /export/home` ; do
 done
 
 rsyncup /usr/local                 usr-local
+rsyncup /var/www		   var-www
 rsyncup /opt                       opt
 rsyncup /local                     local
 rsyncup /etc                       etc
