@@ -17,23 +17,35 @@ die () {
   exit 1
 }
 
-tarup () {
+rsyncup () {
   dir="$1"
   name=$2
 
-  tar=tar; [ -x /usr/sfw/bin/gtar ] && tar=/usr/sfw/bin/gtar
+  rsync=rsync
+  [ -x /usr/sfw/bin/rsync ] && rsync=/usr/sfw/bin/rsync
+  [ -x /opt/sfw/bin/rsync ] && rsync=/opt/sfw/bin/rsync
+  [ -x /opt/csw/bin/rsync ] && rsync=/opt/csw/bin/rsync
+
   excludedir=`dirname $0`
 
-  touch $name.tgz $name.log
-  chmod 600 $name.tgz $name.log
+  [ -d rsynced/$name ] || mkdir -p rsynced/$name
+  chmod 700 rsynced
+
+  touch $name.log
+  chmod 600 $name.log
 
   (
-    nice -20 $tar --create --file=-  \
-        --sparse --exclude-from=$excludedir/excludes   \
-        --label="Backup of $dir at `date`"  \
-        "$dir" | nice -20 gzip -2
+    #nice -20 $dtar --create --file=-  \
+        #--sparse --exclude-from=$excludedir/excludes  \
+        #--label="Backup of $dir at `date`"  \
+        #"$dir" | nice -20 gzip -2
 
-  ) > $name.tgz 2>$name.log
+    nice -20 $rsync -a \
+        --hard-links --whole-file --delete \
+        --sparse --exclude-from=$excludedir/excludes \
+        "$dir/." "rsynced/$name/."
+
+  ) > $name.log 2>&1
 }
 
 ###########################################################################
@@ -41,17 +53,24 @@ tarup () {
 mkdir -p $bupdir 2>/dev/null
 cd $bupdir || die "failed to cd to $bupdir"
 
+[ -f LOG   ] && mv LOG   LOG.1
+[ -f LOG.1 ] && mv LOG.1 LOG.2
+
+(
 for dir in `ls /export/home` ; do
 
   [ "$dir" = "OBSOLETE" ] && continue
-  tarup /export/home/$dir        export-home-$dir
+  rsyncup /export/home/$dir        export-home-$dir
 
 done
 
-tarup /usr/local                 usr-local
-tarup /opt                       opt
-tarup /local                     local
-tarup /etc                       etc
+rsyncup /usr/local                 usr-local
+rsyncup /opt                       opt
+rsyncup /local                     local
+rsyncup /etc                       etc
 
-ls -l $bupdir/*.tgz
+ls -l $bupdir/rsynced
+) 2>&1 | tee LOG
+
 exit 0
+
