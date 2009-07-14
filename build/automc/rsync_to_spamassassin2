@@ -1,0 +1,9 @@
+#!/bin/sh
+
+PATH=$PATH:/opt/sfw/bin
+export PATH
+/opt/sfw/bin/rsync --delete --exclude=ARCHIVE -rze ssh \
+    /export/home/corpus-rsync root@spamassassin2:/export/home/
+/opt/sfw/bin/rsync --delete --exclude=ARCHIVE -rze ssh \
+    /export/home/bbmass/uploadedcorpora root@spamassassin2:/export/home/bbmass/
+
