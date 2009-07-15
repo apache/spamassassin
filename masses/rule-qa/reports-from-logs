@@ -50,6 +50,7 @@ my %time = ();
 my @tmps = ();
 my $time_start = time;
 my $output_revpath;
+my $perl_path = $^X;
 
 configure();
 init();
@@ -312,6 +313,18 @@ sub gen_class {
   if ($class eq 'LOGS') {
     $bytes = gen_report_logs($fname, \@ham, \@spam);
   }
+  elsif ($class eq 'CORPUS') {
+    my $tmpfname = "$fname.$$";
+    push (@tmps, abs_path($tmpfname));
+
+    system "$perl_path $cf{tree}/logs-to-corpus-report ".
+          join(" ", @ham)." ".join(" ", @spam)." > $tmpfname";
+    ($? >> 8 == 0) or warn "failed to run logs-to-corpus-report";
+
+    rename($tmpfname, $fname) or warn "cannot rename $tmpfname to $fname";
+    $bytes = (-s $fname);
+
+  }
   else {
     my $tmpfname = "$fname.$$";
 
@@ -480,7 +493,7 @@ sub start_hit_frequencies_at_rev {
 
   my $needs_checkout = 0;
   if (-d $hfdir && chdir $hfdir) {
-    system("svn up -r$rev && svn up -r$rev rulesrc");
+    system("svn up -r$rev");
     if ($?>>8 != 0) {
       print "simple 'svn update' failed. performing full checkout instead...\n";
       $needs_checkout = 1;
@@ -498,14 +511,13 @@ sub start_hit_frequencies_at_rev {
   chdir "$hfdir" or die "cannot chdir $hfdir";
 
   # ensure these are rebuilt
-  system("rm -f rules/70_sandbox.cf rules/72_active.cf");
+  system "rm -f rules/70_sandbox.cf rules/72_active.cf";
 
   # do this twice in case Makefile.PL is rebuilt
-  my $perl = $^X;
-  system ("( make build_rules || $perl Makefile.PL; make build_rules ) < /dev/null");
+  system "( make build_rules || $perl_path Makefile.PL;make build_rules )</dev/null";
 
   chdir "$hfdir/masses" or die "cannot chdir $hfdir/masses";
-  open (FREQS, "./hit-frequencies -TxpaP $args |")
+  open (FREQS, "$perl_path hit-frequencies -TxpaP $args |")
             or die "cannot run ./hit-frequencies $args |";
 
   chdir $logsdir;
