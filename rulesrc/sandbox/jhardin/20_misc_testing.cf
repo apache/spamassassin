@@ -5,4 +5,7 @@ describe	REPLYTO_MANY_AT	More than one @ in Reply-To:
 header		SENDER_MANY_AT	Sender =~ /\@.+\@/
 describe	SENDER_MANY_AT	More than one @ in Sender:
 
+header		FROM_MANY_AT	From =~ /\@.+\@/
+describe	FROM_MANY_AT	More than one @ in From:
+
 
