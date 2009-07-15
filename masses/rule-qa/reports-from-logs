@@ -305,35 +305,34 @@ sub gen_class {
   }
 
   my $when = scalar localtime time;
-  print qq{creating: $fname
+  print qq{creating: $fname ($class)
   started $when...
 };
   my $bytes = 0;
 
+  my $tmpfname = "$fname.$$";
   if ($class eq 'LOGS') {
     $bytes = gen_report_logs($fname, \@ham, \@spam);
   }
   elsif ($class eq 'CORPUS') {
-    my $tmpfname = "$fname.$$";
     push (@tmps, abs_path($tmpfname));
 
+    print "[$perl_path $cf{tree}/logs-to-corpus-report ".
+          join(" ", @ham)." ".join(" ", @spam)." > $tmpfname]";
     system "$perl_path $cf{tree}/logs-to-corpus-report ".
           join(" ", @ham)." ".join(" ", @spam)." > $tmpfname";
     ($? >> 8 == 0) or warn "failed to run logs-to-corpus-report";
 
     rename($tmpfname, $fname) or warn "cannot rename $tmpfname to $fname";
     $bytes = (-s $fname);
-
   }
   else {
-    my $tmpfname = "$fname.$$";
+    push (@tmps, abs_path($tmpfname));
 
     open(OUT, "> $tmpfname") or warn "cannot write to $tmpfname";
     print OUT "# ham results used for $daterev $class $rtype: " . join(" ", @ham) . "\n";
     print OUT "# spam results used for $daterev $class $rtype: " . join(" ", @spam) . "\n";
     print OUT "# ".log_metadata_xml($daterev, @ham, @spam)."\n";
-
-    push (@tmps, abs_path($tmpfname));
 
     $hf_flags = "";
     $hf_flags = "-t net -s 1" if $class eq "NET";
