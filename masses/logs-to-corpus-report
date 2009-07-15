@@ -1,0 +1,181 @@
+#!/usr/bin/perl
+
+use warnings;
+use strict;
+use File::Basename;
+
+my %opt = ();
+$opt{percents} = 1;
+
+# ---------------------------------------------------------------------------
+
+my $just_year_cutoff_time = time - (60 * 60 * 24 * 365);
+
+my $pairs = { };
+foreach my $f (@ARGV) {
+  my ($class, $who, $daterev);
+  if ($f =~ m,LOGS\.\S+?-(ham|nonspam|spam)-([^\.]+)\.([^\.]+)\.log,) {
+    # LOGS.all-spam-bb-jhardin.20090714-r793817-n.log.gz
+    ($class, $who, $daterev) = ($1, $2, $3);
+  }
+  elsif ($f =~ m,(ham|nonspam|spam)-([^\.]+)\.log,) { # ham-jm.log
+    ($class, $who) = ($1, $2);
+  }
+  elsif ($f =~ m,(ham|nonspam|spam),) {
+    ($class) = ($1);
+    $who = 'unknown';
+  }
+  else {
+    die "cannot parse filename: $f\n";
+  }
+
+  $class = 'ham' if $class eq 'nonspam';
+  push @{$pairs->{$who}}, [ $f, $class ];
+}
+
+my $byuser = {};
+my $total_counts = {};
+foreach my $who (keys %{$pairs}) {
+  my $buckets = {};
+  foreach my $file (@{$pairs->{$who}}) {
+    my ($f, $class) = @{$file};
+    load_log($buckets, $total_counts, $f, $class, $who);
+  }
+  $byuser->{$who}->{buckets} = $buckets;
+}
+
+foreach my $who (sort keys %{$byuser}) {
+  report($byuser->{$who}->{buckets}, $total_counts, $who);
+}
+exit;
+
+# ---------------------------------------------------------------------------
+
+sub load_log {
+  my ($buckets, $total_counts, $f, $class, $who) = @_;
+
+  my ($caught, $score, $restofline);
+
+  if ($f =~ /\.gz$/) {
+    open (IN, "gunzip -cd $f|") or die "cannot read $f";
+  } else {
+    open (IN, "<$f") or die "cannot read $f";
+  }
+  while (<IN>) {
+    ($caught, $score, $restofline) = split(' ', $_, 3);
+    next unless ($caught =~ /^[Y\.]$/ && $restofline);
+    next unless ($restofline =~ /(?: |,)time=(\d+)(?:\D|$)/);
+    my $t = $1;
+
+    my $tbucket = time_to_bucket($t);
+    $buckets->{$tbucket} ||= { };
+    $buckets->{$tbucket}->{$class} ||= {
+      count => 0,
+      range_lo => undef,
+      range_hi => undef,
+    };
+
+    $total_counts->{$class}++;
+    $buckets->{$tbucket}->{$class}->{count}++;
+    update_range_lo(\$buckets->{$tbucket}->{$class}->{range_lo}, $score);
+    update_range_hi(\$buckets->{$tbucket}->{$class}->{range_hi}, $score);
+  }
+  close IN;
+}
+
+# ---------------------------------------------------------------------------
+
+# bb-jhardin       Spam messages    Score range    Ham messages     Score range
+#   in 2009-06          39   (0%)   [0,29]               0
+#   in 2009-07           8   (0%)   [1,24]               2   (0%)   [1,4]
+#   TOTAL:              73   (0%)   [0,29]               2   (0%)   [1,4]
+
+sub report {
+  my ($buckets, $total_counts, $who) = @_;
+
+
+  printf "%-16s %-15s  %-14s %-15s  %-14s\n",
+            $who, "Spam messages", "Score range", "Ham messages", "Score range";
+                
+  my $tspam = 0;
+  my $tham = 0;
+  my ($trslo, $trshi, $trhlo, $trhhi);
+
+  foreach my $tbucket (sort keys %{$buckets}) {
+    my $buck = $buckets->{$tbucket};
+    my $nspam = $buck->{spam}->{count} || 0;
+    my $nham = $buck->{ham}->{count} || 0;
+    printf "%-16s %7s %6s   %-14s %7s %6s   %-14s\n",
+            "  in $tbucket",
+            $nspam, as_percent($nspam, $total_counts->{spam}),
+            format_score_range($buck->{spam}->{range_lo}, $buck->{spam}->{range_hi}),
+            $nham, as_percent($nham, $total_counts->{ham}),
+            format_score_range($buck->{ham}->{range_lo}, $buck->{ham}->{range_hi});
+
+    $tspam += $nspam;
+    $tham += $nham;
+    update_range_lo(\$trslo, $buck->{spam}->{range_lo});
+    update_range_hi(\$trshi, $buck->{spam}->{range_hi});
+    update_range_lo(\$trhlo, $buck->{ham}->{range_lo});
+    update_range_hi(\$trhhi, $buck->{ham}->{range_hi});
+  }
+
+  printf "%-16s %7s %6s   %-14s %7s %6s   %-14s\n",
+            "  TOTAL:",
+            $tspam, as_percent($tspam, $total_counts->{spam}),
+            format_score_range($trslo, $trshi),
+            $tham, as_percent($tham, $total_counts->{ham}),
+            format_score_range($trhlo, $trhhi);
+
+  print "\n";
+}
+
+# ---------------------------------------------------------------------------
+
+sub time_to_bucket {
+  my ($t) = @_;
+  my ($sec,$min,$hour,$mday,$mon,$year,$x) = gmtime $t;
+  $year += 1900;
+  $mon += 1;
+  if ($t < $just_year_cutoff_time) {
+    return $year;
+  } else {
+    return sprintf("%04d-%02d", $year, $mon);
+  }
+}
+
+# ---------------------------------------------------------------------------
+
+sub as_percent {
+  my ($num, $total) = @_;
+  if (!$opt{percents} || !$num) { return ''; }
+  if (!$total) { return '(100%)'; }
+  return sprintf("(%d%%)", (($num||0) *100.0) / $total);
+}
+
+# ---------------------------------------------------------------------------
+
+sub format_score_range {
+  my ($rlo, $rhi) = @_;
+  if (!defined $rlo && !defined $rhi) { return ''; }
+  if (!defined $rlo) { $rlo = ''; }
+  if (!defined $rhi) { $rhi = ''; }
+  return "[$rlo,$rhi]";
+}
+
+# ---------------------------------------------------------------------------
+
+sub update_range_lo {
+  my ($rloref, $score) = @_;
+  return unless defined $score;
+  if (!defined $$rloref || $score < $$rloref) { $$rloref = $score; }
+}
+
+# ---------------------------------------------------------------------------
+
+sub update_range_hi {
+  my ($rhiref, $score) = @_;
+  return unless defined $score;
+  if (!defined $$rhiref || $score > $$rhiref) { $$rhiref = $score; }
+}
+
