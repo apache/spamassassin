@@ -317,10 +317,10 @@ sub gen_class {
   elsif ($class eq 'CORPUS') {
     push (@tmps, abs_path($tmpfname));
 
-    print "[$perl_path $cf{tree}/logs-to-corpus-report ".
-          join(" ", @ham)." ".join(" ", @spam)." > $tmpfname]";
-    system "$perl_path $cf{tree}/logs-to-corpus-report ".
+    my $cmd = "$perl_path $cf{tree}/masses/logs-to-corpus-report ".
           join(" ", @ham)." ".join(" ", @spam)." > $tmpfname";
+    print "[$cmd]\n";
+    system $cmd;
     ($? >> 8 == 0) or warn "failed to run logs-to-corpus-report";
 
     rename($tmpfname, $fname) or warn "cannot rename $tmpfname to $fname";
