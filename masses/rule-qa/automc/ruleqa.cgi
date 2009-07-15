@@ -591,6 +591,33 @@ sub show_default_view {
       </ul>
 
     };
+    my $corpus_on = qq{
+
+      <p><a id="corpus_anchor"></a><a id="corpus" 
+        href="}.$self->gen_switch_url("s_g_corpus", "0").qq{#corpus"
+        >Hide Corpus Make-Up Report</a></p>
+        <pre class='perruleextra'>
+        }.read_corpus_file().qq{
+        </pre>
+
+    };
+
+    my $corpus_off = qq{
+
+      <p><a id="corpus_anchor"></a><a id="corpus" 
+        href="}.$self->gen_switch_url("s_g_corpus", "1").qq{#corpus"
+        >Show Corpus Make-Up Report</a></p>
+
+    };
+
+    print qq{
+
+      <h3 class='corpus_title'>Graph, hit-rate over time</h3>
+      }.($self->{s}{g_corpus} ? $corpus_on : $corpus_off).qq{
+
+      </ul>
+
+    };
 
     my @parms = $self->get_params_except(qw(
             rule s_age s_overlap s_all s_detail
@@ -793,8 +820,7 @@ sub show_mclog {
     die "cannot open $gzfile";
   }
 
-  open (GZ, "gunzip -cd < $gzfile |")
-        or die "cannot gunzip '$gzfile'";
+  open (GZ, "gunzip -cd < $gzfile |") or die "cannot gunzip '$gzfile'";
   while (<GZ>) {
     /^[\.Y]\s+\S+\s+\S+\s+(?:\S*,|)\Q$saferule\E[, ]/ or next;
 
@@ -806,6 +832,22 @@ sub show_mclog {
 
   close GZ;
   exit;
+}
+
+###########################################################################
+
+sub read_corpus_file {
+  $self->{datadir} = $self->get_datadir_for_daterev($self->{daterev});
+  $self->{datadir} =~ /([-\.\,_0-9a-zA-Z\/]+)/; my $safedatadir = $1;
+
+  # outright block possibly-hostile stuff here:
+  # no "../" path traversal
+  die "forbidden: $safedatadir .." if ($safedatadir =~ /\.\./);
+
+  open IN, "<$safedatadir/CORPUS.all" or warn "cannot read $safedatadir/CORPUS.all";
+  my $text = join('', <IN>);
+  close IN;
+  return $text;
 }
 
 ###########################################################################
