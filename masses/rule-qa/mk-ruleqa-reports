@@ -19,7 +19,8 @@ usage: mk-ruleqa-reports [--tag=(n|b)] [--dir=/path/to/files] [--copylogs]
 One of --copylogs or --reports is required.  Both are ok.
 
 reports can be one or more of: 
-  DETAILS.new DETAILS.age DETAILS.all NET.new NET.all NET.age SCOREMAP.new
+  DETAILS.new DETAILS.age DETAILS.all NET.new NET.all NET.age
+  SCOREMAP.new OVERLAP.new CORPUS.all
 
 see http://wiki.apache.org/spamassassin/DateRev for info on daterevs.
 
@@ -76,6 +77,8 @@ my @tmps = ();
 $SIG{INT} = sub { clean_up(); warn "SIGINT"; exit 23; };
 $SIG{TERM} = sub { clean_up(); warn "SIGTERM"; exit 23; };
 $ENV{TIME} = '%e,%U,%S';
+
+my $perl_path = $^X;
 
 if ($opt_copylogs) {
   copylogs();
@@ -310,87 +313,98 @@ sub gen_class {
 };
   my $bytes = 0;
 
-  my $tmpfname = "$fname.$$";
-
-  open(OUT, "> $tmpfname") or warn "cannot write to $tmpfname";
-  push @tmps, $tmpfname;
-  print OUT log_metadata($daterev, $class, $age, \@ham, \@spam);
-
   my @pathspam = map { "$dir/$_" } @spam;
   my @pathham = map { "$dir/$_" } @ham;
 
-  my $flags = "";
-  $flags = "-t net -s 1" if $class eq "NET";
-  $flags = "-o" if $class eq "OVERLAP";
-  $flags = "-S" if $class eq "SCOREMAP";
-  if ($conf{rules_dir}) {
-    $flags .= " -c '$conf{rules_dir}'";
-  }
+  my ($tmp_h, $tmp_s);
+  my $tmpfname = "$fname.$$";
+  push @tmps, $tmpfname;
+  open(OUT, "> $tmpfname") or warn "cannot write to $tmpfname";
 
-  # are we analyzing --net mass-check logs?  if so, use scoreset 1
-  # jm: always use set 1 if the logs allow it
-  if (join(" ", @ham) =~ /-net-/) {
-    $flags .= " -s 1"; # if $class eq "NET";
-  }
+  if ($class eq 'CORPUS') {
+    open (IN, "$perl_path $conf{tree}/logs-to-corpus-report ".
+            join(" ", @pathspam)." ".join(" ", @pathham)."|")
+            or warn "cannot run logs-to-corpus-report";
 
-  # catch an odd error condition, where hit-frequencies creates output
-  # with no log lines included at all
-  $no_msgs = 0;
-
-  my $tmp_h = "$conf{tmp}/ham.log.$$";
-  my $tmp_s = "$conf{tmp}/spam.log.$$";
-  unlink $tmp_h; unlink $tmp_s;
-
-  my @output = ();
-
-  if ($age eq "all") {
-    my %spam;
-    my %ham;
-    # LOGS.all-spam-bb-jm.log.gz
-    for my $f (@pathspam) {
-      $spam{$1} = $f if ($f =~ m/LOGS.all-spam-(\w[-\w]+)\.log/);
-    }
-    for my $f (@pathham) {
-      $ham{$1} = $f if ($f =~ m/LOGS.all-ham-(\w[-\w]+)\.log/);
-    }
-    if (scalar keys %spam <= 0 || scalar keys %ham <= 0) {
-      warn "no files found for $class.$age"; return;
-    }
-
-    my $tmp_all_h = $tmp_h.".all.$$";
-    my $tmp_all_s = $tmp_s.".all.$$";
-    for my $user (sort keys %spam) {
-      next unless $ham{$user};
-      time_filter_fileset([ "$dir/$ham{$user}" ],
-              $tmp_h, $OLDEST_HAM_WEEKS, undef);
-      time_filter_fileset([ "$dir/$spam{$user}" ],
-              $tmp_s, $OLDEST_SPAM_WEEKS, undef);
-
-      push @output, run_hit_frequencies($flags, $user, $tmp_s, $tmp_h);
-      system("cat $tmp_h >> $tmp_all_h");
-      system("cat $tmp_s >> $tmp_all_s");
-    }
-
-    push @output, run_hit_frequencies($flags, undef, $tmp_all_s, $tmp_all_h);
-    for (sort sort_all @output) { print OUT; }
-    unlink ($tmp_all_h, $tmp_all_s);
-  }
-  elsif ($age eq "age") {
-    for my $which (("0-1", "1-2", "2-3", "3-6")) {
-      my ($before, $after) = split(/-/, $which);
-      time_filter_fileset(\@pathham, $tmp_h, $after, $before);
-      time_filter_fileset(\@pathspam, $tmp_s, $after, $before);
-      push @output, run_hit_frequencies($flags, $which, $tmp_s, $tmp_h);
-    }
-    for (sort sort_all @output) { print OUT; }
-  }
-  elsif ($age eq "new") {
-    time_filter_fileset(\@pathham, $tmp_h, $OLDEST_HAM_WEEKS, undef);
-    time_filter_fileset(\@pathspam, $tmp_s, $OLDEST_SPAM_WEEKS, undef);
-    print OUT run_hit_frequencies($flags, undef, $tmp_s, $tmp_h);
+    while (<IN>) { print OUT; }
+    close IN or warn "logs-to-corpus-report failed";
+    close OUT or warn "cannot write to $tmpfname";
   }
   else {
-    warn "bad age $age";
+    print OUT log_metadata($daterev, $class, $age, \@ham, \@spam);
+
+    my $flags = "";
+    $flags = "-t net -s 1" if $class eq "NET";
+    $flags = "-o" if $class eq "OVERLAP";
+    $flags = "-S" if $class eq "SCOREMAP";
+    if ($conf{rules_dir}) {
+      $flags .= " -c '$conf{rules_dir}'";
+    }
+
+    # are we analyzing --net mass-check logs?  if so, use scoreset 1
+    # jm: always use set 1 if the logs allow it
+    if (join(" ", @ham) =~ /-net-/) {
+      $flags .= " -s 1"; # if $class eq "NET";
+    }
+
+    # catch an odd error condition, where hit-frequencies creates output
+    # with no log lines included at all
+    $no_msgs = 0;
+
+    $tmp_h = "$conf{tmp}/ham.log.$$";
+    $tmp_s = "$conf{tmp}/spam.log.$$";
+    unlink $tmp_h; unlink $tmp_s;
+
+    my @output = ();
+    if ($age eq "all") {
+      my %spam;
+      my %ham;
+      # LOGS.all-spam-bb-jm.log.gz
+      for my $f (@pathspam) {
+        $spam{$1} = $f if ($f =~ m/LOGS.all-spam-(\w[-\w]+)\.log/);
+      }
+      for my $f (@pathham) {
+        $ham{$1} = $f if ($f =~ m/LOGS.all-ham-(\w[-\w]+)\.log/);
+      }
+      if (scalar keys %spam <= 0 || scalar keys %ham <= 0) {
+        warn "no files found for $class.$age"; return;
+      }
+
+      my $tmp_all_h = $tmp_h.".all.$$";
+      my $tmp_all_s = $tmp_s.".all.$$";
+      for my $user (sort keys %spam) {
+        next unless $ham{$user};
+        time_filter_fileset([ "$dir/$ham{$user}" ],
+                $tmp_h, $OLDEST_HAM_WEEKS, undef);
+        time_filter_fileset([ "$dir/$spam{$user}" ],
+                $tmp_s, $OLDEST_SPAM_WEEKS, undef);
+
+        push @output, run_hit_frequencies($flags, $user, $tmp_s, $tmp_h);
+        system("cat $tmp_h >> $tmp_all_h");
+        system("cat $tmp_s >> $tmp_all_s");
+      }
+
+      push @output, run_hit_frequencies($flags, undef, $tmp_all_s, $tmp_all_h);
+      for (sort sort_all @output) { print OUT; }
+      unlink ($tmp_all_h, $tmp_all_s);
+    }
+    elsif ($age eq "age") {
+      for my $which (("0-1", "1-2", "2-3", "3-6")) {
+        my ($before, $after) = split(/-/, $which);
+        time_filter_fileset(\@pathham, $tmp_h, $after, $before);
+        time_filter_fileset(\@pathspam, $tmp_s, $after, $before);
+        push @output, run_hit_frequencies($flags, $which, $tmp_s, $tmp_h);
+      }
+      for (sort sort_all @output) { print OUT; }
+    }
+    elsif ($age eq "new") {
+      time_filter_fileset(\@pathham, $tmp_h, $OLDEST_HAM_WEEKS, undef);
+      time_filter_fileset(\@pathspam, $tmp_s, $OLDEST_SPAM_WEEKS, undef);
+      print OUT run_hit_frequencies($flags, undef, $tmp_s, $tmp_h);
+    }
+    else {
+      warn "bad age $age";
+    }
   }
 
   if ($no_msgs) {
@@ -401,7 +415,7 @@ sub gen_class {
   $bytes = (-s OUT);
   close(OUT);
   rename($tmpfname, $fname) or warn "cannot rename $tmpfname to $fname";
-  unlink ($tmp_h, $tmp_s);
+  unlink ($tmp_h, $tmp_s) if defined($tmp_h);
 
   # compress for certain classes
   if ($class eq "OVERLAP") {
@@ -435,7 +449,7 @@ sub run_hit_frequencies {
     chdir "$conf{tree}/masses" or die "cannot chdir $conf{tree}/masses";
 
     print "[hit-frequencies -TxpaP $flags '$spamf' '$hamf']\n";
-    open(IN, "./hit-frequencies -TxpaP $flags '$spamf' '$hamf' |");
+    open(IN, "$perl_path hit-frequencies -TxpaP $flags '$spamf' '$hamf' |");
 
     while(<IN>) {
       chomp;
