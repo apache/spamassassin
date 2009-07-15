@@ -321,6 +321,7 @@ sub gen_class {
   push @tmps, $tmpfname;
   open(OUT, "> $tmpfname") or warn "cannot write to $tmpfname";
 
+  warn "JMD class: $class";
   if ($class eq 'CORPUS') {
     open (IN, "$perl_path $conf{tree}/logs-to-corpus-report ".
             join(" ", @pathspam)." ".join(" ", @pathham)."|")
