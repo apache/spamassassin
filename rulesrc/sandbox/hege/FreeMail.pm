@@ -273,7 +273,7 @@ sub finish_parsing_end {
         dbg("loaded freemail_domains entries: $count normal, $wcount wildcard");
     }
     else {
-        if ($self->{main}->{lint_rules}) {
+        if ($self->{main}->{lint_rules} ||1) {
             dbg("no freemail_domains entries defined, disabling plugin");
         }
         else {
