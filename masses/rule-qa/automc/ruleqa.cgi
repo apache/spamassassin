@@ -147,6 +147,7 @@ sub ui_get_url_switches {
 # selection of what will be displayed.
   $self->{s}{detail} = $self->get_url_switch('s_detail', 0);
   $self->{s}{g_over_time} = $self->get_url_switch('s_g_over_time', 0);
+  $self->{s}{corpus} = $self->get_url_switch('s_corpus', 0);
 
   # "?q=FOO" is a shortcut for "?rule=FOO&s_detail=1"; good for shortcuts
   my $q = $self->{q}->param("q");
@@ -569,7 +570,7 @@ sub show_default_view {
 
       <p><a id="over_time_anchor"></a><a id="overtime" 
         href="}.$self->gen_switch_url("s_g_over_time", "0").qq{#overtime"
-        >Hide Graph</a></p>
+        >Hide graph</a></p>
       <img src="}.$self->gen_switch_url("graph", "over_time").qq{" 
         width='800' height='815' />
 
@@ -579,7 +580,7 @@ sub show_default_view {
 
       <p><a id="over_time_anchor"></a><a id="overtime" 
         href="}.$self->gen_switch_url("s_g_over_time", "1").qq{#overtime"
-        >Show Graph</a></p>
+        >Show graph</a></p>
 
     };
 
@@ -594,26 +595,28 @@ sub show_default_view {
     my $corpus_on = qq{
 
       <p><a id="corpus_anchor"></a><a id="corpus" 
-        href="}.$self->gen_switch_url("s_g_corpus", "0").qq{#corpus"
-        >Hide Corpus Make-Up Report</a></p>
-        <pre class='perruleextra'>
-        }.read_corpus_file().qq{
-        </pre>
+        href="}.$self->gen_switch_url("s_corpus", "0").qq{#corpus"
+        >Hide report</a></p>
+	<table>
+	  <tr class='freqsextra'>
+	    <td><pre class='perruleextra'>}.read_corpus_file().qq{</pre></td>
+	  </tr>
+	<table>
 
     };
 
     my $corpus_off = qq{
 
       <p><a id="corpus_anchor"></a><a id="corpus" 
-        href="}.$self->gen_switch_url("s_g_corpus", "1").qq{#corpus"
-        >Show Corpus Make-Up Report</a></p>
+        href="}.$self->gen_switch_url("s_corpus", "1").qq{#corpus"
+        >Show report</a></p>
 
     };
 
     print qq{
 
-      <h3 class='corpus_title'>Graph, hit-rate over time</h3>
-      }.($self->{s}{g_corpus} ? $corpus_on : $corpus_off).qq{
+      <h3 class='corpus_title'>Corpus quality</h3>
+      }.($self->{s}{corpus} ? $corpus_on : $corpus_off).qq{
 
       </ul>
 
@@ -855,8 +858,8 @@ sub read_corpus_file {
 sub showfreqset {
   my ($self, $type, $strdate) = @_;
   $self->{s}{new} and $self->showfreqsubset("$type.new", $strdate);
-  $self->{s}{age} and $self->showfreqsubset("$type.age", $strdate);
   $self->{s}{all} and $self->showfreqsubset("$type.all", $strdate);
+  $self->{s}{age} and $self->showfreqsubset("$type.age", $strdate);
 }
 
 sub showfreqsubset {
@@ -1151,13 +1154,13 @@ sub set_freqs_templates {
 
   <tr class='freqsline_promo[% PROMO %]'>
     <td>[% MSECS %]</td>
-    <td><a class='ftd'>[% SPAMPC %]<span>[% SPAMPCDETAIL %]</span></a>[% SPAMLOGLINK %]
-    <td><a class='ftd'>[% HAMPC %]<span>[% HAMPCDETAIL %]</span></a>[% HAMLOGLINK %]
+    <td><a class='ftd' [% SPAMLOGHREF %]>[% SPAMPC %]<span>[% SPAMPCDETAIL %]</span></a>
+    <td><a class='ftd' [% HAMLOGHREF %]>[% HAMPC %]<span>[% HAMPCDETAIL %]</span></a>
     <td>[% SO %]</td>
     <td>[% RANK %]</td>
     <td>[% SCORE %]</td>
     <td style='text-align: left'><a href="[% NAMEREF %]">[% NAME %]</a></td>
-    <td>[% USERNAME %][% AGE %]</td>
+    <td>[% USERNAME %][% AGE %][% CORPUSAHREF %]</td>
     <!--
       <rule><test>[% NAME %]</test><promo>[% PROMO %]</promo> <spc>[% SPAMPC %]</spc><hpc>[% HAMPC %]</hpc><so>[% SO %]</so> <detailhref esc='1'>[% NAMEREFENCD %]</detailhref></rule>
     -->
@@ -1236,7 +1239,7 @@ sub create_spampc_detail {
   };
 }
 
-sub create_mclog_link {
+sub create_mclog_href {
   my ($self, $percent, $isspam, $ctx, $line) = @_;
 
   # optimization: no need to look anything up if it's 0.0000%
@@ -1255,9 +1258,7 @@ sub create_mclog_link {
             $self->get_params_except(qw( mclog rule s_detail )));
 
   return qq{
-
-     <br /><a href='$href' class='mcloghref'>[logs]</a>
-
+	href='$href'
   };
 }
 
@@ -1282,20 +1283,20 @@ sub output_freqs_data_line {
                         $line->{spampc}, 1, $header_context, $line);
     my $HAMPCDETAIL = $self->create_spampc_detail(
                         $line->{hampc}, 0, $header_context, $line);
-    my $SPAMLOGLINK = $self->create_mclog_link(
+    my $SPAMLOGHREF = $self->create_mclog_href(
                         $line->{spampc}, 1, $header_context, $line);
-    my $HAMLOGLINK = $self->create_mclog_link(
+    my $HAMLOGHREF = $self->create_mclog_href(
                         $line->{hampc}, 0, $header_context, $line);
 
     $self->process_template($template, {
         RULEDETAIL => $detailurl,
-        MSECS => sprintf("%7s", $line->{msecs}),
-        SPAMPC => sprintf("%7s", $line->{spampc}),
-        HAMPC => sprintf("%7s", $line->{hampc}),
+        MSECS =>  $line->{msecs}+0  ? sprintf("%7s", $line->{msecs})  : "0",
+        SPAMPC => $line->{spampc}+0 ? sprintf("%7s", $line->{spampc}) : "0",
+        HAMPC =>  $line->{hampc}+0  ? sprintf("%7s", $line->{hampc})  : "0",
         SPAMPCDETAIL => $SPAMPCDETAIL,
         HAMPCDETAIL => $HAMPCDETAIL,
-        SPAMLOGLINK => $SPAMLOGLINK,
-        HAMLOGLINK => $HAMLOGLINK,
+        SPAMLOGHREF => $SPAMLOGHREF,
+        HAMLOGHREF => $HAMLOGHREF,
         SO => sprintf("%6s", $line->{so}),
         RANK => sprintf("%6s", $line->{rank}),
         SCORE => sprintf("%6s", $score),
@@ -1303,6 +1304,7 @@ sub output_freqs_data_line {
         NAMEREF => $self->create_detail_url($line->{name}),
         NAMEREFENCD => uri_escape($self->create_detail_url($line->{name})),
         USERNAME => $line->{username} || '',
+        CORPUSAHREF => $self->create_corpus_href($line->{name}, $line->{username}),
         AGE => $line->{age} || '',
         PROMO => $line->{promotable},
     }, \$out);
@@ -1461,6 +1463,22 @@ sub create_detail_url {
   $rulename = uri_escape($rulename);
   $ret =~ s/__create_detail_url_template__/${rulename}/gs;
   return $ret;
+}
+
+sub create_corpus_href {
+  my ($self, $rulename, $username) = @_;
+
+  if (!$self->{s}{detail} || !$username) {	# not already in "detail" mode
+    return '';
+  }
+  my $url = $self->assemble_url(
+	    "s_corpus=1",
+	    "s_detail=1",
+            "rule=".$rulename,
+            "daterev=".$self->{daterev},
+            $self->get_params_except(qw( mclog rule s_detail s_corpus daterev )))
+	    ."#corpus";
+  return "&nbsp;<a href='$url' class='mcloghref'>[corpus]</a>";
 }
 
 sub gen_rule_link {
