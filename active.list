@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: bb-jhardin.20090714-r793817-n bb-jm.20090714-r793817-n dos.20090714-r793817-n jm.20090714-r793817-n wtogami.20090714-r793817-n zmi.20090714-r793817-n; day 2: bb-jhardin.20090713-r793495-n bb-jm.20090713-r793495-n dos.20090713-r793495-n jm.20090713-r793495-n wtogami.20090713-r793495-n zmi.20090713-r793495-n; day 3: bb-jm.20090712-r793294-n dos.20090712-r793294-n jm.20090712-r793294-n zmi.20090712-r793294-n
+# with results from: day 1: bb-jhardin.20090715-r794196-n bb-jm.20090715-r794196-n dos.20090715-r794196-n jm.20090715-r794196-n wtogami.20090715-r794196-n zmi.20090715-r794196-n; day 2: bb-jhardin.20090714-r793817-n bb-jm.20090714-r793817-n dos.20090714-r793817-n jm.20090714-r793817-n wtogami.20090714-r793817-n zmi.20090714-r793817-n; day 3: bb-jhardin.20090713-r793495-n bb-jm.20090713-r793495-n dos.20090713-r793495-n jm.20090713-r793495-n wtogami.20090713-r793495-n zmi.20090713-r793495-n
 
 # tflags userconf
 ALL_TRUSTED
@@ -251,6 +251,9 @@ FSL_HELO_NON_FQDN_1
 FSL_INTERIA_ABUSE
 
 # good enough
+FSL_LSPACES_ABUSE
+
+# good enough
 FSL_MIME_NO_TEXT
 
 # good enough
@@ -369,6 +372,12 @@ KAM_STOCKOTC
 
 # tflags publish
 KAM_STOCKTIP15
+
+# good enough
+KB_DATE_CONTAINS_TAB
+
+# good enough
+KB_FAKED_THE_BAT
 
 # good enough
 KB_RATWARE_MSGID
@@ -694,6 +703,9 @@ STOCK_IMG_CTYPE
 # good enough
 STOCK_IMG_HDR_FROM
 
+# good enough
+STOX_REPLY_TYPE_WITHOUT_QUOTES
+
 # tflags userconf
 SUBJECT_IN_BLACKLIST
 
@@ -722,25 +734,7 @@ TVD_RCVD_IP4
 TVD_RCVD_SINGLE
 
 # good enough
-FSL_GEO_ABUSE
-
-# good enough
-FSL_LSPACES_ABUSE
-
-# good enough
-FS_MAKE_MONEY
-
-# good enough
-KB_DATE_CONTAINS_TAB
-
-# good enough
-KB_FAKED_THE_BAT
-
-# good enough
-STOX_REPLY_TYPE_WITHOUT_QUOTES
-
-# good enough
-URI_OBFU_X9_WS
+DOS_HIGH_BAT_TO_MX
 
 # tflags userconf
 UNPARSEABLE_RELAY
@@ -780,6 +774,9 @@ URIBL_WS_SURBL
 
 # tflags userconf
 URI_NOVOWEL
+
+# good enough
+URI_OBFU_X9_WS
 
 # tflags userconf
 USER_IN_ALL_SPAM_TO
