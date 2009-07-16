@@ -2212,10 +2212,10 @@ Define a raw-body pattern test.  C<pattern> is a Perl regular expression.
 Note: as per the header tests, C<#> must be escaped (C<\#>) or else it is
 considered the beginning of a comment.
 
-The 'raw body' of a message is the raw data inside all textual parts.
-The text will be decoded from base64 or quoted-printable encoding,
-but HTML tags and line breaks will still be present.   The pattern
-will be applied line-by-line.
+The 'raw body' of a message is the raw data inside all textual parts. The
+text will be decoded from base64 or quoted-printable encoding, but HTML
+tags and line breaks will still be present.  Multiline expressions will
+need to be used to match strings that are broken by line breaks.
 
 =item rawbody SYMBOLIC_TEST_NAME eval:name_of_eval_method([args])
 
