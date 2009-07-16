@@ -81,7 +81,7 @@ user's own mail user-agent application.
 
 %build
 CFLAGS="$RPM_OPT_FLAGS"; export CFLAGS
-%{__perl} Makefile.PL PREFIX=%{_prefix} SYSCONFDIR=%{_sysconfdir} DESTDIR=$RPM_BUILD_ROOT < /dev/null
+%{__perl} Makefile.PL PREFIX=%{_prefix} LIB=%{perl_sitelib} SYSCONFDIR=%{_sysconfdir} DESTDIR=$RPM_BUILD_ROOT < /dev/null
 %{__make}
 #%{__make} spamc/libspamc.so
 
@@ -97,9 +97,10 @@ CFLAGS="$RPM_OPT_FLAGS"; export CFLAGS
 	INSTALLVENDORMAN3DIR=%{_mandir}/man3
 
 install -d %buildroot/%{initdir}
+install -d %buildroot/%{_libdir}
 install -d %buildroot/%{_includedir}
 install -m 0755 spamd/redhat-rc-script.sh %buildroot/%{initdir}/spamassassin
-#install -m 0644 spamc/libspamc.so %buildroot/%{_libdir}
+#install -m 0644 spamc/libspamc.so %buildroot/%{_libdir}/libspamc.so
 #install -m 0644 spamc/libspamc.h %buildroot/%{_includedir}/libspamc.h
 
 # Do this so that the spamd README file has a different name ...
