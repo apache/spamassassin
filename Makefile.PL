@@ -232,7 +232,7 @@ my %makefile = (
     },
 
     'AUTHOR'   => 'The Apache SpamAssassin Project <dev at spamassassin.apache.org>',
-    'ABSTRACT' => 'SpamAssassin is an extensible email filter which is used to identify spam.',
+    'ABSTRACT' => 'SpamAssassin is an extensible email filter which is used to identify spam',
 
     # We have only this Makefile.PL and this option keeps MakeMaker from
     # asking all questions twice after a 'make dist*'.
@@ -317,6 +317,41 @@ foreach my $file (@FILES_THAT_MUST_EXIST) {
   open (TOUCH, ">>$file") or die "cannot touch '$file'";
   close TOUCH;
 }
+
+#######################################################################
+
+$makefile{META_MERGE} = {
+  license => 'apache',
+
+  resources => {
+    license     => 'http://www.apache.org/licenses/LICENSE-2.0.html',
+    homepage    => 'http://spamassassin.apache.com/',
+    bugtracker  => 'https://issues.apache.org/SpamAssassin/',
+    repository  => 'http://svn.apache.org/repos/asf/spamassassin/',
+    MailingList => 'http://wiki.apache.org/spamassassin/MailingLists',
+  },
+
+  recommends => {
+    'MIME::Base64' =>              0,
+    'DB_File' =>                   0,
+    'Net::SMTP' =>                 0,
+    'Mail::SPF' =>                 0,
+    'IP::Country::Fast' =>         0,
+    'Razor2::Client::Agent' =>     2.61,
+    'Net::Ident' =>                0,
+    'IO::Socket::INET6' =>         0,
+    'IO::Socket::SSL' =>           0,
+    'Compress::Zlib' =>            0,
+    'Mail::DKIM' =>                0.28,
+    'DBI' =>                       0,
+    'Getopt::Long' =>              2.32,
+    'LWP::UserAgent' =>            0,
+    'HTTP::Date' =>                0,
+    'Archive::Tar' =>              1.23,
+    'IO::Zlib' =>                  1.04,
+    'Encode::Detect' =>            0
+  }
+};
 
 #######################################################################
 
@@ -431,7 +466,7 @@ sub macro_ref {
 # If it is omitted, the value set in the current EU::MM instance is used.
 sub macro_def {
   my($name, $val) = (@_, undef);
-  my $MUST_NOT_HAPPEN = "THIS MUST NOT HAPPEN. PLEASE REPORT A BUG VIA <http://issues.apache.org/SpamAssassin/>";
+  my $MUST_NOT_HAPPEN = "THIS MUST NOT HAPPEN. PLEASE REPORT A BUG VIA <https://issues.apache.org/SpamAssassin/>";
   die $MUST_NOT_HAPPEN  unless defined $name;
   die $MUST_NOT_HAPPEN  unless defined $EQ;
   $val = $SELF->{$name} unless defined $val;
