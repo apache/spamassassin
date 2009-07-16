@@ -29,6 +29,8 @@ If some modules are not in @INC, invoke this way:
   perl -I/path/to/modules apache-spamd.pl \
        --httpd_directive "PerlSwitches -I/path/to/modules"
 
+Note: pass the -H / --helper-home-dir option; there is no reasonable default.
+
 =head1 DESCRIPTION
 
 Starts spamd with Apache as a backend.  Apache is configured according to
@@ -113,6 +115,13 @@ if (exists $opt->{httpd_conf}) {
 	  unless $opt->{httpd_conf} eq '-';
 }
 
+unless ($opt->{username}) {
+	warn "$0:  Running as root, huh?  Asking for trouble, aren't we?\n" if $< == 0;
+	$opt->{username} = getpwuid($>);	# weird apache behaviour on 64bit machines if it's missing
+	warn "$0:  setting User to '$opt->{username}', pass --username to override\n"
+		if $opt->{debug} =~ /\b(?:all|info|spamd|prefork|config)\b/;
+}
+
 #
 # start processing command line and preparing config / cmd line for Apache
 #
@@ -124,7 +133,7 @@ my @run = (        # arguments to exec()
 	'-d', Cwd::cwd(),    # XXX: smarter... home_dir_for_helpers?
 );
 
-if ($opt->{debug} eq 'all') {
+if ($opt->{debug} =~ /\ball\b/) {
 	push @run,        qw(-e debug);
 	push @directives, 'LogLevel debug';
 }
@@ -255,10 +264,7 @@ push @run, '-f',
   map { ; '-C' => $_ } @directives;
 
 warn map({ /^-/ ? "\n    $_" : "  $_" } @run), "\n"
-  if $opt->{debug} eq 'all';
-
-warn "$0:  Running as root, huh?  Asking for trouble, aren't we?\n"
-  if $< == 0 && !$opt->{username};
+  if $opt->{debug} =~ /\ball|spamd|config|info\b/;
 
 undef $opt;                 # there is no DESTROY... but could be one ;-)
 exec @run;                  # we are done
