@@ -5,7 +5,7 @@ use vars qw(%conf_backup %msa_backup);
 use Mail::SpamAssassin::Logger;
 eval { use Time::HiRes qw(time); };
 
-our $SPAMD_VER = '1.3';
+our $SPAMD_VER = '1.4';    # TODO: support for `Compress: zlib'
 our %resphash = (
   EX_OK          => 0,     # no problems
   EX_USAGE       => 64,    # command line usage error
@@ -213,6 +213,11 @@ sub check_headers {
     }
   }
 
+  if ($self->headers_in->{compress} && length $self->headers_in->{compress}) {
+    $self->protocol_error('Compress not supported yet');  # TODO
+    return 0;
+  }
+
   1;
 }
 
@@ -300,14 +305,21 @@ sub send_response {
   my $self = shift;
   my $msg_resp = '';
 
-  if ($self->{method} eq 'PROCESS') {
+  if ( $self->{method} eq 'PROCESS' or $self->{method} eq 'HEADERS' ) {
     $self->status->set_tag('REMOTEHOSTNAME', $self->_remote_host);
     $self->status->set_tag('REMOTEHOSTADDR', $self->_remote_ip);
 
     # Build the message to send back and measure it
     $msg_resp = $self->status->rewrite_mail;
-    #$self->status->finish;
-    #delete $self->{status};
+
+    if ( $self->{method} eq 'HEADERS' ) {
+      # just the headers; delete everything after first \015\012\015\012
+      $msg_resp =~ s/(\015?\012\015?\012).*$/$1/s;
+    }
+
+    open my $dfh, '>', '/tmp/sadebug' or die $!;  # XXX: devel debug
+    print $dfh $msg_resp;
+    close $dfh or die $!;
 
     # Spamc protocol 1.3 means multi hdrs are OK
     $self->send_buffer($self->spamhdr)
@@ -414,14 +426,11 @@ sub pass_through_sa {
       push @{ $self->{did_remove} }, 'remote' if $msgrpt->revoke;
     }
   }
-  else {
-    $self->{status} = $self->spamtest->check($self->{parsed})
-      unless $self->{method} eq 'TELL';
+  else {  # method other than TELL (or PING)
+    $self->{status} = $self->spamtest->check($self->{parsed});
   }
 
-  # we don't access this object anymore, but can't destroy
-  # it yet or something will complain... a lot.
-  $self->{parsed}->finish;
+  undef;
 }
 
 

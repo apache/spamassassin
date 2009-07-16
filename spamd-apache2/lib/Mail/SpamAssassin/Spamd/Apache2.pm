@@ -140,8 +140,14 @@ sub new {    # -: A
 
 sub DESTROY { # -: a
   my $self = shift;
-  $self->status->finish if $self->status;
-  $self->{parsed}->finish if $self->{parsed};
+  if (exists $self->{parsed}) {
+    delete $self->{parsed};
+    $self->{parsed}->finish if $self->{parsed}; # can't do it before status->rewrite_mail
+  }
+  if (exists $self->{status}) {
+    $self->status->finish if $self->status;
+    delete $self->{status};
+  }
   $self->in->destroy;
   $self->out->destroy;
 }
@@ -221,7 +227,7 @@ sub read_headers { # -: A
 
     # get method name
     unless ($self->{method}) {
-      if ($line =~ /^(SKIP|PING|PROCESS|CHECK|SYMBOLS|REPORT|REPORT_IFSPAM|TELL)
+      if ($line =~ /^(SKIP|PING|PROCESS|CHECK|SYMBOLS|REPORT|HEADERS|REPORT_IFSPAM|TELL)
                     \ SPAMC\/(\d{1,2}\.\d{1,3})\b/x) {
         $self->{method} = $1;
         $self->{client_version} = $2;
@@ -297,7 +303,6 @@ sub read_body { # -: A
     # this is never true, actually...  get_brigade ensures we won't get
     # more bytes...  well, at least it's logically correct. ;-)
     # we could check if $message ends with "\n" to detect weird cases.
-    # XXX: remove this block?
     if ($content_length && $len > $content_length) {
       $self->protocol_error('(Content-Length mismatch: Expected'
           . " $content_length bytes, got $len bytes");
@@ -309,7 +314,7 @@ sub read_body { # -: A
   }
 
   $self->{actual_length} = $len;
-  $self->{parsed} = $self->spamtest->parse($message, 0);
+  $self->{parsed} = $self->spamtest->parse($message , 0);
 
   undef;
 }
