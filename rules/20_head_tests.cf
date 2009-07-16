@@ -161,7 +161,7 @@ test INVALID_DATE ok      Sat, 31 Dec 2005 23:00:00
 test INVALID_DATE ok      Thurs, 31 Jul 2002 16:41:57 +0200
 
 # allow +1300, NZ timezone
-header INVALID_DATE_TZ_ABSURD	Date =~ /[-+](?:1[4-9]\d\d|[2-9]\d\d\d)$/
+header INVALID_DATE_TZ_ABSURD	Date =~ /[-+](?!(?:0\d|1[0-4])(?:[03]0|[14]5))\d{4}$/
 describe INVALID_DATE_TZ_ABSURD	Invalid Date: header (timezone does not exist)
 
 header INVALID_TZ_CST		ALL =~ /[+-]\d\d[30]0(?<!-0600|-0500|\+0800|\+0930|\+1030)\s+(?:\bCST\b|\(CST\))/
