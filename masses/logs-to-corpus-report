@@ -18,7 +18,7 @@ foreach my $f (@ARGV) {
     # LOGS.all-spam-bb-jhardin.20090714-r793817-n.log.gz
     ($class, $who, $daterev) = ($1, $2, $3);
   }
-  elsif ($f =~ m,(?:/|^)(ham|nonspam|spam)-([^\.]+)\.([^\.]+)\.log,) {
+  elsif ($f =~ m,(ham|nonspam|spam)-([^\.]+)\.([^\.]+)\.log,) {
     # LOGS.all-spam-bb-jhardin.20090714-r793817-n.log.gz
     ($class, $who, $daterev) = ($1, $2, $3);
   }
