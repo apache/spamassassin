@@ -9,8 +9,8 @@ userdir=/export/home/nitemc/$user
 svndir=/export/home/nitemc/svn
 
 mkdir -p $userdir
-log=$userdir/log
-mv $log $log.1
+cd $userdir
+mv log log.1
 
 (
 echo "Starting corpus-nightly for $user ($svndir , $userdir)"
@@ -30,22 +30,36 @@ src=$svndir/backend/nitemc/corpus.$user
 [ -f $src ] || src=$svndir/backend/nitemc/corpus.default
 
 perl -pe '
+  s{__USERNAME__}{'$user'}g;
   s{__RSYNC_PASSWORD__}{ incfile("rsync_password") }eg;
-  s{__CLIENTHOSTS__}{ incfile("svn/backend/nitemc/clienthosts") }eg;
 
   sub incfile {
     my $file = shift;
-    my $new=`cat '"$userdir"'/$file`; chop $new; $new =~ s/\s+/ /gs;
+    my $new=`cat $file`; chop $new; $new =~ s/\s+/ /gs;
     return "\"".$new."\"";
   }
-' $src > $userdir/.corpus
+' $src > .corpus
 
 rm -rf $svndir/masses/tmp
 rm -rf $svndir/masses/spamassassin
 rm -rf $svndir/masses/*.log
 
+rm -f svn
+ln -s ../svn svn
+
+echo '
+  use_bayes 0
+  use_auto_whitelist 0
+  internal_networks 127/8
+  trusted_networks 127/8
+' > user_prefs.default
+
+[ -f user_prefs.nightly ] || cp user_prefs.default user_prefs.nightly
+[ -f user_prefs.weekly ] || cp user_prefs.default user_prefs.weekly
+
 # use bash to work around Solaris breakage
+cd $svndir
 exec nice bash $svndir/masses/rule-qa/corpus-nightly
 
-) 2>&1 | tee $log
+) 2>&1 | tee log
 
