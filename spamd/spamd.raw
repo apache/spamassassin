@@ -1676,7 +1676,7 @@ sub dotell {
   if ($> == 0) { die "spamd: still running as root! dying"; }
 
   if (!$opt{tell}) {
-    service_unavailable_error("TELL commands have not been enabled.");
+    service_unavailable_error("TELL commands are not enabled, set the --allow-tell switch.");
     return 0;
   }
 
@@ -2010,7 +2010,7 @@ sub protocol_error {
   my ($err) = @_;
   my $resp = "EX_PROTOCOL";
   syswrite($client, "SPAMD/1.0 $resphash{$resp} Bad header line: $err\r\n");
-  warn("spamd: bad protocol: header error: $err");
+  warn("spamd: bad protocol: header error: $err\n");
 }
 
 sub service_unavailable_error {
@@ -2018,14 +2018,14 @@ sub service_unavailable_error {
   my $resp = "EX_UNAVAILABLE";
   syswrite($client,
 	   "SPAMD/1.0 $resphash{$resp} Service Unavailable: $err\r\n");
-  warn("spamd: service unavailable: $err");
+  warn("spamd: service unavailable: $err\n");
 }
 
 sub service_timeout {
   my ($err) = @_;
   my $resp = "EX_TIMEOUT";
   print $client "SPAMD/1.0 $resphash{$resp} Timeout: $err\r\n";
-  warn("spamd: timeout: $err");
+  warn("spamd: timeout: $err\n");
 }
 
 ###########################################################################
