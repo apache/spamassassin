@@ -9,7 +9,7 @@ $opt{percents} = 1;
 
 # ---------------------------------------------------------------------------
 
-my $just_year_cutoff_time = time - (60 * 60 * 24 * 365);
+my $date_lut = create_date_lookup_table();
 
 my $pairs = { };
 foreach my $f (@ARGV) {
@@ -72,17 +72,23 @@ sub load_log {
     my $t = $1;
 
     my $tbucket = time_to_bucket($t);
-    $buckets->{$tbucket} ||= { };
-    $buckets->{$tbucket}->{$class} ||= {
-      count => 0,
-      range_lo => undef,
-      range_hi => undef,
-    };
+    if (!exists $buckets->{$tbucket}) {
+      $buckets->{$tbucket} ||= { };
+    }
+
+    if (!exists $buckets->{$tbucket}->{$class}) {
+      $buckets->{$tbucket}->{$class} = {
+        count => 0,
+        range_lo => undef,
+        range_hi => undef,
+      };
+    }
 
     $total_counts->{$class}++;
-    $buckets->{$tbucket}->{$class}->{count}++;
-    update_range_lo(\$buckets->{$tbucket}->{$class}->{range_lo}, $score);
-    update_range_hi(\$buckets->{$tbucket}->{$class}->{range_hi}, $score);
+    my $b = $buckets->{$tbucket}->{$class};
+    $b->{count}++;
+    update_range_lo(\$b->{range_lo}, $score);
+    update_range_hi(\$b->{range_hi}, $score);
   }
   close IN;
 }
@@ -136,16 +142,43 @@ sub report {
 
 # ---------------------------------------------------------------------------
 
+use Time::Local;
+sub create_date_lookup_table {
+
+  my ($sec,$min,$hour,$mday,$cmon,$cyear,$x) = gmtime time;
+
+  my @month_starts = ();
+  my ($year, $mon);
+  for ($year = $cyear; $year >= 70; $year--) {
+    for ($mon = 11; $mon >= 0; $mon--) {
+      next if ($year == $cyear && $mon > $cmon);        # in the future
+
+      if ($year < $cyear-1 || ($year==$cyear-1 && $mon < $cmon)) {
+        # just record January 1 for times over a year ago
+        next unless ($mon == 0);
+        push @month_starts, [
+          timegm(0,0,0,1,$mon,$year), $year+1900
+        ];
+      }
+      else {
+        push @month_starts, [
+          timegm(0,0,0,1,$mon,$year), sprintf("%04d-%02d", $year+1900, $mon+1) 
+        ];
+      }
+    }
+  }
+  return \@month_starts;
+}
+
 sub time_to_bucket {
   my ($t) = @_;
-  my ($sec,$min,$hour,$mday,$mon,$year,$x) = gmtime $t;
-  $year += 1900;
-  $mon += 1;
-  if ($t < $just_year_cutoff_time) {
-    return $year;
-  } else {
-    return sprintf("%04d-%02d", $year, $mon);
+  # could binary-search here, but the win is probably not worth it
+  foreach my $pair (@{$date_lut}) {
+    if ($pair->[0] < $t) {
+      return $pair->[1];
+    }
   }
+  return "1970";
 }
 
 # ---------------------------------------------------------------------------
