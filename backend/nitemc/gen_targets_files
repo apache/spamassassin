@@ -22,8 +22,8 @@ foreach my $submitter (<*>) {
 
   $submitter =~ s,[^A-Za-z0-9],,gs;
 
-  open (OUT, ">$TGTS_DIR/targets.$submitter")
-    or warn "cannot write to $TGTS_DIR/targets.$submitter";
+  open (OUT, ">$TGTS_DIR/$submitter.targets")
+    or warn "cannot write to $TGTS_DIR/$submitter.targets";
 
   print OUT "ham:detect:$RAWCOR_DIR/$submitter/ham/*\n",
             "spam:detect:$RAWCOR_DIR/$submitter/spam/*\n";

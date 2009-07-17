@@ -5,54 +5,47 @@ user="$1"
 [ "$user" = "" ] && exit 99
 
 # where the $HOMEs are:
-dir="/export/home/nitemc/$user"
+userdir=/export/home/nitemc/$user
+svndir=/export/home/nitemc/svn
 
-# keep one day's logs around
-mv "$dir/corpus-nightly.log" "$dir/corpus-nightly.log.1"
+mkdir -p $userdir
+log=$userdir/log
+mv $log $log.1
 
 (
-echo "Starting corpus-nightly for $user ($dir): $dir/corpus-nightly.log"
+echo "Starting corpus-nightly for $user ($svndir , $userdir)"
 
 . /etc/profile
-
-# ensure we use the user-wide SVN permissions and server identities,
-# otherwise we won't be able to perform noninteractive SVN ops
-rm -rf $dir/.subversion 
-ln -s /export/home/nitemc/.subversion $dir/.subversion 
-
-# oh Solaris, you really suck
-HOME=$dir
+HOME=$userdir
 PERL=/local/perl586/bin/perl
 TMPDIR=/tmpfs
 
 export HOME PERL TMPDIR
 
-# attempt to ensure the "build" dir and raw .corpus file is up to date 
-# (don't worry about tags etc. just yet)
-(
-  cd $dir
-  rm -rf svn
-  svn co http://svn.apache.org/repos/asf/spamassassin/trunk svn ||
-    svn co http://svn.apache.org/repos/asf/spamassassin/trunk svn ||
-    svn co http://svn.apache.org/repos/asf/spamassassin/trunk svn
-
-) < /dev/null
-
 # create the .corpus file, keeping the rsync password secret;
 # the string __RSYNC_PASSWORD__ will be replaced with the
 # contents of /export/home/nitemc/USERNAME/rsync_password
+
+src=$svndir/backend/nitemc/corpus.$user
+[ -f $src ] || src=$svndir/backend/nitemc/corpus.default
+
 perl -pe '
   s{__RSYNC_PASSWORD__}{ incfile("rsync_password") }eg;
   s{__CLIENTHOSTS__}{ incfile("svn/backend/nitemc/clienthosts") }eg;
 
   sub incfile {
     my $file = shift;
-    my $new=`cat '"$dir"'/$file`; chop $new; $new =~ s/\s+/ /gs;
+    my $new=`cat '"$userdir"'/$file`; chop $new; $new =~ s/\s+/ /gs;
     return "\"".$new."\"";
   }
-' $dir/svn/backend/nitemc/corpus.$user > $dir/.corpus
+' $src > $userdir/.corpus
+
+rm -rf $svndir/masses/tmp
+rm -rf $svndir/masses/spamassassin
+rm -rf $svndir/masses/*.log
 
 # use bash to work around Solaris breakage
-exec nice bash $dir/svn/masses/rule-qa/corpus-nightly
+exec nice bash $svndir/masses/rule-qa/corpus-nightly
 
-) 2>&1 | tee "$dir/corpus-nightly.log"
+) 2>&1 | tee $log
+
