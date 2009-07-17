@@ -25,9 +25,10 @@ pkill -15 -f -u nitemc ssh
 
 all_users=`ls /export/home/bbmass/uploadedcorpora`
 nitedir=/export/home/svn-trunk/backend/nitemc
+workdir=/export/home/nitemc
 
-$nitedir/gen_targets_files
 $nitedir/svn_checkout
+
 for user in $all_users ; do
   $nitedir/run_one_nitemc $user
 done
