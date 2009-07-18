@@ -29,6 +29,10 @@ export HOME PERL TMPDIR
 src=$svndir/backend/nitemc/corpus.$user
 [ -f $src ] || src=$svndir/backend/nitemc/corpus.default
 
+if [ ! -f rsync_password ] ; then
+  cp ../rsync_password.default rsync_password
+done
+
 perl -pe '
   s{__USERNAME__}{'$user'}g;
   s{__RSYNC_PASSWORD__}{ incfile("rsync_password") }eg;
