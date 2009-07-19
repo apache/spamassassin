@@ -31,7 +31,7 @@ src=$svndir/backend/nitemc/corpus.$user
 
 if [ ! -f rsync_password ] ; then
   cp ../rsync_password.default rsync_password
-done
+fi
 
 perl -pe '
   s{__USERNAME__}{'$user'}g;
