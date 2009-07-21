@@ -322,12 +322,11 @@ sub show_default_header {
         </td> <td valign=top>
           <p align="right">
             <a href="http://wiki.apache.org/spamassassin/RuleQaApp">help</a>
-            <br>
-            <a href="http://bbmass.spamassassin.org:8011/">preflight mass-check progress</a>
           </p>
         </td> </tr> </table>
 
   };
+  #<br> <a href="http://bbmass.spamassassin.org:8011/">preflight mass-check progress</a>
   return $hdr;
 }
 
@@ -1719,6 +1718,10 @@ sub get_daterev_masscheck_description {
     $mds_as_text = $self->get_mds_as_text($meta->{mclogmds}) || '';
   }
 
+  my $submitters = $meta->{submitters};
+  # remove daterevs, they're superfluous in this table
+  $submitters =~ s/\.\d+-r\d+-[a-z]\b//gs;	
+
   return qq{
 
     <td class="daterevtd $isvisclass" width='20%'>
@@ -1729,7 +1732,7 @@ sub get_daterev_masscheck_description {
             <span class="dr">$dr</span>
           </strong></a> $isvishtml
       </p><p>
-        <em><span class="mcsubmitters">$meta->{submitters}</span></em>
+        <em><span class="mcsubmitters">$submitters</span></em>
         $mds_as_text</x>
       </p>
       <!-- <span class="mctype">$meta->{type}</span> -->
