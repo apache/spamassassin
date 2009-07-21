@@ -43,10 +43,10 @@ rm -f razor-agent.log
 
 if [ -n "$net" ]; then
 	prefs=$prefs_weekly
-	opts=$opts_weekly
+	opts=$opts_weekly ${opts:-}
 else
 	prefs=$prefs_nightly
-	opts=$opts_nightly
+	opts=$opts_nightly ${opts:-}
 fi
 if [ -n "$prefs" -a -f "$prefs" ]; then
 	cp $prefs spamassassin/user_prefs
