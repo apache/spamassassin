@@ -1917,7 +1917,7 @@ describe FH_DATE_IS_19XX	The date is not 19xx.
 
 # Date: Tue, 19 Jan 2038 11:14:07 +0800
 # This exact date is VERY COMMON!
-header   FH_DATE_PAST_20XX	Date =~ /20[1-9][0-9]/ [if-unset: 2006]
+header   FH_DATE_PAST_20XX	Date =~ /20[2-9][0-9]/ [if-unset: 2006]
 describe FH_DATE_PAST_20XX	The date is grossly in the future.
 ##score    FH_DATE_PAST_20XX	10.357
 #counts   FH_DATE_PAST_20XX        207s/0h of 103219 corpus (95719s/7500h FVGT) 03/21/06
