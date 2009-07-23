@@ -180,6 +180,11 @@ SPAMASSASSIN RELEASE PROCEDURE
     PATH=$HOME/sabuildtools/perl584/bin:$HOME/sabuildtools/bin:$PATH
     ./build/update_stable
 
+  You will need the SSH password for
+  updatesd@spamassassin.zones.apache.org.  If you don't have this,
+  ask Justin.  If that fails, log into the zone machine as yourself
+  and reset it.
+
   if you get "gpg-agent" errors about not connecting to the PIN entry
   module, you didn't update your $PATH.
 
