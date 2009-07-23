@@ -1168,7 +1168,7 @@ int message_filter(struct transport *tp, const char *username,
     char versbuf[20];
     float version;
     int response;
-    int failureval;
+    int failureval = EX_SOFTWARE;
     unsigned int throwaway;
     SSL_CTX *ctx = NULL;
     SSL *ssl = NULL;
