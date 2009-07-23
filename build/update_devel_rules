@@ -74,10 +74,9 @@ cp rules/*.pre $sitetmp
 
 # sign and get sums
 rm -f $tmpdir/rules.*.asc
-if [ -d $HOME/sabuildtools/sasigningkey ]; then
-  $HOME/sabuildtools/bin/gpg --homedir $HOME/sabuildtools/sasigningkey \
-        -bsa $tmpdir/rules.tgz                  || exit $?
-fi
+ssh updatesd@spamassassin.zones.apache.org \
+        gpg --homedir /home/updatesd/key -bsa - \
+        < $tmpdir/rules.tgz > $tmpdir/rules.tgz.asc || exit $?
 
 (
   cd $tmpdir
