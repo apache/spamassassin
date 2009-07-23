@@ -1,9 +1,4 @@
 
-##
-## Please add loadplugin to init.pre (so it's loadeded before cf files!):
-
-loadplugin Mail::SpamAssassin::Plugin::FreeMail FreeMail.pm
-
 ifplugin Mail::SpamAssassin::Plugin::FreeMail
 
 body     __freemail_safe_fwd  /---\s?(?:(?:Forwarded|Original) message|Alkuper.inen viesti)/i
