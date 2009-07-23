@@ -75,6 +75,7 @@ cp rules/*.pre $sitetmp
 # sign and get sums
 rm -f $tmpdir/rules.*.asc
 ssh updatesd@spamassassin.zones.apache.org \
+        . /etc/profile \; \
         gpg --homedir /home/updatesd/key -bsa - \
         < $tmpdir/rules.tgz > $tmpdir/rules.tgz.asc || exit $?
 
