@@ -69,18 +69,6 @@ use vars qw( %opt );
 Mail::SpamAssassin::Util::clean_path_in_taint_mode();
 untaint_var( \%ENV );
 
-##############################################################################
-
-# testing purposes only
-my $fixup_re_test;
-#$fixup_re_test = 1; fixup_re("fr()|\\\\|"); die;
-#$fixup_re_test = 1; fixup_re("\\x{1b}\$b"); die;
-#$fixup_re_test = 1; fixup_re("\\33\$b"); die;
-#$fixup_re_test = 1; fixup_re("[link]"); die;
-#$fixup_re_test = 1; fixup_re("please do not resend your original message."); die;
-
-##############################################################################
-
 Getopt::Long::Configure(
   qw(bundling no_getopt_compat
     permute no_auto_abbrev no_ignore_case)
@@ -438,7 +426,9 @@ EOT
       die "no 'r REGEXP:REASON' in $_" unless defined $regexp;
 
       eval {
-	print $re "\t", fixup_re($regexp), "            {RET(\"$reason\");}\n"
+	print $re "\t",
+          Mail::SpamAssassin::Plugin::BodyRuleBaseExtractor::fixup_re($regexp),
+          "            {RET(\"$reason\");}\n"
           or die "error writing: $!";
 	$line++; 1;
       } or do {
@@ -655,64 +645,6 @@ EOT
   $str =~ s/^fnord//gm;
   print FILE $str  or die "error writing to $PMFILE: $!";
   close FILE  or die "error closing $PMFILE: $!";
-}
-
-sub fixup_re {
-  my $re = shift;
-  
-  if ($fixup_re_test) { print "INPUT: /$re/\n"  or die "error writing: $!" }
-  
-  my $output = "";
-  my $TOK = qr([\"\\]);
-
-  my $STATE;
-  local ($1,$2);
-  while ($re =~ /\G(.*?)($TOK)/gc) {
-    my $pre = $1;
-    my $tok = $2;
-
-    if (length($pre)) {
-      $output .= "\"$pre\"";
-    }
-
-    if ($tok eq '"') {
-      $output .= '"\\""';
-    }
-    elsif ($tok eq '\\') {
-      $re =~ /\G(x\{[^\}]+\}|\d+|.)/gc or die "\\ at end of string!";
-      my $esc = $1;
-      if ($esc eq '"') {
-        $output .= '"\\""';
-      } elsif ($esc eq '\\') {
-        $output .= '"**BACKSLASH**"';   # avoid hairy escape-parsing
-      } elsif ($esc =~ /^x\{(\S+)\}$/) {
-        $output .= '"'.chr(hex($1)).'"';
-      } elsif ($esc =~ /^\d+/) {
-        $output .= '"'.chr(oct($esc)).'"';
-      } else {
-        $output .= "\"$esc\"";
-      }
-    }
-    else {
-      print "PRE: $pre\nTOK: $tok\n"  or die "error writing: $!";
-    }
-  }
-  
-  if (!defined(pos($re))) {
-    # no matches
-    $output .= "\"$re\"";
-  }
-  elsif (pos($re) <= length($re)) {
-    $output .= fixup_re(substr($re, pos($re)));
-  }
-
-  $output =~ s/^""/"/;  # protect start and end quotes
-  $output =~ s/(?<!\\)""$/"/;
-  $output =~ s/(?<!\\)""//g; # strip empty strings, or turn "abc""def" -> "abcdef"
-  $output =~ s/\*\*BACKSLASH\*\*/\\\\/gs;
-
-  if ($fixup_re_test) { print "OUTPUT: $output\n"  or die "error writing: $!" }
-  return $output;
 }
 
 sub handle_fixup_error {
