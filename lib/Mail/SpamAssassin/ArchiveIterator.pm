@@ -484,10 +484,9 @@ sub _scan_targets {
     if (ref $target eq 'HASH') {
       # e.g. { target => $target, opt_foo => 1, opt_bar => 0.4 ... }
       foreach my $k (keys %{$target}) {
-        next unless ($k =~ /^opt_/);
-        my $v = $target->{$k};
-        next unless defined $v;
-        $opts{$k} = $v;
+        if ($k =~ /^opt_/) {
+          $opts{$k} = $target->{$k};
+        }
       }
       $target = $target->{target};
     }
