@@ -58,6 +58,16 @@ use constant DEBUG_RE_PARSING => 0;     # noisy!
 # TODO: it would be nice to have a clean API to pass such settings
 # through to plugins instead of hanging them off $main
 
+##############################################################################
+
+# testing purposes only
+my $fixup_re_test;
+#$fixup_re_test = 1; fixup_re("fr()|\\\\|"); die;
+#$fixup_re_test = 1; fixup_re("\\x{1b}\$b"); die;
+#$fixup_re_test = 1; fixup_re("\\33\$b"); die;
+#$fixup_re_test = 1; fixup_re("[link]"); die;
+#$fixup_re_test = 1; fixup_re("please do not resend your original message."); die;
+
 ###########################################################################
 
 sub new {
@@ -120,8 +130,8 @@ sub extract_set_pri {
   # regexp.  We try looking at the regexp from both ends, since there
   # may be a good long string of text at the end of the rule.
 
-  # require this many chars in a base string for it to be viable
-  my $min_chars = 3;
+  # require this many chars in a base string + delimiters for it to be viable
+  my $min_chars = 5;
 
   my $progress;
   $self->{show_progress} and $progress = Mail::SpamAssassin::Util::Progress->new({
@@ -185,7 +195,7 @@ NEXT_RULE:
     # 1 regexp.
     my $minlen;
     foreach my $str (@bases) {
-      my $len = length $str;
+      my $len = length fixup_re($str); # bug 6143: count decoded characters
       if ($len < $min_chars) { $minlen = undef; @bases = (); last; }
       elsif (!defined($minlen) || $len < $minlen) { $minlen = $len; }
     }
@@ -1026,6 +1036,71 @@ sub write_cachefile {
   open(CACHE, ">$cachefile")  or warn "cannot write to $cachefile";
   print CACHE ($dump->Dump, ";1;")  or die "error writing: $!";
   close CACHE  or die "error closing $cachefile: $!";
+}
+
+=item my ($cleanregexp) = fixup_re($regexp);
+
+Converts encoded characters in a regular expression pattern into their
+equivalent characters
+
+=cut
+
+sub fixup_re {
+  my $re = shift;
+  
+  if ($fixup_re_test) { print "INPUT: /$re/\n"  or die "error writing: $!" }
+  
+  my $output = "";
+  my $TOK = qr([\"\\]);
+
+  my $STATE;
+  local ($1,$2);
+  while ($re =~ /\G(.*?)($TOK)/gc) {
+    my $pre = $1;
+    my $tok = $2;
+
+    if (length($pre)) {
+      $output .= "\"$pre\"";
+    }
+
+    if ($tok eq '"') {
+      $output .= '"\\""';
+    }
+    elsif ($tok eq '\\') {
+      $re =~ /\G(x\{[^\}]+\}|\d+|.)/gc or die "\\ at end of string!";
+      my $esc = $1;
+      if ($esc eq '"') {
+        $output .= '"\\""';
+      } elsif ($esc eq '\\') {
+        $output .= '"**BACKSLASH**"';   # avoid hairy escape-parsing
+      } elsif ($esc =~ /^x\{(\S+)\}$/) {
+        $output .= '"'.chr(hex($1)).'"';
+      } elsif ($esc =~ /^\d+/) {
+        $output .= '"'.chr(oct($esc)).'"';
+      } else {
+        $output .= "\"$esc\"";
+      }
+    }
+    else {
+      print "PRE: $pre\nTOK: $tok\n"  or die "error writing: $!";
+    }
+  }
+  
+  if (!defined(pos($re))) {
+    # no matches
+    $output .= "\"$re\"";
+  }
+  elsif (pos($re) <= length($re)) {
+    $output .= fixup_re(substr($re, pos($re)));
+  }
+
+  $output =~ s/^""/"/;  # protect start and end quotes
+  $output =~ s/(?<!\\)""$/"/;
+  $output =~ s/(?<!\\)""//g; # strip empty strings, or turn "abc""def" -> "abcdef"
+  $output =~ s/\*\*BACKSLASH\*\*/\\\\/gs;
+
+  if ($fixup_re_test) { print "OUTPUT: $output\n"  or die "error writing: $!" }
+  return $output;
 }
 
 1;
