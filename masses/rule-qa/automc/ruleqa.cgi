@@ -992,7 +992,7 @@ sub get_freqs_for_rule {
   $titleplinknew =~ s/[^A-Za-z0-9]+/_/gs;
   $titleplinknew =~ s/^tDETAILS_//;
 
-  my $titleplinkhref = $self->gen_this_url()."#".$titleplinknew;
+  my $titleplinkhref = $self->{q}->url(-base=>1).$self->gen_this_url()."#".$titleplinknew;
 
   my $comment = qq{
   
@@ -1103,8 +1103,9 @@ sub get_freqs_for_rule {
     $FREQS_LINE_TEMPLATE =~ s/<!--\s+<rule>.*?-->//gs;
   }
 
-  my $texts = "MSECS      SPAM%     HAM%     S/O    RANK   SCORE  NAME WHO/AGE\n";
-             # 0.00000   0.0216   0.0763   0.221    0.52    2.84  X_IP  
+  my $texts = $titleplinkhref." :\n\n".
+  	      "  MSECS    SPAM%     HAM%     S/O    RANK   SCORE  NAME   WHO/AGE\n";
+             #       0   0.0216   0.0763   0.221    0.52    2.84  X_IP  
   
   foreach my $rule (@rules) {
     if ($rule && defined $self->{freqs_data}{$key}{$rule}) {
@@ -1289,9 +1290,9 @@ sub output_freqs_data_line {
 
     $self->process_template($template, {
         RULEDETAIL => $detailurl,
-        MSECS =>  $line->{msecs}+0  ? sprintf("%7s", $line->{msecs})  : "0",
-        SPAMPC => $line->{spampc}+0 ? sprintf("%7s", $line->{spampc}) : "0",
-        HAMPC =>  $line->{hampc}+0  ? sprintf("%7s", $line->{hampc})  : "0",
+        MSECS =>  $line->{msecs}+0  ? sprintf("%7s", $line->{msecs})  : "      0",
+        SPAMPC => $line->{spampc}+0 ? sprintf("%7s", $line->{spampc}) : "      0",
+        HAMPC =>  $line->{hampc}+0  ? sprintf("%7s", $line->{hampc})  : "      0",
         SPAMPCDETAIL => $SPAMPCDETAIL,
         HAMPCDETAIL => $HAMPCDETAIL,
         SPAMLOGHREF => $SPAMLOGHREF,
