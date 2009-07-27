@@ -17,7 +17,7 @@ umask 002
 cd $REPORTSCRIPTSADIR/masses
 
 # run fast report generation right now
-./rule-qa/corpus-hourly --dir $logdir --tag b
+./rule-qa/import-logs --dir $logdir --tag b
 ./rule-qa/automc/gen_info_xml
 
 # enqueue a request for the slow stuff with the report-generation daemon
