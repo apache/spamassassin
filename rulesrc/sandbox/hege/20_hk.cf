@@ -1,0 +1,18 @@
+
+header	HK_RANDOM_FROM		From:addr =~ /^(?!sentto-|[^@]+(?:[=^]|mail)|[^@]{17})[^+@]*(?:[bcdfgjklmnpqrtvwxz]{5}|[aeiouy]{5})/i
+body	HK_GOLDDUST		/\bgold dust\b/i
+
+body	HK_LOTTO		/(?:(?:(?:inter)?national|foundation|mercato|univers|euro million|e-?mail|euro-pw|bill gates|swiss) ?lo(?:tto|ttery|terie)|coca.?cola games|mega jackpot|staatsloterij|ukonline game promo|loto prestige|(?:fran.aise|e-?mail) sweepstakes|loterie (?:internationale|cristal|am.ricaine|coca.?cola|euromillions)|(?:computer|internet) ballot|foundation internationale billgateslottery award|(?:promotional|online) draws?|lottery (?:fiduciary|department))/i
+header	HK_LOTTO_SUBJECT	Subject =~ /\blot(?:eri[ej]|t(?:ery|o))\b/i
+header	HK_LOTTO_NAME		From =~ /^[^@]*(?:lot(?:eri[ej]|t(?:ery|o))|award|winner)/i
+
+header	__HK_NAME_MR_MRS	From:name =~ /^M(?:RS?|ISS)\b/i
+header	__HK_NAME_DR		From:name =~ /^DR\b/i
+header	__HK_NAME_FROM		From:name =~ /^FROM\b/i
+meta	HK_NAME_MR_MRS		__HK_NAME_MR_MRS && !FREEMAIL_FROM
+meta	HK_NAME_FM_MR_MRS	__HK_NAME_MR_MRS && FREEMAIL_FROM
+meta	HK_NAME_DR		__HK_NAME_DR && !FREEMAIL_FROM
+meta	HK_NAME_FM_DR		__HK_NAME_DR && FREEMAIL_FROM
+meta	HK_NAME_FROM		__HK_NAME_FROM && !FREEMAIL_FROM
+meta	HK_NAME_FM_FROM		__HK_NAME_FROM && FREEMAIL_FROM
+
