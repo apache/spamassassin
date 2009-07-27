@@ -6,6 +6,9 @@ body	HK_LOTTO		/(?:(?:(?:inter)?national|foundation|mercato|univers|euro million
 header	HK_LOTTO_SUBJECT	Subject =~ /\blot(?:eri[ej]|t(?:ery|o))\b/i
 header	HK_LOTTO_NAME		From =~ /^[^@]*(?:lot(?:eri[ej]|t(?:ery|o))|award|winner)/i
 
+header	HK_NAME_DRUGS		From:name =~ /(viagra|cialis)/i
+header	HK_NAME_FREE		From:name =~ /\b(?:get)?free\b/i
+
 header	__HK_NAME_MR_MRS	From:name =~ /^M(?:RS?|ISS)\b/i
 header	__HK_NAME_DR		From:name =~ /^DR\b/i
 header	__HK_NAME_FROM		From:name =~ /^FROM\b/i

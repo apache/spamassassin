@@ -1,4 +1,20 @@
 
+header		__HK_NAME_MICROSOFT	From:name =~ /(microsoft|\bmsn\b)/i
+header		__HK_HELO_MICROSOFT	X-Spam-Relays-External =~ / helo=\S+\.(?:microsoft|msn)\.com /
+meta		HK_FAKENAME_MICROSOFT	__HK_NAME_MICROSOFT && !__HK_HELO_MICROSOFT
+
+header		__HK_NAME_YAHOO		From:name =~ /\byahoo\b/i
+header		__HK_HELO_YAHOO		X-Spam-Relays-External =~ / helo=\S+\.yahoo\.com /
+meta		HK_FAKENAME_YAHOO	__HK_NAME_YAHOO && !__HK_HELO_YAHOO
+
+header		__HK_NAME_PAYPAL	From:name =~ /\bpaypal\b/i
+header		__HK_HELO_PAYPAL	X-Spam-Relays-External =~ / helo=\S+\.paypal\b/
+meta		HK_FAKENAME_PAYPAL	__HK_NAME_PAYPAL && !__HK_HELO_PAYPAL
+
+header		__HK_NAME_EBAY		From:name =~ /\bebay\b/i
+header		__HK_HELO_EBAY		X-Spam-Relays-External =~ / helo=\S+\.(?:ebay|emarsys)\b/
+meta		HK_FAKENAME_EBAY	__HK_NAME_EBAY && !__HK_HELO_EBAY
+
 body		__hk_unsub	/\bto unsub(?:scribe)?\b/i
 
 body		__hk_million	/(?:(?:[0-9]{3}[ ,.]?){2,4}|[0-9] ?M\b|mill(?:(?:es?|ons?)(?: de\b)?|ion)).{0,18}(?:\$|£|eur\b|usd\b|gbp\b|cfa\b|euros?\b|dollard?s?\b|pounds?\b|francs?\b)/i
