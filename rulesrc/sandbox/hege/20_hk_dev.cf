@@ -1,0 +1,52 @@
+
+body		__hk_unsub	/\bto unsub(?:scribe)?\b/i
+
+body		__hk_million	/(?:(?:[0-9]{3}[ ,.]?){2,4}|[0-9] ?M\b|mill(?:(?:es?|ons?)(?: de\b)?|ion)).{0,18}(?:\$|£|eur\b|usd\b|gbp\b|cfa\b|euros?\b|dollard?s?\b|pounds?\b|francs?\b)/i
+body		__hk_million2	/(?:\$|£|eur|usd|gbp|cfa|euros?|dollard?s?|pounds?|francs?)(?: de\b)? mill(?:(?:es?|ons?)|ion)/
+body		__hk_hthousand	/hundred.{0,20}thousand.{0,20}(?:eur|usd|gbp|cfa|euros?|dollard?s?|pounds?|francs?)\b/i
+body		__hk_bigmoney	/(?:EURO?|USD?|GBP|CFA|\&\#163;|£|\$).{0,4}(?:[0-9]{3}[^0-9a-z]?[0-9]{3}|[0-9.,]{1,4}(?: ?M\b| ?(?:de )?Mil))/i
+meta		HK_MUCHMONEY	__hk_million || __hk_million2 || __hk_hthousand || __hk_bigmoney
+describe	HK_MUCHMONEY	Message refers to hundreds of thousands or millions
+
+body		__hk_prize1	/\b(?:(?:prize|lucky|dear|emerged(?: a)?) (?:winners?|money)|attn.{0,10}winner|happily aa?nnounce|pleasure to inform|(?:notice the|your) winnings?)\b/i
+body		__hk_prize2	/(?:cash prize|prize awards?|you have been awarded|award (?:notification|notice))/i
+body		__hk_prize3	/\b(?:(?:ha(?:s|ve)|you) w[io]n|congratulations? to your?|unexpected luck|lucky (?:nl )number|your? e-?mail just w[oi]n|winning e-?mail|your e-?mail (?:address )?(?:has )?w[io]n|une adresse e-?mail sur internet|category (?:\S{0,5} )?winner of our)\b/i
+body		__hk_prize4	/(?:(?:tic(?:ket)?|batch|\bbt|serial|\bsr|\brf|ref(?:erence)?)(?:\:| ?(?:number|no|nr)|.{0,7}\/)|num.ro de (?:ticket|s.rie|r.f.rence|lot)|pleased to inform|selected randomly|randomly selected|winning (?:numbers|information))/i
+body		__hk_prize5	/(?:funds? transfer|(?:winning|ready for|sum) pay ?outs?|claim(?:s? officer| your| procedure)|(?:make|file) (?:for )?your claims?|r.clamation de votre prix|collect your prize|clarification and procedure)/i
+meta		HK_PRIZEWIN	__hk_prize1 + __hk_prize2 + __hk_prize3 + __hk_prize4 + __hk_prize5 > 1
+describe	HK_PRIZEWIN	Won lot of money or prizes
+
+body		__hk_scam_w0	/\b(?:(?:widow|son|daughter|husband|wife|brother|sister) of (?:the )?(?:late|sacked)|next of kin|direct telephone numbers?|e?mail me below|reply (?:me to )?this e?mail (?:at|to)?|send your reply (?:to|at)|anonymous investment|late (?:client of mine|prime minister)|preapproved to receive|your compensation|seek for your indulgence|a huge transfer of|make sure your email is checked|insured with your email|(?:business|important|discreet) transaction|sum of amount)\b/i
+body		__hk_scam_w1	/\b(?:claim|(?:he)?deposit(?:ed)?|inheritance|(?:l')?heriti.re|western union|banque|courier|D[eé]p[oô](?:t|sé.{0,2})|h[ée]rit(?:[ée]|age|i[èe]re)|offshore|profitable|bancaire|(?:meiner|unsere) bank|assasinated|assassin.{0,2}|la somme de|ces fonds|le tribunal)\b/i
+body		__hk_scam_w2	/\b(?:(?:funds?|money) transfer|transfér.r?.{0,2}|REPUBLIQUE|Gouvernement|johannesburg|south africa|assistance|beneficiary|b.n.ficiaire|husband|death|manager|immediate delivery|rebelles|securiser|passeport|personal account|confidenti[ea]l|account overseas|compagnie de s.curit.{0,2}|arrangement secret)\b/i
+meta		HK_SCAM		__hk_scam_w0 + __hk_scam_w1 + __hk_scam_w2 > 1
+describe	HK_SCAM		Looks like scam
+
+body		HK_SCAM_S1	/pay you the sum of/i
+body		HK_SCAM_S2	/lucrative (?:to )?invest/i
+body		HK_SCAM_S3	/invest(?:ment (?:in your area|partner)|in your country|assist me in an investment)/i
+body		HK_SCAM_S4	/transfer (?:this|my|of )?funds?/i
+body		HK_SCAM_S5	/possible investment opportunities/i
+body		HK_SCAM_S6	/large amount of money/i
+body		HK_SCAM_S7	/(?:(?:investment|proposed|lucrative) (?:business|venture)|account offshore|(?:business|venture) (?:enterprise|propos(?:al|ition)))/i
+body		HK_SCAM_S10	/someone i can trust/i
+body		HK_SCAM_S11	/enable me ascertain/i
+body		HK_SCAM_S12	/fidelity investments international/i
+body		HK_SCAM_S13	/credit.{0,10}atlantique/i
+body		HK_SCAM_S14	/(?:interested in chatting to pretty|nice girl that would like to chat|(?:mind if i share|wanna see) .{0,10}some (?:of my )?pictures|(?:hi|hello).{0,5}i am (?:tired|bored) (?:this (?:evening|afternoon)|tonight|today))/i
+body		HK_SCAM_S15	/(?:discovered a dormant account|can you be my partner)/i
+body		HK_SCAM_S16	/mail me at \S{0,50} only\b/i
+body		HK_SCAM_S17	/green card.{0,25}lottery/i
+body		HK_SCAM_S18	/nude pictures especially for you/i
+body		HK_SCAM_S19	/member.{0,3}became strong as a stone/i
+body		HK_SCAM_S20	/good business relation.{0,50}terms of payment/i
+body		HK_SCAM_S21	/notification.{0,40}safe deposit box/i
+body		HK_SCAM_S22	/\bmining companies/i
+body		HK_SCAM_S23	/(?:\b(?:urgent alert|start trade|get it at monday)\b|\b(?:5-|five )day price:)/i
+body		HK_SCAM_S24	/\b(?:government of ghana|recieved funds?|loan number|credit no|afd loan|eligible payments)\b/i
+body		HK_SCAM_S25	/\bbank (?:in|of) ghana/i
+
+body		HK_NASTY	/\b(?:penis|hard cock|footjob|bitch has|dicks)\b/i
+body		HK_LOANS	/\b(?:loans? (?:guild|available)|taylor payments)/i
+body		HK_PILLS	/(?:cut on your medication|(?:huge selection of|demanding to find) drugs|Approved medz|on zale now|LegalRXMedications)/i
+
