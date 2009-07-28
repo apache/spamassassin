@@ -224,3 +224,11 @@ adsp_override sa-test-all.spamassassin.org  all
 adsp_override sa-test-dis.spamassassin.org  discardable
 adsp_override sa-test-di2.spamassassin.org
 endif
+
+ifplugin Mail::SpamAssassin::Plugin::Shortcircuit
+header SHORTCIRCUIT             eval:check_shortcircuit()
+describe SHORTCIRCUIT           Not all rules were run, due to a shortcircuited rule
+tflags SHORTCIRCUIT             userconf noautolearn
+endif
+
+

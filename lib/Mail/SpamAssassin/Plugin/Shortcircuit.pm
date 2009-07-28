@@ -31,6 +31,7 @@ Mail::SpamAssassin::Plugin::Shortcircuit - short-circuit evaluation for certain 
 
 This plugin implements simple, test-based shortcircuiting.  Shortcircuiting a
 test will force all other pending rules to be skipped, if that test is hit.
+In addition, a symbolic rule, C<SHORTCIRCUIT>, will fire.
 
 Recomended usage is to use C<priority> to set rules with strong S/O values (ie.
 1.0) to be run first, and make instant spam or ham classification based on
@@ -58,10 +59,13 @@ sub new {
   my $self = $class->SUPER::new($mailsaobject);
   bless ($self, $class);
 
+  $self->register_eval_rule("check_shortcircuit");
   $self->set_config($mailsaobject->{conf});
 
   return $self;
 }
+
+sub check_shortcircuit { return 0; }        # never used
 
 sub set_config {
   my($self, $conf) = @_;
@@ -244,9 +248,11 @@ sub hit_rule {
   my $score = $params->{score};
 
   $scan->{shortcircuit_rule} = $rule;
+  my $scscore;
   if ($sctype eq 'on') {  # guess by rule score
     dbg("shortcircuit: s/c due to $rule, using score of $score");
     $scan->{shortcircuit_type} = ($score < 0 ? 'ham' : 'spam');
+    $scscore = ($score < 0) ? -0.0001 : 0.0001;
   }
   else {
     $scan->{shortcircuit_type} = $sctype;
@@ -256,16 +262,12 @@ sub hit_rule {
       $score = $conf->{shortcircuit_spam_score};
     }
     dbg("shortcircuit: s/c $sctype due to $rule, using score of $score");
+    $scscore = $score;
   }
 
   # bug 5256: if we short-circuit, don't do auto-learning
   $scan->{disable_auto_learning} = 1;
-
-  # I don't think we really need to do these...
-  # undef $scan->{test_names_hit};       # reset rule hits
-  # $scan->{score}                = 0;   # reset score
-  # $scan->{tag_data}->{REPORT}   = '';  # reset tag data
-  # $scan->{tag_data}->{SUMMARY}  = '';  # reset tag data
+  $scan->got_hit('SHORTCIRCUIT', '', score => $scscore);
 }
 
 sub parsed_metadata {
