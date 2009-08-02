@@ -137,7 +137,9 @@ my %makefile = (
       'spamassassin.raw' => 'spamassassin',
       'sa-learn.raw'     => 'sa-learn',
       'sa-update.raw'    => 'sa-update',
-      'sa-compile.raw'    => 'sa-compile',
+      'sa-compile.raw'   => 'sa-compile',
+      'sa-awl.raw'       => 'sa-awl',
+      'sa-check_spamd.raw' => 'sa-check_spamd',
       'spamc/spamc.c'    => 'spamc/spamc$(EXE_EXT)',
       'spamd/spamd.raw'  => 'spamd/spamd',
     },
@@ -1026,6 +1028,12 @@ sa-update: sa-update.raw build_rules
 
 sa-compile: sa-compile.raw
 	$(PREPROCESS) $(FIXBYTES) $(FIXVARS) $(FIXBANG) -m$(PERM_RWX) -isa-compile.raw -osa-compile
+
+sa-awl: sa-awl.raw
+	$(PREPROCESS) $(FIXBYTES) $(FIXVARS) $(FIXBANG) -m$(PERM_RWX) -isa-awl.raw -osa-awl
+
+sa-check_spamd: sa-check_spamd.raw
+	$(PREPROCESS) $(FIXBYTES) $(FIXVARS) $(FIXBANG) -m$(PERM_RWX) -isa-check_spamd.raw -osa-check_spamd
 
 spamd/spamd: spamd/spamd.raw
 	$(PREPROCESS) $(FIXBYTES) $(FIXVARS) $(FIXBANG) -m$(PERM_RWX) -i$? -o$@

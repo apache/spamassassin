@@ -1,4 +1,4 @@
-#!/usr/bin/perl -w -T
+#!/usr/bin/perl -w
 
 ########################################################################
 #
@@ -22,15 +22,53 @@
 ########################################################################
 
 # Written by Daryl C. W. O'Shea, DOS Technologies <spamassassin@dostech.ca>
-# See  perldoc check_spamd  for program info.
+# See  perldoc sa-check_spamd  for program info.
+
+my $PREFIX          = '@@PREFIX@@';             # substituted at 'make' time
+my $DEF_RULES_DIR   = '@@DEF_RULES_DIR@@';      # substituted at 'make' time
+my $LOCAL_RULES_DIR = '@@LOCAL_RULES_DIR@@';    # substituted at 'make' time
+my $LOCAL_STATE_DIR = '@@LOCAL_STATE_DIR@@';    # substituted at 'make' time
+use lib '@@INSTALLSITELIB@@';                   # substituted at 'make' time
 
 use strict;
+use warnings;
+use re 'taint';
+
+use Errno qw(EBADF);
+use File::Spec;
+use Config;
+
+BEGIN {                          # see comments in "spamassassin.raw" for doco
+  my @bin = File::Spec->splitpath($0);
+  my $bin = ($bin[0] ? File::Spec->catpath(@bin[0..1]) : $bin[1])
+            || File::Spec->curdir;
+
+  if (-e $bin.'/lib/Mail/SpamAssassin.pm'
+        || !-e '@@INSTALLSITELIB@@/Mail/SpamAssassin.pm' )
+  {
+    my $searchrelative;
+    $searchrelative = 1;    # disabled during "make install": REMOVEFORINST
+    if ($searchrelative && $bin eq '../' && -e '../blib/lib/Mail/SpamAssassin.pm')
+    {
+      unshift ( @INC, '../blib/lib' );
+    } else {
+      foreach ( qw(lib ../lib/site_perl
+                ../lib/spamassassin ../share/spamassassin/lib))
+      {
+        my $dir = File::Spec->catdir( $bin, split ( '/', $_ ) );
+        if ( -f File::Spec->catfile( $dir, "Mail", "SpamAssassin.pm" ) )
+        { unshift ( @INC, $dir ); last; }
+      }
+    }
+  }
+}
 
 use Getopt::Long;
 
 use constant HAS_TIME_HIRES => eval { require Time::HiRes; };
 use constant HAS_MSA_CLIENT => eval { require Mail::SpamAssassin::Client; };
 use constant HAS_MSA_TIMEOUT => eval { require Mail::SpamAssassin::Timeout; };
+use Mail::SpamAssassin::Util;
 
 ### nagios plugin return codes: 0 OK / 1 Warning / 2 Critical / 3 Unknown ###
 use constant EX_OK	 => 0;
@@ -38,7 +76,7 @@ use constant EX_WARNING	 => 1;
 use constant EX_CRITICAL => 2;
 use constant EX_UNKNOWN	 => 3;
 
-my $VERSION = "0.01";
+my $VERSION = $Mail::SpamAssassin::VERSION;
 
 my %opt = (
   'critical'	=> undef,
@@ -60,7 +98,7 @@ GetOptions(
   'socketpath=s'	=> \$opt{'socketpath'},
   'timeout|t=s'		=> \$opt{'timeout'},
   'verbose|v'		=> \$opt{'verbose'},
-  'version|V'		=> sub { print "check_spamd version $VERSION\n"; exit EX_UNKNOWN; },
+  'version|V'		=> sub { print "sa-check_spamd version $VERSION\n"; exit EX_UNKNOWN; },
   'warning|w=s'		=> \$opt{'warning'},
 
 ) or print_usage_and_exit();
@@ -158,6 +196,14 @@ unless (HAS_MSA_CLIENT && HAS_MSA_TIMEOUT) {
 }
 
 
+# untaint the command-line args; since the root user supplied these, and
+# we're not a setuid script, we trust them.  This needs to be called explicitly
+foreach my $optkey (keys %opt) {
+  next if ref $opt{$optkey};
+  Mail::SpamAssassin::Util::untaint_var(\$opt{$optkey});
+}
+
+
 # If the client connection fails it'll spit out it's own error message which
 # is probably more appropriate than anything we can provide to Nagios ourself.
 # We'll still spit out something later, but Nagios will ignore it since it
@@ -242,12 +288,12 @@ exit EX_UNKNOWN;
 
 sub print_usage_and_exit {
   print <<EOF;
-check_spamd version $VERSION
+sa-check_spamd version $VERSION
 
-For more details, use "perldoc check_spamd".
+For more details, use "perldoc sa-check_spamd".
 
 Usage:
-   check_spamd [options]
+   sa-check_spamd [options]
 
     Options:
 
@@ -270,11 +316,11 @@ EOF
 
 =head1 NAME
 
-check_spamd - spamd monitoring script for use with Nagios, etc.
+sa-check_spamd - spamd monitoring script for use with Nagios, etc.
 
 =head1 SYNOPSIS
 
-check_spamd [options]
+sa-check_spamd [options]
 
 Options:
 
@@ -390,7 +436,7 @@ timeout value.
 =item 3
 
 UNKNOWN: An error, probably caused by a missing dependency or an invalid
-configuration parameter being supplied, occurred in the check_spamd program.
+configuration parameter being supplied, occurred in the sa-check_spamd program.
 
 =back
 
@@ -410,7 +456,7 @@ Daryl C. W. O'Shea, DOS Technologies <spamassassin@dostech.ca>
 
 =head1 LICENSE
 
-check_spamd is distributed under the Apache License, Version 2.0, as
+sa-check_spamd is distributed under the Apache License, Version 2.0, as
 described in the file C<LICENSE> included with the Apache SpamAssassin
 distribution and available at http://www.apache.org/licenses/LICENSE-2.0
 
