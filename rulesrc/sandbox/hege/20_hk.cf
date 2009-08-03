@@ -1,13 +1,13 @@
 
-header	HK_RANDOM_ENVFROM	EnvelopeFrom =~ /^(?!(?:mail|bounce)[_.-]|[^@]*(?:[=^]|mcgr|kpmg|-mailer@)|[^@]{20})[^+@]*(?:[bcdfgjklmnpqrtvwxz]{5}|[aeiouy]{5}|([a-z]{1,2})(?:\1){3})/i
+header	HK_RANDOM_ENVFROM	EnvelopeFrom =~ /^(?!(?:mail|bounce)[_.-]|[^@]*(?:[+=^~\#]|mcgr|kpmg|nlpbr|ndqv|lcgc|cplpr|-mailer@)|[^@]{20})[^@]*(?:[bcdfgjklmnpqrtvwxz]{5}|[aeiouy]{5}|([a-z]{1,2})(?:\1){3})/i
 
-header	HK_RANDOM_FROM		From:addr =~ /^(?!mail[-.]|[^@]*(?:[=^]|mcgr|kpmg|nlpbr|lcgc)|[^@]{26}|.*?@.{0,20}\bcmp-info\.com$)[^+@]*(?:[bcdfgjklmnpqrtvwxz]{5}|[aeiouy]{5}|([a-z]{1,2})(?:\1){3})/i
-header	HK_RANDOM_FROM_NAME	From:name =~ /(?:[bcdfgjklmnpqrtvwxz]{5}|[aeiouy]{5}|([a-z]{1,2})(?:\1){3})/i
+header	HK_RANDOM_FROM		From:addr =~ /^(?!(?:mail|bounce)[_.-]|[^@]*(?:[+=^~\#]|mcgr|kpmg|nlpbr|ndqv|lcgc|cplpr|-mailer@)|[^@]{26}|.*?@.{0,20}\bcmp-info\.com$)[^@]*(?:[bcdfgjklmnpqrtvwxz]{5}|[aeiouy]{5}|([a-z]{1,2})(?:\1){3})/i
+header	HK_RANDOM_FROM_NAME	From:name =~ /^(?!.*?(?:@|cnnbc|nlpbr)).*?(?:[bcdfgjklmnpqrtvwxz]{5}|[aeiouy]{5}|([a-z]{1,2})(?:\1){3})/i
 
-header	HK_RANDOM_REPLYTO	Reply-To:addr =~ /^(?![^@]*(?:mcgr|kpmg)|[^@]{26}|.*?@.{0,20}\bcnn\.com)[^+@]*(?:[bcdfgjklmnpqrtvwxz]{5}|[aeiouy]{5}|([a-z]{1,2})(?:\1){3})/i
-header	HK_RANDOM_REPLYTO_NAME	Reply-To:name =~ /(?:[bcdfgjklmnpqrtvwxz]{5}|[aeiouy]{5}|([a-z]{1,2})(?:\1){3})/i
+header	HK_RANDOM_REPLYTO	Reply-To:addr =~ /^(?!(?:mail|bounce)[_.-]|[^@]*(?:[+=^~\#]|mcgr|kpmg|nlpbr|ndqv|lcgc|cplpr|-mailer@)|[^@]{26}|.*?@.{0,20}\b(?:cmpgnr|cnn)\.com$)[^@]*(?:[bcdfgjklmnpqrtvwxz]{5}|[aeiouy]{5}|([a-z]{1,2})(?:\1){3})/i
+header	HK_RANDOM_REPLYTO_NAME	Reply-To:name =~ /^(?!.*?(?:@|cnnbc|nlpbr)).*?(?:[bcdfgjklmnpqrtvwxz]{5}|[aeiouy]{5}|([a-z]{1,2})(?:\1){3})/i
 
-body	HK_GOLDDUST		/\bgold dust\b/i
+body	HK_GOLDDUST		/\bgold ?dust\b/i
 
 body	HK_LOTTO		/(?:(?:(?:inter)?national|foundation|mercato|univers|euro million|e-?mail|euro-pw|bill gates|swiss) ?lo(?:tto|ttery|terie)|coca.?cola games|mega jackpot|staatsloterij|ukonline game promo|loto prestige|(?:fran.aise|e-?mail) sweepstakes|loterie (?:internationale|cristal|am.ricaine|coca.?cola|euromillions)|(?:computer|internet) ballot|foundation internationale billgateslottery award|(?:promotional|online) draws?|lottery (?:fiduciary|department))/i
 header	HK_LOTTO_SUBJECT	Subject =~ /\blot(?:eri[ej]|t(?:ery|o))\b/i
