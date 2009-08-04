@@ -13,3 +13,7 @@ header         RDNS_LOCALHOST  X-Spam-Relays-External =~ /^\[ ip=(?!127)\d+\.\d+
 describe       RDNS_LOCALHOST  Sender's public rDNS is "localhost"
 
 
+ifplugin Mail::SpamAssassin::Plugin::MIMEHeader
+  mimeheader   HTML_ATTACH    Content-Type =~ /text\/html\b.+\.htm/i
+endif
+
