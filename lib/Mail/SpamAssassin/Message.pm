@@ -226,6 +226,7 @@ sub new {
 
         # If it's not a valid header (aka: not in the form "foo: bar"), skip it.
         if (defined $value) {
+	  $key =~ s/[ \t]+\z//;  # strip WSP before colon, obsolete rfc822 syn
 	  # limit the length of the pairs we store
 	  if (length($key) > MAX_HEADER_KEY_LENGTH) {
 	    $key = substr($key, 0, MAX_HEADER_KEY_LENGTH);
@@ -362,6 +363,10 @@ ie: If 'Subject' is specified as the header, and there are 2 Subject
 headers in a message, the last/bottom one in the message is returned in
 scalar context or both are returned in array context.
 
+Btw, returning the last header field (not the first) happens to be consistent
+with DKIM signatures, which search for and cover multiple header fields
+bottom-up according to the 'h' tag. Let's keep it this way.
+
 Note: the returned header will include the ending newline and any embedded
 whitespace folding.
 
@@ -370,8 +375,9 @@ whitespace folding.
 sub get_pristine_header {
   my ($self, $hdr) = @_;
   
-  return $self->{pristine_headers} unless $hdr;
-  my(@ret) = $self->{pristine_headers} =~ /^\Q$hdr\E:[ \t]+(.*?\n(?![ \t]))/smgi;
+  return $self->{pristine_headers} if !defined $hdr || $hdr eq '';
+  my(@ret) =
+    $self->{pristine_headers} =~ /^\Q$hdr\E[ \t]*:[ \t]*(.*?\n(?![ \t]))/smgi;
   # taintedness is retained by "use re 'taint'" (fix in bug 5283 now redundant)
   if (!@ret) {
     return $self->get_header($hdr);
@@ -838,7 +844,7 @@ sub _parse_multipart {
 
     if (!$in_body) {
       # s/\s+$//;   # bug 5127: don't clean this up (yet)
-      if (/^[\041-\071\073-\176]+:/) {
+      if (/^[\041-\071\073-\176]+[ \t]*:/) {
         if ($header) {
           my ( $key, $value ) = split ( /:\s*/, $header, 2 );
           $part_msg->header( $key, $value );

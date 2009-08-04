@@ -173,8 +173,8 @@ sub header {
 
     my $dec_value = $raw_value;
     $dec_value =~ s/\n[ \t]+/ /gs;
-    $dec_value =~ s/\s*$//s;
-    $dec_value =~ s/^\s*//s;
+    $dec_value =~ s/\s+$//s;
+    $dec_value =~ s/^\s+//s;
     push @{ $self->{'headers'}->{$key} },     $self->_decode_header($dec_value);
 
     push @{ $self->{'raw_headers'}->{$key} }, $raw_value;
@@ -622,6 +622,10 @@ the last specific header is returned.
 ie: If 'Subject' is specified as the header, and there are 2 Subject
 headers in a message, the last/bottom one in the message is returned in
 scalar context or both are returned in array context.
+
+Btw, returning the last header field (not the first) happens to be consistent
+with DKIM signatures, which search for and cover multiple header fields
+bottom-up according to the 'h' tag. Let's keep it this way.
 
 =cut
 
