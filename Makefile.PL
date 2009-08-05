@@ -13,8 +13,9 @@ my $mm_version = $ExtUtils::MakeMaker::VERSION;
 # avoid stupid 'Argument "6.30_01" isn't numeric in numeric ge (>=)' warnings;
 # strip off the beta subversion noise that causes the trouble.
 $mm_version =~ s/_\S+$//;      # "6.30_01" => "6.30"
+$mm_version += 0;
 
-if ($mm_version+0 < 6.17) {
+if ($mm_version < 6.17) {
   die "SpamAssassin Makefile.PL requires at least ExtUtils::MakeMaker v6.17";
 }
 
@@ -322,7 +323,8 @@ foreach my $file (@FILES_THAT_MUST_EXIST) {
 
 #######################################################################
 
-$makefile{META_MERGE} = {
+# bug 6131
+($mm_version >= 6.46) and $makefile{META_MERGE} = {
   license => 'apache',
 
   resources => {
@@ -361,7 +363,7 @@ $makefile{META_MERGE} = {
 $makefile{EXE_FILES} = [ values %{$makefile{EXE_FILES}} ];
 $makefile{AUTHOR} =~ s/(<.+) at (.+>)/$1\@$2/;
 WriteMakefile(%makefile);
-print "Makefile written by ExtUtils::MakeMaker ${mm_version}\n";
+print "Makefile written by ExtUtils::MakeMaker $mm_version\n";
 
 #######################################################################
 
