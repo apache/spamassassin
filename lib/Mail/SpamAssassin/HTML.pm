@@ -57,7 +57,8 @@ my %elements_text_style = map {; $_ => 1 }
 
 # elements that insert whitespace
 my %elements_whitespace = map {; $_ => 1 }
-  qw( br div li th td dt dd p hr blockquote pre embed listing plaintext xmp title ),
+  qw( br div li th td dt dd p hr blockquote pre embed listing plaintext xmp title 
+    h1 h2 h3 h4 h5 h6 ),
 ;
 
 # elements that push URIs
@@ -298,7 +299,7 @@ sub html_whitespace {
   if ($tag eq "br" || $tag eq "div") {
     $self->display_text("\n", whitespace => 1);
   }
-  elsif ($tag =~ /^(?:li|t[hd]|d[td]|embed)$/) {
+  elsif ($tag =~ /^(?:li|t[hd]|d[td]|embed|h\d)$/) {
     $self->display_text(" ", whitespace => 1);
   }
   elsif ($tag =~ /^(?:p|hr|blockquote|pre|listing|plaintext|xmp|title)$/) {
