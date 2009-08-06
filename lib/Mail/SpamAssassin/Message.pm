@@ -171,7 +171,7 @@ sub new {
     # de facto portability standard in SA's internals.  We need to
     # to this so that Mail::SpamAssassin::Util::parse_rfc822_date
     # can parse the date string...
-    if (/([\s|\d]\d)-([a-zA-Z]{3})-(\d{4})\s(\d{2}):(\d{2}):(\d{2})/) {
+    if (/([\s\d]\d)-([a-zA-Z]{3})-(\d{4})\s(\d{2}):(\d{2}):(\d{2})/) {
       # $1 = day of month
       # $2 = month (text)
       # $3 = year
@@ -181,10 +181,10 @@ sub new {
       my @arr = localtime(timelocal($6,$5,$4,$1,$MONTH{lc($2)}-1,$3));
       my $address;
       foreach (@message) {
-  	if (/From:\s[^<]+<([^>]+)>/) {
+  	if (/^From:[^<]*<([^>]+)>/) {
   	    $address = $1;
   	    last;
-  	} elsif (/From:\s([^<^>]+)/) {
+  	} elsif (/^From:\s*([^<> ]+)/) {
   	    $address = $1;
   	    last;
   	}
