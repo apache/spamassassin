@@ -14,7 +14,7 @@ sub new {
 
 sub check_end {
   my ($self, $opts) = @_;
-  my $str = $opts->{permsgstatus}->get("ALL");
+  my $str = $opts->{permsgstatus}->get("ALL:raw");
   $str =~ s/\n/[\\n]/gs;
   $str =~ s/\t/[\\t]/gs;
   $str =~ s/\n+//gs;

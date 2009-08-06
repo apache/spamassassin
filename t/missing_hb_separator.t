@@ -20,7 +20,7 @@ use Test;
 use SATest; sa_t_init("missing_hb_separator");
 use Mail::SpamAssassin;
 
-plan tests => 12;
+plan tests => 15;
 
 # initialize SpamAssassin
 my $sa = create_saobj({'dont_copy_prefs' => 1});
@@ -92,7 +92,7 @@ $mail->finish();
 
 #####
 
-@msg = ("X-Message-Info: foo\n", "This is a test\n");
+@msg = ("X-Message-Info: foo\n", "--This is a test\n");
 $mail = $sa->parse(\@msg, 1);
 $status = $sa->check($mail);
 
@@ -102,7 +102,48 @@ foreach (@{$status->{test_names_hit}}) {
 }
 
 ok ( $result == 2 );
-ok ( $mail->{pristine_body} eq "This is a test\n" );
+ok ( $mail->{pristine_body} eq "--This is a test\n" );
+
+$status->finish();
+$mail->finish();
+
+
+#####
+
+@msg = ("X-Message-Info:foo\n", "one\n", "ywo\n", "yhree\n", "Subject:x\n",
+        "\n", "test body\n");
+$mail = $sa->parse(\@msg, 1);
+$status = $sa->check($mail);
+
+$result = 0;
+foreach (@{$status->{test_names_hit}}) {
+# print "test hit: $_\n";
+  $result++ if ($_ eq 'MISSING_HB_SEP' || $_ eq 'X_MESSAGE_INFO' ||
+                $_ eq 'MISSING_SUBJECT');
+}
+
+ok ( $result == 1 );
+ok ( $mail->{pristine_body} eq "test body\n" );
+
+$status->finish();
+$mail->finish();
+
+
+#####
+
+@msg = ("X-Message-Info:foo\n", "one\n", "ywo\n", "yhree\n", "four\n",
+        "Subject:x\n", "\n", "test\n");
+$mail = $sa->parse(\@msg, 1);
+$status = $sa->check($mail);
+
+$result = 0;
+foreach (@{$status->{test_names_hit}}) {
+# print "test hitH: $_\n";
+  $result++ if ($_ eq 'MISSING_HB_SEP' || $_ eq 'X_MESSAGE_INFO' ||
+                $_ eq 'MISSING_SUBJECT');
+}
+
+ok ( $result == 3 );
 
 $status->finish();
 $mail->finish();
@@ -148,4 +189,3 @@ ok ( $mail->{pristine_body} eq "--foo\n" );
 
 $status->finish();
 $mail->finish();
-

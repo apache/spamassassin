@@ -260,7 +260,7 @@ describe X_MESSAGE_INFO		Bulk email fingerprint (X-Message-Info) found
 
 # case-sensitive rule
 # only significant rules with no FPs, hit recently, on 2+ corpuses
-header HEADER_SPAM		ALL =~ /^(Alternate-Recipient|Antivirus|Approved|Delivery-Notification|Disclose-Recipients|Error-path|Language|Location|Mime-Subversion|Newsletter-ID|PID|Rot|UID|X-BounceTrace|X-CS-IP|X-Company-Address|X-Company-City|X-Company-Country|X-Company-State|X-Company-Zip|X-E(?:[Mm]ail)?|X-Encoding|X-Originating-Company|X-RMD-Text|X-SG4|X-SP-Track-ID|X-Webmail-Time|X-bounce-to):/m
+header HEADER_SPAM		ALL:raw =~ /^(Alternate-Recipient|Antivirus|Approved|Delivery-Notification|Disclose-Recipients|Error-path|Language|Location|Mime-Subversion|Newsletter-ID|PID|Rot|UID|X-BounceTrace|X-CS-IP|X-Company-Address|X-Company-City|X-Company-Country|X-Company-State|X-Company-Zip|X-E(?:[Mm]ail)?|X-Encoding|X-Originating-Company|X-RMD-Text|X-SG4|X-SP-Track-ID|X-Webmail-Time|X-bounce-to):/m
 describe HEADER_SPAM		Bulk email fingerprint (header-based) found
 
 header RATWARE_RCVD_PF		Received =~ / \(Postfix\) with ESMTP id [^;]+\; \S+ \d+ \S+ \d+ \d+:\d+:\d+ \S+$/s

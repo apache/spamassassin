@@ -1890,16 +1890,27 @@ Example: http://chkpt.zdnet.com/chkpt/whatever/spammer.domain/yo/dude
 =item header SYMBOLIC_TEST_NAME header op /pattern/modifiers	[if-unset: STRING]
 
 Define a test.  C<SYMBOLIC_TEST_NAME> is a symbolic test name, such as
-'FROM_ENDS_IN_NUMS'.  C<header> is the name of a mail header, such as
-'Subject', 'To', etc.
+'FROM_ENDS_IN_NUMS'.  C<header> is the name of a mail header field, such as
+'Subject', 'To', 'From', etc.
 
-Appending C<:raw> to the header name will inhibit decoding of quoted-printable
-or base-64 encoded strings, and will preserve all whitespace inside the
-header string.
+Appending a modifier C<:raw> to a header field name will inhibit decoding of
+quoted-printable or base-64 encoded strings, and will preserve all whitespace
+inside the header string.  The C<:raw> may also be applied to pseudo-headers
+e.g. C<ALL:raw> will return a pristine (unmodified) header section.
 
-Appending C<:addr> to the header name will cause everything except
-the first email address to be removed from the header.  For example,
-all of the following will result in "example@foo":
+Appending a modifier C<:addr> to a header field name will cause everything
+except the first email address to be removed from the header field.  It is
+mainly applicable to header fields 'From', 'Sender', 'To', 'Cc' along with
+their 'Resent-*' counterparts, and the 'Return-Path'.
+
+Appending a modifier C<:name> to a header field name will cause everything
+except the first display name to be removed from the header field.  It is
+mainly applicable to header fields 'From' and 'Resent-From'.
+
+It is syntactically permitted to append more than one modifier to a header
+field name, although currently most combinations achieve no additional effect,
+for example C<From:addr:raw> or C<From:raw:addr> is currently the same as
+C<From:addr> .
 
 =over 4
 
@@ -1943,9 +1954,11 @@ There are several special pseudo-headers that can be specified:
 
 =over 4
 
-=item C<ALL> can be used to mean the text of all the message's headers.  Note
-that all whitespace inside the headers, at line folds, is currently
-compressed into a single space (' ') character.
+=item C<ALL> can be used to mean the text of all the message's headers.
+Note that all whitespace inside the headers, at line folds, is currently
+compressed into a single space (' ') character. To obtain a pristine
+(unmodified) header section, use C<ALL:raw> - the :raw modifier is documented
+above.
 
 =item C<ToCc> can be used to mean the contents of both the 'To' and 'Cc'
 headers.
