@@ -676,9 +676,8 @@ initialized. If not then it will perform this initialization.
 sub _initialize_db {
   my ($self, $create_entry_p) = @_;
 
-  return 0 unless (defined($self->{_dbh}));
-
-  return 0 if (!$self->{_username});
+  return 0 if !defined $self->{_dbh};
+  return 0 if !defined $self->{_username} || $self->{_username} eq '';
 
   # Check to see if we should call the services_authorized_for_username plugin
   # hook to see if this user is allowed/able to use bayes.  If not, do nothing

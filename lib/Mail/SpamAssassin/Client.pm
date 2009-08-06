@@ -91,7 +91,7 @@ sub new {
     $self->{host} = $args->{host};
   }
 
-  if ($args->{username}) {
+  if (defined $args->{username}) {
     $self->{username} = $args->{username};
   }
 
@@ -201,7 +201,7 @@ sub learn {
 
   print $remote "TELL $PROTOVERSION$EOL";
   print $remote "Content-length: $msgsize$EOL";
-  print $remote "User: $self->{username}$EOL" if ($self->{username});
+  print $remote "User: $self->{username}$EOL" if defined $self->{username};
 
   if ($learntype == 0) {
     print $remote "Message-class: spam$EOL";
@@ -288,7 +288,7 @@ sub report {
 
   print $remote "TELL $PROTOVERSION$EOL";
   print $remote "Content-length: $msgsize$EOL";
-  print $remote "User: $self->{username}$EOL" if ($self->{username});
+  print $remote "User: $self->{username}$EOL" if defined $self->{username};
   print $remote "Message-class: spam$EOL";
   print $remote "Set: local,remote$EOL";
   print $remote "$EOL";
@@ -349,7 +349,7 @@ sub revoke {
 
   print $remote "TELL $PROTOVERSION$EOL";
   print $remote "Content-length: $msgsize$EOL";
-  print $remote "User: $self->{username}$EOL" if ($self->{username});
+  print $remote "User: $self->{username}$EOL" if defined $self->{username};
   print $remote "Message-class: ham$EOL";
   print $remote "Set: local$EOL";
   print $remote "Remove: remote$EOL";
@@ -539,7 +539,7 @@ sub _filter {
 
   print $remote "$command $PROTOVERSION$EOL";
   print $remote "Content-length: $msgsize$EOL";
-  print $remote "User: $self->{username}$EOL" if ($self->{username});
+  print $remote "User: $self->{username}$EOL" if defined $self->{username};
   print $remote "$EOL";
   print $remote $msg;
   print $remote "$EOL";

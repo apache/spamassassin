@@ -161,15 +161,16 @@ sub new_checker {
             'tablename' => $main->{conf}->{user_awl_sql_table},
           };
 
-  if ($main->{conf}->{user_awl_sql_override_username}) {
-    $self->{_username} = $main->{conf}->{user_awl_sql_override_username};
+  my $override_username = $main->{conf}->{user_awl_sql_override_username};
+  if (defined $override_username && $override_username ne '') {
+    $self->{_username} = $override_username;
   }
   else {
     $self->{_username} = $main->{username};
 
     # Need to make sure that a username is set, so just in case there is
     # no username set in main, set one here.
-    unless ($self->{_username}) {
+    if (!defined $self->{_username} || $self->{_username} eq '') {
       $self->{_username} = "GLOBAL";
     }
   }
