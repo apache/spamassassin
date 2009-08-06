@@ -131,7 +131,7 @@ sub new {
   if (ref $message eq 'ARRAY') {
      @message = @{$message};
   }
-  elsif (ref $message eq 'GLOB' || ref $message =~ /^IO::/) {
+  elsif (ref($message) eq 'GLOB' || ref($message) =~ /^IO::/) {
     if (defined fileno $message) {
 
       # sysread+split avoids a Perl I/O bug (Bug 5985)
