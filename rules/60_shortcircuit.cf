@@ -37,29 +37,8 @@ priority USER_IN_BLACKLIST      -900
 priority BAYES_99               -400
 
 ###########################################################################
-# SHORTCIRCUITS
 
 ifplugin Mail::SpamAssassin::Plugin::Shortcircuit
-
-# default: strongly-whitelisted mails are *really* whitelisted now, if the
-# shortcircuiting plugin is active, causing early exit to save CPU load
-shortcircuit USER_IN_WHITELIST       on
-shortcircuit USER_IN_DEF_WHITELIST   on
-shortcircuit USER_IN_ALL_SPAM_TO     on
-shortcircuit SUBJECT_IN_WHITELIST    on
-
-# the opposite; blacklisted mails can also save CPU
-shortcircuit USER_IN_BLACKLIST       on
-shortcircuit USER_IN_BLACKLIST_TO    on
-shortcircuit SUBJECT_IN_BLACKLIST    on
-
-# if you have taken the time to correctly specify your "trusted_networks",
-# this is another good way to save CPU
-# shortcircuit ALL_TRUSTED           on
-
-# and a well-trained bayes DB can save running rules, too
-# shortcircuit BAYES_99              spam
-# shortcircuit BAYES_00              ham
 
 # override the default X-Spam-Status line from 10_basic.cf to
 # include shortcircuit info.  (TODO: do we need a better way
