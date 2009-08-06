@@ -52,24 +52,20 @@ sub check_main {
   if (defined $suppl_attrib && ref $suppl_attrib->{rule_hits}) {
     my @caller_rule_hits = @{$suppl_attrib->{rule_hits}};
     dbg("check: adding caller rule hits, %d rules", scalar(@caller_rule_hits));
-    my($tflags_ref,$scoreset_ref,$descr_ref) =
-      @{$pms->{conf}}{'tflags','scoreset','descriptions'};
+    my($tflags_ref) = $pms->{conf}->{tflags};
     for my $caller_rule_hit (@caller_rule_hits) {
       next if ref $caller_rule_hit ne 'HASH';
       my($rulename, $area, $score, $value, $ruletype, $tflags, $description) =
         @$caller_rule_hit{qw(rule area score value ruletype tflags descr)};
-      if (defined $description) { $descr_ref->{$rulename} = $description }
-      if (defined $score) {
-        $scoreset_ref->[$_]->{$rulename} = $score  for (0..3);
-      }
       if (defined $tflags) {
         $_ = join(' ', !defined $_ ? () : split(' '),
                        split(/[ \t,]+/,$tflags))  for $tflags_ref->{$rulename};
       }
       $pms->got_hit($rulename, $area,
-                    !defined $score ? () : (score=>$score),
-                    !defined $value ? () : (value=>$value),
-                    ruletype=>$ruletype);
+                    !defined $score ? () : (score => $score),
+                    !defined $value ? () : (value => $value),
+                    !defined $description ? () : (description => $description),
+                    ruletype => $ruletype);
     }
   }
 

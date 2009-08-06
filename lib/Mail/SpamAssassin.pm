@@ -470,7 +470,7 @@ be deduced from the message itself, or is hard to do so reliably, or would
 represent unnecessary work for SpamAssassin to obtain it. The argument will
 be stored to a Mail::SpamAssassin::Message object as 'suppl_attrib', thus
 made available to the rest of the code as well as to plugins. The exact list
-of attributes will evolve through time, any unknown attributes should be
+of attributes will evolve through time, any unknown attribute should be
 ignored. Possible examples are: SMTP envelope information, a flag indicating
 that a message as supplied by a caller was truncated due to size limit, an
 already verified list of DKIM signature objects, or perhaps a list of rule
