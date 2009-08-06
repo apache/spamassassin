@@ -12,6 +12,8 @@ describe	FROM_MANY_AT	More than one @ in From:
 header         RDNS_LOCALHOST  X-Spam-Relays-External =~ /^\[ ip=(?!127)\d+\.\d+\.\d+\.\d+ rdns=localhost(?:\.localdomain)? /i
 describe       RDNS_LOCALHOST  Sender's public rDNS is "localhost"
 
+body		EU_SPAM_LAW	m,Directive 2000/31/EC of the European Parliament,i
+describe	EU_SPAM_LAW	Quoting "European Parliament" spam law
 
 ifplugin Mail::SpamAssassin::Plugin::MIMEHeader
   mimeheader   HTML_ATTACH    Content-Type =~ /text\/html\b.+\.htm/i
