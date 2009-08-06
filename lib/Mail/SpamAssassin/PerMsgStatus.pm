@@ -2170,6 +2170,12 @@ Optional, but recommended: the rule type string.  This is used in the
 C<hit_rule> plugin call, called by this method.  If unset, I<'unknown'> is
 used.
 
+=item description => $string
+
+Optional: a custom rule description string.  This is used in the
+C<hit_rule> plugin call, called by this method. If unset, the static
+description is used.
+
 =back
 
 Backwards compatibility: the two mandatory arguments have been part of this API
@@ -2181,21 +2187,29 @@ new addition in SpamAssassin 3.2.0.
 sub got_hit {
   my ($self, $rule, $area, %params) = @_;
 
+  my $conf_ref = $self->{conf};
+
+  my $dynamic_score_provided;
   my $score = $params{score};
-  $score = $self->{conf}->{scores}->{$rule}  if !defined $score;
+  if (defined $score) {
+    $dynamic_score_provided = 1;
+  } else {
+    $score = $conf_ref->{scores}->{$rule};
+  }
 
   # adding a hit does nothing if we don't have a score -- we probably
   # shouldn't have run it in the first place
   return unless $score;
 
-  # ensure that rule values always result in an *increase* of
-  # $self->{tests_already_hit}->{$rule}:
-  my $value = $params{value}; if (!$value || $value <= 0) { $value = 1; }
+  # ensure that rule values always result in an *increase*
+  # of $self->{tests_already_hit}->{$rule}:
+  my $value = $params{value};
+  if (!$value || $value <= 0) { $value = 1 }
 
   my $already_hit = $self->{tests_already_hit}->{$rule} || 0;
 
   # don't count hits multiple times, unless 'tflags multiple' is on
-  if ($already_hit && ($self->{conf}->{tflags}->{$rule}||'') !~ /\bmultiple\b/) {
+  if ($already_hit && ($conf_ref->{tflags}->{$rule}||'') !~ /\bmultiple\b/) {
     return;
   }
 
@@ -2204,7 +2218,16 @@ sub got_hit {
   # default ruletype, if not specified:
   $params{ruletype} ||= 'unknown';
 
-  my $rule_descr = $self->{conf}->get_description_for_rule($rule);
+  if ($dynamic_score_provided) {  # copy it to static for proper reporting
+    $conf_ref->{scoreset}->[$_]->{$rule} = $score  for (0..3);
+  }
+
+  my $rule_descr = $params{description};
+  if (defined $rule_descr) {
+    $conf_ref->{descriptions}->{$rule} = $rule_descr;  # save dynamic descr.
+  } else {
+    $rule_descr = $conf_ref->get_description_for_rule($rule);  # static
+  }
   $rule_descr = $rule  if !defined $rule_descr || $rule_descr eq '';
   $self->_handle_hit($rule,
             $score,
@@ -2213,7 +2236,7 @@ sub got_hit {
             $rule_descr);
 
   # take care of duplicate rules, too (bug 5206)
-  my $dups = $self->{conf}->{duplicate_rules}->{$rule};
+  my $dups = $conf_ref->{duplicate_rules}->{$rule};
   if ($dups && @{$dups}) {
     foreach my $dup (@{$dups}) {
       $self->got_hit($dup, $area, %params);
