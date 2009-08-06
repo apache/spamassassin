@@ -65,7 +65,7 @@ describe PLING_QUERY		Subject has exclamation mark and question mark
 
 
 
-header MSGID_SPAM_CAPS		Message-ID =~ /^\s*<?[A-Z]+\@(?!(?:mailcity|whowhere)\.com)/
+header MSGID_SPAM_CAPS		Message-ID =~ /^\s*<?[A-Z]+\@(?!(?:mailcity|whowhere)\.com)/m
 describe MSGID_SPAM_CAPS	Spam tool Message-Id: (caps variant)
 
 header MSGID_SPAM_LETTERS	Message-Id =~ /<[a-z]{5,}\@(\S+\.)+\S+>/
@@ -122,7 +122,7 @@ describe FORGED_MSGID_YAHOO	Message-ID is forged, (yahoo.com)
 
 ###########################################################################
 
-header __MSGID_BEFORE_RECEIVED	ALL =~ /\nMessage-Id:.*\nReceived:/si
+header __MSGID_BEFORE_RECEIVED	ALL:raw =~ /^Message-Id:.*^Received:/msi
 header __MSGID_BEFORE_OKAY	Message-Id =~ /\@[a-z0-9.-]+\.(?:yahoo|wanadoo)(?:\.[a-z]{2,3}){1,2}>/
 
 meta MSGID_FROM_MTA_HEADER	(__MSGID_BEFORE_RECEIVED && !__MSGID_BEFORE_OKAY && !__FROM_HOTMAIL_COM)
@@ -138,7 +138,7 @@ describe MSGID_MULTIPLE_AT	Message-ID contains multiple '@' characters
 
 ###########################################################################
 
-header DATE_SPAMWARE_Y2K	Date =~ /^[A-Z][a-z]{2}, \d\d [A-Z][a-z]{2} [0-6]\d \d\d:\d\d:\d\d [A-Z]{3}$/
+header DATE_SPAMWARE_Y2K	Date =~ /^[A-Z][a-z]{2}, \d\d [A-Z][a-z]{2} [0-6]\d \d\d:\d\d:\d\d [A-Z]{3}$/m
 describe DATE_SPAMWARE_Y2K	Date header uses unusual Y2K formatting
 
 # as noted on the dev@ list, ":60" is valid for seconds when there's a leap
@@ -152,7 +152,7 @@ describe DATE_SPAMWARE_Y2K	Date header uses unusual Y2K formatting
 #
 # WRT the tests, remember that ok and fail are reversed -- so valid dates
 # should be "fail" and invalid dates should be "ok".
-header INVALID_DATE		Date !~ /^\s*(?:(?i:Mon|Tue|Wed|Thu|Fri|Sat|Sun),\s)?\s*(?:[12]\d|3[01]|0?[1-9])\s+(?i:Jan|Feb|Ma[ry]|Apr|Ju[nl]|Aug|Sep|Oct|Nov|Dec)\s+(?:19[7-9]\d|2\d{3})\s+(?:[01]?\d|2[0-3])\:[0-5]\d(?::(?:[0-5]\d|60))?(?:\s+[AP]M)?(?:\s+(?:[+-][0-9]{4}|UT|[A-Z]{2,3}T|0000 GMT|"GMT"))?(?:\s*\(.*\))?\s*$/ [if-unset: Wed, 31 Jul 2002 16:41:57 +0200]
+header INVALID_DATE		Date !~ /^\s*(?:(?i:Mon|Tue|Wed|Thu|Fri|Sat|Sun),\s)?\s*(?:[12]\d|3[01]|0?[1-9])\s+(?i:Jan|Feb|Ma[ry]|Apr|Ju[nl]|Aug|Sep|Oct|Nov|Dec)\s+(?:19[7-9]\d|2\d{3})\s+(?:[01]?\d|2[0-3])\:[0-5]\d(?::(?:[0-5]\d|60))?(?:\s+[AP]M)?(?:\s+(?:[+-][0-9]{4}|UT|[A-Z]{2,3}T|0000 GMT|"GMT"))?(?:\s*\(.*\))?\s*$/m [if-unset: Wed, 31 Jul 2002 16:41:57 +0200]
 describe INVALID_DATE		Invalid Date: header (not RFC 2822)
 test INVALID_DATE fail    Sat, 31 Dec 2005 23:59:60 -0500
 test INVALID_DATE fail    Wed, 31 Jul 2002 16:41:57 +0200
@@ -161,13 +161,13 @@ test INVALID_DATE ok      Sat, 31 Dec 2005 23:00:00
 test INVALID_DATE ok      Thurs, 31 Jul 2002 16:41:57 +0200
 
 # allow +1300, NZ timezone
-header INVALID_DATE_TZ_ABSURD	Date =~ /[-+](?!(?:0\d|1[0-4])(?:[03]0|[14]5))\d{4}$/
+header INVALID_DATE_TZ_ABSURD	Date =~ /[-+](?!(?:0\d|1[0-4])(?:[03]0|[14]5))\d{4}$/m
 describe INVALID_DATE_TZ_ABSURD	Invalid Date: header (timezone does not exist)
 
-header INVALID_TZ_CST		ALL =~ /[+-]\d\d[30]0(?<!-0600|-0500|\+0800|\+0930|\+1030)\s+(?:\bCST\b|\(CST\))/
+header INVALID_TZ_CST		ALL:raw =~ /[+-]\d\d[30]0(?<!-0600|-0500|\+0800|\+0930|\+1030)\s+(?:\bCST\b|\(CST\))/
 describe INVALID_TZ_CST		Invalid date in header (wrong CST timezone)
 
-header INVALID_TZ_EST		ALL =~ /[+-]\d\d[30]0(?<!-0500|-0300|\+1000|\+1100)\s+(?:\bEST\b|\(EST\))/
+header INVALID_TZ_EST		ALL:raw =~ /[+-]\d\d[30]0(?<!-0500|-0300|\+1000|\+1100)\s+(?:\bEST\b|\(EST\))/
 describe INVALID_TZ_EST		Invalid date in header (wrong EST timezone)
 
 
@@ -192,7 +192,7 @@ describe FROM_EXCESS_BASE64	From: base64 encoded unnecessarily
 ###########################################################################
 # ADV tags in various languages
 
-header ENGLISH_UCE_SUBJECT	Subject =~ /^[^0-9a-z]*adv(?:ert)?\b/i
+header ENGLISH_UCE_SUBJECT	Subject =~ /^[^0-9a-z]*adv(?:ert)?\b/mi
 describe ENGLISH_UCE_SUBJECT	Subject contains an English UCE tag
 
 # alan premselaar <alien@12inch.com>, see SpamAssassin-talk list 2003-03
@@ -257,10 +257,12 @@ describe MULTI_FORGED		Received headers indicate multiple forgeries
 header NONEXISTENT_CHARSET	Content-Type =~ /charset=.?DEFAULT/
 describe NONEXISTENT_CHARSET	Character set doesn't exist
 
-header MISSING_MID              Message-Id =~ /^UNSET$/ [if-unset: UNSET]
+header __HAS_MESSAGE_ID		exists:Message-Id
+meta MISSING_MID		!__HAS_MESSAGE_ID
 describe MISSING_MID            Missing Message-Id: header
 
-header MISSING_DATE             Date =~ /^UNSET$/ [if-unset: UNSET]
+header __HAS_DATE		exists:Date
+meta MISSING_DATE		!__HAS_DATE
 describe MISSING_DATE           Missing Date: header
 
 header __HAS_SUBJECT		exists:Subject
@@ -304,7 +306,7 @@ header __IS_EXCH		X-MimeOLE =~ /Produced By Microsoft Exchange V/
 header SUBJ_AS_SEEN		Subject =~ /\bAs Seen/i
 describe SUBJ_AS_SEEN		Subject contains "As Seen"
 
-header SUBJ_DOLLARS             Subject =~ /^\$[0-9.,]+\b/
+header SUBJ_DOLLARS             Subject =~ /^\$[0-9.,]+\b/m
 describe SUBJ_DOLLARS           Subject starts with dollar amount
 
 
@@ -357,21 +359,21 @@ header WITH_LC_SMTP		Received =~ /\swith\ssmtp;\s/
 describe WITH_LC_SMTP		Received line contains spam-sign (lowercase smtp)
 
 
-header SUBJ_BUY                 Subject =~ /^buy/i
+header SUBJ_BUY                 Subject =~ /^buy/mi
 describe SUBJ_BUY               Subject line starts with Buy or Buying
 
 # seems to be ratware
 header RCVD_AM_PM		Received =~ /; [A-Z][a-z][a-z], \d{1,2} \d{4} \d{1,2}:\d\d:\d\d [AP]M [+-]\d{4}/
 describe RCVD_AM_PM		Received headers forged (AM/PM)
 
-header __USER_AGENT_MSN             X-Mailer =~ /^MSN Explorer /
+header __USER_AGENT_MSN		X-Mailer =~ /^MSN Explorer /m
 
 # host no longer exists according to administrator
 header FAKE_OUTBLAZE_RCVD	Received =~ /\.mr\.outblaze\.com/
 describe FAKE_OUTBLAZE_RCVD	Received header contains faked 'mr.outblaze.com'
 
 
-# thanks to David Ritz for passing this on; ready for post-3.0.0
+# thanks to David Ritz for passing this on
 header UNCLOSED_BRACKET		ALL =~ /\[\d+\r?\n/s
 describe UNCLOSED_BRACKET	Headers contain an unclosed bracket
 
@@ -391,13 +393,13 @@ describe FROM_LOCAL_DIGITS	From: localpart has long digit sequence
 
 header __TOCC_EXISTS		exists:ToCc
 
-header X_PRIORITY_CC		ALL =~ /\nX-Priority:[^\n]{0,80}\nCc:/si
+header X_PRIORITY_CC		ALL:raw =~ /^X-Priority:[^\n]{0,80}^Cc:/msi
 describe X_PRIORITY_CC		Cc: after X-Priority: (bulk email fingerprint)
 
 # catch non-RFC2047 compliant messages
 # Apple Mail has a bug where headers will have whitespace around the encoded
 # text, so try to ignore that
-header BAD_ENC_HEADER		ALL =~ /=\?[^?\s]+\?[^?\s]\?\s*[^?]+\s(?!\?=)/
+header BAD_ENC_HEADER		ALL:raw =~ /=\?[^?\s]+\?[^?\s]\?\s*[^?]+\s(?!\?=)/
 describe BAD_ENC_HEADER		Message has bad MIME encoding in the header
 
 
