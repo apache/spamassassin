@@ -202,6 +202,7 @@ sub new {
   }
 
   # Go through all the header fields of the message
+  my $hdr_errors = 0;
   my $header;
   for (;;) {
     # make sure not to lose the last header field when there is no body
@@ -224,7 +225,7 @@ sub new {
       if (defined $header) {  # deal with a previous header field
         my ($key, $value) = split (/:/s, $header, 2);
 
-        # If it's not a valid header (aka: not in the form "foo: bar"), skip it.
+        # If it's not a valid header (aka: not in the form "foo:bar"), skip it.
         if (defined $value) {
 	  $key =~ s/[ \t]+\z//;  # strip WSP before colon, obsolete rfc822 syn
 	  # limit the length of the pairs we store
@@ -240,7 +241,7 @@ sub new {
         }
       }
 
-      if ($current =~ /^\r?$/) {  # a regular end of header section
+      if ($current =~ /^\r?$/) {  # a regular end of a header section
 	if ($eof) {
 	  $self->{'missing_head_body_separator'} = 1;
 	} else {
@@ -248,18 +249,24 @@ sub new {
 	}
 	last;
       }
-      elsif ($current !~ /^[\041-\071\073-\176]+[ \t]*:/ ||
-	     $current =~ /^--/) {  # mime boundary
-	# obsolete header field syntax allowed WSP before a colon;
-	# Check for missing head/body separator
-	# RFC 2822, s2.2:
-	# A field name MUST be composed of printable US-ASCII characters
-	# (i.e., characters that have values between 33 (041) and 126 (176),
-	# inclusive), except colon (072).
-
+      elsif ($current =~ /^--/) {  # mime boundary encountered, bail out
 	$self->{'missing_head_body_separator'} = 1;
 	unshift(@message, $current);
  	last;
+      }
+      # should we assume entering a body on encountering invalid header field?
+      elsif ($current !~ /^[\041-\071\073-\176]+[ \t]*:/) {
+	# A field name MUST be composed of printable US-ASCII characters
+	# (i.e., characters that have values between 33 (041) and 126 (176),
+	# inclusive), except colon (072). Obsolete header field syntax
+	# allowed WSP before a colon.
+	if (++$hdr_errors <= 3) {
+	  # just consume but ignore a few invalid header fields
+	} else {  # enough is enough...
+	  $self->{'missing_head_body_separator'} = 1;
+	  unshift(@message, $current);
+ 	  last;
+ 	}
       }
 
       # start collecting a new header field

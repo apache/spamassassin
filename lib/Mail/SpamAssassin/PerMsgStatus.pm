@@ -1398,7 +1398,7 @@ all of the following will result in "example@foo":
 =back
 
 Appending C<:name> to the header name will cause everything except
-the first real name to be removed from the header.  For example,
+the first display name to be removed from the header.  For example,
 all of the following will result in "Foo Blah"
 
 =over 4
@@ -1469,16 +1469,20 @@ sub _get {
   my $getname = 0;
   my $getraw = 0;
 
-  # special queries
-  if (index($request, ':') != -1) {
-    $getaddr = ($request =~ s/:addr$//);
-    $getname = ($request =~ s/:name$//);
-    $getraw = ($request =~ s/:raw$//);
+  # special queries - process and strip modifiers
+  if (index($request,':') >= 0) {  # triage
+    local $1;
+    while ($request =~ s/:([^:]*)//) {
+      if    ($1 eq 'raw')  { $getraw  = 1 }
+      elsif ($1 eq 'addr') { $getaddr = 1 }
+      elsif ($1 eq 'name') { $getname = 1 }
+    }
   }
 
-  # ALL: entire raw headers
+  # ALL: entire pristine or semi-raw headers
   if ($request eq 'ALL') {
-    $result = $self->{msg}->get_pristine_header();
+    $result = $getraw ? $self->{msg}->get_pristine_header()
+                      : $self->{msg}->get_all_headers(1);
   }
   # ALL-TRUSTED: entire trusted raw headers
   elsif ($request eq 'ALL-TRUSTED') {
@@ -2318,7 +2322,7 @@ sub get_envelope_from {
   if ($envf = $self->get("X-Envelope-From")) {
     # heuristic: this could have been relayed via a list which then used
     # a *new* Envelope-from.  check
-    if ($self->get("ALL") =~ /(?:^|\n)Received:\s.*\nX-Envelope-From:\s/s) {
+    if ($self->get("ALL:raw") =~ /^Received:.*^X-Envelope-From:/smi) {
       dbg("message: X-Envelope-From header found after 1 or more Received lines, cannot trust envelope-from");
       return;
     } else {
@@ -2330,7 +2334,7 @@ sub get_envelope_from {
   if ($envf = $self->get("Envelope-Sender")) {
     # heuristic: this could have been relayed via a list which then used
     # a *new* Envelope-from.  check
-    if ($self->get("ALL") =~ /(?:^|\n)Received:\s.*\nEnvelope-Sender:\s/s) {
+    if ($self->get("ALL:raw") =~ /^Received:.*^Envelope-Sender:/smi) {
       dbg("message: Envelope-Sender header found after 1 or more Received lines, cannot trust envelope-from");
     } else {
       goto ok;
@@ -2347,7 +2351,7 @@ sub get_envelope_from {
   if ($envf = $self->get("Return-Path")) {
     # heuristic: this could have been relayed via a list which then used
     # a *new* Envelope-from.  check
-    if ($self->get("ALL") =~ /(?:^|\n)Received:\s.*\nReturn-Path:\s/s) {
+    if ($self->get("ALL:raw") =~ /^Received:.*^Return-Path:/smi) {
       dbg("message: Return-Path header found after 1 or more Received lines, cannot trust envelope-from");
     } else {
       goto ok;
@@ -2387,8 +2391,9 @@ sub get_all_hdrs_in_rcvd_index_range {
 
   my $cur_rcvd_index = -1;  # none found yet
   my $result = '';
-  foreach my $hdr (split("\n", $self->get('ALL'))) {
-    if ($hdr =~ /^received: /i) {
+
+  foreach my $hdr (split(/^/m, $self->{msg}->get_pristine_header())) {
+    if ($hdr =~ /^Received:/i) {
       $cur_rcvd_index++;
       next if (defined $start_rcvd && !$include_start_rcvd &&
 		$start_rcvd == $cur_rcvd_index);
