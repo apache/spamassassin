@@ -115,7 +115,7 @@ sub finish_parsing_end {
 
           # this will produce an array of tags to be replaced
           # for two adjacent tags, an element of "" will be between the two
-          my @re = split(/(<.+?>)/, $re);
+          my @re = split(/(<[^<>]+>)/, $re);
 
           if ($pre_name) {
             my $pre = $conf->{replace_pre}->{$pre_name};
