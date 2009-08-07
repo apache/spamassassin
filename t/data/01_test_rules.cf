@@ -95,10 +95,12 @@ score TEST_INVALID_DATE    5
 header USER_IN_BLACKLIST    eval:check_from_in_blacklist()
 describe USER_IN_BLACKLIST  From: address is in the user's black-list
 tflags USER_IN_BLACKLIST    userconf noautolearn
+score USER_IN_BLACKLIST 100.000
 
 header USER_IN_BLACKLIST_TO     eval:check_to_in_blacklist()
 describe USER_IN_BLACKLIST_TO   User is listed in 'blacklist_to'
 tflags USER_IN_BLACKLIST_TO     userconf noautolearn
+score USER_IN_BLACKLIST_TO 10.000
 
 header TEST_MSGID_OUTLOOK_INVALID    eval:check_outlook_message_id()
 describe TEST_MSGID_OUTLOOK_INVALID  Message-Id is fake (in Outlook Express format)
