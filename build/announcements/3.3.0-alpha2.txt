@@ -1,0 +1,46 @@
+To: users, dev, announce
+Subject: ANNOUNCE: Apache SpamAssassin 3.3.0-alpha2 available
+
+Apache SpamAssassin 3.3.0-alpha2 is now available for testing.
+
+Downloads are available from:
+  http://people.apache.org/~jm/devel/
+
+md5sum of archive files:
+
+  f8a1600ce5d6f0812026ac2e6238a8e9  Mail-SpamAssassin-3.3.0-alpha2.tar.bz2
+  262c830f901c21c6931e5eada01a3752  Mail-SpamAssassin-3.3.0-alpha2.tar.gz
+  cdbaab3819b202e838aa5255d7ddcb9a  Mail-SpamAssassin-3.3.0-alpha2.zip
+  036f3d3925d2b07f1567d445cba31e00  Mail-SpamAssassin-rules-3.3.0-alpha2.tgz
+
+sha1sum of archive files:
+
+  ff7aa840f36abaabd31596ef75f56c2d85dd0a47  Mail-SpamAssassin-3.3.0-alpha2.tar.bz2
+  93c37218039624bd25b99d24fca4c58f71b3101f  Mail-SpamAssassin-3.3.0-alpha2.tar.gz
+  7b6c25f72d02c3af01765ad8f04e2522490002bf  Mail-SpamAssassin-3.3.0-alpha2.zip
+  bac4c9880148cd803ef74196cc5838e2a852bf4a  Mail-SpamAssassin-rules-3.3.0-alpha2.tgz
+
+
+Note that the *-rules-*.tgz files are only necessary if you cannot, or do not
+wish to, run "sa-update" after install to download the latest fresh rules.
+
+The release files also have a .asc accompanying them.  The file serves
+as an external GPG signature for the given release file.  The signing
+key is available via the wwwkeys.pgp.net key server, as well as
+http://spamassassin.apache.org/released/GPG-SIGNING-KEY
+
+The key information is:
+
+pub 1024D/265FA05B 2003-06-09 SpamAssassin Signing Key <release@spamassassin.org>
+    Key fingerprint = 26C9 00A4 6DD4 0CD5 AD24  F6D7 DEE0 1987 265F A05B
+
+See the INSTALL and UPGRADE files in the distribution for important
+installation notes.
+
+Summary of major changes since 3.2.6
+------------------------------------
+
+Changes to the core code:
+
+[TODO: write changes list]
+
