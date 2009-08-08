@@ -92,20 +92,11 @@ header TEST_INVALID_DATE   Date !~ /^\s*(?:(?i:Mon|Tue|Wed|Thu|Fri|Sat|Sun),\s+)
 describe TEST_INVALID_DATE Invalid Date: header (not RFC 2822)
 score TEST_INVALID_DATE    5
 
-header USER_IN_BLACKLIST    eval:check_from_in_blacklist()
-describe USER_IN_BLACKLIST  From: address is in the user's black-list
-tflags USER_IN_BLACKLIST    userconf noautolearn
-score USER_IN_BLACKLIST 100.000
-
-header USER_IN_BLACKLIST_TO     eval:check_to_in_blacklist()
-describe USER_IN_BLACKLIST_TO   User is listed in 'blacklist_to'
-tflags USER_IN_BLACKLIST_TO     userconf noautolearn
-score USER_IN_BLACKLIST_TO 10.000
-
 header TEST_MSGID_OUTLOOK_INVALID    eval:check_outlook_message_id()
 describe TEST_MSGID_OUTLOOK_INVALID  Message-Id is fake (in Outlook Express format)
 score TEST_MSGID_OUTLOOK_INVALID     5
 
+ifplugin Mail::SpamAssassin::Plugin::Hashcash
 header HASHCASH_20            eval:check_hashcash_value('20', '21')
 header HASHCASH_21            eval:check_hashcash_value('21', '22')
 header HASHCASH_22            eval:check_hashcash_value('22', '23')
@@ -130,6 +121,7 @@ describe HASHCASH_HIGH        Contains valid Hashcash token (>25 bits)
 header HASHCASH_2SPEND        eval:check_hashcash_double_spend()
 describe HASHCASH_2SPEND      Hashcash token already spent in another mail
 tflags HASHCASH_2SPEND        userconf
+endif # Mail::SpamAssassin::Plugin::Hashcash
 
 header MISSING_HB_SEP            eval:check_msg_parse_flags('missing_head_body_separator')
 describe MISSING_HB_SEP          Missing blank line between message header and body
@@ -149,30 +141,37 @@ describe GTUBE           Generic Test for Unsolicited Bulk Email
 score GTUBE              1000
 tflags GTUBE             userconf noautolearn
 
-header USER_IN_WHITELIST  eval:check_from_in_whitelist()
-describe USER_IN_WHITELIST        From: address is in the user's white-list
-tflags USER_IN_WHITELIST  userconf nice noautolearn
-score USER_IN_WHITELIST -100.000
-
 body BAYES_99         eval:check_bayes('0.99', '1.00')
 tflags BAYES_99               learn
 describe BAYES_99     Bayes spam probability is 99 to 100%
 score BAYES_99 0 0 3.5 3.5
 
+ifplugin Mail::SpamAssassin::Plugin::WLBLEval
+header USER_IN_WHITELIST	eval:check_from_in_whitelist()
+tflags USER_IN_WHITELIST	userconf nice noautolearn
+score  USER_IN_WHITELIST -100.000
+header USER_IN_DEF_WHITELIST	eval:check_from_in_default_whitelist()
+tflags USER_IN_DEF_WHITELIST	userconf nice noautolearn
+score  USER_IN_DEF_WHITELIST -15.000
 header USER_IN_WHITELIST_TO     eval:check_to_in_whitelist()
-describe USER_IN_WHITELIST_TO   User is listed in 'whitelist_to'
 tflags USER_IN_WHITELIST_TO     userconf nice noautolearn
-score USER_IN_WHITELIST_TO -6.000
+score  USER_IN_WHITELIST_TO -6.000
+header USER_IN_BLACKLIST	eval:check_from_in_blacklist()
+tflags USER_IN_BLACKLIST	userconf noautolearn
+score  USER_IN_BLACKLIST 100.000
+header USER_IN_BLACKLIST_TO     eval:check_to_in_blacklist()
+tflags USER_IN_BLACKLIST_TO     userconf noautolearn
+score  USER_IN_BLACKLIST_TO 10.000
+endif # Mail::SpamAssassin::Plugin::WLBLEval
 
-score SUBJECT_IN_BLACKLIST 100
-header SUBJECT_IN_BLACKLIST      eval:check_subject_in_blacklist()
-describe SUBJECT_IN_BLACKLIST    Subject: contains string in the user's black-list
-tflags SUBJECT_IN_BLACKLIST      userconf noautolearn
-
-score SUBJECT_IN_WHITELIST -100
-header SUBJECT_IN_WHITELIST      eval:check_subject_in_whitelist()
-describe SUBJECT_IN_WHITELIST    Subject: contains string in the user's white-list
-tflags SUBJECT_IN_WHITELIST      userconf nice noautolearn
+ifplugin Mail::SpamAssassin::Plugin::WhiteListSubject
+header SUBJECT_IN_WHITELIST	eval:check_subject_in_whitelist()
+tflags SUBJECT_IN_WHITELIST	userconf nice noautolearn
+header SUBJECT_IN_BLACKLIST	eval:check_subject_in_blacklist()
+tflags SUBJECT_IN_BLACKLIST	userconf noautolearn
+score  SUBJECT_IN_BLACKLIST 100
+score  SUBJECT_IN_WHITELIST -100
+endif # Mail::SpamAssassin::Plugin::WhiteListSubject
 
 header __HAS_MSGID               MESSAGEID =~ /\S/
 header __SANE_MSGID              MESSAGEID =~ /^<[^<>\\ \t\n\r\x0b\x80-\xff]+\@[^<>\\ \t\n\r\x0b\x80-\xff]+>\s*$/m
@@ -184,9 +183,32 @@ score INVALID_MSGID              2.999 2.603 2.489 1.900
 header TEST_MSGID_SPAM_CAPS      Message-ID =~ /^\s*<?[A-Z]+\@(?!(?:mailcity|whowhere)\.com)/
 score TEST_MSGID_SPAM_CAPS       5
 
-header INVALID_DATE              Date !~ /^\s*(?:(?i:Mon|Tue|Wed|Thu|Fri|Sat|Sun),\s)?\s*(?:[12]\d|3[01]|0?[1-9])\s+(?i:Jan|Feb|Ma[ry]|Apr|Ju[nl]|Aug|Sep|Oct|Nov|Dec)\s+(?:19[7-9]\d|2\d{3})\s+(?:[01]?\d|2[0-3])\:[0-5]\d(?::(?:[0-5]\d|60))?(?:\s+[AP]M)?(?:\s+(?:[+-][0-9]{4}|UT|[A-Z]{2,3}T|0000 GMT|"GMT"))?(?:\s*\(.*\))?\s*$/ [if-unset: Wed, 31 Jul 2002 16:41:57 +0200]
+header INVALID_DATE              Date !~ /^\s*(?:(?i:Mon|Tue|Wed|Thu|Fri|Sat|Sun),\s)?\s*(?:[12]\d|3[01]|0?[1-9])\s+(?i:Jan|Feb|Ma[ry]|Apr|Ju[nl]|Aug|Sep|Oct|Nov|Dec)\s+(?:19[7-9]\d|2\d{3})\s+(?:[01]?\d|2[0-3])\:[0-5]\d(?::(?:[0-5]\d|60))?(?:\s+[AP]M)?(?:\s+(?:[+-][0-9]{4}|UT|[A-Z]{2,3}T|0000 GMT|"GMT"))?(?:\s*\(.*\))?\s*$/m [if-unset: Wed, 31 Jul 2002 16:41:57 +0200]
 describe INVALID_DATE            Invalid Date: header (not RFC 2822)
 score INVALID_DATE               2.303 1.651 1.329 1.245
+
+ifplugin Mail::SpamAssassin::Plugin::SPF
+header SPF_PASS			eval:check_for_spf_pass()
+header SPF_NEUTRAL		eval:check_for_spf_neutral()
+header SPF_FAIL			eval:check_for_spf_fail()
+header SPF_SOFTFAIL		eval:check_for_spf_softfail()
+header SPF_HELO_PASS		eval:check_for_spf_helo_pass()
+header SPF_HELO_NEUTRAL		eval:check_for_spf_helo_neutral()
+header SPF_HELO_FAIL		eval:check_for_spf_helo_fail()
+header SPF_HELO_SOFTFAIL	eval:check_for_spf_helo_softfail()
+tflags SPF_PASS			nice userconf net
+tflags SPF_HELO_PASS		nice userconf net
+tflags SPF_NEUTRAL		net
+tflags SPF_FAIL		        net
+tflags SPF_SOFTFAIL		net
+tflags SPF_HELO_NEUTRAL	        net
+tflags SPF_HELO_FAIL		net
+tflags SPF_HELO_SOFTFAIL	net
+header USER_IN_SPF_WHITELIST	eval:check_for_spf_whitelist_from()
+tflags USER_IN_SPF_WHITELIST	userconf nice noautolearn
+header USER_IN_DEF_SPF_WL	eval:check_for_def_spf_whitelist_from()
+tflags USER_IN_DEF_SPF_WL	userconf nice noautolearn
+endif # Mail::SpamAssassin::Plugin::SPF
 
 ifplugin Mail::SpamAssassin::Plugin::AWL
 header AWL                   eval:check_from_in_auto_whitelist()
@@ -232,5 +254,3 @@ header SHORTCIRCUIT             eval:check_shortcircuit()
 describe SHORTCIRCUIT           Not all rules were run, due to a shortcircuited rule
 tflags SHORTCIRCUIT             userconf noautolearn
 endif
-
-
