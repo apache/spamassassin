@@ -18,8 +18,8 @@ make || exit $?
 make version.env || exit $?
 . ./version.env
 
-# "3.1.0-pre2-r202405" should appear as "3.1.0-pre2" after this!
-VERSION=`echo $FULL_VERSION | perl -pe 's/-r\d+$//'`
+# "3.1.0-pre2-r202405" should appear as "3.1.0-pre2.r202405" after this
+VERSION=`echo $FULL_VERSION | perl -pe 's/-(r\d+)$/\.$1/'`
 DISTVNAME=$DISTNAME-$VERSION
 
 
@@ -33,8 +33,6 @@ rm -f rules/70_*.cf
 
 # and ensure the ruleset lints!
 ./spamassassin --lint                    || exit $?
-
-##make install                             || exit $?
 
 rulesdir=rules
 
