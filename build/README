@@ -116,9 +116,15 @@ SPAMASSASSIN RELEASE PROCEDURE
     make distcheck
 
 - run "make disttest" to ensure all tests pass once the distribution
-  is fully packaged.  (this'll take a minute or two.)
+  is fully packaged.  (this'll take a minute or two.)  this command
+  set will do basically the same thing:
 
-    make disttest < /dev/null
+    make distdir
+    d=`echo Mail-SpamAssassin-?.?.?`
+    sed -e 's/run_\(long\|dcc\|net\)_tests=n/run_\1_tests=y/' \
+                $d/t/config.dist > $d/t/config
+    ( cd $d ; perl Makefile.PL ) < /dev/null
+    ( cd $d ; make test )
 
 - Check in the updated Changes file, and SpamAssassin.pm.
 
@@ -131,27 +137,22 @@ SPAMASSASSIN RELEASE PROCEDURE
 - SVN tag the release files.  This is done using "svn copy".
   For a maintainance release (x.y.1, x.y.2):
 
-    repo=https://svn.apache.org/repos/asf/spamassassin
-    svn delete -m "replaced" $repo/tags/spamassassin_release_3_1_7
-    svn copy -m "creating tag for release 3.1.7" \
-	$repo/branches/3.1 \
-	$repo/tags/spamassassin_release_3_1_7
+    vers=3_1_7
 
   For a trunk release (x.y.0):
 
-    repo=https://svn.apache.org/repos/asf/spamassassin
-    svn delete -m "replaced" $repo/tags/spamassassin_release_3_0_0
-    svn copy -m "creating tag for release 3.0.0" \
-	$repo/trunk \
-	$repo/tags/spamassassin_release_3_0_0
+    vers=3_0_0
 
-  For a trunk pre-release (x.y.0-preZ):
+  For a trunk pre-release (x.y.0-preZ) or alpha (x.y.0-alphaZ):
+
+    vers=3_3_0_alpha_2
+
+  Then run
 
     repo=https://svn.apache.org/repos/asf/spamassassin
-    svn delete -m "replaced" $repo/tags/spamassassin_release_3_2_0_pre_2
-    svn copy -m "creating tag for release 3.2.0-pre2" \
-	$repo/trunk \
-	$repo/tags/spamassassin_release_3_2_0_pre_2
+    svn delete -m "replaced old tag" $repo/tags/spamassassin_release_$vers
+    svn copy -m "creating tag for release $vers" \
+	$repo/trunk $repo/tags/spamassassin_release_$vers
 
   This will do a completely server-side tagging (which is the same as
   a branch really) of whatever the latest branch revision to be the new
