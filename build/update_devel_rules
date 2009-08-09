@@ -18,9 +18,11 @@ make || exit $?
 make version.env || exit $?
 . ./version.env
 
-# "3.1.0-pre2-r202405" should appear as "3.1.0-pre2.r202405" after this
-VERSION=`echo $FULL_VERSION | perl -pe 's/-(r\d+)$/\.$1/'`
-DISTVNAME=$DISTNAME-$VERSION
+# "3.1.0-pre2-r202405" should appear as "3.1.0-pre2" after this
+VERSION=`echo $FULL_VERSION | perl -pe 's/-(r\d+)$//'`
+SVNVER=`svn info | perl -ne '/Revision: (\d+)/ and print $1'`
+DISTVNAME=$DISTNAME-$VERSION.r$SVNVER
+DISTVBASE=$DISTNAME-$VERSION
 
 
 # remove the rules files for rules we won't be shipping
@@ -85,7 +87,7 @@ ssh updatesd@spamassassin.zones.apache.org \
 )
 
 for ext in tgz tgz.md5 tgz.sha1 tgz.asc ; do
-  rm -f $RELDIR/$DISTVNAME.$ext
+  rm -f $RELDIR/$DISTVBASE.*.$ext
   if [ -f $tmpdir/rules.$ext ] ; then
     mv $tmpdir/rules.$ext $RELDIR/$DISTVNAME.$ext
     ls -l $RELDIR/$DISTVNAME.$ext
