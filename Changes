@@ -1,4 +1,76 @@
 ------------------------------------------------------------------------
+r802580 | jm | 2009-08-09 20:26:04 +0000 (Sun, 09 Aug 2009) | 1 line
+
+update build instructions; fix make disttest to use long tests, net tests
+------------------------------------------------------------------------
+r802576 | jm | 2009-08-09 19:57:03 +0000 (Sun, 09 Aug 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r802575 | jm | 2009-08-09 19:44:22 +0000 (Sun, 09 Aug 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r802553 | jm | 2009-08-09 15:48:24 +0000 (Sun, 09 Aug 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r802497 | jm | 2009-08-09 07:08:52 +0000 (Sun, 09 Aug 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r802467 | jm | 2009-08-08 23:34:13 +0000 (Sat, 08 Aug 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r802442 | jm | 2009-08-08 19:39:10 +0000 (Sat, 08 Aug 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r802441 | jm | 2009-08-08 19:26:28 +0000 (Sat, 08 Aug 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r802418 | jm | 2009-08-08 16:30:22 +0000 (Sat, 08 Aug 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r802310 | jm | 2009-08-08 07:26:28 +0000 (Sat, 08 Aug 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r802274 | mmartinec | 2009-08-08 00:12:48 +0000 (Sat, 08 Aug 2009) | 9 lines
+
+- t/data/01_test_rules.cf: copy missing test rules from
+  60_whitelist.cf, 25_spf.cf and 60_whitelist_spf.cf to avoid
+  dependency on production rules, add some missing ifplugin
+  for consistency;
+- t/get_all_headers.t, t/data/Dumpheaders.pm, t/data/spam/008:
+  add a test for get("ALL") besides the existing get("ALL:raw"),
+  add some intricacy to the test case spam/008, let Dumpheaders.pm
+  report also results from get("From") and get("From:raw")
+
+------------------------------------------------------------------------
+r802269 | jm | 2009-08-07 23:44:16 +0000 (Fri, 07 Aug 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r802158 | jm | 2009-08-07 19:36:28 +0000 (Fri, 07 Aug 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r802058 | jm | 2009-08-07 15:59:25 +0000 (Fri, 07 Aug 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r801940 | jm | 2009-08-07 10:38:56 +0000 (Fri, 07 Aug 2009) | 1 line
+
+proposed announcement for 3.3.0-alpha2
+------------------------------------------------------------------------
+r801937 | jm | 2009-08-07 10:28:52 +0000 (Fri, 07 Aug 2009) | 1 line
+
+new cut of 3.3.0-alpha2
+------------------------------------------------------------------------
 r801936 | jm | 2009-08-07 10:26:37 +0000 (Fri, 07 Aug 2009) | 1 line
 
 fix test failure in t/blacklist_autolearn.t
@@ -1438,6 +1510,10 @@ allow image/jpg to be treated as synonymous to image/jpeg in ImageInfo plugin, t
 r789964 | jm | 2009-06-30 21:34:19 +0000 (Tue, 30 Jun 2009) | 1 line
 
 bug 6045: lots of fixes and cleanup for the Bayes benchmarking scripts, thanks to Michael Alan Dorman
+------------------------------------------------------------------------
+r789963 | jm | 2009-06-30 21:21:10 +0000 (Tue, 30 Jun 2009) | 1 line
+
+seriously, remove that external
 ------------------------------------------------------------------------
 r789962 | jm | 2009-06-30 21:20:06 +0000 (Tue, 30 Jun 2009) | 1 line
 
