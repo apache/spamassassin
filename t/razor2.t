@@ -23,11 +23,8 @@ exit unless (TEST_ENABLED && HAS_RAZOR2);
 my $ident = $ENV{'HOME'}.'/.razor/identity';
 if (! -r $ident) {
   $razor_not_available = "razor-register / razor-admin -register has not been run, or $ident is unreadable.";
+  warn "$razor_not_available\n";
 }
-
-%patterns = (
-	q{ Listed in Razor2 }, 'spam',
-            );
 
 if (! $razor_not_available) {
   system ("razor-report < data/spam/001");
@@ -40,9 +37,16 @@ tstpre ("
 loadplugin Mail::SpamAssassin::Plugin::Razor2
 ");
 
+
+#TESTING FOR SPAM
+%patterns = (
+        q{ Listed in Razor2 }, 'spam',
+            );
+
 sarun ("-t < data/spam/001", \&patterns_run_cb);
 skip_all_patterns($razor_not_available);
 
+#TESTING FOR HAM
 %patterns = ();
 %anti_patterns = (
 	q{ Listed in Razor2 }, 'nonspam',
