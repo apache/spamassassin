@@ -16,6 +16,8 @@ body		EU_SPAM_LAW	m,Directive 2000/31/EC of the European Parliament,i
 describe	EU_SPAM_LAW	Quoting "European Parliament" spam law
 
 ifplugin Mail::SpamAssassin::Plugin::MIMEHeader
-  mimeheader   HTML_ATTACH    Content-Type =~ /text\/html\b.+\.htm/i
+  mimeheader   HTML_ATTACH    Content-Type =~ m,text/html;.+\.html?\b,i
+
+  mimeheader   OBFU_TEXT_ATTACH    Content-Type =~ m,application/octet-stream;.+\.txt\b,i
 endif
 
