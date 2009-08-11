@@ -1,4 +1,14 @@
 
+## Mime rules
+ifplugin Mail::SpamAssassin::Plugin::MIMEHeader
+
+mimeheader	__HK_SPAMMY_CTFN	Content-Type =~ /name=.*?(?:lot(?:eri[ej]|t(?:ery|o))|award|prize|winn(?:er|ing)|microsoft|congrat|proposal|urgent|\bfrom\b)/mi
+mimeheader	__HK_SPAMMY_CDFN	Content-Disposition =~ /name=.*?(?:lot(?:eri[ej]|t(?:ery|o))|award|prize|winn(?:er|ing)|microsoft|congrat|proposal|urgent|\bfrom\b)/mi
+meta		HK_SPAMMY_FILENAME	__HK_SPAMMY_CTFN || __HK_SPAMMY_CDFN
+
+endif
+
+
 header		__HK_NAME_MICROSOFT	From:name =~ /(microsoft|\bmsn\b)/i
 header		__HK_HELO_MICROSOFT	X-Spam-Relays-External =~ / helo=\S+\.(?:microsoft|msn)\.com /
 meta		HK_FAKENAME_MICROSOFT	__HK_NAME_MICROSOFT && !__HK_HELO_MICROSOFT
@@ -35,7 +45,7 @@ body		__hk_prize5	/(?:funds? transfer|(?:winning|ready for|sum) pay ?outs?|claim
 meta		HK_PRIZEWIN	__hk_prize1 + __hk_prize2 + __hk_prize3 + __hk_prize4 + __hk_prize5 > 1
 describe	HK_PRIZEWIN	Won lot of money or prizes
 
-body		__hk_scam_w0	/\b(?:(?:widow|son|daughter|husband|wife|brother|sister) of (?:the )?(?:late|sacked)|next of kin|direct telephone numbers?|e?mail me below|reply (?:me to )?this e?mail (?:at|to)?|send your reply (?:to|at)|anonymous investment|late (?:client of mine|prime minister)|preapproved to receive|your compensation|seek for your indulgence|a huge transfer of|make sure your email is checked|insured with your email|(?:business|important|discreet) transaction|sum of amount)\b/i
+body		__hk_scam_w0	/\b|next of kin|direct telephone numbers?|e?mail me below|reply (?:me to )?this e?mail (?:at|to)?|send your reply (?:to|at)|anonymous investment|late (?:client of mine|prime minister)|preapproved to receive|your compensation|seek for your indulgence|a huge transfer of|make sure your email is checked|insured with your email|(?:business|important|discreet) transaction|sum of amount)\b/i
 body		__hk_scam_w1	/\b(?:claim|(?:he)?deposit(?:ed)?|inheritance|(?:l')?heriti.re|western union|banque|courier|D[eé]p[oô](?:t|sé.{0,2})|h[ée]rit(?:[ée]|age|i[èe]re)|offshore|profitable|bancaire|(?:meiner|unsere) bank|assasinated|assassin.{0,2}|la somme de|ces fonds|le tribunal)\b/i
 body		__hk_scam_w2	/\b(?:(?:funds?|money) transfer|transfér.r?.{0,2}|REPUBLIQUE|Gouvernement|johannesburg|south africa|assistance|beneficiary|b.n.ficiaire|husband|death|manager|immediate delivery|rebelles|securiser|passeport|personal account|confidenti[ea]l|account overseas|compagnie de s.curit.{0,2}|arrangement secret)\b/i
 meta		HK_SCAM		__hk_scam_w0 + __hk_scam_w1 + __hk_scam_w2 > 1
