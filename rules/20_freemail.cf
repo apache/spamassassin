@@ -19,8 +19,11 @@ describe FREEMAIL_REPLY  From and body contain different freemails
 header   FREEMAIL_FROM  eval:check_freemail_from()
 describe FREEMAIL_FROM  Sender email is freemail
 
-header   FREEMAIL_FROM_END_DIGIT  eval:check_freemail_from('\d@')
-describe FREEMAIL_FROM_END_DIGIT  Freemail username ends in digit
+header   FREEMAIL_ENVFROM_END_DIGIT  eval:check_freemail_header('EnvelopeFrom', '\d@')
+describe FREEMAIL_ENVFROM_END_DIGIT  Envelope-from freemail username ends in digit
+
+header   FREEMAIL_REPLYTO_END_DIGIT  eval:check_freemail_header('Reply-To', '\d@')
+describe FREEMAIL_REPLYTO_END_DIGIT  Reply-To freemail username ends in digit
 
 header   FREEMAIL_SUBJECT  eval:check_freemail_header('Subject')
 describe FREEMAIL_SUBJECT  Subject contains freemail
