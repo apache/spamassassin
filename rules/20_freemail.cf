@@ -11,27 +11,34 @@ meta     __freemail_safe      __freemail_safe_fwd || __freemail_safe_ml1 || __fr
 header   __freemail_replyto  eval:check_freemail_replyto('replyto')
 meta     FREEMAIL_REPLYTO  __freemail_replyto && !__freemail_safe
 describe FREEMAIL_REPLYTO  Reply-To/From or Reply-To/body contain different freemails
+score    FREEMAIL_REPLYTO  2
 
 header   __freemail_reply  eval:check_freemail_replyto('reply')
 meta     FREEMAIL_REPLY  __freemail_reply && !__freemail_replyto && !__freemail_safe
 describe FREEMAIL_REPLY  From and body contain different freemails
+score    FREEMAIL_REPLY  0.5
 
 header   FREEMAIL_FROM  eval:check_freemail_from()
 describe FREEMAIL_FROM  Sender email is freemail
+score    FREEMAIL_FROM  0.001
 
 header   FREEMAIL_ENVFROM_END_DIGIT  eval:check_freemail_header('EnvelopeFrom', '\d@')
 describe FREEMAIL_ENVFROM_END_DIGIT  Envelope-from freemail username ends in digit
+score    FREEMAIL_ENVFROM_END_DIGIT  0.1
 
 header   FREEMAIL_REPLYTO_END_DIGIT  eval:check_freemail_header('Reply-To', '\d@')
 describe FREEMAIL_REPLYTO_END_DIGIT  Reply-To freemail username ends in digit
+score    FREEMAIL_REPLYTO_END_DIGIT  0.1
 
-header   FREEMAIL_SUBJECT  eval:check_freemail_header('Subject')
-describe FREEMAIL_SUBJECT  Subject contains freemail
+#header   FREEMAIL_SUBJECT  eval:check_freemail_header('Subject')
+#describe FREEMAIL_SUBJECT  Subject contains freemail
+#score    FREEMAIL_SUBJECT  0.001
 
 # Idea from John Hardin
 header   __freemail_hdr_replyto  eval:check_freemail_header('Reply-To')
 meta     FREEMAIL_FORGED_REPLYTO  __freemail_hdr_replyto && !FREEMAIL_FROM && !__freemail_safe
 describe FREEMAIL_FORGED_REPLYTO  Freemail in Reply-To, but not From
+score    FREEMAIL_FORGED_REPLYTO  0.1
 
 endif
 
