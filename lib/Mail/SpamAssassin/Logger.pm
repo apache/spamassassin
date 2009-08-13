@@ -197,8 +197,8 @@ This is used for all low priority debugging messages.
 =cut
 
 sub dbg {
-  return unless $LOG_SA{level} >= DBG;
-  _log(DBG, @_);
+  _log(DBG, @_)  if $LOG_SA{level} >= DBG;
+  1;  # always return the same simple value, regardless of log level
 }
 
 =item info("facility: message")
@@ -210,8 +210,8 @@ messages are typically logged when SpamAssassin is run as a daemon.
 =cut
 
 sub info {
-  return unless $LOG_SA{level} >= INFO;
-  _log(INFO, @_);
+  _log(INFO, @_)  if $LOG_SA{level} >= INFO;
+  1;  # always return the same simple value, regardless of log level
 }
 
 # remember to avoid deep recursion, my friend
