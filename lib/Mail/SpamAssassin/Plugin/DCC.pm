@@ -29,8 +29,9 @@ Mail::SpamAssassin::Plugin::DCC - perform DCC check of messages
 =head1 DESCRIPTION
 
 The DCC or Distributed Checksum Clearinghouse is a system of servers
-collecting and counting checksums of millions of mail messages. TheSpamAssassin.pm
-counts can be used by SpamAssassin to detect and reject or filter spam.
+collecting and counting checksums of millions of mail messages.
+TheSpamAssassin.pm counts can be used by SpamAssassin to detect and
+reject or filter spam.
 
 Because simplistic checksums of spam can be easily defeated, the main
 DCC checksums are fuzzy and ignore aspects of messages.  The fuzzy
@@ -73,6 +74,8 @@ use IO::Socket;
 
 use vars qw(@ISA);
 @ISA = qw(Mail::SpamAssassin::Plugin);
+
+use vars qw($have_inet6);
 
 sub new {
   my $class = shift;
@@ -185,14 +188,14 @@ without the DCC results.
 
 =item dcc_home STRING
 
-This option tells SpamAssassin specifically where to find the dcc homedir.
+This option tells SpamAssassin where to find the dcc homedir.
 If not given, it will try to get dcc to specify one, and if that fails it
 will try dcc's own default homedir of '/var/dcc'.
 If C<dcc_path> is not specified, it will default to looking in
 C<dcc_home/bin> for dcc client instead of relying on SpamAssassin to find it
 in the current PATH.  If it isn't found there, it will look in the current
-PATH. If a C<dccifd> socket is found in C<dcc_home>, it will use that
-interface that instead of C<dccproc>.
+PATH. If a C<dccifd> socket is found in C<dcc_home> or specified explicitly,
+it will use that interface instead of C<dccproc>.
 
 =cut
 
@@ -219,10 +222,14 @@ interface that instead of C<dccproc>.
 
 =item dcc_dccifd_path STRING
 
-This option tells SpamAssassin specifically where to find the dccifd socket.
-If C<dcc_dccifd_path> is not specified, it will default to looking in
-C<dcc_home> If a C<dccifd> socket is found, it will use it instead of
-C<dccproc>.
+This option tells SpamAssassin where to find the dccifd socket. If
+C<dcc_dccifd_path> is not specified, it will default to looking for a socket
+named C<dccifd> in a directory C<dcc_home>.  The C<dcc_dccifd_path> can be
+a Unix socket name (absolute path), or an INET socket specification in a form
+C<[host]:port> or C<host:port>, where a host can be an IPv4 or IPv6 address
+or a host name, and port is a TCP port number. In case of an IPv6 address the
+brackets are required syntax. If a C<dccifd> socket is found, the plugin will
+use it instead of C<dccproc>.
 
 =cut
 
@@ -231,16 +238,36 @@ C<dccproc>.
     is_admin => 1,
     code => sub {
       my ($self, $key, $value, $line) = @_;
-      if (!defined $value || !length $value) {
+      $value = ''  if !defined $value;
+      $self->{dcc_dccifd_path_raw} = $value;  # for logging purposes
+      undef $self->{dcc_dccifd_host};
+      undef $self->{dcc_dccifd_port};
+      undef $self->{dcc_dccifd_socket};
+      local($1,$2,$3);
+      if ($value eq '') {
 	return $Mail::SpamAssassin::Conf::MISSING_REQUIRED_VALUE;
+      } elsif ($value =~ m{^ (?: \[ ([^\]]*) \] | ([^:]*) ) : ([^:]*) \z}sx) {
+        # "[host]:port" or "host:port", where a host can be an IPv4 or IPv6
+        # address or a host name, and port is a TCP port number or service name
+        my $host = defined $1 ? $1 : $2;
+        my $port = $3;
+        $self->{dcc_dccifd_host} = untaint_var($host);
+        $self->{dcc_dccifd_port} = untaint_var($port);
+        dbg("config: dcc_dccifd_path set to [%s]:%s", $host,$port);
+      } else {  # assume a unix socket
+        if ($value !~ m{^/}) {
+          info("config: dcc_dccifd_path should be an absolute socket path");
+        # return $Mail::SpamAssassin::Conf::INVALID_VALUE;  # abort or accept?
+        }
+        $value = untaint_file_path($value);
+      # test disabled, dccifd may not yet be running at spamd startup time
+      # if (!-S $value) {
+      #   info("config: dcc_dccifd_path '$value' isn't a local socket");
+      #   return $Mail::SpamAssassin::Conf::INVALID_VALUE;
+      # }
+        $self->{dcc_dccifd_socket} = $value;
+        dbg("config: dcc_dccifd_path set to local socket %s", $value);
       }
-      $value = untaint_file_path($value);
-      if (!-S $value) {
-	info("config: dcc_dccifd_path \"$value\" isn't a socket");
-	return $Mail::SpamAssassin::Conf::INVALID_VALUE;
-      }
-
-      $self->{dcc_dccifd_path} = $value;
     }
   });
 
@@ -264,7 +291,7 @@ use this, as the current PATH will have been cleared.
       }
       $value = untaint_file_path($value);
       if (!-x $value) {
-	info("config: dcc_path \"$value\" isn't an executable");
+	info("config: dcc_path '$value' isn't an executable");
 	return $Mail::SpamAssassin::Conf::INVALID_VALUE;
       }
 
@@ -322,81 +349,91 @@ The default is C<undef>.
 sub find_dcc_home {
   my ($self) = @_;
 
-  return if ($self->{main}->{conf}->{use_dcc} == 0);
+  my $conf = $self->{main}->{conf};
+  return if !$conf->{use_dcc};
 
-  my $dcchome = $self->{main}->{conf}->{dcc_home} || '';
+  my $dcchome = $conf->{dcc_home} || '';
 
   # If we're not given the DCC homedir, try getting DCC to tell us it.
   # If that fails, try the DCC default homedir of '/var/dcc'.
-  unless ($dcchome) {	
+  if ($dcchome eq '') {
 
     my $cdcc = Mail::SpamAssassin::Util::find_executable_in_env_path('cdcc');
 
     my $cdcc_home = '';
-    if ($cdcc && -x $cdcc && open (CDCC, "$cdcc home 2>&1|")) {
+    if ($cdcc && -x $cdcc && open(CDCC, "$cdcc home 2>&1|")) {
       dbg("dcc: dcc_home not set, querying cdcc utility");
       $cdcc_home = <CDCC> || '';
       close CDCC;
 
       chomp $cdcc_home;
       $cdcc_home =~ s/\s+homedir=//;
-      dbg("dcc: cdcc reports homedir as '" . $cdcc_home . "'");
+      dbg("dcc: cdcc reports homedir as '%s'", $cdcc_home);
     }
 
-    if ($cdcc_home && -d $cdcc_home) {	
-      dbg("dcc: cdcc reported homedir exists, using");
-      $dcchome = $cdcc_home;
+    if ($cdcc_home ne '' && -d $cdcc_home) {	
+      dbg("dcc: cdcc reported homedir exists, using it");
+      $dcchome = untaint_var($cdcc_home);
     } elsif (-d '/var/dcc') {			
-      dbg("dcc: dcc_home not set but dcc default homedir /var/dcc exists, using");
+      dbg("dcc: dcc_home not set but dcc default homedir /var/dcc exists, using it");
       $dcchome = '/var/dcc';
     } else {
       dbg("dcc: unable to get homedir from cdcc and the dcc default homedir was not found");
     }
 
     # Remember found homedir path
-    dbg("dcc: using '" . $dcchome . "' as DCC homedir");
-    $self->{main}->{conf}->{dcc_home} = $dcchome;
+    dbg("dcc: using '%s' as DCC homedir", $dcchome);
+    $conf->{dcc_home} = $dcchome;
   }
 }
 
 sub is_dccifd_available {
   my ($self) = @_;
 
+  my $conf = $self->{main}->{conf};
   $self->{dccifd_available} = 0;
-  if ($self->{main}->{conf}->{use_dcc} == 0) {
-    dbg("dcc: dccifd is not available: use_dcc is set to 0");
-    return 0;
+
+  if (!$conf->{use_dcc}) {
+    dbg("dcc: dccifd is not available: use_dcc is false");
+  } elsif (defined $conf->{dcc_dccifd_host}) {
+    dbg("dcc: dccifd inet socket chosen: [%s]:%s",
+        $conf->{dcc_dccifd_host}, $conf->{dcc_dccifd_port});
+    $self->{dccifd_available} = 1;
+  } else {
+    my $sockpath = $conf->{dcc_dccifd_socket};
+    my $dcchome = $conf->{dcc_home};
+    if (defined $sockpath) {
+      dbg("dcc: dccifd local socket chosen: %s", $sockpath);
+    } elsif (defined $conf->{dcc_dccifd_path_raw}) {
+      # avoid falling back to defaults if explicitly provided but wrong
+    } elsif (defined $dcchome && $dcchome ne '' && -S "$dcchome/dccifd") {
+      $sockpath = "$dcchome/dccifd";
+      $conf->{dcc_dccifd_socket} = $sockpath;
+      dbg("dcc: dccifd default local socket chosen: %s", $sockpath);
+    }
+    if (defined $sockpath && -S $sockpath && -w _ && -r _) {
+      $self->{dccifd_available} = 1;
+    } else {
+      dbg("dcc: dccifd is not available: no r/w dccifd socket found: %s",
+          $conf->{dcc_dccifd_path_raw});
+    }
   }
-  my $dcchome = $self->{main}->{conf}->{dcc_home} || '';
-  my $dccifd = $self->{main}->{conf}->{dcc_dccifd_path} || '';
 
-  if ($dccifd eq '' && ($dcchome ne '' && -S "$dcchome/dccifd")) {
-    $dccifd = "$dcchome/dccifd";
-  }
-
-  unless ($dccifd ne '' && -S $dccifd && -w _ && -r _) {
-    dbg("dcc: dccifd is not available: no r/w dccifd socket found");
-    return 0;
-  }
-
-  # remember any found dccifd socket
-  $self->{main}->{conf}->{dcc_dccifd_path} = $dccifd;
-
-  dbg("dcc: dccifd is available: " . $self->{main}->{conf}->{dcc_dccifd_path});
-  $self->{dccifd_available} = 1;
-  return 1;
+  return $self->{dccifd_available};
 }
 
 sub is_dccproc_available {
   my ($self) = @_;
+  my $conf = $self->{main}->{conf};
 
   $self->{dccproc_available} = 0;
-  if ($self->{main}->{conf}->{use_dcc} == 0) {
-    dbg("dcc: dccproc is not available: use_dcc is set to 0");
+
+  if (!$conf->{use_dcc}) {
+    dbg("dcc: dccproc is not available: use_dcc is false");
     return 0;
   }
-  my $dcchome = $self->{main}->{conf}->{dcc_home} || '';
-  my $dccproc = $self->{main}->{conf}->{dcc_path} || '';
+  my $dcchome = $conf->{dcc_home} || '';
+  my $dccproc = $conf->{dcc_path} || '';
 
   if ($dccproc eq '' && ($dcchome ne '' && -x "$dcchome/bin/dccproc")) {
     $dccproc = "$dcchome/bin/dccproc";
@@ -411,11 +448,58 @@ sub is_dccproc_available {
   }
 
   # remember any found dccproc
-  $self->{main}->{conf}->{dcc_path} = $dccproc;
+  $conf->{dcc_path} = $dccproc;
 
-  dbg("dcc: dccproc is available: " . $self->{main}->{conf}->{dcc_path});
+  dbg("dcc: dccproc is available: %s", $conf->{dcc_path});
   $self->{dccproc_available} = 1;
   return 1;
+}
+
+sub dccifd_connect {
+  my($self) = @_;
+  my $conf = $self->{main}->{conf};
+  my $sockpath = $conf->{dcc_dccifd_socket};
+  my $host = $conf->{dcc_dccifd_host};
+  my $port = $conf->{dcc_dccifd_port};
+  my $sock;
+  if (defined $sockpath) {
+    dbg("dcc: connecting to a local socket %s", $sockpath);
+    $sock = IO::Socket::UNIX->new(
+              Type => SOCK_STREAM, Peer => $sockpath);
+    $sock or die "dcc: failed to connect to a socket $sockpath: $!\n";
+  } elsif (defined $host) {
+    my $specified_path = $conf->{dcc_dccifd_path_raw};
+    if ($host eq '') {
+      die "dcc: empty host specification: $specified_path\n";
+    }
+    if (!defined $port || $port !~ /^\d+\z/ || $port < 1 || $port > 65535) {
+      die "dcc: bad TCP port number: $specified_path\n";
+    }
+    my $is_inet4 = $host =~ /^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\z/;
+    if ($is_inet4) {  # inet4 socket (IPv4 address)
+      dbg("dcc: connecting to inet4 socket [%s]:%s", $host,$port);
+      $sock = IO::Socket::INET->new(
+                Proto => 'tcp', PeerAddr => $host, PeerPort => $port);
+    } else {
+      if (!defined $have_inet6) {
+        $have_inet6 = eval { require IO::Socket::INET6 };
+        $have_inet6 = 0  if !defined $have_inet6;
+      }
+      if (!$have_inet6) {  # fallback to an inet4 socket (IPv4)
+        dbg("dcc: connecting(2) to inet4 socket [%s]:%s", $host,$port);
+        $sock = IO::Socket::INET->new(
+                  Proto => 'tcp', PeerAddr => $host, PeerPort => $port);
+      } else {  # inet6 socket (IPv6) or a host name
+        dbg("dcc: connecting to inet6 socket [%s]:%s", $host,$port);
+        $sock = IO::Socket::INET6->new(
+                  Proto => 'tcp', PeerAddr => $host, PeerPort => $port);
+      }
+    }
+    $sock or die "dcc: failed to connect to [$host]:$port : $!\n";
+  } else {
+    die "dcc: dccifd socket not provided: $conf->{dcc_dccifd_path_raw}\n";
+  }
+  return $sock;
 }
 
 sub get_dcc_interface {
@@ -483,6 +567,8 @@ sub dcc_query {
 
 sub check_dcc {
   my ($self, $permsgstatus, $full) = @_;
+  my $conf = $self->{main}->{conf};
+
   $self->dcc_query($permsgstatus, $full)  if !$permsgstatus->{dcc_checked};
 
   my $response = $permsgstatus->{dcc_response};
@@ -509,17 +595,17 @@ sub check_dcc {
   if ($response =~ /\brep=(\d+)/) {
     $count{rep}  = $1+0;
   }
-  if ($count{body} >= $self->{main}->{conf}->{dcc_body_max} ||
-      $count{fuz1} >= $self->{main}->{conf}->{dcc_fuz1_max} ||
-      $count{fuz2} >= $self->{main}->{conf}->{dcc_fuz2_max} ||
-      $count{rep}  >= $self->{main}->{conf}->{dcc_rep_percent})
+  if ($count{body} >= $conf->{dcc_body_max} ||
+      $count{fuz1} >= $conf->{dcc_fuz1_max} ||
+      $count{fuz2} >= $conf->{dcc_fuz2_max} ||
+      $count{rep}  >= $conf->{dcc_rep_percent})
   {
     dbg(sprintf("dcc: listed: BODY=%s/%s FUZ1=%s/%s FUZ2=%s/%s REP=%s/%s",
                 map { defined $_ ? $_ : 'undef' } (
-		  $count{body}, $self->{main}->{conf}->{dcc_body_max},
-		  $count{fuz1}, $self->{main}->{conf}->{dcc_fuz1_max},
-		  $count{fuz2}, $self->{main}->{conf}->{dcc_fuz2_max},
-		  $count{rep},  $self->{main}->{conf}->{dcc_rep_percent})
+		  $count{body}, $conf->{dcc_body_max},
+		  $count{fuz1}, $conf->{dcc_fuz1_max},
+		  $count{fuz2}, $conf->{dcc_fuz2_max},
+		  $count{rep},  $conf->{dcc_rep_percent})
                 ));
     return 1;
   }
@@ -552,12 +638,12 @@ sub check_dcc_reputation_range {
 
 sub dccifd_lookup {
   my ($self, $permsgstatus, $fulltext, $client, $clientname, $helo) = @_;
+  my $conf = $self->{main}->{conf};
   my $response;
   my $left;
   my $right;
-  my $timeout = $self->{main}->{conf}->{dcc_timeout};
-  my $sockpath = $self->{main}->{conf}->{dcc_dccifd_path};
-  my $opts = $self->{main}->{conf}->{dcc_options};
+  my $timeout = $conf->{dcc_timeout};
+  my $opts = $conf->{dcc_options};
   my @opts = !defined $opts ? () : split(' ',$opts);
 
   $permsgstatus->enter_helper_run_mode();
@@ -567,28 +653,29 @@ sub dccifd_lookup {
 
     local $SIG{PIPE} = sub { die "__brokenpipe__ignore__\n" };
 
-    my $sock = IO::Socket::UNIX->new(Type => SOCK_STREAM,
-      Peer => $sockpath) || dbg("dcc: failed to open socket") && die;
+    my $sock = $self->dccifd_connect();
+    $sock or die "dcc: failed to connect to a dccifd socket";
 
     # send the options and other parameters to the daemon
-    $sock->print("header " . join(" ",@opts) . "\n") || dbg("dcc: failed write") && die; # options
-    $sock->print($client . "\n") || dbg("dcc: failed write") && die; # client
-    $sock->print($helo . "\n") || dbg("dcc: failed write") && die; # HELO value
-    $sock->print("\n") || dbg("dcc: failed write") && die; # sender
-    $sock->print("unknown\r\n") || dbg("dcc: failed write") && die; # recipients
-    $sock->print("\n") || dbg("dcc: failed write") && die; # recipients
+    $sock->print("header " . join(" ",@opts) . "\n")
+                                 or die "dcc: failed write";  # options
+    $sock->print($client . "\n") or die "dcc: failed write";  # client
+    $sock->print($helo . "\n")   or die "dcc: failed write";  # HELO value
+    $sock->print("\n")           or die "dcc: failed write";  # sender
+    $sock->print("unknown\r\n")  or die "dcc: failed write";  # recipients
+    $sock->print("\n")           or die "dcc: failed write";  # recipients
 
-    $sock->print($$fulltext) || dbg("dcc: failed write") && die;
+    $sock->print($$fulltext)     or die "dcc: failed write";
 
-    $sock->shutdown(1) || dbg("dcc: failed socket shutdown: $!") && die;
+    $sock->shutdown(1) or die "dcc: failed socket shutdown: $!";
 
-    $sock->getline() || dbg("dcc: failed read status") && die;
-    $sock->getline() || dbg("dcc: failed read multistatus") && die;
+    $sock->getline()   or die "dcc: failed read status";
+    $sock->getline()   or die "dcc: failed read multistatus";
 
     my @null = $sock->getlines();
     if (!@null) {
       # no facility prefix on this
-      die("failed to read header\n");
+      die "dcc: failed to read header\n";
     }
 
     # the first line will be the header we want to look at
@@ -600,7 +687,7 @@ sub dccifd_lookup {
       $response .= $v;
     }
 
-    dbg("dcc: dccifd got response: $response");
+    dbg("dcc: dccifd got response: %s", $response);
   
   });
 
@@ -613,12 +700,12 @@ sub dccifd_lookup {
 
   if ($err) {
     chomp $err;
-    warn("dcc: dccifd -> check skipped: $! $err");
+    warn("dcc: dccifd -> check skipped: $err\n");
     return;
   }
 
   if (!defined $response || $response !~ /^X-DCC/) {
-    dbg("dcc: dccifd check failed - no X-DCC returned: $response");
+    dbg("dcc: dccifd check failed - no X-DCC returned: %s", $response);
     return;
   }
 
@@ -628,9 +715,10 @@ sub dccifd_lookup {
 
 sub dccproc_lookup {
   my ($self, $permsgstatus, $fulltext, $client) = @_;
+  my $conf = $self->{main}->{conf};
   my $response;
   my %count = (body => 0, fuz1 => 0, fuz2 => 0, rep => 0);
-  my $timeout = $self->{main}->{conf}->{dcc_timeout};
+  my $timeout = $conf->{dcc_timeout};
 
   $permsgstatus->enter_helper_run_mode();
 
@@ -644,9 +732,9 @@ sub dccproc_lookup {
     local $SIG{PIPE} = sub { die "__brokenpipe__ignore__\n" };
 
     # note: not really tainted, this came from system configuration file
-    my $path = untaint_file_path($self->{main}->{conf}->{dcc_path});
+    my $path = untaint_file_path($conf->{dcc_path});
 
-    my $opts = $self->{main}->{conf}->{dcc_options};
+    my $opts = $conf->{dcc_options};
     my @opts = !defined $opts ? () : split(' ',$opts);
     untaint_var(\@opts);
 
@@ -672,7 +760,7 @@ sub dccproc_lookup {
 
     if (!@null) {
       # no facility prefix on this
-      die("failed to read header\n");
+      die "failed to read header\n";
     }
 
     # the first line will be the header we want to look at
@@ -686,10 +774,10 @@ sub dccproc_lookup {
 
     unless (defined($response)) {
       # no facility prefix on this
-      die("no response\n");	# yes, this is possible
+      die "no response\n";	# yes, this is possible
     }
 
-    dbg("dcc: got response: $response");
+    dbg("dcc: got response: %s", $response);
 
   });
 
@@ -723,7 +811,7 @@ sub dccproc_lookup {
 
   if (!defined($response) || $response !~ /^X-DCC/) {
     $response ||= '';
-    dbg("dcc: check failed: no X-DCC returned (did you create a map file?): $response");
+    dbg("dcc: check failed: no X-DCC returned (did you create a map file?): %s", $response);
     return;
   }
 
@@ -777,10 +865,10 @@ sub plugin_report {
 
 sub dccifd_report {
   my ($self, $options, $fulltext, $client, $helo) = @_;
-  my $timeout = $self->{main}->{conf}->{dcc_timeout};
-  my $sockpath = $self->{main}->{conf}->{dcc_dccifd_path};
+  my $conf = $self->{main}->{conf};
+  my $timeout = $conf->{dcc_timeout};
   # instead of header use whatever the report option is
-  my $opts = $self->{main}->{conf}->{dcc_options};
+  my $opts = $conf->{dcc_options};
   my @opts = !defined $opts ? () : split(' ',$opts);
 
   $options->{report}->enter_helper_run_mode();
@@ -790,23 +878,29 @@ sub dccifd_report {
 
     local $SIG{PIPE} = sub { die "__brokenpipe__ignore__\n" };
 
-    my $sock = IO::Socket::UNIX->new(Type => SOCK_STREAM,
-                                     Peer => $sockpath) || dbg("report: dccifd failed to open socket") && die;
+    my $sock = $self->dccifd_connect();
+    $sock or die "report: failed to connect to a dccifd socket";
 
     # send the options and other parameters to the daemon
-    $sock->print("spam " . join(" ",@opts) . "\n") || dbg("report: dccifd failed write") && die; # options
-    $sock->print($client . "\n") || dbg("report: dccifd failed write") && die; # client
-    $sock->print($helo . "\n") || dbg("report: dccifd failed write") && die; # HELO value
-    $sock->print("\n") || dbg("report: dccifd failed write") && die; # sender
-    $sock->print("unknown\r\n") || dbg("report: dccifd failed write") && die; # recipients
-    $sock->print("\n") || dbg("report: dccifd failed write") && die; # recipients
+    $sock->print("spam " . join(" ",@opts) . "\n")
+      or die "report: dccifd failed write"; # options
+    $sock->print($client . "\n")
+      or die "report: dccifd failed write"; # client
+    $sock->print($helo . "\n")
+      or die "report: dccifd failed write"; # HELO value
+    $sock->print("\n")
+      or die "report: dccifd failed write"; # sender
+    $sock->print("unknown\r\n")
+      or die "report: dccifd failed write"; # recipients
+    $sock->print("\n")
+      or die "report: dccifd failed write"; # recipients
 
-    $sock->print($$fulltext) || dbg("report: dccifd failed write") && die;
+    $sock->print($$fulltext) or die "report: dccifd failed write";
 
-    $sock->shutdown(1) || dbg("report: dccifd failed socket shutdown: $!") && die;
+    $sock->shutdown(1) or die "report: dccifd failed socket shutdown: $!";
 
-    $sock->getline() || dbg("report: dccifd failed read status") && die;
-    $sock->getline() || dbg("report: dccifd failed read multistatus") && die;
+    $sock->getline() or die "report: dccifd failed read status";
+    $sock->getline() or die "report: dccifd failed read multistatus";
 
     my @ignored = $sock->getlines();
   });
@@ -833,11 +927,12 @@ sub dccifd_report {
   
 sub dcc_report {
   my ($self, $options, $tmpf, $client) = @_;
+  my $conf = $self->{main}->{conf};
   my $timeout = $options->{report}->{conf}->{dcc_timeout};
 
   # note: not really tainted, this came from system configuration file
   my $path = untaint_file_path($options->{report}->{conf}->{dcc_path});
-  my $opts = $self->{main}->{conf}->{dcc_options};
+  my $opts = $conf->{dcc_options};
   my @opts = !defined $opts ? () : split(' ',$opts);
   untaint_var(\@opts);
 
