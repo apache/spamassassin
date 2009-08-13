@@ -21,3 +21,5 @@ ifplugin Mail::SpamAssassin::Plugin::MIMEHeader
   mimeheader   OBFU_TEXT_ATTACH    Content-Type =~ m,application/octet-stream;.+\.txt\b,i
 endif
 
+header         MUA_ONE_WORD  X-Mailer =~ /^[a-z]+$/i
+
