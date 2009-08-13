@@ -87,7 +87,9 @@ sub check_for_numeric_helo {
   if ($rcvd) {
     my $IP_ADDRESS = IPV4_ADDRESS;
     my $IP_PRIVATE = IP_PRIVATE;
-    if ($rcvd =~ /helo=($IP_ADDRESS)\b/i && $1 !~ /$IP_PRIVATE/) {
+    local $1;
+    if ($rcvd =~ /\bhelo=($IP_ADDRESS)(?=[\000-\040,;\[()<>]|\z)/i  # Bug 5878
+        && $1 !~ /$IP_PRIVATE/) {
       return 1;
     }
   }
