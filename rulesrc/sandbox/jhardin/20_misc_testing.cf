@@ -1,19 +1,19 @@
-
-header		REPLYTO_MANY_AT	Reply-To =~ /\@.+\@/
-describe	REPLYTO_MANY_AT	More than one @ in Reply-To:
-
-header		SENDER_MANY_AT	Sender =~ /\@.+\@/
-describe	SENDER_MANY_AT	More than one @ in Sender:
-
-header		FROM_MANY_AT	From =~ /\@.+\@/
-describe	FROM_MANY_AT	More than one @ in From:
-
+#
+#header		REPLYTO_MANY_AT	Reply-To =~ /\@.+\@/
+#describe	REPLYTO_MANY_AT	More than one @ in Reply-To:
+#
+#header		SENDER_MANY_AT	Sender =~ /\@.+\@/
+#describe	SENDER_MANY_AT	More than one @ in Sender:
+#
+#header		FROM_MANY_AT	From =~ /\@.+\@/
+#describe	FROM_MANY_AT	More than one @ in From:
+#
 
 header         RDNS_LOCALHOST  X-Spam-Relays-External =~ /^\[ ip=(?!127)\d+\.\d+\.\d+\.\d+ rdns=localhost(?:\.localdomain)? /i
 describe       RDNS_LOCALHOST  Sender's public rDNS is "localhost"
 
-body		EU_SPAM_LAW	m,Directive 2000/31/EC of the European Parliament,i
-describe	EU_SPAM_LAW	Quoting "European Parliament" spam law
+#body		EU_SPAM_LAW	m,Directive 2000/31/EC of the European Parliament,i
+#describe	EU_SPAM_LAW	Quoting "European Parliament" spam law
 
 ifplugin Mail::SpamAssassin::Plugin::MIMEHeader
   mimeheader   HTML_ATTACH    Content-Type =~ m,text/html;.+\.html?\b,i
@@ -22,4 +22,7 @@ ifplugin Mail::SpamAssassin::Plugin::MIMEHeader
 endif
 
 header         MUA_ONE_WORD  X-Mailer =~ /^[a-z]+$/i
+
+body           DEAR_BENEFICIARY		/^Dear\sBeneficiary\b/i
+
 
