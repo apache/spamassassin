@@ -48,9 +48,14 @@ foreach my $who (keys %{$pairs}) {
   $byuser->{$who}->{buckets} = $buckets;
 }
 
+my $all_tspam = 0;
+my $all_tham = 0;
+
 foreach my $who (sort keys %{$byuser}) {
   report($byuser->{$who}->{buckets}, $total_counts, $who);
 }
+
+final_report($total_counts);
 exit;
 
 # ---------------------------------------------------------------------------
@@ -137,7 +142,20 @@ sub report {
             $tham, as_percent($tham, $total_counts->{ham}),
             format_score_range($trhlo, $trhhi);
 
+  $all_tspam += $tspam;
+  $all_tham += $tham;
   print "\n";
+}
+
+# ---------------------------------------------------------------------------
+
+sub final_report {
+  my ($total_counts) = @_;
+
+  printf "%-16s %7s %6s   %-14s %7s %6s   %-14s\n",
+            "OVERALL TOTAL:",
+            $all_tspam, '', '',
+            $all_tham, '', '';
 }
 
 # ---------------------------------------------------------------------------
