@@ -25,4 +25,6 @@ header         MUA_ONE_WORD  X-Mailer =~ /^[a-z]+$/i
 
 body           DEAR_BENEFICIARY		/^Dear\sBeneficiary\b/i
 
+uri            URI_NUMERIC_CCTLD     m;^[a-z]+://(?:\d+\.){2,}[a-z][a-z]/;i
+
 
