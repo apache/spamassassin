@@ -83,7 +83,7 @@ endif
 
 header __HELO_NO_DOMAIN   X-Spam-Relays-External =~ /^[^\]]+ helo=[^\.]+ /
 
-meta STOCK_IMG_HDR_FROM  (__ANY_IMAGE_ATTACH&&__ENV_AND_HDR_FROM_MATCH&&TVD_FW_GRAPHIC_ID1&&__HTML_IMG_ONLY)
+meta STOCK_IMG_HDR_FROM  (__ANY_IMAGE_ATTACH&&__ENV_AND_HDR_FROM_MATCH&&__TVD_FW_GRAPHIC_ID1&&__HTML_IMG_ONLY)
 describe STOCK_IMG_HDR_FROM Stock spam image part, with distinctive From line
 
 meta STOCK_IMG_HTML  (__ANY_IMAGE_ATTACH&&__ENV_AND_HDR_FROM_MATCH&&__PART_STOCK_CID&&__HTML_IMG_ONLY)

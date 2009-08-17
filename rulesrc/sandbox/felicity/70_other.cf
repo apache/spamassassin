@@ -146,7 +146,7 @@ mimeheader __GIF_ATTACH Content-Type =~ /^image\/gif\b/i
 
 #  5.679   6.6610   0.0203    0.997   0.92    1.00  TVD_FW_GRAPHIC_ID1
 #  0.339   0.3980   0.0000    1.000   0.50    1.00  TVD_FW_GRAPHIC_ID2
-mimeheader TVD_FW_GRAPHIC_ID1	Content-Id =~ /<[0-9a-f]{12}(?:\$[0-9a-f]{8}){2}\@/
+mimeheader __TVD_FW_GRAPHIC_ID1	Content-Id =~ /<[0-9a-f]{12}(?:\$[0-9a-f]{8}){2}\@/
 mimeheader TVD_FW_GRAPHIC_ID2	Content-Id =~ /<(?:[0-9A-F]{8}\.){3}[0-9A-F]{8}/
 
 #  0.908   1.0658   0.0000    1.000   1.00    0.01  TVD_FW_GRAPHIC_ID3
