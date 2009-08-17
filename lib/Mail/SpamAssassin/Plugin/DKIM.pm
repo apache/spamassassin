@@ -502,6 +502,7 @@ sub _dkim_load_modules {
     { require Mail::DKIM; require Mail::DKIM::Verifier;
       require Mail::DKIM::DkimPolicy;
       eval { require Mail::DKIM::AuthorDomainPolicy }; # since Mail::DKIM 0.34
+      1;
     }
   } or do {
     $eval_stat = $@ ne '' ? $@ : "errno=$!";  chomp $eval_stat;
