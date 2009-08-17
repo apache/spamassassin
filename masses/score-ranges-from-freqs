@@ -17,45 +17,9 @@
 # limitations under the License.
 # </@LICENSE>
 
-# NOTE: I don't think these window algorithms are used anymore! In
-# fact I think it's just [ 0 .. (4.5 * ranking) ].
-
-# (rough) graphic demo of this algorithm:
-# 0.0  = -limit [......] 0 ........ limit
-# 0.25 = -limit ..[..... 0 .]...... limit
-# 0.5  = -limit ....[... 0 ...].... limit
-# 0.75 = -limit ......[. 0 .....].. limit
-# 1.0  = -limit ........ 0 [......] limit
-my $sliding_window_limits = 4.8; # limits = [-$range, +$range]
-my $sliding_window_size =   5.5; # scores have this range within limits
-
-# 0.0  = -limit [......] 0 ........ limit
-# 0.25 = -limit ....[... 0 ]....... limit
-# 0.5  = -limit ......[. 0 .]...... limit (note: tighter)
-# 0.75 = -limit .......[ 0 ...].... limit
-# 1.0  = -limit ........ 0 [......] limit
-my $shrinking_window_lower_base =   0.00; 
-my $shrinking_window_lower_range =  1.00; # *ratio, added to above
-my $shrinking_window_size_base =    1.00;
-my $shrinking_window_size_range =   1.00; # *ratio, added to above
-
-my $use_sliding_window = 0;
-
 my $argcffile = shift @ARGV;
 my $scoreset = shift @ARGV;
 $scoreset = 0 if ( !defined $scoreset );
-
-if (defined ($argcffile) && $argcffile eq '-test') {
-  # use this to debug the ranking -> score-range mapping:
-  for $rat (0.0, 0.25, 0.5, 0.75, 1.0) {
-    my ($lo, $hi); if ($use_sliding_window) {
-      ($lo, $hi) = sliding_window_ratio_to_range($rat);
-    } else {
-      ($lo, $hi) = shrinking_window_ratio_to_range($rat);
-    }
-    warn "test: $rat => [ $lo $hi ]\n";
-  } exit;
-}
 
 my %freq_spam = ();
 my %freq_nonspam = ();
@@ -96,7 +60,7 @@ while (<>) {
   next if ($test eq '(all messages as %)');
 
   if (!defined ($rules{$test})) {
-    warn "rule $test no longer exists; ignoring\n";
+    warn "$test: rule no longer exists; ignoring\n";
     next;
   }
 
@@ -111,20 +75,20 @@ while (<>) {
   # "userconf" rules, or "net" rules in set 0/2, or "learn" rules
   # in set 1/3, are nonmutable.
   if ($tflags =~ /\buserconf\b/) {
-    print "rule $test: immutable due to 'userconf'\n";
+    print "$test: immutable due to 'userconf'\n";
     $mutable_tests{$test} = 0;
   }
   elsif ( ($scoreset & 1) == 0 && $tflags =~ /\bnet\b/ ) {
-    print "rule $test: immutable due to 'net'\n";
+    print "$test: immutable due to 'net'\n";
     $mutable_tests{$test} = 0;
   }
   elsif ( ($scoreset & 2) == 0 && $tflags =~ /\blearn\b/ ) {
-    print "rule $test: immutable due to 'learn'\n";
+    print "$test: immutable due to 'learn'\n";
     $mutable_tests{$test} = 0;
   }
   elsif (!$rules{$test}->{mutable}) {
     # rules read from the non-mutable section
-    print "rule $test: immutable according to parse-rules\n";
+    print "$test: immutable according to parse-rules\n";
     $mutable_tests{$test} = 0;
   }
   elsif ($rules{$test}->{score} == 0) {
@@ -132,7 +96,7 @@ while (<>) {
     # to "simplify" scores down to 0.  comment, since real zero-scored rules
     # that were scored zero when the mass-check ran, will also have no hits
     # and the 'less than 0.01%' case below takes care of that.
-    # print "rule $test: immutable since score is 0\n";
+    # print "$test: immutable since score is 0\n";
     # $mutable_tests{$test} = 0;
   }
 
@@ -144,7 +108,7 @@ while (<>) {
 
   # less than 0.01% of messages were hit: force these rules to 0.0
   if ($overall < 0.01) {
-    print "rule $test: immutable and zero due to low hitrate\n";
+    print "$test: zeroing rule and marking immutable, due to low hitrate\n";
     $mutable_tests{$test} = 0;
     $soratio{$test} = 0.5;
     $ranking{$test} = 0.0;
@@ -163,7 +127,7 @@ if ( ! mkdir "tmp", 0755 ) {
 open (OUT, ">tmp/ranges.data");
 foreach my $test (sort { $ranking{$b} <=> $ranking{$a} } keys %freq) {
   if (!defined ($rules{$test})) {
-    warn "no rule $test";
+    warn "$test: rule not found! forcing score to 0";
     print OUT ("0 0 0 $test\n");
     next;
   }
@@ -198,37 +162,4 @@ foreach my $test (sort { $ranking{$b} <=> $ranking{$a} } keys %freq) {
 close OUT;
 exit;
 
-sub sliding_window_ratio_to_range {
-  my $ratio = shift;
-  my $lo = -$sliding_window_limits + ($sliding_window_size * $ratio);
-  my $hi = +$sliding_window_limits - ($sliding_window_size * (1-$ratio));
-  if ($lo > $hi) { # ???
-    ($lo,$hi) = ($hi,$lo);
-  }
-  ($lo, $hi);
-}
-
-sub shrinking_window_ratio_to_range {
-  my $ratio = shift;
-  my $is_nice = 0;
-  my $adjusted = ($ratio -.5) * 2;      # adj [0,1] to [-1,1]
-  if ($adjusted < 0) { $is_nice = 1; $adjusted = -$adjusted; }
-
-#$adjusted /= 1.5 if ( $ratio < 0.95 && $ratio > 0.15 ); # tvd
-
-  my $lower = $shrinking_window_lower_base 
-                        + ($shrinking_window_lower_range * $adjusted);
-  my $range = $shrinking_window_size_base 
-                        + ($shrinking_window_size_range * $adjusted);
-  my $lo = $lower;
-  my $hi = $lower + $range;
-  if ($is_nice) {
-    my $tmp = $hi; $hi = -$lo; $lo = -$tmp;
-  }
-  if ($lo > $hi) { # ???
-    ($lo,$hi) = ($hi,$lo);
-  }
-
-  ($lo, $hi);
-}
 

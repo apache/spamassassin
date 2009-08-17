@@ -514,7 +514,7 @@ sub fixup_meta_predicates {
       my $depscore = $gen_lines{$depend}{scores}[$opt_scoreset];
       next if (defined $depscore && $depscore != 0);
 
-      warn "dep failure: $name depends on $depend with 0 score; fixing at non-0\n";
+      warn "fix meta dep: $name depends on $depend with 0 score, fixing at non-0\n";
       $gen_lines{$depend}{scores}[$opt_scoreset] = 0.001;
     }
   }

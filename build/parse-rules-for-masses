@@ -169,6 +169,7 @@ sub readrules {
       } else {
         $rules->{$rule}->{score} = $def;
       }
+      $rules->{$rule}->{no_score_found} = 1;
     }
 
     # ignore net rules in set 0 or set 2

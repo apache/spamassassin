@@ -3,8 +3,8 @@ CFLAGS=		-g -O2 -Wall
 LDFLAGS=	-lm
 
 PGAPACK=	/local/pgapack-1.0.0.1
-PGAPACKLIBDIR=  $(PGAPACK)/lib/linux    # linux
-# PGAPACKLIBDIR=  $(PGAPACK)/lib/sun4     # solaris
+#PGAPACKLIBDIR=  $(PGAPACK)/lib/linux    # linux
+PGAPACKLIBDIR=  $(PGAPACK)/lib/sun4     # solaris
 
 # What rule scoreset are we using?
 include config
