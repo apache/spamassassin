@@ -220,6 +220,12 @@ sub writescores_c {
       }
       #$range_lo{$name} ||= 0.1;
       #$range_hi{$name} ||= 1.5;
+
+      # no default score found? set it to max and let GA adjust downwards.  this
+      # seems to help avoid a load of really good rules getting 1.0 scores
+      if ($allrules{$name}->{no_score_found}) {
+        $scores{$name} = ($range_hi{$name} + $range_lo{$name}) / 2.0;
+      }
     }
 
     $output .= ".".$i."\n".
@@ -366,7 +372,7 @@ int tests_count[$num_nondup];
 
 sub read_ranges {
   if (!-f 'tmp/ranges.data') {
-    system ("make tmp/ranges.data SCORESET=$opt_scoreset");
+    die "need to make 'tmp/ranges.data' first";
   }
 
   # read ranges, and mutableness, from ranges.data.
@@ -382,13 +388,13 @@ sub read_ranges {
     my $mut = $3+0;
 
     if ($allrules{$t}->{issubrule}) {
-      # warn "ignoring '$t': is sub-rule\n";    # no need to warn
+      # warn "$t: ignoring, is sub-rule\n";    # no need to warn
       $ignored_rule{$t} = 1;
       $mutable_tests{$t} = 0;
       next;
     }
     if ($t =~ /^T_/) {
-      # warn "ignoring '$t': is T_ test rule\n";    # no need to warn
+      # warn "$t: ignoring, is T_ test rule\n";    # no need to warn
       $ignored_rule{$t} = 1;
       $mutable_tests{$t} = 0;
       $range_lo{$t} = 0.01;    # clamp to insignificant range
@@ -396,7 +402,7 @@ sub read_ranges {
       next;
     }
     if (($range_lo{$t} == $range_hi{$t}) && (! $range_lo{$t})) {
-      warn "ignoring '$t': score and range == 0\n";
+      warn "$t: ignoring, score and range == 0\n";
       $ignored_rule{$t} = 1;
       $mutable_tests{$t} = 0;
       next;
@@ -414,7 +420,7 @@ sub read_ranges {
       $mutable_tests{$t} = 1;
     }
     unless ($mutable_tests{$t} || $scores{$t}) {
-#      warn "ignoring '$t': immutable and score == 0\n";
+      warn "$t: ignoring, immutable and score == 0 in this scoreset\n";
       $ignored_rule{$t} = 1;
     }
   }
@@ -427,7 +433,7 @@ sub read_ranges {
 
     if ($allrules{$t}->{issubrule}) {
       if (!$ignored_rule{$t}) {
-        # warn "ignoring '$t': is sub-rule\n";  # no need to warn here
+        # warn "$t: ignoring, is sub-rule\n";  # no need to warn here
         $ignored_rule{$t} = 1;
       }
       $mutable_tests{$t} = 0;
@@ -435,7 +441,7 @@ sub read_ranges {
     }
     if ($t =~ /^T_/) {
       if (!$ignored_rule{$t}) {
-        # warn "ignoring '$t': is test rule\n";  # no need to warn here
+        # warn "$t: ignoring, is T_ test rule\n";  # no need to warn here
         $ignored_rule{$t} = 1;
 	$range_lo{$t} = 0.01;    # clamp to insignificant range
 	$range_hi{$t} = 0.01;
@@ -450,7 +456,7 @@ sub read_ranges {
     }
     unless ($mutable_tests{$t} || $scores{$t}) {
       if (!$ignored_rule{$t}) {
-        warn "ignoring '$t': immutable and score == 0\n";
+        warn "$t: ignoring, immutable and score == 0 in this scoreset\n";
         $ignored_rule{$t} = 1;
       }
     }
