@@ -51,15 +51,18 @@ my $error = do {
 my $malformed = 0;
 my $unlisted = 0;
 for (split(/^/m, $error)) {
-    if (/^(?: \[ \d+ \] \s+)? ([^:\s]+) : \s* ([^:\s]+) : \s* (.*)/x) {
+    if (/^(?: \[ \d+ \] \s+)? (dbg|info): \s* ([^:\s]+) : \s* (.*)/x) {
 	if (!exists $facility{$2}) {
 	    $unlisted++;
 	    print "unlisted debug facility: $2\n";
 	}
     }
+    elsif (/^(?: \[ \d+ \] \s+)? (warn|error):/x) {
+	# ok
+    }
     else {
 	print "malformed debug message: $_";
- 	$malformed = 1;
+#	$malformed = 1;
     }
 }
 
