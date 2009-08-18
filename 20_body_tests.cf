@@ -96,7 +96,10 @@ describe BLANK_LINES_80_90  Message body has 80-90% blank lines
 # it's the ratio of spaces to non-spaces in each paragraph.  apparently
 # messages where generally there are lots of spaces mean the message is spam.
 # 8.532  10.6051   0.1897    0.982   0.75    0.01  T_VERTICAL_WORDS_TVD_1
-body TVD_SPACE_RATIO	eval:tvd_vertical_words('0','10')
+# bug 6149: avoid common .jp false positives
+header __SUBJECT_UTF8_B_ENCODED     Subject:raw =~ /=\?UTF-8\?B\?/
+body __TVD_SPACE_RATIO	eval:tvd_vertical_words('0','10')
+meta TVD_SPACE_RATIO    (__TVD_SPACE_RATIO && !__ISO_2022_JP_DELIM && !__SUBJECT_UTF8_B_ENCODED)
 
 endif
 
