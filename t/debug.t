@@ -29,11 +29,12 @@ exit unless TEST_ENABLED;
 
 # list of known debug facilities
 my %facility = map {; $_ => 1 }
-  qw( accessdb auto-whitelist bayes check config daemon dcc dns eval
-      generic facility hashcash ident ignore info ldap learn locker log
-      logger markup message metadata mimeheader plugin prefork progress
-      pyzor razor2 received-header replacetags reporter rules spamd spf
-      textcat uri uridnsbl util ),
+  qw( accessdb async auto-whitelist bayes check conf config daemon
+      dcc dkim dns eval generic https_http_mismatch facility FreeMail
+      hashcash ident ignore info ldap learn locker log logger markup
+      message metadata mimeheader plugin prefork progress pyzor razor2
+      received-header replacetags reporter rules spamd spf textcat
+      timing uri uridnsbl util ),
 ;
 
 my $fh = IO::File->new_tmpfile();
@@ -50,7 +51,7 @@ my $error = do {
 my $malformed = 0;
 my $unlisted = 0;
 for (split(/^/m, $error)) {
-    if (/^(\w+):\s+(\S+?):\s*(.*)/) {
+    if (/^(?: \[ \d+ \] \s+)? ([^:\s]+) : \s* ([^:\s]+) : \s* (.*)/x) {
 	if (!exists $facility{$2}) {
 	    $unlisted++;
 	    print "unlisted debug facility: $2\n";
@@ -58,8 +59,7 @@ for (split(/^/m, $error)) {
     }
     else {
 	print "malformed debug message: $_";
-#disabled until bug 4061 is fixed
-#	$malformed = 1;
+ 	$malformed = 1;
     }
 }
 
