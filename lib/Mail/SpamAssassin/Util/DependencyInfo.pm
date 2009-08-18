@@ -128,8 +128,8 @@ my @OPTIONAL_MODULES = (
   module => 'IO::Socket::INET6',
   version => '0.00',
   desc => 'This is required if the first nameserver listed in your IP
-  configuration or /etc/resolv.conf file is available only via
-  an IPv6 address.',
+  configuration or /etc/resolv.conf file is available only via an
+  IPv6 address. Also used by a DCC plugin to access dccifd over network.',
 },
 {
   module => 'IO::Socket::SSL',
@@ -150,11 +150,11 @@ my @OPTIONAL_MODULES = (
 {
   module => 'Mail::DKIM',
   version => '0.31',
-  desc => 'If this module is installed, and you enable the DKIM plugin,
+  desc => 'If this module is installed and the DKIM plugin is enabled,
   SpamAssassin will perform DKIM signature verification when DKIM-Signature
   header fields are present in the message headers, and check ADSP rules
-  when a mail message does not contain a valid author domain signature.
-  Version 0.35 or later is recommended.'
+  (e.g. anti-phishing) when a mail message does not contain a valid author
+  domain signature. Version 0.36_5 or later is needed to fully support ADSP.'
 },
 {
   module => 'DBI',
