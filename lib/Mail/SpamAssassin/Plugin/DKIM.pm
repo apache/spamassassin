@@ -501,7 +501,9 @@ sub _dkim_load_modules {
     # Have to do this so that RPM doesn't find these as required perl modules.
     { require Mail::DKIM; require Mail::DKIM::Verifier;
       require Mail::DKIM::DkimPolicy;
-      eval { require Mail::DKIM::AuthorDomainPolicy }; # since Mail::DKIM 0.34
+      { local $@;
+        eval { require Mail::DKIM::AuthorDomainPolicy }; # since 0.34, optional
+      }
     }
     1;
   } or do {
