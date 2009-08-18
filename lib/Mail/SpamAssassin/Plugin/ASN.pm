@@ -76,8 +76,6 @@ SpamAssassin Issue #4770 concerning this plugin
 
 =head1 STATUS
 
-Experimental - Dec. 18, 2006
-
 No in-depth analysis of the usefulness of bayes tokenization of ASN data has
 been performed.
 
@@ -153,6 +151,7 @@ Examples:
       unless (defined $value && $value !~ /^$/) {
         return $Mail::SpamAssassin::Conf::MISSING_REQUIRED_VALUE;
       }
+      local($1,$2,$3);
       unless ($value =~ /^(\S+?)\.?(?:\s+_(\S+)_\s+_(\S+)_)?$/) {
         return $Mail::SpamAssassin::Conf::INVALID_VALUE;
       }
@@ -189,6 +188,7 @@ sub parsed_metadata {
   } elsif ($relay->{ip_private}) {
     dbg("asn: first external relay is a private IP, skipping ASN check");
   } else {
+    local($1,$2,$3,$4);
     if (defined $relay->{ip} && $relay->{ip} =~ /^(\d+)\.(\d+)\.(\d+)\.(\d+)$/) {
       $reversed_ip_quad = "$4.$3.$2.$1";
       dbg("asn: using first external relay IP for lookups: %s", $relay->{ip});
@@ -211,7 +211,8 @@ sub parsed_metadata {
     }
     next unless $reversed_ip_quad;
   
-    # do the DNS query, have the callback process the result rather than poll for them later
+    # do the DNS query, have the callback process the result
+    # rather than poll for them later
     my $zone_index = $index;
     my $zone = $reversed_ip_quad . '.' . $entry->{zone};
     my $key = "asnlookup-${zone_index}-$entry->{zone}";
@@ -247,19 +248,20 @@ sub process_dns_result {
     dbg("asn: %s: lookup result packet: '%s'", $zone, $rr->string);
     if ($rr->type eq 'TXT') {
       my @items = split(/ /, $rr->txtdata);
-      unless ($#items == 2) {
+      unless (@items == 3) {
         dbg("asn: TXT query response format unknown, ignoring zone: %s, ".
             "response: '%s'", $zone, $rr->txtdata);
         next;
       }
-      unless ($scanner->{tag_data}->{$asn_tag} =~ /\bAS$items[0]\b/) {
+      unless ($scanner->{tag_data}->{$asn_tag} =~ /\b\QAS$items[0]\E\b/) {
         if ($scanner->{tag_data}->{$asn_tag}) {
           $scanner->{tag_data}->{$asn_tag} .= " AS$items[0]";
         } else {
           $scanner->{tag_data}->{$asn_tag} = "AS$items[0]";
         }
       }
-      unless ($scanner->{tag_data}->{$route_tag} =~ m{\b$items[1]/$items[2]\b}) {
+      unless ($scanner->{tag_data}->{$route_tag} =~
+              m{\b\Q$items[1]/$items[2]\E\b}) {
         if ($scanner->{tag_data}->{$route_tag}) {
           $scanner->{tag_data}->{$route_tag} .= " $items[1]/$items[2]";
         } else {
