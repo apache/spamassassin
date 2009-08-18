@@ -91,8 +91,8 @@ C<Mail::DKIM>, C<Mail::SpamAssassin::Plugin>
   http://jason.long.name/dkimproxy/
   http://tools.ietf.org/rfc/rfc4871.txt
   http://tools.ietf.org/rfc/rfc4870.txt
+  http://tools.ietf.org/rfc/rfc5617.txt
   http://ietf.org/html.charters/dkim-charter.html
-  draft-ietf-dkim-ssp-09
 
 =cut
 
@@ -195,10 +195,10 @@ these are often targets for abuse of public mailers which sign their mail.
 
 =item adsp_override domain [signing_practices]
 
-Currently few domains publish their signing practices (draft-ietf-dkim-ssp,
-ADSP), partly because the ADSP draft/rfc is rather new, partly because they
-think hardly any recipient bothers to check it, and partly for fear that
-some recipients might lose mail due to problems in their signature validation
+Currently few domains publish their signing practices (RFC 5617 - ADSP),
+partly because the ADSP rfc is rather new, partly because they think
+hardly any recipient bothers to check it, and partly for fear that some
+recipients might lose mail due to problems in their signature validation
 procedures or mail mangling by mailers beyond their control.
 
 Nevertheless, recipients could benefit by knowing signing practices of a
@@ -216,7 +216,7 @@ to publish (explicitly or by default), and also save on a DNS lookup.
 Note that ADSP (published or overridden) is only consulted for messages
 which do not contain a valid DKIM signature from the author's domain.
 
-According to ADSP draft, signing practices can be one of the following:
+According to RFC 5617, signing practices can be one of the following:
 C<unknown>, C<all> and C<discardable>.
 
 C<unknown>: Messages from this domain might or might not have an author
@@ -448,7 +448,7 @@ sub check_dkim_adsp {
   return 0;
 }
 
-# useless, semantically always true according to the current SSP/ADSP draft
+# useless, semantically always true according to ADSP (RFC 5617)
 sub check_dkim_signsome {
   my ($self, $pms) = @_;
   # the signsome is semantically always true, and thus redundant;
@@ -491,38 +491,40 @@ sub check_for_def_dkim_whitelist_from {
 sub _dkim_load_modules {
   my ($self) = @_;
 
-  return $self->{tried_loading} if defined $self->{tried_loading};
-  $self->{tried_loading} = 0;
+  if (!$self->{tried_loading}) {
+    $self->{service_available} = 0;
+    my $timemethod = $self->{main}->UNIVERSAL::can("time_method") &&
+                     $self->{main}->time_method("dkim_load_modules");
+    my $eval_stat;
+    eval {
+      # Have to do this so that RPM doesn't find these as required perl modules.
+      { require Mail::DKIM::Verifier }
+    } or do {
+      $eval_stat = $@ ne '' ? $@ : "errno=$!";  chomp $eval_stat;
+    };
+    $self->{tried_loading} = 1;
 
-  my $timemethod = $self->{main}->UNIVERSAL::can("time_method") &&
-                   $self->{main}->time_method("dkim_load_modules");
-  my $eval_stat;
-  eval {
-    # Have to do this so that RPM doesn't find these as required perl modules.
-    { require Mail::DKIM; require Mail::DKIM::Verifier;
-      require Mail::DKIM::DkimPolicy;
-      { local $@;
-        eval { require Mail::DKIM::AuthorDomainPolicy }; # since 0.34, optional
+    if (defined $eval_stat) {
+      dbg("dkim: cannot load Mail::DKIM module, DKIM checks disabled: %s",
+          $eval_stat);
+    } else {
+      my $version = Mail::DKIM::Verifier->VERSION;
+      if ($version >= 0.31) {
+        dbg("dkim: using Mail::DKIM version $version");
+      } else {
+        warn("dkim: Mail::DKIM $version is older than the required ".
+             "minimal version 0.31, suggested upgrade to 0.36_5 or later!\n");
+      }
+      $self->{service_available} = 1;
+
+      my $adsp_avail =
+        eval { require Mail::DKIM::AuthorDomainPolicy };  # since 0.34
+      if (!$adsp_avail) {  # fallback to pre-ADSP policy
+        eval { require Mail::DKIM::DkimPolicy }  # ignoring status
       }
     }
-    1;
-  } or do {
-    $eval_stat = $@ ne '' ? $@ : "errno=$!";  chomp $eval_stat;
-  };
-
-  if (defined $eval_stat) {
-    dbg("dkim: cannot load Mail::DKIM module, DKIM checks disabled: %s",
-        $eval_stat);
-  } else {
-    my $version = Mail::DKIM::Verifier->VERSION;
-    if ($version >= 0.31) {
-      dbg("dkim: using Mail::DKIM version $version for DKIM checks");
-    } else {
-      warn("dkim: Mail::DKIM $version is older than the required ".
-           "minimal version 0.31, suggested upgrade to 0.35 or later!\n");
-    }
-    $self->{tried_loading} = 1;
   }
+  return $self->{service_available};
 }
 
 # ---------------------------------------------------------------------------
@@ -624,8 +626,12 @@ sub _check_dkim_signature {
   }
 
   if ($pms->{dkim_signatures_ready}) {
-    # ADSP+RFC5321: localpart is case sensitive, domain is case insensitive
+    # ADSP + RFC 5321: localpart is case sensitive, domain is case insensitive
     my $author = $pms->{dkim_author_address};
+    # Note that RFC 5322 permits multiple addresses in the From header field,
+    # and according to RFC 5617 such message has multiple authors and hence
+    # multiple "Author Domain Signing Practices". For the time being we only
+    # deal with a single author!
     local($1,$2);
     $author = ''  if !defined $author;
     $author = $1 . lc($2)  if $author =~ /^(.*)(\@[^\@]*)\z/s;
@@ -748,14 +754,9 @@ sub _check_dkim_adsp {
     dbg("dkim: adsp not retrieved, signatures not obtained");
 
   } elsif ($pms->{dkim_has_valid_author_sig}) {  # don't fetch adsp when valid
-    # draft-allman-dkim-ssp: If the message contains a valid Author
-    # Signature, no Sender Signing Practices check need be performed:
-    # the Verifier SHOULD NOT look up the Sender Signing Practices
-    # and the message SHOULD be considered non-Suspicious.
-    #
-    # ADSP: If a message has an Author Signature, ADSP provides no benefit
-    # relative to that domain since the message is already known to be
-    # compliant with any possible ADSP for that domain. [...]
+    # RFC 5617: If a message has an Author Domain Signature, ADSP provides
+    # no benefit relative to that domain since the message is already known
+    # to be compliant with any possible ADSP for that domain. [...]
     # implementations SHOULD avoid doing unnecessary DNS lookups
     #
     dbg("dkim: adsp not retrieved, author signature is valid");
