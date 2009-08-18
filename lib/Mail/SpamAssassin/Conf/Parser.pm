@@ -714,7 +714,7 @@ sub finish_parsing {
     $self->find_dup_rules();          # must be after fix_priorities()
   }
 
-  dbg("conf: finish parsing");
+  dbg("config: finish parsing");
 
   while (my ($name, $text) = each %{$conf->{tests}}) {
     my $type = $conf->{test_types}->{$name};

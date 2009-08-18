@@ -89,12 +89,12 @@ sub parse_received_headers {
 
   unless ($did_user_specify_trust && $did_user_specify_internal) {
     if (!$did_user_specify_trust && !$did_user_specify_internal) {
-      dbg('conf: trusted_networks are not configured; it is recommended that '.
-	  'you configure trusted_networks manually');
+      dbg('config: trusted_networks are not configured; it is recommended '.
+	  'that you configure trusted_networks manually');
     } elsif (!$did_user_specify_internal) {
       # use 'trusted' for 'internal'; compatibility with SpamAssassin 2.60
       $internal = $trusted;
-      dbg('conf: internal_networks not configured, using trusted_networks '.
+      dbg('config: internal_networks not configured, using trusted_networks '.
 	  'configuration for internal_networks; if you really want '.
 	  'internal_networks to only contain the required 127/8 add '.
 	  "'internal_networks !0/0' to your configuration");
@@ -102,7 +102,7 @@ sub parse_received_headers {
       # use 'internal' for 'trusted'; I don't know why we let people define
       # internal without trusted, but we do... and we rely on trusted being set
       $trusted = $internal;
-      dbg('conf: trusted_networks not configured, using internal_networks '.
+      dbg('config: trusted_networks not configured, using internal_networks '.
 	  'configuration for trusted_networks');
     }
   }

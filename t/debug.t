@@ -29,7 +29,7 @@ exit unless TEST_ENABLED;
 
 # list of known debug facilities
 my %facility = map {; $_ => 1 }
-  qw( accessdb async auto-whitelist bayes check conf config daemon
+  qw( accessdb async auto-whitelist bayes check config daemon
       dcc dkim dns eval generic https_http_mismatch facility FreeMail
       hashcash ident ignore info ldap learn locker log logger markup
       message metadata mimeheader plugin prefork progress pyzor razor2
