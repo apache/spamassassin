@@ -58,8 +58,9 @@ header FROM_NO_USER		From =~ /(?:^\@|<\@| \@[^\)<]*$|<>)/ [if-unset: unset@unset
 describe FROM_NO_USER		From: has no local-part before @ sign
 
 # also 100% valid
-
-header PLING_QUERY		Subject =~ /\?.*!|!.*\?/
+# bug 6149: avoid common .jp false positives
+header __PLING_QUERY		Subject =~ /\?.*!|!.*\?/
+meta PLING_QUERY                (__PLING_QUERY && !__ISO_2022_JP_DELIM)
 describe PLING_QUERY		Subject has exclamation mark and question mark
 
 
@@ -269,7 +270,9 @@ header __HAS_SUBJECT		exists:Subject
 meta MISSING_SUBJECT		!__HAS_SUBJECT
 describe MISSING_SUBJECT	Missing Subject: header
 
-header GAPPY_SUBJECT		Subject =~ /\b(?:[a-z]([-_. =~\/:,*!\@\#\$\%\^&+;\"\'<>\\])\1{0,2}){4}/i
+# bug 6149: avoid common .jp false positives
+header __GAPPY_SUBJECT		Subject =~ /\b(?:[a-z]([-_. =~\/:,*!\@\#\$\%\^&+;\"\'<>\\])\1{0,2}){4}/i
+meta GAPPY_SUBJECT              (__GAPPY_SUBJECT && !__ISO_2022_JP_DELIM)
 describe GAPPY_SUBJECT		Subject: contains G.a.p.p.y-T.e.x.t
 
 ### header existence tests (description is added automatically)

@@ -47,6 +47,7 @@ my $testsfailed = 0;
 if (@ARGV) {
   foreach my $f (@ARGV) {
     if (-d $f) {    # recurse down 1 level
+      $f =~ s/\/+$//;
       foreach my $subf (<$f/*>) {
         test_msg($subf);
       }
