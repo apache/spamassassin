@@ -43,7 +43,6 @@ create_spamtest();
 my $verbose = $opt{'verbose'};
 $opt{'tests'} ||= join " ", <t.rules/*>;
 my $testsfailed = 0;
-my $testcounter = 1;
 $| = 1;
 
 if (@ARGV) {
