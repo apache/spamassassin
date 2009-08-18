@@ -1,6 +1,4 @@
 #!/usr/bin/perl
-#
-# TODO: Generate TAP output
 
 sub usage {
   die "
@@ -17,6 +15,7 @@ options:
 use strict;
 use warnings;
 
+use Test::More qw(no_plan);
 use Getopt::Long;
 Getopt::Long::Configure(
   qw(bundling no_getopt_compat
@@ -44,6 +43,9 @@ create_spamtest();
 my $verbose = $opt{'verbose'};
 $opt{'tests'} ||= join " ", <t.rules/*>;
 my $testsfailed = 0;
+my $testcounter = 1;
+$| = 1;
+
 if (@ARGV) {
   foreach my $f (@ARGV) {
     if (-d $f) {    # recurse down 1 level
@@ -111,33 +113,33 @@ sub test_msg {
 
   if ($testsline =~ /(?:[ ,]|^)\Q$rule\E(?:[ ,]|$)/) {
     if ($want_hit) {
-      pass($rule, $f, "$testsline");
+      mypass($rule, $f, "$testsline");
     } else {
-      fail($rule, $f, "want=n got=y: $testsline");
+      myfail($rule, $f, "want=n got=y: $testsline");
     }
   } else {
     if ($want_hit) {
-      fail($rule, $f, "want=y got=n: $testsline");
+      myfail($rule, $f, "want=y got=n: $testsline");
     } else {
-      pass($rule, $f, "$testsline");
+      mypass($rule, $f, "$testsline");
     }
   }
 }
 
 # ---------------------------------------------------------------------------
 
-sub fail {
+sub myfail {
   my ($rule, $f, $err) = @_;
-  print "NOT ok on $f for $rule: $err\n";
+  ok 0, "$f for $rule: $err";
   $testsfailed++;
 }
 
-sub pass {
+sub mypass {
   my ($rule, $f, $err) = @_;
   if (!$verbose) {
-    print "ok on $f\n"
+    ok 1, $f;
   } else {
-    print "ok on $f for $rule: $err\n"
+    ok 1, "$f for $rule: $err";
   }
 }
 
