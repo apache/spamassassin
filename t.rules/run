@@ -1,5 +1,8 @@
 #!/usr/bin/perl
 
+use strict;
+use warnings;
+
 sub usage {
   die "
 usage: t.rules/run [options] [file_or_dir ...]
@@ -11,9 +14,6 @@ options:
                 the specified files/dirs
   ";
 }
-
-use strict;
-use warnings;
 
 use Test::More qw(no_plan);
 use Getopt::Long;
