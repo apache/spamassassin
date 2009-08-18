@@ -41,7 +41,6 @@ if (-e 'test_dir') {            # running from test directory, not ..
 }
 
 use IO::File;
-use Mail::DKIM::Verifier;
 use Mail::SpamAssassin;
 
 
