@@ -1,0 +1,7 @@
+ifplugin Mail::SpamAssassin::Plugin::PDFInfo
+
+body            AXB_TITLE_NEWSTELLER        eval:pdf_match_details('title','/^Authorized software reseller\: Newsteller$/')
+describe        AXB_TITLE_NEWSTELLER        OEM spam
+#score           AXB_TITLE_NEWSTELLER       5.0
+
+endif
