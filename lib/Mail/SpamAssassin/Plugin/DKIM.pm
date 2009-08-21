@@ -512,8 +512,8 @@ sub _dkim_load_modules {
       if ($version >= 0.31) {
         dbg("dkim: using Mail::DKIM version $version");
       } else {
-        warn("dkim: Mail::DKIM $version is older than the required ".
-             "minimal version 0.31, suggested upgrade to 0.36_5 or later!\n");
+        info("dkim: Mail::DKIM $version is older than the required ".
+             "minimal version 0.31, suggested upgrade to 0.36_5 or later!");
       }
       $self->{service_available} = 1;
 
