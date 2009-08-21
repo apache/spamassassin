@@ -4,4 +4,9 @@ body            AXB_TITLE_NEWSTELLER        eval:pdf_match_details('title','/^Au
 describe        AXB_TITLE_NEWSTELLER        OEM spam
 #score           AXB_TITLE_NEWSTELLER       5.0
 
+body            AXB_TITLE_PILLZ01         eval:pdf_match_details('title','/218\.75\.144\.9/')
+describe        AXB_TITLE_PILLZ01         Pillz in PDF
+#score           AXB_TITLE_PILLZ01        5.0
+
+
 endif
