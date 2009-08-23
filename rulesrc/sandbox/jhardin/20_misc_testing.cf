@@ -21,22 +21,29 @@ ifplugin Mail::SpamAssassin::Plugin::MIMEHeader
   mimeheader   OBFU_TEXT_ATTACH    Content-Type =~ m,application/octet-stream;.+\.txt\b,i
 endif
 
-header         MUA_ONE_WORD       X-Mailer =~ /^[a-z]+$/i
-describe       MUA_ONE_WORD       Single word X-Mailer:
+header         MUA_ONE_WORD       X-Mailer =~ /^[A-Za-z][a-z]*$/
+describe       MUA_ONE_WORD       Single word X-Mailer: not CamelCase
 
-body           DEAR_BENEFICIARY		/^Dear\sBeneficiary\b/i
+body           DEAR_BENEFICIARY		/^\s?Dear\sBeneficiary\b/i
 describe       DEAR_BENEFICIARY		Dear Beneficiary:
 
+# from users list spamples 8/2009
 uri            URI_NUMERIC_CCTLD     m;^[a-z]+://(?:\d+\.){2,}[a-z][a-z]/;i
 describe       URI_NUMERIC_CCTLD     CCTLD URI with multiple numeric subdomains
 
-header         FROM_MISSPACED        From =~ /\S"</
+header         FROM_MISSPACED        From =~ /^\s*"[^"]*"</
 describe       FROM_MISSPACED        From: missing whitespace
 
-header         MIME_BDRY_0D0D        Content-Type =~ /boundary=\S+(?:0[1-9]){10,}/
-describe       MIME_BDRY_0D0D        Suspicious MIME boundary string
-
+# observed in spam 8/2009
 header         MUA_EQ_ORG         ALL =~ /\nX-Mailer: ([^\n]+)\n.*Organization: \1/sm
 describe       MUA_EQ_ORG         X-Mailer: same as Organization:
+
+header         ___MUA_TBIRD       User-Agent =~ /Thunderbird/
+header         __TB_MIME_BDRY_NOT_Z        Content-Type =~ /boundary=\S+-{5}(?:[1-9]){16,}/
+meta           TBIRD_SUSP_MIME_BDRY   __MUA_TBIRD && __TB_MIME_BDRY_NOT_Z
+describe       TBIRD_SUSP_MIME_BDRY   Unlikely Thunderbird MIME boundary
+
+header         UNQ_MIME_BDRY        Content-Type =~ /boundary=[^"]/i
+describe       UNQ_MIME_BDRY        Unquoted MIME boundary string
 
 
