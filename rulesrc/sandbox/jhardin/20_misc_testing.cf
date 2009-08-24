@@ -52,6 +52,8 @@ describe       UNQ_MIME_BDRY        Unquoted MIME boundary string
 ifplugin Mail::SpamAssassin::Plugin::MIMEHeader
   mimeheader  __IMAGE_JPEG_ATTACH   Content-Type =~ /image\/jpeg/i
   header      __TB_MIME_BDRY_0D0D   Content-Type =~ /boundary="-{8,}(?:0[1-9]){10}/i
-  meta        FORGED_TBIRD_IMAGE    (__MUA_TBIRD && __IMAGE_JPEG_ATTACH && __TB_MIME_BDRY_0D0D)
+  header      __TO_NO_BRACKETS      To =~ />$/
+
+  meta        FORGED_TBIRD_IMAGE    (__MUA_TBIRD && __IMAGE_JPEG_ATTACH && __TB_MIME_BDRY_0D0D && __TO_NO_BRACKETS)
 endif
 
