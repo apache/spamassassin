@@ -40,8 +40,8 @@ header         MUA_EQ_ORG         ALL =~ /\nX-Mailer: ([^\n]+)\n.*Organization: 
 describe       MUA_EQ_ORG         X-Mailer: same as Organization:
 
 # testing
-header         ___MUA_TBIRD       User-Agent =~ /Thunderbird/
-header         __TB_MIME_BDRY_NOT_Z        Content-Type =~ /boundary=\S+-{5}(?:[1-9]){16,}/
+header         __MUA_TBIRD            User-Agent =~ /Thunderbird/
+header         __TB_MIME_BDRY_NOT_Z   Content-Type =~ /boundary=\S+-{5}(?:[1-9]){16,}/
 meta           TBIRD_SUSP_MIME_BDRY   __MUA_TBIRD && __TB_MIME_BDRY_NOT_Z
 describe       TBIRD_SUSP_MIME_BDRY   Unlikely Thunderbird MIME boundary
 
@@ -52,6 +52,6 @@ describe       UNQ_MIME_BDRY        Unquoted MIME boundary string
 ifplugin Mail::SpamAssassin::Plugin::MIMEHeader
   mimeheader  __IMAGE_JPEG_ATTACH   Content-Type =~ /image\/jpeg/i
   header      __TB_MIME_BDRY_0D0D   Content-Type =~ /boundary=\S+-{8}(?:0[1-9]){10,}/i
-  meta        FORGED_TBIRD_IMAGE    (___MUA_TBIRD && __IMAGE_JPEG_ATTACH && __TB_MIME_BDRY_0D0D)
+  meta        FORGED_TBIRD_IMAGE    (__MUA_TBIRD && __IMAGE_JPEG_ATTACH && __TB_MIME_BDRY_0D0D)
 endif
 
