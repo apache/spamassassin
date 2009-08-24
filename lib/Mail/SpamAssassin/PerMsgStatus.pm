@@ -693,34 +693,34 @@ sub rewrite_report_safe {
   # It'd be nice to do this with a foreach loop, but with only three
   # possibilities right now, it's easier not to...
 
-  if ($self->{conf}->{rewrite_header}->{Subject}) {
-    $subject ||= "\n";
+  if (defined $self->{conf}->{rewrite_header}->{Subject}) {
+    $subject = "\n" if !defined $subject;
     my $tag = $self->_replace_tags($self->{conf}->{rewrite_header}->{Subject});
     $tag =~ s/\n/ /gs; # strip tag's newlines
     $subject =~ s/^(?:\Q${tag}\E )?/${tag} /g; # For some reason the tag may already be there!?
   }
 
-  if ($self->{conf}->{rewrite_header}->{To}) {
-    $to ||= "\n";
+  if (defined $self->{conf}->{rewrite_header}->{To}) {
+    $to = "\n" if !defined $to;
     my $tag = $self->_replace_tags($self->{conf}->{rewrite_header}->{To});
     $tag =~ s/\n/ /gs; # strip tag's newlines
     $to =~ s/(?:\t\Q(${tag})\E)?$/\t(${tag})/;
   }
 
-  if ($self->{conf}->{rewrite_header}->{From}) {
-    $from ||= "\n";
+  if (defined $self->{conf}->{rewrite_header}->{From}) {
+    $from = "\n" if !defined $from;
     my $tag = $self->_replace_tags($self->{conf}->{rewrite_header}->{From});
     $tag =~ s/\n+//gs; # strip tag's newlines
     $from =~ s/(?:\t\Q(${tag})\E)?$/\t(${tag})/;
   }
 
   # add report headers to message
-  $newmsg .= "From: $from" if $from;
-  $newmsg .= "To: $to" if $to;
-  $newmsg .= "Cc: $cc" if $cc;
-  $newmsg .= "Subject: $subject" if $subject;
-  $newmsg .= "Date: $date" if $date;
-  $newmsg .= "Message-Id: $msgid" if $msgid;
+  $newmsg .= "From: $from" if defined $from;
+  $newmsg .= "To: $to" if defined $to;
+  $newmsg .= "Cc: $cc" if defined $cc;
+  $newmsg .= "Subject: $subject" if defined $subject;
+  $newmsg .= "Date: $date" if defined $date;
+  $newmsg .= "Message-Id: $msgid" if defined $msgid;
 
   foreach my $header (keys %{$self->{conf}->{headers_spam}}) {
     my $data = $self->{conf}->{headers_spam}->{$header};
