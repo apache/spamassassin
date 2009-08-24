@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi dos hege wt-en1 wt-en2 wt-en3 wt-jp1 wt-jp2; day 2: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi dos hege jm wt-en1 wt-en2 wt-en3 wt-jp1 wt-jp2; day 3: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi dos hege wt-en1 wt-en2 wt-en3 wt-jp1 wt-jp2
+# with results from: day 1: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi dos hege wt-en1 wt-en2 wt-en3 wt-jp1 wt-jp2; day 2: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi dos hege wt-en1 wt-en2 wt-en3 wt-jp1 wt-jp2; day 3: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi dos hege jm wt-en1 wt-en2 wt-en3 wt-jp1 wt-jp2
 
 # tflags userconf
 ALL_TRUSTED
@@ -191,9 +191,6 @@ FH_HOST_IN_ADDRARPA
 FH_MSGID_XXX
 
 # good enough
-FILL_THIS_FORM_FRAUD_PHISH
-
-# good enough
 FILL_THIS_FORM_LOAN
 
 # good enough
@@ -236,10 +233,10 @@ FR_TITLE_NUMS
 FR_WATCHES_HTTP
 
 # good enough
-FSL_FAKE_HOTMAIL_RVCD
+FSL_FAKE_GMAIL_RCVD
 
 # good enough
-FSL_GEO_ABUSE
+FSL_FAKE_HOTMAIL_RVCD
 
 # good enough
 FSL_HELO_BARE_IP_1
@@ -252,9 +249,6 @@ FSL_HELO_NON_FQDN_1
 
 # good enough
 FSL_INTERIA_ABUSE
-
-# good enough
-FSL_LSPACES_ABUSE
 
 # good enough
 FSL_YG_ABUSE
@@ -429,9 +423,6 @@ L_SPAM_TOOL_13
 
 # tflags userconf
 MIME_CHARSET_FARAWAY
-
-# good enough
-MIME_PHP_NO_TEXT
 
 # tflags userconf
 MISSING_HB_SEP
@@ -659,9 +650,6 @@ SANE_3b92eda751c992f230f215fb7eb36844
 SANE_4ef8302546bf270a19baf98508afacc4
 
 # good enough
-SANE_57eb6fb7217efcb7a706124454426ee6
-
-# good enough
 SANE_7429530a7398f43f1f1b795f9420714e
 
 # good enough
@@ -746,7 +734,7 @@ TVD_RCVD_SINGLE
 TVD_VISIT_PHARMA
 
 # good enough
-FSL_FAKE_GMAIL_RCVD
+FB_YOUR_WEIGHT
 
 # tflags userconf
 UNPARSEABLE_RELAY
