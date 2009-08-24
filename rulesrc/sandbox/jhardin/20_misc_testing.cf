@@ -54,6 +54,6 @@ ifplugin Mail::SpamAssassin::Plugin::MIMEHeader
   header      __TB_MIME_BDRY_0D0D   Content-Type =~ /boundary="-{8,}(?:0[1-9]){10}/i
   header      __TO_NO_BRACKETS      To =~ />$/
 
-  meta        FORGED_TBIRD_IMAGE    (__MUA_TBIRD && __IMAGE_JPEG_ATTACH && __TB_MIME_BDRY_0D0D && __TO_NO_BRACKETS)
+  meta        FORGED_TBIRD_IMAGE    (__MUA_TBIRD && __IMAGE_JPEG_ATTACH && __TB_MIME_BDRY_0D0D && !__TO_NO_BRACKETS)
 endif
 
