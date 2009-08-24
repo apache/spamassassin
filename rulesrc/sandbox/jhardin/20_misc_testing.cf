@@ -21,10 +21,11 @@ ifplugin Mail::SpamAssassin::Plugin::MIMEHeader
   mimeheader   OBFU_TEXT_ATTACH    Content-Type =~ m,application/octet-stream;.+\.txt\b,i
 endif
 
+# general case of spample observation
 header         MUA_ONE_WORD       X-Mailer =~ /^[A-Za-z][a-z]*$/
 describe       MUA_ONE_WORD       Single word X-Mailer: not CamelCase
 
-body           DEAR_BENEFICIARY		/^\s?Dear\sBeneficiary\b/i
+body           DEAR_BENEFICIARY		/^\s?(?:Dear\s|Attention:\s?)Beneficiary\b/i
 describe       DEAR_BENEFICIARY		Dear Beneficiary:
 
 # from users list spamples 8/2009
@@ -38,6 +39,7 @@ describe       FROM_MISSPACED        From: missing whitespace
 header         MUA_EQ_ORG         ALL =~ /\nX-Mailer: ([^\n]+)\n.*Organization: \1/sm
 describe       MUA_EQ_ORG         X-Mailer: same as Organization:
 
+# testing
 header         ___MUA_TBIRD       User-Agent =~ /Thunderbird/
 header         __TB_MIME_BDRY_NOT_Z        Content-Type =~ /boundary=\S+-{5}(?:[1-9]){16,}/
 meta           TBIRD_SUSP_MIME_BDRY   __MUA_TBIRD && __TB_MIME_BDRY_NOT_Z
