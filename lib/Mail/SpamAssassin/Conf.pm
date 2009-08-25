@@ -3177,6 +3177,9 @@ optional, and the default is shown below.
  _CONTACTADDRESS_  contents of the 'report_contact' setting
  _HEADER(NAME)_    includes the value of a message header.  value is the same
                    as is found for header rules (see elsewhere in this doc)
+ _TIMING_          timing breakdown report
+ _ADDEDHEADERHAM_  resulting header fields as requested by add_header for spam
+ _ADDEDHEADERSPAM_ resulting header fields as requested by add_header for ham
 
 If a tag reference uses the name of a tag which is not in this list or defined
 by a loaded plugin, the reference will be left intact and not replaced by any
