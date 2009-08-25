@@ -1555,17 +1555,23 @@ sub time_method {
 sub timer_report {
   my ($self) = @_;
 
-  my $earliest = undef;
-  my $latest = undef;
-  foreach my $t (values %{$self->{timers}}) {
-    if (!defined($earliest) || $earliest > $t->{start}) {
-      $earliest = $t->{start};
+  my $earliest;
+  my $latest;
+
+  while (my($name,$h) = each(%{$self->{timers}})) {
+  # dbg("timing: %s - %s", $name, join(", ",
+  #     map { sprintf("%s => %s", $_, $h->{$_}) } keys(%$h)));
+    my $start = $h->{start};
+    if (defined $start && (!defined $earliest || $earliest > $start)) {
+      $earliest = $start;
     }
-    if (!defined($latest) || $latest < $t->{end}) {
-      $latest = $t->{end};
+    my $end = $h->{end};
+    if (defined $end && (!defined $latest || $latest < $end)) {
+      $latest = $end;
     }
   }
-  my $total = $latest - $earliest;
+  my $total =
+    (!defined $latest || !defined $earliest) ? 0 : $latest - $earliest;
   my @str;
   foreach my $name (@{$self->{timers_order}}) {
     my $elapsed = $self->{timers}->{$name}->{elapsed} || 0;
