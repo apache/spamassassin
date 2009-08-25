@@ -651,6 +651,20 @@ sub _fixup_report_line_endings {
   }
 }
 
+sub _get_added_headers($) {
+  my ($self, $which) = @_;
+  my $str = '';
+  # use string appends to put this back together -- I finally benchmarked it.
+  # join() is 56% of the speed of just using string appends. ;)
+  foreach my $hf_ref (@{$self->{conf}->{$which}}) {
+    my($hfname, $hfbody) = @$hf_ref;
+    my $line = $self->_process_header($hfname,$hfbody);
+    $line = $self->qp_encode_header($line);
+    $str .= "X-Spam-$hfname: $line\n";
+  }
+  return $str;
+};
+
 # rewrite the message in report_safe mode
 # should not be called directly, use rewrite_mail instead
 #
@@ -721,13 +735,7 @@ sub rewrite_report_safe {
   $newmsg .= "Subject: $subject" if defined $subject;
   $newmsg .= "Date: $date" if defined $date;
   $newmsg .= "Message-Id: $msgid" if defined $msgid;
-
-  foreach my $hf_ref (@{$self->{conf}->{headers_spam}}) {
-    my ($hfname, $hfbody) = @$hf_ref;
-    my $line = $self->_process_header($hfname,$hfbody);
-    $line = $self->qp_encode_header($line);
-    $newmsg .= "X-Spam-$hfname: $line\n" # add even if empty
-  }
+  $newmsg .= $self->_get_added_headers('headers_spam');
 
   if (defined $self->{conf}->{report_safe_copy_headers}) {
     my %already_added = map { $_ => 1 } qw/from to cc subject date message-id/;
@@ -905,15 +913,7 @@ sub rewrite_no_report_safe {
       $new_hdrs_post .= $hdr;
     }
   }
-
-  # use string appends to put this back together -- I finally benchmarked it.
-  # join() is 56% of the speed of just using string appends. ;)
-  foreach my $hf_ref (@{$self->{conf}->{$addition}}) {
-    my ($hfname, $hfbody) = @$hf_ref;
-    my $line = $self->_process_header($hfname,$hfbody);
-    $line = $self->qp_encode_header($line);
-    $new_hdrs_pre .= "X-Spam-$hfname: $line\n";
-  }
+  $new_hdrs_pre .= $self->_get_added_headers($addition);
 
   # fix up line endings appropriately
   my $newmsg = $new_hdrs_pre.$new_hdrs_post.$separator;
@@ -1220,6 +1220,14 @@ sub _get_tag {
 
             TIMING => sub {
               return $self->{main}->timer_report();
+            },
+
+            ADDEDHEADERHAM => sub {
+              return $self->_get_added_headers('headers_ham');
+            },
+
+            ADDEDHEADERSPAM => sub {
+              return $self->_get_added_headers('headers_spam');
             },
 
           );
