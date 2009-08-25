@@ -694,6 +694,14 @@ ham, or "all" to add to either).  All headers begin with C<X-Spam->
 (so a C<header_name> Foo will generate a header called X-Spam-Foo).
 header_name is restricted to the character set [A-Za-z0-9_-].
 
+The order of C<add_header> configuration options is preserved, inserted
+headers will follow this order of declarations. When combining C<add_header>
+with C<clear_headers> and C<remove_header>, keep in mind that C<add_header>
+appends a new header to the current list, after first removing any existing
+header fields of the same name. Note also that C<add_header>, C<clear_headers>
+and C<remove_header> may appear in multiple .cf files, which are interpreted
+in alphabetic order.
+
 C<string> can contain tags as explained below in the B<TEMPLATE TAGS> section.
 You can also use C<\n> and C<\t> in the header to add newlines and tabulators
 as desired.  A backslash has to be written as \\, any other escaped chars will
@@ -707,7 +715,7 @@ long header lines are possible). The lines will still be properly folded
 You can customize existing headers with B<add_header> (only the specified
 subset of messages will be changed).
 
-See also C<clear_headers> for removing headers.
+See also C<clear_headers> and C<remove_header> for removing headers.
 
 Here are some examples (these are the defaults, note that Checker-Version can
 not be changed or removed):
@@ -744,10 +752,14 @@ not be changed or removed):
       $hline = join("\\", @line);
       chop($hline);  # remove dummy newline again
       if (($type eq "ham") || ($type eq "all")) {
-        $self->{headers_ham}->{$name} = $hline;
+        $self->{headers_ham} =
+          [ grep { lc($_->[0]) ne lc($name) } @{$self->{headers_ham}} ];
+        push(@{$self->{headers_ham}}, [$name, $hline]);
       }
       if (($type eq "spam") || ($type eq "all")) {
-        $self->{headers_spam}->{$name} = $hline;
+        $self->{headers_spam} =
+          [ grep { lc($_->[0]) ne lc($name) } @{$self->{headers_spam}} ];
+        push(@{$self->{headers_spam}}, [$name, $hline]);
       }
     }
   });
@@ -779,11 +791,14 @@ determine that SpamAssassin is running.
       my ($type, $name) = ($1, $2);
       return if ( $name eq "Checker-Version" );
 
+      $name = lc($name);
       if (($type eq "ham") || ($type eq "all")) {
-        delete $self->{headers_ham}->{$name};
+        $self->{headers_ham} =
+          [ grep { lc($_->[0]) ne $name } @{$self->{headers_ham}} ];
       }
       if (($type eq "spam") || ($type eq "all")) {
-        delete $self->{headers_spam}->{$name};
+        $self->{headers_spam} =
+          [ grep { lc($_->[0]) ne $name } @{$self->{headers_spam}} ];
       }
     }
   });
@@ -793,6 +808,11 @@ determine that SpamAssassin is running.
 Clear the list of headers to be added to messages.  You may use this
 before any B<add_header> options to prevent the default headers from being
 added to the message.
+
+C<add_header>, C<clear_headers> and C<remove_header> may appear in multiple
+.cf files, which are interpreted in alphabetic order, so C<clear_headers>
+in a later file will remove all added headers from previously interpreted
+configuration files, which may or may not be desired.
 
 Note that B<X-Spam-Checker-Version> is not removable because the version
 information is needed by mail administrators and developers to debug
@@ -805,12 +825,10 @@ determine that SpamAssassin is running.
     setting => 'clear_headers',
     code => sub {
       my ($self, $key, $value, $line) = @_;
-      for my $name (keys %{ $self->{headers_ham} }) {
-        delete $self->{headers_ham}->{$name} if $name ne "Checker-Version";
-      }
-      for my $name (keys %{ $self->{headers_spam} }) {
-        delete $self->{headers_spam}->{$name} if $name ne "Checker-Version";
-      }
+      my @h = grep { lc($_->[0]) eq "checker-version" }
+                   @{$self->{headers_ham}};
+      $self->{headers_ham}  = !@h ? [] : [ $h[0] ];
+      $self->{headers_spam} = !@h ? [] : [ $h[0] ];
     }
   });
 
@@ -853,8 +871,9 @@ the original mail into tagged messages.
       }
 
       $self->{report_safe} = $value+0;
-      if (! $self->{report_safe}) {
-        $self->{headers_spam}->{"Report"} = "_REPORT_";
+      if (! $self->{report_safe} &&
+          ! (grep { lc($_->[0]) eq "report" } @{$self->{headers_spam}}) ) {
+        push(@{$self->{headers_spam}}, ["Report", "_REPORT_"]);
       }
     }
   });
@@ -3298,8 +3317,8 @@ sub new {
   $self->{rewrite_header} = { };
   $self->{want_rebuild_for_type} = { };
   $self->{user_defined_rules} = { };
-  $self->{headers_spam} = { };
-  $self->{headers_ham} = { };
+  $self->{headers_spam} = [ ];
+  $self->{headers_ham} = [ ];
 
   $self->{bayes_ignore_headers} = [ ];
   $self->{bayes_ignore_from} = { };
@@ -3322,10 +3341,11 @@ sub new {
   $self->{internal_networks_configured} = 0;
 
   # Make sure we add in X-Spam-Checker-Version
-  $self->{headers_spam}->{"Checker-Version"} =
-                "SpamAssassin _VERSION_ (_SUBVERSION_) on _HOSTNAME_";
-  $self->{headers_ham}->{"Checker-Version"} =
-                $self->{headers_spam}->{"Checker-Version"};
+  { my $r = [ "Checker-Version",
+              "SpamAssassin _VERSION_ (_SUBVERSION_) on _HOSTNAME_" ];
+    push(@{$self->{headers_spam}}, $r);
+    push(@{$self->{headers_ham}},  $r);
+  }
 
   # these should potentially be settable by end-users
   # perhaps via plugin?

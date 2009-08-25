@@ -722,11 +722,11 @@ sub rewrite_report_safe {
   $newmsg .= "Date: $date" if defined $date;
   $newmsg .= "Message-Id: $msgid" if defined $msgid;
 
-  foreach my $header (keys %{$self->{conf}->{headers_spam}}) {
-    my $data = $self->{conf}->{headers_spam}->{$header};
-    my $line = $self->_process_header($header,$data);
+  foreach my $hf_ref (@{$self->{conf}->{headers_spam}}) {
+    my ($hfname, $hfbody) = @$hf_ref;
+    my $line = $self->_process_header($hfname,$hfbody);
     $line = $self->qp_encode_header($line);
-    $newmsg .= "X-Spam-$header: $line\n" # add even if empty
+    $newmsg .= "X-Spam-$hfname: $line\n" # add even if empty
   }
 
   if (defined $self->{conf}->{report_safe_copy_headers}) {
@@ -908,10 +908,11 @@ sub rewrite_no_report_safe {
 
   # use string appends to put this back together -- I finally benchmarked it.
   # join() is 56% of the speed of just using string appends. ;)
-  while (my ($header, $data) = each %{$self->{conf}->{$addition}}) {
-    my $line = $self->_process_header($header,$data);
+  foreach my $hf_ref (@{$self->{conf}->{$addition}}) {
+    my ($hfname, $hfbody) = @$hf_ref;
+    my $line = $self->_process_header($hfname,$hfbody);
     $line = $self->qp_encode_header($line);
-    $new_hdrs_pre .= "X-Spam-$header: $line\n";
+    $new_hdrs_pre .= "X-Spam-$hfname: $line\n";
   }
 
   # fix up line endings appropriately
