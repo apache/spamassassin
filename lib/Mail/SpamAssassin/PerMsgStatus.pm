@@ -1141,30 +1141,28 @@ sub _get_tag {
 	    },
 
 	    REMOTEHOSTNAME => sub {
-	      $self->{tag_data}->{'REMOTEHOSTNAME'} ||
-	      "localhost";
+	      $self->{tag_data}->{'REMOTEHOSTNAME'} || "localhost";
 	    },
 	    REMOTEHOSTADDR => sub {
-	      $self->{tag_data}->{'REMOTEHOSTADDR'} ||
-	      "127.0.0.1";
+	      $self->{tag_data}->{'REMOTEHOSTADDR'} || "127.0.0.1";
 	    },
 
             LASTEXTERNALIP => sub {
               my $lasthop = $self->{relays_external}->[0];
-              return $lasthop ? $lasthop->{ip} : '';
+              $lasthop ? $lasthop->{ip} : '';
             },
 
             LASTEXTERNALRDNS => sub {
               my $lasthop = $self->{relays_external}->[0];
-              return $lasthop ? $lasthop->{rdns} : '';
+              $lasthop ? $lasthop->{rdns} : '';
             },
 
             LASTEXTERNALHELO => sub {
               my $lasthop = $self->{relays_external}->[0];
-              return $lasthop ? $lasthop->{helo} : '';
+              $lasthop ? $lasthop->{helo} : '';
             },
 
-            CONTACTADDRESS => sub { $self->{conf}->{report_contact}; },
+            CONTACTADDRESS => sub { $self->{conf}->{report_contact} },
 
             BAYES => sub {
               defined($self->{bayes_score}) ?
@@ -1177,21 +1175,21 @@ sub _get_tag {
               my $arg = (shift || "*");
               my $length = int($self->{score});
               $length = 50 if $length > 50;
-              return $arg x $length;
+              $arg x $length;
             },
 
-            AUTOLEARN => sub { return $self->get_autolearn_status(); },
+            AUTOLEARN => sub { $self->get_autolearn_status() },
 
-            AUTOLEARNSCORE => sub { return $self->get_autolearn_points(); },
+            AUTOLEARNSCORE => sub { $self->get_autolearn_points() },
 
             TESTS => sub {
               my $arg = (shift || ',');
-              return (join($arg, sort(@{$self->{test_names_hit}})) || "none");
+              join($arg, sort(@{$self->{test_names_hit}})) || "none";
             },
 
             SUBTESTS => sub {
               my $arg = (shift || ',');
-              return (join($arg, sort(@{$self->{subtest_names_hit}})) || "none");
+              join($arg, sort(@{$self->{subtest_names_hit}})) || "none";
             },
 
             TESTSSCORES => sub {
@@ -1204,30 +1202,27 @@ sub _get_tag {
                   $line .= $arg . $test . "=" . $self->{conf}->{scores}->{$test};
                 }
               }
-              return $line ? $line : 'none';
+              $line ? $line : 'none';
             },
 
             PREVIEW => sub { $self->get_content_preview() },
 
-            REPORT => sub {
-              return "\n" . ($self->{tag_data}->{REPORT} || "");
-            },
+            REPORT => sub { "\n" . ($self->{tag_data}->{REPORT} || "") },
 
 	    HEADER => sub {
 	      my $hdr = shift || return;
-	      return $self->get($hdr,undef);
+	      $self->get($hdr,undef);
 	    },
 
-            TIMING => sub {
-              return $self->{main}->timer_report();
-            },
+            TIMING => sub { $self->{main}->timer_report() },
 
-            ADDEDHEADERHAM => sub {
-              return $self->_get_added_headers('headers_ham');
-            },
+            ADDEDHEADERHAM => sub { $self->_get_added_headers('headers_ham') },
 
-            ADDEDHEADERSPAM => sub {
-              return $self->_get_added_headers('headers_spam');
+            ADDEDHEADERSPAM=> sub { $self->_get_added_headers('headers_spam') },
+
+            ADDEDHEADER => sub {
+              $self->_get_added_headers(
+                        $self->{is_spam} ? 'headers_spam' : 'headers_ham');
             },
 
           );

@@ -1569,6 +1569,7 @@ sub timer_report {
     if (defined $end && (!defined $latest || $latest < $end)) {
       $latest = $end;
     }
+    dbg("timing: start but no end: $name") if defined $start && !defined $end;
   }
   my $total =
     (!defined $latest || !defined $earliest) ? 0 : $latest - $earliest;
