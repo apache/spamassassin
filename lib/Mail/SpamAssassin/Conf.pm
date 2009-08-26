@@ -3180,6 +3180,7 @@ optional, and the default is shown below.
  _TIMING_          timing breakdown report
  _ADDEDHEADERHAM_  resulting header fields as requested by add_header for spam
  _ADDEDHEADERSPAM_ resulting header fields as requested by add_header for ham
+ _ADDEDHEADER_     same as ADDEDHEADERHAM for ham or ADDEDHEADERSPAM for spam
 
 If a tag reference uses the name of a tag which is not in this list or defined
 by a loaded plugin, the reference will be left intact and not replaced by any
