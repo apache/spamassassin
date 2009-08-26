@@ -1728,6 +1728,14 @@ sub init {
     $self->{conf}->trim_rules($self->{only_these_rules});
   }
 
+  if (!$self->{timer_enabled}) {
+    # enable timing implicitly if _TIMING_ is used in add_header templates
+    foreach my $hf_ref (@{$self->{conf}->{'headers_ham'}},
+                        @{$self->{conf}->{'headers_spam'}}) {
+      if ($hf_ref->[1] =~ /_TIMING_/) { $self->timer_enable(); last }
+    }
+  }
+
   # TODO -- open DNS cache etc. if necessary
 }
 
