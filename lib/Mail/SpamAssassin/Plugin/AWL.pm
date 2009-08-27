@@ -427,13 +427,14 @@ sub check_from_in_auto_whitelist {
 	$whitelist->add_score($awlpoints);
       }
 
-      # current AWL score changes with each hit
-      for my $set (0..3) {
-	$pms->{conf}->{scoreset}->[$set]->{"AWL"} = sprintf("%0.3f", $delta);
-      }
+      # now redundant, got_hit() takes care of it
+      # for my $set (0..3) {  # current AWL score changes with each hit
+      #   $pms->{conf}->{scoreset}->[$set]->{"AWL"} = sprintf("%0.3f", $delta);
+      # }
 
       if ($delta != 0) {
-	$pms->got_hit("AWL", "AWL: ", ruletype => 'eval', score => $delta);
+	$pms->got_hit("AWL", "AWL: ", ruletype => 'eval',
+                      score => sprintf("%0.3f", $delta));
       }
 
       $whitelist->finish();
