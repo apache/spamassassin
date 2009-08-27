@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi dos hege jm wt-en1 wt-en2 wt-en3 wt-jp1 wt-jp2; day 2: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi dos hege jm wt-en1 wt-en2 wt-en3 wt-jp1 wt-jp2; day 3: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi dos hege wt-en1 wt-en2 wt-en3 wt-jp1 wt-jp2
+# with results from: day 1: dos hege jm wt-en1 wt-en2 wt-en3 wt-jp1 wt-jp2; day 2: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi dos hege jm wt-en1 wt-en2 wt-en3 wt-jp1 wt-jp2; day 3: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi dos hege jm wt-en1 wt-en2 wt-en3 wt-jp1 wt-jp2
 
 # tflags userconf
 ALL_TRUSTED
@@ -164,9 +164,6 @@ FB_SOFTTABS
 FB_ULTRA_ALLURE
 
 # good enough
-FB_YOUR_WEIGHT
-
-# good enough
 FH_FAKE_RCVD_LINE_B
 
 # good enough
@@ -227,13 +224,7 @@ FROM_LOCAL_NOVOWEL
 FRT_APPROV
 
 # good enough
-FRT_DIPLOMA
-
-# good enough
 FR_TITLE_NUMS
-
-# good enough
-FR_WATCHES_HTTP
 
 # good enough
 FSL_FAKE_GMAIL_RCVD
@@ -266,9 +257,6 @@ FS_APPROVE_YOU
 FS_ERECTION
 
 # good enough
-FS_LARGE_PERCENT2
-
-# good enough
 FS_NUDE
 
 # good enough
@@ -278,16 +266,10 @@ FS_REPLICA
 FS_REPLICAWATCH
 
 # good enough
-FS_START_LOSE
-
-# good enough
 FS_WEIGHT_LOSS
 
 # good enough
 FS_WILL_HELP
-
-# good enough
-FS_YOUR_PRESCRIP
 
 # tflags userconf
 GTUBE
@@ -336,9 +318,6 @@ HIGH_CODEPAGE_URI
 
 # good enough
 HK_FAKENAME_EBAY
-
-# good enough
-HK_FAKENAME_PAYPAL
 
 # good enough
 HK_LOTTO
@@ -393,9 +372,6 @@ KAM_STOCKTIP4
 
 # tflags publish
 KAM_STOCKTIP6
-
-# good enough
-KB_DATE_CONTAINS_TAB
 
 # good enough
 KB_FAKED_THE_BAT
@@ -689,9 +665,6 @@ SPF_PASS
 SPF_SOFTFAIL
 
 # good enough
-STOCK_IMG_CTYPE
-
-# good enough
 STOCK_IMG_HDR_FROM
 
 # good enough
@@ -713,22 +686,25 @@ THEBAT_UNREG
 TVD_FINGER_02
 
 # good enough
+TVD_PH_REC
+
+# good enough
 TVD_PH_SUBJ_SEC_MEASURES
 
 # good enough
 TVD_QUAL_MEDS
 
 # good enough
-TVD_RCVD_IP
-
-# good enough
-TVD_RCVD_IP4
-
-# good enough
-TVD_RCVD_SINGLE
-
-# good enough
 TVD_VISIT_PHARMA
+
+# good enough
+FILL_THIS_FORM_FRAUD_PHISH
+
+# good enough
+FSL_GEO_ABUSE
+
+# good enough
+MIME_PHP_NO_TEXT
 
 # tflags userconf
 UNPARSEABLE_RELAY
