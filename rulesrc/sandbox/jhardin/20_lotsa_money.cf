@@ -1,6 +1,6 @@
 
 ifplugin Mail::SpamAssassin::Plugin::ReplaceTags
-  replace_tag  CURRENCY   (?:GBP|=[Aa][34]|\xa3|\xa4|EUR|[Ee]uros|US[D\$]{1,2}|\$)
+  replace_tag  CURRENCY   [\(\[]?(?:GBP|=[Aa][34]|\xa3|\xa4|EUR|[Ee]uros|US[D\$]{1,2}|\$)[\]\)]?
 
   body     __LOTSA_MONEY_01   /<CURRENCY>\s?\d[\d.,\sO]{7,20}[\dO]/
   body     __LOTSA_MONEY_02   /\d[\d.,\sO]{7,20}[\dO]\s?<CURRENCY>/
