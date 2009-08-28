@@ -1861,12 +1861,8 @@ it exists, or undef if it doesn't exist.
 sub find_rule_support_file {
   my ($self, $filename) = @_;
 
-  # take a copy to avoid modifying the real one (stupid map { } side-effect)
-  my @paths = @default_rules_path;
-  return $self->first_existing_path (map {
-      s/$/\/${filename}/;
-      $_;
-    } @paths);
+  return $self->first_existing_path(
+    map { my $p = $_; $p =~ s{$}{/$filename}; $p } @default_rules_path );
 }
 
 =item $f->create_default_prefs ($filename, $username [ , $userdir ] )
