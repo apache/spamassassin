@@ -2174,6 +2174,13 @@ Optional, but recommended: the rule type string.  This is used in the
 C<hit_rule> plugin call, called by this method.  If unset, I<'unknown'> is
 used.
 
+=item tflags => $string
+
+Optional: a string, i.e. a space-separated list of additional tflags
+to be appended to an existing list of flags in $self->{conf}->{tflags},
+such as: "nice noautolearn multiple". No syntax checks are performed.
+
+
 =item description => $string
 
 Optional: a custom rule description string.  This is used in the
@@ -2210,10 +2217,16 @@ sub got_hit {
   my $value = $params{value};
   if (!$value || $value <= 0) { $value = 1 }
 
-  my $already_hit = $self->{tests_already_hit}->{$rule} || 0;
+  my $tflags_ref = $conf_ref->{tflags};
+  my $tflags_add = $params{tflags};
+  if (defined $tflags_add && $tflags_add ne '') {
+    $_ = (!defined $_ || $_ eq '') ? $tflags_add : ($_ . ' ' . $tflags_add)
+           for $tflags_ref->{$rule};
+  };
 
+  my $already_hit = $self->{tests_already_hit}->{$rule} || 0;
   # don't count hits multiple times, unless 'tflags multiple' is on
-  if ($already_hit && ($conf_ref->{tflags}->{$rule}||'') !~ /\bmultiple\b/) {
+  if ($already_hit && ($tflags_ref->{$rule}||'') !~ /\bmultiple\b/) {
     return;
   }
 
@@ -2224,6 +2237,7 @@ sub got_hit {
 
   if ($dynamic_score_provided) {  # copy it to static for proper reporting
     $conf_ref->{scoreset}->[$_]->{$rule} = $score  for (0..3);
+    $conf_ref->{scores}->{$rule} = $score;
   }
 
   my $rule_descr = $params{description};
