@@ -8,15 +8,42 @@ ifplugin Mail::SpamAssassin::Plugin::ReplaceTags
   body     __LOTSA_MONEY_04   /(?:mill(?:e|ion)|hundred[^\.]{1,20}thousand)[^\.]{1,50}(?:(?:U\.?S\.?\s)?dollars|U\.?K\.?\spounds|(?:U\.?K\.?\s)?pounds\ssterling|euros?francs?)/i
   replace_rules   __LOTSA_MONEY_01 __LOTSA_MONEY_02 __LOTSA_MONEY_03
 
-  meta     LOTS_OF_MONEY   (__LOTSA_MONEY_01 || __LOTSA_MONEY_02 || __LOTSA_MONEY_03 || __LOTSA_MONEY_04)
-  describe LOTS_OF_MONEY   Huge... sums of money
-  score    LOTS_OF_MONEY   0.01
+  meta     LOTS_OF_MONEY    (__LOTSA_MONEY_01 || __LOTSA_MONEY_02 || __LOTSA_MONEY_03 || __LOTSA_MONEY_04)
+  describe LOTS_OF_MONEY    Huge... sums of money
+  score    LOTS_OF_MONEY    0.01
 
-  meta     MONEY_FREEMAIL  LOTS_OF_MONEY && FREEMAIL_FROM
-  describe MONEY_FREEMAIL  Lots of money from a free email service?
+  # now combine with other stuff in metas to weed out FPs
+  meta     MONEY_FREEMAIL   LOTS_OF_MONEY && FREEMAIL_FROM
+  describe MONEY_FREEMAIL   Lots of money from a free email service?
 
-  meta     MONEY_FEE       LOTS_OF_MONEY && (ADVANCE_FEE_2 || ADVANCE_FEE_3 || ADVANCE_FEE_4)
-  describe MONEY_FEE       Lots of money if you first pay a fee
+  meta     MONEY_FEE        LOTS_OF_MONEY && (ADVANCE_FEE_2 || ADVANCE_FEE_3 || ADVANCE_FEE_4)
+  describe MONEY_FEE        Lots of money if you first pay a fee
+
+  body     LOTTO_WINNINGS   /claim your (?:winnings|money|prize)/i
+  describe LOTTO_WINNINGS   Claim your winnings
+
+  body     LOTTO_WIN_01     /\bwinning\s(?:prize|number|notification|draw|check|cheque|details)/i
+  describe LOTTO_WIN_01     Winning *
+
+  body     LOTTO_AGENT      /\b(?:claims?|fiduciary)\s?(?:agent|manager|officer)/i
+  describe LOTTO_AGENT      Claims Agent
+  score    LOTTO_AGENT      0.5
+
+  body     LOTTO_DEPT       /\b(?:claims?|fiduciary)\s?(?:department|unit|group)/i
+  describe LOTTO_DEPT       Claims Department
+  score    LOTTO_DEPT       0.2
+
+  describe LOTTO_AGENT_FM   Claims Agent
+  header   LOTTO_AGENT_FM   From =~ /(?:claims?|fiduciary|dispatch)[\s_]?(?:agent|manager|officer)/i
+
+  describe LOTTO_AGENT_RPLY Claims Agent
+  header   LOTTO_AGENT_RPLY Reply-To =~ /(?:claims?|fiduciary|dispatch)[\s_]?(?:agent|manager|officer)/i
+
+  describe LOTTO_ADMITS     Admits to being a lottery
+  body     LOTTO_ADMITS     /\b(?:online|ballot|(?:inter)?national|internet)\slottery/i
+
+  meta     MONEY_LOTTERY    LOTS_OF_MONEY && (LOTTO_WINNINGS || LOTTO_WIN_01 || LOTTO_AGENT || LOTTO_DEPT || LOTTO_AGENT_FM || LOTTO_AGENT_RPLY || LOTTO_ADMITS)
+  describe MONEY_LOTTERY    Lots of money in the lottery
 
 endif
 
