@@ -1,15 +1,23 @@
 
 ifplugin Mail::SpamAssassin::Plugin::ReplaceTags
-  replace_tag  CURRENCY   [\(\[]?(?:GBP|=[Aa][34]|\xa3|\xa4|EUR|[Ee]uros|US[D\$]{1,2}|\$)[\]\)]?
+  replace_tag  CURRENCY   [\(\[]?(?:GBP|=[Aa][34]|\xa3|\xa4|EUR|[Ee]uros?|US[D\$]{1,2}|\$)[\]\)]?
 
   body     __LOTSA_MONEY_01   /<CURRENCY>\s?\d[\d.,\sO]{7,20}[\dO]/
   body     __LOTSA_MONEY_02   /\d[\d.,\sO]{7,20}[\dO]\s?<CURRENCY>/
   body     __LOTSA_MONEY_03   /<CURRENCY>\s?\d[\d.,\sO]{1,4}[\dO]\s?(?:[Mm]|[Hh][Uu][Nn][Dd][Rr][Ee][Dd]|[Tt][Hh][Oo][Uu][Ss][Aa][Nn][Dd])/
-  body     __LOTSA_MONEY_04   /(?:million|hundred[^\.]{1,20}thousand)[^\.]{1,50}(?:(?:U\.?S\.?\s)?dollars|U\.?K\.?\spounds|(?:U\.?K\.?\s)?pounds\ssterling|euros)/i
+  body     __LOTSA_MONEY_04   /(?:mill(?:e|ion)|hundred[^\.]{1,20}thousand)[^\.]{1,50}(?:(?:U\.?S\.?\s)?dollars|U\.?K\.?\spounds|(?:U\.?K\.?\s)?pounds\ssterling|euros?francs?)/i
   replace_rules   __LOTSA_MONEY_01 __LOTSA_MONEY_02 __LOTSA_MONEY_03
 
   meta     LOTS_OF_MONEY   (__LOTSA_MONEY_01 || __LOTSA_MONEY_02 || __LOTSA_MONEY_03 || __LOTSA_MONEY_04)
   describe LOTS_OF_MONEY   Huge... sums of money
+  score    LOTS_OF_MONEY   0.01
+
+  meta     MONEY_FREEMAIL  LOTS_OF_MONEY && FREEMAIL_FROM
+  describe MONEY_FREEMAIL  Lots of money from a free email service?
+
+  meta     MONEY_FEE       LOTS_OF_MONEY && (ADVANCE_FEE_2 || ADVANCE_FEE_3 || ADVANCE_FEE_4)
+  describe MONEY_FEE       Lots of money if you first pay a fee
+
 endif
 
 
