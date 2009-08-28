@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: dos hege jm wt-en1 wt-en2 wt-en3 wt-jp1 wt-jp2; day 2: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi dos hege jm wt-en1 wt-en2 wt-en3 wt-jp1 wt-jp2; day 3: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi dos hege jm wt-en1 wt-en2 wt-en3 wt-jp1 wt-jp2
+# with results from: day 1: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi dos hege jm wt-en1 wt-en2 wt-en3 wt-jp1 wt-jp2; day 2: dos hege jm wt-en1 wt-en2 wt-en3 wt-jp1 wt-jp2; day 3: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi dos hege jm wt-en1 wt-en2 wt-en3 wt-jp1 wt-jp2
 
 # tflags userconf
 ALL_TRUSTED
@@ -191,6 +191,9 @@ FH_HOST_IN_ADDRARPA
 FH_MSGID_XXX
 
 # good enough
+FILL_THIS_FORM_FRAUD_PHISH
+
+# good enough
 FILL_THIS_FORM_LOAN
 
 # good enough
@@ -224,6 +227,9 @@ FROM_LOCAL_NOVOWEL
 FRT_APPROV
 
 # good enough
+FRT_ROLEX
+
+# good enough
 FR_TITLE_NUMS
 
 # good enough
@@ -231,6 +237,9 @@ FSL_FAKE_GMAIL_RCVD
 
 # good enough
 FSL_FAKE_HOTMAIL_RVCD
+
+# good enough
+FSL_GEO_ABUSE
 
 # good enough
 FSL_HELO_BARE_IP_1
@@ -402,6 +411,9 @@ L_SPAM_TOOL_13
 
 # tflags userconf
 MIME_CHARSET_FARAWAY
+
+# good enough
+MIME_PHP_NO_TEXT
 
 # tflags userconf
 MISSING_HB_SEP
@@ -698,13 +710,19 @@ TVD_QUAL_MEDS
 TVD_VISIT_PHARMA
 
 # good enough
-FILL_THIS_FORM_FRAUD_PHISH
+FB_YOUR_WEIGHT
 
 # good enough
-FSL_GEO_ABUSE
+FR_WATCHES_HTTP
 
 # good enough
-MIME_PHP_NO_TEXT
+HK_FAKENAME_PAYPAL
+
+# good enough
+KB_DATE_CONTAINS_TAB
+
+# good enough
+TBIRD_SUSP_MIME_BDRY
 
 # tflags userconf
 UNPARSEABLE_RELAY
