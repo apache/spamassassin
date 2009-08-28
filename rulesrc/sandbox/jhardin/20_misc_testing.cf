@@ -48,12 +48,4 @@ describe       TBIRD_SUSP_MIME_BDRY   Unlikely Thunderbird MIME boundary
 header         UNQ_MIME_BDRY        Content-Type =~ /boundary=[^"]/i
 describe       UNQ_MIME_BDRY        Unquoted MIME boundary string
 
-# 08/2009 image spams using specific pattern indicating tbird forgery?
-ifplugin Mail::SpamAssassin::Plugin::MIMEHeader
-  mimeheader  __IMAGE_JPEG_ATTACH   Content-Type =~ /image\/jpeg/i
-  header      __TB_MIME_BDRY_0D0D   Content-Type =~ /boundary="-{8,}(?:0[1-9]){10}/i
-  header      __TO_NO_BRACKETS      To =~ />$/
-
-  meta        FORGED_TBIRD_IMAGE    (__MUA_TBIRD && __IMAGE_JPEG_ATTACH && __TB_MIME_BDRY_0D0D && !__TO_NO_BRACKETS)
-endif
 

@@ -1,0 +1,59 @@
+
+# 08/2009 image spams using specific pattern indicating tbird MUA forgery?
+# FP rate is _UNKNOWN_ so do NOT score this rule very high without testing!
+# Originally by John Hardin <jhardin@impsec.org>
+# with input from Alex Broens and Karsten Bräckelmann
+
+mimeheader __JPEG_ATTACH           Content-Type =~ /image\/jpeg/i
+
+header     __MUA_TBIRD             User-Agent =~ /Thunderbird/
+header     __TB_MIME_BDRY_0D0D     Content-Type =~ /boundary="-{12}(?:0[1-9]){12}/
+
+meta       FORGED_TBIRD_IMG        __MUA_TBIRD && __JPEG_ATTACH && __TB_MIME_BDRY_0D0D
+
+describe   FORGED_TBIRD_IMG        Probably forged Thunderbird image spam
+score      FORGED_TBIRD_IMG        0.01
+
+
+# Additional meta spotted by Alex Broens.  Still might FP on legit mail with
+# manually typed addresses or undisclosed recipients.
+
+header     __NO_ARROWS_R           To !~ />$/
+
+meta       FORGED_TBIRD_IMG_ARROW  FORGED_TBIRD_IMG && __NO_ARROWS_R
+
+describe   FORGED_TBIRD_IMG_ARROW  Likely forged Thunderbird image spam
+score      FORGED_TBIRD_IMG_ARROW  0.8
+
+
+# Vanilla RELAY_MUA_TO_MX variant without RelayCountries plugin.  UNTESTED.
+
+# header   RELAY_MUA_TO_MX  X-Spam-Relays-External !~ /(\[.+){2}/
+# describe RELAY_MUA_TO_MX  Single Relay, direct client to MX
+# score    RELAY_MUA_TO_MX  0.5
+
+
+# The boundary *does* FP on legit mail.  However, all of my (KB) recent samples
+# have another thing in common -- direct MUA to MX spam!  Most unlikely with
+# an MUA like Thunderbird.
+
+#meta       FORGED_TBIRD_IMG_TO_MX  FORGED_TBIRD_IMG && RELAY_MUA_TO_MX
+
+# Lets test this using a good rule from the sandbox
+meta       FORGED_TBIRD_IMG_TO_MX  FORGED_TBIRD_IMG && __DOS_DIRECT_TO_MX
+
+describe   FORGED_TBIRD_IMG_TO_MX  Likely forged Thunderbird image spam
+score      FORGED_TBIRD_IMG_TO_MX  2.5
+
+
+# Another constraint.  No tiny images, and larger ones up to "less than
+# 640x480", as observed in the wild.
+
+body       __ONE_IMG               eval:image_count('all',1,1)
+body       __IMG_LE_300K           eval:pixel_coverage('all',62500,300000)
+
+meta       FORGED_TBIRD_IMG_SIZE   FORGED_TBIRD_IMG && __ONE_IMG && __IMG_LE_300K
+
+describe   FORGED_TBIRD_IMG_SIZE   Likely forged Thunderbird image spam
+score      FORGED_TBIRD_IMG_SIZE   0.8
+
