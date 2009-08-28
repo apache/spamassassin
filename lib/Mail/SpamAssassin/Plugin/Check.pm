@@ -52,18 +52,14 @@ sub check_main {
   if (defined $suppl_attrib && ref $suppl_attrib->{rule_hits}) {
     my @caller_rule_hits = @{$suppl_attrib->{rule_hits}};
     dbg("check: adding caller rule hits, %d rules", scalar(@caller_rule_hits));
-    my($tflags_ref) = $pms->{conf}->{tflags};
     for my $caller_rule_hit (@caller_rule_hits) {
       next if ref $caller_rule_hit ne 'HASH';
       my($rulename, $area, $score, $value, $ruletype, $tflags, $description) =
         @$caller_rule_hit{qw(rule area score value ruletype tflags descr)};
-      if (defined $tflags) {
-        $_ = join(' ', !defined $_ ? () : split(' '),
-                       split(/[ \t,]+/,$tflags))  for $tflags_ref->{$rulename};
-      }
       $pms->got_hit($rulename, $area,
                     !defined $score ? () : (score => $score),
                     !defined $value ? () : (value => $value),
+                    !defined $tflags ? () : (tflags => $tflags),
                     !defined $description ? () : (description => $description),
                     ruletype => $ruletype);
     }
