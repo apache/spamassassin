@@ -25,6 +25,16 @@ meta       FORGED_TBIRD_IMG_ARROW  FORGED_TBIRD_IMG && __TO_NO_ARROWS_R
 describe   FORGED_TBIRD_IMG_ARROW  Likely forged Thunderbird image spam
 score      FORGED_TBIRD_IMG_ARROW  0.8
 
+# try it against other stuff, too
+meta       TO_NO_BRKTS_HTML        __TO_NO_ARROWS_R && HTML_MESSAGE
+
+meta       TO_NO_BRKTS_HTML_ONLY   __TO_NO_ARROWS_R && MIME_HTML_ONLY
+
+meta       TO_NO_BRKTS_DYNIP       __TO_NO_ARROWS_R && RDNS_DYNAMIC
+
+meta       TO_NO_BRKTS_NORDNS      __TO_NO_ARROWS_R && RDNS_NONE
+
+
 
 # The boundary *does* FP on legit mail.  However, all of KB's recent samples
 # have another thing in common -- direct MUA to MX spam!  Most unlikely with

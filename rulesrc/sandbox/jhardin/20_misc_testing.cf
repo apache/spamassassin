@@ -32,8 +32,22 @@ describe       DEAR_BENEFICIARY		Dear Beneficiary:
 uri            URI_NUMERIC_CCTLD     m;^[a-z]+://(?:\d+\.){2,}[a-z][a-z]/;i
 describe       URI_NUMERIC_CCTLD     CCTLD URI with multiple numeric subdomains
 
-header         FROM_MISSPACED        From =~ /^\s*"[^"]*"</
-describe       FROM_MISSPACED        From: missing whitespace
+
+# From should have whitespace between the comment and the address
+header         __FROM_MISSPACED      From =~ /^\s*"[^"]*"</
+describe       __FROM_MISSPACED      From: missing whitespace
+
+ifplugin Mail::SpamAssassin::Plugin::FreeMail
+  meta         FROM_MISSP_FREEMAIL   __FROM_MISSPACED && (FREEMAIL_FROM || FREEMAIL_REPLYTO)
+  describe     FROM_MISSP_FREEMAIL   From misspaced + from freemail
+endif
+
+meta           FROM_MISSP_MSFT       __FROM_MISSPACED && (__ANY_OUTLOOK_MUA || __HAS_MIMEOLE || __MIMEOLE_MS)
+describe       FROM_MISSP_MSFT       Microsoft tools don't botch the From header
+
+meta           FROM_MISSP_DYNIP      __FROM_MISSPACED && RDNS_DYNAMIC
+describe       FROM_MISSP_DYNIP      From misspaced + dynamic rDNS
+
 
 # observed in spam 8/2009
 header         MUA_EQ_ORG         ALL =~ /\nX-Mailer: ([^\n]+)\n.*Organization: \1/sm

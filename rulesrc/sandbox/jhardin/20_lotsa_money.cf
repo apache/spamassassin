@@ -14,8 +14,12 @@ ifplugin Mail::SpamAssassin::Plugin::ReplaceTags
 
   # now combine with other stuff in metas to weed out FPs
   meta     MONEY_FREEMAIL   LOTS_OF_MONEY && FREEMAIL_FROM
-  describe MONEY_FREEMAIL   Lots of money from a free email service?
+  describe MONEY_FREEMAIL   Lots of money from someone using free email?
 
+  meta     MONEY_FROM_MISSP LOTS_OF_MONEY && FROM_MISSPACED
+  describe MONEY_FROM_MISSP Lots of money and misspaced From
+
+  # The ADVANCE_FEE rules should probably be updated with LOTS_OF_MONEY
   meta     MONEY_FEE        LOTS_OF_MONEY && (ADVANCE_FEE_2 || ADVANCE_FEE_3 || ADVANCE_FEE_4)
   describe MONEY_FEE        Lots of money if you first pay a fee
 
@@ -33,17 +37,17 @@ ifplugin Mail::SpamAssassin::Plugin::ReplaceTags
   describe LOTTO_DEPT       Claims Department
   score    LOTTO_DEPT       0.2
 
-  describe LOTTO_AGENT_FM   Claims Agent
   header   LOTTO_AGENT_FM   From =~ /(?:claims?|fiduciary|dispatch)[\s_]?(?:agent|manager|officer)/i
+  describe LOTTO_AGENT_FM   Claims Agent
 
-  describe LOTTO_AGENT_RPLY Claims Agent
   header   LOTTO_AGENT_RPLY Reply-To =~ /(?:claims?|fiduciary|dispatch)[\s_]?(?:agent|manager|officer)/i
+  describe LOTTO_AGENT_RPLY Claims Agent
 
-  describe LOTTO_ADMITS     Admits to being a lottery
   body     LOTTO_ADMITS     /\b(?:online|ballot|(?:inter)?national|internet)\slottery/i
+  describe LOTTO_ADMITS     Admits to being a lottery
 
   meta     MONEY_LOTTERY    LOTS_OF_MONEY && (LOTTO_WINNINGS || LOTTO_WIN_01 || LOTTO_AGENT || LOTTO_DEPT || LOTTO_AGENT_FM || LOTTO_AGENT_RPLY || LOTTO_ADMITS)
-  describe MONEY_LOTTERY    Lots of money in the lottery
+  describe MONEY_LOTTERY    Lots of money from a lottery
 
 endif
 
