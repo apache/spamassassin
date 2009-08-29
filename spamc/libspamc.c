@@ -655,7 +655,7 @@ static int _message_read_raw(int fd, struct message *m)
     m->type = MESSAGE_ERROR;
     if (m->raw_len > (int) m->max_len)
     {
-        libspamc_log(m->priv->flags, LOG_ERR,
+        libspamc_log(m->priv->flags, LOG_NOTICE,
                 "skipped message, greater than max message size (%d bytes)",
                 m->max_len);
 	return EX_TOOBIG;
