@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi dos hege jm wt-en1 wt-en2 wt-en3 wt-jp1 wt-jp2; day 2: dos hege jm wt-en1 wt-en2 wt-en3 wt-jp1 wt-jp2; day 3: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi dos hege jm wt-en1 wt-en2 wt-en3 wt-jp1 wt-jp2
+# with results from: day 1: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi dos hege jm wt-en1 wt-en2 wt-en3 wt-jp1 wt-jp2; day 2: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi dos hege jm wt-en1 wt-en2 wt-en3 wt-jp1 wt-jp2; day 3: dos hege jm wt-en1 wt-en2 wt-en3 wt-jp1 wt-jp2
 
 # tflags userconf
 ALL_TRUSTED
@@ -692,6 +692,9 @@ SUBJECT_IN_BLACKLIST
 SUBJECT_IN_WHITELIST
 
 # good enough
+TBIRD_SUSP_MIME_BDRY
+
+# good enough
 THEBAT_UNREG
 
 # good enough
@@ -710,19 +713,10 @@ TVD_QUAL_MEDS
 TVD_VISIT_PHARMA
 
 # good enough
-FB_YOUR_WEIGHT
+FSL_HELO_SETUP
 
 # good enough
-FR_WATCHES_HTTP
-
-# good enough
-HK_FAKENAME_PAYPAL
-
-# good enough
-KB_DATE_CONTAINS_TAB
-
-# good enough
-TBIRD_SUSP_MIME_BDRY
+SANE_2b173a7fb7518c75ac8a2d294d773fd8
 
 # tflags userconf
 UNPARSEABLE_RELAY
