@@ -54,9 +54,8 @@ header         MUA_EQ_ORG         ALL =~ /\nX-Mailer: ([^\n]+)\n.*Organization: 
 describe       MUA_EQ_ORG         X-Mailer: same as Organization:
 
 # testing
-header         __MUA_TBIRD            User-Agent =~ /Thunderbird/
-header         __TB_MIME_BDRY_NOT_Z   Content-Type =~ /boundary="-{8,}(?:[1-9]){16}/
-meta           TBIRD_SUSP_MIME_BDRY   __MUA_TBIRD && __TB_MIME_BDRY_NOT_Z
+header         __TB_MIME_BDRY_NO_Z   Content-Type =~ /boundary="-{8,}(?:[1-9]){16}/
+meta           TBIRD_SUSP_MIME_BDRY   __MUA_TBIRD && __TB_MIME_BDRY_NO_Z
 describe       TBIRD_SUSP_MIME_BDRY   Unlikely Thunderbird MIME boundary
 
 header         UNQ_MIME_BDRY        Content-Type =~ /boundary=[^"]/i
