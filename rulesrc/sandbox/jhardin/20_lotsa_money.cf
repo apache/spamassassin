@@ -25,26 +25,31 @@ ifplugin Mail::SpamAssassin::Plugin::ReplaceTags
 
   body     LOTTO_WINNINGS   /claim your (?:winnings|money|prize)/i
   describe LOTTO_WINNINGS   Claim your winnings
+  score    LOTTO_WINNINGS   0.25
 
   body     LOTTO_WIN_01     /\bwinning\s(?:prize|number|notification|draw|check|cheque|details)/i
   describe LOTTO_WIN_01     Winning *
+  score    LOTTO_WIN_01     0.20
 
   body     LOTTO_AGENT      /\b(?:claims?|fiduciary)\s?(?:agent|manager|officer)/i
   describe LOTTO_AGENT      Claims Agent
-  score    LOTTO_AGENT      0.5
+  score    LOTTO_AGENT      0.50
 
   body     LOTTO_DEPT       /\b(?:claims?|fiduciary)\s?(?:department|unit|group)/i
   describe LOTTO_DEPT       Claims Department
-  score    LOTTO_DEPT       0.2
+  score    LOTTO_DEPT       0.20
 
   header   LOTTO_AGENT_FM   From =~ /(?:claims?|fiduciary|dispatch)[\s_]?(?:agent|manager|officer)/i
   describe LOTTO_AGENT_FM   Claims Agent
+  score    LOTTO_AGENT_FM   0.50
 
   header   LOTTO_AGENT_RPLY Reply-To =~ /(?:claims?|fiduciary|dispatch)[\s_]?(?:agent|manager|officer)/i
   describe LOTTO_AGENT_RPLY Claims Agent
+  score    LOTTO_AGENT_RPLY 0.50
 
   body     LOTTO_ADMITS     /\b(?:online|ballot|(?:inter)?national|internet)\slottery/i
   describe LOTTO_ADMITS     Admits to being a lottery
+  score    LOTTO_ADMITS     0.20
 
   meta     MONEY_LOTTERY    LOTS_OF_MONEY && (LOTTO_WINNINGS || LOTTO_WIN_01 || LOTTO_AGENT || LOTTO_DEPT || LOTTO_AGENT_FM || LOTTO_AGENT_RPLY || LOTTO_ADMITS)
   describe MONEY_LOTTERY    Lots of money from a lottery
