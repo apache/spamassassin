@@ -1,14 +1,11 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi dos hege jm wt-en1 wt-en2 wt-en3 wt-jp1 wt-jp2; day 2: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi dos hege jm wt-en1 wt-en2 wt-en3 wt-jp1 wt-jp2; day 3: dos hege jm wt-en1 wt-en2 wt-en3 wt-jp1 wt-jp2
+# with results from: day 1: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi dos hege jm wt-en1 wt-en2 wt-en3 wt-jp1 wt-jp2; day 2: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi dos hege jm wt-en1 wt-en2 wt-en3 wt-jp1 wt-jp2; day 3: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi dos hege jm wt-en1 wt-en2 wt-en3 wt-jp1 wt-jp2
 
 # tflags userconf
 ALL_TRUSTED
 
 # good enough
 AXB_HELO_LH_HOME
-
-# good enough
-BASE64_LENGTH_78_79
 
 # tflags learn
 BAYES_00
@@ -251,6 +248,9 @@ FSL_HELO_DEVICE
 FSL_HELO_NON_FQDN_1
 
 # good enough
+FSL_HELO_SETUP
+
+# good enough
 FSL_INTERIA_ABUSE
 
 # good enough
@@ -266,6 +266,9 @@ FS_APPROVE_YOU
 FS_ERECTION
 
 # good enough
+FS_LARGE_PERCENT2
+
+# good enough
 FS_NUDE
 
 # good enough
@@ -273,6 +276,9 @@ FS_REPLICA
 
 # good enough
 FS_REPLICAWATCH
+
+# good enough
+FS_START_LOSE
 
 # good enough
 FS_WEIGHT_LOSS
@@ -429,6 +435,9 @@ NO_RECEIVED
 
 # tflags userconf
 NO_RELAYS
+
+# good enough
+PART_CID_STOCK
 
 # tflags net
 PYZOR_CHECK
@@ -632,6 +641,9 @@ SANE_04e8bf28eb445199a7f11b943c44d209
 SANE_1c4f3286fa4aed6424ced88bfaf8b09c
 
 # good enough
+SANE_2b173a7fb7518c75ac8a2d294d773fd8
+
+# good enough
 SANE_3b92eda751c992f230f215fb7eb36844
 
 # good enough
@@ -677,6 +689,9 @@ SPF_PASS
 SPF_SOFTFAIL
 
 # good enough
+STOCK_IMG_CTYPE
+
+# good enough
 STOCK_IMG_HDR_FROM
 
 # good enough
@@ -710,13 +725,19 @@ TVD_PH_SUBJ_SEC_MEASURES
 TVD_QUAL_MEDS
 
 # good enough
+TVD_RCVD_IP
+
+# good enough
+TVD_RCVD_IP4
+
+# good enough
+TVD_RCVD_SINGLE
+
+# good enough
 TVD_VISIT_PHARMA
 
 # good enough
-FSL_HELO_SETUP
-
-# good enough
-SANE_2b173a7fb7518c75ac8a2d294d773fd8
+KB_DATE_CONTAINS_TAB
 
 # tflags userconf
 UNPARSEABLE_RELAY
