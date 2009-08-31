@@ -5,7 +5,7 @@ ifplugin Mail::SpamAssassin::Plugin::ReplaceTags
   body     __LOTSA_MONEY_01   /<CURRENCY>\s?\d[\d.,\sO]{5,20}[\dO]/
   body     __LOTSA_MONEY_02   /\d[\d.,\sO]{5,20}[\dO]\s?<CURRENCY>/
   body     __LOTSA_MONEY_03   /<CURRENCY>\s?\d[\d.,\sO]{1,4}[\dO]\s?(?:[Mm]\b|[Mm][Ii][Ll][Ll]|[Hh][Uu][Nn][Dd][Rr][Ee][Dd]|[Tt][Hh][Oo][Uu][Ss][Aa][Nn][Dd])/
-  body     __LOTSA_MONEY_04   /(?:mill(?:e|ion)|hundred[^\.]{1,20}thousand)[^\.]{1,50}(?:(?:U\.?S\.?\s)?dollars|U\.?K\.?\spounds|(?:U\.?K\.?\s)?pounds\ssterling|euros?francs?)/i
+  body     __LOTSA_MONEY_04   /(?:mill(?:e|ion)|hundred[^\.]{1,20}thousand)[^\.]{1,50}(?:(?:U\.?S\.?\s)?dollars|U\.?K\.?\spounds|(?:U\.?K\.?\s)?pounds\ssterling|euros?|francs?)/i
   replace_rules   __LOTSA_MONEY_01 __LOTSA_MONEY_02 __LOTSA_MONEY_03
 
   meta     LOTS_OF_MONEY    (__LOTSA_MONEY_01 || __LOTSA_MONEY_02 || __LOTSA_MONEY_03 || __LOTSA_MONEY_04)
@@ -23,11 +23,11 @@ ifplugin Mail::SpamAssassin::Plugin::ReplaceTags
   meta     MONEY_FEE        LOTS_OF_MONEY && (ADVANCE_FEE_2 || ADVANCE_FEE_3 || ADVANCE_FEE_4)
   describe MONEY_FEE        Lots of money if you first pay a fee
 
-  body     LOTTO_WINNINGS   /claim your (?:winnings|money|prize)/i
+  body     LOTTO_WINNINGS   /claim your (?:win+ings|money|prize)/i
   describe LOTTO_WINNINGS   Claim your winnings
   score    LOTTO_WINNINGS   0.25
 
-  body     LOTTO_WIN_01     /\bwinning\s(?:prize|number|notification|draw|check|cheque|details)/i
+  body     LOTTO_WIN_01     /\bwin+ing\s(?:prize|number|notification|draw|check|cheque|details|information)/i
   describe LOTTO_WIN_01     Winning *
   score    LOTTO_WIN_01     0.20
 
