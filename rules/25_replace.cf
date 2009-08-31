@@ -68,7 +68,7 @@ replace_post	P3	{1,3}
 ###########################################################################
 # fuzzy header tests
 
-header SUBJECT_FUZZY_MEDS	Subject =~ /<M><E><D><S>/i
+header SUBJECT_FUZZY_MEDS	Subject =~ /(?:\b|_)(?!meds)<M><E><D><S>(?:\b|_)/i
 describe SUBJECT_FUZZY_MEDS	Attempt to obfuscate words in Subject:
 replace_rules SUBJECT_FUZZY_MEDS
 
