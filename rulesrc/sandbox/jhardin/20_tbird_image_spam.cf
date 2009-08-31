@@ -9,10 +9,9 @@ mimeheader __JPEG_ATTACH           Content-Type =~ /image\/jpeg/i
 header     __MUA_TBIRD             User-Agent =~ /Thunderbird/
 header     __MIME_BDRY_0D0D        Content-Type =~ /boundary="-{12}(?:0[1-9]){12}/
 
-meta       FORGED_TBIRD_IMG        __MUA_TBIRD && __JPEG_ATTACH && __MIME_BDRY_0D0D
+meta       __FORGED_TBIRD_IMG      __MUA_TBIRD && __JPEG_ATTACH && __MIME_BDRY_0D0D
 
-describe   FORGED_TBIRD_IMG        Probably forged Thunderbird image spam
-score      FORGED_TBIRD_IMG        0.01
+describe   __FORGED_TBIRD_IMG      Possibly forged Thunderbird image spam
 
 
 # Additional meta spotted by Alex Broens.  Still might FP on legit mail with
@@ -20,7 +19,7 @@ score      FORGED_TBIRD_IMG        0.01
 
 header     __TO_NO_ARROWS_R        To !~ />$/
 
-meta       FORGED_TBIRD_IMG_ARROW  FORGED_TBIRD_IMG && __TO_NO_ARROWS_R
+meta       FORGED_TBIRD_IMG_ARROW  __FORGED_TBIRD_IMG && __TO_NO_ARROWS_R
 
 describe   FORGED_TBIRD_IMG_ARROW  Likely forged Thunderbird image spam
 score      FORGED_TBIRD_IMG_ARROW  0.8
@@ -45,7 +44,7 @@ score      TO_NO_BRKTS_NORDNS      0.20
 # have another thing in common -- direct MUA to MX spam!  Most unlikely with
 # an MUA like Thunderbird.
 
-meta       FORGED_TBIRD_IMG_TO_MX  FORGED_TBIRD_IMG && __DOS_DIRECT_TO_MX
+meta       FORGED_TBIRD_IMG_TO_MX  __FORGED_TBIRD_IMG && __DOS_DIRECT_TO_MX
 
 describe   FORGED_TBIRD_IMG_TO_MX  Likely forged Thunderbird image spam
 score      FORGED_TBIRD_IMG_TO_MX  2.5
@@ -57,7 +56,7 @@ score      FORGED_TBIRD_IMG_TO_MX  2.5
 body       __ONE_IMG               eval:image_count('all',1,1)
 body       __IMG_LE_300K           eval:pixel_coverage('all',62500,300000)
 
-meta       FORGED_TBIRD_IMG_SIZE   FORGED_TBIRD_IMG && __ONE_IMG && __IMG_LE_300K
+meta       FORGED_TBIRD_IMG_SIZE   __FORGED_TBIRD_IMG && __ONE_IMG && __IMG_LE_300K
 
 describe   FORGED_TBIRD_IMG_SIZE   Likely forged Thunderbird image spam
 score      FORGED_TBIRD_IMG_SIZE   0.8
