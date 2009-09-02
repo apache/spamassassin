@@ -167,22 +167,22 @@ sub set_config {
 
 =over 4
 
-=item whitelist_from_dkim author@example.com [signing-identity]
+=item whitelist_from_dkim author@example.com [signing-domain]
 
 Use this to supplement the whitelist_from addresses with a check to make
-sure the message with a given From address (the author's address) carries a
-valid Domain Keys Identified Mail (DKIM) signature by a verifier-acceptable
-signing-identity (the i= tag).
+sure the message with a given From address (the author's address) carries
+a valid Domain Keys Identified Mail (DKIM) signature by a signing-domain
+(SDID, i.e. the d= tag) that is acceptable to verifier.
 
 Only one whitelist entry is allowed per line, as in C<whitelist_from_rcvd>.
 Multiple C<whitelist_from_dkim> lines are allowed. File-glob style characters
 are allowed for the From address (the first parameter), just like with
 C<whitelist_from_rcvd>. The second parameter does not accept wildcards.
 
-If no signing identity parameter is specified, the only acceptable signature
-will be a first-party signature, i.e. the so called author domain signature,
-which is a signature where the signing identity of a signature matches the
-author address (i.e. the address in a From header field).
+If no signing-domain parameter is specified, the only acceptable signature
+will be an Author Domain Signature (sometimes called first-party signature)
+which is a signature where the signing domain (SDID) of a signature matches
+the domain of the author address (i.e. the address in a From header field).
 
 Since this whitelist requires a DKIM check to be made, network tests must
 be enabled.
@@ -201,13 +201,13 @@ Examples of whitelisting based on third-party signatures:
   whitelist_from_dkim *@info.example.com   example.com
   whitelist_from_dkim *@*                  remailer.example.com
 
-=item def_whitelist_from_dkim author@example.com [signing-identity]
+=item def_whitelist_from_dkim author@example.com [signing-domain]
 
 Same as C<whitelist_from_dkim>, but used for the default whitelist entries
 in the SpamAssassin distribution.  The whitelist score is lower, because
 these are often targets for abuse of public mailers which sign their mail.
 
-=item adsp_override domain [signing_practices]
+=item adsp_override domain [signing-practices]
 
 Currently few domains publish their signing practices (RFC 5617 - ADSP),
 partly because the ADSP rfc is rather new, partly because they think
@@ -263,8 +263,9 @@ C<custom_low>, C<custom_med>, C<custom_high>.
 Absence of this second parameter implies C<discardable>. If a domain is not
 listed by a C<adsp_override> directive nor does it explicitly publish any
 ADSP record, then C<unknown> is implied for valid domains, and C<nxdomain>
-for domains not existing in DNS. (Note: domain validity may be unchecked
-with current versions of Mail::DKIM, so C<nxdomain> may never turn up.)
+for domains not existing in DNS. (Note: domain validity is only checked with
+versions of Mail::DKIM 0.36_5 or later, C<nxdomain> would never turn up with
+older versions).
 
 The strong setting C<discardable> is useful for domains which are known
 to always sign their mail and to always send it directly to recipients
@@ -278,7 +279,7 @@ to author's domain determine which of the following rules fire and
 contributes its score: DKIM_ADSP_NXDOMAIN, DKIM_ADSP_ALL, DKIM_ADSP_DISCARD,
 DKIM_ADSP_CUSTOM_LOW, DKIM_ADSP_CUSTOM_MED, DKIM_ADSP_CUSTOM_HIGH. Not more
 than one of these rules can fire. The last three can only result from a
-'signing_practices' as given in a C<adsp_override> directive (not from a
+'signing-practices' as given in a C<adsp_override> directive (not from a
 DNS lookup), and can serve as a convenient means of providing a different
 score if scores assigned to DKIM_ADSP_ALL or DKIM_ADSP_DISCARD are not
 considered suitable for some domains.
@@ -511,7 +512,7 @@ sub check_dkim_signsome {
   my ($self, $pms) = @_;
   # the signsome is semantically always true, and thus redundant;
   # for compatibility just returns false to prevent
-  # a rule DKIM_POLICY_SIGNSOME from always firing
+  # a legacy rule DKIM_POLICY_SIGNSOME from always firing
   return 0;
 }
 
@@ -865,18 +866,19 @@ sub _check_dkim_adsp {
     $pms->{dkim_adsp} = 'N'; $practices_as_string = 'invalid fqdn, ignored';
 
   } elsif ($pms->{dkim_author_sig_tempfailed}) {
-    dbg("dkim: adsp ignored, temporary failure varifying author domain signature");
+    dbg("dkim: adsp ignored, tempfail varifying author domain signature");
     $practices_as_string = 'pub key tempfailed, ignored';
 
   } elsif ($pms->{dkim_has_any_author_sig} &&
            !$pms->{dkim_signatures_dependable}) {
-    # the message did have an author domain signature but it wasn't valid;
+    # the message did have an Author Domain Signature but it wasn't valid;
     # we also expect the message was truncated just before being passed to
     # SpamAssassin, which is a likely reason for verification failure, so
     # we shouldn't take it too harsh with ADSP rules - just pretend the ADSP
     # was 'unknown'
     #
-    dbg("dkim: adsp ignored, message was truncated, invalid author domain signature");
+    dbg("dkim: adsp ignored, message was truncated, ".
+        "invalid author domain signature");
     $practices_as_string = 'truncated, ignored';
 
   } elsif (my($adsp,$key) =
@@ -1009,7 +1011,7 @@ sub _check_dkim_whitelist {
 }
 
 # check for verifier-acceptable signatures; an empty (or undefined) signing
-# identity in a whitelist implies checking for an author domain signature
+# domain in a whitelist implies checking for an Author Domain Signature
 #
 sub _wlcheck_acceptable_signature {
   my ($self, $pms, $acceptable_identity_tuples_ref, $wl) = @_;
@@ -1089,7 +1091,7 @@ sub _wlcheck_list {
       # $re and $wl are here for logging purposes only, $re already checked.
       # The $acceptable_identity is a verifier-acceptable signing identity.
       # When $acceptable_identity is undef or an empty string it implies an
-      # author domain signature check.
+      # Author Domain Signature check.
 
       my $matches = 0;
       if (!defined $acceptable_identity || $acceptable_identity eq '') {
@@ -1100,7 +1102,7 @@ sub _wlcheck_list {
         # field, is the same as the domain name in the Author Address.
         # Following [RFC5321], domain name comparisons are case insensitive.
 
-        # checking for author domain signature
+        # checking for Author Domain Signature
         $matches = 1  if lc $identity eq lc $author_matching_part;
       }
       else {  # checking for verifier-acceptable signature
