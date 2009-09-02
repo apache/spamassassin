@@ -66,7 +66,7 @@ describe PLING_QUERY		Subject has exclamation mark and question mark
 
 
 
-header MSGID_SPAM_CAPS		Message-ID =~ /^\s*<?[A-Z]+\@(?!(?:mailcity|whowhere)\.com)/m
+header MSGID_SPAM_CAPS		Message-ID =~ /^\s*<?[A-Z]+\@(?!(?:mailcity|whowhere)\.com)/
 describe MSGID_SPAM_CAPS	Spam tool Message-Id: (caps variant)
 
 header MSGID_SPAM_LETTERS	Message-Id =~ /<[a-z]{5,}\@(\S+\.)+\S+>/
@@ -77,8 +77,8 @@ describe MSGID_SPAM_LETTERS	Spam tool Message-Id: (letters variant)
 # negative lookahead exempts this MUA from circa 1997-2000 
 # X-Mailer: Microsoft Outlook Express 4.71.1712.3
 # Message-ID: <01bd45da$2649cdc0$LocalHost@andrew>
-header __MSGID_DOLLARS_OK	MESSAGEID =~ /<[0-9a-f]{4,}\$[0-9a-f]{4,}\$[0-9a-f]{4,}\@\S+>/m
-header __MSGID_DOLLARS_MAYBE	MESSAGEID =~ /<\w{4,}\$\w{4,}\$(?!localhost)\w{4,}\@\S+>/mi
+header __MSGID_DOLLARS_OK	MESSAGEID =~ /<[0-9a-f]{4,}\$[0-9a-f]{4,}\$[0-9a-f]{4,}\@\S+>/
+header __MSGID_DOLLARS_MAYBE	MESSAGEID =~ /<\w{4,}\$\w{4,}\$(?!localhost)\w{4,}\@\S+>/i
 meta MSGID_DOLLARS_RANDOM	__MSGID_DOLLARS_MAYBE && !__MSGID_DOLLARS_OK
 
 # bit of a ratware rule, but catches a bit more than just the one ratware
@@ -131,7 +131,7 @@ describe MSGID_FROM_MTA_HEADER	Message-Id was added by a relay
 
 
 
-header MSGID_SHORT		MESSAGEID =~ /^.{1,15}$|<.{0,4}\@/m
+header MSGID_SHORT		MESSAGEID =~ /^.{1,15}$|<.{0,4}\@/
 describe MSGID_SHORT		Message-ID is unusually short
 
 header MSGID_MULTIPLE_AT	MESSAGEID =~ /<[^>]*\@[^>]*\@/
@@ -139,7 +139,7 @@ describe MSGID_MULTIPLE_AT	Message-ID contains multiple '@' characters
 
 ###########################################################################
 
-header DATE_SPAMWARE_Y2K	Date =~ /^[A-Z][a-z]{2}, \d\d [A-Z][a-z]{2} [0-6]\d \d\d:\d\d:\d\d [A-Z]{3}$/m
+header DATE_SPAMWARE_Y2K	Date =~ /^[A-Z][a-z]{2}, \d\d [A-Z][a-z]{2} [0-6]\d \d\d:\d\d:\d\d [A-Z]{3}$/
 describe DATE_SPAMWARE_Y2K	Date header uses unusual Y2K formatting
 
 # as noted on the dev@ list, ":60" is valid for seconds when there's a leap
@@ -153,7 +153,7 @@ describe DATE_SPAMWARE_Y2K	Date header uses unusual Y2K formatting
 #
 # WRT the tests, remember that ok and fail are reversed -- so valid dates
 # should be "fail" and invalid dates should be "ok".
-header INVALID_DATE		Date !~ /^\s*(?:(?i:Mon|Tue|Wed|Thu|Fri|Sat|Sun),\s)?\s*(?:[12]\d|3[01]|0?[1-9])\s+(?i:Jan|Feb|Ma[ry]|Apr|Ju[nl]|Aug|Sep|Oct|Nov|Dec)\s+(?:19[7-9]\d|2\d{3})\s+(?:[01]?\d|2[0-3])\:[0-5]\d(?::(?:[0-5]\d|60))?(?:\s+[AP]M)?(?:\s+(?:[+-][0-9]{4}|UT|[A-Z]{2,3}T|0000 GMT|"GMT"))?(?:\s*\(.*\))?\s*$/m [if-unset: Wed, 31 Jul 2002 16:41:57 +0200]
+header INVALID_DATE		Date !~ /^\s*(?:(?i:Mon|Tue|Wed|Thu|Fri|Sat|Sun),\s)?\s*(?:[12]\d|3[01]|0?[1-9])\s+(?i:Jan|Feb|Ma[ry]|Apr|Ju[nl]|Aug|Sep|Oct|Nov|Dec)\s+(?:19[7-9]\d|2\d{3})\s+(?:[01]?\d|2[0-3])\:[0-5]\d(?::(?:[0-5]\d|60))?(?:\s+[AP]M)?(?:\s+(?:[+-][0-9]{4}|UT|[A-Z]{2,3}T|0000 GMT|"GMT"))?(?:\s*\(.*\))?\s*$/ [if-unset: Wed, 31 Jul 2002 16:41:57 +0200]
 describe INVALID_DATE		Invalid Date: header (not RFC 2822)
 test INVALID_DATE fail    Sat, 31 Dec 2005 23:59:60 -0500
 test INVALID_DATE fail    Wed, 31 Jul 2002 16:41:57 +0200
@@ -162,7 +162,7 @@ test INVALID_DATE ok      Sat, 31 Dec 2005 23:00:00
 test INVALID_DATE ok      Thurs, 31 Jul 2002 16:41:57 +0200
 
 # allow +1300, NZ timezone
-header INVALID_DATE_TZ_ABSURD	Date =~ /[-+](?!(?:0\d|1[0-4])(?:[03]0|[14]5))\d{4}$/m
+header INVALID_DATE_TZ_ABSURD	Date =~ /[-+](?!(?:0\d|1[0-4])(?:[03]0|[14]5))\d{4}$/
 describe INVALID_DATE_TZ_ABSURD	Invalid Date: header (timezone does not exist)
 
 header INVALID_TZ_CST		ALL:raw =~ /[+-]\d\d[30]0(?<!-0600|-0500|\+0800|\+0930|\+1030)\s+(?:\bCST\b|\(CST\))/
@@ -193,7 +193,7 @@ describe FROM_EXCESS_BASE64	From: base64 encoded unnecessarily
 ###########################################################################
 # ADV tags in various languages
 
-header ENGLISH_UCE_SUBJECT	Subject =~ /^[^0-9a-z]*adv(?:ert)?\b/mi
+header ENGLISH_UCE_SUBJECT	Subject =~ /^[^0-9a-z]*adv(?:ert)?\b/i
 describe ENGLISH_UCE_SUBJECT	Subject contains an English UCE tag
 
 # alan premselaar <alien@12inch.com>, see SpamAssassin-talk list 2003-03
@@ -309,7 +309,7 @@ header __IS_EXCH		X-MimeOLE =~ /Produced By Microsoft Exchange V/
 header SUBJ_AS_SEEN		Subject =~ /\bAs Seen/i
 describe SUBJ_AS_SEEN		Subject contains "As Seen"
 
-header SUBJ_DOLLARS             Subject =~ /^\$[0-9.,]+\b/m
+header SUBJ_DOLLARS             Subject =~ /^\$[0-9.,]+\b/
 describe SUBJ_DOLLARS           Subject starts with dollar amount
 
 
@@ -362,14 +362,14 @@ header WITH_LC_SMTP		Received =~ /\swith\ssmtp;\s/
 describe WITH_LC_SMTP		Received line contains spam-sign (lowercase smtp)
 
 
-header SUBJ_BUY                 Subject =~ /^buy/mi
+header SUBJ_BUY                 Subject =~ /^buy/i
 describe SUBJ_BUY               Subject line starts with Buy or Buying
 
 # seems to be ratware
 header RCVD_AM_PM		Received =~ /; [A-Z][a-z][a-z], \d{1,2} \d{4} \d{1,2}:\d\d:\d\d [AP]M [+-]\d{4}/
 describe RCVD_AM_PM		Received headers forged (AM/PM)
 
-header __USER_AGENT_MSN		X-Mailer =~ /^MSN Explorer /m
+header __USER_AGENT_MSN		X-Mailer =~ /^MSN Explorer /
 
 # host no longer exists according to administrator
 header FAKE_OUTBLAZE_RCVD	Received =~ /\.mr\.outblaze\.com/
@@ -410,7 +410,7 @@ header __ML1  Precedence =~ m{\b(list|bulk)\b}i
 header __ML2  exists:List-Id
 header __ML3  exists:List-Post
 header __ML4  exists:Mailing-List
-header __ML5  Return-Path:addr =~ m{^([^\@]+-(request|bounces|admin|owner)|owner-[^\@]+)(\@|\z)}mi
+header __ML5  Return-Path:addr =~ m{^([^\@]+-(request|bounces|admin|owner)|owner-[^\@]+)(\@|\z)}i
 meta     __VIA_ML  __ML1 || __ML2 || __ML3 || __ML4 || __ML5
 describe __VIA_ML  Mail from a mailing list
 
