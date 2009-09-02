@@ -114,6 +114,11 @@ svn co http://svn.apache.org/repos/asf/spamassassin/trunk/rules trunk-new-rules-
 
 svn up -r $REVISION trunk-new-rules-set${SCORESET}/rulesrc/ || exit $?
 
+# use the newest masses/ directory so that we can fix bugs in the masses/ stuff
+# and not have the net-enabled scores broken all week
+svn up trunk-new-rules-set$SCORESET/masses/
+
+# we need to patch the Makefile to get it to mangle some data for us
 cd trunk-new-rules-set${SCORESET}/masses
 patch < ../../masses-Makefile.patch || exit $?
 cd ../..
