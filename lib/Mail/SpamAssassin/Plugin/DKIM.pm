@@ -23,17 +23,28 @@ Mail::SpamAssassin::Plugin::DKIM - perform DKIM verification tests
 
  loadplugin Mail::SpamAssassin::Plugin::DKIM [/path/to/DKIM.pm]
 
+Taking into account signatures from any signing domains:
  full   DKIM_SIGNED           eval:check_dkim_signed()
  full   DKIM_VALID            eval:check_dkim_valid()
  full   DKIM_VALID_AU         eval:check_dkim_valid_author_sig()
+
+Taking into account signatures from specified signing domains only:
+ full   DKIM_SIGNED_MY1       eval:check_dkim_signed('dom1','dom2',...)
+ full   DKIM_VALID_MY1        eval:check_dkim_valid('dom1','dom2',...)
+ full   DKIM_VALID_AU_MY1     eval:check_dkim_valid_author_sig('d1','d2',...)
+
  full   __DKIM_DEPENDABLE     eval:check_dkim_dependable()
 
+Author Domain Signing Practices (ADSP) from any author domains:
  header DKIM_ADSP_NXDOMAIN    eval:check_dkim_adsp('N')
  header DKIM_ADSP_ALL         eval:check_dkim_adsp('A')
  header DKIM_ADSP_DISCARD     eval:check_dkim_adsp('D')
  header DKIM_ADSP_CUSTOM_LOW  eval:check_dkim_adsp('1')
  header DKIM_ADSP_CUSTOM_MED  eval:check_dkim_adsp('2')
  header DKIM_ADSP_CUSTOM_HIGH eval:check_dkim_adsp('3')
+
+Author Domain Signing Practices (ADSP) from specified author domains only:
+ header DKIM_ADSP_MY1         eval:check_dkim_adsp('*','dom1','dom2',...)
 
  describe DKIM_SIGNED       Message has a DKIM or DK signature, not necessarily valid
  describe DKIM_VALID        Message has at least one valid DKIM or DK signature
@@ -407,21 +418,45 @@ scanning continues without the DKIM result.
 # ---------------------------------------------------------------------------
 
 sub check_dkim_signed {
-  my ($self, $pms) = @_;
-  $self->_check_dkim_signature($pms) unless $pms->{dkim_checked_signature};
-  return $pms->{dkim_signed};
-}
-
-sub check_dkim_valid_author_sig {
-  my ($self, $pms) = @_;
-  $self->_check_dkim_signature($pms) unless $pms->{dkim_checked_signature};
-  return $pms->{dkim_has_valid_author_sig};
+  my ($self, $pms, $full_ref, @acceptable_domains) = @_;
+  $self->_check_dkim_signature($pms)  if !$pms->{dkim_checked_signature};
+  my $result = 0;
+  if (!$pms->{dkim_signed}) {
+    # don't bother
+  } elsif (!@acceptable_domains) {
+    $result = 1;  # no additional constraints, any signing domain will do
+  } else {
+    $result = $self->_check_dkim_signed_by($pms,0,0,\@acceptable_domains);
+  }
+  return $result;
 }
 
 sub check_dkim_valid {
-  my ($self, $pms) = @_;
-  $self->_check_dkim_signature($pms) unless $pms->{dkim_checked_signature};
-  return $pms->{dkim_valid};
+  my ($self, $pms, $full_ref, @acceptable_domains) = @_;
+  $self->_check_dkim_signature($pms)  if !$pms->{dkim_checked_signature};
+  my $result = 0;
+  if (!$pms->{dkim_valid}) {
+    # don't bother
+  } elsif (!@acceptable_domains) {
+    $result = 1;  # no additional constraints, any signing domain will do
+  } else {
+    $result = $self->_check_dkim_signed_by($pms,1,0,\@acceptable_domains);
+  }
+  return $result;
+}
+
+sub check_dkim_valid_author_sig {
+  my ($self, $pms, $full_ref, @acceptable_domains) = @_;
+  $self->_check_dkim_signature($pms)  if !$pms->{dkim_checked_signature};
+  my $result = 0;
+  if (!$pms->{dkim_has_valid_author_sig}) {
+    # don't bother
+  } elsif (!@acceptable_domains) {
+    $result = 1;  # no additional constraints, any signing domain will do
+  } else {
+    $result = $self->_check_dkim_signed_by($pms,1,1,\@acceptable_domains);
+  }
+  return $result;
 }
 
 sub check_dkim_dependable {
@@ -432,20 +467,40 @@ sub check_dkim_dependable {
 
 # mosnomer, old synonym for check_dkim_valid, kept for compatibility
 sub check_dkim_verified {
-  my ($self, $pms) = @_;
-  $self->_check_dkim_signature($pms) unless $pms->{dkim_checked_signature};
-  return $pms->{dkim_valid};
+  return check_dkim_valid(@_);
 }
 
 # no valid author signature && ADSP matches the argument
 sub check_dkim_adsp {
-  my ($self, $pms, $adsp_char) = @_;
-  $self->_check_dkim_signature($pms) unless $pms->{dkim_checked_signature};
-  if ($pms->{dkim_signatures_ready} && !$pms->{dkim_has_valid_author_sig}) {
-    $self->_check_dkim_adsp($pms) unless $pms->{dkim_checked_adsp};
-    return 1  if $pms->{dkim_adsp} eq $adsp_char;
+  my ($self, $pms, $adsp_char, @selected_domains) = @_;
+  $self->_check_dkim_signature($pms)  if !$pms->{dkim_checked_signature};
+  my $result = 0;
+  if (!$pms->{dkim_signatures_ready} || $pms->{dkim_has_valid_author_sig}) {
+    # don't bother
+  } else {
+    $self->_check_dkim_adsp($pms)  if !$pms->{dkim_checked_adsp};
+    if ($adsp_char ne '*' && $pms->{dkim_adsp} ne $adsp_char) {
+      # not the right ADSP type
+    } elsif (!@selected_domains) {
+      $result = 1;  # no additional constraints, any author domain will do
+    } else {
+      my @author_domains = map { defined($_) && /\@([^\@]*)\z/s ? lc($1) : () }
+                               ( $pms->{dkim_author_address} );
+      foreach my $dom (@selected_domains) {
+        if ($dom =~ /^\.(.*)\z/s) {  # domain or its subdomain
+          my $doms = lc $1;
+          if (grep { $_ eq $doms || /\.\Q$doms\E\z/s } @author_domains) {
+            $result = 1; last;
+          }
+        } else {  # match on domain (not a subdomain)
+          if (grep { $_ eq lc $dom } @author_domains) {
+            $result = 1; last;
+          }
+        }
+      }
+    }
   }
-  return 0;
+  return $result;
 }
 
 # useless, semantically always true according to ADSP (RFC 5617)
@@ -528,6 +583,38 @@ sub _dkim_load_modules {
 }
 
 # ---------------------------------------------------------------------------
+
+sub _check_dkim_signed_by {
+  my ($self, $pms, $must_be_valid, $must_be_author_domain_signature,
+      $acceptable_domains_ref) = @_;
+  my $result = 0;
+  my @authors = grep { defined $_ } ( $pms->{dkim_author_address} );
+  my $verifier = $pms->{dkim_verifier};
+  foreach my $sig (@{$pms->{dkim_signatures}}) {
+    next if !defined $sig;
+    if ($must_be_valid) {
+      next if ($sig->UNIVERSAL::can("result") ? $sig : $verifier)
+                ->result ne 'pass';
+      next if $sig->UNIVERSAL::can("check_expiration") &&
+              !$sig->check_expiration;
+    }
+    local $1;
+    my $d = lc($sig->domain);
+    if ($must_be_author_domain_signature) {
+      next if !grep { /\@([^\@]*)\z/s && lc($1) eq $d } @authors;
+    }
+    foreach my $ad (@$acceptable_domains_ref) {
+      if ($ad =~ /^\.(.*)\z/s) {  # domain or its subdomain
+        my $ads = lc $1;
+        if ($d eq $ads || $d =~ /\.\Q$ads\E\z/s) { $result = 1; last }
+      } else {  # match on domain (not a subdomain)
+        if ($d eq lc $ad) { $result = 1; last }
+      }
+    }
+    last if $result;
+  }
+  return $result;
+}
 
 sub _check_dkim_signature {
   my ($self, $pms) = @_;
