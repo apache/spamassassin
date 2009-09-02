@@ -19,6 +19,9 @@ ifplugin Mail::SpamAssassin::Plugin::ReplaceTags
   meta     MONEY_FROM_MISSP LOTS_OF_MONEY && FROM_MISSPACED
   describe MONEY_FROM_MISSP Lots of money and misspaced From
 
+  meta     MONEY_FORM       LOTS_OF_MONEY && (FILL_THIS_FORM_LONG || FILL_THIS_FORM_ML)
+  describe MONEY_FORM       Lots of money if you fill out a form
+
   # The ADVANCE_FEE rules should probably be updated with LOTS_OF_MONEY
   meta     MONEY_FEE        LOTS_OF_MONEY && (ADVANCE_FEE_2 || ADVANCE_FEE_3 || ADVANCE_FEE_4)
   describe MONEY_FEE        Lots of money if you first pay a fee
