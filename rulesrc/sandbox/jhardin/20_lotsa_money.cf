@@ -16,7 +16,7 @@ ifplugin Mail::SpamAssassin::Plugin::ReplaceTags
   meta     MONEY_FREEMAIL   LOTS_OF_MONEY && (FREEMAIL_FROM || FREEMAIL_REPLYTO)
   describe MONEY_FREEMAIL   Lots of money from someone using free email?
 
-  meta     MONEY_FROM_MISSP LOTS_OF_MONEY && FROM_MISSPACED
+  meta     MONEY_FROM_MISSP LOTS_OF_MONEY && __FROM_MISSPACED
   describe MONEY_FROM_MISSP Lots of money and misspaced From
 
   meta     MONEY_FORM       LOTS_OF_MONEY && (FILL_THIS_FORM_LONG || FILL_THIS_FORM_ML)
