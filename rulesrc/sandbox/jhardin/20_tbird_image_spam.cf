@@ -53,14 +53,23 @@ score      FORGED_TBIRD_IMG_TO_MX  2.5
 # Another constraint.  No tiny images, and larger ones up to "less than
 # 640x480", as observed in the wild.
 
-body       __ONE_IMG               eval:image_count('all',1,1)
-body       __IMG_LE_300K           eval:pixel_coverage('all',62500,300000)
-
-meta       FORGED_TBIRD_IMG_SIZE   __FORGED_TBIRD_IMG && __ONE_IMG && __IMG_LE_300K
-
-describe   FORGED_TBIRD_IMG_SIZE   Likely forged Thunderbird image spam
-score      FORGED_TBIRD_IMG_SIZE   0.8
-
+## BROKEN 9/1/2009
+# lint: config: failed to parse line, skipping, in "rules/70_sandbox.cf": mimeheader __JPEG_ATTACH           Co$
+# rules: failed to run __ONE_IMG test, skipping:
+#        (Can't locate object method "image_count" via package "Mail::SpamAssassin::PerMsgStatus" at (eval 363)$
+# )
+# rules: failed to run __IMG_LE_300K test, skipping:
+#        (Can't locate object method "pixel_coverage" via package "Mail::SpamAssassin::PerMsgStatus" at (eval 3$
+# )
+#
+#body       __ONE_IMG               eval:image_count('all',1,1)
+#body       __IMG_LE_300K           eval:pixel_coverage('all',62500,300000)
+#
+#meta       FORGED_TBIRD_IMG_SIZE   __FORGED_TBIRD_IMG && __ONE_IMG && __IMG_LE_300K
+#
+#describe   FORGED_TBIRD_IMG_SIZE   Likely forged Thunderbird image spam
+#score      FORGED_TBIRD_IMG_SIZE   0.8
+#
 
 # Try some combinations not related to tbird forgery
 meta       IMG_DIRECT_TO_MX        __DOS_DIRECT_TO_MX && __JPEG_ATTACH && __ONE_IMG && __IMG_LE_300K
