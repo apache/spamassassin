@@ -46,17 +46,17 @@ Author Domain Signing Practices (ADSP) from any author domains:
 Author Domain Signing Practices (ADSP) from specified author domains only:
  header DKIM_ADSP_MY1         eval:check_dkim_adsp('*','dom1','dom2',...)
 
- describe DKIM_SIGNED       Message has a DKIM or DK signature, not necessarily valid
- describe DKIM_VALID        Message has at least one valid DKIM or DK signature
- describe DKIM_VALID_AU     Message has a valid DKIM or DK signature from author's domain
- describe __DKIM_DEPENDABLE A validation failure not attributable to truncation
+ describe DKIM_SIGNED           Message has a DKIM or DK signature, not necessarily valid
+ describe DKIM_VALID            Message has at least one valid DKIM or DK signature
+ describe DKIM_VALID_AU         Message has a valid DKIM or DK signature from author's domain
+ describe __DKIM_DEPENDABLE     A validation failure not attributable to truncation
 
- describe DKIM_ADSP_NXDOMAIN    No valid author signature and domain not in DNS
- describe DKIM_ADSP_ALL         No valid author signature, domain signs all mail
- describe DKIM_ADSP_DISCARD     No valid author signature, domain signs all mail and suggests discarding mail with no valid author signature
- describe DKIM_ADSP_CUSTOM_LOW  No valid author signature, adsp_override is CUSTOM_LOW
- describe DKIM_ADSP_CUSTOM_MED  No valid author signature, adsp_override is CUSTOM_MED
- describe DKIM_ADSP_CUSTOM_HIGH No valid author signature, adsp_override is CUSTOM_HIGH
+ describe DKIM_ADSP_NXDOMAIN    Domain not in DNS and no valid author domain signature
+ describe DKIM_ADSP_ALL         Domain signs all mail, no valid author domain signature
+ describe DKIM_ADSP_DISCARD     Domain signs all mail and suggests discarding mail with no valid author domain signature, no valid author domain signature
+ describe DKIM_ADSP_CUSTOM_LOW  adsp_override is CUSTOM_LOW, no valid author domain signature
+ describe DKIM_ADSP_CUSTOM_MED  adsp_override is CUSTOM_MED, no valid author domain signature
+ describe DKIM_ADSP_CUSTOM_HIGH adsp_override is CUSTOM_HIGH, no valid author domain signature
 
 For compatibility, the following are synonyms:
  OLD: eval:check_dkim_verified = NEW: eval:check_dkim_valid
@@ -86,8 +86,11 @@ for that module.
 The following tags are added to the set, available for use in reports,
 header fields, other plugins, etc.:
 
-  _DKIMIDENTITY_  signing identities (the 'i' tag) from valid signatures;
-  _DKIMDOMAIN_    signing domains (the 'd' tag) from valid signatures;
+  _DKIMIDENTITY_
+    Agent or User Identifier (AUID) (the 'i' tag) from valid signatures;
+
+  _DKIMDOMAIN_
+    Signing Domain Identifier (SDID) (the 'd' tag) from valid signatures;
 
 Identities and domains from signatures which failed verification are not
 included in these tags. Duplicates are eliminated (e.g. when there are two or
@@ -177,14 +180,14 @@ are allowed for the From address (the first parameter), just like with
 C<whitelist_from_rcvd>. The second parameter does not accept wildcards.
 
 If no signing identity parameter is specified, the only acceptable signature
-will be a first-party signature, i.e. the so called author signature, which
-is a signature where the signing identity of a signature matches the author
-address (i.e. the address in a From header field).
+will be a first-party signature, i.e. the so called author domain signature,
+which is a signature where the signing identity of a signature matches the
+author address (i.e. the address in a From header field).
 
 Since this whitelist requires a DKIM check to be made, network tests must
 be enabled.
 
-Examples of whitelisting based on an author signature (first-party):
+Examples of whitelisting based on an author domain signature (first-party):
 
   whitelist_from_dkim joe@example.com
   whitelist_from_dkim *@corp.example.com
@@ -230,15 +233,15 @@ which do not contain a valid DKIM signature from the author's domain.
 According to RFC 5617, signing practices can be one of the following:
 C<unknown>, C<all> and C<discardable>.
 
-C<unknown>: Messages from this domain might or might not have an author
-signature. This is a default if a domain exists in DNS but no ADSP record
-is found.
+C<unknown>: The domain might sign some or all email - messages from the
+domain may or may not have an Author Domain Signature. This is a default
+if a domain exists in DNS but no ADSP record is found.
 
-C<all>: All messages from this domain are signed with an Author Signature.
+C<all>: All mail from the domain is signed with an Author Domain Signature.
 
-C<discardable>: All messages from this domain are signed with an Author
-Signature. If a message arrives without a valid Author Signature, the domain
-encourages the recipient(s) to discard it.
+C<discardable>: All mail from the domain is signed with an Author Domain
+Signature.  Furthermore, if a message arrives without a valid Author Domain
+Signature, the domain encourages the recipient(s) to discard it.
 
 ADSP lookup can also determine that a domain is "out of scope", i.e., the
 domain does not exist (NXDOMAIN) in the DNS.
@@ -343,7 +346,7 @@ Example:
         return $Mail::SpamAssassin::Conf::INVALID_VALUE;
       }
       my $address = $1;
-      my $identity = defined $2 ? $2 : '';  # empty implies author signature
+      my $identity = defined $2 ? $2 : '';  # empty implies author domain signature
       $self->{parser}->add_to_addrlist_rcvd('whitelist_from_dkim',
                                             $address, $identity);
     }
@@ -361,7 +364,7 @@ Example:
         return $Mail::SpamAssassin::Conf::INVALID_VALUE;
       }
       my $address = $1;
-      my $identity = defined $2 ? $2 : '';  # empty implies author signature
+      my $identity = defined $2 ? $2 : '';  # empty implies author domain signature
       $self->{parser}->add_to_addrlist_rcvd('def_whitelist_from_dkim',
                                             $address, $identity);
     }
@@ -470,7 +473,7 @@ sub check_dkim_verified {
   return check_dkim_valid(@_);
 }
 
-# no valid author signature && ADSP matches the argument
+# no valid Author Domain Signature && ADSP matches the argument
 sub check_dkim_adsp {
   my ($self, $pms, $adsp_char, @selected_domains) = @_;
   $self->_check_dkim_signature($pms)  if !$pms->{dkim_checked_signature};
@@ -633,7 +636,7 @@ sub _check_dkim_signature {
   $pms->{dkim_signed} = 0;
   $pms->{dkim_valid} = 0;
   $pms->{dkim_has_valid_author_sig} = 0;
-  $pms->{dkim_has_any_author_sig} = 0;  # valid or invalid author signature
+  $pms->{dkim_has_any_author_sig} = 0;  # valid or invalid author domain sign.
   $pms->{dkim_key_testing} = 0;
   $pms->{dkim_author_address} =
     $pms->get('from:addr',undef)  if !defined $pms->{dkim_author_address};
@@ -742,7 +745,7 @@ sub _check_dkim_signature {
       if ($valid && $signature->UNIVERSAL::can("check_expiration")) {
         $expired = !$signature->check_expiration;
       }
-      # check if we have a potential author signature, valid or not
+      # check if we have a potential Author Domain Signature, valid or not
       my $id_matches_author = 0;
       if (!defined $identity || $identity eq '') {
         # identity not provided
@@ -846,7 +849,7 @@ sub _check_dkim_adsp {
     # to be compliant with any possible ADSP for that domain. [...]
     # implementations SHOULD avoid doing unnecessary DNS lookups
     #
-    dbg("dkim: adsp not retrieved, author signature is valid");
+    dbg("dkim: adsp not retrieved, author domain signature is valid");
 
   } elsif ($author_domain eq '') {        # have mercy, don't claim a NXDOMAIN
     dbg("dkim: adsp not retrieved, no author domain (empty)");
@@ -862,17 +865,18 @@ sub _check_dkim_adsp {
     $pms->{dkim_adsp} = 'N'; $practices_as_string = 'invalid fqdn, ignored';
 
   } elsif ($pms->{dkim_author_sig_tempfailed}) {
-    dbg("dkim: adsp ignored, temporary failure varifying author signature");
+    dbg("dkim: adsp ignored, temporary failure varifying author domain signature");
     $practices_as_string = 'pub key tempfailed, ignored';
 
   } elsif ($pms->{dkim_has_any_author_sig} &&
            !$pms->{dkim_signatures_dependable}) {
-    # the message did have an author signature but it wasn't valid; we also
-    # expect the message was truncated just before being passed to SpamAssassin,
-    # which is a likely reason for verification failure, so we shouldn't take
-    # it too harsh with ADSP rules - just pretend the ADSP was 'unknown'
+    # the message did have an author domain signature but it wasn't valid;
+    # we also expect the message was truncated just before being passed to
+    # SpamAssassin, which is a likely reason for verification failure, so
+    # we shouldn't take it too harsh with ADSP rules - just pretend the ADSP
+    # was 'unknown'
     #
-    dbg("dkim: adsp ignored, message was truncated, invalid author signature");
+    dbg("dkim: adsp ignored, message was truncated, invalid author domain signature");
     $practices_as_string = 'truncated, ignored';
 
   } elsif (my($adsp,$key) =
@@ -1005,7 +1009,7 @@ sub _check_dkim_whitelist {
 }
 
 # check for verifier-acceptable signatures; an empty (or undefined) signing
-# identity in a whitelist implies checking for an author signature
+# identity in a whitelist implies checking for an author domain signature
 #
 sub _wlcheck_acceptable_signature {
   my ($self, $pms, $acceptable_identity_tuples_ref, $wl) = @_;
@@ -1021,7 +1025,7 @@ sub _wlcheck_acceptable_signature {
 }
 
 # use a traditional whitelist_from -style addrlist, the only acceptable DKIM
-# signature is an Author Signature.  Note: don't pre-parse and store the
+# signature is an Author Domain Signature.  Note: don't pre-parse and store
 # domains; that's inefficient memory-wise and only saves one m//
 #
 sub _wlcheck_author_signature {
@@ -1085,18 +1089,18 @@ sub _wlcheck_list {
       # $re and $wl are here for logging purposes only, $re already checked.
       # The $acceptable_identity is a verifier-acceptable signing identity.
       # When $acceptable_identity is undef or an empty string it implies an
-      # author signature check.
+      # author domain signature check.
 
       my $matches = 0;
       if (!defined $acceptable_identity || $acceptable_identity eq '') {
 
-        # An "Author Signature" (also called a first-party signature) is
-        # any Valid Signature where the signing identity matches the Author
-        # Address. If the signing identity does not include a localpart,
-        # then only the domains must match; otherwise, the two addresses
-        # must be identical.
+        # An "Author Domain Signature" (sometimes called a first-party
+        # signature) is a Valid Signature in which the domain name of the
+        # DKIM signing entity, i.e., the d= tag in the DKIM-Signature header
+        # field, is the same as the domain name in the Author Address.
+        # Following [RFC5321], domain name comparisons are case insensitive.
 
-        # checking for author signature
+        # checking for author domain signature
         $matches = 1  if lc $identity eq lc $author_matching_part;
       }
       else {  # checking for verifier-acceptable signature
