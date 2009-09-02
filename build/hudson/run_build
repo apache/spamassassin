@@ -10,9 +10,11 @@ mkdir artifacts testxml
 perl Makefile.PL < /dev/null
 make
 
+# ensure a lint failure generates shouty mails to the dev list
 rm rules/70_sandbox.cf
-if make build_rules | grep "LINT FAILED" ; then 
-  exit 1        # this will force a mail to the dev list with "build failed"
+make build_rules > make.log 2>&1
+if grep "ERROR:" make.log ; then 
+  exit 2
 else
   true
 fi
