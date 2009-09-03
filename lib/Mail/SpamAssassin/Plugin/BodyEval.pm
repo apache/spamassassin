@@ -195,7 +195,7 @@ sub tvd_vertical_words {
   $max = 101 if ($max >= 100);
 
   if (!defined $pms->{tvd_vertical_words}) {
-    $pms->{tvd_vertical_words} = 0;
+    $pms->{tvd_vertical_words} = -1;
 
     foreach (@{$text}) {
       my $l = length $_;
