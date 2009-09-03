@@ -89,6 +89,16 @@ header  KB_RATWARE_OUTLOOK_MID  ALL =~ /^Message-Id: <....([0-9a-f]{8})\$([0-9a-
 # header  __KB_OUTLOOK_MUA    X-Mailer =~ /^Microsoft (?:Office )?Outlook\b/
 
 
+# Less minimal chars between headers, and reverse variant of RATWARE_BOUNDARY.
+# Supersedes all RATWARE_OUTLOOK_* devel stuff above.
+
+header __RATWARE_BOUND_A  ALL =~ /^Message-Id: <....([0-9a-f]{8})\$[0-9a-f]{8}\$.{10,400}boundary="----=_NextPart_000_...._\1\./msi # "
+
+header __RATWARE_BOUND_B  ALL =~ /boundary="----=_NextPart_000_...._([0-9a-f]{8})\..{10,400}^Message-Id: <....\1\$[0-9a-f]{8}\$/msi # "
+
+meta   KB_RATWARE_BOUNDARY   __RATWARE_BOUND_A || __RATWARE_BOUND_B
+
+
 # Explain later. ;)
 
 header THREAD_INDEX_HEX  Thread-Index =~ /^[a-z0-9]{30}/
