@@ -73,10 +73,11 @@ tflags  __TWO_WORD_LINES multiple
 meta    FSL_STACKED_TEXT (__TWO_WORD_LINES > 10)
 score	FSL_STACKED_TEXT 0.001
 
-uri	__ANY_HTTP_URI	/^http(?:s)?:\/\//
-tflags	__ANY_HTTP_URI	multiple
-meta	FSL_SINGLE_URI	(__ANY_HTTP_URI == 1)
-score	FSL_SINGLE_URI	0.001
+# bug 6166: disabled temporarily for release build, sorry doc
+##uri	__ANY_HTTP_URI	/^http(?:s)?:\/\//
+##tflags	__ANY_HTTP_URI	multiple
+##meta	FSL_SINGLE_URI	(__ANY_HTTP_URI == 1)
+##score	FSL_SINGLE_URI	0.001
 
 header	__HAS_REPLY_TO	exists:Reply-To
 header	__FROM_FREEMAIL	From =~ /\@(?:googlemail|gmail|yahoo|hotmail|msn|aol|aim)\./
