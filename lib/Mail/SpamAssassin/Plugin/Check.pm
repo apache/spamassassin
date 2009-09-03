@@ -638,19 +638,26 @@ sub do_head_tests {
     # override this; useful for profiling rule runtimes, although I think
     # the HitFreqsRuleTiming.pm plugin is probably better nowadays anyway
     if ($self->{main}->{use_rule_subs}) {
+      my $matching_string_unavailable = 0;
       my $expr;
       if ($op =~ /^!?[A-Za-z_]+$/) {  # function or its negation
         $expr = $op . '($text)';
+        $matching_string_unavailable = 1;
       } else {  # infix operator
         $expr = '$text ' . $op . ' ' . $pat;
-        $expr .= 'g'  if $op eq '=~' || $op eq '!~';
+        if ($op eq '=~' || $op eq '!~') {
+          $expr .= 'g';
+        } else {
+          $matching_string_unavailable = 1;
+        }
       }
       $self->add_temporary_method ($rulename.'_head_test', '{
           my($self,$text) = @_;
           '.$self->hash_line_for_rule($pms, $rulename).'
 	    while ('.$expr.') {
             $self->got_hit(q{'.$rulename.'}, "", ruletype => "header");
-            '. $self->hit_rule_plugin_code($pms, $rulename, "header", "last") . '
+            '. $self->hit_rule_plugin_code($pms, $rulename, "header", "last",
+                                           $matching_string_unavailable) . '
             }
         }');
     }
@@ -696,14 +703,16 @@ sub do_head_tests {
           my $hitdone = '';
           my $matchg = '';
 
+          my $matching_string_unavailable = 0;
           my $expr;
           if (!$op_infix) {  # function or its negation
             $expr = $op . '($hval)';
+            $matching_string_unavailable = 1;
           }
           else {  # infix operator
-            if ( ($conf->{tflags}->{$rulename}||'') =~ /\bmultiple\b/ &&
-                 ($op eq '=~' || $op eq '!~') )  # a pattern matching operator
-            {
+            if (! ($op eq '=~' || $op eq '!~') ) { # not a pattern matching op.
+              $matching_string_unavailable = 1;
+            } elsif ( ($conf->{tflags}->{$rulename}||'') =~ /\bmultiple\b/ ) {
               $posline = 'pos $hval = 0;';
               $ifwhile = 'while';
               $hitdone = 'last';
@@ -718,7 +727,8 @@ sub do_head_tests {
             '.$self->hash_line_for_rule($pms, $rulename).'
             '.$ifwhile.' ('.$expr.') {
               $self->got_hit(q{'.$rulename.'}, "", ruletype => "header");
-              '.$self->hit_rule_plugin_code($pms, $rulename, "header", $hitdone).'
+              '.$self->hit_rule_plugin_code($pms, $rulename, "header", $hitdone,
+                                            $matching_string_unavailable).'
             }
             '.$self->ran_rule_plugin_code($rulename, "header").'
           }
@@ -1238,13 +1248,19 @@ sub start_rules_plugin_code {
 }
 
 sub hit_rule_plugin_code {
-  my ($self, $pms, $rulename, $ruletype, $loop_break_directive) = @_;
+  my ($self, $pms, $rulename, $ruletype, $loop_break_directive,
+      $matching_string_unavailable) = @_;
 
   # note: keep this in 'single quotes' to avoid the $ & performance hit,
   # unless specifically requested by the caller.   Also split the
   # two chars, just to be paranoid and ensure that a buggy perl interp
   # doesn't impose that hit anyway (just in case)
-  my $match = '($' . '&' . '|| "negative match")';
+  my $match;
+  if ($matching_string_unavailable) {
+    $match = '"<YES>"'; # nothing better to report, $& is not set by this rule
+  } else {
+    $match = '($' . '&' . '|| "negative match")';
+  }
 
   my $debug_code = '';
   if (exists($pms->{should_log_rule_hits})) {
