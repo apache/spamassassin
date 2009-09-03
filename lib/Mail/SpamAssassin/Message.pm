@@ -469,6 +469,8 @@ sub get_metadata {
   if (!$self->{metadata}) {
     warn "metadata: oops! get_metadata() called after finish_metadata()"; return;
   }
+# dbg("message: get_metadata - %s: %s", $hdr, defined $_ ? $_ : '<undef>')
+#   for $self->{metadata}->{strings}->{$hdr};
   $self->{metadata}->{strings}->{$hdr};
 }
 
@@ -481,6 +483,7 @@ sub put_metadata {
   if (!$self->{metadata}) {
     warn "metadata: oops! put_metadata() called after finish_metadata()"; return;
   }
+# dbg("message: put_metadata - %s: %s", $hdr, $text);
   $self->{metadata}->{strings}->{$hdr} = $text;
 }
 
@@ -508,7 +511,9 @@ sub get_all_metadata {
   }
   my @ret;
   foreach my $key (sort keys %{$self->{metadata}->{strings}}) {
-    push (@ret, "$key: " . $self->{metadata}->{strings}->{$key} . "\n");
+    my $val = $self->{metadata}->{strings}->{$key};
+    $val = ''  if !defined $val;
+    push (@ret, "$key: $val\n");
   }
   return (wantarray ? @ret :  join('', @ret));
 }
