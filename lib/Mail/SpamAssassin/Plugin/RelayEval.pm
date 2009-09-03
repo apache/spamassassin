@@ -103,7 +103,7 @@ sub check_for_illegal_ip {
     # (note this might miss some hits if the Received.pm skips any invalid IPs)
     foreach my $check ( $rcvd->{ip}, $rcvd->{by} ) {
       return 1 if ($check =~ /^
-    	(?:[01257]|(?!127.0.0.)127|22[3-9]|2[3-9]\d|[12]\d{3,}|[3-9]\d\d+)\.\d+\.\d+\.\d+
+    	(?:[01257]|22[3-9]|2[3-9]\d|[12]\d{3,}|[3-9]\d\d+)\.\d+\.\d+\.\d+
 	$/x);
     }
   }
