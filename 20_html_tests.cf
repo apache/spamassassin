@@ -61,7 +61,7 @@ describe HIDE_WIN_STATUS	Javascript to hide URLs in browser
 
 rawbody __OBFUSCATING_COMMENT_A	/\w(?:<![^>]*>)+\w/
 rawbody __OBFUSCATING_COMMENT_B	/[^\s>](?:<![^>]*>)+[^\s<]/
-meta OBFUSCATING_COMMENT	((__OBFUSCATING_COMMENT_A && HTML_MESSAGE) || (__OBFUSCATING_COMMENT_B && MIME_HTML_ONLY))
+meta OBFUSCATING_COMMENT	((__OBFUSCATING_COMMENT_A && HTML_MESSAGE) || (__OBFUSCATING_COMMENT_B && MIME_HTML_ONLY)) && !__ISO_2022_JP_DELIM
 describe OBFUSCATING_COMMENT	HTML comments which obfuscate text
 
 # spams that are assembled from a Javascript array
