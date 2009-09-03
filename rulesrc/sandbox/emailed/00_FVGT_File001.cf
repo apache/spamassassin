@@ -3132,7 +3132,8 @@ describe FM_FORGED_GMAIL	Looks like a forged gmail msg?
 
 header   __FROM_LEFT_BRACK	From:name =~ /</
 header   __FROM_RIGH_BRACK	From:name =~ />/
-meta     FM_FRM_RN_L_BRACK	(__FROM_RIGH_BRACK && !__FROM_LEFT_BRACK)
+header   __FROM_ISO_2022_JP     From:raw =~ /=\?ISO-2022-JP\?/
+meta     FM_FRM_RN_L_BRACK	(__FROM_RIGH_BRACK && !__FROM_LEFT_BRACK && !__FROM_ISO_2022_JP)
 describe FM_FRM_RN_L_BRACK	From name has > but not <
 ##score    FM_FRM_RN_L_BRACK	0.545
 #counts   FRM_RN_L_BRACK           7s/0h of 103219 corpus (95719s/7500h FVGT) 03/21/06
