@@ -89,7 +89,7 @@ use Mail::SpamAssassin::NetSet;
 use Mail::SpamAssassin::SubProcBackChannel;
 use Mail::SpamAssassin::SpamdForkScaling qw(:pfstates);
 use Mail::SpamAssassin::Logger qw(:DEFAULT log_message);
-use Mail::SpamAssassin::Util qw(untaint_var);
+use Mail::SpamAssassin::Util qw(untaint_var exit_status_str);
 use Mail::SpamAssassin::Timeout;
 
 use Getopt::Long;
@@ -2403,6 +2403,7 @@ sub child_handler {
 
   # clean up any children which have exited
   while((my $pid = waitpid(-1, WNOHANG)) > 0) {
+    my $child_stat = $pid > 0 ? $? : undef;
     if (!defined $children{$pid}) {
       # ignore this child; we didn't realise we'd forked it. bug 4237
       next;
@@ -2419,8 +2420,9 @@ sub child_handler {
     }
 
     unless ($Mail::SpamAssassin::Logger::LOG_SA{INHIBIT_LOGGING_IN_SIGCHLD_HANDLER}) {
-      info("spamd: handled cleanup of child pid $pid ".
-                ((defined $sig) ? "due to SIG$sig" : ""));
+      info("spamd: handled cleanup of child pid [%s]%s: %s",
+           $pid, (defined $sig ? " due to SIG$sig" : ""),
+           exit_status_str($child_stat,0));
     }
   }
 
@@ -2439,10 +2441,12 @@ sub restart_handler {
   foreach (keys %children) {
     kill 'INT' => $_;
     my $pid = waitpid($_, 0);
+    my $child_stat = $pid > 0 ? $? : undef;
     if ($scaling) {
       $scaling->child_exited($pid);
     }
-    info("spamd: child $pid killed successfully");
+    info("spamd: child [%s] killed successfully: %s",
+         $pid, exit_status_str($child_stat,0));
   }
   %children = ();
 
@@ -2499,12 +2503,16 @@ sub daemonize {
   $SIG{USR1} = \&serverstarted;
   defined( my $pid = fork ) or die "spamd: cannot fork: $!\n";
   if ($pid) {
+    my $child_stat;
     for (my $retry=30, my $waited=0; ($retry>0) && !$serverstarted && ($waited != $pid); $retry--) {
       warn ("waitpid failed: $waited $!") if ($waited);
       sleep 1;
       $waited=waitpid($pid, WNOHANG);
+      $child_stat = $?  if $waited > 0;
     }
-    die "child process exited or timed out without signaling production of a PID file" unless $serverstarted;
+    die sprintf("child process [%s] exited or timed out ".
+                "without signaling production of a PID file: %s",
+                $pid, exit_status_str($child_stat,0)) unless $serverstarted;
     exit;
   }
   delete  $SIG{USR1};

@@ -1531,7 +1531,8 @@ sub helper_app_pipe_open_unix {
   my $eval_stat = $@ ne '' ? $@ : "errno=$!";  chomp $eval_stat;
 
   # bug 4370: we really have to exit here; break any eval traps
-  force_die("util: failed to spawn a process: $eval_stat");
+  force_die(sprintf('util: failed to spawn a process "%s": %s',
+                    join(", ",@cmdline), $eval_stat));
   die;  # must be a die() otherwise -w will complain
 }
 
