@@ -300,7 +300,7 @@ run_compiled_method:
     $opts{post_loop_body}->($self, $pms, $conf, %nopts);
   }
 
-  $self->flush_evalstr($pms);
+  $self->flush_evalstr($pms, 'run_generic_tests');
   $self->free_ruleset_source($pms, $ruletype, $priority);
 
   # clear out a previous version of this method
@@ -383,11 +383,11 @@ sub end_evalstr_chunk {
 }
 
 sub flush_evalstr {
-  my ($self, $pms) = @_;
+  my ($self, $pms, $caller_name) = @_;
   my $chunk_methodname = $self->{evalstr_chunk_current_methodname};
   $self->end_evalstr_chunk($pms);
-  dbg("rules: flush_evalstr compiling %d chars of %s",
-      $self->{evalstr_l}, $chunk_methodname);
+  dbg("rules: flush_evalstr (%s) compiling %d chars of %s",
+      $caller_name, $self->{evalstr_l}, $chunk_methodname);
 # dbg("rules: %s", $self->{evalstr});
   my $eval_result;
   { my $timer = $self->{main}->time_method('compile_gen');
@@ -407,23 +407,39 @@ sub flush_evalstr {
 
 sub push_evalstr_prefix {
   my ($self, $pms, $str) = @_;
-  $self->add_evalstr($pms, $str);
+  $self->add_evalstr_corked($pms, $str);  # must not flush!
   push(@{$self->{evalstr_chunk_prefix}}, $str);
+# dbg("rules: push_evalstr_prefix (%d) - <%s>",
+#     scalar(@{$self->{evalstr_chunk_prefix}}), $str);
 }
 
 sub pop_evalstr_prefix {
   my ($self) = @_;
   pop(@{$self->{evalstr_chunk_prefix}});
+# dbg("rules: pop_evalstr_prefix (%d)",
+#     scalar(@{$self->{evalstr_chunk_prefix}}));
 }
 
 sub add_evalstr {
   my ($self, $pms, $str) = @_;
-  if (defined $str) {
+  if (defined $str && $str ne '') {
     my $new_code_l = length($str);
-  # dbg("rules: add_evalstr %d", $new_code_l);
+  # dbg("rules: add_evalstr %d - <%s>", $new_code_l, $str);
     $self->{evalstr} .= $str;
     $self->{evalstr_l} += $new_code_l;
-    if ($self->{evalstr_l} > 60000) { $self->flush_evalstr($pms) }
+    if ($self->{evalstr_l} > 60000) {
+      $self->flush_evalstr($pms, 'add_evalstr');
+    }
+  }
+}
+
+# similar to add_evalstr, but avoids flushing on size
+sub add_evalstr_corked {
+  my ($self, $pms, $str) = @_;
+  if (defined $str) {
+    my $new_code_l = length($str);
+    $self->{evalstr} .= $str;
+    $self->{evalstr_l} += $new_code_l;
   }
 }
 
