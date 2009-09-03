@@ -37,7 +37,7 @@ package Mail::SpamAssassin::Plugin::Pyzor;
 use Mail::SpamAssassin::Plugin;
 use Mail::SpamAssassin::Logger;
 use Mail::SpamAssassin::Timeout;
-use Mail::SpamAssassin::Util qw(untaint_file_path
+use Mail::SpamAssassin::Util qw(untaint_var untaint_file_path
                                 proc_status_ok exit_status_str);
 use strict;
 use warnings;
@@ -263,8 +263,7 @@ sub pyzor_lookup {
 
   # note: not really tainted, this came from system configuration file
   my $path = untaint_file_path($self->{main}->{conf}->{pyzor_path});
-
-  my $opts = $self->{main}->{conf}->{pyzor_options} || '';
+  my $opts = untaint_var($self->{main}->{conf}->{pyzor_options}) || '';
 
   $permsgstatus->enter_helper_run_mode();
 
@@ -391,8 +390,8 @@ sub pyzor_report {
 
   # note: not really tainted, this came from system configuration file
   my $path = untaint_file_path($options->{report}->{conf}->{pyzor_path});
+  my $opts = untaint_var($options->{report}->{conf}->{pyzor_options}) || '';
 
-  my $opts = $options->{report}->{conf}->{pyzor_options} || '';
   my $timeout = $self->{main}->{conf}->{pyzor_timeout};
 
   $options->{report}->enter_helper_run_mode();
