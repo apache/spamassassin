@@ -58,6 +58,12 @@ ifplugin Mail::SpamAssassin::Plugin::ReplaceTags
   meta     MONEY_LOTTERY    LOTS_OF_MONEY && (LOTTO_WINNINGS || LOTTO_WIN_01 || LOTTO_AGENT || LOTTO_DEPT || LOTTO_AGENT_FM || LOTTO_AGENT_RPLY || LOTTO_ADMITS || DEAR_WINNER)
   describe MONEY_LOTTERY    Lots of money from a lottery
 
+  body     __DEAL           /\b(?:business|financial|this)\s(?:deal|transaction)/i
+  body     __HUSH_HUSH      /\b(?:confidential|private|secre(?:t|cy)|sensitive)\b/i
+  body     __NO_RISK        /\b(?:no\srisk|risk[-\s]free)/i
+  meta     MONEY_DEAL       LOTS_OF_MONEY && __DEAL && __HUSH_HUSH && __NO_RISK
+  describe MONEY_DEAL       Lots of money in a secret deal
+
 endif
 
 
