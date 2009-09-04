@@ -28,8 +28,8 @@ score      FORGED_TBIRD_IMG_ARROW  0.8
 
 # Try it against other stuff, too,
 # "To without <>" might be useful outside the context of image spam
-meta       TO_NO_BRKTS_HTML        __TO_NO_ARROWS_R && HTML_MESSAGE
-score      TO_NO_BRKTS_HTML        0.20
+meta       TO_NO_BRKTS_HTML_IMG    __TO_NO_ARROWS_R && HTML_MESSAGE && __ONE_IMG
+score      TO_NO_BRKTS_HTML_IMG    0.20
 
 meta       TO_NO_BRKTS_HTML_ONLY   __TO_NO_ARROWS_R && MIME_HTML_ONLY
 score      TO_NO_BRKTS_HTML_ONLY   0.20
@@ -39,6 +39,14 @@ score      TO_NO_BRKTS_DYNIP       0.20
 
 meta       TO_NO_BRKTS_NORDNS      __TO_NO_ARROWS_R && RDNS_NONE
 score      TO_NO_BRKTS_NORDNS      0.20
+
+ifplugin Mail::SpamAssassin::Plugin::FreeMail
+  meta       TO_NO_BRKTS_FREEMAIL    __TO_NO_ARROWS_R && (FREEMAIL_FROM || FREEMAIL_REPLYTO)
+  score      TO_NO_BRKTS_FREEMAIL    0.20
+endif
+
+meta       TO_NO_BRKTS_FROM_MSSP   __TO_NO_ARROWS_R && __FROM_MISSPACED
+score      TO_NO_BRKTS_FROM_MSSP   0.20
 
 
 
