@@ -61,4 +61,6 @@ describe       TBIRD_SUSP_MIME_BDRY   Unlikely Thunderbird MIME boundary
 header         UNQ_MIME_BDRY        Content-Type =~ /boundary=[^"]/i
 describe       UNQ_MIME_BDRY        Unquoted MIME boundary string
 
+# one spam, 9/3/2009
+header         __MSGID_QUOTES     Message-id: =~ /<"[^"]+"\@/
 
