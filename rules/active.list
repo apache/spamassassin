@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi hege jm wt-en1 wt-en2 wt-en3 wt-jp1 wt-jp2; day 2: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi hege jm wt-en1 wt-en2 wt-en3 wt-jp1 wt-jp2; day 3: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi dos hege jm wt-en1 wt-en2 wt-en3 wt-jp1 wt-jp2
+# with results from: day 1: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi hege jm wt-en1 wt-en2 wt-en3 wt-jp1 wt-jp2; day 2: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi hege jm wt-en1 wt-en2 wt-en3 wt-jp1 wt-jp2; day 3: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi hege jm wt-en1 wt-en2 wt-en3 wt-jp1 wt-jp2
 
 # tflags userconf
 ALL_TRUSTED
@@ -165,9 +165,6 @@ FB_MOST_QUALITY
 
 # good enough
 FB_NO_MORE_MAIL
-
-# good enough
-FB_PENIS_GROWTH
 
 # good enough
 FB_QUALITY_REPLICA
@@ -524,6 +521,9 @@ KB_DATE_CONTAINS_TAB
 KB_FAKED_THE_BAT
 
 # good enough
+KB_RATWARE_BOUNDARY
+
+# good enough
 KB_RATWARE_MSGID
 
 # good enough
@@ -603,9 +603,6 @@ NO_RECEIVED
 
 # tflags userconf
 NO_RELAYS
-
-# good enough
-OBFU_TEXT_ATTACH
 
 # tflags net
 PYZOR_CHECK
@@ -764,6 +761,9 @@ RCVD_IN_PBL
 RCVD_IN_PSBL
 
 # tflags net
+RCVD_IN_PSBL_2WEEKS
+
+# tflags net
 RCVD_IN_SBL
 
 # tflags net
@@ -896,9 +896,6 @@ SUBJECT_IN_WHITELIST
 TBIRD_SUSP_MIME_BDRY
 
 # good enough
-TO_NO_BRKTS_DYNIP
-
-# good enough
 TVD_FINGER_02
 
 # good enough
@@ -932,10 +929,10 @@ TVD_RCVD_SINGLE
 TVD_VISIT_PHARMA
 
 # good enough
-KB_RATWARE_BOUNDARY
+MONEY_DEAL
 
-# tflags net
-RCVD_IN_PSBL_2WEEKS
+# good enough
+TO_NO_BRKTS_FROM_MSSP
 
 # tflags userconf
 UNPARSEABLE_RELAY
