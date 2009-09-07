@@ -17,8 +17,10 @@ describe       RDNS_LOCALHOST  Sender's public rDNS is "localhost"
 
 ifplugin Mail::SpamAssassin::Plugin::MIMEHeader
   mimeheader   HTML_ATTACH    Content-Type =~ m,text/html;.+\.html?\b,i
+  describe     HTML_ATTACH    HTML attachment to bypass scanning?
 
   mimeheader   OBFU_TEXT_ATTACH    Content-Type =~ m,application/octet-stream;.+\.txt\b,i
+  describe     OBFU_TEXT_ATTACH    Text attachment with non-text MIME type
 endif
 
 # general case of spample observation
@@ -44,11 +46,11 @@ describe       __FROM_MISSPACED      From: missing whitespace
 
 ifplugin Mail::SpamAssassin::Plugin::FreeMail
   meta         FROM_MISSP_FREEMAIL   __FROM_MISSPACED && (FREEMAIL_FROM || FREEMAIL_REPLYTO)
-  describe     FROM_MISSP_FREEMAIL   From misspaced + from freemail
+  describe     FROM_MISSP_FREEMAIL   From misspaced + freemail provider
 endif
 
 meta           FROM_MISSP_MSFT       __FROM_MISSPACED && (__ANY_OUTLOOK_MUA || __HAS_MIMEOLE || __MIMEOLE_MS)
-describe       FROM_MISSP_MSFT       Microsoft tools don't botch the From header
+describe       FROM_MISSP_MSFT       From misspaced + supposed Microsoft tool
 
 meta           FROM_MISSP_DYNIP      __FROM_MISSPACED && RDNS_DYNAMIC
 describe       FROM_MISSP_DYNIP      From misspaced + dynamic rDNS
@@ -63,9 +65,4 @@ header         __TB_MIME_BDRY_NO_Z   Content-Type =~ /boundary="-{8,}(?:[1-9]){1
 meta           TBIRD_SUSP_MIME_BDRY   __MUA_TBIRD && __TB_MIME_BDRY_NO_Z
 describe       TBIRD_SUSP_MIME_BDRY   Unlikely Thunderbird MIME boundary
 
-header         UNQ_MIME_BDRY        Content-Type =~ /boundary=[^"]/i
-describe       UNQ_MIME_BDRY        Unquoted MIME boundary string
-
-# one spam, 9/3/2009
-header         __MSGID_QUOTES     Message-id: =~ /<"[^"]+"\@/
 

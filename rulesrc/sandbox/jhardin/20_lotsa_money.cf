@@ -30,6 +30,9 @@ describe MONEY_TO_NO_R    Lots of money and bare To
 meta     MONEY_FORM       LOTS_OF_MONEY && (FILL_THIS_FORM_LONG || FILL_THIS_FORM_ML)
 describe MONEY_FORM       Lots of money if you fill out a form
 
+meta     MONEY_ACCOUNT    LOTS_OF_MONEY && __YOUR_ACCOUNT
+describe MONEY_ACCOUNT    Lots of money to your account
+
 # The ADVANCE_FEE rules should probably be updated with LOTS_OF_MONEY
 meta     MONEY_FEE        LOTS_OF_MONEY && (ADVANCE_FEE_2 || ADVANCE_FEE_3 || ADVANCE_FEE_4)
 describe MONEY_FEE        Lots of money if you first pay a fee
@@ -68,7 +71,10 @@ describe MONEY_LOTTERY    Lots of money from a lottery
 
 body     __DEAL           /\b(?:business|financial|this)\s(?:deal|transaction)/i
 body     __HUSH_HUSH      /\b(?:confidential|private|secre(?:t|cy)|sensitive)\b/i
-body     __NO_RISK        /\b(?:no\srisk|risk[-\s]free)/i
+
+body     NO_RISK          /\b(?:no\srisk|risk[-\s]free)\b/i
+describe NO_RISK          No risk involved
+
 meta     MONEY_DEAL       LOTS_OF_MONEY && __DEAL && __HUSH_HUSH && __NO_RISK
 describe MONEY_DEAL       Lots of money in a secret deal
 
