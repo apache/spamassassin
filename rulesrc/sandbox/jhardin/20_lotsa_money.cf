@@ -75,7 +75,7 @@ body     __HUSH_HUSH      /\b(?:confidential|private|secre(?:t|cy)|sensitive)\b/
 body     NO_RISK          /\b(?:no\srisk|risk[-\s]free)\b/i
 describe NO_RISK          No risk involved
 
-meta     MONEY_DEAL       LOTS_OF_MONEY && __DEAL && __HUSH_HUSH && __NO_RISK
+meta     MONEY_DEAL       LOTS_OF_MONEY && __DEAL && __HUSH_HUSH && NO_RISK
 describe MONEY_DEAL       Lots of money in a secret deal
 
 
