@@ -46,9 +46,9 @@ Author Domain Signing Practices (ADSP) from any author domains:
 Author Domain Signing Practices (ADSP) from specified author domains only:
  header DKIM_ADSP_MY1         eval:check_dkim_adsp('*','dom1','dom2',...)
 
- describe DKIM_SIGNED           Message has a DKIM or DK signature, not necessarily valid
- describe DKIM_VALID            Message has at least one valid DKIM or DK signature
- describe DKIM_VALID_AU         Message has a valid DKIM or DK signature from author's domain
+ describe DKIM_SIGNED   Message has a DKIM or DK signature, not necessarily valid
+ describe DKIM_VALID    Message has at least one valid DKIM or DK signature
+ describe DKIM_VALID_AU Message has a valid DKIM or DK signature from author's domain
  describe __DKIM_DEPENDABLE     A validation failure not attributable to truncation
 
  describe DKIM_ADSP_NXDOMAIN    Domain not in DNS and no valid author domain signature
@@ -58,7 +58,7 @@ Author Domain Signing Practices (ADSP) from specified author domains only:
  describe DKIM_ADSP_CUSTOM_MED  adsp_override is CUSTOM_MED, no valid author domain signature
  describe DKIM_ADSP_CUSTOM_HIGH adsp_override is CUSTOM_HIGH, no valid author domain signature
 
-For compatibility, the following are synonyms:
+For compatibility with pre-3.3.0 versions, the following are synonyms:
  OLD: eval:check_dkim_verified = NEW: eval:check_dkim_valid
  OLD: eval:check_dkim_signall  = NEW: eval:check_dkim_adsp('A')
  OLD: eval:check_dkim_signsome = NEW: redundant, semantically always true
@@ -172,7 +172,7 @@ sub set_config {
 Use this to supplement the whitelist_from addresses with a check to make
 sure the message with a given From address (the author's address) carries
 a valid Domain Keys Identified Mail (DKIM) signature by a signing-domain
-(SDID, i.e. the d= tag) that is acceptable to verifier.
+(SDID, i.e. the d= tag) that is acceptable to us (i.e. to the verifier).
 
 Only one whitelist entry is allowed per line, as in C<whitelist_from_rcvd>.
 Multiple C<whitelist_from_dkim> lines are allowed. File-glob style characters
@@ -182,7 +182,7 @@ C<whitelist_from_rcvd>. The second parameter does not accept wildcards.
 If no signing-domain parameter is specified, the only acceptable signature
 will be an Author Domain Signature (sometimes called first-party signature)
 which is a signature where the signing domain (SDID) of a signature matches
-the domain of the author address (i.e. the address in a From header field).
+the domain of the author's address (i.e. the address in a From header field).
 
 Since this whitelist requires a DKIM check to be made, network tests must
 be enabled.
@@ -195,11 +195,10 @@ Examples of whitelisting based on an author domain signature (first-party):
 
 Examples of whitelisting based on third-party signatures:
 
-  whitelist_from_dkim rick@example.net     richard@example.net
-  whitelist_from_dkim rick@sub.example.net example.net
-  whitelist_from_dkim jane@example.net     example.org
-  whitelist_from_dkim *@info.example.com   example.com
-  whitelist_from_dkim *@*                  remailer.example.com
+  whitelist_from_dkim jane@example.net      example.org
+  whitelist_from_dkim rick@info.example.net example.net
+  whitelist_from_dkim *@info.example.net    example.net
+  whitelist_from_dkim *@*                   remailer.example.com
 
 =item def_whitelist_from_dkim author@example.com [signing-domain]
 
@@ -264,8 +263,8 @@ Absence of this second parameter implies C<discardable>. If a domain is not
 listed by a C<adsp_override> directive nor does it explicitly publish any
 ADSP record, then C<unknown> is implied for valid domains, and C<nxdomain>
 for domains not existing in DNS. (Note: domain validity is only checked with
-versions of Mail::DKIM 0.36_5 or later, C<nxdomain> would never turn up with
-older versions).
+versions of Mail::DKIM 0.37 or later (actually since 0.36_5), the C<nxdomain>
+would never turn up with older versions).
 
 The strong setting C<discardable> is useful for domains which are known
 to always sign their mail and to always send it directly to recipients
@@ -278,11 +277,18 @@ When a message does not contain a valid signature by the author's domain
 to author's domain determine which of the following rules fire and
 contributes its score: DKIM_ADSP_NXDOMAIN, DKIM_ADSP_ALL, DKIM_ADSP_DISCARD,
 DKIM_ADSP_CUSTOM_LOW, DKIM_ADSP_CUSTOM_MED, DKIM_ADSP_CUSTOM_HIGH. Not more
-than one of these rules can fire. The last three can only result from a
-'signing-practices' as given in a C<adsp_override> directive (not from a
-DNS lookup), and can serve as a convenient means of providing a different
-score if scores assigned to DKIM_ADSP_ALL or DKIM_ADSP_DISCARD are not
-considered suitable for some domains.
+than one of these rules can fire for messages that have one author (but see
+below). The last three can only result from a 'signing-practices' as given
+in a C<adsp_override> directive (not from a DNS lookup), and can serve as
+a convenient means of providing a different score if scores assigned to
+DKIM_ADSP_ALL or DKIM_ADSP_DISCARD are not considered suitable for some
+domains.
+
+RFC 5322 permits a message to have more than one author - multiple addresses
+may be listed in a single From header field.  RFC 5617 defines that a message
+with multiple authors has multiple signing domain signing practices, but does
+not prescribe how these should be combined. In presence of multiple signing
+practices, more than one of the DKIM_ADSP_* rules may fire.
 
 As a precaution against firing DKIM_ADSP_* rules when there is a known local
 reason for a signature verification failure, the domain's ADSP is considered
@@ -347,9 +353,9 @@ Example:
         return $Mail::SpamAssassin::Conf::INVALID_VALUE;
       }
       my $address = $1;
-      my $identity = defined $2 ? $2 : '';  # empty implies author domain signature
+      my $sdid = defined $2 ? $2 : '';  # empty implies author domain signature
       $self->{parser}->add_to_addrlist_rcvd('whitelist_from_dkim',
-                                            $address, $identity);
+                                            $address, $sdid);
     }
   });
 
@@ -365,9 +371,9 @@ Example:
         return $Mail::SpamAssassin::Conf::INVALID_VALUE;
       }
       my $address = $1;
-      my $identity = defined $2 ? $2 : '';  # empty implies author domain signature
+      my $sdid = defined $2 ? $2 : '';  # empty implies author domain signature
       $self->{parser}->add_to_addrlist_rcvd('def_whitelist_from_dkim',
-                                            $address, $identity);
+                                            $address, $sdid);
     }
   });
 
@@ -453,7 +459,7 @@ sub check_dkim_valid_author_sig {
   my ($self, $pms, $full_ref, @acceptable_domains) = @_;
   $self->_check_dkim_signature($pms)  if !$pms->{dkim_checked_signature};
   my $result = 0;
-  if (!$pms->{dkim_has_valid_author_sig}) {
+  if (!%{$pms->{dkim_has_valid_author_sig}}) {
     # don't bother
   } elsif (!@acceptable_domains) {
     $result = 1;  # no additional constraints, any signing domain will do
@@ -465,7 +471,7 @@ sub check_dkim_valid_author_sig {
 
 sub check_dkim_dependable {
   my ($self, $pms) = @_;
-  $self->_check_dkim_signature($pms) unless $pms->{dkim_checked_signature};
+  $self->_check_dkim_signature($pms)  if !$pms->{dkim_checked_signature};
   return $pms->{dkim_signatures_dependable};
 }
 
@@ -476,28 +482,32 @@ sub check_dkim_verified {
 
 # no valid Author Domain Signature && ADSP matches the argument
 sub check_dkim_adsp {
-  my ($self, $pms, $adsp_char, @selected_domains) = @_;
+  my ($self, $pms, $adsp_char, @domains_list) = @_;
   $self->_check_dkim_signature($pms)  if !$pms->{dkim_checked_signature};
   my $result = 0;
-  if (!$pms->{dkim_signatures_ready} || $pms->{dkim_has_valid_author_sig}) {
+  if (!$pms->{dkim_signatures_ready}) {
     # don't bother
   } else {
     $self->_check_dkim_adsp($pms)  if !$pms->{dkim_checked_adsp};
-    if ($adsp_char ne '*' && $pms->{dkim_adsp} ne $adsp_char) {
+    # an asterisk indicates any ADSP type can match (as long as
+    # there is no valid author domain signature present)
+    if ($adsp_char ne '*' &&
+        !(grep { $_ eq $adsp_char} values %{$pms->{dkim_adsp}}) ) {
       # not the right ADSP type
-    } elsif (!@selected_domains) {
+    } elsif (!@domains_list) {
       $result = 1;  # no additional constraints, any author domain will do
     } else {
-      my @author_domains = map { defined($_) && /\@([^\@]*)\z/s ? lc($1) : () }
-                               ( $pms->{dkim_author_address} );
-      foreach my $dom (@selected_domains) {
-        if ($dom =~ /^\.(.*)\z/s) {  # domain or its subdomain
+      local $1;
+      my %author_domains = %{$pms->{dkim_author_domains}};
+      foreach my $dom (@domains_list) {
+        if ($dom =~ /^\*?\.(.*)\z/s) {  # domain itself or its subdomain
           my $doms = lc $1;
-          if (grep { $_ eq $doms || /\.\Q$doms\E\z/s } @author_domains) {
+          if ($author_domains{$doms} ||
+              (grep { /\.\Q$doms\E\z/s } keys %author_domains) ) {
             $result = 1; last;
           }
         } else {  # match on domain (not a subdomain)
-          if (grep { $_ eq lc $dom } @author_domains) {
+          if ($author_domains{lc $dom}) {
             $result = 1; last;
           }
         }
@@ -526,21 +536,21 @@ sub check_dkim_signall {
 sub check_dkim_testing {
   my ($self, $pms) = @_;
   my $result = 0;
-  $self->_check_dkim_signature($pms) unless $pms->{dkim_checked_signature};
+  $self->_check_dkim_signature($pms)  if !$pms->{dkim_checked_signature};
   $result = 1  if $pms->{dkim_key_testing};
   return $result;
 }
 
 sub check_for_dkim_whitelist_from {
   my ($self, $pms) = @_;
-  $self->_check_dkim_whitelist($pms) unless $pms->{whitelist_checked};
+  $self->_check_dkim_whitelist($pms)  if !$pms->{whitelist_checked};
   return $pms->{dkim_match_in_whitelist_from_dkim} || 
          $pms->{dkim_match_in_whitelist_auth};
 }
 
 sub check_for_def_dkim_whitelist_from {
   my ($self, $pms) = @_;
-  $self->_check_dkim_whitelist($pms) unless $pms->{whitelist_checked};
+  $self->_check_dkim_whitelist($pms)  if !$pms->{whitelist_checked};
   return $pms->{dkim_match_in_def_whitelist_from_dkim} || 
          $pms->{dkim_match_in_def_whitelist_auth};
 }
@@ -572,7 +582,7 @@ sub _dkim_load_modules {
         dbg("dkim: using Mail::DKIM version $version");
       } else {
         info("dkim: Mail::DKIM $version is older than the required ".
-             "minimal version 0.31, suggested upgrade to 0.36_5 or later!");
+             "minimal version 0.31, suggested upgrade to 0.37 or later!");
       }
       $self->{service_available} = 1;
 
@@ -592,7 +602,6 @@ sub _check_dkim_signed_by {
   my ($self, $pms, $must_be_valid, $must_be_author_domain_signature,
       $acceptable_domains_ref) = @_;
   my $result = 0;
-  my @authors = grep { defined $_ } ( $pms->{dkim_author_address} );
   my $verifier = $pms->{dkim_verifier};
   foreach my $sig (@{$pms->{dkim_signatures}}) {
     next if !defined $sig;
@@ -602,22 +611,39 @@ sub _check_dkim_signed_by {
       next if $sig->UNIVERSAL::can("check_expiration") &&
               !$sig->check_expiration;
     }
-    local $1;
-    my $d = lc($sig->domain);
+    my $sdid = lc($sig->domain);
     if ($must_be_author_domain_signature) {
-      next if !grep { /\@([^\@]*)\z/s && lc($1) eq $d } @authors;
+      next if !$pms->{dkim_author_domains}->{$sdid};
     }
     foreach my $ad (@$acceptable_domains_ref) {
-      if ($ad =~ /^\.(.*)\z/s) {  # domain or its subdomain
-        my $ads = lc $1;
-        if ($d eq $ads || $d =~ /\.\Q$ads\E\z/s) { $result = 1; last }
+      if ($ad =~ /^\*?\.(.*)\z/s) {  # domain itself or its subdomain
+        my $d = lc $1;
+        if ($sdid eq $d || $sdid =~ /\.\Q$d\E\z/s) { $result = 1; last }
       } else {  # match on domain (not a subdomain)
-        if ($d eq lc $ad) { $result = 1; last }
+        if ($sdid eq lc $ad) { $result = 1; last }
       }
     }
     last if $result;
   }
   return $result;
+}
+
+sub _get_authors {
+  my ($self, $pms) = @_;
+
+  # Note that RFC 5322 permits multiple addresses in the From header field,
+  # and according to RFC 5617 such message has multiple authors and hence
+  # multiple "Author Domain Signing Practices". For the time being the
+  # SpamAssassin's get() can only provide a single author!
+
+  my %author_domains;  local $1;
+  my @authors = grep { defined $_ } ( $pms->get('from:addr',undef) );
+  for (@authors) {
+    # be tolerant, ignore trailing WSP after a domain name
+    $author_domains{lc $1} = 1  if /\@([^\@]+?)[ \t]*\z/s;
+  }
+  $pms->{dkim_author_addresses} = \@authors;       # list of full addresses
+  $pms->{dkim_author_domains} = \%author_domains;  # hash of their domains
 }
 
 sub _check_dkim_signature {
@@ -631,16 +657,17 @@ sub _check_dkim_signature {
   #   (signatures supplied by a caller) or
   #   ( (signatures obtained by this plugin) and
   #     (no signatures, or message was not truncated) )
-  $pms->{dkim_author_sig_tempfailed} = 0;  # DNS timeout verifying author sign.
   $pms->{dkim_signatures} = \@signatures;
   $pms->{dkim_valid_signatures} = \@valid_signatures;
   $pms->{dkim_signed} = 0;
   $pms->{dkim_valid} = 0;
-  $pms->{dkim_has_valid_author_sig} = 0;
-  $pms->{dkim_has_any_author_sig} = 0;  # valid or invalid author domain sign.
   $pms->{dkim_key_testing} = 0;
-  $pms->{dkim_author_address} =
-    $pms->get('from:addr',undef)  if !defined $pms->{dkim_author_address};
+  # the following hashes are keyed by a signing domain (SDID):
+  $pms->{dkim_author_sig_tempfailed} = {}; # DNS timeout verifying author sign.
+  $pms->{dkim_has_valid_author_sig} = {};  # a valid author domain signature
+  $pms->{dkim_has_any_author_sig} = {};  # valid or invalid author domain sign.
+
+  $self->_get_authors($pms)  if !$pms->{dkim_author_addresses};
 
   my $suppl_attrib = $pms->{msg}->{suppl_attrib};
   if (defined $suppl_attrib && exists $suppl_attrib->{dkim_signatures}) {
@@ -695,7 +722,7 @@ sub _check_dkim_signature {
 
       # currently SpamAssassin's parsing is better than Mail::Address parsing,
       # don't bother fetching $verifier->message_originator->address
-      # to replace what we already have in $pms->{dkim_author_address}
+      # to replace what we already have in $pms->{dkim_author_addresses}
 
       # versions before 0.29 only provided a public interface to fetch one
       # signature, newer versions allow access to all signatures of a message
@@ -705,7 +732,9 @@ sub _check_dkim_signature {
     if ($timer->timed_out()) {
       dbg("dkim: public key lookup or verification timed out after %s s",
           $timeout );
-      $pms->{dkim_author_sig_tempfailed} = 1;
+#***
+    # $pms->{dkim_author_sig_tempfailed}->{$_} = 1  for ...
+
     } elsif ($err) {
       chomp $err;
       dbg("dkim: public key lookup or verification failed: $err");
@@ -717,71 +746,46 @@ sub _check_dkim_signature {
   }
 
   if ($pms->{dkim_signatures_ready}) {
-    # ADSP + RFC 5321: localpart is case sensitive, domain is case insensitive
-    my $author = $pms->{dkim_author_address};
-    # Note that RFC 5322 permits multiple addresses in the From header field,
-    # and according to RFC 5617 such message has multiple authors and hence
-    # multiple "Author Domain Signing Practices". For the time being we only
-    # deal with a single author!
-    local($1,$2);
-    $author = ''  if !defined $author;
-    $author = $1 . lc($2)  if $author =~ /^(.*)(\@[^\@]*)\z/s;
-
     my $sig_result_supported;
     foreach my $signature (@signatures) {
       # old versions of Mail::DKIM would give undef for an invalid signature
       next if !defined $signature;
       $sig_result_supported = $signature->UNIVERSAL::can("result_detail");
-      #
-      # i=  Identity of the user or agent (e.g., a mailing list manager) on
-      #     behalf of which this message is signed (dkim-quoted-printable;
-      #     OPTIONAL, default is an empty local-part followed by an "@"
-      #     followed by the domain from the "d=" tag).
-      my $identity = $signature->identity;
-      $identity = $1 . lc($2)  if defined $identity &&
-                                  $identity =~ /^(.*)(\@[^\@]*)\z/s;
       my $valid =
         ($sig_result_supported ? $signature : $verifier)->result eq 'pass';
       my $expired = 0;
       if ($valid && $signature->UNIVERSAL::can("check_expiration")) {
         $expired = !$signature->check_expiration;
       }
-      # check if we have a potential Author Domain Signature, valid or not
-      my $id_matches_author = 0;
-      if (!defined $identity || $identity eq '') {
-        # identity not provided
-      } elsif ($identity =~ /.\@[^\@]*\z/s) {  # identity has a localpart
-        $id_matches_author = 1  if $author eq $identity;
-      } elsif ($author =~ /(\@[^\@]*)?\z/s && defined $1 && $1 eq $identity) {
-        # ignoring localpart if identity doesn't have a localpart
-        $id_matches_author = 1;
-      }
       push(@valid_signatures, $signature)  if $valid && !$expired;
-      if ($id_matches_author) {
-        $pms->{dkim_has_any_author_sig} = 1;
+      # check if we have a potential Author Domain Signature, valid or not
+      my $d = lc($signature->domain);
+      if ($pms->{dkim_author_domains}->{$d}) {  # SDID matches author domain
+        $pms->{dkim_has_any_author_sig}->{$d} = 1;
         if ($valid && !$expired) {
-          $pms->{dkim_has_valid_author_sig} = 1;
-        } elsif (
-            ($sig_result_supported ? $signature : $verifier)->result_detail
-            =~ /\b(?:timed out|SERVFAIL)\b/i) {
-          $pms->{dkim_author_sig_tempfailed} = 1;
+          $pms->{dkim_has_valid_author_sig}->{$d} = 1;
+        } elsif ( ($sig_result_supported ?$signature :$verifier)->result_detail
+                 =~ /\b(?:timed out|SERVFAIL)\b/i) {
+          $pms->{dkim_author_sig_tempfailed}->{$d} = 1;
         }
       }
-      would_log("dbg","dkim") &&
+      if (would_log("dbg","dkim")) {
         dbg("dkim: i=%s, d=%s, a=%s, c=%s, %s%s, %s",
-          defined $identity ? $identity : 'UNDEF',  $signature->domain,
+          $signature->identity, $d,
           $signature->algorithm, scalar($signature->canonicalization),
           ($sig_result_supported ? $signature : $verifier)->result,
           !$expired ? '' : ', expired',
-          $id_matches_author ? 'matches author' : 'does not match author');
+          $pms->{dkim_author_domains}->{$d} ? 'matches author domain' :
+                                              'does not match author domain');
+      }
     }
     if (@valid_signatures) {
       $pms->{dkim_signed} = 1;
       $pms->{dkim_valid} = 1;
       # let the result stand out more clearly in the log, use uppercase
       my $sig = $valid_signatures[0];
-      my $sigres = ($sig_result_supported ? $sig : $verifier)->result_detail;
-      dbg("dkim: signature verification result: %s", uc($sigres));
+      my $sig_res = ($sig_result_supported ? $sig : $verifier)->result_detail;
+      dbg("dkim: signature verification result: %s", uc($sig_res));
       my(%seen1,%seen2);
       $pms->set_tag('DKIMIDENTITY',
               join(" ", grep { defined($_) && $_ ne '' && !$seen1{$_}++ }
@@ -792,165 +796,167 @@ sub _check_dkim_signature {
     } elsif (@signatures) {
       $pms->{dkim_signed} = 1;
       my $sig = $signatures[0];
-      my $sigres =
+      my $sig_res =
         ($sig_result_supported && $sig ? $sig : $verifier)->result_detail;
-      dbg("dkim: signature verification result: %s", uc($sigres));
+      dbg("dkim: signature verification result: %s", uc($sig_res));
     } else {
       dbg("dkim: signature verification result: none");
     }
   }
 }
 
-sub _lookup_dkim_adsp_override {
-  my ($self, $pms, $author_domain) = @_;
-  # for a domain a.b.c.d it searches the hash in the following order:
-  #   a.b.c.d
-  #   *.b.c.d
-  #     *.c.d
-  #       *.d
-  #         *
-  my($adsp,$matched_key);
-  my $p = $pms->{conf}->{adsp_override};
-  if ($p) {
-    my @d = split(/\./, $author_domain);
-    @d = map { shift @d; join('.', '*', @d) } (0..$#d);
-    for my $key ($author_domain, @d) {
-      $adsp = $p->{$key};
-      if (defined $adsp) { $matched_key = $key; last }
-    };
-  }
-  return !defined $adsp ? () : ($adsp,$matched_key);
-}
-
 sub _check_dkim_adsp {
   my ($self, $pms) = @_;
 
   $pms->{dkim_checked_adsp} = 1;
-  $pms->{dkim_adsp} = 'U';
-  $pms->{dkim_author_address} =
-    $pms->get('from:addr',undef)  if !defined $pms->{dkim_author_address};
-  local $1;
-  my $author_domain = $pms->{dkim_author_address};
-  $author_domain = ''  if !defined $author_domain;
-  $author_domain = $author_domain =~ /\@([^\@]*)$/ ? lc $1 : '';
+
+  # a message may have multiple authors (RFC 5322),
+  # and hence multiple signing policies (RFC 5617)
+  $pms->{dkim_adsp} = {};  # a hash: author_domain => adsp
   my $practices_as_string = '';
+
+  $self->_get_authors($pms)  if !$pms->{dkim_author_addresses};
+
+  # collect only fully qualified domain names, allow '-', think of IDN
+  my @author_domains = grep { /.\.[a-z-]{2,}\z/si }
+                            keys %{$pms->{dkim_author_domains}};
+
   my %label =
    ('D' => 'discardable', 'A' => 'all', 'U' => 'unknown', 'N' => 'nxdomain',
     '1' => 'custom_low', '2' => 'custom_med', '3' => 'custom_high');
 
   # must check the message first to obtain signer, domain, and verif. status
-  $self->_check_dkim_signature($pms) unless $pms->{dkim_checked_signature};
+  $self->_check_dkim_signature($pms)  if !$pms->{dkim_checked_signature};
 
   if (!$pms->{dkim_signatures_ready}) {
     dbg("dkim: adsp not retrieved, signatures not obtained");
 
-  } elsif ($pms->{dkim_has_valid_author_sig}) {  # don't fetch adsp when valid
-    # RFC 5617: If a message has an Author Domain Signature, ADSP provides
-    # no benefit relative to that domain since the message is already known
-    # to be compliant with any possible ADSP for that domain. [...]
-    # implementations SHOULD avoid doing unnecessary DNS lookups
-    #
-    dbg("dkim: adsp not retrieved, author domain signature is valid");
-
-  } elsif ($author_domain eq '') {        # have mercy, don't claim a NXDOMAIN
-    dbg("dkim: adsp not retrieved, no author domain (empty)");
-    $practices_as_string = 'empty domain, ignored';
-
-  } elsif ($author_domain =~ /^[^.]+$/s) {  # have mercy, don't claim NXDOMAIN
-    dbg("dkim: adsp not retrieved, author domain not fqdn: $author_domain");
-    $practices_as_string = 'not fqdn, ignored';
-
-  } elsif ($author_domain !~ /.\.[a-z-]{2,}\z/si) {  # allow '-', think of IDN
-    dbg("dkim: adsp not retrieved, author domain not a fqdn: %s (%s)",
-        $author_domain, $pms->{dkim_author_address});
-    $pms->{dkim_adsp} = 'N'; $practices_as_string = 'invalid fqdn, ignored';
-
-  } elsif ($pms->{dkim_author_sig_tempfailed}) {
-    dbg("dkim: adsp ignored, tempfail varifying author domain signature");
-    $practices_as_string = 'pub key tempfailed, ignored';
-
-  } elsif ($pms->{dkim_has_any_author_sig} &&
-           !$pms->{dkim_signatures_dependable}) {
-    # the message did have an Author Domain Signature but it wasn't valid;
-    # we also expect the message was truncated just before being passed to
-    # SpamAssassin, which is a likely reason for verification failure, so
-    # we shouldn't take it too harsh with ADSP rules - just pretend the ADSP
-    # was 'unknown'
-    #
-    dbg("dkim: adsp ignored, message was truncated, ".
-        "invalid author domain signature");
-    $practices_as_string = 'truncated, ignored';
-
-  } elsif (my($adsp,$key) =
-             $self->_lookup_dkim_adsp_override($pms,$author_domain)) {
-    $pms->{dkim_adsp} = $adsp;
-    $practices_as_string = 'override';
-    $practices_as_string .= " by $key"  if $key ne $author_domain;
-
-  } elsif (!$pms->is_dns_available()) {
-    dbg("dkim: adsp not retrieved, DNS resolving not available");
-
-  } elsif (!$self->_dkim_load_modules()) {
-    dbg("dkim: adsp not retrieved, module Mail::DKIM not available");
+  } elsif (!@author_domains) {
+    dbg("dkim: adsp not retrieved, no author f.q. domain name");
+    $practices_as_string = 'no author domains, ignored';
 
   } else {
-    my $timemethod = $self->{main}->UNIVERSAL::can("time_method") &&
-                     $self->{main}->time_method("check_dkim_adsp");
 
-    my $timeout = $pms->{conf}->{dkim_timeout};
-    my $timer = Mail::SpamAssassin::Timeout->new({ secs => $timeout });
-    my $err = $timer->run_and_catch(sub {
-      my $practices;  # author domain signing practices
-      eval {
-        if (Mail::DKIM::AuthorDomainPolicy->UNIVERSAL::can("fetch")) {
-          dbg("dkim: adsp: performing _adsp lookup on %s", $author_domain);
-          # _adsp._domainkey.domain
-          $practices = Mail::DKIM::AuthorDomainPolicy->fetch(
-                         Protocol => "dns", Domain => $author_domain);
-        } else {  # fall back to pre-ADSP style
-          dbg("dkim: adsp: performing _policy lookup on %s", $author_domain);
-          # _policy._domainkey.domain
-          $practices = Mail::DKIM::DkimPolicy->fetch(
-                         Protocol => "dns", Domain => $author_domain);
-        }
-        1;
-      } or do {
-        # fetching/parsing adsp record may throw error, ignore such practices
-        my $eval_stat = $@ ne '' ? $@ : "errno=$!";  chomp $eval_stat;
-        dbg("dkim: adsp: fetch or parse on domain %s failed: %s",
-            $author_domain,$eval_stat);
-        undef $practices;
-      };
-      if (!$practices) {
-        dbg("dkim: signing practices: none");
+    foreach my $author_domain (@author_domains) {
+      my $adsp;
+
+      if ($pms->{dkim_has_valid_author_sig}->{$author_domain}) {
+        # don't fetch adsp when valid
+        # RFC 5617: If a message has an Author Domain Signature, ADSP provides
+        # no benefit relative to that domain since the message is already known
+        # to be compliant with any possible ADSP for that domain. [...]
+        # implementations SHOULD avoid doing unnecessary DNS lookups
+        #
+        dbg("dkim: adsp not retrieved, author domain signature is valid");
+        $practices_as_string = 'valid a. d. signature';
+
+      } elsif ($pms->{dkim_author_sig_tempfailed}->{$author_domain}) {
+        dbg("dkim: adsp ignored, tempfail varifying author domain signature");
+        $practices_as_string = 'pub key tempfailed, ignored';
+
+      } elsif ($pms->{dkim_has_any_author_sig}->{$author_domain} &&
+               !$pms->{dkim_signatures_dependable}) {
+        # the message did have an Author Domain Signature but it wasn't valid;
+        # we also believe the message was truncated just before being passed
+        # to SpamAssassin, which is a likely reason for verification failure,
+        # so we shouldn't take it too harsh with ADSP rules - just pretend
+        # the ADSP was 'unknown'
+        #
+        dbg("dkim: adsp ignored, message was truncated, ".
+            "invalid author domain signature");
+        $practices_as_string = 'truncated, ignored';
+
       } else {
-        # ADSP: unknown / all / discardable
-        my($sp) = $practices->policy;
-        if (!defined $sp || $sp eq '') {  # SERVFAIL or a timeout
-          dbg("dkim: signing practices: unavailable");
-        } else {
-          $pms->{dkim_adsp} = $sp eq "unknown"      ? 'U'  # most common
-                            : $sp eq "all"          ? 'A'
-                            : $sp eq "discardable"  ? 'D'  # ADSP
-                            : $sp eq "strict"       ? 'D'  # old style SSP
-                            : uc($sp) eq "NXDOMAIN" ? 'N'
-                                                    : 'U';
-          $practices_as_string = $sp;
+        # search the adsp_override list
+
+        # for a domain a.b.c.d it searches the hash in the following order:
+        #   a.b.c.d
+        #   *.b.c.d
+        #     *.c.d
+        #       *.d
+        #         *
+        my $matched_key;
+        my $p = $pms->{conf}->{adsp_override};
+        if ($p) {
+          my @d = split(/\./, $author_domain);
+          @d = map { shift @d; join('.', '*', @d) } (0..$#d);
+          for my $key ($author_domain, @d) {
+            $adsp = $p->{$key};
+            if (defined $adsp) { $matched_key = $key; last }
+          }
+        }
+
+        if (defined $adsp) {
+          dbg("dkim: adsp override for domain %s", $author_domain);
+          $practices_as_string = 'override';
+          $practices_as_string .=
+            " by $matched_key"  if $matched_key ne $author_domain;
+
+        } elsif (!$pms->is_dns_available()) {
+          dbg("dkim: adsp not retrieved, DNS resolving not available");
+
+        } elsif (!$self->_dkim_load_modules()) {
+          dbg("dkim: adsp not retrieved, module Mail::DKIM not available");
+
+        } else {  # do the ADSP DNS lookup
+          my $timemethod = $self->{main}->UNIVERSAL::can("time_method") &&
+                           $self->{main}->time_method("check_dkim_adsp");
+
+          my $practices;  # author domain signing practices object
+          my $timeout = $pms->{conf}->{dkim_timeout};
+          my $timer = Mail::SpamAssassin::Timeout->new({ secs => $timeout });
+          my $err = $timer->run_and_catch(sub {
+            eval {
+              if (Mail::DKIM::AuthorDomainPolicy->UNIVERSAL::can("fetch")) {
+                dbg("dkim: adsp: performing lookup on _adsp._domainkey.%s",
+                    $author_domain);
+                $practices = Mail::DKIM::AuthorDomainPolicy->fetch(
+                               Protocol => "dns", Domain => $author_domain);
+              }
+              1;
+            } or do {
+              # fetching/parsing adsp record may throw error, ignore such s.p.
+              my $eval_stat = $@ ne '' ? $@ : "errno=$!";  chomp $eval_stat;
+              dbg("dkim: adsp: fetch or parse on domain %s failed: %s",
+                  $author_domain, $eval_stat);
+              undef $practices;
+            };
+          });
+          if ($timer->timed_out()) {
+            dbg("dkim: adsp lookup on domain %s timed out after %s seconds",
+                $author_domain, $timeout);
+          } elsif ($err) {
+            chomp $err;
+            dbg("dkim: adsp lookup on domain %s failed: %s",
+                $author_domain, $err);
+          } else {
+            my $sp;  # ADSP: unknown / all / discardable
+            ($sp) = $practices->policy  if $practices;
+            if (!defined $sp || $sp eq '') {  # SERVFAIL or a timeout
+              dbg("dkim: signing practices on %s unavailable", $author_domain);
+              $adsp = 'U';
+              $practices_as_string = 'dns: no result';
+            } else {
+              $adsp = $sp eq "unknown"      ? 'U'  # most common
+                    : $sp eq "all"          ? 'A'
+                    : $sp eq "discardable"  ? 'D'  # ADSP
+                    : $sp eq "strict"       ? 'D'  # old style SSP
+                    : uc($sp) eq "NXDOMAIN" ? 'N'
+                                            : 'U';
+              $practices_as_string = 'dns: ' . $sp;
+            }
+          }
         }
       }
-    });
 
-    if ($timer->timed_out()) {
-      dbg("dkim: adsp lookup timed out after $timeout seconds");
-    } elsif ($err) {
-      chomp $err;
-      dbg("dkim: adsp lookup failed: $err");
+      # is signing practices available?
+      $pms->{dkim_adsp}->{$author_domain} = $adsp  if defined $adsp;
+
+      dbg("dkim: adsp result: %s (%s), author domain '%s'",
+          !defined($adsp) ? '-' : $adsp.'/'.$label{$adsp},
+          $practices_as_string, $author_domain);
     }
   }
-
-  dbg("dkim: adsp result: %s (%s), domain %s",
-      $pms->{dkim_has_valid_author_sig} ? "accept" : $label{$pms->{dkim_adsp}},
-      $practices_as_string, $author_domain);
 }
 
 sub _check_dkim_whitelist {
@@ -958,40 +964,40 @@ sub _check_dkim_whitelist {
 
   $pms->{whitelist_checked} = 1;
 
-  my $author = $pms->{dkim_author_address};
-  if (!defined $author) {
-    $pms->{dkim_author_address} = $author = $pms->get('from:addr',undef);
-  }
-  if (!defined $author || $author eq '') {
+  $self->_get_authors($pms)  if !$pms->{dkim_author_addresses};
+
+  my $authors_str = join(", ", @{$pms->{dkim_author_addresses}});
+  if ($authors_str eq '') {
     dbg("dkim: check_dkim_whitelist: could not find author address");
     return;
   }
 
   # collect whitelist entries matching the author from all lists
-  my @acceptable_identity_tuples;
-  $self->_wlcheck_acceptable_signature($pms, \@acceptable_identity_tuples,
+  my @acceptable_sdid_tuples;
+  $self->_wlcheck_acceptable_signature($pms, \@acceptable_sdid_tuples,
                                        'def_whitelist_from_dkim');
-  $self->_wlcheck_author_signature($pms, \@acceptable_identity_tuples,
+  $self->_wlcheck_author_signature($pms, \@acceptable_sdid_tuples,
                                        'def_whitelist_auth');
-  $self->_wlcheck_acceptable_signature($pms, \@acceptable_identity_tuples,
+  $self->_wlcheck_acceptable_signature($pms, \@acceptable_sdid_tuples,
                                        'whitelist_from_dkim');
-  $self->_wlcheck_author_signature($pms, \@acceptable_identity_tuples,
+  $self->_wlcheck_author_signature($pms, \@acceptable_sdid_tuples,
                                        'whitelist_auth');
-  if (!@acceptable_identity_tuples) {
-    dbg("dkim: no wl entries match author $author, no need to verify sigs");
+  if (!@acceptable_sdid_tuples) {
+    dbg("dkim: no wl entries match author %s, no need to verify sigs",
+        $authors_str);
     return;
   }
 
   # if the message doesn't pass DKIM validation, it can't pass DKIM whitelist
 
-  # trigger a DKIM check so we can get address/identity info;
+  # trigger a DKIM check;
   # continue if one or more signatures are valid or we want the debug info
   return unless $self->check_dkim_valid($pms) || would_log("dbg","dkim");
   return unless $pms->{dkim_signatures_ready};
 
   # now do all the matching in one go, against all signatures in a message
   my($any_match_at_all, $any_match_by_wl_ref) =
-    _wlcheck_list($self, $pms, \@acceptable_identity_tuples);
+    _wlcheck_list($self, $pms, \@acceptable_sdid_tuples);
 
   my(@valid,@fail);
   foreach my $wl (keys %$any_match_by_wl_ref) {
@@ -1002,11 +1008,13 @@ sub _check_dkim_whitelist {
     }
   }
   if (@valid) {
-    dbg("dkim: author %s, WHITELISTED by %s", $author, join(", ",@valid));
+    dbg("dkim: author %s, WHITELISTED by %s",
+        $authors_str, join(", ",@valid));
   } elsif (@fail) {
-    dbg("dkim: author %s, found in %s BUT IGNORED", $author, join(", ",@fail));
+    dbg("dkim: author %s, found in %s BUT IGNORED",
+        $authors_str, join(", ",@fail));
   } else {
-    dbg("dkim: author %s, not in any dkim whitelist", $author);
+    dbg("dkim: author %s, not in any dkim whitelist", $authors_str);
   }
 }
 
@@ -1014,13 +1022,16 @@ sub _check_dkim_whitelist {
 # domain in a whitelist implies checking for an Author Domain Signature
 #
 sub _wlcheck_acceptable_signature {
-  my ($self, $pms, $acceptable_identity_tuples_ref, $wl) = @_;
-  my $author = $pms->{dkim_author_address};
-  foreach my $white_addr (keys %{$pms->{conf}->{$wl}}) {
-    my $re = qr/$pms->{conf}->{$wl}->{$white_addr}{re}/i;
-    if ($author =~ $re) {
-      foreach my $acc_id (@{$pms->{conf}->{$wl}->{$white_addr}{domain}}) {
-        push(@$acceptable_identity_tuples_ref, [$acc_id,$wl,$re] );
+  my ($self, $pms, $acceptable_sdid_tuples_ref, $wl) = @_;
+  my $wl_ref = $pms->{conf}->{$wl};
+  foreach my $author (@{$pms->{dkim_author_addresses}}) {
+    foreach my $white_addr (keys %$wl_ref) {
+      my $wl_addr_ref = $wl_ref->{$white_addr};
+      my $re = qr/$wl_addr_ref->{re}/i;
+      if ($author =~ $re) {
+        foreach my $sdid (@{$wl_addr_ref->{domain}}) {
+          push(@$acceptable_sdid_tuples_ref, [$author,$sdid,$wl,$re]);
+        }
       }
     }
   }
@@ -1031,28 +1042,27 @@ sub _wlcheck_acceptable_signature {
 # domains; that's inefficient memory-wise and only saves one m//
 #
 sub _wlcheck_author_signature {
-  my ($self, $pms, $acceptable_identity_tuples_ref, $wl) = @_;
-  my $author = $pms->{dkim_author_address};
-  foreach my $white_addr (keys %{$pms->{conf}->{$wl}}) {
-    my $re = $pms->{conf}->{$wl}->{$white_addr};
-    if ($author =~ $re) {
-      push(@$acceptable_identity_tuples_ref, [undef,$wl,$re] );
+  my ($self, $pms, $acceptable_sdid_tuples_ref, $wl) = @_;
+  my $wl_ref = $pms->{conf}->{$wl};
+  foreach my $author (@{$pms->{dkim_author_addresses}}) {
+    foreach my $white_addr (keys %$wl_ref) {
+      my $re = $wl_ref->{$white_addr};
+      if ($author =~ $re) {
+        push(@$acceptable_sdid_tuples_ref, [$author,undef,$wl,$re]);
+      }
     }
   }
 }
 
 sub _wlcheck_list {
-  my ($self, $pms, $acceptable_identity_tuples_ref) = @_;
+  my ($self, $pms, $acceptable_sdid_tuples_ref) = @_;
 
   my %any_match_by_wl;
   my $any_match_at_all = 0;
   my $verifier = $pms->{dkim_verifier};
-  my @signatures = @{$pms->{dkim_signatures}};
-  my $author = $pms->{dkim_author_address};  # address in a From header field
-  $author = ''  if !defined $author;
 
   # walk through all signatures present in a message
-  foreach my $signature (@signatures) {
+  foreach my $signature (@{$pms->{dkim_signatures}}) {
     # old versions of Mail::DKIM would give undef for an invalid signature
     next if !defined $signature;
     my $sig_result_supported = $signature->UNIVERSAL::can("result_detail");
@@ -1062,39 +1072,26 @@ sub _wlcheck_list {
     if ($valid && $signature->UNIVERSAL::can("check_expiration")) {
       $expired = !$signature->check_expiration;
     }
-    my $identity = $signature->identity;
-    local($1,$2);
-    if (!defined $identity || $identity eq '') {
-      $identity = '@' . $signature->domain;
-      dbg("dkim: identity empty, setting to %s", $identity);
-    } elsif ($identity !~ /\@/) {  # just in case
-      $identity = '@' . $identity;
-      dbg("dkim: identity with no domain, setting to %s", $identity);
-    }
-    # split identity into local part and domain
-    $identity =~ /^ (.*?) \@ ([^\@]*) $/xs;
-    my($identity_mbx, $identity_dom) = ($1,$2);
+    my $sdid = lc($signature->domain);
 
-    my $author_matching_part = $author;
-    if ($identity =~ /^\@/) {  # empty localpart in signing identity
-      $author_matching_part =~ s/^.*?(\@[^\@]*)?$/$1/s; # strip localpart
-    }
+    my $info = $valid ? 'VALID' : 'FAILED';
+    $info .= ' EXPIRED'  if $expired;
 
-    my $info = '';  # summary info string to be used for logging
-    $info .= ($valid ? 'VALID' : 'FAILED') . ($expired ? ' EXPIRED' : '');
-    $info .= lc $identity eq lc $author_matching_part ? ' author'
-                                                      : ' third-party';
-    $info .= " signature by id " . $identity;
-
-    foreach my $entry (@$acceptable_identity_tuples_ref) {
-      my($acceptable_identity, $wl, $re) = @$entry;
+    my %tried_authors;
+    foreach my $entry (@$acceptable_sdid_tuples_ref) {
+      my($author, $acceptable_sdid, $wl, $re) = @$entry;
       # $re and $wl are here for logging purposes only, $re already checked.
-      # The $acceptable_identity is a verifier-acceptable signing identity.
-      # When $acceptable_identity is undef or an empty string it implies an
-      # Author Domain Signature check.
+      # The $acceptable_sdid is a verifier-acceptable signing domain
+      # identifier (to be matched against a 'd' tag in signatures).
+      # When $acceptable_sdid is undef or an empty string it implies
+      # a check for Author Domain Signature.
+
+      local $1;
+      my $author_domain = $author !~ /\@([^\@]+)\z/s ? '' : lc $1;
+      $tried_authors{$author} = 1;  # for logging purposes
 
       my $matches = 0;
-      if (!defined $acceptable_identity || $acceptable_identity eq '') {
+      if (!defined $acceptable_sdid || $acceptable_sdid eq '') {
 
         # An "Author Domain Signature" (sometimes called a first-party
         # signature) is a Valid Signature in which the domain name of the
@@ -1103,27 +1100,30 @@ sub _wlcheck_list {
         # Following [RFC5321], domain name comparisons are case insensitive.
 
         # checking for Author Domain Signature
-        $matches = 1  if lc $identity eq lc $author_matching_part;
+        $matches = 1  if $sdid eq $author_domain;
       }
       else {  # checking for verifier-acceptable signature
-        if ($acceptable_identity !~ /\@/) {
-          $acceptable_identity = '@' . $acceptable_identity;
-        }
-        # split into local part and domain
-        $acceptable_identity =~ /^ (.*?) \@ ([^\@]*) $/xs;
-        my($accept_id_mbx, $accept_id_dom) = ($1,$2);
 
-        # let's take a liberty and compare local parts case-insensitively
-        if ($accept_id_mbx ne '') {  # local part exists, full id must match
-          $matches = 1  if lc $identity eq lc $acceptable_identity;
-        } else {  # any local part in signing identity is acceptable
-                  # as long as domain matches or is a subdomain
-          $matches = 1  if $identity_dom =~ /(^|\.)\Q$accept_id_dom\E\z/i;
-        }
+        # The second argument to a 'whitelist_from_dkim' option is now (since
+        # version 3.3.0) supposed to be a signing domain (SDID), no longer an
+        # identity (AUID). Nevertheless, be prepared to accept the full e-mail
+        # address there for compatibility, and just ignore its local-part.
+
+        $acceptable_sdid = $1  if $acceptable_sdid =~ /\@([^\@]*)\z/;
+        $matches = 1  if $sdid eq lc $acceptable_sdid;
       }
       if ($matches) {
-        dbg("dkim: $info, author $author, MATCHES $wl $re");
+        if (would_log("dbg","dkim")) {
+          if ($sdid eq $author_domain) {
+            dbg("dkim: %s author domain signature by %s, MATCHES %s %s",
+                $info, $sdid, $wl, $re);
+          } else {
+            dbg("dkim: %s third-party signature by %s, author domain %s, ".
+                "MATCHES %s %s", $info, $sdid, $author_domain, $wl, $re);
+          }
+        }
         # a defined value indicates at least a match, not necessarily valid
+        # (this complication servers to preserve logging compatibility)
         $any_match_by_wl{$wl} = ''  if !exists $any_match_by_wl{$wl};
       }
       # only valid signature can cause whitelisting
@@ -1131,10 +1131,11 @@ sub _wlcheck_list {
 
       if ($matches) {
         $any_match_at_all = 1;
-        $any_match_by_wl{$wl} = $identity;  # value used for debug logging
+        $any_match_by_wl{$wl} = $sdid;  # value used for debug logging
       }
     }
-    dbg("dkim: $info, author $author, no valid matches") if !$any_match_at_all;
+    dbg("dkim: %s signature by %s, author %s, no valid matches",
+        $info, $sdid, join(", ", keys %tried_authors))  if !$any_match_at_all;
   }
   return ($any_match_at_all, \%any_match_by_wl);
 }
