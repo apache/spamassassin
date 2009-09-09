@@ -354,7 +354,7 @@ sub check_from_in_auto_whitelist {
     my $scores = $pms->{conf}->{scores};
     my $tflags = $pms->{conf}->{tflags};
     my $points = 0;
-    my $signedby = $pms->get_tag('DKIMIDENTITY');
+    my $signedby = $pms->get_tag('DKIMDOMAIN');
     $signedby = undef  if defined $signedby && $signedby eq '';
 
     foreach my $test (@{$pms->{test_names_hit}}) {
