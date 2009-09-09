@@ -6,7 +6,7 @@ ifplugin Mail::SpamAssassin::Plugin::ReplaceTags
   body     __LOTSA_MONEY_01   /<CURRENCY>\s?\d[\d.,\sO]{5,20}[\dO]/
   body     __LOTSA_MONEY_02   /\d[\d.,\sO]{5,20}[\dO]\s?<CURRENCY>/
   body     __LOTSA_MONEY_03   /<CURRENCY>\s?\d(?:[\d.,\sO]{0,4}[\dO])?\s?(?:[Mm]\b|[Mm][Ii][Ll][Ll]|[Hh][Uu][Nn][Dd][Rr][Ee][Dd]|[Tt][Hh][Oo][Uu][Ss][Aa][Nn][Dd])/
-  body     __LOTSA_MONEY_04   /(?:mill(?:e|ion)|hundred[^\.]{1,20}thousand)[^\.]{1,50}(?:(?:U\.?S\.?\s)?dollars|<GB_UK>\spounds|(?:<GB_UK>\s)?pounds\ssterling|euros?|francs?)/i
+  body     __LOTSA_MONEY_04   /(?:mill(?:e|ion)|hundred[^\.]{1,20}thousand)[^\.]{1,50}(?:(?:U\.?S\.?\s)?dollars|USD|<GB_UK>\spounds|(?:<GB_UK>\s)?pounds\ssterling|euros?|francs?)/i
   replace_rules   __LOTSA_MONEY_01 __LOTSA_MONEY_02 __LOTSA_MONEY_03 __LOTSA_MONEY_04
 
   meta     LOTS_OF_MONEY    (__LOTSA_MONEY_01 || __LOTSA_MONEY_02 || __LOTSA_MONEY_03 || __LOTSA_MONEY_04)
