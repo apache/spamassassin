@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi dos hege jm wt-en1 wt-en2 wt-en3 wt-jp1 wt-jp2; day 2: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi dos hege jm wt-en1 wt-en2 wt-en3 wt-jp1 wt-jp2; day 3: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi hege jm wt-en1 wt-en2 wt-en3 wt-jp1 wt-jp2
+# with results from: day 1: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi dos hege wt-en1 wt-en2 wt-en3 wt-jp1 wt-jp2; day 2: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi dos hege jm wt-en1 wt-en2 wt-en3 wt-jp1 wt-jp2; day 3: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi dos hege jm wt-en1 wt-en2 wt-en3 wt-jp1 wt-jp2
 
 # tflags userconf
 ALL_TRUSTED
@@ -188,6 +188,9 @@ FH_HELO_EQ_D_D_D_D
 FH_HOST_EQ_DYNAMICIP
 
 # good enough
+FH_HOST_EQ_PACBELL_D
+
+# good enough
 FH_HOST_EQ_VERIZON_P
 
 # good enough
@@ -210,6 +213,9 @@ FM_SCHOOLING
 
 # good enough
 FM_SEX_HELODDDD
+
+# good enough
+FM_VEGAS_CASINO
 
 # good enough
 FORGED_TBIRD_IMG_TO_MX
@@ -239,13 +245,13 @@ FRT_APPROV
 FRT_PHARMAC
 
 # good enough
+FRT_ROLEX
+
+# good enough
 FR_TITLE_NUMS
 
 # good enough
 FSL_FAKE_HOTMAIL_RVCD
-
-# good enough
-FSL_GEO_ABUSE
 
 # good enough
 FSL_HELO_BARE_IP_1
@@ -267,6 +273,12 @@ FS_ABIGGER
 
 # good enough
 FS_APPROVE_YOU
+
+# good enough
+FS_ERECTION
+
+# good enough
+FS_LARGE_PERCENT2
 
 # good enough
 FS_MORE_CONFIDENT
@@ -441,9 +453,6 @@ L_SPAM_TOOL_13
 
 # tflags userconf
 MIME_CHARSET_FARAWAY
-
-# good enough
-MIME_PHP_NO_TEXT
 
 # tflags userconf
 MISSING_HB_SEP
@@ -728,9 +737,6 @@ SUBJECT_IN_BLACKLIST
 SUBJECT_IN_WHITELIST
 
 # good enough
-TBIRD_SUSP_MIME_BDRY
-
-# good enough
 TVD_FINGER_02
 
 # good enough
@@ -758,7 +764,82 @@ TVD_RCVD_SINGLE
 TVD_VISIT_PHARMA
 
 # good enough
-MONEY_DEAL
+FB_LOSE_WEIGHT_CAP
+
+# good enough
+FB_WITHOUT_PRESC
+
+# good enough
+FH_HOST_IN_ADDRARPA
+
+# good enough
+FORGED_TBIRD_IMG_ARROW
+
+# good enough
+FORGED_TBIRD_IMG_SIZE
+
+# good enough
+FR_WATCHES_HTTP
+
+# good enough
+FSL_FAKE_GMAIL_RCVD
+
+# good enough
+IMG_DIRECT_TO_MX
+
+# good enough
+PCT_FOR_YOU
+
+# good enough
+RDNS_LOCALHOST
+
+# good enough
+SANE_0c3c2453c66df7c8df280ebdad248db4
+
+# good enough
+SANE_1c4f3286fa4aed6424ced88bfaf8b09c
+
+# good enough
+SANE_288f8016d836af09d6d57034b52fc5f6
+
+# good enough
+SANE_2b173a7fb7518c75ac8a2d294d773fd8
+
+# good enough
+SANE_391bf5f63e3ab72e7f461b71f06eee80
+
+# good enough
+SANE_3b92eda751c992f230f215fb7eb36844
+
+# good enough
+SANE_5d45e71013e1bf6aa9c7f86d6cf21c0d
+
+# good enough
+SANE_970bca3528887c0b4e6a1e0d63d20450
+
+# good enough
+SANE_af2f58d5e4002bcd31ef44b83569de4b
+
+# good enough
+SANE_b58d7945d89b7afc9e2753c83b00ab44
+
+# good enough
+SANE_c51de255d6cba77d524cf655d5bcee17
+
+# good enough
+SANE_d1ef7f3b64327d9d1c3535a0b7d7de11
+
+# good enough
+THEBAT_UNREG
+
+# good enough
+TO_NO_BRKTS_DYNIP
+
+# good enough
+URI_OBFU_WWW
+
+# good enough
+X_MAILER_CME_6543_MSN
 
 # tflags userconf
 UNPARSEABLE_RELAY
@@ -858,6 +939,9 @@ XMAILER_MIMEOLE_OL_3857F
 
 # good enough
 XMAILER_MIMEOLE_OL_3D61D
+
+# good enough
+XMAILER_MIMEOLE_OL_465CD
 
 # good enough
 XMAILER_MIMEOLE_OL_4B815
