@@ -24,8 +24,8 @@ ifplugin Mail::SpamAssassin::Plugin::MIMEHeader
 endif
 
 # general case of spample observation
-header         MUA_ONE_WORD       X-Mailer =~ /^[A-Za-z][a-z]*$/
-describe       MUA_ONE_WORD       Single word X-Mailer: not CamelCase
+#header         MUA_ONE_WORD       X-Mailer =~ /^[A-Za-z][a-z]*$/
+#describe       MUA_ONE_WORD       Single word X-Mailer: not CamelCase
 
 body           DEAR_BENEFICIARY		/^\s?(?:Dear\s|Attention:\s?)Beneficiary\b/i
 describe       DEAR_BENEFICIARY		Dear Beneficiary:
@@ -68,4 +68,5 @@ describe       TBIRD_SUSP_MIME_BDRY   Unlikely Thunderbird MIME boundary
 # seen in a few HTML fraud spams
 rawbody        RUNON_SHY          /(?:\&shy;){3}/i
 describe       RUNON_SHY          Repeating soft hyphens
+score          RUNON_SHY          0.1
 
