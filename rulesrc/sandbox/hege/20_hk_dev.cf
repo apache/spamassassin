@@ -2,8 +2,8 @@
 ## Mime rules
 ifplugin Mail::SpamAssassin::Plugin::MIMEHeader
 
-mimeheader	__HK_SPAMMY_CTFN	Content-Type =~ /name=.*?(?:lot(?:eri[ej]|t(?:ery|o))|award|prize|winn(?:er|ing)|microsoft|congrat|proposal|urgent|\bfrom\b)/mi
-mimeheader	__HK_SPAMMY_CDFN	Content-Disposition =~ /name=.*?(?:lot(?:eri[ej]|t(?:ery|o))|award|prize|winn(?:er|ing)|microsoft|congrat|proposal|urgent|\bfrom\b)/mi
+mimeheader	__HK_SPAMMY_CTFN	Content-Type =~ /name=.*?(?:lot(?:eri[ej]|t(?:ery|o))|award|prize|winn(?:er|ing)|microsoft|congrat|urgent)/mi
+mimeheader	__HK_SPAMMY_CDFN	Content-Disposition =~ /name=.*?(?:lot(?:eri[ej]|t(?:ery|o))|award|prize|winn(?:er|ing)|microsoft|congrat|urgent)/mi
 meta		HK_SPAMMY_FILENAME	__HK_SPAMMY_CTFN || __HK_SPAMMY_CDFN
 
 endif
@@ -32,8 +32,8 @@ body		__hk_million	/(?:(?:[0-9]{3}[ ,.]?){2,4}|[0-9] ?M\b|mill(?:(?:es?|ons?)(?:
 #body		__hk_million2	/(?:\$|£|eur|usd|gbp|cfa|euros?|dollard?s?|pounds?|francs?)(?: de\b)? mill(?:(?:es?|ons?)|ion)/
 body		__hk_million2	/(?:\$|eur|usd|gbp|cfa|euros?|dollard?s?|pounds?|francs?)(?: de\b)? mill(?:(?:es?|ons?)|ion)/
 body		__hk_hthousand	/hundred.{0,20}thousand.{0,20}(?:eur|usd|gbp|cfa|euros?|dollard?s?|pounds?|francs?)\b/i
-#body		__hk_bigmoney	/(?:EURO?|USD?|GBP|CFA|\&\#163;|£|\$).{0,4}(?:[0-9]{3}[^0-9a-z]?[0-9]{3}|[0-9.,]{1,4}(?: ?M\b| ?(?:de )?Mil))/i
-body		__hk_bigmoney	/(?:EURO?|USD?|GBP|CFA|\&\#163;|\$).{0,4}(?:[0-9]{3}[^0-9a-z]?[0-9]{3}|[0-9.,]{1,4}(?: ?M\b| ?(?:de )?Mil))/i
+#body		__hk_bigmoney	/(?:EURO?|USD?|GBP|CFA|\&\#163;|£|\$|sum of).{0,4}(?:[0-9]{3}[^0-9a-z]?[0-9]{3}|[0-9.,]{1,4}(?: ?M\b| ?(?:de )?Mil))/i
+body		__hk_bigmoney	/(?:EURO?|USD?|GBP|CFA|\&\#163;|\$|sum of).{0,4}(?:[0-9]{3}[^0-9a-z]?[0-9]{3}|[0-9.,]{1,4}(?: ?M\b| ?(?:de )?Mil))/i
 meta		HK_MUCHMONEY	__hk_million || __hk_million2 || __hk_hthousand || __hk_bigmoney
 describe	HK_MUCHMONEY	Message refers to hundreds of thousands or millions
 
