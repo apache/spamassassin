@@ -68,6 +68,11 @@ redirector_pattern m'^http:/*(?:\w+\.)?google(?:\.\w{2,3}){1,2}/pagead/iclk\?.*?
 #	-> http://www.ixp.jp/univac/
 redirector_pattern m'^http:/*(?:\w+\.)?aol\.com/redir\.adp\?.*(?<=[?&])_url=(.*?)(?:$|[&\#])'i
 
+# Facebook redirector
+# http://www.facebook.com/l/;www.example.com
+#       -> http://www.example.com/
+redirector_pattern m'^https?/*(?:\w+\.)?facebook\.com/l/;(.*)'i
+
 # Removed Feb 4, 2008.  jm points out that this redirector pattern is
 # redundant.
 # 
