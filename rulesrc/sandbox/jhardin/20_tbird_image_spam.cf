@@ -19,33 +19,34 @@ describe   __FORGED_TBIRD_IMG      Possibly forged Thunderbird image spam
 # Additional meta spotted by Alex Broens.  Still might FP on legit mail with
 # manually typed addresses or undisclosed recipients.
 
+header     __TO_UNDISCLOSED        To =~ /undisclosed-recipients:/i
 header     __TO_NO_ARROWS_R        To !~ />$/
 
-meta       FORGED_TBIRD_IMG_ARROW  __FORGED_TBIRD_IMG && __TO_NO_ARROWS_R
+meta       FORGED_TBIRD_IMG_ARROW  __FORGED_TBIRD_IMG && __TO_NO_ARROWS_R && !__TO_UNDISCLOSED
 
 describe   FORGED_TBIRD_IMG_ARROW  Likely forged Thunderbird image spam
 score      FORGED_TBIRD_IMG_ARROW  0.8
 
 # Try it against other stuff, too,
 # "To without <>" might be useful outside the context of image spam
-meta       TO_NO_BRKTS_HTML_IMG    __TO_NO_ARROWS_R && HTML_MESSAGE && __ONE_IMG
+meta       TO_NO_BRKTS_HTML_IMG    __TO_NO_ARROWS_R && !__TO_UNDISCLOSED && HTML_MESSAGE && __ONE_IMG
 score      TO_NO_BRKTS_HTML_IMG    0.20
 
-meta       TO_NO_BRKTS_HTML_ONLY   __TO_NO_ARROWS_R && MIME_HTML_ONLY
+meta       TO_NO_BRKTS_HTML_ONLY   __TO_NO_ARROWS_R && !__TO_UNDISCLOSED && MIME_HTML_ONLY
 score      TO_NO_BRKTS_HTML_ONLY   0.20
 
-meta       TO_NO_BRKTS_DYNIP       __TO_NO_ARROWS_R && RDNS_DYNAMIC
+meta       TO_NO_BRKTS_DYNIP       __TO_NO_ARROWS_R && !__TO_UNDISCLOSED && RDNS_DYNAMIC
 score      TO_NO_BRKTS_DYNIP       0.20
 
-meta       TO_NO_BRKTS_NORDNS      __TO_NO_ARROWS_R && RDNS_NONE
+meta       TO_NO_BRKTS_NORDNS      __TO_NO_ARROWS_R && !__TO_UNDISCLOSED && RDNS_NONE
 score      TO_NO_BRKTS_NORDNS      0.20
 
 ifplugin Mail::SpamAssassin::Plugin::FreeMail
-  meta       TO_NO_BRKTS_FREEMAIL    __TO_NO_ARROWS_R && (FREEMAIL_FROM || FREEMAIL_REPLYTO)
+  meta       TO_NO_BRKTS_FREEMAIL    __TO_NO_ARROWS_R && !__TO_UNDISCLOSED && (FREEMAIL_FROM || FREEMAIL_REPLYTO)
   score      TO_NO_BRKTS_FREEMAIL    0.20
 endif
 
-meta       TO_NO_BRKTS_FROM_MSSP   __TO_NO_ARROWS_R && __FROM_MISSPACED
+meta       TO_NO_BRKTS_FROM_MSSP   __TO_NO_ARROWS_R && !__TO_UNDISCLOSED && __FROM_MISSPACED
 score      TO_NO_BRKTS_FROM_MSSP   1.00
 describe   TO_NO_BRKTS_FROM_MSSP   Multiple formatting errors
 
