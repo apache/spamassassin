@@ -27,5 +27,5 @@ meta	HK_NAME_FROM		__HK_NAME_FROM && !FREEMAIL_FROM
 meta	HK_NAME_FM_FROM		__HK_NAME_FROM && FREEMAIL_FROM
 
 # From Mike Cappella
-header	FROM_CONTAINS_TAB	From:raw =~ /^\t/m
+header	FROM_CONTAINS_TAB	From:raw =~ /\A\t/m
 
