@@ -27,13 +27,10 @@ meta		HK_FAKENAME_EBAY	__HK_NAME_EBAY && !__HK_HELO_EBAY
 
 body		__hk_unsub	/\bto unsub(?:scribe)?\b/i
 
-#body		__hk_million	/(?:(?:[0-9]{3}[ ,.]?){2,4}|[0-9] ?M\b|mill(?:(?:es?|ons?)(?: de\b)?|ion)).{0,18}(?:\$|£|eur\b|usd\b|gbp\b|cfa\b|euros?\b|dollard?s?\b|pounds?\b|francs?\b)/i
-body		__hk_million	/(?:(?:[0-9]{3}[ ,.]?){2,4}|[0-9] ?M\b|mill(?:(?:es?|ons?)(?: de\b)?|ion)).{0,18}(?:\$|eur\b|usd\b|gbp\b|cfa\b|euros?\b|dollard?s?\b|pounds?\b|francs?\b)/i
-#body		__hk_million2	/(?:\$|£|eur|usd|gbp|cfa|euros?|dollard?s?|pounds?|francs?)(?: de\b)? mill(?:(?:es?|ons?)|ion)/
-body		__hk_million2	/(?:\$|eur|usd|gbp|cfa|euros?|dollard?s?|pounds?|francs?)(?: de\b)? mill(?:(?:es?|ons?)|ion)/
-body		__hk_hthousand	/hundred.{0,20}thousand.{0,20}(?:eur|usd|gbp|cfa|euros?|dollard?s?|pounds?|francs?)\b/i
-#body		__hk_bigmoney	/(?:EURO?|USD?|GBP|CFA|\&\#163;|£|\$|sum of).{0,4}(?:[0-9]{3}[^0-9a-z]?[0-9]{3}|[0-9.,]{1,4}(?: ?M\b| ?(?:de )?Mil))/i
-body		__hk_bigmoney	/(?:EURO?|USD?|GBP|CFA|\&\#163;|\$|sum of).{0,4}(?:[0-9]{3}[^0-9a-z]?[0-9]{3}|[0-9.,]{1,4}(?: ?M\b| ?(?:de )?Mil))/i
+body		__hk_million	/(?:(?:[0-9]{3}[ ,.]?){2,4}|[0-9] ?M\b|mill(?:(?:es?|ons?)(?: de\b)?|ion)).{0,18}(?:\$|\xa3|\xa4|eur\b|usd\b|gbp\b|cfa\b|euro?s?\b|dollard?s?\b|pounds?\b|francs?\b)/i
+body		__hk_million2	/(?:\$|\xa3|\xa4|eur|usd?|gbp|cfa|euro?s?|dollard?s?|pounds?|francs?)(?: de\b)? mill(?:(?:es?|ons?)|ion)/
+body		__hk_hthousand	/hundred.{0,20}thousand.{0,20}(?:eur|usd|gbp|cfa|euro?s?|dollard?s?|pounds?|francs?)\b/i
+body		__hk_bigmoney	/(?:EURO?|USD?|GBP|CFA|\&\#163;|\xa3|\xa4|\$|sum of).{0,4}(?:[0-9]{3}[^0-9a-z]?[0-9]{3}|[0-9.,]{1,4}(?: ?M\b| ?(?:de )?Mil))/i
 meta		HK_MUCHMONEY	__hk_million || __hk_million2 || __hk_hthousand || __hk_bigmoney
 describe	HK_MUCHMONEY	Message refers to hundreds of thousands or millions
 
