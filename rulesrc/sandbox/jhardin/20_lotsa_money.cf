@@ -25,7 +25,7 @@ meta     MONEY_FROM_MISSP LOTS_OF_MONEY && __FROM_MISSPACED
 describe MONEY_FROM_MISSP Lots of money and misspaced From
 
 meta     MONEY_TO_NO_R    LOTS_OF_MONEY && __TO_NO_ARROWS_R
-describe MONEY_TO_NO_R    Lots of money and bare To
+describe MONEY_TO_NO_R    Lots of money and bare, missing or undisclosed To
 
 meta     MONEY_FORM       LOTS_OF_MONEY && (FILL_THIS_FORM_LONG || FILL_THIS_FORM_ML)
 describe MONEY_FORM       Lots of money if you fill out a form
@@ -49,7 +49,7 @@ describe LOTTO_WIN_01     Winning *
 score    LOTTO_WIN_01     0.20
 
 describe LOTTO_YOU_WON_03 You have been Chosen
-body     LOTTO_YOU_WON_03 /\byou\s(?:were|have be(?:en)?)(?:\srandomly)?\s(?:selected|chosen|choosing|picked)?(:\sat\srandom)?/i 
+body     LOTTO_YOU_WON_03 /\b(?:your?|win+ing|win+ers?|beneficiaries|participants?|individuals?)(?:\s[-a-z\s]{4,30})?\s(?:w(?:ere|as)|ha(?:ve|s) be(?:en)?)(?:\srandomly)?\s(?:selected|chosen|cho+sing|picked)?(:\s[a-z\s]{2,30}\srandom|randomly)?/i 
 score    LOTTO_YOU_WON_03 0.50 
 
 body     LOTTO_AGENT      /\b(?:claim(?:s|ing)?|fiduciary|reimbursement)\s?(?:agent|manager|officer)/i
@@ -68,7 +68,7 @@ header   LOTTO_AGENT_RPLY Reply-To =~ /(?:claim(?:s|ing)?|fiduciary|dispatch|rei
 describe LOTTO_AGENT_RPLY Claims Agent
 score    LOTTO_AGENT_RPLY 0.50
 
-body     LOTTO_ADMITS     /\b(?:online|ballot|(?:inter)?national|internet)\slottery/i
+body     LOTTO_ADMITS     /\b(?:on-?line|e-?mail|ballot|(?:inter)?national|euro ?mil+ions?|internet|mega)\slot(?:to|tery|erie)/i
 describe LOTTO_ADMITS     Admits to being a lottery
 score    LOTTO_ADMITS     0.20
 
