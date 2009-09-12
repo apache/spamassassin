@@ -49,7 +49,7 @@ describe LOTTO_WIN_01     Winning *
 score    LOTTO_WIN_01     0.20
 
 describe LOTTO_YOU_WON_03 You have been Chosen
-body     LOTTO_YOU_WON_03 /\b(?:your?|win+ing|win+ers?|beneficiaries|participants?|individuals?)(?:\s[-a-z\s]{4,30})?\s(?:w(?:ere|as)|ha(?:ve|s) be(?:en)?)(?:\srandomly)?\s(?:selected|chosen|cho+sing|picked)?(:\s[a-z\s]{2,30}\srandom|randomly)?/i 
+body     LOTTO_YOU_WON_03 /\b(?:your?|win+ing|win+ers?|beneficiaries|participants?|individuals?)(?:\s[-a-z\s]{4,30})?\s(?:w(?:ere|as)|ha(?:ve|s) be(?:en)?)\s(?:randomly\s(?:selected|chosen|cho+sing|picked)|(?:selected|chosen|cho+sing|picked)\s(?:[a-z\s]{2,30}\srandom|randomly))/i 
 score    LOTTO_YOU_WON_03 0.50 
 
 body     LOTTO_AGENT      /\b(?:claim(?:s|ing)?|fiduciary|reimbursement)\s?(?:agent|manager|officer)/i
