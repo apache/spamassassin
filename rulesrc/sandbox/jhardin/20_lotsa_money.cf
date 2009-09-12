@@ -1,10 +1,10 @@
 
 ifplugin Mail::SpamAssassin::Plugin::ReplaceTags
-  replace_tag  CURRENCY   [\(\[]?(?:GBP|=[Aa][34]|\xa3|\xa4|EUR|[Ee]uros?|US[D\$]{1,2}|\$)[\]\)]?
+  replace_tag  CURRENCY   [\(\[]?(?:GBP|=[Aa][34]|\xa3|[Pp]ounds\s[Ss]terling|\xa4|EUR|[Ee]uros?|US[D\$]{1,2}|\$)[\]\)]?
   replace_tag  GB_UK      \b(?:U\.?K\.?|(?:Great\s)?Brit(?:ain|ish))\b
 
   body     __LOTSA_MONEY_01   /<CURRENCY>\s?\d[\d.,\sO]{5,20}[\dO]/
-  body     __LOTSA_MONEY_02   /\d[\d.,\sO]{5,20}[\dO]\s?<CURRENCY>/
+  body     __LOTSA_MONEY_02   /\d[\d.,\sO]{5,20}[\dO]\s?(?:<CURRENCY>|Pounds)/
   body     __LOTSA_MONEY_03   /<CURRENCY>\s?\d(?:[\d.,\sO]{0,4}[\dO])?\s?(?:[Mm]\b|[Mm][Ii][Ll][Ll]|[Hh][Uu][Nn][Dd][Rr][Ee][Dd]|[Tt][Hh][Oo][Uu][Ss][Aa][Nn][Dd])/
   body     __LOTSA_MONEY_04   /(?:mill(?:e|ion)|hundred[^\.]{1,20}thousand)[^\.]{1,50}(?:(?:U\.?S\.?\s)?dollars|USD|<GB_UK>\spounds|(?:<GB_UK>\s)?pounds\ssterling|euros?|francs?)/i
   replace_rules   __LOTSA_MONEY_01 __LOTSA_MONEY_02 __LOTSA_MONEY_03 __LOTSA_MONEY_04
@@ -49,7 +49,7 @@ describe LOTTO_WIN_01     Winning *
 score    LOTTO_WIN_01     0.20
 
 describe LOTTO_YOU_WON_03 You have been Chosen
-body     LOTTO_YOU_WON_03 /\b(?:your?|win+ing|win+ers?|beneficiaries|participants?|individuals?)(?:\s[-a-z\s]{4,30})?\s(?:w(?:ere|as)|ha(?:ve|s) be(?:en)?)\s(?:randomly\s(?:selected|chosen|cho+sing|picked)|(?:selected|chosen|cho+sing|picked)\s(?:[a-z\s]{2,30}\srandom|randomly))/i 
+body     LOTTO_YOU_WON_03 /\b(?:your?|win+ing|win+ers?|beneficiaries|participants?|individuals?)(?:\s[-a-z\s]{4,30})?\s(?:w(?:ere|as)|ha(?:ve|s) be(?:en)?)\s(?:randomly\s(?:selected|chosen|cho+sing|picked)|(?:selected|chosen|cho+sing|picked)\s(?:[a-z\s]{2,40}\srandom|randomly|online|lottery))/i 
 score    LOTTO_YOU_WON_03 0.50 
 
 body     LOTTO_AGENT      /\b(?:claim(?:s|ing)?|fiduciary|reimbursement)\s?(?:agent|manager|officer)/i
@@ -75,8 +75,8 @@ score    LOTTO_ADMITS     0.20
 meta     MONEY_LOTTERY    LOTS_OF_MONEY && (LOTTO_WINNINGS || LOTTO_WIN_01 || LOTTO_YOU_WON_03 || LOTTO_AGENT || LOTTO_DEPT || LOTTO_AGENT_FM || LOTTO_AGENT_RPLY || LOTTO_ADMITS || DEAR_WINNER)
 describe MONEY_LOTTERY    Lots of money from a lottery
 
-body     __DEAL           /\b(?:business|financial|this)\s(?:deal|transaction)/i
-body     __HUSH_HUSH      /\b(?:confidential|private|secre(?:t|cy)|sensitive)\b/i
+body     __DEAL           /\b(?:business|financial|this|the|mutual)\s(?:deal|transaction|proposal)/i
+body     __HUSH_HUSH      /\b(?:confidential(?:ity)?|private|secre(?:t|cy)|sensitive)\b/i
 
 body     PCT_FOR_YOU      /\b(?:\d+|ten|[a-z]+teen|(?:twen|thir|fou?r)ty(?:-?[a-z]+)?)\s?(?:%|percent)\s(?:for|to|as)\syour?/i
 describe PCT_FOR_YOU      X% for you
@@ -84,9 +84,27 @@ describe PCT_FOR_YOU      X% for you
 meta     MONEY_DEAL       LOTS_OF_MONEY && (__DEAL + __HUSH_HUSH + PCT_FOR_YOU + __FRAUD_IOU + __FRAUD_JYG) > 2
 describe MONEY_DEAL       Lots of money in a suspicious deal
 
-body     __ATM_CARD       /\byour\satm\scard/i
-
+body     __ATM_CARD       /\b(?:your|the)\satm\scard/i
 meta     MONEY_ATM        LOTS_OF_MONEY && __ATM_CARD
 describe MONEY_ATM        Lots of money on an ATM card
 score    MONEY_ATM        0.1
+
+body     __YOU_INHERIT    /\byour\s[a-z\s]{0,30}inheritance\b/i
+body     __I_INHERIT      /\bI\s[a-z\s]{0,30}inherited\b/i
+body     __I_WILL_YOU     /\bwill\s(?:[a-z\s]{0,20}\s(?:fortune|money)\s)?to\syou\b/i
+body     __NEXT_OF_KIN    /\bnext\sof\skin\b/i
+meta     MONEY_INHERIT    LOTS_OF_MONEY && (__YOU_INHERIT || __I_INHERIT || __I_WILL_YOU || __NEXT_OF_KIN)
+describe MONEY_INHERIT    Lots of money from a dead guy
+score    MONEY_INHERIT    0.1
+
+body     __WIRE_XFR       /\bwire\stransfer/i
+body     __CASHIERS_CHK   /\bcashier'?s?\sche(?:ck|que)/i
+meta     MONEY_XFER       LOTS_OF_MONEY && (__WIRE_XFR || __CASHIERS_CHK)
+describe MONEY_XFER       Lots of money being transferred
+score    MONEY_XFER       0.1
+
+body     __INTL_BANK      /\binternational\sbank\b/i
+meta     MONEY_INTL_BK    LOTS_OF_MONEY && __INTL_BANK
+describe MONEY_INTL_BK    Lots of money from an International Bank
+score    MONEY_INTL_BK    0.1
 
