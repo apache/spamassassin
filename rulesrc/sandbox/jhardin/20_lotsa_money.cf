@@ -6,7 +6,7 @@ ifplugin Mail::SpamAssassin::Plugin::ReplaceTags
   body     __LOTSA_MONEY_01   /<CURRENCY>\s?\d[\d.,\sO]{5,20}[\dO]/
   body     __LOTSA_MONEY_02   /\d[\d.,\sO]{5,20}[\dO]\s?(?:<CURRENCY>|Pounds)/
   body     __LOTSA_MONEY_03   /<CURRENCY>\s?\d(?:[\d.,\sO]{0,4}[\dO])?\s?(?:[Mm]\b|[Mm][Ii][Ll][Ll]|[Hh][Uu][Nn][Dd][Rr][Ee][Dd]|[Tt][Hh][Oo][Uu][Ss][Aa][Nn][Dd])/
-  body     __LOTSA_MONEY_04   /(?:mill(?:e|ion)|hundred[^\.]{1,20}thousand)[^\.]{1,50}(?:(?:U\.?S\.?\s)?dollars|USD|<GB_UK>\spounds|(?:<GB_UK>\s)?pounds\ssterling|euros?|francs?)/i
+  body     __LOTSA_MONEY_04   /(?:mill(?:e|ion(?!s))|hundred(?!s)[^\.]{1,20}thousand(?!s))[^\.]{1,50}(?:(?:U\.?S\.?\s)?dollars|USD|<GB_UK>\spounds|(?:<GB_UK>\s)?pounds\ssterling|euros?|francs?)/i
   replace_rules   __LOTSA_MONEY_01 __LOTSA_MONEY_02 __LOTSA_MONEY_03 __LOTSA_MONEY_04
 
   meta     LOTS_OF_MONEY    (__LOTSA_MONEY_01 || __LOTSA_MONEY_02 || __LOTSA_MONEY_03 || __LOTSA_MONEY_04)
@@ -91,7 +91,7 @@ score    MONEY_ATM        0.1
 
 body     __YOU_INHERIT    /\byour\s[a-z\s]{0,30}inheritance\b/i
 body     __I_INHERIT      /\bI\s[a-z\s]{0,30}inherited\b/i
-body     __I_WILL_YOU     /\bwill\s(?:[a-z\s]{0,20}\s(?:fortune|money)\s)?to\syou\b/i
+body     __I_WILL_YOU     /\bwill(?:ed)?\s(?:[a-z\s]{0,20}\s(?:fortune|money)\s)?to\syou\b/i
 body     __NEXT_OF_KIN    /\bnext\sof\skin\b/i
 meta     MONEY_INHERIT    LOTS_OF_MONEY && (__YOU_INHERIT || __I_INHERIT || __I_WILL_YOU || __NEXT_OF_KIN)
 describe MONEY_INHERIT    Lots of money from a dead guy
