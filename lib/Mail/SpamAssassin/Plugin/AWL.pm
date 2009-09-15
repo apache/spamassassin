@@ -339,6 +339,7 @@ sub check_from_in_auto_whitelist {
     my $timer = $self->{main}->time_method("total_awl");
 
     my $from = lc $pms->get('From:addr');
+  # dbg("auto-whitelist: From: $from");
     return 0 unless $from =~ /\S/;
 
     # find the earliest usable "originating IP".  ignore private nets
@@ -391,7 +392,8 @@ sub check_from_in_auto_whitelist {
     
       dbg("auto-whitelist: AWL active, pre-score: %s, autolearn score: %s, ".
 	  "mean: %s%s, IP: %s, address: %s %s",
-          $pms->{score}, $awlpoints, $meanscore || 'undef',
+          $pms->{score}, $awlpoints,
+          !defined $meanscore ? 'undef' : sprintf("%.3f",$meanscore),
           !defined $signeravg ? '' : sprintf(", signer_avg: %.2f",$signeravg),
           $origip || 'undef',
           $from,  $signedby ? "SIGNED by $signedby" : '(not signed)');
