@@ -12,7 +12,7 @@ BEGIN {
 exit if $SKIP_SPAMD_TESTS;
 
 # ---------------------------------------------------------------------------
-# If user A define's a user rule (when allow_user_rules is enabled) it affects
+# If user A defines a user rule (when allow_user_rules is enabled) it affects
 # user B if they also set a score for that same rule name or create a user rule
 # with the same name.
 

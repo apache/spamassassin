@@ -3329,9 +3329,12 @@ sub new {
   $self->{bayes_ignore_to} = { };
 
   $self->{whitelist_auth} = { };
+  $self->{def_whitelist_auth} = { };
   $self->{whitelist_from} = { };
   $self->{whitelist_allows_relays} = { };
   $self->{blacklist_from} = { };
+  $self->{whitelist_from_rcvd} = { };
+  $self->{def_whitelist_from_rcvd} = { };
 
   $self->{blacklist_to} = { };
   $self->{whitelist_to} = { };
