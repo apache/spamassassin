@@ -43,7 +43,7 @@ case "$1" in
 	RETVAL=$?
         echo
 	if [ $RETVAL = 0 ]; then
-		touch /var/lock/subsys/spamassassin
+		touch /var/lock/subsys/spamd
 	fi
         ;;
   stop)
@@ -53,7 +53,7 @@ case "$1" in
         RETVAL=$?
         echo
 	if [ $RETVAL = 0 ]; then
-		rm -f /var/lock/subsys/spamassassin
+		rm -f /var/lock/subsys/spamd
 		rm -f $SPAMD_PID
 	fi
         ;;
@@ -63,7 +63,7 @@ case "$1" in
         $0 start
         ;;
   condrestart)
-       [ -e /var/lock/subsys/spamassassin ] && $0 restart
+       [ -e /var/lock/subsys/spamd ] && $0 restart
        ;;
   status)
 	status spamd
