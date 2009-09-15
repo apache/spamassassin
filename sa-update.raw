@@ -119,6 +119,8 @@ my %valid_GPG = (
 #
 my @channels = ( 'updates.spamassassin.org' );
 
+my $IGNORE_MIRBY_OLDER_THAN = (24 * 60 * 60 * 7);       # 1 week
+
 ##############################################################################
 
 use constant MIRBY_DOWNLOADED => -1;
@@ -138,6 +140,7 @@ GetOptions(
   'help|h|?'                            => \$opt{'help'},
   'checkonly'                           => \$opt{'checkonly'},
   'allowplugins'                        => \$opt{'allowplugins'},
+  'refreshmirrors'                      => \$opt{'refreshmirrors'},
 
   # allow multiple of these on the commandline
   'gpgkey=s'				=> $opt{'gpgkey'},
@@ -508,13 +511,23 @@ foreach my $channel (@channels) {
   if (!$instfile) {
     # Read in the MIRRORED.BY file if it exists
     if (open(MIRBY, $mirby_path)) {
-      local $/ = undef;
-      $mirby = <MIRBY>;
-      close(MIRBY);
-
       $mirby_time = (stat $mirby_path)[9];
+
+      if ($opt{'refreshmirrors'}) {
+        dbg("channel: --refreshmirrors used, forcing refresh");
+        $mirby = $mirby_time = undef;
+      } elsif (time - $mirby_time > $IGNORE_MIRBY_OLDER_THAN) {
+        dbg("channel: MIRRORED.BY file is too old, forcing refresh");
+        $mirby = $mirby_time = undef;
+      }
+      else {
+        local $/ = undef;
+        $mirby = <MIRBY>;
+      }
+      close(MIRBY);
     }
-    else {
+
+    if (!defined $mirby) {
       # We don't currently have the list of mirrors, so go grab it.
       dbg("channel: no MIRRORED.BY file available");
       my @mirrors = do_txt_query("mirrors.$channel");
@@ -1398,6 +1411,7 @@ Options:
   --updatedir path        Directory to place updates, defaults to the
                           SpamAssassin site rules directory
                           (default: /var/lib/spamassassin/<version>)
+  --refreshmirrors        Force the MIRRORED.BY file to be updated
   -D, --debug [area=n,...]  Print debugging messages
   -V, --version           Print version
   -h, --help              Print usage message
@@ -1528,6 +1542,12 @@ To import multiple keys, use the option multiple times.  i.e.:
 	sa-update --import channel1-GPG.KEY --import channel2-GPG.KEY
 
 Note: use of this option automatically enables GPG verification.
+
+=item B<--refreshmirrors>
+
+Force the list of sa-update mirrors for each channel, stored in the MIRRORED.BY
+file, to be updated.  By default, the MIRRORED.BY file will be cached for up to
+7 days after each time it is downloaded.
 
 =item B<--updatedir>
 
