@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron wt-en1 wt-en2 wt-jp1 wt-jp2; day 2: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi dos hege wt-en1 wt-en2 wt-en3 wt-jp1 wt-jp2; day 3: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi dos hege wt-en1 wt-en2 wt-en3 wt-jp1 wt-jp2
+# with results from: day 1: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi wt-en1 wt-en2 wt-jp1 wt-jp2; day 2: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron wt-en1 wt-en2 wt-jp1 wt-jp2; day 3: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi dos hege wt-en1 wt-en2 wt-en3 wt-jp1 wt-jp2
 
 # tflags userconf
 ALL_TRUSTED
@@ -159,9 +159,6 @@ FB_SOFTTABS
 
 # good enough
 FB_TIRED_OF_YOUR
-
-# good enough
-FB_ULTRA_ALLURE
 
 # good enough
 FB_YOUR_WEIGHT
@@ -416,9 +413,6 @@ LIVEFILESTORE
 LOTTERY_PH_004470
 
 # good enough
-LOTTO_ADMITS
-
-# good enough
 LOTTO_AGENT
 
 # good enough
@@ -426,6 +420,9 @@ LOTTO_WINNINGS
 
 # good enough
 LOTTO_WIN_01
+
+# good enough
+LOTTO_YOU_WON_03
 
 # good enough
 L_SPAM_TOOL_13
@@ -449,6 +446,9 @@ MONEY_DEAL
 MONEY_FORM
 
 # good enough
+MONEY_INHERIT
+
+# good enough
 MONEY_LOTTERY
 
 # good enough
@@ -462,9 +462,6 @@ NO_RECEIVED
 
 # tflags userconf
 NO_RELAYS
-
-# good enough
-PART_CID_STOCK
 
 # good enough
 PCT_FOR_YOU
@@ -674,13 +671,7 @@ SANE_2b173a7fb7518c75ac8a2d294d773fd8
 SANE_4ef8302546bf270a19baf98508afacc4
 
 # good enough
-SANE_57eb6fb7217efcb7a706124454426ee6
-
-# good enough
 SANE_7429530a7398f43f1f1b795f9420714e
-
-# good enough
-SANE_c51de255d6cba77d524cf655d5bcee17
 
 # good enough
 SANE_d0d2b0f6373bf91253d66dd74c594b87
@@ -755,10 +746,19 @@ TVD_RCVD_SINGLE
 TVD_VISIT_PHARMA
 
 # good enough
-LOTTO_YOU_WON_03
+FROM_CONTAINS_TAB
 
 # good enough
-MONEY_INHERIT
+FS_APPROVE_YOU
+
+# good enough
+LOTTO_DEPT
+
+# good enough
+LOTTO_RELATED
+
+# good enough
+SANE_d1ef7f3b64327d9d1c3535a0b7d7de11
 
 # tflags userconf
 UNPARSEABLE_RELAY
@@ -851,9 +851,6 @@ XMAILER_MIMEOLE_OL_3D61D
 XMAILER_MIMEOLE_OL_4B815
 
 # good enough
-XMAILER_MIMEOLE_OL_4EEDB
-
-# good enough
 XMAILER_MIMEOLE_OL_7533E
 
 # good enough
@@ -864,9 +861,6 @@ XMAILER_MIMEOLE_OL_8627E
 
 # good enough
 XMAILER_MIMEOLE_OL_91287
-
-# good enough
-XMAILER_MIMEOLE_OL_C65FA
 
 # good enough
 XMAILER_MIMEOLE_OL_CAC8F
