@@ -45,6 +45,7 @@ use strict;
 use warnings;
 use bytes;
 use re 'taint';
+use NetAddr::IP;
 
 use Mail::SpamAssassin;
 use Mail::SpamAssassin::Logger;
@@ -312,9 +313,17 @@ sub pack_addr {
   } elsif ($origip =~ /:/  &&
            $origip =~
            /^ [0-9a-f]{0,4} (?: : [0-9a-f]{0,4} | \. [0-9]{1,3} ){2,9} $/xsi) {
-    # looks like an IPv6 address;  TODO: put it into a canonical form
-    $origip = uc($origip);
+    # looks like an IPv6 address
+    my $origip_obj = NetAddr::IP->new6($origip);
+    if (!defined $origip_obj) {  # invalid IPv6 address
+      dbg("auto-whitelist: bad IPv6 address $origip");
+      $origip = 'junk-' . $origip;
+    } else {
+      $origip = $origip_obj->full6;  # string in a canonical form
+      $origip =~ s/(:[0-9a-f]{4}){5}\z//si;  # keep only the /48 network addr
+    }
   } else {
+    dbg("auto-whitelist: bad IP address $origip");
     $origip =~ s/[^0-9A-Fa-f:.]/_/gs;	# paranoia
     $origip = 'junk-' . $origip;
   }

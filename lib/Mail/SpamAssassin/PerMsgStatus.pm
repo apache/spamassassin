@@ -1556,6 +1556,7 @@ sub _get {
   else {
     my @results = $getraw ? $self->{msg}->raw_header($request)
                           : $self->{msg}->get_header($request);
+  # dbg("message: get(%s) = %s", $request, join(", ",@results));
     if (@results) {
       $result = join('', @results);
     } else {  # metadata
