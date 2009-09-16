@@ -261,42 +261,6 @@ sub get_addr_entry {
   return $entry;
 }
 
-=head2 get_signer_reputation
-
-=cut
-
-sub get_signer_reputation {
-  my ($self, $addr, $signedby) = @_;
-
-  my $signer_avg_score;
-  if ($self->{_with_awl_signer} && defined $signedby && $signedby ne '') {
-    my $sql = "SELECT sum(totscore), sum(count) FROM awl";
-    my @signedby = split(' ', lc $signedby);
-    if (@signedby == 1) {
-      $sql .= " WHERE signedby = ?";
-    } elsif (@signedby > 1) {
-      $sql .= " WHERE signedby IN (" . join(',', ('?') x @signedby) . ")";
-    }
-    my $sth = $self->{dbh}->prepare($sql);
-    my $rc = $sth->execute(@signedby);
-    if (!$rc) { # there was an error, but try to go on
-      my $err = $self->{dbh}->errstr;
-      dbg("auto-whitelist: sql-based get_signer_reputation: SQL error: $err");
-    }
-    else {
-      my $aryref = $sth->fetchrow_arrayref();
-      my($totscore,$totcount) = !defined($aryref) ? (0,0) : @$aryref;
-      if (defined $totcount && $totcount > 0) {
-        $signer_avg_score = $totscore/$totcount;
-        dbg("auto-whitelist: sql-based signer avg score %.3f",
-            $signer_avg_score);
-      }
-      $sth->finish();
-    }
-  }
-  return $signer_avg_score;
-}
-
 =head2 add_score
 
 public instance (\%) add_score (\% $entry, Integer $score)

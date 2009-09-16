@@ -164,23 +164,6 @@ sub check_address {
 
 ###########################################################################
 
-=item $meanscore = awl->check_signer_reputation($addr, $signedby);
-
-This method will return a mean score of all messages signed by the
-given signing identity, or undef if no such entries exist.
-
-=cut
-
-sub check_signer_reputation {
-  my ($self, $addr, $signedby) = @_;
-
-  return undef if !defined $self->{checker};
-  return undef if !$self->{checker}->UNIVERSAL::can("get_signer_reputation");
-  return $self->{checker}->get_signer_reputation($addr, $signedby);
-}
-
-###########################################################################
-
 =item awl->count();
 
 This method will return the count of messages used in determining the

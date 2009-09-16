@@ -382,14 +382,6 @@ sub check_from_in_auto_whitelist {
       my $delta = 0;
       my $signeravg;
 
-    ### commented out to avoid additional load on a SQL server for now;
-    ### the average score (reputation) is still there and is accessible offline
-    #
-    # if (defined $signedby) {
-    #   my $timer = $self->{main}->time_method("check_awl_reput");
-    #   $signeravg = $whitelist->check_signer_reputation($from, $signedby);
-    # }
-    
       dbg("auto-whitelist: AWL active, pre-score: %s, autolearn score: %s, ".
 	  "mean: %s%s, IP: %s, address: %s %s",
           $pms->{score}, $awlpoints,
