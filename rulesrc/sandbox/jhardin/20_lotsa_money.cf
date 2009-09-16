@@ -40,7 +40,7 @@ meta MONEY_ADVANCE_FEE_4 (__FRAUD_KJV + __FRAUD_IRJ + __FRAUD_NEB + __FRAUD_XJR 
 
 
 # The existing LOTTO rules should be updated if this works out
-body     LOTTO_WINNINGS   /(?:claim|transfer(?:\s\w+)?)\s(?:your|of)\s(?:win+ings?|money|(?:cash\s)?prize)/i
+body     LOTTO_WINNINGS   /(?:claim|transfer(?:\s\w+)?)\s(?:your|of|the)\s(?:win+ings?|money|(?:cash\s)?prize|award)/i
 describe LOTTO_WINNINGS   Claim your winnings
 score    LOTTO_WINNINGS   0.25
 
@@ -53,10 +53,10 @@ body     LOTTO_YOU_WON_03 /\b(?:your?|win+ing|win+ers?|beneficiaries|participant
 score    LOTTO_YOU_WON_03 0.50 
 
 describe LOTTO_YOU_WON_04 You won!
-body     __YOU_WON_04A    /\byou\s(?:\w+\s)?w[io]n/i
-body     __YOU_WON_04B    /\bw[io]n\s(?:\w+\s)?you/i
+body     __YOU_WON_04A    /\byour?\s(?:\w+\s)?w[io]n\b/i
+body     __YOU_WON_04B    /\bw[io]n\s(?:(?:for|by)\s)?your?\b/i
 meta     LOTTO_YOU_WON_04 __YOU_WON_04A || __YOU_WON_04B
-score    LOTTO_YOU_WON_04 0.20 
+score    LOTTO_YOU_WON_04 0.10 
 
 body     LOTTO_AGENT      /\b(?:claim(?:s|ing)?(?:\sprocessing)?|fiduciary|fiducial|reimbursement|prize\stransfer|international\sremittance)\s?(?:agent|manager|officer)/i
 describe LOTTO_AGENT      Claims Agent
@@ -74,7 +74,7 @@ header   LOTTO_AGENT_RPLY Reply-To =~ /(?:claim(?:s|ing)?(?:\sprocessing)?|fiduc
 describe LOTTO_AGENT_RPLY Claims Agent
 score    LOTTO_AGENT_RPLY 0.50
 
-body     __LOTTO_ADMITS_1 /\b(?:on-?line|e-?mail|ballot|(?:inter)?national|state|(?:UK|euro)[- ]?mil+ions?|Canada|Microsoft|MSN|internet|mega|this)(?:\s\w+)?\s(?:lot(?:to|tery|erie)|sweepstake)/i
+body     __LOTTO_ADMITS_1 /\b(?:on-?line|e-?mail|ballot|(?:inter)?national|state|(?:UK|euro)[- ]?mil+ions?|Canada|Microsoft|MSN|internet|mega|jackpot|this)(?:\s\w+)?\s(?:lot(?:to|tery|erie)|sweepstake)/i
 body     __LOTTO_ADMITS_2 /\b(?:lot(?:to|tery|erie)|sweepstakes)\s(?:inter)?na[tz]ional/i
 uri      __LOTTO_ADMITS_3 /lottery/i
 meta     LOTTO_ADMITS     __LOTTO_ADMITS_1 || __LOTTO_ADMITS_2 || __LOTTO_ADMITS_3
@@ -88,31 +88,38 @@ score    LOTTO_RELATED    0.10
 meta     MONEY_LOTTERY    LOTS_OF_MONEY && (LOTTO_WINNINGS + LOTTO_WIN_01 + LOTTO_YOU_WON_03 + LOTTO_YOU_WON_04 + LOTTO_AGENT + LOTTO_DEPT + LOTTO_AGENT_FM + LOTTO_AGENT_RPLY + LOTTO_ADMITS + LOTTO_RELATED + DEAR_WINNER > 1)
 describe MONEY_LOTTERY    Lots of money from a lottery
 
-body     __DEAL           /\b(?:business|financial|this|the|mutual)\s(?:deal|transaction|proposal)/i
+body     __DEAL           /\b(?:business|financial|this|the|mutual)\s(?:deal|transaction|proposal|offer)/i
 body     __HUSH_HUSH      /\b(?:confidential(?:ity)?|private|secre(?:t|cy)|sensitive)\b/i
+body     __IS_LEGAL       /\bthis\s(?:deal|offer|transaction|proposal|exchange|arrangement)?\sis\s(?:(?:guaranteed|completely|absolutely|perfectly|100%)\s)?legal\b/i
+body     __NOT_SCAM       /\bnot\sa\sscam\b/i
+body     __BACK_SCRATCH   /\bmutual+y?\sbenefi(?:t|cial)\b/i
+body     __LUCRATIVE      /\blucrative\b/i
 
 body     __PCT_FOR_YOU_1  /\b(?:\d+|ten|[a-z]+teen|(?:twen|thir|fou?r)ty(?:-?[a-z]+)?)\s?(?:%|percent)[\s)]+(?:for|to|as)\syour?/i
 body     __PCT_FOR_YOU_2  /\b(?:give|offer)\syou\s(?:\d+|en|[a-z]+teen|(?:twen|thir|fou?r)ty(?:-?[a-z]+)?)\s?(?:%|percent)/i
 meta     PCT_FOR_YOU      __PCT_FOR_YOU_1 || __PCT_FOR_YOU_2
 describe PCT_FOR_YOU      X% for you
 
-meta     MONEY_DEAL       LOTS_OF_MONEY && (__DEAL + __HUSH_HUSH + PCT_FOR_YOU + __FRAUD_IOU + __FRAUD_JYG > 2)
+meta     MONEY_DEAL       LOTS_OF_MONEY && (__DEAL + __HUSH_HUSH + PCT_FOR_YOU + __FRAUD_IOU + __FRAUD_JYG + __IS_LEGAL + __NOT_SCAM + __BACK_SCRATCH + __LUCRATIVE > 3)
 describe MONEY_DEAL       Lots of money in a suspicious deal
 
 body     __ATM_CARD       /\b(?:your|the)\satm\scard/i
 meta     MONEY_ATM        LOTS_OF_MONEY && __ATM_CARD
 describe MONEY_ATM        Lots of money on an ATM card
-score    MONEY_ATM        0.1
+score    MONEY_ATM        0.5
 
 body     __YOU_INHERIT    /\byour\s[a-z\s]{0,30}inheritance\b/i
 body     __I_INHERIT      /\bI\s[a-z\s]{0,30}inherited\b/i
+body     __THEY_INHERIT   /\binherit\sth(?:e|is)\smoney\b/i
 body     __I_WILL_YOU     /\bwill(?:ed)?\s(?:[a-z\s]{0,20}\s(?:fortune|money)\s)?to\syou\b/i
 body     __NEXT_OF_KIN    /\bnext\sof\skin\b/i
 body     __DECEASED       /\bdeceased\s(?:client|customer)/i
 body     __DORMANT_ACCT   /\bdormant\saccount/i
-meta     MONEY_INHERIT    LOTS_OF_MONEY && (__YOU_INHERIT || __I_INHERIT || __I_WILL_YOU || __NEXT_OF_KIN || __DECEASED || __DORMANT_ACCT)
+body     __WILL_LEGAL     /\b(?:codicil|last\stestament|probate|executor)\b/i
+body     __EARLY_DEMISE   /\buntimely\sdeath\b/i
+meta     MONEY_INHERIT    LOTS_OF_MONEY && (__YOU_INHERIT || __I_INHERIT || __THEY_INHERIT || __I_WILL_YOU || __NEXT_OF_KIN || __DECEASED || __DORMANT_ACCT || __WILL_LEGAL || __EARLY_DEMISE)
 describe MONEY_INHERIT    Lots of money from a dead guy
-score    MONEY_INHERIT    0.1
+score    MONEY_INHERIT    0.2
 
 body     __WIRE_XFR       /\b(?:wire|telegraph(?:ic)?)\stransfer/i
 body     __CASHIERS_CHK   /\bcashier'?s?\sche(?:ck|que)/i
@@ -125,4 +132,20 @@ body     __INTL_BANK      /\binternational\s(?:\w+\s)?bank\b/i
 meta     MONEY_INTL_BK    LOTS_OF_MONEY && __INTL_BANK
 describe MONEY_INTL_BK    Lots of money from an International Bank
 score    MONEY_INTL_BK    0.1
+
+body     __BARRISTER      /\bbarrister\b/i
+meta     MONEY_BARRISTER  LOTS_OF_MONEY && __BARRISTER
+describe MONEY_BARRISTER  Lots of money from a British lawyer
+score    MONEY_BARRISTER  0.2
+
+body     __SCAM           /\bscam\b/i
+body     __UN             /\bunited\snations?\b/i
+body     __AFR_UNION      /\bafrican\sunion\b/i
+body     __COMPENSATION   /\bcompensation\b/i
+body     __FRAUD          /\bfraud/i
+meta     MONEY_FRAUD_COMP  LOTS_OF_MONEY && __BARRISTER && (__SCAM || __FRAUD) && (__UN || __AFR_UNION) && __COMPENSATION
+describe MONEY_FRAUD_COMP  Lots of money from a fraud compensation
+score    MONEY_FRAUD_COMP  1.0
+
+
 
