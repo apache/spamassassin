@@ -29,3 +29,6 @@ meta	HK_NAME_FM_FROM		__HK_NAME_FROM && FREEMAIL_FROM
 # From Mike Cappella
 header	FROM_CONTAINS_TAB	From:raw =~ /\A\t/m
 
+header	SUBJECT_SPACES		Subject =~ /^(?!.{80}\#).*?\s{10}/
+header	SUBJECT_SPACES_SC	Subject =~ /\s{10}(?:[a-z]|\d{1,4})(?:\s|$)/i
+
