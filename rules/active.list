@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi wt-en1 wt-en2 wt-jp1 wt-jp2; day 2: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron wt-en1 wt-en2 wt-jp1 wt-jp2; day 3: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi dos hege wt-en1 wt-en2 wt-en3 wt-jp1 wt-jp2
+# with results from: day 1: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi dos wt-en1 wt-en2 wt-en3 wt-jp1 wt-jp2; day 2: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi wt-en1 wt-en2 wt-jp1 wt-jp2; day 3: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron wt-en1 wt-en2 wt-jp1 wt-jp2
 
 # tflags userconf
 ALL_TRUSTED
@@ -45,12 +45,6 @@ CHARSET_FARAWAY_HEADER
 
 # tflags userconf
 CORRUPT_FROM_LINE_IN_HDRS
-
-# good enough
-DEAR_BENEFICIARY
-
-# good enough
-DEAR_WINNER
 
 # tflags net
 DIGEST_MULTIPLE
@@ -125,6 +119,9 @@ DOS_RCVD_IP_TWICE_C
 DRUGS_STOCK_MIMEOLE
 
 # good enough
+DYN_RDNS_AND_INLINE_IMAGE
+
+# good enough
 DYN_RDNS_SHORT_HELO_HTML
 
 # good enough
@@ -188,9 +185,6 @@ FH_HOST_EQ_VERIZON_P
 FH_MSGID_XXX
 
 # good enough
-FILL_THIS_FORM_FRAUD_PHISH
-
-# good enough
 FILL_THIS_FORM_LOAN
 
 # good enough
@@ -216,6 +210,9 @@ FORGED_TBIRD_IMG_TO_MX
 
 # tflags userconf
 FRAGMENTED_MESSAGE
+
+# good enough
+FROM_CONTAINS_TAB
 
 # tflags userconf
 FROM_DOMAIN_NOVOWEL
@@ -261,6 +258,9 @@ FS_MORE_CONFIDENT
 
 # good enough
 FS_NUDE
+
+# good enough
+FS_OBFU_PRMCY
 
 # good enough
 FS_REPLICA
@@ -329,9 +329,6 @@ HK_FAKENAME_EBAY
 HK_FAKENAME_PAYPAL
 
 # good enough
-HK_LOTTO
-
-# good enough
 HK_NAME_DRUGS
 
 # good enough
@@ -360,9 +357,6 @@ JM_SOUGHT_FRAUD_3
 
 # good enough
 KAM_LOTTO1
-
-# good enough
-KAM_LOTTO2
 
 # tflags publish
 KAM_STOCKOTC
@@ -410,9 +404,6 @@ KB_RATWARE_OUTLOOK_MID
 LIVEFILESTORE
 
 # good enough
-LOTTERY_PH_004470
-
-# good enough
 LOTTO_AGENT
 
 # good enough
@@ -420,9 +411,6 @@ LOTTO_WINNINGS
 
 # good enough
 LOTTO_WIN_01
-
-# good enough
-LOTTO_YOU_WON_03
 
 # good enough
 L_SPAM_TOOL_13
@@ -434,22 +422,10 @@ MIME_CHARSET_FARAWAY
 MISSING_HB_SEP
 
 # good enough
-MONEY_ADVANCE_FEE_3
-
-# good enough
 MONEY_ADVANCE_FEE_4
 
 # good enough
-MONEY_DEAL
-
-# good enough
-MONEY_FORM
-
-# good enough
 MONEY_INHERIT
-
-# good enough
-MONEY_LOTTERY
 
 # good enough
 MSOE_MID_WRONG_CASE
@@ -707,6 +683,9 @@ SPF_PASS
 SPF_SOFTFAIL
 
 # good enough
+STOCK_IMG_CTYPE
+
+# good enough
 STOCK_IMG_HDR_FROM
 
 # good enough
@@ -746,19 +725,16 @@ TVD_RCVD_SINGLE
 TVD_VISIT_PHARMA
 
 # good enough
-FROM_CONTAINS_TAB
+DOS_HIGHBIT_HDRS_BODY
 
 # good enough
-FS_APPROVE_YOU
+FORGED_RELAY_MUA_TO_MX
 
 # good enough
-LOTTO_DEPT
+FR_TITLE_CONS_6
 
 # good enough
-LOTTO_RELATED
-
-# good enough
-SANE_d1ef7f3b64327d9d1c3535a0b7d7de11
+SANE_c51de255d6cba77d524cf655d5bcee17
 
 # tflags userconf
 UNPARSEABLE_RELAY
@@ -834,9 +810,6 @@ USER_IN_WHITELIST_TO
 
 # good enough
 XMAILER_MIMEOLE_OL_09BB4
-
-# good enough
-XMAILER_MIMEOLE_OL_1ECD5
 
 # good enough
 XMAILER_MIMEOLE_OL_20C99
