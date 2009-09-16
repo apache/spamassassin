@@ -42,7 +42,7 @@ header DKIM_ADSP_CUSTOM_HIGH	eval:check_dkim_adsp('3')
 tflags DKIM_SIGNED		net
 tflags DKIM_VALID		net nice
 tflags DKIM_VALID_AU		net nice
-tflags __DKIM_DEPENDABLE	net nice
+tflags __DKIM_DEPENDABLE	net
 tflags DKIM_ADSP_NXDOMAIN	net
 tflags DKIM_ADSP_DISCARD	net
 tflags DKIM_ADSP_ALL		net
@@ -62,6 +62,12 @@ describe DKIM_ADSP_CUSTOM_LOW	No valid author signature, adsp_override is CUSTOM
 describe DKIM_ADSP_CUSTOM_MED	No valid author signature, adsp_override is CUSTOM_MED
 describe DKIM_ADSP_CUSTOM_HIGH	No valid author signature, adsp_override is CUSTOM_HIGH
 
+meta     NML_ADSP_CUSTOM_LOW    DKIM_ADSP_CUSTOM_LOW  && !__VIA_ML
+meta     NML_ADSP_CUSTOM_MED    DKIM_ADSP_CUSTOM_MED  && !__VIA_ML
+meta     NML_ADSP_CUSTOM_HIGH   DKIM_ADSP_CUSTOM_HIGH && !__VIA_ML
+describe NML_ADSP_CUSTOM_LOW    ADSP custom_low hit, and not from a mailing list
+describe NML_ADSP_CUSTOM_MED    ADSP custom_med hit, and not from a mailing list
+describe NML_ADSP_CUSTOM_HIGH   ADSP custom_high hit, and not from a mailing list
 
 # old, declared for compatibility with pre-3.3, should have scores 0
 
@@ -69,24 +75,9 @@ full   DKIM_VERIFIED		eval:check_dkim_valid()
 header DKIM_POLICY_TESTING	eval:check_dkim_testing()
 header DKIM_POLICY_SIGNSOME	eval:check_dkim_signsome()
 header DKIM_POLICY_SIGNALL	eval:check_dkim_signall()
-
 tflags DKIM_VERIFIED		net nice
 tflags DKIM_POLICY_SIGNSOME	net nice
 tflags DKIM_POLICY_SIGNALL	net nice
 tflags DKIM_POLICY_TESTING	net nice
-
-describe DKIM_VERIFIED		Message has at least one valid DKIM or DK signature
-describe DKIM_POLICY_SIGNSOME	Domain Keys Identified Mail: policy says domain signs some mails
-describe DKIM_POLICY_SIGNALL	Domain Keys Identified Mail: policy says domain signs all mails
-describe DKIM_POLICY_TESTING	Domain Keys Identified Mail: policy says domain is testing DK
-
-meta   NML_ADSP_CUSTOM_LOW   DKIM_ADSP_CUSTOM_LOW  && !__VIA_ML
-meta   NML_ADSP_CUSTOM_MED   DKIM_ADSP_CUSTOM_MED  && !__VIA_ML
-meta   NML_ADSP_CUSTOM_HIGH  DKIM_ADSP_CUSTOM_HIGH && !__VIA_ML
-describe NML_ADSP_CUSTOM_LOW  ADSP custom_low hit, and not from a mailing list
-describe NML_ADSP_CUSTOM_MED  ADSP custom_med hit, and not from a mailing list
-describe NML_ADSP_CUSTOM_HIGH ADSP custom_high hit, and not from a mailing list
-
-# TODO: whitelist based on DKIM_VERIFIED results
 
 endif   # Mail::SpamAssassin::Plugin::DKIM
