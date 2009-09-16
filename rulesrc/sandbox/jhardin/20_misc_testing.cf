@@ -27,7 +27,7 @@ endif
 #header         MUA_ONE_WORD       X-Mailer =~ /^[A-Za-z][a-z]*$/
 #describe       MUA_ONE_WORD       Single word X-Mailer: not CamelCase
 
-body           DEAR_BENEFICIARY		/^\s?(?:Dear\s|Attention:\s?)Beneficiary\b/i
+body           DEAR_BENEFICIARY		/^\s?(?:Dear\s|At+(?:ention|n):\s?)Beneficiary\b/i
 describe       DEAR_BENEFICIARY		Dear Beneficiary:
 
 body           DEAR_EMAIL_USER		/^\s?(?:Dear\s|Attention:\s?)(?:E|Web)-?mail\sUser\b/i
@@ -57,16 +57,37 @@ describe       FROM_MISSP_DYNIP      From misspaced + dynamic rDNS
 
 
 # observed in spam 8/2009
-header         MUA_EQ_ORG         ALL =~ /\nX-Mailer: ([^\n]+)\n.*Organization: \1/sm
-describe       MUA_EQ_ORG         X-Mailer: same as Organization:
+header         __MUA_EQ_ORG_1        ALL =~ /\nX-Mailer: ([^\n]+)\n.*Organization: \1\n/ism
+header         __MUA_EQ_ORG_2        ALL =~ /\nOrganization: ([^\n]+)\n.*X-Mailer: \1\n/ism
+meta           MAILER_EQ_ORG         __MUA_EQ_ORG_1 || __MUA_EQ_ORG_2
+describe       MAILER_EQ_ORG         X-Mailer: same as Organization:
+
+# observed in UCE 9/2009
+header         __HDRS_LCASE          ALL =~ /\n(?:Reply-to|Message-id|Content-type|X-MSMail-priority|from|subject|to):/sm
+tflags         __HDRS_LCASE          multiple
+meta           HDRS_LCASE            __HDRS_LCASE > 2
+describe       HDRS_LCASE            Odd capitalization of multiple message headers
+
+# observed in spam 9/2009
+header         HDRS_MISSP            ALL =~ /\n(?:Subject|From):\S/ism
+describe       HDRS_MISSP            Misspaced headers
+
+header         SPAMMY_MIME_BDRY_01  Content-Type =~ /boundary="\@\@BOUNDARY"/
+describe       SPAMMY_MIME_BDRY_01  Spammy MIME boundary string
+score          SPAMMY_MIME_BDRY_01  0.10
 
 # testing
 header         __TB_MIME_BDRY_NO_Z   Content-Type =~ /boundary="-{8,}(?:[1-9]){16}/
-meta           TBIRD_SUSP_MIME_BDRY   __MUA_TBIRD && __TB_MIME_BDRY_NO_Z
-describe       TBIRD_SUSP_MIME_BDRY   Unlikely Thunderbird MIME boundary
+meta           TBIRD_SUSP_MIME_BDRY  __MUA_TBIRD && __TB_MIME_BDRY_NO_Z
+describe       TBIRD_SUSP_MIME_BDRY  Unlikely Thunderbird MIME boundary
 
 # seen in a few HTML fraud spams
 rawbody        RUNON_SHY          /(?:\&shy;){3}/i
 describe       RUNON_SHY          Repeating soft hyphens
 score          RUNON_SHY          0.1
+
+# Seen all too often
+header         LAZY_LISTWASHING   To =~ /\@(?:example\.com|example\.domain|your\.domain|some\.domain|domain\.dom|somewhere\.tld|somewhere\.com|your\.?domain\.com|your\.favorite\.machine)\b/i
+describe       LAZY_LISTWASHING   Lazy spammer, painfully obvious bogus addresses
+score          LAZY_LISTWASHING   0.25
 
