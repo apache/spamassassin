@@ -130,13 +130,6 @@ sub get_addr_entry {
 
 ###########################################################################
 
-sub get_signer_reputation {
-  my ($self, $addr, $signedby) = @_;
-  return undef;
-}
-
-###########################################################################
-
 sub add_score {
     my($self, $entry, $score) = @_;
 
