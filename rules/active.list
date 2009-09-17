@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi dos wt-en1 wt-en2 wt-en3 wt-jp1 wt-jp2; day 2: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi wt-en1 wt-en2 wt-jp1 wt-jp2; day 3: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron wt-en1 wt-en2 wt-jp1 wt-jp2
+# with results from: day 1: mmartinec; day 2: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi dos wt-en1 wt-en2 wt-en3 wt-jp1 wt-jp2; day 3: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi wt-en1 wt-en2 wt-jp1 wt-jp2
 
 # tflags userconf
 ALL_TRUSTED
@@ -34,9 +34,6 @@ BAYES_95
 # tflags learn
 BAYES_99
 
-# good enough
-BUG6152_INVALID_DATE_TZ_ABSURD
-
 # tflags userconf
 CHARSET_FARAWAY
 
@@ -68,15 +65,6 @@ DKIM_ADSP_DISCARD
 DKIM_ADSP_NXDOMAIN
 
 # tflags net
-DKIM_POLICY_SIGNALL
-
-# tflags net
-DKIM_POLICY_SIGNSOME
-
-# tflags net
-DKIM_POLICY_TESTING
-
-# tflags net
 DKIM_SIGNED
 
 # tflags net
@@ -84,9 +72,6 @@ DKIM_VALID
 
 # tflags net
 DKIM_VALID_AU
-
-# tflags net
-DKIM_VERIFIED
 
 # tflags net
 DNS_FROM_AHBL_RHSBL
@@ -101,16 +86,13 @@ DNS_FROM_RFC_DSN
 DOS_ANAL_SPAM_MAILER
 
 # good enough
-DOS_HIGH_BAT_TO_MX
+DOS_HIGHBIT_HDRS_BODY
 
 # good enough
 DOS_OE_TO_MX
 
 # good enough
 DOS_OE_TO_MX_IMAGE
-
-# good enough
-DOS_OUTLOOK_TO_MX
 
 # good enough
 DOS_RCVD_IP_TWICE_C
@@ -140,12 +122,6 @@ FB_EXTRA_INCHES
 FB_GVR
 
 # good enough
-FB_INCREASE_YOUR
-
-# good enough
-FB_MOST_QUALITY
-
-# good enough
 FB_QUALITY_REPLICA
 
 # good enough
@@ -156,9 +132,6 @@ FB_SOFTTABS
 
 # good enough
 FB_TIRED_OF_YOUR
-
-# good enough
-FB_YOUR_WEIGHT
 
 # good enough
 FH_FAKE_RCVD_LINE
@@ -182,9 +155,6 @@ FH_HOST_EQ_DYNAMICIP
 FH_HOST_EQ_VERIZON_P
 
 # good enough
-FH_MSGID_XXX
-
-# good enough
 FILL_THIS_FORM_LOAN
 
 # good enough
@@ -198,6 +168,9 @@ FM_SCHOOLING
 
 # good enough
 FM_SEX_HELODDDD
+
+# good enough
+FORGED_RELAY_MUA_TO_MX
 
 # good enough
 FORGED_TBIRD_IMG_ARROW
@@ -230,10 +203,7 @@ FROM_MISSP_FREEMAIL
 FROM_MISSP_MSFT
 
 # good enough
-FRT_PHARMAC
-
-# good enough
-FR_TITLE_NUMS
+FR_TITLE_CONS_6
 
 # good enough
 FSL_FAKE_HOTMAIL_RVCD
@@ -251,13 +221,7 @@ FSL_YG_ABUSE
 FS_ABIGGER
 
 # good enough
-FS_ERECTION
-
-# good enough
 FS_MORE_CONFIDENT
-
-# good enough
-FS_NUDE
 
 # good enough
 FS_OBFU_PRMCY
@@ -326,13 +290,7 @@ HIGH_CODEPAGE_URI
 HK_FAKENAME_EBAY
 
 # good enough
-HK_FAKENAME_PAYPAL
-
-# good enough
 HK_NAME_DRUGS
-
-# good enough
-HK_RANDOM_ENVFROM
 
 # good enough
 HS_VPXL
@@ -412,9 +370,6 @@ LOTTO_WINNINGS
 # good enough
 LOTTO_WIN_01
 
-# good enough
-L_SPAM_TOOL_13
-
 # tflags userconf
 MIME_CHARSET_FARAWAY
 
@@ -438,9 +393,6 @@ NO_RECEIVED
 
 # tflags userconf
 NO_RELAYS
-
-# good enough
-PCT_FOR_YOU
 
 # tflags net
 PYZOR_CHECK
@@ -683,16 +635,10 @@ SPF_PASS
 SPF_SOFTFAIL
 
 # good enough
-STOCK_IMG_CTYPE
-
-# good enough
 STOCK_IMG_HDR_FROM
 
 # good enough
 STOCK_IMG_HTML
-
-# good enough
-STOX_REPLY_TYPE_WITHOUT_QUOTES
 
 # tflags userconf
 SUBJECT_IN_BLACKLIST
@@ -713,28 +659,58 @@ TVD_PH_REC
 TVD_PH_SUBJ_SEC_MEASURES
 
 # good enough
-TVD_RCVD_IP
-
-# good enough
-TVD_RCVD_IP4
-
-# good enough
-TVD_RCVD_SINGLE
-
-# good enough
 TVD_VISIT_PHARMA
 
 # good enough
-DOS_HIGHBIT_HDRS_BODY
+DEAR_BENEFICIARY
 
 # good enough
-FORGED_RELAY_MUA_TO_MX
+FILL_THIS_FORM_FRAUD_PHISH
 
 # good enough
-FR_TITLE_CONS_6
+HDRS_MISSP
 
 # good enough
-SANE_c51de255d6cba77d524cf655d5bcee17
+HK_LOTTO
+
+# good enough
+KAM_LOTTO2
+
+# good enough
+LOTTERY_PH_004470
+
+# good enough
+LOTTO_DEPT
+
+# good enough
+LOTTO_RELATED
+
+# good enough
+LOTTO_YOU_WON_03
+
+# good enough
+MAILER_EQ_ORG
+
+# good enough
+MONEY_ADVANCE_FEE_3
+
+# good enough
+MONEY_BARRISTER
+
+# good enough
+MONEY_DEAL
+
+# good enough
+MONEY_FORM
+
+# good enough
+MONEY_LOTTERY
+
+# good enough
+SANE_d1ef7f3b64327d9d1c3535a0b7d7de11
+
+# good enough
+SPAMMY_MIME_BDRY_01
 
 # tflags userconf
 UNPARSEABLE_RELAY
@@ -834,6 +810,9 @@ XMAILER_MIMEOLE_OL_8627E
 
 # good enough
 XMAILER_MIMEOLE_OL_91287
+
+# good enough
+XMAILER_MIMEOLE_OL_ADFF7
 
 # good enough
 XMAILER_MIMEOLE_OL_CAC8F
