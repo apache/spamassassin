@@ -62,9 +62,16 @@ describe DKIM_ADSP_CUSTOM_LOW	No valid author signature, adsp_override is CUSTOM
 describe DKIM_ADSP_CUSTOM_MED	No valid author signature, adsp_override is CUSTOM_MED
 describe DKIM_ADSP_CUSTOM_HIGH	No valid author signature, adsp_override is CUSTOM_HIGH
 
-meta     NML_ADSP_CUSTOM_LOW    DKIM_ADSP_CUSTOM_LOW  && !__VIA_ML
-meta     NML_ADSP_CUSTOM_MED    DKIM_ADSP_CUSTOM_MED  && !__VIA_ML
-meta     NML_ADSP_CUSTOM_HIGH   DKIM_ADSP_CUSTOM_HIGH && !__VIA_ML
+full     __RESIGNER1  eval:check_dkim_valid('linkedin.com')
+full     __RESIGNER2  eval:check_dkim_valid('googlegroups.com','yahoogroups.com','yahoogroups.de')
+tflags   __RESIGNER1  net
+tflags   __RESIGNER2  net
+meta     __VIA_RESIGNER  __RESIGNER1 || __RESIGNER2
+describe __VIA_RESIGNER  Mail through a popular signing remailer
+
+meta     NML_ADSP_CUSTOM_LOW    DKIM_ADSP_CUSTOM_LOW  && !__VIA_ML && !__VIA_RESIGNER
+meta     NML_ADSP_CUSTOM_MED    DKIM_ADSP_CUSTOM_MED  && !__VIA_ML && !__VIA_RESIGNER
+meta     NML_ADSP_CUSTOM_HIGH   DKIM_ADSP_CUSTOM_HIGH && !__VIA_ML && !__VIA_RESIGNER
 describe NML_ADSP_CUSTOM_LOW    ADSP custom_low hit, and not from a mailing list
 describe NML_ADSP_CUSTOM_MED    ADSP custom_med hit, and not from a mailing list
 describe NML_ADSP_CUSTOM_HIGH   ADSP custom_high hit, and not from a mailing list
