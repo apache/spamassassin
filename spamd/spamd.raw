@@ -2086,14 +2086,14 @@ sub handle_user_setuid_basic {
     my $prefsfrom = $username;  # the one passed, NOT $opt{username}
 
     if ($prefsfrom eq $suidto) {
-      $userdir = $suiddir;      # reuse the already-looked-up info
+      $userdir = $suiddir;  # reuse the already-looked-up info, tainted
     } elsif ( $opt{'vpopmail'} ) {
       #
       # If vpopmail config enabled then set $userdir to virtual homedir
       #
-      no re 'taint';
-      my $username_untainted = ( $username =~ /^([-:,.=+A-Za-z0-9_@~]+)$/ ? $1 : undef );
-      use re 'taint';
+      my $username_untainted;
+      $username_untainted =
+        untaint_var($username)  if $username =~ /^[-:,.=+A-Za-z0-9_\@~]+\z/;
       my $vpopdir = $suiddir; # This should work with common vpopmail setups
       $userdir = `$vpopdir/bin/vuserinfo -d \Q$username_untainted\E`;
       if ($? == 0) {
@@ -2119,7 +2119,7 @@ sub handle_user_setuid_basic {
 
   # call this anyway, regardless of --user-config, so that
   # signal_user_changed() is called
-  handle_user_set_user_prefs($userdir, $username);
+  handle_user_set_user_prefs(untaint_var($userdir), $username);
 }
 
 sub handle_user_vpopmail {
@@ -2136,16 +2136,16 @@ sub handle_user_vpopmail {
 
   $vptimer->run(sub {
     my $vpopusername = $username;
+    local $1;
     do {
       my $vpopusername_tainted = `$vpopdir/bin/valias \Q$vpopusername\E`;
-      no re 'taint';
       if ($vpopusername_tainted =~ /.+ -> &?(.+)/) {
-        $vpopusername = $1;
+        $vpopusername = untaint_var($1);
       } else {
         die "failed to resolve vpopmail user/alias '$username' using vuserinfo/valias";
       }
     } until (($userdir = `$vpopdir/bin/vuserinfo -d \Q$vpopusername\E`) && $? == 0);
-    $userdir =~ s,.+ -> (/.+)/Maildir/,$1,;
+    $userdir =~ s{.+ -> (/.+)/Maildir/}{$1};
   });
 
   if ($vptimer->timed_out()) {

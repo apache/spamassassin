@@ -1888,49 +1888,47 @@ sub create_default_prefs {
 #  }
 
   my $stat_errn = stat($fname) ? 0 : 0+$!;
-  if ($stat_errn == ENOENT)
-  {
+  if ($stat_errn == 0) {
+    # fine, it already exists
+  } elsif ($stat_errn != ENOENT) {
+    dbg("config: cannot access user preferences file $fname: $!");
+  } else {
     # Pass on the value of $userdir for virtual users in vpopmail
     # otherwise it is empty and the user's normal homedir is used
     $self->get_and_create_userstate_dir($userdir);
 
     # copy in the default one for later editing
-    my $defprefs = $self->first_existing_path (@Mail::SpamAssassin::default_prefs_path);
+    my $defprefs =
+      $self->first_existing_path(@Mail::SpamAssassin::default_prefs_path);
 
     local(*IN,*OUT);
-    if (defined $defprefs && open (IN, "<$defprefs")) {
-      $fname = Mail::SpamAssassin::Util::untaint_file_path($fname);
-      if (open (OUT, ">$fname")) {
-
-        # former code skipped lines beginning with '#* ', the following copy
-        # procedure no longer does so, as it avoids reading line-by-line
-        my($inbuf,$nread);
-        while ( $nread=read(IN,$inbuf,16384) ) {
-          print OUT $inbuf  or die "cannot write to $fname: $!";
-        }
-        defined $nread  or die "error reading $defprefs: $!";
-        undef $inbuf;
-        close OUT or die "error closing $fname: $!";
-        close IN  or die "error closing $defprefs: $!";
-
-        if (($< == 0) && ($> == 0) && defined($user)) { # chown it
-          my ($uid,$gid) = (getpwnam($user))[2,3];
-          unless (chown($uid, $gid, $fname)) {
-            warn "config: couldn't chown $fname to $uid:$gid for $user: $!\n";
-          }
-        }
-        warn "config: created user preferences file: $fname\n";
-        return(1);
-      }
-      else {
-        warn "config: cannot create $fname: $!\n";
-      }
-    }
-    elsif (defined $defprefs) {
-      warn "config: cannot open $defprefs: $!\n";
-    }
-    else {
+    $fname = Mail::SpamAssassin::Util::untaint_file_path($fname);
+    if (!defined $defprefs) {
       warn "config: can not determine default prefs path\n";
+    } elsif (!open(IN, "<$defprefs")) {
+      warn "config: cannot open $defprefs: $!\n";
+    } elsif (!open(OUT, ">$fname")) {
+      warn "config: cannot create user preferences file $fname: $!\n";
+    } else {
+      # former code skipped lines beginning with '#* ', the following copy
+      # procedure no longer does so, as it avoids reading line-by-line
+      my($inbuf,$nread);
+      while ( $nread=read(IN,$inbuf,16384) ) {
+        print OUT $inbuf  or die "cannot write to $fname: $!";
+      }
+      defined $nread  or die "error reading $defprefs: $!";
+      undef $inbuf;
+      close OUT or die "error closing $fname: $!";
+      close IN  or die "error closing $defprefs: $!";
+
+      if (($< == 0) && ($> == 0) && defined($user)) { # chown it
+        my ($uid,$gid) = (getpwnam($user))[2,3];
+        unless (chown($uid, $gid, $fname)) {
+          warn "config: couldn't chown $fname to $uid:$gid for $user: $!\n";
+        }
+      }
+      warn "config: created user preferences file: $fname\n";
+      return(1);
     }
   }
 
