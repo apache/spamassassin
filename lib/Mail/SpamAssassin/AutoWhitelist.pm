@@ -304,6 +304,8 @@ sub pack_addr {
     } else {
       $origip = $origip_obj->full6;  # string in a canonical form
       $origip =~ s/(:[0-9a-f]{4}){5}\z//si;  # keep only the /48 network addr
+      $origip .= '::';  # although it wastes 2 chars, it's nice to make it
+                        # look like a syntactically correct IPv6 address
     }
   } else {
     dbg("auto-whitelist: bad IP address $origip");
