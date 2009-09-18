@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: mmartinec; day 2: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi dos wt-en1 wt-en2 wt-en3 wt-jp1 wt-jp2; day 3: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi wt-en1 wt-en2 wt-jp1 wt-jp2
+# with results from: day 1: mmartinec; day 2: mmartinec; day 3: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi dos wt-en1 wt-en2 wt-en3 wt-jp1 wt-jp2
 
 # tflags userconf
 ALL_TRUSTED
@@ -134,6 +134,9 @@ FB_SOFTTABS
 FB_TIRED_OF_YOUR
 
 # good enough
+FB_ULTRA_ALLURE
+
+# good enough
 FH_FAKE_RCVD_LINE
 
 # good enough
@@ -170,6 +173,9 @@ FM_SCHOOLING
 FM_SEX_HELODDDD
 
 # good enough
+FM_VEGAS_CASINO
+
+# good enough
 FORGED_RELAY_MUA_TO_MX
 
 # good enough
@@ -201,6 +207,9 @@ FROM_MISSP_FREEMAIL
 
 # good enough
 FROM_MISSP_MSFT
+
+# good enough
+FRT_ROLEX
 
 # good enough
 FR_TITLE_CONS_6
@@ -602,6 +611,9 @@ SANE_4ef8302546bf270a19baf98508afacc4
 SANE_7429530a7398f43f1f1b795f9420714e
 
 # good enough
+SANE_c51de255d6cba77d524cf655d5bcee17
+
+# good enough
 SANE_d0d2b0f6373bf91253d66dd74c594b87
 
 # good enough
@@ -656,7 +668,13 @@ TVD_FINGER_02
 TVD_PH_REC
 
 # good enough
+TVD_PH_SUBJ_ACCOUNTS_POST
+
+# good enough
 TVD_PH_SUBJ_SEC_MEASURES
+
+# good enough
+TVD_QUAL_MEDS
 
 # good enough
 TVD_VISIT_PHARMA
@@ -665,7 +683,22 @@ TVD_VISIT_PHARMA
 DEAR_BENEFICIARY
 
 # good enough
+FB_SAVE_PERSC
+
+# good enough
+FB_WITHOUT_PRESC
+
+# good enough
 FILL_THIS_FORM_FRAUD_PHISH
+
+# good enough
+FR_WATCHES_HTTP
+
+# good enough
+FSL_HELO_NON_FQDN_1
+
+# good enough
+FSL_INTERIA_ABUSE
 
 # good enough
 HDRS_MISSP
@@ -705,6 +738,33 @@ MONEY_FORM
 
 # good enough
 MONEY_LOTTERY
+
+# good enough
+SANE_0c3c2453c66df7c8df280ebdad248db4
+
+# good enough
+SANE_1c4f3286fa4aed6424ced88bfaf8b09c
+
+# good enough
+SANE_288f8016d836af09d6d57034b52fc5f6
+
+# good enough
+SANE_391bf5f63e3ab72e7f461b71f06eee80
+
+# good enough
+SANE_5d45e71013e1bf6aa9c7f86d6cf21c0d
+
+# good enough
+SANE_91eb43f705d25c804374a746d7519660
+
+# good enough
+SANE_970bca3528887c0b4e6a1e0d63d20450
+
+# good enough
+SANE_af2f58d5e4002bcd31ef44b83569de4b
+
+# good enough
+SANE_b58d7945d89b7afc9e2753c83b00ab44
 
 # good enough
 SANE_d1ef7f3b64327d9d1c3535a0b7d7de11
@@ -797,7 +857,13 @@ XMAILER_MIMEOLE_OL_22B61
 XMAILER_MIMEOLE_OL_3D61D
 
 # good enough
+XMAILER_MIMEOLE_OL_465CD
+
+# good enough
 XMAILER_MIMEOLE_OL_4B815
+
+# good enough
+XMAILER_MIMEOLE_OL_5B79A
 
 # good enough
 XMAILER_MIMEOLE_OL_7533E
@@ -816,6 +882,9 @@ XMAILER_MIMEOLE_OL_ADFF7
 
 # good enough
 XMAILER_MIMEOLE_OL_CAC8F
+
+# good enough
+XMAILER_MIMEOLE_OL_CF0C0
 
 # tflags net
 __DKIM_DEPENDABLE
@@ -846,6 +915,12 @@ __RCVD_IN_SORBS
 
 # tflags net
 __RCVD_IN_ZEN
+
+# tflags net
+__RESIGNER1
+
+# tflags net
+__RESIGNER2
 
 # tflags net
 __RFC_IGNORANT_ENVFROM
