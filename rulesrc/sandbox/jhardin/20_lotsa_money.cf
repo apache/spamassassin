@@ -1,12 +1,12 @@
 
 ifplugin Mail::SpamAssassin::Plugin::ReplaceTags
-  replace_tag  CURRENCY   [\(\[]?(?:GBP|=[Aa][34]|\xa3|[Pp]ounds\s[Ss]terling|\xa4|EUR|[Ee]uros?|US[D\$]{1,2}|\$)[\]\)]?
+  replace_tag  CURRENCY   [\(\[]?(?:GBP|=[Aa][34]|\xa3|[Pp]ounds\s[Ss]terling|\xa4|EUR|[Ee][Uu][Rr]\sde|[Ee]uros?|US[D\$]{1,2}|\$(?:US)?)[\]\)]?
   replace_tag  GB_UK      \b(?:U\.?K\.?|(?:Great\s)?Brit(?:ain|ish))\b
 
-  body     __LOTSA_MONEY_01   /<CURRENCY>\s?\d[\d.,\sO]{5,20}[\dO]/
+  body     __LOTSA_MONEY_01   /(?:<CURRENCY>|\bUS)\s?\d[\d.,\sO]{5,20}[\dO]/
   body     __LOTSA_MONEY_02   /\d[\d.,\sO]{5,20}[\dO]\s?(?:<CURRENCY>|Pounds)/
-  body     __LOTSA_MONEY_03   /<CURRENCY>\s?\d(?:[\d.,\sO]{0,4}[\dO])?\s?(?:[Mm]\b|[Mm][Ii][Ll][Ll]|[Hh][Uu][Nn][Dd][Rr][Ee][Dd]|[Tt][Hh][Oo][Uu][Ss][Aa][Nn][Dd])/
-  body     __LOTSA_MONEY_04   /(?:mill(?:e|ion(?!s))|hundred(?!s)[^\.]{1,20}thousand(?!s))[^\.]{1,50}(?:(?:U\.?S\.?\s)?dollars|USD|<GB_UK>\spounds|(?:<GB_UK>\s)?pounds\ssterling|euros?|francs?)/i
+  body     __LOTSA_MONEY_03   /<CURRENCY>\s?\d(?:[\d.,\sO]{0,5})?(?:[Mm](?:[Ii][Ll])?\b|[Mm][Ii][Ll]+\w+|[Hh][Uu][Nn][Dd][Rr][Ee][Dd]|[Tt][Hh][Oo][Uu][Ss][Aa][Nn][Dd])/
+  body     __LOTSA_MONEY_04   /(?:mill(?:e|ion(?!s))|hundred(?!s)[^\.]{1,20}thousand(?!s))[^\.]{1,50}(?:(?:U\.?\s?S\.?\s?(?:A\.?\s?))?dollars|USD|<GB_UK>\spounds?|(?:<GB_UK>\s)?pounds?\ssterling|(?:d'\s?)?euros?|francs?)/i
   replace_rules   __LOTSA_MONEY_01 __LOTSA_MONEY_02 __LOTSA_MONEY_03 __LOTSA_MONEY_04
 
   meta     LOTS_OF_MONEY    (__LOTSA_MONEY_01 || __LOTSA_MONEY_02 || __LOTSA_MONEY_03 || __LOTSA_MONEY_04)
@@ -58,23 +58,23 @@ body     __YOU_WON_04B    /\bw[io]n\s(?:(?:for|by)\s)?your?\b/i
 meta     LOTTO_YOU_WON_04 __YOU_WON_04A || __YOU_WON_04B
 score    LOTTO_YOU_WON_04 0.10 
 
-body     LOTTO_AGENT      /\b(?:claim(?:s|ing)?(?:\sprocessing)?|fiduciary|fiducial|reimbursement|prize\stransfer|international\sremittance)\s?(?:agent|manager|officer)/i
+body     LOTTO_AGENT      /\b(?:claim(?:s|ing)?(?:\sprocessing)?|fiducia\w+|reimbursement|prize\stransfer|(?:international|foreign)\sremittance)\s?(?:agent|manager|officer)/i
 describe LOTTO_AGENT      Claims Agent
 score    LOTTO_AGENT      0.50
 
-body     LOTTO_DEPT       /\b(?:claim(?:s|ing)?(?:\sprocessing)?|fiduciary|fiducial|reimbursement|international\sremittance)\s?(?:department|unit|group|committee)/i
+body     LOTTO_DEPT       /\b(?:claim(?:s|ing)?(?:\sprocessing)?|fiducia\w+|reimbursement|(?:international|foreign)\sremittance)\s?(?:department|dept|unit|group|committee)/i
 describe LOTTO_DEPT       Claims Department
 score    LOTTO_DEPT       0.50
 
-header   LOTTO_AGENT_FM   From =~ /(?:claim(?:s|ing)?(?:\sprocessing)?|fiduciary|fiducial|dispatch|reimbursement|prize\stransfer|international\sremittance)[\s_]?(?:agent|manager|officer)/i
+header   LOTTO_AGENT_FM   From =~ /(?:claim(?:s|ing)?(?:\sprocessing)?|fiducia\w+|dispatch|reimbursement|prize\stransfer|(?:international|foreign)\sremittance)[\s_]?(?:agent|manager|officer)/i
 describe LOTTO_AGENT_FM   Claims Agent
 score    LOTTO_AGENT_FM   0.50
 
-header   LOTTO_AGENT_RPLY Reply-To =~ /(?:claim(?:s|ing)?(?:\sprocessing)?|fiduciary|fiducial|dispatch|reimbursement|prize\stransfer|international\sremittance)[\s_]?(?:agent|manager|officer)/i
+header   LOTTO_AGENT_RPLY Reply-To =~ /(?:claim(?:s|ing)?(?:\sprocessing)?|fiducia\w+|dispatch|reimbursement|prize\stransfer|(?:international|foreign)\sremittance)[\s_]?(?:agent|manager|officer)/i
 describe LOTTO_AGENT_RPLY Claims Agent
 score    LOTTO_AGENT_RPLY 0.50
 
-body     __LOTTO_ADMITS_1 /\b(?:on-?line|e-?mail|ballot|(?:inter)?national|state|(?:UK|euro)[- ]?mil+ions?|Canada|Microsoft|MSN|internet|mega|jackpot|this)(?:\s\w+)?\s(?:lot(?:to|tery|erie)|sweepstake)/i
+body     __LOTTO_ADMITS_1 /\b(?:on-?line|e-?mail|ballot|(?:inter)?national|state|(?:UK|euro)[- ]?(?:mil+ions?|PW)|Canada|Microsoft|MSN|internet|mega|jackpot|this)(?:\s\w+)?\s(?:lot(?:to|tery|erie)|sweepstake)/i
 body     __LOTTO_ADMITS_2 /\b(?:lot(?:to|tery|erie)|sweepstakes)\s(?:inter)?na[tz]ional/i
 uri      __LOTTO_ADMITS_3 /lottery/i
 meta     LOTTO_ADMITS     __LOTTO_ADMITS_1 || __LOTTO_ADMITS_2 || __LOTTO_ADMITS_3
@@ -94,13 +94,14 @@ body     __IS_LEGAL       /\bthis\s(?:deal|offer|transaction|proposal|exchange|a
 body     __NOT_SCAM       /\bnot\sa\sscam\b/i
 body     __BACK_SCRATCH   /\bmutual+y?\sbenefi(?:t|cial)\b/i
 body     __LUCRATIVE      /\blucrative\b/i
+body     __YOU_ASSIST     /\byour\sassistance\b/i
 
 body     __PCT_FOR_YOU_1  /\b(?:\d+|ten|[a-z]+teen|(?:twen|thir|fou?r)ty(?:-?[a-z]+)?)\s?(?:%|percent)[\s)]+(?:for|to|as)\syour?/i
 body     __PCT_FOR_YOU_2  /\b(?:give|offer)\syou\s(?:\d+|en|[a-z]+teen|(?:twen|thir|fou?r)ty(?:-?[a-z]+)?)\s?(?:%|percent)/i
 meta     PCT_FOR_YOU      __PCT_FOR_YOU_1 || __PCT_FOR_YOU_2
 describe PCT_FOR_YOU      X% for you
 
-meta     MONEY_DEAL       LOTS_OF_MONEY && (__DEAL + __HUSH_HUSH + PCT_FOR_YOU + __FRAUD_IOU + __FRAUD_JYG + __IS_LEGAL + __NOT_SCAM + __BACK_SCRATCH + __LUCRATIVE > 3)
+meta     MONEY_DEAL       LOTS_OF_MONEY && (__DEAL + __HUSH_HUSH + PCT_FOR_YOU + __FRAUD_IOU + __FRAUD_JYG + __IS_LEGAL + __NOT_SCAM + __BACK_SCRATCH + __LUCRATIVE || __YOU_ASSIST > 2)
 describe MONEY_DEAL       Lots of money in a suspicious deal
 
 body     __ATM_CARD       /\b(?:your|the)\satm\scard/i
@@ -113,27 +114,29 @@ body     __I_INHERIT      /\bI\s[a-z\s]{0,30}inherited\b/i
 body     __THEY_INHERIT   /\binherit\sth(?:e|is)\smoney\b/i
 body     __I_WILL_YOU     /\bwill(?:ed)?\s(?:[a-z\s]{0,20}\s(?:fortune|money)\s)?to\syou\b/i
 body     __NEXT_OF_KIN    /\bnext\sof\skin\b/i
-body     __DECEASED       /\bdeceased\s(?:client|customer)/i
-body     __DORMANT_ACCT   /\bdormant\saccount/i
+body     __DECEASED       /\b(?:deceased|late)\s(?:client|customer)/i
+body     __DEAD_PARENT    /\bmy\s(?:deceased|dead)\s(?:father|mother)/i
+body     __DORMANT_ACCT   /\b(?:dormant|abandoned)\saccount/i
 body     __WILL_LEGAL     /\b(?:codicil|last\stestament|probate|executor)\b/i
 body     __EARLY_DEMISE   /\buntimely\sdeath\b/i
-meta     MONEY_INHERIT    LOTS_OF_MONEY && (__YOU_INHERIT || __I_INHERIT || __THEY_INHERIT || __I_WILL_YOU || __NEXT_OF_KIN || __DECEASED || __DORMANT_ACCT || __WILL_LEGAL || __EARLY_DEMISE)
+meta     MONEY_INHERIT    LOTS_OF_MONEY && (__YOU_INHERIT || __I_INHERIT || __THEY_INHERIT || __I_WILL_YOU || __NEXT_OF_KIN || __DECEASED || __DEAD_PARENT || __DORMANT_ACCT || __WILL_LEGAL || __EARLY_DEMISE)
 describe MONEY_INHERIT    Lots of money from a dead guy
 score    MONEY_INHERIT    0.2
 
 body     __WIRE_XFR       /\b(?:wire|telegraph(?:ic)?)\stransfer/i
-body     __CASHIERS_CHK   /\bcashier'?s?\sche(?:ck|que)/i
+body     __TRUSTED_CHECK  /\b(?:cashier'?s?|certified)\sche(?:ck|que)/i
 body     __BANK_DRAFT     /\bbank\sdraft/i
-meta     MONEY_XFER       LOTS_OF_MONEY && (__WIRE_XFR || __CASHIERS_CHK || __BANK_DRAFT)
+meta     MONEY_XFER       LOTS_OF_MONEY && (__WIRE_XFR || __TRUSTED_CHECK || __BANK_DRAFT)
 describe MONEY_XFER       Lots of money being transferred
 score    MONEY_XFER       0.1
 
-body     __INTL_BANK      /\binternational\s(?:\w+\s)?bank\b/i
-meta     MONEY_INTL_BK    LOTS_OF_MONEY && __INTL_BANK
+body     __INTL_BANK_EN   /\binternational\s(?:\w+\s)?bank\b/i
+body     __INTL_BANK_FR   /\bBanque\sInternationale\b/i
+meta     MONEY_INTL_BK    LOTS_OF_MONEY && (__INTL_BANK_EN || __INTL_BANK_FR)
 describe MONEY_INTL_BK    Lots of money from an International Bank
 score    MONEY_INTL_BK    0.1
 
-body     __BARRISTER      /\bbarrister\b/i
+body     __BARRISTER      /\bbarrister/i
 meta     MONEY_BARRISTER  LOTS_OF_MONEY && __BARRISTER
 describe MONEY_BARRISTER  Lots of money from a British lawyer
 score    MONEY_BARRISTER  0.2
@@ -147,5 +150,9 @@ meta     MONEY_FRAUD_COMP  LOTS_OF_MONEY && __BARRISTER && (__SCAM || __FRAUD) &
 describe MONEY_FRAUD_COMP  Lots of money from a fraud compensation
 score    MONEY_FRAUD_COMP  1.0
 
+
+body     SUM_OF_FUND      /\bsum\sof\s(?:amount|fund)/i
+describe SUM_OF_FUND      Money by any other name smells of greed
+score    SUM_OF_FUND      1.0
 
 
