@@ -91,3 +91,23 @@ header         LAZY_LISTWASHING   To =~ /\@(?:example\.com|example\.domain|your\
 describe       LAZY_LISTWASHING   Lazy spammer, painfully obvious bogus addresses
 score          LAZY_LISTWASHING   0.25
 
+# Little to work with
+body           __PLS_REVIEW       /\b(?:please|kindly)\sreview(\s\w+)?\sattach(?:ed|ment)\b/i
+
+ifplugin Mail::SpamAssassin::Plugin::MIMEHeader
+  mimeheader   __DOC_ATTACH_MT    Content-Type =~ m,\bapplication/(?:msword|rtf|vnd\.ms-word|vnd\.openxmlformats-officedocument\.wordprocessingml\.document)\b,i
+  mimeheader   __DOC_ATTACH_FN1   Content-Type =~ /="[^"]+\.(?:docx?|rtf)"/i
+  mimeheader   __DOC_ATTACH_FN2   Content-Disposition =~ /="[^"]+\.(?:docx?|rtf)"/i
+  meta         __DOC_ATTACH       (__DOC_ATTACH_MT || __DOC_ATTACH_FN1 || __DOC_ATTACH_FN2)
+  mimeheader   __PDF_ATTACH_MT    Content-Type =~ m,\bapplication/pdf\b,i
+  mimeheader   __PDF_ATTACH_FN1   Content-Type =~ /="[^"]+\.pdf"/i
+  mimeheader   __PDF_ATTACH_FN2   Content-Disposition =~ /="[^"]+\.pdf"/i
+  meta         __PDF_ATTACH       (__PDF_ATTACH_MT || __PDF_ATTACH_FN1 || __PDF_ATTACH_FN2)
+endif
+
+ifplugin Mail::SpamAssassin::Plugin::FreeMail
+  meta         RVW_ATTCH_FREEMAIL   __PLS_REVIEW && (__DOC_ATTACH || __PDF_ATTACH) && (FREEMAIL_FROM || FREEMAIL_REPLYTO)
+  describe     RVW_ATTCH_FREEMAIL   Please review attachment, from freemail
+  score        RVW_ATTCH_FREEMAIL   1.0
+endif
+
