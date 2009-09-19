@@ -1478,7 +1478,7 @@ sub _get {
     local $1;
     while ($request =~ s/:([^:]*)//) {
       if    ($1 eq 'raw')  { $getraw  = 1 }
-      elsif ($1 eq 'addr') { $getaddr = 1 }
+      elsif ($1 eq 'addr') { $getaddr = $getraw = 1 }
       elsif ($1 eq 'name') { $getname = 1 }
     }
   }
@@ -1584,10 +1584,12 @@ sub _get {
       #
       # strip out the (comments)
       $result =~ s/\s*\(.*?\)//g;
-      # strip out the "quoted text"
-      $result =~ s/(?<!<)"[^"]*"(?!@)//g;   #" emacs
+      # strip out the "quoted text", unless it's the only thing in the string
+      if ($result !~ /^".*"$/) {
+        $result =~ s/(?<!<)"[^"]*"(?!@)//g;   #" emacs
+      }
       # Foo Blah <jm@xxx> or <jm@xxx>
-      $result =~ s/^[^<]*?<(.*?)>.*$/$1/;
+      $result =~ s/^[^"<]*?<(.*?)>.*$/$1/;
       # multiple addresses on one line? remove all but first
       $result =~ s/,.*$//;
     }
