@@ -114,7 +114,7 @@ reuse  RCVD_IN_SORBS_SMTP
 #reuse  RCVD_IN_SORBS_SPAM	RCVD_IN_SORBS_SPAM
 
 header RCVD_IN_SORBS_WEB	eval:check_rbl_sub('sorbs', '127.0.0.7')
-describe RCVD_IN_SORBS_WEB	SORBS: sender is a abuseable web server
+describe RCVD_IN_SORBS_WEB	SORBS: sender is an abusable web server
 tflags RCVD_IN_SORBS_WEB	net
 reuse  RCVD_IN_SORBS_WEB
 
