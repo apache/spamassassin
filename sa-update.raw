@@ -445,8 +445,13 @@ foreach my $channel (@channels) {
 
     # Not getting a response isn't a failure, there may just not be any updates
     # for this SA version yet.
-    unless (defined $newV) {
-      dbg("channel: no updates available, skipping channel");
+    if (!defined $newV) {
+      my @mirs = do_txt_query("mirrors.$channel");
+      if (defined shift @mirs) {
+        dbg("channel: no updates available, skipping channel");
+      } else {
+        channel_failed("channel: no 'mirrors.$channel' record found");
+      }
       next;
     }
 
