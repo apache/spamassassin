@@ -322,6 +322,12 @@ SPAMASSASSIN RELEASE PROCEDURE
   TODO: for the first 3.3.0 release, we'll need to add a section allowing
   people to download the rules tarball as well.
 
+- Release a new rules update matching the released code:
+
+    ssh spamassassin.zones.apache.org
+    cd /home/updatesd/svn/spamassassin/build/mkupdates
+    sudo -H -u updatesd ./update-rules 3.3
+
 - rebuild the SpamAssassin website with webmake:
 
         PATH=$HOME/sabuildtools/perl584/bin:$HOME/sabuildtools/bin:$PATH
@@ -350,12 +356,6 @@ SPAMASSASSIN RELEASE PROCEDURE
 
         svn up
         svn commit -m "added new release to website"
-
-- Release a new rules update matching the released code:
-
-    ssh spamassassin.zones.apache.org
-    cd /home/updatesd/svn/spamassassin/build/mkupdates
-    sudo -H -u updatesd ./update-rules 3.3
 
 - update the tag used to point to "current release":
 
