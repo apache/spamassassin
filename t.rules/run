@@ -85,6 +85,7 @@ sub main {
 sub test_msg {
   my ($f) = @_;
   return if ($f =~ /\.cf$/i);
+  $f =~ s,//+,/,gs;             # multiple slashes are ok
   ($f =~ /\/([^\/]+)\/[^\/]+$/) or warn "cannot find rule in '$f'";
   my $rule = $1;
 
