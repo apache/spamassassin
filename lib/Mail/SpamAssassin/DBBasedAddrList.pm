@@ -60,13 +60,15 @@ sub new_checker {
 	$main->{conf}->{auto_whitelist_db_modules}."\n";
   }
 
+  my $umask = umask ~ (oct($main->{conf}->{auto_whitelist_file_mode}));
+
   # if undef then don't worry -- empty hash!
   if (defined($main->{conf}->{auto_whitelist_path})) {
     my $path = $main->sed_path($main->{conf}->{auto_whitelist_path});
     my ($mod1, $mod2);
 
     if ($main->{locker}->safe_lock
-                       ($path, 30, $main->{conf}->{auto_whitelist_file_mode}))
+            ($path, 30, $main->{conf}->{auto_whitelist_file_mode}))
     {
       $self->{locked_file} = $path;
       $self->{is_locked}   = 1;
@@ -80,10 +82,10 @@ sub new_checker {
     dbg("auto-whitelist: tie-ing to DB file of type $dbm_module $mod1 in $path");
 
     ($self->{is_locked} && $dbm_module eq 'DB_File') and
-            Mail::SpamAssassin::Util::avoid_db_file_locking_bug ($path);
+            Mail::SpamAssassin::Util::avoid_db_file_locking_bug($path);
 
     if (! tie %{ $self->{accum} }, $dbm_module, $path, $mod2,
-            oct($main->{conf}->{auto_whitelist_file_mode}) )
+            oct($main->{conf}->{auto_whitelist_file_mode}) & 0666)
     {
       my $err = $!;   # might get overwritten later
       if ($self->{is_locked}) {
@@ -93,6 +95,7 @@ sub new_checker {
       die "auto-whitelist: cannot open auto_whitelist_path $path: $err\n";
     }
   }
+  umask $umask;
 
   bless ($self, $class);
   return $self;
