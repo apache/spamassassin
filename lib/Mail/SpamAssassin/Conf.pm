@@ -3018,6 +3018,21 @@ the filesystem.
     }
   });
 
+=item ignore_always_matching_regexps         (Default: 0)
+
+Ignore any rule which contains a regexp which always matches.
+Currently only catches regexps which contain '||', or which begin or
+end with a '|'.  Also ignore rules with C<some> combinatorial explosions.
+
+=cut
+
+  push (@cmds, {
+    setting  => 'ignore_always_matching_regexps',
+    is_admin => 1,
+    default  => 0,
+    type     => $CONF_TYPE_BOOL
+  });
+
 =back
 
 =head1 PREPROCESSING OPTIONS
