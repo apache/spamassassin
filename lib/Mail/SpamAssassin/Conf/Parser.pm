@@ -1197,6 +1197,21 @@ sub is_regexp_valid {
     $safere = "m#".$re."#";
   }
 
+  if ($self->{conf}->{lint_rules} ||
+      $self->{conf}->{ignore_always_matching_regexps})
+  {
+    my $msg = $self->is_always_matching_regexp($name, $re);
+
+    if (defined $msg) {
+      if ($self->{conf}->{lint_rules}) {
+        $self->lint_warn($msg, $name);
+      } else {
+        warn $msg;
+        return 0;
+      }
+    }
+  }
+
   # now prepend the modifiers, in order to check if they're valid
   if ($mods) {
     $re = "(?".$mods.")".$re;
@@ -1213,6 +1228,24 @@ sub is_regexp_valid {
   $err =~ s/ at .*? line \d.*$//;
   $self->lint_warn("config: invalid regexp for rule $name: $origre: $err\n", $name);
   return 0;
+}
+
+# check the pattern for some basic errors, and warn if found
+sub is_always_matching_regexp {
+  my ($self, $name, $re) = @_;
+
+  if ($re =~ /(?<!\\)\|\|/) {
+    return "config: regexp for rule $name always matches due to '||'";
+  }
+  elsif ($re =~ /^\|/) {
+    return "config: regexp for rule $name always matches due to " .
+      "pattern starting with '|'";
+  }
+  elsif ($re =~ /\|(?<!\\\|)$/) {
+    return "config: regexp for rule $name always matches due to " .
+      "pattern ending with '|'";
+  }
+  return;
 }
 
 ###########################################################################
