@@ -53,8 +53,9 @@ sub safe_lock {
   my @stat;
 
   $max_retries ||= 30;
-  $mode ||= 0600;
-  $mode = oct $mode;
+  $mode ||= "0700";
+  $mode = (oct $mode) & 0666;
+  dbg ("locker: mode is $mode");
 
   my $lock_file = "$path.mutex";
   my $umask = umask(~$mode);
