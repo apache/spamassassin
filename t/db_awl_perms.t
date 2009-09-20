@@ -2,7 +2,7 @@
 
 use lib '.'; use lib 't';
 use SATest; sa_t_init("db_awl_perms");
-use Test; BEGIN { plan tests => 4 };
+use Test; BEGIN { plan tests => 5 };
 use IO::File;
 
 # ---------------------------------------------------------------------------
@@ -24,11 +24,19 @@ sarun("--debug --add-addr-to-whitelist whitelist_test\@example.org",
 
 system "ls -l log/user_state";          # for the logs
 
-my ($dev,$ino,$mode,$nlink,$uid,$gid,$rdev,$size) = stat "log/user_state/awl";
-ok (($mode & 0777) == 0644);
+sub checkmode {
+  my $fname = shift;
+  if (!-f $fname) { return 1; }
+  my ($dev,$ino,$mode,$nlink,$uid,$gid,$rdev,$size) = stat $fname;
+  return (($mode & 0777) == 0644);
+}
 
-($dev,$ino,$mode,$nlink,$uid,$gid,$rdev,$size) = stat "log/user_state/awl.mutex";
-ok (($mode & 0777) == 0644);
+ok checkmode "log/user_state/awl";              # DB_File
+ok checkmode "log/user_state/awl.dir";          # SDBM
+ok checkmode "log/user_state/awl.pag";          # SDBM
+ok checkmode "log/user_state/awl.mutex";
 
-ok unlink 'log/user_state/awl';
+unlink 'log/user_state/awl',
+    'log/user_state/awl.dir',
+    'log/user_state/awl.pag';
 ok unlink 'log/user_state/awl.mutex';
