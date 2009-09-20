@@ -785,6 +785,7 @@ sub extract_ipv4_addr_from_string {
 }
 
 ###########################################################################
+
 {
   my($hostname, $fq_hostname);
 
@@ -797,7 +798,7 @@ sub extract_ipv4_addr_from_string {
     # got to clean PATH before we may call it.
     clean_path_in_taint_mode();
     $hostname = Sys::Hostname::hostname();
-
+    $hostname =~ s/[()]//gs;            # bug 5929
     return $hostname;
   }
 
@@ -812,6 +813,7 @@ sub extract_ipv4_addr_from_string {
                     map { split } (gethostbyname($fq_hostname))[0 .. 1] # from all aliases
                   );
       $fq_hostname = $names[0] if (@names); # take the first FQDN, if any 
+      $fq_hostname =~ s/[()]//gs;       # bug 5929
     }
 
     return $fq_hostname;
