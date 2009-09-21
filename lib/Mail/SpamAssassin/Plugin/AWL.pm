@@ -166,11 +166,15 @@ or group based auto-whitelist databases.
 
 =item auto_whitelist_distinguish_signed
 
+Used by the SQLBasedAddrList storage implementation.
+
 If this option is set the SQLBasedAddrList module will keep separate
 database entries for DKIM-validated e-mail addresses and for non-validated
 ones. A pre-requisite when setting this option is that a field awl.signedby
-exists in a SQL table, otherwise SQL operations will fail. A plugin DKIM
-should also be enabled, as otherwise turning on this option makes no sense.
+exists in a SQL table, otherwise SQL operations will fail (which is why we
+need this option at all - for compatibility with pre-3.3.0 database schema).
+A plugin DKIM should also be enabled, as otherwise there is no benefit from
+turning on this option.
 
 =cut
 
@@ -356,14 +360,13 @@ sub check_from_in_auto_whitelist {
     my $tflags = $pms->{conf}->{tflags};
     my $points = 0;
     my $signedby = $pms->get_tag('DKIMDOMAIN');
-    $signedby = undef  if defined $signedby && $signedby eq '';
+    undef $signedby  if defined $signedby && $signedby eq '';
 
     foreach my $test (@{$pms->{test_names_hit}}) {
       # ignore tests with 0 score in this scoreset,
       # or if the test is marked as "noautolearn"
-      next if ($scores->{$test} == 0);
-      next if (exists $tflags->{$test} && $tflags->{$test} =~ /\bnoautolearn\b/);
-
+      next if !$scores->{$test};
+      next if exists $tflags->{$test} && $tflags->{$test} =~ /\bnoautolearn\b/;
       $points += $scores->{$test};
     }
 
@@ -380,29 +383,16 @@ sub check_from_in_auto_whitelist {
         $meanscore = $whitelist->check_address($from, $origip, $signedby);
       }
       my $delta = 0;
-      my $signeravg;
 
       dbg("auto-whitelist: AWL active, pre-score: %s, autolearn score: %s, ".
-	  "mean: %s%s, IP: %s, address: %s %s",
+	  "mean: %s, IP: %s, address: %s %s",
           $pms->{score}, $awlpoints,
           !defined $meanscore ? 'undef' : sprintf("%.3f",$meanscore),
-          !defined $signeravg ? '' : sprintf(", signer_avg: %.2f",$signeravg),
           $origip || 'undef',
-          $from,  $signedby ? "SIGNED by $signedby" : '(not signed)');
+          $from,  $signedby ? "signed by $signedby" : '(not signed)');
 
-      if (defined $signeravg) {
-	$pms->set_tag('AWLSIGNERMEAN', sprintf("%2.1f", $signeravg));
-      }
-      if (defined $meanscore || defined $signeravg) {
-	my $past_avg;
-        if (defined $meanscore && defined $signeravg) {
-	  $past_avg = ($meanscore + $signeravg) / 2;
-        } elsif (defined $meanscore) {
-	  $past_avg = $meanscore;
-        } else {
-	  $past_avg = $signeravg;
-	}
-	$delta = $past_avg - $awlpoints;
+      if (defined $meanscore) {
+	$delta = $meanscore - $awlpoints;
 	$delta *= $pms->{main}->{conf}->{auto_whitelist_factor};
       
 	$pms->set_tag('AWL', sprintf("%2.1f",$delta));

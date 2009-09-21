@@ -42,30 +42,17 @@ MySQL, SQLite and PostgreSQL) to store user auto-whitelists.
 
 The default table structure looks like this:
 CREATE TABLE awl (
-  username VARCHAR NOT NULL,
-  email VARCHAR NOT NULL,
-  ip VARCHAR NOT NULL,
-  count INT NOT NULL,
-  totscore FLOAT NOT NULL,
-  signedby VARCHAR(255) NOT NULL DEFAULT '',
-  PRIMARY KEY (username, email, signedby, ip)
-)
+  username varchar(100) NOT NULL default '',
+  email varchar(255) NOT NULL default '',
+  ip varchar(16) NOT NULL default '',
+  count int(11) NOT NULL default '0',
+  totscore float NOT NULL default '0',
+  signedby varchar(255) NOT NULL default '',
+  PRIMARY KEY (username,email,signedby,ip)
+) TYPE=MyISAM;
 
 Your table definition may change depending on which database driver
 you choose.  There is a config option to override the table name.
-
-To add a field 'signedby' into an existing table under MySQL
-and to modify a primary key, use:
-  ALTER TABLE awl
-    DROP PRIMARY KEY,
-    ADD signedby varchar(255) NOT NULL DEFAULT '',
-    ADD PRIMARY KEY (username,email,signedby,ip);
-
-To add a field 'signedby' into an existing table under PostgreSQL, use:
-  DROP INDEX awl_pkey;
-  ALTER TABLE awl
-    ADD signedby varchar(255) NOT NULL DEFAULT '',
-    ADD PRIMARY KEY (username,email,signedby,ip);
 
 This module introduces several new config variables:
 
@@ -191,9 +178,9 @@ This method takes a given C<$addr> and splits it between the email address
 component and the ip component and performs a lookup in the database. If
 nothing is found in the database then a blank entry hash is created and
 returned, otherwise an entry containing the found information is returned.
-If a parameter $signedby is defined, only addresses signed by this signing
-identity are taken into account, if $signedby is undefined only addresses
-from unsigned mail are considered.
+If a with_awl_signer configuration option is enabled only addresses signed
+by the given signing identity are taken into account, or, if $signedby is
+undefined (or empty) only unsigned entries are considered.
 
 A key, C<exists_p>, is set to 1 if an entry already exists in the database,
 otherwise it is set to 0.
@@ -207,25 +194,26 @@ sub get_addr_entry {
                 exists_p => 0,
                 count    => 0,
                 totscore => 0,
+                signedby => $signedby,
               };
-  $entry->{signedby} = $signedby  if defined $signedby;
 
   my ($email, $ip) = $self->_unpack_addr($addr);
 
-  return $entry unless ($email && $ip);
+  return $entry  unless $email ne '' && (defined $ip || defined $signedby);
 
   my $sql = "SELECT count, totscore FROM $self->{tablename} " .
             "WHERE username = ? AND email = ?";
   my @args = ($email);
-  if ($self->{_with_awl_signer} && defined $signedby && $signedby ne '') {
-    my @signedby = split(' ', lc $signedby);
+  if ($self->{_with_awl_signer}) {
+    my @signedby = !defined $signedby ? '' : split(' ', lc $signedby);
     if (@signedby == 1) {
       $sql .= " AND signedby = ?";
     } elsif (@signedby > 1) {
       $sql .= " AND signedby IN (" . join(',', ('?') x @signedby) . ")";
     }
     push(@args, @signedby);
-  } elsif (defined $ip && $ip ne '') {
+  }
+  if (!$self->{_with_awl_signer} || !defined $signedby || $signedby eq '') {
     $sql .= " AND ip = ?";
     push(@args, $ip);
   }
@@ -239,19 +227,21 @@ sub get_addr_entry {
     $entry->{totscore} = 0;
   }
   else {
-    my $aryref = $sth->fetchrow_arrayref();
-
-    if (defined($aryref)) { # we got some data back
-      $entry->{count} = $aryref->[0] || 0;
-      $entry->{totscore} = $aryref->[1] || 0;
+    my $cnt = 0;
+    my $aryref;
+    # how to combine data if there are several entries (like signed by
+    # an author domain and by a remailer)?  for now just take an average
+    while ( defined($aryref = $sth->fetchrow_arrayref()) ) {
+      if (defined $entry->{count} && defined $aryref->[1]) {
+        $entry->{count} += $aryref->[0];
+        $entry->{totscore} += $aryref->[1];
+      }
       $entry->{exists_p} = 1;
-      dbg("auto-whitelist: sql-based get_addr_entry: found entry for %s",
-          join('|',@args));
+      $cnt++;
     }
-    else {
-      dbg("auto-whitelist: sql-based get_addr_entry: no entry found for %s",
-          join('|',@args));
-    }
+    dbg("auto-whitelist: sql-based get_addr_entry: %s for %s",
+        $cnt ? "found $cnt entry" : 'no entries found',
+        join('|',@args) );
   }
   $sth->finish();
 
@@ -285,24 +275,26 @@ sub add_score {
 
   $entry->{count} += 1;
   $entry->{totscore} += $score;
-  
-  return $entry unless ($email && $ip);
-
   my $signedby = $entry->{signedby};
+  
+  return $entry  unless $email ne '' && (defined $ip || defined $signedby);
+
   if ($entry->{exists_p}) { # entry already exists, so just update
     my(@args) = ($score, $self->{_username}, $email);
     my $sql = "UPDATE $self->{tablename} ".
               "SET count = count + 1, totscore = totscore + ? ".
               "WHERE username = ? AND email = ?";
-    if ($self->{_with_awl_signer} && defined $signedby && $signedby ne '') {
-      my @signedby = split(' ', lc $signedby);
+    my @signedby;
+    if ($self->{_with_awl_signer}) {
+      @signedby = !defined $signedby ? '' : split(' ', lc $signedby);
       if (@signedby == 1) {
         $sql .= " AND signedby = ?";
       } elsif (@signedby > 1) {
         $sql .= " AND signedby IN (" . join(',', ('?') x @signedby) . ")";
       }
       push(@args, @signedby);
-    } elsif (defined $ip && $ip ne '') {
+    }
+    if (!$self->{_with_awl_signer} || !defined $signedby || $signedby eq '') {
       $sql .= " AND ip = ?";
       push(@args, $ip);
     }
@@ -314,23 +306,25 @@ sub add_score {
       dbg("auto-whitelist: sql-based add_score/update: SQL error: $err");
     }
     else {
-      dbg("auto-whitelist: sql-based add_score: new count: ". $entry->{count} .", new totscore: ".$entry->{totscore}." for ".$entry->{addr});
+      dbg("auto-whitelist: sql-based add_score: ".
+          "new count: %s, new totscore: %s for %s",
+          $entry->{count}, $entry->{totscore}, join('|',@args[2..$#args]));
     }
     $sth->finish();
   }
   else { # no entry yet, so insert a new entry
     my @fields = qw(username email ip count totscore);
+    my @args = ($self->{_username}, $email, $ip, 1, $score);
     my @signedby;
     if ($self->{_with_awl_signer}) {
       push(@fields, 'signedby');
-      @signedby = split(' ', lc $signedby)  if defined $signedby;
+      @signedby = !defined $signedby ? '' : split(' ', lc $signedby);
     }
-    @signedby = ( '' )  if !@signedby;  # empty string indicates unsigned
     my $sql = sprintf("INSERT INTO %s (%s) VALUES (%s)", $self->{tablename},
                       join(',', @fields),  join(',', ('?') x @fields));
     my $sth = $self->{dbh}->prepare($sql);
-    my @args = ($self->{_username},$email,$ip,1,$score);
-    for my $s (@signedby) {  # contains at least one element, possibly ''
+    for my $s (@signedby) {
+      # loop runs for at least one element, possibly an empty signing domain
       my $rc = $sth->execute(@args, (@fields > @args ? $s : ()) );
       if (!$rc) {
         my $err = $self->{dbh}->errstr;
@@ -338,7 +332,8 @@ sub add_score {
       }
     }
     $entry->{exists_p} = 1;
-    dbg("auto-whitelist: sql-based add_score: created new entry for ".$entry->{addr}." with totscore: $score");
+    dbg("auto-whitelist: sql-based add_score: created new entry ".
+        "with totscore %s: %s", $score, join('|',@args[2..$#args]));
     $sth->finish();
   }
   
@@ -378,7 +373,7 @@ sub remove_entry {
   }
   # if a key 'signedby' exists in the $entry, be selective on its value too
   my $signedby = $entry->{signedby};
-  if ($self->{_with_awl_signer} && defined $signedby && $signedby ne '') {
+  if ($self->{_with_awl_signer} && defined $signedby) {
     my @signedby = split(' ', lc $signedby);
     if (@signedby == 1) {
       $sql .= " AND signedby = ?";
