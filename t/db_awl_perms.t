@@ -19,7 +19,7 @@ tstprefs ("
 unlink "log/user_state/awl";
 unlink "log/user_state/awl.mutex";
 umask 022;
-sarun("--debug --add-addr-to-whitelist whitelist_test\@example.org",
+sarun("--add-addr-to-whitelist whitelist_test\@example.org",
       \&patterns_run_cb);
 
 system "ls -l log/user_state";          # for the logs
