@@ -2504,10 +2504,14 @@ sub daemonize {
   defined( my $pid = fork ) or die "spamd: cannot fork: $!\n";
   if ($pid) {
     my $child_stat;
-    for (my $retry=30, my $waited=0; ($retry>0) && !$serverstarted && ($waited != $pid); $retry--) {
-      warn ("waitpid failed: $waited $!") if ($waited);
+    # Bug 6191: takes almost a minute on a slow machine, bump to 90 seconds
+    for (my $retry=90, my $waited=0;
+         $retry > 0 && !$serverstarted && $waited != $pid;
+         $retry--)
+    {
+      warn("waitpid failed: $waited $!")  if $waited;
       sleep 1;
-      $waited=waitpid($pid, WNOHANG);
+      $waited = waitpid($pid, WNOHANG);
       $child_stat = $?  if $waited > 0;
     }
     die sprintf("child process [%s] exited or timed out ".
