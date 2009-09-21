@@ -129,19 +129,19 @@ sub check_address {
   my $entry = $self->{checker}->get_addr_entry ($fulladdr, $signedby);
   $self->{entry} = $entry;
 
-  if (!defined $entry->{count} || $entry->{count} == 0) {
+  if (!$entry->{count}) {
     # no entry found
     if (defined $origip) {
       # try upgrading a default entry (probably from "add-addr-to-foo")
       my $noipaddr = $self->pack_addr ($addr, undef);
-      my $noipent = $self->{checker}->get_addr_entry ($noipaddr, $signedby);
+      my $noipent = $self->{checker}->get_addr_entry ($noipaddr, undef);
 
       if (defined $noipent->{count} && $noipent->{count} > 0) {
 	dbg("auto-whitelist: found entry w/o IP address for $addr: replacing with $origip");
 	$self->{checker}->remove_entry($noipent);
-        # Now assign proper entry the count and totscore values of the no ip entry
-        # instead of assigning the whole value to avoid wiping out any information added
-        # to the previous entry.
+        # Now assign proper entry the count and totscore values of the
+        # no-IP entry instead of assigning the whole value to avoid
+        # wiping out any information added to the previous entry.
 	$entry->{count} = $noipent->{count};
 	$entry->{totscore} = $noipent->{totscore};
       }
@@ -157,9 +157,7 @@ sub check_address {
     $entry->{count} = $entry->{totscore} = 0;
   }
 
-  if ($entry->{count} == 0) { return undef }
-
-  return $entry->{totscore} / $entry->{count};
+  return !$entry->{count} ? undef : $entry->{totscore} / $entry->{count};
 }
 
 ###########################################################################
@@ -312,8 +310,8 @@ sub pack_addr {
     $origip =~ s/[^0-9A-Fa-f:.]/_/gs;	# paranoia
     $origip = 'junk-' . $origip;
   }
-  $origip = substr($origip,0,45)  if length($origip) > 45;  # awl.ip field
-  $addr."|ip=".$origip;
+  $origip = substr($origip,0,16)  if length($origip) > 16;  # awl.ip field
+  return $addr . "|ip=" . $origip;
 }
 
 ###########################################################################
