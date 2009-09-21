@@ -30,7 +30,7 @@ rules apply to all URIs found in the message.
 
 The format for defining a rule is as follows:
 
-  uri_detail SYMBOLIC_TEST_NAME key1 =~ /value1/ key2 !~ /value2/ ...
+  uri_detail SYMBOLIC_TEST_NAME key1 =~ /value1/  key2 !~ /value2/ ...
 
 Supported keys are:
 
@@ -53,11 +53,11 @@ C<domain> is the domain(s) found in the cleaned URIs.
 Example rule for matching a URI where the raw URI matches "%2Ebar",
 the domain "bar.com" is found, and the type is "a" (an anchor tag).
 
-  uri_detail TEST1 raw =~ /%2Ebar/ domain =~ /^bar\.com$/ type =~ /^a$/
+  uri_detail TEST1 raw =~ /%2Ebar/  domain =~ /^bar\.com$/  type =~ /^a$/
 
 Example rule to look for suspicious "https" links:
 
-  uri_detail FAKE_HTTPS text =~ /\bhttps:/ cleaned !~ /\bhttps:/
+  uri_detail FAKE_HTTPS text =~ /\bhttps:/  cleaned !~ /\bhttps:/
 
 Regular expressions should be delimited by slashes.
 
@@ -66,6 +66,7 @@ Regular expressions should be delimited by slashes.
 package Mail::SpamAssassin::Plugin::URIDetail;
 use Mail::SpamAssassin::Plugin;
 use Mail::SpamAssassin::Logger;
+use Mail::SpamAssassin::Util qw(untaint_var);
 
 use strict;
 use warnings;
@@ -85,7 +86,7 @@ sub new {
   my $self = $class->SUPER::new($mailsaobject);
   bless ($self, $class);
 
-  $self->register_eval_rule ("check_uri_detail");
+  $self->register_eval_rule("check_uri_detail");
 
   $self->set_config($mailsaobject->{conf});
 
@@ -128,7 +129,7 @@ sub set_config {
 	}
 
 	dbg("config: uri_detail adding ($target $op /$pattern/) to $name");
-	$pluginobj->{uri_detail}->{$name}->{$target} = "$op /$pattern/";
+	$pluginobj->{uri_detail}->{$name}->{$target} = [$op, $pattern];
 	$added_criteria = 1;
       }
 
@@ -159,65 +160,61 @@ sub check_uri_detail {
     my $rule = $self->{uri_detail}->{$test};
 
     if (exists $rule->{raw}) {
-      my $tmp = $rule->{raw};
-      next unless (eval "\$raw ${tmp}");
-      dbg("uri: raw matched\n");
+      my($op,$patt) = @{$rule->{raw}};
+      if ( ($op eq '=~' && $raw =~ /$patt/) ||
+           ($op eq '!~' && $raw !~ /$patt/) ) {
+        dbg("uri: raw matched: '%s' %s /%s/", $raw,$op,$patt);
+      } else {
+        next;
+      }
     }
 
     if (exists $rule->{type}) {
       next unless $info->{types};
-      my $tmp = $rule->{type};
-      my $match = 0;
+      my($op,$patt) = @{$rule->{type}};
+      my $match;
       for my $text (keys %{ $info->{types} }) {
-	if (eval "\$text ${tmp}") {
-	  $match = 1;
-	  last;
-	}
+        if ( ($op eq '=~' && $text =~ /$patt/) ||
+             ($op eq '!~' && $text !~ /$patt/) ) { $match = $text; last }
       }
-      next unless $match;
-      dbg("uri: type matched\n");
+      next unless defined $match;
+      dbg("uri: type matched: '%s' %s /%s/", $match,$op,$patt);
     }
 
-    if (exists $rule->{cleaned} && exists $info->{cleaned}) {
+    if (exists $rule->{cleaned}) {
       next unless $info->{cleaned};
-      my $tmp = $rule->{cleaned};
-      my $match = 0;
+      my($op,$patt) = @{$rule->{cleaned}};
+      my $match;
       for my $text (@{ $info->{cleaned} }) {
-	if (eval "\$text ${tmp}") {
-	  $match = 1;
-	  last;
-	}
+        if ( ($op eq '=~' && $text =~ /$patt/) ||
+             ($op eq '!~' && $text !~ /$patt/) ) { $match = $text; last }
       }
-      next unless $match;
-      dbg("uri: cleaned matched\n");
+      next unless defined $match;
+      dbg("uri: cleaned matched: '%s' %s /%s/", $match,$op,$patt);
     }
 
     if (exists $rule->{text}) {
       next unless $info->{anchor_text};
-      my $tmp = $rule->{text};
-      my $match = 0;
+      my($op,$patt) = @{$rule->{text}};
+      my $match;
       for my $text (@{ $info->{anchor_text} }) {
-	if (eval "\$text ${tmp}") {
-	  $match = 1;
-	  last;
-	}
+        if ( ($op eq '=~' && $text =~ /$patt/) ||
+             ($op eq '!~' && $text !~ /$patt/) ) { $match = $text; last }
       }
-      next unless $match;
-      dbg("uri: text matched\n");
+      next unless defined $match;
+      dbg("uri: text matched: '%s' %s /%s/", $match,$op,$patt);
     }
 
     if (exists $rule->{domain}) {
       next unless $info->{domains};
-      my $tmp = $rule->{domain};
-      my $match = 0;
+      my($op,$patt) = @{$rule->{domain}};
+      my $match;
       for my $text (keys %{ $info->{domains} }) {
-	if (eval "\$text ${tmp}") {
-	  $match = 1;
-	  last;
-	}
+        if ( ($op eq '=~' && $text =~ /$patt/) ||
+             ($op eq '!~' && $text !~ /$patt/) ) { $match = $text; last }
       }
-      next unless $match;
-      dbg("uri: domain matched\n");
+      next unless defined $match;
+      dbg("uri: domain matched: '%s' %s /%s/", $match,$op,$patt);
     }
 
     if (would_log('dbg', 'rules') > 1) {
