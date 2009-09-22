@@ -63,10 +63,14 @@ meta           MAILER_EQ_ORG         __MUA_EQ_ORG_1 || __MUA_EQ_ORG_2
 describe       MAILER_EQ_ORG         X-Mailer: same as Organization:
 
 # observed in UCE 9/2009
-header         __HDRS_LCASE          ALL =~ /\n(?:Reply-to|Message-id|Content-type|X-MSMail-priority|from|subject|to):/sm
+header         __HDRS_LCASE          ALL =~ /\n(?:Reply-to|Message-id|Content-type|X-MSMail-priority|from|subject|to|Disposition-notification-to):/sm
 tflags         __HDRS_LCASE          multiple
-meta           HDRS_LCASE            __HDRS_LCASE > 2
+meta           HDRS_LCASE            __HDRS_LCASE > 1
 describe       HDRS_LCASE            Odd capitalization of multiple message headers
+
+# observed in UCE from India, 9/2009
+header         MDN_BOTCHED           Disposition-notification-to =~ /<>/
+describe       MDN_BOTCHED           Malformed return receipt header
 
 # observed in spam 9/2009
 header         HDRS_MISSP            ALL =~ /\n(?:Subject|From):\S/ism
@@ -110,4 +114,5 @@ ifplugin Mail::SpamAssassin::Plugin::FreeMail
   describe     RVW_ATTCH_FREEMAIL   Please review attachment, from freemail
   score        RVW_ATTCH_FREEMAIL   1.0
 endif
+
 

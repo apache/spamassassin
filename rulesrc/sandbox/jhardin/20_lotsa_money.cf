@@ -1,15 +1,16 @@
 
 ifplugin Mail::SpamAssassin::Plugin::ReplaceTags
-  replace_tag  CURRENCY   [\(\[]?(?:GBP|=[Aa][34]|\xa3|[Pp]ounds\s[Ss]terling|\xa4|EUR|[Ee][Uu][Rr]\sde|[Ee]uros?|US[D\$]{1,2}|\$(?:US)?)[\]\)]?
-  replace_tag  GB_UK      \b(?:U\.?K\.?|(?:Great\s)?Brit(?:ain|ish))\b
+  replace_tag  CURRENCY   [\(\[]?(?:\bUS[D\$]{0,2}|\$(?:US)?|GBP|=[Aa][34]|\xa3|[Pp]ounds\s[Ss]terling|\xa4|EUR|[Ee]uros?|[Ee][Uu][Rr]\sde)[\]\)]?
+  replace_tag  GB_UK      \b(?:U\.?K\.?|(?:Great\s)?Brit(?:ain|ish)|G\.?B\.?)\b
 
-  body     __LOTSA_MONEY_01   /(?:<CURRENCY>|\bUS)\s?\d[\d.,\sO]{5,20}[\dO]/
-  body     __LOTSA_MONEY_02   /\d[\d.,\sO]{5,20}[\dO]\s?(?:<CURRENCY>|Pounds)/
-  body     __LOTSA_MONEY_03   /<CURRENCY>\s?\d(?:[\d.,\sO]{0,5})?(?:[Mm](?:[Ii][Ll])?\b|[Mm][Ii][Ll]+\w+|[Hh][Uu][Nn][Dd][Rr][Ee][Dd]|[Tt][Hh][Oo][Uu][Ss][Aa][Nn][Dd])/
-  body     __LOTSA_MONEY_04   /(?:mill(?:e|ion(?!s))|hundred(?!s)[^\.]{1,20}thousand(?!s))[^\.]{1,50}(?:(?:U\.?\s?S\.?\s?(?:A\.?\s?))?dollars|USD|<GB_UK>\spounds?|(?:<GB_UK>\s)?pounds?\ssterling|(?:d'\s?)?euros?|francs?)/i
-  replace_rules   __LOTSA_MONEY_01 __LOTSA_MONEY_02 __LOTSA_MONEY_03 __LOTSA_MONEY_04
+  body     __LOTSA_MONEY_00   /<CURRENCY>\s?\d[\dO][,\.][\dO]{3}(?:(?!\d)|\b)/
+  body     __LOTSA_MONEY_01   /(?:[Ss][Uu][Mm]\s[Oo][Ff]\s|<CURRENCY>\s?)\s?\d[\d.,\sO]{5,20}[\dO]/
+  body     __LOTSA_MONEY_02   /\d[\d.,\sO]{5,20}[\dO]\s?(?:<CURRENCY>|Pounds)\b/
+  body     __LOTSA_MONEY_03   /(?:[Ss][Uu][Mm]\s[Oo][Ff]\s|<CURRENCY>\s?)\d(?:[\d.,\sO]{0,5})?(?:[Mm](?:[Ii][Ll])?\b|[Mm][Ii][Ll]+(?:[Ii][Oo]|<O>)[Nn]|[Hh][Uu][Nn][Dd][RrEe]+[DdTt]|[Tt][Hh][Oo][Uu][Ss][Aa][Nn][Dd]|[Tt][Aa][Uu][Ss][Ee][Nn][Dd])/
+  body     __LOTSA_MONEY_04   /(?:million(?!s)|mill<O>n|hundred(?!s)[^\.]{1,25}thousand(?!s)|cents?[^\.]{1,25}mille|hundert[^\.]{1,30}tausend|ientos?[^\.]{1,20}mil)[^\.\$]{0,50}(?:(?:U\.?\s?S\.?\s?(?:A\.?\s?)?|united\sstates?|canad(?:ian|a)\s)?dollars?|USD|GBP|<GB_UK>\spounds?|(?:<GB_UK>\s)?pounds?\ssterling|(?:d'\s?)?euros?)\b/i
+  replace_rules   __LOTSA_MONEY_00 __LOTSA_MONEY_01 __LOTSA_MONEY_02 __LOTSA_MONEY_03 __LOTSA_MONEY_04
 
-  meta     LOTS_OF_MONEY    (__LOTSA_MONEY_01 || __LOTSA_MONEY_02 || __LOTSA_MONEY_03 || __LOTSA_MONEY_04)
+  meta     LOTS_OF_MONEY    (__LOTSA_MONEY_00 || __LOTSA_MONEY_01 || __LOTSA_MONEY_02 || __LOTSA_MONEY_03 || __LOTSA_MONEY_04)
   describe LOTS_OF_MONEY    Huge... sums of money
   score    LOTS_OF_MONEY    0.01
 
@@ -53,7 +54,7 @@ body     LOTTO_YOU_WON_03 /\b(?:your?|win+ing|win+ers?|beneficiaries|participant
 score    LOTTO_YOU_WON_03 0.50 
 
 describe LOTTO_YOU_WON_04 You won!
-body     __YOU_WON_04A    /\byour?\s(?:\w+\s)?w[io]n\b/i
+body     __YOU_WON_04A    /\byou['\w\s]{1,20}w[io]n(?:ner|ning)?\b/i
 body     __YOU_WON_04B    /\bw[io]n\s(?:(?:for|by)\s)?your?\b/i
 meta     LOTTO_YOU_WON_04 __YOU_WON_04A || __YOU_WON_04B
 score    LOTTO_YOU_WON_04 0.10 
@@ -98,7 +99,8 @@ body     __YOU_ASSIST     /\byour\sassistance\b/i
 
 body     __PCT_FOR_YOU_1  /\b(?:\d+|ten|[a-z]+teen|(?:twen|thir|fou?r)ty(?:-?[a-z]+)?)\s?(?:%|percent)[\s)]+(?:for|to|as)\syour?/i
 body     __PCT_FOR_YOU_2  /\b(?:give|offer)\syou\s(?:\d+|en|[a-z]+teen|(?:twen|thir|fou?r)ty(?:-?[a-z]+)?)\s?(?:%|percent)/i
-meta     PCT_FOR_YOU      __PCT_FOR_YOU_1 || __PCT_FOR_YOU_2
+body     __PCT_FOR_YOU_3  /\byour?[\w\s]{6,30}(?:\d+|en|[a-z]+teen|(?:twen|thir|fou?r)ty(?:-?[a-z]+)?)\s?(?:%|percent)/i
+meta     PCT_FOR_YOU      __PCT_FOR_YOU_1 || __PCT_FOR_YOU_2 || __PCT_FOR_YOU_3
 describe PCT_FOR_YOU      X% for you
 
 meta     MONEY_DEAL       LOTS_OF_MONEY && (__DEAL + __HUSH_HUSH + PCT_FOR_YOU + __FRAUD_IOU + __FRAUD_JYG + __IS_LEGAL + __NOT_SCAM + __BACK_SCRATCH + __LUCRATIVE + __YOU_ASSIST > 2)
@@ -113,7 +115,7 @@ body     __YOU_INHERIT    /\byour\s[a-z\s]{0,30}inheritance\b/i
 body     __I_INHERIT      /\bI\s[a-z\s]{0,30}inherited\b/i
 body     __THEY_INHERIT   /\binherit\sth(?:e|is)\smoney\b/i
 body     __I_WILL_YOU     /\bwill(?:ed)?\s(?:[a-z\s]{0,20}\s(?:fortune|money)\s)?to\syou\b/i
-body     __NEXT_OF_KIN    /\bnext\sof\skin\b/i
+body     __NEXT_OF_KIN    /\bnext[-\s]of[-\s]kin\b/i
 body     __DECEASED       /\b(?:deceased|late)\s(?:client|customer)/i
 body     __DEAD_PARENT    /\bmy\s(?:deceased|dead)\s(?:father|mother)/i
 body     __DORMANT_ACCT   /\b(?:dormant|abandoned)\saccount/i
