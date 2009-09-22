@@ -7,7 +7,7 @@ ifplugin Mail::SpamAssassin::Plugin::ReplaceTags
   body     __LOTSA_MONEY_01   /(?:[Ss][Uu][Mm]\s[Oo][Ff]\s|<CURRENCY>\s?)\s?\d[\d.,\sO]{5,20}[\dO]/
   body     __LOTSA_MONEY_02   /\d[\d.,\sO]{5,20}[\dO]\s?(?:<CURRENCY>|Pounds)\b/
   body     __LOTSA_MONEY_03   /(?:[Ss][Uu][Mm]\s[Oo][Ff]\s|<CURRENCY>\s?)\d(?:[\d.,\sO]{0,5})?(?:[Mm](?:[Ii][Ll])?\b|[Mm][Ii][Ll]+(?:[Ii][Oo]|<O>)[Nn]|[Hh][Uu][Nn][Dd][RrEe]+[DdTt]|[Tt][Hh][Oo][Uu][Ss][Aa][Nn][Dd]|[Tt][Aa][Uu][Ss][Ee][Nn][Dd])/
-  body     __LOTSA_MONEY_04   /(?:million(?!s)|mill<O>n|hundred(?!s)[^\.]{1,25}thousand(?!s)|cents?[^\.]{1,25}mille|hundert[^\.]{1,30}tausend|ientos?[^\.]{1,20}mil)[^\.\$]{0,50}(?:(?:U\.?\s?S\.?\s?(?:A\.?\s?)?|united\sstates?|canad(?:ian|a)\s)?dollars?|USD|GBP|<GB_UK>\spounds?|(?:<GB_UK>\s)?pounds?\ssterling|(?:d'\s?)?euros?)\b/i
+  body     __LOTSA_MONEY_04   /(?:million(?!s)|mill<O>n|hundred(?!s)[^\.]{1,25}thousand(?!s)|cents?[^\.]{1,25}mille|hundert[^\.]{1,30}tausend|ientos?[^\.]{1,20}mil)[^\.\$]{0,50}(?:(?:U\.?\s?S\.?\s?(?:A\.?\s?)?|united\s?states?|canad(?:ian|a)\s)?dollars?|USD|GBP|<GB_UK>\spounds?|(?:<GB_UK>\s)?pounds?\ssterling|(?:d'\s?)?euros?)\b/i
   replace_rules   __LOTSA_MONEY_00 __LOTSA_MONEY_01 __LOTSA_MONEY_02 __LOTSA_MONEY_03 __LOTSA_MONEY_04
 
   meta     LOTS_OF_MONEY    (__LOTSA_MONEY_00 || __LOTSA_MONEY_01 || __LOTSA_MONEY_02 || __LOTSA_MONEY_03 || __LOTSA_MONEY_04)
