@@ -63,7 +63,8 @@ meta           MAILER_EQ_ORG         __MUA_EQ_ORG_1 || __MUA_EQ_ORG_2
 describe       MAILER_EQ_ORG         X-Mailer: same as Organization:
 
 # observed in UCE 9/2009
-header         __HDRS_LCASE          ALL =~ /\n(?:Reply-to|Message-id|Content-type|X-MSMail-priority|from|subject|to|Disposition-notification-to):/sm
+#header         __HDRS_LCASE          ALL =~ /\n(?:Reply-to|Message-id|Content-type|X-MSMail-priority|from|subject|to|Disposition-notification-to):/sm
+header         __HDRS_LCASE          ALL =~ /\n(?:Message-id|Content-type|X-MSMail-priority|from|subject|to|Disposition-notification-to):/sm
 tflags         __HDRS_LCASE          multiple
 meta           HDRS_LCASE            __HDRS_LCASE > 1
 describe       HDRS_LCASE            Odd capitalization of multiple message headers
@@ -114,5 +115,25 @@ ifplugin Mail::SpamAssassin::Plugin::FreeMail
   describe     RVW_ATTCH_FREEMAIL   Please review attachment, from freemail
   score        RVW_ATTCH_FREEMAIL   1.0
 endif
+
+body           END_FUTURE_EMAILS   /\bend future emails\b/i
+score          END_FUTURE_EMAILS   0.25
+describe       END_FUTURE_EMAILS   Unsubscribe
+
+body           AD_COMPLAINTS       /\bcomplaints about this ad+\b/i
+score          AD_COMPLAINTS       1.0
+describe       AD_COMPLAINTS       Complain about this spam
+
+# observed in bank phishing 09/2009
+rawbody        MISQ_HTML           /<\w{1,20}[^>]{1,30}=[^"][^">]{1,30}"/
+describe       MISQ_HTML           Unbalanced quotes in HTML tag
+
+# observed in bank phishing 09/2009
+uri            WIKI_IMG            m,^https?://[^/]+wiki[mp]edia\.org/.+\.(?:png|gif|jpe?g),i
+describe       WIKI_IMG            Image from wikipedia
+
+# observed in spam 09/2009
+header         SUBJ_RE_CLNCLN      Subject =~ /^\s*RE::/
+describe       SUBJ_RE_CLNCLN      Subject RE::
 
 
