@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi wt-en1 wt-en2 wt-en3 wt-en4 wt-jp1 wt-jp2; day 2: mmartinec; day 3: mmartinec
+# with results from: day 1: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi wt-en1 wt-en2 wt-en3 wt-en4 wt-jp1 wt-jp2; day 2: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi wt-en1 wt-en2 wt-en3 wt-en4 wt-jp1 wt-jp2; day 3: mmartinec
 
 # tflags userconf
 ALL_TRUSTED
@@ -224,6 +224,9 @@ FSL_HELO_DEVICE
 FSL_HELO_NON_FQDN_1
 
 # good enough
+FSL_UA
+
+# good enough
 FSL_YG_ABUSE
 
 # good enough
@@ -389,6 +392,12 @@ MISSING_HB_SEP
 MONEY_ADVANCE_FEE_4
 
 # good enough
+MONEY_ATM
+
+# good enough
+MONEY_FROM_MISSP
+
+# good enough
 MONEY_INHERIT
 
 # good enough
@@ -405,6 +414,9 @@ NO_RELAYS
 
 # tflags net
 PYZOR_CHECK
+
+# good enough
+RATWARE_HELO_DM
 
 # tflags net
 RAZOR2_CF_RANGE_51_100
@@ -611,9 +623,6 @@ SANE_4ef8302546bf270a19baf98508afacc4
 SANE_7429530a7398f43f1f1b795f9420714e
 
 # good enough
-SANE_af2f58d5e4002bcd31ef44b83569de4b
-
-# good enough
 SANE_d0d2b0f6373bf91253d66dd74c594b87
 
 # good enough
@@ -677,22 +686,43 @@ TVD_PH_SUBJ_SEC_MEASURES
 TVD_VISIT_PHARMA
 
 # good enough
-FSL_UA
+DEAR_BENEFICIARY
 
 # good enough
-HK_NAME_MR_MRS
+FILL_THIS_FORM_FRAUD_PHISH
 
 # good enough
-MONEY_ATM
+HDRS_MISSP
 
 # good enough
-MONEY_FROM_MISSP
+HK_LOTTO
 
 # good enough
-MONEY_INTL_BK
+KAM_LOTTO2
 
 # good enough
-RATWARE_HELO_DM
+LOTTERY_PH_004470
+
+# good enough
+LOTTO_DEPT
+
+# good enough
+LOTTO_RELATED
+
+# good enough
+LOTTO_YOU_WON_03
+
+# good enough
+MONEY_ADVANCE_FEE_3
+
+# good enough
+MONEY_FORM
+
+# good enough
+MONEY_LOTTERY
+
+# good enough
+SPAMMY_MIME_BDRY_01
 
 # tflags userconf
 UNPARSEABLE_RELAY
