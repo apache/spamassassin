@@ -64,7 +64,11 @@ The type of this setting:
            - $CONF_TYPE_HASH_KEY_VALUE: hash key/value pair,
              like "describe" or tflags
 
-If this is set, a 'code' block is assigned based on the type.
+If this is set, and a 'code' block does not already exist, a 'code' block is
+assigned based on the type.
+
+In addition, the SpamAssassin test suite will validate that the settings
+do not 'leak' between users.
 
 Note that C<$CONF_TYPE_HASH_KEY_VALUE>-type settings require that the
 value be non-empty, otherwise they'll produce a warning message.
@@ -87,6 +91,10 @@ from a set of 'valid' values, but the user provided an invalid one.
 
 Any other values -- including C<undef> -- returned from the subroutine are
 considered to mean 'success'.
+
+It is good practice to set a 'type', if possible, describing how your settings
+are stored on the Conf object; this allows the SpamAssassin test suite to
+validate that the settings do not 'leak' between users.
 
 =item default
 

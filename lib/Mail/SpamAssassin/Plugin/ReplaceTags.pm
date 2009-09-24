@@ -251,6 +251,7 @@ body, header, uri, full, rawbody tests are supported.
   push(@cmds, {
     setting => 'replace_rules',
     is_priv => 1,
+    type => $Mail::SpamAssassin::Conf::CONF_TYPE_HASH_KEY_VALUE,
     code => sub {
       my ($self, $key, $value, $line) = @_;
       unless (defined $value && $value !~ /^$/) {

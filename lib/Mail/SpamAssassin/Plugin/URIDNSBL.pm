@@ -580,6 +580,7 @@ sub set_config {
   push (@cmds, {
     setting => 'uridnsbl_skip_domain',
     default => {},
+    type => $Mail::SpamAssassin::Conf::CONF_TYPE_HASH_KEY_VALUE,
     code => sub {
       my ($self, $key, $value, $line) = @_;
       if ($value =~ /^$/) {
