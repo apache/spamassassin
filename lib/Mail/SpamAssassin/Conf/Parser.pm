@@ -499,6 +499,10 @@ sub handle_conditional {
       # replace with method call
       $eval .= "\$self->cond_clause_plugin_loaded";
     }
+    elsif ($token eq 'can') {
+      # replace with method call
+      $eval .= "\$self->cond_clause_can";
+    }
     elsif ($token eq 'version') {
       $eval .= $Mail::SpamAssassin::VERSION." ";
     }
@@ -534,6 +538,17 @@ sub handle_conditional {
 # functions supported in the "if" eval:
 sub cond_clause_plugin_loaded {
   return $_[0]->{conf}->{plugins_loaded}->{$_[1]};
+}
+
+sub cond_clause_can {
+  my ($self, $method) = @_;
+
+  if ($method =~ /^(.*)::([^:]+)$/) {
+    return UNIVERSAL::can($1, $2);
+  } else {
+    $self->lint_warn("bad 'if' line, cannot find '::' in can($method), ".
+                "in \"$self->{currentfile}\"", undef);
+  }
 }
 
 # Let's do some linting here ...
