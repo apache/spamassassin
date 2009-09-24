@@ -3089,6 +3089,13 @@ C<3.004080>.
 This is a function call that returns C<1> if the plugin named
 C<Name::Of::Plugin> is loaded, or C<undef> otherwise.
 
+=item can(Name::Of::Package::function_name)
+
+This is a function call that returns C<1> if the perl package named
+C<Name::Of::Package> includes a function called C<function_name>, or C<undef>
+otherwise.  Note that packages can be SpamAssassin plugins or built-in classes,
+there's no difference in this respect.
+
 =back
 
 If the end of a configuration file is reached while still inside a
