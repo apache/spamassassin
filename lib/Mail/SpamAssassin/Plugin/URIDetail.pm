@@ -131,7 +131,8 @@ sub set_config {
 	}
 
 	dbg("config: uri_detail adding ($target $op /$pattern/) to $name");
-        $conf->{parser}->{conf}->{uri_detail}->{$name}->{$target} = "$op /$pattern/";
+        $conf->{parser}->{conf}->{uri_detail}->{$name}->{$target} =
+          [$op, $pattern];
 	$added_criteria = 1;
       }
 
