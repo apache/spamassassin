@@ -4,9 +4,7 @@
 # once it is used once, it slows down every regexp match thereafter.
 
 BEGIN {
-  if (-e 't/test_dir') { # if we are running "t/rule_tests.t", kluge around ...
-    chdir 't';
-  }
+  if (-d 'xt') { chdir 'xt'; }
 
   if (-e 'test_dir') {            # running from test directory, not ..
     unshift(@INC, '../blib/lib');
@@ -14,33 +12,19 @@ BEGIN {
   }
 }
 
-my $prefix = '.';
-if (-e 'test_dir') {            # running from test directory, not ..
-  $prefix = '..';
-}
-
-use lib '.'; use lib 't';
+use lib '.'; use lib '../t';
 use SATest; sa_t_init("saw_ampersand");
-use Test;
+
+use Test::More;
+plan tests => 40;
+
 use Carp qw(croak);
-
-our $RUN_THIS_TEST;
-use constant HAS_MODULE => eval { require Devel::SawAmpersand; };
-
-BEGIN {
-  $RUN_THIS_TEST = conf_bool('run_saw_ampersand_test')
-                    && HAS_MODULE;
-  plan tests => (!$RUN_THIS_TEST ? 0 : 40)
-};
-
-print "NOTE: this test requires 'run_saw_ampersand_test' set to 'y'.\n";
-exit unless $RUN_THIS_TEST;
 
 # ---------------------------------------------------------------------------
 
 use strict;
 require Mail::SpamAssassin;
-require Devel::SawAmpersand;
+use Devel::SawAmpersand;
 
 # it is important to order these from least-plugin-code-run to most.
 

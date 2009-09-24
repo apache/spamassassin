@@ -115,16 +115,18 @@ SPAMASSASSIN RELEASE PROCEDURE
 
     make distcheck
 
-- run "make disttest" to ensure all tests pass once the distribution
-  is fully packaged.  (this'll take a minute or two.)  this command
-  set will do basically the same thing:
+- run "make disttest" to ensure all default tests pass once the
+  distribution is fully packaged.  (this'll take a minute or two.)
 
-    make distdir
-    d=`echo Mail-SpamAssassin-?.?.?`
-    sed -e 's/run_\(long\|dcc\|net\)_tests=n/run_\1_tests=y/' \
-                $d/t/config.dist > $d/t/config
-    ( cd $d ; perl Makefile.PL ) < /dev/null
-    ( cd $d ; make test )
+    make disttest
+
+- run the release test suite, which forces all tests to run and also
+  applies an additional, more stringent set of tests.  This may require
+  "sudo" privileges on your test box, and unusual CPAN modules like
+  "Devel::SawAmpersand", so you may have to skip some of this or ignore
+  some spurious failures.
+
+    prove -v xt
 
 - Check in the updated Changes file, and SpamAssassin.pm.
 
