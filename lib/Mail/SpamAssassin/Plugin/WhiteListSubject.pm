@@ -77,6 +77,7 @@ sub set_config {
   push(@cmds, {
 	       setting => 'whitelist_subject',
 	       default => {},
+               type => $Mail::SpamAssassin::Conf::CONF_TYPE_ADDRLIST,
 	       code => sub {
 		 my ($self, $key, $value, $line) = @_;
 
@@ -92,6 +93,7 @@ sub set_config {
   push(@cmds, {
 	       setting => 'blacklist_subject',
 	       default => {},
+               type => $Mail::SpamAssassin::Conf::CONF_TYPE_ADDRLIST,
 	       code => sub {
 		 my ($self, $key, $value, $line) = @_;
 

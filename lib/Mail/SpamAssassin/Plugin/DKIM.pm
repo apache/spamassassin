@@ -344,6 +344,7 @@ Example:
 
   push (@cmds, {
     setting => 'whitelist_from_dkim',
+    type => $Mail::SpamAssassin::Conf::CONF_TYPE_ADDRLIST,
     code => sub {
       my ($self, $key, $value, $line) = @_;
       local ($1,$2);
@@ -362,6 +363,7 @@ Example:
 
   push (@cmds, {
     setting => 'def_whitelist_from_dkim',
+    type => $Mail::SpamAssassin::Conf::CONF_TYPE_ADDRLIST,
     code => sub {
       my ($self, $key, $value, $line) = @_;
       local ($1,$2);
@@ -380,6 +382,7 @@ Example:
 
   push (@cmds, {
     setting => 'adsp_override',
+    type => $Mail::SpamAssassin::Conf::CONF_TYPE_HASH_KEY_VALUE,
     code => sub {
       my ($self, $key, $value, $line) = @_;
       local ($1,$2);

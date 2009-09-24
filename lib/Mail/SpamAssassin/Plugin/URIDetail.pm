@@ -14,6 +14,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # </@LICENSE>
+#
+# TODO: where are the tests?
 
 =head1 NAME
 
@@ -129,7 +131,7 @@ sub set_config {
 	}
 
 	dbg("config: uri_detail adding ($target $op /$pattern/) to $name");
-	$pluginobj->{uri_detail}->{$name}->{$target} = [$op, $pattern];
+        $conf->{parser}->{conf}->{uri_detail}->{$name}->{$target} = "$op /$pattern/";
 	$added_criteria = 1;
       }
 
@@ -157,7 +159,7 @@ sub check_uri_detail {
 
     dbg("uri: running $test\n");
 
-    my $rule = $self->{uri_detail}->{$test};
+    my $rule = $permsg->{conf}->{uri_detail}->{$test};
 
     if (exists $rule->{raw}) {
       my($op,$patt) = @{$rule->{raw}};

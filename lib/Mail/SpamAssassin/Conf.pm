@@ -374,6 +374,7 @@ these are often targets for spammer spoofing.
 
   push (@cmds, {
     setting => 'whitelist_from_rcvd',
+    type => $Mail::SpamAssassin::Conf::CONF_TYPE_ADDRLIST,
     code => sub {
       my ($self, $key, $value, $line) = @_;
       unless (defined $value && $value !~ /^$/) {
@@ -389,6 +390,7 @@ these are often targets for spammer spoofing.
 
   push (@cmds, {
     setting => 'def_whitelist_from_rcvd',
+    type => $Mail::SpamAssassin::Conf::CONF_TYPE_ADDRLIST,
     code => sub {
       my ($self, $key, $value, $line) = @_;
       unless (defined $value && $value !~ /^$/) {
@@ -500,6 +502,7 @@ e.g.
   push (@cmds, {
     command => 'unblacklist_from',
     setting => 'blacklist_from',
+    type => $Mail::SpamAssassin::Conf::CONF_TYPE_ADDRLIST,
     code => \&Mail::SpamAssassin::Conf::Parser::remove_addrlist_value
   });
 
@@ -658,6 +661,7 @@ header.
 
   push (@cmds, {
     setting => 'rewrite_header',
+    type => $CONF_TYPE_HASH_KEY_VALUE,
     code => sub {
       my ($self, $key, $value, $line) = @_;
       my($hdr, $string) = split(/\s+/, $value, 2);
@@ -861,6 +865,7 @@ the original mail into tagged messages.
   push (@cmds, {
     setting => 'report_safe',
     default => 1,
+    type => $CONF_TYPE_NUMERIC,
     code => sub {
       my ($self, $key, $value, $line) = @_;
       if ($value eq '') {
@@ -945,6 +950,7 @@ Unicode.  Requires the Encode::Detect module, HTML::Parser version
   push (@cmds, {
     setting => 'normalize_charset',
     default => 0,
+    type => $CONF_TYPE_BOOL,
     code => sub {
 	my ($self, $key, $value, $line) = @_;
 	unless (defined $value && $value !~ /^$/) {
@@ -1238,6 +1244,7 @@ Please note, the DNS test queries for NS records.
   push (@cmds, {
     setting => 'dns_available',
     default => 'test',
+    type => $CONF_TYPE_STRING,
     code => sub {
       my ($self, $key, $value, $line) = @_;
       if ($value =~ /^test(?::\s+.+)?$/) {
@@ -1265,6 +1272,7 @@ time in number of seconds will tell SpamAssassin how often to retest for working
   push (@cmds, {
     setting => 'dns_test_interval',
     default => 600,
+    type => $CONF_TYPE_NUMERIC,
     code => sub {
       my ($self, $key, $value, $line) = @_;
       if ($value !~ /^\d+$/) { return $INVALID_VALUE; }
@@ -1283,6 +1291,7 @@ servers when there are many spamd workers.
 
   push (@cmds, {
     setting => 'dns_options',
+    type => $CONF_TYPE_HASH_KEY_VALUE,
     code => sub {
       my ($self, $key, $value, $line) = @_;
       my $allowed_opts = "rotate";
@@ -1592,6 +1601,7 @@ win32 depending on the platform in use.
   push (@cmds, {
     setting => 'lock_method',
     default => '',
+    type => $CONF_TYPE_STRING,
     code => sub {
       my ($self, $key, $value, $line) = @_;
       if ($value !~ /^(nfssafe|flock|win32)$/) {
@@ -1854,6 +1864,7 @@ existing system rule from a C<user_prefs> file with C<spamd>.
     setting => 'allow_user_rules',
     is_priv => 1,
     default => 0,
+    type => $CONF_TYPE_BOOL,
     code => sub {
       my ($self, $key, $value, $line) = @_;
       if ($value eq '') {
@@ -2586,7 +2597,8 @@ subdomain of the specified zone.
         $self->{by_zone}{$zone}{rbl_timeout}     = $1+0;
         $self->{by_zone}{$zone}{rbl_timeout_min} = $2+0  if defined $2;
       }
-    }
+    },
+    type => $CONF_TYPE_NUMERIC
   });
 
 =item util_rb_tld tld1 tld2 ...
@@ -2732,6 +2744,7 @@ module.
     setting => 'bayes_store_module',
     is_admin => 1,
     default => '',
+    type => $CONF_TYPE_STRING,
     code => sub {
       my ($self, $key, $value, $line) = @_;
       local ($1);
@@ -2918,6 +2931,7 @@ C<SELECT preference, value FROM _TABLE_ WHERE username = _USERNAME_ OR username 
   push (@cmds, {
     setting => 'user_scores_sql_custom_query',
     is_admin => 1,
+    default => undef,
     type => $CONF_TYPE_STRING
   });
 
@@ -3762,6 +3776,7 @@ sub clone {
   # and now, copy over all the rest -- the less complex cases.
   while(my($k,$v) = each %{$source}) {
     next if exists $done{$k};   # we handled it above
+    $done{$k} = undef;
     my $i = ref($v);
 
     # Not a reference, or a scalar?  Just copy the value over.
@@ -3781,6 +3796,13 @@ sub clone {
       # throw a warning for debugging -- should never happen in normal usage
       warn "config: dup unknown type $k, $i\n";
     }
+  }
+
+  foreach my $cmd (@{$self->{registered_commands}}) {
+    my $k = $cmd->{setting};
+    next if exists $done{$k};   # we handled it above
+    $done{$k} = undef;
+    $dest->{$k} = $source->{$k};
   }
 
   # scoresets
