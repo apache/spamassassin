@@ -26,6 +26,8 @@ BEGIN {
 # out: $home: $HOME env variable
 # out: $cwd: here
 # out: $scr: spamassassin script
+# in: if --override appears at start of command line, next 2 args are used to set
+# an environment variable to control test behaviour.
 #
 sub sa_t_init {
   my $tname = shift;
@@ -791,6 +793,14 @@ sub read_config {
     s/#.*$//; s/^\s+//; s/\s+$//; next if /^$/;
     /^([^=]+)=(.*)$/ or next;
     $conf{$1} = $2;
+  }
+
+  # allow our xt test suite to override
+  if (defined $ARGV[0] && $ARGV[0] eq '--override') {
+    shift @ARGV;
+    my $k = shift @ARGV;
+    my $v = shift @ARGV;
+    $conf{$k} = $v;
   }
   close CF;
 }
