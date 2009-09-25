@@ -879,22 +879,26 @@ endif # Mail::SpamAssassin::Plugin::SPF
 
 # DKIM
 ifplugin Mail::SpamAssassin::Plugin::DKIM
-score DKIM_SIGNED 0.001
-score DKIM_VALID -0.001
-score DKIM_VALID_AU -0.005
-score DKIM_VERIFIED 0
-score DKIM_POLICY_SIGNALL 0
-score DKIM_POLICY_SIGNSOME 0
-score DKIM_POLICY_TESTING 0
-score DKIM_ADSP_NXDOMAIN 1.9
-score DKIM_ADSP_DISCARD 2.6
+# Info rules, keep score low:
+score DKIM_SIGNED 0.1
+score DKIM_VALID -0.1
+score DKIM_VALID_AU -0.1
+# Normal rules:
+score DKIM_ADSP_NXDOMAIN 0.9
 score DKIM_ADSP_ALL 1.5
+score DKIM_ADSP_DISCARD 2.5
+# DKIM_ADSP_CUSTOM_* are typically just a source for NML_ADSP_CUSTOM_* rules
 score DKIM_ADSP_CUSTOM_LOW 0.001
 score DKIM_ADSP_CUSTOM_MED 0.001
 score DKIM_ADSP_CUSTOM_HIGH 0.001
 score NML_ADSP_CUSTOM_LOW 0.7
 score NML_ADSP_CUSTOM_MED 0.9
 score NML_ADSP_CUSTOM_HIGH 1.2
+# Legacy rules, disabled (score 0), kept for compatibility with old .cf files:
+score DKIM_VERIFIED 0
+score DKIM_POLICY_SIGNALL 0
+score DKIM_POLICY_SIGNSOME 0
+score DKIM_POLICY_TESTING 0
 endif # Mail::SpamAssassin::Plugin::DKIM
 
 # Hashcash
