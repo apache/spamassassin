@@ -2,7 +2,9 @@
 
 # TODO: add FPRATE instead of HAM_PREFERENCE
 # set SCORESET
-. config
+
+# must use a / in the arg to a 'source' command to avoid searching the PATH
+. ./config
 
 LEARN_RATE="${LEARN_RATE:-2.0}"
 
