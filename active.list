@@ -1,11 +1,17 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-en6 wt-jp1 wt-jp2; day 2: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 3: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi
+# with results from: day 1: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-en6 wt-jp1 wt-jp2; day 2: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-en6 wt-jp1 wt-jp2; day 3: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2
+
+# good enough
+AD_COMPLAINTS
 
 # tflags userconf
 ALL_TRUSTED
 
 # good enough
 AXB_HELO_LH_HOME
+
+# good enough
+BASE64_LENGTH_78_79
 
 # tflags learn
 BAYES_00
@@ -34,6 +40,9 @@ BAYES_95
 # tflags learn
 BAYES_99
 
+# good enough
+BUG6152_INVALID_DATE_TZ_ABSURD
+
 # tflags userconf
 CHARSET_FARAWAY
 
@@ -45,6 +54,9 @@ CORRUPT_FROM_LINE_IN_HDRS
 
 # good enough
 DEAR_BENEFICIARY
+
+# good enough
+DEAR_WINNER
 
 # tflags net
 DIGEST_MULTIPLE
@@ -92,10 +104,16 @@ DOS_ANAL_SPAM_MAILER
 DOS_HIGHBIT_HDRS_BODY
 
 # good enough
+DOS_HIGH_BAT_TO_MX
+
+# good enough
 DOS_OE_TO_MX
 
 # good enough
 DOS_OE_TO_MX_IMAGE
+
+# good enough
+DOS_OUTLOOK_TO_MX
 
 # good enough
 DOS_RCVD_IP_TWICE_C
@@ -111,6 +129,9 @@ DYN_RDNS_SHORT_HELO_HTML
 
 # good enough
 DYN_RDNS_SHORT_HELO_IMAGE
+
+# good enough
+END_FUTURE_EMAILS
 
 # tflags userconf
 ENV_AND_HDR_SPF_MATCH
@@ -131,6 +152,12 @@ FB_GVR
 FB_INCREASE_YOUR
 
 # good enough
+FB_MOST_QUALITY
+
+# good enough
+FB_PENIS_GROWTH
+
+# good enough
 FB_QUALITY_REPLICA
 
 # good enough
@@ -141,6 +168,12 @@ FB_SOFTTABS
 
 # good enough
 FB_TIRED_OF_YOUR
+
+# good enough
+FB_YOUR_WEIGHT
+
+# good enough
+FH_FAKE_RCVD_LINE
 
 # good enough
 FH_FAKE_RCVD_LINE_B
@@ -206,7 +239,16 @@ FROM_MISSP_FREEMAIL
 FROM_MISSP_MSFT
 
 # good enough
+FRT_BELOW2
+
+# good enough
+FRT_PHARMAC
+
+# good enough
 FR_TITLE_CONS_6
+
+# good enough
+FR_TITLE_NUMS
 
 # good enough
 FSL_FAKE_HOTMAIL_RVCD
@@ -228,6 +270,9 @@ FS_ERECTION
 
 # good enough
 FS_MORE_CONFIDENT
+
+# good enough
+FS_NUDE
 
 # good enough
 FS_OBFU_PRMCY
@@ -299,7 +344,16 @@ HIGH_CODEPAGE_URI
 HK_FAKENAME_EBAY
 
 # good enough
+HK_FAKENAME_MICROSOFT
+
+# good enough
+HK_LOTTO_NAME
+
+# good enough
 HK_NAME_DRUGS
+
+# good enough
+HK_RANDOM_ENVFROM
 
 # good enough
 HS_VPXL
@@ -688,6 +742,9 @@ STOCK_IMG_HDR_FROM
 # good enough
 STOCK_IMG_HTML
 
+# good enough
+STOX_REPLY_TYPE_WITHOUT_QUOTES
+
 # tflags userconf
 SUBJECT_IN_BLACKLIST
 
@@ -698,10 +755,16 @@ SUBJECT_IN_WHITELIST
 SUBJECT_NEEDS_ENCODING
 
 # good enough
+SUBJ_RE_CLNCLN
+
+# good enough
 TO_NO_BRKTS_DYNIP
 
 # good enough
 TVD_FINGER_02
+
+# good enough
+TVD_PH_FR5
 
 # good enough
 TVD_PH_REC
@@ -716,55 +779,37 @@ TVD_RCVD_SINGLE
 TVD_VISIT_PHARMA
 
 # good enough
-AD_COMPLAINTS
+DOS_LIVE_SPACES_CID
 
 # good enough
-BUG6152_INVALID_DATE_TZ_ABSURD
+FORGED_TBIRD_IMG_ARROW
 
 # good enough
-DOS_HIGH_BAT_TO_MX
+FORGED_TBIRD_IMG_SIZE
 
 # good enough
-DOS_OUTLOOK_TO_MX
+FORGED_TBIRD_IMG_TO_MX
 
 # good enough
-END_FUTURE_EMAILS
+FSL_LSPACES_ABUSE
 
 # good enough
-FB_MOST_QUALITY
+FSL_UA
 
 # good enough
-FB_YOUR_WEIGHT
+HK_LOTTO
 
 # good enough
-FRT_BELOW2
+HK_LOTTO_SUBJECT
 
 # good enough
-FRT_PHARMAC
+HK_NASTY
 
 # good enough
-FR_TITLE_NUMS
+LOTTO_DEPT
 
 # good enough
-FS_NUDE
-
-# good enough
-HK_FAKENAME_MICROSOFT
-
-# good enough
-HK_LOTTO_NAME
-
-# good enough
-HK_RANDOM_ENVFROM
-
-# good enough
-STOX_REPLY_TYPE_WITHOUT_QUOTES
-
-# good enough
-SUBJ_RE_CLNCLN
-
-# good enough
-TVD_PH_FR5
+LOTTO_WINNINGS
 
 # tflags userconf
 UNPARSEABLE_RELAY
