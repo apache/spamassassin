@@ -222,8 +222,7 @@ sub word_is_in_dictionary {
   if (!$triplets_loaded) {
     # take a copy to avoid modifying the real one
     my @default_triplets_path = @Mail::SpamAssassin::default_rules_path;
-    @default_triplets_path = map { s,$,/triplets.txt,; $_; }
-				    @default_triplets_path;
+    s{$}{/triplets.txt}  for @default_triplets_path;
     my $filename = $self->{main}->first_existing_path (@default_triplets_path);
 
     if (!defined $filename) {

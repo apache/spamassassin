@@ -297,7 +297,7 @@ sub pyzor_lookup {
       # this exact string is needed below
       die("no response\n");	# yes, this is possible
     }
-    map { chomp } @response;
+    chomp for @response;
     dbg("pyzor: got response: " . join("\\n", @response));
 
     if ($response[0] =~ /^Traceback/) {

@@ -748,11 +748,11 @@ not be changed or removed):
                   /\\\\/,     # split at double backslashes,
                   $hline."\n" # newline needed to make trailing backslashes work
                 );
-      map {
+      foreach (@line) {
         s/\\t/\t/g; # expand tabs
         s/\\n/\n/g; # expand newlines
         s/\\.//g;   # purge all other escapes
-      } @line;
+      };
       $hline = join("\\", @line);
       chop($hline);  # remove dummy newline again
       if (($type eq "ham") || ($type eq "all")) {

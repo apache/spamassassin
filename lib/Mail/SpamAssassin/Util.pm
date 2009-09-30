@@ -278,7 +278,7 @@ sub untaint_var {
     return $1;
   }
   elsif (ref eq 'ARRAY') {
-    @{$_} = map { $_ = untaint_var($_) } @{$_};
+    $_ = untaint_var($_)  for @{$_};
     return @{$_} if wantarray;
   }
   elsif (ref eq 'HASH') {

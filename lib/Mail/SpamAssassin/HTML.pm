@@ -962,7 +962,7 @@ sub name_to_rgb {
   my $length = length($color) / 3;
   my @colors = ($color =~ /(.{$length})(.{$length})(.{$length})/);
   # truncate each color to a DWORD, take MSB, left pad nibbles
-  @colors = map { s/.*(.{8})$/$1/; s/(..).*/$1/; s/^(.)$/0$1/; $_; } @colors;
+  foreach (@colors) { s/.*(.{8})$/$1/; s/(..).*/$1/; s/^(.)$/0$1/ };
   # the color
   $color = join("", @colors);
   # replace non-hex characters with 0
