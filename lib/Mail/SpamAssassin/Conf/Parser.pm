@@ -958,15 +958,18 @@ sub pack_eval_method {
 
   my @args;
   if (defined $args) {
-    # bug 4419: Parse quoted strings, unquoted alphanumerics/floats and
-    # both unquoted IPv4 and IPv6 addresses.  s// is used so that we can
-    # determine whether or not we successfully parsed ALL arguments.
-    while ($args =~ s/^\s*(?:['"](.*?)['"]|([\d\.:A-Za-z]+?))\s*(?:,\s*|$)//) {
-      if (defined $1) {
-        push @args, $1;
+    # bug 4419: Parse quoted strings, unquoted alphanumerics/floats,
+    # unquoted IPv4 and IPv6 addresses, and unquoted common domain names.
+    # s// is used so that we can determine whether or not we successfully
+    # parsed ALL arguments.
+    local($1,$2,$3);
+    while ($args =~ s/^\s* (?: (['"]) (.*?) \1 | ( [\d\.:A-Za-z-]+? ) )
+                       \s* (?: , \s* | $ )//x) {
+      if (defined $2) {
+        push @args, $2;
       }
       else {
-        push @args, $2;
+        push @args, $3;
       }
     }
   }

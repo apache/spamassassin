@@ -29,7 +29,8 @@ Taking into account signatures from any signing domains:
  full   DKIM_VALID_AU         eval:check_dkim_valid_author_sig()
 
 Taking into account signatures from specified signing domains only:
-(quotes may be omitted on domains consisting only of letters, digits and dots)
+(quotes may be omitted on domain names consisting only of letters, digits,
+dots, and minus characters)
  full   DKIM_SIGNED_MY1       eval:check_dkim_signed('dom1','dom2',...)
  full   DKIM_VALID_MY1        eval:check_dkim_valid('dom1','dom2',...)
  full   DKIM_VALID_AU_MY1     eval:check_dkim_valid_author_sig('d1','d2',...)
