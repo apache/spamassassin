@@ -29,7 +29,7 @@ print RC q{
 
   severity = 5
   verbose = 10
-  exclude = ValuesAndExpressions::ProhibitLeadingZeros InputOutput::ProhibitBarewordFileHandles InputOutput::ProhibitTwoArgOpen TestingAndDebugging::RequireUseStrict Subroutines::ProhibitExplicitReturnUndef  Variables::RequireLexicalLoopIterators Subroutines::ProhibitSubroutinePrototypes ControlStructures::ProhibitMutatingListFunctions BuiltinFunctions::ProhibitStringyEval TestingAndDebugging::ProhibitNoStrict BuiltinFunctions::ProhibitSleepViaSelect BuiltinFunctions::RequireGlobFunction Variables::ProhibitConditionalDeclarations InputOutput::ProhibitInteractiveTest 
+  exclude = ValuesAndExpressions::ProhibitLeadingZeros InputOutput::ProhibitBarewordFileHandles InputOutput::ProhibitTwoArgOpen TestingAndDebugging::RequireUseStrict Subroutines::ProhibitExplicitReturnUndef  Variables::RequireLexicalLoopIterators Subroutines::ProhibitSubroutinePrototypes ControlStructures::ProhibitMutatingListFunctions BuiltinFunctions::ProhibitStringyEval TestingAndDebugging::ProhibitNoStrict BuiltinFunctions::RequireGlobFunction Variables::ProhibitConditionalDeclarations InputOutput::ProhibitInteractiveTest 
 
 };
 close RC;

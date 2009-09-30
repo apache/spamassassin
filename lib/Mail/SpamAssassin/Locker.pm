@@ -22,6 +22,7 @@ use warnings;
 use bytes;
 use re 'taint';
 use Fcntl;
+use Time::HiRes ();
 
 use Mail::SpamAssassin;
 
@@ -69,7 +70,7 @@ sub refresh_lock {
 
 sub jittery_one_second_sleep {
   my ($self) = @_;
-  select(undef, undef, undef, (rand(1.0) + 0.5));
+  Time::HiRes::sleep(rand(1.0) + 0.5);
 }
 
 ###########################################################################
