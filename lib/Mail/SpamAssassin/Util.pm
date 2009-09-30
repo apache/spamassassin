@@ -1638,7 +1638,7 @@ sub avoid_db_file_locking_bug {
                         '__db.'.basename($path)));
 
   # delete "__db.[DBNAME]" and "__db.[DBNAME].*"
-  foreach my $tfile ($db_tmpfile, <$db_tmpfile.*>) {
+  foreach my $tfile ($db_tmpfile, glob("$db_tmpfile.*")) {
     my $file = untaint_file_path($tfile);
     my $stat_errn = stat($file) ? 0 : 0+$!;
     next if $stat_errn == ENOENT;
