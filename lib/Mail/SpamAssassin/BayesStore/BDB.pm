@@ -705,7 +705,8 @@ sub get_running_expire_tok {
   dbg("bayes: Entering get_running_expire_tok");
 
   my $value = $self->_get(vars => "RUNNING_EXPIRE") || "";
-  my $result = $value if $value =~ /^\d+$/;
+  my $result;
+  $result = $value if $value =~ /^\d+$/;
 
   dbg("bayes: get_running_expire_tok exiting with %s",
       !defined $result ? 'UNDEF' : $result);
