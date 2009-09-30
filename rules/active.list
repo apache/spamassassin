@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-en6 wt-jp1 wt-jp2; day 2: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-en6 wt-jp1 wt-jp2; day 3: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2
+# with results from: day 1: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-en6 wt-jp1 wt-jp2; day 2: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-en6 wt-jp1 wt-jp2; day 3: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-en6 wt-jp1 wt-jp2
 
 # good enough
 AD_COMPLAINTS
@@ -105,6 +105,9 @@ DOS_HIGHBIT_HDRS_BODY
 
 # good enough
 DOS_HIGH_BAT_TO_MX
+
+# good enough
+DOS_LIVE_SPACES_CID
 
 # good enough
 DOS_OE_TO_MX
@@ -217,6 +220,15 @@ FM_SCHOOLING
 # good enough
 FM_SEX_HELODDDD
 
+# good enough
+FORGED_TBIRD_IMG_ARROW
+
+# good enough
+FORGED_TBIRD_IMG_SIZE
+
+# good enough
+FORGED_TBIRD_IMG_TO_MX
+
 # tflags userconf
 FRAGMENTED_MESSAGE
 
@@ -258,6 +270,12 @@ FSL_HELO_BARE_IP_1
 
 # good enough
 FSL_HELO_DEVICE
+
+# good enough
+FSL_LSPACES_ABUSE
+
+# good enough
+FSL_UA
 
 # good enough
 FSL_YG_ABUSE
@@ -347,7 +365,13 @@ HK_FAKENAME_EBAY
 HK_FAKENAME_MICROSOFT
 
 # good enough
+HK_LOTTO
+
+# good enough
 HK_LOTTO_NAME
+
+# good enough
+HK_LOTTO_SUBJECT
 
 # good enough
 HK_NAME_DRUGS
@@ -434,7 +458,13 @@ LOTTERY_PH_004470
 LOTTO_AGENT
 
 # good enough
+LOTTO_DEPT
+
+# good enough
 LOTTO_RELATED
+
+# good enough
+LOTTO_WINNINGS
 
 # good enough
 LOTTO_WIN_01
@@ -777,39 +807,6 @@ TVD_RCVD_SINGLE
 
 # good enough
 TVD_VISIT_PHARMA
-
-# good enough
-DOS_LIVE_SPACES_CID
-
-# good enough
-FORGED_TBIRD_IMG_ARROW
-
-# good enough
-FORGED_TBIRD_IMG_SIZE
-
-# good enough
-FORGED_TBIRD_IMG_TO_MX
-
-# good enough
-FSL_LSPACES_ABUSE
-
-# good enough
-FSL_UA
-
-# good enough
-HK_LOTTO
-
-# good enough
-HK_LOTTO_SUBJECT
-
-# good enough
-HK_NASTY
-
-# good enough
-LOTTO_DEPT
-
-# good enough
-LOTTO_WINNINGS
 
 # tflags userconf
 UNPARSEABLE_RELAY
