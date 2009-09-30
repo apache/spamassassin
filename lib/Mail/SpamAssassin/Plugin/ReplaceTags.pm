@@ -121,19 +121,19 @@ sub finish_parsing_end {
           if ($pre_name) {
             my $pre = $conf->{replace_pre}->{$pre_name};
             if ($pre) {
-              @re = map { s|($start.+?$end)|$pre$1|; $_; } @re;
+              s{($start.+?$end)}{$pre$1}  for @re;
             }
           }
           if ($post_name) {
             my $post = $conf->{replace_post}->{$post_name};
             if ($post) {
-              @re = map { s|($start.+?$end)|$1$post|g; $_; } @re;
+              s{($start.+?$end)}{$1$post}g  for @re;
             }
           }
           if ($inter_name) {
             my $inter = $conf->{replace_inter}->{$inter_name};
             if ($inter) {
-              @re = map { s|^$|$inter|; $_; } @re;
+              s{^$}{$inter}  for @re;
             }
           }
           for (my $i = 0; $i < @re; $i++) {

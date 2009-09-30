@@ -982,10 +982,9 @@ sub pack_eval_method {
   my $argstr = $function;
   $argstr =~ s/\s+//gs;
 
-  if (scalar @args > 0) {
-    $argstr .= ',' . join (', ', map {
-            s/\#/[HASH]/gs; "q#".$_."#" 
-          } @args);
+  if (@args > 0) {
+    $argstr .= ',' . join(', ',
+              map { my $s = $_; $s =~ s/\#/[HASH]/gs; 'q#' . $s . '#' } @args);
   }
   return ($argstr, \@args);
 }

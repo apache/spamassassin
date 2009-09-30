@@ -696,7 +696,7 @@ sub _scan_directory {
             or die "Can't open '$folder/$sub' dir: $!\n";
       # Don't learn from messages marked as deleted
       # Or files starting with a leading dot
-      push @files, map { $_ = "$sub/$_"; } grep { !/^\.|:2,.*T/ } readdir(DIR);
+      push @files, map { "$sub/$_" } grep { !/^\.|:2,.*T/ } readdir(DIR);
       closedir(DIR)  or die "error closing directory $folder: $!";
     } 
   }

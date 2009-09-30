@@ -1430,7 +1430,7 @@ sub zlib_inflate_read {
 
   # TODO: split during inflate, too
   # note that this preserves line endings
-  @{$msglinesref} = map { s/$/\n/gs; $_; } split(/\n/, $out);
+  @{$msglinesref} = map { my $s=$_; $s=~s/$/\n/gs; $s } split(/\n/, $out);
   return $actual_length;
 }
 
