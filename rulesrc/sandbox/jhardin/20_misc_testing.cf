@@ -19,8 +19,15 @@ ifplugin Mail::SpamAssassin::Plugin::MIMEHeader
   mimeheader   HTML_ATTACH    Content-Type =~ m,text/html;.+\.html?\b,i
   describe     HTML_ATTACH    HTML attachment to bypass scanning?
 
+  mimeheader   OBFU_HTML_ATTACH    Content-Type =~ m,application/octet-stream;.+\.html?\b,i
+  describe     OBFU_HTML_ATTACH    HTML attachment with non-text MIME type
+
   mimeheader   OBFU_TEXT_ATTACH    Content-Type =~ m,application/octet-stream;.+\.txt\b,i
   describe     OBFU_TEXT_ATTACH    Text attachment with non-text MIME type
+
+  mimeheader   OBFU_DOC_ATTACH     Content-Type =~ m,application/octet-stream;.+\.(?:doc|rtf)\b,i
+  describe     OBFU_DOC_ATTACH     MS Document attachment with generic MIME type
+  score        OBFU_DOC_ATTACH     0.25
 endif
 
 # general case of spample observation
@@ -29,6 +36,7 @@ endif
 
 body           DEAR_BENEFICIARY		/^\s?(?:Dear\s|At+(?:ention|n):\s?)Beneficiary\b/i
 describe       DEAR_BENEFICIARY		Dear Beneficiary:
+score          DEAR_BENEFICIARY		2.0
 
 body           DEAR_EMAIL_USER		/^\s?(?:Dear\s|Attention:\s?)(?:E|Web)-?mail\sUser\b/i
 describe       DEAR_EMAIL_USER		Dear Email User:
@@ -41,19 +49,27 @@ describe       URI_NUMERIC_CCTLD     CCTLD URI with multiple numeric subdomains
 
 
 # From should have whitespace between the comment and the address
-header         __FROM_MISSPACED      From =~ /^\s*"[^"]*"</
-describe       __FROM_MISSPACED      From: missing whitespace
+#header         FROM_MISSPACED        From =~ /^\s*"[^"]*"</
+header         FROM_MISSPACED        From =~ /\S+<\w+/
+describe       FROM_MISSPACED        From: missing whitespace
+
+# To the same
+header         TO_MISSPACED          To =~ /^\s*"[^"]*"</
+describe       TO_MISSPACED          To: missing whitespace
+score          TO_MISSPACED          0.25
 
 ifplugin Mail::SpamAssassin::Plugin::FreeMail
-  meta         FROM_MISSP_FREEMAIL   __FROM_MISSPACED && (FREEMAIL_FROM || FREEMAIL_REPLYTO)
+  meta         FROM_MISSP_FREEMAIL   FROM_MISSPACED && (FREEMAIL_FROM || FREEMAIL_REPLYTO)
   describe     FROM_MISSP_FREEMAIL   From misspaced + freemail provider
 endif
 
-meta           FROM_MISSP_MSFT       __FROM_MISSPACED && (__ANY_OUTLOOK_MUA || __HAS_MIMEOLE || __MIMEOLE_MS)
+meta           FROM_MISSP_MSFT       FROM_MISSPACED && (__ANY_OUTLOOK_MUA || __HAS_MIMEOLE || __MIMEOLE_MS)
 describe       FROM_MISSP_MSFT       From misspaced + supposed Microsoft tool
+score          FROM_MISSP_MSFT       3.0
 
-meta           FROM_MISSP_DYNIP      __FROM_MISSPACED && RDNS_DYNAMIC
+meta           FROM_MISSP_DYNIP      FROM_MISSPACED && RDNS_DYNAMIC
 describe       FROM_MISSP_DYNIP      From misspaced + dynamic rDNS
+score          FROM_MISSP_DYNIP      2.0
 
 
 # observed in spam 8/2009
@@ -76,6 +92,7 @@ describe       MDN_BOTCHED           Malformed return receipt header
 # observed in spam 9/2009
 header         HDRS_MISSP            ALL =~ /\n(?:Subject|From):\S/ism
 describe       HDRS_MISSP            Misspaced headers
+score          HDRS_MISSP            2.0
 
 header         SPAMMY_MIME_BDRY_01  Content-Type =~ /boundary="\@\@BOUNDARY"/
 describe       SPAMMY_MIME_BDRY_01  Spammy MIME boundary string
@@ -97,7 +114,8 @@ describe       LAZY_LISTWASHING   Lazy spammer, painfully obvious bogus addresse
 score          LAZY_LISTWASHING   0.25
 
 # Little to work with
-body           __PLS_REVIEW       /\b(?:please|kindly)\sreview(\s\w+)?\sattach(?:ed|ment)\b/i
+body           __PLS_REVIEW       /\b(?:please|kindly)\s(?:(?:re)?view|see)(?:\s\w+)?\sattach(?:ed|ment)\b/i
+body           __DLND_ATTACH      /\bdownload\sthe\sattach(?:ed|ment)\b/i
 
 ifplugin Mail::SpamAssassin::Plugin::MIMEHeader
   mimeheader   __DOC_ATTACH_MT    Content-Type =~ m,\bapplication/(?:msword|rtf|vnd\.ms-word|vnd\.openxmlformats-officedocument\.wordprocessingml\.document)\b,i
@@ -111,7 +129,7 @@ ifplugin Mail::SpamAssassin::Plugin::MIMEHeader
 endif
 
 ifplugin Mail::SpamAssassin::Plugin::FreeMail
-  meta         RVW_ATTCH_FREEMAIL   __PLS_REVIEW && (__DOC_ATTACH || __PDF_ATTACH) && (FREEMAIL_FROM || FREEMAIL_REPLYTO)
+  meta         RVW_ATTCH_FREEMAIL   (__PLS_REVIEW || __DLND_ATTACH) && (__DOC_ATTACH || __PDF_ATTACH) && (FREEMAIL_FROM || FREEMAIL_REPLYTO)
   describe     RVW_ATTCH_FREEMAIL   Please review attachment, from freemail
   score        RVW_ATTCH_FREEMAIL   1.0
 endif
@@ -125,7 +143,7 @@ score          AD_COMPLAINTS       1.0
 describe       AD_COMPLAINTS       Complain about this spam
 
 # observed in bank phishing 09/2009
-rawbody        MISQ_HTML           /<\w{1,20}[^>]{1,30}=[^"][^">]{1,30}"/
+rawbody        MISQ_HTML           /<\w{1,20}[^>]{1,30}=[^"][^">]{1,30}[^=]"[\s>]/
 describe       MISQ_HTML           Unbalanced quotes in HTML tag
 
 # observed in bank phishing 09/2009
@@ -136,4 +154,11 @@ describe       WIKI_IMG            Image from wikipedia
 header         SUBJ_RE_CLNCLN      Subject =~ /^\s*RE::/
 describe       SUBJ_RE_CLNCLN      Subject RE::
 
+uri            MANY_SUBDOM         m;^https?://(?:[^\./]{1,30}\.){6};
+describe       MANY_SUBDOM         Lots and lots of subdomain parts in a URI
+
+# 8-letter .cn domain, per Warren Togami
+uri            CN_EIGHT            m;^https?://(?:[^./]+\.)*[^./]{8}\.cn/;
+describe       CN_EIGHT            .CN uri with eight-letter domain name
+score          CN_EIGHT            0.10
 
