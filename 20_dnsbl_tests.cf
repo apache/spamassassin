@@ -145,7 +145,7 @@ tflags __RCVD_IN_ZEN            net
 reuse  __RCVD_IN_ZEN
 
 # SBL is the Spamhaus Block List: http://www.spamhaus.org/sbl/
-header RCVD_IN_SBL              eval:check_rbl_sub('zen', '127.0.0.[23]')
+header RCVD_IN_SBL              eval:check_rbl_sub('zen', '127.0.0.2')
 describe RCVD_IN_SBL            Received via a relay in Spamhaus SBL
 tflags RCVD_IN_SBL              net
 reuse  RCVD_IN_SBL
