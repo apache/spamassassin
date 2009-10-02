@@ -11,9 +11,9 @@
 # The ASF licenses this file to you under the Apache License, Version 2.0
 # (the "License"); you may not use this file except in compliance with
 # the License.  You may obtain a copy of the License at:
-# 
+#
 #     http://www.apache.org/licenses/LICENSE-2.0
-# 
+#
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -43,36 +43,36 @@ ifplugin Mail::SpamAssassin::Plugin::DNSEval
 # NJABL
 # URL: http://www.dnsbl.njabl.org/
 
-header __RCVD_IN_NJABL		eval:check_rbl('njabl', 'combined.njabl.org.')
-describe __RCVD_IN_NJABL	Received via a relay in combined.njabl.org
-tflags __RCVD_IN_NJABL		net
+header __RCVD_IN_NJABL          eval:check_rbl('njabl', 'combined.njabl.org.')
+describe __RCVD_IN_NJABL        Received via a relay in combined.njabl.org
+tflags __RCVD_IN_NJABL          net
 reuse  __RCVD_IN_NJABL
 
-header RCVD_IN_NJABL_RELAY	eval:check_rbl_sub('njabl', '127.0.0.2')
-describe RCVD_IN_NJABL_RELAY	NJABL: sender is confirmed open relay
-tflags RCVD_IN_NJABL_RELAY	net
+header RCVD_IN_NJABL_RELAY      eval:check_rbl_sub('njabl', '127.0.0.2')
+describe RCVD_IN_NJABL_RELAY    NJABL: sender is confirmed open relay
+tflags RCVD_IN_NJABL_RELAY      net
 reuse  RCVD_IN_NJABL_RELAY
 
 # NJABL DUL: obsoleted by PBL (bug 5187)
 
-header RCVD_IN_NJABL_SPAM	eval:check_rbl_sub('njabl', '127.0.0.4')
-describe RCVD_IN_NJABL_SPAM	NJABL: sender is confirmed spam source
-tflags RCVD_IN_NJABL_SPAM	net
+header RCVD_IN_NJABL_SPAM       eval:check_rbl_sub('njabl', '127.0.0.4')
+describe RCVD_IN_NJABL_SPAM     NJABL: sender is confirmed spam source
+tflags RCVD_IN_NJABL_SPAM       net
 reuse  RCVD_IN_NJABL_SPAM
 
-header RCVD_IN_NJABL_MULTI	eval:check_rbl_sub('njabl', '127.0.0.5')
-describe RCVD_IN_NJABL_MULTI	NJABL: sent through multi-stage open relay
-tflags RCVD_IN_NJABL_MULTI	net
+header RCVD_IN_NJABL_MULTI      eval:check_rbl_sub('njabl', '127.0.0.5')
+describe RCVD_IN_NJABL_MULTI    NJABL: sent through multi-stage open relay
+tflags RCVD_IN_NJABL_MULTI      net
 reuse  RCVD_IN_NJABL_MULTI
 
-header RCVD_IN_NJABL_CGI	eval:check_rbl_sub('njabl', '127.0.0.8')
-describe RCVD_IN_NJABL_CGI	NJABL: sender is an open formmail
-tflags RCVD_IN_NJABL_CGI	net
+header RCVD_IN_NJABL_CGI        eval:check_rbl_sub('njabl', '127.0.0.8')
+describe RCVD_IN_NJABL_CGI      NJABL: sender is an open formmail
+tflags RCVD_IN_NJABL_CGI        net
 reuse  RCVD_IN_NJABL_CGI
 
-header RCVD_IN_NJABL_PROXY	eval:check_rbl_sub('njabl', '127.0.0.9')
-describe RCVD_IN_NJABL_PROXY	NJABL: sender is an open proxy
-tflags RCVD_IN_NJABL_PROXY	net
+header RCVD_IN_NJABL_PROXY      eval:check_rbl_sub('njabl', '127.0.0.9')
+describe RCVD_IN_NJABL_PROXY    NJABL: sender is an open proxy
+tflags RCVD_IN_NJABL_PROXY      net
 reuse  RCVD_IN_NJABL_PROXY
 
 # ---------------------------------------------------------------------------
@@ -82,55 +82,55 @@ reuse  RCVD_IN_NJABL_PROXY
 # pay-to-use: no
 # delist: $50 fee for RCVD_IN_SORBS_SPAM, others have free retest on request
 
-header __RCVD_IN_SORBS		eval:check_rbl('sorbs', 'dnsbl.sorbs.net.')
-describe __RCVD_IN_SORBS	SORBS: sender is listed in SORBS
-tflags __RCVD_IN_SORBS		net
+header __RCVD_IN_SORBS          eval:check_rbl('sorbs', 'dnsbl.sorbs.net.')
+describe __RCVD_IN_SORBS        SORBS: sender is listed in SORBS
+tflags __RCVD_IN_SORBS          net
 reuse  __RCVD_IN_SORBS
 
-header RCVD_IN_SORBS_HTTP	eval:check_rbl_sub('sorbs', '127.0.0.2')
-describe RCVD_IN_SORBS_HTTP	SORBS: sender is open HTTP proxy server
-tflags RCVD_IN_SORBS_HTTP	net
+header RCVD_IN_SORBS_HTTP       eval:check_rbl_sub('sorbs', '127.0.0.2')
+describe RCVD_IN_SORBS_HTTP     SORBS: sender is open HTTP proxy server
+tflags RCVD_IN_SORBS_HTTP       net
 reuse  RCVD_IN_SORBS_HTTP
 
-header RCVD_IN_SORBS_SOCKS	eval:check_rbl_sub('sorbs', '127.0.0.3')
-describe RCVD_IN_SORBS_SOCKS	SORBS: sender is open SOCKS proxy server
-tflags RCVD_IN_SORBS_SOCKS	net
+header RCVD_IN_SORBS_SOCKS      eval:check_rbl_sub('sorbs', '127.0.0.3')
+describe RCVD_IN_SORBS_SOCKS    SORBS: sender is open SOCKS proxy server
+tflags RCVD_IN_SORBS_SOCKS      net
 reuse  RCVD_IN_SORBS_SOCKS
 
-header RCVD_IN_SORBS_MISC	eval:check_rbl_sub('sorbs', '127.0.0.4')
-describe RCVD_IN_SORBS_MISC	SORBS: sender is open proxy server
-tflags RCVD_IN_SORBS_MISC	net
+header RCVD_IN_SORBS_MISC       eval:check_rbl_sub('sorbs', '127.0.0.4')
+describe RCVD_IN_SORBS_MISC     SORBS: sender is open proxy server
+tflags RCVD_IN_SORBS_MISC       net
 reuse  RCVD_IN_SORBS_MISC
 
-header RCVD_IN_SORBS_SMTP	eval:check_rbl_sub('sorbs', '127.0.0.5')
-describe RCVD_IN_SORBS_SMTP	SORBS: sender is open SMTP relay
-tflags RCVD_IN_SORBS_SMTP	net
+header RCVD_IN_SORBS_SMTP       eval:check_rbl_sub('sorbs', '127.0.0.5')
+describe RCVD_IN_SORBS_SMTP     SORBS: sender is open SMTP relay
+tflags RCVD_IN_SORBS_SMTP       net
 reuse  RCVD_IN_SORBS_SMTP
 
 # delist: $50 fee
-#header RCVD_IN_SORBS_SPAM	eval:check_rbl_sub('sorbs', '127.0.0.6')
-#describe RCVD_IN_SORBS_SPAM	SORBS: sender is a spam source
-#tflags RCVD_IN_SORBS_SPAM	net
-#reuse  RCVD_IN_SORBS_SPAM	RCVD_IN_SORBS_SPAM
+#header RCVD_IN_SORBS_SPAM      eval:check_rbl_sub('sorbs', '127.0.0.6')
+#describe RCVD_IN_SORBS_SPAM    SORBS: sender is a spam source
+#tflags RCVD_IN_SORBS_SPAM      net
+#reuse  RCVD_IN_SORBS_SPAM      RCVD_IN_SORBS_SPAM
 
-header RCVD_IN_SORBS_WEB	eval:check_rbl_sub('sorbs', '127.0.0.7')
-describe RCVD_IN_SORBS_WEB	SORBS: sender is an abusable web server
-tflags RCVD_IN_SORBS_WEB	net
+header RCVD_IN_SORBS_WEB        eval:check_rbl_sub('sorbs', '127.0.0.7')
+describe RCVD_IN_SORBS_WEB      SORBS: sender is an abusable web server
+tflags RCVD_IN_SORBS_WEB        net
 reuse  RCVD_IN_SORBS_WEB
 
-header RCVD_IN_SORBS_BLOCK	eval:check_rbl_sub('sorbs', '127.0.0.8')
-describe RCVD_IN_SORBS_BLOCK	SORBS: sender demands to never be tested
-tflags RCVD_IN_SORBS_BLOCK	net
+header RCVD_IN_SORBS_BLOCK      eval:check_rbl_sub('sorbs', '127.0.0.8')
+describe RCVD_IN_SORBS_BLOCK    SORBS: sender demands to never be tested
+tflags RCVD_IN_SORBS_BLOCK      net
 reuse  RCVD_IN_SORBS_BLOCK
 
-header RCVD_IN_SORBS_ZOMBIE	eval:check_rbl_sub('sorbs', '127.0.0.9')
-describe RCVD_IN_SORBS_ZOMBIE	SORBS: sender is on a hijacked network
-tflags RCVD_IN_SORBS_ZOMBIE	net
+header RCVD_IN_SORBS_ZOMBIE     eval:check_rbl_sub('sorbs', '127.0.0.9')
+describe RCVD_IN_SORBS_ZOMBIE   SORBS: sender is on a hijacked network
+tflags RCVD_IN_SORBS_ZOMBIE     net
 reuse  RCVD_IN_SORBS_ZOMBIE
 
-header RCVD_IN_SORBS_DUL	eval:check_rbl('sorbs-lastexternal', 'dnsbl.sorbs.net.', '127.0.0.10')
-describe RCVD_IN_SORBS_DUL	SORBS: sent directly from dynamic IP address
-tflags RCVD_IN_SORBS_DUL	net
+header RCVD_IN_SORBS_DUL        eval:check_rbl('sorbs-lastexternal', 'dnsbl.sorbs.net.', '127.0.0.10')
+describe RCVD_IN_SORBS_DUL      SORBS: sent directly from dynamic IP address
+tflags RCVD_IN_SORBS_DUL        net
 reuse  RCVD_IN_SORBS_DUL
 
 # ---------------------------------------------------------------------------
@@ -151,7 +151,7 @@ tflags RCVD_IN_SBL              net
 reuse  RCVD_IN_SBL
 
 # XBL is the Exploits Block List: http://www.spamhaus.org/xbl/
-header RCVD_IN_XBL              eval:check_rbl('zen-lastexternal', 'zen.spamhaus.org.', '127.0.0.[45678]')
+header RCVD_IN_XBL              eval:check_rbl('zen-lastexternal', 'zen.spamhaus.org.', '127.0.0.[345678]')
 describe RCVD_IN_XBL            Received via a relay in Spamhaus XBL
 tflags RCVD_IN_XBL              net
 reuse  RCVD_IN_XBL
@@ -160,87 +160,87 @@ reuse  RCVD_IN_XBL
 header RCVD_IN_PBL              eval:check_rbl('zen-lastexternal', 'zen.spamhaus.org.', '127.0.0.1[01]')
 describe RCVD_IN_PBL            Received via a relay in Spamhaus PBL
 tflags RCVD_IN_PBL              net
-reuse  RCVD_IN_PBL		RCVD_IN_PBL T_RCVD_IN_PBL_WITH_NJABL_DUL RCVD_IN_NJABL_DUL
+reuse  RCVD_IN_PBL              RCVD_IN_PBL T_RCVD_IN_PBL_WITH_NJABL_DUL RCVD_IN_NJABL_DUL
 
 # ---------------------------------------------------------------------------
 # RFC-Ignorant blacklists (both name and IP based)
 
-header __RFC_IGNORANT_ENVFROM	eval:check_rbl_envfrom('rfci_envfrom', 'fulldom.rfc-ignorant.org.')
-tflags __RFC_IGNORANT_ENVFROM	net
+header __RFC_IGNORANT_ENVFROM   eval:check_rbl_envfrom('rfci_envfrom', 'fulldom.rfc-ignorant.org.')
+tflags __RFC_IGNORANT_ENVFROM   net
 
-header DNS_FROM_RFC_DSN		eval:check_rbl_sub('rfci_envfrom', '127.0.0.2')
-describe DNS_FROM_RFC_DSN	Envelope sender in dsn.rfc-ignorant.org
-tflags DNS_FROM_RFC_DSN		net
+header DNS_FROM_RFC_DSN         eval:check_rbl_sub('rfci_envfrom', '127.0.0.2')
+describe DNS_FROM_RFC_DSN       Envelope sender in dsn.rfc-ignorant.org
+tflags DNS_FROM_RFC_DSN         net
 reuse  DNS_FROM_RFC_DSN
 
-header DNS_FROM_RFC_BOGUSMX	eval:check_rbl_sub('rfci_envfrom', '127.0.0.8')
-describe DNS_FROM_RFC_BOGUSMX	Envelope sender in bogusmx.rfc-ignorant.org
-tflags DNS_FROM_RFC_BOGUSMX	net
+header DNS_FROM_RFC_BOGUSMX     eval:check_rbl_sub('rfci_envfrom', '127.0.0.8')
+describe DNS_FROM_RFC_BOGUSMX   Envelope sender in bogusmx.rfc-ignorant.org
+tflags DNS_FROM_RFC_BOGUSMX     net
 reuse  DNS_FROM_RFC_BOGUSMX
 
 # bug 4628: these rules are too unreliable to assign scores to
 header __DNS_FROM_RFC_POST      eval:check_rbl_sub('rfci_envfrom', '127.0.0.3')
 tflags __DNS_FROM_RFC_POST      net
-reuse  __DNS_FROM_RFC_POST	DNS_FROM_RFC_POST
+reuse  __DNS_FROM_RFC_POST      DNS_FROM_RFC_POST
 
 header __DNS_FROM_RFC_ABUSE     eval:check_rbl_sub('rfci_envfrom', '127.0.0.4')
 tflags __DNS_FROM_RFC_ABUSE     net
-reuse  __DNS_FROM_RFC_ABUSE	DNS_FROM_RFC_ABUSE
+reuse  __DNS_FROM_RFC_ABUSE     DNS_FROM_RFC_ABUSE
 
 header __DNS_FROM_RFC_WHOIS     eval:check_rbl_sub('rfci_envfrom', '127.0.0.5')
 tflags __DNS_FROM_RFC_WHOIS     net
-reuse  __DNS_FROM_RFC_WHOIS	DNS_FROM_RFC_WHOIS
+reuse  __DNS_FROM_RFC_WHOIS     DNS_FROM_RFC_WHOIS
 
 # ---------------------------------------------------------------------------
 # Now, single zone BLs follow:
 
 # another domain-based blacklist
-header DNS_FROM_AHBL_RHSBL	eval:check_rbl_envfrom('ahbl', 'rhsbl.ahbl.org.')
-describe DNS_FROM_AHBL_RHSBL	Envelope sender listed in dnsbl.ahbl.org
-tflags DNS_FROM_AHBL_RHSBL	net
+header DNS_FROM_AHBL_RHSBL      eval:check_rbl_envfrom('ahbl', 'rhsbl.ahbl.org.')
+describe DNS_FROM_AHBL_RHSBL    Envelope sender listed in dnsbl.ahbl.org
+tflags DNS_FROM_AHBL_RHSBL      net
 reuse  DNS_FROM_AHBL_RHSBL
 
 # ---------------------------------------------------------------------------
 # NOTE: donation tests, see README file for details
 
-header RCVD_IN_BL_SPAMCOP_NET	eval:check_rbl_txt('spamcop', 'bl.spamcop.net.', '(?i:spamcop)')
-describe RCVD_IN_BL_SPAMCOP_NET	Received via a relay in bl.spamcop.net
-tflags RCVD_IN_BL_SPAMCOP_NET	net
+header RCVD_IN_BL_SPAMCOP_NET   eval:check_rbl_txt('spamcop', 'bl.spamcop.net.', '(?i:spamcop)')
+describe RCVD_IN_BL_SPAMCOP_NET Received via a relay in bl.spamcop.net
+tflags RCVD_IN_BL_SPAMCOP_NET   net
 reuse  RCVD_IN_BL_SPAMCOP_NET
 
 # ---------------------------------------------------------------------------
 # NOTE: commercial tests, see README file for details
 
-header RCVD_IN_MAPS_RBL		eval:check_rbl('rblplus', 'activationcode.r.mail-abuse.com.', '1')
-describe RCVD_IN_MAPS_RBL	Relay in RBL, http://www.mail-abuse.com/enduserinfo_rbl.html
-tflags RCVD_IN_MAPS_RBL		net
+header RCVD_IN_MAPS_RBL         eval:check_rbl('rblplus', 'activationcode.r.mail-abuse.com.', '1')
+describe RCVD_IN_MAPS_RBL       Relay in RBL, http://www.mail-abuse.com/enduserinfo_rbl.html
+tflags RCVD_IN_MAPS_RBL         net
 
-header RCVD_IN_MAPS_DUL		eval:check_rbl('rblplus-lastexternal', 'activationcode.r.mail-abuse.com.', '2')
-describe RCVD_IN_MAPS_DUL	Relay in DUL, http://www.mail-abuse.com/enduserinfo_dul.html
-tflags RCVD_IN_MAPS_DUL		net
+header RCVD_IN_MAPS_DUL         eval:check_rbl('rblplus-lastexternal', 'activationcode.r.mail-abuse.com.', '2')
+describe RCVD_IN_MAPS_DUL       Relay in DUL, http://www.mail-abuse.com/enduserinfo_dul.html
+tflags RCVD_IN_MAPS_DUL         net
 
-header RCVD_IN_MAPS_RSS		eval:check_rbl_sub('rblplus', '4')
-describe RCVD_IN_MAPS_RSS	Relay in RSS, http://www.mail-abuse.com/enduserinfo_rss.html
-tflags RCVD_IN_MAPS_RSS		net
+header RCVD_IN_MAPS_RSS         eval:check_rbl_sub('rblplus', '4')
+describe RCVD_IN_MAPS_RSS       Relay in RSS, http://www.mail-abuse.com/enduserinfo_rss.html
+tflags RCVD_IN_MAPS_RSS         net
 
-header RCVD_IN_MAPS_OPS		eval:check_rbl_sub('rblplus', '8')
-describe RCVD_IN_MAPS_OPS	Relay in OPS, http://www.mail-abuse.com/enduserinfo_ops.html
-tflags RCVD_IN_MAPS_OPS		net
+header RCVD_IN_MAPS_OPS         eval:check_rbl_sub('rblplus', '8')
+describe RCVD_IN_MAPS_OPS       Relay in OPS, http://www.mail-abuse.com/enduserinfo_ops.html
+tflags RCVD_IN_MAPS_OPS         net
 
 # The NML isn't part of the RBL+ and I find any documentation for it - is it dead?
-header RCVD_IN_MAPS_NML		eval:check_rbl('nml', 'nonconfirm.mail-abuse.com.')
-describe RCVD_IN_MAPS_NML	Relay in NML, http://www.mail-abuse.com/enduserinfo_nml.html
-tflags RCVD_IN_MAPS_NML		net
+header RCVD_IN_MAPS_NML         eval:check_rbl('nml', 'nonconfirm.mail-abuse.com.')
+describe RCVD_IN_MAPS_NML       Relay in NML, http://www.mail-abuse.com/enduserinfo_nml.html
+tflags RCVD_IN_MAPS_NML         net
 
 # ---------------------------------------------------------------------------
 # Section for DNS WL related lookups below.
 
 # Sender Score Certified (formerly Bonded Sender, hence the legacy rule names):
-# http://www.senderscorecertified.com/ 
-header RCVD_IN_BSP_TRUSTED	eval:check_rbl_txt('bsp-firsttrusted', 'sa-trusted.bondedsender.org.', '(?i:bonded)')
-describe RCVD_IN_BSP_TRUSTED	Sender is accredited by Return Path's Sender Score Certified program; report issues to senderscorecertified.com@abuse.net
+# http://www.senderscorecertified.com/
+header RCVD_IN_BSP_TRUSTED      eval:check_rbl_txt('bsp-firsttrusted', 'sa-trusted.bondedsender.org.', '(?i:bonded)')
+describe RCVD_IN_BSP_TRUSTED    Sender is accredited by Return Path's Sender Score Certified program; report issues to senderscorecertified.com@abuse.net
 
-tflags RCVD_IN_BSP_TRUSTED	net nice
+tflags RCVD_IN_BSP_TRUSTED      net nice
 reuse  RCVD_IN_BSP_TRUSTED
 
 # confirmed-opt-in list; see bug 5476
@@ -252,44 +252,44 @@ reuse  RCVD_IN_SSC_TRUSTED_COI
 # ---------------------------------------------------------------------------
 
 # IADB support ...
-header __RCVD_IN_IADB		eval:check_rbl('iadb-firsttrusted', 'iadb.isipp.com.')
-tflags __RCVD_IN_IADB		net nice
+header __RCVD_IN_IADB           eval:check_rbl('iadb-firsttrusted', 'iadb.isipp.com.')
+tflags __RCVD_IN_IADB           net nice
 
-header RCVD_IN_IADB_VOUCHED	eval:check_rbl_sub('iadb-firsttrusted', '^127.0.1.255$')
-describe RCVD_IN_IADB_VOUCHED	ISIPP IADB lists as vouched-for sender
-tflags RCVD_IN_IADB_VOUCHED	net nice
+header RCVD_IN_IADB_VOUCHED     eval:check_rbl_sub('iadb-firsttrusted', '^127.0.1.255$')
+describe RCVD_IN_IADB_VOUCHED   ISIPP IADB lists as vouched-for sender
+tflags RCVD_IN_IADB_VOUCHED     net nice
 
 # ---------------------------------------------------------------------------
 
 # Habeas Accredited Senders
-#	 Last octet of the returned A record indicates the Habeas-assigned
-#	"Permission Level" of the Sender.
-#		10 to 39	Personal, transactional, and Confirmed Opt In
-#		40 to 59	Secure referrals and Single Opt In
-#		60 to 99	Checked but not accredited by Habeas.
+#        Last octet of the returned A record indicates the Habeas-assigned
+#       "Permission Level" of the Sender.
+#               10 to 39        Personal, transactional, and Confirmed Opt In
+#               40 to 59        Secure referrals and Single Opt In
+#               60 to 99        Checked but not accredited by Habeas.
 #
 # sa-accredit.habeas.com is for SpamAssassin use.
 #
-header HABEAS_ACCREDITED_COI	eval:check_rbl('habeas-firsttrusted', 'sa-accredit.habeas.com.', '127\.\d+\.\d+\.[123]\d')
-describe HABEAS_ACCREDITED_COI	Sender is accredited by Return Path's Sender Score Safelist program, and uses Confirmed Opt-In; report issues to habeas.com@abuse.net
-tflags HABEAS_ACCREDITED_COI	net nice
+header HABEAS_ACCREDITED_COI    eval:check_rbl('habeas-firsttrusted', 'sa-accredit.habeas.com.', '127\.\d+\.\d+\.[123]\d')
+describe HABEAS_ACCREDITED_COI  Sender is accredited by Return Path's Sender Score Safelist program, and uses Confirmed Opt-In; report issues to habeas.com@abuse.net
+tflags HABEAS_ACCREDITED_COI    net nice
 
-header HABEAS_ACCREDITED_SOI	eval:check_rbl_sub('habeas-firsttrusted', '127\.\d+\.\d+\.[45]\d')
-describe HABEAS_ACCREDITED_SOI	Sender is accredited by Return Path's Sender Score Safelist program, and uses Opt-In or better; report issues to habeas.com@abuse.net
-tflags HABEAS_ACCREDITED_SOI	net nice
+header HABEAS_ACCREDITED_SOI    eval:check_rbl_sub('habeas-firsttrusted', '127\.\d+\.\d+\.[45]\d')
+describe HABEAS_ACCREDITED_SOI  Sender is accredited by Return Path's Sender Score Safelist program, and uses Opt-In or better; report issues to habeas.com@abuse.net
+tflags HABEAS_ACCREDITED_SOI    net nice
 
 # Habeas Accredited Senders, with check for "Accreditor Assertion"
-#	Same Habeas whitelist checks as above, but performed only if the Sender
-#	has specified Habeas as their accreditor in either the EnvelopeFrom or
-#	"Accreditor" header field.  This reduces the DNS overhead, but will
-#	miss senders who are unable to add custom header fields.
+#       Same Habeas whitelist checks as above, but performed only if the Sender
+#       has specified Habeas as their accreditor in either the EnvelopeFrom or
+#       "Accreditor" header field.  This reduces the DNS overhead, but will
+#       miss senders who are unable to add custom header fields.
 #
-# header HABEAS_ACCREDITED_COI	eval:check_rbl_accreditor('accredit-firsttrusted', 'sa-accredit.habeas.com.', '127\.\d+\.\d+\.[123]\d', 'habeas')
-# describe HABEAS_ACCREDITED_COI	Habeas Accredited Confirmed Opt-In or Better
-# tflags HABEAS_ACCREDITED_COI	net nice
-# 
-# header HABEAS_ACCREDITED_SOI	eval:check_rbl_accreditor('accredit-firsttrusted', 'sa-accredit.habeas.com.', '127\.\d+\.\d+\.[45]\d', 'habeas')
-# describe HABEAS_ACCREDITED_SOI	Habeas Accredited Opt-In or Better
-# tflags HABEAS_ACCREDITED_SOI	net nice
-# 
+# header HABEAS_ACCREDITED_COI  eval:check_rbl_accreditor('accredit-firsttrusted', 'sa-accredit.habeas.com.', '127\.\d+\.\d+\.[123]\d', 'habeas')
+# describe HABEAS_ACCREDITED_COI        Habeas Accredited Confirmed Opt-In or Better
+# tflags HABEAS_ACCREDITED_COI  net nice
+#
+# header HABEAS_ACCREDITED_SOI  eval:check_rbl_accreditor('accredit-firsttrusted', 'sa-accredit.habeas.com.', '127\.\d+\.\d+\.[45]\d', 'habeas')
+# describe HABEAS_ACCREDITED_SOI        Habeas Accredited Opt-In or Better
+# tflags HABEAS_ACCREDITED_SOI  net nice
+#
 endif
