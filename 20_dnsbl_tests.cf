@@ -145,13 +145,13 @@ tflags __RCVD_IN_ZEN            net
 reuse  __RCVD_IN_ZEN
 
 # SBL is the Spamhaus Block List: http://www.spamhaus.org/sbl/
-header RCVD_IN_SBL              eval:check_rbl_sub('zen', '127.0.0.2')
+header RCVD_IN_SBL              eval:check_rbl_sub('zen', '127.0.0.[23]')
 describe RCVD_IN_SBL            Received via a relay in Spamhaus SBL
 tflags RCVD_IN_SBL              net
 reuse  RCVD_IN_SBL
 
 # XBL is the Exploits Block List: http://www.spamhaus.org/xbl/
-header RCVD_IN_XBL              eval:check_rbl('zen-lastexternal', 'zen.spamhaus.org.', '127.0.0.[345678]')
+header RCVD_IN_XBL              eval:check_rbl('zen-lastexternal', 'zen.spamhaus.org.', '127.0.0.[45678]')
 describe RCVD_IN_XBL            Received via a relay in Spamhaus XBL
 tflags RCVD_IN_XBL              net
 reuse  RCVD_IN_XBL
