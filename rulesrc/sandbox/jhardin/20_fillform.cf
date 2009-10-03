@@ -73,18 +73,22 @@ ifplugin Mail::SpamAssassin::Plugin::ReplaceTags
   meta     FILL_THIS_FORM_ML (!FILL_THIS_FORM_LONG && (__FILL_THIS_FORM_PARTIAL > 4 || __FILL_THIS_FORM_PARTIAL_RAW > 4))
   score    FILL_THIS_FORM_ML 2.00
 
+  # for use with other rules
+  meta     __FILL_THIS_FORM    (FILL_THIS_FORM_LONG || FILL_THIS_FORM_ML)
+
   # Add to score if loan question is present
   body     __FILL_THIS_FORM_LOAN /<FF_YOUR><FF_L1><FF_SUFFIX>(?:<FF_BLANK1>|<FF_BLANK2>$)/i
   replace_rules   __FILL_THIS_FORM_LOAN
   describe FILL_THIS_FORM_LOAN Answer loan question(s)
-  meta     FILL_THIS_FORM_LOAN  ( FILL_THIS_FORM_LONG || FILL_THIS_FORM_ML ) && __FILL_THIS_FORM_LOAN
+  meta     FILL_THIS_FORM_LOAN  __FILL_THIS_FORM && __FILL_THIS_FORM_LOAN
   score    FILL_THIS_FORM_LOAN 0.50
 
   # Add to score if fraud/phishing question is present
   body     __FILL_THIS_FORM_FRAUD_PHISH /<FF_YOUR>(?:<FF_F1>|<FF_F2>|<FF_F3>|<FF_F4>|<FF_F5>)<FF_SUFFIX>(?:<FF_BLANK1>|<FF_BLANK2>$)/i
   replace_rules   __FILL_THIS_FORM_FRAUD_PHISH
   describe FILL_THIS_FORM_FRAUD_PHISH Answer suspicious question(s)
-  meta     FILL_THIS_FORM_FRAUD_PHISH  ( FILL_THIS_FORM_LONG || FILL_THIS_FORM_ML ) && __FILL_THIS_FORM_FRAUD_PHISH
+  meta     FILL_THIS_FORM_FRAUD_PHISH  __FILL_THIS_FORM && __FILL_THIS_FORM_FRAUD_PHISH
   score    FILL_THIS_FORM_FRAUD_PHISH 1.50
 
+  
 endif   # Mail::SpamAssassin::Plugin::ReplaceTags

@@ -6,8 +6,8 @@ ifplugin Mail::SpamAssassin::Plugin::ReplaceTags
   body     __LOTSA_MONEY_00   /<CURRENCY>\s?\d[\dO][,\.][\dO]{3}(?:(?!\d)|\b)/
   body     __LOTSA_MONEY_01   /(?:(?i:sum\sof\s)[\(\[]?|<CURRENCY>\s?)\s?\d[\d.,\sO]{5,20}[\dO]/
   body     __LOTSA_MONEY_02   /\d[\d.,\sO]{5,20}[\dO]\s?(?:<CURRENCY>|Pounds)\b/
-  body     __LOTSA_MONEY_03   /(?:(?i:sum\sof\s)[\(\[]?|<CURRENCY>\s?)\d(?:[\d.,\sO]{0,5})?(?i:M(?i:il)?\b|mil+(?i:io|<O>)n|hund[re]+[dt]|thousand|tausend)/
-  body     __LOTSA_MONEY_04   /(?:\d[\d\.]{0,4}M|million(?!s)|mill<O>n|hundred(?!s)[^\.]{1,25}thousand(?!s)|cents?[^\.]{1,25}mille|hundert[^\.]{1,30}tausend|ientos?[^\.]{1,20}mil)[^\.\$]{0,50}(?:(?:U\.?\s?S\.?\s?(?:A\.?\s?)?|united\s?states?|canad(?:ian|a)\s)?dollars?|USD|GBP|<GB_UK>\spounds?|(?:<GB_UK>\s)?pounds?\ssterling|(?:d'\s?)?euros?)\b/i
+  body     __LOTSA_MONEY_03   /(?:(?i:sum\sof\s)[\(\[]?|<CURRENCY>\s?)\d(?:[\d.,\sO]{0,5})?(?i:M(?i:il)?\b|mil+(?i:io|<O>)n|hund?[re]+[dt]|thousand|tausend)/
+  body     __LOTSA_MONEY_04   /(?:\d[\d\.]{0,4}M|million(?!s)|mill<O>n|hund?red(?!s)[^\.]{1,25}thousand(?!s)|cents?[^\.]{1,25}mille|hundert[^\.]{1,30}tausend|ientos?[^\.]{1,20}mil)[^\.\$]{0,50}(?:(?:U\.?\s?S\.?\s?(?:A\.?\s?)?|united\s?states?|canad(?:ian|a)\s)?dollars?|USD|GBP|<GB_UK>\spounds?|(?:<GB_UK>\s)?pounds?\ssterling|(?:d'\s?)?euros?)\b/i
   replace_rules   __LOTSA_MONEY_00 __LOTSA_MONEY_01 __LOTSA_MONEY_02 __LOTSA_MONEY_03 __LOTSA_MONEY_04
 
   meta     LOTS_OF_MONEY    (__LOTSA_MONEY_00 || __LOTSA_MONEY_01 || __LOTSA_MONEY_02 || __LOTSA_MONEY_03 || __LOTSA_MONEY_04)
@@ -33,7 +33,7 @@ score    MONEY_FROM_MISSP   1.5
 #meta     MONEY_TO_NO_R    LOTS_OF_MONEY && __TO_NO_ARROWS_R
 #describe MONEY_TO_NO_R    Lots of money and bare, missing or undisclosed To
 
-meta     MONEY_FORM       LOTS_OF_MONEY && (FILL_THIS_FORM_LONG || FILL_THIS_FORM_ML)
+meta     MONEY_FORM       LOTS_OF_MONEY && __FILL_THIS_FORM
 describe MONEY_FORM       Lots of money if you fill out a form
 score    MONEY_FORM       1.5
 
@@ -178,7 +178,7 @@ score    SUM_OF_FUND      1.0
 
 body     __BENEFICIARY    /\bbeneficiary\b/i
 body     __DIPLOMATIC     /\bdiplomatic\b/i
-body     __FEES           /\b(?:security|safe\w*|courier|registration|pay|paid|up-?front|processing)[\s\w]{1,15}\sfees?\b/i 
+body     __FEES           /\b(?:security|safe\w*|courier|registration|pay|paid|up-?front|processing)[\s\w]{1,15}\s(?:fee|charge)s?\b/i 
 body     __LUCKY_WINNER   /\blucky\swin+ers?\b/i
 body     __YOUR_FUND      /\byour\sfund\b/i
 body     __IVORY_COAST    /\b(?:Cote\s?D'Ivoire|Ivory\sCoast)\b/i
@@ -188,5 +188,7 @@ body     __CONTACT_YOU    /\bcontacting\syou\b/i
 body     __FOUND_YOU      /\b(?:I|we)\sfound\syour?\b/i
 body     __INVEST_MONEY   /\binvest\sthis\smoney\b/i
 
-body __FRAUD_PTS_2	/\b(?:ass?ass?inat(?:ed|ion)|murder(?:e?d)?|poison(?:e?d)?|kill(?:ed|ing)\b[^.]{0,99}\b(?:war veterans|rebels?))\b/i
+
+# Adjust __FRAUD_PTS
+body __FRAUD_PTX	/\b(?:ass?ass?inat(?:ed|ion)|murder(?:e?d)?|poison(?:e?d)?|kill(?:ed|ing)\b[^.]{0,99}\b(?:war veterans|rebels?))\b/i
 
