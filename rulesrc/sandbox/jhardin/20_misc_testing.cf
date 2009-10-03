@@ -158,7 +158,7 @@ uri            MANY_SUBDOM         m;^https?://(?:[^\./]{1,30}\.){6};
 describe       MANY_SUBDOM         Lots and lots of subdomain parts in a URI
 
 # 8-letter .cn domain, per Warren Togami
-uri            CN_EIGHT            m;^https?://(?:[^./]+\.)*[^./]{8}\.cn/;
+uri            CN_EIGHT            m;^https?://(?:[^./]+\.)*[^./]{8}\.cn\b;
 describe       CN_EIGHT            .CN uri with eight-letter domain name
 score          CN_EIGHT            0.10
 
