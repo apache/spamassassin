@@ -181,11 +181,12 @@ body     __DIPLOMATIC     /\bdiplomatic\b/i
 body     __FEES           /\b(?:security|safe\w*|courier|registration|pay|paid|up-?front|processing)[\s\w]{1,15}\sfees?\b/i 
 body     __LUCKY_WINNER   /\blucky\swin+ers?\b/i
 body     __YOUR_FUND      /\byour\sfund\b/i
-body     __IVORY_COAST    /\bCote\s?D'Ivoire\b/i
+body     __IVORY_COAST    /\b(?:Cote\s?D'Ivoire|Ivory\sCoast)\b/i
 body     __NIGERIA        /\bnigeria\b/i
 body     __YOUR_PERM      /\byour\spermission\b/i
 body     __CONTACT_YOU    /\bcontacting\syou\b/i
 body     __FOUND_YOU      /\b(?:I|we)\sfound\syour?\b/i
 body     __INVEST_MONEY   /\binvest\sthis\smoney\b/i
 
+body __FRAUD_PTS_2	/\b(?:ass?ass?inat(?:ed|ion)|murder(?:e?d)?|poison(?:e?d)?|kill(?:ed|ing)\b[^.]{0,99}\b(?:war veterans|rebels?))\b/i
 
