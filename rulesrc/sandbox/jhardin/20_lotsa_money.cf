@@ -35,15 +35,10 @@ score    MONEY_FROM_MISSP   1.5
 
 meta     MONEY_FORM       LOTS_OF_MONEY && __FILL_THIS_FORM
 describe MONEY_FORM       Lots of money if you fill out a form
-score    MONEY_FORM       1.5
+score    MONEY_FORM       3.0
 
 #meta     MONEY_ACCOUNT    LOTS_OF_MONEY && __YOUR_ACCOUNT
 #describe MONEY_ACCOUNT    Lots of money to your account
-
-# Replace __FRAUD_DBI in the ADVANCE_FEE rules (testing)
-meta MONEY_ADVANCE_FEE_2 (__FRAUD_KJV + __FRAUD_IRJ + __FRAUD_NEB + __FRAUD_XJR + __FRAUD_EZY + __FRAUD_ZFJ + __FRAUD_KDT + __FRAUD_BGP + __FRAUD_FBI + __FRAUD_JBU + __FRAUD_JYG + __FRAUD_XVW + __FRAUD_SNT + __FRAUD_LTX + __FRAUD_MCQ + __FRAUD_PVN + __FRAUD_FVU + __FRAUD_CKF + __FRAUD_FCW + __FRAUD_MQO + __FRAUD_TCC + __FRAUD_GBW + __FRAUD_NRG + __FRAUD_RLX + __FRAUD_AXF + __FRAUD_THJ + __FRAUD_YQV + __FRAUD_YJA + __FRAUD_YPO + __FRAUD_UOQ + LOTS_OF_MONEY + __FRAUD_BEP + __FRAUD_DPR + __FRAUD_QXX + __FRAUD_QFY + __FRAUD_PTS + __FRAUD_TDP + __FRAUD_GAN + __FRAUD_IPK + __FRAUD_AON + __FRAUD_WNY + __FRAUD_AUM + __FRAUD_WFC + __FRAUD_YWW + __FRAUD_ULK + __FRAUD_IOU + __FRAUD_JNB + __FRAUD_IRT + __FRAUD_ETX + __FRAUD_WDR + __FRAUD_UUY + __FRAUD_MLY > 2)
-meta MONEY_ADVANCE_FEE_3 (__FRAUD_KJV + __FRAUD_IRJ + __FRAUD_NEB + __FRAUD_XJR + __FRAUD_EZY + __FRAUD_ZFJ + __FRAUD_KDT + __FRAUD_BGP + __FRAUD_FBI + __FRAUD_JBU + __FRAUD_JYG + __FRAUD_XVW + __FRAUD_SNT + __FRAUD_LTX + __FRAUD_MCQ + __FRAUD_PVN + __FRAUD_FVU + __FRAUD_CKF + __FRAUD_FCW + __FRAUD_MQO + __FRAUD_TCC + __FRAUD_GBW + __FRAUD_NRG + __FRAUD_RLX + __FRAUD_AXF + __FRAUD_THJ + __FRAUD_YQV + __FRAUD_YJA + __FRAUD_YPO + __FRAUD_UOQ + LOTS_OF_MONEY + __FRAUD_BEP + __FRAUD_DPR + __FRAUD_QXX + __FRAUD_QFY + __FRAUD_PTS + __FRAUD_TDP + __FRAUD_GAN + __FRAUD_IPK + __FRAUD_AON + __FRAUD_WNY + __FRAUD_AUM + __FRAUD_WFC + __FRAUD_YWW + __FRAUD_ULK + __FRAUD_IOU + __FRAUD_JNB + __FRAUD_IRT + __FRAUD_ETX + __FRAUD_WDR + __FRAUD_UUY + __FRAUD_MLY > 3)
-meta MONEY_ADVANCE_FEE_4 (__FRAUD_KJV + __FRAUD_IRJ + __FRAUD_NEB + __FRAUD_XJR + __FRAUD_EZY + __FRAUD_ZFJ + __FRAUD_KDT + __FRAUD_BGP + __FRAUD_FBI + __FRAUD_JBU + __FRAUD_JYG + __FRAUD_XVW + __FRAUD_SNT + __FRAUD_LTX + __FRAUD_MCQ + __FRAUD_PVN + __FRAUD_FVU + __FRAUD_CKF + __FRAUD_FCW + __FRAUD_MQO + __FRAUD_TCC + __FRAUD_GBW + __FRAUD_NRG + __FRAUD_RLX + __FRAUD_AXF + __FRAUD_THJ + __FRAUD_YQV + __FRAUD_YJA + __FRAUD_YPO + __FRAUD_UOQ + LOTS_OF_MONEY + __FRAUD_BEP + __FRAUD_DPR + __FRAUD_QXX + __FRAUD_QFY + __FRAUD_PTS + __FRAUD_TDP + __FRAUD_GAN + __FRAUD_IPK + __FRAUD_AON + __FRAUD_WNY + __FRAUD_AUM + __FRAUD_WFC + __FRAUD_YWW + __FRAUD_ULK + __FRAUD_IOU + __FRAUD_JNB + __FRAUD_IRT + __FRAUD_ETX + __FRAUD_WDR + __FRAUD_UUY + __FRAUD_MLY > 4)
 
 
 body     LOTTO_WINNINGS   /(?:claim|transfer(?:\s\w+)?)\s(?:your|of|the|this)\s(?:win+ings?|money|(?:cash\s)?prize|award)/i
@@ -80,8 +75,12 @@ header   LOTTO_AGENT_RPLY Reply-To =~ /(?:claim(?:s|ing)?(?:\sprocessing)?|fiduc
 describe LOTTO_AGENT_RPLY Claims Agent
 score    LOTTO_AGENT_RPLY 0.50
 
-body     __LOTTO_ADMITS_1 /\b(?:on-?line|e-?mail|ballot|(?:inter)?national|state|(?:UK|euro)[- ]?(?:mil+ions?|PW)|Canada|Microsoft|MSN|internet|mega|jackpot|this)(?:\s\w+)?\s(?:lot(?:to|tery|erie)|sweepstake)/i
-body     __LOTTO_ADMITS_2 /\b(?:lot(?:to|tery|erie)|sweepstakes)\s(?:inter)?na[tz]ional/i
+# incorporated these
+# body    HK_LOTTO                /(?:(?:(?:inter)?national|foundation|mercato|univers|euro million|e-?mail|euro-pw|bill gates|swiss) ?lo(?:tto|ttery|terie)|coca.?cola games|mega jackpot|staatsloterij|ukonline game promo|loto prestige|(?:fran.aise|e-?mail) sweepstakes|loterie (?:internationale|cristal|am.ricaine|coca.?cola|euromillions)|(?:computer|internet) ballot|foundation internationale billgateslottery award|(?:promotional|online) draws?|lottery (?:fiduciary|department))/i
+# body            __KAM_LOTTO5    /(freelotto group|Royal Heritage Lottery|UK National (Online)? Lottery|U\.?K\.? Grand Promotions|Lottery Department UK|Euromillion Loteria|Luckyday International Lottery|International Lottery)/is
+
+body     __LOTTO_ADMITS_1 /\b(?:on-?line|e-?mail|ballot|(?:inter)?national|state|(?:UK|euro)[- ]?(?:mil+ions?|PW)|Canada|Microsoft|MSN|internet|mega|jackpot|Royal Heritage|foundation|mercato|univers|staatsloterij|bill\s?gates|swiss|this)(?:\s\w+)?\s?(?:lot(?:to|tery|eri[ea])|sweepstake)/i
+body     __LOTTO_ADMITS_2 /\b(?:free)?(?:lot(?:to|tery|erie)|sweepstakes)\s(?:(?:inter)?na[tz]ional|department|group|award)/i
 uri      __LOTTO_ADMITS_3 /lottery/i
 meta     LOTTO_ADMITS     __LOTTO_ADMITS_1 || __LOTTO_ADMITS_2 || __LOTTO_ADMITS_3
 describe LOTTO_ADMITS     Admits to being a lottery
@@ -115,7 +114,7 @@ meta     MONEY_DEAL       LOTS_OF_MONEY && (__DEAL + __HUSH_HUSH + PCT_FOR_YOU +
 describe MONEY_DEAL       Lots of money in a suspicious deal
 score    MONEY_DEAL       1.5
 
-body     __ATM_CARD       /\b(?:your|the)\satm(?:\smaster)?\scard/i
+body     __ATM_CARD       /\b(?:your|the|visa)\s(?:atm|debit)(?:\smaster)?\scard/i
 meta     MONEY_ATM        LOTS_OF_MONEY && __ATM_CARD
 describe MONEY_ATM        Lots of money on an ATM card
 score    MONEY_ATM        1.5
@@ -178,7 +177,7 @@ score    SUM_OF_FUND      1.0
 
 body     __BENEFICIARY    /\bbeneficiary\b/i
 body     __DIPLOMATIC     /\bdiplomatic\b/i
-body     __FEES           /\b(?:security|safe\w*|courier|registration|pay|paid|up-?front|processing)[\s\w]{1,15}\s(?:fee|charge)s?\b/i 
+body     __FEES           /\b(?:security|safe\w*|courier|registration|pay|paid|up-?front|processing|delivery)[\s\w]{1,15}\s(?:fee|charge)s?\b/i 
 body     __LUCKY_WINNER   /\blucky\swin+ers?\b/i
 body     __YOUR_FUND      /\byour\sfund\b/i
 body     __IVORY_COAST    /\b(?:Cote\s?D'Ivoire|Ivory\sCoast)\b/i

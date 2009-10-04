@@ -34,11 +34,11 @@ endif
 #header         MUA_ONE_WORD       X-Mailer =~ /^[A-Za-z][a-z]*$/
 #describe       MUA_ONE_WORD       Single word X-Mailer: not CamelCase
 
-body           DEAR_BENEFICIARY		/^\s?(?:Dear\s|At+(?:ention|n):\s?)Beneficiary\b/i
+body           DEAR_BENEFICIARY		/^\s?(?:Dear\s|At+(?:ention|n):?\s?)Beneficiary\b/i
 describe       DEAR_BENEFICIARY		Dear Beneficiary:
 score          DEAR_BENEFICIARY		2.0
 
-body           DEAR_EMAIL_USER		/^\s?(?:Dear\s|Attention:\s?)(?:E|Web)-?mail\sUser\b/i
+body           DEAR_EMAIL_USER		/^\s?(?:Dear\s|Attention:?\s?)(?:E|Web)-?mail\s(?:account\s)?User\b/i
 describe       DEAR_EMAIL_USER		Dear Email User:
 score          DEAR_EMAIL_USER		3.0
 
@@ -157,11 +157,12 @@ describe       SUBJ_RE_CLNCLN      Subject RE::
 uri            MANY_SUBDOM         m;^https?://(?:[^\./]{1,30}\.){6};
 describe       MANY_SUBDOM         Lots and lots of subdomain parts in a URI
 
-# 8-letter .cn domain, per Warren Togami
+# 8-character .cn domain, per Warren Togami
 #uri            CN_EIGHT            m;^https?://(?:[^./]+\.)*[^./]{8}\.cn\b;
-uri            CN_EIGHT            m;^https?://(?:[^./]+\.)*\w{8}\.cn\b;
+uri            CN_EIGHT            m;^https?://(?:[^./]+\.)*[-\w]{8}\.cn\b;
 describe       CN_EIGHT            .cn URI with eight-character domain name
 score          CN_EIGHT            0.10
+tflags         CN_EIGHT            nopublish
 
 # Testing for WT
 # from http://www.apnic.net/db/ranges.html at 20091002, meta bits added 20090930
@@ -171,5 +172,6 @@ describe   __RCVD_VIA_APNIC   Received through a relay in Asia/Pacific Network
 
 meta       CN_EIGHT_NOAPNIC   CN_EIGHT && !__RCVD_VIA_APNIC && !ALL_TRUSTED
 describe   CN_EIGHT_NOAPNIC   .cn URI exactly 8 characters long, excluding APNIC
+tflags     CN_EIGHT_NOAPNIC   nopublish
 
 
