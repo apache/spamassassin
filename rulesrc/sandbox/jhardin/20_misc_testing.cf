@@ -49,8 +49,8 @@ describe       URI_NUMERIC_CCTLD     CCTLD URI with multiple numeric subdomains
 
 
 # From should have whitespace between the comment and the address
-#header         FROM_MISSPACED        From =~ /^\s*"[^"]*"</
-header         FROM_MISSPACED        From =~ /\S+<\w+/
+header         FROM_MISSPACED        From =~ /^\s*"[^"]*"</
+#header         FROM_MISSPACED        From =~ /\S+<\w+/		# way poor S/O
 describe       FROM_MISSPACED        From: missing whitespace
 
 # To the same
