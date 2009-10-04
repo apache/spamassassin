@@ -1,0 +1,25 @@
+# https://issues.apache.org/SpamAssassin/show_bug.cgi?id=6212
+
+header __RCVD_IN_HOSTKARMA eval:check_rbl('HOSTKARMA-lastexternal','hostkarma.junkemailfilter.com.')
+describe __RCVD_IN_HOSTKARMA Sender listed in JunkEmailFilter HostKarma
+tflags __RCVD_IN_HOSTKARMA net
+
+header RCVD_IN_HOSTKARMA_WL eval:check_rbl_sub('HOSTKARMA-lastexternal', '127.0.0.1')
+describe RCVD_IN_HOSTKARMA_WL Sender listed in HOSTKARMA-WHITE, http://hostkarma.junkemailfilter.com
+tflags RCVD_IN_HOSTKARMA_WL net nice
+# score RCVD_IN_HOSTKARMA_WL 0 -0.01 0 -0.01
+
+header RCVD_IN_HOSTKARMA_BL eval:check_rbl_sub('HOSTKARMA-lastexternal', '127.0.0.2')
+describe RCVD_IN_HOSTKARMA_BL Sender listed in HOSTKARMA-BLACK, http://hostkarma.junkemailfilter.com
+tflags RCVD_IN_HOSTKARMA_BL net
+# score RCVD_IN_HOSTKARMA_BL 0 2.0 0 2.0
+ 
+header RCVD_IN_HOSTKARMA_YL eval:check_rbl_sub('HOSTKARMA-lastexternal', '127.0.0.3')
+describe RCVD_IN_HOSTKARMA_YL Sender listed in HOSTKARMA-YELLOW, http://hostkarma.junkemailfilter.com
+tflags RCVD_IN_HOSTKARMA_YL net nice
+# score RCVD_IN_HOSTKARMA_YL 0 -0.01 0 -0.01
+
+header RCVD_IN_HOSTKARMA_BR eval:check_rbl_sub('HOSTKARMA-lastexternal', '127.0.0.4')
+describe RCVD_IN_HOSTKARMA_BR Sender listed in HOSTKARMA-BROWN, http://hostkarma.junkemailfilter.com
+tflags RCVD_IN_HOSTKARMA_BR net
+# score RCVD_IN_HOSTKARMA_BR 0 1.0 0 1.0
