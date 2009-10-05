@@ -134,7 +134,8 @@ body     __WILL_LEGAL     /\b(?:codicil|last\stestament|probate|executor)\b/i
 body     __EARLY_DEMISE   /\buntimely\sdeath\b/i
 body     __WIDOW          /\bwidow(?:e[rd])'?s?\b/i
 body     __MY_FORTUNE     /\b(?:my|his|her)\s(?:fortune|heritage)\b/i
-meta     MONEY_INHERIT    LOTS_OF_MONEY && (__YOU_INHERIT || __I_INHERIT || __THEY_INHERIT || __NOT_DEAD_YET || __I_WILL_YOU || __NEXT_OF_KIN || __EX_CUSTOMER || __DECEASED || __SURVIVORS || __DEAD_PARENT || __DORMANT_ACCT || __WILL_LEGAL || __EARLY_DEMISE || __WIDOW || __MY_FORTUNE > 1)
+body     __DIED_IN        /\bdied\sin\b/i
+meta     MONEY_INHERIT    LOTS_OF_MONEY && (__YOU_INHERIT + __I_INHERIT + __THEY_INHERIT + __NOT_DEAD_YET + __I_WILL_YOU + __NEXT_OF_KIN + __EX_CUSTOMER + __DECEASED + __SURVIVORS + __DEAD_PARENT + __DORMANT_ACCT + __WILL_LEGAL + __EARLY_DEMISE + __WIDOW + __MY_FORTUNE  + __DIED_IN + __DEAL > 1)
 describe MONEY_INHERIT    Lots of money from a dead guy
 score    MONEY_INHERIT    1.5
 
