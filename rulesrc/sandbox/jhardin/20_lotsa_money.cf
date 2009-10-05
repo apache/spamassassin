@@ -103,6 +103,8 @@ body     __LUCRATIVE      /\blucrative\b/i
 body     __YOU_ASSIST     /\byour\sassistance\b/i
 body     __OUR_BEHALF     /\bon\s(?:my|our)\sbehalf\b/i
 body     __AGREED_RATIO   /\bagreed\s(?:ratios?|percent\w+)\b/i
+body     __SHARE_IT       /\bshare\sthe\s(?:proceeds|funds?|money|balance|account)\b/i
+body     __DESTROY_ME     /\bdestroy\sm[ey]\b/i
 
 body     __PCT_FOR_YOU_1  /\b(?:\d\d|ten|[a-z]+teen|(?:twen|thir|fou?r)ty(?:-?[a-z]+)?)\s?(?:%|percent)[\s)]+(?:of\s[\w\s]{0,35}?)?(?:for|to|as)\syour?/i
 body     __PCT_FOR_YOU_2  /\b(?:give|offer)\syou\s(?:\d\d|en|[a-z]+teen|(?:twen|thir|fou?r)ty(?:-?[a-z]+)?)\s?(?:%|percent)/i
@@ -110,11 +112,11 @@ body     __PCT_FOR_YOU_3  /\byour?\s(?!can)[\w\s]{6,20}?(?:(?:share|entitle|assi
 meta     PCT_FOR_YOU      __PCT_FOR_YOU_1 || __PCT_FOR_YOU_2 || __PCT_FOR_YOU_3
 describe PCT_FOR_YOU      X% for you
 
-meta     MONEY_DEAL       LOTS_OF_MONEY && (__DEAL + __HUSH_HUSH + PCT_FOR_YOU + __FRAUD_IOU + __FRAUD_JYG + __IS_LEGAL + __NOT_SCAM + __BACK_SCRATCH + __LUCRATIVE + __YOU_ASSIST + __OUR_BEHALF + __AGREED_RATIO > 2)
+meta     MONEY_DEAL       LOTS_OF_MONEY && (__DEAL + __HUSH_HUSH + PCT_FOR_YOU + __FRAUD_IOU + __FRAUD_JYG + __IS_LEGAL + __NOT_SCAM + __BACK_SCRATCH + __LUCRATIVE + __YOU_ASSIST + __OUR_BEHALF + __AGREED_RATIO + __SHARE_IT + __DESTROY_ME > 2)
 describe MONEY_DEAL       Lots of money in a suspicious deal
 score    MONEY_DEAL       1.5
 
-body     __ATM_CARD       /\b(?:your|the|visa)\s(?:atm|debit)(?:\smaster)?\scard/i
+body     __ATM_CARD       /\b(?:your|the|this)\s(?:atm|debit)(?:\smaster)?\scard/i
 meta     MONEY_ATM        LOTS_OF_MONEY && __ATM_CARD
 describe MONEY_ATM        Lots of money on an ATM card
 score    MONEY_ATM        1.5
@@ -135,7 +137,9 @@ body     __EARLY_DEMISE   /\buntimely\sdeath\b/i
 body     __WIDOW          /\bwidow(?:e[rd])'?s?\b/i
 body     __MY_FORTUNE     /\b(?:my|his|her)\s(?:fortune|heritage)\b/i
 body     __DIED_IN        /\bdied\sin\b/i
-meta     MONEY_INHERIT    LOTS_OF_MONEY && (__YOU_INHERIT + __I_INHERIT + __THEY_INHERIT + __NOT_DEAD_YET + __I_WILL_YOU + __NEXT_OF_KIN + __EX_CUSTOMER + __DECEASED + __SURVIVORS + __DEAD_PARENT + __DORMANT_ACCT + __WILL_LEGAL + __EARLY_DEMISE + __WIDOW + __MY_FORTUNE  + __DIED_IN + __DEAL > 1)
+body     __INHERIT_PMT    /\binheritance\spayment\s/i
+
+meta     MONEY_INHERIT    LOTS_OF_MONEY && (__YOU_INHERIT + __I_INHERIT + __THEY_INHERIT + __NOT_DEAD_YET + __I_WILL_YOU + __NEXT_OF_KIN + __EX_CUSTOMER + __DECEASED + __SURVIVORS + __DEAD_PARENT + __DORMANT_ACCT + __WILL_LEGAL + __EARLY_DEMISE + __WIDOW + __MY_FORTUNE  + __DIED_IN + __INHERIT_PMT + __DEAL > 1)
 describe MONEY_INHERIT    Lots of money from a dead guy
 score    MONEY_INHERIT    1.5
 
