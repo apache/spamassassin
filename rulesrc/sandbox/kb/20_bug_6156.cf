@@ -1,5 +1,5 @@
 
-header   RCVD_IN_PSBL  eval:check_rbl('psbl', 'psbl.surriel.com.')
+header   RCVD_IN_PSBL  eval:check_rbl('psbl-lastexternal', 'psbl.surriel.com.')
 describe RCVD_IN_PSBL  Received via a relay in PSBL
 tflags   RCVD_IN_PSBL  net
 # score    RCVD_IN_PSBL  0 1.00 0 1.00
