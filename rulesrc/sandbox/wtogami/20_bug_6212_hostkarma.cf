@@ -16,7 +16,7 @@ tflags RCVD_IN_HOSTKARMA_BL net
  
 header RCVD_IN_HOSTKARMA_YL eval:check_rbl_sub('HOSTKARMA-lastexternal', '127.0.0.3')
 describe RCVD_IN_HOSTKARMA_YL Sender listed in HOSTKARMA-YELLOW, http://hostkarma.junkemailfilter.com
-tflags RCVD_IN_HOSTKARMA_YL net nice
+tflags RCVD_IN_HOSTKARMA_YL net nice nopublish
 # score RCVD_IN_HOSTKARMA_YL 0 -0.01 0 -0.01
 
 header RCVD_IN_HOSTKARMA_BR eval:check_rbl_sub('HOSTKARMA-lastexternal', '127.0.0.4')
