@@ -149,7 +149,7 @@ void init_data()
 #ifdef USE_VARIABLE_MUTATIONS
   MPI_Bcast(&mutation_rate_modifier, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
 #endif
-  MPI_Bcast(is_mutatable, num_scores, MPI_CHAR, 0, MPI_COMM_WORLD);
+  MPI_Bcast(is_mutable, num_scores, MPI_CHAR, 0, MPI_COMM_WORLD);
   MPI_Bcast(range_lo, num_scores, MPI_DOUBLE, 0, MPI_COMM_WORLD);
   MPI_Bcast(range_hi, num_scores, MPI_DOUBLE, 0, MPI_COMM_WORLD);
   MPI_Bcast(bestscores, num_scores, MPI_DOUBLE, 0, MPI_COMM_WORLD);
@@ -294,7 +294,7 @@ int main(int argc, char **argv) {
 	 for(p=0; p<pop_size; p++) {
 
 #ifndef USE_SCORE_RANGES
-	 if (is_mutatable[i]) {
+	 if (is_mutable[i]) {
             if(bestscores[i] > SCORE_CAP) bestscores[i] = SCORE_CAP;
 	     else if(bestscores[i] < NEG_SCORE_CAP) bestscores[i] =
 						      NEG_SCORE_CAP;
