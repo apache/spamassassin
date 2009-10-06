@@ -67,6 +67,10 @@ body     LOTTO_DEPT       /\b(?:claim(?:s|ing)?(?:\sprocessing)?|fiducia\w+|reim
 describe LOTTO_DEPT       Claims Department
 score    LOTTO_DEPT       0.50
 
+body     LOTTO_URI       /(?:claim(?:s|ing)?(?:[-_]?processing)?|fiducia\w+|reimbursement|(?:international|foreign)?[-_]?remittance)[-_]?(?:department|dept|unit|group|committee|office|agent|manager|secretary)/i
+describe LOTTO_URI       Claims Department
+score    LOTTO_URI       0.50
+
 header   LOTTO_AGENT_FM   From =~ /(?:claim(?:s|ing)?(?:\sprocessing)?|fiducia\w+|dispatch|reimbursement|prize\stransfer|(?:international|foreign)\sremittance)[\s_]?(?:agent|manager|officer|secretary)/i
 describe LOTTO_AGENT_FM   Claims Agent
 score    LOTTO_AGENT_FM   0.50
@@ -185,8 +189,10 @@ body     __DIPLOMATIC     /\bdiplomatic\b/i
 body     __FEES           /\b(?:security|safe\w*|courier|registration|pay|paid|up-?front|processing|delivery)[\s\w]{1,15}\s(?:fee|charge)s?\b/i 
 body     __LUCKY_WINNER   /\blucky\swin+ers?\b/i
 body     __YOUR_FUND      /\byour\sfund\b/i
-body     __IVORY_COAST    /\b(?:Cote\s?D'Ivoire|Ivory\sCoast)\b/i
 body     __NIGERIA        /\bnigeria\b/i
+body     __IVORY_COAST    /\b(?:Cote\s?D'Ivoire|Ivory\sCoast)\b/i
+body     __BURKINA_FASO   /\bburkina\s?faso\b/i
+meta     __AFRICAN_STATE  (__NIGERIA || __IVORY_COAST || __BURKINA_FASO)
 body     __YOUR_PERM      /\byour\spermission\b/i
 body     __CONTACT_YOU    /\bcontacting\syou\b/i
 body     __FOUND_YOU      /\b(?:I|we)\sfound\syour?\b/i
