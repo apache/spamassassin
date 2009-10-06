@@ -10,7 +10,7 @@ describe       CN_EIGHT            .cn URI with eight-character domain name
 
 meta       CN_EIGHT_NOAPNIC   CN_EIGHT && !__RCVD_VIA_APNIC && !ALL_TRUSTED
 describe   CN_EIGHT_NOAPNIC   .cn URI 8 character domain, excluding APNIC
-#score      CN_EIGHT_NOAPNIC  0 1.0 0 1.0
+#score      CN_EIGHT_NOAPNIC  1.0
 
 # 20091006: 7-character .cn domain
 uri            CN_SEVEN            m;^https?://(?:[^./]+\.)*[-\w]{7}\.cn\b;
@@ -19,4 +19,4 @@ describe       CN_SEVEN            .cn URI with seven-character domain name
 
 meta       CN_SEVEN_NOAPNIC   CN_SEVEN && !__RCVD_VIA_APNIC && !ALL_TRUSTED
 describe   CN_SEVEN_NOAPNIC   .cn URI exactly 7 characters long, excluding APNIC
-#score      CN_SEVEN_NOAPNIC  0 1.0 0 1.0
+#score      CN_SEVEN_NOAPNIC  1.0
