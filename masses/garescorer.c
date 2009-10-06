@@ -10,6 +10,7 @@
 #include "pgapack.h"
 
 #include <unistd.h>
+#include <sys/time.h>
 #include <math.h>
 #include "tmp/scores.h"
 #include "tmp/tests.h"
@@ -64,6 +65,9 @@ int no_change_val = 300;
 int pop_size = 50;
 int replace_num = 33;
 int maxiter = 30000;
+
+struct timeval t0;
+int t0_iter;
 
 #ifdef USE_VARIABLE_MUTATIONS
 double mutation_rate = 0.03;
@@ -175,6 +179,8 @@ int main(int argc, char **argv) {
     PGAContext *ctx;
     int i,p;
     int arg;
+    struct timezone tzp;
+    t0.tv_sec = t0.tv_usec = 0;
 
 #ifdef USE_MPI
     MPI_Init(&argc, &argv);
@@ -306,6 +312,7 @@ int main(int argc, char **argv) {
      }
 #endif /* ! USE_VARIABLE_MUTATIONS */
 
+     gettimeofday(&t0, &tzp);
      PGARun(ctx, evaluate);
 
      PGADestroy(ctx);
@@ -1023,7 +1030,22 @@ void showSummary(PGAContext *ctx)
 #endif
       }
 #endif
+
+      { struct timeval t1;
+	struct timezone tzp;
+	if(gettimeofday(&t1, &tzp) == 0)
+	{
+	  double dt = (t1.tv_sec + t1.tv_usec * 1.0e-6) -
+	              (t0.tv_sec + t0.tv_usec * 1.0e-6);
+	  int iter = PGAGetGAIterValue(ctx);
+	  printf("Performance: %.3f iter/s\n", (iter-t0_iter)/dt);
+	  t0.tv_sec = t1.tv_sec; t0.tv_usec = t0.tv_usec;
+	  t0_iter = iter;
+	}
+      }
+
       dump(stdout);
+
     }
     else if(0 == PGAGetGAIterValue(ctx) % 5)
     {
