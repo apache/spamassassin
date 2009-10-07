@@ -66,8 +66,8 @@ int pop_size = 50;
 int replace_num = 33;
 int maxiter = 30000;
 
-struct timeval t0;
-int t0_iter;
+struct timeval t0 = { 0, 0 };
+int t0_iter = 0;
 
 #ifdef USE_VARIABLE_MUTATIONS
 double mutation_rate = 0.03;
@@ -179,8 +179,6 @@ int main(int argc, char **argv) {
     PGAContext *ctx;
     int i,p;
     int arg;
-    struct timezone tzp;
-    t0.tv_sec = t0.tv_usec = 0;
 
 #ifdef USE_MPI
     MPI_Init(&argc, &argv);
@@ -312,7 +310,7 @@ int main(int argc, char **argv) {
      }
 #endif /* ! USE_VARIABLE_MUTATIONS */
 
-     gettimeofday(&t0, &tzp);
+     (void)gettimeofday(&t0, (struct timezone *)NULL);
      PGARun(ctx, evaluate);
 
      PGADestroy(ctx);
@@ -1032,15 +1030,14 @@ void showSummary(PGAContext *ctx)
 #endif
 
       { struct timeval t1;
-	struct timezone tzp;
-	if(gettimeofday(&t1, &tzp) == 0)
-	{
+	if (gettimeofday(&t1, (struct timezone *)NULL) == 0) {
 	  double dt = (t1.tv_sec + t1.tv_usec * 1.0e-6) -
 	              (t0.tv_sec + t0.tv_usec * 1.0e-6);
 	  int iter = PGAGetGAIterValue(ctx);
-	  printf("Performance: %.3f iter/s\n", (iter-t0_iter)/dt);
-	  t0.tv_sec = t1.tv_sec; t0.tv_usec = t0.tv_usec;
-	  t0_iter = iter;
+	  if (dt < 1e-6) dt = 1e-6;
+	  printf("Performance: %.3f iterations/s, iteration no. %d\n",
+	         (iter-t0_iter)/dt, iter);
+	  t0.tv_sec = t1.tv_sec; t0.tv_usec = t0.tv_usec; t0_iter = iter;
 	}
       }
 
