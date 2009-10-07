@@ -91,7 +91,15 @@ ln -s $LOGDIR/SPBASE/spam-test.log .
 ln -s $LOGDIR/NSBASE/ham-test.log .
 
 # try to find number of processors
-numcpus=`cpucount 2>/dev/null || egrep -c '^processor\b' /proc/cpuinfo 2>/dev/null || echo 1`
+ostype=`uname`
+if [ $ostype = "FreeBSD" ]; then
+  numcpus=`/sbin/sysctl -n kern.smp.cpus`
+elif [ $ostype = "SunOS" ]; then
+  numcpus=`/usr/sbin/psrinfo | wc -l`
+else
+  numcpus=`cpucount 2>/dev/null || egrep -c '^processor\b' /proc/cpuinfo 2>/dev/null || echo 1`
+fi
+if [ ${numcpus:=0} -le 0 ]; then numcpus=1; fi
 
 echo "[Generating GA]"
 # Generate GA with full logs
@@ -105,7 +113,8 @@ pwd
 date
 
 # TODO: use -f $FPRATE instead of -b $HAM_PREFERENCE
-./garescorer -b $HAM_PREFERENCE -e $EPOCHS -t $THRESHOLD || exit $?
+time ./garescorer -b $HAM_PREFERENCE -e $EPOCHS -t $THRESHOLD || exit $?
+date
 
 # POST-GA COMMANDS:
 
