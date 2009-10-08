@@ -184,7 +184,7 @@ body     SUM_OF_FUND      /\bsum\sof\s(?:amount|fund)/i
 describe SUM_OF_FUND      Money by any other name smells of greed
 score    SUM_OF_FUND      1.0
 
-body     __BENEFICIARY    /\bbeneficiary\b/i
+body     __BENEFICIARY    /\bbeneficiar(?:y|ies)\b/i
 body     __DIPLOMATIC     /\bdiplomatic\b/i
 body     __FEES           /\b(?:security|safe\w*|courier|registration|pay|paid|up-?front|processing|delivery)[\s\w]{1,15}\s(?:fee|charge)s?\b/i 
 body     __LUCKY_WINNER   /\blucky\swin+ers?\b/i
@@ -197,6 +197,9 @@ body     __YOUR_PERM      /\byour\spermission\b/i
 body     __CONTACT_YOU    /\bcontacting\syou\b/i
 body     __FOUND_YOU      /\b(?:I|we)\sfound\syour?\b/i
 body     __INVEST_MONEY   /\binvest\sthis\smoney\b/i
+
+# update UNCLAIMED_MONEY in rules/20_phrases.cf
+body     __UNCLAIMED      /\bunclaimed\s(?:assets?|accounts?|mon(?:ey|ies)|balance|funds?|prizes?|rewards?)\b/i
 
 # simplification, talking about unspecified lots of money
 body     __MILLIONS       /\bmillions\sof\s(?:dollar|euro|pound)/i
