@@ -25,8 +25,9 @@ extern int num_spam, num_ham;	/* in tmp/tests.h */
 
 #define USE_VARIABLE_MUTATIONS
 
-/* Lamarkian evolution? */
-#define LAMARK
+/* Lamarckian evolution? (Jean-Baptiste Lamarck) */
+/* inheritance of acquired characters / soft inheritance / Lamarckism */
+#define LAMARCK
 
 double evaluate(PGAContext *, int, int);
 int    GetIntegerParameter(char *query);
@@ -36,7 +37,7 @@ void showSummary(PGAContext *ctx);
 
 #if defined(USE_VARIABLE_MUTATIONS) || (! defined(USE_SCORE_RANGES))
 int    myMutation(PGAContext *, int, int, double);
-# ifdef LAMARK
+# ifdef LAMARCK
 int adapt(PGAContext *, int, int, int, int,int);
 # endif
 #endif
@@ -72,7 +73,7 @@ int t0_iter = 0;
 #ifdef USE_VARIABLE_MUTATIONS
 double mutation_rate = 0.03;
 double base_mutation_rate = 0.03;
-#ifdef LAMARK
+#ifdef LAMARCK
 int adapt_yn = 0;
 int adapt_ny = 0;
 #endif
@@ -169,7 +170,7 @@ load_scores_into_lookup(PGAContext *ctx, int p, int pop)
   int i;
   for (i = 0; i < num_mutable; i++) {
     lookup[i] = PGAGetRealAllele(ctx, p, pop, i); 
-#ifdef LAMARK
+#ifdef LAMARCK
     yn_hit[i] = ny_hit[i] = 0;
 #endif
   }
@@ -327,7 +328,7 @@ int ga_yy,ga_yn,ga_ny,ga_nn;
 int num_mutated = 0;
 int var_mutated = 0;
 int iters_same_passed = 0;
-#ifdef LAMARK
+#ifdef LAMARCK
 int weight_balance;
 int adapt_times = 0;
 int adapt_crossover = 0;
@@ -372,7 +373,7 @@ double score_msg(PGAContext *ctx, int p, int pop, int i)
       ga_yn += tests_count[i];
       ynscore += msg_score*tests_count[i];
       /* Each false negative means that ynscore += less than 5 */
-#ifdef LAMARK
+#ifdef LAMARCK
       for(j=num_tests_hit[i]-1; j>=0; j--)
 	yn_hit[tests_hit[i][j]] = 1;
 #endif
@@ -386,7 +387,7 @@ double score_msg(PGAContext *ctx, int p, int pop, int i)
       ga_ny += tests_count[i];
       nyscore += msg_score*tests_count[i];
       /* Each false positive means nyscore += more than 5 */
-#ifdef LAMARK
+#ifdef LAMARCK
       for(j=num_tests_hit[i]-1; j>=0; j--)
 	ny_hit[tests_hit[i][j]] = 1;
 #endif
@@ -437,7 +438,7 @@ double evaluate_inner() {
   ynweight = (ga_yn * threshold) - ynscore;
   nyweight = nyscore - (ga_ny * threshold);
   
-#ifdef LAMARK
+#ifdef LAMARCK
   if (ynweight > (nyweight*nybias))
     weight_balance = -1;
   else if (ynweight < (nyweight*nybias))
@@ -469,7 +470,7 @@ double evaluate_inner() {
   }
 }
 
-#ifdef LAMARK
+#ifdef LAMARCK
 int adapt(PGAContext *ctx, int p, int pop, int done_eval, int threshold,
 	  int repeat) {
   double *myscores;
@@ -803,7 +804,7 @@ int myMutation(PGAContext *ctx, int p, int pop, double mr) {
 		    (myscores[i+num_scores] + mutation_noise)/2;
 	      }
 	    } else {
-#ifdef LAMARK
+#ifdef LAMARCK
 	      if (mr < base_mutation_rate) {
 		count = adapt(ctx,p,pop,1,1,0);
 		if (count) {
@@ -830,14 +831,14 @@ int myMutation(PGAContext *ctx, int p, int pop, double mr) {
 		num_worse++;
 	    }
 	  } else {		/* didn't decrease mutation SD */
-#ifdef LAMARK
+#ifdef LAMARCK
 	    if (mr < base_mutation_rate) {
 	      count = adapt(ctx,p,pop,0,1,0);
 	      new_evaluation = evaluate(ctx, p, pop);
 	    }
 #endif
 	    if (new_evaluation > old_evaluation) {
-#ifdef LAMARK
+#ifdef LAMARCK
 	      if ((mr < base_mutation_rate) && count) {
 		count = adapt(ctx,p,pop,1,2,1);
 		if (count) {
@@ -877,7 +878,7 @@ int myMutation(PGAContext *ctx, int p, int pop, double mr) {
 	num_better_same++;
       }
     }
-#ifdef LAMARK
+#ifdef LAMARCK
     else if (mr < base_mutation_rate) {
       count = adapt(ctx,p,pop,1,2,0);
       if (! count)
@@ -1017,7 +1018,7 @@ void showSummary(PGAContext *ctx)
 	  else
 	    last_best = ctx->rep.Best;
 	}
-#ifdef LAMARK
+#ifdef LAMARCK
 	printf("\n");
 	printf("Adapt (t, fneg, fneg_add, fpos, fpos_add): %d %d %d %d %d\n",
 	       adapt_times,adapt_yn,adapt_fn_add,adapt_ny,adapt_fp_add);
@@ -1123,7 +1124,7 @@ void Crossover(PGAContext *ctx, int p1, int p2, int pop1, int t1, int t2,
     int i;
     double *parent1, *parent2, *child1, *child2;
     double pu;
-#ifdef LAMARK
+#ifdef LAMARCK
     double parent1_eval, parent2_eval, child1_eval, child2_eval;
 #endif
 
@@ -1197,7 +1198,7 @@ void Crossover(PGAContext *ctx, int p1, int p2, int pop1, int t1, int t2,
       child2[i+num_scores] = parent2[i+num_scores];
     }
 
-#ifdef LAMARK
+#ifdef LAMARCK
     if ((PGAGetMutationAndCrossoverFlag(ctx) == PGA_FALSE) &&
 	(mutation_rate < base_mutation_rate) &&
 	(PGAGetEvaluationUpToDateFlag(ctx, p1, pop1) == PGA_TRUE) &&
