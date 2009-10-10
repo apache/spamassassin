@@ -145,7 +145,7 @@ body     __I_WILL_YOU     /\bwill(?:ed)?\s(?:[a-z\s]{0,20}\s(?:fortune|money)\s)
 body     __NEXT_OF_KIN    /\bnext[-\s]of[-\s]kin\b/i
 body     __EX_CUSTOMER    /\b(?:deceased|late)\s(?:client|customer)/i
 body     __DECEASED       /\b(?:the|my)\s(?:deceased|late)\b/i
-body     __SURVIVORS      /\b(?:widow|son|daughter|husband|wife|brother|sister) of (?:the )?late\s\w+\b/i
+body     __SURVIVORS      /\b(?:widow|son|daughter|husband|wife|brother|sister|attorney)\s(?:of|to)\s(?:the\s)?late\s\w+\b/i
 body     __DEAD_PARENT    /\bmy\s(?:deceased|dead)\s(?:father|mother)/i
 body     __DORMANT_ACCT   /\b(?:dormant|abandoned)\saccount/i
 body     __WILL_LEGAL     /\b(?:codicil|last\stestament|probate|executor)\b/i
