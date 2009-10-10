@@ -33,9 +33,13 @@ score    MONEY_FROM_MISSP   1.5
 #meta     MONEY_TO_NO_R    LOTS_OF_MONEY && __TO_NO_ARROWS_R
 #describe MONEY_TO_NO_R    Lots of money and bare, missing or undisclosed To
 
-meta     MONEY_FORM       LOTS_OF_MONEY && __FILL_THIS_FORM
-describe MONEY_FORM       Lots of money if you fill out a form
-score    MONEY_FORM       3.0
+meta     MONEY_FORM        LOTS_OF_MONEY && FILL_THIS_FORM
+describe MONEY_FORM        Lots of money if you fill out a form
+score    MONEY_FORM        3.0
+
+meta     MONEY_SHORT_FORM  LOTS_OF_MONEY && FILL_THIS_FORM_SHORT
+describe MONEY_SHORT_FORM  Lots of money if you fill out a short form
+score    MONEY_SHORT_FORM  2.0
 
 #meta     MONEY_ACCOUNT    LOTS_OF_MONEY && __YOUR_ACCOUNT
 #describe MONEY_ACCOUNT    Lots of money to your account
@@ -59,7 +63,7 @@ body     __YOU_WON_04B    /\bw[io]n\s(?:(?:for|by)\s)?your?\b/i
 meta     LOTTO_YOU_WON_04 __YOU_WON_04A || __YOU_WON_04B
 score    LOTTO_YOU_WON_04 0.10 
 
-body     LOTTO_AGENT      /\b(?:claim(?:s|ing)?(?:\sprocessing)?|fiducia\w+|reimbursement|prize\stransfer|(?:international|foreign)\sremittance)\s?(?:agent|manager|officer|secretary)/i
+body     LOTTO_AGENT      /\b(?:claim(?:s|ing)?(?:\sprocessing)?|fiducia\w+|reimbursement|prize\stransfer|(?:international|foreign)\sremittance|payment)\s?(?:agent|manager|officer|secretary)/i
 describe LOTTO_AGENT      Claims Agent
 score    LOTTO_AGENT      0.50
 
@@ -110,11 +114,19 @@ body     __AGREED_RATIO   /\bagreed\s(?:ratios?|percent\w+)\b/i
 body     __SHARE_IT       /\bshare\sthe\s(?:proceeds|funds?|money|balance|account)\b/i
 body     __DESTROY_ME     /\bdestroy\sm[ey]\b/i
 
-body     __PCT_FOR_YOU_1  /\b(?:\d\d|ten|[a-z]+teen|(?:twen|thir|fou?r)ty(?:-?[a-z]+)?)\s?(?:%|percent)[\s)]+(?:of\s[\w\s]{0,35}?)?(?:for|to|as)\syour?/i
-body     __PCT_FOR_YOU_2  /\b(?:give|offer)\syou\s(?:\d\d|en|[a-z]+teen|(?:twen|thir|fou?r)ty(?:-?[a-z]+)?)\s?(?:%|percent)/i
-body     __PCT_FOR_YOU_3  /\byour?\s(?!can)[\w\s]{6,20}?(?:(?:share|entitle|assist|comp[ea]nsate|reward|renumerate|deduct|account|tage)[\w\s]{1,25}?)?\s(?<!by\s)(?<!up\sto\s)(?:\d\d|en|[a-z]+teen|(?:twen|thir|fou?r)ty(?:-?[a-z]+)?)\s?(?:%|percent)/i
-meta     PCT_FOR_YOU      __PCT_FOR_YOU_1 || __PCT_FOR_YOU_2 || __PCT_FOR_YOU_3
-describe PCT_FOR_YOU      X% for you
+ifplugin Mail::SpamAssassin::Plugin::ReplaceTags
+  replace_tag  PERCENT      \b(?:\d\d|ten|[a-z]+teen|(?:twen|thir|fou?r)ty(?:-?[a-z]+)?)\s?(?:%|percent)
+
+  body     __PCT_FOR_YOU_1  /<PERCENT>[\s)]+(?:of\s[\w\s]{0,35}?)?(?:for|to|as)\syour?/i
+  body     __PCT_FOR_YOU_2  /\b(?:give|offer)\syou\s<PERCENT>/i
+  body     __PCT_FOR_YOU_3  /\byour?\s(?!can)[\w\s]{6,20}?(?:(?:share|entitle|assist|comp[ea]nsate|reward|renumerate|deduct|account|tage)[\w\s]{1,25}?)?\s(?<!by\s)(?<!up\sto\s)<PERCENT>/i
+  body     __PCT_OF_PMTS    /<PERCENT>[\s)]+(?:of\s[\w\s]{0,35}?)?of\s(?:the\s)?(?:payments?|remittances?|chec(?:k|que)s?)/i
+
+  replace_rules  __PCT_FOR_YOU_1 __PCT_FOR_YOU_2 __PCT_FOR_YOU_3 __PCT_OF_PMTS
+
+  meta     PCT_FOR_YOU      __PCT_FOR_YOU_1 || __PCT_FOR_YOU_2 || __PCT_FOR_YOU_3
+  describe PCT_FOR_YOU      X% for you
+endif
 
 meta     MONEY_DEAL       LOTS_OF_MONEY && (__DEAL + __HUSH_HUSH + PCT_FOR_YOU + __FRAUD_IOU + __FRAUD_JYG + __IS_LEGAL + __NOT_SCAM + __BACK_SCRATCH + __LUCRATIVE + __YOU_ASSIST + __OUR_BEHALF + __AGREED_RATIO + __SHARE_IT + __DESTROY_ME > 2)
 describe MONEY_DEAL       Lots of money in a suspicious deal
