@@ -28,6 +28,10 @@ ifplugin Mail::SpamAssassin::Plugin::MIMEHeader
   mimeheader   OBFU_DOC_ATTACH     Content-Type =~ m,application/octet-stream;.+\.(?:doc|rtf)\b,i
   describe     OBFU_DOC_ATTACH     MS Document attachment with generic MIME type
   score        OBFU_DOC_ATTACH     0.25
+
+  mimeheader   OBFU_PDF_ATTACH     Content-Type =~ m,application/octet-stream;.+\.pdf\b,i
+  describe     OBFU_PDF_ATTACH     PDF attachment with generic MIME type
+  score        OBFU_PDF_ATTACH     0.25
 endif
 
 # general case of spample observation
