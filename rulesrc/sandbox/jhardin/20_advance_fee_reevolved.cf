@@ -30,6 +30,9 @@ describe  ADVANCE_FEE_05_NEW  Appears to be advance fee fraud (Nigerian 419)
 
 # if large sums of money are involved...
 
+meta      ADVANCE_FEE_02_NEW_MONEY  LOTS_OF_MONEY && ADVANCE_FEE_02_NEW
+describe  ADVANCE_FEE_02_NEW_MONEY  Advance Fee fraud and lots of money
+
 meta      ADVANCE_FEE_03_NEW_MONEY  LOTS_OF_MONEY && ADVANCE_FEE_03_NEW
 describe  ADVANCE_FEE_03_NEW_MONEY  Advance Fee fraud and lots of money
 
@@ -40,6 +43,9 @@ meta      ADVANCE_FEE_05_NEW_MONEY  LOTS_OF_MONEY && ADVANCE_FEE_05_NEW
 describe  ADVANCE_FEE_05_NEW_MONEY  Advance Fee fraud and lots of money
 
 # if you fill in a form...
+
+meta      ADVANCE_FEE_02_NEW_FORM  FILL_THIS_FORM && ADVANCE_FEE_02_NEW
+describe  ADVANCE_FEE_02_NEW_FORM  Advance Fee fraud and a form
 
 meta      ADVANCE_FEE_03_NEW_FORM  FILL_THIS_FORM && ADVANCE_FEE_03_NEW
 describe  ADVANCE_FEE_03_NEW_FORM  Advance Fee fraud and a form
