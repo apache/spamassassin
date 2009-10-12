@@ -133,9 +133,13 @@ ifplugin Mail::SpamAssassin::Plugin::MIMEHeader
 endif
 
 ifplugin Mail::SpamAssassin::Plugin::FreeMail
-  meta         RVW_ATTCH_FREEMAIL   (__PLS_REVIEW || __DLND_ATTACH) && (__DOC_ATTACH || __PDF_ATTACH) && (FREEMAIL_FROM || FREEMAIL_REPLYTO)
-  describe     RVW_ATTCH_FREEMAIL   Please review attachment, from freemail
-  score        RVW_ATTCH_FREEMAIL   1.0
+  meta         FREEMAIL_DOC_PDF     (__DOC_ATTACH || __PDF_ATTACH) && (FREEMAIL_FROM || FREEMAIL_REPLYTO)
+  describe     FREEMAIL_DOC_PDF     MS document or PDF attachment, from freemail
+  score        FREEMAIL_DOC_PDF     1.0
+
+  meta         FREEMAIL_RVW_ATTCH   (__PLS_REVIEW || __DLND_ATTACH) && FREEMAIL_DOC_PDF
+  describe     FREEMAIL_RVW_ATTCH   Please review attached document, from freemail
+  score        FREEMAIL_RVW_ATTCH   1.0
 endif
 
 body           END_FUTURE_EMAILS   /\bend future emails\b/i
