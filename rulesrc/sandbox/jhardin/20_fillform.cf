@@ -51,9 +51,11 @@ ifplugin Mail::SpamAssassin::Plugin::ReplaceTags
   replace_tag FF_ALL (?:<FF_A1>|<FF_A2>|<FF_N1>|<FF_P1>|<FF_M1>|<FF_L1>|<FF_F1>|<FF_F2>|<FF_F3>|<FF_F4>|<FF_F5>)
 
   # 5+ fields (high reliability)
-  #describe __FILL_THIS_FORM_LONG Fill in a form, 5+ questions
-  body     __FILL_THIS_FORM_LONG /(?:<FF_LNNO>?<FF_YOUR><FF_ALL><FF_SUFFIX>(?:<FF_BLANK2>|<ANDOR>)){5,}/i
-  replace_rules   __FILL_THIS_FORM_LONG
+  # Leave this exposed, it's a fairly good spam sign by itself
+  body     FILL_THIS_FORM_LONG /(?:<FF_LNNO>?<FF_YOUR><FF_ALL><FF_SUFFIX>(?:<FF_BLANK2>|<ANDOR>)){5,}/i
+  replace_rules   FILL_THIS_FORM_LONG
+  describe FILL_THIS_FORM_LONG    Fill in a form with personal information
+  score    FILL_THIS_FORM_LONG    1.00
 
   # 5+ fields that body paragraph processing didn't paste together
   body     __FILL_THIS_FORM_PARTIAL /^\s*<FF_LNNO>?<FF_YOUR>(?:<FF_ALL><ANDOR>?){1,3}<FF_SUFFIX>(?:<FF_BLANK1>|(?:[-=_.,:;*\s]|=20){1,4}$)/im
@@ -64,7 +66,8 @@ ifplugin Mail::SpamAssassin::Plugin::ReplaceTags
   tflags   __FILL_THIS_FORM_PARTIAL_RAW multiple
 
   # 5+ fields in either format
-  meta     FILL_THIS_FORM    (__FILL_THIS_FORM_LONG || __FILL_THIS_FORM_PARTIAL > 4 || __FILL_THIS_FORM_PARTIAL_RAW > 4)
+  # For easy use in metas
+  meta     FILL_THIS_FORM    (FILL_THIS_FORM_LONG || __FILL_THIS_FORM_PARTIAL > 4 || __FILL_THIS_FORM_PARTIAL_RAW > 4)
   describe FILL_THIS_FORM    Fill in a form with personal information
   score    FILL_THIS_FORM    1.00
 
