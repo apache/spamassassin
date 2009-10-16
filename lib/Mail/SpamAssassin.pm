@@ -2065,7 +2065,7 @@ sub call_plugins {
   return unless $self->{plugins};
 
   # safety net in case some plugin changes global settings, Bug 6218
-  local($/, $\);  # protect some of the more likely troublemakers
+  local $/ = $/;  # prevent underlying modules from changing the global $/
 
   my $subname = shift;
   return $self->{plugins}->callback($subname, @_);
