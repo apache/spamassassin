@@ -1,8 +1,3 @@
-# SEM-BACKSCATTER
-header RCVD_IN_SEMBACKSCATTER eval:check_rbl('sembackscatter-lastexternal', 'backscatter.spameatingmonkey.net')
-describe RCVD_IN_SEMBACKSCATTER Received from an IP listed by SEM-BACKSCATTER
-tflags RCVD_IN_SEMBACKSCATTER net nopublish
-
 # SEM-BLACK
 header RCVD_IN_SEMBLACK eval:check_rbl('semblack-lastexternal', 'bl.spameatingmonkey.net')
 describe RCVD_IN_SEMBLACK Received from an IP listed by SEM-BLACK
