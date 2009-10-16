@@ -177,7 +177,7 @@ rawbody        __SPAN_BEG_TEXT     /\w{3}<span\s/i
 tflags         __SPAN_BEG_TEXT     multiple
 rawbody        __SPAN_END_TEXT     /<\/span>\w{3}/i
 tflags         __SPAN_END_TEXT     multiple
-meta           MANY_SPAN_IN_TEXT   (__SPAN_BEG_TEXT > 10) && (__SPAN_END_TEXT > 10)
+meta           MANY_SPAN_IN_TEXT   (__SPAN_BEG_TEXT > 5) && (__SPAN_END_TEXT > 5)
 describe       MANY_SPAN_IN_TEXT   Many <SPAN> tags embedded within text
 
 rawbody        __FEEDPROXY         m;http://feedproxy\.google\.com/;
@@ -187,7 +187,7 @@ describe       MANY_GOOG_PROXY     Many Google feedproxy URIs
 
 rawbody        __TINY_FLOAT         /\bstyle\s*=\s*"[^"]{0,40}?(?:(?:FONT-SIZE\s*:\s+\dpx|FLOAT\s*:\s+(?:right|left))(?:;\s+)?(?:(?!(?:FONT-SIZE|FLOAT))\w+:\s+\w+;?\s*)*){2}/i
 tflags         __TINY_FLOAT         multiple
-meta           MANY_TINY_FLOAT      __TINY_FLOAT > 10
+meta           MANY_TINY_FLOAT      __TINY_FLOAT > 5
 describe       MANY_TINY_FLOAT      Many small-font floating HTML elements - text obfuscation?
 
 
