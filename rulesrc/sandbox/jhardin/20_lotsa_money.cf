@@ -94,7 +94,7 @@ meta     LOTTO_ADMITS     __LOTTO_ADMITS_1 || __LOTTO_ADMITS_2 || __LOTTO_ADMITS
 describe LOTTO_ADMITS     Admits to being a lottery
 score    LOTTO_ADMITS     0.50
 
-body     LOTTO_RELATED    /\b(?:lott(?:o|ery)|sweepstakes)\s(?:prize|draw(?:s|ing)?|win(?:n?er|n?ing)?|jackpot|award|com+it+e+|com+is+ion|guild|promotion|program|day|online|company|(?:in)?corporat|agent|co-?ordinator|team)/i
+body     LOTTO_RELATED    /\b(?:lott(?:o|ery)|sweepstakes)\s(?:prize|draw(?:s|ing)?|win(?:n?er|n?ing)?|jackpot|award|fund|com+it+e+|com+is+ion|guild|promotion|program|day|online|company|(?:in)?corporat|agent|co-?ordinator|team)/i
 describe LOTTO_RELATED    Talks about lottery
 score    LOTTO_RELATED    0.10
 
@@ -196,7 +196,7 @@ body     SUM_OF_FUND      /\bsum\sof\s(?:amount|fund)/i
 describe SUM_OF_FUND      Money by any other name smells of greed
 score    SUM_OF_FUND      1.0
 
-body     __BENEFICIARY    /\bbeneficiar(?:y|ies)\b/i
+body     __BENEFICIARY    /\bbenefi(?:c|sh)i?ar(?:y|ies)\b/i
 body     __DIPLOMATIC     /\bdiplomatic\b/i
 body     __FEES           /\b(?:security|safe\w*|courier|registration|pay|paid|up-?front|processing|delivery)[\s\w]{1,15}\s(?:fee|charge)s?\b/i 
 body     __LUCKY_WINNER   /\blucky\swin+ers?\b/i
