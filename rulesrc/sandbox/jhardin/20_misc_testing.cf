@@ -173,9 +173,9 @@ score          RFC_ABUSE_POST      0.01
 body           SA_SKYPE            /\bCall this phone number in South Africa with Skype\b/
 
 # <SPAN> tags shouldn't appear in the midst of text
-rawbody        __SPAN_BEG_TEXT     /\w{2}<span\s/i
+rawbody        __SPAN_BEG_TEXT     /[a-z]{2}<(?i:span)\s/
 tflags         __SPAN_BEG_TEXT     multiple
-rawbody        __SPAN_END_TEXT     /<\/span>\w{3}/i
+rawbody        __SPAN_END_TEXT     /[^;>]<\/(?i:span)>[a-z]{3}/
 tflags         __SPAN_END_TEXT     multiple
 meta           MANY_SPAN_IN_TEXT   (__SPAN_BEG_TEXT > 5) && (__SPAN_END_TEXT > 5)
 describe       MANY_SPAN_IN_TEXT   Many <SPAN> tags embedded within text
