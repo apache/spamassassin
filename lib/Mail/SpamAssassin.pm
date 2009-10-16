@@ -788,7 +788,7 @@ sub signal_user_changed {
 
   $self->{conf}->set_score_set ($set);
 
-  $self->call_plugins ("signal_user_changed", {
+  $self->call_plugins("signal_user_changed", {
 		username => $self->{username},
 		userstate_dir => $self->{userstate_dir},
 		user_dir => $self->{user_dir},
@@ -2064,8 +2064,11 @@ sub call_plugins {
   # We could potentially get called after a finish(), so just return.
   return unless $self->{plugins};
 
+  # safety net in case some plugin changes global settings, Bug 6218
+  local($/, $\);  # protect some of the more likely troublemakers
+
   my $subname = shift;
-  return $self->{plugins}->callback ($subname, @_);
+  return $self->{plugins}->callback($subname, @_);
 }
 
 ###########################################################################
