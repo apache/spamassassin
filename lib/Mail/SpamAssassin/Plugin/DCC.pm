@@ -371,14 +371,45 @@ sub find_dcc_home {
       dbg("dcc: cdcc reports homedir as '%s'", $cdcc_home);
     }
 
-    if ($cdcc_home ne '' && -d $cdcc_home) {	
-      dbg("dcc: cdcc reported homedir exists, using it");
+    # try first with whatever the cdcc utility reported
+    my $cdcc_home_errno = 0;
+    if ($cdcc_home eq '') {
+      $cdcc_home_errno = ENOENT;
+    } elsif (!stat($cdcc_home)) {
+      $cdcc_home_errno = 0+$!;
+    }
+    if ($cdcc_home_errno == ENOENT) {
+      # no such file
+    } elsif ($cdcc_home_errno != 0) {
+      dbg("dcc: cdcc reported homedir $cdcc_home is not accessible: $!");
+    } elsif (!-d _) {
+      dbg("dcc: cdcc reported homedir $cdcc_home is not a directory");
+    } else {  # ok
+      dbg("dcc: cdcc reported homedir $cdcc_home exists, using it");
       $dcchome = untaint_var($cdcc_home);
-    } elsif (-d '/var/dcc') {			
-      dbg("dcc: dcc_home not set but dcc default homedir /var/dcc exists, using it");
-      $dcchome = '/var/dcc';
-    } else {
-      dbg("dcc: unable to get homedir from cdcc and the dcc default homedir was not found");
+    }
+
+    # try falling back to /var/dcc
+    if ($dcchome eq '') {
+      my $var_dcc_errno = stat('/var/dcc') ? 0 : 0+$!;
+      if ($var_dcc_errno == ENOENT) {
+        # no such file
+      } elsif ($var_dcc_errno != 0) {
+        dbg("dcc: dcc_home not set and dcc default homedir /var/dcc ".
+            "is not accessible: $!");
+      } elsif (!-d _) {
+        dbg("dcc: dcc_home not set and dcc default homedir /var/dcc ".
+            "is not a directory");
+      } else {  # ok
+        dbg("dcc: dcc_home not set but dcc default homedir /var/dcc exists, ".
+            "using it");
+        $dcchome = '/var/dcc';
+      }
+    }
+
+    if ($dcchome eq '') {
+      dbg("dcc: unable to get homedir from cdcc ".
+          "and the dcc default homedir was not found");
     }
 
     # Remember found homedir path
