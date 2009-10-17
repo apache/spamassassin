@@ -1,0 +1,4 @@
+# UBL testing
+header   RCVD_IN_UBL eval:check_rbl('ubl-lastexternal', 'ubl.unsubscore.com')
+describe RCVD_IN_UBL Relay listed in UBL http://www.lashback.com/support/UnsubscribeBlacklistSupport.aspx
+tflags   RCVD_IN_UBL net nopublish
