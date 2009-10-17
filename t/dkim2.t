@@ -110,9 +110,16 @@ $spamassassin_obj = Mail::SpamAssassin->new({
   rules_filename      => "$prefix/t/log/test_rules_copy",
   site_rules_filename => "$prefix/t/log/localrules.tmp",
   userprefs_filename  => "$prefix/masses/spamassassin/user_prefs",
-  dont_copy_prefs   => 1,
-  require_rules     => 1,
-# debug             => 'dkim',
+  dont_copy_prefs     => 1,
+  require_rules       => 1,
+# debug               => 'dkim',
+  post_config_text => q{
+    use_auto_whitelist 0
+    use_bayes 0
+    use_razor2 0
+    use_pyzor 0
+    use_dcc 0
+  },
 });
 ok($spamassassin_obj);
 $spamassassin_obj->compile_now;  # try to preloaded most modules
