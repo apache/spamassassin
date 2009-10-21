@@ -1,14 +1,27 @@
-
-##
-## This file most probably wont be updated often or at all!!
-## Try to download at most once a day, with "wget -N" or such.
-##
-## See: http://sa.hege.li/FreeMail.pm
-##
-## Also see: http://www.rulesemporium.com/rules/90_sare_freemail.cf
-##
-## <sa@hege.li>
-##
+# SpamAssassin - FreeMail domains file
+#
+# Please don't modify this file as your changes will be overwritten with
+# the next update. Use @@LOCAL_RULES_DIR@@/local.cf instead.
+# See 'perldoc Mail::SpamAssassin::Conf' for details.
+#
+# <@LICENSE>
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to you under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at:
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# </@LICENSE>
+#
+###########################################################################
 
 ifplugin Mail::SpamAssassin::Plugin::FreeMail
 
@@ -366,4 +379,48 @@ freemail_domains zmail.pt zmail.ru zona-andina.net zonai.com zoneview.net zonnet
 freemail_domains zoomshare.com zoznam.sk zubee.com zuvio.com zwallet.com zworg.com
 freemail_domains zybermail.com zzn.com foxmail.com
 
+# tunome.com / 091028
+
+freemail_domains acatperson.com adogperson.com all4theskins.com
+freemail_domains allsportsrock.com alwaysgrilling.com alwaysinthekitchen.com
+freemail_domains alwayswatchingmovies.com alwayswatchingtv.com asylum.com
+freemail_domains basketball-email.com beabookworm.com beagolfer.com beahealthnut.com
+freemail_domains believeinliberty.com bestcoolcars.com bestjobcandidate.com besure2vote.com
+freemail_domains bigtimecatperson.com bigtimedogperson.com bigtimereader.com
+freemail_domains bigtimesportsfan.com blackvoices.com capsfanatic.com capshockeyfan.com
+freemail_domains capsred.com car-nut.net cat-person.com catpeoplerule.com chat-with-me.com
+freemail_domains cheatasrule.com crazy4baseball.com crazy4homeimprovement.com crazy4mail.com
+freemail_domains crazyaboutfilms.net crazycarfan.com crazyforemail.com crazymoviefan.com
+freemail_domains descriptivemail.com differentmail.com dog-person.com dogpeoplerule.com
+freemail_domains easydoesit.com expertrenovator.com expressivemail.com fanaticos.com
+freemail_domains fanofbooks.com fanofcomputers.com fanofcooking.com fanoftheweb.com
+freemail_domains fieldmail.com fleetmail.com focusedonprofits.com focusedonreturns.com
+freemail_domains futboladdict.com games.com getintobooks.com hail2theskins.com hitthepuck.com
+freemail_domains i-dig-movies.com i-love-restaurants.com idigcomputers.com
+freemail_domains idigelectronics.com idigvideos.com ilike2helpothers.com ilike2invest.com
+freemail_domains ilike2workout.com ilikeelectronics.com ilikeworkingout.com
+freemail_domains ilovehomeprojects.com iloveourteam.com iloveworkingout.com in2autos.net
+freemail_domains interestedinthejob.com intomotors.com iwatchrealitytv.com lemondrop.com
+freemail_domains love2exercise.com love2workout.com lovefantasysports.com lovetoexercise.com
+freemail_domains luvfishing.com luvgolfing.com luvsoccer.com
+freemail_domains mail4me.com majorgolfer.com majorshopaholic.com majortechie.com mcom.com
+freemail_domains motor-nut.com moviefan.com mycapitalsmail.com mycatiscool.com
+freemail_domains myfantasyteamrules.com myteamisbest.com netbusiness.com news-fanatic.com
+freemail_domains newspaperfan.com onlinevideosrock.com realbookfan.com realhealthnut.com
+freemail_domains realitytvaddict.net realitytvnut.com reallyintomusic.com realtravelfan.com
+freemail_domains redskinscheer.com redskinsfamily.com redskinsfancentral.com redskinshog.com
+freemail_domains redskinsrule.com redskinsspecialteams.com redskinsultimatefan.com
+freemail_domains scoutmail.com skins4life.com stargate2.com stargateatlantis.com
+freemail_domains stargatefanclub.com stargatesg1.com stargateu.com switched.com
+freemail_domains thegamefanatic.com total-techie.com totalfoodnut.com
+freemail_domains totally-into-cooking.com totallyintobaseball.com totallyintobasketball.com
+freemail_domains totallyintocooking.com totallyintofootball.com totallyintogolf.com
+freemail_domains totallyintohockey.com totallyintomusic.com totallyintoreading.com
+freemail_domains totallyintosports.com totallyintotravel.com totalmoviefan.com
+freemail_domains travel2newplaces.com tvchannelsurfer.com ultimateredskinsfan.com
+freemail_domains videogamesrock.com volunteeringisawesome.com wayintocomputers.com
+freemail_domains whatmail.com when.com wild4music.com wildaboutelectronics.com
+freemail_domains workingaroundthehouse.com workingonthehouse.com writesoon.com xmasmail.com
+
 endif
+
