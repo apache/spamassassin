@@ -1,34 +1,172 @@
 
-header	HK_RANDOM_ENVFROM	EnvelopeFrom =~ /^(?!(?:mail|bounce)[_.-]|[^@]*(?:[+=^~\#]|mcgr|kpmg|nlpbr|ndqv|lcgc|cplpr|-mailer@)|[^@]{20})[^@]*(?:[bcdfgjklmnpqrtvwxz]{5}|[aeiouy]{5}|([a-z]{1,2})(?:\1){3})/mi
+####
+#### Basic stuff
+####
 
-#header	HK_RANDOM_FROM		From:addr =~ /^(?!(?:mail|bounce)[_.-]|[^@]*(?:[+=^~\#]|mcgr|kpmg|nlpbr|ndqv|lcgc|cplpr|-mailer@)|[^@]{26}|.*?@.{0,20}\bcmp-info\.com$)[^@]*(?:[bcdfgjklmnpqrtvwxz]{5}|[aeiouy]{5}|([a-z]{1,2})(?:\1){3})/mi
-header	HK_RANDOM_FROM_NAME	From:name =~ /^(?!.*?(?:@|cnnbc|nlpbr)).*?(?:[bcdfgjklmnpqrtvwxz]{5}|[aeiouy]{5}|([a-z]{1,2})(?:\1){3})/mi
+header		HK_RANDOM_ENVFROM	EnvelopeFrom =~ /^(?!(?:mail|bounce)[_.-]|[^@]*(?:[+=^~\#]|mcgr|kpmg|nlpbr|ndqv|lcgc|cplpr|-mailer@)|[^@]{20})[^@]*(?:[bcdfgjklmnpqrtvwxz]{5}|[aeiouy]{5}|([a-z]{1,2})(?:\1){3})/mi
+describe	HK_RANDOM_ENVFROM	Envelope sender username looks random
+header		HK_RANDOM_FROM		From:addr =~ /^(?!(?:mail|bounce)[_.-]|[^@]*(?:[+=^~\#]|mcgr|kpmg|nlpbr|ndqv|lcgc|cplpr|-mailer@)|[^@]{26}|.*?@.{0,20}\bcmp-info\.com$)[^@]*(?:[bcdfgjklmnpqrtvwxz]{5}|[aeiouy]{5}|([a-z]{1,2})(?:\1){3})/mi
+describe	HK_RANDOM_FROM		From username looks random
+header		HK_RANDOM_FROM_NAME	From:name =~ /^(?!.*?(?:@|cnnbc|nlpbr)).*?(?:[bcdfgjklmnpqrtvwxz]{5}|[aeiouy]{5}|([a-z]{1,2})(?:\1){3})/mi
+describe	HK_RANDOM_FROM_NAME	From name looks random
+header		HK_RANDOM_REPLYTO	Reply-To:addr =~ /^(?!(?:mail|bounce)[_.-]|[^@]*(?:[+=^~\#]|mcgr|kpmg|nlpbr|ndqv|lcgc|cplpr|-mailer@)|[^@]{26}|.*?@.{0,20}\b(?:cmpgnr|cnn)\.com$)[^@]*(?:[bcdfgjklmnpqrtvwxz]{5}|[aeiouy]{5}|([a-z]{1,2})(?:\1){3})/mi
+describe	HK_RANDOM_REPLYTO	Reply-To username looks random
+header		HK_RANDOM_REPLYTO_NAME	Reply-To:name =~ /^(?!.*?(?:@|cnnbc|nlpbr)).*?(?:[bcdfgjklmnpqrtvwxz]{5}|[aeiouy]{5}|([a-z]{1,2})(?:\1){3})/mi
+describe	HK_RANDOM_REPLYTO_NAME	Reply-To name looks random
 
-header	HK_RANDOM_REPLYTO	Reply-To:addr =~ /^(?!(?:mail|bounce)[_.-]|[^@]*(?:[+=^~\#]|mcgr|kpmg|nlpbr|ndqv|lcgc|cplpr|-mailer@)|[^@]{26}|.*?@.{0,20}\b(?:cmpgnr|cnn)\.com$)[^@]*(?:[bcdfgjklmnpqrtvwxz]{5}|[aeiouy]{5}|([a-z]{1,2})(?:\1){3})/mi
-#header	HK_RANDOM_REPLYTO_NAME	Reply-To:name =~ /^(?!.*?(?:@|cnnbc|nlpbr)).*?(?:[bcdfgjklmnpqrtvwxz]{5}|[aeiouy]{5}|([a-z]{1,2})(?:\1){3})/mi
+header		HK_NAME_DRUGS		From:name =~ /(viagra|cialis)/mi
+describe	HK_NAME_DRUGS		From name contains drugs
 
-body	HK_GOLDDUST		/\bgold ?dust\b/i
+header		HK_NAME_FREE		From:name =~ /\b(?:get)?free\b/mi
+describe	HK_NAME_FREE		From name mentions free stuff
 
-body	HK_LOTTO		/(?:(?:(?:inter)?national|foundation|mercato|univers|euro million|e-?mail|euro-pw|bill gates|swiss) ?lo(?:tto|ttery|terie)|coca.?cola games|mega jackpot|staatsloterij|ukonline game promo|loto prestige|(?:fran.aise|e-?mail) sweepstakes|loterie (?:internationale|cristal|am.ricaine|coca.?cola|euromillions)|(?:computer|internet) ballot|foundation internationale billgateslottery award|(?:promotional|online) draws?|lottery (?:fiduciary|department))/i
-header	HK_LOTTO_SUBJECT	Subject =~ /\blot(?:eri[ej]|t(?:ery|o))\b/mi
-header	HK_LOTTO_NAME		From =~ /^[^@]*(?:lot(?:eri[ej]|t(?:ery|o))|award|winner)/mi
+header		HK_SUBJECT_SPACES	Subject =~ /^(?!.{80}\#).*?\s{10}/
+describe	HK_SUBJECT_SPACES	Lots of spaces in Subject
 
-header	HK_NAME_DRUGS		From:name =~ /(viagra|cialis)/mi
-header	HK_NAME_FREE		From:name =~ /\b(?:get)?free\b/mi
+header		HK_SUBJECT_SPACES_SC	Subject =~ /\s{10}(?:[a-z]|\d{1,4})(?:\s|$)/i
+describe	HK_SUBJECT_SPACES_SC	Lots of spaces in Subject with some obfuscation
 
-header	__HK_NAME_MR_MRS	From:name =~ /^M(?:RS?|ISS)\b/mi
-header	__HK_NAME_DR		From:name =~ /^DR\b/mi
-header	__HK_NAME_FROM		From:name =~ /^FROM\b/mi
-meta	HK_NAME_MR_MRS		__HK_NAME_MR_MRS && !FREEMAIL_FROM
-meta	HK_NAME_FM_MR_MRS	__HK_NAME_MR_MRS && FREEMAIL_FROM
-meta	HK_NAME_DR		__HK_NAME_DR && !FREEMAIL_FROM
-meta	HK_NAME_FM_DR		__HK_NAME_DR && FREEMAIL_FROM
-meta	HK_NAME_FROM		__HK_NAME_FROM && !FREEMAIL_FROM
-meta	HK_NAME_FM_FROM		__HK_NAME_FROM && FREEMAIL_FROM
+header		__HK_NAME_MICROSOFT	From:name =~ /(microsoft|\bmsn\b)/i
+header		__HK_HELO_MICROSOFT	X-Spam-Relays-External =~ / helo=\S+\.(?:microsoft|msn)\.com /
+meta		HK_FAKENAME_MICROSOFT	__HK_NAME_MICROSOFT && !__HK_HELO_MICROSOFT
+describe	HK_FAKENAME_MICROSOFT	From name mentions Microsoft, but not relayed from there
+
+header		__HK_NAME_YAHOO		From:name =~ /\byahoo\b/i
+header		__HK_HELO_YAHOO		X-Spam-Relays-External =~ / helo=[^ ]+\.yahoo\.com /
+meta		HK_FAKENAME_YAHOO	__HK_NAME_YAHOO && !__HK_HELO_YAHOO
+describe	HK_FAKENAME_YAHOO	From name mentions Yahoo, but not relayed from there
+
+header		__HK_NAME_PAYPAL	From:name =~ /\bpaypal\b/i
+header		__HK_HELO_PAYPAL	X-Spam-Relays-External =~ / helo=[^ ]+\.paypal\b/
+meta		HK_FAKENAME_PAYPAL	__HK_NAME_PAYPAL && !__HK_HELO_PAYPAL
+describe	HK_FAKENAME_PAYPAL	From name mentions PayPal, but not relayed from there
+
+header		__HK_NAME_EBAY		From:name =~ /\bebay\b/i
+header		__HK_HELO_EBAY		X-Spam-Relays-External =~ / helo=[^ ]+\.(?:ebay|emarsys)\b/
+meta		HK_FAKENAME_EBAY	__HK_NAME_EBAY && !__HK_HELO_EBAY
+describe	HK_FAKENAME_EBAY	From name mentions eBay, but not relayed from there
+
+body		__hk_million		/(?:(?:[0-9]{3}[ ,.]?){2,4}|[0-9] ?M\b|mill(?:(?:es?|ons?)(?: de\b)?|ion)).{0,18}(?:\$|[\xa3\xa4]|eur\b|usd\b|gbp\b|cfa\b|euro?s?\b|dollard?s?\b|pounds?\b|francs?\b)/i
+body		__hk_million2		/(?:\$|[\xa3\xa4]|eur|usd?|gbp|cfa|euro?s?|dollard?s?|pounds?|francs?)(?: de\b)? mill(?:(?:es?|ons?)|ion)/
+body		__hk_hthousand		/hundred.{0,20}thousand.{0,20}(?:eur|usd|gbp|cfa|euro?s?|dollard?s?|pounds?|francs?)\b/i
+body		__hk_bigmoney		/(?:EURO?|USD?|GBP|CFA|\&\#163;|[\xa3\xa4]|\$|sum of).{0,4}(?:[0-9]{3}[^0-9a-z]?[0-9]{3}|[0-9.,]{1,4}(?: ?M\b| ?(?:de )?Mil))/i
+meta		HK_MUCHMONEY		__hk_million || __hk_million2 || __hk_hthousand || __hk_bigmoney
+describe	HK_MUCHMONEY		Message refers to hundreds of thousands or millions
+score		HK_MUCHMONEY		0.001
+
+body		__hk_prize1		/\b(?:(?:prize|lucky|dear|emerged(?: a)?) (?:winners?|money)|attn.{0,10}winner|happily aa?nnounce|pleasure to inform|(?:notice the|your) winnings?)\b/i
+body		__hk_prize2		/(?:cash prize|prize awards?|you have been awarded|award (?:notification|notice))/i
+body		__hk_prize3		/\b(?:(?:ha(?:s|ve)|you) w[io]n|congratulations? to your?|unexpected luck|lucky (?:nl )number|your? e-?mail just w[oi]n|winning e-?mail|your e-?mail (?:address )?(?:has )?w[io]n|une adresse e-?mail sur internet|category (?:\S{0,5} )?winner of our)\b/i
+body		__hk_prize4		/(?:(?:tic(?:ket)?|batch|\bbt|serial|\bsr|\brf|ref(?:erence)?)(?:\:| ?(?:number|no|nr))|num.ro de (?:ticket|s.rie|r.f.rence|lot)|pleased to inform|selected randomly|randomly selected|winning (?:numbers|information))/i
+body		__hk_prize5		/(?:funds? transfer|(?:winning|ready for|sum) pay ?outs?|claim(?:s? officer| your| procedure)|(?:make|file) (?:for )?your claims?|r.clamation de votre prix|collect your prize|clarification and procedure)/i
+meta		HK_PRIZEWIN		__hk_prize1 + __hk_prize2 + __hk_prize3 + __hk_prize4 + __hk_prize5 > 1
+describe	HK_PRIZEWIN		Won lot of money or prizes
+
+body		__HK_LOTTO_1		/\b(?:(?:inter)?national|foundation|mercato|univers|euro ?million|e-?mail|euro-pw|bill ?gates|swiss|prestige|cristal|am.ricaine|coca.?cola|fiduciary|department) ?lot(?:eri[ej]|t(?:ery|o))/i
+body		__HK_LOTTO_2		/\blot(?:eri[ej]|t(?:ery|o)) ?(?:(?:inter)?national|foundation|mercato|univers|euro ?million|e-?mail|euro-pw|bill ?gates|swiss|prestige|cristal|am.ricaine|coca.?cola|fiduciary|department)/i
+body		__HK_LOTTO_COLA		/\bcoca.?cola games\b/i
+body		__HK_LOTTO_JACKPOT	/\bmega jackpot\b/i
+body		__HK_LOTTO_STAATS	/\bstaatsloteri/i
+body		__HK_LOTTO_UK		/\bukonline game promo/i
+body		__HK_LOTTO_BALLOT	/\b(?:promotional|on.?line|computer|internet|e-?mail|fran.aise) (?:ballot|draw|sweepstake)/i
+meta		HK_LOTTO		__HK_LOTTO_1 || __HK_LOTTO_2 || __HK_LOTTO_COLA || __HK_LOTTO_JACKPOT || __HK_LOTTO_STAATS || __HK_LOTTO_UK || __HK_LOTTO_BALLOT
+
+header		HK_LOTTO_SUBJECT	Subject =~ /\blot(?:eri[ej]|t(?:ery|o))\b/mi
+header		HK_LOTTO_NAME		From =~ /^[^@]*(?:lot(?:eri[ej]|t(?:ery|o))|award|winner)/mi
+
+body		HK_SCAM_N1		/\b(?:widow|son|daughter|husband|wife|brother|sister) of (?:the )?(?:late|sacked|dead|passed)\b/i
+body		HK_SCAM_N2		/\bnext of kin\b/i
+body		HK_SCAM_N3		/\bdirect telephone numbers?\b/i
+body		HK_SCAM_N4		/\b(?:e?mail me below|reply (?:me to )?this e?mail (?:at|to)?|send your reply (?:to|at))\b/i
+body		HK_SCAM_N5		/\banonymous investment\b/i
+body		HK_SCAM_N6		/\blate (?:client of mine|prime minister)\b/i
+body		HK_SCAM_N7		/\bpreapproved to receive\b/i
+body		HK_SCAM_N8		/\byour compensation\b/i
+body		HK_SCAM_N9		/\bseek for your indulgence\b/i
+body		HK_SCAM_N10		/\bhuge transfer of\b/i
+body		HK_SCAM_N11		/\bmake sure your email is checked\b/i
+body		HK_SCAM_N12		/\binsured with your email\b/i
+body		HK_SCAM_N13		/\b(?:business|important|discreet) transaction\b/i
+body		HK_SCAM_N14		/\bsum of amount\b/i
+body		HK_SCAM_N15		/\b(?:account (?:overseas?|offshore)|(?:overseas?|offshore) account)\b/i
+body		HK_SCAM_N16		/\b(?:arrangement secret|secret arrangement)\b/i
+	
+body		HK_SCAM_S15		/(?:discovered a dormant account|can you be my partner)/i
+body		HK_SCAM_S7		/(?:(?:investment|proposed|lucrative) (?:business|venture)|(?:business|venture) (?:enterprise|propos(?:al|ition)))/i
+body		HK_SCAM_S12		/fidelity investments international/i
+body		HK_SCAM_S25		/\bbank (?:in|of) ghana/i
+
+body		HK_SCAM_S1		/pay you the sum of/i
+body		HK_SCAM_S2		/lucrative (?:to )?invest/i
+body		HK_SCAM_S3		/invest(?:ment (?:in your area|partner)|in your country|assist me in an investment)/i
+body		HK_SCAM_S4		/transfer (?:this|my|of )?funds?/i
+body		HK_SCAM_S5		/possible investment opportunities/i
+body		HK_SCAM_S6		/large amount of money/i
+body		HK_SCAM_S10		/someone i can trust/i
+body		HK_SCAM_S11		/enable me ascertain/i
+body		HK_SCAM_S13		/credit.{0,10}atlantique/i
+body		HK_SCAM_S14		/(?:interested in chatting to pretty|nice girl that would like to chat|(?:mind if i share|wanna see) .{0,10}some (?:of my )?pictures|(?:hi|hello).{0,5}i am (?:tired|bored) (?:this (?:evening|afternoon)|tonight|today))/i
+body		HK_SCAM_S16		/mail me at \S{0,50} only\b/i
+body		HK_SCAM_S17		/green card.{0,25}lottery/i
+body		HK_SCAM_S18		/nude pictures especially for you/i
+body		HK_SCAM_S19		/member.{0,3}became strong as a stone/i
+body		HK_SCAM_S20		/good business relation.{0,50}terms of payment/i
+body		HK_SCAM_S21		/notification.{0,40}safe deposit box/i
+body		HK_SCAM_S22		/\bmining companies/i
+body		HK_SCAM_S23		/(?:\b(?:urgent alert|start trade|get it at monday)\b|\b(?:5-|five )day price:)/i
+body		HK_SCAM_S24		/\b(?:government of ghana|recieved funds?|loan number|credit no|afd loan|eligible payments)\b/i
+
+body		HK_GOLDDUST		/\bgold ?dust\b/i
+
+body		__HK_NASTY_P		/\bpenis(?:es)?\b/i
+body		__HK_NASTY_C		/\bhard cocks?\b/i
+body		__HK_NASTY_D		/\bdick\b/i
+body		__HK_NASTY_DS		/\bdicks\b/i
+body		__HK_NASTY_FJ		/\bfootjob\b/i
+body		__HK_NASTY_B		/\bbitch has\b/i
+meta		HK_NASTY		__HK_NASTY_P || __HK_NASTY_C || __HK_NASTY_D || __HK_NASTY_DS || __HK_NASTY_FJ || __HK_NASTY_B
+
+body		__HK_MEDS_CUTM		/\bcut on your medication\b/i
+body		__HK_MEDS_DRUG		/\b(?:huge selection of|demanding to find) drugs\b/i
+body		__HK_MEDS_APPR		/\bapproved med[sz]\b/i
+body		__HK_MEDS_ZALE		/\bon zale now\b/i
+body		__HK_MEDS_LRX		/LegalRXMedications/i
+meta		HK_MEDS			__HK_MEDS_CUTM || __HK_MEDS_DRUG || __HK_MEDS_APPR || __HK_MEDS_ZALE || __HK_MEDS_LRX
 
 # From Mike Cappella
-header	FROM_CONTAINS_TAB	From:raw =~ /\A\t/m
+header		TAB_IN_FROM		From:raw =~ /^\t/s
+describe	TAB_IN_FROM		From starts with a tab
 
-header	SUBJECT_SPACES		Subject =~ /^(?!.{80}\#).*?\s{10}/
-header	SUBJECT_SPACES_SC	Subject =~ /\s{10}(?:[a-z]|\d{1,4})(?:\s|$)/i
+
+####
+#### FreeMail related
+####
+
+ifplugin Mail::SpamAssassin::Plugin::FreeMail
+
+header		__HK_NAME_MR_MRS	From:name =~ /^M(?:RS?|ISS)\b/mi
+header		__HK_NAME_DR		From:name =~ /^DR\b/mi
+header		__HK_NAME_FROM		From:name =~ /^FROM\b/mi
+meta		HK_NAME_MR_MRS		__HK_NAME_MR_MRS && !FREEMAIL_FROM
+meta		HK_NAME_FM_MR_MRS	__HK_NAME_MR_MRS && FREEMAIL_FROM
+meta		HK_NAME_DR		__HK_NAME_DR && !FREEMAIL_FROM
+meta		HK_NAME_FM_DR		__HK_NAME_DR && FREEMAIL_FROM
+meta		HK_NAME_FROM		__HK_NAME_FROM && !FREEMAIL_FROM
+meta		HK_NAME_FM_FROM		__HK_NAME_FROM && FREEMAIL_FROM
+
+endif
+
+
+####
+#### MIMEHeader
+####
+
+ifplugin Mail::SpamAssassin::Plugin::MIMEHeader
+
+mimeheader	__HK_SPAMMY_CTFN	Content-Type =~ /name=.*?(?:lot(?:eri[ej]|t(?:ery|o))|award|prize|winn(?:er|ing)|microsoft|congrat|urgent)/mi
+mimeheader	__HK_SPAMMY_CDFN	Content-Disposition =~ /name=.*?(?:lot(?:eri[ej]|t(?:ery|o))|award|prize|winn(?:er|ing)|microsoft|congrat|urgent)/mi
+meta		HK_SPAMMY_FILENAME	__HK_SPAMMY_CTFN || __HK_SPAMMY_CDFN
+
+endif
+
 
