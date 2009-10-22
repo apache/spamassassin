@@ -151,7 +151,7 @@ score          AD_COMPLAINTS       1.0
 describe       AD_COMPLAINTS       Complain about this spam
 
 # observed in bank phishing 09/2009
-rawbody        MISQ_HTML           /<\w{1,20}[^>]{1,30}=[^"][^">]{1,30}[^=]"[\s>]/
+rawbody        MISQ_HTML           /<\w{2,20}[^>=]{1,30}=[^"][^">]{1,30}[^=]"[\s>]/
 describe       MISQ_HTML           Unbalanced quotes in HTML tag
 
 # observed in bank phishing 09/2009
@@ -170,7 +170,7 @@ meta           RFC_ABUSE_POST      (__DNS_FROM_RFC_ABUSE && __DNS_FROM_RFC_POST)
 describe       RFC_ABUSE_POST      Both abuse and postmaster missing on sender domain
 score          RFC_ABUSE_POST      0.01
 
-body           SA_SKYPE            /\bCall this phone number in South Africa with Skype\b/
+body           CALL_SKYPE            /\bCall this phone number [\w\s]{0,30}with Skype\b/
 
 # <SPAN> tags shouldn't appear in the midst of text
 rawbody        __SPAN_BEG_TEXT     /[a-z]{2}<(?i:span)\s/
@@ -189,5 +189,6 @@ rawbody        __TINY_FLOAT         /\bstyle\s*=\s*"[^"]{0,40}?(?:(?:FONT-SIZE\s
 tflags         __TINY_FLOAT         multiple
 meta           MANY_TINY_FLOAT      __TINY_FLOAT > 5
 describe       MANY_TINY_FLOAT      Many small-font floating HTML elements - text obfuscation?
+
 
 
