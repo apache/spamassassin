@@ -14,15 +14,3 @@ describe __RCVD_IN_2WEEKS      Received: within the past 2 weeks
 meta RCVD_IN_PSBL_2WEEKS       RCVD_IN_PSBL && __RCVD_IN_2WEEKS
 tflags RCVD_IN_PSBL_2WEEKS     net nopublish
 endif
-
-# RCVD_IN_PSBL_DEEP
-# This is an experimental rule to assign a smaller score to deep parsed
-# relays listed by PSBL.  Earlier masscheck results have indicated very rare 
-# FP's with deep parsed relays.  This rule however is known to be prejudiced
-# against certain users like mobile phones or mobile broadband so it should 
-# be limited to a small score if you opt to use it.
-header   __RCVD_IN_PSBL_DEEP  eval:check_rbl('psbl', 'psbl.surriel.com.')
-describe __RCVD_IN_PSBL_DEEP  Received via a relay in PSBL (deep parsing)
-tflags   __RCVD_IN_PSBL_DEEP  net nopublish
-meta     RCVD_IN_PSBL_DEEP    __RCVD_IN_PSBL_DEEP && !RCVD_IN_PSBL
-tflags   RCVD_IN_PSBL_DEEP    net nopublish
