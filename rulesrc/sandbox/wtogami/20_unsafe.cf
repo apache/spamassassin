@@ -24,3 +24,8 @@ meta       CN_SEVEN_NOAPNIC   CN_SEVEN && !__RCVD_VIA_APNIC && !ALL_TRUSTED
 describe   CN_SEVEN_NOAPNIC   .cn URI exactly 7 characters long, excluding APNIC
 tflags     CN_SEVEN_NOAPNIC   nopublish
 #score      CN_SEVEN_NOAPNIC  1.0
+
+# 20091025: .cn URI beginning with rx
+uri            CN_RX            m;^https?://(?:[^./]+\.)*rx[-\w].+\.cn\b;
+describe       CN_RX            .cn URI beginning with rx
+tflags         CN_RX            nopublish
