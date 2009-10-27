@@ -148,7 +148,7 @@ body     __EX_CUSTOMER    /\b(?:deceased|late|verstorbenen)\s(?:client|customer|
 body     __DECEASED       /\b(?:the|my|der)\s(?:deceased|late|verstorbenen)\b/i
 body     __SURVIVORS      /\b(?:widow|son|daughter|husband|wife|brother|sister|attorney)\s(?:of|to)\s(?:the\s)?late\s\w+\b/i
 body     __DEAD_PARENT    /\bmy\s(?:deceased|dead)\s(?:father|mother)/i
-body     __DORMANT_ACCT   /\b(?:dormant|abandoned)\s(?:account|fund)/i
+body     __DORMANT_ACCT   /\b(?:dormant|abandoned)\s(?:account|fund|transaction)/i
 body     __WILL_LEGAL     /\b(?:codicil|last\stestament|probate|executor|intestate)\b/i
 body     __EARLY_DEMISE   /\buntimely\sdeath\b/i
 body     __WIDOW          /\bwidow(?:e[rd])'?s?\b/i
@@ -201,7 +201,7 @@ body     __SUM_OF_FUND      /\bsum\sof\s(?:amount|fund)/i
 
 body     __BENEFICIARY    /\bbenefi(?:c|sh)i?ar(?:y|ies)\b/i
 body     __DIPLOMATIC     /\bdiplomatic\b/i
-body     __FEES           /\b(?:security|safe\w*|courier|registration|pay|paid|up-?front|processing|delivery)[\s\w]{1,15}\s(?:fee|charge)s?\b/i 
+body     __FEES           /\b(?:security|safe\w*|courier|registration|pay|paid|up-?front|processing|delivery|transfer)[\s\w]{1,15}\s(?:fee|charge)s?\b/i 
 body     __LUCKY_WINNER   /\blucky\swin+ers?\b/i
 body     __YOUR_FUND      /\byour\sfund\b/i
 body     __NIGERIA        /\bnigeria\b/i
