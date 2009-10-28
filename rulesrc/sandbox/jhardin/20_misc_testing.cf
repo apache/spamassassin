@@ -191,4 +191,9 @@ meta           MANY_TINY_FLOAT      __TINY_FLOAT > 5
 describe       MANY_TINY_FLOAT      Many small-font floating HTML elements - text obfuscation?
 
 
+# endless requests on the users list...
+header         TO_EQ_FROM      ALL =~ /\nFrom:[^\n<]{0,80}<?([^\n\s>]+)>?\n(?:[^\n]{1,100}\n)*To:[^\n]+\1/ism
+describe       TO_EQ_FROM      To: same as From:
+score          TO_EQ_FROM      0.001
+
 
