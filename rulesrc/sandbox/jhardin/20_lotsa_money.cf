@@ -45,7 +45,7 @@ score    MONEY_FORM        3.0
 #describe MONEY_ACCOUNT    Lots of money to your account
 
 
-body     __LOTTO_WINNINGS   /(?:claim|transfert?(?:\s\w+)?|virement)\s(?:your|of|the|this|de)\s(?:win+ings?|money|(?:cash\s)?prize|award|f[ou]nds?)/i
+body     __LOTTO_WINNINGS   /(?:claim|transfert?(?:\s\w+)?|virement)\s(?:your|of|the|this|de)\s(?:win+ings?|money|(?:cash\s)?prize|award|f[ou]nds?|grant)/i
 #describe LOTTO_WINNINGS   Claim your winnings
 #score    LOTTO_WINNINGS   0.25
 
@@ -55,21 +55,21 @@ body     __LOTTO_WIN_01     /\bwin+ing\s(?:prize|number|notification|draw|check|
 
 body     __YOU_WON_01    /\byou(?:r|'re|'ve|'ll|\shave|\sdid)?\s(?:e-?mail\s)?(?:\w+\s){0,2}(?:a\s)?w[io]n+(?:er|ing)?\b/i
 body     __YOU_WON_02    /\bw[io]n\s(?:(?:for|by)\s)?your?\b/i
-body     __YOU_WON_03    /\b(?:your?|win+ing|win+ers?|beneficiaries|participants?|individuals?)(?:\s[-a-z\s]{4,30})?\s(?:w(?:ere|as)|ha(?:ve|s) be(?:en)?)\s(?:randomly\s(?:selected|cho+sen|cho+sing|picked)|(?:selected|cho+sen|cho+sing|picked)\s(?:[a-z\s]{2,40}\srandom|randomly|online|lottery|computer\sballot))/i 
+body     __YOU_WON_03    /\b(?:your?|win+ing|win+ers?|beneficiaries|participants?|individuals?)(?:\s[-a-z\s]{4,30}?)?\s(?:w(?:ere|as)|ha(?:ve|s) be(?:en)?)\s(?:randomly\s(?:selected|cho+sen|cho+sing|picked)|(?:selected|cho+sen|cho+sing|picked)\s(?:[a-z\s]{2,40}?\srandom|randomly|online|lottery|computer\sballot))/i 
 meta     LOTTO_YOU_WON   __YOU_WON_01 || __YOU_WON_02 || __YOU_WON_03
 describe LOTTO_YOU_WON   You won!
 score    LOTTO_YOU_WON   1.00 
 tflags   LOTTO_YOU_WON   nopublish
 
-body     LOTTO_AGENT      /\b(?:claim(?:s|ing)?(?:\sprocessing)?|fiducia\w+|reimbursement|prize\stransfer|(?:international|foreign)\sremittance|payment|immunity)\s?(?:agent|manager|officer|secretary)/i
+body     LOTTO_AGENT      /\b(?:claim(?:s|ing)?(?:\sprocessing)?|fiducia\w+|reimbursement|prize\stransfer|(?:international|foreign)\sremittance|payment|immunity|grants?)\s?(?:agent|manager|officer|secretary)/i
 describe LOTTO_AGENT      Claims Agent
 score    LOTTO_AGENT      0.50
 
-body     LOTTO_DEPT       /\b(?:claim(?:s|ing)?(?:\sprocessing)?|fiducia\w+|reimbursement|(?:international|foreign)\sremittance|payment)\s?(?:department|dept|unit|group|committee|bureau)/i
+body     LOTTO_DEPT       /\b(?:claim(?:s|ing)?(?:\sprocessing)?|fiducia\w+|reimbursement|(?:international|foreign)\sremittance|payment|award)\s?(?:department|dept|unit|group|committee|bureau)/i
 describe LOTTO_DEPT       Claims Department
 score    LOTTO_DEPT       0.50
 
-uri      LOTTO_URI       /(?:claim(?:s|ing)?(?:[-_]?processing)?|fiducia\w+|reimbursement|(?:international|foreign)?[-_]?remittance)[-_]?(?:department|dept|unit|group|committee|office|agent|manager|secretary)/i
+uri      LOTTO_URI       /(?:claim(?:s|ing)?(?:[-_]?processing)?|fiducia\w+|reimbursement|(?:international|foreign)?[-_]?remittance|award)[-_]?(?:department|dept|unit|group|committee|office|agent|manager|secretary)/i
 describe LOTTO_URI       Claims Department
 score    LOTTO_URI       0.50
 
@@ -199,7 +199,7 @@ body     __SUM_OF_FUND      /\bsum\sof\s(?:amount|fund)/i
 #describe SUM_OF_FUND      Money by any other name smells of greed
 #score    SUM_OF_FUND      1.0
 
-body     __BENEFICIARY    /\bbenefi(?:c|sh)i?ar(?:y|ies)\b/i
+body     __BENEFICIARY    /\bben[ei]fi(?:c|sh)i?ar(?:y|ies)\b/i
 body     __DIPLOMATIC     /\bdiplomatic\b/i
 body     __FEES           /\b(?:security|safe\w*|courier|registration|pay|paid|up-?front|processing|delivery|transfer)[\s\w]{1,15}\s(?:fee|charge)s?\b/i 
 body     __LUCKY_WINNER   /\blucky\swin+ers?\b/i
