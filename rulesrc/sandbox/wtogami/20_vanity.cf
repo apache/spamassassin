@@ -1,7 +1,9 @@
 # VANTIY SPAM
 # Who's Who and other types of fake or vanity awards.
 # TODO: Simplify to fewer patterns after some nightly masscheck results.
-meta VANITY		(__KNOWN_VANITY && (__NO_COST + __INFORM_YOU + __INNERCIRCLE + __SHMUCK + __EXECS_PROS + __PUB_DEADLINE + __REGISTRY + __NOMINATION + __BIOGRAPHY + __ACCOLADES + __RECOGNITION + __DISTINGUISHED + __EXCELLENCE + __ACHIEVEMENT > 3)) || (__SBCAVANITY && __BESTOFBIZ)
+meta VANITY		(__KNOWN_VANITY && (__NO_COST + __INFORM_YOU + __INNERCIRCLE + __SHMUCK + __EXECS_PROS + __PUB_DEADLINE + __REGISTRY + __NOMINATION + __BIOGRAPHY + __ACCOLADES + __RECOGNITION + __DISTINGUISHED + __EXCELLENCE + __ACHIEVEMENT > 3)) || (__BESTOFAWARD && (__SBCAVANITY || __USCAVANITY))
+describe VANITY Vanity or fake awards
+score VANITY 2.3
 
 # Known Vanity Spammers
 meta __KNOWN_VANITY	__PRINCETONPRE || __WHOSWHO
@@ -26,5 +28,7 @@ body __DISTINGUISHED	/\bdistinguished\b/i
 body __EXCELLENCE	/\bdemonstrated excellence\b/i
 body __ACHIEVEMENT	/\bbenchmark of achievement\b/i
 # SBCA 20091023
+body __BESTOFAWARD	/\bBest of \w+ Award/
 body __SBCAVANITY	/\bSmall Business Commerce Association/
-body __BESTOFBIZ	/\bBest of Business Award\b/
+# USCA 20091024
+body __USCAVANITY	/\bUS Commerce Association/
