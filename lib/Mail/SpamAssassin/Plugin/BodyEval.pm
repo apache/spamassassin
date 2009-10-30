@@ -168,24 +168,28 @@ sub check_blank_line_ratio {
     $minlines = 1;
   }
 
-  if (! exists $pms->{blank_line_ratio}->{$minlines}) {
+  my $blank_line_ratio_ref = $pms->{blank_line_ratio};
+
+  if (! exists $blank_line_ratio_ref->{$minlines}) {
     $fulltext = $pms->get_decoded_body_text_array();
-    my ($blank) = 0;
-    if (scalar @{$fulltext} >= $minlines) {
-      foreach my $line (@{$fulltext}) {
-        next if ($line =~ /\S/);
-        $blank++;
+
+    my $blank = 0;
+    my $nlines = 0;
+    foreach my $chunk (@$fulltext) {
+      foreach (split(/^/m, $chunk, -1)) {
+        $nlines++;
+        $blank++  if !/\S/;
       }
-      $pms->{blank_line_ratio}->{$minlines} = 100 * $blank / scalar @{$fulltext};
     }
-    else {
-      $pms->{blank_line_ratio}->{$minlines} = -1; # don't report if it's a blank message ...
-    }
+
+    # report -1 if it's a blank message ...
+    $blank_line_ratio_ref->{$minlines} =
+      $nlines < $minlines ? -1 : 100 * $blank / $nlines;
   }
 
-  return (($min == 0 && $pms->{blank_line_ratio}->{$minlines} <= $max) ||
-	  ($pms->{blank_line_ratio}->{$minlines} > $min &&
-	   $pms->{blank_line_ratio}->{$minlines} <= $max));
+  return (($min == 0 && $blank_line_ratio_ref->{$minlines} <= $max) ||
+	  ($blank_line_ratio_ref->{$minlines} > $min &&
+	   $blank_line_ratio_ref->{$minlines} <= $max));
 }
 
 sub tvd_vertical_words {
