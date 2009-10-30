@@ -35,6 +35,21 @@ those IP addresses.  This is quite effective.
 
 =over 4
 
+=item skip_uribl_checks ( 0 | 1 )   (default: 0)
+
+Turning on the skip_uribl_checks setting will disable the URIDNSBL plugin.
+
+By default, SpamAssassin will run URI DNSBL checks. Individual URI blocklists
+may be disabled selectively by setting a score of a corresponding rule to 0
+or through the uridnsbl_skip_domain parameter.
+
+See also a related configuration parameter skip_rbl_checks,
+which controls the DNSEval plugin (documented in the Conf man page).
+
+=back
+
+=over 4
+
 =item uridnsbl_skip_domain domain1 domain2 ...
 
 Specify a domain, or a number of domains, which should be skipped for the
@@ -241,9 +256,11 @@ sub parsed_metadata {
   my ($self, $opts) = @_;
   my $scanner = $opts->{permsgstatus};
 
+  return 0  if $scanner->{main}->{conf}->{skip_uribl_checks};
+
   if (!$scanner->is_dns_available()) {
     $self->{dns_not_available} = 1;
-    return;
+    return 0;
   } else {
     # due to re-testing dns may become available after being unavailable
     # DOS: I don't think dns_not_available is even used anymore
@@ -373,6 +390,12 @@ sub parsed_metadata {
 sub set_config {
   my($self, $conf) = @_;
   my @cmds;
+
+  push(@cmds, {
+    setting => 'skip_uribl_checks',
+    default => 0,
+    type => $Mail::SpamAssassin::Conf::CONF_TYPE_BOOL,
+  });
 
   push(@cmds, {
     setting => 'uridnsbl_max_domains',
