@@ -8,6 +8,7 @@ use File::Basename;
 use File::Copy;
 use File::Path;
 use File::Spec;
+use POSIX qw(WIFEXITED WIFSIGNALED WIFSTOPPED WEXITSTATUS WTERMSIG WSTOPSIG);
 
 BEGIN {
   # No spamd test in Windows unless env override says user figured out a way
@@ -924,7 +925,32 @@ sub system_or_die {
   my $cmd = $_[0];
   print ("\t$cmd\n");
   system($cmd);
-  ($? >> 8 == 0) or die "'$cmd' failed";
+  $? == 0  or die "'$cmd' failed: ".exit_status_str($?,0);
+}
+
+# (sub exit_status_str copied from Util.pm)
+# map process termination status number to an informative string, and
+# append optional mesage (dual-valued errno or a string or a number),
+# returning the resulting string
+#
+sub exit_status_str($;$) {
+  my($stat,$errno) = @_;
+  my $str;
+  if (WIFEXITED($stat)) {
+    $str = sprintf("exit %d", WEXITSTATUS($stat));
+  } elsif (WIFSTOPPED($stat)) {
+    $str = sprintf("stopped, signal %d", WSTOPSIG($stat));
+  } else {
+    my $sig = WTERMSIG($stat);
+    $str = sprintf("%s, signal %d (%04x)",
+             $sig == 2 ? 'INTERRUPTED' : $sig == 6 ? 'ABORTED' :
+             $sig == 9 ? 'KILLED' : $sig == 15 ? 'TERMINATED' : 'DIED',
+             $sig, $stat);
+  }
+  if (defined $errno) {  # deal with dual-valued and plain variables
+    $str .= ', '.$errno  if (0+$errno) != 0 || ($errno ne '' && $errno ne '0');
+  }
+  return $str;
 }
 
 sub dbgprint { print STDOUT "[".time()."] ".$_[0]; }
