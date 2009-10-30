@@ -1213,8 +1213,14 @@ more trusted relays.  See also C<envelope_sender_header>.
 
 =item skip_rbl_checks ( 0 | 1 )   (default: 0)
 
-By default, SpamAssassin will run RBL checks.  If your ISP already does this
-for you, set this to 1.
+Turning on the skip_rbl_checks setting will disable the DNSEval plugin,
+which implements Real-time Block List (or: Blackhole List) (RBL) lookups.
+
+By default, SpamAssassin will run RBL checks. Individual blocklists may
+be disabled selectively by setting a score of a corresponding rule to 0.
+
+See also a related configuration parameter skip_uribl_checks,
+which controls the URIDNSBL plugin (documented in the URIDNSBL man page).
 
 =cut
 
