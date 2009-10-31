@@ -4,7 +4,7 @@ header     __RCVD_VIA_APNIC   Received =~ /(?-xism:[^0-9.](?:2(?:0(?:2(?:\.1(?:2
 describe   __RCVD_VIA_APNIC   Received through a relay in Asia/Pacific Network
 
 # 20091004: 8-character .cn domain
-uri            CN_EIGHT            m;^https?://(?:[^./]+\.)*[-\w]{8}\.cn\b;
+uri            CN_EIGHT            m;^https?://(?:[^./]+\.)*[-\w]{8}\.cn(?:$|[/:\#]);
 describe       CN_EIGHT            .cn URI with eight-character domain name
 tflags         CN_EIGHT            nopublish
 #score          CN_EIGHT            0.50
@@ -15,7 +15,7 @@ tflags     CN_EIGHT_NOAPNIC   nopublish
 #score      CN_EIGHT_NOAPNIC  1.0
 
 # 20091006: 7-character .cn domain
-uri            CN_SEVEN            m;^https?://(?:[^./]+\.)*[-\w]{7}\.cn\b;
+uri            CN_SEVEN            m;^https?://(?:[^./]+\.)*[-\w]{7}\.cn(?:$|[/:\#]);
 describe       CN_SEVEN            .cn URI with seven-character domain name
 tflags         CN_SEVEN            nopublish
 #score          CN_SEVEN            0.01
@@ -26,6 +26,6 @@ tflags     CN_SEVEN_NOAPNIC   nopublish
 #score      CN_SEVEN_NOAPNIC  1.0
 
 # 20091025: .cn URI beginning with rx
-uri            CN_RX            m;^https?://(?:[^./]+\.)*rx[-\w].+\.cn\b;
+uri            CN_RX            m;^https?://(?:[^./]+\.)*rx[-\w].+\.cn(?:$|[/:\#]);
 describe       CN_RX            .cn URI beginning with rx
 tflags         CN_RX            nopublish
