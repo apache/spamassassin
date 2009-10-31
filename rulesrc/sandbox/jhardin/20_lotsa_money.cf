@@ -148,7 +148,7 @@ body     __EX_CUSTOMER    /\b(?:deceased|late|verstorbenen)\s(?:client|customer|
 body     __DECEASED       /\b(?:the|my|der)\s(?:deceased|late|verstorbenen)\b/i
 body     __SURVIVORS      /\b(?:widow|son|daughter|husband|wife|brother|sister|attorney)\s(?:of|to)\s(?:the\s)?late\s\w+\b/i
 body     __DEAD_PARENT    /\bmy\s(?:deceased|dead)\s(?:father|mother)/i
-body     __DORMANT_ACCT   /\b(?:dormant|abandoned)\s(?:account|fund|transaction)/i
+body     __DORMANT_ACCT   /\b(?:dormant|abandoned)\s(?:account|fund|transaction|sum)/i
 body     __WILL_LEGAL     /\b(?:codicil|last\stestament|probate|executor|intestate)\b/i
 body     __EARLY_DEMISE   /\buntimely\sdeath\b/i
 body     __WIDOW          /\bwidow(?:e[rd])'?s?\b/i
