@@ -54,8 +54,9 @@ describe       URI_NUMERIC_CCTLD     CCTLD URI with multiple numeric subdomains
 
 # From should have whitespace between the comment and the address
 header         FROM_MISSPACED        From =~ /^\s*"[^"]*"</
-#header         FROM_MISSPACED        From =~ /\S+<\w+/		# way poor S/O
 describe       FROM_MISSPACED        From: missing whitespace
+
+header         __FROM_RUNON          From =~ /\S+<\w+/		# way poor S/O
 
 # To the same
 header         TO_MISSPACED          To =~ /^\s*"[^"]*"</
@@ -65,16 +66,21 @@ score          TO_MISSPACED          0.25
 ifplugin Mail::SpamAssassin::Plugin::FreeMail
   meta         FROM_MISSP_FREEMAIL   FROM_MISSPACED && (FREEMAIL_FROM || FREEMAIL_REPLYTO)
   describe     FROM_MISSP_FREEMAIL   From misspaced + freemail provider
+
+  meta         FROM_RUNON_FREEMAIL   __FROM_RUNON && (FREEMAIL_FROM || FREEMAIL_REPLYTO)
 endif
 
 meta           FROM_MISSP_MSFT       FROM_MISSPACED && (__ANY_OUTLOOK_MUA || __HAS_MIMEOLE || __MIMEOLE_MS)
 describe       FROM_MISSP_MSFT       From misspaced + supposed Microsoft tool
 score          FROM_MISSP_MSFT       3.0
 
+meta           FROM_RUNON_MSFT       __FROM_RUNON && (__ANY_OUTLOOK_MUA || __HAS_MIMEOLE || __MIMEOLE_MS)
+
 meta           FROM_MISSP_DYNIP      FROM_MISSPACED && RDNS_DYNAMIC
 describe       FROM_MISSP_DYNIP      From misspaced + dynamic rDNS
 score          FROM_MISSP_DYNIP      2.0
 
+meta           FROM_RUNON_DYNIP      __FROM_RUNON && RDNS_DYNAMIC
 
 # observed in spam 8/2009
 header         __MUA_EQ_ORG_1        ALL =~ /\nX-Mailer: ([^\n]+)\n.*Organization: \1\n/ism
