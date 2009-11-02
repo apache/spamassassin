@@ -42,17 +42,16 @@ header DKIM_ADSP_CUSTOM_HIGH	eval:check_dkim_adsp('3')
 # Note: DKIM_SIGNED, DKIM_VALID and DKIM_VALID_AU are mainly informational
 # rules, and can serve as a basis for meta rules; it is not difficult for a
 # sender to cause hits on them or to prevent them from firing, so their score
-# should be kept low. These are "userconf" so that scores are set by hand.
-tflags DKIM_SIGNED		net userconf
-tflags DKIM_VALID		net userconf nice
-tflags DKIM_VALID_AU		net userconf nice
-tflags __DKIM_DEPENDABLE	net
+# should be kept low.
+tflags DKIM_SIGNED		net
+tflags DKIM_VALID		net nice
+tflags DKIM_VALID_AU		net nice
 tflags DKIM_ADSP_NXDOMAIN	net
 tflags DKIM_ADSP_DISCARD	net
 tflags DKIM_ADSP_ALL		net
-tflags DKIM_ADSP_CUSTOM_LOW	net
-tflags DKIM_ADSP_CUSTOM_MED	net
-tflags DKIM_ADSP_CUSTOM_HIGH	net
+tflags DKIM_ADSP_CUSTOM_LOW	net userconf
+tflags DKIM_ADSP_CUSTOM_MED	net userconf
+tflags DKIM_ADSP_CUSTOM_HIGH	net userconf
 
 describe DKIM_SIGNED		Message has a DKIM or DK signature, not necessarily valid
 describe DKIM_VALID		Message has at least one valid DKIM or DK signature
@@ -86,9 +85,9 @@ full   DKIM_VERIFIED		eval:check_dkim_valid()
 header DKIM_POLICY_TESTING	eval:check_dkim_testing()
 header DKIM_POLICY_SIGNSOME	eval:check_dkim_signsome()
 header DKIM_POLICY_SIGNALL	eval:check_dkim_signall()
-tflags DKIM_VERIFIED		net nice userconf
-tflags DKIM_POLICY_SIGNSOME	net nice userconf
-tflags DKIM_POLICY_SIGNALL	net nice userconf
-tflags DKIM_POLICY_TESTING	net nice userconf
+tflags DKIM_VERIFIED		net nice
+tflags DKIM_POLICY_SIGNSOME	net nice
+tflags DKIM_POLICY_SIGNALL	net nice
+tflags DKIM_POLICY_TESTING	net nice
 
 endif   # Mail::SpamAssassin::Plugin::DKIM
