@@ -28,11 +28,11 @@ ifplugin Mail::SpamAssassin::Plugin::DKIM
 
 header USER_IN_DKIM_WHITELIST	eval:check_for_dkim_whitelist_from()
 describe USER_IN_DKIM_WHITELIST	From: address is in the user's DKIM whitelist
-tflags USER_IN_DKIM_WHITELIST	userconf nice noautolearn net
+tflags USER_IN_DKIM_WHITELIST	nice noautolearn net userconf
 
 header USER_IN_DEF_DKIM_WL	eval:check_for_def_dkim_whitelist_from()
 describe USER_IN_DEF_DKIM_WL	From: address is in the default DKIM white-list
-tflags USER_IN_DEF_DKIM_WL	userconf nice noautolearn net
+tflags USER_IN_DEF_DKIM_WL	nice noautolearn net
 
 ###########################################################################
 # Default whitelists.  These should be addresses which send mail that is often
