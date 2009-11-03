@@ -317,7 +317,7 @@ sub _check_spf {
     }
 
     foreach my $hdr (@internal_hdrs) {
-      if ($hdr =~ /^received-spf: /i) {
+      if ($hdr =~ /^received-spf:/i) {
 	dbg("spf: found a Received-SPF header added by an internal host: $hdr");
 
 	# old version:
@@ -336,7 +336,7 @@ sub _check_spf {
 
 	# http://www.openspf.org/RFC_4408#header-field
 	# wtf - for some reason something is sticking an extra space between the header name and field value
-	if ($hdr =~ /^received-spf:\s+(pass|neutral|(?:soft)?fail|none)\b(?:.*\bidentity=(\S+?);?\b)?/i) {
+	if ($hdr =~ /^received-spf:\s*(pass|neutral|(?:soft)?fail|none)\b(?:.*\bidentity=(\S+?);?\b)?/i) {
 	  my $result = lc($1);
 
 	  my $identity = '';	# we assume it's a mfrom check if we can't tell otherwise
