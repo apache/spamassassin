@@ -38,6 +38,7 @@ my $OLDEST_SPAM_WEEKS    = 6 * 4;       # 6 months
 
 # ---------------------------------------------------------------------------
 
+sub runcmd;
 my $configuration = "$ENV{HOME}/.corpus";
 my %cf;
 my %revision = ();
@@ -92,7 +93,7 @@ sub configure {
 
 sub clean_up {
   chdir "/";
-  system "rm -rf $cf{tmp}/*.$$ ".join(' ', @tmps);
+  runcmd "rm -rf $cf{tmp}/*.$$ ".join(' ', @tmps);
 }
 
 # ---------------------------------------------------------------------------
@@ -319,8 +320,7 @@ sub gen_class {
 
     my $cmd = "$perl_path $cf{tree}/masses/logs-to-corpus-report ".
           join(" ", @ham)." ".join(" ", @spam)." > $tmpfname";
-    print "[$cmd]\n";
-    system $cmd;
+    runcmd $cmd;
     ($? >> 8 == 0) or warn "failed to run logs-to-corpus-report";
 
     rename($tmpfname, $fname) or warn "cannot rename $tmpfname to $fname";
@@ -378,7 +378,7 @@ sub gen_class {
     # compress for certain classes
     if ($class eq "OVERLAP") {
       $fname =~ s/'//gs;
-      system ("rm '$fname.gz'; gzip '$fname'"); 
+      runcmd ("rm '$fname.gz'; gzip '$fname'"); 
       # takes care of keeping the original around so we don't have to
       if ($? >> 8 != 0) { warn "gzip '$fname' failed"; }
     }
@@ -471,7 +471,7 @@ sub get_rulemetadata_for_revision {
   my $cmd = "$cf{tree}/masses/rule-qa/get-rulemetadata-for-revision ".
                     "--rev=$rev --outputdir='$dir'";
 
-  system($cmd);
+  runcmd($cmd);
   if ($? >> 8 != 0) {
     warn "'$cmd' failed";
   }
@@ -485,15 +485,16 @@ sub start_hit_frequencies_at_rev {
   my ($rev, $args) = @_;
 
   $rev ||= 'HEAD';
-  (-d "$cf{tmp}/hfdir") or system("mkdir -p $cf{tmp}/hfdir");
+  (-d "$cf{tmp}/hfdir") or runcmd("mkdir -p $cf{tmp}/hfdir");
   my $hfdir = "$cf{tmp}/hfdir/r$rev";
+  my $expected_svn_file = 'Makefile.PL';
 
   print "setting up hit-frequencies for r$rev in $hfdir\n";
 
   my $needs_checkout = 0;
   if (-d $hfdir && chdir $hfdir) {
-    system("svn up -r$rev");
-    if ($?>>8 != 0) {
+    runcmd("svn up -r$rev");
+    if ($?>>8 != 0 || !-f $expected_svn_file) {
       print "simple 'svn update' failed. performing full checkout instead...\n";
       $needs_checkout = 1;
     }
@@ -503,17 +504,17 @@ sub start_hit_frequencies_at_rev {
 
   if ($needs_checkout) {
     my $svnurl = get_svn_url();
-    system("rm -rf $hfdir");
-    system("svn co $svnurl\@$rev $hfdir");
-    if ($?>>8 != 0) { die "svn co failed"; }
+    runcmd("rm -rf $hfdir");
+    runcmd("svn co $svnurl\@$rev $hfdir");
+    if ($?>>8 != 0 || !-f $expected_svn_file) { die "svn co failed"; }
   }
   chdir "$hfdir" or die "cannot chdir $hfdir";
 
   # ensure these are rebuilt
-  system "rm -f rules/70_sandbox.cf rules/72_active.cf";
+  runcmd "rm -f rules/70_sandbox.cf rules/72_active.cf";
 
   # do this twice in case Makefile.PL is rebuilt
-  system "( make build_rules || $perl_path Makefile.PL;make build_rules )</dev/null";
+  runcmd "( make build_rules || $perl_path Makefile.PL;make build_rules )</dev/null";
 
   chdir "$hfdir/masses" or die "cannot chdir $hfdir/masses";
   open (FREQS, "$perl_path hit-frequencies -TxpaP $args |")
@@ -544,7 +545,7 @@ sub gen_report_logs {
     $f =~ s/[^-\._A-Za-z0-9]+/_/gs;    # sanitize!
     my $zf = "$fname-$f.gz";
 
-    system("gzip -c < $f > $zf.$$");
+    runcmd("gzip -c < $f > $zf.$$");
     if ($? >> 8 != 0) {
       warn "gzip -c < $f > $zf.$$ failed";
     }
@@ -606,8 +607,8 @@ sub gen_report_freqs_all {
     }
     close(FREQS);
 
-    system("cat $tmp_h >> $tmp_h_all");
-    system("cat $tmp_s >> $tmp_s_all");
+    runcmd("cat $tmp_h >> $tmp_h_all");
+    runcmd("cat $tmp_s >> $tmp_s_all");
   }
 
   if (-z $tmp_h_all && -z $tmp_s_all) {
@@ -676,3 +677,8 @@ sub gen_report_freqs_basic {
   close(FREQS);
 }
 
+sub runcmd {
+  my ($cmd) = @_;
+  print "[$cmd]\n";
+  system $cmd;
+}
