@@ -317,7 +317,7 @@ sub new_dns_packet {
   $self->connect_sock_if_reqd();
   my $packet;
   eval {
-    $packet = Net::DNS::Packet->new($host, $type, $class);
+    $packet = Net::DNS::Packet->new(Net::DNS::stripdot($host), $type, $class);
 
     # a bit noisy, so commented by default...
     #dbg("dns: new DNS packet time=%s host=%s type=%s id=%s",
@@ -398,6 +398,7 @@ sub bgsend {
     return;
   }
   my $id = $self->_packet_id($pkt);
+  dbg("dns: providing a callback for id: $id");
   $self->{id_to_callback}->{$id} = $cb;
   return $id;
 }
