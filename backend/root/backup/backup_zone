@@ -70,7 +70,6 @@ rsyncup /opt                       opt
 rsyncup /local                     local
 rsyncup /etc                       etc
 
-ls -l $bupdir/rsynced
 ) 2>&1 | tee LOG
 
 exit 0
