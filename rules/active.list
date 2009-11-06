@@ -1,11 +1,14 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi binnocenti-it_batt binnocenti-mix binnocenti hege wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 2: binnocenti wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 3: binnocenti wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2
+# with results from: day 1: bernie-it_batt bernie-mix hege wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 2: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix hege wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 3: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi binnocenti-it_batt binnocenti-mix binnocenti hege nbebout wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2
 
 # tflags userconf
 ALL_TRUSTED
 
 # good enough
 AXB_HELO_LH_HOME
+
+# good enough
+BANKING_LAWS
 
 # good enough
 BASE64_LENGTH_78_79
@@ -48,6 +51,9 @@ CORRUPT_FROM_LINE_IN_HDRS
 
 # good enough
 DEAR_BENEFICIARY
+
+# good enough
+DEAR_EMAIL_USER
 
 # good enough
 DEAR_WINNER
@@ -128,6 +134,15 @@ FB_CIALIS_LEO3
 FB_EXTRA_INCHES
 
 # good enough
+FB_GET_MEDS
+
+# good enough
+FB_IMAGIRL
+
+# good enough
+FB_INCREASE_YOUR
+
+# good enough
 FB_MOST_QUALITY
 
 # good enough
@@ -141,6 +156,9 @@ FB_SOFTTABS
 
 # good enough
 FB_TIRED_OF_YOUR
+
+# good enough
+FB_ULTRA_ALLURE
 
 # good enough
 FH_FAKE_RCVD_LINE
@@ -165,6 +183,9 @@ FH_HOST_EQ_VERIZON_P
 
 # good enough
 FH_MSGID_XXX
+
+# good enough
+FILL_THIS_FORM
 
 # good enough
 FILL_THIS_FORM_FRAUD_PHISH
@@ -196,11 +217,17 @@ FORM_FRAUD
 # tflags userconf
 FRAGMENTED_MESSAGE
 
+# good enough
+FREEMAIL_RVW_ATTCH
+
 # tflags userconf
 FROM_DOMAIN_NOVOWEL
 
 # tflags userconf
 FROM_LOCAL_NOVOWEL
+
+# good enough
+FROM_MISSPACED
 
 # good enough
 FROM_MISSP_DYNIP
@@ -213,6 +240,9 @@ FROM_MISSP_MSFT
 
 # good enough
 FRT_BIGGERMEM1
+
+# good enough
+FSL_FAKE_HOTMAIL_RVCD
 
 # good enough
 FSL_HELO_BARE_IP_1
@@ -305,6 +335,9 @@ HK_FAKENAME_EBAY
 HK_FAKENAME_MICROSOFT
 
 # good enough
+HK_FAKENAME_PAYPAL
+
+# good enough
 HK_FAKENAME_YAHOO
 
 # good enough
@@ -323,25 +356,49 @@ HK_LOTTO_SUBJECT
 HK_NAME_DRUGS
 
 # good enough
-HK_NAME_FM_MR_MRS
+HK_NAME_FM_DR
 
 # good enough
-HK_NAME_FREE
+HK_NAME_FM_FROM
+
+# good enough
+HK_NAME_FM_MR_MRS
 
 # good enough
 HK_NAME_MR_MRS
 
 # good enough
+HK_PRIZEWIN
+
+# good enough
 HK_SCAM_N1
+
+# good enough
+HK_SCAM_N12
+
+# good enough
+HK_SCAM_N13
 
 # good enough
 HK_SCAM_N15
 
 # good enough
+HK_SCAM_N16
+
+# good enough
 HK_SCAM_N2
 
 # good enough
+HK_SCAM_N3
+
+# good enough
+HK_SCAM_N4
+
+# good enough
 HK_SCAM_N8
+
+# good enough
+HK_SCAM_S12
 
 # good enough
 HK_SCAM_S15
@@ -398,6 +455,9 @@ KAM_STOCKTIP6
 KB_FAKED_THE_BAT
 
 # good enough
+KB_RATWARE_BOUNDARY
+
+# good enough
 KB_RATWARE_MSGID
 
 # good enough
@@ -413,10 +473,16 @@ KB_RATWARE_OUTLOOK_16
 KB_RATWARE_OUTLOOK_MID
 
 # good enough
+LOTTERY_1
+
+# good enough
 LOTTERY_PH_004470
 
 # good enough
 LOTTO_AGENT
+
+# good enough
+LOTTO_AGENT_RPLY
 
 # good enough
 LOTTO_DEPT
@@ -650,13 +716,22 @@ RCVD_IN_SSC_TRUSTED_COI
 RCVD_IN_XBL
 
 # good enough
+REPLYTO_WITHOUT_TO_CC
+
+# good enough
 SANE_04e8bf28eb445199a7f11b943c44d209
 
 # good enough
 SANE_4ef8302546bf270a19baf98508afacc4
 
 # good enough
+SANE_6d8469947da377e0a0b4b7fed8f7e1d8
+
+# good enough
 SANE_7429530a7398f43f1f1b795f9420714e
+
+# good enough
+SANE_8f9d40cc4e21b11c7171a7d6b3eea4c1
 
 # good enough
 SHORT_HELO_AND_INLINE_IMAGE
@@ -697,9 +772,6 @@ STOCK_IMG_HDR_FROM
 # good enough
 STOCK_IMG_HTML
 
-# good enough
-STOX_REPLY_TYPE_WITHOUT_QUOTES
-
 # tflags userconf
 SUBJECT_IN_BLACKLIST
 
@@ -710,13 +782,25 @@ SUBJECT_IN_WHITELIST
 TO_NO_BRKTS_DYNIP
 
 # good enough
+TO_NO_BRKTS_FROM_MSSP
+
+# good enough
 TVD_FINGER_02
 
 # good enough
 TVD_INCREASE_SIZE
 
 # good enough
+TVD_PH_BODY_META
+
+# good enough
 TVD_PH_REC
+
+# good enough
+TVD_PH_SUBJ_SEC_MEASURES
+
+# good enough
+TVD_PH_SUBJ_URGENT
 
 # good enough
 TVD_QUAL_MEDS
@@ -734,88 +818,43 @@ TVD_RCVD_SINGLE
 TVD_VISIT_PHARMA
 
 # good enough
-DEAR_EMAIL_USER
+DOS_OUTLOOK_TO_MX
 
 # good enough
-FB_IMAGIRL
+FB_REPLICA_ROLEX
 
 # good enough
-FILL_THIS_FORM
+FB_WITHOUT_PRESC
 
 # good enough
-FREEMAIL_RVW_ATTCH
+FRT_APPROV
 
 # good enough
-FROM_MISSPACED
+HK_SPAMMY_FILENAME
 
 # good enough
-FRT_BELOW2
+HK_SUBJECT_SPACES_SC
 
 # good enough
-FSL_FAKE_HOTMAIL_RVCD
+HS_VPXL
 
 # good enough
-HK_FAKENAME_PAYPAL
+KB_DATE_CONTAINS_TAB
 
 # good enough
-HK_NAME_FM_DR
+MANY_GOOG_PROXY
 
 # good enough
-HK_NAME_FM_FROM
+MONEY_FROM_RUNON
 
 # good enough
-HK_PRIZEWIN
+SANE_57eb6fb7217efcb7a706124454426ee6
 
 # good enough
-HK_RANDOM_ENVFROM
+SANE_91eb43f705d25c804374a746d7519660
 
 # good enough
-HK_SCAM_N12
-
-# good enough
-HK_SCAM_N13
-
-# good enough
-HK_SCAM_N16
-
-# good enough
-HK_SCAM_N3
-
-# good enough
-HK_SCAM_N4
-
-# good enough
-HK_SCAM_S12
-
-# good enough
-KB_RATWARE_BOUNDARY
-
-# good enough
-LOTTO_AGENT_RPLY
-
-# good enough
-OBFU_TEXT_ATTACH
-
-# good enough
-REPLYTO_WITHOUT_TO_CC
-
-# good enough
-SANE_6d8469947da377e0a0b4b7fed8f7e1d8
-
-# good enough
-SANE_8f9d40cc4e21b11c7171a7d6b3eea4c1
-
-# good enough
-TO_NO_BRKTS_FROM_MSSP
-
-# good enough
-TVD_PH_BODY_META
-
-# good enough
-TVD_PH_SUBJ_SEC_MEASURES
-
-# good enough
-X_MAILER_CME_6543_MSN
+TAB_IN_FROM
 
 # tflags userconf
 UNPARSEABLE_RELAY
@@ -893,9 +932,6 @@ USER_IN_WHITELIST_TO
 VANITY
 
 # good enough
-XMAILER_MIMEOLE_OL_07794
-
-# good enough
 XMAILER_MIMEOLE_OL_09BB4
 
 # good enough
@@ -918,6 +954,9 @@ XMAILER_MIMEOLE_OL_3D61D
 
 # good enough
 XMAILER_MIMEOLE_OL_4B815
+
+# good enough
+XMAILER_MIMEOLE_OL_4BF4C
 
 # good enough
 XMAILER_MIMEOLE_OL_5B79A
@@ -953,9 +992,6 @@ XMAILER_MIMEOLE_OL_C65FA
 XMAILER_MIMEOLE_OL_CAC8F
 
 # good enough
-XMAILER_MIMEOLE_OL_F3B05
-
-# good enough
 XMAILER_MIMEOLE_OL_F475E
 
 # good enough
@@ -963,6 +999,9 @@ XMAILER_MIMEOLE_OL_F6D01
 
 # good enough
 XMAILER_MIMEOLE_OL_FF5C8
+
+# good enough
+X_MAILER_CME_6543_MSN
 
 # tflags net
 __DNS_FROM_RFC_ABUSE
