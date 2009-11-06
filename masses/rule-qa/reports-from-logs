@@ -487,7 +487,7 @@ sub start_hit_frequencies_at_rev {
   $rev ||= 'HEAD';
   (-d "$cf{tmp}/hfdir") or runcmd("mkdir -p $cf{tmp}/hfdir");
   my $hfdir = "$cf{tmp}/hfdir/r$rev";
-  my $expected_svn_file = '$hfdir/Makefile.PL';
+  my $expected_svn_file = "$hfdir/Makefile.PL";
 
   print "setting up hit-frequencies for r$rev in $hfdir\n";
 
