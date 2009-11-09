@@ -155,7 +155,11 @@ through those mechanisms, too, if you prefer.
 Required Perl Interpreter
 -------------------------
 
-Perl 5.6.1 or a later version is required.
+Perl 5.8.1 or a later version is required.
+Preferred versions are 5.8.8, or 5.10.1 or later.
+
+Most of the functions might still work with Perl 5.6.1 or 5.6.2,
+but 5.6.* is no longer a supported version.
 
 
 Required Perl Modules
@@ -342,12 +346,13 @@ version is too low for them to be used.
 
     If this module is installed, and you enable the DKIM plugin,
     SpamAssassin will perform DKIM lookups when a DKIM-Signature header is
-    present in the message headers.  If Mail::DKIM version 0.20 or later
-    is installed, this will also perform Domain Key lookups on
-    DomainKey-Signature headers, without requiring the Mail::DomainKeys
-    module, which is now obsolete.
+    present in the message headers.  Current versions of Mail::DKIM (0.20
+    or later) also perform Domain Key lookups on DomainKey-Signature headers,
+    without requiring the Mail::DomainKeys module, which is now obsolete.
+    Version 0.37 or later is preferred, the absolute minimal version is 0.31.
     
-    Note that the Mail::DKIM module in turn requres the OpenSSL libraries.
+    Note that the Mail::DKIM module in turn requires the Digest::SHA module
+    and OpenSSL libraries.
 
 
   - DBI *and* DBD driver/modules for your database (from CPAN)
