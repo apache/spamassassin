@@ -172,10 +172,16 @@ SpamAssassin build directory.
 The list of required modules that do not ship with Perl and must be
 installed:
 
-  - Digest::SHA1 (from CPAN)
+  - Digest::SHA1 (from CPAN),
+    or the newer Digest::SHA which is a perl base module since Perl 5.10.0
 
     The Digest::SHA1 module is used as a cryptographic hash for some
-    tests and the Bayes subsystem.
+    tests and the Bayes subsystem if Digest::SHA module is not available.
+
+    An external perl module razor-agents-2.84 as used by a Razor2 plugin
+    seems to be the only remaining component depending on Digest::SHA1
+    (note that a packager may ship a patched version of razor-agents which
+    can use Digest::SHA instead)
 
     Debian: apt-get install libdigest-sha1-perl
     Gentoo: emerge dev-perl/Digest-SHA1

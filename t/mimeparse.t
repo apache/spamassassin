@@ -19,7 +19,11 @@ if (-e 'test_dir') {            # running from test directory, not ..
 use strict;
 use Test;
 use Mail::SpamAssassin;
-use Digest::SHA1;
+
+BEGIN {
+  eval { require Digest::SHA; import Digest::SHA qw(sha1_hex); 1 }
+  or do { require Digest::SHA1; import Digest::SHA1 qw(sha1_hex) }
+}
 
 my %files = (
 	"$prefix/t/data/nice/mime1" => [
@@ -127,7 +131,7 @@ foreach my $k ( sort keys %files ) {
 	  $res = '';
 	}
 	else {
-	  $res = Digest::SHA1::sha1_hex($parts[0]->decode());
+	  $res = sha1_hex($parts[0]->decode());
 	}
 #	print ">> ",$parts[0]->{'type'}," = $res\n";
 #	print ">> ",$parts[0]->{'type'}," expected $_\n";

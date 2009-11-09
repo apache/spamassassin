@@ -18,9 +18,13 @@ if (-e 'test_dir') {            # running from test directory, not ..
 use strict;
 use SATest; sa_t_init("rule_names");
 use Test;
-
 use Mail::SpamAssassin;
-use Digest::SHA1;
+
+BEGIN {
+  eval { require Digest::SHA; import Digest::SHA qw(sha1); 1 }
+  or do { require Digest::SHA1; import Digest::SHA1 qw(sha1) }
+}
+
 use vars qw(%patterns %anti_patterns);
 
 # initialize SpamAssassin
@@ -132,6 +136,6 @@ sub sha1_shuffle {
   my $i = shift;
   return map { $_->[0] }
          sort { $a->[1] cmp $b->[1] }
-         map { [$_, Digest::SHA1::sha1($_ . $i)] }
+         map { [$_, sha1($_ . $i)] }
          @_;
 }

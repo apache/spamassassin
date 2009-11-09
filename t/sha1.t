@@ -19,15 +19,18 @@ use strict;
 use Test;
 use Mail::SpamAssassin;
 
-use Digest::SHA1;
+BEGIN {
+  eval { require Digest::SHA; import Digest::SHA qw(sha1_hex); 1 }
+  or do { require Digest::SHA1; import Digest::SHA1 qw(sha1_hex) }
+}
 
 plan tests => 15;
 
 sub try {
   my ($data, $want) = @_;
 
-  if ($want ne Digest::SHA1::sha1_hex($data)) {
-    print "Digest::SHA1 mismatch\n";
+  if ($want ne sha1_hex($data)) {
+    print "Digest::SHA(1) sha1 mismatch\n";
     return 0;
   }
   return 1;

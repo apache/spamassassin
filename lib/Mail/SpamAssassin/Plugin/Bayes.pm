@@ -50,6 +50,11 @@ use warnings;
 use bytes;
 use re 'taint';
 
+BEGIN {
+  eval { require Digest::SHA; import Digest::SHA qw(sha1 sha1_hex); 1 }
+  or do { require Digest::SHA1; import Digest::SHA1 qw(sha1 sha1_hex) }
+}
+
 use Mail::SpamAssassin;
 use Mail::SpamAssassin::Plugin;
 use Mail::SpamAssassin::PerMsgStatus;
@@ -59,8 +64,6 @@ use Mail::SpamAssassin::Util qw(untaint_var);
 # pick ONLY ONE of these combining implementations.
 use Mail::SpamAssassin::Bayes::CombineChi;
 # use Mail::SpamAssassin::Bayes::CombineNaiveBayes;
-
-use Digest::SHA1 qw(sha1 sha1_hex);
 
 our @ISA = qw(Mail::SpamAssassin::Plugin);
 
