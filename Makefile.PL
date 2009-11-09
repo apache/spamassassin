@@ -182,6 +182,7 @@ my %makefile = (
         'Pod::Usage'    => 1.10,          # all versions prior to this do seem to be buggy
         'HTML::Parser'  => 3.43,          # the HTML code is based on this parser, older versions have utf-8 bugs
         'Archive::Tar'  => 1.23,          # for sa-update
+        'Mail::DKIM'    => 0.31,
         'Net::DNS'      => (RUNNING_ON_WINDOWS ? 0.46 : 0.34), # bugs in older revs
         'NetAddr::IP'   => 0,
         'Sys::Hostname' => 0,
@@ -346,7 +347,7 @@ foreach my $file (@FILES_THAT_MUST_EXIST) {
     'IO::Socket::INET6' =>         0,
     'IO::Socket::SSL' =>           0,
     'Compress::Zlib' =>            0,
-    'Mail::DKIM' =>                0.28,
+    'Mail::DKIM' =>                0.37,
     'DBI' =>                       0,
     'Getopt::Long' =>              2.32,
     'LWP::UserAgent' =>            0,
