@@ -126,7 +126,7 @@ EOF
 # Fisher-Yates shuffle
 sub fy_shuffle {
   for (my $i = $#_; $i > 0; $i--) {
-    @_[$_,$i] = @_[$i,$_] for rand $i+1;
+    @_[$_,$i] = @_[$i,$_] for int rand($i+1);
   }
   return @_;
 }
