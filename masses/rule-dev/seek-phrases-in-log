@@ -47,6 +47,12 @@ use warnings;
 use strict;
 use Getopt::Long qw(:config no_ignore_case);
 use Data::Dumper;
+
+BEGIN {
+  eval { require Digest::SHA; import Digest::SHA qw(sha1_base64); 1 }
+  or do { require Digest::SHA1; import Digest::SHA1 qw(sha1_base64) }
+}
+
 sub logmsg;
 
 my %opt = ();
@@ -673,7 +679,6 @@ sub ensure_reqpatlength {
 
 sub generate_rule_name {
   my $str = shift;
-  use Digest::SHA1 qw(sha1_base64);
   $str = sha1_base64($str);
   $str =~ s/^(.{6}).*$/$1/gs;
   $str =~ tr/a-z/A-Z/;

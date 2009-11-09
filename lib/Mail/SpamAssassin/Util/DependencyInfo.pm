@@ -28,12 +28,14 @@ use vars qw (
   @MODULES @OPTIONAL_MODULES $EXIT_STATUS $WARNINGS
 );
 
-my @MODULES = (
+my $have_sha = eval { require Digest::SHA };
+
+@MODULES = (
 {
-  'module' => 'Digest::SHA1',
+  'module' => 'Digest::SHA',
   'version' => '0.00',
-  'desc' => 'The Digest::SHA1 module is used as a cryptographic hash for some
-  tests and the Bayes subsystem.  It is also used by Razor2.',
+  'desc' => 'The Digest::SHA module is used as a cryptographic hash for some
+  tests and the Bayes subsystem.  It is also required by the DKIM plugin.',
 },
 {
   'module' => 'HTML::Parser',
@@ -74,6 +76,13 @@ my @MODULES = (
 );
 
 my @OPTIONAL_MODULES = (
+{
+  'module' => 'Digest::SHA1',
+  'version' => '0.00',
+  'desc' => 'The Digest::SHA1 module can be used as a cryptographic hash for
+  some tests and the Bayes subsystem if Digest::SHA is not available.  It is
+  also required by (unpatched) razor-agents-2.84 as used by a Razor2 plugin.',
+},
 {
   module => 'MIME::Base64',
   version => '0.00',
