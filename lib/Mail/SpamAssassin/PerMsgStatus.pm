@@ -56,7 +56,7 @@ use re 'taint';
 use Mail::SpamAssassin::Constants qw(:sa);
 use Mail::SpamAssassin::AsyncLoop;
 use Mail::SpamAssassin::Conf;
-use Mail::SpamAssassin::Util;
+use Mail::SpamAssassin::Util qw(untaint_var);
 use Mail::SpamAssassin::Logger;
 
 use vars qw{
@@ -1896,12 +1896,18 @@ sub _get_parsed_uri_list {
     my $redirector_patterns = $self->{conf}->{redirector_patterns};
 
     my ($rulename, $pat, @uris);
-    local ($_);
-
     my $text;
 
-    for (@$textary) {
-      # NOTE: do not modify $_ in this loop
+    for my $entry (@$textary) {
+
+      # a workaround for [perl #69973] bug: 
+      # Invalid and tainted utf-8 char crashes perl 5.10.1 in regexp evaluation
+      # Bug 6225, regexp and string should both be utf8, or none of them;
+      # untainting string also seems to avoid the crash
+      #
+      # Bug 6225: untaint the string in an attempt to work around a perl crash
+      local $_ = untaint_var($entry);
+
       while (/$tbirdurire/igo) {
         my $rawuri = $1||$2||$3;
         $rawuri =~ s/(^[^(]*)\).*$/$1/;  # as per ThunderBird, ) is an end delimiter if there is no ( preceeding it
