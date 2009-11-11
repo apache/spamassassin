@@ -553,6 +553,7 @@ sub get_content_preview {
   chomp ($str); $str .= " [...]\n";
 
   # in case the last line was huge, trim it back to around 200 chars
+  local $1;
   $str =~ s/^(.{,200}).*$/$1/gs;
 
   # now, some tidy-ups that make things look a bit prettier
@@ -888,6 +889,7 @@ sub rewrite_no_report_safe {
 	# The tag should be a comment for this header ...
 	$tag = "($tag)" if ($hdr =~ /^(?:From|To)$/);
 
+        local $1;
         s/^([^:]+:)[ \t]*(?:\Q${tag}\E )?/$1 ${tag} /i;
       }
 
@@ -935,6 +937,7 @@ sub qp_encode_header {
 
   my @hexchars = split('', '0123456789abcdef');
   my $ord;
+  local $1;
   $text =~ s{([\x80-\xff])}{
 		$ord = ord $1;
 		'='.$hexchars[($ord & 0xf0) >> 4].$hexchars[$ord & 0x0f]
@@ -979,6 +982,7 @@ sub _replace_tags {
   # a tag for it (bug 4793)
   my $t;
   my $v;
+  local($1,$2,$3);
   $text =~ s{(_(\w+?)(?:\((.*?)\))?_)}{
 	my $full = $1;
         my $tag = $2;
@@ -1566,6 +1570,7 @@ sub _get {
       
   # special queries
   if (defined $result && ($getaddr || $getname)) {
+    local $1;
     $result =~ s/^[^:]+:(.*);\s*$/$1/gs;	# 'undisclosed-recipients: ;'
     $result =~ s/\s+/ /g;			# reduce whitespace
     $result =~ s/^\s+//;			# leading whitespace
@@ -1589,6 +1594,7 @@ sub _get {
         $result =~ s/(?<!<)"[^"]*"(?!@)//g;   #" emacs
       }
       # Foo Blah <jm@xxx> or <jm@xxx>
+      local $1;
       $result =~ s/^[^"<]*?<(.*?)>.*$/$1/;
       # multiple addresses on one line? remove all but first
       $result =~ s/,.*$//;
@@ -1604,6 +1610,7 @@ sub _get {
       # "Foo Blah" <jm@foo>
       # "'Foo Blah'" <jm@foo>
       #
+      local $1;
       $result =~ s/^[\'\"]*(.*?)[\'\"]*\s*<.+>\s*$/$1/g
 	  or $result =~ s/^.+\s\((.*?)\)\s*$/$1/g; # jm@foo (Foo Blah)
     }
@@ -1908,6 +1915,7 @@ sub _get_parsed_uri_list {
       # Bug 6225: untaint the string in an attempt to work around a perl crash
       local $_ = untaint_var($entry);
 
+      local($1,$2,$3);
       while (/$tbirdurire/igo) {
         my $rawuri = $1||$2||$3;
         $rawuri =~ s/(^[^(]*)\).*$/$1/;  # as per ThunderBird, ) is an end delimiter if there is no ( preceeding it
@@ -1956,7 +1964,10 @@ sub _get_parsed_uri_list {
           my $domain = Mail::SpamAssassin::Util::uri_to_domain($cleanuri);
           if ($domain) {
             # bug 5780: Stop after domain to avoid FP, but do that after all deobfuscation of urlencoding and redirection
-            $cleanuri =~ s/^(https?:\/\/[^:\/]+).*$/$1/ if $rblonly;
+            if ($rblonly) {
+              local $1;
+              $cleanuri =~ s/^(https?:\/\/[^:\/]+).*$/$1/;
+            }
             push (@uris, $cleanuri);
             $goodurifound = 1;
           }
