@@ -1,5 +1,8 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud; day 2: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix hege nbebout wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 3: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix hege nbebout wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2
+# with results from: day 1: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix hege nbebout wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 2: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix hege nbebout wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 3: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix hege nbebout wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2
+
+# good enough
+AD_COMPLAINTS
 
 # tflags userconf
 ALL_TRUSTED
@@ -51,6 +54,9 @@ CORRUPT_FROM_LINE_IN_HDRS
 
 # good enough
 DEAR_BENEFICIARY
+
+# good enough
+DEAR_EMAIL_USER
 
 # good enough
 DEAR_WINNER
@@ -107,6 +113,9 @@ DOS_LIVE_SPACES_CID
 DOS_OE_TO_MX
 
 # good enough
+DOS_OE_TO_MX_IMAGE
+
+# good enough
 DOS_OUTLOOK_TO_MX
 
 # good enough
@@ -143,10 +152,10 @@ FB_GET_MEDS
 FB_GVR
 
 # good enough
-FB_INCREASE_YOUR
+FB_IMAGIRL
 
 # good enough
-FB_MOST_QUALITY
+FB_INCREASE_YOUR
 
 # good enough
 FB_PENIS_GROWTH
@@ -156,6 +165,9 @@ FB_QUALITY_REPLICA
 
 # good enough
 FB_REPLICA_ROLEX
+
+# good enough
+FB_SAVE_PERSC
 
 # good enough
 FB_SOFTTABS
@@ -174,6 +186,9 @@ FB_WITHOUT_PRESC
 
 # good enough
 FB_YOUR_REFI
+
+# good enough
+FB_YOUR_WEIGHT
 
 # good enough
 FH_FAKE_RCVD_LINE
@@ -230,6 +245,9 @@ FM_SUBJ_APPROVE
 FM_VEGAS_CASINO
 
 # good enough
+FORGED_TBIRD_IMG_SIZE
+
+# good enough
 FORGED_TBIRD_IMG_TO_MX
 
 # good enough
@@ -237,6 +255,9 @@ FORM_FRAUD
 
 # tflags userconf
 FRAGMENTED_MESSAGE
+
+# good enough
+FREEMAIL_RVW_ATTCH
 
 # tflags userconf
 FROM_DOMAIN_NOVOWEL
@@ -257,7 +278,16 @@ FROM_MISSP_FREEMAIL
 FROM_MISSP_MSFT
 
 # good enough
+FRT_APPROV
+
+# good enough
 FRT_BELOW2
+
+# good enough
+FRT_PHARMAC
+
+# good enough
+FR_TITLE_NUMS
 
 # good enough
 FSL_FAKE_HOTMAIL_RVCD
@@ -282,6 +312,9 @@ FSL_YG_ABUSE
 
 # good enough
 FS_ABIGGER
+
+# good enough
+FS_APPROVE_YOU
 
 # good enough
 FS_LARGE_PERCENT2
@@ -340,6 +373,9 @@ HASHCASH_2SPEND
 # tflags userconf
 HASHCASH_HIGH
 
+# good enough
+HDRS_MISSP
+
 # tflags userconf
 HEAD_LONG
 
@@ -362,16 +398,40 @@ HK_FAKENAME_MICROSOFT
 HK_FAKENAME_PAYPAL
 
 # good enough
+HK_FAKENAME_YAHOO
+
+# good enough
+HK_GOLDDUST
+
+# good enough
 HK_LOTTO
 
 # good enough
 HK_LOTTO_NAME
 
 # good enough
+HK_LOTTO_SUBJECT
+
+# good enough
 HK_NAME_DRUGS
 
 # good enough
+HK_NAME_FM_DR
+
+# good enough
+HK_NAME_FM_FROM
+
+# good enough
+HK_NAME_FM_MR_MRS
+
+# good enough
+HK_NAME_FREE
+
+# good enough
 HK_NAME_MR_MRS
+
+# good enough
+HK_PRIZEWIN
 
 # good enough
 HK_RANDOM_ENVFROM
@@ -380,7 +440,13 @@ HK_RANDOM_ENVFROM
 HK_SCAM_N1
 
 # good enough
+HK_SCAM_N13
+
+# good enough
 HK_SCAM_N15
+
+# good enough
+HK_SCAM_N16
 
 # good enough
 HK_SCAM_N2
@@ -389,13 +455,28 @@ HK_SCAM_N2
 HK_SCAM_N3
 
 # good enough
+HK_SCAM_N4
+
+# good enough
 HK_SCAM_N8
+
+# good enough
+HK_SCAM_S12
+
+# good enough
+HK_SCAM_S15
 
 # good enough
 HK_SCAM_S25
 
 # good enough
 HK_SCAM_S7
+
+# good enough
+HK_SPAMMY_FILENAME
+
+# good enough
+HK_SUBJECT_SPACES_SC
 
 # good enough
 HS_VPXL
@@ -420,6 +501,9 @@ KAM_LOTTO1
 
 # good enough
 KAM_LOTTO2
+
+# good enough
+KAM_LOTTO3
 
 # tflags publish
 KAM_STOCKOTC
@@ -464,6 +548,9 @@ KB_RATWARE_OUTLOOK_16
 KB_RATWARE_OUTLOOK_MID
 
 # good enough
+LIVEFILESTORE
+
+# good enough
 LOTTERY_1
 
 # good enough
@@ -471,6 +558,9 @@ LOTTERY_PH_004470
 
 # good enough
 LOTTO_AGENT
+
+# good enough
+LOTTO_AGENT_RPLY
 
 # good enough
 LOTTO_DEPT
@@ -483,6 +573,9 @@ L_SPAM_TOOL_13
 
 # good enough
 MANY_GOOG_PROXY
+
+# good enough
+MANY_SPAN_IN_TEXT
 
 # good enough
 MANY_TINY_FLOAT
@@ -713,16 +806,34 @@ RCVD_IN_SSC_TRUSTED_COI
 RCVD_IN_XBL
 
 # good enough
+REPLYTO_WITHOUT_TO_CC
+
+# good enough
 SANE_04e8bf28eb445199a7f11b943c44d209
 
 # good enough
+SANE_2b173a7fb7518c75ac8a2d294d773fd8
+
+# good enough
 SANE_4ef8302546bf270a19baf98508afacc4
+
+# good enough
+SANE_6d8469947da377e0a0b4b7fed8f7e1d8
 
 # good enough
 SANE_7429530a7398f43f1f1b795f9420714e
 
 # good enough
 SANE_8f9d40cc4e21b11c7171a7d6b3eea4c1
+
+# good enough
+SANE_91eb43f705d25c804374a746d7519660
+
+# good enough
+SANE_b58d7945d89b7afc9e2753c83b00ab44
+
+# good enough
+SANE_d0d2b0f6373bf91253d66dd74c594b87
 
 # good enough
 SHORT_HELO_AND_INLINE_IMAGE
@@ -776,7 +887,13 @@ SUBJECT_IN_WHITELIST
 TAB_IN_FROM
 
 # good enough
+THREAD_INDEX_HEX
+
+# good enough
 TO_NO_BRKTS_DYNIP
+
+# good enough
+TO_NO_BRKTS_FROM_MSSP
 
 # good enough
 TVD_FINGER_02
@@ -786,6 +903,9 @@ TVD_INCREASE_SIZE
 
 # good enough
 TVD_PH_BODY_META
+
+# good enough
+TVD_PH_FR5
 
 # good enough
 TVD_PH_REC
@@ -812,133 +932,10 @@ TVD_RCVD_SINGLE
 TVD_VISIT_PHARMA
 
 # good enough
-AD_COMPLAINTS
+BUG6152_INVALID_DATE_TZ_ABSURD
 
 # good enough
-DEAR_EMAIL_USER
-
-# good enough
-DOS_OE_TO_MX_IMAGE
-
-# good enough
-FB_IMAGIRL
-
-# good enough
-FB_SAVE_PERSC
-
-# good enough
-FB_YOUR_WEIGHT
-
-# good enough
-FORGED_TBIRD_IMG_SIZE
-
-# good enough
-FREEMAIL_RVW_ATTCH
-
-# good enough
-FRT_APPROV
-
-# good enough
-FRT_PHARMAC
-
-# good enough
-FR_TITLE_NUMS
-
-# good enough
-FS_APPROVE_YOU
-
-# good enough
-FS_NUDE
-
-# good enough
-HDRS_MISSP
-
-# good enough
-HK_FAKENAME_YAHOO
-
-# good enough
-HK_GOLDDUST
-
-# good enough
-HK_LOTTO_SUBJECT
-
-# good enough
-HK_NAME_FM_DR
-
-# good enough
-HK_NAME_FM_FROM
-
-# good enough
-HK_NAME_FM_MR_MRS
-
-# good enough
-HK_NAME_FREE
-
-# good enough
-HK_PRIZEWIN
-
-# good enough
-HK_SCAM_N13
-
-# good enough
-HK_SCAM_N16
-
-# good enough
-HK_SCAM_N4
-
-# good enough
-HK_SCAM_S12
-
-# good enough
-HK_SCAM_S15
-
-# good enough
-HK_SPAMMY_FILENAME
-
-# good enough
-HK_SUBJECT_SPACES_SC
-
-# good enough
-KAM_LOTTO3
-
-# good enough
-LIVEFILESTORE
-
-# good enough
-LOTTO_AGENT_RPLY
-
-# good enough
-MANY_SPAN_IN_TEXT
-
-# good enough
-OBFU_TEXT_ATTACH
-
-# good enough
-REPLYTO_WITHOUT_TO_CC
-
-# good enough
-SANE_2b173a7fb7518c75ac8a2d294d773fd8
-
-# good enough
-SANE_6d8469947da377e0a0b4b7fed8f7e1d8
-
-# good enough
-SANE_91eb43f705d25c804374a746d7519660
-
-# good enough
-SANE_b58d7945d89b7afc9e2753c83b00ab44
-
-# good enough
-SANE_d0d2b0f6373bf91253d66dd74c594b87
-
-# good enough
-THREAD_INDEX_HEX
-
-# good enough
-TO_NO_BRKTS_FROM_MSSP
-
-# good enough
-TVD_PH_FR5
+TVD_NOT_SATISFIED
 
 # tflags userconf
 UNPARSEABLE_RELAY
@@ -1046,12 +1043,6 @@ XMAILER_MIMEOLE_OL_4B815
 XMAILER_MIMEOLE_OL_4BF4C
 
 # good enough
-XMAILER_MIMEOLE_OL_5B79A
-
-# good enough
-XMAILER_MIMEOLE_OL_6554A
-
-# good enough
 XMAILER_MIMEOLE_OL_7533E
 
 # good enough
@@ -1068,9 +1059,6 @@ XMAILER_MIMEOLE_OL_91287
 
 # good enough
 XMAILER_MIMEOLE_OL_B4B40
-
-# good enough
-XMAILER_MIMEOLE_OL_C65FA
 
 # good enough
 XMAILER_MIMEOLE_OL_CAC8F
