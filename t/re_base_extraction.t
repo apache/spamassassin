@@ -22,7 +22,7 @@ BEGIN {
   if (-e 't/test_dir') { chdir 't'; } 
   if (-e 'test_dir') { unshift(@INC, '../blib/lib'); }
 
-  plan tests => 125;
+  plan tests => 128;
 
 };
 use lib '../lib';
@@ -416,6 +416,25 @@ try_extraction ('
     'nano superlattice technology:KAM_STOCKTIP15,[l=1]',
     'fooish bar:TEST1,[l=1]',
     'fooish bar:TEST2,[l=1]',
+
+]);
+
+# ---------------------------------------------------------------------------
+
+try_extraction ('
+    body TEST3 /toniospam/i
+
+', {
+    base_extract => 1,
+    bases_must_be_casei => 1,
+    bases_can_use_alternations => 0,
+    bases_can_use_quantifiers => 0,
+    bases_can_use_char_classes => 0,
+    bases_split_out_alternations => 0
+}, [
+
+    'toniospam:TEST3,[l=0]',
+],[
 
 ]);
 
