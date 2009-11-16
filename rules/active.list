@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix hege wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 2: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix hege nbebout wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 3: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix hege nbebout wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2
+# with results from: day 1: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix hege wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 2: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix hege wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 3: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix hege nbebout wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2
 
 # tflags userconf
 ALL_TRUSTED
@@ -180,9 +180,6 @@ FB_ULTRA_ALLURE
 
 # good enough
 FB_WITHOUT_PRESC
-
-# good enough
-FB_YOUR_REFI
 
 # good enough
 FB_YOUR_WEIGHT
@@ -380,9 +377,6 @@ HK_FAKENAME_MICROSOFT
 HK_FAKENAME_PAYPAL
 
 # good enough
-HK_FAKENAME_YAHOO
-
-# good enough
 HK_GOLDDUST
 
 # good enough
@@ -408,6 +402,9 @@ HK_NAME_FM_MR_MRS
 
 # good enough
 HK_NAME_MR_MRS
+
+# good enough
+HK_PNIS
 
 # good enough
 HK_RANDOM_ENVFROM
@@ -582,9 +579,6 @@ NO_RECEIVED
 
 # tflags userconf
 NO_RELAYS
-
-# good enough
-OBFU_TEXT_ATTACH
 
 # tflags net
 PYZOR_CHECK
@@ -895,9 +889,6 @@ TVD_RCVD_SINGLE
 # good enough
 TVD_VISIT_PHARMA
 
-# good enough
-HK_PNIS
-
 # tflags userconf
 UNPARSEABLE_RELAY
 
@@ -989,9 +980,6 @@ XMAILER_MIMEOLE_OL_20C99
 XMAILER_MIMEOLE_OL_22B61
 
 # good enough
-XMAILER_MIMEOLE_OL_25340
-
-# good enough
 XMAILER_MIMEOLE_OL_3857F
 
 # good enough
@@ -1005,6 +993,9 @@ XMAILER_MIMEOLE_OL_4B815
 
 # good enough
 XMAILER_MIMEOLE_OL_4BF4C
+
+# good enough
+XMAILER_MIMEOLE_OL_5B79A
 
 # good enough
 XMAILER_MIMEOLE_OL_7533E
@@ -1022,7 +1013,13 @@ XMAILER_MIMEOLE_OL_91287
 XMAILER_MIMEOLE_OL_B4B40
 
 # good enough
+XMAILER_MIMEOLE_OL_C65FA
+
+# good enough
 XMAILER_MIMEOLE_OL_CAC8F
+
+# good enough
+XMAILER_MIMEOLE_OL_F475E
 
 # good enough
 XMAILER_MIMEOLE_OL_F6D01
