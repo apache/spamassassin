@@ -1,0 +1,14 @@
+# trobert 20091116
+header __SUBJECT_MAIL_DEACTIVATED         Subject =~ /mail.*deactivated/
+describe __SUBJECT_MAIL_DEACTIVATED        Email warns of deactivated email account
+tflags __SUBJECT_MAIL_DEACTIVATED         nopublish
+
+ifplugin Mail::SpamAssassin::Plugin::MIMEHeader
+mimeheader __ZIP_MIME_ATTACHMENT          Content-Type =~ /application\/zip/
+describe __ZIP_MIME_ATTACHMENT            Contains a zip file attachment
+tflags __ZIP_MIME_ATTACHMENT              nopublish
+endif
+
+meta DEACTIVATED_WITH_ZIP       __SUBJECT_MAIL_DEACTIVATED && __ZIP_MIME_ATTACHMENT
+describe DEACTIVATED_WITH_ZIP   Deactivated email account phishing .zip
+tflags DEACTIVATED_WITH_ZIP     nopublish
