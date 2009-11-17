@@ -777,8 +777,8 @@ and returns its spam_count, ham_count and last access time.
 sub tok_get {
   my($self, $token) = @_;
   dbg("bayes: Entering tok_get");
-  my $array = $self->tok_get_all([$token]);
-  return !@$array ? () : @{$array->[0]};
+  my $array = $self->tok_get_all($token);
+  return !@$array ? () : (@{$array->[0]})[1,2,3];
 }
 
 =head2 tok_get_all
