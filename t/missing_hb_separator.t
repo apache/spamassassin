@@ -23,7 +23,13 @@ use Mail::SpamAssassin;
 plan tests => 13;
 
 # initialize SpamAssassin
-my $sa = create_saobj({'dont_copy_prefs' => 1});
+my $sa = create_saobj({
+  dont_copy_prefs => 1,
+  post_config_text => q{
+    score X_MESSAGE_INFO 0.1
+    score MISSING_HB_SEP 0.1
+  },
+});
 
 $sa->init(0); # parse rules
 
