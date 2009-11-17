@@ -319,9 +319,6 @@ sub new_dns_packet {
   eval {
     $packet = Net::DNS::Packet->new($host, $type, $class);
 
-  # Bug 6232:
-  # $packet = Net::DNS::Packet->new(Net::DNS::stripdot($host), $type, $class);
-
     # a bit noisy, so commented by default...
     #dbg("dns: new DNS packet time=%s host=%s type=%s id=%s",
     #    time, $host, $type, $packet->id);
@@ -349,13 +346,27 @@ sub _packet_id {
   my $ques = $questions[0];
 
   if (defined $ques) {
-    return join '/', $id, $ques->qname, $ques->qtype, $ques->qclass;
+    # Bug 6232: Net::DNS::Packet::new is not consistent in keeping data in
+    # sections of a packet either as original bytes or presentation-encoded:
+    # creating a query packet as above in new_dns_packet() keeps label in
+    # non-encoded form, yet on parsing an answer packet, its query section
+    # is converted to presentation form by Net::DNS::Question::parse calling
+    # Net::DNS::Packet::dn_expand and Net::DNS::wire2presentation in turn.
+    # Let's undo the effect of the wire2presentation routine here to make
+    # sure the query section of an answer packet matches the query section
+    # in our packet formed by new_dns_packet():
+    #
+    my $qname = $ques->qname;
+    $qname =~ s/\\([0-9]{3}|.)/length($1)==1 ? $1 : chr($1)/gse;
+    return join '/', $id, $qname, $ques->qtype, $ques->qclass;
+
   } else {
     # odd.  this should not happen, but clearly some DNS servers
     # can return something that Net::DNS interprets as having no
     # question section.  Better support it; just return the
     # (safe) ID part, along with a text token indicating that
     # the packet had no question part.
+    #
     return $id . "NO_QUESTION_IN_PACKET";
   }
 }
