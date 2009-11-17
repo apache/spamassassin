@@ -38,7 +38,7 @@ sub getimpl {
 }
 ok($sa);
 
-ok ($sa->{bayes_scanner} && getimpl);
+ok($sa->{bayes_scanner} && getimpl);
 
 ok(!$sa->{bayes_scanner}->is_scan_available());
 
@@ -149,6 +149,7 @@ sa_t_init('bayes'); # this wipes out what is there and begins anew
 
 # make sure we learn to a journal
 tstlocalrules ("
+bayes_store_module Mail::SpamAssassin::BayesStore::BDB
 bayes_min_spam_num 10
 bayes_min_ham_num 10
 ");
