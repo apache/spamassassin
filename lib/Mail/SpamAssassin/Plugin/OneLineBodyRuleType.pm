@@ -125,7 +125,7 @@ sub do_one_line_body_tests {
     pre_loop_body => sub
   {
     my ($self, $pms, $conf, %opts) = @_;
-    $self->add_evalstr ('
+    $self->add_evalstr($pms, '
  
       my $bodytext = $self->get_decoded_stripped_body_text_array();
       $self->{main}->call_plugins("run_body_fast_scan", {
