@@ -26,7 +26,7 @@ endif
 #  score    MONEY_FREEMAIL   0.5
 #endif
 
-meta     MONEY_FROM_RUNON   LOTS_OF_MONEY && __FROM_RUNON
+#meta     MONEY_FROM_RUNON   LOTS_OF_MONEY && __FROM_RUNON	# almost same spam hit rate, poorer S/O
 meta     MONEY_FROM_MISSP   LOTS_OF_MONEY && FROM_MISSPACED
 describe MONEY_FROM_MISSP   Lots of money and misspaced From
 score    MONEY_FROM_MISSP   1.5
@@ -216,6 +216,8 @@ body     __FOUND_YOU      /\b(?:I|we)\sfound\syour?\b/i
 body     __INVEST_MONEY   /\binvest\sthis\smoney\b/i
 body     __RANDOM_PICK    /\b(?:random(?:ly)?\s(?:\w+\s)?(?:select(?:ion|ed)|pick(?:ed)?|computer)|(?:select|pick)ed\s(?:at\s)?random(?:ly)?)\b/i
 body     __CHARITY        /\bcharit(?:y|[ai]ble)\b/i
+
+body     __UC_MONEY       /\bMONEY\b/
 
 # update UNCLAIMED_MONEY in rules/20_phrases.cf
 body     __UNCLAIMED      /\bunclaimed\s(?:assets?|accounts?|mon(?:ey|ies)|balance|funds?|prizes?|rewards?|payments?)\b/i
