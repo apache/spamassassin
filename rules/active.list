@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix dos hege wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 2: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix hege wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 3: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix hege wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2
+# with results from: day 1: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix dos hege wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 2: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix dos hege wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 3: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix hege wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2
 
 # tflags userconf
 ALL_TRUSTED
@@ -95,12 +95,6 @@ DNS_FROM_RFC_DSN
 DOS_ANAL_SPAM_MAILER
 
 # good enough
-DOS_HIGH_BAT_TO_MX
-
-# good enough
-DOS_LIVE_SPACES_CID
-
-# good enough
 DOS_OE_TO_MX
 
 # good enough
@@ -132,9 +126,6 @@ FB_EXTRA_INCHES
 
 # good enough
 FB_GET_MEDS
-
-# good enough
-FB_PENIS_GROWTH
 
 # good enough
 FB_QUALITY_REPLICA
@@ -245,6 +236,9 @@ FS_ABIGGER
 FS_MORE_CONFIDENT
 
 # good enough
+FS_NUDE
+
+# good enough
 FS_REPLICA
 
 # good enough
@@ -320,6 +314,9 @@ HK_PNIS
 HK_RANDOM_ENVFROM
 
 # good enough
+HK_RANDOM_FROM
+
+# good enough
 HK_SCAM_N1
 
 # good enough
@@ -342,15 +339,6 @@ HS_VPXL
 
 # tflags userconf
 HTML_CHARSET_FARAWAY
-
-# good enough
-JM_SOUGHT_FRAUD_1
-
-# good enough
-JM_SOUGHT_FRAUD_2
-
-# good enough
-JM_SOUGHT_FRAUD_3
 
 # good enough
 KAM_LOTTO1
@@ -399,9 +387,6 @@ MONEY_FORM
 
 # good enough
 MONEY_FROM_MISSP
-
-# good enough
-MONEY_FROM_RUNON
 
 # good enough
 MONEY_PERCENT
@@ -664,9 +649,6 @@ SPF_SOFTFAIL
 # good enough
 STOCK_IMG_HDR_FROM
 
-# good enough
-STOCK_IMG_HTML
-
 # tflags userconf
 SUBJECT_IN_BLACKLIST
 
@@ -699,12 +681,6 @@ TVD_RCVD_SINGLE
 
 # good enough
 TVD_VISIT_PHARMA
-
-# good enough
-FS_NUDE
-
-# good enough
-HK_RANDOM_FROM
 
 # tflags userconf
 UNPARSEABLE_RELAY
