@@ -678,7 +678,7 @@ Options:
   --siteconfigpath=path         Path for site configs
                                 (default: /etc/mail/spamassassin)
   --updatedir=path              Directory to place updates
-                      (default: /var/lib/spamassassin/compiled/<perlversion>/<version>)
+          (default: @@LOCAL_STATE_DIR@@/compiled/<perlversion>/@@VERSION@@)
   --cf='config line'            Additional line of configuration
   -D, --debug [area=n,...]	Print debugging messages
   -V, --version			Print version
