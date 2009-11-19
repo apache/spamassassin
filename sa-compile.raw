@@ -744,7 +744,7 @@ the default directories (usually C</etc/mail/spamassassin> or similar).
 
 By default, C<sa-compile> will use the system-wide rules update directory:
 
-        @@LOCAL_STATE_DIR@@/spamassassin/compiled/@@PERL_MAJOR_VER@@/@@VERSION@@
+        @@LOCAL_STATE_DIR@@/compiled/@@PERL_MAJOR_VER@@/@@VERSION@@
 
 If the updates should be stored in another location, specify it here.
 
