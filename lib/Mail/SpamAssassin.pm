@@ -485,14 +485,24 @@ and C<Mail::SpamAssassin::Message::Node> POD.
 
 sub parse {
   my($self, $message, $parsenow, $suppl_attrib) = @_;
-  $self->init(1);
 
+  my $start_time = time;
+  $self->init(1);
   my $timer = $self->time_method("parse");
 
   my $msg = Mail::SpamAssassin::Message->new({
     message=>$message, parsenow=>$parsenow,
     normalize=>$self->{conf}->{normalize_charset},
     suppl_attrib=>$suppl_attrib });
+
+  if (ref $suppl_attrib && exists $suppl_attrib->{master_deadline}) {
+    $msg->{master_deadline} = $suppl_attrib->{master_deadline};  # may be undef
+  } elsif ($self->{conf}->{time_limit}) {  # defined and nonzero
+    $msg->{master_deadline} = $start_time + $self->{conf}->{time_limit};
+  }
+  if (defined $msg->{master_deadline}) {
+    dbg("config: time limit %.1f s", $msg->{master_deadline} - $start_time);
+  }
 
   # bug 5069: The goal here is to get rendering plugins to do things
   # like OCR, convert doc and pdf to text, etc, though it could be anything
@@ -524,10 +534,10 @@ sub check {
   my ($self, $mail_obj) = @_;
 
   $self->init(1);
-  my $msg = Mail::SpamAssassin::PerMsgStatus->new($self, $mail_obj);
-  $msg->check();
+  my $pms = Mail::SpamAssassin::PerMsgStatus->new($self, $mail_obj);
+  $pms->check();
   dbg("timing: " . $self->timer_report())  if $self->{timer_enabled};
-  $msg;
+  $pms;
 }
 
 =item $status = $f->check_message_text ($mailtext)
@@ -1350,7 +1360,7 @@ sub compile_now {
     "Message-Id:  <".time."\@spamassassin_spamd_init>\n", "\n",
     "I need to make this message body somewhat long so TextCat preloads\n"x20);
 
-  my $mail = $self->parse(\@testmsg, 1);
+  my $mail = $self->parse(\@testmsg, 1, { master_deadline => undef });
   my $status = Mail::SpamAssassin::PerMsgStatus->new($self, $mail,
                         { disable_auto_learning => 1 } );
 

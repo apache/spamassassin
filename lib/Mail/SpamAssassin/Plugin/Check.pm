@@ -18,9 +18,12 @@ use strict;
 use warnings;
 use re 'taint';
 
+use Time::HiRes qw(time);
+
 use Mail::SpamAssassin::Plugin;
 use Mail::SpamAssassin::Logger;
 use Mail::SpamAssassin::Util qw(untaint_var);
+use Mail::SpamAssassin::Timeout;
 use Mail::SpamAssassin::Constants qw(:sa);
 
 use vars qw(@ISA @TEMPORARY_METHODS);
@@ -49,7 +52,7 @@ sub check_main {
   my $pms = $args->{permsgstatus};
 
   my $suppl_attrib = $pms->{msg}->{suppl_attrib};
-  if (defined $suppl_attrib && ref $suppl_attrib->{rule_hits}) {
+  if (ref $suppl_attrib && ref $suppl_attrib->{rule_hits}) {
     my @caller_rule_hits = @{$suppl_attrib->{rule_hits}};
     dbg("check: adding caller rule hits, %d rules", scalar(@caller_rule_hits));
     for my $caller_rule_hit (@caller_rule_hits) {
@@ -79,6 +82,7 @@ sub check_main {
   my $decoded = $pms->get_decoded_stripped_body_text_array();
   my $bodytext = $pms->get_decoded_body_text_array();
   my $fulltext = $pms->{msg}->get_pristine();
+  my $master_deadline = $pms->{master_deadline};
 
   my @uris = $pms->get_uri_list();
 
@@ -87,11 +91,19 @@ sub check_main {
     # happen in Conf.pm when we switch a rule from one priority to another
     next unless ($pms->{conf}->{priorities}->{$priority} > 0);
 
+    if ($pms->{deadline_exceeded}) {
+      last;
+    } elsif ($master_deadline && time > $master_deadline) {
+      info("check: exceeded time limit, skipping further tests");
+      $pms->{deadline_exceeded} = 1;
+      last;
+    } elsif ($self->{main}->call_plugins("have_shortcircuited",
+                                         { permsgstatus => $pms })) {
+      # if shortcircuiting is hit, we skip all other priorities...
+      last;
+    }
+
     my $timer = $self->{main}->time_method("tests_pri_".$priority);
-
-    # if shortcircuiting is hit, we skip all other priorities...
-    last if $self->{main}->call_plugins("have_shortcircuited", { permsgstatus => $pms });
-
     dbg("check: running tests for priority: $priority");
 
     # only harvest the dnsbl queries once priority HARVEST_DNSBL_PRIORITY
@@ -122,33 +134,49 @@ sub check_main {
     # do head tests
     $self->do_head_tests($pms, $priority);
     $pms->harvest_completed_queries();
+    last if $pms->{deadline_exceeded};
+
     $self->do_head_eval_tests($pms, $priority);
     $pms->harvest_completed_queries();
+    last if $pms->{deadline_exceeded};
 
     $self->do_body_tests($pms, $priority, $decoded);
     $pms->harvest_completed_queries();
+    last if $pms->{deadline_exceeded};
+
     $self->do_uri_tests($pms, $priority, @uris);
     $pms->harvest_completed_queries();
+    last if $pms->{deadline_exceeded};
+
     $self->do_body_eval_tests($pms, $priority, $decoded);
     $pms->harvest_completed_queries();
+    last if $pms->{deadline_exceeded};
   
     $self->do_rawbody_tests($pms, $priority, $bodytext);
     $pms->harvest_completed_queries();
+    last if $pms->{deadline_exceeded};
+
     $self->do_rawbody_eval_tests($pms, $priority, $bodytext);
     $pms->harvest_completed_queries();
+    last if $pms->{deadline_exceeded};
   
     $self->do_full_tests($pms, $priority, \$fulltext);
     $pms->harvest_completed_queries();
+    last if $pms->{deadline_exceeded};
+
     $self->do_full_eval_tests($pms, $priority, \$fulltext);
     $pms->harvest_completed_queries();
+    last if $pms->{deadline_exceeded};
 
     $self->do_meta_tests($pms, $priority);
     $pms->harvest_completed_queries();
+    last if $pms->{deadline_exceeded};
 
     # we may need to call this more often than once through the loop, but
     # it needs to be done at least once, either at the beginning or the end.
     $self->{main}->call_plugins ("check_tick", { permsgstatus => $pms });
     $pms->harvest_completed_queries();
+    last if $pms->{deadline_exceeded};
   }
 
   # sanity check, it is possible that no rules >= HARVEST_DNSBL_PRIORITY ran so the harvest
@@ -167,15 +195,27 @@ sub check_main {
     $pms->{resolver}->finish_socket() if $pms->{resolver};
   }
 
+  if ($pms->{deadline_exceeded}) {
+    $pms->got_hit('TIME_LIMIT_EXCEEDED', '', score => 0.001,
+                  description => 'Exceeded time limit / deadline');
+  }
+
   # finished running rules
   delete $pms->{current_rule_name};
   undef $decoded;
   undef $bodytext;
   undef $fulltext;
 
-  # auto-learning
-  $pms->learn();
-  $self->{main}->call_plugins ("check_post_learn", { permsgstatus => $pms });
+  if ($pms->{deadline_exceeded}) {
+  # dbg("check: exceeded time limit, skipping auto-learning");
+  } elsif ($master_deadline && time > $master_deadline) {
+    info("check: exceeded time limit, skipping auto-learning");
+    $pms->{deadline_exceeded} = 1;
+  } else {
+    # auto-learning
+    $pms->learn();
+    $self->{main}->call_plugins ("check_post_learn", { permsgstatus => $pms });
+  }
 
   # track user_rules recompilations; each scanned message is 1 tick on this counter
   if ($self->{done_user_rules}) {
@@ -239,8 +279,17 @@ sub run_rbl_eval_tests {
 sub run_generic_tests {
   my ($self, $pms, $priority, %opts) = @_;
 
-  return if $self->{main}->call_plugins("have_shortcircuited",
-                                        { permsgstatus => $pms });
+  my $master_deadline = $pms->{master_deadline};
+  if ($pms->{deadline_exceeded}) {
+    return;
+  } elsif ($master_deadline && time > $master_deadline) {
+    info("check: (run_generic) exceeded time limit, skipping further tests");
+    $pms->{deadline_exceeded} = 1;
+    return;
+  } elsif ($self->{main}->call_plugins("have_shortcircuited",
+                                        { permsgstatus => $pms })) {
+    return;
+  }
 
   my $ruletype = $opts{type};
   dbg("rules: running $ruletype tests; score so far=".$pms->{score});
@@ -257,11 +306,17 @@ sub run_generic_tests {
   my $methodname = $package_name."::_".$ruletype."_tests_".$clean_priority;
 
   if (defined &{$methodname} && !$doing_user_rules) {
-    no strict "refs";
 run_compiled_method:
   # dbg("rules: run_generic_tests - calling %s", $methodname);
-    $methodname->($pms, @{$opts{args}});
-    use strict "refs";
+    my $t = Mail::SpamAssassin::Timeout->new({ deadline => $master_deadline });
+    my $err = $t->run(sub {
+      no strict "refs";
+      $methodname->($pms, @{$opts{args}});
+    });
+    if ($t->timed_out() && $master_deadline && time > $master_deadline) {
+      info("check: exceeded time limit in $methodname, skipping further tests");
+      $pms->{deadline_exceeded} = 1;
+    }
     return;
   }
 
@@ -1030,8 +1085,17 @@ sub do_full_eval_tests {
 sub run_eval_tests {
   my ($self, $pms, $testtype, $evalhash, $prepend2desc, $priority, @extraevalargs) = @_;
  
-  return if $self->{main}->call_plugins("have_shortcircuited",
-                                        { permsgstatus => $pms });
+  my $master_deadline = $pms->{master_deadline};
+  if ($pms->{deadline_exceeded}) {
+    return;
+  } elsif ($master_deadline && time > $master_deadline) {
+    info("check: (run_eval) exceeded time limit, skipping further tests");
+    $pms->{deadline_exceeded} = 1;
+    return;
+  } elsif ($self->{main}->call_plugins("have_shortcircuited",
+                                        { permsgstatus => $pms })) {
+    return;
+  }
 
   my $conf = $pms->{conf};
   my $doing_user_rules = $conf->{want_rebuild_for_type}->{$testtype};
@@ -1053,10 +1117,17 @@ sub run_eval_tests {
   if (defined &{"${package_name}::${methodname}"}
       && !$doing_user_rules)
   {
+    my $method = "${package_name}::${methodname}";
   # dbg("rules: run_eval_tests - calling %s", $methodname);
-    no strict "refs";
-    &{"${package_name}::${methodname}"}($pms,@extraevalargs);
-    use strict "refs";
+    my $t = Mail::SpamAssassin::Timeout->new({ deadline => $master_deadline });
+    my $err = $t->run(sub {
+      no strict "refs";
+      &{$method}($pms,@extraevalargs);
+    });
+    if ($t->timed_out() && $master_deadline && time > $master_deadline) {
+      info("check: exceeded time limit in $method, skipping further tests");
+      $pms->{deadline_exceeded} = 1;
+    }
     return;
   }
 
@@ -1207,9 +1278,15 @@ EOT
     my $method = "${package_name}::${methodname}";
     push (@TEMPORARY_METHODS, $methodname);
   # dbg("rules: run_eval_tests - calling %s", $methodname);
-    no strict "refs";
-    &{$method}($pms,@extraevalargs);
-    use strict "refs";
+    my $t = Mail::SpamAssassin::Timeout->new({ deadline => $master_deadline });
+    my $err = $t->run(sub {
+      no strict "refs";
+      &{$method}($pms,@extraevalargs);
+    });
+    if ($t->timed_out() && $master_deadline && time > $master_deadline) {
+      info("check: exceeded time limit in $method, skipping further tests");
+      $pms->{deadline_exceeded} = 1;
+    }
   }
 }
 

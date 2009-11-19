@@ -23,7 +23,7 @@ Mail::SpamAssassin::Timeout - safe, reliable timeouts in perl
 
     # non-timeout code...
 
-    my $t = Mail::SpamAssassin::Timeout->new({ secs => 5 });
+    my $t = Mail::SpamAssassin::Timeout->new({ secs => 5, deadline => $when });
     
     $t->run(sub {
         # code to run with a 5-second timeout...
@@ -58,6 +58,8 @@ use warnings;
 use bytes;
 use re 'taint';
 
+use Time::HiRes qw(time alarm);
+
 use vars qw{
   @ISA
 };
@@ -74,7 +76,14 @@ Constructor.  Options include:
 
 =item secs => $seconds
 
-timeout, in seconds.  Optional; if not specified, no timeouts will be applied.
+time interval, in seconds. Optional; if neither C<secs> nor C<deadline> is
+specified, no timeouts will be applied.
+
+=item deadline => $unix_timestamp
+
+Unix timestamp (time in seconds since epoch) when a timeout is reached.
+Optional; if neither B<secs> nor B<deadline> is specified, no timeouts will
+be applied. If both are specified, the shorter interval of the two prevails.
 
 =back
 
@@ -96,7 +105,8 @@ sub new {
 
 Run a code reference within the currently-defined timeout.
 
-The timeout is as defined by the B<secs> parameter to the constructor.
+The timeout is as defined by the B<secs> and B<deadline> parameters
+to the constructor.
 
 Returns whatever the subroutine returns, or C<undef> on timeout.
 If the timer times out, C<$t-<gt>timed_out()> will return C<1>.
@@ -123,13 +133,22 @@ sub _run {      # private
 
   delete $self->{timed_out};
 
-  if (!$self->{secs}) { # no timeout!  just call the sub and return.
+  my $secs = $self->{secs};
+  my $deadline = $self->{deadline};
+
+  if (defined $deadline) {
+    my $dt = $deadline - time;
+    $dt = 1  if $dt < 1;  # give some slack
+    $secs = $dt  if !defined $secs || $dt < $secs;
+  }
+
+  if (!defined $secs) {  # no timeout!  just call the sub and return.
     return &$sub;
   }
 
   # assertion
-  if ($self->{secs} < 0) {
-    die "Mail::SpamAssassin::Timeout: oops? neg value for 'secs': $self->{secs}";
+  if ($secs < 0) {
+    die "Mail::SpamAssassin::Timeout: oops? neg value for 'secs': $secs";
   }
 
   my $oldalarm = 0;
@@ -146,7 +165,7 @@ sub _run {      # private
     local $SIG{ALRM} = sub { $timedout++; die "__alarm__ignore__\n" };
     local $SIG{__DIE__};   # bug 4631
 
-    $oldalarm = alarm($self->{secs});
+    $oldalarm = alarm($secs);
 
     $ret = &$sub;
 
@@ -187,11 +206,7 @@ sub _run {      # private
     $self->{timed_out} = 1;
   }
 
-  if ($and_catch) {
-    return;                 # undef
-  } else {
-    return $ret;
-  }
+  return $and_catch ? undef : $ret;
 }
 
 ###########################################################################
@@ -219,7 +234,16 @@ be reset to its starting value.
 
 sub reset {
   my ($self) = @_;
-  alarm($self->{secs});
+
+  my $secs = $self->{secs};
+  my $deadline = $self->{deadline};
+
+  if (defined $deadline) {
+    my $dt = $deadline - time;
+    $dt = 1  if $dt < 1;  # give some slack
+    $secs = $dt  if !defined $secs || $dt < $secs;
+  }
+  alarm($secs)  if defined $secs;
 }
 
 ###########################################################################

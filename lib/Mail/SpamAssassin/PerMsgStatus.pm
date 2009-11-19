@@ -53,6 +53,8 @@ use strict;
 use warnings;
 use re 'taint';
 
+use Time::HiRes qw(time);
+
 use Mail::SpamAssassin::Constants qw(:sa);
 use Mail::SpamAssassin::AsyncLoop;
 use Mail::SpamAssassin::Conf;
@@ -92,7 +94,9 @@ sub new {
     'disable_auto_learning' => 0,
     'auto_learn_status' => undef,
     'conf'              => $main->{conf},
-    'async'             => Mail::SpamAssassin::AsyncLoop->new($main)
+    'async'             => Mail::SpamAssassin::AsyncLoop->new($main),
+    'master_deadline'   => $msg->{master_deadline},  # typically just inherited
+    'deadline_exceeded' => 0,  # time limit exceeded, skipping further tests
   };
   #$self->{main}->{use_rule_subs} = 1;
 
@@ -2199,7 +2203,6 @@ used.
 Optional: a string, i.e. a space-separated list of additional tflags
 to be appended to an existing list of flags in $self->{conf}->{tflags},
 such as: "nice noautolearn multiple". No syntax checks are performed.
-
 
 =item description => $string
 

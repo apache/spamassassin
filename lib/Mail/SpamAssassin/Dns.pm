@@ -124,7 +124,8 @@ sub do_rbl_lookup {
       });
 
     $ent->{id} = $id;     # tie up the loose end
-    $existing = $self->{async}->start_lookup($ent);
+    $existing =
+      $self->{async}->start_lookup($ent, $self->{master_deadline});
   }
 
   # always add set
@@ -172,7 +173,7 @@ sub do_dns_lookup {
     });
 
   $ent->{id} = $id;     # tie up the loose end
-  $self->{async}->start_lookup($ent);
+  $self->{async}->start_lookup($ent, $self->{master_deadline});
 }
 
 ###########################################################################

@@ -73,6 +73,7 @@ sub new {
     'main'              => $main,
     'msg'               => $msg,
     'learned'		=> 0,
+    'master_deadline'   => $msg->{master_deadline},
   };
 
   $self->{conf} = $self->{main}->{conf};
