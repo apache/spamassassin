@@ -1419,7 +1419,7 @@ Options:
                           keyring. Use multiple times for multiple files
   --updatedir path        Directory to place updates, defaults to the
                           SpamAssassin site rules directory
-                          (default: /var/lib/spamassassin/<version>)
+                          (default: @@LOCAL_STATE_DIR@@/@@VERSION@@)
   --refreshmirrors        Force the MIRRORED.BY file to be updated
   -D, --debug [area=n,...]  Print debugging messages
   -V, --version           Print version
