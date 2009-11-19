@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix dos hege wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 2: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix dos hege wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 3: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix hege wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2
+# with results from: day 1: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix dos hege wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 2: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix dos hege wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 3: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix dos hege wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2
 
 # tflags userconf
 ALL_TRUSTED
@@ -110,6 +110,9 @@ DOS_RCVD_IP_TWICE_C
 DRUGS_STOCK_MIMEOLE
 
 # good enough
+DYN_RDNS_AND_INLINE_IMAGE
+
+# good enough
 DYN_RDNS_SHORT_HELO_HTML
 
 # good enough
@@ -141,6 +144,9 @@ FB_TIRED_OF_YOUR
 
 # good enough
 FB_WITHOUT_PRESC
+
+# good enough
+FH_DATE_PAST_20XX
 
 # good enough
 FH_FAKE_RCVD_LINE
@@ -184,6 +190,12 @@ FM_SCHOOLING
 # good enough
 FM_SEX_HELODDDD
 
+# good enough
+FM_SUBJ_APPROVE
+
+# good enough
+FM_VEGAS_CASINO
+
 # tflags userconf
 FRAGMENTED_MESSAGE
 
@@ -206,7 +218,13 @@ FROM_MISSP_MSFT
 FRT_APPROV
 
 # good enough
+FRT_BIGGERMEM1
+
+# good enough
 FRT_PHARMAC
+
+# good enough
+FRT_ROLEX
 
 # good enough
 FSL_FAKE_HOTMAIL_RVCD
@@ -237,6 +255,9 @@ FS_MORE_CONFIDENT
 
 # good enough
 FS_NUDE
+
+# good enough
+FS_PHARMASUB2
 
 # good enough
 FS_REPLICA
@@ -299,9 +320,6 @@ HELO_OEM
 HK_FAKENAME_EBAY
 
 # good enough
-HK_FAKENAME_MICROSOFT
-
-# good enough
 HK_LOTTO
 
 # good enough
@@ -314,9 +332,6 @@ HK_PNIS
 HK_RANDOM_ENVFROM
 
 # good enough
-HK_RANDOM_FROM
-
-# good enough
 HK_SCAM_N1
 
 # good enough
@@ -324,9 +339,6 @@ HK_SCAM_N15
 
 # good enough
 HK_SCAM_N2
-
-# good enough
-HK_SCAM_N3
 
 # good enough
 HK_SCAM_N8
@@ -605,9 +617,6 @@ SANE_4ef8302546bf270a19baf98508afacc4
 SANE_7429530a7398f43f1f1b795f9420714e
 
 # good enough
-SANE_8f9d40cc4e21b11c7171a7d6b3eea4c1
-
-# good enough
 SANE_91eb43f705d25c804374a746d7519660
 
 # good enough
@@ -659,6 +668,9 @@ SUBJECT_IN_WHITELIST
 TO_NO_BRKTS_DYNIP
 
 # good enough
+TT_MSGID_TRUNC
+
+# good enough
 TVD_FINGER_02
 
 # good enough
@@ -681,6 +693,90 @@ TVD_RCVD_SINGLE
 
 # good enough
 TVD_VISIT_PHARMA
+
+# good enough
+AXB_XMID_DIGDOTSHRT
+
+# good enough
+DOS_HIGH_BAT_TO_MX
+
+# good enough
+FB_GREAT_BEST_SEX
+
+# good enough
+FB_MOST_RECOG
+
+# good enough
+FB_SAVE_PERSC
+
+# good enough
+FB_YOU_CAN_BECOME
+
+# good enough
+FH_HOST_IN_ADDRARPA
+
+# good enough
+FORGED_RELAY_MUA_TO_MX
+
+# good enough
+FRT_ERECTION
+
+# good enough
+FSL_FAKE_GMAIL_RCVD
+
+# good enough
+FSL_GEO_ABUSE
+
+# good enough
+FSL_HELO_SETUP
+
+# good enough
+FSL_INTERIA_ABUSE
+
+# good enough
+FS_APPROVE_YOU
+
+# good enough
+HK_NAME_FREE
+
+# good enough
+HK_RANDOM_REPLYTO_NAME
+
+# good enough
+HS_BOBAX_MID_2
+
+# good enough
+JM_SOUGHT_FRAUD_1
+
+# good enough
+JM_SOUGHT_FRAUD_2
+
+# good enough
+JM_SOUGHT_FRAUD_3
+
+# good enough
+RDNS_LOCALHOST
+
+# good enough
+SANE_1c4f3286fa4aed6424ced88bfaf8b09c
+
+# good enough
+SANE_2b173a7fb7518c75ac8a2d294d773fd8
+
+# good enough
+SANE_b58d7945d89b7afc9e2753c83b00ab44
+
+# good enough
+SANE_e0b42866efae083b5d78a87e2e6710e9
+
+# good enough
+TBIRD_SUSP_MIME_BDRY
+
+# good enough
+THEBAT_UNREG
+
+# good enough
+TVD_NOT_SATISFIED
 
 # tflags userconf
 UNPARSEABLE_RELAY
