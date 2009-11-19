@@ -542,7 +542,8 @@ sub _check_spf {
 
     my $timeout = $scanner->{conf}->{spf_timeout};
 
-    my $timer = Mail::SpamAssassin::Timeout->new({ secs => $timeout });
+    my $timer = Mail::SpamAssassin::Timeout->new(
+                { secs => $timeout, deadline => $scanner->{master_deadline} });
     $err = $timer->run_and_catch(sub {
 
       my $query = $self->{spf_server}->process($request);
@@ -579,7 +580,8 @@ sub _check_spf {
 
     my $timeout = $scanner->{conf}->{spf_timeout};
 
-    my $timer = Mail::SpamAssassin::Timeout->new({ secs => $timeout });
+    my $timer = Mail::SpamAssassin::Timeout->new(
+                { secs => $timeout, deadline => $scanner->{master_deadline} });
     $err = $timer->run_and_catch(sub {
 
       ($result, $comment) = $query->result();

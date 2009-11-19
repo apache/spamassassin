@@ -225,7 +225,7 @@ sub parsed_metadata {
       key=>$key, id=>$id, type=>'TXT',
       zone => $zone,  # serves to fetch other per-zone settings
     };
-    $scanner->{async}->start_lookup($ent);
+    $scanner->{async}->start_lookup($ent, $scanner->{master_deadline});
     dbg("asn: launched DNS TXT query for %s.%s in background",
         $reversed_ip_quad, $entry->{zone});
 

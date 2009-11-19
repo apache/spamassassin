@@ -140,7 +140,7 @@ Currently this is left to Razor to decide.
 }
 
 sub razor2_access {
-  my ($self, $fulltext, $type) = @_;
+  my ($self, $fulltext, $type, $deadline) = @_;
   my $timeout = $self->{main}->{conf}->{razor_timeout};
   my $return = 0;
   my @results;
@@ -155,7 +155,8 @@ sub razor2_access {
 
   Mail::SpamAssassin::PerMsgStatus::enter_helper_run_mode($self);
 
-  my $timer = Mail::SpamAssassin::Timeout->new({ secs => $timeout });
+  my $timer = Mail::SpamAssassin::Timeout->new(
+               { secs => $timeout, deadline => $deadline });
   my $err = $timer->run_and_catch(sub {
 
     local ($^W) = 0;    # argh, warnings in Razor
@@ -347,7 +348,7 @@ sub plugin_report {
   return unless $self->{main}->{conf}->{use_razor2};
   return if $options->{report}->{options}->{dont_report_to_razor};
 
-  if ($self->razor2_access($options->{text}, 'report')) {
+  if ($self->razor2_access($options->{text}, 'report', undef)) {
     $options->{report}->{report_available} = 1;
     info('reporter: spam reported to Razor');
     $options->{report}->{report_return} = 1;
@@ -365,7 +366,7 @@ sub plugin_revoke {
   return unless $self->{main}->{conf}->{use_razor2};
   return if $options->{revoke}->{options}->{dont_report_to_razor};
 
-  if ($self->razor2_access($options->{text}, 'revoke')) {
+  if ($self->razor2_access($options->{text}, 'revoke', undef)) {
     $options->{revoke}->{revoke_available} = 1;
     dbg('reporter: spam revoked from Razor');
     $options->{revoke}->{revoke_return} = 1;
@@ -394,7 +395,8 @@ sub check_razor2 {
 
   # do it this way to make it easier to get out the results later from the
   # netcache plugin
-  ($return, @results) = $self->razor2_access($full, 'check');
+  ($return, @results) =
+    $self->razor2_access($full, 'check', $permsgstatus->{master_deadline});
   $self->{main}->call_plugins ('process_razor_result',
   	{ results => \@results, permsgstatus => $permsgstatus }
   );

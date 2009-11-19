@@ -719,7 +719,8 @@ sub _check_dkim_signature {
     };
 
     my $timeout = $pms->{conf}->{dkim_timeout};
-    my $timer = Mail::SpamAssassin::Timeout->new({ secs => $timeout });
+    my $timer = Mail::SpamAssassin::Timeout->new(
+                  { secs => $timeout, deadline => $pms->{master_deadline} });
 
     my $err = $timer->run_and_catch(sub {
       dbg("dkim: performing public key lookup and signature verification");
@@ -909,7 +910,8 @@ sub _check_dkim_adsp {
 
           my $practices;  # author domain signing practices object
           my $timeout = $pms->{conf}->{dkim_timeout};
-          my $timer = Mail::SpamAssassin::Timeout->new({ secs => $timeout });
+          my $timer = Mail::SpamAssassin::Timeout->new(
+                    { secs => $timeout, deadline => $pms->{master_deadline} });
           my $err = $timer->run_and_catch(sub {
             eval {
               if (Mail::DKIM::AuthorDomainPolicy->UNIVERSAL::can("fetch")) {

@@ -168,7 +168,7 @@ C<$obj> is returned by this method.
 =cut
 
 sub start_lookup {
-  my ($self, $ent) = @_;
+  my ($self, $ent, $master_deadline) = @_;
 
   die "oops, no id"   unless $ent->{id}   ne '';
   die "oops, no key"  unless $ent->{key}  ne '';
@@ -210,8 +210,17 @@ sub start_lookup {
   $t_end = $settings->{rbl_timeout_min}  if $settings && !defined $t_end;
   $t_end = 0.2 * $t_init  if !defined $t_end;
   $t_end = 0  if $t_end < 0;  # just in case
-
   $t_init = $t_end  if $t_init < $t_end;
+
+  my $clipped_by_master_deadline = 0;
+  if (defined $master_deadline) {
+    my $time_avail = $master_deadline - time;
+    $time_avail = 0.5  if $time_avail < 0.5;  # give some slack
+    if ($t_init > $time_avail) {
+      $t_init = $time_avail; $clipped_by_master_deadline = 1;
+      $t_end  = $time_avail  if $t_end > $time_avail;
+    }
+  }
   $ent->{timeout_initial} = $t_init;
   $ent->{timeout_min} = $t_end;
 
@@ -224,8 +233,9 @@ sub start_lookup {
   $self->{total_queries_started}++;
   $self->{pending_lookups}->{$key} = $ent;
 
-  dbg("async: starting: %s (timeout %.1fs, min %.1fs)",
-      $ent->{display_id}, $ent->{timeout_initial}, $ent->{timeout_min});
+  dbg("async: starting: %s (timeout %.1fs, min %.1fs)%s",
+      $ent->{display_id}, $ent->{timeout_initial}, $ent->{timeout_min},
+      !$clipped_by_master_deadline ? '' : ', capped by time limit');
   $ent;
 }
 

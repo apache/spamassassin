@@ -267,7 +267,8 @@ sub pyzor_lookup {
 
   $permsgstatus->enter_helper_run_mode();
 
-  my $timer = Mail::SpamAssassin::Timeout->new({ secs => $timeout });
+  my $timer = Mail::SpamAssassin::Timeout->new(
+           { secs => $timeout, deadline => $permsgstatus->{master_deadline} });
   my $err = $timer->run_and_catch(sub {
 
     local $SIG{PIPE} = sub { die "__brokenpipe__ignore__\n" };

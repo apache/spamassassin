@@ -1573,6 +1573,61 @@ delay before the updates are actually committed to the Bayes database.
 
 =over 4
 
+=item time_limit n   (default: 0, i.e. unlimited)
+
+Specifies a limit on elapsed time in seconds that SpamAssassin is allowed
+to spend before providing a result. The value may be fractional and must not
+be negative, zero is interpreted as unlimited and is a default.
+
+This is a best-effort advisory setting, processing will not be abruptly
+aborted at an arbitrary point in processing when the time limit is exceeded,
+but only on reaching one of locations in the program flow equipped with a
+time test. Currently equipped with the test are the main checking loop,
+asynchronous DNS lookups, plugins which are calling external programs.
+Rule evaluation is guarded by starting a timer (alarm) on each set of
+compiled rules.
+
+When a message is passed to Mail::SpamAssassin::parse, a deadline time
+is established as a sum of current time and the C<time_limit> setting.
+This deadline may be overruled by a caller through option 'master_deadline'
+in $suppl_attrib on a call to parse(), possibly providing a more accurate
+deadline taking into account past and expected future processing of a
+message in a mail filtering setup.
+
+When a time limit is exceeded, most of the remaining tests will be skipped,
+as well as auto-learning. Whatever tests fired so far will determine the
+final score. The behaviour is similar to short-circuiting with attribute 'on',
+as implemented by a Shortcircuit plugin. A synthetic hit on a rule named
+TIME_LIMIT_EXCEEDED with a near-zero score is generated, so that the report
+will reflect the event.
+
+The C<time_limit> option is a useful protection against excessive processing
+time on certain degenerate or unusually long or complex mail messages, as well
+as against some DoS attacks. It is also needed in time-critical pre-queue
+filtering setups (e.g. milter, proxy, integration with MTA), where message
+processing must finish before a SMTP client times out.  RFC 5321 prescribes
+in section 4.5.3.2.6 the 'DATA Termination' time limit of 10 minutes,
+although it is not unusual to see some SMTP clients abort sooner on waiting
+for a response. A sensible C<time_limit> for a pre-queue filtering setup is
+maybe 50 seconds, assuming that clients are willing to wait at least a minute.
+
+=cut
+
+  push (@cmds, {
+    setting => 'time_limit',
+    default => 0,
+    type => $CONF_TYPE_NUMERIC,
+    code => sub {
+      my ($self, $key, $value, $line) = @_;
+      if ($value !~ /^\d+(?:\.\d*)?$/) { return $INVALID_VALUE }
+      $value = 0+$value;
+      if ($value < 0) { return $INVALID_VALUE }
+      $self->{time_limit} = $value;
+    }
+  });
+
+=over 4
+
 =item lock_method type
 
 Select the file-locking method used to protect database files on-disk. By
@@ -2549,7 +2604,7 @@ general running of SpamAssassin.
 
 All DNS queries are made at the beginning of a check and we try to read
 the results at the end.  This value specifies the maximum period of time
-(in seconds) to wait for an DNS query.  If most of the DNS queries have
+(in seconds) to wait for a DNS query.  If most of the DNS queries have
 succeeded for a particular message, then SpamAssassin will not wait for
 the full period to avoid wasting time on unresponsive server(s), but will
 shrink the timeout according to a percentage of queries already completed.

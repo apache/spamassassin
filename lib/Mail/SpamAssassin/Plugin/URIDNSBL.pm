@@ -924,7 +924,7 @@ sub start_lookup {
       }
     }
   };
-  $scanner->{async}->start_lookup($ent);
+  $scanner->{async}->start_lookup($ent, $scanner->{master_deadline});
   return $ent;
 }
 
