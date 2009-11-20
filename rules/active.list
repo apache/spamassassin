@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix dos hege wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 2: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix dos hege wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 3: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix dos hege wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2
+# with results from: day 1: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix dos nbebout wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 2: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix dos hege nbebout wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 3: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix dos hege wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2
 
 # tflags userconf
 ALL_TRUSTED
@@ -48,9 +48,6 @@ CORRUPT_FROM_LINE_IN_HDRS
 
 # good enough
 DEAR_BENEFICIARY
-
-# good enough
-DEAR_WINNER
 
 # tflags net
 DIGEST_MULTIPLE
@@ -173,15 +170,6 @@ FH_HOST_EQ_VERIZON_P
 FH_MSGID_XXX
 
 # good enough
-FILL_THIS_FORM_LOAN
-
-# good enough
-FILL_THIS_FORM_LONG
-
-# good enough
-FM_LOTTO_MONEY
-
-# good enough
 FM_LOTTO_YOU_WON
 
 # good enough
@@ -218,9 +206,6 @@ FROM_MISSP_MSFT
 FRT_APPROV
 
 # good enough
-FRT_BIGGERMEM1
-
-# good enough
 FRT_PHARMAC
 
 # good enough
@@ -240,9 +225,6 @@ FSL_HELO_NON_FQDN_1
 
 # good enough
 FSL_LSPACES_ABUSE
-
-# good enough
-FSL_UA
 
 # good enough
 FSL_YG_ABUSE
@@ -320,31 +302,10 @@ HELO_OEM
 HK_FAKENAME_EBAY
 
 # good enough
-HK_LOTTO
-
-# good enough
 HK_NAME_DRUGS
 
 # good enough
 HK_PNIS
-
-# good enough
-HK_RANDOM_ENVFROM
-
-# good enough
-HK_SCAM_N1
-
-# good enough
-HK_SCAM_N15
-
-# good enough
-HK_SCAM_N2
-
-# good enough
-HK_SCAM_N8
-
-# good enough
-HK_SCAM_S25
 
 # good enough
 HS_VPXL
@@ -368,19 +329,10 @@ KB_RATWARE_MSGID
 KB_RATWARE_OUTLOOK_MID
 
 # good enough
-LIVEFILESTORE
-
-# good enough
 LOTTERY_PH_004470
 
 # good enough
 LOTTO_AGENT
-
-# good enough
-LOTTO_DEPT
-
-# good enough
-LOTTO_URI
 
 # good enough
 L_SPAM_TOOL_13
@@ -395,13 +347,7 @@ MIME_CHARSET_FARAWAY
 MISSING_HB_SEP
 
 # good enough
-MONEY_FORM
-
-# good enough
 MONEY_FROM_MISSP
-
-# good enough
-MONEY_PERCENT
 
 # good enough
 MSOE_MID_WRONG_CASE
@@ -677,9 +623,6 @@ TVD_FINGER_02
 TVD_INCREASE_SIZE
 
 # good enough
-TVD_PH_REC
-
-# good enough
 TVD_QUAL_MEDS
 
 # good enough
@@ -705,12 +648,6 @@ FB_GREAT_BEST_SEX
 
 # good enough
 FB_MOST_RECOG
-
-# good enough
-FB_SAVE_PERSC
-
-# good enough
-FB_YOU_CAN_BECOME
 
 # good enough
 FH_HOST_IN_ADDRARPA
@@ -762,6 +699,9 @@ SANE_1c4f3286fa4aed6424ced88bfaf8b09c
 
 # good enough
 SANE_2b173a7fb7518c75ac8a2d294d773fd8
+
+# good enough
+SANE_75491b468ec2e117e50f9842d32abfab
 
 # good enough
 SANE_b58d7945d89b7afc9e2753c83b00ab44
@@ -863,9 +803,6 @@ XMAILER_MIMEOLE_OL_20C99
 XMAILER_MIMEOLE_OL_22B61
 
 # good enough
-XMAILER_MIMEOLE_OL_3AC1D
-
-# good enough
 XMAILER_MIMEOLE_OL_3D61D
 
 # good enough
@@ -885,9 +822,6 @@ XMAILER_MIMEOLE_OL_91287
 
 # good enough
 XMAILER_MIMEOLE_OL_CAC8F
-
-# good enough
-X_MAILER_CME_6543_MSN
 
 # tflags net
 __DNS_FROM_RFC_ABUSE
