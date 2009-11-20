@@ -1,0 +1,28 @@
+# experiments based on masscheck results
+
+meta  HDRS_LCASE_NOASIA	__HDRS_LCASE && !__RCVD_VIA_APNIC && !__freemail_safe
+describe HDRS_LCASE_NOASIA	Has a lowercase header but not from Asia
+#score HDRS_LCASE_NOASIA	0.001
+
+# also in khop-general
+# Looking at daterev 20091107-r833654-n (the latest network test),
+# __HELO_NO_DOMAIN is 17.7782/1.2064 with 08/69 overlap with HELO_LOCALHOST
+# so nodom+!localhost should translate to 16.3559/0.3740 (S/O=0.978)
+# looking at daterev 20091113-r835775-n (latest std test),
+# __HELO_NO_DOMAIN is 17.6557/0.5898 with 07/98 overlap with HELO_LOCALHOST
+# this translates to a whopping 16.4198/0.118 (S/O=0.993)
+meta     HELO_NO_DOMAIN	__HELO_NO_DOMAIN && !HELO_LOCALHOST
+describe HELO_NO_DOMAIN	Relay has no TLD and is not localhost
+#score	 HELO_NO_DOMAIN	2.375 0.327 1.497 0.884
+# scores derived from 90% of RDNS_DYNAMIC's sa3.3 proposal (attachment 4565)
+# because they have such similar definitions, numbers, and merits
+
+meta     MALFORMED_FREEMAIL	MISSING_HEADERS && FREEMAIL_FROM
+describe MALFORMED_FREEMAIL	Missing headers on message from free email
+#score    MALFORMED_FREEMAIL	0.1
+
+# how often is references/in-reply-to present but lacking an email address?
+header __NO_ADDR_REF	References  !~ /\w\@\w+\.\w\w/ [if-unset: a@example.net]
+header __NO_ADDR_REPLY	In-Reply-to !~ /\w\@\w+\.\w\w/ [if-unset: a@example.net]
+# compare to !__MISSING_REF and !__MISSING_REPLY
+

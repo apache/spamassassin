@@ -1,0 +1,73 @@
+# From Adam Katz (khopesh) testing grounds and live channels
+# http://khopesh.com/Anti-spam
+
+### select rules from khop-general
+
+# Now looks for two DIFFERENT IPs, be they HELO or rDNS or real IP.  20091008
+# This does NOT hit assumed HELOs like Received: [10.2.3.4] (foo [1.2.3.4])
+# SpamAssassin has a bug(?) that reads ALL Received headers concatenated as one
+header	 TWO_IPS_RCVD	Received =~ /[\[\(\s]((?:[12]?\d\d?\.){3}[12]?\d\d?)[\[\(\s][^\[\n;,]{0,99}\[(?!\1)\d/
+describe TWO_IPS_RCVD	Received: Relay identifies itself as wrong IP
+#score	 1.25	# 20050729
+
+# Sendmail's FCrDNS, see http://www.sendmail.org/faq/section3#3.38
+header	 MAY_BE_FORGED	Received =~ /\(may be forged\)/
+describe MAY_BE_FORGED	Relay IP's reverse DNS does not resolve to IP
+#score	 MAY_BE_FORGED	0.8 # 20050802, raised 0.15->0.8 20090603
+
+# Note: unfair regarding RFC 2821, see http://en.wikipedia.org/wiki/FCrDNS#Uses
+header	 KHOP_HELO_FCRDNS	X-Spam-Relays-External =~ /^[^\]]+ rdns=(\S+) helo=(?!\1)\S/
+describe KHOP_HELO_FCRDNS	Relay HELO differs from its IP's reverse DNS
+#score	 KHOP_HELO_FCRDNS	0.4 # 20090603, currently scoring 0.001
+score	 KHOP_HELO_FCRDNS	0.001
+
+# This doesn't fire often after greylisting ... how about w/out it?
+meta	 KHOP_NO_FQDN	__HELO_NO_DOMAIN && (RDNS_NONE || RDNS_DYNAMIC)
+describe KHOP_NO_FQDN	HELO: not a domain, no static reverse DNS on IP
+#score	 KHOP_NO_FQDN	0.5	# 20090603
+
+header	 __PREC_BULK	Precedence =~ /bulk|list/
+
+header __NAME_IS_EMAIL	From:raw =~ /\w\@[\w.-]+\.\w\w+["'`]*\s*<\w+\@\w/
+header __NAME_EQ_EMAIL	From:raw =~ /([\w+.-]+\@[\w.-]+\.\w\w+)["'`\s]*<\s*\1>/
+meta	 NAME_EMAIL_DIFF	__NAME_IS_EMAIL && ! __NAME_EQ_EMAIL
+describe NAME_EMAIL_DIFF	Sender NAME is an unrelated email address
+#score	 NAME_EMAIL_DIFF	0.375 # tot=0.5, low for noreply@dom  20090811
+
+header	 ADV_SUBJ	Subject =~ /\[ ?(?:ADV|A D V) ?\]/i
+describe ADV_SUBJ	Marked by sender as an advertisement
+tflags	 ADV_SUBJ	nopublish
+#score	 ADV_SUBJ 1.5 # 20090304
+
+body	 DEAR_EMAIL	/^\s*Dear\b.{0,70}\w\@\w/i
+describe DEAR_EMAIL	Message contains Dear email address
+score	 DEAR_EMAIL	0.5 # 20090424
+
+body	 DEAR_NOBODY	/^\s*Dear\b[^a-zA-Z]{0,70}$/i
+describe DEAR_NOBODY	Message contains Dear but with no name
+#score	 DEAR_NOBODY	1.25	# 20090408
+
+# uri_detail lacks support for carrying matches across consecutive regexps
+#uri_detail SPOOFED_URL	raw =~ /^https?:..(.{6,50})/ text =~ /\bhttps?:..(?!$1).{5}/
+rawbody  SPOOFED_URL	m/<a\s[^>]{0,99}\bhref=.?(https?:[^>"' ]{8,50})[^>]{0,99}>(?:[^<]{0,99}<(?!\/a)[^>]{1,99}>)*(?!\1)https?:\/\/[^<]{5}/i
+describe SPOOFED_URL	Has a link whose text is a different URL
+#score	 SPOOFED_URL	2.0	# 20090408, beware of 'legit' tracking bugs
+
+uri	 FORGED_URL_DOM	/http:\/\/[^\/]{0,30}\.(?:com|org|edu|net|gov|com?\.[a-z]{2})\.[^\/]{5}/i
+describe FORGED_URL_DOM	Link domain has a TLD as a subdomain
+
+ifplugin Mail::SpamAssassin::Plugin::MIMEHeader # {
+  ifplugin Mail::SpamAssassin::Plugin::ImageInfo
+    mimeheader	__MIME_GIF	Content-Type =~ /image\/gif/i
+    mimeheader	__MIME_PNG	Content-Type =~ /image\/png/i
+    mimeheader	__MIME_JPEG	Content-Type =~ /image\/jpeg/i
+    body	__GIF_ATTACH	eval:image_count('gif',1)
+    body	__PNG_ATTACH	eval:image_count('png',1)
+    body	__JPEG_ATTACH	eval:image_count('jpeg',1)
+
+    meta	IMAGE_MISMATCH	(__MIME_GIF && !__GIF_ATTACH) || (__MIME_PNG && !__PNG_ATTACH) || (__MIME_JPEG && !__JPEG_ATTACH)
+    describe	IMAGE_MISMATCH	Contains wrong image format for MIME header
+    #score	IMAGE_MISMATCH	1.0 # 20090610, proposed to sa-users @20090524
+  endif
+endif # }
+

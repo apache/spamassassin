@@ -1,0 +1,31 @@
+# From Adam Katz (khopesh) testing grounds and live channels
+# http://khopesh.com/Anti-spam
+
+### select rules from khop-blessed
+
+# 2007/02/27 - Syntax taken from the OpenPGP standard, RFC 2440 section 6.2
+if ! plugin (Mail::SpamAssassin::Plugin::OpenPGP)
+  # moved from rawbody to body 20091021
+  body __KHOP_PGP_I1            /-----BEGIN PGP (?:SIGNATURE|MESSAGE|PUBLIC|PRIVATE)(?:, PART [0-9]{1,4}\/[0-9]{1,4}| KEY BLOCK)?-----/
+  body  __KHOP_PGP_I2           /-----END PGP/
+  meta     KHOP_PGP_INLINE      ( __KHOP_PGP_I1 && __KHOP_PGP_I2 )
+  describe KHOP_PGP_INLINE      BODY: Contains PGP data
+  tflags   KHOP_PGP_INLINE      nice noautolearn nopublish
+  #score    KHOP_PGP_INLINE      -2 -2 -3 -3
+
+  # 2005/12/14 - worthwhile even though we're not verifying the sig
+  header  KHOP_PGP_SIGNED Content-Type =~ /multipart\/signed;.*\/pgp-signature/s
+  describe KHOP_PGP_SIGNED  Message seems to contain PGP signature
+  tflags   KHOP_PGP_SIGNED  nice noautolearn
+  #score    KHOP_PGP_SIGNED  -2 -2 -3 -3     # none net bayes net+bayes
+endif
+
+# 20091016 after much testing, has yet to hit a SINGLE spam (hits ~38% of ham)
+# NOTE: This may soon move to khop-general if it is needed as a dependency
+#meta     KHOP_THREADED	!__MISSING_REF || !__MISSING_REPLY || !__MISSING_THREAD
+meta     KHOP_THREADED	(!__MISSING_REPLY && !__NO_INR_YES_REF) || (__MISSING_REPLY && !__MISSING_REF)
+# Note that this does NOT verify legitimacy of referenced MSGIDs.
+describe KHOP_THREADED  Message references or replies to another message
+tflags   KHOP_THREADED  nice
+#score    KHOP_THREADED -0.5 -0.5 -1.5 -1.5 # EASILY abused -- keep minimal
+
