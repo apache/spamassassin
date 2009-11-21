@@ -5,18 +5,17 @@
 # (warren's work has already covered most of what I'd add here)
 
 ifplugin Mail::SpamAssassin::Plugin::SPF
-  ifplugin Mail::SpamAssassin::Plugin::DKIM
+# ifplugin Mail::SpamAssassin::Plugin::DKIM
     meta   __NOT_SPOOFED       ALL_TRUSTED || SPF_PASS || DKIM_VERIFIED
-  else
-    meta   __NOT_SPOOFED       ALL_TRUSTED || SPF_PASS
-  endif
+# else
+#   meta   __NOT_SPOOFED       ALL_TRUSTED || SPF_PASS
+# endif
 else
-  ifplugin Mail::SpamAssassin::Plugin::DKIM
+# ifplugin Mail::SpamAssassin::Plugin::DKIM
     meta   __NOT_SPOOFED       ALL_TRUSTED || DKIM_VERIFIED
-  else
-    # Neither DKIM nor SPF ... ugh.  Approximate by looking for just the header.
-    header __DKIM_EXISTS        exists:DKIM-Signature
-    meta   __NOT_SPOOFED       ALL_TRUSTED || __DKIM_EXISTS
-  endif
+# else
+#   # Neither DKIM nor SPF ... ugh.  Approximate by looking for just the header.
+#   header __DKIM_EXISTS        exists:DKIM-Signature
+#   meta   __NOT_SPOOFED       ALL_TRUSTED || __DKIM_EXISTS
+# endif
 endif
-
