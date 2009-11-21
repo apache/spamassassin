@@ -58,7 +58,7 @@ use warnings;
 use bytes;
 use re 'taint';
 
-use Time::HiRes qw(time alarm);
+use Time::HiRes qw(time);
 
 use vars qw{
   @ISA
@@ -89,10 +89,14 @@ be applied. If both are specified, the shorter interval of the two prevails.
 
 =cut
 
+use vars qw($id_gen);
+BEGIN { $id_gen = 0 }  # unique generator of IDs for timer objects
+
 sub new {
   my ($class, $opts) = @_;
   $class = ref($class) || $class;
   my %selfval = $opts ? %{$opts} : ();
+  $selfval{id} = ++$id_gen;
   my $self = \%selfval;
 
   bless ($self, $class);
@@ -112,7 +116,11 @@ Returns whatever the subroutine returns, or C<undef> on timeout.
 If the timer times out, C<$t-<gt>timed_out()> will return C<1>.
 
 Time elapsed is not cumulative; multiple runs of C<run> will restart the
-timeout from scratch.
+timeout from scratch. On the other hand, nested timers do observe outer
+timeouts if they are shorter, resignalling a timeout to the level which
+established them, i.e. code running under an inner timer can not exceed
+the time limit established by an outer timer. When restarting an outer
+timer the elapsed time of a running code is taken into account.
 
 =item $t->run_and_catch($coderef)
 
@@ -136,9 +144,13 @@ sub _run {      # private
   my $secs = $self->{secs};
   my $deadline = $self->{deadline};
 
+  # assertion
+  if (defined $secs && $secs < 0) {
+    die "Mail::SpamAssassin::Timeout: oops? neg value for 'secs': $secs";
+  }
+
   if (defined $deadline) {
     my $dt = $deadline - time;
-    $dt = 1  if $dt < 1;  # give some slack
     $secs = $dt  if !defined $secs || $dt < $secs;
   }
 
@@ -146,28 +158,36 @@ sub _run {      # private
     return &$sub;
   }
 
-  # assertion
-  if ($secs < 0) {
-    die "Mail::SpamAssassin::Timeout: oops? neg value for 'secs': $secs";
-  }
-
-  my $oldalarm = 0;
+  my $id = $self->{id};
   my $ret;
+  my $oldalarm = alarm(0);  # remaining time, 0 when disarmed, undef on error
+  my $start_time = time;
 
   # bug 4699: under heavy load, an alarm may fire while $@ will contain "",
-  # which isn't very useful.  this counter works around it safely, since
+  # which isn't very useful.  this flag works around it safely, since
   # it will not require malloc() be called if it fires
   my $timedout = 0;
 
   my $eval_stat;
   eval {
-    # note use of local to ensure closed scope here
-    local $SIG{ALRM} = sub { $timedout++; die "__alarm__ignore__\n" };
-    local $SIG{__DIE__};   # bug 4631
+    if ($secs <= 0) {
+      die "__alarm__ignore__($id) (pre-expired)\n";
 
-    $oldalarm = alarm($secs);
+    } elsif ($oldalarm && $oldalarm < $secs) {
+      # just restore outer timer, a timeout signal will be handled there
+      alarm($oldalarm);
+      $ret = &$sub;
 
-    $ret = &$sub;
+    } else {
+      # note use of local to ensure closed scope here
+      local $SIG{ALRM} = sub { $timedout = 1;  die "__alarm__ignore__($id)\n" };
+      local $SIG{__DIE__};   # bug 4631
+
+      my $isecs = int($secs);
+      $isecs++  if $secs > int($isecs);  # ceiling
+      alarm($isecs);
+      $ret = &$sub;
+    }
 
     # Unset the alarm() before we leave eval{ } scope, as that stack-pop
     # operation can take a second or two under load. Note: previous versions
@@ -177,36 +197,55 @@ sub _run {      # private
     # timing out. In terms of how we might possibly have nested timeouts in
     # SpamAssassin, this is an academic issue with little impact, but it's
     # still worth avoiding anyway.
+    #
+    alarm(0);  # disarm
 
-    alarm 0;
     1;
   } or do {
     $eval_stat = $@ ne '' ? $@ : "errno=$!";  chomp $eval_stat;
+    alarm(0);  # in case we popped out for some other reason
   };
 
-  if (defined $oldalarm) {
-    # now, we could have died from a SIGALRM == timed out.  if so,
-    # restore the previously-active one, or zero all timeouts if none
-    # were previously active.
-    alarm $oldalarm;
-  }
+  # catch timedout  return:
+  #    0    0       $ret
+  #    0    1       undef
+  #    1    0       $eval_stat
+  #    1    1       undef
+  #
+  my $return = $and_catch ? $eval_stat : $ret;
 
   if (defined $eval_stat) {
-    if ($eval_stat =~ /__alarm__ignore__/) {
-      $self->{timed_out} = 1;
-    } elsif ($and_catch) {
-      return $eval_stat;
-    } else {
-      die "Timeout::_run: $eval_stat\n";  # propagate any "real" errors
+    if ($eval_stat =~ /__alarm__ignore__\Q($id)\E/) {
+      undef $return;  $self->{timed_out} = 1;
     }
   } elsif ($timedout) {
     # this happens occasionally; haven't figured out why.  seems
     # harmless in effect, though, so just issue a warning and carry on...
     warn "timeout with empty eval status\n";
-    $self->{timed_out} = 1;
+    undef $return;  $self->{timed_out} = 1;
   }
 
-  return $and_catch ? undef : $ret;
+  my $remaining_time;
+  if ($oldalarm) {
+    $remaining_time = $start_time + $oldalarm - time;
+    if ($remaining_time > 0) {  # still in the future
+      # restore the previously-active alarm,
+      # taking into account the elapsed time we spent here
+      my $iremaining_time = int($remaining_time);
+      $iremaining_time++  if $remaining_time > int($remaining_time); # ceiling
+      alarm($iremaining_time);
+      undef $remaining_time;  # already taken care of
+    }
+  }
+  if (!$and_catch && defined $eval_stat &&
+      $eval_stat !~ /__alarm__ignore__\Q($id)\E/) {
+    # propagate "real" errors or outer timeouts
+    die "Timeout::_run: $eval_stat\n";
+  }
+  if (defined $remaining_time) {
+    kill('ALRM',0);  # previous timer expired meanwhile, re-signal right away
+  }
+  return $return;
 }
 
 ###########################################################################
@@ -240,10 +279,18 @@ sub reset {
 
   if (defined $deadline) {
     my $dt = $deadline - time;
-    $dt = 1  if $dt < 1;  # give some slack
     $secs = $dt  if !defined $secs || $dt < $secs;
   }
-  alarm($secs)  if defined $secs;
+
+  if (!defined $secs) {
+    # not timed
+  } elsif ($secs > 0) {
+    my $isecs = int($secs);
+    $isecs++  if $secs > int($isecs);  # ceiling
+    alarm($isecs);
+  } else {
+    kill('ALRM',0);  # previous timer expired meanwhile, re-signal right away
+  }
 }
 
 ###########################################################################
