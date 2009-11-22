@@ -6,7 +6,8 @@
 # Now looks for two DIFFERENT IPs, be they HELO or rDNS or real IP.  20091008
 # This does NOT hit assumed HELOs like Received: [10.2.3.4] (foo [1.2.3.4])
 # SpamAssassin has a bug(?) that reads ALL Received headers concatenated as one
-header	 TWO_IPS_RCVD	Received =~ /[\[\(\s]((?:[12]?\d\d?\.){3}[12]?\d\d?)[\[\(\s][^\[\n;,]{0,99}\[(?!\1)\d/
+header	 __TWO_IPS_RCVD	Received =~ /[\[\(\s]((?:[12]?\d\d?\.){3}[12]?\d\d?)[\[\(\s][^\[\n;,]{0,99}\[(?!\1)\d/
+meta	 TWO_IPS_RCVD	__TWO_IPS_RCVD && !ALL_TRUSTED
 describe TWO_IPS_RCVD	Received: Relay identifies itself as wrong IP
 #score	 1.25	# 20050729
 
@@ -16,7 +17,8 @@ describe MAY_BE_FORGED	Relay IP's reverse DNS does not resolve to IP
 #score	 MAY_BE_FORGED	0.8 # 20050802, raised 0.15->0.8 20090603
 
 # Note: unfair regarding RFC 2821, see http://en.wikipedia.org/wiki/FCrDNS#Uses
-header	 KHOP_HELO_FCRDNS	X-Spam-Relays-External =~ /^[^\]]+ rdns=(\S+) helo=(?!\1)\S/
+header __HELO_NOT_RDNS	X-Spam-Relays-External =~ /^[^\]]+ rdns=(\S+) helo=(?!\1)\S/
+meta	 KHOP_HELO_FCRDNS	__HELO_NOT_RDNS && !(__VIA_ML || __freemail_safe || __RCVD_IN_DNSWL || !__NOT_SPOOFED)
 describe KHOP_HELO_FCRDNS	Relay HELO differs from its IP's reverse DNS
 #score	 KHOP_HELO_FCRDNS	0.4 # 20090603, currently scoring 0.001
 score	 KHOP_HELO_FCRDNS	0.001
@@ -39,7 +41,7 @@ tflags	 ADV_SUBJ	nopublish
 
 body	 DEAR_EMAIL	/^\s*Dear\b.{0,70}\w\@\w/i
 describe DEAR_EMAIL	Message contains Dear email address
-score	 DEAR_EMAIL	0.5 # 20090424
+#score	 DEAR_EMAIL	0.5 # 20090424
 
 body	 DEAR_NOBODY	/^\s*Dear\b[^a-zA-Z]{0,70}$/i
 describe DEAR_NOBODY	Message contains Dear but with no name
