@@ -6,12 +6,14 @@
 # 2007/02/27 - Syntax taken from the OpenPGP standard, RFC 2440 section 6.2
 if ! plugin (Mail::SpamAssassin::Plugin::OpenPGP)
   # moved from rawbody to body 20091021
-  body __KHOP_PGP_I1            /-----BEGIN PGP (?:SIGNATURE|MESSAGE|PUBLIC|PRIVATE)(?:, PART [0-9]{1,4}\/[0-9]{1,4}| KEY BLOCK)?-----/
-  body  __KHOP_PGP_I2           /-----END PGP/
-  meta     KHOP_PGP_INLINE      ( __KHOP_PGP_I1 && __KHOP_PGP_I2 )
-  describe KHOP_PGP_INLINE      BODY: Contains PGP data
-  tflags   KHOP_PGP_INLINE      nice noautolearn nopublish
-  #score    KHOP_PGP_INLINE      -2 -2 -3 -3
+  body     __KHOP_PGP_I1	/-----BEGIN PGP (?:SIGNATURE|MESSAGE|PUBLIC|PRIVATE)(?:, PART [0-9]{1,4}\/[0-9]{1,4}| KEY BLOCK)?-----/
+  tflags   __KHOP_PGP_I1	nice
+  body     __KHOP_PGP_I2	/-----END PGP/
+  tflags   __KHOP_PGP_I2	nice
+  meta     KHOP_PGP_INLINE	( __KHOP_PGP_I1 && __KHOP_PGP_I2 )
+  describe KHOP_PGP_INLINE	BODY: Contains PGP data
+  tflags   KHOP_PGP_INLINE	nice noautolearn nopublish
+  #score    KHOP_PGP_INLINE	-2 -2 -3 -3
 
   # 2005/12/14 - worthwhile even though we're not verifying the sig
   header  KHOP_PGP_SIGNED Content-Type =~ /multipart\/signed;.*\/pgp-signature/s
@@ -21,6 +23,7 @@ if ! plugin (Mail::SpamAssassin::Plugin::OpenPGP)
 endif
 
 # 20091016 after much testing, has yet to hit a SINGLE spam (hits ~38% of ham)
+# 20091121 masscheck features 1.0255% spam to 39.3385% ham (S/O=0.025)
 # NOTE: This may soon move to khop-general if it is needed as a dependency
 #meta     KHOP_THREADED	!__MISSING_REF || !__MISSING_REPLY || !__MISSING_THREAD
 meta     KHOP_THREADED	(!__MISSING_REPLY && !__NO_INR_YES_REF) || (__MISSING_REPLY && !__MISSING_REF)

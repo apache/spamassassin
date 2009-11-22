@@ -20,9 +20,3 @@ describe HELO_NO_DOMAIN	Relay has no TLD and is not localhost
 meta     MALFORMED_FREEMAIL	MISSING_HEADERS && FREEMAIL_FROM
 describe MALFORMED_FREEMAIL	Missing headers on message from free email
 #score    MALFORMED_FREEMAIL	0.1
-
-# how often is references/in-reply-to present but lacking an email address?
-header __NO_ADDR_REF	References  !~ /\w\@\w+\.\w\w/ [if-unset: a@example.net]
-header __NO_ADDR_REPLY	In-Reply-to !~ /\w\@\w+\.\w\w/ [if-unset: a@example.net]
-# compare to !__MISSING_REF and !__MISSING_REPLY
-
