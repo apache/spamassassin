@@ -388,7 +388,8 @@ sub parse_received_line {
   # with ESMTPA, ESMTPSA, LMTPA, LMTPSA should cover RFC 3848 compliant MTAs
   # with ASMTP (Authenticated SMTP) is used by Earthlink, Exim 4.34, and others
   # with HTTP should only be authenticated webmail sessions
-  if (/ by / && / with (ESMTPA|ESMTPSA|LMTPA|LMTPSA|ASMTP|HTTP)(?: |$)/i) {
+  # with HTTPU is used by Communigate Pro with Pronto! webmail interface
+  if (/ by / && / with (ESMTPA|ESMTPSA|LMTPA|LMTPSA|ASMTP|HTTPU?)(?: |$)/i) {
     $auth = $1;
   }
   # Courier v0.47 and possibly others
