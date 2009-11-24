@@ -45,7 +45,8 @@ use strict;
 use warnings;
 use bytes;
 use re 'taint';
-use NetAddr::IP qw(:upper);  # ensure IPv6 string case even if default changes
+
+use NetAddr::IP;   # qw(:upper);
 
 use Mail::SpamAssassin;
 use Mail::SpamAssassin::Logger;
