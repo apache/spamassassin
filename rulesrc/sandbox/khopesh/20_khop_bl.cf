@@ -6,7 +6,7 @@
 
 # Detect milter-greylist, scam-grey, postgrey, SQLgrey, and hopefully others
 header	 __GREYLISTING	ALL =~ /^X-(?:Scam-Grey|Greylist(?:ing)?):\s/m
-header	 __GREYLISTED	ALL =~ /^X-(?:Scam-grey|Greylist(?:ing)?): [Dd]elay(?:ed)? (?:for )?\d+(?: ?s(?:ec(?:ond)?s?)?|:\d\d)/
+header	 __GREYLISTED	ALL =~ /^X-(?:Scam-Grey|Greylist(?:ing)?): [Dd]elay(?:ed)? (?:for )?\d+(?: ?s(?:ec(?:ond)?s?)?|:\d\d)/m
 
 meta KHOP_GREYED __GREYLISTED && (RDNS_NONE || RDNS_DYNAMIC || __HELO_NO_DOMAIN)
 describe KHOP_GREYED	Greylisted and sent from dynamically-named relay
@@ -34,3 +34,22 @@ else
 # endif
 endif
 tflags	   __NOT_SPOOFED	nice
+
+
+# Some tests:
+
+# The DNSBL side of the Manitu iXhash zone, http://www.dnsbl.manitu.net/
+# Out-performs PSBL (72.98/0.12 spam/ham to PSBL's 48.69/0.36) at Intra2net:
+# http://www.intra2net.com/en/support/antispam/blacklist.php_dnsbl=RCVD_IN_NIX_SPAM.html
+# Since this is run by Heise and already decently advertised, I don't anticipate
+# problems testing here.  Flagged 'nopublish' to keep it in testing for now.
+header	 RCVD_IN_NIX_SPAM	eval:check_rbl('nix-spam-lastexternal','ix.dnsbl.manitu.net.')
+describe RCVD_IN_NIX_SPAM	Received via a relay in NiX Spam (heise.de)
+tflags	 RCVD_IN_NIX_SPAM	net nopublish	# 20091123
+
+# Limit SpamCop to LASTEXT like every other DNSBL ... why haven't we tried this?
+#header	 RCVD_IN_SPAMCOP	eval:check_rbl_txt('spamcop-lastexternal', 'bl.spamcop.net.', '(?i:spamcop)')
+header	 RCVD_IN_SPAMCOP	eval:check_rbl('spamcop-lastexternal', 'bl.spamcop.net.')
+describe RCVD_IN_SPAMCOP	Received via a relay in bl.spamcop.net
+tflags	 RCVD_IN_SPAMCOP	net nopublish	# 20091123
+
