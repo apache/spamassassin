@@ -424,7 +424,11 @@ my %data = (
 
   # bug 5512
   'from ([89.79.20.16]) by pop3.m80.net with MailEnable ESMTP; Tue, 20 Feb 2007 09:26:17 -0500' =>
-  '[ ip=89.79.20.16 rdns= helo= by=pop3.m80.net ident= envfrom= id= auth= msa=0 ]'
+  '[ ip=89.79.20.16 rdns= helo= by=pop3.m80.net ident= envfrom= id= auth= msa=0 ]',
+
+  # bug 6239
+  'from [1.2.3.4] (account user@example.com) by webmail.example.com (CommuniGate Pro XIMSS 5.2.16) with HTTPU id 87581547 for user@example.org; Thu, 19 Nov 2009 20:08:10 -0500' =>
+  '[ ip=1.2.3.4 rdns= helo= by=webmail.example.com ident= envfrom= id=87581547 auth=HTTPU msa=0 ]'
 
 );
 
