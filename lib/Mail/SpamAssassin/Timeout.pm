@@ -141,6 +141,7 @@ sub _run {      # private
 
   delete $self->{timed_out};
 
+  my $id = $self->{id};
   my $secs = $self->{secs};
   my $deadline = $self->{deadline};
 
@@ -149,29 +150,34 @@ sub _run {      # private
     die "Mail::SpamAssassin::Timeout: oops? neg value for 'secs': $secs";
   }
 
+  my $start_time = time;
   if (defined $deadline) {
-    my $dt = $deadline - time;
+    my $dt = $deadline - $start_time;
     $secs = $dt  if !defined $secs || $dt < $secs;
   }
-
-  if (!defined $secs) {  # no timeout!  just call the sub and return.
-    return &$sub;
-  }
-
-  my $id = $self->{id};
-  my $ret;
-  my $oldalarm = alarm(0);  # remaining time, 0 when disarmed, undef on error
-  my $start_time = time;
 
   # bug 4699: under heavy load, an alarm may fire while $@ will contain "",
   # which isn't very useful.  this flag works around it safely, since
   # it will not require malloc() be called if it fires
   my $timedout = 0;
 
-  my $eval_stat;
+  my($oldalarm, $handler);
+  if (defined $secs) {
+    $oldalarm = alarm(0);  # remaining time, 0 when disarmed, undef on error
+    $self->{end_time} = $start_time + $secs;  # needed by reset()
+    $handler = sub { $timedout = 1; die "__alarm__ignore__($id)\n" };
+  }
+
+  my($ret, $eval_stat);
   eval {
-    if ($secs <= 0) {
-      die "__alarm__ignore__($id) (pre-expired)\n";
+    local $SIG{__DIE__};   # bug 4631
+
+    if (!defined $secs) {  # no timeout, just call the sub 
+      $ret = &$sub;
+
+    } elsif ($secs <= 0) {
+      $self->{timed_out} = 1;
+      &$handler;
 
     } elsif ($oldalarm && $oldalarm < $secs) {
       # just restore outer timer, a timeout signal will be handled there
@@ -179,10 +185,7 @@ sub _run {      # private
       $ret = &$sub;
 
     } else {
-      # note use of local to ensure closed scope here
-      local $SIG{ALRM} = sub { $timedout = 1;  die "__alarm__ignore__($id)\n" };
-      local $SIG{__DIE__};   # bug 4631
-
+      local $SIG{ALRM} = $handler;  # ensure closed scope here
       my $isecs = int($secs);
       $isecs++  if $secs > int($isecs);  # ceiling
       alarm($isecs);
@@ -206,6 +209,8 @@ sub _run {      # private
     alarm(0);  # in case we popped out for some other reason
   };
 
+  delete $self->{end_time};  # reset() is only applicable within a &$sub
+
   # catch timedout  return:
   #    0    0       $ret
   #    0    1       undef
@@ -214,16 +219,17 @@ sub _run {      # private
   #
   my $return = $and_catch ? $eval_stat : $ret;
 
-  if (defined $eval_stat) {
-    if ($eval_stat =~ /__alarm__ignore__\Q($id)\E/) {
-      undef $return;  $self->{timed_out} = 1;
-    }
+  if (defined $eval_stat && $eval_stat =~ /__alarm__ignore__\Q($id)\E/) {
+    $self->{timed_out} = 1;
   } elsif ($timedout) {
     # this happens occasionally; haven't figured out why.  seems
     # harmless in effect, though, so just issue a warning and carry on...
     warn "timeout with empty eval status\n";
-    undef $return;  $self->{timed_out} = 1;
+    $self->{timed_out} = 1;
   }
+
+  # covers all cases, including where $self->{timed_out} is flagged by reset()
+  undef $return  if $self->{timed_out};
 
   my $remaining_time;
   if ($oldalarm) {
@@ -243,7 +249,11 @@ sub _run {      # private
     die "Timeout::_run: $eval_stat\n";
   }
   if (defined $remaining_time) {
-    kill('ALRM',0);  # previous timer expired meanwhile, re-signal right away
+    $self->{timed_out} = 1;
+    # previous timer expired meanwhile, re-signal right away
+    # somehow the kill('ALRM',0) does not behave like alarm does
+  # kill('ALRM',0) == 1  or die "Cannot send SIGALRM to myself [$$]";
+    Time::HiRes::alarm(0.01);
   }
   return $return;
 }
@@ -266,30 +276,28 @@ sub timed_out {
 
 =item $t->reset()
 
-If called within a C<run()> code reference, causes the current alarm timer to
-be reset to its starting value.
+If called within a C<run()> code reference, causes the current alarm timer
+to be restored to its original setting (useful after our alarm setting was
+clobbered by some underlying module).
 
 =cut
 
 sub reset {
   my ($self) = @_;
 
-  my $secs = $self->{secs};
-  my $deadline = $self->{deadline};
+  return if !defined $self->{end_time};
 
-  if (defined $deadline) {
-    my $dt = $deadline - time;
-    $secs = $dt  if !defined $secs || $dt < $secs;
-  }
-
-  if (!defined $secs) {
-    # not timed
-  } elsif ($secs > 0) {
+  my $secs = $self->{end_time} - time;
+  if ($secs > 0) {
     my $isecs = int($secs);
     $isecs++  if $secs > int($isecs);  # ceiling
     alarm($isecs);
   } else {
-    kill('ALRM',0);  # previous timer expired meanwhile, re-signal right away
+    $self->{timed_out} = 1;
+    # time interval expired meanwhile, re-signal right away
+    # somehow the kill('ALRM',0) does not behave like alarm does
+  # kill('ALRM',0) == 1  or die "Cannot send SIGALRM to myself [$$]";
+    Time::HiRes::alarm(0.01);
   }
 }
 
