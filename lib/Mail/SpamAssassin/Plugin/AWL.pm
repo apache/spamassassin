@@ -148,6 +148,67 @@ mean; C<factor> = 0 mean just use the calculated score.
 		type => $Mail::SpamAssassin::Conf::CONF_TYPE_NUMERIC
 	       });
 
+=item auto_whitelist_ipv4_mask_len n	(default: 16, range [0..32])
+
+The AWL database keeps only the specified number of most-significant bits
+of an IPv4 address in its fields, so that different individual IP addresses
+within a subnet belonging to the same owner are managed under a single
+database record. As we have no information available on the allocated
+address ranges of senders, this CIDR mask length is only an approximation.
+The default is 16 bits, corresponding to a former class B. Increase the
+number if a finer granularity is desired, e.g. to 24 (class C) or 32.
+A value 0 is allowed but is not particularly useful, as it would treat the
+whole internet as a single organization. The number need not be a multiple
+of 8, any split is allowed.
+
+=cut
+
+  push (@cmds, {
+		setting => 'auto_whitelist_ipv4_mask_len',
+		default => 16,
+		type => $Mail::SpamAssassin::Conf::CONF_TYPE_NUMERIC,
+		code => sub {
+		  my ($self, $key, $value, $line) = @_;
+		  if (!defined $value || $value eq '') {
+		    return $Mail::SpamAssassin::Conf::MISSING_REQUIRED_VALUE;
+		  } elsif ($value !~ /^\d+$/ || $value < 0 || $value > 32) {
+		    return $Mail::SpamAssassin::Conf::INVALID_VALUE;
+		  }
+		  $self->{auto_whitelist_ipv4_mask_len} = $value;
+		}
+	       });
+
+=item auto_whitelist_ipv6_mask_len n	(default: 48, range [0..128])
+
+The AWL database keeps only the specified number of most-significant bits
+of an IPv6 address in its fields, so that different individual IP addresses
+within a subnet belonging to the same owner are managed under a single
+database record. As we have no information available on the allocated address
+ranges of senders, this CIDR mask length is only an approximation. The default
+is 48 bits, corresponding to an address range commonly allocated to individual
+(smaller) organizations. Increase the number for a finer granularity, e.g.
+to 64 or 96 or 128, or decrease for wider ranges, e.g. 32.  A value 0 is
+allowed but is not particularly useful, as it would treat the whole internet
+as a single organization. The number need not be a multiple of 4, any split
+is allowed.
+
+=cut
+
+  push (@cmds, {
+		setting => 'auto_whitelist_ipv6_mask_len',
+		default => 48,
+		type => $Mail::SpamAssassin::Conf::CONF_TYPE_NUMERIC,
+		code => sub {
+		  my ($self, $key, $value, $line) = @_;
+		  if (!defined $value || $value eq '') {
+		    return $Mail::SpamAssassin::Conf::MISSING_REQUIRED_VALUE;
+		  } elsif ($value !~ /^\d+$/ || $value < 0 || $value > 128) {
+		    return $Mail::SpamAssassin::Conf::INVALID_VALUE;
+		  }
+		  $self->{auto_whitelist_ipv6_mask_len} = $value;
+		}
+	       });
+
 =item user_awl_sql_override_username
 
 Used by the SQLBasedAddrList storage implementation.

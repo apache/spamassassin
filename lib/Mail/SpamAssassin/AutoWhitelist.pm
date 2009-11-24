@@ -45,7 +45,7 @@ use strict;
 use warnings;
 use bytes;
 use re 'taint';
-use NetAddr::IP;
+use NetAddr::IP qw(:upper);  # ensure IPv6 string case even if default changes
 
 use Mail::SpamAssassin;
 use Mail::SpamAssassin::Logger;
@@ -64,18 +64,20 @@ sub new {
   $class = ref($class) || $class;
   my ($main, $msg) = @_;
 
+  my $conf = $main->{conf};
   my $self = {
-    'main'		=> $main,
+    main          => $main,
+    factor        => $conf->{auto_whitelist_factor},
+    ipv4_mask_len => $conf->{auto_whitelist_ipv4_mask_len},
+    ipv6_mask_len => $conf->{auto_whitelist_ipv6_mask_len},
   };
-
-  $self->{factor} = $main->{conf}->{auto_whitelist_factor};
 
   my $factory;
   if ($main->{pers_addr_list_factory}) {
     $factory = $main->{pers_addr_list_factory};
   }
   else {
-    my $type = $main->{conf}->{auto_whitelist_factory};
+    my $type = $conf->{auto_whitelist_factory};
     if ($type =~ /^([_A-Za-z0-9:]+)$/) {
       $type = untaint_var($type);
       eval '
@@ -278,39 +280,68 @@ sub finish {
 
 ###########################################################################
 
+sub ip_to_awl_key {
+  my ($self, $origip) = @_;
+
+  my $result;
+  local $1;
+  if (!defined $origip) {
+    # could not find an IP address to use
+  } elsif ($origip =~ /^ (\d{1,3} \. \d{1,3}) \. \d{1,3} \. \d{1,3} $/xs) {
+    my $mask_len = $self->{ipv4_mask_len};
+    $mask_len = 16  if !defined $mask_len;
+    # handle the default and easy cases manually
+    if ($mask_len == 32) {
+      $result = $origip;
+    } elsif ($mask_len == 16) {
+      $result = $1;
+    } else {
+      my $origip_obj = NetAddr::IP->new($origip . '/' . $mask_len);
+      if (!defined $origip_obj) {  # invalid IPv4 address
+        dbg("auto-whitelist: bad IPv4 address $origip");
+      } else {
+        $result = $origip_obj->network->addr;
+        $result =~s/(\.0){1,3}\z//;  # truncate zero tail
+      }
+    }
+  } elsif ($origip =~ /:/ &&  # triage
+           $origip =~
+           /^ [0-9a-f]{0,4} (?: : [0-9a-f]{0,4} | \. [0-9]{1,3} ){2,9} $/xsi) {
+    # looks like an IPv6 address
+    my $mask_len = $self->{ipv6_mask_len};
+    $mask_len = 48  if !defined $mask_len;
+    my $origip_obj = NetAddr::IP->new6($origip . '/' . $mask_len);
+    if (!defined $origip_obj) {  # invalid IPv6 address
+      dbg("auto-whitelist: bad IPv6 address $origip");
+    } else {
+      $result = $origip_obj->network->full6;  # string in a canonical form
+      $result =~ s/(:0000){1,7}\z/::/;        # compress zero tail
+    }
+  } else {
+    dbg("auto-whitelist: bad IP address $origip");
+  }
+  if (defined $result && length($result) > 39) {  # just in case, keep under
+    $result = substr($result,0,39);               # the awl.ip field size
+  }
+  dbg("auto-whitelist: IP masking %s -> %s", $origip,$result);
+  return $result;
+}
+
+###########################################################################
+
 sub pack_addr {
   my ($self, $addr, $origip) = @_;
 
   $addr = lc $addr;
   $addr =~ s/[\000\;\'\"\!\|]/_/gs;	# paranoia
 
-  local $1;
   if (!defined $origip) {
-    # could not find an IP address to use, could be localhost mail or from
-    # the user running "add-addr-to-*".
+    # could not find an IP address to use, could be localhost mail
+    # or from the user running "add-addr-to-*".
     $origip = 'none';
-  } elsif ($origip =~ /^ (\d{1,3} \. \d{1,3}) \. \d{1,3} \. \d{1,3} $/xs) {
-    $origip = $1;
-  } elsif ($origip =~ /:/  &&
-           $origip =~
-           /^ [0-9a-f]{0,4} (?: : [0-9a-f]{0,4} | \. [0-9]{1,3} ){2,9} $/xsi) {
-    # looks like an IPv6 address
-    my $origip_obj = NetAddr::IP->new6($origip);
-    if (!defined $origip_obj) {  # invalid IPv6 address
-      dbg("auto-whitelist: bad IPv6 address $origip");
-      $origip = 'junk-' . $origip;
-    } else {
-      $origip = $origip_obj->full6;  # string in a canonical form
-      $origip =~ s/(:[0-9a-f]{4}){5}\z//si;  # keep only the /48 network addr
-      $origip .= '::';  # although it wastes 2 chars, it's nice to make it
-                        # look like a syntactically correct IPv6 address
-    }
   } else {
-    dbg("auto-whitelist: bad IP address $origip");
-    $origip =~ s/[^0-9A-Fa-f:.]/_/gs;	# paranoia
-    $origip = 'junk-' . $origip;
+    $origip = $self->ip_to_awl_key($origip);
   }
-  $origip = substr($origip,0,16)  if length($origip) > 16;  # awl.ip field
   return $addr . "|ip=" . $origip;
 }
 

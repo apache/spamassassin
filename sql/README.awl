@@ -74,7 +74,7 @@ setting: "awl") with at least these fields:
 
   username varchar(100)	  # this is the username whose e-mail is being filtered
   email varchar(200)      # this is the address key
-  ip    varchar(16)       # this is the ip key (fits IPv4/24 or IPv6/48)
+  ip    varchar(40)       # this is the ip key (fits IPv4 IPv6)
   count int(11)           # this is the message counter
   totscore float          # this is the total calculated score
   signedby varchar(255)   # a DKIM or DomainKeys signing domain(s)
@@ -108,7 +108,7 @@ This will create the following table:
 CREATE TABLE awl (
   username varchar(100) NOT NULL default '',
   email varchar(255) NOT NULL default '',
-  ip varchar(16) NOT NULL default '',
+  ip varchar(40) NOT NULL default '',
   count int(11) NOT NULL default '0',
   totscore float NOT NULL default '0',
   signedby varchar(255) NOT NULL default '',
@@ -137,11 +137,11 @@ newly added field 'signedby' :
   auto_whitelist_distinguish_signed 1
 
 To extend a field awl.ip on an existing table to be able to fit
-an IPv6 addresses (its /48 network part) or an IPv4 address (/24):
+an IPv6 addresses (39 characters would suffice) or an IPv4 address:
 under MySQL:
-  ALTER TABLE awl MODIFY ip varchar(16);
+  ALTER TABLE awl MODIFY ip varchar(40);
 under PostgreSQL:
-  ALTER TABLE awl ALTER ip TYPE varchar(16);
+  ALTER TABLE awl ALTER ip TYPE varchar(40);
 
 
 Once you have created the database and added the table, just add the

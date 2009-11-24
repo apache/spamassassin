@@ -136,7 +136,8 @@ sub new_checker {
   my $dbh = DBI->connect($dsn, $dbuser, $dbpass, {'PrintError' => 0});
 
   if(!$dbh) {
-    dbg("auto-whitelist: sql-based unable to connect to database ($dsn) : " . DBI::errstr);
+    info("auto-whitelist: sql-based unable to connect to database (%s) : %s",
+         $dsn, DBI::errstr);
     return undef;
   }
 
@@ -203,26 +204,28 @@ sub get_addr_entry {
 
   my $sql = "SELECT count, totscore FROM $self->{tablename} " .
             "WHERE username = ? AND email = ?";
-  my @args = ($email);
-  if ($self->{_with_awl_signer}) {
-    my @signedby = !defined $signedby ? '' : split(' ', lc $signedby);
-    if (@signedby == 1) {
+  my @args = ( $email );
+  if (!$self->{_with_awl_signer}) {
+    $sql .= " AND ip = ?";
+    push(@args, $ip);
+  } else {
+    my @signedby = !defined $signedby ? () : split(' ', lc $signedby);
+    if (!@signedby) {
+      $sql .= " AND signedby = '' AND ip = ?";
+      push(@args, $ip);
+    } elsif (@signedby == 1) {
       $sql .= " AND signedby = ?";
     } elsif (@signedby > 1) {
       $sql .= " AND signedby IN (" . join(',', ('?') x @signedby) . ")";
     }
     push(@args, @signedby);
   }
-  if (!$self->{_with_awl_signer} || !defined $signedby || $signedby eq '') {
-    $sql .= " AND ip = ?";
-    push(@args, $ip);
-  }
   my $sth = $self->{dbh}->prepare($sql);
   my $rc = $sth->execute($self->{_username}, @args);
 
   if (!$rc) { # there was an error, but try to go on
-    my $err = $self->{dbh}->errstr;
-    dbg("auto-whitelist: sql-based get_addr_entry: SQL error: $err");
+    info("auto-whitelist: sql-based get_addr_entry %s: SQL error: %s",
+         join('|',@args), $sth->errstr);
     $entry->{count} = 0;
     $entry->{totscore} = 0;
   }
@@ -240,7 +243,7 @@ sub get_addr_entry {
       $cnt++;
     }
     dbg("auto-whitelist: sql-based get_addr_entry: %s for %s",
-        $cnt ? "found $cnt entry" : 'no entries found',
+        $cnt ? "found $cnt entries" : 'no entries found',
         join('|',@args) );
   }
   $sth->finish();
@@ -279,62 +282,81 @@ sub add_score {
   
   return $entry  unless $email ne '' && (defined $ip || defined $signedby);
 
-  if ($entry->{exists_p}) { # entry already exists, so just update
-    my(@args) = ($score, $self->{_username}, $email);
+  # try inserting first, and if that fails we'll do the update; this way
+  # we avoid to large extent a race condition between multiple processes
+
+  my $inserted = 0;
+
+  { my @fields = qw(username email ip count totscore);
+    my @signedby;
+    if ($self->{_with_awl_signer}) {
+      push(@fields, 'signedby');
+      @signedby = !defined $signedby ? () : split(' ', lc $signedby);
+      @signedby = ( '' )  if !@signedby;
+    }
+    my @args = ($self->{_username}, $email, $ip, 1, $score);
+    my $sql = sprintf("INSERT INTO %s (%s) VALUES (%s)", $self->{tablename},
+                      join(',', @fields),  join(',', ('?') x @fields));
+    my $sth = $self->{dbh}->prepare($sql);
+
+    if (!$self->{_with_awl_signer}) {
+      my $rc = $sth->execute(@args);
+      if (!$rc) {
+        dbg("auto-whitelist: sql-based add_score/insert %s: SQL error: %s",
+             join('|',@args), $sth->errstr);
+      } else {
+        dbg("auto-whitelist: sql-based add_score/insert ".
+            "score %s: %s", $score, join('|',@args));
+        $inserted = 1; $entry->{exists_p} = 1;
+      }
+    } else {
+      for my $s (@signedby) {
+        my $rc = $sth->execute(@args, $s);
+        if (!$rc) {
+          dbg("auto-whitelist: sql-based add_score/insert %s: SQL error: %s",
+              join('|',@args,$s), $sth->errstr);
+        } else {
+          dbg("auto-whitelist: sql-based add_score/insert ".
+              "score %s: %s", $score, join('|',@args,$s));
+          $inserted = 1; $entry->{exists_p} = 1;
+        }
+      }
+    }
+  }
+
+  if (!$inserted) {
+    # insert failed, assume primary key constraint, so try the update
+
     my $sql = "UPDATE $self->{tablename} ".
               "SET count = count + 1, totscore = totscore + ? ".
               "WHERE username = ? AND email = ?";
-    my @signedby;
+    my(@args) = ($score, $self->{_username}, $email);
     if ($self->{_with_awl_signer}) {
-      @signedby = !defined $signedby ? '' : split(' ', lc $signedby);
-      if (@signedby == 1) {
+      my @signedby = !defined $signedby ? () : split(' ', lc $signedby);
+      if (!@signedby) {
+        $sql .= " AND signedby = ''";
+      } elsif (@signedby == 1) {
         $sql .= " AND signedby = ?";
       } elsif (@signedby > 1) {
         $sql .= " AND signedby IN (" . join(',', ('?') x @signedby) . ")";
       }
       push(@args, @signedby);
     }
-    if (!$self->{_with_awl_signer} || !defined $signedby || $signedby eq '') {
-      $sql .= " AND ip = ?";
-      push(@args, $ip);
-    }
+    $sql .= " AND ip = ?";
+    push(@args, $ip);
+
     my $sth = $self->{dbh}->prepare($sql);
     my $rc = $sth->execute(@args);
     
     if (!$rc) {
-      my $err = $self->{dbh}->errstr;
-      dbg("auto-whitelist: sql-based add_score/update: SQL error: $err");
-    }
-    else {
-      dbg("auto-whitelist: sql-based add_score: ".
+      info("auto-whitelist: sql-based add_score/update %s: SQL error: %s",
+           join('|',@args), $sth->errstr);
+    } else {
+      dbg("auto-whitelist: sql-based add_score/update ".
           "new count: %s, new totscore: %s for %s",
-          $entry->{count}, $entry->{totscore}, join('|',@args[2..$#args]));
+          $entry->{count}, $entry->{totscore}, join('|',@args));
+      $entry->{exists_p} = 1;
     }
-    $sth->finish();
-  }
-  else { # no entry yet, so insert a new entry
-    my @fields = qw(username email ip count totscore);
-    my @args = ($self->{_username}, $email, $ip, 1, $score);
-    my @signedby;
-    if ($self->{_with_awl_signer}) {
-      push(@fields, 'signedby');
-      @signedby = !defined $signedby ? '' : split(' ', lc $signedby);
-    }
-    my $sql = sprintf("INSERT INTO %s (%s) VALUES (%s)", $self->{tablename},
-                      join(',', @fields),  join(',', ('?') x @fields));
-    my $sth = $self->{dbh}->prepare($sql);
-    for my $s (@signedby) {
-      # loop runs for at least one element, possibly an empty signing domain
-      my $rc = $sth->execute(@args, (@fields > @args ? $s : ()) );
-      if (!$rc) {
-        my $err = $self->{dbh}->errstr;
-        dbg("auto-whitelist: sql-based add_score/insert: SQL error: $err");
-      }
-    }
-    $entry->{exists_p} = 1;
-    dbg("auto-whitelist: sql-based add_score: created new entry ".
-        "with totscore %s: %s", $score, join('|',@args[2..$#args]));
-    $sth->finish();
   }
   
   return $entry;
@@ -387,8 +409,8 @@ sub remove_entry {
   my $rc = $sth->execute(@args);
 
   if (!$rc) {
-    my $err = $self->{dbh}->errstr;
-    dbg("auto-whitelist: sql-based remove_entry: SQL error: $err");
+    info("auto-whitelist: sql-based remove_entry %s: SQL error: %s",
+         join('|',@args), $sth->errstr);
   }
   else {
     # We might normally have a dbg saying we removed the address
