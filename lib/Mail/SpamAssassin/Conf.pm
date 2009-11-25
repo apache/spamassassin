@@ -1573,11 +1573,12 @@ delay before the updates are actually committed to the Bayes database.
 
 =over 4
 
-=item time_limit n   (default: 0, i.e. unlimited)
+=item time_limit n   (default: 300)
 
 Specifies a limit on elapsed time in seconds that SpamAssassin is allowed
-to spend before providing a result. The value may be fractional and must not
-be negative, zero is interpreted as unlimited and is a default.
+to spend before providing a result. The value may be fractional and must
+not be negative, zero is interpreted as unlimited. The default is 300
+seconds for consistency with the spamd default setting of --timeout-child .
 
 This is a best-effort advisory setting, processing will not be abruptly
 aborted at an arbitrary point in processing when the time limit is exceeded,
@@ -1589,10 +1590,14 @@ compiled rules.
 
 When a message is passed to Mail::SpamAssassin::parse, a deadline time
 is established as a sum of current time and the C<time_limit> setting.
+
 This deadline may be overruled by a caller through option 'master_deadline'
 in $suppl_attrib on a call to parse(), possibly providing a more accurate
 deadline taking into account past and expected future processing of a
-message in a mail filtering setup.
+message in a mail filtering setup. Note that spamd (and possibly some
+third-party callers of SpamAssassin) will overrule the C<time_limit> setting
+based on its --timeout-child option, unlike the command line C<spamassassin>,
+which has no such command line option.
 
 When a time limit is exceeded, most of the remaining tests will be skipped,
 as well as auto-learning. Whatever tests fired so far will determine the
@@ -1615,7 +1620,7 @@ maybe 50 seconds, assuming that clients are willing to wait at least a minute.
 
   push (@cmds, {
     setting => 'time_limit',
-    default => 0,
+    default => 300,
     type => $CONF_TYPE_NUMERIC,
     code => sub {
       my ($self, $key, $value, $line) = @_;

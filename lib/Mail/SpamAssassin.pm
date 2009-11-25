@@ -1455,7 +1455,7 @@ sub lint_rules {
   $self->{'conf'}->{'use_auto_whitelist'} = 0;
   $self->{'conf'}->{'bayes_auto_learn'} = 0;
 
-  my $mail = $self->parse(\@testmsg, 1);
+  my $mail = $self->parse(\@testmsg, 1, { master_deadline => undef });
   my $status = Mail::SpamAssassin::PerMsgStatus->new($self, $mail,
                         { disable_auto_learning => 1 } );
   $status->check();
