@@ -101,6 +101,7 @@ use Cwd ();
 use File::Spec 0.8;
 use File::Path;
 use Carp ();
+use Time::HiRes qw(time);
 
 use constant RUNNING_ON_MACOS => ($^O =~ /^darwin/oi);
 
@@ -110,10 +111,7 @@ if ($Mail::SpamAssassin::VERSION ne '@@VERSION@@' && '@@VERSION@@' ne "\@\@VERSI
   die 'spamd: spamd script is v@@VERSION@@, but using modules v'.$Mail::SpamAssassin::VERSION."\n";
 }
 
-# Load Time::HiRes if it's available
 BEGIN {
-  eval { require Time::HiRes };
-  Time::HiRes->import(qw(time)) unless $@;
   # redirect __WARN__ and __DIE__
   # do not trap warnings here based on eval scope; evals are very
   # common throughout.  die()s can be trapped though.
@@ -1381,7 +1379,8 @@ sub parse_body {
   
   # Now parse *only* the message headers; the MIME tree won't be generated 
   # yet, it will be done on demand later on.
-  my $mail = $spamtest->parse(\@msglines, 0);
+  my $mail = $spamtest->parse(\@msglines, 0,
+         !$timeout_child ? () : { master_deadline => time + $timeout_child } );
 
   return ($mail, $actual_length);
 }
