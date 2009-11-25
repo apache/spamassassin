@@ -260,7 +260,7 @@ sub parse_received_headers {
     $self->{msg}->delete_header ("X-Spam-Relays-Untrusted");
     $self->{msg}->delete_header ("X-Spam-Relays-Internal");
     $self->{msg}->delete_header ("X-Spam-Relays-External");
- 
+
     if ($self->{msg}->can ("put_metadata")) {
       $self->{msg}->put_metadata ("X-Spam-Relays-Trusted",
 			$self->{relays_trusted_str});
@@ -407,6 +407,10 @@ sub parse_received_line {
   # Postfix 2.3 and later with "smtpd_sasl_authenticated_header yes"
   elsif (/\) \(Authenticated sender: \S+\) by \S+ \(Postfix\) with /) {
     $auth = 'Postfix';
+  }
+  # Communigate Pro
+  elsif (/CommuniGate Pro SMTP/ && / \(account /) {
+    $auth = 'Communigate';
   }
 
 # ---------------------------------------------------------------------------
@@ -936,6 +940,14 @@ sub parse_received_line {
     # Fri, 07 Mar 2003 13:05:06 -0500
     if (/^\[(${IP_ADDRESS})\] \((?:account \S+ )?(?:HELO|EHLO) (\S*)\) by (\S+) \(/) {
       $ip = $1; $helo = $2; $by = $3; goto enough;
+    }
+
+    # Received: from host.example.com ([192.0.2.1] verified)
+    # by mail.example.net (CommuniGate Pro SMTP 5.1.13)
+    # with ESMTP id 9786656 for user@example.net; Thu, 27 Mar 2008 15:08:17 +0600
+    if (/ \(CommuniGate Pro/ && /^(\S+) \(\[(${IP_ADDRESS})\] verified\) by (\S+) \(/) {
+      $mta_looked_up_dns = 1;
+      $rdns = $1; $helo = $1; $ip = $2; $by = $3; goto enough;
     }
 
     # Received: from ([10.0.0.6]) by mail0.ciphertrust.com with ESMTP ; Thu,
