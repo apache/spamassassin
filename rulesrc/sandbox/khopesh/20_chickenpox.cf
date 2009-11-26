@@ -1,0 +1,57 @@
+# From chickenpox.cf by Jennifer Wheeler
+# http://wiki.apache.org/spamassassin/CustomRulesets#line-63
+#
+# If these perform well, we can consider testing more of them;
+# their performance five years ago wasn't so stellar (these were >1.5% spam),
+# http://wiki.apache.org/spamassassin/MasscheckChickenpox (2004-02-06)
+# TODO: verify license before removing nopublish
+
+describe J_CHICKENPOX_12  Obfuscated text: 1alpha-pock-2alpha
+body     J_CHICKENPOX_12  m/\s(?![cdjlmnosyx][`'"])[a-zA-Z]{1}[.,\;:?%!+^~`'\$*=\#|013467\(\)\[\]\{\}<>"][a-zA-Z]{2}(?<!\.(?:(?-i:[A-Z][a-z]{1})|a[eiu]|b[ebmrsz]|c[afhnrx]|d[bek]|es|f[ir]|g[uz]|h[knrtu]|i[elnqrst]|j[mops]|k[prwy]|m[cfkpx]|n[loz]|p[lmrsty]|ru|s[eghm]|t[cnv]|u[ksu]|v[gi])|:no|['`"](?:[il]l|ve|on))(?:[,'\?!]|\.?\s)/i
+score    J_CHICKENPOX_12  0.6
+tflags   J_CHICKENPOX_12  nopublish
+
+describe J_CHICKENPOX_13  Obfuscated text: 1alpha-pock-3alpha
+body     J_CHICKENPOX_13  m/\s(?![acdgjlmnosx][`'"])[a-zA-Z]{1}[.,\;:?%!&+^~`'\$*=\#|013467\(\)\[\]\{\}<>"][a-zA-Z]{3}(?<!\.(?:(?-i:[A-Z][a-z]{2})|a(?:sc|sp|ux)|b(?:ak|at|iz|in|ks|mk|mp)|c(?:fg|gi|nf|om|pp|ss)|d(?:at|ll|mg|oc)|e(?:du|nt|xe|xt)|g(?:if|ov)|htm|i(?:co|di|mg|nc|nf|ni)|jpg|l(?:ib|og)|m(?:ap|bs|il|p[eg])|net|org|p(?:df|fb|hp|i[df]|ng|pt|sd)|raw|s(?:cr|ql|ty|ys)|t(?:ar|ex|ld|mp|tf|xt)|usr|w(?:av|pi)|x(?:ls|ml|sl)|zip)|[`'"]all)(?:[,'\?!]|\.?\s)/i
+score    J_CHICKENPOX_13  0.6
+tflags   J_CHICKENPOX_13  nopublish
+
+describe J_CHICKENPOX_14  Obfuscated text: 1alpha-pock-4alpha
+body     J_CHICKENPOX_14  m/\s(?!(?:[cdgjlmnosx][`'"]|a:))[a-zA-Z]{1}[.,\;:?%!&+^~`'\$*=\#|013467\(\)\[\]\{\}<>"][a-zA-Z]{4}(?<!\.(?:(?-i:[A-Z][a-z]{3})|aero|c(?:onf|oop)|html|in(?:fo|it)|jpeg|m(?:ail|idi|peg)|name|sgml|tiff)|:mail)(?:[,'\?!]|\.?\s)/i
+score    J_CHICKENPOX_14  0.6
+tflags   J_CHICKENPOX_14  nopublish
+
+describe J_CHICKENPOX_22  Obfuscated text: 2alpha-pock-2alpha
+body     J_CHICKENPOX_22  m/\s(?!(?:fn|re):|(?:cc|to)=|(?:ma|qu|un)[`'"]|(?:dr|m[rst]|li|st|td)\.)[a-zA-Z]{2}[.,\;:?%!&+^~`'\$*=\#|013467\(\)\[\]\{\}<>"][a-zA-Z]{2}(?<!\.(?:(?-i:[A-Z][a-z]{1})|a[eiu]|b[ebmrsz]|c[afhnrx]|d[bek]|es|f[ir]|g[uz]|h[knrtu]|i[elnqrst]|j[mops]|k[prwy]|m[cfkpx]|n[loz]|p[lmrsty]|ru|s[eghm]|t[cnv]|u[ksu]|v[gi])|:no|['`"](?:ed|ll|[rv]e))(?:[,'\?!]|\.?\s)/i
+score    J_CHICKENPOX_22  0.6
+tflags   J_CHICKENPOX_22  nopublish
+
+describe J_CHICKENPOX_23  Obfuscated text: 2alpha-pock-3alpha
+body     J_CHICKENPOX_23  m/\s(?!(?:fn|re):|(?:cc|to)=|(?:qu|un)[`'"]|(?:dr|m[rst]|li|st|td)\.)[a-zA-Z]{2}[.,\;:?%!&+^~`'\$*=\#|013467\(\)\[\]\{\}<>"][a-zA-Z]{3}(?<!\.(?:(?-i:[A-Z][a-z]{2})|a(?:sc|sp|ux)|b(?:ak|at|iz|in|ks|mk|mp)|c(?:fg|gi|nf|om|pp|ss)|d(?:at|ll|mg|oc)|e(?:du|nt|xe|xt)|g(?:if|ov)|htm|i(?:co|di|mg|nc|nf|ni)|jpg|l(?:ib|og)|m(?:ap|bs|il|p[eg])|net|org|p(?:df|fb|hp|i[df]|ng|pt|sd)|raw|s(?:cr|ql|ty|ys)|t(?:ar|ex|ld|mp|tf|xt)|usr|w(?:av|pi)|x(?:ls|ml|sl)|zip)|['`"]tje)(?:[,'\?!]|\.?\s)/i
+score    J_CHICKENPOX_23  0.6
+tflags   J_CHICKENPOX_23  nopublish
+
+describe J_CHICKENPOX_24  Obfuscated text: 2alpha-pock-4alpha
+body     J_CHICKENPOX_24  m/\s(?!(?:fn|re):|(?:cc|to)=|(?:qu|un)[`'"]|(?:dr|m[rst]|li|st|td)\.)[a-zA-Z]{2}[.,\;:?%!&+^~`'\$*=\#|013467\(\)\[\]\{\}<>"][a-zA-Z]{4}(?<!\.(?:(?-i:[A-Z][a-z]{3})|aero|c(?:onf|oop)|html|in(?:fo|it)|jpeg|m(?:ail|idi|peg)|name|sgml|tiff))(?:[,'\?!]|\.?\s)/i
+score    J_CHICKENPOX_24  0.6
+tflags   J_CHICKENPOX_24  nopublish
+
+describe J_CHICKENPOX_26  Obfuscated text: 2alpha-pock-6alpha
+body     J_CHICKENPOX_26  m/\s(?!(?:fn|re):|(?:cc|to)=|(?:qu|un)[`'"]|(?:dr|m[rst]|li|st|td)\.)[a-zA-Z]{2}[.,\;:?%!&+^~`'\$*=\#|013467\(\)\[\]\{\}<>"][a-zA-Z]{6}(?<!\.(?:(?-i:[A-Z][a-z]{5})|museum))(?:[,'\?!]|\.?\s)/i
+score    J_CHICKENPOX_26  0.6
+tflags   J_CHICKENPOX_26  nopublish
+
+describe J_CHICKENPOX_32  Obfuscated text: 3alpha-pock-2alpha
+body     J_CHICKENPOX_32  m/\s(?!(?:alt|biz|mrs|rev|s(?:ci|en|oc))\.|(?:end|fwd|org|reg):|pop3|[cd]os')[a-zA-Z]{3}[.,\;:?%!&+^~`'\$*=\#|013467\(\)\[\]\{\}<>"][a-zA-Z]{2}(?<!\.(?:(?-i:[A-Z][a-z]{1})|a[eiu]|b[ebmrsz]|c[afhnrx]|d[bek]|es|f[ir]|g[uz]|h[knrtu]|i[elnqrst]|j[mops]|k[prwy]|m[cfkpx]|n[loz]|p[lmrsty]|ru|s[eghm]|t[cnv]|u[ksu]|v[gi])|:no|['`"](?:ed|ll|ts|[rv]e))(?:[,'\?!]|\.?\s)/i
+score    J_CHICKENPOX_32  0.6
+tflags   J_CHICKENPOX_32  nopublish
+
+describe J_CHICKENPOX_33  Obfuscated text: 3alpha-pock-3alpha
+body     J_CHICKENPOX_33  m/\s(?!(?:alt|biz|mrs|rev|s(?:ci|en|oc))\.|(?:end|fwd|org|reg):|pop3|cos')[a-zA-Z]{3}[.,\;:?%!&+^~`'\$*=\#|013467\(\)\[\]\{\}<>"][a-zA-Z]{3}(?<!\.(?:(?-i:[A-Z][a-z]{2})|a(?:sc|sp|ux)|b(?:ak|at|iz|in|ks|mk|mp)|c(?:fg|gi|nf|om|pp|ss)|d(?:at|ll|mg|oc)|e(?:du|nt|xe|xt)|g(?:if|ov)|htm|i(?:co|di|mg|nc|nf|ni)|jpg|l(?:ib|og)|m(?:ap|bs|il|p[eg])|net|org|p(?:df|fb|hp|i[df]|ng|pt|sd)|raw|s(?:cr|ql|ty|ys)|t(?:ar|ex|ld|mp|tf|xt)|usr|w(?:av|pi)|x(?:ls|ml|sl)|zip)|['`"]tje)(?:[,'\?!]|\.?\s)/i
+score    J_CHICKENPOX_33  0.6
+tflags   J_CHICKENPOX_33  nopublish
+
+describe J_CHICKENPOX_65  Obfuscated text: 6alpha-pock-5alpha
+body     J_CHICKENPOX_65  m/\s(?!(?:(?:bord|mail)er|format|target)=)[a-zA-Z]{6}[.,\;:?%!&+^~`'\$*=\#|013467\(\)\[\]\{\}<>"][a-zA-Z]{5}(?<!\.(?:(?-i:[A-Z][a-z]{4})|shtml)|=(?:esmtp|local))(?:[,'\?!]|\.?\s)/i
+score    J_CHICKENPOX_65  0.6
+tflags   J_CHICKENPOX_65  nopublish
