@@ -117,7 +117,7 @@ clear_pattern_counters();
 
 # -------------------------------------------------------------------
 
-system_or_die "$instdir/foo/bin/sa-compile --debug --keep-tmps";
+system_or_die "$instdir/foo/bin/sa-compile --keep-tmps";  # --debug
 %patterns = (
 
   q{ able to use 1/1 'body_0' compiled rules }, 'able-to-use',

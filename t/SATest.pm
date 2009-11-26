@@ -147,13 +147,13 @@ sub sa_t_init {
     my $file = $1;
     $base = basename $file;
     copy ($file, "log/test_rules_copy/$base")
-      or warn "cannot copy $file to log/test_rules_copy/$base";
+      or warn "cannot copy $file to log/test_rules_copy/$base: $!";
   }
 
   copy ("data/01_test_rules.pre", "log/test_rules_copy/01_test_rules.pre")
-    or warn "cannot copy data/01_test_rules.cf to log/test_rules_copy/01_test_rules.pre";
+    or warn "cannot copy data/01_test_rules.cf to log/test_rules_copy/01_test_rules.pre: $!";
   copy ("data/01_test_rules.cf", "log/test_rules_copy/01_test_rules.cf")
-    or warn "cannot copy data/01_test_rules.cf to log/test_rules_copy/01_test_rules.cf";
+    or warn "cannot copy data/01_test_rules.cf to log/test_rules_copy/01_test_rules.cf: $!";
 
   rmtree ("log/localrules.tmp");
   mkdir ("log/localrules.tmp", 0755);
@@ -163,18 +163,24 @@ sub sa_t_init {
     my $file = $1;
     $base = basename $file;
     copy ($file, "log/localrules.tmp/$base")
-      or warn "cannot copy $file to log/localrules.tmp/$base";
+      or warn "cannot copy $file to log/localrules.tmp/$base: $!";
   }
 
   copy ("../rules/user_prefs.template", "log/test_rules_copy/99_test_default.cf")
-    or die "user prefs copy failed";
+    or die "user prefs copy failed: $!";
 
-  open (PREFS, ">>log/test_rules_copy/99_test_default.cf");
-  print PREFS $default_cf_lines;
-  close PREFS;
+  open (PREFS, ">>log/test_rules_copy/99_test_default.cf")
+    or die "cannot append to log/test_rules_copy/99_test_default.cf: $!";
+  print PREFS $default_cf_lines
+    or die "error writing to log/test_rules_copy/99_test_default.cf: $!";
+  close PREFS
+    or die "error closing log/test_rules_copy/99_test_default.cf: $!";
 
   # create an empty .prefs file
-  open (PREFS, ">>log/test_default.cf"); close PREFS;
+  open (PREFS, ">>log/test_default.cf")
+    or die "cannot append to log/test_default.cf: $!";
+  close PREFS
+    or die "error closing log/test_default.cf: $!";
 
   mkdir("log/user_state",$tmp_dir_mode);
   chmod ($tmp_dir_mode, "log/user_state");  # unaffected by umask
@@ -786,7 +792,7 @@ sub read_config {
 
   if (!open (CF, "<${prefix}config")) {
     if (!open (CF, "<${prefix}config.dist")) {   # fall back to defaults
-      die "cannot open test suite configuration file 'config.dist'";
+      die "cannot open test suite configuration file 'config.dist': $!";
     }
   }
 
