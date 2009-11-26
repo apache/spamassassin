@@ -5,8 +5,8 @@
 # (warren's work has already covered most of what I'd add here)
 
 # Detect milter-greylist, scam-grey, postgrey, SQLgrey, and hopefully others
-header	 __GREYLISTING	ALL =~ /^X-(?:Scam-Grey|Greylist(?:ing)?):\s/m
-header	 __GREYLISTED	ALL =~ /^X-(?:Scam-Grey|Greylist(?:ing)?): [Dd]elay(?:ed)? (?:for )?\d+(?: ?s(?:ec(?:ond)?s?)?|:\d\d)/m
+header	 __GREYLISTING	ALL =~ /(?:^|\n)X-(?:Scam-Grey|Greylist(?:ing)?):\s/m
+header	 __GREYLISTED	ALL =~ /(?:^|\n)X-(?:Scam-Grey|Greylist(?:ing)?):\s+delay(?:ed)? (?:for )?\d+(?: ?s(?:ec(?:ond)?s?)?|:\d\d)/im
 
 meta KHOP_GREYED __GREYLISTED && (RDNS_NONE || RDNS_DYNAMIC || __HELO_NO_DOMAIN)
 describe KHOP_GREYED	Greylisted and sent from dynamically-named relay
