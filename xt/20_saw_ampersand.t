@@ -16,7 +16,7 @@ use lib '.'; use lib '../t';
 use SATest; sa_t_init("saw_ampersand");
 
 use Test::More;
-plan tests => 40;
+plan tests => 37;
 
 use Carp qw(croak);
 
@@ -39,14 +39,14 @@ foreach my $file
         (<log/localrules.tmp/*.pre>, <log/test_rules_copy/*.pre>) #*/
 {
   rename $file, "$file.bak" or die "rename $file failed";
-  open IN, "<$file.bak" or die "cannot read $file.bak";
-  open OUT, ">$file" or die "cannot write $file";
+  open IN, "<$file.bak" or die "cannot read $file.bak: $!";
+  open OUT, ">$file" or die "cannot write $file: $!";
   while (<IN>) {
     s/^loadplugin/###loadplugin/g;
     print OUT;
   }
-  close IN;
-  close OUT;
+  close IN  or die "error closing $file.bak: $!";
+  close OUT or die "error closing $file: $!";
 }
 
 
@@ -146,9 +146,12 @@ exit;
 
 sub write_plugin_pre {
   my $cftext = shift;
-  open OUT, ">log/localrules.tmp/test.pre";
-  print OUT $cftext;
-  close OUT or die;
+  open OUT, ">log/localrules.tmp/test.pre"
+    or die "cannot create log/localrules.tmp/test.pre: $!";
+  print OUT $cftext
+    or die "error writing to log/localrules.tmp/test.pre: $!";
+  close OUT
+    or die "cannot close log/localrules.tmp/test.pre: $!";
 }
 
 sub tryone {
@@ -163,15 +166,15 @@ sub tryone {
     'dont_copy_prefs' => 1,
     # 'debug' => 1,
     'local_tests_only' => $ltests,
-    'post_config_text' => $cftext
+    'post_config_text' => $cftext,
   });
 
   $sa->init(1);
   ok($sa);
 
-  open (IN, "<data/spam/009");
-  my $mail = $sa->parse(\*IN);
-  close IN;
+  open (IN, "<data/spam/009") or die "cannot open data/spam/009: $!";
+  my $mail = $sa->parse(\*IN,0);
+  close IN or die "error closing data/spam/009: $!";
 
   my $status = $sa->check($mail);
   my $rewritten = $status->rewrite_mail();
