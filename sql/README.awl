@@ -74,7 +74,7 @@ setting: "awl") with at least these fields:
 
   username varchar(100)	  # this is the username whose e-mail is being filtered
   email varchar(200)      # this is the address key
-  ip    varchar(40)       # this is the ip key (fits IPv4 IPv6)
+  ip    varchar(40)       # this is the ip key (fits IPv4 or IPv6)
   count int(11)           # this is the message counter
   totscore float          # this is the total calculated score
   signedby varchar(255)   # a DKIM or DomainKeys signing domain(s)
