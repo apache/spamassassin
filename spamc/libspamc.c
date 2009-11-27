@@ -140,7 +140,7 @@ static const int EXPANSION_ALLOWANCE = 16384;
  */
 
 /* Set the protocol version that this spamc speaks */
-static const char *PROTOCOL_VERSION = "SPAMC/1.4";
+static const char *PROTOCOL_VERSION = "SPAMC/1.5";
 
 /* "private" part of struct message.
  * we use this instead of the struct message directly, so that we
@@ -1341,8 +1341,10 @@ int message_filter(struct transport *tp, const char *username,
               }
               return EX_DATAERR;
           }
-          len += snprintf(buf + len, 8192-len, "Content-length: %d\r\n\r\n", (int) towrite_len);
+          len += snprintf(buf + len, 8192-len, "Content-length: %d\r\n", (int) towrite_len);
         }
+        /* bug 6187, PING needs empty line too, bumps protocol version to 1.5 */
+        len += snprintf(buf + len, 8192-len, "\r\n");
     
         libspamc_timeout = m->timeout;
         libspamc_connect_timeout = m->connect_timeout;	/* Sep 8, 2008 mrgus: separate connect timeout */

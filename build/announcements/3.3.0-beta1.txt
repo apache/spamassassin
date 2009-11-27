@@ -57,6 +57,11 @@ COMPATIBILITY WITH 3.2.5
   See sql/README.awl for details. The change need not be undone even if
   downgrading back to 3.2.* for some reason;
 
+- fixing a protocol implementation error regarding a PING command required
+  bumping up the SPAMC protocol version to 1.5.  Spamd retains compatibility
+  with older spamc clients. Combining new spamc clients with pre-3.3 versions
+  of a spamd daemon is not supported.
+
 - support for versions of perl 5.6.* is being gradually revoked
   (may still work, but no promises and no support)
 

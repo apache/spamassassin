@@ -25,7 +25,7 @@ conversation looks like:
 After each side is done writing, it shuts down its side of the connection.
 
 The first line from spamc is the command for spamd to execute (PROCESS a
-message is the command in protocol<=1.3) followed by the protocol version.
+message is the command in protocol<=1.5) followed by the protocol version.
 
 There may be additional headers following the command, which are as yet
 undefined.  Servers should ignore these, and keep looking for headers which
@@ -45,7 +45,7 @@ which they do support, or the "\r\n\r\n" end-of-headers marker.
 Commands
 --------
 
-The following commands are defined as of protocol 1.4:
+The following commands are defined as of protocol 1.5:
 
 CHECK         --  Just check if the passed message is spam or not and reply as
                   described below
@@ -122,15 +122,21 @@ the report text, and how many CR-LFs there are.
 REPORT_IFSPAM returns the same as REPORT if the message is spam, or nothing at
 all if the message is non-spam.
 
+
 The PING command does not actually trigger any spam checking, and (as with
-SKIP) no additional input is expected. It returns a simple confirmation
+SKIP) no additional headers are expected. It returns a simple confirmation
 response, like this:
 
-	SPAMD/1.4 0 PONG\r\n
+	SPAMD/1.5 0 PONG\r\n
 
 This facility may be useful for monitoring programs which wish to check that
 the daemon is alive and providing at least a basic response within a reasonable
 time frame.
+
+Note that since the protocol version 1.5, a client sending a PING command
+is required to follow the command (and a null header) with an empty line,
+for consistency with other commands (fixes bug 6187).
+
 
 TELL accepts three new headers, Message-class, Set and Remove and will return
 two possible headers, DidSet and DidRemove which indicate which action was
