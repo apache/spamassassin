@@ -62,7 +62,7 @@ use Errno qw(EBADF);
 
 my $EOL = "\015\012";
 my $BLANK = $EOL x 2;
-my $PROTOVERSION = 'SPAMC/1.3';
+my $PROTOVERSION = 'SPAMC/1.5';
 
 =head1 PUBLIC METHODS
 
@@ -408,7 +408,7 @@ sub ping {
   return 0 unless ($remote);
 
   print $remote "PING $PROTOVERSION$EOL";
-  print $remote "$EOL";
+  print $remote "$EOL";  # bug 6187, bumps protocol version to 1.5
 
   $! = 0; my $line = <$remote>;
   defined $line || $!==0  or
