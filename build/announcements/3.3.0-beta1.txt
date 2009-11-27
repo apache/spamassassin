@@ -46,7 +46,7 @@ COMPATIBILITY WITH 3.2.5
   - no longer used: Mail::DomainKeys, Mail::SPF::Query
   - if module Digest::SHA is not available, a module Digest::SHA1
     will be used, but at least one of them must be installed;
-    a DKIM plugin requires Digest::SHA (as the older Digest::SHA1 does not
+    a DKIM plugin requires Digest::SHA (the older Digest::SHA1 does not
     support sha256 hashes), so in practice the Digest::SHA is required
 
 - if keeping AWL database in SQL, the field awl.ip must be extended to
@@ -60,7 +60,8 @@ COMPATIBILITY WITH 3.2.5
 - fixing a protocol implementation error regarding a PING command required
   bumping up the SPAMC protocol version to 1.5.  Spamd retains compatibility
   with older spamc clients. Combining new spamc clients with pre-3.3 versions
-  of a spamd daemon is not supported.
+  of a spamd daemon is not supported (but happens to work, except for the
+  PING and SKIP commands).
 
 - support for versions of perl 5.6.* is being gradually revoked
   (may still work, but no promises and no support)
@@ -180,8 +181,15 @@ IPv6 SUPPORT
 - ::1/128 is always included in the trusted_networks/internal_networks set
   similar to 127.0.0.0/8;
 
+- some of the IPv6 functionality in SpamAssassin requires that a perl module
+  IO::Socket::INET6 is available (like accessing a DNS resolver over inet6,
+  talking to a dccifd host over inet6 socket, SPAMC protocol);
+
 
 SPAMC
+
+- Mail::SpamAssasin::Client ping may erronesously result in broken pipe;
+  bump spamc protocol version to 1.5, updated spamd, spamc and Client.pm;
 
 - added -n / --connect-timeout switch to spamc, allowing separate
   connection timeout from communication timeout;
@@ -229,7 +237,7 @@ API
 
 - let the generated header fields ('add_header' configuration options)
   be accessible to a caller through the existing get_tag mechanism
-  (tag ADDEDHEADER and friends);
+  (tags ADDEDHEADER, ADDEDHEADERHAM, ADDEDHEADERSPAM);
 
 
 RULES
@@ -251,26 +259,28 @@ RULES
   NML_ADSP_CUSTOM_{LOW,MED,HIGH}, __VIA_ML, MIME_BASE64_TEXT, LOTTO_URI,
   FORGED_MUA_THEBAT_BOUN, FORGED_MUA_THEBAT_CS, UNRESOLVED_TEMPLATE,
   __THEBAT_MUA, __ANY_OUTLOOK_MUA, RP_MATCHES_RCVD, one-word X-Mailer,
-  Vanity and fake award rules, HOSTKARMA URIBL rules, advance_fee update,
-  SEM URIBL (Spam Eating Monkey), tweak SPAN rules, tweak skype and
-  misquoted-HTML rules, added some new HTML obfuscation and Google
+  Vanity and fake award rules, advance_fee update, tweak SPAN rules, tweak
+  skype and misquoted-HTML rules, added some new HTML obfuscation and Google
   feedproxy URI rules, tweak reevolved advance fee second-order metarules,
-  added a test rule for postmaster+abuse missing, FROM_MISSPACED,
-  refinements of CN_EIGHT, adding support for http://www.spamhaus.org/css/,
-  fix FROM_CONTAINS_TAB, added Facebook redirector pattern,
-  avoid ISO-2022-JP FPs on FM_FRM_RN_L_BRACK rule, FP fix for one-word mails
-  on TVD_SPACE_RATIO, RATWARE_BOUNDARY plus variant, supersedes all previous
-  RATWARE_OUTLOOK stuff, added exclusion for __ISO_2022_JP_DELIM to
-  OBFUSCATING_COMMENT, FP in obfuscated URI rule, fixed breakage in tbird
-  image rule, fixed SUBJECT_FUZZY_MEDS FP on unobfuscated "meds", ...
+  added a test rule for postmaster+abuse missing, FROM_MISSPACED, refinements
+  of CN_EIGHT, fix FROM_CONTAINS_TAB, added Facebook redirector pattern,
+  avoided ISO-2022-JP FPs on TVD_SPACE_RATIO, GAPPY_SUBJECT, PLING_QUERY
+  and FM_FRM_RN_L_BRACK rules, FP fix for one-word mails on TVD_SPACE_RATIO,
+  RATWARE_BOUNDARY plus variant, supersede all previous RATWARE_OUTLOOK
+  stuff, added exclusion for __ISO_2022_JP_DELIM to OBFUSCATING_COMMENT,
+  FP in obfuscated URI rule, fixed breakage in tbird image rule, fixed
+  SUBJECT_FUZZY_MEDS FP on unobfuscated "meds", added misspaced From header
+  field rule, numeric+cctld URI rule, ...
+
+- added PSBL blacklist - http://psbl.surriel.com/
+
+- added support for http://www.spamhaus.org/css/
 
 - added rule for plain text attachments with octet-stream MIME type;
 
 - avoided false positives on ISO-2022-JP messages in several rules;
 
 - removed massmailers from uridnsbl_skip_domain in 25_uribl.cf;
-
-- improved "misspaced From:" metarules a bit;
 
 - updated various default whitelists, uridnsbl_skip_domain, adsp_override, ...
 
@@ -405,7 +415,7 @@ BUG FIXES
   a header field body being nonempty; internally, the pms->get can
   also now distinguish between empty and nonexistent header fields;
 
-- applyed fixes to header fields parsing in several places: header field
+- applied fixes to header fields parsing in several places: header field
   names are case-insensitive, whitespace is not required after a colon,
   obsolete rfc822 syntax allowed whitespace before a colon;
   VBounce: match "Received:" only at the beginning of a line;
@@ -425,6 +435,11 @@ BUG FIXES
 - Bug 6206, Bug 2536: spamd: untaint directory as obtained from a password
   file or from vpopmail utilities, avoid implicit untainting; report error
   if user preferences file exists but cannot be accessed;
+
+- avoid using raw data from DNS as a regexp in Plugin/ASN.pm;
+
+- ensured the dbg() and info() calls always return the same value (true)
+  regardless of log level;
 
 - suppress logging of $& when its value is not available (i.e. when
   no regexp has been evaluated during rule evaluation);
@@ -536,6 +551,13 @@ OTHER CHANGES
   a child process exit status or aborting condition in an informative way;
 
 - detect accidental match-everything regexps in rules;
+
+- updated garescorer for 3.3.0: use more epochs in GA runs for better scores;
+  clarify some mass-check warning output, ensure rule name always appears at
+  start of line; if a rule had no default/existing score in 50_scores.cf,
+  don't tell the GA that 1.0 is an appropriate default value, instead pick
+  the midway point of its score range. this produces better results;
+  remove some dead code from masses/score-ranges-from-freqs;
 
 - report performance as iterations per second in garescorer.c;
 
