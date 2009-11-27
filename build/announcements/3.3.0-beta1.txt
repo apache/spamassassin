@@ -63,6 +63,9 @@ COMPATIBILITY WITH 3.2.5
   of a spamd daemon is not supported (but happens to work, except for the
   PING and SKIP commands).
 
+- it may be worth mentioning that a rule DKIM_VERIFIED has been renamed
+  to DKIM_VALID, to match its semantics;
+
 - support for versions of perl 5.6.* is being gradually revoked
   (may still work, but no promises and no support)
 
