@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix dos hege wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 2: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix hege nbebout wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 3: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-trec_enron bb-zmi bernie-it_batt bernie-mix dos hege wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2
+# with results from: day 1: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix dos hege nbebout wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 2: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix dos hege wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 3: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix hege nbebout wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2
 
 # tflags userconf
 ALL_TRUSTED
@@ -398,6 +398,9 @@ LOTTO_URI
 L_SPAM_TOOL_13
 
 # good enough
+MANY_SPAN_IN_TEXT
+
+# good enough
 MANY_TINY_FLOAT
 
 # tflags userconf
@@ -638,9 +641,6 @@ SANE_4ef8302546bf270a19baf98508afacc4
 SANE_7429530a7398f43f1f1b795f9420714e
 
 # good enough
-SANE_8f9d40cc4e21b11c7171a7d6b3eea4c1
-
-# good enough
 SANE_91eb43f705d25c804374a746d7519660
 
 # good enough
@@ -722,7 +722,19 @@ TVD_RCVD_SINGLE
 TVD_VISIT_PHARMA
 
 # good enough
-MANY_SPAN_IN_TEXT
+BUG6152_INVALID_DATE_TZ_ABSURD
+
+# good enough
+DOS_HIGH_BAT_TO_MX
+
+# good enough
+JM_SOUGHT_FRAUD_1
+
+# good enough
+JM_SOUGHT_FRAUD_2
+
+# good enough
+JM_SOUGHT_FRAUD_3
 
 # tflags userconf
 UNPARSEABLE_RELAY
@@ -831,9 +843,6 @@ XMAILER_MIMEOLE_OL_91287
 
 # good enough
 XMAILER_MIMEOLE_OL_CAC8F
-
-# good enough
-X_MAILER_CME_6543_MSN
 
 # tflags net
 __DNS_FROM_RFC_ABUSE
