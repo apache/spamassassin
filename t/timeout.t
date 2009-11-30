@@ -130,10 +130,10 @@ ok($t1->timed_out);
 ok($t2->timed_out);
 ok(!defined $r);
 
-my $when = time + 1;
+my $when = int(time + 1.5);
 $t1 = Mail::SpamAssassin::Timeout->new({ deadline => $when });
 $t2 = Mail::SpamAssassin::Timeout->new({ deadline => $when });
-$r = $t1->run(sub { $t2->run(sub { mysleep 3; 43 }); 42 });
+$r = $t1->run(sub { $t2->run(sub { mysleep 4; 43 }); 42 });
 ok($t1->timed_out);
 ok($t2->timed_out);
 ok(!defined $r);
