@@ -1,14 +1,11 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix dos hege nbebout wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 2: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix dos hege wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 3: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix hege nbebout wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2
+# with results from: day 1: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail nbebout; day 2: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix dos hege nbebout wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 3: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix dos hege wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2
 
 # tflags userconf
 ALL_TRUSTED
 
 # good enough
 AXB_HELO_LH_HOME
-
-# good enough
-BASE64_LENGTH_78_79
 
 # tflags learn
 BAYES_00
@@ -113,6 +110,9 @@ DOS_RCVD_IP_TWICE_C
 DRUGS_STOCK_MIMEOLE
 
 # good enough
+DYN_RDNS_AND_INLINE_IMAGE
+
+# good enough
 DYN_RDNS_SHORT_HELO_HTML
 
 # good enough
@@ -135,9 +135,6 @@ FB_QUALITY_REPLICA
 
 # good enough
 FB_REPLICA_ROLEX
-
-# good enough
-FB_SAVE_PERSC
 
 # good enough
 FB_SOFTTABS
@@ -177,9 +174,6 @@ FILL_THIS_FORM_LOAN
 
 # good enough
 FILL_THIS_FORM_LONG
-
-# good enough
-FM_LOTTO_MONEY
 
 # good enough
 FM_LOTTO_YOU_WON
@@ -230,6 +224,9 @@ FRT_PHARMAC
 FRT_ROLEX
 
 # good enough
+FR_TITLE_NUMS
+
+# good enough
 FSL_FAKE_HOTMAIL_RVCD
 
 # good enough
@@ -237,9 +234,6 @@ FSL_HELO_BARE_IP_1
 
 # good enough
 FSL_HELO_DEVICE
-
-# good enough
-FSL_HELO_NON_FQDN_1
 
 # good enough
 FSL_LSPACES_ABUSE
@@ -258,6 +252,9 @@ FS_APPROVE_YOU
 
 # good enough
 FS_MORE_CONFIDENT
+
+# good enough
+FS_NUDE
 
 # good enough
 FS_REPLICA
@@ -335,9 +332,6 @@ HK_NAME_FREE
 HK_PNIS
 
 # good enough
-HK_RANDOM_ENVFROM
-
-# good enough
 HK_SCAM_N1
 
 # good enough
@@ -366,6 +360,9 @@ KAM_LOTTO1
 
 # good enough
 KAM_LOTTO2
+
+# good enough
+KB_DATE_CONTAINS_TAB
 
 # good enough
 KB_FAKED_THE_BAT
@@ -635,6 +632,9 @@ SANE_04e8bf28eb445199a7f11b943c44d209
 SANE_2b173a7fb7518c75ac8a2d294d773fd8
 
 # good enough
+SANE_3b92eda751c992f230f215fb7eb36844
+
+# good enough
 SANE_4ef8302546bf270a19baf98508afacc4
 
 # good enough
@@ -685,6 +685,9 @@ SPF_SOFTFAIL
 # good enough
 STOCK_IMG_HDR_FROM
 
+# good enough
+STOX_REPLY_TYPE_WITHOUT_QUOTES
+
 # tflags userconf
 SUBJECT_IN_BLACKLIST
 
@@ -701,10 +704,10 @@ TVD_FINGER_02
 TVD_INCREASE_SIZE
 
 # good enough
-TVD_NOT_SATISFIED
+TVD_PH_REC
 
 # good enough
-TVD_PH_REC
+TVD_PH_SUBJ_SEC_MEASURES
 
 # good enough
 TVD_QUAL_MEDS
@@ -720,21 +723,6 @@ TVD_RCVD_SINGLE
 
 # good enough
 TVD_VISIT_PHARMA
-
-# good enough
-BUG6152_INVALID_DATE_TZ_ABSURD
-
-# good enough
-DOS_HIGH_BAT_TO_MX
-
-# good enough
-JM_SOUGHT_FRAUD_1
-
-# good enough
-JM_SOUGHT_FRAUD_2
-
-# good enough
-JM_SOUGHT_FRAUD_3
 
 # tflags userconf
 UNPARSEABLE_RELAY
@@ -819,9 +807,6 @@ XMAILER_MIMEOLE_OL_20C99
 
 # good enough
 XMAILER_MIMEOLE_OL_22B61
-
-# good enough
-XMAILER_MIMEOLE_OL_3AC1D
 
 # good enough
 XMAILER_MIMEOLE_OL_3D61D
