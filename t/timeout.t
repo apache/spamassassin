@@ -18,7 +18,7 @@ if (-e 'test_dir') {            # running from test directory, not ..
 
 use lib '.'; use lib 't';
 use SATest; sa_t_init("timeout");
-use Test; BEGIN { plan tests => 27 };
+use Test; BEGIN { plan tests => 30 };
 
 use strict;
 use Time::HiRes qw(time sleep);
@@ -126,6 +126,14 @@ ok(!defined $r);
 $t1 = Mail::SpamAssassin::Timeout->new({ secs => 1 });
 $t2 = Mail::SpamAssassin::Timeout->new({ secs => 1 });
 $r = $t1->run(sub { $t2->run(sub { mysleep 3; 43 }); mysleep 3; 42 });
+ok($t1->timed_out);
+ok($t2->timed_out);
+ok(!defined $r);
+
+my $when = time + 1;
+$t1 = Mail::SpamAssassin::Timeout->new({ deadline => $when });
+$t2 = Mail::SpamAssassin::Timeout->new({ deadline => $when });
+$r = $t1->run(sub { $t2->run(sub { mysleep 3; 43 }); 42 });
 ok($t1->timed_out);
 ok($t2->timed_out);
 ok(!defined $r);
