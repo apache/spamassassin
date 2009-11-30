@@ -59,6 +59,7 @@ use bytes;
 use re 'taint';
 
 use Time::HiRes qw(time);
+#use Mail::SpamAssassin::Logger;
 
 use vars qw{
   @ISA
@@ -81,7 +82,7 @@ specified, no timeouts will be applied.
 
 =item deadline => $unix_timestamp
 
-Unix timestamp (time in seconds since epoch) when a timeout is reached.
+Unix timestamp (seconds since epoch) when a timeout is reached in the latest.
 Optional; if neither B<secs> nor B<deadline> is specified, no timeouts will
 be applied. If both are specified, the shorter interval of the two prevails.
 
@@ -120,7 +121,7 @@ timeout from scratch. On the other hand, nested timers do observe outer
 timeouts if they are shorter, resignalling a timeout to the level which
 established them, i.e. code running under an inner timer can not exceed
 the time limit established by an outer timer. When restarting an outer
-timer the elapsed time of a running code is taken into account.
+timer on return, elapsed time of a running code is taken into account.
 
 =item $t->run_and_catch($coderef)
 
@@ -144,6 +145,7 @@ sub _run {      # private
   my $id = $self->{id};
   my $secs = $self->{secs};
   my $deadline = $self->{deadline};
+# dbg("timed: %s run", $id);
 
   # assertion
   if (defined $secs && $secs < 0) {
@@ -181,6 +183,7 @@ sub _run {      # private
 
     } elsif ($oldalarm && $oldalarm < $secs) {
       # just restore outer timer, a timeout signal will be handled there
+    # dbg("timed: %s restoring outer alarm(%s)", $id,$oldalarm);
       alarm($oldalarm);
       $ret = &$sub;
 
@@ -188,8 +191,10 @@ sub _run {      # private
       local $SIG{ALRM} = $handler;  # ensure closed scope here
       my $isecs = int($secs);
       $isecs++  if $secs > int($isecs);  # ceiling
+    # dbg("timed: %s alarm(%s)", $id,$secs);
       alarm($isecs);
       $ret = &$sub;
+    # dbg("timed: %s post-sub", $id);
     }
 
     # Unset the alarm() before we leave eval{ } scope, as that stack-pop
@@ -221,6 +226,7 @@ sub _run {      # private
 
   if (defined $eval_stat && $eval_stat =~ /__alarm__ignore__\Q($id)\E/) {
     $self->{timed_out} = 1;
+  # dbg("timed: %s cought: %s", $id,$eval_stat);
   } elsif ($timedout) {
     # this happens occasionally; haven't figured out why.  seems
     # harmless in effect, though, so just issue a warning and carry on...
@@ -239,6 +245,7 @@ sub _run {      # private
       # taking into account the elapsed time we spent here
       my $iremaining_time = int($remaining_time);
       $iremaining_time++  if $remaining_time > int($remaining_time); # ceiling
+    # dbg("timed: %s restoring outer alarm(%s)", $id,$iremaining_time);
       alarm($iremaining_time);
       undef $remaining_time;  # already taken care of
     }
@@ -252,8 +259,12 @@ sub _run {      # private
     $self->{timed_out} = 1;
     # previous timer expired meanwhile, re-signal right away
     # somehow the kill('ALRM',0) does not behave like alarm does
-  # kill('ALRM',0) == 1  or die "Cannot send SIGALRM to myself [$$]";
-    Time::HiRes::alarm(0.01);
+    my $prev_handler = $SIG{ALRM};
+  # dbg("timed: %s outer timer already expired, calling its handler",
+  #     $id,$prev_handler);
+    &$prev_handler  if ref $prev_handler eq 'CODE';
+    Time::HiRes::alarm(0.001);  # the kill('ALRM') does not work as expected
+  # kill('ALRM',0) == 1  or die "Cannot send SIGALRM to myself";
   }
   return $return;
 }
@@ -285,19 +296,25 @@ clobbered by some underlying module).
 sub reset {
   my ($self) = @_;
 
+# dbg("timed: reset");
   return if !defined $self->{end_time};
 
   my $secs = $self->{end_time} - time;
   if ($secs > 0) {
     my $isecs = int($secs);
     $isecs++  if $secs > int($isecs);  # ceiling
+  # dbg("timed: %s reset: alarm(%s)", $self->{id},$isecs);
     alarm($isecs);
   } else {
     $self->{timed_out} = 1;
     # time interval expired meanwhile, re-signal right away
     # somehow the kill('ALRM',0) does not behave like alarm does
-  # kill('ALRM',0) == 1  or die "Cannot send SIGALRM to myself [$$]";
-    Time::HiRes::alarm(0.01);
+    my $prev_handler = $SIG{ALRM};
+  # dbg("timed: %s reset, previous timer expired, calling its handler",
+  #     $self->{id},$prev_handler);
+    &$prev_handler  if ref $prev_handler eq 'CODE';
+    Time::HiRes::alarm(0.001);  # the kill('ALRM') does not work as expected
+  # kill('ALRM',0) == 1  or die "Cannot send SIGALRM to myself";
   }
 }
 
