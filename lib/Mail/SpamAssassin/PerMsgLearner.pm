@@ -73,7 +73,7 @@ sub new {
     'main'              => $main,
     'msg'               => $msg,
     'learned'		=> 0,
-    'master_deadline'   => $msg->{master_deadline},
+    'master_deadline'   => $msg->{master_deadline},  # dflt inherited from msg
   };
 
   $self->{conf} = $self->{main}->{conf};

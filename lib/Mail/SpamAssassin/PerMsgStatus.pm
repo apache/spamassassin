@@ -95,7 +95,7 @@ sub new {
     'auto_learn_status' => undef,
     'conf'              => $main->{conf},
     'async'             => Mail::SpamAssassin::AsyncLoop->new($main),
-    'master_deadline'   => $msg->{master_deadline},  # typically just inherited
+    'master_deadline'   => $msg->{master_deadline},  # dflt inherited from msg
     'deadline_exceeded' => 0,  # time limit exceeded, skipping further tests
   };
   #$self->{main}->{use_rule_subs} = 1;
