@@ -473,7 +473,7 @@ sub is_dccproc_available {
     $dccproc = Mail::SpamAssassin::Util::find_executable_in_env_path('dccproc');
   }
 
-  unless ($dccproc ne '' && -x $dccproc) {
+  unless (defined $dccproc && $dccproc ne '' && -x $dccproc) {
     dbg("dcc: dccproc is not available: no dccproc executable found");
     return 0;
   }
