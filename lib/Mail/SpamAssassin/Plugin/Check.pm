@@ -83,6 +83,8 @@ sub check_main {
   my $bodytext = $pms->get_decoded_body_text_array();
   my $fulltext = $pms->{msg}->get_pristine();
   my $master_deadline = $pms->{master_deadline};
+  dbg("check: check_main, time limit in %.3f s",
+      $master_deadline - time)  if $master_deadline;
 
   my @uris = $pms->get_uri_list();
 
