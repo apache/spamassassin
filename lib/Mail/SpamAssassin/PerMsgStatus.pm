@@ -100,6 +100,9 @@ sub new {
   };
   #$self->{main}->{use_rule_subs} = 1;
 
+  dbg("check: pms new, time limit in %.3f s",
+      $self->{master_deadline} - time)  if $self->{master_deadline};
+
   if (defined $opts && $opts->{disable_auto_learning}) {
     $self->{disable_auto_learning} = 1;
   }
@@ -129,6 +132,21 @@ Runs the SpamAssassin rules against the message pointed to by the object.
 =cut
 
 sub check {
+  my ($self) = shift;
+  my $master_deadline = $self->{master_deadline};
+  if (!$master_deadline) {
+    $self->check_timed(@_);
+  } else {
+    my $t = Mail::SpamAssassin::Timeout->new({ deadline => $master_deadline });
+    my $err = $t->run(sub { $self->check_timed(@_) });
+    if (time > $master_deadline && !$self->{deadline_exceeded}) {
+      info("check: exceeded time limit in pms check");
+      $self->{deadline_exceeded} = 1;
+    }
+  }
+}
+
+sub check_timed {
   my ($self) = @_;
   local ($_);
 
@@ -208,6 +226,21 @@ so that future similar mails will be caught.
 =cut
 
 sub learn {
+  my ($self) = shift;
+  my $master_deadline = $self->{master_deadline};
+  if (!$master_deadline) {
+    $self->learn_timed(@_);
+  } else {
+    my $t = Mail::SpamAssassin::Timeout->new({ deadline => $master_deadline });
+    my $err = $t->run(sub { $self->learn_timed(@_) });
+    if (time > $master_deadline && !$self->{deadline_exceeded}) {
+      info("learn: exceeded time limit in pms learn");
+      $self->{deadline_exceeded} = 1;
+    }
+  }
+}
+
+sub learn_timed {
   my ($self) = @_;
 
   if (!$self->{conf}->{bayes_auto_learn} ||
