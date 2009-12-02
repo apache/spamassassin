@@ -2,7 +2,8 @@
 
 # set SCORESET
 # note: this script does not need to rely on the runGA setup
-[ -r config ] && . config
+# must use a / in the arg to a 'source' command to avoid searching the PATH
+[ -r config ] && . ./config
 
 if [ "x$1" != "x" ]; then
  SCORESET=$1
