@@ -1,4 +1,3384 @@
 ------------------------------------------------------------------------
+r886671 | wtogami | 2009-12-03 03:58:19 +0000 (Thu, 03 Dec 2009) | 2 lines
+
+Comment out IS_DEVEL_BUILD for beta1 release.
+
+------------------------------------------------------------------------
+r886670 | wtogami | 2009-12-03 03:46:49 +0000 (Thu, 03 Dec 2009) | 2 lines
+
+Bug 6223: Add new key fingerprint to the 3.3.0-beta1 announcement.
+
+------------------------------------------------------------------------
+r886667 | wtogami | 2009-12-03 02:55:10 +0000 (Thu, 03 Dec 2009) | 4 lines
+
+Bug 6155: Undo previous commit.  jm agreed that the output of the script was
+not correct because it lists rules that were auto-promoted.  The 
+force-publish-active-rules script is not doing the right thing.  Fix this later.
+
+------------------------------------------------------------------------
+r886665 | khopesh | 2009-12-03 02:53:17 +0000 (Thu, 03 Dec 2009) | 1 line
+
+khop/s25r safety tweaks, brush up khop-exp tests, fixed bug in khop_helo_fcrdns, khop-sc update
+------------------------------------------------------------------------
+r886232 | mmartinec | 2009-12-02 18:11:35 +0000 (Wed, 02 Dec 2009) | 2 lines
+
+rules/STATISTICS-set*.txt
+
+------------------------------------------------------------------------
+r886222 | mmartinec | 2009-12-02 17:52:48 +0000 (Wed, 02 Dec 2009) | 2 lines
+
+mk-baseline-results: avoid the shell 'source' command consulting the PATH
+
+------------------------------------------------------------------------
+r886212 | mmartinec | 2009-12-02 17:33:57 +0000 (Wed, 02 Dec 2009) | 3 lines
+
+Bug 6155: generated new rulesrc/10_force_active.cf
+as per step 6.5 in RescoreMassCheck
+
+------------------------------------------------------------------------
+r886173 | mmartinec | 2009-12-02 15:24:32 +0000 (Wed, 02 Dec 2009) | 1 line
+
+runGA config files used
+------------------------------------------------------------------------
+r886149 | mmartinec | 2009-12-02 14:04:56 +0000 (Wed, 02 Dec 2009) | 2 lines
+
+forgot to require a Timeout.pm in PerMsgStatus.pm
+
+------------------------------------------------------------------------
+r886133 | mmartinec | 2009-12-02 12:32:55 +0000 (Wed, 02 Dec 2009) | 4 lines
+
+Timeout.pm: allow a two second grace period extensions on restoring
+an outer timer which already expired (plays better with spamd);
+wrap PerMsgStatus::check() and learn() in a timer; improved debugging
+
+------------------------------------------------------------------------
+r886073 | jm | 2009-12-02 08:50:01 +0000 (Wed, 02 Dec 2009) | 1 line
+
+promotions validated
+------------------------------------------------------------------------
+r885853 | mmartinec | 2009-12-01 18:12:38 +0000 (Tue, 01 Dec 2009) | 3 lines
+
+spamd: take a connect time as a reference for time limiting,
+instead of the current time at the start of message parsing
+
+------------------------------------------------------------------------
+r885690 | jm | 2009-12-01 08:50:03 +0000 (Tue, 01 Dec 2009) | 1 line
+
+promotions validated
+------------------------------------------------------------------------
+r885649 | mmartinec | 2009-12-01 01:59:22 +0000 (Tue, 01 Dec 2009) | 4 lines
+
+t/timeout.t: commented-out the last test,
+don't know why it is failing on Hudson;
+avoid a warning in DCC.pm when dccproc is not available
+
+------------------------------------------------------------------------
+r885588 | mmartinec | 2009-11-30 21:31:40 +0000 (Mon, 30 Nov 2009) | 2 lines
+
+t/timeout.t: make the last test more robust
+
+------------------------------------------------------------------------
+r885578 | wtogami | 2009-11-30 20:32:54 +0000 (Mon, 30 Nov 2009) | 2 lines
+
+Note beta1 in SpamAssassin.pm
+
+------------------------------------------------------------------------
+r885577 | wtogami | 2009-11-30 20:32:02 +0000 (Mon, 30 Nov 2009) | 2 lines
+
+.spec to reflect upcoming beta1
+
+------------------------------------------------------------------------
+r885564 | mmartinec | 2009-11-30 19:46:11 +0000 (Mon, 30 Nov 2009) | 4 lines
+
+Timeout.pm: on restoring an expired outer timer
+just call its handler directly when possible;
+added debugging; added one test to t/timeout.t
+
+------------------------------------------------------------------------
+r885355 | jm | 2009-11-30 08:50:03 +0000 (Mon, 30 Nov 2009) | 1 line
+
+promotions validated
+------------------------------------------------------------------------
+r885077 | jm | 2009-11-28 08:50:03 +0000 (Sat, 28 Nov 2009) | 1 line
+
+promotions validated
+------------------------------------------------------------------------
+r884945 | mmartinec | 2009-11-27 18:40:20 +0000 (Fri, 27 Nov 2009) | 3 lines
+
+mention a rename of DKIM_VERIFIED into DKIM_VALID
+in release notes
+
+------------------------------------------------------------------------
+r884927 | mmartinec | 2009-11-27 18:01:38 +0000 (Fri, 27 Nov 2009) | 3 lines
+
+changed score of FM_FRM_RN_L_BRACK from 0 into 0.001,
+to make xt/10_rule_test_suite.t happy
+
+------------------------------------------------------------------------
+r884912 | wtogami | 2009-11-27 17:10:20 +0000 (Fri, 27 Nov 2009) | 3 lines
+
+Bug #6155 Update the force_active list to prevent auto-demotion of sandbox rules.
+I took 50_scores.cf list all rule names that were not commented out.  Please review.
+
+------------------------------------------------------------------------
+r884908 | wtogami | 2009-11-27 17:04:49 +0000 (Fri, 27 Nov 2009) | 2 lines
+
+Remove more nopublish rules from the release notes.
+
+------------------------------------------------------------------------
+r884902 | mmartinec | 2009-11-27 16:18:28 +0000 (Fri, 27 Nov 2009) | 2 lines
+
+Bug 6144: updated 3.3.0-beta1.txt
+
+------------------------------------------------------------------------
+r884863 | mmartinec | 2009-11-27 12:49:43 +0000 (Fri, 27 Nov 2009) | 3 lines
+
+Bug 6187 - Mail::SpamAssasin::Client ping may erronesously
+result in broken pipe. Bumps spamc protocol vesion to 1.5.
+
+------------------------------------------------------------------------
+r884785 | jm | 2009-11-27 08:50:02 +0000 (Fri, 27 Nov 2009) | 1 line
+
+promotions validated
+------------------------------------------------------------------------
+r884704 | mmartinec | 2009-11-26 21:51:59 +0000 (Thu, 26 Nov 2009) | 3 lines
+
+Prepared a beta1 release notes: build/announcements/3.3.0-beta1.txt
+based on alpha3 release notes and change log
+
+------------------------------------------------------------------------
+r884681 | axb | 2009-11-26 19:55:34 +0000 (Thu, 26 Nov 2009) | 1 line
+
+
+------------------------------------------------------------------------
+r884673 | axb | 2009-11-26 19:31:38 +0000 (Thu, 26 Nov 2009) | 1 line
+
+added AXB_ESP_ABUSE01
+------------------------------------------------------------------------
+r884667 | mmartinec | 2009-11-26 19:04:02 +0000 (Thu, 26 Nov 2009) | 4 lines
+
+SATest.pm: include errno of a failing copy command in error messages;
+SATest.pm and 20_saw_ampersand.t: add some missing status tests and
+report failures; turn off debugging in sa_compile.t to reduce noise
+
+------------------------------------------------------------------------
+r884465 | jm | 2009-11-26 08:50:02 +0000 (Thu, 26 Nov 2009) | 1 line
+
+promotions validated
+------------------------------------------------------------------------
+r884343 | khopesh | 2009-11-26 00:11:48 +0000 (Thu, 26 Nov 2009) | 1 line
+
+added more safeties for khop and s25r tests, pseudo-botnet, testing some old pock rules
+------------------------------------------------------------------------
+r884223 | mmartinec | 2009-11-25 18:08:16 +0000 (Wed, 25 Nov 2009) | 3 lines
+
+Bug 5883 - support for Communigate Pro 'Received' header field;
+folded-in all supplied test cases into t/rcvd_parser.t
+
+------------------------------------------------------------------------
+r884199 | mmartinec | 2009-11-25 17:12:56 +0000 (Wed, 25 Nov 2009) | 6 lines
+
+Bug 6238: change a default for time_limit option from unlimited
+to 300 s (consistent with a spamd default);  let spamd override
+the deadline according to its own --timeout-child option value;
+spamd: just 'use' the Time::HiRes (which is now a required module),
+instead of probing for it with an eval-ed 'require'
+
+------------------------------------------------------------------------
+r884007 | jm | 2009-11-25 08:50:32 +0000 (Wed, 25 Nov 2009) | 1 line
+
+promotions validated
+------------------------------------------------------------------------
+r883795 | mmartinec | 2009-11-24 17:28:57 +0000 (Tue, 24 Nov 2009) | 2 lines
+
+Old versions of NetAddr::IP do not support option qw(:upper), dropping.
+
+------------------------------------------------------------------------
+r883779 | mmartinec | 2009-11-24 16:47:31 +0000 (Tue, 24 Nov 2009) | 2 lines
+
+svn propset svn:executable 1 t/bayesbdb.t
+
+------------------------------------------------------------------------
+r883778 | mmartinec | 2009-11-24 16:45:53 +0000 (Tue, 24 Nov 2009) | 2 lines
+
+svn propset svn:executable 1 t/timeout.t
+
+------------------------------------------------------------------------
+r883770 | mmartinec | 2009-11-24 16:32:51 +0000 (Tue, 24 Nov 2009) | 8 lines
+
+Bug 6203: make AWL CIDR mask configurable: auto_whitelist_ipv4_mask_len
+and auto_whitelist_ipv6_mask_len;  update README.awl and sql/awl_*.sql
+accordingly (increasing awl.ip field width);  'fix' the t/data/spam/004
+sample mail to avoid a test failing with a /24 net mask;
+avoid race condition in SQLBasedAddrList.pm when multiple processes
+try to insert-or-update an awl SQL record: try INSERT first, and if
+that fails go for UPDATE. 
+
+------------------------------------------------------------------------
+r883710 | khopesh | 2009-11-24 14:51:53 +0000 (Tue, 24 Nov 2009) | 1 line
+
+testing some dnsbl stuff, tweaks to khop entries
+------------------------------------------------------------------------
+r883666 | mmartinec | 2009-11-24 11:54:37 +0000 (Tue, 24 Nov 2009) | 2 lines
+
+bumped up the t/rcvd_parser.t 'plan tests' count by one
+
+------------------------------------------------------------------------
+r883650 | mmartinec | 2009-11-24 10:51:24 +0000 (Tue, 24 Nov 2009) | 6 lines
+
+Bug 6238: run_and_catch failed to catch a non-timed run;
+M::S::Timeout::reset() should have accounted for time already
+spent; signal produced by kill('ALRM',0) does not behave like a
+signal from alarm() - just use Time::HiRes::alarm(0.01) instead;
+added timing tests t/timeout.t
+
+------------------------------------------------------------------------
+r883623 | jm | 2009-11-24 08:50:02 +0000 (Tue, 24 Nov 2009) | 1 line
+
+promotions validated
+------------------------------------------------------------------------
+r883570 | dos | 2009-11-24 01:50:56 +0000 (Tue, 24 Nov 2009) | 1 line
+
+bug 6239: Parse Communigate Pro "with HTTPU" auth token
+------------------------------------------------------------------------
+r883281 | jm | 2009-11-23 08:50:02 +0000 (Mon, 23 Nov 2009) | 1 line
+
+promotions validated
+------------------------------------------------------------------------
+r883193 | khopesh | 2009-11-22 23:56:17 +0000 (Sun, 22 Nov 2009) | 1 line
+
+khop channels - added safeties as per Warren's warnings, tweaks, updates
+------------------------------------------------------------------------
+r883047 | jm | 2009-11-22 08:50:02 +0000 (Sun, 22 Nov 2009) | 1 line
+
+promotions validated
+------------------------------------------------------------------------
+r883038 | khopesh | 2009-11-22 05:44:14 +0000 (Sun, 22 Nov 2009) | 1 line
+
+updates on khop rules, minor tweaks mostly
+------------------------------------------------------------------------
+r882858 | jm | 2009-11-21 08:50:01 +0000 (Sat, 21 Nov 2009) | 1 line
+
+promotions validated
+------------------------------------------------------------------------
+r882815 | mmartinec | 2009-11-21 01:13:57 +0000 (Sat, 21 Nov 2009) | 5 lines
+
+M::S::Timeout - reworked the module to deal with nested
+timers as one would expect: an inner timer shouldn't be able
+to extend an outer timer's limit; account for time elapsed
+in the submitted subroutine when restarting an outer timer
+
+------------------------------------------------------------------------
+r882811 | mmartinec | 2009-11-21 01:03:14 +0000 (Sat, 21 Nov 2009) | 2 lines
+
+hacked 20_khop_bl.cf, looks like the 'mkrules' does not understand an 'else' !?
+
+------------------------------------------------------------------------
+r882450 | jm | 2009-11-20 08:50:03 +0000 (Fri, 20 Nov 2009) | 1 line
+
+promotions validated
+------------------------------------------------------------------------
+r882413 | khopesh | 2009-11-20 04:56:38 +0000 (Fri, 20 Nov 2009) | 1 line
+
+selections from my sa-update channels
+------------------------------------------------------------------------
+r882245 | mmartinec | 2009-11-19 18:53:25 +0000 (Thu, 19 Nov 2009) | 2 lines
+
+Bug 5630 - improved path information in man pages for sa-update and sa-compile
+
+------------------------------------------------------------------------
+r882241 | mmartinec | 2009-11-19 18:43:53 +0000 (Thu, 19 Nov 2009) | 2 lines
+
+Bug 5628 - inline documentation contradicts code
+
+------------------------------------------------------------------------
+r882213 | mmartinec | 2009-11-19 17:32:32 +0000 (Thu, 19 Nov 2009) | 2 lines
+
+Bug 6237 - RCVD_ILLEGAL_IP with ip 2.0.0.0/8 (and 223.0.0.0/8)
+
+------------------------------------------------------------------------
+r882080 | jm | 2009-11-19 08:50:20 +0000 (Thu, 19 Nov 2009) | 1 line
+
+promotions validated
+------------------------------------------------------------------------
+r882020 | mmartinec | 2009-11-19 00:51:09 +0000 (Thu, 19 Nov 2009) | 3 lines
+
+Bug 6238: introducing the 'time_limit' configuration option,
+with associated code changes in various places
+
+------------------------------------------------------------------------
+r881700 | jm | 2009-11-18 08:50:02 +0000 (Wed, 18 Nov 2009) | 1 line
+
+promotions validated
+------------------------------------------------------------------------
+r881633 | jhardin | 2009-11-18 00:35:48 +0000 (Wed, 18 Nov 2009) | 1 line
+
+tweak lotsa_money
+------------------------------------------------------------------------
+r881494 | wtogami | 2009-11-17 20:30:47 +0000 (Tue, 17 Nov 2009) | 2 lines
+
+*yoink*
+
+------------------------------------------------------------------------
+r881382 | mmartinec | 2009-11-17 17:18:20 +0000 (Tue, 17 Nov 2009) | 2 lines
+
+Bug 6232: workaround for Net::DNS::Packet::new inconsistency
+
+------------------------------------------------------------------------
+r881316 | mmartinec | 2009-11-17 15:00:34 +0000 (Tue, 17 Nov 2009) | 2 lines
+
+Fixed bug in BayesStore::BDB::tok_get, fixed corresponding test
+
+------------------------------------------------------------------------
+r881240 | mmartinec | 2009-11-17 10:57:36 +0000 (Tue, 17 Nov 2009) | 2 lines
+
+Bug 6155 #163: force nonzero scores on MISSING_HB_SEP and X_MESSAGE_INFO for the test
+
+------------------------------------------------------------------------
+r881199 | jm | 2009-11-17 08:50:03 +0000 (Tue, 17 Nov 2009) | 1 line
+
+promotions validated
+------------------------------------------------------------------------
+r881163 | wtogami | 2009-11-17 05:58:48 +0000 (Tue, 17 Nov 2009) | 9 lines
+
+Bug #6155 manually fudge PSBL with higher scores as noted in Comment #151.
+PSBL became lastexternal subsequent to the rescore masscheck, nearly
+eliminating false positives.
+
+WARNING: Measuring with fp-fn-statistics using rescore masscheck logs is
+no longer valid after this change.  Revert this score manually if you want
+to run that tool on those logs.  Weekly masscheck logs after 20091005 are
+fine as-is.
+
+------------------------------------------------------------------------
+r881160 | wtogami | 2009-11-17 05:41:41 +0000 (Tue, 17 Nov 2009) | 2 lines
+
+Bug #6155 score reductions as documented in Comment #162.
+
+------------------------------------------------------------------------
+r881159 | wtogami | 2009-11-17 05:35:00 +0000 (Tue, 17 Nov 2009) | 2 lines
+
+Bug #6155 commit raw scores from Comment #146 as documented in #162.
+
+------------------------------------------------------------------------
+r881065 | jm | 2009-11-17 00:06:03 +0000 (Tue, 17 Nov 2009) | 1 line
+
+bug 6214: sa-compile broken by change from bug 6060, fix (and add test)
+------------------------------------------------------------------------
+r880938 | wtogami | 2009-11-16 20:01:49 +0000 (Mon, 16 Nov 2009) | 2 lines
+
+trobert's phishing rule
+
+------------------------------------------------------------------------
+r880674 | jm | 2009-11-16 08:50:08 +0000 (Mon, 16 Nov 2009) | 1 line
+
+promotions validated
+------------------------------------------------------------------------
+r836340 | jm | 2009-11-15 08:50:02 +0000 (Sun, 15 Nov 2009) | 1 line
+
+promotions validated
+------------------------------------------------------------------------
+r836300 | jm | 2009-11-15 00:34:38 +0000 (Sun, 15 Nov 2009) | 1 line
+
+bug 6214: add a passing regression test case for this bug
+------------------------------------------------------------------------
+r836144 | jm | 2009-11-14 08:50:02 +0000 (Sat, 14 Nov 2009) | 1 line
+
+promotions validated
+------------------------------------------------------------------------
+r835775 | jm | 2009-11-13 08:50:02 +0000 (Fri, 13 Nov 2009) | 1 line
+
+promotions validated
+------------------------------------------------------------------------
+r835740 | jhardin | 2009-11-13 04:55:48 +0000 (Fri, 13 Nov 2009) | 2 lines
+
+Tweak lotsa_money
+
+------------------------------------------------------------------------
+r835374 | hege | 2009-11-12 13:00:04 +0000 (Thu, 12 Nov 2009) | 2 lines
+
+reorganize
+
+------------------------------------------------------------------------
+r835366 | hege | 2009-11-12 12:36:55 +0000 (Thu, 12 Nov 2009) | 1 line
+
+
+------------------------------------------------------------------------
+r835304 | jm | 2009-11-12 08:50:04 +0000 (Thu, 12 Nov 2009) | 1 line
+
+promotions validated
+------------------------------------------------------------------------
+r834996 | mmartinec | 2009-11-11 18:12:04 +0000 (Wed, 11 Nov 2009) | 3 lines
+
+Preventively local()-ize $1 in a couple of places in PerMsgStatus
+in view of [perl #67962]
+
+------------------------------------------------------------------------
+r834803 | jm | 2009-11-11 08:50:02 +0000 (Wed, 11 Nov 2009) | 1 line
+
+promotions validated
+------------------------------------------------------------------------
+r834191 | mmartinec | 2009-11-09 19:45:40 +0000 (Mon, 09 Nov 2009) | 6 lines
+
+Bug 6225: untaint the string in an attempt to work around
+a perl crash - a workaround for [perl #69973] bug:
+  Invalid and tainted utf-8 char crashes perl 5.10.1 in regexp evaluation
+A regexp and a string should both be utf8, or none of them;
+untainting string also seems to avoid the crash.
+
+------------------------------------------------------------------------
+r834162 | mmartinec | 2009-11-09 18:02:22 +0000 (Mon, 09 Nov 2009) | 2 lines
+
+Bug 6200 cont'd: fixed DependencyInfo.pm
+
+------------------------------------------------------------------------
+r834158 | mmartinec | 2009-11-09 17:43:33 +0000 (Mon, 09 Nov 2009) | 2 lines
+
+t/rule_names.t cosmetics
+
+------------------------------------------------------------------------
+r834157 | mmartinec | 2009-11-09 17:42:25 +0000 (Mon, 09 Nov 2009) | 3 lines
+
+Updated minimal/recommended versions of Perl and Mail::DKIM
+in INSTALL, META.yml, Makefile.PL
+
+------------------------------------------------------------------------
+r834155 | mmartinec | 2009-11-09 17:37:53 +0000 (Mon, 09 Nov 2009) | 4 lines
+
+Bug 6200: let SA use either Digest::SHA or Digest::SHA1,
+whichever is available (the Digest::SHA is now a base
+module since perl 5.10.0)
+
+------------------------------------------------------------------------
+r833769 | axb | 2009-11-07 21:21:19 +0000 (Sat, 07 Nov 2009) | 10 lines
+
+as per bug 6230 removed:
+
+partner2profit.com
+smileycentral.com
+tickle.com
+topica.com
+vistaprint.com
+freelotto.com
+yourfreedvds.com
+
+------------------------------------------------------------------------
+r833654 | jm | 2009-11-07 08:50:02 +0000 (Sat, 07 Nov 2009) | 1 line
+
+promotions validated
+------------------------------------------------------------------------
+r833344 | mmartinec | 2009-11-06 11:11:56 +0000 (Fri, 06 Nov 2009) | 2 lines
+
+Bug 6232: backed out r833081 (except the added debug line)
+
+------------------------------------------------------------------------
+r833320 | jm | 2009-11-06 08:50:02 +0000 (Fri, 06 Nov 2009) | 1 line
+
+promotions validated
+------------------------------------------------------------------------
+r833250 | jm | 2009-11-06 00:03:12 +0000 (Fri, 06 Nov 2009) | 1 line
+
+oops.  fix bug
+------------------------------------------------------------------------
+r833246 | jm | 2009-11-05 23:54:18 +0000 (Thu, 05 Nov 2009) | 1 line
+
+hmm. need to use full path here
+------------------------------------------------------------------------
+r833245 | jm | 2009-11-05 23:51:47 +0000 (Thu, 05 Nov 2009) | 1 line
+
+work around changes in spamassassin2.zones SVN command -- it appears 'svn up' where no svn checkout exists will now exit 0, which broke our script.  fix.  also, increase logging
+------------------------------------------------------------------------
+r833081 | mmartinec | 2009-11-05 17:03:50 +0000 (Thu, 05 Nov 2009) | 2 lines
+
+Bug 6232, a quick workaround hack to Net::DNS inconsistency
+
+------------------------------------------------------------------------
+r832991 | jhardin | 2009-11-05 04:56:25 +0000 (Thu, 05 Nov 2009) | 2 lines
+
+tweak fillform
+
+------------------------------------------------------------------------
+r832683 | jm | 2009-11-04 08:50:02 +0000 (Wed, 04 Nov 2009) | 1 line
+
+promotions validated
+------------------------------------------------------------------------
+r832650 | jhardin | 2009-11-04 03:03:30 +0000 (Wed, 04 Nov 2009) | 2 lines
+
+tweak lotsa_money
+
+------------------------------------------------------------------------
+r832530 | mmartinec | 2009-11-03 20:03:10 +0000 (Tue, 03 Nov 2009) | 2 lines
+
+Plugin::SPF incorrectly insisted on a space after colon in a Received-SPF header field
+
+------------------------------------------------------------------------
+r832479 | jhardin | 2009-11-03 17:30:29 +0000 (Tue, 03 Nov 2009) | 1 line
+
+improve "misspaced From:" metarules a bit
+------------------------------------------------------------------------
+r831941 | mmartinec | 2009-11-02 16:19:45 +0000 (Mon, 02 Nov 2009) | 5 lines
+
+25_dkim.cf, 60_whitelist_dkim.cf: remove tflags userconf from
+some DKIM rules, partly reverting my r818926 - the flag was
+added due to my misunderstanding of userconf flag; actually
+these rules only need </gen:mutable> in the 50_scores.cf 
+
+------------------------------------------------------------------------
+r831820 | jm | 2009-11-02 08:50:05 +0000 (Mon, 02 Nov 2009) | 1 line
+
+promotions validated
+------------------------------------------------------------------------
+r831701 | jhardin | 2009-11-01 16:43:32 +0000 (Sun, 01 Nov 2009) | 2 lines
+
+Try runon FROM rule again
+
+------------------------------------------------------------------------
+r831685 | jm | 2009-11-01 15:04:22 +0000 (Sun, 01 Nov 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r831667 | jm | 2009-11-01 11:00:12 +0000 (Sun, 01 Nov 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r831655 | jm | 2009-11-01 08:50:01 +0000 (Sun, 01 Nov 2009) | 1 line
+
+promotions validated
+------------------------------------------------------------------------
+r831647 | jm | 2009-11-01 06:55:45 +0000 (Sun, 01 Nov 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r831614 | jm | 2009-10-31 23:11:57 +0000 (Sat, 31 Oct 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r831583 | jm | 2009-10-31 19:07:27 +0000 (Sat, 31 Oct 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r831548 | jm | 2009-10-31 15:03:04 +0000 (Sat, 31 Oct 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r831529 | jm | 2009-10-31 10:59:03 +0000 (Sat, 31 Oct 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r831520 | jm | 2009-10-31 08:50:02 +0000 (Sat, 31 Oct 2009) | 1 line
+
+promotions validated
+------------------------------------------------------------------------
+r831517 | jm | 2009-10-31 06:54:09 +0000 (Sat, 31 Oct 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r831515 | wtogami | 2009-10-31 04:33:21 +0000 (Sat, 31 Oct 2009) | 2 lines
+
+Improve the uri patterns, thanks hege.
+
+------------------------------------------------------------------------
+r831508 | jhardin | 2009-10-31 02:13:14 +0000 (Sat, 31 Oct 2009) | 2 lines
+
+Tweak lotsa_money
+
+------------------------------------------------------------------------
+r831495 | mmartinec | 2009-10-31 00:27:01 +0000 (Sat, 31 Oct 2009) | 2 lines
+
+Bug 6230: remove massmailers from uridnsbl_skip_domain in 25_uribl.cf
+
+------------------------------------------------------------------------
+r831492 | mmartinec | 2009-10-31 00:14:14 +0000 (Sat, 31 Oct 2009) | 2 lines
+
+Bug 6231: add timestamps when logging on stderr
+
+------------------------------------------------------------------------
+r831487 | jm | 2009-10-30 23:12:30 +0000 (Fri, 30 Oct 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r831439 | mmartinec | 2009-10-30 20:17:23 +0000 (Fri, 30 Oct 2009) | 2 lines
+
+Bug 6216: fix Plugin::BodyEval::check_blank_line_ratio()
+
+------------------------------------------------------------------------
+r831427 | jm | 2009-10-30 19:08:48 +0000 (Fri, 30 Oct 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r831368 | mmartinec | 2009-10-30 16:11:59 +0000 (Fri, 30 Oct 2009) | 3 lines
+
+t/SATest.pm: provide information about the process
+failure reason if system() fails
+
+------------------------------------------------------------------------
+r831320 | mmartinec | 2009-10-30 15:09:04 +0000 (Fri, 30 Oct 2009) | 3 lines
+
+Bug 6142: add a config parameter skip_uribl_checks to the
+URIDNSBL plugin, cross-document it with skip_rbl_checks.
+
+------------------------------------------------------------------------
+r831317 | jm | 2009-10-30 15:04:07 +0000 (Fri, 30 Oct 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r831283 | hege | 2009-10-30 12:38:33 +0000 (Fri, 30 Oct 2009) | 1 line
+
+irq.ir
+------------------------------------------------------------------------
+r831260 | jm | 2009-10-30 11:00:25 +0000 (Fri, 30 Oct 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r831229 | jm | 2009-10-30 08:50:05 +0000 (Fri, 30 Oct 2009) | 1 line
+
+promotions validated
+------------------------------------------------------------------------
+r831215 | jm | 2009-10-30 06:56:25 +0000 (Fri, 30 Oct 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r831149 | jm | 2009-10-29 23:19:32 +0000 (Thu, 29 Oct 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r831064 | jm | 2009-10-29 19:16:19 +0000 (Thu, 29 Oct 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r830995 | jm | 2009-10-29 15:12:27 +0000 (Thu, 29 Oct 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r830895 | jm | 2009-10-29 11:08:00 +0000 (Thu, 29 Oct 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r830862 | jm | 2009-10-29 08:50:03 +0000 (Thu, 29 Oct 2009) | 1 line
+
+promotions validated
+------------------------------------------------------------------------
+r830853 | jm | 2009-10-29 07:04:04 +0000 (Thu, 29 Oct 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r830824 | wtogami | 2009-10-29 01:44:53 +0000 (Thu, 29 Oct 2009) | 2 lines
+
+Add USCA pattern to VANITY.
+
+------------------------------------------------------------------------
+r830791 | jm | 2009-10-28 23:25:31 +0000 (Wed, 28 Oct 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r830735 | jm | 2009-10-28 19:21:01 +0000 (Wed, 28 Oct 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r830574 | jm | 2009-10-28 15:17:50 +0000 (Wed, 28 Oct 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r830570 | jhardin | 2009-10-28 15:11:17 +0000 (Wed, 28 Oct 2009) | 1 line
+
+restore to_no_brkts + freemail rule for testing
+------------------------------------------------------------------------
+r830501 | jm | 2009-10-28 11:12:57 +0000 (Wed, 28 Oct 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r830464 | jm | 2009-10-28 08:50:03 +0000 (Wed, 28 Oct 2009) | 1 line
+
+promotions validated
+------------------------------------------------------------------------
+r830451 | jm | 2009-10-28 07:08:54 +0000 (Wed, 28 Oct 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r830438 | jhardin | 2009-10-28 04:20:26 +0000 (Wed, 28 Oct 2009) | 2 lines
+
+Fix a typo
+
+------------------------------------------------------------------------
+r830437 | jhardin | 2009-10-28 04:16:41 +0000 (Wed, 28 Oct 2009) | 1 line
+
+More advance fee tweaking
+------------------------------------------------------------------------
+r830412 | jhardin | 2009-10-28 00:39:27 +0000 (Wed, 28 Oct 2009) | 1 line
+
+Add to TO=FROM rule
+------------------------------------------------------------------------
+r830402 | jm | 2009-10-27 23:33:28 +0000 (Tue, 27 Oct 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r830306 | jm | 2009-10-27 19:28:48 +0000 (Tue, 27 Oct 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r830226 | jm | 2009-10-27 15:24:14 +0000 (Tue, 27 Oct 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r830134 | jm | 2009-10-27 11:19:28 +0000 (Tue, 27 Oct 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r830076 | jm | 2009-10-27 07:12:26 +0000 (Tue, 27 Oct 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r830057 | jhardin | 2009-10-27 04:51:13 +0000 (Tue, 27 Oct 2009) | 2 lines
+
+more lotsa_money tweaking
+
+------------------------------------------------------------------------
+r830018 | jm | 2009-10-26 23:35:08 +0000 (Mon, 26 Oct 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r829917 | jm | 2009-10-26 19:31:13 +0000 (Mon, 26 Oct 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r829824 | jm | 2009-10-26 15:26:29 +0000 (Mon, 26 Oct 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r829821 | jhardin | 2009-10-26 15:05:05 +0000 (Mon, 26 Oct 2009) | 1 line
+
+More lotsa_money tweaking
+------------------------------------------------------------------------
+r829751 | jm | 2009-10-26 11:21:22 +0000 (Mon, 26 Oct 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r829711 | jm | 2009-10-26 07:16:09 +0000 (Mon, 26 Oct 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r829681 | jm | 2009-10-25 23:51:59 +0000 (Sun, 25 Oct 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r829678 | jm | 2009-10-25 23:37:45 +0000 (Sun, 25 Oct 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r829656 | jhardin | 2009-10-25 21:27:25 +0000 (Sun, 25 Oct 2009) | 1 line
+
+More lotsa_money tweaking - spammers can't spell...
+------------------------------------------------------------------------
+r829645 | jhardin | 2009-10-25 21:04:23 +0000 (Sun, 25 Oct 2009) | 2 lines
+
+Fix a stupid bug in LOTTO_URI, tweak some other lotsa_money rules
+
+------------------------------------------------------------------------
+r829633 | jm | 2009-10-25 19:33:20 +0000 (Sun, 25 Oct 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r829606 | jm | 2009-10-25 15:28:13 +0000 (Sun, 25 Oct 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r829539 | jm | 2009-10-25 11:24:03 +0000 (Sun, 25 Oct 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r829502 | jm | 2009-10-25 07:18:27 +0000 (Sun, 25 Oct 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r829494 | wtogami | 2009-10-25 04:49:12 +0000 (Sun, 25 Oct 2009) | 2 lines
+
+CN_RX: .cn URI beginning with rx
+
+------------------------------------------------------------------------
+r829461 | jhardin | 2009-10-24 22:41:05 +0000 (Sat, 24 Oct 2009) | 1 line
+
+More lotsa_money and fillform tweaking
+------------------------------------------------------------------------
+r829459 | jm | 2009-10-24 22:32:30 +0000 (Sat, 24 Oct 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r829429 | jm | 2009-10-24 18:18:25 +0000 (Sat, 24 Oct 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r829373 | jm | 2009-10-24 14:13:50 +0000 (Sat, 24 Oct 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r829338 | jm | 2009-10-24 10:08:25 +0000 (Sat, 24 Oct 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r829310 | jm | 2009-10-24 06:02:53 +0000 (Sat, 24 Oct 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r829301 | wtogami | 2009-10-24 03:05:42 +0000 (Sat, 24 Oct 2009) | 3 lines
+
+Two weeks of weekly masschecks indicate that the deep parsing was not worthwhile.
+0.4% spam 0.04% fp
+
+------------------------------------------------------------------------
+r829300 | wtogami | 2009-10-24 02:59:44 +0000 (Sat, 24 Oct 2009) | 2 lines
+
+Make it easy to see the safety of all Anubis blacklists together.
+
+------------------------------------------------------------------------
+r829299 | wtogami | 2009-10-24 02:54:05 +0000 (Sat, 24 Oct 2009) | 3 lines
+
+Vanity and fake award rules.
+Easy for the spammer to evade, but proper spelling and grammar along with certain keywords are necessary to have any success in fooling anyone.
+
+------------------------------------------------------------------------
+r829262 | jm | 2009-10-23 22:19:37 +0000 (Fri, 23 Oct 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r829163 | jm | 2009-10-23 18:14:19 +0000 (Fri, 23 Oct 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r829104 | jhardin | 2009-10-23 15:51:38 +0000 (Fri, 23 Oct 2009) | 1 line
+
+More lotsa_money tweaking
+------------------------------------------------------------------------
+r829071 | jm | 2009-10-23 14:10:06 +0000 (Fri, 23 Oct 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r828982 | jm | 2009-10-23 10:05:36 +0000 (Fri, 23 Oct 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r828938 | jm | 2009-10-23 06:00:33 +0000 (Fri, 23 Oct 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r828871 | jm | 2009-10-22 22:17:15 +0000 (Thu, 22 Oct 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r828705 | jm | 2009-10-22 14:07:49 +0000 (Thu, 22 Oct 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r828628 | jm | 2009-10-22 10:03:50 +0000 (Thu, 22 Oct 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r828320 | jm | 2009-10-22 05:58:16 +0000 (Thu, 22 Oct 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r828303 | wtogami | 2009-10-22 04:31:06 +0000 (Thu, 22 Oct 2009) | 2 lines
+
+Wrap with ifplugin and put into the correct file.
+
+------------------------------------------------------------------------
+r828295 | wtogami | 2009-10-22 03:58:25 +0000 (Thu, 22 Oct 2009) | 2 lines
+
+HOSTKARMA URIBL rules for testing
+
+------------------------------------------------------------------------
+r828291 | jhardin | 2009-10-22 03:29:49 +0000 (Thu, 22 Oct 2009) | 2 lines
+
+clean up lotsa_money and fillform in preparation for advance_fee update; tweak skype and misquoted-HTML rules
+
+------------------------------------------------------------------------
+r828239 | jm | 2009-10-21 22:28:41 +0000 (Wed, 21 Oct 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r828235 | jm | 2009-10-21 22:14:42 +0000 (Wed, 21 Oct 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r828123 | jm | 2009-10-21 18:09:48 +0000 (Wed, 21 Oct 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r828023 | hege | 2009-10-21 14:14:36 +0000 (Wed, 21 Oct 2009) | 1 line
+
+add SA file header, add tunome.com domains
+------------------------------------------------------------------------
+r828022 | hege | 2009-10-21 14:13:51 +0000 (Wed, 21 Oct 2009) | 1 line
+
+add SA file header
+------------------------------------------------------------------------
+r827948 | jm | 2009-10-21 10:01:11 +0000 (Wed, 21 Oct 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r827908 | hege | 2009-10-21 07:19:48 +0000 (Wed, 21 Oct 2009) | 1 line
+
+reorganize
+------------------------------------------------------------------------
+r827892 | jm | 2009-10-21 05:55:57 +0000 (Wed, 21 Oct 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r827821 | jm | 2009-10-20 22:11:15 +0000 (Tue, 20 Oct 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r827752 | jm | 2009-10-20 18:07:07 +0000 (Tue, 20 Oct 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r827021 | jm | 2009-10-20 09:58:29 +0000 (Tue, 20 Oct 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r826962 | jm | 2009-10-20 05:53:17 +0000 (Tue, 20 Oct 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r826832 | jm | 2009-10-19 22:09:19 +0000 (Mon, 19 Oct 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r826740 | jm | 2009-10-19 18:05:34 +0000 (Mon, 19 Oct 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r826674 | jm | 2009-10-19 14:01:17 +0000 (Mon, 19 Oct 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r826624 | jm | 2009-10-19 09:56:53 +0000 (Mon, 19 Oct 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r826587 | wtogami | 2009-10-19 06:00:36 +0000 (Mon, 19 Oct 2009) | 2 lines
+
+Disable UBL, too broken to be worthwhile to test.
+
+------------------------------------------------------------------------
+r826586 | jm | 2009-10-19 05:52:18 +0000 (Mon, 19 Oct 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r826541 | jm | 2009-10-18 22:23:40 +0000 (Sun, 18 Oct 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r826538 | jm | 2009-10-18 22:09:40 +0000 (Sun, 18 Oct 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r826476 | jm | 2009-10-18 18:05:45 +0000 (Sun, 18 Oct 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r826441 | jm | 2009-10-18 14:01:33 +0000 (Sun, 18 Oct 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r826391 | jm | 2009-10-18 09:58:00 +0000 (Sun, 18 Oct 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r826359 | jm | 2009-10-18 05:53:37 +0000 (Sun, 18 Oct 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r826315 | jm | 2009-10-17 22:15:50 +0000 (Sat, 17 Oct 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r826286 | jm | 2009-10-17 18:11:46 +0000 (Sat, 17 Oct 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r826256 | jm | 2009-10-17 14:08:06 +0000 (Sat, 17 Oct 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r826214 | jm | 2009-10-17 10:03:41 +0000 (Sat, 17 Oct 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r826198 | jm | 2009-10-17 08:50:03 +0000 (Sat, 17 Oct 2009) | 1 line
+
+promotions validated
+------------------------------------------------------------------------
+r826179 | wtogami | 2009-10-17 06:03:09 +0000 (Sat, 17 Oct 2009) | 2 lines
+
+Test UBL in masschecks
+
+------------------------------------------------------------------------
+r826178 | jm | 2009-10-17 05:59:04 +0000 (Sat, 17 Oct 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r826153 | mmartinec | 2009-10-17 00:49:29 +0000 (Sat, 17 Oct 2009) | 3 lines
+
+t/dkim2.t: disable awl, razor, pyzor, bayes for this test,
+these are just wasting time here
+
+------------------------------------------------------------------------
+r826116 | jm | 2009-10-16 22:24:32 +0000 (Fri, 16 Oct 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r826083 | wtogami | 2009-10-16 20:52:32 +0000 (Fri, 16 Oct 2009) | 2 lines
+
+Test Anubis Reputation DNS lists
+
+------------------------------------------------------------------------
+r826044 | mmartinec | 2009-10-16 19:16:16 +0000 (Fri, 16 Oct 2009) | 3 lines
+
+Plugin/DCC.pm: improve error reporting on finding
+a DCC home directory, to facilitate troubleshooting
+
+------------------------------------------------------------------------
+r826040 | mmartinec | 2009-10-16 19:05:10 +0000 (Fri, 16 Oct 2009) | 2 lines
+
+Fix the previous change, it should be: local $/ = $/
+
+------------------------------------------------------------------------
+r826024 | jm | 2009-10-16 18:20:24 +0000 (Fri, 16 Oct 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r825924 | jhardin | 2009-10-16 15:09:39 +0000 (Fri, 16 Oct 2009) | 1 line
+
+tweak lotsa_money
+------------------------------------------------------------------------
+r825906 | jm | 2009-10-16 14:16:52 +0000 (Fri, 16 Oct 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r825892 | mmartinec | 2009-10-16 13:43:01 +0000 (Fri, 16 Oct 2009) | 3 lines
+
+Bug 6218 - input delimiter $/ can be corrupted by a plugin,
+localize $/ and $\ (and possibly others) before calling a plugin
+
+------------------------------------------------------------------------
+r825886 | jhardin | 2009-10-16 13:31:03 +0000 (Fri, 16 Oct 2009) | 2 lines
+
+Tweak SPAN rules a bit more
+
+------------------------------------------------------------------------
+r825877 | jhardin | 2009-10-16 13:13:17 +0000 (Fri, 16 Oct 2009) | 2 lines
+
+Tweak lotsa_money and SPAN rules
+
+------------------------------------------------------------------------
+r825834 | jm | 2009-10-16 10:12:12 +0000 (Fri, 16 Oct 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r825811 | jm | 2009-10-16 08:50:03 +0000 (Fri, 16 Oct 2009) | 1 line
+
+promotions validated
+------------------------------------------------------------------------
+r825779 | jm | 2009-10-16 06:06:58 +0000 (Fri, 16 Oct 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r825769 | wtogami | 2009-10-16 05:16:23 +0000 (Fri, 16 Oct 2009) | 2 lines
+
+RCVD_IN_SEMBACKSCATTER is not useful to test.
+
+------------------------------------------------------------------------
+r825749 | jhardin | 2009-10-16 02:55:53 +0000 (Fri, 16 Oct 2009) | 2 lines
+
+Tweak lotsa_money and SPAN rules
+
+------------------------------------------------------------------------
+r825687 | jm | 2009-10-15 22:29:45 +0000 (Thu, 15 Oct 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r825625 | jhardin | 2009-10-15 19:49:17 +0000 (Thu, 15 Oct 2009) | 1 line
+
+Added some new HTML obfuscation and Google feedproxy URI rules
+------------------------------------------------------------------------
+r825604 | jm | 2009-10-15 18:25:08 +0000 (Thu, 15 Oct 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r825503 | jm | 2009-10-15 14:21:09 +0000 (Thu, 15 Oct 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r825456 | jm | 2009-10-15 10:16:42 +0000 (Thu, 15 Oct 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r825439 | jm | 2009-10-15 08:50:03 +0000 (Thu, 15 Oct 2009) | 1 line
+
+promotions validated
+------------------------------------------------------------------------
+r825405 | jm | 2009-10-15 06:11:53 +0000 (Thu, 15 Oct 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r825325 | jm | 2009-10-14 22:46:05 +0000 (Wed, 14 Oct 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r825316 | jm | 2009-10-14 22:31:27 +0000 (Wed, 14 Oct 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r825211 | jm | 2009-10-14 18:27:14 +0000 (Wed, 14 Oct 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r825150 | jm | 2009-10-14 14:22:55 +0000 (Wed, 14 Oct 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r825129 | jhardin | 2009-10-14 13:38:39 +0000 (Wed, 14 Oct 2009) | 2 lines
+
+Fix a typo and add some German text to lotsa_money and the reevolved advance fee
+
+------------------------------------------------------------------------
+r825079 | jm | 2009-10-14 10:16:26 +0000 (Wed, 14 Oct 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r825058 | jm | 2009-10-14 08:50:02 +0000 (Wed, 14 Oct 2009) | 1 line
+
+promotions validated
+------------------------------------------------------------------------
+r825049 | axb | 2009-10-14 07:49:45 +0000 (Wed, 14 Oct 2009) | 1 line
+
+added AXB_419_FROM_C1
+------------------------------------------------------------------------
+r825015 | jm | 2009-10-14 06:10:06 +0000 (Wed, 14 Oct 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r824961 | jm | 2009-10-13 22:31:21 +0000 (Tue, 13 Oct 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r824869 | jm | 2009-10-13 18:25:33 +0000 (Tue, 13 Oct 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r824776 | jm | 2009-10-13 14:19:08 +0000 (Tue, 13 Oct 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r824659 | jm | 2009-10-13 10:14:07 +0000 (Tue, 13 Oct 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r824640 | jm | 2009-10-13 08:50:02 +0000 (Tue, 13 Oct 2009) | 1 line
+
+promotions validated
+------------------------------------------------------------------------
+r824599 | jm | 2009-10-13 06:06:52 +0000 (Tue, 13 Oct 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r824590 | jhardin | 2009-10-13 04:58:21 +0000 (Tue, 13 Oct 2009) | 1 line
+
+add "skype to south africa" pattern in recent spams
+------------------------------------------------------------------------
+r824526 | jm | 2009-10-12 22:39:10 +0000 (Mon, 12 Oct 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r824523 | jm | 2009-10-12 22:24:27 +0000 (Mon, 12 Oct 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r824478 | jhardin | 2009-10-12 19:58:20 +0000 (Mon, 12 Oct 2009) | 1 line
+
+rearrange freemail doc/pdf rules a bit
+------------------------------------------------------------------------
+r824445 | jm | 2009-10-12 18:20:22 +0000 (Mon, 12 Oct 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r824436 | jhardin | 2009-10-12 17:37:18 +0000 (Mon, 12 Oct 2009) | 1 line
+
+re-expose FILL_THIS_FORM_LONG, it's got a good S/O by itself
+------------------------------------------------------------------------
+r824350 | jm | 2009-10-12 14:16:26 +0000 (Mon, 12 Oct 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r824287 | jm | 2009-10-12 10:11:37 +0000 (Mon, 12 Oct 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r824262 | jm | 2009-10-12 08:50:02 +0000 (Mon, 12 Oct 2009) | 1 line
+
+promotions validated
+------------------------------------------------------------------------
+r824240 | jm | 2009-10-12 06:06:59 +0000 (Mon, 12 Oct 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r824206 | jhardin | 2009-10-12 00:41:40 +0000 (Mon, 12 Oct 2009) | 1 line
+
+try shotgun approach: (lotsa_money|fill_form) + (any two fraud rules)
+------------------------------------------------------------------------
+r824203 | jhardin | 2009-10-11 23:56:34 +0000 (Sun, 11 Oct 2009) | 1 line
+
+reevolved ADVANCE_FEE using nightly logs
+------------------------------------------------------------------------
+r824197 | jhardin | 2009-10-11 23:20:58 +0000 (Sun, 11 Oct 2009) | 1 line
+
+Add another attachment obfu rule
+------------------------------------------------------------------------
+r824187 | jm | 2009-10-11 22:31:42 +0000 (Sun, 11 Oct 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r824121 | jm | 2009-10-11 18:27:18 +0000 (Sun, 11 Oct 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r824112 | jhardin | 2009-10-11 17:20:32 +0000 (Sun, 11 Oct 2009) | 2 lines
+
+tweak reevolved advance fee second-order metarules
+
+------------------------------------------------------------------------
+r824081 | jm | 2009-10-11 14:23:10 +0000 (Sun, 11 Oct 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r824048 | jm | 2009-10-11 10:18:08 +0000 (Sun, 11 Oct 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r824039 | jm | 2009-10-11 08:50:02 +0000 (Sun, 11 Oct 2009) | 1 line
+
+promotions validated
+------------------------------------------------------------------------
+r824030 | jm | 2009-10-11 06:15:02 +0000 (Sun, 11 Oct 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r823972 | jm | 2009-10-10 22:53:19 +0000 (Sat, 10 Oct 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r823971 | jm | 2009-10-10 22:39:06 +0000 (Sat, 10 Oct 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r823921 | jm | 2009-10-10 18:49:02 +0000 (Sat, 10 Oct 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r823915 | jm | 2009-10-10 18:34:44 +0000 (Sat, 10 Oct 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r823885 | jhardin | 2009-10-10 16:52:11 +0000 (Sat, 10 Oct 2009) | 2 lines
+
+Tweak fillform and lotsa_money yet more
+
+------------------------------------------------------------------------
+r823884 | jhardin | 2009-10-10 16:42:34 +0000 (Sat, 10 Oct 2009) | 2 lines
+
+Clean up naming of fillform rules; tweak lotsa_money some more
+
+------------------------------------------------------------------------
+r823860 | jm | 2009-10-10 14:29:18 +0000 (Sat, 10 Oct 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r823838 | jm | 2009-10-10 10:24:14 +0000 (Sat, 10 Oct 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r823821 | jm | 2009-10-10 08:50:02 +0000 (Sat, 10 Oct 2009) | 1 line
+
+promotions validated
+------------------------------------------------------------------------
+r823800 | jm | 2009-10-10 06:19:39 +0000 (Sat, 10 Oct 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r823779 | wtogami | 2009-10-10 03:40:44 +0000 (Sat, 10 Oct 2009) | 2 lines
+
+RCVD_IN_PSBL_DEEP experimental rule for net masscheck
+
+------------------------------------------------------------------------
+r823770 | wtogami | 2009-10-10 02:32:15 +0000 (Sat, 10 Oct 2009) | 2 lines
+
+Wrap the SEM URIBL rules with ifplugin
+
+------------------------------------------------------------------------
+r823745 | jhardin | 2009-10-09 23:44:29 +0000 (Fri, 09 Oct 2009) | 1 line
+
+add test rule for postmaster + abuse missing
+------------------------------------------------------------------------
+r823725 | jm | 2009-10-09 22:43:20 +0000 (Fri, 09 Oct 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r823655 | jm | 2009-10-09 18:38:18 +0000 (Fri, 09 Oct 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r823644 | wtogami | 2009-10-09 18:06:37 +0000 (Fri, 09 Oct 2009) | 2 lines
+
+Apparently his sample rules are not proper syntax, disable them until I have time to figure out why.
+
+------------------------------------------------------------------------
+r823635 | wtogami | 2009-10-09 17:47:39 +0000 (Fri, 09 Oct 2009) | 2 lines
+
+Bug 6220: Evaluate Spam Eating Monkey DNSBL and URIBL's in weekly mass check
+
+------------------------------------------------------------------------
+r823564 | jm | 2009-10-09 14:32:22 +0000 (Fri, 09 Oct 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r823528 | mmartinec | 2009-10-09 12:36:12 +0000 (Fri, 09 Oct 2009) | 2 lines
+
+garescorer.c: spelling: LAMARK -> LAMARCK (Jean-Baptiste Lamarck)
+
+------------------------------------------------------------------------
+r823503 | jm | 2009-10-09 10:26:27 +0000 (Fri, 09 Oct 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r823460 | jm | 2009-10-09 08:50:01 +0000 (Fri, 09 Oct 2009) | 1 line
+
+promotions validated
+------------------------------------------------------------------------
+r823418 | jm | 2009-10-09 06:20:48 +0000 (Fri, 09 Oct 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r823352 | jm | 2009-10-08 22:45:12 +0000 (Thu, 08 Oct 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r823204 | jhardin | 2009-10-08 15:23:29 +0000 (Thu, 08 Oct 2009) | 1 line
+
+reevolved ADVANCE_FEE using nightly logs
+------------------------------------------------------------------------
+r823190 | jm | 2009-10-08 14:32:38 +0000 (Thu, 08 Oct 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r823171 | jhardin | 2009-10-08 13:34:57 +0000 (Thu, 08 Oct 2009) | 1 line
+
+reevolved ADVANCE_FEE using nightly logs
+------------------------------------------------------------------------
+r823119 | jm | 2009-10-08 10:26:56 +0000 (Thu, 08 Oct 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r823090 | jm | 2009-10-08 08:50:03 +0000 (Thu, 08 Oct 2009) | 1 line
+
+promotions validated
+------------------------------------------------------------------------
+r823061 | jm | 2009-10-08 06:21:59 +0000 (Thu, 08 Oct 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r823005 | jhardin | 2009-10-08 02:36:52 +0000 (Thu, 08 Oct 2009) | 1 line
+
+More lotsa_money tweaking
+------------------------------------------------------------------------
+r822958 | jm | 2009-10-07 22:59:22 +0000 (Wed, 07 Oct 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r822953 | jm | 2009-10-07 22:45:18 +0000 (Wed, 07 Oct 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r822801 | jhardin | 2009-10-07 16:46:32 +0000 (Wed, 07 Oct 2009) | 1 line
+
+More lotsa_money tweaking
+------------------------------------------------------------------------
+r822785 | mmartinec | 2009-10-07 16:13:55 +0000 (Wed, 07 Oct 2009) | 2 lines
+
+runGA: obtain numcpus on FreeBSD and Solaris; add time/date log on garescorer run
+
+------------------------------------------------------------------------
+r822784 | mmartinec | 2009-10-07 16:10:06 +0000 (Wed, 07 Oct 2009) | 2 lines
+
+garescorer.c: polishing the performance report
+
+------------------------------------------------------------------------
+r822767 | jhardin | 2009-10-07 14:58:01 +0000 (Wed, 07 Oct 2009) | 1 line
+
+reevolved ADVANCE_FEE using nightly logs
+------------------------------------------------------------------------
+r822754 | jm | 2009-10-07 14:24:06 +0000 (Wed, 07 Oct 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r822737 | jhardin | 2009-10-07 13:49:28 +0000 (Wed, 07 Oct 2009) | 1 line
+
+reevolved ADVANCE_FEE using nightly logs
+------------------------------------------------------------------------
+r822643 | jm | 2009-10-07 10:19:12 +0000 (Wed, 07 Oct 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r822624 | jm | 2009-10-07 08:50:02 +0000 (Wed, 07 Oct 2009) | 1 line
+
+promotions validated
+------------------------------------------------------------------------
+r822598 | jm | 2009-10-07 06:13:47 +0000 (Wed, 07 Oct 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r822529 | jm | 2009-10-06 22:32:56 +0000 (Tue, 06 Oct 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r822519 | jhardin | 2009-10-06 21:32:13 +0000 (Tue, 06 Oct 2009) | 1 line
+
+reevolved ADVANCE_FEE using nightly logs
+------------------------------------------------------------------------
+r822506 | wtogami | 2009-10-06 21:17:19 +0000 (Tue, 06 Oct 2009) | 2 lines
+
+I misunderstood what nopublish means, none of these rules should be used except in masscheck.
+
+------------------------------------------------------------------------
+r822482 | jhardin | 2009-10-06 20:31:02 +0000 (Tue, 06 Oct 2009) | 1 line
+
+reevolved ADVANCE_FEE using nightly logs
+------------------------------------------------------------------------
+r822479 | wtogami | 2009-10-06 20:29:51 +0000 (Tue, 06 Oct 2009) | 2 lines
+
+RCVD_IN_HOSTKARMA_YL is masscheck only, do not ever publish.
+
+------------------------------------------------------------------------
+r822467 | wtogami | 2009-10-06 20:15:23 +0000 (Tue, 06 Oct 2009) | 2 lines
+
+Oops, these are not network rules.
+
+------------------------------------------------------------------------
+r822420 | wtogami | 2009-10-06 18:44:12 +0000 (Tue, 06 Oct 2009) | 2 lines
+
+Test 7-length .cn
+
+------------------------------------------------------------------------
+r822413 | jm | 2009-10-06 18:28:24 +0000 (Tue, 06 Oct 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r822291 | jm | 2009-10-06 14:23:47 +0000 (Tue, 06 Oct 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r822269 | jhardin | 2009-10-06 13:38:29 +0000 (Tue, 06 Oct 2009) | 1 line
+
+More lotsa_money tweaking
+------------------------------------------------------------------------
+r822208 | mmartinec | 2009-10-06 10:39:31 +0000 (Tue, 06 Oct 2009) | 2 lines
+
+garescorer.c: report performance as iterations per second
+
+------------------------------------------------------------------------
+r822206 | mmartinec | 2009-10-06 10:35:14 +0000 (Tue, 06 Oct 2009) | 2 lines
+
+garescorer.c: fix undeclared variable usage: rename is_mutatable to is_mutable
+
+------------------------------------------------------------------------
+r822193 | jm | 2009-10-06 10:19:24 +0000 (Tue, 06 Oct 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r822140 | jm | 2009-10-06 06:13:53 +0000 (Tue, 06 Oct 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r822082 | jhardin | 2009-10-05 23:15:15 +0000 (Mon, 05 Oct 2009) | 1 line
+
+Tweak fillform
+------------------------------------------------------------------------
+r822063 | jm | 2009-10-05 22:35:43 +0000 (Mon, 05 Oct 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r821950 | jm | 2009-10-05 18:30:06 +0000 (Mon, 05 Oct 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r821949 | jhardin | 2009-10-05 18:13:09 +0000 (Mon, 05 Oct 2009) | 1 line
+
+reevolved ADVANCE_FEE using nightly logs
+------------------------------------------------------------------------
+r821921 | jhardin | 2009-10-05 17:06:00 +0000 (Mon, 05 Oct 2009) | 1 line
+
+reevolved ADVANCE_FEE using nightly logs
+------------------------------------------------------------------------
+r821814 | jhardin | 2009-10-05 14:54:25 +0000 (Mon, 05 Oct 2009) | 1 line
+
+More lotsa_money tweaking
+------------------------------------------------------------------------
+r821807 | jm | 2009-10-05 14:24:55 +0000 (Mon, 05 Oct 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r821776 | wtogami | 2009-10-05 12:39:53 +0000 (Mon, 05 Oct 2009) | 2 lines
+
+Bug 6156: Make PSBL lastexternal instead of deep parsing
+
+------------------------------------------------------------------------
+r821738 | jm | 2009-10-05 10:20:10 +0000 (Mon, 05 Oct 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r821692 | jm | 2009-10-05 06:13:57 +0000 (Mon, 05 Oct 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r821658 | wtogami | 2009-10-05 02:02:11 +0000 (Mon, 05 Oct 2009) | 2 lines
+
+These rules were moved to wtogami's sandbox.
+
+------------------------------------------------------------------------
+r821650 | wtogami | 2009-10-05 01:55:46 +0000 (Mon, 05 Oct 2009) | 2 lines
+
+Move CN_EIGHT rules to wtogami's sandbox.
+
+------------------------------------------------------------------------
+r821645 | jhardin | 2009-10-05 01:27:59 +0000 (Mon, 05 Oct 2009) | 1 line
+
+More lotsa_money tweaking
+------------------------------------------------------------------------
+r821638 | wtogami | 2009-10-04 23:09:14 +0000 (Sun, 04 Oct 2009) | 2 lines
+
+Bug 6212: RCVD_IN_HOSTKARMA_* rules for testing.
+
+------------------------------------------------------------------------
+r821630 | jm | 2009-10-04 22:38:20 +0000 (Sun, 04 Oct 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r821618 | wtogami | 2009-10-04 21:17:36 +0000 (Sun, 04 Oct 2009) | 2 lines
+
+Add myself to CREDITS
+
+------------------------------------------------------------------------
+r821571 | jm | 2009-10-04 18:32:37 +0000 (Sun, 04 Oct 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r821566 | jhardin | 2009-10-04 17:43:16 +0000 (Sun, 04 Oct 2009) | 1 line
+
+reevolved ADVANCE_FEE using nightly logs
+------------------------------------------------------------------------
+r821563 | jhardin | 2009-10-04 17:25:21 +0000 (Sun, 04 Oct 2009) | 1 line
+
+reevolved ADVANCE_FEE using nightly logs
+------------------------------------------------------------------------
+r821560 | jhardin | 2009-10-04 17:12:33 +0000 (Sun, 04 Oct 2009) | 2 lines
+
+Tewak lotsa_money to incorporate some other sandbox rules, tewak CN_EIGHT
+
+------------------------------------------------------------------------
+r821544 | jm | 2009-10-04 14:28:00 +0000 (Sun, 04 Oct 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r821503 | axb | 2009-10-04 10:48:17 +0000 (Sun, 04 Oct 2009) | 1 line
+
+
+------------------------------------------------------------------------
+r821499 | jm | 2009-10-04 10:22:51 +0000 (Sun, 04 Oct 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r821470 | jm | 2009-10-04 06:17:22 +0000 (Sun, 04 Oct 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r821463 | jhardin | 2009-10-04 04:19:39 +0000 (Sun, 04 Oct 2009) | 2 lines
+
+Reevolved based on local masscheck
+
+------------------------------------------------------------------------
+r821462 | jhardin | 2009-10-04 04:18:19 +0000 (Sun, 04 Oct 2009) | 2 lines
+
+FROM_MISSPACED has rotten S/O without quotes
+
+------------------------------------------------------------------------
+r821441 | jhardin | 2009-10-03 22:59:08 +0000 (Sat, 03 Oct 2009) | 2 lines
+
+refinements of CN_EIGHT per list discussion
+
+------------------------------------------------------------------------
+r821439 | jm | 2009-10-03 22:37:50 +0000 (Sat, 03 Oct 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r821415 | jhardin | 2009-10-03 21:04:24 +0000 (Sat, 03 Oct 2009) | 2 lines
+
+fix CN_EIGHT - d'oh!
+
+------------------------------------------------------------------------
+r821389 | jm | 2009-10-03 18:33:38 +0000 (Sat, 03 Oct 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r821372 | jhardin | 2009-10-03 17:36:23 +0000 (Sat, 03 Oct 2009) | 2 lines
+
+Tweak lotas_money and fillform, add first cut of re-evolved ADVANCE_FEE (based on iffy logs, will need to reevolve again)
+
+------------------------------------------------------------------------
+r821326 | jm | 2009-10-03 14:28:08 +0000 (Sat, 03 Oct 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r821289 | jm | 2009-10-03 10:23:04 +0000 (Sat, 03 Oct 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r821273 | jm | 2009-10-03 08:50:02 +0000 (Sat, 03 Oct 2009) | 1 line
+
+promotions validated
+------------------------------------------------------------------------
+r821257 | jm | 2009-10-03 06:30:49 +0000 (Sat, 03 Oct 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r821231 | jhardin | 2009-10-03 03:26:18 +0000 (Sat, 03 Oct 2009) | 1 line
+
+minor lotsa_money tweaks
+------------------------------------------------------------------------
+r821195 | jm | 2009-10-02 22:50:44 +0000 (Fri, 02 Oct 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r821190 | jm | 2009-10-02 22:37:52 +0000 (Fri, 02 Oct 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r821132 | jhardin | 2009-10-02 19:01:43 +0000 (Fri, 02 Oct 2009) | 1 line
+
+More lotsa_money tweaking
+------------------------------------------------------------------------
+r821123 | jm | 2009-10-02 18:33:08 +0000 (Fri, 02 Oct 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r821034 | jm | 2009-10-02 14:28:12 +0000 (Fri, 02 Oct 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r821017 | jhardin | 2009-10-02 13:35:32 +0000 (Fri, 02 Oct 2009) | 2 lines
+
+Lotsa_Money changes preparatory to reevolving ADVANCE_FEE. Some other new misc rules and tuning of other rules.
+
+------------------------------------------------------------------------
+r820981 | axb | 2009-10-02 11:56:37 +0000 (Fri, 02 Oct 2009) | 3 lines
+
+
+removed CSS support in RCVD_IN_SBL
+CSS probably rates separate rule score
+------------------------------------------------------------------------
+r820970 | axb | 2009-10-02 11:31:15 +0000 (Fri, 02 Oct 2009) | 4 lines
+
+undid CSS "3" in  RCVD_IN_XBL
+added to RCVD_IN_SBL as per
+http://www.spamhaus.org/css/
+"CSS is an integral part of the SBL"
+------------------------------------------------------------------------
+r820968 | axb | 2009-10-02 11:24:06 +0000 (Fri, 02 Oct 2009) | 6 lines
+
+adding support for
+http://www.spamhaus.org/news.lasso?article=646
+http://www.spamhaus.org/css/
+
+RCVD_IN_XBL  "3"
+
+------------------------------------------------------------------------
+r820950 | jm | 2009-10-02 10:22:37 +0000 (Fri, 02 Oct 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r820935 | jm | 2009-10-02 08:50:02 +0000 (Fri, 02 Oct 2009) | 1 line
+
+promotions validated
+------------------------------------------------------------------------
+r820896 | jm | 2009-10-02 06:16:58 +0000 (Fri, 02 Oct 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r820816 | jm | 2009-10-01 21:51:04 +0000 (Thu, 01 Oct 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r820809 | jm | 2009-10-01 21:37:40 +0000 (Thu, 01 Oct 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r820340 | mmartinec | 2009-09-30 16:37:50 +0000 (Wed, 30 Sep 2009) | 3 lines
+
+Enable TestingAndDebugging::ProhibitNoStrict test but
+allow the use of 'no strict "refs"'
+
+------------------------------------------------------------------------
+r820325 | mmartinec | 2009-09-30 16:01:28 +0000 (Wed, 30 Sep 2009) | 3 lines
+
+Deal with BuiltinFunctions::RequireGlobFunction,
+removing it from xt/60_perlcritic.t exceptions
+
+------------------------------------------------------------------------
+r820310 | mmartinec | 2009-09-30 15:49:36 +0000 (Wed, 30 Sep 2009) | 3 lines
+
+Deal with ControlStructures::ProhibitMutatingListFunctions
+and remove this exception from xt/60_perlcritic.t
+
+------------------------------------------------------------------------
+r820297 | mmartinec | 2009-09-30 15:20:41 +0000 (Wed, 30 Sep 2009) | 3 lines
+
+Deal with BayesStore/BDB.pm, removing another exception from
+xt/60_perlcritic.t: Variables::ProhibitConditionalDeclarations
+
+------------------------------------------------------------------------
+r820294 | mmartinec | 2009-09-30 15:09:24 +0000 (Wed, 30 Sep 2009) | 4 lines
+
+Now that the module Time::HiRes is a required module, we can afford
+to replace a select() with Time::HiRes::sleep, and remove exception
+BuiltinFunctions::ProhibitSleepViaSelect from xt/60_perlcritic.t
+
+------------------------------------------------------------------------
+r820289 | mmartinec | 2009-09-30 14:59:32 +0000 (Wed, 30 Sep 2009) | 3 lines
+
+Bug 6213: parsing of eval-type rules: allow unquoted
+domain names, disallow unmatched quotes
+
+------------------------------------------------------------------------
+r820211 | jm | 2009-09-30 08:50:02 +0000 (Wed, 30 Sep 2009) | 1 line
+
+promotions validated
+------------------------------------------------------------------------
+r820065 | jm | 2009-09-29 18:46:49 +0000 (Tue, 29 Sep 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r819987 | jm | 2009-09-29 15:36:42 +0000 (Tue, 29 Sep 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r819980 | jm | 2009-09-29 15:15:14 +0000 (Tue, 29 Sep 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r819938 | jm | 2009-09-29 13:25:46 +0000 (Tue, 29 Sep 2009) | 1 line
+
+add a Test::Perl::Critic release-test, with most criticisms turned off initially
+------------------------------------------------------------------------
+r819861 | jm | 2009-09-29 08:50:02 +0000 (Tue, 29 Sep 2009) | 1 line
+
+promotions validated
+------------------------------------------------------------------------
+r819476 | jm | 2009-09-28 08:50:02 +0000 (Mon, 28 Sep 2009) | 1 line
+
+promotions validated
+------------------------------------------------------------------------
+r819244 | jm | 2009-09-27 02:24:53 +0000 (Sun, 27 Sep 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r818926 | mmartinec | 2009-09-25 17:41:22 +0000 (Fri, 25 Sep 2009) | 4 lines
+
+add tflag 'userconf' to rules DKIM_SIGNED, DKIM_VALID
+and DKIM_VALID_AU and document that their score should
+be kept low
+
+------------------------------------------------------------------------
+r818921 | mmartinec | 2009-09-25 17:27:08 +0000 (Fri, 25 Sep 2009) | 5 lines
+
+masses/runGA: prevent a shell 'source' command from loading
+an unrelated file named 'config' which happens to be in the
+current PATH - must use a / in an arg to a 'source' command
+to avoid searching the PATH
+
+------------------------------------------------------------------------
+r818463 | mmartinec | 2009-09-24 12:34:10 +0000 (Thu, 24 Sep 2009) | 2 lines
+
+URIDetail.pm: fix Bug 6205 comment 5
+
+------------------------------------------------------------------------
+r818446 | jm | 2009-09-24 11:00:31 +0000 (Thu, 24 Sep 2009) | 1 line
+
+bug 6207: add 'if can(Class::method)' conditional statement, allowing conf settings to be conditionalised on plugin capabilities without requiring new version releases to do so
+------------------------------------------------------------------------
+r818443 | jm | 2009-09-24 10:57:17 +0000 (Thu, 24 Sep 2009) | 1 line
+
+bug 6205: add test to ensure that all config settings are correctly handled when switching between users; add more config setting type metadata to enable those tests to work; and fix URIDetail to store config on the {conf} object, not on the plugin.
+------------------------------------------------------------------------
+r818439 | jm | 2009-09-24 10:53:25 +0000 (Thu, 24 Sep 2009) | 1 line
+
+bug 6158: move 'release tests' to xt/ directory; mirror long-running, net-tests and stress tests with xt/50_testname.t scripts to enforce their run before a release
+------------------------------------------------------------------------
+r818438 | jm | 2009-09-24 10:51:39 +0000 (Thu, 24 Sep 2009) | 1 line
+
+bug 6158: move 'release tests' to xt/ directory; mirror long-running, net-tests and stress tests with xt/50_testname.t scripts to enforce their run before a release
+------------------------------------------------------------------------
+r818007 | jm | 2009-09-23 08:50:03 +0000 (Wed, 23 Sep 2009) | 1 line
+
+promotions validated
+------------------------------------------------------------------------
+r817751 | mmartinec | 2009-09-22 18:24:15 +0000 (Tue, 22 Sep 2009) | 5 lines
+
+DKIM.pm/POD: document that quotes may be omitted in eval-rule
+arguments on domains consisting only of letters, digits and
+dots (btw, it would be handly if Parser.pm would allow a '-'
+too, which is quite common in domain names)
+
+------------------------------------------------------------------------
+r817690 | jhardin | 2009-09-22 15:12:03 +0000 (Tue, 22 Sep 2009) | 1 line
+
+tweak lotsa_money, add some more testing rules
+------------------------------------------------------------------------
+r817483 | jhardin | 2009-09-22 02:59:50 +0000 (Tue, 22 Sep 2009) | 1 line
+
+tweak lotsa_money some more, add some more testing rules
+------------------------------------------------------------------------
+r817328 | mmartinec | 2009-09-21 17:24:02 +0000 (Mon, 21 Sep 2009) | 6 lines
+
+AWL/AutoWhitelist/SQLBasedAddrList cleanups: remove leftovers of
+signer reputations; prevent a new nonsigned query from updating
+a signed SQL entry; average across all signed entries in case of
+multiple valid signatures (e.g. author domain + signing remailer);
+cleanup (long lines, minor details); documentation consistency
+
+------------------------------------------------------------------------
+r817311 | mmartinec | 2009-09-21 16:21:47 +0000 (Mon, 21 Sep 2009) | 3 lines
+
+Bug 6191: takes almost a minute to start spamd on a
+slow machine, bump up the retry counter to 90 seconds
+
+------------------------------------------------------------------------
+r817198 | mmartinec | 2009-09-21 10:18:31 +0000 (Mon, 21 Sep 2009) | 2 lines
+
+Bug 5958: URIDetail plugin not taint safe, fixed
+
+------------------------------------------------------------------------
+r817140 | jm | 2009-09-21 03:30:24 +0000 (Mon, 21 Sep 2009) | 1 line
+
+bug 5912: fix parsing of multi-line Received: headers for BOUNCE_MESSAGE/VBOUNCE_MESSAGE et al
+------------------------------------------------------------------------
+r817137 | jm | 2009-09-21 02:41:40 +0000 (Mon, 21 Sep 2009) | 1 line
+
+oops. remove --debug
+------------------------------------------------------------------------
+r817096 | jm | 2009-09-20 20:28:04 +0000 (Sun, 20 Sep 2009) | 1 line
+
+fix db_awl_perms.t failure on Hudson, where SDBM_File is installed instead of DB_File
+------------------------------------------------------------------------
+r817087 | jm | 2009-09-20 19:45:09 +0000 (Sun, 20 Sep 2009) | 1 line
+
+bug 5912: add tests for BOUNCE_MESSAGE header parsing bug
+------------------------------------------------------------------------
+r817085 | jm | 2009-09-20 19:34:54 +0000 (Sun, 20 Sep 2009) | 1 line
+
+bug 5712: initial fix to detect accidental match-everything regexps in rules, thanks to Matt Cline
+------------------------------------------------------------------------
+r817084 | jm | 2009-09-20 19:30:10 +0000 (Sun, 20 Sep 2009) | 1 line
+
+reorder build instructions to build rules earlier after release
+------------------------------------------------------------------------
+r817081 | jm | 2009-09-20 19:11:33 +0000 (Sun, 20 Sep 2009) | 1 line
+
+s/3.2/3.3/ for new version
+------------------------------------------------------------------------
+r817067 | jm | 2009-09-20 17:57:49 +0000 (Sun, 20 Sep 2009) | 2 lines
+
+bug 6173: fix incorrect mode bits when creating lock files for AWL, thanks to Cedric Knight
+
+------------------------------------------------------------------------
+r817057 | jm | 2009-09-20 17:34:43 +0000 (Sun, 20 Sep 2009) | 1 line
+
+bug 5929: avoid taint warnings if hostname is returned as '(none)'
+------------------------------------------------------------------------
+r817036 | jhardin | 2009-09-20 14:45:52 +0000 (Sun, 20 Sep 2009) | 2 lines
+
+Fix bug in lotsa_money, tweak it a bit
+
+------------------------------------------------------------------------
+r816968 | jhardin | 2009-09-19 23:45:18 +0000 (Sat, 19 Sep 2009) | 2 lines
+
+Tweak lotsa_money, add rule for "please review attachment" and hope for the best
+
+------------------------------------------------------------------------
+r816933 | jm | 2009-09-19 14:54:49 +0000 (Sat, 19 Sep 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r816932 | jm | 2009-09-19 14:41:41 +0000 (Sat, 19 Sep 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r816871 | jm | 2009-09-19 08:50:01 +0000 (Sat, 19 Sep 2009) | 1 line
+
+promotions validated
+------------------------------------------------------------------------
+r816855 | jm | 2009-09-19 05:41:41 +0000 (Sat, 19 Sep 2009) | 1 line
+
+bug 5201: fix some cases where :addr headers were parsed incorrectly
+------------------------------------------------------------------------
+r816853 | jm | 2009-09-19 05:13:01 +0000 (Sat, 19 Sep 2009) | 1 line
+
+bug 5782: produce an error message if an sa-update channel doesn't exist
+------------------------------------------------------------------------
+r816835 | mmartinec | 2009-09-19 00:34:36 +0000 (Sat, 19 Sep 2009) | 2 lines
+
+Bug 6174 trivial: typo in a rule description text
+
+------------------------------------------------------------------------
+r816683 | mmartinec | 2009-09-18 15:51:14 +0000 (Fri, 18 Sep 2009) | 5 lines
+
+When storing an IPv6 address to AWL database, append
+a '::' to a /48 network address -  although it wastes
+2 chars, it's nice to make it look like a syntactically
+correct IPv6 address; just fits into SQL 16 char field.
+
+------------------------------------------------------------------------
+r816538 | jm | 2009-09-18 08:50:02 +0000 (Fri, 18 Sep 2009) | 1 line
+
+promotions validated
+------------------------------------------------------------------------
+r816412 | mmartinec | 2009-09-17 23:44:11 +0000 (Thu, 17 Sep 2009) | 6 lines
+
+Bug 6206, Bug 2536: spamd: untaint directory as obtained from
+a password file or from vpopmail utilities, avoid implicit
+untainting; report error if user preferences file exists
+but cannot be accessed; some cosmetics (avoid deep nesting
+where possible, and avoid faraway small code segments)
+
+------------------------------------------------------------------------
+r816136 | mmartinec | 2009-09-17 11:02:14 +0000 (Thu, 17 Sep 2009) | 2 lines
+
+25_dkim.cf: tame NML_ADSP_CUSTOM_* rules by __VIA_RESIGNER
+
+------------------------------------------------------------------------
+r816109 | jm | 2009-09-17 09:36:03 +0000 (Thu, 17 Sep 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r816103 | jm | 2009-09-17 09:09:58 +0000 (Thu, 17 Sep 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r816097 | jm | 2009-09-17 08:50:02 +0000 (Thu, 17 Sep 2009) | 1 line
+
+promotions validated
+------------------------------------------------------------------------
+r815997 | mmartinec | 2009-09-16 22:52:21 +0000 (Wed, 16 Sep 2009) | 2 lines
+
+25_dkim.cf: tidy up - remove old stuff, shuffle
+
+------------------------------------------------------------------------
+r815844 | mmartinec | 2009-09-16 15:41:01 +0000 (Wed, 16 Sep 2009) | 6 lines
+
+AWL: drop unused code for assessing signer reputation:
+the extra load on SQL for dynamic queries is not worth it,
+as the reputation changes very little after a while,
+so it is cheaper to collect if offline from an AWL
+database once in a while and prepare some scoring rules
+
+------------------------------------------------------------------------
+r815828 | mmartinec | 2009-09-16 15:14:30 +0000 (Wed, 16 Sep 2009) | 5 lines
+
+sql/README.awl, sql/awl_*.sql: extend awl.ip field from
+10 to 16 characters to be able to store an IPv6 /48
+network address; provide an example of an ALTER command
+to change an existing database
+
+------------------------------------------------------------------------
+r815775 | jhardin | 2009-09-16 13:40:25 +0000 (Wed, 16 Sep 2009) | 2 lines
+
+Tweak fillform, add new stuff to lotsa_money and misc
+
+------------------------------------------------------------------------
+r815674 | jm | 2009-09-16 08:50:04 +0000 (Wed, 16 Sep 2009) | 1 line
+
+promotions validated
+------------------------------------------------------------------------
+r815598 | hege | 2009-09-16 04:10:24 +0000 (Wed, 16 Sep 2009) | 1 line
+
+add subject_spaces
+------------------------------------------------------------------------
+r815575 | jm | 2009-09-16 00:12:39 +0000 (Wed, 16 Sep 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r815569 | jm | 2009-09-15 23:53:15 +0000 (Tue, 15 Sep 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r815520 | jm | 2009-09-15 22:10:42 +0000 (Tue, 15 Sep 2009) | 1 line
+
+bug 6204: use /var/lock/subsys/spamd instead of /var/lock/subsys/spamassassin for rc script, so that 'service spamd status' will work, fix by Warren Togami
+------------------------------------------------------------------------
+r815518 | jm | 2009-09-15 22:07:37 +0000 (Tue, 15 Sep 2009) | 1 line
+
+MANIFEST tidying
+------------------------------------------------------------------------
+r815516 | jm | 2009-09-15 22:05:59 +0000 (Tue, 15 Sep 2009) | 1 line
+
+bug 6003: fix leakage of 'whitelist_from_rcvd' entries between spamd users
+------------------------------------------------------------------------
+r815500 | jm | 2009-09-15 21:40:55 +0000 (Tue, 15 Sep 2009) | 1 line
+
+bug 6083: re-download MIRRRORED.BY files at least once a week, or if 'sa-update --refreshmirrors' switch is used
+------------------------------------------------------------------------
+r815263 | jm | 2009-09-15 10:36:33 +0000 (Tue, 15 Sep 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r815222 | jm | 2009-09-15 08:50:02 +0000 (Tue, 15 Sep 2009) | 1 line
+
+promotions validated
+------------------------------------------------------------------------
+r814964 | jm | 2009-09-15 02:04:22 +0000 (Tue, 15 Sep 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r814961 | jm | 2009-09-15 01:41:57 +0000 (Tue, 15 Sep 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r814949 | mmartinec | 2009-09-15 01:03:33 +0000 (Tue, 15 Sep 2009) | 4 lines
+
+AutoWhitelist.pm: (complete the unfinished to-do) canonicalize
+an IPv6 address and keep only the /48 network part, when using
+it in an AWL database entry; added some commented-out debugging
+
+------------------------------------------------------------------------
+r814729 | jm | 2009-09-14 16:44:05 +0000 (Mon, 14 Sep 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r814588 | jm | 2009-09-14 11:37:56 +0000 (Mon, 14 Sep 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r814525 | jm | 2009-09-14 08:50:02 +0000 (Mon, 14 Sep 2009) | 1 line
+
+promotions validated
+------------------------------------------------------------------------
+r814507 | jm | 2009-09-14 07:42:25 +0000 (Mon, 14 Sep 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r814458 | jm | 2009-09-14 01:09:25 +0000 (Mon, 14 Sep 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r814456 | jm | 2009-09-14 00:46:11 +0000 (Mon, 14 Sep 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r814383 | jhardin | 2009-09-13 21:16:49 +0000 (Sun, 13 Sep 2009) | 1 line
+
+tweak lotsa_money and fill_form
+------------------------------------------------------------------------
+r814339 | jm | 2009-09-13 16:46:28 +0000 (Sun, 13 Sep 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r814292 | jm | 2009-09-13 09:12:00 +0000 (Sun, 13 Sep 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r814285 | jm | 2009-09-13 08:50:02 +0000 (Sun, 13 Sep 2009) | 1 line
+
+promotions validated
+------------------------------------------------------------------------
+r814284 | jm | 2009-09-13 08:49:38 +0000 (Sun, 13 Sep 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r814258 | jhardin | 2009-09-13 01:49:54 +0000 (Sun, 13 Sep 2009) | 2 lines
+
+tweak lotsa_money, reduce FPs
+
+------------------------------------------------------------------------
+r814252 | jm | 2009-09-12 23:31:07 +0000 (Sat, 12 Sep 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r814249 | jm | 2009-09-12 23:04:46 +0000 (Sat, 12 Sep 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r814243 | jhardin | 2009-09-12 21:43:35 +0000 (Sat, 12 Sep 2009) | 3 lines
+
+tweak lotsa_money
+
+
+------------------------------------------------------------------------
+r814222 | jhardin | 2009-09-12 18:24:56 +0000 (Sat, 12 Sep 2009) | 2 lines
+
+fix lotsa_money lottery FPs
+
+------------------------------------------------------------------------
+r814217 | jhardin | 2009-09-12 17:59:39 +0000 (Sat, 12 Sep 2009) | 1 line
+
+tweak lotsa_money lottery rules
+------------------------------------------------------------------------
+r814117 | jm | 2009-09-12 08:50:02 +0000 (Sat, 12 Sep 2009) | 1 line
+
+promotions validated
+------------------------------------------------------------------------
+r814069 | jm | 2009-09-11 22:43:32 +0000 (Fri, 11 Sep 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r814066 | jm | 2009-09-11 22:30:22 +0000 (Fri, 11 Sep 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r813826 | jhardin | 2009-09-11 13:41:40 +0000 (Fri, 11 Sep 2009) | 2 lines
+
+Fix FP in tbird image ruleset, add more lottery coverage in lotsa_money
+
+------------------------------------------------------------------------
+r813723 | jm | 2009-09-11 08:50:02 +0000 (Fri, 11 Sep 2009) | 1 line
+
+promotions validated
+------------------------------------------------------------------------
+r813670 | hege | 2009-09-11 06:07:34 +0000 (Fri, 11 Sep 2009) | 1 line
+
+muchmoney fix attempt 2
+------------------------------------------------------------------------
+r813666 | hege | 2009-09-11 05:17:37 +0000 (Fri, 11 Sep 2009) | 1 line
+
+fix FROM_CONTAINS_TAB
+------------------------------------------------------------------------
+r813665 | hege | 2009-09-11 05:17:05 +0000 (Fri, 11 Sep 2009) | 1 line
+
+fixup muchmoney
+------------------------------------------------------------------------
+r813594 | jm | 2009-09-10 21:24:59 +0000 (Thu, 10 Sep 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r813583 | jm | 2009-09-10 20:55:35 +0000 (Thu, 10 Sep 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r813434 | jhardin | 2009-09-10 13:42:41 +0000 (Thu, 10 Sep 2009) | 2 lines
+
+Minor rule cleanup
+
+------------------------------------------------------------------------
+r813389 | hstern | 2009-09-10 11:59:26 +0000 (Thu, 10 Sep 2009) | 3 lines
+
+Added Facebook redirector pattern.  Thanks to RLS for pointing it out.
+
+
+------------------------------------------------------------------------
+r813361 | jm | 2009-09-10 10:41:39 +0000 (Thu, 10 Sep 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r813333 | jm | 2009-09-10 09:47:38 +0000 (Thu, 10 Sep 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r813312 | jm | 2009-09-10 08:50:04 +0000 (Thu, 10 Sep 2009) | 1 line
+
+promotions validated
+------------------------------------------------------------------------
+r813237 | hege | 2009-09-10 05:57:24 +0000 (Thu, 10 Sep 2009) | 1 line
+
+fix filenames, improve bigmoney
+------------------------------------------------------------------------
+r813163 | mmartinec | 2009-09-09 23:08:38 +0000 (Wed, 09 Sep 2009) | 4 lines
+
+Plugin::AWL let SQL awl.signedby field be based on a tag
+DKIMDOMAIN instead of the DKIMIDENTITY as before, to go
+along with a change in the DKIM plugin
+
+------------------------------------------------------------------------
+r813097 | jm | 2009-09-09 19:56:37 +0000 (Wed, 09 Sep 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r813095 | mmartinec | 2009-09-09 19:49:07 +0000 (Wed, 09 Sep 2009) | 11 lines
+
+Bug 6189 - DKIM plugin:
+draft-ietf-dkim-ssp-10/RFC-5617 made Author Domain Signature
+based on 'd':
+- updated ADSP code accordingly;
+- changed whitelisting code to be based on SDID ('d')
+  instead of AUID ('i');
+- as a mail message may have multiple authors, it can have
+  multiple author domain signatures from different domains,
+  and can have multiple author domain signing practices;
+  change internal data structures and code accordingly;
+
+------------------------------------------------------------------------
+r813017 | kb | 2009-09-09 16:04:49 +0000 (Wed, 09 Sep 2009) | 2 lines
+
+Fix oops regarding public vs confidential PMC contact.
+
+------------------------------------------------------------------------
+r812956 | jm | 2009-09-09 13:39:22 +0000 (Wed, 09 Sep 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r812935 | jhardin | 2009-09-09 13:04:50 +0000 (Wed, 09 Sep 2009) | 2 lines
+
+tweak lotsa_money
+
+------------------------------------------------------------------------
+r812836 | jm | 2009-09-09 08:50:02 +0000 (Wed, 09 Sep 2009) | 1 line
+
+promotions validated
+------------------------------------------------------------------------
+r812739 | kb | 2009-09-09 00:43:15 +0000 (Wed, 09 Sep 2009) | 2 lines
+
+10 months late, move myself from Committers to PMC.
+
+------------------------------------------------------------------------
+r812731 | jhardin | 2009-09-08 23:47:26 +0000 (Tue, 08 Sep 2009) | 3 lines
+
+tweak misc rules
+
+
+------------------------------------------------------------------------
+r812726 | jhardin | 2009-09-08 23:43:56 +0000 (Tue, 08 Sep 2009) | 2 lines
+
+Tweak fillform
+
+------------------------------------------------------------------------
+r812706 | jhardin | 2009-09-08 21:44:27 +0000 (Tue, 08 Sep 2009) | 2 lines
+
+Tweak lotsa_money rules
+
+------------------------------------------------------------------------
+r812608 | jm | 2009-09-08 18:23:39 +0000 (Tue, 08 Sep 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r812515 | jm | 2009-09-08 14:05:48 +0000 (Tue, 08 Sep 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r812393 | jm | 2009-09-08 08:50:02 +0000 (Tue, 08 Sep 2009) | 1 line
+
+promotions validated
+------------------------------------------------------------------------
+r812348 | jm | 2009-09-08 06:07:04 +0000 (Tue, 08 Sep 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r812297 | jm | 2009-09-07 22:30:55 +0000 (Mon, 07 Sep 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r812254 | jhardin | 2009-09-07 18:48:56 +0000 (Mon, 07 Sep 2009) | 1 line
+
+fix oops in lotsa_money
+------------------------------------------------------------------------
+r812247 | jm | 2009-09-07 18:28:48 +0000 (Mon, 07 Sep 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r812148 | jm | 2009-09-07 14:12:28 +0000 (Mon, 07 Sep 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r812142 | jm | 2009-09-07 13:59:29 +0000 (Mon, 07 Sep 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r812041 | jm | 2009-09-07 08:50:03 +0000 (Mon, 07 Sep 2009) | 1 line
+
+promotions validated
+------------------------------------------------------------------------
+r812003 | jm | 2009-09-07 06:13:08 +0000 (Mon, 07 Sep 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r811992 | jhardin | 2009-09-07 03:57:29 +0000 (Mon, 07 Sep 2009) | 2 lines
+
+Small rule tweaks, add descriptions
+
+------------------------------------------------------------------------
+r811935 | jm | 2009-09-06 22:45:18 +0000 (Sun, 06 Sep 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r811929 | jm | 2009-09-06 22:32:37 +0000 (Sun, 06 Sep 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r811858 | jm | 2009-09-06 18:48:12 +0000 (Sun, 06 Sep 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r811854 | jm | 2009-09-06 18:33:02 +0000 (Sun, 06 Sep 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r811829 | jhardin | 2009-09-06 15:46:01 +0000 (Sun, 06 Sep 2009) | 2 lines
+
+Tweak lots-of-money, add Dear Email User rule for phishing
+
+------------------------------------------------------------------------
+r811781 | jm | 2009-09-06 08:50:01 +0000 (Sun, 06 Sep 2009) | 1 line
+
+promotions validated
+------------------------------------------------------------------------
+r811768 | jm | 2009-09-06 06:12:33 +0000 (Sun, 06 Sep 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r811722 | jm | 2009-09-05 22:31:27 +0000 (Sat, 05 Sep 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r811695 | jm | 2009-09-05 18:40:35 +0000 (Sat, 05 Sep 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r811694 | jm | 2009-09-05 18:26:30 +0000 (Sat, 05 Sep 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r811660 | jm | 2009-09-05 15:01:51 +0000 (Sat, 05 Sep 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r811659 | jm | 2009-09-05 14:49:42 +0000 (Sat, 05 Sep 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r811608 | jm | 2009-09-05 08:50:02 +0000 (Sat, 05 Sep 2009) | 1 line
+
+promotions validated
+------------------------------------------------------------------------
+r811591 | jm | 2009-09-05 06:22:36 +0000 (Sat, 05 Sep 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r811590 | jm | 2009-09-05 06:10:20 +0000 (Sat, 05 Sep 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r811509 | jm | 2009-09-04 18:25:22 +0000 (Fri, 04 Sep 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r811462 | jhardin | 2009-09-04 16:09:10 +0000 (Fri, 04 Sep 2009) | 1 line
+
+add msgid rule for evaluation
+------------------------------------------------------------------------
+r811424 | jm | 2009-09-04 14:19:03 +0000 (Fri, 04 Sep 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r811417 | jm | 2009-09-04 14:06:07 +0000 (Fri, 04 Sep 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r811401 | jhardin | 2009-09-04 13:49:18 +0000 (Fri, 04 Sep 2009) | 1 line
+
+Tweak lots_of_money and tbird forgery ruleset test metas
+------------------------------------------------------------------------
+r811389 | jhardin | 2009-09-04 13:36:21 +0000 (Fri, 04 Sep 2009) | 1 line
+
+Tweak lots_of_money ruleset
+------------------------------------------------------------------------
+r811288 | jm | 2009-09-04 08:50:03 +0000 (Fri, 04 Sep 2009) | 1 line
+
+promotions validated
+------------------------------------------------------------------------
+r811227 | jm | 2009-09-04 06:09:18 +0000 (Fri, 04 Sep 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r811214 | jhardin | 2009-09-04 04:01:12 +0000 (Fri, 04 Sep 2009) | 1 line
+
+Tweak lots_of_money ruleset
+------------------------------------------------------------------------
+r811170 | jm | 2009-09-03 23:24:16 +0000 (Thu, 03 Sep 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r811168 | jm | 2009-09-03 23:11:34 +0000 (Thu, 03 Sep 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r811150 | jm | 2009-09-03 21:56:49 +0000 (Thu, 03 Sep 2009) | 1 line
+
+reinstate working active list from 2009-08-31, to work around bugs due to broken ruleset so mass-checks can proceed
+------------------------------------------------------------------------
+r811133 | jm | 2009-09-03 21:30:34 +0000 (Thu, 03 Sep 2009) | 1 line
+
+bug 6156: add RCVD_IN_PSBL_2WEEKS to measure accuracy of PSBL using recent mail only
+------------------------------------------------------------------------
+r811131 | jm | 2009-09-03 21:26:19 +0000 (Thu, 03 Sep 2009) | 1 line
+
+bug 5937: add some additional Subject patterns for anti-phishing rule TVD_PH_SUBJ_ACCOUNTS_POST
+------------------------------------------------------------------------
+r811130 | jm | 2009-09-03 21:23:35 +0000 (Thu, 03 Sep 2009) | 1 line
+
+bug 6166: disable a test 'tflags multiple' rule for mass-check release build, since it's causing a lot of noise in mass-check logs
+------------------------------------------------------------------------
+r811129 | jm | 2009-09-03 21:20:54 +0000 (Thu, 03 Sep 2009) | 1 line
+
+bug 6183: avoid ISO-2022-JP FPs on FM_FRM_RN_L_BRACK rule
+------------------------------------------------------------------------
+r811120 | jm | 2009-09-03 21:01:02 +0000 (Thu, 03 Sep 2009) | 1 line
+
+bug 6119: add an FP sample
+------------------------------------------------------------------------
+r811119 | jm | 2009-09-03 20:57:31 +0000 (Thu, 03 Sep 2009) | 1 line
+
+bug 6119: trivial FP fix for one-word mails on TVD_SPACE_RATIO
+------------------------------------------------------------------------
+r811118 | kb | 2009-09-03 20:54:05 +0000 (Thu, 03 Sep 2009) | 2 lines
+
+RATWARE_BOUNDARY plus variant, supersedes all previous RATWARE_OUTLOOK stuff.
+
+------------------------------------------------------------------------
+r811067 | jm | 2009-09-03 18:22:30 +0000 (Thu, 03 Sep 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r811024 | mmartinec | 2009-09-03 16:46:55 +0000 (Thu, 03 Sep 2009) | 3 lines
+
+Bug 6192: suppress logging of $& when its value is not available
+(i.e. when no regexp has been evaluated during rule evaluation)
+
+------------------------------------------------------------------------
+r810952 | jm | 2009-09-03 14:08:24 +0000 (Thu, 03 Sep 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r810905 | mmartinec | 2009-09-03 12:00:13 +0000 (Thu, 03 Sep 2009) | 3 lines
+
+Plugin/HeaderEval.pm: add one line: expose existing function
+'received_within_months' as an eval function (by Warren Togami)
+
+------------------------------------------------------------------------
+r810895 | mmartinec | 2009-09-03 11:16:25 +0000 (Thu, 03 Sep 2009) | 2 lines
+
+Bug 6191: Plugin/Pyzor.pm, 'pyzor_options' was not untainted
+
+------------------------------------------------------------------------
+r810883 | mmartinec | 2009-09-03 10:45:38 +0000 (Thu, 03 Sep 2009) | 3 lines
+
+Bug 6150, Bug 6127, Bug 5981, Bug 5950, Bug 6191: let spamd log/report
+a child process exit status or aborting condition in an informative way
+
+------------------------------------------------------------------------
+r810866 | mmartinec | 2009-09-03 10:23:00 +0000 (Thu, 03 Sep 2009) | 6 lines
+
+- Check.pm: while preparing chunks of rules to be compiled,
+  inserting a prefix code was not atomic and could flush
+  buffered code in the middle of assembling prefix code;
+- avoid 'Use of uninitialized value' in Message.pm;
+- added some commented-out debugging;
+
+------------------------------------------------------------------------
+r810818 | jm | 2009-09-03 08:45:48 +0000 (Thu, 03 Sep 2009) | 1 line
+
+bug 6188: add exclusion for __ISO_2022_JP_DELIM to OBFUSCATING_COMMENT as well
+------------------------------------------------------------------------
+r810813 | jm | 2009-09-03 08:40:25 +0000 (Thu, 03 Sep 2009) | 1 line
+
+bug 6179: 127/8 isn't an illegal IP
+------------------------------------------------------------------------
+r810780 | jm | 2009-09-03 06:20:28 +0000 (Thu, 03 Sep 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r810778 | jm | 2009-09-03 06:07:37 +0000 (Thu, 03 Sep 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r810764 | dos | 2009-09-03 02:48:37 +0000 (Thu, 03 Sep 2009) | 1 line
+
+updated scores for revision 810419 active rules added since last mass-check
+------------------------------------------------------------------------
+r810730 | jhardin | 2009-09-02 23:17:26 +0000 (Wed, 02 Sep 2009) | 1 line
+
+Fix FP in obfuscated URI rule
+------------------------------------------------------------------------
+r810722 | jm | 2009-09-02 22:45:30 +0000 (Wed, 02 Sep 2009) | 1 line
+
+bug 6144: add changes list, thanks Mark
+------------------------------------------------------------------------
+r810717 | jm | 2009-09-02 22:27:30 +0000 (Wed, 02 Sep 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r810692 | jm | 2009-09-02 20:18:26 +0000 (Wed, 02 Sep 2009) | 1 line
+
+doh, attempt to catch lint failures in Hudson was broken
+------------------------------------------------------------------------
+r810673 | jhardin | 2009-09-02 19:03:01 +0000 (Wed, 02 Sep 2009) | 1 line
+
+Fix breakage - rules must end with newline!
+------------------------------------------------------------------------
+r810657 | jm | 2009-09-02 18:35:50 +0000 (Wed, 02 Sep 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r810647 | jhardin | 2009-09-02 18:19:53 +0000 (Wed, 02 Sep 2009) | 1 line
+
+Fix breakage in tbird image rule
+------------------------------------------------------------------------
+r810641 | jhardin | 2009-09-02 18:13:36 +0000 (Wed, 02 Sep 2009) | 1 line
+
+Fix breakage in tbird image rule
+------------------------------------------------------------------------
+r810619 | jhardin | 2009-09-02 17:15:00 +0000 (Wed, 02 Sep 2009) | 1 line
+
+Fix breakage in tbird image rule
+------------------------------------------------------------------------
+r810606 | jhardin | 2009-09-02 16:54:37 +0000 (Wed, 02 Sep 2009) | 1 line
+
+Tweak lots_of_money ruleset
+------------------------------------------------------------------------
+r810602 | jhardin | 2009-09-02 16:45:32 +0000 (Wed, 02 Sep 2009) | 1 line
+
+Tweak lots_of_money ruleset
+------------------------------------------------------------------------
+r810544 | mmartinec | 2009-09-02 15:13:30 +0000 (Wed, 02 Sep 2009) | 2 lines
+
+Plugin/DKIM.pm - more changes to the text in comments and POD
+
+------------------------------------------------------------------------
+r810522 | mmartinec | 2009-09-02 14:32:06 +0000 (Wed, 02 Sep 2009) | 4 lines
+
+Bug 6189 - Plugin/DKIM.pm: terminology changes in comments and
+logging according to RFC 5617 and draft-ietf-dkim-rfc4871-errata-07
+(no changes to code)
+
+------------------------------------------------------------------------
+r810462 | jm | 2009-09-02 11:42:40 +0000 (Wed, 02 Sep 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r810454 | mmartinec | 2009-09-02 11:18:24 +0000 (Wed, 02 Sep 2009) | 5 lines
+
+Plugin/DKIM.pm: check_dkim_signed and check_dkim_adsp eval rules
+can now take an optional list of domain names, which limits their
+action to listed domains only. It facilitates building DKIM-based
+rules for specific domains, without having to resort to meta rules.
+
+------------------------------------------------------------------------
+r810448 | mmartinec | 2009-09-02 10:33:15 +0000 (Wed, 02 Sep 2009) | 5 lines
+
+Partly revert r801487 to 20_head_tests.cf, removing
+some of the then-added /m flags. There is no good way
+to distinguish folding from multiple occurrences
+of a header field (except in ALL:raw).
+
+------------------------------------------------------------------------
+r810419 | jm | 2009-09-02 08:50:01 +0000 (Wed, 02 Sep 2009) | 1 line
+
+promotions validated
+------------------------------------------------------------------------
+r810357 | dos | 2009-09-02 04:44:00 +0000 (Wed, 02 Sep 2009) | 1 line
+
+svn co the latest masses/ stuff so that regressions can be fixed quickly instead of having score generation broken for a week for net enabled scores (this has been in use for nearly two years, I just forgot to check it in)
+------------------------------------------------------------------------
+r810295 | jm | 2009-09-01 22:41:33 +0000 (Tue, 01 Sep 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r810285 | jm | 2009-09-01 22:28:53 +0000 (Tue, 01 Sep 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r810155 | jm | 2009-09-01 18:24:39 +0000 (Tue, 01 Sep 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r810067 | jm | 2009-09-01 14:20:18 +0000 (Tue, 01 Sep 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r809979 | jm | 2009-09-01 11:44:53 +0000 (Tue, 01 Sep 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r809894 | jm | 2009-09-01 08:50:02 +0000 (Tue, 01 Sep 2009) | 1 line
+
+promotions validated
+------------------------------------------------------------------------
+r809884 | axb | 2009-09-01 08:32:59 +0000 (Tue, 01 Sep 2009) | 1 line
+
+
+------------------------------------------------------------------------
+r809879 | axb | 2009-09-01 08:15:01 +0000 (Tue, 01 Sep 2009) | 1 line
+
+
+------------------------------------------------------------------------
+r809780 | jhardin | 2009-08-31 23:41:28 +0000 (Mon, 31 Aug 2009) | 1 line
+
+bug 5380: fix SUBJECT_FUZZY_MEDS FP on unobfuscated "meds"
+------------------------------------------------------------------------
+r809771 | jm | 2009-08-31 22:42:02 +0000 (Mon, 31 Aug 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r809765 | jm | 2009-08-31 22:29:23 +0000 (Mon, 31 Aug 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r809755 | jhardin | 2009-08-31 21:37:30 +0000 (Mon, 31 Aug 2009) | 1 line
+
+Tweak forged tbird image ruleset
+------------------------------------------------------------------------
+r809683 | jm | 2009-08-31 18:38:09 +0000 (Mon, 31 Aug 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r809682 | jm | 2009-08-31 18:24:55 +0000 (Mon, 31 Aug 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r809566 | jm | 2009-08-31 12:56:41 +0000 (Mon, 31 Aug 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r809564 | jhardin | 2009-08-31 12:55:36 +0000 (Mon, 31 Aug 2009) | 2 lines
+
+bufix and refine lotsa_money
+
+------------------------------------------------------------------------
+r809502 | jm | 2009-08-31 08:50:02 +0000 (Mon, 31 Aug 2009) | 1 line
+
+promotions validated
+------------------------------------------------------------------------
+r809432 | jm | 2009-08-30 22:28:51 +0000 (Sun, 30 Aug 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r809423 | jhardin | 2009-08-30 22:06:30 +0000 (Sun, 30 Aug 2009) | 2 lines
+
+lotsa_money tweaks
+
+------------------------------------------------------------------------
+r809400 | jm | 2009-08-30 18:36:30 +0000 (Sun, 30 Aug 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r809396 | jm | 2009-08-30 18:23:27 +0000 (Sun, 30 Aug 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r809391 | jhardin | 2009-08-30 17:55:28 +0000 (Sun, 30 Aug 2009) | 2 lines
+
+Add comments about replacetags fixes in 3.2.5
+
+------------------------------------------------------------------------
+r809377 | jhardin | 2009-08-30 17:03:54 +0000 (Sun, 30 Aug 2009) | 2 lines
+
+remove duplicated rule
+
+------------------------------------------------------------------------
+r809327 | jm | 2009-08-30 12:52:48 +0000 (Sun, 30 Aug 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r809247 | jm | 2009-08-30 06:07:37 +0000 (Sun, 30 Aug 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r809244 | jhardin | 2009-08-30 03:42:17 +0000 (Sun, 30 Aug 2009) | 2 lines
+
+score metas for people using these files, add some non-tbird-related image spam tests
+
+------------------------------------------------------------------------
+r809209 | jm | 2009-08-29 22:26:44 +0000 (Sat, 29 Aug 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r809186 | jm | 2009-08-29 18:17:59 +0000 (Sat, 29 Aug 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r809148 | jhardin | 2009-08-29 15:39:23 +0000 (Sat, 29 Aug 2009) | 2 lines
+
+Add metas to improve S/O
+
+------------------------------------------------------------------------
+r809132 | jm | 2009-08-29 13:37:43 +0000 (Sat, 29 Aug 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r809102 | jm | 2009-08-29 08:50:01 +0000 (Sat, 29 Aug 2009) | 1 line
+
+promotions validated
+------------------------------------------------------------------------
+r809085 | jm | 2009-08-29 06:02:45 +0000 (Sat, 29 Aug 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r809077 | mmartinec | 2009-08-29 00:44:38 +0000 (Sat, 29 Aug 2009) | 4 lines
+
+Bug 5325: syslog severity level in spamc/libspamc.c for
+max message size (changed LOG_ERR into LOG_NOTICE for the
+message: "skipped message, greater than max message size")
+
+------------------------------------------------------------------------
+r809048 | jm | 2009-08-28 22:21:18 +0000 (Fri, 28 Aug 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r808975 | jm | 2009-08-28 18:17:34 +0000 (Fri, 28 Aug 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r808960 | jhardin | 2009-08-28 17:19:35 +0000 (Fri, 28 Aug 2009) | 1 line
+
+Tweak lots_of_money ruleset
+------------------------------------------------------------------------
+r808954 | jhardin | 2009-08-28 17:00:29 +0000 (Fri, 28 Aug 2009) | 1 line
+
+Tweak lots_of_money ruleset
+------------------------------------------------------------------------
+r808953 | mmartinec | 2009-08-28 16:54:55 +0000 (Fri, 28 Aug 2009) | 2 lines
+
+Cosmetics in find_rule_support_file.
+
+------------------------------------------------------------------------
+r808940 | jhardin | 2009-08-28 16:19:12 +0000 (Fri, 28 Aug 2009) | 1 line
+
+Tweak image spam ruleset
+------------------------------------------------------------------------
+r808936 | mmartinec | 2009-08-28 16:05:27 +0000 (Fri, 28 Aug 2009) | 3 lines
+
+Add option 'tflags' to sub got_hit(), simplifying life for
+plugins which provide dynamic rules and scores.
+
+------------------------------------------------------------------------
+r808888 | jhardin | 2009-08-28 13:48:35 +0000 (Fri, 28 Aug 2009) | 2 lines
+
+refine tbird image spam ruleset
+
+------------------------------------------------------------------------
+r808816 | jm | 2009-08-28 08:50:02 +0000 (Fri, 28 Aug 2009) | 1 line
+
+promotions validated
+------------------------------------------------------------------------
+r808764 | jm | 2009-08-28 06:03:19 +0000 (Fri, 28 Aug 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r808667 | jm | 2009-08-27 22:23:00 +0000 (Thu, 27 Aug 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r808560 | jm | 2009-08-27 18:18:46 +0000 (Thu, 27 Aug 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r808417 | jm | 2009-08-27 14:00:13 +0000 (Thu, 27 Aug 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r808411 | jhardin | 2009-08-27 13:29:14 +0000 (Thu, 27 Aug 2009) | 2 lines
+
+Tweak lots_of_money
+
+------------------------------------------------------------------------
+r808390 | mmartinec | 2009-08-27 12:10:43 +0000 (Thu, 27 Aug 2009) | 4 lines
+
+Plugin/AWL.pm: pushing scores to {scoreset} is now redundant      
+as it is handled by got_hit();  round AWL score to three  
+fraction digits in a call to got_hit()
+
+------------------------------------------------------------------------
+r808324 | jm | 2009-08-27 08:50:02 +0000 (Thu, 27 Aug 2009) | 1 line
+
+promotions validated
+------------------------------------------------------------------------
+r808286 | jm | 2009-08-27 06:04:32 +0000 (Thu, 27 Aug 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r808148 | jm | 2009-08-26 18:20:02 +0000 (Wed, 26 Aug 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r808126 | mmartinec | 2009-08-26 16:59:39 +0000 (Wed, 26 Aug 2009) | 4 lines
+
+t/dkim2.t: add a test for DKIM_ADSP_NXDOMAIN;
+tell (to STDERR) about expected failures in older
+versions of Mail::DKIM
+
+------------------------------------------------------------------------
+r808012 | jm | 2009-08-26 14:01:15 +0000 (Wed, 26 Aug 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r807941 | mmartinec | 2009-08-26 09:40:04 +0000 (Wed, 26 Aug 2009) | 4 lines
+
+enable timing implicitly if _TIMING_ is used in add_header templates,
+so that the following works:  add_header all Timing _TIMING_
+even when debugging is off
+
+------------------------------------------------------------------------
+r807936 | mmartinec | 2009-08-26 09:10:22 +0000 (Wed, 26 Aug 2009) | 4 lines
+
+added tag _ADDEDHEADER_ for completeness;
+consmetics/consistency: drop redundant 'return' in short
+anonymous subroutines declared for tags in _get_tag()
+
+------------------------------------------------------------------------
+r807925 | jm | 2009-08-26 08:50:03 +0000 (Wed, 26 Aug 2009) | 1 line
+
+promotions validated
+------------------------------------------------------------------------
+r807891 | jm | 2009-08-26 06:16:18 +0000 (Wed, 26 Aug 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r807887 | jm | 2009-08-26 06:05:03 +0000 (Wed, 26 Aug 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r807839 | jm | 2009-08-25 22:27:11 +0000 (Tue, 25 Aug 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r807784 | mmartinec | 2009-08-25 19:57:03 +0000 (Tue, 25 Aug 2009) | 3 lines
+
+Get rid of undef warnings during timing report,
+document a tag TIMING and the two newly added tags
+
+------------------------------------------------------------------------
+r807765 | mmartinec | 2009-08-25 19:11:35 +0000 (Tue, 25 Aug 2009) | 4 lines
+
+(related to Bug 6185): factor out common code as _get_added_headers;
+add new tags ADDEDHEADERHAM and ADDEDHEADERSPAM, making added header
+fields available to the caller
+
+------------------------------------------------------------------------
+r807706 | mmartinec | 2009-08-25 16:42:45 +0000 (Tue, 25 Aug 2009) | 4 lines
+
+Bug 6185 - 'add_header' config option adds header fields in
+random order - change internal representation to preserve
+the declared order of added header fields
+
+------------------------------------------------------------------------
+r807641 | jm | 2009-08-25 14:09:21 +0000 (Tue, 25 Aug 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r807522 | jm | 2009-08-25 08:50:02 +0000 (Tue, 25 Aug 2009) | 1 line
+
+promotions validated
+------------------------------------------------------------------------
+r807491 | jm | 2009-08-25 06:05:08 +0000 (Tue, 25 Aug 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r807421 | jm | 2009-08-24 22:43:01 +0000 (Mon, 24 Aug 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r807414 | jm | 2009-08-24 22:31:41 +0000 (Mon, 24 Aug 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r807407 | jhardin | 2009-08-24 22:08:46 +0000 (Mon, 24 Aug 2009) | 1 line
+
+Add more image spam sign
+------------------------------------------------------------------------
+r807405 | jhardin | 2009-08-24 22:06:55 +0000 (Mon, 24 Aug 2009) | 1 line
+
+Add more image spam sign
+------------------------------------------------------------------------
+r807380 | jhardin | 2009-08-24 21:10:50 +0000 (Mon, 24 Aug 2009) | 1 line
+
+forgot .cf extension - d'oh!!!
+------------------------------------------------------------------------
+r807359 | axb | 2009-08-24 20:07:35 +0000 (Mon, 24 Aug 2009) | 1 line
+
+
+------------------------------------------------------------------------
+r807335 | jhardin | 2009-08-24 18:42:26 +0000 (Mon, 24 Aug 2009) | 1 line
+
+RE tuning
+------------------------------------------------------------------------
+r807328 | jm | 2009-08-24 18:20:06 +0000 (Mon, 24 Aug 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r807277 | jhardin | 2009-08-24 15:10:40 +0000 (Mon, 24 Aug 2009) | 1 line
+
+fix typo
+------------------------------------------------------------------------
+r807274 | jhardin | 2009-08-24 15:09:00 +0000 (Mon, 24 Aug 2009) | 1 line
+
+Possible image spam rule
+------------------------------------------------------------------------
+r807240 | mmartinec | 2009-08-24 14:32:32 +0000 (Mon, 24 Aug 2009) | 4 lines
+
+Bug 5965: rewrite_report_safe - fix further cases of treating
+user data as booleans (in this case it was the string in
+"rewrite_header" configuration option)
+
+------------------------------------------------------------------------
+r807235 | jm | 2009-08-24 14:26:23 +0000 (Mon, 24 Aug 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r807231 | jm | 2009-08-24 14:13:44 +0000 (Mon, 24 Aug 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r807127 | jm | 2009-08-24 08:50:02 +0000 (Mon, 24 Aug 2009) | 1 line
+
+promotions validated
+------------------------------------------------------------------------
+r807082 | jm | 2009-08-24 06:04:39 +0000 (Mon, 24 Aug 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r807049 | jhardin | 2009-08-24 02:29:19 +0000 (Mon, 24 Aug 2009) | 2 lines
+
+Tweak misc rules, add lotsa_money ruleset
+
+------------------------------------------------------------------------
+r807025 | jm | 2009-08-23 22:30:14 +0000 (Sun, 23 Aug 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r807009 | jhardin | 2009-08-23 19:42:40 +0000 (Sun, 23 Aug 2009) | 1 line
+
+tweaks to misc rules
+------------------------------------------------------------------------
+r807001 | axb | 2009-08-23 19:19:52 +0000 (Sun, 23 Aug 2009) | 2 lines
+
+Added *.OEM1
+formating cleanup
+------------------------------------------------------------------------
+r806998 | jm | 2009-08-23 18:23:03 +0000 (Sun, 23 Aug 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r806977 | jm | 2009-08-23 14:29:35 +0000 (Sun, 23 Aug 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r806974 | jm | 2009-08-23 14:18:19 +0000 (Sun, 23 Aug 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r806811 | jm | 2009-08-22 08:50:02 +0000 (Sat, 22 Aug 2009) | 1 line
+
+promotions validated
+------------------------------------------------------------------------
+r806731 | axb | 2009-08-21 21:48:42 +0000 (Fri, 21 Aug 2009) | 1 line
+
+
+------------------------------------------------------------------------
+r806619 | mmartinec | 2009-08-21 16:06:31 +0000 (Fri, 21 Aug 2009) | 3 lines
+
+Plugin::DKIM: change a warn() into info() on detecting an old
+version of Mail::DKIM
+
+------------------------------------------------------------------------
+r806510 | jm | 2009-08-21 11:48:37 +0000 (Fri, 21 Aug 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r806481 | jm | 2009-08-21 10:02:32 +0000 (Fri, 21 Aug 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r806459 | jm | 2009-08-21 08:50:02 +0000 (Fri, 21 Aug 2009) | 1 line
+
+promotions validated
+------------------------------------------------------------------------
+r806103 | axb | 2009-08-20 10:05:12 +0000 (Thu, 20 Aug 2009) | 1 line
+
+added directnic.com to uridnsbl_skip_domain
+------------------------------------------------------------------------
+r806090 | jm | 2009-08-20 08:50:02 +0000 (Thu, 20 Aug 2009) | 1 line
+
+promotions validated
+------------------------------------------------------------------------
+r805606 | jm | 2009-08-18 22:21:11 +0000 (Tue, 18 Aug 2009) | 1 line
+
+satisfy perlcritic, a little
+------------------------------------------------------------------------
+r805605 | jm | 2009-08-18 22:20:30 +0000 (Tue, 18 Aug 2009) | 1 line
+
+not needed anymore
+------------------------------------------------------------------------
+r805602 | mmartinec | 2009-08-18 22:12:49 +0000 (Tue, 18 Aug 2009) | 3 lines
+
+Change few remaining dbg("conf: ..") to dbg("config: ..")
+to go with the flock.
+
+------------------------------------------------------------------------
+r805584 | jm | 2009-08-18 21:17:40 +0000 (Tue, 18 Aug 2009) | 1 line
+
+promotions validated
+------------------------------------------------------------------------
+r805579 | jm | 2009-08-18 21:06:22 +0000 (Tue, 18 Aug 2009) | 1 line
+
+first test for an 'xt' release test suite; runs the t.rules tests, and requires they pass
+------------------------------------------------------------------------
+r805577 | jm | 2009-08-18 21:05:24 +0000 (Tue, 18 Aug 2009) | 1 line
+
+port t.rules/run to use Test::More so that valid TAP output is produced
+------------------------------------------------------------------------
+r805563 | jm | 2009-08-18 20:12:33 +0000 (Tue, 18 Aug 2009) | 1 line
+
+bug 6149: fix more false positives on ISO-2022-JP mail for TVD_SPACE_RATIO reported by Thomas Maadie. add more samples to t.rules test suite for WEIRD_QUOTING, TVD_SPACE_RATIO, GAPPY_SUBJECT, OBSCURED_EMAIL to avoid regressions in future
+------------------------------------------------------------------------
+r805562 | axb | 2009-08-18 20:09:45 +0000 (Tue, 18 Aug 2009) | 1 line
+
+added AXB_TITLE_NEWSTELLER
+------------------------------------------------------------------------
+r805559 | jm | 2009-08-18 20:02:16 +0000 (Tue, 18 Aug 2009) | 1 line
+
+bug 6149: fix false positives on ISO-2022-JP mail for TVD_SPACE_RATIO, GAPPY_SUBJECT, PLING_QUERY reported by Thomas Maadie
+------------------------------------------------------------------------
+r805521 | mmartinec | 2009-08-18 18:18:25 +0000 (Tue, 18 Aug 2009) | 2 lines
+
+Plugin/ASN.pm: don't use raw data from DNS as a regexp
+
+------------------------------------------------------------------------
+r805514 | mmartinec | 2009-08-18 17:54:37 +0000 (Tue, 18 Aug 2009) | 4 lines
+
+DKIM.pm - decouple {tried_loading} from {service_available};
+edit text replacing references to a SSP draft with RFC 5617,
+which has recently been published.
+
+------------------------------------------------------------------------
+r805476 | mmartinec | 2009-08-18 16:15:50 +0000 (Tue, 18 Aug 2009) | 2 lines
+
+t/debug.t: warn and error messages do not have a facility name
+
+------------------------------------------------------------------------
+r805406 | mmartinec | 2009-08-18 13:22:00 +0000 (Tue, 18 Aug 2009) | 2 lines
+
+t/debug.t: get rid of the "malformed debug message:"
+
+------------------------------------------------------------------------
+r805388 | mmartinec | 2009-08-18 12:43:47 +0000 (Tue, 18 Aug 2009) | 2 lines
+
+DependencyInfo.pm: updated text for modules Mail::DKIM and IO::Socket::INET6
+
+------------------------------------------------------------------------
+r805328 | mmartinec | 2009-08-18 09:04:20 +0000 (Tue, 18 Aug 2009) | 2 lines
+
+DKIM.pm: localize $@
+
+------------------------------------------------------------------------
+r805325 | mmartinec | 2009-08-18 08:55:10 +0000 (Tue, 18 Aug 2009) | 2 lines
+
+Let t/dkim2.t just quit in absence of Mail::DKIM::Verifier
+
+------------------------------------------------------------------------
+r805296 | jm | 2009-08-18 07:24:38 +0000 (Tue, 18 Aug 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r805266 | jhardin | 2009-08-18 03:31:45 +0000 (Tue, 18 Aug 2009) | 1 line
+
+add some new header rules and some descriptions
+------------------------------------------------------------------------
+r805225 | jm | 2009-08-17 23:53:01 +0000 (Mon, 17 Aug 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r805165 | jm | 2009-08-17 21:52:30 +0000 (Mon, 17 Aug 2009) | 1 line
+
+change T_TVD_FW_GRAPHIC_ID1 to be a meta rule so that it can be used in a published rule
+------------------------------------------------------------------------
+r805137 | jm | 2009-08-17 20:56:52 +0000 (Mon, 17 Aug 2009) | 1 line
+
+bug 6155: garescorer updates for 3.3.0.  use more epochs in GA runs for better scores.  clarify some mass-check warning output, ensure rule name always appears at start of line.  nowadays we run the GA on Solaris, so update makefile.  If a rule had no default/existing score in 50_scores.cf, don't tell the GA that 1.0 is an appropriate default value; instead pick the midway point of its score range. this produces better results.  remove some dead code from masses/score-ranges-from-freqs
+------------------------------------------------------------------------
+r805135 | jm | 2009-08-17 20:53:15 +0000 (Mon, 17 Aug 2009) | 1 line
+
+3.3.0alpha2 released; starting alpha3 dev
+------------------------------------------------------------------------
+r805123 | jm | 2009-08-17 20:17:39 +0000 (Mon, 17 Aug 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r805121 | mmartinec | 2009-08-17 20:12:17 +0000 (Mon, 17 Aug 2009) | 2 lines
+
+Bug 6180: "cannot load Mail::DKIM module", fixed
+
+------------------------------------------------------------------------
+r805118 | jm | 2009-08-17 20:02:21 +0000 (Mon, 17 Aug 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r805036 | jm | 2009-08-17 16:53:20 +0000 (Mon, 17 Aug 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r804888 | jm | 2009-08-17 07:41:24 +0000 (Mon, 17 Aug 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r804838 | jm | 2009-08-17 03:44:49 +0000 (Mon, 17 Aug 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r804836 | jhardin | 2009-08-17 03:44:03 +0000 (Mon, 17 Aug 2009) | 1 line
+
+add misspaced From: header rule
+------------------------------------------------------------------------
+r804755 | jm | 2009-08-16 20:02:42 +0000 (Sun, 16 Aug 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r804711 | jhardin | 2009-08-16 16:20:59 +0000 (Sun, 16 Aug 2009) | 1 line
+
+add numeric+cctld URI rule
+------------------------------------------------------------------------
+r804710 | jm | 2009-08-16 16:12:15 +0000 (Sun, 16 Aug 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r804641 | jm | 2009-08-16 07:42:13 +0000 (Sun, 16 Aug 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r804638 | jm | 2009-08-16 07:28:22 +0000 (Sun, 16 Aug 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r804540 | jm | 2009-08-15 23:47:59 +0000 (Sat, 15 Aug 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r804521 | jm | 2009-08-15 20:01:14 +0000 (Sat, 15 Aug 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r804519 | jm | 2009-08-15 19:48:01 +0000 (Sat, 15 Aug 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r804487 | jm | 2009-08-15 17:08:14 +0000 (Sat, 15 Aug 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r804440 | jm | 2009-08-15 07:25:48 +0000 (Sat, 15 Aug 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r804410 | jm | 2009-08-14 23:51:56 +0000 (Fri, 14 Aug 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r804377 | jm | 2009-08-14 21:17:46 +0000 (Fri, 14 Aug 2009) | 1 line
+
+bug 6155: enable all rules in preparation for the rescore run
+------------------------------------------------------------------------
+r804360 | jm | 2009-08-14 20:21:20 +0000 (Fri, 14 Aug 2009) | 1 line
+
+add an OVERALL TOTAL bottom line to the corpus report
+------------------------------------------------------------------------
+r804346 | jm | 2009-08-14 20:02:05 +0000 (Fri, 14 Aug 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r804342 | jm | 2009-08-14 19:48:43 +0000 (Fri, 14 Aug 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r804272 | jm | 2009-08-14 15:56:45 +0000 (Fri, 14 Aug 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r804248 | jhardin | 2009-08-14 15:01:02 +0000 (Fri, 14 Aug 2009) | 1 line
+
+tweak fillform
+------------------------------------------------------------------------
+r804100 | jm | 2009-08-14 07:25:31 +0000 (Fri, 14 Aug 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r804061 | jm | 2009-08-13 23:45:54 +0000 (Thu, 13 Aug 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r804009 | jm | 2009-08-13 19:48:25 +0000 (Thu, 13 Aug 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r803940 | mmartinec | 2009-08-13 16:07:35 +0000 (Thu, 13 Aug 2009) | 3 lines
+
+Bug 5878: IPV4_ADDRESS regexp matches ip.ad.dr.in-addr.arpa format
+(attempting a fix; do we have any tests for this?)
+
+------------------------------------------------------------------------
+r803935 | jm | 2009-08-13 15:52:53 +0000 (Thu, 13 Aug 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r803923 | mmartinec | 2009-08-13 15:10:34 +0000 (Thu, 13 Aug 2009) | 5 lines
+
+Make sure the dbg() and info() calls always return the
+same value (true) regardless of log level - some code
+is/was making unsound assumptions on the return value,
+e.g. $s = IO::Socket::UNIX->new || dbg("...") && die
+
+------------------------------------------------------------------------
+r803858 | mmartinec | 2009-08-13 12:20:59 +0000 (Thu, 13 Aug 2009) | 13 lines
+
+Bug 5649, Bug 6180 - DCC plugin:
+- enable usage of a remote dccifd hosts by extending
+  semantics of a config parameter dcc_dccifd_path,
+  which can be either a socket path or [host-ip]:port
+- support inet4, inet6 and unix sockets on connections
+  to dccifd daemon;
+- if dcc_dccifd_path is explicitly specified but wrong,
+  don't fall back to auto-guessing;
+- avoid taint error when a home directory was not
+  explicitly given;
+- do not depend on a return value from calls to dbg !
+- cleanup / cosmetics
+
+------------------------------------------------------------------------
+r803798 | jm | 2009-08-13 07:27:55 +0000 (Thu, 13 Aug 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r803779 | jhardin | 2009-08-13 05:32:52 +0000 (Thu, 13 Aug 2009) | 1 line
+
+Add rule for one-word X-Mailer header
+------------------------------------------------------------------------
+r803741 | jm | 2009-08-12 23:42:31 +0000 (Wed, 12 Aug 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r803678 | jm | 2009-08-12 19:36:31 +0000 (Wed, 12 Aug 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r803569 | jm | 2009-08-12 15:50:12 +0000 (Wed, 12 Aug 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r803468 | hege | 2009-08-12 12:13:14 +0000 (Wed, 12 Aug 2009) | 1 line
+
+add some sane scores
+------------------------------------------------------------------------
+r803324 | jm | 2009-08-11 23:37:33 +0000 (Tue, 11 Aug 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r803259 | jm | 2009-08-11 19:43:21 +0000 (Tue, 11 Aug 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r803254 | jm | 2009-08-11 19:29:56 +0000 (Tue, 11 Aug 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r803203 | jhardin | 2009-08-11 16:47:12 +0000 (Tue, 11 Aug 2009) | 1 line
+
+rule for plain text attachments with octet-stream MIME type
+------------------------------------------------------------------------
+r803170 | jm | 2009-08-11 15:42:27 +0000 (Tue, 11 Aug 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r803012 | jm | 2009-08-11 07:27:56 +0000 (Tue, 11 Aug 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r803010 | jm | 2009-08-11 07:14:04 +0000 (Tue, 11 Aug 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r803005 | hege | 2009-08-11 06:36:03 +0000 (Tue, 11 Aug 2009) | 1 line
+
+
+------------------------------------------------------------------------
+r803004 | hege | 2009-08-11 06:35:22 +0000 (Tue, 11 Aug 2009) | 1 line
+
+spammy filename
+------------------------------------------------------------------------
+r802973 | jhardin | 2009-08-11 01:42:04 +0000 (Tue, 11 Aug 2009) | 1 line
+
+tweak fill_this_form
+------------------------------------------------------------------------
+r802970 | hege | 2009-08-11 01:05:22 +0000 (Tue, 11 Aug 2009) | 1 line
+
+
+------------------------------------------------------------------------
+r802966 | hege | 2009-08-11 00:36:15 +0000 (Tue, 11 Aug 2009) | 5 lines
+
+
+Remove FREEMAIL_FROM_END_DIGIT, use ENVFROM instead for better ratio
+Add FREEMAIL_REPLYTO_END_DIGIT, which also has very nice ratio
+
+
+------------------------------------------------------------------------
+r802961 | jm | 2009-08-10 23:53:22 +0000 (Mon, 10 Aug 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r802959 | jm | 2009-08-10 23:40:38 +0000 (Mon, 10 Aug 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r802907 | jm | 2009-08-10 19:27:30 +0000 (Mon, 10 Aug 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r802835 | jm | 2009-08-10 15:47:47 +0000 (Mon, 10 Aug 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r802828 | jm | 2009-08-10 15:34:18 +0000 (Mon, 10 Aug 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r802809 | kmcgrail | 2009-08-10 14:37:45 +0000 (Mon, 10 Aug 2009) | 1 line
+
+minor cleanup on Razor2.t and added Razor rules to the test rules.  resolves bug 6177
+------------------------------------------------------------------------
+r802675 | hege | 2009-08-10 07:32:44 +0000 (Mon, 10 Aug 2009) | 1 line
+
+test separate freemail end digit rules
+------------------------------------------------------------------------
+r802668 | jm | 2009-08-10 07:10:41 +0000 (Mon, 10 Aug 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r802633 | jm | 2009-08-09 23:44:50 +0000 (Sun, 09 Aug 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r802630 | jm | 2009-08-09 23:32:07 +0000 (Sun, 09 Aug 2009) | 1 line
+
+auto-generated test rules
+------------------------------------------------------------------------
+r802607 | jm | 2009-08-09 21:11:52 +0000 (Sun, 09 Aug 2009) | 1 line
+
+update 3.3.0-alpha2 proposed release announcement mail
+------------------------------------------------------------------------
+r802598 | jm | 2009-08-09 21:00:49 +0000 (Sun, 09 Aug 2009) | 1 line
+
+preparing to repackage 3.3.0-alpha2
+------------------------------------------------------------------------
 r802597 | jm | 2009-08-09 20:59:23 +0000 (Sun, 09 Aug 2009) | 1 line
 
 hmm. not including SVN rev in rules tgz name.  fix
