@@ -1,11 +1,14 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix dos hege wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 2: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix dos hege nbebout wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 3: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail nbebout
+# with results from: day 1: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix dos hege nbebout wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 2: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix dos hege wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 3: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix dos hege nbebout wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2
 
 # tflags userconf
 ALL_TRUSTED
 
 # good enough
 AXB_HELO_LH_HOME
+
+# good enough
+BASE64_LENGTH_78_79
 
 # tflags learn
 BAYES_00
@@ -137,6 +140,9 @@ FB_QUALITY_REPLICA
 FB_REPLICA_ROLEX
 
 # good enough
+FB_SAVE_PERSC
+
+# good enough
 FB_SOFTTABS
 
 # good enough
@@ -144,6 +150,9 @@ FB_TIRED_OF_YOUR
 
 # good enough
 FB_WITHOUT_PRESC
+
+# good enough
+FH_DATE_PAST_20XX
 
 # good enough
 FH_FAKE_RCVD_LINE
@@ -167,13 +176,10 @@ FH_HOST_EQ_DYNAMICIP
 FH_HOST_EQ_VERIZON_P
 
 # good enough
+FH_HOST_IN_ADDRARPA
+
+# good enough
 FH_MSGID_XXX
-
-# good enough
-FILL_THIS_FORM_LOAN
-
-# good enough
-FILL_THIS_FORM_LONG
 
 # good enough
 FM_LOTTO_YOU_WON
@@ -227,13 +233,25 @@ FRT_ROLEX
 FR_TITLE_NUMS
 
 # good enough
+FSL_FAKE_GMAIL_RCVD
+
+# good enough
 FSL_FAKE_HOTMAIL_RVCD
+
+# good enough
+FSL_GEO_ABUSE
 
 # good enough
 FSL_HELO_BARE_IP_1
 
 # good enough
 FSL_HELO_DEVICE
+
+# good enough
+FSL_HELO_NON_FQDN_1
+
+# good enough
+FSL_INTERIA_ABUSE
 
 # good enough
 FSL_LSPACES_ABUSE
@@ -252,6 +270,9 @@ FS_MORE_CONFIDENT
 
 # good enough
 FS_NUDE
+
+# good enough
+FS_PHARMASUB2
 
 # good enough
 FS_REPLICA
@@ -314,9 +335,6 @@ HELO_NO_DOMAIN
 HELO_OEM
 
 # good enough
-HK_FAKENAME_EBAY
-
-# good enough
 HK_LOTTO
 
 # good enough
@@ -338,10 +356,7 @@ HK_SCAM_N15
 HK_SCAM_N2
 
 # good enough
-HK_SCAM_N8
-
-# good enough
-HK_SCAM_S25
+HS_BOBAX_MID_2
 
 # good enough
 HS_VPXL
@@ -365,9 +380,6 @@ KB_RATWARE_MSGID
 KB_RATWARE_OUTLOOK_MID
 
 # good enough
-KHOP_NO_FQDN
-
-# good enough
 LIVEFILESTORE
 
 # good enough
@@ -378,9 +390,6 @@ LOTTO_AGENT
 
 # good enough
 LOTTO_DEPT
-
-# good enough
-LOTTO_URI
 
 # good enough
 L_SPAM_TOOL_13
@@ -402,9 +411,6 @@ MONEY_FORM
 
 # good enough
 MONEY_FROM_MISSP
-
-# good enough
-MONEY_PERCENT
 
 # good enough
 MSOE_MID_WRONG_CASE
@@ -608,6 +614,9 @@ RCVD_IN_SSC_TRUSTED_COI
 RCVD_IN_XBL
 
 # good enough
+RDNS_LOCALHOST
+
+# good enough
 REPLYTO_WITHOUT_TO_CC
 
 # good enough
@@ -680,7 +689,16 @@ SUBJECT_IN_BLACKLIST
 SUBJECT_IN_WHITELIST
 
 # good enough
+TBIRD_SUSP_MIME_BDRY
+
+# good enough
+THEBAT_UNREG
+
+# good enough
 TO_NO_BRKTS_DYNIP
+
+# good enough
+TT_MSGID_TRUNC
 
 # good enough
 TVD_FINGER_02
@@ -707,10 +725,64 @@ TVD_RCVD_SINGLE
 TVD_VISIT_PHARMA
 
 # good enough
-FSL_UA
+AXB_XMID_DIGDOTSHRT
 
 # good enough
-HK_SCAM_N3
+DEAR_NOBODY
+
+# good enough
+FB_GREAT_BEST_SEX
+
+# good enough
+FB_MOST_RECOG
+
+# good enough
+FB_YOU_CAN_BECOME
+
+# good enough
+FM_SUBJ_YOU_PROFIT
+
+# good enough
+HK_RANDOM_REPLYTO_NAME
+
+# good enough
+MANY_GOOG_PROXY
+
+# good enough
+SANE_0de5cadd0badbd3e70f22a3ae31951fb
+
+# good enough
+SANE_75491b468ec2e117e50f9842d32abfab
+
+# good enough
+SANE_767b5516127c9ea7beef8ae90de854a6
+
+# good enough
+SANE_86be5ef5c040075ea29f99d46dfe3832
+
+# good enough
+SANE_a4ac830e310d5f2de12338a27ab64719
+
+# good enough
+SANE_d5ee9290870fd33fde2ec65ebd06034c
+
+# good enough
+SANE_e0b42866efae083b5d78a87e2e6710e9
+
+# good enough
+SANE_eb8833b51aa54190f3a7dc22d67a9189
+
+# good enough
+SANE_f7d3274e8932068e2fa1d892c1dc28f8
+
+# good enough
+TVD_ENHANCE
+
+# good enough
+TVD_NOT_SATISFIED
+
+# good enough
+TWO_IPS_RCVD
 
 # tflags userconf
 UNPARSEABLE_RELAY
