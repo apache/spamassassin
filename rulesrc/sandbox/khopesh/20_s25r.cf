@@ -14,7 +14,7 @@
 
 header __S25R_1 X-Spam-Relays-Untrusted =~ /^[^\]]+ rdns=[^. ]*\d[^0-9. ]+\d\S*\./
 describe S25R_1 S25R: Bottom of rDNS has num, non-num, num
-meta	 S25R_1 __LAST_EXTERNAL_RELAY_NO_AUTH && __S25R_1 && !(__S25R_2||__S25R_3||__S25R_4||__S25R_5||__S25R_6 || __NOT_SPOOFED || __GREYLISTED)
+meta	 S25R_1 __LAST_EXTERNAL_RELAY_NO_AUTH && __S25R_1 && !(__DOS_RELAYED_EXT||__S25R_2||__S25R_3||__S25R_4||__S25R_5||__S25R_6 || __NOT_SPOOFED || __GREYLISTED)
 #score	 S25R_1 0.1
 
 header __S25R_2 X-Spam-Relays-Untrusted =~ /^[^\]]+ rdns=[^. ]*\d{5}/
@@ -48,8 +48,9 @@ meta	 S25R	__LAST_EXTERNAL_RELAY_NO_AUTH && ((RDNS_NONE&&__HELO_NO_DOMAIN)||__S2
 describe S25R	Selective SMTP Rejection: Relay has dynamic rDNS
 tflags	 S25R	nopublish
 
-# here it is, my full-blown poor-man's botnet (limits S25R 0 and 1 for high FPs)
+# Here it is, my full-blown poor-man's botnet (limits S25R 0 and 1 for high FPs)
 # based on 20091124 masscheck, ham% is 0.6-1.8% while spam% is 25.9%-83.0%
-meta	 KHOP_BOTNET	__LAST_EXTERNAL_RELAY_NO_AUTH && (RDNS_DYNAMIC || (__HELO_NO_DOMAIN&&RDNS_NONE) || (__S25R_1&&!__DOS_RELAYED_EXT) || __S25R_3 || __S25R_5 || __S25R_2 || __S25R_6 || __S25R_4) && !__NOT_SPOOFED && !__GREYLISTED
+# 20091202 got it to 65.6157/1.6324.  Latest tweaks should drop ham by ~0.5%
+meta	 KHOP_BOTNET	__LAST_EXTERNAL_RELAY_NO_AUTH && (RDNS_DYNAMIC || (__HELO_NO_DOMAIN&&RDNS_NONE) || (__S25R_1&&!__DOS_RELAYED_EXT) || __S25R_3 || __S25R_5 || __S25R_2 || __S25R_6 || __S25R_4) && !(__FROM_FREEMAIL || __NOT_SPOOFED || __GREYLISTED)
 describe KHOP_BOTNET	Relay looks like a dynamic address
 tflags	 KHOP_BOTNET	nopublish
