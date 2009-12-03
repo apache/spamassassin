@@ -6,16 +6,18 @@ describe VANITY Vanity or fake awards
 score VANITY 2.3
 
 # Known Vanity Spammers
-meta __KNOWN_VANITY	__PRINCETONPRE || __WHOSWHO
+meta __KNOWN_VANITY	__PRINCETONPRE || __WHOSWHO || __DPHP
 body __PRINCETONPRE	/\bPrinceton Premier/
 body __WHOSWHO		/\bWho.s Who\b/
+# 20091203
+body __DPHP		/\bDistinguished Professionals Hardcover Publication\b/
 # Typical Patterns
 body __NO_COST		/\b(?:no costs?|cost-? *free|free of costs?|no fees?)\b/i
 body __INFORM_YOU	/\b(?:pleased?|pleasure) to inform you\b/
 body __INNERCIRCLE	/\bInner Circle\b/
 # Honored People
 body __SHMUCK		/\b(?:accomplished|distinguished|exceptional|talented) +(?:professionals?|individuals?)\b/i
-body __EXECS_PROS	/\bexecutives? and professionals?\b/i
+body __EXECS_PROS	/\bexecutives? (?:and|&) professionals?\b/i
 # Registry Application
 body __PUB_DEADLINE	/\bpublication deadlines?\b/i
 body __REGISTRY	/\bregistry\b/i
