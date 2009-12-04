@@ -264,7 +264,7 @@ RULES
 
 - dropped redundant rules or rules causing too many false positives;
 
-- added or updated many rules (incomplete list in no particular order:
+- added or updated many rules; incomplete list in no particular order:
   vbounce, lotsa_money, muchmoney, image spam, fill_this_form, FreeMail,
   European Parliament, HTML attachments, uri_obfu*, urinsrhsbl, urinsrhssub,
   urifullnsrhsbl, URI_OBFU_X9_WS, rDNS=localhost, INVALID_DATE_TZ_ABSURD,
@@ -461,9 +461,9 @@ BUG FIXES
 
 - Exporter never really worked in SA, was not enclosed in BEGIN {};
 
-- masses/runGA: prevent a shell 'source' command from loading an unrelated
-  file named 'config' which happens to be in the current PATH - must use
-  a / in an arg to a 'source' command to avoid searching the PATH;
+- masses/runGA and masses/mk-baseline-results: prevent a shell 'source'
+  command from loading an unrelated file named 'config' which happens to be
+  in the current PATH - must use a ./ in an arg to a 'source' command;
 
 
 ERROR HANDLING, ROBUSTNESS
