@@ -186,6 +186,7 @@ sub _run {      # private
     # dbg("timed: %s restoring outer alarm(%.3f)", $id,$oldalarm);
       alarm($oldalarm);
       $ret = &$sub;
+    # dbg("timed: %s post-sub(outer)", $id);
 
     } else {
       local $SIG{ALRM} = $handler;  # ensure closed scope here
@@ -238,7 +239,7 @@ sub _run {      # private
   undef $return  if $self->{timed_out};
 
   my $remaining_time;
-  if ($oldalarm) {
+  if ($oldalarm) {  # an outer alarm was already active when we were called
     $remaining_time = $start_time + $oldalarm - time;
     if ($remaining_time > 0) {  # still in the future
       # restore the previously-active alarm,
@@ -310,7 +311,7 @@ sub reset {
     alarm($isecs);
   } else {
     $self->{timed_out} = 1;
-  # dbg("timed: %s reset, outer timer expired %.3f s ago", $id, -$secs);
+  # dbg("timed: %s reset, timer expired %.3f s ago", $id, -$secs);
     alarm(2);  # mercifully grant two additional seconds
   # my $prev_handler = $SIG{ALRM};
   # if (ref $prev_handler eq 'CODE') {
