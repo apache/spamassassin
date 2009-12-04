@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix dos hege nbebout wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 2: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix dos hege wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 3: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix dos hege nbebout wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2
+# with results from: day 1: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix dos nbebout wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 2: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix dos hege nbebout wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 3: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix dos hege wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2
 
 # tflags userconf
 ALL_TRUSTED
@@ -51,9 +51,6 @@ DEAR_BENEFICIARY
 
 # good enough
 DEAR_EMAIL
-
-# good enough
-DEAR_WINNER
 
 # tflags net
 DIGEST_MULTIPLE
@@ -335,9 +332,6 @@ HELO_NO_DOMAIN
 HELO_OEM
 
 # good enough
-HK_LOTTO
-
-# good enough
 HK_NAME_DRUGS
 
 # good enough
@@ -345,12 +339,6 @@ HK_NAME_FREE
 
 # good enough
 HK_PNIS
-
-# good enough
-HK_SCAM_N1
-
-# good enough
-HK_SCAM_N15
 
 # good enough
 HK_SCAM_N2
@@ -389,9 +377,6 @@ LOTTERY_PH_004470
 LOTTO_AGENT
 
 # good enough
-LOTTO_DEPT
-
-# good enough
 L_SPAM_TOOL_13
 
 # good enough
@@ -405,9 +390,6 @@ MIME_CHARSET_FARAWAY
 
 # tflags userconf
 MISSING_HB_SEP
-
-# good enough
-MONEY_FORM
 
 # good enough
 MONEY_FROM_MISSP
@@ -707,9 +689,6 @@ TVD_FINGER_02
 TVD_INCREASE_SIZE
 
 # good enough
-TVD_PH_REC
-
-# good enough
 TVD_QUAL_MEDS
 
 # good enough
@@ -740,10 +719,10 @@ FB_MOST_RECOG
 FB_YOU_CAN_BECOME
 
 # good enough
-FM_SUBJ_YOU_PROFIT
+HK_RANDOM_REPLYTO_NAME
 
 # good enough
-HK_RANDOM_REPLYTO_NAME
+KHOP_HELO_BOT
 
 # good enough
 MANY_GOOG_PROXY
