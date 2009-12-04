@@ -1,18 +1,33 @@
 # experiments based on masscheck results
 
-# also in khop-general
-# Looking at daterev 20091107-r833654-n (the latest network test),
-# __HELO_NO_DOMAIN is 17.7782/1.2064 with 08/69 overlap with HELO_LOCALHOST
-# so nodom+!localhost should translate to 16.3559/0.3740 (S/O=0.978)
-# looking at daterev 20091113-r835775-n (latest std test),
-# __HELO_NO_DOMAIN is 17.6557/0.5898 with 07/98 overlap with HELO_LOCALHOST
-# this translates to a whopping 16.4198/0.118 (S/O=0.993)
-meta     HELO_NO_DOMAIN	__HELO_NO_DOMAIN && !HELO_LOCALHOST
-describe HELO_NO_DOMAIN	Relay reports its domain incorrectly
-#score	 HELO_NO_DOMAIN	2.375 0.327 1.497 0.884
-# scores derived from 90% of RDNS_DYNAMIC's sa3.3 proposal (attachment 4565)
-# because they have such similar definitions, numbers, and merits
-
-meta     MALFORMED_FREEMAIL	(MISSING_HEADERS||__HDRS_LCASE) && FREEMAIL_FROM
+meta	 MALFORMED_FREEMAIL	(MISSING_HEADERS||__HDRS_LCASE) && FREEMAIL_FROM
 describe MALFORMED_FREEMAIL	Bad headers on message from free email service
-#score    MALFORMED_FREEMAIL	0.1
+#score	 MALFORMED_FREEMAIL	0.1
+
+header	 __FROM_THE	From:name =~ /\b(?:THE|[Tt]he)\b/
+meta	 FROM_THE	__FROM_THE && !(__VIA_ML || __SENDER_BOT || __DOS_HAS_LIST_UNSUB || __REPLYTO_EXISTS)
+describe FROM_THE	Non-bulk sender is "The" something
+# I don't actually expect this to do well.  maybe s/o around 0.450?
+# There's also the argument that Bayes should handle this, since (iirc) it codifies tokens like "from:the" indicating that "the" occurs in "From" headers...
+
+header	 KHOP_BIG_TO_CC      ToCc =~ /(?:[^,\@]{1,60}\@[^,]{4,25},){10,19}/
+describe KHOP_BIG_TO_CC      Sent to 10+ recipients instaed of Bcc or a list
+score	 KHOP_BIG_TO_CC      0.3 # 20090527
+
+header	 __KHOP_EBAY_ADDY	From:addr =~ /\@(?:.+\.)?ebay\..{3,5}$/i
+meta	 KHOP_FAKE_EBAY 	__KHOP_EBAY_ADDY && !__NOT_SPOOFED
+describe KHOP_FAKE_EBAY	Sender falsely claims to be from eBay
+#score	 KHOP_FAKE_EBAY	2.25 # 20090408
+
+ifplugin Mail::SpamAssassin::Plugin::URIDetail
+  uri_detail KHOP_CLIQUEZ_ICI	text =~ /^cliquez\Wici\b/i
+else
+  rawbody  KHOP_CLIQUEZ_ICI	/>cliquez\Wici\b/i
+endif
+describe KHOP_CLIQUEZ_ICI	Click here link in French
+score    KHOP_CLIQUEZ_ICI	1.1	# 20090526 see also SARE_UN7
+
+# I don't think this ever fires
+uri      URI_HIDDEN	/.{7}\/\../
+describe URI_HIDDEN	Contains a hidden directory
+#score    URI_HIDDEN	0.7 # 20090515 13:29 by Adam Katz (me) on sa-users list

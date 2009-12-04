@@ -38,6 +38,11 @@ tflags	   __NOT_SPOOFED	nice
 
 # Some tests:
 
+# This should be a cleaner representation of __DOS_RELAYED_EXT:
+header	 __MULTIPLE_EXT 	X-Spam-Relays-External =~ /...\[/
+
+ifplugin Mail::SpamAssassin::Plugin::DNSEval # {
+
 # The DNSBL side of the Manitu iXhash zone, http://www.dnsbl.manitu.net/
 # Out-performs PSBL (72.98/0.12 spam/ham to PSBL's 48.69/0.36) at Intra2net:
 # http://www.intra2net.com/en/support/antispam/blacklist.php_dnsbl=RCVD_IN_NIX_SPAM.html
@@ -53,3 +58,11 @@ header	 RCVD_IN_SPAMCOP	eval:check_rbl('spamcop-lastexternal', 'bl.spamcop.net.'
 describe RCVD_IN_SPAMCOP	Received via a relay in bl.spamcop.net
 tflags	 RCVD_IN_SPAMCOP	net nopublish	# 20091123
 
+# we have the non-lastext data; let's see how good it is if we clean it up a bit
+# we'll exclude anything that might have too much info relaying (mailling lists
+# and freemail).  my intuition is 35-50% spam, 2-4% ham, but we could get lucky.
+meta	 DNSBL_INDIRECT		__LAST_EXTERNAL_RELAY_NO_AUTH && __MULTIPLE_EXT && (RCVD_IN_BL_SPAMCOP_NET||__RCVD_IN_BRBL) && !(__VIA_ML||__DOS_HAS_LIST_UNSUB||__SENDER_BOT||__freemail_safe||RCVD_IN_SPAMCOP||RCVD_IN_BRBL_LASTEXT)
+describe DNSBL_INDIRECT		Received indirectly through a relay in a DNSBL
+tflags	 DNSBL_INDIRECT		net nopublish	# 20091203
+
+endif # } Mail::SpamAssassin::Plugin::DNSEval

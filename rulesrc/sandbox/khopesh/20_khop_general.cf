@@ -10,6 +10,7 @@ header	 __TWO_IPS_RCVD	Received =~ /[\[\(\s]((?!(?:10|127|169\.254|172\.(?:1[6-9
 meta	 TWO_IPS_RCVD	__TWO_IPS_RCVD && !ALL_TRUSTED
 describe TWO_IPS_RCVD	Received: Relay identifies itself as wrong IP
 #score	 1.25	# 20050729
+# 100% overlap with RCVD_NUMERIC_HELO ...
 
 # Sendmail's FCrDNS, see http://www.sendmail.org/faq/section3#3.38
 header __MAY_BE_FORGED	Received =~ /\(may be forged\)/
@@ -23,6 +24,12 @@ meta	 KHOP_HELO_FCRDNS	__HELO_NOT_RDNS && !(__VIA_ML || __freemail_safe || __RCV
 describe KHOP_HELO_FCRDNS	Relay HELO differs from its IP's reverse DNS
 #score	 KHOP_HELO_FCRDNS	0.4 # 20090603, currently scoring 0.001
 score	 KHOP_HELO_FCRDNS	0.001
+
+meta     HELO_NO_DOMAIN	__HELO_NO_DOMAIN && !HELO_LOCALHOST
+describe HELO_NO_DOMAIN	Relay reports its domain incorrectly
+#score	 HELO_NO_DOMAIN	2.375 0.327 1.497 0.884
+# scores derived from 90% of RDNS_DYNAMIC's sa3.3 proposal (attachment 4565)
+# because they have such similar definitions, numbers, and merits
 
 # This doesn't fire often after greylisting ... how about w/out it?
 # renamed from KHOP_NO_FQDN
@@ -62,6 +69,11 @@ meta	 FORGED_URL_DOM	__FORGED_URL_DOM_1 || __FORGED_URL_DOM_2
 describe FORGED_URL_DOM	Link domain has a TLD as a subdomain
 
 ifplugin Mail::SpamAssassin::Plugin::MIMEHeader # {
+
+  mimeheader DSCL4_PNG    Content-Type =~ /name\=\"DS[CL]\d{4,5}\.(?:png|PNG)\"/
+  describe   DSCL4_PNG		Digital camera filename is PNG
+  score      DSCL4_PNG		0.9 # 1.6->0.9 20091019 no recent hits
+
   ifplugin Mail::SpamAssassin::Plugin::ImageInfo
     # __JPEG_ATTACH is in sandbox/jhardin/20_tbird_image_spam.cf
     # __GIF_ATTACH is in sandbox/felicity/70_other.cf
