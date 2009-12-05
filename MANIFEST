@@ -13,6 +13,14 @@ README
 TRADEMARK
 UPGRADE
 USAGE
+build/check_dependencies
+build/convert_pods_to_doc
+build/get_version
+build/md5sum.pl
+build/mkrules
+build/parse-rules-for-masses
+build/preprocessor
+build/sha1sum.pl
 ldap/README
 ldap/README.testing
 ldap/sa_test.ldif
@@ -290,11 +298,6 @@ t/data/nice/014
 t/data/nice/015
 t/data/nice/016
 t/data/nice/base64.txt
-t/data/nice/cjk/big5-base64.1
-t/data/nice/cjk/gb2312.1
-t/data/nice/cjk/gb2312.2
-t/data/nice/cjk/iso-2022-jp.1
-t/data/nice/cjk/iso-2022-jp.2
 t/data/nice/crlf-endings
 t/data/nice/dkim/AddedVtag_07
 t/data/nice/dkim/BasicTest_01
@@ -411,8 +414,6 @@ t/lang_lint.t
 t/lang_pl_tests.t
 t/line_endings.t
 t/lint_nocreate_prefs.t
-t/make_install.t
-t/mass_check.t
 t/memory_cycles.t
 t/metadata.t
 t/mimeheader.t
@@ -450,7 +451,6 @@ t/root_spamd_x_paranoid.t
 t/root_spamd_x_u.t
 t/rule_multiple.t
 t/rule_names.t
-t/rule_tests.t
 t/rule_types.t
 t/sa_awl.t
 t/sa_check_spamd.t
