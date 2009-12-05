@@ -1,11 +1,14 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix dos nbebout wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 2: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix dos hege nbebout wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 3: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix dos hege wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2
+# with results from: day 1: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix dos wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 2: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix dos nbebout wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 3: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix dos hege nbebout wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2
 
 # tflags userconf
 ALL_TRUSTED
 
 # good enough
 AXB_HELO_LH_HOME
+
+# good enough
+AXB_XMID_DIGDOTSHRT
 
 # good enough
 BASE64_LENGTH_78_79
@@ -51,6 +54,9 @@ DEAR_BENEFICIARY
 
 # good enough
 DEAR_EMAIL
+
+# good enough
+DEAR_NOBODY
 
 # tflags net
 DIGEST_MULTIPLE
@@ -131,6 +137,12 @@ FB_EXTRA_INCHES
 FB_GET_MEDS
 
 # good enough
+FB_GREAT_BEST_SEX
+
+# good enough
+FB_MOST_RECOG
+
+# good enough
 FB_QUALITY_REPLICA
 
 # good enough
@@ -147,6 +159,9 @@ FB_TIRED_OF_YOUR
 
 # good enough
 FB_WITHOUT_PRESC
+
+# good enough
+FB_YOU_CAN_BECOME
 
 # good enough
 FH_DATE_PAST_20XX
@@ -189,6 +204,9 @@ FM_SEX_HELODDDD
 
 # good enough
 FM_SUBJ_APPROVE
+
+# good enough
+FM_SUBJ_YOU_PROFIT
 
 # good enough
 FM_VEGAS_CASINO
@@ -243,9 +261,6 @@ FSL_HELO_BARE_IP_1
 
 # good enough
 FSL_HELO_DEVICE
-
-# good enough
-FSL_HELO_NON_FQDN_1
 
 # good enough
 FSL_INTERIA_ABUSE
@@ -341,6 +356,9 @@ HK_NAME_FREE
 HK_PNIS
 
 # good enough
+HK_RANDOM_REPLYTO_NAME
+
+# good enough
 HK_SCAM_N2
 
 # good enough
@@ -378,6 +396,9 @@ LOTTO_AGENT
 
 # good enough
 L_SPAM_TOOL_13
+
+# good enough
+MANY_GOOG_PROXY
 
 # good enough
 MANY_SPAN_IN_TEXT
@@ -611,6 +632,9 @@ S25R_6
 SANE_04e8bf28eb445199a7f11b943c44d209
 
 # good enough
+SANE_0de5cadd0badbd3e70f22a3ae31951fb
+
+# good enough
 SANE_2b173a7fb7518c75ac8a2d294d773fd8
 
 # good enough
@@ -620,13 +644,37 @@ SANE_4ef8302546bf270a19baf98508afacc4
 SANE_7429530a7398f43f1f1b795f9420714e
 
 # good enough
+SANE_75491b468ec2e117e50f9842d32abfab
+
+# good enough
+SANE_767b5516127c9ea7beef8ae90de854a6
+
+# good enough
+SANE_86be5ef5c040075ea29f99d46dfe3832
+
+# good enough
 SANE_91eb43f705d25c804374a746d7519660
+
+# good enough
+SANE_a4ac830e310d5f2de12338a27ab64719
 
 # good enough
 SANE_b58d7945d89b7afc9e2753c83b00ab44
 
 # good enough
 SANE_d0d2b0f6373bf91253d66dd74c594b87
+
+# good enough
+SANE_d5ee9290870fd33fde2ec65ebd06034c
+
+# good enough
+SANE_e0b42866efae083b5d78a87e2e6710e9
+
+# good enough
+SANE_eb8833b51aa54190f3a7dc22d67a9189
+
+# good enough
+SANE_f7d3274e8932068e2fa1d892c1dc28f8
 
 # good enough
 SHORT_HELO_AND_INLINE_IMAGE
@@ -664,6 +712,9 @@ SPF_SOFTFAIL
 # good enough
 STOCK_IMG_HDR_FROM
 
+# good enough
+STOX_REPLY_TYPE_WITHOUT_QUOTES
+
 # tflags userconf
 SUBJECT_IN_BLACKLIST
 
@@ -683,10 +734,16 @@ TO_NO_BRKTS_DYNIP
 TT_MSGID_TRUNC
 
 # good enough
+TVD_ENHANCE
+
+# good enough
 TVD_FINGER_02
 
 # good enough
 TVD_INCREASE_SIZE
+
+# good enough
+TVD_NOT_SATISFIED
 
 # good enough
 TVD_QUAL_MEDS
@@ -704,64 +761,16 @@ TVD_RCVD_SINGLE
 TVD_VISIT_PHARMA
 
 # good enough
-AXB_XMID_DIGDOTSHRT
+TWO_IPS_RCVD
 
 # good enough
-DEAR_NOBODY
-
-# good enough
-FB_GREAT_BEST_SEX
-
-# good enough
-FB_MOST_RECOG
-
-# good enough
-FB_YOU_CAN_BECOME
-
-# good enough
-HK_RANDOM_REPLYTO_NAME
+DOS_HIGHBIT_HDRS_BODY
 
 # good enough
 KHOP_HELO_BOT
 
 # good enough
-MANY_GOOG_PROXY
-
-# good enough
-SANE_0de5cadd0badbd3e70f22a3ae31951fb
-
-# good enough
-SANE_75491b468ec2e117e50f9842d32abfab
-
-# good enough
-SANE_767b5516127c9ea7beef8ae90de854a6
-
-# good enough
-SANE_86be5ef5c040075ea29f99d46dfe3832
-
-# good enough
-SANE_a4ac830e310d5f2de12338a27ab64719
-
-# good enough
-SANE_d5ee9290870fd33fde2ec65ebd06034c
-
-# good enough
-SANE_e0b42866efae083b5d78a87e2e6710e9
-
-# good enough
-SANE_eb8833b51aa54190f3a7dc22d67a9189
-
-# good enough
-SANE_f7d3274e8932068e2fa1d892c1dc28f8
-
-# good enough
-TVD_ENHANCE
-
-# good enough
-TVD_NOT_SATISFIED
-
-# good enough
-TWO_IPS_RCVD
+SANE_20d820d8f491476ca39941979ab139dd
 
 # tflags userconf
 UNPARSEABLE_RELAY
@@ -837,9 +846,6 @@ USER_IN_WHITELIST_TO
 
 # good enough
 XMAILER_MIMEOLE_OL_09BB4
-
-# good enough
-XMAILER_MIMEOLE_OL_1ECD5
 
 # good enough
 XMAILER_MIMEOLE_OL_20C99
