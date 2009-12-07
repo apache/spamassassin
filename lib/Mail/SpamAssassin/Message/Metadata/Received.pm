@@ -412,6 +412,10 @@ sub parse_received_line {
   elsif (/CommuniGate Pro SMTP/ && / \(account /) {
     $auth = 'Communigate';
   }
+  # Microsoft Exchange (complete with syntax error)
+  elsif (/ with Microsoft Exchange Server HTTP-DAV /) {
+    $auth = 'HTTP-DAV';
+  }
 
 # ---------------------------------------------------------------------------
 
