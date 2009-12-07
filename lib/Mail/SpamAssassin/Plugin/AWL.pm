@@ -64,6 +64,7 @@ use bytes;
 use re 'taint';
 use Mail::SpamAssassin::Plugin;
 use Mail::SpamAssassin::AutoWhitelist;
+use Mail::SpamAssassin::Util qw(untaint_var);
 use Mail::SpamAssassin::Logger;
 
 use vars qw(@ISA);
@@ -332,7 +333,14 @@ not have any execute bits set (the umask is set to 111).
 		setting => 'auto_whitelist_file_mode',
 		is_admin => 1,
 		default => '0700',
-		type => $Mail::SpamAssassin::Conf::CONF_TYPE_NUMERIC
+		type => $Mail::SpamAssassin::Conf::CONF_TYPE_NUMERIC,
+		code => sub {
+		  my ($self, $key, $value, $line) = @_;
+		  if ($value !~ /^0?\d{3}$/) {
+                    return $Mail::SpamAssassin::Conf::INVALID_VALUE;
+                  }
+		  $self->{auto_whitelist_file_mode} = untaint_var($value);
+		}
 	       });
 
 =item user_awl_dsn DBI:databasetype:databasename:hostname:port

@@ -2792,7 +2792,12 @@ string of octal digits, it is converted to a numeric value internally.
     setting => 'bayes_file_mode',
     is_admin => 1,
     default => '0700',
-    type => $CONF_TYPE_STRING
+    type => $CONF_TYPE_NUMERIC,
+    code => sub {
+      my ($self, $key, $value, $line) = @_;
+      if ($value !~ /^0?\d{3}$/) { return $INVALID_VALUE }
+      $self->{bayes_file_mode} = untaint_var($value);
+    }
   });
 
 =item bayes_store_module Name::Of::BayesStore::Module
