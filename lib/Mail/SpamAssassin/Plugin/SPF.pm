@@ -82,9 +82,10 @@ sub set_config {
 
 =item whitelist_from_spf add@ress.com
 
-Use this to supplement the whitelist_from addresses with a check against the
-domain's SPF record. Aside from the name 'whitelist_from_spf', the syntax is
-exactly the same as the syntax for 'whitelist_from'.
+Works similarly to whitelist_from, except that in addition to matching
+a sender address, a check against the domain's SPF record must pass.
+The first parameter is an address to whitelist, and the second is a string
+to match the relay's rDNS.
 
 Just like whitelist_from, multiple addresses per line, separated by spaces,
 are OK. Multiple C<whitelist_from_spf> lines are also OK.

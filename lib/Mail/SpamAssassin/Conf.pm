@@ -340,8 +340,9 @@ e.g.
 
 =item whitelist_from_rcvd addr@lists.sourceforge.net sourceforge.net
 
-Use this to supplement the whitelist_from addresses with a check against the
-Received headers. The first parameter is the address to whitelist, and the
+Works similarly to whitelist_from, except that in addition to matching
+a sender address, a relay's rDNS name must match too for the whitelisting
+rule to fire. The first parameter is an address to whitelist, and the
 second is a string to match the relay's rDNS.
 
 This string is matched against the reverse DNS lookup used during the handover
