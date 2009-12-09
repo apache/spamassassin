@@ -171,10 +171,10 @@ sub set_config {
 
 =item whitelist_from_dkim author@example.com [signing-domain]
 
-Use this to supplement the whitelist_from addresses with a check to make
-sure the message with a given From address (the author's address) carries
-a valid Domain Keys Identified Mail (DKIM) signature by a signing-domain
-(SDID, i.e. the d= tag) that is acceptable to us (i.e. to the verifier).
+Works similarly to whitelist_from, except that in addition to matching
+an author address (From) to the pattern in the first parameter, the message
+must also carry a Domain Keys Identified Mail (DKIM) signature made by a
+signing domain (SDID, i.e. the d= tag) that is acceptable to us.
 
 Only one whitelist entry is allowed per line, as in C<whitelist_from_rcvd>.
 Multiple C<whitelist_from_dkim> lines are allowed. File-glob style characters
