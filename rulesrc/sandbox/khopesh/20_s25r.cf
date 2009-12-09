@@ -54,3 +54,16 @@ tflags	 S25R	nopublish
 meta	 KHOP_BOTNET	__LAST_EXTERNAL_RELAY_NO_AUTH && (RDNS_DYNAMIC || (__HELO_NO_DOMAIN&&RDNS_NONE) || (__S25R_1&&!__DOS_RELAYED_EXT) || __S25R_3 || __S25R_5 || __S25R_2 || __S25R_6 || __S25R_4) && !(__FROM_FREEMAIL || __NOT_SPOOFED || __GREYLISTED)
 describe KHOP_BOTNET	Relay looks like a dynamic address
 tflags	 KHOP_BOTNET	nopublish
+
+meta	 KHOP_BOTNET_1	__LAST_EXTERNAL_RELAY_NO_AUTH && (RDNS_DYNAMIC || (__HELO_NO_DOMAIN&&RDNS_NONE) || (__S25R_1&&!__DOS_RELAYED_EXT) || __S25R_3 || __S25R_5 || __S25R_2 || __S25R_6 || __S25R_4) && !(__FROM_FREEMAIL || __VIA_ML || __SENDER_BOT || __DOS_HAS_LIST_UNSUB || __NOT_SPOOFED || __GREYLISTED)
+describe KHOP_BOTNET_1	Relay looks like a dynamic address (exclude lists)
+tflags	 KHOP_BOTNET_1	nopublish
+
+meta	 KHOP_BOTNET_2	__LAST_EXTERNAL_RELAY_NO_AUTH && !(__FROM_FREEMAIL || __NOT_SPOOFED || __GREYLISTED) && (__S25R_3 || __S25R_4 || __S25R_5 || __S25R_6 || (RDNS_DYNAMIC + RDNS_NONE + __S25R_1 + __S25R_2) > 1)
+describe KHOP_BOTNET_2	Relay looks like a dynamic address (tightened)
+tflags	 KHOP_BOTNET_2	nopublish
+
+meta	 KHOP_BOTNET_3	__LAST_EXTERNAL_RELAY_NO_AUTH && !(__FROM_FREEMAIL || __VIA_ML || __SENDER_BOT || __DOS_HAS_LIST_UNSUB || __NOT_SPOOFED || __GREYLISTED) && (__S25R_3 || __S25R_4 || __S25R_5 || __S25R_6 || (RDNS_DYNAMIC + RDNS_NONE + __S25R_1 + __S25R_2) > 1)
+describe KHOP_BOTNET_3	Relay looks like a dynamic address (tightened + lists)
+tflags	 KHOP_BOTNET_3	nopublish
+

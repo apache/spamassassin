@@ -58,7 +58,8 @@ describe DEAR_NOBODY	Message contains Dear but with no name
 
 # uri_detail lacks support for carrying matches across consecutive regexps
 #uri_detail SPOOFED_URL	raw =~ /^https?:..(.{6,50})/ text =~ /\bhttps?:..(?!$1).{5}/
-rawbody  __SPOOFED_URL	m/<a\s[^>]{0,99}\bhref=.?(https?:[^>"' ]{8,50})[^>]{0,99}>(?:[^<]{0,99}<(?!\/a)[^>]{1,99}>)*(?!\1)https?:\/\/[^<]{5}/i
+# reduced to 30 chars (35 w/ http:) for URL wrapping, e.g. LeadLander wraps @35
+rawbody  __SPOOFED_URL	m/<a\s[^>]{0,99}\bhref=(?:3D)?.?(https?:[^>"' ]{8,30})[^>]{0,99}>(?:[^<]{0,99}<(?!\/a)[^>]{1,99}>)*(?!\1)https?:\/\/[^<]{5}/i
 meta	 SPOOFED_URL	__SPOOFED_URL && !(__VIA_ML || __SENDER_BOT || __YAHOO_BULK || __UNSUB_LINK || __THREADED)
 describe SPOOFED_URL	Has a link whose text is a different URL
 #score	 SPOOFED_URL	2.0	# 20090408, beware of 'legit' tracking bugs
