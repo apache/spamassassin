@@ -3,7 +3,7 @@
 
 ### select rules from khop-lists
 
-header	 __SENDER_BOT	ALL =~ /(?:not?\W?repl[yi]|bounce|subscrib|news|nobody)[^@ >]{0,4}@\w/i
+header	 __SENDER_BOT	ALL =~ /(?:not?\W?repl[yi]|bounce|subscrib|\bnews|\bnobody|report|\bagent|\bsend(?:er|ing)?|\bbot\b)[^@ >]{0,4}@\w/i
 uri	 __UNSUB_LINK	/\b(?:(?:un)?subscri(?:ber?|ptions?)|abuses?|opt(?:ing)?.?out)\b/i
 uri	 __MAIL_LINK	/\?.{0,200}\w@[\w-]{1,20}.\w\w\w?\b/i
 
