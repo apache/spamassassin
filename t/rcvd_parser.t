@@ -18,7 +18,7 @@ if (-e 'test_dir') {            # running from test directory, not ..
 
 use lib '.'; use lib 't';
 use SATest; sa_t_init("rcvd_parser");
-use Test; BEGIN { plan tests => 141 };
+use Test; BEGIN { plan tests => 142 };
 use strict;
 
 # format is:
@@ -457,6 +457,9 @@ my %data = (
 
 # 'from docsis-77-106-72-91.tomtelnet.ru (account moskalenko@postbox.tomsk.ru [77.106.72.91] verified) by relay2.tomsk.ru (CommuniGate Pro SMTP 5.1.13) with ESMTPSA id 9828571 for hostmaster@ns.tomsk.ru; Sun, 06 Apr 2008 04:00:16 +0700' =>
 # '[ ip=77.106.72.91 rdns=docsis-77-106-72-91.tomtelnet.ru helo=docsis-77-106-72-91.tomtelnet.ru by=relay2.tomsk.ru ident= envfrom= id=9828571 auth=ESMTPSA msa=0 ]',
+
+  'from  [140.211.11.9] (HELO example.com) by smtp-gw138.mailanyone.net with esmtp (MailAnyone incSMTP Exim) id f138m939701uh17Yipk65; Fri, 04 Dec 2009 09:15:01 -0600' =>
+  '[ ip=140.211.11.9 rdns= helo=example.com by=smtp-gw138.mailanyone.net ident= envfrom= id=f138m939701uh17Yipk65 auth= msa=0 ]',
 
 );
 
