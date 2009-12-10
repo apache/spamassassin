@@ -92,7 +92,7 @@ my $error = do {
   <$fh>;
 };
 $fh->close();
-open STDOUT, ">&", $oldout || die "Cannot dupe \$oldout: $!";
+open STDOUT, ">&".fileno($oldout) || die "Cannot dupe \$oldout: $!";
 select STDOUT; $| = 1;
 
 #warn "# $error\n";
@@ -119,7 +119,7 @@ $error = do {
   <$fh>;
 };
 $fh->close();
-open STDOUT, ">&", $oldout || die "Cannot dupe \$oldout: $!";
+open STDOUT, ">&".fileno($oldout) || die "Cannot dupe \$oldout: $!";
 select STDOUT; $| = 1;
 
 #warn "# $error\n";
@@ -143,7 +143,7 @@ $error = do {
   <$fh>;
 };
 $fh->close();
-open STDOUT, ">&", $oldout || die "Cannot dupe \$oldout: $!";
+open STDOUT, ">&".fileno($oldout) || die "Cannot dupe \$oldout: $!";
 select STDOUT; $| = 1;
 
 #warn "# $error\n";
@@ -183,7 +183,7 @@ $error = do {
   <$fh>;
 };
 $fh->close();
-open STDOUT, ">&", $oldout || die "Cannot dupe \$oldout: $!";
+open STDOUT, ">&".fileno($oldout) || die "Cannot dupe \$oldout: $!";
 select STDOUT; $| = 1;
 
 #warn "# $error\n";
@@ -210,7 +210,7 @@ $error = do {
   <$fh>;
 };
 $fh->close();
-open STDOUT, ">&", $oldout || die "Cannot dupe \$oldout: $!";
+open STDOUT, ">&".fileno($oldout) || die "Cannot dupe \$oldout: $!";
 select STDOUT; $| = 1;
 
 #warn "# $error\n";
@@ -234,7 +234,7 @@ $error = do {
   <$fh>;
 };
 $fh->close();
-open STDOUT, ">&", $oldout || die "Cannot dupe \$oldout: $!";
+open STDOUT, ">&".fileno($oldout) || die "Cannot dupe \$oldout: $!";
 select STDOUT; $| = 1;
 
 #warn "# $error\n";
