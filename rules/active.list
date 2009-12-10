@@ -1,14 +1,11 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi dos wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 2: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi dos wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 3: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2
+# with results from: day 1: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi; day 2: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi dos wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 3: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi dos wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2
 
 # tflags userconf
 ALL_TRUSTED
 
 # good enough
 AXB_HELO_LH_HOME
-
-# good enough
-BASE64_LENGTH_78_79
 
 # tflags learn
 BAYES_00
@@ -37,6 +34,9 @@ BAYES_95
 # tflags learn
 BAYES_99
 
+# good enough
+BUG6152_INVALID_DATE_TZ_ABSURD
+
 # tflags userconf
 CHARSET_FARAWAY
 
@@ -51,9 +51,6 @@ DEAR_BENEFICIARY
 
 # good enough
 DEAR_EMAIL
-
-# good enough
-DEAR_NOBODY
 
 # tflags net
 DIGEST_MULTIPLE
@@ -146,15 +143,6 @@ FB_SOFTTABS
 FB_TIRED_OF_YOUR
 
 # good enough
-FB_WITHOUT_PRESC
-
-# good enough
-FH_DATE_PAST_20XX
-
-# good enough
-FH_FAKE_RCVD_LINE
-
-# good enough
 FH_FAKE_RCVD_LINE_B
 
 # good enough
@@ -203,9 +191,6 @@ FROM_MISSP_MSFT
 FRT_PHARMAC
 
 # good enough
-FRT_ROLEX
-
-# good enough
 FR_TITLE_NUMS
 
 # good enough
@@ -216,9 +201,6 @@ FSL_HELO_BARE_IP_1
 
 # good enough
 FSL_HELO_DEVICE
-
-# good enough
-FSL_LSPACES_ABUSE
 
 # good enough
 FSL_YG_ABUSE
@@ -305,16 +287,10 @@ HK_FAKENAME_MICROSOFT
 HK_NAME_DRUGS
 
 # good enough
-HK_PNIS
-
-# good enough
 HK_RANDOM_ENVFROM
 
 # good enough
 HK_SCAM_N2
-
-# good enough
-HK_SPAMMY_FILENAME
 
 # good enough
 HS_VPXL
@@ -354,9 +330,6 @@ LOTTO_AGENT
 
 # good enough
 L_SPAM_TOOL_13
-
-# good enough
-MANY_GOOG_PROXY
 
 # good enough
 MANY_SPAN_IN_TEXT
@@ -575,16 +548,19 @@ RCVD_IN_SSC_TRUSTED_COI
 RCVD_IN_XBL
 
 # good enough
-S25R_3
+REPLYTO_WITHOUT_TO_CC
 
 # good enough
-S25R_4
+S25R_3
 
 # good enough
 S25R_6
 
 # good enough
 SANE_04e8bf28eb445199a7f11b943c44d209
+
+# good enough
+SANE_2b173a7fb7518c75ac8a2d294d773fd8
 
 # good enough
 SANE_4ef8302546bf270a19baf98508afacc4
@@ -641,22 +617,16 @@ SUBJECT_IN_BLACKLIST
 SUBJECT_IN_WHITELIST
 
 # good enough
-TO_NO_BRKTS_DYNIP
+TAB_IN_FROM
 
 # good enough
-TT_MSGID_TRUNC
+TO_NO_BRKTS_DYNIP
 
 # good enough
 TVD_FINGER_02
 
 # good enough
-TVD_INCREASE_SIZE
-
-# good enough
 TVD_PH_REC
-
-# good enough
-TVD_QUAL_MEDS
 
 # good enough
 TVD_RCVD_IP
@@ -674,19 +644,10 @@ TVD_VISIT_PHARMA
 TWO_IPS_RCVD
 
 # good enough
-FORGED_TBIRD_IMG_ARROW
+HK_RANDOM_FROM
 
 # good enough
-FORGED_TBIRD_IMG_SIZE
-
-# good enough
-FORGED_TBIRD_IMG_TO_MX
-
-# good enough
-IMG_DIRECT_TO_MX
-
-# good enough
-TAB_IN_FROM
+S25R_1
 
 # tflags userconf
 UNPARSEABLE_RELAY
@@ -789,9 +750,6 @@ XMAILER_MIMEOLE_OL_91287
 
 # good enough
 XMAILER_MIMEOLE_OL_CAC8F
-
-# good enough
-X_MAILER_CME_6543_MSN
 
 # tflags net
 __DNS_FROM_RFC_ABUSE
