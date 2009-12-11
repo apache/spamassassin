@@ -79,6 +79,10 @@ COMPATIBILITY WITH 3.2.5
   find a fresh version on its wiki page. It retains backwards compatibility,
   so can be used with both 3.2.5 as well as with SpamAssassin 3.3.0;
 
+- versions of amavisd-new between 2.5.2 and 2.6.1 (inclusive) are incompatible
+  with SpamAssassin 3.3; please upgrade amavisd to 2.6.2 or later, or apply
+  a workaround https://issues.apache.org/SpamAssassin/show_bug.cgi?id=6257
+
 - support for versions of perl 5.6.* is being gradually revoked
   (may still work, but no promises and no support);
 
