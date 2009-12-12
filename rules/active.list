@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi dos wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 2: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi; day 3: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi dos wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2
+# with results from: day 1: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix nbebout; day 2: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi dos wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 3: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi
 
 # tflags userconf
 ALL_TRUSTED
@@ -281,13 +281,7 @@ HELO_OEM
 HK_FAKENAME_EBAY
 
 # good enough
-HK_FAKENAME_MICROSOFT
-
-# good enough
 HK_NAME_DRUGS
-
-# good enough
-HK_RANDOM_ENVFROM
 
 # good enough
 HK_SCAM_N2
@@ -551,7 +545,7 @@ RCVD_IN_XBL
 REPLYTO_WITHOUT_TO_CC
 
 # good enough
-S25R_3
+S25R_1
 
 # good enough
 S25R_6
@@ -644,10 +638,34 @@ TVD_VISIT_PHARMA
 TWO_IPS_RCVD
 
 # good enough
-HK_RANDOM_FROM
+FB_WITHOUT_PRESC
 
 # good enough
-S25R_1
+FORGED_TBIRD_IMG_ARROW
+
+# good enough
+FORGED_TBIRD_IMG_SIZE
+
+# good enough
+FORGED_TBIRD_IMG_TO_MX
+
+# good enough
+FSL_LSPACES_ABUSE
+
+# good enough
+HK_PNIS
+
+# good enough
+HK_SPAMMY_FILENAME
+
+# good enough
+IMG_DIRECT_TO_MX
+
+# good enough
+MANY_GOOG_PROXY
+
+# good enough
+S25R_4
 
 # tflags userconf
 UNPARSEABLE_RELAY
