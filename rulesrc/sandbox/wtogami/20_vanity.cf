@@ -15,11 +15,11 @@ body __DPHPVANITY	/\bDistinguished Professionals Hardcover Publication\b/
 body __CBNVANITY	/\bContinental Broadcasting Network\b/
 
 # Typical Patterns
-body __NO_COST		/\b(?:no costs?|cost-? *free|free of costs?|no fees?)\b/i
+body __NO_COST		/\b(?:no costs?|cost-? *free|free of costs?|no fees?|neither cost nor obligation)\b/i
 body __INFORM_YOU	/\b(?:pleased?|pleasure) to inform you\b/
 body __INNERCIRCLE	/\bInner Circle\b/
 # Honored People
-body __SHMUCK		/\b(?:accomplished|distinguished|exceptional|talented) +(?:professionals?|individuals?)\b/i
+body __SHMUCK		/\b(?:accomplished|distinguished|exceptional|talented|calibre of) +(?:professionals?|individuals?)\b/i
 body __EXECS_PROS	/\bexecutives? (?:and|&) professionals?\b/i
 # Registry Application
 body __PUB_DEADLINE	/\bpublication deadlines?\b/i
