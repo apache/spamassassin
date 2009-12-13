@@ -1,9 +1,11 @@
 # S25R is:  http://www.gabacho-net.jp/en/anti-spam/anti-spam-system.html
 # S25R is seven regexps used to detect botnets by reverse DNS.
-# The whitelist is way too big to be worthwhile, so we use SPF/DKIM/Greylisting.
 # Last updated with upstream regexps on 2009-11-23
 
-# With RDNS_DYNAMIC, this represents a decent poor-man's botnet detector
+# S25R whitelist includes:  google.com, hotmail.com, data-hotel.net, yahoo.co.jp, yahoo.com, mixi.jp, home.ne.jp, softbank.ne.jp, ezweb.ne.jp, verisign.net
+# of these, only yahoo.com(has DKIM), home.ne.jp, and verisign.net lack SPF.
+# The whitelist is way too big to be worthwhile, so we use SPF/DKIM/Greylisting.
+
 
 # Limited via __HELO_NO_DOMAIN to distinguish from (and improve upon) RDNS_NONE
 #meta	 S25R_0 __LAST_EXTERNAL_RELAY_NO_AUTH && RDNS_NONE && __HELO_NO_DOMAIN && !__NOT_SPOOFED && !__GREYLISTED
@@ -44,26 +46,21 @@ meta	 S25R_6 __LAST_EXTERNAL_RELAY_NO_AUTH && __S25R_6 && !(__S25R_1||__S25R_2||
 
 # Testing the union.  Limits S25R_0 (RDNS_NONE) for high FPs.
 # Ordered by popularity in an effort to improve short-circuiting.
-meta	 S25R	__LAST_EXTERNAL_RELAY_NO_AUTH && ((RDNS_NONE&&__HELO_NO_DOMAIN)||__S25R_1||__S25R_3||__S25R_5||__S25R_2||__S25R_6||__S25R_4) && !__NOT_SPOOFED && !__GREYLISTED
-describe S25R	Selective SMTP Rejection: Relay has dynamic rDNS
-tflags	 S25R	nopublish
+#meta	 S25R	__LAST_EXTERNAL_RELAY_NO_AUTH && ((RDNS_NONE&&__HELO_NO_DOMAIN)||__S25R_1||__S25R_3||__S25R_5||__S25R_2||__S25R_6||__S25R_4) && !__NOT_SPOOFED && !__GREYLISTED
+#describe S25R	Selective SMTP Rejection: Relay has dynamic rDNS
+#tflags	 S25R	nopublish
 
-# Here it is, my full-blown poor-man's botnet (limits S25R 0 and 1 for high FPs)
-# based on 20091124 masscheck, ham% is 0.6-1.8% while spam% is 25.9%-83.0%
-# 20091202 got it to 65.6157/1.6324.  Latest tweaks should drop ham by ~0.5%
-meta	 KHOP_BOTNET	__LAST_EXTERNAL_RELAY_NO_AUTH && (RDNS_DYNAMIC || (__HELO_NO_DOMAIN&&RDNS_NONE) || (__S25R_1&&!__DOS_RELAYED_EXT) || __S25R_3 || __S25R_5 || __S25R_2 || __S25R_6 || __S25R_4) && !(__FROM_FREEMAIL || __NOT_SPOOFED || __GREYLISTED)
-describe KHOP_BOTNET	Relay looks like a dynamic address
-tflags	 KHOP_BOTNET	nopublish
-
-meta	 KHOP_BOTNET_1	__LAST_EXTERNAL_RELAY_NO_AUTH && (RDNS_DYNAMIC || (__HELO_NO_DOMAIN&&RDNS_NONE) || (__S25R_1&&!__DOS_RELAYED_EXT) || __S25R_3 || __S25R_5 || __S25R_2 || __S25R_6 || __S25R_4) && !(__FROM_FREEMAIL || __VIA_ML || __SENDER_BOT || __DOS_HAS_LIST_UNSUB || __NOT_SPOOFED || __GREYLISTED)
-describe KHOP_BOTNET_1	Relay looks like a dynamic address (exclude lists)
-tflags	 KHOP_BOTNET_1	nopublish
-
+# Here it is, my full-blown poor-man's botnet
 meta	 KHOP_BOTNET_2	__LAST_EXTERNAL_RELAY_NO_AUTH && !(__FROM_FREEMAIL || __NOT_SPOOFED || __GREYLISTED) && (__S25R_3 || __S25R_4 || __S25R_5 || __S25R_6 || (RDNS_DYNAMIC + RDNS_NONE + __S25R_1 + __S25R_2) > 1)
-describe KHOP_BOTNET_2	Relay looks like a dynamic address (tightened)
+describe KHOP_BOTNET_2	Relay looks like a dynamic address
 tflags	 KHOP_BOTNET_2	nopublish
 
-meta	 KHOP_BOTNET_3	__LAST_EXTERNAL_RELAY_NO_AUTH && !(__FROM_FREEMAIL || __VIA_ML || __SENDER_BOT || __DOS_HAS_LIST_UNSUB || __NOT_SPOOFED || __GREYLISTED) && (__S25R_3 || __S25R_4 || __S25R_5 || __S25R_6 || (RDNS_DYNAMIC + RDNS_NONE + __S25R_1 + __S25R_2) > 1)
-describe KHOP_BOTNET_3	Relay looks like a dynamic address (tightened + lists)
-tflags	 KHOP_BOTNET_3	nopublish
+meta	 KHOP_BOTNET_4	__LAST_EXTERNAL_RELAY_NO_AUTH && !(__FROM_FREEMAIL || __NOT_SPOOFED || __GREYLISTED) && (__S25R_3 || __S25R_4 || __S25R_5 || __S25R_6 || RDNS_DYNAMIC + RDNS_NONE + __S25R_1*.8 + __S25R_2*.8 > 1.7)
+describe KHOP_BOTNET_4	Relay looks like a dynamic address
+tflags	 KHOP_BOTNET_4	nopublish
 
+
+# S25R-wanted item (3.2 a, "A terminal host name includes hexadecimal number")
+# not published with S25R due to matching words like 'feed'
+# ... perl lets us prevent that.  Here I limit it to 2 consecutive hex letters
+header __RDNS_HEX X-Spam-Relays-Untrusted =~ /^[^\]]+ rdns=[^ .]*\d(?![0-9a-f]*[a-f]{3})[0-9a-f]{7}/

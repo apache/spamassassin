@@ -3,9 +3,12 @@
 
 ### select rules from khop-lists
 
-header	 __SENDER_BOT	ALL =~ /(?:not?\W?repl[yi]|bounce|subscrib|\bnews|\bnobody|report|\bagent|\bsend(?:er|ing)?|\bbot\b)[^@ >]{0,4}@\w/i
+header	 __SENDER_BOT	ALL =~ /(?:not?\W?repl[yi]|bounce|daemon|subscri|report|\b(?:root|news|nobody|agent|(?:post)?master|manag|send(?:er|ing)?|out|bot\b))[^@ >]{0,5}s?@\w/i
 uri	 __UNSUB_LINK	/\b(?:(?:un)?subscri(?:ber?|ptions?)|abuses?|opt(?:ing)?.?out)\b/i
 uri	 __MAIL_LINK	/\?.{0,200}\w@[\w-]{1,20}.\w\w\w?\b/i
+
+header   __MSGID_LIST	Message-ID =~ /--\w+\#[\w.]+\.\w{2,4}@/
+tflags   __MSGID_LIST	nice
 
 body     KHOP_NEWSLETTER	/\b(?:e?newsletters?|(?:un)?(?:subscrib|register)|you(?:r| are) subscri(?:b|ption)|opt(?:.|ing)?out\b|further info|you do ?n[o']t w(?:ish|ant)|remov\w{1,3}.{1,9}\blists?\b|to your white.?list)/i
 describe KHOP_NEWSLETTER	Is a newsletter or has list managing details
