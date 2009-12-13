@@ -31,3 +31,22 @@ score    KHOP_CLIQUEZ_ICI	1.1	# 20090526 see also SARE_UN7
 uri      URI_HIDDEN	/.{7}\/\../
 describe URI_HIDDEN	Contains a hidden directory
 #score    URI_HIDDEN	0.7 # 20090515 13:29 by Adam Katz (me) on sa-users list
+
+header	 KHOP_SLD	X-Spam-Relays-Untrusted =~ /^[^\]]+ rdns=[^. ]*\.\w+ /
+describe KHOP_SLD	Relay rDNS is a 2nd-level domain (no subdomain)
+
+# Relays with 5+ subdomains.
+# My data (post-greylisting) is 1.7869/0.0682 spam/ham, s/o = .897
+# Those should be significantly better sans-greylisting (they can't get worse).
+header __5_SUBDOM X-Spam-Relays-Untrusted =~ /^[^\]]+ rdns=(?:[^. ]*\.){6,}\w+ /
+
+# Probably too similar to __S25R_1
+header __NUM_LTR_3 X-Spam-Relays-Untrusted =~ /^[^\]]+ rdns=\S*(?:\d\S*[^0-9. ]\S*\d){3,} /
+
+# IP address in relay's rDNS or HELO
+header __IP_IN_RELAY X-Spam-Relays-Untrusted =~ /^\[ ip=(\d+)\.(\d+)\.(\d+)\.(\d+) [^\]]*(?:rdns|helo)=\S*(?:\1\D\2\D\3\D\4|\4\D\3\D\2\D\1)/
+header __IP_PART_IN_RELAY X-Spam-Relays-Untrusted =~ /^\[ ip=\d+\.\d+\.(\d+)\.(\d+) [^\]]*(?:rdns|helo)=\S*(?:\1\W\2\W|\2\W\1)\b/
+
+header __MSGID_DOTZERO	Message-ID =~ /\.0\.0\./
+
+header __MSGID_JAVAMAIL	Message-ID =~ /\.JavaMail\./

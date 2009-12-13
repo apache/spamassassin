@@ -33,7 +33,7 @@ describe HELO_NO_DOMAIN	Relay reports its domain incorrectly
 
 # This doesn't fire often after greylisting ... how about w/out it?
 # renamed from KHOP_NO_FQDN
-meta	 KHOP_HELO_BOT	__HELO_NO_DOMAIN && KHOP_BOTNET
+meta	 KHOP_HELO_BOT	__HELO_NO_DOMAIN && KHOP_BOTNET_2
 describe KHOP_HELO_BOT	Suspect botnet sender claims no domain name
 #score	 KHOP_HELO_BOT	0.5	# 20090603
 
