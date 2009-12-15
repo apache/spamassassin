@@ -10,34 +10,35 @@ describe FROM_THE	Non-bulk sender is "The" something
 # I don't actually expect this to do well.  maybe s/o around 0.450?
 # There's also the argument that Bayes should handle this, since (iirc) it codifies tokens like "from:the" indicating that "the" occurs in "From" headers...
 
-header	 KHOP_BIG_TO_CC      ToCc =~ /(?:[^,\@]{1,60}\@[^,]{4,25},){10,19}/
+header	 KHOP_BIG_TO_CC      ToCc =~ /(?:[^,\@]{1,60}\@[^,]{4,25},){10}/
 describe KHOP_BIG_TO_CC      Sent to 10+ recipients instaed of Bcc or a list
 score	 KHOP_BIG_TO_CC      0.3 # 20090527
 
 header	 __KHOP_EBAY_ADDY	From:addr =~ /\@(?:.+\.)?ebay\..{3,5}$/i
 meta	 KHOP_FAKE_EBAY 	__KHOP_EBAY_ADDY && !__NOT_SPOOFED
-describe KHOP_FAKE_EBAY	Sender falsely claims to be from eBay
-#score	 KHOP_FAKE_EBAY	2.25 # 20090408
+describe KHOP_FAKE_EBAY 	Sender falsely claims to be from eBay
+#score	 KHOP_FAKE_EBAY 	2.25 # 20090408
 
 ifplugin Mail::SpamAssassin::Plugin::URIDetail
   uri_detail KHOP_CLIQUEZ_ICI	text =~ /^cliquez\Wici\b/i
 else
-  rawbody  KHOP_CLIQUEZ_ICI	/>cliquez\Wici\b/i
+  rawbody    KHOP_CLIQUEZ_ICI	/>cliquez\Wici\b/i
 endif
 describe KHOP_CLIQUEZ_ICI	Click here link in French
-score    KHOP_CLIQUEZ_ICI	1.1	# 20090526 see also SARE_UN7
+#score	 KHOP_CLIQUEZ_ICI	1.1	# 20090526 see also SARE_UN7
 
 # I don't think this ever fires
-uri      URI_HIDDEN	/.{7}\/\../
+uri	 URI_HIDDEN	m'.{7}\/\.\.?/?\w'
 describe URI_HIDDEN	Contains a hidden directory
-#score    URI_HIDDEN	0.7 # 20090515 13:29 by Adam Katz (me) on sa-users list
+#score	 URI_HIDDEN	0.7 # 20090515 13:29 by Adam Katz (me) on sa-users list
 
-header	 KHOP_SLD	X-Spam-Relays-Untrusted =~ /^[^\]]+ rdns=[^. ]*\.\w+ /
-describe KHOP_SLD	Relay rDNS is a 2nd-level domain (no subdomain)
+# no subdomain; sent by example.com rather than server.example.com
+header __RDNS_NO_SUBDOM	X-Spam-Relays-Untrusted =~ /^[^\]]+ rdns=[^. ]*\.\w+ /
 
 # Relays with 5+ subdomains.
 # My data (post-greylisting) is 1.7869/0.0682 spam/ham, s/o = .897
 # Those should be significantly better sans-greylisting (they can't get worse).
+# @ 20091214, 5.7617/0.0344 spam/ham, 0.994 s/o.
 header __5_SUBDOM X-Spam-Relays-Untrusted =~ /^[^\]]+ rdns=(?:[^. ]*\.){6,}\w+ /
 
 # Probably too similar to __S25R_1
@@ -50,3 +51,4 @@ header __IP_PART_IN_RELAY X-Spam-Relays-Untrusted =~ /^\[ ip=\d+\.\d+\.(\d+)\.(\
 header __MSGID_DOTZERO	Message-ID =~ /\.0\.0\./
 
 header __MSGID_JAVAMAIL	Message-ID =~ /\.JavaMail\./
+tflags __MSGID_JAVAMAIL	nice
