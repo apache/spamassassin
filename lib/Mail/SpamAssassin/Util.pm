@@ -320,15 +320,18 @@ sub taint_var {
 sub exit_status_str($;$) {
   my($stat,$errno) = @_;
   my $str;
-  if (WIFEXITED($stat)) {
+  if (!defined($stat)) {
+    $str = '(no status)';
+  } elsif (WIFEXITED($stat)) {
     $str = sprintf("exit %d", WEXITSTATUS($stat));
   } elsif (WIFSTOPPED($stat)) {
     $str = sprintf("stopped, signal %d", WSTOPSIG($stat));
   } else {
     my $sig = WTERMSIG($stat);
     $str = sprintf("%s, signal %d (%04x)",
-             $sig == 2 ? 'INTERRUPTED' : $sig == 6 ? 'ABORTED' :
-             $sig == 9 ? 'KILLED' : $sig == 15 ? 'TERMINATED' : 'DIED',
+             $sig == 1 ? 'HANGUP' : $sig == 2 ? 'INTERRUPTED' :
+             $sig == 6 ? 'ABORTED' : $sig == 9 ? 'KILLED' :
+             $sig == 15 ? 'TERMINATED' : 'DIED',
              $sig, $stat);
   }
   if (defined $errno) {  # deal with dual-valued and plain variables
