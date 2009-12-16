@@ -34,12 +34,12 @@ my $have_sha1 = eval { require Digest::SHA1 };
 @MODULES = (
 $have_sha1 ? {
   'module' => 'Digest::SHA1',
-  'version' => '0.00',
+  'version' => 0,
   'desc' => 'The Digest::SHA1 module is used as a cryptographic hash for some
   tests and the Bayes subsystem.  It is also required by the Razor2 plugin.',
 } : {
   'module' => 'Digest::SHA',
-  'version' => '0.00',
+  'version' => 0,
   'desc' => 'The Digest::SHA module is used as a cryptographic hash for some
   tests and the Bayes subsystem.  It is also required by the DKIM plugin.',
 },
@@ -63,9 +63,10 @@ $have_sha1 ? {
 },
 {
   'module' => 'NetAddr::IP',
-  'version' => '0.00',
+  'version' => 0,
   'desc' => "Used in determining which DNS tests are to be done for each of
-  the header's received fields.",
+  the header's received fields, and used by AWL plugin for extracting network
+  address from an IPv6 addresses (and from IPv4 address on nondefault mask).",
 },
 {
   module => 'Archive::Tar',
@@ -75,7 +76,7 @@ $have_sha1 ? {
 },
 {
   module => 'Time::HiRes',
-  version => '0.00',
+  version => 0,
   desc => 'Used by asynchronous DNS lookups to operate timeouts with subsecond
   precision and to report processing times accurately.'
 },
@@ -84,22 +85,22 @@ $have_sha1 ? {
 my @OPTIONAL_MODULES = (
 $have_sha ? {
   'module' => 'Digest::SHA1',
-  'version' => '0.00',
+  'version' => 0,
   'desc' => 'The Digest::SHA1 module is required by the Razor2 plugin.',
 } : {
   'module' => 'Digest::SHA',
-  'version' => '0.00',
+  'version' => 0,
   'desc' => 'The Digest::SHA module is required by the DKIM plugin.',
 },
 {
   module => 'MIME::Base64',
-  version => '0.00',
+  version => 0,
   desc => 'This module is highly recommended to increase the speed with which
   Base64 encoded messages/mail parts are decoded.',
 },
 {
   module => 'DB_File',
-  version => '0.00',
+  version => 0,
   desc => 'Used to store data on-disk, for the Bayes-style logic and
   auto-whitelist.  *Much* more efficient than the other standard Perl
   database packages.  Strongly recommended.',
@@ -107,19 +108,19 @@ $have_sha ? {
 {
   module => 'Net::SMTP',
   alt_name => 'libnet',
-  version => '0.00',
+  version => 0,
   desc => 'Used when manually reporting spam to SpamCop with "spamassassin -r".',
 },
 {
   module => 'Mail::SPF',
-  version => '0.00',
+  version => 0,
   desc => 'Used to check DNS Sender Policy Framework (SPF) records to fight email
   address forgery and make it easier to identify spams.',
 },
 {
   module => 'IP::Country::Fast',
   alt_name => 'IP::Country',
-  version => '0.00',
+  version => 0,
   desc => 'Used by the RelayCountry plugin (not enabled by default) to determine
   the domain country codes of each relay in the path of an email.',
 },
@@ -137,20 +138,20 @@ $have_sha ? {
 },
 {
   module => 'Net::Ident',
-  version => '0.00',
+  version => 0,
   desc => 'If you plan to use the --auth-ident option to spamd, you will need
   to install this module.',
 },
 {
   module => 'IO::Socket::INET6',
-  version => '0.00',
+  version => 0,
   desc => 'This is required if the first nameserver listed in your IP
   configuration or /etc/resolv.conf file is available only via an
   IPv6 address. Also used by a DCC plugin to access dccifd over network.',
 },
 {
   module => 'IO::Socket::SSL',
-  version => '0.00',
+  version => 0,
   desc => 'If you wish to use SSL encryption to communicate between spamc and
   spamd (the --ssl option to spamd), you need to install this
   module. (You will need the OpenSSL libraries and use the
@@ -159,7 +160,7 @@ $have_sha ? {
 },
 {
   module => 'Compress::Zlib',
-  version => '0.00',
+  version => 0,
   desc => 'If you wish to use the optional zlib compression for communication
   between spamc and spamd (the -z option to spamc), you need to install
   this module.',
@@ -167,15 +168,16 @@ $have_sha ? {
 {
   module => 'Mail::DKIM',
   version => '0.31',
+  recommended_min_version => '0.37',
   desc => 'If this module is installed and the DKIM plugin is enabled,
   SpamAssassin will perform DKIM signature verification when DKIM-Signature
   header fields are present in the message headers, and check ADSP rules
   (e.g. anti-phishing) when a mail message does not contain a valid author
-  domain signature. Version 0.36_5 or later is needed to fully support ADSP.'
+  domain signature. Version 0.37 or later is needed to fully support ADSP.'
 },
 {
   module => 'DBI',
-  version => '0.00',
+  version => 0,
   desc => 'If you intend to use SpamAssassin with an SQL database backend for
   user configuration data, Bayes storage, or other storage, you will need
   to have these installed; both the basic DBI module and the DBD driver for
@@ -190,12 +192,12 @@ $have_sha ? {
 },
 {
   module => 'LWP::UserAgent',
-  version => '0.00',
+  version => 0,
   desc => 'The "sa-update" program requires this module to make HTTP requests.',
 },
 {
   module => 'HTTP::Date',
-  version => '0.00',
+  version => 0,
   desc => 'The "sa-update" program requires this module to make HTTP
   If-Modified-Since GET requests.',
 },
@@ -207,7 +209,7 @@ $have_sha ? {
 },
 {
   module => 'Encode::Detect',
-  version => '0.00',
+  version => 0,
   desc => 'If you plan to use the normalize_charset config setting to detect
   charsets and convert them into Unicode, you will need to install
   this module.',
@@ -273,52 +275,93 @@ sub long_diagnostics {
 sub try_module {
   my ($required, $moddef, $summref) = @_;
 
-  if (eval "use $moddef->{module} $moddef->{version}; 1") {
-    return;
-  };
+  my $module_version;
+  my $installed = 0;
+  my $version_meets_required = 0;
+  my $version_meets_recommended = 0;
+  my $required_version = $moddef->{version};
+  my $recommended_version = $moddef->{recommended_min_version};
 
-  my $not_installed = 0;
-  my $eval_stat;
-  eval "use $moddef->{module}; 1"
-  or do {
-    $not_installed = 1;
-    $eval_stat = $@ ne '' ? $@ : "errno=$!";  chomp $eval_stat;
-  };
+  if (eval "use $moddef->{module} $required_version; 1") {
+    $installed = 1;  $version_meets_required = 1;
+  } else {
+    my $eval_stat;
+    if (eval "use $moddef->{module}; 1") {
+      $installed = 1;
+    } else {
+      $eval_stat = $@ ne '' ? $@ : "errno=$!";  chomp $eval_stat;
+    # dbg("dependency: $eval_stat");
+    };
+  }
 
-  my $pretty_name = $moddef->{alt_name} || $moddef->{module};
-  my $pretty_version = ($moddef->{version} > 0 ?
-                "(version $moddef->{version}) " : "");
-  my $desc = $moddef->{desc}; $desc =~ s/^(\S)/  $1/gm;
+  if ($installed) {
+    eval { $module_version = $moddef->{module}->VERSION };  # wrap just in case
+    if (!$recommended_version ||
+        ($module_version && $module_version >= $recommended_version)) {
+      $version_meets_recommended = 1;
+    }
+  }
 
   my $errtype;
-  if ($not_installed) {
-    $errtype = "is not installed.";
-  } else {
-    $errtype = "is installed,\nbut is not an up-to-date version.";
-  }
-  # dbg("dependency: $eval_stat");
-
-  print "\n", ("*" x 75), "\n";
-  if ($required) {
-    $EXIT_STATUS++;
-    warn "\aERROR: the required $pretty_name ${pretty_version}module $errtype";
-    if ($not_installed) {
-      $$summref .= "REQUIRED module missing: $pretty_name\n";
-    } else {
-      $$summref .= "REQUIRED module out of date: $pretty_name\n";
+  if (!$installed) {
+    $errtype = "is not installed";
+    if ($required_version || $recommended_version) {
+      $errtype .= ",\n";
+      if ($required_version) {
+        $errtype .= "minimum required version is $required_version";
+      }
+      if ($recommended_version) {
+        $errtype .= ", "  if $required_version;
+        $errtype .= "recommended version is $recommended_version or higher";
+      }
     }
-  }
-  else {
-    $WARNINGS++;
-    print "NOTE: the optional $pretty_name ${pretty_version}module $errtype";
-    if ($not_installed) {
-      $$summref .= "optional module missing: $pretty_name\n";
-    } else {
-      $$summref .= "optional module out of date: $pretty_name\n";
-    }
+    $errtype .= ".";
+  } elsif (!$version_meets_required) {
+    $errtype = "is installed ($module_version),\nbut is below the ".
+               "minimum required version $required_version,\n".
+               "some functionality will not be available.";
+    $errtype .= "\nRecommended version is $recommended_version or higher."
+      if $recommended_version;
+  } elsif (!$version_meets_recommended) {
+    $errtype = "is installed ($module_version),\nbut is below the ".
+               "recommended version $recommended_version,\n".
+               "some functionality may not be available,\n".
+               "and some of the tests in the SpamAssassin test suite may fail.";
   }
 
-  print "\n\n".$desc."\n\n";
+  if (defined $errtype) {
+    my $pretty_name = $moddef->{alt_name} || $moddef->{module};
+    my $desc = $moddef->{desc}; $desc =~ s/^(\S)/  $1/gm;
+    my $pretty_min_version =
+      !$required_version ? '' : "(version $required_version) ";
+
+    print "\n", ("*" x 75), "\n";
+
+    if ($required) {
+      $EXIT_STATUS++;
+      warn "\aERROR: the required $pretty_name module $errtype\n";
+      if (!$installed) {
+        $$summref .= "REQUIRED module missing: $pretty_name\n";
+      } elsif (!$version_meets_required) {
+        $$summref .= "REQUIRED module out of date: $pretty_name\n";
+      } else {
+        $$summref .= "REQUIRED module older than recommended: $pretty_name\n";
+      }
+    }
+    else {
+      $WARNINGS++;
+      print "NOTE: the optional $pretty_name module $errtype\n";
+      if (!$installed) {
+        $$summref .= "optional module missing: $pretty_name\n";
+      } elsif (!$version_meets_required) {
+        $$summref .= "optional module out of date: $pretty_name\n";
+      } else {
+        $$summref .= "optional module older than recommended: $pretty_name\n";
+      }
+    }
+
+    print "\n".$desc."\n\n";
+  }
 }
 
 1;
