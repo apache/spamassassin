@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix dos nbebout wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 2: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix nbebout wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 3: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix nbebout
+# with results from: day 1: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix; day 2: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix dos nbebout wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 3: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix nbebout wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2
 
 # tflags userconf
 ALL_TRUSTED
@@ -140,12 +140,6 @@ FB_SOFTTABS
 FB_TIRED_OF_YOUR
 
 # good enough
-FB_WITHOUT_PRESC
-
-# good enough
-FH_FAKE_RCVD_LINE
-
-# good enough
 FH_FAKE_RCVD_LINE_B
 
 # good enough
@@ -170,19 +164,7 @@ FM_LOTTO_YOU_WON
 FM_SEX_HELODDDD
 
 # good enough
-FM_SUBJ_APPROVE
-
-# good enough
 FORGED_RELAY_MUA_TO_MX
-
-# good enough
-FORGED_TBIRD_IMG_ARROW
-
-# good enough
-FORGED_TBIRD_IMG_SIZE
-
-# good enough
-FORGED_TBIRD_IMG_TO_MX
 
 # tflags userconf
 FRAGMENTED_MESSAGE
@@ -203,16 +185,7 @@ FROM_MISSP_FREEMAIL
 FROM_MISSP_MSFT
 
 # good enough
-FRT_APPROV
-
-# good enough
-FRT_ERECTION
-
-# good enough
 FRT_PHARMAC
-
-# good enough
-FRT_ROLEX
 
 # good enough
 FR_TITLE_NUMS
@@ -225,12 +198,6 @@ FSL_HELO_BARE_IP_1
 
 # good enough
 FSL_HELO_DEVICE
-
-# good enough
-FSL_HELO_NON_FQDN_1
-
-# good enough
-FSL_LSPACES_ABUSE
 
 # good enough
 FSL_YG_ABUSE
@@ -308,25 +275,13 @@ HELO_OEM
 HK_NAME_DRUGS
 
 # good enough
-HK_NAME_FREE
-
-# good enough
-HK_PNIS
-
-# good enough
 HK_SCAM_N2
-
-# good enough
-HK_SPAMMY_FILENAME
 
 # good enough
 HS_VPXL
 
 # tflags userconf
 HTML_CHARSET_FARAWAY
-
-# good enough
-IMG_DIRECT_TO_MX
 
 # good enough
 KAM_LOTTO1
@@ -360,12 +315,6 @@ LOTTO_AGENT
 
 # good enough
 L_SPAM_TOOL_13
-
-# good enough
-MANY_GOOG_PROXY
-
-# good enough
-MANY_SPAN_IN_TEXT
 
 # good enough
 MANY_TINY_FLOAT
@@ -602,12 +551,6 @@ SANE_4ef8302546bf270a19baf98508afacc4
 SANE_7429530a7398f43f1f1b795f9420714e
 
 # good enough
-SANE_91eb43f705d25c804374a746d7519660
-
-# good enough
-SANE_b58d7945d89b7afc9e2753c83b00ab44
-
-# good enough
 SANE_d0d2b0f6373bf91253d66dd74c594b87
 
 # good enough
@@ -665,12 +608,6 @@ TO_NO_BRKTS_DYNIP
 TVD_FINGER_02
 
 # good enough
-TVD_INCREASE_SIZE
-
-# good enough
-TVD_QUAL_MEDS
-
-# good enough
 TVD_RCVD_IP
 
 # good enough
@@ -684,12 +621,6 @@ TVD_VISIT_PHARMA
 
 # good enough
 TWO_IPS_RCVD
-
-# good enough
-S25R_1
-
-# good enough
-THREAD_INDEX_HEX
 
 # tflags userconf
 UNPARSEABLE_RELAY
