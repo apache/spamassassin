@@ -24,16 +24,15 @@ use strict;
 use Time::HiRes qw(time sleep);
 
 require Mail::SpamAssassin::Timeout;
-require Mail::SpamAssassin::Logger;
-Mail::SpamAssassin::Logger::add_facilities('all');
+# require Mail::SpamAssassin::Logger;
+# Mail::SpamAssassin::Logger::add_facilities('all');
 
 # attempt to circumvent an advice not to mix alarm() with sleep();
-# interaction between alarms and sleeps is unspecified;
-# select() might be restarted on a signal
+# interaction between alarms and sleeps is unspecified
 #
 sub mysleep($) {
   my($dt) = @_;
-  select(undef, undef, undef, 0.1)  for 1..int(10*$dt);
+  sleep(0.1) for 1..int(10*$dt);
 }
 
 my($r,$t,$t1,$t2);

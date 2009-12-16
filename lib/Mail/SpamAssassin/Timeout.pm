@@ -59,7 +59,7 @@ use bytes;
 use re 'taint';
 
 use Time::HiRes qw(time);
-use Mail::SpamAssassin::Logger;
+# use Mail::SpamAssassin::Logger;
 
 use vars qw{
   @ISA
@@ -92,7 +92,6 @@ be applied. If both are specified, the shorter interval of the two prevails.
 
 use vars qw($id_gen);
 BEGIN { $id_gen = 0 }  # unique generator of IDs for timer objects
-use vars qw(@expiration);  # stack of expected expiration times, top at [0]
 
 sub new {
   my ($class, $opts) = @_;
@@ -146,7 +145,7 @@ sub _run {      # private
   my $id = $self->{id};
   my $secs = $self->{secs};
   my $deadline = $self->{deadline};
-  dbg("timed: %s run", $id);
+# dbg("timed: %s run", $id);
 
   # assertion
   if (defined $secs && $secs < 0) {
@@ -167,27 +166,11 @@ sub _run {      # private
   my($oldalarm, $handler);
   if (defined $secs) {
     $oldalarm = alarm(0);  # remaining time, 0 when disarmed, undef on error
-    if (!@expiration) {
-      dbg("timed: %s no timer in evidence", $id);
-      dbg("timed: %s actual timer was running, time left %.3f s",
-          $id,$oldalarm)  if $oldalarm;
-    } elsif (!defined $expiration[0]) {
-      dbg("timed: %s timer not running according to evidence", $id);
-      dbg("timed: %s actual timer was running, time left %.3f s",
-          $id,$oldalarm)  if $oldalarm;
-    } else {
-      my $oldalarm2 = $expiration[0] - time;
-      dbg("timed: %s stopping timer, time left %.3f s", $id,$oldalarm2);
-      dbg("timed: %s actual timer was running, time left %.3f s",
-          $id,$oldalarm)  if $oldalarm;
-      $oldalarm = $oldalarm2;
-    }
     $self->{end_time} = $start_time + $secs;  # needed by reset()
     $handler = sub { $timedout = 1; die "__alarm__ignore__($id)\n" };
   }
 
   my($ret, $eval_stat);
-  unshift(@expiration, undef);
   eval {
     local $SIG{__DIE__};   # bug 4631
 
@@ -200,21 +183,19 @@ sub _run {      # private
 
     } elsif ($oldalarm && $oldalarm < $secs) {
       # just restore outer timer, a timeout signal will be handled there
-      dbg("timed: %s restoring outer alarm(%.3f)", $id,$oldalarm);
-      $expiration[0] = time + $oldalarm;
+    # dbg("timed: %s restoring outer alarm(%.3f)", $id,$oldalarm);
       alarm($oldalarm);
       $ret = &$sub;
-      dbg("timed: %s post-sub(outer)", $id);
+    # dbg("timed: %s post-sub(outer)", $id);
 
     } else {
       local $SIG{ALRM} = $handler;  # ensure closed scope here
       my $isecs = int($secs);
       $isecs++  if $secs > int($isecs);  # ceiling
-      dbg("timed: %s alarm(%.3f)", $id,$secs);
-      $expiration[0] = time + $isecs;
+    # dbg("timed: %s alarm(%.3f)", $id,$secs);
       alarm($isecs);
       $ret = &$sub;
-      dbg("timed: %s post-sub", $id);
+    # dbg("timed: %s post-sub", $id);
     }
 
     # Unset the alarm() before we leave eval{ } scope, as that stack-pop
@@ -227,16 +208,13 @@ sub _run {      # private
     # still worth avoiding anyway.
     #
     alarm(0);  # disarm
-    $expiration[0] = undef;
 
     1;
   } or do {
     $eval_stat = $@ ne '' ? $@ : "errno=$!";  chomp $eval_stat;
     alarm(0);  # in case we popped out for some other reason
-    $expiration[0] = undef;
   };
 
-  shift(@expiration);  # pop off the stack
   delete $self->{end_time};  # reset() is only applicable within a &$sub
 
   # catch timedout  return:
@@ -249,7 +227,7 @@ sub _run {      # private
 
   if (defined $eval_stat && $eval_stat =~ /__alarm__ignore__\Q($id)\E/) {
     $self->{timed_out} = 1;
-    dbg("timed: %s cought: %s", $id,$eval_stat);
+  # dbg("timed: %s cought: %s", $id,$eval_stat);
   } elsif ($timedout) {
     # this happens occasionally; haven't figured out why.  seems
     # harmless in effect, though, so just issue a warning and carry on...
@@ -268,7 +246,7 @@ sub _run {      # private
       # taking into account the elapsed time we spent here
       my $iremaining_time = int($remaining_time);
       $iremaining_time++  if $remaining_time > int($remaining_time); # ceiling
-      dbg("timed: %s restoring outer alarm(%.3f)", $id,$iremaining_time);
+    # dbg("timed: %s restoring outer alarm(%.3f)", $id,$iremaining_time);
       alarm($iremaining_time);
       undef $remaining_time;  # already taken care of
     }
@@ -279,7 +257,8 @@ sub _run {      # private
     die "Timeout::_run: $eval_stat\n";
   }
   if (defined $remaining_time) {
-    dbg("timed: %s outer timer expired %.3f s ago", $id, -$remaining_time);
+    $self->{timed_out} = 1;
+  # dbg("timed: %s outer timer expired %.3f s ago", $id, -$remaining_time);
     alarm(2);  # mercifully grant two additional seconds
   # my $prev_handler = $SIG{ALRM};
   # if (ref $prev_handler eq 'CODE') {
@@ -321,18 +300,18 @@ sub reset {
   my ($self) = @_;
 
   my $id = $self->{id};
-  dbg("timed: %s reset", $id);
+# dbg("timed: %s reset", $id);
   return if !defined $self->{end_time};
 
   my $secs = $self->{end_time} - time;
   if ($secs > 0) {
     my $isecs = int($secs);
     $isecs++  if $secs > int($isecs);  # ceiling
-    dbg("timed: %s reset: alarm(%.3f)", $self->{id},$isecs);
+  # dbg("timed: %s reset: alarm(%.3f)", $self->{id},$isecs);
     alarm($isecs);
   } else {
     $self->{timed_out} = 1;
-    dbg("timed: %s reset, timer expired %.3f s ago", $id, -$secs);
+  # dbg("timed: %s reset, timer expired %.3f s ago", $id, -$secs);
     alarm(2);  # mercifully grant two additional seconds
   # my $prev_handler = $SIG{ALRM};
   # if (ref $prev_handler eq 'CODE') {
