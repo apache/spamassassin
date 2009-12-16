@@ -756,16 +756,12 @@ score DNS_FROM_RFC_DSN 0 0.001 0 0.001 # n=0 n=2
 score NO_DNS_FOR_FROM 0 0.379 0 0.001 # n=0 n=2
 # </gen:mutable>
 
-# Sender Score Certified (formerly Bonded Sender):
-# http://www.senderscorecertified.com/ .  See bug 5476.
-# note: RCVD_IN_SSC_TRUSTED_COI-listed IPs are also in RCVD_IN_BSP_TRUSTED,
-# hence score is additive (-4.3 + -3.7 = -8.0)
-score RCVD_IN_BSP_TRUSTED 0 -4.3 0 -4.3
-score RCVD_IN_SSC_TRUSTED_COI 0 -3.7 0 -3.7
-
-# Habeas: http://www.habeas.com/
-score HABEAS_ACCREDITED_COI 0 -8.0 0 -8.0
-score HABEAS_ACCREDITED_SOI 0 -4.3 0 -4.3
+# ReturnPath Certified
+# http://www.returnpath.net/internetserviceprovider/certification/
+# CERTIFIED is a subset of SAFE, thus the score is cumulative.
+# -2 + -3 = -5 points for CERTIFIED
+score RCVD_IN_RP_CERTIFIED 0.0 -3.0 0.0 -3.0
+score RCVD_IN_RP_SAFE 0.0 -2.0 0.0 -2.0
 
 # DNSWL
 score RCVD_IN_DNSWL_NONE 0 -0.0001 0 -0.0001
