@@ -185,10 +185,10 @@ test_samples(\@test_filenames, \@patt_antipatt_list);
 STDOUT->autoflush(1);
 if ($version < 0.34) {
   print STDERR "\n\n*** Mail::DKIM $version, Tests 105, 109, 113, 117, 120 ".
-               "are expected to fail with versions older than 0.34\n";
+               "are expected to fail with versions older than 0.34\n\n";
 } elsif ($version < 0.37) {
   print STDERR "\n\n*** Mail::DKIM $version, Test 120 ".
-               "is expected to fail with versions older than 0.36_5\n";
+               "is expected to fail with versions older than 0.36_5\n\n";
 }
 
 END {
