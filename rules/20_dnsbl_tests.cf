@@ -235,22 +235,6 @@ tflags RCVD_IN_MAPS_NML         net
 # ---------------------------------------------------------------------------
 # Section for DNS WL related lookups below.
 
-# Sender Score Certified (formerly Bonded Sender, hence the legacy rule names):
-# http://www.senderscorecertified.com/
-header RCVD_IN_BSP_TRUSTED      eval:check_rbl_txt('bsp-firsttrusted', 'sa-trusted.bondedsender.org.', '(?i:bonded)')
-describe RCVD_IN_BSP_TRUSTED    Sender is accredited by Return Path's Sender Score Certified program; report issues to senderscorecertified.com@abuse.net
-
-tflags RCVD_IN_BSP_TRUSTED      net nice
-reuse  RCVD_IN_BSP_TRUSTED
-
-# confirmed-opt-in list; see bug 5476
-header RCVD_IN_SSC_TRUSTED_COI    eval:check_rbl('ssc-firsttrusted', 'plus.bondedsender.org.')
-describe RCVD_IN_SSC_TRUSTED_COI  Sender is accredited by Return Path's Sender Score Certified (confirmed opt-in)
-tflags RCVD_IN_SSC_TRUSTED_COI    net nice
-reuse  RCVD_IN_SSC_TRUSTED_COI
-
-# ---------------------------------------------------------------------------
-
 # IADB support ...
 header __RCVD_IN_IADB           eval:check_rbl('iadb-firsttrusted', 'iadb.isipp.com.')
 tflags __RCVD_IN_IADB           net nice
@@ -259,37 +243,4 @@ header RCVD_IN_IADB_VOUCHED     eval:check_rbl_sub('iadb-firsttrusted', '^127.0.
 describe RCVD_IN_IADB_VOUCHED   ISIPP IADB lists as vouched-for sender
 tflags RCVD_IN_IADB_VOUCHED     net nice
 
-# ---------------------------------------------------------------------------
-
-# Habeas Accredited Senders
-#        Last octet of the returned A record indicates the Habeas-assigned
-#       "Permission Level" of the Sender.
-#               10 to 39        Personal, transactional, and Confirmed Opt In
-#               40 to 59        Secure referrals and Single Opt In
-#               60 to 99        Checked but not accredited by Habeas.
-#
-# sa-accredit.habeas.com is for SpamAssassin use.
-#
-header HABEAS_ACCREDITED_COI    eval:check_rbl('habeas-firsttrusted', 'sa-accredit.habeas.com.', '127\.\d+\.\d+\.[123]\d')
-describe HABEAS_ACCREDITED_COI  Sender is accredited by Return Path's Sender Score Safelist program, and uses Confirmed Opt-In; report issues to habeas.com@abuse.net
-tflags HABEAS_ACCREDITED_COI    net nice
-
-header HABEAS_ACCREDITED_SOI    eval:check_rbl_sub('habeas-firsttrusted', '127\.\d+\.\d+\.[45]\d')
-describe HABEAS_ACCREDITED_SOI  Sender is accredited by Return Path's Sender Score Safelist program, and uses Opt-In or better; report issues to habeas.com@abuse.net
-tflags HABEAS_ACCREDITED_SOI    net nice
-
-# Habeas Accredited Senders, with check for "Accreditor Assertion"
-#       Same Habeas whitelist checks as above, but performed only if the Sender
-#       has specified Habeas as their accreditor in either the EnvelopeFrom or
-#       "Accreditor" header field.  This reduces the DNS overhead, but will
-#       miss senders who are unable to add custom header fields.
-#
-# header HABEAS_ACCREDITED_COI  eval:check_rbl_accreditor('accredit-firsttrusted', 'sa-accredit.habeas.com.', '127\.\d+\.\d+\.[123]\d', 'habeas')
-# describe HABEAS_ACCREDITED_COI        Habeas Accredited Confirmed Opt-In or Better
-# tflags HABEAS_ACCREDITED_COI  net nice
-#
-# header HABEAS_ACCREDITED_SOI  eval:check_rbl_accreditor('accredit-firsttrusted', 'sa-accredit.habeas.com.', '127\.\d+\.\d+\.[45]\d', 'habeas')
-# describe HABEAS_ACCREDITED_SOI        Habeas Accredited Opt-In or Better
-# tflags HABEAS_ACCREDITED_SOI  net nice
-#
 endif
