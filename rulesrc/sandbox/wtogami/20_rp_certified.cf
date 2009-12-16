@@ -19,7 +19,7 @@ tflags RCVD_IN_RP_SAFE     net nice nopublish
 # https://senderscore.org/blacklistlookup/
 header RCVD_IN_RP_RNBL         eval:check_rbl('rnbl-lastexternal','bl.score.senderscore.com.')
 describe RCVD_IN_RP_RNBL       Relay in RNBL, https://senderscore.org/blacklistlookup/
-tflags RCVD_IN_RP_RNBL         net nopublish
+tflags RCVD_IN_RP_RNBL         net
 
 # Proposed Scores after this is checked in weekly masscheck
 #score RCVD_IN_RP_CERTIFIED 0.0 -5.0 0.0 -5.0
