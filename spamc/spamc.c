@@ -553,7 +553,7 @@ combine_args(char *config_file, int argc, char **argv,
 	     int *combo_argc, char **combo_argv)
 {
     FILE *config;
-    char option[100];
+    char option[CONFIG_MAX_LINE_SIZE];
     int i, count = 0;
     char *tok = NULL;
     int is_user_defined_p = 1;
@@ -570,13 +570,18 @@ combine_args(char *config_file, int argc, char **argv,
 	return EX_CONFIG;
     }
 
-    while(!(feof(config)) && (fgets(option, 100, config))) {
+    while(!feof(config) && fgets(option, CONFIG_MAX_LINE_SIZE, config)) {
+	int option_l = strlen(option);
 
         count++; /* increment the line counter */
 
-	if(option[0] == '#' || option[0] == '\n') {
+	if (option_l < 1 || option[0] == '#' || option[0] == '\n') {
 	    continue;
         }
+	if (option[option_l-1] != '\n') {
+	    fprintf(stderr,"Exceeded the max line size (%d) in %s\n", CONFIG_MAX_LINE_SIZE-2, config_file);
+	    return EX_CONFIG;
+	}
 
 	tok = option;
 	while((tok = strtok(tok, " ")) != NULL) {
@@ -742,6 +747,7 @@ main(int argc, char *argv[])
     int out_fd = -1;
     int result = EX_SOFTWARE;
     int ret = EX_SOFTWARE;
+    int ret_conf = EX_SOFTWARE;
     int extratype = 0;
     int islearned = 0;
     int isreported = 0;
@@ -782,7 +788,7 @@ main(int argc, char *argv[])
        }
     }
  
-    if((combine_args(config_file, argc, argv, &combo_argc, combo_argv)) == EX_OK)
+    if((ret_conf = combine_args(config_file, argc, argv, &combo_argc, combo_argv)) == EX_OK)
     {
       /* Parse the combined arguments of command line and config file */
       if ((ret = read_args(combo_argc, combo_argv, &max_size, &username, 
@@ -800,6 +806,10 @@ main(int argc, char *argv[])
       {
         if(ret == EX_TEMPFAIL)
  	 ret = EX_OK;
+        goto finish;
+      }
+      if (ret_conf == EX_CONFIG) {
+        ret = EX_OK;
         goto finish;
       }
     }
