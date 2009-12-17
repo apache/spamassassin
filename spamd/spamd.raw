@@ -2524,8 +2524,9 @@ sub daemonize {
   defined( my $pid = fork ) or die "spamd: cannot fork: $!\n";
   if ($pid) {
     my $child_stat;
-    # Bug 6191: takes almost a minute on a slow machine, bump to 90 seconds
-    for (my $retry=90, my $waited=0;
+    # Bug 6191, Bug 6258: takes almost two minutes on a slow machine
+    # for a forked child process to report back, bump limit to 180 seconds
+    for (my $retry=180, my $waited=0;
          $retry > 0 && !$serverstarted && $waited != $pid;
          $retry--)
     {
