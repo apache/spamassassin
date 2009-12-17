@@ -59,7 +59,7 @@ use bytes;
 use re 'taint';
 
 use Time::HiRes qw(time);
-# use Mail::SpamAssassin::Logger;
+use Mail::SpamAssassin::Logger;
 
 use vars qw{
   @ISA
@@ -92,6 +92,7 @@ be applied. If both are specified, the shorter interval of the two prevails.
 
 use vars qw($id_gen);
 BEGIN { $id_gen = 0 }  # unique generator of IDs for timer objects
+use vars qw(@expiration);  # stack of expected expiration times, top at [0]
 
 sub new {
   my ($class, $opts) = @_;
@@ -145,6 +146,7 @@ sub _run {      # private
   my $id = $self->{id};
   my $secs = $self->{secs};
   my $deadline = $self->{deadline};
+  my $alarm_tinkered_with = 0;
 # dbg("timed: %s run", $id);
 
   # assertion
@@ -165,35 +167,54 @@ sub _run {      # private
 
   my($oldalarm, $handler);
   if (defined $secs) {
-    $oldalarm = alarm(0);  # remaining time, 0 when disarmed, undef on error
+    # stop the timer, collect remaining time
+    $oldalarm = alarm(0);  # 0 when disarmed, undef on error
+    $alarm_tinkered_with = 1;
+    if (!@expiration) {
+    # dbg("timed: %s no timer in evidence", $id);
+    # dbg("timed: %s actual timer was running, time left %.3f s",
+    #     $id, $oldalarm)  if $oldalarm;
+    } elsif (!defined $expiration[0]) {
+    # dbg("timed: %s timer not running according to evidence", $id);
+    # dbg("timed: %s actual timer was running, time left %.3f s",
+    #      $id, $oldalarm)  if $oldalarm;
+    } else {
+      my $oldalarm2 = $expiration[0] - $start_time;
+    # dbg("timed: %s stopping timer, time left %.3f s%s", $id, $oldalarm2,
+    #     !$oldalarm ? '' : sprintf(", reported as %.3f s", $oldalarm));
+      $oldalarm = $oldalarm2 < 1 ? 1 : $oldalarm2;
+    }
     $self->{end_time} = $start_time + $secs;  # needed by reset()
     $handler = sub { $timedout = 1; die "__alarm__ignore__($id)\n" };
   }
 
   my($ret, $eval_stat);
+  unshift(@expiration, undef);
   eval {
     local $SIG{__DIE__};   # bug 4631
 
-    if (!defined $secs) {  # no timeout, just call the sub 
+    if (!defined $secs) {  # no timeout specified, just call the sub 
       $ret = &$sub;
 
     } elsif ($secs <= 0) {
       $self->{timed_out} = 1;
       &$handler;
 
-    } elsif ($oldalarm && $oldalarm < $secs) {
+    } elsif ($oldalarm && $oldalarm < $secs) {  # run under an outer timer
       # just restore outer timer, a timeout signal will be handled there
-    # dbg("timed: %s restoring outer alarm(%.3f)", $id,$oldalarm);
-      alarm($oldalarm);
+    # dbg("timed: %s alarm(%.3f) - outer", $id, $oldalarm);
+      $expiration[0] = $start_time + $oldalarm;
+      alarm($oldalarm); $alarm_tinkered_with = 1;
       $ret = &$sub;
     # dbg("timed: %s post-sub(outer)", $id);
 
-    } else {
+    } else {  # run under a timer specified with this call
       local $SIG{ALRM} = $handler;  # ensure closed scope here
       my $isecs = int($secs);
       $isecs++  if $secs > int($isecs);  # ceiling
-    # dbg("timed: %s alarm(%.3f)", $id,$secs);
-      alarm($isecs);
+    # dbg("timed: %s alarm(%d)", $id, $isecs);
+      $expiration[0] = $start_time + $isecs;
+      alarm($isecs); $alarm_tinkered_with = 1;
       $ret = &$sub;
     # dbg("timed: %s post-sub", $id);
     }
@@ -207,12 +228,13 @@ sub _run {      # private
     # SpamAssassin, this is an academic issue with little impact, but it's
     # still worth avoiding anyway.
     #
-    alarm(0);  # disarm
+    alarm(0)  if $alarm_tinkered_with;  # disarm
 
     1;
   } or do {
     $eval_stat = $@ ne '' ? $@ : "errno=$!";  chomp $eval_stat;
-    alarm(0);  # in case we popped out for some other reason
+    # just in case we popped out for some other reason
+    alarm(0)  if $alarm_tinkered_with;  # disarm
   };
 
   delete $self->{end_time};  # reset() is only applicable within a &$sub
@@ -227,18 +249,20 @@ sub _run {      # private
 
   if (defined $eval_stat && $eval_stat =~ /__alarm__ignore__\Q($id)\E/) {
     $self->{timed_out} = 1;
-  # dbg("timed: %s cought: %s", $id,$eval_stat);
+  # dbg("timed: %s cought: %s", $id, $eval_stat);
   } elsif ($timedout) {
-    # this happens occasionally; haven't figured out why.  seems
-    # harmless in effect, though, so just issue a warning and carry on...
-    warn "timeout with empty eval status\n";
+    # this happens occasionally; haven't figured out why. seems harmless
+  # dbg("timed: %s timeout with empty eval status", $id);
     $self->{timed_out} = 1;
   }
+
+  shift(@expiration);  # pop off the stack
 
   # covers all cases, including where $self->{timed_out} is flagged by reset()
   undef $return  if $self->{timed_out};
 
   my $remaining_time;
+  # restore previous timer if necessary
   if ($oldalarm) {  # an outer alarm was already active when we were called
     $remaining_time = $start_time + $oldalarm - time;
     if ($remaining_time > 0) {  # still in the future
@@ -246,8 +270,8 @@ sub _run {      # private
       # taking into account the elapsed time we spent here
       my $iremaining_time = int($remaining_time);
       $iremaining_time++  if $remaining_time > int($remaining_time); # ceiling
-    # dbg("timed: %s restoring outer alarm(%.3f)", $id,$iremaining_time);
-      alarm($iremaining_time);
+    # dbg("timed: %s restoring outer alarm(%.3f)", $id, $iremaining_time);
+      alarm($iremaining_time); $alarm_tinkered_with = 1;
       undef $remaining_time;  # already taken care of
     }
   }
@@ -257,17 +281,9 @@ sub _run {      # private
     die "Timeout::_run: $eval_stat\n";
   }
   if (defined $remaining_time) {
-    $self->{timed_out} = 1;
   # dbg("timed: %s outer timer expired %.3f s ago", $id, -$remaining_time);
-    alarm(2);  # mercifully grant two additional seconds
-  # my $prev_handler = $SIG{ALRM};
-  # if (ref $prev_handler eq 'CODE') {
-  #   &$prev_handler;
-  # } else {
-  #   Time::HiRes::alarm(0.001);
-  # # somehow the kill('ALRM',0) does not behave like alarm does
-  # # kill('ALRM',0) == 1  or die "Cannot send SIGALRM to myself";
-  # }
+    # mercifully grant two additional seconds
+    alarm(2); $alarm_tinkered_with = 1;
   }
   return $return;
 }
@@ -307,20 +323,12 @@ sub reset {
   if ($secs > 0) {
     my $isecs = int($secs);
     $isecs++  if $secs > int($isecs);  # ceiling
-  # dbg("timed: %s reset: alarm(%.3f)", $self->{id},$isecs);
+  # dbg("timed: %s reset: alarm(%.3f)", $self->{id}, $isecs);
     alarm($isecs);
   } else {
     $self->{timed_out} = 1;
   # dbg("timed: %s reset, timer expired %.3f s ago", $id, -$secs);
     alarm(2);  # mercifully grant two additional seconds
-  # my $prev_handler = $SIG{ALRM};
-  # if (ref $prev_handler eq 'CODE') {
-  #   &$prev_handler;
-  # } else {
-  #   Time::HiRes::alarm(0.001);
-  # # somehow the kill('ALRM',0) does not behave like alarm does
-  # # kill('ALRM',0) == 1  or die "Cannot send SIGALRM to myself";
-  # }
   }
 }
 
