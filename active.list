@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix; day 2: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix dos nbebout wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 3: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix nbebout wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2
+# with results from: day 1: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix dos wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 2: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix; day 3: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix dos nbebout wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2
 
 # tflags userconf
 ALL_TRUSTED
@@ -209,6 +209,9 @@ FS_ABIGGER
 FS_MORE_CONFIDENT
 
 # good enough
+FS_NUDE
+
+# good enough
 FS_REPLICA
 
 # good enough
@@ -225,12 +228,6 @@ FS_WILL_HELP
 
 # tflags userconf
 GTUBE
-
-# tflags net
-HABEAS_ACCREDITED_COI
-
-# tflags net
-HABEAS_ACCREDITED_SOI
 
 # tflags userconf
 HASHCASH_20
@@ -288,9 +285,6 @@ KAM_LOTTO1
 
 # good enough
 KAM_LOTTO2
-
-# good enough
-KB_DATE_CONTAINS_TAB
 
 # good enough
 KB_FAKED_THE_BAT
@@ -359,9 +353,6 @@ RAZOR2_CHECK
 RCVD_IN_BL_SPAMCOP_NET
 
 # tflags net
-RCVD_IN_BSP_TRUSTED
-
-# tflags net
 RCVD_IN_CSS
 
 # tflags net
@@ -372,6 +363,9 @@ RCVD_IN_DNSWL_LOW
 
 # tflags net
 RCVD_IN_DNSWL_MED
+
+# tflags net
+RCVD_IN_DNSWL_NONE
 
 # tflags net
 RCVD_IN_IADB_DK
@@ -524,13 +518,7 @@ RCVD_IN_SORBS_ZOMBIE
 RCVD_IN_SSBL
 
 # tflags net
-RCVD_IN_SSC_TRUSTED_COI
-
-# tflags net
 RCVD_IN_XBL
-
-# good enough
-REPLYTO_WITHOUT_TO_CC
 
 # good enough
 S25R_4
@@ -599,9 +587,6 @@ SUBJECT_IN_BLACKLIST
 SUBJECT_IN_WHITELIST
 
 # good enough
-TAB_IN_FROM
-
-# good enough
 TO_NO_BRKTS_DYNIP
 
 # good enough
@@ -621,6 +606,60 @@ TVD_VISIT_PHARMA
 
 # good enough
 TWO_IPS_RCVD
+
+# good enough
+FB_WITHOUT_PRESC
+
+# good enough
+FORGED_TBIRD_IMG_ARROW
+
+# good enough
+FORGED_TBIRD_IMG_SIZE
+
+# good enough
+FORGED_TBIRD_IMG_TO_MX
+
+# good enough
+FRT_ERECTION
+
+# good enough
+FSL_LSPACES_ABUSE
+
+# good enough
+HK_NAME_FREE
+
+# good enough
+HK_PNIS
+
+# good enough
+HK_SPAMMY_FILENAME
+
+# good enough
+IMG_DIRECT_TO_MX
+
+# good enough
+MANY_GOOG_PROXY
+
+# good enough
+MANY_SPAN_IN_TEXT
+
+# tflags net
+RCVD_IN_RP_CERTIFIED
+
+# tflags net
+RCVD_IN_RP_RNBL
+
+# tflags net
+RCVD_IN_RP_SAFE
+
+# good enough
+S25R_1
+
+# good enough
+S25R_3
+
+# good enough
+SANE_b58d7945d89b7afc9e2753c83b00ab44
 
 # tflags userconf
 UNPARSEABLE_RELAY
