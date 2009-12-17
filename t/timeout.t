@@ -18,28 +18,30 @@ if (-e 'test_dir') {            # running from test directory, not ..
 
 use lib '.'; use lib 't';
 use SATest; sa_t_init("timeout");
-use Test; BEGIN { plan tests => 27 };
+use Test; BEGIN { plan tests => 33 };
 
 use strict;
-use Time::HiRes qw(time sleep);
+use Time::HiRes qw(time);
 
 require Mail::SpamAssassin::Timeout;
 # require Mail::SpamAssassin::Logger;
 # Mail::SpamAssassin::Logger::add_facilities('all');
 
 # attempt to circumvent an advice not to mix alarm() with sleep();
-# interaction between alarms and sleeps is unspecified
+# interaction between alarms and sleeps is unspecified;
+# select() might be restarted on a signal
 #
 sub mysleep($) {
   my($dt) = @_;
-  sleep(0.1) for 1..int(10*$dt);
+  select(undef, undef, undef, 0.1)  for 1..int(10*$dt);
 }
 
 my($r,$t,$t1,$t2);
 
 $t = Mail::SpamAssassin::Timeout->new;
 $r = $t->run(sub { mysleep 1; 42 });
-ok(!$t->timed_out && $r == 42);
+ok(!$t->timed_out);
+ok($r == 42);
 
 $t = Mail::SpamAssassin::Timeout->new({ });
 $r = $t->run(sub { mysleep 1; 42 });
@@ -60,11 +62,13 @@ ok(!$t->timed_out && $caught);
 
 $t = Mail::SpamAssassin::Timeout->new({ secs => 2 });
 $r = $t->run(sub { mysleep 3; 42 });
-ok($t->timed_out && !defined $r);
+ok($t->timed_out);
+ok(!defined $r);
 
 $t = Mail::SpamAssassin::Timeout->new({ secs => 2 });
 $r = $t->run(sub { mysleep 1; 42 });
-ok(!$t->timed_out && $r == 42);
+ok(!$t->timed_out);
+ok($r == 42);
 
 $t = Mail::SpamAssassin::Timeout->new({ deadline => time+2 });
 $r = $t->run(sub { mysleep 3; 42 });
@@ -106,7 +110,7 @@ $t1 = Mail::SpamAssassin::Timeout->new({ secs => 1 });
 $t2 = Mail::SpamAssassin::Timeout->new({ secs => 2 });
 $r = $t1->run(sub { $t2->run(sub { mysleep 3; 43 }); 42 });
 ok($t1->timed_out);
-ok(!$t2->timed_out);
+ok(!$t2->timed_out);  # should t2 be considered expired or not after 1 s ???
 ok(!defined $r);
 
 $t1 = Mail::SpamAssassin::Timeout->new({ secs => 2 });
@@ -130,12 +134,12 @@ ok($t1->timed_out);
 ok($t2->timed_out);
 ok(!defined $r);
 
-# my $when = int(time + 1.5);
-# $t1 = Mail::SpamAssassin::Timeout->new({ deadline => $when });
-# $t2 = Mail::SpamAssassin::Timeout->new({ deadline => $when });
-# $r = $t1->run(sub { $t2->run(sub { mysleep 4; 43 }); 42 });
-# ok($t1->timed_out);
-# ok($t2->timed_out);
-# ok(!defined $r);
+my $when = int(time + 1.5);
+$t1 = Mail::SpamAssassin::Timeout->new({ deadline => $when });
+$t2 = Mail::SpamAssassin::Timeout->new({ deadline => $when });
+$r = $t1->run(sub { $t2->run(sub { mysleep 4; 43 }); 42 });
+ok(!$t1->timed_out);  # should t1 be considered expired or not ???
+ok($t2->timed_out);
+ok($r == 42);
 
 1;
