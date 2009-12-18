@@ -231,6 +231,18 @@ $spamtest = new Mail::SpamAssassin(
 );
 
 $spamtest->init(1);
+dbg("sa-learn: spamtest initialized");
+
+# Bug 6228 hack: bridge the transition gap of moving Bayes.pm into a plugin;
+# To be resolved more cleanly!!!
+if ($spamtest->{bayes_scanner}) {
+  foreach my $plugin ( @{ $spamtest->{plugins}->{plugins} } ) {
+    if ($plugin->isa('Mail::SpamAssassin::Plugin::Bayes')) {
+      # copy plugin's "store" object ref one level up!
+      $spamtest->{bayes_scanner}->{store} = $plugin->{store};
+    }
+  }
+}
 
 if (Mail::SpamAssassin::Util::am_running_on_windows()) {
   binmode(STDIN)  or die "cannot set binmode on STDIN: $!";  # bug 4363
