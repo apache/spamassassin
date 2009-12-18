@@ -37,6 +37,8 @@ RETVAL=0
 # See how we were called.
 case "$1" in
   start)
+	# tell portreserve to release the port
+	[ -x /sbin/portrelease ] && /sbin/portrelease spamd &>/dev/null || :
 	# Start daemon.
 	echo -n $"Starting $prog: "
 	daemon $NICELEVEL spamd $SPAMDOPTIONS -r $SPAMD_PID
