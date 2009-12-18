@@ -216,6 +216,9 @@ SPAMC
 
 - added --filter-retries and --filter-retry-sleep
 
+- increased allowed line length in spamc.conf files to 8 KiB and report
+  an error when the limit is exceeded
+
 - spamc would not time out connections to a hung spamd, fixed
 
 - spamc client library leaked the zlib compression buffer if compression
@@ -295,6 +298,10 @@ RULES
 - added PSBL blacklist - http://psbl.surriel.com/
 
 - added support for http://www.spamhaus.org/css/
+
+- replaces HABEAS, BSP and SSC with RP CERTIFIED;
+
+- use ReturnPath's RNBL, replacing SSBL;
 
 - added rule for plain text attachments with octet-stream MIME type;
 
@@ -429,6 +436,7 @@ BUG FIXES
   expect: an inner timer shouldn't be able to extend an outer timer's limit;
   account for time elapsed in the submitted subroutine when restarting an
   outer timer; reset() should have accounted for time already spent;
+  deal with nested timed runs where alarm(0) does not provide remaining time;
 
 - the 'exists:' evaluator in HEADER rules now works as documented
   and tests for existence of a header field, instead of testing for
@@ -532,6 +540,9 @@ OTHER CHANGES
 
 - parse Communigate Pro "with HTTPU" auth token;
 
+- let DependencyInfo.pm understand a concept of recommended module version,
+  besides a required version;
+
 - provided a workaround for Net::DNS::Packet::new inconsistency;
 
 - let SpamAssassin use either Digest::SHA or Digest::SHA1, whichever is
@@ -557,7 +568,7 @@ OTHER CHANGES
   calling a plugin;
 
 - takes almost a minute to start spamd on a slow machine, bumped up the
-  retry counter to 90 seconds;
+  retry counter to 180 seconds;
 
 - resolved Bug 5325: syslog severity level in spamc/libspamc.c for max
   message size (changed LOG_ERR into LOG_NOTICE for the message:
