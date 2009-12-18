@@ -1,4 +1,291 @@
 ------------------------------------------------------------------------
+r892319 | mmartinec | 2009-12-18 17:19:50 +0000 (Fri, 18 Dec 2009) | 2 lines
+
+3.3.0-rc1.txt: mention some of the recent changes
+
+------------------------------------------------------------------------
+r892312 | wtogami | 2009-12-18 16:55:41 +0000 (Fri, 18 Dec 2009) | 2 lines
+
+RH Bug #103401: Use portreserve if available during spamd startup on RHEL or Fedora
+
+------------------------------------------------------------------------
+r892229 | mmartinec | 2009-12-18 11:52:40 +0000 (Fri, 18 Dec 2009) | 4 lines
+
+Bug 6228 - sa-learn --backup is broken:
+a quick-and-hackish temporary solution to a problem
+of Bayes pluginization not (yet) carried out fully
+
+------------------------------------------------------------------------
+r892183 | jm | 2009-12-18 08:50:02 +0000 (Fri, 18 Dec 2009) | 1 line
+
+promotions validated
+------------------------------------------------------------------------
+r891968 | axb | 2009-12-17 22:59:38 +0000 (Thu, 17 Dec 2009) | 1 line
+
+added ms*.hinet.net
+------------------------------------------------------------------------
+r891935 | mmartinec | 2009-12-17 21:51:31 +0000 (Thu, 17 Dec 2009) | 2 lines
+
+Bug 6176: spamc truncates lines read from spamc.conf
+
+------------------------------------------------------------------------
+r891864 | mmartinec | 2009-12-17 20:04:19 +0000 (Thu, 17 Dec 2009) | 8 lines
+
+Bug 6253:
+- avoid bad interaction between Time::HiRes::sleep and alarm on Solaris
+  by using a select() to simulate delays in t/timing.t;
+- avoid depending on alarm() returning a remaining time (some implementations
+  just return a 0) by providing our own stack for nested timed calls;
+- avoid using alarm() entirely for non-timed calls, thus leaving possible
+  foreign running timer untouched
+
+------------------------------------------------------------------------
+r891806 | mmartinec | 2009-12-17 17:26:01 +0000 (Thu, 17 Dec 2009) | 1 line
+
+Bug 6191, Bug 6258: bump the timeout for a spawned spamd start to 3 minutes
+------------------------------------------------------------------------
+r891584 | jm | 2009-12-17 08:50:03 +0000 (Thu, 17 Dec 2009) | 1 line
+
+promotions validated
+------------------------------------------------------------------------
+r891501 | wtogami | 2009-12-17 00:59:42 +0000 (Thu, 17 Dec 2009) | 2 lines
+
+One more test failure
+
+------------------------------------------------------------------------
+r891472 | wtogami | 2009-12-16 23:26:35 +0000 (Wed, 16 Dec 2009) | 2 lines
+
+Fix test warning, odd that this rule was translated but not the others.
+
+------------------------------------------------------------------------
+r891460 | wtogami | 2009-12-16 22:36:28 +0000 (Wed, 16 Dec 2009) | 3 lines
+
+Bug #6247: Replace HABEAS, BSP and SSC with RP CERTIFIED.
+Note: CERTIFIED is cumulative with SAFE.
+
+------------------------------------------------------------------------
+r891391 | wtogami | 2009-12-16 19:25:47 +0000 (Wed, 16 Dec 2009) | 4 lines
+
+Bug #6259: Use ReturnPath's RNBL, replacing SSBL
+RNBL is almost identical to SSBL, except safer for FP's.
+RNBL takes SSBL's former GA assigned score, and SSBL is removed entirely.
+
+------------------------------------------------------------------------
+r891227 | mmartinec | 2009-12-16 13:03:16 +0000 (Wed, 16 Dec 2009) | 2 lines
+
+oops, submitted too many files, reverting Timeout.pm and t/timeout.t
+
+------------------------------------------------------------------------
+r891224 | mmartinec | 2009-12-16 12:59:47 +0000 (Wed, 16 Dec 2009) | 6 lines
+
+20_khop_bl.cf Bug 6241: comment out complex 'if's to work
+ around a deficiency in mkrules (may be restored when fixed);
+20_khop_bl.cf Bug 6258: replace DKIM_VERIFIED with DKIM_VALID
+ to avoid a warning: "rules: meta test __NOT_SPOOFED has
+ dependency 'DKIM_VERIFIED' with a zero score"
+
+------------------------------------------------------------------------
+r891207 | mmartinec | 2009-12-16 12:02:52 +0000 (Wed, 16 Dec 2009) | 4 lines
+
+Bug 6246: let DependencyInfo.pm understand a concept of
+recommended module version, besides a required version;
+polish reporting, esp. in view of Mail::DKIM dependencies
+
+------------------------------------------------------------------------
+r891160 | jm | 2009-12-16 08:50:02 +0000 (Wed, 16 Dec 2009) | 1 line
+
+promotions validated
+------------------------------------------------------------------------
+r891005 | wtogami | 2009-12-15 21:39:47 +0000 (Tue, 15 Dec 2009) | 2 lines
+
+Add DNSWL_NONE as informational rule.  Helpful in measurements and in combination with other rules.
+
+------------------------------------------------------------------------
+r891001 | wtogami | 2009-12-15 21:30:53 +0000 (Tue, 15 Dec 2009) | 2 lines
+
+Bug #6251: Temporarily reduce DNSWL scores
+
+------------------------------------------------------------------------
+r890963 | mmartinec | 2009-12-15 19:56:54 +0000 (Tue, 15 Dec 2009) | 3 lines
+
+Bug 6258: avoid warnings on undefined exit status,
+recognize and nicely display a HUP signal (trivial)
+
+------------------------------------------------------------------------
+r890693 | jm | 2009-12-15 08:50:02 +0000 (Tue, 15 Dec 2009) | 1 line
+
+promotions validated
+------------------------------------------------------------------------
+r890644 | khopesh | 2009-12-15 05:02:12 +0000 (Tue, 15 Dec 2009) | 1 line
+
+khop updates
+------------------------------------------------------------------------
+r890227 | jm | 2009-12-14 08:50:02 +0000 (Mon, 14 Dec 2009) | 1 line
+
+promotions validated
+------------------------------------------------------------------------
+r890077 | khopesh | 2009-12-13 17:07:51 +0000 (Sun, 13 Dec 2009) | 1 line
+
+khop updates, tweaks
+------------------------------------------------------------------------
+r889898 | jm | 2009-12-12 08:50:03 +0000 (Sat, 12 Dec 2009) | 1 line
+
+promotions validated
+------------------------------------------------------------------------
+r889887 | wtogami | 2009-12-12 04:24:37 +0000 (Sat, 12 Dec 2009) | 2 lines
+
+Tweak VANITY more
+
+------------------------------------------------------------------------
+r889883 | wtogami | 2009-12-12 04:00:13 +0000 (Sat, 12 Dec 2009) | 2 lines
+
+Bug #6247: Add RP_* rules for weekly masscheck.
+
+------------------------------------------------------------------------
+r889864 | wtogami | 2009-12-12 00:03:34 +0000 (Sat, 12 Dec 2009) | 2 lines
+
+Tweak VANITY
+
+------------------------------------------------------------------------
+r889764 | mmartinec | 2009-12-11 18:46:38 +0000 (Fri, 11 Dec 2009) | 2 lines
+
+Bug 6257 3.3.0-rc1.txt: add a note on compatibility with amavisd-new
+
+------------------------------------------------------------------------
+r889534 | jm | 2009-12-11 08:50:03 +0000 (Fri, 11 Dec 2009) | 1 line
+
+promotions validated
+------------------------------------------------------------------------
+r889337 | mmartinec | 2009-12-10 17:00:45 +0000 (Thu, 10 Dec 2009) | 2 lines
+
+Bug 6245: added one test case to t/rcvd_parser.t
+
+------------------------------------------------------------------------
+r889332 | mmartinec | 2009-12-10 16:53:16 +0000 (Thu, 10 Dec 2009) | 3 lines
+
+Bug 6255: make a test whitelist_addrs.t pass under perl 5.6.* by
+changing unrecognized 'open F,">&",$f' into 'open F,">&".fileno($f)'
+
+------------------------------------------------------------------------
+r889277 | wtogami | 2009-12-10 14:46:16 +0000 (Thu, 10 Dec 2009) | 2 lines
+
+Bug #6252: Force publish VANITY
+
+------------------------------------------------------------------------
+r889141 | jm | 2009-12-10 08:50:26 +0000 (Thu, 10 Dec 2009) | 1 line
+
+promotions validated
+------------------------------------------------------------------------
+r889034 | mmartinec | 2009-12-10 00:30:41 +0000 (Thu, 10 Dec 2009) | 3 lines
+
+copied 3.3.0-beta1.txt to 3.3.0-rc1.txt and added
+a paragraph on compatibility with a ClamAV plugin
+
+------------------------------------------------------------------------
+r888928 | mmartinec | 2009-12-09 19:29:19 +0000 (Wed, 09 Dec 2009) | 4 lines
+
+documentation (POD) change: get rid of the misleading
+wording: "Use this to supplement the whitelist_from"
+according to a ML topic "clarification on whitelist_from_rcvd"
+
+------------------------------------------------------------------------
+r888736 | jm | 2009-12-09 08:50:02 +0000 (Wed, 09 Dec 2009) | 1 line
+
+promotions validated
+------------------------------------------------------------------------
+r888673 | khopesh | 2009-12-09 01:55:57 +0000 (Wed, 09 Dec 2009) | 1 line
+
+khop tweaks/updates
+------------------------------------------------------------------------
+r888291 | jm | 2009-12-08 08:50:02 +0000 (Tue, 08 Dec 2009) | 1 line
+
+promotions validated
+------------------------------------------------------------------------
+r887980 | mmartinec | 2009-12-07 16:23:26 +0000 (Mon, 07 Dec 2009) | 2 lines
+
+Bug 6250: check syntax of awl & bayes mode settings and untaint them
+
+------------------------------------------------------------------------
+r887941 | fanf | 2009-12-07 14:57:20 +0000 (Mon, 07 Dec 2009) | 2 lines
+
+Bug 6242: Recognize MS Exchange HTTP-DAV message submission
+
+------------------------------------------------------------------------
+r887863 | jm | 2009-12-07 08:50:02 +0000 (Mon, 07 Dec 2009) | 1 line
+
+promotions validated
+------------------------------------------------------------------------
+r887738 | mmartinec | 2009-12-06 18:42:14 +0000 (Sun, 06 Dec 2009) | 2 lines
+
+3.3.0-beta1.txt add: "expect some tests in t/dkim2.t to fail with versions older than 0.36_5"
+
+------------------------------------------------------------------------
+r887516 | jm | 2009-12-05 08:50:03 +0000 (Sat, 05 Dec 2009) | 1 line
+
+promotions validated
+------------------------------------------------------------------------
+r887479 | mmartinec | 2009-12-05 01:35:04 +0000 (Sat, 05 Dec 2009) | 4 lines
+
+update MANIFEST, bringing back needed files from ./build
+(based on MANIFEST.SKIP and MANIFEST from 3.2.5);
+update MANIFEST.SKIP, adding missing backslashes and anchors
+
+------------------------------------------------------------------------
+r887451 | mmartinec | 2009-12-04 23:31:52 +0000 (Fri, 04 Dec 2009) | 2 lines
+
+updated MANIFEST, according to discussion on the dev ML
+
+------------------------------------------------------------------------
+r887254 | mmartinec | 2009-12-04 16:24:36 +0000 (Fri, 04 Dec 2009) | 2 lines
+
+comments changed in Timeout.pm
+
+------------------------------------------------------------------------
+r887241 | mmartinec | 2009-12-04 16:04:16 +0000 (Fri, 04 Dec 2009) | 2 lines
+
+3.3.0-beta1.txt minor tweaks: unmatched parenthesis, mention mk-baseline-results
+
+------------------------------------------------------------------------
+r887114 | jm | 2009-12-04 08:50:09 +0000 (Fri, 04 Dec 2009) | 1 line
+
+promotions validated
+------------------------------------------------------------------------
+r887064 | khopesh | 2009-12-04 05:16:19 +0000 (Fri, 04 Dec 2009) | 1 line
+
+khop updates
+------------------------------------------------------------------------
+r886931 | jm | 2009-12-03 21:36:41 +0000 (Thu, 03 Dec 2009) | 1 line
+
+fix typo
+------------------------------------------------------------------------
+r886920 | wtogami | 2009-12-03 21:04:03 +0000 (Thu, 03 Dec 2009) | 2 lines
+
+IS_DEVEL_BUILD yes.
+
+------------------------------------------------------------------------
+r886918 | wtogami | 2009-12-03 21:01:35 +0000 (Thu, 03 Dec 2009) | 2 lines
+
+Updated 3.3.0-beta1 text.
+
+------------------------------------------------------------------------
+r886849 | wtogami | 2009-12-03 17:08:51 +0000 (Thu, 03 Dec 2009) | 2 lines
+
+Tweaks to VANITY
+
+------------------------------------------------------------------------
+r886706 | jm | 2009-12-03 08:50:05 +0000 (Thu, 03 Dec 2009) | 1 line
+
+promotions validated
+------------------------------------------------------------------------
+r886679 | wtogami | 2009-12-03 04:36:01 +0000 (Thu, 03 Dec 2009) | 1 line
+
+preparing to release 3.3.0-beta1
+------------------------------------------------------------------------
+r886674 | wtogami | 2009-12-03 04:23:00 +0000 (Thu, 03 Dec 2009) | 2 lines
+
+Add missing file t/timeout.t to MANIFEST.
+
+------------------------------------------------------------------------
 r886671 | wtogami | 2009-12-03 03:58:19 +0000 (Thu, 03 Dec 2009) | 2 lines
 
 Comment out IS_DEVEL_BUILD for beta1 release.
