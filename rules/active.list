@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix dos wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 2: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix; day 3: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix dos nbebout wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2
+# with results from: day 1: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix dos wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 2: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix dos wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 3: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix
 
 # tflags userconf
 ALL_TRUSTED
@@ -269,7 +269,13 @@ HELO_NO_DOMAIN
 HELO_OEM
 
 # good enough
+HK_FAKENAME_EBAY
+
+# good enough
 HK_NAME_DRUGS
+
+# good enough
+HK_RANDOM_ENVFROM
 
 # good enough
 HK_SCAM_N2
@@ -488,6 +494,15 @@ RCVD_IN_PBL
 RCVD_IN_PSBL
 
 # tflags net
+RCVD_IN_RP_CERTIFIED
+
+# tflags net
+RCVD_IN_RP_RNBL
+
+# tflags net
+RCVD_IN_RP_SAFE
+
+# tflags net
 RCVD_IN_SBL
 
 # tflags net
@@ -515,10 +530,13 @@ RCVD_IN_SORBS_WEB
 RCVD_IN_SORBS_ZOMBIE
 
 # tflags net
-RCVD_IN_SSBL
-
-# tflags net
 RCVD_IN_XBL
+
+# good enough
+S25R_1
+
+# good enough
+S25R_3
 
 # good enough
 S25R_4
@@ -593,6 +611,9 @@ TO_NO_BRKTS_DYNIP
 TVD_FINGER_02
 
 # good enough
+TVD_PH_REC
+
+# good enough
 TVD_RCVD_IP
 
 # good enough
@@ -608,58 +629,7 @@ TVD_VISIT_PHARMA
 TWO_IPS_RCVD
 
 # good enough
-FB_WITHOUT_PRESC
-
-# good enough
-FORGED_TBIRD_IMG_ARROW
-
-# good enough
-FORGED_TBIRD_IMG_SIZE
-
-# good enough
-FORGED_TBIRD_IMG_TO_MX
-
-# good enough
-FRT_ERECTION
-
-# good enough
-FSL_LSPACES_ABUSE
-
-# good enough
-HK_NAME_FREE
-
-# good enough
-HK_PNIS
-
-# good enough
-HK_SPAMMY_FILENAME
-
-# good enough
-IMG_DIRECT_TO_MX
-
-# good enough
-MANY_GOOG_PROXY
-
-# good enough
-MANY_SPAN_IN_TEXT
-
-# tflags net
-RCVD_IN_RP_CERTIFIED
-
-# tflags net
-RCVD_IN_RP_RNBL
-
-# tflags net
-RCVD_IN_RP_SAFE
-
-# good enough
-S25R_1
-
-# good enough
-S25R_3
-
-# good enough
-SANE_b58d7945d89b7afc9e2753c83b00ab44
+HK_FAKENAME_MICROSOFT
 
 # tflags userconf
 UNPARSEABLE_RELAY
