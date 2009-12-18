@@ -1498,25 +1498,22 @@ sub _opportunistic_calls {
 sub learner_new {
   my ($self) = @_;
 
-  if ($self->{conf}->{bayes_store_module}) {
-    my $module = $self->{conf}->{bayes_store_module};
-    $module = untaint_var($module);  # good enough?
-    my $store;
+  my $store;
+  my $module = untaint_var($self->{conf}->{bayes_store_module});
+  $module = 'Mail::SpamAssassin::BayesStore::DBM'  if !$module;
 
-    eval '
-      require '.$module.';
-      $store = '.$module.'->new($self);
-      1;
-    ' or do {
-      my $eval_stat = $@ ne '' ? $@ : "errno=$!";  chomp $eval_stat;
-      die "bayes: (in new) $eval_stat\n";
-    };
-    $self->{store} = $store;
-  }
-  else {
-    require Mail::SpamAssassin::BayesStore::DBM;
-    $self->{store} = Mail::SpamAssassin::BayesStore::DBM->new($self);
-  }
+  dbg("bayes: learner_new self=%s, bayes_store_module=%s", $self,$module);
+  eval '
+    require '.$module.';
+    $store = '.$module.'->new($self);
+    1;
+  ' or do {
+    my $eval_stat = $@ ne '' ? $@ : "errno=$!";  chomp $eval_stat;
+    die "bayes: learner_new $module new() failed: $eval_stat\n";
+  };
+
+  dbg("bayes: learner_new: got store=%s", $store);
+  $self->{store} = $store;
 
   $self;
 }
