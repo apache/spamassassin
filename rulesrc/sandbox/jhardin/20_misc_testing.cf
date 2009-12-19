@@ -218,5 +218,17 @@ meta           __RP_SAFE_NJABL            RCVD_IN_RP_SAFE && __RCVD_IN_NJABL
 meta           __RP_CERTIFIED_NJABL       RCVD_IN_RP_CERTIFIED && __RCVD_IN_NJABL
 tflags         __RP_SAFE_NJABL            nopublish
 tflags         __RP_CERTIFIED_NJABL       nopublish
+meta           __RP_SAFE_XBL              RCVD_IN_RP_SAFE && RCVD_IN_XBL
+meta           __RP_CERTIFIED_XBL         RCVD_IN_RP_CERTIFIED && RCVD_IN_XBL
+tflags         __RP_SAFE_XBL              nopublish
+tflags         __RP_CERTIFIED_XBL         nopublish
+meta           __RP_SAFE_PSBL             RCVD_IN_RP_SAFE && RCVD_IN_PSBL
+meta           __RP_CERTIFIED_PSBL        RCVD_IN_RP_CERTIFIED && RCVD_IN_PSBL
+tflags         __RP_SAFE_PSBL             nopublish
+tflags         __RP_CERTIFIED_PSBL        nopublish
+meta           __RP_SAFE_ANBREP_L3        RCVD_IN_RP_SAFE && RCVD_IN_ANBREP_L3
+meta           __RP_CERTIFIED_ANBREP_L3   RCVD_IN_RP_CERTIFIED && RCVD_IN_ANBREP_L3
+tflags         __RP_SAFE_ANBREP_L3        nopublish
+tflags         __RP_CERTIFIED_ANBREP_L3   nopublish
 
 
