@@ -201,3 +201,34 @@ describe       TO_EQ_FROM      To: same as From:
 score          TO_EQ_FROM      0.001
 
 
+# Evaluate ReturnPath and blacklist collisions
+meta           __RP_SAFE_BRBL             RCVD_IN_RP_SAFE && __RCVD_IN_BRBL
+meta           __RP_CERTIFIED_BRBL        RCVD_IN_RP_CERTIFIED && __RCVD_IN_BRBL
+tflags         __RP_SAFE_BRBL             net nopublish
+tflags         __RP_CERTIFIED_BRBL        net nopublish
+meta           __RP_SAFE_ZEN              RCVD_IN_RP_SAFE && __RCVD_IN_ZEN
+meta           __RP_CERTIFIED_ZEN         RCVD_IN_RP_CERTIFIED && __RCVD_IN_ZEN
+tflags         __RP_SAFE_ZEN              net nopublish
+tflags         __RP_CERTIFIED_ZEN         net nopublish
+meta           __RP_SAFE_SORBS            RCVD_IN_RP_SAFE && __RCVD_IN_SORBS
+meta           __RP_CERTIFIED_SORBS       RCVD_IN_RP_CERTIFIED && __RCVD_IN_SORBS
+tflags         __RP_SAFE_SORBS            net nopublish
+tflags         __RP_CERTIFIED_SORBS       net nopublish
+meta           __RP_SAFE_NJABL            RCVD_IN_RP_SAFE && __RCVD_IN_NJABL
+meta           __RP_CERTIFIED_NJABL       RCVD_IN_RP_CERTIFIED && __RCVD_IN_NJABL
+tflags         __RP_SAFE_NJABL            net nopublish
+tflags         __RP_CERTIFIED_NJABL       net nopublish
+meta           __RP_SAFE_XBL              RCVD_IN_RP_SAFE && RCVD_IN_XBL
+meta           __RP_CERTIFIED_XBL         RCVD_IN_RP_CERTIFIED && RCVD_IN_XBL
+tflags         __RP_SAFE_XBL              net nopublish
+tflags         __RP_CERTIFIED_XBL         net nopublish
+meta           __RP_SAFE_PSBL             RCVD_IN_RP_SAFE && RCVD_IN_PSBL
+meta           __RP_CERTIFIED_PSBL        RCVD_IN_RP_CERTIFIED && RCVD_IN_PSBL
+tflags         __RP_SAFE_PSBL             net nopublish
+tflags         __RP_CERTIFIED_PSBL        net nopublish
+meta           __RP_SAFE_ANBREP_L3        RCVD_IN_RP_SAFE && RCVD_IN_ANBREP_L3
+meta           __RP_CERTIFIED_ANBREP_L3   RCVD_IN_RP_CERTIFIED && RCVD_IN_ANBREP_L3
+tflags         __RP_SAFE_ANBREP_L3        net nopublish
+tflags         __RP_CERTIFIED_ANBREP_L3   net nopublish
+
+

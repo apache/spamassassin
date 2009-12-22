@@ -372,7 +372,7 @@ read_args(int argc, char **argv,
 		  flags |= (SPAMC_SSLV2 | SPAMC_SSLV3);
 		}
 		else {
-		    libspamc_log(flags, LOG_ERR, "Please specifiy a legal ssl version (%s)", spamc_optarg);
+		    libspamc_log(flags, LOG_ERR, "Please specify a legal ssl version (%s)", spamc_optarg);
 		    ret = EX_USAGE;
 		}
                 break;
@@ -409,7 +409,7 @@ read_args(int argc, char **argv,
 		    *extratype = 2;
 		}
 		else {
-		    libspamc_log(flags, LOG_ERR, "Please specifiy a legal learn type");
+		    libspamc_log(flags, LOG_ERR, "Please specify a legal learn type");
 		    ret = EX_USAGE;
 		}
 		break;
@@ -424,7 +424,7 @@ read_args(int argc, char **argv,
 		    *extratype = 1;
 		}
 		else {
-		    libspamc_log(flags, LOG_ERR, "Please specifiy a legal report type");
+		    libspamc_log(flags, LOG_ERR, "Please specify a legal report type");
 		    ret = EX_USAGE;
 		}
 		break;
@@ -546,7 +546,8 @@ read_args(int argc, char **argv,
  *
  * lines beginning with # or blank lines are ignored
  *
- * returns EX_OK on success, EX_CONFIG on failure
+ * returns EX_OK on success, EX_NOINPUT on absence of a config file (success),
+ * and EX_CONFIG on failure
  */
 int
 combine_args(char *config_file, int argc, char **argv,
@@ -563,14 +564,17 @@ combine_args(char *config_file, int argc, char **argv,
       is_user_defined_p = 0;
     }
 
-    if((config = fopen(config_file, "r")) == NULL) {
-        if (is_user_defined_p == 1) { /* if the config file was user defined we should issue an error */
+    if ((config = fopen(config_file, "r")) == NULL) {
+        if (is_user_defined_p == 1) {
+	    /* if the config file was user defined we should issue an error */
 	    fprintf(stderr,"Failed to open config file: %s\n", config_file);
+
+	    return EX_CONFIG;
 	}
-	return EX_CONFIG;
+	return EX_NOINPUT;
     }
 
-    while(!feof(config) && fgets(option, CONFIG_MAX_LINE_SIZE, config)) {
+    while (!feof(config) && fgets(option, CONFIG_MAX_LINE_SIZE, config)) {
 	int option_l = strlen(option);
 
         count++; /* increment the line counter */
@@ -579,18 +583,23 @@ combine_args(char *config_file, int argc, char **argv,
 	    continue;
         }
 	if (option[option_l-1] != '\n') {
-	    fprintf(stderr,"Exceeded the max line size (%d) in %s\n", CONFIG_MAX_LINE_SIZE-2, config_file);
+	    fprintf(stderr,"Exceeded max line size (%d) in %s\n",
+                    CONFIG_MAX_LINE_SIZE-2, config_file);
 	    return EX_CONFIG;
 	}
 
 	tok = option;
 	while((tok = strtok(tok, " ")) != NULL) {
-       if(tok[0] == '\n')
-          break;
+	    if(tok[0] == '\n') break;
 	    for(i=strlen(tok); i>0; i--) {
 	        if(tok[i] == '\n')
 		    tok[i] = '\0';
 	    }
+            if (*combo_argc >= COMBO_ARGV_SIZE) {
+	        fprintf(stderr,"Exceeded max number of arguments (%d) in %s\n",
+	                COMBO_ARGV_SIZE, config_file);
+	        return EX_CONFIG;
+            }
             combo_argv[*combo_argc] = strdup(tok);
             check_malloc(combo_argv[*combo_argc]);
             /* TODO: leaked.  not a big deal since spamc exits quickly */
@@ -603,6 +612,11 @@ combine_args(char *config_file, int argc, char **argv,
 
     /* note: not starting at 0, that's the command name */
     for(i=1; i<argc; i++) {
+        if (*combo_argc >= COMBO_ARGV_SIZE) {
+	    fprintf(stderr,"Exceeded max number of arguments (%d) in %s\n",
+                    COMBO_ARGV_SIZE, config_file);
+	    return EX_CONFIG;
+        }
         combo_argv[*combo_argc] = strdup(argv[i]);
         check_malloc(combo_argv[*combo_argc]);
         /* TODO: leaked.  not a big deal since spamc exits quickly */
@@ -754,7 +768,7 @@ main(int argc, char *argv[])
 
     /* these are to hold CLI and config options combined, to be passed
      * to read_args() */
-    char *combo_argv[24];
+    char *combo_argv[COMBO_ARGV_SIZE];
     int combo_argc;
 
     int i;
@@ -788,30 +802,29 @@ main(int argc, char *argv[])
        }
     }
  
-    if((ret_conf = combine_args(config_file, argc, argv, &combo_argc, combo_argv)) == EX_OK)
-    {
+    ret_conf = combine_args(config_file, argc, argv, &combo_argc, combo_argv);
+
+    if (ret_conf == EX_OK) {
       /* Parse the combined arguments of command line and config file */
       if ((ret = read_args(combo_argc, combo_argv, &max_size, &username, 
- 			  &extratype, &trans)) != EX_OK)
+ 			   &extratype, &trans)) != EX_OK)
       {
-        if (ret == EX_TEMPFAIL)
- 	 ret = EX_OK;
+        if (ret == EX_TEMPFAIL) ret = EX_OK;
         goto finish;
       }
     }
-    else {
+    else if (ret_conf == EX_NOINPUT) {  /* no config file read */
       /* parse only command line arguments (default behaviour) */
-      if((ret = read_args(argc, argv, &max_size, &username, 
- 			 &extratype, &trans)) != EX_OK)
+      if ((ret = read_args(argc, argv, &max_size, &username, 
+ 			   &extratype, &trans)) != EX_OK)
       {
-        if(ret == EX_TEMPFAIL)
- 	 ret = EX_OK;
+        if (ret == EX_TEMPFAIL) ret = EX_OK;
         goto finish;
       }
-      if (ret_conf == EX_CONFIG) {
-        ret = EX_OK;
-        goto finish;
-      }
+    }
+    else {  /* ret_conf == EX_CONFIG. or some other error */
+      ret = EX_CONFIG;
+      goto finish;
     }
 
     ret = get_current_user(&username);

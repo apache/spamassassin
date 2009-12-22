@@ -1,0 +1,7 @@
+# additional settings for AXB_AUTOGEN rules for SVN only; ensure that they are
+# not promoted into the main SpamAssassin ruleset, since they're distributed as
+# a much more frequently-updated optional add-on.
+
+tflags AXB_AUTOGEN_1  nopublish
+tflags AXB_AUTOGEN_2  nopublish
+tflags AXB_AUTOGEN_2 nopublish
