@@ -70,6 +70,14 @@ COMPATIBILITY WITH 3.2.5
   of a spamd daemon is not supported (but happens to work, except for the
   PING and SKIP commands).
 
+- if using one of the plugins (FreeMail, PhishTag, Reuse) which were
+  previously not part of the official package, please retire your local copy
+  to avoid it conflicting with a new native plugin;
+
+- as the plugin AWL is no longer loaded by default, to continue using it
+  the following line is needed in one of the .pre files (e.g. local.pre):
+    loadplugin Mail::SpamAssassin::Plugin::AWL
+
 - it may be worth mentioning that a rule DKIM_VERIFIED has been renamed
   to DKIM_VALID, to match its semantics;
 
