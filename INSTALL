@@ -147,9 +147,9 @@ third party modules.
 Additional information about the CPAN module is also available via
 "perldoc CPAN".
 
-Most Linux distributions also offer the CPAN modules in their own native
-formats (RPMs, Debian packages, etc.), so you should be able to find these
-through those mechanisms, too, if you prefer.
+Most Linux/Unix distributions also offer the CPAN modules in their own native
+formats (RPMs, Debian packages, ports, etc.), so you should be able to find
+these through those mechanisms, too, if you prefer.
 
 
 Required Perl Interpreter
@@ -257,13 +257,14 @@ Optional Modules
 ----------------
 
 In addition, the following modules will be used for some checks, if
-available and the version is high enough.  If they are not available or if
-their version is too low, SpamAssassin will still work, just not as
+available and the version is high enough.  If they are not available or
+if their version is too low, SpamAssassin will still work, just not as
 effectively because some of the spam-detection tests will have to be
 skipped.
 
-Note: SpamAssassin will not warn you if these are installed, but the
-version is too low for them to be used.
+Note: running SpamAssassin will not warn you if these are installed, but
+the version is too low for them to be used. A warning is only issued during
+installation.
 
   - MIME::Base64
 

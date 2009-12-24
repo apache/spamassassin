@@ -44,6 +44,7 @@ COMPATIBILITY WITH 3.2.5
 - rules are no longer distributed with the package, but installed by
   sa-update - either automatically fetched from the network (preferably),
   or from a tar archive, which is available for downloading separately
+  (see below, section INSTALLING RULES);
 
 - CPAN module requirements:
   - minimum required version of ExtUtils::MakeMaker is 6.17
@@ -95,6 +96,28 @@ COMPATIBILITY WITH 3.2.5
   (may still work, but no promises and no support);
 
 - preferred versions of perl are 5.8.8, 5.8.9, and 5.10.1 or later
+
+
+INSTALLING RULES
+
+Installing rules from network is done with a single command:
+  sa-update
+
+Installing rules from files:
+  obtain all the following files:
+    Mail-SpamAssassin-rules-xxx.tgz
+    Mail-SpamAssassin-rules-xxx.tgz.asc
+    Mail-SpamAssassin-rules-xxx.tgz.md5
+    Mail-SpamAssassin-rules-xxx.tgz.sha1
+      (where xxx may look something like '3.3.0-rc1.r893295')
+  obtain a rules-signing key:
+    curl -O http://spamassassin.apache.org/updates/GPG.KEY
+  import the signing key to a SpamAssassin keyring:
+    sa-update --import GPG.KEY
+  install rules from a compressed tar archive:
+    sa-update --install Mail-SpamAssassin-rules-3.3.0-rc1.r893295.tgz
+      (sa-update will need corresponding .asc and .sha1 files with the
+       same base name in a currect directory)
 
 
 MAIN NEW FEATURES
