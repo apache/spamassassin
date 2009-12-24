@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix dos nbebout wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 2: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix dos nbebout wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 3: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix nbebout wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2
+# with results from: day 1: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix; day 2: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix dos nbebout wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 3: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix dos nbebout wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2
 
 # tflags userconf
 ALL_TRUSTED
@@ -12,9 +12,6 @@ AXB_AUTOGEN_FRAUD_3
 
 # good enough
 AXB_HELO_LH_HOME
-
-# good enough
-BASE64_LENGTH_78_79
 
 # tflags learn
 BAYES_00
@@ -149,15 +146,6 @@ FB_SOFTTABS
 FB_TIRED_OF_YOUR
 
 # good enough
-FB_WITHOUT_PRESC
-
-# good enough
-FH_DATE_PAST_20XX
-
-# good enough
-FH_FAKE_RCVD_LINE
-
-# good enough
 FH_FAKE_RCVD_LINE_B
 
 # good enough
@@ -182,19 +170,7 @@ FM_LOTTO_YOU_WON
 FM_SEX_HELODDDD
 
 # good enough
-FM_SUBJ_APPROVE
-
-# good enough
 FORGED_RELAY_MUA_TO_MX
-
-# good enough
-FORGED_TBIRD_IMG_ARROW
-
-# good enough
-FORGED_TBIRD_IMG_SIZE
-
-# good enough
-FORGED_TBIRD_IMG_TO_MX
 
 # tflags userconf
 FRAGMENTED_MESSAGE
@@ -215,16 +191,7 @@ FROM_MISSP_FREEMAIL
 FROM_MISSP_MSFT
 
 # good enough
-FRT_APPROV
-
-# good enough
-FRT_ERECTION
-
-# good enough
 FRT_PHARMAC
-
-# good enough
-FRT_ROLEX
 
 # good enough
 FR_TITLE_NUMS
@@ -242,9 +209,6 @@ FSL_HELO_DEVICE
 FSL_HELO_NON_FQDN_1
 
 # good enough
-FSL_LSPACES_ABUSE
-
-# good enough
 FSL_YG_ABUSE
 
 # good enough
@@ -252,6 +216,9 @@ FS_ABIGGER
 
 # good enough
 FS_MORE_CONFIDENT
+
+# good enough
+FS_NUDE
 
 # good enough
 FS_REPLICA
@@ -314,22 +281,13 @@ HELO_OEM
 HK_NAME_DRUGS
 
 # good enough
-HK_NAME_FREE
-
-# good enough
 HK_PNIS
-
-# good enough
-HK_SPAMMY_FILENAME
 
 # good enough
 HS_VPXL
 
 # tflags userconf
 HTML_CHARSET_FARAWAY
-
-# good enough
-IMG_DIRECT_TO_MX
 
 # good enough
 KAM_LOTTO1
@@ -360,15 +318,6 @@ LOTTO_AGENT
 
 # good enough
 L_SPAM_TOOL_13
-
-# good enough
-MANY_GOOG_PROXY
-
-# good enough
-MANY_SPAN_IN_TEXT
-
-# good enough
-MANY_TINY_FLOAT
 
 # tflags userconf
 MIME_CHARSET_FARAWAY
@@ -587,6 +536,9 @@ RCVD_IN_XBL
 REPLYTO_WITHOUT_TO_CC
 
 # good enough
+S25R_1
+
+# good enough
 S25R_4
 
 # good enough
@@ -599,16 +551,13 @@ SANE_04e8bf28eb445199a7f11b943c44d209
 SANE_2b173a7fb7518c75ac8a2d294d773fd8
 
 # good enough
+SANE_3b92eda751c992f230f215fb7eb36844
+
+# good enough
 SANE_4ef8302546bf270a19baf98508afacc4
 
 # good enough
 SANE_7429530a7398f43f1f1b795f9420714e
-
-# good enough
-SANE_91eb43f705d25c804374a746d7519660
-
-# good enough
-SANE_b58d7945d89b7afc9e2753c83b00ab44
 
 # good enough
 SANE_d0d2b0f6373bf91253d66dd74c594b87
@@ -659,19 +608,13 @@ SUBJECT_IN_BLACKLIST
 SUBJECT_IN_WHITELIST
 
 # good enough
+TAB_IN_FROM
+
+# good enough
 TO_NO_BRKTS_DYNIP
 
 # good enough
-TT_MSGID_TRUNC
-
-# good enough
 TVD_FINGER_02
-
-# good enough
-TVD_INCREASE_SIZE
-
-# good enough
-TVD_QUAL_MEDS
 
 # good enough
 TVD_RCVD_IP
@@ -686,67 +629,7 @@ TVD_RCVD_SINGLE
 TVD_VISIT_PHARMA
 
 # good enough
-TWO_IPS_RCVD
-
-# good enough
-AXB_XMID_DIGDOTSHRT
-
-# good enough
-DEAR_NOBODY
-
-# good enough
-FB_GREAT_BEST_SEX
-
-# good enough
-FB_YOU_CAN_BECOME
-
-# good enough
-FM_SUBJ_YOU_PROFIT
-
-# good enough
-S25R_1
-
-# good enough
-S25R_3
-
-# good enough
-SANE_0de5cadd0badbd3e70f22a3ae31951fb
-
-# good enough
-SANE_20d820d8f491476ca39941979ab139dd
-
-# good enough
-SANE_75491b468ec2e117e50f9842d32abfab
-
-# good enough
-SANE_767b5516127c9ea7beef8ae90de854a6
-
-# good enough
-SANE_86be5ef5c040075ea29f99d46dfe3832
-
-# good enough
-SANE_a4ac830e310d5f2de12338a27ab64719
-
-# good enough
-SANE_d5ee9290870fd33fde2ec65ebd06034c
-
-# good enough
-SANE_e0b42866efae083b5d78a87e2e6710e9
-
-# good enough
-SANE_eb8833b51aa54190f3a7dc22d67a9189
-
-# good enough
-SANE_f7d3274e8932068e2fa1d892c1dc28f8
-
-# good enough
-TAB_IN_FROM
-
-# good enough
-THREAD_INDEX_HEX
-
-# good enough
-TVD_ENHANCE
+HK_SCAM_N2
 
 # tflags userconf
 UNPARSEABLE_RELAY
@@ -852,9 +735,6 @@ XMAILER_MIMEOLE_OL_91287
 
 # good enough
 XMAILER_MIMEOLE_OL_CAC8F
-
-# good enough
-X_MAILER_CME_6543_MSN
 
 # tflags net
 __DNS_FROM_RFC_ABUSE
