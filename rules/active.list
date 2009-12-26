@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix; day 2: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix; day 3: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix dos nbebout wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2
+# with results from: day 1: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 2: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix; day 3: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix
 
 # tflags userconf
 ALL_TRUSTED
@@ -132,6 +132,9 @@ FB_CIALIS_LEO3
 
 # good enough
 FB_EXTRA_INCHES
+
+# good enough
+FB_GVR
 
 # good enough
 FB_QUALITY_REPLICA
@@ -275,10 +278,10 @@ HELO_NO_DOMAIN
 HELO_OEM
 
 # good enough
-HK_NAME_DRUGS
+HK_FAKENAME_EBAY
 
 # good enough
-HS_VPXL
+HK_NAME_DRUGS
 
 # tflags userconf
 HTML_CHARSET_FARAWAY
@@ -288,9 +291,6 @@ KAM_LOTTO1
 
 # good enough
 KAM_LOTTO2
-
-# good enough
-KB_DATE_CONTAINS_TAB
 
 # good enough
 KB_FAKED_THE_BAT
@@ -596,13 +596,13 @@ SUBJECT_IN_BLACKLIST
 SUBJECT_IN_WHITELIST
 
 # good enough
-TAB_IN_FROM
-
-# good enough
 TO_NO_BRKTS_DYNIP
 
 # good enough
 TVD_FINGER_02
+
+# good enough
+TVD_PH_REC
 
 # good enough
 TVD_RCVD_IP
@@ -617,10 +617,7 @@ TVD_RCVD_SINGLE
 TVD_VISIT_PHARMA
 
 # good enough
-S25R_3
-
-# good enough
-TWO_IPS_RCVD
+HK_PNIS
 
 # tflags userconf
 UNPARSEABLE_RELAY
@@ -696,9 +693,6 @@ USER_IN_WHITELIST_TO
 
 # good enough
 XMAILER_MIMEOLE_OL_09BB4
-
-# good enough
-XMAILER_MIMEOLE_OL_1ECD5
 
 # good enough
 XMAILER_MIMEOLE_OL_20C99
