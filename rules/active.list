@@ -1,11 +1,8 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 2: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix; day 3: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix
+# with results from: day 1: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 2: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 3: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix
 
 # tflags userconf
 ALL_TRUSTED
-
-# good enough
-AXB_AUTOGEN_FRAUD_1
 
 # good enough
 AXB_AUTOGEN_FRAUD_3
@@ -283,6 +280,9 @@ HK_FAKENAME_EBAY
 # good enough
 HK_NAME_DRUGS
 
+# good enough
+HK_RANDOM_ENVFROM
+
 # tflags userconf
 HTML_CHARSET_FARAWAY
 
@@ -527,9 +527,6 @@ RCVD_IN_SORBS_ZOMBIE
 RCVD_IN_XBL
 
 # good enough
-S25R_1
-
-# good enough
 S25R_4
 
 # good enough
@@ -605,6 +602,9 @@ TVD_FINGER_02
 TVD_PH_REC
 
 # good enough
+TVD_QUAL_MEDS
+
+# good enough
 TVD_RCVD_IP
 
 # good enough
@@ -617,7 +617,16 @@ TVD_RCVD_SINGLE
 TVD_VISIT_PHARMA
 
 # good enough
-HK_PNIS
+HK_FAKENAME_MICROSOFT
+
+# good enough
+S25R_3
+
+# good enough
+TAB_IN_FROM
+
+# good enough
+TWO_IPS_RCVD
 
 # tflags userconf
 UNPARSEABLE_RELAY
