@@ -91,6 +91,7 @@ sub new {
     'spamd_result_log_items' => [ ],
     'tests_already_hit' => { },
     'c'                 => { },
+    'tag_data'          => { },
     'rule_errors'       => 0,
     'disable_auto_learning' => 0,
     'auto_learn_status' => undef,
@@ -118,6 +119,17 @@ sub new {
   my $dbgcache = would_log('dbg', 'rules');
   if ($dbgcache || $self->{save_pattern_hits}) {
     $self->{should_log_rule_hits} = 1;
+  }
+
+  # known valid tags that might not get their entry in pms->{tag_data}
+  # in some circumstances
+  my $tag_data_ref = $self->{tag_data};
+  foreach (qw(SUMMARY REPORT RBL)) { $tag_data_ref->{$_} = '' }
+  foreach (qw(AWL AWLMEAN AWLCOUNT AWLPRESCORE
+              DCCB DCCR DCCREP PYZOR DKIMIDENTITY DKIMDOMAIN
+              BAYESTC BAYESTCLEARNED BAYESTCSPAMMY BAYESTCHAMMY
+              HAMMYTOKENS SPAMMYTOKENS TOKENSUMMARY)) {
+    $tag_data_ref->{$_} = undef;  # exist, but undefined
   }
 
   bless ($self, $class);
@@ -1269,21 +1281,16 @@ sub _get_tag {
 
           );
 
-  my $data = "";
+  my $data;
   if (exists $tags{$tag}) {
-    $data = $tags{$tag}->(@_);
-  }
-  elsif (exists($self->{tag_data}->{$tag})) {
+    $data = $tags{$tag};
+    $data = $data->(@_)  if ref $data eq 'CODE';
+    $data = ""  if !defined $data;
+  } elsif (exists $self->{tag_data}->{$tag}) {
     $data = $self->{tag_data}->{$tag};
-    if (ref $data eq 'CODE') {
-      $data = $data->(@_);
-    }
+    $data = $data->(@_)  if ref $data eq 'CODE';
+    $data = ""  if !defined $data;
   }
-  # known valid tags that might not get defined in some circumstances
-  elsif ($tag !~ /^(?:BAYESTC(?:|LEARNED|SPAMMY|HAMMY)|RBL)$/) {
-    return;
-  }
-  $data = "" unless defined $data;
   return $data;
 }
 
