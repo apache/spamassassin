@@ -33,6 +33,10 @@ usually as simple as:
 	make
 	make install                            [as root]
 
+After installing SpamAssassin, you need to download and install the
+SpamAssassin ruleset using "sa-update".  See the "Installing Rules"
+section below.
+
 Please make sure to read this whole document before installing, especially
 the prerequisite information further down.
 
@@ -78,15 +82,22 @@ http://wiki.apache.org/spamassassin/SingleUserUnixInstall
    and "Setting further options on the command line" for more informations
    on available command line variables.
 
-4. If you already use procmail, skip to step 6.  If not, ensure procmail
+4. Install the SpamAssassin ruleset using "sa-update":
+
+        $HOME/bin/sa-update
+
+   See the "Installing Rules" section below if you do not wish to download
+   the rules directly from the internet.
+
+5. If you already use procmail, skip to step 7.  If not, ensure procmail
    is installed using "which procmail" or install it from www.procmail.org.
 
-5. Create a .forward file in your home directory containing the below
+6. Create a .forward file in your home directory containing the below
    lines:
 
 "|IFS=' ' && exec /usr/bin/procmail -f- || exit 75 #user"
 
-6. Edit or create a .procmailrc file in your home directory containing the
+7. Edit or create a .procmailrc file in your home directory containing the
    below lines.  If you already have a .procmailrc file, add the lines to
    the top of your .procmailrc file:
 
@@ -106,7 +117,7 @@ caughtspam
 Also, see the file procmailrc.example and
 http://wiki.apache.org/spamassassin/UsedViaProcmail
 
-7. Now, you should be ready to send some test emails and ensure everything
+8. Now, you should be ready to send some test emails and ensure everything
    works as expected.  First, send yourself a test email that doesn't
    contain anything suspicious.  You should receive it normally, but there
    will be a header containing "X-Spam-Status: No".  If you are only
@@ -123,7 +134,45 @@ http://wiki.apache.org/spamassassin/UsedViaProcmail
    Note: one possible cause for this is the use of smrsh on the MTA system;
    see http://wiki.spamassassin.org/w/ProcmailVsSmrsh for details.
 
-8. You can now customize SpamAssassin.  See README for more information.
+9. You can now customize SpamAssassin.  See README for more information.
+
+
+Installing Rules
+----------------
+
+Installing rules from network is done with a single command:
+
+        sa-update
+
+This is normally run as root.
+
+If you wish to install rules from downloaded files, rather than "live" from
+the latest online ruleset, here is how to do it.
+
+Obtain all the following files:
+
+    Mail-SpamAssassin-rules-xxx.tgz
+    Mail-SpamAssassin-rules-xxx.tgz.asc
+    Mail-SpamAssassin-rules-xxx.tgz.md5
+    Mail-SpamAssassin-rules-xxx.tgz.sha1
+      (where xxx may look something like '3.3.0-rc1.r893295')
+
+Save them all to the current directory.
+Obtain a rules-signing public key:
+
+    curl -O http://spamassassin.apache.org/updates/GPG.KEY
+
+Import the signing key to the SpamAssassin keyring, so that the rules
+files can be verified safely:
+
+    sa-update --import GPG.KEY
+
+Install rules from a compressed tar archive:
+
+    sa-update --install Mail-SpamAssassin-rules-3.3.0-rc1.r893295.tgz
+
+Note that the ".tgz.asc", ".tgz.md5" and ".tgz.sha1" files all need to
+be in the same directory, otherwise sa-update will fail.
 
 
 CPAN
@@ -147,9 +196,9 @@ third party modules.
 Additional information about the CPAN module is also available via
 "perldoc CPAN".
 
-Most Linux/Unix distributions also offer the CPAN modules in their own native
-formats (RPMs, Debian packages, ports, etc.), so you should be able to find
-these through those mechanisms, too, if you prefer.
+Most Linux distributions also offer the CPAN modules in their own native
+formats (RPMs, Debian packages, etc.), so you should be able to find these
+through those mechanisms, too, if you prefer.
 
 
 Required Perl Interpreter
@@ -257,14 +306,13 @@ Optional Modules
 ----------------
 
 In addition, the following modules will be used for some checks, if
-available and the version is high enough.  If they are not available or
-if their version is too low, SpamAssassin will still work, just not as
+available and the version is high enough.  If they are not available or if
+their version is too low, SpamAssassin will still work, just not as
 effectively because some of the spam-detection tests will have to be
 skipped.
 
-Note: running SpamAssassin will not warn you if these are installed, but
-the version is too low for them to be used. A warning is only issued during
-installation.
+Note: SpamAssassin will not warn you if these are installed, but the
+version is too low for them to be used.
 
   - MIME::Base64
 
