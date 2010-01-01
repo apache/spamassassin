@@ -32,7 +32,7 @@ require_version @@VERSION@@
 
 # cmr-208-124-139-194.cr.net.cable.rogers.com) [208.124.139.194]
 # cmr-208-97-119-114.cr.net.cable.rogers.com) [208.97.119.114]
-header __HELO_STATIC_ROGERS X-Spam-Relays-Untrusted =~ /^[^\]]+ helo=cmr-\d{1,3}-\d{1,3}-\d{1,3}-\d{1,3}\S+\.rogers\.com[^\]]+ auth= /i 
+header __HELO_STATIC_ROGERS X-Spam-Relays-External =~ /^[^\]]+ helo=cmr-\d{1,3}-\d{1,3}-\d{1,3}-\d{1,3}\S+\.rogers\.com[^\]]+ auth= /i 
 describe HELO_STATIC_HOST Relay HELO'd using static hostname
 meta HELO_STATIC_HOST (__HELO_STATIC_ROGERS)
 
