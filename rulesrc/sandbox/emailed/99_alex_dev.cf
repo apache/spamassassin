@@ -1,9 +1,4 @@
 
-header          AXB_HELO_LH_HOME        X-Spam-Relays-External =~ /^[^\]]+ helo=\w+\.(lan|home) /i
-describe        AXB_HELO_LH_HOME        HELO from home
-#score          AXB_HELO_LH_HOME        1.0
-
-
 
 ##
 header          AXB_XMID_DIGDOTSHRT             Message-ID =~ /\<[0-9]{5}\.[a-z]{2,10}\@/
