@@ -1,5 +1,5 @@
 
-header          AXB_HELO_LH_HOME        X-Spam-Relays-Untrusted =~ /^[^\]]+ helo=\w+\.(lan|home) /i
+header          AXB_HELO_LH_HOME        X-Spam-Relays-External =~ /^[^\]]+ helo=\w+\.(lan|home) /i
 describe        AXB_HELO_LH_HOME        HELO from home
 #score          AXB_HELO_LH_HOME        1.0
 
