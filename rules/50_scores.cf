@@ -11,9 +11,9 @@
 # The ASF licenses this file to you under the Apache License, Version 2.0
 # (the "License"); you may not use this file except in compliance with
 # the License.  You may obtain a copy of the License at:
-# 
+#
 #     http://www.apache.org/licenses/LICENSE-2.0
-# 
+#
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -178,7 +178,6 @@ score FB_YOURSELF_MASTER 0 # n=0 n=1 n=2 n=3
 score FB_YOUR_REFI 0 # n=0 n=1 n=2 n=3
 score FH_BAD_OEV1441 0 # n=0 n=1 n=2 n=3
 score FH_DATE_IS_19XX 0.000 1.598 2.373 0.277 # n=2
-score FH_DATE_PAST_20XX 1.536 2.699 2.390 2.564 # n=2
 score FH_FAKE_RCVD_LINE 2.167 1.431 2.525 1.778 # n=2
 score FH_FAKE_RCVD_LINE_B 4.000 3.372 3.999 3.999
 score FH_FROMEML_NOTLD 1.708 0.180 0.975 1.082 # n=2
@@ -988,7 +987,7 @@ score HASHCASH_HIGH -5.0
 score HASHCASH_2SPEND 0.1
 endif # Mail::SpamAssassin::Plugin::Hashcash
 
-# SPF                                              
+# SPF
 # Note that the benefit for a valid SPF record is deliberately minimal; it's
 # likely that more spammers would quickly move to setting valid SPF records
 # otherwise.  The penalties for an *incorrect* record, however, are large.  ;)
@@ -1140,7 +1139,7 @@ endif # Mail::SpamAssassin::Plugin::AntiVirus
 # and should not be scored as antispam rules; instead the user needs
 # to detect messages that hit ANY_BOUNCE_MESSAGE, and filter them aside
 # as spurious bounces.
-# 
+#
 score BOUNCE_MESSAGE     0.1
 score CRBOUNCE_MESSAGE   0.1
 score VBOUNCE_MESSAGE    0.1
