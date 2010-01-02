@@ -20,12 +20,7 @@ uri             AXB_URI_APE_ABUSE1     /profiles\.yahooo\.com/
 describe        AXB_URI_APE_ABUSE1     Gorilla Syndrome
 #score           AXB_URI_APE_ABUSE1     2.5
 
-# Henrik's logic
-header          AXB_HELO_HOME_LE        X-Spam-Relays-External =~ /^[^\]]+ helo=\w+\.(lan|home) /i
-describe        AXB_HELO_HOME_LE        HELO from home - last external
-#score          AXB_HELO_HOME_LE        1.0
 
-# Axb's logic
 header          AXB_HELO_HOME_UN        X-Spam-Relays-Untrusted =~ /^[^\]]+ helo=\w+\.(lan|home) /i
 describe        AXB_HELO_HOME_UN        HELO from home  - untrusted
 #score          AXB_HELO_HOME_UN        1.0
