@@ -14,32 +14,32 @@
 #tflags	 S25R_0 nopublish
 # still trying to figure out whether to push this or just let RDNS_NONE do it.
 
-header __S25R_1 X-Spam-Relays-Untrusted =~ /^[^\]]+ rdns=[^. ]*\d[^0-9. ]+\d\S*\./
+header __S25R_1 X-Spam-Relays-External =~ /^[^\]]+ rdns=[^. ]*\d[^0-9. ]+\d\S*\./
 describe S25R_1 S25R: Bottom of rDNS has num, non-num, num
 meta	 S25R_1 __LAST_EXTERNAL_RELAY_NO_AUTH && __S25R_1 && !(__DOS_RELAYED_EXT||__S25R_2||__S25R_3||__S25R_4||__S25R_5||__S25R_6 || __NOT_SPOOFED || __GREYLISTED)
 #score	 S25R_1 0.1
 
-header __S25R_2 X-Spam-Relays-Untrusted =~ /^[^\]]+ rdns=[^. ]*\d{5}/
+header __S25R_2 X-Spam-Relays-External =~ /^[^\]]+ rdns=[^. ]*\d{5}/
 describe S25R_2 S25R: Bottom of rDNS has 5+ digits in a row
 meta	 S25R_2 __LAST_EXTERNAL_RELAY_NO_AUTH && __S25R_2 && !(__S25R_1||__S25R_3||__S25R_4||__S25R_5||__S25R_6 || __NOT_SPOOFED || __GREYLISTED)
 #score	 S25R_2 0.1
 
-header __S25R_3 X-Spam-Relays-Untrusted =~ /^[^\]]+ rdns=(?:[^. ]+\.)?\d[^. ]*\.[^. ]+\.\S+\.[a-z]/
+header __S25R_3 X-Spam-Relays-External =~ /^[^\]]+ rdns=(?:[^. ]+\.)?\d[^. ]*\.[^. ]+\.\S+\.[a-z]/
 describe S25R_3 S25R: A low-level of rDNS starts w/ a number
 meta	 S25R_3 __LAST_EXTERNAL_RELAY_NO_AUTH && __S25R_3 && !(__S25R_1||__S25R_2||__S25R_4||__S25R_5||__S25R_6 || __NOT_SPOOFED || __GREYLISTED)
 #score	 S25R_3 0.1
 
-header __S25R_4 X-Spam-Relays-Untrusted =~ /^[^\]]+ rdns=[^. ]*\d\.[^. ]*\d-\d/
+header __S25R_4 X-Spam-Relays-External =~ /^[^\]]+ rdns=[^. ]*\d\.[^. ]*\d-\d/
 describe S25R_4 S25R: Bottom of rDNS ends w/ num, next lvl has num-num
 meta	 S25R_4 __LAST_EXTERNAL_RELAY_NO_AUTH && __S25R_4 && !(__S25R_1||__S25R_2||__S25R_3||__S25R_5||__S25R_6 || __NOT_SPOOFED || __GREYLISTED)
 #score	 S25R_4 0.1
 
-header __S25R_5 X-Spam-Relays-Untrusted =~ /^[^\]]+ rdns=[^. ]*\d\.[^. ]*\d\.[^. ]+\.\S+\./
+header __S25R_5 X-Spam-Relays-External =~ /^[^\]]+ rdns=[^. ]*\d\.[^. ]*\d\.[^. ]+\.\S+\./
 describe S25R_5 S25R: rDNS has 5+ layers, bottom 2 end in numbers
 meta	 S25R_5 __LAST_EXTERNAL_RELAY_NO_AUTH && __S25R_5 && !(__S25R_1||__S25R_2||__S25R_3||__S25R_4||__S25R_6 || __NOT_SPOOFED || __GREYLISTED)
 #score	 S25R_5 0.1
 
-header __S25R_6 X-Spam-Relays-Untrusted =~ /^[^\]]+ rdns=(?:dhcp|dialup|ppp|[achrsvx]?dsl)[^. ]*\d/
+header __S25R_6 X-Spam-Relays-External =~ /^[^\]]+ rdns=(?:dhcp|dialup|ppp|[achrsvx]?dsl)[^. ]*\d/
 describe S25R_6 S25R: rDNS looks dynamic or customer-facing
 meta	 S25R_6 __LAST_EXTERNAL_RELAY_NO_AUTH && __S25R_6 && !(__S25R_1||__S25R_2||__S25R_3||__S25R_4||__S25R_5 || __NOT_SPOOFED || __GREYLISTED)
 #score	 S25R_6 0.1
@@ -72,4 +72,4 @@ tflags	 KHOP_BOTNET_6	nopublish
 # Negative look-ahead lets us ignore 3+ consecutive hex letters.
 # 4.4352/0.0163 spam/ham, 0.996 s/o @ 20091214
 # plus, lots of low-scoring spam hit.  this is a really good rule.
-header __RDNS_HEX X-Spam-Relays-Untrusted =~ /^[^\]]+ rdns=[^ .]*\d(?![0-9a-f]*[a-f]{3})[0-9a-f]{7}/
+header __RDNS_HEX X-Spam-Relays-External =~ /^[^\]]+ rdns=[^ .]*\d(?![0-9a-f]*[a-f]{3})[0-9a-f]{7}/

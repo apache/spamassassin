@@ -20,12 +20,12 @@ describe KHOP_FAKE_EBAY 	Sender falsely claims to be from eBay
 #score	 KHOP_FAKE_EBAY 	2.25 # 20090408
 
 ifplugin Mail::SpamAssassin::Plugin::URIDetail
-  uri_detail KHOP_CLIQUEZ_ICI	text =~ /^cliquez\Wici\b/i
+  uri_detail KHOP_FOREIGN_CLICK	text =~ /\b(?:cliquez\Wici\b|clic aqu[^<.,a ])/i
 else
-  rawbody    KHOP_CLIQUEZ_ICI	/>cliquez\Wici\b/i
+  rawbody    KHOP_FOREIGN_CLICK	m{\bhref=[^>]{9,199}>[^<]{0,80}(?:<(?!/a\b)[^>]{0,299}>[^<]{0,80}){0,9}[^<]{0,80}\b(?:cliquez\Wici\b|clic aqu[^<.,a ])}si
 endif
-describe KHOP_CLIQUEZ_ICI	Click here link in French
-#score	 KHOP_CLIQUEZ_ICI	1.1	# 20090526 see also SARE_UN7
+describe KHOP_FOREIGN_CLICK	Click here link in French or Spanish
+#score	 KHOP_FOREIGN_CLICK	1.1	# 20090526 see also SARE_UN7
 
 # I don't think this ever fires
 uri	 URI_HIDDEN	m'.{7}\/\.\.?/?\w'
@@ -33,20 +33,20 @@ describe URI_HIDDEN	Contains a hidden directory
 #score	 URI_HIDDEN	0.7 # 20090515 13:29 by Adam Katz (me) on sa-users list
 
 # no subdomain; sent by example.com rather than server.example.com
-header __RDNS_NO_SUBDOM	X-Spam-Relays-Untrusted =~ /^[^\]]+ rdns=[^. ]*\.\w+ /
+header __RDNS_NO_SUBDOM	X-Spam-Relays-External =~ /^[^\]]+ rdns=[^. ]*\.\w+ /
 
 # Relays with 5+ subdomains.
 # My data (post-greylisting) is 1.7869/0.0682 spam/ham, s/o = .897
 # Those should be significantly better sans-greylisting (they can't get worse).
 # @ 20091214, 5.7617/0.0344 spam/ham, 0.994 s/o.
-header __5_SUBDOM X-Spam-Relays-Untrusted =~ /^[^\]]+ rdns=(?:[^. ]*\.){6,}\w+ /
+header __5_SUBDOM X-Spam-Relays-External =~ /^[^\]]+ rdns=(?:[^. ]*\.){6,}\w+ /
 
 # Probably too similar to __S25R_1
-header __NUM_LTR_3 X-Spam-Relays-Untrusted =~ /^[^\]]+ rdns=\S*(?:\d\S*[^0-9. ]\S*\d){3,} /
+header __NUM_LTR_3 X-Spam-Relays-External =~ /^[^\]]+ rdns=\S*(?:\d\S*[^0-9. ]\S*\d){3,} /
 
 # IP address in relay's rDNS or HELO
-header __IP_IN_RELAY X-Spam-Relays-Untrusted =~ /^\[ ip=(\d+)\.(\d+)\.(\d+)\.(\d+) [^\]]*(?:rdns|helo)=\S*(?:\1\D\2\D\3\D\4|\4\D\3\D\2\D\1)/
-header __IP_PART_IN_RELAY X-Spam-Relays-Untrusted =~ /^\[ ip=\d+\.\d+\.(\d+)\.(\d+) [^\]]*(?:rdns|helo)=\S*(?:\1\W\2\W|\2\W\1)\b/
+header __IP_IN_RELAY  X-Spam-Relays-External =~ /^\[ ip=(\d+)\.(\d+)\.(\d+)\.(\d+) (?:[^\]]* )?(?:rdns|helo)=\S*(?:\1\D\2\D\3\D\4|\4\D\3\D\2\D\1)/
+header __IP_PART_IN_RELAY X-Spam-Relays-External =~ /^\[ ip=\d+\.\d+\.(\d+)\.(\d+) (?:[^\]]* )?(?:rdns|helo)=\S*(?:\1\W\2\W|\2\W\1)\b/
 
 header __MSGID_DOTZERO	Message-ID =~ /\.0\.0\./
 
