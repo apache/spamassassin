@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 2: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix dos wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 3: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2
+# with results from: day 1: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 2: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 3: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix dos wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2
 
 # tflags userconf
 ALL_TRUSTED
@@ -128,6 +128,9 @@ FB_CIALIS_LEO3
 FB_EXTRA_INCHES
 
 # good enough
+FB_GVR
+
+# good enough
 FB_QUALITY_REPLICA
 
 # good enough
@@ -138,9 +141,6 @@ FB_SOFTTABS
 
 # good enough
 FB_TIRED_OF_YOUR
-
-# good enough
-FB_WITHOUT_PRESC
 
 # good enough
 FH_FAKE_RCVD_LINE
@@ -203,9 +203,6 @@ FROM_MISSP_MSFT
 FRT_PHARMAC
 
 # good enough
-FRT_ROLEX
-
-# good enough
 FR_TITLE_NUMS
 
 # good enough
@@ -216,9 +213,6 @@ FSL_HELO_BARE_IP_1
 
 # good enough
 FSL_HELO_DEVICE
-
-# good enough
-FSL_LSPACES_ABUSE
 
 # good enough
 FSL_YG_ABUSE
@@ -299,9 +293,6 @@ HK_FAKENAME_MICROSOFT
 HK_NAME_DRUGS
 
 # good enough
-HK_PNIS
-
-# good enough
 HK_RANDOM_ENVFROM
 
 # tflags userconf
@@ -333,9 +324,6 @@ LOTTO_AGENT
 
 # good enough
 L_SPAM_TOOL_13
-
-# good enough
-MANY_GOOG_PROXY
 
 # good enough
 MANY_SPAN_IN_TEXT
@@ -572,6 +560,9 @@ SANE_04e8bf28eb445199a7f11b943c44d209
 SANE_2b173a7fb7518c75ac8a2d294d773fd8
 
 # good enough
+SANE_3b92eda751c992f230f215fb7eb36844
+
+# good enough
 SANE_4ef8302546bf270a19baf98508afacc4
 
 # good enough
@@ -629,9 +620,6 @@ SUBJECT_IN_WHITELIST
 TO_NO_BRKTS_DYNIP
 
 # good enough
-TT_MSGID_TRUNC
-
-# good enough
 TVD_FINGER_02
 
 # good enough
@@ -654,6 +642,12 @@ TVD_VISIT_PHARMA
 
 # good enough
 TWO_IPS_RCVD
+
+# good enough
+AXB_HELO_HOME_UN
+
+# good enough
+HK_SPAMMY_FILENAME
 
 # tflags userconf
 UNPARSEABLE_RELAY
@@ -756,9 +750,6 @@ XMAILER_MIMEOLE_OL_91287
 
 # good enough
 XMAILER_MIMEOLE_OL_CAC8F
-
-# good enough
-X_MAILER_CME_6543_MSN
 
 # tflags net
 __DNS_FROM_RFC_ABUSE
