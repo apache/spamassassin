@@ -127,6 +127,11 @@ bayes_auto_learn			1
 # body of spam messages will not be modified
 report_safe           1
 
+# Headers to parse for originating IP address
+clear_originating_ip_headers
+originating_ip_headers X-Yahoo-Post-IP X-Originating-IP X-Apparently-From
+originating_ip_headers X-SenderIP
+
 # Some common prefs settings can be set here, to take effect site-wide
 # unless the user override them. See the user_prefs.template file for
 # explanations.

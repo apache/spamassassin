@@ -1199,6 +1199,46 @@ Empty the list of msa networks.
     }
   });
 
+=item originating_ip_headers header ...   (default: X-Yahoo-Post-IP X-Originating-IP X-Apparently-From X-SenderIP)
+
+Headers to parse originating IP addresses for. For example webmail servers
+usually record the client address in X-Originating-IP.
+
+These IP addresses are virtually appended into the Received: chain, so they
+are used in RBL checks where appropriate.
+
+Currently the IP addresses are not added into X-Spam-Relays-* headers, but
+they may be in the future.
+
+=cut
+
+  push (@cmds, {
+    setting => 'originating_ip_headers',
+    code => sub {
+      my ($self, $key, $value, $line) = @_;
+      unless (defined $value && $value !~ /^$/) {
+	return $MISSING_REQUIRED_VALUE;
+      }
+      foreach my $header (split (/\s+/, $value)) {
+        push(@{$self->{originating_ip_headers}}, $header);
+      }
+    }
+  });
+
+=item clear_originating_ip_headers
+
+Empty the list of originating headers.
+
+=cut
+
+  push (@cmds, {
+    setting => 'clear_originating_ip_headers',
+    code => sub {
+      my ($self, $key, $value, $line) = @_;
+      $self->{originating_ip_headers} = [];
+    }
+  });
+
 =item always_trust_envelope_sender ( 0 | 1 )   (default: 0)
 
 Trust the envelope sender even if the message has been passed through one or

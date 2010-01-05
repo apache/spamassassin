@@ -38,6 +38,7 @@ my @ignored_commands = qw(
   clear_headers trusted_networks clear_trusted_networks internal_networks
   clear_internal_networks msa_networks clear_msa_networks bayes_ignore_header
   report_safe_copy_headers redirector_pattern reuse mimeheader uridnsbl_timeout
+  originating_ip_headers clear_originating_ip_headers
 
 );
 
