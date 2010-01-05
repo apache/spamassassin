@@ -169,7 +169,7 @@ sub check_rbl_backend {
   # X-Sender: has a very low bang-for-buck for me
   my $IP_ADDRESS = IP_ADDRESS;
   my @originating;
-  for my $header ('X-Yahoo-Post-IP', 'X-Originating-IP', 'X-Apparently-From', 'X-SenderIP') {
+  for my $header (@{$pms->{conf}->{originating_ip_headers}}) {
     my $str = $pms->get($header,undef);
     next unless defined $str && $str ne '';
     push (@originating, ($str =~ m/($IP_ADDRESS)/g));
