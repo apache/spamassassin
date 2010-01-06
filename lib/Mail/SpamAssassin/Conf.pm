@@ -1201,33 +1201,33 @@ Empty the list of msa networks.
 
 =item originating_ip_headers header ...   (default: X-Yahoo-Post-IP X-Originating-IP X-Apparently-From X-SenderIP)
 
-Headers to parse originating IP addresses for. For example webmail servers
-usually record the client address in X-Originating-IP.
+A list of header field names from which an originating IP address can
+be obtained. For example, webmail servers may record a client IP address
+in X-Originating-IP.
 
 These IP addresses are virtually appended into the Received: chain, so they
 are used in RBL checks where appropriate.
 
-Currently the IP addresses are not added into X-Spam-Relays-* headers, but
-they may be in the future.
+Currently the IP addresses are not added into X-Spam-Relays-* header fields,
+but they may be in the future.
 
 =cut
 
   push (@cmds, {
     setting => 'originating_ip_headers',
+    default => [],
     code => sub {
       my ($self, $key, $value, $line) = @_;
       unless (defined $value && $value !~ /^$/) {
 	return $MISSING_REQUIRED_VALUE;
       }
-      foreach my $header (split (/\s+/, $value)) {
-        push(@{$self->{originating_ip_headers}}, $header);
-      }
+      push(@{$self->{originating_ip_headers}}, split(/\s+/, $value));
     }
   });
 
 =item clear_originating_ip_headers
 
-Empty the list of originating headers.
+Empty the list of 'originating IP address' header field names.
 
 =cut
 
