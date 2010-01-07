@@ -3977,6 +3977,13 @@ sub sa_die { Mail::SpamAssassin::sa_die(@_); }
 
 ###########################################################################
 
+# subroutines available to conditionalize rules, for example:
+#   if (can(Mail::SpamAssassin::Conf::feature_originating_ip_headers))
+
+sub feature_originating_ip_headers { 1 }
+
+###########################################################################
+
 1;
 __END__
 
