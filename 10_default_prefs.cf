@@ -128,9 +128,11 @@ bayes_auto_learn			1
 report_safe           1
 
 # Headers to parse for originating IP address
+if (can(Mail::SpamAssassin::Conf::feature_originating_ip_headers))
 clear_originating_ip_headers
 originating_ip_headers X-Yahoo-Post-IP X-Originating-IP X-Apparently-From
 originating_ip_headers X-SenderIP
+endif
 
 # Some common prefs settings can be set here, to take effect site-wide
 # unless the user override them. See the user_prefs.template file for
