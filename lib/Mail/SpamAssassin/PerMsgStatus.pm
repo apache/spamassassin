@@ -895,7 +895,7 @@ sub rewrite_no_report_safe {
   my @pristine_headers = split(/^/m, $self->{msg}->get_pristine_header());
   for (my $line = 0; $line <= $#pristine_headers; $line++) {
     next unless ($pristine_headers[$line] =~ /^X-Spam-(?!Prev-)/i);
-    splice @pristine_headers, $line, 1 while ($pristine_headers[$line] =~ /^(?:X-Spam-(?!Prev-)|\s+\S)/i);
+    splice @pristine_headers, $line, 1 while ($pristine_headers[$line] =~ /^(?:X-Spam-(?!Prev-)|[ \t])/i);
     $line--;
   }
   my $separator = '';
@@ -946,29 +946,27 @@ sub rewrite_no_report_safe {
       $addition = 'headers_spam';
   }
 
-  # Break the pristine header set up into two blocks; "pre" is the stuff that
-  # we want to ensure comes before any SpamAssassin markup headers, like the
-  # Return-Path header (see bug 3409).
+  # Break the pristine header set into two blocks; $new_hdrs_pre is the stuff
+  # that we want to ensure comes before any SpamAssassin markup headers,
+  # like the Return-Path header (see bug 3409).
   #
-  # "post" is all the rest of the message headers, placed after the
-  # SpamAssassin markup hdrs. Once one of those headers is seen, all further
-  # headers go into that set; it's assumed that it's an old copy of the
-  # header, or attempted spoofing, if it crops up halfway through the
-  # headers.
+  # all the rest of the message headers (as left in @pristine_headers), is
+  # to be placed after the SpamAssassin markup hdrs. Once one of those headers
+  # is seen, all further headers go into that set; it's assumed that it's an
+  # old copy of the header, or attempted spoofing, if it crops up halfway
+  # through the headers.
 
   my $new_hdrs_pre = '';
-  my $new_hdrs_post = '';
-  foreach my $hdr (@pristine_headers) {
-    if ($new_hdrs_post eq '' && $hdr =~ /^Return-Path:/i) {
-      $new_hdrs_pre .= $hdr;
-    } else {
-      $new_hdrs_post .= $hdr;
+  if (@pristine_headers && $pristine_headers[0] =~ /^Return-Path:/i) {
+    $new_hdrs_pre .= shift(@pristine_headers);
+    while (@pristine_headers && $pristine_headers[0] =~ /^[ \t]/) {
+      $new_hdrs_pre .= shift(@pristine_headers);
     }
   }
   $new_hdrs_pre .= $self->_get_added_headers($addition);
 
   # fix up line endings appropriately
-  my $newmsg = $new_hdrs_pre.$new_hdrs_post.$separator;
+  my $newmsg = $new_hdrs_pre . join('',@pristine_headers) . $separator;
   $self->_fixup_report_line_endings(\$newmsg);
 
   return $newmsg.$self->{msg}->get_pristine_body();
