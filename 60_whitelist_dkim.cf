@@ -35,16 +35,15 @@ describe USER_IN_DEF_DKIM_WL	From: address is in the default DKIM white-list
 tflags USER_IN_DEF_DKIM_WL	nice noautolearn net
 
 ###########################################################################
-# Default whitelists.  These should be addresses which send mail that is often
-# tagged (incorrectly) as spam; it also helps that they be addresses of big
-# companies with lots of lawyers, so if spammers impersonate them, they'll get
-# into big trouble, so it doesn't provide a shortcut around SpamAssassin.
+# Default whitelists.  These should be e-mail addresses of authors (i.e.
+# addresses in the From header field) which send mail that is often
+# tagged (incorrectly) as spam.  DKIM whitelisting only applies to mail
+# with a valid DKIM (or older DK) signature.  An optional second parameter
+# can specify a signing domain (the 'd' tag), if different from author's
+# domain. Please see Mail::SpamAssassin::Plugin::DKIM man page for details.
 #
-# Whitelist and blacklist addresses are now file-glob-style patterns, so
+# Whitelist and blacklist addresses are file-glob-style patterns, so
 # "friend@somewhere.com", "*@isp.com", or "*.domain.net" will all work.
-#
-# Please do not add unmoderated public mailing lists here.  They are
-# too easily abused by spammers.
 
 def_whitelist_from_dkim  *@ebay.com
 def_whitelist_from_dkim  *@*.ebay.com
