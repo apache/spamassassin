@@ -583,8 +583,13 @@ combine_args(char *config_file, int argc, char **argv,
 	    continue;
         }
 	if (option[option_l-1] != '\n') {
-	    fprintf(stderr,"Exceeded max line size (%d) in %s\n",
-                    CONFIG_MAX_LINE_SIZE-2, config_file);
+	    if (option_l < CONFIG_MAX_LINE_SIZE-1) {
+	        fprintf(stderr,"Line not terminated with a newline in %s\n",
+                        config_file);
+	    } else {
+	        fprintf(stderr,"Exceeded max line size (%d) in %s\n",
+                        CONFIG_MAX_LINE_SIZE-2, config_file);
+	    }
 	    return EX_CONFIG;
 	}
 
