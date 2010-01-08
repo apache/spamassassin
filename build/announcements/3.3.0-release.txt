@@ -82,11 +82,11 @@ COMPATIBILITY WITH 3.2.5
 - it may be worth mentioning that a rule DKIM_VERIFIED has been renamed
   to DKIM_VALID, to match its semantics;
 
-- due to a change in internal data structure (Bug 6185, 6254), third-party
-  plugins which accesss the $pms->{main}->{conf}->{headers_spam} (and ham)
-  need to be updated. One such example is the ClamAVPlugin plugin - please
-  find a fresh version on its wiki page. It retains backwards compatibility,
-  so can be used with both 3.2.5 as well as with SpamAssassin 3.3.0;
+- due to changes in some internal data structures (like Bug 6185, 6254),
+  some third-party plugins may need to be updated. One such example is
+  the ClamAVPlugin plugin - please find a fresh version on its wiki page.
+  The updated ClamAVPlugin plugin can be used with both 3.2.5 as well as
+  with SpamAssassin 3.3.0;
 
 - versions of amavisd-new between 2.5.2 and 2.6.1 (inclusive) are incompatible
   with SpamAssassin 3.3; please upgrade amavisd to 2.6.2 or later, or apply
@@ -101,11 +101,12 @@ COMPATIBILITY WITH 3.2.5
 INSTALLING RULES
 
 Rules are normally installed by running a sa-update command.
-The version of sa-update should match the version of SpamAssassin
-modules, so invoking sa-update should be performed after installing
+The version of sa-update program should match the version of SpamAssassin
+modules, so invoking sa-update should be performed only after installing
 or upgrading SpamAssassin code, not before.
 
-Installing rules from network is done with a single command:
+Installing rules from network is done with a single command,
+normally run as root:
   sa-update
 
 Installing rules from files:
