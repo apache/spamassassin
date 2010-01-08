@@ -140,6 +140,11 @@ http://wiki.apache.org/spamassassin/UsedViaProcmail
 Installing Rules
 ----------------
 
+Rules are normally installed by running a sa-update command.
+The version of sa-update program should match the version of SpamAssassin
+modules, so invoking sa-update should be performed only after installing
+or upgrading SpamAssassin code, not before.
+
 Installing rules from network is done with a single command:
 
         sa-update
@@ -162,17 +167,26 @@ Obtain a rules-signing public key:
 
     curl -O http://spamassassin.apache.org/updates/GPG.KEY
 
-Import the signing key to the SpamAssassin keyring, so that the rules
+Import the signing key to the SpamAssassin gpg keyring, so that the rules
 files can be verified safely:
 
     sa-update --import GPG.KEY
 
 Install rules from a compressed tar archive:
 
-    sa-update --install Mail-SpamAssassin-rules-3.3.0-rc1.r893295.tgz
+    sa-update --install Mail-SpamAssassin-rules-xxx.tgz
 
 Note that the ".tgz.asc", ".tgz.md5" and ".tgz.sha1" files all need to
 be in the same directory, otherwise sa-update will fail.
+
+
+If the intended rules destination directory differs from a default location
+as assumed by sa-update and SpamAssassin, such as when running a content
+filter within a Unix jail or on an unusual installation, please supply the
+rules destination directory to sa-update through its option --updatedir,
+such as:
+
+    sa-update --updatedir /var/jail/var/db/spamassassin/3.003000
 
 
 CPAN
