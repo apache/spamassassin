@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix jm wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 2: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix dos jm nbebout wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 3: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix dos wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2
+# with results from: day 1: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix dos jm nbebout wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 2: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix jm wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 3: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix dos jm nbebout wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2
 
 # tflags userconf
 ALL_TRUSTED
@@ -293,7 +293,7 @@ HELO_OEM
 HK_NAME_DRUGS
 
 # good enough
-HK_SPAMMY_FILENAME
+HS_VPXL
 
 # tflags userconf
 HTML_CHARSET_FARAWAY
@@ -303,6 +303,12 @@ IMG_DIRECT_TO_MX
 
 # good enough
 KAM_LOTTO1
+
+# good enough
+KAM_LOTTO2
+
+# good enough
+KB_DATE_CONTAINS_TAB
 
 # good enough
 KB_FAKED_THE_BAT
@@ -348,6 +354,9 @@ NO_RECEIVED
 
 # tflags userconf
 NO_RELAYS
+
+# good enough
+PART_CID_STOCK
 
 # tflags net
 PYZOR_CHECK
@@ -640,6 +649,9 @@ TWO_IPS_RCVD
 # good enough
 S25R_1
 
+# good enough
+TAB_IN_FROM
+
 # tflags userconf
 UNPARSEABLE_RELAY
 
@@ -714,6 +726,9 @@ USER_IN_WHITELIST_TO
 
 # good enough
 XMAILER_MIMEOLE_OL_09BB4
+
+# good enough
+XMAILER_MIMEOLE_OL_1ECD5
 
 # good enough
 XMAILER_MIMEOLE_OL_20C99
