@@ -142,6 +142,7 @@ GetOptions(
   'debug|D:s'                           => \$opt{'debug'},
   'version|V'                           => \$opt{'version'},
   'help|h|?'                            => \$opt{'help'},
+  'verbose|v'                           => \$opt{'verbose'},
   'checkonly'                           => \$opt{'checkonly'},
   'allowplugins'                        => \$opt{'allowplugins'},
   'refreshmirrors'                      => \$opt{'refreshmirrors'},
@@ -466,6 +467,8 @@ foreach my $channel (@channels) {
       next;
     }
 
+    print "Update available for channel $channel\n"  if $opt{'verbose'};
+
     # If we are only checking for update availability, exit now
     if ( defined $opt{'checkonly'} ) {            
       dbg("channel: $channel: update available, not downloading in checkonly mode");
@@ -482,6 +485,8 @@ foreach my $channel (@channels) {
       die "channel: $channel: --install file $instfile does not contain a 3-digit version number!\n";
     }
     $newV = $1;
+
+#   print "Update available for channel $channel\n"  if $opt{'verbose'};
 
     if ( defined $opt{'checkonly'} ) {            
       dbg("channel: $channel: --install and --checkonly, claiming update available");
@@ -507,6 +512,7 @@ foreach my $channel (@channels) {
     dbg("generic: lint checking site pre files once before attempting channel updates");
     unless (lint_check_dir(File::Spec->catfile($UPDTmp, "doesnotexist"))) {
       dbg("generic: lint of site pre files failed, cannot continue"); 
+      print "Lint of site pre files failed, cannot continue\n"  if $opt{'verbose'};
       $exit = 2;
       last;
     }
@@ -1003,6 +1009,21 @@ foreach ( $content_file, $UPDTmp ) {
 }
 
 dbg("diag: updates complete, exiting with code $exit");
+
+if ($opt{'verbose'}) {
+  if (!$exit) {
+    if (defined $opt{'checkonly'}) {
+      print "Update was available, but not installed in checkonly mode\n";
+    } else {
+      print "Update was available, and was downloaded and installed successfully\n";
+    }
+  } elsif ($exit == 1) {
+    print "Update finished, no fresh updates were available\n";
+  } else {
+    print "Update failed, exiting with code $exit\n";
+  }
+}
+
 exit $exit;
 
 ##############################################################################
@@ -1422,6 +1443,7 @@ Options:
                           (default: @@LOCAL_STATE_DIR@@/@@VERSION@@)
   --refreshmirrors        Force the MIRRORED.BY file to be updated
   -D, --debug [area=n,...]  Print debugging messages
+  -v, --verbose           Be more verbose, like print updated channel names
   -V, --version           Print version
   -h, --help              Print usage message
 
