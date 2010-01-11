@@ -69,16 +69,22 @@ $have_sha1 ? {
   address from an IPv6 addresses (and from IPv4 address on nondefault mask).",
 },
 {
+  module => 'Time::HiRes',
+  version => 0,
+  desc => 'Used by asynchronous DNS lookups to operate timeouts with subsecond
+  precision and to report processing times accurately.'
+},
+{
   module => 'Archive::Tar',
   version => '1.23',
   desc => 'The "sa-update" program requires this module to access tar update
   archive files.',
 },
 {
-  module => 'Time::HiRes',
-  version => 0,
-  desc => 'Used by asynchronous DNS lookups to operate timeouts with subsecond
-  precision and to report processing times accurately.'
+  module => 'IO::Zlib',
+  version => '1.04',
+  desc => 'The "sa-update" program requires this module to access compressed
+  update archive files.',
 },
 );
 
@@ -200,12 +206,6 @@ $have_sha ? {
   version => 0,
   desc => 'The "sa-update" program requires this module to make HTTP
   If-Modified-Since GET requests.',
-},
-{
-  module => 'IO::Zlib',
-  version => '1.04',
-  desc => 'The "sa-update" program requires this module to access compressed
-  update archive files.',
 },
 {
   module => 'Encode::Detect',
