@@ -1032,9 +1032,15 @@ sub _replace_tags {
   my $v;
   local($1,$2,$3);
   $text =~ s{(_(\w+?)(?:\((.*?)\))?_)}{
-	my $full = $1;
+        my $full = $1;
         my $tag = $2;
-        my $result = $self->_get_tag($tag,$3);
+        my $result;
+        if ($tag =~ /^ADDEDHEADER(?:HAM|SPAM|)\z/) {
+          # Bug 6278: break infinite recursion through _get_added_headers and
+          # _get_tag on an attempt to use such tag in add_header template
+        } else {
+          $result = $self->_get_tag($tag,$3);
+        }
         defined $result ? $result : $full;
       }ge;
 
