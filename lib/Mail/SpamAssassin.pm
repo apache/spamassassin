@@ -1840,13 +1840,15 @@ sub get_and_create_userstate_dir {
     dbg("config: using \"$fname\" for user state dir");
   }
 
+  # if this is not a dir, not readable, or we are unable to create the dir,
+  # this is not (yet) a serious error; in fact, it's not even worth
+  # a warning at all times, so use dbg().  see bug 6268
   my $stat_errn = stat($fname) ? 0 : 0+$!;
   if ($stat_errn == 0 && !-d _) {
-    die "config: $fname exists but is not a directory\n";
+    dbg("config: $fname exists but is not a directory");
   } elsif ($stat_errn != 0 && $stat_errn != ENOENT) {
-    die "config: error accessing $fname: $!\n";
+    dbg("config: error accessing $fname: $!");
   } else {  # does not exist, create it
-    # not being able to create the *dir* is not worth a warning at all times
     eval {
       mkpath($fname, 0, 0700);  1;
     } or do {
