@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix jm nbebout wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 2: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix dos jm nbebout wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 3: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix jm wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2
+# with results from: day 1: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix jm nbebout wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 2: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix jm nbebout wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 3: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix dos jm nbebout wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2
 
 # tflags userconf
 ALL_TRUSTED
@@ -131,9 +131,6 @@ FB_CIALIS_LEO3
 FB_EXTRA_INCHES
 
 # good enough
-FB_GVR
-
-# good enough
 FB_QUALITY_REPLICA
 
 # good enough
@@ -203,7 +200,13 @@ FROM_MISSP_FREEMAIL
 FROM_MISSP_MSFT
 
 # good enough
+FRT_APPROV
+
+# good enough
 FRT_PHARMAC
+
+# good enough
+FRT_ROLEX
 
 # good enough
 FR_TITLE_NUMS
@@ -216,6 +219,9 @@ FSL_HELO_BARE_IP_1
 
 # good enough
 FSL_HELO_DEVICE
+
+# good enough
+FSL_HELO_NON_FQDN_1
 
 # good enough
 FSL_YG_ABUSE
@@ -348,9 +354,6 @@ NO_RECEIVED
 
 # tflags userconf
 NO_RELAYS
-
-# good enough
-PART_CID_STOCK
 
 # tflags net
 PYZOR_CHECK
@@ -545,6 +548,9 @@ RCVD_IN_SORBS_ZOMBIE
 RCVD_IN_XBL
 
 # good enough
+REPLYTO_WITHOUT_TO_CC
+
+# good enough
 S25R_4
 
 # good enough
@@ -561,6 +567,9 @@ SANE_4ef8302546bf270a19baf98508afacc4
 
 # good enough
 SANE_7429530a7398f43f1f1b795f9420714e
+
+# good enough
+SANE_91eb43f705d25c804374a746d7519660
 
 # good enough
 SANE_d0d2b0f6373bf91253d66dd74c594b87
@@ -617,6 +626,9 @@ TAB_IN_FROM
 TO_NO_BRKTS_DYNIP
 
 # good enough
+TT_MSGID_TRUNC
+
+# good enough
 TVD_FINGER_02
 
 # good enough
@@ -641,7 +653,34 @@ TVD_VISIT_PHARMA
 TWO_IPS_RCVD
 
 # good enough
-HK_SPAMMY_FILENAME
+FB_WITHOUT_PRESC
+
+# good enough
+FRT_ERECTION
+
+# good enough
+FSL_LSPACES_ABUSE
+
+# good enough
+HK_NAME_FREE
+
+# good enough
+HK_PNIS
+
+# good enough
+JM_FAKE_PSMTP_RCVD
+
+# good enough
+MANY_GOOG_PROXY
+
+# good enough
+S25R_1
+
+# good enough
+SANE_b58d7945d89b7afc9e2753c83b00ab44
+
+# good enough
+THREAD_INDEX_HEX
 
 # tflags userconf
 UNPARSEABLE_RELAY
