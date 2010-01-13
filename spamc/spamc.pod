@@ -299,9 +299,10 @@ message.
 The B<-c> and B<-E> options modify this; instead, spamc will use an exit code
 of C<1> if the message is determined to be spam.
 
-If the C<-x> option is specified, 'safe fallback' will be disabled, and certain
-error conditions related to communication between spamc and spamd will result 
-in an error code.  The exit codes used are as follows:
+If one of the C<-x>, C<-L> or C<-C> options are specified, 'safe fallback' will
+be disabled, and certain error conditions related to communication between
+spamc and spamd will result in an error code.  The exit codes used are as
+follows:
 
     EX_USAGE        64  command line usage error
     EX_DATAERR      65  data format error       
@@ -318,6 +319,7 @@ in an error code.  The exit codes used are as follows:
     EX_PROTOCOL     76  remote error in protocol
     EX_NOPERM       77  permission denied
     EX_CONFIG       78  configuration error
+    EX_TOOBIG       98  message was too big to process (see --max-size)
 
 =head1 SEE ALSO
 
