@@ -2646,7 +2646,7 @@ general running of SpamAssassin.
     setting => 'test',
     is_admin => 1,
     code => sub {
-      return unless defined($COLLECT_REGRESSION_TESTS);
+      return unless defined($Mail::SpamAssassin::Conf::COLLECT_REGRESSION_TESTS);
       my ($self, $key, $value, $line) = @_;
       local ($1,$2,$3);
       if ($value !~ /^(\S+)\s+(ok|fail)\s+(.*)$/) { return $INVALID_VALUE; }
