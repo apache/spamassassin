@@ -96,6 +96,8 @@ use vars qw{
   $CONF_TYPE_STRING $CONF_TYPE_BOOL
   $CONF_TYPE_NUMERIC $CONF_TYPE_HASH_KEY_VALUE
   $CONF_TYPE_ADDRLIST $CONF_TYPE_TEMPLATE
+  $CONF_TYPE_STRINGLIST $CONF_TYPE_IPADDRLIST
+  $CONF_TYPE_NOARGS
   $INVALID_VALUE $MISSING_REQUIRED_VALUE
   @MIGRATED_SETTINGS
 
@@ -133,12 +135,15 @@ $VERSION = 'bogus';     # avoid CPAN.pm picking up version strings later
 # these are variables instead of constants so that other classes can
 # access them; if they're constants, they'd have to go in Constants.pm
 # TODO: move to Constants.pm?
-$CONF_TYPE_STRING           = 1;
-$CONF_TYPE_BOOL             = 2;
-$CONF_TYPE_NUMERIC          = 3;
-$CONF_TYPE_HASH_KEY_VALUE   = 4;
-$CONF_TYPE_ADDRLIST         = 5;
-$CONF_TYPE_TEMPLATE         = 6;
+$CONF_TYPE_STRING           =  1;
+$CONF_TYPE_BOOL             =  2;
+$CONF_TYPE_NUMERIC          =  3;
+$CONF_TYPE_HASH_KEY_VALUE   =  4;
+$CONF_TYPE_ADDRLIST         =  5;
+$CONF_TYPE_TEMPLATE         =  6;
+$CONF_TYPE_NOARGS           =  7;
+$CONF_TYPE_STRINGLIST       =  8;
+$CONF_TYPE_IPADDRLIST       =  9;
 $MISSING_REQUIRED_VALUE     = -99999999999999;
 $INVALID_VALUE              = -99999999999998;
 
@@ -179,7 +184,7 @@ name is still accepted, but is deprecated.
     setting => 'required_score',
     aliases => ['required_hits'],       # backwards compat
     default => 5,
-    type => $CONF_TYPE_NUMERIC
+    type => $CONF_TYPE_NUMERIC,
   });
 
 =item score SYMBOLIC_TEST_NAME n.nn [ n.nn n.nn n.nn ]
@@ -314,7 +319,7 @@ e.g.
 
   push (@cmds, {
     setting => 'whitelist_from',
-    type => $Mail::SpamAssassin::Conf::CONF_TYPE_ADDRLIST
+    type => $CONF_TYPE_ADDRLIST,
   });
 
 =item unwhitelist_from add@ress.com
@@ -335,6 +340,7 @@ e.g.
   push (@cmds, {
     command => 'unwhitelist_from',
     setting => 'whitelist_from',
+    type => $CONF_TYPE_ADDRLIST,
     code => \&Mail::SpamAssassin::Conf::Parser::remove_addrlist_value
   });
 
@@ -375,14 +381,14 @@ these are often targets for spammer spoofing.
 
   push (@cmds, {
     setting => 'whitelist_from_rcvd',
-    type => $Mail::SpamAssassin::Conf::CONF_TYPE_ADDRLIST,
+    type => $CONF_TYPE_ADDRLIST,
     code => sub {
       my ($self, $key, $value, $line) = @_;
       unless (defined $value && $value !~ /^$/) {
-	return $Mail::SpamAssassin::Conf::MISSING_REQUIRED_VALUE;
+	return $MISSING_REQUIRED_VALUE;
       }
       unless ($value =~ /^\S+\s+\S+$/) {
-	return $Mail::SpamAssassin::Conf::INVALID_VALUE;
+	return $INVALID_VALUE;
       }
       $self->{parser}->add_to_addrlist_rcvd ('whitelist_from_rcvd',
                                         split(/\s+/, $value));
@@ -391,14 +397,14 @@ these are often targets for spammer spoofing.
 
   push (@cmds, {
     setting => 'def_whitelist_from_rcvd',
-    type => $Mail::SpamAssassin::Conf::CONF_TYPE_ADDRLIST,
+    type => $CONF_TYPE_ADDRLIST,
     code => sub {
       my ($self, $key, $value, $line) = @_;
       unless (defined $value && $value !~ /^$/) {
-	return $Mail::SpamAssassin::Conf::MISSING_REQUIRED_VALUE;
+	return $MISSING_REQUIRED_VALUE;
       }
       unless ($value =~ /^\S+\s+\S+$/) {
-	return $Mail::SpamAssassin::Conf::INVALID_VALUE;
+	return $INVALID_VALUE;
       }
       $self->{parser}->add_to_addrlist_rcvd ('def_whitelist_from_rcvd',
                                         split(/\s+/, $value));
@@ -434,7 +440,7 @@ e.g.
 
   push (@cmds, {
     setting => 'whitelist_allows_relays',
-    type => $Mail::SpamAssassin::Conf::CONF_TYPE_ADDRLIST
+    type => $CONF_TYPE_ADDRLIST,
   });
 
 =item unwhitelist_from_rcvd add@ress.com
@@ -456,13 +462,14 @@ e.g.
 
   push (@cmds, {
     setting => 'unwhitelist_from_rcvd',
+    type => $CONF_TYPE_ADDRLIST,
     code => sub {
       my ($self, $key, $value, $line) = @_;
       unless (defined $value && $value !~ /^$/) {
-	return $Mail::SpamAssassin::Conf::MISSING_REQUIRED_VALUE;
+	return $MISSING_REQUIRED_VALUE;
       }
       unless ($value =~ /^(?:\S+(?:\s+\S+)*)$/) {
-	return $Mail::SpamAssassin::Conf::INVALID_VALUE;
+	return $INVALID_VALUE;
       }
       $self->{parser}->remove_from_addrlist_rcvd('whitelist_from_rcvd',
                                         split (/\s+/, $value));
@@ -480,7 +487,7 @@ non-spam, but which the user doesn't want.  Same format as C<whitelist_from>.
 
   push (@cmds, {
     setting => 'blacklist_from',
-    type => $Mail::SpamAssassin::Conf::CONF_TYPE_ADDRLIST
+    type => $CONF_TYPE_ADDRLIST,
   });
 
 =item unblacklist_from add@ress.com
@@ -503,7 +510,7 @@ e.g.
   push (@cmds, {
     command => 'unblacklist_from',
     setting => 'blacklist_from',
-    type => $Mail::SpamAssassin::Conf::CONF_TYPE_ADDRLIST,
+    type => $CONF_TYPE_ADDRLIST,
     code => \&Mail::SpamAssassin::Conf::Parser::remove_addrlist_value
   });
 
@@ -549,15 +556,15 @@ See above.
 
   push (@cmds, {
     setting => 'whitelist_to',
-    type => $Mail::SpamAssassin::Conf::CONF_TYPE_ADDRLIST
+    type => $CONF_TYPE_ADDRLIST,
   });
   push (@cmds, {
     setting => 'more_spam_to',
-    type => $Mail::SpamAssassin::Conf::CONF_TYPE_ADDRLIST
+    type => $CONF_TYPE_ADDRLIST,
   });
   push (@cmds, {
     setting => 'all_spam_to',
-    type => $Mail::SpamAssassin::Conf::CONF_TYPE_ADDRLIST
+    type => $CONF_TYPE_ADDRLIST,
   });
 
 =item blacklist_to add@ress.com
@@ -570,7 +577,7 @@ be blacklisted.  Same format as C<blacklist_from>.
 
   push (@cmds, {
     setting => 'blacklist_to',
-    type => $Mail::SpamAssassin::Conf::CONF_TYPE_ADDRLIST
+    type => $CONF_TYPE_ADDRLIST,
   });
 
 =item whitelist_auth add@ress.com
@@ -604,12 +611,12 @@ these are often targets for spammer spoofing.
 
   push (@cmds, {
     setting => 'whitelist_auth',
-    type => $Mail::SpamAssassin::Conf::CONF_TYPE_ADDRLIST
+    type => $CONF_TYPE_ADDRLIST,
   });
 
   push (@cmds, {
     setting => 'def_whitelist_auth',
-    type => $Mail::SpamAssassin::Conf::CONF_TYPE_ADDRLIST
+    type => $CONF_TYPE_ADDRLIST,
   });
 
 =item unwhitelist_auth add@ress.com
@@ -627,6 +634,7 @@ e.g.
   push (@cmds, {
     command => 'unwhitelist_auth',
     setting => 'whitelist_auth',
+    type => $CONF_TYPE_ADDRLIST,
     code => \&Mail::SpamAssassin::Conf::Parser::remove_addrlist_value
   });
 
@@ -828,8 +836,12 @@ determine that SpamAssassin is running.
 
   push (@cmds, {
     setting => 'clear_headers',
+    type => $CONF_TYPE_NOARGS,
     code => sub {
       my ($self, $key, $value, $line) = @_;
+      unless (!defined $value || $value eq '') {
+        return $INVALID_VALUE;
+      }
       my @h = grep { lc($_->[0]) eq "checker-version" }
                    @{$self->{headers_ham}};
       $self->{headers_ham}  = !@h ? [] : [ $h[0] ];
@@ -937,7 +949,7 @@ Select the locales to allow from the list below:
   push (@cmds, {
     setting => 'ok_locales',
     default => 'all',
-    type => $CONF_TYPE_STRING
+    type => $CONF_TYPE_STRING,
   });
 
 =item normalize_charset ( 0 | 1)        (default: 0)
@@ -1055,16 +1067,7 @@ Otherwise this host, and all further hosts, are consider untrusted.
 
   push (@cmds, {
     setting => 'trusted_networks',
-    code => sub {
-      my ($self, $key, $value, $line) = @_;
-      unless (defined $value && $value !~ /^$/) {
-	return $MISSING_REQUIRED_VALUE;
-      }
-      foreach my $net (split (/\s+/, $value)) {
-        $self->{trusted_networks}->add_cidr ($net);
-      }
-      $self->{trusted_networks_configured} = 1;
-    }
+    type => $CONF_TYPE_IPADDRLIST,
   });
 
 =item clear_trusted_networks
@@ -1075,8 +1078,12 @@ Empty the list of trusted networks.
 
   push (@cmds, {
     setting => 'clear_trusted_networks',
+    type => $CONF_TYPE_NOARGS,
     code => sub {
       my ($self, $key, $value, $line) = @_;
+      unless (!defined $value || $value eq '') {
+        return $INVALID_VALUE;
+      }
       $self->{trusted_networks} = $self->new_netset();
       $self->{trusted_networks_configured} = 0;
     }
@@ -1114,16 +1121,7 @@ your config.
 
   push (@cmds, {
     setting => 'internal_networks',
-    code => sub {
-      my ($self, $key, $value, $line) = @_;
-      unless (defined $value && $value !~ /^$/) {
-	return $MISSING_REQUIRED_VALUE;
-      }
-      foreach my $net (split (/\s+/, $value)) {
-        $self->{internal_networks}->add_cidr ($net);
-      }
-      $self->{internal_networks_configured} = 1;
-    }
+    type => $CONF_TYPE_IPADDRLIST,
   });
 
 =item clear_internal_networks
@@ -1134,8 +1132,12 @@ Empty the list of internal networks.
 
   push (@cmds, {
     setting => 'clear_internal_networks',
+    type => $CONF_TYPE_NOARGS,
     code => sub {
       my ($self, $key, $value, $line) = @_;
+      unless (!defined $value || $value eq '') {
+        return $INVALID_VALUE;
+      }
       $self->{internal_networks} = $self->new_netset();
       $self->{internal_networks_configured} = 0;
     }
@@ -1172,16 +1174,7 @@ external relays being trusted.
 
   push (@cmds, {
     setting => 'msa_networks',
-    code => sub {
-      my ($self, $key, $value, $line) = @_;
-      unless (defined $value && $value !~ /^$/) {
-	return $MISSING_REQUIRED_VALUE;
-      }
-      foreach my $net (split (/\s+/, $value)) {
-        $self->{msa_networks}->add_cidr ($net);
-      }
-      $self->{msa_networks_configured} = 1;
-    }
+    type => $CONF_TYPE_IPADDRLIST,
   });
 
 =item clear_msa_networks
@@ -1192,8 +1185,12 @@ Empty the list of msa networks.
 
   push (@cmds, {
     setting => 'clear_msa_networks',
+    type => $CONF_TYPE_NOARGS,
     code => sub {
       my ($self, $key, $value, $line) = @_;
+      unless (!defined $value || $value eq '') {
+        return $INVALID_VALUE;
+      }
       $self->{msa_networks} = Mail::SpamAssassin::NetSet->new(); # not new_netset
       $self->{msa_networks_configured} = 0;
     }
@@ -1216,6 +1213,7 @@ but they may be in the future.
   push (@cmds, {
     setting => 'originating_ip_headers',
     default => [],
+    type => $CONF_TYPE_STRINGLIST,
     code => sub {
       my ($self, $key, $value, $line) = @_;
       unless (defined $value && $value !~ /^$/) {
@@ -1233,8 +1231,12 @@ Empty the list of 'originating IP address' header field names.
 
   push (@cmds, {
     setting => 'clear_originating_ip_headers',
+    type => $CONF_TYPE_NOARGS,
     code => sub {
       my ($self, $key, $value, $line) = @_;
+      unless (!defined $value || $value eq '') {
+        return $INVALID_VALUE;
+      }
       $self->{originating_ip_headers} = [];
     }
   });
@@ -1249,7 +1251,7 @@ more trusted relays.  See also C<envelope_sender_header>.
   push (@cmds, {
     setting => 'always_trust_envelope_sender',
     default => 0,
-    type => $CONF_TYPE_BOOL
+    type => $CONF_TYPE_BOOL,
   });
 
 =item skip_rbl_checks ( 0 | 1 )   (default: 0)
@@ -1268,7 +1270,7 @@ which controls the URIDNSBL plugin (documented in the URIDNSBL man page).
   push (@cmds, {
     setting => 'skip_rbl_checks',
     default => 0,
-    type => $CONF_TYPE_BOOL
+    type => $CONF_TYPE_BOOL,
   });
 
 =item dns_available { yes | test[: name1 name2...] | no }   (default: test)
@@ -1367,7 +1369,7 @@ human-trained classifiers.
   push (@cmds, {
     setting => 'use_learner',
     default => 1,
-    type => $CONF_TYPE_BOOL
+    type => $CONF_TYPE_BOOL,
   });
 
 =item use_bayes ( 0 | 1 )		(default: 1)
@@ -1381,7 +1383,7 @@ operations.
   push (@cmds, {
     setting => 'use_bayes',
     default => 1,
-    type => $CONF_TYPE_BOOL
+    type => $CONF_TYPE_BOOL,
   });
 
 =item use_bayes_rules ( 0 | 1 )		(default: 1)
@@ -1395,7 +1397,7 @@ auto and manual learning enabled.
   push (@cmds, {
     setting => 'use_bayes_rules',
     default => 1,
-    type => $CONF_TYPE_BOOL
+    type => $CONF_TYPE_BOOL,
   });
 
 =item bayes_auto_learn ( 0 | 1 )      (default: 1)
@@ -1413,7 +1415,7 @@ for details on how Bayes auto-learning is implemented by default.
   push (@cmds, {
     setting => 'bayes_auto_learn',
     default => 1,
-    type => $CONF_TYPE_BOOL
+    type => $CONF_TYPE_BOOL,
   });
 
 =item bayes_ignore_header header_name
@@ -1432,6 +1434,8 @@ setting.  Example:
 
   push (@cmds, {
     setting => 'bayes_ignore_header',
+    default => [],
+    type => $CONF_TYPE_STRINGLIST,
     code => sub {
       my ($self, $key, $value, $line) = @_;
       if ($value eq '') {
@@ -1468,7 +1472,7 @@ be listed.
 
   push (@cmds, {
     setting => 'bayes_ignore_from',
-    type => $CONF_TYPE_ADDRLIST
+    type => $CONF_TYPE_ADDRLIST,
   });
 
 =item bayes_ignore_to add@ress.com
@@ -1480,7 +1484,7 @@ to the listed addresses.  See C<bayes_ignore_from> for details.
 
   push (@cmds, {
     setting => 'bayes_ignore_to',
-    type => $CONF_TYPE_ADDRLIST
+    type => $CONF_TYPE_ADDRLIST,
   });
 
 =item bayes_min_ham_num			(Default: 200)
@@ -1496,12 +1500,12 @@ spam, but you can tune these up or down with these two settings.
   push (@cmds, {
     setting => 'bayes_min_ham_num',
     default => 200,
-    type => $CONF_TYPE_NUMERIC
+    type => $CONF_TYPE_NUMERIC,
   });
   push (@cmds, {
     setting => 'bayes_min_spam_num',
     default => 200,
-    type => $CONF_TYPE_NUMERIC
+    type => $CONF_TYPE_NUMERIC,
   });
 
 =item bayes_learn_during_report         (Default: 1)
@@ -1515,7 +1519,7 @@ this option to 0.
   push (@cmds, {
     setting => 'bayes_learn_during_report',
     default => 1,
-    type => $CONF_TYPE_BOOL
+    type => $CONF_TYPE_BOOL,
   });
 
 =item bayes_sql_override_username
@@ -1531,7 +1535,7 @@ group bayes databases.
   push (@cmds, {
     setting => 'bayes_sql_override_username',
     default => '',
-    type => $CONF_TYPE_STRING
+    type => $CONF_TYPE_STRING,
   });
 
 =item bayes_use_hapaxes		(default: 1)
@@ -1545,7 +1549,7 @@ increases database size by about a factor of 8 to 10.
   push (@cmds, {
     setting => 'bayes_use_hapaxes',
     default => 1,
-    type => $CONF_TYPE_BOOL
+    type => $CONF_TYPE_BOOL,
   });
 
 =item bayes_journal_max_size		(default: 102400)
@@ -1560,7 +1564,7 @@ syncing will not occur.
   push (@cmds, {
     setting => 'bayes_journal_max_size',
     default => 102400,
-    type => $CONF_TYPE_NUMERIC
+    type => $CONF_TYPE_NUMERIC,
   });
 
 =item bayes_expiry_max_db_size		(default: 150000)
@@ -1575,7 +1579,7 @@ equivalent to a 8Mb database file.
   push (@cmds, {
     setting => 'bayes_expiry_max_db_size',
     default => 150000,
-    type => $CONF_TYPE_NUMERIC
+    type => $CONF_TYPE_NUMERIC,
   });
 
 =item bayes_auto_expire       		(default: 1)
@@ -1589,7 +1593,7 @@ database surpasses the bayes_expiry_max_db_size value.
   push (@cmds, {
     setting => 'bayes_auto_expire',
     default => 1,
-    type => $CONF_TYPE_BOOL
+    type => $CONF_TYPE_BOOL,
   });
 
 =item bayes_learn_to_journal  	(default: 0)
@@ -1605,7 +1609,7 @@ delay before the updates are actually committed to the Bayes database.
   push (@cmds, {
     setting => 'bayes_learn_to_journal',
     default => 0,
-    type => $CONF_TYPE_BOOL
+    type => $CONF_TYPE_BOOL,
   });
 
 =back
@@ -1737,7 +1741,7 @@ long lines.  RFC 2822 required that header lines do not exceed 998 characters
   push (@cmds, {
     setting => 'fold_headers',
     default => 1,
-    type => $CONF_TYPE_BOOL
+    type => $CONF_TYPE_BOOL,
   });
 
 =item report_safe_copy_headers header_name ...
@@ -1752,6 +1756,8 @@ separated by spaces, or you can just use multiple lines.
 
   push (@cmds, {
     setting => 'report_safe_copy_headers',
+    default => [],
+    type => $CONF_TYPE_STRINGLIST,
     code => sub {
       my ($self, $key, $value, $line) = @_;
       if ($value eq '') {
@@ -1808,7 +1814,7 @@ example:
   push (@cmds, {
     setting => 'envelope_sender_header',
     default => undef,
-    type => $CONF_TYPE_STRING
+    type => $CONF_TYPE_STRING,
   });
 
 =item describe SYMBOLIC_TEST_NAME description ...
@@ -1827,7 +1833,7 @@ length to no more than 50 characters.
     command => 'describe',
     setting => 'descriptions',
     is_frequent => 1,
-    type => $CONF_TYPE_HASH_KEY_VALUE
+    type => $CONF_TYPE_HASH_KEY_VALUE,
   });
 
 =item report_charset CHARSET		(default: unset)
@@ -1840,7 +1846,7 @@ is attached to spam mail messages.
   push (@cmds, {
     setting => 'report_charset',
     default => '',
-    type => $CONF_TYPE_STRING
+    type => $CONF_TYPE_STRING,
   });
 
 =item report ...some text for a report...
@@ -1860,7 +1866,8 @@ Tags can be included as explained above.
   push (@cmds, {
     command => 'report',
     setting => 'report_template',
-    type => $CONF_TYPE_TEMPLATE
+    default => '',
+    type => $CONF_TYPE_TEMPLATE,
   });
 
 =item clear_report_template
@@ -1872,7 +1879,7 @@ Clear the report template.
   push (@cmds, {
     command => 'clear_report_template',
     setting => 'report_template',
-    default => '',
+    type => $CONF_TYPE_NOARGS,
     code => \&Mail::SpamAssassin::Conf::Parser::set_template_clear
   });
 
@@ -1887,7 +1894,7 @@ of the system the scanner is running on is also included.
   push (@cmds, {
     setting => 'report_contact',
     default => 'the administrator of that system',
-    type => $CONF_TYPE_STRING
+    type => $CONF_TYPE_STRING,
   });
 
 =item report_hostname ...hostname to use...
@@ -1901,7 +1908,7 @@ SpamAssassin calls itself.
   push (@cmds, {
     setting => 'report_hostname',
     default => '',
-    type => $CONF_TYPE_STRING
+    type => $CONF_TYPE_STRING,
   });
 
 =item unsafe_report ...some text for a report...
@@ -1921,7 +1928,7 @@ Tags can be used in this template (see above for details).
     command => 'unsafe_report',
     setting => 'unsafe_report_template',
     default => '',
-    type => $CONF_TYPE_TEMPLATE
+    type => $CONF_TYPE_TEMPLATE,
   });
 
 =item clear_unsafe_report_template
@@ -1933,6 +1940,7 @@ Clear the unsafe_report template.
   push (@cmds, {
     command => 'clear_unsafe_report_template',
     setting => 'unsafe_report_template',
+    type => $CONF_TYPE_NOARGS,
     code => \&Mail::SpamAssassin::Conf::Parser::set_template_clear
   });
 
@@ -2500,7 +2508,7 @@ B<Mail::SpamAssassin::Plugin::Reuse>.
     code => sub {
       my ($self, $key, $value, $line) = @_;
       if ($value !~ /\s*(\w+)(?:\s+(?:\w+(?:\s+\w+)*))?\s*$/) {
-        return $Mail::SpamAssassin::Conf::INVALID_VALUE;
+        return $INVALID_VALUE;
       }
       my $rule_name = $1;
       # don't overwrite tests, just define them so scores, priorities work
@@ -2557,7 +2565,7 @@ Only affects header, body, rawbody, uri, and full tests.
     setting => 'tflags',
     is_frequent => 1,
     is_priv => 1,
-    type => $CONF_TYPE_HASH_KEY_VALUE
+    type => $CONF_TYPE_HASH_KEY_VALUE,
   });
 
 =item priority SYMBOLIC_TEST_NAME n
@@ -2575,7 +2583,7 @@ internally, and should not be used.
   push (@cmds, {
     setting => 'priority',
     is_priv => 1,
-    type => $CONF_TYPE_HASH_KEY_VALUE
+    type => $CONF_TYPE_HASH_KEY_VALUE,
   });
 
 =back
@@ -2638,7 +2646,7 @@ general running of SpamAssassin.
     setting => 'test',
     is_admin => 1,
     code => sub {
-      return unless defined($Mail::SpamAssassin::Conf::COLLECT_REGRESSION_TESTS);
+      return unless defined($COLLECT_REGRESSION_TESTS);
       my ($self, $key, $value, $line) = @_;
       local ($1,$2,$3);
       if ($value !~ /^(\S+)\s+(ok|fail)\s+(.*)$/) { return $INVALID_VALUE; }
@@ -2705,7 +2713,7 @@ subdomain of the specified zone.
         $self->{by_zone}{$zone}{rbl_timeout_min} = $2+0  if defined $2;
       }
     },
-    type => $CONF_TYPE_NUMERIC
+    type => $CONF_TYPE_NUMERIC,
   });
 
 =item util_rb_tld tld1 tld2 ...
@@ -2806,6 +2814,7 @@ more effective with individual user databases.
     setting => 'bayes_path',
     is_admin => 1,
     default => '__userstate__/bayes',
+    type => $CONF_TYPE_STRING,
     code => sub {
       my ($self, $key, $value, $line) = @_;
       unless (defined $value && $value !~ /^$/) {
@@ -2877,7 +2886,7 @@ This option give the connect string used to connect to the SQL based Bayes stora
     setting => 'bayes_sql_dsn',
     is_admin => 1,
     default => '',
-    type => $CONF_TYPE_STRING
+    type => $CONF_TYPE_STRING,
   });
 
 =item bayes_sql_username
@@ -2892,7 +2901,7 @@ This option gives the username used by the above DSN.
     setting => 'bayes_sql_username',
     is_admin => 1,
     default => '',
-    type => $CONF_TYPE_STRING
+    type => $CONF_TYPE_STRING,
   });
 
 =item bayes_sql_password
@@ -2907,7 +2916,7 @@ This option gives the password used by the above DSN.
     setting => 'bayes_sql_password',
     is_admin => 1,
     default => '',
-    type => $CONF_TYPE_STRING
+    type => $CONF_TYPE_STRING,
   });
 
 =item bayes_sql_username_authorized ( 0 | 1 )  (default: 0)
@@ -2929,7 +2938,7 @@ bayes_sql_override_username config option.
     setting => 'bayes_sql_username_authorized',
     is_admin => 1,
     default => 0,
-    type => $CONF_TYPE_BOOL
+    type => $CONF_TYPE_BOOL,
   });
 
 =item user_scores_dsn DBI:databasetype:databasename:hostname:port
@@ -2955,7 +2964,7 @@ Example: C<ldap://localhost:389/dc=koehntopp,dc=de?spamassassinconfig?uid=__USER
     setting => 'user_scores_dsn',
     is_admin => 1,
     default => '',
-    type => $CONF_TYPE_STRING
+    type => $CONF_TYPE_STRING,
   });
 
 =item user_scores_sql_username username
@@ -2968,7 +2977,7 @@ The authorized username to connect to the above DSN.
     setting => 'user_scores_sql_username',
     is_admin => 1,
     default => '',
-    type => $CONF_TYPE_STRING
+    type => $CONF_TYPE_STRING,
   });
 
 =item user_scores_sql_password password
@@ -2981,7 +2990,7 @@ The password for the database username, for the above DSN.
     setting => 'user_scores_sql_password',
     is_admin => 1,
     default => '',
-    type => $CONF_TYPE_STRING
+    type => $CONF_TYPE_STRING,
   });
 
 =item user_scores_sql_custom_query query
@@ -3044,7 +3053,7 @@ C<SELECT preference, value FROM _TABLE_ WHERE username = _USERNAME_ OR username 
     setting => 'user_scores_sql_custom_query',
     is_admin => 1,
     default => undef,
-    type => $CONF_TYPE_STRING
+    type => $CONF_TYPE_STRING,
   });
 
 =item user_scores_ldap_username
@@ -3060,7 +3069,7 @@ Example: C<cn=master,dc=koehntopp,dc=de>
     setting => 'user_scores_ldap_username',
     is_admin => 1,
     default => '',
-    type => $CONF_TYPE_STRING
+    type => $CONF_TYPE_STRING,
   });
 
 =item user_scores_ldap_password
@@ -3074,7 +3083,7 @@ to the empty string ("").
     setting => 'user_scores_ldap_password',
     is_admin => 1,
     default => '',
-    type => $CONF_TYPE_STRING
+    type => $CONF_TYPE_STRING,
   });
 
 =item loadplugin PluginModuleName [/path/module.pm]
@@ -3156,7 +3165,7 @@ end with a '|'.  Also ignore rules with C<some> combinatorial explosions.
     setting  => 'ignore_always_matching_regexps',
     is_admin => 1,
     default  => 0,
-    type     => $CONF_TYPE_BOOL
+    type     => $CONF_TYPE_BOOL,
   });
 
 =back
@@ -3253,6 +3262,7 @@ version.  So 3.0.0 is C<3.000000>, and 3.4.80 is C<3.004080>.
 
   push (@cmds, {
     setting => 'require_version',
+    type => $CONF_TYPE_STRING,
     code => sub {
     }
   });

@@ -156,6 +156,7 @@ characters in the range [0-9A-Za-z ,._/-] are allowed for security reasons.
     setting => 'pyzor_options',
     is_admin => 1,
     default => '',
+    type => $Mail::SpamAssassin::Conf::CONF_TYPE_STRING,
     code => sub {
       my ($self, $key, $value, $line) = @_;
       if ($value !~ m{^([0-9A-Za-z ,._/-]+)$}) {
@@ -178,6 +179,7 @@ you should use this, as the current PATH will have been cleared.
     setting => 'pyzor_path',
     is_admin => 1,
     default => undef,
+    type => $Mail::SpamAssassin::Conf::CONF_TYPE_STRING,
     code => sub {
       my ($self, $key, $value, $line) = @_;
       if (!defined $value || !length $value) {

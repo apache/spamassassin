@@ -56,13 +56,15 @@ An [aryref] of other aliases for the same command.  optional.
 
 The type of this setting:
 
-           - $CONF_TYPE_STRING: string
-           - $CONF_TYPE_NUMERIC: numeric value (float or int)
-           - $CONF_TYPE_BOOL: boolean (0/no or 1/yes)
-           - $CONF_TYPE_TEMPLATE: template, like "report"
-           - $CONF_TYPE_ADDRLIST: mail address list, like "whitelist_from"
-           - $CONF_TYPE_HASH_KEY_VALUE: hash key/value pair,
-             like "describe" or tflags
+ - $CONF_TYPE_NOARGS: must not have any argument, like "clear_headers"
+ - $CONF_TYPE_STRING: string
+ - $CONF_TYPE_NUMERIC: numeric value (float or int)
+ - $CONF_TYPE_BOOL: boolean (0/no or 1/yes)
+ - $CONF_TYPE_TEMPLATE: template, like "report"
+ - $CONF_TYPE_ADDRLIST: list of mail addresses, like "whitelist_from"
+ - $CONF_TYPE_HASH_KEY_VALUE: hash key/value pair, like "describe" or tflags
+ - $CONF_TYPE_STRINGLIST list of strings, stored as an array
+ - $CONF_TYPE_IPADDRLIST list of IP addresses, stored as an array of SA::NetSet
 
 If this is set, and a 'code' block does not already exist, a 'code' block is
 assigned based on the type.
@@ -133,6 +135,7 @@ use Mail::SpamAssassin::Conf;
 use Mail::SpamAssassin::Constants qw(:sa);
 use Mail::SpamAssassin::Logger;
 use Mail::SpamAssassin::Util qw(untaint_var);
+use Mail::SpamAssassin::NetSet;
 
 use strict;
 use warnings;
@@ -622,11 +625,28 @@ sub setup_default_code_cb {
   elsif ($type == $Mail::SpamAssassin::Conf::CONF_TYPE_TEMPLATE) {
     $cmd->{code} = \&set_template_append;
   }
+  elsif ($type == $Mail::SpamAssassin::Conf::CONF_TYPE_NOARGS) {
+    $cmd->{code} = \&set_no_value;
+  }
+  elsif ($type == $Mail::SpamAssassin::Conf::CONF_TYPE_STRINGLIST) {
+    $cmd->{code} = \&set_string_list;
+  }
+  elsif ($type == $Mail::SpamAssassin::Conf::CONF_TYPE_IPADDRLIST) {
+    $cmd->{code} = \&set_ipaddr_list;
+  }
   else {
     warn "config: unknown conf type $type!";
     return 0;
   }
   return 1;
+}
+
+sub set_no_value {
+  my ($conf, $key, $value, $line) = @_;
+
+  unless (!defined $value || $value eq '') {
+    return $Mail::SpamAssassin::Conf::INVALID_VALUE;
+  }
 }
 
 sub set_numeric_value {
@@ -674,6 +694,29 @@ sub set_string_value {
   $conf->{$key} = $value;  # keep tainted
 }
 
+sub set_string_list {
+  my ($conf, $key, $value, $line) = @_;
+
+  unless (defined $value && $value !~ /^$/) {
+    return $Mail::SpamAssassin::Conf::MISSING_REQUIRED_VALUE;
+  }
+
+  push(@{$conf->{$key}}, split(' ', $value));
+}
+
+sub set_ipaddr_list {
+  my ($conf, $key, $value, $line) = @_;
+
+  unless (defined $value && $value !~ /^$/) {
+    return $Mail::SpamAssassin::Conf::MISSING_REQUIRED_VALUE;
+  }
+
+  foreach my $net (split(' ', $value)) {
+    $conf->{$key}->add_cidr($net);
+  }
+  $conf->{$key.'_configured'} = 1;
+}
+
 sub set_hash_key_value {
   my ($conf, $key, $value, $line) = @_;
   my($k,$v) = split(/\s+/, $value, 2);
@@ -711,6 +754,9 @@ sub set_template_append {
 
 sub set_template_clear {
   my ($conf, $key, $value, $line) = @_;
+  unless (!defined $value || $value eq '') {
+    return $Mail::SpamAssassin::Conf::INVALID_VALUE;
+  }
   $conf->{$key} = '';
 }
 
