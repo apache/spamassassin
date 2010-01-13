@@ -30,15 +30,11 @@ use Test; BEGIN { plan tests => 6 };
 #
 my @ignored_commands = qw(
 
-  score unwhitelist_from unblacklist_from unwhitelist_auth
-  unwhitelist_from_rcvd clear_report_template clear_unsafe_report_template
-  header body uri rawbody full meta test loadplugin tryplugin require_version
-  uri_detail version_tag uridnssub uridnsbl urirhsbl urirhssub urinsrhsbl
+  score header body uri rawbody full meta test loadplugin tryplugin
+  version_tag uri_detail uridnssub uridnsbl urirhsbl urirhssub urinsrhsbl
   urinsrhssub urifullnsrhsbl urifullnsrhssub add_header remove_header
-  clear_headers trusted_networks clear_trusted_networks internal_networks
-  clear_internal_networks msa_networks clear_msa_networks bayes_ignore_header
-  report_safe_copy_headers redirector_pattern reuse mimeheader uridnsbl_timeout
-  originating_ip_headers clear_originating_ip_headers
+  redirector_pattern reuse mimeheader rbl_timeout uridnsbl_timeout
+  util_rb_tld util_rb_2tld util_rb_3tld shortcircuit asn_lookup
 
 );
 
@@ -56,9 +52,10 @@ my $sa = create_saobj({
 $sa->compile_now(0,1);
 ok($sa);
 
+print "Copying config to backup\n";
 my %conf_backup;
-$sa->copy_config(undef, \%conf_backup) || die "copy_config failed";
-ok (scalar keys %conf_backup > 2);
+$sa->copy_config(undef, \%conf_backup) or die "copy_config failed";
+ok(scalar keys %conf_backup > 2);
 
 # ---------------------------------------------------------------------------
 
@@ -71,24 +68,32 @@ my $EXPECTED_VAL_TEMPLATE       = '__test_expected_tmpl';
 my $EXPECTED_VAL_HK_KEY         = '__test_expected_hk_key';
 my $EXPECTED_VAL_HK_VALUE       = '__test_expected_hk_val';
 my $EXPECTED_VAL_ADDRLIST       = '__test_expected_foo@bar.com';
+my $EXPECTED_VAL_NOARGS         = '__test_expected_noargs';
+my $EXPECTED_VAL_STRINGLIST     = [qw(__test_expected_s1 __test_expected_s2)];
+my $EXPECTED_VAL_IPADDRLIST     = '__test_expected_';
+
 my %expected_val;
 my %ignored_command;
 foreach my $k (@ignored_commands) { $ignored_command{$k}++; }
 
+print "Reading log/user_prefs1\n";
 $sa->read_scoreonly_config("log/user_prefs1");
 set_all_confs($sa->{conf});
 
 $sa->signal_user_changed( { username => "user1", user_dir => "log/user1" });
 ok validate_all_confs($sa->{conf}, 1, 'after first user config read');
 
+print "Restoring config from backup\n";
 $sa->copy_config(\%conf_backup, undef) or die "copy_config failed";
 ok validate_all_confs($sa->{conf}, 0, 'after restoring from backup');
 
 
+print "Reading log/user_prefs2\n";
 $sa->read_scoreonly_config("log/user_prefs2");
 $sa->signal_user_changed( { username => "user2", user_dir => "log/user2" });
 ok validate_all_confs($sa->{conf}, 0, 'after second user config read');
 
+print "Restoring config from backup, second time\n";
 $sa->copy_config(\%conf_backup, undef) or die "copy_config failed";
 ok validate_all_confs($sa->{conf}, 0, 'after second restore from backup');
 exit;
@@ -134,7 +139,10 @@ sub set_all_confs {
       next;
     }
 
-    if ($cmd->{type} == $Mail::SpamAssassin::Conf::CONF_TYPE_STRING) {
+    if ($cmd->{type} == $Mail::SpamAssassin::Conf::CONF_TYPE_NOARGS) {
+      $conf->{$k} = $EXPECTED_VAL_NOARGS;
+    }
+    elsif ($cmd->{type} == $Mail::SpamAssassin::Conf::CONF_TYPE_STRING) {
       $conf->{$k} = $EXPECTED_VAL_STRING;
     }
     elsif ($cmd->{type} == $Mail::SpamAssassin::Conf::CONF_TYPE_BOOL) {
@@ -153,13 +161,26 @@ sub set_all_confs {
     elsif ($cmd->{type} == $Mail::SpamAssassin::Conf::CONF_TYPE_TEMPLATE) {
       $conf->{$k} = $EXPECTED_VAL_TEMPLATE;
     }
+    elsif ($cmd->{type} == $Mail::SpamAssassin::Conf::CONF_TYPE_STRINGLIST) {
+      $conf->{$k} = [@$EXPECTED_VAL_STRINGLIST];
+    }
+    elsif ($cmd->{type} == $Mail::SpamAssassin::Conf::CONF_TYPE_IPADDRLIST) {
+      $conf->{$k} = $EXPECTED_VAL_IPADDRLIST;
+    }
     elsif ($cmd->{type} == $Mail::SpamAssassin::Conf::CONF_TYPE_HASH_KEY_VALUE) {
       $conf->{$k}->{$EXPECTED_VAL_HK_KEY} = $EXPECTED_VAL_HK_VALUE;
     }
     elsif ($cmd->{type} == $Mail::SpamAssassin::Conf::CONF_TYPE_ADDRLIST) {
       $conf->add_to_addrlist($k, $EXPECTED_VAL_ADDRLIST);
     }
-    $expected_val{$k} = $conf->{$k};
+
+    if (ref $conf->{$k} eq 'ARRAY') {
+      @{$expected_val{$k}} = @{$conf->{$k}};    # ensure this copies!
+    } elsif (ref $conf->{$k} eq 'HASH') {
+      %{$expected_val{$k}} = %{$conf->{$k}};
+    } else {
+      $expected_val{$k} = $conf->{$k};
+    }
   }
 }
 
@@ -184,6 +205,9 @@ sub validate_all_confs {
     if (!defined $cmd->{type}) {
       # warn "undef config type for $k";                # already done this
     }
+    elsif ($cmd->{type} == $Mail::SpamAssassin::Conf::CONF_TYPE_NOARGS) {
+      assert_validation($conf->{$k}, $expected_val{$k});
+    }
     elsif ($cmd->{type} == $Mail::SpamAssassin::Conf::CONF_TYPE_STRING) {
       assert_validation($conf->{$k}, $expected_val{$k});
     }
@@ -194,6 +218,15 @@ sub validate_all_confs {
       assert_validation($conf->{$k}, $expected_val{$k});
     }
     elsif ($cmd->{type} == $Mail::SpamAssassin::Conf::CONF_TYPE_TEMPLATE) {
+      assert_validation($conf->{$k}, $expected_val{$k});
+    }
+    elsif ($cmd->{type} == $Mail::SpamAssassin::Conf::CONF_TYPE_STRINGLIST) {
+      # flatten for comparison
+      my $val = $conf->{$k} ? join(" ", @{$conf->{$k}}) : undef;
+      my $exp_val = $expected_val{$k} ? join(" ", @{$expected_val{$k}}) : undef;
+      assert_validation($val, $exp_val);
+    }
+    elsif ($cmd->{type} == $Mail::SpamAssassin::Conf::CONF_TYPE_IPADDRLIST) {
       assert_validation($conf->{$k}, $expected_val{$k});
     }
     elsif ($cmd->{type} == $Mail::SpamAssassin::Conf::CONF_TYPE_HASH_KEY_VALUE) {
@@ -228,4 +261,3 @@ sub assert_validation {
     $validation_passed = 0;
   }
 }
-

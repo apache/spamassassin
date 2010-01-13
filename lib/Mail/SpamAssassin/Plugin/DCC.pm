@@ -202,6 +202,7 @@ it will use that interface instead of C<dccproc>.
   push (@cmds, {
     setting => 'dcc_home',
     is_admin => 1,
+    type => $Mail::SpamAssassin::Conf::CONF_TYPE_STRING,
     code => sub {
       my ($self, $key, $value, $line) = @_;
       if (!defined $value || !length $value) {
@@ -236,6 +237,7 @@ use it instead of C<dccproc>.
   push (@cmds, {
     setting => 'dcc_dccifd_path',
     is_admin => 1,
+    type => $Mail::SpamAssassin::Conf::CONF_TYPE_STRING,
     code => sub {
       my ($self, $key, $value, $line) = @_;
       $value = ''  if !defined $value;
@@ -284,6 +286,7 @@ use this, as the current PATH will have been cleared.
     setting => 'dcc_path',
     is_admin => 1,
     default => undef,
+    type => $Mail::SpamAssassin::Conf::CONF_TYPE_STRING,
     code => sub {
       my ($self, $key, $value, $line) = @_;
       if (!defined $value || !length $value) {
@@ -312,6 +315,7 @@ The default is C<undef>.
     setting => 'dcc_options',
     is_admin => 1,
     default => undef,
+    type => $Mail::SpamAssassin::Conf::CONF_TYPE_STRING,
     code => sub {
       my ($self, $key, $value, $line) = @_;
       if ($value !~ m{^([0-9A-Za-z ,._/-]+)$}) {
@@ -334,6 +338,7 @@ The default is C<undef>.
     setting => 'dccifd_options',
     is_admin => 1,
     default => undef,
+    type => $Mail::SpamAssassin::Conf::CONF_TYPE_STRING,
     code => sub {
       my ($self, $key, $value, $line) = @_;
       if ($value !~ m{^([0-9A-Za-z ,._/-]+)$}) {

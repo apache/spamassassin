@@ -283,6 +283,7 @@ across all users, although that is not recommended.
 		setting => 'auto_whitelist_path',
 		is_admin => 1,
 		default => '__userstate__/auto-whitelist',
+		type => $Mail::SpamAssassin::Conf::CONF_TYPE_STRING,
 		code => sub {
 		  my ($self, $key, $value, $line) = @_;
 		  unless (defined $value && $value !~ /^$/) {
