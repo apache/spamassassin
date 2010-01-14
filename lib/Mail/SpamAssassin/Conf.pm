@@ -100,6 +100,7 @@ use vars qw{
   $CONF_TYPE_NOARGS
   $INVALID_VALUE $MISSING_REQUIRED_VALUE
   @MIGRATED_SETTINGS
+  $COLLECT_REGRESSION_TESTS
 
 $TYPE_HEAD_TESTS $TYPE_HEAD_EVALS
 $TYPE_BODY_TESTS $TYPE_BODY_EVALS $TYPE_FULL_TESTS $TYPE_FULL_EVALS
@@ -2646,7 +2647,7 @@ general running of SpamAssassin.
     setting => 'test',
     is_admin => 1,
     code => sub {
-      return unless defined($Mail::SpamAssassin::Conf::COLLECT_REGRESSION_TESTS);
+      return unless defined $COLLECT_REGRESSION_TESTS;
       my ($self, $key, $value, $line) = @_;
       local ($1,$2,$3);
       if ($value !~ /^(\S+)\s+(ok|fail)\s+(.*)$/) { return $INVALID_VALUE; }
