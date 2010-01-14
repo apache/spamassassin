@@ -3,10 +3,26 @@ Subject: ANNOUNCE: Apache SpamAssassin 3.3.0 available
 
 [DRAFT DRAFT DRAFT - NOT YET RELEASED - DRAFT DRAFT DRAFT]
 
-Apache SpamAssassin 3.3.0 is now available for testing.
+Release Notes -- Apache SpamAssassin -- Version 3.3.0
+
+
+Introduction
+------------
+
+This is a major release, incorporating enhancements and bug fixes that have
+accumulated in a year and a half of development since the 3.2.5 release.
+Apart from some new or changed dependencies on perl modules, this version
+is compatible to large extent with existing installations, so the upgrade
+is not expected to be problematic (and neither downgrading, if need arises).
+Please consult the list of known incompatibilities below before upgrading.
+
+
+Downloading and availability
+----------------------------
 
 Downloads are available from:
-  http://people.apache.org/~wtogami/devel/
+
+[...]
 
 md5sum of archive files:
 
@@ -136,6 +152,8 @@ MAIN NEW FEATURES
 - added 'if can(Class::method)' conditional statement, allowing configuration
   settings to be conditionalised on plugin capabilities without requiring
   new version releases to do so;
+
+- added a --verbose option to the sa-update utility to show updated channels;
 
 - added a configuration option 'time_limit', defaulting to 300 seconds
   or whatever the caller (like spamd) provides; attempting to gracefully
@@ -284,6 +302,10 @@ API
   or dynamic rule hits); this information is made available to plugins and
   the rest of the code through a 'suppl_attrib' hash;
 
+- added option 'master_deadline' to the suppl_attrib argument of a
+  Mail::SpamAssassin::parse method, allowing the caller to override a
+  time_limit configuration setting;
+
 - Plugin::Check - pick up 'rule_hits' from caller via the new mechanism
   and call got_hit() on them;
 
@@ -330,7 +352,7 @@ RULES
   stuff, added exclusion for __ISO_2022_JP_DELIM to OBFUSCATING_COMMENT,
   FP in obfuscated URI rule, fixed breakage in tbird image rule, fixed
   SUBJECT_FUZZY_MEDS FP on unobfuscated "meds", added misspaced From header
-  field rule, numeric+cctld URI rule, ...
+  field rule, numeric+cctld URI rule, fixed FH_DATE_PAST_20XX, ...
 
 - added PSBL blacklist - http://psbl.surriel.com/
 
@@ -456,6 +478,9 @@ BUG FIXES
 
 - ArchiveIterator: prevent _scan_directory from passing directories
   to _scan_file (on NFS it would fail with EISDIR on read(2);
+
+- fixed inserting the SpamAssassin -generated header fields after a
+  multiline Return-Path header field;
 
 - fixed vpopmail support;
 
@@ -659,3 +684,37 @@ OTHER CHANGES
 
 - extensive improvements to development process:
   automated testing through Hudson, improvements to mass-check and rules
+
+
+About Apache SpamAssassin
+-------------------------
+
+Apache SpamAssassin is a mature, widely-deployed open source project
+that serves as a mail filter to identify spam. SpamAssassin uses a variety
+of mechanisms including mail header and text analysis, Bayesian filtering,
+DNS blocklists, and collaborative filtering databases. In addition, Apache
+SpamAssassin has a modular architecture that allows other technologies to be
+quickly incorporated as an addition or as a replacement for existing methods.
+Apache SpamAssassin typically runs on a server, classifies and labels spam
+before it reaches your mailbox, while allowing other components of a mail
+system to act on its results.
+
+Most of the Apache SpamAssassin is written in Perl, with heavily traversed
+code paths carefully optimized. As such it can run on a wide variety of
+Unix and Linux platforms, and is also runnable on MS Windows systems under
+ActivePerl.
+
+For more information, visit http://spamassassin.apache.org/
+
+
+About The Apache Software Foundation
+------------------------------------
+
+Established in 1999, The Apache Software Foundation provides organizational,
+legal, and financial support for more than 100 freely-available,
+collaboratively-developed Open Source projects. The pragmatic Apache License
+enables individual and commercial users to easily deploy Apache software;
+the Foundation's intellectual property framework limits the legal exposure
+of its 2,500+ contributors.
+
+For more information, visit http://www.apache.org/
