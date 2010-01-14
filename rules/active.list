@@ -1,11 +1,8 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix dos jm nbebout wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 2: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix jm nbebout wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 3: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix jm nbebout wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2
+# with results from: day 1: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-trec_enron bb-zmi bernie-it_batt bernie-mix dos nbebout wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 2: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix dos jm nbebout wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 3: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix jm nbebout wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2
 
 # tflags userconf
 ALL_TRUSTED
-
-# good enough
-AXB_AUTOGEN_FRAUD_3
 
 # good enough
 AXB_HELO_HOME_UN
@@ -302,10 +299,7 @@ HK_NAME_DRUGS
 HK_NAME_FREE
 
 # good enough
-HK_PNIS
-
-# good enough
-HS_VPXL
+HK_SCAM_N2
 
 # tflags userconf
 HTML_CHARSET_FARAWAY
@@ -677,10 +671,7 @@ TVD_VISIT_PHARMA
 TWO_IPS_RCVD
 
 # good enough
-HK_SCAM_N2
-
-# good enough
-SANE_57eb6fb7217efcb7a706124454426ee6
+S25R_1
 
 # tflags userconf
 UNPARSEABLE_RELAY
