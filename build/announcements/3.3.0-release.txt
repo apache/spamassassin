@@ -700,9 +700,10 @@ before it reaches your mailbox, while allowing other components of a mail
 system to act on its results.
 
 Most of the Apache SpamAssassin is written in Perl, with heavily traversed
-code paths carefully optimized. As such it can run on a wide variety of
-Unix and Linux platforms, and is also runnable on MS Windows systems under
-ActivePerl.
+code paths carefully optimized. Benefits are portability, robustness and
+facilitated maintenance. It can run on a wide variety of POSIX platforms.
+The server and the Perl library feels at home on Unix and Linux platforms,
+and reportedly also works on MS Windows systems under ActivePerl.
 
 For more information, visit http://spamassassin.apache.org/
 
