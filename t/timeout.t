@@ -61,61 +61,61 @@ eval {
 ok(!$t->timed_out && $caught);
 
 $t = Mail::SpamAssassin::Timeout->new({ secs => 2 });
-$r = $t->run(sub { mysleep 3; 42 });
+$r = $t->run(sub { mysleep 4; 42 });
 ok($t->timed_out);
 ok(!defined $r);
 
-$t = Mail::SpamAssassin::Timeout->new({ secs => 2 });
+$t = Mail::SpamAssassin::Timeout->new({ secs => 3 });
 $r = $t->run(sub { mysleep 1; 42 });
 ok(!$t->timed_out);
 ok($r == 42);
 
 $t = Mail::SpamAssassin::Timeout->new({ deadline => time+2 });
-$r = $t->run(sub { mysleep 3; 42 });
+$r = $t->run(sub { mysleep 4; 42 });
 ok($t->timed_out && !defined $r);
 
-$t = Mail::SpamAssassin::Timeout->new({ deadline => time+2 });
+$t = Mail::SpamAssassin::Timeout->new({ deadline => time+3 });
 $r = $t->run(sub { mysleep 1; 42 });
 ok(!$t->timed_out && $r == 42);
 
-$t = Mail::SpamAssassin::Timeout->new({ secs => 2, deadline => time+5 });
-$r = $t->run(sub { mysleep 3; 42 });
+$t = Mail::SpamAssassin::Timeout->new({ secs => 2, deadline => time+6 });
+$r = $t->run(sub { mysleep 4; 42 });
 ok($t->timed_out && !defined $r);
 
-$t = Mail::SpamAssassin::Timeout->new({ secs => 2, deadline => time+5 });
+$t = Mail::SpamAssassin::Timeout->new({ secs => 3, deadline => time+6 });
 $r = $t->run(sub { mysleep 1; 42 });
 ok(!$t->timed_out && $r == 42);
 
 $t = Mail::SpamAssassin::Timeout->new({ secs => 9, deadline => time+2 });
-$r = $t->run(sub { mysleep 3; 42 });
+$r = $t->run(sub { mysleep 4; 42 });
 ok($t->timed_out && !defined $r);
 
-$t = Mail::SpamAssassin::Timeout->new({ secs => 9, deadline => time+2 });
+$t = Mail::SpamAssassin::Timeout->new({ secs => 9, deadline => time+3 });
 $r = $t->run(sub { mysleep 1; 42 });
 ok(!$t->timed_out && $r == 42);
-
-$t = Mail::SpamAssassin::Timeout->new({ secs => 2 });
-$r = $t->run(sub { alarm 0; mysleep 1; $t->reset; mysleep 2; 42 });
-ok($t->timed_out && !defined $r);
 
 $t = Mail::SpamAssassin::Timeout->new({ secs => 3 });
+$r = $t->run(sub { alarm 0; mysleep 1; $t->reset; mysleep 5; 42 });
+ok($t->timed_out && !defined $r);
+
+$t = Mail::SpamAssassin::Timeout->new({ secs => 5 });
 $r = $t->run(sub { alarm 0; mysleep 1; $t->reset; mysleep 1; 42 });
 ok(!$t->timed_out && $r == 42);
 
 $t = Mail::SpamAssassin::Timeout->new({ secs => 2 });
-$r = $t->run(sub { alarm 0; mysleep 3; $t->reset; 42 });
+$r = $t->run(sub { alarm 0; mysleep 4; $t->reset; 42 });
 ok($t->timed_out && !defined $r);
 
 $t1 = Mail::SpamAssassin::Timeout->new({ secs => 1 });
 $t2 = Mail::SpamAssassin::Timeout->new({ secs => 2 });
-$r = $t1->run(sub { $t2->run(sub { mysleep 3; 43 }); 42 });
+$r = $t1->run(sub { $t2->run(sub { mysleep 4; 43 }); 42 });
 ok($t1->timed_out);
 ok(!$t2->timed_out);  # should t2 be considered expired or not after 1 s ???
 ok(!defined $r);
 
 $t1 = Mail::SpamAssassin::Timeout->new({ secs => 2 });
 $t2 = Mail::SpamAssassin::Timeout->new({ secs => 1 });
-$r = $t1->run(sub { $t2->run(sub { mysleep 3; 43 }); 42 });
+$r = $t1->run(sub { $t2->run(sub { mysleep 4; 43 }); 42 });
 ok(!$t1->timed_out);
 ok($t2->timed_out);
 ok($r == 42);
