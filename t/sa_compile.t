@@ -5,7 +5,24 @@ $ENV{'TEST_PERL_TAINT'} = 'no';     # inhibit for this test
 use SATest; sa_t_init("sa_compile");
 use Test;
 
-use constant TEST_ENABLED => conf_bool('run_long_tests');
+# called from BEGIN
+sub re2c_version_new_enough {
+
+  my $re2c_ver = `re2c -V 2>&1`;
+  if (!defined $re2c_ver || $re2c_ver =~ /^$/) {
+    print "re2c not found, or 're2c -V' not supported, skipping test\n";
+    return;
+  }
+
+  chop $re2c_ver;
+  my $newenough = ($re2c_ver+0 >= 001200);   # 0.12.0 seems safe enough as a baseline
+  print "re2c version ($re2c_ver) new enough? ".($newenough ? "yes" : "no")."\n";
+  return $newenough;
+}
+
+use constant TEST_ENABLED => conf_bool('run_long_tests')
+                                && re2c_version_new_enough();
+
 BEGIN { 
   if (-e 't/test_dir') {
     chdir 't';
@@ -13,6 +30,7 @@ BEGIN {
   if (-e 'test_dir') {
     unshift(@INC, '../blib/lib');
   }
+
   plan tests => ((TEST_ENABLED && !$RUNNING_ON_WINDOWS) ? 5 : 0);
 };
 
