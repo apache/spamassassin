@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-trec_enron bb-zmi bernie-it_batt bernie-mix dos nbebout wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 2: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix dos jm nbebout wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 3: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix jm nbebout wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2
+# with results from: day 1: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix dos nbebout wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 2: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-trec_enron bb-zmi bernie-it_batt bernie-mix dos nbebout wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 3: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix dos jm nbebout wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2
 
 # tflags userconf
 ALL_TRUSTED
@@ -128,6 +128,9 @@ FB_CIALIS_LEO3
 FB_EXTRA_INCHES
 
 # good enough
+FB_GVR
+
+# good enough
 FB_QUALITY_REPLICA
 
 # good enough
@@ -159,6 +162,9 @@ FH_HOST_EQ_DYNAMICIP
 
 # good enough
 FH_HOST_EQ_VERIZON_P
+
+# good enough
+FH_HOST_IN_ADDRARPA
 
 # good enough
 FM_LOTTO_YOU_WON
@@ -212,6 +218,9 @@ FRT_ROLEX
 FR_TITLE_NUMS
 
 # good enough
+FSL_FAKE_GMAIL_RCVD
+
+# good enough
 FSL_FAKE_HOTMAIL_RVCD
 
 # good enough
@@ -234,6 +243,12 @@ FS_ABIGGER
 
 # good enough
 FS_MORE_CONFIDENT
+
+# good enough
+FS_NUDE
+
+# good enough
+FS_PHARMASUB2
 
 # good enough
 FS_REPLICA
@@ -369,6 +384,9 @@ NO_RECEIVED
 
 # tflags userconf
 NO_RELAYS
+
+# good enough
+PART_CID_STOCK
 
 # tflags net
 PYZOR_CHECK
@@ -563,7 +581,13 @@ RCVD_IN_SORBS_ZOMBIE
 RCVD_IN_XBL
 
 # good enough
+RDNS_LOCALHOST
+
+# good enough
 REPLYTO_WITHOUT_TO_CC
+
+# good enough
+S25R_1
 
 # good enough
 S25R_4
@@ -576,6 +600,9 @@ SANE_04e8bf28eb445199a7f11b943c44d209
 
 # good enough
 SANE_2b173a7fb7518c75ac8a2d294d773fd8
+
+# good enough
+SANE_3b92eda751c992f230f215fb7eb36844
 
 # good enough
 SANE_4ef8302546bf270a19baf98508afacc4
@@ -671,7 +698,58 @@ TVD_VISIT_PHARMA
 TWO_IPS_RCVD
 
 # good enough
-S25R_1
+AXB_XMID_DIGDOTSHRT
+
+# good enough
+DEAR_NOBODY
+
+# good enough
+FB_YOU_CAN_BECOME
+
+# good enough
+FM_SUBJ_YOU_PROFIT
+
+# good enough
+FR_WATCHES_HTTP
+
+# good enough
+S25R_3
+
+# good enough
+SANE_0de5cadd0badbd3e70f22a3ae31951fb
+
+# good enough
+SANE_20d820d8f491476ca39941979ab139dd
+
+# good enough
+SANE_75491b468ec2e117e50f9842d32abfab
+
+# good enough
+SANE_767b5516127c9ea7beef8ae90de854a6
+
+# good enough
+SANE_7d8e92a09f27d49fafe09a1dbd5cac10
+
+# good enough
+SANE_86be5ef5c040075ea29f99d46dfe3832
+
+# good enough
+SANE_a4ac830e310d5f2de12338a27ab64719
+
+# good enough
+SANE_d5ee9290870fd33fde2ec65ebd06034c
+
+# good enough
+SANE_eb8833b51aa54190f3a7dc22d67a9189
+
+# good enough
+SANE_ef00ce28cfa5ed6e4c405ed37ff36d46
+
+# good enough
+SANE_f7d3274e8932068e2fa1d892c1dc28f8
+
+# good enough
+TVD_ENHANCE
 
 # tflags userconf
 UNPARSEABLE_RELAY
