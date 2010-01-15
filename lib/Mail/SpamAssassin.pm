@@ -94,7 +94,7 @@ use vars qw{
 };
 
 $VERSION = "3.003000";      # update after release (same format as perl $])
-#$IS_DEVEL_BUILD = 1;        # change for release versions
+# $IS_DEVEL_BUILD = 1;        # change for release versions
 
 # Used during the prerelease/release-candidate part of the official release
 # process. If you hacked up your SA, you should add a version_tag to your .cf

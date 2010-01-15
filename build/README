@@ -118,7 +118,7 @@ SPAMASSASSIN RELEASE PROCEDURE
 - run "make disttest" to ensure all default tests pass once the
   distribution is fully packaged.  (this'll take a minute or two.)
 
-    make disttest
+    make disttest < /dev/null
 
 - run the release test suite, which forces all tests to run and also
   applies an additional, more stringent set of tests.  This may require
