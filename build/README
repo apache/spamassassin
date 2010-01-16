@@ -41,7 +41,8 @@ SPAMASSASSIN RELEASE PROCEDURE
 
     PATH=$HOME/sabuildtools/perl584/bin:$HOME/sabuildtools/bin:$PATH
 
-
+- ensure ExtUtils::MakeMaker is version 6.46 or later, to create
+  a detailed-enough META.yml (TODO: this should not be required.)
 
 - In your own, writable, checkout (this may be on another host instead
   of people.apache.org, such as your home machine):
