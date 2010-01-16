@@ -1,11 +1,14 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix dos nbebout wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 2: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-trec_enron bb-zmi bernie-it_batt bernie-mix dos nbebout wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 3: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix dos jm nbebout wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2
+# with results from: day 1: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix dos nbebout wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 2: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix dos nbebout wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 3: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-trec_enron bb-zmi bernie-it_batt bernie-mix dos nbebout wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2
 
 # tflags userconf
 ALL_TRUSTED
 
 # good enough
 AXB_HELO_HOME_UN
+
+# good enough
+AXB_XMID_DIGDOTSHRT
 
 # tflags learn
 BAYES_00
@@ -48,6 +51,9 @@ DEAR_BENEFICIARY
 
 # good enough
 DEAR_EMAIL
+
+# good enough
+DEAR_NOBODY
 
 # tflags net
 DIGEST_MULTIPLE
@@ -143,6 +149,9 @@ FB_SOFTTABS
 FB_WITHOUT_PRESC
 
 # good enough
+FB_YOU_CAN_BECOME
+
+# good enough
 FH_FAKE_RCVD_LINE
 
 # good enough
@@ -171,6 +180,9 @@ FM_LOTTO_YOU_WON
 
 # good enough
 FM_SEX_HELODDDD
+
+# good enough
+FM_SUBJ_YOU_PROFIT
 
 # good enough
 FORGED_RELAY_MUA_TO_MX
@@ -215,7 +227,7 @@ FRT_PHARMAC
 FRT_ROLEX
 
 # good enough
-FR_TITLE_NUMS
+FR_WATCHES_HTTP
 
 # good enough
 FSL_FAKE_GMAIL_RCVD
@@ -590,6 +602,9 @@ REPLYTO_WITHOUT_TO_CC
 S25R_1
 
 # good enough
+S25R_3
+
+# good enough
 S25R_4
 
 # good enough
@@ -597,6 +612,12 @@ S25R_6
 
 # good enough
 SANE_04e8bf28eb445199a7f11b943c44d209
+
+# good enough
+SANE_0de5cadd0badbd3e70f22a3ae31951fb
+
+# good enough
+SANE_20d820d8f491476ca39941979ab139dd
 
 # good enough
 SANE_2b173a7fb7518c75ac8a2d294d773fd8
@@ -611,13 +632,40 @@ SANE_4ef8302546bf270a19baf98508afacc4
 SANE_7429530a7398f43f1f1b795f9420714e
 
 # good enough
+SANE_75491b468ec2e117e50f9842d32abfab
+
+# good enough
+SANE_767b5516127c9ea7beef8ae90de854a6
+
+# good enough
+SANE_7d8e92a09f27d49fafe09a1dbd5cac10
+
+# good enough
+SANE_86be5ef5c040075ea29f99d46dfe3832
+
+# good enough
 SANE_91eb43f705d25c804374a746d7519660
+
+# good enough
+SANE_a4ac830e310d5f2de12338a27ab64719
 
 # good enough
 SANE_b58d7945d89b7afc9e2753c83b00ab44
 
 # good enough
 SANE_d0d2b0f6373bf91253d66dd74c594b87
+
+# good enough
+SANE_d5ee9290870fd33fde2ec65ebd06034c
+
+# good enough
+SANE_eb8833b51aa54190f3a7dc22d67a9189
+
+# good enough
+SANE_ef00ce28cfa5ed6e4c405ed37ff36d46
+
+# good enough
+SANE_f7d3274e8932068e2fa1d892c1dc28f8
 
 # good enough
 SHORT_HELO_AND_INLINE_IMAGE
@@ -674,6 +722,9 @@ TO_NO_BRKTS_DYNIP
 TT_MSGID_TRUNC
 
 # good enough
+TVD_ENHANCE
+
+# good enough
 TVD_FINGER_02
 
 # good enough
@@ -698,58 +749,7 @@ TVD_VISIT_PHARMA
 TWO_IPS_RCVD
 
 # good enough
-AXB_XMID_DIGDOTSHRT
-
-# good enough
-DEAR_NOBODY
-
-# good enough
-FB_YOU_CAN_BECOME
-
-# good enough
-FM_SUBJ_YOU_PROFIT
-
-# good enough
-FR_WATCHES_HTTP
-
-# good enough
-S25R_3
-
-# good enough
-SANE_0de5cadd0badbd3e70f22a3ae31951fb
-
-# good enough
-SANE_20d820d8f491476ca39941979ab139dd
-
-# good enough
-SANE_75491b468ec2e117e50f9842d32abfab
-
-# good enough
-SANE_767b5516127c9ea7beef8ae90de854a6
-
-# good enough
-SANE_7d8e92a09f27d49fafe09a1dbd5cac10
-
-# good enough
-SANE_86be5ef5c040075ea29f99d46dfe3832
-
-# good enough
-SANE_a4ac830e310d5f2de12338a27ab64719
-
-# good enough
-SANE_d5ee9290870fd33fde2ec65ebd06034c
-
-# good enough
-SANE_eb8833b51aa54190f3a7dc22d67a9189
-
-# good enough
-SANE_ef00ce28cfa5ed6e4c405ed37ff36d46
-
-# good enough
-SANE_f7d3274e8932068e2fa1d892c1dc28f8
-
-# good enough
-TVD_ENHANCE
+TVD_PCT_OFF
 
 # tflags userconf
 UNPARSEABLE_RELAY
