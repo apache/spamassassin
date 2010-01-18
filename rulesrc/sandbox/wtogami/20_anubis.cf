@@ -2,10 +2,10 @@
 
 ## Bad
 header __RCVD_IN_ANBREP          eval:check_rbl('anubisrep-lastexternal', 'c.anubisnetworks.com.')
-tflags __RCVD_IN_ANBREP          net
+tflags __RCVD_IN_ANBREP          net nopublish
 ## Good
 header __RCVD_IN_ANBREP_F          eval:check_rbl('anubisrep-firsttrusted', 'c.anubisnetworks.com.')
-tflags __RCVD_IN_ANBREP_F          net
+tflags __RCVD_IN_ANBREP_F          net nopublish
 
 ##### Reputation compensations
 # Definitions
