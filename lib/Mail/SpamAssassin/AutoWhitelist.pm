@@ -46,7 +46,7 @@ use warnings;
 use bytes;
 use re 'taint';
 
-use NetAddr::IP;   # qw(:upper);
+use NetAddr::IP 4.000;   # qw(:upper);
 
 use Mail::SpamAssassin;
 use Mail::SpamAssassin::Logger;

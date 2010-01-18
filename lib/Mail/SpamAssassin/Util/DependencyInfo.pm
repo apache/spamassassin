@@ -63,7 +63,7 @@ $have_sha1 ? {
 },
 {
   'module' => 'NetAddr::IP',
-  'version' => 0,
+  'version' => '4.000',
   'desc' => "Used in determining which DNS tests are to be done for each of
   the header's received fields, and used by AWL plugin for extracting network
   address from an IPv6 addresses (and from IPv4 address on nondefault mask).",
