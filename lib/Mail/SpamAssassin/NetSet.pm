@@ -22,7 +22,7 @@ use strict;
 use warnings;
 use bytes;
 use re 'taint';
-use NetAddr::IP;
+use NetAddr::IP 4.000;
 
 use Mail::SpamAssassin::Util;
 use Mail::SpamAssassin::Logger;

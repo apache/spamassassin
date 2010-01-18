@@ -64,7 +64,8 @@ COMPATIBILITY WITH 3.2.5
 
 - CPAN module requirements:
   - minimum required version of ExtUtils::MakeMaker is 6.17
-  - modules now required: Time::HiRes, NetAddr::IP, Archive::Tar, IO::Zlib
+  - modules now required: Time::HiRes, NetAddr::IP (4.000 or later),
+    Archive::Tar (1.23 or later), IO::Zlib
   - minimal version of Mail::DKIM is 0.31 (preferred: 0.37 or later);
     expect some tests in t/dkim2.t to fail with versions older than 0.36_5;
   - no longer used: Mail::DomainKeys, Mail::SPF::Query
