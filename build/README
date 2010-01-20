@@ -89,6 +89,13 @@ SPAMASSASSIN RELEASE PROCEDURE
   Verify that the X-Spam-* headers use the correct version string,
   without an SVN revision number (those are only for dev builds).
 
+- Temporary kludge check until bug 6297 is fixed properly:
+
+    grep nopublish rules/72_active.cf
+
+  This should return nothing.  If not, edit the rulesrc files and
+  add "tflags nopublish" lines as necessary.
+
 - create the Changes file.  Do this step on your own checkout, as
   the release checkout is read-only.   There are two options here:
 
