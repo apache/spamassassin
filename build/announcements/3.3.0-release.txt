@@ -78,6 +78,7 @@ COMPATIBILITY WITH 3.2.5
   - either Digest::SHA or the older Digest::SHA1 is required, though
     note that the DKIM plugin requires Digest::SHA for sha256 hashes
     and Razor agents still need Digest::SHA1;
+  - some IPv6 functionality requires IO::Socket::INET6;
 
 - if keeping the AWL database in SQL, the field awl.ip must be extended to
   40 characters. The change is necessary to allow AWL to keep track of IPv6
@@ -263,7 +264,7 @@ IPv6 SUPPORT
 - NetSet now understands that ::ffff:192.168.1.2 and 192.168.1.2 are
   the same address;
 
-- IPv6 addresses are now recognised in Received header fields;
+- IPv6 addresses are now properly read from Received header fields;
 
 - when reading Received header fields, the "IPv6:" prefix is stripped from
   IPv6 addresses, and "::ffff:" is removed from IPv6-mapped IPv4 addresses
@@ -357,18 +358,18 @@ RULES
   NML_ADSP_CUSTOM_{LOW,MED,HIGH}, __VIA_ML, MIME_BASE64_TEXT, LOTTO_URI,
   FORGED_MUA_THEBAT_BOUN, FORGED_MUA_THEBAT_CS, UNRESOLVED_TEMPLATE,
   __THEBAT_MUA, __ANY_OUTLOOK_MUA, RP_MATCHES_RCVD, one-word X-Mailer,
-  advance_fee update, tweak SPAN rules, tweak skype and misquoted-HTML rules,
-  added some new HTML obfuscation and Google feedproxy URI rules, 
-  tweak revolved advance fee second-order metarules,
-  added a test rule for postmaster+abuse missing, FROM_MISSPACED, 
-  fix FROM_CONTAINS_TAB, added Facebook redirector pattern,
-  avoided ISO-2022-JP FPs on TVD_SPACE_RATIO, GAPPY_SUBJECT, PLING_QUERY
-  and FM_FRM_RN_L_BRACK rules, FP fix for one-word mails on TVD_SPACE_RATIO,
-  RATWARE_BOUNDARY plus variant, supersede all previous RATWARE_OUTLOOK
-  stuff, added exclusion for __ISO_2022_JP_DELIM to OBFUSCATING_COMMENT,
-  FP in obfuscated URI rule, fixed breakage in tbird image rule, fixed
-  SUBJECT_FUZZY_MEDS FP on unobfuscated "meds", added misspaced From header
-  field rule, numeric+cctld URI rule, fixed FH_DATE_PAST_20XX, ...
+  SPAN rules, skype and misquoted-HTML rules, HTML obfuscation and
+  Google feedproxy URI rules, advance_fee updates including further
+  evolved advance fee second-order metarules, test rule for
+  postmaster+abuse missing, FROM_MISSPACED, fixed FROM_CONTAINS_TAB, a
+  Facebook redirector pattern, fixed FPs with TVD_SPACE_RATIO regarding
+  one-word emails and ISO-2022-JP, added exclusion for __ISO_2022_JP_DELIM
+  to OBFUSCATING_COMMENT, GAPPY_SUBJECT, PLING_QUERY and FM_FRM_RN_L_BRACK
+  rules, RATWARE_BOUNDARY plus variant, superseded all previous
+  RATWARE_OUTLOOK stuff, resolved FP in obfuscated URI rule, fixed breakage
+  in tbird image rule, fixed SUBJECT_FUZZY_MEDS FP on unobfuscated "meds",
+  added misspaced From header field rule, numeric+cctld URI rule,
+  updated FH_DATE_PAST_20XX, ...
 
 - added PSBL blacklist - http://psbl.surriel.com/
 
