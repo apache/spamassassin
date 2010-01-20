@@ -99,11 +99,13 @@ COMPATIBILITY WITH 3.2.5
 - it may be worth mentioning that a rule DKIM_VERIFIED has been renamed
   to DKIM_VALID, to match its semantics;
 
-- the DKIM plugin is now enabled by default for new installs if a perl
+- the DKIM plugin is now enabled by default for new installs, if the perl
   module Mail::DKIM is installed.  However, SpamAssassin installation will
   not overwrite existing .pre configuration files, so to use DKIM when
   upgrading from a previous release that did not use DKIM, a directive:
+
     loadplugin Mail::SpamAssassin::Plugin::DKIM
+
   will need to be uncommented in file "v312.pre", or added to some
   other .pre file, such as local.pre;
 
@@ -145,10 +147,6 @@ Installing rules from files:
     Mail-SpamAssassin-rules-xxx.tgz.md5
     Mail-SpamAssassin-rules-xxx.tgz.sha1
       (where xxx may look something like '3.3.0.r893295')
-  obtain a rules-signing public key:
-    curl -O http://spamassassin.apache.org/updates/GPG.KEY
-  import the signing key to a SpamAssassin gpg keyring:
-    sa-update --import GPG.KEY
   install rules from a compressed tar archive:
     sa-update --install Mail-SpamAssassin-rules-xxx.tgz
       (sa-update will need corresponding .asc and .sha1 files with the
