@@ -99,6 +99,14 @@ COMPATIBILITY WITH 3.2.5
 - it may be worth mentioning that a rule DKIM_VERIFIED has been renamed
   to DKIM_VALID, to match its semantics;
 
+- the DKIM plugin is now enabled by default for new installs if a perl
+  module Mail::DKIM is installed.  However, SpamAssassin installation will
+  not overwrite existing .pre configuration files, so to use DKIM when
+  upgrading from a previous release that did not use DKIM, a directive:
+    loadplugin Mail::SpamAssassin::Plugin::DKIM
+  will need to be uncommented in file "v312.pre", or added to some
+  other .pre file, such as local.pre;
+
 - due to changes in some internal data structures (like Bug 6185, 6254),
   some third-party plugins may need to be updated. One such example is
   the ClamAVPlugin plugin - please find a fresh version on its wiki page.
@@ -112,7 +120,11 @@ COMPATIBILITY WITH 3.2.5
 - support for versions of perl 5.6.* is being gradually revoked
   (may still work, but no promises and no support);
 
-- preferred versions of perl are 5.8.8, 5.8.9, and 5.10.1 or later
+- preferred versions of perl are 5.8.8, 5.8.9, and 5.10.1 or later;
+
+- on FreeBSD, please avoid using multithreaded versions of perl older
+  than 5.10.0 due to small default main thread's stack size, which may
+  not suffice for some regular expression evaluations;
 
 
 INSTALLING RULES
@@ -421,11 +433,18 @@ DCC PLUGIN
 
 DKIM PLUGIN
 
-- the plugin is now enabled by default;
+- the DKIM plugin is now enabled by default for new installs if a perl
+  module Mail::DKIM is installed.  However, SpamAssassin installation will
+  not overwrite existing .pre configuration files, so to use DKIM when
+  upgrading from a previous release that did not use DKIM, a directive:
+    loadplugin Mail::SpamAssassin::Plugin::DKIM
+  will need to be uncommented in file "v312.pre", or added to some
+  other .pre file, such as local.pre;
 
 - absolute minimal version of Mail::DKIM is 0.31;
   support for ADSP requires Mail::DKIM 0.34;
-  a DNS test (and rule) for NXDOMAIN is operational since Mail::DKIM 0.36_5
+  a DNS test (and rule) for NXDOMAIN is operational since Mail::DKIM 0.36_5,
+  so effectively the recommended version is Mail::DKIM 0.37 or later;
 
 - a perl module Digest::SHA is required if the DKIM plugin is enabled
   (if a perl module Digest::SHA is available, the module Digest::SHA1
