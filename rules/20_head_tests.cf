@@ -414,6 +414,16 @@ header __ML5  Return-Path:addr =~ m{^([^\@]+-(request|bounces|admin|owner)|owner
 meta     __VIA_ML  __ML1 || __ML2 || __ML3 || __ML4 || __ML5
 describe __VIA_ML  Mail from a mailing list
 
+
+# Bug #6295 - RCVD_ILLEGAL_IP should not be eval rule
+#
+# (note this might miss some hits if the Received.pm skips any invalid IPs)
+# do we really want to chase the more recent IANA allocations?
+# check: http://www.iana.org/assignments/ipv4-address-space/
+header RCVD_ILLEGAL_IP		X-Spam-Relays-Untrusted =~ / (?:ip|by)=(?:[057]|22[4-9]|2[3-9]\d|[12]\d{3,}|[3-9]\d\d+)\.\d+\.\d+\.\d+ /
+describe RCVD_ILLEGAL_IP	Received: contains illegal IP address
+
+
 ###########################################################################
 
 ifplugin Mail::SpamAssassin::Plugin::HeaderEval
@@ -551,9 +561,6 @@ describe RCVD_HELO_IP_MISMATCH	Received: HELO and IP do not match, but should
 
 header RCVD_NUMERIC_HELO	eval:check_for_numeric_helo()
 describe RCVD_NUMERIC_HELO	Received: contains an IP address used for HELO
-
-header RCVD_ILLEGAL_IP		eval:check_for_illegal_ip()
-describe RCVD_ILLEGAL_IP	Received: contains illegal IP address
 
 # not used directly right now due to FPs; but CONFIRMED_FORGED turns it
 # into a 1.0 S/O rule anyway, so that's not a problem ;)
