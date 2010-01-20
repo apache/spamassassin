@@ -755,6 +755,10 @@ score DNS_FROM_RFC_DSN 0 0.001 0 0.001 # n=0 n=2
 score NO_DNS_FOR_FROM 0 0.379 0 0.001 # n=0 n=2
 # </gen:mutable>
 
+# Spamhaus CSS does not appear in masschecks thus cannot be
+# scored by automated means.  Set an explicit score.
+score RCVD_IN_CSS 0 1.0 0 1.0
+
 # ReturnPath Certified
 # http://www.returnpath.net/internetserviceprovider/certification/
 # CERTIFIED is a subset of SAFE, thus the score is cumulative.
