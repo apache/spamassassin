@@ -6,10 +6,10 @@
 # 2007/02/27 - Syntax taken from the OpenPGP standard, RFC 2440 section 6.2
 if ! plugin (Mail::SpamAssassin::Plugin::OpenPGP)
   # moved from rawbody to body 20091021
-  body     __PGP_I1	/-----BEGIN PGP (?:SIGNATURE|MESSAGE|PUBLIC|PRIVATE)(?:, PART [0-9]{1,4}\/[0-9]{1,4}| KEY BLOCK)?-----/
-  tflags   __PGP_I1	nice
-  body     __PGP_I2	/-----END PGP/
-  tflags   __PGP_I2	nice
+  body     __KHOP_PGP_I1	/-----BEGIN PGP (?:SIGNATURE|MESSAGE|PUBLIC|PRIVATE)(?:, PART [0-9]{1,4}\/[0-9]{1,4}| KEY BLOCK)?-----/
+  tflags   __KHOP_PGP_I1	nice
+  body     __KHOP_PGP_I2	/-----END PGP/
+  tflags   __KHOP_PGP_I2	nice
   meta     __PGP_INLINE	( __KHOP_PGP_I1 && __KHOP_PGP_I2 )
   tflags   __PGP_INLINE	nice noautolearn
   meta     KHOP_PGP_INLINE	__PGP_INLINE
