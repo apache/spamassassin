@@ -73,7 +73,7 @@ sub hostname_to_domain {
   }
 }
 
-sub helo_forgery_whitelisted {
+sub _helo_forgery_whitelisted {
   my ($helo, $rdns) = @_;
   if ($helo eq 'msn.com' && $rdns eq 'hotmail.com') { return 1; }
   0;
@@ -98,28 +98,10 @@ sub check_for_numeric_helo {
 
 sub check_for_illegal_ip {
   my ($self, $pms) = @_;
-
-  foreach my $rcvd ( @{$pms->{relays_untrusted}} ) {
-    # (note this might miss some hits if the Received.pm skips any invalid IPs)
-    # do we really want to chase the more recent IANA allocations?
-    # check: http://www.iana.org/assignments/ipv4-address-space/
-    foreach my $check ( $rcvd->{ip}, $rcvd->{by} ) {
-      return 1 if ($check =~ /^
-	(?:[0157]|22[4-9]|2[3-9]\d|[12]\d{3,}|[3-9]\d\d+) \.\d+\.\d+\.\d+
-	$/x);
-    }
-  }
+  # Bug 6295, no longer in use, kept for compatibility with old rules
+  dbg('eval: the "check_for_illegal_ip" eval rule no longer available, '.
+      'please update your rules');
   return 0;
-}
-
-sub sent_by_applemail {
-  my ($self, $pms) = @_;
-
-  return 0 unless ($pms->get("MIME-Version") =~ /Apple Message framework/);
-  return 0 unless ($pms->get("X-Mailer") =~ /^Apple Mail \(\d+\.\d+\)/);
-  return 0 unless ($pms->get("Message-Id") =~
-		   /^<[A-F0-9]+(?:-[A-F0-9]+){4}\@\S+.\S+>$/);
-  return 1;
 }
 
 # note using IPv4 addresses for now due to empty strings matching IP_ADDRESS
@@ -375,7 +357,7 @@ sub _check_for_forged_received {
     my $prev = $from[$i-1];
     if (defined($prev) && $i > 0
 		&& $prev =~ /^\w+(?:[\w.-]+\.)+\w+$/
-		&& $by ne $prev && !helo_forgery_whitelisted($by, $prev))
+		&& $by ne $prev && !_helo_forgery_whitelisted($by, $prev))
     {
       dbg2("eval: forged-HELO: mismatch on from: '$prev' != '$by'");
       $pms->{mismatch_from}++;
