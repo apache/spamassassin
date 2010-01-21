@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-set -x
+set -ex
 
 # A whole bunch of variables are defined in that file!
 . build/update_devel
@@ -7,7 +7,7 @@ set -x
 MAINDISTVNAME=$DISTVNAME
 
 rm -rf $WEBDIR/doc
-tar cf - --exclude=CVS --exclude='.#*' doc | ( cd $WEBDIR ; tar xf - )
+tar cf - --exclude='.#*' doc | ( cd $WEBDIR ; tar xf - )
 
 . build/update_devel_rules
 
