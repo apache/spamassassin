@@ -11,11 +11,16 @@ Note for Users Upgrading to SpamAssassin 3.3.0
   install a new version to determine if any SQL updates need to be made to
   your local installation.
 
-- The DKIM plugin is now enabled by default for new installs, if you have the
-  "Mail::DKIM" perl module installed from CPAN.  However, SpamAssassin will not
-  overwrite existing plugin .pre configuration files, so if you wish to use
-  DKIM, and are upgrading from a previous release, you will need to edit the
-  "v312.pre" file yourself to uncomment it.
+- The DKIM plugin is now enabled by default for new installs, if the perl
+  module Mail::DKIM is installed.  However, installation of SpamAssassin
+  will not overwrite existing .pre configuration files, so to use DKIM when
+  upgrading from a previous release that did not use DKIM, a directive:
+
+    loadplugin Mail::SpamAssassin::Plugin::DKIM
+
+  will need to be uncommented in file "v312.pre", or added to some
+  other .pre file, such as local.pre.
+
 
 Note for Users Upgrading to SpamAssassin 3.2.0
 -----------------------------------------------
@@ -32,6 +37,7 @@ Note for Users Upgrading to SpamAssassin 3.2.0
   Agents, relay hosts which accept mail from your own users and authenticates
   them appropriately.  See the Mail::SpamAssassin::Conf manual page for the
   "msa_networks" setting.
+
 
 Note for Users Upgrading to SpamAssassin 3.1.0
 -----------------------------------------------
@@ -114,6 +120,7 @@ Note for Users Upgrading to SpamAssassin 3.1.0
   be good to double-check any custom configuration options to make sure
   they're still valid.  This could be as simple as running "spamassassin
   --lint", or more complex, as required by the environment.
+
 
 Note for Users Upgrading to SpamAssassin 3.0.x
 ----------------------------------------------
