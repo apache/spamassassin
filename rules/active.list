@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix dos nbebout wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 2: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix nbebout wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 3: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix jm nbebout wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2
+# with results from: day 1: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix jm wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 2: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix dos nbebout wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 3: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix nbebout wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2
 
 # tflags userconf
 ALL_TRUSTED
@@ -137,9 +137,6 @@ FB_REPLICA_ROLEX
 FB_SOFTTABS
 
 # good enough
-FB_WITHOUT_PRESC
-
-# good enough
 FH_FAKE_RCVD_LINE
 
 # good enough
@@ -197,16 +194,7 @@ FROM_MISSP_FREEMAIL
 FROM_MISSP_MSFT
 
 # good enough
-FRT_APPROV
-
-# good enough
-FRT_ERECTION
-
-# good enough
 FRT_PHARMAC
-
-# good enough
-FRT_ROLEX
 
 # good enough
 FSL_FAKE_HOTMAIL_RVCD
@@ -302,9 +290,6 @@ HTML_CHARSET_FARAWAY
 IMG_DIRECT_TO_MX
 
 # good enough
-JM_FAKE_PSMTP_RCVD
-
-# good enough
 KAM_LOTTO1
 
 # good enough
@@ -330,9 +315,6 @@ LOTTERY_PH_004470
 
 # good enough
 LOTTO_AGENT
-
-# good enough
-L_SPAM_TOOL_13
 
 # good enough
 MANY_GOOG_PROXY
@@ -572,19 +554,10 @@ S25R_6
 SANE_04e8bf28eb445199a7f11b943c44d209
 
 # good enough
-SANE_2b173a7fb7518c75ac8a2d294d773fd8
-
-# good enough
 SANE_4ef8302546bf270a19baf98508afacc4
 
 # good enough
 SANE_7429530a7398f43f1f1b795f9420714e
-
-# good enough
-SANE_91eb43f705d25c804374a746d7519660
-
-# good enough
-SANE_b58d7945d89b7afc9e2753c83b00ab44
 
 # good enough
 SANE_d0d2b0f6373bf91253d66dd74c594b87
@@ -633,9 +606,6 @@ SUBJECT_IN_WHITELIST
 
 # good enough
 TAB_IN_FROM
-
-# good enough
-THREAD_INDEX_HEX
 
 # good enough
 TO_NO_BRKTS_DYNIP
