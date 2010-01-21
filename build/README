@@ -44,6 +44,8 @@ SPAMASSASSIN RELEASE PROCEDURE
 - ensure ExtUtils::MakeMaker is version 6.46 or later, to create
   a detailed-enough META.yml (TODO: this should not be required.)
 
+    perl -MExtUtils::MakeMaker -e 'print $ExtUtils::MakeMaker::VERSION'
+
 - In your own, writable, checkout (this may be on another host instead
   of spamassassin.zones.apache.org, such as your home machine):
 
@@ -221,12 +223,15 @@ SPAMASSASSIN RELEASE PROCEDURE
   list.  The default location -- ~/public_html/devel/ , or
   http://people.apache.org/~jm/devel/ , qualifies as "discreet".
 
-  If you build on the zone, you will need to scp them over.
+  If you build on the zone, you will need to scp them over:
+
+    scp ~/public_html/devel/Mail-SpamAssassin-* people.apache.org:public_html/devel/
 
   While doing this, also upload a copy of the proposed release
   announcement to the website:
 
-    version=3.2.4
+    ssh people.apache.org
+    version=3.3.0
     cp build/announcements/$version.txt ~/public_html/devel/PROPOSED-$version.txt
 
   Pre-releases and RCs require just lazy consensus -- ie. no objections.
