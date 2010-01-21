@@ -94,6 +94,6 @@ for ext in tgz tgz.md5 tgz.sha1 tgz.asc ; do
   fi
 done
 
-chgrp -R spamassassin $RELDIR
+chgrp -R spamassassin $RELDIR || true
 rm -rf $tmpdir
 
