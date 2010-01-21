@@ -156,7 +156,7 @@ Installing rules from files:
   install rules from a compressed tar archive:
     sa-update --install Mail-SpamAssassin-rules-xxx.tgz
       (sa-update will need corresponding .asc and .sha1 files with the
-       same base name in a current directory)
+       same base name in the same directory as the .tgz file)
 
 
 MAIN NEW FEATURES
@@ -184,7 +184,7 @@ MAIN NEW FEATURES
   a TIMING tag;
 
 - added a configuration option skip_uribl_checks to the URIDNSBL plugin,
-  cross-document it with skip_rbl_checks;
+  cross-documented it with skip_rbl_checks;
 
 - preserve order of declared 'add_header' header fields;
 
@@ -283,8 +283,8 @@ SPAMC
 - Mail::SpamAssasin::Client ping may erroneously result in broken pipe;
   bump spamc protocol version to 1.5, updated spamd, spamc and Client.pm;
 
-- added -n / --connect-timeout switch to spamc, allowing separate
-  connection timeout from communication timeout;
+- added -n / --connect-timeout switch to spamc, allowing to separate
+  a connection timeout from communication timeout;
 
 - added --filter-retries and --filter-retry-sleep;
 
@@ -391,7 +391,7 @@ RULES
 PLUGINS
 
 - new plugins: FreeMail, PhishTag, Reuse;
-  
+
 - now enabled by default: DKIM;
 
 - now disabled by default: AWL;
@@ -536,8 +536,8 @@ BUG FIXES
   obsolete rfc822 syntax allowed whitespace before a colon;
   VBounce: match "Received:" only at the beginning of a line;
 
-- fixed bug 6237: 2.0.0.0/8 is now an allocated address range,
-  fixed RCVD_ILLEGAL_IP with IP 2.0.0.0/8 (and 223.0.0.0/8);
+- fixed bugs 6237 and 6295: 1.0.0.0/8 and 2.0.0.0/8 are now valid allocated
+  address ranges, fixed a corresponding rule RCVD_ILLEGAL_IP;
 
 - fixed bug 6205 comment 5 in URIDetail.pm;
 
@@ -596,9 +596,9 @@ ERROR HANDLING, ROBUSTNESS
 
 - added 'use strict' where missing;
 
-- avoided a bunch of warnings on "Use of uninitialized value"
+- avoided a bunch of warnings on "Use of uninitialized value";
 
-- clearly report reasons for helper application process failures
+- clearly report reasons for helper application process failures;
 
 - t/SATest.pm: provide information about the process failure reason
   if a system() call fails;  improved its reporting of failures;
@@ -636,8 +636,8 @@ OTHER CHANGES
 - let SpamAssassin use either Digest::SHA or Digest::SHA1, whichever is
   available (the Digest::SHA is now a base module since perl 5.10.0);
 
-- improved parsing of eval-type rules: allow unquoted domain names,
-  disallow unmatched quotes;
+- improved parsing of eval-type rules: allow unquoted domain names as
+  arguments, disallow unmatched quotes;
 
 - provided a new module Mail::SpamAssassin::BayesStore::BDB. It should be
   treated as alpha-quality (needs more testing) and is not yet ready for
