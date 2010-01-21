@@ -4,19 +4,19 @@ SPAMASSASSIN DEVELOPMENT SNAPSHOT PROCEDURE
 - cd to the directory for the codebase you want the devel tree to
   come from
 
-    ssh people.apache.org
+    ssh spamassassin.zones.apache.org
     cd [checkedoutdir]
 
 - ensure the required code and data is available for the build scripts:
 
     $HOME/sabuildtools
 
-  All can be copied (or symlinked) from ~jm on people.apache.org if
+  All can be copied (or symlinked) from ~jm on spamassassin.zones.apache.org if
   required.
 
-- ensure your PATH is correct, with the right perl FIRST in the path:
+- ensure your PATH is correct:
 
-    PATH=$HOME/sabuildtools/perl584/bin:$HOME/sabuildtools/bin:$PATH
+    PATH=$HOME/sabuildtools/bin:$PATH
 
 - run "./build/update_devel" to build the tar.gz files.
 
@@ -29,23 +29,23 @@ SPAMASSASSIN DEVELOPMENT SNAPSHOT PROCEDURE
 SPAMASSASSIN RELEASE PROCEDURE
 ==============================
 
-- First off, log in to people.apache.org for some preliminary tool
+- First off, log in to spamassassin.zones.apache.org for some preliminary tool
   checks.
 
-    ssh people.apache.org
+    ssh spamassassin.zones.apache.org
 
 - ensure the required code and data is available for the build scripts:
   see above.
 
-- ensure your PATH is correct, with the right perl FIRST in the path:
+- ensure your PATH is correct:
 
-    PATH=$HOME/sabuildtools/perl584/bin:$HOME/sabuildtools/bin:$PATH
+    PATH=$HOME/sabuildtools/bin:$PATH
 
 - ensure ExtUtils::MakeMaker is version 6.46 or later, to create
   a detailed-enough META.yml (TODO: this should not be required.)
 
 - In your own, writable, checkout (this may be on another host instead
-  of people.apache.org, such as your home machine):
+  of spamassassin.zones.apache.org, such as your home machine):
 
   Run "svn status" to ensure you're building/releasing from a pristine
   checkout:
@@ -88,6 +88,13 @@ SPAMASSASSIN RELEASE PROCEDURE
 
   Verify that the X-Spam-* headers use the correct version string,
   without an SVN revision number (those are only for dev builds).
+
+- Temporary kludge check until bug 6297 is fixed properly:
+
+    grep nopublish rules/72_active.cf
+
+  This should return nothing.  If not, edit the rulesrc files and
+  add "tflags nopublish" lines as necessary.
 
 - create the Changes file.  Do this step on your own checkout, as
   the release checkout is read-only.   There are two options here:
@@ -166,13 +173,14 @@ SPAMASSASSIN RELEASE PROCEDURE
   later.)
 
 
-- In your checkout on people.apache.org (may be read-only):
+- In your checkout on spamassassin.zones.apache.org (may be read-only):
 
   Check out the code from the tag you just made:
 
+    vers=3_3_0_alpha_2
     repo=https://svn.apache.org/repos/asf/spamassassin
     rm -rf ~/relbuild
-    svn co $repo/tags/spamassassin_release_3_2_0_pre_2 ~/relbuild
+    svn co $repo/tags/spamassassin_release_$vers ~/relbuild
     cd ~/relbuild
 
   (If you are privately preparing a security release, you will need
@@ -181,7 +189,7 @@ SPAMASSASSIN RELEASE PROCEDURE
 
 - run "./build/update_stable" to build the tar.gz files.
 
-    PATH=$HOME/sabuildtools/perl584/bin:$HOME/sabuildtools/bin:$PATH
+    PATH=$HOME/sabuildtools/bin:$PATH
     ./build/update_stable
 
   You will need the SSH password for
@@ -212,7 +220,9 @@ SPAMASSASSIN RELEASE PROCEDURE
   md5sums/sha1sums, and proposed release announcement mail to the dev
   list.  The default location -- ~/public_html/devel/ , or
   http://people.apache.org/~jm/devel/ , qualifies as "discreet".
-  
+
+  If you build on the zone, you will need to scp them over.
+
   While doing this, also upload a copy of the proposed release
   announcement to the website:
 
@@ -333,7 +343,7 @@ SPAMASSASSIN RELEASE PROCEDURE
 
 - rebuild the SpamAssassin website with webmake:
 
-        PATH=$HOME/sabuildtools/perl584/bin:$HOME/sabuildtools/bin:$PATH
+        PATH=$HOME/sabuildtools/bin:$PATH
         cd /www/spamassassin.apache.org
         webmake -F
 

@@ -13,7 +13,7 @@ This is a major release, incorporating enhancements and bug fixes that have
 accumulated in a year and a half of development since the 3.2.5 release.
 Apart from some new or changed dependencies on perl modules, this version
 is compatible to large extent with existing installations, so the upgrade
-is not expected to be problematic (and neither downgrading, if need arises).
+is not expected to be problematic (neither is downgrading, if need arises).
 Please consult the list of known incompatibilities below before upgrading.
 
 
@@ -26,11 +26,17 @@ Downloads are available from:
 
 md5sum of archive files:
 
-[...]
+ 58a439f930b49b0a3747c6caa738acc6  Mail-SpamAssassin-3.3.0.tar.bz2
+ a24302ff6a3c410b5c6b84041877c914  Mail-SpamAssassin-3.3.0.tar.gz
+ ed99edd70819579bcc722411e1da49a1  Mail-SpamAssassin-3.3.0.zip
+ d60aece3341b48befc549110eb271b8e  Mail-SpamAssassin-rules-3.3.0.r900610.tgz
 
 sha1sum of archive files:
 
-[...]
+ 5e639ccf5773e3a1781285ea104f05394b5ea1b0  Mail-SpamAssassin-3.3.0.tar.bz2
+ 598eebc4791dc7c7b958d87f9a33ecaef12edd09  Mail-SpamAssassin-3.3.0.tar.gz
+ 8e425d21593140ee3a6ae0cb7a30d515b6227c95  Mail-SpamAssassin-3.3.0.zip
+ 6f642382d7870c2cb542f50b22a0adb250165c6f  Mail-SpamAssassin-rules-3.3.0.r900610.tgz
 
 Note that the *-rules-*.tgz files are only necessary if you cannot, or do not
 wish to, run "sa-update" after install to download the latest fresh rules.
@@ -58,35 +64,35 @@ Summary of major changes since 3.2.5
 COMPATIBILITY WITH 3.2.5
 
 - rules are no longer distributed with the package, but installed by
-  sa-update - either automatically fetched from the network (preferably),
+  sa-update - either automatically fetched from the network (preferably)
   or from a tar archive, which is available for downloading separately
   (see below, section INSTALLING RULES);
 
 - CPAN module requirements:
-  - minimum required version of ExtUtils::MakeMaker is 6.17
+  - minimum required version of ExtUtils::MakeMaker is 6.17;
   - modules now required: Time::HiRes, NetAddr::IP (4.000 or later),
-    Archive::Tar (1.23 or later), IO::Zlib
+    Archive::Tar (1.23 or later), IO::Zlib;
   - minimal version of Mail::DKIM is 0.31 (preferred: 0.37 or later);
     expect some tests in t/dkim2.t to fail with versions older than 0.36_5;
-  - no longer used: Mail::DomainKeys, Mail::SPF::Query
-  - if module Digest::SHA is not available, a module Digest::SHA1
-    will be used, but at least one of them must be installed;
-    a DKIM plugin requires Digest::SHA (the older Digest::SHA1 does not
-    support sha256 hashes), so in practice the Digest::SHA is required
+  - no longer used: Mail::DomainKeys, Mail::SPF::Query;
+  - either Digest::SHA or the older Digest::SHA1 is required, though
+    note that the DKIM plugin requires Digest::SHA for sha256 hashes
+    and Razor agents still need Digest::SHA1;
+  - some IPv6 functionality requires IO::Socket::INET6;
 
-- if keeping AWL database in SQL, the field awl.ip must be extended to
+- if keeping the AWL database in SQL, the field awl.ip must be extended to
   40 characters. The change is necessary to allow AWL to keep track of IPv6
   addresses which may appear in a mail header even on non-IPv6 -enabled host.
   While at it, consider also adding a field 'signedby' to the SQL table 'awl'
   (and adding 'auto_whitelist_distinguish_signed 1' to local.cf);
-  See sql/README.awl for details. The change need not be undone even if
+  see sql/README.awl for details. The change need not be undone even if
   downgrading back to 3.2.* for some reason;
 
 - fixing a protocol implementation error regarding a PING command required
   bumping up the SPAMC protocol version to 1.5.  Spamd retains compatibility
   with older spamc clients. Combining new spamc clients with pre-3.3 versions
   of a spamd daemon is not supported (but happens to work, except for the
-  PING and SKIP commands).
+  PING and SKIP commands);
 
 - if using one of the plugins (FreeMail, PhishTag, Reuse) which were
   previously not part of the official package, please retire your local copy
@@ -97,13 +103,23 @@ COMPATIBILITY WITH 3.2.5
     loadplugin Mail::SpamAssassin::Plugin::AWL
 
 - it may be worth mentioning that a rule DKIM_VERIFIED has been renamed
-  to DKIM_VALID, to match its semantics;
+  to DKIM_VALID to match its semantics;
+
+- the DKIM plugin is now enabled by default for new installs, if the perl
+  module Mail::DKIM is installed.  However, installation of SpamAssassin
+  will not overwrite existing .pre configuration files, so to use DKIM when
+  upgrading from a previous release that did not use DKIM, a directive:
+
+    loadplugin Mail::SpamAssassin::Plugin::DKIM
+
+  will need to be uncommented in file "v312.pre", or added to some
+  other .pre file, such as local.pre;
 
 - due to changes in some internal data structures (like Bug 6185, 6254),
   some third-party plugins may need to be updated. One such example is
-  the ClamAVPlugin plugin - please find a fresh version on its wiki page.
-  The updated ClamAVPlugin plugin can be used with both 3.2.5 as well as
-  with SpamAssassin 3.3.0;
+  the ClamAVPlugin plugin - please find a fresh version, which can be used
+  with both SpamAssassin versions 3.2.5 and 3.3.0, on its wiki page at
+  http://wiki.apache.org/spamassassin/ClamAVPlugin
 
 - versions of amavisd-new between 2.5.2 and 2.6.1 (inclusive) are incompatible
   with SpamAssassin 3.3; please upgrade amavisd to 2.6.2 or later, or apply
@@ -112,7 +128,11 @@ COMPATIBILITY WITH 3.2.5
 - support for versions of perl 5.6.* is being gradually revoked
   (may still work, but no promises and no support);
 
-- preferred versions of perl are 5.8.8, 5.8.9, and 5.10.1 or later
+- preferred versions of perl are 5.8.8, 5.8.9, and 5.10.1 or later;
+
+- on FreeBSD, please avoid using multithreaded versions of perl older
+  than 5.10.0 due to small default main thread's stack size, which may
+  not suffice for some regular expression evaluations;
 
 
 INSTALLING RULES
@@ -133,10 +153,6 @@ Installing rules from files:
     Mail-SpamAssassin-rules-xxx.tgz.md5
     Mail-SpamAssassin-rules-xxx.tgz.sha1
       (where xxx may look something like '3.3.0.r893295')
-  obtain a rules-signing public key:
-    curl -O http://spamassassin.apache.org/updates/GPG.KEY
-  import the signing key to a SpamAssassin gpg keyring:
-    sa-update --import GPG.KEY
   install rules from a compressed tar archive:
     sa-update --install Mail-SpamAssassin-rules-xxx.tgz
       (sa-update will need corresponding .asc and .sha1 files with the
@@ -151,7 +167,7 @@ MAIN NEW FEATURES
   supports multiple signatures, ADSP support with overrides) - (see below);
 
 - added 'if can(Class::method)' conditional statement, allowing configuration
-  settings to be conditionalised on plugin capabilities without requiring
+  settings to be conditional on plugin capabilities without requiring
   new version releases to do so;
 
 - added a --verbose option to the sa-update utility to show updated channels;
@@ -199,20 +215,20 @@ BUILDING AND PACKAGING
 WORKAROUNDS TO PERL BUGS AND LIMITATIONS
 
 - modified the Check.pm plugin to produce smaller chunks of source code
-  from rules (60 kB) to avoid Perl compiler crashing on exceeding stack size
+  from rules (60 kB) to avoid Perl compiler crashing on exceeding stack size;
 
 - localized global variables $1, $2, etc at several places, avoiding taint
-  issue from propagating
+  issue from propagating;
 
 - avoided Perl I/O bug by replacing line-by-line reading with read() where
   suitable, or played down the EBADF status in other places and only report
   it as a dbg instead of a die - while also providing a little speedup
-  (10 .. 25 %) on reading a message
+  (10 .. 25 %) on reading a message;
 
 - provided a new sub Message::split_into_array_of_short_lines to split
   a text into array of paragraph chunks of sizes between 1 kB and 2 kB,
   giving less opportunity to runaway regular expressions in rules;
-  fixes bugs: 5717, 5644, 5795, 5486, 5801, 5041
+  fixes bugs: 5717, 5644, 5795, 5486, 5801, 5041;
 
 
 MEMORY FOOTPRINT
@@ -248,7 +264,7 @@ IPv6 SUPPORT
 - NetSet now understands that ::ffff:192.168.1.2 and 192.168.1.2 are
   the same address;
 
-- IPv6 addresses are now recognised in Received header fields;
+- IPv6 addresses are now properly read from Received header fields;
 
 - when reading Received header fields, the "IPv6:" prefix is stripped from
   IPv6 addresses, and "::ffff:" is removed from IPv6-mapped IPv4 addresses
@@ -270,17 +286,17 @@ SPAMC
 - added -n / --connect-timeout switch to spamc, allowing separate
   connection timeout from communication timeout;
 
-- added --filter-retries and --filter-retry-sleep
+- added --filter-retries and --filter-retry-sleep;
 
 - increased allowed line length in spamc.conf files to 8 KiB and report
-  an error when the limit is exceeded
+  an error when the limit is exceeded;
 
-- spamc would not time out connections to a hung spamd, fixed
+- fixed issue where spamc would not time out connections to a hung spamd;
 
 - spamc client library leaked the zlib compression buffer if compression
-  is used
+  is used;
 
-- spamc long option '--dest' was broken
+- spamc long option '--dest' was broken;
 
 
 SPAMD
@@ -292,7 +308,7 @@ SPAMD
 - additional tempfile cleanup in kill_handler;
 
 - added SPAMD_LOCALHOST option to "make test" to allow specifying
-  non-127.0.0.1 IP address for use in FreeBSD jail
+  non-127.0.0.1 IP address for use in FreeBSD jail;
 
 
 API
@@ -327,8 +343,8 @@ RULES
 
 - rules are no longer distributed with the package;
 
-- new scores have been generated by a GA algorithm and then manually tweaked,
-  based on cleaned datasets supplied by a dozen of volunteers;
+- new scores were generated by a genetic algorithm (GA) and then manually
+  tweaked based on cleaned datasets supplied by a dozen volunteers;
 
 - dropped redundant rules or rules causing too many false positives;
 
@@ -342,18 +358,18 @@ RULES
   NML_ADSP_CUSTOM_{LOW,MED,HIGH}, __VIA_ML, MIME_BASE64_TEXT, LOTTO_URI,
   FORGED_MUA_THEBAT_BOUN, FORGED_MUA_THEBAT_CS, UNRESOLVED_TEMPLATE,
   __THEBAT_MUA, __ANY_OUTLOOK_MUA, RP_MATCHES_RCVD, one-word X-Mailer,
-  advance_fee update, tweak SPAN rules, tweak skype and misquoted-HTML rules,
-  added some new HTML obfuscation and Google feedproxy URI rules, 
-  tweak reevolved advance fee second-order metarules,
-  added a test rule for postmaster+abuse missing, FROM_MISSPACED, 
-  fix FROM_CONTAINS_TAB, added Facebook redirector pattern,
-  avoided ISO-2022-JP FPs on TVD_SPACE_RATIO, GAPPY_SUBJECT, PLING_QUERY
-  and FM_FRM_RN_L_BRACK rules, FP fix for one-word mails on TVD_SPACE_RATIO,
-  RATWARE_BOUNDARY plus variant, supersede all previous RATWARE_OUTLOOK
-  stuff, added exclusion for __ISO_2022_JP_DELIM to OBFUSCATING_COMMENT,
-  FP in obfuscated URI rule, fixed breakage in tbird image rule, fixed
-  SUBJECT_FUZZY_MEDS FP on unobfuscated "meds", added misspaced From header
-  field rule, numeric+cctld URI rule, fixed FH_DATE_PAST_20XX, ...
+  SPAN rules, skype and misquoted-HTML rules, HTML obfuscation and
+  Google feedproxy URI rules, advance_fee updates including further
+  evolved advance fee second-order metarules, test rule for
+  postmaster+abuse missing, FROM_MISSPACED, fixed FROM_CONTAINS_TAB, a
+  Facebook redirector pattern, fixed FPs with TVD_SPACE_RATIO regarding
+  one-word emails and ISO-2022-JP, added exclusion for __ISO_2022_JP_DELIM
+  to OBFUSCATING_COMMENT, GAPPY_SUBJECT, PLING_QUERY and FM_FRM_RN_L_BRACK
+  rules, RATWARE_BOUNDARY plus variant, superseded all previous
+  RATWARE_OUTLOOK stuff, resolved FP in obfuscated URI rule, fixed breakage
+  in tbird image rule, fixed SUBJECT_FUZZY_MEDS FP on unobfuscated "meds",
+  added misspaced From header field rule, numeric+cctld URI rule,
+  updated FH_DATE_PAST_20XX, ...
 
 - added PSBL blacklist - http://psbl.surriel.com/
 
@@ -374,13 +390,13 @@ RULES
 
 PLUGINS
 
-- new plugins: FreeMail, PhishTag, Reuse
+- new plugins: FreeMail, PhishTag, Reuse;
   
-- now enabled by default: DKIM
+- now enabled by default: DKIM;
 
-- now disabled by default: AWL
+- now disabled by default: AWL;
 
-- retired plugin: DomainKeys
+- retired plugin: DomainKeys;
 
 
 AWL PLUGIN
@@ -396,7 +412,7 @@ AWL PLUGIN
 
 - AutoWhitelist.pm: allowed storing a canonicalized IPv6 address, cropped
   to a configurable network mask (previously causing SQL server errors:
-  'value too long')
+  'value too long');
 
 - let AWL with SQL keep separate records for DKIM-signed and unsigned mail
   (when auto_whitelist_distinguish_signed configuration option is true,
@@ -421,16 +437,25 @@ DCC PLUGIN
 
 DKIM PLUGIN
 
-- the plugin is now enabled by default;
+- the DKIM plugin is now enabled by default for new installs if the perl
+  module Mail::DKIM is installed.  However, installing SpamAssassin will
+  not overwrite existing .pre configuration files, so to use DKIM when
+  upgrading from a previous release that did not use DKIM, the directive:
+
+    loadplugin Mail::SpamAssassin::Plugin::DKIM
+
+  will need to be uncommented in file "v312.pre", or added to some
+  other .pre file, such as local.pre;
 
 - absolute minimal version of Mail::DKIM is 0.31;
   support for ADSP requires Mail::DKIM 0.34;
-  a DNS test (and rule) for NXDOMAIN is operational since Mail::DKIM 0.36_5
+  a DNS test (and rule) for NXDOMAIN is operational since Mail::DKIM 0.36_5,
+  so effectively the recommended version is Mail::DKIM 0.37 or later;
 
-- a perl module Digest::SHA is required if the DKIM plugin is enabled
-  (if a perl module Digest::SHA is available, the module Digest::SHA1
-  becomes optional as far as SpamAssassin is concerned (but is still
-  needed by Razor agents));
+- a perl module Digest::SHA is required if the DKIM plugin is enabled.
+  If a perl module Digest::SHA is available, the module Digest::SHA1
+  becomes optional as far as SpamAssassin is concerned, but is still
+  needed by Razor agents;
 
 - added support for multiple signatures (useful for whitelisting);
 
@@ -518,7 +543,7 @@ BUG FIXES
 
 - 'pyzor_options' in Plugin/Pyzor.pm was not untainted;
 
-- URIDetail plugin was not taint safe, fixed;
+- made the URIDetail plugin taint safe;
 
 - fixed parsing of multi-line Received header fields for
   BOUNCE_MESSAGE/VBOUNCE_MESSAGE et al;
@@ -527,12 +552,12 @@ BUG FIXES
   file or from vpopmail utilities, avoid implicit untainting; report error
   if user preferences file exists but cannot be accessed;
 
-- avoid using raw data from DNS as a regexp in Plugin/ASN.pm;
+- avoided using raw data from DNS as a regexp in Plugin/ASN.pm;
 
 - ensured the dbg() and info() calls always return the same value (true)
   regardless of log level;
 
-- suppress logging of $& when its value is not available (i.e. when
+- suppressed logging of $& when its value is not available (i.e. when
   no regexp has been evaluated during rule evaluation);
 
 - Exporter never really worked in SA, was not enclosed in BEGIN {};
@@ -621,30 +646,29 @@ OTHER CHANGES
 - exposed existing function 'received_within_months' as an eval function
   in Plugin/HeaderEval.pm;
 
-- use /var/lock/subsys/spamd instead of /var/lock/subsys/spamassassin for
-  rc script, so that 'service spamd status' will work;
+- moved rc script to /var/lock/subsys/spamd instead of
+  /var/lock/subsys/spamassassin so 'service spamd status' will work;
 
-- re-download MIRRRORED.BY files at least once a week, or if
+- added feature to re-download MIRRRORED.BY files at least once a week, or if
   'sa-update --refreshmirrors' switch is used;
 
 - input delimiter $/ can be corrupted by a plugin, localize $/ and $\ before
   calling a plugin;
 
-- takes almost a minute to start spamd on a slow machine, bumped up the
-  retry counter to 180 seconds;
+- bumped the retry counter to 180 seconds for starting spamd on slow machines;
 
 - resolved Bug 5325: syslog severity level in spamc/libspamc.c for max
   message size (changed LOG_ERR into LOG_NOTICE for the message:
   "skipped message, greater than max message size");
 
-- avoid taint warnings if hostname is returned as '(none)';
+- added checker to avoid taint warnings if hostname is returned as '(none)';
 
-- produce an error message if an sa-update channel doesn't exist;
+- altered sa-update to produce an error message if a channel doesn't exist;
 
 - Bug 6150, Bug 6127, Bug 5981, Bug 5950, Bug 6191: let spamd log/report
   a child process exit status or aborting condition in an informative way;
 
-- detect accidental match-everything regexps in rules;
+- added checker to detect accidental match-everything regexps in rules;
 
 - updated garescorer for 3.3.0: use more epochs in GA runs for better scores;
   clarify some mass-check warning output, ensure rule name always appears at
@@ -653,7 +677,7 @@ OTHER CHANGES
   the midway point of its score range. this produces better results;
   remove some dead code from masses/score-ranges-from-freqs;
 
-- report performance as iterations per second in garescorer.c;
+- set garescorer.c to report performance as iterations per second;
 
 - added test to ensure that all config settings are correctly handled when
   switching between users; added more config setting type metadata to enable
@@ -664,11 +688,11 @@ OTHER CHANGES
   stress tests with xt/50_testname.t scripts to enforce their run before a
   release;
 
-- numerous additional and updated self-tests;
+- made numerous additional and updated self-tests;
 
 - added a Test::Perl::Critic release-test;
 
-- some code cleanups based on suggestions by a perl module Test::Perl::Critic,
+- cleaned up some code based on suggestions by perl module Test::Perl::Critic,
   among others:
   . enable TestingAndDebugging::ProhibitNoStrict test but allow the
     use of 'no strict "refs"';
@@ -678,13 +702,14 @@ OTHER CHANGES
   . deal with BayesStore/BDB.pm, Variables::ProhibitConditionalDeclarations
   . now that the module Time::HiRes is a required module, we can afford
     to replace a select() with Time::HiRes::sleep, and remove exception
-    BuiltinFunctions::ProhibitSleepViaSelect from xt/60_perlcritic.t
+    BuiltinFunctions::ProhibitSleepViaSelect from xt/60_perlcritic.t;
 
-- documentation was updated, fixing numerous typos and mistakes in
-  documentation text and in log messages;
+- updated documentation, fixing numerous typos and mistakes in documentation
+  text and in log messages;
 
-- extensive improvements to development process:
-  automated testing through Hudson, improvements to mass-check and rules
+- extensively improved development process:
+  . automated testing through Hudson, a continuous integration tool;
+  . improved mass-check system and rules oversight;
 
 
 About Apache SpamAssassin
