@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix jm wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 2: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix dos nbebout wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 3: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix nbebout wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2
+# with results from: day 1: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix dos jm wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 2: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix jm wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 3: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix dos nbebout wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2
 
 # tflags userconf
 ALL_TRUSTED
@@ -98,16 +98,10 @@ DOS_HIGHBIT_HDRS_BODY
 DOS_OE_TO_MX
 
 # good enough
-DOS_OE_TO_MX_IMAGE
-
-# good enough
 DOS_OUTLOOK_TO_MX
 
 # good enough
 DOS_RCVD_IP_TWICE_C
-
-# good enough
-DRUGS_STOCK_MIMEOLE
 
 # good enough
 DYN_RDNS_AND_INLINE_IMAGE
@@ -126,6 +120,9 @@ FB_CIALIS_LEO3
 
 # good enough
 FB_EXTRA_INCHES
+
+# good enough
+FB_GVR
 
 # good enough
 FB_QUALITY_REPLICA
@@ -259,9 +256,6 @@ HASHCASH_2SPEND
 # tflags userconf
 HASHCASH_HIGH
 
-# good enough
-HDRS_MISSP
-
 # tflags userconf
 HEAD_LONG
 
@@ -294,9 +288,6 @@ KAM_LOTTO1
 
 # good enough
 KAM_LOTTO2
-
-# good enough
-KB_DATE_CONTAINS_TAB
 
 # good enough
 KB_FAKED_THE_BAT
@@ -345,6 +336,9 @@ NO_RECEIVED
 
 # tflags userconf
 NO_RELAYS
+
+# good enough
+PART_CID_STOCK
 
 # tflags net
 PYZOR_CHECK
@@ -542,9 +536,6 @@ RCVD_IN_XBL
 RDNS_LOCALHOST
 
 # good enough
-REPLYTO_WITHOUT_TO_CC
-
-# good enough
 S25R_4
 
 # good enough
@@ -605,9 +596,6 @@ SUBJECT_IN_BLACKLIST
 SUBJECT_IN_WHITELIST
 
 # good enough
-TAB_IN_FROM
-
-# good enough
 TO_NO_BRKTS_DYNIP
 
 # good enough
@@ -615,9 +603,6 @@ TT_MSGID_TRUNC
 
 # good enough
 TVD_FINGER_02
-
-# good enough
-TVD_INCREASE_SIZE
 
 # good enough
 TVD_PCT_OFF
@@ -639,6 +624,18 @@ TVD_VISIT_PHARMA
 
 # good enough
 TWO_IPS_RCVD
+
+# good enough
+DEAR_NOBODY
+
+# good enough
+FB_YOU_CAN_BECOME
+
+# good enough
+S25R_1
+
+# good enough
+S25R_3
 
 # tflags userconf
 UNPARSEABLE_RELAY
