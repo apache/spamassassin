@@ -16,7 +16,6 @@ header	 RCVD_LINK_LOCAL	X-Spam-Relays-Untrusted =~ / (?:by|ip)=169\.254\.d+\.\d+
 describe RCVD_LINK_LOCAL	Received: uses link-local IP, violating RFC 3927
 
 # NOTE, THIS NEEDS IPv6 HELP
-# jm: lint failed, commenting out until fixed
-#header	 T_RCVD_INVALID_IP	X-Spam-Relays-Untrusted =~ / (?:by|ip)=(?!(?:(?:\.(?:1?\d?\d|2(?[0-4]\d|5[0-4])))\.(?:1?\d?\d|2(?[0-4]\d|5[0-4]))){3} )/
-#describe T_RCVD_INVALID_IP	Received: contains an invalidly formatted IP
+header	 T_RCVD_INVALID_IP	X-Spam-Relays-Untrusted =~ / (?:by|ip)=(?!(?:(?:\.(?:1?\d?\d|2(?:[0-4]\d|5[0-4])))\.(?:1?\d?\d|2(?:[0-4]\d|5[0-4]))){3} )/
+describe T_RCVD_INVALID_IP	Received: contains an invalidly formatted IP
 
