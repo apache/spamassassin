@@ -26,6 +26,8 @@ if [ "$#" -gt 0 ]; then
   soadir="$1"
 fi
 
+umask 002
+
 # ---------------------------------------------------------------------------
 
 # increment the zone serial.  we use a counter, with rollover at 100,
