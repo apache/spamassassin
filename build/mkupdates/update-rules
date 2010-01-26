@@ -28,7 +28,11 @@ fi
 DIR=/tmp/upd-$$
 rm -rf $DIR || exit 1
 
-SOURCE=svn.apache.org/repos/asf/spamassassin/rules/branches/$VERS
+if [ "$VERS" = "3.1" -o "$VERS" = "3.2" ] ; then
+  SOURCE=svn.apache.org/repos/asf/spamassassin/branches/rules/$VERS
+else
+  SOURCE=svn.apache.org/repos/asf/spamassassin/branches/$VERS/rules
+fi
 
 tagstamp=`date "+%Y%m%d%H%M%S"`
 DEST=svn.apache.org/repos/asf/spamassassin/tags/sa-update_${VERS}_${tagstamp}
