@@ -1,0 +1,41 @@
+# Imported from debian spamassassin 3.2.5-7 package
+# under assumed license compatibility and cooperation.
+# Flagged 'nopublish' until that is confirmed.
+
+
+# Special SpamAssassin rules for Debian
+# Duncan Findlay
+
+header	 D_SENT_BY_DEBCONF	Subject =~ /^Debconf:/
+#score	 D_SENT_BY_DEBCONF	-5.0
+describe D_SENT_BY_DEBCONF	Sent by Debconf
+tflags	 D_SENT_BY_DEBCONF	nice nopublish
+
+body	 D_SENT_BY_AFBACKUP	/^\[Afbackup\]: Overall exit status:/
+#score	 D_SENT_BY_AFBACKUP	-5.0
+describe D_SENT_BY_AFBACKUP	Sent by Afbackup
+tflags	 D_SENT_BY_AFBACKUP	nice nopublish
+
+header	 D_SENT_BY_APTLC	Subject =~ /^apt-listchanges: (changelogs|news) for/
+#score	 D_SENT_BY_APTLC	-5.0
+describe D_SENT_BY_APTLC	Sent by apt-listchanges
+tflags	 D_SENT_BY_APTLC	nice nopublish
+
+header	 __ANACRON_SUBJ		Subject =~ /^Anacron job '[a-z0-9_.-]+' on/i
+tflags	 __ANACRON_SUBJ		nice nopublish
+header   __ANACRON_FROM		From =~ /^Anacron/
+tflags	 __ANACRON_FROM		nice nopublish
+meta	 D_SENT_BY_ANACRON	__ANACRON_SUBJ && __ANACRON_FROM
+#score	 D_SENT_BY_ANACRON	-5.0
+describe D_SENT_BY_ANACRON	Sent by Anacron Daemon
+tflags	 D_SENT_BY_ANACRON	nice nopublish
+
+
+header	 __CRON_FROM		From =~ /^Cron Daemon/
+tflags	 __CRON_FROM		nice nopublish
+header 	 __CRON_HEADER		X-Cron-Env =~ /./
+tflags	 __CRON_HEADER		nice nopublish
+meta	 D_SENT_BY_CRON		__CRON_FROM && __CRON_HEADER
+#score 	 D_SENT_BY_CRON		-5.0
+describe D_SENT_BY_CRON		Sent by Cron Daemon
+tflags	 D_SENT_BY_CRON 	nice nopublish
