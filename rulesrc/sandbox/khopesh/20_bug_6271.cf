@@ -35,4 +35,15 @@ header	 DATE_IN_DISTANT_FUTURE	eval:check_for_shifted_date('35064', 'undef')
 describe DATE_IN_DISTANT_FUTURE	Date: is over 4 years after Received: date
 tflags	 DATE_IN_DISTANT_FUTURE	nopublish
 
+
+
+# Expected stats: 0.1782/0.0029 Spam%/Ham% at 0.984 S/O
+header	 DATE_IN_FUTURE_96_Q	eval:check_for_shifted_date('96', '2920')
+describe DATE_IN_FUTURE_96_Q	Date: is 4 days to 4 months after Received: date
+tflags	 DATE_IN_FUTURE_96_Q	nopublish # remove 96_XX before publishing this!
+
+# Expected stats: 0.2469/0.0008 Spam%/Ham% at 0.997 S/O and a higher 'Rank'
+header	 DATE_IN_FUTURE_Q_PLUS	eval:check_for_shifted_date('2920', 'undef')
+describe DATE_IN_FUTURE_Q_PLUS	Date: is over 4 months after Received: date
+
 endif
