@@ -334,6 +334,11 @@ SPAMASSASSIN RELEASE PROCEDURE
   possibly more, depending on if this is the first release of a new
   release line.
 
+  When changing the timestamp in the downloads.cgi link URL, ensure you
+  use a time 2 hours from now.  The ASF websites are synced internally to
+  the public HTTP servers on a bi-hourly basis, so it may take up to this
+  long for a file-download link to become valid and not a 404.
+
 - rebuild the SpamAssassin website with webmake:
 
         PATH=$HOME/sabuildtools/bin:$PATH
