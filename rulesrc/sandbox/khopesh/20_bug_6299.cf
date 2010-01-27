@@ -1,8 +1,9 @@
 # includes updates through 2010-01-19 (as last referenced 2010-01-21)
 # via http://www.iana.org/assignments/ipv4-address-space/
 # updates itemized by date at http://www.cymru.com/Documents/bogon-list.html
-header	 T_KHOP_RCVD_ILLEGAL_IP	X-Spam-Relays-Untrusted =~ / (?:by|ip)=(?:[05]|14|23|3[1679]|4[29]|50|1(?:0[1234567]|7[679]|8[15])|22[3-9]|2[3-9]\d|\d{4,}|[3-9]\d\d)\.\d+\.\d+\.\d+ /
+header	 T_KHOP_RCVD_ILLEGAL_IP	X-Spam-Relays-Untrusted =~ / (?:by|ip)=(?:[05]|14|23|3[1679]|4[29]|50|1(?:0[0-7]|7[679]|8[15])|2(?:2[3-9]|[3-9]\d)|\d{4,}|[3-9]\d\d)\.\d+\.\d+\.\d+ /
 describe T_KHOP_RCVD_ILLEGAL_IP	Received: contains reserved or unallocated IP
+header	 T_KHOP_RCVD_ILLEGAL_IP_LE	X-Spam-Relays-Untrusted =~ /^[^\]]+ (?:by|ip)=(?:[05]|14|23|3[1679]|4[29]|50|1(?:0[0-7]|7[679]|8[15])|2(?:2[3-9]|[3-5]\d)|\d{4,}|[3-9]\d\d)\.\d+\.\d+\.\d+ /
 
 # TEST-NET addresses are for documentation and examples only
 header	 RCVD_TEST_NET	X-Spam-Relays-Untrusted =~ / (?:by|ip)=(?:192\.0\.2|198\.51\.100|203\.0\.113)\.\d+ /
@@ -16,6 +17,6 @@ header	 RCVD_LINK_LOCAL	X-Spam-Relays-Untrusted =~ / (?:by|ip)=169\.254\.d+\.\d+
 describe RCVD_LINK_LOCAL	Received: uses link-local IP, violating RFC 3927
 
 # NOTE, THIS NEEDS IPv6 HELP
-header	 T_RCVD_INVALID_IP	X-Spam-Relays-Untrusted =~ / (?:by|ip)=(?!(?:(?:\.(?:1?\d?\d|2(?:[0-4]\d|5[0-4])))\.(?:1?\d?\d|2(?:[0-4]\d|5[0-4]))){3} )/
+header	 T_RCVD_INVALID_IP	X-Spam-Relays-Untrusted =~ / (?:by|ip)=(?!(?:(?:1?\d?\d|2(?:[0-4]\d|5[0-4])))(\.(?:1?\d?\d|2(?:[0-4]\d|5[0-4]))){3} )\d/
 describe T_RCVD_INVALID_IP	Received: contains an invalidly formatted IP
 
