@@ -274,6 +274,28 @@ SPAMASSASSIN RELEASE PROCEDURE
 
 	(where X.Y.N is the new version number)
 
+- [X.Y.0 RELEASES ONLY]: in trunk, bump the version to the correct
+  version in the following files (just as above for the branch):
+
+  - lib/Mail/SpamAssassin.pm
+  - spamassassin.spec
+
+- [X.Y.0 RELEASES ONLY]: NOTE: This may change, make sure this info is
+  still accurate before changing this (preferrably find out BEFORE doing
+  an X.Y.0 release.  Update the mkupdates stuff:
+
+  - In build/mkupdates/run_part2 change versions="X.Y.0" to the new
+    development version (X.Y+1.0).
+
+  - Create an empty file for the new version number in
+    /var/named/updates.dev.spamassassin.org.d/ on the zone
+
+  - Add "$INCLUDE /var/named/updates.spamassassin.org.d/X.Y+1.0" to the
+    spamassassin.org zone file in spamassassin/dns/
+
+  - commit the changes, update the zone (if not doing above on the zone)
+    and tick the zone file using build/mkupdates/tick_zone_serial
+
 - !WARNING! After the next step, the version number will be considered
   "burned". The number is locked for this particular code.  The same
   number cannot be used for a future different release.  So make sure
