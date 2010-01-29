@@ -1381,8 +1381,9 @@ sub parse_body {
   
   # Now parse *only* the message headers; the MIME tree won't be generated 
   # yet, it will be done on demand later on.
-  my $mail = $spamtest->parse(\@msglines, 0, !$timeout_child ? () :
-                         { master_deadline => $start_time + $timeout_child } );
+  my $mail = $spamtest->parse(\@msglines, 0,
+                       !$timeout_child || !$start_time ? ()
+                       : { master_deadline => $start_time + $timeout_child } );
 
   return ($mail, $actual_length);
 }
@@ -1705,8 +1706,9 @@ sub dotell {
   my $resp = "EX_OK";
 
   # generate mail object from input
-  my ($mail, $actual_length) = parse_body($client, $expected_length,
-                $compress_zlib);
+  my($mail, $actual_length) =
+    parse_body($client, $expected_length, $compress_zlib, $start_time);
+
   return 0 unless defined($mail);       # error
 
   if ($compress_zlib) {
