@@ -1,9 +1,9 @@
 #!/bin/bash
 #
-# Increment the spamassassin.org DNS zone's serial number, and trigger
+# Increment the yerp.org DNS zone's serial number, and trigger
 # a zone update against the DNS server.
 #
-# usage: sudo -u updatesd /home/updatesd/svn/spamassassin/build/jmupdates/tick_zone_serial
+# usage: sudo -u updatesd /home/updatesd/svn/spamassassin/build/jmupdates/tick_zone_serial /var/named/jm/yerp.org.d
 #
 # required setup, in /etc/sudoers or /opt/sfw/etc/sudoers:
 #   updatesd     ALL = NOPASSWD: /usr/sbin/rndc reload
@@ -16,10 +16,11 @@ set -x
 # it's assumed that the *real* zone $INCLUDEs files from this dir.
 # it must be writable by the user this script runs as.
 #
-soadir=/var/named/jm/yerp.org.d
-if [ "$#" -gt 0 ]; then
-  soadir="$1"
+if [ "$#" -lt 1 ]; then
+  echo "usage: tick_zone_serial /var/named/path/to/soadir.d" 1>&2
+  exit 1
 fi
+soadir="$1"
 
 # ---------------------------------------------------------------------------
 
