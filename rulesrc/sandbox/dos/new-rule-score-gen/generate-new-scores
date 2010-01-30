@@ -37,12 +37,12 @@ if [ ! -e corpus ]; then
 fi
 
 date
-echo "[ rsyncing logs ]"
 # if running on spamassassin.zones.apache.org rsync locally, otherwise rsync remotely
 if [ -e $CORPUS_SRC_DIR ]; then
-  cp $CORPUS_SRC_DIR/*.log corpus/.
+  echo "[ rsyncing logs locally ]"
   rsync -artv --delete $CORPUS_SRC_DIR/*.log corpus/. || exit $?
 else
+  echo "[ rsyncing logs remotely ]"
   # load rsync credentials from RSYNC-CREDS file
   # RSYNC_USERNAME="username"
   # RSYNC_PASSWORD="password"
