@@ -23,12 +23,7 @@
 # </@LICENSE>
 
 SCORESET=$1
-
-# load rsync credentials from RSYNC-CREDS file
-# RSYNC_USERNAME="username"
-# RSYNC_PASSWORD="password"
-. RSYNC-CREDS
-export RSYNC_PASSWORD
+CORPUS_SRC_DIR="/export/home/corpus-rsync/corpus"
 
 if [ ! $SCORESET ]; then
   echo "Missing scoreset number parameter"
@@ -43,8 +38,18 @@ fi
 
 date
 echo "[ rsyncing logs ]"
-
-rsync -artvz $RSYNC_USERNAME@rsync.spamassassin.org::corpus/*.log corpus/. || exit $?
+# if running on spamassassin.zones.apache.org rsync locally, otherwise rsync remotely
+if [ -e $CORPUS_SRC_DIR ]; then
+  cp $CORPUS_SRC_DIR/*.log corpus/.
+  rsync -artv --delete $CORPUS_SRC_DIR/*.log corpus/. || exit $?
+else
+  # load rsync credentials from RSYNC-CREDS file
+  # RSYNC_USERNAME="username"
+  # RSYNC_PASSWORD="password"
+  . RSYNC-CREDS
+  export RSYNC_PASSWORD
+  rsync -artvz --delete $RSYNC_USERNAME@rsync.spamassassin.org::corpus/*.log corpus/. || exit $?
+fi
 
 date
 echo "[ selecting log files to use for scoreset $SCORESET ]"
