@@ -115,6 +115,7 @@ describe       TBIRD_SUSP_MIME_BDRY  Unlikely Thunderbird MIME boundary
 rawbody        RUNON_SHY          /(?:\&shy;){3}/i
 describe       RUNON_SHY          Repeating soft hyphens
 score          RUNON_SHY          0.1
+tflags         RUNON_SHY          nopublish
 
 # Seen all too often
 header         LAZY_LISTWASHING   To =~ /\@(?:example\.com|example\.domain|your\.domain|some\.domain|domain\.dom|somewhere\.tld|somewhere\.com|your\.?domain\.com|your\.favorite\.machine)\b/i
@@ -146,7 +147,7 @@ ifplugin Mail::SpamAssassin::Plugin::FreeMail
   score        FREEMAIL_RVW_ATTCH   1.0
 endif
 
-body           END_FUTURE_EMAILS   /\bend future emails\b/i
+body           END_FUTURE_EMAILS   /\bend future (?:email|alert)s?\b/i
 score          END_FUTURE_EMAILS   0.50
 describe       END_FUTURE_EMAILS   Unsubscribe
 
@@ -157,6 +158,7 @@ describe       AD_COMPLAINTS       Complain about this spam
 # observed in bank phishing 09/2009
 rawbody        MISQ_HTML           /<\w{2,20}[^>=]{1,30}=[^"][^">]{1,30}[^=]"[\s>]/
 describe       MISQ_HTML           Unbalanced quotes in HTML tag
+tflags         MISQ_HTML           nopublish
 
 # observed in bank phishing 09/2009
 uri            WIKI_IMG            m,^https?://[^/]+wiki[mp]edia\.org/.+\.(?:png|gif|jpe?g),i
@@ -199,6 +201,7 @@ describe       MANY_TINY_FLOAT      Many small-font floating HTML elements - tex
 header         TO_EQ_FROM      ALL =~ /\nFrom:[^\n<]{0,80}<?([^\n\s>]+)>?\n(?:[^\n]{1,100}\n)*To:[^\n]+\1/ism
 describe       TO_EQ_FROM      To: same as From:
 score          TO_EQ_FROM      0.001
+tflags         TO_EQ_FROM      nopublish
 
 
 # Evaluate ReturnPath and blacklist collisions
@@ -231,4 +234,7 @@ meta           __RP_CERTIFIED_ANBREP_L3   RCVD_IN_RP_CERTIFIED && RCVD_IN_ANBREP
 tflags         __RP_SAFE_ANBREP_L3        net nopublish
 tflags         __RP_CERTIFIED_ANBREP_L3   net nopublish
 
+# a URI in the From comment text, to bypass URIBL checks
+# simplistic URI format for now
+header         FROM_URI       From =~ /".*www\.\S+\.(?:com|net|info|biz|org).*"/i
 
