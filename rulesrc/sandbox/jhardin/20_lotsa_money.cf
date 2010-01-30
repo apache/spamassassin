@@ -117,7 +117,7 @@ body     __DESTROY_ME     /\b(?:destroy|hunt)\sm[ey]\b/i
 ifplugin Mail::SpamAssassin::Plugin::ReplaceTags
   replace_tag  PERCENT      \b(?:\d\d|ten|[a-z]+teen|(?:twen|thir|fou?r)ty(?:-?[a-z]+)?)\s?(?:%|percent)
 
-  body     __PCT_FOR_YOU_1  /<PERCENT>[\s)]+(?:of\s[\w\s]{0,35}?)?(?:for|to|as)\syour?/i
+  body     __PCT_FOR_YOU_1  /<PERCENT>[\s)]{0,3}(?:of\s[\w\s]{0,35}?)?(?:for|to|as)\syour?/i
   body     __PCT_FOR_YOU_2  /\b(?:give|offer)\syou\s<PERCENT>/i
   body     __PCT_FOR_YOU_3  /\byour?\s(?!can)[\w\s]{6,20}?(?:(?:share|entitle|assist|comp[ea]nsate|reward|renumerate|deduct|account|tage)[\w\s]{1,25}?)?\s(?<!by\s)(?<!up\sto\s)<PERCENT>/i
   body     __PCT_OF_PMTS    /<PERCENT>[\s)]+(?:of\s[\w\s]{0,35}?)?of\s(?:the\s)?(?:payments?|remittances?|chec(?:k|que)s?)/i
