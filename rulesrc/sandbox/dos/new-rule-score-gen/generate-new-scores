@@ -216,9 +216,7 @@ if [ -s scores-active-zeroed ]; then
 fi
 
 cd ../..
-./merge-scoresets $SCORESET
-echo
-cat scores
+cat scores-set$SCORESET
 
 # collect some stats
 echo "##### WITH NEW RULES AND SCORES #####" > stats-set$SCORESET

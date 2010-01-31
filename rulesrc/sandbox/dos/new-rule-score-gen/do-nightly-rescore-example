@@ -30,4 +30,9 @@ else
   REVISION=`grep "revision .*" scores-set0 -o | cut -d" " -f2`
 fi
 
+cp scores-set0 scores-set2
+cp scores-set1 scores-set3
+./merge-scoresets $SCORESET
+cat scores
+
 svn ci -m "updated scores for revision $REVISION active rules added since last mass-check"
