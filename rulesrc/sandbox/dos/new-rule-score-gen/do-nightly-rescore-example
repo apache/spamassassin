@@ -23,11 +23,11 @@ svn up
 if [ `date +%w` -eq 6 ]; then
   ./generate-new-scores 0
   ./generate-new-scores 1
-  REVISION=`grep "revision .*" scores-set1 -o | cut -d" " -f2`
+  REVISION=`grep "revision .*" scores-set1 | cut -d" " -f9`
 else
   ./generate-new-scores 1
   ./generate-new-scores 0
-  REVISION=`grep "revision .*" scores-set0 -o | cut -d" " -f2`
+  REVISION=`grep "revision .*" scores-set0 | cut -d" " -f9`
 fi
 
 cp scores-set0 scores-set2
