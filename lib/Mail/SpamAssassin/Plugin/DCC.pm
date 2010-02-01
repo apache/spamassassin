@@ -449,6 +449,8 @@ sub is_dccifd_available {
     }
     if (defined $sockpath && -S $sockpath && -w _ && -r _) {
       $self->{dccifd_available} = 1;
+    } elsif (!defined $conf->{dcc_dccifd_path_raw}) {
+      dbg("dcc: dccifd is not available: no r/w dccifd socket found");
     } else {
       dbg("dcc: dccifd is not available: no r/w dccifd socket found: %s",
           $conf->{dcc_dccifd_path_raw});
@@ -679,7 +681,7 @@ sub dccifd_lookup {
   my $left;
   my $right;
   my $timeout = $conf->{dcc_timeout};
-  my $opts = $conf->{dcc_options};
+  my $opts = $conf->{dccifd_options};
   my @opts = !defined $opts ? () : split(' ',$opts);
 
   $permsgstatus->enter_helper_run_mode();
@@ -906,7 +908,7 @@ sub dccifd_report {
   my $conf = $self->{main}->{conf};
   my $timeout = $conf->{dcc_timeout};
   # instead of header use whatever the report option is
-  my $opts = $conf->{dcc_options};
+  my $opts = $conf->{dccifd_options};
   my @opts = !defined $opts ? () : split(' ',$opts);
 
   $options->{report}->enter_helper_run_mode();
