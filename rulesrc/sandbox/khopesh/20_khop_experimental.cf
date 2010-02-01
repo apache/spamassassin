@@ -4,7 +4,7 @@ meta	 MALFORMED_FREEMAIL	(MISSING_HEADERS||__HDRS_LCASE) && FREEMAIL_FROM
 describe MALFORMED_FREEMAIL	Bad headers on message from free email service
 #score	 MALFORMED_FREEMAIL	0.1
 
-header	 FROM_WEBSITE	From =~ /\b(?:f|ht)tps?:\/\/[^\/\@]{3,60}\.\w\w/i
+header	 FROM_WEBSITE	From =~ m'\b(?:f|ht)tps?://[^/\@]{3,60}\.\w\w'i
 describe FROM_WEBSITE	Sender name appears to be a link
 header	 FROM_WWW	From:name =~ /\bwww\.[^\/\@]{3,60}\.\w\w/i
 describe FROM_WWW	Sender name appears to be a website
@@ -69,3 +69,24 @@ meta	 LACNIC_ALL_CAPS __RCVD_VIA_LACNIC && UPPERCASE_75_100
 describe LACNIC_ALL_CAPS Latino users sometimes write mail in all uppercase
 tflags	 LACNIC_ALL_CAPS nice nopublish
 
+header	 __LONG_NOBR_ADDR	From:addr =~ /[a-zA-Z0-9]{20,}\@/i
+meta LONG_FREEMAIL_ADDR  __LONG_NOBR_ADDR && FREEMAIL_FROM && !__freemail_safe
+describe LONG_FREEMAIL_ADDR	Freemail address has 20+ unbroken characters
+
+header	 __HOTMAIL_HELO	Received =~ /from ([A-Z]{3})\d[^.]+ [^\n]+ by \1\d+-[^\n ]+\.\1\d+\.hotmail\.com with Microsoft/i
+tflags	 __HOTMAIL_HELO 	nice
+# 1 & 2 are in 20_head_tests.cf ... this one doesn't use eval rules
+meta	 FORGED_HOTMAIL_RCVD3	__HOST_HOTMAIL && (!__HOTMAIL_HELO || __DOS_SINGLE_EXT_RELAY)
+
+# As cross-posted between sa-users list and sare-users list at
+# http://old.nabble.com/forum/ViewPost.jtp?post=27358692&framed=y
+# SARE_RECV_SPAM_DOMN0b examines all received headers for a dynamic host on
+# hinet, which is unfair and likely unneccessary given we can do about as well
+# with this safer version.  It also appears that people think this rule useful
+# even today, so I'm testing it here.  The rDNS dynamic tests will likely trump.
+header SARE_RECV_SPAM_DOMN0B Received =~ /\bdynamic.hinet\.(?:com|net|org|info)/
+tflags SARE_RECV_SPAM_DOMN0B	nopublish
+header SARE_RECV_SPAM_DOMN0B2	X-Spam-Relays-External =~ /^[^\]]+ rdns=[^ ]{0,25}\bdynamic.hinet\.(?:com|net|org|info)(?:\.tw)? /
+tflags SARE_RECV_SPAM_DOMN0B2	nopublish
+header SARE_RECV_SPAM_DOMN0B3	X-Spam-Relays-External =~ /^[^\]]+ rdns=[^ ]{0,25}\bdynamic.hinet\.net /
+tflags SARE_RECV_SPAM_DOMN0B3	nopublish
