@@ -490,19 +490,20 @@ sub parse {
   $self->init(1);
   my $timer = $self->time_method("parse");
 
+  my $master_deadline;
+  if (ref $suppl_attrib && exists $suppl_attrib->{master_deadline}) {
+    $master_deadline = $suppl_attrib->{master_deadline};  # may be undef
+  } elsif ($self->{conf}->{time_limit}) {  # defined and nonzero
+    $master_deadline = $start_time + $self->{conf}->{time_limit};
+  }
+  if (defined $master_deadline) {
+    dbg("config: time limit %.1f s", $master_deadline - $start_time);
+  }
+
   my $msg = Mail::SpamAssassin::Message->new({
     message=>$message, parsenow=>$parsenow,
     normalize=>$self->{conf}->{normalize_charset},
-    suppl_attrib=>$suppl_attrib });
-
-  if (ref $suppl_attrib && exists $suppl_attrib->{master_deadline}) {
-    $msg->{master_deadline} = $suppl_attrib->{master_deadline};  # may be undef
-  } elsif ($self->{conf}->{time_limit}) {  # defined and nonzero
-    $msg->{master_deadline} = $start_time + $self->{conf}->{time_limit};
-  }
-  if (defined $msg->{master_deadline}) {
-    dbg("config: time limit %.1f s", $msg->{master_deadline} - $start_time);
-  }
+    master_deadline=>$master_deadline, suppl_attrib=>$suppl_attrib });
 
   # bug 5069: The goal here is to get rendering plugins to do things
   # like OCR, convert doc and pdf to text, etc, though it could be anything

@@ -114,6 +114,7 @@ sub new {
   $self->{pristine_body} =	'';
   $self->{mime_boundary_state} = {};
   $self->{line_ending} =	"\012";
+  $self->{master_deadline} = $opts->{'master_deadline'};
   $self->{suppl_attrib} = $opts->{'suppl_attrib'};
 
   bless($self,$class);
