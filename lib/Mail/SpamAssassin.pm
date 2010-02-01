@@ -75,6 +75,7 @@ use Mail::SpamAssassin::PerMsgStatus;
 use Mail::SpamAssassin::Message;
 use Mail::SpamAssassin::PluginHandler;
 use Mail::SpamAssassin::DnsResolver;
+use Mail::SpamAssassin::Util qw(untaint_var);
 use Mail::SpamAssassin::Util::ScopedTimer;
 
 use Errno qw(ENOENT EACCES);
@@ -1935,7 +1936,7 @@ sub create_default_prefs {
       close IN  or die "error closing $defprefs: $!";
 
       if (($< == 0) && ($> == 0) && defined($user)) { # chown it
-        my ($uid,$gid) = (getpwnam($user))[2,3];
+        my ($uid,$gid) = (getpwnam(untaint_var($user)))[2,3];
         unless (chown($uid, $gid, $fname)) {
           warn "config: couldn't chown $fname to $uid:$gid for $user: $!\n";
         }

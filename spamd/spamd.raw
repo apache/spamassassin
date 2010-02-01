@@ -2276,8 +2276,14 @@ sub handle_user_ldap {
 
 sub handle_user_setuid_with_sql {
   my $username = shift;
+
+  # Bug 6313: interestingly, if $username is not tainted than $pwd, $gcos and
+  # $etc end up tainted but other fields not;  if $username _is_ tainted,
+  # getpwnam does not complain, but all returned fields are tainted (which
+  # makes sense, but is worth remembering)
+  #
   my ($name, $pwd, $uid, $gid, $quota, $comment, $gcos, $dir, $etc) =
-      getpwnam($username);
+      getpwnam(untaint_var($username));
 
   if (!$spamtest->{'paranoid'} && !defined($uid)) {
     # if we are given a username, but can't look it up, maybe name
@@ -2300,7 +2306,7 @@ sub handle_user_setuid_with_sql {
   }
 
   my $spam_conf_dir = $dir . '/.spamassassin'; # needed for Bayes, etc.
-  if (! -d $spam_conf_dir) {
+  if ($opt{'user-config'} && ! -d $spam_conf_dir) {
     if (mkdir $spam_conf_dir, 0700) {
       info("spamd: created $spam_conf_dir for $username");
     }
