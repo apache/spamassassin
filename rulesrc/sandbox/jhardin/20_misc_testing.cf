@@ -236,5 +236,5 @@ tflags         __RP_CERTIFIED_ANBREP_L3   net nopublish
 
 # a URI in the From comment text, to bypass URIBL checks
 # simplistic URI format for now
-header         FROM_URI       From =~ /".*www\.\S+\.(?:com|net|info|biz|org).*"/i
+header         FROM_URI       From =~ /[^<].*www\.[^\s"<]+\.(?:com|net|info|biz|org|\w\w)\b.*["<]/i
 
