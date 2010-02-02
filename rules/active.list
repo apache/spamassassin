@@ -1,26 +1,14 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 2: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix dos jm kgolding nbebout wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 3: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix dos jm nbebout wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2
-
-# good enough
-ADVANCE_FEE_3
-
-# good enough
-ADVANCE_FEE_4
+# with results from: day 1: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix dos jm kgolding nbebout wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 2: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 3: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix dos jm kgolding nbebout wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2
 
 # tflags userconf
 ALL_TRUSTED
-
-# tflags userconf
-AWL
 
 # good enough
 AXB_HELO_HOME_UN
 
 # good enough
 AXB_URI_APE_ABUSE2
-
-# good enough
-BAD_ENC_HEADER
 
 # tflags learn
 BAYES_00
@@ -49,12 +37,6 @@ BAYES_95
 # tflags learn
 BAYES_99
 
-# good enough
-BODY_ENHANCEMENT
-
-# good enough
-BODY_ENHANCEMENT2
-
 # tflags userconf
 CHARSET_FARAWAY
 
@@ -63,18 +45,6 @@ CHARSET_FARAWAY_HEADER
 
 # tflags userconf
 CORRUPT_FROM_LINE_IN_HDRS
-
-# good enough
-DATE_IN_FUTURE_06_12
-
-# good enough
-DATE_IN_FUTURE_12_24
-
-# good enough
-DATE_IN_FUTURE_24_48
-
-# good enough
-DATE_IN_FUTURE_96_XX
 
 # good enough
 DATE_IN_FUTURE_Q_PLUS
@@ -110,15 +80,6 @@ DKIM_ADSP_DISCARD
 DKIM_ADSP_NXDOMAIN
 
 # tflags net
-DKIM_POLICY_SIGNALL
-
-# tflags net
-DKIM_POLICY_SIGNSOME
-
-# tflags net
-DKIM_POLICY_TESTING
-
-# tflags net
 DKIM_SIGNED
 
 # tflags net
@@ -126,9 +87,6 @@ DKIM_VALID
 
 # tflags net
 DKIM_VALID_AU
-
-# tflags net
-DKIM_VERIFIED
 
 # tflags net
 DNS_FROM_AHBL_RHSBL
@@ -149,13 +107,7 @@ DOS_HIGHBIT_HDRS_BODY
 DOS_OE_TO_MX
 
 # good enough
-DOS_OUTLOOK_TO_MX
-
-# good enough
 DOS_RCVD_IP_TWICE_C
-
-# good enough
-DRUGS_ERECTILE
 
 # good enough
 DRUGS_STOCK_MIMEOLE
@@ -169,14 +121,8 @@ DYN_RDNS_SHORT_HELO_HTML
 # good enough
 DYN_RDNS_SHORT_HELO_IMAGE
 
-# good enough
-EM_ROLEX
-
 # tflags userconf
 ENV_AND_HDR_SPF_MATCH
-
-# good enough
-FAKE_HELO_MAIL_COM_DOM
 
 # good enough
 FB_CIALIS_LEO3
@@ -198,6 +144,9 @@ FH_FAKE_RCVD_LINE
 
 # good enough
 FH_FAKE_RCVD_LINE_B
+
+# good enough
+FH_FROM_GET_NAME
 
 # good enough
 FH_HELO_ALMOST_IP
@@ -224,18 +173,6 @@ FM_LOTTO_YOU_WON
 FM_SEX_HELODDDD
 
 # good enough
-FORGED_MUA_OIMO
-
-# good enough
-FORGED_MUA_OUTLOOK
-
-# good enough
-FORGED_MUA_THEBAT_BOUN
-
-# good enough
-FORGED_OUTLOOK_HTML
-
-# good enough
 FORGED_RELAY_MUA_TO_MX
 
 # good enough
@@ -250,17 +187,8 @@ FORGED_TBIRD_IMG_TO_MX
 # tflags userconf
 FRAGMENTED_MESSAGE
 
-# good enough
-FREEMAIL_REPLYTO
-
 # tflags userconf
 FROM_DOMAIN_NOVOWEL
-
-# good enough
-FROM_ILLEGAL_CHARS
-
-# good enough
-FROM_LOCAL_DIGITS
 
 # tflags userconf
 FROM_LOCAL_NOVOWEL
@@ -273,9 +201,6 @@ FROM_MISSP_FREEMAIL
 
 # good enough
 FROM_MISSP_MSFT
-
-# good enough
-FROM_STARTS_WITH_NUMS
 
 # good enough
 FROM_WWW
@@ -296,19 +221,10 @@ FSL_LSPACES_ABUSE
 FSL_YG_ABUSE
 
 # good enough
-FS_ABIGGER
-
-# good enough
 FS_REPLICA
 
 # good enough
 FS_REPLICAWATCH
-
-# good enough
-FUZZY_PHARMACY
-
-# good enough
-FUZZY_XPILL
 
 # tflags userconf
 GTUBE
@@ -344,30 +260,6 @@ HDRS_MISSP
 HEAD_LONG
 
 # good enough
-HELO_DYNAMIC_CHELLO_NL
-
-# good enough
-HELO_DYNAMIC_DHCP
-
-# good enough
-HELO_DYNAMIC_DIALIN
-
-# good enough
-HELO_DYNAMIC_HCC
-
-# good enough
-HELO_DYNAMIC_HOME_NL
-
-# good enough
-HELO_DYNAMIC_IPADDR
-
-# good enough
-HELO_DYNAMIC_IPADDR2
-
-# good enough
-HELO_DYNAMIC_SPLIT_IP
-
-# good enough
 HELO_LH_HOME
 
 # good enough
@@ -392,34 +284,7 @@ HK_SCAM_N2
 HTML_CHARSET_FARAWAY
 
 # good enough
-HTML_IMAGE_ONLY_04
-
-# good enough
-HTML_IMAGE_ONLY_20
-
-# good enough
-HTML_IMAGE_ONLY_24
-
-# good enough
-HTML_IMAGE_ONLY_32
-
-# good enough
-HTML_SHORT_CENTER
-
-# good enough
-HTML_SHORT_LINK_IMG_1
-
-# good enough
-HTML_SHORT_LINK_IMG_2
-
-# good enough
-HTML_SHORT_LINK_IMG_3
-
-# good enough
 IMG_DIRECT_TO_MX
-
-# good enough
-IMPOTENCE
 
 # good enough
 KAM_LOTTO1
@@ -440,13 +305,28 @@ KB_RATWARE_MSGID
 KB_RATWARE_OUTLOOK_MID
 
 # good enough
+KHOP_SC_CIDR16
+
+# good enough
+KHOP_SC_CIDR24
+
+# good enough
+KHOP_SC_CIDR8
+
+# good enough
+KHOP_SC_TOP200
+
+# good enough
+KHOP_SC_TOP_CIDR16
+
+# good enough
+KHOP_SC_TOP_CIDR8
+
+# good enough
 LIVEFILESTORE
 
 # good enough
 LOTTERY_PH_004470
-
-# good enough
-MALE_ENHANCE
 
 # good enough
 MANY_GOOG_PROXY
@@ -457,12 +337,6 @@ MANY_SPAN_IN_TEXT
 # good enough
 MANY_TINY_FLOAT
 
-# good enough
-MILLION_USD
-
-# good enough
-MIME_BOUND_DD_DIGITS
-
 # tflags userconf
 MIME_CHARSET_FARAWAY
 
@@ -471,15 +345,6 @@ MISSING_HB_SEP
 
 # good enough
 MONEY_FROM_MISSP
-
-# good enough
-MORE_SEX
-
-# good enough
-MSGID_OUTLOOK_INVALID
-
-# good enough
-MSGID_SPAM_CAPS
 
 # good enough
 MSOE_MID_WRONG_CASE
@@ -494,19 +359,10 @@ NO_RECEIVED
 NO_RELAYS
 
 # good enough
-ONLINE_PHARMACY
-
-# good enough
 PART_CID_STOCK
 
 # tflags net
 PYZOR_CHECK
-
-# good enough
-RATWARE_MS_HASH
-
-# good enough
-RATWARE_OUTLOOK_NONAME
 
 # tflags net
 RAZOR2_CF_RANGE_51_100
@@ -519,15 +375,6 @@ RAZOR2_CF_RANGE_E8_51_100
 
 # tflags net
 RAZOR2_CHECK
-
-# good enough
-RCVD_DOUBLE_IP_SPAM
-
-# good enough
-RCVD_HELO_IP_MISMATCH
-
-# good enough
-RCVD_ILLEGAL_IP
 
 # tflags net
 RCVD_IN_BL_SPAMCOP_NET
@@ -707,13 +554,7 @@ RCVD_IN_SORBS_ZOMBIE
 RCVD_IN_XBL
 
 # good enough
-RDNS_DYNAMIC
-
-# good enough
 RDNS_LOCALHOST
-
-# good enough
-REPLICA_WATCH
 
 # good enough
 REPLYTO_WITHOUT_TO_CC
@@ -770,12 +611,6 @@ SPF_PASS
 SPF_SOFTFAIL
 
 # good enough
-SPOOF_COM2COM
-
-# good enough
-SPOOF_COM2OTH
-
-# good enough
 STOCK_IMG_HDR_FROM
 
 # good enough
@@ -783,12 +618,6 @@ STOX_META_5
 
 # good enough
 STOX_REPLY_TYPE_WITHOUT_QUOTES
-
-# good enough
-SUBJECT_DIET
-
-# good enough
-SUBJECT_DRUG_GAP_C
 
 # tflags userconf
 SUBJECT_IN_BLACKLIST
@@ -833,31 +662,46 @@ TVD_VISIT_PHARMA
 TWO_IPS_RCVD
 
 # good enough
-KHOP_SC_CIDR16
+AXB_XMID_DIGDOTSHRT
 
 # good enough
-KHOP_SC_CIDR24
+FM_SUBJ_YOU_PROFIT
 
 # good enough
-KHOP_SC_CIDR8
+FRT_ERECTION
 
 # good enough
-KHOP_SC_TOP200
+FR_WATCHES_HTTP
 
 # good enough
-KHOP_SC_TOP_CIDR16
+JM_FAKE_PSMTP_RCVD
 
 # good enough
-KHOP_SC_TOP_CIDR8
+MAILER_EQ_ORG
 
 # good enough
-UNCLOSED_BRACKET
+S25R_1
+
+# good enough
+S25R_4
+
+# good enough
+SANE_20d820d8f491476ca39941979ab139dd
+
+# good enough
+SANE_7d8e92a09f27d49fafe09a1dbd5cac10
+
+# good enough
+SANE_b58d7945d89b7afc9e2753c83b00ab44
+
+# good enough
+SANE_ef00ce28cfa5ed6e4c405ed37ff36d46
+
+# good enough
+TVD_ENHANCE
 
 # tflags userconf
 UNPARSEABLE_RELAY
-
-# good enough
-UNRESOLVED_TEMPLATE
 
 # tflags net
 URIBL_AB_SURBL
