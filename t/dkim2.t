@@ -10,7 +10,7 @@ use Test;
 
 use vars qw(%patterns %anti_patterns);
 
-use constant num_tests => 123;
+use constant num_tests => 199;
 
 use constant TEST_ENABLED => conf_bool('run_net_tests');
 use constant HAS_MODULES => eval {
@@ -98,6 +98,8 @@ tstlocalrules("
   score DKIM_ADSP_CUSTOM_LOW  0.1
   score DKIM_ADSP_CUSTOM_MED  0.1
   score DKIM_ADSP_CUSTOM_HIGH 0.1
+  header DKIM_ADSP_SEL_TEST   eval:check_dkim_adsp('*', .spamassassin.org)
+  score  DKIM_ADSP_SEL_TEST   0.1
   score RAZOR2_CHECK 0
   score RAZOR2_CF_RANGE_51_100 0
   score RAZOR2_CF_RANGE_E4_51_100 0
@@ -137,7 +139,9 @@ while (defined($fn = readdir(DIR))) {
   push(@test_filenames, "$dirname/$fn");
 }
 closedir(DIR) or die "Error closing directory $dirname: $!";
-@patt_antipatt_list = ( 'DKIM_SIGNED DKIM_VALID DKIM_VALID_AU /' );
+@patt_antipatt_list = (
+  'DKIM_SIGNED DKIM_VALID DKIM_VALID_AU / DKIM_ADSP_NXDOMAIN DKIM_ADSP_DISCARD DKIM_ADSP_ALL DKIM_ADSP_SEL_TEST'
+);
 test_samples(\@test_filenames, \@patt_antipatt_list);
 
 # this mail sample is special, doesn't have any signature
