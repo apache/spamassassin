@@ -832,7 +832,7 @@ skip:
             });
 
   $permsgstatus->set_tag ('TOKENSUMMARY', sub {
-              if( defined $self->{tag_data}{BAYESTC} )
+              if ( defined $permsgstatus->{tag_data}{BAYESTC} )
                 {
                   my $tcount_neutral = $permsgstatus->{tag_data}{BAYESTCLEARNED}
                                     - $permsgstatus->{tag_data}{BAYESTCSPAMMY}
