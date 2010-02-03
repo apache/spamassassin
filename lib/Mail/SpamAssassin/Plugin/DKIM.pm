@@ -776,8 +776,10 @@ sub _check_dkim_signature {
         }
       }
       if (would_log("dbg","dkim")) {
-        dbg("dkim: i=%s, d=%s, a=%s, c=%s, %s%s, %s",
-          $signature->identity, $d,
+        dbg("dkim: %s, i=%s, d=%s, s=%s, a=%s, c=%s, %s%s, %s",
+          map { !defined $_ ? '(undef)' : $_ }
+          $signature->isa('Mail::DKIM::DkSignature') ? 'DK' : 'DKIM',
+          $signature->identity, $d, $signature->selector,
           $signature->algorithm, scalar($signature->canonicalization),
           ($sig_result_supported ? $signature : $verifier)->result,
           !$expired ? '' : ', expired',
