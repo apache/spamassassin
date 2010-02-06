@@ -5,9 +5,9 @@ ifplugin Mail::SpamAssassin::Plugin::ReplaceTags
 
   body     __LOTSA_MONEY_00   /<CURRENCY>\s?\d[\dO][,\.][\dO]{3}(?:(?!\d)|\b)/
   body     __LOTSA_MONEY_01   /(?:(?i:sum\sof\s)[\(\[]?|<CURRENCY>\s?)\s?\d[\d.,\sO]{5,20}[\dO]/
-  body     __LOTSA_MONEY_02   /\d[\d.,\sO]{5,20}[\dO][\)\]]?\s?(?:<CURRENCY>|Pounds|(?i:dollars?))\b/
+  body     __LOTSA_MONEY_02   /\d[\d.,\sO]{5,20}[\dO][\)\]]?\s?(?:<CURRENCY>|Pounds|(?i:dollars?|bucks))\b/
   body     __LOTSA_MONEY_03   /(?:(?i:sum\sof\s)[\(\[]?|<CURRENCY>\s?)\d(?:[\d.,\sO]{0,5})?[\)\]]?\s?(?i:M(?i:il)?\b|mil+(?i:io|<O>)n|hund?[re]+a?[dt]|thousand|tausend)/
-  body     __LOTSA_MONEY_04   /(?:\d[\d\.]{0,4}M|million(?!s)|mill<O>n|hund?rea?d(?!s)[^\.]{1,25}thousand(?!s)|cents?[^\.]{1,25}mille|hundert[^\.]{1,30}tausend|ientos?[^\.]{1,20}mil)[^\.\$]{0,50}(?:(?:U\.?\s?S\.?\s?(?:A\.?\s?)?|united\s?states?|canad(?:ian|a)\s)?dollars?|USD|GBP|<GB_UK>\spounds?|(?:<GB_UK>\s)?pounds?\ssterling|pounds(?!\sof)|(?:d'\s?)?euros?|francs?)\b/i
+  body     __LOTSA_MONEY_04   /(?:\d[\d\.]{0,4}M|million(?!s)|mill<O>n|hund?rea?d(?!s)[^\.]{1,25}thousand(?!s)|cents?[^\.]{1,25}mille|hundert[^\.]{1,30}tausend|ientos?[^\.]{1,20}mil)[^\.\$]{0,50}(?:(?:U\.?\s?S\.?\s?(?:A\.?\s?)?|united\s?states?|canad(?:ian|a)\s)?dollars?|bucks|USD|GBP|<GB_UK>\spounds?|(?:<GB_UK>\s)?pounds?\ssterling|pounds(?!\sof)|(?:d'\s?)?euros?|francs?)\b/i
   replace_rules   __LOTSA_MONEY_00 __LOTSA_MONEY_01 __LOTSA_MONEY_02 __LOTSA_MONEY_03 __LOTSA_MONEY_04
 
   meta     LOTS_OF_MONEY    (__LOTSA_MONEY_00 || __LOTSA_MONEY_01 || __LOTSA_MONEY_02 || __LOTSA_MONEY_03 || __LOTSA_MONEY_04)
