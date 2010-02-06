@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix dos jm kgolding nbebout wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 2: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix dos jm kgolding nbebout wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 3: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix dos kgolding wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2
+# with results from: day 1: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix dos jm kgolding nbebout wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 2: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix dos jm kgolding nbebout wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 3: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix dos jm kgolding nbebout wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2
 
 # tflags userconf
 ALL_TRUSTED
@@ -236,7 +236,13 @@ FSL_HELO_BARE_IP_1
 FSL_HELO_DEVICE
 
 # good enough
+FSL_HELO_NON_FQDN_1
+
+# good enough
 FSL_LSPACES_ABUSE
+
+# good enough
+FSL_YG_ABUSE
 
 # good enough
 FS_PHARMASUB2
@@ -273,6 +279,9 @@ HASHCASH_2SPEND
 
 # tflags userconf
 HASHCASH_HIGH
+
+# good enough
+HDRS_MISSP
 
 # tflags userconf
 HEAD_LONG
@@ -667,6 +676,9 @@ SPF_SOFTFAIL
 # good enough
 STOCK_IMG_HDR_FROM
 
+# good enough
+STOX_REPLY_TYPE_WITHOUT_QUOTES
+
 # tflags userconf
 SUBJECT_IN_BLACKLIST
 
@@ -705,9 +717,6 @@ TVD_RCVD_SINGLE
 
 # good enough
 TWO_IPS_RCVD
-
-# good enough
-HDRS_MISSP
 
 # tflags userconf
 UNPARSEABLE_RELAY
@@ -810,6 +819,9 @@ XMAILER_MIMEOLE_OL_8627E
 
 # good enough
 XMAILER_MIMEOLE_OL_91287
+
+# good enough
+XMAILER_MIMEOLE_OL_CAC8F
 
 # tflags net
 __DNS_FROM_RFC_ABUSE
