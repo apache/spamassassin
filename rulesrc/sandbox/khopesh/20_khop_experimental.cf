@@ -4,9 +4,9 @@ meta	 MALFORMED_FREEMAIL	(MISSING_HEADERS||__HDRS_LCASE) && FREEMAIL_FROM
 describe MALFORMED_FREEMAIL	Bad headers on message from free email service
 #score	 MALFORMED_FREEMAIL	0.1
 
-header	 FROM_WEBSITE	From =~ m'\b(?:f|ht)tps?://[^/\@]{3,60}\.\w\w'i
+header	 FROM_WEBSITE	From =~ m'\b(?:f|ht)tps?://[^\s"</\@]{3,60}\.\w\w'i
 describe FROM_WEBSITE	Sender name appears to be a link
-header	 FROM_WWW	From:name =~ /\bwww\.[^\/\@]{3,60}\.\w\w/i
+header	 FROM_WWW	From:name =~ /\bwww\.[^\s"<\/\@]{4,60}\.\w\w/i
 describe FROM_WWW	Sender name appears to be a website
 
 header	 FROM_2_EMAILS	From =~ /([^\@]{2,}\@[^\@]{2,60}\.\w\w).*(?!\1)[^\@]{2,}\@[^\@]/
@@ -86,7 +86,11 @@ meta	 FORGED_HOTMAIL_RCVD3	__HOST_HOTMAIL && (!__HOTMAIL_HELO || __DOS_SINGLE_EX
 # even today, so I'm testing it here.  The rDNS dynamic tests will likely trump.
 header SARE_RECV_SPAM_DOMN0B Received =~ /\bdynamic.hinet\.(?:com|net|org|info)/
 tflags SARE_RECV_SPAM_DOMN0B	nopublish
-header SARE_RECV_SPAM_DOMN0B2	X-Spam-Relays-External =~ /^[^\]]+ rdns=[^ ]{0,25}\bdynamic.hinet\.(?:com|net|org|info)(?:\.tw)? /
+header SARE_RECV_SPAM_DOMN0B2	X-Spam-Relays-External =~ /^[^\]]+ rdns=[^\] ]{0,25}\bdynamic.hinet\.(?:com|net|org|info)(?:\.tw)? /
 tflags SARE_RECV_SPAM_DOMN0B2	nopublish
-header SARE_RECV_SPAM_DOMN0B3	X-Spam-Relays-External =~ /^[^\]]+ rdns=[^ ]{0,25}\bdynamic.hinet\.net /
+header SARE_RECV_SPAM_DOMN0B3	X-Spam-Relays-External =~ /^[^\]]+ rdns=[^\] ]{0,25}\bdynamic.hinet\.net /
 tflags SARE_RECV_SPAM_DOMN0B3	nopublish
+
+header	 RCVD_VIA_IPV6	X-Spam-Relays-Untrusted =~ /^[^\]]+ (?:by|ip)=[^\] ]+:[^\] .]+ /
+describe RCVD_VIA_IPV6	Received by the last trusted relay via IPv6
+tflags	 RCVD_VIA_IPV6	nice
