@@ -1,19 +1,19 @@
 #
-#header		REPLYTO_MANY_AT	Reply-To =~ /\@.+\@/
-#describe	REPLYTO_MANY_AT	More than one @ in Reply-To:
+#header         REPLYTO_MANY_AT Reply-To =~ /\@.+\@/
+#describe       REPLYTO_MANY_AT More than one @ in Reply-To:
 #
-#header		SENDER_MANY_AT	Sender =~ /\@.+\@/
-#describe	SENDER_MANY_AT	More than one @ in Sender:
+#header         SENDER_MANY_AT  Sender =~ /\@.+\@/
+#describe       SENDER_MANY_AT  More than one @ in Sender:
 #
-#header		FROM_MANY_AT	From =~ /\@.+\@/
-#describe	FROM_MANY_AT	More than one @ in From:
+#header         FROM_MANY_AT    From =~ /\@.+\@/
+#describe       FROM_MANY_AT    More than one @ in From:
 #
 
 header         RDNS_LOCALHOST  X-Spam-Relays-External =~ /^\[ ip=(?!127)\d+\.\d+\.\d+\.\d+ rdns=localhost(?:\.localdomain)? /i
 describe       RDNS_LOCALHOST  Sender's public rDNS is "localhost"
 
-#body		EU_SPAM_LAW	m,Directive 2000/31/EC of the European Parliament,i
-#describe	EU_SPAM_LAW	Quoting "European Parliament" spam law
+#body           EU_SPAM_LAW     m,Directive 2000/31/EC of the European Parliament,i
+#describe       EU_SPAM_LAW     Quoting "European Parliament" spam law
 
 ifplugin Mail::SpamAssassin::Plugin::MIMEHeader
   mimeheader   HTML_ATTACH    Content-Type =~ m,text/html;.+\.html?\b,i
@@ -38,13 +38,13 @@ endif
 #header         MUA_ONE_WORD       X-Mailer =~ /^[A-Za-z][a-z]*$/
 #describe       MUA_ONE_WORD       Single word X-Mailer: not CamelCase
 
-body           DEAR_BENEFICIARY		/^\s?(?:Dear\s|At+(?:ention|n):?\s?)Beneficiary\b/i
-describe       DEAR_BENEFICIARY		Dear Beneficiary:
-score          DEAR_BENEFICIARY		2.0
+body           DEAR_BENEFICIARY         /^\s?(?:Dear\s|At+(?:ention|n):?\s?)Beneficiary\b/i
+describe       DEAR_BENEFICIARY         Dear Beneficiary:
+score          DEAR_BENEFICIARY         2.0
 
-body           DEAR_EMAIL_USER		/^\s?(?:Dear\s|Attention:?\s?)(?:E|Web)-?mail\s(?:account\s)?User\b/i
-describe       DEAR_EMAIL_USER		Dear Email User:
-score          DEAR_EMAIL_USER		3.0
+body           DEAR_EMAIL_USER          /^\s?(?:Dear\s|Attention:?\s?)(?:E|Web)-?mail\s(?:account\s)?User\b/i
+describe       DEAR_EMAIL_USER          Dear Email User:
+score          DEAR_EMAIL_USER          3.0
 
 
 # from users list spamples 8/2009
@@ -237,4 +237,50 @@ tflags         __RP_CERTIFIED_ANBREP_L3   net nopublish
 # a URI in the From comment text, to bypass URIBL checks
 # simplistic URI format for now
 header         FROM_URI       From =~ /[^<].*www\.[^\s"<]+\.(?:com|net|info|biz|org|\w\w)\b.*["<]/i
+
+# observed in spam feb 2010
+# Apparently-To per RFC2821 SHOULD NOT be used
+header         __APPARENTLY_TO            Apparently-To =~ /<.*>/
+tflags         __APPARENTLY_TO            multiple nopublish
+meta           HAS_APPARENTLY_TO          __APPARENTLY_TO > 0
+describe       HAS_APPARENTLY_TO          Has deprecated Apparently-To header
+score          HAS_APPARENTLY_TO          0.50
+tflags         HAS_APPARENTLY_TO          nopublish
+meta           MANY_APPARENTLY_TO         __APPARENTLY_TO > 20
+describe       MANY_APPARENTLY_TO         Has many Apparently-To headers
+score          MANY_APPARENTLY_TO         2.00
+tflags         MANY_APPARENTLY_TO         nopublish
+
+# obfuscation of "opt out"
+ifplugin Mail::SpamAssassin::Plugin::ReplaceTags
+  body           FUZZY_OPTOUT             /\b(?!opt.?out)<O><P><T>.?<O><U><T>\b/i
+  replace_rules  FUZZY_OPTOUT
+  describe       FUZZY_OPTOUT             Obfuscated opt-out text
+endif
+
+# stock spam disclaimer obfuscation
+body           GAPPY_TRADING              /\b(?!trading)t[^a-z]?r[^a-z]?a[^a-z]?d[^a-z]?i[^a-z]?n[^a-z]?g/i
+body           GAPPY_SECURITIES           /\b(?!securities)s[^a-z]?e[^a-z]?c[^a-z]?u[^a-z]?r[^a-z]?i[^a-z]?t[^a-z]?i[^a-z]?e[^a-z]?s/i
+body           GAPPY_RISK                 /\b(?!risky?)r[^a-z]?i[^a-z]?s[^a-z]?k(?:[^a-z]?y)?/i
+body           GAPPY_SELLING              /\b(?!selling)s[^a-z]?e[^a-z]?l[^a-z]?l[^a-z]?i[^a-z]?n[^a-z]?g/i
+body           GAPPY_HUNDRED              /\b(?!hundred)h[^a-z]?u[^a-z]?n[^a-z]?d[^a-z]?r[^a-z]?e[^a-z]?d/i
+body           GAPPY_THOUSAND             /\b(?!thousand)t[^a-z]?h[^a-z]?o[^a-z]?u[^a-z]?s[^a-z]?a[^a-z]?n[^a-z]?d/i
+body           GAPPY_EXPENSES             /\b(?!expenses)e[^a-z]?x[^a-z]?p[^a-z]?e[^a-z]?n[^a-z]?s[^a-z]?e[^a-z]?s/i
+body           GAPPY_DOLLARS              /\b(?!dollars)d[^a-z]?o[^a-z]?l[^a-z]?l[^a-z]?a[^a-z]?r[^a-z]?s/i
+
+describe       GAPPY_TRADING              Possible obfuscated stock disclaimer
+describe       GAPPY_SECURITIES           Possible obfuscated stock disclaimer
+describe       GAPPY_RISK                 Possible obfuscated stock disclaimer
+describe       GAPPY_SELLING              Possible obfuscated stock disclaimer
+describe       GAPPY_HUNDRED              Possible obfuscated stock disclaimer
+describe       GAPPY_THOUSAND             Possible obfuscated stock disclaimer
+describe       GAPPY_EXPENSES             Possible obfuscated stock disclaimer
+describe       GAPPY_DOLLARS              Possible obfuscated stock disclaimer
+
+# talking about a stock symbol
+body           __DISCUSS_STOCK            /(?:[a-z]{2,}\s|^)[A-Z]{4}(?:\s[a-z]{2,}|[,.!])/
+tflags         __DISCUSS_STOCK            multiple
+meta           MANY_DISCUSS_STOCK         __DISCUSS_STOCK > 5
+describe       MANY_DISCUSS_STOCK         Talks about apparent stock symbols a lot
+
 

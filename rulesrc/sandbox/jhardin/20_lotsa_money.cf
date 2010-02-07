@@ -66,7 +66,7 @@ body     LOTTO_AGENT      /\b(?:claim(?:s|ing)?(?:\sprocessing)?|fiducia\w+|reim
 describe LOTTO_AGENT      Claims Agent
 score    LOTTO_AGENT      0.50
 
-body     LOTTO_DEPT       /\b(?:claim(?:s|ing)?(?:\sprocessing)?|fiducia\w+|reimbursement|(?:international|foreign)\sremittance|payment|award)\s?(?:department|dept|unit|group|committee|bureau)/i
+body     LOTTO_DEPT       /\b(?:claim(?:s|ing)?(?:\sprocessing)?|fiducia\w+|reimbursement|(?:international|foreign)\s(?:remittance|settlement)|payment|award)\s?(?:department|dept|unit|group|committee|bureau)/i
 describe LOTTO_DEPT       Claims Department
 score    LOTTO_DEPT       0.50
 
@@ -134,7 +134,7 @@ endif
 #describe MONEY_DEAL       Lots of money in a suspicious deal
 #score    MONEY_DEAL       1.5
 
-body     __ATM_CARD       /\b(?:your|the|this)\s(?:atm|debit)(?:\smaster)?\scard/i
+body     __ATM_CARD       /\b(?:your|the|this)\s(?:atm|debit)(?:\smaster|swift)?\scard/i
 #meta     MONEY_ATM        LOTS_OF_MONEY && __ATM_CARD
 #describe MONEY_ATM        Lots of money on an ATM card
 #score    MONEY_ATM        1.5
@@ -162,7 +162,7 @@ body     __INHERIT_PMT    /\binheritance\spayment\s/i
 #score    MONEY_INHERIT    1.5
 #tflags   MONEY_INHERIT    nopublish
 
-body     __WIRE_XFR       /\b(?:wire|telegraph(?:ic)?|bank)\stransfer/i
+body     __WIRE_XFR       /\b(?:wire|telegraph(?:ic)?|bank)\s?transfer/i
 body     __TRUSTED_CHECK  /\b(?:cashier'?s?|certified)\sche(?:ck|que)/i
 body     __BANK_DRAFT     /\bbank\sdraft/i
 meta     __XFER_MONEY     (__WIRE_XFR || __TRUSTED_CHECK || __BANK_DRAFT)
@@ -184,13 +184,13 @@ body     __BARRISTER      /\b(?:barrister|solicitor at law)/i
 body     __SCAM           /\bscam(?:me[dr])?s?\b/i
 body     __UN             /\bunited\snations?\b/i
 body     __AFR_UNION      /\bafrican\sunion\b/i
-body     __COMPENSATION   /\bcompensation\b/i
+body     __COMPENSATION   /\bcompensat(?:e|ion)\b/i
 body     __FRAUD          /\b(?:de)?fraud/i
 #meta     MONEY_FRAUD_COMP  LOTS_OF_MONEY && __BARRISTER && (__SCAM || __FRAUD) && (__UN || __AFR_UNION) && __COMPENSATION
 #describe MONEY_FRAUD_COMP  Lots of money from a fraud compensation
 #score    MONEY_FRAUD_COMP  1.0
  
-body     __TRUNK_BOX      /\b(?:trunk|metallic|proof|security)\sbox(?:es)?\b/i
+body     __TRUNK_BOX      /\b(?:trunk|metallic|proof|security|consignment)\sbox(?:es)?\b/i
 body     __COURIER        /\bcourier\s(?:company|service)\b/i
 #meta     MONEY_FRAUD_BOX  LOTS_OF_MONEY && __TRUNK_BOX && __COURIER
 #describe MONEY_FRAUD_BOX  Lots of money in a box, lots of money from a fox
@@ -204,7 +204,7 @@ body     __BENEFICIARY    /\bben[ei]fi(?:c|sh)i?ar(?:y|ies)\b/i
 body     __DIPLOMATIC     /\bdiplomatic\b/i
 body     __FEES           /\b(?:security|safe\w*|courier|registration|pay|paid|up-?front|processing|delivery|transfer)[\s\w]{1,15}\s(?:fee|charge)s?\b/i 
 body     __LUCKY_WINNER   /\blucky\swin+ers?\b/i
-body     __YOUR_FUND      /\byour\sfund\b/i
+body     __YOUR_FUND      /\byour\s(?:unpaid\s)fund\b/i
 body     __NIGERIA        /\bnigeria\b/i
 body     __IVORY_COAST    /\b(?:Cote\s?D.Ivoire|Ivory\s?Coast)\b/i
 body     __BURKINA_FASO   /\bburkina\s?faso\b/i
