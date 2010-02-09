@@ -284,3 +284,7 @@ meta           MANY_DISCUSS_STOCK         __DISCUSS_STOCK > 5
 describe       MANY_DISCUSS_STOCK         Talks about apparent stock symbols a lot
 
 
+rawbody        STYLE_GIBBERISH            /<style[^>]{0,30}>[^:;<]{80}/im
+tflags         STYLE_GIBBERISH            nopublish
+
+
