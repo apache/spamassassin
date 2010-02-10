@@ -193,8 +193,11 @@ describe       MANY_GOOG_PROXY     Many Google feedproxy URIs
 
 rawbody        __TINY_FLOAT         /\bstyle\s*=\s*"[^"]{0,40}?(?:(?:FONT-SIZE\s*:\s+\dpx|FLOAT\s*:\s+(?:right|left))(?:;\s+)?(?:(?!(?:FONT-SIZE|FLOAT))\w+:\s+\w+;?\s*)*){2}/i
 tflags         __TINY_FLOAT         multiple
+meta           TINY_FLOAT           __TINY_FLOAT > 0
+describe       TINY_FLOAT           Has small-font floating HTML elements - text obfuscation?
+score          TINY_FLOAT           2.00
 meta           MANY_TINY_FLOAT      __TINY_FLOAT > 5
-describe       MANY_TINY_FLOAT      Many small-font floating HTML elements - text obfuscation?
+describe       MANY_TINY_FLOAT      Many small-font floating HTML elements
 
 
 # endless requests on the users list...
@@ -259,14 +262,14 @@ ifplugin Mail::SpamAssassin::Plugin::ReplaceTags
 endif
 
 # stock spam disclaimer obfuscation
-body           GAPPY_TRADING              /\b(?!trading)t[^a-z]?r[^a-z]?a[^a-z]?d[^a-z]?i[^a-z]?n[^a-z]?g/i
-body           GAPPY_SECURITIES           /\b(?!securities)s[^a-z]?e[^a-z]?c[^a-z]?u[^a-z]?r[^a-z]?i[^a-z]?t[^a-z]?i[^a-z]?e[^a-z]?s/i
-body           GAPPY_RISK                 /\b(?!risky?)r[^a-z]?i[^a-z]?s[^a-z]?k(?:[^a-z]?y)?/i
-body           GAPPY_SELLING              /\b(?!selling)s[^a-z]?e[^a-z]?l[^a-z]?l[^a-z]?i[^a-z]?n[^a-z]?g/i
-body           GAPPY_HUNDRED              /\b(?!hundred)h[^a-z]?u[^a-z]?n[^a-z]?d[^a-z]?r[^a-z]?e[^a-z]?d/i
-body           GAPPY_THOUSAND             /\b(?!thousand)t[^a-z]?h[^a-z]?o[^a-z]?u[^a-z]?s[^a-z]?a[^a-z]?n[^a-z]?d/i
-body           GAPPY_EXPENSES             /\b(?!expenses)e[^a-z]?x[^a-z]?p[^a-z]?e[^a-z]?n[^a-z]?s[^a-z]?e[^a-z]?s/i
-body           GAPPY_DOLLARS              /\b(?!dollars)d[^a-z]?o[^a-z]?l[^a-z]?l[^a-z]?a[^a-z]?r[^a-z]?s/i
+body           GAPPY_TRADING              /\b(?!trading)t[^a-z\s]?r[^a-z\s]?a[^a-z\s]?d[^a-z\s]?i[^a-z\s]?n[^a-z\s]?g/i
+body           GAPPY_SECURITIES           /\b(?!securities)s[^a-z\s]?e[^a-z\s]?c[^a-z\s]?u[^a-z\s]?r[^a-z\s]?i[^a-z\s]?t[^a-z\s]?i[^a-z\s]?e[^a-z\s]?s/i
+body           GAPPY_RISK                 /\b(?!risky?)r[^a-z\s]?i[^a-z\s]?s[^a-z\s]?k(?:[^a-z\s]?y)?/i
+body           GAPPY_SELLING              /\b(?!selling)s[^a-z\s]?e[^a-z\s]?l[^a-z\s]?l[^a-z\s]?i[^a-z\s]?n[^a-z\s]?g/i
+body           GAPPY_HUNDRED              /\b(?!hundred)h[^a-z\s]?u[^a-z\s]?n[^a-z\s]?d[^a-z\s]?r[^a-z\s]?e[^a-z\s]?d/i
+body           GAPPY_THOUSAND             /\b(?!thousand)t[^a-z\s]?h[^a-z\s]?o[^a-z\s]?u[^a-z\s]?s[^a-z\s]?a[^a-z\s]?n[^a-z\s]?d/i
+body           GAPPY_EXPENSES             /\b(?!expenses)e[^a-z\s]?x[^a-z\s]?p[^a-z\s]?e[^a-z\s]?n[^a-z\s]?s[^a-z\s]?e[^a-z\s]?s/i
+body           GAPPY_DOLLARS              /\b(?!dollars)d[^a-z\s]?o[^a-z\s]?l[^a-z\s]?l[^a-z\s]?a[^a-z\s]?r[^a-z\s]?s/i
 
 describe       GAPPY_TRADING              Possible obfuscated stock disclaimer
 describe       GAPPY_SECURITIES           Possible obfuscated stock disclaimer
