@@ -366,7 +366,7 @@ sub find_dcc_home {
     my $cdcc = Mail::SpamAssassin::Util::find_executable_in_env_path('cdcc');
 
     my $cdcc_home = '';
-    if ($cdcc && -x $cdcc && open(CDCC, "$cdcc home 2>&1|")) {
+    if ($cdcc && -x $cdcc && open(CDCC, "$cdcc homedir 2>&1|")) {
       dbg("dcc: dcc_home not set, querying cdcc utility");
       $cdcc_home = <CDCC> || '';
       close CDCC;
