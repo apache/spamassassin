@@ -494,10 +494,12 @@ sub check_dkim_adsp {
     # don't bother
   } else {
     $self->_check_dkim_adsp($pms)  if !$pms->{dkim_checked_adsp};
+
     # an asterisk indicates any ADSP type can match (as long as
     # there is no valid author domain signature present)
-    if ($adsp_char ne '*' &&
-        !(grep { $_ eq $adsp_char} values %{$pms->{dkim_adsp}}) ) {
+    $adsp_char = 'NAD123'  if $adsp_char eq '*';  # a shorthand for NAD123
+
+    if ( !(grep { index($adsp_char,$_) >= 0 } values %{$pms->{dkim_adsp}}) ) {
       # not the right ADSP type
     } elsif (!@domains_list) {
       $result = 1;  # no additional constraints, any author domain will do
