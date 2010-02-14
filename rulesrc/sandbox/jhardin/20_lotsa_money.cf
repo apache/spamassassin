@@ -184,7 +184,7 @@ body     __BARRISTER      /\b(?:barrister|solicitor at law)/i
 body     __SCAM           /\bscam(?:me[dr])?s?\b/i
 body     __UN             /\bunited\snations?\b/i
 body     __AFR_UNION      /\bafrican\sunion\b/i
-body     __COMPENSATION   /\bcompensat(?:e|ion)\b/i
+body     __COMPENSATION   /\b(?:compensat(?:e|ion)|recompensed?)\b/i
 body     __FRAUD          /\b(?:de)?fraud/i
 #meta     MONEY_FRAUD_COMP  LOTS_OF_MONEY && __BARRISTER && (__SCAM || __FRAUD) && (__UN || __AFR_UNION) && __COMPENSATION
 #describe MONEY_FRAUD_COMP  Lots of money from a fraud compensation
