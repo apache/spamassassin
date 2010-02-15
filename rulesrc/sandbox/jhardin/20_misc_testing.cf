@@ -98,7 +98,7 @@ header         MDN_BOTCHED           Disposition-notification-to =~ /<>/
 describe       MDN_BOTCHED           Malformed return receipt header
 
 # observed in spam 9/2009
-header         HDRS_MISSP            ALL =~ /\n(?:Subject|From):\S/ism
+header         HDRS_MISSP            ALL =~ /\n(?:Subject|From|To):\S/ism
 describe       HDRS_MISSP            Misspaced headers
 score          HDRS_MISSP            2.0
 
@@ -280,15 +280,12 @@ endif
 # describe       GAPPY_EXPENSES             Possible obfuscated stock disclaimer
 # describe       GAPPY_DOLLARS              Possible obfuscated stock disclaimer
 
-# talking about a stock symbol
-body           __DISCUSS_STOCK            /(?:[a-z]{2,}\s|^)[A-Z]{4}(?:\s[a-z]{2,}|[,.!])/
-tflags         __DISCUSS_STOCK            multiple
-meta           MANY_DISCUSS_STOCK         __DISCUSS_STOCK > 5
-describe       MANY_DISCUSS_STOCK         Talks about apparent stock symbols a lot
 
-
-rawbody        STYLE_GIBBERISH            /<style[^>]{0,30}>[^:;<]{80}/im
+rawbody        STYLE_GIBBERISH            /<style[^>]{0,30}>(?:\s{1,20}|[^\s:;<]){175}/im
 tflags         STYLE_GIBBERISH            nopublish
+
+rawbody        SCRIPT_GIBBERISH           /<script>[^;<]{50}/im
+tflags         SCRIPT_GIBBERISH           nopublish
 
 rawbody        MANY_DIV                   /(?:<div[^>]{0,30}>\s{0,20}){30}/im
 tflags         MANY_DIV                   nopublish
