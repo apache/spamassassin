@@ -95,17 +95,13 @@ type to C<off>.
 
 Shortcircuits the rest of the tests, but does not make a strict classification
 of spam or ham.  Rather, it uses the default score for the rule being
-shortcircuited.  This would allow you, for example, to define a rule such as 
-  
-=over 4
+shortcircuited.  This would allow you, for example, to define a rule such as
 
   body TEST /test/
   describe TEST test rule that scores barely over spam threshold
   score TEST 5.5
   priority TEST -100
   shortcircuit TEST on
-
-=back
 
 The result of a message hitting the above rule would be a final score of 5.5,
 as opposed to 100 (default) if it were classified as spam.
@@ -121,14 +117,10 @@ this rule with the score from C<shortcircuit_spam_score>, set the
 C<noautolearn> tflag, and set priority to C<-100>.  In other words,
 equivalent to:
 
-=over 4
-
   shortcircuit TEST on
   priority TEST -100
   score TEST 100
   tflags TEST noautolearn
-
-=back
 
 =item ham
 
@@ -137,14 +129,10 @@ this rule with the score from C<shortcircuit_ham_score>, set the C<noautolearn>
 and C<nice> tflags, and set priority to C<-100>.   In other words, equivalent
 to:
 
-=over 4
-
   shortcircuit TEST on
   priority TEST -100
   score TEST -100
   tflags TEST noautolearn nice
-
-=back
 
 =back
 

@@ -39,8 +39,6 @@ Mail::SpamAssassin::SubProcBackChannel - back-channel for communication between 
 
 =head1 METHODS
 
-=over 4
-
 =cut
 
 
@@ -170,8 +168,6 @@ sub get_parent_socket {
 1;
 
 __END__
-
-=back
 
 =head1 SEE ALSO
 
