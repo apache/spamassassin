@@ -268,6 +268,8 @@ foreach (qw/
 
 ###########################################################################
 
+=over 4
+
 =item ($hostname, $domain) = split_domain ($fqdn)
 
 Cut a fully-qualified hostname into the hostname part and the domain
@@ -369,6 +371,8 @@ sub trim_domain {
 Return C<1> if the domain is valid, C<undef> otherwise.  A valid domain
 (a) does not contain whitespace, (b) contains at least one dot, and (c)
 uses a valid TLD or ccTLD.
+
+=back
 
 =cut
 

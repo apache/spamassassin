@@ -75,6 +75,8 @@ sub set_config {
 
 The following configuration settings are used to control shortcircuiting:
 
+=over 4
+
 =item shortcircuit SYMBOLIC_TEST_NAME {ham|spam|on|off}
 
 Shortcircuiting a test will force all other pending rules to be skipped, if
@@ -217,6 +219,8 @@ for that rule.
 
   $conf->{parser}->register_commands(\@cmds);
 }
+
+=back
 
 =head1 TAGS
 
