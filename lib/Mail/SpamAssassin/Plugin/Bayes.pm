@@ -39,8 +39,6 @@ The results are incorporated into SpamAssassin as the BAYES_* rules.
 
 =head1 METHODS
 
-=over 4
-
 =cut
 
 package Mail::SpamAssassin::Plugin::Bayes;
@@ -1563,7 +1561,3 @@ sub bayes_report_make_list {
 }
 
 1;
-
-=back
-
-=cut
