@@ -1,4 +1,4 @@
-=head1 
+=head1 testplugin2.pm
 
 To try this out, write these lines to /etc/mail/spamassassin/plugintest.cf:
 

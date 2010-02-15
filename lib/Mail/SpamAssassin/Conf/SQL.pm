@@ -85,6 +85,8 @@ sub load_modules {		# static
 
 Read configuration paramaters from SQL database and parse scores from it.
 
+=back
+
 =cut
 
 sub load {

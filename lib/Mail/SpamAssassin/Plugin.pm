@@ -896,8 +896,6 @@ not be called.
 
 Called when the C<Mail::SpamAssassin> object is destroyed.
 
-=back
-
 =cut
 
 sub finish {
@@ -1005,6 +1003,8 @@ Set to 1 if warning messages should be suppressed.
 
 =back
 
+=back
+
 =head1 HELPER APIS
 
 These methods provide an API for plugins to register themselves
@@ -1079,6 +1079,8 @@ Tells the plugin handler to inhibit calling into other plugins in the plugin
 chain for the current callback.  Frequently used when parsing configuration
 settings using C<parse_config()>.
 
+=back
+
 =cut
 
 sub inhibit_further_callbacks {
@@ -1090,6 +1092,8 @@ sub inhibit_further_callbacks {
 __END__
 
 =head1 LOGGING
+
+=over 4
 
 =item Mail::SpamAssassin::Plugin::dbg($message)
 

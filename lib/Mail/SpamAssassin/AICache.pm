@@ -49,6 +49,8 @@ use Errno qw(EBADF);
 
 Generates a new cache object.
 
+=back
+
 =cut
 
 sub new {

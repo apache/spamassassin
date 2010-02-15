@@ -31,6 +31,7 @@ Taking into account signatures from any signing domains:
 Taking into account signatures from specified signing domains only:
 (quotes may be omitted on domain names consisting only of letters, digits,
 dots, and minus characters)
+
  full   DKIM_SIGNED_MY1       eval:check_dkim_signed('dom1','dom2',...)
  full   DKIM_VALID_MY1        eval:check_dkim_valid('dom1','dom2',...)
  full   DKIM_VALID_AU_MY1     eval:check_dkim_valid_author_sig('d1','d2',...)
@@ -38,6 +39,7 @@ dots, and minus characters)
  full   __DKIM_DEPENDABLE     eval:check_dkim_dependable()
 
 Author Domain Signing Practices (ADSP) from any author domains:
+
  header DKIM_ADSP_NXDOMAIN    eval:check_dkim_adsp('N')
  header DKIM_ADSP_ALL         eval:check_dkim_adsp('A')
  header DKIM_ADSP_DISCARD     eval:check_dkim_adsp('D')
@@ -46,6 +48,7 @@ Author Domain Signing Practices (ADSP) from any author domains:
  header DKIM_ADSP_CUSTOM_HIGH eval:check_dkim_adsp('3')
 
 Author Domain Signing Practices (ADSP) from specified author domains only:
+
  header DKIM_ADSP_MY1         eval:check_dkim_adsp('*','dom1','dom2',...)
 
  describe DKIM_SIGNED   Message has a DKIM or DK signature, not necessarily valid
@@ -61,6 +64,7 @@ Author Domain Signing Practices (ADSP) from specified author domains only:
  describe DKIM_ADSP_CUSTOM_HIGH adsp_override is CUSTOM_HIGH, no valid author domain signature
 
 For compatibility with pre-3.3.0 versions, the following are synonyms:
+
  OLD: eval:check_dkim_verified = NEW: eval:check_dkim_valid
  OLD: eval:check_dkim_signall  = NEW: eval:check_dkim_adsp('A')
  OLD: eval:check_dkim_signsome = NEW: redundant, semantically always true
@@ -417,6 +421,8 @@ Example:
 
 How many seconds to wait for a DKIM query to complete, before
 scanning continues without the DKIM result.
+
+=back
 
 =cut
 

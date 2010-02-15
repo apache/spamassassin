@@ -604,8 +604,6 @@ The following methods must be overloaded:
 
 =over
 
-=cut
-
 =item C<_remote_host()>
 
 =item C<_remote_ip()>
@@ -640,6 +638,8 @@ Send buffers to the client.
 =item C<auth_ident()>
 
 XXX
+
+=back
 
 =cut
 
