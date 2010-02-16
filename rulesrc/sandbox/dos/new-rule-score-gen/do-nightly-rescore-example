@@ -22,7 +22,7 @@ set -e
 rm -rf scores scores-set0 scores-set1 scores-set2 scores-set3 stats-set0 stats-set1 stats-set2 stats-set3 trunk-rulesrc-scores
 svn up
 
-if [ `date +%w` -eq 6 ]; then
+if [ `date +%w` -eq 0 ]; then
   ./generate-new-scores 0
   ./generate-new-scores 1
   REVISION=`grep "revision .*" scores-set1 | cut -d" " -f9`
