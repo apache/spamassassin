@@ -165,7 +165,7 @@ make_rule_update_from_trunk() {
 
   cd ../..
 
-  sha1sum $TMPDIR/${REVISION}.tar.gz > $TMPDIR/${REVISION}.tar.gz.sha1
+  shasum $TMPDIR/${REVISION}.tar.gz > $TMPDIR/${REVISION}.tar.gz.sha1
   gpg --batch --homedir $KEYDIR -bas $TMPDIR/${REVISION}.tar.gz || exit $?
 }
 
@@ -221,11 +221,12 @@ if [ $UPDATED_VERSIONS -gt 0 ]; then
   # on a set interval
 
   # delete any existing jobs in at queue 'n' used for named reloads
-  for JOB in `atq | cut -d" " -f1`; do at -d $JOB; done;
+  for JOB in `at -l -q n | cut -d" " -f1`; do atrm $JOB; done
 
   # schedule a job to tick the zone serial and reload named in 16 minutes
   # (mirror rsyncs are done every 15 minutes)
   echo "/export/home/updatesd/svn/spamassassin/build/mkupdates/tick_zone_serial" | at -q n now + 16min
 fi
 
+cd /tmp
 rm -rf $TMPDIR
