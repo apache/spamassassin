@@ -751,7 +751,7 @@ sub set_server_failed_to_respond_for_domain {
 sub enter_helper_run_mode {
   my ($self) = @_;
 
-  dbg("info: entering helper-app run mode");
+  dbg("dns: entering helper-app run mode");
   $self->{old_slash} = $/;              # Razor pollutes this
   %{$self->{old_env}} = ();
   if ( defined %ENV ) {
@@ -787,7 +787,7 @@ sub enter_helper_run_mode {
 sub leave_helper_run_mode {
   my ($self) = @_;
 
-  dbg("info: leaving helper-app run mode");
+  dbg("dns: leaving helper-app run mode");
   $/ = $self->{old_slash};
   %ENV = %{$self->{old_env}};
 
