@@ -225,8 +225,9 @@ if [ $UPDATED_VERSIONS -gt 0 ]; then
 
   # schedule a job to tick the zone serial and reload named in 16 minutes
   # (mirror rsyncs are done every 15 minutes)
+  cd
   echo "/export/home/updatesd/svn/spamassassin/build/mkupdates/tick_zone_serial" | at -q n now + 16min
 fi
 
-cd /tmp
+cd
 rm -rf $TMPDIR
