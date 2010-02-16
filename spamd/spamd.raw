@@ -442,7 +442,12 @@ my $log_facility = $opt{'syslog'} || 'mail';
 #  socket of 'none' means as much as --syslog=null. Sounds complicated? It is.
 #  But it works.
 # )
-my $log_socket = lc($opt{'syslog-socket'}) || 'unix';
+my $log_socket = lc($opt{'syslog-socket'});
+
+if (!defined $log_socket || $log_socket eq '') {
+  $log_socket =
+    Mail::SpamAssassin::Util::am_running_on_windows() ? 'none' : 'unix';
+}
 
 # This is the default log file; it can be changed on the command line
 # via a --syslog flag containing non-word characters.
@@ -3040,15 +3045,16 @@ C<pipe>, or C<console>.  The value C<eventlog> is specific to Win32 events
 logger and requires a perl module Win32::EventLog to be installed.
 For more information please consult the Sys::Syslog documentation.
 
-The default is to try C<unix> first, falling back to C<inet> if perl detects
-errors in its C<unix> support.
+A historical setting --syslog-socket=none is mapped to --syslog=stderr.
+
+A default for Windows platforms is C<none>, otherwise the default is
+to try C<unix> first, falling back to C<inet> if perl detects errors
+in its C<unix> support.
 
 Some platforms, or versions of perl, are shipped with old or dysfunctional
 versions of the B<Sys::Syslog> module which do not support some socket types,
 so you may need to set this option explicitly.  If you get error messages
 regarding B<__PATH_LOG> or similar spamd, try changing this setting.
-
-A historical setting --syslog-socket=none is mapped to --syslog=stderr.
 
 The socket types C<file> is used internally and should not be specified.
 Use the C<-s> switch instead.
