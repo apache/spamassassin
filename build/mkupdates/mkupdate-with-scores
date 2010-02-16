@@ -111,7 +111,11 @@ copy_update_paranoid() {
 
   set +e
   cp $SRC $DST
-  diff -u $SRC $DST || ( set -e && return 1 )
+  diff -u $SRC $DST
+  if [ $? -ne 0 ]; then
+    set -e
+    return 1
+  fi
   set -e
   return 0
 }
@@ -204,16 +208,22 @@ echo "VERSIONS UPDATE PASSED ON: $UPDATED_VERSIONS"
 if [ $UPDATED_VERSIONS -gt 0 ]; then
   # be careful, we want to make sure that the DNS records are always in a good state;
   # even if we end up exiting unexpectedly due to an error
+  EXIT=0
   (
     copy_update_paranoid "$TMPDIR/$REVISION.tar.gz"      "$UPDATEDIR/$REVISION.tar.gz" &&
     copy_update_paranoid "$TMPDIR/$REVISION.tar.gz.asc"  "$UPDATEDIR/$REVISION.tar.gz.asc" &&
     copy_update_paranoid "$TMPDIR/$REVISION.tar.gz.sha1" "$UPDATEDIR/$REVISION.tar.gz.sha1" &&
     chmod 544 $UPDATEDIR/$REVISION.tar.gz*
-  ) || (
+  ) || EXIT=5
+
+  # copying the update files went wrong, revert dns and exit
+  if [ $EXIT -gt 0 ]; then
     for (( I=0; I<=$MINOR_VERS; I++ )); do
-      revert_dns_record "3.3.$MINOR_VERS"
+      revert_dns_record "3.3.$I"
     done
-  )
+    exit $EXIT
+  fi
+
   # schedule dns commit/reload atq job
   # note that we're probably not going to be able to commit the DNS changes
   # until the update tarball mirrors have had time to sync since the ASF
