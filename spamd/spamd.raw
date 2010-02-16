@@ -420,13 +420,28 @@ if ( $listen_ssl ) {
 #   of a specific logfile
 my $log_facility = $opt{'syslog'} || 'mail';
 
-# The socket to log over can be changed on the command line with the
-# --syslog-socket flag. Logging to any file handler (either a specific log
-# file or STDERR) is internally represented by a socket 'file', no logging
-# at all is 'none'. The latter is different from --syslog-socket=none which
-# gets mapped to --syslog=stderr and such --syslog-socket=file. An internal
-# socket of 'none' means as much as --syslog=null. Sounds complicated? It is.
-# But it works.
+# The --syslog-socket option specifies one of the possible socket types or
+# logging mechanisms as accepted by the Sys::Syslog::setlogsock() subroutine.
+# Depending on a version of Sys::Syslog and on the underlying operating system,
+# one of the following values (or their subset) can be used: native, eventlog,
+# tcp, udp, inet, unix, stream, pipe, console. The value 'eventlog' is
+# specific to Win32 events logger and requires a perl module Win32::EventLog.
+#
+# In addition to values acceptable by Sys::Syslog::setlogsock(),
+# a --syslog-socket=none is mapped to --syslog=stderr and $log_socket='file'.
+#
+# A value 'file' in variable $log_socket implies logging to any file handler
+# (either a specific log file or STDERR), A value 'none' in $log_socket
+# represents no logging, equivalent to --syslog=null.
+#
+# (old text: The socket to log over can be changed on the command line with
+#  the --syslog-socket flag. Logging to any file handler (either a specific log
+#  file or STDERR) is internally represented by a socket 'file', no logging
+#  at all is 'none'. The latter is different from --syslog-socket=none which
+#  gets mapped to --syslog=stderr and such --syslog-socket=file. An internal
+#  socket of 'none' means as much as --syslog=null. Sounds complicated? It is.
+#  But it works.
+# )
 my $log_socket = lc($opt{'syslog-socket'}) || 'unix';
 
 # This is the default log file; it can be changed on the command line
@@ -3016,17 +3031,27 @@ considered a fatal error.)
 
 =item B<--syslog-socket>=I<type>
 
-Specify how spamd should send messages to syslogd.  The options are C<unix>,
-C<inet> or C<none>.   The default is to try C<unix> first, falling back to
-C<inet> if perl detects errors in its C<unix> support.
+Specify how spamd should send messages to syslogd. The I<type> can be any
+of the socket types or logging mechanisms as accepted by the subroutine
+Sys::Syslog::setlogsock(). Depending on a version of Sys::Syslog and on the
+underlying operating system, one of the following values (or their subset) can
+be used: C<native>, C<eventlog>, C<tcp>, C<udp>, C<inet>, C<unix>, C<stream>,
+C<pipe>, or C<console>.  The value C<eventlog> is specific to Win32 events
+logger and requires a perl module Win32::EventLog to be installed.
+For more information please consult the Sys::Syslog documentation.
 
-Some platforms, or versions of perl, are shipped with dysfunctional versions of
-the B<Sys::Syslog> package which do not support some socket types, so you may
-need to set this.  If you get error messages regarding B<__PATH_LOG> or similar
-from spamd, try changing this setting.
+The default is to try C<unix> first, falling back to C<inet> if perl detects
+errors in its C<unix> support.
 
-The socket type C<file> is used internally and should not be specified.  Use
-the C<-s> switch instead.
+Some platforms, or versions of perl, are shipped with old or dysfunctional
+versions of the B<Sys::Syslog> module which do not support some socket types,
+so you may need to set this option explicitly.  If you get error messages
+regarding B<__PATH_LOG> or similar spamd, try changing this setting.
+
+A historical setting --syslog-socket=none is mapped to --syslog=stderr.
+
+The socket types C<file> is used internally and should not be specified.
+Use the C<-s> switch instead.
 
 =item B<-u> I<username>, B<--username>=I<username>
 
