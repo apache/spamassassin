@@ -54,13 +54,12 @@ sub log_message {
   my ($self, $level, $msg) = @_;
 
   my $now = Time::HiRes::time;
-  printf STDERR ("%s:%06.3f [%d] %s: %s\n",
-    POSIX::strftime("%b %e %H:%M",localtime($now)), $now-int($now/60)*60,
-    $$, $level, $msg)  or warn "Error writing to log file: $!";
-
-# print STDERR "[$$] $level: $msg\n"
-#   or warn "Error writing to log file: $!";
-
+  my $timestamp = sprintf("%s:%06.3f",
+    POSIX::strftime("%b %d %H:%M",localtime($now)), $now-int($now/60)*60);
+  # Bug 6329: %e is not in a POSIX standard, use %d instead and edit
+  local $1; $timestamp =~ s/^(\S+\s+)0/$1 /;
+  printf STDERR ("%s [%d] %s: %s\n",
+    $timestamp, $$, $level, $msg)  or warn "Error writing to log file: $!";
 }
 
 sub close_log {
