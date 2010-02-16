@@ -20,7 +20,7 @@
 set -e
 set -x
 
-umask 077
+umask 022
 
 UPDATEDIR=/var/www/buildbot.spamassassin.org/updatestage
 DNSDIR=/var/named/updates.spamassassin.org.d
