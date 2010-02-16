@@ -72,12 +72,16 @@ sub init {
   my ($self) = @_;
 
   my $log_socket = $self->{log_socket};
+  $log_socket = ''  if !defined $log_socket;
 
-  dbg("logger: trying to connect to syslog/$log_socket ...\n");
   my $eval_stat;
   eval {
-    defined(setlogsock($log_socket))
-      or die "setlogsock($log_socket) failed: $!";
+    if ($log_socket eq '') {
+      # calling setlogsock is optional, let Sys::Syslog choose a default
+    } else {
+      dbg("logger: calling setlogsock($log_socket)");
+      setlogsock($log_socket) or die "setlogsock($log_socket) failed: $!";
+    }
     dbg("logger: opening syslog with $log_socket socket");
     # the next call is required to actually open the socket
     openlog($self->{ident}, 'cons,pid,ndelay', $self->{log_facility});
@@ -90,11 +94,13 @@ sub init {
   # Solaris sometimes doesn't support UNIX-domain syslog sockets apparently;
   # the same is true for perl 5.6.0 build on an early version of Red Hat 7!
   # In these cases we try it with INET instead.
+  # See also Bug 6267 and Bug 6331.
+
   if (defined($eval_stat) && $log_socket ne 'inet') {
-    dbg("logger: trying to connect to syslog/inet...");
+    dbg("logger: trying setlogsock('inet')");
     undef $eval_stat;
     eval {
-      defined(setlogsock('inet')) or die "setlogsock('inet') failed: $!";
+      setlogsock('inet') or die "setlogsock('inet') failed: $!";
       dbg("logger: opening syslog using inet socket");
       openlog($self->{ident}, 'cons,pid,ndelay', $self->{log_facility});
       1;
