@@ -158,6 +158,7 @@ make_rule_update_from_trunk() {
   # remember that 3KB == 1GB of traffic on the mirrors as of Jan 1, 2010
   set +e
   rm 70_sandbox.cf 70_inactive.cf
+  rm STATISTICS-set?.txt
   set -e
 
   mkdir -p $TMPDIR/trunk/etc/mail/spamassassin
