@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: bb-doc bb-fredt bb-guenther_fraud; day 2: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix kgolding nbebout wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 3: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix kgolding nbebout wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2
+# with results from: day 1: bb-doc bb-fredt bb-guenther_fraud bb-kmcgrail bb-trec_enron bb-zmi; day 2: bb-doc bb-fredt bb-guenther_fraud; day 3: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix kgolding nbebout wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2
 
 # tflags userconf
 ALL_TRUSTED
@@ -42,9 +42,6 @@ CHARSET_FARAWAY_HEADER
 
 # tflags userconf
 CORRUPT_FROM_LINE_IN_HDRS
-
-# good enough
-DATE_IN_FUTURE_Q_PLUS
 
 # good enough
 DEAR_BENEFICIARY
@@ -102,12 +99,6 @@ DRUGS_STOCK_MIMEOLE
 
 # tflags userconf
 ENV_AND_HDR_SPF_MATCH
-
-# good enough
-FB_TIRED_OF_YOUR
-
-# good enough
-FB_YOU_CAN_BECOME
 
 # good enough
 FH_FAKE_RCVD_LINE_B
@@ -503,9 +494,6 @@ RCVD_IN_SORBS_ZOMBIE
 RCVD_IN_XBL
 
 # good enough
-REPLYTO_WITHOUT_TO_CC
-
-# good enough
 SPAMMY_XMAILER
 
 # tflags net
@@ -551,10 +539,19 @@ TINY_FLOAT
 TVD_FINGER_02
 
 # good enough
-DEAR_NOBODY
+FROM_MISSPACED
 
 # good enough
-S25R_3
+OBFU_TEXT_ATTACH
+
+# good enough
+S25R_1
+
+# good enough
+TO_NO_BRKTS_DYNIP
+
+# good enough
+TWO_IPS_RCVD
 
 # tflags userconf
 UNPARSEABLE_RELAY
@@ -672,9 +669,6 @@ XMAILER_MIMEOLE_OL_ADFF7
 
 # good enough
 XMAILER_MIMEOLE_OL_B4B40
-
-# good enough
-XMAILER_MIMEOLE_OL_CAC8F
 
 # tflags net
 __DNS_FROM_RFC_ABUSE
