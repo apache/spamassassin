@@ -190,7 +190,7 @@ body     __FRAUD          /\b(?:de)?fraud/i
 #describe MONEY_FRAUD_COMP  Lots of money from a fraud compensation
 #score    MONEY_FRAUD_COMP  1.0
  
-body     __TRUNK_BOX      /\b(?:trunk|metallic|proof|security|consignment)\sbox(?:es)?\b/i
+body     __TRUNK_BOX      /\b(?:(?:trunk|metallic|proof|security|consignment)\sbox(?:es)?|sealed\ssafe)\b/i
 body     __COURIER        /\bcourier\s(?:company|service)\b/i
 #meta     MONEY_FRAUD_BOX  LOTS_OF_MONEY && __TRUNK_BOX && __COURIER
 #describe MONEY_FRAUD_BOX  Lots of money in a box, lots of money from a fox
