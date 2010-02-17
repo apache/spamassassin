@@ -281,8 +281,9 @@ endif
 # describe       GAPPY_DOLLARS              Possible obfuscated stock disclaimer
 
 
-rawbody        STYLE_GIBBERISH            /<style[^>]{0,30}>(?:\s{1,20}|[^\s:;<]){175}/im
-tflags         STYLE_GIBBERISH            nopublish
+# destroys performance
+#rawbody        STYLE_GIBBERISH            /<style[^>]{0,30}>(?:\s{1,20}|[^\s:;<]){175}/im
+#tflags         STYLE_GIBBERISH            nopublish
 
 rawbody        SCRIPT_GIBBERISH           /<script>[^;<]{50}/im
 tflags         SCRIPT_GIBBERISH           nopublish
