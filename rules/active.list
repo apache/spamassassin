@@ -1,11 +1,14 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: bb-doc bb-fredt bb-guenther_fraud bb-kmcgrail bb-trec_enron bb-zmi; day 2: bb-doc bb-fredt bb-guenther_fraud; day 3: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix kgolding nbebout wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2
+# with results from: day 1: bb-doc bb-fredt bb-guenther_fraud bb-kmcgrail bb-trec_enron bb-zmi wt-en1 wt-en2 wt-en3 wt-jp1 wt-jp2; day 2: bb-doc bb-fredt bb-guenther_fraud bb-kmcgrail bb-trec_enron bb-zmi; day 3: bb-doc bb-fredt bb-guenther_fraud
 
 # tflags userconf
 ALL_TRUSTED
 
 # good enough
 AXB_HELO_HOME_UN
+
+# good enough
+BANKING_LAWS
 
 # tflags learn
 BAYES_00
@@ -101,7 +104,19 @@ DRUGS_STOCK_MIMEOLE
 ENV_AND_HDR_SPF_MATCH
 
 # good enough
+FAKE_REPLY_C
+
+# good enough
 FH_FAKE_RCVD_LINE_B
+
+# good enough
+FH_FROM_GIVEAWAY
+
+# good enough
+FH_HAS_XAIMC
+
+# good enough
+FH_HAS_XID
 
 # good enough
 FH_HELO_ALMOST_IP
@@ -110,7 +125,13 @@ FH_HELO_ALMOST_IP
 FH_HELO_EQ_D_D_D_D
 
 # good enough
+FH_HOST_IN_ADDRARPA
+
+# good enough
 FILL_THIS_FORM
+
+# good enough
+FILL_THIS_FORM_FRAUD_PHISH
 
 # good enough
 FILL_THIS_FORM_LOAN
@@ -120,6 +141,9 @@ FILL_THIS_FORM_LONG
 
 # good enough
 FM_LOTTO_YOU_WON
+
+# good enough
+FM_SCHOOLING
 
 # good enough
 FORGED_RELAY_MUA_TO_MX
@@ -185,7 +209,7 @@ HEAD_LONG
 HELO_LH_HOME
 
 # good enough
-HELO_OEM
+HELO_LOCALHOST
 
 # good enough
 HK_LOTTO
@@ -248,9 +272,6 @@ KB_RATWARE_MSGID
 KB_RATWARE_OUTLOOK_MID
 
 # good enough
-KHOP_SC_CIDR16
-
-# good enough
 KHOP_SC_TOP200
 
 # good enough
@@ -258,6 +279,9 @@ KHOP_SC_TOP_CIDR16
 
 # good enough
 KHOP_SC_TOP_CIDR8
+
+# good enough
+LOTTERY_1
 
 # good enough
 LOTTERY_PH_004470
@@ -494,6 +518,9 @@ RCVD_IN_SORBS_ZOMBIE
 RCVD_IN_XBL
 
 # good enough
+RDNS_LOCALHOST
+
+# good enough
 SPAMMY_XMAILER
 
 # tflags net
@@ -520,9 +547,6 @@ SPF_PASS
 # tflags net
 SPF_SOFTFAIL
 
-# good enough
-STOX_REPLY_TYPE_WITHOUT_QUOTES
-
 # tflags userconf
 SUBJECT_IN_BLACKLIST
 
@@ -539,19 +563,121 @@ TINY_FLOAT
 TVD_FINGER_02
 
 # good enough
-FROM_MISSPACED
+AB_TEST_PDF4
 
 # good enough
-OBFU_TEXT_ATTACH
+AXB_419_FROM_C1
 
 # good enough
-S25R_1
+DEAR_NOBODY
 
 # good enough
-TO_NO_BRKTS_DYNIP
+DOS_FAKE_SQUIRREL
 
 # good enough
-TWO_IPS_RCVD
+FB_EARN_UP_TO
+
+# good enough
+FB_IMAGIRL
+
+# good enough
+FM_LOTTO_MONEY
+
+# good enough
+FRT_EXPERIENCE
+
+# good enough
+FSL_FREEMAIL_1
+
+# good enough
+FSL_FREEMAIL_2
+
+# good enough
+FSL_RCVD_USER
+
+# good enough
+FS_LOW_INTMOR
+
+# good enough
+FS_MAKE_MONEY
+
+# good enough
+HK_FAKENAME_MICROSOFT
+
+# good enough
+HK_FAKENAME_PAYPAL
+
+# good enough
+HK_LOTTO_SUBJECT
+
+# good enough
+HK_NAME_FM_FROM
+
+# good enough
+HK_NAME_FM_MR_MRS
+
+# good enough
+HK_NAME_FROM
+
+# good enough
+HK_NAME_MR_MRS
+
+# good enough
+HK_SCAM_N12
+
+# good enough
+HK_SCAM_N13
+
+# good enough
+HK_SCAM_N14
+
+# good enough
+HK_SCAM_N16
+
+# good enough
+HK_SCAM_N4
+
+# good enough
+HK_SCAM_S1
+
+# good enough
+HK_SCAM_S15
+
+# good enough
+HK_SCAM_S7
+
+# good enough
+KHOP_SC_CIDR8
+
+# good enough
+LONG_FREEMAIL_ADDR
+
+# good enough
+LOTTO_AGENT_RPLY
+
+# good enough
+RP_MINUS
+
+# good enough
+S25R_3
+
+# good enough
+SANE_6d8469947da377e0a0b4b7fed8f7e1d8
+
+# good enough
+SANE_8f9d40cc4e21b11c7171a7d6b3eea4c1
+
+# good enough
+SANE_e3634fb4bb521c6a312bb1d001c20a1d
+
+# good enough
+TVD_BODY_END_STAR
+
+# good enough
+TVD_LONG_WORD5
+
+# good enough
+TVD_PH_BODY_META
 
 # tflags userconf
 UNPARSEABLE_RELAY
@@ -626,9 +752,6 @@ USER_IN_WHITELIST
 USER_IN_WHITELIST_TO
 
 # good enough
-XMAILER_MIMEOLE_OL_015D5
-
-# good enough
 XMAILER_MIMEOLE_OL_09BB4
 
 # good enough
@@ -650,9 +773,6 @@ XMAILER_MIMEOLE_OL_4B815
 XMAILER_MIMEOLE_OL_58CB5
 
 # good enough
-XMAILER_MIMEOLE_OL_6554A
-
-# good enough
 XMAILER_MIMEOLE_OL_7533E
 
 # good enough
@@ -663,9 +783,6 @@ XMAILER_MIMEOLE_OL_83BF7
 
 # good enough
 XMAILER_MIMEOLE_OL_91287
-
-# good enough
-XMAILER_MIMEOLE_OL_ADFF7
 
 # good enough
 XMAILER_MIMEOLE_OL_B4B40
