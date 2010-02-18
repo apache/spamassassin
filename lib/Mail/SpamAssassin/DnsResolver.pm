@@ -313,7 +313,8 @@ sub dnsext_dns0x20 {
   for my $ic (unpack("C*",$string)) {
     if (chr($ic) =~ /^[A-Za-z]\z/) {
       if ($have_rnd_bits < 1) {
-        $rnd = rand(0x7fffffff);  $have_rnd_bits = 31;
+        # only reveal few bits at a time, hiding most of the accumulator
+        $rnd = rand(~0) & 0xff;  $have_rnd_bits = 8;
       }
       $ic ^= 0x20  if $rnd & 1;  # flip the 0x20 bit in name if dice says so
       $rnd = $rnd >> 1;  $have_rnd_bits--;
