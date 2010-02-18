@@ -189,7 +189,7 @@ sub dnsbl_hit {
       $log =~ s/(?<![<([])(https?:\/\/\S+)/<$1>/g;
     }
     elsif ($question->string =~ m/^(\d+)\.(\d+)\.(\d+)\.(\d+)\.(\S+\w)/) {
-      $log = "$4.$3.$2.$1 listed in $5";
+      $log = "$4.$3.$2.$1 listed in ".lc($5);
     }
   }
 

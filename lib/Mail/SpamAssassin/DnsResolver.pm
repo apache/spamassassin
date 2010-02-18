@@ -303,6 +303,26 @@ to:
 
 =cut
 
+# implements draft-vixie-dnsext-dns0x20-00
+#
+sub dnsext_dns0x20 {
+  my ($string) = @_;
+  my $rnd;
+  my $have_rnd_bits = 0;
+  my $result = '';
+  for my $ic (unpack("C*",$string)) {
+    if (chr($ic) =~ /^[A-Za-z]\z/) {
+      if ($have_rnd_bits < 1) {
+        $rnd = rand(0x7fffffff);  $have_rnd_bits = 31;
+      }
+      $ic ^= 0x20  if $rnd & 1;  # flip the 0x20 bit in name if dice says so
+      $rnd = $rnd >> 1;  $have_rnd_bits--;
+    }
+    $result .= chr($ic);
+  }
+  return $result;
+}
+
 sub new_dns_packet {
   my ($self, $host, $type, $class) = @_;
 
@@ -317,6 +337,7 @@ sub new_dns_packet {
   $self->connect_sock_if_reqd();
   my $packet;
   eval {
+    $host = dnsext_dns0x20($host)  if $self->{conf}->{dns_options}->{dns0x20};
     $packet = Net::DNS::Packet->new($host, $type, $class);
 
     # a bit noisy, so commented by default...
@@ -463,8 +484,8 @@ sub poll_responses {
 
       my $cb = delete $self->{id_to_callback}->{$id};
       if (!$cb) {
-        dbg("dns: no callback for id: %s, ignored; packet: %s",
-            $id,  $packet ? $packet->string : "undef" );
+        info("dns: no callback for id: %s, ignored; packet: %s",
+             $id,  $packet ? $packet->string : "undef" );
       } else {
         $cb->($packet, $id, $now);
         $cnt++;

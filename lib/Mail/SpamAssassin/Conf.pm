@@ -1332,12 +1332,29 @@ time in number of seconds will tell SpamAssassin how often to retest for working
     }
   });
 
-=item dns_options rotate    (default: empty)
+=item dns_options opts   (default: empty)
 
-If set to 'rotate', this causes SpamAssassin to choose a DNS server at random
+Provides a (whitespace or comma -separated) list of options applying to
+DNS resolving. Available options are 'rotate' and 'dns0x20' (without quotes).
+Option name may be negated by prepending a 'no' (e.g. 'norotate') to
+counteract previously enabled option. The last setting in configuration
+files prevails. By default options 'rotate' and 'dns0x20' are disabled.
+
+Option 'rotate' causes SpamAssassin to choose a DNS server at random
 from all servers listed in C</etc/resolv.conf> every 'dns_test_interval'
 seconds, effectively spreading the load over all currently available DNS
 servers when there are many spamd workers. 
+
+Option 'dns0x20' enables randomization of letters in a DNS query label
+according to draft-vixie-dnsext-dns0x20, decreasing a chance of collisions
+of responses (by chance or by a malicious intent) by increasing spread
+as provided by a 16-bit query ID and up to 16 bits of a port number,
+with additional bits as encoded by flipping case (upper/lower) of letters
+in a query. The number of additional random bits corresponds to the number
+of letters in a query label. Should work reliably with all mainstream
+DNS servers - do not turn on if you see frequent info messages
+"dns: no callback for id:" in the log, or if RBL or URIDNS lookups
+do not work for no apparent reason.
 
 =cut
 
@@ -1346,11 +1363,13 @@ servers when there are many spamd workers.
     type => $CONF_TYPE_HASH_KEY_VALUE,
     code => sub {
       my ($self, $key, $value, $line) = @_;
-      my $allowed_opts = "rotate";
-      
-      foreach my $option (split (/\s+/, $value)) {
-        if ($allowed_opts !~ /^$option$/) { return $INVALID_VALUE; }
-        else { $self->{dns_options}->{$option} = 1; }
+      foreach my $option (split (/[\s,]+/, $value)) {
+        local($1,$2);
+        if (lc($option) =~ /^(no)?(rotate|dns0x20)\z/) {
+          $self->{dns_options}->{$2} = $1 ? 0 : 1;
+        } else {
+          return $INVALID_VALUE;
+        }
       }
     }
   });
