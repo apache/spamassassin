@@ -155,6 +155,8 @@ sub razor2_access {
 
   Mail::SpamAssassin::PerMsgStatus::enter_helper_run_mode($self);
 
+  my $rnd = rand(~0);  # save entropy before Razor clobbers it
+
   my $timer = Mail::SpamAssassin::Timeout->new(
                { secs => $timeout, deadline => $deadline });
   my $err = $timer->run_and_catch(sub {
@@ -309,7 +311,10 @@ sub razor2_access {
   # OK, that's enough Razor stuff. now, reset all that global
   # state it futzes with :(
   # work around serious brain damage in Razor2 (constant seed)
-  srand;
+  $rnd ^= rand(~0);  # mix old accumulator with whatever came out of razor
+  srand;             # let Perl give it a try ...
+  $rnd ^= rand(~0);  # ... and mix that in too
+  srand($rnd & 0x7fffffff);  # reseed, keep it unsigned 32-bit just in case
 
   Mail::SpamAssassin::PerMsgStatus::leave_helper_run_mode($self);
 
