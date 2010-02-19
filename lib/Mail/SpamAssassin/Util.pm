@@ -329,7 +329,7 @@ sub exit_status_str($;$) {
   } else {
     my $sig = WTERMSIG($stat);
     $str = sprintf("%s, signal %d (%04x)",
-             $sig == 1 ? 'HANGUP' : $sig == 2 ? 'INTERRUPTED' :
+             $sig == 1 ? 'HANGUP' : $sig == 2 ? 'interrupted' :
              $sig == 6 ? 'ABORTED' : $sig == 9 ? 'KILLED' :
              $sig == 15 ? 'TERMINATED' : 'DIED',
              $sig, $stat);
