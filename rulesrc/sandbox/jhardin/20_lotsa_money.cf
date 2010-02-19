@@ -56,7 +56,7 @@ body     __LOTTO_WIN_01     /\bwin+ing\s(?:prize|number|notification|draw|check|
 
 body     __YOU_WON_01    /\byou(?:r|'re|'ve|'ll|\shave|\sdid)?\s(?:e-?mail\s)?(?:\w+\s){0,2}(?:a\s)?w[io]n+(?:er|ing)?\b/i
 body     __YOU_WON_02    /\bw[io]n\s(?:(?:for|by)\s)?your?\b/i
-body     __YOU_WON_03    /\b(?:your?|win+ing|win+ers?|beneficiaries|participants?|individuals?)(?:\s[-a-z\s]{4,30}?)?\s(?:w(?:ere|as)|ha(?:ve|s) be(?:en)?)\s(?:randomly\s(?:selected|cho+sen|cho+sing|picked)|(?:selected|cho+sen|cho+sing|picked)\s(?:[a-z\s]{2,40}?\srandom|randomly|online|lottery|computer\s(?:ballot|wahlgang))/i 
+body     __YOU_WON_03    /\b(?:your?|win+ing|win+ers?|beneficiaries|participants?|individuals?)(?:\s[-a-z\s]{4,30}?)?\s(?:w(?:ere|as)|ha(?:ve|s) be(?:en)?)\s(?:randomly\s(?:selected|cho+sen|cho+sing|picked)|(?:selected|cho+sen|cho+sing|picked)\s(?:[a-z\s]{2,40}?\srandom|randomly|online|lottery|computer\s(?:ballot|wahlgang)))/i 
 meta     LOTTO_YOU_WON   __YOU_WON_01 || __YOU_WON_02 || __YOU_WON_03
 describe LOTTO_YOU_WON   You won!
 score    LOTTO_YOU_WON   1.00 
