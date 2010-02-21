@@ -106,17 +106,16 @@ done
 HAMCONTRIBS=`ls -l corpus/usable-corpus-set$SCORESET/ham-*.log | wc -l | sed -e 's/^[ \t]*//' | cut -d" " -f1`
 SPAMCONTRIBS=`ls -l corpus/usable-corpus-set$SCORESET/spam-*.log | wc -l | sed -e 's/^[ \t]*//' | cut -d" " -f1`
 
+echo " HAM CONTRIBUTORS FOUND: $HAMCONTRIBS (required 10)"
+echo "SPAM CONTRIBUTORS FOUND: $SPAMCONTRIBS (required 10)"
+
 if [ $HAMCONTRIBS -lt 10 ]; then
   echo "Insufficient ham corpus contributors; aborting."
-  echo " HAM CONTRIBUTORS FOUND: $HAMCONTRIBS (required 10)"
-  echo "SPAM CONTRIBUTORS FOUND: $SPAMCONTRIBS (required 10)"
   exit 6
 fi
 
 if [ $SPAMCONTRIBS -lt 10 ]; then
   echo "Insufficient spam corpus contributors; aborting."
-  echo " HAM CONTRIBUTORS FOUND: $HAMCONTRIBS (required 10)"
-  echo "SPAM CONTRIBUTORS FOUND: $SPAMCONTRIBS (required 10)"
   exit 7
 fi
 
@@ -176,17 +175,16 @@ masses/log-grep-recent -m 2 ../corpus/usable-corpus-set$SCORESET/spam-*.log > ma
 HAMCOUNT=`wc -l masses/ham-full.log | sed -e 's/^[ \t]*//' | cut -d" " -f1`
 SPAMCOUNT=`wc -l masses/spam-full.log | sed -e 's/^[ \t]*//' | cut -d" " -f1`
 
+echo " HAM: $HAMCOUNT (150000 required)"
+echo "SPAM: $SPAMCOUNT (150000 required)"
+
 if [ $HAMCOUNT -lt 150000 ]; then
   echo "Insufficient ham corpus to generate scores; aborting."
-  echo " HAM: $HAMCOUNT (150000 required)"
-  echo "SPAM: $SPAMCOUNT (150000 required)"
   exit 8
 fi
 
 if [ $SPAMCOUNT -lt 150000 ]; then
   echo "Insufficient spam corpus to generate scores; aborting."
-  echo " HAM: $HAMCOUNT (150000 required)"
-  echo "SPAM: $SPAMCOUNT (150000 required)"
   exit 9
 fi
 
