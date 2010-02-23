@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix kgolding wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 2: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix dos jm kgolding wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 3: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix dos jm kgolding wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2
+# with results from: day 1: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix dos jm wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 2: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix kgolding wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 3: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix dos jm kgolding wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2
 
 # tflags userconf
 ALL_TRUSTED
@@ -50,7 +50,16 @@ CHARSET_FARAWAY_HEADER
 CORRUPT_FROM_LINE_IN_HDRS
 
 # good enough
+DATE_IN_FUTURE_96_Q
+
+# good enough
+DATE_IN_FUTURE_Q_PLUS
+
+# good enough
 DEAR_BENEFICIARY
+
+# good enough
+DEAR_EMAIL
 
 # tflags net
 DIGEST_MULTIPLE
@@ -95,7 +104,13 @@ DNS_FROM_RFC_DSN
 DOS_ANAL_SPAM_MAILER
 
 # good enough
+DOS_HIGHBIT_HDRS_BODY
+
+# good enough
 DOS_OE_TO_MX
+
+# good enough
+DOS_OUTLOOK_TO_MX
 
 # good enough
 DOS_RCVD_IP_TWICE_C
@@ -160,6 +175,15 @@ FM_SEX_HELODDDD
 # good enough
 FORGED_RELAY_MUA_TO_MX
 
+# good enough
+FORGED_TBIRD_IMG_ARROW
+
+# good enough
+FORGED_TBIRD_IMG_SIZE
+
+# good enough
+FORGED_TBIRD_IMG_TO_MX
+
 # tflags userconf
 FRAGMENTED_MESSAGE
 
@@ -179,13 +203,25 @@ FROM_MISSP_FREEMAIL
 FROM_MISSP_MSFT
 
 # good enough
-FRT_ROLEX
+FROM_URI
+
+# good enough
+FROM_WWW
+
+# good enough
+FR_TITLE_CONS_6
 
 # good enough
 FSL_HELO_BARE_IP_1
 
 # good enough
 FSL_HELO_DEVICE
+
+# good enough
+FSL_LSPACES_ABUSE
+
+# good enough
+FS_MORE_CONFIDENT
 
 # good enough
 FS_REPLICA
@@ -227,6 +263,9 @@ HEAD_LONG
 HELO_LH_HOME
 
 # good enough
+HELO_NO_DOMAIN
+
+# good enough
 HELO_OEM
 
 # good enough
@@ -242,10 +281,16 @@ HK_NAME_FREE
 HK_RANDOM_ENVFROM
 
 # good enough
+HK_RANDOM_FROM
+
+# good enough
 HK_SCAM_N2
 
 # tflags userconf
 HTML_CHARSET_FARAWAY
+
+# good enough
+IMG_DIRECT_TO_MX
 
 # good enough
 KAM_LOTTO1
@@ -261,6 +306,12 @@ KB_RATWARE_MSGID
 
 # good enough
 KB_RATWARE_OUTLOOK_MID
+
+# good enough
+KHOP_SC_CIDR16
+
+# good enough
+KHOP_SC_CIDR24
 
 # good enough
 KHOP_SC_TOP200
@@ -284,6 +335,9 @@ LOTTO_AGENT
 L_SPAM_TOOL_13
 
 # good enough
+MANY_GOOG_PROXY
+
+# good enough
 MANY_SPAN_IN_TEXT
 
 # tflags userconf
@@ -303,6 +357,9 @@ NO_RECEIVED
 
 # tflags userconf
 NO_RELAYS
+
+# good enough
+PART_CID_STOCK
 
 # tflags net
 PYZOR_CHECK
@@ -497,7 +554,13 @@ RCVD_IN_SORBS_ZOMBIE
 RCVD_IN_XBL
 
 # good enough
+S25R_1
+
+# good enough
 S25R_3
+
+# good enough
+S25R_6
 
 # good enough
 SANE_04e8bf28eb445199a7f11b943c44d209
@@ -510,6 +573,9 @@ SANE_4ef8302546bf270a19baf98508afacc4
 
 # good enough
 SANE_7429530a7398f43f1f1b795f9420714e
+
+# good enough
+SANE_75491b468ec2e117e50f9842d32abfab
 
 # good enough
 SANE_d0d2b0f6373bf91253d66dd74c594b87
@@ -563,7 +629,13 @@ TAB_IN_FROM
 TINY_FLOAT
 
 # good enough
+TO_NO_BRKTS_DYNIP
+
+# good enough
 TVD_FINGER_02
+
+# good enough
+TVD_PCT_OFF
 
 # good enough
 TVD_QUAL_MEDS
@@ -575,76 +647,16 @@ TVD_RCVD_IP
 TVD_RCVD_SINGLE
 
 # good enough
-DATE_IN_FUTURE_96_Q
-
-# good enough
-DATE_IN_FUTURE_Q_PLUS
-
-# good enough
-DEAR_EMAIL
-
-# good enough
-DOS_HIGHBIT_HDRS_BODY
-
-# good enough
-FORGED_TBIRD_IMG_ARROW
-
-# good enough
-FORGED_TBIRD_IMG_SIZE
-
-# good enough
-FORGED_TBIRD_IMG_TO_MX
-
-# good enough
-FROM_URI
-
-# good enough
-FROM_WWW
-
-# good enough
-FR_TITLE_CONS_6
-
-# good enough
-FSL_LSPACES_ABUSE
-
-# good enough
-FS_MORE_CONFIDENT
-
-# good enough
-HELO_NO_DOMAIN
-
-# good enough
-HK_RANDOM_FROM
-
-# good enough
-IMG_DIRECT_TO_MX
-
-# good enough
-KHOP_SC_CIDR16
-
-# good enough
-KHOP_SC_CIDR24
-
-# good enough
-MANY_GOOG_PROXY
-
-# good enough
-S25R_1
-
-# good enough
-S25R_6
-
-# good enough
-SANE_75491b468ec2e117e50f9842d32abfab
-
-# good enough
-TO_NO_BRKTS_DYNIP
-
-# good enough
-TVD_PCT_OFF
-
-# good enough
 TWO_IPS_RCVD
+
+# good enough
+AXB_URI_APE_ABUSE2
+
+# good enough
+DEAR_NOBODY
+
+# good enough
+MONEY_FROM_MISSP
 
 # tflags userconf
 UNPARSEABLE_RELAY
