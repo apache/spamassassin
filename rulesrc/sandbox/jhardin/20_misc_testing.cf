@@ -281,14 +281,30 @@ endif
 # describe       GAPPY_DOLLARS              Possible obfuscated stock disclaimer
 
 
-# destroys performance
-#rawbody        STYLE_GIBBERISH            /<style[^>]{0,30}>(?:\s{1,20}|[^\s:;<]){175}/im
-#tflags         STYLE_GIBBERISH            nopublish
+rawbody        STYLE_GIBBERISH          /<style[^>]{0,30}>(?:\s{0,80}[^\s:;<]){150}/im
+tflags         STYLE_GIBBERISH          nopublish
 
 rawbody        SCRIPT_GIBBERISH           /<script>[^;<]{50}/im
 tflags         SCRIPT_GIBBERISH           nopublish
 
-rawbody        MANY_DIV                   /(?:<div[^>]{0,30}>\s{0,20}){30}/im
-tflags         MANY_DIV                   nopublish
+rawbody        MANY_DIV_5                   /(?:<div[^>]{0,30}>\s{0,80}){5}/im
+tflags         MANY_DIV_5                    nopublish
+rawbody        MANY_DIV_6                   /(?:<div[^>]{0,30}>\s{0,80}){6}/im
+tflags         MANY_DIV_6                    nopublish
+rawbody        MANY_DIV_7                   /(?:<div[^>]{0,30}>\s{0,80}){7}/im
+tflags         MANY_DIV_7                    nopublish
+rawbody        MANY_DIV_8                   /(?:<div[^>]{0,30}>\s{0,80}){8}/im
+tflags         MANY_DIV_8                    nopublish
+rawbody        MANY_DIV_9                   /(?:<div[^>]{0,30}>\s{0,80}){9}/im
+tflags         MANY_DIV_9                    nopublish
+rawbody        MANY_DIV_10                   /(?:<div[^>]{0,30}>\s{0,80}){10}/im
+tflags         MANY_DIV_10                   nopublish
+
+header         FROM_TRL_UNDR              From =~ /_\@/
+tflags         FROM_TRL_UNDR              nopublish
+
+header         MSGID_SHORT                Message-ID =~ /^.{0,12}\@.{0,12}$/
+tflags         MSGID_SHORT                nopublish
+
 
 

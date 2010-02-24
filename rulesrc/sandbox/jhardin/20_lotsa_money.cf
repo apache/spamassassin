@@ -1,6 +1,6 @@
 
 ifplugin Mail::SpamAssassin::Plugin::ReplaceTags
-  replace_tag  CURRENCY   [\(\[]?(?:\bUS[D\$]{0,2}|\$(?:US)?|GBP|=[Aa][34]|\xa3|&\#16[34];|(?i:pounds\ssterling)|\xa4|EUR|[Ee]uros?|(?i:eur)\sde|CHF)[\]\)]?
+  replace_tag  CURRENCY   [\(\[]?(?:\bUS[D\$]{0,2}|\$(?:US)?|usd|GBP|=[Aa][34]|\xa3|&\#16[34];|(?i:pounds\ssterling)|\xa4|EUR|[Ee]uros?|(?i:eur)\sde|CHF)[\]\)]?
   replace_tag  GB_UK      \b(?:U\.?K\.?|(?:Great\s)?Brit(?:ain|ish)|G\.?B\.?)\b
 
   body     __LOTSA_MONEY_00   /<CURRENCY>\s?\d[\dO][,\.][\dO]{3}(?:(?!\d)|\b)/
