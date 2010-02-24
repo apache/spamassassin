@@ -936,6 +936,19 @@ sub compile_output_files {
     my $text    = $rules->{$rule}->{output_text};
     next unless defined ($text);
 
+# DOS - bug 6297 - HACK HACK HACK HACK
+# this will probably screw up meta rules that do something like '&& !$rule'
+
+    # avoid publishing 'tflags nopublish' rules
+    if (pubfile_is_activeout($pubfile) && exists $rules->{$rule}->{tflags} &&
+        $rules->{$rule}->{tflags} =~ /\bnopublish\b/)
+    {
+      print "omitting rule $rule due to tflags nopublish (tflags $rules->{$rule}->{tflags})\n";
+      next;
+    }
+
+# DOS - END HACK
+
     $output_file_text->{$pubfile} .= "##{ $rule\n".
                             $text.
                             "##} ".$rule."\n\n";
@@ -947,6 +960,20 @@ sub compile_output_files {
     my $pubfile = $rules->{$rule}->{output_file};
     my $text    = $rules->{$rule}->{output_text};
     next unless defined ($text);
+
+# DOS - bug 6297 - HACK HACK HACK HACK
+# this will probably screw up meta rules that do something like '&& !$rule'
+
+    # avoid publishing 'tflags nopublish' rules
+    if (pubfile_is_activeout($pubfile) && exists $rules->{$rule}->{tflags} &&
+        $rules->{$rule}->{tflags} =~ /\bnopublish\b/)
+    {
+      print "omitting rule $rule due to tflags nopublish (tflags $rules->{$rule}->{tflags})\n";
+      next;
+    }
+
+# DOS - END HACK
+
     $output_file_text->{$pubfile} .= $text;
   }
 
