@@ -25,6 +25,7 @@ umask 022
 UPDATEDIR=/var/www/buildbot.spamassassin.org/updatestage
 DNSDIR=/var/named/updates.spamassassin.org.d
 KEYDIR=/home/updatesd/key
+UPDATE_BUILD_DIR=0
 
 # if $1 is present redirect output files to a test directory structure
 if [ $1 ]; then
@@ -38,6 +39,10 @@ fi
 
 if [ $2 ]; then
   KEYDIR=$2
+fi
+
+if [ $3 ]; then
+  UPDATE_BUILD_DIR=1
 fi
 
 echo "UPDATEDIR=$UPDATEDIR"
@@ -135,6 +140,10 @@ make_rule_update_from_trunk() {
   svn co --revision=$REVISION https://svn.apache.org/repos/asf/spamassassin/trunk trunk
 
   cd trunk
+
+  if [ $UPDATE_BUILD_DIR ]; then
+    svn up build
+  fi
 
   perl Makefile.PL PREFIX=$TMPDIR/trunk < /dev/null
   make
