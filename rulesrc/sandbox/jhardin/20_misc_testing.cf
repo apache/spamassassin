@@ -303,8 +303,8 @@ tflags         MANY_DIV_10                   nopublish
 header         FROM_TRL_UNDR              From =~ /_\@/
 tflags         FROM_TRL_UNDR              nopublish
 
-header         MSGID_SHORT                Message-ID =~ /^.{0,12}\@.{0,12}$/
-tflags         MSGID_SHORT                nopublish
+header         MSGID_SHORT_JDH            Message-ID =~ /^.{0,12}\@.{0,12}$/
+tflags         MSGID_SHORT_JDH            nopublish
 
 
 
