@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix dos jm kgolding wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 2: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix dos jm kgolding wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 3: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix dos jm wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2
+# with results from: day 1: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-trec_enron bb-zmi bernie-it_batt bernie-mix dos jm wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 2: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix dos jm kgolding wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 3: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix dos jm kgolding wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2
 
 # tflags userconf
 ALL_TRUSTED
@@ -9,6 +9,9 @@ AXB_HELO_HOME_UN
 
 # good enough
 AXB_URI_APE_ABUSE2
+
+# good enough
+AXB_XMID_DIGDOTSHRT
 
 # good enough
 BASE64_LENGTH_78_79
@@ -60,6 +63,9 @@ DATE_IN_FUTURE_Q_PLUS
 
 # good enough
 DEAR_BENEFICIARY
+
+# good enough
+DEAR_NOBODY
 
 # tflags net
 DIGEST_MULTIPLE
@@ -137,9 +143,6 @@ FB_CIALIS_LEO3
 FB_EXTRA_INCHES
 
 # good enough
-FB_GVR
-
-# good enough
 FB_QUALITY_REPLICA
 
 # good enough
@@ -180,6 +183,9 @@ FM_LOTTO_YOU_WON
 
 # good enough
 FM_SEX_HELODDDD
+
+# good enough
+FM_SUBJ_YOU_PROFIT
 
 # good enough
 FORGED_RELAY_MUA_TO_MX
@@ -236,9 +242,6 @@ FSL_LSPACES_ABUSE
 FS_MORE_CONFIDENT
 
 # good enough
-FS_PHARMASUB2
-
-# good enough
 FS_REPLICA
 
 # good enough
@@ -293,6 +296,9 @@ HK_NAME_DRUGS
 HK_NAME_FREE
 
 # good enough
+HK_PNIS
+
+# good enough
 HK_RANDOM_ENVFROM
 
 # good enough
@@ -335,6 +341,9 @@ KHOP_SC_TOP200
 KHOP_SC_TOP_CIDR16
 
 # good enough
+KHOP_SC_TOP_CIDR24
+
+# good enough
 KHOP_SC_TOP_CIDR8
 
 # good enough
@@ -350,10 +359,16 @@ LOTTO_AGENT
 L_SPAM_TOOL_13
 
 # good enough
+MAILER_EQ_ORG
+
+# good enough
 MANY_GOOG_PROXY
 
 # good enough
 MANY_SPAN_IN_TEXT
+
+# good enough
+MAY_BE_FORGED
 
 # tflags userconf
 MIME_CHARSET_FARAWAY
@@ -581,10 +596,16 @@ S25R_1
 S25R_3
 
 # good enough
+S25R_4
+
+# good enough
 S25R_6
 
 # good enough
 SANE_04e8bf28eb445199a7f11b943c44d209
+
+# good enough
+SANE_20d820d8f491476ca39941979ab139dd
 
 # good enough
 SANE_2b173a7fb7518c75ac8a2d294d773fd8
@@ -602,10 +623,19 @@ SANE_7429530a7398f43f1f1b795f9420714e
 SANE_75491b468ec2e117e50f9842d32abfab
 
 # good enough
+SANE_7d8e92a09f27d49fafe09a1dbd5cac10
+
+# good enough
 SANE_91eb43f705d25c804374a746d7519660
 
 # good enough
+SANE_b58d7945d89b7afc9e2753c83b00ab44
+
+# good enough
 SANE_d0d2b0f6373bf91253d66dd74c594b87
+
+# good enough
+SANE_ef00ce28cfa5ed6e4c405ed37ff36d46
 
 # good enough
 SHORT_HELO_AND_INLINE_IMAGE
@@ -671,9 +701,6 @@ TVD_PCT_OFF
 TVD_PH_BODY_ACCOUNTS_PRE
 
 # good enough
-TVD_QUAL_MEDS
-
-# good enough
 TVD_RCVD_IP
 
 # good enough
@@ -684,45 +711,6 @@ TVD_RCVD_SINGLE
 
 # good enough
 TWO_IPS_RCVD
-
-# good enough
-AXB_XMID_DIGDOTSHRT
-
-# good enough
-DEAR_NOBODY
-
-# good enough
-FM_SUBJ_YOU_PROFIT
-
-# good enough
-HK_PNIS
-
-# good enough
-KHOP_SC_TOP_CIDR24
-
-# good enough
-MAILER_EQ_ORG
-
-# good enough
-MAY_BE_FORGED
-
-# good enough
-S25R_4
-
-# good enough
-SANE_20d820d8f491476ca39941979ab139dd
-
-# good enough
-SANE_7d8e92a09f27d49fafe09a1dbd5cac10
-
-# good enough
-SANE_b58d7945d89b7afc9e2753c83b00ab44
-
-# good enough
-SANE_ef00ce28cfa5ed6e4c405ed37ff36d46
-
-# good enough
-TVD_ENHANCE
 
 # tflags userconf
 UNPARSEABLE_RELAY
@@ -801,6 +789,9 @@ XMAILER_MIMEOLE_OL_1ECD5
 
 # good enough
 XMAILER_MIMEOLE_OL_22B61
+
+# good enough
+XMAILER_MIMEOLE_OL_4B815
 
 # good enough
 XMAILER_MIMEOLE_OL_7533E
