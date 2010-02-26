@@ -282,7 +282,7 @@ endif
 
 
 rawbody        STYLE_GIBBERISH          /<style[^>]{0,30}>(?:\s{0,80}[^\s:;<]){150}/im
-tflags         STYLE_GIBBERISH          nopublish
+#tflags         STYLE_GIBBERISH          nopublish
 
 rawbody        SCRIPT_GIBBERISH           /<script>[^;<]{50}/im
 tflags         SCRIPT_GIBBERISH           nopublish
@@ -306,5 +306,20 @@ tflags         FROM_TRL_UNDR              nopublish
 header         MSGID_SHORT_JDH            Message-ID =~ /^.{0,12}\@.{0,12}$/
 tflags         MSGID_SHORT_JDH            nopublish
 
+body           LOTSA_EMAILS		  /\b(?:thousand|million)\se-?mail(?:\saddresse)?s?\b/i
+tflags         LOTSA_EMAILS		  nopublish
 
+body           NUM_EMAILS                 /\b\d[,\d]{3,}\s(?:(?!and|or)\w+\s)?e-?mail\saddress(?:es)?\b/i
+tflags         NUM_EMAILS                 nopublish
+
+rawbody        __HTML_ELEM_OBFU           /[a-z\s]&\#[91]\d\d?[a-z]/
+tflags         __HTML_ELEM_OBFU           multiple nopublish
+meta           HTML_ELEM_OBFU_25          __HTML_ELEM_OBFU > 25
+tflags         HTML_ELEM_OBFU_25          nopublish
+meta           HTML_ELEM_OBFU_50          __HTML_ELEM_OBFU > 50
+tflags         HTML_ELEM_OBFU_50          nopublish
+meta           HTML_ELEM_OBFU_100         __HTML_ELEM_OBFU > 100
+tflags         HTML_ELEM_OBFU_100         nopublish
+meta           HTML_ELEM_OBFU_150         __HTML_ELEM_OBFU > 150
+tflags         HTML_ELEM_OBFU_150         nopublish
 
