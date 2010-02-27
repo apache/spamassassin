@@ -1,40 +1,40 @@
 ##### WITH NEW RULES AND SCORES #####
 
 # SUMMARY for threshold 5.0:
-# Correctly non-spam: 132377  12.363%  (99.711% of non-spam corpus)
-# Correctly spam:     930617  86.910%  (99.210% of spam corpus)
-# False positives:       384  0.036%  (0.289% of nonspam, 162060 weighted)
-# False negatives:      7410  0.692%  (0.790% of spam,  21937 weighted)
+# Correctly non-spam: 132235  12.352%  (99.719% of non-spam corpus)
+# Correctly spam:     930727  86.935%  (99.226% of spam corpus)
+# False positives:       373  0.035%  (0.281% of nonspam, 157029 weighted)
+# False negatives:      7262  0.678%  (0.774% of spam,  21455 weighted)
 # Average score for spam:  23.0    nonspam: -1.1
 # Average for false-pos:   6.0  false-neg: 3.0
-# TOTAL:              1070788  100.00%
+# TOTAL:              1070597  100.00%
 
 Reading scores from "tmprules"...
 Reading per-message hit stat logs and scores...
 
 # SUMMARY for threshold 5.0:
-# Correctly non-spam:  16620  99.80%
-# Correctly spam:     116188  99.23%
-# False positives:        34  0.20%
-# False negatives:       898  0.77%
-# TCR(l=50): 45.067744  SpamRecall: 99.233%  SpamPrec: 99.971%
+# Correctly non-spam:  16587  99.71%
+# Correctly spam:     116119  99.18%
+# False positives:        48  0.29%
+# False negatives:       961  0.82%
+# TCR(l=50): 34.834871  SpamRecall: 99.179%  SpamPrec: 99.959%
 
 ##### WITHOUT NEW RULES AND SCORES #####
 Reading scores from "../rules-base"...
 Reading per-message hit stat logs and scores...
 
 # SUMMARY for threshold 5.0:
-# Correctly non-spam: 132294  99.65%
-# Correctly spam:     914736  97.52%
-# False positives:       467  0.35%
-# False negatives:     23291  2.48%
-# TCR(l=50): 20.111640  SpamRecall: 97.517%  SpamPrec: 99.949%
+# Correctly non-spam: 132139  99.65%
+# Correctly spam:     914827  97.53%
+# False positives:       469  0.35%
+# False negatives:     23162  2.47%
+# TCR(l=50): 20.123337  SpamRecall: 97.531%  SpamPrec: 99.949%
 Reading scores from "../rules-base"...
 Reading per-message hit stat logs and scores...
 
 # SUMMARY for threshold 5.0:
-# Correctly non-spam:  16592  99.63%
-# Correctly spam:     114209  97.54%
-# False positives:        62  0.37%
-# False negatives:      2877  2.46%
-# TCR(l=50): 19.589426  SpamRecall: 97.543%  SpamPrec: 99.946%
+# Correctly non-spam:  16577  99.65%
+# Correctly spam:     114156  97.50%
+# False positives:        58  0.35%
+# False negatives:      2924  2.50%
+# TCR(l=50): 20.103022  SpamRecall: 97.503%  SpamPrec: 99.949%
