@@ -20,7 +20,7 @@ describe	HK_RANDOM_REPLYTO_NAME	Reply-To name looks random
 header		HK_NAME_DRUGS		From:name =~ /(viagra|cialis)/mi
 describe	HK_NAME_DRUGS		From name contains drugs
 
-header		HK_NAME_FREE		From:name =~ /\b(?:get)?free\b/mi
+header		HK_NAME_FREE		From:name =~ /\b(?:get)?free(?!\.fr)\b/mi
 describe	HK_NAME_FREE		From name mentions free stuff
 
 header		HK_SUBJECT_SPACES	Subject =~ /^(?!.{80}\#).*?\s{10}/
