@@ -123,10 +123,6 @@ up first for speed.
 
 =back
 
-=head1 METHODS
-
-=over 4
-
 =cut
 
 package Mail::SpamAssassin::Conf::Parser;
