@@ -78,6 +78,7 @@ Regular expressions are not used for security reasons.
 Multiple addresses per line, separated by spaces, is OK.  Multiple
 C<whitelist_bounce_relays> lines are also OK.
 
+=back
 
 =cut
 

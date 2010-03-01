@@ -1038,10 +1038,14 @@ sub write_cachefile {
   close CACHE  or die "error closing $cachefile: $!";
 }
 
+=over 4
+
 =item my ($cleanregexp) = fixup_re($regexp);
 
 Converts encoded characters in a regular expression pattern into their
 equivalent characters
+
+=back
 
 =cut
 

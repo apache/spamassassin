@@ -209,6 +209,8 @@ Multiple ip patterns per line are permitted, as are multiple lines.
 <b>Note: Currently only file-glob style wildcards are supported.  CIDR
 notation, nor any other format, is <b> NOT supported.
 
+=back
+
 =cut
 
   push (@cmds, {
@@ -235,8 +237,6 @@ notation, nor any other format, is <b> NOT supported.
 =head1 RULE DEFINITIONS AND PRIVILEGED SETTINGS
 
 There are no privileged settings provided.
-
-=over 4
 
 =head1 ADMINISTRATOR SETTINGS
 
@@ -647,6 +647,8 @@ You <B>MUST include a priority for the rule that is greater in value than the
 priority of the required pre-requisite eval test.  The pseudo-header will not
 yet be present if this rule's priority is less than (higher) than the above
 eval tests.
+
+=back
 
 =cut 
 

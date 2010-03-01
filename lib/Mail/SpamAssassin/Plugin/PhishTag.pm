@@ -214,15 +214,11 @@ PhishTag - SpamAssassin plugin for redirecting links in incoming emails.
 
 =head1 SYNOPSIS
 
-=over 4
+ loadplugin     Mail::SpamAssassin::Plugin::PhishTag
 
-    loadplugin     Mail::SpamAssassin::Plugin::PhishTag
+ trigger_ratio    0.1
+ trigger_target   RULE_NAME  http://www.antiphishing.org/consumer_recs.html
 
-    trigger_ratio    0.1
-    trigger_target   RULE_NAME  http://www.antiphishing.org/consumer_recs.html
-
-=back
-    
 =head1 DESCRIPTION
 
 PhishTag enables administrators to rewrite links in emails that trigger certain

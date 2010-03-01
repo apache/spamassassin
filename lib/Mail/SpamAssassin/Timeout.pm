@@ -310,6 +310,8 @@ If called within a C<run()> code reference, causes the current alarm timer
 to be restored to its original setting (useful after our alarm setting was
 clobbered by some underlying module).
 
+=back
+
 =cut
 
 sub reset {

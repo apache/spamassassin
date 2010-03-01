@@ -218,10 +218,14 @@ $have_sha ? {
 
 ###########################################################################
 
+=over 4
+
 =item $f->debug_diagnostics ()
 
 Output some diagnostic information, useful for debugging SpamAssassin
 problems.
+
+=back
 
 =cut
 

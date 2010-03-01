@@ -17,7 +17,7 @@
 
 =head1 NAME
 
-  Mail::SpamAssassin::Util::Progress - Progress bar support for SpamAssassin
+Mail::SpamAssassin::Util::Progress - Progress bar support for SpamAssassin
 
 =head1 SYNOPSIS
 

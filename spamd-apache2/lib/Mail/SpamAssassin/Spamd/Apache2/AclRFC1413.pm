@@ -52,7 +52,7 @@ you want to prevent users from lying about their identity.  Or use SSL
 with client certificates (refer to C<mod_ssl> documentation for details).
 
 =head1 FUNCTIONS
- 
+
 =cut
 
 sub handler {

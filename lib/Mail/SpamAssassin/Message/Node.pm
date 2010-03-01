@@ -669,6 +669,8 @@ If get_all_header() is called in an array context, an array will be
 returned with each header entry in a different element.  In a scalar
 context, the headers are returned in a single scalar.
 
+=back
+
 =cut
 
 # build it and it will not bomb

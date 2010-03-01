@@ -60,6 +60,8 @@ use Mail::SpamAssassin::Logger;
 
 =item new()
 
+=back
+
 =cut
 
 sub new {

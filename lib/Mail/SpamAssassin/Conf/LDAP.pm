@@ -87,6 +87,8 @@ sub load_modules {		# static
 
 Read configuration paramaters from LDAP server and parse scores from it.
 
+=back
+
 =cut
 
 sub load {

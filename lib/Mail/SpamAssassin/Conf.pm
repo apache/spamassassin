@@ -277,6 +277,8 @@ it from running.
     }
   });
 
+=back
+
 =head2 WHITELIST AND BLACKLIST OPTIONS
 
 =over 4
@@ -1676,8 +1678,6 @@ maybe 50 seconds, assuming that clients are willing to wait at least a minute.
       $self->{time_limit} = $value;
     }
   });
-
-=over 4
 
 =item lock_method type
 
@@ -3414,6 +3414,8 @@ seen four days ago.  The second token appeared in two ham messages,
 (Unlike the C<compact> option, the long option shows declassification
 distances that are greater than 9.)
 
+=back
+
 =cut
 
   return \@cmds;
@@ -3998,8 +4000,6 @@ sub feature_originating_ip_headers { 1 }
 
 1;
 __END__
-
-=back
 
 =head1 LOCALI[SZ]ATION
 
