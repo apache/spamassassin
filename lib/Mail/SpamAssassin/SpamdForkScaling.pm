@@ -447,12 +447,12 @@ sub read_one_message_from_child_socket {
 
   chomp $line;
   if ($line =~ s/^I//) {
-    my $pid = unpack("N1", $line);
+    my $pid = unpack("l1", $line);      # signed, as 'N' causes win32 bugs (bug 6356)
     $self->set_child_state ($pid, PFSTATE_IDLE);
     return PFSTATE_IDLE;
   }
   elsif ($line =~ s/^B//) {
-    my $pid = unpack("N1", $line);
+    my $pid = unpack("l1", $line);
     $self->set_child_state ($pid, PFSTATE_BUSY);
     return PFSTATE_BUSY;
   }
@@ -562,13 +562,13 @@ sub set_my_pid {
 sub update_child_status_idle {
   my ($self) = @_;
   # "I  b1 b2 b3 b4 \n "
-  $self->report_backchannel_socket("I".pack("N",$self->{pid})."\n");
+  $self->report_backchannel_socket("I".pack("l",$self->{pid})."\n");
 }
 
 sub update_child_status_busy {
   my ($self) = @_;
   # "B  b1 b2 b3 b4 \n "
-  $self->report_backchannel_socket("B".pack("N",$self->{pid})."\n");
+  $self->report_backchannel_socket("B".pack("l",$self->{pid})."\n");
 }
 
 sub report_backchannel_socket {
