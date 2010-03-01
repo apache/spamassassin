@@ -3,6 +3,9 @@
 #### Basic stuff
 ####
 
+header T_BUG6353_1 From:addr !~ /\@.+\.[a-z]+$/i [if-unset: foo@bar.com]
+header T_BUG6353_2 From:addr !~ /\.[a-z]+$/i [if-unset: foo@bar.com]
+
 # cheers to spam-l
 header		RCVD_HAS_FROM_USER	Received =~ /\bfrom\sUser\b/im
 header		RCVD_HAS_HELO_USER	Received =~ /\bHELO[\s=]User\b/im
