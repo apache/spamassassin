@@ -31,13 +31,20 @@
 ifplugin Mail::SpamAssassin::Plugin::URIDNSBL
 
 ###########################################################################
-## SBL
+## Spamhaus
 
 uridnssub       URIBL_SBL       zen.spamhaus.org.       A   127.0.0.2
 body            URIBL_SBL       eval:check_uridnsbl('URIBL_SBL')
 describe        URIBL_SBL       Contains an URL listed in the SBL blocklist
 tflags          URIBL_SBL       net
 reuse           URIBL_SBL
+
+# DBL, http://www.spamhaus.org/dbl/ .  Note that hits return 127.0.1.x
+# A records, so we use a 32-bit mask to match that /24 range.
+uridnssub       URIBL_DBL       dbl.spamhaus.org.       A   2130706688
+body            URIBL_DBL       eval:check_uridnsbl('URIBL_DBL')
+describe        URIBL_DBL       Contains an URL listed in the DBL blocklist
+tflags          URIBL_DBL       net domains_only
 
 ###########################################################################
 ## SURBL

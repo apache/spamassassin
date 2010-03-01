@@ -187,6 +187,16 @@ B<A>).  C<subtest> is the sub-test to run against the returned data; see
 Note that, as with C<urirhsbl>, you must also define a body-eval rule calling
 C<check_uridnsbl()> to use this.
 
+=item tflags NAME_OF_RULE ips_only
+
+Only URIs containing IP addresses as the "host" component will be matched
+against the named rule.
+
+=item tflags NAME_OF_RULE domains_only
+
+Only URIs containing a non-IP-address "host" component will be matched against
+the named rule.
+
 =back
 
 =head1 ADMINISTRATOR SETTINGS
@@ -370,7 +380,6 @@ sub parsed_metadata {
     }
     else {
       # trim down to a limited number - pick randomly
-      my $i;
       while (@domains && keys %domlist < $umd) {
         my $r = int rand (scalar @domains);
         $domlist{splice (@domains, $r, 1)} = 1;
@@ -644,8 +653,18 @@ sub query_domain {
 
   my $obj = { dom => $dom };
 
+  my $tflags = $scanner->{conf}->{tflags};
+  my $cf = $scanner->{uridnsbl_active_rules_revipbl};
+  my $dnsbl_lookup_ips = 0;
+  foreach my $rulename (keys %{$cf}) {
+    if ($tflags->{$rulename} !~ /\bdomains_only\b/) {
+      $dnsbl_lookup_ips++;
+    }
+  }
+
+  my $is_ip = 0;
   my $single_dnsbl = 0;
-  if ($dom =~ /^\d+\.\d+\.\d+\.\d+$/) {
+  if ($dnsbl_lookup_ips && $dom =~ /^\d+\.\d+\.\d+\.\d+$/) {
     my $IPV4_ADDRESS = IPV4_ADDRESS;
     my $IP_PRIVATE = IP_PRIVATE;
     # only look up the IP if it is public and valid
@@ -655,6 +674,7 @@ sub query_domain {
       if ($dom =~ /^(\d+)\.(\d+)\.(\d+)\.(\d+)$/) {
 	$dom = "$4.$3.$2.$1";
 	$single_dnsbl = 1;
+        $is_ip = 1;
       }
     }
   }
@@ -670,6 +690,9 @@ sub query_domain {
   if ($single_dnsbl) {
     # look up the domain in the RHSBL subset
     foreach my $rulename (keys %{$rhsblrules}) {
+      next if ($is_ip && $tflags->{$rulename} =~ /\bdomains_only\b/);
+      next if (!$is_ip && $tflags->{$rulename} =~ /\bips_only\b/);
+
       my $rulecf = $scanner->{conf}->{uridnsbls}->{$rulename};
       $self->lookup_single_dnsbl($scanner, $obj, $rulename,
 				 $dom, $rulecf->{zone}, $rulecf->{type});
