@@ -4,25 +4,11 @@ use lib '.'; use lib 't';
 use SATest; sa_t_init("uribl");
 
 use constant TEST_ENABLED => conf_bool('run_net_tests') && conf_bool('run_long_tests');
-use constant HAS_NET_DNS => eval { require Net::DNS; };
-# bug 3806:
-# Do not run this test with version of Sys::Hostname::Long older than 1.4
-# on non-Linux unices as root, due to a bug in Sys::Hostname::Long
-# (which is used by Net::DNS)
-use constant IS_LINUX   => $^O eq 'linux';
-use constant IS_WINDOWS => ($^O =~ /^(mswin|dos|os2)/oi);
-use constant AM_ROOT    => $< == 0;
-use constant HAS_SAFE_HOSTNAME =>
-  eval { require Sys::Hostname::Long; Sys::Hostname::Long->VERSION(1.4) };
-
-use constant DO_RUN =>
-  TEST_ENABLED && HAS_NET_DNS &&
-  (HAS_SAFE_HOSTNAME || !AM_ROOT || IS_LINUX || IS_WINDOWS);
-
+use constant DO_RUN => TEST_ENABLED && can_use_net_dns_safely();
 use Test;
 
 BEGIN {
-  plan tests => (DO_RUN ? 5 : 0),
+  plan tests => (DO_RUN ? 6 : 0),
 };
 
 exit unless (DO_RUN);
@@ -34,6 +20,7 @@ exit unless (DO_RUN);
  q{ X_URIBL_B } => 'B',
  q{ X_URIBL_NS } => 'NS',
  q{ X_URIBL_FULL_NS } => 'FULL_NS',
+ q{ X_URIBL_DOMSONLY } => 'X_URIBL_DOMSONLY',
 );
 
 tstlocalrules(q{
@@ -55,6 +42,10 @@ tstlocalrules(q{
   urifullnsrhssub X_URIBL_FULL_NS  dnsbltest.spamassassin.org.  A 8
   body       X_URIBL_FULL_NS  eval:check_uridnsbl('X_URIBL_FULL_NS')
   tflags     X_URIBL_FULL_NS  net
+
+  urirhssub  X_URIBL_DOMSONLY  dnsbltest.spamassassin.org.    A 2
+  body       X_URIBL_DOMSONLY  eval:check_uridnsbl('X_URIBL_DOMSONLY')
+  tflags     X_URIBL_DOMSONLY  net domains_only
 
   add_header all RBL _RBL_
 

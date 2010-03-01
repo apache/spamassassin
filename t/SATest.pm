@@ -21,6 +21,7 @@ BEGIN {
   our $SKIP_SPAMC_TESTS;
   our $SSL_AVAILABLE;
   our $SKIP_SETUID_NOBODY_TESTS = 0;
+  our $SKIP_DNSBL_TESTS = 0;
 }
 
 # Set up for testing. Exports (as global vars):
@@ -960,5 +961,19 @@ sub exit_status_str($;$) {
 }
 
 sub dbgprint { print STDOUT "[".time()."] ".$_[0]; }
+
+sub can_use_net_dns_safely {
+  return unless eval { require Net::DNS; };
+
+  # bug 3806:
+  # Do not run this test with version of Sys::Hostname::Long older than 1.4
+  # on non-Linux unices as root, due to a bug in Sys::Hostname::Long
+  # (which is used by Net::DNS)
+
+  return 1 if eval { require Sys::Hostname::Long; Sys::Hostname::Long->VERSION(1.4) };
+  return 1 if ($< != 0);
+  return 1 if ($^O =~ /^(linux|mswin|dos|os2)/oi);
+  return;
+}
 
 1;
