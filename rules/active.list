@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-trec_enron bb-zmi bernie-it_batt bernie-mix hege kgolding wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 2: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix hege jm kgolding wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 3: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-trec_enron bb-zmi bernie-it_batt bernie-mix dos jm wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2
+# with results from: day 1: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix dos hege jm kgolding wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 2: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-trec_enron bb-zmi bernie-it_batt bernie-mix hege kgolding wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 3: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix hege jm kgolding wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2
 
 # tflags userconf
 ALL_TRUSTED
@@ -290,6 +290,9 @@ IMG_DIRECT_TO_MX
 KAM_LOTTO1
 
 # good enough
+KAM_LOTTO2
+
+# good enough
 KB_DATE_CONTAINS_TAB
 
 # good enough
@@ -372,9 +375,6 @@ RAZOR2_CF_RANGE_E8_51_100
 
 # tflags net
 RAZOR2_CHECK
-
-# good enough
-RCVD_HAS_FROM_USER
 
 # tflags net
 RCVD_IN_BL_SPAMCOP_NET
@@ -635,10 +635,10 @@ TVD_FINGER_02
 TVD_PCT_OFF
 
 # good enough
-TVD_RCVD_IP
+TVD_QUAL_MEDS
 
 # good enough
-TVD_RCVD_IP4
+TVD_RCVD_IP
 
 # good enough
 TVD_RCVD_SINGLE
@@ -647,16 +647,7 @@ TVD_RCVD_SINGLE
 TWO_IPS_RCVD
 
 # good enough
-FORM_FRAUD_3
-
-# good enough
-FORM_FRAUD_5
-
-# good enough
-MONEY_FRAUD_5
-
-# good enough
-MONEY_FRAUD_8
+DEAR_EMAIL
 
 # tflags userconf
 UNPARSEABLE_RELAY
