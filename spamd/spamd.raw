@@ -2187,7 +2187,7 @@ sub handle_user_vpopmail {
         if ($vpopusername =~ s{(/.+)/Maildir/}{$1}) {
           # this is the path to a real mailbox
           $userdir = $vpopusername;
-        } elsif ($vpopusername =~ /\@/) {
+        } elsif ($vpopusername =~ /^[a-z0-9._%+-]+\@[a-z0-9.-]+\.[a-z]{2,4}$/) {
           # this is a forward to another e-mail address
           $vpopusername =~ s{.+ -> (.+)}{$1};
           $vpopusername_tainted = `$vpopdir/bin/vuserinfo -d \Q$vpopusername\E`;
