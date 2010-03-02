@@ -24,6 +24,7 @@ Mail::SpamAssassin::Plugin::DKIM - perform DKIM verification tests
  loadplugin Mail::SpamAssassin::Plugin::DKIM [/path/to/DKIM.pm]
 
 Taking into account signatures from any signing domains:
+
  full   DKIM_SIGNED           eval:check_dkim_signed()
  full   DKIM_VALID            eval:check_dkim_valid()
  full   DKIM_VALID_AU         eval:check_dkim_valid_author_sig()
