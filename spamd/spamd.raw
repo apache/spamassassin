@@ -1037,7 +1037,8 @@ sub spawn {
     }
     sigprocmask( POSIX::SIG_UNBLOCK(), $sigset )
       or die "spamd: cannot unblock SIGINT/SIGCHLD for fork: $!\n";
-    return;
+    #Changing to return the process id to improve communications for bug 6304
+    return $pid;
   }
   else {
     ## CHILD
