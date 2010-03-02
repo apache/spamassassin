@@ -67,9 +67,6 @@ make clean
 $PERL Makefile.PL PREFIX=$tmpdir < /dev/null || exit $?
 make                                     || exit $?
 
-# remove the rules files for rules we won't be shipping
-rm rules/70_sandbox.cf rules/70_inactive.cf
-
 # remove new features, unsupported in existing code in the field
 # (TODO: need a better way to exclude files that require new features
 # like this; judicious use of "ifplugin" helps)
@@ -78,12 +75,15 @@ rm rules/70_sandbox.cf rules/70_inactive.cf
 # ensure the basic lint/rule-sanity test suite passes for this ruleset
 # before we build an update from it.  useful particularly to catch
 # "tflags nopublish" leakage (bug 6297)
-RULE_LINT_TESTS="
-        t/basic_lint.t
-        t/basic_lint_without_sandbox.t
-        t/basic_meta.t
-"
-make test TEST_FILES="$RULE_LINT_TESTS" || exit $?
+make test \
+    TEST_FILES="t/basic_lint.t t/basic_lint_without_sandbox.t t/basic_meta.t" \
+    || exit $?
+
+# remove the rules files for rules we won't be shipping
+rm rules/70_sandbox.cf rules/70_inactive.cf
+
+# double check we still lint without those 2 files
+./spamassassin --lint                   || exit $?
 
 rulesdir=`pwd`/rules
 
