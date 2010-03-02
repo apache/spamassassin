@@ -202,7 +202,7 @@ my %makefile = (
     },
 
     'clean' => { FILES => join(' ' =>
-        'sa-learn', 'sa-update', 'spamassassin', 'sa-compile',
+        'sa-learn', 'sa-update', 'spamassassin', 'sa-compile', 'sa-awl', 'sa-check_spamd',
         
         'spamd/spamd',
 
