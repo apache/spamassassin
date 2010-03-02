@@ -542,8 +542,10 @@ sub cond_clause_plugin_loaded {
 sub cond_clause_can {
   my ($self, $method) = @_;
 
+  local($1,$2);
   if ($method =~ /^(.*)::([^:]+)$/) {
-    return UNIVERSAL::can($1, $2);
+    my($module, $meth) = ($1, $2);
+    return UNIVERSAL::can($module, $meth);
   } else {
     $self->lint_warn("bad 'if' line, cannot find '::' in can($method), ".
                 "in \"$self->{currentfile}\"", undef);
