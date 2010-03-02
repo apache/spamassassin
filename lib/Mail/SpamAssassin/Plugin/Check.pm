@@ -1,6 +1,6 @@
 =head1 NAME
 
-Mail::SpamAssassin::Plugin::Check
+Mail::SpamAssassin::Plugin::Check - primary message check functionality
 
 =head1 SYNOPSIS
 

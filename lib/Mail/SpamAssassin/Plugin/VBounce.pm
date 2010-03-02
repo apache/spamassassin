@@ -17,7 +17,7 @@
 
 =head1 NAME
 
-Mail::SpamAssassin::Plugin::VBounce
+Mail::SpamAssassin::Plugin::VBounce - aid in rescuing genuine bounces
 
 =head1 SYNOPSIS
 
