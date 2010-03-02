@@ -75,8 +75,15 @@ rm rules/70_sandbox.cf rules/70_inactive.cf
 # like this; judicious use of "ifplugin" helps)
 # rm rules/60_somerandomfeature.cf
 
-# and ensure the ruleset lints!
-./spamassassin --lint                    || exit $?
+# ensure the basic lint/rule-sanity test suite passes for this ruleset
+# before we build an update from it.  useful particularly to catch
+# "tflags nopublish" leakage (bug 6297)
+RULE_LINT_TESTS="
+        t/basic_lint.t
+        t/basic_lint_without_sandbox.t
+        t/basic_meta.t
+"
+make test TEST_FILES="$RULE_LINT_TESTS" || exit $?
 
 rulesdir=`pwd`/rules
 
