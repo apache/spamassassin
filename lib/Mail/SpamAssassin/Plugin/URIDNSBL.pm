@@ -664,23 +664,14 @@ sub query_domain {
   my $tflags = $scanner->{conf}->{tflags};
   my $cf = $scanner->{uridnsbl_active_rules_revipbl};
 
-  # set to 1 if _any_ URIBL supports non-domains_only lookups
-  my $dnsbl_lookup_ips;
-  foreach my $rulename (keys %{$cf}) {
-    if ($tflags->{$rulename} !~ /\bdomains_only\b/) { $dnsbl_lookup_ips = 1; }
-  }
-
-  my $is_ip = 0;
-  my $single_dnsbl = 0;
+  my ($is_ip, my $single_dnsbl);
   if ($dom =~ /^\d+\.\d+\.\d+\.\d+$/) {
     my $IPV4_ADDRESS = IPV4_ADDRESS;
     my $IP_PRIVATE = IP_PRIVATE;
     # only look up the IP if it is public and valid
     if ($dom =~ /^$IPV4_ADDRESS$/ && $dom !~ /^$IP_PRIVATE$/) {
-      if ($dnsbl_lookup_ips) {
-        $self->lookup_dnsbl_for_ip($scanner, $obj, $dom);
-      }
-      # and check the IP in non-domain_only RHSBLs too
+      $self->lookup_dnsbl_for_ip($scanner, $obj, $dom);
+      # and check the IP in RHSBLs too
       if ($dom =~ /^(\d+)\.(\d+)\.(\d+)\.(\d+)$/) {
 	$dom = "$4.$3.$2.$1";
 	$single_dnsbl = 1;
@@ -850,7 +841,7 @@ sub lookup_dnsbl_for_ip {
   foreach my $rulename (keys %{$cf}) {
     my $rulecf = $scanner->{conf}->{uridnsbls}->{$rulename};
 
-    # ips_only/domains_only lookups should not act on multi
+    # ips_only/domains_only lookups should not act on this kind of BL
     next if ($tflags->{$rulename} =~ /\b(?:ips_only|domains_only)\b/);
     
     $self->lookup_single_dnsbl($scanner, $obj, $rulename,
