@@ -1002,4 +1002,8 @@ sub log_dns_result {
 
 # ---------------------------------------------------------------------------
 
+# capability checks for "if can()":
+#
+sub has_tflags_domains_only { 1 }
+
 1;
