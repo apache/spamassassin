@@ -827,9 +827,14 @@ sub lookup_dnsbl_for_ip {
   $ip =~ /^(\d+)\.(\d+)\.(\d+)\.(\d+)$/;
   my $revip = "$4.$3.$2.$1";
 
+  my $tflags = $scanner->{conf}->{tflags};
   my $cf = $scanner->{uridnsbl_active_rules_revipbl};
   foreach my $rulename (keys %{$cf}) {
     my $rulecf = $scanner->{conf}->{uridnsbls}->{$rulename};
+
+    # ips_only/domains_only lookups should not act on multi
+    next if ($tflags->{$rulename} =~ /\b(?:ips_only|domains_only)\b/);
+    
     $self->lookup_single_dnsbl($scanner, $obj, $rulename,
 			       $revip, $rulecf->{zone}, $rulecf->{type});
   }
