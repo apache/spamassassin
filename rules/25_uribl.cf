@@ -41,10 +41,12 @@ reuse           URIBL_SBL
 
 # DBL, http://www.spamhaus.org/dbl/ .  Note that hits return 127.0.1.x
 # A records, so we use a 32-bit mask to match that /24 range.
+if can(Mail::SpamAssassin::Plugin::URIDNSBL::has_tflags_domains_only)
 urirhssub       URIBL_DBL       dbl.spamhaus.org.       A   2130706688
 body            URIBL_DBL       eval:check_uridnsbl('URIBL_DBL')
 describe        URIBL_DBL       Contains an URL listed in the DBL blocklist
 tflags          URIBL_DBL       net domains_only
+endif
 
 ###########################################################################
 ## SURBL
