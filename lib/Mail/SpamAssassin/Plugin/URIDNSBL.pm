@@ -664,7 +664,7 @@ sub query_domain {
   my $tflags = $scanner->{conf}->{tflags};
   my $cf = $scanner->{uridnsbl_active_rules_revipbl};
 
-  my ($is_ip, my $single_dnsbl);
+  my ($is_ip, $single_dnsbl);
   if ($dom =~ /^\d+\.\d+\.\d+\.\d+$/) {
     my $IPV4_ADDRESS = IPV4_ADDRESS;
     my $IP_PRIVATE = IP_PRIVATE;
