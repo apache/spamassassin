@@ -190,12 +190,12 @@ C<check_uridnsbl()> to use this.
 =item tflags NAME_OF_RULE ips_only
 
 Only URIs containing IP addresses as the "host" component will be matched
-against the named rule.
+against the named "urirhsbl"/"urirhssub" rule.
 
 =item tflags NAME_OF_RULE domains_only
 
 Only URIs containing a non-IP-address "host" component will be matched against
-the named rule.
+the named "urirhsbl"/"urirhssub" rule.
 
 =back
 
