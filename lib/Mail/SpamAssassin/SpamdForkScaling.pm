@@ -175,6 +175,8 @@ sub child_error_kill {
   # close the socket and remove the child from our list
   $self->set_child_state ($pid, PFSTATE_KILLED);
 
+  #Bug 6304 research
+  #info("6304: prefork: child_error_kill called - %s", $pid);
   kill 'INT' => $pid
     or warn "prefork: kill of failed child $pid failed: $!\n";
 
@@ -818,11 +820,15 @@ sub adapt_num_children {
 
 sub need_to_add_server {
   my ($self, $num_idle) = @_;
+  my ($pid);
   my $cur = ${$self->{cur_children_ref}};
   $cur++;
   dbg("prefork: adjust: increasing, not enough idle children ($num_idle < $self->{min_idle})");
-  main::spawn();
+  $pid = main::spawn();
   # servers will be started once main_server_poll() returns
+
+  #Added for bug 6304 to work on notifying administrators of poor parameters for spamd
+  info("prefork: adjust: %s idle children less than %s minimum idle children.  Increasing spamd children: %s started.",$num_idle, $self->{min_idle}, $pid);
 }
 
 sub need_to_del_server {
@@ -853,6 +859,8 @@ sub need_to_del_server {
   kill 'INT' => $pid;
 
   dbg("prefork: adjust: decreasing, too many idle children ($num_idle > $self->{max_idle}), killed $pid");
+  #Added for bug 6304 to work on notifying administrators of poor parameters for spamd
+  info("prefork: adjust: %s idle children more than %s maximum idle children. Decreasing spamd children: %s killed.",$num_idle, $self->{max_idle}, $pid);
 }
 
 sub vec_all {
