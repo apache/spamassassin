@@ -32,6 +32,9 @@ ifplugin Mail::SpamAssassin::Plugin::MIMEHeader
   mimeheader   OBFU_PDF_ATTACH     Content-Type =~ m,application/octet-stream;.+\.pdf\b,i
   describe     OBFU_PDF_ATTACH     PDF attachment with generic MIME type
   score        OBFU_PDF_ATTACH     0.25
+
+  meta         OBFU_ATTACH_MISSP   FROM_MISSPACED && (OBFU_HTML_ATTACH || OBFU_TEXT_ATTACH || OBFU_DOC_ATTACH || OBFU_PDF_ATTACH)
+  describe     OBFU_ATTACH_MISSP   Obfuscated attachment type and misspaced From
 endif
 
 # general case of spample observation
