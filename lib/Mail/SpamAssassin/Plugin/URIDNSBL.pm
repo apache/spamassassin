@@ -83,8 +83,9 @@ and C<lookuptype> is the type of lookup (B<TXT> or B<A>).
 
 C<subtest> is the sub-test to run against the returned data.  The sub-test may
 either be an IPv4 dotted address for DNSBLs that return multiple A records or a
-non-negative decimal number to specify a bitmask for DNSBLs that return a
-single A record containing a bitmask of results.
+non-negative decimal or hexadecimal number to specify a bitmask for DNSBLs that
+return a single A record containing a bitmask of results.  If a hexadecimal
+mask is used, it must be prefixed by 0x .
 
 Note that, as with C<uridnsbl>, you must also define a body-eval rule calling
 C<check_uridnsbl()> to use this.
@@ -123,8 +124,9 @@ in, and C<lookuptype> is the type of lookup (B<TXT> or B<A>).
 
 C<subtest> is the sub-test to run against the returned data.  The sub-test may
 either be an IPv4 dotted address for RHSBLs that return multiple A records or a
-non-negative decimal number to specify a bitmask for RHSBLs that return a
-single A record containing a bitmask of results.
+non-negative decimal or hexadecimal number to specify a bitmask for RHSBLs that
+return a single A record containing a bitmask of results.  If a hexadecimal
+mask is used, it must be prefixed by 0x .
 
 Note that, as with C<urirhsbl>, you must also define a body-eval rule calling
 C<check_uridnsbl()> to use this.
@@ -449,11 +451,12 @@ sub set_config {
     is_priv => 1,
     code => sub {
       my ($self, $key, $value, $line) = @_;
-      if ($value =~ /^(\S+)\s+(\S+)\s+(\S+)\s+(\d{1,10}|\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})$/) {
+      if ($value =~ /^(\S+)\s+(\S+)\s+(\S+)\s+(\d{1,10}|0x[0-9a-z]{1,8}|\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})$/i) {
         my $rulename = $1;
         my $zone = $2;
         my $type = $3;
         my $subrule = $4;
+        $subrule = hex($subrule)  if $subrule =~ /^0x/i;
         $self->{uridnsbls}->{$rulename} = {
          zone => $zone, type => $type,
           is_rhsbl => 0, is_subrule => 1
@@ -498,11 +501,12 @@ sub set_config {
     is_priv => 1,
     code => sub {
       my ($self, $key, $value, $line) = @_;
-      if ($value =~ /^(\S+)\s+(\S+)\s+(\S+)\s+(\d{1,10}|\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})$/) {
+      if ($value =~ /^(\S+)\s+(\S+)\s+(\S+)\s+(\d{1,10}|0x[0-9a-z]{1,8}|\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})$/i) {
         my $rulename = $1;
         my $zone = $2;
         my $type = $3;
         my $subrule = $4;
+        $subrule = hex($subrule)  if $subrule =~ /^0x/i;
         $self->{uridnsbls}->{$rulename} = {
 	  zone => $zone, type => $type,
           is_rhsbl => 1, is_subrule => 1
@@ -547,11 +551,12 @@ sub set_config {
     is_priv => 1,
     code => sub {
       my ($self, $key, $value, $line) = @_;
-      if ($value =~ /^(\S+)\s+(\S+)\s+(\S+)\s+(\d{1,10}|\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})$/) {
+      if ($value =~ /^(\S+)\s+(\S+)\s+(\S+)\s+(\d{1,10}|0x[0-9a-z]{1,8}|\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})$/i) {
         my $rulename = $1;
         my $zone = $2;
         my $type = $3;
         my $subrule = $4;
+        $subrule = hex($subrule)  if $subrule =~ /^0x/i;
         $self->{uridnsbls}->{$rulename} = {
 	  zone => $zone, type => $type,
           is_nsrhsbl => 1, is_subrule => 1
@@ -596,11 +601,12 @@ sub set_config {
     is_priv => 1,
     code => sub {
       my ($self, $key, $value, $line) = @_;
-      if ($value =~ /^(\S+)\s+(\S+)\s+(\S+)\s+(\d{1,10}|\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})$/) {
+      if ($value =~ /^(\S+)\s+(\S+)\s+(\S+)\s+(\d{1,10}|0x[0-9a-z]{1,8}|\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})$/i) {
         my $rulename = $1;
         my $zone = $2;
         my $type = $3;
         my $subrule = $4;
+        $subrule = hex($subrule)  if $subrule =~ /^0x/i;
         $self->{uridnsbls}->{$rulename} = {
 	  zone => $zone, type => $type,
           is_fullnsrhsbl => 1, is_subrule => 1
