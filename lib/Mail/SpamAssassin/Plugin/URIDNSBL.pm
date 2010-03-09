@@ -312,6 +312,7 @@ sub parsed_metadata {
 
     my $rulecf = $scanner->{conf}->{uridnsbls}->{$rulename};
     my $tflags = $scanner->{conf}->{tflags}->{$rulename};
+    $tflags = ''  if !defined $tflags;
 
     if ($rulecf->{is_rhsbl} && $tflags =~ /\b ips_only \b/x) {
       $scanner->{uridnsbl_active_rules_rhsbl_ipsonly}->{$rulename} = 1;
@@ -985,6 +986,8 @@ sub complete_dnsbl_lookup {
           $match = 1;
         } elsif ($subtest =~ m{^ (\d+) (?: ([/-]) (\d+) )? \z}x) {
           my($n1,$delim,$n2) = ($1,$2,$3);
+        # dbg("uridnsbl: %s/%s, %s, %s", $rulename, $dom, $rdatanum,
+        #     !defined $n2 ? $n1 : "$n1 $delim $n2");
           $match =
             !defined $n2  ? $rdatanum & $n1                       # mask only
           : $delim eq '-' ? $rdatanum >= $n1 && $rdatanum <= $n2  # range

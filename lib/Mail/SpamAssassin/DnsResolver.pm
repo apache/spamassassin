@@ -158,15 +158,31 @@ sub get_resolver {
 
 =item $res->nameservers()
 
-Wrapper for Net::DNS::Resolver->nameservers to get or set list of nameservers
+Get or set a list of nameservers
 
 =cut
 
 sub nameservers {
   my $self = shift;
-  my $res = $self->{res};
+
+  if (@_) {
+    $self->{available_dns_servers} = [@_];
+    dbg("dns: servers set by a caller to: %s",
+         join(', ',@{$self->{available_dns_servers}}));
+  } elsif (!$self->{available_dns_servers}) {
+    my $res = $self->{res};
+    my @ns_addr_port;  # list of name servers: [addr]:port entries
+    if ($self->{conf}->{dns_servers}) {  # specified in a config file
+      @ns_addr_port = @{$self->{conf}->{dns_servers}};
+      dbg("dns: servers set by config to: %s", join(', ',@ns_addr_port));
+    } elsif ($res) {  # default as provided by Net::DNS, e.g. /etc/resolv.conf
+      @ns_addr_port = map { "[$_]:" . $res->{port} } @{$res->{nameservers}};
+      dbg("dns: servers obtained from Net::DNS : %s", join(', ',@ns_addr_port));
+    }
+    $self->{available_dns_servers} = \@ns_addr_port;
+  }
   $self->connect_sock_if_reqd();
-  return $res->nameservers(@_) if $res;
+  return @{$self->{available_dns_servers}};
 }
 
 =item $res->connect_sock()
@@ -187,24 +203,29 @@ sub connect_sock {
   my $sock;
   my $errno;
 
+  # list of name servers: [addr]:port entries
+  my @ns_addr_port = @{$self->{available_dns_servers}};
+  # use the first name server in a list
+  my($ns_addr,$ns_port); local($1,$2);
+  ($ns_addr,$ns_port) = ($1,$2)  if $ns_addr_port[0] =~ /^\[(.*)\]:(\d+)\z/;
+
   # IO::Socket::INET6 may choose wrong LocalAddr if family is unspecified,
   # causing EINVAL failure when automatically assigned local IP address
   # and remote address do not belong to the same address family:
   use Mail::SpamAssassin::Constants qw(:ip);
   my $ip64 = IP_ADDRESS;
   my $ip4 = IPV4_ADDRESS;
-  my $ns = $self->{res}->{nameservers}[0];
   my $ipv6opt = !($self->{force_ipv4});
 
   # ensure families of src and dest addresses match (bug 4412 comment 29)
   my $srcaddr;
-  if ($ipv6opt && $ns=~/^${ip64}$/o && $ns!~/^${ip4}$/o) {
+  if ($ipv6opt && $ns_addr =~ /^${ip64}$/o && $ns_addr !~ /^${ip4}$/o) {
     $srcaddr = "::";
   } else {
     $srcaddr = "0.0.0.0";
   }
-
-  dbg("dns: name server: %s, LocalAddr: %s", $ns,$srcaddr);
+  dbg("dns: LocalAddr: %s, name server(s): %s",
+      $srcaddr, join(', ',@ns_addr_port));
 
   # find next available unprivileged port (1024 - 65535)
   # starting at a random value to spread out use of ports
@@ -213,8 +234,8 @@ sub connect_sock {
     my $lport = 1024 + (($port_offset + $i) % 64511);
 
     my %args = (
-        PeerAddr => $ns,
-        PeerPort => $self->{res}->{port},
+        PeerAddr => $ns_addr,
+        PeerPort => $ns_port,
         Proto => 'udp',
         LocalPort => $lport,
         Type => SOCK_DGRAM,
