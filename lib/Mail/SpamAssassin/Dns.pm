@@ -688,7 +688,7 @@ sub is_dns_available {
   while( $ns  = shift(@nameservers)) {
     for(my $retry = 3; $retry > 0 and $#domains>-1; $retry--) {
       my $domain = splice(@domains, rand(@domains), 1);
-      dbg("dns: trying ($retry) $domain...");
+      dbg("dns: trying ($retry) $domain, server $ns ...");
       my $result = $self->lookup_ns($domain);
       if(defined $result) {
         if (scalar @$result > 0) {
