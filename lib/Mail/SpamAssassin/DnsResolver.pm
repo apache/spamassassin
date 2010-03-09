@@ -181,7 +181,6 @@ sub nameservers {
     }
     $self->{available_dns_servers} = \@ns_addr_port;
   }
-  $self->connect_sock_if_reqd();
   return @{$self->{available_dns_servers}};
 }
 
@@ -204,7 +203,7 @@ sub connect_sock {
   my $errno;
 
   # list of name servers: [addr]:port entries
-  $self->nameservers  if !$self->{available_dns_servers};
+  $self->nameservers()  if !$self->{available_dns_servers};
   my @ns_addr_port = @{$self->{available_dns_servers}};
   # use the first name server in a list
   my($ns_addr,$ns_port); local($1,$2);
