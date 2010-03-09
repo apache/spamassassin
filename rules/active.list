@@ -1,14 +1,11 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix hege jm kgolding wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 2: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-trec_enron bb-zmi bernie-it_batt bernie-mix hege jm kgolding wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 3: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix hege jm kgolding wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2
+# with results from: day 1: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix dos hege jm kgolding wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 2: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix hege jm kgolding wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 3: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-trec_enron bb-zmi bernie-it_batt bernie-mix hege jm kgolding wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2
 
 # tflags userconf
 ALL_TRUSTED
 
 # good enough
 AXB_HELO_HOME_UN
-
-# good enough
-AXB_URI_APE_ABUSE2
 
 # good enough
 BASE64_LENGTH_78_79
@@ -63,9 +60,6 @@ DEAR_BENEFICIARY
 
 # good enough
 DEAR_EMAIL
-
-# good enough
-DEAR_WINNER
 
 # tflags net
 DIGEST_MULTIPLE
@@ -140,9 +134,6 @@ FB_CIALIS_LEO3
 FB_EXTRA_INCHES
 
 # good enough
-FB_GET_MEDS
-
-# good enough
 FB_QUALITY_REPLICA
 
 # good enough
@@ -174,18 +165,6 @@ FH_HOST_EQ_DYNAMICIP
 
 # good enough
 FH_HOST_EQ_VERIZON_P
-
-# good enough
-FH_MSGID_XXX
-
-# good enough
-FILL_THIS_FORM_FRAUD_PHISH
-
-# good enough
-FILL_THIS_FORM_LOAN
-
-# good enough
-FILL_THIS_FORM_LONG
 
 # good enough
 FM_LOTTO_YOU_WON
@@ -242,12 +221,6 @@ FSL_HELO_DEVICE
 FSL_LSPACES_ABUSE
 
 # good enough
-FSL_YG_ABUSE
-
-# good enough
-FS_ABIGGER
-
-# good enough
 FS_MORE_CONFIDENT
 
 # good enough
@@ -255,9 +228,6 @@ FS_REPLICA
 
 # good enough
 FS_REPLICAWATCH
-
-# good enough
-FS_WILL_HELP
 
 # tflags userconf
 GTUBE
@@ -299,13 +269,7 @@ HELO_NO_DOMAIN
 HELO_OEM
 
 # good enough
-HK_FAKENAME_EBAY
-
-# good enough
 HK_FAKENAME_MICROSOFT
-
-# good enough
-HK_LOTTO
 
 # good enough
 HK_NAME_DRUGS
@@ -599,9 +563,6 @@ RCVD_IN_SORBS_ZOMBIE
 RCVD_IN_XBL
 
 # good enough
-REPLYTO_WITHOUT_TO_CC
-
-# good enough
 S25R_1
 
 # good enough
@@ -680,13 +641,7 @@ TO_NO_BRKTS_DYNIP
 TVD_FINGER_02
 
 # good enough
-TVD_INCREASE_SIZE
-
-# good enough
 TVD_PCT_OFF
-
-# good enough
-TVD_PH_REC
 
 # good enough
 TVD_QUAL_MEDS
@@ -695,118 +650,10 @@ TVD_QUAL_MEDS
 TVD_RCVD_IP
 
 # good enough
-TVD_RCVD_IP4
-
-# good enough
 TVD_RCVD_SINGLE
 
 # good enough
-TVD_VISIT_PHARMA
-
-# good enough
 TWO_IPS_RCVD
-
-# good enough
-FILL_THIS_FORM
-
-# good enough
-FORGED_URL_DOM
-
-# good enough
-FROM_UNBAL1
-
-# good enough
-FROM_UNBAL2
-
-# good enough
-FROM_WSP_LEAD
-
-# good enough
-FSL_UA
-
-# good enough
-HDRS_MISSP
-
-# good enough
-HK_FAKENAME_PAYPAL
-
-# good enough
-HK_NAME_FM_DR
-
-# good enough
-HK_NAME_FM_FROM
-
-# good enough
-HK_RANDOM_REPLYTO_NAME
-
-# good enough
-HK_SCAM_N1
-
-# good enough
-HK_SCAM_N15
-
-# good enough
-HK_SCAM_N3
-
-# good enough
-HK_SCAM_N4
-
-# good enough
-HK_SCAM_N8
-
-# good enough
-HK_SCAM_S15
-
-# good enough
-HK_SCAM_S25
-
-# good enough
-HK_SUBJECT_SPACES_SC
-
-# good enough
-KAM_LOTTO3
-
-# good enough
-LOTTO_DEPT
-
-# good enough
-LOTTO_URI
-
-# good enough
-MANY_SUBDOM
-
-# good enough
-MONEY_FORM
-
-# good enough
-MONEY_FRAUD_5
-
-# good enough
-MONEY_LOTTERY
-
-# good enough
-MONEY_PERCENT
-
-# good enough
-OBFU_ATTACH_MISSP
-
-# good enough
-RATWARE_HELO_DM
-
-# good enough
-RCVD_HAS_FROM_USER
-
-# good enough
-SANE_8f9d40cc4e21b11c7171a7d6b3eea4c1
-
-# good enough
-SPAMMY_MIME_BDRY_01
-
-# good enough
-STOX_META_5
-
-# good enough
-TVD_NOT_SATISFIED
 
 # tflags userconf
 UNPARSEABLE_RELAY
@@ -816,9 +663,6 @@ URIBL_AB_SURBL
 
 # tflags net
 URIBL_BLACK
-
-# tflags net
-URIBL_DBL
 
 # tflags net
 URIBL_GREY
@@ -884,109 +728,19 @@ USER_IN_WHITELIST
 USER_IN_WHITELIST_TO
 
 # good enough
-VANITY
-
-# good enough
-XMAILER_MIMEOLE_OL_015D5
-
-# good enough
-XMAILER_MIMEOLE_OL_07794
-
-# good enough
-XMAILER_MIMEOLE_OL_09BB4
-
-# good enough
 XMAILER_MIMEOLE_OL_1ECD5
-
-# good enough
-XMAILER_MIMEOLE_OL_20C99
 
 # good enough
 XMAILER_MIMEOLE_OL_22B61
 
 # good enough
-XMAILER_MIMEOLE_OL_25340
-
-# good enough
-XMAILER_MIMEOLE_OL_3857F
-
-# good enough
-XMAILER_MIMEOLE_OL_3D61D
-
-# good enough
-XMAILER_MIMEOLE_OL_4B815
-
-# good enough
-XMAILER_MIMEOLE_OL_4BF4C
-
-# good enough
-XMAILER_MIMEOLE_OL_4EEDB
-
-# good enough
-XMAILER_MIMEOLE_OL_4F240
-
-# good enough
-XMAILER_MIMEOLE_OL_58CB5
-
-# good enough
-XMAILER_MIMEOLE_OL_5B79A
-
-# good enough
-XMAILER_MIMEOLE_OL_6554A
-
-# good enough
 XMAILER_MIMEOLE_OL_7533E
-
-# good enough
-XMAILER_MIMEOLE_OL_812FF
-
-# good enough
-XMAILER_MIMEOLE_OL_83BF7
 
 # good enough
 XMAILER_MIMEOLE_OL_8627E
 
 # good enough
 XMAILER_MIMEOLE_OL_91287
-
-# good enough
-XMAILER_MIMEOLE_OL_9B90B
-
-# good enough
-XMAILER_MIMEOLE_OL_ADFF7
-
-# good enough
-XMAILER_MIMEOLE_OL_B30D1
-
-# good enough
-XMAILER_MIMEOLE_OL_B4B40
-
-# good enough
-XMAILER_MIMEOLE_OL_BC7E6
-
-# good enough
-XMAILER_MIMEOLE_OL_C65FA
-
-# good enough
-XMAILER_MIMEOLE_OL_CAC8F
-
-# good enough
-XMAILER_MIMEOLE_OL_CF0C0
-
-# good enough
-XMAILER_MIMEOLE_OL_F3B05
-
-# good enough
-XMAILER_MIMEOLE_OL_F475E
-
-# good enough
-XMAILER_MIMEOLE_OL_F6D01
-
-# good enough
-XMAILER_MIMEOLE_OL_FF5C8
-
-# good enough
-X_MAILER_CME_6543_MSN
 
 # tflags net
 __DNS_FROM_RFC_ABUSE
