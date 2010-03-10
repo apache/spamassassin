@@ -840,7 +840,7 @@ sub complete_ns_lookup {
     $self->log_dns_result ("NSs for $dom: $str");
 
     if ($str =~ /IN\s+NS\s+(\S+)/) {
-      my $nsmatch = $1;
+      my $nsmatch = lc $1;
       my $nsrhblstr = $nsmatch;
       my $fullnsrhblstr = $nsmatch;
       $fullnsrhblstr =~ s/\.$//;
