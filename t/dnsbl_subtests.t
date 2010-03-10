@@ -11,7 +11,7 @@ use SATest; sa_t_init("dnsbl_subtests");
 use Test;
 
 use vars qw(%patterns %anti_patterns);
-use constant num_tests => 30;
+use constant num_tests => 47;
 use constant DO_RUN => 1;
 
 BEGIN {
@@ -32,8 +32,9 @@ $dns_server_localaddr = '::1'        if !$dns_server_localaddr;
 
 my $dns_server_localport = '5353';  # some port (mdns), hopefully free
 
-# test zone
-my $z = 'sa-dbl-test.spamassassin.org';
+# test zones
+my $z  = 'sa1-dbl-test.spamassassin.org';
+my $z2 = 'sa2-dbl-test.spamassassin.org';
 
 my $local_conf = <<"EOD";
   use_bayes 0
@@ -50,50 +51,92 @@ my $local_conf = <<"EOD";
   clear_dns_servers
   dns_server [$dns_server_localaddr]:$dns_server_localport
 
+# zone 1
   urirhssub  X_URIBL_Y_2A   $z  A  127.0.1.2
   body       X_URIBL_Y_2A   eval:check_uridnsbl('X_URIBL_Y_2A')
+  tflags     X_URIBL_Y_2A   domains_only
 
   urirhssub  X_URIBL_Y_2B   $z  A  127.0.1.2-127.0.1.2
   body       X_URIBL_Y_2B   eval:check_uridnsbl('X_URIBL_Y_2B')
+  tflags     X_URIBL_Y_2B   domains_only
 
   urirhssub  X_URIBL_Y_2C   $z  A  127.0.1.2/0xffffffff
   body       X_URIBL_Y_2C   eval:check_uridnsbl('X_URIBL_Y_2C')
+  tflags     X_URIBL_Y_2C   domains_only
 
   urirhssub  X_URIBL_Y_2D   $z  A  127.0.1.2/255.255.255.255
   body       X_URIBL_Y_2D   eval:check_uridnsbl('X_URIBL_Y_2D')
+  tflags     X_URIBL_Y_2D   domains_only
 
   urirhssub  X_URIBL_Y_2E   $z  A  127.0.1.2/127.0.1.2
   body       X_URIBL_Y_2E   eval:check_uridnsbl('X_URIBL_Y_2E')
+  tflags     X_URIBL_Y_2E   domains_only
 
   urirhssub  X_URIBL_Y_2F   $z  A  0/128.255.254.253
   body       X_URIBL_Y_2F   eval:check_uridnsbl('X_URIBL_Y_2F')
+  tflags     X_URIBL_Y_2F   domains_only
 
   urirhssub  X_URIBL_Y_2G   $z  A  2
   body       X_URIBL_Y_2G   eval:check_uridnsbl('X_URIBL_Y_2G')
+  tflags     X_URIBL_Y_2G   domains_only
 
   urirhssub  X_URIBL_N_2G   $z  A  5
   body       X_URIBL_N_2G   eval:check_uridnsbl('X_URIBL_N_2G')
+  tflags     X_URIBL_N_2G   domains_only
 
   urirhssub  X_URIBL_Y_ANY  $z  A  127.0.1.1-127.0.1.254
   body       X_URIBL_Y_ANY  eval:check_uridnsbl('X_URIBL_Y_ANY')
+  tflags     X_URIBL_Y_ANY  domains_only
 
   urirhssub  X_URIBL_Y_3    $z  A  127.0.1.3-127.0.1.19
   body       X_URIBL_Y_3    eval:check_uridnsbl('X_URIBL_Y_3')
+  tflags     X_URIBL_Y_3    domains_only
 
   urirhssub  X_URIBL_N_3    $z  A  127.0.1.4-127.0.1.18
   body       X_URIBL_N_3    eval:check_uridnsbl('X_URIBL_Y_3')
+  tflags     X_URIBL_N_3    domains_only
+
+  urirhssub  X_URIBL_Y_FFA  $z  A  255.255.255.0
+  body       X_URIBL_Y_FFA  eval:check_uridnsbl('X_URIBL_Y_FFA')
+  tflags     X_URIBL_Y_FFA  domains_only
+
+  urirhssub  X_URIBL_Y_FFB  $z  A  255.0.255.0/0xFF00FFff
+  body       X_URIBL_Y_FFB  eval:check_uridnsbl('X_URIBL_Y_FFB')
+  tflags     X_URIBL_Y_FFB  domains_only
+
+  urirhssub  X_URIBL_Y_FFC  $z  A  0xFFffFF00/0xFFffFFff
+  body       X_URIBL_Y_FFC  eval:check_uridnsbl('X_URIBL_Y_FFC')
+  tflags     X_URIBL_Y_FFC  domains_only
+
+  urirhssub  X_URIBL_Y_FFD  $z  A  0x80000000
+  body       X_URIBL_Y_FFD  eval:check_uridnsbl('X_URIBL_Y_FFD')
+  tflags     X_URIBL_Y_FFD  domains_only
 
   urirhssub  X_URIBL_N_0A   $z  A  127.0.0.0
   body       X_URIBL_N_0A   eval:check_uridnsbl('X_URIBL_N_0A')
+  tflags     X_URIBL_N_0A   domains_only
 
   urirhssub  X_URIBL_N_0B   $z  A  127.0.1.0
   body       X_URIBL_N_0B   eval:check_uridnsbl('X_URIBL_N_0B')
+  tflags     X_URIBL_N_0B   domains_only
 
   urirhssub  X_URIBL_N_255A $z  A  127.0.1.255
   body       X_URIBL_N_255A eval:check_uridnsbl('X_URIBL_N_255A')
+  tflags     X_URIBL_N_255A domains_only
 
   urirhssub  X_URIBL_N_255B $z  A  0.0.0.255/0.0.0.255
   body       X_URIBL_N_255B eval:check_uridnsbl('X_URIBL_N_255B')
+  tflags     X_URIBL_N_255B domains_only
+
+# zone 2
+  urirhssub  X_URIBL_Y_2AZ2 $z2  A  127.0.1.2
+  body       X_URIBL_Y_2AZ2 eval:check_uridnsbl('X_URIBL_Y_2AZ2')
+
+  urirhssub  X_URIBL_Y_255A $z2  A  127.0.1.255
+  body       X_URIBL_Y_255A eval:check_uridnsbl('X_URIBL_Y_255A')
+
+  urirhssub  X_URIBL_Y_255B $z2  A  0.0.0.255/0.0.0.255
+  body       X_URIBL_Y_255B eval:check_uridnsbl('X_URIBL_Y_255B')
 EOD
 
 my(@testzone) = map { chomp; s/[ \t]+//; $_ } split(/^/, <<"EOD");
@@ -102,8 +145,6 @@ my(@testzone) = map { chomp; s/[ \t]+//; $_ } split(/^/, <<"EOD");
   $z               3600 IN MX 0 .
   ns.$z            3600 IN A    127.0.0.1
   ns.$z            3600 IN AAAA ::1
-  foo.$z           3600 IN A    10.1.2.3
-  foo.$z           3600 IN A    10.1.2.4
   dbltest.com.$z   3600 IN A    127.0.1.2
   dbltest.com.$z   3600 IN TXT  "test answer on dbltest.com"
   dbltest03.com.$z 3600 IN A    127.0.1.3
@@ -115,10 +156,16 @@ my(@testzone) = map { chomp; s/[ \t]+//; $_ } split(/^/, <<"EOD");
   dbltest50.com.$z 3600 IN A    127.0.1.50
   dbltest59.com.$z 3600 IN A    127.0.1.59
   dbltest99.com.$z 3600 IN A    127.0.1.99
+  dbltestff.com.$z 3600 IN A    255.255.255.0
   dbltestER.com.$z 3600 IN A    127.0.1.255
   dbltestER.com.$z 3600 IN TXT  "No IP queries allowed"
-  10.1.2.3.$z      3600 IN A    127.0.1.255
-  10.1.2.3.$z      3600 IN TXT  "No IP queries allowed"
+
+  $z2              3600 IN SOA  ns.$z2 master.$z2 (1 10800 1800 2419200 3600)
+  $z2              3600 IN NS   ns.$z2
+  $z2              3600 IN MX 0 .
+  ns.$z2           3600 IN A    127.0.0.1
+  ns.$z2           3600 IN AAAA ::1
+  dbltest.com.$z2  3600 IN A    127.0.1.2
 EOD
 
 # ---------------------------------------------------------------------------
@@ -134,6 +181,7 @@ sub reply_handler {
 # $query->print;
   $rcode = "NXDOMAIN";
   for my $rec_str (@testzone) {
+    next if $rec_str =~ /^#/ || $rec_str =~ /^\s*$/;
     my($rrname,$rrttl,$rrclass,$rrtype,$rrdata) = split(' ',$rec_str,5);
     if ($qclass_uc eq uc($rrclass) && lc($rrname) eq lc($qname)) {
       $rcode = 'NOERROR';
@@ -144,7 +192,7 @@ sub reply_handler {
     }
   }
   # special DBL test case - numerical IP query handling
-  if ($qclass_uc eq 'IN' && $qname =~ /^[0-9.]+\.\Q$z\E\z/is) {
+  if ($qclass_uc eq 'IN' && $qname =~ /^[0-9.]+\.(?:\Q$z\E|\Q$z2\E)\z/is) {
     $rcode = 'NOERROR';
     if ($qtype_uc eq 'A' || $qtype_uc eq 'ANY') {
       push(@ans, Net::DNS::RR->new(join(' ',
@@ -242,7 +290,7 @@ $spamassassin_obj = Mail::SpamAssassin->new({
 # debug               => 'dns,async,uridnsbl',
 });
 ok($spamassassin_obj);
-$spamassassin_obj->compile_now;  # try to preloaded most modules
+$spamassassin_obj->compile_now;  # try to preload most modules
 
 test_samples(
   [q{ X_URIBL_Y_2A X_URIBL_Y_2B X_URIBL_Y_2C X_URIBL_Y_2D X_URIBL_Y_2E
@@ -254,8 +302,14 @@ test_samples(
   [q{ X_URIBL_Y_2A X_URIBL_Y_2B X_URIBL_Y_2C X_URIBL_Y_2D X_URIBL_Y_2E
       X_URIBL_Y_2F X_URIBL_Y_2G X_URIBL_Y_ANY X_URIBL_Y_3 / X_URIBL_N_3
       X_URIBL_N_0A X_URIBL_N_0B X_URIBL_N_255A X_URIBL_N_255B }],
-  [qw( http://dbltest.com/ http://dbltest03.com/ http://dbltest19.com/
-       http://10.11.22.33/ )]);
+  [qw( http://dbltest.com/ http://dbltest03.com/ http://dbltest19.com/ )]);
+
+test_samples(
+  [q{ X_URIBL_Y_2A X_URIBL_Y_2B X_URIBL_Y_2C X_URIBL_Y_2D X_URIBL_Y_2E
+      X_URIBL_Y_2F X_URIBL_Y_2G X_URIBL_Y_FFA X_URIBL_Y_FFB X_URIBL_Y_FFC
+      X_URIBL_Y_FFD X_URIBL_Y_255A X_URIBL_Y_255B / X_URIBL_N_0A X_URIBL_N_0B
+      X_URIBL_N_255A X_URIBL_N_255B }],
+  [qw( http://DBLtest.COM/ http://dbltestFF.CoM/ http://140.211.11.130/ )]);
 
 if ($pid) {
   kill('TERM',$pid) or die "Cannot stop a DNS server [$pid]: $!";
