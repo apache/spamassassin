@@ -451,13 +451,13 @@ sub parse_and_canonicalize_subtest {
         # ok, $n2 may not exist
       } elsif (/^\d{1,10}\z/) {
         # ok, already a decimal number
-      } elsif (/^0x[0-9a-z]{1,8}\z/) {
+      } elsif (/^0x[0-9a-zA-Z]{1,8}\z/) {
         $_ = hex($_);  # hex -> number
       } elsif (/^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\z/) {
         $_ = Mail::SpamAssassin::Util::my_inet_aton($_);  # quad-dot -> number
         $any_quad_dot = 1;
       } else {
-        return $Mail::SpamAssassin::Conf::INVALID_VALUE;
+        return undef;
       }
     }
     $digested_subtest = defined $n2 ? $n1.$delim.$n2
@@ -986,13 +986,14 @@ sub complete_dnsbl_lookup {
           $match = 1;
         } elsif ($subtest =~ m{^ (\d+) (?: ([/-]) (\d+) )? \z}x) {
           my($n1,$delim,$n2) = ($1,$2,$3);
-        # dbg("uridnsbl: %s/%s, %s, %s", $rulename, $dom, $rdatanum,
-        #     !defined $n2 ? $n1 : "$n1 $delim $n2");
           $match =
             !defined $n2  ? $rdatanum & $n1                       # mask only
           : $delim eq '-' ? $rdatanum >= $n1 && $rdatanum <= $n2  # range
           : $delim eq '/' ? ($rdatanum & $n2) == ($n1 & $n2)      # value/mask
           : 0;  
+        # dbg("uridnsbl: %s %s/%s/%s, %s, %s", $match?'Y':'N', $dom, $rulename,
+        #     join('.',@{$uridnsbl_subs->{$subtest}->{rulenames}}),
+        #     $rdatanum, !defined $n2 ? $n1 : "$n1 $delim $n2");
         }
         if ($match) {
           foreach my $subrulename (@{$uridnsbl_subs->{$subtest}->{rulenames}}) {
