@@ -1555,8 +1555,9 @@ sub helper_app_pipe_open_unix {
 
 sub trap_sigalrm_fully {
   my ($handler) = @_;
-  if ($] < 5.008) {
-    # signals are always unsafe, just use %SIG
+  if ($] < 5.008 || Mail::SpamAssassin::Util::am_running_on_windows()) {
+    # signals are always unsafe on perl older than 5.008, just use %SIG
+    # Bug 6359, no POSIX::SIGALRM on Windows, just use %SIG
     $SIG{ALRM} = $handler;
   } else {
     # may be using "safe" signals with %SIG; use POSIX to avoid it
