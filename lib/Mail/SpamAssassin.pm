@@ -75,7 +75,7 @@ use Mail::SpamAssassin::PerMsgStatus;
 use Mail::SpamAssassin::Message;
 use Mail::SpamAssassin::PluginHandler;
 use Mail::SpamAssassin::DnsResolver;
-use Mail::SpamAssassin::Util qw(untaint_var);
+use Mail::SpamAssassin::Util qw(untaint_var am_running_on_windows);
 use Mail::SpamAssassin::Util::ScopedTimer;
 
 use Errno qw(ENOENT EACCES);
@@ -423,7 +423,7 @@ sub create_locker {
   elsif ($m eq 'nfssafe') { $class = 'UnixNFSSafe'; }
   else {
     # OS-specific defaults
-    if (Mail::SpamAssassin::Util::am_running_on_windows()) {
+    if (am_running_on_windows()) {
       $class = 'Win32';
     } else {
       $class = 'UnixNFSSafe';
@@ -1955,7 +1955,7 @@ sub expand_name ($) {
   my ($self, $name) = @_;
   my $home = $self->{user_dir} || $ENV{HOME} || '';
 
-  if (Mail::SpamAssassin::Util::am_running_on_windows()) {
+  if (am_running_on_windows()) {
     my $userprofile = $ENV{USERPROFILE} || '';
 
     return $userprofile if ($userprofile && $userprofile =~ m/^[a-z]\:[\/\\]/oi);
