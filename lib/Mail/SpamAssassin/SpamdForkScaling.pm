@@ -25,7 +25,7 @@ use bytes;
 use re 'taint';
 use Errno qw();
 
-use Mail::SpamAssassin::Util;
+use Mail::SpamAssassin::Util qw(am_running_on_windows);
 use Mail::SpamAssassin::Logger;
 use Mail::SpamAssassin::Timeout;
 
@@ -603,6 +603,9 @@ sub wait_for_orders {
     chomp $line;
     if (index ($line, "P") == 0) {  # string starts with "P" = ping
       dbg("prefork: periodic ping from spamd parent");
+      if (am_running_on_windows()) {
+        sleep 2;  # need this on win32 so that a child can get a signal
+      }
       next;
     }
     if (index ($line, "A") == 0) {  # string starts with "A" = accept
@@ -856,7 +859,20 @@ sub need_to_del_server {
   # warning: race condition if these two lines are the other way around.
   # see bug 3983, comment 37 for details
   $self->set_child_state ($pid, PFSTATE_KILLED);
-  kill 'INT' => $pid;
+  if (!am_running_on_windows()) {
+    kill 'INT' => $pid;
+  } else {
+    my $sock = $self->{backchannel}->get_socket_for_child($pid);
+    # On win32 child cannot get a signal while reading socket
+    $sock->syswrite("P....\n");
+    kill 'INT' => $pid or warn "prefork: kill of child $pid failed: $!\n";
+	
+    $self->{backchannel}->delete_socket_for_child($pid);
+    if (defined $sock && defined $sock->fileno()) {
+      $self->{backchannel}->remove_from_selector($sock);
+    }
+    $sock->close  if $sock;
+  }
 
   dbg("prefork: adjust: decreasing, too many idle children ($num_idle > $self->{max_idle}), killed $pid");
   #Added for bug 6304 to work on notifying administrators of poor parameters for spamd
