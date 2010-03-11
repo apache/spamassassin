@@ -205,6 +205,16 @@ B<A>).  C<subtest> is the sub-test to run against the returned data; see
 Note that, as with C<urirhsbl>, you must also define a body-eval rule calling
 C<check_uridnsbl()> to use this.
 
+=item tflags NAME_OF_RULE ips_only
+
+Only URIs containing IP addresses as the "host" component will be matched
+against the named "urirhsbl"/"urirhssub" rule.
+
+=item tflags NAME_OF_RULE domains_only
+
+Only URIs containing a non-IP-address "host" component will be matched against
+the named "urirhsbl"/"urirhssub" rule.
+
 =back
 
 =head1 ADMINISTRATOR SETTINGS
@@ -291,6 +301,8 @@ sub parsed_metadata {
 
   # only hit DNSBLs for active rules (defined and score != 0)
   $scanner->{'uridnsbl_active_rules_rhsbl'} = { };
+  $scanner->{'uridnsbl_active_rules_rhsbl_ipsonly'} = { };
+  $scanner->{'uridnsbl_active_rules_rhsbl_domsonly'} = { };
   $scanner->{'uridnsbl_active_rules_nsrhsbl'} = { };
   $scanner->{'uridnsbl_active_rules_fullnsrhsbl'} = { };
   $scanner->{'uridnsbl_active_rules_revipbl'} = { };
@@ -299,7 +311,13 @@ sub parsed_metadata {
     next unless ($scanner->{conf}->is_rule_active('body_evals',$rulename));
 
     my $rulecf = $scanner->{conf}->{uridnsbls}->{$rulename};
-    if ($rulecf->{is_rhsbl}) {
+    my $tflags = $scanner->{conf}->{tflags}->{$rulename};
+
+    if ($rulecf->{is_rhsbl} && $tflags =~ /\b ips_only \b/x) {
+      $scanner->{uridnsbl_active_rules_rhsbl_ipsonly}->{$rulename} = 1;
+    } elsif ($rulecf->{is_rhsbl} && $tflags =~ /\b domains_only \b/x) {
+      $scanner->{uridnsbl_active_rules_rhsbl_domsonly}->{$rulename} = 1;
+    } elsif ($rulecf->{is_rhsbl}) {
       $scanner->{uridnsbl_active_rules_rhsbl}->{$rulename} = 1;
     } elsif ($rulecf->{is_fullnsrhsbl}) {
       $scanner->{uridnsbl_active_rules_fullnsrhsbl}->{$rulename} = 1;
@@ -388,7 +406,6 @@ sub parsed_metadata {
     }
     else {
       # trim down to a limited number - pick randomly
-      my $i;
       while (@domains && keys %domlist < $umd) {
         my $r = int rand (scalar @domains);
         $domlist{splice (@domains, $r, 1)} = 1;
@@ -721,7 +738,10 @@ sub query_domain {
 
   my $obj = { dom => $dom };
 
-  my $single_dnsbl = 0;
+  my $tflags = $scanner->{conf}->{tflags};
+  my $cf = $scanner->{uridnsbl_active_rules_revipbl};
+
+  my ($is_ip, $single_dnsbl);
   if ($dom =~ /^\d+\.\d+\.\d+\.\d+$/) {
     my $IPV4_ADDRESS = IPV4_ADDRESS;
     my $IP_PRIVATE = IP_PRIVATE;
@@ -733,6 +753,7 @@ sub query_domain {
       if ($dom =~ /^(\d+)\.(\d+)\.(\d+)\.(\d+)$/) {
 	$dom = "$4.$3.$2.$1";
 	$single_dnsbl = 1;
+        $is_ip = 1;
       }
     }
   }
@@ -741,13 +762,24 @@ sub query_domain {
   }
 
   my $rhsblrules = $scanner->{uridnsbl_active_rules_rhsbl};
+  my $rhsbliprules = $scanner->{uridnsbl_active_rules_rhsbl_ipsonly};
+  my $rhsbldomrules = $scanner->{uridnsbl_active_rules_rhsbl_domsonly};
   my $nsrhsblrules = $scanner->{uridnsbl_active_rules_nsrhsbl};
   my $fullnsrhsblrules = $scanner->{uridnsbl_active_rules_fullnsrhsbl};
   my $reviprules = $scanner->{uridnsbl_active_rules_revipbl};
 
   if ($single_dnsbl) {
-    # look up the domain in the RHSBL subset
-    foreach my $rulename (keys %{$rhsblrules}) {
+    # look up the domain in the basic RHSBL subset
+    my @rhsbldoms = keys %{$rhsblrules};
+
+    # and add the "domains_only" and "ips_only" subsets as appropriate
+    if ($is_ip) {
+      push @rhsbldoms, keys %{$rhsbliprules};
+    } else {
+      push @rhsbldoms, keys %{$rhsbldomrules};
+    }
+
+    foreach my $rulename (@rhsbldoms) {
       my $rulecf = $scanner->{conf}->{uridnsbls}->{$rulename};
       $self->lookup_single_dnsbl($scanner, $obj, $rulename,
 				 $dom, $rulecf->{zone}, $rulecf->{type});
@@ -883,9 +915,14 @@ sub lookup_dnsbl_for_ip {
   $ip =~ /^(\d+)\.(\d+)\.(\d+)\.(\d+)$/;
   my $revip = "$4.$3.$2.$1";
 
+  my $tflags = $scanner->{conf}->{tflags};
   my $cf = $scanner->{uridnsbl_active_rules_revipbl};
   foreach my $rulename (keys %{$cf}) {
     my $rulecf = $scanner->{conf}->{uridnsbls}->{$rulename};
+
+    # ips_only/domains_only lookups should not act on this kind of BL
+    next if ($tflags->{$rulename} =~ /\b(?:ips_only|domains_only)\b/);
+    
     $self->lookup_single_dnsbl($scanner, $obj, $rulename,
 			       $revip, $rulecf->{zone}, $rulecf->{type});
   }
@@ -981,7 +1018,9 @@ sub got_dnsbl_hit {
   if ($scanner->{uridnsbl_active_rules_revipbl}->{$rulename}
     || $scanner->{uridnsbl_active_rules_nsrhsbl}->{$rulename}
     || $scanner->{uridnsbl_active_rules_fullnsrhsbl}->{$rulename}
-    || $scanner->{uridnsbl_active_rules_rhsbl}->{$rulename})
+    || $scanner->{uridnsbl_active_rules_rhsbl}->{$rulename}
+    || $scanner->{uridnsbl_active_rules_rhsbl_ipsonly}->{$rulename}
+    || $scanner->{uridnsbl_active_rules_rhsbl_domsonly}->{$rulename})
   {
     # TODO: this needs to handle multiple domain hits per rule
     $scanner->clear_test_state();
@@ -1052,6 +1091,7 @@ sub log_dns_result {
 
 # capability checks for "if can()":
 #
+sub has_tflags_domains_only { 1 }
 sub has_subtest_for_ranges { 1 }
 
 1;
