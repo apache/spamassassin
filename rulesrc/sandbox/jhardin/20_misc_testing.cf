@@ -326,5 +326,7 @@ tflags         HTML_ELEM_OBFU_150         nopublish
 header         PPMC_FROM_1                From =~ /\bPayPa[IL](?:\.Com)?\b/
 describe       PPMC_FROM_1                Paypal phishing sign
 
+uri            URI_HIDDEN_2               m;.{8}(?:[/\\]|%(?i:5c|2f))(?!\.\.?[/%\\])\..;
+describe       URI_HIDDEN_2               URI contains a hidden file or directory
 
 
