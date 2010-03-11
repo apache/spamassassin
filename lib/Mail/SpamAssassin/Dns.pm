@@ -29,7 +29,7 @@ use Mail::SpamAssassin::Conf;
 use Mail::SpamAssassin::PerMsgStatus;
 use Mail::SpamAssassin::AsyncLoop;
 use Mail::SpamAssassin::Constants qw(:ip);
-use Mail::SpamAssassin::Util qw(untaint_var);
+use Mail::SpamAssassin::Util qw(untaint_var am_running_on_windows);
 
 use File::Spec;
 use IO::Socket;
@@ -635,7 +635,7 @@ sub is_dns_available {
 
   # Check version numbers - runtime check only
   if (defined $Net::DNS::VERSION) {
-    if (Mail::SpamAssassin::Util::am_running_on_windows()) {
+    if (am_running_on_windows()) {
       if ($Net::DNS::VERSION < 0.46) {
 	warn("dns: Net::DNS version is $Net::DNS::VERSION, but need 0.46 for Win32");
 	return $IS_DNS_AVAILABLE;

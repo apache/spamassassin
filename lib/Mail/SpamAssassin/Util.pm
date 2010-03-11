@@ -58,7 +58,7 @@ BEGIN {
   @ISA = qw(Exporter);
   @EXPORT = ();
   @EXPORT_OK = qw(&local_tz &base64_decode &untaint_var &untaint_file_path
-                  &exit_status_str &proc_status_ok);
+                  &exit_status_str &proc_status_ok &am_running_on_windows);
 }
 
 use Mail::SpamAssassin;
@@ -1555,7 +1555,7 @@ sub helper_app_pipe_open_unix {
 
 sub trap_sigalrm_fully {
   my ($handler) = @_;
-  if ($] < 5.008 || Mail::SpamAssassin::Util::am_running_on_windows()) {
+  if ($] < 5.008 || am_running_on_windows()) {
     # signals are always unsafe on perl older than 5.008, just use %SIG
     # Bug 6359, no POSIX::SIGALRM on Windows, just use %SIG
     $SIG{ALRM} = $handler;

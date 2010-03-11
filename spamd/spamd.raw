@@ -89,7 +89,8 @@ use Mail::SpamAssassin::NetSet;
 use Mail::SpamAssassin::SubProcBackChannel;
 use Mail::SpamAssassin::SpamdForkScaling qw(:pfstates);
 use Mail::SpamAssassin::Logger qw(:DEFAULT log_message);
-use Mail::SpamAssassin::Util qw(untaint_var exit_status_str);
+use Mail::SpamAssassin::Util qw(untaint_var exit_status_str
+                                am_running_on_windows);
 use Mail::SpamAssassin::Timeout;
 
 use Getopt::Long;
@@ -445,8 +446,7 @@ my $log_facility = $opt{'syslog'} || 'mail';
 my $log_socket = lc($opt{'syslog-socket'});
 
 if (!defined $log_socket || $log_socket eq '') {
-  $log_socket =
-    Mail::SpamAssassin::Util::am_running_on_windows() ? 'none' : 'unix';
+  $log_socket = am_running_on_windows() ? 'none' : 'unix';
 }
 
 # This is the default log file; it can be changed on the command line
@@ -1354,16 +1354,17 @@ sub handle_setuid_to_user {
   if ($spamtest->{paranoid}) {
     die("spamd: in paranoid mode, still running as root: closing connection");
   }
-  warn("spamd: still running as root: user not specified with -u, "
-       . "not found, or set to root, falling back to nobody\n");
+  if (!am_running_on_windows()) {
+    warn("spamd: still running as root: user not specified with -u, "
+         . "not found, or set to root, falling back to nobody\n");
 
-  my ($name, $pwd, $uid, $gid, $quota, $comment, $gcos, $dir, $etc) =
-      getpwnam('nobody');
+    my ($name, $pwd, $uid, $gid, $quota, $comment, $gcos, $dir, $etc) =
+        getpwnam('nobody');
   
-  $) = "$gid $gid";                   # eGID
-  $> = $uid;                          # eUID
-  if (!defined($uid) || ($> != $uid and $> != ($uid - 2**32))) {
-    die("spamd: setuid to nobody failed");
+    $) = "$gid $gid";                   # eGID
+    $> = $uid;                          # eUID
+    if (!defined($uid) || ($> != $uid and $> != ($uid - 2**32))) {
+      die("spamd: setuid to nobody failed");
   }
 
   $spamtest->signal_user_changed(
@@ -1372,6 +1373,7 @@ sub handle_setuid_to_user {
       user_dir => $dir
     }
   );
+  }
 }
 
 sub parse_body {
@@ -1500,7 +1502,9 @@ sub check {
   }
 
   return 0 unless do_user_handling();
-  if ($> == 0) { die "spamd: still running as root! dying"; }
+  if ($> == 0 && !am_running_on_windows()) {
+	die "spamd: still running as root! dying";
+  }
 
   my $resp = "EX_OK";
 
@@ -1696,7 +1700,9 @@ sub dotell {
   my $compress_zlib = $hdrs->{compress_zlib};
 
   return 0 unless do_user_handling();
-  if ($> == 0) { die "spamd: still running as root! dying"; }
+  if ($> == 0 && !am_running_on_windows()) {
+	die "spamd: still running as root! dying";
+  }
 
   if (!$opt{tell}) {
     service_unavailable_error("TELL commands are not enabled, set the --allow-tell switch.");
@@ -2097,7 +2103,7 @@ sub handle_user_setuid_basic {
     $suidto = $opt{'username'};
   }
   my ($name, $pwd, $uid, $gid, $quota, $comment, $gcos, $suiddir, $etc) =
-      getpwnam($suidto);
+      am_running_on_windows() ? ('nobody') : getpwnam($suidto);
 
   if (!defined $uid) {
       my $errmsg = "spamd: handle_user unable to find user: '$suidto'\n";
