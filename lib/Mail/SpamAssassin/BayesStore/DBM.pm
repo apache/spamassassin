@@ -34,7 +34,7 @@ BEGIN {
 }
 
 use Mail::SpamAssassin;
-use Mail::SpamAssassin::Util qw(untaint_var);
+use Mail::SpamAssassin::Util qw(untaint_var am_running_on_windows);
 use Mail::SpamAssassin::BayesStore;
 use Mail::SpamAssassin::Logger;
 
@@ -458,7 +458,7 @@ sub _upgrade_db {
     # it to be interrupted.
     local $SIG{'INT'} = 'IGNORE';
     local $SIG{'TERM'} = 'IGNORE';
-    local $SIG{'HUP'} = 'IGNORE' if (!Mail::SpamAssassin::Util::am_running_on_windows());
+    local $SIG{'HUP'} = 'IGNORE' if !am_running_on_windows();
 
     # older versions used scancount, so kill the stupid little file ...
     my $msgc = $path.'_msgcount';
@@ -553,7 +553,7 @@ sub _upgrade_db {
     # it to be interrupted.
     local $SIG{'INT'} = 'IGNORE';
     local $SIG{'TERM'} = 'IGNORE';
-    local $SIG{'HUP'} = 'IGNORE' if (!Mail::SpamAssassin::Util::am_running_on_windows());
+    local $SIG{'HUP'} = 'IGNORE' if !am_running_on_windows();
 
     # now rename in the new one.  Try several extensions
     for my $ext ($self->DB_EXTENSIONS) {
@@ -766,7 +766,7 @@ sub token_expiration {
     {
       local $SIG{'INT'} = 'IGNORE';
       local $SIG{'TERM'} = 'IGNORE';
-      local $SIG{'HUP'} = 'IGNORE' if (!Mail::SpamAssassin::Util::am_running_on_windows());
+      local $SIG{'HUP'} = 'IGNORE' if !am_running_on_windows();
 
       # now rename in the new one.  Try several extensions
       for my $ext ($self->DB_EXTENSIONS) {
@@ -1258,7 +1258,7 @@ sub _sync_journal_trapped {
   {
     local $SIG{'INT'} = 'IGNORE';
     local $SIG{'TERM'} = 'IGNORE';
-    local $SIG{'HUP'} = 'IGNORE' if (!Mail::SpamAssassin::Util::am_running_on_windows());
+    local $SIG{'HUP'} = 'IGNORE' if !am_running_on_windows();
 
     # retire the journal, so we can update the db files from it in peace.
     # TODO: use locking here
@@ -1828,7 +1828,7 @@ sub restore_database {
 
   local $SIG{'INT'} = 'IGNORE';
   local $SIG{'TERM'} = 'IGNORE';
-  local $SIG{'HUP'} = 'IGNORE' if (!Mail::SpamAssassin::Util::am_running_on_windows());
+  local $SIG{'HUP'} = 'IGNORE' if !am_running_on_windows();
 
   untie %new_toks;
   untie %new_seen;
