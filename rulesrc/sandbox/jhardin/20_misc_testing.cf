@@ -330,3 +330,41 @@ uri            URI_HIDDEN_2               m;.{8}(?:[/\\]|%(?i:5c|2f))(?!\.\.?[/%
 describe       URI_HIDDEN_2               URI contains a hidden file or directory
 
 
+
+# Catch spam originating from 41.0.0.0/8 (Africa, incl S.Africa)
+# Ned Slider, SAU list, 3/11/2010
+header          NSL_ORIG_FROM_41        X-Originating-IP =~ /^(?:.+\[)?41\./
+describe        NSL_ORIG_FROM_41        Originates from 41.0.0.0/8
+score           NSL_ORIG_FROM_41        0.20
+#tflags          NSL_ORIG_FROM_41        nopublish
+
+# Catch spam injected from 41.0.0.0/8 (Africa, incl S.Africa)
+# Ned Slider, SAU list, 3/11/2010
+header          NSL_RCVD_FROM_41        Received =~ /\[41\./
+describe        NSL_RCVD_FROM_41        Received from 41.0.0.0/8
+score           NSL_RCVD_FROM_41        0.10
+#tflags          NSL_RCVD_FROM_41        nopublish
+
+# some metas with the above, maybe reduce FPs
+ifplugin Mail::SpamAssassin::Plugin::FreeMail
+  meta         FROM_41_FREEMAIL         (NSL_ORIG_FROM_41 || NSL_RCVD_FROM_41) && (FREEMAIL_FROM || FREEMAIL_REPLYTO)
+  describe     FROM_41_FREEMAIL         Sent from Africa + freemail provider
+  tflags       FROM_41_FREEMAIL         nopublish
+endif
+
+# More from Ned
+header         NSL_RCVD_HELO_USER       Received =~ /helo[= ]user\)/i
+describe       NSL_RCVD_HELO_USER       Received from HELO User
+#tflags         NSL_RCVD_HELO_USER       nopublish
+
+header         NSL_RCVD_FROM_USER       Received =~ /from User [\[\(]/
+describe       NSL_RCVD_FROM_USER       Received from User
+#tflags         NSL_RCVD_FROM_USER       nopublish
+
+
+# observed in spam 3/11/2010
+header          DATE_DOTS               Date =~ /\d\d\.\d\d\.\d\d/
+describe        DATE_DOTS               Periods in date header
+#tflags          DATE_DOTS               nopublish
+
+
