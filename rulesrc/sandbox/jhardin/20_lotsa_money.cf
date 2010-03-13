@@ -102,7 +102,7 @@ body     __LUCRATIVE      /\blucrative\b/i
 body     __YOU_ASSIST     /\byour\sassistance\b/i
 body     __OUR_BEHALF     /\bon\s(?:my|our)\sbehalf\b/i
 body     __AGREED_RATIO   /\b(?:agreed|sharing)\s(?:ratios?|percent\w+)\b/i
-body     __SHARE_IT       /\b(?:(?:share|receive)\sthe\s(?:proceeds|funds?|money|balance|account)|partager (?:avec vous|ratio))\b/i
+body     __SHARE_IT       /\b(?:(?:share|receive)\sth(?:e|is)\s(?:proceeds|funds?|money|balance|account)|partager (?:avec vous|ratio))\b/i
 body     __DESTROY_ME     /\b(?:destroy|hunt)\sm[ey]\b/i
 body     __YOUR_PROFIT    /\byour?\sprofit/i
 
@@ -201,7 +201,7 @@ body     __MILLIONS       /\bmillions\sof\s(?:dollar|euro|pound)/i
 
 # Adjust __FRAUD_PTS __FRAUD_XVW __FRAUD_IOU
 body __FRAUD_PTX	/\b(?:ass?ass?inat(?:ed|ion)|murder(?:e?d)?|poison(?:e?d)?|kill(?:ed|ing)\b[^.]{0,99}\b(?:war veterans|rebels?))\b/i
-body __FRAUD_XWW	/\b(?:honest\sco-?operation|ehrliche\szusammenarbeit)\b/i
+body __FRAUD_XWW	/\b(?:honest(?:ly)?\sco(?:-?operat(?:e|ion)|llaborat(?:e|ion))|ehrliche\szusammenarbeit)\b/i
 body __FRAUD_IOV	/\b(?:no risks?|risk-? *free|free of risks?|100% safe|v.llig Risikofrei ist)\b/i
 
 
