@@ -349,7 +349,8 @@ score           NSL_RCVD_FROM_41        0.10
 ifplugin Mail::SpamAssassin::Plugin::FreeMail
   meta         FROM_41_FREEMAIL         (NSL_ORIG_FROM_41 || NSL_RCVD_FROM_41) && (FREEMAIL_FROM || FREEMAIL_REPLYTO)
   describe     FROM_41_FREEMAIL         Sent from Africa + freemail provider
-  tflags       FROM_41_FREEMAIL         nopublish
+  score        FROM_41_FREEMAIL         0.25
+  #tflags       FROM_41_FREEMAIL         nopublish
 endif
 
 # More from Ned
