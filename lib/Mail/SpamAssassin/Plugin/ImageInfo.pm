@@ -5,9 +5,9 @@
 # The ASF licenses this file to you under the Apache License, Version 2.0
 # (the "License"); you may not use this file except in compliance with
 # the License.  You may obtain a copy of the License at:
-# 
+#
 #     http://www.apache.org/licenses/LICENSE-2.0
-# 
+#
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -16,20 +16,36 @@
 # </@LICENSE>
 #
 # -------------------------------------------------------
+# ImageInfo Plugin for SpamAssassin
+# Version: 0.7
+# Created: 2006-08-02
+# Modified: 2007-01-17
+#
+# Changes:
+#   0.7 - added image_name_regex to allow pattern matching on the image name
+#       - added support for image/pjpeg content types (progressive jpeg)
+#       - updated imageinfo.cf with a few sample rules for using image_name_regex()
+#   0.6 - fixed dems_ bug in image_size_range_
+#   0.5 - added image_named and image_to_text_ratio
+#   0.4 - added image_size_exact and image_size_range
+#   0.3 - added jpeg support
+#   0.2 - optimized by theo
+#   0.1 - added gif/png support
+#
 #
 # Usage:
 #  image_count()
 #
-#     body RULENAME  eval:image_count(<type>,<min>,[max]) 
-#        type: 'all','gif','png', or 'jpeg'  
-#        min: required, message contains at least this 
+#     body RULENAME  eval:image_count(<type>,<min>,[max])
+#        type: 'all','gif','png', or 'jpeg'
+#        min: required, message contains at least this
 #             many images
-#        max: optional, if specified, message must not 
+#        max: optional, if specified, message must not
 #             contain more than this number of images
 #
-#  examples
-# 
-#     body ONE_IMAGE  eval:image_count('all',1,1) 
+#  image_count() examples
+#
+#     body ONE_IMAGE  eval:image_count('all',1,1)
 #     body ONE_OR_MORE_IMAGES  eval:image_count('all',1)
 #     body ONE_PNG eval:image_count('png',1,1)
 #     body TWO_GIFS eval:image_count('gif',2,2)
@@ -44,13 +60,21 @@
 #        max: optional, if specified, message must not
 #             contain more than this much pixel area
 #
-#  examples
+#   pixel_coverage() examples
 #
-#     body LARGE_IMAGE_AREA  eval:pixel_coverage('all',150000)
-#     body SMALL_GIF_AREA  eval:pixel_coverage('gif',1,40000)
+#     body LARGE_IMAGE_AREA  eval:pixel_coverage('all',150000)  # catches any images that are 150k pixel/sq or higher
+#     body SMALL_GIF_AREA  eval:pixel_coverage('gif',1,40000)   # catches only gifs that 1 to 40k pixel/sql
 #
-#  See the ruleset for ways to meta image_count() 
-#  and pixel_coverage() together.  
+#  image_name_regex()
+#
+#     body RULENAME  eval:image_name_regex(<regex>)
+#        regex: full quoted regexp, see examples below
+#
+#  image_name_regex() examples
+#
+#     body CG_DOUBLEDOT_GIF  eval:image_name_regex('/^\w{2,9}\.\.gif$/i') # catches double dot gifs  abcd..gif
+#
+#
 #
 # -------------------------------------------------------
 
@@ -75,12 +99,13 @@ sub new {
   $class = ref($class) || $class;
   my $self = $class->SUPER::new($mailsaobject);
   bless ($self, $class);
-  
+
   $self->register_eval_rule ("image_count");
   $self->register_eval_rule ("pixel_coverage");
   $self->register_eval_rule ("image_size_exact");
   $self->register_eval_rule ("image_size_range");
   $self->register_eval_rule ("image_named");
+  $self->register_eval_rule ("image_name_regex");
   $self->register_eval_rule ("image_to_text_ratio");
 
   return $self;
@@ -105,13 +130,13 @@ my %get_details = (
     #my $has_global_color_table = $global_color_table ? 1 : 0;
     #my $sorted_colors = ($packed & 0x08)?1:0;
     #my $resolution = ((($packed & 0x70) >> 4) + 1);
- 
+
     if ($height && $width) {
       my $area = $width * $height;
       $pms->{imageinfo}->{pc_gif} += $area;
       $pms->{imageinfo}->{dems_gif}->{"${height}x${width}"} = 1;
       $pms->{imageinfo}->{names_all}->{$part->{'name'}} = 1 if $part->{'name'};
-      dbg("imageinfo: gif image ".($part->{'name'} ? $part->{'name'} : '')." is $height x $width pixels ($area pixels sq.), with $color_table_size color table"); 
+      dbg("imageinfo: gif image ".($part->{'name'} ? $part->{'name'} : '')." is $height x $width pixels ($area pixels sq.), with $color_table_size color table");
     }
   },
 
@@ -126,15 +151,15 @@ my %get_details = (
     my $chunksize = 8;
     my ($width, $height) = ( 0, 0 );
     my ($depth, $ctype, $compression, $filter, $interlace);
-  
+
     while ($pos < $datalen) {
       my ($len, $type) = unpack("Na4", substr($data, $pos, $chunksize));
       $pos += $chunksize;
- 
+
       last if $type eq "IEND";  # end of png image.
 
       next unless ( $type eq "IHDR" && $len == 13 );
-      
+
       my $bytes = substr($data, $pos, $len + 4);
       my $crc = unpack("N", substr($bytes, -4, 4, ""));
 
@@ -181,7 +206,7 @@ my %get_details = (
     }
 
     if ($height && $width) {
-      my $area = $height * $width; 
+      my $area = $height * $width;
       $pms->{imageinfo}->{pc_jpeg} += $area;
       $pms->{imageinfo}->{dems_jpeg}->{"${height}x${width}"} = 1;
       $pms->{imageinfo}->{names_all}->{$part->{'name'}} = 1 if $part->{'name'};
@@ -201,13 +226,12 @@ sub _get_images {
     $pms->{'imageinfo'}->{"count_$type"} = 0;
   }
 
-  foreach my $p ($pms->{msg}->find_parts(qr@^image/(?:gif|png|jpe?g)$@, 1)) {
+  foreach my $p ($pms->{msg}->find_parts(qr@^image/(?:gif|png|jpeg)$@, 1)) {
     # make sure its base64 encoded
     my $cte = lc $p->get_header('content-transfer-encoding') || '';
     next if ($cte !~ /^base64$/);
 
     my ($type) = $p->{'type'} =~ m@/(\w+)$@;
-    $type='jpeg' if $type eq 'jpg';
     if ($type && exists $get_details{$type}) {
        $get_details{$type}->($pms,$p);
        $pms->{'imageinfo'}->{"count_$type"} ++;
@@ -246,9 +270,36 @@ sub image_named {
 
 # -----------------------------------------
 
+sub image_name_regex {
+  my ($self,$pms,$body,$re) = @_;
+  return unless (defined $re);
+
+  # make sure we have image data read in.
+  if (!exists $pms->{'imageinfo'}) {
+    $self->_get_images($pms);
+  }
+
+  return 0 unless (exists $pms->{'imageinfo'}->{"names_all"});
+
+  my $hit = 0;
+  foreach my $name (keys %{$pms->{'imageinfo'}->{"names_all"}}) {
+    dbg("imageinfo: checking image named $name against regex $re");
+    if (eval { $name =~ /$re/ }) { $hit = 1 }
+    dbg("imageinfo: error in regex /$re/ - $@") if $@;
+    if ($hit) {
+      dbg("imageinfo: image_name_regex hit on $name");
+      return 1;
+    }
+  }
+  return 0;
+
+}
+
+# -----------------------------------------
+
 sub image_count {
   my ($self,$pms,$body,$type,$min,$max) = @_;
-  
+
   return unless defined $min;
 
   # make sure we have image data read in.
@@ -271,7 +322,7 @@ sub pixel_coverage {
   if (!exists $pms->{'imageinfo'}) {
     $self->_get_images($pms);
   }
-  
+
   # dbg("imageinfo: pc_$type: $min, ".($max ? $max:'').", $type, ".$pms->{'imageinfo'}->{"pc_$type"});
   return result_check($min, $max, $pms->{'imageinfo'}->{"pc_$type"});
 }
@@ -287,12 +338,12 @@ sub image_to_text_ratio {
     $self->_get_images($pms);
   }
 
-  # depending on how you call this eval (body vs rawbody), 
+  # depending on how you call this eval (body vs rawbody),
   # the $textlen will differ.
   my $textlen = length(join('',@$body));
 
   return 0 unless ( $textlen > 0 && exists $pms->{'imageinfo'}->{"pc_$type"} && $pms->{'imageinfo'}->{"pc_$type"} > 0);
-  
+
   my $ratio = $textlen / $pms->{'imageinfo'}->{"pc_$type"};
   dbg("imageinfo: image ratio=$ratio, min=$min max=$max");
   return result_check($min, $max, $ratio, 1);
@@ -325,7 +376,8 @@ sub image_size_range {
     $self->_get_images($pms);
   }
 
-  return unless (exists $pms->{'imageinfo'}->{"dems_$type"});
+  my $name = 'dems_'.$type;
+  return unless (exists $pms->{'imageinfo'}->{$name});
 
   foreach my $dem ( keys %{$pms->{'imageinfo'}->{"dems_$type"}}) {
     my ($h,$w) = split(/x/,$dem);
