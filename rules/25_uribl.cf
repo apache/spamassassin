@@ -93,14 +93,6 @@ describe        URIBL_JP_SURBL  Contains an URL listed in the JP SURBL blocklist
 tflags          URIBL_JP_SURBL  net
 reuse           URIBL_JP_SURBL
 
-if (version >= 3.003001)
-urirhssub       URIBL_XS_SURBL  multi.surbl.org.        A   128
-body            URIBL_XS_SURBL  eval:check_uridnsbl('URIBL_XS_SURBL')
-describe        URIBL_XS_SURBL  Contains an URL listed in the XS SURBL blocklist
-tflags          URIBL_XS_SURBL  net
-reuse           URIBL_XS_SURBL
-endif
-
 ###########################################################################
 ## URIBL
 
