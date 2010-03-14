@@ -1019,6 +1019,9 @@ score URIBL_RHS_DOB 0 0.276 0 1.514 # n=0 n=2
 score URIBL_SBL 0 0.644 0 1.623 # n=0 n=2
 score URIBL_SC_SURBL 0 0.001 0 0.568 # n=0 n=2
 score URIBL_WS_SURBL 0 1.659 0 1.608 # n=0 n=2
+if (version >= 3.003001)
+score URIBL_XS_SURBL 0 0.7   0 0.7
+endif
 score URIBL_BLACK 0 1.775 0 1.725 # n=0 n=2
 score URIBL_GREY 0 1.084 0 0.424 # n=0 n=2
 score URIBL_DBL_SPAM 0 1.7 0 1.7
