@@ -38,15 +38,16 @@ while (<CONFIG>) {
   $scoreset = $1 if /^\s*SCORESET=(\d)\s*$/;
   $ham_pref = $1 if /^\s*HAM_PREFERENCE=([\d.-]+)/;
   $threshold = $1 if /^\s*THRESHOLD=([\d.-]+)/;
-  $epochs = $1 if /^\s*EPOCHS=(\d+)\s*$/;
+  $epochs = $1 if /^\s*EPOCHS=(\d)\s*$/;
   $note = "-$1" if /^\s*NOTE=(.+)$/;
+
+
 }
 close CONFIG;
 
 print "Removing scores for base release rules from newly generated scores\n";
 
-open(ORIG, "../rules/50_scores.cf") or
-  die "Cannot open original score file (../rules/50_scores.cf): $!";
+open(ORIG, "../rules/50_scores.cf") or die "Cannot open original score file: $!";
 while(<ORIG>) {
   if (/^score\s+(\S+)/) {
     $original_rules{$1} = undef;
@@ -54,12 +55,9 @@ while(<ORIG>) {
 }
 close ORIG;
 
-print "extract-new-scores using gen-set$scoreset-$ham_pref-$threshold-$epochs-ga$note/scores\n";
 
-open(ORIG, "gen-set$scoreset-$ham_pref-$threshold-$epochs-ga$note/scores") or
-  die "Cannot open gen-set$scoreset-$ham_pref-$threshold-$epochs-ga$note/scores: $!";
-open(NEW, ">gen-set$scoreset-$ham_pref-$threshold-$epochs-ga$note/scores-new") or
-  die "Cannot open gen-set$scoreset-$ham_pref-$threshold-$epochs-ga$note/scores-new: $!";
+open(ORIG, "gen-set$scoreset-$ham_pref-$threshold-$epochs-ga$note/scores") or die "Cannot open original scores file: $!";
+open(NEW, ">gen-set$scoreset-$ham_pref-$threshold-$epochs-ga$note/scores-new") or die "Cannot open scores-new file: $!";
 while (<ORIG>) {
   if (/^score\s+(\S+)/) {
     next if exists $original_rules{$1};

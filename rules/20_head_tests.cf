@@ -506,8 +506,7 @@ describe DATE_IN_FUTURE_24_48	Date: is 24 to 48 hours after Received: date
 header DATE_IN_FUTURE_48_96	eval:check_for_shifted_date('48', '96')
 describe DATE_IN_FUTURE_48_96	Date: is 48 to 96 hours after Received: date
 
-#header DATE_IN_FUTURE_96_XX	eval:check_for_shifted_date('96', 'undef')
-meta DATE_IN_FUTURE_96_XX 	(0)
+header DATE_IN_FUTURE_96_XX	eval:check_for_shifted_date('96', 'undef')
 describe DATE_IN_FUTURE_96_XX	Date: is 96 hours or more after Received: date
 
 header UNRESOLVED_TEMPLATE	eval:check_unresolved_template()

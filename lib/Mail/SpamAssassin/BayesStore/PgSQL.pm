@@ -23,7 +23,7 @@ Mail::SpamAssassin::BayesStore::PgSQL - PostgreSQL Specific Bayesian Storage Mod
 
 =head1 DESCRIPTION
 
-This module implements a PostgreSQL specific bayesian storage module.
+This module implementes a PostgresSQL specific bayesian storage module.
 
 It subclasses Mail::SpamAssassin::BayesStore::SQL and overrides any methods
 which makes SQL calls involving the token column.  Since PostgreSQL uses BYTEA

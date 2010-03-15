@@ -189,7 +189,7 @@ sub dnsbl_hit {
       $log =~ s/(?<![<([])(https?:\/\/\S+)/<$1>/g;
     }
     elsif ($question->string =~ m/^(\d+)\.(\d+)\.(\d+)\.(\d+)\.(\S+\w)/) {
-      $log = "$4.$3.$2.$1 listed in ".lc($5);
+      $log = "$4.$3.$2.$1 listed in $5";
     }
   }
 
@@ -688,7 +688,7 @@ sub is_dns_available {
   while( $ns  = shift(@nameservers)) {
     for(my $retry = 3; $retry > 0 and $#domains>-1; $retry--) {
       my $domain = splice(@domains, rand(@domains), 1);
-      dbg("dns: trying ($retry) $domain, server $ns ...");
+      dbg("dns: trying ($retry) $domain...");
       my $result = $self->lookup_ns($domain);
       if(defined $result) {
         if (scalar @$result > 0) {

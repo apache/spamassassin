@@ -9,14 +9,16 @@ use constant DO_RUN => TEST_ENABLED && can_use_net_dns_safely();
 use Test;
 
 BEGIN {
-  plan tests => (DO_RUN ? 4 : 0),
+  plan tests => (DO_RUN ? 2 : 0),
 };
 
 exit unless (DO_RUN);
 
 # ---------------------------------------------------------------------------
 
-%anti_patterns = ( q{ X_URIBL_DOMSONLY } => 'A' );
+%anti_patterns = (
+ q{ X_URIBL_DOMSONLY } => 'A',
+);
 
 tstlocalrules(q{
 
@@ -32,12 +34,5 @@ tstlocalrules(q{
 
 # note: don't leave -D here, it causes spurious passes
 ok sarun ("-t < data/spam/dnsbl_domsonly.eml 2>&1", \&patterns_run_cb);
-ok_all_patterns();
-
-%patterns = ( q{ X_URIBL_DOMSONLY } => 'A' );
-%anti_patterns = ();
-
-clear_pattern_counters();
-ok sarun ("-t < data/spam/dnsbl_ipsonly.eml 2>&1", \&patterns_run_cb);
 ok_all_patterns();
 

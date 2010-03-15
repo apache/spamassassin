@@ -84,7 +84,7 @@ use re 'taint';
 
 use Mail::SpamAssassin::Util;
 use Mail::SpamAssassin::NetSet;
-use Mail::SpamAssassin::Constants qw(:sa :ip);
+use Mail::SpamAssassin::Constants qw(:sa);
 use Mail::SpamAssassin::Conf::Parser;
 use Mail::SpamAssassin::Logger;
 use Mail::SpamAssassin::Util::TieOneStringHash;
@@ -1314,74 +1314,6 @@ Please note, the DNS test queries for NS records.
     }
   });
 
-=item dns_server ip-addr-port  (default: first entry provided by Net::DNS)
-
-Specifies an IP address of a DNS server, and optionally its port number.
-The I<dns_server> directive may be specified multiple times, each entry
-adding to a list of available resolving name servers. The I<ip-addr-port>
-argument can either be an IPv4 or IPv6 address, optionally enclosed in
-brackets, and optionally followed by a colon and a port number. In absence
-of a port number a standard port number 53 is assumed. When an IPv6 address
-is specified along with a port number, the address B<must> be enclosed in
-brackets to avoid parsing ambiguity regarding a colon separator,
-
-Examples :
- dns_server 127.0.0.1
- dns_server 127.0.0.1:53
- dns_server [127.0.0.1]:53
- dns_server [::1]:53
-
-In absence of I<dns_server> directives, the list of name servers is provided
-by Net::DNS module, which typically obtains the list from /etc/resolv.conf,
-but this may be platform dependent. Please consult Net::DNS documentation
-for details.
-
-=cut
-
-  push (@cmds, {
-    setting => 'dns_server',
-    type => $CONF_TYPE_STRING,
-    code => sub {
-      no warnings 'uninitialized';
-      my ($self, $key, $value, $line) = @_;
-      my($address,$port); local($1,$2,$3);
-      if ($value =~ /^(?: \[ ([^\]]*) \] | ([^:]*) ) : (\d+) \z/sx) {
-        ($address, $port) = ($1.$2, $3);
-      } elsif ($value =~ /^(?: \[ ([^\]]*) \] | ([0-9a-fA-F.:]+) ) \z/sx) {
-        ($address, $port) = ($1.$2, '53');
-      } else {
-        return $INVALID_VALUE;
-      }
-      my $IP_ADDRESS = IP_ADDRESS;
-      if ($address =~ /$IP_ADDRESS/ && $port >= 1 && $port <= 65535) {
-        $self->{dns_server} = []  if !$self->{dns_server};
-        # checked, untainted, stored in a normalized form
-        push(@{$self->{dns_servers}}, untaint_var("[$address]:$port"));
-      } else {
-        return $INVALID_VALUE;
-      }
-    }
-  });
-
-=item clear_dns_servers
-
-Empty the list of explicitly configured DNS servers through a I<dns_server>
-directive, falling back to Net::DNS -supplied defaults.
-
-=cut
-
-  push (@cmds, {
-    setting => 'clear_dns_servers',
-    type => $CONF_TYPE_NOARGS,
-    code => sub {
-      my ($self, $key, $value, $line) = @_;
-      unless (!defined $value || $value eq '') {
-        return $INVALID_VALUE;
-      }
-      undef $self->{dns_servers};
-    }
-  });
-
 =item dns_test_interval n   (default: 600 seconds)
 
 If dns_available is set to 'test' (which is the default), the dns_test_interval
@@ -1400,29 +1332,12 @@ time in number of seconds will tell SpamAssassin how often to retest for working
     }
   });
 
-=item dns_options opts   (default: empty)
+=item dns_options rotate    (default: empty)
 
-Provides a (whitespace or comma -separated) list of options applying to
-DNS resolving. Available options are 'rotate' and 'dns0x20' (without quotes).
-Option name may be negated by prepending a 'no' (e.g. 'norotate') to
-counteract previously enabled option. The last setting in configuration
-files prevails. By default options 'rotate' and 'dns0x20' are disabled.
-
-Option 'rotate' causes SpamAssassin to choose a DNS server at random
+If set to 'rotate', this causes SpamAssassin to choose a DNS server at random
 from all servers listed in C</etc/resolv.conf> every 'dns_test_interval'
 seconds, effectively spreading the load over all currently available DNS
 servers when there are many spamd workers. 
-
-Option 'dns0x20' enables randomization of letters in a DNS query label
-according to draft-vixie-dnsext-dns0x20, decreasing a chance of collisions
-of responses (by chance or by a malicious intent) by increasing spread
-as provided by a 16-bit query ID and up to 16 bits of a port number,
-with additional bits as encoded by flipping case (upper/lower) of letters
-in a query. The number of additional random bits corresponds to the number
-of letters in a query label. Should work reliably with all mainstream
-DNS servers - do not turn on if you see frequent info messages
-"dns: no callback for id:" in the log, or if RBL or URIDNS lookups
-do not work for no apparent reason.
 
 =cut
 
@@ -1431,13 +1346,11 @@ do not work for no apparent reason.
     type => $CONF_TYPE_HASH_KEY_VALUE,
     code => sub {
       my ($self, $key, $value, $line) = @_;
-      foreach my $option (split (/[\s,]+/, $value)) {
-        local($1,$2);
-        if (lc($option) =~ /^(no)?(rotate|dns0x20)\z/) {
-          $self->{dns_options}->{$2} = $1 ? 0 : 1;
-        } else {
-          return $INVALID_VALUE;
-        }
+      my $allowed_opts = "rotate";
+      
+      foreach my $option (split (/\s+/, $value)) {
+        if ($allowed_opts !~ /^$option$/) { return $INVALID_VALUE; }
+        else { $self->{dns_options}->{$option} = 1; }
       }
     }
   });

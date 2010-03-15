@@ -37,7 +37,7 @@ dnsdir=/var/named/updates.spamassassin.org.d
 #
 soadir=/var/named/spamassassin.org.d
 
-versions="3.4.0"
+versions="3.3.0"
 
 # ---------------------------------------------------------------------------
 # TODO: if/when this becomes fully automatic, this commit will be superfluous
@@ -67,23 +67,16 @@ make clean
 $PERL Makefile.PL PREFIX=$tmpdir < /dev/null || exit $?
 make                                     || exit $?
 
+# remove the rules files for rules we won't be shipping
+rm rules/70_sandbox.cf rules/70_inactive.cf
+
 # remove new features, unsupported in existing code in the field
 # (TODO: need a better way to exclude files that require new features
 # like this; judicious use of "ifplugin" helps)
 # rm rules/60_somerandomfeature.cf
 
-# ensure the basic lint/rule-sanity test suite passes for this ruleset
-# before we build an update from it.  useful particularly to catch
-# "tflags nopublish" leakage (bug 6297)
-make test \
-    TEST_FILES="t/basic_lint.t t/basic_lint_without_sandbox.t t/basic_meta.t" \
-    || exit $?
-
-# remove the rules files for rules we won't be shipping
-rm rules/70_sandbox.cf rules/70_inactive.cf
-
-# double check we still lint without those 2 files
-./spamassassin --lint                   || exit $?
+# and ensure the ruleset lints!
+./spamassassin --lint                    || exit $?
 
 rulesdir=`pwd`/rules
 

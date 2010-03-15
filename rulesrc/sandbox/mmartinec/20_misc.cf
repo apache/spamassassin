@@ -3,7 +3,7 @@
 rawbody  LONGLINE	/^.{998}.+\r?$/
 describe LONGLINE	Line length exceeds 998 character limit, RFC 5322
 
-header   RP_8BIT	Return-Path:raw =~ /[^\000-\177]/
+header   RP_8BIT	Return-Path =~ /[^\000-\177]/
 describe RP_8BIT	Return-Path contains 8-bit characters with high bit on
 
 header   RP_LASTNAME	Return-Path =~ /LAST_NAME/m
@@ -15,7 +15,7 @@ describe RP_UNDERLINE	Return-Path address starts with an underline
 header   RP_MINUS	Return-Path:addr =~ /^-/m
 describe RP_MINUS	Return-Path address starts with a minus
 
-header   CR_IN_SUBJ	Subject:raw =~ /\015/
+header   CR_IN_SUBJ	Subject =~ /\015/
 describe CR_IN_SUBJ	Subject contains a CR character
 
 # must use :raw to avoid seeing a decoded display name
@@ -24,6 +24,9 @@ describe FROM_UNBAL1	From with unbalanced angle brackets, '>' missing
 
 header   FROM_UNBAL2	From:raw =~ /^ [^<]* > /xm
 describe FROM_UNBAL2	From with unbalanced angle brackets, '<' missing
+
+header   FROM_UC_UNBAL	From:raw =~ /^\s*[A-Z][A-Z0-9 \t]*<[A-Z0-9]+\@[^>]*$/m
+describe FROM_UC_UNBAL	All-upercase name in From and unbalanced <>
 
 header   FROM_WSP_TRAIL	From:raw =~ /< [^>]* \s > [^<>]* \z/xm
 describe FROM_WSP_TRAIL	Trailing whitespace before '>' in From header field
@@ -44,11 +47,12 @@ describe MSGID_NOFQDN2  Message-ID without a fully-qualified domain name
 #score   RP_LASTNAME	4
 #score   RP_UNDERLINE	3
 #score   RP_MINUS	2
-#score   CR_IN_SUBJ	4
+#score   CR_IN_SUBJ	7
 #score   FROM_UNBAL1	3
 #score   FROM_UNBAL2	3
-#score   FROM_WSP_TRAIL 2
+#score   FROM_UC_UNBAL	6
+#score   FROM_WSP_TRAIL	2
 #score   FROM_WSP_LEAD	2
 #score   MSGID_WSP_TRAIL 2
-#score   MSGID_NOFQDN1	1
-#score   MSGID_NOFQDN2	1
+#score   MSGID_NOFQDN1  1
+#score   MSGID_NOFQDN2  1

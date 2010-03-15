@@ -1,19 +1,19 @@
 #
-#header         REPLYTO_MANY_AT Reply-To =~ /\@.+\@/
-#describe       REPLYTO_MANY_AT More than one @ in Reply-To:
+#header		REPLYTO_MANY_AT	Reply-To =~ /\@.+\@/
+#describe	REPLYTO_MANY_AT	More than one @ in Reply-To:
 #
-#header         SENDER_MANY_AT  Sender =~ /\@.+\@/
-#describe       SENDER_MANY_AT  More than one @ in Sender:
+#header		SENDER_MANY_AT	Sender =~ /\@.+\@/
+#describe	SENDER_MANY_AT	More than one @ in Sender:
 #
-#header         FROM_MANY_AT    From =~ /\@.+\@/
-#describe       FROM_MANY_AT    More than one @ in From:
+#header		FROM_MANY_AT	From =~ /\@.+\@/
+#describe	FROM_MANY_AT	More than one @ in From:
 #
 
 header         RDNS_LOCALHOST  X-Spam-Relays-External =~ /^\[ ip=(?!127)\d+\.\d+\.\d+\.\d+ rdns=localhost(?:\.localdomain)? /i
 describe       RDNS_LOCALHOST  Sender's public rDNS is "localhost"
 
-#body           EU_SPAM_LAW     m,Directive 2000/31/EC of the European Parliament,i
-#describe       EU_SPAM_LAW     Quoting "European Parliament" spam law
+#body		EU_SPAM_LAW	m,Directive 2000/31/EC of the European Parliament,i
+#describe	EU_SPAM_LAW	Quoting "European Parliament" spam law
 
 ifplugin Mail::SpamAssassin::Plugin::MIMEHeader
   mimeheader   HTML_ATTACH    Content-Type =~ m,text/html;.+\.html?\b,i
@@ -32,22 +32,19 @@ ifplugin Mail::SpamAssassin::Plugin::MIMEHeader
   mimeheader   OBFU_PDF_ATTACH     Content-Type =~ m,application/octet-stream;.+\.pdf\b,i
   describe     OBFU_PDF_ATTACH     PDF attachment with generic MIME type
   score        OBFU_PDF_ATTACH     0.25
-
-  meta         OBFU_ATTACH_MISSP   __FROM_RUNON && (OBFU_HTML_ATTACH || OBFU_TEXT_ATTACH || OBFU_DOC_ATTACH || OBFU_PDF_ATTACH)
-  describe     OBFU_ATTACH_MISSP   Obfuscated attachment type and misspaced From
 endif
 
 # general case of spample observation
 #header         MUA_ONE_WORD       X-Mailer =~ /^[A-Za-z][a-z]*$/
 #describe       MUA_ONE_WORD       Single word X-Mailer: not CamelCase
 
-body           DEAR_BENEFICIARY         /^\s?(?:Dear\s|At+(?:ention|n):?\s?)Beneficiary\b/i
-describe       DEAR_BENEFICIARY         Dear Beneficiary:
-score          DEAR_BENEFICIARY         2.0
+body           DEAR_BENEFICIARY		/^\s?(?:Dear\s|At+(?:ention|n):?\s?)Beneficiary\b/i
+describe       DEAR_BENEFICIARY		Dear Beneficiary:
+score          DEAR_BENEFICIARY		2.0
 
-body           DEAR_EMAIL_USER          /^\s?(?:Dear\s|Attention:?\s?)(?:E|Web)-?mail\s(?:account\s)?User\b/i
-describe       DEAR_EMAIL_USER          Dear Email User:
-score          DEAR_EMAIL_USER          3.0
+body           DEAR_EMAIL_USER		/^\s?(?:Dear\s|Attention:?\s?)(?:E|Web)-?mail\s(?:account\s)?User\b/i
+describe       DEAR_EMAIL_USER		Dear Email User:
+score          DEAR_EMAIL_USER		3.0
 
 
 # from users list spamples 8/2009
@@ -101,7 +98,7 @@ header         MDN_BOTCHED           Disposition-notification-to =~ /<>/
 describe       MDN_BOTCHED           Malformed return receipt header
 
 # observed in spam 9/2009
-header         HDRS_MISSP            ALL =~ /\n(?:Subject|From|To):\S/ism
+header         HDRS_MISSP            ALL =~ /\n(?:Subject|From):\S/ism
 describe       HDRS_MISSP            Misspaced headers
 score          HDRS_MISSP            2.0
 
@@ -118,7 +115,6 @@ describe       TBIRD_SUSP_MIME_BDRY  Unlikely Thunderbird MIME boundary
 rawbody        RUNON_SHY          /(?:\&shy;){3}/i
 describe       RUNON_SHY          Repeating soft hyphens
 score          RUNON_SHY          0.1
-tflags         RUNON_SHY          nopublish
 
 # Seen all too often
 header         LAZY_LISTWASHING   To =~ /\@(?:example\.com|example\.domain|your\.domain|some\.domain|domain\.dom|somewhere\.tld|somewhere\.com|your\.?domain\.com|your\.favorite\.machine)\b/i
@@ -150,7 +146,7 @@ ifplugin Mail::SpamAssassin::Plugin::FreeMail
   score        FREEMAIL_RVW_ATTCH   1.0
 endif
 
-body           END_FUTURE_EMAILS   /\bend future (?:email|alert)s?\b/i
+body           END_FUTURE_EMAILS   /\bend future emails\b/i
 score          END_FUTURE_EMAILS   0.50
 describe       END_FUTURE_EMAILS   Unsubscribe
 
@@ -161,7 +157,6 @@ describe       AD_COMPLAINTS       Complain about this spam
 # observed in bank phishing 09/2009
 rawbody        MISQ_HTML           /<\w{2,20}[^>=]{1,30}=[^"][^">]{1,30}[^=]"[\s>]/
 describe       MISQ_HTML           Unbalanced quotes in HTML tag
-tflags         MISQ_HTML           nopublish
 
 # observed in bank phishing 09/2009
 uri            WIKI_IMG            m,^https?://[^/]+wiki[mp]edia\.org/.+\.(?:png|gif|jpe?g),i
@@ -186,28 +181,24 @@ rawbody        __SPAN_BEG_TEXT     /[a-z]{2}<(?i:span)\s/
 tflags         __SPAN_BEG_TEXT     multiple
 rawbody        __SPAN_END_TEXT     /[^;>]<\/(?i:span)>[a-z]{3}/
 tflags         __SPAN_END_TEXT     multiple
-meta           MANY_SPAN_IN_TEXT   (__SPAN_BEG_TEXT > 4) && (__SPAN_END_TEXT > 4)
+meta           MANY_SPAN_IN_TEXT   (__SPAN_BEG_TEXT > 5) && (__SPAN_END_TEXT > 5)
 describe       MANY_SPAN_IN_TEXT   Many <SPAN> tags embedded within text
 
 rawbody        __FEEDPROXY         m;http://feedproxy\.google\.com/;
 tflags         __FEEDPROXY         multiple
-meta           MANY_GOOG_PROXY     __FEEDPROXY > 4
+meta           MANY_GOOG_PROXY     __FEEDPROXY > 5
 describe       MANY_GOOG_PROXY     Many Google feedproxy URIs
 
-rawbody        TINY_FLOAT         /\bstyle\s*=\s*"[^"]{0,40}?(?:(?:FONT-SIZE\s*:\s+\dpx|FLOAT\s*:\s+(?:right|left))(?:;\s+)?(?:(?!(?:FONT-SIZE|FLOAT))\w+:\s+\w+;?\s*)*){2}/i
-#tflags         __TINY_FLOAT         multiple
-#meta           TINY_FLOAT           __TINY_FLOAT > 0
-describe       TINY_FLOAT           Has small-font floating HTML elements - text obfuscation?
-score          TINY_FLOAT           2.00
-#meta           MANY_TINY_FLOAT      __TINY_FLOAT > 5
-#describe       MANY_TINY_FLOAT      Many small-font floating HTML elements
+rawbody        __TINY_FLOAT         /\bstyle\s*=\s*"[^"]{0,40}?(?:(?:FONT-SIZE\s*:\s+\dpx|FLOAT\s*:\s+(?:right|left))(?:;\s+)?(?:(?!(?:FONT-SIZE|FLOAT))\w+:\s+\w+;?\s*)*){2}/i
+tflags         __TINY_FLOAT         multiple
+meta           MANY_TINY_FLOAT      __TINY_FLOAT > 5
+describe       MANY_TINY_FLOAT      Many small-font floating HTML elements - text obfuscation?
 
 
 # endless requests on the users list...
 header         TO_EQ_FROM      ALL =~ /\nFrom:[^\n<]{0,80}<?([^\n\s>]+)>?\n(?:[^\n]{1,100}\n)*To:[^\n]+\1/ism
 describe       TO_EQ_FROM      To: same as From:
 score          TO_EQ_FROM      0.001
-tflags         TO_EQ_FROM      nopublish
 
 
 # Evaluate ReturnPath and blacklist collisions
@@ -239,133 +230,5 @@ meta           __RP_SAFE_ANBREP_L3        RCVD_IN_RP_SAFE && RCVD_IN_ANBREP_L3
 meta           __RP_CERTIFIED_ANBREP_L3   RCVD_IN_RP_CERTIFIED && RCVD_IN_ANBREP_L3
 tflags         __RP_SAFE_ANBREP_L3        net nopublish
 tflags         __RP_CERTIFIED_ANBREP_L3   net nopublish
-
-# a URI in the From comment text, to bypass URIBL checks
-# simplistic URI format for now
-header         FROM_URI       From =~ /[^\@]www[.\s][^\s"<\@]+[.\s](?:com|net|info|biz|org|\w\w)\b.*["<]/i
-
-# observed in spam feb 2010
-# Apparently-To per RFC2821 SHOULD NOT be used
-header         __APPARENTLY_TO            Apparently-To =~ /<.*>/
-tflags         __APPARENTLY_TO            multiple nopublish
-meta           HAS_APPARENTLY_TO          __APPARENTLY_TO > 0
-describe       HAS_APPARENTLY_TO          Has deprecated Apparently-To header
-score          HAS_APPARENTLY_TO          0.50
-tflags         HAS_APPARENTLY_TO          nopublish
-meta           MANY_APPARENTLY_TO         __APPARENTLY_TO > 20
-describe       MANY_APPARENTLY_TO         Has many Apparently-To headers
-score          MANY_APPARENTLY_TO         2.00
-tflags         MANY_APPARENTLY_TO         nopublish
-
-# obfuscation of "opt out"
-ifplugin Mail::SpamAssassin::Plugin::ReplaceTags
-  body           FUZZY_OPTOUT             /\b(?!opt.?out)<O><P><T>.?<O><U><T>\b/i
-  replace_rules  FUZZY_OPTOUT
-  describe       FUZZY_OPTOUT             Obfuscated opt-out text
-endif
-
-# stock spam disclaimer obfuscation
-# body           GAPPY_TRADING              /\b(?!trading)t[^a-z\s]?r[^a-z\s]?a[^a-z\s]?d[^a-z\s]?i[^a-z\s]?n[^a-z\s]?g/i
-# body           GAPPY_SECURITIES           /\b(?!securities)s[^a-z\s]?e[^a-z\s]?c[^a-z\s]?u[^a-z\s]?r[^a-z\s]?i[^a-z\s]?t[^a-z\s]?i[^a-z\s]?e[^a-z\s]?s/i
-# body           GAPPY_RISK                 /\b(?!risky?)r[^a-z\s]?i[^a-z\s]?s[^a-z\s]?k(?:[^a-z\s]?y)?/i
-# body           GAPPY_SELLING              /\b(?!selling)s[^a-z\s]?e[^a-z\s]?l[^a-z\s]?l[^a-z\s]?i[^a-z\s]?n[^a-z\s]?g/i
-# body           GAPPY_HUNDRED              /\b(?!hundred)h[^a-z\s]?u[^a-z\s]?n[^a-z\s]?d[^a-z\s]?r[^a-z\s]?e[^a-z\s]?d/i
-# body           GAPPY_THOUSAND             /\b(?!thousand)t[^a-z\s]?h[^a-z\s]?o[^a-z\s]?u[^a-z\s]?s[^a-z\s]?a[^a-z\s]?n[^a-z\s]?d/i
-# body           GAPPY_EXPENSES             /\b(?!expenses)e[^a-z\s]?x[^a-z\s]?p[^a-z\s]?e[^a-z\s]?n[^a-z\s]?s[^a-z\s]?e[^a-z\s]?s/i
-# body           GAPPY_DOLLARS              /\b(?!dollars)d[^a-z\s]?o[^a-z\s]?l[^a-z\s]?l[^a-z\s]?a[^a-z\s]?r[^a-z\s]?s/i
-# 
-# describe       GAPPY_TRADING              Possible obfuscated stock disclaimer
-# describe       GAPPY_SECURITIES           Possible obfuscated stock disclaimer
-# describe       GAPPY_RISK                 Possible obfuscated stock disclaimer
-# describe       GAPPY_SELLING              Possible obfuscated stock disclaimer
-# describe       GAPPY_HUNDRED              Possible obfuscated stock disclaimer
-# describe       GAPPY_THOUSAND             Possible obfuscated stock disclaimer
-# describe       GAPPY_EXPENSES             Possible obfuscated stock disclaimer
-# describe       GAPPY_DOLLARS              Possible obfuscated stock disclaimer
-
-
-rawbody        STYLE_GIBBERISH          /<style[^>]{0,30}>(?:\s{0,80}[^\s:;<]){150}/im
-#tflags         STYLE_GIBBERISH          nopublish
-
-rawbody        SCRIPT_GIBBERISH           /<script>[^;<]{50}/im
-tflags         SCRIPT_GIBBERISH           nopublish
-
-rawbody        MANY_DIV_5                   /(?:<div[^>]{0,30}>\s{0,80}){5}/im
-tflags         MANY_DIV_5                    nopublish
-rawbody        MANY_DIV_6                   /(?:<div[^>]{0,30}>\s{0,80}){6}/im
-tflags         MANY_DIV_6                    nopublish
-rawbody        MANY_DIV_7                   /(?:<div[^>]{0,30}>\s{0,80}){7}/im
-tflags         MANY_DIV_7                    nopublish
-rawbody        MANY_DIV_8                   /(?:<div[^>]{0,30}>\s{0,80}){8}/im
-tflags         MANY_DIV_8                    nopublish
-rawbody        MANY_DIV_9                   /(?:<div[^>]{0,30}>\s{0,80}){9}/im
-tflags         MANY_DIV_9                    nopublish
-rawbody        MANY_DIV_10                   /(?:<div[^>]{0,30}>\s{0,80}){10}/im
-tflags         MANY_DIV_10                   nopublish
-
-header         FROM_TRL_UNDR              From =~ /_\@/
-tflags         FROM_TRL_UNDR              nopublish
-
-body           LOTSA_EMAILS		  /\b(?:thousand|million)\se-?mail(?:\saddresse)?s?\b/i
-tflags         LOTSA_EMAILS		  nopublish
-
-body           NUM_EMAILS                 /\b\d[,\d]{3,}\s(?:(?!and|or)\w+\s)?e-?mail\saddress(?:es)?\b/i
-tflags         NUM_EMAILS                 nopublish
-
-rawbody        __HTML_ELEM_OBFU           /[a-z\s]&\#[91]\d\d?[a-z]/
-tflags         __HTML_ELEM_OBFU           multiple nopublish
-meta           HTML_ELEM_OBFU_25          __HTML_ELEM_OBFU > 25
-tflags         HTML_ELEM_OBFU_25          nopublish
-meta           HTML_ELEM_OBFU_50          __HTML_ELEM_OBFU > 50
-tflags         HTML_ELEM_OBFU_50          nopublish
-meta           HTML_ELEM_OBFU_100         __HTML_ELEM_OBFU > 100
-tflags         HTML_ELEM_OBFU_100         nopublish
-meta           HTML_ELEM_OBFU_150         __HTML_ELEM_OBFU > 150
-tflags         HTML_ELEM_OBFU_150         nopublish
-
-header         PPMC_FROM_1                From =~ /\bPayPa[IL](?:\.Com)?\b/
-describe       PPMC_FROM_1                Paypal phishing sign
-
-uri            URI_HIDDEN_2               m;.{8}(?:[/\\]|%(?i:5c|2f))(?!\.\.?[/%\\])\..;
-describe       URI_HIDDEN_2               URI contains a hidden file or directory
-
-
-
-# Catch spam originating from 41.0.0.0/8 (Africa, incl S.Africa)
-# Ned Slider, SAU list, 3/11/2010
-header          NSL_ORIG_FROM_41        X-Originating-IP =~ /^(?:.+\[)?41\./
-describe        NSL_ORIG_FROM_41        Originates from 41.0.0.0/8
-score           NSL_ORIG_FROM_41        0.20
-#tflags          NSL_ORIG_FROM_41        nopublish
-
-# Catch spam injected from 41.0.0.0/8 (Africa, incl S.Africa)
-# Ned Slider, SAU list, 3/11/2010
-header          NSL_RCVD_FROM_41        Received =~ /\[41\./
-describe        NSL_RCVD_FROM_41        Received from 41.0.0.0/8
-score           NSL_RCVD_FROM_41        0.10
-#tflags          NSL_RCVD_FROM_41        nopublish
-
-# some metas with the above, maybe reduce FPs
-ifplugin Mail::SpamAssassin::Plugin::FreeMail
-  meta         FROM_41_FREEMAIL         (NSL_ORIG_FROM_41 || NSL_RCVD_FROM_41) && (FREEMAIL_FROM || FREEMAIL_REPLYTO)
-  describe     FROM_41_FREEMAIL         Sent from Africa + freemail provider
-  score        FROM_41_FREEMAIL         0.25
-  #tflags       FROM_41_FREEMAIL         nopublish
-endif
-
-# More from Ned
-header         NSL_RCVD_HELO_USER       Received =~ /helo[= ]user\)/i
-describe       NSL_RCVD_HELO_USER       Received from HELO User
-#tflags         NSL_RCVD_HELO_USER       nopublish
-
-header         NSL_RCVD_FROM_USER       Received =~ /from User [\[\(]/
-describe       NSL_RCVD_FROM_USER       Received from User
-#tflags         NSL_RCVD_FROM_USER       nopublish
-
-
-# observed in spam 3/11/2010
-header          DATE_DOTS               Date =~ /\d\d\.\d\d\.\d\d/
-describe        DATE_DOTS               Periods in date header
-#tflags          DATE_DOTS               nopublish
 
 

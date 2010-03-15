@@ -9,15 +9,3 @@ header RCVD_FORGED_WROTE3 Received =~ /from \[[0-9.]+\] \(port=\d+ helo=\S+[A-Za
 # Another variant a bit like Sendmail instead of Exim...
 #
 header RCVD_FORGED_WROTE4 Received =~ /from [0-9.]+ \(HELO \S+[A-Za-z]+\) by (\S+) with \(8[0-9.]+\/8[0-9.]+\) ESMTP [0-9a-z]{14} for \S+@\1;/s
-
-# Following samples spotted by an eagle-eyed user...
-#
-# From: TravelDeals <fanny walt.423usage smaller,@dirtsgrounds.com>
-# From: FreeCellPhone <param orsina.168Hayyan,@foreguide.com>
-# From: PhotographySchool <cathal penha.073posturing,@showersville.com>
-# From: AirlineTickets7 <cali zakuro.586genetics,@miledown.com>
-# From: HealthHappy <janine jamari.070packing,@redmatte.com>
-# From: KitchenCabinets <nelly ben.188sense,@miledown.com>
-#
-header   FROM_SPACE_COMMA	From =~ /\w+ <\w+ \w+\.\d+[^,@]+,@[a-z0-9.-]+>/i
-describe FROM_SPACE_COMMA	Distinctive syntax error in from address

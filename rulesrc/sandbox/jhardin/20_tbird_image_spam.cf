@@ -19,8 +19,8 @@ describe   __FORGED_TBIRD_IMG      Possibly forged Thunderbird image spam
 # Additional meta spotted by Alex Broens.  Still might FP on legit mail with
 # manually typed addresses or undisclosed recipients.
 
-header     __TO_UNDISCLOSED        To =~ /(?:undisclosed-recipients|destinataires inconnus):/i
-header     __TO_NO_ARROWS_R        To !~ /(?:>$|>,)/
+header     __TO_UNDISCLOSED        To =~ /undisclosed-recipients:/i
+header     __TO_NO_ARROWS_R        To !~ />$/
 
 meta       FORGED_TBIRD_IMG_ARROW  __FORGED_TBIRD_IMG && __TO_NO_ARROWS_R && !__TO_UNDISCLOSED
 

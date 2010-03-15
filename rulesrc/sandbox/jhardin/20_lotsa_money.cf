@@ -1,18 +1,16 @@
 
 ifplugin Mail::SpamAssassin::Plugin::ReplaceTags
-  replace_tag  CURRENCY   [\(\[]?(?:\bUS[D\$]{0,2}|\$(?:US)?|usd|GBP|=[Aa][34]|\xa3|&\#16[34];|(?i:pounds\ssterling)|\xa4|EUR|[Ee]uros?|(?i:eur)\sde|CHF)[\]\)]?
+  replace_tag  CURRENCY   [\(\[]?(?:\bUS[D\$]{0,2}|\$(?:US)?|GBP|=[Aa][34]|\xa3|&\#16[34];|(?i:pounds\ssterling)|\xa4|EUR|[Ee]uros?|(?i:eur)\sde|CHF)[\]\)]?
   replace_tag  GB_UK      \b(?:U\.?K\.?|(?:Great\s)?Brit(?:ain|ish)|G\.?B\.?)\b
 
   body     __LOTSA_MONEY_00   /<CURRENCY>\s?\d[\dO][,\.][\dO]{3}(?:(?!\d)|\b)/
   body     __LOTSA_MONEY_01   /(?:(?i:sum\sof\s)[\(\[]?|<CURRENCY>\s?)\s?\d[\d.,\sO]{5,20}[\dO]/
-  body     __LOTSA_MONEY_02   /\d[\d.,\sO]{5,20}[\dO][\)\]\(]?\s?(?:<CURRENCY>|Pounds|(?i:dollars?|bucks))\b/
+  body     __LOTSA_MONEY_02   /\d[\d.,\sO]{5,20}[\dO][\)\]]?\s?(?:<CURRENCY>|Pounds|(?i:dollars?))\b/
   body     __LOTSA_MONEY_03   /(?:(?i:sum\sof\s)[\(\[]?|<CURRENCY>\s?)\d(?:[\d.,\sO]{0,5})?[\)\]]?\s?(?i:M(?i:il)?\b|mil+(?i:io|<O>)n|hund?[re]+a?[dt]|thousand|tausend)/
-  body     __LOTSA_MONEY_04   /(?:\d[\d\.]{0,4}M|million(?!s)|mill<O>n|hund?rea?d(?!s)[^\.]{1,25}thousand(?!s)|cents?[^\.]{1,25}mille|hundert[^\.]{1,30}tausend|ientos?[^\.]{1,20}mil)[^\.\$]{0,50}(?:(?:U\.?\s?S\.?\s?(?:A\.?\s?)?|united\s?states?|canad(?:ian|a)\s)?dollars?|bucks|USD|GBP|<GB_UK>\spounds?|(?:<GB_UK>\s)?pounds?\ssterling|pounds(?!\sof)|(?:d'\s?)?euros?|francs?)\b/i
-  body     __LOTSA_MONEY_05   /(?:(?:sum|value|amount)\sof\s)\d[\d.,\sO]{7,20}[\dO\.][\)\]\(\s]{0,3}(?:pounds?|dollars?|euros?|bucks)\b/i
+  body     __LOTSA_MONEY_04   /(?:\d[\d\.]{0,4}M|million(?!s)|mill<O>n|hund?rea?d(?!s)[^\.]{1,25}thousand(?!s)|cents?[^\.]{1,25}mille|hundert[^\.]{1,30}tausend|ientos?[^\.]{1,20}mil)[^\.\$]{0,50}(?:(?:U\.?\s?S\.?\s?(?:A\.?\s?)?|united\s?states?|canad(?:ian|a)\s)?dollars?|USD|GBP|<GB_UK>\spounds?|(?:<GB_UK>\s)?pounds?\ssterling|pounds(?!\sof)|(?:d'\s?)?euros?|francs?)\b/i
   replace_rules   __LOTSA_MONEY_00 __LOTSA_MONEY_01 __LOTSA_MONEY_02 __LOTSA_MONEY_03 __LOTSA_MONEY_04
 
-  # not a meta so it will show up in the report
-  meta     LOTS_OF_MONEY    (__LOTSA_MONEY_00 || __LOTSA_MONEY_01 || __LOTSA_MONEY_02 || __LOTSA_MONEY_03 || __LOTSA_MONEY_04 || __LOTSA_MONEY_05)
+  meta     LOTS_OF_MONEY    (__LOTSA_MONEY_00 || __LOTSA_MONEY_01 || __LOTSA_MONEY_02 || __LOTSA_MONEY_03 || __LOTSA_MONEY_04)
   describe LOTS_OF_MONEY    Huge... sums of money
   score    LOTS_OF_MONEY    0.01
 
@@ -22,12 +20,11 @@ endif
 # A lot of this is research intended to feed a re-evolve of the ADVANCE_FEE ruleset.
 # Some of these are pulled from other sandbox rules in preparation for this.
 
-ifplugin Mail::SpamAssassin::Plugin::FreeMail
-  meta     MONEY_FREEMAIL   LOTS_OF_MONEY && (FREEMAIL_FROM || FREEMAIL_REPLYTO)
-  describe MONEY_FREEMAIL   Lots of money from someone using free email?
-  score    MONEY_FREEMAIL   0.5
-  tflags   MONEY_FREEMAIL   nopublish
-endif
+#ifplugin Mail::SpamAssassin::Plugin::FreeMail
+#  meta     MONEY_FREEMAIL   LOTS_OF_MONEY && (FREEMAIL_FROM || FREEMAIL_REPLYTO)
+#  describe MONEY_FREEMAIL   Lots of money from someone using free email?
+#  score    MONEY_FREEMAIL   0.5
+#endif
 
 #meta     MONEY_FROM_RUNON   LOTS_OF_MONEY && __FROM_RUNON	# almost same spam hit rate, poorer S/O
 meta     MONEY_FROM_MISSP   LOTS_OF_MONEY && FROM_MISSPACED
@@ -49,20 +46,27 @@ score    MONEY_FORM        3.0
 #describe MONEY_ACCOUNT    Lots of money to your account
 
 
-body     __LOTTO_WINNINGS   /(?:claim|transfert?(?:\s\w+)?|virement|zahlung)\s(?:your|of|the|this|de|ihrer)\s(?:win+ings?|money|(?:cash\s)?prize|award|f[ou]nds?|grant|gewinne)/i
+body     __LOTTO_WINNINGS   /(?:claim|transfert?(?:\s\w+)?|virement)\s(?:your|of|the|this|de)\s(?:win+ings?|money|(?:cash\s)?prize|award|f[ou]nds?|grant)/i
+#describe LOTTO_WINNINGS   Claim your winnings
+#score    LOTTO_WINNINGS   0.25
 
 body     __LOTTO_WIN_01     /\bwin+ing\s(?:prize|number|notification|draw|check|cheque|details|information)/i
+#describe LOTTO_WIN_01     Winning *
+#score    LOTTO_WIN_01     0.20
 
-body     __YOU_WON_01    /\byou(?:r|'re|'ve|'ll|\shave|\sdid)?\s(?:e-?mail\s)?(?:\w+\s){0,2}(?:a\s)?w[io]n+(?:er|ing)?(?!'t)\b/i
+body     __YOU_WON_01    /\byou(?:r|'re|'ve|'ll|\shave|\sdid)?\s(?:e-?mail\s)?(?:\w+\s){0,2}(?:a\s)?w[io]n+(?:er|ing)?\b/i
 body     __YOU_WON_02    /\bw[io]n\s(?:(?:for|by)\s)?your?\b/i
-body     __YOU_WON_03    /\b(?:your?|win+ing|win+ers?|beneficiaries|participants?|individuals?)(?:\s[-a-z\s]{4,30}?)?\s(?:w(?:ere|as)|ha(?:ve|s) be(?:en)?)\s(?:randomly\s(?:selected|cho+sen|cho+sing|picked)|(?:selected|cho+sen|cho+sing|picked)\s(?:[a-z\s]{2,40}?\srandom|randomly|online|lottery|computer\s(?:ballot|wahlgang)))/i 
-meta     __YOU_WON       __YOU_WON_01 || __YOU_WON_02 || __YOU_WON_03
+body     __YOU_WON_03    /\b(?:your?|win+ing|win+ers?|beneficiaries|participants?|individuals?)(?:\s[-a-z\s]{4,30}?)?\s(?:w(?:ere|as)|ha(?:ve|s) be(?:en)?)\s(?:randomly\s(?:selected|cho+sen|cho+sing|picked)|(?:selected|cho+sen|cho+sing|picked)\s(?:[a-z\s]{2,40}?\srandom|randomly|online|lottery|computer\sballot))/i 
+meta     LOTTO_YOU_WON   __YOU_WON_01 || __YOU_WON_02 || __YOU_WON_03
+describe LOTTO_YOU_WON   You won!
+score    LOTTO_YOU_WON   1.00 
+tflags   LOTTO_YOU_WON   nopublish
 
 body     LOTTO_AGENT      /\b(?:claim(?:s|ing)?(?:\sprocessing)?|fiducia\w+|reimbursement|prize\stransfer|(?:international|foreign)\sremittance|payment|immunity|grants?)\s?(?:agent|manager|officer|secretary)/i
 describe LOTTO_AGENT      Claims Agent
 score    LOTTO_AGENT      0.50
 
-body     LOTTO_DEPT       /\b(?:claim(?:s|ing)?(?:\sprocessing)?|fiducia\w+|reimbursement|(?:international|foreign)\s(?:remittance|settlement)|payment|award)\s?(?:department|dept|unit|group|committee|bureau)/i
+body     LOTTO_DEPT       /\b(?:claim(?:s|ing)?(?:\sprocessing)?|fiducia\w+|reimbursement|(?:international|foreign)\sremittance|payment|award)\s?(?:department|dept|unit|group|committee|bureau)/i
 describe LOTTO_DEPT       Claims Department
 score    LOTTO_DEPT       0.50
 
@@ -86,33 +90,34 @@ body     __LOTTO_ADMITS_1 /\b(?:on-?line|e-?mail|ballot|(?:inter)?national|state
 body     __LOTTO_ADMITS_2 /\b(?:free)?(?:lot(?:to|tery|erie)|sweepstakes)\s(?:(?:inter)?na[tz]ional|department|bureau|group|award)/i
 uri      __LOTTO_ADMITS_3 /lottery/i
 meta     __LOTTO_ADMITS     __LOTTO_ADMITS_1 || __LOTTO_ADMITS_2 || __LOTTO_ADMITS_3
+#describe LOTTO_ADMITS     Admits to being a lottery
+#score    LOTTO_ADMITS     0.50
 
-body     __LOTTO_RELATED    /\b(?:lott(?:o|ery)|sweepstakes)\s(?:prize|draw(?:s|ing)?|(?:ge)?win(?:n?er|n?ing)?|jackpot|award|fund|com+it+e+|com+is+ion|guild|promotion|program|day|online|company|(?:in)?corporat|agent|co[-,]?ordinator|team)/i
+body     __LOTTO_RELATED    /\b(?:lott(?:o|ery)|sweepstakes)\s(?:prize|draw(?:s|ing)?|win(?:n?er|n?ing)?|jackpot|award|fund|com+it+e+|com+is+ion|guild|promotion|program|day|online|company|(?:in)?corporat|agent|co[-,]?ordinator|team)/i
+#describe LOTTO_RELATED    Talks about lottery
+#score    LOTTO_RELATED    0.10
 
-meta     MONEY_LOTTERY    LOTS_OF_MONEY && (__LOTTO_WINNINGS + __LOTTO_WIN_01 + __YOU_WON + LOTTO_AGENT + LOTTO_DEPT + LOTTO_AGENT_FM + LOTTO_AGENT_RPLY + __LOTTO_ADMITS + __LOTTO_RELATED + DEAR_WINNER > 1)
+meta     MONEY_LOTTERY    LOTS_OF_MONEY && (__LOTTO_WINNINGS + __LOTTO_WIN_01 + LOTTO_YOU_WON + LOTTO_AGENT + LOTTO_DEPT + LOTTO_AGENT_FM + LOTTO_AGENT_RPLY + __LOTTO_ADMITS + __LOTTO_RELATED + DEAR_WINNER > 1)
 describe MONEY_LOTTERY    Lots of money from a lottery
 score    MONEY_LOTTERY    1.5
+tflags   MONEY_LOTTERY    nopublish
 
 body     __DEAL           /\b(?:business|financial|this|the|mutual|die(?:se)?|cette)\s(?:deal|transa[ck]tion|proposal|offer|venture|suggestion|partnership)/i
-body     __HUSH_HUSH      /\b(?:confiden[tc]i[ae]l(?:ity)?|private|secre(?:te?|cy)|sensitive|concealed|obscured|discre(?:et|tion)|vertraulich(?:en)?|geheim)\b/i
+body     __HUSH_HUSH      /\b(?:confiden[tc]i[ae]l(?:ity)?|private|secre(?:te?|cy)|sensitive|concealed|obscured|discre(?:et|tion)|vertraulich|geheim)\b/i
 body     __IS_LEGAL       /\b(?:this\s(?:deal|offer|transaction|proposal|exchange|arrangement)|it)?\sis\s(?:(?:guaranteed|completely|absolutely|perfectly|100%|very)\s)?(?:legal|hitch-free)\b/i
 body     __NOT_SCAM       /\bnot\sa\sscam\b/i
 body     __BACK_SCRATCH   /\bmutual+y?\sbenefi(?:t|cial)\b/i
 body     __LUCRATIVE      /\blucrative\b/i
 body     __YOU_ASSIST     /\byour\sassistance\b/i
 body     __OUR_BEHALF     /\bon\s(?:my|our)\sbehalf\b/i
-body     __AGREED_RATIO   /\b(?:agreed|sharing)\s(?:ratios?|percent\w+)\b/i
-body     __SHARE_IT       /\b(?:(?:share|receive)\sth(?:e|is)\s(?:proceeds|funds?|money|balance|account)|partager (?:avec vous|ratio))\b/i
+body     __AGREED_RATIO   /\bagreed\s(?:ratios?|percent\w+)\b/i
+body     __SHARE_IT       /\b(?:share\sthe\s(?:proceeds|funds?|money|balance|account)|partager (?:avec vous|ratio))\b/i
 body     __DESTROY_ME     /\b(?:destroy|hunt)\sm[ey]\b/i
-body     __YOUR_PROFIT    /\byour?\sprofit/i
-
-body     EMRCP            /\bExcess Maximum Return Capital Profit\b/i
-describe EMRCP            "Excess Maximum Return Capital Profit" Fidelity scam
 
 ifplugin Mail::SpamAssassin::Plugin::ReplaceTags
   replace_tag  PERCENT      \b(?:\d\d|ten|[a-z]+teen|(?:twen|thir|fou?r)ty(?:-?[a-z]+)?)\s?(?:%|percent)
 
-  body     __PCT_FOR_YOU_1  /<PERCENT>[\s)]{0,3}(?:of\s[\w\s]{0,35}?)?(?:for|to|as)\syour?/i
+  body     __PCT_FOR_YOU_1  /<PERCENT>[\s)]+(?:of\s[\w\s]{0,35}?)?(?:for|to|as)\syour?/i
   body     __PCT_FOR_YOU_2  /\b(?:give|offer)\syou\s<PERCENT>/i
   body     __PCT_FOR_YOU_3  /\byour?\s(?!can)[\w\s]{6,20}?(?:(?:share|entitle|assist|comp[ea]nsate|reward|renumerate|deduct|account|tage)[\w\s]{1,25}?)?\s(?<!by\s)(?<!up\sto\s)<PERCENT>/i
   body     __PCT_OF_PMTS    /<PERCENT>[\s)]+(?:of\s[\w\s]{0,35}?)?of\s(?:the\s)?(?:payments?|remittances?|chec(?:k|que)s?)/i
@@ -129,56 +134,77 @@ endif
 #describe MONEY_DEAL       Lots of money in a suspicious deal
 #score    MONEY_DEAL       1.5
 
-body     __ATM_CARD       /\b(?:your|the|this)\s(?:atm|debit)(?:\smaster|swift)?\scard/i
+body     __ATM_CARD       /\b(?:your|the|this)\s(?:atm|debit)(?:\smaster)?\scard/i
+#meta     MONEY_ATM        LOTS_OF_MONEY && __ATM_CARD
+#describe MONEY_ATM        Lots of money on an ATM card
+#score    MONEY_ATM        1.5
 
 body     __YOU_INHERIT    /\byour\s[a-z\s]{0,30}inherit+ance\b/i
 body     __I_INHERIT      /\bI\s[a-z\s]{0,30}inherited\b/i
 body     __THEY_INHERIT   /\binherit\sth(?:e|is)\smoney\b/i
 body     __NOT_DEAD_YET   /\bwill\sinherit\b/i
-body     __AM_DYING       /\bam\s(?:\S+\s)?dying\b/i
 body     __I_WILL_YOU     /\bwill(?:ed)?\s(?:[a-z\s]{0,20}\s(?:fortune|money)\s)?to\syou\b/i
 body     __NEXT_OF_KIN    /\bnext[-\s]of[-\s]kin\b/i
 body     __EX_CUSTOMER    /\b(?:dead|deceased|late|verstorbenen)\s(?:client|customer|account|investor|kunde)/i
 body     __DECEASED       /\b(?:the|my|der)\s(?:deceased|late|verstorbenen)\b/i
 body     __SURVIVORS      /\b(?:widow|son|daughter|husband|wife|brother|sister|attorney)\s(?:of|to)\s(?:the\s)?late\s\w+\b/i
 body     __DEAD_PARENT    /\bmy\s(?:deceased|dead)\s(?:father|mother)/i
-body     __DORMANT_ACCT   /\b(?:dormant|abandoned|left\s?over)\s(?:account|fund|transaction|sum)/i
+body     __DORMANT_ACCT   /\b(?:dormant|abandoned)\s(?:account|fund|transaction|sum)/i
 body     __WILL_LEGAL     /\b(?:codicil|last\stestament|probate|executor|intestate)\b/i
 body     __EARLY_DEMISE   /\buntimely\sdeath\b/i
 body     __WIDOW          /\bwidow(?:e[rd])'?s?\b/i
 body     __MY_FORTUNE     /\b(?:my|his|her)\s(?:fortune|heritage)\b/i
 body     __DIED_IN        /\bdied\sin\b/i
 body     __INHERIT_PMT    /\binheritance\spayment\s/i
-body     __CONTACT_ATTY   /\bcontact\smy\s(?:barrister|attou?rney)\b/i
 
-body     __WIRE_XFR       /\b(?:wire|telegraph(?:ic)?|bank)\s?transfer/i
+#meta     MONEY_INHERIT    LOTS_OF_MONEY && (__YOU_INHERIT + __I_INHERIT + __THEY_INHERIT + __NOT_DEAD_YET + __I_WILL_YOU + __NEXT_OF_KIN + __EX_CUSTOMER + __DECEASED + __SURVIVORS + __DEAD_PARENT + __DORMANT_ACCT + __WILL_LEGAL + __EARLY_DEMISE + __WIDOW + __MY_FORTUNE  + __DIED_IN + __INHERIT_PMT + __DEAL > 1)
+#describe MONEY_INHERIT    Lots of money from a dead guy
+#score    MONEY_INHERIT    1.5
+#tflags   MONEY_INHERIT    nopublish
+
+body     __WIRE_XFR       /\b(?:wire|telegraph(?:ic)?|bank)\stransfer/i
 body     __TRUSTED_CHECK  /\b(?:cashier'?s?|certified)\sche(?:ck|que)/i
 body     __BANK_DRAFT     /\bbank\sdraft/i
 meta     __XFER_MONEY     (__WIRE_XFR || __TRUSTED_CHECK || __BANK_DRAFT)
+#meta     MONEY_XFER       LOTS_OF_MONEY && __XFER_MONEY
+#describe MONEY_XFER       Lots of money being transferred
+#score    MONEY_XFER       1.5
+#tflags   MONEY_XFER       nopublish
 
 body     __INTL_BANK      /\b(?:international\s(?:\w+\s)?bank|banque\sinternationale)\b/i
+#meta     MONEY_INTL_BK    LOTS_OF_MONEY && __INTL_BANK
+#describe MONEY_INTL_BK    Lots of money from an International Bank
+#score    MONEY_INTL_BK    0.5
 
-body     __BARRISTER      /\b(?:barrister|solicitor at law|barr\.)/i
+body     __BARRISTER      /\b(?:barrister|solicitor at law)/i
+#meta     MONEY_BARRISTER  LOTS_OF_MONEY && __BARRISTER
+#describe MONEY_BARRISTER  Lots of money from a British lawyer
+#score    MONEY_BARRISTER  1.5
 
-body     __SCAM           /\bscam(?:m?e[dr])?s?\b/i
+body     __SCAM           /\bscam(?:me[dr])?s?\b/i
 body     __UN             /\bunited\snations?\b/i
 body     __AFR_UNION      /\bafrican\sunion\b/i
-body     __COMPENSATION   /\b(?:compensat(?:e|ion)|recompensed?)\b/i
+body     __COMPENSATION   /\bcompensation\b/i
 body     __FRAUD          /\b(?:de)?fraud/i
+#meta     MONEY_FRAUD_COMP  LOTS_OF_MONEY && __BARRISTER && (__SCAM || __FRAUD) && (__UN || __AFR_UNION) && __COMPENSATION
+#describe MONEY_FRAUD_COMP  Lots of money from a fraud compensation
+#score    MONEY_FRAUD_COMP  1.0
  
-body     __TRUNK_BOX      /\b(?:(?:trunk|metallic|proof|security|consignment)\sbox(?:es)?|sealed\ssafe)\b/i
+body     __TRUNK_BOX      /\b(?:trunk|metallic|proof|security)\sbox(?:es)?\b/i
 body     __COURIER        /\bcourier\s(?:company|service)\b/i
 #meta     MONEY_FRAUD_BOX  LOTS_OF_MONEY && __TRUNK_BOX && __COURIER
 #describe MONEY_FRAUD_BOX  Lots of money in a box, lots of money from a fox
 #score    MONEY_FRAUD_BOX  1.0
  
 body     __SUM_OF_FUND      /\bsum\sof\s(?:amount|fund)/i
+#describe SUM_OF_FUND      Money by any other name smells of greed
+#score    SUM_OF_FUND      1.0
 
 body     __BENEFICIARY    /\bben[ei]fi(?:c|sh)i?ar(?:y|ies)\b/i
 body     __DIPLOMATIC     /\bdiplomatic\b/i
 body     __FEES           /\b(?:security|safe\w*|courier|registration|pay|paid|up-?front|processing|delivery|transfer)[\s\w]{1,15}\s(?:fee|charge)s?\b/i 
-body     __LUCKY_WINNER   /\b(?:lucky|gl.cklich(?:en)?)\s(?:ge)?win+ers?\b/i
-body     __YOUR_FUND      /\b(?:your|ihr)\s(?:unpaid\s|nicht\sausbezahlten\s)?(?:fund|geld)\b/i
+body     __LUCKY_WINNER   /\blucky\swin+ers?\b/i
+body     __YOUR_FUND      /\byour\sfund\b/i
 body     __NIGERIA        /\bnigeria\b/i
 body     __IVORY_COAST    /\b(?:Cote\s?D.Ivoire|Ivory\s?Coast)\b/i
 body     __BURKINA_FASO   /\bburkina\s?faso\b/i
@@ -201,42 +227,15 @@ body     __MILLIONS       /\bmillions\sof\s(?:dollar|euro|pound)/i
 
 # Adjust __FRAUD_PTS __FRAUD_XVW __FRAUD_IOU
 body __FRAUD_PTX	/\b(?:ass?ass?inat(?:ed|ion)|murder(?:e?d)?|poison(?:e?d)?|kill(?:ed|ing)\b[^.]{0,99}\b(?:war veterans|rebels?))\b/i
-body __FRAUD_XWW	/\b(?:honest(?:ly)?\sco(?:-?operat(?:e|ion)|llaborat(?:e|ion))|ehrliche\szusammenarbeit)\b/i
+body __FRAUD_XWW	/\b(?:honest\sco-?operation|ehrliche\szusammenarbeit)\b/i
 body __FRAUD_IOV	/\b(?:no risks?|risk-? *free|free of risks?|100% safe|v.llig Risikofrei ist)\b/i
 
 
-#meta     MONEY_FRAUD      LOTS_OF_MONEY && (__FRAUD_VQE + __FRAUD_KJV + __FRAUD_IRJ + __FRAUD_NEB + __FRAUD_XJR + __FRAUD_DPR + __FRAUD_BEP + __FRAUD_TDP + __FRAUD_GAN + __FRAUD_IRT + __FRAUD_AON + __FRAUD_WNY + __FRAUD_IPK + __FRAUD_QXX + __FRAUD_IOV + __FRAUD_MLY + __FRAUD_ULK + __FRAUD_BGP + __FRAUD_YWW + __FRAUD_JYG + __FRAUD_XWW + __FRAUD_UUY + __FRAUD_SNT + __FRAUD_JNB + __FRAUD_QFY + __FRAUD_WDR + __FRAUD_WFC + __FRAUD_AUM + __FRAUD_MCQ + __FRAUD_PVN + __FRAUD_FVU + __FRAUD_CKF + __FRAUD_MQO + __FRAUD_TCC + __FRAUD_GBW + __FRAUD_AXF + __FRAUD_THJ + __FRAUD_YQV + __FRAUD_YJA + __FRAUD_YPO + __FRAUD_UOQ + __AFRICAN_STATE + __AFR_UNION + __AGREED_RATIO + __AM_DYING + __ATM_CARD + __BACK_SCRATCH +  __BARRISTER + __COMPENSATION + __CONTACT_ATTY + __CONTACT_YOU + __COURIER + __DEAD_PARENT + __DEAL + DEAR_BENEFICIARY + DEAR_WINNER + __DECEASED + __DESTROY_ME + __DIED_IN + __DIPLOMATIC + __DORMANT_ACCT + __EARLY_DEMISE + EMRCP + __EX_CUSTOMER + __FEES + __FOUND_YOU + __FRAUD + __FRAUD_PTX + __HUSH_HUSH + __I_INHERIT + __INHERIT_PMT + __INTL_BANK + __INVEST_MONEY + __IS_LEGAL + __I_WILL_YOU + __KAM_LOTTO2 + __LOTTO_ADMITS + LOTTO_AGENT + LOTTO_DEPT + __LOTTO_RELATED + LOTTO_URI + __LOTTO_WIN_01 + __LOTTO_WINNINGS +  __LUCKY_WINNER + __LUCRATIVE + __MILLIONS + __MY_FORTUNE + __NEXT_OF_KIN + __NOT_DEAD_YET + __NOT_SCAM + __OUR_BEHALF + __SCAM + __SHARE_IT + __SUM_OF_FUND + __SURVIVORS + __THEY_INHERIT + __TRUNK_BOX +  __UN + __UNCLAIMED + __WIDOW + __WILL_LEGAL + __XFER_MONEY + __YOU_ASSIST + __YOU_INHERIT + __YOUR_FUND + __YOUR_PERM + __YOUR_PROFIT + __YOU_WON + LOTTO_AGENT_FM + LOTTO_AGENT_RPLY + __PCT_FOR_YOU + __PCT_OF_PMTS + __RANDOM_PICK + __CHARITY > 1)
-#score    MONEY_FRAUD      0.25
-#describe MONEY_FRAUD      Lots of money and a fraud phrase
-#tflags   MONEY_FRAUD      nopublish
+meta     MONEY_FRAUD      LOTS_OF_MONEY && (__FRAUD_VQE + __FRAUD_KJV + __FRAUD_IRJ + __FRAUD_NEB + __FRAUD_XJR + __FRAUD_DPR + __FRAUD_BEP + __FRAUD_TDP + __FRAUD_GAN + __FRAUD_IRT + __FRAUD_AON + __FRAUD_WNY + __FRAUD_IPK + __FRAUD_QXX + __FRAUD_IOV + __FRAUD_MLY + __FRAUD_ULK + __FRAUD_BGP + __FRAUD_YWW + __FRAUD_JYG + __FRAUD_XWW + __FRAUD_UUY + __FRAUD_SNT + __FRAUD_JNB + __FRAUD_QFY + __FRAUD_WDR + __FRAUD_WFC + __FRAUD_AUM + __FRAUD_MCQ + __FRAUD_PVN + __FRAUD_FVU + __FRAUD_CKF + __FRAUD_MQO + __FRAUD_TCC + __FRAUD_GBW + __FRAUD_AXF + __FRAUD_THJ + __FRAUD_YQV + __FRAUD_YJA + __FRAUD_YPO + __FRAUD_UOQ + __AFRICAN_STATE + __AFR_UNION + __AGREED_RATIO + __ATM_CARD + __BACK_SCRATCH +  __BARRISTER + __COMPENSATION + __CONTACT_YOU + __COURIER + __DEAD_PARENT + __DEAL + DEAR_BENEFICIARY + DEAR_WINNER + __DECEASED + __DESTROY_ME + __DIED_IN + __DIPLOMATIC + __DORMANT_ACCT + __EARLY_DEMISE + __EX_CUSTOMER + __FEES + __FOUND_YOU + __FRAUD + __FRAUD_PTX + __HUSH_HUSH + __I_INHERIT + __INHERIT_PMT + __INTL_BANK + __INVEST_MONEY + __IS_LEGAL + __I_WILL_YOU + __KAM_LOTTO2 + __LOTTO_ADMITS + LOTTO_AGENT + LOTTO_DEPT + __LOTTO_RELATED + LOTTO_URI + __LOTTO_WIN_01 + __LOTTO_WINNINGS +  __LUCKY_WINNER + __LUCRATIVE + __MILLIONS + __MY_FORTUNE + __NEXT_OF_KIN + __NOT_DEAD_YET + __NOT_SCAM + __OUR_BEHALF + __SCAM + __SHARE_IT + __SUM_OF_FUND + __SURVIVORS + __THEY_INHERIT + __TRUNK_BOX +  __UN + __UNCLAIMED + __WIDOW + __WILL_LEGAL + __XFER_MONEY + __YOU_ASSIST + __YOU_INHERIT + __YOUR_FUND + __YOUR_PERM + LOTTO_YOU_WON + LOTTO_AGENT_FM + LOTTO_AGENT_RPLY + __PCT_FOR_YOU + __PCT_OF_PMTS + __RANDOM_PICK + __CHARITY > 1)
+score    MONEY_FRAUD      0.25
+describe MONEY_FRAUD      Lots of money and any of the fraud rules
 
-meta     MONEY_FRAUD_3 LOTS_OF_MONEY && (__FRAUD_VQE + __FRAUD_KJV + __FRAUD_IRJ + __FRAUD_NEB + __FRAUD_XJR + __FRAUD_DPR + __FRAUD_BEP + __FRAUD_TDP + __FRAUD_GAN + __FRAUD_IRT + __FRAUD_AON + __FRAUD_WNY + __FRAUD_IPK + __FRAUD_QXX + __FRAUD_IOV + __FRAUD_MLY + __FRAUD_ULK + __FRAUD_BGP + __FRAUD_YWW + __FRAUD_JYG + __FRAUD_XWW + __FRAUD_UUY + __FRAUD_SNT + __FRAUD_JNB + __FRAUD_QFY + __FRAUD_WDR + __FRAUD_WFC + __FRAUD_AUM + __FRAUD_MCQ + __FRAUD_PVN + __FRAUD_FVU + __FRAUD_CKF + __FRAUD_MQO + __FRAUD_TCC + __FRAUD_GBW + __FRAUD_AXF + __FRAUD_THJ + __FRAUD_YQV + __FRAUD_YJA + __FRAUD_YPO + __FRAUD_UOQ + __AFRICAN_STATE + __AFR_UNION + __AGREED_RATIO + __AM_DYING + __ATM_CARD + __BACK_SCRATCH +  __BARRISTER + __COMPENSATION + __CONTACT_ATTY + __CONTACT_YOU + __COURIER + __DEAD_PARENT + __DEAL + DEAR_BENEFICIARY + DEAR_WINNER + __DECEASED + __DESTROY_ME + __DIED_IN + __DIPLOMATIC + __DORMANT_ACCT + __EARLY_DEMISE + EMRCP + __EX_CUSTOMER + __FEES + __FOUND_YOU + __FRAUD + __FRAUD_PTX + __HUSH_HUSH + __I_INHERIT + __INHERIT_PMT + __INTL_BANK + __INVEST_MONEY + __IS_LEGAL + __I_WILL_YOU + __KAM_LOTTO2 + __LOTTO_ADMITS + LOTTO_AGENT + LOTTO_DEPT + __LOTTO_RELATED + LOTTO_URI + __LOTTO_WIN_01 + __LOTTO_WINNINGS +  __LUCKY_WINNER + __LUCRATIVE + __MILLIONS + __MY_FORTUNE + __NEXT_OF_KIN + __NOT_DEAD_YET + __NOT_SCAM + __OUR_BEHALF + __SCAM + __SHARE_IT + __SUM_OF_FUND + __SURVIVORS + __THEY_INHERIT + __TRUNK_BOX +  __UN + __UNCLAIMED + __WIDOW + __WILL_LEGAL + __XFER_MONEY + __YOU_ASSIST + __YOU_INHERIT + __YOUR_FUND + __YOUR_PERM + __YOUR_PROFIT + __YOU_WON + LOTTO_AGENT_FM + LOTTO_AGENT_RPLY + __PCT_FOR_YOU + __PCT_OF_PMTS + __RANDOM_PICK + __CHARITY > 3)
-score    MONEY_FRAUD_3 1.00
-describe MONEY_FRAUD_3 Lots of money and several fraud phrases
-#tflags   MONEY_FRAUD_3 nopublish
-
-meta     MONEY_FRAUD_5 LOTS_OF_MONEY && (__FRAUD_VQE + __FRAUD_KJV + __FRAUD_IRJ + __FRAUD_NEB + __FRAUD_XJR + __FRAUD_DPR + __FRAUD_BEP + __FRAUD_TDP + __FRAUD_GAN + __FRAUD_IRT + __FRAUD_AON + __FRAUD_WNY + __FRAUD_IPK + __FRAUD_QXX + __FRAUD_IOV + __FRAUD_MLY + __FRAUD_ULK + __FRAUD_BGP + __FRAUD_YWW + __FRAUD_JYG + __FRAUD_XWW + __FRAUD_UUY + __FRAUD_SNT + __FRAUD_JNB + __FRAUD_QFY + __FRAUD_WDR + __FRAUD_WFC + __FRAUD_AUM + __FRAUD_MCQ + __FRAUD_PVN + __FRAUD_FVU + __FRAUD_CKF + __FRAUD_MQO + __FRAUD_TCC + __FRAUD_GBW + __FRAUD_AXF + __FRAUD_THJ + __FRAUD_YQV + __FRAUD_YJA + __FRAUD_YPO + __FRAUD_UOQ + __AFRICAN_STATE + __AFR_UNION + __AGREED_RATIO + __AM_DYING + __ATM_CARD + __BACK_SCRATCH +  __BARRISTER + __COMPENSATION + __CONTACT_ATTY + __CONTACT_YOU + __COURIER + __DEAD_PARENT + __DEAL + DEAR_BENEFICIARY + DEAR_WINNER + __DECEASED + __DESTROY_ME + __DIED_IN + __DIPLOMATIC + __DORMANT_ACCT + __EARLY_DEMISE + EMRCP + __EX_CUSTOMER + __FEES + __FOUND_YOU + __FRAUD + __FRAUD_PTX + __HUSH_HUSH + __I_INHERIT + __INHERIT_PMT + __INTL_BANK + __INVEST_MONEY + __IS_LEGAL + __I_WILL_YOU + __KAM_LOTTO2 + __LOTTO_ADMITS + LOTTO_AGENT + LOTTO_DEPT + __LOTTO_RELATED + LOTTO_URI + __LOTTO_WIN_01 + __LOTTO_WINNINGS +  __LUCKY_WINNER + __LUCRATIVE + __MILLIONS + __MY_FORTUNE + __NEXT_OF_KIN + __NOT_DEAD_YET + __NOT_SCAM + __OUR_BEHALF + __SCAM + __SHARE_IT + __SUM_OF_FUND + __SURVIVORS + __THEY_INHERIT + __TRUNK_BOX +  __UN + __UNCLAIMED + __WIDOW + __WILL_LEGAL + __XFER_MONEY + __YOU_ASSIST + __YOU_INHERIT + __YOUR_FUND + __YOUR_PERM + __YOUR_PROFIT + __YOU_WON + LOTTO_AGENT_FM + LOTTO_AGENT_RPLY + __PCT_FOR_YOU + __PCT_OF_PMTS + __RANDOM_PICK + __CHARITY > 5)
-score    MONEY_FRAUD_5 1.50
-describe MONEY_FRAUD_5 Lots of money and many fraud phrases
-#tflags   MONEY_FRAUD_5 nopublish
-
-meta     MONEY_FRAUD_8 LOTS_OF_MONEY && (__FRAUD_VQE + __FRAUD_KJV + __FRAUD_IRJ + __FRAUD_NEB + __FRAUD_XJR + __FRAUD_DPR + __FRAUD_BEP + __FRAUD_TDP + __FRAUD_GAN + __FRAUD_IRT + __FRAUD_AON + __FRAUD_WNY + __FRAUD_IPK + __FRAUD_QXX + __FRAUD_IOV + __FRAUD_MLY + __FRAUD_ULK + __FRAUD_BGP + __FRAUD_YWW + __FRAUD_JYG + __FRAUD_XWW + __FRAUD_UUY + __FRAUD_SNT + __FRAUD_JNB + __FRAUD_QFY + __FRAUD_WDR + __FRAUD_WFC + __FRAUD_AUM + __FRAUD_MCQ + __FRAUD_PVN + __FRAUD_FVU + __FRAUD_CKF + __FRAUD_MQO + __FRAUD_TCC + __FRAUD_GBW + __FRAUD_AXF + __FRAUD_THJ + __FRAUD_YQV + __FRAUD_YJA + __FRAUD_YPO + __FRAUD_UOQ + __AFRICAN_STATE + __AFR_UNION + __AGREED_RATIO + __AM_DYING + __ATM_CARD + __BACK_SCRATCH +  __BARRISTER + __COMPENSATION + __CONTACT_ATTY + __CONTACT_YOU + __COURIER + __DEAD_PARENT + __DEAL + DEAR_BENEFICIARY + DEAR_WINNER + __DECEASED + __DESTROY_ME + __DIED_IN + __DIPLOMATIC + __DORMANT_ACCT + __EARLY_DEMISE + EMRCP + __EX_CUSTOMER + __FEES + __FOUND_YOU + __FRAUD + __FRAUD_PTX + __HUSH_HUSH + __I_INHERIT + __INHERIT_PMT + __INTL_BANK + __INVEST_MONEY + __IS_LEGAL + __I_WILL_YOU + __KAM_LOTTO2 + __LOTTO_ADMITS + LOTTO_AGENT + LOTTO_DEPT + __LOTTO_RELATED + LOTTO_URI + __LOTTO_WIN_01 + __LOTTO_WINNINGS +  __LUCKY_WINNER + __LUCRATIVE + __MILLIONS + __MY_FORTUNE + __NEXT_OF_KIN + __NOT_DEAD_YET + __NOT_SCAM + __OUR_BEHALF + __SCAM + __SHARE_IT + __SUM_OF_FUND + __SURVIVORS + __THEY_INHERIT + __TRUNK_BOX +  __UN + __UNCLAIMED + __WIDOW + __WILL_LEGAL + __XFER_MONEY + __YOU_ASSIST + __YOU_INHERIT + __YOUR_FUND + __YOUR_PERM + __YOUR_PROFIT + __YOU_WON + LOTTO_AGENT_FM + LOTTO_AGENT_RPLY + __PCT_FOR_YOU + __PCT_OF_PMTS + __RANDOM_PICK + __CHARITY > 8)
-score    MONEY_FRAUD_8 1.50
-describe MONEY_FRAUD_8 Lots of money and very many fraud phrases
-#tflags   MONEY_FRAUD_8 nopublish
-
-meta     FORM_FRAUD       (FILL_THIS_FORM || FILL_THIS_FORM_SHORT) && (__FRAUD_VQE + __FRAUD_KJV + __FRAUD_IRJ + __FRAUD_NEB + __FRAUD_XJR + __FRAUD_DPR + __FRAUD_BEP + __FRAUD_TDP + __FRAUD_GAN + __FRAUD_IRT + __FRAUD_AON + __FRAUD_WNY + __FRAUD_IPK + __FRAUD_QXX + __FRAUD_IOV + __FRAUD_MLY + __FRAUD_ULK + __FRAUD_BGP + __FRAUD_YWW + __FRAUD_JYG + __FRAUD_XWW + __FRAUD_UUY + __FRAUD_SNT + __FRAUD_JNB + __FRAUD_QFY + __FRAUD_WDR + __FRAUD_WFC + __FRAUD_AUM + __FRAUD_MCQ + __FRAUD_PVN + __FRAUD_FVU + __FRAUD_CKF + __FRAUD_MQO + __FRAUD_TCC + __FRAUD_GBW + __FRAUD_AXF + __FRAUD_THJ + __FRAUD_YQV + __FRAUD_YJA + __FRAUD_YPO + __FRAUD_UOQ + __AFRICAN_STATE + __AFR_UNION + __AGREED_RATIO + __AM_DYING + __ATM_CARD + __BACK_SCRATCH +  __BARRISTER + __COMPENSATION + __CONTACT_ATTY + __CONTACT_YOU + __COURIER + __DEAD_PARENT + __DEAL + DEAR_BENEFICIARY + DEAR_WINNER + __DECEASED + __DESTROY_ME + __DIED_IN + __DIPLOMATIC + __DORMANT_ACCT + __EARLY_DEMISE + EMRCP + __EX_CUSTOMER + __FEES + __FOUND_YOU + __FRAUD + __FRAUD_PTX + __HUSH_HUSH + __I_INHERIT + __INHERIT_PMT + __INTL_BANK + __INVEST_MONEY + __IS_LEGAL + __I_WILL_YOU + __KAM_LOTTO2 + __LOTTO_ADMITS + LOTTO_AGENT + LOTTO_DEPT + __LOTTO_RELATED + LOTTO_URI + __LOTTO_WIN_01 + __LOTTO_WINNINGS + __LUCKY_WINNER + __LUCRATIVE + __MILLIONS + __MY_FORTUNE + __NEXT_OF_KIN + __NOT_DEAD_YET + __NOT_SCAM + __OUR_BEHALF + __SCAM + __SHARE_IT + __SUM_OF_FUND + __SURVIVORS + __THEY_INHERIT + __TRUNK_BOX +  __UN + __UNCLAIMED + __WIDOW + __WILL_LEGAL + __XFER_MONEY + __YOU_ASSIST + __YOU_INHERIT + __YOUR_FUND + __YOUR_PERM + __YOUR_PROFIT + __YOU_WON + LOTTO_AGENT_FM + LOTTO_AGENT_RPLY + __PCT_FOR_YOU + __PCT_OF_PMTS + __RANDOM_PICK + __CHARITY > 1)
+meta     FORM_FRAUD       (FILL_THIS_FORM || FILL_THIS_FORM_SHORT) && (__FRAUD_VQE + __FRAUD_KJV + __FRAUD_IRJ + __FRAUD_NEB + __FRAUD_XJR + __FRAUD_DPR + __FRAUD_BEP + __FRAUD_TDP + __FRAUD_GAN + __FRAUD_IRT + __FRAUD_AON + __FRAUD_WNY + __FRAUD_IPK + __FRAUD_QXX + __FRAUD_IOV + __FRAUD_MLY + __FRAUD_ULK + __FRAUD_BGP + __FRAUD_YWW + __FRAUD_JYG + __FRAUD_XWW + __FRAUD_UUY + __FRAUD_SNT + __FRAUD_JNB + __FRAUD_QFY + __FRAUD_WDR + __FRAUD_WFC + __FRAUD_AUM + __FRAUD_MCQ + __FRAUD_PVN + __FRAUD_FVU + __FRAUD_CKF + __FRAUD_MQO + __FRAUD_TCC + __FRAUD_GBW + __FRAUD_AXF + __FRAUD_THJ + __FRAUD_YQV + __FRAUD_YJA + __FRAUD_YPO + __FRAUD_UOQ + __AFRICAN_STATE + __AFR_UNION + __AGREED_RATIO + __ATM_CARD + __BACK_SCRATCH +  __BARRISTER + __COMPENSATION + __CONTACT_YOU + __COURIER + __DEAD_PARENT + __DEAL + DEAR_BENEFICIARY + DEAR_WINNER + __DECEASED + __DESTROY_ME + __DIED_IN + __DIPLOMATIC + __DORMANT_ACCT + __EARLY_DEMISE + __EX_CUSTOMER + __FEES + __FOUND_YOU + __FRAUD + __FRAUD_PTX + __HUSH_HUSH + __I_INHERIT + __INHERIT_PMT + __INTL_BANK + __INVEST_MONEY + __IS_LEGAL + __I_WILL_YOU + __KAM_LOTTO2 + __LOTTO_ADMITS + LOTTO_AGENT + LOTTO_DEPT + __LOTTO_RELATED + LOTTO_URI + __LOTTO_WIN_01 + __LOTTO_WINNINGS + __LUCKY_WINNER + __LUCRATIVE + __MILLIONS + __MY_FORTUNE + __NEXT_OF_KIN + __NOT_DEAD_YET + __NOT_SCAM + __OUR_BEHALF + __SCAM + __SHARE_IT + __SUM_OF_FUND + __SURVIVORS + __THEY_INHERIT + __TRUNK_BOX +  __UN + __UNCLAIMED + __WIDOW + __WILL_LEGAL + __XFER_MONEY + __YOU_ASSIST + __YOU_INHERIT + __YOUR_FUND + __YOUR_PERM + LOTTO_YOU_WON + LOTTO_AGENT_FM + LOTTO_AGENT_RPLY + __PCT_FOR_YOU + __PCT_OF_PMTS + __RANDOM_PICK + __CHARITY > 1)
 score    FORM_FRAUD       0.25
-describe FORM_FRAUD       Fill a form and a fraud phrase
-tflags   FORM_FRAUD       nopublish
-
-meta     FORM_FRAUD_3  (FILL_THIS_FORM || FILL_THIS_FORM_SHORT) && (__FRAUD_VQE + __FRAUD_KJV + __FRAUD_IRJ + __FRAUD_NEB + __FRAUD_XJR + __FRAUD_DPR + __FRAUD_BEP + __FRAUD_TDP + __FRAUD_GAN + __FRAUD_IRT + __FRAUD_AON + __FRAUD_WNY + __FRAUD_IPK + __FRAUD_QXX + __FRAUD_IOV + __FRAUD_MLY + __FRAUD_ULK + __FRAUD_BGP + __FRAUD_YWW + __FRAUD_JYG + __FRAUD_XWW + __FRAUD_UUY + __FRAUD_SNT + __FRAUD_JNB + __FRAUD_QFY + __FRAUD_WDR + __FRAUD_WFC + __FRAUD_AUM + __FRAUD_MCQ + __FRAUD_PVN + __FRAUD_FVU + __FRAUD_CKF + __FRAUD_MQO + __FRAUD_TCC + __FRAUD_GBW + __FRAUD_AXF + __FRAUD_THJ + __FRAUD_YQV + __FRAUD_YJA + __FRAUD_YPO + __FRAUD_UOQ + __AFRICAN_STATE + __AFR_UNION + __AGREED_RATIO + __AM_DYING + __ATM_CARD + __BACK_SCRATCH +  __BARRISTER + __COMPENSATION + __CONTACT_ATTY + __CONTACT_YOU + __COURIER + __DEAD_PARENT + __DEAL + DEAR_BENEFICIARY + DEAR_WINNER + __DECEASED + __DESTROY_ME + __DIED_IN + __DIPLOMATIC + __DORMANT_ACCT + __EARLY_DEMISE + EMRCP + __EX_CUSTOMER + __FEES + __FOUND_YOU + __FRAUD + __FRAUD_PTX + __HUSH_HUSH + __I_INHERIT + __INHERIT_PMT + __INTL_BANK + __INVEST_MONEY + __IS_LEGAL + __I_WILL_YOU + __KAM_LOTTO2 + __LOTTO_ADMITS + LOTTO_AGENT + LOTTO_DEPT + __LOTTO_RELATED + LOTTO_URI + __LOTTO_WIN_01 + __LOTTO_WINNINGS + __LUCKY_WINNER + __LUCRATIVE + __MILLIONS + __MY_FORTUNE + __NEXT_OF_KIN + __NOT_DEAD_YET + __NOT_SCAM + __OUR_BEHALF + __SCAM + __SHARE_IT + __SUM_OF_FUND + __SURVIVORS + __THEY_INHERIT + __TRUNK_BOX +  __UN + __UNCLAIMED + __WIDOW + __WILL_LEGAL + __XFER_MONEY + __YOU_ASSIST + __YOU_INHERIT + __YOUR_FUND + __YOUR_PERM + __YOUR_PROFIT + __YOU_WON + LOTTO_AGENT_FM + LOTTO_AGENT_RPLY + __PCT_FOR_YOU + __PCT_OF_PMTS + __RANDOM_PICK + __CHARITY > 3)
-score    FORM_FRAUD_3  1.00
-describe FORM_FRAUD_3  Fill a form and several fraud phrases
-#tflags   FORM_FRAUD_3  nopublish
-
-meta     FORM_FRAUD_5  (FILL_THIS_FORM || FILL_THIS_FORM_SHORT) && (__FRAUD_VQE + __FRAUD_KJV + __FRAUD_IRJ + __FRAUD_NEB + __FRAUD_XJR + __FRAUD_DPR + __FRAUD_BEP + __FRAUD_TDP + __FRAUD_GAN + __FRAUD_IRT + __FRAUD_AON + __FRAUD_WNY + __FRAUD_IPK + __FRAUD_QXX + __FRAUD_IOV + __FRAUD_MLY + __FRAUD_ULK + __FRAUD_BGP + __FRAUD_YWW + __FRAUD_JYG + __FRAUD_XWW + __FRAUD_UUY + __FRAUD_SNT + __FRAUD_JNB + __FRAUD_QFY + __FRAUD_WDR + __FRAUD_WFC + __FRAUD_AUM + __FRAUD_MCQ + __FRAUD_PVN + __FRAUD_FVU + __FRAUD_CKF + __FRAUD_MQO + __FRAUD_TCC + __FRAUD_GBW + __FRAUD_AXF + __FRAUD_THJ + __FRAUD_YQV + __FRAUD_YJA + __FRAUD_YPO + __FRAUD_UOQ + __AFRICAN_STATE + __AFR_UNION + __AGREED_RATIO + __AM_DYING + __ATM_CARD + __BACK_SCRATCH +  __BARRISTER + __COMPENSATION + __CONTACT_ATTY + __CONTACT_YOU + __COURIER + __DEAD_PARENT + __DEAL + DEAR_BENEFICIARY + DEAR_WINNER + __DECEASED + __DESTROY_ME + __DIED_IN + __DIPLOMATIC + __DORMANT_ACCT + __EARLY_DEMISE + EMRCP + __EX_CUSTOMER + __FEES + __FOUND_YOU + __FRAUD + __FRAUD_PTX + __HUSH_HUSH + __I_INHERIT + __INHERIT_PMT + __INTL_BANK + __INVEST_MONEY + __IS_LEGAL + __I_WILL_YOU + __KAM_LOTTO2 + __LOTTO_ADMITS + LOTTO_AGENT + LOTTO_DEPT + __LOTTO_RELATED + LOTTO_URI + __LOTTO_WIN_01 + __LOTTO_WINNINGS + __LUCKY_WINNER + __LUCRATIVE + __MILLIONS + __MY_FORTUNE + __NEXT_OF_KIN + __NOT_DEAD_YET + __NOT_SCAM + __OUR_BEHALF + __SCAM + __SHARE_IT + __SUM_OF_FUND + __SURVIVORS + __THEY_INHERIT + __TRUNK_BOX +  __UN + __UNCLAIMED + __WIDOW + __WILL_LEGAL + __XFER_MONEY + __YOU_ASSIST + __YOU_INHERIT + __YOUR_FUND + __YOUR_PERM + __YOUR_PROFIT + __YOU_WON + LOTTO_AGENT_FM + LOTTO_AGENT_RPLY + __PCT_FOR_YOU + __PCT_OF_PMTS + __RANDOM_PICK + __CHARITY > 5)
-score    FORM_FRAUD_5  1.00
-describe FORM_FRAUD_5  Fill a form and many fraud phrases
-#tflags   FORM_FRAUD_5  nopublish
+describe FORM_FRAUD       Fill a form and any of the fraud rules
 

@@ -676,7 +676,7 @@ format of:
 NOTE: This data structure has changed since it was originally introduced
 in version 3.0.0.  The values are no longer perl anonymous hashes, they
 are a single string containing the raw token value.  You can test for
-backwards compatibility by checking to see if the value for a key is a
+backwards compatability by checking to see if the value for a key is a
 reference to a perl HASH, for instance:
 
 if (ref($toksref->{$sometokenkey}) eq 'HASH') {...

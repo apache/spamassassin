@@ -17,29 +17,18 @@
 # limitations under the License.
 # </@LICENSE>
 
-set -e
-
-rm -rf scores scores-set0 scores-set1 scores-set2 scores-set3 stats-set0 stats-set1 stats-set2 stats-set3 trunk-rulesrc-scores
+cd /home/dos/sa-score-gen/nightly-rescore-via-cron
+rm -rf scores scores-set0 scores-set1 scores-set2 scores-set3 stats-set0 stats-set1 stats-set2 stats-set3
 svn up
 
-if [ `date +%w` -eq 0 ]; then
+if [ `date +%w` -eq 6 ]; then
   ./generate-new-scores 0
   ./generate-new-scores 1
-  REVISION=`grep "revision .*" scores-set1 | cut -d" " -f9`
+  REVISION=`grep "revision .*" scores-set1 -o | cut -d" " -f2`
 else
   ./generate-new-scores 1
   ./generate-new-scores 0
-  REVISION=`grep "revision .*" scores-set0 | cut -d" " -f9`
+  REVISION=`grep "revision .*" scores-set0 -o | cut -d" " -f2`
 fi
 
-cp scores-set0 scores-set2
-cp scores-set1 scores-set3
-./merge-scoresets $SCORESET
-cat scores
-
-svn co https://svn.apache.org/repos/asf/spamassassin/trunk/rulesrc/scores trunk-rulesrc-scores
-
-cp scores trunk-rulesrc-scores/72_scores.cf
-cp scores-set* stats-set* trunk-rulesrc-scores/.
-
-svn ci trunk-rulesrc-scores/ -m "updated scores for revision $REVISION active rules added since last mass-check"
+svn ci -m "updated scores for revision $REVISION active rules added since last mass-check"

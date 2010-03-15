@@ -33,10 +33,9 @@ describe HELO_NO_DOMAIN	Relay reports its domain incorrectly
 
 # This doesn't fire often after greylisting ... how about w/out it?
 # renamed from KHOP_NO_FQDN
-# this is useless -- 99% of its hits overlap HELO_NO_DOMAIN
-#meta	 KHOP_HELO_BOT	__HELO_NO_DOMAIN && KHOP_BOTNET_7
-#describe KHOP_HELO_BOT	Suspect botnet sender claims no domain name
-#tflags   KHOP_HELO_BOT	nopublish
+meta	 KHOP_HELO_BOT	__HELO_NO_DOMAIN && KHOP_BOTNET_2
+describe KHOP_HELO_BOT	Suspect botnet sender claims no domain name
+tflags   KHOP_HELO_BOT	nopublish
 #score	 KHOP_HELO_BOT	0.5	# 20090603
 
 header __NAME_IS_EMAIL	From:raw =~ /\w\@[\w.-]+\.\w\w+["'`]*\s*<\w+\@\w/
@@ -66,8 +65,8 @@ meta	 SPOOFED_URL	__SPOOFED_URL && !(__VIA_ML || __SENDER_BOT || __YAHOO_BULK ||
 describe SPOOFED_URL	Has a link whose text is a different URL
 #score	 SPOOFED_URL	2.0	# 20090408, beware of 'legit' tracking bugs
 
-uri	 __FORGED_URL_DOM_1	m'https?://[^/]{0,40}\.(?:com|org|edu|net|gov|com?\.[a-z]{2})\.\w[^/\s]{4}'i
-body	 __FORGED_URL_DOM_2	m'(^|\W)https?://[\w.-]{0,40}\.(?:com|org|edu|net|gov|com?\.[a-z]{2})\.\w[^/\s]{5}'i
+uri	 __FORGED_URL_DOM_1	m'https?://[^/]{0,40}\.(?:com|org|edu|net|gov|com?\.[a-z]{2})\.[^/]{5}'i
+body	 __FORGED_URL_DOM_2	m'(^|\W)https?://[\w.-]{0,40}\.(?:com|org|edu|net|gov|com?\.[a-z]{2})\.[^/]{5}'i
 meta	 FORGED_URL_DOM	__FORGED_URL_DOM_1 || __FORGED_URL_DOM_2
 describe FORGED_URL_DOM	Link domain has a TLD as a subdomain
 

@@ -1,5 +1,10 @@
 #!/bin/bash
 #
+# Continue the updates-building process, post the user approval step.
+# Currently this is interactive as it requires a GPG passphrase entry.
+#
+# usage: sudo -u updatesd /home/updatesd/svn/spamassassin/build/jmupdates/run_part2
+#
 # required setup, in /etc/sudoers or /opt/sfw/etc/sudoers:
 #   updatesd     ALL = NOPASSWD: /usr/sbin/rndc reload
 

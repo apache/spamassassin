@@ -3,19 +3,6 @@
 #### Basic stuff
 ####
 
-header T_BUG6353_1 From:addr !~ /\@.+\.[a-z]+$/i [if-unset: foo@bar.com]
-header T_BUG6353_2 From:addr !~ /\.[a-z]+$/i [if-unset: foo@bar.com]
-header T_BUG6353_3 From:addr !~ /\@.+?\.[a-z]/i [if-unset: foo@bar.com]
-header T_BUG6353_4 From:addr !~ /\@[^@]+\.(?:[a-z]{2,}|xn--[a-z0-9]+(?:-[a-z0-9]*)?)$/i
-header T_BUG6353_5 From:addr !~ /\@[^@]+\.(?:[a-z]{2,}|xn--[a-z0-9]+(?:-[a-z0-9]*)?)$/i [if-unset: foo@bar.com]
-header T_BUG6353_6 From:addr !~ /\@[^@]+\.(?:[a-z0-9-]+)$/i
-header T_BUG6353_7 From:addr !~ /\@[^@]+\.(?:[a-z0-9-]+)$/i [if-unset: foo@bar.com]
-header T_MISSING_FROM From =~ /^UNSET$/ [if-unset: UNSET]
-
-# cheers to spam-l
-header		RCVD_HAS_FROM_USER	Received =~ /\bfrom\sUser\b/im
-header		RCVD_HAS_HELO_USER	Received =~ /\bHELO[\s=]User\b/im
-
 header		HK_RANDOM_ENVFROM	EnvelopeFrom =~ /^(?!(?:mail|bounce)[_.-]|[^@]*(?:[+=^~\#]|mcgr|kpmg|nlpbr|ndqv|lcgc|cplpr|-mailer@)|[^@]{20})[^@]*(?:[bcdfgjklmnpqrtvwxz]{5}|[aeiouy]{5}|([a-z]{1,2})(?:\1){3})/mi
 describe	HK_RANDOM_ENVFROM	Envelope sender username looks random
 header		HK_RANDOM_FROM		From:addr =~ /^(?!(?:mail|bounce)[_.-]|[^@]*(?:[+=^~\#]|mcgr|kpmg|nlpbr|ndqv|lcgc|cplpr|-mailer@)|[^@]{26}|.*?@.{0,20}\bcmp-info\.com$)[^@]*(?:[bcdfgjklmnpqrtvwxz]{5}|[aeiouy]{5}|([a-z]{1,2})(?:\1){3})/mi
@@ -30,7 +17,7 @@ describe	HK_RANDOM_REPLYTO_NAME	Reply-To name looks random
 header		HK_NAME_DRUGS		From:name =~ /(viagra|cialis)/mi
 describe	HK_NAME_DRUGS		From name contains drugs
 
-header		HK_NAME_FREE		From:name =~ /\b(?:get)?free(?!\.fr)\b/mi
+header		HK_NAME_FREE		From:name =~ /\b(?:get)?free\b/mi
 describe	HK_NAME_FREE		From name mentions free stuff
 
 header		HK_SUBJECT_SPACES	Subject =~ /^(?!.{80}\#).*?\s{10}/
@@ -40,7 +27,7 @@ header		HK_SUBJECT_SPACES_SC	Subject =~ /\s{10}(?:[a-z]|\d{1,4})(?:\s|$)/i
 describe	HK_SUBJECT_SPACES_SC	Lots of spaces in Subject with some obfuscation
 
 header		__HK_NAME_MICROSOFT	From:name =~ /(microsoft|\bmsn\b)/i
-header		__HK_HELO_MICROSOFT	X-Spam-Relays-External =~ / helo=\S+\.(?:microsoft(?:email)?|msn)\.com /
+header		__HK_HELO_MICROSOFT	X-Spam-Relays-External =~ / helo=\S+\.(?:microsoft|msn)\.com /
 meta		HK_FAKENAME_MICROSOFT	__HK_NAME_MICROSOFT && !__HK_HELO_MICROSOFT
 describe	HK_FAKENAME_MICROSOFT	From name mentions Microsoft, but not relayed from there
 

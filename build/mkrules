@@ -186,7 +186,6 @@ my $renamed_rules = { };
 my $output_files = { };
 my $output_file_text = { };
 my $files_to_lint = { };
-my $entries_for_rule_name = { };
 
 # $COMMENTS is a "catch-all" "name", for lines that appear after the last line
 # that refers to a rule by name.  Those lines are not published by themselves;
@@ -406,8 +405,8 @@ sub rule_file_compile {
     $rules->{$ALWAYS_PUBLISH} = rule_entry_create();
   }
 
-  # zero or more "ifplugin" or "if" scopes
-  my @current_conditionals = ();
+  # an "ifplugin" or "if" scope
+  my $current_conditional;
   my $current_comments = '';
 
   while (<IN>) {
@@ -435,21 +434,7 @@ sub rule_file_compile {
       if ($issandbox) {
         $name = sandbox_rule_name_avoid_collisions($name, $f);
       }
-      my $origname_w_T_prefix = $name;
       # non-sandbox rules always use the same name
-
-      if (scalar @current_conditionals) {
-        # ensure the current conditionals are used in the block name;
-        # this ensures that we scope alternative (#ifdef-style) dupe
-        # rule definitions in their own ifplugin scopes
-        $name .= " ".join("", @current_conditionals);
-        $name =~ s/\s+/ /gs; $name =~ s/ $//;
-      }
-
-      # track this as a rule-entry block for that rule name
-      # (and it's T_ prefixed variant, if relevant)
-      push @{$entries_for_rule_name->{$origname}}, $name;
-      push @{$entries_for_rule_name->{$origname_w_T_prefix}}, $name;
 
       # comment "score" lines for sandbox rules (bug 5558)
       # use generated scores, though, if the rule is active
@@ -460,25 +445,16 @@ sub rule_file_compile {
       }
 
       if (!$rules->{$name}) { $rules->{$name} = rule_entry_create(); }
-
       $rules->{$name}->{issandbox} = $issandbox;
       $rules->{$name}->{isscores} = $isscores;
       $rules->{$name}->{origname} = $origname;
-      $rules->{$name}->{origname_w_T_prefix} = $origname_w_T_prefix;
-      $rules->{$name}->{cond} = [@current_conditionals];
+      $rules->{$name}->{cond} ||= $current_conditional;
       $rules->{$name}->{text} .= $current_comments . $orig;
-      $rules->{$name}->{plugin_dependencies} = {};
 
       # note if the conditional is a plugin reference, as we need to
       # ensure that "loadplugin" lines stay in the same place
-      foreach my $c (@current_conditionals) {
-        if ($c =~ /^ifplugin\s+(\S+)/) {
-          $rules->{$name}->{plugin_dependencies}->{$1} = 1;
-        } elsif ($c =~ /^if.*plugin/) {
-          while ($c =~ /plugin\s*\(\s*(\S+)\s*\)/g) {
-            $rules->{$name}->{plugin_dependencies}->{$1} = 1;
-          }
-        }
+      if ($current_conditional && $current_conditional =~ /ifplugin\s+(\S+)/) {
+        $rules->{$name}->{ifplugin} = $1;
       }
 
       # note if we found the rule defn or not.  if we did not,
@@ -530,7 +506,6 @@ sub rule_file_compile {
 
       if (!$rules->{$name}) { $rules->{$name} = rule_entry_create(); }
       $rules->{$name}->{origname} = $origname;
-      $rules->{$name}->{origname_w_T_prefix} = $origname;
 
       if ($command eq 'publish') {
         # the 'publish' command defaults to "1", unless it explicitly
@@ -557,24 +532,15 @@ sub rule_file_compile {
         \s+(.*?)$
       /x)
     {
-      push @current_conditionals, $orig;
-    }
-    elsif (/^else\b/x)
-    {
-      if (!scalar @current_conditionals) {
-        warn "WARNING: 'else' without 'if'/'ifplugin' conditional\n";
+      if ($current_conditional) {
+        $current_conditional .= "#|#".$orig;
       } else {
-        my $cond = invert_conditional(pop @current_conditionals);
-        push @current_conditionals, $cond;
+        $current_conditional = $orig;
       }
     }
     elsif (/^endif\b/x)
     {
-      if (!scalar @current_conditionals) {
-        warn "WARNING: 'endif' without 'if'/'ifplugin' conditional\n";
-      } else {
-        pop @current_conditionals;
-      }
+      undef $current_conditional;
     }
     elsif (/^require_version\s*(\S+)\b/) {
       # silently ignored.  TODO?  (meh)
@@ -584,8 +550,6 @@ sub rule_file_compile {
 
       unless ($rules->{$name}) {
         $rules->{$name} = rule_entry_create();
-        $rules->{$name}->{origname} = $name;
-        $rules->{$name}->{origname_w_T_prefix} = $name;
         $rules->{$name}->{issandbox} = $issandbox;
         $rules->{$name}->{iscommand} = 1;
       }
@@ -647,9 +611,10 @@ sub rule_file_compile {
         $name =~ s/\s+/ /gs;
       }
 
-      if (scalar @current_conditionals) {
-        $name = join("", @current_conditionals);
-        $name =~ s/\s+/ /gs; $name =~ s/ $//;
+      my $cond;
+      if ($current_conditional) {
+        $name = $current_conditional; $name =~ s/\#\|\#/ /gs; $name =~ s/\s+/ /gs;
+        $cond = $current_conditional;
       }
 
       if ($issandbox) {
@@ -658,16 +623,12 @@ sub rule_file_compile {
 
       unless ($rules->{$name}) {
         $rules->{$name} = rule_entry_create();
-        $rules->{$name}->{origname} = $name;
-        $rules->{$name}->{origname_w_T_prefix} = $name;
       }
-      $rules->{$name}->{cond} = [@current_conditionals];
+      $rules->{$name}->{cond} ||= $cond;
       $rules->{$name}->{issandbox} = $issandbox;
       $rules->{$name}->{forceactive} = $forceactive;
       # $rules->{$name}->{forceactive} = 1;
       $rules->{$name}->{iscommand} = 1;
-
-      # TODO: bug 6241: 'replace_rules' should be handled ok, but isn't
 
       # warn "unknown line in rules file '$f', saving to default: $orig";
 
@@ -774,39 +735,40 @@ sub copy_to_output_buffers {
     }
 
     my $srcfile = $rules->{$name}->{srcfile};
-    my $pubfile = pubfile_for_rule($rules, $rules->{$name}->{origname_w_T_prefix});
+    my $pubfile = pubfile_for_rule($rules, $name);
     my $is_active = 0;
     if (pubfile_is_activeout($pubfile)) {
       $is_active++;
     }
 
     my $cond = $rules->{$name}->{cond};
-    if ($cond) {
-      foreach my $pluginclass (keys %{$rules->{$name}->{plugin_dependencies}}) {
-        my $ifplugin_text_name = "loadplugin_".($pluginclass || "");
+    my $pluginclass = $rules->{$name}->{ifplugin};
+    if ($cond)
+    {
+      my $ifplugin_text_name = "loadplugin_".($pluginclass || "");
 
-        if ($rules->{$ifplugin_text_name}) {
-          # if the plugin is a sandbox plugin, ensure it's not
-          # sent to the active file
-          if ($rules->{$ifplugin_text_name}->{sandbox_plugin}) {
-            $pubfile = $opt_out.'/'.$opt_sandboxout;
-            $is_active = 0;
-          }
-
-          # either way, ensure the "loadplugin" line, if there is one,
-          # goes to the same file
-          $rules->{$ifplugin_text_name}->{output_file} = $pubfile;
+      if ($pluginclass && $rules->{$ifplugin_text_name})
+      {
+        # if the plugin is a sandbox plugin, ensure it's not
+        # sent to the active file
+        if ($rules->{$ifplugin_text_name}->{sandbox_plugin}) {
+          $pubfile = $opt_out.'/'.$opt_sandboxout;
+          $is_active = 0;
         }
+
+        # either way, ensure the "loadplugin" line, if there is one,
+        # goes to the same file
+        $rules->{$ifplugin_text_name}->{output_file} = $pubfile;
       }
 
       # ensure we produce enough "endif"s to match however many
       # nested conditions there are
-      my $endifs = "endif\n" x (scalar @{$cond});
+      my $endifs = "endif\n";
+      while ($cond =~ s/\#\|\#//) {
+        $endifs .= "endif\n";
+      }
 
-      $rules->{$name}->{output_text} = "\n"
-                .join("", @{$cond})
-                .$text
-                .$endifs;
+      $rules->{$name}->{output_text} = "\n".$cond.$text.$endifs;
 
     } else {
       $rules->{$name}->{output_text} = $text;
@@ -936,19 +898,6 @@ sub compile_output_files {
     my $text    = $rules->{$rule}->{output_text};
     next unless defined ($text);
 
-# DOS - bug 6297 - HACK HACK HACK HACK
-# this will probably screw up meta rules that do something like '&& !$rule'
-
-    # avoid publishing 'tflags nopublish' rules
-    if (pubfile_is_activeout($pubfile) && exists $rules->{$rule}->{tflags} &&
-        $rules->{$rule}->{tflags} =~ /\bnopublish\b/)
-    {
-      print "omitting rule $rule due to tflags nopublish (tflags $rules->{$rule}->{tflags})\n";
-      next;
-    }
-
-# DOS - END HACK
-
     $output_file_text->{$pubfile} .= "##{ $rule\n".
                             $text.
                             "##} ".$rule."\n\n";
@@ -960,20 +909,6 @@ sub compile_output_files {
     my $pubfile = $rules->{$rule}->{output_file};
     my $text    = $rules->{$rule}->{output_text};
     next unless defined ($text);
-
-# DOS - bug 6297 - HACK HACK HACK HACK
-# this will probably screw up meta rules that do something like '&& !$rule'
-
-    # avoid publishing 'tflags nopublish' rules
-    if (pubfile_is_activeout($pubfile) && exists $rules->{$rule}->{tflags} &&
-        $rules->{$rule}->{tflags} =~ /\bnopublish\b/)
-    {
-      print "omitting rule $rule due to tflags nopublish (tflags $rules->{$rule}->{tflags})\n";
-      next;
-    }
-
-# DOS - END HACK
-
     $output_file_text->{$pubfile} .= $text;
   }
 
@@ -1063,23 +998,15 @@ sub fix_up_rule_dependencies {
 
       # deal with rules that changed name from "FOO" to "T_FOO"
       sed_renamed_rule_names(\$rule2);
+      
+      next unless ($rules->{$rule2} && $rules->{$rule2}->{output_file});
 
-      if (!$entries_for_rule_name->{$rule2}) {
-        # we may not always have a rule entry, if the rule was from a non-sandbox
-        # source
-        # warn "cannot find entries_for_rule_name '$rule2'";
-      }
+      # don't do this if the subrule would be moved *out* of the
+      # active file!
+      my $pubfile2 = $rules->{$rule2}->{output_file};
+      next if (pubfile_is_activeout($pubfile2));
 
-      foreach my $entryname2 (@{$entries_for_rule_name->{$rule2}}) {
-        next unless ($rules->{$entryname2} && $rules->{$entryname2}->{output_file});
-
-        # don't do this if the subrule would be moved *out* of the
-        # active file!
-        my $pubfile2 = $rules->{$entryname2}->{output_file};
-        next if (pubfile_is_activeout($pubfile2));
-
-        $rules->{$entryname2}->{output_file} = $pubfile;
-      }
+      $rules->{$rule2}->{output_file} = $pubfile;
     }
   }
 }
@@ -1181,39 +1108,34 @@ sub sed_renamed_rule_names {
 
 ###########################################################################
 
-sub invert_conditional {
-  my $cond = shift;
-  if ($cond =~ /^ \s* ifplugin \s+(.*?)$ /x) {
-    return "if !plugin($1)\n";
-  } elsif ($cond =~ /^ \s* if \s+(.*?)$ /x) {
-    return "if !($1)\n";
-  } else {
-    warn "WARNING: cannot parse '$cond' for 'else'\n";
-    return 'if 0';
-  }
-}
-
-###########################################################################
-
 sub read_manifest {
-  my ($fname) = @_;
-  parse_line_delimited_config_file($fname, sub {
-      /^\s*(.*?)\s*$/ and $file_manifest->{$1} = 1;
-    });
+  my ($mfest) = @_;
+  open (IN, "<$mfest") or warn "cannot read $mfest";
+  while (<IN>) {
+    next if /^#/;
+    /^\s*(.*?)\s*$/ and $file_manifest->{$1} = 1;
+  }
+  close IN;
 }
 
 sub read_manifest_skip {
-  my ($fname) = @_;
-  parse_line_delimited_config_file($fname, sub {
-      /^\s*(.*?)\s*$/ and push (@{$file_manifest_skip}, qr/$1/);
-    });
+  my ($mfest) = @_;
+  open (IN, "<$mfest") or warn "cannot read $mfest";
+  while (<IN>) {
+    next if /^#/;
+    /^\s*(.*?)\s*$/ and push (@{$file_manifest_skip}, qr/$1/);
+  }
+  close IN;
 }
 
 sub read_active {
   my ($fname) = @_;
-  parse_line_delimited_config_file($fname, sub {
-      /^(\S+)/ and $active_rules->{$1} = 1;
-    });
+  open (IN, "<$fname") or die "cannot read $fname";
+  while (<IN>) {
+    s/#.*$//; next if /^\s*$/;
+    /^(\S+)/ and $active_rules->{$1} = 1;
+  }
+  close IN;
 }
 
 sub filename_in_manifest {
@@ -1223,19 +1145,6 @@ sub filename_in_manifest {
     return 1 if ($fname =~ $skipre);
   }
   return 0;
-}
-
-sub parse_line_delimited_config_file {
-  my ($fname, $callback) = @_;
-  if (!open (IN, "<$fname")) {
-    warn "cannot read $fname\n";
-  } else {
-    while (<IN>) {
-      next if /^#/;
-      $callback->();
-    }
-    close IN;
-  }
 }
 
 

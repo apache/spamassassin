@@ -63,7 +63,7 @@ describe IP_LINK_PLUS	Dotted-decimal IP address followed by CGI
 # allow ports 80 and 443 which are http and https, respectively
 # we don't want to hit http://www.cnn.com:USArticle1840@www.liquidshirts.com/
 # though, which actually doesn't have a weird port in it.
-uri WEIRD_PORT			m{https?://[^/?\s]+?:\d+(?<!:80)(?<!:443)(?<!:8080)(?:/|\s|$)}
+uri WEIRD_PORT			m{https?://[^/\s]+?:\d+(?<!:80)(?<!:443)(?<!:8080)(?:/|\s|$)}
 describe WEIRD_PORT		Uses non-standard port number for HTTP
 
 # Matt Cline

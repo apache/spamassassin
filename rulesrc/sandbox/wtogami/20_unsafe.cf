@@ -1,3 +1,8 @@
+# from http://www.apnic.net/db/ranges.html at 20091002, meta bits added 20090930
+# copied from khop-bl.sa.khopesh.com
+header     __RCVD_VIA_APNIC   Received =~ /(?-xism:[^0-9.](?:2(?:0(?:2(?:\.1(?:2(?:3\.(?:0?(?:[4-9][0-9]|3[2-9])|[12][0-9]{2})\.[012]?[0-9]{1,2}|[^3]\.(?:012]?[0-9]{1,2}){2})|[^2]3\.(?:012]?[0-9]{1,2}){2})|(?:\.[02]?[0-9]{1,2}){3})|3(?:\.[012]?[0-9]{1,2}){3})|(?:1[0189]|2[012])(?:\.[012]?[0-9]{1,2}){3})|1(?:(?:2[0123456]|8[023]|1\d|75)(?:\.[012]?[0-9]{1,2}){3}|69\.2(?:1[0-9]|2[0-3]|0[89])(?:\.[012]?[0-9]{1,2}){2})|(?:5[89]|6[01])(?:\.[012]?[0-9]{1,2}){3})(?:[\]\)\s]))/
+describe   __RCVD_VIA_APNIC   Received through a relay in Asia/Pacific Network
+
 # 20091004: 8-character .cn domain
 uri            CN_EIGHT            m;^https?://(?:[^./]+\.)*[-\w]{8}\.cn(?:$|[/:\#]);
 describe       CN_EIGHT            .cn URI with eight-character domain name

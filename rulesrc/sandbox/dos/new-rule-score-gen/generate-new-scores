@@ -23,7 +23,12 @@
 # </@LICENSE>
 
 SCORESET=$1
-CORPUS_SRC_DIR="/export/home/corpus-rsync/corpus"
+
+# load rsync credentials from RSYNC-CREDS file
+# RSYNC_USERNAME="username"
+# RSYNC_PASSWORD="password"
+. RSYNC-CREDS
+export RSYNC_PASSWORD
 
 if [ ! $SCORESET ]; then
   echo "Missing scoreset number parameter"
@@ -37,19 +42,9 @@ if [ ! -e corpus ]; then
 fi
 
 date
-# if running on spamassassin.zones.apache.org rsync locally, otherwise rsync remotely
-if [ -e $CORPUS_SRC_DIR ]; then
-  echo "[ rsyncing logs locally ]"
-  rsync -artv --delete $CORPUS_SRC_DIR/*.log corpus/. || exit $?
-else
-  echo "[ rsyncing logs remotely ]"
-  # load rsync credentials from RSYNC-CREDS file
-  # RSYNC_USERNAME="username"
-  # RSYNC_PASSWORD="password"
-  . RSYNC-CREDS
-  export RSYNC_PASSWORD
-  rsync -artvz --delete $RSYNC_USERNAME@rsync.spamassassin.org::corpus/*.log corpus/. || exit $?
-fi
+echo "[ rsyncing logs ]"
+
+rsync -artvz $RSYNC_USERNAME@rsync.spamassassin.org::corpus/*.log corpus/. || exit $?
 
 date
 echo "[ selecting log files to use for scoreset $SCORESET ]"
@@ -102,23 +97,6 @@ do
   head $FILE | grep "SVN revision: $REVISION" || rm $FILE
 done
 
-# check to make sure that we have enough corpus submitters
-HAMCONTRIBS=`ls -l corpus/usable-corpus-set$SCORESET/ham-*.log | wc -l | sed -e 's/^[ \t]*//' | cut -d" " -f1`
-SPAMCONTRIBS=`ls -l corpus/usable-corpus-set$SCORESET/spam-*.log | wc -l | sed -e 's/^[ \t]*//' | cut -d" " -f1`
-
-echo " HAM CONTRIBUTORS FOUND: $HAMCONTRIBS (required 10)"
-echo "SPAM CONTRIBUTORS FOUND: $SPAMCONTRIBS (required 10)"
-
-if [ $HAMCONTRIBS -lt 10 ]; then
-  echo "Insufficient ham corpus contributors; aborting."
-  exit 6
-fi
-
-if [ $SPAMCONTRIBS -lt 10 ]; then
-  echo "Insufficient spam corpus contributors; aborting."
-  exit 7
-fi
-
 date
 echo "[ checking out code from svn repository ]"
 
@@ -169,24 +147,6 @@ echo "[ running log-grep-recent ]"
 # only use recent spam to generate scores; use a lot of ham history to avoid FPs
 masses/log-grep-recent -m 38 ../corpus/usable-corpus-set$SCORESET/ham-*.log > masses/ham-full.log
 masses/log-grep-recent -m 2 ../corpus/usable-corpus-set$SCORESET/spam-*.log > masses/spam-full.log
-
-# make sure that we have enough mass-check results to actually generate reasonable scores
-# NOTE: currently we only check for a minimum number of messages
-HAMCOUNT=`wc -l masses/ham-full.log | sed -e 's/^[ \t]*//' | cut -d" " -f1`
-SPAMCOUNT=`wc -l masses/spam-full.log | sed -e 's/^[ \t]*//' | cut -d" " -f1`
-
-echo " HAM: $HAMCOUNT (150000 required)"
-echo "SPAM: $SPAMCOUNT (150000 required)"
-
-if [ $HAMCOUNT -lt 150000 ]; then
-  echo "Insufficient ham corpus to generate scores; aborting."
-  exit 8
-fi
-
-if [ $SPAMCOUNT -lt 150000 ]; then
-  echo "Insufficient spam corpus to generate scores; aborting."
-  exit 9
-fi
 
 # set config to chosen scoreset
 cp masses/config.set$SCORESET masses/config
@@ -251,7 +211,9 @@ if [ -s scores-active-zeroed ]; then
 fi
 
 cd ../..
-cat scores-set$SCORESET
+./merge-scoresets $SCORESET
+echo
+cat scores
 
 # collect some stats
 echo "##### WITH NEW RULES AND SCORES #####" > stats-set$SCORESET

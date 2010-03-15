@@ -612,7 +612,7 @@ Options:
  --spam                Learn messages as spam
  --forget              Forget a message
  --use-ignores         Use bayes_ignore_from and bayes_ignore_to
- --sync                Synchronize the database and the journal if needed
+ --sync                Syncronize the database and the journal if needed
  --force-expire        Force a database sync and expiry run
  --dbpath <path>       Allows commandline override (in bayes_path form)
                        for where to read the Bayes DB from
@@ -728,7 +728,7 @@ been removed.
 
 =item B<--sync>
 
-Synchronize the journal and databases.  Upon successfully syncing the
+Syncronize the journal and databases.  Upon successfully syncing the
 database with the entries in the journal, the journal file is removed.
 
 =item B<--force-expire>
@@ -1236,7 +1236,7 @@ atime delta based on the old atime delta.  (new_atime_delta =
 old_atime_delta * old_reduction_count / goal)
 
 =item - if no expire has been done before, or the last expire looks
-"weird", do an estimation pass.  The definition of "weird" is:
+"wierd", do an estimation pass.  The definition of "wierd" is:
 
 =over 8
 

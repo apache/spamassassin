@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # This script assumes it's being run from the root of the SA code tree
-set -x
+set -ex
 
 umask 002
 
@@ -64,5 +64,5 @@ done
 test -f Makefile && make distclean
 rm -f $DISTVNAME.*
 
-chgrp -R spamassassin $RELDIR
+chgrp -R spamassassin $RELDIR || true
 ls -l $RELDIR

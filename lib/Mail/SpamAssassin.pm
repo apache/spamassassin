@@ -94,8 +94,8 @@ use vars qw{
   @site_rules_path
 };
 
-$VERSION = "3.004000";      # update after release (same format as perl $])
-$IS_DEVEL_BUILD = 1;        # change for release versions
+$VERSION = "3.003001";      # update after release (same format as perl $])
+# $IS_DEVEL_BUILD = 1;        # change for release versions
 
 # Used during the prerelease/release-candidate part of the official release
 # process. If you hacked up your SA, you should add a version_tag to your .cf
@@ -229,7 +229,7 @@ override of config files.
 =item force_ipv4
 
 If set to 1, DNS tests will not attempt to use IPv6. Use if the existing tests
-for IPv6 availability produce incorrect results or crashes.
+for IPv6 availablity produce incorrect results or crashes.
 
 =item require_rules
 

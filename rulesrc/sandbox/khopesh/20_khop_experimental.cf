@@ -4,14 +4,6 @@ meta	 MALFORMED_FREEMAIL	(MISSING_HEADERS||__HDRS_LCASE) && FREEMAIL_FROM
 describe MALFORMED_FREEMAIL	Bad headers on message from free email service
 #score	 MALFORMED_FREEMAIL	0.1
 
-header	 FROM_WEBSITE	From =~ m'\b(?:f|ht)tps?://[^\s"</\@]{3,60}\.\w\w'i
-describe FROM_WEBSITE	Sender name appears to be a link
-header	 FROM_WWW	From:name =~ /\bwww\.[^\s"<\/\@]{4,60}\.\w\w/i
-describe FROM_WWW	Sender name appears to be a website
-
-header	 FROM_2_EMAILS	From =~ /([^\@]{2,}\@[^\@]{2,60}\.\w\w).*(?!\1)[^\@]{2,}\@[^\@]/
-describe FROM_2_EMAILS	Sender claims to have a different email
-
 header	 __FROM_THE	From:name =~ /\b(?:THE|[Tt]he)\b/
 meta	 FROM_THE	__FROM_THE && !(__VIA_ML || __SENDER_BOT || __DOS_HAS_LIST_UNSUB || __REPLYTO_EXISTS)
 describe FROM_THE	Non-bulk sender is "The" something
@@ -49,6 +41,9 @@ header __RDNS_NO_SUBDOM	X-Spam-Relays-External =~ /^[^\]]+ rdns=[^. ]*\.\w+ /
 # @ 20091214, 5.7617/0.0344 spam/ham, 0.994 s/o.
 header __5_SUBDOM X-Spam-Relays-External =~ /^[^\]]+ rdns=(?:[^. ]*\.){6,}\w+ /
 
+# Probably too similar to __S25R_1
+header __NUM_LTR_3 X-Spam-Relays-External =~ /^[^\]]+ rdns=\S*(?:\d\S*[^0-9. ]\S*\d){3,} /
+
 # IP address in relay's rDNS or HELO
 header __IP_IN_RELAY  X-Spam-Relays-External =~ /^\[ ip=(\d+)\.(\d+)\.(\d+)\.(\d+) (?:[^\]]* )?(?:rdns|helo)=\S*(?:\1\D\2\D\3\D\4|\4\D\3\D\2\D\1)/
 header __IP_PART_IN_RELAY X-Spam-Relays-External =~ /^\[ ip=\d+\.\d+\.(\d+)\.(\d+) (?:[^\]]* )?(?:rdns|helo)=\S*(?:\1\W\2\W|\2\W\1)\b/
@@ -58,9 +53,27 @@ header __MSGID_DOTZERO	Message-ID =~ /\.0\.0\./
 header __MSGID_JAVAMAIL	Message-ID =~ /\.JavaMail\./
 tflags __MSGID_JAVAMAIL	nice
 
+
 meta	 AOL_ALL_CAPS	__AT_AOL_MSGID && UPPERCASE_75_100
 describe AOL_ALL_CAPS	AOL users sometimes write mail in all uppercase
 tflags	 AOL_ALL_CAPS	nice
+
+# from http://lacnic.net/en/registro/ at 20100115
+header	 __RCVD_VIA_LACNIC	X-Spam-Relays-External =~ /\[ ip=(?:1(?:90|8[679]|20(?:[01]\.|6\.223\.1(?:24|30))))\./
+tflags	 __RCVD_VIA_LACNIC	nopublish
+header	 __RCVD_VIA_LACNIC_LE	X-Spam-Relays-External =~ /^\[ ip=(?:1(?:90|8[679]|20(?:[01]\.|6\.223\.1(?:24|30))))\./
+tflags	 __RCVD_VIA_LACNIC_LE	nopublish
+
+# __RCVD_VIA_APNIC is from my khop-bl and was adopted into warren's sandbox
+
+# just to test ... E + I should equal the original, LE should be the useful one
+header __RCVD_VIA_APNIC_E X-Spam-Relays-External =~ /\[ ip=(?-xism:0?5[89]|6[01]|1(?:[12][0-6]|1[7-9]|75|8[0123])|2(?:03|1[0189]|2[012]|02(?!\.123\.0?(?:[012]\d|3[01])))|169\.2(?:0[89]|1\d|2[01]|223)|169\.2(?:1[04]|22))\./
+tflags __RCVD_VIA_APNIC_E nopublish
+header __RCVD_VIA_APNIC_I X-Spam-Relays-Internal =~ /\[ ip=(?-xism:0?5[89]|6[01]|1(?:[12][0-6]|1[7-9]|75|8[0123])|2(?:03|1[0189]|2[012]|02(?!\.123\.0?(?:[012]\d|3[01])))|169\.2(?:0[89]|1\d|2[01]|223)|169\.2(?:1[04]|22))\./
+tflags __RCVD_VIA_APNIC_I nopublish
+
+header __RCVD_VIA_APNIC_LE X-Spam-Relays-External =~ /^\[ ip=(?-xism:0?5[89]|6[01]|1(?:[12][0-6]|1[7-9]|75|8[0123])|2(?:03|1[0189]|2[012]|02(?!\.123\.0?(?:[012]\d|3[01])))|169\.2(?:0[89]|1\d|2[01]|223)|169\.2(?:1[04]|22))\./
+tflags __RCVD_VIA_APNIC_LE nopublish
 
 # testing warren's theory from "Uppercase E-mail in Latin America" 2009-10-06
 # http://old.nabble.com/Uppercase-E-mail-in-Latin-America-td25748291.html
@@ -69,28 +82,3 @@ meta	 LACNIC_ALL_CAPS __RCVD_VIA_LACNIC && UPPERCASE_75_100
 describe LACNIC_ALL_CAPS Latino users sometimes write mail in all uppercase
 tflags	 LACNIC_ALL_CAPS nice nopublish
 
-header	 __LONG_NOBR_ADDR	From:addr =~ /[a-zA-Z0-9]{20,}\@/i
-meta LONG_FREEMAIL_ADDR  __LONG_NOBR_ADDR && FREEMAIL_FROM && !__freemail_safe
-describe LONG_FREEMAIL_ADDR	Freemail address has 20+ unbroken characters
-
-header	 __HOTMAIL_HELO	Received =~ /from ([A-Z]{3})\d[^.]+ [^\n]+ by \1\d+-[^\n ]+\.\1\d+\.hotmail\.com with Microsoft/i
-tflags	 __HOTMAIL_HELO 	nice
-# 1 & 2 are in 20_head_tests.cf ... this one doesn't use eval rules
-meta	 FORGED_HOTMAIL_RCVD3	__HOST_HOTMAIL && (!__HOTMAIL_HELO || __DOS_SINGLE_EXT_RELAY)
-
-# As cross-posted between sa-users list and sare-users list at
-# http://old.nabble.com/forum/ViewPost.jtp?post=27358692&framed=y
-# SARE_RECV_SPAM_DOMN0b examines all received headers for a dynamic host on
-# hinet, which is unfair and likely unneccessary given we can do about as well
-# with this safer version.  It also appears that people think this rule useful
-# even today, so I'm testing it here.  The rDNS dynamic tests will likely trump.
-header SARE_RECV_SPAM_DOMN0B Received =~ /\bdynamic.hinet\.(?:com|net|org|info)/
-tflags SARE_RECV_SPAM_DOMN0B	nopublish
-header SARE_RECV_SPAM_DOMN0B2	X-Spam-Relays-External =~ /^[^\]]+ rdns=[^\] ]{0,25}\bdynamic.hinet\.(?:com|net|org|info)(?:\.tw)? /
-tflags SARE_RECV_SPAM_DOMN0B2	nopublish
-header SARE_RECV_SPAM_DOMN0B3	X-Spam-Relays-External =~ /^[^\]]+ rdns=[^\] ]{0,25}\bdynamic.hinet\.net /
-tflags SARE_RECV_SPAM_DOMN0B3	nopublish
-
-header	 RCVD_VIA_IPV6	X-Spam-Relays-Untrusted =~ /^[^\]]+ (?:by|ip)=[^\] ]+:[^\] .]+ /
-describe RCVD_VIA_IPV6	Received by the last trusted relay via IPv6
-tflags	 RCVD_VIA_IPV6	nice

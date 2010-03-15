@@ -1,6 +1,6 @@
 #!/bin/sh
 
-WEBDIR=/var/www/buildbot.spamassassin.org/staging/website
+WEBDIR=/www/spamassassin.apache.org
 vers=3.3.x
 
 if [ -z "$PERL" ]; then
@@ -21,7 +21,7 @@ make text_html_doc || exit 1
 rm -rf $fulldir/doc
 mkdir $fulldir
 tar cf - \
-        --exclude=CVS --exclude='.#*'  \
+        --exclude='.#*'  \
         --exclude=.svn \
         --exclude='logs' --exclude='*.tar.gz' --exclude='*.zip' \
         --exclude='*.log' --exclude='*.o' \

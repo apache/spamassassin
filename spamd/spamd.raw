@@ -2349,7 +2349,6 @@ sub handle_user_setuid_with_sql {
   }
 
   my $spam_conf_dir = $dir . '/.spamassassin'; # needed for Bayes, etc.
-
   if ( ($opt{'user-config'} || defined $opt{'home_dir_for_helpers'})
        && ! -d $spam_conf_dir ) {
     if (mkdir $spam_conf_dir, 0700) {

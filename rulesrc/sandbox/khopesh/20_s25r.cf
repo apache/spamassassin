@@ -51,17 +51,25 @@ meta	 S25R_6 __LAST_EXTERNAL_RELAY_NO_AUTH && __S25R_6 && !(__S25R_1||__S25R_2||
 #tflags	 S25R	nopublish
 
 # Here it is, my full-blown poor-man's botnet
+meta	 KHOP_BOTNET_2	__LAST_EXTERNAL_RELAY_NO_AUTH && !(__FROM_FREEMAIL || __NOT_SPOOFED || __GREYLISTED) && (__S25R_3 || __S25R_4 || __S25R_5 || __S25R_6 || (RDNS_DYNAMIC + __S25R_1 + __S25R_2) > 1)
+describe KHOP_BOTNET_2	Relay looks like a dynamic address
+tflags	 KHOP_BOTNET_2	nopublish
+
 meta	 KHOP_BOTNET_4	__LAST_EXTERNAL_RELAY_NO_AUTH && !(__FROM_FREEMAIL || __NOT_SPOOFED || __GREYLISTED) && (__S25R_3 || __S25R_4 || __S25R_5 || __S25R_6 || RDNS_DYNAMIC + __S25R_1*.8 + __S25R_2*.8 > 1.7)
 describe KHOP_BOTNET_4	Relay looks like a dynamic address
 tflags	 KHOP_BOTNET_4	nopublish
 
+meta	 KHOP_BOTNET_5	__LAST_EXTERNAL_RELAY_NO_AUTH && !(__FROM_FREEMAIL || __NOT_SPOOFED || __GREYLISTED) && (__S25R_3 || __S25R_4 || __S25R_5 || __S25R_6 || __RDNS_HEX || __5_SUBDOM || (RDNS_DYNAMIC + __S25R_1 + __S25R_2 + __IP_IN_RELAY) > 1)
+describe KHOP_BOTNET_5	Relay looks like a dynamic address
+tflags	 KHOP_BOTNET_5	nopublish
+
+meta	 KHOP_BOTNET_6	__LAST_EXTERNAL_RELAY_NO_AUTH && !(__FROM_FREEMAIL || __NOT_SPOOFED || __GREYLISTED) && (__S25R_3 || __S25R_4 || __S25R_5 || __S25R_6 || __RDNS_HEX || __5_SUBDOM || RDNS_DYNAMIC + __S25R_1*.8 + __S25R_2*.6 + __IP_IN_RELAY*.8 > 2)
+describe KHOP_BOTNET_6	Relay looks like a dynamic address
+tflags	 KHOP_BOTNET_6	nopublish
+
 meta	 KHOP_BOTNET_7	__LAST_EXTERNAL_RELAY_NO_AUTH && !(__FROM_FREEMAIL || __NOT_SPOOFED || __GREYLISTED) && (__S25R_4 || __S25R_5 || __S25R_6 || __RDNS_HEX || __5_SUBDOM || __S25R_1 + __S25R_2 + __S25R_3 + __IP_IN_RELAY > 2)
 describe KHOP_BOTNET_7	Relay looks like a dynamic address
 tflags	 KHOP_BOTNET_7	nopublish
-
-meta	 KHOP_BOTNET_UNCLEAN	__LAST_EXTERNAL_RELAY_NO_AUTH && (__S25R_4 || __S25R_5 || __S25R_6 || __RDNS_HEX || __5_SUBDOM || __S25R_1 + __S25R_2 + __S25R_3 + __IP_IN_RELAY > 2)
-describe KHOP_BOTNET_UNCLEAN	Relay looks like a dynamic address
-tflags	 KHOP_BOTNET_UNCLEAN	nopublish
 
 # S25R-wanted item (3.2 a, "A terminal host name includes hexadecimal number")
 # not published with S25R due to matching words like 'feed.'
