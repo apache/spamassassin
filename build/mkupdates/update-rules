@@ -7,6 +7,7 @@
 # no lint problems, etc.  This script simply takes the branch data and creates
 # the update for you.
 #
+# WARNING: this is 3.1 and 3.2 only!
 
 shopt -s nullglob
 
@@ -31,7 +32,10 @@ rm -rf $DIR || exit 1
 if [ "$VERS" = "3.1" -o "$VERS" = "3.2" ] ; then
   SOURCE=svn.apache.org/repos/asf/spamassassin/branches/rules/$VERS
 else
-  SOURCE=svn.apache.org/repos/asf/spamassassin/branches/$VERS/rules
+  echo "ERROR: this script produces broken updates for 3.3; see bug 6311. exiting"
+  exit 99
+
+  # SOURCE=svn.apache.org/repos/asf/spamassassin/branches/$VERS/rules
 fi
 
 tagstamp=`date "+%Y%m%d%H%M%S"`
