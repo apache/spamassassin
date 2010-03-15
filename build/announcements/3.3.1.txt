@@ -1,0 +1,144 @@
+To: users, dev, announce
+Subject: ANNOUNCE: Apache SpamAssassin 3.3.1 available
+
+Release Notes -- Apache SpamAssassin -- Version 3.3.1
+
+
+Introduction
+------------
+
+This is a minor release, adding a new URIBL network rule (URIBL_DBL_SPAM, for the
+Spamhaus DBL).
+
+
+Downloading and availability
+----------------------------
+
+Downloads are available from:
+
+http://spamassassin.apache.org/downloads.cgi
+
+
+md5sum of archive files:
+
+  2290490889b2d91f71a3104eaf9c5cd3  Mail-SpamAssassin-3.3.1.tar.bz2
+  e70096d6baa695371b413e6691a49038  Mail-SpamAssassin-3.3.1.tar.gz
+  915e22168642997f168f5678f66d8def  Mail-SpamAssassin-3.3.1.zip
+  e004b3172650f003c2e9f15e5b2f6ac4  Mail-SpamAssassin-rules-3.3.1.r923257.tgz
+
+sha1sum of archive files:
+
+  9a84b175241c52cf6e1bf4cfcf0719cf65f5dc18  Mail-SpamAssassin-3.3.1.tar.bz2
+  4160be9c795573d8208a81665614387797136030  Mail-SpamAssassin-3.3.1.tar.gz
+  8f8ba7c69283bec99a91a7d266f8e5a1477c3b41  Mail-SpamAssassin-3.3.1.zip
+  e211a58e0d4cf7d30fdaf6b9ff8f797086f96312  Mail-SpamAssassin-rules-3.3.1.r923257.tgz
+
+Note that the *-rules-*.tgz files are only necessary if you cannot, or do not
+wish to, run "sa-update" after install to download the latest fresh rules.
+
+The release files also have a .asc accompanying them.  The file serves
+as an external GPG signature for the given release file.  The signing
+key is available via the wwwkeys.pgp.net key server, as well as
+http://www.apache.org/dist/spamassassin/KEYS
+
+The key information is:
+
+pub   4096R/F7D39814 2009-12-02
+      Key fingerprint = D809 9BC7 9E17 D7E4 9BC2  1E31 FDE5 2F40 F7D3 9814
+uid                  SpamAssassin Project Management Committee <private@spamassassin.apache.org>
+uid                  SpamAssassin Signing Key (Code Signing Key, replacement for 1024D/265FA05B) <dev@spamassassin.apache.org>
+sub   4096R/7B3265A5 2009-12-02
+
+See the INSTALL and UPGRADE files in the distribution for important
+installation notes.
+
+
+Summary of major changes since 3.3.0
+------------------------------------
+
+bug 6335: add Spamhaus DBL as URIBL_DBL_SPAM rule
+
+Bug 6370: update ImageInfo plugin to latest release
+
+bug 6215, bug 6294: RCVD_IN_CSS rule was broken.  the check_rbl_sub() syntax
+was incorrect, resulting in missing hits
+
+bug 6361: list 2tld and 3tld sub-domain hosters for URIBL/SURBL/DBL queries
+
+Bug 6369, 6356, 6373: WIN32 support for spamd improved
+
+Bug 6267: Solaris 10 requires --syslog-socket=native
+
+bug 6304 spamd is spawning and killing processes too often - Added spamd
+adjustments to info level and more information for administrators + small fix
+to Makefile.PL
+
+Bug 6310: sa-learn --import gives Insecure dependency in open
+
+Bug 6313: -Q or -q AND -x should not result in creation of a ~/.spamassassin
+dir; plus: taint issues fixed
+
+Bug 6342: make test failure on if_can under perl 5.6
+
+Bug 6340: Impossible to find user home directory of VPOPMAIL alias
+
+Bug 6072, 6343: POD warnings, documentation fixes
+
+Bug 6304 (trivial), reduce sysadmin's stress level by lowercasing
+the 'INTERRUPTED' in a logged message:
+ spamd: handled cleanup of child pid [...] due to SIGCHLD: INTERRUPTED
+
+Bug 6329: POSIX::strftime in call under Win32 ActivePerl causes Perl to hang up;
+formatting option %e is not in a POSIX standard, use %d instead and edit
+
+Bug 6322: In DKIM ADSP eval test check_dkim_adsp() the '*' is handled incorrectly
+
+Bug 6327: Fix calling argument in utility used to determine DCC's homedir
+
+Bug 6316: DCC.pm, wrong options for dcc_proc, (plus: avoid a warning on undef
+in logger when dccifd socket is not provided)
+
+Bug 6287: improved DKIM plugin debugging
+
+Bug 6321 - _TOKENSUMMARY_ not working in 3.3.0 (Plugin/Bayes.pm looks-up a tag
+from wrong location)
+
+Bug 6312 - uninitialized value $start_time in spamd
+
+bug 5761: trivial doc fix: document SPAMD_LOCALHOST test-control env variable
+
+
+About Apache SpamAssassin
+-------------------------
+
+Apache SpamAssassin is a mature, widely-deployed open source project
+that serves as a mail filter to identify spam. SpamAssassin uses a variety
+of mechanisms including mail header and text analysis, Bayesian filtering,
+DNS blocklists, and collaborative filtering databases. In addition, Apache
+SpamAssassin has a modular architecture that allows other technologies to be
+quickly incorporated as an addition or as a replacement for existing methods.
+Apache SpamAssassin typically runs on a server, classifies and labels spam
+before it reaches your mailbox, while allowing other components of a mail
+system to act on its results.
+
+Most of the Apache SpamAssassin is written in Perl, with heavily traversed
+code paths carefully optimized. Benefits are portability, robustness and
+facilitated maintenance. It can run on a wide variety of POSIX platforms.
+The server and the Perl library feels at home on Unix and Linux platforms,
+and reportedly also works on MS Windows systems under ActivePerl.
+
+For more information, visit http://spamassassin.apache.org/
+
+
+About The Apache Software Foundation
+------------------------------------
+
+Established in 1999, The Apache Software Foundation provides organizational,
+legal, and financial support for more than 100 freely-available,
+collaboratively-developed Open Source projects. The pragmatic Apache License
+enables individual and commercial users to easily deploy Apache software;
+the Foundation's intellectual property framework limits the legal exposure
+of its 2,500+ contributors.
+
+For more information, visit http://www.apache.org/
+
