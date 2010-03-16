@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix hege kgolding wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 2: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix dos hege jm kgolding wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 3: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix dos hege jm kgolding wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2
+# with results from: day 1: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-trec_enron bb-zmi bernie-it_batt bernie-mix dos hege jm kgolding wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 2: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix hege kgolding wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 3: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix dos hege jm kgolding wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2
 
 # tflags userconf
 ALL_TRUSTED
@@ -128,9 +128,6 @@ ENV_AND_HDR_SPF_MATCH
 FB_CIALIS_LEO3
 
 # good enough
-FB_EXTRA_INCHES
-
-# good enough
 FB_QUALITY_REPLICA
 
 # good enough
@@ -186,6 +183,9 @@ FORM_FRAUD_5
 
 # tflags userconf
 FRAGMENTED_MESSAGE
+
+# good enough
+FROM_41_FREEMAIL
 
 # tflags userconf
 FROM_DOMAIN_NOVOWEL
@@ -293,9 +293,6 @@ IMG_DIRECT_TO_MX
 KAM_LOTTO1
 
 # good enough
-KAM_LOTTO2
-
-# good enough
 KB_DATE_CONTAINS_TAB
 
 # good enough
@@ -335,9 +332,6 @@ LOTTO_AGENT
 L_SPAM_TOOL_13
 
 # good enough
-MANY_GOOG_PROXY
-
-# good enough
 MANY_SPAN_IN_TEXT
 
 # tflags userconf
@@ -363,6 +357,12 @@ NO_RECEIVED
 
 # tflags userconf
 NO_RELAYS
+
+# good enough
+NSL_RCVD_FROM_41
+
+# good enough
+NSL_RCVD_FROM_USER
 
 # good enough
 PART_CID_STOCK
@@ -656,22 +656,43 @@ TVD_RCVD_SINGLE
 TWO_IPS_RCVD
 
 # good enough
-DATE_DOTS
+AXB_XMID_DIGDOTSHRT
 
 # good enough
-FROM_41_FREEMAIL
+FM_SUBJ_YOU_PROFIT
 
 # good enough
-NSL_ORIG_FROM_41
+FROM_URI
 
 # good enough
-NSL_RCVD_FROM_41
+FROM_WWW
 
 # good enough
-NSL_RCVD_FROM_USER
+HK_PNIS
 
 # good enough
-NSL_RCVD_HELO_USER
+KHOP_SC_TOP_CIDR24
+
+# good enough
+MAILER_EQ_ORG
+
+# good enough
+MAY_BE_FORGED
+
+# good enough
+S25R_3
+
+# good enough
+S25R_4
+
+# good enough
+SANE_20d820d8f491476ca39941979ab139dd
+
+# good enough
+SANE_7d8e92a09f27d49fafe09a1dbd5cac10
+
+# good enough
+SANE_ef00ce28cfa5ed6e4c405ed37ff36d46
 
 # tflags userconf
 UNPARSEABLE_RELAY
@@ -758,13 +779,7 @@ XMAILER_MIMEOLE_OL_1ECD5
 XMAILER_MIMEOLE_OL_22B61
 
 # good enough
-XMAILER_MIMEOLE_OL_7533E
-
-# good enough
 XMAILER_MIMEOLE_OL_8627E
-
-# good enough
-XMAILER_MIMEOLE_OL_91287
 
 # tflags net
 __DNS_FROM_RFC_ABUSE
