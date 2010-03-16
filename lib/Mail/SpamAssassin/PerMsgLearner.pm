@@ -163,7 +163,7 @@ sub forget {
 
 =item $didlearn = $status->did_learn()
 
-Returns C<1> if the message was learned from or forgotten succesfully.
+Returns C<1> if the message was learned from or forgotten successfully.
 
 =cut
 

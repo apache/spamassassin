@@ -472,7 +472,7 @@ Description:
 This method parses the initial response line/header from the server
 and returns its parts.
 
-We have this as a seperate method in case we ever decide to get fancy
+We have this as a separate method in case we ever decide to get fancy
 with the response line.
 
 =cut
