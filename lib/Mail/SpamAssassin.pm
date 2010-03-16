@@ -229,7 +229,7 @@ override of config files.
 =item force_ipv4
 
 If set to 1, DNS tests will not attempt to use IPv6. Use if the existing tests
-for IPv6 availablity produce incorrect results or crashes.
+for IPv6 availability produce incorrect results or crashes.
 
 =item require_rules
 

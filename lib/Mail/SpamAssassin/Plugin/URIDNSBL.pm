@@ -312,6 +312,7 @@ sub parsed_metadata {
 
     my $rulecf = $scanner->{conf}->{uridnsbls}->{$rulename};
     my $tflags = $scanner->{conf}->{tflags}->{$rulename};
+    $tflags = ''  if !defined $tflags;
 
     if ($rulecf->{is_rhsbl} && $tflags =~ /\b ips_only \b/x) {
       $scanner->{uridnsbl_active_rules_rhsbl_ipsonly}->{$rulename} = 1;
