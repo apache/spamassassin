@@ -20,25 +20,25 @@ make version.env || exit $?
 
 # "3.1.0-pre2-r202405" should appear as "3.1.0-pre2" after this
 VERSION=`echo $FULL_VERSION | perl -pe 's/-(r\d+)$//'`
-SVNVER=`svn info | perl -ne '/Revision: (\d+)/ and print $1'`
-DISTVNAME=$DISTNAME-$VERSION.r$SVNVER
-DISTVBASE=$DISTNAME-$VERSION
 
 set -e
 
-./sa-update.raw --updatedir $tmpdir --debug > $tmpdir/o 2>&1 || true
-tgzbase=`perl -ne '/parsed as (\d{5,})$/ and print $1' < $tmpdir/o`
+$PERL -T ./sa-update.raw --updatedir $tmpdir --debug > $tmpdir/o 2>&1 || true
+SVNVER=`perl -ne '/parsed as (\d{5,})$/ and print $1' < $tmpdir/o`
 
-if [ "$tgzbase" = "" ] ; then
+if [ "$SVNVER" = "" ] ; then
     echo "cannot find 'parsed as' line in $tmpdir/o"
     exit 1
 fi
 
+DISTVNAME=$DISTNAME-$VERSION.r$SVNVER
+DISTVBASE=$DISTNAME-$VERSION
+
 MIRROR=http://buildbot.spamassassin.org/updatestage/
 
-wget -O $tmpdir/rules.tgz      $MIRROR/$tgzbase.tar.gz
-wget -O $tmpdir/rules.tgz.sha1 $MIRROR/$tgzbase.tar.gz.sha1
-wget -O $tmpdir/rules.tgz.asc  $MIRROR/$tgzbase.tar.gz.asc
+wget -O $tmpdir/rules.tgz      $MIRROR/$SVNVER.tar.gz
+wget -O $tmpdir/rules.tgz.sha1 $MIRROR/$SVNVER.tar.gz.sha1
+wget -O $tmpdir/rules.tgz.asc  $MIRROR/$SVNVER.tar.gz.asc
 
 # ensure non-empty
 [ -s $tmpdir/rules.tgz ] || exit 3
@@ -63,7 +63,7 @@ cp rules/*.pre $sitetmp
                -p /dev/null --lint \
                 || exit $?
 
-mv $tmpdir/rules.tgz.sha1 $tmpdir/rules.tgz.sha1.orig
+awk '{print $1}' $tmpdir/rules.tgz.sha1 > $tmpdir/sha.orig
 
 (
   cd $tmpdir
@@ -73,7 +73,8 @@ mv $tmpdir/rules.tgz.sha1 $tmpdir/rules.tgz.sha1.orig
   $PERL $srcdir/build/sha1sum.pl $DISTVNAME.tgz > rules.tgz.sha1  || exit $?
 )
 
-cmp $tmpdir/rules.tgz.sha1 $tmpdir/rules.tgz.sha1.orig            || exit $?
+awk '{print $1}' $tmpdir/rules.tgz.sha1 > $tmpdir/sha.new
+cmp $tmpdir/sha.orig $tmpdir/sha.new                              || exit $?
 
 for ext in tgz tgz.md5 tgz.sha1 tgz.asc ; do
   rm -f $RELDIR/$DISTVBASE.*.$ext
