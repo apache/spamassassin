@@ -20,7 +20,9 @@ SPAMASSASSIN DEVELOPMENT SNAPSHOT PROCEDURE
 
 - run "./build/update_devel" to build the tar.gz files.
 
-- next run "./build/update_devel_rules" to build the rules tarball.
+- next run "./build/update_devel_rules" to build the rules tarball,
+  or run "./build/repackage_latest_update_rules" to repackage the
+  latest file on updates.spamassassin.org.
 
 - by default, they're written to ~/public_html/devel/ . 
   Copy them to wherever you want, yourself.
@@ -57,12 +59,13 @@ SPAMASSASSIN RELEASE PROCEDURE
 
   The output should look like this:
 
-  X      rulesrc
+  ?      rules/SIQ.pm
+  ?      rules/EmailBL.pm
+  ?      rules/sandbox-hstern.pm
+  ?      rules/sandbox-felicity.pm
 
-  Performing status on external item at 'rulesrc'
-
-  (no "M" or "C" files; any files marked "M" have been locally modified,
-  and should be "svn revert"ed before you continue.)
+  (ie., no "M" or "C" files; any files marked "M" have been locally
+  modified, and should be "svn revert"ed before you continue.)
 
 - edit lib/Mail/SpamAssassin.pm and comment the $IS_DEVEL_BUILD
   line.   Ensure the correct version number is present in $VERSION
@@ -164,7 +167,7 @@ SPAMASSASSIN RELEASE PROCEDURE
     repo=https://svn.apache.org/repos/asf/spamassassin
     svn delete -m "replaced old tag" $repo/tags/spamassassin_release_$vers
     svn copy -m "creating tag for release $vers" \
-	$repo/trunk $repo/tags/spamassassin_release_$vers
+	$repo/branches/3.3 $repo/tags/spamassassin_release_$vers
 
   This will do a completely server-side tagging (which is the same as
   a branch really) of whatever the latest branch revision to be the new
@@ -194,10 +197,9 @@ SPAMASSASSIN RELEASE PROCEDURE
     PATH=$HOME/sabuildtools/bin:$PATH
     ./build/update_stable
 
-  You will need the SSH password for
-  updatesd@spamassassin.zones.apache.org.  If you don't have this,
-  ask Justin.  If that fails, log into the zone machine as yourself
-  and reset it.
+  WARNING: this will use the most recently-created "sa-update" tarball for
+  the rules tgz, so if changes have been committed to the "rules" dir in
+  SVN since then, they will not be released!
 
   if you get "gpg-agent" errors about not connecting to the PIN entry
   module, you didn't update your $PATH.
