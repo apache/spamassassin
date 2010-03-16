@@ -1,0 +1,89 @@
+#!/bin/sh
+
+umask 002
+
+srcdir=`pwd`
+tmpdir=$srcdir/tmp/rulesdir.$$
+rm -rf $tmpdir; mkdir -p $tmpdir         || exit $?
+
+
+PERL=${PERL:-perl}
+
+RELDIR=$HOME/public_html/devel
+mkdir -p $RELDIR
+
+DISTNAME=Mail-SpamAssassin-rules
+make || perl Makefile.PL < /dev/null || exit $?
+make || exit $?
+make version.env || exit $?
+. ./version.env
+
+# "3.1.0-pre2-r202405" should appear as "3.1.0-pre2" after this
+VERSION=`echo $FULL_VERSION | perl -pe 's/-(r\d+)$//'`
+
+set -e
+
+$PERL -T ./sa-update.raw --updatedir $tmpdir --debug > $tmpdir/o 2>&1 || true
+SVNVER=`perl -ne '/parsed as (\d{5,})$/ and print $1' < $tmpdir/o`
+
+if [ "$SVNVER" = "" ] ; then
+    echo "cannot find 'parsed as' line in $tmpdir/o"
+    exit 1
+fi
+
+DISTVNAME=$DISTNAME-$VERSION.r$SVNVER
+DISTVBASE=$DISTNAME-$VERSION
+
+MIRROR=http://buildbot.spamassassin.org/updatestage/
+
+wget -O $tmpdir/rules.tgz      $MIRROR/$SVNVER.tar.gz
+wget -O $tmpdir/rules.tgz.sha1 $MIRROR/$SVNVER.tar.gz.sha1
+wget -O $tmpdir/rules.tgz.asc  $MIRROR/$SVNVER.tar.gz.asc
+
+# ensure non-empty
+[ -s $tmpdir/rules.tgz ] || exit 3
+
+linttmp=$tmpdir/lintdir
+rm -rf $linttmp
+mkdir $linttmp
+(
+  cd $linttmp
+  # check validity of tarball; also extract
+  gunzip -cd < $tmpdir/rules.tgz | tar xf - || exit $?
+)
+
+sitetmp=$tmpdir/sitetmp
+rm -rf $sitetmp
+mkdir $sitetmp
+cp rules/*.pre $sitetmp
+
+# now, ensure the ruleset (entirely as distributed) lints, also.
+# use "-p /dev/null" so any user_prefs data is ignored.
+./spamassassin -x --configpath=$linttmp --siteconfigpath=$sitetmp \
+               -p /dev/null --lint \
+                || exit $?
+
+awk '{print $1}' $tmpdir/rules.tgz.sha1 > $tmpdir/sha.orig
+
+(
+  cd $tmpdir
+  ln rules.tgz $DISTVNAME.tgz
+  $PERL $srcdir/build/md5sum.pl $DISTVNAME.tgz > rules.tgz.md5    || exit $?
+  # rebuild the SHA1 sum
+  $PERL $srcdir/build/sha1sum.pl $DISTVNAME.tgz > rules.tgz.sha1  || exit $?
+)
+
+awk '{print $1}' $tmpdir/rules.tgz.sha1 > $tmpdir/sha.new
+cmp $tmpdir/sha.orig $tmpdir/sha.new                              || exit $?
+
+for ext in tgz tgz.md5 tgz.sha1 tgz.asc ; do
+  rm -f $RELDIR/$DISTVBASE.*.$ext
+  if [ -f $tmpdir/rules.$ext ] ; then
+    mv $tmpdir/rules.$ext $RELDIR/$DISTVNAME.$ext
+    ls -l $RELDIR/$DISTVNAME.$ext
+  fi
+done
+
+chgrp -R spamassassin $RELDIR
+rm -rf $tmpdir
+
