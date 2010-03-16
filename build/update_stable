@@ -9,7 +9,7 @@ MAINDISTVNAME=$DISTVNAME
 rm -rf $WEBDIR/doc
 tar cf - --exclude='.#*' doc | ( cd $WEBDIR ; tar xf - )
 
-. build/update_devel_rules
+. build/repackage_latest_update_rules
 
 set +x
 echo
