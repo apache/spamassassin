@@ -333,24 +333,24 @@ describe       URI_HIDDEN_2               URI contains a hidden file or director
 
 # Catch spam originating from 41.0.0.0/8 (Africa, incl S.Africa)
 # Ned Slider, SAU list, 3/11/2010
-header          NSL_ORIG_FROM_41        X-Originating-IP =~ /^(?:.+\[)?41\./
-describe        NSL_ORIG_FROM_41        Originates from 41.0.0.0/8
-score           NSL_ORIG_FROM_41        0.20
-#tflags          NSL_ORIG_FROM_41        nopublish
+header          T_NSL_ORIG_FROM_41        X-Originating-IP =~ /^(?:.+\[)?41\./
+describe        T_NSL_ORIG_FROM_41        Originates from 41.0.0.0/8
+score           T_NSL_ORIG_FROM_41        0.20
+#tflags          T_NSL_ORIG_FROM_41        nopublish
 
 # Catch spam injected from 41.0.0.0/8 (Africa, incl S.Africa)
 # Ned Slider, SAU list, 3/11/2010
-header          NSL_RCVD_FROM_41        Received =~ /\[41\./
-describe        NSL_RCVD_FROM_41        Received from 41.0.0.0/8
-score           NSL_RCVD_FROM_41        0.10
-#tflags          NSL_RCVD_FROM_41        nopublish
+header          T_NSL_RCVD_FROM_41        Received =~ /\[41\./
+describe        T_NSL_RCVD_FROM_41        Received from 41.0.0.0/8
+score           T_NSL_RCVD_FROM_41        0.10
+#tflags          T_NSL_RCVD_FROM_41        nopublish
 
 # some metas with the above, maybe reduce FPs
 ifplugin Mail::SpamAssassin::Plugin::FreeMail
-  meta         FROM_41_FREEMAIL         (NSL_ORIG_FROM_41 || NSL_RCVD_FROM_41) && (FREEMAIL_FROM || FREEMAIL_REPLYTO)
-  describe     FROM_41_FREEMAIL         Sent from Africa + freemail provider
-  score        FROM_41_FREEMAIL         0.25
-  #tflags       FROM_41_FREEMAIL         nopublish
+  meta         T_FROM_41_FREEMAIL         (T_NSL_ORIG_FROM_41 || T_NSL_RCVD_FROM_41) && (FREEMAIL_FROM || FREEMAIL_REPLYTO)
+  describe     T_FROM_41_FREEMAIL         Sent from Africa + freemail provider
+  score        T_FROM_41_FREEMAIL         0.25
+  #tflags       T_FROM_41_FREEMAIL         nopublish
 endif
 
 # More from Ned
