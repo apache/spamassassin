@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix dos hege jm kgolding wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 2: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-trec_enron bb-zmi bernie-it_batt bernie-mix dos hege jm kgolding wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 3: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix hege kgolding wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2
+# with results from: day 1: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix dos hege jm kgolding wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 2: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix dos hege jm kgolding wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 3: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-trec_enron bb-zmi bernie-it_batt bernie-mix dos hege jm kgolding wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2
 
 # tflags userconf
 ALL_TRUSTED
@@ -146,6 +146,9 @@ FH_FAKE_RCVD_LINE_B
 FH_FROM_GET_NAME
 
 # good enough
+FH_FROM_GIVEAWAY
+
+# good enough
 FH_HELO_ALMOST_IP
 
 # good enough
@@ -159,6 +162,9 @@ FH_HOST_EQ_DYNAMICIP
 
 # good enough
 FH_HOST_EQ_VERIZON_P
+
+# good enough
+FH_HOST_IN_ADDRARPA
 
 # good enough
 FM_LOTTO_YOU_WON
@@ -198,6 +204,12 @@ FROM_MISSP_FREEMAIL
 
 # good enough
 FROM_MISSP_MSFT
+
+# good enough
+FRT_APPROV
+
+# good enough
+FRT_ROLEX
 
 # good enough
 FR_TITLE_CONS_6
@@ -554,6 +566,9 @@ RCVD_IN_SORBS_ZOMBIE
 RCVD_IN_XBL
 
 # good enough
+RDNS_LOCALHOST
+
+# good enough
 S25R_1
 
 # good enough
@@ -635,9 +650,6 @@ TO_NO_BRKTS_DYNIP
 TVD_FINGER_02
 
 # good enough
-TVD_PCT_OFF
-
-# good enough
 TVD_QUAL_MEDS
 
 # good enough
@@ -650,7 +662,46 @@ TVD_RCVD_SINGLE
 TWO_IPS_RCVD
 
 # good enough
-MANY_GOOG_PROXY
+AXB_XMID_DIGDOTSHRT
+
+# good enough
+FM_SUBJ_YOU_PROFIT
+
+# good enough
+FROM_URI
+
+# good enough
+FROM_WWW
+
+# good enough
+FSL_FAKE_YAHOO_RCVD
+
+# good enough
+HK_PNIS
+
+# good enough
+KHOP_SC_TOP_CIDR24
+
+# good enough
+MAILER_EQ_ORG
+
+# good enough
+MAY_BE_FORGED
+
+# good enough
+S25R_3
+
+# good enough
+S25R_4
+
+# good enough
+SANE_20d820d8f491476ca39941979ab139dd
+
+# good enough
+SANE_7d8e92a09f27d49fafe09a1dbd5cac10
+
+# good enough
+SANE_ef00ce28cfa5ed6e4c405ed37ff36d46
 
 # tflags userconf
 UNPARSEABLE_RELAY
