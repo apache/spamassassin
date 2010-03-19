@@ -135,9 +135,7 @@ def_whitelist_from_dkim  *@*.skype.net
 def_whitelist_from_dkim  *@*.skype.net		skype.net
 def_whitelist_from_dkim  *@*.skype.com
 def_whitelist_from_dkim  *@*.skype.com		skype.com
-def_whitelist_from_dkim  *@facebookmail.com
-def_whitelist_from_dkim  *@linkedin.com
-def_whitelist_from_dkim  *@bounce.linkedin.com
+
 def_whitelist_from_dkim  service@youtube.com
 
 #consider also:
@@ -148,8 +146,5 @@ def_whitelist_from_dkim  service@youtube.com
 # def_whitelist_from_dkim  *@meetup.com
 # def_whitelist_from_dkim  *@astrology.com
 # def_whitelist_from_dkim  *@google.com
-# def_whitelist_from_dkim  *@twitter.com
-# def_whitelist_from_dkim  *@*.twitter.com
-# def_whitelist_from_dkim  *@*.twitter.com	twitter.com
 
 endif # Mail::SpamAssassin::Plugin::DKIM
