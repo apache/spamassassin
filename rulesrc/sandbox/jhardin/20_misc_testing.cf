@@ -287,8 +287,8 @@ endif
 rawbody        STYLE_GIBBERISH          /<style[^>]{0,30}>(?:\s{0,80}[^\s:;<]){150}/im
 #tflags         STYLE_GIBBERISH          nopublish
 
-rawbody        SCRIPT_GIBBERISH           /<script>[^;<]{50}/im
-tflags         SCRIPT_GIBBERISH           nopublish
+rawbody        SCRIPT_GIBBERISH           /<script>[^;<]{200}/im
+#tflags         SCRIPT_GIBBERISH           nopublish
 
 rawbody        MANY_DIV_5                   /(?:<div[^>]{0,30}>\s{0,80}){5}/im
 tflags         MANY_DIV_5                    nopublish
