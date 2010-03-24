@@ -652,17 +652,14 @@ sub is_dns_available {
   $self->clear_resolver();
   goto done unless $self->load_resolver();
 
-  my @nameservers = $self->{resolver}->nameservers();
-
-  # optionally shuffle the list of nameservers to distribute the load
-  if ($self->{conf}->{dns_options}->{rotate}) {
-    Mail::SpamAssassin::Util::fisher_yates_shuffle(\@nameservers);
-    dbg("dns: shuffled NS list: ".join(", ", @nameservers));
-    $self->{resolver}->nameservers(@nameservers);
-    $self->{resolver}->connect_sock();
-  }
-
   if ($dnsopt eq "yes") {
+    # optionally shuffle the list of nameservers to distribute the load
+    if ($self->{conf}->{dns_options}->{rotate}) {
+      my @nameservers = $self->{resolver}->available_nameservers();
+      Mail::SpamAssassin::Util::fisher_yates_shuffle(\@nameservers);
+      dbg("dns: shuffled NS list: " . join(", ", @nameservers));
+      $self->{resolver}->available_nameservers(@nameservers);
+    }
     $IS_DNS_AVAILABLE = 1;
     dbg("dns: dns_available set to yes in config file, skipping test");
     return $IS_DNS_AVAILABLE;
@@ -678,49 +675,48 @@ sub is_dns_available {
     @domains = @EXISTING_DOMAINS;
   }
 
-  # Net::DNS::Resolver scans a list of nameservers when it does a foreground
-  # query but only uses the first in a background query like we use.
-  # Try the different nameservers here in case the first one is not working
+  # do the test with a full set of configured nameservers
+  my @nameservers = $self->{resolver}->configured_nameservers();
 
-  my @good_nameservers = ();
-  dbg("dns: testing resolver nameservers: " . join(", ", @nameservers));
-  my $ns;
-  while( $ns  = shift(@nameservers)) {
-    for(my $retry = 3; $retry > 0 and $#domains>-1; $retry--) {
+  # optionally shuffle the list of nameservers to distribute the load
+  if ($self->{conf}->{dns_options}->{rotate}) {
+    Mail::SpamAssassin::Util::fisher_yates_shuffle(\@nameservers);
+    dbg("dns: shuffled NS list, testing: " . join(", ", @nameservers));
+  } else {
+    dbg("dns: testing resolver nameservers: " . join(", ", @nameservers));
+  }
+
+  # Try the different nameservers here and collect a list of working servers
+  my @good_nameservers;
+  foreach my $ns (@nameservers) {
+    $self->{resolver}->available_nameservers($ns);  # try just this one
+    for (my $retry = 3; $retry > 0 && @domains; $retry--) {
       my $domain = splice(@domains, rand(@domains), 1);
       dbg("dns: trying ($retry) $domain, server $ns ...");
       my $result = $self->lookup_ns($domain);
-      if(defined $result) {
-        if (scalar @$result > 0) {
-          dbg("dns: NS lookup of $domain using $ns succeeded => DNS available".
-              " (set dns_available to override)");
-          $IS_DNS_AVAILABLE = 1;
-          push(@good_nameservers, $ns);
-          last;
-        }
-        else {
-          dbg("dns: NS lookup of $domain using $ns failed, no results found");
-          next;
-        }
-      }
-      else {
+      $self->{resolver}->finish_socket();
+      if (!$result) {
         dbg("dns: NS lookup of $domain using $ns failed horribly, ".
             "may not be a valid nameserver");
-        $IS_DNS_AVAILABLE = 0; # should already be 0, but let's be sure.
-        last; 
+        last;
+      } elsif (!@$result) {
+        dbg("dns: NS lookup of $domain using $ns failed, no results found");
+      } else {
+        dbg("dns: NS lookup of $domain using $ns succeeded => DNS available".
+            " (set dns_available to override)");
+        push(@good_nameservers, $ns);
+        last;
       }
     }
-    $self->{resolver}->nameservers(@nameservers);
-    $self->{resolver}->connect_sock(); # reconnect socket to new nameserver
   }
 
-  if ($IS_DNS_AVAILABLE == 1)
-  {
-    dbg("dns: NS list: ".join(", ", @good_nameservers));
-    $self->{resolver}->nameservers(@good_nameservers);
-    $self->{resolver}->connect_sock();
+  if (!@good_nameservers) {
+    dbg("dns: all NS queries failed => DNS unavailable ".
+        "(set dns_available to override)");
   } else {
-    dbg("dns: all NS queries failed => DNS unavailable (set dns_available to override)");
+    $IS_DNS_AVAILABLE = 1;
+    dbg("dns: NS list: ".join(", ", @good_nameservers));
+    $self->{resolver}->available_nameservers(@good_nameservers);
   }
 
 done:

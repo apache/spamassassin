@@ -156,30 +156,45 @@ sub get_resolver {
   return $self->{res};
 }
 
-=item $res->nameservers()
+=item $res->configured_nameservers()
 
-Get or set a list of nameservers
+Get a list of nameservers are configured by dns_server directives
+or as provided by Net::DNS, typically from /etc/resolv.conf
 
 =cut
 
-sub nameservers {
+sub configured_nameservers {
+  my $self = shift;
+
+  my $res = $self->{res};
+  my @ns_addr_port;  # list of name servers: [addr]:port entries
+  if ($self->{conf}->{dns_servers}) {  # specified in a config file
+    @ns_addr_port = @{$self->{conf}->{dns_servers}};
+    dbg("dns: servers set by config to: %s", join(', ',@ns_addr_port));
+  } elsif ($res) {  # default as provided by Net::DNS, e.g. /etc/resolv.conf
+    @ns_addr_port = map { "[$_]:" . $res->{port} } @{$res->{nameservers}};
+    dbg("dns: servers obtained from Net::DNS : %s", join(', ',@ns_addr_port));
+  }
+  return @ns_addr_port;
+}
+
+=item $res->available_nameservers()
+
+Get or set a list of currently available nameservers,
+which is typically a known-to-be-good subset of configured nameservers
+
+=cut
+
+sub available_nameservers {
   my $self = shift;
 
   if (@_) {
-    $self->{available_dns_servers} = [@_];
+    $self->{available_dns_servers} = [ @_ ];  # copy
     dbg("dns: servers set by a caller to: %s",
          join(', ',@{$self->{available_dns_servers}}));
   } elsif (!$self->{available_dns_servers}) {
-    my $res = $self->{res};
-    my @ns_addr_port;  # list of name servers: [addr]:port entries
-    if ($self->{conf}->{dns_servers}) {  # specified in a config file
-      @ns_addr_port = @{$self->{conf}->{dns_servers}};
-      dbg("dns: servers set by config to: %s", join(', ',@ns_addr_port));
-    } elsif ($res) {  # default as provided by Net::DNS, e.g. /etc/resolv.conf
-      @ns_addr_port = map { "[$_]:" . $res->{port} } @{$res->{nameservers}};
-      dbg("dns: servers obtained from Net::DNS : %s", join(', ',@ns_addr_port));
-    }
-    $self->{available_dns_servers} = \@ns_addr_port;
+    # a list of configured name servers: [addr]:port entries
+    $self->{available_dns_servers} = [ $self->configured_nameservers() ];
   }
   return @{$self->{available_dns_servers}};
 }
@@ -194,6 +209,7 @@ platform-dependent source, as provided by C<Net::DNS>.
 sub connect_sock {
   my ($self) = @_;
 
+  dbg("dns: connect_sock, resolver: %s", $self->{no_resolver} ? "no" : "yes");
   return if $self->{no_resolver};
 
   if ($self->{sock}) {
@@ -203,8 +219,7 @@ sub connect_sock {
   my $errno;
 
   # list of name servers: [addr]:port entries
-  $self->nameservers()  if !$self->{available_dns_servers};
-  my @ns_addr_port = @{$self->{available_dns_servers}};
+  my @ns_addr_port = $self->available_nameservers();
   # use the first name server in a list
   my($ns_addr,$ns_port); local($1,$2);
   ($ns_addr,$ns_port) = ($1,$2)  if $ns_addr_port[0] =~ /^\[(.*)\]:(\d+)\z/;
@@ -287,7 +302,8 @@ sub connect_sock {
   return;
 
 no_sock:
-  $self->{no_resolver} = 1;
+  undef $self->{sock};
+  undef $self->{sock_as_vec};
 }
 
 sub connect_sock_if_reqd {
@@ -356,7 +372,6 @@ sub new_dns_packet {
     $type = 'PTR';
   }
 
-  $self->connect_sock_if_reqd();
   my $packet;
   eval {
     $host = dnsext_dns0x20($host)  if $self->{conf}->{dns_options}->{dns0x20};
@@ -449,11 +464,32 @@ sub bgsend {
 
   my $pkt = $self->new_dns_packet($host, $type, $class);
 
-  $self->connect_sock_if_reqd();
-  if (!defined($self->{sock}->send($pkt->data, 0))) {
-    warn "dns: sendto() failed: $!";
-    return;
+  my @ns_addr_port = $self->available_nameservers();
+  dbg("dns: bgsend, DNS servers: %s", join(', ',@ns_addr_port));
+  my $n_servers = scalar @ns_addr_port;
+
+  my $ok;
+  for (my $attempts=1; $attempts <= $n_servers; $attempts++) {
+    dbg("dns: attempt %d/%d, trying connect/sendto to %s",
+        $attempts, $n_servers, $ns_addr_port[0]);
+    $self->connect_sock_if_reqd();
+    if ($self->{sock} && defined($self->{sock}->send($pkt->data, 0))) {
+      $ok = 1; last;
+    } else {  # any other DNS servers in a list to try?
+      my $msg = !$self->{sock} ? "unable to connect to $ns_addr_port[0]"
+                               : "sendto() to $ns_addr_port[0] failed: $!";
+      $self->finish_socket();
+      if ($attempts >= $n_servers) {
+        warn "dns: $msg, no more alternatives\n";
+        last;
+      }
+      # try with a next DNS server, rotate the list left
+      warn "dns: $msg, failing over to $ns_addr_port[1]\n";
+      push(@ns_addr_port, shift(@ns_addr_port));
+      $self->available_nameservers(@ns_addr_port);
+    }
   }
+  return if !$ok;
   my $id = $self->_packet_id($pkt);
   dbg("dns: providing a callback for id: $id");
   $self->{id_to_callback}->{$id} = $cb;
@@ -608,8 +644,8 @@ Reset socket when done with it.
 sub finish_socket {
   my ($self) = @_;
   if ($self->{sock}) {
-    $self->{sock}->close()  or die "error closing socket: $!";
-    delete $self->{sock};
+    $self->{sock}->close()  or warn "error closing socket: $!";
+    undef $self->{sock};
   }
 }
 
@@ -648,9 +684,8 @@ sub fhs_to_vec {
 # call Mail::SA::init() instead
 sub reinit_post_fork {
   my ($self) = @_;
-  # and a new socket, so we don't have 5 spamds sharing the same
-  # socket
-  $self->connect_sock();
+  # release parent's socket, don't want all spamds sharing the same socket
+  $self->finish_socket();
 }
 
 1;
