@@ -1440,7 +1440,7 @@ sub perform_upgrade {
     my $path = $main->sed_path($main->{conf}->{bayes_path});
 
     # prevent dirname() from tainting the result, it assumes $1 is not tainted
-    local($1,$2,$3);  # Bug 6310
+    local($1,$2,$3);  # Bug 6310;  perl #67962 (fixed in perl 5.12/5.13)
     my $dir = dirname($path);
 
     # make temporary copy since old dbm and new dbm may have same name
