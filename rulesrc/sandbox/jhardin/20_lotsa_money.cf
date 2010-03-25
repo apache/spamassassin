@@ -55,7 +55,7 @@ body     __LOTTO_WIN_01     /\bwin+ing\s(?:prize|number|notification|draw|check|
 
 body     __YOU_WON_01    /\byou(?:r|'re|'ve|'ll|\shave|\sdid)?\s(?:e-?mail\s)?(?:\w+\s){0,2}(?:a\s)?w[io]n+(?:er|ing)?(?!'t)\b/i
 body     __YOU_WON_02    /\bw[io]n\s(?:(?:for|by)\s)?your?\b/i
-body     __YOU_WON_03    /\b(?:your?|win+ing|win+ers?|beneficiaries|participants?|individuals?)(?:\s[-a-z\s]{4,30}?)?\s(?:w(?:ere|as)|ha(?:ve|s) be(?:en)?)\s(?:randomly\s(?:selected|cho+sen|cho+sing|picked)|(?:selected|cho+sen|cho+sing|picked)\s(?:[a-z\s]{2,40}?\srandom|randomly|online|lottery|computer\s(?:ballot|wahlgang)))/i 
+body     __YOU_WON_03    /\b(?:your?|win+ing|win+ers?|beneficiaries|participants?|individuals?)(?:\s[-a-z\s]{4,30}?)?\s(?:w(?:ere|as)|ha(?:ve|s) be(?:en)?)\s(?:(?:randomly|raffly)\s(?:selected|cho+sen|cho+sing|picked)|(?:selected|cho+sen|cho+sing|picked)\s(?:[a-z\s]{2,40}?\srandom|randomly|online|lottery|computer\s(?:ballot|wahlgang)))/i 
 meta     __YOU_WON       __YOU_WON_01 || __YOU_WON_02 || __YOU_WON_03
 
 body     LOTTO_AGENT      /\b(?:claim(?:s|ing)?(?:\sprocessing)?|fiducia\w+|reimbursement|prize\stransfer|(?:international|foreign)\sremittance|payment|immunity|grants?)\s?(?:agent|manager|officer|secretary)/i
@@ -89,7 +89,10 @@ meta     __LOTTO_ADMITS     __LOTTO_ADMITS_1 || __LOTTO_ADMITS_2 || __LOTTO_ADMI
 
 body     __LOTTO_RELATED    /\b(?:lott(?:o|ery)|sweepstakes)\s(?:prize|draw(?:s|ing)?|(?:ge)?win(?:n?er|n?ing)?|jackpot|award|fund|com+it+e+|com+is+ion|guild|promotion|program|day|online|company|(?:in)?corporat|agent|co[-,]?ordinator|team)/i
 
-meta     MONEY_LOTTERY    LOTS_OF_MONEY && (__LOTTO_WINNINGS + __LOTTO_WIN_01 + __YOU_WON + LOTTO_AGENT + LOTTO_DEPT + LOTTO_AGENT_FM + LOTTO_AGENT_RPLY + __LOTTO_ADMITS + __LOTTO_RELATED + DEAR_WINNER > 1)
+body     __LOTTO_VERIFY     /\bpromo\sverification/i
+
+
+meta     MONEY_LOTTERY    LOTS_OF_MONEY && (__LOTTO_WINNINGS + __LOTTO_WIN_01 + __YOU_WON + LOTTO_AGENT + LOTTO_DEPT + LOTTO_AGENT_FM + LOTTO_AGENT_RPLY + __LOTTO_ADMITS + __LOTTO_RELATED + DEAR_WINNER + __LOTTO_VERIFY > 1)
 describe MONEY_LOTTERY    Lots of money from a lottery
 score    MONEY_LOTTERY    1.5
 
@@ -192,6 +195,13 @@ body     __RANDOM_PICK    /\b(?:random(?:ly)?\s(?:\w+\s)?(?:select(?:ion|ed)|pic
 body     __CHARITY        /\bcharit(?:y|[ai]ble)\b/i
 
 body     __UC_MONEY       /\bMONEY\b/
+
+body     DEAR_BENEFICIARY         /^\s?(?:Dear\s|At+(?:ention|n):?\s?)(?:\S+\s)?Beneficiary\b/i
+describe DEAR_BENEFICIARY         Dear Beneficiary:
+score    DEAR_BENEFICIARY         2.0
+
+# DEAR_WINNER from felicity/70_other.cf
+
 
 # update UNCLAIMED_MONEY in rules/20_phrases.cf
 body     __UNCLAIMED      /\bunclaimed\s(?:assets?|accounts?|mon(?:ey|ies)|balance|funds?|prizes?|rewards?|payments?)\b/i

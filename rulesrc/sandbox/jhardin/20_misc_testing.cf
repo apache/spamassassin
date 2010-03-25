@@ -41,10 +41,6 @@ endif
 #header         MUA_ONE_WORD       X-Mailer =~ /^[A-Za-z][a-z]*$/
 #describe       MUA_ONE_WORD       Single word X-Mailer: not CamelCase
 
-body           DEAR_BENEFICIARY         /^\s?(?:Dear\s|At+(?:ention|n):?\s?)Beneficiary\b/i
-describe       DEAR_BENEFICIARY         Dear Beneficiary:
-score          DEAR_BENEFICIARY         2.0
-
 body           DEAR_EMAIL_USER          /^\s?(?:Dear\s|Attention:?\s?)(?:E|Web)-?mail\s(?:account\s)?User\b/i
 describe       DEAR_EMAIL_USER          Dear Email User:
 score          DEAR_EMAIL_USER          3.0
@@ -62,6 +58,11 @@ describe       FROM_MISSPACED        From: missing whitespace
 
 # Poorer S/O than FROM_MISSPACED but better performance in metas
 header         __FROM_RUNON          From =~ /\S+<\w+/
+
+meta           FROM_MISSP_SPF_FAIL1  (__FROM_RUNON && !SPF_PASS)
+tflags         FROM_MISSP_SPF_FAIL1  net
+meta           FROM_MISSP_SPF_FAIL2  (__FROM_RUNON && SPF_FAIL)
+tflags         FROM_MISSP_SPF_FAIL2  net
 
 ## To the same
 #header         TO_MISSPACED          To =~ /^\s*"[^"]*"</
