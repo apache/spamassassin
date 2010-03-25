@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix dos hege jm kgolding wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 2: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix dos hege jm kgolding wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 3: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix hege kgolding wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2
+# with results from: day 1: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix dos kgolding wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 2: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix dos hege jm kgolding wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 3: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix dos hege jm kgolding wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2
 
 # tflags userconf
 ALL_TRUSTED
@@ -58,9 +58,6 @@ DATE_IN_FUTURE_Q_PLUS
 # good enough
 DEAR_BENEFICIARY
 
-# good enough
-DEAR_EMAIL
-
 # tflags net
 DIGEST_MULTIPLE
 
@@ -113,6 +110,9 @@ DOS_OE_TO_MX
 DOS_OUTLOOK_TO_MX
 
 # good enough
+DOS_RCVD_IP_TWICE_C
+
+# good enough
 DYN_RDNS_AND_INLINE_IMAGE
 
 # good enough
@@ -149,6 +149,9 @@ FH_FAKE_RCVD_LINE_B
 FH_FROM_GET_NAME
 
 # good enough
+FH_FROM_GIVEAWAY
+
+# good enough
 FH_HELO_ALMOST_IP
 
 # good enough
@@ -164,6 +167,9 @@ FH_HOST_EQ_DYNAMICIP
 FH_HOST_EQ_VERIZON_P
 
 # good enough
+FH_HOST_IN_ADDRARPA
+
+# good enough
 FM_LOTTO_YOU_WON
 
 # good enough
@@ -177,9 +183,6 @@ FORGED_TBIRD_IMG_SIZE
 
 # good enough
 FORGED_TBIRD_IMG_TO_MX
-
-# good enough
-FORM_FRAUD_5
 
 # tflags userconf
 FRAGMENTED_MESSAGE
@@ -200,7 +203,22 @@ FROM_MISSP_FREEMAIL
 FROM_MISSP_MSFT
 
 # good enough
+FROM_URI
+
+# good enough
+FRT_APPROV
+
+# good enough
+FRT_PRICE
+
+# good enough
+FRT_ROLEX
+
+# good enough
 FR_TITLE_CONS_6
+
+# good enough
+FSL_FAKE_GMAIL_RCVD
 
 # good enough
 FSL_FAKE_HOTMAIL_RVCD
@@ -212,10 +230,16 @@ FSL_HELO_BARE_IP_1
 FSL_HELO_DEVICE
 
 # good enough
+FSL_INTERIA_ABUSE
+
+# good enough
 FSL_LSPACES_ABUSE
 
 # good enough
 FS_MORE_CONFIDENT
+
+# good enough
+FS_PHARMASUB2
 
 # good enough
 FS_REPLICA
@@ -293,9 +317,6 @@ IMG_DIRECT_TO_MX
 KAM_LOTTO1
 
 # good enough
-KAM_LOTTO2
-
-# good enough
 KB_DATE_CONTAINS_TAB
 
 # good enough
@@ -333,9 +354,6 @@ LOTTO_AGENT
 
 # good enough
 L_SPAM_TOOL_13
-
-# good enough
-MANY_GOOG_PROXY
 
 # good enough
 MANY_SPAN_IN_TEXT
@@ -563,6 +581,9 @@ RCVD_IN_SORBS_ZOMBIE
 RCVD_IN_XBL
 
 # good enough
+RDNS_LOCALHOST
+
+# good enough
 S25R_1
 
 # good enough
@@ -572,6 +593,9 @@ S25R_6
 SANE_04e8bf28eb445199a7f11b943c44d209
 
 # good enough
+SANE_3b92eda751c992f230f215fb7eb36844
+
+# good enough
 SANE_4ef8302546bf270a19baf98508afacc4
 
 # good enough
@@ -579,6 +603,9 @@ SANE_7429530a7398f43f1f1b795f9420714e
 
 # good enough
 SANE_75491b468ec2e117e50f9842d32abfab
+
+# good enough
+SANE_91eb43f705d25c804374a746d7519660
 
 # good enough
 SANE_d0d2b0f6373bf91253d66dd74c594b87
@@ -638,13 +665,13 @@ TINY_FLOAT
 TO_NO_BRKTS_DYNIP
 
 # good enough
+TT_MSGID_TRUNC
+
+# good enough
 TVD_FINGER_02
 
 # good enough
 TVD_QUAL_MEDS
-
-# good enough
-TVD_RCVD_IP
 
 # good enough
 TVD_RCVD_SINGLE
@@ -653,7 +680,49 @@ TVD_RCVD_SINGLE
 TWO_IPS_RCVD
 
 # good enough
-FROM_URI
+AXB_XMID_DIGDOTSHRT
+
+# good enough
+FB_INCREASE_VOL
+
+# good enough
+FM_SUBJ_YOU_PROFIT
+
+# good enough
+FROM_WWW
+
+# good enough
+FSL_FAKE_YAHOO_RCVD
+
+# good enough
+FS_TIGHT_TEEN
+
+# good enough
+HK_PNIS
+
+# good enough
+KHOP_SC_TOP_CIDR24
+
+# good enough
+MAILER_EQ_ORG
+
+# good enough
+MAY_BE_FORGED
+
+# good enough
+S25R_3
+
+# good enough
+S25R_4
+
+# good enough
+SANE_20d820d8f491476ca39941979ab139dd
+
+# good enough
+SANE_7d8e92a09f27d49fafe09a1dbd5cac10
+
+# good enough
+SANE_ef00ce28cfa5ed6e4c405ed37ff36d46
 
 # tflags userconf
 UNPARSEABLE_RELAY
