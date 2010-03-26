@@ -366,4 +366,12 @@ describe        DATE_DOTS               Periods in date header
 uri             IMAGESHACK_URI          /\.imageshack\.us\//i
 describe        IMAGESHACK_URI          URI contains imageshack.us
 
+uri             URI_DOM_OBFU            /:\/\/(?:\w+\.)+(?:com|gov|net|org)(?:\.\w+){3,}\//i
+describe        URI_DOM_OBFU            URI pretending to be different domain
+
+uri             DQ_URI_DOM_IN_PATH      /:\/\/[\d\.]+\/[^\/]+\/[^\@]+[a-z0-9]\w{3,}\.(?:com|gov|net)/i
+describe        DQ_URI_DOM_IN_PATH      DQ URI having a domain name in the path part
+
+uri             LH_URI_DOM_IN_PATH      /:\/\/[^\/]{25,}\/[^\/]+\/[^\@]+[a-z0-9]\w{3,}\.(?:com|gov|net)/i
+describe        LH_URI_DOM_IN_PATH      Long-host URI having a domain name in the path part
 
