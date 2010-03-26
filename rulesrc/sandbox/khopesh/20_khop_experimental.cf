@@ -27,13 +27,15 @@ meta	 KHOP_FAKE_EBAY 	__KHOP_EBAY_ADDY && !__NOT_SPOOFED
 describe KHOP_FAKE_EBAY 	Sender falsely claims to be from eBay
 #score	 KHOP_FAKE_EBAY 	2.25 # 20090408
 
-ifplugin Mail::SpamAssassin::Plugin::URIDetail
-  uri_detail KHOP_FOREIGN_CLICK	text =~ /\b(?:cliquez\Wici\b|clic aqu[^<.,a ])/i
-else
+# masscheck doesn't cover ifplugin lines
+#ifplugin Mail::SpamAssassin::Plugin::URIDetail
+# uri_detail KHOP_FOREIGN_CLICK	text =~ /\b(?:cliquez\Wici\b|clic aqu[^<.,a ])/i
+#else
   rawbody    KHOP_FOREIGN_CLICK	m{\bhref=[^>]{9,199}>[^<]{0,80}(?:<(?!/a\b)[^>]{0,299}>[^<]{0,80}){0,9}[^<]{0,80}\b(?:cliquez\Wici\b|clic aqu[^<.,a ])}si
-endif
+#endif
 describe KHOP_FOREIGN_CLICK	Click here link in French or Spanish
 #score	 KHOP_FOREIGN_CLICK	1.1	# 20090526 see also SARE_UN7
+tflags	 KHOP_FOREIGN_CLICK	nopublish  # re-do ifplugin to publish
 
 # I don't think this ever fires
 uri	 URI_HIDDEN	m'.{7}\/\.\.?/?\w'
@@ -77,19 +79,6 @@ header	 __HOTMAIL_HELO	Received =~ /from ([A-Z]{3})\d[^.]+ [^\n]+ by \1\d+-[^\n 
 tflags	 __HOTMAIL_HELO 	nice
 # 1 & 2 are in 20_head_tests.cf ... this one doesn't use eval rules
 meta	 FORGED_HOTMAIL_RCVD3	__HOST_HOTMAIL && (!__HOTMAIL_HELO || __DOS_SINGLE_EXT_RELAY)
-
-# As cross-posted between sa-users list and sare-users list at
-# http://old.nabble.com/forum/ViewPost.jtp?post=27358692&framed=y
-# SARE_RECV_SPAM_DOMN0b examines all received headers for a dynamic host on
-# hinet, which is unfair and likely unneccessary given we can do about as well
-# with this safer version.  It also appears that people think this rule useful
-# even today, so I'm testing it here.  The rDNS dynamic tests will likely trump.
-header SARE_RECV_SPAM_DOMN0B Received =~ /\bdynamic.hinet\.(?:com|net|org|info)/
-tflags SARE_RECV_SPAM_DOMN0B	nopublish
-header SARE_RECV_SPAM_DOMN0B2	X-Spam-Relays-External =~ /^[^\]]+ rdns=[^\] ]{0,25}\bdynamic.hinet\.(?:com|net|org|info)(?:\.tw)? /
-tflags SARE_RECV_SPAM_DOMN0B2	nopublish
-header SARE_RECV_SPAM_DOMN0B3	X-Spam-Relays-External =~ /^[^\]]+ rdns=[^\] ]{0,25}\bdynamic.hinet\.net /
-tflags SARE_RECV_SPAM_DOMN0B3	nopublish
 
 header	 RCVD_VIA_IPV6	X-Spam-Relays-Untrusted =~ /^[^\]]+ (?:by|ip)=[^\] ]+:[^\] .]+ /
 describe RCVD_VIA_IPV6	Received by the last trusted relay via IPv6
