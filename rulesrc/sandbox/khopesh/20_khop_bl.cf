@@ -13,6 +13,7 @@ describe KHOP_GREYED	Greylisted and sent from dynamically-named relay
 score	 KHOP_GREYED	0.1
 
 header	 __DKIM_EXISTS	exists:DKIM-Signature
+
 ifplugin Mail::SpamAssassin::Plugin::DKIM
   meta	   DKIM_INVALID	__DKIM_EXISTS && !DKIM_VALID
   describe DKIM_INVALID	DKIM-Signature header exists but is not valid
@@ -29,7 +30,6 @@ else
     meta   __NOT_SPOOFED	ALL_TRUSTED || DKIM_VALID
  else
    # Neither DKIM nor SPF ... ugh.  Approximate by looking for just the header.
-   header __DKIM_EXISTS        exists:DKIM-Signature
    meta   __NOT_SPOOFED       ALL_TRUSTED || __DKIM_EXISTS
  endif
 endif
