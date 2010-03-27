@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix dos hege jm wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 2: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix dos kgolding wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 3: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix dos hege jm kgolding wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2
+# with results from: day 1: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix dos hege jm kgolding wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 2: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix dos hege jm wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 3: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix dos kgolding wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2
 
 # tflags userconf
 ALL_TRUSTED
@@ -208,6 +208,12 @@ FROM_MISSP_FREEMAIL
 # good enough
 FROM_MISSP_MSFT
 
+# tflags net
+FROM_MISSP_SPF_FAIL1
+
+# tflags net
+FROM_MISSP_SPF_FAIL2
+
 # good enough
 FROM_URI
 
@@ -336,24 +342,6 @@ KB_RATWARE_MSGID
 
 # good enough
 KB_RATWARE_OUTLOOK_MID
-
-# good enough
-KHOP_SC_CIDR16
-
-# good enough
-KHOP_SC_CIDR24
-
-# good enough
-KHOP_SC_TOP200
-
-# good enough
-KHOP_SC_TOP_CIDR16
-
-# good enough
-KHOP_SC_TOP_CIDR24
-
-# good enough
-KHOP_SC_TOP_CIDR8
 
 # good enough
 LIVEFILESTORE
@@ -710,16 +698,16 @@ TVD_RCVD_SINGLE
 TWO_IPS_RCVD
 
 # good enough
-DEAR_EMAIL
+FB_INCREASE_VOL
 
 # good enough
-FORM_FRAUD_5
+FS_TIGHT_TEEN
 
-# tflags net
-FROM_MISSP_SPF_FAIL1
+# good enough
+HK_PNIS
 
-# tflags net
-FROM_MISSP_SPF_FAIL2
+# good enough
+URI_DOM_OBFU
 
 # tflags userconf
 UNPARSEABLE_RELAY
