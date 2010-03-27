@@ -64,6 +64,15 @@ tflags         FROM_MISSP_SPF_FAIL1  net
 meta           FROM_MISSP_SPF_FAIL2  (__FROM_RUNON && SPF_FAIL)
 tflags         FROM_MISSP_SPF_FAIL2  net
 
+meta           FROM_MISSP_EH_MATCH   (__FROM_RUNON && __ENV_AND_HDR_FROM_MATCH)
+describe       FROM_MISSP_EH_MATCH   From misspaced, matches envelope
+
+meta           FROM_MISSP_URI        (__FROM_RUNON && __HAS_ANY_URI)
+describe       FROM_MISSP_URI        From misspaced, has URI
+
+meta           FROM_MISSP_USER       (__FROM_RUNON && NSL_RCVD_FROM_USER)
+describe       FROM_MISSP_USER       From misspaced, from "user"
+
 ## To the same
 #header         TO_MISSPACED          To =~ /^\s*"[^"]*"</
 #describe       TO_MISSPACED          To: missing whitespace
@@ -351,17 +360,14 @@ endif
 # More from Ned
 header         NSL_RCVD_HELO_USER       Received =~ /helo[= ]user\)/i
 describe       NSL_RCVD_HELO_USER       Received from HELO User
-#tflags         NSL_RCVD_HELO_USER       nopublish
 
 header         NSL_RCVD_FROM_USER       Received =~ /from User [\[\(]/
 describe       NSL_RCVD_FROM_USER       Received from User
-#tflags         NSL_RCVD_FROM_USER       nopublish
 
 
 # observed in spam 3/11/2010
 header          DATE_DOTS               Date =~ /\d\d\.\d\d\.\d\d/
 describe        DATE_DOTS               Periods in date header
-#tflags          DATE_DOTS               nopublish
 
 uri             IMAGESHACK_URI          /\.imageshack\.us\//i
 describe        IMAGESHACK_URI          URI contains imageshack.us
