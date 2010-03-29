@@ -59,10 +59,10 @@ describe       FROM_MISSPACED        From: missing whitespace
 # Poorer S/O than FROM_MISSPACED but better performance in metas
 header         __FROM_RUNON          From =~ /\S+<\w+/
 
-meta           FROM_MISSP_SPF_FAIL1  (__FROM_RUNON && !SPF_PASS)
-tflags         FROM_MISSP_SPF_FAIL1  net
-meta           FROM_MISSP_SPF_FAIL2  (__FROM_RUNON && SPF_FAIL)
-tflags         FROM_MISSP_SPF_FAIL2  net
+#meta           FROM_MISSP_SPF_FAIL1  (__FROM_RUNON && !SPF_PASS)
+#tflags         FROM_MISSP_SPF_FAIL1  net
+meta           FROM_MISSP_SPF_FAIL  (__FROM_RUNON && SPF_FAIL)
+tflags         FROM_MISSP_SPF_FAIL  net
 
 meta           FROM_MISSP_EH_MATCH   (__FROM_RUNON && __ENV_AND_HDR_FROM_MATCH)
 describe       FROM_MISSP_EH_MATCH   From misspaced, matches envelope
@@ -71,7 +71,19 @@ meta           FROM_MISSP_URI        (__FROM_RUNON && __HAS_ANY_URI)
 describe       FROM_MISSP_URI        From misspaced, has URI
 
 meta           FROM_MISSP_USER       (__FROM_RUNON && NSL_RCVD_FROM_USER)
-describe       FROM_MISSP_USER       From misspaced, from "user"
+describe       FROM_MISSP_USER       From misspaced, from "User"
+
+meta           FROM_MISSP_NO_TO      (__FROM_RUNON && MISSING_HEADERS)
+describe       FROM_MISSP_NO_TO      From misspaced, To missing
+
+meta           FROM_MISSP_TO_UNDISC  (__FROM_RUNON && __TO_UNDISCLOSED)
+describe       FROM_MISSP_TO_UNDISC  From misspaced, To undisclosed
+
+meta           FROM_MISSP_DKIM       (__FROM_RUNON && __DKIM_DEPENDABLE)
+describe       FROM_MISSP_DKIM       From misspaced, DKIM dependable
+
+meta           FROM_MISSP_REPLYTO    (__FROM_RUNON && __REPLYTO_EXISTS)
+describe       FROM_MISSP_REPLYTO    From misspaced, has Reply-To
 
 ## To the same
 #header         TO_MISSPACED          To =~ /^\s*"[^"]*"</
@@ -205,20 +217,18 @@ meta           MANY_GOOG_PROXY     __FEEDPROXY > 4
 describe       MANY_GOOG_PROXY     Many Google feedproxy URIs
 
 rawbody        TINY_FLOAT         /\bstyle\s*=\s*"[^"]{0,40}?(?:(?:FONT-SIZE\s*:\s+\dpx|FLOAT\s*:\s+(?:right|left))(?:;\s+)?(?:(?!(?:FONT-SIZE|FLOAT))\w+:\s+\w+;?\s*)*){2}/i
-#tflags         __TINY_FLOAT         multiple
-#meta           TINY_FLOAT           __TINY_FLOAT > 0
-describe       TINY_FLOAT           Has small-font floating HTML elements - text obfuscation?
-score          TINY_FLOAT           2.00
-#meta           MANY_TINY_FLOAT      __TINY_FLOAT > 5
-#describe       MANY_TINY_FLOAT      Many small-font floating HTML elements
+describe       TINY_FLOAT         Has small-font floating HTML - text obfuscation?
+score          TINY_FLOAT         2.00
 
 
 # endless requests on the users list...
-header         TO_EQ_FROM      ALL =~ /\nFrom:[^\n<]{0,80}<?([^\n\s>]+)>?\n(?:[^\n]{1,100}\n)*To:[^\n]+\1/ism
-describe       TO_EQ_FROM      To: same as From:
-score          TO_EQ_FROM      0.001
-tflags         TO_EQ_FROM      nopublish
+header         __TO_EQ_FROM_1       ALL =~ /\nFrom:[^\n<]{0,80}<?([^\n\s>]+)>?\n(?:[^\n]{1,100}\n)*To:[^\n]+\1/ism
+header         __TO_EQ_FROM_2       ALL =~ /\nTo:[^\n<]{0,80}<?([^\n\s>]+)>?\n(?:[^\n]{1,100}\n)*From:[^\n]+\1/ism
+meta           __TO_EQ_FROM         (__TO_EQ_FROM_1 || __TO_EQ_FROM_2)
+describe       __TO_EQ_FROM         To: same as From:
 
+meta           TO_EQ_FM_HTML_ONLY   (__TO_EQ_FROM && MIME_HTML_ONLY)
+describe       TO_EQ_FM_HTML_ONLY   To == From and HTML only
 
 # Evaluate ReturnPath and blacklist collisions
 meta           __RP_SAFE_BRBL             RCVD_IN_RP_SAFE && __RCVD_IN_BRBL
@@ -316,8 +326,8 @@ tflags         MANY_DIV_10                   nopublish
 header         FROM_TRL_UNDR              From =~ /_\@/
 tflags         FROM_TRL_UNDR              nopublish
 
-body           LOTSA_EMAILS		  /\b(?:thousand|million)\se-?mail(?:\saddresse)?s?\b/i
-tflags         LOTSA_EMAILS		  nopublish
+body           LOTSA_EMAILS               /\b(?:thousand|million)\se-?mail(?:\saddresse)?s?\b/i
+tflags         LOTSA_EMAILS               nopublish
 
 body           NUM_EMAILS                 /\b\d[,\d]{3,}\s(?:(?!and|or)\w+\s)?e-?mail\saddress(?:es)?\b/i
 tflags         NUM_EMAILS                 nopublish
