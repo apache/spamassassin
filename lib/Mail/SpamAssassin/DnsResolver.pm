@@ -199,6 +199,77 @@ sub available_nameservers {
   return @{$self->{available_dns_servers}};
 }
 
+sub disable_available_port {
+  my($self, $lport) = @_;
+  if ($lport >= 0 && $lport <= 65535) {
+    my $conf = $self->{conf};
+    if (!$conf->{dns_available_portscount_buckets}) {
+      $self->pick_random_available_port();  # initialize
+    }
+    if (vec($conf->{dns_available_ports_bitset}, $lport, 1)) {
+      dbg("dns: disabling local port %d", $lport);
+      vec($conf->{dns_available_ports_bitset}, $lport, 1) = 0;
+      $conf->{dns_available_portscount_buckets}->[$lport >> 8] --;
+      $conf->{dns_available_portscount} --;
+    }
+  }
+}
+
+sub pick_random_available_port {
+  my $self = shift;
+  my $port_number;  # resulting port number, or undef if none available
+
+  my $conf = $self->{conf};
+  my $ports_bitset = $conf->{dns_available_ports_bitset};
+  my $available_portscount = $conf->{dns_available_portscount};
+
+  # initialize when here for the first time
+  if (!defined $available_portscount) {
+    # prepare auxilliary data structure to speed up further free-port lookups;
+    # 256 buckets, each accounting for 256 ports: 8+8 = 16 bit port numbers;
+    # each bucket holds a count of available ports in its range
+    my @bucket_counts = (0) x 256;
+    my $all_zeroes = "\000" x 32;  # one bucket's worth (256) of zeroes
+    my $all_ones   = "\377" x 32;  # one bucket's worth (256) of ones
+    my $ind = 0;
+    $available_portscount = 0;  # number of all available ports
+    foreach my $bucket (0..255) {
+      my $cnt = 0;
+      my $b = substr($ports_bitset, $bucket*32, 32);  # one bucket: 256 bits
+      if  ($b eq $all_zeroes) { $ind += 256 }
+      elsif ($b eq $all_ones) { $ind += 256; $cnt += 256 }
+      else {  # count nontrivial cases the slow way
+        foreach (0..255) { if (vec($ports_bitset, $ind++, 1)) { $cnt++ } }
+      }
+      $available_portscount += $cnt;
+      $bucket_counts[$bucket] = $cnt;
+    }
+    $conf->{dns_available_portscount} = $available_portscount;
+    $conf->{dns_available_portscount_buckets} = \@bucket_counts;
+  }
+
+  # find the n-th port number from the ordered set of available port numbers
+  dbg("dns: %d configured local ports for DNS queries", $available_portscount);
+  if ($available_portscount > 0) {
+    my $n = int(rand($available_portscount));
+    my $bucket_counts_ref = $conf->{dns_available_portscount_buckets};
+    my $ind = 0;
+    foreach my $bucket (0..255) {
+      # find the bucket containing n-th turned-on bit
+      my $cnt = $bucket_counts_ref->[$bucket];
+      if ($cnt > $n) { last } else { $n -= $cnt; $ind += 256 }
+    }
+    while ($ind <= 65535) {  # scans one bucket, runs at most 256 iterations
+      # find the n-th turned-on bit within the corresponding bucket
+      if (vec($ports_bitset, $ind, 1)) {
+        if ($n <= 0) { $port_number = $ind; last } else { $n-- }
+      }
+      $ind++;
+    }
+  }
+  return $port_number;
+}
+
 =item $res->connect_sock()
 
 Re-connect to the first nameserver listed in C</etc/resolv.conf> or similar
@@ -242,12 +313,21 @@ sub connect_sock {
   dbg("dns: LocalAddr: %s, name server(s): %s",
       $srcaddr, join(', ',@ns_addr_port));
 
-  # find next available unprivileged port (1024 - 65535)
-  # starting at a random value to spread out use of ports
-  my $port_offset = int(rand(64511));  # 65535 - 1024
-  for (my $i = 0; $i<64511; $i++) {
-    my $lport = 1024 + (($port_offset + $i) % 64511);
-
+  # find a free local random port from a set of declared-to-be-available ports
+  my $lport;
+  my $attempts = 0;
+  for (;;) {
+    $attempts++;
+    $lport = $self->pick_random_available_port();
+    if (!defined $lport) {
+      $lport = 0;
+      dbg("no configured local ports for DNS queries, letting OS choose");
+    }
+    if ($attempts+1 > 50) {  # sanity check
+      warn "could not create a DNS resolver socket in $attempts attempts\n";
+      $errno = 0;
+      last;
+    }
     my %args = (
         PeerAddr => $ns_addr,
         PeerPort => $ns_port,
@@ -256,7 +336,6 @@ sub connect_sock {
         Type => SOCK_DGRAM,
         LocalAddr => $srcaddr,
     );
-
     if ($ipv6opt) {
       $sock = IO::Socket::INET6->new(%args);
     } else {
@@ -265,15 +344,19 @@ sub connect_sock {
     $errno = $!;
     if (defined $sock) {  # ok, got it
       last;
-    } elsif ($! == EADDRINUSE || $! == EACCES) {  # in use, let's try another source port
-      dbg("dns: UDP port %s already in use, trying another port", $lport);
+    } elsif ($! == EADDRINUSE || $! == EACCES) {
+      # in use, let's try another source port
+      dbg("dns: UDP port $lport already in use, trying another port");
+      if ($self->{conf}->{dns_available_portscount} > 100) {  # still abundant
+        $self->disable_available_port($lport);
+      }
     } else {
       warn "error creating a DNS resolver socket: $errno";
       goto no_sock;
     }
   }
   if (!defined $sock) {
-    warn "cannot create a DNS resolver socket: $errno";
+    warn "could not create a DNS resolver socket in $attempts attempts: $errno";
     goto no_sock;
   }
 
@@ -282,14 +365,15 @@ sub connect_sock {
     $bufsiz = $sock->sockopt(Socket::SO_RCVBUF)
       or die "cannot get a resolver socket rx buffer size: $!";
     if ($bufsiz >= 32*1024) {
-      dbg("dns: resolver socket rx buffer size is %d bytes", $bufsiz);
+      dbg("dns: resolver socket rx buffer size is %d bytes, local port %d",
+           $bufsiz, $lport);
     } else {
       $sock->sockopt(Socket::SO_RCVBUF, 32*1024)
         or die "cannot set a resolver socket rx buffer size: $!";
       $newbufsiz = $sock->sockopt(Socket::SO_RCVBUF)
         or die "cannot get a resolver socket rx buffer size: $!";
-      dbg("dns: resolver socket rx buffer size changed from %d to %d bytes",
-          $bufsiz, $newbufsiz);
+      dbg("dns: resolver socket rx buffer size changed from %d to %d bytes, ".
+          "local port %d", $bufsiz, $newbufsiz, $lport);
     }
     1;
   } or do {
