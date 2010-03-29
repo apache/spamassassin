@@ -41,6 +41,10 @@ score      TO_NO_BRKTS_DYNIP       0.20
 meta       TO_NO_BRKTS_NORDNS      __TO_NO_ARROWS_R && !__TO_UNDISCLOSED && RDNS_NONE
 score      TO_NO_BRKTS_NORDNS      0.20
 
+meta       TO_NO_BRKTS_NORDNS_HTML      __TO_NO_ARROWS_R && !__TO_UNDISCLOSED && RDNS_NONE && MIME_HTML_ONLY
+score      TO_NO_BRKTS_NORDNS_HTML      0.20
+
+
 ifplugin Mail::SpamAssassin::Plugin::FreeMail
 #  meta       TO_NO_BRKTS_FREEMAIL    __TO_NO_ARROWS_R && !__TO_UNDISCLOSED && (FREEMAIL_FROM || FREEMAIL_REPLYTO)
   meta       TO_NO_BRKTS_FREEMAIL    __TO_NO_ARROWS_R && (FREEMAIL_FROM || FREEMAIL_REPLYTO)
