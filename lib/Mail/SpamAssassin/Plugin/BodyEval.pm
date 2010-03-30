@@ -119,7 +119,7 @@ sub _multipart_alternative_difference {
         }
 
 	# If there are no words, mark if there's at least 1 image ...
-	if (keys %html == 0 && exists $pms->{html}{inside}{img}) {
+	if (!%html && exists $pms->{html}{inside}{img}) {
 	  # Use "\n" as the mark since it can't ever occur normally
 	  $html{"\n"}=1;
 	}

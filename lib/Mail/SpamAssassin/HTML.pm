@@ -191,7 +191,7 @@ sub get_rendered_text {
   my $self = shift;
   my %options = @_;
 
-  return join('', @{ $self->{text} }) unless keys %options;
+  return join('', @{ $self->{text} }) unless %options;
 
   my $mask;
   while (my ($k, $v) = each %options) {
