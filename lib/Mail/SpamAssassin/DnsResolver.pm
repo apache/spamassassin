@@ -500,6 +500,7 @@ sub _packet_id {
     #
     my $qname = $ques->qname;
     $qname =~ s/\\([0-9]{3}|.)/length($1)==1 ? $1 : chr($1)/gse;
+    $qname = lc $qname  if !$self->{conf}->{dns_options}->{dns0x20};
     return join '/', $id, $qname, $ques->qtype, $ques->qclass;
 
   } else {
