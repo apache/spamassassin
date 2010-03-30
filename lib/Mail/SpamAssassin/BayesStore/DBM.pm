@@ -1433,7 +1433,6 @@ sub perform_upgrade {
     local $SIG{'__DIE__'};	# do not run user die() traps in here
 
     use File::Basename;
-    use File::Copy;
 
     # bayes directory
     my $main = $self->{bayes}->{main};
