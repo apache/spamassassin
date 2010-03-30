@@ -82,7 +82,6 @@ use Errno qw(ENOENT EACCES);
 use File::Basename;
 use File::Path;
 use File::Spec 0.8;
-use File::Copy;
 use Time::HiRes qw(time);
 use Cwd;
 use Config;
