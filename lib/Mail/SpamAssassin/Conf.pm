@@ -1381,36 +1381,6 @@ directive, falling back to Net::DNS -supplied defaults.
     }
   });
 
-=item dns_local_ports_none
-
-Is a comfortable and faster-to-execute shorthand for:
-
-  dns_local_ports_avoid 1-65535
-
-leaving the set of available DNS query local port numbers empty. In all
-respects (apart from speed) it is equivalent to the shown directive, and can
-be freely mixed with I<dns_local_ports_permit> and I<dns_local_ports_avoid>.
-
-If the resulting set of port numbers is empty, then SpamAssassin does not
-apply its ports randomization logic, but instead leaves the operating system
-to choose a suitable free local port number.
-
-See also directives I<dns_local_ports_permit> and I<dns_local_ports_avoid>.
-
-=cut
-
-  push (@cmds, {
-    setting => 'dns_local_ports_none',
-    type => $CONF_TYPE_NOARGS,
-    code => sub {
-      my ($self, $key, $value, $line) = @_;
-      unless (!defined $value || $value eq '') {
-        return $INVALID_VALUE;
-      }
-      wipe_ports_range(\$self->{dns_available_ports_bitset}, 0);
-    }
-  });
-
 =item dns_local_ports_permit ranges...
 
 Add the specified ports or ports ranges to the set of allowed port numbers
@@ -1460,6 +1430,7 @@ See also directives I<dns_local_ports_permit> and I<dns_local_ports_none>.
         }
       }
       foreach my $p (@port_ranges) {
+        undef $self->{dns_available_portscount};  # invalidate derived data
         set_ports_range(\$self->{dns_available_ports_bitset},
                         $p->[0], $p->[1], 1);
       }
@@ -1494,9 +1465,41 @@ Please see directive I<dns_local_ports_permit> for details.
         }
       }
       foreach my $p (@port_ranges) {
+        undef $self->{dns_available_portscount};  # invalidate derived data
         set_ports_range(\$self->{dns_available_ports_bitset},
                         $p->[0], $p->[1], 0);
       }
+    }
+  });
+
+=item dns_local_ports_none
+
+Is a fast shorthand for:
+
+  dns_local_ports_avoid 1-65535
+
+leaving the set of available DNS query local port numbers empty. In all
+respects (apart from speed) it is equivalent to the shown directive, and can
+be freely mixed with I<dns_local_ports_permit> and I<dns_local_ports_avoid>.
+
+If the resulting set of port numbers is empty, then SpamAssassin does not
+apply its ports randomization logic, but instead leaves the operating system
+to choose a suitable free local port number.
+
+See also directives I<dns_local_ports_permit> and I<dns_local_ports_avoid>.
+
+=cut
+
+  push (@cmds, {
+    setting => 'dns_local_ports_none',
+    type => $CONF_TYPE_NOARGS,
+    code => sub {
+      my ($self, $key, $value, $line) = @_;
+      unless (!defined $value || $value eq '') {
+        return $INVALID_VALUE;
+      }
+      undef $self->{dns_available_portscount};  # invalidate derived data
+      wipe_ports_range(\$self->{dns_available_ports_bitset}, 0);
     }
   });
 
@@ -3730,9 +3733,6 @@ sub new {
 
   $self->{encapsulated_content_description} = 'original message before SpamAssassin';
 
-  # ensure the ports bitset is initialized
-  set_ports_range(\$self->{conf}->{dns_available_ports_bitset}, 0, 0, 0);
-
   $self;
 }
 
@@ -3941,6 +3941,8 @@ sub set_ports_range {
   if (!defined $$bitset_ref) {  # provide a sensible default
     wipe_ports_range($bitset_ref, 1);  # turn on all bits 0..65535
     vec($$bitset_ref,$_,1) = 0  for 0..1023;  # avoid 0 and privileged ports
+  } elsif ($$bitset_ref eq '') {  # repopulate the bitset (late configuration)
+    wipe_ports_range($bitset_ref, 0);  # turn off all bits 0..65535
   }
   $value = !$value ? 0 : 1;
   for (my $j = $port_range_lo; $j <= $port_range_hi; $j++) {
