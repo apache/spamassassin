@@ -750,7 +750,7 @@ sub enter_helper_run_mode {
   dbg("dns: entering helper-app run mode");
   $self->{old_slash} = $/;              # Razor pollutes this
   %{$self->{old_env}} = ();
-  if ( defined %ENV ) {
+  if ( %ENV ) {
     # undefined values in %ENV can result due to autovivification elsewhere,
     # this prevents later possible warnings when we restore %ENV
     while (my ($key, $value) = each %ENV) {
