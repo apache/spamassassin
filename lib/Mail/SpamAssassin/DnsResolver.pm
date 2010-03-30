@@ -203,7 +203,7 @@ sub disable_available_port {
   my($self, $lport) = @_;
   if ($lport >= 0 && $lport <= 65535) {
     my $conf = $self->{conf};
-    if (!$conf->{dns_available_portscount_buckets}) {
+    if (!defined $conf->{dns_available_portscount}) {
       $self->pick_random_available_port();  # initialize
     }
     if (vec($conf->{dns_available_ports_bitset}, $lport, 1)) {
@@ -220,11 +220,15 @@ sub pick_random_available_port {
   my $port_number;  # resulting port number, or undef if none available
 
   my $conf = $self->{conf};
-  my $ports_bitset = $conf->{dns_available_ports_bitset};
   my $available_portscount = $conf->{dns_available_portscount};
 
-  # initialize when here for the first time
+  # initialize when called for the first time or after a config change
   if (!defined $available_portscount) {
+    my $ports_bitset = $conf->{dns_available_ports_bitset};
+    if (!defined $ports_bitset) {  # ensure it is initialized
+      Mail::SpamAssassin::Conf::set_ports_range(\$ports_bitset, 0, 0, 0);
+      $conf->{dns_available_ports_bitset} = $ports_bitset;
+    }
     # prepare auxilliary data structure to speed up further free-port lookups;
     # 256 buckets, each accounting for 256 ports: 8+8 = 16 bit port numbers;
     # each bucket holds a count of available ports in its range
@@ -245,12 +249,18 @@ sub pick_random_available_port {
       $bucket_counts[$bucket] = $cnt;
     }
     $conf->{dns_available_portscount} = $available_portscount;
-    $conf->{dns_available_portscount_buckets} = \@bucket_counts;
+    if ($available_portscount) {
+      $conf->{dns_available_portscount_buckets} = \@bucket_counts;
+    } else {  # save some storage
+      $conf->{dns_available_portscount_buckets} = undef;
+      $conf->{dns_available_ports_bitset} = '';
+    }
   }
 
   # find the n-th port number from the ordered set of available port numbers
   dbg("dns: %d configured local ports for DNS queries", $available_portscount);
   if ($available_portscount > 0) {
+    my $ports_bitset = $conf->{dns_available_ports_bitset};
     my $n = int(rand($available_portscount));
     my $bucket_counts_ref = $conf->{dns_available_portscount_buckets};
     my $ind = 0;
