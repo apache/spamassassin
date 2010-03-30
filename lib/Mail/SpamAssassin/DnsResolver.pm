@@ -451,9 +451,12 @@ sub new_dns_packet {
   return if $self->{no_resolver};
 
   # construct a PTR query if it looks like an IPv4 address
-  if ((!defined($type) || $type eq 'PTR') && $host =~ /^(\d+)\.(\d+)\.(\d+)\.(\d+)$/) {
-    $host = "$4.$3.$2.$1.in-addr.arpa.";
-    $type = 'PTR';
+  if (!defined($type) || $type eq 'PTR') {
+    local($1,$2,$3,$4);
+    if ($host =~ /^(\d+)\.(\d+)\.(\d+)\.(\d+)$/) {
+      $host = "$4.$3.$2.$1.in-addr.arpa.";
+      $type = 'PTR';
+    }
   }
 
   my $packet;
