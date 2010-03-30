@@ -1457,7 +1457,10 @@ sub perform_upgrade {
     for (@files) {
       my $src = "$dir/$_";
       my $dst = "$dir/old_$_";
-      copy($src, $dst) || die "bayes: can't copy $src to $dst: $!\n";
+      eval q{
+        use File::Copy;
+        copy($src, $dst);
+      } || die "bayes: can't copy $src to $dst: $!\n";
     }
 
     # delete previous to make way for import
