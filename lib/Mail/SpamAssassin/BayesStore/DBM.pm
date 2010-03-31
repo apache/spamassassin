@@ -1433,7 +1433,6 @@ sub perform_upgrade {
     local $SIG{'__DIE__'};	# do not run user die() traps in here
 
     use File::Basename;
-    use File::Copy;
 
     # bayes directory
     my $main = $self->{bayes}->{main};
@@ -1457,7 +1456,10 @@ sub perform_upgrade {
     for (@files) {
       my $src = "$dir/$_";
       my $dst = "$dir/old_$_";
-      copy($src, $dst) || die "bayes: can't copy $src to $dst: $!\n";
+      eval q{
+        use File::Copy;
+        copy($src, $dst);
+      } || die "bayes: can't copy $src to $dst: $!\n";
     }
 
     # delete previous to make way for import
