@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-trec_enron bb-zmi bernie-it_batt bernie-mix dos hege jm wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 2: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix hege jm kgolding wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 3: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix dos hege jm kgolding wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2
+# with results from: day 1: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix hege kgolding wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 2: bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-trec_enron bb-zmi bernie-it_batt bernie-mix dos hege jm wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 3: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix hege jm kgolding wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2
 
 # tflags userconf
 ALL_TRUSTED
@@ -200,10 +200,16 @@ FROM_MISSP_FREEMAIL
 FROM_MISSP_MSFT
 
 # good enough
-FROM_MISSP_USER
+FROM_MISSP_NO_TO
+
+# tflags net
+FROM_MISSP_SPF_FAIL
 
 # good enough
-FROM_URI
+FROM_MISSP_TO_UNDISC
+
+# good enough
+FROM_MISSP_USER
 
 # good enough
 FR_TITLE_CONS_6
@@ -351,9 +357,6 @@ NO_RELAYS
 
 # good enough
 NSL_RCVD_FROM_USER
-
-# good enough
-PART_CID_STOCK
 
 # tflags net
 PYZOR_CHECK
@@ -623,7 +626,13 @@ TAB_IN_FROM
 TINY_FLOAT
 
 # good enough
+TO_EQ_FM_HTML_ONLY
+
+# good enough
 TO_NO_BRKTS_DYNIP
+
+# good enough
+TO_NO_BRKTS_NORDNS_HTML
 
 # good enough
 TT_MSGID_TRUNC
@@ -635,6 +644,9 @@ TVD_FINGER_02
 TVD_QUAL_MEDS
 
 # good enough
+TVD_RCVD_IP
+
+# good enough
 TVD_RCVD_SINGLE
 
 # good enough
@@ -644,58 +656,7 @@ TVD_VISIT_PHARMA
 TWO_IPS_RCVD
 
 # good enough
-AXB_XMID_DIGDOTSHRT
-
-# good enough
-FB_INCREASE_VOL
-
-# good enough
-FROM_MISSP_NO_TO
-
-# tflags net
-FROM_MISSP_SPF_FAIL
-
-# good enough
-FROM_MISSP_TO_UNDISC
-
-# good enough
-FROM_WWW
-
-# good enough
-FSL_FAKE_YAHOO_RCVD
-
-# good enough
-FS_TIGHT_TEEN
-
-# good enough
-HK_PNIS
-
-# good enough
-MAILER_EQ_ORG
-
-# good enough
-MAY_BE_FORGED
-
-# good enough
-S25R_3
-
-# good enough
-S25R_4
-
-# good enough
-SANE_20d820d8f491476ca39941979ab139dd
-
-# good enough
-SANE_7d8e92a09f27d49fafe09a1dbd5cac10
-
-# good enough
-SANE_ef00ce28cfa5ed6e4c405ed37ff36d46
-
-# good enough
-TO_EQ_FM_HTML_ONLY
-
-# good enough
-TO_NO_BRKTS_NORDNS_HTML
+FROM_MISSP_EH_MATCH
 
 # tflags userconf
 UNPARSEABLE_RELAY
