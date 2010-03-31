@@ -191,9 +191,9 @@ my %get_details = (
     my ($prec, $height, $width, $comps) = (undef,0,0,undef);
     while  (1) {
       my ($xx, $mark, $len) = unpack("CCn", substr($data, $pos, $chunksize));
-      last if ($xx != 0xFF);
-      last if ($mark == 0xDA || $mark == 0xD9);
-      last if ($len < 2);
+      last if (!defined $xx   || $xx != 0xFF);
+      last if (!defined $mark || $mark == 0xDA || $mark == 0xD9);
+      last if (!defined $len  || $len < 2);
       $pos += $chunksize;
       my $block = substr($data, $pos, $len - 2);
       my $blocklen = length($block);
