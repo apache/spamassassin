@@ -498,7 +498,7 @@ sub _check_base64_length {
     # perhaps just limit to test, and image?
     next if ($ctype eq 'application/ics');
 
-    my $cte = lc $p->get_header('content-transfer-encoding') || '';
+    my $cte = lc($p->get_header('content-transfer-encoding') || '');
     next if ($cte !~ /^base64$/);
     foreach my $l ( @{$p->raw()} ) {
       my $len = length $l;
