@@ -1413,6 +1413,7 @@ See also directives I<dns_local_ports_permit> and I<dns_local_ports_none>.
   push (@cmds, {
     setting => 'dns_local_ports_permit',
     type => $CONF_TYPE_STRING,
+    is_admin => 1,
     code => sub {
       my($self, $key, $value, $line) = @_;
       my(@port_ranges); local($1,$2);
@@ -1449,6 +1450,7 @@ Please see directive I<dns_local_ports_permit> for details.
   push (@cmds, {
     setting => 'dns_local_ports_avoid',
     type => $CONF_TYPE_STRING,
+    is_admin => 1,
     code => sub {
       my($self, $key, $value, $line) = @_;
       my(@port_ranges); local($1,$2);
@@ -1493,6 +1495,7 @@ See also directives I<dns_local_ports_permit> and I<dns_local_ports_avoid>.
   push (@cmds, {
     setting => 'dns_local_ports_none',
     type => $CONF_TYPE_NOARGS,
+    is_admin => 1,
     code => sub {
       my ($self, $key, $value, $line) = @_;
       unless (!defined $value || $value eq '') {
