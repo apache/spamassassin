@@ -22,19 +22,23 @@ header	 KHOP_BIG_TO_CC      ToCc =~ /(?:[^,\@]{1,60}\@[^,]{4,25},){10}/
 describe KHOP_BIG_TO_CC      Sent to 10+ recipients instaed of Bcc or a list
 score	 KHOP_BIG_TO_CC      0.3 # 20090527
 
-header	 __KHOP_EBAY_ADDY	From:addr =~ /\@(?:.+\.)?ebay\..{3,5}$/i
-meta	 KHOP_FAKE_EBAY 	__KHOP_EBAY_ADDY && !__NOT_SPOOFED
+# see also 70_sare_spoof.cf's __EBAY_ADDRESS:
+# header __EBAY_ADDRESS     From:addr =~ /[\@\.]ebay\.(?:com(?:\.au|\.cn|\.hk|\.my|\.sg)?|co\.uk|at|be|ca|fr|de|in|ie|it|nl|ph|pl|es|se|ch)/i
+header	 __EBAY_ADDRESS 	From:addr =~ /[\@.]ebay\..{3,5}$/i
+meta	 KHOP_FAKE_EBAY 	__EBAY_ADDRESS && !__NOT_SPOOFED
 describe KHOP_FAKE_EBAY 	Sender falsely claims to be from eBay
 #score	 KHOP_FAKE_EBAY 	2.25 # 20090408
 
 # masscheck doesn't cover ifplugin lines
 #ifplugin Mail::SpamAssassin::Plugin::URIDetail
-# uri_detail KHOP_FOREIGN_CLICK	text =~ /\b(?:cliquez\Wici\b|clic aqu[^<.,a ])/i
+  # uri_detail doesn't support m{foo}i notation
+  #uri_detail KHOP_FOREIGN_CLICK	text =~ /\b(?:cli(?:quez\W|ck\Wa)ici\b|cli(?:cca\W|c\Wa|que\Wa)qu[^<.,a ]|klie?k(?:\Whi?er|ni(?:j|nite)\Wtu[tk]aj)\b)/i
 #else
-  rawbody    KHOP_FOREIGN_CLICK	m{\bhref=[^>]{9,199}>[^<]{0,80}(?:<(?!/a\b)[^>]{0,299}>[^<]{0,80}){0,9}[^<]{0,80}\b(?:cliquez\Wici\b|clic aqu[^<.,a ])}si
+  rawbody    KHOP_FOREIGN_CLICK	m{\bhref=[^>]{9,199}>[^<]{0,80}(?:<(?!/a\b)[^>]{0,299}>[^<]{0,80}){0,9}[^<]{0,80}\b(?:cli(?:quez\W|ck\Wa)ici\b|cli(?:cca\W|c\Wa|que\Wa)qu[^<.,a ]|klie?k(?:\Whi?er|ni(?:j|nite)\Wtu[tk]aj)\b)}si
 #endif
-describe KHOP_FOREIGN_CLICK	Click here link in French or Spanish
-#score	 KHOP_FOREIGN_CLICK	1.1	# 20090526 see also SARE_UN7
+# includes fr, es, it, pt, nl, da, ca, sl, af, and probably others
+describe KHOP_FOREIGN_CLICK	Click here link in non-English Latin text
+#score	 KHOP_FOREIGN_CLICK	0.1	# 20090526 see also SARE_UN7
 tflags	 KHOP_FOREIGN_CLICK	nopublish  # re-do ifplugin to publish
 
 # I don't think this ever fires
