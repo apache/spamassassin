@@ -528,13 +528,7 @@ sub show_default_view {
     my $rev = $self->get_rev_for_daterev($self->{daterev});
     my $md = $self->get_rule_metadata($rev);
     my $src = eval { $md->{rulemds}->{$self->{rule}}->{src} } || '(not found)';
-
-    # urgh.  this could have been cleaner if it wasn't for the tricky SVN external
     my $srchref = "http://svn.apache.org/viewvc/spamassassin/trunk/$src?revision=$rev\&view=markup";
-    if ($src =~ m{^rulesrc/(.*)$}) {
-      # http://svn.apache.org/viewvc/spamassassin/rules/trunk/sandbox/jm/20_basic.cf?revision=635196&view=markup
-      $srchref = "http://svn.apache.org/viewvc/spamassassin/rules/trunk/$1?revision=$rev\&view=markup";
-    }
 
     my $lastmod = eval {
           POSIX::strftime "%Y-%m-%d %H:%M:%S UTC", gmtime $md->{rulemds}->{$self->{rule}}->{srcmtime}
