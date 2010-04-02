@@ -87,3 +87,9 @@ meta	 FORGED_HOTMAIL_RCVD3	__HOST_HOTMAIL && (!__HOTMAIL_HELO || __DOS_SINGLE_EX
 header	 RCVD_VIA_IPV6	X-Spam-Relays-Untrusted =~ /^[^\]]+ (?:by|ip)=[^\] ]+:[^\] .]+ /
 describe RCVD_VIA_IPV6	Received by the last trusted relay via IPv6
 tflags	 RCVD_VIA_IPV6	nice
+
+meta	 KHOP_SC_TOP_CIDR8_C  KHOP_SC_TOP_CIDR8 && !(__VIA_ML||__freemail_safe||__RCVD_IN_DNSWL||RCVD_IN_HOSTKARMA_WL)
+tflags	 KHOP_SC_TOP_CIDR8_C  nopublish
+meta	 KHOP_SC_CIDR8_C  KHOP_SC_CIDR8 && !(__VIA_ML||__freemail_safe)
+tflags	 KHOP_SC_CIDR8_C  nopublish
+
