@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix dos hege jm kgolding wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 2: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix dos hege jm kgolding wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 3: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix hege kgolding wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2
+# with results from: day 1: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix dos hege jm kgolding wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 2: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix dos hege jm kgolding wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 3: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix dos hege jm kgolding wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2
 
 # tflags userconf
 ALL_TRUSTED
@@ -58,9 +58,6 @@ DATE_IN_FUTURE_Q_PLUS
 # good enough
 DEAR_BENEFICIARY
 
-# good enough
-DEAR_EMAIL
-
 # tflags net
 DIGEST_MULTIPLE
 
@@ -113,6 +110,9 @@ DOS_OE_TO_MX
 DOS_OUTLOOK_TO_MX
 
 # good enough
+DOS_RCVD_IP_TWICE_C
+
+# good enough
 DYN_RDNS_AND_INLINE_IMAGE
 
 # good enough
@@ -149,6 +149,9 @@ FH_FAKE_RCVD_LINE_B
 FH_FROM_GET_NAME
 
 # good enough
+FH_FROM_GIVEAWAY
+
+# good enough
 FH_HELO_ALMOST_IP
 
 # good enough
@@ -164,10 +167,16 @@ FH_HOST_EQ_DYNAMICIP
 FH_HOST_EQ_VERIZON_P
 
 # good enough
+FH_HOST_IN_ADDRARPA
+
+# good enough
 FM_LOTTO_YOU_WON
 
 # good enough
 FM_SEX_HELODDDD
+
+# good enough
+FM_SUBJ_APPROVE
 
 # good enough
 FORGED_TBIRD_IMG_ARROW
@@ -212,7 +221,19 @@ FROM_MISSP_TO_UNDISC
 FROM_MISSP_USER
 
 # good enough
+FRT_APPROV
+
+# good enough
+FRT_PRICE
+
+# good enough
+FRT_ROLEX
+
+# good enough
 FR_TITLE_CONS_6
+
+# good enough
+FSL_FAKE_GMAIL_RCVD
 
 # good enough
 FSL_FAKE_HOTMAIL_RVCD
@@ -224,10 +245,16 @@ FSL_HELO_BARE_IP_1
 FSL_HELO_DEVICE
 
 # good enough
+FSL_INTERIA_ABUSE
+
+# good enough
 FSL_LSPACES_ABUSE
 
 # good enough
 FS_MORE_CONFIDENT
+
+# good enough
+FS_PHARMASUB2
 
 # good enough
 FS_REPLICA
@@ -357,6 +384,9 @@ NO_RELAYS
 
 # good enough
 NSL_RCVD_FROM_USER
+
+# good enough
+PART_CID_STOCK
 
 # tflags net
 PYZOR_CHECK
@@ -551,6 +581,9 @@ RCVD_IN_SORBS_ZOMBIE
 RCVD_IN_XBL
 
 # good enough
+RDNS_LOCALHOST
+
+# good enough
 S25R_1
 
 # good enough
@@ -570,6 +603,9 @@ SANE_7429530a7398f43f1f1b795f9420714e
 
 # good enough
 SANE_75491b468ec2e117e50f9842d32abfab
+
+# good enough
+SANE_91eb43f705d25c804374a746d7519660
 
 # good enough
 SANE_d0d2b0f6373bf91253d66dd74c594b87
@@ -626,6 +662,9 @@ TAB_IN_FROM
 TINY_FLOAT
 
 # good enough
+TO_EQ_FM_DIRECT_MX
+
+# good enough
 TO_EQ_FM_HTML_ONLY
 
 # good enough
@@ -641,6 +680,9 @@ TT_MSGID_TRUNC
 TVD_FINGER_02
 
 # good enough
+TVD_PH_BODY_ACCOUNTS_PRE
+
+# good enough
 TVD_QUAL_MEDS
 
 # good enough
@@ -652,8 +694,62 @@ TVD_VISIT_PHARMA
 # good enough
 TWO_IPS_RCVD
 
+# tflags publish
+ADVANCE_FEE_4_NEW
+
+# tflags publish
+ADVANCE_FEE_5_NEW
+
 # good enough
-TO_EQ_FM_DIRECT_MX
+AXB_XMID_DIGDOTSHRT
+
+# good enough
+FB_INCREASE_VOL
+
+# good enough
+FORGED_RELAY_MUA_TO_MX
+
+# good enough
+FROM_URI
+
+# good enough
+FROM_WWW
+
+# good enough
+FSL_FAKE_YAHOO_RCVD
+
+# good enough
+FS_TIGHT_TEEN
+
+# good enough
+HK_PNIS
+
+# good enough
+MAILER_EQ_ORG
+
+# good enough
+MAY_BE_FORGED
+
+# good enough
+OPERA_MID_NON_OP
+
+# good enough
+S25R_3
+
+# good enough
+S25R_4
+
+# good enough
+SANE_20d820d8f491476ca39941979ab139dd
+
+# good enough
+SANE_7d8e92a09f27d49fafe09a1dbd5cac10
+
+# good enough
+SANE_ef00ce28cfa5ed6e4c405ed37ff36d46
+
+# good enough
+TO_EQ_FM_HTML_DIRECT
 
 # tflags userconf
 UNPARSEABLE_RELAY
