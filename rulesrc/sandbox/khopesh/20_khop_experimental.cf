@@ -90,6 +90,6 @@ tflags	 RCVD_VIA_IPV6	nice
 
 meta	 KHOP_SC_TOP_CIDR8_C  KHOP_SC_TOP_CIDR8 && !(__VIA_ML||__freemail_safe||__RCVD_IN_DNSWL||RCVD_IN_HOSTKARMA_WL)
 tflags	 KHOP_SC_TOP_CIDR8_C  nopublish
-meta	 KHOP_SC_CIDR8_C  KHOP_SC_CIDR8 && !(__VIA_ML||__freemail_safe)
+meta	 KHOP_SC_CIDR8_C  KHOP_SC_CIDR8 && !(__VIA_ML||__freemail_safe||_RCVD_IN_DNSWL||RCVD_IN_HOSTKARMA_WL)
 tflags	 KHOP_SC_CIDR8_C  nopublish
 
