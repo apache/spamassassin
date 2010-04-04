@@ -1750,9 +1750,9 @@ my $urischemeless = qr/[a-z\d][a-z\d._-]{0,251}\.${tldsRE}\.?(?::\d{1,5})?(?:\/[
 my $uriknownscheme = qr/(?:(?:(?:(?:https?)|(?:ftp)):(?:\/\/)?)|(?:(?:www\d{0,2}|ftp)\.))[^$tbirdenddelim]{1,251}/io;
 my $urimailscheme = qr/(?:mailto:)?[^$tbirdenddelimplusat]{1,251}@[^$tbirdenddelimemail]{1,251}/io;
 my $tbirdurire = qr/(?:\b|(?<=$iso2022shift)|(?<=[$tbirdstartdelim]))
-                    (?:(?:($uriknownscheme)(?=[$tbirdenddelim])) |
-                       (?:($urimailscheme)(?=[$tbirdenddelimemail])) |
-                       (?:\b($urischemeless)(?=[$tbirdenddelim])))/xo;
+                    (?:(?:($uriknownscheme)(?=(?:[$tbirdenddelim]|\z))) |
+                       (?:($urimailscheme)(?=(?:[$tbirdenddelimemail]|\z))) |
+                       (?:\b($urischemeless)(?=(?:[$tbirdenddelim]|\z))))/xo;
 
 =item $status->get_uri_list ()
 
