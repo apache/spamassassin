@@ -25,12 +25,23 @@ if (-e 'test_dir') {            # running from test directory, not ..
   $prefix = '..';
 }
 
+use Errno qw(EADDRINUSE EACCES);
+use IO::Socket::INET;
+use Net::DNS::Nameserver;
+use Mail::SpamAssassin;
+
 # Bug 5761 (no 127.0.0.1 in jail, use SPAMD_LOCALHOST if specified)
 my $dns_server_localaddr = $ENV{'SPAMD_LOCALHOST'};
 $dns_server_localaddr = '127.0.0.1'  if !$dns_server_localaddr;
-$dns_server_localaddr = '::1'        if !$dns_server_localaddr;
 
-my $dns_server_localport = '5353';  # some port (mdns), hopefully free
+sub find_free_port($);  # prototype
+my($dns_server_localport, $sock_udp, $sock_tcp) =
+  find_free_port($dns_server_localaddr);
+
+$dns_server_localport  or die "Failed to obtain a free port number";
+
+printf("Using [%s]:%s for a spawned test DNS server\n",
+       $dns_server_localaddr, $dns_server_localport);
 
 # test zones
 my $z  = 'sa1-dbl-test.spamassassin.org';
@@ -170,8 +181,6 @@ EOD
 
 # ---------------------------------------------------------------------------
 
-use Net::DNS::Nameserver;
-
 sub reply_handler {
   my($qname, $qclass, $qtype, $peerhost,$query,$conn) = @_;
   my($rcode, @ans, @auth, @add);
@@ -215,9 +224,26 @@ sub dns_server($$) {
   $ns->main_loop;
 }
 
+sub find_free_port($) {
+  my($addr) = @_;
+  my($port, $sock_udp, $sock_tcp);
+  for (1..20) {  # choose a pair of free tcp & udp ports
+    $port = 11001 + int(rand(65536-11001));
+    my %args = (LocalAddr => $addr, LocalPort => $port);
+    $sock_udp = IO::Socket::INET->new(%args, Proto => 'udp');
+    $sock_udp || $! == EADDRINUSE || $! == EACCES
+      or printf("Error creating UDP socket [%s]:%s: %s\n", $addr, $port, $!);
+    $sock_tcp = IO::Socket::INET->new(%args, Proto => 'tcp');
+    $sock_tcp || $! == EADDRINUSE || $! == EACCES
+      or printf("Error creating TCP socket [%s]:%s: %s\n", $addr, $port, $!);
+    last if $sock_tcp && $sock_udp;
+  }
+  undef $port if !$sock_tcp || !$sock_udp;
+  return ($port, $sock_udp, $sock_tcp);
+}
+
 # ---------------------------------------------------------------------------
 
-use Mail::SpamAssassin;
 my $spamassassin_obj;
 
 sub process_sample_urls(@) {
@@ -265,6 +291,18 @@ sub test_samples($$) {
   my $status = ok_all_patterns();
   printf("\nTest on %s failed:\n%s\n",
          join(', ',@$url_list_ref), $spam_report)  if !$status;
+}
+
+
+# there is a time gap between closing sockets and reusing them by a spawned
+# DNS server - if we are very unlucky and the port is acquired by some other
+# process during this short interval, our spawned DNS server will fail to start
+#
+if ($sock_udp) {
+  $sock_udp->close()  or die "Error closing UDP socket: $!";
+}
+if ($sock_tcp) {
+  $sock_tcp->close()  or die "Error closing TCP socket: $!";
 }
 
 # detach a DNS server process
