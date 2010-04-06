@@ -58,11 +58,11 @@ body     __YOU_WON_02    /\bw[io]n\s(?:(?:for|by)\s)?your?\b/i
 body     __YOU_WON_03    /\b(?:your?|win+ing|win+ers?|beneficiaries|participants?|individuals?)(?:\s[-a-z\s]{4,30}?)?\s(?:w(?:ere|as)|ha(?:ve|s) be(?:en)?)\s(?:(?:randomly|raffly)\s(?:selected|cho+sen|cho+sing|picked)|(?:selected|cho+sen|cho+sing|picked)\s(?:[a-z\s]{2,40}?\srandom|randomly|online|lottery|computer\s(?:ballot|wahlgang)))/i 
 meta     __YOU_WON       __YOU_WON_01 || __YOU_WON_02 || __YOU_WON_03
 
-body     LOTTO_AGENT      /\b(?:claim(?:s|ing)?(?:\sprocessing)?|fiducia\w+|reimbursement|prize\stransfer|(?:international|foreign)\sremittance|payment|immunity|grants?)\s?(?:agent|manager|officer|secretary)/i
+body     LOTTO_AGENT      /\b(?:claim(?:s|ing)?(?:\sprocessing)?|fiducia\w+|reimbursement|prize\stransfer|(?:international|foreign)(?:\s(?:remittance|settlement|payment|award))+|payment|immunity|grants?)\s?(?:agent|manager|officer|secretary)/i
 describe LOTTO_AGENT      Claims Agent
 score    LOTTO_AGENT      0.50
 
-body     LOTTO_DEPT       /\b(?:claim(?:s|ing)?(?:\sprocessing)?|fiducia\w+|reimbursement|(?:international|foreign)\s(?:remittance|settlement)|payment|award)\s?(?:department|dept|unit|group|committee|bureau)/i
+body     LOTTO_DEPT       /\b(?:claim(?:s|ing)?(?:\sprocessing)?|fiducia\w+|reimbursement|(?:international|foreign)(?:\s(?:remittance|settlement|payment|award))+|payment|award)\s?(?:department|dept|unit|group|committee|bureau)/i
 describe LOTTO_DEPT       Claims Department
 score    LOTTO_DEPT       0.50
 
@@ -179,7 +179,7 @@ body     __SUM_OF_FUND      /\bsum\sof\s(?:amount|fund)/i
 
 body     __BENEFICIARY    /\bben[ei]fi(?:c|sh)i?ar(?:y|ies)\b/i
 body     __DIPLOMATIC     /\bdiplomatic\b/i
-body     __FEES           /\b(?:security|safe\w*|courier|registration|pay|paid|up-?front|processing|delivery|transfer)[\s\w]{1,15}\s(?:fee|charge)s?\b/i 
+body     __FEES           /\b(?:security|safe\w*|courier|registration|pay|paid|up-?front|processing|delivery|transfer)[\s\w]{0,15}\s(?:fee|charge)s?\b/i 
 body     __LUCKY_WINNER   /\b(?:lucky|gl.cklich(?:en)?)\s(?:ge)?win+ers?\b/i
 body     __YOUR_FUND      /\b(?:your|ihr)\s(?:unpaid\s|winning\s|nicht\sausbezahlten\s)?(?:fund|geld)\b/i
 body     __NIGERIA        /\bnigeria\b/i
