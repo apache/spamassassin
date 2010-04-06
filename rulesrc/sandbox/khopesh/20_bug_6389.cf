@@ -1,0 +1,10 @@
+# from two sample FPs posted to bug 6389 (attachment 4721 and attachment 4730)
+
+# just a raw numbers check:
+header __HAS_XMIME_AUTOCONV	exists:X-MIME-Autoconverted
+
+# possible fix to bug 6389
+header __MIME_QP_TO_8BIT X-MIME-Autoconverted =~ /from quoted-printable to 8bit/
+
+meta DOS_HIGHBIT_HDRS_BODY_BUG6389 __FROM_NEEDS_MIME && __SUBJECT_ENCODED_B64 && __FROM_ENCODED_B64 && __SUBJECT_NEEDS_MIME && __HIGHBITS && !__MIME_QP_TO_8BIT
+
