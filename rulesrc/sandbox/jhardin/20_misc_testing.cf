@@ -391,6 +391,9 @@ describe        DATE_DOTS               Periods in date header
 uri             IMAGESHACK_URI          /\.imageshack\.us\//i
 describe        IMAGESHACK_URI          URI contains imageshack.us
 
+uri             __BITLY_URI             /\/\/bit\.ly\//i
+describe        __BITLY_URI             URI contains bit.ly
+
 uri             URI_DOM_OBFU            /:\/\/(?:\w+\.)+(?:com|gov|net|org)(?:\.\w+){3,}\//i
 describe        URI_DOM_OBFU            URI pretending to be different domain
 
