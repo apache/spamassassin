@@ -324,7 +324,9 @@ sub ip_to_awl_key {
   if (defined $result && length($result) > 39) {  # just in case, keep under
     $result = substr($result,0,39);               # the awl.ip field size
   }
-  dbg("auto-whitelist: IP masking %s -> %s", $origip,$result);
+  if (defined $result) {
+    dbg("auto-whitelist: IP masking %s -> %s", $origip,$result);
+  }
   return $result;
 }
 
@@ -336,12 +338,13 @@ sub pack_addr {
   $addr = lc $addr;
   $addr =~ s/[\000\;\'\"\!\|]/_/gs;	# paranoia
 
+  if (defined $origip) {
+    $origip = $self->ip_to_awl_key($origip);
+  }
   if (!defined $origip) {
     # could not find an IP address to use, could be localhost mail
     # or from the user running "add-addr-to-*".
     $origip = 'none';
-  } else {
-    $origip = $self->ip_to_awl_key($origip);
   }
   return $addr . "|ip=" . $origip;
 }
