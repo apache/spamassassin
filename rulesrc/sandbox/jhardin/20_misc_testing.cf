@@ -315,7 +315,7 @@ rawbody        STYLE_GIBBERISH          /<style[^>]{0,30}>(?:\s{0,80}[^\s:;<]){1
 #tflags         STYLE_GIBBERISH          nopublish
 
 body           __SCRIPT_TAG_IN_BODY     /<script>/i
-rawbody        __SCRIPT_GIBBERISH       /<script>[^;<]{200}/im
+rawbody        __SCRIPT_GIBBERISH       /<script>[^;<]{100}/im
 meta           SCRIPT_GIBBERISH         __SCRIPT_GIBBERISH && !__SCRIPT_TAG_IN_BODY 
 #tflags         SCRIPT_GIBBERISH           nopublish
 
