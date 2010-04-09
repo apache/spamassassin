@@ -306,5 +306,7 @@ meta DOS_BODY_HIGH_NO_MID       __HIGHBITS && MISSING_MID
 describe DOS_BODY_HIGH_NO_MID   High bit body and no message ID header
 
 # 20081111 - less conservative shot at highbit spam
-meta DOS_HIGHBIT_HDRS_BODY      __FROM_NEEDS_MIME && __SUBJECT_ENCODED_B64 && __FROM_ENCODED_B64 && __SUBJECT_NEEDS_MIME && __HIGHBITS
-describe DOS_HIGHBIT_HDRS_BODY  Headers need encoding and body is highbit
+# 20100408 - disabled -- this rule appears to be bad... complaints in bug 6389
+#meta DOS_HIGHBIT_HDRS_BODY      __FROM_NEEDS_MIME && __SUBJECT_ENCODED_B64 && __FROM_ENCODED_B64 && __SUBJECT_NEEDS_MIME && __HIGHBITS
+#describe DOS_HIGHBIT_HDRS_BODY  Headers need encoding and body is highbit
+
