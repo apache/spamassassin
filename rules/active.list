@@ -1,11 +1,8 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix hege jm kgolding wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 2: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix hege kgolding wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 3: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix dos hege jm kgolding wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2
+# with results from: day 1: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix dos hege jm kgolding wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 2: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix hege jm kgolding wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 3: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix hege kgolding wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2
 
 # tflags publish
 ADVANCE_FEE_2_NEW_FORM
-
-# tflags publish
-ADVANCE_FEE_2_NEW_FRM_MNY
 
 # tflags publish
 ADVANCE_FEE_2_NEW_MONEY
@@ -119,9 +116,6 @@ DNS_FROM_RFC_DSN
 DOS_ANAL_SPAM_MAILER
 
 # good enough
-DOS_HIGHBIT_HDRS_BODY_BUG6389
-
-# good enough
 DOS_OE_TO_MX
 
 # good enough
@@ -141,9 +135,6 @@ ENV_AND_HDR_SPF_MATCH
 
 # good enough
 FB_CIALIS_LEO3
-
-# good enough
-FB_EXTRA_INCHES
 
 # good enough
 FB_QUALITY_REPLICA
@@ -342,6 +333,9 @@ LOTTO_AGENT
 
 # good enough
 L_SPAM_TOOL_13
+
+# good enough
+MANY_GOOG_PROXY
 
 # good enough
 MANY_SPAN_IN_TEXT
@@ -662,6 +656,9 @@ TT_MSGID_TRUNC
 TVD_FINGER_02
 
 # good enough
+TVD_PCT_OFF
+
+# good enough
 TVD_RCVD_SINGLE
 
 # good enough
@@ -669,18 +666,6 @@ TVD_VISIT_PHARMA
 
 # good enough
 TWO_IPS_RCVD
-
-# good enough
-DOS_HIGHBIT_HDRS_BODY_BUG6389
-
-# good enough
-MANY_GOOG_PROXY
-
-# good enough
-TO_EQ_FM_DIRECT_MX
-
-# good enough
-TVD_PCT_OFF
 
 # tflags userconf
 UNPARSEABLE_RELAY
