@@ -31,18 +31,31 @@ score      FORGED_TBIRD_IMG_ARROW  0.8
 # "To without <>" might be useful outside the context of image spam
 meta       TO_NO_BRKTS_HTML_IMG    __TO_NO_ARROWS_R && !__TO_UNDISCLOSED && HTML_MESSAGE && __ONE_IMG
 score      TO_NO_BRKTS_HTML_IMG    0.20
+describe   TO_NO_BRKTS_HTML_IMG    To: misformatted + HTML and one image
 
 meta       TO_NO_BRKTS_HTML_ONLY   __TO_NO_ARROWS_R && !__TO_UNDISCLOSED && MIME_HTML_ONLY
 score      TO_NO_BRKTS_HTML_ONLY   0.20
+describe   TO_NO_BRKTS_HTML_ONLY   To: misformatted + HTML only
 
 meta       TO_NO_BRKTS_DYNIP       __TO_NO_ARROWS_R && !__TO_UNDISCLOSED && RDNS_DYNAMIC
 score      TO_NO_BRKTS_DYNIP       0.20
+describe   TO_NO_BRKTS_DYNIP       To: misformatted + Dynamic rDNS
 
 meta       TO_NO_BRKTS_NORDNS      __TO_NO_ARROWS_R && !__TO_UNDISCLOSED && RDNS_NONE
 score      TO_NO_BRKTS_NORDNS      0.20
+describe   TO_NO_BRKTS_NORDNS      To: misformatted + no rDNS
 
 meta       TO_NO_BRKTS_NORDNS_HTML      __TO_NO_ARROWS_R && !__TO_UNDISCLOSED && RDNS_NONE && MIME_HTML_ONLY
 score      TO_NO_BRKTS_NORDNS_HTML      0.20
+describe   TO_NO_BRKTS_NORDNS_HTML      To: misformatted + no rDNS + HTML only
+
+meta       TO_NO_BRKTS_MSFT         __TO_NO_ARROWS_R && !__TO_UNDISCLOSED && (__ANY_OUTLOOK_MUA || __HAS_MIMEOLE || __MIMEOLE_MS)
+describe   TO_NO_BRKTS_MSFT         To: misformatted + supposed Microsoft tool
+score      TO_NO_BRKTS_MSFT         0.20
+
+meta       TO_NO_BRKTS_PCNT         __TO_NO_ARROWS_R && __FB_NUM_PERCNT
+describe   TO_NO_BRKTS_PCNT         To: misformatted + percentage
+score      TO_NO_BRKTS_PCNT         0.20
 
 
 ifplugin Mail::SpamAssassin::Plugin::FreeMail
@@ -55,7 +68,6 @@ meta       TO_NO_BRKTS_FROM_RUNON   __TO_NO_ARROWS_R && !__TO_UNDISCLOSED && __F
 meta       TO_NO_BRKTS_FROM_MSSP   __TO_NO_ARROWS_R && !__TO_UNDISCLOSED && FROM_MISSPACED
 score      TO_NO_BRKTS_FROM_MSSP   1.00
 describe   TO_NO_BRKTS_FROM_MSSP   Multiple formatting errors
-
 
 
 # The boundary *does* FP on legit mail.  However, all of KB's recent samples
