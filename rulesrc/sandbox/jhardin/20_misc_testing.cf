@@ -403,3 +403,7 @@ describe        DQ_URI_DOM_IN_PATH      DQ URI having a domain name in the path 
 uri             LH_URI_DOM_IN_PATH      /:\/\/[^\/]{25,}\/[^\/]+\/[^\@]+[a-z0-9]\w{3,}\.(?:com|gov|net)/i
 describe        LH_URI_DOM_IN_PATH      Long-host URI having a domain name in the path part
 
+# observed in phish 4/10/10
+uri             URI_1234                m,//1\.2\.3\.4/,
+
+

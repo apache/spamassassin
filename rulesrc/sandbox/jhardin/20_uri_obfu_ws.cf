@@ -10,7 +10,7 @@
 
 ifplugin Mail::SpamAssassin::Plugin::ReplaceTags
 
-body          URI_OBFU_WWW  /(?<!http:\/\/)\b_*w{2,3}(?!\.[-\w]+\.(?:com|net|org|biz|info))[^[:alnum:]]{1,3}(?:<D><O><T>+[^[:alnum:]]{1,3})?[[:alnum:]][-\w]{1,20}[[:alnum:]](?!\.[[:alnum:]])[^[:alnum:]]{1,3}(?:<D><O><T>+[^[:alnum:]]{1,3})?(?:c\s?o\s?m|n\s?e\s?t|o\s?r\s?g|b\s?i\s?z|i\s?n\s?f\s?o)_*\b/i
+body          URI_OBFU_WWW  /(?<!http:\/\/)\b_*w{2,3}(?!\.[-\w]+\.(?:com|net|org|biz|info))[^[:alnum:]]{1,3}(?:<D><O><T>+[^[:alnum:]]{1,3})?[[:alnum:]][-\w]{1,20}[[:alnum:]][^[:alnum:]]{1,3}(?:<D><O><T>+[^[:alnum:]]{1,3})?(?:c\s?o\s?m|n\s?e\s?t|o\s?r\s?g|b\s?i\s?z|i\s?n\s?f\s?o)_*\b/i
 describe      URI_OBFU_WWW  Obfuscated URI
 replace_rules URI_OBFU_WWW
 
