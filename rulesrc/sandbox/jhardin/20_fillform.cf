@@ -29,16 +29,16 @@ ifplugin Mail::SpamAssassin::Plugin::ReplaceTags
   replace_tag FF_A2 (?:(?:contact|e-?mail|full|house|home|resident[ia]+l|busines+|mailing|work|of+ice|delivery|ship+ing|post(?:al)?)<ANDOR>?){0,3}\s?(?:ad+res+(?:es)?|location)(?:\sline)?(?:\s[0-9])?
 
   # Name variations
-  replace_tag FF_N1 (?:company|first|last|all|busines+|legal|ben[ei]ficiary)?\s?names?(?:<ANDOR>ad+res+)?
+  replace_tag FF_N1 (?:company|first|last|all|busines+|legal|ben[ei]ficiary|vollstaendigen)?\s?name[sn]?(?:<ANDOR>ad+res+)?
 
   # Telephone variations
-  replace_tag FF_P1 (?:(?:(?:busines+|contact|fax|voice|cel+(?:ular)?|house|home|mobile|of+ice|tel+e?(?:\s?phone)?|phone)(?:\sphone)?<ANDOR>?){1,3}(?:\s<NUMBER>)?<ANDOR>?){1,3}
+  replace_tag FF_P1 (?:(?:(?:busines+|contact|fax|voice|cel+(?:ular)?|house|home|mobile?|of+ice|tel+e?(?:\s?(?:ph|f)one)?|(?:ph|f)one)(?:\s(?:ph|f)one)?<ANDOR>?){1,3}(?:\s<NUMBER>)?<ANDOR>?){1,3}
 
   # Misc personal data
-  replace_tag FF_M1 (?:(?:age|marital\s?statu[se]|sex|gender|male\sor\sfemale|(?:date\sof\s)?birth|religion|nationality|email|next\sof\skin)<ANDOR>?){1,3}
+  replace_tag FF_M1 (?:(?:age|marital\s?statu[se]|sex|gender|male\sor\sfemale|(?:date\sof\s)?birth|religion|nationality|email|next\sof\skin|alter|staatsangehoerigkeit)<ANDOR>?){1,3}
 
   # Loan application details
-  replace_tag FF_L1 (?:(?:previous\s)?work(?:ing)\s?experience|employment|position|profes+ion|oc+up[ae]tion(?:\/position)?|(?:monthly|an+ual)?\s?income|an+ual\sturn\s?over|purpose\sof\sl(?:oa|ao)n|l(?:oa|ao)n\sduration|(?:l(?:oa|ao)n\s|the\s)?amount(?:\sneed(ed)?|\sdesired)?(?:\s(?:as|of)\sloan)?)
+  replace_tag FF_L1 (?:(?:previous\s)?work(?:ing)\s?experience|employment|position|profes+ion|oc+up[ae]tion(?:\/position)?|(?:monthly|an+ual)?\s?income|an+ual\sturn\s?over|purpose\sof\sl(?:oa|ao)n|l(?:oa|ao)n\sduration|(?:l(?:oa|ao)n\s|the\s)?amount(?:\sneed(ed)?|\sdesired)?(?:\s(?:as|of)\sloan)?|beruf)
 
   # Financial/ID details (scams and phishing)
   replace_tag FF_F1 (?:(?:bank|beneficiary|billing|acc(?:oun)?t|a\/c|rout(?:ing)?|swift|receiver|user)<ANDOR>?){1,3}\s(?:(?:name|ad+res+(?:es)?|location|code|details|<NUMBER>)<ANDOR>?){1,3}
