@@ -3,8 +3,8 @@ ifplugin Mail::SpamAssassin::Plugin::ReplaceTags
   replace_tag  CURRENCY   [\(\[]?(?:\bUS[D\$]{0,2}|\$(?:US)?|usd|GBP|=[Aa][34]|\xa3|&\#16[34];|(?i:pounds\ssterling)|\xa4|EUR|[Ee]uros?|(?i:eur)\sde|CHF)[\]\)]?
   replace_tag  GB_UK      \b(?:U\.?K\.?|(?:Great\s)?Brit(?:ain|ish)|G\.?B\.?)\b
 
-  body     __LOTSA_MONEY_00   /<CURRENCY>\s?\d[\dO][,\.][\dO]{3}(?:(?!\d)|\b)/
-  body     __LOTSA_MONEY_01   /(?:(?i:sum\sof\s)[\(\[]?|<CURRENCY>\s?)\s?\d[\d.,\sO]{5,20}[\dO]/
+  body     __LOTSA_MONEY_00   /<CURRENCY>[\s\.]?\d[\dO][,\.][\dO]{3}(?:(?!\d)|\b)/
+  body     __LOTSA_MONEY_01   /(?:(?i:sum\sof\s)[\(\[]?|<CURRENCY>\s?)[\s\.]?\d[\d.,\sO]{5,20}[\dO]/
   body     __LOTSA_MONEY_02   /\d[\d.,\sO]{5,20}[\dO][\)\]\(]?\s?(?:<CURRENCY>|Pounds|(?i:dollars?|bucks))\b/
   body     __LOTSA_MONEY_03   /(?:(?i:sum\sof\s)[\(\[]?|<CURRENCY>\s?)\d(?:[\d.,\sO]{0,5})?[\)\]]?\s?(?i:M(?i:il)?\b|mil+(?i:io|<O>)n|hund?[re]+a?[dt]|thousand|tausend)/
   body     __LOTSA_MONEY_04   /(?:\d[\d\.]{0,4}M|million(?!s)|mill<O>n|hund?rea?d(?!s)[^\.]{1,25}thousand(?!s)|cents?[^\.]{1,25}mille|hundert[^\.]{1,30}tausend|ientos?[^\.]{1,20}mil)[^\.\$]{0,50}(?:(?:U\.?\s?S\.?\s?(?:A\.?\s?)?|united\s?states?|canad(?:ian|a)\s)?dollars?|bucks|USD|GBP|<GB_UK>\spounds?|(?:<GB_UK>\s)?pounds?\ssterling|pounds(?!\sof)|(?:d'\s?)?euros?|francs?)\b/i
@@ -105,9 +105,11 @@ body     __LUCRATIVE      /\blucrative\b/i
 body     __YOU_ASSIST     /\byour\sassistance\b/i
 body     __OUR_BEHALF     /\bon\s(?:my|our)\sbehalf\b/i
 body     __AGREED_RATIO   /\b(?:agreed|sharing)\s(?:ratios?|percent\w+)\b/i
-body     __SHARE_IT       /\b(?:(?:share|receive|re-?profile)\sth(?:e|is)\s(?:proceeds|funds?|money|balance|account)|partager (?:avec vous|ratio))\b/i
+body     __SHARE_IT       /\b(?:(?:share|receive|re-?profile|teilen)\s(?:th(?:e|is)|das)\s(?:proceeds|funds?|money|balance|account|geld)|partager (?:avec vous|ratio))\b/i
 body     __DESTROY_ME     /\b(?:destroy|hunt)\sm[ey]\b/i
 body     __YOUR_PROFIT    /\byour?\sprofit/i
+body     __FIFTY_FIFTY    /\b50\/50\b/
+meta     SHARE_50_50      __SHARE_IT && __FIFTY_FIFTY
 
 body     EMRCP            /\bExcess Maximum Return Capital Profit\b/i
 describe EMRCP            "Excess Maximum Return Capital Profit" Fidelity scam
@@ -122,9 +124,9 @@ ifplugin Mail::SpamAssassin::Plugin::ReplaceTags
 
   replace_rules  __PCT_FOR_YOU_1 __PCT_FOR_YOU_2 __PCT_FOR_YOU_3 __PCT_OF_PMTS
 
-  meta     __PCT_FOR_YOU    __PCT_FOR_YOU_1 || __PCT_FOR_YOU_2 || __PCT_FOR_YOU_3
+  meta     __PCT_FOR_YOU    __PCT_FOR_YOU_1 || __PCT_FOR_YOU_2 || __PCT_FOR_YOU_3 || SHARE_50_50
 
-  meta     MONEY_PERCENT    LOTS_OF_MONEY && (__PCT_FOR_YOU || __PCT_OF_PMTS)
+  meta     MONEY_PERCENT    LOTS_OF_MONEY && (__PCT_FOR_YOU || __PCT_OF_PMTS || __FIFTY_FIFTY)
   describe MONEY_PERCENT    X% of a lot of money for you
 endif
 
@@ -141,7 +143,7 @@ body     __NOT_DEAD_YET   /\bwill\sinherit\b/i
 body     __AM_DYING       /\bam\s(?:\S+\s)?dying\b/i
 body     __I_WILL_YOU     /\bwill(?:ed)?\s(?:[a-z\s]{0,20}\s(?:fortune|money)\s)?to\syou\b/i
 body     __NEXT_OF_KIN    /\bnext[-\s]of[-\s]kin\b/i
-body     __EX_CUSTOMER    /\b(?:dead|deceased|late|verstorbenen)\s(?:client|customer|account|investor|kunde)/i
+body     __EX_CUSTOMER    /\b(?:dead|deceased|late|verstorbenen)\s(?:[ck]lient|customer|account|investor|kunde)/i
 body     __DECEASED       /\b(?:the|my|der)\s(?:deceased|late|verstorbenen)\b/i
 body     __SURVIVORS      /\b(?:widow|son|daughter|husband|wife|brother|sister|attorney)\s(?:of|to)\s(?:the\s)?late\s\w+\b/i
 body     __DEAD_PARENT    /\bmy\s(?:deceased|dead)\s(?:father|mother)/i
@@ -175,7 +177,7 @@ body     __COURIER        /\bcourier\s(?:company|service)\b/i
 #describe MONEY_FRAUD_BOX  Lots of money in a box, lots of money from a fox
 #score    MONEY_FRAUD_BOX  1.0
  
-body     __SUM_OF_FUND      /\bsum\sof\s(?:amount|fund)/i
+body     __SUM_OF_FUND      /\b(?:sum|release|freigabe)\s(?:of|der)\s(?:amount|fund|mittel)\b/i
 
 body     __BENEFICIARY    /\bben[ei]fi(?:c|sh)i?ar(?:y|ies)\b/i
 body     __DIPLOMATIC     /\bdiplomatic\b/i
