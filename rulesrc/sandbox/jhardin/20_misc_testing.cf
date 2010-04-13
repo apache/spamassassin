@@ -222,8 +222,8 @@ score          TINY_FLOAT         2.00
 
 
 # endless requests on the users list...
-header         __TO_EQ_FROM_1       ALL =~ /\nFrom:[^\n<]{0,80}<?([^\n\s>]+)>?\n(?:[^\n]{1,100}\n)*To:[^\n]+\1/ism
-header         __TO_EQ_FROM_2       ALL =~ /\nTo:[^\n<]{0,80}<?([^\n\s>]+)>?\n(?:[^\n]{1,100}\n)*From:[^\n]+\1/ism
+header         __TO_EQ_FROM_1       ALL =~ /\nFrom:\s+(?:[^\n<]{0,80}<)?([^\n\s>]+)>?\n(?:[^\n]{1,100}\n)*To:\s+(?:[^\n]+<)?\1[>,\s\n]/ism
+header         __TO_EQ_FROM_2       ALL =~ /\nTo:\s+(?:[^\n<]{0,80}<)?([^\n\s>]+)>?\n(?:[^\n]{1,100}\n)*From:\s+(?:[^\n]+<)?\1[>,\s\n]/ism
 meta           __TO_EQ_FROM         (__TO_EQ_FROM_1 || __TO_EQ_FROM_2)
 describe       __TO_EQ_FROM         To: same as From:
 
