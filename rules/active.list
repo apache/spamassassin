@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix dos hege kgolding wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 2: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix dos hege jm kgolding wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 3: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix hege jm kgolding wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2
+# with results from: day 1: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix hege kgolding wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 2: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix dos hege kgolding wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 3: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix dos hege jm kgolding wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2
 
 # tflags publish
 ADVANCE_FEE_2_NEW_FORM
@@ -361,9 +361,6 @@ NO_RELAYS
 # good enough
 NSL_RCVD_FROM_USER
 
-# good enough
-PART_CID_STOCK
-
 # tflags net
 PYZOR_CHECK
 
@@ -632,10 +629,16 @@ TAB_IN_FROM
 TINY_FLOAT
 
 # good enough
+TO_EQ_FM_DIRECT_MX
+
+# good enough
 TO_EQ_FM_HTML_DIRECT
 
 # good enough
 TO_EQ_FM_HTML_ONLY
+
+# good enough
+TO_NO_BRKTS_DIRECT
 
 # good enough
 TO_NO_BRKTS_DYNIP
@@ -662,10 +665,13 @@ TVD_VISIT_PHARMA
 TWO_IPS_RCVD
 
 # good enough
-TO_EQ_FM_DIRECT_MX
+FR_TITLE_CONS_6
 
 # good enough
-TO_NO_BRKTS_DIRECT
+MANY_GOOG_PROXY
+
+# good enough
+SHARE_50_50
 
 # tflags userconf
 UNPARSEABLE_RELAY
