@@ -180,7 +180,7 @@ body     __COURIER        /\bcourier\s(?:company|service)\b/i
  
 body     __SUM_OF_FUND      /\b(?:sum|release|freigabe)\s(?:of|der)\s(?:amount|fund|investment|mittel)\b/i
 
-body     __BENEFICIARY    /\bb(?:[e\xe9]n[ei\xe9]|\xc3\xa9n\xc3\xa9)fi(?:c|sh)i?ai?r(?:y|ies|es?)\b/i
+body     __BENEFICIARY    /\bbenefi(?:c|sh)i?ai?r(?:y|ies|es?)\b/i      # TODO fix http://hudson.zones.apache.org/hudson/job/SpamAssassin-trunk/5309/testReport/junit/make_test/t_recreate_t/test______9/
 body     __DIPLOMATIC     /\bdiplomatic\b/i
 body     __FEES           /\b(?:security|safe\w*|courier|registration|pay|paid|up-?front|processing|delivery|transfer)[\s\w]{0,15}\s(?:fee|charge)s?\b/i 
 body     __LUCKY_WINNER   /\b(?:lucky|gl.cklich(?:en)?)\s(?:ge)?win+ers?\b/i
@@ -189,7 +189,7 @@ body     __NIGERIA        /\bnigeria\b/i
 body     __IVORY_COAST    /\b(?:Cote\s?D.Ivoire|Ivory\s?Coast)\b/i
 body     __BURKINA_FASO   /\bburkina\s?faso\b/i
 body     __GHANA          /\bghana\b/i
-body     __BENIN          /\bb(?:[e\xe9]|\xc3\xa9)nin\b/i
+body     __BENIN          /\bbenin\b/i          # TODO fix http://hudson.zones.apache.org/hudson/job/SpamAssassin-trunk/5309/testReport/junit/make_test/t_recreate_t/test______9/
 meta     __AFRICAN_STATE  (__NIGERIA || __IVORY_COAST || __BURKINA_FASO || __GHANA || __BENIN || __AFR_UNION)
 body     __YOUR_PERM      /\byour\spermission\b/i
 body     __CONTACT_YOU    /\bcontacting\syou\b/i
