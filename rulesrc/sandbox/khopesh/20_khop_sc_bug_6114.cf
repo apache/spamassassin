@@ -57,10 +57,10 @@ score	 KHOP_SC_TOP_CIDR8  0.9 0.1 0.9 0.1
 # 11.6286/0.0475 0.996 20100410  net, solo=11.7224/0.6900@0.944, ->LE as above
 
 # http://www.spamcop.net/w3m?action=map;net=bmaxcnt;mask=16777215;sort=spamcnt
-header	 KHOP_SC_CIDR16  Received =~ /### KHOP_SC_CIDR16 failed to populate ###/
-describe KHOP_SC_CIDR16  Relay CIDR /16 is among worst in SpamCop
-tflags	 KHOP_SC_CIDR16  nopublish
-score	 KHOP_SC_CIDR16  1.6 0.5 1.6 0.5
+#header	 KHOP_SC_CIDR16  Received =~ /### KHOP_SC_CIDR16 failed to populate ###/
+#describe KHOP_SC_CIDR16  Relay CIDR /16 is among worst in SpamCop
+#tflags	 KHOP_SC_CIDR16  nopublish
+#score	 KHOP_SC_CIDR16  1.6 0.5 1.6 0.5
 #    spam/ham    s/o   corpus
 # 0.7444/0.0129 0.983 20100211
 # 0.5943/0.0139 0.977 20100325   .6 .5 .9 .75
