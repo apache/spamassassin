@@ -189,7 +189,7 @@ body     __NIGERIA        /\bnigeria\b/i
 body     __IVORY_COAST    /\b(?:Cote\s?D.Ivoire|Ivory\s?Coast)\b/i
 body     __BURKINA_FASO   /\bburkina\s?faso\b/i
 body     __GHANA          /\bghana\b/i
-body     __BENIN          /\bb[e\xe9]nin\b/i          # TODO fix http://hudson.zones.apache.org/hudson/job/SpamAssassin-trunk/5309/testReport/junit/make_test/t_recreate_t/test______9/
+body     __BENIN          /\bb(?:[e\xe9]|[\xc3][\xa9])nin\b/i          # TODO fix http://hudson.zones.apache.org/hudson/job/SpamAssassin-trunk/5309/testReport/junit/make_test/t_recreate_t/test______9/
 meta     __AFRICAN_STATE  (__NIGERIA || __IVORY_COAST || __BURKINA_FASO || __GHANA || __BENIN || __AFR_UNION)
 body     __YOUR_PERM      /\byour\spermission\b/i
 body     __CONTACT_YOU    /\bcontacting\syou\b/i
