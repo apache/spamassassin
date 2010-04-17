@@ -206,6 +206,12 @@ ftp://www.luzoop5k.com		ftp://www.luzoop5k.com
 mailto:www.luzoop5k.com		mailto:www.luzoop5k.com
 file://www.luzoop5k.com		file://www.luzoop5k.com
 
+Http://www.auzoop5k.com		Http://www.auzoop5k.com
+Https://www.auzoop5k.com	Https://www.auzoop5k.com
+Ftp://www.auzoop5k.com		Ftp://www.auzoop5k.com
+Mailto:www.auzoop5k.com		Mailto:www.auzoop5k.com
+File://www.auzoop5k.com		File://www.auzoop5k.com
+
 # //<user>:<password>@<host>:<port>/<url-path>
 http://user:pass@jiefeet4.com:80/x/y	http://user:pass@jiefeet4.com:80/x/y
 

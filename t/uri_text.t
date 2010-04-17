@@ -24,7 +24,7 @@ use Mail::SpamAssassin;
 use vars qw(%patterns %anti_patterns);
 
 # settings
-plan tests => 678;
+plan tests => 682;
 
 # initialize SpamAssassin
 my $sa = create_saobj({'dont_copy_prefs' => 1});
@@ -223,6 +223,12 @@ mailto:baeb1fai@quo6puyo.com	mailto:baeb1fai@quo6puyo.com
 http://www.luzoop5k.com		http://www.luzoop5k.com
 https://www.luzoop5k.com	https://www.luzoop5k.com
 ftp://www.luzoop5k.com		ftp://www.luzoop5k.com
+
+Mailto:aaeb1fai@quo6puyo.com	Mailto:aaeb1fai@quo6puyo.com
+Http://www.auzoop5k.com		Http://www.auzoop5k.com
+Https://www.auzoop5k.com	Https://www.auzoop5k.com
+Ftp://www.auzoop5k.com		Ftp://www.auzoop5k.com
+
 mailto:www.luzoop5k.com		!mailto:www.luzoop5k.com
 # no longer accept file: scheme
 file://www.luzoop5k.com		!file://www.luzoop5k.com
