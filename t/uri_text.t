@@ -558,7 +558,7 @@ example.wf	^http://example.wf$
 example.ws	^http://example.ws$
 example.ye	^http://example.ye$
 example.yt	!^http://example.yt$
-example.yu	^http://example.yu$
+example.yu	!^http://example.yu$
 example.za	^http://example.za$
 example.zm	^http://example.zm$
 example.zw	^http://example.zw$
@@ -834,7 +834,7 @@ www.example.wf	^http://www.example.wf$
 www.example.ws	^http://www.example.ws$
 www.example.ye	^http://www.example.ye$
 www.example.yt	!^http://www.example.yt$
-www.example.yu	^http://www.example.yu$
+www.example.yu	!^http://www.example.yu$
 www.example.za	^http://www.example.za$
 www.example.zm	^http://www.example.zm$
 www.example.zw	^http://www.example.zw$

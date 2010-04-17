@@ -1732,7 +1732,7 @@ my $tbirdenddelimplusat = $tbirdenddelimemail . '@';
 # regexps for finding plain text non-scheme hostnames with valid TLDs.
 
 # the list from %VALID_TLDS in Util/RegistrarBoundaries.pm, as a
-# Regexp::List optimized regexp ;)  accurate as of 20080208
+# Regexp::List optimized regexp ;)  accurate as of 2010-0415
 my $tldsRE = qr/
   (?=[a-wyz])
   (?:a(?:e(?:ro)?|r(?:pa)?|s(?:ia)?|[cdfgilmnoqtuwxz])|b(?:iz?|[abdefghjmnorstwyz])
@@ -1741,7 +1741,7 @@ my $tldsRE = qr/
     |j(?:o(?:bs)?|[emp])|k[eghimnprwyz]|l[abcikrstuvy]
     |m(?:o(?:bi)?|u(?:seum)?|[acdeghkmnpqrstvwxyz]|i?l)|n(?:a(?:me)?|et?|[cfgilopruz])
     |o(?:m|rg)|p(?:ro?|[aefghklnstwy])|r[eosuw]|s[abcdeghiklmnrtuvyz]
-    |t(?:r(?:avel)?|[cdfghjkmnoptvwz]|e?l)|u[agksyz]|v[aceginu]|w[fs]|y[eu]|z[amw]|qa
+    |t(?:r(?:avel)?|[cdfghjkmnoptvwz]|e?l)|u[agksyz]|v[aceginu]|w[fs]|ye|z[amw]|qa
   )/ix;
 
 # knownscheme regexp looks for either a https?: or ftp: scheme, or www\d*\. or ftp\. prefix, i.e., likely to start a URL
