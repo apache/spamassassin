@@ -50,7 +50,7 @@ foreach (qw/
   nf ng ni nl no np nr nu nz om org pa pe pf pg ph pk pl pn pr pro ps
   pt pw py qa re ro rs ru rw sa sb sc sd se sg sh si sk sl sm sn
   sr st su sv sy sz tc td tel tf tg th tj tk tl tm tn to tp tr travel tt
-  tv tw tz ua ug uk us uy uz va vc ve vg vi vn vu wf ws ye yu za
+  tv tw tz ua ug uk us uy uz va vc ve vg vi vn vu wf ws ye za
   zm zw
   /) { 
   $VALID_TLDS{$_} = 1;
@@ -164,6 +164,7 @@ foreach(qw/
   biz.ly com.ly edu.ly gov.ly id.ly med.ly net.ly org.ly plc.ly sch.ly
   ac.ma co.ma gov.ma net.ma org.ma press.ma
   asso.mc tm.mc
+  ac.me co.me edu.me gov.me its.me net.me org.me priv.me
   com.mg edu.mg gov.mg mil.mg nom.mg org.mg prd.mg tm.mg
   army.mil navy.mil
   com.mk org.mk
@@ -240,7 +241,6 @@ foreach(qw/
   ch.vu com.vu de.vu edu.vu fr.vu net.vu org.vu
   com.ws edu.ws gov.ws net.ws org.ws
   com.ye edu.ye gov.ye mil.ye net.ye org.ye
-  ac.yu co.yu edu.yu org.yu
   ac.za alt.za bourse.za city.za co.za edu.za gov.za law.za mil.za net.za ngo.za nom.za org.za school.za tm.za web.za
   ac.zm co.zm gov.zm org.zm sch.zm
   ac.zw co.zw gov.zw org.zw
