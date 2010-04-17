@@ -1995,7 +1995,7 @@ sub _get_parsed_uri_list {
           }
         }
 
-        if ($uri =~ /^mailto:/) {
+        if ($uri =~ /^mailto:/i) {
           # skip a mail link that does not have a valid TLD or other than one @ after decoding any URLEncoded characters
           $uri = Mail::SpamAssassin::Util::url_encode($uri) if ($uri =~ /\%(?:2[1-9a-fA-F]|[3-6][0-9a-fA-f]|7[0-9a-eA-E])/);
           next if ($uri !~ /^[^@]+@[^@]+$/);
@@ -2005,7 +2005,7 @@ sub _get_parsed_uri_list {
           push (@uris, $uri) unless ($rawuri eq $uri);
         }
 
-        next unless ($uri =~/^(?:https?|ftp):/);  # at this point only valid if one or the other of these
+        next unless ($uri =~/^(?:https?|ftp):/i);  # at this point only valid if one or the other of these
 
         my @tmp = Mail::SpamAssassin::Util::uri_list_canonify($redirector_patterns, $uri);
         my $goodurifound = 0;
@@ -2015,7 +2015,7 @@ sub _get_parsed_uri_list {
             # bug 5780: Stop after domain to avoid FP, but do that after all deobfuscation of urlencoding and redirection
             if ($rblonly) {
               local $1;
-              $cleanuri =~ s/^(https?:\/\/[^:\/]+).*$/$1/;
+              $cleanuri =~ s/^(https?:\/\/[^:\/]+).*$/$1/i;
             }
             push (@uris, $cleanuri);
             $goodurifound = 1;
