@@ -1,5 +1,1 @@
 # sidney's test rules, if any go here.
-
-rawbody T_TLD_AT_END_OF_CODE	/(?:\b|(?<=\x1b)|(?<=[><"'`,{[(|\s\x1b]))\b[a-z\d][a-z\d._-]{0,251}\.(?=[a-wyz])(?:a(?:e(?:ro)?|r(?:pa)?|s(?:ia)?|[cdfgilmnoqtuwxz])|b(?:iz?|[abdefghjmnorstwyz])|c(?:at?|o(?:m|op)?|[cdfghiklmnruvxyz])|d[ejkmoz]|e(?:[cegrst]|d?u)|f[ijkmor]|g(?:[adefghilmnpqrstuwy]|ov)|h[kmnrtu]|i(?:n(?:fo|t)?|[delmoqrst])|j(?:o(?:bs)?|[emp])|k[eghimnprwyz]|l[abcikrstuvy]|m(?:o(?:bi)?|u(?:seum)?|[acdeghkmnpqrstvwxyz]|i?l)|n(?:a(?:me)?|et?|[cfgilopruz])|o(?:m|rg)|p(?:ro?|[aefghklnstwy])|r[eosuw]|s[abcdeghiklmnrtuvyz]|t(?:r(?:avel)?|[cdfghjkmnoptvwz]|e?l)|u[agksyz]|v[aceginu]|w[fs]|y[eu]|z[amw]|qa)\.?(?::\d{1,5})?(?:\/[^><"`}\]{[|\s\x1b]{1,251})?\z/
-describe T_TLD_AT_END_OF_CODE	URL with TLD in a strange place
-score T_TLD_AT_END_OF_CODE 0.1
