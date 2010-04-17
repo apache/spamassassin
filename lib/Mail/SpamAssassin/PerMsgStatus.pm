@@ -1741,7 +1741,7 @@ my $tldsRE = qr/
     |j(?:o(?:bs)?|[emp])|k[eghimnprwyz]|l[abcikrstuvy]
     |m(?:o(?:bi)?|u(?:seum)?|[acdeghkmnpqrstvwxyz]|i?l)|n(?:a(?:me)?|et?|[cfgilopruz])
     |o(?:m|rg)|p(?:ro?|[aefghklnstwy])|r[eosuw]|s[abcdeghiklmnrtuvyz]
-    |t(?:r(?:avel)?|[cdfghjkmnoptvwz]|e?l)|u[agksyz]|v[aceginu]|w[fs]|y[eu]|z[amw]|qa
+    |t(?:r(?:avel)?|[cdfghjkmnoptvwz]|e?l)|u[agksyz]|v[aceginu]|w[fs]|y[e]|z[amw]|qa
   )/ix;
 
 # knownscheme regexp looks for either a https?: or ftp: scheme, or www\d*\. or ftp\. prefix, i.e., likely to start a URL
