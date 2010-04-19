@@ -1,1 +1,5 @@
 # sidney's test rules, if any go here.
+
+uri T_UPPERCASE_HTTP	/^(?:H|hT|htT|httP|httpS)/
+describe T_UPPERCASE_HTTP	URI with an uppercase character in the ScHeMe
+score T_UPPERCASE_HTTP 0.1
