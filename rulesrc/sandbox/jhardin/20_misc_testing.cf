@@ -24,6 +24,8 @@ ifplugin Mail::SpamAssassin::Plugin::MIMEHeader
 
   mimeheader   OBFU_TEXT_ATTACH    Content-Type =~ m,application/octet-stream;.+\.txt\b,i
   describe     OBFU_TEXT_ATTACH    Text attachment with non-text MIME type
+  score        OBFU_TEXT_ATTACH    2.5
+  tflags       OBFU_TEXT_ATTACH    publish
 
   mimeheader   OBFU_DOC_ATTACH     Content-Type =~ m,application/octet-stream;.+\.(?:doc|rtf)\b,i
   describe     OBFU_DOC_ATTACH     MS Document attachment with generic MIME type
@@ -110,6 +112,7 @@ header         __MUA_EQ_ORG_1        ALL =~ /\nX-Mailer: ([^\n]+)\n.*Organizatio
 header         __MUA_EQ_ORG_2        ALL =~ /\nOrganization: ([^\n]+)\n.*X-Mailer: \1\n/ism
 meta           MAILER_EQ_ORG         __MUA_EQ_ORG_1 || __MUA_EQ_ORG_2
 describe       MAILER_EQ_ORG         X-Mailer: same as Organization:
+tflags         MAILER_EQ_ORG         publish
 
 # observed in UCE 9/2009
 #header         __HDRS_LCASE          ALL =~ /\n(?:Reply-to|Message-id|Content-type|X-MSMail-priority|from|subject|to|Disposition-notification-to):/sm
@@ -165,19 +168,15 @@ endif
 ifplugin Mail::SpamAssassin::Plugin::FreeMail
   meta         FREEMAIL_DOC_PDF     (__DOC_ATTACH || __PDF_ATTACH) && (FREEMAIL_FROM || FREEMAIL_REPLYTO)
   describe     FREEMAIL_DOC_PDF     MS document or PDF attachment, from freemail
-  score        FREEMAIL_DOC_PDF     1.0
 
   meta         FREEMAIL_RVW_ATTCH   (__PLS_REVIEW || __DLND_ATTACH) && FREEMAIL_DOC_PDF
   describe     FREEMAIL_RVW_ATTCH   Please review attached document, from freemail
-  score        FREEMAIL_RVW_ATTCH   1.0
 endif
 
 body           END_FUTURE_EMAILS   /\bend future (?:email|alert)s?\b/i
-score          END_FUTURE_EMAILS   0.50
-describe       END_FUTURE_EMAILS   Unsubscribe
+describe       END_FUTURE_EMAILS   Pump-and-dump unsubscribe
 
 body           AD_COMPLAINTS       /\bcomplaints about this ad+\b/i
-score          AD_COMPLAINTS       1.0
 describe       AD_COMPLAINTS       Complain about this spam
 
 # observed in bank phishing 09/2009
@@ -211,7 +210,8 @@ tflags         __SPAN_END_TEXT     multiple
 meta           MANY_SPAN_IN_TEXT   (__SPAN_BEG_TEXT > 4) && (__SPAN_END_TEXT > 4)
 describe       MANY_SPAN_IN_TEXT   Many <SPAN> tags embedded within text
 
-rawbody        __FEEDPROXY         m;http://feedproxy\.google\.com/;
+uri            __FEEDPROXY_URI     m;http://feedproxy\.google\.com/;i
+rawbody        __FEEDPROXY         m;http://feedproxy\.google\.com/;i
 tflags         __FEEDPROXY         multiple
 meta           MANY_GOOG_PROXY     __FEEDPROXY > 4
 describe       MANY_GOOG_PROXY     Many Google feedproxy URIs
@@ -319,18 +319,18 @@ rawbody        __SCRIPT_GIBBERISH       /<script>[^;<]{100}/im
 meta           SCRIPT_GIBBERISH         __SCRIPT_GIBBERISH && !__SCRIPT_TAG_IN_BODY 
 #tflags         SCRIPT_GIBBERISH           nopublish
 
-rawbody        MANY_DIV_5                   /(?:<div[^>]{0,30}>\s{0,80}){5}/im
-tflags         MANY_DIV_5                    nopublish
-rawbody        MANY_DIV_6                   /(?:<div[^>]{0,30}>\s{0,80}){6}/im
-tflags         MANY_DIV_6                    nopublish
-rawbody        MANY_DIV_7                   /(?:<div[^>]{0,30}>\s{0,80}){7}/im
-tflags         MANY_DIV_7                    nopublish
-rawbody        MANY_DIV_8                   /(?:<div[^>]{0,30}>\s{0,80}){8}/im
-tflags         MANY_DIV_8                    nopublish
-rawbody        MANY_DIV_9                   /(?:<div[^>]{0,30}>\s{0,80}){9}/im
-tflags         MANY_DIV_9                    nopublish
-rawbody        MANY_DIV_10                   /(?:<div[^>]{0,30}>\s{0,80}){10}/im
-tflags         MANY_DIV_10                   nopublish
+#rawbody        MANY_DIV_5                   /(?:<div[^>]{0,30}>\s{0,80}){5}/im
+#tflags         MANY_DIV_5                    nopublish
+#rawbody        MANY_DIV_6                   /(?:<div[^>]{0,30}>\s{0,80}){6}/im
+#tflags         MANY_DIV_6                    nopublish
+#rawbody        MANY_DIV_7                   /(?:<div[^>]{0,30}>\s{0,80}){7}/im
+#tflags         MANY_DIV_7                    nopublish
+#rawbody        MANY_DIV_8                   /(?:<div[^>]{0,30}>\s{0,80}){8}/im
+#tflags         MANY_DIV_8                    nopublish
+#rawbody        MANY_DIV_9                   /(?:<div[^>]{0,30}>\s{0,80}){9}/im
+#tflags         MANY_DIV_9                    nopublish
+#rawbody        MANY_DIV_10                   /(?:<div[^>]{0,30}>\s{0,80}){10}/im
+#tflags         MANY_DIV_10                   nopublish
 
 header         FROM_TRL_UNDR              From =~ /_\@/
 tflags         FROM_TRL_UNDR              nopublish
@@ -341,16 +341,16 @@ tflags         LOTSA_EMAILS               nopublish
 body           NUM_EMAILS                 /\b\d[,\d]{3,}\s(?:(?!and|or)\w+\s)?e-?mail\saddress(?:es)?\b/i
 tflags         NUM_EMAILS                 nopublish
 
-rawbody        __HTML_ELEM_OBFU           /[a-z\s]&\#[91]\d\d?[a-z]/
-tflags         __HTML_ELEM_OBFU           multiple nopublish
-meta           HTML_ELEM_OBFU_25          __HTML_ELEM_OBFU > 25
-tflags         HTML_ELEM_OBFU_25          nopublish
-meta           HTML_ELEM_OBFU_50          __HTML_ELEM_OBFU > 50
-tflags         HTML_ELEM_OBFU_50          nopublish
-meta           HTML_ELEM_OBFU_100         __HTML_ELEM_OBFU > 100
-tflags         HTML_ELEM_OBFU_100         nopublish
-meta           HTML_ELEM_OBFU_150         __HTML_ELEM_OBFU > 150
-tflags         HTML_ELEM_OBFU_150         nopublish
+#rawbody        __HTML_ELEM_OBFU           /[a-z\s]&\#[91]\d\d?[a-z]/
+#tflags         __HTML_ELEM_OBFU           multiple nopublish
+#meta           HTML_ELEM_OBFU_25          __HTML_ELEM_OBFU > 25
+#tflags         HTML_ELEM_OBFU_25          nopublish
+#meta           HTML_ELEM_OBFU_50          __HTML_ELEM_OBFU > 50
+#tflags         HTML_ELEM_OBFU_50          nopublish
+#meta           HTML_ELEM_OBFU_100         __HTML_ELEM_OBFU > 100
+#tflags         HTML_ELEM_OBFU_100         nopublish
+#meta           HTML_ELEM_OBFU_150         __HTML_ELEM_OBFU > 150
+#tflags         HTML_ELEM_OBFU_150         nopublish
 
 header         PPMC_FROM_1                From =~ /\bPayPa[IL](?:\.Com)?\b/
 describe       PPMC_FROM_1                Paypal phishing sign
