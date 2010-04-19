@@ -38,7 +38,6 @@ score      TO_NO_BRKTS_HTML_ONLY   0.20
 describe   TO_NO_BRKTS_HTML_ONLY   To: misformatted and HTML only
 
 meta       TO_NO_BRKTS_DYNIP       __TO_NO_ARROWS_R && !__TO_UNDISCLOSED && RDNS_DYNAMIC
-score      TO_NO_BRKTS_DYNIP       0.20
 describe   TO_NO_BRKTS_DYNIP       To: misformatted and dynamic rDNS
 
 meta       TO_NO_BRKTS_NORDNS      __TO_NO_ARROWS_R && !__TO_UNDISCLOSED && RDNS_NONE
@@ -59,7 +58,7 @@ score      TO_NO_BRKTS_PCNT         0.20
 
 meta       TO_NO_BRKTS_DIRECT       __TO_NO_ARROWS_R && __DOS_DIRECT_TO_MX
 describe   TO_NO_BRKTS_DIRECT       To: misformatted and direct-to-MX
-score      TO_NO_BRKTS_DIRECT       0.20
+tflags     TO_NO_BRKTS_DIRECT       publish
 
 ifplugin Mail::SpamAssassin::Plugin::FreeMail
 #  meta       TO_NO_BRKTS_FREEMAIL    __TO_NO_ARROWS_R && !__TO_UNDISCLOSED && (FREEMAIL_FROM || FREEMAIL_REPLYTO)
