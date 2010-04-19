@@ -46,10 +46,10 @@ sub detect_ml_ezmlm {
     my ($self) = @_;
     return 0 unless $self->get('mailing-list') =~ /ezmlm$/;
     return 0 unless $self->get('precedence') eq "bulk\n";
-    return 0 unless $self->get('list-post') =~ /^<mailto:/;
-    return 0 unless $self->get('list-help') =~ /^<mailto:/;
-    return 0 unless $self->get('list-unsubscribe') =~ /<mailto:[a-zA-Z\.-]+-unsubscribe\@/;
-    return 0 unless $self->get('list-subscribe') =~ /<mailto:[a-zA-Z\.-]+-subscribe\@/;
+    return 0 unless $self->get('list-post') =~ /^<mailto:/i;
+    return 0 unless $self->get('list-help') =~ /^<mailto:/i;
+    return 0 unless $self->get('list-unsubscribe') =~ /<mailto:[a-zA-Z\.-]+-unsubscribe\@/i;
+    return 0 unless $self->get('list-subscribe') =~ /<mailto:[a-zA-Z\.-]+-subscribe\@/i;
     return 1; # assume ezmlm then.
 }
 
@@ -88,10 +88,10 @@ sub detect_ml_mailman {
     }
 
     return 0 unless defined $self->get('list-id',undef);
-    return 0 unless $self->get('list-help') =~ /^<mailto:/;
-    return 0 unless $self->get('list-post') =~ /^<mailto:/;
-    return 0 unless $self->get('list-subscribe') =~ /<mailto:.*=subscribe>/;
-    return 0 unless $self->get('list-unsubscribe') =~ /<mailto:.*=unsubscribe>/;
+    return 0 unless $self->get('list-help') =~ /^<mailto:/i;
+    return 0 unless $self->get('list-post') =~ /^<mailto:/i;
+    return 0 unless $self->get('list-subscribe') =~ /<mailto:.*=subscribe>/i;
+    return 0 unless $self->get('list-unsubscribe') =~ /<mailto:.*=unsubscribe>/i;
     return 1; # assume this is a valid mailman list
 }
 

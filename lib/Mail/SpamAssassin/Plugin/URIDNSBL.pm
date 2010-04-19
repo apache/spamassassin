@@ -349,7 +349,7 @@ sub parsed_metadata {
   # 5: a_empty
   while (my($uri, $info) = each %{$uris}) {
     # we want to skip mailto: uris
-    next if ($uri =~ /^mailto:/);
+    next if ($uri =~ /^mailto:/i);
 
     # no domains were found via this uri, so skip
     next unless ($info->{domains});

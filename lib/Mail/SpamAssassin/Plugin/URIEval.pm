@@ -52,7 +52,7 @@ sub check_for_http_redirector {
   my ($self, $pms) = @_;
 
   foreach ($pms->get_uri_list()) {
-    while (s{^https?://([^/:\?]+).+?(https?:/{0,2}?([^/:\?]+).*)$}{$2}) {
+    while (s{^https?://([^/:\?]+).+?(https?:/{0,2}?([^/:\?]+).*)$}{$2}i) {
       my ($redir, $dest) = ($1, $3);
       foreach ($redir, $dest) {
 	$_ = Mail::SpamAssassin::Util::uri_to_domain(lc($_)) || $_;

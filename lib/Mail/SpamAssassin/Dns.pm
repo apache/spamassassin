@@ -186,7 +186,7 @@ sub dnsbl_hit {
     if ($answer->type eq 'TXT') {
       $log = $answer->rdatastr;
       $log =~ s/^"(.*)"$/$1/;
-      $log =~ s/(?<![<([])(https?:\/\/\S+)/<$1>/g;
+      $log =~ s/(?<![<([])(https?:\/\/\S+)/<$1>/gi;
     }
     elsif ($question->string =~ m/^(\d+)\.(\d+)\.(\d+)\.(\d+)\.(\S+\w)/) {
       $log = "$4.$3.$2.$1 listed in ".lc($5);

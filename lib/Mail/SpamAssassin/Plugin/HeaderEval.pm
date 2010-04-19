@@ -976,7 +976,7 @@ sub check_messageid_not_usable {
 
   # Lyris eats message-ids.  also some ezmlm, I think :(
   $_ = $pms->get("List-Unsubscribe");
-  return 1 if (/<mailto:(?:leave-\S+|\S+-unsubscribe)\@\S+>$/);
+  return 1 if (/<mailto:(?:leave-\S+|\S+-unsubscribe)\@\S+>$/i);
 
   # ezmlm again
   if($self->gated_through_received_hdr_remover($pms)) { return 1; }
