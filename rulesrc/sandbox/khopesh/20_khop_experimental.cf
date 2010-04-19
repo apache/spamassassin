@@ -4,7 +4,7 @@ meta	 MALFORMED_FREEMAIL	(MISSING_HEADERS||__HDRS_LCASE) && FREEMAIL_FROM
 describe MALFORMED_FREEMAIL	Bad headers on message from free email service
 #score	 MALFORMED_FREEMAIL	0.1
 
-header	 FROM_WEBSITE	From =~ m'\b(?:f|ht)tps?://[^\s"</\@]{3,60}\.\w\w'i
+header	 FROM_WEBSITE	From:raw =~ m'\b(?:f|ht)tps?://[^\s"</\@]{3,60}\.\w\w'i
 describe FROM_WEBSITE	Sender name appears to be a link
 header	 FROM_WWW	From:name =~ /\bwww\.[^\s"<\/\@]{4,60}\.\w\w/i
 describe FROM_WWW	Sender name appears to be a website
@@ -47,6 +47,7 @@ uri	 __SHORT_URL	/^http:\/\/[^\/]{3,6}\.\w\w\/[^\/]{3,8}\/?$/
 # bold below that threshold.
 uri	 URL_SHORTENER	/^http:\/\/(?:bit\.ly|tinyurl\.com|ow\.ly|is\.gd|tumblr\.com|formspring\.me|ff\.im|youtu\.be|tl\.gd|plurk\.com|migre\.me|j\.mp|cli\.gs|goo\.gl|yfrog\.com|lnk\.ms|su\.pr|fb\.me|alturl\.com|wp\.me|ping\.fm|chatter\.com|post\.ly|twurl\.nl|tiny\.cc|4sq\.com|ustre\.am|short\.to|u\.nu|flic\.kr|budurl\.com|digg\.com|twitvid\.com|gowal\.la|om\.ly|justin\.tv|icio\.us|p\.gs|loopt\.us|tcrn\.ch|xrl\.us|wpo\.st|bkite\.com)\/[^\/]{3}\/?/
 describe URL_SHORTENER	Has a shortened URL (can hide a blacklisted link)
+tflags	 URL_SHORTENER	nopublish
 #uri	 SHORT_URL	/^http:\/\/(!?(?:bit\.ly|tinyurl\.com|ow\.ly|is\.gd|tumblr\.com|formspring\.me|ff\.im|youtu\.be|tl\.gd|plurk\.com|migre\.me|j\.mp|cli\.gs|goo\.gl|yfrog\.com|lnk\.ms|su\.pr|fb\.me|alturl\.com|wp\.me|ping\.fm|chatter\.com|post\.ly|twurl\.nl|tiny\.cc|4sq\.com|ustre\.am|short\.to|u\.nu|flic\.kr|budurl\.com|digg\.com|twitvid\.com|gowal\.la|om\.ly|justin\.tv|icio\.us|p\.gs|loopt\.us|tcrn\.ch|xrl\.us|wpo\.st|bkite\.com)\/)[^\/]{3,6}\.\w\w\/[^\/]{3,8}\/?$/
 meta	 SHORT_URL	__SHORT_URL && !URL_SHORTENER && !ALL_TRUSTED
 describe SHORT_URL	Has a short URL without a shortening service
@@ -60,10 +61,13 @@ describe URI_HIDDEN	Contains a hidden directory
 header __RDNS_NO_SUBDOM	X-Spam-Relays-External =~ /^[^\]]+ rdns=[^. ]*\.\w+ /
 
 # Relays with 5+ subdomains.
-# My data (post-greylisting) is 1.7869/0.0682 spam/ham, s/o = .897
-# Those should be significantly better sans-greylisting (they can't get worse).
-# @ 20091214, 5.7617/0.0344 spam/ham, 0.994 s/o.
-header __5_SUBDOM X-Spam-Relays-External =~ /^[^\]]+ rdns=(?:[^. ]*\.){6,}\w+ /
+header RDNS_5_SUBDOM X-Spam-Relays-External =~ /^[^\]]+ rdns=(?:[^. ]*\.){6,}\w+ /
+# 5.7617/0.0344 spam/ham, 0.994 s/o @ 20091214
+# 6.8885/0.0129 spam/ham, 0.998 s/o @ 20100417
+
+# how far can I push it?
+header RDNS_4_SUBDOM X-Spam-Relays-External =~ /^[^\]]+ rdns=(?:[^. ]*\.){5}\w+ /
+header RDNS_3_SUBDOM X-Spam-Relays-External =~ /^[^\]]+ rdns=(?:[^. ]*\.){4}\w+ /
 
 # IP address in relay's rDNS or HELO
 header __IP_IN_RELAY  X-Spam-Relays-External =~ /^\[ ip=(\d+)\.(\d+)\.(\d+)\.(\d+) (?:[^\]]* )?(?:rdns|helo)=\S*(?:\1\D\2\D\3\D\4|\4\D\3\D\2\D\1)/
