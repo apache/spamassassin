@@ -327,7 +327,7 @@ sub _parse_body {
         my $parsed = $pms->get_uri_detail_list();
         while (my($uri, $info) = each %{$parsed}) {
             if (defined $info->{types}->{a} and not defined $info->{types}->{parsed}) {
-                if ($uri =~ /^mailto:${email_regex}/) {
+                if ($uri =~ /^(?:(?i)mailto):${email_regex}/) {
                     my $email = lc($1);
                     push(@body_emails, $email) unless defined $seen{$email};
                     $seen{$email} = 1;
