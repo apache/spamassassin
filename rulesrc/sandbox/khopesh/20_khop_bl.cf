@@ -6,33 +6,47 @@
 
 # Detect milter-greylist, scam-grey, postgrey, SQLgrey, and hopefully others
 header	 __GREYLISTING	ALL =~ /(?:^|\n)X-(?:Scam-Grey|Greylist(?:ing)?):\s/m
-header	 __GREYLISTED	ALL =~ /(?:^|\n)X-(?:Scam-Grey|Greylist(?:ing)?):\s+delay(?:ed)? (?:for )?\d+(?: ?s(?:ec(?:ond)?s?)?|:\d\d)/im
 
-meta KHOP_GREYED __GREYLISTED && (RDNS_NONE || RDNS_DYNAMIC || __HELO_NO_DOMAIN)
+# doesn't match enough, has a higher S/O than above, therefore useless.
+#header	 __GREYLISTED	ALL =~ /(?:^|\n)X-(?:Scam-Grey|Greylist(?:ing)?):\s+delay(?:ed)? (?:for )?\d+(?: ?s(?:ec(?:ond)?s?)?|:\d\d)/im
+
+meta KHOP_GREYED __GREYLISTING && (RDNS_NONE||RDNS_DYNAMIC||__HELO_NO_DOMAIN)
 describe KHOP_GREYED	Greylisted and sent from dynamically-named relay
 score	 KHOP_GREYED	0.1
-
-header	 __DKIM_EXISTS	exists:DKIM-Signature
 
 ifplugin Mail::SpamAssassin::Plugin::DKIM
   meta	   DKIM_INVALID	__DKIM_EXISTS && !DKIM_VALID
   describe DKIM_INVALID	DKIM-Signature header exists but is not valid
+  # masscheck ignores ifplugins and thus always has DKIM_INVALID==__DKIM_EXISTS
 endif
 
-ifplugin Mail::SpamAssassin::Plugin::SPF
- ifplugin Mail::SpamAssassin::Plugin::DKIM
-   meta   __NOT_SPOOFED	ALL_TRUSTED || SPF_PASS || DKIM_VALID
+
+header	 __DKIM_EXISTS	exists:DKIM-Signature
+# 0.1320/12.7782 spam/ham, 0.010 s/o @ 20100420  safe without forgeries for now.
+
+
+
+# Note 1: This is ordered counterintuitively because masscheck
+#         ignores ifplugins and just takes the first definition.
+# Note 2: At the moment, __DKIM_EXISTS is safe.  When that changes,
+#         it will need to be removed from the first entry.
+# Note 3: I have zero confidence in the auto-publish mechanism
+#         leaving the below block intact.  I'll try using its own syntax...
+
+##{ __NOT_SPOOFED
+if ! plugin (Mail::SpamAssassin::Plugin::DKIM)
+ ifplugin Mail::SpamAssassin::Plugin::SPF
+   meta __NOT_SPOOFED  SPF_PASS || __DKIM_EXISTS || !__LAST_EXTERNAL_RELAY_NO_AUTH || ALL_TRUSTED	# no DKIM, yes SPF
  else
-   meta   __NOT_SPOOFED	ALL_TRUSTED || SPF_PASS
+   meta __NOT_SPOOFED  __DKIM_EXISTS || !__LAST_EXTERNAL_RELAY_NO_AUTH || ALL_TRUSTED	# no DKIM, no SPF.
  endif
 else
- ifplugin Mail::SpamAssassin::Plugin::DKIM
-    meta   __NOT_SPOOFED	ALL_TRUSTED || DKIM_VALID
+ ifplugin Mail::SpamAssassin::Plugin::SPF
+  meta __NOT_SPOOFED  SPF_PASS || DKIM_VALID || !__LAST_EXTERNAL_RELAY_NO_AUTH || ALL_TRUSTED	# yes DKIM, yes SPF
  else
-   # Neither DKIM nor SPF ... ugh.  Approximate by looking for just the header.
-   meta   __NOT_SPOOFED       ALL_TRUSTED || __DKIM_EXISTS
- endif
+  meta __NOT_SPOOFED  DKIM_VALID || !__LAST_EXTERNAL_RELAY_NO_AUTH || ALL_TRUSTED	# yes DKIM, no SPF
 endif
+##} __NOT_SPOOFED
 
 
 # I'm using the RCVD_VIA_ prefix to represent regional internet registries
