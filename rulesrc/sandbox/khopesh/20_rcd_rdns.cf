@@ -1,0 +1,45 @@
+# From the 2010 MIT Spam Conference "best student paper"
+# "Detecting Gray in Black and White"
+# by Christian Rossow, Thomas Czerwinski, Christian J. Dietrich (all students)
+# http://www.internet-sicherheit.de/uploads/media/Christian-Rossow-Thomas-Czerwinski-Christian-J-Dietrich-Detecting-Gray-in-Black-and-White-MIT-spam-conference-2010.pdf
+#
+# The paper evaluates very similar methodology to the S25R concepts any my own
+# tinkering within this space (of searching for dynamic-type names in rDNS).
+# It cleanses itself with some white rDNS searches that might be interesting.
+# Named RCD for the paper's authors but the rules and regex's are mine.
+
+header __RCD_RDNS_MX_MESSY X-Spam-Relays-External =~ /^[^\]]+ rdns=[^. ]*mx/
+header __RCD_RDNS_MX X-Spam-Relays-External =~ /^[^\]]+ rdns=[^. ]*\bmx[^a-z]/i
+header __RCD_RDNS_SMTP_MESSY X-Spam-Relays-External =~ /^[^\]]+ rdns=[^. ]*smtp/
+header __RCD_RDNS_SMTP X-Spam-Relays-External =~ /^[^\]]+ rdns=[^. ]*\bsmtp[^a-z]/i
+header __RCD_RDNS_MTA_MESSY X-Spam-Relays-External =~ /^[^\]]+ rdns=[^. ]*mta/i
+header __RCD_RDNS_MTA X-Spam-Relays-External =~ /^[^\]]+ rdns=[^. ]*\bmta[^a-z]/i
+header __RCD_RDNS_STATIC_MESSY X-Spam-Relays-External =~ /^[^\]]+ rdns=[^. ]*static/i
+header __RCD_RDNS_STATIC X-Spam-Relays-External =~ /^[^\]]+ rdns=[^. ]*\bstatic[^a-z]/i
+# Based on the paper's results, OB shouldn't hit much
+header __RCD_RDNS_OB_MESSY X-Spam-Relays-External =~ /^[^\]]+ rdns=[^. ]*outbound/i
+header __RCD_RDNS_OB X-Spam-Relays-External =~ /^[^\]]+ rdns=[^. ]*\boutbound[^a-z]/i
+header __RCD_RDNS_MAIL_MESSY X-Spam-Relays-External =~ /^[^\]]+ rdns=[^. ]*mail/i
+header __RCD_RDNS_MAIL X-Spam-Relays-External =~ /^[^\]]+ rdns=[^. ]*\bmail[^a-z]/i
+
+meta RCD_RDNS_SERVER __RCD_RDNS_MX || __RCD_RDNS_SMTP || __RCD_RDNS_MTA || __RCD_RDNS_STATIC || __RCD_RDNS_OB || __RCD_RDNS_MAIL
+tflags RCD_RDNS_SERVER nice nopublish
+meta RCD_RDNS_SERVER_MESSY __RCD_RDNS_MX_MESSY_MESSY || __RCD_RDNS_SMTP_MESSY || __RCD_RDNS_MTA_MESSY || __RCD_RDNS_STATIC_MESSY || __RCD_RDNS_OB_MESSY || __RCD_RDNS_MAIL_MESSY
+tflags RCD_RDNS_SERVER_MESSY nice nopublish
+
+header __RCD_RDNS_DIAL_MESSY X-Spam-Relays-External =~ /^[^\]]+ rdns=[^. ]*dial/i
+header __RCD_RDNS_DIAL X-Spam-Relays-External =~ /^[^\]]+ rdns=[^. ]*\bdial(?:ing?)?[^a-z]/i
+header __RCD_RDNS_DYN_MESSY X-Spam-Relays-External =~ /^[^\]]+ rdns=[^. ]*dyn/i
+header __RCD_RDNS_DYN X-Spam-Relays-External =~ /^[^\]]+ rdns=[^. ]*\bdyna?(?:mic)?[^a-z]/i
+header __RCD_RDNS_PROXY_MESSY X-Spam-Relays-External =~ /^[^\]]+ rdns=[^. ]*proxy/i
+header __RCD_RDNS_PROXY X-Spam-Relays-External =~ /^[^\]]+ rdns=[^. ]*\bprox(?:y(?:ing)?|ie[ds])[^a-z]/i
+header __RCD_RDNS_PPP_MESSY X-Spam-Relays-External =~ /^[^\]]+ rdns=[^. ]*ppp/i
+header __RCD_RDNS_PPP X-Spam-Relays-External =~ /^[^\]]+ rdns=[^. ]*\bppp[^a-z]/i
+header __RCD_RDNS_PPOE_MESSY X-Spam-Relays-External =~ /^[^\]]+ rdns=[^. ]*ppoe/i
+header __RCD_RDNS_PPOE X-Spam-Relays-External =~ /^[^\]]+ rdns=[^. ]*\bppoe[^a-z]/i
+
+meta RCD_RDNS_DYNAMIC_MESSY __RCD_RDNS_DIAL_MESSY || __RCD_RDNS_DYN_MESSY || __RCD_RDNS_PROXY || __RCD_RDNS_PPP_MESSY || __RCD_RDNS_PPOE_MESSY
+tflags RCD_RDNS_DYNAMIC_MESSY nopublish
+meta RCD_RDNS_DYNAMIC __RCD_RDNS_DIAL_MESSY || __RCD_RDNS_DYN_MESSY || __RCD_RDNS_PROXY_MESSY || __RCD_RDNS_PPP_MESSY || __RCD_RDNS_PPOE_MESSY
+tflags RCD_RDNS_DYNAMIC nopublish
+
