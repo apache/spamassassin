@@ -60,14 +60,13 @@ describe URI_HIDDEN	Contains a hidden directory
 # no subdomain; sent by example.com rather than server.example.com
 header __RDNS_NO_SUBDOM	X-Spam-Relays-External =~ /^[^\]]+ rdns=[^. ]*\.\w+ /
 
-# Relays with 5+ subdomains.
-header RDNS_5_SUBDOM X-Spam-Relays-External =~ /^[^\]]+ rdns=(?:[^. ]*\.){6,}\w+ /
+# Relays with 5+ subdomains in their rDNS.
+header __5_SUBDOM X-Spam-Relays-External =~ /^[^\]]+ rdns=(?:[^. ]*\.){6,}\w+ /
 # 5.7617/0.0344 spam/ham, 0.994 s/o @ 20091214
 # 6.8885/0.0129 spam/ham, 0.998 s/o @ 20100417
-
-# how far can I push it?
-header RDNS_4_SUBDOM X-Spam-Relays-External =~ /^[^\]]+ rdns=(?:[^. ]*\.){5}\w+ /
-header RDNS_3_SUBDOM X-Spam-Relays-External =~ /^[^\]]+ rdns=(?:[^. ]*\.){4}\w+ /
+# 6.8984/0.0251 spam/ham, 0.996 s/o @ 20100420
+# 20100420 results for 4_subdom=6.8577/2.0856, 3=15.3590/8.4512
+# which means 4+ was 13.7561/2.1106@0.866 and 3+ was 29.1151/10.5619@0.734
 
 # IP address in relay's rDNS or HELO
 header __IP_IN_RELAY  X-Spam-Relays-External =~ /^\[ ip=(\d+)\.(\d+)\.(\d+)\.(\d+) (?:[^\]]* )?(?:rdns|helo)=\S*(?:\1\D\2\D\3\D\4|\4\D\3\D\2\D\1)/
