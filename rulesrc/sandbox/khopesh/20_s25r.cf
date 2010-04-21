@@ -8,7 +8,7 @@
 
 
 # Limited via __HELO_NO_DOMAIN to distinguish from (and improve upon) RDNS_NONE
-#meta	 S25R_0 __LAST_EXTERNAL_RELAY_NO_AUTH && RDNS_NONE && __HELO_NO_DOMAIN && !__NOT_SPOOFED && !__GREYLISTED
+#meta	 S25R_0 __LAST_EXTERNAL_RELAY_NO_AUTH && RDNS_NONE && __HELO_NO_DOMAIN && !__NOT_SPOOFED && !__GREYLISTING
 #describe S25R_0	S25R: Reverse lookup failure
 #score	 S25R_0	0.1
 #tflags	 S25R_0 nopublish
@@ -16,56 +16,81 @@
 
 header __S25R_1 X-Spam-Relays-External =~ /^[^\]]+ rdns=[^. ]*\d[^0-9. ]+\d\S*\./
 describe S25R_1 S25R: Bottom of rDNS has num, non-num, num
-meta	 S25R_1 __LAST_EXTERNAL_RELAY_NO_AUTH && __S25R_1 && !(__DOS_RELAYED_EXT||__S25R_2||__S25R_3||__S25R_4||__S25R_5||__S25R_6 || __NOT_SPOOFED || __GREYLISTED)
+meta	 S25R_1 __S25R_1 && !(__DOS_RELAYED_EXT||__S25R_2||__S25R_3||__S25R_4||__S25R_5||__S25R_6 || __NOT_SPOOFED || __GREYLISTING)
+tflags	 S25R_1 nopublish
 #score	 S25R_1 0.1
 
 header __S25R_2 X-Spam-Relays-External =~ /^[^\]]+ rdns=[^. ]*\d{5}/
 describe S25R_2 S25R: Bottom of rDNS has 5+ digits in a row
-meta	 S25R_2 __LAST_EXTERNAL_RELAY_NO_AUTH && __S25R_2 && !(__S25R_1||__S25R_3||__S25R_4||__S25R_5||__S25R_6 || __NOT_SPOOFED || __GREYLISTED)
+meta	 S25R_2 __S25R_2 && !(__S25R_1||__S25R_3||__S25R_4||__S25R_5||__S25R_6 || __NOT_SPOOFED || __GREYLISTING)
+tflags	 S25R_2 nopublish
 #score	 S25R_2 0.1
 
 header __S25R_3 X-Spam-Relays-External =~ /^[^\]]+ rdns=(?:[^. ]+\.)?\d[^. ]*\.[^. ]+\.\S+\.[a-z]/
 describe S25R_3 S25R: A low-level of rDNS starts w/ a number
-meta	 S25R_3 __LAST_EXTERNAL_RELAY_NO_AUTH && __S25R_3 && !(__S25R_1||__S25R_2||__S25R_4||__S25R_5||__S25R_6 || __NOT_SPOOFED || __GREYLISTED)
+meta	 S25R_3 __S25R_3 && !(__S25R_1||__S25R_2||__S25R_4||__S25R_5||__S25R_6 || __NOT_SPOOFED || __GREYLISTING)
+tflags	 S25R_3 nopublish
 #score	 S25R_3 0.1
 
 header __S25R_4 X-Spam-Relays-External =~ /^[^\]]+ rdns=[^. ]*\d\.[^. ]*\d-\d/
 describe S25R_4 S25R: Bottom of rDNS ends w/ num, next lvl has num-num
-meta	 S25R_4 __LAST_EXTERNAL_RELAY_NO_AUTH && __S25R_4 && !(__S25R_1||__S25R_2||__S25R_3||__S25R_5||__S25R_6 || __NOT_SPOOFED || __GREYLISTED)
+meta	 S25R_4 __S25R_4 && !(__S25R_1||__S25R_2||__S25R_3||__S25R_5||__S25R_6 || __NOT_SPOOFED || __GREYLISTING)
+#tflags	 S25R_4 nopublish
 #score	 S25R_4 0.1
 
 header __S25R_5 X-Spam-Relays-External =~ /^[^\]]+ rdns=[^. ]*\d\.[^. ]*\d\.[^. ]+\.\S+\./
 describe S25R_5 S25R: rDNS has 5+ layers, bottom 2 end in numbers
-meta	 S25R_5 __LAST_EXTERNAL_RELAY_NO_AUTH && __S25R_5 && !(__S25R_1||__S25R_2||__S25R_3||__S25R_4||__S25R_6 || __NOT_SPOOFED || __GREYLISTED)
+meta	 S25R_5 __S25R_5 && !(__S25R_1||__S25R_2||__S25R_3||__S25R_4||__S25R_6 || __NOT_SPOOFED || __GREYLISTING)
+tflags	 S25R_5 nopublish
 #score	 S25R_5 0.1
 
 header __S25R_6 X-Spam-Relays-External =~ /^[^\]]+ rdns=(?:dhcp|dialup|ppp|[achrsvx]?dsl)[^. ]*\d/
 describe S25R_6 S25R: rDNS looks dynamic or customer-facing
-meta	 S25R_6 __LAST_EXTERNAL_RELAY_NO_AUTH && __S25R_6 && !(__S25R_1||__S25R_2||__S25R_3||__S25R_4||__S25R_5 || __NOT_SPOOFED || __GREYLISTED)
+meta	 S25R_6 __S25R_6 && !(__S25R_1||__S25R_2||__S25R_3||__S25R_4||__S25R_5 || __NOT_SPOOFED || __GREYLISTING)
+#tflags	 S25R_6 nopublish
 #score	 S25R_6 0.1
 
 # Testing the union.  Limits S25R_0 (RDNS_NONE) for high FPs.
 # Ordered by popularity in an effort to improve short-circuiting.
-#meta	 S25R	__LAST_EXTERNAL_RELAY_NO_AUTH && ((RDNS_NONE&&__HELO_NO_DOMAIN)||__S25R_1||__S25R_3||__S25R_5||__S25R_2||__S25R_6||__S25R_4) && !__NOT_SPOOFED && !__GREYLISTED
+#meta	 S25R	((RDNS_NONE&&__HELO_NO_DOMAIN)||__S25R_1||__S25R_3||__S25R_5||__S25R_2||__S25R_6||__S25R_4) && !__NOT_SPOOFED && !__GREYLISTING
 #describe S25R	Selective SMTP Rejection: Relay has dynamic rDNS
 #tflags	 S25R	nopublish
 
+
+
 # Here it is, my full-blown poor-man's botnet
-meta	 KHOP_BOTNET_4	__LAST_EXTERNAL_RELAY_NO_AUTH && !(__FROM_FREEMAIL || __NOT_SPOOFED || __GREYLISTED) && (__S25R_3 || __S25R_4 || __S25R_5 || __S25R_6 || RDNS_DYNAMIC + __S25R_1*.8 + __S25R_2*.8 > 1.7)
+meta	 KHOP_BOTNET_4	__LAST_EXTERNAL_RELAY_NO_AUTH && !(__FROM_FREEMAIL || __NOT_SPOOFED || __GREYLISTING) && (__S25R_3 || __S25R_4 || __S25R_5 || __S25R_6 || RDNS_DYNAMIC + __S25R_1*.8 + __S25R_2*.8 > 1.7)
 describe KHOP_BOTNET_4	Relay looks like a dynamic address
 tflags	 KHOP_BOTNET_4	nopublish
 
-meta	 KHOP_BOTNET_7	__LAST_EXTERNAL_RELAY_NO_AUTH && !(__FROM_FREEMAIL || __NOT_SPOOFED || __GREYLISTED) && (__S25R_4 || __S25R_5 || __S25R_6 || __RDNS_HEX || __5_SUBDOM || __S25R_1 + __S25R_2 + __S25R_3 + __IP_IN_RELAY > 2)
+meta	 KHOP_BOTNET_7	!(__FROM_FREEMAIL || __NOT_SPOOFED || __GREYLISTING) && (__S25R_4 || __S25R_5 || __S25R_6 || __RDNS_HEX || __S25R_1 + __S25R_2 + __S25R_3 + __IP_IN_RELAY > 2)
 describe KHOP_BOTNET_7	Relay looks like a dynamic address
 tflags	 KHOP_BOTNET_7	nopublish
+
+
+
+# I intend to remove s25r_4 and s25r_6 from publish
+# and enable the next two once I've added findings from RCD.
+
+# safe, no cleansing needed
+meta	 KHOP_DYNAMIC	__LAST_EXTERNAL_RELAY_NO_AUTH && !ALL_TRUSTED && (__TWO_IPS_RCVD || __5_SUBDOM || __RDNS_HEX || __S25R_4 || __S25R_6)
+describe KHOP_DYNAMIC	Relay looks like a dynamic address
+tflags	 KHOP_DYNAMIC	nopublish
+
+# cleansing added to make safe
+meta	 KHOP_DYNAMIC2	!(__NOT_SPOOFED||__GREYLISTING||__FROM_FREEMAIL) && (__S25R_1 + __S25R_2 + __S25R_3 + __S25R_5 + __IP_IN_RELAY > 3)
+describe KHOP_DYNAMIC2	Relay looks like a dynamic address
+tflags	 KHOP_DYNAMIC2	nopublish
 
 meta	 KHOP_BOTNET_UNCLEAN	__LAST_EXTERNAL_RELAY_NO_AUTH && (__S25R_4 || __S25R_5 || __S25R_6 || __RDNS_HEX || __5_SUBDOM || __S25R_1 + __S25R_2 + __S25R_3 + __IP_IN_RELAY > 2)
 describe KHOP_BOTNET_UNCLEAN	Relay looks like a dynamic address
 tflags	 KHOP_BOTNET_UNCLEAN	nopublish
 
+
+
 # S25R-wanted item (3.2 a, "A terminal host name includes hexadecimal number")
-# not published with S25R due to matching words like 'feed.'
-# Negative look-ahead lets us ignore 3+ consecutive hex letters.
-# 4.4352/0.0163 spam/ham, 0.996 s/o @ 20091214
-# plus, lots of low-scoring spam hit.  this is a really good rule.
+# This was not published with S25R due to matching 'feed' and similar words.
+# PCRE lets us use negative look-ahead. This ignores 3+ consecutive hex letters.
 header __RDNS_HEX X-Spam-Relays-External =~ /^[^\]]+ rdns=[^ .]*\d(?![0-9a-f]*[a-f]{3})[0-9a-f]{7}/
+# 4.4352/0.0163 spam/ham, 0.996 s/o @ 20091214  awesome score-map; avg is LOW!
+# 4.9976/0.0086 spam/ham, 0.998 s/o @ 20100420  37% of spam hits are under 6 pts
