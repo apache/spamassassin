@@ -209,8 +209,6 @@ Multiple ip patterns per line are permitted, as are multiple lines.
 <b>Note: Currently only file-glob style wildcards are supported.  CIDR
 notation, nor any other format, is <b> NOT supported.
 
-=back
-
 =cut
 
   push (@cmds, {
@@ -233,6 +231,8 @@ notation, nor any other format, is <b> NOT supported.
       }
     }
   });
+
+=back
 
 =head1 RULE DEFINITIONS AND PRIVILEGED SETTINGS
 
