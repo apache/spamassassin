@@ -163,5 +163,3 @@ sub dump_bayes_db {
 }
 
 1;
-
-=cut
