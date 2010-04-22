@@ -4,6 +4,8 @@
 ### select rules from khop-lists
 
 header	 __SENDER_BOT	ALL =~ /(?:not?\W?repl[yi]|bounce|daemon|subscri|report|\b(?:root|news|nobody|agent|(?:post)?master|manag|send(?:er|ing)?|out|bot\b))[^@ >]{0,5}s?@\w/i
+body	 __UNSUB_EMAIL	/\b(?:(?:un)?subscri(?:ber?|ptions?)|abuses?|opt(?:ing)?.?out)\b[-a-z_0-9.+=]{0,60}\@[a-z0-9][-a-z_0-9.]{4,20}(?:[^a-z_0-9.-]|$)/i
+rawbody	 __UNSUB_MAILTO	/href=["']?mailto:[^>]{6,60}>[^<]{0,6}\b(?:(?:un)?subscri(?:ber?|ptions?)|abuses?|opt(?:ing)?.?out)\b/
 uri	 __UNSUB_LINK	/\b(?:(?:un)?subscri(?:ber?|ptions?)|abuses?|opt(?:ing)?.?out)\b/i
 uri	 __MAIL_LINK	/\?.{0,200}\w@[\w-]{1,20}.\w\w\w?\b/i
 
@@ -26,6 +28,8 @@ describe KHOP_MAIL_LINK	A link contains an email address in the URL
 tflags	 KHOP_MAIL_LINK	nopublish
 #score	 KHOP_MAIL_LINK	0.1 0.2 0.3 0.4
 
+meta	 KHOP_UNSUB_EMAIL	!__UNSUB_LINK && (__UNSUB_EMAIL||__UNSUB_MAILTO)
+describe KHOP_UNSUB_EMAIL	Unsubscribe by email but not by link
 
 # This matches foreign characters by process of elimination.
 # From: must start w/ ~uppercase, ~letters, space/punctuation, then ~uppercase.
