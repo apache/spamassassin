@@ -12,15 +12,18 @@ describe FROM_WWW	Sender name appears to be a website
 header	 FROM_2_EMAILS	From =~ /([^\@]{2,}\@[^\@]{2,60}\.\w\w).*(?!\1)[^\@]{2,}\@[^\@]/
 describe FROM_2_EMAILS	Sender claims to have a different email
 
-header	 __FROM_THE	From:name =~ /\b(?:THE|[Tt]he)\b/
-meta	 FROM_THE	__FROM_THE && !(__VIA_ML || __SENDER_BOT || __DOS_HAS_LIST_UNSUB || __REPLYTO_EXISTS)
-describe FROM_THE	Non-bulk sender is "The" something
-# I don't actually expect this to do well.  maybe s/o around 0.450?
-# There's also the argument that Bayes should handle this, since (iirc) it codifies tokens like "from:the" indicating that "the" occurs in "From" headers...
+header __FROM_BIG_NUM	From =~ /\d{6}/
+header __FROM_BIG_HEX	From =~ /[a-f0-9]{6}/i
+
+header __FROM_DOT_COM	From:raw =~ /\.(?:com|COM)\s.*</
+header __RELAY_DOT_COM	X-Spam-Relays-Untrusted =~ /^[^\]]+ (?:rdns|helo)=[^\] ]+\.com /
+meta	 FROM_DOT_COM	__FROM_DOT_COM && !__RELAY_DOT_COM
+describe FROM_DOT_COM	From NAME contains .com but relay was not a .com
+header FROM_NOT_DOTCOM From:raw =~ /\.(?:com|COM)\s.*<[^>]+\.(?!com|COM)[^.>]+>/
+describe FROM_NOT_DOTCOM  Sender NAME has .com but sender ADDRESS does not
 
 header	 KHOP_BIG_TO_CC      ToCc =~ /(?:[^,\@]{1,60}\@[^,]{4,25},){10}/
 describe KHOP_BIG_TO_CC      Sent to 10+ recipients instaed of Bcc or a list
-score	 KHOP_BIG_TO_CC      0.3 # 20090527
 
 # see also 70_sare_spoof.cf's __EBAY_ADDRESS:
 # header __EBAY_ADDRESS     From:addr =~ /[\@\.]ebay\.(?:com(?:\.au|\.cn|\.hk|\.my|\.sg)?|co\.uk|at|be|ca|fr|de|in|ie|it|nl|ph|pl|es|se|ch)/i
@@ -57,6 +60,7 @@ uri	 URI_HIDDEN	m'.{7}\/\.\.?/?\w'
 describe URI_HIDDEN	Contains a hidden directory
 #score	 URI_HIDDEN	0.7 # 20090515 13:29 by Adam Katz (me) on sa-users list
 
+
 # no subdomain; sent by example.com rather than server.example.com
 header __RDNS_NO_SUBDOM	X-Spam-Relays-External =~ /^[^\]]+ rdns=[^. ]*\.\w+ /
 
@@ -70,12 +74,64 @@ header __5_SUBDOM X-Spam-Relays-External =~ /^[^\]]+ rdns=(?:[^. ]*\.){6,}\w+ /
 
 # IP address in relay's rDNS or HELO
 header __IP_IN_RELAY  X-Spam-Relays-External =~ /^\[ ip=(\d+)\.(\d+)\.(\d+)\.(\d+) (?:[^\]]* )?(?:rdns|helo)=\S*(?:\1\D\2\D\3\D\4|\4\D\3\D\2\D\1)/
-header __IP_PART_IN_RELAY X-Spam-Relays-External =~ /^\[ ip=\d+\.\d+\.(\d+)\.(\d+) (?:[^\]]* )?(?:rdns|helo)=\S*(?:\1\W\2\W|\2\W\1)\b/
 
-header __MSGID_DOTZERO	Message-ID =~ /\.0\.0\./
+
+
+# Rough nonplugin regexs from John Rudd's Botnet plugin (v0.8, 2007-08-05).
+# http://people.ucsc.edu/~jrudd/spamassassin/Botnet-0.8.tar
+# I've purposefully removed anything alrady in RDNS_DYNAMIC
+# NOTE: this is GPLv2, which is incompatible with the Apache License.
+# My *brief* read is that Apache->GPLv2 is taboo but GPLv2->Apache is fine.
+# I wrote the next four rules from his base words, so these are fine.
+header __BOTNET_CLIENT1 X-Spam-Relays-External =~ /^[\]]+ rdns=\S+\b(?:ddns|dial-?(?:in|up)|dyn(?:amic)?ip|resident(?:ial)?|bredband)[^a-z]/i
+header __BOTNET_CLIENT2 X-Spam-Relays-External =~ /^[\]]+ rdns=\S+(?:\b(?:pool|user)[^a-z]|[-.]ip[-.])/i
+header __BOTNET_SERVER X-Spam-Relays-External =~ /^[\]]+ rdns=\S+\b(?:e?mail(?:out)?|mta|mx(?:pool)?|relay|smtp|exch(?:ange)?)[^a-z]/i
+meta BOTNET_NOPLUGIN	!__BOTNET_SERVER && (__BOTNET_CLIENT1||__BOTNET_CLIENT2)
+
+# shawcable.net uses customer hostnames that don't match other botnet patterns
+describe BOTNET_SHAWCABLE	Shawcable.net customer address
+meta	 BOTNET_SHAWCABLE	(__BOTNET_SHAWCABLE && __BOTNET_NOTRUST)
+header	 __BOTNET_SHAWCABLE	X-Spam-Relays-Untrusted =~ /^[^\]]+ rdns=s[0-9a-f]*\...\.shawcable\.net\b/i
+#score	 BOTNET_SHAWCABLE	5.0
+tflags	 BOTNET_SHAWCABLE	nopublish # confirm license with author first
+
+# ocn.ne.jp uses customer hostnames that don't match other botnet patterns
+describe BOTNET_OCNNEJP		Ocn.ne.jp customer address
+meta	 BOTNET_OCNNEJP		(__BOTNET_OCNNEJP && __BOTNET_NOTRUST)
+header	 __BOTNET_OCNNEJP	X-Spam-Relays-Untrusted =~ /^[^\]]+ rdns=p\d{4}-ip\S*\.ocn\.ne\.jp\b/i
+#score	 BOTNET_OCNNEJP		5.0
+tflags	 BOTNET_OCNNEJP	nopublish # confirm license with author first
+
+# If the message was authenticated or hit a trusted host, then we want to
+# exempt these 'non-module' rules.
+describe __BOTNET_NOTRUST	Message has no trusted relays
+header	 __BOTNET_NOTRUST	X-Spam-Relays-Trusted !~ /ip=/i
+tflags	 __BOTNET_NOTRUST	nopublish # confirm license with author first
+
+# license to this one (same author as botnet) is unclear.
+# http://people.ucsc.edu/~jrudd/spamassassin/jr_rfc1912.cf
+describe JR_RCVD_TOO_FEW_HOPS	Just one hop means direct untrusted client
+header   JR_RCVD_TOO_FEW_HOPS	X-Spam-Relays-Untrusted =~ /^\[[^\]]+\]$/
+#score	 JR_RCVD_TOO_FEW_HOPS	1.0
+tflags	 JR_RCVD_TOO_FEW_HOPS	nopublish # confirm license with author first
+
 
 header __MSGID_JAVAMAIL	Message-ID =~ /\.JavaMail\./
 tflags __MSGID_JAVAMAIL	nice
+
+header __TAB_IN_SUBJ	Subject =~ /\t/
+# "i owe u 4 something b4 tomorrow" hits this four times:
+header __SUBJ_INFORMAL	Subject =~ /(?:^| )(?:[iuU4]|[Bb]4)(?: |$)/
+
+# these two ignore leading things like "Re:" and "[foo list]"
+header __SUBJ_4LOWER	Subject =~ /^(?:[a-zA-Z]{2,4}: +)?(?:\[[ \w]+\] +)?(?:.*[a-z]){4}/
+header __SUBJ_2UPPER	Subject =~ /^(?:[a-zA-Z]{2,4}: +)?(?:\[[ \w]+\] +)?(?:.*[A-Z]){2}/
+header __SUBJ_SHORT	Subject =~ /^.{0,8}$/
+header __SUBJ_IMPORTANT	Subject =~ /\b(?:important|IMPORTANT)\b/
+
+# attempts to fix SUBJ_ALL_CAPS, which has an S/O of 0.563 yet is published
+meta	 SUBJ_ALL_CAPS2	SUBJ_ALL_CAPS && __SUBJ_4LOWER && __SUBJ_2UPPER && !__SUBJ_SHORT
+meta	 SUBJ_ALL_CAPS3	SUBJ_ALL_CAPS && __SUBJ_4LOWER && __SUBJ_2UPPER && !(__SUBJ_SHORT||__SUBJ_IMPORTANT)
 
 meta	 AOL_ALL_CAPS	__AT_AOL_MSGID && UPPERCASE_75_100
 describe AOL_ALL_CAPS	AOL users sometimes write mail in all uppercase
@@ -88,10 +144,6 @@ meta	 LACNIC_ALL_CAPS __RCVD_VIA_LACNIC && UPPERCASE_75_100
 describe LACNIC_ALL_CAPS Latino users sometimes write mail in all uppercase
 tflags	 LACNIC_ALL_CAPS nice nopublish
 
-header	 __LONG_NOBR_ADDR	From:addr =~ /[a-zA-Z0-9]{20,}\@/i
-meta LONG_FREEMAIL_ADDR  __LONG_NOBR_ADDR && FREEMAIL_FROM && !__freemail_safe
-describe LONG_FREEMAIL_ADDR	Freemail address has 20+ unbroken characters
-
 header	 __HOTMAIL_HELO	Received =~ /from ([A-Z]{3})\d[^.]+ [^\n]+ by \1\d+-[^\n ]+\.\1\d+\.hotmail\.com with Microsoft/i
 tflags	 __HOTMAIL_HELO 	nice
 # 1 & 2 are in 20_head_tests.cf ... this one doesn't use eval rules
@@ -101,3 +153,7 @@ header	 RCVD_VIA_IPV6	X-Spam-Relays-Untrusted =~ /^[^\]]+ (?:by|ip)=[^\] ]+:[^\]
 describe RCVD_VIA_IPV6	Received by the last trusted relay via IPv6
 tflags	 RCVD_VIA_IPV6	nice
 
+# A blend of sidney's UPPERCASE_HTTP and jhardin's URI_UC for bug 6408
+# This one avoids Http: which I think is the biggest problem.
+uri	 UPPERCASE_URI	/^[^:A-Z]+[A-Z]/
+describe UPPERCASE_URI	Link protocol has unexpected mixed case
