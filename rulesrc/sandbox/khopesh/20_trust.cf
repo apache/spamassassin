@@ -1,0 +1,46 @@
+## khop-trust.cf  v 2010042418
+## Khopesh's Trust metrics, used as a dependency for several channels.
+## 
+## Spamassassin rules written by Adam Katz <antispamATkhopiscom>
+## http://khopesh.com/Anti-spam
+## khopesh on irc://irc.freenode.net/#spamassassin
+## 
+## sa-update --gpgkey E8B493D6 --channel khop-bl.sa.khopesh.com
+## 
+## These rules are Copyright (C) 2001-2009 by Adam Katz <antispamATkhopiscom>
+## Licensed under the Apache License 2.0 or Creative Commons Share-alike 2.0
+## The author is receptive to relicensing requests.
+## 
+## This file is fully vetted by the Spamassassin Rule QA testing system at
+## http://ruleqa.spamassassin.org/?srcpath=20_trust.cf
+
+# Detect milter-greylist, postgrey, SQLgrey, scam-grey, and hopefully others
+header	 __GREYLISTING	ALL =~ /(?:^|\n)X-(?:Scam-Grey|Greylist(?:ing)?):\s/m
+
+header	 __DKIM_EXISTS	exists:DKIM-Signature
+tflags	 __DKIM_EXISTS	nice
+# 0.1638/13.3402 spam/ham, 0.012 s/o @ 20100318
+# 0.1320/12.7782 spam/ham, 0.010 s/o @ 20100420  safe with no forgeries for now.
+
+# Note 1: This is ordered counterintuitively because masscheck
+#         ignores ifplugins and just takes the first definition.
+# Note 2: At the moment, __DKIM_EXISTS is safe.  When that changes,
+#         it will need to be removed from the first entry.
+# Note 3: I have zero confidence in the auto-publish mechanism
+#         leaving the below block intact.  I'll try using its own syntax...
+
+##{ __NOT_SPOOFED
+if ! plugin (Mail::SpamAssassin::Plugin::DKIM)
+ ifplugin Mail::SpamAssassin::Plugin::SPF
+   meta __NOT_SPOOFED  SPF_PASS || __DKIM_EXISTS || !__LAST_EXTERNAL_RELAY_NO_AUTH || ALL_TRUSTED	# no DKIM, yes SPF
+ else
+   meta __NOT_SPOOFED  __DKIM_EXISTS || !__LAST_EXTERNAL_RELAY_NO_AUTH || ALL_TRUSTED	# no DKIM, no SPF.
+ endif
+else
+ ifplugin Mail::SpamAssassin::Plugin::SPF
+  meta __NOT_SPOOFED  SPF_PASS || DKIM_VALID || !__LAST_EXTERNAL_RELAY_NO_AUTH || ALL_TRUSTED	# yes DKIM, yes SPF
+ else
+  meta __NOT_SPOOFED  DKIM_VALID || !__LAST_EXTERNAL_RELAY_NO_AUTH || ALL_TRUSTED	# yes DKIM, no SPF
+endif
+tflags	   __NOT_SPOOFED	nice
+##} __NOT_SPOOFED
