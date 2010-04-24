@@ -3,13 +3,13 @@
 
 ### select rules from khop-lists
 
-header	 __SENDER_BOT	ALL =~ /(?:not?\W?repl[yi]|bounce|daemon|subscri|report|\b(?:root|news|nobody|agent|(?:post)?master|manag|send(?:er|ing)?|out|bot\b))[^@ >]{0,5}s?@\w/i
+header	 __SENDER_BOT	ALL =~ /(?:not?\W?repl[yi]|bounce|daemon|subscri|report|\b(?:root|news|nobody|agent|(?:post)?master|manag|send(?:er|ing)?|out|bot\b))[^\@ >]{0,5}s?\@\w/i
 body	 __UNSUB_EMAIL	/\b(?:(?:un)?subscri(?:ber?|ptions?)|abuses?|opt(?:ing)?.?out)\b[-a-z_0-9.+=]{0,60}\@[a-z0-9][-a-z_0-9.]{4,20}(?:[^a-z_0-9.-]|$)/i
 rawbody	 __UNSUB_MAILTO	/href=["']?mailto:[^>]{6,60}>[^<]{0,6}\b(?:(?:un)?subscri(?:ber?|ptions?)|abuses?|opt(?:ing)?.?out)\b/
 uri	 __UNSUB_LINK	/\b(?:(?:un)?subscri(?:ber?|ptions?)|abuses?|opt(?:ing)?.?out)\b/i
-uri	 __MAIL_LINK	/\?.{0,200}\w@[\w-]{1,20}.\w\w\w?\b/i
+uri	 __MAIL_LINK	/\?.{0,200}\w\@[\w-]{1,20}.\w\w\w?\b/i
 
-header   __MSGID_LIST	Message-ID =~ /-\w+\#[\w.]+\.\w{2,4}@/
+header   __MSGID_LIST	Message-ID =~ /-\w+\#[\w.]+\.\w{2,4}\@/
 tflags   __MSGID_LIST	nice
 
 body     KHOP_NEWSLETTER	/\b(?:e?newsletters?|(?:un)?(?:subscrib|register)|you(?:r| are) subscri(?:b|ption)|opt(?:.|ing)?out\b|further info|you do ?n[o']t w(?:ish|ant)|remov\w{1,3}.{1,9}\blists?\b|to your white.?list)/i
