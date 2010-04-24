@@ -67,6 +67,11 @@ meta	 KHOP_BOTNET_7	!(__FROM_FREEMAIL || __NOT_SPOOFED || __GREYLISTING) && (__S
 describe KHOP_BOTNET_7	Relay looks like a dynamic address
 tflags	 KHOP_BOTNET_7	nopublish
 
+meta	 KHOP_BOTNET_UNCLEAN	__LAST_EXTERNAL_RELAY_NO_AUTH && (__S25R_4 || __S25R_5 || __S25R_6 || __RDNS_HEX || __5_SUBDOM || __S25R_1 + __S25R_2 + __S25R_3 + __IP_IN_RELAY > 2)
+describe KHOP_BOTNET_UNCLEAN	Relay looks like a dynamic address
+tflags	 KHOP_BOTNET_UNCLEAN	nopublish
+
+
 
 
 # I intend to remove s25r_4 and s25r_6 from publish
@@ -78,14 +83,12 @@ describe KHOP_DYNAMIC	Relay looks like a dynamic address
 tflags	 KHOP_DYNAMIC	nopublish
 
 # cleansing added to make safe
-meta	 KHOP_DYNAMIC2	!(__NOT_SPOOFED||__GREYLISTING||__FROM_FREEMAIL) && (__S25R_1 + __S25R_2 + __S25R_3 + __S25R_5 + __IP_IN_RELAY > 3)
+meta	 KHOP_DYNAMIC2	!(__NOT_SPOOFED||__GREYLISTING) && (__S25R_1 + __S25R_2 + 2*__S25R_3 + 2*__S25R_5 + __IP_IN_RELAY > 2)
 describe KHOP_DYNAMIC2	Relay looks like a dynamic address
 tflags	 KHOP_DYNAMIC2	nopublish
 
-meta	 KHOP_BOTNET_UNCLEAN	__LAST_EXTERNAL_RELAY_NO_AUTH && (__S25R_4 || __S25R_5 || __S25R_6 || __RDNS_HEX || __5_SUBDOM || __S25R_1 + __S25R_2 + __S25R_3 + __IP_IN_RELAY > 2)
-describe KHOP_BOTNET_UNCLEAN	Relay looks like a dynamic address
-tflags	 KHOP_BOTNET_UNCLEAN	nopublish
-
+# Sanity check:  how much freemail lacks spf or dkim?
+meta	 SPOOFED_FREEMAIL	!__NOT_SPOOFED && FREEMAIL_FROM
 
 
 # S25R-wanted item (3.2 a, "A terminal host name includes hexadecimal number")
@@ -94,3 +97,6 @@ tflags	 KHOP_BOTNET_UNCLEAN	nopublish
 header __RDNS_HEX X-Spam-Relays-External =~ /^[^\]]+ rdns=[^ .]*\d(?![0-9a-f]*[a-f]{3})[0-9a-f]{7}/
 # 4.4352/0.0163 spam/ham, 0.996 s/o @ 20091214  awesome score-map; avg is LOW!
 # 4.9976/0.0086 spam/ham, 0.998 s/o @ 20100420  37% of spam hits are under 6 pts
+
+# see if we can further reduce the FPs w/out impacting the spam hits too hard
+header __RDNS_HEX9 X-Spam-Relays-External =~ /^[^\]]+ rdns=[^ .]*\d(?![0-9a-f]*[a-f]{3})[0-9a-f]{8}/
