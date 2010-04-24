@@ -12,8 +12,13 @@ describe FROM_WWW	Sender name appears to be a website
 header	 FROM_2_EMAILS	From =~ /([^\@]{2,}\@[^\@]{2,60}\.\w\w).*(?!\1)[^\@]{2,}\@[^\@]/
 describe FROM_2_EMAILS	Sender claims to have a different email
 
-header __FROM_BIG_NUM	From =~ /\d{6}/
-header __FROM_BIG_HEX	From =~ /[a-f0-9]{6}/i
+header __FROM_USR_6DIGITS From =~ /\d{6}[^\@]{0,18}\@/
+header __FROM_7DIGITS     From =~ /\d{7}/
+header __FROM_USR_7DIGITS From =~ /\d{7}[^\@]{0,18}\@/
+header __FROM_7HEX From =~ /\d(?![0-9a-f]*[a-f]{3})[0-9a-f]{6}/i
+header __FROM_USR_7HEX From =~ /\d(?![0-9a-f]*[a-f]{3})[0-9a-f]{6}[^\@]{0,18}\@/i
+header __FROM_8HEX From =~ /\d(?![0-9a-f]*[a-f]{3})[0-9a-f]{7}/i
+header __FROM_9HEX From =~ /\d(?![0-9a-f]*[a-f]{3})[0-9a-f]{8}/i
 
 header __FROM_DOT_COM	From:raw =~ /\.(?:com|COM)\s.*</
 header __RELAY_DOT_COM	X-Spam-Relays-Untrusted =~ /^[^\]]+ (?:rdns|helo)=[^\] ]+\.com /
