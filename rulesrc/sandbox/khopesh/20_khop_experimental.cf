@@ -154,6 +154,7 @@ tflags	 __HOTMAIL_HELO 	nice
 # 1 & 2 are in 20_head_tests.cf ... this one doesn't use eval rules
 meta	 FORGED_HOTMAIL_RCVD3	__HOST_HOTMAIL && (!__HOTMAIL_HELO || __DOS_SINGLE_EXT_RELAY)
 
+# This is broken and needs help
 header	 RCVD_VIA_IPV6	X-Spam-Relays-Untrusted =~ /^[^\]]+ (?:by|ip)=[^\] ]+:[^\] .]+ /
 describe RCVD_VIA_IPV6	Received by the last trusted relay via IPv6
 tflags	 RCVD_VIA_IPV6	nice
@@ -162,3 +163,20 @@ tflags	 RCVD_VIA_IPV6	nice
 # This one avoids Http: which I think is the biggest problem.
 uri	 UPPERCASE_URI	/^[^:A-Z]+[A-Z]/
 describe UPPERCASE_URI	Link protocol has unexpected mixed case
+
+
+# doesn't match enough, has a higher S/O than __GREYLISTING, therefore useless.
+header	 __GREYLISTED	ALL =~ /(?:^|\n)X-(?:Scam-Grey|Greylist(?:ing)?):\s+delay(?:ed)? (?:for )?\d+(?: ?s(?:ec(?:ond)?s?)?|:\d\d)/im
+
+meta KHOP_GREYED __GREYLISTED && (RDNS_NONE||RDNS_DYNAMIC||__HELO_NO_DOMAIN)
+describe KHOP_GREYED	Greylisted and sent from dynamically-named relay
+score	 KHOP_GREYED	0.1
+
+
+# This is useless while __DKIM_EXISTS continues to perform so well.
+# This is useless while ruleqa continues to lack DKIM support.
+ifplugin Mail::SpamAssassin::Plugin::DKIM
+  meta	   DKIM_INVALID	__DKIM_EXISTS && !DKIM_VALID
+  describe DKIM_INVALID	DKIM-Signature header exists but is not valid
+  # masscheck ignores ifplugins and thus always has DKIM_INVALID==__DKIM_EXISTS
+endif
