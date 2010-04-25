@@ -27,7 +27,7 @@ use Pod::Usage;
 use vars qw {
   $opt_c $opt_s $opt_f $opt_a $opt_p $opt_x $opt_m $opt_t $opt_M
   $opt_X $opt_L $opt_l $opt_i $opt_T $opt_o $opt_S $opt_P $opt_d
-  $sorting
+  $opt_g $sorting
 };
 
 GetOptions("c|cffile=s" => \$opt_c,
@@ -47,7 +47,8 @@ GetOptions("c|cffile=s" => \$opt_c,
 	   "o|overlaps" => \$opt_o,
 	   "S|scoremap" => \$opt_S,
 	   "P|promotion" => \$opt_P,
-	   "d|xml" => \$opt_d
+	   "d|xml" => \$opt_d,
+	   "g|generated" => \$opt_g
 	  );
 
 =head1 NAME
@@ -77,6 +78,7 @@ hit-frequencies [options] <spam-log> <ham-log>
     -S,--scoremap         Display score-map of hits
     -P,--promotion        Flag rules that meet the promotion criteria
     -d,--XML              XML output (conflicts with -x, -p)
+    -g,--generated        Include generated nightly scores for sandbox rules
 
 =head1 DESCRIPTION
 
@@ -131,7 +133,8 @@ indicate how I<useful> a test is.
 =item SCORE
 
 Shown only with B<-x> or B<-p>, this is the current score assigned to
-the rule.
+the rule. If B<-g> is used, the scores generated for sandbox rules from
+nightly masscheck results (72_scores.cf) will be included as well.
 
 =item NAME
 
@@ -928,8 +931,12 @@ sub _hmap_to_overlap_ratio {
 sub readscores {
   my($cffile) = @_;
   my $tmpf = "tmp/rules$$.pl";
+  my $genscores = "";
+  if ($opt_g) {
+    $genscores = "-d \"$FindBin::Bin/../rulesrc/scores\"";
+  }
   if (system (
-      "$FindBin::Bin/../build/parse-rules-for-masses -d \"$cffile\" -s $opt_s -o $tmpf"
+      "$FindBin::Bin/../build/parse-rules-for-masses -d \"$cffile\" $genscores -s $opt_s -o $tmpf"
     ))
   {
     warn "parse-rules-for-masses failed!";
