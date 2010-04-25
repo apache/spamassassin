@@ -517,7 +517,7 @@ sub start_hit_frequencies_at_rev {
   runcmd "( make build_rules || $perl_path Makefile.PL;make build_rules )</dev/null";
 
   chdir "$hfdir/masses" or die "cannot chdir $hfdir/masses";
-  open (FREQS, "$perl_path hit-frequencies -TxpaP $args |")
+  open (FREQS, "$perl_path hit-frequencies -TxpagP $args |")
             or die "cannot run ./hit-frequencies $args |";
 
   chdir $logsdir;
