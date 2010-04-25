@@ -409,4 +409,8 @@ uri             URI_1234                m,//1\.2\.3\.4/,
 # requested by Benny Pedersen 17 Apr 2010
 meta            __SPF_FULL_PASS         (SPF_PASS && SPF_HELO_PASS)
 
+# Spam from ZA
+header          CAN_SPAM_HDR            CAN-SPAM_Compliant =~ /./
+header          RPT_SPAM_HDR            Report-SPAM =~ /./
+
 
