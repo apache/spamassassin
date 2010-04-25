@@ -22,7 +22,7 @@
 
 # Sendmail's FCrDNS, see http://www.sendmail.org/faq/section3#3.38
 header __MAY_BE_FORGED	Received =~ /\(may be forged\)/
-meta	 MAY_BE_FORGED	__MAY_BE_FORGED && !__NOT_SPOOFED
+meta	 MAY_BE_FORGED	__MAY_BE_FORGED && !__NOT_SPOOFED && !__VIA_ML
 describe MAY_BE_FORGED	Relay IP's reverse DNS does not resolve to IP
 #score	 MAY_BE_FORGED	0.4 # 20050802
 # Note, masscheck lacks DKIM, so the numbers are dirtier than reality
