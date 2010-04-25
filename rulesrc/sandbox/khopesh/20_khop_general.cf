@@ -1,75 +1,74 @@
-# From Adam Katz (khopesh) testing grounds and live channels
-# http://khopesh.com/Anti-spam
+## khop-general.cf	v 2010042011
+## Khopesh General purpose spam filters
+## 
+## Spamassassin rules written by Adam Katz <antispamATkhopiscom>
+## http://khopesh.com/Anti-spam
+## khopesh on irc://irc.freenode.net/#spamassassin
+## 
+## sa-learn --gpgkey E8B493D6 --channel khop-general.sa.khopesh.com
+## 
+## These rules are Copyright (C) 2001-2009 by Adam Katz <antispamATkhopiscom>
+## Licensed under the Apache License 2.0 or Creative Commons Share-alike 2.0
+## The author is receptive to relicensing requests.
 
-### select rules from khop-general
+# SVN version; minor tweaks, removed scores and published/redundant rules.
 
-# Now looks for two DIFFERENT IPs, be they HELO or rDNS or real IP.  20091008
-# This does NOT hit assumed HELOs like Received: [10.2.3.4] (foo [1.2.3.4])
-# Note \n is needed: https://issues.apache.org/SpamAssassin/show_bug.cgi?id=6224
-header	 __TWO_IPS_RCVD	Received =~ /[\[\(\s]((?!(?:10|127|169\.254|172\.(?:1[6-9]|2[0-9]|3[01])|192\.168)\.)(?:[12]?\d\d?\.){3}[12]?\d\d?)[\[\(\s][^\[\n;,]{0,99}\[(?!\1)\d/
-meta	 TWO_IPS_RCVD	__TWO_IPS_RCVD && !ALL_TRUSTED
-describe TWO_IPS_RCVD	Received: Relay identifies itself as wrong IP
-#score	 1.25	# 20050729
-# 100% overlap with RCVD_NUMERIC_HELO ...
+# FCrDNS possibilities (4 and 5 aren't technically FCrDNS failures):
+# 1:  IP -> rDNS: Domain -> DNS: IP2 -> FAIL (mismatch) -> KHOP_MAYBE_FORGED
+# 2:  IP -> rDNS: [none] ->-> FAIL (no rDNS) -> RDNS_NONE
+# 3:  IP -> rDNS: Domain -> DNS: [none] -> FAIL (no DNS) -> uncaught
+# 4:  IP -> rDNS: Domain != HELO -> ~FAIL -> KHOP_HELO_FCRDNS
+# 5:  HELO -> DNS: IP2 != IP -> ~FAIL -> uncaught
 
 # Sendmail's FCrDNS, see http://www.sendmail.org/faq/section3#3.38
 header __MAY_BE_FORGED	Received =~ /\(may be forged\)/
-meta	 MAY_BE_FORGED	__LAST_EXTERNAL_RELAY_NO_AUTH && __MAY_BE_FORGED && !__NOT_SPOOFED
+meta	 MAY_BE_FORGED	__MAY_BE_FORGED && !__NOT_SPOOFED
 describe MAY_BE_FORGED	Relay IP's reverse DNS does not resolve to IP
-#score	 MAY_BE_FORGED	0.8 # 20050802, raised 0.15->0.8 20090603
-
-# Note: unfair regarding RFC 2821, see http://en.wikipedia.org/wiki/FCrDNS#Uses
-header __HELO_NOT_RDNS	X-Spam-Relays-External =~ /^[^\]]+ rdns=(\S+) helo=(?!\1)\S/
-meta	 KHOP_HELO_FCRDNS	__HELO_NOT_RDNS && !(__VIA_ML || __freemail_safe || __RCVD_IN_DNSWL || __NOT_SPOOFED)
-describe KHOP_HELO_FCRDNS	Relay HELO differs from its IP's reverse DNS
-#score	 KHOP_HELO_FCRDNS	0.4 # 20090603, currently scoring 0.001
-score	 KHOP_HELO_FCRDNS	0.001
-
-meta     HELO_NO_DOMAIN	__HELO_NO_DOMAIN && !HELO_LOCALHOST
-describe HELO_NO_DOMAIN	Relay reports its domain incorrectly
-#score	 HELO_NO_DOMAIN	2.375 0.327 1.497 0.884
-# scores derived from 90% of RDNS_DYNAMIC's sa3.3 proposal (attachment 4565)
-# because they have such similar definitions, numbers, and merits
-
-# This doesn't fire often after greylisting ... how about w/out it?
-# renamed from KHOP_NO_FQDN
-# this is useless -- 99% of its hits overlap HELO_NO_DOMAIN
-#meta	 KHOP_HELO_BOT	__HELO_NO_DOMAIN && KHOP_BOTNET_7
-#describe KHOP_HELO_BOT	Suspect botnet sender claims no domain name
-#tflags   KHOP_HELO_BOT	nopublish
-#score	 KHOP_HELO_BOT	0.5	# 20090603
-
-header __NAME_IS_EMAIL	From:raw =~ /\w\@[\w.-]+\.\w\w+["'`]*\s*<\w+\@\w/
-header __NAME_EQ_EMAIL	From:raw =~ /([\w+.-]+\@[\w.-]+\.\w\w+)["'`\s]*<\s*\1>/
-meta	 NAME_EMAIL_DIFF	__NAME_IS_EMAIL && ! __NAME_EQ_EMAIL
-describe NAME_EMAIL_DIFF	Sender NAME is an unrelated email address
-#score	 NAME_EMAIL_DIFF	0.375 # tot=0.5, low for noreply@dom  20090811
-
-header	 ADV_SUBJ	Subject =~ /\[ ?(?:ADV|A D V) ?\]/i
-describe ADV_SUBJ	Marked by sender as an advertisement
-tflags	 ADV_SUBJ	nopublish
-#score	 ADV_SUBJ 1.5 # 20090304
+#score	 MAY_BE_FORGED	0.4 # 20050802
+# Note, masscheck lacks DKIM, so the numbers are dirtier than reality
+# 21.3121/0.5060 spam/ham, 0.977 s/o @ 20091201 0.8 -> 1.25
+# 24.8786/1.9789 spam/ham, 0.926 s/o @ 20100203 1.25 -> 0.8
+# 22.2650/0.4342 spam/ham, 0.982 s/o @ 20100318
+# 22.6304/0.3898 spam/ham, 0.983 s/o @ 20100329 0.4
+# 22.6600/0.3742 spam/ham, 0.984 s/o @ 20100417 net.  updated not_spoofed.
 
 body	 DEAR_EMAIL	/^\s*Dear\b.{0,70}\w\@\w/i
 describe DEAR_EMAIL	Message contains Dear email address
-#score	 DEAR_EMAIL	0.5 # 20090424
+score    DEAR_EMAIL	1.5 # 20090424
+# 3.6598/0.0083 spam/ham, 0.998 s/o @ 20091201 0.75 -> 1.75
+# 1.0903/0.0169 spam/ham, 0.985 s/o @ 20100203 removed KHOP_ prefix
+# 0.6115/0.0083 spam/ham, 0.987 s/o @ 20100318
+# published with sa3.3.1 at score  0.000 0.000 0.000 0.000 (!)
+# 0.4706/0.0077 spam/ham, 0.984 s/o @ 20100329 1.5
+# 0.1097/0.0107 spam/ham, 0.911 s/o @ 20100417 net
 
 body	 DEAR_NOBODY	/^\s*Dear\b[^a-zA-Z]{0,70}$/i
 describe DEAR_NOBODY	Message contains Dear but with no name
-#score	 DEAR_NOBODY	1.25	# 20090408
-
-# uri_detail lacks support for carrying matches across consecutive regexps
-#uri_detail SPOOFED_URL	raw =~ /^https?:..(.{6,50})/ text =~ /\bhttps?:..(?!$1).{5}/
-# reduced to 30 chars (35 w/ http:) for URL wrapping, e.g. LeadLander wraps @35
-rawbody  __SPOOFED_URL	m/<a\s[^>]{0,99}\bhref=(?:3D)?.?(https?:[^>"' ]{8,30})[^>]{0,99}>(?:[^<]{0,99}<(?!\/a)[^>]{1,99}>)*(?!\1)https?:\/\/[^<]{5}/i
-meta	 SPOOFED_URL	__SPOOFED_URL && !(__VIA_ML || __SENDER_BOT || __YAHOO_BULK || __UNSUB_LINK || __THREADED)
-describe SPOOFED_URL	Has a link whose text is a different URL
-#score	 SPOOFED_URL	2.0	# 20090408, beware of 'legit' tracking bugs
+#score    DEAR_NOBODY	0.001 # 20090408
+# 0.8729/0.0108 spam/ham, 0.988 s/o @ 20091201
+# 0.5260/0.0175 spam/ham, 0.968 s/o @ 20100203
+# 0.1154/0.0087 spam/ham, 0.930 s/o @ 20100318
+# 0.0329/0.0080 spam/ham, 0.803 s/o @ 20100417 net
+# 0.0138/0.0084 spam/ham, 0.620 s/o @ 20100424 net.  oof, score 1.25->0.001
 
 uri	 __FORGED_URL_DOM_1	m'https?://[^/]{0,40}\.(?:com|org|edu|net|gov|com?\.[a-z]{2})\.\w[^/\s]{4}'i
 rawbody	 __FORGED_URL_DOM_2	m'(^|\W)https?://[\w.-]{0,40}\.(?:com|org|edu|net|gov|com?\.[a-z]{2})\.\w[^/\s]{5}'i
 meta	 FORGED_URL_DOM	__FORGED_URL_DOM_1 || __FORGED_URL_DOM_2
 describe FORGED_URL_DOM	Link domain has a TLD as a subdomain
+#score	 FORGED_URL_DOM	0.1	# 200904
+# 0.4626/0.0417 spam/ham, 0.917 s/o @ 20091201.  removed .mil
+# 0.5174/1.9899 spam/ham, 0.206 s/o @ 20100203.  1 -> 0.001, strip KHOP_, \s
+# 0.4389/0.0644 spam/ham, 0.872 s/o @ 20100318.  0.001 -> 0.1
+# 0.5010/0.0701 spam/ham, 0.877 s/o @ 20100417 net.
+
+header	 FROM_WWW	From:name =~ /\bwww\.[^\s"<\/\@]{4,60}\.\w\w/i
+describe FROM_WWW	Sender name appears to be a website
+#score	 FROM_WWW	0.75
+# 0.2425/0.0089 spam/ham, 0.965 s/o @ 20100130
+# 0.3716/0.0062 spam/ham, 0.984 s/o @ 20100203
+# 0.3219/0.0052 spam/ham, 0.984 s/o @ 20100313
+# 0.4949/0.0189 spam/ham, 0.963 s/o @ 20100318
+# 0.2273/0.0080 spam/ham, 0.966 s/o @ 20100417 net.  1.75 -> 0.75
 
 ifplugin Mail::SpamAssassin::Plugin::MIMEHeader # {
 
@@ -81,13 +80,15 @@ ifplugin Mail::SpamAssassin::Plugin::MIMEHeader # {
     # __JPEG_ATTACH is in sandbox/jhardin/20_tbird_image_spam.cf
     # __GIF_ATTACH is in sandbox/felicity/70_other.cf
     mimeheader	__PNG_ATTACH	Content-Type =~ /^image\/png\b/i
+    body	__JPEG_EXISTS	eval:image_count('jpeg',1)
     body	__GIF_EXISTS	eval:image_count('gif',1)
     body	__PNG_EXISTS	eval:image_count('png',1)
-    body	__JPEG_EXISTS	eval:image_count('jpeg',1)
 
     meta	IMAGE_MISMATCH	(__GIF_ATTACH && !__GIF_EXISTS) || (__PNG_ATTACH && !__PNG_EXISTS) || (__JPEG_ATTACH && !__JPEG_EXISTS)
     describe	IMAGE_MISMATCH	Contains wrong image format for MIME header
-    #score	IMAGE_MISMATCH	1.0 # 20090610, proposed to sa-users @20090524
-  endif
-endif # }
+    #score	IMAGE_MISMATCH	0.5 # 20090610, proposed to sa-users @20090524
+    # in SA masscheck, no hits to date, probably because ifplugin never fires
+  endif # ImageInfo
+
+endif # } MIMEHeader
 
