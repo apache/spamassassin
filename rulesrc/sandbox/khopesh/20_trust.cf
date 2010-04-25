@@ -1,11 +1,9 @@
-## khop-trust.cf  v 2010042418
+## khop-trust.cf	v 2010042500
 ## Khopesh's Trust metrics, used as a dependency for several channels.
 ## 
 ## Spamassassin rules written by Adam Katz <antispamATkhopiscom>
 ## http://khopesh.com/Anti-spam
 ## khopesh on irc://irc.freenode.net/#spamassassin
-## 
-## sa-update --gpgkey E8B493D6 --channel khop-bl.sa.khopesh.com
 ## 
 ## These rules are Copyright (C) 2001-2009 by Adam Katz <antispamATkhopiscom>
 ## Licensed under the Apache License 2.0 or Creative Commons Share-alike 2.0
@@ -41,6 +39,7 @@ else
   meta __NOT_SPOOFED  SPF_PASS || DKIM_VALID || !__LAST_EXTERNAL_RELAY_NO_AUTH || ALL_TRUSTED	# yes DKIM, yes SPF
  else
   meta __NOT_SPOOFED  DKIM_VALID || !__LAST_EXTERNAL_RELAY_NO_AUTH || ALL_TRUSTED	# yes DKIM, no SPF
+ endif
 endif
 tflags	   __NOT_SPOOFED	nice
 ##} __NOT_SPOOFED
