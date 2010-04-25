@@ -6,8 +6,6 @@ describe MALFORMED_FREEMAIL	Bad headers on message from free email service
 
 header	 FROM_WEBSITE	From:raw =~ m'\b(?:f|ht)tps?://[^\s"</\@]{3,60}\.\w\w'i
 describe FROM_WEBSITE	Sender name appears to be a link
-header	 FROM_WWW	From:name =~ /\bwww\.[^\s"<\/\@]{4,60}\.\w\w/i
-describe FROM_WWW	Sender name appears to be a website
 
 header	 FROM_2_EMAILS	From =~ /([^\@]{2,}\@[^\@]{2,60}\.\w\w).*(?!\1)[^\@]{2,}\@[^\@]/
 describe FROM_2_EMAILS	Sender claims to have a different email
@@ -35,19 +33,33 @@ describe KHOP_BIG_TO_CC      Sent to 10+ recipients instaed of Bcc or a list
 header	 __EBAY_ADDRESS 	From:addr =~ /[\@.]ebay\..{3,5}$/i
 meta	 KHOP_FAKE_EBAY 	__EBAY_ADDRESS && !__NOT_SPOOFED
 describe KHOP_FAKE_EBAY 	Sender falsely claims to be from eBay
-#score	 KHOP_FAKE_EBAY 	2.25 # 20090408
+# 0.0684/0.0210 spam/ham, 0.765 s/o @ 20091204, though ruleqa ignores dkim
+# 0.0017/0.0185 spam/ham, 0.092 s/o @ 20100203
+# 0.0049/0.1999 spam/ham, 0.281 s/o @ 20100424 net.
 
-# masscheck doesn't cover ifplugin lines
-#ifplugin Mail::SpamAssassin::Plugin::URIDetail
-  # uri_detail doesn't support m{foo}i notation
-  #uri_detail KHOP_FOREIGN_CLICK	text =~ /\b(?:cli(?:quez\W|ck\Wa)ici\b|cli(?:cca\W|c\Wa|que\Wa)qu[^<.,a ]|klie?k(?:\Whi?er|ni(?:j|nite)\Wtu[tk]aj)\b)/i
-#else
+# masscheck doesn't cover ifplugin lines.  It takes the first hit anyway.
+if ! plugin (Mail::SpamAssassin::Plugin::URIDetail)
   rawbody    KHOP_FOREIGN_CLICK	m{\bhref=[^>]{9,199}>[^<]{0,80}(?:<(?!/a\b)[^>]{0,299}>[^<]{0,80}){0,9}[^<]{0,80}\b(?:cli(?:quez\W|ck\Wa)ici\b|cli(?:cca\W|c\Wa|que\Wa)qu[^<.,a ]|klie?k(?:\Whi?er|ni(?:j|nite)\Wtu[tk]aj)\b)}si
-#endif
+else
+  # uri_detail doesn't support m{foo}i notation
+  uri_detail KHOP_FOREIGN_CLICK	text =~ /\b(?:cli(?:quez\W|ck\Wa)ici\b|cli(?:cca\W|c\Wa|que\Wa)qu[^<.,a ]|klie?k(?:\Whi?er|ni(?:j|nite)\Wtu[tk]aj)\b)/i
+endif
 # includes fr, es, it, pt, nl, da, ca, sl, af, and probably others
 describe KHOP_FOREIGN_CLICK	Click here link in non-English Latin text
-#score	 KHOP_FOREIGN_CLICK	0.1	# 20090526 see also SARE_UN7
+#score	 KHOP_FOREIGN_CLICK	0.01	# 20090526 see also SARE_UN7
 tflags	 KHOP_FOREIGN_CLICK	nopublish  # re-do ifplugin to publish
+# 20100319.  0.8 -> 0.3, re-enabled in masscheck w/out ifplugin, output pending
+# 0.0097/0.0100 spam/ham, 0.493 s/o @ 20100330  0.3 -> 0.1
+# 0.0176/0.0116 spam/ham, 0.603 s/o @ 20100417 net.  0.1 -> 0.01
+# 0.0175/0.0120 spam/ham, 0.594 s/o @ 20100425 net.  fired from khop-general.
+
+# uri_detail lacks support for carrying matches across consecutive regexps
+#uri_detail SPOOFED_URL	raw =~ /^https?:..(.{6,50})/ text =~ /\bhttps?:..(?!$1).{5}/
+# reduced to 30 chars (35 w/ http:) for URL wrapping, e.g. LeadLander wraps @35
+rawbody  __SPOOFED_URL	m/<a\s[^>]{0,99}\bhref=(?:3D)?.?(https?:[^>"' ]{8,30})[^>]{0,99}>(?:[^<]{0,99}<(?!\/a)[^>]{1,99}>)*(?!\1)https?:\/\/[^<]{5}/i
+# even with scrubbing, probably can't handle 'legit' tracking redirectors
+meta	 SPOOFED_URL	__SPOOFED_URL && !(__VIA_ML || __SENDER_BOT || __YAHOO_BULK || __UNSUB_LINK || __THREADED)
+describe SPOOFED_URL	Has a link whose text is a different URL
 
 uri	 __SHORT_URL	/^http:\/\/[^\/]{3,6}\.\w\w\/[^\/]{3,8}\/?$/
 # list from http://techcrunch.com/2010/01/06/bit-ly-market-share/ containing
@@ -119,6 +131,36 @@ describe JR_RCVD_TOO_FEW_HOPS	Just one hop means direct untrusted client
 header   JR_RCVD_TOO_FEW_HOPS	X-Spam-Relays-Untrusted =~ /^\[[^\]]+\]$/
 #score	 JR_RCVD_TOO_FEW_HOPS	1.0
 tflags	 JR_RCVD_TOO_FEW_HOPS	nopublish # confirm license with author first
+
+
+# O'Reilly Sendmail 3e p396 10.7.2 "Forging with SMTP" http://tinyurl.com/pb8vje
+# This had problems with the first hop, which *always* fails FCrDNS.
+#header   KHOP_HELO_FCRDNS Received =~/from (\S+) \((?!\1)\S+\.\w{2,6} \[[0-9.]/
+
+# Note: unfair regarding RFC 2821, see http://en.wikipedia.org/wiki/FCrDNS#Uses
+header __HELO_NOT_RDNS	X-Spam-Relays-External =~ /^[^\]]+ rdns=(\S+) helo=(?!\1)\S/
+meta	 KHOP_HELO_FCRDNS	__HELO_NOT_RDNS && !(__VIA_ML || __freemail_safe || __RCVD_IN_DNSWL || __NOT_SPOOFED)
+describe KHOP_HELO_FCRDNS	Relay HELO differs from its IP's reverse DNS
+#score	 KHOP_HELO_FCRDNS	0.4 # 20090603, currently scoring 0.001
+score	 KHOP_HELO_FCRDNS	0.001
+# 33.9858/7.3415 spam/ham, 0.822 s/o @ 20100203
+# 40.5025/2.1738 spam/ham, 0.949 s/o @ 20100417 net
+
+meta     HELO_NO_DOMAIN	__HELO_NO_DOMAIN && !HELO_LOCALHOST
+describe HELO_NO_DOMAIN	Relay reports its domain incorrectly
+#score	 HELO_NO_DOMAIN	2.375 0.327 1.497 0.884
+# scores derived from 90% of RDNS_DYNAMIC's sa3.3 proposal (attachment 4565)
+# because they have such similar definitions, numbers, and merits
+
+header __NAME_IS_EMAIL	From:raw =~ /\w\@[\w.-]+\.\w\w+["'`]*\s*<\w+\@\w/
+header __NAME_EQ_EMAIL	From:raw =~ /([\w+.-]+\@[\w.-]+\.\w\w+)["'`\s]*<\s*\1>/
+meta	 NAME_EMAIL_DIFF	__NAME_IS_EMAIL && ! __NAME_EQ_EMAIL
+describe NAME_EMAIL_DIFF	Sender NAME is an unrelated email address
+#score	 NAME_EMAIL_DIFF	0.375 # tot=0.5, low for noreply@dom  20090811
+
+header	 ADV_SUBJ	Subject =~ /\[ ?(?:ADV|A D V) ?\]/i
+describe ADV_SUBJ	Marked by sender as an advertisement
+#score	 ADV_SUBJ 1.5 # 20090304
 
 
 header __MSGID_JAVAMAIL	Message-ID =~ /\.JavaMail\./
