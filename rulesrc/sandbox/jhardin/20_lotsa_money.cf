@@ -55,14 +55,14 @@ body     __LOTTO_WIN_01     /\bwin+ing\s(?:prize|number|notification|draw|check|
 
 body     __YOU_WON_01    /\byou(?:r|'re|'ve|'ll|\shave|\sdid)?\s(?:e-?mail\s)?(?:\w+\s){0,2}(?:a\s)?w[io]n+(?:er|ing)?(?!'t)\b/i
 body     __YOU_WON_02    /\bw[io]n\s(?:(?:for|by)\s)?your?\b/i
-body     __YOU_WON_03    /\b(?:your?|win+ing|win+ers?|beneficiaries|participants?|individuals?)(?:\s[-a-z\s]{4,30}?)?\s(?:w(?:ere|as)|ha(?:ve|s) be(?:en)?)\s(?:(?:randomly|raffly)\s(?:selected|cho+sen|cho+sing|picked)|(?:selected|cho+sen|cho+sing|picked)\s(?:[a-z\s]{2,40}?\srandom|randomly|online|lottery|computer\s(?:ballot|wahlgang)))/i 
+body     __YOU_WON_03    /\b(?:your?|win+ing|win+ers?|beneficiaries|participants?|individuals?|address(?:es)?)(?:\s[-a-z\s]{4,40}?)?\s(?:w(?:ere|as)|ha(?:ve|s) be(?:en)?)\s(?:(?:randomly|raffly)\s(?:selected|cho+sen|cho+sing|picked)|(?:selected|cho+sen|cho+sing|picked)\s(?:[a-z\s]{2,40}?\srandom|randomly|online|lottery|computer\s(?:ballot|wahlgang)))/i 
 meta     __YOU_WON       __YOU_WON_01 || __YOU_WON_02 || __YOU_WON_03
 
-body     LOTTO_AGENT      /\b(?:claim(?:s|ing)?(?:\sprocessing)?|fiducia\w+|reimbursement|prize\stransfer|(?:international|foreign)(?:\s(?:remittance|settlement|payment|award))+|payment|immunity|grants?)\s?(?:agent|manager|officer|secretary)/i
+body     LOTTO_AGENT      /\b(?:claim(?:s|ing)?(?:\sprocessing)?|fiducia\w+|reimbursement|(?:prize|international|foreign)(?:\s(?:remittance|settlement|payment|award|transfer))+|payment|immunity|grants?)\s?(?:agent|manager|officer|secretary|mgr\b)/i
 describe LOTTO_AGENT      Claims Agent
 score    LOTTO_AGENT      0.50
 
-body     LOTTO_DEPT       /\b(?:claim(?:s|ing)?(?:\sprocessing)?|fiducia\w+|reimbursement|(?:international|foreign)(?:\s(?:remittance|settlement|payment|award))+|payment|award)\s?(?:department|dept|unit|group|committee|bureau)/i
+body     LOTTO_DEPT       /\b(?:claim(?:s|ing)?(?:\sprocessing)?|fiducia\w+|reimbursement|(?:international|foreign)(?:\s(?:remittance|settlement|payment|award))+|payment|award|compensation)(?:\s\w+)?\s?(?:department|dept|unit|group|committee|bureau)/i
 describe LOTTO_DEPT       Claims Department
 score    LOTTO_DEPT       0.50
 
@@ -70,11 +70,11 @@ uri      LOTTO_URI       /(?:claim(?:s|ing)?(?:[-_]?processing)?|fiducia\w+|reim
 describe LOTTO_URI       Claims Department
 score    LOTTO_URI       0.50
 
-header   LOTTO_AGENT_FM   From =~ /(?:claim(?:s|ing)?(?:\sprocessing)?|fiducia\w+|dispatch|reimbursement|prize\stransfer|(?:international|foreign)\sremittance)[\s_]?(?:agent|manager|officer|secretary)/i
+header   LOTTO_AGENT_FM   From =~ /(?:claim(?:s|ing)?(?:[\s_.]processing)?|fiducia\w+|dispatch|reimbursement|prize[\s_.]transfer|(?:international|foreign)[\s_.]remittance)[\s_.]?(?:agent|manager|officer|secretary|department|dept)/i
 describe LOTTO_AGENT_FM   Claims Agent
 score    LOTTO_AGENT_FM   0.50
 
-header   LOTTO_AGENT_RPLY Reply-To =~ /(?:claim(?:s|ing)?(?:\sprocessing)?|fiducia\w+|dispatch|reimbursement|prize\stransfer|(?:international|foreign)\sremittance)[\s_]?(?:agent|manager|officer|secretary)/i
+header   LOTTO_AGENT_RPLY Reply-To =~ /(?:claim(?:s|ing)?(?:[\s_.]processing)?|fiducia\w+|dispatch|reimbursement|prize\stransfer|(?:international|foreign)[\s_.]remittance)[\s_.]?(?:agent|manager|officer|secretary|department|dept)/i
 describe LOTTO_AGENT_RPLY Claims Agent
 score    LOTTO_AGENT_RPLY 0.50
 
@@ -143,12 +143,12 @@ body     __NOT_DEAD_YET   /\bwill\sinherit\b/i
 body     __AM_DYING       /\bam\s(?:\S+\s)?dying\b/i
 body     __I_WILL_YOU     /\bwill(?:ed)?\s(?:[a-z\s]{0,20}\s(?:fortune|money)\s)?to\syou\b/i
 body     __NEXT_OF_KIN    /\bnext[-\s]of[-\s]kin\b/i
-body     __EX_CUSTOMER    /\b(?:(?:dead|deceased|late|verstorbenen)\s(?:[ck]lient|customer|account|investor|kunde)|titulaire du compte est (?:d\xe9c\xe9d\xe9|d\xc3\xa9c\xc3\xa9d\xc3\xa9))/i
+body     __EX_CUSTOMER    /\b(?:(?:dead|deceased|late|verstorbenen)\s(?:[ck]lient|customer|account|investor|mr\.|kunde)|titulaire du compte est (?:d\xe9c\xe9d\xe9|d\xc3\xa9c\xc3\xa9d\xc3\xa9))/i
 body     __DECEASED       /\b(?:the|my|der|du)\s(?:deceased|late|verstorbenen|d\xe9funt|d\xc3\xa9nt)\b/i
 body     __SURVIVORS      /\b(?:widow|son|daughter|husband|wife|brother|sister|attorney)\s(?:of|to)\s(?:the\s)?late\s\w+\b/i
 body     __DEAD_PARENT    /\bmy\s(?:deceased|dead)\s(?:father|mother)/i
 body     __DORMANT_ACCT   /\b(?:dormant|abandoned|left\s?over)\s(?:account|fund|transaction|sum)/i
-body     __WILL_LEGAL     /\b(?:codicil|last\stestament|probate|executor|intestate)\b/i
+body     __WILL_LEGAL     /\b(?:codicil|last\stestament|probate|executor|intestate|bequest)\b/i
 body     __EARLY_DEMISE   /\buntimely\sdeath\b/i
 body     __WIDOW          /\bwidow(?:e[rd])'?s?\b/i
 body     __MY_FORTUNE     /\b(?:my|his|her)\s(?:fortune|heritage)\b/i
