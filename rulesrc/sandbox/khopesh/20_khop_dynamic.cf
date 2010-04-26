@@ -1,4 +1,4 @@
-## khop-dynamic.cf  v 2010042418
+## khop-dynamic.cf	v 2010042500
 ## Khopesh's Dynamic host detection
 ## This depends on khop-trust.cf which has a lesser form in SpamAssassin 3.3.1+
 ## 
@@ -12,8 +12,10 @@
 ## Licensed under the Apache License 2.0 or Creative Commons Share-alike 2.0
 ## The author is receptive to relicensing requests.
 ## 
-## Additional credit goes to the original designers of the concepts knit together
-## by these rules, namely ASAMI Hideo for S25R.
+## Additional credit goes to the original designers of the concepts knit
+## together by these rules, namely ASAMI Hideo for S25R
+## and Christian Rossow, Thomas Czerwinski, and Christian J. Dietrich for
+## "Detecting Gray in Black and White"
 ## 
 ## This file is fully vetted by the Spamassassin Rule QA testing system at
 ## http://ruleqa.spamassassin.org/?srcpath=20_khop_dynamic.cf
@@ -50,6 +52,24 @@ header __RDNS_HEX X-Spam-Relays-External =~ /^[^\]]+ rdns=[^ .]*\d(?![0-9a-f]*[a
 # 4.4352/0.0163 spam/ham, 0.996 s/o @ 20091214  awesome score-map; avg is LOW!
 # 4.9976/0.0086 spam/ham, 0.998 s/o @ 20100420  37% of spam hits are under 6 pts
 
+
+# From the 2010 MIT Spam Conference "best student paper"
+# "Detecting Gray in Black and White"
+# by Christian Rossow, Thomas Czerwinski, Christian J. Dietrich (all students)
+# http://bit.ly/Detecting_Gray_in_Black_and_White (PDF)
+#
+# The paper evaluates very similar methodology to the S25R concepts any my own
+# tinkering within this space (of searching for dynamic-type names in rDNS).
+# It cleanses itself with some white rDNS searches that might be interesting.
+# Named RCD for the paper's authors but the rules and regex's are mine.
+# Named MESSY because there are no delimiters (delimited versions unnecessary).
+
+header __RCD_RDNS_DYN_MESSY X-Spam-Relays-External =~ /^[^\]]+ rdns=\S*dyn/i
+header __RCD_RDNS_PPP_MESSY X-Spam-Relays-External =~ /^[^\]]+ rdns=\S*ppp/i
+header __RCD_RDNS_PPOE_MESSY X-Spam-Relays-External =~ /^[^\]]+ rdns=\S*ppoe/i
+
+
+
 # safe, no cleansing needed
 meta	 KHOP_DYNAMIC	__LAST_EXTERNAL_RELAY_NO_AUTH && !ALL_TRUSTED && (__TWO_IPS_RCVD || __5_SUBDOM || __RDNS_HEX || __S25R_4 || __S25R_6)
 describe KHOP_DYNAMIC	Relay looks like a dynamic address
@@ -57,7 +77,7 @@ tflags	 KHOP_DYNAMIC	nopublish
 score	 KHOP_DYNAMIC	2.0
 
 # cleansing added to make safe
-meta	 KHOP_DYNAMIC2	!(__NOT_SPOOFED||__GREYLISTING||KHOP_DYNAMIC) && (__S25R_1 + __S25R_2 + 2*__S25R_3 + 2*__S25R_5 + __IP_IN_RELAY > 2)
+meta	 KHOP_DYNAMIC2	!(__NOT_SPOOFED||__GREYLISTING||KHOP_DYNAMIC) && (1.4*__S25R_1 + 1.4*__S25R_2 + 1.8*__S25R_3 + 1.8*__S25R_5 + 1.4*__IP_IN_RELAY > 3)
 describe KHOP_DYNAMIC2	Relay looks like a dynamic address
 tflags	 KHOP_DYNAMIC2	nopublish
 score	 KHOP_DYNAMIC2	1.0
