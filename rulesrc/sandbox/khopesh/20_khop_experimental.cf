@@ -100,9 +100,9 @@ header __IP_IN_RELAY  X-Spam-Relays-External =~ /^\[ ip=(\d+)\.(\d+)\.(\d+)\.(\d
 # NOTE: this is GPLv2, which is incompatible with the Apache License.
 # My *brief* read is that Apache->GPLv2 is taboo but GPLv2->Apache is fine.
 # I wrote the next four rules from his base words, so these are fine.
-header __BOTNET_CLIENT1 X-Spam-Relays-External =~ /^[\]]+ rdns=\S+\b(?:ddns|dial-?(?:in|up)|dyn(?:amic)?ip|resident(?:ial)?|bredband)[^a-z]/i
-header __BOTNET_CLIENT2 X-Spam-Relays-External =~ /^[\]]+ rdns=\S+(?:\b(?:pool|user)[^a-z]|[-.]ip[-.])/i
-header __BOTNET_SERVER X-Spam-Relays-External =~ /^[\]]+ rdns=\S+\b(?:e?mail(?:out)?|mta|mx(?:pool)?|relay|smtp|exch(?:ange)?)[^a-z]/i
+header __BOTNET_CLIENT1 X-Spam-Relays-External =~ /^[\]]+ rdns=\S*\b(?:ddns|dial-?(?:in|up)|dyn(?:amic)?ip|resident(?:ial)?|bredband)[^a-z]/i
+header __BOTNET_CLIENT2 X-Spam-Relays-External =~ /^[\]]+ rdns=\S*(?:\b(?:pool|user)[^a-z]|[-.]ip[-.])/i
+header __BOTNET_SERVER	X-Spam-Relays-External =~ /^[\]]+ rdns=\S*\b(?:e?mail(?:out)?|mta|mx(?:pool)?|relay|smtp|exch(?:ange)?)[^a-z]/i
 meta BOTNET_NOPLUGIN	!__BOTNET_SERVER && (__BOTNET_CLIENT1||__BOTNET_CLIENT2)
 
 # shawcable.net uses customer hostnames that don't match other botnet patterns
