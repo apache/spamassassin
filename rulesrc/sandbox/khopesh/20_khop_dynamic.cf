@@ -71,7 +71,7 @@ header __RCD_RDNS_PPOE_MESSY X-Spam-Relays-External =~ /^[^\]]+ rdns=\S*ppoe/i
 
 
 # safe, no cleansing needed
-meta	 KHOP_DYNAMIC	__LAST_EXTERNAL_RELAY_NO_AUTH && !ALL_TRUSTED && (__TWO_IPS_RCVD || __5_SUBDOM || __RDNS_HEX || __S25R_4 || __S25R_6)
+meta	 KHOP_DYNAMIC	__LAST_EXTERNAL_RELAY_NO_AUTH && !ALL_TRUSTED && (__5_SUBDOM || __RDNS_HEX || __S25R_4 || __S25R_6 || __RCD_RDNS_DYN_MESSY || __RCD_RDNS_PPP_MESSY || __RCD_RDNS_PPOE_MESSY)
 describe KHOP_DYNAMIC	Relay looks like a dynamic address
 tflags	 KHOP_DYNAMIC	nopublish
 score	 KHOP_DYNAMIC	2.0
