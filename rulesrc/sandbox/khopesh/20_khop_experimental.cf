@@ -10,13 +10,19 @@ describe FROM_WEBSITE	Sender name appears to be a link
 header	 FROM_2_EMAILS	From =~ /([^\@]{2,}\@[^\@]{2,60}\.\w\w).*(?!\1)[^\@]{2,}\@[^\@]/
 describe FROM_2_EMAILS	Sender claims to have a different email
 
-header __FROM_USR_6DIGITS From =~ /\d{6}[^\@]{0,18}\@/
-header __FROM_7DIGITS     From =~ /\d{7}/
-header __FROM_USR_7DIGITS From =~ /\d{7}[^\@]{0,18}\@/
-header __FROM_7HEX From =~ /\d(?![0-9a-f]*[a-f]{3})[0-9a-f]{6}/i
-header __FROM_USR_7HEX From =~ /\d(?![0-9a-f]*[a-f]{3})[0-9a-f]{6}[^\@]{0,18}\@/i
-header __FROM_8HEX From =~ /\d(?![0-9a-f]*[a-f]{3})[0-9a-f]{7}/i
-header __FROM_9HEX From =~ /\d(?![0-9a-f]*[a-f]{3})[0-9a-f]{8}/i
+# Fix for __FROM_ALL_NUMS, which has a y2k but in it.  Now it's a y2.1k bug.
+header __FROM_ALL_NUMS_FIX  From:addr =~ /^(?!(?:19|20)\d\d[01]\d[0-3]\d)\d+\@/
+header __FROM_ALL_NUMS_SIMPLE	From:addr =~ /^\d+\@/
+header __FROM_YYYYMMDD		From:addr =~ /(?:19[6-9]|20\d)\d[01]\d[0-3]\d/
+meta   __FROM_ALL_NUMS_META	__FROM_ALL_NUMS_FIX && ! __FROM_YYYYMMDD
+
+header __FROM_USR_6DIGITS	From:addr =~ /\d{6}[^\@]{0,18}\@/
+header __FROM_7DIGITS		From:addr =~ /\d{7}/
+header __FROM_USR_7DIGITS	From:addr =~ /\d{7}[^\@]{0,18}\@/
+header __FROM_7HEX	From:addr =~ /\d(?![0-9a-f]*[a-f]{3})[0-9a-f]{6}/i
+header __FROM_USR_7HEX	From:addr =~ /\d(?![0-9a-f]*[a-f]{3})[0-9a-f]{6}[^\@]{0,18}\@/i
+header __FROM_8HEX From:addr =~ /\d(?![0-9a-f]*[a-f]{3})[0-9a-f]{7}/i
+header __FROM_9HEX From:addr =~ /\d(?![0-9a-f]*[a-f]{3})[0-9a-f]{8}/i
 
 header __FROM_DOT_COM	From:raw =~ /\.(?:com|COM)\s.*</
 header __RELAY_DOT_COM	X-Spam-Relays-Untrusted =~ /^[^\]]+ (?:rdns|helo)=[^\] ]+\.com /
