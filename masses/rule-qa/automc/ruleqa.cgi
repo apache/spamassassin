@@ -1384,9 +1384,9 @@ sub generate_scoremap_chart {
       ."\&amp;chxl=0:|$min_x+points|$max_x+points|1:|0\%|$max_y\%"
       ."\&amp;chxt=x,y";
 
-  $$outref .= "<div style='scoremap_chart'>
+  $$outref .= "<div class='scoremap_chart'>
        <img src='http://chart.apis.google.com/chart?$chartsetup'
-         style='scoremap_chart' width='400' height='200' align='right'
+         class='scoremap_chart' width='400' height='200' align='right'
        /></div>\n";
 }
 
