@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix dos hege jm kgolding wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 2: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-trec_enron bb-zmi bernie-it_batt bernie-mix hege wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 3: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix hege kgolding wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2
+# with results from: day 1: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix hege jm kgolding wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 2: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix dos hege jm kgolding wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 3: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-trec_enron bb-zmi bernie-it_batt bernie-mix hege wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2
 
 # tflags publish
 ADVANCE_FEE_2_NEW_FORM
@@ -28,6 +28,9 @@ ALL_TRUSTED
 # good enough
 AXB_HELO_HOME_UN
 
+# good enough
+BASE64_LENGTH_78_79
+
 # tflags learn
 BAYES_00
 
@@ -55,9 +58,6 @@ BAYES_95
 # tflags learn
 BAYES_99
 
-# good enough
-BUG6152_INVALID_DATE_TZ_ABSURD
-
 # tflags userconf
 CHARSET_FARAWAY
 
@@ -75,9 +75,6 @@ DATE_IN_FUTURE_Q_PLUS
 
 # good enough
 DEAR_BENEFICIARY
-
-# good enough
-DEAR_EMAIL
 
 # tflags net
 DIGEST_MULTIPLE
@@ -233,6 +230,9 @@ FSL_HELO_BARE_IP_1
 FSL_HELO_DEVICE
 
 # good enough
+FSL_INTERIA_ABUSE
+
+# good enough
 FSL_LSPACES_ABUSE
 
 # good enough
@@ -291,9 +291,6 @@ HK_FAKENAME_MICROSOFT
 
 # good enough
 HK_NAME_DRUGS
-
-# good enough
-HK_NAME_FREE
 
 # good enough
 HK_RANDOM_ENVFROM
@@ -378,6 +375,9 @@ NSL_RCVD_FROM_USER
 
 # tflags publish
 OBFU_TEXT_ATTACH
+
+# good enough
+PART_CID_STOCK
 
 # tflags net
 PYZOR_CHECK
@@ -674,115 +674,10 @@ TVD_PCT_OFF
 TVD_QUAL_MEDS
 
 # good enough
-TVD_RCVD_IP
-
-# good enough
 TVD_RCVD_SINGLE
 
 # good enough
 TVD_VISIT_PHARMA
-
-# good enough
-AXB_URI_APE_ABUSE2
-
-# good enough
-DATE_DOTS
-
-# good enough
-FB_YOU_CAN_BECOME
-
-# good enough
-FORGED_URL_DOM
-
-# good enough
-FORM_FRAUD_3
-
-# good enough
-FROM_MISSP_EH_MATCH
-
-# good enough
-FROM_MISSP_REPLYTO
-
-# good enough
-FROM_UNBAL1
-
-# good enough
-FROM_UNBAL2
-
-# good enough
-FROM_WSP_LEAD
-
-# good enough
-FR_TITLE_CONS_6
-
-# good enough
-FSL_UA
-
-# good enough
-HDRS_MISSP
-
-# good enough
-HK_FAKENAME_PAYPAL
-
-# good enough
-HK_NAME_FM_MR_MRS
-
-# good enough
-HK_NAME_FROM
-
-# good enough
-HK_SCAM_N1
-
-# good enough
-HK_SCAM_N15
-
-# good enough
-HK_SCAM_N3
-
-# good enough
-HK_SCAM_N4
-
-# good enough
-HK_SCAM_N8
-
-# good enough
-HK_SCAM_S25
-
-# good enough
-KAM_LOTTO3
-
-# good enough
-LOTTO_URI
-
-# good enough
-MANY_SUBDOM
-
-# good enough
-MONEY_FRAUD_5
-
-# good enough
-MONEY_PERCENT
-
-# good enough
-OBFU_ATTACH_MISSP
-
-# good enough
-RATWARE_HELO_DM
-
-# good enough
-RCVD_HAS_FROM_USER
-
-# good enough
-SANE_b1666f872e931b52d09c9f2b601712c3
-
-# good enough
-SCRIPT_GIBBERISH
-
-# good enough
-TVD_NOT_SATISFIED
-
-# good enough
-TVD_SINGLE_SPAN_DIV
 
 # tflags userconf
 UNPARSEABLE_RELAY
