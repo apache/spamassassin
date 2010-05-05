@@ -31,7 +31,7 @@ describe        AXB_HELO_HOME_UN        HELO from home  - untrusted
 
 
 # 2010-05-05
-uri             AXB_GOO_MALWARE  /groups\.google\.com\/group/[a-z0-9]{3,15}\/web\/setup\.zip\b/
+uri             AXB_GOO_MALWARE  /groups\.google\.com\/group\/[a-z0-9]{3,15}\/web\/setup\.zip\b/
 describe        AXB_GOO_MALWARE  Trojan Downloader
 score           AXB_GOO_MALWARE  5.0
 
