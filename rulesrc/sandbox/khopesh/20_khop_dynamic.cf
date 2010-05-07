@@ -77,7 +77,7 @@ tflags	 KHOP_DYNAMIC	nopublish
 score	 KHOP_DYNAMIC	2.0
 
 # cleansing added to make safe
-meta	 KHOP_DYNAMIC2	!(__NOT_SPOOFED||__GREYLISTING||KHOP_DYNAMIC) && (1.4*__S25R_1 + 1.4*__S25R_2 + 1.8*__S25R_3 + 1.8*__S25R_5 + 1.4*__IP_IN_RELAY > 3)
+meta	 KHOP_DYNAMIC2	!(__NOT_SPOOFED||__GREYLISTING||KHOP_DYNAMIC) && (__S25R_1 + __S25R_2 + 1.1*__S25R_3 + 1.1*__S25R_5 + __IP_IN_RELAY > 3)
 describe KHOP_DYNAMIC2	Relay looks like a dynamic address
 tflags	 KHOP_DYNAMIC2	nopublish
 score	 KHOP_DYNAMIC2	1.0
