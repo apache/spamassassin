@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix hege jm kgolding wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 2: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix hege jm kgolding wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 3: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix dos hege jm kgolding wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2
+# with results from: day 1: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix hege kgolding wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 2: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix hege jm kgolding wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 3: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix hege jm kgolding wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2
 
 # tflags publish
 ADVANCE_FEE_2_NEW_FORM
@@ -58,6 +58,9 @@ BAYES_95
 # tflags learn
 BAYES_99
 
+# good enough
+BUG6152_INVALID_DATE_TZ_ABSURD
+
 # tflags userconf
 CHARSET_FARAWAY
 
@@ -75,6 +78,9 @@ DATE_IN_FUTURE_Q_PLUS
 
 # good enough
 DEAR_BENEFICIARY
+
+# good enough
+DEAR_WINNER
 
 # tflags net
 DIGEST_MULTIPLE
@@ -125,6 +131,9 @@ DOS_OE_TO_MX
 DOS_OUTLOOK_TO_MX
 
 # good enough
+DRUGS_STOCK_MIMEOLE
+
+# good enough
 DYN_RDNS_AND_INLINE_IMAGE
 
 # good enough
@@ -138,6 +147,12 @@ ENV_AND_HDR_SPF_MATCH
 
 # good enough
 FB_CIALIS_LEO3
+
+# good enough
+FB_EXTRA_INCHES
+
+# good enough
+FB_GVR
 
 # good enough
 FB_QUALITY_REPLICA
@@ -171,6 +186,12 @@ FH_HOST_EQ_DYNAMICIP
 
 # good enough
 FH_HOST_EQ_VERIZON_P
+
+# good enough
+FILL_THIS_FORM_LOAN
+
+# good enough
+FILL_THIS_FORM_LONG
 
 # good enough
 FM_LOTTO_YOU_WON
@@ -287,6 +308,9 @@ HELO_NO_DOMAIN
 HELO_OEM
 
 # good enough
+HK_FAKENAME_EBAY
+
+# good enough
 HK_FAKENAME_MICROSOFT
 
 # good enough
@@ -301,6 +325,9 @@ HK_RANDOM_FROM
 # good enough
 HK_SCAM_N2
 
+# good enough
+HS_FORGED_OE_FW
+
 # tflags userconf
 HTML_CHARSET_FARAWAY
 
@@ -312,6 +339,9 @@ IMG_DIRECT_TO_MX
 
 # good enough
 KAM_LOTTO1
+
+# good enough
+KAM_LOTTO2
 
 # good enough
 KB_DATE_CONTAINS_TAB
@@ -674,10 +704,121 @@ TVD_PCT_OFF
 TVD_QUAL_MEDS
 
 # good enough
+TVD_RCVD_IP
+
+# good enough
 TVD_RCVD_SINGLE
 
 # good enough
 TVD_VISIT_PHARMA
+
+# good enough
+AXB_URI_APE_ABUSE2
+
+# good enough
+DATE_DOTS
+
+# good enough
+DEAR_EMAIL
+
+# good enough
+FB_YOU_CAN_BECOME
+
+# good enough
+FORGED_URL_DOM
+
+# good enough
+FORM_FRAUD_3
+
+# good enough
+FROM_MISSP_EH_MATCH
+
+# good enough
+FROM_MISSP_REPLYTO
+
+# good enough
+FROM_UNBAL1
+
+# good enough
+FROM_UNBAL2
+
+# good enough
+FROM_WSP_LEAD
+
+# good enough
+FR_TITLE_CONS_6
+
+# good enough
+FSL_UA
+
+# good enough
+HK_FAKENAME_PAYPAL
+
+# good enough
+HK_NAME_FM_MR_MRS
+
+# good enough
+HK_NAME_FREE
+
+# good enough
+HK_NAME_FROM
+
+# good enough
+HK_SCAM_N1
+
+# good enough
+HK_SCAM_N15
+
+# good enough
+HK_SCAM_N3
+
+# good enough
+HK_SCAM_N4
+
+# good enough
+HK_SCAM_N8
+
+# good enough
+HK_SCAM_S25
+
+# good enough
+LOTTO_AGENT_RPLY
+
+# good enough
+LOTTO_URI
+
+# good enough
+MANY_SUBDOM
+
+# good enough
+MONEY_FRAUD_5
+
+# good enough
+MONEY_PERCENT
+
+# good enough
+NSL_RCVD_HELO_USER
+
+# good enough
+OBFU_ATTACH_MISSP
+
+# good enough
+RATWARE_HELO_DM
+
+# good enough
+RCVD_HAS_FROM_USER
+
+# good enough
+RCVD_HAS_HELO_USER
+
+# good enough
+SANE_b1666f872e931b52d09c9f2b601712c3
+
+# good enough
+SCRIPT_GIBBERISH
+
+# good enough
+TVD_SINGLE_SPAN_DIV
 
 # tflags userconf
 UNPARSEABLE_RELAY
@@ -761,19 +902,100 @@ USER_IN_WHITELIST
 USER_IN_WHITELIST_TO
 
 # good enough
+VANITY
+
+# good enough
+XMAILER_MIMEOLE_OL_015D5
+
+# good enough
+XMAILER_MIMEOLE_OL_07794
+
+# good enough
+XMAILER_MIMEOLE_OL_09BB4
+
+# good enough
 XMAILER_MIMEOLE_OL_1ECD5
+
+# good enough
+XMAILER_MIMEOLE_OL_20C99
 
 # good enough
 XMAILER_MIMEOLE_OL_22B61
 
 # good enough
+XMAILER_MIMEOLE_OL_25340
+
+# good enough
+XMAILER_MIMEOLE_OL_3857F
+
+# good enough
+XMAILER_MIMEOLE_OL_3D61D
+
+# good enough
+XMAILER_MIMEOLE_OL_4B815
+
+# good enough
+XMAILER_MIMEOLE_OL_4BF4C
+
+# good enough
+XMAILER_MIMEOLE_OL_4EEDB
+
+# good enough
+XMAILER_MIMEOLE_OL_4F240
+
+# good enough
+XMAILER_MIMEOLE_OL_58CB5
+
+# good enough
+XMAILER_MIMEOLE_OL_5B79A
+
+# good enough
+XMAILER_MIMEOLE_OL_6554A
+
+# good enough
 XMAILER_MIMEOLE_OL_7533E
+
+# good enough
+XMAILER_MIMEOLE_OL_83BF7
 
 # good enough
 XMAILER_MIMEOLE_OL_8627E
 
 # good enough
 XMAILER_MIMEOLE_OL_91287
+
+# good enough
+XMAILER_MIMEOLE_OL_9B90B
+
+# good enough
+XMAILER_MIMEOLE_OL_ADFF7
+
+# good enough
+XMAILER_MIMEOLE_OL_B30D1
+
+# good enough
+XMAILER_MIMEOLE_OL_B4B40
+
+# good enough
+XMAILER_MIMEOLE_OL_BC7E6
+
+# good enough
+XMAILER_MIMEOLE_OL_C65FA
+
+# good enough
+XMAILER_MIMEOLE_OL_CF0C0
+
+# good enough
+XMAILER_MIMEOLE_OL_F3B05
+
+# good enough
+XMAILER_MIMEOLE_OL_F475E
+
+# good enough
+XMAILER_MIMEOLE_OL_F6D01
+
+# good enough
+XMAILER_MIMEOLE_OL_FF5C8
 
 # good enough
 X_MAILER_CME_6543_MSN
