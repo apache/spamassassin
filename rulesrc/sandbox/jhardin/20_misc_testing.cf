@@ -196,9 +196,19 @@ describe       MANY_TINY_FLOAT      Many small-font floating HTML elements - tex
 
 
 # endless requests on the users list...
-header         TO_EQ_FROM      ALL =~ /\nFrom:[^\n<]{0,80}<?([^\n\s>]+)>?\n(?:[^\n]{1,100}\n)*To:[^\n]+\1/ism
-describe       TO_EQ_FROM      To: same as From:
-score          TO_EQ_FROM      0.001
+header         __TO_EQ_FROM_1       ALL =~ /\nFrom:\s+(?:[^\n<]{0,80}<)?([^\n\s>]+)>?\n(?:[^\n]{1,100}\n)*To:\s+(?:[^\n]+<)?\1[>,\s\n]/ism
+header         __TO_EQ_FROM_2       ALL =~ /\nTo:\s+(?:[^\n<]{0,80}<)?([^\n\s>]+)>?\n(?:[^\n]{1,100}\n)*From:\s+(?:[^\n]+<)?\1[>,\s\n]/ism
+meta           __TO_EQ_FROM         (__TO_EQ_FROM_1 || __TO_EQ_FROM_2)
+describe       __TO_EQ_FROM         To: same as From:
+
+meta           TO_EQ_FM_HTML_ONLY   (__TO_EQ_FROM && MIME_HTML_ONLY)
+describe       TO_EQ_FM_HTML_ONLY   To == From and HTML only
+
+meta           TO_EQ_FM_DIRECT_MX   (__TO_EQ_FROM && __DOS_DIRECT_TO_MX)
+describe       TO_EQ_FM_DIRECT_MX   To == From and direct-to-MX
+
+meta           TO_EQ_FM_HTML_DIRECT  (__TO_EQ_FROM && MIME_HTML_ONLY && __DOS_DIRECT_TO_MX)
+describe       TO_EQ_FM_HTML_DIRECT  To == From and HTML only, direct-to-MX
 
 
 # Evaluate ReturnPath and blacklist collisions
