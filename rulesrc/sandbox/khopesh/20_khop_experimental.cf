@@ -228,3 +228,9 @@ ifplugin Mail::SpamAssassin::Plugin::DKIM
   describe DKIM_INVALID	DKIM-Signature header exists but is not valid
   # masscheck ignores ifplugins and thus always has DKIM_INVALID==__DKIM_EXISTS
 endif
+
+ifplugin Mail::SpamAssassin::Plugin::MIMEHeader # {
+  # probably all over the place, indicating only a MS document is attached,
+  # which might hit only ham and virii
+  full	__BASE64_MDAW	/^(?:MDAw){19}/
+endif # }
