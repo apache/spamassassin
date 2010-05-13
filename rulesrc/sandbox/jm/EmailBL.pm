@@ -307,7 +307,7 @@ sub _acl_allow {
 sub _lookup {
     my ($self, $pms, $prs, $emails) = @_;
 
-    return 0 unless defined @$emails;
+    return 0 unless @$emails;
 
     my %digests = map { md5_hex($_) => $_ } @$emails;
     my $dcnt = scalar keys %digests;
