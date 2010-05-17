@@ -10,38 +10,22 @@ describe FROM_WEBSITE	Sender name appears to be a link
 header	 FROM_2_EMAILS	From =~ /([^\@]{2,}\@[^\@]{2,60}\.\w\w).*(?!\1)[^\@]{2,}\@[^\@]/
 describe FROM_2_EMAILS	Sender claims to have a different email
 
-# Fix for __FROM_ALL_NUMS, which has a y2k but in it.  Now it's a y2.1k bug.
+# Fix for __FROM_ALL_NUMS, which has a y2k bug in it.  Now it's a y2.1k bug.
 header __FROM_ALL_NUMS_FIX  From:addr =~ /^(?!(?:19|20)\d\d[01]\d[0-3]\d)\d+\@/
-header __FROM_ALL_NUMS_SIMPLE	From:addr =~ /^\d+\@/
-header __FROM_YYYYMMDD		From:addr =~ /(?:19[6-9]|20\d)\d[01]\d[0-3]\d/
-meta   __FROM_ALL_NUMS_META	__FROM_ALL_NUMS_FIX && ! __FROM_YYYYMMDD
-
-header __FROM_USR_6DIGITS	From:addr =~ /\d{6}[^\@]{0,18}\@/
-header __FROM_7DIGITS		From:addr =~ /\d{7}/
-header __FROM_USR_7DIGITS	From:addr =~ /\d{7}[^\@]{0,18}\@/
-header __FROM_7HEX	From:addr =~ /\d(?![0-9a-f]*[a-f]{3})[0-9a-f]{6}/i
-header __FROM_USR_7HEX	From:addr =~ /\d(?![0-9a-f]*[a-f]{3})[0-9a-f]{6}[^\@]{0,18}\@/i
-header __FROM_8HEX From:addr =~ /\d(?![0-9a-f]*[a-f]{3})[0-9a-f]{7}/i
-header __FROM_9HEX From:addr =~ /\d(?![0-9a-f]*[a-f]{3})[0-9a-f]{8}/i
-
-header __FROM_DOT_COM	From:raw =~ /\.(?:com|COM)\s.*</
-header __RELAY_DOT_COM	X-Spam-Relays-Untrusted =~ /^[^\]]+ (?:rdns|helo)=[^\] ]+\.com /
-meta	 FROM_DOT_COM	__FROM_DOT_COM && !__RELAY_DOT_COM
-describe FROM_DOT_COM	From NAME contains .com but relay was not a .com
-header FROM_NOT_DOTCOM From:raw =~ /\.(?:com|COM)\s.*<[^>]+\.(?!com|COM)[^.>]+>/
-describe FROM_NOT_DOTCOM  Sender NAME has .com but sender ADDRESS does not
+header __FROM_ALL_HEX	    From:addr =~ /^(?!(?:19|20)\d\d[01]\d[0-3]\d)(?![0-9a-f]*[a-f]{3})[0-9a-f]+\@/
 
 header	 KHOP_BIG_TO_CC      ToCc =~ /(?:[^,\@]{1,60}\@[^,]{4,25},){10}/
 describe KHOP_BIG_TO_CC      Sent to 10+ recipients instaed of Bcc or a list
 
 # see also 70_sare_spoof.cf's __EBAY_ADDRESS:
 # header __EBAY_ADDRESS     From:addr =~ /[\@\.]ebay\.(?:com(?:\.au|\.cn|\.hk|\.my|\.sg)?|co\.uk|at|be|ca|fr|de|in|ie|it|nl|ph|pl|es|se|ch)/i
-header	 __EBAY_ADDRESS 	From:addr =~ /[\@.]ebay\..{3,5}$/i
+header	 __EBAY_ADDRESS 	From:addr =~ /[\@.]ebay\.\w\w\w?(?:\.\w\w)?$/i
 meta	 KHOP_FAKE_EBAY 	__EBAY_ADDRESS && !__NOT_SPOOFED
 describe KHOP_FAKE_EBAY 	Sender falsely claims to be from eBay
 # 0.0684/0.0210 spam/ham, 0.765 s/o @ 20091204, though ruleqa ignores dkim
 # 0.0017/0.0185 spam/ham, 0.092 s/o @ 20100203
 # 0.0049/0.1999 spam/ham, 0.281 s/o @ 20100424 net.
+# 0.0095/0.0246 spam/ham, 0.278 s/o @ 20100517
 
 # masscheck doesn't cover ifplugin lines.  It takes the first hit anyway.
 if ! plugin (Mail::SpamAssassin::Plugin::URIDetail)
@@ -64,7 +48,7 @@ tflags	 KHOP_FOREIGN_CLICK	nopublish  # re-do ifplugin to publish
 # reduced to 30 chars (35 w/ http:) for URL wrapping, e.g. LeadLander wraps @35
 rawbody  __SPOOFED_URL	m/<a\s[^>]{0,99}\bhref=(?:3D)?.?(https?:[^>"' ]{8,30})[^>]{0,99}>(?:[^<]{0,99}<(?!\/a)[^>]{1,99}>)*(?!\1)https?:\/\/[^<]{5}/i
 # even with scrubbing, probably can't handle 'legit' tracking redirectors
-meta	 SPOOFED_URL	__SPOOFED_URL && !(__VIA_ML || __SENDER_BOT || __YAHOO_BULK || __UNSUB_LINK || __THREADED)
+meta	 SPOOFED_URL	__SPOOFED_URL && !(__VIA_ML || __SENDER_BOT || __YAHOO_BULK || __UNSUB_LINK || __THREADED || URL_SHORTENER)
 describe SPOOFED_URL	Has a link whose text is a different URL
 
 uri	 __SHORT_URL	/^http:\/\/[^\/]{3,6}\.\w\w\/[^\/]{3,8}\/?$/
@@ -87,6 +71,15 @@ describe URI_HIDDEN	Contains a hidden directory
 # no subdomain; sent by example.com rather than server.example.com
 header __RDNS_NO_SUBDOM	X-Spam-Relays-External =~ /^[^\]]+ rdns=[^. ]*\.\w+ /
 
+header __RDNS_IS_WWW	X-Spam-Relays-External =~ /^[^\]]+ rdns=www\./
+header __RELAY_THRU_WWW	Received =~ /from (?:[^ \@]+\@)?www\./
+header __FROM_WEB_DAEMON From:addr =~ /(?:apache|www|web|tomcat|\biis\b).*\@/i
+meta	 KHOP_FROM_WWW	(__RDNS_IS_WWW || __RELAY_THRU_WWW) && ! (__FROM_WEB_DAEMON || __MSGID_JAVAMAIL)
+
+# a REALLY simple test...
+header __RDNS_LONG	X-Spam-Relays-External =~ /^[^\]]+ rdns=\S{30}/
+header __RDNS_SHORT	X-Spam-Relays-External =~ /^[^\]]+ rdns=\S{4,14} /
+
 # Relays with 5+ subdomains in their rDNS.
 header __5_SUBDOM X-Spam-Relays-External =~ /^[^\]]+ rdns=(?:[^. ]*\.){6,}\w+ /
 # 5.7617/0.0344 spam/ham, 0.994 s/o @ 20091214
@@ -94,9 +87,11 @@ header __5_SUBDOM X-Spam-Relays-External =~ /^[^\]]+ rdns=(?:[^. ]*\.){6,}\w+ /
 # 6.8984/0.0251 spam/ham, 0.996 s/o @ 20100420
 # 20100420 results for 4_subdom=6.8577/2.0856, 3=15.3590/8.4512
 # which means 4+ was 13.7561/2.1106@0.866 and 3+ was 29.1151/10.5619@0.734
+# 6.8205/0.0232 spam/ham, 0.997 s/o @ 20100514
 
 # IP address in relay's rDNS or HELO
 header __IP_IN_RELAY  X-Spam-Relays-External =~ /^\[ ip=(\d+)\.(\d+)\.(\d+)\.(\d+) (?:[^\]]* )?(?:rdns|helo)=\S*(?:\1\D\2\D\3\D\4|\4\D\3\D\2\D\1)/
+# 49.0895/0.4994 spam/ham, 0.990 s/o @ 20100514
 
 
 
@@ -131,13 +126,6 @@ describe __BOTNET_NOTRUST	Message has no trusted relays
 header	 __BOTNET_NOTRUST	X-Spam-Relays-Trusted !~ /ip=/i
 tflags	 __BOTNET_NOTRUST	nopublish # confirm license with author first
 
-# license to this one (same author as botnet) is unclear.
-# http://people.ucsc.edu/~jrudd/spamassassin/jr_rfc1912.cf
-describe JR_RCVD_TOO_FEW_HOPS	Just one hop means direct untrusted client
-header   JR_RCVD_TOO_FEW_HOPS	X-Spam-Relays-Untrusted =~ /^\[[^\]]+\]$/
-#score	 JR_RCVD_TOO_FEW_HOPS	1.0
-tflags	 JR_RCVD_TOO_FEW_HOPS	nopublish # confirm license with author first
-
 
 # O'Reilly Sendmail 3e p396 10.7.2 "Forging with SMTP" http://tinyurl.com/pb8vje
 # This had problems with the first hop, which *always* fails FCrDNS.
@@ -145,12 +133,13 @@ tflags	 JR_RCVD_TOO_FEW_HOPS	nopublish # confirm license with author first
 
 # Note: unfair regarding RFC 2821, see http://en.wikipedia.org/wiki/FCrDNS#Uses
 header __HELO_NOT_RDNS	X-Spam-Relays-External =~ /^[^\]]+ rdns=(\S+) helo=(?!\1)\S/
-meta	 KHOP_HELO_FCRDNS	__HELO_NOT_RDNS && !(__VIA_ML || __freemail_safe || __RCVD_IN_DNSWL || __NOT_SPOOFED)
+meta	 KHOP_HELO_FCRDNS	__HELO_NOT_RDNS && !(__VIA_ML || __freemail_safe || __RCVD_IN_DNSWL || __NOT_SPOOFED || __RDNS_SHORT)
 describe KHOP_HELO_FCRDNS	Relay HELO differs from its IP's reverse DNS
 #score	 KHOP_HELO_FCRDNS	0.4 # 20090603, currently scoring 0.001
 score	 KHOP_HELO_FCRDNS	0.001
 # 33.9858/7.3415 spam/ham, 0.822 s/o @ 20100203
 # 40.5025/2.1738 spam/ham, 0.949 s/o @ 20100417 net
+# 44.5263/5.6620 spam/ham, 0.887 s/o @ 20100514.  Added rdns_short 5/17.
 
 meta     HELO_NO_DOMAIN	__HELO_NO_DOMAIN && !HELO_LOCALHOST
 describe HELO_NO_DOMAIN	Relay reports its domain incorrectly
@@ -175,27 +164,17 @@ tflags __MSGID_JAVAMAIL	nice
 header __TAB_IN_SUBJ	Subject =~ /\t/
 # "i owe u 4 something b4 tomorrow" hits this four times:
 header __SUBJ_INFORMAL	Subject =~ /(?:^| )(?:[iuU4]|[Bb]4)(?: |$)/
+header __SUBJ_ALL_LOWER	Subject =~ /^[a-z -]$/
 
 # these two ignore leading things like "Re:" and "[foo list]"
 header __SUBJ_4LOWER	Subject =~ /^(?:[a-zA-Z]{2,4}: +)?(?:\[[ \w]+\] +)?(?:.*[a-z]){4}/
 header __SUBJ_2UPPER	Subject =~ /^(?:[a-zA-Z]{2,4}: +)?(?:\[[ \w]+\] +)?(?:.*[A-Z]){2}/
 header __SUBJ_SHORT	Subject =~ /^.{0,8}$/
-header __SUBJ_IMPORTANT	Subject =~ /\b(?:important|IMPORTANT)\b/
+header __SUBJ_IMPORTANT	Subject =~ /\b(?:[Ii]mportant|IMPORTANT)\b/
 
 # attempts to fix SUBJ_ALL_CAPS, which has an S/O of 0.563 yet is published
 meta	 SUBJ_ALL_CAPS2	SUBJ_ALL_CAPS && __SUBJ_4LOWER && __SUBJ_2UPPER && !__SUBJ_SHORT
 meta	 SUBJ_ALL_CAPS3	SUBJ_ALL_CAPS && __SUBJ_4LOWER && __SUBJ_2UPPER && !(__SUBJ_SHORT||__SUBJ_IMPORTANT)
-
-meta	 AOL_ALL_CAPS	__AT_AOL_MSGID && UPPERCASE_75_100
-describe AOL_ALL_CAPS	AOL users sometimes write mail in all uppercase
-tflags	 AOL_ALL_CAPS	nice
-
-# testing warren's theory from "Uppercase E-mail in Latin America" 2009-10-06
-# http://old.nabble.com/Uppercase-E-mail-in-Latin-America-td25748291.html
-# note, masscheck probably doesn't have enough LACNIC ham for this test
-meta	 LACNIC_ALL_CAPS __RCVD_VIA_LACNIC && UPPERCASE_75_100
-describe LACNIC_ALL_CAPS Latino users sometimes write mail in all uppercase
-tflags	 LACNIC_ALL_CAPS nice nopublish
 
 header	 __HOTMAIL_HELO	Received =~ /from ([A-Z]{3})\d[^.]+ [^\n]+ by \1\d+-[^\n ]+\.\1\d+\.hotmail\.com with Microsoft/i
 tflags	 __HOTMAIL_HELO 	nice
@@ -203,7 +182,7 @@ tflags	 __HOTMAIL_HELO 	nice
 meta	 FORGED_HOTMAIL_RCVD3	__HOST_HOTMAIL && (!__HOTMAIL_HELO || __DOS_SINGLE_EXT_RELAY)
 
 # This is broken and needs help
-header	 RCVD_VIA_IPV6	X-Spam-Relays-Untrusted =~ /^[^\]]+ (?:by|ip)=[^\] ]+:[^\] .]+ /
+header	 RCVD_VIA_IPV6	X-Spam-Relays-Untrusted =~ /^[^\]]+ (?:by|ip)=[^\]: ]+:/
 describe RCVD_VIA_IPV6	Received by the last trusted relay via IPv6
 tflags	 RCVD_VIA_IPV6	nice
 
@@ -232,5 +211,5 @@ endif
 ifplugin Mail::SpamAssassin::Plugin::MIMEHeader # {
   # probably all over the place, indicating only a MS document is attached,
   # which might hit only ham and virii
-  full	__BASE64_MDAW	/^(?:MDAw){19}/
+  full	__BASE64_MDAW	/^(?:MDAw){12}/
 endif # }
