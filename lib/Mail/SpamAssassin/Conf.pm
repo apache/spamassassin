@@ -283,7 +283,7 @@ it from running.
 
 =over 4
 
-=item whitelist_from add@ress.com
+=item whitelist_from user@example.com
 
 Used to whitelist sender addresses which send mail that is often tagged
 (incorrectly) as spam.
@@ -325,7 +325,7 @@ e.g.
     type => $CONF_TYPE_ADDRLIST,
   });
 
-=item unwhitelist_from add@ress.com
+=item unwhitelist_from user@example.com
 
 Used to override a default whitelist_from entry, so for example a distribution
 whitelist_from can be overridden in a local.cf file, or an individual user can
@@ -414,7 +414,7 @@ these are often targets for spammer spoofing.
     }
   });
 
-=item whitelist_allows_relays add@ress.com
+=item whitelist_allows_relays user@example.com
 
 Specify addresses which are in C<whitelist_from_rcvd> that sometimes
 send through a mail relay other than the listed ones. By default mail
@@ -446,7 +446,7 @@ e.g.
     type => $CONF_TYPE_ADDRLIST,
   });
 
-=item unwhitelist_from_rcvd add@ress.com
+=item unwhitelist_from_rcvd user@example.com
 
 Used to override a default whitelist_from_rcvd entry, so for example a
 distribution whitelist_from_rcvd can be overridden in a local.cf file,
@@ -481,7 +481,7 @@ e.g.
     }
   });
 
-=item blacklist_from add@ress.com
+=item blacklist_from user@example.com
 
 Used to specify addresses which send mail that is often tagged (incorrectly) as
 non-spam, but which the user doesn't want.  Same format as C<whitelist_from>.
@@ -493,7 +493,7 @@ non-spam, but which the user doesn't want.  Same format as C<whitelist_from>.
     type => $CONF_TYPE_ADDRLIST,
   });
 
-=item unblacklist_from add@ress.com
+=item unblacklist_from user@example.com
 
 Used to override a default blacklist_from entry, so for example a
 distribution blacklist_from can be overridden in a local.cf file, or
@@ -518,7 +518,7 @@ e.g.
   });
 
 
-=item whitelist_to add@ress.com
+=item whitelist_to user@example.com
 
 If the given address appears as a recipient in the message headers
 (Resent-To, To, Cc, obvious envelope recipient, etc.) the mail will
@@ -547,11 +547,11 @@ following set of headers:
         X-Rcpt-To
         X-Real-To
 
-=item more_spam_to add@ress.com
+=item more_spam_to user@example.com
 
 See above.
 
-=item all_spam_to add@ress.com
+=item all_spam_to user@example.com
 
 See above.
 
@@ -570,7 +570,7 @@ See above.
     type => $CONF_TYPE_ADDRLIST,
   });
 
-=item blacklist_to add@ress.com
+=item blacklist_to user@example.com
 
 If the given address appears as a recipient in the message headers
 (Resent-To, To, Cc, obvious envelope recipient, etc.) the mail will
@@ -583,7 +583,7 @@ be blacklisted.  Same format as C<blacklist_from>.
     type => $CONF_TYPE_ADDRLIST,
   });
 
-=item whitelist_auth add@ress.com
+=item whitelist_auth user@example.com
 
 Used to specify addresses which send mail that is often tagged (incorrectly) as
 spam.  This is different from C<whitelist_from> and C<whitelist_from_rcvd> in
@@ -604,7 +604,7 @@ e.g.
   whitelist_auth joe@example.com fred@example.com
   whitelist_auth *@example.com
 
-=item def_whitelist_auth add@ress.com
+=item def_whitelist_auth user@example.com
 
 Same as C<whitelist_auth>, but used for the default whitelist entries
 in the SpamAssassin distribution.  The whitelist score is lower, because
@@ -622,7 +622,7 @@ these are often targets for spammer spoofing.
     type => $CONF_TYPE_ADDRLIST,
   });
 
-=item unwhitelist_auth add@ress.com
+=item unwhitelist_auth user@example.com
 
 Used to override a C<whitelist_auth> entry. The specified email address has to
 match exactly the address previously used in a C<whitelist_auth> line.
@@ -1659,7 +1659,7 @@ setting.  Example:
     }
   });
 
-=item bayes_ignore_from add@ress.com
+=item bayes_ignore_from user@example.com
 
 Bayesian classification and autolearning will not be performed on mail
 from the listed addresses.  Program C<sa-learn> will also ignore the
@@ -1689,7 +1689,7 @@ be listed.
     type => $CONF_TYPE_ADDRLIST,
   });
 
-=item bayes_ignore_to add@ress.com
+=item bayes_ignore_to user@example.com
 
 Bayesian classification and autolearning will not be performed on mail
 to the listed addresses.  See C<bayes_ignore_from> for details.

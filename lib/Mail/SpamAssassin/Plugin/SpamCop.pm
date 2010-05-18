@@ -86,7 +86,7 @@ sub set_config {
 
 =over 4
 
-=item spamcop_from_address add@ress.com   (default: none)
+=item spamcop_from_address user@example.com   (default: none)
 
 This address is used during manual reports to SpamCop as the From:
 address.  You can use your normal email address.  If this is not set, a
@@ -112,7 +112,7 @@ guess will be used as the From: address in SpamCop reports.
     },
   });
 
-=item spamcop_to_address add@ress.com   (default: generic reporting address)
+=item spamcop_to_address user@example.com   (default: generic reporting address)
 
 Your customized SpamCop report submission address.  You need to obtain
 this address by registering at C<http://www.spamcop.net/>.  If this is

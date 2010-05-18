@@ -80,7 +80,7 @@ sub set_config {
 
 =over 4
 
-=item whitelist_from_spf add@ress.com
+=item whitelist_from_spf user@example.com
 
 Works similarly to whitelist_from, except that in addition to matching
 a sender address, a check against the domain's SPF record must pass.
@@ -102,7 +102,7 @@ e.g.
   whitelist_from_spf joe@example.com fred@example.com
   whitelist_from_spf *@example.com
 
-=item def_whitelist_from_spf add@ress.com
+=item def_whitelist_from_spf user@example.com
 
 Same as C<whitelist_from_spf>, but used for the default whitelist entries
 in the SpamAssassin distribution.  The whitelist score is lower, because
