@@ -212,4 +212,14 @@ ifplugin Mail::SpamAssassin::Plugin::MIMEHeader # {
   # probably all over the place, indicating only a MS document is attached,
   # which might hit only ham and virii
   full	__BASE64_MDAW	/^(?:MDAw){12}/
+
+  meta	REMOTE_IMAGE	(__HTML_IMG_ONLY || __HTML_LINK_IMAGE) && !(KHOP_NEWSLETTER || __VIA_ML || __SENDER_BOT || __ANY_IMAGE_ATTACH)
+  describe REMOTE_IMAGE	Message contains an external image
+
 endif # }
+
+rawbody  __BUGGED_IMG	m{<img\b[^>]{0,100}\ssrc=.?https?://[^>]{6,80}(?:\?[^>]{8}|[^a-z](?![a-f]{3}|20\d\d[01]\d[0-3]\d)[0-9a-f]{8})}i
+
+# inspired by retired SA 2.x HTML_WEB_BUGS rule's eval:html_test('web_bugs')
+rawbody  __WEB_BUGS	m{<[^>]{4,100}\ssrc=[^>]{8,200}\.(?:pl|cgi|php\d?|asp|jsp|cfm|py|\?[^>]{4})\b}i
+
