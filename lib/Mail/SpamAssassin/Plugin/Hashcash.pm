@@ -41,7 +41,7 @@ Whether to use hashcash, if it is available.
 
 =cut
 
-=item hashcash_accept add@ress.com ...
+=item hashcash_accept user@example.com ...
 
 Used to specify addresses that we accept HashCash tokens for.  You should set
 it to match all the addresses that you may receive mail at.
