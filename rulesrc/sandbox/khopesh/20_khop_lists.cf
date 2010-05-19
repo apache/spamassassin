@@ -12,7 +12,8 @@ uri	 __MAIL_LINK	/\?.{0,200}\w\@[\w-]{1,20}.\w\w\w?\b/i
 header   __MSGID_LIST	Message-ID =~ /-\w+\#[\w.]+\.\w{2,4}\@/
 tflags   __MSGID_LIST	nice
 
-body     KHOP_NEWSLETTER	/\b(?:e?newsletters?|(?:un)?(?:subscrib|register)|you(?:r| are) subscri(?:b|ption)|opt(?:.|ing)?out\b|further info|you do ?n[o']t w(?:ish|ant)|remov\w{1,3}.{1,9}\blists?\b|to your white.?list)/i
+body     __SUBSCRIPTION_INFO	/\b(?:e?newsletters?|(?:un)?(?:subscrib|register)|you(?:r| are) subscri(?:b|ption)|opt(?:.|ing)?out\b|further info|you do ?n[o']t w(?:ish|ant)|remov\w{1,3}.{1,9}\blists?\b|to your white.?list)/i
+meta	 KHOP_NEWSLETTER	__SUBSCRIPTION_INFO
 describe KHOP_NEWSLETTER	Is a newsletter or has list managing details
 score    KHOP_NEWSLETTER	0.4 0.5 0.6 0.7 # 20090219
 tflags	 KHOP_NEWSLETTER	nopublish
