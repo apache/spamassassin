@@ -213,7 +213,7 @@ ifplugin Mail::SpamAssassin::Plugin::MIMEHeader # {
   # which might hit only ham and virii
   full	__BASE64_MDAW	/^(?:MDAw){12}/
 
-  meta	REMOTE_IMAGE	(__HTML_IMG_ONLY || __HTML_LINK_IMAGE) && !(KHOP_NEWSLETTER || __VIA_ML || __SENDER_BOT || __ANY_IMAGE_ATTACH)
+  meta	REMOTE_IMAGE	(__HTML_IMG_ONLY || __HTML_LINK_IMAGE) && !(__SUBSCRIPTION_INFO || __VIA_ML || __SENDER_BOT || __ANY_IMAGE_ATTACH)
   describe REMOTE_IMAGE	Message contains an external image
 
 endif # }
