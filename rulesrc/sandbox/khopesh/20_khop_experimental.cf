@@ -223,3 +223,25 @@ rawbody  __BUGGED_IMG	m{<img\b[^>]{0,100}\ssrc=.?https?://[^>]{6,80}(?:\?[^>]{8}
 # inspired by retired SA 2.x HTML_WEB_BUGS rule's eval:html_test('web_bugs')
 rawbody  __WEB_BUGS	m{<[^>]{4,100}\ssrc=[^>]{8,200}\.(?:pl|cgi|php\d?|asp|jsp|cfm|py|\?[^>]{4})\b}i
 
+# Idea from Michael Scheidell of SECNAP on SpamAssassin Users List 2010-05-08
+# http://old.nabble.com/yahoo-X-YMail-OSG-tp28496110p28496110.html
+header	 SINGLE_HEADER_1K  ALL:raw =~ /^(?!X-Spam|X-MailScan)(?=.{1024,2047}$)/m
+header	 SINGLE_HEADER_2K  ALL:raw =~ /^(?=.{2048,3071}$)/m
+header	 SINGLE_HEADER_3K  ALL:raw =~ /^(?=.{3072,4095}$)/m
+header	 SINGLE_HEADER_4K  ALL:raw =~ /^(?=.{4096,5119}$)/m
+header	 SINGLE_HEADER_5K  ALL:raw =~ /^(?=.{5120})/m
+describe SINGLE_HEADER_1K  A single header contains 1K-2K characters
+describe SINGLE_HEADER_2K  A single header contains 2K-3K characters
+describe SINGLE_HEADER_3K  A single header contains 3K-4K characters
+describe SINGLE_HEADER_4K  A single header contains 4K-5K characters
+describe SINGLE_HEADER_5K  A single header contains 5K+ characters
+
+header	 BIG_HEADERS_2K    ALL:raw =~ /^(?=.{2048,3071}$)/s
+header	 BIG_HEADERS_3K    ALL:raw =~ /^(?=.{3072,4095}$)/s
+header	 BIG_HEADERS_4K    ALL:raw =~ /^(?=.{4096,5119}$)/s
+header	 BIG_HEADERS_5K    ALL:raw =~ /^(?=.{5120})/s
+tflags	 BIG_HEADERS_2K    userconf  # unset trusted_networks can mess this up
+describe BIG_HEADERS_2K    Headers contain 2K-3K characters total
+describe BIG_HEADERS_3K    Headers contain 3K-4K characters total
+describe BIG_HEADERS_4K    Headers contain 4K-5K characters total
+describe BIG_HEADERS_5K    Headers contain 5K+ characters total
