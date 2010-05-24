@@ -225,23 +225,28 @@ rawbody  __WEB_BUGS	m{<[^>]{4,100}\ssrc=[^>]{8,200}\.(?:pl|cgi|php\d?|asp|jsp|cf
 
 # Idea from Michael Scheidell of SECNAP on SpamAssassin Users List 2010-05-08
 # http://old.nabble.com/yahoo-X-YMail-OSG-tp28496110p28496110.html
-header	 SINGLE_HEADER_1K  ALL:raw =~ /^(?!X-Spam|X-MailScan)(?=.{1024,2047}$)/m
-header	 SINGLE_HEADER_2K  ALL:raw =~ /^(?=.{2048,3071}$)/m
-header	 SINGLE_HEADER_3K  ALL:raw =~ /^(?=.{3072,4095}$)/m
-header	 SINGLE_HEADER_4K  ALL:raw =~ /^(?=.{4096,5119}$)/m
-header	 SINGLE_HEADER_5K  ALL:raw =~ /^(?=.{5120})/m
-describe SINGLE_HEADER_1K  A single header contains 1K-2K characters
-describe SINGLE_HEADER_2K  A single header contains 2K-3K characters
-describe SINGLE_HEADER_3K  A single header contains 3K-4K characters
-describe SINGLE_HEADER_4K  A single header contains 4K-5K characters
-describe SINGLE_HEADER_5K  A single header contains 5K+ characters
+header   SINGLE_HEADER_1K	ALL:raw =~ /(?-xim:(?!X-Spam|X-MailScan)(?:^|\n)[^\s\n]+:(?:.(?!\n\S)){1024,2047}.(?:\n\S|$))/s
+header   SINGLE_HEADER_2K	ALL:raw =~ /(?-xim:(?:^|\n)[^\s\n]+:(?:.(?!\n\S)){2048,3071}.(?:\n\S|$))/s
+header   SINGLE_HEADER_3K	ALL:raw =~ /(?-xim:(?:^|\n)[^\s\n]+:(?:.(?!\n\S)){3072,4095}.(?:\n\S|$))/s
+header   SINGLE_HEADER_4K	ALL:raw =~ /(?-xim:(?:^|\n)[^\s\n]+:(?:.(?!\n\S)){4096,5119}.(?:\n\S|$))/s
+header   SINGLE_HEADER_5K	ALL:raw =~ /(?-xim:(?:^|\n)[^\s\n]+:(?:.(?!\n\S)){5120})/s
+describe SINGLE_HEADER_1K	A single header contains 1K-2K characters
+describe SINGLE_HEADER_2K	A single header contains 2K-3K characters
+describe SINGLE_HEADER_3K	A single header contains 3K-4K characters
+describe SINGLE_HEADER_4K	A single header contains 4K-5K characters
+describe SINGLE_HEADER_5K	A single header contains 5K+ characters
 
-header	 BIG_HEADERS_2K    ALL:raw =~ /^(?=.{2048,3071}$)/s
-header	 BIG_HEADERS_3K    ALL:raw =~ /^(?=.{3072,4095}$)/s
-header	 BIG_HEADERS_4K    ALL:raw =~ /^(?=.{4096,5119}$)/s
-header	 BIG_HEADERS_5K    ALL:raw =~ /^(?=.{5120})/s
-tflags	 BIG_HEADERS_2K    userconf  # unset trusted_networks can mess this up
-describe BIG_HEADERS_2K    Headers contain 2K-3K characters total
-describe BIG_HEADERS_3K    Headers contain 3K-4K characters total
-describe BIG_HEADERS_4K    Headers contain 4K-5K characters total
-describe BIG_HEADERS_5K    Headers contain 5K+ characters total
+header	 BIG_HEADERS_2K 	ALL:raw =~ /^(?=.{2048,3071}$)/s
+header	 BIG_HEADERS_3K 	ALL:raw =~ /^(?=.{3072,4095}$)/s
+header	 BIG_HEADERS_4K 	ALL:raw =~ /^(?=.{4096,5119}$)/s
+header	 BIG_HEADERS_5K 	ALL:raw =~ /^(?=.{5120})/s
+describe BIG_HEADERS_2K 	Headers contain 2K-3K characters total
+describe BIG_HEADERS_3K 	Headers contain 3K-4K characters total
+describe BIG_HEADERS_4K 	Headers contain 4K-5K characters total
+describe BIG_HEADERS_5K 	Headers contain 5K+ characters total
+
+header	 MS_XYMOSG_1K	X-Ymail-OSG =~ /^(?=.{1024,2047}$)/s
+header	 MS_XYMOSG_2K	X-Ymail-OSG =~ /^(?=.{2048,3071}$)/s
+header	 MS_XYMOSG_3K	X-Ymail-OSG =~ /^(?=.{3072,4095}$)/s
+header	 MS_XYMOSG_4K	X-Ymail-OSG =~ /^(?=.{4096,5119}$)/s
+header	 MS_XYMOSG_5K	X-Ymail-OSG =~ /^(?=.{4096})/s
