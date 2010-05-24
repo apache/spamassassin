@@ -11,20 +11,65 @@
 # quite competitive with the DNSBLs, which is more a reflection of our lack of
 # foreign ham in the corpora than any real facts.
 
+# Asia-Pacific Network Information Centre (APNIC)
 # from http://www.apnic.net/db/ranges.html at 20091002, updated 20100125
 # updates easily gleamed from http://www.cymru.com/Documents/bogon-list.html
-header __RCVD_VIA_APNIC   X-Spam-Relays-External =~ /^\[ ip=(?-xism:1|27|5[89]|6[01]|1(?:[12][0-6]|1[7-9]|75|8[0123])|2(?:03|1[0189]|2[012]|02(?!\.123\.0?(?:[012]\d|3[01])))|169\.2(?:0[89]|1\d|2[01]|223)|169\.2(?:1[04]|22))\.\d/
+header	 __RCVD_VIA_APNIC	X-Spam-Relays-External =~ /^\[ ip=(?-xism:1|27|5[89]|6[01]|1(?:[12][0-6]|1[7-9]|75|8[0123])|2(?:03|1[0189]|2[012]|02(?!\.123\.(?:[012]?\d|3[01])))|169\.2(?:0[89]|1\d|2[01]|223)|169\.2(?:1[04]|22))\.\d/
 
 # Matches ANY external relay.  This was __RCVD_VIA_APNIC until 2010-04-24.
-header __RCVD_VIA_APNIC_E X-Spam-Relays-External =~ /\[ ip=(?-xism:1|27|5[89]|6[01]|1(?:[12][0-6]|1[7-9]|75|8[0123])|2(?:03|1[0189]|2[012]|02(?!\.123\.0?(?:[012]\d|3[01])))|169\.2(?:0[89]|1\d|2[01]|223)|169\.2(?:1[04]|22))\.\d/
-tflags __RCVD_VIA_APNIC_E nopublish # not production-grade but useful for tests
+header	 __RCVD_VIA_APNIC_E	X-Spam-Relays-External  =~ /\[ ip=(?-xism:1|27|5[89]|6[01]|1(?:[12][0-6]|1[7-9]|75|8[0123])|2(?:03|1[0189]|2[012]|02(?!\.123\.(?:[012]?\d|3[01])))|169\.2(?:0[89]|1\d|2[01]|223)|169\.2(?:1[04]|22))\.\d/
+tflags	 __RCVD_VIA_APNIC_E	nopublish
 
+# African Network Informati Center (AfriNIC)
+# from http://www.afrinic.net/Registration/resources.htm at 20100524
+# Note that APNIC claims to have transferred 202.123.0.0/19 to AfriNIC
+# although AfriNIC appears to have no recognition of this.  
+# Also note APNIC and RIPE have some kind of proxy allocation deal assigning
+# 196.192.0.0/13 for AfriNIC (though it belongs to AfriNIC anyway...)
+# APNIC's site says the range is "used to make /22 allocations to future
+# members of AfriNIC" while RIPE says it allocates /24s from the same block to 
+# "Local Internet Registries (LIRs) and End Users in African countries north
+# of the equator."
+header	 __RCVD_VIA_AFRINIC	X-Spam-Relays-External =~ /^\[ ip=(?:(?:41|19[67])|202\.123\.(?:[12]?\d|3[01]))\.\d/
+header	 __RCVD_VIA_AFRINIC_E	X-Spam-Relays-External  =~ /\[ ip=(?:(?:41|19[67])|202\.123\.(?:[12]?\d|3[01]))\.\d/
+tflags	 __RCVD_VIA_AFRINIC_E	nopublish
+
+# Reseaux IP Europeens Network Coordination Centre (RIPE NCC)
+# (Europe, Middle East, parts of Central Asia)
+# from command:
+#     whois -h whois.ripe.net ' -rTrs RS-IP-ALLOCATIONS-TO-RIPE-NCC-FROM-IANA '
+# as noted at http://www.ripe.net/ripe/docs/ripe-493.html at 20100524
+header	 __RCVD_VIA_RIPE	X-Spam-Relays-External =~ /^\[ ip=(?:1(?:9[345]|7[68]|09|88)|2(?:1(?:[23]|7))?|7[789]|9[0-5]|8\d|31|46|62)\.\d/
+header	 __RCVD_VIA_RIPE_E	X-Spam-Relays-External  =~ /\[ ip=(?:1(?:9[345]|7[68]|09|88)|2(?:1(?:[23]|7))?|7[789]|9[0-5]|8\d|31|46|62)\.\d/
+tflags	 __RCVD_VIA_RIPE_E	nopublish
+
+# Latin American and Caribbean Internet Addresses Registry (LACNIC)
 # from http://lacnic.net/en/registro/ at 20100115
 header	 __RCVD_VIA_LACNIC	X-Spam-Relays-External =~ /^\[ ip=(?:1(?:90|8[679]|20(?:[01]\.|6\.223\.1(?:24|30))))\.\d/
 #tflags	 __RCVD_VIA_LACNIC	nopublish
-header	 __RCVD_VIA_LACNIC_E	X-Spam-Relays-External =~ /\[ ip=(?:1(?:90|8[679]|20(?:[01]\.|6\.223\.1(?:24|30))))\.\d/
+header	 __RCVD_VIA_LACNIC_E	X-Spam-Relays-External  =~ /\[ ip=(?:1(?:90|8[679]|20(?:[01]\.|6\.223\.1(?:24|30))))\.\d/
 tflags	 __RCVD_VIA_LACNIC_E	nopublish
 
+# American Registry of Internet Numbers (ARIN)
+# (Canada, many Carribbean and North Atlantic islands, the United States)
+# from https://www.arin.net/knowledge/ip_blocks.html at 20100524
+# ... that page is out of date.  Using IANA page instead:
+# http://www.iana.org/assignments/ipv4-address-space/ipv4-address-space.txt
+#header	 __RCVD_VIA_ARIN	X-Spam-Relays-External =~ /^\[ ip=(?:1(?:0[78]|7[34]|84|99)|2(?:0[4-9]|16|4)|6[3-9]|7[0-6]|9[6-9]|50)\.\d/
+header	 __RCVD_VIA_ARIN	X-Spam-Relays-External =~ /^\[ ip=(?!169\.254|172\.(?:1[6-9]|2\d|3[01])\.|192\.(?:0\.[02]|168)\.|198\.51\.100)(?:1(?:3[0124-9]|6[0124-9]|4[02346-9]|5[25-9]|7[0234]|9[289]|0[78]|2[89]|84)|2(?:0[4-9]|16|4)|7[0-6]?|6[3-9]|9[6-9]|50)\.\d/
+header	 __RCVD_VIA_ARIN_E	X-Spam-Relays-External  =~ /\[ ip=(?!169\.254|172\.(?:1[6-9]|2\d|3[01])\.|192\.(?:0\.[02]|168)\.|198\.51\.100)(?:1(?:3[0124-9]|6[0124-9]|4[02346-9]|5[25-9]|7[0234]|9[289]|0[78]|2[89]|84)|2(?:0[4-9]|16|4)|7[0-6]?|6[3-9]|9[6-9]|50)\.\d/
+tflags	 __RCVD_VIA_ARIN_E	nopublish
+
+# IP Space allocated before RIRs, mostly to corporations in the United States.
+# from iana source at 20100524 via command
+# perl -w -mRegexp::Assemble -e 'open (IANA, "<ipv4-address-space.txt"); my $re = Regexp::Assemble->new; while (<IANA>) { next if /RESERVED|IANA|whois\.(?:ripe|arin|apnic|afrinic|lacnic)\.net/; next unless m{^\s*\d{3}/\d+\s}; s/^(.{80}).*/$1/; chomp; print "$_\n"; s:/8.*| |^0+::g; $re->add($_); } print "$re\n"'
+header	 __RCVD_VIA_NON_RIR	X-Spam-Relays-External =~ /^\[ ip=(?:0(?:1[1235-9]|2[012689]|3[02-58]|4[034578]|5[2-7]|0[34689])|21[45])\.\d/
+header	 __RCVD_VIA_NON_RIR_E	X-Spam-Relays-External  =~ /\[ ip=(?:0(?:1[1235-9]|2[012689]|3[02-58]|4[034578]|5[2-7]|0[34689])|21[45])\.\d/
+tflags	 __RCVD_VIA_NON_RIR_E	nopublish
+
+# This should never hit anything.  If it does, there is a hole in a subrules.
+# One such hole is IPv6; RCVD_VIA_IPV6 is absent here because it doesn't work.
+meta	UNKNOWN_ORIGIN	!(__RCVD_VIA_AFRINIC || __RCVD_VIA_APNIC || __RCVD_VIA_ARIN || __RCVD_VIA_LACNIC || __RCVD_VIA_RIPE || __RCVD_VIA_NON_RIR || RCVD_ILLEGAL_IP)
 
 
 ifplugin Mail::SpamAssassin::Plugin::DNSEval # {
