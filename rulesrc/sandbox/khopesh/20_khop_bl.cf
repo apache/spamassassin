@@ -62,14 +62,19 @@ tflags	 __RCVD_VIA_ARIN_E	nopublish
 
 # IP Space allocated before RIRs, mostly to corporations in the United States.
 # from iana source at 20100524 via command
-# perl -w -mRegexp::Assemble -e 'open (IANA, "<ipv4-address-space.txt"); my $re = Regexp::Assemble->new; while (<IANA>) { next if /RESERVED|IANA|whois\.(?:ripe|arin|apnic|afrinic|lacnic)\.net/; next unless m{^\s*\d{3}/\d+\s}; s/^(.{80}).*/$1/; chomp; print "$_\n"; s:/8.*| |^0+::g; $re->add($_); } print "$re\n"'
+# (note, it doesn't collaps ranges, e.g. [1234567] -> [1-7] )
+# perl -w -mRegexp::Assemble -e 'open (IANA, "<ipv4-address-space.txt"); my $re = Regexp::Assemble->new; while (<IANA>) { next if /RESERVED|IANA|whois\.(?:ripe|arin|apnic|afrinic|lacnic)\.net/; next unless m{^\s*\d{3}/\d+\s}; chomp; print "$_\n"; s:/8.*| |^0+::g; $re->add($_); } print "$re\n"'
 header	 __RCVD_VIA_NON_RIR	X-Spam-Relays-External =~ /^\[ ip=(?:0(?:1[1235-9]|2[012689]|3[02-58]|4[034578]|5[2-7]|0[34689])|21[45])\.\d/
 header	 __RCVD_VIA_NON_RIR_E	X-Spam-Relays-External  =~ /\[ ip=(?:0(?:1[1235-9]|2[012689]|3[02-58]|4[034578]|5[2-7]|0[34689])|21[45])\.\d/
 tflags	 __RCVD_VIA_NON_RIR_E	nopublish
 
+# Note that none of the above RCVD_VIA rules account for IPv6, 
+# nor do any of the RCVD_ILLEGAL_IP rules.
+header	 __RCVD_VIA_IPV6	X-Spam-Relays-External =~ /^\[ ip=[0-9a-f:]+ /i
+header	 __RCVD_VIA_IPV6_E	X-Spam-Relays-External  =~ /\[ ip=[0-9a-f:]+ /i
+
 # This should never hit anything.  If it does, there is a hole in a subrules.
-# One such hole is IPv6; RCVD_VIA_IPV6 is absent here because it doesn't work.
-meta	UNKNOWN_ORIGIN	!(__RCVD_VIA_AFRINIC || __RCVD_VIA_APNIC || __RCVD_VIA_ARIN || __RCVD_VIA_LACNIC || __RCVD_VIA_RIPE || __RCVD_VIA_NON_RIR || RCVD_ILLEGAL_IP)
+meta	 UNKNOWN_ORIGIN	!(__RCVD_VIA_AFRINIC || __RCVD_VIA_APNIC || __RCVD_VIA_ARIN || __RCVD_VIA_LACNIC || __RCVD_VIA_RIPE || __RCVD_VIA_NON_RIR || RCVD_ILLEGAL_IP || __RCVD_VIA_IPV6)
 
 
 ifplugin Mail::SpamAssassin::Plugin::DNSEval # {
