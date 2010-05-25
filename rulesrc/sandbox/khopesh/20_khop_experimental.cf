@@ -181,11 +181,6 @@ tflags	 __HOTMAIL_HELO 	nice
 # 1 & 2 are in 20_head_tests.cf ... this one doesn't use eval rules
 meta	 FORGED_HOTMAIL_RCVD3	__HOST_HOTMAIL && (!__HOTMAIL_HELO || __DOS_SINGLE_EXT_RELAY)
 
-# This is broken and needs help
-header	 RCVD_VIA_IPV6	X-Spam-Relays-Untrusted =~ /^[^\]]+ (?:by|ip)=[^\]: ]+:/
-describe RCVD_VIA_IPV6	Received by the last trusted relay via IPv6
-tflags	 RCVD_VIA_IPV6	nice
-
 # A blend of sidney's UPPERCASE_HTTP and jhardin's URI_UC for bug 6408
 # This one avoids Http: which I think is the biggest problem.
 uri	 UPPERCASE_URI	/^[^:A-Z]+[A-Z]/
@@ -225,11 +220,24 @@ rawbody  __WEB_BUGS	m{<[^>]{4,100}\ssrc=[^>]{8,200}\.(?:pl|cgi|php\d?|asp|jsp|cf
 
 # Idea from Michael Scheidell of SECNAP on SpamAssassin Users List 2010-05-08
 # http://old.nabble.com/yahoo-X-YMail-OSG-tp28496110p28496110.html
-header   SINGLE_HEADER_1K	ALL:raw =~ /(?-xim:(?!X-Spam|X-MailScan)(?:^|\n)[^\s\n]+:(?:.(?!\n\S)){1024,2047}.(?:\n\S|$))/s
-header   SINGLE_HEADER_2K	ALL:raw =~ /(?-xim:(?:^|\n)[^\s\n]+:(?:.(?!\n\S)){2048,3071}.(?:\n\S|$))/s
-header   SINGLE_HEADER_3K	ALL:raw =~ /(?-xim:(?:^|\n)[^\s\n]+:(?:.(?!\n\S)){3072,4095}.(?:\n\S|$))/s
-header   SINGLE_HEADER_4K	ALL:raw =~ /(?-xim:(?:^|\n)[^\s\n]+:(?:.(?!\n\S)){4096,5119}.(?:\n\S|$))/s
-header   SINGLE_HEADER_5K	ALL:raw =~ /(?-xim:(?:^|\n)[^\s\n]+:(?:.(?!\n\S)){5120})/s
+header	 LONG_HEADER_LINE_80	ALL:raw =~ /^(?-xis:(?=(?!X-Spam|X-MailScan|Received).{80,159}$))/m
+header	 LONG_HEADER_LINE_160	ALL:raw =~ /^(?-xis:(?=(?!X-Spam|X-MailScan|Received).{160,239}$))/m
+header	 LONG_HEADER_LINE_240	ALL:raw =~ /^(?-xis:(?=(?!X-Spam|X-MailScan|Received).{240,319}$))/m
+header	 LONG_HEADER_LINE_320	ALL:raw =~ /^(?-xis:(?=(?!X-Spam|X-MailScan|Received).{320,399}$))/m
+header	 LONG_HEADER_LINE_400	ALL:raw =~ /^(?-xis:(?=(?!X-Spam|X-MailScan|Received).{400,499}$))/m
+header	 LONG_HEADER_LINE_500	ALL:raw =~ /^(?-xis:(?=(?!X-Spam|X-MailScan|Received).{500}))/m
+describe LONG_HEADER_LINE_80	A header line contains 80-159 characters
+describe LONG_HEADER_LINE_160	A header line contains 160-239 characters
+describe LONG_HEADER_LINE_240	A header line contains 240-319 characters
+describe LONG_HEADER_LINE_320	A header line contains 320-399 characters
+describe LONG_HEADER_LINE_400	A header line contains 400-499 characters
+describe LONG_HEADER_LINE_500	A header line contains 500+ characters
+
+header   SINGLE_HEADER_1K	ALL:raw =~ /(?-xim:(?=(?!X-Spam|X-MailScan)(?:^|\n)[^\s\n]+:(?:.(?!\n\S)){1024,2047}.(?:\n\S|$)))/s
+header   SINGLE_HEADER_2K	ALL:raw =~ /(?-xim:(?=(?:^|\n)[^\s\n]+:(?:.(?!\n\S)){2048,3071}.(?:\n\S|$)))/s
+header   SINGLE_HEADER_3K	ALL:raw =~ /(?-xim:(?=(?:^|\n)[^\s\n]+:(?:.(?!\n\S)){3072,4095}.(?:\n\S|$)))/s
+header   SINGLE_HEADER_4K	ALL:raw =~ /(?-xim:(?=(?:^|\n)[^\s\n]+:(?:.(?!\n\S)){4096,5119}.(?:\n\S|$)))/s
+header   SINGLE_HEADER_5K	ALL:raw =~ /(?-xim:(?=(?:^|\n)[^\s\n]+:(?:.(?!\n\S)){5120}))/s
 describe SINGLE_HEADER_1K	A single header contains 1K-2K characters
 describe SINGLE_HEADER_2K	A single header contains 2K-3K characters
 describe SINGLE_HEADER_3K	A single header contains 3K-4K characters
@@ -245,8 +253,8 @@ describe BIG_HEADERS_3K 	Headers contain 3K-4K characters total
 describe BIG_HEADERS_4K 	Headers contain 4K-5K characters total
 describe BIG_HEADERS_5K 	Headers contain 5K+ characters total
 
-header	 MS_XYMOSG_1K	X-Ymail-OSG =~ /^(?=.{1024,2047}$)/s
-header	 MS_XYMOSG_2K	X-Ymail-OSG =~ /^(?=.{2048,3071}$)/s
-header	 MS_XYMOSG_3K	X-Ymail-OSG =~ /^(?=.{3072,4095}$)/s
-header	 MS_XYMOSG_4K	X-Ymail-OSG =~ /^(?=.{4096,5119}$)/s
-header	 MS_XYMOSG_5K	X-Ymail-OSG =~ /^(?=.{4096})/s
+header	 MS_XYMOSG_1K	X-YMail-OSG =~ /^(?=.{1024,2047}$)/s
+header	 MS_XYMOSG_2K	X-YMail-OSG =~ /^(?=.{2048,3071}$)/s
+header	 MS_XYMOSG_3K	X-YMail-OSG =~ /^(?=.{3072,4095}$)/s
+header	 MS_XYMOSG_4K	X-YMail-OSG =~ /^(?=.{4096,5119}$)/s
+header	 MS_XYMOSG_5K	X-YMail-OSG =~ /^(?=.{4096})/s
