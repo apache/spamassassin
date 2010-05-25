@@ -62,6 +62,9 @@ tflags	 URL_SHORTENER	nopublish
 meta	 SHORT_URL	__SHORT_URL && !URL_SHORTENER && !ALL_TRUSTED
 describe SHORT_URL	Has a short URL without a shortening service
 
+rawbody	 SHORTENED_URL_SRC	/<[^>]{1,99}\ssrc=\W?http:\/\/(?:bit\.ly|tinyurl\.com|ow\.ly|is\.gd|tumblr\.com|formspring\.me|ff\.im|youtu\.be|tl\.gd|plurk\.com|migre\.me|j\.mp|cli\.gs|goo\.gl|yfrog\.com|lnk\.ms|su\.pr|fb\.me|alturl\.com|wp\.me|ping\.fm|chatter\.com|post\.ly|twurl\.nl|tiny\.cc|4sq\.com|ustre\.am|short\.to|u\.nu|flic\.kr|budurl\.com|digg\.com|twitvid\.com|gowal\.la|om\.ly|justin\.tv|icio\.us|p\.gs|loopt\.us|tcrn\.ch|xrl\.us|wpo\.st|bkite\.com)\/[^\/]{3}/
+rawbody	 SHORTENED_URL_HREF	/<[^>]{1,99}\shref=\W?http:\/\/(?:bit\.ly|tinyurl\.com|ow\.ly|is\.gd|tumblr\.com|formspring\.me|ff\.im|youtu\.be|tl\.gd|plurk\.com|migre\.me|j\.mp|cli\.gs|goo\.gl|yfrog\.com|lnk\.ms|su\.pr|fb\.me|alturl\.com|wp\.me|ping\.fm|chatter\.com|post\.ly|twurl\.nl|tiny\.cc|4sq\.com|ustre\.am|short\.to|u\.nu|flic\.kr|budurl\.com|digg\.com|twitvid\.com|gowal\.la|om\.ly|justin\.tv|icio\.us|p\.gs|loopt\.us|tcrn\.ch|xrl\.us|wpo\.st|bkite\.com)\/[^\/]{3}/
+
 # I don't think this ever fires
 uri	 URI_HIDDEN	m'.{7}\/\.\.?/?\w'
 describe URI_HIDDEN	Contains a hidden directory
