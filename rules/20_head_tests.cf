@@ -416,7 +416,7 @@ describe __VIA_ML  Mail from a mailing list
 
 
 # must keep it in sync with http://www.iana.org/assignments/ipv4-address-space/
-header RCVD_ILLEGAL_IP		X-Spam-Relays-Untrusted =~ / (?:by|ip)=(?:[057]|22[4-9]|2[3-9]\d|[12]\d{3,}|[3-9]\d\d+)\.\d+\.\d+\.\d+ /
+header RCVD_ILLEGAL_IP		X-Spam-Relays-Untrusted =~ / (?:by|ip)=(?:[05]|14|23|3[1679]|4[29]|1(?:0[0-6]|7[679]|8[15])|2(?:2[3-9]|[3-5]\d)|169\.254|192\.0\.2|198\.51\.100|203\.0\.113)\./
 describe RCVD_ILLEGAL_IP	Received: contains illegal IP address
 
 
