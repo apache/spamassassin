@@ -23,7 +23,7 @@ use bytes;
 use Fcntl;
 
 use Mail::SpamAssassin::PersistentAddrList;
-use Mail::SpamAssassin::Util qw(untaint_var);
+use Mail::SpamAssassin::Util;
 use Mail::SpamAssassin::Logger;
 
 use vars qw{
@@ -57,7 +57,6 @@ sub new_checker {
   };
 
   my @order = split (' ', $main->{conf}->{auto_whitelist_db_modules});
-  untaint_var(\@order);
   my $dbm_module = Mail::SpamAssassin::Util::first_available_module (@order);
   if (!$dbm_module) {
     die "auto-whitelist: cannot find a usable DB package from auto_whitelist_db_modules: " .
