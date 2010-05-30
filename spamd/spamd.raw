@@ -2189,7 +2189,7 @@ sub handle_user_vpopmail {
     while (@aliases) {
       my $vpopusername_tainted = shift(@aliases);
       local $1;
-      if ($vpopusername_tainted =~ /->  &?(.+)$/) {
+      if ($vpopusername_tainted =~ /-> &?(.+)$/) {
         $vpopusername = untaint_var($1);
         if ($vpopusername =~ s{^(/.+)/Maildir/$}{$1}) {
           # this is the path to a real mailbox
