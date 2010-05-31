@@ -1372,6 +1372,30 @@ sub remove_from_addrlist_rcvd {
   }
 }
 
+sub add_to_addrlist_dkim {
+  add_to_addrlist_rcvd(@_);
+}
+
+sub remove_from_addrlist_dkim {
+  my ($self, $listname, $addr, $domain) = @_;
+  my $conf = $self->{conf};
+  my $conf_lname = $conf->{$listname};
+
+  $addr = lc $addr;
+  if ($conf_lname->{$addr}) {
+    $domain = lc $domain;
+    my $domains_listref = $conf_lname->{$addr}{domain};
+    # removing $domain from the list
+    my @replacement = grep { lc $_ ne $domain } @$domains_listref;
+    if (!@replacement) {  # nothing left, remove the entire addr entry
+      delete($conf_lname->{$addr});
+    } elsif (@replacement != @$domains_listref) {  # anything changed?
+      $conf_lname->{$addr}{domain} = \@replacement;
+    }
+  }
+}
+
+
 ###########################################################################
 
 sub fix_path_relative_to_current_file {
