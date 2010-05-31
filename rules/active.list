@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix jm kgolding wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 2: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-trec_enron bb-zmi bernie-it_batt bernie-mix jm kgolding wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 3: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix jm kgolding wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2
+# with results from: day 1: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix kgolding wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 2: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix jm kgolding wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 3: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-trec_enron bb-zmi bernie-it_batt bernie-mix jm kgolding wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2
 
 # tflags publish
 ADVANCE_FEE_2_NEW_FORM
@@ -334,9 +334,6 @@ HASHCASH_2SPEND
 # tflags userconf
 HASHCASH_HIGH
 
-# good enough
-HDRS_MISSP
-
 # tflags userconf
 HEAD_LONG
 
@@ -360,9 +357,6 @@ HK_FAKENAME_PAYPAL
 
 # good enough
 HK_NAME_DRUGS
-
-# good enough
-HK_NAME_FM_DR
 
 # good enough
 HK_NAME_FM_MR_MRS
@@ -464,9 +458,6 @@ MIME_CHARSET_FARAWAY
 MISSING_HB_SEP
 
 # good enough
-MONEY_FRAUD_5
-
-# good enough
 MONEY_FRAUD_8
 
 # good enough
@@ -498,9 +489,6 @@ OBFU_ATTACH_MISSP
 
 # tflags publish
 OBFU_TEXT_ATTACH
-
-# good enough
-PART_CID_STOCK
 
 # tflags net
 PYZOR_CHECK
@@ -764,9 +752,6 @@ SPF_SOFTFAIL
 STOCK_IMG_HDR_FROM
 
 # good enough
-STOX_META_5
-
-# good enough
 STOX_REPLY_TYPE
 
 # good enough
@@ -828,6 +813,24 @@ TVD_RCVD_SINGLE
 
 # good enough
 TVD_VISIT_PHARMA
+
+# good enough
+FSL_FAKE_YAHOO_RCVD
+
+# good enough
+HK_SPAMMY_FILENAME
+
+# good enough
+MANY_SUBDOM
+
+# good enough
+NSL_RCVD_HELO_USER
+
+# good enough
+RCVD_HAS_HELO_USER
+
+# good enough
+SANE_237c2b0099548ddbfa5a37f07e0687ab
 
 # tflags userconf
 UNPARSEABLE_RELAY
