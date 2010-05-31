@@ -1019,9 +1019,12 @@ sub spawn {
   $backchannel->setup_backchannel_parent_pre_fork();
 
   # block signal for fork
-  my $sigset = POSIX::SigSet->new( POSIX::SIGINT(), POSIX::SIGCHLD() );
-  sigprocmask( POSIX::SIG_BLOCK(), $sigset )
-    or die "spamd: cannot block SIGINT/SIGCHLD for fork: $!\n";
+  my $sigset;
+  if (!am_running_on_windows()) {
+    $sigset = POSIX::SigSet->new( POSIX::SIGINT(), POSIX::SIGCHLD() );
+    sigprocmask( POSIX::SIG_BLOCK(), $sigset )
+      or die "spamd: cannot block SIGINT/SIGCHLD for fork: $!\n";
+  }    
 
   $pid = fork();
   die "spamd: fork: $!" unless defined $pid;
@@ -1035,8 +1038,10 @@ sub spawn {
     if ($scaling) {
       $scaling->add_child($pid);
     }
-    sigprocmask( POSIX::SIG_UNBLOCK(), $sigset )
-      or die "spamd: cannot unblock SIGINT/SIGCHLD for fork: $!\n";
+    if (!am_running_on_windows()) {
+      sigprocmask( POSIX::SIG_UNBLOCK(), $sigset )
+        or die "spamd: cannot unblock SIGINT/SIGCHLD for fork: $!\n";
+    }
     #Changing to return the process id to improve communications for bug 6304
     return $pid;
   }
@@ -1046,8 +1051,10 @@ sub spawn {
     # Reset signal handling to default settings, and unblock.
     # These lines must be as soon as possible after the fork (bug 4304)
     setup_child_sig_handlers();
-    sigprocmask( POSIX::SIG_UNBLOCK(), $sigset )
-      or die "spamd: cannot unblock SIGINT/SIGCHLD for fork: $!\n";
+    if (!am_running_on_windows()) {
+      sigprocmask( POSIX::SIG_UNBLOCK(), $sigset )
+        or die "spamd: cannot unblock SIGINT/SIGCHLD for fork: $!\n";
+    }
 
     $spamtest->call_plugins("spamd_child_init");
 
