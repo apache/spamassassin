@@ -2482,8 +2482,16 @@ sub child_handler {
   # children.  This is due to syslog-ng brokenness -- bugs 3625, 4237.
 
   # clean up any children which have exited
-  while((my $pid = waitpid(-1, WNOHANG)) > 0) {
-    my $child_stat = $pid > 0 ? $? : undef;
+  for (;;) {
+    # waitpid returns a pid of the deceased process, or -1 if there is no
+    # such child process. On some systems, a value of 0 indicates that there
+    # are processes still running. Note that Windows uses negative pids for
+    # child processes - bug 6376, bug 6356.
+    #
+    my $pid = waitpid(-1, WNOHANG);
+    last if !$pid || $pid == -1;
+    my $child_stat = $?;
+
     if (!defined $children{$pid}) {
       # ignore this child; we didn't realise we'd forked it. bug 4237
       next;
