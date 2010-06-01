@@ -443,10 +443,12 @@ my $log_facility = $opt{'syslog'} || 'mail';
 #  socket of 'none' means as much as --syslog=null. Sounds complicated? It is.
 #  But it works.
 # )
-my $log_socket = lc($opt{'syslog-socket'});
+my $log_socket = $opt{'syslog-socket'};
 
 if (!defined $log_socket || $log_socket eq '') {
   $log_socket = am_running_on_windows() ? 'none' : 'unix';
+} else {
+  $log_socket = lc $log_socket;
 }
 
 # This is the default log file; it can be changed on the command line
