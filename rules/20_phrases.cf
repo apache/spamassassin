@@ -147,7 +147,7 @@ describe MARKETING_PARTNERS	Claims you registered with a partner
 body LOW_PRICE                  /\blow.{0,4} (?-i:P)rice/i
 describe LOW_PRICE              Lowest Price
 
-body UNCLAIMED_MONEY            /\bunclaimed\s(?:assets?|accounts?|mon(?:ey|ies)|balance|funds?|prizes?|rewards?|payments?)\b/i
+body UNCLAIMED_MONEY            /\bunclaimed\s(?:assets?|accounts?|mon(?:ey|ies)|balance|funds?|prizes?|rewards?|payments?|deposits?)\b/i
 describe UNCLAIMED_MONEY        People just leave money laying around
 
 body OBSCURED_EMAIL		/\w+\^\S+\(\w{2,4}\b/
