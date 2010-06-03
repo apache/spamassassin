@@ -2247,8 +2247,10 @@ Example: http://chkpt.zdnet.com/chkpt/whatever/spammer.domain/yo/dude
 =item header SYMBOLIC_TEST_NAME header op /pattern/modifiers	[if-unset: STRING]
 
 Define a test.  C<SYMBOLIC_TEST_NAME> is a symbolic test name, such as
-'FROM_ENDS_IN_NUMS'.  C<header> is the name of a mail header field, such as
-'Subject', 'To', 'From', etc.
+'FROM_ENDS_IN_NUMS'.  C<header> is the name of a mail header field,
+such as 'Subject', 'To', 'From', etc.  Header field names are matched
+case-insensitively (conforming to RFC 5322 section 1.2.2), except for
+all-capitals metaheader fields such as ALL, MESSAGEID, ALL-TRUSTED.
 
 Appending a modifier C<:raw> to a header field name will inhibit decoding of
 quoted-printable or base-64 encoded strings, and will preserve all whitespace

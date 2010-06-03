@@ -1525,6 +1525,7 @@ sub _get {
   my $getaddr = 0;
   my $getname = 0;
   my $getraw = 0;
+  my $request_lc = lc $request;
 
   # special queries - process and strip modifiers
   if (index($request,':') >= 0) {  # triage
@@ -1567,27 +1568,27 @@ sub _get {
 			$self->{last_internal_relay_index}+1, undef);
   }
   # EnvelopeFrom: the SMTP MAIL FROM: address
-  elsif ($request eq 'EnvelopeFrom') {
+  elsif ($request_lc eq "\LEnvelopeFrom") {
     $result = $self->get_envelope_from();
   }
   # untrusted relays list, as string
-  elsif ($request eq 'X-Spam-Relays-Untrusted') {
+  elsif ($request_lc eq "\LX-Spam-Relays-Untrusted") {
     $result = $self->{relays_untrusted_str};
   }
   # trusted relays list, as string
-  elsif ($request eq 'X-Spam-Relays-Trusted') {
+  elsif ($request_lc eq "\LX-Spam-Relays-Trusted") {
     $result = $self->{relays_trusted_str};
   }
   # external relays list, as string
-  elsif ($request eq 'X-Spam-Relays-External') {
+  elsif ($request_lc eq "\LX-Spam-Relays-External") {
     $result = $self->{relays_external_str};
   }
   # internal relays list, as string
-  elsif ($request eq 'X-Spam-Relays-Internal') {
+  elsif ($request_lc eq "\LX-Spam-Relays-Internal") {
     $result = $self->{relays_internal_str};
   }
   # ToCc: the combined recipients list
-  elsif ($request eq 'ToCc') {
+  elsif ($request_lc eq "\LToCc") {
     $result = join("\n", $self->{msg}->get_header('To', $getraw));
     if ($result ne '') {
       chomp $result;
