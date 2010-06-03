@@ -471,8 +471,9 @@ sub get_metadata {
     warn "metadata: oops! get_metadata() called after finish_metadata()"; return;
   }
 # dbg("message: get_metadata - %s: %s", $hdr, defined $_ ? $_ : '<undef>')
-#   for $self->{metadata}->{strings}->{$hdr};
-  $self->{metadata}->{strings}->{$hdr};
+#   for $self->{metadata}->{strings}->{lc $hdr};
+
+  $self->{metadata}->{strings}->{lc $hdr};
 }
 
 =item put_metadata($hdr, $text)
@@ -485,7 +486,7 @@ sub put_metadata {
     warn "metadata: oops! put_metadata() called after finish_metadata()"; return;
   }
 # dbg("message: put_metadata - %s: %s", $hdr, $text);
-  $self->{metadata}->{strings}->{$hdr} = $text;
+  $self->{metadata}->{strings}->{lc $hdr} = $text;
 }
 
 =item delete_metadata($hdr)
@@ -497,7 +498,7 @@ sub delete_metadata {
   if (!$self->{metadata}) {
     warn "metadata: oops! delete_metadata() called after finish_metadata()"; return;
   }
-  delete $self->{metadata}->{strings}->{$hdr};
+  delete $self->{metadata}->{strings}->{lc $hdr};
 }
 
 =item $str = get_all_metadata()
@@ -511,8 +512,9 @@ sub get_all_metadata {
     warn "metadata: oops! get_all_metadata() called after finish_metadata()"; return;
   }
   my @ret;
-  foreach my $key (sort keys %{$self->{metadata}->{strings}}) {
-    my $val = $self->{metadata}->{strings}->{$key};
+  my $keys_ref = $self->{metadata}->{strings};
+  foreach my $key (sort keys %$keys_ref) {
+    my $val = $keys_ref->{$key};
     $val = ''  if !defined $val;
     push (@ret, "$key: $val\n");
   }
