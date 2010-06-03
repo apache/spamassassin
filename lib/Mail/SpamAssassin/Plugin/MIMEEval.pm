@@ -296,7 +296,16 @@ sub _check_attachments {
       }
 
       if ($where != 1 && $cte eq "quoted-printable" && ! /^SPAM: /) {
-        if (length > 77) {
+        # RFC 5322: Each line SHOULD be no more than 78 characters,
+        #           excluding the CRLF
+        # RFC 2045: The Quoted-Printable encoding REQUIRES that
+        #           encoded lines be no more than 76 characters long.
+        # Bug 5491: 6% of email classified as HAM by SA triggered the
+        #           MIME_QP_LONG_LINE rule. Apple Mail can generate a QP-line
+        #           that is 2 chars too long. Same goes for Outlook Web Access.
+        # lines include one trailing \n character
+      # if (length > 76+1) {  # conforms to RFC 5322 and RFC 2045
+        if (length > 78+1) {  # conforms to RFC 5322 only, not RFC 2045
 	  $pms->{mime_qp_long_line} = 1;
         }
         $qp_bytes += length;
