@@ -1525,7 +1525,6 @@ sub _get {
   my $getaddr = 0;
   my $getname = 0;
   my $getraw = 0;
-  my $request_lc = lc $request;
 
   # special queries - process and strip modifiers
   if (index($request,':') >= 0) {  # triage
@@ -1536,6 +1535,7 @@ sub _get {
       elsif ($1 eq 'name') { $getname = 1 }
     }
   }
+  my $request_lc = lc $request;
 
   # ALL: entire pristine or semi-raw headers
   if ($request eq 'ALL') {
