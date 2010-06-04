@@ -961,7 +961,7 @@ if ($copy_config_p) {
 
 # bonus: SIGUSR2 to dump a stack trace.  this is never reset
 my $current_msgid = "(none)";
-$SIG{USR2} = \&backtrace_handler;
+$SIG{USR2} = \&backtrace_handler  if !am_running_on_windows();
 
 # log server started, but processes watching the log to wait for connect
 # should wait until they see the pid, after signal handlers are in place
@@ -1002,12 +1002,14 @@ while (1) {
     # bug 4190: use a time-limited sleep, and call child_handler() even
     # if haven't received a SIGCHLD, due to inherent race condition
     sleep 10;
-    child_handler();
   } else {
     $scaling->main_server_poll($opt{'server-scale-period'});
   }
+  # bug 6377: on win32 the parent never receives SIGCHLD
+# child_handler()  if !$scaling || am_running_on_windows();
+  child_handler();  # it doesn't hurt to call child_handler unconditionally
 
-  ( defined $got_sighup ) and do_sighup_restart();
+  do_sighup_restart()  if defined $got_sighup;
 
   for (my $i = keys %children; $i < $childlimit; $i++) {
     spawn();
@@ -2448,7 +2450,16 @@ sub setup_parent_sig_handlers {
 sub setup_child_sig_handlers {
   # note: all the signals changed in setup_parent_sig_handlers() must
   # be reset to appropriate values here!
-  $SIG{HUP} = $SIG{CHLD} = $SIG{INT} = $SIG{TERM} = 'DEFAULT';
+  my $h = 'DEFAULT';
+  if (am_running_on_windows()) {
+    # on win32 the parent never receives SIGCHLD
+    $h = sub { my($sig) = @_;
+               info("spamd: child got SIG$sig, exiting");
+               kill QUIT => 0;
+               exit 0;
+             };
+  }
+  $SIG{$_} = $h  foreach qw(HUP INT TERM CHLD);
   $SIG{PIPE} = 'IGNORE';
 }
 
@@ -2472,7 +2483,11 @@ sub kill_handler {
   if ($scaling) {
     $scaling->set_exiting_flag(); # don't start new ones
   }
-  kill 'INT' => keys %children;
+  my $killsig = am_running_on_windows() ? 'KILL' : 'INT';
+  foreach my $pid (keys %children) {
+    kill($killsig, $pid)
+      or info("spamd: cannot send SIG$killsig to child process [$pid]: $!");
+  }
   exit 0;
 }
 
