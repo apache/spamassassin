@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix dos jm kgolding wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 2: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix jm kgolding wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 3: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix jm kgolding wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2
+# with results from: day 1: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix kgolding wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 2: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix dos jm kgolding wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 3: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix jm kgolding wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2
 
 # tflags publish
 ADVANCE_FEE_2_NEW_FORM
@@ -224,16 +224,13 @@ FROM_MISSP_USER
 FSL_FAKE_HOTMAIL_RVCD
 
 # good enough
+FSL_FAKE_YAHOO_RCVD
+
+# good enough
 FSL_HELO_BARE_IP_1
 
 # good enough
 FSL_HELO_DEVICE
-
-# good enough
-FSL_HELO_NON_FQDN_1
-
-# good enough
-FSL_INTERIA_ABUSE
 
 # good enough
 FSL_LSPACES_ABUSE
@@ -677,7 +674,88 @@ TVD_RCVD_SINGLE
 TVD_VISIT_PHARMA
 
 # good enough
-FSL_FAKE_YAHOO_RCVD
+DATE_DOTS
+
+# good enough
+FORM_FRAUD_3
+
+# good enough
+FORM_FRAUD_5
+
+# good enough
+FROM_MISSP_EH_MATCH
+
+# good enough
+FROM_MISSP_REPLYTO
+
+# good enough
+FROM_UNBAL1
+
+# good enough
+FROM_UNBAL2
+
+# good enough
+FROM_URI
+
+# good enough
+FROM_WSP_LEAD
+
+# good enough
+FR_TITLE_CONS_6
+
+# good enough
+FSL_UA
+
+# good enough
+HK_NAME_FM_MR_MRS
+
+# good enough
+HK_NAME_FREE
+
+# good enough
+HK_NAME_FROM
+
+# good enough
+HK_RANDOM_FROM
+
+# good enough
+HK_SCAM_N1
+
+# good enough
+HK_SCAM_N15
+
+# good enough
+HK_SCAM_N3
+
+# good enough
+HK_SCAM_N4
+
+# good enough
+HK_SCAM_N8
+
+# good enough
+IMG_DIRECT_TO_MX
+
+# good enough
+LOTTO_AGENT_RPLY
+
+# good enough
+LOTTO_URI
+
+# good enough
+MONEY_PERCENT
+
+# good enough
+MS_XYMOSG_2K
+
+# good enough
+OBFU_ATTACH_MISSP
+
+# good enough
+SCRIPT_GIBBERISH
+
+# good enough
+SINGLE_HEADER_3K
 
 # tflags userconf
 UNPARSEABLE_RELAY
