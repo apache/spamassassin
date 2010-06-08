@@ -261,6 +261,7 @@ GetOptions(
   'ssl-version=s'            => \$opt{'ssl-version'},
   'syslog-socket=s'          => \$opt{'syslog-socket'},
   'syslog|s=s'               => \$opt{'syslog'},
+  'log-timestamp-fmt:s'      => \$opt{'log-timestamp-fmt'},
   'timeout-tcp|T=i'          => \$opt{'timeout-tcp'},
   'timeout-child|t=i'        => \$opt{'timeout-child'},
   'user-config'              => \$opt{'user-config'},
@@ -297,6 +298,16 @@ if ($opt{'version'}) {
   exit($resphash{'EX_OK'});
 }
 
+my $log_timestamp_fmt = $opt{'log-timestamp-fmt'};
+if (defined $log_timestamp_fmt && lc($log_timestamp_fmt) eq 'default') {
+  undef $log_timestamp_fmt;  # undefined implies per-logger's default
+}
+if (defined $log_timestamp_fmt) {
+  # a nondefault timestamp format was specified, need to reopen stderr logger
+  Mail::SpamAssassin::Logger::remove('stderr');
+  Mail::SpamAssassin::Logger::add(method => 'stderr',
+				  timestamp_fmt => $log_timestamp_fmt);
+}
 
 # Enable debugging, if any areas were specified.  We do this already here,
 # accessing some non-public API so we can use the convenient dbg() routine.
@@ -443,6 +454,7 @@ my $log_facility = $opt{'syslog'} || 'mail';
 #  socket of 'none' means as much as --syslog=null. Sounds complicated? It is.
 #  But it works.
 # )
+
 my $log_socket = $opt{'syslog-socket'};
 
 if (!defined $log_socket || $log_socket eq '') {
@@ -486,12 +498,21 @@ if ($log_facility eq 'stderr') {
   $log_socket = 'file';
 }
 
+# The --log-timestamp-fmt option can provide a POSIX strftime(3) format for
+# timestamps included in each logged message. Each logger (stderr, file,
+# syslog) has its own default value for a timestamp format, which applies when
+# --log-timestamp-fmt option is not given, or with --log-timestamp-fmt=default 	
+# Timestamps can be turned off by specifying an empty string with this
+# option, e.g. --log-timestamp-fmt='' or just --log-timestamp-fmt=
+# Typical use: --log-timestamp-fmt='%a %b %e %H:%M:%S %Y' .
+
 # Logging via syslog is requested.
 if ($log_socket ne 'file' && $log_facility ne 'null') {
   if (!Mail::SpamAssassin::Logger::add(method => 'syslog',
 				       socket => $log_socket,
 				       facility => $log_facility,
-                                       ident => 'spamd'))
+				       ident => 'spamd',
+				       timestamp_fmt => $log_timestamp_fmt))
   {
     # syslog method failed 
     $log_facility = 'stderr';
@@ -500,7 +521,8 @@ if ($log_socket ne 'file' && $log_facility ne 'null') {
 # Otherwise, the user wants to log to some file.
 elsif ($log_facility eq 'file') {
   if (!Mail::SpamAssassin::Logger::add(method => 'file',
-				       filename => $log_file))
+				       filename => $log_file,
+				       timestamp_fmt => $log_timestamp_fmt))
   {
     # file method failed
     $log_facility = 'stderr';
@@ -2848,6 +2870,8 @@ Options:
  -r pidfile, --pidfile             Write the process id to pidfile
  -s facility, --syslog=facility    Specify the syslog facility
  --syslog-socket=type              How to connect to syslogd
+ --log-timestamp-fmt=fmt           strftime(3) format for timestamps, may be
+                                   empty to disable timestamps, or 'default'
  -u username, --username=username  Run as username
  -g groupname, --groupname=groupname  Run as groupname
  -v, --vpopmail                    Enable vpopmail config
@@ -3115,6 +3139,20 @@ regarding B<__PATH_LOG> or similar spamd, try changing this setting.
 
 The socket types C<file> is used internally and should not be specified.
 Use the C<-s> switch instead.
+
+=item B<--log-timestamp-fmt>=I<format>
+
+The --log-timestamp-fmt option can provide a POSIX strftime(3) format for
+timestamps included in each logged message. Each logger (stderr, file,
+syslog) has its own default value for a timestamp format, which applies when
+--log-timestamp-fmt option is not given, or with --log-timestamp-fmt=default .
+Timestamps can be turned off by specifying an empty string with this
+option, e.g. --log-timestamp-fmt='' or just --log-timestamp-fmt= .
+Typical use: --log-timestamp-fmt='%a %b %e %H:%M:%S %Y' (provides
+localized weekday and month names in the ctime(3) style),
+or '%a, %e %b %Y %H:%M:%S %z (%Z)' for a RFC 2822 format,
+or maybe '%Y-%m-%d %H:%M:%S%z' for an ISO 8601 (EN 28601) format,
+or just '%Y%m%dT%H%M%S' .
 
 =item B<-u> I<username>, B<--username>=I<username>
 
