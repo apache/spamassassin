@@ -4236,6 +4236,7 @@ sub sa_die { Mail::SpamAssassin::sa_die(@_); }
 
 sub feature_originating_ip_headers { 1 }
 sub feature_dns_local_ports_permit_avoid { 1 }
+sub feature_bayes_auto_learn_on_error { 1 }
 
 ###########################################################################
 
