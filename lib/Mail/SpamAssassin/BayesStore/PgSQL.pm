@@ -638,7 +638,69 @@ do in tok_get_all)
 
 =cut
 
-sub tok_touch_all {
+sub tok_touch_all {  # proposed in bug 6444
+  my ($self, $tokens, $atime) = @_;
+
+  return 0 unless (defined($self->{_dbh}));
+
+  return 1 unless (scalar(@{$tokens}));
+
+  my $sql =
+    "UPDATE bayes_token SET atime=? WHERE id=? AND token=? AND atime < ?";
+
+  my $sth = $self->{_dbh}->prepare_cached($sql);
+  unless (defined($sth)) {
+    dbg("bayes: tok_touch_all: SQL error: ".$self->{_dbh}->errstr());
+    return 0;
+  }
+
+  my $bytea_type = { pg_type => DBD::Pg::PG_BYTEA };
+  $sth->bind_param(1, $atime);
+  $sth->bind_param(2, $self->{_userid});
+# $sth->bind_param(3, $token, $bytea_type);  # later
+  $sth->bind_param(4, $atime);
+
+  $self->{_dbh}->begin_work();
+
+  my $n_updates = 0;
+  foreach my $token (@$tokens) {
+    $sth->bind_param(3, $token, $bytea_type);
+    my $rc = $sth->execute();
+    unless ($rc) {
+      dbg("bayes: tok_touch_all: SQL error: ".$self->{_dbh}->errstr());
+      $self->{_dbh}->rollback();
+      return 0;
+    }
+    my $rows = $sth->rows;
+    unless (defined($rows) && $rows >= 0) {
+      dbg("bayes: tok_touch_all: SQL error: ".$self->{_dbh}->errstr());
+      $self->{_dbh}->rollback();
+      return 0;
+    }
+    if ($rows > 0) { $n_updates++ }
+  }
+
+  # if we didn't update a row then no need to update newest_token_age
+  if ($n_updates) {  # update newest_token_age
+    # need to check newest_token_age
+    # no need to check oldest_token_age since we would only update if the
+    # atime was newer than what is in the database
+    my $sql_upd_age = "UPDATE bayes_vars SET newest_token_age = ?".
+                      " WHERE id = ? AND newest_token_age < ?";
+    my $rows = $self->{_dbh}->do($sql_upd_age,
+                                 undef, $atime, $self->{_userid}, $atime);
+    unless (defined($rows) && $rows >= 0) {
+      dbg("bayes: tok_touch_all: SQL error: ".$self->{_dbh}->errstr());
+      $self->{_dbh}->rollback();
+      return 0;
+    }
+  }
+  $self->{_dbh}->commit();
+  dbg("bayes: tok_touch_all: HERE3 updated %d tokens", $n_updates);
+  return 1;
+}
+
+sub tok_touch_all_old {
   my ($self, $tokens, $atime) = @_;
 
   return 0 unless (defined($self->{_dbh}));
@@ -714,39 +776,6 @@ sub tok_touch_all {
     $self->{_dbh}->rollback();
     return 0;
   }
-
-  $self->{_dbh}->commit();
-
-  return 1;
-}
-
-
-sub tok_touch_allold {
-  my ($self, $tokens, $atime) = @_;
-
-  return 0 unless (defined($self->{_dbh}));
-
-  return 1 unless (scalar(@{$tokens}));
-
-  my $tokenarray = join(",", map { '"' . _quote_bytea($_) . '"' } sort @{$tokens});
-
-  my $sth = $self->{_dbh}->prepare("select touch_tokens($self->{_userid}, $self->{_esc_prefix}'{$tokenarray}', $atime)");
-
-  unless (defined($sth)) {
-    dbg("bayes: tok_touch_all: SQL error: ".$self->{_dbh}->errstr());
-    $self->{_dbh}->rollback();
-    return 0;
-  }
-
-  my $rc = $sth->execute();
-
-  unless ($rc) {
-    dbg("bayes: tok_touch_all: SQL error: ".$self->{_dbh}->errstr());
-    $self->{_dbh}->rollback();
-    return 0;
-  }
-
-  $sth->finish();
 
   $self->{_dbh}->commit();
 
