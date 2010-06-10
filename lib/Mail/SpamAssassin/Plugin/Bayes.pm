@@ -670,8 +670,10 @@ sub scan {
 
   my $msgtokens = $self->tokenize($msg, $msgdata);
 
-  my $tokensdata = $self->{store}->tok_get_all(keys %{$msgtokens});
-
+  my $tokensdata;
+  { my $timer = $self->{main}->time_method('tok_get_all');
+    $tokensdata = $self->{store}->tok_get_all(keys %{$msgtokens});
+  }
   my %pw;
 
   foreach my $tokendata (@{$tokensdata}) {
@@ -769,7 +771,10 @@ sub scan {
   # no need to call tok_touch_all unless there were significant
   # tokens and a score was returned
   # we don't really care about the return value here
-  $self->{store}->tok_touch_all(\@touch_tokens, $msgatime);
+
+  { my $timer = $self->{main}->time_method('tok_touch_all');
+    $self->{store}->tok_touch_all(\@touch_tokens, $msgatime);
+  }
 
   $permsgstatus->{bayes_nspam} = $ns;
   $permsgstatus->{bayes_nham} = $nn;
