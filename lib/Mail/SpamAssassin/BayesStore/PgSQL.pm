@@ -696,7 +696,7 @@ sub tok_touch_all {  # proposed in bug 6444
     }
   }
   $self->{_dbh}->commit();
-  dbg("bayes: tok_touch_all: HERE3 updated %d tokens", $n_updates);
+  dbg("bayes: tok_touch_all: updated %d tokens", $n_updates);
   return 1;
 }
 

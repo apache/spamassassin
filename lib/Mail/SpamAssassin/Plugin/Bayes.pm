@@ -668,14 +668,18 @@ sub scan {
 
   my $msgdata = $self->_get_msgdata_from_permsgstatus ($permsgstatus);
 
-  my $msgtokens = $self->tokenize($msg, $msgdata);
+  my $msgtokens;
+  { my $timer = $self->{main}->time_method('b_tokenize');
+    $msgtokens = $self->tokenize($msg, $msgdata);
+  }
 
   my $tokensdata;
-  { my $timer = $self->{main}->time_method('tok_get_all');
+  { my $timer = $self->{main}->time_method('b_tok_get');
     $tokensdata = $self->{store}->tok_get_all(keys %{$msgtokens});
   }
   my %pw;
 
+  my $timer_compute_prob = $self->{main}->time_method('b_comp_prob');
   foreach my $tokendata (@{$tokensdata}) {
     my ($token, $tok_spam, $tok_ham, $atime) = @{$tokendata};
     my $prob = $self->_compute_prob_for_token($token, $ns, $nn, $tok_spam, $tok_ham);
@@ -762,6 +766,7 @@ sub scan {
   }
 
   $score = Mail::SpamAssassin::Bayes::Combine::combine($ns, $nn, \@sorted);
+  undef $timer_compute_prob;  # end a timing section
 
   # Couldn't come up with a probability?
   goto skip unless defined $score;
@@ -772,7 +777,7 @@ sub scan {
   # tokens and a score was returned
   # we don't really care about the return value here
 
-  { my $timer = $self->{main}->time_method('tok_touch_all');
+  { my $timer = $self->{main}->time_method('b_tok_touch');
     $self->{store}->tok_touch_all(\@touch_tokens, $msgatime);
   }
 
@@ -791,6 +796,7 @@ sub scan {
 					    });
 
 skip:
+  undef $timer_compute_prob;  # end a timing section if still running
   if (!defined $score) {
     dbg("bayes: not scoring message, returning undef");
   }
