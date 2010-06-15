@@ -725,7 +725,7 @@ This method updates the given tokens (C<$token>) access time.
 
 sub tok_touch {
   my ($self, $token, $atime) = @_;
-  die "bayes: tok_touch: not implemanted\n";
+  die "bayes: tok_touch: not implemented\n";
 }
 
 =item tok_touch_all
@@ -741,7 +741,7 @@ atime is < C<$atime>.
 
 sub tok_touch_all {
   my ($self, $tokens, $atime) = @_;
-  die "bayes: tok_touch_all: not implemanted\n";
+  die "bayes: tok_touch_all: not implemented\n";
 }
 
 =item cleanup
