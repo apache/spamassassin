@@ -129,6 +129,7 @@ sub tie_db_readonly {
   }
 
   my $main = $self->{bayes}->{main};
+  my $timer_tie_ro = $main->time_method('b_tie_ro');
 
   $self->read_db_configs();
 
@@ -176,6 +177,7 @@ sub tie_db_writable {
   }
 
   my $main = $self->{bayes}->{main};
+  my $timer_tie_rw = $main->time_method('b_tie_rw');
 
   $self->read_db_configs();
 
