@@ -297,7 +297,7 @@ sub _check_attachments {
 
       if ($where != 1 && $cte eq "quoted-printable" && ! /^SPAM: /) {
         # RFC 5322: Each line SHOULD be no more than 78 characters,
-        #           excluding the CRLF
+        #           excluding the CRLF.
         # RFC 2045: The Quoted-Printable encoding REQUIRES that
         #           encoded lines be no more than 76 characters long.
         # Bug 5491: 6% of email classified as HAM by SA triggered the
