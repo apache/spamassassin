@@ -666,15 +666,14 @@ sub scan {
 
   dbg("bayes: corpus size: nspam = $ns, nham = $nn");
 
-  my $msgdata = $self->_get_msgdata_from_permsgstatus ($permsgstatus);
-
   my $msgtokens;
   { my $timer = $self->{main}->time_method('b_tokenize');
+    my $msgdata = $self->_get_msgdata_from_permsgstatus ($permsgstatus);
     $msgtokens = $self->tokenize($msg, $msgdata);
   }
 
   my $tokensdata;
-  { my $timer = $self->{main}->time_method('b_tok_get');
+  { my $timer = $self->{main}->time_method('b_tok_get_all');
     $tokensdata = $self->{store}->tok_get_all(keys %{$msgtokens});
   }
   my %pw;
@@ -777,9 +776,11 @@ sub scan {
   # tokens and a score was returned
   # we don't really care about the return value here
 
-  { my $timer = $self->{main}->time_method('b_tok_touch');
+  { my $timer = $self->{main}->time_method('b_tok_touch_all');
     $self->{store}->tok_touch_all(\@touch_tokens, $msgatime);
   }
+
+  my $timer_finish = $self->{main}->time_method('b_finish');
 
   $permsgstatus->{bayes_nspam} = $ns;
   $permsgstatus->{bayes_nham} = $nn;
@@ -796,9 +797,13 @@ sub scan {
 					    });
 
 skip:
-  undef $timer_compute_prob;  # end a timing section if still running
   if (!defined $score) {
     dbg("bayes: not scoring message, returning undef");
+  }
+
+  undef $timer_compute_prob;  # end a timing section if still running
+  if (!defined $timer_finish) {
+    $timer_finish = $self->{main}->time_method('b_finish');
   }
 
   # Take any opportunistic actions we can take
