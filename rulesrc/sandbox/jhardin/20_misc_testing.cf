@@ -227,7 +227,7 @@ header         __TO_EQ_FROM_2       ALL =~ /\nTo:\s+(?:[^\n<]{0,80}<)?([^\n\s>]+
 meta           __TO_EQ_FROM         (__TO_EQ_FROM_1 || __TO_EQ_FROM_2)
 describe       __TO_EQ_FROM         To: same as From:
 
-meta           TO_EQ_FM_HTML_ONLY   (__TO_EQ_FROM && MIME_HTML_ONLY)
+meta           TO_EQ_FM_HTML_ONLY   (__TO_EQ_FROM && MIME_HTML_ONLY && !ALL_TRUSTED)
 describe       TO_EQ_FM_HTML_ONLY   To == From and HTML only
 
 meta           TO_EQ_FM_DIRECT_MX   (__TO_EQ_FROM && __DOS_DIRECT_TO_MX)
