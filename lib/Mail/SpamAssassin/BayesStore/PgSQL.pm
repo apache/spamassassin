@@ -587,15 +587,17 @@ sub tok_touch {
   }
 
   my $rows = $sth->rows;
+  # returns the number of rows affected by the last row affecting command,
+  # or -1 if the number of rows is not known or not available
 
-  unless (defined($rows)) {
+  unless (defined($rows) && $rows >= 0) {
     dbg("bayes: tok_touch: SQL error: ".$self->{_dbh}->errstr());
     $self->{_dbh}->rollback();
     return 0;
   }
 
   # if we didn't update a row then no need to update newest_token_age
-  if ($rows eq '0E0') {
+  if (!$rows) {
     $self->{_dbh}->commit();
     return 1;
   }
@@ -748,15 +750,17 @@ sub tok_touch_all_old {
   }
 
   my $rows = $sth->rows;
+  # returns the number of rows affected by the last row affecting command,
+  # or -1 if the number of rows is not known or not available
 
-  unless (defined($rows)) {
+  unless (defined($rows) && $rows >= 0) {
     dbg("bayes: tok_touch_all: SQL error: ".$self->{_dbh}->errstr());
     $self->{_dbh}->rollback();
     return 0;
   }
 
   # if we didn't update a row then no need to update newest_token_age
-  if ($rows eq '0E0') {
+  if (!$rows) {
     $self->{_dbh}->commit();
     return 1;
   }
