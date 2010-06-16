@@ -43,8 +43,8 @@ describe FROM_BLANK_NAME	From: contains empty name
 
 header __FROM_ENDS_IN_NUMS	From:addr =~ /\D\d{8,}\@/i
 
-header FROM_STARTS_WITH_NUMS	From:addr =~ /^\d{6,}\S+\@/i
-describe FROM_STARTS_WITH_NUMS	From: starts with many numbers
+header FROM_STARTS_WITH_NUMS	From:addr =~ /^\d{3,50}[^0-9\@]/
+describe FROM_STARTS_WITH_NUMS	From: starts with several numbers
 
 # don't match US/Canada phone numbers: 10 digits optionally preceded by a "1"
 header __FROM_ALL_NUMS		From:addr =~ /^(?:\d{1,9}|[02-9]\d{10}|\d{12,})@/
