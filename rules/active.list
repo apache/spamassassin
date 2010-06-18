@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix jm kgolding wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 2: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix jm kgolding wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 3: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi jm kgolding
+# with results from: day 1: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-trec_enron bb-zmi bernie-it_batt bernie-mix jm kgolding wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 2: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix jm kgolding wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 3: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix jm kgolding wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2
 
 # tflags publish
 ADVANCE_FEE_2_NEW_FORM
@@ -27,6 +27,9 @@ ALL_TRUSTED
 
 # good enough
 AXB_HELO_HOME_UN
+
+# good enough
+AXB_URI_APE_ABUSE2
 
 # good enough
 BASE64_LENGTH_78_79
@@ -66,6 +69,9 @@ CHARSET_FARAWAY_HEADER
 
 # tflags userconf
 CORRUPT_FROM_LINE_IN_HDRS
+
+# good enough
+DATE_IN_FUTURE_Q_PLUS
 
 # good enough
 DEAR_BENEFICIARY
@@ -116,7 +122,13 @@ DOS_ANAL_SPAM_MAILER
 DOS_OE_TO_MX
 
 # good enough
+DOS_OE_TO_MX_IMAGE
+
+# good enough
 DOS_OUTLOOK_TO_MX
+
+# good enough
+DOS_RCVD_IP_TWICE_C
 
 # good enough
 DYN_RDNS_AND_INLINE_IMAGE
@@ -129,6 +141,9 @@ ENV_AND_HDR_SPF_MATCH
 
 # good enough
 FB_CIALIS_LEO3
+
+# good enough
+FB_GVR
 
 # good enough
 FB_QUALITY_REPLICA
@@ -146,7 +161,13 @@ FH_FAKE_RCVD_LINE
 FH_FAKE_RCVD_LINE_B
 
 # good enough
+FH_FROM_GET_NAME
+
+# good enough
 FH_HELO_ALMOST_IP
+
+# good enough
+FH_HELO_EQ_CHARTER
 
 # good enough
 FH_HELO_EQ_D_D_D_D
@@ -209,7 +230,16 @@ FSL_HELO_BARE_IP_1
 FSL_HELO_DEVICE
 
 # good enough
+FSL_HELO_NON_FQDN_1
+
+# good enough
 FSL_LSPACES_ABUSE
+
+# good enough
+FS_PHARMASUB2
+
+# good enough
+FS_REPLICA
 
 # good enough
 FS_REPLICAWATCH
@@ -257,13 +287,7 @@ HELO_NO_DOMAIN
 HELO_OEM
 
 # good enough
-HK_FAKENAME_MICROSOFT
-
-# good enough
 HK_NAME_DRUGS
-
-# good enough
-HK_RANDOM_ENVFROM
 
 # good enough
 HK_SCAM_N2
@@ -312,6 +336,12 @@ MIME_CHARSET_FARAWAY
 
 # tflags userconf
 MISSING_HB_SEP
+
+# good enough
+MONEY_ATM_CARD
+
+# tflags publish
+MONEY_FRAUD_3
 
 # tflags publish
 MONEY_FRAUD_5
@@ -533,6 +563,9 @@ RCVD_IN_SORBS_ZOMBIE
 RCVD_IN_XBL
 
 # good enough
+S25R_6
+
+# good enough
 SANE_04e8bf28eb445199a7f11b943c44d209
 
 # good enough
@@ -543,6 +576,9 @@ SANE_4ef8302546bf270a19baf98508afacc4
 
 # good enough
 SANE_7429530a7398f43f1f1b795f9420714e
+
+# good enough
+SANE_75491b468ec2e117e50f9842d32abfab
 
 # good enough
 SANE_d0d2b0f6373bf91253d66dd74c594b87
@@ -581,6 +617,9 @@ SPF_SOFTFAIL
 STOCK_IMG_HDR_FROM
 
 # good enough
+STOX_REPLY_TYPE
+
+# good enough
 STOX_REPLY_TYPE_WITHOUT_QUOTES
 
 # good enough
@@ -591,6 +630,9 @@ SUBJECT_IN_BLACKLIST
 
 # tflags userconf
 SUBJECT_IN_WHITELIST
+
+# good enough
+SUBJECT_NEEDS_ENCODING
 
 # good enough
 TAB_IN_FROM
@@ -611,7 +653,22 @@ TO_EQ_FM_HTML_ONLY
 TO_NO_BRKTS_DIRECT
 
 # good enough
+TO_NO_BRKTS_DYNIP
+
+# good enough
+TO_NO_BRKTS_NORDNS_HTML
+
+# good enough
+TT_MSGID_TRUNC
+
+# good enough
 TVD_FINGER_02
+
+# good enough
+TVD_PCT_OFF
+
+# good enough
+TVD_QUAL_MEDS
 
 # good enough
 TVD_RCVD_SINGLE
@@ -620,34 +677,25 @@ TVD_RCVD_SINGLE
 TVD_VISIT_PHARMA
 
 # good enough
-AXB_URI_APE_ABUSE2
+DATE_IN_FUTURE_96_Q
 
 # good enough
-DATE_IN_FUTURE_Q_PLUS
+FSL_FAKE_YAHOO_RCVD
 
 # good enough
-MONEY_ATM_CARD
-
-# tflags publish
-MONEY_FRAUD_3
+FSL_UA
 
 # good enough
-S25R_6
+FS_MORE_CONFIDENT
 
 # good enough
-SANE_75491b468ec2e117e50f9842d32abfab
+IMG_DIRECT_TO_MX
 
 # good enough
-TO_NO_BRKTS_DYNIP
+SINGLE_HEADER_2K
 
 # good enough
-TO_NO_BRKTS_NORDNS_HTML
-
-# good enough
-TVD_PCT_OFF
-
-# good enough
-URI_DOM_OBFU
+TVD_FUZZY_SECTOR
 
 # tflags userconf
 UNPARSEABLE_RELAY
@@ -690,6 +738,9 @@ URIBL_SC_SURBL
 
 # tflags net
 URIBL_WS_SURBL
+
+# good enough
+URI_DOM_OBFU
 
 # tflags userconf
 URI_NOVOWEL
