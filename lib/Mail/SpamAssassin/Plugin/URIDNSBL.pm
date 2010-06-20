@@ -283,8 +283,9 @@ sub check_uridnsbl {
 sub parsed_metadata {
   my ($self, $opts) = @_;
   my $scanner = $opts->{permsgstatus};
+  my $conf = $scanner->{conf};
 
-  return 0  if $scanner->{main}->{conf}->{skip_uribl_checks};
+  return 0  if $conf->{skip_uribl_checks};
 
   if (!$scanner->is_dns_available()) {
     $self->{dns_not_available} = 1;
@@ -307,18 +308,19 @@ sub parsed_metadata {
   $scanner->{'uridnsbl_active_rules_fullnsrhsbl'} = { };
   $scanner->{'uridnsbl_active_rules_revipbl'} = { };
 
-  foreach my $rulename (keys %{$scanner->{conf}->{uridnsbls}}) {
-    next unless ($scanner->{conf}->is_rule_active('body_evals',$rulename));
+  foreach my $rulename (keys %{$conf->{uridnsbls}}) {
+    next unless ($conf->is_rule_active('body_evals',$rulename));
 
-    my $rulecf = $scanner->{conf}->{uridnsbls}->{$rulename};
-    my $tflags = $scanner->{conf}->{tflags}->{$rulename};
+    my $rulecf = $conf->{uridnsbls}->{$rulename};
+    my $tflags = $conf->{tflags}->{$rulename};
     $tflags = ''  if !defined $tflags;
 
-    if ($rulecf->{is_rhsbl} && $tflags =~ /\b ips_only \b/x) {
+    my $is_rhsbl = $rulecf->{is_rhsbl};
+    if ($is_rhsbl && $tflags =~ /\b ips_only \b/x) {
       $scanner->{uridnsbl_active_rules_rhsbl_ipsonly}->{$rulename} = 1;
-    } elsif ($rulecf->{is_rhsbl} && $tflags =~ /\b domains_only \b/x) {
+    } elsif ($is_rhsbl && $tflags =~ /\b domains_only \b/x) {
       $scanner->{uridnsbl_active_rules_rhsbl_domsonly}->{$rulename} = 1;
-    } elsif ($rulecf->{is_rhsbl}) {
+    } elsif ($is_rhsbl) {
       $scanner->{uridnsbl_active_rules_rhsbl}->{$rulename} = 1;
     } elsif ($rulecf->{is_fullnsrhsbl}) {
       $scanner->{uridnsbl_active_rules_fullnsrhsbl}->{$rulename} = 1;
@@ -332,7 +334,7 @@ sub parsed_metadata {
   # get all domains in message
 
   # don't keep dereferencing this
-  my $skip_domains = $scanner->{main}->{conf}->{uridnsbl_skip_domains};
+  my $skip_domains = $conf->{uridnsbl_skip_domains};
 
   # list of hashes to use in order
   my @uri_ordered;
@@ -390,7 +392,7 @@ sub parsed_metadata {
   # at this point, @uri_ordered is an ordered array of uri hashes
 
   my %domlist;
-  my $umd = $scanner->{main}->{conf}->{uridnsbl_max_domains};
+  my $umd = $conf->{uridnsbl_max_domains};
   while (keys %domlist < $umd && @uri_ordered) {
     my $array = shift @uri_ordered;
     next unless $array;
@@ -728,6 +730,7 @@ sub set_config {
 
 sub query_domain {
   my ($self, $scanner, $dom) = @_;
+  my $conf = $scanner->{conf};
 
   #warn "uridnsbl: domain $dom\n";
   #return;
@@ -735,12 +738,11 @@ sub query_domain {
   $dom = lc $dom;
   return if $scanner->{uridnsbl_seen_domain}->{$dom};
   $scanner->{uridnsbl_seen_domain}->{$dom} = 1;
-  $self->log_dns_result("querying domain $dom");
+  dbg("uridnsbl: querying domain $dom");
 
   my $obj = { dom => $dom };
 
-  my $tflags = $scanner->{conf}->{tflags};
-  my $cf = $scanner->{uridnsbl_active_rules_revipbl};
+  my $tflags = $conf->{tflags};
 
   my ($is_ip, $single_dnsbl);
   if ($dom =~ /^\d+\.\d+\.\d+\.\d+$/) {
@@ -781,7 +783,7 @@ sub query_domain {
     }
 
     foreach my $rulename (@rhsbldoms) {
-      my $rulecf = $scanner->{conf}->{uridnsbls}->{$rulename};
+      my $rulecf = $conf->{uridnsbls}->{$rulename};
       $self->lookup_single_dnsbl($scanner, $obj, $rulename,
 				 $dom, $rulecf->{zone}, $rulecf->{type});
 
@@ -792,9 +794,7 @@ sub query_domain {
     # perform NS, A lookups to look up the domain in the non-RHSBL subset,
     # but only if there are active reverse-IP-URIBL rules
     if ($dom !~ /^\d+\.\d+\.\d+\.\d+$/ && 
-                (scalar keys %{$reviprules} ||
-                  scalar keys %{$nsrhsblrules} ||
-                  scalar keys %{$fullnsrhsblrules}))
+         (%$reviprules || %$nsrhsblrules || %$fullnsrhsblrules) )
     {
       $self->lookup_domain_ns($scanner, $obj, $dom);
     }
@@ -825,6 +825,7 @@ sub lookup_domain_ns {
 
 sub complete_ns_lookup {
   my ($self, $scanner, $ent, $dom) = @_;
+  my $conf = $scanner->{conf};
 
   my $packet = $ent->{response_packet};
   my @answer = !defined $packet ? () : $packet->answer;
@@ -837,7 +838,7 @@ sub complete_ns_lookup {
   foreach my $rr (@answer) {
     my $str = $rr->string;
     next unless (defined($str) && defined($dom));
-    $self->log_dns_result ("NSs for $dom: $str");
+    dbg("uridnsbl: NSs for $dom: $str");
 
     if ($str =~ /IN\s+NS\s+(\S+)/) {
       my $nsmatch = lc $1;
@@ -859,7 +860,7 @@ sub complete_ns_lookup {
       }
 
       foreach my $rulename (keys %{$nsrhsblrules}) {
-        my $rulecf = $scanner->{conf}->{uridnsbls}->{$rulename};
+        my $rulecf = $conf->{uridnsbls}->{$rulename};
         $self->lookup_single_dnsbl($scanner, $ent->{obj}, $rulename,
                                   $nsrhblstr, $rulecf->{zone}, $rulecf->{type});
 
@@ -867,7 +868,7 @@ sub complete_ns_lookup {
       }
 
       foreach my $rulename (keys %{$fullnsrhsblrules}) {
-        my $rulecf = $scanner->{conf}->{uridnsbls}->{$rulename};
+        my $rulecf = $conf->{uridnsbls}->{$rulename};
         $self->lookup_single_dnsbl($scanner, $ent->{obj}, $rulename,
                                   $fullnsrhblstr, $rulecf->{zone}, $rulecf->{type});
 
@@ -899,7 +900,7 @@ sub complete_a_lookup {
   my @answer = !defined $packet ? () : $packet->answer;
   foreach my $rr (@answer) {
     my $str = $rr->string;
-    $self->log_dns_result ("A for NS $hname: $str");
+    dbg("uridnsbl: A for $hname: $str");
 
     if ($str =~ /IN\s+A\s+(\S+)/) {
       $self->lookup_dnsbl_for_ip($scanner, $ent->{obj}, $1);
@@ -916,10 +917,11 @@ sub lookup_dnsbl_for_ip {
   $ip =~ /^(\d+)\.(\d+)\.(\d+)\.(\d+)$/;
   my $revip = "$4.$3.$2.$1";
 
-  my $tflags = $scanner->{conf}->{tflags};
+  my $conf = $scanner->{conf};
+  my $tflags = $conf->{tflags};
   my $cf = $scanner->{uridnsbl_active_rules_revipbl};
   foreach my $rulename (keys %{$cf}) {
-    my $rulecf = $scanner->{conf}->{uridnsbls}->{$rulename};
+    my $rulecf = $conf->{uridnsbls}->{$rulename};
 
     # ips_only/domains_only lookups should not act on this kind of BL
     next if ($tflags->{$rulename} =~ /\b(?:ips_only|domains_only)\b/);
@@ -1081,11 +1083,6 @@ sub res_bgsend {
         my ($pkt, $id, $timestamp) = @_;
         $scanner->{async}->set_response_packet($id, $pkt, $key, $timestamp);
       });
-}
-
-sub log_dns_result {
-  #my $self = shift;
-  #Mail::SpamAssassin::dbg("uridnsbl: ".join (' ', @_));
 }
 
 # ---------------------------------------------------------------------------
