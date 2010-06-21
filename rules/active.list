@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-trec_enron bb-zmi bernie-it_batt bernie-mix dos jm kgolding wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 2: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-trec_enron bb-zmi bernie-it_batt bernie-mix dos jm kgolding nbebout wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 3: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix jm kgolding wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2
+# with results from: day 1: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix kgolding wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 2: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-trec_enron bb-zmi bernie-it_batt bernie-mix dos jm kgolding wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 3: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-trec_enron bb-zmi bernie-it_batt bernie-mix dos jm kgolding nbebout wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2
 
 # tflags publish
 ADVANCE_FEE_2_NEW_FORM
@@ -131,9 +131,6 @@ DOS_OE_TO_MX_IMAGE
 DOS_OUTLOOK_TO_MX
 
 # good enough
-DOS_RCVD_IP_TWICE_C
-
-# good enough
 DYN_RDNS_AND_INLINE_IMAGE
 
 # good enough
@@ -147,9 +144,6 @@ FB_CIALIS_LEO3
 
 # good enough
 FB_GVR
-
-# good enough
-FB_NO_SCRIP_NEEDED
 
 # good enough
 FB_QUALITY_REPLICA
@@ -185,16 +179,10 @@ FH_HOST_EQ_DYNAMICIP
 FH_HOST_EQ_VERIZON_P
 
 # good enough
-FH_HOST_IN_ADDRARPA
-
-# good enough
 FM_LOTTO_YOU_WON
 
 # good enough
 FM_SEX_HELODDDD
-
-# good enough
-FM_SUBJ_APPROVE
 
 # tflags publish
 FORM_FRAUD_3
@@ -233,18 +221,6 @@ FROM_MISSP_TO_UNDISC
 FROM_MISSP_USER
 
 # good enough
-FRT_APPROV
-
-# good enough
-FRT_BIGGERMEM1
-
-# good enough
-FRT_PRICE
-
-# good enough
-FRT_ROLEX
-
-# good enough
 FSL_FAKE_HOTMAIL_RVCD
 
 # good enough
@@ -257,19 +233,10 @@ FSL_HELO_BARE_IP_1
 FSL_HELO_DEVICE
 
 # good enough
-FSL_HELO_NON_FQDN_1
-
-# good enough
 FSL_LSPACES_ABUSE
 
 # good enough
-FS_LARGE_PERCENT2
-
-# good enough
 FS_MORE_CONFIDENT
-
-# good enough
-FS_OBFU_PRMCY
 
 # good enough
 FS_PHARMASUB2
@@ -279,9 +246,6 @@ FS_REPLICA
 
 # good enough
 FS_REPLICAWATCH
-
-# good enough
-FS_WEIGHT_LOSS
 
 # good enough
 FS_WILL_HELP
@@ -602,9 +566,6 @@ RCVD_IN_SORBS_ZOMBIE
 RCVD_IN_XBL
 
 # good enough
-RDNS_LOCALHOST
-
-# good enough
 S25R_6
 
 # good enough
@@ -621,9 +582,6 @@ SANE_7429530a7398f43f1f1b795f9420714e
 
 # good enough
 SANE_75491b468ec2e117e50f9842d32abfab
-
-# good enough
-SANE_91eb43f705d25c804374a746d7519660
 
 # good enough
 SANE_d0d2b0f6373bf91253d66dd74c594b87
@@ -660,9 +618,6 @@ SPF_PASS
 
 # tflags net
 SPF_SOFTFAIL
-
-# good enough
-STOCK_IMG_CTYPE
 
 # good enough
 STOCK_IMG_HDR_FROM
@@ -722,9 +677,6 @@ TVD_FUZZY_SECTOR
 TVD_PCT_OFF
 
 # good enough
-TVD_PH_REC
-
-# good enough
 TVD_QUAL_MEDS
 
 # good enough
@@ -734,76 +686,10 @@ TVD_RCVD_SINGLE
 TVD_VISIT_PHARMA
 
 # good enough
-AXB_GOO_MALWARE
+FSL_UA
 
 # good enough
-FB_INCREASE_VOL
-
-# good enough
-FB_LAON
-
-# good enough
-FB_LIMITED_TIME
-
-# good enough
-FB_SMALL_PEN
-
-# good enough
-FB_WITHOUT_PRESC
-
-# good enough
-FM_COSTA_RICA
-
-# good enough
-FRT_ERECTION
-
-# good enough
-FRT_EXPERIENCE
-
-# good enough
-FRT_INCOME
-
-# good enough
-FR_WATCHES_HTTP
-
-# good enough
-FS_CAILIS
-
-# good enough
-FS_SILDENAFIL
-
-# good enough
-HK_FAKENAME_MICROSOFT
-
-# good enough
-HK_PNIS
-
-# good enough
-MAY_BE_FORGED
-
-# good enough
-S25R_4
-
-# good enough
-SANE_0de5cadd0badbd3e70f22a3ae31951fb
-
-# good enough
-SANE_20d820d8f491476ca39941979ab139dd
-
-# good enough
-SANE_86be5ef5c040075ea29f99d46dfe3832
-
-# good enough
-SANE_af2f58d5e4002bcd31ef44b83569de4b
-
-# good enough
-SANE_b58d7945d89b7afc9e2753c83b00ab44
-
-# good enough
-SANE_ef00ce28cfa5ed6e4c405ed37ff36d46
-
-# good enough
-TVD_PH_BODY_META
+IMG_DIRECT_TO_MX
 
 # tflags userconf
 UNPARSEABLE_RELAY
