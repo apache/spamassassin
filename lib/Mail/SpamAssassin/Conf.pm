@@ -649,7 +649,7 @@ Adds one or more host names to a list of blacklisted URI domains.
 No wildcards are supported, but subdomains do match implicitly. There is
 only one combined list for black- and whitelisting of host names in URIs.
 Search starts by looking up the full hostname first, then leading fields
-are progresively stripped off (e.g.: sub.example.com, example.com, com)
+are progressively stripped off (e.g.: sub.example.com, example.com, com)
 until a match is found or we run out of fields. The first matching entry
 (the most specific) determines if a lookup yielded a blacklisted or a
 whitelisted result.
@@ -696,7 +696,7 @@ See blacklist_uri_host directive for details.
 
 =item unlist_uri_host host-or-domain ...
 
-Adds one or more specified host names from a list of black-or-white -listed
+Removes one or more specified host names from a list of black- or whitelisted
 URI domains. Removing an unlisted name is ignored (is not an error).
 
 =cut
