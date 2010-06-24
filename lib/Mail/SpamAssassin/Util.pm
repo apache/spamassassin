@@ -1142,6 +1142,8 @@ sub uri_to_domain {
   # we'll see the decoded version as well.  see url_encode()
   return if $uri =~ /\%(?:2[1-9a-fA-F]|[3-6][0-9a-fA-f]|7[0-9a-eA-E])/;
 
+  my $host = $uri;  # unstripped/full domain name
+
   # keep IPs intact
   if ($uri !~ /^\d+\.\d+\.\d+\.\d+$/) { 
     # get rid of hostname part of domain, understanding delegation
@@ -1152,8 +1154,8 @@ sub uri_to_domain {
         (Mail::SpamAssassin::Util::RegistrarBoundaries::is_domain_valid($uri));
   }
   
-  # $uri is now the domain only
-  return lc $uri;
+  # $uri is now the domain only, optionally return unstripped host name
+  return !wantarray ? lc $uri : (lc $uri, lc $host);
 }
 
 sub uri_list_canonify {

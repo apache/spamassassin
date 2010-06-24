@@ -77,10 +77,10 @@ value be non-empty, otherwise they'll produce a warning message.
 
 =item code
 
-A subroutine to deal with the setting.  Only used if B<type> is not set.  ONE OF
-B<code> OR B<type> IS REQUIRED.  The arguments passed to the function are
-C<($self, $key, $value, $line)>, where $key is the setting (*not* the command),
-$value is the value string, and $line is the entire line.
+A subroutine to deal with the setting.  ONE OF B<code> OR B<type> IS REQUIRED.
+The arguments passed to the function are C<($self, $key, $value, $line)>,
+where $key is the setting (*not* the command), $value is the value string,
+and $line is the entire line.
 
 There are two special return values that the B<code> subroutine may return
 to signal that there is an error in the configuration:
@@ -215,8 +215,9 @@ sub build_command_luts {
 sub parse {
   my ($self, undef, $scoresonly) = @_; # leave $rules in $_[1]
 
-  $self->{scoresonly} = $scoresonly;
   my $conf = $self->{conf};
+  $self->{scoresonly} = $scoresonly;
+  delete $conf->{wblist_uri_host_userprefs}  if $scoresonly;  # start afresh
 
   # Language selection:
   # See http://www.gnu.org/manual/glibc-2.2.5/html_node/Locale-Categories.html

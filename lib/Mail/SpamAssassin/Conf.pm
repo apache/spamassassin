@@ -641,6 +641,85 @@ e.g.
     code => \&Mail::SpamAssassin::Conf::Parser::remove_addrlist_value
   });
 
+
+=item blacklist_uri_host host-or-domain ...
+
+Adds one or more host names to a list of blacklisted URI domains.
+
+No wildcards are supported, but subdomains do match implicitly. There is
+only one combined list for black- and whitelisting of host names in URIs.
+Search starts by looking up the full hostname first, then leading fields
+are progresively stripped off (e.g.: sub.example.com, example.com, com)
+until a match is found or we run out of fields. The first matching entry
+(the most specific) determines if a lookup yielded a blacklisted or a
+whitelisted result.
+
+If an URL contains an IP address in place of a host name, the
+black- (or white-) list must specify the exact same IP address.
+
+A domain cannot be both blacklisted and whitelisted at the same time, the
+last directive prevails. Use the unlist_uri_host directive to neutralize
+previous blacklist_uri_host and whitelist_uri_host settings.
+
+=cut
+
+  push (@cmds, {
+    command => 'blacklist_uri_host',
+    setting => 'wblist_uri_host',
+    type => $CONF_TYPE_ADDRLIST,
+    code => sub {
+      my($conf, $key, $value, $line) = @_;
+      my $listname = $self->{parser}{scoresonly} ? 'wblist_uri_host_userprefs'
+                                                 : 'wblist_uri_host';
+      my $listref = $conf->{$listname};
+      $conf->{$listname} = $listref = {}  if !$listref;
+      $listref->{$_} = +1  for split(' ', lc $value);
+    }
+  });
+
+=item whitelist_uri_host host-or-domain ...
+
+Adds one or more host names to a list of whitelisted URI domains.
+See blacklist_uri_host directive for details.
+
+=cut
+
+  push (@cmds, {
+    command => 'whitelist_uri_host',
+    setting => 'wblist_uri_host',
+    type => $CONF_TYPE_ADDRLIST,
+    code => sub {
+      my($conf, $key, $value, $line) = @_;
+      my $listname = $self->{parser}{scoresonly} ? 'wblist_uri_host_userprefs'
+                                                 : 'wblist_uri_host';
+      my $listref = $conf->{$listname};
+      $conf->{$listname} = $listref = {}  if !$listref;
+      $listref->{$_} = -1  for split(' ', lc $value);
+    }
+  });
+
+=item unlist_uri_host host-or-domain ...
+
+Adds one or more specified host names from a list of black-or-white -listed
+URI domains. Removing an unlisted name is ignored (is not an error).
+
+=cut
+
+  push (@cmds, {
+    command => 'unlist_uri_host',
+    setting => 'wblist_uri_host',
+    type => $CONF_TYPE_ADDRLIST,
+    code => sub {
+      my($conf, $key, $value, $line) = @_;
+      my $listname = $self->{parser}{scoresonly} ? 'wblist_uri_host_userprefs'
+                                                 : 'wblist_uri_host';
+      my $listref = $conf->{$listname};
+      $conf->{$listname} = $listref = {}  if !$listref;
+      $listref->{$_} = 0  for split(' ', lc $value);
+      # choosing 0 instead of deletion allows userprefs to override a global
+    }
+  });
+
 =back
 
 =head2 BASIC MESSAGE TAGGING OPTIONS
@@ -4237,6 +4316,7 @@ sub sa_die { Mail::SpamAssassin::sa_die(@_); }
 sub feature_originating_ip_headers { 1 }
 sub feature_dns_local_ports_permit_avoid { 1 }
 sub feature_bayes_auto_learn_on_error { 1 }
+sub feature_uri_host_wblist { 1 }
 
 ###########################################################################
 
