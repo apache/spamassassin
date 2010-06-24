@@ -190,7 +190,7 @@ body     __BENEFICIARY    /\bb(?:[e\xe9]n[e\xe9]|[\xc3][\xa9]n[\xc3][\xa9])fi(?:
 body     __DIPLOMATIC     /\bdiplomatic\b/i
 body     __FEES           /\b(?:security|safe\w*|courier|registration|pay|paid|up-?front|processing|delivery|transfer)[\s\w]{0,15}\s(?:fee|charge)s?\b/i 
 body     __LUCKY_WINNER   /\b(?:lucky|gl.cklich(?:en)?)\s(?:ge)?win+ers?\b/i
-body     __YOUR_FUND      /\b(?:your|ihr)\s(?:unpaid\s|win+ing\s|nicht\sausbezahlten\s)?(?:fund|geld)\b/i
+body     __YOUR_FUND      /\b(?:your|ihr)\s(?:unpaid\s|win+ing\s|ap+roved\s|foreign\s|nicht\sausbezahlten\s)?(?:fund|payment|geld)\b/i
 body     __NIGERIA        /\bnigeria\b/i
 body     __IVORY_COAST    /\b(?:Cote\s?D.Ivoire|Ivory\s?Coast)\b/i
 body     __BURKINA_FASO   /\bburkina\s?faso\b/i
