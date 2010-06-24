@@ -669,10 +669,8 @@ previous blacklist_uri_host and whitelist_uri_host settings.
     type => $CONF_TYPE_ADDRLIST,
     code => sub {
       my($conf, $key, $value, $line) = @_;
-      my $listname = $self->{parser}{scoresonly} ? 'wblist_uri_host_userprefs'
-                                                 : 'wblist_uri_host';
-      my $listref = $conf->{$listname};
-      $conf->{$listname} = $listref = {}  if !$listref;
+      my $listref = $conf->{wblist_uri_host};
+      $conf->{wblist_uri_host} = $listref = {}  if !$listref;
       $listref->{$_} = +1  for split(' ', lc $value);
     }
   });
@@ -690,10 +688,8 @@ See blacklist_uri_host directive for details.
     type => $CONF_TYPE_ADDRLIST,
     code => sub {
       my($conf, $key, $value, $line) = @_;
-      my $listname = $self->{parser}{scoresonly} ? 'wblist_uri_host_userprefs'
-                                                 : 'wblist_uri_host';
-      my $listref = $conf->{$listname};
-      $conf->{$listname} = $listref = {}  if !$listref;
+      my $listref = $conf->{wblist_uri_host};
+      $conf->{wblist_uri_host} = $listref = {}  if !$listref;
       $listref->{$_} = -1  for split(' ', lc $value);
     }
   });
@@ -711,12 +707,9 @@ URI domains. Removing an unlisted name is ignored (is not an error).
     type => $CONF_TYPE_ADDRLIST,
     code => sub {
       my($conf, $key, $value, $line) = @_;
-      my $listname = $self->{parser}{scoresonly} ? 'wblist_uri_host_userprefs'
-                                                 : 'wblist_uri_host';
-      my $listref = $conf->{$listname};
-      $conf->{$listname} = $listref = {}  if !$listref;
-      $listref->{$_} = 0  for split(' ', lc $value);
-      # choosing 0 instead of deletion allows userprefs to override a global
+      my $listref = $conf->{wblist_uri_host};
+      $conf->{wblist_uri_host} = $listref = {}  if !$listref;
+      delete $listref->{$_}  for split(' ', lc $value);
     }
   });
 

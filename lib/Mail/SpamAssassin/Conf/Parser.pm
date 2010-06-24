@@ -217,7 +217,6 @@ sub parse {
 
   my $conf = $self->{conf};
   $self->{scoresonly} = $scoresonly;
-  delete $conf->{wblist_uri_host_userprefs}  if $scoresonly;  # start afresh
 
   # Language selection:
   # See http://www.gnu.org/manual/glibc-2.2.5/html_node/Locale-Categories.html
