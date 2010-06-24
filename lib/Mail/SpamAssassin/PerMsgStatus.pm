@@ -1833,6 +1833,9 @@ C<anchor_text> is an array of the anchor text (text between <a> and
 
 C<domains> is a hash of the domains found in the canonified URIs.
 
+C<hosts> is a hash of unstripped hostnames found in the canonified URIs
+as hash keys, with their domain part stored as a value of each hash entry.
+
 =cut
 
 sub get_uri_detail_list {
@@ -1873,10 +1876,14 @@ sub get_uri_detail_list {
     $info->{cleaned} = \@tmp;
 
     foreach (@tmp) {
-      my $domain = Mail::SpamAssassin::Util::uri_to_domain($_);
-      if ($domain && !$info->{domains}->{$domain}) {
-        $info->{domains}->{$domain} = 1;
-        $self->{uri_domain_count}++;
+      my($domain,$host) = Mail::SpamAssassin::Util::uri_to_domain($_);
+      if (defined $host && $host ne '' && !$info->{hosts}->{$host}) {
+        # unstripped full host name as a key, and its domain part as a value
+        $info->{hosts}->{$host} = $domain;
+        if (defined $domain && $domain ne '' && !$info->{domains}->{$domain}) {
+          $info->{domains}->{$domain} = 1;  # stripped to domain boundary
+          $self->{uri_domain_count}++;
+        }
       }
     }
 
@@ -1885,9 +1892,9 @@ sub get_uri_detail_list {
       foreach my $nuri (@tmp) {
         dbg("uri: cleaned html uri, $nuri");
       }
-      if ($info->{domains}) {
-        foreach my $domain (keys %{$info->{domains}}) {
-          dbg("uri: html domain, $domain");
+      if ($info->{hosts} && $info->{domains}) {
+        for my $host (keys %{$info->{hosts}}) {
+          dbg("uri: html host %s, domain %s", $host, $info->{hosts}->{$host});
         }
       }
     }
@@ -1910,10 +1917,14 @@ sub get_uri_detail_list {
       $info->{cleaned} = \@uris;
 
       foreach (@uris) {
-        my $domain = Mail::SpamAssassin::Util::uri_to_domain($_);
-        if ($domain && !$info->{domains}->{$domain}) {
-          $info->{domains}->{$domain} = 1;
-          $self->{uri_domain_count}++;
+        my($domain,$host) = Mail::SpamAssassin::Util::uri_to_domain($_);
+        if (defined $host && $host ne '' && !$info->{hosts}->{$host}) {
+          # unstripped full host name as a key, and its domain part as a value
+          $info->{hosts}->{$host} = $domain;
+          if (defined $domain && $domain ne '' && !$info->{domains}->{$domain}){
+            $info->{domains}->{$domain} = 1;
+            $self->{uri_domain_count}++;
+          }
         }
       }
     }
@@ -1923,9 +1934,9 @@ sub get_uri_detail_list {
       foreach my $nuri (@uris) {
         dbg("uri: cleaned parsed uri, $nuri");
       }
-      if ($info->{domains}) {
-        foreach my $domain (keys %{$info->{domains}}) {
-          dbg("uri: parsed domain, $domain");
+      if ($info->{hosts} && $info->{domains}) {
+        for my $host (keys %{$info->{hosts}}) {
+          dbg("uri: parsed host %s, domain %s", $host, $info->{hosts}->{$host});
         }
       }
     }
