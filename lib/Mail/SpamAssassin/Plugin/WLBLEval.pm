@@ -363,8 +363,7 @@ sub check_uri_host_in_blacklist {
   my ($self, $pms) = @_;
   my $conf = $self->{main}{conf};
   my($host_bl, $host_wl) =
-    $self->_check_uri_wblist($pms, $conf->{wblist_uri_userprefs},
-                                   $conf->{wblist_uri_host});
+    $self->_check_uri_wblist($pms, $conf->{wblist_uri_host});
   if (defined $host_bl) {
     dbg("rules: uri host blacklisted: $host_bl");
     $pms->test_log("URI: $host_bl");
@@ -377,8 +376,7 @@ sub check_uri_host_in_whitelist {
   my ($self, $pms) = @_;
   my $conf = $self->{main}{conf};
   my($host_bl, $host_wl) =
-    $self->_check_uri_wblist($pms, $conf->{wblist_uri_userprefs},
-                                   $conf->{wblist_uri_host});
+    $self->_check_uri_wblist($pms, $conf->{wblist_uri_host});
   if (defined $host_wl) {
     dbg("rules: uri host whitelisted: $host_wl");
     $pms->test_log("URI: $host_wl");
@@ -388,22 +386,20 @@ sub check_uri_host_in_whitelist {
 }
 
 sub _check_uri_wblist {
-  my ($self, $pms, $usr_wb_hashref, $sys_wb_hashref) = @_;
+  my ($self, $pms, $wb_hashref) = @_;
 
   if ($pms->{'uri_wblisted'}) {
     # just provide a cached result
-  } elsif ( (!$usr_wb_hashref || !%$usr_wb_hashref) &&
-            (!$sys_wb_hashref || !%$sys_wb_hashref) ) {
+  } elsif (!$wb_hashref || !%$wb_hashref) {
     $pms->{'uri_wblisted'} = [ undef, undef ];
   } else {
     my $host_blacklisted;
     my $host_whitelisted;
-    $usr_wb_hashref = {}  if !$usr_wb_hashref;
-    $sys_wb_hashref = {}  if !$sys_wb_hashref;
-    dbg("rules: check_uri_wblist usr: %s",
-      join(', ', map { $_.'='.$usr_wb_hashref->{$_} } keys %$usr_wb_hashref));
-    dbg("rules: check_uri_wblist sys: %s",
-      join(', ', map { $_.'='.$sys_wb_hashref->{$_} } keys %$sys_wb_hashref));
+    $wb_hashref = {}  if !$wb_hashref;
+    if (would_log("dbg","rules")) {
+      dbg("rules: check_uri_wblist: %s",
+        join(', ', map { $_.'='.$wb_hashref->{$_} } sort keys %$wb_hashref));
+    }
     # obtain a full list of html-parsed domains
     my $uris = $pms->get_uri_detail_list();
     my %seen;
@@ -431,8 +427,7 @@ sub _check_uri_wblist {
         my $wb_verdict;  # positive=blacklisted; negative=whitelisted
         my $match;
         for my $q (@query_keys) {
-          $wb_verdict = $usr_wb_hashref->{$q};
-          $wb_verdict = $sys_wb_hashref->{$q}  if !$wb_verdict;
+          $wb_verdict = $wb_hashref->{$q};
           if ($wb_verdict) { $match = $q; last }
         }
         if (!$wb_verdict) {
