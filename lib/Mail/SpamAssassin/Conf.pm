@@ -642,74 +642,135 @@ e.g.
   });
 
 
+=item enlist_uri_host (listname) host ...
+
+Adds one or more host names or domain names to a named list of URI domains.
+The named list can then be consulted through a check_uri_host_in_wblist()
+eval rule, which takes the list name as an argument. Parenthesis around
+a list name are literal - a required syntax.
+
+Host names may optionally be prefixed by an exclamantion mark '!', which
+produces false as a result if this entry matches. This makes it easier
+to exclude some subdomains when their superdomain is listed, for example:
+
+  enlist_uri_host (MYLIST) !sub1.example.com !sub2.example.com example.com
+
+No wildcards are supported, but subdomains do match implicitly. Lists
+are independent. Search for each named list starts by looking up the
+full hostname first, then leading fields are progressively stripped off
+(e.g.: sub.example.com, example.com, com) until a match is found or we run
+out of fields. The first matching entry (the most specific) determines if
+a lookup yielded a true (no '!' prefix) or a false ('!'-prefixed) result.
+
+If an URL found in a message contains an IP address in place of a host name,
+the given list must specify the exact same IP address (instead of a host name)
+in order to match.
+
+Use the delist_uri_host directive to neutralize previous enlist_uri_host
+settings. Listnames 'BLACK' and 'WHITE' have their shorthand directives
+blacklist_uri_host and whitelist_uri_host and default rules, but are
+otherwise not special or reserved.
+
+=cut
+
+  push (@cmds, {
+    command => 'enlist_uri_host',
+    setting => 'uri_host_lists',
+    type => $CONF_TYPE_ADDRLIST,
+    code => sub {
+      my($conf, $key, $value, $line) = @_;
+      local($1,$2);
+      if ($value !~ /^ \( (.*?) \) \s+ (.*) \z/sx) {
+        return $MISSING_REQUIRED_VALUE;
+      }
+      my $listname = $1;  # corresponds to arg in check_uri_host_in_wblist()
+      # note: must not factor out dereferencing, as otherwise
+      # subhashes would spring up in a copy and be lost
+      foreach my $host ( split(' ', lc $2) ) {
+        my $v = $host =~ s/^!// ? 0 : 1;
+        $conf->{uri_host_lists}{$listname}{$host} = $v;
+      }
+    }
+  });
+
+=item delist_uri_host [ (listname) ] host ...
+
+Removes one or more specified host names from a named list of URI domains.
+Removing an unlisted name is ignored (is not an error). Listname is optional,
+if specified then just the named list is affected, otherwise hosts are
+removed from all URI host lists created so far. Parenthesis around a list
+name are a required syntax.
+
+Note that directives in configuration files are processed in sequence,
+the delist_uri_host only applies to previously listed entries and has
+no effect on enlisted entries in yet-to-be-processed directives.
+
+For convenience (similarity to the enlist_uri_host directive) hostnames
+may be prefixed by a an exclamation mark, which is stripped off from each
+name and has no meaning here.
+
+=cut
+
+  push (@cmds, {
+    command => 'delist_uri_host',
+    setting => 'uri_host_lists',
+    type => $CONF_TYPE_ADDRLIST,
+    code => sub {
+      my($conf, $key, $value, $line) = @_;
+      local($1,$2);
+      if ($value !~ /^ (?: \( (.*?) \) \s+ )? (.*) \z/sx) {
+        return $MISSING_REQUIRED_VALUE;
+      }
+      my @listnames = defined $1 ? $1 : keys %{$conf->{uri_host_lists}};
+      my @args = split(' ', lc $2);
+      foreach my $listname (@listnames) {
+        foreach my $host (@args) {
+          my $v = $host =~ s/^!// ? 0 : 1;
+          delete $conf->{uri_host_lists}{$listname}{$host};
+        }
+      }
+    }
+  });
+
 =item blacklist_uri_host host-or-domain ...
 
-Adds one or more host names to a list of blacklisted URI domains.
+Is a shorthand for a directive:  enlist_uri_host (BLACK) host ...
 
-No wildcards are supported, but subdomains do match implicitly. There is
-only one combined list for black- and whitelisting of host names in URIs.
-Search starts by looking up the full hostname first, then leading fields
-are progressively stripped off (e.g.: sub.example.com, example.com, com)
-until a match is found or we run out of fields. The first matching entry
-(the most specific) determines if a lookup yielded a blacklisted or a
-whitelisted result.
-
-If an URL contains an IP address in place of a host name, the
-black- (or white-) list must specify the exact same IP address.
-
-A domain cannot be both blacklisted and whitelisted at the same time, the
-last directive prevails. Use the unlist_uri_host directive to neutralize
-previous blacklist_uri_host and whitelist_uri_host settings.
+Please see directives enlist_uri_host and delist_uri_host for details.
 
 =cut
 
   push (@cmds, {
     command => 'blacklist_uri_host',
-    setting => 'wblist_uri_host',
+    setting => 'uri_host_lists',
     type => $CONF_TYPE_ADDRLIST,
     code => sub {
       my($conf, $key, $value, $line) = @_;
-      my $listref = $conf->{wblist_uri_host};
-      $conf->{wblist_uri_host} = $listref = {}  if !$listref;
-      $listref->{$_} = +1  for split(' ', lc $value);
+      foreach my $host ( split(' ', lc $value) ) {
+        my $v = $host =~ s/^!// ? 0 : 1;
+        $conf->{uri_host_lists}{'BLACK'}{$host} = $v;
+      }
     }
   });
 
 =item whitelist_uri_host host-or-domain ...
 
-Adds one or more host names to a list of whitelisted URI domains.
-See blacklist_uri_host directive for details.
+Is a shorthand for a directive:  enlist_uri_host (BLACK) host ...
+
+Please see directives enlist_uri_host and delist_uri_host for details.
 
 =cut
 
   push (@cmds, {
     command => 'whitelist_uri_host',
-    setting => 'wblist_uri_host',
+    setting => 'uri_host_lists',
     type => $CONF_TYPE_ADDRLIST,
     code => sub {
       my($conf, $key, $value, $line) = @_;
-      my $listref = $conf->{wblist_uri_host};
-      $conf->{wblist_uri_host} = $listref = {}  if !$listref;
-      $listref->{$_} = -1  for split(' ', lc $value);
-    }
-  });
-
-=item unlist_uri_host host-or-domain ...
-
-Removes one or more specified host names from a list of black- or whitelisted
-URI domains. Removing an unlisted name is ignored (is not an error).
-
-=cut
-
-  push (@cmds, {
-    command => 'unlist_uri_host',
-    setting => 'wblist_uri_host',
-    type => $CONF_TYPE_ADDRLIST,
-    code => sub {
-      my($conf, $key, $value, $line) = @_;
-      my $listref = $conf->{wblist_uri_host};
-      $conf->{wblist_uri_host} = $listref = {}  if !$listref;
-      delete $listref->{$_}  for split(' ', lc $value);
+      foreach my $host ( split(' ', lc $value) ) {
+        my $v = $host =~ s/^!// ? 0 : 1;
+        $conf->{uri_host_lists}{'WHITE'}{$host} = $v;
+      }
     }
   });
 
@@ -4171,6 +4232,8 @@ sub clone {
     $dest = $self;
   }
 
+  my %done;
+
   # keys that should not be copied in ->clone().
   # bug 4179: include want_rebuild_for_type, so that if a user rule
   # is defined, its method will be recompiled for future scans in
@@ -4180,22 +4243,30 @@ sub clone {
     scoreset scores want_rebuild_for_type
   );
 
+  # special cases.  first, skip anything that cannot be changed
+  # by users, and the stuff we take care of here
+  foreach my $var (@NON_COPIED_KEYS) {
+    $done{$var} = undef;
+  }
+
   # keys that should can be copied using a ->clone() method, in ->clone()
   my @CLONABLE_KEYS = qw(
     internal_networks trusted_networks msa_networks 
   );
 
-  my %done;
-
-  # special cases.  first, skip anything that cannot be changed
-  # by users, and the stuff we take care of here
   foreach my $key (@CLONABLE_KEYS) {
     $dest->{$key} = $source->{$key}->clone();
     $done{$key} = undef;
   }
 
-  foreach my $var (@NON_COPIED_KEYS) {
-    $done{$var} = undef;
+  # two-level hash(es)
+  foreach my $key ('uri_host_lists') {
+    my $v = $source->{$key};
+    my $dest_key_ref = $dest->{$key} = {};  # must start from scratch!
+    while(my($k2,$v2) = each %{$v}) {
+      %{$dest_key_ref->{$k2}} = %{$v2};
+    }
+    $done{$key} = undef;
   }
 
   # bug 4179: be smarter about cloning the rule-type structures;
@@ -4309,7 +4380,7 @@ sub sa_die { Mail::SpamAssassin::sa_die(@_); }
 sub feature_originating_ip_headers { 1 }
 sub feature_dns_local_ports_permit_avoid { 1 }
 sub feature_bayes_auto_learn_on_error { 1 }
-sub feature_uri_host_wblist { 1 }
+sub feature_uri_host_listed { 1 }
 
 ###########################################################################
 

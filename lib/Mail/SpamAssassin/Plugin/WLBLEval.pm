@@ -51,8 +51,7 @@ sub new {
   $self->register_eval_rule("check_from_in_default_whitelist");
   $self->register_eval_rule("check_forged_in_default_whitelist");
   $self->register_eval_rule("check_mailfrom_matches_rcvd");
-  $self->register_eval_rule("check_uri_host_in_blacklist");
-  $self->register_eval_rule("check_uri_host_in_whitelist");
+  $self->register_eval_rule("check_uri_host_listed");
 
   return $self;
 }
@@ -361,94 +360,94 @@ sub _check_whitelist {
 
 sub check_uri_host_in_blacklist {
   my ($self, $pms) = @_;
-  my $conf = $self->{main}{conf};
-  my($host_bl, $host_wl) =
-    $self->_check_uri_wblist($pms, $conf->{wblist_uri_host});
-  if (defined $host_bl) {
-    dbg("rules: uri host blacklisted: $host_bl");
-    $pms->test_log("URI: $host_bl");
-    return 1;
-  }
-  return 0;
+  $self->check_uri_host_listed($pms, 'BLACK');
 }
 
 sub check_uri_host_in_whitelist {
   my ($self, $pms) = @_;
-  my $conf = $self->{main}{conf};
-  my($host_bl, $host_wl) =
-    $self->_check_uri_wblist($pms, $conf->{wblist_uri_host});
-  if (defined $host_wl) {
-    dbg("rules: uri host whitelisted: $host_wl");
-    $pms->test_log("URI: $host_wl");
-    return 1;
+  $self->check_uri_host_listed($pms, 'WHITE');
+}
+
+sub check_uri_host_listed {
+  my ($self, $pms, $subname) = @_;
+  my $host_enlisted_ref = $self->_check_uri_host_listed($pms);
+  if ($host_enlisted_ref) {
+    my $matched_host = $host_enlisted_ref->{$subname};
+    if ($matched_host) {
+      dbg("rules: uri host enlisted (%s): %s", $subname, $matched_host);
+      $pms->test_log("URI: $matched_host");
+      return 1;
+    }
   }
   return 0;
 }
 
-sub _check_uri_wblist {
-  my ($self, $pms, $wb_hashref) = @_;
+sub _check_uri_host_listed {
+  my ($self, $pms) = @_;
 
-  if ($pms->{'uri_wblisted'}) {
-    # just provide a cached result
-  } elsif (!$wb_hashref || !%$wb_hashref) {
-    $pms->{'uri_wblisted'} = [ undef, undef ];
-  } else {
-    my $host_blacklisted;
-    my $host_whitelisted;
-    $wb_hashref = {}  if !$wb_hashref;
-    if (would_log("dbg","rules")) {
-      dbg("rules: check_uri_wblist: %s",
-        join(', ', map { $_.'='.$wb_hashref->{$_} } sort keys %$wb_hashref));
+  if ($pms->{'uri_host_enlisted'}) {
+    return $pms->{'uri_host_enlisted'};  # just provide a cached result
+  }
+
+  my $uri_lists_href = $self->{main}{conf}{uri_host_lists};
+  if (!$uri_lists_href || !%$uri_lists_href) {
+    $pms->{'uri_host_enlisted'} = {};  # no URI host lists
+    return $pms->{'uri_host_enlisted'};
+  }
+
+  my %host_enlisted;
+  my @uri_listnames = sort keys %$uri_lists_href;
+  if (would_log("dbg","rules")) {
+    foreach my $nm (@uri_listnames) {
+      dbg("rules: check_uri_host_listed: (%s) %s",
+          $nm, join(', ', map { $uri_lists_href->{$nm}{$_} ? $_ : '!'.$_ }
+                              sort keys %{$uri_lists_href->{$nm}}));
     }
-    # obtain a full list of html-parsed domains
-    my $uris = $pms->get_uri_detail_list();
-    my %seen;
-    while (my($uri,$info) = each %$uris) {
-      next if $uri =~ /^mailto:/i;  # we may want to skip mailto: uris (?)
-      while (my($host,$domain) = each( %{$info->{hosts}} )) {  # typically one
-        next if $seen{$host};
-        $seen{$host} = 1;
-        local($1,$2);
-        my @query_keys;
-        if ($host =~ /^\[(.*)\]\z/) {  # looks like an address literal
-          @query_keys = ( $1 );
-        } elsif ($host =~ /^\d+\.\d+\.\d+\.\d+\z/) {  # IPv4 address
-          @query_keys = ( $host );
-        } elsif ($host ne '') {
-          my($h) = $host;
-          for (;;) {
-            push(@query_keys, $h);  # sub.example.com, example.com, com
-            last if $h !~ s{^([^.]*)\.(.*)\z}{$2}s;
-          }
-          if (@query_keys > 10) {  # sanity limit, keep the tail
-            @query_keys = @query_keys[$#query_keys-9 .. $#query_keys];
-          }
+  }
+  # obtain a complete list of html-parsed domains
+  my $uris = $pms->get_uri_detail_list();
+  my %seen;
+  while (my($uri,$info) = each %$uris) {
+    next if $uri =~ /^mailto:/i;  # we may want to skip mailto: uris (?)
+    while (my($host,$domain) = each( %{$info->{hosts}} )) {  # typically one
+      next if $seen{$host};
+      $seen{$host} = 1;
+      local($1,$2);
+      my @query_keys;
+      if ($host =~ /^\[(.*)\]\z/) {  # looks like an address literal
+        @query_keys = ( $1 );
+      } elsif ($host =~ /^\d+\.\d+\.\d+\.\d+\z/) {  # IPv4 address
+        @query_keys = ( $host );
+      } elsif ($host ne '') {
+        my($h) = $host;
+        for (;;) {
+          shift @query_keys  if @query_keys > 10;  # sanity limit, keep tail
+          push(@query_keys, $h);  # sub.example.com, example.com, com
+          last if $h !~ s{^([^.]*)\.(.*)\z}{$2}s;
         }
-        my $wb_verdict;  # positive=blacklisted; negative=whitelisted
+      }
+      foreach my $nm (@uri_listnames) {
         my $match;
-        for my $q (@query_keys) {
-          $wb_verdict = $wb_hashref->{$q};
-          if ($wb_verdict) { $match = $q; last }
+        my $verdict;
+        my $hash_nm_ref = $uri_lists_href->{$nm};
+        foreach my $q (@query_keys) {
+          $verdict = $hash_nm_ref->{$q};
+          if (defined $verdict) {
+            $match = $q eq $host ? $host : "$host ($q)";
+            $match = '!'  if !$verdict;
+            last;
+          }
         }
-        if (!$wb_verdict) {
-        # dbg("rules: check_uri_wblist %s, NO MATCH for %s, search: %s",
-        #     $uri, $host, join(', ',@query_keys));
-        } elsif ($wb_verdict > 0) {
-          $host_blacklisted = $host;
-          $host_blacklisted .= " ($match)"  if $match ne $host;
-          dbg("rules: check_uri_wblist %s, BLACK: %s, search: %s",
-              $uri, $host_blacklisted, join(', ',@query_keys));
-        } elsif ($wb_verdict < 0) {
-          $host_whitelisted = $host;
-          $host_whitelisted .= " ($match)"  if $match ne $host;
-          dbg("rules: check_uri_wblist %s, WHITE: %s, search: %s",
-              $uri, $host_whitelisted, join(', ',@query_keys));
+        if (defined $verdict) {
+          $host_enlisted{$nm} = $match  if $verdict;
+          dbg("rules: check_uri_host_listed %s, (%s): %s, search: %s",
+              $uri, $nm, $match, join(', ',@query_keys));
         }
       }
     }
-    $pms->{'uri_wblisted'} = [ $host_blacklisted, $host_whitelisted ];
   }
-  return @{ $pms->{'uri_wblisted'} };
+  $pms->{'uri_host_enlisted'} = \%host_enlisted;
+  return $pms->{'uri_host_enlisted'};
 }
 
 1;
