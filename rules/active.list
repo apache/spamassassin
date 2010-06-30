@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix jm kgolding wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 2: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-trec_enron bb-zmi bernie-it_batt bernie-mix kgolding wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 3: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix jm kgolding wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2
+# with results from: day 1: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix jm wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 2: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix jm kgolding wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 3: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-trec_enron bb-zmi bernie-it_batt bernie-mix kgolding wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2
 
 # tflags publish
 ADVANCE_FEE_2_NEW_FORM
@@ -75,6 +75,9 @@ CORRUPT_FROM_LINE_IN_HDRS
 
 # good enough
 DATE_DOTS
+
+# good enough
+DATE_IN_FUTURE_96_Q
 
 # good enough
 DATE_IN_FUTURE_Q_PLUS
@@ -159,9 +162,6 @@ FB_CIALIS_LEO3
 
 # good enough
 FB_EXTRA_INCHES
-
-# good enough
-FB_GVR
 
 # good enough
 FB_QUALITY_REPLICA
@@ -260,10 +260,31 @@ FROM_MISSP_TO_UNDISC
 FROM_MISSP_USER
 
 # good enough
+FROM_UNBAL1
+
+# good enough
+FROM_UNBAL2
+
+# good enough
+FROM_URI
+
+# good enough
+FROM_WSP_LEAD
+
+# good enough
+FROM_WWW
+
+# good enough
+FRT_PHARMAC
+
+# good enough
 FR_TITLE_CONS_6
 
 # good enough
 FSL_FAKE_HOTMAIL_RVCD
+
+# good enough
+FSL_FAKE_YAHOO_RCVD
 
 # good enough
 FSL_HELO_BARE_IP_1
@@ -276,6 +297,9 @@ FSL_LSPACES_ABUSE
 
 # good enough
 FSL_UA
+
+# good enough
+FS_MORE_CONFIDENT
 
 # good enough
 FS_PHARMASUB2
@@ -332,10 +356,16 @@ HELO_OEM
 HK_FAKENAME_EBAY
 
 # good enough
+HK_FAKENAME_MICROSOFT
+
+# good enough
 HK_NAME_DRUGS
 
 # good enough
 HK_NAME_FM_MR_MRS
+
+# good enough
+HK_NAME_FROM
 
 # good enough
 HK_RANDOM_ENVFROM
@@ -365,6 +395,9 @@ HK_SCAM_N8
 HK_SCAM_S25
 
 # good enough
+HK_SPAMMY_FILENAME
+
+# good enough
 HS_FORGED_OE_FW
 
 # tflags userconf
@@ -372,6 +405,9 @@ HTML_CHARSET_FARAWAY
 
 # good enough
 IMAGESHACK_URI
+
+# good enough
+IMG_DIRECT_TO_MX
 
 # good enough
 KAM_LOTTO1
@@ -390,6 +426,9 @@ KB_RATWARE_MSGID
 
 # good enough
 KB_RATWARE_OUTLOOK_MID
+
+# good enough
+KHOP_GREYED
 
 # good enough
 LIVEFILESTORE
@@ -671,6 +710,9 @@ S25R_6
 SANE_04e8bf28eb445199a7f11b943c44d209
 
 # good enough
+SANE_237c2b0099548ddbfa5a37f07e0687ab
+
+# good enough
 SANE_3b92eda751c992f230f215fb7eb36844
 
 # good enough
@@ -683,6 +725,9 @@ SANE_7429530a7398f43f1f1b795f9420714e
 SANE_75491b468ec2e117e50f9842d32abfab
 
 # good enough
+SANE_b1666f872e931b52d09c9f2b601712c3
+
+# good enough
 SANE_d0d2b0f6373bf91253d66dd74c594b87
 
 # good enough
@@ -693,6 +738,9 @@ SHORT_HELO_AND_INLINE_IMAGE
 
 # good enough
 SINGLE_HEADER_2K
+
+# good enough
+SINGLE_HEADER_3K
 
 # good enough
 SPAMMY_XMAILER
@@ -773,6 +821,9 @@ TT_MSGID_TRUNC
 TVD_FINGER_02
 
 # good enough
+TVD_FUZZY_SECTOR
+
+# good enough
 TVD_PCT_OFF
 
 # good enough
@@ -785,70 +836,13 @@ TVD_RCVD_IP
 TVD_RCVD_SINGLE
 
 # good enough
+TVD_SINGLE_SPAN_DIV
+
+# good enough
 TVD_VISIT_PHARMA
 
 # good enough
-DATE_IN_FUTURE_96_Q
-
-# good enough
-FROM_UNBAL1
-
-# good enough
-FROM_UNBAL2
-
-# good enough
-FROM_URI
-
-# good enough
-FROM_WSP_LEAD
-
-# good enough
-FROM_WWW
-
-# good enough
-FRT_PHARMAC
-
-# good enough
-FSL_FAKE_YAHOO_RCVD
-
-# good enough
-FS_MORE_CONFIDENT
-
-# good enough
-HK_FAKENAME_MICROSOFT
-
-# good enough
-HK_NAME_FROM
-
-# good enough
-HK_SPAMMY_FILENAME
-
-# good enough
-IMG_DIRECT_TO_MX
-
-# good enough
-KHOP_GREYED
-
-# good enough
-LOTTO_AGENT_RPLY
-
-# good enough
-SANE_237c2b0099548ddbfa5a37f07e0687ab
-
-# good enough
-SANE_b1666f872e931b52d09c9f2b601712c3
-
-# good enough
-SCRIPT_GIBBERISH
-
-# good enough
-SINGLE_HEADER_3K
-
-# good enough
-TVD_FUZZY_SECTOR
-
-# good enough
-TVD_SINGLE_SPAN_DIV
+FRT_STOCK1
 
 # tflags userconf
 UNPARSEABLE_RELAY
