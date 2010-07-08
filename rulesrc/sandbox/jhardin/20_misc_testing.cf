@@ -247,13 +247,13 @@ describe       __TO_EQ_FROM_DOM     To: domain same as From: domain
 
 meta           TO_EQ_FM_DOM_HTML_ONLY (__TO_EQ_FROM_DOM && MIME_HTML_ONLY && !ALL_TRUSTED)
 describe       TO_EQ_FM_DOM_HTML_ONLY To domain == From domain and HTML only
-score          TO_EQ_FM_DOM_HTML_ONLY 0.10
-tflags         TO_EQ_FM_DOM_HTML_ONLY nopublish
+
+meta           TO_EQ_FM_DOM_HTML_IMG (__TO_EQ_FROM_DOM && __HTML_LINK_IMAGE && !ALL_TRUSTED)
+describe       TO_EQ_FM_DOM_HTML_IMG To domain == From domain and HTML image link
 
 meta           TO_EQ_FM_DOM_SPF_FAIL  (__TO_EQ_FROM_DOM && SPF_FAIL && !ALL_TRUSTED)
 describe       TO_EQ_FM_DOM_SPF_FAIL  To domain == From domain and external SPF failed
-score          TO_EQ_FM_DOM_SPF_FAIL  0.10
-tflags         TO_EQ_FM_DOM_SPF_FAIL  net nopublish
+tflags         TO_EQ_FM_DOM_SPF_FAIL  net
 
 
 # Evaluate ReturnPath and blacklist collisions
