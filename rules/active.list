@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud; day 2: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm kgolding; day 3: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix jm kgolding wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2
+# with results from: day 1: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix kgolding; day 2: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud; day 3: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm kgolding
 
 # tflags publish
 ADVANCE_FEE_2_NEW_FORM
@@ -28,6 +28,9 @@ ALL_TRUSTED
 # good enough
 AXB_HELO_HOME_UN
 
+# good enough
+BANKING_LAWS
+
 # tflags learn
 BAYES_00
 
@@ -54,6 +57,9 @@ BAYES_95
 
 # tflags learn
 BAYES_99
+
+# good enough
+CAN_SPAM_HDR
 
 # tflags userconf
 CHARSET_FARAWAY
@@ -138,6 +144,9 @@ FH_HELO_EQ_D_D_D_D
 
 # good enough
 FILL_THIS_FORM_LOAN
+
+# good enough
+FILL_THIS_FORM_LONG
 
 # good enough
 FM_LOTTO_YOU_WON
@@ -230,9 +239,6 @@ HEAD_LONG
 HELO_LH_HOME
 
 # good enough
-HK_FAKENAME_EBAY
-
-# good enough
 HK_FAKENAME_MICROSOFT
 
 # good enough
@@ -285,6 +291,9 @@ KB_FAKED_THE_BAT
 
 # good enough
 KB_RATWARE_OUTLOOK_MID
+
+# good enough
+LOTTERY_1
 
 # good enough
 LOTTERY_PH_004470
@@ -542,6 +551,12 @@ RCVD_IN_SORBS_ZOMBIE
 RCVD_IN_XBL
 
 # good enough
+REPLYTO_WITHOUT_TO_CC
+
+# good enough
+RPT_SPAM_HDR
+
+# good enough
 SCRIPT_GIBBERISH
 
 # good enough
@@ -589,6 +604,9 @@ SUBJECT_IN_WHITELIST
 # good enough
 TAB_IN_FROM
 
+# tflags net
+TO_EQ_FM_DOM_SPF_FAIL
+
 # good enough
 TO_EQ_FM_HTML_ONLY
 
@@ -605,16 +623,73 @@ TO_NO_BRKTS_DYNIP
 TVD_FINGER_02
 
 # good enough
-CAN_SPAM_HDR
+FB_YOU_CAN_BECOME
 
 # good enough
-DATE_IN_FUTURE_96_Q
+FR_TITLE_CONS_6
 
 # good enough
-RPT_SPAM_HDR
+FSL_LSPACES_ABUSE
 
-# tflags net
-TO_EQ_FM_DOM_SPF_FAIL
+# good enough
+HELO_NO_DOMAIN
+
+# good enough
+HK_SCAM_S1
+
+# good enough
+HK_SCAM_S15
+
+# good enough
+HK_SCAM_S7
+
+# good enough
+IMAGESHACK_URI
+
+# good enough
+KAM_LOTTO3
+
+# good enough
+LOTTO_AGENT_FM
+
+# good enough
+LOTTO_DEPT
+
+# good enough
+MANY_GOOG_PROXY
+
+# good enough
+MANY_SPAN_IN_TEXT
+
+# good enough
+MONEY_LOTTERY
+
+# good enough
+S25R_6
+
+# good enough
+SANE_6d8469947da377e0a0b4b7fed8f7e1d8
+
+# good enough
+SANE_8f9d40cc4e21b11c7171a7d6b3eea4c1
+
+# good enough
+TINY_FLOAT
+
+# good enough
+TO_EQ_FM_DIRECT_MX
+
+# good enough
+TO_EQ_FM_DOM_HTML_IMG
+
+# good enough
+TO_EQ_FM_HTML_DIRECT
+
+# good enough
+TO_NO_BRKTS_NORDNS_HTML
+
+# good enough
+URI_DOM_OBFU
 
 # tflags userconf
 UNPARSEABLE_RELAY
