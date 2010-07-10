@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix kgolding; day 2: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud; day 3: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm kgolding
+# with results from: day 1: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix dos kgolding wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 2: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix kgolding; day 3: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud
 
 # tflags publish
 ADVANCE_FEE_2_NEW_FORM
@@ -28,9 +28,6 @@ ALL_TRUSTED
 # good enough
 AXB_HELO_HOME_UN
 
-# good enough
-BANKING_LAWS
-
 # tflags learn
 BAYES_00
 
@@ -58,9 +55,6 @@ BAYES_95
 # tflags learn
 BAYES_99
 
-# good enough
-CAN_SPAM_HDR
-
 # tflags userconf
 CHARSET_FARAWAY
 
@@ -71,16 +65,10 @@ CHARSET_FARAWAY_HEADER
 CORRUPT_FROM_LINE_IN_HDRS
 
 # good enough
-DATE_DOTS
-
-# good enough
 DATE_IN_FUTURE_Q_PLUS
 
 # good enough
 DEAR_BENEFICIARY
-
-# good enough
-DEAR_WINNER
 
 # tflags net
 DIGEST_MULTIPLE
@@ -143,12 +131,6 @@ FH_HELO_ALMOST_IP
 FH_HELO_EQ_D_D_D_D
 
 # good enough
-FILL_THIS_FORM_LOAN
-
-# good enough
-FILL_THIS_FORM_LONG
-
-# good enough
 FM_LOTTO_YOU_WON
 
 # tflags publish
@@ -167,13 +149,7 @@ FROM_DOMAIN_NOVOWEL
 FROM_LOCAL_NOVOWEL
 
 # good enough
-FROM_MISSPACED
-
-# good enough
 FROM_MISSP_DYNIP
-
-# good enough
-FROM_MISSP_EH_MATCH
 
 # good enough
 FROM_MISSP_FREEMAIL
@@ -183,9 +159,6 @@ FROM_MISSP_MSFT
 
 # good enough
 FROM_MISSP_NO_TO
-
-# good enough
-FROM_MISSP_REPLYTO
 
 # tflags net
 FROM_MISSP_SPF_FAIL
@@ -198,9 +171,6 @@ FROM_MISSP_USER
 
 # good enough
 FSL_HELO_DEVICE
-
-# good enough
-FSL_UA
 
 # good enough
 FS_WILL_HELP
@@ -242,46 +212,19 @@ HELO_LH_HOME
 HK_FAKENAME_MICROSOFT
 
 # good enough
-HK_NAME_FM_DR
-
-# good enough
-HK_NAME_FM_MR_MRS
-
-# good enough
 HK_RANDOM_ENVFROM
-
-# good enough
-HK_RANDOM_FROM
-
-# good enough
-HK_SCAM_N1
-
-# good enough
-HK_SCAM_N15
 
 # good enough
 HK_SCAM_N2
 
 # good enough
-HK_SCAM_N3
-
-# good enough
-HK_SCAM_N4
-
-# good enough
 HK_SCAM_N8
-
-# good enough
-HK_SCAM_S25
 
 # tflags userconf
 HTML_CHARSET_FARAWAY
 
 # good enough
 KAM_LOTTO1
-
-# good enough
-KAM_LOTTO2
 
 # good enough
 KB_DATE_CONTAINS_TAB
@@ -293,19 +236,10 @@ KB_FAKED_THE_BAT
 KB_RATWARE_OUTLOOK_MID
 
 # good enough
-LOTTERY_1
-
-# good enough
 LOTTERY_PH_004470
 
 # good enough
 LOTTO_AGENT
-
-# good enough
-LOTTO_AGENT_RPLY
-
-# good enough
-LOTTO_URI
 
 # tflags publish
 MAILER_EQ_ORG
@@ -332,13 +266,7 @@ MONEY_FRAUD_8
 MONEY_FROM_MISSP
 
 # good enough
-MONEY_PERCENT
-
-# good enough
 MSOE_MID_WRONG_CASE
-
-# good enough
-MS_XYMOSG_2K
 
 # tflags net
 NO_DNS_FOR_FROM
@@ -551,18 +479,6 @@ RCVD_IN_SORBS_ZOMBIE
 RCVD_IN_XBL
 
 # good enough
-REPLYTO_WITHOUT_TO_CC
-
-# good enough
-RPT_SPAM_HDR
-
-# good enough
-SCRIPT_GIBBERISH
-
-# good enough
-SHARE_50_50
-
-# good enough
 SHORT_HELO_AND_INLINE_IMAGE
 
 # tflags net
@@ -592,9 +508,6 @@ SPF_SOFTFAIL
 # good enough
 STOX_REPLY_TYPE_WITHOUT_QUOTES
 
-# good enough
-STYLE_GIBBERISH
-
 # tflags userconf
 SUBJECT_IN_BLACKLIST
 
@@ -623,55 +536,19 @@ TO_NO_BRKTS_DYNIP
 TVD_FINGER_02
 
 # good enough
-FB_YOU_CAN_BECOME
-
-# good enough
-FR_TITLE_CONS_6
-
-# good enough
 FSL_LSPACES_ABUSE
 
 # good enough
 HELO_NO_DOMAIN
 
 # good enough
-HK_SCAM_S1
-
-# good enough
-HK_SCAM_S15
-
-# good enough
-HK_SCAM_S7
-
-# good enough
 IMAGESHACK_URI
-
-# good enough
-KAM_LOTTO3
-
-# good enough
-LOTTO_AGENT_FM
-
-# good enough
-LOTTO_DEPT
-
-# good enough
-MANY_GOOG_PROXY
 
 # good enough
 MANY_SPAN_IN_TEXT
 
 # good enough
-MONEY_LOTTERY
-
-# good enough
 S25R_6
-
-# good enough
-SANE_6d8469947da377e0a0b4b7fed8f7e1d8
-
-# good enough
-SANE_8f9d40cc4e21b11c7171a7d6b3eea4c1
 
 # good enough
 TINY_FLOAT
@@ -687,6 +564,9 @@ TO_EQ_FM_HTML_DIRECT
 
 # good enough
 TO_NO_BRKTS_NORDNS_HTML
+
+# good enough
+TVD_PH_BODY_META
 
 # good enough
 URI_DOM_OBFU
@@ -771,9 +651,6 @@ USER_IN_WHITELIST_TO
 
 # good enough
 XMAILER_MIMEOLE_OL_1ECD5
-
-# good enough
-XMAILER_MIMEOLE_OL_83BF7
 
 # tflags net
 __DNS_FROM_RFC_ABUSE
