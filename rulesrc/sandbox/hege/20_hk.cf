@@ -44,10 +44,11 @@ header		__HK_NAME_MICROSOFT	From:name =~ /(microsoft|\bmsn\b)/i
 header		__HK_HELO_MICROSOFT	X-Spam-Relays-External =~ / helo=\S+\.(?:microsoft(?:email)?|msn)\.com /
 # false hits per bug 6417
 ifplugin Mail::SpamAssassin::Plugin::SPF
-  meta		HK_FAKENAME_MICROSOFT	__HK_NAME_MICROSOFT && !__HK_HELO_MICROSOFT && !SPF_PASS
-  describe	HK_FAKENAME_MICROSOFT	From name mentions Microsoft, but not relayed from there
+  ifplugin Mail::SpamAssassin::Plugin::DKIM
+    meta	HK_FAKENAME_MICROSOFT	__HK_NAME_MICROSOFT && !__HK_HELO_MICROSOFT && !SPF_PASS && !DKIM_VALID_AU
+    describe	HK_FAKENAME_MICROSOFT	From name mentions Microsoft, but not relayed from there
+  endif
 endif
-
 header		__HK_NAME_YAHOO		From:name =~ /\byahoo\b/i
 header		__HK_HELO_YAHOO		X-Spam-Relays-External =~ / helo=[^ ]+\.yahoo\.com /
 meta		HK_FAKENAME_YAHOO	__HK_NAME_YAHOO && !__HK_HELO_YAHOO
