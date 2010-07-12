@@ -232,7 +232,7 @@ meta           TO_EQ_FM_HTML_ONLY   (__TO_EQ_FROM && MIME_HTML_ONLY && !HTML_MIM
 describe       TO_EQ_FM_HTML_ONLY   To == From and HTML only
 #tflags         TO_EQ_FM_HTML_ONLY   publish
 
-meta           TO_EQ_FM_DIRECT_MX   (__TO_EQ_FROM && __DOS_DIRECT_TO_MX && !__THREAD_INDEX_GOOD)
+meta           TO_EQ_FM_DIRECT_MX   (__TO_EQ_FROM && __DOS_DIRECT_TO_MX && !__THREAD_INDEX_GOOD && !__IS_EXCH)
 describe       TO_EQ_FM_DIRECT_MX   To == From and direct-to-MX
 
 # Why __HUSH_HUSH hits ham on this in masscheck I don't know. Legit bank emails maybe?
@@ -250,11 +250,11 @@ meta           __TO_EQ_FROM_DOM     (__TO_EQ_FROM_DOM_1 || __TO_EQ_FROM_DOM_2)
 describe       __TO_EQ_FROM_DOM     To: domain same as From: domain
 #tflags         __TO_EQ_FROM_DOM     publish
 
-meta           TO_EQ_FM_DOM_HTML_ONLY (__TO_EQ_FROM_DOM && MIME_HTML_ONLY && !__CTYPE_MULTIPART_ALT && !HTML_MIME_NO_HTML_TAG && !ALL_TRUSTED)
+meta           TO_EQ_FM_DOM_HTML_ONLY (__TO_EQ_FROM_DOM && MIME_HTML_ONLY && !__CTYPE_MULTIPART_ALT && !HTML_MIME_NO_HTML_TAG && !ALL_TRUSTED && !__MIME_QP && !__IS_EXCH)
 describe       TO_EQ_FM_DOM_HTML_ONLY To domain == From domain and HTML only
 #tflags         TO_EQ_FM_DOM_HTML_ONLY publish
 
-meta           TO_EQ_FM_DOM_HTML_IMG (__TO_EQ_FROM_DOM && __HTML_LINK_IMAGE && !__CTYPE_MULTIPART_ALT && !ALL_TRUSTED)
+meta           TO_EQ_FM_DOM_HTML_IMG (__TO_EQ_FROM_DOM && __HTML_LINK_IMAGE && !__CTYPE_MULTIPART_ALT && !ALL_TRUSTED && !__MIME_QP && !__IS_EXCH)
 describe       TO_EQ_FM_DOM_HTML_IMG To domain == From domain and HTML image link
 #tflags         TO_EQ_FM_DOM_HTML_IMG publish
 
@@ -438,5 +438,8 @@ meta            __SPF_FULL_PASS         (SPF_PASS && SPF_HELO_PASS)
 # Spam from ZA
 header          CAN_SPAM_HDR            CAN-SPAM_Compliant =~ /./
 header          RPT_SPAM_HDR            Report-SPAM =~ /./
+
+
+header          LONG_FROM               From =~ /<[^<]{40,}\@/
 
 
