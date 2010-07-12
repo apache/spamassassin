@@ -440,6 +440,6 @@ header          CAN_SPAM_HDR            CAN-SPAM_Compliant =~ /./
 header          RPT_SPAM_HDR            Report-SPAM =~ /./
 
 
-header          LONG_FROM               From =~ /<[^<]{40,}\@/
+header          LONG_FROM               From =~ /<[^<@]{40,}\@/
 
 
