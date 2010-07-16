@@ -440,6 +440,11 @@ header          CAN_SPAM_HDR            CAN-SPAM_Compliant =~ /./
 header          RPT_SPAM_HDR            Report-SPAM =~ /./
 
 
-header          LONG_FROM               From =~ /<[^<@]{40,}\@/
+#header          LONG_FROM               From =~ /<[^<@]{40,}\w\@/
 
+
+body            __MANY_RECORDS          /\s[A-Z][a-z]{1,30}s(?:\sDatabase)?[-:\s]{2,5}(?i:1\smillion\s|\d[\d,.]{1,8}[Kk]?\s(?i:thousand\s|million\s)?)(?i:total\s|full\sdata\s)?(?i:email|record)s/
+tflags          __MANY_RECORDS          multiple
+meta            BIG_LISTS               __MANY_RECORDS > 3
+meta            MANY_BIG_LISTS          __MANY_RECORDS > 10
 
