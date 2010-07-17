@@ -56,7 +56,7 @@ meta       TO_NO_BRKTS_PCNT         __TO_NO_ARROWS_R && __FB_NUM_PERCNT
 describe   TO_NO_BRKTS_PCNT         To: misformatted + percentage
 score      TO_NO_BRKTS_PCNT         0.20
 
-meta       TO_NO_BRKTS_DIRECT       __TO_NO_ARROWS_R && __DOS_DIRECT_TO_MX && !__MIME_QP && !__IS_EXCH && !__THREAD_INDEX_GOOD
+meta       TO_NO_BRKTS_DIRECT       __TO_NO_ARROWS_R && __DOS_DIRECT_TO_MX && !__MIME_QP && !__IS_EXCH && !__THREAD_INDEX_GOOD && !__COMMENT_EXISTS && !__RCD_RDNS_MTA_MESSY
 describe   TO_NO_BRKTS_DIRECT       To: misformatted and direct-to-MX
 tflags     TO_NO_BRKTS_DIRECT       publish
 
