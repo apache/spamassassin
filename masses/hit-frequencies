@@ -7,9 +7,9 @@
 # The ASF licenses this file to you under the Apache License, Version 2.0
 # (the "License"); you may not use this file except in compliance with
 # the License.  You may obtain a copy of the License at:
-# 
+#
 #     http://www.apache.org/licenses/LICENSE-2.0
-# 
+#
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -480,7 +480,7 @@ foreach $test (sort { $ranking{$b} <=> $ranking{$a} } @tests) {
   # exact same ruleset version; this assumption screws up nightly
   # mass-check reports if they are generated with a different SVN rev
   # next unless (exists $rules{$test});
-  
+
   next if (!$opt_a && $test =~ /^__/);
 
   my $fs = $freq_spam{$test}; $fs ||= 0;
@@ -786,6 +786,8 @@ sub compute_overlaps_for_rule {
   my %overlaps_spam1 = ();
   my %overlaps_ham2 = ();
   my %overlaps_spam2 = ();
+  my %overlaps_ham1r = ();
+  my %overlaps_spam1r = ();
 
   foreach my $r2 (keys %hmap_spam) {
     next if $r1 eq $r2;
@@ -795,14 +797,20 @@ sub compute_overlaps_for_rule {
 
     my ($a1ina2, $a2ina1) = _hmap_to_overlap_ratio ($r2, $r1,
                                     $hmap_spam{$r2}, $hmap_spam{$r1});
-    
-    if (exists $overlaps_spam1{$a1ina2})
-    { $overlaps_spam1{$a1ina2} .= " ".$r2."[$a2ina1]"; }
-    else { $overlaps_spam1{$a1ina2} = $r2."[$a2ina1]"; }
 
-    if (exists $overlaps_spam2{$a2ina1})
-    { $overlaps_spam2{$a2ina1} .= " ".$r2."[$a2ina1]"; }
-    else { $overlaps_spam2{$a2ina1} = $r2."[$a2ina1]"; }
+    if ($a1ina2 > 0)
+    {
+      $overlaps_spam1r{$r2} = $a1ina2;
+
+      if (exists $overlaps_spam1{$a1ina2})
+      { $overlaps_spam1{$a1ina2} .= " ".$r2."[$a2ina1]"; }
+      else { $overlaps_spam1{$a1ina2} = $r2."[$a2ina1]"; }
+
+      if (exists $overlaps_spam2{$a2ina1})
+      { $overlaps_spam2{$a2ina1} .= " ".$r2."[$a2ina1]"; }
+      else { $overlaps_spam2{$a2ina1} = $r2."[$a2ina1]"; }
+    }
+
   }
 
   foreach my $r2 (keys %hmap_ham) {
@@ -813,28 +821,36 @@ sub compute_overlaps_for_rule {
 
     my ($a1ina2, $a2ina1) = _hmap_to_overlap_ratio ($r1, $r2,
                                     $hmap_ham{$r2}, $hmap_ham{$r1});
-    
-    if (exists $overlaps_ham1{$a1ina2})
-    { $overlaps_ham1{$a1ina2} .= " ".$r2."[$a2ina1]"; }
-    else { $overlaps_ham1{$a1ina2} = $r2."[$a2ina1]"; }
 
-    if (exists $overlaps_ham2{$a2ina1})
-    { $overlaps_ham2{$a2ina1} .= " ".$r2."[$a1ina2]"; }
-    else { $overlaps_ham2{$a2ina1} = $r2."[$a1ina2]"; }
+    if ($a1ina2 > 0)
+    {
+      $overlaps_ham1r{$r2} = $a1ina2;
+
+      if (exists $overlaps_ham1{$a1ina2})
+      { $overlaps_ham1{$a1ina2} .= " ".$r2."[$a2ina1]"; }
+      else { $overlaps_ham1{$a1ina2} = $r2."[$a2ina1]"; }
+
+      if (exists $overlaps_ham2{$a2ina1})
+      { $overlaps_ham2{$a2ina1} .= " ".$r2."[$a1ina2]"; }
+      else { $overlaps_ham2{$a2ina1} = $r2."[$a1ina2]"; }
+    }
+
   }
 
-  _print_overlap_ratios($r1, \%overlaps_spam1, \%overlaps_spam2, "spam");
-  _print_overlap_ratios($r1, \%overlaps_ham1, \%overlaps_ham2, "ham");
+  _print_overlap_ratios($r1, \%overlaps_spam1, \%overlaps_spam2, "spam", \%overlaps_ham1r, "ham");
+  _print_overlap_ratios($r1, \%overlaps_ham1, \%overlaps_ham2, "ham", \%overlaps_spam1r, "spam");
 }
 
 sub _print_overlap_ratios {
-  my ($r1, $hash1, $hash2, $type) = @_;
+  my ($r1, $hash1, $hash2, $type, $hash_other_type, $other_type) = @_;
 
   return unless defined $r1;
 
   if ($opt_d) {
     print qq{ <overlap class='$type'> };
   }
+
+  my %other_type_rules = %$hash_other_type;
 
   foreach my $ratio (sort { $b <=> $a } keys %$hash1) {
     $ratio ||= 0;
@@ -859,10 +875,12 @@ sub _print_overlap_ratios {
         };
 
       } else {
-        printf "  overlap %4s: %3d%% of %s hits also hit %s; %3d%% of %s hits also hit %s%s\n",
+        printf "  overlap %4s: %3d%% of %s hits also hit %s; %3d%% of %s hits also hit %s%s%s\n",
                     $type, $ratio, $r1, $r2,
                     $reverse_ratio, $r2, $r1,
-                    ($is_subrule ? ' (meta rule and subrule)' : '');
+                    ($is_subrule ? ' (meta rule and subrule)' : ''),
+                    (exists $other_type_rules{$r2} ? " ($other_type $other_type_rules{$r2}%)" : " (no $other_type)")
+        ;
       }
     }
   }
