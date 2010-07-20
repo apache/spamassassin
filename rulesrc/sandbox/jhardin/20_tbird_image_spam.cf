@@ -37,7 +37,7 @@ meta       TO_NO_BRKTS_HTML_ONLY   __TO_NO_ARROWS_R && !__TO_UNDISCLOSED && MIME
 score      TO_NO_BRKTS_HTML_ONLY   0.20
 describe   TO_NO_BRKTS_HTML_ONLY   To: misformatted and HTML only
 
-meta       TO_NO_BRKTS_DYNIP       __TO_NO_ARROWS_R && !__TO_UNDISCLOSED && RDNS_DYNAMIC && !__NAME_IS_EMAIL && !__MSGID_OK_HEX
+meta       TO_NO_BRKTS_DYNIP       __TO_NO_ARROWS_R && !__TO_UNDISCLOSED && RDNS_DYNAMIC && !__NAME_IS_EMAIL && !__MSGID_OK_HEX && !__HAS_X_MAILER && !__MIME_QP
 describe   TO_NO_BRKTS_DYNIP       To: misformatted and dynamic rDNS
 
 meta       TO_NO_BRKTS_NORDNS      __TO_NO_ARROWS_R && !__TO_UNDISCLOSED && RDNS_NONE
