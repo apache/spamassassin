@@ -1150,20 +1150,15 @@ sub _get_tag_value_for_yesno {
 }
 
 sub _get_tag_value_for_score {
-  my ($self, $pad) = @_;
+  #$pad parameter never used.  removed.
+  my ($self) = @_;
 
   my $score  = sprintf("%2.1f", $self->{score});
   my $rscore = $self->_get_tag_value_for_required_score();
 
-  # padding
-  if (defined $pad && $pad =~ /^(0+| +)$/) {
-    my $count = length($1) + 3 - length($score);
-    $score = (substr($pad, 0, $count) . $score) if $count > 0;
-  }
-
-  # bug 2607: Do some rounding tricks to avoid the 5.0!=5.0-phenomenon,
-  return $score if $self->{is_spam} or $score < $rscore;
-  return $rscore - 0.1;
+  #Change due to bug 6419 to use Util function for consistency with spamd
+  #and PerMessageStatus
+  return Mail::SpamAssassin::Util::get_tag_value_for_score($score, $rscore, $self->{is_spam});
 }
 
 sub _get_tag_value_for_required_score {
