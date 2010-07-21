@@ -1664,6 +1664,40 @@ sub fisher_yates_shuffle {
 
 ###########################################################################
 
+
+###########################################################################
+
+# bugs 6419 and 2607 relate to returning a score 1/10th lower than the
+# required score if the rounded to the 10th version of the score is equal
+# to the required score
+#
+# moved from PerMessageStatus.pm to here and modified to allow for a 
+# non-class version of the routine to be called from PerMessageStatus
+# and from spamd
+
+sub get_tag_value_for_score {
+  my ($score, $rscore, $is_spam) = @_;
+
+  #BASED ON _get_tag_value_for_score from PerMsgStatus.pm
+
+  $score  = sprintf("%2.1f", $score);
+  $rscore = sprintf("%2.1f", $rscore);
+
+  # if the email is spam, return the accurate score
+  # if the email is NOT spam and the score is less than the required score, 
+  #   then return the accurate score
+
+  return $score if $is_spam or $score < $rscore;
+
+  # if the email is NOT spam and $score = $rscore, return the $rscore - 0.1 
+  #   effectively flooring the value to the closest tenth
+
+  return $rscore - 0.1;
+}
+
+###########################################################################
+
+
 1;
 
 =back
