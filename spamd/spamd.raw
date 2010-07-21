@@ -1575,8 +1575,8 @@ sub check {
   my $status = Mail::SpamAssassin::PerMsgStatus->new($spamtest, $mail);
   $status->check();
 
-  my $msg_score     = sprintf( "%.1f", $status->get_score );
-  my $msg_threshold = sprintf( "%.1f", $status->get_required_score );
+  my $msg_score     =  &Mail::SpamAssassin::Util::get_tag_value_for_score($status->get_score, $status->get_required_score, $status->is_spam);
+  my $msg_threshold = sprintf( "%2.1f", $status->get_required_score );
 
   my $response_spam_status = "";
   my $was_it_spam;
