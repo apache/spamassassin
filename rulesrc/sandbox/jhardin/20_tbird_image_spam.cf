@@ -33,7 +33,7 @@ meta       TO_NO_BRKTS_HTML_IMG    __TO_NO_ARROWS_R && !__TO_UNDISCLOSED && HTML
 score      TO_NO_BRKTS_HTML_IMG    0.20
 describe   TO_NO_BRKTS_HTML_IMG    To: misformatted and HTML and one image
 
-meta       TO_NO_BRKTS_HTML_ONLY   __TO_NO_ARROWS_R && !__TO_UNDISCLOSED && MIME_HTML_ONLY && !__MIME_QP && !__MSGID_JAVAMAIL && !__HAS_X_MAILER
+meta       TO_NO_BRKTS_HTML_ONLY   __TO_NO_ARROWS_R && !__TO_UNDISCLOSED && MIME_HTML_ONLY && !__MIME_QP && !__MSGID_JAVAMAIL && !__HAS_X_MAILER && !__HAS_REPLY_TO
 score      TO_NO_BRKTS_HTML_ONLY   0.20
 describe   TO_NO_BRKTS_HTML_ONLY   To: misformatted and HTML only
 
@@ -59,6 +59,10 @@ score      TO_NO_BRKTS_PCNT         0.20
 meta       TO_NO_BRKTS_DIRECT       __TO_NO_ARROWS_R && __DOS_DIRECT_TO_MX && !__MIME_QP && !__IS_EXCH && !__THREAD_INDEX_GOOD && !__COMMENT_EXISTS && !__RCD_RDNS_MTA_MESSY && !__CTYPE_HAS_BOUNDARY && !__TVD_SPACE_RATIO
 describe   TO_NO_BRKTS_DIRECT       To: misformatted and direct-to-MX
 tflags     TO_NO_BRKTS_DIRECT       publish
+
+meta       TO_NO_BRKTS_NOTLIST      __TO_NO_ARROWS_R && !__VIA_ML && !__UNUSABLE_MSGID && !__THREADED && !__SUBJ_RE
+describe   TO_NO_BRKTS_NOTLIST      To: misformatted and not a mailing list
+
 
 ifplugin Mail::SpamAssassin::Plugin::FreeMail
 #  meta       TO_NO_BRKTS_FREEMAIL    __TO_NO_ARROWS_R && !__TO_UNDISCLOSED && (FREEMAIL_FROM || FREEMAIL_REPLYTO)
