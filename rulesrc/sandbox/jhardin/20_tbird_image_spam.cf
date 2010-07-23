@@ -33,7 +33,7 @@ meta       TO_NO_BRKTS_HTML_IMG    __TO_NO_ARROWS_R && !__TO_UNDISCLOSED && HTML
 score      TO_NO_BRKTS_HTML_IMG    0.20
 describe   TO_NO_BRKTS_HTML_IMG    To: misformatted and HTML and one image
 
-meta       TO_NO_BRKTS_HTML_ONLY   __TO_NO_ARROWS_R && !__TO_UNDISCLOSED && MIME_HTML_ONLY && !__MIME_QP && !__MSGID_JAVAMAIL && !__HAS_X_MAILER && !__HAS_REPLY_TO && !__CTYPE_CHARSET_QUOTED
+meta       TO_NO_BRKTS_HTML_ONLY   __TO_NO_ARROWS_R && !__TO_UNDISCLOSED && MIME_HTML_ONLY && !__MIME_QP && !__MSGID_JAVAMAIL && !__HAS_X_MAILER && !__HAS_REPLY_TO && !__CTYPE_CHARSET_QUOTED && !__SUBJECT_ENCODED_B64
 score      TO_NO_BRKTS_HTML_ONLY   0.20
 describe   TO_NO_BRKTS_HTML_ONLY   To: misformatted and HTML only
 
@@ -52,7 +52,7 @@ meta       TO_NO_BRKTS_MSFT         __TO_NO_ARROWS_R && !__TO_UNDISCLOSED && (__
 describe   TO_NO_BRKTS_MSFT         To: misformatted and supposed Microsoft tool
 score      TO_NO_BRKTS_MSFT         0.20
 
-meta       TO_NO_BRKTS_PCNT         __TO_NO_ARROWS_R && __FB_NUM_PERCNT
+meta       TO_NO_BRKTS_PCNT         __TO_NO_ARROWS_R && __FB_NUM_PERCNT && !__REPLYTO_EXISTS && !__CTYPE_MULTIPART_ANY && !__SUBJECT_ENCODED_B64 && !__COMMENT_EXISTS
 describe   TO_NO_BRKTS_PCNT         To: misformatted + percentage
 score      TO_NO_BRKTS_PCNT         0.20
 
@@ -60,7 +60,7 @@ meta       TO_NO_BRKTS_DIRECT       __TO_NO_ARROWS_R && __DOS_DIRECT_TO_MX && !_
 describe   TO_NO_BRKTS_DIRECT       To: misformatted and direct-to-MX
 tflags     TO_NO_BRKTS_DIRECT       publish
 
-meta       TO_NO_BRKTS_NOTLIST      __TO_NO_ARROWS_R && !__VIA_ML && !__UNUSABLE_MSGID && !__THREADED && !__SUBJ_RE
+meta       TO_NO_BRKTS_NOTLIST      __TO_NO_ARROWS_R && !__VIA_ML && !__UNUSABLE_MSGID && !__THREADED && !__SUBJ_RE && !__MIME_QP
 describe   TO_NO_BRKTS_NOTLIST      To: misformatted and not a mailing list
 
 
