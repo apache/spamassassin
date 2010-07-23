@@ -250,7 +250,7 @@ meta           __TO_EQ_FROM_DOM     (__TO_EQ_FROM_DOM_1 || __TO_EQ_FROM_DOM_2)
 describe       __TO_EQ_FROM_DOM     To: domain same as From: domain
 #tflags         __TO_EQ_FROM_DOM     publish
 
-meta           TO_EQ_FM_DOM_HTML_ONLY (__TO_EQ_FROM_DOM && MIME_HTML_ONLY && !__CTYPE_MULTIPART_ALT && !HTML_MIME_NO_HTML_TAG && !ALL_TRUSTED && !__MIME_QP && !__IS_EXCH)
+meta           TO_EQ_FM_DOM_HTML_ONLY (__TO_EQ_FROM_DOM && MIME_HTML_ONLY && !__CTYPE_MULTIPART_ALT && !HTML_MIME_NO_HTML_TAG && !ALL_TRUSTED && !__MIME_QP && !__IS_EXCH) && !__MSGID_BEFORE_RECEIVED
 describe       TO_EQ_FM_DOM_HTML_ONLY To domain == From domain and HTML only
 #tflags         TO_EQ_FM_DOM_HTML_ONLY publish
 
