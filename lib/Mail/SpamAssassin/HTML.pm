@@ -489,17 +489,9 @@ sub text_style {
 	    if ($value =~ /rgb/) {
 	      $value =~ tr/0-9,//cd;
 	      my @rgb = split(/,/, $value);
-	      splice @rgb, 3;
-	      for(my $i=0; $i<3; $i++) {
-	        if (!defined $rgb[$i]) {
-	          $_ = 0;
-	        }
-	        elsif ($rgb[$i] > 255) {
-	          $rgb[$i] = 255;
-                }
-	      }
-
-              $new{$whcolor} = sprintf("#%02x%02x%02x", @rgb);
+              $new{$whcolor} = sprintf("#%02x%02x%02x",
+                                       map { !$_ ? 0 : $_ > 255 ? 255 : $_ }
+                                           @rgb[0..2]);
             }
 	    else {
 	      $new{$whcolor} = name_to_rgb($value);
