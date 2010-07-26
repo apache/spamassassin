@@ -55,7 +55,9 @@ describe       URI_NUMERIC_CCTLD     CCTLD URI with multiple numeric subdomains
 
 # From should have whitespace between the comment and the address
 # Better S/O, good enough for standalone rule
-header         FROM_MISSPACED        From =~ /^\s*"[^"]*"</
+header         __FROM_MISSPACED      From =~ /^\s*"[^"]*"</
+# meta with some stuff to reduce FPs
+meta           FROM_MISSPACED        __FROM_MISSPACED && !__RCD_RDNS_MTA_MESSY && !__CTYPE_MULTIPART_ALT && !__REPTO_QUOTE
 describe       FROM_MISSPACED        From: missing whitespace
 
 # Poorer S/O than FROM_MISSPACED but better performance in metas
@@ -66,10 +68,10 @@ header         __FROM_RUNON          From =~ /\S+<\w+/
 meta           FROM_MISSP_SPF_FAIL  (__FROM_RUNON && SPF_FAIL)
 tflags         FROM_MISSP_SPF_FAIL  net
 
-meta           FROM_MISSP_EH_MATCH   (__FROM_RUNON && __ENV_AND_HDR_FROM_MATCH)
+meta           FROM_MISSP_EH_MATCH   (__FROM_RUNON && __ENV_AND_HDR_FROM_MATCH) && !__RCD_RDNS_MTA_MESSY
 describe       FROM_MISSP_EH_MATCH   From misspaced, matches envelope
 
-meta           FROM_MISSP_URI        (__FROM_RUNON && __HAS_ANY_URI)
+meta           FROM_MISSP_URI        (__FROM_RUNON && __HAS_ANY_URI) && !__NOT_SPOOFED && !__RCD_RDNS_MTA_MESSY
 describe       FROM_MISSP_URI        From misspaced, has URI
 
 meta           FROM_MISSP_USER       (__FROM_RUNON && NSL_RCVD_FROM_USER)
@@ -84,7 +86,7 @@ describe       FROM_MISSP_TO_UNDISC  From misspaced, To undisclosed
 meta           FROM_MISSP_DKIM       (__FROM_RUNON && __DKIM_DEPENDABLE)
 describe       FROM_MISSP_DKIM       From misspaced, DKIM dependable
 
-meta           FROM_MISSP_REPLYTO    (__FROM_RUNON && __REPLYTO_EXISTS)
+meta           FROM_MISSP_REPLYTO    (__FROM_RUNON && __REPLYTO_EXISTS) && !__NOT_SPOOFED && !__RCD_RDNS_MTA_MESSY
 describe       FROM_MISSP_REPLYTO    From misspaced, has Reply-To
 
 ## To the same

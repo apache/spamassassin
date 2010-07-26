@@ -71,7 +71,7 @@ ifplugin Mail::SpamAssassin::Plugin::FreeMail
 endif
 
 meta       TO_NO_BRKTS_FROM_RUNON   __TO_NO_ARROWS_R && !__TO_UNDISCLOSED && __FROM_RUNON
-meta       TO_NO_BRKTS_FROM_MSSP   __TO_NO_ARROWS_R && !__TO_UNDISCLOSED && FROM_MISSPACED
+meta       TO_NO_BRKTS_FROM_MSSP   __TO_NO_ARROWS_R && !__TO_UNDISCLOSED && FROM_MISSPACED && !__RCD_RDNS_MTA_MESSY && !__CTYPE_MULTIPART_ALT && !__REPTO_QUOTE
 score      TO_NO_BRKTS_FROM_MSSP   1.00
 describe   TO_NO_BRKTS_FROM_MSSP   Multiple formatting errors
 
