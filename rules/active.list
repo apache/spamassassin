@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix dos kgolding wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 2: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix dos jm kgolding wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 3: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix dos jm kgolding wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2
+# with results from: day 1: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix dos wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 2: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix dos jm kgolding wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 3: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix dos jm kgolding wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2
 
 # tflags publish
 ADVANCE_FEE_2_NEW_FORM
@@ -27,9 +27,6 @@ ALL_TRUSTED
 
 # good enough
 AXB_HELO_HOME_UN
-
-# good enough
-BASE64_LENGTH_78_79
 
 # good enough
 BASE64_LENGTH_79_INF
@@ -158,9 +155,6 @@ FB_QUALITY_REPLICA
 FB_REPLICA_ROLEX
 
 # good enough
-FB_SOFTTABS
-
-# good enough
 FH_FAKE_RCVD_LINE
 
 # good enough
@@ -245,12 +239,6 @@ FSL_HELO_BARE_IP_1
 FSL_HELO_DEVICE
 
 # good enough
-FSL_HELO_NON_FQDN_1
-
-# good enough
-FSL_INTERIA_ABUSE
-
-# good enough
 FS_ABIGGER
 
 # good enough
@@ -258,9 +246,6 @@ FS_CAILIS
 
 # good enough
 FS_MORE_CONFIDENT
-
-# good enough
-FS_PHARMASUB2
 
 # good enough
 FS_REPLICA
@@ -389,6 +374,9 @@ MONEY_FRAUD_8
 MONEY_FROM_MISSP
 
 # good enough
+MONEY_LOTTERY
+
+# good enough
 MSOE_MID_WRONG_CASE
 
 # tflags net
@@ -402,9 +390,6 @@ NO_RELAYS
 
 # good enough
 NSL_RCVD_FROM_USER
-
-# good enough
-OBFU_ATTACH_MISSP
 
 # tflags publish
 OBFU_TEXT_ATTACH
@@ -748,9 +733,6 @@ TVD_RCVD_SINGLE
 # good enough
 TVD_VISIT_PHARMA
 
-# good enough
-MONEY_LOTTERY
-
 # tflags userconf
 UNPARSEABLE_RELAY
 
@@ -834,6 +816,9 @@ VANITY
 
 # good enough
 XMAILER_MIMEOLE_OL_1ECD5
+
+# good enough
+XMAILER_MIMEOLE_OL_7533E
 
 # good enough
 XMAILER_MIMEOLE_OL_91287
