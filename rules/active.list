@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix dos jm kgolding wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 2: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix dos jm kgolding wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 3: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix dos kgolding wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2
+# with results from: day 1: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix dos jm kgolding wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 2: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix dos jm kgolding wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 3: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix dos jm kgolding wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2
 
 # tflags publish
 ADVANCE_FEE_2_NEW_FORM
@@ -30,9 +30,6 @@ AXB_HELO_HOME_UN
 
 # good enough
 BASE64_LENGTH_78_79
-
-# good enough
-BASE64_LENGTH_79_INF
 
 # tflags learn
 BAYES_00
@@ -242,6 +239,9 @@ FSL_HELO_DEVICE
 FSL_HELO_NON_FQDN_1
 
 # good enough
+FSL_INTERIA_ABUSE
+
+# good enough
 FS_ABIGGER
 
 # good enough
@@ -320,9 +320,6 @@ HTML_CHARSET_FARAWAY
 IMAGESHACK_URI
 
 # good enough
-IMG_DIRECT_TO_MX
-
-# good enough
 KAM_LOTTO1
 
 # good enough
@@ -393,6 +390,9 @@ NO_RELAYS
 
 # good enough
 NSL_RCVD_FROM_USER
+
+# good enough
+OBFU_ATTACH_MISSP
 
 # tflags publish
 OBFU_TEXT_ATTACH
@@ -650,9 +650,6 @@ SPF_SOFTFAIL
 STOCK_IMG_CTYPE
 
 # good enough
-STOCK_IMG_HDR_FROM
-
-# good enough
 STOX_REPLY_TYPE_WITHOUT_QUOTES
 
 # tflags userconf
@@ -713,9 +710,6 @@ TVD_FUZZY_SECTOR
 TVD_INCREASE_SIZE
 
 # good enough
-TVD_PH_BODY_META
-
-# good enough
 TVD_QUAL_MEDS
 
 # good enough
@@ -723,9 +717,6 @@ TVD_RCVD_SINGLE
 
 # good enough
 TVD_VISIT_PHARMA
-
-# good enough
-OBFU_ATTACH_MISSP
 
 # tflags userconf
 UNPARSEABLE_RELAY
