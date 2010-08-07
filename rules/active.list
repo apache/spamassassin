@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix dos jm kgolding wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 2: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix dos kgolding wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 3: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix dos jm kgolding wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2
+# with results from: day 1: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix dos kgolding wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 2: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix dos jm kgolding wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 3: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix dos kgolding wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2
 
 # tflags publish
 ADVANCE_FEE_2_NEW_FORM
@@ -180,9 +180,6 @@ FM_LOTTO_YOU_WON
 
 # good enough
 FM_SEX_HELODDDD
-
-# good enough
-FM_SUBJ_APPROVE
 
 # tflags publish
 FORM_FRAUD_3
@@ -605,6 +602,9 @@ SANE_3b92eda751c992f230f215fb7eb36844
 SANE_4ef8302546bf270a19baf98508afacc4
 
 # good enough
+SANE_57eb6fb7217efcb7a706124454426ee6
+
+# good enough
 SANE_7429530a7398f43f1f1b795f9420714e
 
 # good enough
@@ -692,6 +692,9 @@ TO_NO_BRKTS_DYNIP
 TO_NO_BRKTS_NORDNS_HTML
 
 # good enough
+TO_NO_BRKTS_NOTLIST
+
+# good enough
 TO_NO_BRKTS_PCNT
 
 # good enough
@@ -708,12 +711,6 @@ TVD_QUAL_MEDS
 
 # good enough
 TVD_RCVD_SINGLE
-
-# good enough
-SANE_57eb6fb7217efcb7a706124454426ee6
-
-# good enough
-TO_NO_BRKTS_NOTLIST
 
 # tflags userconf
 UNPARSEABLE_RELAY
