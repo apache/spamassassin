@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix dos kgolding wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 2: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix dos jm kgolding wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 3: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix dos kgolding wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2
+# with results from: day 1: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix dos jm kgolding wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 2: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix kgolding wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 3: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-trec_enron bb-zmi bernie-it_batt bernie-mix dos kgolding wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2
 
 # tflags publish
 ADVANCE_FEE_2_NEW_FORM
@@ -143,9 +143,6 @@ ENV_AND_HDR_SPF_MATCH
 FB_CIALIS_LEO3
 
 # good enough
-FB_GREAT_BEST_SEX
-
-# good enough
 FB_QUALITY_REPLICA
 
 # good enough
@@ -156,9 +153,6 @@ FH_FAKE_RCVD_LINE
 
 # good enough
 FH_FAKE_RCVD_LINE_B
-
-# good enough
-FH_FROM_GET_NAME
 
 # good enough
 FH_HELO_ALMOST_IP
@@ -173,13 +167,13 @@ FH_HELO_EQ_D_D_D_D
 FH_HOST_EQ_DYNAMICIP
 
 # good enough
-FH_HOST_IN_ADDRARPA
-
-# good enough
 FM_LOTTO_YOU_WON
 
 # good enough
 FM_SEX_HELODDDD
+
+# good enough
+FM_SUBJ_APPROVE
 
 # tflags publish
 FORM_FRAUD_3
@@ -218,9 +212,6 @@ FROM_MISSP_TO_UNDISC
 FROM_MISSP_USER
 
 # good enough
-FRT_EXPERIENCE
-
-# good enough
 FRT_PHARMAC
 
 # good enough
@@ -231,9 +222,6 @@ FSL_HELO_BARE_IP_1
 
 # good enough
 FSL_HELO_DEVICE
-
-# good enough
-FSL_HELO_NON_FQDN_1
 
 # good enough
 FS_ABIGGER
@@ -299,16 +287,10 @@ HK_FAKENAME_MICROSOFT
 HK_NAME_DRUGS
 
 # good enough
-HK_PNIS
-
-# good enough
 HK_SCAM_N2
 
 # tflags userconf
 HTML_CHARSET_FARAWAY
-
-# good enough
-IMAGESHACK_URI
 
 # good enough
 KAM_LOTTO1
@@ -339,9 +321,6 @@ MAILER_EQ_ORG
 
 # good enough
 MANY_SPAN_IN_TEXT
-
-# good enough
-MAY_BE_FORGED
 
 # tflags userconf
 MIME_CHARSET_FARAWAY
@@ -581,12 +560,6 @@ RCVD_IN_SORBS_ZOMBIE
 RCVD_IN_XBL
 
 # good enough
-RDNS_LOCALHOST
-
-# good enough
-S25R_4
-
-# good enough
 S25R_6
 
 # good enough
@@ -600,9 +573,6 @@ SANE_3b92eda751c992f230f215fb7eb36844
 
 # good enough
 SANE_4ef8302546bf270a19baf98508afacc4
-
-# good enough
-SANE_57eb6fb7217efcb7a706124454426ee6
 
 # good enough
 SANE_7429530a7398f43f1f1b795f9420714e
@@ -639,9 +609,6 @@ SPF_PASS
 
 # tflags net
 SPF_SOFTFAIL
-
-# good enough
-STOCK_IMG_CTYPE
 
 # good enough
 STOX_REPLY_TYPE_WITHOUT_QUOTES
@@ -684,9 +651,6 @@ TO_EQ_FM_SPF_FAIL
 
 # tflags publish
 TO_NO_BRKTS_DIRECT
-
-# good enough
-TO_NO_BRKTS_DYNIP
 
 # good enough
 TO_NO_BRKTS_NORDNS_HTML
