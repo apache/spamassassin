@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix dos jm kgolding wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 2: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix dos jm kgolding wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 3: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix dos jm kgolding wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2
+# with results from: day 1: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix dos kgolding wt-en1 wt-en2 wt-en3; day 2: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix dos jm kgolding wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 3: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix dos jm kgolding wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2
 
 # tflags publish
 ADVANCE_FEE_2_NEW_FORM
@@ -128,6 +128,9 @@ DOS_OE_TO_MX
 DOS_OE_TO_MX_IMAGE
 
 # good enough
+DOS_OUTLOOK_TO_MX
+
+# good enough
 DOS_RCVD_IP_TWICE_C
 
 # good enough
@@ -153,6 +156,9 @@ FH_FAKE_RCVD_LINE
 
 # good enough
 FH_FAKE_RCVD_LINE_B
+
+# good enough
+FH_FROM_GET_NAME
 
 # good enough
 FH_HELO_ALMOST_IP
@@ -224,6 +230,9 @@ FRT_PHARMAC
 FRT_PRICE
 
 # good enough
+FR_WATCHES_HTTP
+
+# good enough
 FSL_HELO_BARE_IP_1
 
 # good enough
@@ -242,13 +251,7 @@ FS_CAILIS
 FS_MORE_CONFIDENT
 
 # good enough
-FS_REPLICA
-
-# good enough
 FS_REPLICAWATCH
-
-# good enough
-FS_WILL_HELP
 
 # tflags userconf
 GTUBE
@@ -305,19 +308,10 @@ HTML_CHARSET_FARAWAY
 KAM_LOTTO1
 
 # good enough
-KB_DATE_CONTAINS_TAB
-
-# good enough
-KB_FAKED_THE_BAT
-
-# good enough
 KB_RATWARE_MSGID
 
 # good enough
 KB_RATWARE_OUTLOOK_MID
-
-# good enough
-LIVEFILESTORE
 
 # good enough
 LOTTERY_PH_004470
@@ -369,9 +363,6 @@ NO_RELAYS
 
 # good enough
 NSL_RCVD_FROM_USER
-
-# good enough
-OBFU_ATTACH_MISSP
 
 # tflags publish
 OBFU_TEXT_ATTACH
@@ -638,9 +629,6 @@ SUBJECT_IN_WHITELIST
 SUBJECT_NEEDS_ENCODING
 
 # good enough
-TAB_IN_FROM
-
-# good enough
 TINY_FLOAT
 
 # good enough
@@ -680,19 +668,10 @@ TO_NO_BRKTS_PCNT
 TVD_FINGER_02
 
 # good enough
-TVD_FUZZY_SECTOR
-
-# good enough
 TVD_INCREASE_SIZE
 
 # good enough
 TVD_QUAL_MEDS
-
-# good enough
-TVD_RCVD_SINGLE
-
-# good enough
-FR_WATCHES_HTTP
 
 # tflags userconf
 UNPARSEABLE_RELAY
@@ -773,13 +752,7 @@ USER_IN_WHITELIST
 USER_IN_WHITELIST_TO
 
 # good enough
-VANITY
-
-# good enough
 XMAILER_MIMEOLE_OL_1ECD5
-
-# good enough
-XMAILER_MIMEOLE_OL_91287
 
 # good enough
 X_MAILER_CME_6543_MSN
