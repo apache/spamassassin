@@ -451,3 +451,16 @@ tflags          __MANY_RECORDS          multiple
 meta            BIG_LISTS               __MANY_RECORDS > 3
 meta            MANY_BIG_LISTS          __MANY_RECORDS > 10
 
+
+# Suggested by Gerard Zonjee <Gerard.Zonjee@HenZ.nl> on Users list 2010-08-15
+uri         __GZ_PILL_SQUAT1       /\/[a-z]{3,8}\d{2}\.html/
+uri         __GZ_PILL_SQUAT2       /\/[a-z]{3,8}\d{2}\.jpg/
+meta        GZ_PILL_SQUATTERS      (__GZ_PILL_SQUAT1 && __GZ_PILL_SQUAT2)
+describe    GZ_PILL_SQUATTERS      Found a link to rogue pill pusher content
+
+# observed in multiple spam
+header      TO_JOHNZY              TO =~ /johnzy_the_king\@hotmail\.com/i
+describe    TO_JOHNZY              To a spammy recipent	
+score       TO_JOHNZY              3.00
+
+
