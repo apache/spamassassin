@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix dos jm kgolding wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 2: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix; day 3: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix dos kgolding wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2
+# with results from: day 1: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix jm wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 2: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix dos jm kgolding wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 3: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix
 
 # tflags publish
 ADVANCE_FEE_2_NEW_FORM
@@ -134,9 +134,6 @@ FH_HELO_ALMOST_IP
 FH_HELO_EQ_D_D_D_D
 
 # good enough
-FH_HOST_IN_ADDRARPA
-
-# good enough
 FM_LOTTO_YOU_WON
 
 # tflags publish
@@ -176,9 +173,6 @@ FROM_MISSP_TO_UNDISC
 FROM_MISSP_USER
 
 # good enough
-FRT_EXPERIENCE
-
-# good enough
 FSL_HELO_DEVICE
 
 # good enough
@@ -186,6 +180,9 @@ FS_WILL_HELP
 
 # tflags userconf
 GTUBE
+
+# good enough
+GZ_PILL_SQUATTERS
 
 # tflags userconf
 HASHCASH_20
@@ -246,9 +243,6 @@ LOTTO_AGENT
 
 # tflags publish
 MAILER_EQ_ORG
-
-# good enough
-MAY_BE_FORGED
 
 # tflags userconf
 MIME_CHARSET_FARAWAY
@@ -485,9 +479,6 @@ RCVD_IN_SORBS_ZOMBIE
 RCVD_IN_XBL
 
 # good enough
-RDNS_LOCALHOST
-
-# good enough
 S25R_4
 
 # tflags net
@@ -527,6 +518,9 @@ SUBJECT_IN_WHITELIST
 SUBJECT_NEEDS_ENCODING
 
 # good enough
+TAB_IN_FROM
+
+# good enough
 TO_EQ_FM_DIRECT_MX
 
 # good enough
@@ -545,73 +539,16 @@ TO_EQ_FM_SPF_FAIL
 TO_NO_BRKTS_DIRECT
 
 # good enough
-TO_NO_BRKTS_DYNIP
-
-# good enough
 TO_NO_BRKTS_NORDNS_HTML
 
 # good enough
 TVD_FINGER_02
 
 # good enough
-DEAR_EMAIL
+FROM_MISSPACED
 
 # good enough
-FB_GREAT_BEST_SEX
-
-# good enough
-FRT_PHARMAC
-
-# good enough
-FS_CAILIS
-
-# good enough
-FS_MORE_CONFIDENT
-
-# good enough
-GZ_PILL_SQUATTERS
-
-# good enough
-HELO_NO_DOMAIN
-
-# good enough
-MANY_SPAN_IN_TEXT
-
-# good enough
-OBFU_ATTACH_MISSP
-
-# good enough
-S25R_6
-
-# good enough
-SANE_237c2b0099548ddbfa5a37f07e0687ab
-
-# good enough
-SANE_57eb6fb7217efcb7a706124454426ee6
-
-# good enough
-SINGLE_HEADER_2K
-
-# good enough
-TAB_IN_FROM
-
-# good enough
-TINY_FLOAT
-
-# good enough
-TO_EQ_FM_DOM_HTML_IMG
-
-# good enough
-TO_EQ_FM_HTML_DIRECT
-
-# good enough
-TO_NO_BRKTS_NOTLIST
-
-# good enough
-TO_NO_BRKTS_PCNT
-
-# good enough
-TVD_FUZZY_SECTOR
+TO_NO_BRKTS_FROM_MSSP
 
 # tflags userconf
 UNPARSEABLE_RELAY
