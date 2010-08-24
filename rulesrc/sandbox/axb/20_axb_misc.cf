@@ -42,3 +42,5 @@ score           AXB_GOO_MALWARE  5.0
 header  AXB_X_419_CANTV  X-Matched-Lists =~ /^\[\]$/
 #score   AXB_X_419_CANTV 1.2
 
+header  AXB_XFROM_THISJUST      From =~ /\<thisisjust\w+\@/
+#score   AXB_XFROM_THISJUST      4.3
