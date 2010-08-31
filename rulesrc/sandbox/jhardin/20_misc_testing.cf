@@ -463,4 +463,13 @@ header      TO_JOHNZY              TO =~ /johnzy_the_king\@hotmail\.com/i
 describe    TO_JOHNZY              To a spammy recipent	
 score       TO_JOHNZY              3.00
 
+# 12-letter domain names, suggested by Len Conrad on the users list
+#header         RCVD_12LTRDOM       Received =~ /[(\s.][a-z]{12}\./
+#tflags         RCVD_12LTRDOM       nopublish
+header         RPATH_12LTRDOM      Return-Path =~ /\@[a-z]{12}\./
+tflags         RPATH_12LTRDOM      nopublish
+header         FROM_12LTRDOM       From =~ /\@[a-z]{12}\./
+tflags         FROM_12LTRDOM       nopublish
+#uri            URI_12LTRDOM        m,://(?:[^./]+\.)*[a-z]{12}\.[^./]+/,
+#tflags         URI_12LTRDOM        nopublish
 
