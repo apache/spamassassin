@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix dos kgolding wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 2: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix dos kgolding wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 3: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix dos jm kgolding wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2
+# with results from: day 1: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix kgolding; day 2: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix dos jm kgolding wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 3: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix dos kgolding wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2
 
 # tflags publish
 ADVANCE_FEE_2_NEW_FORM
@@ -76,6 +76,9 @@ DATE_IN_FUTURE_Q_PLUS
 # good enough
 DEAR_BENEFICIARY
 
+# good enough
+DEAR_EMAIL
+
 # tflags net
 DIGEST_MULTIPLE
 
@@ -128,9 +131,6 @@ DOS_OE_TO_MX_IMAGE
 DOS_RCVD_IP_TWICE_C
 
 # good enough
-DYN_RDNS_AND_INLINE_IMAGE
-
-# good enough
 DYN_RDNS_SHORT_HELO_HTML
 
 # tflags userconf
@@ -144,6 +144,9 @@ FB_EXTRA_INCHES
 
 # good enough
 FB_GET_MEDS
+
+# good enough
+FB_GREAT_BEST_SEX
 
 # good enough
 FB_GVR
@@ -227,10 +230,13 @@ FROM_MISSP_USER
 FRT_APPROV
 
 # good enough
-FRT_EXPERIENCE
+FRT_PHARMAC
 
 # good enough
 FRT_PRICE
+
+# good enough
+FR_WATCHES_HTTP
 
 # good enough
 FSL_HELO_BARE_IP_1
@@ -243,6 +249,15 @@ FSL_HELO_NON_FQDN_1
 
 # good enough
 FS_ABIGGER
+
+# good enough
+FS_CAILIS
+
+# good enough
+FS_GET_LAID
+
+# good enough
+FS_MORE_CONFIDENT
 
 # good enough
 FS_NUDE
@@ -290,6 +305,9 @@ HEAD_LONG
 HELO_LH_HOME
 
 # good enough
+HELO_NO_DOMAIN
+
+# good enough
 HELO_OEM
 
 # good enough
@@ -303,6 +321,9 @@ HK_SCAM_N2
 
 # tflags userconf
 HTML_CHARSET_FARAWAY
+
+# good enough
+IMG_DIRECT_TO_MX
 
 # good enough
 KAM_LOTTO1
@@ -332,7 +353,7 @@ LOTTO_AGENT
 MAILER_EQ_ORG
 
 # good enough
-MANY_SPAN_IN_TEXT
+MAY_BE_FORGED
 
 # tflags userconf
 MIME_CHARSET_FARAWAY
@@ -351,9 +372,6 @@ MONEY_FRAUD_5
 
 # tflags publish
 MONEY_FRAUD_8
-
-# good enough
-MONEY_FROM_MISSP
 
 # good enough
 MONEY_LOTTERY
@@ -578,7 +596,13 @@ RDNS_LOCALHOST
 S25R_4
 
 # good enough
+S25R_6
+
+# good enough
 SANE_04e8bf28eb445199a7f11b943c44d209
+
+# good enough
+SANE_237c2b0099548ddbfa5a37f07e0687ab
 
 # good enough
 SANE_3b92eda751c992f230f215fb7eb36844
@@ -587,10 +611,16 @@ SANE_3b92eda751c992f230f215fb7eb36844
 SANE_4ef8302546bf270a19baf98508afacc4
 
 # good enough
+SANE_57eb6fb7217efcb7a706124454426ee6
+
+# good enough
 SANE_7429530a7398f43f1f1b795f9420714e
 
 # good enough
 SANE_d0d2b0f6373bf91253d66dd74c594b87
+
+# good enough
+SINGLE_HEADER_2K
 
 # good enough
 SPAMMY_XMAILER
@@ -683,7 +713,13 @@ TO_NO_BRKTS_PCNT
 TVD_FINGER_02
 
 # good enough
+TVD_FUZZY_SECTOR
+
+# good enough
 TVD_INCREASE_SIZE
+
+# good enough
+TVD_PCT_OFF
 
 # good enough
 TVD_QUAL_MEDS
@@ -692,52 +728,7 @@ TVD_QUAL_MEDS
 TVD_RCVD_SINGLE
 
 # good enough
-DEAR_EMAIL
-
-# good enough
-FB_GREAT_BEST_SEX
-
-# good enough
-FRT_PHARMAC
-
-# good enough
-FR_WATCHES_HTTP
-
-# good enough
-FS_CAILIS
-
-# good enough
-FS_GET_LAID
-
-# good enough
-FS_MORE_CONFIDENT
-
-# good enough
-HELO_NO_DOMAIN
-
-# good enough
-IMG_DIRECT_TO_MX
-
-# good enough
-MAY_BE_FORGED
-
-# good enough
-S25R_6
-
-# good enough
-SANE_237c2b0099548ddbfa5a37f07e0687ab
-
-# good enough
-SANE_57eb6fb7217efcb7a706124454426ee6
-
-# good enough
-SINGLE_HEADER_2K
-
-# good enough
-TVD_FUZZY_SECTOR
-
-# good enough
-TVD_PCT_OFF
+AXB_AUTOGEN_FRAUD_1
 
 # tflags userconf
 UNPARSEABLE_RELAY
