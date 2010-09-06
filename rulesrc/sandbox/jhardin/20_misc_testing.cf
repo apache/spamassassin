@@ -473,3 +473,9 @@ tflags         FROM_12LTRDOM       nopublish
 #uri            URI_12LTRDOM        m,://(?:[^./]+\.)*[a-z]{12}\.[^./]+/,
 #tflags         URI_12LTRDOM        nopublish
 
+# spammer email addresses noted by D. German on users list 9/2010
+body        DG_SPAMMER_EMAIL_B     /\b[a-z]{10,30}\.[a-z]{3,10}\@[a-z]{3,10}\.[a-z]{6,30}\.[a-z]{2,4}\b/
+header      DG_SPAMMER_EMAIL_F     From =~ /\b[a-z]{10,30}\.[a-z]{3,10}\@[a-z]{3,10}\.[a-z]{6,30}\.[a-z]{2,4}\b/
+
+
+
