@@ -163,6 +163,10 @@ body     __TRTMT_DEFILED  /\bdefiled\sall\s(?:forms\sof\s)?(?:medical\s)treatmen
 meta     TO_NO_BRKTS_DECD __DECEASED && __TO_NO_ARROWS_R
 describe TO_NO_BRKTS_DECD To: misformatted + deceased
 
+meta     DECEASED_NO_ML   __DECEASED && !__VIA_ML && !__UNSUB_LINK
+describe DECEASED_NO_ML   Dead not via mailing list
+tflags   DECEASED_NO_ML   nopublish
+ 
 body     __WIRE_XFR       /\b(?:wire|telegraph(?:ic)?|bank)\s?transfer/i
 body     __TRUSTED_CHECK  /\b(?:cashier'?s?|certified)\sche(?:ck|que)/i
 body     __BANK_DRAFT     /\bbank\sdraft/i
@@ -180,7 +184,7 @@ body     __AFR_UNION      /\bafrican\sunion\b/i
 body     __COMPENSATION   /\b(?:compensat(?:e|ion)|recompensed?)\b/i
 body     __FRAUD          /\b(?:de)?fraud/i
 
-meta     UN_NO_ML         __UN && !__VIA_ML
+meta     UN_NO_ML         __UN && !__VIA_ML && !__UNSUB_LINK
 describe UN_NO_ML         United Nations not via mailing list
 tflags   UN_NO_ML         nopublish
  
