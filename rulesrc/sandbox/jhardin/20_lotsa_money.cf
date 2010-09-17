@@ -160,7 +160,7 @@ body     __INHERIT_PMT    /\binheritance\spayment\s/i
 body     __CONTACT_ATTY   /\bcontact\smy\s(?:barrister|attou?rney)\b/i
 body     __TRTMT_DEFILED  /\bdefiled\sall\s(?:forms\sof\s)?(?:medical\s)treatments?\b/i
 
-meta     TO_NO_BRKTS_DECD __DECEASED && __TO_NO_ARROWS_R
+meta     TO_NO_BRKTS_DECD __DECEASED && __TO_NO_ARROWS_R && !__DOS_HAS_LIST_UNSUB
 describe TO_NO_BRKTS_DECD To: misformatted + deceased
 
 meta     DECEASED_NO_ML   __DECEASED && !__VIA_ML && !__UNSUB_LINK
