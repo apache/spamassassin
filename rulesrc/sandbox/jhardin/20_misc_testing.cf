@@ -481,5 +481,10 @@ header      DG_SPAMMER_EMAIL_F     From =~ /\b[a-z]{10,30}\.[a-z]{3,10}\@[a-z]{3
 # Spammers can't include the real name successfully...
 body        __FORGED_FB_USERCP_01  /This message was intended for Want to control which emails you receive from Facebook\?/i
 
+# Javascript obfuscation noted by J. Brennan on the Users list 09/2010
 rawbody     OBFU_JVSCR_ESC         /document\.write\(unescape\("(?:%[0-9a-f]{2}){10}/i
+describe    OBFU_JVSCR_ESC         Injects content using obfuscated javascript
+score       OBFU_JVSCR_ESC         2.75
+tflags      OBFU_JVSCR_ESC         publish
+
 
