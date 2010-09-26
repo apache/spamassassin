@@ -851,22 +851,10 @@ sub _print_overlap_ratios {
   }
 
   my %other_type_rules = %$hash_other_type;
-  my $minratio = -1;
 
   foreach my $ratio (sort { $b <=> $a } keys %$hash1) {
     $ratio ||= 0;
-    if ($minratio < 0) {
-        # Adapt reporting cutoff point to actual ratios.
-        # The first (highest) ratio encountered determines reporting cutoff point:
-        # > 20, cutoff is 20% (100%-20%, the vast majority of rules), else
-        # > 10, cutoff is 5% (20%-5%), else
-        # cutoff is 1% (10%-1%)
-        # This will help FP analysis of very-high-S/O rules
-        if ($ratio > 20) {$minratio = 20;}
-        elsif ($ratio > 10) {$minratio = 5;}
-        else {$minratio = 1;}
-    }
-    last if ($ratio < $minratio);       # don't report overlaps below cutoff
+    last if ($ratio < 20);     # 20% cutoff
     my $rules = _prettify_overlap_rules($r1, $hash1->{$ratio});
     next if ($rules eq '');
 
