@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix danmcdonald dos jm kgolding wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 2: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix danmcdonald jm kgolding wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 3: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix danmcdonald dos jm kgolding wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2
+# with results from: day 1: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix danmcdonald dos kgolding wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 2: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix danmcdonald dos jm kgolding wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 3: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix danmcdonald jm kgolding wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2
 
 # tflags publish
 ADVANCE_FEE_2_NEW_FORM
@@ -75,6 +75,9 @@ DATE_IN_FUTURE_Q_PLUS
 
 # good enough
 DEAR_BENEFICIARY
+
+# good enough
+DEAR_EMAIL
 
 # tflags net
 DIGEST_MULTIPLE
@@ -218,6 +221,9 @@ FROM_MISSP_USER
 FRT_APPROV
 
 # good enough
+FRT_PHARMAC
+
+# good enough
 FRT_PRICE
 
 # good enough
@@ -231,9 +237,6 @@ FSL_HELO_DEVICE
 
 # good enough
 FSL_HELO_NON_FQDN_1
-
-# good enough
-FS_ABIGGER
 
 # good enough
 FS_CAILIS
@@ -281,6 +284,9 @@ HEAD_LONG
 HELO_LH_HOME
 
 # good enough
+HELO_NO_DOMAIN
+
+# good enough
 HELO_OEM
 
 # good enough
@@ -291,6 +297,9 @@ HK_SCAM_N2
 
 # good enough
 HK_SCAM_N8
+
+# good enough
+HK_SPAMMY_FILENAME
 
 # tflags userconf
 HTML_CHARSET_FARAWAY
@@ -566,6 +575,9 @@ RCVD_IN_XBL
 RISK_FREE_NOSUB
 
 # good enough
+S25R_6
+
+# good enough
 SANE_04e8bf28eb445199a7f11b943c44d209
 
 # good enough
@@ -579,6 +591,9 @@ SANE_7429530a7398f43f1f1b795f9420714e
 
 # good enough
 SANE_d0d2b0f6373bf91253d66dd74c594b87
+
+# good enough
+SINGLE_HEADER_2K
 
 # good enough
 SPAMMY_XMAILER
@@ -626,6 +641,12 @@ SUBJECT_NEEDS_ENCODING
 TAB_IN_FROM
 
 # good enough
+TINY_FLOAT
+
+# good enough
+TO_EQ_FM_DIRECT_MX
+
+# good enough
 TO_EQ_FM_DOM_HTML_IMG
 
 # good enough
@@ -665,67 +686,13 @@ TVD_FINGER_02
 TVD_INCREASE_SIZE
 
 # good enough
+TVD_PCT_OFF
+
+# good enough
 TVD_QUAL_MEDS
 
 # good enough
 TVD_RCVD_SINGLE
-
-# good enough
-DEAR_EMAIL
-
-# good enough
-FB_ACHIEVE_BACH
-
-# good enough
-FRT_PHARMAC
-
-# good enough
-FR_WATCHES_HTTP
-
-# good enough
-FS_SILDENAFIL
-
-# good enough
-HELO_NO_DOMAIN
-
-# good enough
-HK_SPAMMY_FILENAME
-
-# good enough
-HTML_ATTACH
-
-# good enough
-IMG_DIRECT_TO_MX
-
-# good enough
-MAY_BE_FORGED
-
-# good enough
-OBFU_JPG_ATTACH
-
-# good enough
-S25R_4
-
-# good enough
-S25R_6
-
-# good enough
-SINGLE_HEADER_2K
-
-# good enough
-SPAMMY_MIME_BDRY_01
-
-# good enough
-TINY_FLOAT
-
-# good enough
-TO_EQ_FM_DIRECT_MX
-
-# good enough
-TO_NO_BRKTS_DYNIP
-
-# good enough
-TVD_PCT_OFF
 
 # tflags userconf
 UNPARSEABLE_RELAY
