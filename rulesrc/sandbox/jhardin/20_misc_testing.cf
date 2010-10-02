@@ -232,11 +232,16 @@ score          TINY_FLOAT         2.00
 
 
 # endless requests on the users list...
-header         __TO_EQ_FROM_1       ALL =~ /\nFrom:\s+(?:[^\n<]{0,80}<)?([^\n\s>]+)>?\n(?:[^\n]{1,100}\n)*To:\s+(?:[^\n]+<)?\1[>,\s\n]/ism
-header         __TO_EQ_FROM_2       ALL =~ /\nTo:\s+(?:[^\n<]{0,80}<)?([^\n\s>]+)>?\n(?:[^\n]{1,100}\n)*From:\s+(?:[^\n]+<)?\1[>,\s\n]/ism
+header         __TO_EQ_FROM_1       ALL =~ /\nFrom:\s+(?:[^\n<]{0,80}<)?([^\n\s>]+)>?\n(?:[^\n]{1,100}\n)*To:\s+(?:[^\n]{0,80}<)?\1[>,\s\n]/ism
+header         __TO_EQ_FROM_2       ALL =~ /\nTo:\s+(?:[^\n<]{0,80}<)?([^\n\s>]+)>?\n(?:[^\n]{1,100}\n)*From:\s+(?:[^\n]{0,80}<)?\1[>,\s\n]/ism
 meta           __TO_EQ_FROM         (__TO_EQ_FROM_1 || __TO_EQ_FROM_2)
 describe       __TO_EQ_FROM         To: same as From:
 #tflags         __TO_EQ_FROM         publish
+
+header         __SUBJ_HAS_FROM_1    ALL =~ /\nFrom:\s+(?:[^\n<]{0,80}<)?([^\n\s>]+)>?\n(?:[^\n]{1,100}\n)*Subject:\s+[^\n]{0,100}\1[>,\s\n]/ism
+meta           FROM_IN_TO_AND_SUBJ  (__TO_EQ_FROM && __SUBJ_HAS_FROM_1)
+describe       FROM_IN_TO_AND_SUBJ  From address is in To and Subject
+score          FROM_IN_TO_AND_SUBJ  0.10
 
 meta           TO_EQ_FM_HTML_ONLY   (__TO_EQ_FROM && MIME_HTML_ONLY && !HTML_MIME_NO_HTML_TAG && !MISSING_MID && !ALL_TRUSTED)
 describe       TO_EQ_FM_HTML_ONLY   To == From and HTML only
