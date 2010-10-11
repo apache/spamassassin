@@ -82,7 +82,7 @@ score    LOTTO_AGENT_RPLY 0.50
 # body    HK_LOTTO                /(?:(?:(?:inter)?national|foundation|mercato|univers|euro million|e-?mail|euro-pw|bill gates|swiss) ?lo(?:tto|ttery|terie)|coca.?cola games|mega jackpot|staatsloterij|ukonline game promo|loto prestige|(?:fran.aise|e-?mail) sweepstakes|loterie (?:internationale|cristal|am.ricaine|coca.?cola|euromillions|bill gates)|(?:computer|internet) ballot|foundation internationale billgateslottery award|(?:promotional|online) draws?|lottery (?:fiduciary|department))/i
 # body            __KAM_LOTTO5    /(freelotto group|Royal Heritage Lottery|UK National (Online)? Lottery|U\.?K\.? Grand Promotions|Lottery Department UK|Euromillion Loteria|Luckyday International Lottery|International Lottery)/is
 
-body     __LOTTO_ADMITS_1 /\b(?:on-?line|e-?mail|ballot|(?:inter)?national|state|(?:UK|euro)[- ]?(?:mil+ions?|PW)|Canada|Microsoft|MSN|internet|mega|jackpot|Royal Heritage|foundation|mercato|univers|staatsloterij|bill\s?gates|swiss|this)(?:\s\w+)?\s?(?:lot(?:to|tery|eri[ea])|sweepstake)/i
+body     __LOTTO_ADMITS_1 /\b(?:on-?line|e-?mail|ballot|(?:inter)?national|state|(?:UK|euro)[- ]?(?:mil+ions?|PW)|Canada|Microsoft|MSN|internet|mega|jackpot|Royal Heritage|foundation|mercato|univers|staatsloterij|bill\s?gates|swiss|this)(?:\s\w+)?\s?(?:lot(?:to|tery|eri[ea])|sweepstake|promotion)/i
 body     __LOTTO_ADMITS_2 /\b(?:free)?(?:lot(?:to|tery|erie)|sweepstakes)\s(?:(?:inter)?na[tz]ional|department|bureau|group|award)/i
 uri      __LOTTO_ADMITS_3 /lottery/i
 meta     __LOTTO_ADMITS     __LOTTO_ADMITS_1 || __LOTTO_ADMITS_2 || __LOTTO_ADMITS_3
@@ -96,9 +96,9 @@ meta     MONEY_LOTTERY    LOTS_OF_MONEY && (__LOTTO_WINNINGS + __LOTTO_WIN_01 + 
 describe MONEY_LOTTERY    Lots of money from a lottery
 score    MONEY_LOTTERY    1.5
 
-body     __DEAL           /\b(?:business|financial|this|the|mutual|die(?:se)?|cette)\s(?:deal|transa[ck]tion|proposal|offer|venture|suggestion|partnership)/i
+body     __DEAL           /\b(?:business|financial|this|the|mutual|die(?:se)?|cette|profitable)\s(?:deal|transa[ck]tion|proposal|offer|venture|suggestion|partnership)/i
 body     __HUSH_HUSH      /\b(?:confiden[tc]i[ae]l(?:\b|ity\b|it(?:[\xe9]|[\xc3][\xa9]))|private\b|secre(?:te?|cy)\b|sensitive\b|concealed\b|obscured\b|discre(?:et|tion)\b|vertraulich(?:en)?\b|geheim\b|priv(?:[\xe9]|[\xc3][\xa9]))/i
-body     __IS_LEGAL       /\b(?:this\s(?:deal|offer|transaction|proposal|exchange|arrangement)|it)?\sis\s(?:(?:guaranteed|completely|absolutely|perfectly|100%|very)\s)?(?:legal|hitch-free)\b/i
+body     __IS_LEGAL       /\b(?:this\s(?:deal|offer|transaction|proposal|exchange|arrangement|work)|it)?\sis\s(?:(?:guaranteed|completely|absolutely|perfectly|100%|very|fully)\s)?(?:legal|hitch-free)\b/i
 body     __NOT_SCAM       /\bnot\sa\sscam\b/i
 body     __BACK_SCRATCH   /\bmutual+y?\sbenefi(?:t|cial)\b/i
 body     __LUCRATIVE      /\blucrative\b/i
@@ -167,7 +167,7 @@ tflags   DECEASED_NO_ML   nopublish
 body     __WIRE_XFR       /\b(?:wire|telegraph(?:ic)?|bank)\s?transfer/i
 body     __TRUSTED_CHECK  /\b(?:cashier'?s?|certified)\sche(?:ck|que)/i
 body     __BANK_DRAFT     /\bbank\sdraft/i
-body     __MOVE_MONEY     /\b(?:receive|re-?profile|repatriate|rapatrier)\s(?:th(?:e|is)|das|sur ce)\s(?:proceeds|funds?|money|balance|account|geld|compte)\b/i
+body     __MOVE_MONEY     /\b(?:(?:receive|re-?profile|repatriate|rapatrier|secure)\s(?:th(?:e|is)|das|sur ce)|re-?profiling)\s(?:proceeds|funds?|money|balance|account|geld|compte)\b/i
 meta     __XFER_MONEY     (__WIRE_XFR || __TRUSTED_CHECK || __BANK_DRAFT || __MOVE_MONEY)
 
 body     __INTL_BANK      /\b(?:international\s(?:\w+\s)?bank|banque\sinternationale)\b/i
@@ -198,7 +198,7 @@ body     __BENEFICIARY    /\bb(?:[e\xe9]n[e\xe9]|[\xc3][\xa9]n[\xc3][\xa9])fi(?:
 body     __DIPLOMATIC     /\bdiplomatic\b/i
 body     __FEES           /\b(?:security|safe\w*|courier|registration|pay|paid|up-?front|processing|delivery|transfer)[\s\w]{0,15}\s(?:fee|charge)s?\b/i 
 body     __LUCKY_WINNER   /\b(?:lucky|gl.cklich(?:en)?)\s(?:ge)?win+ers?\b/i
-body     __YOUR_FUND      /\b(?:your|ihr)\s(?:unpaid\s|win+ing\s|ap+roved\s|foreign\s|nicht\sausbezahlten\s)?(?:fund|payment|geld)\b/i
+body     __YOUR_FUND      /\b(?:your|ihr)\s(?:unpaid\s|win+ing\s|ap+roved\s|foreign\s|overdue\s|outstanding\s|nicht\sausbezahlten\s){0,3}(?:fund|payment|geld)\b/i
 body     __NIGERIA        /\bnigeria\b/i
 body     __IVORY_COAST    /\b(?:Cote\s?D.Ivoire|Ivory\s?Coast)\b/i
 body     __BURKINA_FASO   /\bburkina\s?faso\b/i
