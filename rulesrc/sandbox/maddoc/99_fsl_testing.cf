@@ -1,0 +1,101 @@
+# 419 Spam
+header  __FSL_HELO_USER_1   X-Spam-Relays-External =~ / helo=user /i
+header 	__FSL_HELO_USER_2   Received =~ /from User(?:\s+by|\s*\()/i
+header  __FSL_HELO_USER_3   Received =~ /helo User/i
+meta    FSL_NEW_HELO_USER   (__FSL_HELO_USER_1 || __FSL_HELO_USER_2 || __FSL_HELO_USER_3)
+score   FSL_NEW_HELO_USER   2.0
+
+# 419 Spam
+header   FSL_XM_419   X-Mailer =~ /\s+6\.00\.2600\.0000$/
+describe FSL_XM_419   Old OE version in X-Mailer only seen in 419 spam
+score    FSL_XM_419   2.0
+
+# 419 Spam
+header   FSL_CTYPE_WIN1251   Content-Type =~ /charset="Windows-1251"/
+describe FSL_CTYPE_WIN1251   Content-Type only seen in 419 spam
+score    FSL_CTYPE_WIN1251   2.0
+
+# 419 Spam
+header   FSL_MID_419   /\@User>$/
+describe FSL_MID_419   Spam signature in Message-ID
+score    FSL_MID_419   2.0
+
+meta     FSL_MISSP_REPLYTO   (__FROM_MISSPACED && __HAS_REPLY_TO)
+describe FSL_MISSP_REPLYTO   Mis-spaced from and Reply-to
+score    FSL_MISSP_REPLYTO   2.0
+
+# http://groups.yahoo.com/group/oftajscns/message
+uri      FSL_YHG_ABUSE   /groups\.yahoo\.com\/group\/\S+\/message/
+describe FSL_YHG_ABUSE 	 URI pointing to a message in an abused Yahoo Group
+score 	 FSL_YHG_ABUSE 	 2.0
+
+# Bot spew
+rawbody  FSL_BOTSPAM_1   /^[^\n]+\nhttp:\/\/[^\n]+\.ru\/\n$/s
+describe FSL_BOTSPAM_1   Two-line spam with URI pointing to .ru domain
+score    FSL_BOTSPAM_1   2.0
+
+# Mainsleaze
+body     FSL_SPAM_ADDR_1   /201 Spring Garden St, Suite 400.*Philadelphia, PA 19123/
+describe FSL_SPAM_ADDR_1   Unsubscribe snail-mail address seen in spam
+score    FSL_SPAM_ADDR_1   2.0
+
+body     FSL_SPAM_ADDR_2   /72 HIGH STREET.*HASLEMERE,.*SURREY,.*GU27 2LA/
+describe FSL_SPAM_ADDR_2   Unsubscribe snail-mail address seen in spam
+score    FSL_SPAM_ADDR_2   2.0
+
+body     FSL_SPAM_ADDR_3   /4447 North Central Expressway,.*Suite 110 PMB 406.*Dallas,.*Texas 75205/
+describe FSL_SPAM_ADDR_3   Unsubscribe snail-mail address seen in spam
+score    FSL_SPAM_ADDR_3   2.0
+
+body     FSL_SPAM_ADDR_4   /3616 Far West Blvd #117165,.*Austin Tx 78731/
+describe FSL_SPAM_ADDR_4   Unsubscribe snail-mail address seen in spam
+score    FSL_SPAM_ADDR_4   2.0
+
+body     FSL_SPAM_ADDR_5   /write to 405 West Fairmont Drive Tempe,/
+describe FSL_SPAM_ADDR_5   Unsubscribe snail-mail address seen in spam
+score    FSL_SPAM_ADDR_5   2.0
+
+body     FSL_SPAM_ADDR_6   /2727 Skyway Drive,.*Santa Maria.*CA 93455/
+describe FSL_SPAM_ADDR_6   Unsubscribe snail-mail address seen in spam
+score    FSL_SPAM_ADDR_6   2.0
+
+body     FSL_SPAM_ADDR_7   /2 Wisconsin Circle,.*Suite 700 Chevy Chase,.*MD 20815/
+describe FSL_SPAM_ADDR_7   Unsubscribe snail-mail address seen in spam
+score    FSL_SPAM_ADDR_7   2.0
+
+body     FSL_SPAM_ADDR_8   /P.O. Box 310 Thornsby,.*AL,.*35171,.*US/
+describe FSL_SPAM_ADDR_8   Unsubscribe snail-mail address seen in spam
+score    FSL_SPAM_ADDR_8   2.0
+
+body     FSL_SPAM_ADDR_9   /1348 beacon lane Bartlett,.*IL,.*60103,.*US/
+describe FSL_SPAM_ADDR_9   Unsubscribe snail-mail address seen in spam
+score    FSL_SPAM_ADDR_9   2.0
+
+body     FSL_SPAM_ADDR_10  /PO Box 88538.*Seattle, WA 98138/
+describe FSL_SPAM_ADDR_10  Unsubscribe snail-mail address seen in spam
+score    FSL_SPAM_ADDR_10  2.0
+ 
+body     FSL_SPAM_ADDR_11  /3810 Murrell Road,.*suite #190 viera,.*FL 32955/
+describe FSL_SPAM_ADDR_11  Unsubscribe snail-mail address seen in spam
+score    FSL_SPAM_ADDR_11  2.0
+
+body     FSL_SPAM_ADDR_12  /137 Russell Dr Waynesboro,.*MS,.*39367,.*US/
+describe FSL_SPAM_ADDR_12  Unsubscribe snail-mail address seen in spam
+score    FSL_SPAM_ADDR_12  2.0
+
+body     FSL_SPAM_ADDR_13  /424 E. 92nd St New york,.*NY 10128-6804/
+describe FSL_SPAM_ADDR_13  Unsubscribe snail-mail address seen in spam
+score    FSL_SPAM_ADDR_13  2.0
+
+body     FSL_SPAM_ADDR_14  /One Telebrands Plaza,.*Fairfield,.*NJ 07004/
+describe FSL_SPAM_ADDR_14  Unsubscribe snail-mail address seen in spam
+score    FSL_SPAM_ADDR_14  2.0
+
+body     FSL_SPAM_ADDR_15  /PO Box 4562,.*Grand Central Station,.*New York,.*NY 10163/
+describe FSL_SPAM_ADDR_15  Unsubscribe snail-mail address seen in spam
+score    FSL_SPAM_ADDR_15  2.0
+
+# Mainsleaze
+body     FSL_THIS_IS_ADV  /This is an advertisement./
+describe FSL_THIS_IS_ADV  This is an advertisement
+score    FSL_THIS_IS_ADV  3.0
