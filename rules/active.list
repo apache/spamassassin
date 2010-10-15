@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix danmcdonald kgolding; day 2: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix danmcdonald jm kgolding wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 3: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-trec_enron bb-zmi bernie-it_batt bernie-mix danmcdonald jm kgolding wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2
+# with results from: day 1: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix danmcdonald jm wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 2: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix danmcdonald jm kgolding wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 3: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix danmcdonald jm kgolding wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2
 
 # tflags publish
 ADVANCE_FEE_2_NEW_FORM
@@ -57,9 +57,6 @@ BAYES_95
 
 # tflags learn
 BAYES_99
-
-# good enough
-BIG_LISTS
 
 # tflags userconf
 CHARSET_FARAWAY
@@ -284,9 +281,6 @@ FSL_HELO_BARE_IP_1
 FSL_HELO_DEVICE
 
 # good enough
-FSL_HELO_NON_FQDN_1
-
-# good enough
 FSL_UA
 
 # good enough
@@ -362,16 +356,10 @@ HK_FAKENAME_MICROSOFT
 HK_NAME_DRUGS
 
 # good enough
-HK_NAME_FM_MR_MRS
-
-# good enough
 HK_SCAM_N15
 
 # good enough
 HK_SCAM_N2
-
-# good enough
-HK_SCAM_N3
 
 # good enough
 HK_SCAM_N8
@@ -423,6 +411,9 @@ LOTTO_AGENT
 
 # tflags publish
 MAILER_EQ_ORG
+
+# good enough
+MANY_SPAN_IN_TEXT
 
 # tflags userconf
 MIME_CHARSET_FARAWAY
@@ -698,9 +689,6 @@ SANE_d0d2b0f6373bf91253d66dd74c594b87
 SB_GIF_AND_NO_URIS
 
 # good enough
-SCRIPT_GIBBERISH
-
-# good enough
 SHARE_50_50
 
 # good enough
@@ -791,9 +779,6 @@ TO_EQ_FM_SPF_FAIL
 TO_NO_BRKTS_DIRECT
 
 # good enough
-TO_NO_BRKTS_FROM_MSSP
-
-# good enough
 TO_NO_BRKTS_NORDNS_HTML
 
 # good enough
@@ -830,10 +815,10 @@ TVD_RCVD_SINGLE
 TVD_VISIT_PHARMA
 
 # good enough
-MANY_SPAN_IN_TEXT
+HTML_ATTACH
 
 # good enough
-OBFU_JPG_ATTACH
+RISK_FREE
 
 # tflags userconf
 UNPARSEABLE_RELAY
