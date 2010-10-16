@@ -311,7 +311,10 @@ tflags         __RP_CERTIFIED_ANBREP_L3   net nopublish
 
 # a URI in the From comment text, to bypass URIBL checks
 # simplistic URI format for now
-header         FROM_URI       From =~ /[^\@]www[.\s][^\s"<\@]+[.\s](?:com|net|info|biz|org|\w\w)\b.*["<]/i
+header         __FROM_URI_1               From =~ /[^\@]www[.\s][^\s"<\@]+[.\s](?:com|net|info|biz|org|\w\w)\b.*["<]/i
+header         __FROM_URI_2               From =~ m;http://(?:[^.\s]+\.){1,3}(?:com|net|info|biz|org|\w\w)\b;i
+meta           FROM_URI                   __FROM_URI_1 || __FROM_URI_2
+describe       FROM_URI                   URI or www. in From
 
 # observed in spam feb 2010
 # Apparently-To per RFC2821 SHOULD NOT be used
@@ -482,13 +485,18 @@ header      TO_JOHNZY              TO =~ /johnzy_the_king\@hotmail\.com/i
 describe    TO_JOHNZY              To a spammy recipent	
 score       TO_JOHNZY              3.00
 
+# Discussed on list and observed in spam 10/15/2010
+header      TO_ONE_CHAR            To =~ /^\s*"<"\s*</
+describe    TO_ONE_CHAR            Bogus TO name
+
 # 12-letter domain names, suggested by Len Conrad on the users list
 #header         RCVD_12LTRDOM       Received =~ /[(\s.][a-z]{12}\./
 #tflags         RCVD_12LTRDOM       nopublish
 header         RPATH_12LTRDOM      Return-Path =~ /\@[a-z]{12}\./
 tflags         RPATH_12LTRDOM      nopublish
-header         FROM_12LTRDOM       From =~ /\@[a-z]{12}\./
-tflags         FROM_12LTRDOM       nopublish
+header         __FROM_12LTRDOM_1   From =~ /\@[a-z]{12}\./
+meta           FROM_12LTRDOM       __FROM_12LTRDOM_1 && !__VIA_ML && !__TO___LOWER && !__FS_SUBJ_RE && !__RCD_RDNS_MAIL_MESSY
+#tflags         FROM_12LTRDOM       nopublish
 #uri            URI_12LTRDOM        m,://(?:[^./]+\.)*[a-z]{12}\.[^./]+/,
 #tflags         URI_12LTRDOM        nopublish
 
