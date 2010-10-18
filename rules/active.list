@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix danmcdonald kgolding wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 2: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix danmcdonald jm wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 3: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix danmcdonald jm kgolding wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2
+# with results from: day 1: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix danmcdonald kgolding wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 2: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix danmcdonald kgolding wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 3: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix danmcdonald jm wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2
 
 # tflags publish
 ADVANCE_FEE_2_NEW_FORM
@@ -188,9 +188,6 @@ FH_HELO_EQ_D_D_D_D
 FH_HOST_EQ_DYNAMICIP
 
 # good enough
-FH_HOST_EQ_VERIZON_P
-
-# good enough
 FILL_THIS_FORM_LOAN
 
 # good enough
@@ -372,9 +369,6 @@ HK_SPAMMY_FILENAME
 
 # good enough
 HS_FORGED_OE_FW
-
-# good enough
-HTML_ATTACH
 
 # tflags userconf
 HTML_CHARSET_FARAWAY
@@ -818,10 +812,13 @@ TVD_RCVD_SINGLE
 TVD_VISIT_PHARMA
 
 # good enough
-SCRIPT_GIBBERISH
+MANY_SPAN_IN_TEXT
 
 # good enough
-TO_NO_BRKTS_FROM_MSSP
+OBFU_JPG_ATTACH
+
+# good enough
+SANE_9f754392a8c622a3eb2ef735b6b00c3b
 
 # tflags userconf
 UNPARSEABLE_RELAY
@@ -921,9 +918,6 @@ XMAILER_MIMEOLE_OL_83BF7
 
 # good enough
 XMAILER_MIMEOLE_OL_91287
-
-# good enough
-XMAILER_MIMEOLE_OL_CAC8F
 
 # good enough
 X_MAILER_CME_6543_MSN
