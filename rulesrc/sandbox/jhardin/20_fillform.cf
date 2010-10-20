@@ -72,7 +72,8 @@ ifplugin Mail::SpamAssassin::Plugin::ReplaceTags
   # For easy use in metas
   meta     FILL_THIS_FORM    (FILL_THIS_FORM_LONG || __FILL_THIS_FORM_PARTIAL > 4 || __FILL_THIS_FORM_PARTIAL_RAW > 4)
   describe FILL_THIS_FORM    Fill in a form with personal information
-  score    FILL_THIS_FORM    1.00
+  #score    FILL_THIS_FORM    1.00
+  tflags   FILL_THIS_FORM    publish
 
   # 3 or 4 fields (low reliability, but still useful in metas
   body     __FILL_THIS_FORM_SHORT1 /(?:<FF_LNNO><FF_YOUR><FF_ALL><FF_SUFFIX>(?:<FF_BLANK2>|<ANDOR>)){3}/i
