@@ -1,0 +1,100 @@
+# 419 Spam
+header  __FSL_HELO_USER_1   X-Spam-Relays-External =~ / helo=user /i
+header 	__FSL_HELO_USER_2   Received =~ /from User(?:\s+by|\s*\(|$)/i
+header  __FSL_HELO_USER_3   Received =~ /helo(?:=|\s)User/i
+meta    FSL_NEW_HELO_USER   (__FSL_HELO_USER_1 || __FSL_HELO_USER_2 || __FSL_HELO_USER_3)
+score   FSL_NEW_HELO_USER   2.0
+
+# 419 Spam
+header   FSL_XM_419   X-Mailer =~ /\s+6\.00\.2600\.0000$/
+describe FSL_XM_419   Old OE version in X-Mailer only seen in 419 spam
+score    FSL_XM_419   2.0
+
+# 419 Spam
+header   FSL_CTYPE_WIN1251   Content-Type =~ /charset="Windows-1251"/
+describe FSL_CTYPE_WIN1251   Content-Type only seen in 419 spam
+score    FSL_CTYPE_WIN1251   2.0
+
+# 419 Spam
+header   FSL_MID_419   MESSAGE-ID =~ /\@User>$/
+describe FSL_MID_419   Spam signature in Message-ID
+score    FSL_MID_419   2.0
+
+meta     FSL_MISSP_REPLYTO   (__FROM_MISSPACED && __HAS_REPLY_TO)
+describe FSL_MISSP_REPLYTO   Mis-spaced from and Reply-to
+score    FSL_MISSP_REPLYTO   2.0
+
+# http://groups.yahoo.com/group/oftajscns/message
+uri      FSL_YHG_ABUSE   /groups\.yahoo\.com\/group\/\S+\/message/
+describe FSL_YHG_ABUSE 	 URI pointing to a message in an abused Yahoo Group
+score 	 FSL_YHG_ABUSE 	 2.0
+
+# Bot spew
+rawbody  FSL_BOTSPAM_1   /^[^\n]+\nhttp:\/\/[^\n]+\.ru\/\n$/s
+describe FSL_BOTSPAM_1   Two-line spam with URI pointing to .ru domain
+score    FSL_BOTSPAM_1   2.0
+
+# Mainsleaze
+body     FSL_THIS_IS_ADV  /This is an advertisement\./
+describe FSL_THIS_IS_ADV  This is an advertisement
+score    FSL_THIS_IS_ADV  3.0
+
+# Bot spew
+rawbody  FSL_BOTSPAM_2   /alt="Click here to show image"/
+score    FSL_BOTSPAM_2   0.01
+
+rawbody  FSL_BOTSPAM_3   /<img alt="\*\*\* Click here \*\*\*"/
+score    FSL_BOTSPAM_3   0.01
+
+# Fake Amazon order e-mails
+rawbody  FSL_BOTSPAM_4   /Sorry for taking your time\.\./
+score    FSL_BOTSPAM_4   0.01
+
+uri      FSL_RU_URL      /[^\/]+\.ru(?:$|\/|\?)/i
+score    FSL_RU_URL      0.01
+
+# SpamEatingMonkey lists
+# SEM-BACKSCATTER
+#header RCVD_IN_SEMBACKSCATTER eval:check_rbl('sembackscatter-lastexternal', 'backscatter.spameatingmonkey.net')
+#tflags RCVD_IN_SEMBACKSCATTER net
+#describe RCVD_IN_SEMBACKSCATTER Received from an IP listed by SEM-BACKSCATTER
+#score RCVD_IN_SEMBACKSCATTER 0.5
+
+# SEM-BLACK
+#header RCVD_IN_SEMBLACK eval:check_rbl('semblack-lastexternal', 'bl.spameatingmonkey.net')
+#tflags RCVD_IN_SEMBLACK net
+#describe RCVD_IN_SEMBLACK Received from an IP listed by SEM-BLACK
+#score RCVD_IN_SEMBLACK 0.5
+
+# SEM-URI
+#urirhssub SEM_URI uribl.spameatingmonkey.net. A 2
+#body SEM_URI eval:check_uridnsbl('SEM_URI')
+#describe SEM_URI Contains a URI listed by SEM-URI
+#tflags SEM_URI net
+#score SEM_URI 0.5
+
+# SEM-URIRED
+#urirhssub SEM_URIRED urired.spameatingmonkey.net. A 2
+#body SEM_URIRED eval:check_uridnsbl('SEM_URIRED')
+#describe SEM_URIRED Contains a URI listed by SEM-URIRED
+#tflags SEM_URIRED net
+#score SEM_URIRED 0.5
+
+# SEM-FRESH
+#urirhssub SEM_FRESH fresh.spameatingmonkey.net. A 2
+#body SEM_FRESH eval:check_uridnsbl('SEM_FRESH')
+#describe SEM_FRESH Contains a domain registered less than 5 days ago
+#tflags SEM_FRESH net
+#score SEM_FRESH 0.5
+
+#urirhssub SEM_FRESH_10 fresh10.spameatingmonkey.net. A 2
+#body SEM_FRESH_10 eval:check_uridnsbl('SEM_FRESH_10')
+#describe SEM_FRESH_10 Contains a domain registered less than 10 days ago
+#tflags SEM_FRESH_10 net
+#score SEM_FRESH_10 0.5
+
+#urirhssub SEM_FRESH_15 fresh15.spameatingmonkey.net. A 2
+#body SEM_FRESH_15 eval:check_uridnsbl('SEM_FRESH_15')
+#describe SEM_FRESH_15 Contains a domain registered less than 15 days ago
+#tflags SEM_FRESH_15 net
+#score SEM_FRESH_15 0.5
