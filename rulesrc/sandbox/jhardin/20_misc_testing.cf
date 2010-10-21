@@ -245,7 +245,7 @@ describe       FROM_IN_TO_AND_SUBJ  From address is in To and Subject
 tflags         FROM_IN_TO_AND_SUBJ  publish
 
 header         __SUBJ_HAS_TO_1      ALL =~ /\nTo:\s+(?:[^\n<]{0,80}<)?([^\n\s>,]+)>?\n(?:[^\n]{1,100}\n)*Subject:\s+[^\n]{0,100}\1[>,\s\n]/ism
-meta           TO_IN_SUBJ           __SUBJ_HAS_TO_1
+meta           TO_IN_SUBJ           __SUBJ_HAS_TO_1 && !__VIA_ML && !MISSING_MIMEOLE
 describe       TO_IN_SUBJ           To address is in Subject
 
 meta           TO_EQ_FM_HTML_ONLY   (__TO_EQ_FROM && MIME_HTML_ONLY && !HTML_MIME_NO_HTML_TAG && !MISSING_MID && !ALL_TRUSTED)
