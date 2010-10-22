@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-trec_enron bb-zmi bernie-it_batt bernie-mix danmcdonald dos kgolding wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 2: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi danmcdonald kgolding; day 3: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix danmcdonald kgolding wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2
+# with results from: day 1: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi danmcdonald kgolding; day 2: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-trec_enron bb-zmi bernie-it_batt bernie-mix danmcdonald dos kgolding wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 3: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi danmcdonald jm kgolding
 
 # tflags publish
 ADVANCE_FEE_2_NEW_FORM
@@ -646,6 +646,9 @@ TO_EQ_FM_HTML_ONLY
 # tflags net
 TO_EQ_FM_SPF_FAIL
 
+# good enough
+TO_IN_SUBJ
+
 # tflags publish
 TO_NO_BRKTS_DIRECT
 
@@ -674,73 +677,31 @@ TVD_RCVD_IP
 TVD_VISIT_PHARMA
 
 # good enough
-DEAR_EMAIL
+FROM_URI
 
 # good enough
-END_FUTURE_EMAILS
+FSL_BOTSPAM_1
 
 # good enough
-FROM_UNBAL1
+FSL_CTYPE_WIN1251
 
 # good enough
-FROM_UNBAL2
+FSL_MID_419
 
 # good enough
-FRT_PHARMAC
+FSL_MISSP_REPLYTO
 
 # good enough
-FSL_FAKE_YAHOO_RCVD
+FSL_NEW_HELO_USER
 
 # good enough
-FS_MORE_CONFIDENT
+FSL_RU_URL
 
 # good enough
-HDRS_MISSP
+FSL_XM_419
 
 # good enough
-HELO_NO_DOMAIN
-
-# good enough
-HTML_ATTACH
-
-# good enough
-S25R_6
-
-# good enough
-SANE_237c2b0099548ddbfa5a37f07e0687ab
-
-# good enough
-SANE_9f754392a8c622a3eb2ef735b6b00c3b
-
-# good enough
-SHORTENED_URL_SRC
-
-# good enough
-SINGLE_HEADER_2K
-
-# good enough
-SINGLE_HEADER_3K
-
-# good enough
-STYLE_GIBBERISH
-
-# good enough
-TINY_FLOAT
-
-# good enough
-TO_EQ_FM_DIRECT_MX
-
-# good enough
-TO_EQ_FM_HTML_DIRECT
-
-# good enough
-TO_IN_SUBJ
-
-# good enough
-TVD_FUZZY_SECTOR
-
-# good enough
-TVD_PCT_OFF
+OBFU_JPG_ATTACH
 
 # tflags userconf
 UNPARSEABLE_RELAY
