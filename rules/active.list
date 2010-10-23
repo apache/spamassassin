@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi danmcdonald kgolding; day 2: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-trec_enron bb-zmi bernie-it_batt bernie-mix danmcdonald dos kgolding wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 3: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi danmcdonald jm kgolding
+# with results from: day 1: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-trec_enron bb-zmi bernie-it_batt bernie-mix danmcdonald wt-en1 wt-en2 wt-en3; day 2: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi danmcdonald kgolding; day 3: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-trec_enron bb-zmi bernie-it_batt bernie-mix danmcdonald dos kgolding wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2
 
 # tflags publish
 ADVANCE_FEE_2_NEW_FORM
@@ -128,19 +128,10 @@ DOS_OE_TO_MX
 ENV_AND_HDR_SPF_MATCH
 
 # good enough
-FB_GVR
-
-# good enough
-FB_QUALITY_REPLICA
-
-# good enough
 FH_FAKE_RCVD_LINE
 
 # good enough
 FH_FAKE_RCVD_LINE_B
-
-# good enough
-FH_FROM_GET_NAME
 
 # good enough
 FH_HELO_ALMOST_IP
@@ -203,7 +194,7 @@ FROM_MISSP_TO_UNDISC
 FROM_MISSP_USER
 
 # good enough
-FR_WATCHES_HTTP
+FSL_CTYPE_WIN1251
 
 # good enough
 FSL_HELO_BARE_IP_1
@@ -212,25 +203,25 @@ FSL_HELO_BARE_IP_1
 FSL_HELO_DEVICE
 
 # good enough
+FSL_MID_419
+
+# good enough
+FSL_MISSP_REPLYTO
+
+# good enough
+FSL_NEW_HELO_USER
+
+# good enough
+FSL_RU_URL
+
+# good enough
 FSL_UA
 
 # good enough
-FS_CAILIS
-
-# good enough
-FS_REPLICA
-
-# good enough
-FS_REPLICAWATCH
-
-# good enough
-FS_WILL_HELP
+FSL_XM_419
 
 # tflags userconf
 GTUBE
-
-# good enough
-GZ_PILL_SQUATTERS
 
 # tflags userconf
 HASHCASH_20
@@ -269,9 +260,6 @@ HK_FAKENAME_EBAY
 HK_FAKENAME_MICROSOFT
 
 # good enough
-HK_NAME_DRUGS
-
-# good enough
 HK_SCAM_N15
 
 # good enough
@@ -293,9 +281,6 @@ HS_FORGED_OE_FW
 HTML_CHARSET_FARAWAY
 
 # good enough
-IMAGESHACK_URI
-
-# good enough
 KAM_LOTTO1
 
 # good enough
@@ -308,10 +293,10 @@ KB_DATE_CONTAINS_TAB
 KB_FAKED_THE_BAT
 
 # good enough
-KB_RATWARE_OUTLOOK_MID
+KB_RATWARE_MSGID
 
 # good enough
-KHOP_GREYED
+KB_RATWARE_OUTLOOK_MID
 
 # tflags publish
 LOTS_OF_MONEY
@@ -578,18 +563,6 @@ RCVD_IN_XBL
 RISK_FREE
 
 # good enough
-SANE_04e8bf28eb445199a7f11b943c44d209
-
-# good enough
-SANE_3b92eda751c992f230f215fb7eb36844
-
-# good enough
-SANE_4ef8302546bf270a19baf98508afacc4
-
-# good enough
-SCRIPT_GIBBERISH
-
-# good enough
 SHARE_50_50
 
 # tflags net
@@ -631,12 +604,6 @@ SUBJECT_IN_WHITELIST
 # good enough
 TAB_IN_FROM
 
-# good enough
-TO_EQ_FM_DOM_HTML_IMG
-
-# good enough
-TO_EQ_FM_DOM_HTML_ONLY
-
 # tflags net
 TO_EQ_FM_DOM_SPF_FAIL
 
@@ -659,49 +626,25 @@ TO_NO_BRKTS_FROM_MSSP
 TO_NO_BRKTS_NORDNS_HTML
 
 # good enough
-TO_NO_BRKTS_NOTLIST
-
-# good enough
 TO_NO_BRKTS_PCNT
 
 # good enough
 TVD_FINGER_02
 
 # good enough
-TVD_QUAL_MEDS
-
-# good enough
 TVD_RCVD_IP
 
 # good enough
-TVD_VISIT_PHARMA
+HDRS_MISSP
 
 # good enough
-FROM_URI
+TINY_FLOAT
 
 # good enough
-FSL_BOTSPAM_1
+TO_EQ_FM_DIRECT_MX
 
 # good enough
-FSL_CTYPE_WIN1251
-
-# good enough
-FSL_MID_419
-
-# good enough
-FSL_MISSP_REPLYTO
-
-# good enough
-FSL_NEW_HELO_USER
-
-# good enough
-FSL_RU_URL
-
-# good enough
-FSL_XM_419
-
-# good enough
-OBFU_JPG_ATTACH
+TVD_FUZZY_SECTOR
 
 # tflags userconf
 UNPARSEABLE_RELAY
@@ -783,9 +726,6 @@ USER_IN_WHITELIST_TO
 
 # good enough
 XMAILER_MIMEOLE_OL_1ECD5
-
-# good enough
-X_MAILER_CME_6543_MSN
 
 # good enough
 YOUR_PERMISSION
