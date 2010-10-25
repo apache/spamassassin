@@ -499,7 +499,7 @@ describe    TO_ONE_CHAR            Bogus TO name
 header         RPATH_12LTRDOM      Return-Path =~ /\@[a-z]{12}\./
 tflags         RPATH_12LTRDOM      nopublish
 header         __FROM_12LTRDOM_1   From =~ /\@[a-z]{12}\./
-meta           FROM_12LTRDOM       __FROM_12LTRDOM_1 && !__VIA_ML && !__TO___LOWER && !__FS_SUBJ_RE && !__RCD_RDNS_MAIL_MESSY && !__freemail_safe && !__RCVD_IN_DNSWL
+meta           FROM_12LTRDOM       __FROM_12LTRDOM_1 && !__VIA_ML && !__TO___LOWER && !__FS_SUBJ_RE && !__RCD_RDNS_MAIL_MESSY && !__freemail_safe && !__RCVD_IN_DNSWL && !__UNSUB_LINK
 #tflags         FROM_12LTRDOM       nopublish
 #uri            URI_12LTRDOM        m,://(?:[^./]+\.)*[a-z]{12}\.[^./]+/,
 #tflags         URI_12LTRDOM        nopublish
