@@ -1295,9 +1295,9 @@ EOT
 
 sub hash_line_for_rule {
   my ($self, $pms, $rulename) = @_;
-  return sprintf("\n#line 1 \"%s, rule %s,\"",
-                 untaint_var($pms->{conf}->{source_file}->{$rulename}),
-                 $rulename);
+  # using tainted subr. argument may taint the whole expression, avoid
+  my $u = untaint_var($pms->{conf}->{source_file}->{$rulename});
+  return sprintf("\n#line 1 \"%s, rule %s,\"", $u, $rulename);
 }
 
 sub is_user_rule_sub {

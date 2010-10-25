@@ -492,7 +492,9 @@ sub handle_conditional {
   my $bad = 0;
   foreach my $token (@tokens) {
     if ($token =~ /^(?:\W+|[+-]?\d+(?:\.\d+)?)$/) {
-      $eval .= untaint_var($token) . " ";
+      # using tainted subr. argument may taint the whole expression, avoid
+      my $u = untaint_var($token);
+      $eval .= $u . " ";
     }
     elsif ($token eq 'plugin') {
       # replace with method call
@@ -506,7 +508,8 @@ sub handle_conditional {
       $eval .= $Mail::SpamAssassin::VERSION." ";
     }
     elsif ($token =~ /^\w[\w\:]+$/) { # class name
-      $eval .= '"' . untaint_var($token) . '" ';
+      my $u = untaint_var($token);
+      $eval .= '"' . $u . '" ';
     }
     else {
       $bad++;
