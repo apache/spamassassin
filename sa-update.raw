@@ -384,8 +384,9 @@ if ( !defined $content_file ) {
 }
 close($tfh);
 
-# by default, exit code is 1, to indicate no updates occurred
-my $exit = 1;
+my $lint_failures = 0;
+my $channel_failures = 0;
+my $channel_successes = 0;
 
 # Use a temporary directory for all update channels
 my $UPDTmp;
@@ -472,7 +473,6 @@ foreach my $channel (@channels) {
     # If we are only checking for update availability, exit now
     if ( defined $opt{'checkonly'} ) {            
       dbg("channel: $channel: update available, not downloading in checkonly mode");
-      $exit = 0;
       next;
     }
 
@@ -490,7 +490,6 @@ foreach my $channel (@channels) {
 
     if ( defined $opt{'checkonly'} ) {            
       dbg("channel: $channel: --install and --checkonly, claiming update available");
-      $exit = 0;
       next;
     }
   }
@@ -513,7 +512,7 @@ foreach my $channel (@channels) {
     unless (lint_check_dir(File::Spec->catfile($UPDTmp, "doesnotexist"))) {
       dbg("generic: lint of site pre files failed, cannot continue"); 
       print "Lint of site pre files failed, cannot continue\n"  if $opt{'verbose'};
-      $exit = 2;
+      $lint_failures++;
       last;
     }
     dbg("generic: lint check of site pre files succeeded, continuing with channel updates");
@@ -951,7 +950,7 @@ ENDOFVALIDATIONERR
           return 0;
         }
 
-        $exit = 0;            # "exit 0" means an update occurred
+        $channel_successes++;
         dbg("channel: update complete");
 
 	return 1;
@@ -1008,6 +1007,22 @@ foreach ( $content_file, $UPDTmp ) {
   }
 }
 
+my $exit;
+if ($lint_failures) {
+  # 2: lint of site pre files failed, cannot continue
+  $exit = 2;
+}
+elsif (!$channel_failures) {
+  # 0: updates found and successfully applied
+  # 1: no updates were needed (success with nothing to do)
+  $exit = $channel_successes ? 0 : 1;
+}
+else {  # at least some failures
+  # 3: some failures, but at least one channel suceeded
+  # 4 or higher means all channels failed
+  $exit = $channel_successes ? 3 : 4;
+}
+
 dbg("diag: updates complete, exiting with code $exit");
 
 if ($opt{'verbose'}) {
@@ -1019,6 +1034,8 @@ if ($opt{'verbose'}) {
     }
   } elsif ($exit == 1) {
     print "Update finished, no fresh updates were available\n";
+  } elsif ($exit == 3) {
+    print "Update of at least one channel finished, other updates failed\n";
   } else {
     print "Update failed, exiting with code $exit\n";
   }
@@ -1057,11 +1074,7 @@ sub write_channel_file {
 sub channel_failed {
   my $reason = shift;
   warn("$reason, channel failed\n");
-  if ($exit > 4) {
-    $exit++;
-  } else {
-    $exit = 4;      # 4 or higher means channel failed
-  }
+  $channel_failures++;
 }
 
 ##############################################################################
@@ -1625,8 +1638,11 @@ An exit code of C<2> means that at least one update is available but that a
 lint check of the site pre files failed.  The site pre files must pass a lint
 check before any updates are attempted.
 
+An exit code of C<3> means that at least one update succeeded while 
+other channels failed.  If using sa-compile, you should proceed with it.
+
 An exit code of C<4> or higher, indicates that errors occurred while
-attempting to download and extract updates.
+attempting to download and extract updates, and no channels were updated.
 
 =head1 SEE ALSO
 
