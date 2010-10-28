@@ -250,15 +250,16 @@ describe       TO_IN_SUBJ           To address is in Subject
 
 meta           TO_EQ_FM_HTML_ONLY   (__TO_EQ_FROM && MIME_HTML_ONLY && !HTML_MIME_NO_HTML_TAG && !MISSING_MID && !ALL_TRUSTED)
 describe       TO_EQ_FM_HTML_ONLY   To == From and HTML only
-#tflags         TO_EQ_FM_HTML_ONLY   publish
+tflags         TO_EQ_FM_HTML_ONLY   publish
 
 meta           TO_EQ_FM_DIRECT_MX   (__TO_EQ_FROM && __DOS_DIRECT_TO_MX && !__THREAD_INDEX_GOOD && !__IS_EXCH)
 describe       TO_EQ_FM_DIRECT_MX   To == From and direct-to-MX
+tflags         TO_EQ_FM_DIRECT_MX   publish
 
 # Why __HUSH_HUSH hits ham on this in masscheck I don't know. Legit bank emails maybe?
 meta           TO_EQ_FM_HTML_DIRECT  (__TO_EQ_FROM && MIME_HTML_ONLY && __DOS_DIRECT_TO_MX && !__HUSH_HUSH)
 describe       TO_EQ_FM_HTML_DIRECT  To == From and HTML only, direct-to-MX
-#tflags         TO_EQ_FM_HTML_DIRECT  publish
+tflags         TO_EQ_FM_HTML_DIRECT  publish
 
 meta           TO_EQ_FM_SPF_FAIL    (__TO_EQ_FROM && SPF_FAIL && !__THREADED && !ALL_TRUSTED)
 describe       TO_EQ_FM_SPF_FAIL    To == From and external SPF failed
