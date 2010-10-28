@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix danmcdonald dos kgolding wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 2: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-trec_enron bb-zmi bernie-it_batt bernie-mix danmcdonald dos wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 3: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi danmcdonald jm kgolding
+# with results from: day 1: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix danmcdonald kgolding wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 2: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix danmcdonald kgolding wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 3: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix danmcdonald jm kgolding nbebout
 
 # tflags publish
 ADVANCE_FEE_2_NEW_FORM
@@ -73,6 +73,9 @@ DATE_IN_FUTURE_Q_PLUS
 # good enough
 DEAR_BENEFICIARY
 
+# good enough
+DEAR_WINNER
+
 # tflags net
 DIGEST_MULTIPLE
 
@@ -118,6 +121,18 @@ DOS_ANAL_SPAM_MAILER
 # good enough
 DOS_OE_TO_MX
 
+# good enough
+DOS_OE_TO_MX_IMAGE
+
+# good enough
+DOS_RCVD_IP_TWICE_C
+
+# good enough
+DRUGS_STOCK_MIMEOLE
+
+# good enough
+DYN_RDNS_SHORT_HELO_HTML
+
 # tflags userconf
 ENV_AND_HDR_SPF_MATCH
 
@@ -126,6 +141,9 @@ FB_GVR
 
 # good enough
 FB_QUALITY_REPLICA
+
+# good enough
+FB_REPLICA_ROLEX
 
 # good enough
 FH_FAKE_RCVD_LINE
@@ -142,11 +160,20 @@ FH_HELO_ALMOST_IP
 # good enough
 FH_HELO_EQ_D_D_D_D
 
+# good enough
+FH_HOST_EQ_DYNAMICIP
+
 # tflags publish
 FILL_THIS_FORM
 
 # good enough
+FILL_THIS_FORM_LOAN
+
+# good enough
 FM_LOTTO_YOU_WON
+
+# good enough
+FM_SEX_HELODDDD
 
 # tflags publish
 FORM_FRAUD_3
@@ -194,6 +221,12 @@ FROM_MISSP_TO_UNDISC
 FROM_MISSP_USER
 
 # good enough
+FRT_PRICE
+
+# good enough
+FRT_ROLEX
+
+# good enough
 FR_WATCHES_HTTP
 
 # good enough
@@ -215,7 +248,10 @@ FSL_MID_419
 FSL_RU_URL
 
 # good enough
-FS_CAILIS
+FS_PHARMASUB2
+
+# good enough
+FS_REPLICA
 
 # good enough
 FS_REPLICAWATCH
@@ -260,7 +296,7 @@ HEAD_LONG
 HELO_LH_HOME
 
 # good enough
-HK_FAKENAME_MICROSOFT
+HELO_OEM
 
 # good enough
 HK_NAME_DRUGS
@@ -554,7 +590,19 @@ RISK_FREE
 SANE_04e8bf28eb445199a7f11b943c44d209
 
 # good enough
+SANE_3b92eda751c992f230f215fb7eb36844
+
+# good enough
 SANE_4ef8302546bf270a19baf98508afacc4
+
+# good enough
+SANE_7429530a7398f43f1f1b795f9420714e
+
+# good enough
+SANE_d0d2b0f6373bf91253d66dd74c594b87
+
+# good enough
+SPAMMY_XMAILER
 
 # tflags net
 SPF_FAIL
@@ -581,6 +629,12 @@ SPF_PASS
 SPF_SOFTFAIL
 
 # good enough
+STOCK_IMG_HDR_FROM
+
+# good enough
+STOX_REPLY_TYPE
+
+# good enough
 STOX_REPLY_TYPE_WITHOUT_QUOTES
 
 # tflags userconf
@@ -588,6 +642,9 @@ SUBJECT_IN_BLACKLIST
 
 # tflags userconf
 SUBJECT_IN_WHITELIST
+
+# good enough
+SUBJECT_NEEDS_ENCODING
 
 # good enough
 TAB_IN_FROM
@@ -626,13 +683,82 @@ TO_NO_BRKTS_NOTLIST
 TO_NO_BRKTS_PCNT
 
 # good enough
+TT_MSGID_TRUNC
+
+# good enough
 TVD_FINGER_02
 
 # good enough
 TVD_QUAL_MEDS
 
 # good enough
-TO_ONE_CHAR
+TVD_RCVD_IP
+
+# good enough
+TVD_RCVD_SINGLE
+
+# good enough
+TVD_VISIT_PHARMA
+
+# good enough
+DATE_DOTS
+
+# good enough
+FRT_PHARMAC
+
+# good enough
+FSL_NEW_HELO_USER
+
+# good enough
+FSL_UA
+
+# good enough
+FSL_XM_419
+
+# good enough
+HDRS_MISSP
+
+# good enough
+HELO_NO_DOMAIN
+
+# good enough
+HK_SCAM_N15
+
+# good enough
+HK_SCAM_S25
+
+# good enough
+MONEY_FORM
+
+# good enough
+NSL_RCVD_HELO_USER
+
+# good enough
+OBFU_JPG_ATTACH
+
+# good enough
+RCVD_HAS_HELO_USER
+
+# good enough
+S25R_6
+
+# good enough
+SCRIPT_GIBBERISH
+
+# good enough
+SHARE_50_50
+
+# good enough
+SINGLE_HEADER_2K
+
+# good enough
+TINY_FLOAT
+
+# good enough
+TO_EQ_FM_DIRECT_MX
+
+# good enough
+TO_EQ_FM_HTML_DIRECT
 
 # tflags userconf
 UNPARSEABLE_RELAY
@@ -716,7 +842,16 @@ USER_IN_WHITELIST_TO
 XMAILER_MIMEOLE_OL_1ECD5
 
 # good enough
-YOUR_PERMISSION
+XMAILER_MIMEOLE_OL_20C99
+
+# good enough
+XMAILER_MIMEOLE_OL_7533E
+
+# good enough
+XMAILER_MIMEOLE_OL_83BF7
+
+# good enough
+XMAILER_MIMEOLE_OL_91287
 
 # tflags net
 __DNS_FROM_RFC_ABUSE
