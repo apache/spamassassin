@@ -98,9 +98,9 @@ sub _check_attachments {
     my ($ctype, $boundary, $charset, $name) =
       Mail::SpamAssassin::Util::parse_content_type($p->get_header('content-type'));
 
-    $name = lc $name || '';
+    $name = lc($name || '');
 
-    my $cte = lc $p->get_header('content-transfer-encoding') || '';
+    my $cte = lc($p->get_header('content-transfer-encoding') || '');
     $ctype = lc $ctype;
 
     if ($name && $name =~ /\.(?:ade|adp|asx|bas|bat|chm|cmd|com|cpl|crt|dll|exe|hlp|hta|inf|ins|isp|js|jse|lnk|mda|mdb|mde|mdt|mdw|mdz|msc|msi|msp|mst|nws|ops|pcd|pif|prf|reg|scf|scr\??|sct|shb|shs|shm|swf|url|vb|vbe|vbs|vbx|vxd|wsc|wsf|wsh)$/)
