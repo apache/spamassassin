@@ -4355,7 +4355,7 @@ sub free_uncompiled_rule_source {
 sub new_netset {
   my ($self) = @_;
   my $set = Mail::SpamAssassin::NetSet->new();
-  $set->add_cidr ('127/8');
+  $set->add_cidr ('127.0.0.0/8');
   $set->add_cidr ('::1');
   return $set;
 }
