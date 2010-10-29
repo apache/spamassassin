@@ -129,7 +129,7 @@ my $IGNORE_MIRBY_OLDER_THAN = (24 * 60 * 60 * 7);       # 1 week
 
 use constant MIRBY_DOWNLOADED => -1;
 
-my %opt = ();
+my %opt;
 @{$opt{'gpgkey'}} = ();
 @{$opt{'channel'}} = ();
 my $GPG_ENABLED = 1;
@@ -570,7 +570,7 @@ foreach my $channel (@channels) {
 
     # Read in the list of mirrors
     dbg("channel: reading MIRRORED.BY file");
-    my %mirrors = ();
+    my %mirrors;
     my @mirrors = split(/^/, $mirby);
     while(my $mirror = shift @mirrors) {
       chomp $mirror;
@@ -901,8 +901,8 @@ ENDOFVALIDATIONERR
       'try' => sub {
         # the last step is to create the .cf and .pre files to include the
         # channel files
-        my @CF = ();
-        my @PRE = ();
+        my @CF;
+        my @PRE;
 
         dbg("channel: creating update cf/pre files");
 
@@ -915,7 +915,7 @@ ENDOFVALIDATIONERR
           die "fatal: can't access $UPDDir: $!\n";
         }
 
-        my @files = ();
+        my @files;
         while(my $file = readdir(DIR)) {
 	  next if $file eq '.' || $file eq '..';
           Mail::SpamAssassin::Util::untaint_var(\$file);
