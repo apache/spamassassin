@@ -39,6 +39,7 @@ describe   TO_NO_BRKTS_HTML_ONLY   To: misformatted and HTML only
 
 meta       TO_NO_BRKTS_DYNIP       __TO_NO_ARROWS_R && !__TO_UNDISCLOSED && RDNS_DYNAMIC && !__NAME_IS_EMAIL && !__MSGID_OK_HEX && !__HAS_X_MAILER && !__MIME_QP && !__UNSUB_LINK && !__THREADED && !__HAVE_BOUNCE_RELAYS && !__VIA_ML && !__DOS_RELAYED_EXT
 describe   TO_NO_BRKTS_DYNIP       To: misformatted and dynamic rDNS
+tflags     TO_NO_BRKTS_DYNIP       publish
 
 meta       TO_NO_BRKTS_NORDNS      __TO_NO_ARROWS_R && !__TO_UNDISCLOSED && RDNS_NONE && !__MANY_RECIPS && !__FROM_RUNON && !__VIA_ML && !__TO___LOWER && !ALL_TRUSTED && !__TO_EQ_FROM_DOM && !__DOS_REF_TODAY
 score      TO_NO_BRKTS_NORDNS      0.20
