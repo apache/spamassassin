@@ -219,6 +219,8 @@ rawbody        __SPAN_END_TEXT     /[^;>]<\/(?i:span)>[a-z]{3}/
 tflags         __SPAN_END_TEXT     multiple
 meta           MANY_SPAN_IN_TEXT   (__SPAN_BEG_TEXT > 4) && (__SPAN_END_TEXT > 4)
 describe       MANY_SPAN_IN_TEXT   Many <SPAN> tags embedded within text
+tflags         MANY_SPAN_IN_TEXT   publish
+score          MANY_SPAN_IN_TEXT   2.50
 
 uri            __FEEDPROXY_URI     m;http://feedproxy\.google\.com/;i
 rawbody        __FEEDPROXY         m;http://feedproxy\.google\.com/;i
