@@ -521,4 +521,7 @@ describe    OBFU_JVSCR_ESC         Injects content using obfuscated javascript
 score       OBFU_JVSCR_ESC         2.75
 tflags      OBFU_JVSCR_ESC         publish
 
+# Starting to observe in spam
+meta        LIST_PARTIAL           __DOS_HAS_LIST_UNSUB && !__DOS_HAS_LIST_ID
+describe    LIST_PARTIAL           Has incomplete List-* header set
 
