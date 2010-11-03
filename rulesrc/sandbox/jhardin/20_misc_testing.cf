@@ -495,6 +495,9 @@ score       TO_JOHNZY              3.00
 # Discussed on list and observed in spam 10/15/2010
 header      TO_ONE_CHAR            To =~ /^\s*"<"\s*</
 describe    TO_ONE_CHAR            Bogus TO name
+# Check From: as well...
+header      FROM_ONE_CHAR          From =~ /^\s*"[^"]"\s*</
+describe    FROM_ONE_CHAR          Bogus FROM name
 
 # 12-letter domain names, suggested by Len Conrad on the users list
 #header         RCVD_12LTRDOM       Received =~ /[(\s.][a-z]{12}\./
