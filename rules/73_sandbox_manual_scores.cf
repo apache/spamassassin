@@ -25,16 +25,18 @@
 require_version @@VERSION@@
 
 # jhardin
+# things depend on these
+score LOTS_OF_MONEY            0.001
+score FILL_THIS_FORM           0.001
 
-# things depend on this
-score LOTS_OF_MONEY            0.01
-
+# jhardin
 # reevolved Advance Fee rules
 # scores are cumulative (i.e. 3 hits 2, 4 hits 3 and 2)
 score ADVANCE_FEE_2_NEW_MONEY  0.50
 score ADVANCE_FEE_2_NEW_FORM   0.75
 score ADVANCE_FEE_3_NEW        0.50
 score ADVANCE_FEE_3_NEW_MONEY  1.00
+score ADVANCE_FEE_3_NEW_FORM   1.00
 score ADVANCE_FEE_4_NEW        1.50
 # GA is assigning a nonzero score to 5, use that
 #score  ADVANCE_FEE_5_NEW        3.399
