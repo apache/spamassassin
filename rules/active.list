@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix danmcdonald dos kgolding wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 2: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix danmcdonald kgolding wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 3: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix danmcdonald jm kgolding wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2
+# with results from: day 1: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix danmcdonald dos kgolding wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 2: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix danmcdonald jm kgolding wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 3: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix danmcdonald dos jm kgolding wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2
 
 # tflags publish
 ADVANCE_FEE_2_NEW_FORM
@@ -197,9 +197,6 @@ FROM_IN_TO_AND_SUBJ
 FROM_LOCAL_NOVOWEL
 
 # good enough
-FROM_MISSPACED
-
-# good enough
 FROM_MISSP_DYNIP
 
 # good enough
@@ -255,6 +252,9 @@ FSL_HELO_BARE_IP_1
 
 # good enough
 FSL_HELO_DEVICE
+
+# good enough
+FSL_HELO_NON_FQDN_1
 
 # good enough
 FSL_MID_419
@@ -331,9 +331,6 @@ HK_SCAM_N8
 # good enough
 HK_SPAMMY_FILENAME
 
-# good enough
-HTML_ATTACH
-
 # tflags userconf
 HTML_CHARSET_FARAWAY
 
@@ -367,6 +364,9 @@ LOTTO_AGENT
 # tflags publish
 MAILER_EQ_ORG
 
+# tflags publish
+MANY_SPAN_IN_TEXT
+
 # tflags userconf
 MIME_CHARSET_FARAWAY
 
@@ -384,9 +384,6 @@ MONEY_FRAUD_5
 
 # tflags publish
 MONEY_FRAUD_8
-
-# good enough
-MONEY_FROM_MISSP
 
 # good enough
 MONEY_LOTTERY
@@ -706,6 +703,9 @@ TO_IN_SUBJ
 # tflags publish
 TO_NO_BRKTS_DIRECT
 
+# tflags publish
+TO_NO_BRKTS_DYNIP
+
 # good enough
 TO_NO_BRKTS_NORDNS_HTML
 
@@ -730,14 +730,11 @@ TVD_QUAL_MEDS
 # good enough
 TVD_RCVD_SINGLE
 
-# tflags publish
-MANY_SPAN_IN_TEXT
-
-# tflags publish
-TO_NO_BRKTS_DYNIP
+# good enough
+OBFU_JPG_ATTACH
 
 # good enough
-TO_NO_BRKTS_FROM_MSSP
+SINGLE_HEADER_3K
 
 # tflags userconf
 UNPARSEABLE_RELAY
