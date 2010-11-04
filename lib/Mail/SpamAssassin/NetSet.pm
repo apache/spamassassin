@@ -52,7 +52,7 @@ sub new {
     name => $netset_name, num_nets => 0,
     cache_hits => 0, cache_attempts => 0,
   };
-  $self->{pt} = Net::Patricia->new(AF_INET6)  if $have_patricia;
+  $self->{pt} = Net::Patricia->new(&AF_INET6)  if $have_patricia;
 
   bless $self, $class;
   $self;
