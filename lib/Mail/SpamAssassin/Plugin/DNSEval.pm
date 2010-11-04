@@ -253,10 +253,8 @@ sub check_rbl_backend {
 
   # Trusted relays should only be checked against nice rules (dnswls)
   if (defined $tflags && $tflags !~ /\bnice\b/) {
-    foreach my $ip (@ips) {
-      last if !$trusted->contains_ip($ip);
-      shift @ips;  # remove trusted hosts from beginning
-    }
+    # remove trusted hosts from beginning
+    while (@ips && $trusted->contains_ip($ips[0])) { shift @ips }
   }
 
   unless (scalar @ips > 0) {
