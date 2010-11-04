@@ -22,16 +22,24 @@ use strict;
 use warnings;
 use bytes;
 use re 'taint';
+use Time::HiRes qw(time);
 use NetAddr::IP 4.000;
 
 use Mail::SpamAssassin::Util;
 use Mail::SpamAssassin::Logger;
 
 use vars qw{
-  @ISA $TESTCODE $NUMTESTS
+  @ISA $TESTCODE $NUMTESTS $have_patricia
 };
 
-@ISA = qw();
+BEGIN {
+  eval {
+    require Net::Patricia;
+    Net::Patricia->VERSION(1.015);  # need AF_INET6 support
+    import Net::Patricia;
+    $have_patricia = 1;
+  };
+}
 
 ###########################################################################
 
@@ -40,22 +48,74 @@ sub new {
   $class = ref($class) || $class;
 
   $netset_name = ''  if !defined $netset_name;  # object name for debugging
-  my $self = { name => $netset_name };
-  bless $self, $class;
+  my $self = {
+    name => $netset_name, num_nets => 0,
+    cache_hits => 0, cache_attempts => 0,
+  };
+  $self->{pt} = Net::Patricia->new(AF_INET6)  if $have_patricia;
 
+  bless $self, $class;
   $self;
+}
+
+###########################################################################
+
+sub DESTROY {
+  my($self) = shift;
+  if (exists $self->{cache}) {
+    local($@, $!, $_);  # protect outer layers from a potential surprise
+    my($hits, $attempts) = ($self->{cache_hits}, $self->{cache_attempts});
+    dbg("netset: cache %s hits/attempts: %d/%d, %.1f %%",
+        $self->{name}, $hits, $attempts, 100*$hits/$attempts) if $attempts > 0;
+  }
 }
 
 ###########################################################################
 
 sub add_cidr {
   my ($self, @nets) = @_;
-  local ($_);
 
   $self->{nets} ||= [ ];
   my $numadded = 0;
+  delete $self->{cache};  # invalidate cache (in case of late additions)
 
   foreach my $cidr (@nets) {
+
+    if ($self->{pt}) {
+      local $_ = $cidr;
+      local($1,$2,$3,$4); my($masklen);
+      if (s{ / ([0-9.]+) \z }{}x) {
+        $masklen = $1;
+        $masklen =~ /^\d{1,3}\z/
+          or die "Network mask not supported, use a CIDR syntax: $cidr";
+      }
+      my $neg = s/^!//;  # strip negation from a key, will be retained in data
+      $_ = $1  if /^ \[ ( [^\]]* ) \] \z/xs;  # discard optional brackets
+      s/%[A-Z0-9:._-]+\z//si;     # discard interface specification
+      if (/^ \d+ (\. | \z) /x) {  # triage for an IPv4 network address
+        if (/^ (\d+) \. (\d+) \. (\d+) \. (\d+) \z/x) {
+          # also strips leading zeroes, not liked by inet_pton
+          $_ = sprintf('::ffff:%d.%d.%d.%d', $1,$2,$3,$4);
+          $masklen = 32  if !defined $masklen;
+        } elsif (/^ (\d+) \. (\d+) \. (\d+) \.? \z/x) {
+          $_ = sprintf('::ffff:%d.%d.%d.0', $1,$2,$3);
+          $masklen = 24  if !defined $masklen;
+        } elsif (/^ (\d+) \. (\d+) \.? \z/x) {
+          $_ = sprintf('::ffff:%d.%d.0.0', $1,$2);
+          $masklen = 16  if !defined $masklen;
+        } elsif (/^ (\d+) \.? \z/x) {
+          $_ = sprintf('::ffff:%d.0.0.0', $1);
+          $masklen = 8  if !defined $masklen;
+        }
+        $masklen += 96  if defined $masklen;
+      }
+      $masklen = 128  if !defined $masklen;
+      $_ .= '/' . $masklen;
+      defined eval { $self->{pt}->add_string($_, $neg ? '!'.$_ : $_) }
+        or warn "netset: illegal network address given (patricia trie): ".
+                "'$cidr': $@\n";
+    }
+
     my $exclude = ($cidr =~ s/^\s*!//) ? 1 : 0;
 
     my $is_ip4 = 0;
@@ -98,14 +158,13 @@ sub add_cidr {
     $numadded++;
   }
 
+  $self->{num_nets} += $numadded;
   $numadded;
 }
 
 sub get_num_nets {
   my ($self) = @_;
-
-  if (!exists $self->{nets}) { return 0; }
-  return scalar @{$self->{nets}};
+  return $self->{num_nets};
 }
 
 sub _convert_ipv4_cidr_to_ipv6 {
@@ -164,23 +223,55 @@ sub is_net_declared {
 
 sub contains_ip {
   my ($self, $ip) = @_;
+  my $result = 0;
 
-  if (!defined $self->{nets}) { return 0; }
+  if (!$self->{num_nets}) { return 0 }
 
-  my ($ip4, $ip6);
-  if ($ip =~ /^\d+\./) {
-    $ip4 = NetAddr::IP->new($ip);
-    $ip6 = $self->_convert_ipv4_cidr_to_ipv6($ip);
+  $self->{cache_attempts}++;
+  if ($self->{cache} && exists $self->{cache}{$ip}) {
+    dbg("netset: %s cached lookup on %s, %d networks, result: %s",
+        $self->{name}, $ip, $self->{num_nets}, $self->{cache}{$ip});
+    $self->{cache_hits}++;
+    return $self->{cache}{$ip};
+
+  } elsif ($self->{pt}) {
+    # do a quick lookup on a Patricia Trie
+    my $t0 = time;
+    local($1,$2,$3,$4); local $_ = $ip;
+    $_ = $1  if /^ \[ ( [^\]]* ) \] \z/xs;  # discard optional brackets
+    s/%[A-Z0-9:._-]+\z//si;  # discard interface specification
+    if (m{^ (\d+) \. (\d+) \. (\d+) \. (\d+) \z}x) {
+      $_ = sprintf('::ffff:%d.%d.%d.%d', $1,$2,$3,$4);
+    } else {
+      s/^IPv6://si;  # discard optional 'IPv6:' prefix
+    }
+    eval { $result = $self->{pt}->match_string($_); 1 }  or undef $result;
+    $result = defined $result && $result !~ /^!/ ? 1 : 0;
+    dbg("netset: %s patricia lookup on %s, %d networks, result: %s, %.3f ms",
+         $self->{name}, $ip, $self->{num_nets}, $result, 1000*(time - $t0));
   } else {
-    $ip6 = NetAddr::IP->new($ip);
+    # do a sequential search on a list of NetAddr::IP objects
+    my $t0 = time;
+    my ($ip4, $ip6);
+    if ($ip =~ /^\d+\./) {
+      $ip4 = NetAddr::IP->new($ip);
+      $ip6 = $self->_convert_ipv4_cidr_to_ipv6($ip);
+    } else {
+      $ip6 = NetAddr::IP->new($ip);
+    }
+    foreach my $net (@{$self->{nets}}) {
+      if ((defined $ip4 && defined $net->{ip4} && $net->{ip4}->contains($ip4))
+       || (defined $ip6 && defined $net->{ip6} && $net->{ip6}->contains($ip6))){
+        $result = !$net->{exclude};
+        last;
+      }
+    }
+    dbg("netset: %s lookup on %s, %d networks, result: %s, %.3f ms",
+         $self->{name}, $ip, $self->{num_nets}, $result, 1000*(time - $t0));
   }
 
-  foreach my $net (@{$self->{nets}}) {
-    return !$net->{exclude} if
-        ((defined $ip4 && defined $net->{ip4} && $net->{ip4}->contains($ip4))
-        || (defined $ip6 && defined $net->{ip6} && $net->{ip6}->contains($ip6)));
-  }
-  return 0;
+  $self->{cache}{$ip} = $result;
+  return $result;
 }
 
 sub contains_net {
@@ -191,12 +282,30 @@ sub contains_net {
   return $self->_nets_contains_network($net4, $net6, $exclude, 1, "", 0);
 }
 
+sub ditch_cache {
+  my ($self) = @_;
+  if (exists $self->{cache}) {
+    dbg("netset: ditch cache on %s", $self->{name});
+    delete $self->{cache};
+  }
+}
+
 sub clone {
   my ($self) = @_;
   my $dup = Mail::SpamAssassin::NetSet->new($self->{name});
-  if (defined $self->{nets}) {
+  if ($self->{nets}) {
     @{$dup->{nets}} = @{$self->{nets}};
   }
+  if ($self->{pt}) {
+    my $dup_pt = $dup->{pt};
+    $self->{pt}->climb(sub {
+      my $key = $_[0]; $key =~ s/^!//;
+      defined eval { $dup_pt->add_string($key, $_[0]) }
+        or die "Adding a network $_[0] to a patricia trie failed: $@";
+      1;
+    });
+  }
+  $dup->{num_nets} = $self->{num_nets};
   return $dup;
 }
 
