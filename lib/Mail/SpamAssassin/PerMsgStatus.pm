@@ -168,6 +168,12 @@ sub check_timed {
   $self->{head_only_points} = 0;
   $self->{score} = 0;
 
+  # clear NetSet cache before every check to prevent it growing too large
+  foreach my $nset_name (qw(internal_networks trusted_networks msa_networks)) {
+    my $netset = $self->{conf}->{$nset_name};
+    $netset->ditch_cache()  if $netset;
+  }
+
   $self->{main}->call_plugins ("check_start", { permsgstatus => $self });
 
   # in order of slowness; fastest first, slowest last.
