@@ -43,7 +43,7 @@ my @data = (
 q{
 
   Received: from sender.net (127.0.1.2) by receiver.net
-              with SMTP; 10 Nov 2005 00:00:00 -0000
+              with SMTP; 10 Nov 2005 00:00:01 -0000
 
 } => q{
 
@@ -59,7 +59,7 @@ q{
 
   trusted_networks 127/8
   Received: from sender.net (127.0.1.2) by receiver.net
-              with SMTP; 10 Nov 2005 00:00:00 -0000
+              with SMTP; 10 Nov 2005 00:00:02 -0000
 
 } => q{
 
@@ -74,7 +74,7 @@ q{
 
   trusted_networks 127/8 1.2.2.1
   Received: from sender.net (127.0.1.2) by receiver.net
-              with SMTP; 10 Nov 2005 00:00:00 -0000
+              with SMTP; 10 Nov 2005 00:00:03 -0000
 
 } => q{
 
@@ -92,7 +92,7 @@ q{
   trusted_networks 1.2/16 !127/8
   internal_networks 1.2/16 !127/8
   Received: from sender.net (127.0.1.2) by receiver.net
-              with SMTP; 10 Nov 2005 00:00:00 -0000
+              with SMTP; 10 Nov 2005 00:00:04 -0000
 
 } => q{
 
@@ -109,7 +109,7 @@ q{
 
   trusted_networks 1.2/16
   Received: from sender.net (127.0.1.2) by receiver.net
-              with SMTP; 10 Nov 2005 00:00:00 -0000
+              with SMTP; 10 Nov 2005 00:00:05 -0000
 
 } => q{
 
@@ -125,7 +125,7 @@ Untrusted:
 q{
 
   Received: from sender.net (10.0.1.2) by receiver.net
-              with SMTP; 10 Nov 2005 00:00:00 -0000
+              with SMTP; 10 Nov 2005 00:00:06 -0000
 
 } => q{
 
@@ -141,7 +141,7 @@ q{
 
   trusted_networks 1.2/16 !1.2/16
   Received: from sender.net (1.2.3.2) by receiver.net
-              with SMTP; 10 Nov 2005 00:00:00 -0000
+              with SMTP; 10 Nov 2005 00:00:07 -0000
 
 } => q{
 
@@ -157,7 +157,7 @@ q{
 
   trusted_networks 1.2/16
   Received: from sender.net (1.1.1.2) by receiver.net
-              with SMTP; 10 Nov 2005 00:00:00 -0000
+              with SMTP; 10 Nov 2005 00:00:08 -0000
 
 } => q{
 
@@ -172,7 +172,7 @@ q{
 
   trusted_networks 1.1/16
   Received: from sender.net (1.1.1.2) by receiver.net
-              with SMTP; 10 Nov 2005 00:00:00 -0000
+              with SMTP; 10 Nov 2005 00:00:09 -0000
 
 } => q{
 
@@ -188,7 +188,7 @@ q{
   trusted_networks 1.1/16
   internal_networks 1.1/16
   Received: from sender.net (1.1.1.2) by receiver.net
-              with SMTP; 10 Nov 2005 00:00:00 -0000
+              with SMTP; 10 Nov 2005 00:00:10 -0000
 
 } => q{
 
@@ -205,7 +205,7 @@ q{
 
   internal_networks 1.1/16
   Received: from sender.net (1.1.1.2) by receiver.net
-              with SMTP; 10 Nov 2005 00:00:00 -0000
+              with SMTP; 10 Nov 2005 00:00:11 -0000
 
 } => q{
 
@@ -221,7 +221,7 @@ q{
   trusted_networks 1.1/16 1.2/16
   internal_networks 1.2/16
   Received: from sender.net (1.1.1.2) by receiver.net
-              with SMTP; 10 Nov 2005 00:00:00 -0000
+              with SMTP; 10 Nov 2005 00:00:12 -0000
 
 } => q{
 
@@ -240,7 +240,7 @@ q{
   trusted_networks 1.1/16
   internal_networks 1.2.8/24
   Received: from sender.net (1.1.1.2) by receiver.net
-              with SMTP; 10 Nov 2005 00:00:00 -0000
+              with SMTP; 10 Nov 2005 00:00:13 -0000
 
 } => q{
 
@@ -260,7 +260,7 @@ q{
   trusted_networks 1.1.1/24
   internal_networks 1.1/16
   Received: from sender.net (1.1.1.2) by receiver.net
-              with SMTP; 10 Nov 2005 00:00:00 -0000
+              with SMTP; 10 Nov 2005 00:00:14 -0000
 
 } => q{
 
@@ -280,7 +280,7 @@ q{
   trusted_networks !1.1.1.1 1.1/16
   internal_networks 1.1.1.1
   Received: from sender.net (1.1.1.2) by receiver.net
-              with SMTP; 10 Nov 2005 00:00:00 -0000
+              with SMTP; 10 Nov 2005 00:00:15 -0000
 
 } => q{
 
@@ -298,7 +298,7 @@ q{
 
   trusted_networks 1/8 !1.1.1.2
   Received: from sender.net (1.1.1.2) by receiver.net
-              with SMTP; 10 Nov 2005 00:00:00 -0000
+              with SMTP; 10 Nov 2005 00:00:16 -0000
 
 } => q{
 
@@ -316,7 +316,7 @@ q{
   trusted_networks 1.1/16
   internal_networks !4.3.2.1 1.1/16
   Received: from sender.net (1.1.1.2) by receiver.net
-              with SMTP; 10 Nov 2005 00:00:00 -0000
+              with SMTP; 10 Nov 2005 00:00:17 -0000
 
 } => q{
 
@@ -333,11 +333,11 @@ q{
   trusted_networks 1.1/16
   msa_networks 1.1.1.2
   Received: from sender.net (1.1.1.1) by receiver.net
-              with SMTP; 10 Nov 2005 00:00:00 -0000
+              with SMTP; 10 Nov 2005 00:00:18 -0000
   Received: from sender.net (1.1.1.2) by receiver.net
-              with SMTP; 10 Nov 2005 00:00:00 -0000
+              with SMTP; 10 Nov 2005 00:00:18 -0000
   Received: from sender.net (5.5.5.5) by receiver.net
-              with SMTP; 10 Nov 2005 00:00:00 -0000
+              with SMTP; 10 Nov 2005 00:00:18 -0000
 
 } => q{
 
@@ -355,11 +355,11 @@ q{
   internal_networks !1.1.1.2 1.1/16
   msa_networks 1.1.1.2
   Received: from sender.net (1.1.1.1) by receiver.net
-              with SMTP; 10 Nov 2005 00:00:00 -0000
+              with SMTP; 10 Nov 2005 00:00:19 -0000
   Received: from sender.net (1.1.1.2) by receiver.net
-              with SMTP; 10 Nov 2005 00:00:00 -0000
+              with SMTP; 10 Nov 2005 00:00:19 -0000
   Received: from sender.net (5.5.5.5) by receiver.net
-              with SMTP; 10 Nov 2005 00:00:00 -0000
+              with SMTP; 10 Nov 2005 00:00:19 -0000
 
 } => q{
 
@@ -376,11 +376,11 @@ q{
   trusted_networks !1.1.1.2 1.1/16 5.5.5.5
   msa_networks 5.5.5.5
   Received: from sender.net (1.1.1.1) by receiver.net
-              with SMTP; 10 Nov 2005 00:00:00 -0000
+              with SMTP; 10 Nov 2005 00:00:20 -0000
   Received: from sender.net (1.1.1.2) by receiver.net
-              with SMTP; 10 Nov 2005 00:00:00 -0000
+              with SMTP; 10 Nov 2005 00:00:20 -0000
   Received: from sender.net (5.5.5.5) by receiver.net
-              with SMTP; 10 Nov 2005 00:00:00 -0000
+              with SMTP; 10 Nov 2005 00:00:20 -0000
 
 } => q{
 
@@ -397,11 +397,11 @@ q{
   trusted_networks 1.1/16
   msa_networks 5.5.5.5
   Received: from sender.net (1.1.1.1) by receiver.net
-              with SMTP; 10 Nov 2005 00:00:00 -0000
+              with SMTP; 10 Nov 2005 00:00:21 -0000
   Received: from sender.net (1.1.1.2) by receiver.net
-              with SMTP; 10 Nov 2005 00:00:00 -0000
+              with SMTP; 10 Nov 2005 00:00:21 -0000
   Received: from sender.net (5.5.5.5) by receiver.net
-              with SMTP; 10 Nov 2005 00:00:00 -0000
+              with SMTP; 10 Nov 2005 00:00:21 -0000
 
 } => q{
 
@@ -418,7 +418,7 @@ q{
 
   trusted_networks 1/8 !1/8
   Received: from sender.net (1.1.1.1) by receiver.net
-              with SMTP; 10 Nov 2005 00:00:00 -0000
+              with SMTP; 10 Nov 2005 00:00:22 -0000
 
 } => q{
 
@@ -435,7 +435,7 @@ q{
 
   trusted_networks 1/8
   Received: from sender.net (1.1.1.1) by receiver.net
-              with SMTP; 10 Nov 2005 00:00:00 -0000
+              with SMTP; 10 Nov 2005 00:00:23 -0000
   X-Originating-IP: 2.2.2.2
 
 } => q{
@@ -453,7 +453,7 @@ q{
   trusted_networks 1/8 2/8
   internal_networks 1/8
   Received: from sender.net (1.1.1.1) by receiver.net
-              with SMTP; 10 Nov 2005 00:00:00 -0000
+              with SMTP; 10 Nov 2005 00:00:24 -0000
   X-Originating-IP: 2.2.2.2
 
 } => q{
@@ -471,7 +471,7 @@ q{
   trusted_networks 1/8
   msa_networks 1/8
   Received: from sender.net (1.1.1.1) by receiver.net
-              with SMTP; 10 Nov 2005 00:00:00 -0000
+              with SMTP; 10 Nov 2005 00:00:25 -0000
   X-Originating-IP: 2.2.2.2
 
 } => q{
@@ -489,7 +489,7 @@ q{
   trusted_networks 1/8 2/8
   internal_networks 1/8 2/8
   Received: from sender.net (1.1.1.1) by receiver.net
-              with SMTP; 10 Nov 2005 00:00:00 -0000
+              with SMTP; 10 Nov 2005 00:00:26 -0000
   X-Originating-IP: 2.2.2.2
 
 } => q{
@@ -506,7 +506,7 @@ q{
 
   trusted_networks !1/8 1/8
   Received: from sender.net (1.1.1.1) by receiver.net
-              with SMTP; 10 Nov 2005 00:00:00 -0000
+              with SMTP; 10 Nov 2005 00:00:27 -0000
 
 } => q{
 
@@ -523,7 +523,8 @@ q{
 
   trusted_networks DEAD:BEEF:0000:0102:0304:0506:0708:0a0b
   Received: from sender.net (sender.net [DEAD:BEEF:0000:0102:0304:0506:0708:0a0b])
-        by receiver.net (Postfix) with ESMTP id A96E18BD97
+        by receiver.net (Postfix) with ESMTP id A96E18BD97;
+        10 Nov 2005 00:00:28 -0000
 
 } => q{
 
@@ -539,7 +540,8 @@ q{
 
   trusted_networks DEAD:BEEF:0000:0102:0304:0506:0708:0a0b
   Received: from sender.net (sender.net [IPv6:2002:abcd:ef10::1])
-        by receiver.net (Postfix) with ESMTP id A96E18BD97
+        by receiver.net (Postfix) with ESMTP id A96E18BD97;
+        10 Nov 2005 00:00:29 -0000
 
 } => q{
 
@@ -554,7 +556,7 @@ Untrusted: [ ip=2002:abcd:ef10::1 rdns=sender.net helo=sender.net by=receiver.ne
 q{
 
   Received: from sender.net (::1) by receiver.net
-              with SMTP; 10 Nov 2005 00:00:00 -0000
+              with SMTP; 10 Nov 2005 00:00:30 -0000
 
 } => q{
 
@@ -569,7 +571,8 @@ q{
 
   trusted_networks DEAD:BEEF:0000:0102:0304:0506:0708:0000/108
   Received: from sender.net (sender.net [DEAD:BEEF:0000:0102:0304:0506:0708:0a0b])
-        by receiver.net (Postfix) with ESMTP id A96E18BD97
+        by receiver.net (Postfix) with ESMTP id A96E18BD97;
+        10 Nov 2005 00:00:31 -0000
 
 } => q{
 
@@ -584,7 +587,8 @@ q{
 
   trusted_networks DEAD:BEEF:0000:0102:0304:0506:0708:0a0c
   Received: from sender.net (sender.net [DEAD:BEEF:0000:0102:0304:0506:0708:0a0b])
-        by receiver.net (Postfix) with ESMTP id A96E18BD97
+        by receiver.net (Postfix) with ESMTP id A96E18BD97;
+        10 Nov 2005 00:00:32 -0000
 
 } => q{
 
