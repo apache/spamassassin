@@ -36,10 +36,11 @@ use vars qw{
 ###########################################################################
 
 sub new {
-  my $class = shift;
+  my ($class,$netset_name) = @_;
   $class = ref($class) || $class;
 
-  my $self = { };
+  $netset_name = ''  if !defined $netset_name;  # object name for debugging
+  my $self = { name => $netset_name };
   bless $self, $class;
 
   $self;
@@ -192,7 +193,7 @@ sub contains_net {
 
 sub clone {
   my ($self) = @_;
-  my $dup = Mail::SpamAssassin::NetSet->new();
+  my $dup = Mail::SpamAssassin::NetSet->new($self->{name});
   if (defined $self->{nets}) {
     @{$dup->{nets}} = @{$self->{nets}};
   }

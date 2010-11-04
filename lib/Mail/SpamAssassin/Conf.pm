@@ -1220,7 +1220,7 @@ Empty the list of trusted networks.
       unless (!defined $value || $value eq '') {
         return $INVALID_VALUE;
       }
-      $self->{trusted_networks} = $self->new_netset();
+      $self->{trusted_networks} = $self->new_netset('trusted_networks',1);
       $self->{trusted_networks_configured} = 0;
     }
   });
@@ -1274,7 +1274,7 @@ Empty the list of internal networks.
       unless (!defined $value || $value eq '') {
         return $INVALID_VALUE;
       }
-      $self->{internal_networks} = $self->new_netset();
+      $self->{internal_networks} = $self->new_netset('internal_networks',1);
       $self->{internal_networks_configured} = 0;
     }
   });
@@ -1327,7 +1327,8 @@ Empty the list of msa networks.
       unless (!defined $value || $value eq '') {
         return $INVALID_VALUE;
       }
-      $self->{msa_networks} = Mail::SpamAssassin::NetSet->new(); # not new_netset
+      $self->{msa_networks} =
+        $self->new_netset('msa_networks',0);  # no loopback IP
       $self->{msa_networks_configured} = 0;
     }
   });
@@ -3849,9 +3850,9 @@ sub new {
   $self->{more_spam_to} = { };
   $self->{all_spam_to} = { };
 
-  $self->{trusted_networks} = $self->new_netset();
-  $self->{internal_networks} = $self->new_netset();
-  $self->{msa_networks} = Mail::SpamAssassin::NetSet->new(); # not new_netset
+  $self->{trusted_networks} = $self->new_netset('trusted_networks',1);
+  $self->{internal_networks} = $self->new_netset('internal_networks',1);
+  $self->{msa_networks} = $self->new_netset('msa_networks',0); # no loopback IP
   $self->{trusted_networks_configured} = 0;
   $self->{internal_networks_configured} = 0;
 
@@ -4353,10 +4354,12 @@ sub free_uncompiled_rule_source {
 }
 
 sub new_netset {
-  my ($self) = @_;
-  my $set = Mail::SpamAssassin::NetSet->new();
-  $set->add_cidr ('127.0.0.0/8');
-  $set->add_cidr ('::1');
+  my ($self, $netset_name, $add_loopback) = @_;
+  my $set = Mail::SpamAssassin::NetSet->new($netset_name);
+  if ($add_loopback) {
+    $set->add_cidr('127.0.0.0/8');
+    $set->add_cidr('::1');
+  }
   return $set;
 }
 
