@@ -40,7 +40,7 @@ sub new{
 
 sub set_config{
   my($self, $conf) = @_;
-  my @cmds = ();
+  my @cmds;
 
   push (@cmds, {
     setting => 'trigger_target',
@@ -152,7 +152,7 @@ sub check_post_learn {
   #find out which targets have fulfilled their requirements
   my $triggers= $pms->{PHISHTAG}->{triggers};
   my $targets= $pms->{PHISHTAG}->{targets};
-  my @filled=();
+  my @filled;
   foreach my $target(@$targets){
       my $uri= $$target[0];
       my $fulfilled=1;
