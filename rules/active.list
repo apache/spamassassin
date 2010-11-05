@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix danmcdonald dos kgolding wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 2: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix danmcdonald dos jm kgolding wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 3: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix danmcdonald jm kgolding wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2
+# with results from: day 1: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix danmcdonald dos kgolding wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 2: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix danmcdonald dos jm kgolding wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 3: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix danmcdonald dos jm kgolding wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2
 
 # tflags publish
 ADVANCE_FEE_2_NEW_FORM
@@ -143,6 +143,9 @@ DYN_RDNS_SHORT_HELO_HTML
 ENV_AND_HDR_SPF_MATCH
 
 # good enough
+FB_GET_MEDS
+
+# good enough
 FB_GVR
 
 # good enough
@@ -168,6 +171,9 @@ FH_HELO_EQ_D_D_D_D
 
 # good enough
 FH_HOST_EQ_DYNAMICIP
+
+# good enough
+FH_HOST_IN_ADDRARPA
 
 # tflags publish
 FILL_THIS_FORM
@@ -321,6 +327,9 @@ HK_FAKENAME_MICROSOFT
 
 # good enough
 HK_NAME_DRUGS
+
+# good enough
+HK_RANDOM_ENVFROM
 
 # good enough
 HK_SCAM_N2
@@ -605,6 +614,9 @@ RCVD_IN_SORBS_ZOMBIE
 RCVD_IN_XBL
 
 # good enough
+RDNS_LOCALHOST
+
+# good enough
 RISK_FREE
 
 # good enough
@@ -615,6 +627,9 @@ SANE_4ef8302546bf270a19baf98508afacc4
 
 # good enough
 SANE_7429530a7398f43f1f1b795f9420714e
+
+# good enough
+SANE_91eb43f705d25c804374a746d7519660
 
 # good enough
 SANE_9f754392a8c622a3eb2ef735b6b00c3b
@@ -654,6 +669,9 @@ SPF_PASS
 
 # tflags net
 SPF_SOFTFAIL
+
+# good enough
+STOCK_IMG_CTYPE
 
 # good enough
 STOCK_IMG_HDR_FROM
@@ -731,16 +749,34 @@ TVD_QUAL_MEDS
 TVD_RCVD_SINGLE
 
 # good enough
-FROM_MISSPACED
+FB_ACHIEVE_BACH
 
 # good enough
-HTML_ATTACH
+FRT_EXPERIENCE
 
 # good enough
-MONEY_FROM_MISSP
+FSL_BOTSPAM_4
 
 # good enough
-TO_NO_BRKTS_FROM_MSSP
+FS_SILDENAFIL
+
+# good enough
+IMG_DIRECT_TO_MX
+
+# good enough
+MAY_BE_FORGED
+
+# good enough
+OBFU_JPG_ATTACH
+
+# good enough
+S25R_4
+
+# good enough
+SPAMMY_MIME_BDRY_01
+
+# good enough
+TO_ONE_CHAR
 
 # tflags userconf
 UNPARSEABLE_RELAY
