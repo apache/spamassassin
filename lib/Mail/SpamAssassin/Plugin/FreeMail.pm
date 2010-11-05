@@ -177,7 +177,7 @@ sub new {
 
 sub set_config {
     my ($self, $conf) = @_;
-    my @cmds = ();
+    my @cmds;
     push(@cmds, {
         setting => 'freemail_max_body_emails',
         default => 5,

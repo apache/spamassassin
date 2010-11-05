@@ -747,7 +747,7 @@ sub _scan_directory {
       warn "archive-iterator: $file is not a plain file or directory: $!";
     }
   }
-  @files = ();  # release storage
+  undef @files;  # release storage
 
   # recurse into directories
   foreach my $dir (@subdirs) {
