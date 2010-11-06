@@ -93,6 +93,7 @@ describe       FROM_MISSP_TO_UNDISC  From misspaced, To undisclosed
 
 meta           FROM_MISSP_DKIM       (__FROM_RUNON && __DKIM_DEPENDABLE)
 describe       FROM_MISSP_DKIM       From misspaced, DKIM dependable
+tflags         FROM_MISSP_DKIM       net
 
 meta           FROM_MISSP_REPLYTO    (__FROM_RUNON && __REPLYTO_EXISTS) && !__NOT_SPOOFED && !__RCD_RDNS_MTA_MESSY
 describe       FROM_MISSP_REPLYTO    From misspaced, has Reply-To
@@ -209,6 +210,7 @@ describe       MANY_SUBDOM         Lots and lots of subdomain parts in a URI
 meta           RFC_ABUSE_POST      (__DNS_FROM_RFC_ABUSE && __DNS_FROM_RFC_POST)
 describe       RFC_ABUSE_POST      Both abuse and postmaster missing on sender domain
 score          RFC_ABUSE_POST      0.01
+tflags         RFC_ABUSE_POST      net
 
 body           CALL_SKYPE            /\bCall this phone number [\w\s]{0,30}with Skype\b/
 
@@ -466,6 +468,7 @@ uri             URI_1234                m,//1\.2\.3\.4/,
 
 # requested by Benny Pedersen 17 Apr 2010
 meta            __SPF_FULL_PASS         (SPF_PASS && SPF_HELO_PASS)
+tflags          __SPF_FULL_PASS         net
 
 # Spam from ZA
 header          CAN_SPAM_HDR            CAN-SPAM_Compliant =~ /./
@@ -525,6 +528,6 @@ score       OBFU_JVSCR_ESC         2.75
 tflags      OBFU_JVSCR_ESC         publish
 
 # Starting to observe in spam
-meta        LIST_PARTIAL           __DOS_HAS_LIST_UNSUB && !__DOS_HAS_LIST_ID
-describe    LIST_PARTIAL           Has incomplete List-* header set
+meta        __LIST_PARTIAL         __DOS_HAS_LIST_UNSUB && !__DOS_HAS_LIST_ID
+describe    __LIST_PARTIAL         Has incomplete List-* header set
 
