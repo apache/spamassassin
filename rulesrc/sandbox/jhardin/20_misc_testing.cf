@@ -366,13 +366,11 @@ endif
 
 
 rawbody        __STYLE_GIBBERISH        /<style[^>]{0,30}>(?:\s{0,80}[^\s:;<]){150}/im
-meta           STYLE_GIBBERISH          __STYLE_GIBBERISH && !__THREADED
-#tflags         STYLE_GIBBERISH          nopublish
+meta           STYLE_GIBBERISH          __STYLE_GIBBERISH && !__THREADED && !__MIME_QP
 
 body           __SCRIPT_TAG_IN_BODY     /<script>/i
 rawbody        __SCRIPT_GIBBERISH       /<script>[^;<]{100}/im
 meta           SCRIPT_GIBBERISH         __SCRIPT_GIBBERISH && !__SCRIPT_TAG_IN_BODY && !__TAG_EXISTS_META
-#tflags         SCRIPT_GIBBERISH           nopublish
 
 #rawbody        MANY_DIV_5                   /(?:<div[^>]{0,30}>\s{0,80}){5}/im
 #tflags         MANY_DIV_5                    nopublish
