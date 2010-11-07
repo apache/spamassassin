@@ -167,7 +167,7 @@ date
 echo "[ running log-grep-recent ]"
 
 # only use recent spam to generate scores; use a lot of ham history to avoid FPs
-masses/log-grep-recent -m 38 ../corpus/usable-corpus-set$SCORESET/ham-*.log > masses/ham-full.log
+masses/log-grep-recent -m 72 ../corpus/usable-corpus-set$SCORESET/ham-*.log > masses/ham-full.log
 masses/log-grep-recent -m 2 ../corpus/usable-corpus-set$SCORESET/spam-*.log > masses/spam-full.log
 
 # make sure that we have enough mass-check results to actually generate reasonable scores
