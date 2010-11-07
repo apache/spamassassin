@@ -433,6 +433,9 @@ NSL_RCVD_FROM_USER
 # good enough
 OBFU_ATTACH_MISSP
 
+# good enough
+OBFU_JPG_ATTACH
+
 # tflags publish
 OBFU_JVSCR_ESC
 
@@ -775,8 +778,11 @@ TVD_QUAL_MEDS
 # good enough
 TVD_RCVD_SINGLE
 
-# good enough
-HTML_ATTACH
+# tflags net
+FROM_MISSP_DKIM
+
+# tflags net
+RFC_ABUSE_POST
 
 # tflags userconf
 UNPARSEABLE_RELAY
@@ -903,3 +909,6 @@ __RESIGNER2
 
 # tflags net
 __RFC_IGNORANT_ENVFROM
+
+# tflags net
+__SPF_FULL_PASS
