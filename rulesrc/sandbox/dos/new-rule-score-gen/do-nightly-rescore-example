@@ -32,6 +32,10 @@ else
   REVISION=`grep "revision .*" scores-set0 | cut -d" " -f9`
 fi
 
+# 20101106 - temporarily s/0.000/0.001/g scores - bug 6510
+sed -e 's/0.000/0.001 # force non-zero/g' < scores-set0 > scores-set0-non-zero; mv -f scores-set0-non-zero scores-set0
+sed -e 's/0.000/0.001 # force non-zero/g' < scores-set1 > scores-set1-non-zero; mv -f scores-set1-non-zero scores-set1
+
 cp scores-set0 scores-set2
 cp scores-set1 scores-set3
 ./merge-scoresets $SCORESET

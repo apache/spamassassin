@@ -34,7 +34,7 @@ $active_rule_set = $ARGV[0] if (defined $ARGV[0] && $ARGV[0] =~ /^[0-3]$/);
 if (defined $active_rule_set) {
   open (SCORES, "scores-set$active_rule_set") or die "Cannot open scores-set$active_rule_set: $!";
   while(<SCORES>) {
-    next unless /^score (\S+)\s+(-?[\d.]+)$/;
+    next unless /^score (\S+)\s+(-?[\d.]+)\b/;
     @{$rules{$1}} = ('0.001', '0.001' ,'0.001', '0.001');
     $rules{$1}[$active_rule_set] = $2;
   }
@@ -45,7 +45,7 @@ for (my $i = 0; $i < 4; $i++) {
   next if (defined $active_rule_set && $i == $active_rule_set);
   open (SCORES, "scores-set$i") or die "Cannot open scores-set$i: $!";
   while(<SCORES>) {
-    next unless /^score (\S+)\s+(-?[\d.]+)$/;
+    next unless /^score (\S+)\s+(-?[\d.]+)\b/;
     next if (defined $active_rule_set && !exists $rules{$1});
     @{$rules{$1}} = ('0.001', '0.001' ,'0.001', '0.001') unless exists $rules{$1};
     $rules{$1}[$i] = $2;
