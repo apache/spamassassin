@@ -529,3 +529,9 @@ tflags      OBFU_JVSCR_ESC         publish
 meta        __LIST_PARTIAL         __DOS_HAS_LIST_UNSUB && !__DOS_HAS_LIST_ID
 describe    __LIST_PARTIAL         Has incomplete List-* header set
 
+# in lots of phishing
+uri         UCOZ_URI               /\.ucoz\.org\//i
+describe    UCOZ_URI               URI contains ucoz.org
+
+
+
