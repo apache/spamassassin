@@ -31,7 +31,7 @@ ifplugin Mail::SpamAssassin::Plugin::FreeMail
 endif
 
 #meta     MONEY_FROM_RUNON   LOTS_OF_MONEY && __FROM_RUNON	# almost same spam hit rate, poorer S/O
-meta     MONEY_FROM_MISSP   LOTS_OF_MONEY && __FROM_MISSPACED
+meta     MONEY_FROM_MISSP   LOTS_OF_MONEY && __FROM_MISSPACED && !__MIME_QP
 describe MONEY_FROM_MISSP   Lots of money and misspaced From
 score    MONEY_FROM_MISSP   1.5
 
