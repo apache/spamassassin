@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix danmcdonald dos jm kgolding wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 2: bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix danmcdonald dos jm kgolding wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 3: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix danmcdonald dos jm kgolding wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2
+# with results from: day 1: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix danmcdonald dos jm kgolding wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 2: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix danmcdonald dos jm kgolding wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 3: bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix danmcdonald dos jm kgolding wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2
 
 # tflags publish
 ADVANCE_FEE_2_NEW_FORM
@@ -287,9 +287,6 @@ FSL_THIS_IS_ADV
 FS_CAILIS
 
 # good enough
-FS_REPLICAWATCH
-
-# good enough
 FS_SILDENAFIL
 
 # good enough
@@ -411,6 +408,9 @@ MONEY_FRAUD_5
 
 # tflags publish
 MONEY_FRAUD_8
+
+# good enough
+MONEY_FROM_MISSP
 
 # good enough
 MONEY_LOTTERY
@@ -761,9 +761,6 @@ TO_NO_BRKTS_PCNT
 TO_ONE_CHAR
 
 # good enough
-TT_MSGID_TRUNC
-
-# good enough
 TVD_FINGER_02
 
 # good enough
@@ -776,10 +773,7 @@ TVD_QUAL_MEDS
 TVD_RCVD_SINGLE
 
 # good enough
-MONEY_FROM_MISSP
-
-# good enough
-OBFU_JPG_ATTACH
+HTML_ATTACH
 
 # tflags userconf
 UNPARSEABLE_RELAY
@@ -858,9 +852,6 @@ USER_IN_WHITELIST
 
 # tflags userconf
 USER_IN_WHITELIST_TO
-
-# good enough
-VANITY
 
 # good enough
 XMAILER_MIMEOLE_OL_1ECD5
