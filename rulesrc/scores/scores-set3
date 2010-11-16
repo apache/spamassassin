@@ -1,82 +1,75 @@
-# Using score set 1 logs for revision 1031975 from:
-# ham-net-bb-doc.log ham-net-bb-fredt.log ham-net-bb-guenther_fraud.log ham-net-bb-jhardin.log ham-net-bb-jhardin_fraud.log ham-net-bb-jm.log ham-net-bb-kmcgrail.log ham-net-bb-trec_enron.log ham-net-bb-zmi.log ham-net-bernie-it_batt.log ham-net-bernie-mix.log ham-net-danmcdonald.log ham-net-dos.log ham-net-wt-en1.log ham-net-wt-en2.log ham-net-wt-en3.log ham-net-wt-en4.log ham-net-wt-en5.log ham-net-wt-jp1.log ham-net-wt-jp2.log spam-net-bb-doc.log spam-net-bb-fredt.log spam-net-bb-guenther_fraud.log spam-net-bb-jhardin.log spam-net-bb-jhardin_fraud.log spam-net-bb-jm.log spam-net-bb-kmcgrail.log spam-net-bb-trec_enron.log spam-net-bb-zmi.log spam-net-bernie-it_batt.log spam-net-bernie-mix.log spam-net-danmcdonald.log spam-net-dos.log spam-net-wt-en1.log spam-net-wt-en2.log spam-net-wt-en3.log spam-net-wt-en4.log spam-net-wt-en5.log spam-net-wt-jp1.log spam-net-wt-jp2.log
+# Using score set 1 logs for revision 1034704 from:
+# ham-net-bb-guenther_fraud.log ham-net-bb-jhardin.log ham-net-bb-jhardin_fraud.log ham-net-bb-jm.log ham-net-bb-kmcgrail.log ham-net-bb-trec_enron.log ham-net-bb-zmi.log ham-net-bernie-it_batt.log ham-net-bernie-mix.log ham-net-danmcdonald.log ham-net-dos.log ham-net-wt-en1.log ham-net-wt-en2.log ham-net-wt-en3.log ham-net-wt-en4.log ham-net-wt-en5.log ham-net-wt-jp1.log ham-net-wt-jp2.log spam-net-bb-guenther_fraud.log spam-net-bb-jhardin.log spam-net-bb-jhardin_fraud.log spam-net-bb-jm.log spam-net-bb-kmcgrail.log spam-net-bb-trec_enron.log spam-net-bb-zmi.log spam-net-bernie-it_batt.log spam-net-bernie-mix.log spam-net-danmcdonald.log spam-net-dos.log spam-net-wt-en1.log spam-net-wt-en2.log spam-net-wt-en3.log spam-net-wt-en4.log spam-net-wt-en5.log spam-net-wt-jp1.log spam-net-wt-jp2.log
 
-score ADVANCE_FEE_2_NEW_FORM         0.001
+score ADVANCE_FEE_2_NEW_FORM         0.001 # force non-zero
 score ADVANCE_FEE_2_NEW_MONEY        0.001
-score ADVANCE_FEE_3_NEW              0.001 # force non-zero
-score ADVANCE_FEE_3_NEW_FORM         0.111
+score ADVANCE_FEE_3_NEW              0.001
+score ADVANCE_FEE_3_NEW_FORM         2.894
 score ADVANCE_FEE_3_NEW_MONEY        0.001
-score ADVANCE_FEE_4_NEW              2.079
-score ADVANCE_FEE_5_NEW              2.361
-score AXB_HELO_HOME_UN               1.876
-score DATE_IN_FUTURE_96_Q            1.377
+score ADVANCE_FEE_4_NEW              2.081
+score ADVANCE_FEE_5_NEW              3.299
+score AXB_HELO_HOME_UN               2.898
+score DATE_IN_FUTURE_96_Q            1.337
 score DATE_IN_FUTURE_Q_PLUS          2.799
 score DEAR_BENEFICIARY               2.699
-score DEAR_EMAIL                     0.755
-score FB_ACHIEVE_BACH                2.413
+score DEAR_EMAIL                     0.454
 score FILL_THIS_FORM                 0.001 # force non-zero
 score FORM_FRAUD_3                   0.001
-score FORM_FRAUD_5                   0.001 # force non-zero
-score FROM_IN_TO_AND_SUBJ            0.673
-score FROM_MISSP_DYNIP               3.399
-score FROM_MISSP_EH_MATCH            0.001 # force non-zero
-score FROM_MISSP_FREEMAIL            3.258
-score FROM_MISSP_MSFT                0.264
-score FROM_MISSP_NO_TO               0.502
-score FROM_MISSP_SPF_FAIL            1.609
-score FROM_MISSP_TO_UNDISC           1.139
-score FROM_MISSP_USER                1.426
-score FRT_EXPERIENCE                 3.267
-score FRT_PHARMAC                    1.138
-score FR_WATCHES_HTTP                0.538
-score FSL_BOTSPAM_1                  3.390
-score FSL_BOTSPAM_2                  0.663
-score FSL_BOTSPAM_3                  3.162
-score FSL_BOTSPAM_4                  0.676
+score FORM_FRAUD_5                   0.001
+score FROM_IN_TO_AND_SUBJ            2.949
+score FROM_MISSP_DKIM                0.154
+score FROM_MISSP_DYNIP               0.031
+score FROM_MISSP_EH_MATCH            0.001
+score FROM_MISSP_FREEMAIL            2.217
+score FROM_MISSP_MSFT                0.001
+score FROM_MISSP_NO_TO               2.884
+score FROM_MISSP_SPF_FAIL            0.291
+score FROM_MISSP_TO_UNDISC           1.163
+score FROM_MISSP_USER                2.366
+score FRT_PHARMAC                    0.620
+score FR_WATCHES_HTTP                2.368
+score FSL_BOTSPAM_1                  4.100
+score FSL_BOTSPAM_2                  0.499
+score FSL_BOTSPAM_3                  0.750
 score FSL_CTYPE_WIN1251              3.499
-score FSL_MID_419                    0.041
+score FSL_MID_419                    0.914
 score FSL_RU_URL                     0.001
-score FSL_THIS_IS_ADV                0.001 # force non-zero
-score FS_SILDENAFIL                  0.121
-score GZ_PILL_SQUATTERS              3.895
-score HELO_NO_DOMAIN                 0.001
-score HK_SCAM_N2                     0.139
-score HK_SCAM_N8                     2.027
+score FSL_THIS_IS_ADV                1.006
+score GZ_PILL_SQUATTERS              3.567
+score HELO_NO_DOMAIN                 1.160
+score HK_SCAM_N2                     0.607
+score HK_SCAM_N8                     1.275
 score HK_SPAMMY_FILENAME             2.699
-score IMG_DIRECT_TO_MX               0.001
-score LOTS_OF_MONEY                  0.001 # force non-zero
-score LOTTO_AGENT                    2.699
+score LOTS_OF_MONEY                  0.001
+score LOTTO_AGENT                    2.438
 score MANY_SPAN_IN_TEXT              0.001
-score MAY_BE_FORGED                  0.772
-score MONEY_ATM_CARD                 0.981
-score MONEY_FRAUD_3                  0.001 # force non-zero
+score MONEY_ATM_CARD                 2.236
+score MONEY_FRAUD_3                  0.001
 score MONEY_FRAUD_5                  0.001
 score MONEY_FRAUD_8                  0.001
+score MONEY_FROM_MISSP               1.712
 score MONEY_LOTTERY                  0.001
-score NSL_RCVD_FROM_USER             1.555
+score NSL_RCVD_FROM_USER             3.242
 score OBFU_JVSCR_ESC                 3.699
+score RFC_ABUSE_POST                 0.001 # force non-zero
 score RISK_FREE                      1.594
-score S25R_4                         2.059
-score S25R_6                         2.774
-score SANE_9f754392a8c622a3eb2ef735b6b00c3b 0.706
-score SINGLE_HEADER_2K               0.001 # force non-zero
-score SINGLE_HEADER_3K               0.110
-score SPAMMY_MIME_BDRY_01            2.324
+score S25R_6                         2.676
+score SANE_9f754392a8c622a3eb2ef735b6b00c3b 1.128
+score SINGLE_HEADER_2K               0.001
 score TAB_IN_FROM                    0.001
 score TINY_FLOAT                     0.001
 score TO_EQ_FM_DIRECT_MX             0.001
 score TO_EQ_FM_DOM_HTML_IMG          0.001
-score TO_EQ_FM_DOM_HTML_ONLY         3.351
-score TO_EQ_FM_DOM_SPF_FAIL          0.475
-score TO_EQ_FM_HTML_DIRECT           1.650
+score TO_EQ_FM_DOM_HTML_ONLY         2.609
+score TO_EQ_FM_DOM_SPF_FAIL          0.731
+score TO_EQ_FM_HTML_DIRECT           1.638
 score TO_EQ_FM_HTML_ONLY             2.269
-score TO_EQ_FM_SPF_FAIL              0.184
-score TO_IN_SUBJ                     3.289
-score TO_NO_BRKTS_DIRECT             2.104
-score TO_NO_BRKTS_DYNIP              3.074
+score TO_EQ_FM_SPF_FAIL              0.078
+score TO_IN_SUBJ                     0.001
+score TO_NO_BRKTS_DIRECT             2.087
+score TO_NO_BRKTS_DYNIP              2.953
 score TO_NO_BRKTS_NORDNS_HTML        1.266
-score TO_NO_BRKTS_NOTLIST            1.521
-score TO_NO_BRKTS_PCNT               1.152
-score TO_ONE_CHAR                    3.099
-score TVD_PCT_OFF                    1.081
-score YOUR_PERMISSION                0.266
+score TO_NO_BRKTS_NOTLIST            1.540
+score TO_NO_BRKTS_PCNT               0.465
+score TVD_PCT_OFF                    1.483
+score YOUR_PERMISSION                0.267
