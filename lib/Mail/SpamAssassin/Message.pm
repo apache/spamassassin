@@ -144,7 +144,15 @@ sub new {
       defined $nread  or die "error reading: $!";
       @message = split(/^/m, $raw_str, -1);
 
-      dbg("message: empty message read")  if $raw_str eq '';
+      if ($raw_str eq '') {
+        dbg("message: empty message read");
+      } elsif (length($raw_str) > 256*1024) {
+        # ditch rarely used large chunks of allocated memory, Bug 6514
+        #   http://www.perlmonks.org/?node_id=803515
+        # about 98% of mail messages are below 256 kB (2010 statistics)
+        dbg("message: deallocating %.2f MB", length($raw_str)/1024/1024);
+        undef $raw_str;
+      }
     }
   }
   elsif (ref $message) {
