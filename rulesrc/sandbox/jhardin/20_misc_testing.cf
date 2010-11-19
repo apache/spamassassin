@@ -65,7 +65,7 @@ describe       URI_NUMERIC_CCTLD     CCTLD URI with multiple numeric subdomains
 # Better S/O, good enough for standalone rule
 header         __FROM_MISSPACED      From =~ /^\s*"[^"]*"</
 # meta with some stuff to reduce FPs
-meta           FROM_MISSPACED        __FROM_MISSPACED && !__RCD_RDNS_MTA_MESSY && !__CTYPE_MULTIPART_ALT && !__REPTO_QUOTE && !__MIME_QP && !__UNSUB_LINK
+meta           FROM_MISSPACED        __FROM_MISSPACED && !__RCD_RDNS_MTA_MESSY && !__CTYPE_MULTIPART_ALT && !__REPTO_QUOTE && !__MIME_QP && !__UNSUB_LINK && !__TO___LOWER && !__BUGGED_IMG
 describe       FROM_MISSPACED        From: missing whitespace
 
 # Poorer S/O than FROM_MISSPACED but better performance in metas
@@ -530,8 +530,8 @@ meta        __LIST_PARTIAL         __DOS_HAS_LIST_UNSUB && !__DOS_HAS_LIST_ID
 describe    __LIST_PARTIAL         Has incomplete List-* header set
 
 # in lots of phishing
-uri         UCOZ_URI               /\.ucoz\.org\//i
-describe    UCOZ_URI               URI contains ucoz.org
+uri         __UCOZ_URI             /\.ucoz\.org\//i
+describe    __UCOZ_URI             URI contains ucoz.org
 
 
 
