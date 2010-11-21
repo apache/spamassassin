@@ -36,7 +36,8 @@ score ADVANCE_FEE_2_NEW_MONEY  0.50
 score ADVANCE_FEE_2_NEW_FORM   0.75
 score ADVANCE_FEE_3_NEW        0.50
 score ADVANCE_FEE_3_NEW_MONEY  1.00
-score ADVANCE_FEE_3_NEW_FORM   1.00
+# GA is scoring reasonably now
+#score ADVANCE_FEE_3_NEW_FORM   1.00
 score ADVANCE_FEE_4_NEW        1.50
 # GA is assigning a nonzero score to 5, use that
 #score  ADVANCE_FEE_5_NEW        3.399
@@ -45,14 +46,14 @@ score ADVANCE_FEE_4_NEW        1.50
 # metas using Advance Fee component rules
 score FORM_FRAUD_3             0.50
 score FORM_FRAUD_5             0.50
-score MONEY_FRAUD_3            0.50
+score MONEY_FRAUD_3            1.00
 score MONEY_FRAUD_5            0.50
 score MONEY_FRAUD_8            0.75
 
 # jhardin
 # misc rules
+score FROM_MISSP_MSFT          0.50
 # Better scores being generated now
-#score FROM_MISSP_MSFT          0.50
 #score TO_NO_BRKTS_DYNIP        0.50
 #score LOTTO_AGENT              0.50
 
