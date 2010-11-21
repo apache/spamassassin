@@ -1,6 +1,6 @@
 
 ifplugin Mail::SpamAssassin::Plugin::ReplaceTags
-  replace_tag  CURRENCY   [\(\[]?(?:\bUS[D\$]{0,2}|\$(?:US)?|usd|GBP|=[Aa][34]|\xa3|&\#16[34];|(?i:pounds\ssterling)|\xa4|EUR|[Ee]uros?|(?i:eur)\sde|CHF)[\]\)]?
+  replace_tag  CURRENCY   [\(\[]?(?:\bUS[D\$]{0,2}|\$(?:US)?|usd|GBP|=[Aa][34]|\xa3|&\#16[34];|(?i:pounds\ssterling)|\xa4|EUR|[Ee]uros?|(?i:eur)\sde|CHF|FCFA)[\]\)]?
   replace_tag  GB_UK      \b(?:U\.?K\.?|(?:Great\s)?Brit(?:ain|ish)|G\.?B\.?)\b
 
   body     __LOTSA_MONEY_00   /<CURRENCY>[\s\.]?\d[\dO][,\.][\dO]{3}(?:(?!\d)|\b)/
@@ -98,18 +98,18 @@ describe MONEY_LOTTERY    Lots of money from a lottery
 score    MONEY_LOTTERY    1.5
 
 body     __DEAL           /\b(?:business|financial|this|the|mutual|die(?:se)?|cette|profitable)\s(?:deal|transa[ck]tion|proposal|offer|venture|suggestion|partnership)/i
-body     __HUSH_HUSH      /\b(?:confiden[tc]i[ae]l(?:\b|ity\b|it(?:[\xe9]|[\xc3][\xa9]))|private\b|secre(?:te?|cy)\b|sensitive\b|concealed\b|obscured\b|discre(?:et|tion)\b|vertraulich(?:en)?\b|geheim\b|priv(?:[\xe9]|[\xc3][\xa9]))/i
+body     __HUSH_HUSH      /\b(?:confiden[tc]i[ae]l(?:\b|ity\b|it(?:[\xe9]|[\xc3][\xa9]))|private\b|secr[e\xe8](?:te?|cy)\b|sensitive\b|concealed\b|obscured\b|discre(?:et|tion)\b|vertraulich(?:en)?\b|geheim\b|priv(?:[\xe9]|[\xc3][\xa9]))/i
 body     __IS_LEGAL       /\b(?:this\s(?:deal|offer|transaction|proposal|exchange|arrangement|work)|it)?\sis\s(?:(?:guaranteed|completely|absolutely|perfectly|100%|very|fully)\s)?(?:legal|hitch-free)\b/i
 body     __NOT_SCAM       /\bnot\sa\sscam\b/i
 body     __BACK_SCRATCH   /\bmutual+y?\sbenefi(?:t|cial)\b/i
-body     __LUCRATIVE      /\blucrative\b/i
+body     __LUCRATIVE      /\b(?:lucrative|profitable|tr[\xe8]s\ssalutaire)\b/i
 body     __YOU_ASSIST     /\byour\sassistance\b/i
 body     __OUR_BEHALF     /\bon\s(?:my|our)\sbehalf\b/i
 body     __AGREED_RATIO   /\b(?:agreed|sharing)\s(?:ratios?|percent\w+)\b/i
-body     __SHARE_IT       /\b(?:(?:share|teilen|parteger(?:ez|ons)?)\s(?:th(?:e|is)|das|les?)\s(?:proceeds|funds?|money|balance|account|geld|compte|fonds)|partager(?:ez|ons)? (?:avec (?:vous|moi)|ratio|suivant un pourcentage))\b/i
+body     __SHARE_IT       /\b(?:(?:share|allocate|teilen|parteger(?:ez|ons)?|partage)\s(?:th(?:e|is)|das|les?|des)\s(?:proceeds|funds?|money|balance|account|geld|compte|fonds)|partager(?:ez|ons)? (?:avec (?:vous|moi)|ratio|suivant un pourcentage))\b/i
 body     __DESTROY_ME     /\b(?:destroy|hunt)\sm[ey]\b/i
 body     __YOUR_PROFIT    /\byour?\sprofit/i
-body     __FIFTY_FIFTY    /\b50[\/:]50\b/
+body     __FIFTY_FIFTY    /\b50(?:%?[\/:]50%?|%)\b/
 meta     SHARE_50_50     (__SHARE_IT || __AGREED_RATIO) && __FIFTY_FIFTY
 describe SHARE_50_50     Share the money 50/50
 
@@ -120,7 +120,7 @@ ifplugin Mail::SpamAssassin::Plugin::ReplaceTags
   replace_tag  PERCENT      \b(?:\d\d|ten|[a-z]+teen|(?:twen|thir|fou?r)ty(?:-?[a-z]+)?)\s?(?:%|percent)
 
   body     __PCT_FOR_YOU_1  /<PERCENT>[\s)]{0,3}(?:of\s[\w\s]{0,35}?)?(?:for|to|as)\syour?/i
-  body     __PCT_FOR_YOU_2  /\b(?:give|offer)\syou\s<PERCENT>/i
+  body     __PCT_FOR_YOU_2  /\b(?:(?:give|offer)\syou|vous\saurez\sdroit\s[\xe0])\s<PERCENT>/i
   body     __PCT_FOR_YOU_3  /\byour?\s(?!can)[\w\s]{6,20}?(?:(?:share|entitle|assist|comp[ea]nsate|reward|renumerate|paid|deduct|account|tage)[\w\s]{1,25}?)?\s(?<!by\s)(?<!up\sto\s)<PERCENT>/i
   body     __PCT_OF_PMTS    /<PERCENT>[\s)]+(?:of\s[\w\s]{0,35}?)?of\s(?:the\s)?(?:payments?|rem+it+ances?|chec(?:k|que)s?)/i
 
@@ -147,12 +147,12 @@ body     __NOT_DEAD_YET   /\bwill\sinherit\b/i
 body     __AM_DYING       /\bam\s(?:\S+\s)?dying\b/i
 body     __I_WILL_YOU     /\bwill(?:ed)?\s(?:[a-z\s]{0,20}\s(?:fortune|money)\s)?to\syou\b/i
 body     __NEXT_OF_KIN    /\bnext[-\s]of[-\s]kin\b/i
-body     __EX_CUSTOMER    /\b(?:(?:dead|deceased|late|verstorbenen)\s(?:[ck]lient|customer|ac+ount|invest[eo]r|mr\.|kunde|engr?\.?)|titulaire du compte est (?:d[\xe9]c[\xe9]d[\xe9]|d[\xc3][\xa9]c[\xc3][\xa9]d[\xc3][\xa9])|invest[eo]r\sdied)/i
-body     __DECEASED       /\b(?:the|my|der|du)\s(?:deceased|late|verstorbenen|d[\xe9]funt|d[\xc3][\xa9]nt)\b/i
+body     __EX_CUSTOMER    /\b(?:(?:dead|deceased|late|verstorbenen)\s(?:[ck]lient|customer|ac+ount|invest[eo]r|beneficiary|mr\.|kunde|engr?\.?)|titulaire\sdu\scompte\sest\s(?:d[\xe9]c[\xe9]d[\xe9]|d[\xc3][\xa9]c[\xc3][\xa9]d[\xc3][\xa9])|invest[eo]r\sdied|[\xe9]tranger\sd[\xe9]c[\xe9]d[\xe9])/i
+body     __DECEASED       /\b(?:the|my|der|du|le)\s(?:deceased|late|verstorbenen|d[\xe9]funt|d[\xc3][\xa9]nt)\b/i
 body     __SURVIVORS      /\b(?:widow|son|daughter|husband|wife|brother|sister|attorney)\s(?:of|to)\s(?:the\s)?late\s\w+\b/i
 body     __DEAD_PARENT    /\bmy\s(?:deceased|dead)\s(?:father|mother)/i
-body     __DORMANT_ACCT   /\b(?:dormant|abandoned|left\s?over)\s(?:account|fund|transaction|sum)/i
-body     __WILL_LEGAL     /\b(?:codicil|last\stestament|probate|executor|intestate|bequest)\b/i
+body     __DORMANT_ACCT   /\b(?:(?:dormant|abandoned|left\s?over)\s(?:account|fund|transaction|sum|deposit)|fonds\sdorment)/i
+body     __WILL_LEGAL     /\b(?:codicil|last\stestament|probate|executor|intestate|bequest|mandamus)\b/i
 body     __EARLY_DEMISE   /\buntimely\sdeath\b/i
 body     __WIDOW          /\bwidow(?:e[rd])'?s?\b/i
 body     __MY_FORTUNE     /\b(?:my|his|her)\s(?:fortune|heritage)\b/i
@@ -168,7 +168,7 @@ tflags   DECEASED_NO_ML   nopublish
 body     __WIRE_XFR       /\b(?:wire|telegraph(?:ic)?|bank)\s?transfer/i
 body     __TRUSTED_CHECK  /\b(?:cashier'?s?|certified)\sche(?:ck|que)/i
 body     __BANK_DRAFT     /\bbank\sdraft/i
-body     __MOVE_MONEY     /\b(?:(?:receive|re-?profile|repatriate|rapatrier|secure)\s(?:th(?:e|is)|das|sur ce)|re-?profiling)\s(?:proceeds|funds?|money|balance|account|geld|compte)\b/i
+body     __MOVE_MONEY     /\b(?:(?:receive|re-?profile|repatriate|rapatrier|secure|r[\xe9]clamation|possession|virer)\s(?:th(?:e|is)|das|sur ce|de ces|cet)|re-?profiling)\s(?:proceeds|funds?|money|balance|account|geld|compte|fonds|argent)\b/i
 meta     __XFER_MONEY     (__WIRE_XFR || __TRUSTED_CHECK || __BANK_DRAFT || __MOVE_MONEY)
 
 body     __INTL_BANK      /\b(?:international\s(?:\w+\s)?bank|banque\sinternationale)\b/i
@@ -207,7 +207,7 @@ body     __GHANA          /\bghana\b/i
 body     __BENIN          /\bb(?:[e\xe9]|[\xc3][\xa9])nin\b/i
 meta     __AFRICAN_STATE  (__NIGERIA || __IVORY_COAST || __BURKINA_FASO || __GHANA || __BENIN || __AFR_UNION)
 body     __YOUR_PERM      /\byour\spermission\b/i
-body     __CONTACT_YOU    /\bcontacting\syou\b/i
+body     __CONTACT_YOU    /\b(?:contact(?:ing)\syou|vous\scontacter)\b/i
 body     __FOUND_YOU      /\b(?:I|we)\sfound\syour?\b/i
 body     __INVEST_MONEY   /\binvest\sthis\smoney\b/i
 body     __INVEST_COUNTRY /\binvest\sin\syour?\scountry\b/i
