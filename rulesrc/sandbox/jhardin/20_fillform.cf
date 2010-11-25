@@ -16,7 +16,7 @@
 ifplugin Mail::SpamAssassin::Plugin::ReplaceTags
 
   # Repetitive syntactic bits
-  replace_tag FF_LNNO   (?:(?:\d{1,3}[)}\]:.,]{1,80}|\W?\([\div]{1,5}\)|\W?\{\d{1,3}\}|\[\d{1,3}\]|\*{1,5}|\#{1,5}|\(?[A-K][)}\]:.,]{1,3})\s?)
+  replace_tag FF_LNNO   (?:(?:\d{1,3}(?:[)}\]:.,]{1,80}|(?:st|nd|rd|th)[)}\]:.,]{0,3})|\W?\([\div]{1,5}\)|\W?\{\d{1,3}\}|\[\d{1,3}\]|\*{1,5}|\#{1,5}|\(?[A-K][)}\]:.,]{1,3})\s?)
   replace_tag FF_YOUR   (?:a?\s?copy\sof\s)?(?:(?:your|din)[\s,:]{1,5})?(?:present\s|c[uo]rrent\s|full\s?|complete\s|direct\s|private\s|valid\s|personal\s){0,3}
   replace_tag ANDOR     (?:\s?[\/&+,]\s?|\sor\s|\sand?\s)
   replace_tag NUMBER    (?:num(?:[bm]er)?s?|nos?\.|no\b|\#s?|nbrs?\.?)
