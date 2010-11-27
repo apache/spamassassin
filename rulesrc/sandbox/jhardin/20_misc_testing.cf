@@ -79,7 +79,7 @@ tflags         FROM_MISSP_SPF_FAIL  net
 meta           FROM_MISSP_EH_MATCH   (__FROM_RUNON && __ENV_AND_HDR_FROM_MATCH) && !__RCD_RDNS_MTA_MESSY
 describe       FROM_MISSP_EH_MATCH   From misspaced, matches envelope
 
-meta           FROM_MISSP_URI        (__FROM_RUNON && __HAS_ANY_URI) && !__NOT_SPOOFED && !__RCD_RDNS_MTA_MESSY && !MISSING_MIMEOLE
+meta           FROM_MISSP_URI        (__FROM_RUNON && __HAS_ANY_URI) && !__NOT_SPOOFED && !__RCD_RDNS_MTA_MESSY && !MISSING_MIMEOLE && !__COMMENT_EXISTS && !__REPTO_QUOTE
 describe       FROM_MISSP_URI        From misspaced, has URI
 
 meta           FROM_MISSP_USER       (__FROM_RUNON && NSL_RCVD_FROM_USER)
@@ -366,7 +366,7 @@ endif
 
 
 rawbody        __STYLE_GIBBERISH        /<style[^>]{0,30}>(?:\s{0,80}[^\s:;<]){150}/im
-meta           STYLE_GIBBERISH          __STYLE_GIBBERISH && !__THREADED && !__MIME_QP && !__RCD_RDNS_MAIL_MESSY
+meta           STYLE_GIBBERISH          __STYLE_GIBBERISH && !__THREADED && !__MIME_QP && !__RCD_RDNS_MAIL_MESSY && !MPART_ALT_DIFF
 
 body           __SCRIPT_TAG_IN_BODY     /<script>/i
 rawbody        __SCRIPT_GIBBERISH       /<script>[^;<]{100}/im
