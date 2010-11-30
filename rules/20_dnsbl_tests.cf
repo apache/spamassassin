@@ -1,4 +1,4 @@
-# SpamAssassin rules file: DNS blacklist tests
+# SpamAssassin rules file: DNS blacklist and whitelist tests
 #
 # Please don't modify this file as your changes will be overwritten with
 # the next update. Use @@LOCAL_RULES_DIR@@/local.cf instead.
@@ -242,5 +242,22 @@ tflags __RCVD_IN_IADB           net nice
 header RCVD_IN_IADB_VOUCHED     eval:check_rbl_sub('iadb-firsttrusted', '^127.0.1.255$')
 describe RCVD_IN_IADB_VOUCHED   ISIPP IADB lists as vouched-for sender
 tflags RCVD_IN_IADB_VOUCHED     net nice
+
+endif
+
+
+ifplugin Mail::SpamAssassin::Plugin::AskDNS
+
+askdns   DKIMDOMAIN_IN_DWL  _DKIMDOMAIN_._vouch.dwl.spamhaus.org TXT /^([a-z]+ )*(transaction|list|all)( [a-z]+)*$/
+tflags   DKIMDOMAIN_IN_DWL  net nice
+describe DKIMDOMAIN_IN_DWL  Signing domain listed in Spamhaus DWL
+
+askdns   __DKIMDOMAIN_IN_DWL_ANY  _DKIMDOMAIN_._vouch.dwl.spamhaus.org TXT
+tflags   __DKIMDOMAIN_IN_DWL_ANY  net nice
+describe __DKIMDOMAIN_IN_DWL_ANY  Any TXT response received from a Spamhaus DWL
+
+meta DKIMDOMAIN_IN_DWL_UNKNOWN    __DKIMDOMAIN_IN_DWL_ANY && !DKIMDOMAIN_IN_DWL
+tflags   DKIMDOMAIN_IN_DWL_UNKNOWN  net nice
+describe DKIMDOMAIN_IN_DWL_UNKNOWN  Unrecognized response from Spamhaus DWL
 
 endif

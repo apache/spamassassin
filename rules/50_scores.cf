@@ -753,6 +753,8 @@ score DNS_FROM_AHBL_RHSBL 0 2.438 0 2.699 # n=0 n=2
 score DNS_FROM_RFC_BOGUSMX 0 1.464 0 1.668 # n=0 n=2
 score DNS_FROM_RFC_DSN 0 0.001 0 0.001 # n=0 n=2
 score NO_DNS_FOR_FROM 0 0.379 0 0.001 # n=0 n=2
+score DKIMDOMAIN_IN_DWL 0 -3.5 0 -3.5
+score DKIMDOMAIN_IN_DWL_UNKNOWN  0 -0.01 0 -0.01
 # </gen:mutable>
 
 # Spamhaus CSS does not appear in masschecks thus cannot be
