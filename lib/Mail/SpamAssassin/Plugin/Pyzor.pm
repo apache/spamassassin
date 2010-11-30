@@ -351,12 +351,8 @@ sub pyzor_lookup {
     }
   }
 
-  if ($pyzor_whitelisted) {
-    $permsgstatus->{tag_data}->{PYZOR} = "Whitelisted.";
-  }
-  else {
-    $permsgstatus->{tag_data}->{PYZOR} = "Reported $pyzor_count times.";
-  }
+  $permsgstatus->set_tag('PYZOR', $pyzor_whitelisted ? "Whitelisted."
+                                             : "Reported $pyzor_count times.");
 
   if ($pyzor_count >= $self->{main}->{conf}->{pyzor_max}) {
     dbg("pyzor: listed: COUNT=$pyzor_count/$self->{main}->{conf}->{pyzor_max} WHITELIST=$pyzor_whitelisted");
