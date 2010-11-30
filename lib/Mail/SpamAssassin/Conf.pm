@@ -4260,8 +4260,8 @@ sub clone {
     $done{$key} = undef;
   }
 
-  # two-level hash(es)
-  foreach my $key ('uri_host_lists') {
+  # two-level hashes
+  foreach my $key (qw(uri_host_lists askdns)) {
     my $v = $source->{$key};
     my $dest_key_ref = $dest->{$key} = {};  # must start from scratch!
     while(my($k2,$v2) = each %{$v}) {
