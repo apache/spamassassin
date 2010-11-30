@@ -841,13 +841,21 @@ sub _check_dkim_signature {
       my $sig = $valid_signatures[0];
       my $sig_res = ($sig_result_supported ? $sig : $verifier)->result_detail;
       dbg("dkim: signature verification result: %s", uc($sig_res));
-      my(%seen1,%seen2);
-      $pms->set_tag('DKIMIDENTITY',
-              join(" ", grep { defined($_) && $_ ne '' && !$seen1{$_}++ }
-                         map { $_->identity } @valid_signatures));
-      $pms->set_tag('DKIMDOMAIN',
-              join(" ", grep { defined($_) && $_ ne '' && !$seen2{$_}++ }
-                         map { $_->domain } @valid_signatures));
+
+      # supply values for both tags
+      my(%seen1, %seen2, @identity_list, @domain_list);
+      @identity_list = grep(defined $_ && $_ ne '' && !$seen1{$_}++,
+                            map($_->identity, @valid_signatures));
+      @domain_list =   grep(defined $_ && $_ ne '' && !$seen2{$_}++,
+                            map($_->domain, @valid_signatures));
+      $pms->set_tag('DKIMIDENTITY', !@identity_list ? ''
+                                  :  @identity_list == 1 ? $identity_list[0]
+                                  : \@identity_list);
+      $pms->set_tag('DKIMDOMAIN',   !@domain_list ? ''
+                                  :  @domain_list == 1 ? $domain_list[0]
+                                  : \@domain_list);
+      $pms->set_tag('DKIMDOMAIN',   'test');
+
     } elsif (@signatures) {
       $pms->{dkim_signed} = 1;
       my $sig = $signatures[0];

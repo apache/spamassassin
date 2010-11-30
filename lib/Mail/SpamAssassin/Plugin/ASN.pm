@@ -243,6 +243,8 @@ sub process_dns_result {
   my $zone = $conf->{asnlookups}[$zone_index]->{zone};
   my $asn_tag = $conf->{asnlookups}[$zone_index]->{asn_tag};
   my $route_tag = $conf->{asnlookups}[$zone_index]->{route_tag};
+  my %asn_tag_data;
+  my %route_tag_data;
 
   my @answer = !defined $response ? () : $response->answer;
 
@@ -255,23 +257,12 @@ sub process_dns_result {
             "response: '%s'", $zone, $rr->txtdata);
         next;
       }
-      unless ($scanner->{tag_data}->{$asn_tag} =~ /\b\QAS$items[0]\E\b/) {
-        if ($scanner->{tag_data}->{$asn_tag}) {
-          $scanner->{tag_data}->{$asn_tag} .= " AS$items[0]";
-        } else {
-          $scanner->{tag_data}->{$asn_tag} = "AS$items[0]";
-        }
-      }
-      unless ($scanner->{tag_data}->{$route_tag} =~
-              m{\b\Q$items[1]/$items[2]\E\b}) {
-        if ($scanner->{tag_data}->{$route_tag}) {
-          $scanner->{tag_data}->{$route_tag} .= " $items[1]/$items[2]";
-        } else {
-          $scanner->{tag_data}->{$route_tag} = "$items[1]/$items[2]";
-        }
-      }
+      $asn_tag_data{'AS'.$items[0]} = 1;
+      $route_tag_data{$items[1].'/'.$items[2]} = 1;
     }
   }
+  $scanner->set_tag($asn_tag,   join(' ', keys %asn_tag_data));
+  $scanner->set_tag($route_tag, join(' ', keys %route_tag_data));
 
   return;
 }

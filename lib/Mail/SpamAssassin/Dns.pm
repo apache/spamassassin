@@ -400,13 +400,16 @@ sub set_rbl_tag_data {
   my ($self) = @_;
 
   # DNS URIs
+  my $rbl_tag = $self->{tag_data}->{RBL};  # just in case, should be empty
+  $rbl_tag = ''  if !defined $rbl_tag;
   while (my ($dnsuri, $answers) = each %{ $self->{dnsuri} }) {
     # when parsing, look for elements of \".*?\" or \S+ with ", " as separator
-    $self->{tag_data}->{RBL} .= "<$dnsuri>" .
-	" [" . join(", ", @{ $answers }) . "]\n";
+    $rbl_tag .= "<$dnsuri>" . " [" . join(", ", @{ $answers }) . "]\n";
   }
-
-  chomp $self->{tag_data}->{RBL} if defined $self->{tag_data}->{RBL};
+  if (defined $rbl_tag && $rbl_tag ne '') {
+    chomp $rbl_tag;
+    $self->set_tag('RBL', $rbl_tag);
+  }
 }
 
 ###########################################################################

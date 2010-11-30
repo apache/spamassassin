@@ -614,8 +614,8 @@ sub check_dcc {
 
   local($1,$2);
   if ($response =~ /^X-DCC-(.*)-Metrics: (.*)$/) {
-    $permsgstatus->{tag_data}->{DCCB} = $1;
-    $permsgstatus->{tag_data}->{DCCR} = $2;
+    $permsgstatus->set_tag('DCCB', $1);
+    $permsgstatus->set_tag('DCCR', $2);
   }
   $response =~ s/many/999999/ig;
   $response =~ s/ok\d?/0/ig;
@@ -668,7 +668,7 @@ sub check_dcc_reputation_range {
     my $result = $dcc_rep >= $min && $dcc_rep <= $max ? 1 : 0;
     dbg("dcc: dcc_rep %s, min %s, max %s => result=%s",
         $dcc_rep, $min, $max, $result?'YES':'no');
-    $permsgstatus->{tag_data}->{DCCREP} = $dcc_rep;
+    $permsgstatus->set_tag('DCCREP', $dcc_rep);
     return $dcc_rep >= $min && $dcc_rep <= $max ? 1 : 0;
   }
   return 0;

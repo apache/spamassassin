@@ -1034,8 +1034,6 @@ sub _replace_tags {
 
   # default to leaving the original string in place, if we cannot find
   # a tag for it (bug 4793)
-  my $t;
-  my $v;
   local($1,$2,$3);
   $text =~ s{(_(\w+?)(?:\((.*?)\))?_)}{
         my $full = $1;
@@ -1056,6 +1054,107 @@ sub _replace_tags {
 ###########################################################################
 
 # public API for plugins
+
+=item $status->action_depends_on_tags($tags, $code, @args)
+
+Enqueue the supplied subroutine reference C<$code>, to become runnable when
+all the specified tags become available. The C<$tags> may be a simple
+scalar - a tag name, or a listref of tag names. The subroutine C<&$code>
+when called will be passed a C<permessagestatus> object as its first argument,
+followed by the supplied (optional) list C<@args> .
+
+=cut
+
+sub action_depends_on_tags {
+  my($self, $tags, $code, @args) = @_;
+
+  ref $code eq 'CODE'
+    or die "action_depends_on_tags: argument must be a subroutine ref";
+
+  # tag names on which the given action depends
+  my @dep_tags = !ref $tags ? uc $tags : map(uc($_),@$tags);
+
+  # @{$self->{tagrun_subs}}            list of all submitted subroutines
+  # @{$self->{tagrun_actions}{$tag}}   bitmask of action indices blocked by tag
+  # $self->{tagrun_tagscnt}[$action_ind]  count of tags still pending
+
+  # store action details, obtain its index
+  push(@{$self->{tagrun_subs}}, [$code,@args]);
+  my $action_ind = $#{$self->{tagrun_subs}};
+
+  # list dependency tag names which are not already satistied
+  my @blocking_tags =
+    grep(!defined $self->{tag_data}{$_} || $self->{tag_data}{$_} eq '',
+         @dep_tags);
+
+  $self->{tagrun_tagscnt}[$action_ind] = scalar @blocking_tags;
+  $self->{tagrun_actions}{$_}[$action_ind] = 1  for @blocking_tags;
+
+  if (@blocking_tags) {
+    dbg("check: tagrun - action %s blocking on tags %s",
+        $action_ind, join(', ',@blocking_tags));
+  } else {
+    dbg("check: tagrun - tag %s was ready, action %s runnable immediately: %s",
+        join(', ',@dep_tags), $action_ind, join(', ',$code,@args));
+    &$code($self, @args);
+  }
+}
+
+# tag_is_ready() will be called by set_tag(), indicating that a given
+# tag just received its value, possibly unblocking an action routine
+# as declared by action_depends_on_tags().
+#
+# Well-behaving plugins should call set_tag() once when a tag is fully
+# assembled and ready. Multiple calls to set the same tag value are handled
+# gracefully, but may result in premature activation of a pending action.
+# Setting tag values by plugins should not be done directly but only through
+# the public API set_tag(), otherwise a pending action release may be missed.
+#
+sub tag_is_ready {
+  my($self, $tag) = @_;
+  $tag = uc $tag;
+
+  if (would_log('dbg', 'check')) {
+    my $tag_val = $self->{tag_data}{$tag};
+    dbg("check: tagrun - tag %s is now ready, value: %s",
+         $tag, ref $tag_val ne 'ARRAY' ? $tag_val
+                                       : 'ARY:['.join(',',@$tag_val).']' );
+  }
+  if (ref $self->{tagrun_actions}{$tag}) {  # any action blocking on this tag?
+    my $action_ind = 0;
+    foreach my $action_pending (@{$self->{tagrun_actions}{$tag}}) {
+      if ($action_pending) {
+        $self->{tagrun_actions}{$tag}[$action_ind] = 0;
+        if ($self->{tagrun_tagscnt}[$action_ind] <= 0) {
+          # should not happen, warn and ignore
+          warn "tagrun error: count for $action_ind is ".
+                $self->{tagrun_tagscnt}[$action_ind]."\n";
+        } elsif (! --($self->{tagrun_tagscnt}[$action_ind])) {
+          my($code,@args) = @{$self->{tagrun_subs}[$action_ind]};
+          dbg("check: tagrun - tag %s unblocking the action %s: %s",
+              $tag, $action_ind, join(', ',$code,@args));
+          &$code($self, @args);
+        }
+      }
+      $action_ind++;
+    }
+  }
+}
+
+# debugging aid: show actions that are still pending, waiting for their
+# tags to receive a value
+#
+sub report_unsatisfied_actions {
+  my($self) = @_;
+  my @tags;
+  @tags = keys %{$self->{tagrun_actions}}  if ref $self->{tagrun_actions};
+  for my $tag (@tags) {
+    my @pending_actions = grep($self->{tagrun_actions}{$tag}[$_],
+                               (0 .. $#{$self->{tagrun_actions}{$tag}}));
+    dbg("check: tagrun - tag %s is still blocking action %s",
+        $tag, join(', ', @pending_actions))  if @pending_actions;
+  }
+}
 
 =item $status->set_tag($tagname, $value)
 
@@ -1081,11 +1180,9 @@ C<undef> will be returned if a tag by that name has not been defined.
 =cut
 
 sub set_tag {
-  my $self = shift;
-  my $tag  = uc shift;
-  my $val  = shift;
-
-  $self->{tag_data}->{$tag} = $val;
+  my($self,$tag,$val) = @_;
+  $self->{tag_data}->{uc $tag} = $val;
+  $self->tag_is_ready($tag);
 }
 
 # public API for plugins
@@ -1290,10 +1387,12 @@ sub _get_tag {
   if (exists $tags{$tag}) {
     $data = $tags{$tag};
     $data = $data->(@_)  if ref $data eq 'CODE';
+    $data = join(' ',@$data)  if ref $data eq 'ARRAY';
     $data = ""  if !defined $data;
   } elsif (exists $self->{tag_data}->{$tag}) {
     $data = $self->{tag_data}->{$tag};
     $data = $data->(@_)  if ref $data eq 'CODE';
+    $data = join(' ',@$data)  if ref $data eq 'ARRAY';
     $data = ""  if !defined $data;
   }
   return $data;
@@ -1317,6 +1416,8 @@ sub finish {
   $self->{main}->call_plugins ("per_msg_finish", {
 	  permsgstatus => $self
 	});
+
+  $self->report_unsatisfied_actions;
 
   # Delete out all of the members of $self.  This will remove any direct
   # circular references and let the memory get reclaimed while also being more
@@ -1370,11 +1471,11 @@ sub extract_message_metadata {
     $self->{$item} = $self->{msg}->{metadata}->{$item};
   }
 
-  $self->{tag_data}->{RELAYSTRUSTED} = $self->{relays_trusted_str};
-  $self->{tag_data}->{RELAYSUNTRUSTED} = $self->{relays_untrusted_str};
-  $self->{tag_data}->{RELAYSINTERNAL} = $self->{relays_internal_str};
-  $self->{tag_data}->{RELAYSEXTERNAL} = $self->{relays_external_str};
-  $self->{tag_data}->{LANGUAGES} = $self->{msg}->get_metadata("X-Languages");
+  $self->set_tag('RELAYSTRUSTED',   $self->{relays_trusted_str});
+  $self->set_tag('RELAYSUNTRUSTED', $self->{relays_untrusted_str});
+  $self->set_tag('RELAYSINTERNAL',  $self->{relays_internal_str});
+  $self->set_tag('RELAYSEXTERNAL',  $self->{relays_external_str});
+  $self->set_tag('LANGUAGES', $self->{msg}->get_metadata("X-Languages"));
 
   # This should happen before we get called, but just in case.
   if (!defined $self->{msg}->{metadata}->{html}) {
