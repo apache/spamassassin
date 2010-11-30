@@ -146,11 +146,12 @@ sub new {
 
       if ($raw_str eq '') {
         dbg("message: empty message read");
-      } elsif (length($raw_str) > 256*1024) {
+      } elsif (length($raw_str) > 128*1024) {
         # ditch rarely used large chunks of allocated memory, Bug 6514
         #   http://www.perlmonks.org/?node_id=803515
+        # about 97% of mail messages are below 128 kB,
         # about 98% of mail messages are below 256 kB (2010 statistics)
-        dbg("message: deallocating %.2f MB", length($raw_str)/1024/1024);
+        # dbg("message: deallocating %.2f MB", length($raw_str)/1024/1024);
         undef $raw_str;
       }
     }
