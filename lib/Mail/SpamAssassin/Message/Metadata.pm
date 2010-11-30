@@ -83,8 +83,9 @@ sub extract {
   # pre-chew Received headers
   $self->parse_received_headers ($permsgstatus, $msg);
 
-  $permsgstatus->{main}->call_plugins("extract_metadata", { msg => $msg,
-					    conf => $permsgstatus->{main}->{conf} });
+  $permsgstatus->{main}->call_plugins("extract_metadata",
+                       { msg => $msg, permsgstatus => $permsgstatus,
+                         conf => $permsgstatus->{main}->{conf} });
 }
 
 sub finish {

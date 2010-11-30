@@ -101,7 +101,7 @@ sub readrules {
           $lang = $1;
         }
 
-        if (/^(header|rawbody|body|full|uri|meta|mimeheader|reuse)\s+(\S+)\s+(.*)$/) {
+        if (/^(header|rawbody|body|full|uri|askdns|meta|mimeheader|reuse)\s+(\S+)\s+(.*)$/) {
           my $type = $1;
           my $name = $2;
           my $val = $3;
