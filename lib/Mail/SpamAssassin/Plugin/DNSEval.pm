@@ -265,10 +265,27 @@ sub check_rbl_backend {
   dbg("dns: only inspecting the following IPs: ".join(", ", @ips));
 
   eval {
-    foreach my $ip (@ips) {
-      next unless ($ip =~ /(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})/);
+    local($1,$2,$3,$4);
+    foreach (@ips) {
+      my $revip;
+      if (/(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})/) {
+        $revip = "$4.$3.$2.$1";
+      } elsif (/:/ &&  # triage
+               /^ [0-9a-f]{0,4}
+                  (?: : [0-9a-f]{0,4} | \. [0-9]{1,3} ){2,9} $/xsi) {
+        # could be an IPv6 address, let NetAddr::IP check the details
+        my $ip_obj = NetAddr::IP->new6($_);
+        if (!defined $ip_obj) {
+          # invalid IPv6 address, $revip remains undefined
+        } else {
+          # RFC 5782 section 2.4.
+          $revip = lc $ip_obj->network->full6;  # string in a canonical form
+          $revip =~ s/://g;
+          $revip = join('.', reverse split(//,$revip));
+        }
+      }
       $pms->do_rbl_lookup($rule, $set, $type, $rbl_server,
-			   "$4.$3.$2.$1.$rbl_server", $subtest);
+			   $revip . '.' . $rbl_server, $subtest);
     }
   };
 
