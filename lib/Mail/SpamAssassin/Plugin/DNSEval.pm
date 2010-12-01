@@ -285,7 +285,7 @@ sub check_rbl_backend {
         }
       }
       $pms->do_rbl_lookup($rule, $set, $type, $rbl_server,
-			   $revip . '.' . $rbl_server, $subtest);
+                          $revip.'.'.$rbl_server, $subtest) if defined $revip;
     }
   };
 
