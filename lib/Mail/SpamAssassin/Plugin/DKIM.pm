@@ -854,8 +854,6 @@ sub _check_dkim_signature {
       $pms->set_tag('DKIMDOMAIN',   !@domain_list ? ''
                                   :  @domain_list == 1 ? $domain_list[0]
                                   : \@domain_list);
-      $pms->set_tag('DKIMDOMAIN',   'test');
-
     } elsif (@signatures) {
       $pms->{dkim_signed} = 1;
       my $sig = $signatures[0];

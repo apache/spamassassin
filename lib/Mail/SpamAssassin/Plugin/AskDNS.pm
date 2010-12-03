@@ -55,7 +55,7 @@ A query template is a string which will be expanded to produce a domain name
 to be used in a DNS query. The template may include SpamAssassin tag names,
 which will be replaced with their values to form the final query domain.
 The final query domain must adhere to rules governing DNS domains, i.e. must
-consist of labels each up to 63 characters long, delimited by dots. There
+consist of fields each up to 63 characters long, delimited by dots. There
 may be a trailing dot at the end, but it is redundant / carries no semantics,
 because SpamAssassin uses a Net::DSN::Resolver::send method for querying
 DNS, which ignores any 'search' or 'domain' DNS resolver options.
