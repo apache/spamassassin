@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix danmcdonald dos jm wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 2: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix danmcdonald dos jm kgolding wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 3: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix danmcdonald dos jm kgolding wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2
+# with results from: day 1: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix danmcdonald dos jm kgolding wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 2: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix danmcdonald dos jm wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 3: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix danmcdonald dos jm kgolding wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2
 
 # tflags publish
 ADVANCE_FEE_2_NEW_FORM
@@ -148,6 +148,9 @@ DYN_RDNS_AND_INLINE_IMAGE
 # good enough
 DYN_RDNS_SHORT_HELO_HTML
 
+# good enough
+END_FUTURE_EMAILS
+
 # tflags userconf
 ENV_AND_HDR_SPF_MATCH
 
@@ -293,6 +296,12 @@ FSL_MID_419
 FSL_RU_URL
 
 # good enough
+FSL_THIS_IS_ADV
+
+# good enough
+FS_CAILIS
+
+# good enough
 FS_SILDENAFIL
 
 # good enough
@@ -348,6 +357,9 @@ HK_SCAM_N2
 
 # good enough
 HK_SCAM_N8
+
+# good enough
+HK_SPAMMY_FILENAME
 
 # tflags userconf
 HTML_CHARSET_FARAWAY
@@ -644,6 +656,9 @@ S25R_6
 SINGLE_HEADER_2K
 
 # good enough
+SINGLE_HEADER_3K
+
+# good enough
 SPAMMY_MIME_BDRY_01
 
 # good enough
@@ -681,6 +696,9 @@ STOCK_IMG_HDR_FROM
 
 # good enough
 STOX_REPLY_TYPE_WITHOUT_QUOTES
+
+# good enough
+STYLE_GIBBERISH
 
 # tflags userconf
 SUBJECT_IN_BLACKLIST
@@ -750,30 +768,6 @@ TVD_QUAL_MEDS
 
 # good enough
 TVD_RCVD_SINGLE
-
-# good enough
-END_FUTURE_EMAILS
-
-# good enough
-FSL_THIS_IS_ADV
-
-# good enough
-FS_CAILIS
-
-# good enough
-HK_SPAMMY_FILENAME
-
-# good enough
-HTML_ATTACH
-
-# good enough
-OBFU_JPG_ATTACH
-
-# good enough
-SINGLE_HEADER_3K
-
-# good enough
-STYLE_GIBBERISH
 
 # tflags userconf
 UNPARSEABLE_RELAY
