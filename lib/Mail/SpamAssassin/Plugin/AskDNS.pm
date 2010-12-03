@@ -15,6 +15,136 @@
 # limitations under the License.
 # </@LICENSE>
 
+=head1 NAME
+
+AskDNS - form a DNS query using tag values, and look up the DNSxL lists
+
+=head1 SYNOPSIS
+
+  loadplugin  Mail::SpamAssassin::Plugin::AskDNS
+  askdns DKIMDOMAIN_IN_DWL _DKIMDOMAIN_._vouch.dwl.spamhaus.org TXT /\ball\b/
+
+=head1 DESCRIPTION
+
+Using a DNS query template as specified in a parameter of the askdns rule,
+the plugin replaces tag names as found in the template with their values as
+soon as they become available, and launches DNS queries. When DNS responses
+trickle in, filters them according the requested DNS resource record type
+and optional subrule filtering expression, yielding a rule hit if a response
+meets filtering conditions.
+
+=head1 USER SETTINGS
+
+=over 4
+
+=item rbl_timeout t [t_min] [zone]		(default: 15 3)
+
+The rbl_timeout setting is common to all DNS querying rules. It can
+specify a DNS query timeout globally, or individually for each zone.
+See the C<Mail::SpamAssassin::Conf> POD for details on C<rbl_timeout>.
+
+=head1 RULE DEFINITIONS
+
+=over 4
+
+=item askdns NAME_OF_RULE query_template [rr_type [subqueryfilter]]
+
+A query template is a string which will be expanded to produce a domain name
+to be used in a DNS query. The template may include SpamAssassin tag names,
+which will be replaced with their values to form the final query domain.
+The final query domain must adhere to rules governing DNS domains, i.e. must
+consist of fields each up to 63 characters long, delimited by dots. There
+may be a trailing dot at the end, but it is redundant / carries no semantics,
+because SpamAssassin uses a Net::DSN::Resolver::send method for querying
+DNS, which ignores any 'search' or 'domain' DNS resolver options.
+Domain names in DNS queries are case-insensitive.
+
+A tag name is a string of capital letters, preceded and followed by an
+underscore character. This syntax mirrors the add_header setting, except that
+tags cannot have parameters in parenthesis when used in askdns templates.
+Tag names may appear anywhere in the template - each queried DNS zone
+prescribes how a query should be formed.
+
+A query template may contain any number of tag names including none,
+although in the most common anticipated scenario exactly one tag name would
+appear in each askdns rule. Specified tag names are considered dependencies.
+Askdns rules with dependencies on the same set of tags are grouped, and all
+queries in a group are launched as soon as all their dependencies are met,
+i.e. when the last of the awaited tag values becomes available by a call
+to set_tag() from some other plugin or elsewhere in the SpamAssassin code.
+
+Launched queries from all askdns rules are grouped too according to a pair
+of: RR type and expanded query domain name. Even if there are multiple rules
+producing the same type/domain pair, only one DNS query is launched, and
+a reply to such query contributes to all the constituent rules.
+
+A tag may produce none, one or multiple values. Askdns rules waiting for
+a tag which never receives its value never result in a DNS query. Tags which
+produce multiple values will result in multiple queries launched, each with
+an expanded template using one of the tag values. An example is a DKIMDOMAIN
+tag which yields a list of signing domains, one for each valid signature in
+a message signed by more than one domain.
+
+When more than one tag name appears in a template, each potentially resulting
+in multiple values, a Cartesian product is formed, and each tuple results in
+a launch of one DNS query (duplicates excluded). For example, a query template
+_A_._B_.example.com where tag A is a list (11,22) and B is (xx,yy,zz),
+will result in queries: 11.xx.example.com, 22.xx.example.com,
+11.yy.example.com, 22.yy.example.com, 11.zz.example.com, 22.zz.example.com .
+
+The parameter following the query template is a DNS resource record (RR)
+type. A DNS result may bring resource records of multiple types, but only
+those resource records matching the type specified in a rule are considered,
+returned resource records with non-matching types are ignored for this rule.
+Currently the RR type parameter also determines the DNS query types (not
+just the filter for the result), although in future similar queries could
+be combined, launching a query of type 'ANY'. Currently allowed RR types
+are: A, AAAA, MX, TXT, PTR, NS, SOA, CNAME, HINFO, MINFO, WKS, SRV, SPF.
+
+The last optional parameter of a rule is filtering expression, a.k.a. a
+subrule. Its function is much like the subrule in URIDNSBL plugin rules
+(like in the uridnssub rules), or in the check_rbl eval rules. The main
+difference is that with askdns rules there is no need to manually group
+rules according to their queried zone, as the grouping is automatic and
+duplicate queries are implicitly eliminated.
+
+The subrule filtering parameter can be: a plain string, a regular expression,
+a single numerical value. or a pair of numerical values. Absence of the
+filtering parameter implies no filtering, i.e. any positive DNS response
+of the requested RR type will result in a rule hit, regardless of the RR
+value returned with the response.
+
+When a plain string is used as a filter, it must match the response exactly.
+Typical use is an exact text string for TXT queries.
+
+A regular expression follows a familiar perl syntax like /.../ or m{...}
+optionally followed by regexp flags (such as 'i' for case-insensitivity).
+If a DNS response matches the requested RR type and the regular expression,
+the rule hits. Typical use: /^127\.0\.0\.\d+$/ or m{\bdial up\b}i .
+
+A single numerical value can be a decimal number, or a hexadecimal number
+prefixed by 0x. Such numeric filtering expression is typically used with
+RR type-A DNS queries. The returned value (IP address) is masked with the
+specified filtering value, and the rule hits if the result is nonzero:
+(r & n) != 0 .  An example: 0x10 .
+
+A pair of numerical values (each a decimal, hexadecimal or quad-dotted)
+delimited by a '-' specifies an IP address range, and a pair of values
+delimited by a '/' specifies an IP address followed by a bitmask. Again,
+this type of filtering expression is primarily intended with RR type-A
+DNS queries. The rule hits if the returned IP address falls within the
+specified range: (r >= n1 && r <= n2), or masked with a bitmask matches
+the specified value: (r & m) == (n & m) .  As a shorthand notation,
+a single quad-dotted value is equivalent to a n/32 form, i.e. it must
+match the returned value exactly with all its bits.
+
+Some typical examples of a numeric filtering parameter are: 127.0.1.2,
+127.0.1.20-127.0.1.39, 127.0.1.0/255.255.255.0, 0.0.0.16/0.0.0.16,
+0x10/0x10, 16, 0x10 .
+
+=back
+
+=cut
 
 package Mail::SpamAssassin::Plugin::AskDNS;
 
@@ -46,7 +176,7 @@ sub new {
 # Accepts argument as a regular expression (including its m() operator or
 # equivalent perl syntaxes), or in one of the following forms: m, n1-n2,
 # or n/m, where n,n1,n2,m can be any of: decimal digits, 0x followed by
-# up to 8 hexadecimal digits, or an IPv4 address in quad-dot form.
+# up to 8 hexadecimal digits, or an IPv4 address in quad-dotted notation.
 # The argument is checked for syntax, undef is returned on syntax errors.
 # A string that looks like a regular expression is converted to a compiled
 # Regexp object and returned as a result. Otherwise, numeric components of
