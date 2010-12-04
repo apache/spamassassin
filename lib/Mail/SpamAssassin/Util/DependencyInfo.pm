@@ -63,11 +63,12 @@ $have_sha1 ? {
 },
 {
   'module' => 'NetAddr::IP',
-  'version' => '4.010',
+  'version' => '4.000',
   'desc' => "Used in determining which DNS tests are to be done for each of
   the header's received fields, used by AWL plugin for extracting network
   address from an IPv6 addresses (and from IPv4 address on nondefault mask),
-  and used by DNSxL rules for assembling DNS queries out of IPv6 addresses.",
+  and used by DNSxL rules for assembling DNS queries out of IPv6 addresses.
+  Avoid versions 4.034 and 4.035.",
 },
 {
   module => 'Time::HiRes',
