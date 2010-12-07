@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix danmcdonald dos jm kgolding wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 2: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix danmcdonald dos wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 3: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix danmcdonald dos jm kgolding wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2
+# with results from: day 1: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix danmcdonald dos jm kgolding wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 2: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix danmcdonald dos jm kgolding wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 3: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix danmcdonald dos wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2
 
 # tflags publish
 ADVANCE_FEE_2_NEW_FORM
@@ -153,6 +153,9 @@ ENV_AND_HDR_SPF_MATCH
 
 # good enough
 FB_ACHIEVE_BACH
+
+# good enough
+FB_CIALIS_LEO3
 
 # good enough
 FB_GET_MEDS
@@ -749,10 +752,7 @@ TVD_QUAL_MEDS
 TVD_RCVD_SINGLE
 
 # good enough
-HK_SCAM_N8
-
-# good enough
-URI_DOM_OBFU
+OBFU_JPG_ATTACH
 
 # tflags userconf
 UNPARSEABLE_RELAY
@@ -795,6 +795,9 @@ URIBL_SC_SURBL
 
 # tflags net
 URIBL_WS_SURBL
+
+# good enough
+URI_DOM_OBFU
 
 # tflags userconf
 URI_NOVOWEL
