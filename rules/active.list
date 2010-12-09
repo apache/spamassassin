@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix danmcdonald dos jm kgolding wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 2: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix danmcdonald dos jm kgolding wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 3: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix danmcdonald dos jm kgolding wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2
+# with results from: day 1: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix danmcdonald dos kgolding; day 2: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix danmcdonald dos jm kgolding wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2; day 3: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix danmcdonald dos jm kgolding wt-en1 wt-en2 wt-en3 wt-en4 wt-en5 wt-jp1 wt-jp2
 
 # tflags publish
 ADVANCE_FEE_2_NEW_FORM
@@ -27,9 +27,6 @@ ALL_TRUSTED
 
 # good enough
 AXB_HELO_HOME_UN
-
-# good enough
-BASE64_LENGTH_78_79
 
 # tflags learn
 BAYES_00
@@ -137,9 +134,6 @@ DOS_OE_TO_MX
 DOS_OE_TO_MX_IMAGE
 
 # good enough
-DOS_RCVD_IP_TWICE_C
-
-# good enough
 DRUGS_STOCK_MIMEOLE
 
 # good enough
@@ -168,9 +162,6 @@ FB_QUALITY_REPLICA
 
 # good enough
 FB_REPLICA_ROLEX
-
-# good enough
-FH_FAKE_RCVD_LINE
 
 # good enough
 FH_FAKE_RCVD_LINE_B
@@ -284,9 +275,6 @@ FSL_HELO_BARE_IP_1
 FSL_HELO_DEVICE
 
 # good enough
-FSL_HELO_NON_FQDN_1
-
-# good enough
 FSL_MID_419
 
 # good enough
@@ -297,9 +285,6 @@ FS_LARGE_PERCENT2
 
 # good enough
 FS_SILDENAFIL
-
-# good enough
-FS_WILL_HELP
 
 # tflags userconf
 GTUBE
@@ -649,9 +634,6 @@ SINGLE_HEADER_2K
 # good enough
 SPAMMY_MIME_BDRY_01
 
-# good enough
-SPAMMY_XMAILER
-
 # tflags net
 SPF_FAIL
 
@@ -687,9 +669,6 @@ STOCK_IMG_OUTLOOK
 
 # good enough
 STOX_REPLY_TYPE_WITHOUT_QUOTES
-
-# good enough
-STYLE_GIBBERISH
 
 # tflags userconf
 SUBJECT_IN_BLACKLIST
@@ -758,10 +737,7 @@ TVD_PCT_OFF
 TVD_QUAL_MEDS
 
 # good enough
-TVD_RCVD_SINGLE
-
-# good enough
-HK_SCAM_N8
+OBFU_JPG_ATTACH
 
 # tflags userconf
 UNPARSEABLE_RELAY
@@ -804,9 +780,6 @@ URIBL_SC_SURBL
 
 # tflags net
 URIBL_WS_SURBL
-
-# good enough
-URI_DOM_OBFU
 
 # tflags userconf
 URI_NOVOWEL
