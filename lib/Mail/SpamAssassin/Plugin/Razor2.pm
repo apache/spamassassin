@@ -30,11 +30,6 @@ filtering network based on user submissions of spam.  Detection is done
 with signatures that efficiently spot mutating spam content and user
 input is validated through reputation assignments.
 
-Note that Razor2 is disabled by default in C<init.pre> because it is not
-available for unlimited free use.  It is currently free for personal
-use, subject to capacity constraints.  See the Cloudmark SpamNet Service
-Policy for more details.
-
 See http://razor.sourceforge.net/ for more information about Razor.
 
 =head1 USER SETTINGS
