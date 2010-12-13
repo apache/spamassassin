@@ -46,7 +46,7 @@ use warnings;
 use bytes;
 use re 'taint';
 
-use NetAddr::IP 4.000;   # qw(:upper);
+use NetAddr::IP 4.000;
 
 use Mail::SpamAssassin;
 use Mail::SpamAssassin::Logger;
@@ -314,7 +314,7 @@ sub ip_to_awl_key {
     my $origip_obj = NetAddr::IP->new6($origip . '/' . $mask_len);
     if (!defined $origip_obj) {  # invalid IPv6 address
       dbg("auto-whitelist: bad IPv6 address $origip");
-    } else {
+    } elsif (NetAddr::IP->can('full6')) {  # since NetAddr::IP 4.010
       $result = $origip_obj->network->full6;  # string in a canonical form
       $result =~ s/(:0000){1,7}\z/::/;        # compress zero tail
     }
