@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix danmcdonald dos; day 2: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix danmcdonald dos kgolding; day 3: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix danmcdonald dos kgolding
+# with results from: day 1: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix danmcdonald dos kgolding; day 2: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix danmcdonald dos; day 3: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix danmcdonald dos kgolding
 
 # tflags publish
 ADVANCE_FEE_2_NEW_FORM
@@ -27,6 +27,9 @@ ALL_TRUSTED
 
 # good enough
 AXB_HELO_HOME_UN
+
+# good enough
+AXB_XMID_DIGDOTSHRT
 
 # tflags learn
 BAYES_00
@@ -233,6 +236,9 @@ FROM_MISSP_SPF_FAIL
 FROM_MISSP_TO_UNDISC
 
 # good enough
+FROM_MISSP_URI
+
+# good enough
 FROM_MISSP_USER
 
 # good enough
@@ -381,6 +387,9 @@ MISSING_HB_SEP
 
 # good enough
 MONEY_ATM_CARD
+
+# good enough
+MONEY_FORM
 
 # tflags publish
 MONEY_FRAUD_3
@@ -713,6 +722,9 @@ TO_NO_BRKTS_DIRECT
 TO_NO_BRKTS_DYNIP
 
 # good enough
+TO_NO_BRKTS_FROM_MSSP
+
+# good enough
 TO_NO_BRKTS_NORDNS_HTML
 
 # good enough
@@ -734,16 +746,7 @@ TVD_PCT_OFF
 TVD_QUAL_MEDS
 
 # good enough
-AXB_XMID_DIGDOTSHRT
-
-# good enough
-FROM_MISSP_URI
-
-# good enough
-MONEY_FORM
-
-# good enough
-TO_NO_BRKTS_FROM_MSSP
+OBFU_JPG_ATTACH
 
 # tflags userconf
 UNPARSEABLE_RELAY
