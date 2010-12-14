@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix danmcdonald dos kgolding; day 2: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix danmcdonald dos; day 3: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix danmcdonald dos kgolding
+# with results from: day 1: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix danmcdonald jm kgolding; day 2: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix danmcdonald dos kgolding; day 3: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix danmcdonald dos
 
 # tflags publish
 ADVANCE_FEE_2_NEW_FORM
@@ -27,9 +27,6 @@ ALL_TRUSTED
 
 # good enough
 AXB_HELO_HOME_UN
-
-# good enough
-AXB_XMID_DIGDOTSHRT
 
 # tflags learn
 BAYES_00
@@ -75,9 +72,6 @@ DATE_IN_FUTURE_Q_PLUS
 
 # good enough
 DEAR_BENEFICIARY
-
-# good enough
-DEAR_EMAIL
 
 # good enough
 DECEASED_NO_ML
@@ -134,37 +128,10 @@ DOS_ANAL_SPAM_MAILER
 DOS_OE_TO_MX
 
 # good enough
-DOS_OE_TO_MX_IMAGE
-
-# good enough
 DRUGS_STOCK_MIMEOLE
-
-# good enough
-DYN_RDNS_AND_INLINE_IMAGE
-
-# good enough
-DYN_RDNS_SHORT_HELO_HTML
 
 # tflags userconf
 ENV_AND_HDR_SPF_MATCH
-
-# good enough
-FB_ACHIEVE_BACH
-
-# good enough
-FB_CIALIS_LEO3
-
-# good enough
-FB_GET_MEDS
-
-# good enough
-FB_GVR
-
-# good enough
-FB_QUALITY_REPLICA
-
-# good enough
-FB_REPLICA_ROLEX
 
 # good enough
 FH_FAKE_RCVD_LINE_B
@@ -177,12 +144,6 @@ FH_HELO_ALMOST_IP
 
 # good enough
 FH_HELO_EQ_D_D_D_D
-
-# good enough
-FH_HOST_EQ_DYNAMICIP
-
-# good enough
-FH_HOST_IN_ADDRARPA
 
 # tflags publish
 FILL_THIS_FORM
@@ -242,34 +203,13 @@ FROM_MISSP_URI
 FROM_MISSP_USER
 
 # good enough
-FRT_APPROV
-
-# good enough
-FRT_EXPERIENCE
-
-# good enough
 FRT_PHARMAC
-
-# good enough
-FRT_PRICE
 
 # good enough
 FRT_ROLEX
 
 # good enough
-FR_WATCHES_HTTP
-
-# good enough
 FSL_BOTSPAM_1
-
-# good enough
-FSL_BOTSPAM_2
-
-# good enough
-FSL_BOTSPAM_3
-
-# good enough
-FSL_BOTSPAM_4
 
 # good enough
 FSL_CTYPE_WIN1251
@@ -288,9 +228,6 @@ FSL_RU_URL
 
 # good enough
 FS_LARGE_PERCENT2
-
-# good enough
-FS_SILDENAFIL
 
 # tflags userconf
 GTUBE
@@ -329,22 +266,10 @@ HEAD_LONG
 HELO_LH_HOME
 
 # good enough
-HELO_NO_DOMAIN
-
-# good enough
-HELO_OEM
-
-# good enough
-HK_NAME_DRUGS
-
-# good enough
 HK_SCAM_N2
 
 # tflags userconf
 HTML_CHARSET_FARAWAY
-
-# good enough
-IMG_DIRECT_TO_MX
 
 # good enough
 KAM_LOTTO1
@@ -631,15 +556,6 @@ RISK_FREE
 # good enough
 S25R_4
 
-# good enough
-S25R_6
-
-# good enough
-SINGLE_HEADER_2K
-
-# good enough
-SPAMMY_MIME_BDRY_01
-
 # tflags net
 SPF_FAIL
 
@@ -665,15 +581,6 @@ SPF_PASS
 SPF_SOFTFAIL
 
 # good enough
-STOCK_IMG_CTYPE
-
-# good enough
-STOCK_IMG_HDR_FROM
-
-# good enough
-STOCK_IMG_OUTLOOK
-
-# good enough
 STOX_REPLY_TYPE_WITHOUT_QUOTES
 
 # tflags userconf
@@ -683,9 +590,6 @@ SUBJECT_IN_BLACKLIST
 SUBJECT_IN_WHITELIST
 
 # good enough
-SUBJECT_NEEDS_ENCODING
-
-# good enough
 TAB_IN_FROM
 
 # good enough
@@ -693,9 +597,6 @@ TINY_FLOAT
 
 # tflags publish
 TO_EQ_FM_DIRECT_MX
-
-# good enough
-TO_EQ_FM_DOM_HTML_IMG
 
 # good enough
 TO_EQ_FM_DOM_HTML_ONLY
@@ -740,13 +641,7 @@ TO_ONE_CHAR
 TVD_FINGER_02
 
 # good enough
-TVD_PCT_OFF
-
-# good enough
 TVD_QUAL_MEDS
-
-# good enough
-OBFU_JPG_ATTACH
 
 # tflags userconf
 UNPARSEABLE_RELAY
