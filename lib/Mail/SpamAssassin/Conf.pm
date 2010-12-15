@@ -2867,13 +2867,12 @@ B<Mail::SpamAssassin::Plugin::Reuse>.
     }
   });
 
-=item tflags SYMBOLIC_TEST_NAME [ {net|nice|learn|userconf|noautolearn|multiple} ]
+=item tflags SYMBOLIC_TEST_NAME [ {net|nice|learn|userconf|noautolearn|multiple|ips_only|domains_only|a|ns} ]
 
-Used to set flags on a test.  These flags are used in the
-score-determination back end system for details of the test's
-behaviour.  Please see C<bayes_auto_learn> for more information
-about tflag interaction with those systems. The following flags
-can be set:
+Used to set flags on a test. Parameter is a space-separated list of flag names.
+These flags are used in the score-determination back end system for details
+of the test's behaviour.  Please see C<bayes_auto_learn> for more information
+about tflag interaction with those systems. The following flags can be set:
 
 =over 4
 
@@ -2889,22 +2888,42 @@ assigned a negative score.
 
 =item  userconf
 
-The test requires user configuration before it can be used (like language-
-specific tests).
+The test requires user configuration before it can be used (like
+language-specific tests).
 
 =item  learn
 
 The test requires training before it can be used.
 
-=item noautolearn
+=item  noautolearn
 
 The test will explicitly be ignored when calculating the score for
 learning systems.
 
-=item multiple
+=item  multiple
 
 The test will be evaluated multiple times, for use with meta rules.
 Only affects header, body, rawbody, uri, and full tests.
+
+=item  ips_only
+
+This flag is specific to rules invoking an URIDNSBL plugin,
+it is documented there.
+
+=item  domains_only
+
+This flag is specific to rules invoking an URIDNSBL plugin,
+it is documented there.
+
+=item  ns
+
+This flag is specific to rules invoking an URIDNSBL plugin,
+it is documented there.
+
+=item  a
+
+This flag is specific to rules invoking an URIDNSBL plugin,
+it is documented there.
 
 =back
 
