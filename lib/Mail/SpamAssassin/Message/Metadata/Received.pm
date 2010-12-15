@@ -413,7 +413,7 @@ sub parse_received_line {
     $auth = 'Communigate';
   }
   # Microsoft Exchange (complete with syntax error)
-  elsif (/ with Microsoft Exchange Server HTTP-DAV /) {
+  elsif (/ with Microsoft Exchange Server HTTP-DAV\b/) {
     $auth = 'HTTP-DAV';
   }
 
