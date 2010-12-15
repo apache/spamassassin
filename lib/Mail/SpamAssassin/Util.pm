@@ -58,7 +58,8 @@ BEGIN {
   @ISA = qw(Exporter);
   @EXPORT = ();
   @EXPORT_OK = qw(&local_tz &base64_decode &untaint_var &untaint_file_path
-                  &exit_status_str &proc_status_ok &am_running_on_windows);
+                  &exit_status_str &proc_status_ok &am_running_on_windows
+                  &reverse_ip_address);
 }
 
 use Mail::SpamAssassin;
@@ -70,6 +71,7 @@ use File::Spec;
 use File::Basename;
 use Time::Local;
 use Sys::Hostname (); # don't import hostname() into this namespace!
+use NetAddr::IP 4.000;
 use Fcntl;
 use Errno qw(ENOENT EACCES EEXIST);
 use POSIX qw(:sys_wait_h WIFEXITED WIFSIGNALED WIFSTOPPED WEXITSTATUS
@@ -781,9 +783,8 @@ sub extract_ipv4_addr_from_string {
     if (defined $1) { return $1; }
   }
 
-  # ignore native IPv6 addresses; currently we have no way to deal with
-  # these if we could extract them, as the DNSBLs don't provide a way
-  # to query them!  TODO, eventually, once IPv6 spam starts to appear ;)
+  # ignore native IPv6 addresses;
+  # TODO, eventually, once IPv6 spam starts to appear ;)
   return;
 }
 
@@ -857,6 +858,37 @@ sub ips_match_in_24_mask {
   }
 
   return 0;
+}
+
+###########################################################################
+
+# Given a quad-dotted IPv4 address or an IPv6 address, reverses the order
+# of its bytes (IPv4) or nibbles (IPv6), joins them with dots, producing
+# a string suitable for reverse DNS lookups. Returns undef in case of a
+# syntactically invalid IP address.
+#
+sub reverse_ip_address {
+  my ($ip) = @_;
+
+  my $revip;
+  local($1,$2,$3,$4);
+  if ($ip =~ /^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})\z/) {
+    $revip = "$4.$3.$2.$1";
+  } elsif ($ip !~ /:/ || $ip !~ /^[0-9a-fA-F:.]{2,}\z/) {  # triage
+    # obviously unrecognized syntax
+  } elsif (!NetAddr::IP->can('full6')) {  # since NetAddr::IP 4.010
+    info("util: version of NetAddr::IP is too old, IPv6 not supported");
+  } else {
+    # looks like an IPv6 address, let NetAddr::IP check the details
+    my $ip_obj = NetAddr::IP->new6($ip);
+    if (defined $ip_obj) {  # valid IPv6 address
+      # RFC 5782 section 2.4.
+      $revip = lc $ip_obj->network->full6;  # string in a canonical form
+      $revip =~ s/://g;
+      $revip = join('.', reverse split(//,$revip));
+    }
+  }
+  return $revip;
 }
 
 ###########################################################################
@@ -1649,7 +1681,7 @@ sub avoid_db_file_locking_bug {
     my $stat_errn = stat($file) ? 0 : 0+$!;
     next if $stat_errn == ENOENT;
 
-    dbg("Berkeley DB bug work-around: cleaning tmp file $file");
+    dbg("util: Berkeley DB bug work-around: cleaning tmp file $file");
     unlink($file) or warn "cannot remove Berkeley DB tmp file $file: $!\n";
   }
 }

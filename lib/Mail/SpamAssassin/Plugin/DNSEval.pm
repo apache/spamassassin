@@ -17,11 +17,10 @@
 
 package Mail::SpamAssassin::Plugin::DNSEval;
 
-use NetAddr::IP 4.000;
-
 use Mail::SpamAssassin::Plugin;
 use Mail::SpamAssassin::Logger;
 use Mail::SpamAssassin::Constants qw(:ip);
+use Mail::SpamAssassin::Util qw(reverse_ip_address);
 
 use strict;
 use warnings;
@@ -267,29 +266,8 @@ sub check_rbl_backend {
   dbg("dns: only inspecting the following IPs: ".join(", ", @ips));
 
   eval {
-    local($1,$2,$3,$4);
-    foreach (@ips) {
-      my $revip;
-      if (/^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})\z/) {
-        $revip = "$4.$3.$2.$1";
-      } elsif (/:/ &&  # triage
-               /^ [0-9a-f]{0,4}
-                  (?: : [0-9a-f]{0,4} | \. [0-9]{1,3} ){2,9} $/xsi) {
-        if (!NetAddr::IP->can('full6')) {  # since NetAddr::IP 4.010
-          info("dns: version of NetAddr::IP is too old, IPv6 not supported");
-        } else {
-          # looks like an IPv6 address, let NetAddr::IP check the details
-          my $ip_obj = NetAddr::IP->new6($_);
-          if (!defined $ip_obj) {
-            # invalid IPv6 address, $revip remains undefined
-          } else {
-            # RFC 5782 section 2.4.
-            $revip = lc $ip_obj->network->full6;  # string in a canonical form
-            $revip =~ s/://g;
-            $revip = join('.', reverse split(//,$revip));
-          }
-        }
-      }
+    foreach my $ip (@ips) {
+      my $revip = reverse_ip_address($ip);
       $pms->do_rbl_lookup($rule, $set, $type, $rbl_server,
                           $revip.'.'.$rbl_server, $subtest) if defined $revip;
     }
