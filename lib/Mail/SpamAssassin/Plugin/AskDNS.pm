@@ -22,16 +22,16 @@ AskDNS - form a DNS query using tag values, and look up the DNSxL lists
 =head1 SYNOPSIS
 
   loadplugin  Mail::SpamAssassin::Plugin::AskDNS
-  askdns DKIMDOMAIN_IN_DWL _DKIMDOMAIN_._vouch.dwl.spamhaus.org TXT /\ball\b/
+  askdns D_IN_DWL _DKIMDOMAIN_._vouch.dwl.spamhaus.org TXT /\b(transaction|list|all)\b/
 
 =head1 DESCRIPTION
 
-Using a DNS query template as specified in a parameter of the askdns rule,
-the plugin replaces tag names as found in the template with their values as
-soon as they become available, and launches DNS queries. When DNS responses
-trickle in, filters them according the requested DNS resource record type
-and optional subrule filtering expression, yielding a rule hit if a response
-meets filtering conditions.
+Using a DNS query template as specified in a parameter of a askdns rule,
+the plugin replaces tag names as found in the template with their values
+and launches DNS queries, as soon as tag values become available. When DNS
+responses trickle in, filters them according the requested DNS resource
+record type and optional subrule filtering expression, yielding a rule hit
+if a response meets filtering conditions.
 
 =head1 USER SETTINGS
 
@@ -39,8 +39,10 @@ meets filtering conditions.
 
 =item rbl_timeout t [t_min] [zone]		(default: 15 3)
 
-The rbl_timeout setting is common to all DNS querying rules. It can
-specify a DNS query timeout globally, or individually for each zone.
+The rbl_timeout setting is common to all DNS querying rules (as implemented
+by other plugins). It can specify a DNS query timeout globally, or individually
+for each zone. When the zone parameter is specified, the settings affects DNS
+queries when their query domain equals the specified zone, or is its subdomain.
 See the C<Mail::SpamAssassin::Conf> POD for details on C<rbl_timeout>.
 
 =back
@@ -53,12 +55,12 @@ See the C<Mail::SpamAssassin::Conf> POD for details on C<rbl_timeout>.
 
 A query template is a string which will be expanded to produce a domain name
 to be used in a DNS query. The template may include SpamAssassin tag names,
-which will be replaced with their values to form the final query domain.
-The final query domain must adhere to rules governing DNS domains, i.e. must
-consist of fields each up to 63 characters long, delimited by dots. There
-may be a trailing dot at the end, but it is redundant / carries no semantics,
-because SpamAssassin uses a Net::DSN::Resolver::send method for querying
-DNS, which ignores any 'search' or 'domain' DNS resolver options.
+which will be replaced by their values to form a final query domain.
+The final query domain must adhere to rules governing DNS domains, i.e.
+must consist of fields each up to 63 characters long, delimited by dots.
+There may be a trailing dot at the end, but it is redundant / carries
+no semantics, because SpamAssassin uses a Net::DSN::Resolver::send method
+for querying DNS, which ignores any 'search' or 'domain' DNS resolver options.
 Domain names in DNS queries are case-insensitive.
 
 A tag name is a string of capital letters, preceded and followed by an
@@ -76,73 +78,92 @@ i.e. when the last of the awaited tag values becomes available by a call
 to set_tag() from some other plugin or elsewhere in the SpamAssassin code.
 
 Launched queries from all askdns rules are grouped too according to a pair
-of: RR type and expanded query domain name. Even if there are multiple rules
-producing the same type/domain pair, only one DNS query is launched, and
-a reply to such query contributes to all the constituent rules.
+of: query type and expanded query domain name. Even if there are multiple
+rules producing the same type/domain pair, only one DNS query is launched,
+and a reply to such query contributes to all the constituent rules.
 
-A tag may produce none, one or multiple values. Askdns rules waiting for
+A tag may produce none, one or multiple values. Askdns rules awaiting for
 a tag which never receives its value never result in a DNS query. Tags which
 produce multiple values will result in multiple queries launched, each with
 an expanded template using one of the tag values. An example is a DKIMDOMAIN
 tag which yields a list of signing domains, one for each valid signature in
 a message signed by more than one domain.
 
-When more than one tag name appears in a template, each potentially resulting
-in multiple values, a Cartesian product is formed, and each tuple results in
-a launch of one DNS query (duplicates excluded). For example, a query template
-_A_._B_.example.com where tag A is a list (11,22) and B is (xx,yy,zz),
-will result in queries: 11.xx.example.com, 22.xx.example.com,
-11.yy.example.com, 22.yy.example.com, 11.zz.example.com, 22.zz.example.com .
+When more than one distinct tag name appears in a template, each potentially
+resulting in multiple values, a Cartesian product is formed, and each tuple
+results in a launch of one DNS query (duplicates excluded). For example,
+a query template _A_._B_.example._A_.com where tag A is a list (11,22)
+and B is (xx,yy,zz), will result in queries: 11.xx.example.11.com,
+22.xx.example.22.com, 11.yy.example.11.com, 22.yy.example.22.com,
+11.zz.example.11.com, 22.zz.example.22.com .
 
 The parameter following the query template is a DNS resource record (RR)
 type. A DNS result may bring resource records of multiple types, but only
 those resource records matching the type specified in a rule are considered,
 returned resource records with non-matching types are ignored for this rule.
-Currently the RR type parameter also determines the DNS query types (not
-just the filter for the result), although in future similar queries could
+Currently the RR type parameter determines the DNS query type as well as a
+filter for the resulting RR types, although in future similar queries could
 be combined, launching a query of type 'ANY'. Currently allowed RR types
 are: A, AAAA, MX, TXT, PTR, NS, SOA, CNAME, HINFO, MINFO, WKS, SRV, SPF.
 
 The last optional parameter of a rule is filtering expression, a.k.a. a
-subrule. Its function is much like the subrule in URIDNSBL plugin rules
-(like in the uridnssub rules), or in the check_rbl eval rules. The main
-difference is that with askdns rules there is no need to manually group
-rules according to their queried zone, as the grouping is automatic and
-duplicate queries are implicitly eliminated.
+subrule. Its function is much like the subrule in URIDNSBL plugin rules,
+or in the check_rbl eval rules. The main difference is that with askdns
+rules there is no need to manually group rules according to their queried
+zone, as the grouping is automatic and duplicate queries are implicitly
+eliminated.
 
 The subrule filtering parameter can be: a plain string, a regular expression,
-a single numerical value. or a pair of numerical values. Absence of the
-filtering parameter implies no filtering, i.e. any positive DNS response
-of the requested RR type will result in a rule hit, regardless of the RR
-value returned with the response.
+a single numerical value or a pair of numerical values, or a list of rcodes
+(DNS status codes of a response). Absence of the filtering parameter implies
+no filtering, i.e. any positive DNS response (rcode=NOERROR) of the requested
+RR type will result in a rule hit, regardless of the RR value returned with
+the response.
 
-When a plain string is used as a filter, it must match the response exactly.
-Typical use is an exact text string for TXT queries.
+When a plain string is used as a filter, it must be enclosed in single or
+double quotes. For the rule to hit, the response must match the filtering
+string exactly, and a RR type of a response must match the query type.
+Typical use is an exact text string for TXT queries, or an exact quad-dotted
+IPv4 address. In case of a TXT or SPF resource record which can return
+multiple character-strings (as defined in Section 3.3 of [RFC1035]), these
+strings are concatenated with no delimiters before comparing the result
+to the filtering string. This follows requirements of several documents,
+such as RFC 5518, RFC 4408, RFC 4871, RFC 5617.  Examples: "127.0.0.1",
+"transaction", 'list' .
 
 A regular expression follows a familiar perl syntax like /.../ or m{...}
 optionally followed by regexp flags (such as 'i' for case-insensitivity).
 If a DNS response matches the requested RR type and the regular expression,
-the rule hits. Typical use: /^127\.0\.0\.\d+$/ or m{\bdial up\b}i .
+the rule hits. Examples: /^127\.0\.0\.\d+$/, m{\bdial up\b}i .
 
 A single numerical value can be a decimal number, or a hexadecimal number
 prefixed by 0x. Such numeric filtering expression is typically used with
-RR type-A DNS queries. The returned value (IP address) is masked with the
-specified filtering value, and the rule hits if the result is nonzero:
+RR type-A DNS queries. The returned value (IPv4 address) is masked with
+a specified filtering value, and the rule hits if the result is nonzero:
 (r & n) != 0 .  An example: 0x10 .
 
 A pair of numerical values (each a decimal, hexadecimal or quad-dotted)
-delimited by a '-' specifies an IP address range, and a pair of values
-delimited by a '/' specifies an IP address followed by a bitmask. Again,
+delimited by a '-' specifies an IPv4 address range, and a pair of values
+delimited by a '/' specifies an IPv4 address followed by a bitmask. Again,
 this type of filtering expression is primarily intended with RR type-A
-DNS queries. The rule hits if the returned IP address falls within the
-specified range: (r >= n1 && r <= n2), or masked with a bitmask matches
-the specified value: (r & m) == (n & m) .  As a shorthand notation,
-a single quad-dotted value is equivalent to a n/32 form, i.e. it must
-match the returned value exactly with all its bits.
+DNS queries. The rule hits if the RR type matches, and the returned IP
+address falls within the specified range: (r >= n1 && r <= n2), or
+masked with a bitmask matches the specified value: (r & m) == (n & m) .
+
+As a shorthand notation, a single quad-dotted value is equivalent to
+a n-n form, i.e. it must match the returned value exactly with all its bits.
 
 Some typical examples of a numeric filtering parameter are: 127.0.1.2,
 127.0.1.20-127.0.1.39, 127.0.1.0/255.255.255.0, 0.0.0.16/0.0.0.16,
 0x10/0x10, 16, 0x10 .
+
+Lastly, the filtering parameter can be a comma-separated list of DNS status
+codes (rcode), enclosed in square brackets. Rcodes can be represented either
+by their numeric decimal values (0=NOERROR, 3=NXDOMAIN, ...), or their names.
+See http://www.iana.org/assignments/dns-parameters for the list of names. When
+testing for a rcode where rcode is nonzero, a RR type parameter is ignored
+as a filter, as there is typically no answer section in a DNS reply when
+rcode indicates an error.  Example: [NXDOMAIN], or [FormErr,ServFail,4,5] .
 
 =back
 
@@ -158,8 +179,15 @@ use Mail::SpamAssassin::Plugin;
 use Mail::SpamAssassin::Util;
 use Mail::SpamAssassin::Logger;
 
-use vars qw(@ISA);
+use vars qw(@ISA %rcode_value);
 @ISA = qw(Mail::SpamAssassin::Plugin);
+
+%rcode_value = (  # http://www.iana.org/assignments/dns-parameters
+  NOERROR => 0,  FORMERR => 1, SERVFAIL => 2, NXDOMAIN => 3, NOTIMP => 4,
+  REFUSED => 5,  YXDOMAIN => 6, YXRRSET => 7, NXRRSET => 8, NOTAUTH => 9,
+  NOTZONE => 10, BADVERS => 16, BADSIG => 16, BADKEY => 17, BADTIME => 18,
+  BADMODE => 19, BADNAME => 20, BADALG => 21, BADTRUNC => 22,
+);
 
 sub new {
   my($class,$sa_main) = @_;
@@ -175,8 +203,10 @@ sub new {
 
 # ---------------------------------------------------------------------------
 
-# Accepts argument as a regular expression (including its m() operator or
-# equivalent perl syntaxes), or in one of the following forms: m, n1-n2,
+# Accepts argument as a string in single or double quotes, or as a regular
+# expression in // or m{} notation, or as a numerical value or a pair of
+# numerical values, or as a bracketed and comma-separated list of DNS rcode
+# names or their numerical codes. Recognized numerical forms are: m, n1-n2,
 # or n/m, where n,n1,n2,m can be any of: decimal digits, 0x followed by
 # up to 8 hexadecimal digits, or an IPv4 address in quad-dotted notation.
 # The argument is checked for syntax, undef is returned on syntax errors.
@@ -187,20 +217,24 @@ sub new {
 # then components are reassembled into a string delimited by '-' or '/'.
 # As a special backward compatibility measure, a single quad-dot (with no
 # second number) is converted into n-n, to distinguish it from a traditional
-# mask-only form.
+# mask-only form. A list or rcodes is returned as a hashref, where keys
+# represent specified numerical rcodes.
 #
-# In practice, arguments like the following are anticipated:
+# Arguments like the following are anticipated:
+#   "127.0.0.1", "some text", 'some "other" text',
+#   /regexp/flags, m{regexp}flags,
 #   127.0.1.2  (same as 127.0.1.2-127.0.1.2 or 127.0.1.2/255.255.255.255)
 #   127.0.1.20-127.0.1.39  (= 0x7f000114-0x7f000127 or 2130706708-2130706727)
 #   0.0.0.16/0.0.0.16  (same as 0x10/0x10 or 16/0x10 or 16/16)
 #   16  (traditional style mask-only, same as 0x10)
+#   [NXDOMAIN], [FormErr,ServFail,4,5]
 #
 sub parse_and_canonicalize_subtest {
   my($subtest) = @_;
   my $result;
 
   local($1,$2,$3);
-  if ($subtest =~ m{^ / (.+) / ([msixo]*) \z}xs) {
+  if (     $subtest =~ m{^ / (.+) / ([msixo]*) \z}xs) {
     $result = $2 ne '' ? qr{(?$2)$1} : qr{$1};
   } elsif ($subtest =~ m{^ m \s* \( (.+) \) ([msixo]*) \z}xs) {
     $result = $2 ne '' ? qr{(?$2)$1} : qr{$1};
@@ -212,6 +246,16 @@ sub parse_and_canonicalize_subtest {
     $result = $2 ne '' ? qr{(?$2)$1} : qr{$1};
   } elsif ($subtest =~ m{^ m \s* (\S) (.+) \1 ([msixo]*) \z}xs) {
     $result = $2 ne '' ? qr{(?$2)$1} : qr{$1};
+  } elsif ($subtest =~ m{^ (["']) (.*) \1 \z}xs) {  # quoted string
+    $result = $2;
+  } elsif ($subtest =~ m{^ \[ ( (?:[A-Z]+|\d+)
+                                (?: \s* , \s* (?:[A-Z]+|\d+) )* ) \] \z}xis) {
+    # a comma-separated list of rcode names or their decimal values
+    my @rcodes = split(/\s*,\s*/, uc $1);
+    for (@rcodes) { $_ = $rcode_value{$_}  if exists $rcode_value{$_} }
+    return undef  if grep(!/^\d+\z/, @rcodes);
+    # a hashref indicates a list of DNS rcodes (stored as hash keys)
+    $result = { map( ($_,1), @rcodes) };
   } elsif ($subtest =~ m{^ ([^/-]+) (?: ([/-]) (.+) )? \z}xs) {
     my($n1,$delim,$n2) = ($1,$2,$3);
     my $any_quad_dot;
@@ -241,7 +285,7 @@ sub set_config {
 
   push(@cmds, {
     setting => 'askdns',
-    is_priv => 1,
+    is_admin => 1,
     type => $Mail::SpamAssassin::Conf::CONF_TYPE_HASH_KEY_VALUE,
     code => sub {
       my($self, $key, $value, $line) = @_;
@@ -257,8 +301,7 @@ sub set_config {
         my($rulename,$query_template,$query_type,$subtest) = ($1,$2,$3,$4);
         $query_type = 'A' if !defined $query_type;
         $query_type = uc $query_type;
-        $subtest = '' if !defined $subtest;
-        if ($subtest ne '') {
+        if (defined $subtest) {
           $subtest = parse_and_canonicalize_subtest($subtest);
           defined $subtest or return $Mail::SpamAssassin::Conf::INVALID_VALUE;
         }
@@ -432,54 +475,79 @@ OUTER:
 sub process_response_packet {
   my($self, $pms, $packet, $dnskey, $query_type, $query_domain) = @_;
   my $conf = $pms->{conf};
+  my %rulenames_hit;
 
   # map a dnskey back to info on queries which caused this DNS lookup
   my $queries_ref = $pms->{askdns_map_dnskey_to_rules}{$dnskey};
 
-  my %rulenames_hit;
-  my @answer;
-  @answer = $packet->answer  if $packet;
-  for my $rr (@answer) {
-    my $rr_type = $rr->type;
-    $rr_type = '' if !defined $rr_type;
-    $rr_type = uc $rr_type;
-    my $rr_rdatastr;
-    my $rdatanum;
-    if ($rr_type eq 'TXT' || $rr_type eq 'SPF') {
-      # RFC 5518: If the RDATA in the TXT record contains multiple
-      # character-strings (as defined in Section 3.3 of [RFC1035]),
-      # the code handling that reply from DNS MUST assemble all of these
-      # marshaled text blocks into a single one before any syntactical
-      # verification takes place.
-      # The same goes for RFC 4408 (SPF), RFC 4871 (DKIM), RFC 5617 (ADSP) ...
-      $rr_rdatastr = join('', $rr->char_str_list);  # as per RFC 5518
-    } else {
-      $rr_rdatastr = $rr->rdatastr;
-      if ($rr_type eq 'A' &&
-          $rr_rdatastr =~ m/^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\z/) {
-        $rdatanum = Mail::SpamAssassin::Util::my_inet_aton($rr_rdatastr);
-      }
+  my($header, @question, @answer, $qtype, $rcode);
+  if ($packet) {
+    @answer = $packet->answer;
+    $header = $packet->header;
+    @question = $packet->question;
+    $qtype = uc $question[0]->qtype  if @question;
+    my $query_str = join(', ',map($_->qtype.' '.$_->qname, @question));
+    $rcode = uc $header->rcode  if $header;  # 'NOERROR', 'NXDOMAIN', ...
+    dbg("askdns: answer received, rcode %s, query %s, answer has %d records",
+        $rcode, $query_str, scalar @answer);
+    if (defined $rcode && exists $rcode_value{$rcode}) {
+      # Net::DNS return a rcode name for codes it knows about,
+      # and returns a number for the rest; we deal with numbers from here on
+      $rcode = $rcode_value{$rcode}  if exists $rcode_value{$rcode};
     }
-    # decode DNS presentation format as returned by Net::DNS
-    $rr_rdatastr =~ s/\\([0-9]{3}|.)/length($1)==1 ? $1 : chr($1)/gse;
-  # dbg("askdns: received rr type %s, data: %s", $rr_type, $rr_rdatastr);
+  }
+  if (!@answer) {
+    # a trick to make the following loop run at least once, so that we can
+    # evaluate also rules which only care for rcode status
+    @answer = ( undef );
+  }
+  for my $rr (@answer) {
+    my($rr_rdatastr, $rdatanum, $rr_type);
+    if (!$rr) {
+      # special case, no answer records, only rcode can be tested
+    } else {
+      $rr_type = uc $rr->type;
+      if ($rr_type eq 'TXT' || $rr_type eq 'SPF') {
+        # RFC 5518: If the RDATA in the TXT record contains multiple
+        # character-strings (as defined in Section 3.3 of [RFC1035]),
+        # the code handling that reply from DNS MUST assemble all of these
+        # marshaled text blocks into a single one before any syntactical
+        # verification takes place.
+        # The same goes for RFC 4408 (SPF), RFC 4871 (DKIM), RFC 5617 (ADSP) ...
+        $rr_rdatastr = join('', $rr->char_str_list);  # as per RFC 5518
+      } else {
+        $rr_rdatastr = $rr->rdatastr;
+        if ($rr_type eq 'A' &&
+            $rr_rdatastr =~ m/^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\z/) {
+          $rdatanum = Mail::SpamAssassin::Util::my_inet_aton($rr_rdatastr);
+        }
+      }
+      # decode DNS presentation format as returned by Net::DNS
+      $rr_rdatastr =~ s/\\([0-9]{3}|.)/length($1)==1 ? $1 : chr($1)/gse;
+    # dbg("askdns: received rr type %s, data: %s", $rr_type, $rr_rdatastr);
+    }
 
     my $j = 0;
     for my $q_tuple (!ref $queries_ref ? () : @$queries_ref) {
       next  if !$q_tuple;
-
       my($query_type, $rules) = @$q_tuple;
-      next  if $rr_type ne $query_type;
-      $pms->{askdns_map_dnskey_to_rules}{$dnskey}[$j++] = undef; # mark it done
+      next  if $query_type ne $qtype;
 
-      local($1,$2,$3);
+      # mark rule as done
+      $pms->{askdns_map_dnskey_to_rules}{$dnskey}[$j++] = undef;
+
       while (my($rulename,$subtest) = each %$rules) {
         my $match;
-        if (!defined $subtest || $subtest eq '') {
-          $match = 1;  # any response of the requested RR type matches
-        } elsif (ref $subtest eq 'Regexp') {
+        local($1,$2,$3);
+        if (ref $subtest eq 'HASH') {  # a list of DNS rcodes (as hash keys)
+          $match = 1  if $subtest->{$rcode};
+        } elsif ($rcode != 0 || $rr_type ne $query_type) {
+          # skip remaining tests on DNS error or wrong RR type
+        } elsif (!defined $subtest) {
+          $match = 1;  # any valid response of the requested RR type matches
+        } elsif (ref $subtest eq 'Regexp') {  # a regular expression
           $match = 1  if $rr_rdatastr =~ $subtest;
-        } elsif ($rr_rdatastr eq $subtest) {
+        } elsif ($rr_rdatastr eq $subtest) {  # exact equality
           $match = 1;
         } elsif (defined $rdatanum &&
                  $subtest =~ m{^ (\d+) (?: ([/-]) (\d+) )? \z}x) {
@@ -491,7 +559,7 @@ sub process_response_packet {
           : 0;  
         }
         if ($match) {
-          $self->askdns_hit($pms,$query_domain,$rr_type,$rr_rdatastr,$rulename);
+          $self->askdns_hit($pms,$query_domain,$qtype,$rr_rdatastr,$rulename);
           $rulenames_hit{$rulename} = 1;
         }
       }
@@ -502,15 +570,16 @@ sub process_response_packet {
 }
 
 sub askdns_hit {
-  my($self, $pms, $query_domain, $rr_type, $rr_rdatastr, $rulename) = @_;
+  my($self, $pms, $query_domain, $qtype, $rr_rdatastr, $rulename) = @_;
 
+  $rr_rdatastr = '' if !defined $rr_rdatastr;  # e.g. with rules testing rcode
   dbg('askdns: domain "%s" listed (%s): %s',
       $query_domain, $rulename, $rr_rdatastr);
 
   # only the first hit will show in the test log report, even if
   # an answer section matches more than once - got_hit() handles this
   $pms->clear_test_state;
-  $pms->test_log(sprintf("%s %s:%s", $query_domain,$rr_type,$rr_rdatastr));
+  $pms->test_log(sprintf("%s %s:%s", $query_domain,$qtype,$rr_rdatastr));
   $pms->got_hit($rulename, 'ASKDNS: ', ruletype => 'askdns');  # score=>$score
 }
 
