@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix danmcdonald dos jm kgolding wt-calamari wt-trap; day 2: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix danmcdonald dos jm kgolding wt-trap; day 3: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix danmcdonald jm kgolding
+# with results from: day 1: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix danmcdonald dos jm kgolding wt-ackbar wt-home-trap; day 2: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix danmcdonald dos jm kgolding wt-calamari wt-trap; day 3: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix danmcdonald dos jm kgolding wt-trap
 
 # tflags publish
 ADVANCE_FEE_2_NEW_FORM
@@ -128,10 +128,37 @@ DOS_ANAL_SPAM_MAILER
 DOS_OE_TO_MX
 
 # good enough
+DOS_OE_TO_MX_IMAGE
+
+# good enough
+DOS_OUTLOOK_TO_MX
+
+# good enough
 DRUGS_STOCK_MIMEOLE
+
+# good enough
+DYN_RDNS_AND_INLINE_IMAGE
+
+# good enough
+DYN_RDNS_SHORT_HELO_HTML
 
 # tflags userconf
 ENV_AND_HDR_SPF_MATCH
+
+# good enough
+FB_CIALIS_LEO3
+
+# good enough
+FB_GET_MEDS
+
+# good enough
+FB_GVR
+
+# good enough
+FB_QUALITY_REPLICA
+
+# good enough
+FB_REPLICA_ROLEX
 
 # good enough
 FH_FAKE_RCVD_LINE_B
@@ -144,6 +171,12 @@ FH_HELO_ALMOST_IP
 
 # good enough
 FH_HELO_EQ_D_D_D_D
+
+# good enough
+FH_HOST_EQ_DYNAMICIP
+
+# good enough
+FH_HOST_IN_ADDRARPA
 
 # tflags publish
 FILL_THIS_FORM
@@ -200,7 +233,13 @@ FROM_MISSP_TO_UNDISC
 FROM_MISSP_USER
 
 # good enough
+FRT_APPROV
+
+# good enough
 FRT_PHARMAC
+
+# good enough
+FRT_PRICE
 
 # good enough
 FRT_ROLEX
@@ -216,6 +255,9 @@ FSL_HELO_BARE_IP_1
 
 # good enough
 FSL_HELO_DEVICE
+
+# good enough
+FSL_HELO_NON_FQDN_1
 
 # good enough
 FSL_MID_419
@@ -263,7 +305,19 @@ HEAD_LONG
 HELO_LH_HOME
 
 # good enough
+HELO_OEM
+
+# good enough
+HK_NAME_DRUGS
+
+# good enough
+HK_RANDOM_ENVFROM
+
+# good enough
 HK_SCAM_N2
+
+# good enough
+HK_SCAM_N8
 
 # tflags userconf
 HTML_CHARSET_FARAWAY
@@ -578,6 +632,15 @@ SPF_PASS
 SPF_SOFTFAIL
 
 # good enough
+STOCK_IMG_CTYPE
+
+# good enough
+STOCK_IMG_HDR_FROM
+
+# good enough
+STOCK_IMG_OUTLOOK
+
+# good enough
 STOX_REPLY_TYPE_WITHOUT_QUOTES
 
 # tflags userconf
@@ -585,6 +648,9 @@ SUBJECT_IN_BLACKLIST
 
 # tflags userconf
 SUBJECT_IN_WHITELIST
+
+# good enough
+SUBJECT_NEEDS_ENCODING
 
 # good enough
 TAB_IN_FROM
@@ -636,9 +702,6 @@ TVD_FINGER_02
 
 # good enough
 TVD_QUAL_MEDS
-
-# good enough
-HK_SCAM_N8
 
 # tflags userconf
 UNPARSEABLE_RELAY
