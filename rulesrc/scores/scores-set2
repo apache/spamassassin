@@ -1,77 +1,77 @@
-# Using score set 0 logs for revision 1052198 from:
+# Using score set 0 logs for revision 1052462 from:
 # ham-bb-doc.log ham-bb-fredt.log ham-bb-guenther_fraud.log ham-bb-jhardin.log ham-bb-jhardin_fraud.log ham-bb-jm.log ham-bb-kmcgrail.log ham-bb-trec_enron.log ham-bb-zmi.log ham-bernie-it_batt.log ham-bernie-mix.log ham-danmcdonald.log ham-dos.log ham-kgolding.log ham-wt-ackbar.log ham-wt-en1.log ham-wt-homeone.log spam-bb-doc.log spam-bb-fredt.log spam-bb-guenther_fraud.log spam-bb-jhardin.log spam-bb-jhardin_fraud.log spam-bb-jm.log spam-bb-kmcgrail.log spam-bb-trec_enron.log spam-bb-zmi.log spam-bernie-it_batt.log spam-bernie-mix.log spam-danmcdonald.log spam-dos.log spam-kgolding.log spam-wt-ackbar.log spam-wt-en1.log spam-wt-homeone.log
 
 score ADVANCE_FEE_2_NEW_FORM         0.001
-score ADVANCE_FEE_2_NEW_MONEY        1.737
-score ADVANCE_FEE_3_NEW              0.001
-score ADVANCE_FEE_3_NEW_FORM         1.706
+score ADVANCE_FEE_2_NEW_MONEY        0.711
+score ADVANCE_FEE_3_NEW              0.001 # force non-zero
+score ADVANCE_FEE_3_NEW_FORM         1.709
 score ADVANCE_FEE_3_NEW_MONEY        0.001
-score ADVANCE_FEE_4_NEW              0.453
-score ADVANCE_FEE_5_NEW              3.300
-score AXB_HELO_HOME_UN               3.199
-score DATE_IN_FUTURE_96_Q            2.752
-score DATE_IN_FUTURE_Q_PLUS          2.599
-score DEAR_BENEFICIARY               2.544
+score ADVANCE_FEE_4_NEW              0.550
+score ADVANCE_FEE_5_NEW              3.199
+score AXB_HELO_HOME_UN               3.100
+score DATE_IN_FUTURE_96_Q            2.778
+score DATE_IN_FUTURE_Q_PLUS          2.600
+score DEAR_BENEFICIARY               2.186
 score DEAR_EMAIL                     0.001
-score DECEASED_NO_ML                 0.001 # force non-zero
-score FILL_THIS_FORM                 0.001
+score DECEASED_NO_ML                 0.001
+score FILL_THIS_FORM                 0.001 # force non-zero
 score FORM_FRAUD_3                   0.001
-score FORM_FRAUD_5                   0.001
-score FROM_IN_TO_AND_SUBJ            0.645
-score FROM_MISSPACED                 2.447
-score FROM_MISSP_DYNIP               2.366
-score FROM_MISSP_EH_MATCH            0.353
-score FROM_MISSP_FREEMAIL            2.799
-score FROM_MISSP_MSFT                0.276
-score FROM_MISSP_NO_TO               3.099
-score FROM_MISSP_TO_UNDISC           2.454
-score FROM_MISSP_USER                0.289
-score FRT_EXPERIENCE                 1.721
-score FRT_PHARMAC                    2.309
-score FR_WATCHES_HTTP                2.699
-score FSL_BOTSPAM_1                  1.722
-score FSL_BOTSPAM_2                  1.859
-score FSL_BOTSPAM_3                  2.442
-score FSL_BOTSPAM_4                  2.700
-score FSL_CTYPE_WIN1251              3.499
-score FSL_MID_419                    0.001
+score FORM_FRAUD_5                   0.001 # force non-zero
+score FROM_IN_TO_AND_SUBJ            1.936
+score FROM_MISSPACED                 2.446
+score FROM_MISSP_DYNIP               2.599
+score FROM_MISSP_EH_MATCH            0.354
+score FROM_MISSP_FREEMAIL            2.798
+score FROM_MISSP_MSFT                1.293
+score FROM_MISSP_NO_TO               0.752
+score FROM_MISSP_TO_UNDISC           2.329
+score FROM_MISSP_USER                3.254
+score FRT_EXPERIENCE                 2.900
+score FR_WATCHES_HTTP                2.631
+score FSL_BOTSPAM_1                  2.644
+score FSL_BOTSPAM_2                  3.892
+score FSL_BOTSPAM_3                  1.908
+score FSL_BOTSPAM_4                  2.699
+score FSL_CTYPE_WIN1251              3.500
+score FSL_MID_419                    2.138
 score FSL_RU_URL                     3.499
 score HELO_NO_DOMAIN                 2.601
-score HK_SCAM_N2                     0.499
-score HK_SCAM_N8                     1.728
-score IMG_DIRECT_TO_MX               1.429
-score LOTS_OF_MONEY                  0.001 # force non-zero
-score LOTTO_AGENT                    2.330
-score MANY_SPAN_IN_TEXT              2.999
-score MAY_BE_FORGED                  3.500
-score MONEY_ATM_CARD                 0.594
-score MONEY_FORM                     0.001 # force non-zero
-score MONEY_FRAUD_3                  0.001
+score HK_SCAM_N2                     0.497
+score HK_SCAM_N8                     1.641
+score IMG_DIRECT_TO_MX               0.964
+score LOTS_OF_MONEY                  0.001
+score LOTTO_AGENT                    2.065
+score MANY_SPAN_IN_TEXT              2.526
+score MAY_BE_FORGED                  3.499
+score MONEY_ATM_CARD                 1.241
+score MONEY_FORM                     0.001
+score MONEY_FRAUD_3                  1.082
 score MONEY_FRAUD_5                  0.001 # force non-zero
-score MONEY_FRAUD_8                  0.097
-score MONEY_FROM_MISSP               1.946
+score MONEY_FRAUD_8                  0.001
+score MONEY_FROM_MISSP               2.443
 score MONEY_LOTTERY                  0.001
-score NSL_RCVD_FROM_USER             1.373
-score OBFU_JPG_ATTACH                3.599
-score RISK_FREE                      2.289
+score NSL_RCVD_FROM_USER             1.180
+score OBFU_TEXT_ATTACH               0.478
+score RISK_FREE                      2.207
 score S25R_4                         2.499
-score S25R_6                         0.001
-score SINGLE_HEADER_2K               3.000
-score TINY_FLOAT                     2.000
+score S25R_6                         2.399
+score SINGLE_HEADER_2K               2.601
+score STYLE_GIBBERISH                2.599
+score TINY_FLOAT                     2.473
 score TO_EQ_FM_DIRECT_MX             4.200
 score TO_EQ_FM_DOM_HTML_IMG          0.001
-score TO_EQ_FM_DOM_HTML_ONLY         0.001
-score TO_EQ_FM_HTML_DIRECT           1.258
-score TO_EQ_FM_HTML_ONLY             0.050
-score TO_IN_SUBJ                     4.099
+score TO_EQ_FM_DOM_HTML_ONLY         0.056
+score TO_EQ_FM_HTML_DIRECT           0.879
+score TO_EQ_FM_HTML_ONLY             0.251
+score TO_IN_SUBJ                     4.100
 score TO_NO_BRKTS_DIRECT             4.299
-score TO_NO_BRKTS_DYNIP              2.361
+score TO_NO_BRKTS_DYNIP              2.740
 score TO_NO_BRKTS_NORDNS_HTML        0.001
-score TO_NO_BRKTS_NOTLIST            1.499
-score TO_NO_BRKTS_PCNT               0.106
+score TO_NO_BRKTS_NOTLIST            2.597
+score TO_NO_BRKTS_PCNT               1.099
 score TO_ONE_CHAR                    2.799
-score TVD_PCT_OFF                    0.580
-score URI_DOM_OBFU                   0.779
+score TVD_PCT_OFF                    0.098
+score URI_DOM_OBFU                   1.008
 score YOUR_PERMISSION                2.800
 # in active.list but have no hits in recent corpus
 score FROM_MISSP_DKIM                0.001 # force non-zero
