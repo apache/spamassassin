@@ -77,8 +77,6 @@ header	 __RCVD_VIA_IPV6_E	X-Spam-Relays-External  =~ /\[ ip=[0-9a-f:]+ /i
 meta	 UNKNOWN_ORIGIN	!(__RCVD_VIA_AFRINIC || __RCVD_VIA_APNIC || __RCVD_VIA_ARIN || __RCVD_VIA_LACNIC || __RCVD_VIA_RIPE || __RCVD_VIA_NON_RIR || RCVD_ILLEGAL_IP || __RCVD_VIA_IPV6)
 
 
-ifplugin Mail::SpamAssassin::Plugin::DNSEval # {
-
 # The DNSBL side of the Manitu iXhash zone, http://www.dnsbl.manitu.net/
 # Out-performs PSBL (72.98/0.12 spam/ham to PSBL's 48.69/0.36) at Intra2net:
 # http://www.intra2net.com/en/support/antispam/blacklist.php_dnsbl=RCVD_IN_NIX_SPAM.html
@@ -87,6 +85,8 @@ ifplugin Mail::SpamAssassin::Plugin::DNSEval # {
 header	 RCVD_IN_NIX_SPAM	eval:check_rbl('nix-spam-lastexternal','ix.dnsbl.manitu.net.')
 describe RCVD_IN_NIX_SPAM	Received via a relay in NiX Spam (heise.de)
 tflags	 RCVD_IN_NIX_SPAM	net nopublish	# 20091123
+
+ifplugin Mail::SpamAssassin::Plugin::DNSEval # {
 
 # Limit SpamCop to LASTEXT like every other DNSBL ... why haven't we tried this?
 # ... and what a difference! @20091204, 21.59/2.59 became 3.80/0.07
