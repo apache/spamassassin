@@ -89,8 +89,6 @@ header	 RCVD_IN_NIX_SPAM	eval:check_rbl('nix-spam-lastexternal','ix.dnsbl.manitu
 describe RCVD_IN_NIX_SPAM	Received via a relay in NiX Spam (heise.de)
 tflags	 RCVD_IN_NIX_SPAM	net nopublish reuse	# 20091123
 
-ifplugin Mail::SpamAssassin::Plugin::DNSEval # {
-
 # Limit SpamCop to LASTEXT like every other DNSBL ... why haven't we tried this?
 # ... and what a difference! @20091204, 21.59/2.59 became 3.80/0.07
 # ...                        @20091128, 18.87/2.16 became 5.30/0.09
@@ -98,6 +96,8 @@ ifplugin Mail::SpamAssassin::Plugin::DNSEval # {
 header	 RCVD_IN_SPAMCOP	eval:check_rbl_txt('spamcop-lastexternal', 'bl.spamcop.net.', '(?i:spamcop)')
 describe RCVD_IN_SPAMCOP	Received via a relay in bl.spamcop.net
 tflags	 RCVD_IN_SPAMCOP	net nopublish	# 20091123
+
+ifplugin Mail::SpamAssassin::Plugin::DNSEval # {
 
 # we have the non-lastext data; let's see how good it is if we clean it up a bit
 # we'll exclude anything that might have too much info relaying (mailling lists
