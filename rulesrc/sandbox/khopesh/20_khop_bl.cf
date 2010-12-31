@@ -87,7 +87,8 @@ meta	 UNKNOWN_ORIGIN	!(__RCVD_VIA_AFRINIC || __RCVD_VIA_APNIC || __RCVD_VIA_ARIN
 # not useful.  It must rely on tagging during delivery.
 header	 RCVD_IN_NIX_SPAM	eval:check_rbl('nix-spam-lastexternal','ix.dnsbl.manitu.net.')
 describe RCVD_IN_NIX_SPAM	Received via a relay in NiX Spam (heise.de)
-tflags	 RCVD_IN_NIX_SPAM	net nopublish reuse	# 20091123
+tflags	 RCVD_IN_NIX_SPAM	net nopublish	# 20091123
+reuse	 RCVD_IN_NIX_SPAM
 
 # Limit SpamCop to LASTEXT like every other DNSBL ... why haven't we tried this?
 # ... and what a difference! @20091204, 21.59/2.59 became 3.80/0.07
