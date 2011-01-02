@@ -306,7 +306,9 @@ sub new {
   $self->{finished} = { };
 
   $self->register_eval_rule ("check_uridnsbl");
+  $self->register_eval_rule ("domains_skipped");
   $self->set_config($samain->{conf});
+  $self->{skipped} = 0;
 
   return $self;
 }
@@ -389,6 +391,9 @@ sub parsed_metadata {
   # Generate the full list of html-parsed domains.
   my $uris = $scanner->get_uri_detail_list();
 
+  # Reset the skipped counter
+  $self->{skipped} = 0;
+
   # go from uri => info to uri_ordered
   # 0: a
   # 1: form
@@ -430,6 +435,7 @@ sub parsed_metadata {
     while (my($host,$domain) = each( %{$info->{hosts}} )) {
       if ($skip_domains->{$domain}) {
         dbg("uridnsbl: domain $domain in skip list");
+        $self->{skipped}++;
       } else {
         # use hostname as a key, and drag along the stipped domain name part
         $uri_ordered[$entry]->{$host} = $domain;
@@ -1147,6 +1153,23 @@ sub res_bgsend {
         my ($pkt, $id, $timestamp) = @_;
         $scanner->{async}->set_response_packet($id, $pkt, $key, $timestamp);
       });
+}
+
+# ---------------------------------------------------------------------------
+
+sub domains_skipped {
+  my ($self, $pms) = @_;
+  my $skipped = defined $self->{skipped} ? $self->{skipped} : 0;
+  if ($skipped >= 20) {
+    $pms->got_hit('URI_SKIPPED_20');
+  } elsif ($skipped >= 15) {
+    $pms->got_hit('URI_SKIPPED_15');
+  } elsif ($skipped >= 10) {
+    $pms->got_hit('URI_SKIPPED_10');
+  } elsif ($skipped >= 5) {
+    $pms->got_hit('URI_SKIPPED_5');
+  }
+  return 0;
 }
 
 # ---------------------------------------------------------------------------
