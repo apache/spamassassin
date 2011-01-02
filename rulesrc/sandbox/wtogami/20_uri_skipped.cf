@@ -1,3 +1,5 @@
+ifplugin Mail::SpamAssassin::Plugin::URIDNSBL
+
 body     URI_SKIPPED_20 eval:domains_skipped()
 describe URI_SKIPPED_20 Whitelisted URI's skipped: 20+
 score    URI_SKIPPED_20 0.01
@@ -17,3 +19,5 @@ body     URI_SKIPPED_5 eval:domains_skipped()
 describe URI_SKIPPED_5 Whitelisted URI's skipped: 5-9
 score    URI_SKIPPED_5 0.01
 tflags   net nopublish
+
+endif
