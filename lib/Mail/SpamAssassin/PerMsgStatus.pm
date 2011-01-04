@@ -1117,8 +1117,9 @@ sub tag_is_ready {
   if (would_log('dbg', 'check')) {
     my $tag_val = $self->{tag_data}{$tag};
     dbg("check: tagrun - tag %s is now ready, value: %s",
-         $tag, ref $tag_val ne 'ARRAY' ? $tag_val
-                                       : 'ARY:['.join(',',@$tag_val).']' );
+         $tag, !defined $tag_val ? '<UNDEF>'
+               : ref $tag_val ne 'ARRAY' ? $tag_val
+               : 'ARY:[' . join(',',@$tag_val) . ']' );
   }
   if (ref $self->{tagrun_actions}{$tag}) {  # any action blocking on this tag?
     my $action_ind = 0;
