@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix danmcdonald dos kgolding wt-ackbar-en2-flh wt-ackbar wt-en1 wt-en3 wt-homeone wt-jp1; day 2: bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix danmcdonald dos jm kgolding wt-ackbar wt-en1 wt-en2-flh wt-homeone; day 3: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi danmcdonald dos jm kgolding wt-ackbar wt-en1 wt-en2-flh wt-homeone
+# with results from: day 1: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix danmcdonald dos kgolding wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-homeone wt-jp1; day 2: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix danmcdonald dos jm kgolding wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-homeone wt-jp1; day 3: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix danmcdonald dos jm kgolding wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-homeone wt-jp1
 
 # tflags publish
 ADVANCE_FEE_2_NEW_FORM
@@ -29,7 +29,7 @@ ALL_TRUSTED
 AXB_HELO_HOME_UN
 
 # good enough
-AXB_XMID_DIGDOTSHRT
+BASE64_LENGTH_78_79
 
 # tflags learn
 BAYES_00
@@ -137,7 +137,7 @@ DOS_OE_TO_MX
 DOS_OE_TO_MX_IMAGE
 
 # good enough
-DOS_RCVD_IP_TWICE_C
+DOS_OUTLOOK_TO_MX
 
 # good enough
 DRUGS_STOCK_MIMEOLE
@@ -150,9 +150,6 @@ ENV_AND_HDR_SPF_MATCH
 
 # good enough
 FB_ACHIEVE_BACH
-
-# good enough
-FB_CIALIS_LEO3
 
 # good enough
 FB_GET_MEDS
@@ -344,9 +341,6 @@ HELO_OEM
 HK_NAME_DRUGS
 
 # good enough
-HK_RANDOM_ENVFROM
-
-# good enough
 HK_SCAM_N2
 
 # tflags userconf
@@ -357,6 +351,12 @@ IMG_DIRECT_TO_MX
 
 # good enough
 KAM_LOTTO1
+
+# good enough
+KAM_LOTTO2
+
+# good enough
+KB_DATE_CONTAINS_TAB
 
 # good enough
 KB_FAKED_THE_BAT
@@ -754,6 +754,18 @@ TVD_PCT_OFF
 # good enough
 TVD_QUAL_MEDS
 
+# good enough
+TVD_RCVD_SINGLE
+
+# good enough
+AXB_TRACK_MOZ
+
+# good enough
+OBFU_JPG_ATTACH
+
+# good enough
+TAB_IN_FROM
+
 # tflags userconf
 UNPARSEABLE_RELAY
 
@@ -836,7 +848,31 @@ USER_IN_WHITELIST
 USER_IN_WHITELIST_TO
 
 # good enough
+XMAILER_MIMEOLE_OL_07794
+
+# good enough
 XMAILER_MIMEOLE_OL_1ECD5
+
+# good enough
+XMAILER_MIMEOLE_OL_3857F
+
+# good enough
+XMAILER_MIMEOLE_OL_4BF4C
+
+# good enough
+XMAILER_MIMEOLE_OL_4F240
+
+# good enough
+XMAILER_MIMEOLE_OL_58CB5
+
+# good enough
+XMAILER_MIMEOLE_OL_B30D1
+
+# good enough
+XMAILER_MIMEOLE_OL_B4B40
+
+# good enough
+XMAILER_MIMEOLE_OL_CF0C0
 
 # good enough
 X_MAILER_CME_6543_MSN
