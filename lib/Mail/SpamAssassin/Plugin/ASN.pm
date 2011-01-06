@@ -18,10 +18,31 @@
 # </@LICENSE>
 #
 ###########################################################################
+#
+# Originated by Matthias Leisi, 2006-12-15 (SpamAssassin enhancement #4770).
+# Modifications by D. Stussy, 2010-12-15 (SpamAssassin enhancement #6484):
+#
+# Since SA 3.4.0 a fixed text prefix (such as AS) to each ASN is configurable
+# through an asn_prefix directive. Its value is 'AS' by default for backwards
+# compatibility with SA 3.3.*, but is rather redundant and can be set to an
+# empty string for clarity if desired.
+#
+# Enhanced TXT-RR decoding for alternative formats from other DNS zones.
+# Some of the supported formats of TXT RR are (quoted strings here represent
+# individual string fields in a TXT RR):
+#   "1103" "192.88.99.0" "24"
+#   "559 1103 1239 1257 1299 | 192.88.99.0/24 | US | iana | 2001-06-01"
+#   "192.88.99.0/24 | AS1103 | SURFnet, The Netherlands | 2002-10-15 | EU"
+#   "15169 | 2a00:1450::/32 | IE | ripencc | 2009-10-05"
+#   "as1103"
+#
+# Some zones also support IPv6 lookups, for example:
+#   asn_lookup origin6.asn.cymru.com [_ASN_ _ASNCIDR_]
 
 =head1 NAME
 
-Mail::SpamAssassin::Plugin::ASN - SpamAssassin plugin to look up the Autonomous System Number (ASN) of the connecting IP address.
+Mail::SpamAssassin::Plugin::ASN - SpamAssassin plugin to look up the
+Autonomous System Number (ASN) of the connecting IP address.
 
 =head1 SYNOPSIS
 
@@ -33,35 +54,39 @@ Mail::SpamAssassin::Plugin::ASN - SpamAssassin plugin to look up the Autonomous 
 
 =head1 DESCRIPTION
 
-This plugin uses DNS lookups to the services of
-C<http://www.routeviews.org/> to do the actual work. Please make sure
-that your use of the plugin does not overload their infrastructure -
+This plugin uses DNS lookups to the services of an external DNS zone such
+as at C<http://www.routeviews.org/> to do the actual work. Please make
+sure that your use of the plugin does not overload their infrastructure -
 this generally means that B<you should not use this plugin in a
 high-volume environment> or that you should use a local mirror of the
-zone (see C<ftp://ftp.routeviews.org/dnszones/>).
+zone (see C<ftp://ftp.routeviews.org/dnszones/>).  Other similar zones
+may also be used.
 
 =head1 TEMPLATE TAGS
 
 This plugin allows you to create template tags containing the connecting
 IP's AS number and route info for that AS number.
 
-The default config will add a header that looks like this:
+The default config will add a header field that looks like this:
 
  X-Spam-ASN: AS24940 213.239.192.0/18
 
-where "AS24940" is the ASN and "213.239.192.0/18" is the route
-announced by that ASN where the connecting IP address came from. If
-the AS announces multiple networks (more/less specific), they will
+where "24940" is the ASN and "213.239.192.0/18" is the route
+announced by that ASN where the connecting IP address came from.
+If the AS announces multiple networks (more/less specific), they will
 all be added to the C<_ASNCIDR_> tag, separated by spaces, eg:
 
- X-Spam-ASN: AS1680 89.138.0.0/15 89.139.0.0/16 
+ X-Spam-ASN: AS1680 89.138.0.0/15 89.139.0.0/16
+
+Note that the literal "AS" before the ASN in the _ASN_ tag is configurable
+through the I<asn_prefix> directive and may be set to an empty string.
 
 =head1 CONFIGURATION
 
-The standard ruleset contains a configuration that will add a header
+The standard ruleset contains a configuration that will add a header field
 containing ASN data to scanned messages.  The bayes tokenizer will use the
-added header for bayes calculations, and thus affect which BAYES_* rule will
-trigger for a particular message.
+added header field for bayes calculations, and thus affect which BAYES_* rule
+will trigger for a particular message.
 
 B<Note> that in most cases you should not score on the ASN data directly.
 Bayes learning will probably trigger on the _ASNCIDR_ tag, but probably not
@@ -69,7 +94,7 @@ very well on the _ASN_ tag alone.
 
 =head1 SEE ALSO
 
-http://www.routeviews.org/ - all data regarding routing, ASNs etc
+http://www.routeviews.org/ - all data regarding routing, ASNs, etc....
 
 http://issues.apache.org/SpamAssassin/show_bug.cgi?id=4770 -
 SpamAssassin Issue #4770 concerning this plugin
@@ -88,6 +113,7 @@ use re 'taint';
 use Mail::SpamAssassin;
 use Mail::SpamAssassin::Plugin;
 use Mail::SpamAssassin::Logger;
+use Mail::SpamAssassin::Util qw(reverse_ip_address);
 use Mail::SpamAssassin::Dns;
 
 our @ISA = qw(Mail::SpamAssassin::Plugin);
@@ -97,7 +123,7 @@ sub new {
   $class = ref($class) || $class;
   my $self = $class->SUPER::new($mailsa);
   bless ($self, $class);
-  
+
   $self->set_config($mailsa->{conf});
 
   return $self;
@@ -121,7 +147,7 @@ to the second specified tag.
 
 If no tags are specified the AS number will be added to the _ASN_ tag and the
 routing info will be added to the _ASNCIDR_ tag.  You must specify either none
-or both of the tags.  Tags must start and end with an underscore.
+or both of the tag names.  Tag names must start and end with an underscore.
 
 If two or more I<asn_lookup>s use the same set of template tags, the results of
 their lookups will be appended to each other in the template tag values in no
@@ -141,6 +167,22 @@ Examples:
 
   asn_lookup in1tag.example.net _ASNDATA_ _ASNDATA_
 
+=over 4
+
+=item clear_asn_lookups
+
+Removes any previously declared I<asn_lookup> entries from a list of queries.
+
+=over 4
+
+=item asn_prefix 'prefix_string'       (default: 'AS')
+
+The string specified in the argument is prepended to each ASN when storing
+it as a tag. This prefix is rather redundant, but its default value 'AS'
+is kept for backwards compatibility with versions of SpamAssassin earlier
+than 3.4.0. A sensible setting is an empty string. The argument may be (but
+need not be) enclosed in single or double quotes for clarity.
+
 =back
 
 =cut
@@ -149,7 +191,7 @@ Examples:
     setting => 'asn_lookup',
     is_admin => 1,
     code => sub {
-      my ($self, $key, $value, $line) = @_;
+      my ($conf, $key, $value, $line) = @_;
       unless (defined $value && $value !~ /^$/) {
         return $Mail::SpamAssassin::Conf::MISSING_REQUIRED_VALUE;
       }
@@ -157,11 +199,37 @@ Examples:
       unless ($value =~ /^(\S+?)\.?(?:\s+_(\S+)_\s+_(\S+)_)?$/) {
         return $Mail::SpamAssassin::Conf::INVALID_VALUE;
       }
-      my $zone = $1.'.';
-      my $asn_tag = (defined $2 ? $2 : 'ASN');
-      my $route_tag = (defined $3 ? $3 : 'ASNCIDR');
+      my ($zone, $asn_tag, $route_tag) = ($1, $2, $3);
+      $asn_tag   = 'ASN'     if !defined $asn_tag;
+      $route_tag = 'ASNCIDR' if !defined $route_tag;
+      push @{$conf->{asnlookups}},
+           { zone=>$zone, asn_tag=>$asn_tag, route_tag=>$route_tag };
+    }
+  });
 
-      push @{$self->{main}->{conf}->{asnlookups}}, { zone=>$zone, asn_tag=>$asn_tag, route_tag=>$route_tag };
+  push (@cmds, {
+    setting => 'clear_asn_lookups',
+    is_admin => 1,
+    type => $Mail::SpamAssassin::Conf::CONF_TYPE_NOARGS,
+    code => sub {
+      my ($conf, $key, $value, $line) = @_;
+      if (defined $value && $value ne '') {
+        return $Mail::SpamAssassin::Conf::INVALID_VALUE;
+      }
+      delete $conf->{asnlookups};
+    }
+  });
+
+  push (@cmds, {
+    setting => 'asn_prefix',
+    type => $Mail::SpamAssassin::Conf::CONF_TYPE_STRING,
+    default => 'AS',
+    code => sub {
+      my ($conf, $key, $value, $line) = @_;
+      $value = ''  if !defined $value;
+      local($1,$2);
+      $value = $2  if $value =~ /^(['"])(.*)\1\z/;  # strip quotes if any
+      $conf->{$key} = $value;  # keep tainted
     }
   });
 
@@ -173,7 +241,7 @@ Examples:
 sub parsed_metadata {
   my ($self, $opts) = @_;
 
-  my $scanner = $opts->{permsgstatus};
+  my $pms = $opts->{permsgstatus};
   my $conf = $self->{main}->{conf};
 
   unless ($conf->{asnlookups}) {
@@ -181,90 +249,174 @@ sub parsed_metadata {
     return; # no asn_lookups mean no tags need to be initialized
   }
 
-  # get reversed IP-quad of last external relay to lookup
+  # get reversed IP address of last external relay to lookup
   # don't return until we've initialized the template tags
-  my $reversed_ip_quad;
-  my $relay = $scanner->{relays_external}->[0];
-  if (!$scanner->is_dns_available()) {
+  my($ip,$reversed_ip);
+  my $relay = $pms->{relays_external}->[0];
+  $ip = $relay->{ip}  if defined $relay;
+  if (!$pms->is_dns_available()) {
     dbg("asn: DNS is not available, skipping ASN checks");
+  } elsif (!defined $ip) {
+    dbg("asn: no first external relay IP available, skipping ASN check");
   } elsif ($relay->{ip_private}) {
     dbg("asn: first external relay is a private IP, skipping ASN check");
   } else {
-    local($1,$2,$3,$4);
-    if (defined $relay->{ip} && $relay->{ip} =~ /^(\d+)\.(\d+)\.(\d+)\.(\d+)$/) {
-      $reversed_ip_quad = "$4.$3.$2.$1";
-      dbg("asn: using first external relay IP for lookups: %s", $relay->{ip});
+    $reversed_ip = reverse_ip_address($ip);
+    if (defined $reversed_ip) {
+      dbg("asn: using first external relay IP for lookups: %s", $ip);
     } else {
-      dbg("asn: could not parse IP from first external relay, skipping ASN check");
+      dbg("asn: could not parse first external relay IP: %s, skipping", $ip);
     }
   }
 
-  # random note: we use arrays and array indices rather than hashes and hash
-  # keys in case someone wants the same zone added to multiple sets of tags
+  # we use arrays and array indices rather than hashes and hash keys
+  # in case someone wants the same zone added to multiple sets of tags
   my $index = 0;
   foreach my $entry (@{$conf->{asnlookups}}) {
     # initialize the tag data so that if no result is returned from the DNS
-    # query we won't end up with a missing tag
-    unless (defined $scanner->{tag_data}->{$entry->{asn_tag}}) {
-      $scanner->{tag_data}->{$entry->{asn_tag}} = '';
+    # query we won't end up with a missing tag.  Don't use $pms->set_tag()
+    # here to avoid triggering any tag-dependent action unnecessarily
+    unless (defined $pms->{tag_data}->{$entry->{asn_tag}}) {
+      $pms->{tag_data}->{$entry->{asn_tag}} = '';
     }
-    unless (defined $scanner->{tag_data}->{$entry->{route_tag}}) {
-      $scanner->{tag_data}->{$entry->{route_tag}} = '';
+    unless (defined $pms->{tag_data}->{$entry->{route_tag}}) {
+      $pms->{tag_data}->{$entry->{route_tag}} = '';
     }
-    next unless $reversed_ip_quad;
-  
+    next unless $reversed_ip;
+
     # do the DNS query, have the callback process the result
-    # rather than poll for them later
     my $zone_index = $index;
-    my $zone = $reversed_ip_quad . '.' . $entry->{zone};
+    my $zone = $reversed_ip . '.' . $entry->{zone};
     my $key = "asnlookup-${zone_index}-$entry->{zone}";
-    my $id = $scanner->{main}->{resolver}->bgsend($zone, 'TXT', undef, sub {
+    my $id = $pms->{main}->{resolver}->bgsend($zone, 'TXT', undef, sub {
       my ($pkt, $id, $timestamp) = @_;
-      $scanner->{async}->set_response_packet($id, $pkt, $key, $timestamp);
-      $self->process_dns_result($scanner, $pkt, $zone_index);
+      $pms->{async}->set_response_packet($id, $pkt, $key, $timestamp);
+      $self->process_dns_result($pms, $pkt, $zone_index);
     });
     my $ent = {
       key=>$key, id=>$id, type=>'TXT',
       zone => $zone,  # serves to fetch other per-zone settings
     };
-    $scanner->{async}->start_lookup($ent, $scanner->{master_deadline});
+    $pms->{async}->start_lookup($ent, $pms->{master_deadline});
     dbg("asn: launched DNS TXT query for %s.%s in background",
-        $reversed_ip_quad, $entry->{zone});
+        $reversed_ip, $entry->{zone});
 
     $index++;
   }
 }
 
+#
+# TXT-RR format of response:
+#    3 fields, each as one TXT RR <character-string> (RFC 1035): ASN IP MASK
+#       The latter two fields are combined to create a CIDR.
+#    or:  At least 2 fields made of a single or multiple
+#       <character-string>s, fields are separated by a vertical bar.
+#       They will be the ASN and CIDR fields in any order.
+#    If only one field is returned, it is the ASN.  There will
+#       be no CIDR field in that case.
+#
 sub process_dns_result {
-  my ($self, $scanner, $response, $zone_index) = @_;
+  my ($self, $pms, $response, $zone_index) = @_;
 
   my $conf = $self->{main}->{conf};
 
   my $zone = $conf->{asnlookups}[$zone_index]->{zone};
   my $asn_tag = $conf->{asnlookups}[$zone_index]->{asn_tag};
   my $route_tag = $conf->{asnlookups}[$zone_index]->{route_tag};
-  my %asn_tag_data;
-  my %route_tag_data;
+
+  my($any_asn_updates, $any_route_updates, $tag_value);
+
+  my(@asn_tag_data, %asn_tag_data_seen);
+  $tag_value = $pms->get_tag($asn_tag);
+  if (defined $tag_value) {
+    my $prefix = $pms->{conf}->{asn_prefix};
+    if (defined $prefix && $prefix ne '') {
+      # must strip prefix before splitting on whitespace
+      $tag_value =~ s/(^| )\Q$prefix\E(?=\d+)/$1/gs;
+    }
+    @asn_tag_data = split(/ /,$tag_value);
+    %asn_tag_data_seen = map(($_,1), @asn_tag_data);
+  }
+
+  my(@route_tag_data, %route_tag_data_seen);
+  $tag_value = $pms->get_tag($route_tag);
+  if (defined $tag_value) {
+    @route_tag_data = split(/ /,$tag_value);
+    %route_tag_data_seen = map(($_,1), @route_tag_data);
+  }
 
   my @answer = !defined $response ? () : $response->answer;
 
   foreach my $rr (@answer) {
-    dbg("asn: %s: lookup result packet: '%s'", $zone, $rr->string);
-    if ($rr->type eq 'TXT') {
-      my @items = split(/ /, $rr->txtdata);
-      unless (@items == 3) {
-        dbg("asn: TXT query response format unknown, ignoring zone: %s, ".
-            "response: '%s'", $zone, $rr->txtdata);
-        next;
+    dbg("asn: %s: lookup result packet: %s", $zone, $rr->string);
+    next if $rr->type ne 'TXT';
+    my @strings = $rr->char_str_list;
+    next if !@strings;
+
+    my @items;
+    if (@strings > 1 && join('',@strings) !~ m{\|}) {
+      # routeviews.org style, multiple string fields in a TXT RR
+      @items = @strings;
+      if (@items >= 3 && $items[1] !~ m{/} && $items[2] =~ /^\d+\z/) {
+        $items[1] .= '/' . $items[2];  # append the net mask length to route
       }
-      $asn_tag_data{'AS'.$items[0]} = 1;
-      $route_tag_data{$items[1].'/'.$items[2]} = 1;
+    } else {
+      # cymru.com and spameatingmonkey.net style, or just a single field
+      @items = split(/\s*\|\s*/, join(' ',@strings));
+    }
+
+    my(@route_value, @asn_value);
+    if (@items && $items[0] =~ /(?: (?:^|\s+) (?:AS)? \d+ )+ \z/xsi) {
+      # routeviews.org and cymru.com style, ASN is the first field,
+      # possibly a whitespace-separated list (e.g. cymru.com)
+      @asn_value = split(' ',$items[0]);
+      @route_value = split(' ',$items[1])  if @items >= 2;
+    } elsif (@items > 1 && $items[1] =~ /(?: (?:^|\s+) (?:AS)? \d+ )+ \z/xsi) {
+      # spameatingmonkey.net style, ASN is the second field
+      @asn_value = split(' ',$items[1]);
+      @route_value = split(' ',$items[0]);
+    } else {
+      dbg("asn: unparseable response: %s", join(' ', map("\"$_\"",@strings)));
+    }
+
+    foreach my $route (@route_value) {
+      if (!defined $route || $route eq '') {
+        # ignore, just in case
+      } elsif ($route =~ m{/0+\z}) {
+        # unassigned/unannounced address space
+      } elsif ($route_tag_data_seen{$route}) {
+        dbg("asn: %s duplicate route %s", $route_tag, $route);
+      } else {
+        dbg("asn: %s added route %s", $route_tag, $route);
+        push(@route_tag_data, $route);
+        $route_tag_data_seen{$route} = 1;
+        $any_route_updates = 1;
+      }
+    }
+
+    foreach my $asn (@asn_value) {
+      $asn =~ s/^AS(?=\d+)//si;
+      if (!$asn || $asn == 4294967295) {
+        # unassigned/unannounced address space
+      } elsif ($asn_tag_data_seen{$asn}) {
+        dbg("asn: %s duplicate asn %s", $asn_tag, $asn);
+      } else {
+        dbg("asn: %s added asn %s", $asn_tag, $asn);
+        push(@asn_tag_data, $asn);
+        $asn_tag_data_seen{$asn} = 1;
+        $any_asn_updates = 1;
+      }
     }
   }
-  $scanner->set_tag($asn_tag,   join(' ', keys %asn_tag_data));
-  $scanner->set_tag($route_tag, join(' ', keys %route_tag_data));
 
-  return;
+  if ($any_asn_updates && @asn_tag_data) {
+    my $prefix = $pms->{conf}->{asn_prefix};
+    if (defined $prefix && $prefix ne '') { s/^/$prefix/ for @asn_tag_data }
+    $pms->set_tag($asn_tag, join(' ',@asn_tag_data));
+  }
+  if ($any_route_updates && @route_tag_data) {
+    $pms->set_tag($route_tag, join(' ',@route_tag_data));
+  }
 }
 
 1;
