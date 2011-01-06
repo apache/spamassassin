@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix danmcdonald dos kgolding wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-homeone wt-jp1; day 2: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix danmcdonald dos jm kgolding wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-homeone wt-jp1; day 3: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix danmcdonald dos jm kgolding wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-homeone wt-jp1
+# with results from: day 1: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix danmcdonald dos jm kgolding wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-homeone wt-jp1; day 2: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix danmcdonald dos jm kgolding wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-homeone wt-jp1; day 3: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix danmcdonald dos jm kgolding wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-homeone wt-jp1
 
 # tflags publish
 ADVANCE_FEE_2_NEW_FORM
@@ -27,6 +27,9 @@ ALL_TRUSTED
 
 # good enough
 AXB_HELO_HOME_UN
+
+# good enough
+AXB_TRACK_MOZ
 
 # good enough
 BASE64_LENGTH_78_79
@@ -140,7 +143,13 @@ DOS_OE_TO_MX_IMAGE
 DOS_OUTLOOK_TO_MX
 
 # good enough
+DOS_RCVD_IP_TWICE_C
+
+# good enough
 DRUGS_STOCK_MIMEOLE
+
+# good enough
+DYN_RDNS_AND_INLINE_IMAGE
 
 # good enough
 DYN_RDNS_SHORT_HELO_HTML
@@ -150,6 +159,9 @@ ENV_AND_HDR_SPF_MATCH
 
 # good enough
 FB_ACHIEVE_BACH
+
+# good enough
+FB_CIALIS_LEO3
 
 # good enough
 FB_GET_MEDS
@@ -339,6 +351,9 @@ HELO_OEM
 
 # good enough
 HK_NAME_DRUGS
+
+# good enough
+HK_RANDOM_ENVFROM
 
 # good enough
 HK_SCAM_N2
@@ -701,6 +716,9 @@ SUBJECT_IN_WHITELIST
 SUBJECT_NEEDS_ENCODING
 
 # good enough
+TAB_IN_FROM
+
+# good enough
 TINY_FLOAT
 
 # tflags publish
@@ -758,13 +776,10 @@ TVD_QUAL_MEDS
 TVD_RCVD_SINGLE
 
 # good enough
-AXB_TRACK_MOZ
+HK_SCAM_N8
 
 # good enough
-OBFU_JPG_ATTACH
-
-# good enough
-TAB_IN_FROM
+JM_FAKE_PSMTP_RCVD
 
 # tflags userconf
 UNPARSEABLE_RELAY
@@ -848,6 +863,9 @@ USER_IN_WHITELIST
 USER_IN_WHITELIST_TO
 
 # good enough
+XMAILER_MIMEOLE_OL_015D5
+
+# good enough
 XMAILER_MIMEOLE_OL_07794
 
 # good enough
@@ -860,10 +878,19 @@ XMAILER_MIMEOLE_OL_3857F
 XMAILER_MIMEOLE_OL_4BF4C
 
 # good enough
+XMAILER_MIMEOLE_OL_4EEDB
+
+# good enough
 XMAILER_MIMEOLE_OL_4F240
 
 # good enough
 XMAILER_MIMEOLE_OL_58CB5
+
+# good enough
+XMAILER_MIMEOLE_OL_6554A
+
+# good enough
+XMAILER_MIMEOLE_OL_812FF
 
 # good enough
 XMAILER_MIMEOLE_OL_B30D1
@@ -872,7 +899,19 @@ XMAILER_MIMEOLE_OL_B30D1
 XMAILER_MIMEOLE_OL_B4B40
 
 # good enough
+XMAILER_MIMEOLE_OL_C65FA
+
+# good enough
 XMAILER_MIMEOLE_OL_CF0C0
+
+# good enough
+XMAILER_MIMEOLE_OL_F3B05
+
+# good enough
+XMAILER_MIMEOLE_OL_F6D01
+
+# good enough
+XMAILER_MIMEOLE_OL_FF5C8
 
 # good enough
 X_MAILER_CME_6543_MSN
