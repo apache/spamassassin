@@ -35,6 +35,8 @@
 #   "192.88.99.0/24 | AS1103 | SURFnet, The Netherlands | 2002-10-15 | EU"
 #   "15169 | 2a00:1450::/32 | IE | ripencc | 2009-10-05"
 #   "as1103"
+# Multiple routes are sometimes provided by returning multiple TXT records
+# (e.g. from cymru.com). This form of a response is handled as well.
 #
 # Some zones also support IPv6 lookups, for example:
 #   asn_lookup origin6.asn.cymru.com [_ASN_ _ASNCIDR_]
@@ -410,11 +412,13 @@ sub process_dns_result {
   }
 
   if ($any_asn_updates && @asn_tag_data) {
+    $pms->{msg}->put_metadata('X-ASN', join(' ',@asn_tag_data));
     my $prefix = $pms->{conf}->{asn_prefix};
     if (defined $prefix && $prefix ne '') { s/^/$prefix/ for @asn_tag_data }
     $pms->set_tag($asn_tag, join(' ',@asn_tag_data));
   }
   if ($any_route_updates && @route_tag_data) {
+    $pms->{msg}->put_metadata('X-ASN-Route', join(' ',@route_tag_data));
     $pms->set_tag($route_tag, join(' ',@route_tag_data));
   }
 }
