@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix danmcdonald dos jm kgolding wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-homeone wt-jp1; day 2: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix danmcdonald dos jm kgolding wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-homeone wt-jp1; day 3: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix danmcdonald dos jm kgolding wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-homeone wt-jp1
+# with results from: day 1: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix danmcdonald dos kgolding wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-homeone wt-jp1; day 2: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix danmcdonald dos jm kgolding wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-homeone wt-jp1; day 3: bb-doc bb-fredt bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-trec_enron bb-zmi bernie-it_batt bernie-mix danmcdonald dos jm kgolding wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-homeone wt-jp1
 
 # tflags publish
 ADVANCE_FEE_2_NEW_FORM
@@ -147,9 +147,6 @@ DOS_RCVD_IP_TWICE_C
 
 # good enough
 DRUGS_STOCK_MIMEOLE
-
-# good enough
-DYN_RDNS_AND_INLINE_IMAGE
 
 # good enough
 DYN_RDNS_SHORT_HELO_HTML
@@ -353,9 +350,6 @@ HELO_OEM
 HK_NAME_DRUGS
 
 # good enough
-HK_RANDOM_ENVFROM
-
-# good enough
 HK_SCAM_N2
 
 # tflags userconf
@@ -412,9 +406,6 @@ MISSING_HB_SEP
 # good enough
 MONEY_ATM_CARD
 
-# good enough
-MONEY_FORM
-
 # tflags publish
 MONEY_FRAUD_3
 
@@ -447,6 +438,9 @@ NSL_RCVD_FROM_USER
 
 # good enough
 OBFU_ATTACH_MISSP
+
+# good enough
+OBFU_JPG_ATTACH
 
 # tflags publish
 OBFU_JVSCR_ESC
@@ -775,12 +769,6 @@ TVD_QUAL_MEDS
 # good enough
 TVD_RCVD_SINGLE
 
-# good enough
-HK_SCAM_N8
-
-# good enough
-JM_FAKE_PSMTP_RCVD
-
 # tflags userconf
 UNPARSEABLE_RELAY
 
@@ -863,25 +851,10 @@ USER_IN_WHITELIST
 USER_IN_WHITELIST_TO
 
 # good enough
-XMAILER_MIMEOLE_OL_015D5
-
-# good enough
 XMAILER_MIMEOLE_OL_07794
 
 # good enough
 XMAILER_MIMEOLE_OL_1ECD5
-
-# good enough
-XMAILER_MIMEOLE_OL_3857F
-
-# good enough
-XMAILER_MIMEOLE_OL_4BF4C
-
-# good enough
-XMAILER_MIMEOLE_OL_4EEDB
-
-# good enough
-XMAILER_MIMEOLE_OL_4F240
 
 # good enough
 XMAILER_MIMEOLE_OL_58CB5
@@ -890,28 +863,10 @@ XMAILER_MIMEOLE_OL_58CB5
 XMAILER_MIMEOLE_OL_6554A
 
 # good enough
-XMAILER_MIMEOLE_OL_812FF
-
-# good enough
-XMAILER_MIMEOLE_OL_B30D1
-
-# good enough
 XMAILER_MIMEOLE_OL_B4B40
 
 # good enough
-XMAILER_MIMEOLE_OL_C65FA
-
-# good enough
-XMAILER_MIMEOLE_OL_CF0C0
-
-# good enough
 XMAILER_MIMEOLE_OL_F3B05
-
-# good enough
-XMAILER_MIMEOLE_OL_F6D01
-
-# good enough
-XMAILER_MIMEOLE_OL_FF5C8
 
 # good enough
 X_MAILER_CME_6543_MSN
