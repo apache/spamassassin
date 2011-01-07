@@ -116,8 +116,7 @@ sub parse_received_headers {
   # Now add the single line headers like X-Originating-IP. (bug 5680)
   # we convert them into synthetic "Received" headers so we can share
   # code below.
-  for my $header ('X-Yahoo-Post-IP', 'X-Originating-IP',
-                    'X-Apparently-From', 'X-SenderIP')
+  for my $header (@{$permsgstatus->{main}->{conf}->{originating_ip_headers}})
   {
     my $str = $msg->get_header($header);
     next unless ($str && $str =~ m/($IP_ADDRESS)/);
