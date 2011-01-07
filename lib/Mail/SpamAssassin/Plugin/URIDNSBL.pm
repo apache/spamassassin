@@ -57,6 +57,18 @@ Specify a domain, or a number of domains, which should be skipped for the
 URIBL checks.  This is very useful to specify very common domains which are
 not going to be listed in URIBLs.
 
+=over 4
+
+=item clear_uridnsbl_skip_domain [domain1 domain2 ...]
+
+If no argument is given, then clears the entire list of domains declared
+by I<uridnsbl_skip_domain> configuration directives so far. Any subsequent
+I<uridnsbl_skip_domain> directives will start creating a new list of skip
+domains.
+
+When given a list of domains as arguments, only the specified domains
+are removed from the list of skipped domains.
+
 =back
 
 =head1 RULE DEFINITIONS AND PRIVILEGED SETTINGS
@@ -382,6 +394,7 @@ sub parsed_metadata {
 
   # don't keep dereferencing this
   my $skip_domains = $conf->{uridnsbl_skip_domains};
+  $skip_domains = {}  if !$skip_domains;
 
   # list of hashes to use in order
   my @uri_ordered;
@@ -760,6 +773,22 @@ sub set_config {
       }
       foreach my $domain (split(/\s+/, $value)) {
         $self->{uridnsbl_skip_domains}->{lc $domain} = 1;
+      }
+    }
+  });
+
+  push (@cmds, {
+    setting => 'clear_uridnsbl_skip_domain',
+    type => $Mail::SpamAssassin::Conf::CONF_TYPE_HASH_KEY_VALUE,
+    code => sub {
+      my ($self, $key, $value, $line) = @_;
+      if (!defined $value || $value eq '') {
+        # clear the entire list
+        $self->{uridnsbl_skip_domains} = {};
+      } else {
+        foreach my $domain (split(/\s+/, $value)) {
+          delete $self->{uridnsbl_skip_domains}->{lc $domain};
+        }
       }
     }
   });
