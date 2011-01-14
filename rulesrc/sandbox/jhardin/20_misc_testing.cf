@@ -533,5 +533,16 @@ describe    __LIST_PARTIAL         Has incomplete List-* header set
 uri         __UCOZ_URI             /\.ucoz\.org\//i
 describe    __UCOZ_URI             URI contains ucoz.org
 
+# Intrust Domains is a persistent domain registration spammer
+# recent sign, will likely change
+body        __ARTHUR_SIMMONS       /Arthur Simmons/
+body        __INTRUST_DOMS         /In[Tt]rust Domains/
+meta        ARTHUR_INTRUST         __ARTHUR_SIMMONS && __INTRUST_DOMS
+score       ARTHUR_INTRUST         4.5
+describe    ARTHUR_INTRUST         Arthur Simmons - registrar spammer extraordinaire
+
+header      ART_NAMES_ORG          Received =~ /\bart\.names\.org\b/i
+score       ART_NAMES_ORG          4.0
+describe    ART_NAMES_ORG          Arthur Simmons - registrar spammer extraordinaire
 
 
