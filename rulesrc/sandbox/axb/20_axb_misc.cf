@@ -29,12 +29,6 @@ header          __UA_NIX                User-Agent =~ /(?:Macintosh|X11)/
 header          __UA_NT4                User-Agent =~ /U\; NT4\.0\;/
 meta            AXB_TRACK_MOZ           (__UA_MOZ5 && __UA_NIX && __UA_NT4)
 describe        AXB_TRACK_MOZ           MozTrack
-#score           AXB_TRACK_MOZ           0.001
-
-
-# 2011-01-12
-header          AXB_XM_EDMAILR6         X-Mailer =~ /^EDMAIL R6\.00\.02$/
-describe        AXB_XM_EDMAILR6         fingerprint
-#score           AXB_XM_EDMAILR6         2.5
+#score           AXB_TRACK_MOZ           1.5
 
 
