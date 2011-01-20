@@ -32,22 +32,27 @@ ifplugin Mail::SpamAssassin::Plugin::DNSEval
 
 header	__RCVD_IN_DNSWL		eval:check_rbl('dnswl-firsttrusted', 'list.dnswl.org.')
 tflags	__RCVD_IN_DNSWL		nice net
+reuse   __RCVD_IN_DNSWL
 
 header	RCVD_IN_DNSWL_NONE	eval:check_rbl_sub('dnswl-firsttrusted', '127.0.\d+.0')
 describe RCVD_IN_DNSWL_NONE	Sender listed at http://www.dnswl.org/, low trust
 tflags RCVD_IN_DNSWL_NONE	nice net
+reuse  RCVD_IN_DNSWL_NONE
 
 header	RCVD_IN_DNSWL_LOW	eval:check_rbl_sub('dnswl-firsttrusted', '127.0.\d+.1')
 describe RCVD_IN_DNSWL_LOW	Sender listed at http://www.dnswl.org/, low trust
 tflags RCVD_IN_DNSWL_LOW	nice net
+reuse  RCVD_IN_DNSWL_LOW
 
 header	RCVD_IN_DNSWL_MED	eval:check_rbl_sub('dnswl-firsttrusted', '127.0.\d+.2')
 describe RCVD_IN_DNSWL_MED	Sender listed at http://www.dnswl.org/, medium trust
 tflags RCVD_IN_DNSWL_MED	nice net
+reuse  RCVD_IN_DNSWL_MED
 
 header	RCVD_IN_DNSWL_HI	eval:check_rbl_sub('dnswl-firsttrusted', '127.0.\d+.3')
 describe RCVD_IN_DNSWL_HI	Sender listed at http://www.dnswl.org/, high trust
 tflags RCVD_IN_DNSWL_HI		nice net
+reuse  RCVD_IN_DNSWL_HI
 
 ## score RCVD_IN_DNSWL_LOW		-1
 ## score RCVD_IN_DNSWL_MED		-4
