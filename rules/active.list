@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-it_batt bernie-mix danmcdonald darxus dos grenier jarif jm kgolding wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-homeone wt-jp1; day 2: bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-it_batt bernie-mix danmcdonald darxus dos grenier jarif jm kgolding nbebout wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-homeone wt-jp1; day 3: bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-it_batt bernie-mix danmcdonald dos jarif jm kgolding wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-homeone wt-jp1
+# with results from: day 1: bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-it_batt bernie-mix danmcdonald darxus dos grenier jarif jm wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-homeone wt-jp1; day 2: bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-it_batt bernie-mix danmcdonald darxus dos grenier jarif jm kgolding nbebout wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-homeone wt-jp1; day 3: bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-it_batt bernie-mix danmcdonald darxus dos grenier jarif jm kgolding nbebout wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-homeone wt-jp1
 
 # tflags publish
 ADVANCE_FEE_2_NEW_FORM
@@ -149,6 +149,9 @@ DOS_RCVD_IP_TWICE_C
 DRUGS_STOCK_MIMEOLE
 
 # good enough
+DYN_RDNS_AND_INLINE_IMAGE
+
+# good enough
 DYN_RDNS_SHORT_HELO_HTML
 
 # tflags userconf
@@ -291,6 +294,12 @@ FSL_HELO_NON_FQDN_1
 
 # good enough
 FSL_MID_419
+
+# good enough
+FSL_UA
+
+# good enough
+FSL_XM_419
 
 # good enough
 FS_REPLICAWATCH
@@ -647,6 +656,9 @@ S25R_6
 SINGLE_HEADER_2K
 
 # good enough
+SINGLE_HEADER_3K
+
+# good enough
 SPAMMY_MIME_BDRY_01
 
 # good enough
@@ -737,6 +749,9 @@ TO_NO_BRKTS_DIRECT
 TO_NO_BRKTS_DYNIP
 
 # good enough
+TO_NO_BRKTS_NORDNS
+
+# good enough
 TO_NO_BRKTS_NORDNS_HTML
 
 # good enough
@@ -761,22 +776,16 @@ TVD_QUAL_MEDS
 TVD_RCVD_SINGLE
 
 # good enough
-FSL_UA
+FROM_MISSP_EH_MATCH
 
 # good enough
-FSL_XM_419
+HK_SCAM_N8
 
 # good enough
-HTML_ATTACH
+LOTTO_AGENT
 
 # good enough
-OBFU_JPG_ATTACH
-
-# good enough
-SINGLE_HEADER_3K
-
-# good enough
-TO_NO_BRKTS_NORDNS
+YOUR_PERMISSION
 
 # tflags userconf
 UNPARSEABLE_RELAY
