@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-it_batt bernie-mix danmcdonald darxus dos grenier jarif jm wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-homeone wt-jp1; day 2: bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-it_batt bernie-mix danmcdonald darxus dos grenier jarif jm kgolding nbebout wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-homeone wt-jp1; day 3: bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-it_batt bernie-mix danmcdonald darxus dos grenier jarif jm kgolding nbebout wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-homeone wt-jp1
+# with results from: day 1: bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-it_batt bernie-mix darxus dos grenier jarif nbebout wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-homeone wt-jp1; day 2: bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-it_batt bernie-mix danmcdonald darxus dos grenier jarif jm wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-homeone wt-jp1; day 3: bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-it_batt bernie-mix danmcdonald darxus dos grenier jarif jm kgolding nbebout wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-homeone wt-jp1
 
 # tflags publish
 ADVANCE_FEE_2_NEW_FORM
@@ -179,9 +179,6 @@ FB_QUALITY_REPLICA
 FB_REPLICA_ROLEX
 
 # good enough
-FB_SOFTTABS
-
-# good enough
 FH_FAKE_RCVD_LINE
 
 # good enough
@@ -354,6 +351,9 @@ HK_NAME_DRUGS
 
 # good enough
 HK_SCAM_N2
+
+# good enough
+HK_SCAM_N8
 
 # tflags userconf
 HTML_CHARSET_FARAWAY
@@ -776,16 +776,10 @@ TVD_QUAL_MEDS
 TVD_RCVD_SINGLE
 
 # good enough
-FROM_MISSP_EH_MATCH
+HTML_ATTACH
 
 # good enough
-HK_SCAM_N8
-
-# good enough
-LOTTO_AGENT
-
-# good enough
-YOUR_PERMISSION
+OBFU_JPG_ATTACH
 
 # tflags userconf
 UNPARSEABLE_RELAY
@@ -869,49 +863,10 @@ USER_IN_WHITELIST
 USER_IN_WHITELIST_TO
 
 # good enough
-XMAILER_MIMEOLE_OL_015D5
-
-# good enough
-XMAILER_MIMEOLE_OL_07794
-
-# good enough
 XMAILER_MIMEOLE_OL_1ECD5
 
 # good enough
-XMAILER_MIMEOLE_OL_4BF4C
-
-# good enough
-XMAILER_MIMEOLE_OL_4EEDB
-
-# good enough
-XMAILER_MIMEOLE_OL_4F240
-
-# good enough
-XMAILER_MIMEOLE_OL_58CB5
-
-# good enough
 XMAILER_MIMEOLE_OL_6554A
-
-# good enough
-XMAILER_MIMEOLE_OL_812FF
-
-# good enough
-XMAILER_MIMEOLE_OL_B30D1
-
-# good enough
-XMAILER_MIMEOLE_OL_B4B40
-
-# good enough
-XMAILER_MIMEOLE_OL_C65FA
-
-# good enough
-XMAILER_MIMEOLE_OL_CF0C0
-
-# good enough
-XMAILER_MIMEOLE_OL_F3B05
-
-# good enough
-XMAILER_MIMEOLE_OL_F6D01
 
 # tflags net
 __DKIMDOMAIN_IN_DWL_ANY
