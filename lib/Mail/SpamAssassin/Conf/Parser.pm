@@ -1342,6 +1342,7 @@ sub add_to_addrlist_rcvd {
   my ($self, $listname, $addr, $domain) = @_;
   my $conf = $self->{conf};
 
+  $domain = lc $domain;
   $addr = lc $addr;
   if ($conf->{$listname}->{$addr}) {
     push @{$conf->{$listname}->{$addr}{domain}}, $domain;
@@ -1362,7 +1363,7 @@ sub remove_from_addrlist {
   my $conf = $self->{conf};
 
   foreach my $addr (@addrs) {
-    delete($conf->{$singlelist}->{$addr});
+    delete($conf->{$singlelist}->{lc $addr});
   }
 }
 
@@ -1371,7 +1372,7 @@ sub remove_from_addrlist_rcvd {
   my $conf = $self->{conf};
 
   foreach my $addr (@addrs) {
-    delete($conf->{$listname}->{$addr});
+    delete($conf->{$listname}->{lc $addr});
   }
 }
 

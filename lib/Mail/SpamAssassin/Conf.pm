@@ -295,11 +295,12 @@ whitelisting methods, or C<whitelist_from_rcvd>.
 
 Whitelist and blacklist addresses are now file-glob-style patterns, so
 C<friend@somewhere.com>, C<*@isp.com>, or C<*.domain.net> will all work.
-Specifically, C<*> and C<?> are allowed, but all other metacharacters are not.
-Regular expressions are not used for security reasons.
+Specifically, C<*> and C<?> are allowed, but all other metacharacters
+are not. Regular expressions are not used for security reasons.
+Matching is case-insensitive.
 
 Multiple addresses per line, separated by spaces, is OK.  Multiple
-C<whitelist_from> lines is also OK.
+C<whitelist_from> lines are also OK.
 
 The headers checked for whitelist addresses are as follows: if C<Resent-From>
 is set, use that; otherwise check all addresses taken from the following
@@ -330,8 +331,9 @@ e.g.
 Used to override a default whitelist_from entry, so for example a distribution
 whitelist_from can be overridden in a local.cf file, or an individual user can
 override a whitelist_from entry in their own C<user_prefs> file.
-The specified email address has to match exactly the address previously
-used in a whitelist_from line.
+The specified email address has to match exactly (although case-insensitively)
+the address previously used in a whitelist_from line, which implies that a
+wildcard only matches literally the same wildcard (not 'any' address).
 
 e.g.
 
@@ -352,7 +354,7 @@ e.g.
 Works similarly to whitelist_from, except that in addition to matching
 a sender address, a relay's rDNS name must match too for the whitelisting
 rule to fire. The first parameter is an address to whitelist, and the
-second is a string to match the relay's rDNS.
+second is a string to match the relay's rDNS. Matching is case-insensitive.
 
 This string is matched against the reverse DNS lookup used during the handover
 from the internet to your internal network's mail exchangers.  It can
@@ -424,11 +426,12 @@ C<whitelist_allows_relay> prevents that.
 
 Whitelist and blacklist addresses are now file-glob-style patterns, so
 C<friend@somewhere.com>, C<*@isp.com>, or C<*.domain.net> will all work.
-Specifically, C<*> and C<?> are allowed, but all other metacharacters are not.
-Regular expressions are not used for security reasons.
+Specifically, C<*> and C<?> are allowed, but all other metacharacters
+are not. Regular expressions are not used for security reasons.
+Matching is case-insensitive.
 
 Multiple addresses per line, separated by spaces, is OK.  Multiple
-C<whitelist_allows_relays> lines is also OK.
+C<whitelist_allows_relays> lines are also OK.
 
 The specified email address does not have to match exactly the address
 previously used in a whitelist_from_rcvd line as it is compared to the
