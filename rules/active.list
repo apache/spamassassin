@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-it_batt bernie-mix darxus dos grenier jarif nbebout wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-homeone wt-jp1; day 2: bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-it_batt bernie-mix danmcdonald darxus dos grenier jarif jm wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-homeone wt-jp1; day 3: bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-it_batt bernie-mix danmcdonald darxus dos grenier jarif jm kgolding nbebout wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-homeone wt-jp1
+# with results from: day 1: bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm danmcdonald darxus dos grenier jarif kgolding nbebout wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-homeone wt-jp1 wt-oink-oink-splat; day 2: bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-it_batt bernie-mix danmcdonald darxus dos grenier jarif jm kgolding nbebout wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-homeone wt-jp1; day 3: bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-it_batt bernie-mix danmcdonald darxus dos jarif jm kgolding wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-homeone wt-jp1
 
 # tflags publish
 ADVANCE_FEE_2_NEW_FORM
@@ -149,9 +149,6 @@ DOS_RCVD_IP_TWICE_C
 DRUGS_STOCK_MIMEOLE
 
 # good enough
-DYN_RDNS_AND_INLINE_IMAGE
-
-# good enough
 DYN_RDNS_SHORT_HELO_HTML
 
 # tflags userconf
@@ -183,6 +180,9 @@ FH_FAKE_RCVD_LINE
 
 # good enough
 FH_FAKE_RCVD_LINE_B
+
+# good enough
+FH_FROM_GET_NAME
 
 # good enough
 FH_HELO_ALMOST_IP
@@ -261,9 +261,6 @@ FRT_PRICE
 
 # good enough
 FRT_ROLEX
-
-# good enough
-FR_WATCHES_HTTP
 
 # good enough
 FSL_BOTSPAM_1
@@ -351,9 +348,6 @@ HK_NAME_DRUGS
 
 # good enough
 HK_SCAM_N2
-
-# good enough
-HK_SCAM_N8
 
 # tflags userconf
 HTML_CHARSET_FARAWAY
@@ -749,9 +743,6 @@ TO_NO_BRKTS_DIRECT
 TO_NO_BRKTS_DYNIP
 
 # good enough
-TO_NO_BRKTS_NORDNS
-
-# good enough
 TO_NO_BRKTS_NORDNS_HTML
 
 # good enough
@@ -776,10 +767,7 @@ TVD_QUAL_MEDS
 TVD_RCVD_SINGLE
 
 # good enough
-HTML_ATTACH
-
-# good enough
-OBFU_JPG_ATTACH
+TVD_VISIT_PHARMA
 
 # tflags userconf
 UNPARSEABLE_RELAY
@@ -863,10 +851,46 @@ USER_IN_WHITELIST
 USER_IN_WHITELIST_TO
 
 # good enough
+XMAILER_MIMEOLE_OL_015D5
+
+# good enough
+XMAILER_MIMEOLE_OL_07794
+
+# good enough
 XMAILER_MIMEOLE_OL_1ECD5
 
 # good enough
+XMAILER_MIMEOLE_OL_4BF4C
+
+# good enough
+XMAILER_MIMEOLE_OL_4EEDB
+
+# good enough
+XMAILER_MIMEOLE_OL_4F240
+
+# good enough
+XMAILER_MIMEOLE_OL_58CB5
+
+# good enough
 XMAILER_MIMEOLE_OL_6554A
+
+# good enough
+XMAILER_MIMEOLE_OL_B30D1
+
+# good enough
+XMAILER_MIMEOLE_OL_B4B40
+
+# good enough
+XMAILER_MIMEOLE_OL_C65FA
+
+# good enough
+XMAILER_MIMEOLE_OL_CF0C0
+
+# good enough
+XMAILER_MIMEOLE_OL_F3B05
+
+# good enough
+XMAILER_MIMEOLE_OL_F6D01
 
 # tflags net
 __DKIMDOMAIN_IN_DWL_ANY
