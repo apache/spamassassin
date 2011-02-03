@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-it_batt bernie-mix danmcdonald darxus dos grenier jarif jm kgolding nbebout wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap-en wt-homeone wt-jp1; day 2: bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-it_batt bernie-mix danmcdonald darxus dos grenier jarif jm kgolding nbebout wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap-en wt-homeone wt-jp1; day 3: bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-it_batt bernie-mix danmcdonald darxus jarif jm kgolding
+# with results from: day 1: bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-it_batt bernie-mix danmcdonald darxus dos grenier jarif jm nbebout wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap-en wt-homeone wt-jp1; day 2: bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-it_batt bernie-mix danmcdonald darxus dos grenier jarif jm kgolding nbebout wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap-en wt-homeone wt-jp1; day 3: bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-it_batt bernie-mix danmcdonald darxus dos grenier jarif jm kgolding nbebout wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap-en wt-homeone wt-jp1
 
 # tflags publish
 ADVANCE_FEE_2_NEW_FORM
@@ -152,10 +152,19 @@ DOS_RCVD_IP_TWICE_C
 DRUGS_STOCK_MIMEOLE
 
 # good enough
+DYN_RDNS_AND_INLINE_IMAGE
+
+# good enough
 DYN_RDNS_SHORT_HELO_HTML
 
 # tflags userconf
 ENV_AND_HDR_SPF_MATCH
+
+# good enough
+FB_CIALIS_LEO3
+
+# good enough
+FB_GET_MEDS
 
 # good enough
 FB_GVR
@@ -179,6 +188,9 @@ FH_FAKE_RCVD_LINE
 FH_FAKE_RCVD_LINE_B
 
 # good enough
+FH_FROM_GET_NAME
+
+# good enough
 FH_HELO_ALMOST_IP
 
 # good enough
@@ -186,6 +198,9 @@ FH_HELO_EQ_D_D_D_D
 
 # good enough
 FH_HOST_EQ_DYNAMICIP
+
+# good enough
+FH_HOST_IN_ADDRARPA
 
 # tflags publish
 FILL_THIS_FORM
@@ -239,7 +254,16 @@ FROM_MISSP_TO_UNDISC
 FROM_MISSP_USER
 
 # good enough
+FRT_APPROV
+
+# good enough
 FRT_PHARMAC
+
+# good enough
+FRT_PRICE
+
+# good enough
+FRT_ROLEX
 
 # good enough
 FSL_BOTSPAM_1
@@ -269,7 +293,16 @@ FSL_UA
 FSL_XM_419
 
 # good enough
+FS_PHARMASUB2
+
+# good enough
+FS_REPLICA
+
+# good enough
 FS_REPLICAWATCH
+
+# good enough
+FS_WEIGHT_LOSS
 
 # good enough
 FS_WILL_HELP
@@ -314,10 +347,16 @@ HELO_LH_HOME
 HELO_NO_DOMAIN
 
 # good enough
+HELO_OEM
+
+# good enough
 HK_NAME_DRUGS
 
 # good enough
 HK_SCAM_N2
+
+# good enough
+HK_SCAM_N8
 
 # tflags userconf
 HTML_CHARSET_FARAWAY
@@ -598,6 +637,9 @@ RCVD_IN_SORBS_ZOMBIE
 # tflags net
 RCVD_IN_XBL
 
+# good enough
+RDNS_LOCALHOST
+
 # tflags net
 RFC_ABUSE_POST
 
@@ -638,7 +680,13 @@ SPF_PASS
 SPF_SOFTFAIL
 
 # good enough
+STOCK_IMG_CTYPE
+
+# good enough
 STOCK_IMG_HDR_FROM
+
+# good enough
+STOCK_IMG_OUTLOOK
 
 # good enough
 STOX_REPLY_TYPE_WITHOUT_QUOTES
@@ -651,6 +699,9 @@ SUBJECT_IN_BLACKLIST
 
 # tflags userconf
 SUBJECT_IN_WHITELIST
+
+# good enough
+SUBJECT_NEEDS_ENCODING
 
 # good enough
 TAB_IN_FROM
@@ -719,7 +770,43 @@ TVD_RCVD_SINGLE
 TVD_VISIT_PHARMA
 
 # good enough
-HK_SCAM_N8
+FB_ACHIEVE_BACH
+
+# good enough
+FRT_EXPERIENCE
+
+# good enough
+FSL_BOTSPAM_4
+
+# good enough
+FS_SILDENAFIL
+
+# good enough
+HTML_ATTACH
+
+# good enough
+MAY_BE_FORGED
+
+# good enough
+OBFU_JPG_ATTACH
+
+# good enough
+SINGLE_HEADER_2K
+
+# good enough
+SINGLE_HEADER_3K
+
+# good enough
+SINGLE_HEADER_4K
+
+# good enough
+SPAMMY_MIME_BDRY_01
+
+# good enough
+TO_NO_BRKTS_NORDNS
+
+# good enough
+URI_DOM_OBFU
 
 # tflags userconf
 UNPARSEABLE_RELAY
@@ -819,9 +906,6 @@ XMAILER_MIMEOLE_OL_6554A
 
 # good enough
 XMAILER_MIMEOLE_OL_B30D1
-
-# good enough
-XMAILER_MIMEOLE_OL_B4B40
 
 # good enough
 XMAILER_MIMEOLE_OL_CF0C0
