@@ -1,16 +1,12 @@
-# smf test rules
+#testrules
 header SMF_BRACKETS_TO To:raw =~ /<<[^<>]+>>/
 describe SMF_BRACKETS_TO Double-brackets around To header address
 score SMF_BRACKETS_TO 0.01
 
-header SMF_BRACKETS_FROM From:raw =~ /<<[^<>]+>>/
-describe SMF_BRACKETS_FROM Double-brackets around From header address
-score SMF_BRACKETS_FROM 0.01
-
-header SMF_FAKE_HOTMAIL_RCVD Received =~ /\bmx[1234]\.hotmail\.com\b/
+header SMF_FAKE_HOTMAIL_RCVD Received =~ /from mx[1234]\.hotmail\.com/i
 describe SMF_FAKE_HOTMAIL_RCVD Fake hotmail received header
 score SMF_FAKE_HOTMAIL_RCVD 0.01
 
-body SMF_COPY_PASTE_LINK /copy and paste the link into your browser/i
+body SMF_COPY_PASTE_LINK /copy and paste (?:th(?:e|is)\s+)?link into your browser/i
 describe SMF_COPY_PASTE_LINK Intentionally Unclickable link
 score SMF_COPY_PASTE_LINK 0.01
