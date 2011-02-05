@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-it_batt bernie-mix danmcdonald darxus dos grenier jarif jm nbebout wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1; day 2: bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-it_batt bernie-mix danmcdonald darxus dos grenier jarif jm nbebout wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap-en wt-homeone wt-jp1; day 3: bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-it_batt bernie-mix danmcdonald darxus dos grenier jarif jm kgolding nbebout wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap-en wt-homeone wt-jp1
+# with results from: day 1: bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm danmcdonald darxus dos grenier jarif kgolding nbebout wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1; day 2: bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-it_batt bernie-mix danmcdonald darxus dos grenier jarif jm nbebout wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1; day 3: bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-it_batt bernie-mix danmcdonald darxus dos grenier jarif jm nbebout wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap-en wt-homeone wt-jp1
 
 # tflags publish
 ADVANCE_FEE_2_NEW_FORM
@@ -152,9 +152,6 @@ DOS_RCVD_IP_TWICE_C
 DRUGS_STOCK_MIMEOLE
 
 # good enough
-DYN_RDNS_AND_INLINE_IMAGE
-
-# good enough
 DYN_RDNS_SHORT_HELO_HTML
 
 # tflags userconf
@@ -168,6 +165,9 @@ FB_CIALIS_LEO3
 
 # good enough
 FB_GET_MEDS
+
+# good enough
+FB_GREAT_BEST_SEX
 
 # good enough
 FB_GVR
@@ -237,6 +237,9 @@ FROM_MISSP_DKIM
 
 # good enough
 FROM_MISSP_DYNIP
+
+# good enough
+FROM_MISSP_EH_MATCH
 
 # good enough
 FROM_MISSP_FREEMAIL
@@ -356,13 +359,13 @@ HEAD_LONG
 HELO_LH_HOME
 
 # good enough
-HELO_NO_DOMAIN
-
-# good enough
 HELO_OEM
 
 # good enough
 HK_NAME_DRUGS
+
+# good enough
+HK_NAME_FM_MR_MRS
 
 # good enough
 HK_SCAM_N2
@@ -767,9 +770,6 @@ TO_NO_BRKTS_DIRECT
 TO_NO_BRKTS_DYNIP
 
 # good enough
-TO_NO_BRKTS_NORDNS
-
-# good enough
 TO_NO_BRKTS_NORDNS_HTML
 
 # good enough
@@ -800,13 +800,13 @@ TVD_RCVD_SINGLE
 TVD_VISIT_PHARMA
 
 # good enough
-FB_GREAT_BEST_SEX
+FR_WATCHES_HTTP
 
 # good enough
-FROM_MISSP_EH_MATCH
+HTML_ATTACH
 
 # good enough
-HK_NAME_FM_MR_MRS
+OBFU_JPG_ATTACH
 
 # tflags userconf
 UNPARSEABLE_RELAY
@@ -890,25 +890,10 @@ USER_IN_WHITELIST
 USER_IN_WHITELIST_TO
 
 # good enough
-XMAILER_MIMEOLE_OL_07794
-
-# good enough
 XMAILER_MIMEOLE_OL_1ECD5
 
 # good enough
 XMAILER_MIMEOLE_OL_3AC1D
-
-# good enough
-XMAILER_MIMEOLE_OL_4F240
-
-# good enough
-XMAILER_MIMEOLE_OL_58CB5
-
-# good enough
-XMAILER_MIMEOLE_OL_B30D1
-
-# good enough
-XMAILER_MIMEOLE_OL_CF0C0
 
 # tflags net
 __DKIMDOMAIN_IN_DWL_ANY
