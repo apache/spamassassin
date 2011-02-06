@@ -3,10 +3,10 @@ header SMF_BRACKETS_TO To:raw =~ /<<[^<>]+>>/
 describe SMF_BRACKETS_TO Double-brackets around To header address
 score SMF_BRACKETS_TO 0.01
 
-header SMF_FAKE_HOTMAIL_RCVD Received =~ /from mx[1234]\.hotmail\.com/i
-describe SMF_FAKE_HOTMAIL_RCVD Fake hotmail received header
-score SMF_FAKE_HOTMAIL_RCVD 0.01
+rawbody SMF_HIDDEN_TEXT /<font color="white">[^<]{50,}<\/font>/i
+describe SMF_HIDDEN_TEXT Text hidden inside <font> tag
+score SMF_HIDDEN_TEXT 0.01
 
-body SMF_COPY_PASTE_LINK /copy and paste (?:th(?:e|is)\s+)?link into your browser/i
-describe SMF_COPY_PASTE_LINK Intentionally Unclickable link
-score SMF_COPY_PASTE_LINK 0.01
+rawbody SMF_SPAMSIG_1 /<br><center><a href="http:\/\/\S+\/(\S+)\.htm"><img src="http:\/\/\S+\/images\/(\1)\.gif" border="0"><\/a><\/center>/i
+describe SMF_SPAMSIG_1 Signature seen in mainsleze spam
+score SMF_SPAMSIG_1 0.01
