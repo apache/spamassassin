@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm danmcdonald darxus dos grenier jarif kgolding nbebout wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1; day 2: bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-it_batt bernie-mix danmcdonald darxus dos grenier jarif jm nbebout wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1; day 3: bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-it_batt bernie-mix danmcdonald darxus dos grenier jarif jm nbebout wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap-en wt-homeone wt-jp1
+# with results from: day 1: bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-it_batt bernie-mix danmcdonald darxus dos grenier jarif kgolding nbebout wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1; day 2: bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-it_batt bernie-mix danmcdonald darxus dos grenier jarif jm kgolding nbebout wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1; day 3: bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-it_batt bernie-mix danmcdonald darxus dos grenier jarif jm kgolding nbebout wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1
 
 # tflags publish
 ADVANCE_FEE_2_NEW_FORM
@@ -152,6 +152,9 @@ DOS_RCVD_IP_TWICE_C
 DRUGS_STOCK_MIMEOLE
 
 # good enough
+DYN_RDNS_AND_INLINE_IMAGE
+
+# good enough
 DYN_RDNS_SHORT_HELO_HTML
 
 # tflags userconf
@@ -210,6 +213,9 @@ FILL_THIS_FORM
 
 # good enough
 FM_LOTTO_YOU_WON
+
+# good enough
+FM_SUBJ_APPROVE
 
 # tflags publish
 FORM_FRAUD_3
@@ -275,6 +281,9 @@ FRT_PRICE
 FRT_ROLEX
 
 # good enough
+FR_WATCHES_HTTP
+
+# good enough
 FSL_BOTSPAM_1
 
 # good enough
@@ -303,6 +312,9 @@ FSL_UA
 
 # good enough
 FSL_XM_419
+
+# good enough
+FS_ABIGGER
 
 # good enough
 FS_PHARMASUB2
@@ -800,7 +812,22 @@ TVD_RCVD_SINGLE
 TVD_VISIT_PHARMA
 
 # good enough
-FR_WATCHES_HTTP
+DOS_PHISH_WWW_COM_RU
+
+# good enough
+HELO_NO_DOMAIN
+
+# good enough
+HTML_ATTACH
+
+# good enough
+MANY_SUBDOM
+
+# good enough
+OBFU_JPG_ATTACH
+
+# good enough
+TO_NO_BRKTS_NORDNS
 
 # tflags userconf
 UNPARSEABLE_RELAY
