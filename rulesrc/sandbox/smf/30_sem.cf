@@ -1,0 +1,53 @@
+#testrules
+
+# DNSEval rules
+ifplugin Mail::SpamAssassin::Plugin::DNSEval
+
+header    SMF_SEM_BLACK    eval:check_rbl('semblack-lastexternal', 'bl.spameatingmonkey.net')
+tflags    SMF_SEM_BLACK    net
+describe  SMF_SEM_BLACK    Received from an IP listed by SEM-BLACK
+score     SMF_SEM_BLACK    0.1
+reuse     SMF_SEM_BLACK
+
+endif
+
+
+# URIDNSBL rules
+ifplugin Mail::SpamAssassin::Plugin::URIDNSBL
+
+urirhssub SMF_SEM_URI      uribl.spameatingmonkey.net. A 2
+body      SMF_SEM_URI      eval:check_uridnsbl('SEM_URI')
+describe  SMF_SEM_URI      Contains a URI listed by SEM-URI
+tflags    SMF_SEM_URI      net
+score     SMF_SEM_URI      0.1
+reuse     SMF_SEM_URI
+
+urirhssub SMF_SEM_URIRED   urired.spameatingmonkey.net. A 2
+body      SMF_SEM_URIRED   eval:check_uridnsbl('SEM_URIRED')
+describe  SMF_SEM_URIRED   Contains a URI listed by SEM-URIRED
+tflags    SMF_SEM_URIRED   net
+score     SMF_SEM_URIRED   0.1
+reuse     SMF_SEM_URIRED
+
+urirhssub SMF_SEM_FRESH    fresh.spameatingmonkey.net. A 2
+body      SMF_SEM_FRESH    eval:check_uridnsbl('SEM_FRESH')
+describe  SMF_SEM_FRESH    Contains a domain registered less than 5 days ago
+tflags    SMF_SEM_FRESH    net
+score     SMF_SEM_FRESH    0.1
+reuse	  SMF_SEM_FRESH 
+
+urirhssub SMF_SEM_FRESH_10 fresh10.spameatingmonkey.net. A 2
+body      SMF_SEM_FRESH_10 eval:check_uridnsbl('SEM_FRESH')
+describe  SMF_SEM_FRESH_10 Contains a domain registered less than 5 days ago
+tflags    SMF_SEM_FRESH_10 net
+score     SMF_SEM_FRESH_10 0.1
+reuse     SMF_SEM_FRESH_10
+
+urirhssub SMF_SEM_FRESH_15 fresh15.spameatingmonkey.net. A 2
+body      SMF_SEM_FRESH_15 eval:check_uridnsbl('SEM_FRESH')
+describe  SMF_SEM_FRESH_15 Contains a domain registered less than 5 days ago
+tflags    SMF_SEM_FRESH_15 net
+score     SMF_SEM_FRESH_15 0.1
+reuse     SMF_SEM_FRESH_15
+
+endif
