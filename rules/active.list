@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-it_batt bernie-mix danmcdonald darxus dos grenier jarif kgolding nbebout wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1; day 2: bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-it_batt bernie-mix danmcdonald darxus dos grenier jarif jm kgolding nbebout wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1; day 3: bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-it_batt bernie-mix danmcdonald darxus dos grenier jarif jm kgolding nbebout wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1
+# with results from: day 1: bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-it_batt bernie-mix danmcdonald darxus dos grenier jarif jm nbebout wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1; day 2: bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-it_batt bernie-mix danmcdonald darxus dos grenier jarif kgolding nbebout wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1; day 3: bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-it_batt bernie-mix danmcdonald darxus dos grenier jarif jm kgolding nbebout wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1
 
 # tflags publish
 ADVANCE_FEE_2_NEW_FORM
@@ -146,6 +146,9 @@ DOS_OE_TO_MX_IMAGE
 DOS_OUTLOOK_TO_MX
 
 # good enough
+DOS_PHISH_WWW_COM_RU
+
+# good enough
 DOS_RCVD_IP_TWICE_C
 
 # good enough
@@ -214,9 +217,6 @@ FILL_THIS_FORM
 # good enough
 FM_LOTTO_YOU_WON
 
-# good enough
-FM_SUBJ_APPROVE
-
 # tflags publish
 FORM_FRAUD_3
 
@@ -267,6 +267,9 @@ FROM_MISSP_USER
 
 # good enough
 FRT_APPROV
+
+# good enough
+FRT_BIGGERMEM1
 
 # good enough
 FRT_EXPERIENCE
@@ -371,6 +374,9 @@ HEAD_LONG
 HELO_LH_HOME
 
 # good enough
+HELO_NO_DOMAIN
+
+# good enough
 HELO_OEM
 
 # good enough
@@ -423,6 +429,9 @@ MAILER_EQ_ORG
 
 # tflags publish
 MANY_SPAN_IN_TEXT
+
+# good enough
+MANY_SUBDOM
 
 # good enough
 MAY_BE_FORGED
@@ -782,6 +791,9 @@ TO_NO_BRKTS_DIRECT
 TO_NO_BRKTS_DYNIP
 
 # good enough
+TO_NO_BRKTS_NORDNS
+
+# good enough
 TO_NO_BRKTS_NORDNS_HTML
 
 # good enough
@@ -810,24 +822,6 @@ TVD_RCVD_SINGLE
 
 # good enough
 TVD_VISIT_PHARMA
-
-# good enough
-DOS_PHISH_WWW_COM_RU
-
-# good enough
-HELO_NO_DOMAIN
-
-# good enough
-HTML_ATTACH
-
-# good enough
-MANY_SUBDOM
-
-# good enough
-OBFU_JPG_ATTACH
-
-# good enough
-TO_NO_BRKTS_NORDNS
 
 # tflags userconf
 UNPARSEABLE_RELAY
