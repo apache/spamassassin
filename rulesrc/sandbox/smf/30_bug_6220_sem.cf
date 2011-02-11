@@ -6,7 +6,7 @@ ifplugin Mail::SpamAssassin::Plugin::DNSEval
 
 header    RCVD_IN_SEMBLACK    eval:check_rbl('semblack-lastexternal', 'bl.spameatingmonkey.net')
 tflags    RCVD_IN_SEMBLACK    net
-describe  RCVD_IN_SEMBLACK    Received from an IP listed by SEM-BLACK
+describe  RCVD_IN_SEMBLACK    Received from an IP listed in bl.spameatingmonkey.net
 score     RCVD_IN_SEMBLACK    0.1
 
 endif
@@ -15,37 +15,37 @@ endif
 # URIDNSBL rules
 ifplugin Mail::SpamAssassin::Plugin::URIDNSBL
 
-#urirhssub SEM_URI      uribl.spameatingmonkey.net. A 2
-#body      SEM_URI      eval:check_uridnsbl('SEM_URI')
-#describe  SEM_URI      Contains a URI listed by SEM-URI
-#tflags    SEM_URI      net
-#score     SEM_URI      0.1
+urirhssub URIBL_SEM          uribl.spameatingmonkey.net. A 2
+body      URIBL_SEM          eval:check_uridnsbl('URIBL_SEM')
+describe  URIBL_SEM          Contains a URI listed in uribl.spameatingmonkey.net
+tflags    URIBL_SEM          net
+score     URIBL_SEM          0.1
 
-#urirhssub SEM_URIRED   urired.spameatingmonkey.net. A 2
-#body      SEM_URIRED   eval:check_uridnsbl('SEM_URIRED')
-#describe  SEM_URIRED   Contains a URI listed by SEM-URIRED
-#tflags    SEM_URIRED   net
-#score     SEM_URIRED   0.1
+urirhssub URIBL_SEM_RED      urired.spameatingmonkey.net. A 2
+body      URIBL_SEM_RED      eval:check_uridnsbl('URIBL_SEM_RED')
+describe  URIBL_SEM_RED      Contains a URI listed in urired.spameatingmonkey.net
+tflags    URIBL_SEM_RED      net
+score     URIBL_SEM_RED      0.1
 
-#urirhssub SEM_FRESH    fresh.spameatingmonkey.net. A 2
-#body      SEM_FRESH    eval:check_uridnsbl('SEM_FRESH')
-#describe  SEM_FRESH    Contains a domain registered less than 5 days ago
-#tflags    SEM_FRESH    net
-#score     SEM_FRESH    0.1
-#reuse	  SEM_FRESH 
+urirhssub URIBL_SEM_FRESH    fresh.spameatingmonkey.net. A 2
+body      URIBL_SEM_FRESH    eval:check_uridnsbl('URIBL_SEM_FRESH')
+describe  URIBL_SEM_FRESH    Contains a domain registered less than 5 days ago
+tflags    URIBL_SEM_FRESH    net
+score     URIBL_SEM_FRESH    0.1
+reuse	  URIBL_SEM_FRESH 
 
-#urirhssub SEM_FRESH_10 fresh10.spameatingmonkey.net. A 2
-#body      SEM_FRESH_10 eval:check_uridnsbl('SEM_FRESH_10')
-#describe  SEM_FRESH_10 Contains a domain registered less than 5 days ago
-#tflags    SEM_FRESH_10 net
-#score     SEM_FRESH_10 0.1
-#reuse     SEM_FRESH_10
+urirhssub URIBL_SEM_FRESH_10 fresh10.spameatingmonkey.net. A 2
+body      URIBL_SEM_FRESH_10 eval:check_uridnsbl('URIBL_SEM_FRESH_10')
+describe  URIBL_SEM_FRESH_10 Contains a domain registered less than 10 days ago
+tflags    URIBL_SEM_FRESH_10 net
+score     URIBL_SEM_FRESH_10 0.1
+reuse     URIBL_SEM_FRESH_10
 
-#urirhssub SEM_FRESH_15 fresh15.spameatingmonkey.net. A 2
-#body      SEM_FRESH_15 eval:check_uridnsbl('SEM_FRESH_15')
-#describe  SEM_FRESH_15 Contains a domain registered less than 5 days ago
-#tflags    SEM_FRESH_15 net
-#score     SEM_FRESH_15 0.1
-#reuse     SEM_FRESH_15
+urirhssub URIBL_SEM_FRESH_15 fresh15.spameatingmonkey.net. A 2
+body      URIBL_SEM_FRESH_15 eval:check_uridnsbl('URIBL_SEM_FRESH_15')
+describe  URIBL_SEM_FRESH_15 Contains a domain registered less than 15 days ago
+tflags    URIBL_SEM_FRESH_15 net
+score     URIBL_SEM_FRESH_15 0.1
+reuse     URIBL_SEM_FRESH_15
 
 endif
