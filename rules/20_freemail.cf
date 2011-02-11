@@ -43,7 +43,7 @@ describe FREEMAIL_REPLY  From and body contain different freemails
 score    FREEMAIL_REPLY  0.5
 
 header   FREEMAIL_FROM  eval:check_freemail_from()
-describe FREEMAIL_FROM  Sender email is freemail
+describe FREEMAIL_FROM  Sender email is commonly abused enduser mail provider
 score    FREEMAIL_FROM  0.001
 
 header   FREEMAIL_ENVFROM_END_DIGIT  eval:check_freemail_header('EnvelopeFrom', '\d@')
