@@ -16,3 +16,14 @@ replace_rules URI_OBFU_WWW
 
 endif
 
+# First started appearing 02/2011
+body          URI_OBFU_PROTO    m,h\st\st\sp\s?:\s?/\s?/,i
+describe      URI_OBFU_PROTO    URI http protocol with space obfuscation
+
+body          URI_OBFU_TLD      /\.\s(?:c\so\sm|n\se\st|o\sr\sg|b\si\sz|i\sn\sf\so)/i
+describe      URI_OBFU_TLD      URI top-level domain with space obfuscation
+
+body          URI_DEOBFU_INSTR  /(?:delete|remove|take\sout)(?:\sthe)?\sspaces/i
+describe      URI_DEOBFU_INSTR  How to deobfuscate this URI
+tflags        URI_DEOBFU_INSTR  nopublish
+
