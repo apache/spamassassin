@@ -545,4 +545,29 @@ header      ART_NAMES_ORG          Received =~ /\bart\.names\.org\b/i
 score       ART_NAMES_ORG          4.0
 describe    ART_NAMES_ORG          Arthur Simmons - registrar spammer extraordinaire
 
+body        __PILL_PRICE_1         m;\$?[\d\s.]{3,8}(?:/|per|each)\s?(?:pill|tablet|cap(?:sule|let));i
+body        __PILL_PRICE_2         /(?:pill|tablet|cap(?:sule|let))s\s\$?[\d\s.]{3,8}/i
+body        __PILL_PRICE_3         /free\s(?:pill|tablet|cap(?:sule|let))s/i
+tflags      __PILL_PRICE_1         multiple
+tflags      __PILL_PRICE_2         multiple
+tflags      __PILL_PRICE_3         multiple
+meta        MANY_PILL_PRICE        (__PILL_PRICE_1 + __PILL_PRICE_2 + __PILL_PRICE_3) > 2
+describe    MANY_PILL_PRICE        Prices for pills
+
+# More from Ned Slider
+meta        NSL_FREEMAIL_SUBJ      (FREEMAIL_FROM && MISSING_SUBJECT)
+describe    NSL_FREEMAIL_SUBJ      From freemail with missing subject
+score       NSL_FREEMAIL_SUBJ      0.1
+tflags      NSL_FREEMAIL_SUBJ      nopublish
+
+meta        NSL_FREEMAIL_M1        (NSL_FREEMAIL_SUBJ && (__HAS_ANY_URI || __MANY_RECIPS))
+describe    NSL_FREEMAIL_M1        From freemail, missing subject and uri or many recips
+score       NSL_FREEMAIL_M1        0.1
+tflags      NSL_FREEMAIL_M1        nopublish
+
+meta        NSL_FREEMAIL_M2        (FREEMAIL_FROM && __HAS_ANY_URI && __MANY_RECIPS)
+describe    NSL_FREEMAIL_M2        From freemail with uri and many recips
+score       NSL_FREEMAIL_M2        0.1
+tflags      NSL_FREEMAIL_M2        nopublish
+
 
