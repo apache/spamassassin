@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-it_batt bernie-mix danmcdonald darxus dos grenier jarif jm kgolding nbebout wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1; day 2: bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-it_batt bernie-mix danmcdonald darxus dos grenier jarif kgolding nbebout wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1; day 3: bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-it_batt bernie-mix danmcdonald darxus dos grenier jarif jm kgolding nbebout wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1
+# with results from: day 1: bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-it_batt bernie-mix danmcdonald darxus dos grenier kgolding nbebout wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1; day 2: bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-it_batt bernie-mix danmcdonald darxus dos grenier jarif jm kgolding nbebout wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1; day 3: bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-it_batt bernie-mix danmcdonald darxus dos grenier jarif kgolding nbebout wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1
 
 # tflags publish
 ADVANCE_FEE_2_NEW_FORM
@@ -191,6 +191,9 @@ FB_REPLICA_ROLEX
 FB_SOFTTABS
 
 # good enough
+FB_WITHOUT_PRESC
+
+# good enough
 FH_FAKE_RCVD_LINE
 
 # good enough
@@ -320,9 +323,6 @@ FSL_UA
 FSL_XM_419
 
 # good enough
-FS_ABIGGER
-
-# good enough
 FS_PHARMASUB2
 
 # good enough
@@ -375,9 +375,6 @@ HEAD_LONG
 
 # good enough
 HELO_LH_HOME
-
-# good enough
-HELO_NO_DOMAIN
 
 # good enough
 HELO_OEM
@@ -827,22 +824,22 @@ TVD_RCVD_SINGLE
 TVD_VISIT_PHARMA
 
 # good enough
-FB_WITHOUT_PRESC
+HTML_ATTACH
 
-# tflags net
-URIBL_SEM
+# good enough
+MANY_PILL_PRICE
 
-# tflags net
-URIBL_SEM_FRESH
+# good enough
+OBFU_JPG_ATTACH
 
-# tflags net
-URIBL_SEM_FRESH_10
+# good enough
+SPAMMY_MIME_BDRY_01
 
-# tflags net
-URIBL_SEM_FRESH_15
+# good enough
+URI_OBFU_PROTO
 
-# tflags net
-URIBL_SEM_RED
+# good enough
+URI_OBFU_TLD
 
 # tflags userconf
 UNPARSEABLE_RELAY
@@ -882,6 +879,21 @@ URIBL_SBL
 
 # tflags net
 URIBL_SC_SURBL
+
+# tflags net
+URIBL_SEM
+
+# tflags net
+URIBL_SEM_FRESH
+
+# tflags net
+URIBL_SEM_FRESH_10
+
+# tflags net
+URIBL_SEM_FRESH_15
+
+# tflags net
+URIBL_SEM_RED
 
 # tflags net
 URIBL_WS_SURBL
@@ -930,6 +942,9 @@ XMAILER_MIMEOLE_OL_1ECD5
 
 # good enough
 XMAILER_MIMEOLE_OL_3AC1D
+
+# good enough
+XMAILER_MIMEOLE_OL_7533E
 
 # good enough
 XMAILER_MIMEOLE_OL_91287
