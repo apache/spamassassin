@@ -570,4 +570,12 @@ describe    NSL_FREEMAIL_M2        From freemail with uri and many recips
 score       NSL_FREEMAIL_M2        0.1
 tflags      NSL_FREEMAIL_M2        nopublish
 
+header      NSL_TO_ENDS_COMMA      To =~ /,$/
+describe    NSL_TO_ENDS_COMMA      To: ends with a comma
+score       NSL_TO_ENDS_COMMA      0.001
+tflags      NSL_TO_ENDS_COMMA      nopublish
+
+
+body        CN_B2B_SPAMMER         /We are a China[-\s]based/i
+describe    CN_B2B_SPAMMER         Chinese company introducing itself
 
