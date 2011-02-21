@@ -261,3 +261,10 @@ header	 MS_XYMOSG_2K	X-YMail-OSG =~ /^(?=.{2048,3071}$)/s
 header	 MS_XYMOSG_3K	X-YMail-OSG =~ /^(?=.{3072,4095}$)/s
 header	 MS_XYMOSG_4K	X-YMail-OSG =~ /^(?=.{4096,5119}$)/s
 header	 MS_XYMOSG_5K	X-YMail-OSG =~ /^(?=.{4096})/s
+
+# from mailing list, subject "Tonns of russian DOT info spam" 2011-02-21
+header __LISTID_DEBIAN	List-Id =~ /\.lists\.debian\.org>/
+body   __RAJONAA_INFO	m' rajonaa: http://www\.[\w-]{0,50}\.info !$'
+meta	 DEB_RAJONAA	__LISTID_DEBIAN && __RAJONAA_INFO
+describe DEB_RAJONAA	Latvian text with .info URI on Debian List
+#score	 DEB_RAJONAA	3.0
