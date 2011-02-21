@@ -506,6 +506,10 @@ to add their own metadata as well.
 
 The C<Mail::SpamAssassin::Message> object for this message.
 
+=item permsgstatus
+
+The C<Mail::SpamAssassin::PerMsgStatus> context object for this scan.
+
 =back
 
 =item $plugin->parsed_metadata ( { options ... } )
