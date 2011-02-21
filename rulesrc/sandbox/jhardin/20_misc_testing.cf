@@ -76,7 +76,7 @@ header         __FROM_RUNON          From =~ /\S+<\w+/
 meta           FROM_MISSP_SPF_FAIL  (__FROM_RUNON && SPF_FAIL)
 tflags         FROM_MISSP_SPF_FAIL  net
 
-meta           FROM_MISSP_EH_MATCH   (__FROM_RUNON && __ENV_AND_HDR_FROM_MATCH) && !__RCD_RDNS_MTA_MESSY
+meta           FROM_MISSP_EH_MATCH   (__FROM_RUNON && __ENV_AND_HDR_FROM_MATCH) && !__RCD_RDNS_MTA_MESSY && !__UNSUB_LINK && !__COMMENT_EXISTS
 describe       FROM_MISSP_EH_MATCH   From misspaced, matches envelope
 
 meta           FROM_MISSP_URI        (__FROM_RUNON && __HAS_ANY_URI) && !__NOT_SPOOFED && !__RCD_RDNS_MTA_MESSY && !MISSING_MIMEOLE && !__COMMENT_EXISTS && !__REPTO_QUOTE
@@ -203,7 +203,8 @@ describe       WIKI_IMG            Image from wikipedia
 header         SUBJ_RE_CLNCLN      Subject =~ /^\s*RE::/
 describe       SUBJ_RE_CLNCLN      Subject RE::
 
-uri            MANY_SUBDOM         m;^https?://(?:[^\./]{1,30}\.){6};
+uri            __MANY_SUBDOM       m;^https?://(?:[^\./]{1,30}\.){6};
+meta           MANY_SUBDOM         __MANY_SUBDOM && !__JM_REACTOR_DATE && !__UNSUB_LINK && !__VIA_ML
 describe       MANY_SUBDOM         Lots and lots of subdomain parts in a URI
 
 # by request of Benny Pedersen <me@junc.org> on the users list 10/9/2009
@@ -249,10 +250,10 @@ describe       FROM_IN_TO_AND_SUBJ  From address is in To and Subject
 tflags         FROM_IN_TO_AND_SUBJ  publish
 
 header         __SUBJ_HAS_TO_1      ALL =~ /\nTo:\s+(?:[^\n<]{0,80}<)?([^\n\s>,]+)>?\n(?:[^\n]{1,100}\n)*Subject:\s+[^\n]{0,100}\1[>,\s\n]/ism
-meta           TO_IN_SUBJ           __SUBJ_HAS_TO_1 && !__VIA_ML && !MISSING_MIMEOLE
+meta           TO_IN_SUBJ           __SUBJ_HAS_TO_1 && !__VIA_ML && !MISSING_MIMEOLE && !__THREAD_INDEX_GOOD
 describe       TO_IN_SUBJ           To address is in Subject
 
-meta           TO_EQ_FM_HTML_ONLY   (__TO_EQ_FROM && MIME_HTML_ONLY && !HTML_MIME_NO_HTML_TAG && !MISSING_MID && !ALL_TRUSTED)
+meta           TO_EQ_FM_HTML_ONLY   (__TO_EQ_FROM && MIME_HTML_ONLY && !HTML_MIME_NO_HTML_TAG && !MISSING_MID && !ALL_TRUSTED) && !__RCD_RDNS_MAIL_MESSY
 describe       TO_EQ_FM_HTML_ONLY   To == From and HTML only
 tflags         TO_EQ_FM_HTML_ONLY   publish
 
@@ -275,7 +276,7 @@ meta           __TO_EQ_FROM_DOM     (__TO_EQ_FROM_DOM_1 || __TO_EQ_FROM_DOM_2)
 describe       __TO_EQ_FROM_DOM     To: domain same as From: domain
 #tflags         __TO_EQ_FROM_DOM     publish
 
-meta           TO_EQ_FM_DOM_HTML_ONLY (__TO_EQ_FROM_DOM && MIME_HTML_ONLY && !__CTYPE_MULTIPART_ALT && !HTML_MIME_NO_HTML_TAG && !ALL_TRUSTED && !__MIME_QP && !__IS_EXCH) && !__MSGID_BEFORE_RECEIVED
+meta           TO_EQ_FM_DOM_HTML_ONLY (__TO_EQ_FROM_DOM && MIME_HTML_ONLY && !__CTYPE_MULTIPART_ALT && !HTML_MIME_NO_HTML_TAG && !ALL_TRUSTED && !__MIME_QP && !__IS_EXCH) && !__MSGID_BEFORE_RECEIVED && !__RCD_RDNS_MAIL_MESSY
 describe       TO_EQ_FM_DOM_HTML_ONLY To domain == From domain and HTML only
 #tflags         TO_EQ_FM_DOM_HTML_ONLY publish
 
