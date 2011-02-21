@@ -477,10 +477,14 @@ header          RPT_SPAM_HDR            Report-SPAM =~ /./
 #header          LONG_FROM               From =~ /<[^<@]{40,}\w\@/
 
 
-body            __MANY_RECORDS          /\s[A-Z][a-z]{1,30}s(?:\sDatabase)?[-:\s]{2,5}(?i:1\smillion\s|\d[\d,.]{1,8}[Kk]?\s(?i:thousand\s|million\s)?)(?i:total\s|full\sdata\s)?(?i:email|record)s/
-tflags          __MANY_RECORDS          multiple
-meta            BIG_LISTS               __MANY_RECORDS > 3
-meta            MANY_BIG_LISTS          __MANY_RECORDS > 10
+body            __MANY_RECORDS_1        /\s[A-Z][a-z]{1,30}s(?:\sDatabase)?[-:\s]{2,5}(?i:1\smillion\s|\d[\d,.]{1,8}[Kk]?\s(?i:thousand\s|million\s)?)(?i:total\s|full\sdata\s)?(?i:email|record)s/
+tflags          __MANY_RECORDS_1        multiple
+body            __MANY_RECORDS_2        /\W{1,4}\s(?:[a-z\/]{1,20}\s){0,4}(?:doctor|physician|provider|therapist|counselor|dentist|veterinarian|clinic|hospital|agent|chiropractor|psychologist|companie|supplier)s/i
+tflags          __MANY_RECORDS_2        multiple
+body            __MANY_RECORDS_3        /\W{1,4}\s(?:(?:[A-Z]{1,2}[a-z\/]{0,20}|and)\s){0,4}[A-Z][a-z]{1,20}s Database/
+tflags          __MANY_RECORDS_3        multiple
+meta            BIG_LISTS               (__MANY_RECORDS_1 + __MANY_RECORDS_2 + __MANY_RECORDS_3) > 5
+meta            MANY_BIG_LISTS          (__MANY_RECORDS_1 + __MANY_RECORDS_2 + __MANY_RECORDS_3) > 15
 
 
 # Suggested by Gerard Z 2010-08-15
