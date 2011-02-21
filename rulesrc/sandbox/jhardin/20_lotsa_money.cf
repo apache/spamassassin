@@ -109,7 +109,7 @@ body     __AGREED_RATIO   /\b(?:agreed|sharing)\s(?:ratios?|percent\w+)\b/i
 body     __SHARE_IT       /\b(?:(?:share|allocate|teilen|parteger(?:ez|ons)?|partage)\s(?:th(?:e|is)|das|les?|des)\s(?:proceeds|funds?|money|balance|account|geld|compte|fonds)|partager(?:ez|ons)? (?:avec (?:vous|moi)|ratio|suivant un pourcentage))\b/i
 body     __DESTROY_ME     /\b(?:destroy|hunt)\sm[ey]\b/i
 body     __YOUR_PROFIT    /\byour?\sprofit/i
-body     __FIFTY_FIFTY    /\b50(?:%?[\/:]50%?|%)\b/
+body     __FIFTY_FIFTY    /\b(?:50|fifty)(?:%?[\/:]50%?|%|\spercent)\b/
 meta     SHARE_50_50     (__SHARE_IT || __AGREED_RATIO) && __FIFTY_FIFTY
 describe SHARE_50_50     Share the money 50/50
 
@@ -117,11 +117,11 @@ body     EMRCP            /\bExcess Maximum Return Capital Profit\b/i
 describe EMRCP            "Excess Maximum Return Capital Profit" Fidelity scam
 
 ifplugin Mail::SpamAssassin::Plugin::ReplaceTags
-  replace_tag  PERCENT      \b(?:\d\d|ten|[a-z]+teen|(?:twen|thir|fou?r)ty(?:-?[a-z]+)?)\s?(?:%|percent)
+  replace_tag  PERCENT      \b(?:\d\d|ten|[a-z]+teen|(?:twen|thir|fou?r|fif)ty(?:-?[a-z]+)?)\s?(?:%|percent)
 
   body     __PCT_FOR_YOU_1  /<PERCENT>[\s)]{0,3}(?:of\s[\w\s]{0,35}?)?(?:for|to|as)\syour?/i
   body     __PCT_FOR_YOU_2  /\b(?:(?:give|offer)\syou|vous\saurez\sdroit\s[\xe0]|ihnen)\s<PERCENT>/i
-  body     __PCT_FOR_YOU_3  /\byour?\s(?!can)[\w\s]{6,20}?(?:(?:share|entitle|assist|comp[ea]nsate|reward|renumerate|paid|deduct|account|tage)[\w\s]{1,25}?)?\s(?<!by\s)(?<!up\sto\s)<PERCENT>/i
+  body     __PCT_FOR_YOU_3  /\byour?\s(?!can)[\w\s]{6,20}?(?:(?:share|entitle|assist|comp[ea]nsate|reward|renumerate|paid|deduct|account|tage|keep)[\w\s]{1,25}?)?\s(?<!by\s)(?<!up\sto\s)<PERCENT>/i
   body     __PCT_OF_PMTS    /<PERCENT>[\s)]+(?:of\s[\w\s]{0,35}?)?of\s(?:the\s)?(?:payments?|rem+it+ances?|chec(?:k|que)s?)/i
 
   replace_rules  __PCT_FOR_YOU_1 __PCT_FOR_YOU_2 __PCT_FOR_YOU_3 __PCT_OF_PMTS
