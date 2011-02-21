@@ -352,29 +352,43 @@ e.g.
 =item whitelist_from_rcvd addr@lists.sourceforge.net sourceforge.net
 
 Works similarly to whitelist_from, except that in addition to matching
-a sender address, a relay's rDNS name must match too for the whitelisting
-rule to fire. The first parameter is an address to whitelist, and the
-second is a string to match the relay's rDNS. Matching is case-insensitive.
+a sender address, a relay's rDNS name or its IP address must match too
+for the whitelisting rule to fire. The first parameter is a sender's e-mail
+address to whitelist, and the second is a string to match the relay's rDNS,
+or its IP address. Matching is case-insensitive.
 
-This string is matched against the reverse DNS lookup used during the handover
-from the internet to your internal network's mail exchangers.  It can
-either be the full hostname, or the domain component of that hostname.  In
-other words, if the host that connected to your MX had an IP address that
-mapped to 'sendinghost.spamassassin.org', you should specify
-C<sendinghost.spamassassin.org> or just C<spamassassin.org> here.
+This second parameter is matched against the TCP-info information field as
+provided in a FROM clause of a trace information (i.e. the Received header
+field, see RFC 5321). Only the Received header fields inserted by trusted
+hosts are considered. This parameter can either be a full hostname, or the
+domain component of that hostname, or an IP address in square brackets.
+The reverse DNS lookup is done by a MTA, not by SpamAssassin.
 
-Note that this requires that C<internal_networks> be correct.  For simple cases,
-it will be, but for a complex network you may get better results by setting that
-parameter.
+In case of an IPv4 address in brackets, it may be truncated on classful
+boundaries to cover whole subnets, e.g. C<[10.1.2.3]>, C<[10.1.2]>,
+C<[10.1]>, C<[10]>.  CIDR notation is currently not supported, nor is
+IPv6. The matching on IP address is mainly provided to cover rare cases
+where whitelisting of a sending MTA is desired which does not have a
+correct reverse DNS configured.
+
+In other words, if the host that connected to your MX had an IP address
+192.0.2.123 that mapped to 'sendinghost.example.org', you should specify
+C<sendinghost.example.org>, or C<example.org>, or C<[192.0.2.123]> or
+C<[192.0.2]> here.
+
+Note that this requires that C<internal_networks> be correct.  For simple
+cases, it will be, but for a complex network you may get better results
+by setting that parameter.
 
 It also requires that your mail exchangers be configured to perform DNS
 reverse lookups on the connecting host's IP address, and to record the
-result in the generated Received: header.
+result in the generated Received header field according to RFC 5321.
 
 e.g.
 
   whitelist_from_rcvd joe@example.com  example.com
   whitelist_from_rcvd *@axkit.org      sergeant.org
+  whitelist_from_rcvd *@axkit.org      [192.0.2.123]
 
 =item def_whitelist_from_rcvd addr@lists.sourceforge.net sourceforge.net
 

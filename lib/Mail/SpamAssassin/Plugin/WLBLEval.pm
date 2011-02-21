@@ -315,12 +315,29 @@ sub _check_whitelist_rcvd {
     foreach my $domain (@{$list->{$white_addr}{domain}}) {
       
       if ($addr =~ $regexp) {
+        my $match;
         foreach my $lastunt (@relays) {
-          my $rdns = $lastunt->{lc_rdns};
-          if ($rdns =~ /(?:^|\.)\Q${domain}\E$/i) { 
-            dbg("rules: address $addr matches (def_)whitelist_from_rcvd $list->{$white_addr}{re} ${domain}");
-            return 1;
+          local $1;
+          if ($domain =~ m{^ \[ (.*) \] \z}sx) {  # matching by IP address
+            my($wl_ip, $rly_ip) = ($1, $lastunt->{ip});
+            if (!defined $rly_ip || $rly_ip eq '') {
+              # relay's IP address not provided or unparseable
+            } elsif ($wl_ip =~ /^\d+\.\d+\.\d+\.\d+\z/) {
+              if ($wl_ip eq $rly_ip) { $match = 1; last }  # exact match
+            } elsif ($wl_ip =~ /^[\d\.]+\z/) {  # assume IPv4 classful subnet
+              $wl_ip =~ s/\.*\z/./;  # enforce trailing dot
+              if ($rly_ip =~ /^\Q$wl_ip\E/i) { $match = 1; last }  # subnet
+            }
+            # todo: handle IPv6 and CIDR notation
+          } else {  # match by a rdns name
+            my $rdns = $lastunt->{lc_rdns};
+            if ($rdns =~ /(?:^|\.)\Q${domain}\E$/i) { $match=1; last }
           }
+        }
+        if ($match) {
+          dbg("rules: address %s matches (def_)whitelist_from_rcvd %s %s",
+              $addr, $list->{$white_addr}{re}, $domain);
+          return 1;
         }
         # found address match but no relay match. note as possible forgery
         $found_forged = -1;
