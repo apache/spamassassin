@@ -661,6 +661,7 @@ sub wanted {
   }
 
   memory_track_start() if ($opt_logmem);
+  $spamtest->timer_reset;
 
   # parse the message, and force it to complete
   my $ma = $spamtest->parse($dataref, 1);
