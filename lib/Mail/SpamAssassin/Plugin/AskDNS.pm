@@ -234,17 +234,18 @@ sub parse_and_canonicalize_subtest {
   my $result;
 
   local($1,$2,$3);
-  if (     $subtest =~ m{^ / (.+) / ([msixo]*) \z}xs) {
+  # modifiers /a, /d, /l, /u in suffix form were added with perl 5.13.10
+  if (     $subtest =~ m{^ / (.+) / ([msixoadlu]*) \z}xs) {
     $result = $2 ne '' ? qr{(?$2)$1} : qr{$1};
-  } elsif ($subtest =~ m{^ m \s* \( (.+) \) ([msixo]*) \z}xs) {
+  } elsif ($subtest =~ m{^ m \s* \( (.+) \) ([msixoadlu]*) \z}xs) {
     $result = $2 ne '' ? qr{(?$2)$1} : qr{$1};
-  } elsif ($subtest =~ m{^ m \s* \[ (.+) \] ([msixo]*) \z}xs) {
+  } elsif ($subtest =~ m{^ m \s* \[ (.+) \] ([msixoadlu]*) \z}xs) {
     $result = $2 ne '' ? qr{(?$2)$1} : qr{$1};
-  } elsif ($subtest =~ m{^ m \s* \{ (.+) \} ([msixo]*) \z}xs) {
+  } elsif ($subtest =~ m{^ m \s* \{ (.+) \} ([msixoadlu]*) \z}xs) {
     $result = $2 ne '' ? qr{(?$2)$1} : qr{$1};
-  } elsif ($subtest =~ m{^ m \s*  < (.+)  > ([msixo]*) \z}xs) {
+  } elsif ($subtest =~ m{^ m \s*  < (.+)  > ([msixoadlu]*) \z}xs) {
     $result = $2 ne '' ? qr{(?$2)$1} : qr{$1};
-  } elsif ($subtest =~ m{^ m \s* (\S) (.+) \1 ([msixo]*) \z}xs) {
+  } elsif ($subtest =~ m{^ m \s* (\S) (.+) \1 ([msixoadlu]*) \z}xs) {
     $result = $2 ne '' ? qr{(?$2)$1} : qr{$1};
   } elsif ($subtest =~ m{^ (["']) (.*) \1 \z}xs) {  # quoted string
     $result = $2;
