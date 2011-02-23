@@ -28,7 +28,7 @@ Mail::SpamAssassin::Logger - SpamAssassin logging module
   };
 
   $SIG{__DIE__} = sub {
-    log_message("error", $_[0]) if $_[0] !~ /\bin eval\b/;
+    log_message("error", $_[0])  if !$^S;
   };
 
 =cut

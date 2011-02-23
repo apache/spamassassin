@@ -617,10 +617,16 @@ sub poll_responses {
     { my $timer;  # collects timestamp when variable goes out of scope
       if (!defined($timeout) || $timeout > 0)
         { $timer = $self->{main}->time_method("poll_dns_idle") }
+      $! = 0;
       ($nfound, $timeleft) = select($rout=$rin, undef, undef, $timeout);
     }
     if (!defined $nfound || $nfound < 0) {
-      warn "dns: select failed: $!";
+      if ($!) { warn "dns: select failed: $!\n" }
+      else    { warn "dns: select interrupted\n" }
+      return;
+    } elsif (!$nfound) {
+      if (!defined $timeout) { warn("dns: select returned empty-handed\n") }
+      elsif ($timeout > 0) { dbg("dns: select timed out %.3f s", $timeout) }
       return;
     }
 
