@@ -98,7 +98,9 @@ sub new {
   my ($class, $opts) = @_;
   $class = ref($class) || $class;
   my %selfval = $opts ? %{$opts} : ();
-  $selfval{id} = ++$id_gen;
+  my($package, $filename, $line, $subroutine) = caller(1);
+  $subroutine =~ s/^Mail::SpamAssassin::/::/;
+  $selfval{id} = join('/', ++$id_gen, $subroutine, $line);
   my $self = \%selfval;
 
   bless ($self, $class);
