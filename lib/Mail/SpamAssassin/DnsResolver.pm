@@ -622,7 +622,7 @@ sub poll_responses {
     }
     if (!defined $nfound || $nfound < 0) {
       if ($!) { warn "dns: select failed: $!\n" }
-      else    { warn "dns: select interrupted\n" }
+      else    { info("dns: select interrupted") }
       return;
     } elsif (!$nfound) {
       if (!defined $timeout) { warn("dns: select returned empty-handed\n") }
