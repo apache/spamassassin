@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-it_batt bernie-mix danmcdonald darxus dos grenier jarif kgolding nbebout wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1; day 2: bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-it_batt bernie-mix danmcdonald darxus dos grenier jarif kgolding nbebout wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1; day 3: bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-it_batt bernie-mix danmcdonald darxus dos jarif kgolding nbebout wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1
+# with results from: day 1: bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-it_batt bernie-mix danmcdonald darxus dos grenier jarif jm kgolding nbebout wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1; day 2: bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-it_batt bernie-mix danmcdonald darxus dos grenier jarif kgolding nbebout wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1; day 3: bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-it_batt bernie-mix danmcdonald darxus dos grenier jarif kgolding nbebout wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1
 
 # tflags publish
 ADVANCE_FEE_2_NEW_FORM
@@ -160,6 +160,9 @@ DYN_RDNS_AND_INLINE_IMAGE
 # good enough
 DYN_RDNS_SHORT_HELO_HTML
 
+# good enough
+END_FUTURE_EMAILS
+
 # tflags userconf
 ENV_AND_HDR_SPF_MATCH
 
@@ -219,9 +222,6 @@ FILL_THIS_FORM
 
 # good enough
 FM_LOTTO_YOU_WON
-
-# good enough
-FM_SEX_HELODDDD
 
 # good enough
 FM_SUBJ_APPROVE
@@ -710,6 +710,9 @@ SINGLE_HEADER_3K
 SINGLE_HEADER_4K
 
 # good enough
+SPAMMY_MIME_BDRY_01
+
+# good enough
 SPAMMY_XMAILER
 
 # tflags net
@@ -797,9 +800,6 @@ TO_NO_BRKTS_DIRECT
 TO_NO_BRKTS_DYNIP
 
 # good enough
-TO_NO_BRKTS_FROM_MSSP
-
-# good enough
 TO_NO_BRKTS_NORDNS_HTML
 
 # good enough
@@ -830,13 +830,19 @@ TVD_RCVD_SINGLE
 TVD_VISIT_PHARMA
 
 # good enough
-END_FUTURE_EMAILS
+FR_WATCHES_HTTP
 
 # good enough
-SPAMMY_MIME_BDRY_01
+HK_SCAM_N15
 
 # good enough
-URI_DEOBFU_INSTR
+HK_SCAM_N8
+
+# good enough
+HTML_ATTACH
+
+# good enough
+OBFU_JPG_ATTACH
 
 # tflags userconf
 UNPARSEABLE_RELAY
@@ -894,6 +900,9 @@ URIBL_SEM_RED
 
 # tflags net
 URIBL_WS_SURBL
+
+# good enough
+URI_DEOBFU_INSTR
 
 # good enough
 URI_DOM_OBFU
