@@ -76,7 +76,8 @@ header         __FROM_RUNON          From =~ /\S+<\w+/
 meta           FROM_MISSP_SPF_FAIL  (__FROM_RUNON && SPF_FAIL)
 tflags         FROM_MISSP_SPF_FAIL  net
 
-meta           FROM_MISSP_EH_MATCH   (__FROM_RUNON && __ENV_AND_HDR_FROM_MATCH) && !__RCD_RDNS_MTA_MESSY && !__UNSUB_LINK && !__COMMENT_EXISTS
+meta           __FROM_MISSP_EH_MATCH __FROM_RUNON && __ENV_AND_HDR_FROM_MATCH
+meta           FROM_MISSP_EH_MATCH   __FROM_MISSP_EH_MATCH && !__RCD_RDNS_MTA_MESSY && !__UNSUB_LINK && !__COMMENT_EXISTS && !__TO___LOWER
 describe       FROM_MISSP_EH_MATCH   From misspaced, matches envelope
 
 meta           FROM_MISSP_URI        (__FROM_RUNON && __HAS_ANY_URI) && !__NOT_SPOOFED && !__RCD_RDNS_MTA_MESSY && !MISSING_MIMEOLE && !__COMMENT_EXISTS && !__REPTO_QUOTE
@@ -204,7 +205,7 @@ header         SUBJ_RE_CLNCLN      Subject =~ /^\s*RE::/
 describe       SUBJ_RE_CLNCLN      Subject RE::
 
 uri            __MANY_SUBDOM       m;^https?://(?:[^\./]{1,30}\.){6};
-meta           MANY_SUBDOM         __MANY_SUBDOM && !__JM_REACTOR_DATE && !__UNSUB_LINK && !__VIA_ML
+meta           MANY_SUBDOM         __MANY_SUBDOM && !__JM_REACTOR_DATE && !__UNSUB_LINK && !__VIA_ML && !NO_RELAYS && !__UPPERCASE_URI
 describe       MANY_SUBDOM         Lots and lots of subdomain parts in a URI
 
 # by request of Benny Pedersen <me@junc.org> on the users list 10/9/2009
@@ -508,10 +509,10 @@ describe    FROM_ONE_CHAR          Bogus FROM name
 # 12-letter domain names, suggested by Len Conrad on the users list
 #header         RCVD_12LTRDOM       Received =~ /[(\s.][a-z]{12}\./
 #tflags         RCVD_12LTRDOM       nopublish
-header         RPATH_12LTRDOM      Return-Path =~ /\@[a-z]{12}\./
-tflags         RPATH_12LTRDOM      nopublish
+header         __RPATH_12LTRDOM      Return-Path =~ /\@[a-z]{12}\./
+#tflags         RPATH_12LTRDOM      nopublish
 header         __FROM_12LTRDOM_1   From =~ /\@[a-z]{12}\./
-meta           FROM_12LTRDOM       __FROM_12LTRDOM_1 && !__VIA_ML && !__TO___LOWER && !__FS_SUBJ_RE && !__RCD_RDNS_MAIL_MESSY && !__freemail_safe && !__RCVD_IN_DNSWL && !__UNSUB_LINK
+meta           FROM_12LTRDOM       __FROM_12LTRDOM_1 && !__VIA_ML && !__TO___LOWER && !__FS_SUBJ_RE && !__RCD_RDNS_MAIL_MESSY && !__freemail_safe && !__RCVD_IN_DNSWL && !__UNSUB_LINK && !NO_RELAYS && !__UNUSABLE_MSGID && !DATE_IN_PAST_96_XX
 #tflags         FROM_12LTRDOM       nopublish
 #uri            URI_12LTRDOM        m,://(?:[^./]+\.)*[a-z]{12}\.[^./]+/,
 #tflags         URI_12LTRDOM        nopublish
@@ -583,4 +584,7 @@ tflags      NSL_TO_ENDS_COMMA      nopublish
 
 body        CN_B2B_SPAMMER         /We are a China[-\s]based/i
 describe    CN_B2B_SPAMMER         Chinese company introducing itself
+
+# __ version of khopesh UPPERCASE_URI, for use in metas
+uri         __UPPERCASE_URI        /^[^:A-Z]+[A-Z]/
 
