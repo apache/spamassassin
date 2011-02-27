@@ -80,7 +80,8 @@ meta           __FROM_MISSP_EH_MATCH __FROM_RUNON && __ENV_AND_HDR_FROM_MATCH
 meta           FROM_MISSP_EH_MATCH   __FROM_MISSP_EH_MATCH && !__RCD_RDNS_MTA_MESSY && !__UNSUB_LINK && !__COMMENT_EXISTS && !__TO___LOWER
 describe       FROM_MISSP_EH_MATCH   From misspaced, matches envelope
 
-meta           FROM_MISSP_URI        (__FROM_RUNON && __HAS_ANY_URI) && !__NOT_SPOOFED && !__RCD_RDNS_MTA_MESSY && !MISSING_MIMEOLE && !__COMMENT_EXISTS && !__REPTO_QUOTE
+meta           __FROM_MISSP_URI      __FROM_RUNON && __HAS_ANY_URI
+meta           FROM_MISSP_URI        __FROM_MISSP_URI && !__NOT_SPOOFED && !__RCD_RDNS_MTA_MESSY && !MISSING_MIMEOLE && !__COMMENT_EXISTS && !__REPTO_QUOTE && !__UNSUB_LINK && !__TO___LOWER && !__MSGID_OK_HEX
 describe       FROM_MISSP_URI        From misspaced, has URI
 
 meta           FROM_MISSP_USER       (__FROM_RUNON && NSL_RCVD_FROM_USER)
@@ -96,7 +97,8 @@ meta           FROM_MISSP_DKIM       (__FROM_RUNON && __DKIM_DEPENDABLE)
 describe       FROM_MISSP_DKIM       From misspaced, DKIM dependable
 tflags         FROM_MISSP_DKIM       net
 
-meta           FROM_MISSP_REPLYTO    (__FROM_RUNON && __REPLYTO_EXISTS) && !__NOT_SPOOFED && !__RCD_RDNS_MTA_MESSY
+meta           __FROM_MISSP_REPLYTO  __FROM_RUNON && __REPLYTO_EXISTS
+meta           FROM_MISSP_REPLYTO    __FROM_MISSP_REPLYTO && !__NOT_SPOOFED && !__RCD_RDNS_MTA_MESSY
 describe       FROM_MISSP_REPLYTO    From misspaced, has Reply-To
 
 ## To the same
@@ -204,6 +206,11 @@ describe       WIKI_IMG            Image from wikipedia
 header         SUBJ_RE_CLNCLN      Subject =~ /^\s*RE::/
 describe       SUBJ_RE_CLNCLN      Subject RE::
 
+# observed in spam 02/2011
+header         TO_SEM_SEM          To =~ /;;/
+describe       TO_SEM_SEM          To has ";;"
+tflags         TO_SEM_SEM          nopublish
+
 uri            __MANY_SUBDOM       m;^https?://(?:[^\./]{1,30}\.){6};
 meta           MANY_SUBDOM         __MANY_SUBDOM && !__JM_REACTOR_DATE && !__UNSUB_LINK && !__VIA_ML && !NO_RELAYS && !__UPPERCASE_URI
 describe       MANY_SUBDOM         Lots and lots of subdomain parts in a URI
@@ -254,20 +261,25 @@ header         __SUBJ_HAS_TO_1      ALL =~ /\nTo:\s+(?:[^\n<]{0,80}<)?([^\n\s>,]
 meta           TO_IN_SUBJ           __SUBJ_HAS_TO_1 && !__VIA_ML && !MISSING_MIMEOLE && !__THREAD_INDEX_GOOD
 describe       TO_IN_SUBJ           To address is in Subject
 
-meta           TO_EQ_FM_HTML_ONLY   (__TO_EQ_FROM && MIME_HTML_ONLY && !HTML_MIME_NO_HTML_TAG && !MISSING_MID && !ALL_TRUSTED) && !__RCD_RDNS_MAIL_MESSY
+meta           __TO_EQ_FM_HTML_ONLY __TO_EQ_FROM && MIME_HTML_ONLY
+meta           TO_EQ_FM_HTML_ONLY   __TO_EQ_FM_HTML_ONLY && !HTML_MIME_NO_HTML_TAG && !MISSING_MID && !ALL_TRUSTED && !__RCD_RDNS_MAIL_MESSY
 describe       TO_EQ_FM_HTML_ONLY   To == From and HTML only
 tflags         TO_EQ_FM_HTML_ONLY   publish
 
-meta           TO_EQ_FM_DIRECT_MX   (__TO_EQ_FROM && __DOS_DIRECT_TO_MX && !__THREAD_INDEX_GOOD && !__IS_EXCH)
+meta           __TO_EQ_FM_DIRECT_MX __TO_EQ_FROM && __DOS_DIRECT_TO_MX
+meta           TO_EQ_FM_DIRECT_MX   __TO_EQ_FM_DIRECT_MX && !__THREAD_INDEX_GOOD && !__IS_EXCH
 describe       TO_EQ_FM_DIRECT_MX   To == From and direct-to-MX
 tflags         TO_EQ_FM_DIRECT_MX   publish
 
 # Why __HUSH_HUSH hits ham on this in masscheck I don't know. Legit bank emails maybe?
-meta           TO_EQ_FM_HTML_DIRECT  (__TO_EQ_FROM && MIME_HTML_ONLY && __DOS_DIRECT_TO_MX && !__HUSH_HUSH)
+meta           __TO_EQ_FM_HTML_DIRECT __TO_EQ_FM_DIRECT_MX && MIME_HTML_ONLY
+meta           TO_EQ_FM_HTML_DIRECT  __TO_EQ_FM_HTML_DIRECT && !__HUSH_HUSH
 describe       TO_EQ_FM_HTML_DIRECT  To == From and HTML only, direct-to-MX
 tflags         TO_EQ_FM_HTML_DIRECT  publish
 
-meta           TO_EQ_FM_SPF_FAIL    (__TO_EQ_FROM && SPF_FAIL && !__THREADED && !ALL_TRUSTED)
+meta           __TO_EQ_FM_SPF_FAIL  __TO_EQ_FROM && SPF_FAIL
+tflags         __TO_EQ_FM_SPF_FAIL  net
+meta           TO_EQ_FM_SPF_FAIL    __TO_EQ_FM_SPF_FAIL && !__THREADED && !ALL_TRUSTED
 describe       TO_EQ_FM_SPF_FAIL    To == From and external SPF failed
 tflags         TO_EQ_FM_SPF_FAIL    net
 
@@ -275,19 +287,20 @@ header         __TO_EQ_FROM_DOM_1   ALL =~ /\nFrom:\s+[^\n@]{0,80}@([^\n\s>]+)>?
 header         __TO_EQ_FROM_DOM_2   ALL =~ /\nTo:\s+[^\n@]{0,80}@([^\n\s>]+)>?\n(?:[^\n]{1,100}\n)*From:\s+[^\n]+@\1[>,\s\n]/ism
 meta           __TO_EQ_FROM_DOM     (__TO_EQ_FROM_DOM_1 || __TO_EQ_FROM_DOM_2)
 describe       __TO_EQ_FROM_DOM     To: domain same as From: domain
-#tflags         __TO_EQ_FROM_DOM     publish
 
-meta           TO_EQ_FM_DOM_HTML_ONLY (__TO_EQ_FROM_DOM && MIME_HTML_ONLY && !__CTYPE_MULTIPART_ALT && !HTML_MIME_NO_HTML_TAG && !ALL_TRUSTED && !__MIME_QP && !__IS_EXCH) && !__MSGID_BEFORE_RECEIVED && !__RCD_RDNS_MAIL_MESSY
-describe       TO_EQ_FM_DOM_HTML_ONLY To domain == From domain and HTML only
-#tflags         TO_EQ_FM_DOM_HTML_ONLY publish
+meta           __TO_EQ_FM_DOM_HTML_ONLY __TO_EQ_FROM_DOM && MIME_HTML_ONLY
+meta           TO_EQ_FM_DOM_HTML_ONLY   __TO_EQ_FM_DOM_HTML_ONLY && !__CTYPE_MULTIPART_ALT && !HTML_MIME_NO_HTML_TAG && !ALL_TRUSTED && !__MIME_QP && !__IS_EXCH && !__MSGID_BEFORE_RECEIVED && !__RCD_RDNS_MAIL_MESSY
+describe       TO_EQ_FM_DOM_HTML_ONLY   To domain == From domain and HTML only
 
-meta           TO_EQ_FM_DOM_HTML_IMG (__TO_EQ_FROM_DOM && __HTML_LINK_IMAGE && !__CTYPE_MULTIPART_ALT && !ALL_TRUSTED && !__MIME_QP && !__IS_EXCH)
-describe       TO_EQ_FM_DOM_HTML_IMG To domain == From domain and HTML image link
-#tflags         TO_EQ_FM_DOM_HTML_IMG publish
+meta           __TO_EQ_FM_DOM_HTML_IMG  __TO_EQ_FROM_DOM && __HTML_LINK_IMAGE
+meta           TO_EQ_FM_DOM_HTML_IMG    __TO_EQ_FM_DOM_HTML_IMG && !__CTYPE_MULTIPART_ALT && !ALL_TRUSTED && !__MIME_QP && !__IS_EXCH
+describe       TO_EQ_FM_DOM_HTML_IMG    To domain == From domain and HTML image link
 
-meta           TO_EQ_FM_DOM_SPF_FAIL  (__TO_EQ_FROM_DOM && SPF_FAIL && !__THREADED && !ALL_TRUSTED)
-describe       TO_EQ_FM_DOM_SPF_FAIL  To domain == From domain and external SPF failed
-tflags         TO_EQ_FM_DOM_SPF_FAIL  net
+meta           __TO_EQ_FM_DOM_SPF_FAIL  __TO_EQ_FROM_DOM && SPF_FAIL
+tflags         __TO_EQ_FM_DOM_SPF_FAIL  net
+meta           TO_EQ_FM_DOM_SPF_FAIL    __TO_EQ_FM_DOM_SPF_FAIL && !__THREADED && !ALL_TRUSTED
+describe       TO_EQ_FM_DOM_SPF_FAIL    To domain == From domain and external SPF failed
+tflags         TO_EQ_FM_DOM_SPF_FAIL    net
 
 
 # Evaluate ReturnPath and blacklist collisions
@@ -454,8 +467,9 @@ describe        DYNDNS_URIS             Has multiple dyndns.org URIs
 uri             __BITLY_URI             /\/\/bit\.ly\//i
 #describe        __BITLY_URI             URI contains bit.ly
 
-uri             URI_DOM_OBFU            /:\/\/(?:\w+\.)+(?:com|gov|net|org)(?:\.\w+){3,}\//i
-describe        URI_DOM_OBFU            URI pretending to be different domain
+uri             __URI_OBFU_DOM          /:\/\/(?:\w+\.)+(?:com|gov|net|org)(?:\.\w+){3,}\//i
+meta            URI_OBFU_DOM            __URI_OBFU_DOM && !__VIA_ML
+describe        URI_OBFU_DOM            URI pretending to be different domain
 
 uri             DQ_URI_DOM_IN_PATH      /:\/\/[\d\.]+\/[^\/]+\/[^\@]+[a-z0-9]\w{3,}\.(?:com|gov|net)/i
 describe        DQ_URI_DOM_IN_PATH      DQ URI having a domain name in the path part
@@ -484,14 +498,17 @@ body            __MANY_RECORDS_2        /\W{1,4}\s(?:[a-z\/]{1,20}\s){0,4}(?:doc
 tflags          __MANY_RECORDS_2        multiple
 body            __MANY_RECORDS_3        /\W{1,4}\s(?:(?:[A-Z]{1,2}[a-z\/]{0,20}|and)\s){0,4}[A-Z][a-z]{1,20}s Database/
 tflags          __MANY_RECORDS_3        multiple
-meta            BIG_LISTS               (__MANY_RECORDS_1 + __MANY_RECORDS_2 + __MANY_RECORDS_3) > 5
-meta            MANY_BIG_LISTS          (__MANY_RECORDS_1 + __MANY_RECORDS_2 + __MANY_RECORDS_3) > 15
+#meta            BIG_LISTS               (__MANY_RECORDS_1 + __MANY_RECORDS_2 + __MANY_RECORDS_3) > 5
+meta            __MANY_BIG_LISTS        (__MANY_RECORDS_1 + __MANY_RECORDS_2 + __MANY_RECORDS_3) > 15
+meta            MANY_BIG_LISTS          __MANY_BIG_LISTS && !HTML_MESSAGE && !__CTYPE_MULTIPART_ANY && !__HS_SUBJ_RE_FW && !__HAS_THREAD_INDEX
+describe        MANY_BIG_LISTS          Lots of mailing lists / databases available!
 
 
 # Suggested by Gerard Z 2010-08-15
 uri         __GZ_PILL_SQUAT1       /\/[a-z]{3,8}\d{2}\.html/
 uri         __GZ_PILL_SQUAT2       /\/[a-z]{3,8}\d{2}\.jpg/
-meta        GZ_PILL_SQUATTERS      (__GZ_PILL_SQUAT1 && __GZ_PILL_SQUAT2) && !__DOS_RELAYED_EXT && !__FROM_ISO_2022_JP && !__RCD_RDNS_MX_MESSY
+meta        __GZ_PILL_SQUATTERS    __GZ_PILL_SQUAT1 && __GZ_PILL_SQUAT2
+meta        GZ_PILL_SQUATTERS      __GZ_PILL_SQUATTERS && !__DOS_RELAYED_EXT && !__FROM_ISO_2022_JP && !__RCD_RDNS_MX_MESSY
 describe    GZ_PILL_SQUATTERS      Found a link to rogue pill pusher content
 
 # observed in multiple spam
@@ -507,15 +524,12 @@ header      FROM_ONE_CHAR          From =~ /^\s*"[^"]"\s*</
 describe    FROM_ONE_CHAR          Bogus FROM name
 
 # 12-letter domain names, suggested by Len Conrad on the users list
-#header         RCVD_12LTRDOM       Received =~ /[(\s.][a-z]{12}\./
-#tflags         RCVD_12LTRDOM       nopublish
-header         __RPATH_12LTRDOM      Return-Path =~ /\@[a-z]{12}\./
-#tflags         RPATH_12LTRDOM      nopublish
+header         __RCVD_12LTRDOM     Received =~ /[(\s.][a-z]{12}\./
+header         __RPATH_12LTRDOM    Return-Path =~ /\@[a-z]{12}\./
 header         __FROM_12LTRDOM_1   From =~ /\@[a-z]{12}\./
 meta           FROM_12LTRDOM       __FROM_12LTRDOM_1 && !__VIA_ML && !__TO___LOWER && !__FS_SUBJ_RE && !__RCD_RDNS_MAIL_MESSY && !__freemail_safe && !__RCVD_IN_DNSWL && !__UNSUB_LINK && !NO_RELAYS && !__UNUSABLE_MSGID && !DATE_IN_PAST_96_XX
 #tflags         FROM_12LTRDOM       nopublish
-#uri            URI_12LTRDOM        m,://(?:[^./]+\.)*[a-z]{12}\.[^./]+/,
-#tflags         URI_12LTRDOM        nopublish
+uri            __URI_12LTRDOM      m,://(?:[^./]+\.)*[a-z]{12}\.[^./]+/,
 
 # spammer email addresses noted by D. German on users list 9/2010
 body        DG_SPAMMER_EMAIL_B     /\b[a-z]{10,30}\.[a-z]{3,10}\@[a-z]{3,10}\.[a-z]{6,30}\.[a-z]{2,4}\b/
