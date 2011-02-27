@@ -20,10 +20,12 @@ endif
 body          URI_OBFU_PROTO    m,h\st\st\sp(?:\ss)\s?:\s?/\s?/,i
 describe      URI_OBFU_PROTO    URI http protocol with space obfuscation
 
-body          URI_OBFU_TLD      /\.\s(?:c\so\sm|n\se\st|o\sr\sg|b\si\sz|i\sn\sf\so)/i
+body          __URI_OBFU_TLD    /\.\s(?:c\so\sm|n\se\st|o\sr\sg|b\si\sz|i\sn\sf\so)/i
+meta          URI_OBFU_TLD      __URI_OBFU_TLD && !__MSGID_OK_HOST
 describe      URI_OBFU_TLD      URI top-level domain with space obfuscation
 
-body          URI_DEOBFU_INSTR  /(?:delete|remove|take\sout)(?:\sthe)?\sspaces/i
-describe      URI_DEOBFU_INSTR  How to deobfuscate this URI
-#tflags        URI_DEOBFU_INSTR  nopublish
+body          __URI_DEOBFU_INSTR  /(?:delete|remove|take\sout)(?:\sthe)?\sspaces/i
+meta          URI_DEOBFU_INSTR    __URI_DEOBFU_INSTR && !__MSGID_OK_HOST
+describe      URI_DEOBFU_INSTR    How to deobfuscate this URI
+#tflags        URI_DEOBFU_INSTR    nopublish
 
