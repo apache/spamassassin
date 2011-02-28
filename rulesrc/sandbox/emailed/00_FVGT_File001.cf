@@ -3498,7 +3498,7 @@ replace_rules FRT_ADULT2
 #counts   FRT_ADULT2               16s/0h of 47019 corpus (37183s/9836h FVGT) 12/23/06
 
 
-body     FRT_APPROV             /<inter sP2><post P2>\b(?!approv)<A><P><P><R><O><V>/i
+body     FRT_APPROV             /<inter sP2><post P2>\b(?!approu?v)<A><P><P><R><O><V>/i
 describe FRT_APPROV             ReplaceTags: Approve
 ##score    FRT_APPROV           1.645
 replace_rules FRT_APPROV
@@ -3613,7 +3613,7 @@ replace_rules FRT_ESTABLISH2
 #counts   FRT_ESTABLISH2           7s/0h of 47019 corpus (37183s/9836h FVGT) 12/23/06
 
 
-body     FRT_EXPERIENCE         /<inter SP2><post P2>\b(?!experience)<E><X><P><E><R><IX><E><N><C><E>\b/i
+body     FRT_EXPERIENCE         /<inter SP2><post P2>\b(?!exp[e\xe9\xc9]rience)<E><X><P><E><R><IX><E><N><C><E>\b/i
 describe FRT_EXPERIENCE         ReplaceTags: Experience
 ##score    FRT_EXPERIENCE               2.333
 replace_rules FRT_EXPERIENCE
