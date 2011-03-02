@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-it_batt bernie-mix danmcdonald darxus dos grenier jarif kgolding nbebout wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1; day 2: bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-it_batt bernie-mix danmcdonald darxus dos grenier jarif jm kgolding nbebout wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1; day 3: bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-it_batt bernie-mix danmcdonald darxus dos grenier jarif jm kgolding nbebout wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1
+# with results from: day 1: bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-it_batt bernie-mix danmcdonald darxus dos grenier jarif kgolding nbebout wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1; day 2: bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-it_batt bernie-mix danmcdonald darxus dos grenier jarif jm nbebout wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1; day 3: bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-it_batt bernie-mix danmcdonald darxus dos jarif jm kgolding nbebout wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1
 
 # tflags publish
 ADVANCE_FEE_2_NEW_FORM
@@ -137,6 +137,9 @@ DNS_FROM_RFC_DSN
 DOS_ANAL_SPAM_MAILER
 
 # good enough
+DOS_BODY_HIGH_NO_MID
+
+# good enough
 DOS_OE_TO_MX
 
 # good enough
@@ -153,9 +156,6 @@ DOS_RCVD_IP_TWICE_C
 
 # good enough
 DRUGS_STOCK_MIMEOLE
-
-# good enough
-DYN_RDNS_AND_INLINE_IMAGE
 
 # good enough
 DYN_RDNS_SHORT_HELO_HTML
@@ -217,6 +217,9 @@ FH_HOST_EQ_DYNAMICIP
 # good enough
 FH_HOST_IN_ADDRARPA
 
+# good enough
+FH_MSGID_XXX
+
 # tflags publish
 FILL_THIS_FORM
 
@@ -228,6 +231,9 @@ FM_LOTTO_YOU_WON
 
 # good enough
 FM_SUBJ_APPROVE
+
+# good enough
+FM_VEGAS_CASINO
 
 # tflags publish
 FORM_FRAUD_3
@@ -284,9 +290,6 @@ FRT_APPROV
 FRT_BIGGERMEM1
 
 # good enough
-FRT_EXPERIENCE
-
-# good enough
 FRT_PHARMAC
 
 # good enough
@@ -327,6 +330,9 @@ FSL_UA
 
 # good enough
 FSL_XM_419
+
+# good enough
+FS_OBFU_PRMCY
 
 # good enough
 FS_PHARMASUB2
@@ -719,6 +725,9 @@ S25R_4
 S25R_6
 
 # good enough
+SB_GIF_AND_NO_URIS
+
+# good enough
 SINGLE_HEADER_2K
 
 # good enough
@@ -726,9 +735,6 @@ SINGLE_HEADER_3K
 
 # good enough
 SINGLE_HEADER_4K
-
-# good enough
-SPAMMY_MIME_BDRY_01
 
 # good enough
 SPAMMY_XMAILER
@@ -830,6 +836,9 @@ TO_NO_BRKTS_PCNT
 TO_ONE_CHAR
 
 # good enough
+TT_MSGID_TRUNC
+
+# good enough
 TVD_FINGER_02
 
 # good enough
@@ -848,13 +857,22 @@ TVD_RCVD_SINGLE
 TVD_VISIT_PHARMA
 
 # good enough
-DOS_BODY_HIGH_NO_MID
+ADVANCE_FEE_3_NEW_FRM_MNY
 
 # good enough
-HTML_ATTACH
+FB_YOUR_REFILL
 
 # good enough
-OBFU_JPG_ATTACH
+FR_WATCHES_HTTP
+
+# good enough
+FSL_STACKED_TEXT
+
+# good enough
+LOTTO_AGENT
+
+# good enough
+URI_OBFU_DOM
 
 # tflags userconf
 UNPARSEABLE_RELAY
@@ -916,9 +934,6 @@ URIBL_WS_SURBL
 # good enough
 URI_DEOBFU_INSTR
 
-# good enough
-URI_DOM_OBFU
-
 # tflags userconf
 URI_NOVOWEL
 
@@ -977,10 +992,19 @@ XMAILER_MIMEOLE_OL_3D61D
 XMAILER_MIMEOLE_OL_7533E
 
 # good enough
+XMAILER_MIMEOLE_OL_83BF7
+
+# good enough
 XMAILER_MIMEOLE_OL_91287
 
 # good enough
+XMAILER_MIMEOLE_OL_C65FA
+
+# good enough
 XMAILER_MIMEOLE_OL_CAC8F
+
+# good enough
+XMAILER_MIMEOLE_OL_CF0C0
 
 # tflags net
 __DKIMDOMAIN_IN_DWL_ANY
@@ -1023,3 +1047,9 @@ __RFC_IGNORANT_ENVFROM
 
 # tflags net
 __SPF_FULL_PASS
+
+# tflags net
+__TO_EQ_FM_DOM_SPF_FAIL
+
+# tflags net
+__TO_EQ_FM_SPF_FAIL
