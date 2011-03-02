@@ -35,7 +35,7 @@ use vars qw{
 BEGIN {
   eval {
     require Net::Patricia;
-    Net::Patricia->VERSION(1.015);  # need AF_INET6 support
+    Net::Patricia->VERSION(1.16);  # need AF_INET6 support
     import Net::Patricia;
     $have_patricia = 1;
   };

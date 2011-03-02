@@ -218,7 +218,7 @@ $have_sha ? {
 },
 {
   module => 'Net::Patricia',
-  version => 1.015,
+  version => 1.16,
   desc => 'If this module is available, it will be used for IP address lookups
   in tables internal_networks, trusted_networks, and msa_networks. Recommended
   when the number of entries in these tables is large, i.e. in hundreds or
