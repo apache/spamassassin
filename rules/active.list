@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-it_batt bernie-mix danmcdonald darxus dos grenier jarif kgolding nbebout wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1; day 2: bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-it_batt bernie-mix danmcdonald darxus dos grenier jarif jm nbebout wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1; day 3: bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-it_batt bernie-mix danmcdonald darxus dos jarif jm kgolding nbebout wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1
+# with results from: day 1: bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-it_batt bernie-mix danmcdonald darxus dos grenier jarif kgolding nbebout wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1; day 2: bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-it_batt bernie-mix danmcdonald darxus dos grenier jarif jm kgolding nbebout wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1; day 3: bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-it_batt bernie-mix danmcdonald darxus dos grenier jarif jm nbebout wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1
 
 # tflags publish
 ADVANCE_FEE_2_NEW_FORM
@@ -15,6 +15,9 @@ ADVANCE_FEE_3_NEW
 
 # tflags publish
 ADVANCE_FEE_3_NEW_FORM
+
+# good enough
+ADVANCE_FEE_3_NEW_FRM_MNY
 
 # tflags publish
 ADVANCE_FEE_3_NEW_MONEY
@@ -84,9 +87,6 @@ DEAR_EMAIL
 
 # good enough
 DEAR_WINNER
-
-# good enough
-DECEASED_NO_ML
 
 # tflags net
 DIGEST_MULTIPLE
@@ -197,6 +197,9 @@ FB_SOFTTABS
 FB_WITHOUT_PRESC
 
 # good enough
+FB_YOUR_REFILL
+
+# good enough
 FH_FAKE_RCVD_LINE
 
 # good enough
@@ -216,9 +219,6 @@ FH_HOST_EQ_DYNAMICIP
 
 # good enough
 FH_HOST_IN_ADDRARPA
-
-# good enough
-FH_MSGID_XXX
 
 # tflags publish
 FILL_THIS_FORM
@@ -299,6 +299,9 @@ FRT_PRICE
 FRT_ROLEX
 
 # good enough
+FR_WATCHES_HTTP
+
+# good enough
 FSL_BOTSPAM_1
 
 # good enough
@@ -324,6 +327,9 @@ FSL_HELO_DEVICE
 
 # good enough
 FSL_MID_419
+
+# good enough
+FSL_STACKED_TEXT
 
 # good enough
 FSL_UA
@@ -447,6 +453,9 @@ LOTS_OF_MONEY
 
 # good enough
 LOTTERY_PH_004470
+
+# good enough
+LOTTO_AGENT
 
 # tflags publish
 MAILER_EQ_ORG
@@ -725,9 +734,6 @@ S25R_4
 S25R_6
 
 # good enough
-SB_GIF_AND_NO_URIS
-
-# good enough
 SINGLE_HEADER_2K
 
 # good enough
@@ -857,22 +863,16 @@ TVD_RCVD_SINGLE
 TVD_VISIT_PHARMA
 
 # good enough
-ADVANCE_FEE_3_NEW_FRM_MNY
+FROM_MISSP_URI
 
 # good enough
-FB_YOUR_REFILL
+FSL_NEW_HELO_USER
 
 # good enough
-FR_WATCHES_HTTP
+HTML_ATTACH
 
 # good enough
-FSL_STACKED_TEXT
-
-# good enough
-LOTTO_AGENT
-
-# good enough
-URI_OBFU_DOM
+OBFU_JPG_ATTACH
 
 # tflags userconf
 UNPARSEABLE_RELAY
@@ -938,6 +938,9 @@ URI_DEOBFU_INSTR
 URI_NOVOWEL
 
 # good enough
+URI_OBFU_DOM
+
+# good enough
 URI_OBFU_TLD
 
 # tflags userconf
@@ -989,6 +992,9 @@ XMAILER_MIMEOLE_OL_3AC1D
 XMAILER_MIMEOLE_OL_3D61D
 
 # good enough
+XMAILER_MIMEOLE_OL_4B815
+
+# good enough
 XMAILER_MIMEOLE_OL_7533E
 
 # good enough
@@ -998,13 +1004,7 @@ XMAILER_MIMEOLE_OL_83BF7
 XMAILER_MIMEOLE_OL_91287
 
 # good enough
-XMAILER_MIMEOLE_OL_C65FA
-
-# good enough
 XMAILER_MIMEOLE_OL_CAC8F
-
-# good enough
-XMAILER_MIMEOLE_OL_CF0C0
 
 # tflags net
 __DKIMDOMAIN_IN_DWL_ANY
