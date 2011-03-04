@@ -81,7 +81,7 @@ header SUBJECT_FUZZY_CHEAP	Subject =~ /<inter W2><post P3>\b(?!cheap)<C><H><E><A
 describe SUBJECT_FUZZY_CHEAP	Attempt to obfuscate words in Subject:
 replace_rules SUBJECT_FUZZY_CHEAP
 
-header SUBJECT_FUZZY_PENIS	Subject =~ /<inter W3><post P3>\b(?!(pen(is|ny)))<P><E><N><I><S>\b/i
+header SUBJECT_FUZZY_PENIS	Subject =~ /<inter W3><post P3>\b(?!pen\s?(?:ie?s|ny[ ']?s))<P><E><N><I><S>\b/i
 describe SUBJECT_FUZZY_PENIS	Attempt to obfuscate words in Subject:
 replace_rules SUBJECT_FUZZY_PENIS
 
@@ -109,7 +109,7 @@ body FUZZY_CPILL	/(?!ciali[sz])<C><I><A><L><I><S>/i
 describe FUZZY_CPILL	Attempt to obfuscate words in spam
 replace_rules FUZZY_CPILL
 
-body FUZZY_CREDIT	/<inter W1>(?!credit)<C><R><E><D><I><T>/i
+body FUZZY_CREDIT	/<inter W1>(?![ck]r[e\xe9]dit)<C><R><E><D><I><T>/i
 describe FUZZY_CREDIT	Attempt to obfuscate words in spam
 replace_rules FUZZY_CREDIT
 
@@ -122,12 +122,12 @@ body FUZZY_GUARANTEE	/<inter W1><post P2>(?!guarantee)<G><U><A><R><A><N><T><E><E
 describe FUZZY_GUARANTEE	Attempt to obfuscate words in spam
 replace_rules FUZZY_GUARANTEE
 
-body FUZZY_MEDICATION	/<inter W1><post P2>(?!medication)<M><E><D><I><C><A><T><I><O><N>/i
+body FUZZY_MEDICATION	/<inter W1><post P2>(?!medicati[eo])<M><E><D><I><C><A><T><I><O><N>/i
 describe FUZZY_MEDICATION	Attempt to obfuscate words in spam
 replace_rules FUZZY_MEDICATION
 
 
-body FUZZY_MILLION	/(?!million)<M><I><L><L><I><O><N>/i
+body FUZZY_MILLION	/(?!milli?[o\xf3\xd3]n)<M><I><L><L><I><O><N>/i
 describe FUZZY_MILLION	Attempt to obfuscate words in spam
 replace_rules FUZZY_MILLION
 

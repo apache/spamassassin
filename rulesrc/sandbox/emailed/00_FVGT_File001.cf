@@ -3564,7 +3564,7 @@ replace_rules FRT_CONTACT
 #counts   FRT_CONTACT              10s/0h of 47019 corpus (37183s/9836h FVGT) 12/23/06
 
 
-body     FRT_DIPLOMA            /<inter SP2><post P2>\b(?!diploma)<D><IX><P><L><O><M><A>/i
+body     FRT_DIPLOMA            /<inter SP2><post P2>\b(?!d[iy]pl[o\xe2\xc2]m)<D><IX><P><L><O><M><A>/i
 describe FRT_DIPLOMA            ReplaceTags: Diploma
 ##score    FRT_DIPLOMA          1.499
 replace_rules FRT_DIPLOMA
@@ -3791,7 +3791,7 @@ replace_rules FRT_PAYMENT
 #counts   FRT_PAYMENT              2s/0h of 47019 corpus (37183s/9836h FVGT) 12/23/06
 
 
-body     FRT_PENIS1             /<inter SP2><post P2>\b(?!pen\s?is)(?!penny[ ']?s)<P><E><N><IX><SX>\b/i
+body     FRT_PENIS1             /<inter SP2><post P2>\b(?!pen\s?(?:ie?s|ny[ ']?s))<P><E><N><IX><SX>\b/i
 describe FRT_PENIS1             ReplaceTags: Penis
 ##score    FRT_PENIS1           3.592
 replace_rules FRT_PENIS1
