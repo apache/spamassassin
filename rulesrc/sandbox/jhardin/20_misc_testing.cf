@@ -77,7 +77,7 @@ meta           FROM_MISSP_SPF_FAIL  (__FROM_RUNON && SPF_FAIL)
 tflags         FROM_MISSP_SPF_FAIL  net
 
 meta           __FROM_MISSP_EH_MATCH __FROM_RUNON && __ENV_AND_HDR_FROM_MATCH
-meta           FROM_MISSP_EH_MATCH   __FROM_MISSP_EH_MATCH && !__RCD_RDNS_MTA_MESSY && !__UNSUB_LINK && !__COMMENT_EXISTS && !__TO___LOWER
+meta           FROM_MISSP_EH_MATCH   __FROM_MISSP_EH_MATCH && !__RCD_RDNS_MTA_MESSY && !__UNSUB_LINK && !__COMMENT_EXISTS && !__TO___LOWER && !__MIME_QP
 describe       FROM_MISSP_EH_MATCH   From misspaced, matches envelope
 
 meta           __FROM_MISSP_URI      __FROM_RUNON && __HAS_ANY_URI
@@ -98,7 +98,7 @@ describe       FROM_MISSP_DKIM       From misspaced, DKIM dependable
 tflags         FROM_MISSP_DKIM       net
 
 meta           __FROM_MISSP_REPLYTO  __FROM_RUNON && __REPLYTO_EXISTS
-meta           FROM_MISSP_REPLYTO    __FROM_MISSP_REPLYTO && !__NOT_SPOOFED && !__RCD_RDNS_MTA_MESSY
+meta           FROM_MISSP_REPLYTO    __FROM_MISSP_REPLYTO && !__NOT_SPOOFED && !__RCD_RDNS_MTA_MESSY && !__TO___LOWER && !__COMMENT_EXISTS && !__UNSUB_LINK && !__MIME_QP
 describe       FROM_MISSP_REPLYTO    From misspaced, has Reply-To
 
 ## To the same
@@ -212,7 +212,7 @@ describe       TO_SEM_SEM          To has ";;"
 tflags         TO_SEM_SEM          nopublish
 
 uri            __MANY_SUBDOM       m;^https?://(?:[^\./]{1,30}\.){6};
-meta           MANY_SUBDOM         __MANY_SUBDOM && !__JM_REACTOR_DATE && !__UNSUB_LINK && !__VIA_ML && !NO_RELAYS && !__UPPERCASE_URI
+meta           MANY_SUBDOM         __MANY_SUBDOM && !__JM_REACTOR_DATE && !__UNSUB_LINK && !__VIA_ML && !NO_RELAYS && !__UPPERCASE_URI && !__MIME_QP
 describe       MANY_SUBDOM         Lots and lots of subdomain parts in a URI
 
 # by request of Benny Pedersen <me@junc.org> on the users list 10/9/2009
@@ -527,7 +527,7 @@ describe    FROM_ONE_CHAR          Bogus FROM name
 header         __RCVD_12LTRDOM     Received =~ /[(\s.][a-z]{12}\./
 header         __RPATH_12LTRDOM    Return-Path =~ /\@[a-z]{12}\./
 header         __FROM_12LTRDOM_1   From =~ /\@[a-z]{12}\./
-meta           FROM_12LTRDOM       __FROM_12LTRDOM_1 && !__VIA_ML && !__TO___LOWER && !__FS_SUBJ_RE && !__RCD_RDNS_MAIL_MESSY && !__freemail_safe && !__RCVD_IN_DNSWL && !__UNSUB_LINK && !NO_RELAYS && !__UNUSABLE_MSGID && !DATE_IN_PAST_96_XX
+meta           FROM_12LTRDOM       __FROM_12LTRDOM_1 && !__VIA_ML && !__TO___LOWER && !__FS_SUBJ_RE && !__RCD_RDNS_MAIL_MESSY && !__freemail_safe && !__RCVD_IN_DNSWL && !__UNSUB_LINK && !NO_RELAYS && !__UNUSABLE_MSGID && !DATE_IN_PAST_96_XX && !ALL_TRUSTED && !__MSGID_APPLEMAIL && !__RCD_RDNS_SMTP_MESSY
 #tflags         FROM_12LTRDOM       nopublish
 uri            __URI_12LTRDOM      m,://(?:[^./]+\.)*[a-z]{12}\.[^./]+/,
 
