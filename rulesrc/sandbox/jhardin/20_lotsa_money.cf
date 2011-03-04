@@ -220,7 +220,7 @@ body     DEAR_BENEFICIARY         /^\s?(?:Dear\s|At+(?:ention|n):?\s?)(?:\S+\s)?
 describe DEAR_BENEFICIARY         Dear Beneficiary:
 score    DEAR_BENEFICIARY         2.0
 
-meta     YOUR_PERMISSION  __YOUR_PERM && !__CTYPE_HAS_BOUNDARY && !__DKIM_EXISTS && !__DOS_HAS_LIST_UNSUB
+meta     YOUR_PERMISSION  __YOUR_PERM && !__CTYPE_HAS_BOUNDARY && !__DKIM_EXISTS && !__DOS_HAS_LIST_UNSUB && !__CT_TEXT_PLAIN
 describe YOUR_PERMISSION  With your permission...
 
 # DEAR_WINNER from felicity/70_other.cf
