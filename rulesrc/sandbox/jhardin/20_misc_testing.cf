@@ -77,11 +77,11 @@ meta           FROM_MISSP_SPF_FAIL  (__FROM_RUNON && SPF_FAIL)
 tflags         FROM_MISSP_SPF_FAIL  net
 
 meta           __FROM_MISSP_EH_MATCH __FROM_RUNON && __ENV_AND_HDR_FROM_MATCH
-meta           FROM_MISSP_EH_MATCH   __FROM_MISSP_EH_MATCH && !__RCD_RDNS_MTA_MESSY && !__UNSUB_LINK && !__COMMENT_EXISTS && !__TO___LOWER && !__MIME_QP
+meta           FROM_MISSP_EH_MATCH   __FROM_MISSP_EH_MATCH && !__RCD_RDNS_MTA_MESSY && !__UNSUB_LINK && !__COMMENT_EXISTS && !__TO___LOWER && !__MIME_QP && !__TO_EQ_FROM_DOM
 describe       FROM_MISSP_EH_MATCH   From misspaced, matches envelope
 
 meta           __FROM_MISSP_URI      __FROM_RUNON && __HAS_ANY_URI
-meta           FROM_MISSP_URI        __FROM_MISSP_URI && !__NOT_SPOOFED && !__RCD_RDNS_MTA_MESSY && !MISSING_MIMEOLE && !__COMMENT_EXISTS && !__REPTO_QUOTE && !__UNSUB_LINK && !__TO___LOWER && !__MSGID_OK_HEX
+meta           FROM_MISSP_URI        __FROM_MISSP_URI && !__NOT_SPOOFED && !__RCD_RDNS_MTA_MESSY && !MISSING_MIMEOLE && !__COMMENT_EXISTS && !__REPTO_QUOTE && !__UNSUB_LINK && !__TO___LOWER && !__MSGID_OK_HEX && !__MAIL_LINK
 describe       FROM_MISSP_URI        From misspaced, has URI
 
 meta           FROM_MISSP_USER       (__FROM_RUNON && NSL_RCVD_FROM_USER)
@@ -98,7 +98,7 @@ describe       FROM_MISSP_DKIM       From misspaced, DKIM dependable
 tflags         FROM_MISSP_DKIM       net
 
 meta           __FROM_MISSP_REPLYTO  __FROM_RUNON && __REPLYTO_EXISTS
-meta           FROM_MISSP_REPLYTO    __FROM_MISSP_REPLYTO && !__NOT_SPOOFED && !__RCD_RDNS_MTA_MESSY && !__TO___LOWER && !__COMMENT_EXISTS && !__UNSUB_LINK && !__MIME_QP
+meta           FROM_MISSP_REPLYTO    __FROM_MISSP_REPLYTO && !__NOT_SPOOFED && !__RCD_RDNS_MTA_MESSY && !__TO___LOWER && !__COMMENT_EXISTS && !__UNSUB_LINK && !__MIME_QP && !__CTYPE_MULTIPART_ALT
 describe       FROM_MISSP_REPLYTO    From misspaced, has Reply-To
 
 ## To the same
@@ -228,7 +228,8 @@ rawbody        __SPAN_BEG_TEXT     /[a-z]{2}<(?i:span)\s/
 tflags         __SPAN_BEG_TEXT     multiple
 rawbody        __SPAN_END_TEXT     /[^;>]<\/(?i:span)>[a-z]{3}/
 tflags         __SPAN_END_TEXT     multiple
-meta           MANY_SPAN_IN_TEXT   (__SPAN_BEG_TEXT > 4) && (__SPAN_END_TEXT > 4)
+meta           __MANY_SPAN_IN_TEXT   (__SPAN_BEG_TEXT > 4) && (__SPAN_END_TEXT > 4)
+meta           MANY_SPAN_IN_TEXT   __MANY_SPAN_IN_TEXT && !__VIA_ML
 describe       MANY_SPAN_IN_TEXT   Many <SPAN> tags embedded within text
 tflags         MANY_SPAN_IN_TEXT   publish
 score          MANY_SPAN_IN_TEXT   2.50
