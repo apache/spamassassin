@@ -65,7 +65,7 @@ describe       URI_NUMERIC_CCTLD     CCTLD URI with multiple numeric subdomains
 # Better S/O, good enough for standalone rule
 header         __FROM_MISSPACED      From =~ /^\s*"[^"]*"</
 # meta with some stuff to reduce FPs
-meta           FROM_MISSPACED        __FROM_MISSPACED && !__RCD_RDNS_MTA_MESSY && !__CTYPE_MULTIPART_ALT && !__REPTO_QUOTE && !__MIME_QP && !__UNSUB_LINK && !__TO___LOWER && !__BUGGED_IMG && !__DOS_HAS_LIST_UNSUB
+meta           FROM_MISSPACED        __FROM_MISSPACED && !__RCD_RDNS_MTA_MESSY && !__CTYPE_MULTIPART_ALT && !__REPTO_QUOTE && !__MIME_QP && !__UNSUB_LINK && !__TO___LOWER && !__BUGGED_IMG && !__DOS_HAS_LIST_UNSUB && !__TO_EQ_FROM_DOM && !__MAIL_LINK
 describe       FROM_MISSPACED        From: missing whitespace
 
 # Poorer S/O than FROM_MISSPACED but better performance in metas
@@ -81,7 +81,7 @@ meta           FROM_MISSP_EH_MATCH   __FROM_MISSP_EH_MATCH && !__RCD_RDNS_MTA_ME
 describe       FROM_MISSP_EH_MATCH   From misspaced, matches envelope
 
 meta           __FROM_MISSP_URI      __FROM_RUNON && __HAS_ANY_URI
-meta           FROM_MISSP_URI        __FROM_MISSP_URI && !__NOT_SPOOFED && !__RCD_RDNS_MTA_MESSY && !MISSING_MIMEOLE && !__COMMENT_EXISTS && !__REPTO_QUOTE && !__UNSUB_LINK && !__TO___LOWER && !__MSGID_OK_HEX && !__MAIL_LINK
+meta           FROM_MISSP_URI        __FROM_MISSP_URI && !__NOT_SPOOFED && !__RCD_RDNS_MTA_MESSY && !MISSING_MIMEOLE && !__COMMENT_EXISTS && !__REPTO_QUOTE && !__UNSUB_LINK && !__TO___LOWER && !__MSGID_OK_HEX && !__MAIL_LINK && !__MIME_QP
 describe       FROM_MISSP_URI        From misspaced, has URI
 
 meta           FROM_MISSP_USER       (__FROM_RUNON && NSL_RCVD_FROM_USER)
@@ -98,7 +98,7 @@ describe       FROM_MISSP_DKIM       From misspaced, DKIM dependable
 tflags         FROM_MISSP_DKIM       net
 
 meta           __FROM_MISSP_REPLYTO  __FROM_RUNON && __REPLYTO_EXISTS
-meta           FROM_MISSP_REPLYTO    __FROM_MISSP_REPLYTO && !__NOT_SPOOFED && !__RCD_RDNS_MTA_MESSY && !__TO___LOWER && !__COMMENT_EXISTS && !__UNSUB_LINK && !__MIME_QP && !__CTYPE_MULTIPART_ALT
+meta           FROM_MISSP_REPLYTO    __FROM_MISSP_REPLYTO && !__NOT_SPOOFED && !__RCD_RDNS_MTA_MESSY && !__TO___LOWER && !__COMMENT_EXISTS && !__UNSUB_LINK && !__MIME_QP && !__CTYPE_MULTIPART_ALT && !__JM_REACTOR_DATE
 describe       FROM_MISSP_REPLYTO    From misspaced, has Reply-To
 
 ## To the same
@@ -524,13 +524,18 @@ describe    TO_ONE_CHAR            Bogus TO name
 header      FROM_ONE_CHAR          From =~ /^\s*"[^"]"\s*</
 describe    FROM_ONE_CHAR          Bogus FROM name
 
+# __ version of khop rule for FP filtering
+meta           __NAME_EMAIL_DIFF   __NAME_IS_EMAIL && ! __NAME_EQ_EMAIL
+
 # 12-letter domain names, suggested by Len Conrad on the users list
 header         __RCVD_12LTRDOM     Received =~ /[(\s.][a-z]{12}\./
 header         __RPATH_12LTRDOM    Return-Path =~ /\@[a-z]{12}\./
-header         __FROM_12LTRDOM_1   From =~ /\@[a-z]{12}\./
-meta           FROM_12LTRDOM       __FROM_12LTRDOM_1 && !__VIA_ML && !__TO___LOWER && !__FS_SUBJ_RE && !__RCD_RDNS_MAIL_MESSY && !__freemail_safe && !__RCVD_IN_DNSWL && !__UNSUB_LINK && !NO_RELAYS && !__UNUSABLE_MSGID && !DATE_IN_PAST_96_XX && !ALL_TRUSTED && !__MSGID_APPLEMAIL && !__RCD_RDNS_SMTP_MESSY
-#tflags         FROM_12LTRDOM       nopublish
 uri            __URI_12LTRDOM      m,://(?:[^./]+\.)*[a-z]{12}\.[^./]+/,
+
+header         __FROM_12LTRDOM_1   From =~ /\@[a-z]{12}\./
+meta           FROM_12LTRDOM       __FROM_12LTRDOM_1 && !__VIA_ML && !__TO___LOWER && !__FS_SUBJ_RE && !__RCD_RDNS_MAIL_MESSY && !__freemail_safe && !__RCVD_IN_DNSWL && !__UNSUB_LINK && !NO_RELAYS && !__UNUSABLE_MSGID && !DATE_IN_PAST_96_XX && !ALL_TRUSTED && !__MSGID_APPLEMAIL && !__RCD_RDNS_SMTP_MESSY && !__FB_NATIONAL && !__MAIL_LINK && !__NAME_EMAIL_DIFF
+describe       FROM_12LTRDOM       From a 12-letter domain
+#tflags         FROM_12LTRDOM       nopublish
 
 # spammer email addresses noted by D. German on users list 9/2010
 body        DG_SPAMMER_EMAIL_B     /\b[a-z]{10,30}\.[a-z]{3,10}\@[a-z]{3,10}\.[a-z]{6,30}\.[a-z]{2,4}\b/
