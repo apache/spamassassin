@@ -54,7 +54,7 @@ score      TO_NO_BRKTS_NORDNS_HTML      0.20
 describe   TO_NO_BRKTS_NORDNS_HTML      To: misformatted and no rDNS and HTML only
 
 meta       __TO_NO_BRKTS_MSFT       __TO_NO_ARROWS_R && !__TO_UNDISCLOSED && (__ANY_OUTLOOK_MUA || __HAS_MIMEOLE || __MIMEOLE_MS)
-meta       TO_NO_BRKTS_MSFT         __TO_NO_BRKTS_MSFT && !__VIA_ML && !__LYRIS_EZLM_REMAILER && !__THREAD_INDEX_GOOD && !__IS_EXCH && !__UNSUB_LINK && !__NOT_SPOOFED && !__DOS_HAS_LIST_UNSUB
+meta       TO_NO_BRKTS_MSFT         __TO_NO_BRKTS_MSFT && !__VIA_ML && !__LYRIS_EZLM_REMAILER && !__THREAD_INDEX_GOOD && !__IS_EXCH && !__UNSUB_LINK && !__NOT_SPOOFED && !__DOS_HAS_LIST_UNSUB && !__NAME_EQ_EMAIL
 describe   TO_NO_BRKTS_MSFT         To: misformatted and supposed Microsoft tool
 score      TO_NO_BRKTS_MSFT         0.20
 
@@ -80,7 +80,7 @@ endif
 
 meta       __TO_NO_BRKTS_FROM_RUNON  __TO_NO_ARROWS_R && !__TO_UNDISCLOSED && __FROM_RUNON
 meta       __TO_NO_BRKTS_FROM_MSSP   __TO_NO_ARROWS_R && !__TO_UNDISCLOSED && __FROM_MISSPACED
-meta       TO_NO_BRKTS_FROM_MSSP     __TO_NO_BRKTS_FROM_MSSP && !__RCD_RDNS_MTA_MESSY && !__CTYPE_MULTIPART_ALT && !__REPTO_QUOTE && !__MIME_QP && !__TO___LOWER && !__BUGGED_IMG
+meta       TO_NO_BRKTS_FROM_MSSP     __TO_NO_BRKTS_FROM_MSSP && !__RCD_RDNS_MTA_MESSY && !__CTYPE_MULTIPART_ALT && !__REPTO_QUOTE && !__MIME_QP && !__TO___LOWER && !__BUGGED_IMG && !__SUBJECT_ENCODED_QP && !__VIA_ML && !__FR_SPACING_8
 score      TO_NO_BRKTS_FROM_MSSP     1.00
 describe   TO_NO_BRKTS_FROM_MSSP     Multiple formatting errors
 
