@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-it_batt bernie-mix danmcdonald darxus dos grenier jarif wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1; day 2: bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-it_batt bernie-mix danmcdonald darxus dos grenier jarif jm wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1; day 3: bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-it_batt bernie-mix danmcdonald darxus dos grenier hege jarif kgolding nbebout wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1
+# with results from: day 1: bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-it_batt bernie-mix danmcdonald darxus dos grenier jarif kgolding wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1; day 2: bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-it_batt bernie-mix danmcdonald darxus dos grenier jarif jm wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1; day 3: bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-it_batt bernie-mix danmcdonald darxus dos grenier jarif jm kgolding wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1
 
 # tflags publish
 ADVANCE_FEE_2_NEW_FORM
@@ -36,6 +36,9 @@ AXB_HELO_HOME_UN
 
 # good enough
 AXB_TRACK_MOZ
+
+# good enough
+BASE64_LENGTH_78_79
 
 # tflags learn
 BAYES_00
@@ -137,9 +140,6 @@ DNS_FROM_RFC_DSN
 DOS_ANAL_SPAM_MAILER
 
 # good enough
-DOS_BODY_HIGH_NO_MID
-
-# good enough
 DOS_OE_TO_MX
 
 # good enough
@@ -188,6 +188,9 @@ FB_REPLICA_ROLEX
 FB_SOFTTABS
 
 # good enough
+FB_THIS_ADVERT
+
+# good enough
 FB_WITHOUT_PRESC
 
 # good enough
@@ -212,7 +215,13 @@ FH_HOST_IN_ADDRARPA
 FILL_THIS_FORM
 
 # good enough
+FILL_THIS_FORM_LOAN
+
+# good enough
 FM_LOTTO_YOU_WON
+
+# good enough
+FM_SCHOOL_DIPLOMA
 
 # good enough
 FM_SUBJ_APPROVE
@@ -308,10 +317,10 @@ FSL_HELO_BARE_IP_1
 FSL_HELO_DEVICE
 
 # good enough
-FSL_MID_419
+FSL_HELO_NON_FQDN_1
 
 # good enough
-FSL_NEW_HELO_USER
+FSL_MID_419
 
 # good enough
 FSL_STACKED_TEXT
@@ -333,9 +342,6 @@ FS_REPLICA
 
 # good enough
 FS_REPLICAWATCH
-
-# good enough
-FS_SILDENAFIL
 
 # good enough
 FS_START_DOYOU2
@@ -372,9 +378,6 @@ HASHCASH_2SPEND
 
 # tflags userconf
 HASHCASH_HIGH
-
-# good enough
-HDRS_MISSP
 
 # tflags userconf
 HEAD_LONG
@@ -722,6 +725,9 @@ S25R_4
 S25R_6
 
 # good enough
+SB_GIF_AND_NO_URIS
+
+# good enough
 SINGLE_HEADER_2K
 
 # good enough
@@ -764,7 +770,7 @@ STOCK_IMG_CTYPE
 STOCK_IMG_HDR_FROM
 
 # good enough
-STOX_REPLY_TYPE_WITHOUT_QUOTES
+STOCK_IMG_OUTLOOK
 
 # good enough
 STYLE_GIBBERISH
@@ -818,9 +824,6 @@ TO_NO_BRKTS_DYNIP
 TO_NO_BRKTS_NORDNS_HTML
 
 # good enough
-TO_NO_BRKTS_NOTLIST
-
-# good enough
 TO_NO_BRKTS_PCNT
 
 # good enough
@@ -848,13 +851,25 @@ TVD_RCVD_SINGLE
 TVD_VISIT_PHARMA
 
 # good enough
-FROM_MISSP_URI
+CN_B2B_SPAMMER
 
 # good enough
-HTML_ATTACH
+FB_B0NUS
 
 # good enough
-OBFU_JPG_ATTACH
+FROM_MISSP_REPLYTO
+
+# good enough
+FSL_THIS_IS_ADV
+
+# good enough
+HS_OUTLOOK_MID_NOBRK
+
+# good enough
+TO_NO_BRKTS_MSFT
+
+# good enough
+YOUR_PERMISSION
 
 # tflags userconf
 UNPARSEABLE_RELAY
@@ -959,6 +974,9 @@ USER_IN_WHITELIST
 USER_IN_WHITELIST_TO
 
 # good enough
+XMAILER_MIMEOLE_OL_015D5
+
+# good enough
 XMAILER_MIMEOLE_OL_07794
 
 # good enough
@@ -968,10 +986,40 @@ XMAILER_MIMEOLE_OL_09BB4
 XMAILER_MIMEOLE_OL_1ECD5
 
 # good enough
+XMAILER_MIMEOLE_OL_20C99
+
+# good enough
+XMAILER_MIMEOLE_OL_25340
+
+# good enough
+XMAILER_MIMEOLE_OL_3857F
+
+# good enough
 XMAILER_MIMEOLE_OL_3AC1D
 
 # good enough
 XMAILER_MIMEOLE_OL_3D61D
+
+# good enough
+XMAILER_MIMEOLE_OL_4B815
+
+# good enough
+XMAILER_MIMEOLE_OL_4BF4C
+
+# good enough
+XMAILER_MIMEOLE_OL_4EEDB
+
+# good enough
+XMAILER_MIMEOLE_OL_4F240
+
+# good enough
+XMAILER_MIMEOLE_OL_58CB5
+
+# good enough
+XMAILER_MIMEOLE_OL_5B79A
+
+# good enough
+XMAILER_MIMEOLE_OL_6554A
 
 # good enough
 XMAILER_MIMEOLE_OL_7533E
@@ -983,7 +1031,34 @@ XMAILER_MIMEOLE_OL_83BF7
 XMAILER_MIMEOLE_OL_91287
 
 # good enough
+XMAILER_MIMEOLE_OL_ADFF7
+
+# good enough
+XMAILER_MIMEOLE_OL_B30D1
+
+# good enough
+XMAILER_MIMEOLE_OL_BC7E6
+
+# good enough
+XMAILER_MIMEOLE_OL_C65FA
+
+# good enough
 XMAILER_MIMEOLE_OL_CAC8F
+
+# good enough
+XMAILER_MIMEOLE_OL_CF0C0
+
+# good enough
+XMAILER_MIMEOLE_OL_F3B05
+
+# good enough
+XMAILER_MIMEOLE_OL_F6D01
+
+# good enough
+XMAILER_MIMEOLE_OL_FF5C8
+
+# good enough
+X_MAILER_CME_6543_MSN
 
 # tflags net
 __DKIMDOMAIN_IN_DWL_ANY
