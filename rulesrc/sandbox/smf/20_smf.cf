@@ -15,7 +15,7 @@ header SMF_EXTRA_BRKTS_FROM From:raw =~ /(?:<<|>>)/
 describe SMF_EXTRA_BRKTS_FROM Doube-brackets in From header
 score SMF_EXTRA_BRKTS_FROM 0.01
 
-rawbody SMF_HIDDEN_TEXT /<font color="white">[^<]{50,}<\/font>/i
+rawbody SMF_HIDDEN_TEXT /<font color="(?:white|\#FFFFF[0-F])">[^<]{50,}<\/font>/i
 describe SMF_HIDDEN_TEXT Text hidden inside <font> tag
 score SMF_HIDDEN_TEXT 0.01
 
