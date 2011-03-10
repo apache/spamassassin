@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-it_batt bernie-mix danmcdonald darxus dos grenier jarif kgolding wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1; day 2: bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-it_batt bernie-mix danmcdonald darxus dos grenier jarif jm wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1; day 3: bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-it_batt bernie-mix danmcdonald darxus dos grenier jarif jm kgolding wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1
+# with results from: day 1: bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-it_batt bernie-mix danmcdonald darxus dos grenier jarif jm wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1; day 2: bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-it_batt bernie-mix danmcdonald darxus dos grenier jarif kgolding wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1; day 3: bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-it_batt bernie-mix danmcdonald darxus dos grenier jarif jm wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1
 
 # tflags publish
 ADVANCE_FEE_2_NEW_FORM
@@ -72,6 +72,9 @@ CHARSET_FARAWAY
 
 # tflags userconf
 CHARSET_FARAWAY_HEADER
+
+# good enough
+CN_B2B_SPAMMER
 
 # tflags userconf
 CORRUPT_FROM_LINE_IN_HDRS
@@ -162,6 +165,9 @@ END_FUTURE_EMAILS
 
 # tflags userconf
 ENV_AND_HDR_SPF_MATCH
+
+# good enough
+FB_B0NUS
 
 # good enough
 FB_CIALIS_LEO3
@@ -268,6 +274,9 @@ FROM_MISSP_MSFT
 # good enough
 FROM_MISSP_NO_TO
 
+# good enough
+FROM_MISSP_REPLYTO
+
 # tflags net
 FROM_MISSP_SPF_FAIL
 
@@ -324,6 +333,9 @@ FSL_MID_419
 
 # good enough
 FSL_STACKED_TEXT
+
+# good enough
+FSL_THIS_IS_ADV
 
 # good enough
 FSL_UA
@@ -408,6 +420,9 @@ HK_SCAM_N2
 
 # good enough
 HK_SCAM_N8
+
+# good enough
+HS_OUTLOOK_MID_NOBRK
 
 # tflags userconf
 HTML_CHARSET_FARAWAY
@@ -821,6 +836,9 @@ TO_NO_BRKTS_DIRECT
 TO_NO_BRKTS_DYNIP
 
 # good enough
+TO_NO_BRKTS_MSFT
+
+# good enough
 TO_NO_BRKTS_NORDNS_HTML
 
 # good enough
@@ -851,25 +869,22 @@ TVD_RCVD_SINGLE
 TVD_VISIT_PHARMA
 
 # good enough
-CN_B2B_SPAMMER
+DOS_BODY_HIGH_NO_MID
 
 # good enough
-FB_B0NUS
+FROM_12LTRDOM
 
 # good enough
-FROM_MISSP_REPLYTO
+FSL_NEW_HELO_USER
 
 # good enough
-FSL_THIS_IS_ADV
+HDRS_MISSP
 
 # good enough
-HS_OUTLOOK_MID_NOBRK
+HTML_ATTACH
 
 # good enough
-TO_NO_BRKTS_MSFT
-
-# good enough
-YOUR_PERMISSION
+OBFU_JPG_ATTACH
 
 # tflags userconf
 UNPARSEABLE_RELAY
@@ -1031,10 +1046,16 @@ XMAILER_MIMEOLE_OL_83BF7
 XMAILER_MIMEOLE_OL_91287
 
 # good enough
+XMAILER_MIMEOLE_OL_9B90B
+
+# good enough
 XMAILER_MIMEOLE_OL_ADFF7
 
 # good enough
 XMAILER_MIMEOLE_OL_B30D1
+
+# good enough
+XMAILER_MIMEOLE_OL_B4B40
 
 # good enough
 XMAILER_MIMEOLE_OL_BC7E6
@@ -1052,6 +1073,9 @@ XMAILER_MIMEOLE_OL_CF0C0
 XMAILER_MIMEOLE_OL_F3B05
 
 # good enough
+XMAILER_MIMEOLE_OL_F475E
+
+# good enough
 XMAILER_MIMEOLE_OL_F6D01
 
 # good enough
@@ -1059,6 +1083,9 @@ XMAILER_MIMEOLE_OL_FF5C8
 
 # good enough
 X_MAILER_CME_6543_MSN
+
+# good enough
+YOUR_PERMISSION
 
 # tflags net
 __DKIMDOMAIN_IN_DWL_ANY
