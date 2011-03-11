@@ -536,7 +536,7 @@ describe RCVD_HELO_IP_MISMATCH	Received: HELO and IP do not match, but should
 header RCVD_NUMERIC_HELO	eval:check_for_numeric_helo()
 describe RCVD_NUMERIC_HELO	Received: contains an IP address used for HELO
 
-header RCVD_ILLEGAL_IP		eval:check_for_illegal_ip()
+header RCVD_ILLEGAL_IP		X-Spam-Relays-Untrusted =~ / (?:by|ip)=(?=\d+\.\d+\.\d+\.\d+ )(?:0|2(?:2[4-9]|[3-5]\d)|192\.0\.2|198\.51\.100|203\.0\.113)\./
 describe RCVD_ILLEGAL_IP	Received: contains illegal IP address
 
 # not used directly right now due to FPs; but CONFIRMED_FORGED turns it

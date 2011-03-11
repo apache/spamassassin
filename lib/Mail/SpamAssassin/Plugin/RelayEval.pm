@@ -96,15 +96,9 @@ sub check_for_numeric_helo {
 
 sub check_for_illegal_ip {
   my ($self, $pms) = @_;
-
-  foreach my $rcvd ( @{$pms->{relays_untrusted}} ) {
-    # (note this might miss some hits if the Received.pm skips any invalid IPs)
-    foreach my $check ( $rcvd->{ip}, $rcvd->{by} ) {
-      return 1 if ($check =~ /^
-    	(?:[01257]|(?!127.0.0.)127|22[3-9]|2[3-9]\d|[12]\d{3,}|[3-9]\d\d+)\.\d+\.\d+\.\d+
-	$/x);
-    }
-  }
+  # Bug 6295, no longer in use, kept for compatibility with old rules
+  dbg('eval: the "check_for_illegal_ip" eval rule no longer available, '.
+      'please update your rules');
   return 0;
 }
 
