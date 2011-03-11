@@ -533,7 +533,7 @@ header         __RPATH_12LTRDOM    Return-Path =~ /\@[a-z]{12}\./
 uri            __URI_12LTRDOM      m,://(?:[^./]+\.)*[a-z]{12}\.[^./]+/,
 
 header         __FROM_12LTRDOM_1   From =~ /\@[a-z]{12}\./
-meta           FROM_12LTRDOM       __FROM_12LTRDOM_1 && !__VIA_ML && !__TO___LOWER && !__FS_SUBJ_RE && !__RCD_RDNS_MAIL_MESSY && !__freemail_safe && !__RCVD_IN_DNSWL && !__UNSUB_LINK && !NO_RELAYS && !__UNUSABLE_MSGID && !DATE_IN_PAST_96_XX && !ALL_TRUSTED && !__MSGID_APPLEMAIL && !__RCD_RDNS_SMTP_MESSY && !__FB_NATIONAL && !__MAIL_LINK && !__NAME_EMAIL_DIFF && !__RCD_RDNS_MX_MESSY && !__RCD_RDNS_MXA && !__SENDER_BOT
+meta           FROM_12LTRDOM       __FROM_12LTRDOM_1 && !__VIA_ML && !__TO___LOWER && !__FS_SUBJ_RE && !__RCD_RDNS_MAIL_MESSY && !__freemail_safe && !__RCVD_IN_DNSWL && !__UNSUB_LINK && !NO_RELAYS && !__UNUSABLE_MSGID && !DATE_IN_PAST_96_XX && !ALL_TRUSTED && !__MSGID_APPLEMAIL && !__RCD_RDNS_SMTP_MESSY && !__FB_NATIONAL && !__MAIL_LINK && !__NAME_EMAIL_DIFF && !__RCD_RDNS_MX_MESSY && !__RCD_RDNS_MX && !__SENDER_BOT
 describe       FROM_12LTRDOM       From a 12-letter domain
 #tflags         FROM_12LTRDOM       nopublish
 
