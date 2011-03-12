@@ -621,3 +621,6 @@ body        __FOR_SALE_PRC_10K        /\bprice:? \$\d\d,\d\d\d/i
 tflags      __FOR_SALE_PRC_10K        multiple
 meta        __FOR_SALE_PRC_10K_MANY   __FOR_SALE_PRC_10K > 5
 
+header      REPLYTO_EMPTY          Reply-To =~ /<>/
+describe    REPLYTO_EMPTY          Reply-To undeliverable
+
