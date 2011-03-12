@@ -52,50 +52,55 @@ ifplugin Mail::SpamAssassin::Plugin::ReplaceTags
 
   # 5+ fields (high reliability)
   # Leave this exposed, it's a fairly good spam sign by itself
-  body     __FILL_THIS_FORM_LONG1 /(?:<FF_LNNO><FF_YOUR><FF_ALL><FF_SUFFIX>(?:<FF_BLANK2>(?:P[a-z\.\s]{10,30})?|<ANDOR>)){5}/i
-  body     __FILL_THIS_FORM_LONG2 /(?:<FF_YOUR><FF_ALL><FF_SUFFIX>(?:<FF_BLANK2>(?:P[a-z\.\s]{10,30})?|<ANDOR>)){5}/i
+  body     __FILL_THIS_FORM_LONG1         /(?:<FF_LNNO><FF_YOUR><FF_ALL><FF_SUFFIX>(?:<FF_BLANK2>(?:P[a-z\.\s]{10,30})?|<ANDOR>)){5}/i
+  body     __FILL_THIS_FORM_LONG2         /(?:<FF_YOUR><FF_ALL><FF_SUFFIX>(?:<FF_BLANK2>(?:P[a-z\.\s]{10,30})?|<ANDOR>)){5}/i
   replace_rules   __FILL_THIS_FORM_LONG1
   replace_rules   __FILL_THIS_FORM_LONG2
-  meta     FILL_THIS_FORM_LONG    __FILL_THIS_FORM_LONG1 || __FILL_THIS_FORM_LONG2
-  describe FILL_THIS_FORM_LONG    Fill in a form with personal information
-  score    FILL_THIS_FORM_LONG    1.00
+  meta     __FILL_THIS_FORM_LONG          __FILL_THIS_FORM_LONG1 || __FILL_THIS_FORM_LONG2
+  meta     FILL_THIS_FORM_LONG            __FILL_THIS_FORM_LONG && !__VIA_ML && !__DOS_HAS_LIST_UNSUB && !__COMMENT_EXISTS && !__THREADED
+  describe FILL_THIS_FORM_LONG            Fill in a form with personal information
+  score    FILL_THIS_FORM_LONG            1.00
 
   # 5+ fields that body paragraph processing didn't paste together
-  body     __FILL_THIS_FORM_PARTIAL /^\s*<FF_LNNO>?<FF_YOUR>(?:<FF_ALL><ANDOR>?){1,3}<FF_SUFFIX>(?:<FF_BLANK1>|(?:[-=_.,:;*\s]|=20){1,4}$)/im
+  body     __FILL_THIS_FORM_PARTIAL       /^\s*<FF_LNNO>?<FF_YOUR>(?:<FF_ALL><ANDOR>?){1,3}<FF_SUFFIX>(?:<FF_BLANK1>|(?:[-=_.,:;*\s]|=20){1,4}$)/im
   replace_rules   __FILL_THIS_FORM_PARTIAL
   tflags   __FILL_THIS_FORM_PARTIAL multiple
-  rawbody  __FILL_THIS_FORM_PARTIAL_RAW /^\s*<FF_LNNO>?<FF_YOUR>(?:<FF_ALL><ANDOR>?){1,3}<FF_SUFFIX>(?:<FF_BLANK1>|(?:[-=_.,:;*\s]|=20|&nbsp;|<\/\w+>){0,4}$)/im
+  rawbody  __FILL_THIS_FORM_PARTIAL_RAW   /^\s*<FF_LNNO>?<FF_YOUR>(?:<FF_ALL><ANDOR>?){1,3}<FF_SUFFIX>(?:<FF_BLANK1>|(?:[-=_.,:;*\s]|=20|&nbsp;|<\/\w+>){0,4}$)/im
   replace_rules   __FILL_THIS_FORM_PARTIAL_RAW
   tflags   __FILL_THIS_FORM_PARTIAL_RAW multiple
 
   # 5+ fields in either format
   # For easy use in metas
-  meta     FILL_THIS_FORM    (FILL_THIS_FORM_LONG || __FILL_THIS_FORM_PARTIAL > 4 || __FILL_THIS_FORM_PARTIAL_RAW > 4)
-  describe FILL_THIS_FORM    Fill in a form with personal information
-  #score    FILL_THIS_FORM    1.00
-  tflags   FILL_THIS_FORM    publish
+  meta     __FILL_THIS_FORM               (__FILL_THIS_FORM_LONG || __FILL_THIS_FORM_PARTIAL > 4 || __FILL_THIS_FORM_PARTIAL_RAW > 4)
+  meta     FILL_THIS_FORM                 __FILL_THIS_FORM && !__COMMENT_EXISTS && !__THREADED && !__FB_TOUR
+  describe FILL_THIS_FORM                 Fill in a form with personal information
+  #score    FILL_THIS_FORM                 1.00
+  tflags   FILL_THIS_FORM                 publish
 
   # 3 or 4 fields (low reliability, but still useful in metas
-  body     __FILL_THIS_FORM_SHORT1 /(?:<FF_LNNO><FF_YOUR><FF_ALL><FF_SUFFIX>(?:<FF_BLANK2>|<ANDOR>)){3}/i
-  body     __FILL_THIS_FORM_SHORT2 /(?:<FF_YOUR><FF_ALL><FF_SUFFIX>(?:<FF_BLANK2>|<ANDOR>)){3}/i
+  body     __FILL_THIS_FORM_SHORT1        /(?:<FF_LNNO><FF_YOUR><FF_ALL><FF_SUFFIX>(?:<FF_BLANK2>|<ANDOR>)){3}/i
+  body     __FILL_THIS_FORM_SHORT2        /(?:<FF_YOUR><FF_ALL><FF_SUFFIX>(?:<FF_BLANK2>|<ANDOR>)){3}/i
   replace_rules   __FILL_THIS_FORM_SHORT1
   replace_rules   __FILL_THIS_FORM_SHORT2
-  meta     FILL_THIS_FORM_SHORT !FILL_THIS_FORM && (__FILL_THIS_FORM_SHORT1 || __FILL_THIS_FORM_SHORT2 || __FILL_THIS_FORM_PARTIAL > 2 || __FILL_THIS_FORM_PARTIAL_RAW > 2)
-  describe FILL_THIS_FORM_SHORT Fill in a short form with personal information
-  score    FILL_THIS_FORM_SHORT 0.25
+  meta     __FILL_THIS_FORM_SHORT         !__FILL_THIS_FORM && (__FILL_THIS_FORM_SHORT1 || __FILL_THIS_FORM_SHORT2 || __FILL_THIS_FORM_PARTIAL > 2 || __FILL_THIS_FORM_PARTIAL_RAW > 2)
+  meta     FILL_THIS_FORM_SHORT           __FILL_THIS_FORM_SHORT && !__VIA_ML && !__MSGID_JAVAMAIL
+  describe FILL_THIS_FORM_SHORT           Fill in a short form with personal information
+  score    FILL_THIS_FORM_SHORT           0.25
 
   # Add to score if loan question is present
-  body     __FILL_THIS_FORM_LOAN /<FF_YOUR><FF_L1><FF_SUFFIX>(?:<FF_BLANK1>|<FF_BLANK2>$)/i
-  replace_rules   __FILL_THIS_FORM_LOAN
-  describe FILL_THIS_FORM_LOAN Answer loan question(s)
-  meta     FILL_THIS_FORM_LOAN FILL_THIS_FORM && __FILL_THIS_FORM_LOAN
-  score    FILL_THIS_FORM_LOAN 0.50
+  body     __FILL_THIS_FORM_LOAN1         /<FF_YOUR><FF_L1><FF_SUFFIX>(?:<FF_BLANK1>|<FF_BLANK2>$)/i
+  replace_rules   __FILL_THIS_FORM_LOAN1
+  meta     __FILL_THIS_FORM_LOAN          __FILL_THIS_FORM && __FILL_THIS_FORM_LOAN1
+  meta     FILL_THIS_FORM_LOAN            __FILL_THIS_FORM_LOAN && !__COMMENT_EXISTS && !__HTML_LINK_IMAGE
+  describe FILL_THIS_FORM_LOAN            Answer loan question(s)
+  score    FILL_THIS_FORM_LOAN            0.50
 
   # Add to score if fraud/phishing question is present
-  body     __FILL_THIS_FORM_FRAUD_PHISH /<FF_YOUR>(?:<FF_F1>|<FF_F2>|<FF_F3>|<FF_F4>|<FF_F5>)<FF_SUFFIX>(?:<FF_BLANK1>|<FF_BLANK2>$)/i
-  replace_rules   __FILL_THIS_FORM_FRAUD_PHISH
-  describe FILL_THIS_FORM_FRAUD_PHISH Answer suspicious question(s)
-  meta     FILL_THIS_FORM_FRAUD_PHISH (FILL_THIS_FORM || FILL_THIS_FORM_SHORT) && __FILL_THIS_FORM_FRAUD_PHISH
-  score    FILL_THIS_FORM_FRAUD_PHISH 1.50
+  body     __FILL_THIS_FORM_FRAUD_PHISH1   /<FF_YOUR>(?:<FF_F1>|<FF_F2>|<FF_F3>|<FF_F4>|<FF_F5>)<FF_SUFFIX>(?:<FF_BLANK1>|<FF_BLANK2>$)/i
+  replace_rules   __FILL_THIS_FORM_FRAUD_PHISH1
+  meta     __FILL_THIS_FORM_FRAUD_PHISH   (__FILL_THIS_FORM || __FILL_THIS_FORM_SHORT) && __FILL_THIS_FORM_FRAUD_PHISH1
+  meta     FILL_THIS_FORM_FRAUD_PHISH     __FILL_THIS_FORM_FRAUD_PHISH && !__UNSUB_LINK && !__SPOOFED_URL && !__DOS_LINK && !__CAN_HELP
+  describe FILL_THIS_FORM_FRAUD_PHISH     Answer suspicious question(s)
+  score    FILL_THIS_FORM_FRAUD_PHISH     1.50
 
 endif   # Mail::SpamAssassin::Plugin::ReplaceTags
