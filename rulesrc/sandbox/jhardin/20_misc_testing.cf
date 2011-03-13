@@ -81,7 +81,7 @@ meta           FROM_MISSP_EH_MATCH   __FROM_MISSP_EH_MATCH && !__RCD_RDNS_MTA_ME
 describe       FROM_MISSP_EH_MATCH   From misspaced, matches envelope
 
 meta           __FROM_MISSP_URI      __FROM_RUNON && __HAS_ANY_URI
-meta           FROM_MISSP_URI        __FROM_MISSP_URI && !__NOT_SPOOFED && !__RCD_RDNS_MTA_MESSY && !MISSING_MIMEOLE && !__COMMENT_EXISTS && !__REPTO_QUOTE && !__UNSUB_LINK && !__TO___LOWER && !__MSGID_OK_HEX && !__MAIL_LINK && !__MIME_QP
+meta           FROM_MISSP_URI        __FROM_MISSP_URI && !__NOT_SPOOFED && !__RCD_RDNS_MTA_MESSY && !MISSING_MIMEOLE && !__COMMENT_EXISTS && !__REPTO_QUOTE && !__UNSUB_LINK && !__TO___LOWER && !__MSGID_OK_HEX && !__MAIL_LINK && !__MIME_QP && !__BUGGED_IMG && !MIME_BASE64_TEXT
 describe       FROM_MISSP_URI        From misspaced, has URI
 
 meta           FROM_MISSP_USER       (__FROM_RUNON && NSL_RCVD_FROM_USER)
@@ -620,6 +620,13 @@ meta        __FOR_SALE_PRC_1K_MANY    __FOR_SALE_PRC_1K > 5
 body        __FOR_SALE_PRC_10K        /\bprice:? \$\d\d,\d\d\d/i
 tflags      __FOR_SALE_PRC_10K        multiple
 meta        __FOR_SALE_PRC_10K_MANY   __FOR_SALE_PRC_10K > 5
+
+meta        __FOR_SALE_PRC_MANY       (__FOR_SALE_PRC_1K + __FOR_SALE_PRC_10K) > 10
+
+uri         __URI_MAILTO              /^mailto:/
+tflags      __URI_MAILTO              multiple
+meta        __URI_MAILTO_MANY         __URI_MAILTO > 10
+
 
 header      REPLYTO_EMPTY          Reply-To =~ /<>/
 describe    REPLYTO_EMPTY          Reply-To undeliverable
