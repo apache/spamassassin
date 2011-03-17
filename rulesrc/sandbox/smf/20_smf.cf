@@ -30,3 +30,23 @@ score SMF_SPAMSIG_2 0.01
 body SMF_SPAMSIG_3 /our server will reject all response traffic/i
 describe SMF_SPAMSIG_3 Signature seen in trap hits
 score SMF_SPAMSIG_3 0.01
+
+# URIBL meta
+meta __SMF_ANY_URIBL (URIBL_AB_SURBL || URIBL_JP_SURBL || URIBL_OB_SURBL || URIBL_PH_SURBL || URIBL_SC_SURBL || URIBL_WS_SURBL || URIBL_DBL_SPAM || URIBL_RHS_DOB || URIBL_BLACK)
+
+# Google groups test rules
+header SMF_TO_GGRPS To:addr =~ /\@googlegroups\.com$/
+describe SMF_TO_GGRPS Message to a Google Group
+score SMF_TO_GGRPS 0.01
+
+meta SMF_GGRPS_URIBL (__SMF_ANY_URIBL && SMF_TO_GGRPS)
+describe SMF_GGRPS_URIBL Message to a Google Group contains blacklisted URI(s)
+score SMF_GGRPS_URIBL 0.01
+
+header SMF_FROM_GMAIL From:addr =~ /\@gmail\.com$/
+describe SMF_FROM_GMAIL Message is from a Gmail address
+score SMF_FROM_GMAIL 0.01
+
+meta SMF_GGRPS_FROM_GMAIL (SMF_TO_GGRPS && SMF_FROM_GMAIL)
+describe SMF_GGRPS_FROM_GMAIL Message is from a Gmail user to a Google Group
+score SMF_GGRPS_FROM_GMAIL 0.01
