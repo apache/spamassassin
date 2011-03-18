@@ -158,7 +158,7 @@ sub get_resolver {
 
 =item $res->configured_nameservers()
 
-Get a list of nameservers are configured by dns_server directives
+Get a list of nameservers as configured by dns_server directives
 or as provided by Net::DNS, typically from /etc/resolv.conf
 
 =cut
