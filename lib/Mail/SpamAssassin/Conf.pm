@@ -1465,7 +1465,7 @@ Please note, the DNS test queries for NS records.
     }
   });
 
-=item dns_server ip-addr-port  (default: first entry provided by Net::DNS)
+=item dns_server ip-addr-port  (default: entries provided by Net::DNS)
 
 Specifies an IP address of a DNS server, and optionally its port number.
 The I<dns_server> directive may be specified multiple times, each entry
@@ -1484,8 +1484,8 @@ Examples :
 
 In absence of I<dns_server> directives, the list of name servers is provided
 by Net::DNS module, which typically obtains the list from /etc/resolv.conf,
-but this may be platform dependent. Please consult Net::DNS documentation
-for details.
+but this may be platform dependent. Please consult the Net::DNS::Resolver
+documentation for details.
 
 =cut
 
@@ -1504,7 +1504,7 @@ for details.
       }
       my $IP_ADDRESS = IP_ADDRESS;
       if ($address =~ /$IP_ADDRESS/ && $port >= 1 && $port <= 65535) {
-        $self->{dns_server} = []  if !$self->{dns_server};
+        $self->{dns_servers} = []  if !$self->{dns_servers};
         # checked, untainted, stored in a normalized form
         push(@{$self->{dns_servers}}, untaint_var("[$address]:$port"));
       } else {
