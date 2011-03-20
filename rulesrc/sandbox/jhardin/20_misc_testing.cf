@@ -571,14 +571,16 @@ header      ART_NAMES_ORG          Received =~ /\bart\.names\.org\b/i
 score       ART_NAMES_ORG          4.0
 describe    ART_NAMES_ORG          Arthur Simmons - registrar spammer extraordinaire
 
-body        __PILL_PRICE_1         m;\$?[\d\s.]{3,8}(?:/|per|each)\s?(?:pill|tablet|cap(?:sule|let));i
-body        __PILL_PRICE_2         /(?:pill|tablet|cap(?:sule|let))s\s\$?[\d\s.]{3,8}/i
-body        __PILL_PRICE_3         /free\s(?:pill|tablet|cap(?:sule|let))s/i
-tflags      __PILL_PRICE_1         multiple
-tflags      __PILL_PRICE_2         multiple
-tflags      __PILL_PRICE_3         multiple
-meta        MANY_PILL_PRICE        (__PILL_PRICE_1 + __PILL_PRICE_2 + __PILL_PRICE_3) > 2
-describe    MANY_PILL_PRICE        Prices for pills
+# Causes infinite loops if compiled on ia32 (users list 2011-03-20)
+# Disabled until that is resolved
+# body        __PILL_PRICE_1         m;\$?[\d\s.]{3,8}(?:/|per|each)\s?(?:pill|tablet|cap(?:sule|let));i
+# body        __PILL_PRICE_2         /(?:pill|tablet|cap(?:sule|let))s\s\$?[\d\s.]{3,8}/i
+# body        __PILL_PRICE_3         /free\s(?:pill|tablet|cap(?:sule|let))s/i
+# tflags      __PILL_PRICE_1         multiple
+# tflags      __PILL_PRICE_2         multiple
+# tflags      __PILL_PRICE_3         multiple
+# meta        MANY_PILL_PRICE        (__PILL_PRICE_1 + __PILL_PRICE_2 + __PILL_PRICE_3) > 2
+# describe    MANY_PILL_PRICE        Prices for pills
 
 # More from Ned Slider
 meta        NSL_FREEMAIL_SUBJ      (FREEMAIL_FROM && MISSING_SUBJECT)
@@ -613,19 +615,35 @@ body        __FOR_SALE_OBO            /\bor best offer\b/i
 tflags      __FOR_SALE_OBO            multiple
 meta        __FOR_SALE_OBO_MANY       __FOR_SALE_OBO > 5
 
-body        __FOR_SALE_PRC_1K         /\bprice:? \$\d,\d\d\d/i
+body        __FOR_SALE_PRC_1K         /\bprice:? \$\d,?\d\d\d[.\s]/i
 tflags      __FOR_SALE_PRC_1K         multiple
-meta        __FOR_SALE_PRC_1K_MANY    __FOR_SALE_PRC_1K > 5
+meta        __FOR_SALE_PRC_1K_MANY    __FOR_SALE_PRC_1K > 10
 
 body        __FOR_SALE_PRC_10K        /\bprice:? \$\d\d,\d\d\d/i
 tflags      __FOR_SALE_PRC_10K        multiple
-meta        __FOR_SALE_PRC_10K_MANY   __FOR_SALE_PRC_10K > 5
+meta        __FOR_SALE_PRC_10K_MANY   __FOR_SALE_PRC_10K > 10
 
-meta        __FOR_SALE_PRC_MANY       (__FOR_SALE_PRC_1K + __FOR_SALE_PRC_10K) > 10
+body        __FOR_SALE_PRC_100K       /\bprice:? \$\d\d\d,\d\d\d/i
+tflags      __FOR_SALE_PRC_100K       multiple
+meta        __FOR_SALE_PRC_100K_MANY  __FOR_SALE_PRC_100K > 5
+
+meta        __FOR_SALE_PRC_MANY       (__FOR_SALE_PRC_1K + __FOR_SALE_PRC_10K + __FOR_SALE_PRC_100K) > 20
+
+body        __FOR_SALE_LTP            /00\.? (?:less 10%|LTP)/i
+tflags      __FOR_SALE_LTP            multiple
+meta        __FOR_SALE_LTP_MANY       __FOR_SALE_LTP > 10
+
+body        __FOR_SALE_NET            /00\.? NET/i
+tflags      __FOR_SALE_NET            multiple
+meta        __FOR_SALE_NET_MANY       __FOR_SALE_NET > 10
+
+rawbody     __FOR_SALE_PRC_EOL        /\s\$\d{1,3},\d00(?:\.00)?$/m
+tflags      __FOR_SALE_PRC_EOL        multiple
+meta        __FOR_SALE_PRC_EOL_MANY   __FOR_SALE_PRC_EOL > 10
 
 uri         __URI_MAILTO              /^mailto:/
 tflags      __URI_MAILTO              multiple
-meta        __URI_MAILTO_MANY         __URI_MAILTO > 10
+meta        __URI_MAILTO_MANY         __URI_MAILTO > 15
 
 
 header      REPLYTO_EMPTY          Reply-To =~ /<>/

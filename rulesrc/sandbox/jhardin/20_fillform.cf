@@ -57,7 +57,7 @@ ifplugin Mail::SpamAssassin::Plugin::ReplaceTags
   replace_rules   __FILL_THIS_FORM_LONG1
   replace_rules   __FILL_THIS_FORM_LONG2
   meta     __FILL_THIS_FORM_LONG          __FILL_THIS_FORM_LONG1 || __FILL_THIS_FORM_LONG2
-  meta     FILL_THIS_FORM_LONG            __FILL_THIS_FORM_LONG && !__VIA_ML && !__DOS_HAS_LIST_UNSUB && !__COMMENT_EXISTS && !__THREADED
+  meta     FILL_THIS_FORM_LONG            __FILL_THIS_FORM_LONG && !__VIA_ML && !__DOS_HAS_LIST_UNSUB && !__THREADED
   describe FILL_THIS_FORM_LONG            Fill in a form with personal information
   score    FILL_THIS_FORM_LONG            1.00
 
@@ -72,7 +72,7 @@ ifplugin Mail::SpamAssassin::Plugin::ReplaceTags
   # 5+ fields in either format
   # For easy use in metas
   meta     __FILL_THIS_FORM               (__FILL_THIS_FORM_LONG || __FILL_THIS_FORM_PARTIAL > 4 || __FILL_THIS_FORM_PARTIAL_RAW > 4)
-  meta     FILL_THIS_FORM                 __FILL_THIS_FORM && !__COMMENT_EXISTS && !__THREADED && !__FB_TOUR && !__VIA_ML
+  meta     FILL_THIS_FORM                 __FILL_THIS_FORM && !__THREADED && !__FB_TOUR && !__VIA_ML
   describe FILL_THIS_FORM                 Fill in a form with personal information
   #score    FILL_THIS_FORM                 1.00
   tflags   FILL_THIS_FORM                 publish
