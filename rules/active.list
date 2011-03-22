@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-it_batt bernie-mix danmcdonald dos grenier jarif kgolding wt-ackbar wt-en2-flh wt-hamtrap wt-homeone; day 2: bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-it_batt bernie-mix danmcdonald darxus-trap darxus dos grenier jarif kgolding wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1; day 3: bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-it_batt bernie-mix danmcdonald darxus dos grenier jarif jm kgolding wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1
+# with results from: day 1: bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-it_batt bernie-mix danmcdonald darxus-trap darxus dos grenier jarif jm kgolding wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1; day 2: bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-it_batt bernie-mix danmcdonald darxus-trap darxus dos grenier jarif kgolding wt-ackbar wt-en2-flh wt-hamtrap wt-homeone; day 3: bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-it_batt bernie-mix danmcdonald darxus-trap darxus dos grenier jarif kgolding wt-ackbar wt-en2-flh wt-hamtrap wt-homeone
 
 # tflags publish
 ADVANCE_FEE_2_NEW_FORM
@@ -80,13 +80,7 @@ CORRUPT_FROM_LINE_IN_HDRS
 DATE_IN_FUTURE_96_Q
 
 # good enough
-DATE_IN_FUTURE_Q_PLUS
-
-# good enough
 DEAR_BENEFICIARY
-
-# good enough
-DEAR_EMAIL
 
 # good enough
 DEAR_WINNER
@@ -188,10 +182,16 @@ FB_QUALITY_REPLICA
 FB_REPLICA_ROLEX
 
 # good enough
+FB_SAVE_PERSC
+
+# good enough
 FB_SOFTTABS
 
 # good enough
 FB_THIS_ADVERT
+
+# good enough
+FB_TO_STOP_DISTRO
 
 # good enough
 FB_WITHOUT_PRESC
@@ -203,6 +203,9 @@ FH_FAKE_RCVD_LINE
 FH_FAKE_RCVD_LINE_B
 
 # good enough
+FH_FROM_CASH
+
+# good enough
 FH_HELO_ALMOST_IP
 
 # good enough
@@ -211,14 +214,14 @@ FH_HELO_EQ_D_D_D_D
 # good enough
 FH_HOST_EQ_DYNAMICIP
 
-# good enough
-FH_HOST_IN_ADDRARPA
-
 # tflags publish
 FILL_THIS_FORM
 
 # good enough
 FILL_THIS_FORM_LOAN
+
+# good enough
+FILL_THIS_FORM_LONG
 
 # good enough
 FM_LOTTO_YOU_WON
@@ -227,7 +230,13 @@ FM_LOTTO_YOU_WON
 FM_SCHOOL_DIPLOMA
 
 # good enough
+FM_SEX_HELODDDD
+
+# good enough
 FM_SUBJ_APPROVE
+
+# good enough
+FM_VEGAS_CASINO
 
 # tflags publish
 FORM_FRAUD_3
@@ -284,31 +293,13 @@ FROM_MISSP_TO_UNDISC
 FROM_MISSP_USER
 
 # good enough
-FRT_APPROV
-
-# good enough
 FRT_BIGGERMEM1
 
 # good enough
 FRT_PHARMAC
 
 # good enough
-FRT_PRICE
-
-# good enough
-FRT_ROLEX
-
-# good enough
-FSL_BOTSPAM_1
-
-# good enough
 FSL_BOTSPAM_2
-
-# good enough
-FSL_BOTSPAM_3
-
-# good enough
-FSL_BOTSPAM_4
 
 # good enough
 FSL_CTYPE_WIN1251
@@ -339,9 +330,6 @@ FSL_UA
 
 # good enough
 FSL_XM_419
-
-# good enough
-FS_OBFU_PRMCY
 
 # good enough
 FS_PHARMASUB2
@@ -421,6 +409,9 @@ HK_SCAM_N8
 # good enough
 HS_OUTLOOK_MID_NOBRK
 
+# good enough
+HS_VPXL
+
 # tflags userconf
 HTML_CHARSET_FARAWAY
 
@@ -459,9 +450,6 @@ LOTTO_AGENT
 
 # tflags publish
 MAILER_EQ_ORG
-
-# good enough
-MANY_PILL_PRICE
 
 # tflags publish
 MANY_SPAN_IN_TEXT
@@ -782,9 +770,6 @@ STOCK_IMG_CTYPE
 STOCK_IMG_HDR_FROM
 
 # good enough
-STOCK_IMG_OUTLOOK
-
-# good enough
 STYLE_GIBBERISH
 
 # tflags userconf
@@ -854,9 +839,6 @@ TVD_FINGER_02
 TVD_INCREASE_SIZE
 
 # good enough
-TVD_PCT_OFF
-
-# good enough
 TVD_QUAL_MEDS
 
 # good enough
@@ -866,7 +848,19 @@ TVD_RCVD_SINGLE
 TVD_VISIT_PHARMA
 
 # good enough
-OBFU_JPG_ATTACH
+FROM_MISSP_URI
+
+# good enough
+IMG_DIRECT_TO_MX
+
+# good enough
+LOTTO_URI
+
+# good enough
+MONEY_FORM
+
+# good enough
+TVD_DOLLARS_US
 
 # tflags userconf
 UNPARSEABLE_RELAY
@@ -1065,9 +1059,6 @@ XMAILER_MIMEOLE_OL_F6D01
 
 # good enough
 XMAILER_MIMEOLE_OL_FF5C8
-
-# good enough
-X_MAILER_CME_6543_MSN
 
 # good enough
 YOUR_PERMISSION
