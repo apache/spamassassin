@@ -4420,6 +4420,7 @@ sub feature_originating_ip_headers { 1 }
 sub feature_dns_local_ports_permit_avoid { 1 }
 sub feature_bayes_auto_learn_on_error { 1 }
 sub feature_uri_host_listed { 1 }
+sub feature_bug6558_free { 1 }
 
 ###########################################################################
 
