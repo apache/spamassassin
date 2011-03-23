@@ -3,7 +3,10 @@
 
 ### rules from khop-lists
 
-header	 __SENDER_BOT	ALL =~ /(?:not?\W?repl[yi]|bounce|daemon|subscri|report|\b(?:root|news|nobody|agent|(?:post)?master|manag|send(?:er|ing)?|out|bot\b))[^\@ >]{0,5}s?\@\w/i
+header	 __FROM_DNS		From =~ /(?<![^\w.-])dns(?:admin)?\@/i
+header	 __FROM_INFO		From =~ /(?<![^\w.-])info\@/i
+
+header	 __SENDER_BOT	ALL =~ /(?:not?\W?repl[yi]|bounce|contact|daemon|subscri|report|respon[ds]e?r?s?\b|\b(?:root|news|nobody|agent|(?:post|web)?master|manag|send(?:er|ing)?|out|(?:bot|web|www)\b))[^\@ >]{0,5}s?\@\w/i
 tflags	 __SENDER_BOT	nice
 
 header __VACATION Subject =~ /\b(?:vacatio|away|out.of.offic|auto.?re|confirm)/i

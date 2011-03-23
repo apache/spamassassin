@@ -268,3 +268,17 @@ body   __RAJONAA_INFO	m' rajonaa: http://www\.[\w-]{0,50}\.info !$'
 meta	 DEB_RAJONAA	__LISTID_DEBIAN && __RAJONAA_INFO
 describe DEB_RAJONAA	Latvian text with .info URI on Debian List
 #score	 DEB_RAJONAA	3.0
+
+# Requested on sa-users list
+# See http://old.nabble.com/username-in-from-address-tp31213779p31213779.html
+# See also __TO_EQ_FROM_DOM
+header	 __TO_EQ_FROM_USR_1	ALL =~ /\nFrom:\s+(?:[^\n<]{0,80}<)?([^\n\s\@>]+)\@[^\n\s]+>?\n(?:[^\n]{1,100}\n)*To:\s+(?:[^\n]{0,80}<)?\1[\@>,\s\n]/ism
+header	 __TO_EQ_FROM_USR_2	ALL =~ /\nTo:\s+(?:[^\n<]{0,80}<)?([^\n\s\@>]+)\@[^\n\s]+>?\n(?:[^\n]{1,100}\n)*From:\s+(?:[^\n]{0,80}<)?\1[\@>,\s\n]/ism
+meta	 __TO_EQ_FROM_USR	(__TO_EQ_FROM_USR_1 || __TO_EQ_FROM_USR_2) && !(__FROM_DNS || __FROM_INFO || __SENDER_BOT)
+describe __TO_EQ_FROM_USR	To: username same as From: username
+
+header	 __TO_EQ_FROM_USR_NN_1	ALL =~ /\nFrom:\s+(?:[^\n<]{0,80}<)?([^\n\s\@>]{4,80}?)\d*\@[^\n\s]+>?\n(?:[^\n]{1,100}\n)*To:\s+(?:[^\n]{0,80}<)?\1\d*[\@>,\s\n]/ism
+header	 __TO_EQ_FROM_USR_NN_2	ALL =~ /\nTo:\s+(?:[^\n<]{0,80}<)?([^\n\s\@>]{4,80}?)\d*\@[^\n\s]+>?\n(?:[^\n]{1,100}\n)*From:\s+(?:[^\n]{0,80}<)?\1\d*[\@>,\s\n]/ism
+meta	 __TO_EQ_FROM_USR_NN	(__TO_EQ_FROM_USR_NN_1 || __TO_EQ_FROM_USR_NN_2) && !(__FROM_DNS || __FROM_INFO || __SENDER_BOT)
+describe __TO_EQ_FROM_USR_NN	To: username same as From: username sans trailing nums
+
