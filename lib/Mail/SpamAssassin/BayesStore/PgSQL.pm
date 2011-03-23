@@ -640,7 +640,11 @@ do in tok_get_all)
 
 =cut
 
-sub tok_touch_all {  # proposed in bug 6444
+# tok_touch_all as proposed in bug 6444, executes one update for each token;
+# might run faster with some (older?) versions of PostgreSQL
+# (to switch: rename this one to tok_touch_all and stash the other one away)
+#
+sub tok_touch_all_6444 {
   my ($self, $tokens, $atime) = @_;
 
   return 0 unless (defined($self->{_dbh}));
@@ -702,7 +706,11 @@ sub tok_touch_all {  # proposed in bug 6444
   return 1;
 }
 
-sub tok_touch_all_old {
+# original tok_touch_all (not the one proposed in bug 6444),
+# executes one update for all token using an IN operator;
+# seems to run faster with PostgreSQL 8.3.14 than the alternative 
+#
+sub tok_touch_all {
   my ($self, $tokens, $atime) = @_;
 
   return 0 unless (defined($self->{_dbh}));
