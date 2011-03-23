@@ -1070,7 +1070,7 @@ sub fixup_re {
       $output .= '"\\""';
     }
     elsif ($tok eq '\\') {
-      $re =~ /\G(x\{[^\}]+\}|\d+|.)/gc or die "\\ at end of string!";
+      $re =~ /\G(x\{[^\}]+\}|\d{1,3}|.)/gc or die "\\ at end of string!";
       my $esc = $1;
       if ($esc eq '"') {
         $output .= '"\\""';
