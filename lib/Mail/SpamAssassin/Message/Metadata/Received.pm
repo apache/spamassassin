@@ -56,6 +56,14 @@ use Mail::SpamAssassin::Constants qw(:ip);
 sub parse_received_headers {
   my ($self, $permsgstatus, $msg) = @_;
 
+  my $suppl_attrib = $msg->{suppl_attrib};  # out-of-band info from a caller
+
+  # a caller may assert that a message is coming from inside or from an
+  # authenticated roaming users; this info may not be available in mail
+  # header section, e.g. in case of nonstandard authentication mechanisms
+  my $originating;  # boolean
+  $originating = $suppl_attrib->{originating}  if ref $suppl_attrib;
+
   $self->{relays_trusted} = [ ];
   $self->{num_relays_trusted} = 0;
   $self->{relays_trusted_str} = '';
@@ -190,7 +198,15 @@ sub parse_received_headers {
       } else {
 	# trusted_networks matches?
 	if (!$relay->{auth} && !$trusted->contains_ip($relay->{ip})) {
-	  $in_trusted = 0;
+	  if (!$originating) {
+	    $in_trusted = 0;	# break the trust chain
+	  } else {  # caller asserts a msg was submitted from inside or auth'd
+	    $found_msa = 1;	# let's assume the previous hop was actually
+				# an MSA, and propagate trust from here on
+	    dbg('received-header: originating, '.
+	        '%s and remaining relays will be considered trusted%s',
+	        $relay->{ip}, !$in_internal ? '' : ', but no longer internal');
+	  }
 	  $in_internal = 0;	# if it's not trusted it's not internal
 	} else {
 	  # internal_networks matches?
