@@ -125,6 +125,7 @@ sub extract_set_pri {
   my $start = time;
   $self->{main} = $conf->{main};	# for use in extract_hints()
   $self->{show_progress} and info ("extracting from rules of type $ruletype");
+  my $tflags = $conf->{tflags};
 
   # attempt to find good "base strings" (simplified regexp subsets) for each
   # regexp.  We try looking at the regexp from both ends, since there
@@ -189,6 +190,11 @@ NEXT_RULE:
         dbg("zoom: giving up on regexp: $eval_stat");
       };
 
+      if ($lossy && ($tflags->{$name}||'') =~ /\bmultiple\b/) {
+        warn "\nzoom: rule $name will loop on SpamAssassin older that 3.3.2 ".
+             "running under Perl 5.12 or older, Bug 6558\n";
+      }
+
       # if any of the extracted hints in a set are too short, the entire
       # set is invalid; this is because each set of N hints represents just
       # 1 regexp.
@@ -200,8 +206,9 @@ NEXT_RULE:
     }
 
     if ($is_a_replacetags_rule || !$minlen || !@bases) {
-      dbg("zoom: ignoring %s %s",
-          $is_a_replacetags_rule ? 'replace rule' : 'NO',  $rule);
+      dbg("zoom: ignoring rule %s, %s", $name,
+          $is_a_replacetags_rule ? 'is a replace rule'
+          : !@bases ? 'no bases' : 'no minlen');
       push @failed, { orig => $rule };
       $cached->{rule_bases}->{$cachekey} = { };
       $no++;
