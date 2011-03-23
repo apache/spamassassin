@@ -547,8 +547,9 @@ sub cond_clause_can {
 
   local($1,$2);
   if ($method =~ /^(.*)::([^:]+)$/) {
+    no strict "refs";
     my($module, $meth) = ($1, $2);
-    return UNIVERSAL::can($module, $meth);
+    return UNIVERSAL::can($module,$meth) && &{$method}();
   } else {
     $self->lint_warn("bad 'if' line, cannot find '::' in can($method), ".
                 "in \"$self->{currentfile}\"", undef);
