@@ -140,8 +140,8 @@ for consistency with other commands (fixes bug 6187).
 
 TELL accepts three new headers, Message-class, Set and Remove and will return
 two possible headers, DidSet and DidRemove which indicate which action was
-taken.  It is up to the caller to determine if the proper action happened.  Here
-are some examples:
+taken.  It is up to the caller to determine if the proper action happened.
+Here are some examples:
 
 To learn a message as spam:
 TELL SPAMC/1.3\r\n
@@ -155,13 +155,13 @@ Remove: local\r\n
 To report a spam message:
 TELL SPAMC/1.3\r\n
 Message-class: spam\r\n
-Set: local, remove\r\n
+Set: local, remote\r\n
 
 To revoke a ham message:
 TELL SPAMC/1.3\r\n
-Message-class: spam\r\n
+Message-class: ham\r\n
 Set: local\r\n
-Remove: remove\r\n
+Remove: remote\r\n
 
 HEADERS returns the same as PROCESS, up to and including the double-newline
 separator between message headers and body -- but stops there.  It was
@@ -200,4 +200,3 @@ Compress
 As-yet-undefined headers should not be treated as errors, and instead
 should be ignored.  Multiple headers can appear in requests and responses
 (this was not clearly defined until protocol version 1.3).
-
