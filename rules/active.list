@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-it_batt bernie-mix danmcdonald darxus-trap darxus dos grenier jarif jm kgolding wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1; day 2: bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-it_batt bernie-mix danmcdonald darxus-trap darxus dos grenier jarif jm kgolding wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1; day 3: bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-it_batt bernie-mix danmcdonald darxus-trap darxus dos grenier jarif kgolding wt-ackbar wt-en2-flh wt-hamtrap wt-homeone
+# with results from: day 1: bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-it_batt bernie-mix danmcdonald darxus-trap darxus dos grenier jarif jm kgolding wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1; day 2: bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-it_batt bernie-mix danmcdonald darxus-trap darxus dos grenier jarif jm kgolding wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1; day 3: bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-it_batt bernie-mix danmcdonald darxus-trap darxus dos grenier jarif jm kgolding wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1
 
 # tflags publish
 ADVANCE_FEE_2_NEW_FORM
@@ -63,6 +63,9 @@ BAYES_95
 
 # tflags learn
 BAYES_99
+
+# good enough
+BUG6152_INVALID_DATE_TZ_ABSURD
 
 # tflags userconf
 CHARSET_FARAWAY
@@ -159,6 +162,9 @@ END_FUTURE_EMAILS
 
 # tflags userconf
 ENV_AND_HDR_SPF_MATCH
+
+# good enough
+FAKE_REPLY_C
 
 # good enough
 FB_B0NUS
@@ -450,6 +456,9 @@ LOTTERY_PH_004470
 
 # good enough
 LOTTO_AGENT
+
+# good enough
+L_SPAM_TOOL_13
 
 # tflags publish
 MAILER_EQ_ORG
@@ -857,10 +866,25 @@ TVD_VISIT_PHARMA
 FROM_MISSP_URI
 
 # good enough
+FR_WATCHES_HTTP
+
+# good enough
+FSL_FAKE_YAHOO_RCVD
+
+# good enough
+FSL_NEW_HELO_USER
+
+# good enough
 IMG_DIRECT_TO_MX
 
 # good enough
+KAM_LOTTO3
+
+# good enough
 LOTTO_URI
+
+# good enough
+MANY_BIG_LISTS
 
 # good enough
 MONEY_FORM
