@@ -191,7 +191,7 @@ NEXT_RULE:
       };
 
       if ($lossy && ($tflags->{$name}||'') =~ /\bmultiple\b/) {
-        warn "\nzoom: rule $name will loop on SpamAssassin older that 3.3.2 ".
+        warn "\nzoom: rule $name will loop on SpamAssassin older than 3.3.2 ".
              "running under Perl 5.12 or older, Bug 6558\n";
       }
 
