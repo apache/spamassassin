@@ -209,11 +209,7 @@ foreach my $plistkey (sort keys %{$plist->[1]}) {
   if ($tfs) {
     next if ($tfs =~ /\bnopublish\b/);
 
-    # all of these tflags force publication;
-    # include "net", since otherwise this script has to be aware
-    # what day of the week it is for weekly net/non-net mass-checks!
-    # very messy.  TODO?
-    if ($tfs =~ /\b(publish|userconf|learn|net)\b/) {
+    if ($tfs =~ /\bpublish\b/) {
       $notes = "tflags ".$1;
       goto publish;
     }
@@ -223,6 +219,16 @@ foreach my $plistkey (sort keys %{$plist->[1]}) {
   # note: this is after "tflags publish" support, so you can override
   # it on a rule-by-rule basis anyway
   next if ($mailsa->{conf}->{testrules}->{$name});
+
+  # bug 6560, unless specifically declared #testrules;
+  # all of these tflags force publication;
+  # include "net", since otherwise this script has to be aware
+  # what day of the week it is for weekly net/non-net mass-checks!
+  # very messy.  TODO?
+  if ($tfs && $tfs =~ /\b(userconf|learn|net)\b/) {
+    $notes = "tflags ".$1;
+    goto publish;
+  }
 
   # ignore rules that are not marked as promotable in ANY of the days.
   # ie a rule must be promotable in all 3, to be listed.  (Also allow
