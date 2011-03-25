@@ -1,31 +1,31 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
 # with results from: day 1: bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-it_batt bernie-mix danmcdonald darxus-trap darxus dos grenier jarif jm kgolding wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1; day 2: bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-it_batt bernie-mix danmcdonald darxus-trap darxus dos grenier jarif jm kgolding wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1; day 3: bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-it_batt bernie-mix danmcdonald darxus-trap darxus dos grenier jarif jm kgolding wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1
 
-# tflags publish
+# tflags 
 ADVANCE_FEE_2_NEW_FORM
 
 # good enough
 ADVANCE_FEE_2_NEW_FRM_MNY
 
-# tflags publish
+# tflags 
 ADVANCE_FEE_2_NEW_MONEY
 
-# tflags publish
+# tflags 
 ADVANCE_FEE_3_NEW
 
-# tflags publish
+# tflags 
 ADVANCE_FEE_3_NEW_FORM
 
 # good enough
 ADVANCE_FEE_3_NEW_FRM_MNY
 
-# tflags publish
+# tflags 
 ADVANCE_FEE_3_NEW_MONEY
 
-# tflags publish
+# tflags 
 ADVANCE_FEE_4_NEW
 
-# tflags publish
+# tflags 
 ADVANCE_FEE_5_NEW
 
 # tflags userconf
@@ -76,7 +76,7 @@ CHARSET_FARAWAY_HEADER
 # good enough
 CN_B2B_SPAMMER
 
-# tflags userconf
+# tflags 
 CORRUPT_FROM_LINE_IN_HDRS
 
 # good enough
@@ -136,7 +136,7 @@ DNS_FROM_RFC_BOGUSMX
 # tflags net
 DNS_FROM_RFC_DSN
 
-# tflags publish
+# tflags 
 DOS_ANAL_SPAM_MAILER
 
 # good enough
@@ -223,7 +223,7 @@ FH_HELO_EQ_D_D_D_D
 # good enough
 FH_HOST_EQ_DYNAMICIP
 
-# tflags publish
+# tflags 
 FILL_THIS_FORM
 
 # good enough
@@ -247,10 +247,10 @@ FM_SUBJ_APPROVE
 # good enough
 FM_VEGAS_CASINO
 
-# tflags publish
+# tflags 
 FORM_FRAUD_3
 
-# tflags publish
+# tflags 
 FORM_FRAUD_5
 
 # tflags userconf
@@ -262,7 +262,7 @@ FROM_12LTRDOM
 # tflags userconf
 FROM_DOMAIN_NOVOWEL
 
-# tflags publish
+# tflags 
 FROM_IN_TO_AND_SUBJ
 
 # tflags userconf
@@ -448,7 +448,7 @@ KB_RATWARE_OUTLOOK_MID
 # good enough
 LIVEFILESTORE
 
-# tflags publish
+# tflags 
 LOTS_OF_MONEY
 
 # good enough
@@ -460,10 +460,10 @@ LOTTO_AGENT
 # good enough
 L_SPAM_TOOL_13
 
-# tflags publish
+# tflags 
 MAILER_EQ_ORG
 
-# tflags publish
+# tflags 
 MANY_SPAN_IN_TEXT
 
 # good enough
@@ -481,13 +481,13 @@ MISSING_HB_SEP
 # good enough
 MONEY_ATM_CARD
 
-# tflags publish
+# tflags 
 MONEY_FRAUD_3
 
-# tflags publish
+# tflags 
 MONEY_FRAUD_5
 
-# tflags publish
+# tflags 
 MONEY_FRAUD_8
 
 # good enough
@@ -517,10 +517,10 @@ NULL_IN_BODY
 # good enough
 OBFU_ATTACH_MISSP
 
-# tflags publish
+# tflags 
 OBFU_JVSCR_ESC
 
-# tflags publish
+# tflags 
 OBFU_TEXT_ATTACH
 
 # tflags net
@@ -689,9 +689,6 @@ RCVD_IN_RP_SAFE
 RCVD_IN_SBL
 
 # tflags net
-RCVD_IN_SEMBLACK
-
-# tflags net
 RCVD_IN_SORBS_BLOCK
 
 # tflags net
@@ -799,7 +796,7 @@ TAB_IN_FROM
 # good enough
 TINY_FLOAT
 
-# tflags publish
+# tflags 
 TO_EQ_FM_DIRECT_MX
 
 # good enough
@@ -811,10 +808,10 @@ TO_EQ_FM_DOM_HTML_ONLY
 # tflags net
 TO_EQ_FM_DOM_SPF_FAIL
 
-# tflags publish
+# tflags 
 TO_EQ_FM_HTML_DIRECT
 
-# tflags publish
+# tflags 
 TO_EQ_FM_HTML_ONLY
 
 # tflags net
@@ -823,10 +820,10 @@ TO_EQ_FM_SPF_FAIL
 # good enough
 TO_IN_SUBJ
 
-# tflags publish
+# tflags 
 TO_NO_BRKTS_DIRECT
 
-# tflags publish
+# tflags 
 TO_NO_BRKTS_DYNIP
 
 # good enough
@@ -930,21 +927,6 @@ URIBL_SBL
 
 # tflags net
 URIBL_SC_SURBL
-
-# tflags net
-URIBL_SEM
-
-# tflags net
-URIBL_SEM_FRESH
-
-# tflags net
-URIBL_SEM_FRESH_10
-
-# tflags net
-URIBL_SEM_FRESH_15
-
-# tflags net
-URIBL_SEM_RED
 
 # tflags net
 URIBL_WS_SURBL
