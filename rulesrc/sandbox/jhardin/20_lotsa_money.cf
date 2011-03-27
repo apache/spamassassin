@@ -1,6 +1,6 @@
 
 ifplugin Mail::SpamAssassin::Plugin::ReplaceTags
-  replace_tag  CURRENCY   [\(\[]?(?:\bUS[D\$]{0,2}|\$(?:US)?|usd|GBP|=[Aa][34]|\xa3|&\#16[34];|(?i:pounds\ssterling)|\xa4|EUR(?:OS)?|[Ee]uros?|(?i:eur)\sde|CHF|FCFA)[\]\)]?
+  replace_tag  CURRENCY   [\(\[]?(?:\bUS[D\$]{0,2}|\$(?:US)?|usd|GBP|=[Aa][34]|\xa3|&\#16[34];|(?i:pounds\ssterling)|\xa4|EUR(?:OS)?|[Ee]uro?s?|(?i:eur)\sde|CHF|FCFA)[\]\)]?
   replace_tag  GB_UK      \b(?:U\.?K\.?|(?:Great\s)?Brit(?:ain|ish)|G\.?B\.?)\b
 
   body     __LOTSA_MONEY_00   /<CURRENCY>[\s\.]?\d[\dO][,\.][\dO]{3}(?:(?!\d)|\b)/
@@ -50,13 +50,13 @@ score    MONEY_FORM_SHORT  0.5
 #describe MONEY_ACCOUNT    Lots of money to your account
 
 
-body     __LOTTO_WINNINGS   /(?:claim|process(?:ing)?|transfert?(?:\s\w+)?|redeem|virement|zahlung|reivindicar|demandar)\s(?:(?:[a-z]{1,5}\s)?(?:your|of|the|this|de|ihrer|seu|tu)\s)+(?:win+ings?|money|(?:cash\s)?prize|award|f[ou]nds?|grant|gewinne|premio)/i
+body     __LOTTO_WINNINGS   /(?:claim|process(?:ing)?|transfert?(?:\s\w+)?|redeem|payment|virement|zahlung|reivindicar|demandar)\s(?:(?:[a-z]{1,5}\s)?(?:your|of|the|this|de|ihrer|seu|tu)\s)+(?:win+ings?|money|(?:cash\s)?prize|award|f[ou]nds?|grant|gewinne|premio)/i
 
 body     __LOTTO_WIN_01     /\bwin+ing\s(?:prize|number|notification|draw|check|cheque|details|information|payment)/i
 
 body     __YOU_WON_01    /\byou(?:r|'re|'ve|'ll|\shave|\sdid)?\s(?:e-?mail\s)?(?:\w+\s){0,2}(?:a\s)?w[io]n+(?:er|ing)?(?!'t)\b/i
 body     __YOU_WON_02    /\bw[io]n\s(?:(?:for|by)\s)?your?\b/i
-body     __YOU_WON_03    /\b(?:your?|win+ing|win+ers?|beneficiaries|participants?|individuals?|address(?:es)?)(?:\s[-a-z\s]{4,40}?)?\s(?:w(?:ere|as)|ha(?:ve|s) be(?:en)?)\s(?:(?:randomly|raffly)\s(?:selected|cho+sen|cho+sing|picked)|(?:selected|cho+sen|cho+sing|picked)\s(?:[a-z\s]{2,40}?\srandom|randomly|online|lottery|computer\s(?:ballot|wahlgang)))/i 
+body     __YOU_WON_03    /\b(?:your?|win+ing|win+ers?|beneficiaries|participants?|individuals?|address(?:es)?)(?:\s[-a-z\s]{4,40})?\s(?:w(?:ere|as)|ha(?:ve|s) be(?:en)?)\s(?:automatically\s)?(?:(?:randomly|raffly)\s(?:selected|cho+sen|cho+sing|picked)|(?:selected|cho+sen|cho+sing|picked)\s(?:[a-z\s]{2,40}?\srandom|randomly|online|lottery|computer\s(?:ballot|wahlgang)))/i 
 body     __HAS_WON_01    /\bque ha ganado\b/i
 meta     __YOU_WON       __YOU_WON_01 || __YOU_WON_02 || __YOU_WON_03 || __HAS_WON_01
 
