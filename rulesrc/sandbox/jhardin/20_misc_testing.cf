@@ -493,16 +493,18 @@ header          RPT_SPAM_HDR            Report-SPAM =~ /./
 #header          LONG_FROM               From =~ /<[^<@]{40,}\w\@/
 
 
-body            __MANY_RECORDS_1        /\s[A-Z][a-z]{1,30}s(?:\sDatabase)?[-:\s]{2,5}(?i:1\smillion\s|\d[\d,.]{1,8}[Kk]?\s(?i:thousand\s|million\s)?)(?i:total\s|full\sdata\s)?(?i:email|record)s/
-tflags          __MANY_RECORDS_1        multiple
-body            __MANY_RECORDS_2        /\W{1,4}\s(?:[a-z\/]{1,20}\s){0,4}(?:doctor|physician|provider|therapist|counselor|dentist|veterinarian|clinic|hospital|agent|chiropractor|psychologist|companie|supplier)s/i
-tflags          __MANY_RECORDS_2        multiple
-body            __MANY_RECORDS_3        /\W{1,4}\s(?:(?:[A-Z]{1,2}[a-z\/]{0,20}|and)\s){0,4}[A-Z][a-z]{1,20}s Database/
-tflags          __MANY_RECORDS_3        multiple
-#meta            BIG_LISTS               (__MANY_RECORDS_1 + __MANY_RECORDS_2 + __MANY_RECORDS_3) > 5
-meta            __MANY_BIG_LISTS        (__MANY_RECORDS_1 + __MANY_RECORDS_2 + __MANY_RECORDS_3) > 15
-meta            MANY_BIG_LISTS          __MANY_BIG_LISTS && !HTML_MESSAGE && !__CTYPE_MULTIPART_ANY && !__HS_SUBJ_RE_FW && !__HAS_THREAD_INDEX
-describe        MANY_BIG_LISTS          Lots of mailing lists / databases available!
+if can(Mail::SpamAssassin::Conf::feature_bug6558_free)
+  body            __MANY_RECORDS_1        /\s[A-Z][a-z]{1,30}s(?:\sDatabase)?[-:\s]{2,5}(?i:1\smillion\s|\d[\d,.]{1,8}[Kk]?\s(?i:thousand\s|million\s)?)(?i:total\s|full\sdata\s)?(?i:email|record)s/
+  tflags          __MANY_RECORDS_1        multiple
+  body            __MANY_RECORDS_2        /\W{1,4}\s(?:[a-z\/]{1,20}\s){0,4}(?:doctor|physician|provider|therapist|counselor|dentist|veterinarian|clinic|hospital|agent|chiropractor|psychologist|companie|supplier)s/i
+  tflags          __MANY_RECORDS_2        multiple
+  body            __MANY_RECORDS_3        /\W{1,4}\s(?:(?:[A-Z]{1,2}[a-z\/]{0,20}|and)\s){0,4}[A-Z][a-z]{1,20}s Database/
+  tflags          __MANY_RECORDS_3        multiple
+  #meta            BIG_LISTS               (__MANY_RECORDS_1 + __MANY_RECORDS_2 + __MANY_RECORDS_3) > 5
+  meta            __MANY_BIG_LISTS        (__MANY_RECORDS_1 + __MANY_RECORDS_2 + __MANY_RECORDS_3) > 15
+  meta            MANY_BIG_LISTS          __MANY_BIG_LISTS && !HTML_MESSAGE && !__CTYPE_MULTIPART_ANY && !__HS_SUBJ_RE_FW && !__HAS_THREAD_INDEX
+  describe        MANY_BIG_LISTS          Lots of mailing lists / databases available!
+endif
 
 
 # Suggested by Gerard Z 2010-08-15
@@ -571,16 +573,22 @@ header      ART_NAMES_ORG          Received =~ /\bart\.names\.org\b/i
 score       ART_NAMES_ORG          4.0
 describe    ART_NAMES_ORG          Arthur Simmons - registrar spammer extraordinaire
 
-# Causes infinite loops if compiled on ia32 (users list 2011-03-20)
-# Disabled until that is resolved
-# body        __PILL_PRICE_1         m;\$?[\d\s.]{3,8}(?:/|per|each)\s?(?:pill|tablet|cap(?:sule|let));i
-# body        __PILL_PRICE_2         /(?:pill|tablet|cap(?:sule|let))s\s\$?[\d\s.]{3,8}/i
-# body        __PILL_PRICE_3         /free\s(?:pill|tablet|cap(?:sule|let))s/i
-# tflags      __PILL_PRICE_1         multiple
-# tflags      __PILL_PRICE_2         multiple
-# tflags      __PILL_PRICE_3         multiple
-# meta        MANY_PILL_PRICE        (__PILL_PRICE_1 + __PILL_PRICE_2 + __PILL_PRICE_3) > 2
-# describe    MANY_PILL_PRICE        Prices for pills
+# Causes infinite loops if compiled on some systems (users list 2011-03-20)
+#body        __PILL_PRICE_1_evil         m;\$?[\d .]{3,8}(?:/|per|each) ?(?:pill|tablet|cap(?:sule|let));i
+#body        __PILL_PRICE_2_evil         /(?:pill|tablet|cap(?:sule|let))s \$?[\d .]{3,8}/i
+#body        __PILL_PRICE_3_evil         /free (?:pill|tablet|cap(?:sule|let))s/i
+#tflags      __PILL_PRICE_1_evil         multiple
+#tflags      __PILL_PRICE_2_evil         multiple
+#tflags      __PILL_PRICE_3_evil         multiple
+#meta        MANY_PILL_PRICE        (__PILL_PRICE_1_evil + __PILL_PRICE_2_evil + __PILL_PRICE_3_evil) > 2
+if can(Mail::SpamAssassin::Conf::feature_bug6558_free)
+  body        __PILL_PRICE_1         m;(?=[\d .f])(?:free|[\d .]{3}(?:/|per|each)) ?(?=[ptc])(?:pill|tablet|cap(?:sule|let))s?\b;i
+  body        __PILL_PRICE_2         /(?=[ptc])(?:pill|tablet|cap(?:sule|let))s[ :-]{1,5}\$?[\d .]{3}/i
+  tflags      __PILL_PRICE_1         multiple
+  tflags      __PILL_PRICE_2         multiple
+  meta        MANY_PILL_PRICE        (__PILL_PRICE_1 + __PILL_PRICE_2) > 2
+  describe    MANY_PILL_PRICE        Prices for pills
+endif
 
 # More from Ned Slider
 meta        NSL_FREEMAIL_SUBJ      (FREEMAIL_FROM && MISSING_SUBJECT)
@@ -611,35 +619,37 @@ describe    CN_B2B_SPAMMER         Chinese company introducing itself
 uri         __UPPERCASE_URI        /^[^:A-Z]+[A-Z]/
 
 # for sale newsletters
-body        __FOR_SALE_OBO            /\bor best offer\b/i
-tflags      __FOR_SALE_OBO            multiple
-meta        __FOR_SALE_OBO_MANY       __FOR_SALE_OBO > 5
+if can(Mail::SpamAssassin::Conf::feature_bug6558_free)
+  body        __FOR_SALE_OBO            /\bor best offer\b/i
+  tflags      __FOR_SALE_OBO            multiple
+  meta        __FOR_SALE_OBO_MANY       __FOR_SALE_OBO > 5
 
-body        __FOR_SALE_PRC_1K         /\bprice:? \$\d,?\d\d\d[.\s]/i
-tflags      __FOR_SALE_PRC_1K         multiple
-meta        __FOR_SALE_PRC_1K_MANY    __FOR_SALE_PRC_1K > 10
+  body        __FOR_SALE_PRC_1K         /\bprice:? \$\d,?\d\d\d[.\s]/i
+  tflags      __FOR_SALE_PRC_1K         multiple
+  meta        __FOR_SALE_PRC_1K_MANY    __FOR_SALE_PRC_1K > 10
 
-body        __FOR_SALE_PRC_10K        /\bprice:? \$\d\d,\d\d\d/i
-tflags      __FOR_SALE_PRC_10K        multiple
-meta        __FOR_SALE_PRC_10K_MANY   __FOR_SALE_PRC_10K > 10
+  body        __FOR_SALE_PRC_10K        /\bprice:? \$\d\d,\d\d\d/i
+  tflags      __FOR_SALE_PRC_10K        multiple
+  meta        __FOR_SALE_PRC_10K_MANY   __FOR_SALE_PRC_10K > 10
 
-body        __FOR_SALE_PRC_100K       /\bprice:? \$\d\d\d,\d\d\d/i
-tflags      __FOR_SALE_PRC_100K       multiple
-meta        __FOR_SALE_PRC_100K_MANY  __FOR_SALE_PRC_100K > 5
+  body        __FOR_SALE_PRC_100K       /\bprice:? \$\d\d\d,\d\d\d/i
+  tflags      __FOR_SALE_PRC_100K       multiple
+  meta        __FOR_SALE_PRC_100K_MANY  __FOR_SALE_PRC_100K > 5
 
-meta        __FOR_SALE_PRC_MANY       (__FOR_SALE_PRC_1K + __FOR_SALE_PRC_10K + __FOR_SALE_PRC_100K) > 20
+  meta        __FOR_SALE_PRC_MANY       (__FOR_SALE_PRC_1K + __FOR_SALE_PRC_10K + __FOR_SALE_PRC_100K) > 20
 
-body        __FOR_SALE_LTP            /00\.? (?:less 10%|LTP)/i
-tflags      __FOR_SALE_LTP            multiple
-meta        __FOR_SALE_LTP_MANY       __FOR_SALE_LTP > 10
+  body        __FOR_SALE_LTP            /00\.? (?:less 10%|LTP)/i
+  tflags      __FOR_SALE_LTP            multiple
+  meta        __FOR_SALE_LTP_MANY       __FOR_SALE_LTP > 10
 
-body        __FOR_SALE_NET            /00\.? NET/i
-tflags      __FOR_SALE_NET            multiple
-meta        __FOR_SALE_NET_MANY       __FOR_SALE_NET > 10
+  body        __FOR_SALE_NET            /00\.? NET/i
+  tflags      __FOR_SALE_NET            multiple
+  meta        __FOR_SALE_NET_MANY       __FOR_SALE_NET > 10
 
-rawbody     __FOR_SALE_PRC_EOL        /\s\$\d{1,3},\d00(?:\.00)?$/m
-tflags      __FOR_SALE_PRC_EOL        multiple
-meta        __FOR_SALE_PRC_EOL_MANY   __FOR_SALE_PRC_EOL > 10
+  rawbody     __FOR_SALE_PRC_EOL        /\s\$\d{1,3},\d00(?:\.00)?$/m
+  tflags      __FOR_SALE_PRC_EOL        multiple
+  meta        __FOR_SALE_PRC_EOL_MANY   __FOR_SALE_PRC_EOL > 10
+endif
 
 uri         __URI_MAILTO              /^mailto:/
 tflags      __URI_MAILTO              multiple
@@ -648,4 +658,6 @@ meta        __URI_MAILTO_MANY         __URI_MAILTO > 15
 
 header      REPLYTO_EMPTY          Reply-To =~ /<>/
 describe    REPLYTO_EMPTY          Reply-To undeliverable
+
+body        GAPPY_PHONE_NA         /1 - \d \d \d - \d \d \d - \d \d \d \d/
 
