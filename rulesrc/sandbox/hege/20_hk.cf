@@ -28,7 +28,7 @@ describe	HK_RANDOM_REPLYTO	Reply-To username looks random
 header		HK_RANDOM_REPLYTO_NAME	Reply-To:name =~ /^(?!.*?(?:@|cnnbc|nlpbr)).*?(?:[bcdfgjklmnpqrtvwxz]{5}|[aeiouy]{5}|([a-z]{1,2})(?:\1){3})/mi
 describe	HK_RANDOM_REPLYTO_NAME	Reply-To name looks random
 
-header		HK_NAME_DRUGS		From:name =~ /(viagra|cialis)/mi
+header		HK_NAME_DRUGS		From:name =~ /(viagra|\bcialis|cialis\b)/mi
 describe	HK_NAME_DRUGS		From name contains drugs
 
 header		HK_NAME_FREE		From:name =~ /\b(?:get)?free(?!\.fr)\b/mi
