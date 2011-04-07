@@ -1298,6 +1298,8 @@ sub hash_line_for_rule {
   # using tainted subr. argument may taint the whole expression, avoid
   my $u = untaint_var($pms->{conf}->{source_file}->{$rulename});
   return sprintf("\n#line 1 \"%s, rule %s,\"", $u, $rulename);
+# return sprintf("\n#line 1 \"%s, rule %s,\"", $u, $rulename) .
+#        "\ndbg(\"rules: will run %s\", q(".$rulename."));\n";
 }
 
 sub is_user_rule_sub {
