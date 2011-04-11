@@ -101,7 +101,7 @@ The database must contain a table, default name "userpref", with at
 least three fields:
 
   username varchar(100)	  # this is the username whose e-mail is being filtered
-  preference varchar(30)  # the preference (whitelist_from, required_score, etc.)
+  preference varchar(50)  # the preference (whitelist_from, required_score, etc.)
   value varchar(100)	  # the value of the named preference
 
 You can add as many other fields you wish as long as the above three fields are
@@ -132,7 +132,7 @@ This will create the following table:
 
 CREATE TABLE userpref (
   username varchar(100) default NOT NULL,
-  preference varchar(30) default NOT NULL,
+  preference varchar(50) default NOT NULL,
   value varchar(100) default NOT NULL,
   prefid int(11) NOT NULL auto_increment,
   PRIMARY KEY (prefid),
