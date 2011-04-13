@@ -263,7 +263,7 @@ meta           TO_IN_SUBJ           __SUBJ_HAS_TO_1 && !__VIA_ML && !MISSING_MIM
 describe       TO_IN_SUBJ           To address is in Subject
 
 meta           __TO_EQ_FM_HTML_ONLY __TO_EQ_FROM && MIME_HTML_ONLY
-meta           TO_EQ_FM_HTML_ONLY   __TO_EQ_FM_HTML_ONLY && !HTML_MIME_NO_HTML_TAG && !MISSING_MID && !ALL_TRUSTED && !__RCD_RDNS_MAIL_MESSY
+meta           TO_EQ_FM_HTML_ONLY   __TO_EQ_FM_HTML_ONLY && !ALL_TRUSTED && !__RCD_RDNS_MAIL_MESSY && !__DOS_LINK && !__NOT_SPOOFED && !__DKIM_EXISTS
 describe       TO_EQ_FM_HTML_ONLY   To == From and HTML only
 tflags         TO_EQ_FM_HTML_ONLY   publish
 
@@ -574,19 +574,19 @@ score       ART_NAMES_ORG          4.0
 describe    ART_NAMES_ORG          Arthur Simmons - registrar spammer extraordinaire
 
 # Causes infinite loops if compiled on some systems (users list 2011-03-20)
-#body        __PILL_PRICE_1_evil         m;\$?[\d .]{3,8}(?:/|per|each) ?(?:pill|tablet|cap(?:sule|let));i
-#body        __PILL_PRICE_2_evil         /(?:pill|tablet|cap(?:sule|let))s \$?[\d .]{3,8}/i
-#body        __PILL_PRICE_3_evil         /free (?:pill|tablet|cap(?:sule|let))s/i
-#tflags      __PILL_PRICE_1_evil         multiple
-#tflags      __PILL_PRICE_2_evil         multiple
-#tflags      __PILL_PRICE_3_evil         multiple
-#meta        MANY_PILL_PRICE        (__PILL_PRICE_1_evil + __PILL_PRICE_2_evil + __PILL_PRICE_3_evil) > 2
+#body        __PILL_PRICE_1_EVIL         m;\$?[\d .]{3,8}(?:/|per|each) ?(?:pill|tablet|cap(?:sule|let));i
+#body        __PILL_PRICE_2_EVIL         /(?:pill|tablet|cap(?:sule|let))s \$?[\d .]{3,8}/i
+#body        __PILL_PRICE_3_EVIL         /free (?:pill|tablet|cap(?:sule|let))s/i
+#tflags      __PILL_PRICE_1_EVIL         multiple
+#tflags      __PILL_PRICE_2_EVIL         multiple
+#tflags      __PILL_PRICE_3_EVIL         multiple
+#meta        MANY_PILL_PRICE        (__PILL_PRICE_1_EVIL + __PILL_PRICE_2_EVIL + __PILL_PRICE_3_EVIL) > 2
 if can(Mail::SpamAssassin::Conf::feature_bug6558_free)
-  body        __PILL_PRICE_1         m;(?=[\d .f])(?:free|[\d .]{3}(?:/|per|each)) ?(?=[ptc])(?:pill|tablet|cap(?:sule|let))s?\b;i
-  body        __PILL_PRICE_2         /(?=[ptc])(?:pill|tablet|cap(?:sule|let))s[ :-]{1,5}\$?[\d .]{3}/i
-  tflags      __PILL_PRICE_1         multiple
-  tflags      __PILL_PRICE_2         multiple
-  meta        MANY_PILL_PRICE        (__PILL_PRICE_1 + __PILL_PRICE_2) > 2
+  body        __PILL_PRICE_01        m;(?=[\d .f])(?:free|[\d .]{3}(?:/|per|each)) ?(?=[ptc])(?:pill|tablet|cap(?:sule|let))s?\b;i
+  body        __PILL_PRICE_02        /(?=[ptc])(?:pill|tablet|cap(?:sule|let))s[ :-]{1,5}\$?[\d .]{3}/i
+  tflags      __PILL_PRICE_01        multiple
+  tflags      __PILL_PRICE_02        multiple
+  meta        MANY_PILL_PRICE        (__PILL_PRICE_01 + __PILL_PRICE_02) > 2
   describe    MANY_PILL_PRICE        Prices for pills
 endif
 
@@ -660,4 +660,10 @@ header      REPLYTO_EMPTY          Reply-To =~ /<>/
 describe    REPLYTO_EMPTY          Reply-To undeliverable
 
 body        GAPPY_PHONE_NA         /1 - \d \d \d - \d \d \d - \d \d \d \d/
+
+header      __TO_TOO_MANY          To =~ /(?:,[^,]{1,80}){30}/
+
+header      __CC_TOO_MANY          Cc =~ /(?:,[^,]{1,80}){30}/
+
+header      __TO_WAY_TOO_MANY      ToCc =~ /(?:,[^,]{1,80}){50}/
 
