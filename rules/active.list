@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-it_batt bernie-mix danmcdonald darxus-trap darxus dos grenier jm kgolding nbebout wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1; day 2: bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-it_batt bernie-mix danmcdonald darxus-trap darxus dos grenier jarif jm kgolding nbebout wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1; day 3: bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-it_batt bernie-mix danmcdonald darxus-trap darxus dos grenier jarif jm kgolding nbebout wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1
+# with results from: day 1: bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-it_batt bernie-mix danmcdonald darxus-trap darxus dos grenier jm nbebout wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1; day 2: bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-it_batt bernie-mix danmcdonald darxus-trap darxus dos grenier jm kgolding nbebout wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1; day 3: bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-it_batt bernie-mix danmcdonald darxus-trap darxus dos grenier jarif jm kgolding nbebout wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1
 
 # tflags 
 ADVANCE_FEE_2_NEW_FORM
@@ -80,6 +80,9 @@ CORRUPT_FROM_LINE_IN_HDRS
 DATE_IN_FUTURE_96_Q
 
 # good enough
+DATE_IN_FUTURE_Q_PLUS
+
+# good enough
 DEAR_BENEFICIARY
 
 # good enough
@@ -146,6 +149,9 @@ DOS_OE_TO_MX_IMAGE
 DOS_OUTLOOK_TO_MX
 
 # good enough
+DOS_RCVD_IP_TWICE_B
+
+# good enough
 DOS_RCVD_IP_TWICE_C
 
 # good enough
@@ -180,6 +186,9 @@ FB_QUALITY_REPLICA
 
 # good enough
 FB_REPLICA_ROLEX
+
+# good enough
+FB_SMALL_PEN
 
 # good enough
 FB_THIS_ADVERT
@@ -237,6 +246,9 @@ FM_SUBJ_APPROVE
 
 # good enough
 FM_VEGAS_CASINO
+
+# good enough
+FORGED_RELAY_MUA_TO_MX
 
 # tflags 
 FORM_FRAUD_3
@@ -305,6 +317,9 @@ FRT_PHARMAC
 FRT_ROLEX
 
 # good enough
+FR_DOT_FEVER_5
+
+# good enough
 FSL_CTYPE_WIN1251
 
 # good enough
@@ -354,6 +369,9 @@ FS_WEIGHT_LOSS
 
 # good enough
 FS_WILL_HELP
+
+# good enough
+GAPPY_PHONE_NA
 
 # tflags userconf
 GTUBE
@@ -456,6 +474,9 @@ L_SPAM_TOOL_13
 
 # tflags 
 MAILER_EQ_ORG
+
+# good enough
+MANY_PILL_PRICE
 
 # tflags 
 MANY_SPAN_IN_TEXT
@@ -824,6 +845,9 @@ TVD_DOLLARS_US
 TVD_FINGER_02
 
 # good enough
+TVD_FROM_1
+
+# good enough
 TVD_INCREASE_SIZE
 
 # good enough
@@ -842,28 +866,7 @@ TVD_RCVD_SINGLE
 TVD_VISIT_PHARMA
 
 # good enough
-DATE_IN_FUTURE_Q_PLUS
-
-# good enough
-DOS_RCVD_IP_TWICE_B
-
-# good enough
-FB_SMALL_PEN
-
-# good enough
-FORGED_RELAY_MUA_TO_MX
-
-# good enough
-FR_DOT_FEVER_5
-
-# good enough
-GAPPY_PHONE_NA
-
-# good enough
-MANY_PILL_PRICE
-
-# good enough
-TVD_FROM_1
+FR_WATCHES_HTTP
 
 # tflags userconf
 UNPARSEABLE_RELAY
