@@ -34,12 +34,12 @@ score      TO_NO_BRKTS_HTML_IMG    0.20
 describe   TO_NO_BRKTS_HTML_IMG    To: misformatted and HTML and one image
 
 meta       __TO_NO_BRKTS_HTML_ONLY __TO_NO_ARROWS_R && !__TO_UNDISCLOSED && MIME_HTML_ONLY
-meta       TO_NO_BRKTS_HTML_ONLY   __TO_NO_BRKTS_HTML_ONLY && !__MIME_QP && !__MSGID_JAVAMAIL && !__HAS_X_MAILER && !__HAS_REPLY_TO && !__CTYPE_CHARSET_QUOTED && !__SUBJECT_ENCODED_B64 && !__VIA_ML && !__MSGID_BEFORE_RECEIVED && !__MIME_BASE64 && !__RCD_RDNS_MAIL_MESSY && !__COMMENT_EXISTS && !LOTS_OF_MONEY && !__TAG_EXISTS_CENTER
+meta       TO_NO_BRKTS_HTML_ONLY   __TO_NO_BRKTS_HTML_ONLY && !__MIME_QP && !__MSGID_JAVAMAIL && !__CTYPE_CHARSET_QUOTED && !__SUBJECT_ENCODED_B64 && !__VIA_ML && !__MSGID_BEFORE_RECEIVED && !__MIME_BASE64 && !__RCD_RDNS_MAIL_MESSY && !__COMMENT_EXISTS && !LOTS_OF_MONEY && !__TAG_EXISTS_CENTER && !__UPPERCASE_URI && !__UNSUB_LINK && !__RCD_RDNS_MX_MESSY && !__DKIM_EXISTS
 score      TO_NO_BRKTS_HTML_ONLY   0.20
 describe   TO_NO_BRKTS_HTML_ONLY   To: misformatted and HTML only
 
 meta       __TO_NO_BRKTS_DYNIP     __TO_NO_ARROWS_R && !__TO_UNDISCLOSED && RDNS_DYNAMIC
-meta       TO_NO_BRKTS_DYNIP       __TO_NO_BRKTS_DYNIP && !__NAME_IS_EMAIL && !__MSGID_OK_HEX && !__UNSUB_LINK && !__THREADED && !__VIA_ML
+meta       TO_NO_BRKTS_DYNIP       __TO_NO_BRKTS_DYNIP && !__NAME_IS_EMAIL && !__MSGID_OK_HEX && !__UNSUB_LINK && !__THREADED && !__VIA_ML && !__NOT_SPOOFED
 describe   TO_NO_BRKTS_DYNIP       To: misformatted and dynamic rDNS
 tflags     TO_NO_BRKTS_DYNIP       publish
 
@@ -59,7 +59,7 @@ describe   TO_NO_BRKTS_MSFT         To: misformatted and supposed Microsoft tool
 score      TO_NO_BRKTS_MSFT         0.20
 
 meta       __TO_NO_BRKTS_PCNT       __TO_NO_ARROWS_R && __FB_NUM_PERCNT
-meta       TO_NO_BRKTS_PCNT         __TO_NO_BRKTS_PCNT && !__SUBJECT_ENCODED_B64 && !__COMMENT_EXISTS && !__DOS_HAS_LIST_UNSUB && !__VIA_ML && !__ISO_2022_JP_DELIM && !__IMS_MSGID && !__THREAD_INDEX_GOOD && !__RCD_RDNS_MAIL_MESSY && !__NOT_SPOOFED
+meta       TO_NO_BRKTS_PCNT         __TO_NO_BRKTS_PCNT && !__SUBJECT_ENCODED_B64 && !__COMMENT_EXISTS && !__DOS_HAS_LIST_UNSUB && !__VIA_ML && !__ISO_2022_JP_DELIM && !__IMS_MSGID && !__THREAD_INDEX_GOOD && !__RCD_RDNS_MAIL_MESSY && !__NOT_SPOOFED && !__DKIM_EXISTS && !__RCD_RDNS_MX_MESSY && !__UNSUB_LINK
 describe   TO_NO_BRKTS_PCNT         To: misformatted + percentage
 score      TO_NO_BRKTS_PCNT         0.20
 
