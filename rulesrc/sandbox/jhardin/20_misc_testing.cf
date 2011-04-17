@@ -659,11 +659,18 @@ meta        __URI_MAILTO_MANY         __URI_MAILTO > 15
 header      REPLYTO_EMPTY          Reply-To =~ /<>/
 describe    REPLYTO_EMPTY          Reply-To undeliverable
 
-body        GAPPY_PHONE_NA         /1 - \d \d \d - \d \d \d - \d \d \d \d/
-
 header      __TO_TOO_MANY          To =~ /(?:,[^,]{1,80}){30}/
 
 header      __CC_TOO_MANY          Cc =~ /(?:,[^,]{1,80}){30}/
 
 header      __TO_WAY_TOO_MANY      ToCc =~ /(?:,[^,]{1,80}){50}/
+
+body        __GAPPY_PHONE_NA       /1 - \d \d \d - \d \d \d - \d \d \d \d/
+meta        GAPPY_PHONE_NA         __GAPPY_PHONE_NA
+describe    GAPPY_PHONE_NA         Phone number with lots of spaces
+
+rawbody     __GAPPY_HTML           /\b(?:\s{4,80}[\w'()\#,.:]{1,15}){7}\s{0,5}<br[^>]?>/
+meta        GAPPY_HTML             __GAPPY_HTML
+describe    GAPPY_HTML             HTML body with much useless whitespace
+
 
