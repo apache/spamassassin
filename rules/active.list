@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-it_batt bernie-mix danmcdonald darxus-trap darxus dos grenier kgolding nbebout wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1; day 2: bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-it_batt bernie-mix danmcdonald darxus-trap darxus dos grenier jarif jm kgolding nbebout wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1; day 3: bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-it_batt bernie-mix danmcdonald darxus-trap darxus dos grenier jm nbebout wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1
+# with results from: day 1: bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-it_batt bernie-mix danmcdonald darxus-trap darxus dos grenier jarif jm kgolding nbebout wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1; day 2: bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-it_batt bernie-mix danmcdonald darxus-trap darxus dos grenier jarif jm kgolding nbebout wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1; day 3: bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-it_batt bernie-mix danmcdonald darxus-trap darxus dos grenier jarif kgolding nbebout wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1
 
 # tflags 
 ADVANCE_FEE_2_NEW_FORM
@@ -194,9 +194,6 @@ FB_SMALL_PEN
 FB_THIS_ADVERT
 
 # good enough
-FB_TO_STOP_DISTRO
-
-# good enough
 FB_WITHOUT_PRESC
 
 # good enough
@@ -320,6 +317,9 @@ FRT_ROLEX
 FR_DOT_FEVER_5
 
 # good enough
+FR_WATCHES_HTTP
+
+# good enough
 FSL_CTYPE_WIN1251
 
 # good enough
@@ -338,9 +338,6 @@ FSL_HELO_NON_FQDN_1
 FSL_MID_419
 
 # good enough
-FSL_THIS_IS_ADV
-
-# good enough
 FSL_UA
 
 # good enough
@@ -348,6 +345,9 @@ FSL_XM_419
 
 # good enough
 FS_ABIGGER
+
+# good enough
+FS_OBFU_PRMCY
 
 # good enough
 FS_PHARMASUB2
@@ -860,7 +860,13 @@ TVD_RCVD_SINGLE
 TVD_VISIT_PHARMA
 
 # good enough
-FR_WATCHES_HTTP
+GAPPY_HTML
+
+# good enough
+HK_NAME_FM_MR_MRS
+
+# good enough
+TO_NO_BRKTS_HTML_ONLY
 
 # tflags userconf
 UNPARSEABLE_RELAY
@@ -1029,9 +1035,6 @@ XMAILER_MIMEOLE_OL_BC7E6
 
 # good enough
 XMAILER_MIMEOLE_OL_C65FA
-
-# good enough
-XMAILER_MIMEOLE_OL_CAC8F
 
 # good enough
 XMAILER_MIMEOLE_OL_CF0C0
