@@ -39,17 +39,17 @@ score      TO_NO_BRKTS_HTML_ONLY   0.20
 describe   TO_NO_BRKTS_HTML_ONLY   To: misformatted and HTML only
 
 meta       __TO_NO_BRKTS_DYNIP     __TO_NO_ARROWS_R && !__TO_UNDISCLOSED && RDNS_DYNAMIC
-meta       TO_NO_BRKTS_DYNIP       __TO_NO_BRKTS_DYNIP && !__NAME_IS_EMAIL && !__MSGID_OK_HEX && !__UNSUB_LINK && !__THREADED && !__VIA_ML && !__NOT_SPOOFED
+meta       TO_NO_BRKTS_DYNIP       __TO_NO_BRKTS_DYNIP && !__NAME_IS_EMAIL && !__MSGID_OK_HEX && !__UNSUB_LINK && !__THREADED && !__VIA_ML && !__NOT_SPOOFED && !__RCD_RDNS_MX_MESSY && !__COMMENT_EXISTS
 describe   TO_NO_BRKTS_DYNIP       To: misformatted and dynamic rDNS
 tflags     TO_NO_BRKTS_DYNIP       publish
 
 meta       __TO_NO_BRKTS_NORDNS    __TO_NO_ARROWS_R && !__TO_UNDISCLOSED && RDNS_NONE
-meta       TO_NO_BRKTS_NORDNS      __TO_NO_BRKTS_NORDNS && !__MANY_RECIPS && !__FROM_RUNON && !__VIA_ML && !__TO___LOWER && !ALL_TRUSTED && !__TO_EQ_FROM_DOM && !__DOS_REF_TODAY && (__HDRS_LCASE > 1)
+meta       TO_NO_BRKTS_NORDNS      __TO_NO_BRKTS_NORDNS && !__MANY_RECIPS && !__FROM_RUNON && !__VIA_ML && !__TO___LOWER && !ALL_TRUSTED && !__TO_EQ_FROM_DOM && (__HDRS_LCASE > 1)
 score      TO_NO_BRKTS_NORDNS      0.20
 describe   TO_NO_BRKTS_NORDNS      To: misformatted and no rDNS
 
 meta       __TO_NO_BRKTS_NORDNS_HTML    __TO_NO_BRKTS_HTML_ONLY && RDNS_NONE
-meta       TO_NO_BRKTS_NORDNS_HTML      __TO_NO_BRKTS_NORDNS_HTML && !__MIME_QP && !__MSGID_JAVAMAIL && !__REPLYTO_EXISTS && !__MSGID_BEFORE_RECEIVED && !__VIA_ML && !__UA_MUTT && !__FROM_FREEMAIL && !__HAS_X_MAILER && !__COMMENT_EXISTS && !__HTML_LENGTH_384 && !__MIME_BASE64 && !__UPPERCASE_URI && !__TO___LOWER
+meta       TO_NO_BRKTS_NORDNS_HTML      __TO_NO_BRKTS_NORDNS_HTML && !ALL_TRUSTED && !__MSGID_JAVAMAIL && !__MSGID_BEFORE_RECEIVED && !__VIA_ML && !__UA_MUTT && !__FROM_FREEMAIL && !__COMMENT_EXISTS && !__HTML_LENGTH_384 && !__MIME_BASE64 && !__UPPERCASE_URI && !__TO___LOWER
 score      TO_NO_BRKTS_NORDNS_HTML      0.20
 describe   TO_NO_BRKTS_NORDNS_HTML      To: misformatted and no rDNS and HTML only
 
@@ -59,7 +59,7 @@ describe   TO_NO_BRKTS_MSFT         To: misformatted and supposed Microsoft tool
 score      TO_NO_BRKTS_MSFT         0.20
 
 meta       __TO_NO_BRKTS_PCNT       __TO_NO_ARROWS_R && __FB_NUM_PERCNT
-meta       TO_NO_BRKTS_PCNT         __TO_NO_BRKTS_PCNT && !__SUBJECT_ENCODED_B64 && !__COMMENT_EXISTS && !__DOS_HAS_LIST_UNSUB && !__VIA_ML && !__ISO_2022_JP_DELIM && !__IMS_MSGID && !__THREAD_INDEX_GOOD && !__RCD_RDNS_MAIL_MESSY && !__NOT_SPOOFED && !__DKIM_EXISTS && !__RCD_RDNS_MX_MESSY && !__UNSUB_LINK
+meta       TO_NO_BRKTS_PCNT         __TO_NO_BRKTS_PCNT && !__SUBJECT_ENCODED_B64 && !__COMMENT_EXISTS && !__DOS_HAS_LIST_UNSUB && !__VIA_ML && !__ISO_2022_JP_DELIM && !__IMS_MSGID && !__THREAD_INDEX_GOOD && !__RCD_RDNS_MAIL_MESSY && !__NOT_SPOOFED && !__DKIM_EXISTS && !__RCD_RDNS_MX_MESSY && !__UNSUB_LINK && !__LONGLINE && !URI_HEX
 describe   TO_NO_BRKTS_PCNT         To: misformatted + percentage
 score      TO_NO_BRKTS_PCNT         0.20
 
@@ -68,7 +68,7 @@ describe   TO_NO_BRKTS_DIRECT       To: misformatted and direct-to-MX
 tflags     TO_NO_BRKTS_DIRECT       publish
 
 meta       __TO_NO_BRKTS_NOTLIST    __TO_NO_ARROWS_R && !__VIA_ML
-meta       TO_NO_BRKTS_NOTLIST      __TO_NO_BRKTS_NOTLIST && !__UNUSABLE_MSGID && !__THREADED && !__SUBJ_RE && !__MIME_QP && !__COMMENT_EXISTS && !__RCD_RDNS_MAIL_MESSY && !__MANY_RECIPS && !__HAS_MIMEOLE && !__THREAD_INDEX_GOOD && !__IMS_MSGID && !__RCD_RDNS_MTA_MESSY && !__BOUNCE_RPATH_NULL && !__BOUNCE_STAT_FAIL && !__BOUNCE_CTYPE && !ALL_TRUSTED && !__FB_DO_NOT_REPLY && !__NOT_SPOOFED && !__DEAL && !__FH_HAS_XPRIORITY && !__RPATH_12LTRDOM && !__MIME_BASE64 && !__UPPERCASE_URI && !__TO___LOWER && !__BUGGED_IMG && !__JM_REACTOR_DATE
+meta       TO_NO_BRKTS_NOTLIST      __TO_NO_BRKTS_NOTLIST && !__UNUSABLE_MSGID && !__THREADED && !__SUBJ_RE && !__COMMENT_EXISTS && !__RCD_RDNS_MAIL_MESSY && !__MANY_RECIPS && !__HAS_MIMEOLE && !__THREAD_INDEX_GOOD && !__IMS_MSGID && !__RCD_RDNS_MTA_MESSY && !__BOUNCE_RPATH_NULL && !__BOUNCE_STAT_FAIL && !__BOUNCE_CTYPE && !ALL_TRUSTED && !__FB_DO_NOT_REPLY && !__NOT_SPOOFED && !__RPATH_12LTRDOM && !__MIME_BASE64 && !__UPPERCASE_URI && !__TO___LOWER && !__BUGGED_IMG && !__JM_REACTOR_DATE
 describe   TO_NO_BRKTS_NOTLIST      To: misformatted and not a mailing list
 
 

@@ -618,6 +618,9 @@ describe    CN_B2B_SPAMMER         Chinese company introducing itself
 # __ version of khopesh UPPERCASE_URI, for use in metas
 uri         __UPPERCASE_URI        /^[^:A-Z]+[A-Z]/
 
+# __ version of mmartinec LONGLINE, for use in metas
+rawbody     __LONGLINE             /^.{998}.+\r?$/
+
 # for sale newsletters
 if can(Mail::SpamAssassin::Conf::feature_bug6558_free)
   body        __FOR_SALE_OBO            /\bor best offer\b/i
@@ -669,8 +672,8 @@ body        __GAPPY_PHONE_NA       /1 - \d \d \d - \d \d \d - \d \d \d \d/
 meta        GAPPY_PHONE_NA         __GAPPY_PHONE_NA
 describe    GAPPY_PHONE_NA         Phone number with lots of spaces
 
-rawbody     __GAPPY_HTML_01        m;</?[a-z]{1,6}(?:\s[^>]{0,40})?>\s{0,80}(?:[\w'()\#,.:!]{1,15}\s{4,80}){7}\S;
-rawbody     __GAPPY_HTML_02        m;\S(?:\s{4,80}[\w'()\#,.:!]{1,15}){7}\s{0,5}</?[a-z]{1,6}/?>;
+rawbody     __GAPPY_HTML_01        m;</?[a-z]{1,6}(?:\s[^>]{0,40})?>\s{0,80}(?:(?!\d)[\w'()\#,.:!]{1,15}\s{4,80}){7}\S;
+rawbody     __GAPPY_HTML_02        m;\S(?:\s{4,80}(?!\d)[\w'()\#,.:!]{1,15}){7}\s{0,5}</?[a-z]{1,6}/?>;
 meta        GAPPY_HTML             __GAPPY_HTML_01 || __GAPPY_HTML_02
 describe    GAPPY_HTML             HTML body with much useless whitespace
 
