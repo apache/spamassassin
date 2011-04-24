@@ -77,7 +77,7 @@ meta           FROM_MISSP_SPF_FAIL  (__FROM_RUNON && SPF_FAIL)
 tflags         FROM_MISSP_SPF_FAIL  net
 
 meta           __FROM_MISSP_EH_MATCH __FROM_RUNON && __ENV_AND_HDR_FROM_MATCH
-meta           FROM_MISSP_EH_MATCH   __FROM_MISSP_EH_MATCH && !__RCD_RDNS_MTA_MESSY && !__UNSUB_LINK && !__COMMENT_EXISTS && !__TO___LOWER && !__MIME_QP && !__TO_EQ_FROM_DOM
+meta           FROM_MISSP_EH_MATCH   __FROM_MISSP_EH_MATCH && !__RCD_RDNS_MTA_MESSY && !__UNSUB_LINK && !__COMMENT_EXISTS && !__TO___LOWER && !__MIME_QP && !__TO_EQ_FROM_DOM && !__BUGGED_IMG && !__DKIM_EXISTS
 describe       FROM_MISSP_EH_MATCH   From misspaced, matches envelope
 
 meta           __FROM_MISSP_URI      __FROM_RUNON && __HAS_ANY_URI
@@ -294,7 +294,7 @@ meta           TO_EQ_FM_DOM_HTML_ONLY   __TO_EQ_FM_DOM_HTML_ONLY && !__CTYPE_MUL
 describe       TO_EQ_FM_DOM_HTML_ONLY   To domain == From domain and HTML only
 
 meta           __TO_EQ_FM_DOM_HTML_IMG  __TO_EQ_FROM_DOM && __HTML_LINK_IMAGE
-meta           TO_EQ_FM_DOM_HTML_IMG    __TO_EQ_FM_DOM_HTML_IMG && !__CTYPE_MULTIPART_ALT && !ALL_TRUSTED && !__MIME_QP && !__IS_EXCH
+meta           TO_EQ_FM_DOM_HTML_IMG    __TO_EQ_FM_DOM_HTML_IMG && !__CTYPE_MULTIPART_ALT && !ALL_TRUSTED && !__MIME_QP && !__IS_EXCH && !__BUGGED_IMG && !__UNSUB_LINK && !__COMMENT_EXISTS
 describe       TO_EQ_FM_DOM_HTML_IMG    To domain == From domain and HTML image link
 
 meta           __TO_EQ_FM_DOM_SPF_FAIL  __TO_EQ_FROM_DOM && SPF_FAIL
@@ -535,7 +535,7 @@ header         __RPATH_12LTRDOM    Return-Path =~ /\@[a-z]{12}\./
 uri            __URI_12LTRDOM      m,://(?:[^./]+\.)*[a-z]{12}\.[^./]+/,
 
 header         __FROM_12LTRDOM_1   From =~ /\@[a-z]{12}\./
-meta           FROM_12LTRDOM       __FROM_12LTRDOM_1 && !__VIA_ML && !__TO___LOWER && !__FS_SUBJ_RE && !__RCD_RDNS_MAIL_MESSY && !__freemail_safe && !__RCVD_IN_DNSWL && !__UNSUB_LINK && !NO_RELAYS && !__UNUSABLE_MSGID && !DATE_IN_PAST_96_XX && !ALL_TRUSTED && !__MSGID_APPLEMAIL && !__RCD_RDNS_SMTP_MESSY && !__FB_NATIONAL && !__MAIL_LINK && !__NAME_EMAIL_DIFF && !__RCD_RDNS_MX_MESSY && !__RCD_RDNS_MX && !__SENDER_BOT && !__IMS_MSGID
+meta           FROM_12LTRDOM       __FROM_12LTRDOM_1 && !__VIA_ML && !__TO___LOWER && !__FS_SUBJ_RE && !__RCD_RDNS_MAIL_MESSY && !__freemail_safe && !__RCVD_IN_DNSWL && !__UNSUB_LINK && !NO_RELAYS && !__UNUSABLE_MSGID && !DATE_IN_PAST_96_XX && !ALL_TRUSTED && !__MSGID_APPLEMAIL && !__RCD_RDNS_SMTP_MESSY && !__FB_NATIONAL && !__MAIL_LINK && !__NAME_EMAIL_DIFF && !__RCD_RDNS_MX_MESSY && !__RCD_RDNS_MX && !__SENDER_BOT && !__IMS_MSGID && !__HS_SUBJ_RE_FW
 describe       FROM_12LTRDOM       From a 12-letter domain
 #tflags         FROM_12LTRDOM       nopublish
 
