@@ -674,7 +674,8 @@ describe    GAPPY_PHONE_NA         Phone number with lots of spaces
 
 rawbody     __GAPPY_HTML_01        m;</?[a-z]{1,6}(?:\s[^>]{0,40})?>\s{0,80}(?:(?!\d)[\w'()\#,.:!]{1,15}\s{4,80}){7}\S;
 rawbody     __GAPPY_HTML_02        m;\S(?:\s{4,80}(?!\d)[\w'()\#,.:!]{1,15}){7}\s{0,5}</?[a-z]{1,6}/?>;
-meta        GAPPY_HTML             __GAPPY_HTML_01 || __GAPPY_HTML_02
+meta        __GAPPY_HTML           __GAPPY_HTML_01 || __GAPPY_HTML_02
+meta        GAPPY_HTML             __GAPPY_HTML && !__UNSUB_LINK
 describe    GAPPY_HTML             HTML body with much useless whitespace
 
 
