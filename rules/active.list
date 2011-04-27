@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm danmcdonald darxus-trap darxus dos grenier jarif kgolding nbebout wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1; day 2: bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus-trap darxus dos grenier jarif jm kgolding nbebout wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1; day 3: bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-it_batt bernie-mix danmcdonald darxus-trap darxus dos grenier jarif jm nbebout wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1
+# with results from: day 1: bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus-trap darxus dos grenier jarif llanga nbebout wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1; day 2: bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus-trap darxus dos grenier jarif kgolding llanga nbebout wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1; day 3: bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix darxus-trap darxus dos grenier jarif kgolding llanga nbebout wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1
 
 # tflags 
 ADVANCE_FEE_2_NEW_FORM
@@ -60,9 +60,6 @@ BAYES_95
 
 # tflags learn
 BAYES_99
-
-# good enough
-BUG6152_INVALID_DATE_TZ_ABSURD
 
 # tflags userconf
 CHARSET_FARAWAY
@@ -167,9 +164,6 @@ END_FUTURE_EMAILS
 ENV_AND_HDR_SPF_MATCH
 
 # good enough
-FAKE_REPLY_C
-
-# good enough
 FB_CIALIS_LEO3
 
 # good enough
@@ -213,9 +207,6 @@ FH_HELO_EQ_D_D_D_D
 
 # good enough
 FH_HOST_EQ_DYNAMICIP
-
-# good enough
-FH_MSGID_XXX
 
 # tflags 
 FILL_THIS_FORM
@@ -303,9 +294,6 @@ FROM_MISSP_USER
 
 # good enough
 FRT_BIGGERMEM1
-
-# good enough
-FRT_PHARMAC
 
 # good enough
 FRT_ROLEX
@@ -420,9 +408,6 @@ HK_SCAM_N2
 
 # good enough
 HK_SCAM_N8
-
-# good enough
-HS_VPXL
 
 # tflags userconf
 HTML_CHARSET_FARAWAY
@@ -845,6 +830,9 @@ TVD_FROM_1
 TVD_INCREASE_SIZE
 
 # good enough
+TVD_PH_SUBJ_URGENT
+
+# good enough
 TVD_QUAL_MEDS
 
 # good enough
@@ -855,6 +843,12 @@ TVD_RCVD_SINGLE
 
 # good enough
 TVD_VISIT_PHARMA
+
+# good enough
+GAPPY_HTML
+
+# good enough
+TO_NO_BRKTS_FROM_MSSP
 
 # tflags userconf
 UNPARSEABLE_RELAY
@@ -897,9 +891,6 @@ URIBL_SC_SURBL
 
 # tflags net
 URIBL_WS_SURBL
-
-# good enough
-URI_DEOBFU_INSTR
 
 # tflags userconf
 URI_NOVOWEL
@@ -999,6 +990,9 @@ XMAILER_MIMEOLE_OL_7533E
 
 # good enough
 XMAILER_MIMEOLE_OL_812FF
+
+# good enough
+XMAILER_MIMEOLE_OL_83BF7
 
 # good enough
 XMAILER_MIMEOLE_OL_91287
