@@ -31,12 +31,8 @@ meta            AXB_TRACK_MOZ           (__UA_MOZ5 && __UA_NIX && __UA_NT4)
 describe        AXB_TRACK_MOZ           MozTrack
 #score           AXB_TRACK_MOZ           1.5
 
-# 2011-03-25
-header          AXB_XRCVD_SSL_BOGUS     Received =~ /\(version\=SSLv3 cipher\=OTHER\)\;/
-describe        AXB_XRCVD_SSL_BOGUS     Suspicious fingerprint
-#score           AXB_XRCVD_SSL_BOGUS     0.5
 
-
-
-# 2011-04-15
-# redirector_pattern      /^http\:\/\/www\.viruslist\.com\/click\?\_URL=(.*)$/i
+# 2011-04-27
+header          AXB_X_MASER_BRUD        X-Maser =~ /^brud$/
+describe        AXB_X_MASER_BRUD        419 Fingerprint
+#score           AXB_X_MASER_BRUD        1.5
