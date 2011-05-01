@@ -40,30 +40,6 @@ describe	HK_SUBJECT_SPACES	Lots of spaces in Subject
 header		HK_SUBJECT_SPACES_SC	Subject =~ /\s{10}(?:[a-z]|\d{1,4})(?:\s|$)/i
 describe	HK_SUBJECT_SPACES_SC	Lots of spaces in Subject with some obfuscation
 
-header		__HK_NAME_MICROSOFT	From:name =~ /(microsoft|\bmsn\b)/i
-header		__HK_HELO_MICROSOFT	X-Spam-Relays-External =~ / helo=\S+\.(?:microsoft(?:email)?|msn)\.com /
-# false hits per bug 6417
-ifplugin Mail::SpamAssassin::Plugin::SPF
-  ifplugin Mail::SpamAssassin::Plugin::DKIM
-    meta	HK_FAKENAME_MICROSOFT	__HK_NAME_MICROSOFT && !__HK_HELO_MICROSOFT && !SPF_PASS && !DKIM_VALID_AU
-    describe	HK_FAKENAME_MICROSOFT	From name mentions Microsoft, but not relayed from there
-  endif
-endif
-header		__HK_NAME_YAHOO		From:name =~ /\byahoo\b/i
-header		__HK_HELO_YAHOO		X-Spam-Relays-External =~ / helo=[^ ]+\.yahoo\.com /
-meta		HK_FAKENAME_YAHOO	__HK_NAME_YAHOO && !__HK_HELO_YAHOO
-describe	HK_FAKENAME_YAHOO	From name mentions Yahoo, but not relayed from there
-
-header		__HK_NAME_PAYPAL	From:name =~ /\bpaypal\b/i
-header		__HK_HELO_PAYPAL	X-Spam-Relays-External =~ / helo=[^ ]+\.paypal\b/
-meta		HK_FAKENAME_PAYPAL	__HK_NAME_PAYPAL && !__HK_HELO_PAYPAL
-describe	HK_FAKENAME_PAYPAL	From name mentions PayPal, but not relayed from there
-
-header		__HK_NAME_EBAY		From:name =~ /\bebay\b/i
-header		__HK_HELO_EBAY		X-Spam-Relays-External =~ / helo=[^ ]+\.(?:ebay|emarsys)\b/
-meta		HK_FAKENAME_EBAY	__HK_NAME_EBAY && !__HK_HELO_EBAY
-describe	HK_FAKENAME_EBAY	From name mentions eBay, but not relayed from there
-
 body		__hk_million		/(?:(?:[0-9]{3}[ ,.]?){2,4}|[0-9] ?M\b|mill(?:(?:es?|ons?)(?: de\b)?|ion)).{0,18}(?:\$|[\xa3\xa4]|eur\b|usd\b|gbp\b|cfa\b|euro?s?\b|dollard?s?\b|pounds?\b|francs?\b)/i
 body		__hk_million2		/(?:\$|[\xa3\xa4]|eur|usd?|gbp|cfa|euro?s?|dollard?s?|pounds?|francs?)(?: de\b)? mill(?:(?:es?|ons?)|ion)/
 body		__hk_hthousand		/hundred.{0,20}thousand.{0,20}(?:eur|usd|gbp|cfa|euro?s?|dollard?s?|pounds?|francs?)\b/i
@@ -174,4 +150,35 @@ meta		HK_SPAMMY_FILENAME	__HK_SPAMMY_CTFN || __HK_SPAMMY_CDFN
 
 endif
 
+####
+#### Some fakename tests which rely in SPF & DKIM
+####
+
+ifplugin Mail::SpamAssassin::Plugin::SPF
+ifplugin Mail::SpamAssassin::Plugin::DKIM
+
+# check spf and dkim for all, false hits per bug 6417
+
+header		__HK_NAME_MICROSOFT	From:name =~ /(microsoft|\bmsn\b)/i
+header		__HK_HELO_MICROSOFT	X-Spam-Relays-External =~ / helo=\S+\.(?:microsoft(?:email)?|msn)\.com /
+meta		HK_FAKENAME_MICROSOFT	__HK_NAME_MICROSOFT && !__HK_HELO_MICROSOFT && !SPF_PASS && !DKIM_VALID_AU
+describe	HK_FAKENAME_MICROSOFT	From name mentions Microsoft, but not relayed from there
+
+header		__HK_NAME_YAHOO		From:name =~ /\byahoo\b/i
+header		__HK_HELO_YAHOO		X-Spam-Relays-External =~ / helo=[^ ]+\.yahoo\.com /
+meta		HK_FAKENAME_YAHOO	__HK_NAME_YAHOO && !__HK_HELO_YAHOO && !SPF_PASS && !DKIM_VALID_AU
+describe	HK_FAKENAME_YAHOO	From name mentions Yahoo, but not relayed from there
+
+header		__HK_NAME_PAYPAL	From:name =~ /\bpaypal\b/i
+header		__HK_HELO_PAYPAL	X-Spam-Relays-External =~ / helo=[^ ]+\.paypal\b/
+meta		HK_FAKENAME_PAYPAL	__HK_NAME_PAYPAL && !__HK_HELO_PAYPAL && !SPF_PASS && !DKIM_VALID_AU
+describe	HK_FAKENAME_PAYPAL	From name mentions PayPal, but not relayed from there
+
+header		__HK_NAME_EBAY		From:name =~ /\bebay\b/i
+header		__HK_HELO_EBAY		X-Spam-Relays-External =~ / helo=[^ ]+\.(?:ebay|emarsys)\b/
+meta		HK_FAKENAME_EBAY	__HK_NAME_EBAY && !__HK_HELO_EBAY && !SPF_PASS && !DKIM_VALID_AU
+describe	HK_FAKENAME_EBAY	From name mentions eBay, but not relayed from there
+
+endif
+endif
 
