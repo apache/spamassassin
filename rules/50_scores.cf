@@ -554,8 +554,6 @@ score TVD_QUAL_MEDS 2.697 2.397 2.799 2.483 # n=2
 score TVD_RATWARE_CB 0 # n=0 n=1 n=2 n=3
 score TVD_RATWARE_CB_2 0 # n=0 n=1 n=2 n=3
 score TVD_RATWARE_MSGID_02 0 # n=0 n=1 n=2 n=3
-score TVD_RCVD_IP 0.001 0.054 0.001 0.695 # n=2
-score TVD_RCVD_IP4 0.159 1.495 0.674 1.596 # n=2
 score TVD_RCVD_SINGLE 0.242 1.213 0.001 2.172 # n=2
 score TVD_RCVD_SPACE_BRACKET 0.001 0.001 0.001 0.001 # n=1
 score TVD_SECTION 0 # n=0 n=1 n=2 n=3
@@ -638,6 +636,9 @@ score YAHOO_RD_REDIR 0 # n=0 n=1 n=2 n=3
 
 # Bug 6394, score 1.5 is too high, depends on local traffic
 score FREEMAIL_ENVFROM_END_DIGIT 0.1
+# Bug 6022, settle at informative score
+score TVD_RCVD_IP 0.001
+score TVD_RCVD_IP4 0.001
 
 ###########################################################################
 
