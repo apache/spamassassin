@@ -46,7 +46,6 @@ score AXB_XMID_OEGOESNULL 0 # n=0 n=1 n=2 n=3
 score AXB_XM_SENDMAIL_NOT 0 # n=0 n=1 n=2 n=3
 score AXB_XR_STULDAP 0 # n=0 n=1 n=2 n=3
 score BAD_CREDIT 2.799 1.658 1.279 2.415
-score BAD_ENC_HEADER 3.099 1.716 1.805 1.988
 score BANG_GUAR 2.202 2.377 1.690 2.704
 score BANG_OPRAH 0 # n=0 n=1 n=2 n=3
 score BANKING_LAWS 2.399 2.004 2.157 1.099 # n=2
@@ -639,6 +638,8 @@ score FREEMAIL_ENVFROM_END_DIGIT 0.1
 # Bug 6022, settle at informative score
 score TVD_RCVD_IP 0.001
 score TVD_RCVD_IP4 0.001
+# Bug 6280, 5690, settle at informative score
+score BAD_ENC_HEADER 0.001
 
 ###########################################################################
 
