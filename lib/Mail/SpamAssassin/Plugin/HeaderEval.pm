@@ -79,10 +79,6 @@ sub compile_now_start {
   $self->word_is_in_dictionary("aba");
 }
 
-# sad but true. sort it out, sysadmins!
-my $CCTLDS_WITH_LOTS_OF_OPEN_RELAYS = qr{(?:kr|cn|cl|ar|hk|il|th|tw|sg|za|tr|ma|ua|in|pe|br)};
-my $ROUND_THE_WORLD_RELAYERS = qr{(?:net|com|ca)};
-
 sub check_for_fake_aol_relay_in_rcvd {
   my ($self, $pms) = @_;
   local ($_);
