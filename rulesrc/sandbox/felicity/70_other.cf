@@ -311,7 +311,8 @@ describe HEADER_COUNT_SUBJECT	Multiple Subject headers found
 endif
 
 # 13.245  14.9333   0.0000    1.000   1.00    1.00  RCVD_BAD_ID
-header RCVD_BAD_ID      Received =~ /\bid\s+[a-zA-Z0-9_+\/\\,-]+(?:[!"\#\$\%&'()*:<=>?\@\[\]^\`{|}~]|;\S)/
+# bug 6073, removed colon
+header RCVD_BAD_ID      Received =~ /\bid\s+[a-zA-Z0-9_+\/\\,-]+(?:[!"\#\$\%&'()*<=>?\@\[\]^\`{|}~]|;\S)/
 
 # 8.791  10.1359   0.0000    1.000   1.00    1.00  TVD_ENVFROM_APOST
 header TVD_ENVFROM_APOST	EnvelopeFrom =~ /\'/
