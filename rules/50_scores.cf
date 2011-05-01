@@ -255,7 +255,6 @@ score FORGED_TELESP_RCVD 2.499 2.499 2.499 1.841 # n=0
 score FORGED_THEBAT_HTML 0 # n=0 n=1 n=2 n=3
 score FORWARD_LOOKING 0 # n=0 n=1 n=2 n=3
 score FRAGMENTED_MESSAGE 0 # n=0 n=1 n=2
-score FREEMAIL_ENVFROM_END_DIGIT 2.602 2.223 1.770 1.553
 score FREEMAIL_FORGED_REPLYTO 1.199 2.503 1.204 2.095
 score FREEMAIL_REPLY 2.499 2.499 1.788 1.929
 score FREEMAIL_REPLYTO 3.257 2.775 1.811 2.398
@@ -636,6 +635,9 @@ score YAHOO_DRS_REDIR 0 # n=0 n=1 n=2 n=3
 score YAHOO_RD_REDIR 0 # n=0 n=1 n=2 n=3
 
 # End of generated scores.  </gen:mutable>
+
+# Bug 6394, score 1.5 is too high, depends on local traffic
+score FREEMAIL_ENVFROM_END_DIGIT 0.1
 
 ###########################################################################
 
