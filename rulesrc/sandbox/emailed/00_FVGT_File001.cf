@@ -759,7 +759,7 @@ describe FB_CHOLESTERBLCK       Phrase: Cholesterblock
 #counts   FB_CHOLESTERBLCK         50s/0h of 47019 corpus (37183s/9836h FVGT) 12/23/06
 
 
-body     FB_CIALIS_LEO3         /(?!CIALIS)\bC\s?[a-z]?\s?[Iitl1\\\/]\s?[a-z]?\s?[Aa]\s?[a-z]?\s?[LIl1\\\/]\s?[a-z]?\s?[ilIt1\\\/]\s?[a-z]?\s?[Ss]\b/
+body     FB_CIALIS_LEO3         /\bC(?!IALIS|eibal|laim|laritas)\s?[a-z]?\s?[Iitl1\\\/]\s?[a-z]?\s?[Aa]\s?[a-z]?\s?[LIl1\\\/]\s?[a-z]?\s?[ilIt1\\\/]\s?[a-z]?\s?[Ss]\b/
 describe FB_CIALIS_LEO3         Uses a mis-spelled version of cialis.
 ##score    FB_CIALIS_LEO3               4.599
 #counts   FB_CIALIS_LEO3           2604s/0h of 41968 corpus (34130s/7838h FVGT) 04/11/06
