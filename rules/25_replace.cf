@@ -186,7 +186,7 @@ describe FUZZY_THOUSANDS	Attempt to obfuscate words in spam
 replace_rules FUZZY_THOUSANDS
 
 
-body FUZZY_VLIUM	/<inter W1><post P2>(?!valium)<V><A><L><I><U><M>/i
+body FUZZY_VLIUM	/<inter W1><post P2>(?!valium|verifiquem|volturno|vollum)<V><A><L><I><U><M>/i
 describe FUZZY_VLIUM	Attempt to obfuscate words in spam
 replace_rules FUZZY_VLIUM
 

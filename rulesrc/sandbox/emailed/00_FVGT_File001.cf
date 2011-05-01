@@ -3967,7 +3967,7 @@ replace_rules FRT_TODAY2
 
 
 
-body FRT_VALIUM1 /<inter W0><post P2>\b(?!valium|verifiquem)<V><A><L><I><U><M>\b/i
+body FRT_VALIUM1 /<inter W0><post P2>\b(?!valium|verifiquem|volturno|vollum)<V><A><L><I><U><M>\b/i
 describe FRT_VALIUM1            ReplaceTags: Valium
 ##score    FRT_VALIUM1          10.357
 replace_rules FRT_VALIUM1
@@ -3976,7 +3976,7 @@ replace_rules FRT_VALIUM1
 #counts   FRT_VALIUM1              183s/0h of 47019 corpus (37183s/9836h FVGT) 12/23/06
 
 
-body FRT_VALIUM2 /<inter SP2><post P2>\b(?!valium)<V><A><L><I><U><M>\b/i
+body FRT_VALIUM2 /<inter SP2><post P2>\b(?!valium|verifiquem|volturno|vollum)<V><A><L><I><U><M>\b/i
 describe FRT_VALIUM2            ReplaceTags: Valium (2)
 ##score    FRT_VALIUM2          2.843
 replace_rules FRT_VALIUM2
