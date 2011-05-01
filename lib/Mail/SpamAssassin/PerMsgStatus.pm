@@ -59,6 +59,7 @@ use Mail::SpamAssassin::Constants qw(:sa);
 use Mail::SpamAssassin::AsyncLoop;
 use Mail::SpamAssassin::Conf;
 use Mail::SpamAssassin::Util qw(untaint_var);
+use Mail::SpamAssassin::Util::RegistrarBoundaries;
 use Mail::SpamAssassin::Timeout;
 use Mail::SpamAssassin::Logger;
 
