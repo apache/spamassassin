@@ -295,17 +295,21 @@ meta           TO_EQ_FM_SPF_FAIL    __TO_EQ_FM_SPF_FAIL && !__THREADED && !ALL_T
 describe       TO_EQ_FM_SPF_FAIL    To == From and external SPF failed
 tflags         TO_EQ_FM_SPF_FAIL    net
 
+header         __FROM_ALL_NUMS      From:addr =~ /^\d+@/
+header         __TO_ALL_NUMS        To:addr =~ /^\d+@/
+meta           __FM_TO_ALL_NUMS     __FROM_ALL_NUMS && __TO_ALL_NUMS  
+
 header         __TO_EQ_FROM_DOM_1   ALL =~ /\nFrom:\s+[^\n@]{0,80}@([^\n\s>]+)>?\n(?:[^\n]{1,100}\n)*To:\s+[^\n]+@\1[>,\s\n]/ism
 header         __TO_EQ_FROM_DOM_2   ALL =~ /\nTo:\s+[^\n@]{0,80}@([^\n\s>]+)>?\n(?:[^\n]{1,100}\n)*From:\s+[^\n]+@\1[>,\s\n]/ism
 meta           __TO_EQ_FROM_DOM     (__TO_EQ_FROM_DOM_1 || __TO_EQ_FROM_DOM_2)
 describe       __TO_EQ_FROM_DOM     To: domain same as From: domain
 
 meta           __TO_EQ_FM_DOM_HTML_ONLY __TO_EQ_FROM_DOM && MIME_HTML_ONLY
-meta           TO_EQ_FM_DOM_HTML_ONLY   __TO_EQ_FM_DOM_HTML_ONLY && !__CTYPE_MULTIPART_ALT && !HTML_MIME_NO_HTML_TAG && !ALL_TRUSTED && !__MIME_QP && !__IS_EXCH && !__MSGID_BEFORE_RECEIVED && !__RCD_RDNS_MAIL_MESSY
+meta           TO_EQ_FM_DOM_HTML_ONLY   __TO_EQ_FM_DOM_HTML_ONLY && !__CTYPE_MULTIPART_ALT && !HTML_MIME_NO_HTML_TAG && !ALL_TRUSTED && !__MIME_QP && !__IS_EXCH && !__MSGID_BEFORE_RECEIVED && !__RCD_RDNS_MAIL_MESSY && !__FM_TO_ALL_NUMS
 describe       TO_EQ_FM_DOM_HTML_ONLY   To domain == From domain and HTML only
 
 meta           __TO_EQ_FM_DOM_HTML_IMG  __TO_EQ_FROM_DOM && __HTML_LINK_IMAGE
-meta           TO_EQ_FM_DOM_HTML_IMG    __TO_EQ_FM_DOM_HTML_IMG && !__CTYPE_MULTIPART_ALT && !ALL_TRUSTED && !__MIME_QP && !__IS_EXCH && !__BUGGED_IMG && !__UNSUB_LINK && !__COMMENT_EXISTS
+meta           TO_EQ_FM_DOM_HTML_IMG    __TO_EQ_FM_DOM_HTML_IMG && !__CTYPE_MULTIPART_ALT && !ALL_TRUSTED && !__MIME_QP && !__IS_EXCH && !__BUGGED_IMG && !__UNSUB_LINK && !__COMMENT_EXISTS && !__FM_TO_ALL_NUMS
 describe       TO_EQ_FM_DOM_HTML_IMG    To domain == From domain and HTML image link
 
 meta           __TO_EQ_FM_DOM_SPF_FAIL  __TO_EQ_FROM_DOM && SPF_FAIL
