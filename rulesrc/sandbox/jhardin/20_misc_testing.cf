@@ -227,10 +227,10 @@ meta           MANY_SUBDOM         __MANY_SUBDOM && !__JM_REACTOR_DATE && !__UNS
 describe       MANY_SUBDOM         Lots and lots of subdomain parts in a URI
 
 # by request of Benny Pedersen <me@junc.org> on the users list 10/9/2009
-meta           RFC_ABUSE_POST      (__DNS_FROM_RFC_ABUSE && __DNS_FROM_RFC_POST)
-describe       RFC_ABUSE_POST      Both abuse and postmaster missing on sender domain
-score          RFC_ABUSE_POST      0.01
-tflags         RFC_ABUSE_POST      net
+#meta           RFC_ABUSE_POST      (__DNS_FROM_RFC_ABUSE && __DNS_FROM_RFC_POST)
+#describe       RFC_ABUSE_POST      Both abuse and postmaster missing on sender domain
+#score          RFC_ABUSE_POST      0.01
+#tflags         RFC_ABUSE_POST      net
 
 body           CALL_SKYPE            /\bCall this phone number [\w\s]{0,30}with Skype\b/
 
