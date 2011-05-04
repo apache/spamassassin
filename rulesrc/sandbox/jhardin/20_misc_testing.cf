@@ -126,7 +126,7 @@ header         __MUA_EQ_ORG_1        ALL =~ /\nX-Mailer: ([^\n]+)\n.*Organizatio
 header         __MUA_EQ_ORG_2        ALL =~ /\nOrganization: ([^\n]+)\n.*X-Mailer: \1\n/ism
 meta           MAILER_EQ_ORG         __MUA_EQ_ORG_1 || __MUA_EQ_ORG_2
 describe       MAILER_EQ_ORG         X-Mailer: same as Organization:
-tflags         MAILER_EQ_ORG         publish
+#tflags         MAILER_EQ_ORG         publish
 
 # observed in UCE 9/2009
 #header         __HDRS_LCASE          ALL =~ /\n(?:Reply-to|Message-id|Content-type|X-MSMail-priority|from|subject|to|Disposition-notification-to):/sm
@@ -276,18 +276,18 @@ describe       TO_IN_SUBJ           To address is in Subject
 meta           __TO_EQ_FM_HTML_ONLY __TO_EQ_FROM && MIME_HTML_ONLY
 meta           TO_EQ_FM_HTML_ONLY   __TO_EQ_FM_HTML_ONLY && !ALL_TRUSTED && !__RCD_RDNS_MAIL_MESSY && !__DOS_LINK && !__NOT_SPOOFED && !__DKIM_EXISTS
 describe       TO_EQ_FM_HTML_ONLY   To == From and HTML only
-tflags         TO_EQ_FM_HTML_ONLY   publish
+#tflags         TO_EQ_FM_HTML_ONLY   publish
 
 meta           __TO_EQ_FM_DIRECT_MX __TO_EQ_FROM && __DOS_DIRECT_TO_MX
 meta           TO_EQ_FM_DIRECT_MX   __TO_EQ_FM_DIRECT_MX && !__THREAD_INDEX_GOOD && !__IS_EXCH
 describe       TO_EQ_FM_DIRECT_MX   To == From and direct-to-MX
-tflags         TO_EQ_FM_DIRECT_MX   publish
+#tflags         TO_EQ_FM_DIRECT_MX   publish
 
 # Why __HUSH_HUSH hits ham on this in masscheck I don't know. Legit bank emails maybe?
 meta           __TO_EQ_FM_HTML_DIRECT __TO_EQ_FM_DIRECT_MX && MIME_HTML_ONLY
 meta           TO_EQ_FM_HTML_DIRECT  __TO_EQ_FM_HTML_DIRECT && !__HUSH_HUSH
 describe       TO_EQ_FM_HTML_DIRECT  To == From and HTML only, direct-to-MX
-tflags         TO_EQ_FM_HTML_DIRECT  publish
+#tflags         TO_EQ_FM_HTML_DIRECT  publish
 
 meta           __TO_EQ_FM_SPF_FAIL  __TO_EQ_FROM && SPF_FAIL
 tflags         __TO_EQ_FM_SPF_FAIL  net
