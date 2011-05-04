@@ -59,6 +59,7 @@ use Mail::SpamAssassin::Constants qw(:sa);
 use Mail::SpamAssassin::AsyncLoop;
 use Mail::SpamAssassin::Conf;
 use Mail::SpamAssassin::Util qw(untaint_var);
+use Mail::SpamAssassin::Util::RegistrarBoundaries;
 use Mail::SpamAssassin::Timeout;
 use Mail::SpamAssassin::Logger;
 
@@ -1725,20 +1726,8 @@ my $nonASCII    = '\x80-\xff';
 my $tbirdenddelimemail = $tbirdenddelim . '(\'' . $nonASCII;  # tbird ignores non-ASCII mail addresses for now, until RFC changes
 my $tbirdenddelimplusat = $tbirdenddelimemail . '@';
 
-# regexps for finding plain text non-scheme hostnames with valid TLDs.
-
-# the list from %VALID_TLDS in Util/RegistrarBoundaries.pm, as a
-# Regexp::List optimized regexp ;)  accurate as of 2010-0415
-my $tldsRE = qr/
-  (?=[a-wyz])
-  (?:a(?:e(?:ro)?|r(?:pa)?|s(?:ia)?|[cdfgilmnoqtuwxz])|b(?:iz?|[abdefghjmnorstwyz])
-    |c(?:at?|o(?:m|op)?|[cdfghiklmnruvxyz])|d[ejkmoz]|e(?:[cegrst]|d?u)|f[ijkmor]
-    |g(?:[adefghilmnpqrstuwy]|ov)|h[kmnrtu]|i(?:n(?:fo|t)?|[delmoqrst])
-    |j(?:o(?:bs)?|[emp])|k[eghimnprwyz]|l[abcikrstuvy]
-    |m(?:o(?:bi)?|u(?:seum)?|[acdeghkmnpqrstvwxyz]|i?l)|n(?:a(?:me)?|et?|[cfgilopruz])
-    |o(?:m|rg)|p(?:ro?|[aefghklnstwy])|r[eosuw]|s[abcdeghiklmnrtuvyz]
-    |t(?:r(?:avel)?|[cdfghjkmnoptvwz]|e?l)|u[agksyz]|v[aceginu]|w[fs]|ye|z[amw]|qa
-  )/ix;
+# valid TLDs
+my $tldsRE = $Mail::SpamAssassin::Util::RegistrarBoundaries::VALID_TLDS_RE;
 
 # knownscheme regexp looks for either a https?: or ftp: scheme, or www\d*\. or ftp\. prefix, i.e., likely to start a URL
 # schemeless regexp looks for a valid TLD at the end of what may be a FQDN, followed by optional ., optional :portnum, optional /rest_of_uri

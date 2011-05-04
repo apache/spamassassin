@@ -107,12 +107,13 @@ my $VERSION = 2.001;
 
 use Mail::SpamAssassin::Plugin;
 use Mail::SpamAssassin::PerMsgStatus;
+use Mail::SpamAssassin::Util::RegistrarBoundaries;
 use strict;
 use vars qw(@ISA);
 @ISA = qw(Mail::SpamAssassin::Plugin);
 
-# TLDs generated from RegistrarBoundaries.pm VALID_TLDS 2008020601
-my $tlds = '(?:m(?:[acdeghkmnpqrstvwxyz]|u(?:seum)?|o(?:bi)?|i?l)|a(?:[cdfgilmnoqtuwxz]|e(?:ro)?|r(?:pa)?|s(?:ia)?)|c(?:[cdfghiklmnruvxyz]|o(?:op|m)?|at?)|t(?:[cdfghjkmnoptvwz]|r(?:avel)?|e?l)|n(?:[cfgilopruz]|a(?:me)?|et?)|b(?:[abdefghjmnorstwyz]|iz?)|g(?:[adefghilmnpqrstuwy]|ov)|i(?:[delmoqrst]|n(?:fo|t)?)|p(?:[aefghklnstwy]|ro?)|s[abcdeghiklmnrtuvyz]|j(?:[emp]|o(?:bs)?)|e(?:[cegrst]|d?u)|k[eghimnprwyz]|l[abcikrstuvy]|v[aceginu]|d[ejkmoz]|f[ijkmor]|h[kmnrtu]|o(?:rg|m)|u[agksyz]|r[eosuw]|z[amw]|w[fs]|y[eu]|qa)';
+# List of TLDs from RegistrarBoundaries.pm
+my $tlds = $Mail::SpamAssassin::Util::RegistrarBoundaries::VALID_TLDS_RE;
 
 ### Some regexp tips courtesy of http://www.regular-expressions.info/email.html
 ### v 0.02

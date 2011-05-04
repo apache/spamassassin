@@ -26,7 +26,7 @@ use bytes;
 use re 'taint';
 
 use vars qw (
-  @ISA %TWO_LEVEL_DOMAINS %THREE_LEVEL_DOMAINS %US_STATES %VALID_TLDS
+  @ISA %TWO_LEVEL_DOMAINS %THREE_LEVEL_DOMAINS %US_STATES %VALID_TLDS $VALID_TLDS_RE
 );
 
 # The list of currently-valid TLDs for the DNS system.
@@ -37,6 +37,8 @@ use vars qw (
 # inactive, as can be seen in the Wikipedia articles about them
 # as of 2008-02-08, e.g. http://en.wikipedia.org/wiki/.so_%28domain_name%29
 #     bv gb pm sj so um yt
+#
+# Remember to also change regexp below when updating!
 
 foreach (qw/
   ac ad ae aero af ag ai al am an ao aq ar arpa as asia at au aw ax az
@@ -56,6 +58,23 @@ foreach (qw/
   $VALID_TLDS{$_} = 1;
 }
 
+# %VALID_TLDS as Regexp::List optimized regexp, for use in Plugins etc
+# Paste above list to:
+#  perl -MRegexp::List -e '$/=undef; $_=<>; $r = Regexp::List->new; push @l, $_ for (split); print $r->list2re(@l)'
+# Verified up to date 20110501
+$VALID_TLDS_RE = qr/
+  (?=[abcdefghijklmnopqrstuvwyz])
+  (?:a(?:e(?:ro)?|r(?:pa)?|s(?:ia)?|[cdfgilmnoqtuwxz])|b(?:iz?|[abdefghjmnorstwyz])
+    |c(?:at?|o(?:m|op)?|[cdfghiklmnruvxyz])|d[ejkmoz]|e(?:[cegrst]|d?u)|f[ijkmor]
+    |g(?:[adefghilmnpqrstuwy]|ov)|h[kmnrtu]|i(?:n(?:fo|t)?|[delmoqrst])|j(?:o(?:bs)?|[emp])
+    |k[eghimnprwyz]|l[abcikrstuvy]|m(?:o(?:bi)?|u(?:seum)?|[acdeghkmnpqrstvwxyz]|i?l)
+    |n(?:a(?:me)?|et?|[cfgilopruz])|o(?:m|rg)|p(?:ro?|[aefghklnstwy])|r[eosuw]
+    |s[abcdeghiklmnrtuvyz]|t(?:r(?:avel)?|[cdfghjkmnoptvwz]|e?l)|u[agksyz]
+    |v[aceginu]|w[fs]|z[amw]|qa|ye
+  )/ix;
+
+# Two-Level TLDs
+#
 # to resort this, pump the whole list through:
 #  perl -e '$/=undef; $_=<>; foreach(split) { ($a,$b) = split(/\./, $_, 2); $t{$b}->{$_}=1; } foreach (sort keys %t) { print "  ",join(" ", sort keys %{$t{$_}}),"\n" }'
 #
