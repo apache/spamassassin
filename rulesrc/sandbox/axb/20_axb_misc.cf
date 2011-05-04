@@ -1,21 +1,3 @@
-# 6/28/2009
-# Disabled: 2011-01-01
-# http://www.sun.com/cgi-bin/go.cgi?dest=http://thevintagecars.eu/names89/sound/recent91.php
-# redirector_pattern      /^http\:\/\/sun\.com\/cgi\-bin\/go\.cgi\?dest\=(.*)$/i
-
-redirector_pattern      /^http\:\/\/www\.rediffmail\.com\/cgi\-bin\/red\.cgi\?red\=(.*)$/i
-
-# 9/1/2009
-# http://www.att.net/s/context.dll?redirecturl=nuevohan.com/?xxxxxxxxxxxxxxxxx
-redirector_pattern      /^http\:\/\/www\.att\.net\/s\/context\.dll\?redirecturl\=(.*)$/i
-
-uri             AXB_URI_APE_ABUSE1     /profiles\.yahooo\.com/
-describe        AXB_URI_APE_ABUSE1     Gorilla Syndrome
-#score           AXB_URI_APE_ABUSE1     2.5
-
-uri             AXB_URI_APE_ABUSE2     /feedproxy\.google\.com/
-describe        AXB_URI_APE_ABUSE2     Gorilla Syndrome
-#score           AXB_URI_APE_ABUSE2     2.5
 
 
 header          AXB_HELO_HOME_UN        X-Spam-Relays-Untrusted =~ /^[^\]]+ helo=\w+\.(lan|home) /i
@@ -32,7 +14,3 @@ describe        AXB_TRACK_MOZ           MozTrack
 #score           AXB_TRACK_MOZ           1.5
 
 
-# 2011-04-27
-header          AXB_X_MASER_BRUD        X-Maser =~ /^brud$/
-describe        AXB_X_MASER_BRUD        419 Fingerprint
-#score           AXB_X_MASER_BRUD        1.5
