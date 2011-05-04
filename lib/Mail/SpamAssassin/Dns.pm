@@ -182,14 +182,25 @@ sub dnsbl_hit {
   my ($self, $rule, $question, $answer) = @_;
 
   my $log = "";
-  if (substr($rule, 0, 2) ne "__") {
-    if ($answer->type eq 'TXT') {
-      $log = $answer->rdatastr;
-      $log =~ s/^"(.*)"$/$1/;
-      $log =~ s/(?<![<([])(https?:\/\/\S+)/<$1>/gi;
-    }
-    elsif ($question->string =~ m/^(\d+)\.(\d+)\.(\d+)\.(\d+)\.(\S+\w)/) {
-      $log = "$4.$3.$2.$1 listed in ".lc($5);
+  if (substr($rule, 0, 2) eq "__") {
+    # don't bother with meta rules
+  } elsif ($answer->type eq 'TXT') {
+    local $1;
+    $log = $answer->rdatastr;
+    $log =~ s/^"(.*)"$/$1/;
+    $log =~ s/(?<![<([])(https?:\/\/\S+)/<$1>/gi;
+  } else {  # assuming $answer->type eq 'A'
+    local($1,$2,$3,$4,$5);
+    if ($question->string =~ m/^((?:[0-9a-fA-F]\.){32})(\S+\w)/) {
+      $log = ' listed in ' . lc($2);
+      my $ipv6addr = join('', reverse split(/\./, lc $1));
+      $ipv6addr =~ s/\G(....)/$1:/g;  chop $ipv6addr;
+      $ipv6addr =~ s/:0{1,3}/:/g;
+      $log = $ipv6addr . $log;
+    } elsif ($question->string =~ m/^(\d+)\.(\d+)\.(\d+)\.(\d+)\.(\S+\w)/) {
+      $log = "$4.$3.$2.$1 listed in " . lc($5);
+    } else {
+      $log = 'listed in ' . $question->string;
     }
   }
 
