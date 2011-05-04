@@ -639,9 +639,6 @@ header      __SINGLE_HEADER_1K     ALL:raw =~ /(?-xim:(?=(?!X-Spam|X-MailScan)(?
 # __ version of mmartinec RP_MATCHES_RCVD, for use in metas
 header      __RP_MATCHES_RCVD      eval:check_mailfrom_matches_rcvd()
 
-# __ version of mmartinec LONGLINE, for use in metas
-rawbody     __LONGLINE             /^.{998}.+\r?$/
-
 # for sale newsletters
 if can(Mail::SpamAssassin::Conf::feature_bug6558_free)
   body        __FOR_SALE_OBO            /\bor best offer\b/i
