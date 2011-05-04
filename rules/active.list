@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix darxus-trap darxus dos grenier jarif kgolding llanga nbebout wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1; day 2: bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus-trap darxus dos grenier jarif kgolding llanga nbebout wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1; day 3: bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus-trap darxus dos grenier jarif kgolding llanga nbebout wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1
+# with results from: day 1: bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix darxus-trap darxus dos grenier jarif jm kgolding llanga nbebout wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1; day 2: bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix darxus-trap darxus dos grenier jarif jm kgolding llanga nbebout wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1; day 3: bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix darxus-trap darxus dos grenier jarif jm kgolding llanga nbebout wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1
 
 # tflags 
 ADVANCE_FEE_2_NEW_FORM
@@ -60,6 +60,9 @@ BAYES_95
 
 # tflags learn
 BAYES_99
+
+# good enough
+BUG6152_INVALID_DATE_TZ_ABSURD
 
 # tflags userconf
 CHARSET_FARAWAY
@@ -188,13 +191,13 @@ FB_SOFTTABS
 FB_THIS_ADVERT
 
 # good enough
-FB_WITHOUT_PRESC
-
-# good enough
 FH_FAKE_RCVD_LINE
 
 # good enough
 FH_FAKE_RCVD_LINE_B
+
+# good enough
+FH_FROMEML_NOTLD
 
 # good enough
 FH_FROM_CASH
@@ -204,6 +207,9 @@ FH_FROM_GET_NAME
 
 # good enough
 FH_HELO_ALMOST_IP
+
+# good enough
+FH_HELO_EQ_CHARTER
 
 # good enough
 FH_HELO_EQ_D_D_D_D
@@ -405,6 +411,9 @@ HK_NAME_DRUGS
 
 # good enough
 HK_PNIS
+
+# good enough
+HK_RANDOM_ENVFROM
 
 # good enough
 HK_SCAM_N15
@@ -812,9 +821,6 @@ TO_NO_BRKTS_DIRECT
 TO_NO_BRKTS_DYNIP
 
 # good enough
-TO_NO_BRKTS_FROM_MSSP
-
-# good enough
 TO_NO_BRKTS_HTML_ONLY
 
 # good enough
@@ -852,6 +858,27 @@ TVD_RCVD_SINGLE
 
 # good enough
 TVD_VISIT_PHARMA
+
+# good enough
+FB_SMALL_PEN
+
+# good enough
+FSL_MISSP_REPLYTO
+
+# good enough
+FS_MAKE_MONEY
+
+# good enough
+HDRS_LCASE_1K
+
+# good enough
+HK_NAME_FM_MR_MRS
+
+# good enough
+MONEY_FORM
+
+# good enough
+TO_NO_BRKTS_PCNT
 
 # tflags userconf
 UNPARSEABLE_RELAY
@@ -993,9 +1020,6 @@ XMAILER_MIMEOLE_OL_7533E
 
 # good enough
 XMAILER_MIMEOLE_OL_812FF
-
-# good enough
-XMAILER_MIMEOLE_OL_83BF7
 
 # good enough
 XMAILER_MIMEOLE_OL_91287
