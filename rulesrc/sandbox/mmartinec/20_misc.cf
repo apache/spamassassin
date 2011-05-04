@@ -1,6 +1,7 @@
 # SpamAssassin rules file
 
-rawbody  LONGLINE	/^.{998}.+\r?$/
+rawbody  __LONGLINE	/^.{998}[^\r\n]/
+meta     LONGLINE	__LONGLINE
 describe LONGLINE	Line length exceeds 998 character limit, RFC 5322
 
 header   RP_8BIT	Return-Path:raw =~ /[^\000-\177]/
