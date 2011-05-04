@@ -176,31 +176,37 @@ NEXT_RULE:
     }
 
     # ignore ReplaceTags rules
-    # TODO: need cleaner way to do this
-    goto NO if ($conf->{rules_to_replace}->{$name});
+    my $is_a_replacetags_rule = $conf->{rules_to_replace}->{$name};
+    my ($minlen, $lossy, @bases);
 
-    my ($lossy, @bases);
+    if (!$is_a_replacetags_rule) {
+      eval {  # catch die()s
+        my ($qr, $mods) = $self->simplify_and_qr_regexp($rule);
+        ($lossy, @bases) = $self->extract_hints($rule, $qr, $mods);
+        1;
+      } or do {
+        my $eval_stat = $@ ne '' ? $@ : "errno=$!";  chomp $eval_stat;
+        dbg("zoom: giving up on regexp: $eval_stat");
+      };
 
-    eval {  # catch die()s
-      my ($qr, $mods) = $self->simplify_and_qr_regexp($rule);
-      ($lossy, @bases) = $self->extract_hints($rule, $qr, $mods);
-      1;
-    } or do {
-      my $eval_stat = $@ ne '' ? $@ : "errno=$!";  chomp $eval_stat;
-      dbg("zoom: giving up on regexp: $eval_stat");
-    };
-
-    # if any of the extracted hints in a set are too short, the entire
-    # set is invalid; this is because each set of N hints represents just
-    # 1 regexp.
-    my $minlen;
-    foreach my $str (@bases) {
-      my $len = length fixup_re($str); # bug 6143: count decoded characters
-      if ($len < $min_chars) { $minlen = undef; @bases = (); last; }
-      elsif (!defined($minlen) || $len < $minlen) { $minlen = $len; }
+      # if any of the extracted hints in a set are too short, the entire
+      # set is invalid; this is because each set of N hints represents just
+      # 1 regexp.
+      foreach my $str (@bases) {
+        my $len = length fixup_re($str); # bug 6143: count decoded characters
+        if ($len < $min_chars) { $minlen = undef; @bases = (); last; }
+        elsif (!defined($minlen) || $len < $minlen) { $minlen = $len; }
+      }
     }
 
-    if ($minlen && @bases) {
+    if ($is_a_replacetags_rule || !$minlen || !@bases) {
+      dbg("zoom: ignoring %s %s",
+          $is_a_replacetags_rule ? 'replace rule' : 'NO',  $rule);
+      push @failed, { orig => $rule };
+      $cached->{rule_bases}->{$cachekey} = { };
+      $no++;
+    }
+    else {
       # dbg("zoom: YES <base>$base</base> <origrule>$rule</origrule>");
 
       # figure out if we have e.g. ["foo", "foob", "foobar"]; in this
@@ -228,13 +234,6 @@ NEXT_RULE:
 
       $cached->{rule_bases}->{$cachekey} = { g => \@forcache };
       $yes++;
-    }
-    else {
-NO:
-      dbg("zoom: NO $rule");
-      push @failed, { orig => $rule };
-      $cached->{rule_bases}->{$cachekey} = { };
-      $no++;
     }
   }
 
