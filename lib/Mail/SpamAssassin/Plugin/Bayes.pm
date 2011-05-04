@@ -198,8 +198,8 @@ use constant ADD_INVIZ_TOKENS_NO_PREFIX => 0;
   'Organization'	=> '*o',
   'Organisation'        => '*o',
   'Content-Type'	=> '*c',
-  'X-Spam-Relays-Trusted' => '*RT',
-  'X-Spam-Relays-Untrusted' => '*RU',
+  'x-spam-relays-trusted' => '*RT',
+  'x-spam-relays-untrusted' => '*RU',
 );
 
 # How many seconds should the opportunistic_expire lock be valid?
