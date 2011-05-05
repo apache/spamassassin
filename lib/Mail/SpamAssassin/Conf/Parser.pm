@@ -497,12 +497,16 @@ sub handle_conditional {
       $eval .= $u . " ";
     }
     elsif ($token eq 'plugin') {
-      # replace with method call
-      $eval .= "\$self->cond_clause_plugin_loaded";
+      # replace with a method call
+      $eval .= '$self->cond_clause_plugin_loaded';
     }
     elsif ($token eq 'can') {
-      # replace with method call
-      $eval .= "\$self->cond_clause_can";
+      # replace with a method call
+      $eval .= '$self->cond_clause_can';
+    }
+    elsif ($token eq 'has') {
+      # replace with a method call
+      $eval .= '$self->cond_clause_has';
     }
     elsif ($token eq 'version') {
       $eval .= $Mail::SpamAssassin::VERSION." ";
@@ -544,16 +548,31 @@ sub cond_clause_plugin_loaded {
 
 sub cond_clause_can {
   my ($self, $method) = @_;
+  $self->cond_clause_can_or_has('can', $method);
+}
+
+sub cond_clause_has {
+  my ($self, $method) = @_;
+  $self->cond_clause_can_or_has('has', $method);
+}
+
+sub cond_clause_can_or_has {
+  my ($self, $fn_name, $method) = @_;
 
   local($1,$2);
-  if ($method =~ /^(.*)::([^:]+)$/) {
+  if (!defined $method) {
+    $self->lint_warn("bad 'if' line, no argument to $fn_name(), ".
+                     "in \"$self->{currentfile}\"", undef);
+  } elsif ($method =~ /^(.*)::([^:]+)$/) {
     no strict "refs";
     my($module, $meth) = ($1, $2);
-    return UNIVERSAL::can($module,$meth) && &{$method}();
+    return 1  if UNIVERSAL::can($module,$meth) &&
+                 ( $fn_name eq 'has' || &{$method}() );
   } else {
-    $self->lint_warn("bad 'if' line, cannot find '::' in can($method), ".
-                "in \"$self->{currentfile}\"", undef);
+    $self->lint_warn("bad 'if' line, cannot find '::' in $fn_name($method), ".
+                     "in \"$self->{currentfile}\"", undef);
   }
+  return undef;
 }
 
 # Let's do some linting here ...

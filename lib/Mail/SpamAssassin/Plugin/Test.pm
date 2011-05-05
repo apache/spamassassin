@@ -69,4 +69,7 @@ sub check_test_plugin {
   return 1;
 }
 
+sub test_feature_xxxx_false { undef }
+sub test_feature_xxxx_true  { 1 }
+
 1;
