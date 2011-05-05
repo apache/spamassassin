@@ -293,7 +293,7 @@ sub process_dnsbl_set {
     next if $self->{tests_already_hit}->{$rule};
 
     if ($subtest =~ /^\d+\.\d+\.\d+\.\d+$/) {
-      # test for exact equality, not a regexp (usually IP address)
+      # test for exact equality, not a regexp (an IPv4 address)
       $self->dnsbl_hit($rule, $question, $answer)  if $subtest eq $rdatastr;
     }
     # senderbase
