@@ -281,9 +281,9 @@ sub process_dnsbl_set {
   while (my ($subtest, $rule) = each %{ $self->{dnspost}->{$set} }) {
     next if $self->{tests_already_hit}->{$rule};
 
-    # exact substr (usually IP address)
-    if ($subtest eq $rdatastr) {
-      $self->dnsbl_hit($rule, $question, $answer);
+    if ($subtest =~ /^\d+\.\d+\.\d+\.\d+$/) {
+      # test for exact equality, not a regexp (an IPv4 address)
+      $self->dnsbl_hit($rule, $question, $answer)  if $subtest eq $rdatastr;
     }
     # senderbase
     elsif ($subtest =~ s/^sb://) {
