@@ -33,8 +33,8 @@ use constant DATEREV_ADJ => - (8 * 60 * 60);
 
 # what's the max age of mail we will accept data from? (in weeks)
 # TODO: maybe this should be in ~/.corpus
-my $OLDEST_HAM_WEEKS    = 52 * 10;      # 10 years
-my $OLDEST_SPAM_WEEKS    = 6 * 4;       # 6 months
+my $OLDEST_HAM_WEEKS    = 72 * 4;       # 72 months = 6 years
+my $OLDEST_SPAM_WEEKS    = 2 * 4;       # 2 months
 
 # ---------------------------------------------------------------------------
 
