@@ -78,7 +78,7 @@ i.e. when the last of the awaited tag values becomes available by a call
 to set_tag() from some other plugin or elsewhere in the SpamAssassin code.
 
 Launched queries from all askdns rules are grouped too according to a pair
-of: query type and expanded query domain name. Even if there are multiple
+of: query type and an expanded query domain name. Even if there are multiple
 rules producing the same type/domain pair, only one DNS query is launched,
 and a reply to such query contributes to all the constituent rules.
 
@@ -87,7 +87,7 @@ a tag which never receives its value never result in a DNS query. Tags which
 produce multiple values will result in multiple queries launched, each with
 an expanded template using one of the tag values. An example is a DKIMDOMAIN
 tag which yields a list of signing domains, one for each valid signature in
-a message signed by more than one domain.
+a signed message.
 
 When more than one distinct tag name appears in a template, each potentially
 resulting in multiple values, a Cartesian product is formed, and each tuple
@@ -97,7 +97,7 @@ and B is (xx,yy,zz), will result in queries: 11.xx.example.11.com,
 22.xx.example.22.com, 11.yy.example.11.com, 22.yy.example.22.com,
 11.zz.example.11.com, 22.zz.example.22.com .
 
-The parameter following the query template is a DNS resource record (RR)
+A parameter following the query template is a DNS resource record (RR)
 type. A DNS result may bring resource records of multiple types, but only
 those resource records matching the type specified in a rule are considered,
 returned resource records with non-matching types are ignored for this rule.
@@ -106,7 +106,7 @@ filter for the resulting RR types, although in future similar queries could
 be combined, launching a query of type 'ANY'. Currently allowed RR types
 are: A, AAAA, MX, TXT, PTR, NS, SOA, CNAME, HINFO, MINFO, WKS, SRV, SPF.
 
-The last optional parameter of a rule is filtering expression, a.k.a. a
+The last optional parameter of a rule is a filtering expression, a.k.a. a
 subrule. Its function is much like the subrule in URIDNSBL plugin rules,
 or in the check_rbl eval rules. The main difference is that with askdns
 rules there is no need to manually group rules according to their queried
@@ -128,8 +128,8 @@ IPv4 address. In case of a TXT or SPF resource record which can return
 multiple character-strings (as defined in Section 3.3 of [RFC1035]), these
 strings are concatenated with no delimiters before comparing the result
 to the filtering string. This follows requirements of several documents,
-such as RFC 5518, RFC 4408, RFC 4871, RFC 5617.  Examples: "127.0.0.1",
-"transaction", 'list' .
+such as RFC 5518, RFC 4408, RFC 4871, RFC 5617.  Examples of a plain text
+filtering parameter: "127.0.0.1", "transaction", 'list' .
 
 A regular expression follows a familiar perl syntax like /.../ or m{...}
 optionally followed by regexp flags (such as 'i' for case-insensitivity).
@@ -138,7 +138,7 @@ the rule hits. Examples: /^127\.0\.0\.\d+$/, m{\bdial up\b}i .
 
 A single numerical value can be a decimal number, or a hexadecimal number
 prefixed by 0x. Such numeric filtering expression is typically used with
-RR type-A DNS queries. The returned value (IPv4 address) is masked with
+RR type-A DNS queries. The returned value (an IPv4 address) is masked with
 a specified filtering value, and the rule hits if the result is nonzero:
 (r & n) != 0 .  An example: 0x10 .
 
@@ -221,7 +221,7 @@ sub new {
 # represent specified numerical rcodes.
 #
 # Arguments like the following are anticipated:
-#   "127.0.0.1", "some text", 'some "other" text',
+#   "127.0.0.1", "some text", 'some "more" text',
 #   /regexp/flags, m{regexp}flags,
 #   127.0.1.2  (same as 127.0.1.2-127.0.1.2 or 127.0.1.2/255.255.255.255)
 #   127.0.1.20-127.0.1.39  (= 0x7f000114-0x7f000127 or 2130706708-2130706727)
