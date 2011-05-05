@@ -1082,6 +1082,12 @@ sub parse_received_line {
       goto enough;
     }
 
+    # Yahoo Authenticated SMTP; Bug #6535
+    # from itrqtnlnq (lucilleskinner@93.124.107.183 with login) by smtp111.mail.ne1.yahoo.com with SMTP; 17 Jan 2011 08:23:27 -0800 PST
+    if (/^(\S+) \((\S+)@(${IP_ADDRESS}) with login\) by (\S+\.yahoo\.com) with SMTP/) {
+      $helo = $1; $ip = $3; $by = $4; goto enough;
+    }
+
     # a synthetic header, generated internally:
     # Received: X-Originating-IP: 1.2.3.4
     if (/^X-Originating-IP: (\S+)$/) {
