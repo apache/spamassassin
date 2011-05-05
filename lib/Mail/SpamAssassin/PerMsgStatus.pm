@@ -1249,9 +1249,11 @@ sub get_spamd_result_log_items {
 ###########################################################################
 
 sub _get_tag_value_for_yesno {
-  my $self   = shift;
-  
-  return $self->{is_spam} ? "Yes" : "No";
+  my($self, $arg) = @_;
+  my($arg_spam, $arg_ham);
+  ($arg_spam, $arg_ham) = split(/,/, $arg, 2)  if defined $arg;
+  return $self->{is_spam} ? (defined $arg_spam ? $arg_spam : 'Yes')
+                          : (defined $arg_ham  ? $arg_ham  : 'No');
 }
 
 sub _get_tag_value_for_score {
@@ -1280,9 +1282,9 @@ sub _get_tag {
 
   $tag = "" unless defined $tag; # can be "0", so use a defined test
 
-  %tags = ( YESNO     => sub {    $self->_get_tag_value_for_yesno() },
+  %tags = ( YESNO     => sub {    $self->_get_tag_value_for_yesno(@_) },
   
-            YESNOCAPS => sub { uc $self->_get_tag_value_for_yesno() },
+            YESNOCAPS => sub { uc $self->_get_tag_value_for_yesno(@_) },
 
             SCORE => sub { $self->_get_tag_value_for_score(shift) },
             HITS  => sub { $self->_get_tag_value_for_score(shift) },
