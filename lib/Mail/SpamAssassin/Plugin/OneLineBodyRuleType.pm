@@ -94,10 +94,12 @@ sub do_one_line_body_tests {
 
     if (($conf->{tflags}->{$rulename}||'') =~ /\bmultiple\b/)
     {
+      # avoid [perl #86784] bug (fixed in 5.13.x), access the arg through ref
       $sub = '
-      pos $_[1] = 0;
+      my $lref = \$_[1];
+      pos $$lref = 0;
       '.$self->hash_line_for_rule($pms, $rulename).'
-      while ($_[1] =~ '.$pat.'g) {
+      while ($$lref =~ '.$pat.'g) {
         my $self = $_[0];
         $self->got_hit(q{'.$rulename.'}, "BODY: ", ruletype => "one_line_body");
         '. $self->hit_rule_plugin_code($pms, $rulename, "one_line_body",

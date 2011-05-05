@@ -200,8 +200,9 @@ NEXT_RULE:
     }
 
     if ($is_a_replacetags_rule || !$minlen || !@bases) {
-      dbg("zoom: ignoring %s %s",
-          $is_a_replacetags_rule ? 'replace rule' : 'NO',  $rule);
+      dbg("zoom: ignoring rule %s, %s", $name,
+          $is_a_replacetags_rule ? 'is a replace rule'
+          : !@bases ? 'no bases' : 'no minlen');
       push @failed, { orig => $rule };
       $cached->{rule_bases}->{$cachekey} = { };
       $no++;
