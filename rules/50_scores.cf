@@ -763,10 +763,13 @@ score RCVD_IN_SORBS_ZOMBIE 0 # n=0 n=1 n=2 n=3
 score RCVD_IN_XBL 0 0.724 0 0.375 # n=0 n=2
 score RCVD_IN_PBL 0 3.558 0 3.335 # n=0 n=2
 score DNS_FROM_AHBL_RHSBL 0 2.438 0 2.699 # n=0 n=2
-score DNS_FROM_RFC_BOGUSMX 0 1.464 0 1.668 # n=0 n=2
-score DNS_FROM_RFC_DSN 0 0.001 0 0.001 # n=0 n=2
 score NO_DNS_FOR_FROM 0 0.379 0 0.001 # n=0 n=2
 # </gen:mutable>
+
+# rfc-ignorant.org, disabled May 2011 due to poor hit rate and accuracy:
+# https://issues.apache.org/SpamAssassin/show_bug.cgi?id=6526
+score DNS_FROM_RFC_BOGUSMX 0
+score DNS_FROM_RFC_DSN 0
 
 # Spamhaus CSS does not appear in masschecks thus cannot be
 # scored by automated means.  Set an explicit score.
