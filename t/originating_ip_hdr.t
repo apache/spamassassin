@@ -6,7 +6,12 @@ use Test; BEGIN { plan tests => 9 };
 
 # ---------------------------------------------------------------------------
 
+# the 'originating_ip_headers X-Originating-IP' is normally in a default
+# set of originating_ip_headers, but not when 'make disttest' is run;
+# let's just make it explicit:
+#
 tstlocalrules (q{
+  originating_ip_headers X-Originating-IP
   header TEST_ORIG_IP_H1 X-Spam-Relays-External =~ /\bip=198\.51\.100\.1\b/
   score  TEST_ORIG_IP_H1 0.1
   header TEST_ORIG_IP_H2 X-Spam-Relays-External =~ /\bip=198\.51\.100\.2\b/
