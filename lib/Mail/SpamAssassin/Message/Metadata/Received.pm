@@ -407,6 +407,11 @@ sub parse_received_line {
   if (/ by / && / with (ESMTPA|ESMTPSA|LMTPA|LMTPSA|ASMTP|HTTPU?)(?: |$)/i) {
     $auth = $1;
   }
+  # GMail should use ESMTPSA to indicate that it is in fact authenticated,
+  # but doesn't.
+  elsif (/ by mx\.google\.com with ESMTPS id [a-z0-9]{1,4}sm[0-9]{2,9}[a-z]{3}\.[0-9]{1,3}\.[0-9]{4}\.(?:[0-6][0-9]\.){4}[0-6][0-9]/ && /\(version=([^ ]+) cipher=([^\)]+)\)/ ) {
+    $auth = 'GMail - transport=' . $1 . ' cipher=' . $2;
+  }
   # Courier v0.47 and possibly others
   elsif (/^from .*?(?:\]\)|\)\]) \(AUTH: (LOGIN|PLAIN|DIGEST-MD5|CRAM-MD5) \S+(?:, .*?)?\) by /) {
     $auth = $1;
