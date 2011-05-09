@@ -402,7 +402,7 @@ sub _check_spf {
         my $tmphdr = $1;
         if ($tmphdr =~ /^(pass|neutral|(?:hard|soft)?fail|none)(?:[^;]*?\bsmtp\.(\S+)\s*=[^;]+)?/i) {
           my $result = lc($1);
-          my $result = 'fail' if ($result eq 'hardfail'); # RFC5451 permits this.
+          $result = 'fail'  if $result eq 'hardfail';  # RFC5451 permits this
 
           my $identity = '';    # we assume it's a mfrom check if we can't tell otherwise
           if (defined $2) {
