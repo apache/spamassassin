@@ -4000,6 +4000,7 @@ sub sa_die { Mail::SpamAssassin::sa_die(@_); }
 #   if (can(Mail::SpamAssassin::Conf::feature_originating_ip_headers))
 
 sub feature_originating_ip_headers { 1 }
+sub feature_bayes_auto_learn_on_error { 1 }
 sub feature_bug6558_free { 1 }
 
 ###########################################################################
