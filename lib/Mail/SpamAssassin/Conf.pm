@@ -3281,8 +3281,11 @@ They will be replaced by the corresponding value when they are used.
 Some tags can take an argument (in parentheses). The argument is
 optional, and the default is shown below.
 
- _YESNOCAPS_       "YES"/"NO" for is/isn't spam
- _YESNO_           "Yes"/"No" for is/isn't spam
+ _YESNO_           "Yes" for spam, "No" for nonspam (=ham)
+ _YESNO(spam_str,ham_str)_  returns the first argument ("Yes" if missing)
+                   for spam, and the second argument ("No" if missing) for ham
+ _YESNOCAPS_       "YES" for spam, "NO" for nonspam (=ham)
+ _YESNOCAPS(spam_str,ham_str)_  same as _YESNO(...)_, but uppercased
  _SCORE(PAD)_      message score, if PAD is included and is either spaces or
                    zeroes, then pad scores with that many spaces or zeroes
 		   (default, none)  ie: _SCORE(0)_ makes 2.4 become 02.4,
