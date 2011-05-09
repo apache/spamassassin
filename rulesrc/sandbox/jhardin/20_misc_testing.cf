@@ -696,4 +696,10 @@ meta        __GAPPY_HTML           __GAPPY_HTML_01 || __GAPPY_HTML_02
 meta        GAPPY_HTML             __GAPPY_HTML && !__UNSUB_LINK
 describe    GAPPY_HTML             HTML body with much useless whitespace
 
+# Try to improve S/O per bug 6119
+meta        TVD_SPACE_RATIO_MINFP  __TVD_SPACE_RATIO && !__OBFUSCATING_COMMENT_B && !WEIRD_QUOTING && !__NOT_SPOOFED && !__BUGGED_IMG
+tflags      TVD_SPACE_RATIO_MINFP  nopublish
+
+
+
 
