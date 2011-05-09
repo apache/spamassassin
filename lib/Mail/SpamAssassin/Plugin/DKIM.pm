@@ -213,6 +213,20 @@ Same as C<whitelist_from_dkim>, but used for the default whitelist entries
 in the SpamAssassin distribution.  The whitelist score is lower, because
 these are often targets for abuse of public mailers which sign their mail.
 
+=item unwhitelist_from_dkim author@example.com [signing-domain]
+
+Removes an email address with its corresponding signing-domain field
+from def_whitelist_from_dkim and whitelist_from_dkim tables, if it exists.
+Parameters to unwhitelist_from_dkim must exactly match the parameters of
+a corresponding whitelist_from_dkim or def_whitelist_from_dkim config
+option which created the entry, for it to be removed (a domain name is
+matched case-insensitively);  i.e. if a signing-domain parameter was
+specified in a whitelisting command, it must also be specified in the
+unwhitelisting command.
+
+Useful for removing undesired default entries from a distributed configuration
+by a local or site-specific configuration or by C<user_prefs>.
+
 =item adsp_override domain [signing-practices]
 
 Currently few domains publish their signing practices (RFC 5617 - ADSP),
@@ -362,8 +376,9 @@ Example:
       }
       my $address = $1;
       my $sdid = defined $2 ? $2 : '';  # empty implies author domain signature
-      $self->{parser}->add_to_addrlist_rcvd('whitelist_from_dkim',
-                                            $address, $sdid);
+      $address =~ s/(\@[^@]*)\z/lc($1)/e;  # lowercase the email address domain
+      $self->{parser}->add_to_addrlist_dkim('whitelist_from_dkim',
+                                            $address, lc $sdid);
     }
   });
 
@@ -381,8 +396,31 @@ Example:
       }
       my $address = $1;
       my $sdid = defined $2 ? $2 : '';  # empty implies author domain signature
-      $self->{parser}->add_to_addrlist_rcvd('def_whitelist_from_dkim',
-                                            $address, $sdid);
+      $address =~ s/(\@[^@]*)\z/lc($1)/e;  # lowercase the email address domain
+      $self->{parser}->add_to_addrlist_dkim('def_whitelist_from_dkim',
+                                            $address, lc $sdid);
+    }
+  });
+
+  push (@cmds, {
+    setting => 'unwhitelist_from_dkim',
+    type => $Mail::SpamAssassin::Conf::CONF_TYPE_ADDRLIST,
+    code => sub {
+      my ($self, $key, $value, $line) = @_;
+      local ($1,$2);
+      unless (defined $value && $value !~ /^$/) {
+        return $Mail::SpamAssassin::Conf::MISSING_REQUIRED_VALUE;
+      }
+      unless ($value =~ /^(\S+)(?:\s+(\S+))?$/) {
+        return $Mail::SpamAssassin::Conf::INVALID_VALUE;
+      }
+      my $address = $1;
+      my $sdid = defined $2 ? $2 : '';  # empty implies author domain signature
+      $address =~ s/(\@[^@]*)\z/lc($1)/e;  # lowercase the email address domain
+      $self->{parser}->remove_from_addrlist_dkim('whitelist_from_dkim',
+                                                 $address, lc $sdid);
+      $self->{parser}->remove_from_addrlist_dkim('def_whitelist_from_dkim',
+                                                 $address, lc $sdid);
     }
   });
 
