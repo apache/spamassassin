@@ -25,20 +25,20 @@ Mail::SpamAssassin::Plugin::TextCat - TextCat language guesser
 
 =head1 DESCRIPTION
 
-This plugin will try to guess the language used in the message text.
+This plugin will try to guess the language used in the message body text.
 
-You can then specify which languages are considered okay for incoming
-mail and if the guessed language is not okay, C<UNWANTED_LANGUAGE_BODY>
-is triggered
+You can use the "ok_languages" directive to set which languages are
+considered okay for incoming mail and if the guessed language is not okay,
+C<UNWANTED_LANGUAGE_BODY> is triggered.
 
-It will always add the results to a "X-Language" name-value pair in
-the message metadata data structure. This may be useful as Bayes
-tokens. The results can also be added to marked-up messages using
-"add_header", with the _LANGUAGES_ tag. See
+It will always add the results to a "X-Language" name-value pair in the
+message metadata data structure. This may be useful as Bayes tokens and
+can also be used in rules for scoring. The results can also be added to
+marked-up messages using "add_header", with the _LANGUAGES_ tag. See
 L<Mail::SpamAssassin::Conf> for details.
 
-Note: the language cannot always be recognized with sufficient
-confidence.  In that case, C<UNWANTED_LANGUAGE_BODY> will not trigger.
+Note: the language cannot always be recognized with sufficient confidence.
+In that case, no action is taken.
 
 =cut
 
@@ -95,12 +95,15 @@ sub set_config {
 
 This option is used to specify which languages are considered okay for
 incoming mail.  SpamAssassin will try to detect the language used in the
-message text.
+message body text.
 
 Note that the language cannot always be recognized with sufficient
-confidence.  In that case, no points will be assigned.
+confidence. In that case, no action is taken.
 
-The rule C<UNWANTED_LANGUAGE_BODY> is triggered based on how this is set.
+The rule C<UNWANTED_LANGUAGE_BODY> is triggered if none of the languages
+detected are in the "ok" list. Note that this is the only effect of the
+"ok" list. It does not act as a whitelist against any other form of spam
+scanning.
 
 In your configuration, you must use the two or three letter language
 specifier in lowercase, not the English name for the language.  You may
