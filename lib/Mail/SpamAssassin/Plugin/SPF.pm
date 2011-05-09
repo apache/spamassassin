@@ -332,6 +332,7 @@ sub _check_spf {
     }
 
     foreach my $hdr (@internal_hdrs) {
+      local($1,$2);
       if ($hdr =~ /^received-spf:/i) {
 	dbg("spf: found a Received-SPF header added by an internal host: $hdr");
 
@@ -391,55 +392,55 @@ sub _check_spf {
 	} else {
 	  dbg("spf: could not parse result from existing Received-SPF header");
 	}
-      }
-      if ($hdr =~ /^Authentication-Results:.*;\s*SPF=([^;]*)/i) {
-       dbg("spf: found a Authentication-Results header added by an internal host: $hdr");
 
-       # RFC 5451 header parser - added by D. Stussy 2010-09-09:
-       # Authentication-Results: mail.example.com; SPF=none smtp.mailfrom=example.org (comment)
+      } elsif ($hdr =~ /^Authentication-Results:.*;\s*SPF\s*=\s*([^;]*)/i) {
+        dbg("spf: found an Authentication-Results header added by an internal host: $hdr");
 
-       my $tmphdr = $1;
-       if ($tmphdr =~ /^(pass|neutral|(?:hard|soft)?fail|none)(?:\b+smtp\.(\S+)=[^;]+)?/i) {
-         my $result = lc($1);
-         my $result = 'fail' if ($result eq 'hardfail'); # RFC5451 permits this.
+        # RFC 5451 header parser - added by D. Stussy 2010-09-09:
+        # Authentication-Results: mail.example.com; SPF=none smtp.mailfrom=example.org (comment)
 
-         my $identity = '';    # we assume it's a mfrom check if we can't tell otherwise
-         if (defined $2) {
-           $identity = lc($2);
-           if ($identity eq 'mfrom' || $identity eq 'mailfrom') {
-             next if $scanner->{spf_checked};
-             $identity = '';
-           } elsif ($identity eq 'helo') {
-             next if $scanner->{spf_helo_checked};
-             $identity = 'helo_';
-           } else {
-             dbg("spf: found unknown identity value, cannot use: $identity");
-             next;     # try the next Authentication-Results header, if any
-           }
-         } else {
-           next if $scanner->{spf_checked};
-         }
+        my $tmphdr = $1;
+        if ($tmphdr =~ /^(pass|neutral|(?:hard|soft)?fail|none)(?:[^;]*?\bsmtp\.(\S+)\s*=[^;]+)?/i) {
+          my $result = lc($1);
+          my $result = 'fail' if ($result eq 'hardfail'); # RFC5451 permits this.
 
-         # we'd set these if we actually did the check
-         $scanner->{"spf_${identity}checked"} = 1;
-         $scanner->{"spf_${identity}pass"} = 0;
-         $scanner->{"spf_${identity}neutral"} = 0;
-         $scanner->{"spf_${identity}none"} = 0;
-         $scanner->{"spf_${identity}fail"} = 0;
-         $scanner->{"spf_${identity}softfail"} = 0;
-         $scanner->{"spf_${identity}failure_comment"} = undef;
+          my $identity = '';    # we assume it's a mfrom check if we can't tell otherwise
+          if (defined $2) {
+            $identity = lc($2);
+            if ($identity eq 'mfrom' || $identity eq 'mailfrom') {
+              next if $scanner->{spf_checked};
+              $identity = '';
+            } elsif ($identity eq 'helo') {
+              next if $scanner->{spf_helo_checked};
+              $identity = 'helo_';
+            } else {
+              dbg("spf: found unknown identity value, cannot use: $identity");
+              next;     # try the next Authentication-Results header, if any
+            }
+          } else {
+            next if $scanner->{spf_checked};
+          }
 
-         # and the result
-         $scanner->{"spf_${identity}${result}"} = 1;
-         dbg("spf: re-using %s result from Authentication-Results header: %s",
-              ($identity ? 'helo' : 'mfrom'), $result);
+          # we'd set these if we actually did the check
+          $scanner->{"spf_${identity}checked"} = 1;
+          $scanner->{"spf_${identity}pass"} = 0;
+          $scanner->{"spf_${identity}neutral"} = 0;
+          $scanner->{"spf_${identity}none"} = 0;
+          $scanner->{"spf_${identity}fail"} = 0;
+          $scanner->{"spf_${identity}softfail"} = 0;
+          $scanner->{"spf_${identity}failure_comment"} = undef;
 
-         # if we've got *both* the mfrom and helo results we're done
-         return if ($scanner->{spf_checked} && $scanner->{spf_helo_checked});
+          # and the result
+          $scanner->{"spf_${identity}${result}"} = 1;
+          dbg("spf: re-using %s result from Authentication-Results header: %s",
+               ($identity ? 'helo' : 'mfrom'), $result);
 
-       } else {
-         dbg("spf: could not parse result from existing Authentication-Results header");
-       }
+          # if we've got *both* the mfrom and helo results we're done
+          return if ($scanner->{spf_checked} && $scanner->{spf_helo_checked});
+
+        } else {
+          dbg("spf: could not parse result from existing Authentication-Results header");
+        }
       }
     }
     # we can return if we've found the one we're being asked to get
