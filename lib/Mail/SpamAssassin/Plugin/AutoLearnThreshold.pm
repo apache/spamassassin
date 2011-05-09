@@ -114,6 +114,29 @@ working value for this option is 6.
     type => $Mail::SpamAssassin::Conf::CONF_TYPE_NUMERIC
   });
 
+=item bayes_auto_learn_on_error (0 | 1)        (default: 0)
+
+With C<bayes_auto_learn_on_error> off, autolearning will be performed
+even if bayes classifier already agrees with the new classification (i.e.
+yielded BAYES_00 for what we are now trying to teach it as ham, or yielded
+BAYES_99 for spam). This is a traditional setting, the default was chosen
+to retain backwards compatibility.
+
+With C<bayes_auto_learn_on_error> turned on, autolearning will be performed
+only when a bayes classifier had a different opinion from what the autolearner
+is now trying to teach it (i.e. it made an error in judgement). This strategy
+may or may not produce better future classifications, but usually works
+very well, while also preventing unnecessary overlearning and slows down
+database growth.
+
+=cut
+
+  push (@cmds, {
+    setting => 'bayes_auto_learn_on_error',
+    default => 0,
+    type => $Mail::SpamAssassin::Conf::CONF_TYPE_BOOL
+  });
+
   $conf->{parser}->register_commands(\@cmds);
 }
 
@@ -187,6 +210,22 @@ sub autolearn_discriminator {
     if ($scan->is_spam()) {
       dbg("learn: auto-learn? no: scored as spam but autolearn wanted ham");
       return;
+    }
+  }
+
+  if ($conf->{bayes_auto_learn_on_error}) {
+    # learn-on-error strategy chosen:
+    # only allow learning if the autolearning classifier was unsure or
+    # had a different opinion from what we are trying to make it learn
+    #
+    my $tests = $scan->get_tag('TESTS');
+    if (defined $tests && $tests ne 'none') {
+      my %t = map { ($_,1) } split(/,/, $tests);
+      if ($isspam && $t{'BAYES_99'} || !$isspam && $t{'BAYES_00'}) {
+        dbg("learn: auto-learn? no: learn-on-error, %s, already classified ".
+            "as such",  $isspam ? 'spam' : 'ham');
+        return;
+      }
     }
   }
 
