@@ -1010,7 +1010,7 @@ main(int argc, char *argv[])
             /* bug 5412: spamc -x should not output the message on error */
             if ((flags & SPAMC_SAFE_FALLBACK) || result == EX_TOOBIG) {
                 get_output_fd(&out_fd);
-                message_dump(STDIN_FILENO, out_fd, &m);
+                message_dump(STDIN_FILENO, out_fd, &m, flags);
             }
             /* else, do NOT get_output_fd() (bug 5478) */
         }
