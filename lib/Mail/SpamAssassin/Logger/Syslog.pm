@@ -33,10 +33,11 @@ use strict;
 use warnings;
 use bytes;
 use re 'taint';
-use Mail::SpamAssassin::Logger;
+
+use POSIX qw(:sys_wait_h setsid sigprocmask);
+use Time::HiRes ();
 use Sys::Syslog qw(:DEFAULT setlogsock);
-use POSIX qw(:sys_wait_h);
-use POSIX qw(setsid sigprocmask);
+use Mail::SpamAssassin::Logger;
 
 use vars qw(@ISA);
 @ISA = ();
@@ -59,6 +60,7 @@ sub new {
   $self->{ident} = $params{ident} || 'spamassassin';
   $self->{log_socket} = $params{socket};
   $self->{log_facility} = $params{facility};
+  $self->{timestamp_fmt} = $params{timestamp_fmt};
 
   if (! $self->init()) {
     die "logger: syslog initialization failed\n";
@@ -138,6 +140,13 @@ sub log_message {
     # force a log-close.   trap possible die() calls
     eval { closelog(); };
   };
+
+  my $timestamp = '';
+  my $fmt = $self->{timestamp_fmt};
+  if (defined $fmt && $fmt ne '') {  # for completeness, rarely used
+    $timestamp = POSIX::strftime($fmt, localtime(Time::HiRes::time));
+  }
+  $msg = $timestamp . ' ' . $msg  if $timestamp ne '';
 
   # important: do not call syslog() from the SIGCHLD handler
   # child_handler().   otherwise we can get into a loop if syslog()
