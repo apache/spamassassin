@@ -853,6 +853,10 @@ void message_dump(int in_fd, int out_fd, struct message *m)
     char buf[8196];
     int bytes;
 
+    if (m == NULL) {
+      return; /* Bug 6562 reported by Frederik Deweerdt <frederik.deweerdt@xprog.eu> */
+    }
+
     if (m != NULL && m->type != MESSAGE_NONE) {
 	message_write(out_fd, m);
     }
