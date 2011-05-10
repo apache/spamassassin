@@ -138,7 +138,8 @@ meta           MANY_HDRS_LCASE       __MANY_HDRS_LCASE && !__VIA_ML && !__freema
 describe       MANY_HDRS_LCASE       Odd capitalization of multiple message headers
 
 # Some metas that appear to perform well in masscheck
-meta           HDRS_LCASE_1K         __HDRS_LCASE && __SINGLE_HEADER_1K
+meta           __HDRS_LCASE_1K       __HDRS_LCASE && __SINGLE_HEADER_1K
+meta           HDRS_LCASE_1K         __HDRS_LCASE_1K && !__VIA_ML
 describe       HDRS_LCASE_1K         Odd capitalization of message headers + long header
 meta           HDRS_LCASE_IMGONLY    __HDRS_LCASE && __HTML_IMG_ONLY
 describe       HDRS_LCASE_IMGONLY    Odd capitalization of message headers + image-only HTML
