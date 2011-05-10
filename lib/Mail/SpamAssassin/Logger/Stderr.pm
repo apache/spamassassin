@@ -47,19 +47,34 @@ sub new {
   my $self = { };
   bless ($self, $class);
 
+  my %params = @_;
+  $self->{timestamp_fmt} = $params{timestamp_fmt};
+
   return($self);
 }
 
 sub log_message {
   my ($self, $level, $msg) = @_;
 
-  my $now = Time::HiRes::time;
-  my $timestamp = sprintf("%s:%06.3f",
-    POSIX::strftime("%b %d %H:%M",localtime($now)), $now-int($now/60)*60);
-  # Bug 6329: %e is not in a POSIX standard, use %d instead and edit
-  local $1; $timestamp =~ s/^(\S+\s+)0/$1 /;
-  printf STDERR ("%s [%d] %s: %s\n",
-    $timestamp, $$, $level, $msg)  or warn "Error writing to log file: $!";
+  my $timestamp;
+  my $fmt = $self->{timestamp_fmt};
+  if (!defined $fmt) {
+    # default since 3.3.0
+    my $now = Time::HiRes::time;
+    $timestamp = sprintf("%s:%06.3f",
+      POSIX::strftime("%b %d %H:%M", localtime($now)), $now-int($now/60)*60);
+    # Bug 6329: %e is not in a POSIX standard, use %d instead and edit
+    local $1; $timestamp =~ s/^(\S+\s+)0/$1 /;
+  } elsif ($fmt eq '') {
+    $timestamp = '';
+  } else {
+    $timestamp = POSIX::strftime($fmt, localtime(Time::HiRes::time));
+  }
+  $timestamp .= ' '  if $timestamp ne '';
+
+  my($nwrite) = syswrite(STDERR, sprintf("%s[%d] %s: %s\n",
+                                         $timestamp, $$, $level, $msg));
+  defined $nwrite  or warn "error writing to log file: $!";
 }
 
 sub close_log {

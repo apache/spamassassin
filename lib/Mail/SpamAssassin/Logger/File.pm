@@ -33,6 +33,9 @@ use strict;
 use warnings;
 use bytes;
 use re 'taint';
+
+use POSIX ();
+use Time::HiRes ();
 use Mail::SpamAssassin::Logger;
 
 use vars qw(@ISA);
@@ -48,6 +51,7 @@ sub new {
   # parameters
   my %params = @_;
   $self->{filename} = $params{filename} || 'spamassassin.log';
+  $self->{timestamp_fmt} = $params{timestamp_fmt};
 
   if (! $self->init()) {
     die "logger: file initialization failed\n";
@@ -79,8 +83,19 @@ sub init {
 sub log_message {
   my ($self, $level, $msg) = @_;
 
-  my($nwrite) = syswrite(STDLOG, sprintf("%s [%s] %s: %s\n",
-			   scalar localtime, $$, $level, $msg));
+  my $timestamp;
+  my $fmt = $self->{timestamp_fmt};
+  if (!defined $fmt) {
+    $timestamp = scalar localtime;  # default, backwards compatibility
+  } elsif ($fmt eq '') {
+    $timestamp = '';
+  } else {
+    $timestamp = POSIX::strftime($fmt, localtime(Time::HiRes::time));
+  }
+  $timestamp .= ' '  if $timestamp ne '';
+
+  my($nwrite) = syswrite(STDLOG, sprintf("%s[%s] %s: %s\n",
+                                         $timestamp, $$, $level, $msg));
   defined $nwrite  or warn "error writing to log file: $!";
 }
 
