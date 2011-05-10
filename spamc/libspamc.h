@@ -284,7 +284,7 @@ int message_tell(struct transport *tp, const char *username, int flags,
  * will be MESSAGE_ERROR) it will be message_writed. Then, fd_in will be piped
  * to fd_out intol EOF. This is particularly useful if you get back an
  * EX_TOOBIG. */
-void message_dump(int in_fd, int out_fd, struct message *m);
+void message_dump(int in_fd, int out_fd, struct message *m, int flags);
 
 /* Do a message_read->message_filter->message_write sequence, handling errors
  * appropriately with dump_message or appropriate CHECK_ONLY output. Returns

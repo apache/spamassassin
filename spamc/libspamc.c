@@ -848,17 +848,23 @@ long message_write(int fd, struct message *m)
     }
 }
 
-void message_dump(int in_fd, int out_fd, struct message *m)
+void message_dump(int in_fd, int out_fd, struct message *m, int flags)
 {
     char buf[8196];
     int bytes;
 
-    if (m != NULL && m->type != MESSAGE_NONE) {
+    if (m == NULL) {
+	libspamc_log(flags, LOG_ERR, "oops! message_dump called with NULL message");
+	return;
+    }
+
+    if (m->type != MESSAGE_NONE) {
 	message_write(out_fd, m);
     }
+
     while ((bytes = full_read(in_fd, 1, buf, 8192, 8192)) > 0) {
 	if (bytes != full_write(out_fd, 1, buf, bytes)) {
-	    libspamc_log(m->priv->flags, LOG_ERR, "oops! message_dump of %d returned different",
+	    libspamc_log(flags, LOG_ERR, "oops! message_dump of %d returned different",
 		   bytes);
 	}
     }
@@ -1564,7 +1570,7 @@ int message_process(struct transport *trans, char *username, int max_size,
         return EX_NOTSPAM;
     }
     else {
-        message_dump(in_fd, out_fd, &m);
+        message_dump(in_fd, out_fd, &m, flags);
         message_cleanup(&m);
         return ret;
     }
