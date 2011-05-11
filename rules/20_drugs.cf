@@ -77,7 +77,8 @@ describe DRUG_ED_ONLINE		Fast Viagra Delivery
 body ONLINE_PHARMACY		/\bonline pharmacy|\b(?:drugs|medications) online/i
 describe ONLINE_PHARMACY	Online Pharmacy
 
-body NO_PRESCRIPTION		/no.{1,10}P(?:er|re)scription.{1,10}(?:needed|require|necessary)/i
+# Updated bug 6448
+body NO_PRESCRIPTION		/N[o0].{1,10}P(?:er|re)scr[i1]pt[i1][o0]n.{1,10}(?:n[e3][e3]d[e3]d|requ[1i]re|n[e3]c[e3]ssary)/i
 describe NO_PRESCRIPTION	No prescription needed
 
 # too easy
