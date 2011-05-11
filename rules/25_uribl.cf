@@ -39,7 +39,7 @@ describe        URIBL_SBL        Contains an URL listed in the SBL blocklist
 tflags          URIBL_SBL        net
 reuse           URIBL_SBL
 
-# DBL, http://www.spamhaus.org/dbl/ 
+# DBL, http://www.spamhaus.org/dbl/
 if can(Mail::SpamAssassin::Plugin::URIDNSBL::has_tflags_domains_only)
 urirhssub       URIBL_DBL_SPAM   dbl.spamhaus.org.       A   127.0.1.2
 body            URIBL_DBL_SPAM   eval:check_uridnsbl('URIBL_DBL_SPAM')
@@ -176,5 +176,10 @@ uridnsbl_skip_domain alexa.com ask.com baidu.com bing.com craigslist.org
 uridnsbl_skip_domain doubleclick.com ebay.de facebook.com flickr.com godaddy.com
 uridnsbl_skip_domain google.co.in google.it mozilla.com myspace.com rediff.com
 uridnsbl_skip_domain twitter.com wordpress.com yahoo.co.jp youtube.com
+
+# axb's frequent known good URIDNSBL lookups
+
+uridnsbl_skip_domain fedex.com
+uridnsbl_skip_domain openoffice.org
 
 endif   # Mail::SpamAssassin::Plugin::URIDNSBL
