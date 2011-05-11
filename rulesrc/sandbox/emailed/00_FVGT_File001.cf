@@ -1245,8 +1245,9 @@ describe FB_NO_MORE_OFFER       Phrase: no more offer
 #counts   FB_NO_MORE_OFFER         1s/0h of 47019 corpus (37183s/9836h FVGT) 12/23/06
 
 
-body     FB_NO_SCRIP_NEEDED     /No.{1,10}P(?:er|re)scr[i1]pt[i1][o0]n (?:needed|requ[1i]re)/i
-describe FB_NO_SCRIP_NEEDED     Phrase: no prescription needed.
+# Bug 6448: replaced with NO_PRESCRIPTION
+#body     FB_NO_SCRIP_NEEDED     /No.{1,10}P(?:er|re)scr[i1]pt[i1][o0]n (?:needed|requ[1i]re)/i
+#describe FB_NO_SCRIP_NEEDED     Phrase: no prescription needed.
 ##score    FB_NO_SCRIP_NEEDED   10.357
 #counts   FB_NO_SCRIP_NEEDED       722s/0h of 207630 corpus (200121s/7509h FT) 12/13/05
 #counts   FB_NO_SCRIP_NEEDED       1042s/0h of 107818 corpus (99658s/8160h FVGT) 03/13/06
