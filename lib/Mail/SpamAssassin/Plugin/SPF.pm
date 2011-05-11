@@ -56,10 +56,12 @@ sub new {
 
   $self->register_eval_rule ("check_for_spf_pass");
   $self->register_eval_rule ("check_for_spf_neutral");
+  $self->register_eval_rule ("check_for_spf_none");
   $self->register_eval_rule ("check_for_spf_fail");
   $self->register_eval_rule ("check_for_spf_softfail");
   $self->register_eval_rule ("check_for_spf_helo_pass");
   $self->register_eval_rule ("check_for_spf_helo_neutral");
+  $self->register_eval_rule ("check_for_spf_helo_none");
   $self->register_eval_rule ("check_for_spf_helo_fail");
   $self->register_eval_rule ("check_for_spf_helo_softfail");
   $self->register_eval_rule ("check_for_spf_whitelist_from");
@@ -233,6 +235,12 @@ sub check_for_spf_neutral {
   $scanner->{spf_neutral};
 }
 
+sub check_for_spf_none {
+  my ($self, $scanner) = @_;
+  $self->_check_spf ($scanner, 0) unless $scanner->{spf_checked};
+  $scanner->{spf_none};
+}
+
 sub check_for_spf_fail {
   my ($self, $scanner) = @_;
   $self->_check_spf ($scanner, 0) unless $scanner->{spf_checked};
@@ -258,6 +266,12 @@ sub check_for_spf_helo_neutral {
   my ($self, $scanner) = @_;
   $self->_check_spf ($scanner, 1) unless $scanner->{spf_helo_checked};
   $scanner->{spf_helo_neutral};
+}
+
+sub check_for_spf_helo_none {
+  my ($self, $scanner) = @_;
+  $self->_check_spf ($scanner, 1) unless $scanner->{spf_helo_checked};
+  $scanner->{spf_helo_none};
 }
 
 sub check_for_spf_helo_fail {
@@ -318,6 +332,7 @@ sub _check_spf {
     }
 
     foreach my $hdr (@internal_hdrs) {
+      local($1,$2);
       if ($hdr =~ /^received-spf:/i) {
 	dbg("spf: found a Received-SPF header added by an internal host: $hdr");
 
@@ -361,6 +376,7 @@ sub _check_spf {
 	  $scanner->{"spf_${identity}checked"} = 1;
 	  $scanner->{"spf_${identity}pass"} = 0;
 	  $scanner->{"spf_${identity}neutral"} = 0;
+	  $scanner->{"spf_${identity}none"} = 0;
 	  $scanner->{"spf_${identity}fail"} = 0;
 	  $scanner->{"spf_${identity}softfail"} = 0;
 	  $scanner->{"spf_${identity}failure_comment"} = undef;
@@ -376,6 +392,55 @@ sub _check_spf {
 	} else {
 	  dbg("spf: could not parse result from existing Received-SPF header");
 	}
+
+      } elsif ($hdr =~ /^Authentication-Results:.*;\s*SPF\s*=\s*([^;]*)/i) {
+        dbg("spf: found an Authentication-Results header added by an internal host: $hdr");
+
+        # RFC 5451 header parser - added by D. Stussy 2010-09-09:
+        # Authentication-Results: mail.example.com; SPF=none smtp.mailfrom=example.org (comment)
+
+        my $tmphdr = $1;
+        if ($tmphdr =~ /^(pass|neutral|(?:hard|soft)?fail|none)(?:[^;]*?\bsmtp\.(\S+)\s*=[^;]+)?/i) {
+          my $result = lc($1);
+          $result = 'fail'  if $result eq 'hardfail';  # RFC5451 permits this
+
+          my $identity = '';    # we assume it's a mfrom check if we can't tell otherwise
+          if (defined $2) {
+            $identity = lc($2);
+            if ($identity eq 'mfrom' || $identity eq 'mailfrom') {
+              next if $scanner->{spf_checked};
+              $identity = '';
+            } elsif ($identity eq 'helo') {
+              next if $scanner->{spf_helo_checked};
+              $identity = 'helo_';
+            } else {
+              dbg("spf: found unknown identity value, cannot use: $identity");
+              next;     # try the next Authentication-Results header, if any
+            }
+          } else {
+            next if $scanner->{spf_checked};
+          }
+
+          # we'd set these if we actually did the check
+          $scanner->{"spf_${identity}checked"} = 1;
+          $scanner->{"spf_${identity}pass"} = 0;
+          $scanner->{"spf_${identity}neutral"} = 0;
+          $scanner->{"spf_${identity}none"} = 0;
+          $scanner->{"spf_${identity}fail"} = 0;
+          $scanner->{"spf_${identity}softfail"} = 0;
+          $scanner->{"spf_${identity}failure_comment"} = undef;
+
+          # and the result
+          $scanner->{"spf_${identity}${result}"} = 1;
+          dbg("spf: re-using %s result from Authentication-Results header: %s",
+               ($identity ? 'helo' : 'mfrom'), $result);
+
+          # if we've got *both* the mfrom and helo results we're done
+          return if ($scanner->{spf_checked} && $scanner->{spf_helo_checked});
+
+        } else {
+          dbg("spf: could not parse result from existing Authentication-Results header");
+        }
       }
     }
     # we can return if we've found the one we're being asked to get
@@ -454,6 +519,7 @@ sub _check_spf {
     $scanner->{spf_helo_checked} = 1;
     $scanner->{spf_helo_pass} = 0;
     $scanner->{spf_helo_neutral} = 0;
+    $scanner->{spf_helo_none} = 0;
     $scanner->{spf_helo_fail} = 0;
     $scanner->{spf_helo_softfail} = 0;
     $scanner->{spf_helo_failure_comment} = undef;
@@ -462,6 +528,7 @@ sub _check_spf {
     $scanner->{spf_checked} = 1;
     $scanner->{spf_pass} = 0;
     $scanner->{spf_neutral} = 0;
+    $scanner->{spf_none} = 0;
     $scanner->{spf_fail} = 0;
     $scanner->{spf_softfail} = 0;
     $scanner->{spf_failure_comment} = undef;
@@ -607,6 +674,7 @@ sub _check_spf {
   if ($ishelo) {
     if ($result eq 'pass') { $scanner->{spf_helo_pass} = 1; }
     elsif ($result eq 'neutral') { $scanner->{spf_helo_neutral} = 1; }
+    elsif ($result eq 'none') { $scanner->{spf_helo_none} = 1; }
     elsif ($result eq 'fail') { $scanner->{spf_helo_fail} = 1; }
     elsif ($result eq 'softfail') { $scanner->{spf_helo_softfail} = 1; }
 
@@ -616,6 +684,7 @@ sub _check_spf {
   } else {
     if ($result eq 'pass') { $scanner->{spf_pass} = 1; }
     elsif ($result eq 'neutral') { $scanner->{spf_neutral} = 1; }
+    elsif ($result eq 'none') { $scanner->{spf_none} = 1; }
     elsif ($result eq 'fail') { $scanner->{spf_fail} = 1; }
     elsif ($result eq 'softfail') { $scanner->{spf_softfail} = 1; }
 
