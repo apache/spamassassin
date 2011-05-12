@@ -83,3 +83,21 @@ ifplugin Mail::SpamAssassin::Plugin::Shortcircuit
 
 endif # Mail::SpamAssassin::Plugin::Shortcircuit
 
+#RULES DISABLED BY DEFAULT FOR ADMINISTRATOR CONSIDERATION
+
+# SPF_NONE - As discussed in Bug 6490, this rule allows you to penalize
+# senders for not implementing SPF. It is provided for the administrator
+# to enable and score at their own risk.
+# https://issues.apache.org/SpamAssassin/show_bug.cgi?id=6490
+#
+#header    SPF_NONE    eval:check_for_spf_none()
+#describe  SPF_NONE    SPF: sender SPF record missing
+#score     SPF_NONE    0.1
+
+# RFC-Ignorant - enable blacklist from http://www.rfc-ignorant.org/
+# Disabled in 3.3.2 due to poor hit rate and accuracy:
+# https://issues.apache.org/SpamAssassin/show_bug.cgi?id=6526
+#
+#score DNS_FROM_RFC_BOGUSMX 0 1.464 0 1.668 # n=0 n=2
+#score DNS_FROM_RFC_DSN 0 0.001 0 0.001 # n=0 n=2
+~
