@@ -201,7 +201,7 @@ sub check_main {
   }
 
   if ($pms->{deadline_exceeded}) {
-    $pms->got_hit('TIME_LIMIT_EXCEEDED', '', score => 0.001,
+    $pms->got_hit('TIME_LIMIT_EXCEEDED', '', defscore => 0.001,
                   description => 'Exceeded time limit / deadline');
   }
 
