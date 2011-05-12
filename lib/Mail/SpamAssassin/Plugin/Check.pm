@@ -383,7 +383,7 @@ EOT
 
     dbg("rules: run_generic_tests - compiling eval code: %s, priority %s",
         $ruletype, $priority);
-  # dbg("rules: eval code to compile: $evalstr");
+  # dbg("rules: eval code to compile: %s", $evalstr);
     my $eval_result;
     { my $timer = $self->{main}->time_method('compile_gen');
       $eval_result = eval($evalstr);
@@ -446,7 +446,7 @@ sub flush_evalstr {
   $self->end_evalstr_chunk($pms);
   dbg("rules: flush_evalstr (%s) compiling %d chars of %s",
       $caller_name, $self->{evalstr_l}, $chunk_methodname);
-# dbg("rules: %s", $self->{evalstr});
+# dbg("rules: eval code(2): %s", $self->{evalstr});
   my $eval_result;
   { my $timer = $self->{main}->time_method('compile_gen');
     $eval_result = eval($self->{evalstr});
@@ -1121,7 +1121,7 @@ sub run_eval_tests {
       && !$doing_user_rules)
   {
     my $method = "${package_name}::${methodname}";
-  # dbg("rules: run_eval_tests - calling %s", $methodname);
+  # dbg("rules: run_eval_tests - calling previously compiled %s", $method);
     my $t = Mail::SpamAssassin::Timeout->new({ deadline => $master_deadline });
     my $err = $t->run(sub {
       no strict "refs";
@@ -1268,6 +1268,7 @@ EOT
 
   dbg("rules: run_eval_tests - compiling eval code: %s, priority %s",
        $testtype, $priority);
+# dbg("rules: eval code(3): %s", $evalstr);
   my $eval_result;
   { my $timer = $self->{main}->time_method('compile_eval');
     $eval_result = eval($evalstr);
@@ -1280,7 +1281,7 @@ EOT
   else {
     my $method = "${package_name}::${methodname}";
     push (@TEMPORARY_METHODS, $methodname);
-  # dbg("rules: run_eval_tests - calling %s", $methodname);
+  # dbg("rules: run_eval_tests - calling the just compiled %s", $method);
     my $t = Mail::SpamAssassin::Timeout->new({ deadline => $master_deadline });
     my $err = $t->run(sub {
       no strict "refs";
