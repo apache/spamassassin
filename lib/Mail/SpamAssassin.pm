@@ -491,10 +491,16 @@ sub parse {
   my $timer = $self->time_method("parse");
 
   my $master_deadline;
+  # passed in at a function call
   if (ref $suppl_attrib && exists $suppl_attrib->{master_deadline}) {
     $master_deadline = $suppl_attrib->{master_deadline};  # may be undef
-  } elsif ($self->{conf}->{time_limit}) {  # defined and nonzero
-    $master_deadline = $start_time + $self->{conf}->{time_limit};
+  }
+  # found in a config file - overrides passed-in number if lower
+  if ($self->{conf}->{time_limit}) {  # defined and nonzero
+    my $time_limit_deadline = $start_time + $self->{conf}->{time_limit};
+    if (!defined $master_deadline || $time_limit_deadline < $master_deadline) {
+      $master_deadline = $time_limit_deadline;
+    }
   }
   if (defined $master_deadline) {
     dbg("config: time limit %.1f s", $master_deadline - $start_time);
