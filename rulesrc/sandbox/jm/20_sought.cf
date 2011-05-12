@@ -1,12 +1,12 @@
 # Note: rule names are based on a hash of the content pattern.
-body __SEEK_NGYZKH  /http:\/\/www\.casinosupergreat\.ru/
-body __SEEK_AXB9EP  / online gaming destination ..e/
-body __SEEK_Q0CH6P  /http:\/\/www\.super-magic-casino\.ru/
-body __SEEK_NF9PXP  /http:\/\/www\.super-game-net\.ru/
 body __SEEK_61FFSQ  /http:\/\/www\.net-game-super\.ru/
 body __SEEK_DDIB3L  /http:\/\/www\.net-super-game\.ru/
-body __SEEK_HID_I4  /http:\/\/www\.greatcasinosuper\.ru/
+body __SEEK_NGYZKH  /http:\/\/www\.casinosupergreat\.ru/
+body __SEEK_NF9PXP  /http:\/\/www\.super-game-net\.ru/
+body __SEEK_AXB9EP  / online gaming destination ..e/
+body __SEEK_Q0CH6P  /http:\/\/www\.super-magic-casino\.ru/
 body __SEEK_PF3FEF  /http:\/\/www\.super-net-game\.ru/
+body __SEEK_HID_I4  /http:\/\/www\.greatcasinosuper\.ru/
 body __SEEK_MMRFQP  /http:\/\/www\.casinogreatsuper\.ru/
 body __SEEK_VMVNJZ  /http:\/\/great-super-casino\.ru/
 body __SEEK_FAO2SH  /http:\/\/www\.casino-super-magic\.ru/
@@ -18,8 +18,8 @@ body __SEEK_WUBF6T  /http:\/\/super-great-casino\.ru/
 body __SEEK_Z0XJHM  /Welcome to a Casino gaming experience like no other on the =\?iso-8859-1\?Q\?\?=/
 body __SEEK_DC915O  /When Casino royalty heads to play, Winner Palace is where they go/
 body __SEEK_MQ0R1_  /Winner Palace VIP Club \x{96} truly exclusive /
-body __SEEK_QDHDKQ  /Instant Play, super bonuses, and big earnings at Winner Palace/
 body __SEEK_5_CWOP  /Get the VIP treatment you deserve with an exclusive .{0,20}USD bonus\. Additional info in here /
+body __SEEK_QDHDKQ  /Instant Play, super bonuses, and big earnings at Winner Palace/
 body __SEEK_NMFRPA  /Be warned, you may not feel like leaving this place/
 body __SEEK_WX_PJT  /Bonuses to swell your Bank Balance at Winner Palace/
 body __SEEK_LNACLU  /Everyone\x{92}s a winner at Winner Palace/
@@ -29,6 +29,11 @@ body __SEEK_HEA1CR  /Awesome games and super bonuses at Winner Palace/
 body __SEEK_XHW9EI  /More than 100 games to enjoy and win/
 body __SEEK_MEYMZ4  /Winner Palace delivers more than what it promises/
 body __SEEK_P8QOSM  /At Winner Palace, patrons get taken care of/
+# passed hit-rate threshold: 1.0
+
+meta JM_SOUGHT_1   (__SEEK_61FFSQ || __SEEK_DDIB3L || __SEEK_NGYZKH || __SEEK_NF9PXP || __SEEK_AXB9EP || __SEEK_Q0CH6P || __SEEK_PF3FEF || __SEEK_HID_I4 || __SEEK_MMRFQP || __SEEK_VMVNJZ || __SEEK_FAO2SH || __SEEK_XIX0KD || __SEEK_X30CZR || __SEEK_D1A_DT || __SEEK_QGJOVL || __SEEK_WUBF6T || __SEEK_Z0XJHM || __SEEK_DC915O || __SEEK_MQ0R1_ || __SEEK_5_CWOP || __SEEK_QDHDKQ || __SEEK_NMFRPA || __SEEK_WX_PJT || __SEEK_LNACLU || __SEEK_GJWSSN || __SEEK_2B_JOG || __SEEK_HEA1CR || __SEEK_XHW9EI || __SEEK_MEYMZ4 || __SEEK_P8QOSM)
+score JM_SOUGHT_1  4.0
+describe JM_SOUGHT_1  Body contains frequently-spammed text patterns
 body __SEEK_X2V9CE  /At Winner Palace your satisfaction is our reward/
 body __SEEK_GVKY_9  /USD bonus to all Americans, Get yours here /
 body __SEEK_EKLFQG  /Online casino gaming at its exciting best/
@@ -36,57 +41,56 @@ body __SEEK_ZGCJPJ  /Are you a Slots Lover\? Winner Palace Beckons/
 body __SEEK_SDIIGS  /Winner Palace \x{96} where the sweet scent of winning beckons =\?iso-8859-1\?Q\?\?=/
 body __SEEK_0A_PT7  /There\'s an unbelievable .{0,40}, it\'s available only today\!/
 body __SEEK_4RO1TZ  /USD Bonus offer in this website.{0,3}, it\'s available only today\!/
-body __SEEK__VDTBC  /Love BlackJack\? Check out the games at Winner Palace/
 body __SEEK_7W_SCS  /Your email address came up in our 2010 Sensational Bonus Draw\. Withdraw your /
+body __SEEK__VDTBC  /Love BlackJack\? Check out the games at Winner Palace/
 body __SEEK_RBF9K7  /Fun begins with a \$1000 Welcome Bonus/
-body __SEEK_ZGN_OB  /USD reward please visit our website and follow the instructions /
 body __SEEK_NJGZRN  /USD richer, go to this link and follow the instructions\. /
+body __SEEK_ZGN_OB  /USD reward please visit our website and follow the instructions /
+body __SEEK_NLK7MY  /USD bonus is just waiting for you to take it, do it fast it\'s available only for 24 hours - It\'s here: /
 body __SEEK_WBKOFF  /Get your attention to this amazing /
 body __SEEK__UDKRZ  /USD Bonus opportunity, It\'s 100\% Real\! Available in here /
-# passed hit-rate threshold: 1.0
-
-meta JM_SOUGHT_1   (__SEEK_NGYZKH || __SEEK_AXB9EP || __SEEK_Q0CH6P || __SEEK_NF9PXP || __SEEK_61FFSQ || __SEEK_DDIB3L || __SEEK_HID_I4 || __SEEK_PF3FEF || __SEEK_MMRFQP || __SEEK_VMVNJZ || __SEEK_FAO2SH || __SEEK_XIX0KD || __SEEK_X30CZR || __SEEK_D1A_DT || __SEEK_QGJOVL || __SEEK_WUBF6T || __SEEK_Z0XJHM || __SEEK_DC915O || __SEEK_MQ0R1_ || __SEEK_QDHDKQ || __SEEK_5_CWOP || __SEEK_NMFRPA || __SEEK_WX_PJT || __SEEK_LNACLU || __SEEK_GJWSSN || __SEEK_2B_JOG || __SEEK_HEA1CR || __SEEK_XHW9EI || __SEEK_MEYMZ4 || __SEEK_P8QOSM || __SEEK_X2V9CE || __SEEK_GVKY_9 || __SEEK_EKLFQG || __SEEK_ZGCJPJ || __SEEK_SDIIGS || __SEEK_0A_PT7 || __SEEK_4RO1TZ || __SEEK__VDTBC || __SEEK_7W_SCS || __SEEK_RBF9K7 || __SEEK_ZGN_OB || __SEEK_NJGZRN || __SEEK_WBKOFF || __SEEK__UDKRZ)
-score JM_SOUGHT_1  4.0
-describe JM_SOUGHT_1  Body contains frequently-spammed text patterns
-body __SEEK_NLK7MY  /USD bonus is just waiting for you to take it, do it fast it\'s available only for 24 hours - It\'s here: /
-body __SEEK__QOVTE  /Quality casino games and cutting edge software at Winner Palace/
 body __SEEK_NFCGSS  /USD bonus has just arrived, Claim it in here /
+body __SEEK__QOVTE  /Quality casino games and cutting edge software at Winner Palace/
 body __SEEK_X4TST2  /USD bonus is available for limited time only, Click here to get it now /
 body __SEEK_N0KWV7  /USD bonus treat - Get it here /
 body __SEEK_KEU3BG  /We are glad to welcome you with a sweet /
 body __SEEK_VOD3VL  /There\'s a lot of loose goods in the internet, here\'s a website where you can get .{0,20}USD bonus on the spot\!/
 body __SEEK_L_4B86  /We just got you an amazing Vegas-Style reward, Get your Huge /
-body __SEEK_YAVLAU  /Start your day with a sweet bonus treat - /
 body __SEEK_KGN_6O  /Go to this website and get your exclusive .{0,20} bonus - You definitely deserve it\!/
+body __SEEK_YAVLAU  /Start your day with a sweet bonus treat - /
 body __SEEK_VOPMSU  /USD bonus offer - Take it today /
 body __SEEK_YBLS0U  /Your email came up and you are entitled for our /
 body __SEEK_LCYYEC  /Are you living in the US\?\! you are entitled for an exclusive .{0,20}USD bonus\. Get it in here /
-body __SEEK_HP6ABZ  /At Winner Palace high quality online gaming meets industry leading customer service\. Choose \x{93}Instant Play\x{94} and you can be on your way to some of the best winnings of your life\! Avail cool bonuses; in fact get \$1000 as Welcome Bonus the moment you join\. Play for entertainment or to win, you\x{92}re guaranteed a great time here\!/
 body __SEEK_1MFFB2  / some of the best bonuses out there/
+body __SEEK_HP6ABZ  /At Winner Palace high quality online gaming meets industry leading customer service\. Choose \x{93}Instant Play\x{94} and you can be on your way to some of the best winnings of your life\! Avail cool bonuses; in fact get \$1000 as Welcome Bonus the moment you join\. Play for entertainment or to win, you\x{92}re guaranteed a great time here\!/
 body __SEEK_ZM_T_V  /With more than 100 online games to choose from, the fun never ends at Winner Palace\. Real Time Gaming software lets you enjoy a 3D interface, stereo sound and superb graphics\. Download software, register, and you\x{92}re good to go\! Choose your game, enjoy huge bonuses, and play for money or for fun\./
 body __SEEK_7EA8WW  /Yes, if Slots is your game then there\x{92}s no better place to be at than Winner Palace\. A massive 300\% bonus on your first deposit\! Up to \$ 3000 so that you can play to your heart\x{92}s content\. No matter what you\x{92}re geographical location is, you\x{92}ll feel at home here\. /
 body __SEEK_UNI9M2  /USD Bonus offer in this website - , it\'s available only today\!/
 body __SEEK_X_DCDM  /A warm welcome to players from the U\.S and Europe, indulge and win at Winner Palace\. Enjoy a one-of-a-kind gaming experience for connoisseurs like you\. Promotions for newcomers, daily tournaments and much more\! You are entitled to a mind boggling range of bonuses, our way of saying that we appreciate your presence\./
 body __SEEK_YGLPK_  /Winner Palace is a gaming destination par excellence\. Experience customer service of the highest standards\. Set the tone by getting a \$1000 Welcome Bonus\. Play in euros or dollars and get fast cashouts\. Come to where there are opportunities galore for fun and super winnings\./
-body __SEEK_U19MJL  /If you\x{92}re a high roller who loves the excitement and is fond of winning; Then we\x{92}ve got the games for you\. Winner Palace has also got special high roller bonuses\. Make a first deposit of \$750 or more and get a whopping \$200 bonus\. Head over to where the big boys come out to play\./
-body __SEEK_Y_VZZO  /Winner Palace is your port of call for elegant and stylish gaming\. Come and enjoy an industry-leading array of games and bonuses\. Choose from more than a 100 games; win with your skills and creativity\! And we back it up all with the highest level of customer service, state of the art gaming software, and assured payouts\./
 body __SEEK_HMXVHS  /Your favorite games become that much more interesting with an array of bonuses\. A 300\% Match Bonus up to \$3,000 with your first deposit at some of the best Slot games ever seen\! Customer service that sets new standards in the industry\. Fortune beckons at Winner Palace\./
+body __SEEK_Y_VZZO  /Winner Palace is your port of call for elegant and stylish gaming\. Come and enjoy an industry-leading array of games and bonuses\. Choose from more than a 100 games; win with your skills and creativity\! And we back it up all with the highest level of customer service, state of the art gaming software, and assured payouts\./
+body __SEEK_U19MJL  /If you\x{92}re a high roller who loves the excitement and is fond of winning; Then we\x{92}ve got the games for you\. Winner Palace has also got special high roller bonuses\. Make a first deposit of \$750 or more and get a whopping \$200 bonus\. Head over to where the big boys come out to play\./
+body __SEEK_DHM_Q_  /http:\/\/www\.supergamenet\.ru/
 body __SEEK_MOQOC_  /If you love slots, then head to Winner Palace\. Real series slots games for you to pick from\. Get a gigantic 300\% bonus of up to \$3,000 on the first deposit\! And there are more bonuses, more games, and more excitement for you to explore\./
 body __SEEK_OASEYC  /Get ready to be treated like royalty\. Download the free software and begin instantly\. A \$1000 Welcome Bonus to let you know that you\x{92}re truly valued\. 24\/7 toll-free support and fast cash outs for esteemed patrons like you\. Daily tournaments at Winner Palace, so head over if you want to strike gold\./
 body __SEEK_22SVOX  /At Winner Palace, once the fun begins it does not end\. Choose from more than 100 world-class games\. Play, win, and cash your earnings smoothly\. Download games or enjoy \x{93}Instant Play\x{94} Promotions galore and 24\/7 customer service for you because you deserve nothing but the best\./
-body __SEEK_TOPEYF  /At Winner Palace, it\x{92}s so much more than the games\.\.\. Easy cashouts, super array of bonuses, and dedicated customer service are just some of the things you\x{92}ll enjoy\. Don\x{92}t take our word, take a look and you\x{92}ll believe us\!/
 body __SEEK_IN8BLD  /Yes, a \$1000 Welcome Bonus\x{85}and that\x{92}s just the beginning\. Jackpots galore beyond your wildest dreams\! Fair gaming, quick cash outs, and superb customer service for all\. A huge choice of games awaits you, O seeker of gaming glory\. Experience a superlative online gaming experience in Euros or Dollars\./
 body __SEEK_FIL3SB  /ed to world class service. ..d.e/
+body __SEEK_TOPEYF  /At Winner Palace, it\x{92}s so much more than the games\.\.\. Easy cashouts, super array of bonuses, and dedicated customer service are just some of the things you\x{92}ll enjoy\. Don\x{92}t take our word, take a look and you\x{92}ll believe us\!/
 body __SEEK_VQUKV6  /If you\x{92}re looking for a gaming experience that lives up to the hype; And are used to royal treatment then don\x{92}t look beyond Winner Palace\. It takes reliability, consistency, and world-class customer service seriously\. Great games, great atmosphere, and great winnings come together here\!/
+body __SEEK_XBI9_S  /USD bonus available only for today/
 body __SEEK_JHLAID  /BlackJack or slots, roulette or craps, and everything in between; Pick your game, and get ready to win\. Choose between \x{93}download\x{94} and instant play\x{94}\. Come to where the experience trumps expectations\!/
 body __SEEK_VZ15I1  /Winner Palace invites you to live life king size with a \$1000 welcome bonus\. Be a part of an exclusive set that has grown used to world class service\. Redeem bonuses galore\! Get a 200\% bonus on your first AND second deposits\. Your first deposit for a game of SLOTS qualifies you for a 300\% bonus\./
 body __SEEK_NHMK5C  /Whether you play BlackJack for fun or money; Winner Palace has made the game that much more attractive for all\. Get a 100\% bonus on your first deposit and you can redeem it up to 10 times\. Experience a plush online gaming environment and enjoy the best customer service\!/
 body __SEEK_ED2ZIN  /At Winner Palace, we know what the discerning gamer wants; And we offer it\! Getting started with some of the best games online today is easy as 1, 2, 3\. And then there is the small matter of our crazy bonuses and free offers, do check these out\. Play with euros or dollars\. /
 body __SEEK_WCRNNJ  /At Winner Palace, you discover that there is so much more to gaming than just the games\. The extra effort for client satisfaction shows in so many ways\. A rich playing environment, responsive customer support, fast cashouts and more\. Play in euros or dollars\. /
-body __SEEK_XBI9_S  /USD bonus available only for today/
-body __SEEK_NXB3FY  /Get the VIP treatment you deserve with an exclusive 555USD bonus\. Additional info in here - /
 body __SEEK_ZNYONA  /Feel at once at home with a \$1000 welcome bonus when you join\. Pick your game and there are bonuses waiting for you\. Play in dollars or euros\. A place where patron loyalty entitles you to extra perks and special bonuses\. You don\x{92}t need to be royalty, only be ready to be treated like one\!/
+body __SEEK_NXB3FY  /Get the VIP treatment you deserve with an exclusive 555USD bonus\. Additional info in here - /
+body __SEEK_F2QNIM  /http:\/\/www\.supernetgame\.ru/
+body __SEEK_EZC8NO  /http:\/\/www\.netsupergame\.ru/
 body __SEEK_39EXK0  /VIP treatment does not get better than this\. 24 \/ 7 personal manager at your disposal\. Enjoy extra bonuses and avail higher table limits\. Find your gaming experience peppered with pleasant surprises\./
+body __SEEK_LXKZVZ  /http:\/\/www\.game-net-super\.ru/
 body __SEEK_B2A2JJ  / The All-Natural Male Enhancement Formula We sells a natural supplement, with list of ingredients, company information and a product guarantee\. Add 3-inches more to your SHORT PENIS\! 4 months supply - \$149\.95 \(YOU SAVE \$44\.90\)/
 body __SEEK_WAUOQJ  /FW: Your 555USD bonus has arrived/
 body __SEEK_W0NSP1  /FW: You are entitled to 555USD/
@@ -94,178 +98,185 @@ body __SEEK_WU2QUZ  /Get an amazing 555USD bonus on the house - /
 body __SEEK_3VWDKG  /Limited time offer \x{96} 555USD Bonus/
 body __SEEK_YYC0W0  /Americans are getting 555USD bonus/
 body __SEEK_DR6WVE  /ou have been rewarded with 555USD/
-body __SEEK_V6BREG  /Are you living in the US\?\! you are entitled for an exclusive 555USD bonus\. Get it in here - /
 body __SEEK_QFBEJ0  /Loose Goods Alert \x{96} 555USD on the spot/
+body __SEEK_V6BREG  /Are you living in the US\?\! you are entitled for an exclusive 555USD bonus\. Get it in here - /
 body __SEEK_QXK_JN  /Go to this website and get your exclusive 555 bonus - You definitely deserve it\!/
 body __SEEK_0R5BQU  /There\'s a lot of loose goods in the internet, here\'s a website where you can get 555USD bonus on the spot\!/
 # passed hit-rate threshold: 0.5
 
-meta JM_SOUGHT_2   (__SEEK_NLK7MY || __SEEK__QOVTE || __SEEK_NFCGSS || __SEEK_X4TST2 || __SEEK_N0KWV7 || __SEEK_KEU3BG || __SEEK_VOD3VL || __SEEK_L_4B86 || __SEEK_YAVLAU || __SEEK_KGN_6O || __SEEK_VOPMSU || __SEEK_YBLS0U || __SEEK_LCYYEC || __SEEK_HP6ABZ || __SEEK_1MFFB2 || __SEEK_ZM_T_V || __SEEK_7EA8WW || __SEEK_UNI9M2 || __SEEK_X_DCDM || __SEEK_YGLPK_ || __SEEK_U19MJL || __SEEK_Y_VZZO || __SEEK_HMXVHS || __SEEK_MOQOC_ || __SEEK_OASEYC || __SEEK_22SVOX || __SEEK_TOPEYF || __SEEK_IN8BLD || __SEEK_FIL3SB || __SEEK_VQUKV6 || __SEEK_JHLAID || __SEEK_VZ15I1 || __SEEK_NHMK5C || __SEEK_ED2ZIN || __SEEK_WCRNNJ || __SEEK_XBI9_S || __SEEK_NXB3FY || __SEEK_ZNYONA || __SEEK_39EXK0 || __SEEK_B2A2JJ || __SEEK_WAUOQJ || __SEEK_W0NSP1 || __SEEK_WU2QUZ || __SEEK_3VWDKG || __SEEK_YYC0W0 || __SEEK_DR6WVE || __SEEK_V6BREG || __SEEK_QFBEJ0 || __SEEK_QXK_JN || __SEEK_0R5BQU)
+meta JM_SOUGHT_2   (__SEEK_X2V9CE || __SEEK_GVKY_9 || __SEEK_EKLFQG || __SEEK_ZGCJPJ || __SEEK_SDIIGS || __SEEK_0A_PT7 || __SEEK_4RO1TZ || __SEEK_7W_SCS || __SEEK__VDTBC || __SEEK_RBF9K7 || __SEEK_NJGZRN || __SEEK_ZGN_OB || __SEEK_NLK7MY || __SEEK_WBKOFF || __SEEK__UDKRZ || __SEEK_NFCGSS || __SEEK__QOVTE || __SEEK_X4TST2 || __SEEK_N0KWV7 || __SEEK_KEU3BG || __SEEK_VOD3VL || __SEEK_L_4B86 || __SEEK_KGN_6O || __SEEK_YAVLAU || __SEEK_VOPMSU || __SEEK_YBLS0U || __SEEK_LCYYEC || __SEEK_1MFFB2 || __SEEK_HP6ABZ || __SEEK_ZM_T_V || __SEEK_7EA8WW || __SEEK_UNI9M2 || __SEEK_X_DCDM || __SEEK_YGLPK_ || __SEEK_HMXVHS || __SEEK_Y_VZZO || __SEEK_U19MJL || __SEEK_DHM_Q_ || __SEEK_MOQOC_ || __SEEK_OASEYC || __SEEK_22SVOX || __SEEK_IN8BLD || __SEEK_FIL3SB || __SEEK_TOPEYF || __SEEK_VQUKV6 || __SEEK_XBI9_S || __SEEK_JHLAID || __SEEK_VZ15I1 || __SEEK_NHMK5C || __SEEK_ED2ZIN || __SEEK_WCRNNJ || __SEEK_ZNYONA || __SEEK_NXB3FY || __SEEK_F2QNIM || __SEEK_EZC8NO || __SEEK_39EXK0 || __SEEK_LXKZVZ || __SEEK_B2A2JJ || __SEEK_WAUOQJ || __SEEK_W0NSP1 || __SEEK_WU2QUZ || __SEEK_3VWDKG || __SEEK_YYC0W0 || __SEEK_DR6WVE || __SEEK_QFBEJ0 || __SEEK_V6BREG || __SEEK_QXK_JN || __SEEK_0R5BQU)
 score JM_SOUGHT_2  4.0
 describe JM_SOUGHT_2  Body contains frequently-spammed text patterns
 body __SEEK_FQ8MSD  /4 months supply penis longer pill - \$149\.95\. We sells a natural supplement, with list of ingredients \& product guarantee\./
 body __SEEK_SG1WTC  /More slots games are open to you now\. /
-body __SEEK_Q_O_6K  /lay today\'s featured games and get ..0/
-body __SEEK_KBU1GA  / We accept VISA, AMEX, E-Check\./
-body __SEEK_MLBYTE  /Cialis 2\.5mg x 40 = \$78\.00 /
-body __SEEK_MV3JZU  /Transfer money to your account\. Proceed here\. /
 body __SEEK_Q6F8Z_  / Vicodin ES - 7\.5\/750 mg: 30 - \$195/
 body __SEEK_HQWUO_  /Hydrocodone\/Vicodin ES\/Brand Watson/
-body __SEEK_LG1OGH  /Buy Cialis \(Brand\) or Generic Cialis \(Tadalafil\) online WITHOUT PRESCRIPTION\! /
 body __SEEK_BB_4NE  / FREE Express FedEx \(3-5 days Delivery\) for over \$200 order/
 body __SEEK_00XEVK  / Brand Watson - 7\.5\/750 mg: 30 - \$195 /
 body __SEEK_H6SU0L  / Major Credit Cards \+ E-CHECK/
+body __SEEK_Q_O_6K  /lay today\'s featured games and get ..0/
+body __SEEK_MV3JZU  /Transfer money to your account\. Proceed here\. /
+body __SEEK_KBU1GA  / We accept VISA, AMEX, E-Check\./
+body __SEEK_MLBYTE  /Cialis 2\.5mg x 40 = \$78\.00 /
+body __SEEK_LG1OGH  /Buy Cialis \(Brand\) or Generic Cialis \(Tadalafil\) online WITHOUT PRESCRIPTION\! /
 body __SEEK_HVL7UD  /Pick your favorite game and claim great rewards /
+body __SEEK_QMOMAW  /Our \$5000 special offer will soon expire\. Claim yours now\! /
 body __SEEK_QDPUWZ  / GENERIC CIALIS 120 Pills - \$246\.80 \+ FREE 10 VIAGRA\! Order Price Match\. No prescription\. Shipping - 7-15 working days\./
 body __SEEK_F1AQ5Y  /We accept VISA \& MasterCard\. Worldwide Shipping http:\/\//
 body __SEEK_VMMOMU  / enjoy powerful orgasms, recover and start again in minutes\./
 body __SEEK_IWMMR3  /Buy Viagra Super Active Plus 100 mg Online/
 body __SEEK_8HIGZF  /Try all our games and collect more extra cash\./
+body __SEEK_K6MSII  /Would you like to receive invitations to exclusive jackpot games\? /
 body __SEEK_V1XVWG  /Taking just one pill of Viagra Super Active will let you get an erection as and when you want/
 body __SEEK_CSD9_I  /Do you believe in luck\? Put it to good use, play slots\! /
-body __SEEK_QMOMAW  /Our \$5000 special offer will soon expire\. Claim yours now\! /
-body __SEEK_K6MSII  /Would you like to receive invitations to exclusive jackpot games\? /
 body __SEEK_V59Y0_  /aintain your erection for as long as you want, have stronger and harder erection/
+body __SEEK_6TU7QZ  /Pick the winning slots game of the day\. /
+body __SEEK_HFKUJZ  /Don\'t pass on all this money\. Carry your balance now\. /
 body __SEEK_AQ_HYX  /You have won the chance to play for our new jackpot\. /
 body __SEEK_1DKZCK  /The best players of the day will get the biggest jackpot /
 body __SEEK_SJ9MTI  / Viagra Super Active in low price \$2\.79 per pill\./
 body __SEEK_IIQA_3  /You have picked for the first round of today\'s games /
 body __SEEK_KZF6PN  / Designer Replica Handbags, Replica Handbags from \$300 We offer the best Louis Vuitton handbags and other premium designer replica handbags with very low cost\. 100\% Satisfaction Guaranteed\./
-body __SEEK_YYEOXB  /To get the fastest results, take Viagra Super Active on an empty stomach or after eating a low-fat meal\. http:\/\//
-body __SEEK_6TU7QZ  /Pick the winning slots game of the day\. /
 body __SEEK_3MRRRY  /This is an exclusive invitation to play our new slots games /
-body __SEEK_HFKUJZ  /Don\'t pass on all this money\. Carry your balance now\. /
+body __SEEK_YYEOXB  /To get the fastest results, take Viagra Super Active on an empty stomach or after eating a low-fat meal\. http:\/\//
 body __SEEK_WKOWGJ  /the more you play, the higher prizes you could reach\! /
 body __SEEK_NQ2_LA  /You are one of fifty playing for our jackpot\. Keep playing to win\. /
 body __SEEK_KKTUY_  /Think big, we did\.\.\. Check out our new jackpots\./
-body __SEEK_RRIPWN  /000 coupon please pick 2 new games to play\. /
 body __SEEK_EGGUL2  /How many rows in the slots machine\? Check now and claim your prize\. /
+body __SEEK_RRIPWN  /000 coupon please pick 2 new games to play\. /
+body __SEEK_OVJ5MD  /Play our new games exclusively - for 1 day only\./
 body __SEEK_PU8Q9L  /We have accepted your registration to play new games\. /
 body __SEEK_C9HJ6N  /Subscribe now to receive exclusive alerts on new slots games\. /
-body __SEEK_OVJ5MD  /Play our new games exclusively - for 1 day only\./
-body __SEEK_YGP6EF  /Have you seen our latest jackpot games\? /
-body __SEEK_UQE5BP  /You have earned a limited time offer of \$.0.0/
-body __SEEK_T53_DY  /We have added new jackpots - get to them first\!/
-body __SEEK_MHA8MM  /Be the first to take our great new jackpot /
+body __SEEK_GZB86B  /If you can play, we can pay\! /
 body __SEEK_FLF6XA  /Accept our invitation to try out great new jackpot games /
 body __SEEK_LI6X_F  /Do our new slots games pay well\? Try and tell us how much you won\./
+body __SEEK_MHA8MM  /Be the first to take our great new jackpot /
+body __SEEK_UQE5BP  /You have earned a limited time offer of \$.0.0/
+body __SEEK_YGP6EF  /Have you seen our latest jackpot games\? /
+body __SEEK_T53_DY  /We have added new jackpots - get to them first\!/
 body __SEEK_R0QPPY  /Don\'t let anyone else take your jackpot\. Play now\! /
-body __SEEK_GZB86B  /If you can play, we can pay\! /
 body __SEEK_IRLN8X  /This is your lucky day - play slots with great paying jackpots\! /
+body __SEEK_T1LJNE  /000 for you - please approve\. /
+body __SEEK_591Z_Q  /Please see attached for best new slots games\. /
 body __SEEK_NX_AMB  /Lets see how much money you can make at slots /
 body __SEEK_VMVQ_T  / - http:\/\/www\.vipgamesuper\.ru/
 body __SEEK_PDU8FN  /Sign up now to receive first notice of new available jackpots\. /
-body __SEEK_5KQD3H  /Where do you win more\? Pick your game from our list\. /
-body __SEEK_T1LJNE  /000 for you - please approve\. /
-body __SEEK_591Z_Q  /Please see attached for best new slots games\. /
 body __SEEK_BG5A8B  /Pick from many slots games and jackpot\! /
+body __SEEK_5KQD3H  /Where do you win more\? Pick your game from our list\. /
 body __SEEK_D5OQ0R  /We have a heavy jackpot - will you be our victorious player\? /
-body __SEEK_LYJVX_  / - http:\/\/www\.gamesupervip\.ru/
 body __SEEK_HNRUMY  /As a previous jackpot winner, we offer you these new games\. /
+body __SEEK_IGJJZ2  /You can be our next jackpot winner\. Join the game\./
+body __SEEK_BF0CGK  /We have compiled the best slots games for you\. /
 body __SEEK_HEFBMD  / an exclusive 5,000USD bonus\. /
+body __SEEK_PST2G4  /Here are our top ten slots games\. Is your favorite on the list\? /
+body __SEEK_LYJVX_  / - http:\/\/www\.gamesupervip\.ru/
+body __SEEK_ONWZDG  /Our new slots games have big winners\. Join them\! /
 body __SEEK_N22BLP  /You may pick a game to cash in your prize\. /
 body __SEEK_W4VGTI  /Play today\'s featured games and get \$.0.0/
-body __SEEK_BF0CGK  /We have compiled the best slots games for you\. /
-body __SEEK_IGJJZ2  /You can be our next jackpot winner\. Join the game\./
-body __SEEK_PST2G4  /Here are our top ten slots games\. Is your favorite on the list\? /
+body __SEEK_J6V_27  /We signed you up for a special offer - redeem it today\. /
 body __SEEK_U3RSYX  / Online Penis Health \| Size Genetics - What Every Men Need To Know SizeGenetics Review, the No\. 1 Penis enlargement pill/
 body __SEEK_2G9GOP  /SizeGenetics is the only medically proven device guaranteed to: - Increase your penis length\/girth, - Last longer during sex, - Hard rock erection, - Increase sexual appetite\./
 body __SEEK_Z_NJCF  /Visit Size Genetics Now\! http:\/\//
-body __SEEK_ONWZDG  /Our new slots games have big winners\. Join them\! /
-body __SEEK_IPL5DW  /If you would like a chance to win our jackpot, please register here\. /
-body __SEEK_J6V_27  /We signed you up for a special offer - redeem it today\. /
-body __SEEK_EG_OPK  /Do you want us to give your money to someone else\? Claim it now\. /
 body __SEEK_9WEJBV  /Our players are the happiest because we treat them like winners\. /
-body __SEEK_BVYIH2  /Today\'s best players won\'t believe this jackpot /
+body __SEEK_IPL5DW  /If you would like a chance to win our jackpot, please register here\. /
+body __SEEK_EG_OPK  /Do you want us to give your money to someone else\? Claim it now\. /
 body __SEEK__NULZM  /No one has claimed our jackpot\! This is your chance to try\! /
-body __SEEK_YGZ4WS  /If you don\'t try all the games, how will you take all the cash\?/
 body __SEEK_0SIS9H  /We want you to test our new slot machines\. /
+body __SEEK_BVYIH2  /Today\'s best players won\'t believe this jackpot /
+body __SEEK_YGZ4WS  /If you don\'t try all the games, how will you take all the cash\?/
+body __SEEK_HGSA_J  /,000USD bonus is available for withdraw, please start the process here /
 body __SEEK_KELOXU  / an exclusive 20,000USD bonus\. /
 body __SEEK_E2WNZW  /It\'s your turn to play\. Will you take the prize\? /
-body __SEEK_HGSA_J  /,000USD bonus is available for withdraw, please start the process here /
 body __SEEK_GONG0Y  /We will give you \$5000 to play your favorite games\. /
-body __SEEK_W4UANF  / - http:\/\/www\.vipsupergame\.ru/
 body __SEEK_CRSBHN  /Only those who play can win\! /
+body __SEEK_W4UANF  / - http:\/\/www\.vipsupergame\.ru/
 body __SEEK_8QT__P  /Attached is a list of games with the best jackpots online\. /
 body __SEEK_P1NNVI  / - http:\/\/www\.supercasinogreat\.ru/
 body __SEEK_OWBE4P  / - http:\/\/www\.supergamevip\.ru/
 body __SEEK_GR2JR4  / - http:\/\/www\.supergreatcasino\.ru/
 body __SEEK_O7ORRM  / - http:\/\/www\.casino-super-great\.ru/
 body __SEEK_JOO__I  /I can\'t believe they picked you/
-body __SEEK_I42T72  / tracking number are attached in document below\./
+body __SEEK_8YK6NK  /Beat the game, Raise the balance/
 body __SEEK_ICSSKE  / High Quality Swiss Replica Watches from \$130 We provide high quality replica watches combined with a good service\. We offer a huge selection of replica watches of the most popular brands like Breitling, Panerai, Omega and many more\./
 body __SEEK_SRS_GD  /Get youself a quality branded watches from \$130 http:\/\//
-body __SEEK_ON_MY2  /Take \$5000 and go for the jackpot\. /
-body __SEEK_8YK6NK  /Beat the game, Raise the balance/
-body __SEEK_FU8ERA  /It\'s yours\. No questions asked\./
+body __SEEK_I42T72  / tracking number are attached in document below\./
 body __SEEK_TK5BPX  /\@hotmail\.com and i\`ll send you some pictures within 5 mins ;\)/
 body __SEEK_EEUMTQ  /i found your profile on the internet and wanna know you :\) i can send you few hot pictures of me too, i\`m online right now so email me at /
-body __SEEK_2KSKDH  / - http:\/\/www\.casino-great-super\.ru/
-body __SEEK_EBGGKH  / Your package has been returned to the Post Express office\./
-body __SEEK_BHM6XW  /The reason of the return is \"/
 body __SEEK_PO5LDW  /\@hotmail\.com \. im online right now so i can send you my photos in 5 mins :\)/
 body __SEEK_T3GVN7  /i made new pictures for you, some of them are nude :\) i changed my email because my husband found last one\. don\`t use my old email, drop me a line at /
+body __SEEK_ON_MY2  /Take \$5000 and go for the jackpot\. /
+body __SEEK_GNVLPT  /Only at GrandDollar Gaming Club/
+body __SEEK_QI97LQ  /i can send you some nude pictures of me, im nice 23 yo girl :\) please drop me a line at /
 body __SEEK_Q5SKIG  /If you can\'t read or see this email, /
-body __SEEK_WS5FFD  /Don\'t waste time - make money now/
-body __SEEK_ZA0FLG  /Do Not Reply to this Email\. We do not reply to text inquiries, and our server will reject all response traffic\. We apologize for any inconvenience this may have caused you\./
-body __SEEK_7MTDJK  /We are proud to bring you the qualitative diplomas: Bachelor\x{92}s, Master\x{92}s and Doctorate \(PHD\)\. Why people are now considering moving to the land of opportunity\? \x{95} to become financially successful \x{95} to become professionally experienced \x{95} to be a prosperous person Everything you can get easier, faster and cheaper\! Are you interested\? Contact us\. The professional help for everyone is guaranteed\. /
-body __SEEK_M40UB2  /We need your infarmation: 1\) Your Name 2\) Your Country 3\) Telephone No\. with a code of country if you are outside USA/
-body __SEEK_RCQIFQ  /There\'s a lot of loose goods in the internet, here\'s a website where you can get 5,000USD bonus on the spot\! /
-body __SEEK_PARU4V  /We are happy to announce that you have been rewarded with 5,000USD\! You can get it in here /
+body __SEEK_FU8ERA  /It\'s yours\. No questions asked\./
 body __SEEK_SFLADB  / Trackable Courier Service: the packages are send by this postal service can by tracked by the tracking number supplied after the order is shipped\. International Unregistered Airmail We sell all kind of med products\. /
 body __SEEK_WWWOS5  / We use only board certified physicians and U\.S licensed pharmacies/
 body __SEEK_AVGB5X  /------------------------ Best regards, Dr/
 body __SEEK_I1K2MM  /In Our Pharmacy you can buy FDA approved med-products online\!/
 body __SEEK_XQWVZ7  /Our physicians are U\.S licensed/
 body __SEEK_FH0KK9  /We are fully dedicated to your privacy and security\. Please refer to the current privacy policy in the terms \& conditions section of our order page\. We ship Internationally/
-body __SEEK_QI97LQ  /i can send you some nude pictures of me, im nice 23 yo girl :\) please drop me a line at /
-body __SEEK_ZRVTTJ  /You have earned a limited time offer of \$5000\! /
+body __SEEK_XH9MAP  /ignup bonus at GrandDollar Gaming Club\./
+body __SEEK_WS5FFD  /Don\'t waste time - make money now/
+body __SEEK_2KSKDH  / - http:\/\/www\.casino-great-super\.ru/
+body __SEEK_EBGGKH  / Your package has been returned to the Post Express office\./
+body __SEEK_BHM6XW  /The reason of the return is \"/
+body __SEEK_RCQIFQ  /There\'s a lot of loose goods in the internet, here\'s a website where you can get 5,000USD bonus on the spot\! /
+body __SEEK_PARU4V  /We are happy to announce that you have been rewarded with 5,000USD\! You can get it in here /
+body __SEEK_VHQNK0  / signup bonus when you register\./
+body __SEEK_ZA0FLG  /Do Not Reply to this Email\. We do not reply to text inquiries, and our server will reject all response traffic\. We apologize for any inconvenience this may have caused you\./
+body __SEEK_7MTDJK  /We are proud to bring you the qualitative diplomas: Bachelor\x{92}s, Master\x{92}s and Doctorate \(PHD\)\. Why people are now considering moving to the land of opportunity\? \x{95} to become financially successful \x{95} to become professionally experienced \x{95} to be a prosperous person Everything you can get easier, faster and cheaper\! Are you interested\? Contact us\. The professional help for everyone is guaranteed\. /
+body __SEEK_M40UB2  /We need your infarmation: 1\) Your Name 2\) Your Country 3\) Telephone No\. with a code of country if you are outside USA/
 body __SEEK_EO_3_A  /Get an amazing 5,000USD bonus on the house /
+body __SEEK_ZRVTTJ  /You have earned a limited time offer of \$5000\! /
+body __SEEK_XIBUHD  / To unsubscribe please go here or send mail to: /
 body __SEEK_H2ZQDQ  /Play today\'s featured games and get \$5000 extra /
+body __SEEK_260JPR  / get your free no-deposit bonus/
 body __SEEK_JAPAJQ  /Go to this website and get your exclusive 5,000 bonus - You definitely deserve it\! /
 body __SEEK_TCDMIW  /There\'s an unbelievable 5,000USD Bonus offer in this website, it\'s available only today\! /
-body __SEEK_XIBUHD  / To unsubscribe please go here or send mail to: /
 body __SEEK_7WKFMN  /Take \$20,000 and go for the jackpot\. http:\/\/www\./
-body __SEEK__1USBZ  /We are happy to announce that you have been rewarded with 20,000USD\! You can get it in here - http:\/\/www\./
 body __SEEK_DT1VGB  /Gregory-Christopher Group report/
-body __SEEK_GNVLPT  /Only at GrandDollar Gaming Club/
+body __SEEK__1USBZ  /We are happy to announce that you have been rewarded with 20,000USD\! You can get it in here - http:\/\/www\./
+body __SEEK_RMBCLV  /Head over to GrandDollar Gaming Club/
+body __SEEK_01B_AA  / free USD 12,500 signup bonus\./
 body __SEEK_OE6ZKQ  /You have earned a limited time offer of \$20,000\! http:\/\/www\./
-body __SEEK_VNORN8  /Go to this website and get your exclusive 20,000 bonus - You definitely deserve it\! http:\/\/www\./
 body __SEEK_XB4Q93  /There\'s a lot of loose goods in the internet, here\'s a website where you can get 20,000USD bonus on the spot\! http:\/\/www\./
-body __SEEK_8NJQEZ  /t by Gregory-Christopher Group/
-body __SEEK_XH9MAP  /ignup bonus at GrandDollar Gaming Club\./
+body __SEEK_VNORN8  /Go to this website and get your exclusive 20,000 bonus - You definitely deserve it\! http:\/\/www\./
+body __SEEK_DIJ4TN  / p\x{e5}\x{e3}uc\x{f2}\x{e0}p\x{e0}\x{f6}uu \x{ee}\x{e1}p\x{e0}\x{f9}\x{e0}\x{e9}\x{f2}\x{e5}c\x{fc} \x{ef}\x{ee} \x{f2}\x{e5}\x{eb}: /
 body __SEEK_ZLGBOB  /Get an amazing 20,000USD bonus on the house - http:\/\/www\./
-body __SEEK_D4MIIF  /\+FREE 10 VIAGRA\! CIALIS 120 Pills - \$246\.80, We accept VISA \& MasterCard\. Worldwide Shipping/
+body __SEEK_8NJQEZ  /t by Gregory-Christopher Group/
 body __SEEK_KFCMHS  /Play today\'s featured games and get \$20,000 extra http:\/\/www\./
+body __SEEK_D4MIIF  /\+FREE 10 VIAGRA\! CIALIS 120 Pills - \$246\.80, We accept VISA \& MasterCard\. Worldwide Shipping/
 body __SEEK_M4OAUU  /The All-Natural Male Enhancement Formula, Add 3-inches more to your SHORT PENIS\!/
+body __SEEK_4FR9IY  /egister for free signup bonus\./
+body __SEEK_PMR7EO  / Tel:\x{a3}\x{a8}020\x{a3}\x{a9}61133775 \x{d5}\x{c5}\x{c3}\x{f4}\x{a3}\x{a8}0755\x{a3}\x{a9}61289820 \x{b0}\x{d7}\x{de}\x{b1}/
+body __SEEK_ARWZ1C  /\x{a3}\x{a8}021\x{a3}\x{a9}51870612 \x{b2}\x{dc}\x{d1}\x{a9}\x{a3}\x{a8}010\x{a3}\x{a9}51295409 \x{ce}\x{c4}\x{c7}\x{e5}/
 body __SEEK_XB3U_6  /Designer Replica Handbags, Replica Handbags from \$300, 100\% Satisfaction Guaranteed\./
+body __SEEK_FDF8WG  / Grand-Dollar Club, the signup bonus is /
 body __SEEK_LOQ9QE  /Generic Cialis \(Tadalafil\) 2\.5mg x 40 = \$78\.00, limited period discount/
 body __SEEK_UJX9FS  / games\. http:\/\/www\.supergreatcasino\.ru/
 body __SEEK_YX0XDI  /ORDER HERE \.\.\. LowestPrices Online\! http:\/\/meds-for-you\.ru/
-body __SEEK_VHQNK0  / signup bonus when you register\./
 body __SEEK_4OPVDO  /ORDER HERE \.\.\. LowestPrices Online\! http:\/\/meds-4you\.ru/
 body __SEEK_CV0K26  /The Gregory-Christopher Group /
-body __SEEK_260JPR  / get your free no-deposit bonus/
-body __SEEK_DIJ4TN  / p\x{e5}\x{e3}uc\x{f2}\x{e0}p\x{e0}\x{f6}uu \x{ee}\x{e1}p\x{e0}\x{f9}\x{e0}\x{e9}\x{f2}\x{e5}c\x{fc} \x{ef}\x{ee} \x{f2}\x{e5}\x{eb}: /
+body __SEEK_XYHO1E  / p\x{c5}\x{c7}uc\x{d4}\x{c1}p\x{c1}\x{c3}uu \x{cf}\x{c2}p\x{c1}\x{dd}\x{c1}\x{ca}\x{d4}\x{c5}c\x{d8} \x{d0}\x{cf} \x{d4}\x{c5}\x{cc}: /
 body __SEEK_OAABN8  / games\. http:\/\/www\.vipsupergame\.ru/
-body __SEEK_5CTTGM  / games\. http:\/\/www\.supergamevip\.ru/
 body __SEEK_ATMO2W  / games\. http:\/\/www\.gamesupervip\.ru/
 body __SEEK_DVMKOD  / from under \$0\.25 to over \$1\.25/
 body __SEEK_WB1JWV  /Louis Vuitton handbags and other premium designer replica handbags with very low cost - from \$300/
-body __SEEK_FDF8WG  / Grand-Dollar Club, the signup bonus is /
+body __SEEK_5CTTGM  / games\. http:\/\/www\.supergamevip\.ru/
+body __SEEK_HCFPTK  /ORDER HERE \.\.\. LowestPrices Online\! http:\/\/rx-4-you\.ru/
 body __SEEK_ESYOKM  /U\.S\. Special \x{96} 5,000USD Bonus/
-body __SEEK_01B_AA  / free USD 12,500 signup bonus\./
-body __SEEK_PMR7EO  / Tel:\x{a3}\x{a8}020\x{a3}\x{a9}61133775 \x{d5}\x{c5}\x{c3}\x{f4}\x{a3}\x{a8}0755\x{a3}\x{a9}61289820 \x{b0}\x{d7}\x{de}\x{b1}/
-body __SEEK_ARWZ1C  /\x{a3}\x{a8}021\x{a3}\x{a9}51870612 \x{b2}\x{dc}\x{d1}\x{a9}\x{a3}\x{a8}010\x{a3}\x{a9}51295409 \x{ce}\x{c4}\x{c7}\x{e5}/
-body __SEEK_SPMWSU  /FW: You are entitled to 5,000USD/
-body __SEEK_UZPTRO  /Americans are getting 5,000USD bonus/
+body __SEEK_H3B61M  /We don\x{92}t give you a scepter and a purple robe when you register; but we do give you a really royal signup bonus\. /
+body __SEEK_EMBPDK  /hi sweetie\.\.\. sending you my naked picture i made today, hope you like it :\) c ya tommorow/
+body __SEEK_EZNYQP  /The bonus money\x{92}s easy to get, it\x{92}s real, and so will your winnings be\. Register for free bonus\./
+body __SEEK_TYK3X1  /Regal treatment begins with a USD 12,500 no-deposit signup bonus\./
 body __SEEK_JSKYA8  /Get your 5,000USD bonus in here/
-body __SEEK_5EE4XE  /FW: Your 20,000USD bonus has arrived/
+body __SEEK_SPMWSU  /FW: You are entitled to 5,000USD/
 body __SEEK_7GQWUP  /FW: Your 5,000USD bonus has arrived/
-body __SEEK_RMBCLV  /Head over to GrandDollar Gaming Club/
-body __SEEK_XYHO1E  / p\x{c5}\x{c7}uc\x{d4}\x{c1}p\x{c1}\x{c3}uu \x{cf}\x{c2}p\x{c1}\x{dd}\x{c1}\x{ca}\x{d4}\x{c5}c\x{d8} \x{d0}\x{cf} \x{d4}\x{c5}\x{cc}: /
-body __SEEK_WUVYHG  /Get your 20,000USD bonus in here/
+body __SEEK_WKC_0R  /Check out Grand Dollar Club for cool weekly surprise bonuses\. A great reason to be there for the fun\. There are more than 100 games to choose from\. It\x{92}s a free download and you can preview the games to your heart\x{92}s content\. /
+body __SEEK_GTZO_Q  /The bonuses start flowing the moment you sign up at Grand-Dollar Club\. Signup and get instant free bonus\./
+body __SEEK_X6MD_9  /Give this a second thought if you insist, but you\x{92}re going to take the USD 12,500 signup bonus and we both know it\./
+body __SEEK_UZPTRO  /Americans are getting 5,000USD bonus/
 
-meta JM_SOUGHT_3   (__SEEK_FQ8MSD || __SEEK_SG1WTC || __SEEK_Q_O_6K || __SEEK_KBU1GA || __SEEK_MLBYTE || __SEEK_MV3JZU || __SEEK_Q6F8Z_ || __SEEK_HQWUO_ || __SEEK_LG1OGH || __SEEK_BB_4NE || __SEEK_00XEVK || __SEEK_H6SU0L || __SEEK_HVL7UD || __SEEK_QDPUWZ || __SEEK_F1AQ5Y || __SEEK_VMMOMU || __SEEK_IWMMR3 || __SEEK_8HIGZF || __SEEK_V1XVWG || __SEEK_CSD9_I || __SEEK_QMOMAW || __SEEK_K6MSII || __SEEK_V59Y0_ || __SEEK_AQ_HYX || __SEEK_1DKZCK || __SEEK_SJ9MTI || __SEEK_IIQA_3 || __SEEK_KZF6PN || __SEEK_YYEOXB || __SEEK_6TU7QZ || __SEEK_3MRRRY || __SEEK_HFKUJZ || __SEEK_WKOWGJ || __SEEK_NQ2_LA || __SEEK_KKTUY_ || __SEEK_RRIPWN || __SEEK_EGGUL2 || __SEEK_PU8Q9L || __SEEK_C9HJ6N || __SEEK_OVJ5MD || __SEEK_YGP6EF || __SEEK_UQE5BP || __SEEK_T53_DY || __SEEK_MHA8MM || __SEEK_FLF6XA || __SEEK_LI6X_F || __SEEK_R0QPPY || __SEEK_GZB86B || __SEEK_IRLN8X || __SEEK_NX_AMB || __SEEK_VMVQ_T || __SEEK_PDU8FN || __SEEK_5KQD3H || __SEEK_T1LJNE || __SEEK_591Z_Q || __SEEK_BG5A8B || __SEEK_D5OQ0R || __SEEK_LYJVX_ || __SEEK_HNRUMY || __SEEK_HEFBMD || __SEEK_N22BLP || __SEEK_W4VGTI || __SEEK_BF0CGK || __SEEK_IGJJZ2 || __SEEK_PST2G4 || __SEEK_U3RSYX || __SEEK_2G9GOP || __SEEK_Z_NJCF || __SEEK_ONWZDG || __SEEK_IPL5DW || __SEEK_J6V_27 || __SEEK_EG_OPK || __SEEK_9WEJBV || __SEEK_BVYIH2 || __SEEK__NULZM || __SEEK_YGZ4WS || __SEEK_0SIS9H || __SEEK_KELOXU || __SEEK_E2WNZW || __SEEK_HGSA_J || __SEEK_GONG0Y || __SEEK_W4UANF || __SEEK_CRSBHN || __SEEK_8QT__P || __SEEK_P1NNVI || __SEEK_OWBE4P || __SEEK_GR2JR4 || __SEEK_O7ORRM || __SEEK_JOO__I || __SEEK_I42T72 || __SEEK_ICSSKE || __SEEK_SRS_GD || __SEEK_ON_MY2 || __SEEK_8YK6NK || __SEEK_FU8ERA || __SEEK_TK5BPX || __SEEK_EEUMTQ || __SEEK_2KSKDH || __SEEK_EBGGKH || __SEEK_BHM6XW || __SEEK_PO5LDW || __SEEK_T3GVN7 || __SEEK_Q5SKIG || __SEEK_WS5FFD || __SEEK_ZA0FLG || __SEEK_7MTDJK || __SEEK_M40UB2 || __SEEK_RCQIFQ || __SEEK_PARU4V || __SEEK_SFLADB || __SEEK_WWWOS5 || __SEEK_AVGB5X || __SEEK_I1K2MM || __SEEK_XQWVZ7 || __SEEK_FH0KK9 || __SEEK_QI97LQ || __SEEK_ZRVTTJ || __SEEK_EO_3_A || __SEEK_H2ZQDQ || __SEEK_JAPAJQ || __SEEK_TCDMIW || __SEEK_XIBUHD || __SEEK_7WKFMN || __SEEK__1USBZ || __SEEK_DT1VGB || __SEEK_GNVLPT || __SEEK_OE6ZKQ || __SEEK_VNORN8 || __SEEK_XB4Q93 || __SEEK_8NJQEZ || __SEEK_XH9MAP || __SEEK_ZLGBOB || __SEEK_D4MIIF || __SEEK_KFCMHS || __SEEK_M4OAUU || __SEEK_XB3U_6 || __SEEK_LOQ9QE || __SEEK_UJX9FS || __SEEK_YX0XDI || __SEEK_VHQNK0 || __SEEK_4OPVDO || __SEEK_CV0K26 || __SEEK_260JPR || __SEEK_DIJ4TN || __SEEK_OAABN8 || __SEEK_5CTTGM || __SEEK_ATMO2W || __SEEK_DVMKOD || __SEEK_WB1JWV || __SEEK_FDF8WG || __SEEK_ESYOKM || __SEEK_01B_AA || __SEEK_PMR7EO || __SEEK_ARWZ1C || __SEEK_SPMWSU || __SEEK_UZPTRO || __SEEK_JSKYA8 || __SEEK_5EE4XE || __SEEK_7GQWUP || __SEEK_RMBCLV || __SEEK_XYHO1E || __SEEK_WUVYHG)
+meta JM_SOUGHT_3   (__SEEK_FQ8MSD || __SEEK_SG1WTC || __SEEK_Q6F8Z_ || __SEEK_HQWUO_ || __SEEK_BB_4NE || __SEEK_00XEVK || __SEEK_H6SU0L || __SEEK_Q_O_6K || __SEEK_MV3JZU || __SEEK_KBU1GA || __SEEK_MLBYTE || __SEEK_LG1OGH || __SEEK_HVL7UD || __SEEK_QMOMAW || __SEEK_QDPUWZ || __SEEK_F1AQ5Y || __SEEK_VMMOMU || __SEEK_IWMMR3 || __SEEK_8HIGZF || __SEEK_K6MSII || __SEEK_V1XVWG || __SEEK_CSD9_I || __SEEK_V59Y0_ || __SEEK_6TU7QZ || __SEEK_HFKUJZ || __SEEK_AQ_HYX || __SEEK_1DKZCK || __SEEK_SJ9MTI || __SEEK_IIQA_3 || __SEEK_KZF6PN || __SEEK_3MRRRY || __SEEK_YYEOXB || __SEEK_WKOWGJ || __SEEK_NQ2_LA || __SEEK_KKTUY_ || __SEEK_EGGUL2 || __SEEK_RRIPWN || __SEEK_OVJ5MD || __SEEK_PU8Q9L || __SEEK_C9HJ6N || __SEEK_GZB86B || __SEEK_FLF6XA || __SEEK_LI6X_F || __SEEK_MHA8MM || __SEEK_UQE5BP || __SEEK_YGP6EF || __SEEK_T53_DY || __SEEK_R0QPPY || __SEEK_IRLN8X || __SEEK_T1LJNE || __SEEK_591Z_Q || __SEEK_NX_AMB || __SEEK_VMVQ_T || __SEEK_PDU8FN || __SEEK_BG5A8B || __SEEK_5KQD3H || __SEEK_D5OQ0R || __SEEK_HNRUMY || __SEEK_IGJJZ2 || __SEEK_BF0CGK || __SEEK_HEFBMD || __SEEK_PST2G4 || __SEEK_LYJVX_ || __SEEK_ONWZDG || __SEEK_N22BLP || __SEEK_W4VGTI || __SEEK_J6V_27 || __SEEK_U3RSYX || __SEEK_2G9GOP || __SEEK_Z_NJCF || __SEEK_9WEJBV || __SEEK_IPL5DW || __SEEK_EG_OPK || __SEEK__NULZM || __SEEK_0SIS9H || __SEEK_BVYIH2 || __SEEK_YGZ4WS || __SEEK_HGSA_J || __SEEK_KELOXU || __SEEK_E2WNZW || __SEEK_GONG0Y || __SEEK_CRSBHN || __SEEK_W4UANF || __SEEK_8QT__P || __SEEK_P1NNVI || __SEEK_OWBE4P || __SEEK_GR2JR4 || __SEEK_O7ORRM || __SEEK_JOO__I || __SEEK_8YK6NK || __SEEK_ICSSKE || __SEEK_SRS_GD || __SEEK_I42T72 || __SEEK_TK5BPX || __SEEK_EEUMTQ || __SEEK_PO5LDW || __SEEK_T3GVN7 || __SEEK_ON_MY2 || __SEEK_GNVLPT || __SEEK_QI97LQ || __SEEK_Q5SKIG || __SEEK_FU8ERA || __SEEK_SFLADB || __SEEK_WWWOS5 || __SEEK_AVGB5X || __SEEK_I1K2MM || __SEEK_XQWVZ7 || __SEEK_FH0KK9 || __SEEK_XH9MAP || __SEEK_WS5FFD || __SEEK_2KSKDH || __SEEK_EBGGKH || __SEEK_BHM6XW || __SEEK_RCQIFQ || __SEEK_PARU4V || __SEEK_VHQNK0 || __SEEK_ZA0FLG || __SEEK_7MTDJK || __SEEK_M40UB2 || __SEEK_EO_3_A || __SEEK_ZRVTTJ || __SEEK_XIBUHD || __SEEK_H2ZQDQ || __SEEK_260JPR || __SEEK_JAPAJQ || __SEEK_TCDMIW || __SEEK_7WKFMN || __SEEK_DT1VGB || __SEEK__1USBZ || __SEEK_RMBCLV || __SEEK_01B_AA || __SEEK_OE6ZKQ || __SEEK_XB4Q93 || __SEEK_VNORN8 || __SEEK_DIJ4TN || __SEEK_ZLGBOB || __SEEK_8NJQEZ || __SEEK_KFCMHS || __SEEK_D4MIIF || __SEEK_M4OAUU || __SEEK_4FR9IY || __SEEK_PMR7EO || __SEEK_ARWZ1C || __SEEK_XB3U_6 || __SEEK_FDF8WG || __SEEK_LOQ9QE || __SEEK_UJX9FS || __SEEK_YX0XDI || __SEEK_4OPVDO || __SEEK_CV0K26 || __SEEK_XYHO1E || __SEEK_OAABN8 || __SEEK_ATMO2W || __SEEK_DVMKOD || __SEEK_WB1JWV || __SEEK_5CTTGM || __SEEK_HCFPTK || __SEEK_ESYOKM || __SEEK_H3B61M || __SEEK_EMBPDK || __SEEK_EZNYQP || __SEEK_TYK3X1 || __SEEK_JSKYA8 || __SEEK_SPMWSU || __SEEK_7GQWUP || __SEEK_WKC_0R || __SEEK_GTZO_Q || __SEEK_X6MD_9 || __SEEK_UZPTRO)
 score JM_SOUGHT_3  4.0
 describe JM_SOUGHT_3  Body contains frequently-spammed text patterns
