@@ -2001,20 +2001,25 @@ compiled rules.
 When a message is passed to Mail::SpamAssassin::parse, a deadline time
 is established as a sum of current time and the C<time_limit> setting.
 
-This deadline may be overruled by a caller through option 'master_deadline'
-in $suppl_attrib on a call to parse(), possibly providing a more accurate
-deadline taking into account past and expected future processing of a
-message in a mail filtering setup. Note that spamd (and possibly some
-third-party callers of SpamAssassin) will overrule the C<time_limit> setting
-based on its --timeout-child option, unlike the command line C<spamassassin>,
-which has no such command line option.
+This deadline may also be specified by a caller through an option
+'master_deadline' in $suppl_attrib on a call to parse(), possibly providing
+a more accurate deadline taking into account past and expected future
+processing of a message in a mail filtering setup. If both the config
+option as well as a 'master_deadline' option in a call are provided,
+the shorter time limit of the two is used (since version 3.3.2).
+Note that spamd (and possibly third-party callers of SpamAssassin) will
+supply the 'master_deadline' option in a call based on its --timeout-child
+option (or equivalent), unlike the command line C<spamassassin>, which has
+no such command line option.
 
 When a time limit is exceeded, most of the remaining tests will be skipped,
 as well as auto-learning. Whatever tests fired so far will determine the
 final score. The behaviour is similar to short-circuiting with attribute 'on',
 as implemented by a Shortcircuit plugin. A synthetic hit on a rule named
-TIME_LIMIT_EXCEEDED with a near-zero score is generated, so that the report
-will reflect the event.
+TIME_LIMIT_EXCEEDED with a near-zero default score is generated, so that
+the report will reflect the event. A score for TIME_LIMIT_EXCEEDED may
+be provided explicitly in a configuration file, for example to achieve
+whitelisting or blacklisting effect for messages with long processing times.
 
 The C<time_limit> option is a useful protection against excessive processing
 time on certain degenerate or unusually long or complex mail messages, as well

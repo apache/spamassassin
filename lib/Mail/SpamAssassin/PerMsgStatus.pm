@@ -2335,7 +2335,13 @@ data:
 
 Optional: the score to use for the rule hit.  If unspecified,
 the value from the C<Mail::SpamAssassin::Conf> object's C<{scores}>
-hash will be used.
+hash will be used (a configured score), and in its absence the
+C<defscore> option value.
+
+=item defscore => $num
+
+Optional: the score to use for the rule hit if neither the
+option C<score> is provided, nor a configured score value is provided.
 
 =item value => $num
 
@@ -2376,10 +2382,11 @@ sub got_hit {
 
   my $dynamic_score_provided;
   my $score = $params{score};
-  if (defined $score) {
+  if (defined $score) {  # overrides any configured scores
     $dynamic_score_provided = 1;
   } else {
     $score = $conf_ref->{scores}->{$rule};
+    $score = $params{defscore}  if !defined $score;
   }
 
   # adding a hit does nothing if we don't have a score -- we probably

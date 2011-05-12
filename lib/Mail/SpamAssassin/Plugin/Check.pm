@@ -57,10 +57,13 @@ sub check_main {
     dbg("check: adding caller rule hits, %d rules", scalar(@caller_rule_hits));
     for my $caller_rule_hit (@caller_rule_hits) {
       next if ref $caller_rule_hit ne 'HASH';
-      my($rulename, $area, $score, $value, $ruletype, $tflags, $description) =
-        @$caller_rule_hit{qw(rule area score value ruletype tflags descr)};
+      my($rulename, $area, $score, $defscore, $value,
+         $ruletype, $tflags, $description) =
+        @$caller_rule_hit{qw(rule area score defscore value
+                             ruletype tflags descr)};
       $pms->got_hit($rulename, $area,
                     !defined $score ? () : (score => $score),
+                    !defined $defscore ? () : (defscore => $defscore),
                     !defined $value ? () : (value => $value),
                     !defined $tflags ? () : (tflags => $tflags),
                     !defined $description ? () : (description => $description),
