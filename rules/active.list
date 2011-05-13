@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix darxus-trap darxus dos grenier jarif kgolding llanga nbebout wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1; day 2: bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus-trap darxus dos grenier jarif jm kgolding llanga nbebout wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1; day 3: bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus-trap darxus dos grenier jarif kgolding llanga nbebout wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1
+# with results from: day 1: bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix darxus-trap darxus dos grenier jarif kgolding llanga nbebout wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1; day 2: bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix darxus-trap darxus dos grenier jarif kgolding llanga nbebout wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1; day 3: bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus-trap darxus dos grenier jarif jm kgolding llanga nbebout wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1
 
 # tflags 
 ADVANCE_FEE_2_NEW_FORM
@@ -293,6 +293,9 @@ FROM_MISSP_URI
 FROM_MISSP_USER
 
 # good enough
+FROM_ONE_CHAR
+
+# good enough
 FRT_BIGGERMEM1
 
 # good enough
@@ -330,6 +333,9 @@ FSL_XM_419
 
 # good enough
 FS_ABIGGER
+
+# good enough
+FS_GET_LAID
 
 # good enough
 FS_MAKE_MONEY
@@ -444,6 +450,9 @@ KB_DATE_CONTAINS_TAB
 
 # good enough
 KB_FAKED_THE_BAT
+
+# good enough
+KB_FORGED_MOZ4
 
 # good enough
 KB_RATWARE_MSGID
@@ -821,6 +830,9 @@ TO_NO_BRKTS_HTML_ONLY
 TO_NO_BRKTS_MSFT
 
 # good enough
+TO_NO_BRKTS_NORDNS
+
+# good enough
 TO_NO_BRKTS_NORDNS_HTML
 
 # good enough
@@ -855,24 +867,6 @@ TVD_RCVD_SINGLE
 
 # good enough
 TVD_VISIT_PHARMA
-
-# good enough
-FROM_ONE_CHAR
-
-# good enough
-FSL_MISSP_REPLYTO
-
-# good enough
-FS_GET_LAID
-
-# good enough
-HK_SCAM_N3
-
-# good enough
-KB_FORGED_MOZ4
-
-# good enough
-TO_NO_BRKTS_NORDNS
 
 # tflags userconf
 UNPARSEABLE_RELAY
@@ -1035,9 +1029,6 @@ XMAILER_MIMEOLE_OL_BC7E6
 
 # good enough
 XMAILER_MIMEOLE_OL_C65FA
-
-# good enough
-XMAILER_MIMEOLE_OL_CAC8F
 
 # good enough
 XMAILER_MIMEOLE_OL_CF0C0
