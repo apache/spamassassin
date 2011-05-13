@@ -638,7 +638,12 @@ uri         __UPPERCASE_URI        /^[^:A-Z]+[A-Z]/
 header      __SINGLE_HEADER_1K     ALL:raw =~ /(?-xim:(?=(?!X-Spam|X-MailScan)(?:^|\n)[^\s\n]+:(?:.(?!\n\S)){1024,2047}.(?:\n\S|$)))/s 
 
 # __ version of mmartinec RP_MATCHES_RCVD, for use in metas
-header      __RP_MATCHES_RCVD      eval:check_mailfrom_matches_rcvd()
+
+if version >= 3.003000
+ifplugin Mail::SpamAssassin::Plugin::WLBLEval
+  header      __RP_MATCHES_RCVD      eval:check_mailfrom_matches_rcvd()
+endif
+endif
 
 # for sale newsletters
 if can(Mail::SpamAssassin::Conf::feature_bug6558_free)
@@ -698,7 +703,7 @@ meta        GAPPY_HTML             __GAPPY_HTML && !__UNSUB_LINK
 describe    GAPPY_HTML             HTML body with much useless whitespace
 
 # Try to improve S/O per bug 6119
-meta        TVD_SPACE_RATIO_MINFP  __TVD_SPACE_RATIO && !__OBFUSCATING_COMMENT_B && !WEIRD_QUOTING && !__NOT_SPOOFED && !__BUGGED_IMG
+meta        TVD_SPACE_RATIO_MINFP  __TVD_SPACE_RATIO && !__OBFUSCATING_COMMENT_B && !WEIRD_QUOTING && !__NOT_SPOOFED && !__BUGGED_IMG && !__ML1 && !__DOS_HAS_LIST_UNSUB
 tflags      TVD_SPACE_RATIO_MINFP  nopublish
 
 
