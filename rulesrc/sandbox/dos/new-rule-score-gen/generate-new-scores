@@ -148,6 +148,8 @@ cd ../..
 # copy the support scripts to masses/ of the scoreset's checkout; this lets us
 # contain all the new score generation scripts in their own directory and keeps
 # us from having to pass the checkout path as an argument to each of the scripts
+# NOTE: lock-scores now uses existing scores (even commented out) in 72_active.cf
+# as absolute maximum values to be inserted in tmp/ranges.data
 cp lock-scores trunk-new-rules-set$SCORESET/masses/lock-scores
 cp extract-new-scores trunk-new-rules-set$SCORESET/masses/extract-new-scores
 cp add-hitless-active-to-freqs trunk-new-rules-set$SCORESET/masses/add-hitless-active-to-freqs
