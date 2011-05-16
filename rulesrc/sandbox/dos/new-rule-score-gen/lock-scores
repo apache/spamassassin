@@ -8,6 +8,9 @@
 # locks the score ranges for the base release rules to their original scores
 # from 50_scores.cf
 #
+# the script also uses existing scores in 72_active.cf (even commented ones)
+# to set the absolute min or max score in the ranges.data file
+#
 # if called with a 1 parameter new rules that aren't in the most current copy
 # of the active.list file will be locked to zero so that the GA can ignore
 # rules that aren't in the most current update (this is used for zeroing rules
@@ -37,6 +40,7 @@ use warnings;
 my $scoreset = 0; # default
 
 my %rulescores;
+my %newrulescores;
 my %currently_active;
 
 my $only_currently_active_rules = (defined $ARGV[0] && $ARGV[0] == 1 ? 1 : 0);
@@ -66,6 +70,21 @@ while(<ORIG>) {
 }
 close ORIG;
 
+open(ORIG, "../rules/72_active.cf") or die "Cannot open original score file: $!";
+while(<ORIG>) {
+  if (/^(?:\#\s*)?score/) {
+    /^(?:\#\s*)?score\s+(\S+)\s+(-?[\d.]+)(?:\s+(-?[\d.]+)\s+(-?[\d.]+)\s+(-?[\d.]+))?/;
+    my @scores;
+    if (defined $3) {
+      push @scores, ($2, $3, $4, $5);
+    } else {
+      push @scores, ($2, $2, $2, $2);
+    }
+    $newrulescores{$1} = $scores[$scoreset];
+  }
+}
+close ORIG;
+
 if ($only_currently_active_rules) {
   open(ACTIVE, "../rules-current/active.list") or die "Cannot open rules-current/active.list: $!";
   while(<ACTIVE>) {
@@ -77,15 +96,24 @@ if ($only_currently_active_rules) {
 open(ORIG, "tmp/ranges.data") or die "Cannot open original range.data file: $!";
 open(NEW, ">tmp/ranges.data-new") or die "Cannot open range.data-new file: $!";
 while (<ORIG>) {
-  if (/^(?:(?:-?[\d.]+) ){3}(\S+)$/) {
-    if (defined $rulescores{$1}) {
-      print NEW "$rulescores{$1} $rulescores{$1} 0 $1\n";
+#  if (/^(?:(?:-?[\d.]+) ){3}(\S+)$/) {
+  if (/^(-?[\d.]+) (-?[\d.]+) (-?[\d.]+) (\S+)$/) {
+    if (defined $rulescores{$4}) {
+      print NEW "$rulescores{$4} $rulescores{$4} 0 $4\n";
     } else {
       if ($only_currently_active_rules) {
-        if (exists $currently_active{$1}) {
-          print NEW $_;
+        if (exists $currently_active{$4}) {
+          if (defined $newrulescores{$4}) {
+            if ($newrulescores{$4} > 0) {
+              print NEW "0 $newrulescores{$4} $3 $4\n"
+            } else {
+              print NEW "$newrulescores{$4} 0 $3 $4\n"
+            }
+          } else {
+            print NEW $_;
+          }
         } else {
-          print NEW "0 0 0 $1\n";
+          print NEW "0 0 0 $4\n";
         }
       } else {
         print NEW $_;
