@@ -1,6 +1,6 @@
 =head1 NAME
 
-Mail::SpamAssassin::Plugin::OneLineBodyRuleType
+Mail::SpamAssassin::Plugin::OneLineBodyRuleType - spamassassin body test plugin
 
 =cut
 

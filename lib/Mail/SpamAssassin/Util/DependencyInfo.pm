@@ -17,6 +17,16 @@
 # limitations under the License.
 # </@LICENSE>
 
+=head1 NAME
+
+Mail:SpamAssassin::Util::DependencyInfo - spamassassin debugging helpers
+
+=head1 SYNOPSIS
+
+loadplugin Mail:SpamAssassin::Util::DependencyInfo
+
+=cut
+
 package Mail::SpamAssassin::Util::DependencyInfo;
 
 use strict;
@@ -217,6 +227,8 @@ $have_sha ? {
 );
 
 ###########################################################################
+
+=head1 METHODS
 
 =over 4
 
