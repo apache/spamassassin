@@ -169,9 +169,13 @@ Examples:
 
   asn_lookup in1tag.example.net _ASNDATA_ _ASNDATA_
 
+=back
+
 =over 4
 
 =item clear_asn_lookups
+
+=back
 
 Removes any previously declared I<asn_lookup> entries from a list of queries.
 
