@@ -18,6 +18,12 @@
 # limitations under the License.
 # </@LICENSE>
 
+=head1 NAME
+
+Mail::SpamAssassin::Util::RegistrarBoundaries - domain delegation rules
+
+=cut
+
 package Mail::SpamAssassin::Util::RegistrarBoundaries;
 
 use strict;
@@ -286,6 +292,8 @@ foreach (qw/
 }
 
 ###########################################################################
+
+=head1 METHODS
 
 =over 4
 

@@ -56,6 +56,8 @@ Specify a domain, or a number of domains, which should be skipped for the
 URIBL checks.  This is very useful to specify very common domains which are
 not going to be listed in URIBLs.
 
+=back
+
 =over 4
 
 =item clear_uridnsbl_skip_domain [domain1 domain2 ...]

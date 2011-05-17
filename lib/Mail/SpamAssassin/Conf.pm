@@ -2965,7 +2965,7 @@ out the wanted username. Note that the filter expression is being used in a
 sprintf statement with the username as the only parameter, thus is can hold a
 single __USERNAME__ expression. This will be replaced with the username.
 
-Example: C<ldap://localhost:389/dc=koehntopp,dc=de?spamassassinconfig?uid=__USERNAME__>
+Example: C<ldap://localhost:389/dc=koehntopp,dc=de?saconfig?uid=__USERNAME__>
 
 =cut
 
