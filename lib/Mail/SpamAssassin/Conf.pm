@@ -1373,7 +1373,11 @@ but they may be in the future.
       unless (defined $value && $value !~ /^$/) {
 	return $MISSING_REQUIRED_VALUE;
       }
-      push(@{$self->{originating_ip_headers}}, split(/\s+/, $value));
+      foreach my $hfname (split(/\s+/, $value)) {
+        # avoid duplicates, consider header field names case-insensitive
+        push(@{$self->{originating_ip_headers}}, $hfname)
+          if !grep(lc($_) eq lc($hfname), @{$self->{originating_ip_headers}});
+      }
     }
   });
 

@@ -613,8 +613,7 @@ while (1) {
             "add_header all Trusted _RELAYSTRUSTED_\n".
             "clear_trusted_networks\n".
             "clear_internal_networks\n".
-            "clear_msa_networks\n".
-            "originating_ip_headers X-Originating-IP\n";
+            "clear_msa_networks\n";
 
   if ($hdrs =~ s/^\s*(trusted_networks\s+[^\n]*)//gs) {
     $conf .= $1."\n";
@@ -631,7 +630,7 @@ while (1) {
   my $netset_warn = 0;
   my $fh;
   if ($expected =~ s/^\s*Netset-Warn\s*//) {    
-    # create a file descriptior for logging STDERR
+    # create a file descriptor for logging STDERR
     # (we do not want warnings for regexps we know are invalid)
     $fh = IO::File->new_tmpfile();
     open(STDERR, ">&".fileno($fh)) || die "Cannot create LOGERR temp file";
