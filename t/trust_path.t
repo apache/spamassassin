@@ -613,7 +613,8 @@ while (1) {
             "add_header all Trusted _RELAYSTRUSTED_\n".
             "clear_trusted_networks\n".
             "clear_internal_networks\n".
-            "clear_msa_networks\n";
+            "clear_msa_networks\n".
+            "originating_ip_headers X-Originating-IP\n";
 
   if ($hdrs =~ s/^\s*(trusted_networks\s+[^\n]*)//gs) {
     $conf .= $1."\n";
