@@ -83,9 +83,6 @@ SPAMASSASSIN RELEASE PROCEDURE
   then 'svn update' in the release account -- since I think it
   builds from a read-only checkout.]
 
-- check "spamassassin.spec" has the right version number in the
-  "%define real_version" line.  Fix if not.
-
 - Ensure the new version number takes hold:
 
     make clean ; perl Makefile.PL < /dev/null ; make
@@ -267,9 +264,6 @@ SPAMASSASSIN RELEASE PROCEDURE
 - In the new development codeline, edit lib/Mail/SpamAssassin.pm
   and bump the $VERSION line to the correct version.
 
-- In the new development codeline, edit spamassassin.spec, and bump the
-  version number in the "%define real_version" line.
-
 - then, commit the new version number to the new branch:
 
         svn commit -m "X.Y.N devel cycle started"
@@ -280,7 +274,6 @@ SPAMASSASSIN RELEASE PROCEDURE
   version in the following files (just as above for the branch):
 
   - lib/Mail/SpamAssassin.pm
-  - spamassassin.spec
 
 - [X.Y.0 RELEASES ONLY]: NOTE: This may change, make sure this info is
   still accurate before changing this (preferrably find out BEFORE doing
