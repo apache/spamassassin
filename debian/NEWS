@@ -1,0 +1,87 @@
+spamassassin (3.3.1-2) unstable; urgency=low
+
+  This version of spamassassin introduces a change in behavior when
+  using SSL to encrypt communication between spamc and spamd.  This
+  change only affects usage of spamc or spamd with the --ssl option.
+  Due to protocol insecurity, OpenSSL has removed support for SSL
+  version 2.  Consequently, the "sslv2" and "sslv23" options have been
+  removed from spamc and spamd.  The default option is sslv3.
+
+  This change should be transparent unless you are using spamc or spamd
+  with a peer that is explicitly configured to use only sslv2
+
+ -- Noah Meyerhans <noahm@debian.org>  Sun, 10 Apr 2011 18:27:36 -0700
+
+spamassassin (3.3.0-2) unstable; urgency=low
+
+   Prior to version 3.3.0, spamassassin defaulted to having the
+   auto-whitelist plugin enabled.  This is no longer the case.  If you
+   wish to continue using it, you will want to add 
+   loadplugin Mail::SpamAssassin::Plugin::AWL
+   to /etc/spamassassin/local.pre
+   Additionally, note that if you have added any custom configuration
+   options related to the auto-whitelist plugin (e.g.
+   auto_whitelist_factory), the upgrade from to 3.3.0 from prior 
+   versions may fail unless you explicitly enable the plugin.
+
+ -- Noah Meyerhans <noahm@debian.org>  Sun, 28 Feb 2010 19:37:34 -0800
+
+spamassassin (3.2.5-7) unstable; urgency=high
+
+   This version of SpamAssassin fixes a bug which caused mails sent
+   in 2010 to be flagged as suspiciously spammy. If upgrading to this
+   version, you are recommended to update any per-user caches previously
+   created by sa-compile, and to check mail already in your spam folder
+   for false positives more carefully than usual.
+
+ -- Joey Hess <joeyh@debian.org>  Fri, 01 Jan 2010 12:03:40 -0500
+
+spamassassin (3.2.0-1) unstable; urgency=low
+
+  This version of SpamAssassin contains a new feature which can be
+  used to greatly improve the performance of SpamAssassin. Read
+  README.Debian and the sa-compile man page for more information.
+
+  This version now includes a cron job to automatically update the
+  SpamAssassin rules on a daily basis. To enable it, edit
+  /etc/default/spamassassin
+
+ -- Duncan Findlay <duncf@debian.org>  Mon, 21 May 2007 11:17:49 -0400
+
+spamassassin (3.1.1-1) unstable; urgency=low
+
+  This is a new upstream release containing mostly bug fixes. The
+  largest change is the inclusion of a (fixed) script called sa-update
+  that can be used to download the latest rules from upstream. To use
+  it run sa-update as root. In the future, this may, by default, run
+  from a cron job automatically, but in the interim it is a manual
+  process.
+
+ -- Duncan Findlay <duncf@debian.org>  Sun,  7 May 2006 17:27:34 -0400
+
+spamassassin (3.1.0a-1) unstable; urgency=low
+
+  This is a new major upstream release with many new
+  features. Detailed information on the upgrade is available in
+  /usr/share/doc/spamassassin/UPGRADE.gz. The most important changes
+  are documented here. If you have made local configuration changes,
+  you will probably want to read that documentation to ensure you
+  configuration is still correct.
+
+  DCC and Razor support have been disabled by default, since they are
+  no longer free for non-personal use. To re-enable them, edit
+  /etc/spamassassin/v310.pre
+
+  More Bayes storage modules have been added. The default, using
+  perl's DB_File module, is the slowest. You may wish to switch to the
+  SDBM storage module (uses perl's SDBM_File module). If you are
+  currently using the SQL module, you may wish to switch to using the
+  MySQL or PgSQL modules. To switch storage modules, follow the steps
+  listed in the "MIGRATION" section of the sa-learn(1) man page.
+
+  Spamd and spamc now support Bayes learning, if the --allow-tell or
+  -l option is given to spamd. Please note that there may be security
+  implications with enabling this option. (Command line options to
+  spamd are changed in /etc/default/spamassassin)
+
+ -- Duncan Findlay <duncf@debian.org>  Wed,  5 Oct 2005 14:40:41 -0400

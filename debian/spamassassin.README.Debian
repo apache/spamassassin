@@ -1,0 +1,158 @@
+
+READ "UPGRADE" IF YOU ARE UPGRADING FROM A PREVIOUS VERSION
+
+Cron job
+--------
+
+There is a cron job in /etc/cron.daily/spamassassin that will
+automatically run sa-update and reload spamd every day if it is
+enabled. To enable this script, edit
+/etc/default/spamassassin. sa-update, when run as root, downloads the
+latest set of rules distributed by upstream to a directory under
+/var/lib/spamassassin. This script will work correctly with sa-compile
+(see below).
+
+sa-compile
+----------
+
+This package now includes a new plugin to greatly improve the
+performance of SpamAssassin by compiling a ruleset using re2c. Please
+read the "sa-compile" manpage for more information. To enable this
+enhancement, you will need to uncomment a line in
+/etc/spamassassin/v320.pre and make sure the following packages are
+installed:
+
+ aptitude install re2c libc6-dev gcc make
+
+The "compiled" ruleset is used whenever possible to speed spamassassin
+up. If you disable or change a rule in the configuration, the compiled
+version will no longer be used. If you create or change a rule, you
+will want to run sa-compile to generate the compiled version to
+improve performance, but if you don't you will simply use the
+un-compiled version.
+
+Trusted Networks
+----------------
+
+SpamAssassin has a built in guessing algorithm to determine which
+Received headers in a message are trustworthy and which are not. You
+should ensure that the configuration option trusted_networks and
+internal_networks are set correctly, especially if you are
+experiencing false positives from tests referring to Received headers.
+
+Please read man Mail::SpamAssassin::Conf for more information on this.
+
+Plugins
+-------
+
+As of version 3.1.0, much of the functionality in SpamAssassin
+relating to external programs and perl modules has been removed and
+placed in plugins. For example, Razor, DCC and Pyzor have been
+"pluginized".
+
+Plugins can be enabled and disabled in /etc/spamassassin/init.pre and
+/etc/spamassassin/v310.pre. You may wish to read through those files
+to see which plugins you might want to install. In general, plugins
+may have dependencies that you may need to install for them to
+function. For example, the Razor2 plugin requires that you install
+razor. You should read the manpage before enabling a plugin.
+
+Please note that DCC is disabled by default as it is not free.
+
+Configuring spamd
+-----------------
+
+spamd, the daemonized form of spamassassin, is generally the preferred
+way of running spamassassin. Please read man spamd and README.spamd
+for more information. Init scripts are provided with this package in
+/etc/init.d/spamassassin. To change the command line options, please
+edit /etc/default/spamassassin.
+
+If you intend to use Bayes sitewide, it is recommended that you set up
+an SQL-based Bayes storage module. (You may also want to store scores
+and other prefences in SQL too.) Please read the documentation in
+/usr/share/doc/spamassassin/sql/ for more information.
+
+Please note that SQL storage is not very private -- anyone that has
+access to the database can read and write it freely, meaning users
+could corrupt other users' Bayes databases.
+
+Please note that the --auth-ident option does not work with pidentd or
+gidentd. See http://bugs.debian.org/278030 for more information.
+
+Poor Performance
+----------------
+
+If you experience poor performance with spamd, please ensure that you
+have not set the --max-children option too high. spamd now uses a
+"Apache httpd style scaling" algorithm to prefork children, so these
+children will always be present. Please note also that there seems to be
+a bug with respect to how memory usage is reported by the kernel to
+programs such as top. Multiple spamd children share much more memory
+than is indicated.
+
+One common problem with spamd is that load spikes whenever the Bayes
+database needs to be sync'd. This is especially true right after an
+upgrade. It's often a good idea to do this manually right after you
+upgrade with the command: sa-learn --sync for each user/Bayes DB. (You
+can use the --dbpath option to specify the database path)
+
+You can also disable automatic expiry by setting the
+"bayes_auto_expire 0" option in your configuration and running
+sa-learn --force-expire from a cronjob. See
+http://wiki.spamassassin.org/BayesForceExpire
+
+Mail stream integration
+-----------------------
+
+There is also a very incomplete set of examples in the examples/
+directory. More examples are welcome! Please file a bug against
+spamassassin with the minor or wishlist severity and attach a file or
+patch.
+
+There is a large amount of information on setting spamassassin up with
+your mail system at
+http://wiki.apache.org/spamassassin/UsingSpamAssassin.
+
+Configuration Files
+-------------------
+
+To add rules, change scores or edit the report template, edit
+/etc/spamassassin/local.cf. Please don't touch the files in
+/usr/share/spamassassin, as you will NOT be prompted to overwrite them
+on upgrade. Configuration file details are available in the
+Mail::SpamAssassin::Conf(3) man page.
+
+User-specific configuration is the automatically created
+~/.spamassassin/user_prefs, which is copied from
+/etc/spamassassin/user_prefs.template. It is automatically created
+whenever spamassassin is called, or when spamc is used with 'spamd
+-c'.
+
+Semi-free RBLs
+--------------
+
+The spamhaus SURBL blacklists are both offer free service to relatively
+small mail systems (less than approximately 1,000 mailboxes or 250,000
+emails per day).  Larger systems require a paid service.  These
+blacklists are enabled by default in this package, but should be
+disabled if you run a large system and do not pay for these services.
+
+Non-free RBLs
+-------------
+
+By default, spamassassin checks certain free RBLs. Other, commercial
+RBLs can easily be enabled. See the README for more
+information. Furthermore, SpamAssassin supports using third-party
+programs Razor, DCC and Pyzor, but Razor and DCC are disabled by
+default since they are not free for non-personal use. Feel free to
+enable them in /etc/spamassassin/init.pre
+
+IPv6
+----
+
+Some users have reported difficulty running spamd with an IPv6
+listening address. As a work around, please ensure you have
+libio-socket-inet6-perl installed.
+
+ -- Duncan Findlay <duncf@debian.org>, Mon, 21 May 2007 23:53:57 -0400

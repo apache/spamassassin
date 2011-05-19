@@ -1,0 +1,119 @@
+Index: Mail-SpamAssassin-3.3.1/spamc/libspamc.c
+===================================================================
+--- Mail-SpamAssassin-3.3.1.orig/spamc/libspamc.c	2010-03-16 07:49:23.000000000 -0700
++++ Mail-SpamAssassin-3.3.1/spamc/libspamc.c	2011-04-10 17:16:32.000000000 -0700
+@@ -1198,14 +1198,10 @@
+     if (flags & SPAMC_USE_SSL) {
+ #ifdef SPAMC_SSL
+ 	SSLeay_add_ssl_algorithms();
+-	if ((flags & SPAMC_SSLV2) && (flags & SPAMC_SSLV3)) {
+-	  meth = TLSv1_client_method(); /* both flag bits on means use TLSv1 */
+-	} else if (flags & SPAMC_SSLV2) {
+-	  meth = SSLv2_client_method();
+-	} else if (flags & SPAMC_SSLV3) {
+-	  meth = SSLv3_client_method();
++	if (flags & SPAMC_TLSV1) {
++	    meth = TLSv1_client_method();
+ 	} else {
+-	  meth = SSLv23_client_method(); /* no flag bits, default SSLv23 */
++	    meth = SSLv3_client_method(); /* default */
+ 	}
+ 	SSL_load_error_strings();
+ 	ctx = SSL_CTX_new(meth);
+@@ -1593,7 +1589,7 @@
+     if (flags & SPAMC_USE_SSL) {
+ #ifdef SPAMC_SSL
+ 	SSLeay_add_ssl_algorithms();
+-	meth = SSLv2_client_method();
++	meth = SSLv3_client_method();
+ 	SSL_load_error_strings();
+ 	ctx = SSL_CTX_new(meth);
+ #else
+Index: Mail-SpamAssassin-3.3.1/spamc/libspamc.h
+===================================================================
+--- Mail-SpamAssassin-3.3.1.orig/spamc/libspamc.h	2010-03-16 07:49:23.000000000 -0700
++++ Mail-SpamAssassin-3.3.1/spamc/libspamc.h	2011-04-10 17:16:05.000000000 -0700
+@@ -119,7 +119,7 @@
+ /* Jan 1, 2007 sidney: added SSL protocol versions */
+ /* no flags means use default of SSL_v23 */
+ /* Set both flags to specify TSL_v1 */
+-#define SPAMC_SSLV2 (1<<18)
++#define SPAMC_TLSV1 (1<<18)
+ #define SPAMC_SSLV3 (1<<17)
+ 
+ /* Nov 30, 2006 jm: add -z, zlib support */
+Index: Mail-SpamAssassin-3.3.1/spamc/spamc.c
+===================================================================
+--- Mail-SpamAssassin-3.3.1.orig/spamc/spamc.c	2010-03-16 07:49:23.000000000 -0700
++++ Mail-SpamAssassin-3.3.1/spamc/spamc.c	2011-04-10 17:16:05.000000000 -0700
+@@ -359,17 +359,11 @@
+             case 'S':
+             {
+                 flags |= SPAMC_USE_SSL;
+-		if (!spamc_optarg || (strcmp(spamc_optarg,"sslv23") == 0)) {
+-		  /* this is the default */
+-		}
+-	        else if (strcmp(spamc_optarg,"sslv2") == 0) {
+-		  flags |= SPAMC_SSLV2;
+-		}
+-		else if (strcmp(spamc_optarg,"sslv3") == 0) {
+-		  flags |= SPAMC_SSLV3;
++		if (!spamc_optarg || (strcmp(spamc_optarg,"sslv3") == 0)) {
++		    flags |= SPAMC_SSLV3;
+ 		}
+ 		else if (strcmp(spamc_optarg,"tlsv1") == 0) {
+-		  flags |= (SPAMC_SSLV2 | SPAMC_SSLV3);
++		    flags |= SPAMC_TLSV1;
+ 		}
+ 		else {
+ 		    libspamc_log(flags, LOG_ERR, "Please specify a legal ssl version (%s)", spamc_optarg);
+Index: Mail-SpamAssassin-3.3.1/spamc/spamc.pod
+===================================================================
+--- Mail-SpamAssassin-3.3.1.orig/spamc/spamc.pod	2011-04-10 17:16:05.000000000 -0700
++++ Mail-SpamAssassin-3.3.1/spamc/spamc.pod	2011-04-10 17:16:05.000000000 -0700
+@@ -181,10 +181,8 @@
+ 
+ If spamc was built with support for SSL, encrypt data to and from the
+ spamd process with SSL; spamd must support SSL as well.
+-I<sslversion> specifies the SSL protocol version to use, one of
+-C<sslv2>, C<sslv3>, C<tlsv1>, or C<sslv23>. The default, C<sslv23>, causes
+-spamc to use a SSLv2 hello handshake then negotiate use of SSLv3 or TLSv1
+-protocol if the spamd server can accept it.
++I<sslversion> specifies the SSL protocol version to use, either
++C<sslv3>, or C<tlsv1>. The default, is C<sslv3>.
+ 
+ =item B<-t> I<timeout>, B<--timeout>=I<timeout>
+ 
+Index: Mail-SpamAssassin-3.3.1/spamd/spamd.raw
+===================================================================
+--- Mail-SpamAssassin-3.3.1.orig/spamd/spamd.raw	2011-04-10 17:16:05.000000000 -0700
++++ Mail-SpamAssassin-3.3.1/spamd/spamd.raw	2011-04-10 17:16:05.000000000 -0700
+@@ -693,8 +693,8 @@
+       $sslport = ( getservbyname($sslport, 'tcp') )[2];
+       die "spamd: invalid ssl-port: $opt{'port'}\n" unless $sslport;
+     }
+-    $sslversion = $opt{'ssl-version'} || 'sslv23';
+-    if ($sslversion !~ /^(?:sslv([23]|23)|(tlsv1))$/) {
++    $sslversion = $opt{'ssl-version'} || 'sslv3';
++    if ($sslversion !~ /^(?:sslv3|tlsv1)$/) {
+       die "spamd: invalid ssl-version: $opt{'ssl-version'}\n";
+     }
+ 
+@@ -3271,12 +3271,11 @@
+ 
+ =item B<--ssl-version>=I<sslversion>
+ 
+-Specify the SSL protocol version to use, one of
+-B<sslv2>, B<sslv3>, B<tlsv1>, or B<sslv23>.
+-The default, B<sslv23>, is the most flexible, accepting a SSLv2 or higher
+-hello handshake, then negotiating use of SSLv3 or TLSv1 protocol if the client
+-can accept it.
+-Specifying B<--ssl-version> implies B<--ssl>.
++Specify the SSL protocol version to use, one of B<sslv3> or B<tlsv1>.
++The default, B<sslv3>, is the most flexible, accepting a SSLv3 or
++higher hello handshake, then negotiating use of SSLv3 or TLSv1
++protocol if the client can accept it.  Specifying B<--ssl-version>
++implies B<--ssl>.
+ 
+ =item B<--server-key> I<keyfile>
+ 
