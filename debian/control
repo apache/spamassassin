@@ -1,29 +1,55 @@
 Source: spamassassin
 Section: mail
 Priority: optional
-Build-Depends: debhelper (>= 3.0.5), perl (>= 5.6.1), libdigest-sha1-perl
-Maintainer: Apache SpamAssassin <dev@spamassassin.apache.org>
-Standards-Version: 3.5.1
+Maintainer: Noah Meyerhans <noahm@debian.org>
+Uploaders: Jesus Climent <jesus.climent@hispalinux.es>
+Build-Depends: debhelper (>= 7), perl, libssl-dev,
+ libhtml-parser-perl (>= 3.24), libdigest-sha1-perl,
+ libnet-dns-perl (>= 0.34), libnetaddr-ip-perl
+Standards-Version: 3.9.1
+Homepage: http://www.spamassassin.org/
+Vcs-Svn: svn://svn.debian.org/svn/collab-maint/deb-maint/spamassassin/trunk
+Vcs-Browser: http://svn.debian.org/viewsvn/collab-maint/deb-maint/spamassassin/trunk/
 
 Package: spamassassin
+Architecture: all
+Conflicts: spamass-milter (<< 0.2.0-7), gotmail (<= 0.8.1-1)
+Depends: perl (>= 5.8.0), libhtml-parser-perl (>= 3.43),
+ libdigest-sha1-perl, libsocket6-perl, libsys-hostname-long-perl,
+ libarchive-tar-perl, libwww-perl, libnet-dns-perl (>=
+ 0.34), perl-modules (>= 5.10) | libio-zlib-perl (>= 1.04), libnetaddr-ip-perl,
+ ${misc:Depends}
+Recommends: spamc (>= 2.30), libmail-spf-perl,
+ re2c, libsys-syslog-perl, gnupg, gcc, libc6-dev, make, libio-socket-inet6-perl
+Suggests: razor (>= 2.361-2),
+ libnet-ident-perl, libio-socket-ssl-perl, libdbi-perl, pyzor,
+ libcompress-zlib-perl, libmail-dkim-perl
+Provides: libmail-spamassassin-perl
+Description: Perl-based spam filter using text analysis
+ SpamAssassin is a very powerful and fully configurable spam filter
+ with numerous features including automatic white-listing, RBL
+ testing, Bayesian analysis, header and body text analysis. It is
+ designed to be called from a user's .procmail or .forward file, but
+ can also be integrated into a Mail Transport Agent (MTA).
+ .
+ Included in this package is a daemonized form of spamassassin (spamd)
+ which communicates with its client (spamc) via TCP, to reduce the
+ overhead of loading perl with each message. To take advantage of
+ this, you must install the spamc package.
+
+Package: spamc
 Architecture: any
-Depends: ${perl:Depends}, ${shlibs:Depends}, libdigest-sha1-perl, libhtml-parser-perl (>= 3.24), libnet-dns-perl | perl (>= 5.8.0)
-Recommends: libmail-spf-query-perl
-Suggests: razor (>= 2.40), pyzor, libtime-hires-perl
-Provides: spamassassin, spamc
-Description:  Spam detector and markup engine
- Mail::SpamAssassin is a module to identify spam using several methods
- including text analysis, internet-based realtime blacklists, statistical
- analysis, and internet-based hashing algorithms.
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Suggests: spamassassin
+Conflicts: spamassassin (<< 2.30-2)
+Description: Client for SpamAssassin spam filtering daemon
+ spamc is the client to communicate with spamd, the daemonized form of
+ SpamAssassin (see the spamassassin package). It is written in C for
+ maximum speed and minimum loading overhead.
  .
- Using its rule base, it uses a wide range of heuristic tests on mail headers
- and body text to identify "spam", also known as unsolicited bulk email.
+ spamc is quite useful for integrating spamassassin into an MTA or
+ into a .procmailrc file because of its speed.
  .
- Once identified, the mail can then be tagged as spam for later filtering
- using the user's own mail user-agent application or at the mail transfer
- agent.
- .
- If you wish to use a command-line filter tool, try the spamassassin
- or spamd/spamc tools provided.
- .
- Homepage: http://spamassassin.apache.org/
+ This package is useless unless you have spamassassin installed,
+ either on this machine or another local machine (i.e. a mail server).
+

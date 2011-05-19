@@ -1,15 +1,1064 @@
-spamassassin (3.1.0-1) unstable; urgency=low
+spamassassin (3.3.1-2) unstable; urgency=low
 
-  * 3.1.0 Release.
+  * Disable SSLv2 support due to its removal from OpenSSL (Closes: 622053)
+  * Apply a patch from Dominic Hargreaves <dom@earth.li> to register
+    spamassassin for the perl-major-upgrade trigger (Closes: 619817)
+  * Bump standards version to 3.9.1.
 
- -- Daniel Quinlan <quinlan@pathname.com>  Mon, 13 Sep 2004 12:20:49 -0700
+ -- Noah Meyerhans <noahm@debian.org>  Sun, 10 Apr 2011 20:58:34 -0700
+
+spamassassin (3.3.1-1) unstable; urgency=low
+
+  * New upstream version.
+  * Update several patches now that bugfixes have been incorporated
+    upstream.
+
+ -- Noah Meyerhans <noahm@debian.org>  Sun, 21 Mar 2010 23:20:31 -0700
+
+spamassassin (3.3.0-2) unstable; urgency=low
+
+  * Document the fact that auto-whitelist is now disabled by default and that
+    this may affect upgrades from version <3.3.0 (Closes: #570734)
+  * Stop ignoring output from sa-compile and instead use its undocumented
+    "quiet" option.  (Closes: #563802)
+  * Don't ignore output from /etc/init.d/spamassassin when reloading spamd
+    after sa-update downloads updates (Closes: #565227)
+  * Run the contents of /etc/spamassassin/sa-update-hooks.d/ using
+    run-parts following a successful download of new rules via sa-update
+    in the daily cron script. (Closes: #315961, #567205)
+  * Fix a problem in debian/rules where manpage generation for sa-awl and
+    sa-check_spamd happened in the wrong rule.
+  * Bump standards compliance to 3.8.4 (no changes needed)
+
+ -- Noah Meyerhans <noahm@debian.org>  Mon, 01 Mar 2010 00:57:24 -0800
+
+spamassassin (3.3.0-1) unstable; urgency=low
+
+  * New upstream version.
+  * Switch to dpkg-source 3.0 (quilt) format
+
+ -- Noah Meyerhans <noahm@debian.org>  Tue, 26 Jan 2010 22:53:12 -0500
+
+spamassassin (3.2.5-7) unstable; urgency=high
+
+  * Fix a bunch of spelling errors in spamassassin documentation.
+  * Add ${misc:Depends} to spamassassin Depends.
+  * Fix FH_DATE_PAST_20XX so dates in 2010 aren't considered "grossly 
+    in the future"
+
+ -- Noah Meyerhans <noahm@debian.org>  Fri, 01 Jan 2010 12:51:32 -0500
+
+spamassassin (3.2.5-6) unstable; urgency=low
+
+  * Fix call to "make install" in debian/rules to handle changes to
+    ExtUtils::MakeMaker in perl. (Closes: #549726)
+  * Fix Makefile.PL so DESTDIR actually works when provided on the 
+    "make install" commandline.
+  * Updated to standards compliance 3.8.3, dropping versioned build-dep on
+    perl (>= 5.6.0)
+  * Switch from dh_clean -k to dh_prep in debian/rules
+  * Add versioned build-dep on debhelper 7
+
+ -- Noah Meyerhans <noahm@debian.org>  Tue, 06 Oct 2009 17:51:02 -0400
+
+spamassassin (3.2.5-5) unstable; urgency=low
+
+  * Remove open-whois.org as it is cybersquatted (Closes: #537477)
+  * Update debhelper compatibility level to 7.
+  * Apply patch to init script to provide a "status" command (Closes: #530896)
+  * Fix missing documentation of spamc exit code 98 (Closes: #539148)
+  * Backport IPv6 support for the Received header parser (Closes: #510711)
+  * Fix additional pod2man errors. We're finally lintian-clean!
+  * Update Standards-Version to 3.8.2 (no changes needed).
+  * Fix typo in spamd manpage (Closes: #509273)
+
+ -- Noah Meyerhans <noahm@debian.org>  Mon, 10 Aug 2009 12:07:10 -0400
+
+spamassassin (3.2.5-4) unstable; urgency=low
+
+  * "Lintian, you will torment me no more!"
+  * Add patches/60_fix-pod.dpatch to fix a whole mess of pod warnings
+  * set -e in prerm, preinst, and postinst per policy
+  * Add patches/70_fix-whatis.dpatch to fix lintian's complaints about
+    missing whatis entries in several manpages.
+  * Fix some more man errors by shortening some long lines.
+
+ -- Noah Meyerhans <noahm@debian.org>  Mon, 23 Feb 2009 12:21:57 -0500
+
+spamassassin (3.2.5-3) unstable; urgency=low
+
+  * Add an alternate dependency on libio-zlib-perl (>= 1.04) to ease
+    backporting (yeah, should have been done three uploads ago...)
+  * Set myself as the Maintainer per Duncan's request.
+  * Explicity set a umask (022) in /etc/cron.daily/spamassassin
+  * Don't compress GPG.KEY, since we need to use it during postinst and
+    it's small.
+  * Add Andrew Schulman's fix for sa-learn to properly handle a case
+    where an empty folder list is given as a source of training data.
+    (Closes: 491159)
+
+ -- Noah Meyerhans <noahm@debian.org>  Wed, 18 Feb 2009 22:15:20 -0500
+
+spamassassin (3.2.5-2) unstable; urgency=low
+
+  [ Duncan Findlay ]
+  * Add Recommends: on libio-socket-inet6-perl (Closes: 481696)
+  * Ship GPG.KEY and call sa-update --import in the postinst to work
+    around broken key. (Closes: 486408)
+  * Work around permissions issues from sa-compile and sa-update. (Closes:
+    491232, 470834)
+
+  [ Noah Meyerhans ]
+  * Remove obsolete DSBL blacklist (Closes: #501122)
+  * Bump standards version to 3.8.0.  This should have been done with
+    3.2.5-1, since that's where we made the changes to support this
+    version.
+  * Document the fact that spamhaus and SURBL are free only for smaller
+    sites and may require sites exceeding a certain threshold of mail
+    volume to pay for service.  (Closes: #505273)
+
+ -- Noah Meyerhans <noahm@debian.org>  Mon, 17 Nov 2008 00:53:11 -0500
+
+spamassassin (3.2.5-1) unstable; urgency=low
+
+  * New upstream version.  (Closes: 482010, 475526)
+  * Remove debian/patches/91_pg_8.1_bayes.dpatch, which is now in upstream's
+    release.
+  * Stop shipping the entire text of the Apache license now that it's in
+    common-licenses.
+
+ -- Noah Meyerhans <noahm@debian.org>  Tue, 17 Jun 2008 21:18:16 -0400
+
+spamassassin (3.2.4-2) unstable; urgency=low
+
+  * Fix Vcs-Svn entry in debian/control
+  * Add $syslog to Should-Start in the LSB header in spamassassin.init,
+    since we'd like spamd to be able to send its logs somewhere.
+  * replaced versioned dependency on libio-zlib-perl with dependency on
+    perl-modules >= 5.10 (Closes: #479462)
+  * Add myself to Uploaders
+  * Incorporate a patch from Ubuntu containing upstream's fix to the SQL
+    Bayes store on postgresql 8.1 and above
+
+ -- Noah Meyerhans <noahm@debian.org>  Tue, 13 May 2008 21:58:00 -0400
+
+spamassassin (3.2.4-1) unstable; urgency=low
+
+  * New upstream release (Closes: #466620)
+  * Stop creating directories /etc/logcheck/ignore.d.paranoid and
+    /etc/logcheck/violations.ignore.d
+  * Modify preinst to find and delete old, unchanged
+    /etc/logcheck/ignore.d.paranoid/spamassassin and
+    /logcheck/violations.ignore.d/spamassassin files (Closes: #454370)
+  * Add LSB init info to /etc/init.d/spamassassin (Closes: #451726)
+    - Patch from Petter Reinholdtsen.
+    - Note that this probably doesn't really show all the dependencies,
+    further patches welcome.
+  * Replace Recommends: on libmail-spf-query-perl with one on libmail-spf-perl
+    (Closes: #448671)
+  * Drop Suggests: on dcc-client, as it has been removed from Debian
+    (Closes: #434169)
+  * Drop version on libarchive-tar-perl dependency to avoid issues
+    with perl-modules 5.10.0 (Closes: #466903)
+
+ -- Duncan Findlay <duncf@debian.org>  Sun, 02 Mar 2008 07:18:07 -0800
+
+spamassassin (3.2.3-1) unstable; urgency=low
+
+  * New upstream release (Closes: #435144)
+    - Fixes errors with allow_user_rules (Closes: #437816)
+    - Fix "spamc -x" (Closes: #376380)
+  * Avoid DOSing with sa-update by sleeping a random interval less than an
+    hour before downloading and compiling updates. (Closes: #428319)
+  * Check for existence of Makefile instead of using "-$(MAKE) veryclean"
+    in debian/rules (to satisfy lintian)
+  * Fix spurious inclusion of INSTALL.orig in
+    10_change_config_paths.dpatch, causing debian/rules clean to
+    fail. (Closes: #442734)
+
+ -- Duncan Findlay <duncf@debian.org>  Sun, 28 Oct 2007 22:52:20 -0700
+
+spamassassin (3.2.1-1) unstable; urgency=low
+
+  * New upstream release
+    - Fixes security vulnerability CVE-2007-2873
+    - Silences loud warning message (Closes: #425685)
+    - Properly document message size "limit" (Closes: #402241)
+  * Recommends: gcc, libc6-dev, make for sa-compile (Closes: #427725)
+  * Fixed out of date section in README.Debian discussing sa-update
+    (Closes: #428316)
+  * Clarified how sa-compile works in README.Debian (Closes: #427862)
+  * Check in cron.daily that /var/lib/spamassassin/compiled exists
+    (i.e. only compile rules if sa-compile has previously been run)
+  * Recompile rules in postinst if /var/lib/spamassassin/compiled
+    exists (and sa-update and re2c exist)
+
+ -- Duncan Findlay <duncf@debian.org>  Mon, 11 Jun 2007 14:36:38 -0700
+
+spamassassin (3.2.0-2) unstable; urgency=low
+
+  * Fix cron script to exit 0 if sa-update does not find new updates
+    (Closes: #425962)
+  * Add libnet-dns-perl to Build-Depends. (Closes: #425932)
+
+ -- Duncan Findlay <duncf@debian.org>  Sun, 27 May 2007 22:25:07 -0400
+
+spamassassin (3.2.0-1) unstable; urgency=low
+
+  * New upstream release (Closes: #422692, #411022)
+    - New plugin and script "sa-compile" should greatly improve
+    performance if enabled (Closes: #394939)
+    - Fix ordering of lines in sa-update generated files (Closes: #413978)
+    - Fix parsing of Exim received headers (Closes: #357696)
+    - Stop requiring Crypt::OpenSSL::Bignum with DKIM (Closes: #400437)  
+    - Better handling of trusted_networks (Closes: #290927)
+    - More robust prefork mechanism for spamd (multiple bugs fixed)
+    (Closes: #336236, #396500, #341055)
+    - Better handling of Unicode (Closes: #333882)
+    - Different rules, scores (Closes: #337617)
+    - Doesn't flag certain PGP/MIME messages as empty (Closes: #367635)
+    - sa-learn man-page now looks okay in 80 columns (Closes: #312263)
+  * Put 65_debian.cf in /etc/spamassassin instead of
+    /usr/share/spamassassin/ (Closes: #376610)
+  * Recommend libsys-syslog-perl, gnupg (Closes: #395872, #402572, #374435)
+  * Depend on libsys-hostname-perl (libnet-dns-perl needs it?) (Closes: #400435)  * Suggest libmail-dkim-perl (Closes: #391655)
+  * Change the init script to properly restart spamd (would fail if it had
+    been previously HUP'd)
+  * Install daily cronjob that will automatically update to the newest
+    rules (off by default, enable in /etc/default/spamassassin) (Closes: #374432)
+  * Make sa-update's prerequisites Depends instead of Recommends. (Closes:
+    #408472)
+  * Stop pointing to the README for mail stream integration help in README.Debian (Closes:
+    #374714)
+  * Remove reference to libnet-dns-perl now that it's required in README.Debian (Closes: #319478) 
+ -- Duncan Findlay <duncf@debian.org>  Mon, 21 May 2007 10:08:17 -0400
+
+spamassassin (3.1.7-2) unstable; urgency=high
+
+  * Security fixes backported from 3.1.8:
+    - CVE-2007-0451: potential DoS with long URIs found in the message
+    content (Closes: #410843)
+    - Prevents perl code from being loaded via sa-update by default
+    (override with --allowplugins) (SpamAssassin bug 5240)
+
+ -- Duncan Findlay <duncf@debian.org>  Wed, 14 Feb 2007 21:46:52 -0500
+
+spamassassin (3.1.7-1) unstable; urgency=low
+
+  * New upstream release (Closes: #385450, #396600)
+    - Fixes handling of PGP/MIME messages (Closes: #367365)
+    - Fixes URIDNSBL warning of invalid bitwise or (Closes: #373914)
+    - Fix date handling bug (Closes: #362913)
+
+  * Fix README.Debian now that libnet-dns-perl isn't a dependency anymore
+    (Closes: #374377)
+
+ -- Duncan Findlay <duncf@debian.org>  Thu,  2 Nov 2006 01:43:42 -0500
+
+spamassassin (3.1.4-1) unstable; urgency=low
+
+  * New upstream release
+    - Fixed a bug where sa-update's failure would leave SA without rules
+      (Closes: #370357)
+    - Fix BSMTP with exim (Closes: #375286)
+    - gtube.t test failed with non-english locales.
+    - Fixed memory leak with Bayes and BayesStore.
+
+ -- Jesus Climent <jesus.climent@hispalinux.es>  Thu, 10 Aug 2006 22:40:09 +0300
+
+spamassassin (3.1.3-1) unstable; urgency=high
+
+  * New upstream release
+    - Fixes spamd --vpopmail/--paranoid remote command execution bug. This
+    has been assigned CVE-2006-2447.
+  
+ -- Duncan Findlay <duncf@debian.org>  Sun,  4 Jun 2006 18:24:05 -0400
+
+spamassassin (3.1.2-1) unstable; urgency=low
+
+  * New upstream release
+    - Razor2 support re-enabled by default
+    - sa-learn should now return an error code when it can't find the
+      target file (Closes: #261346)
+  * Now really depends on libarchive-tar-perl; depends on libwww-perl,
+    libio-zlib-perl for sa-update (Closes: #348884, #359874, #366700,
+    #368424)
+
+ -- Duncan Findlay <duncf@debian.org>  Sun,  4 Jun 2006 14:56:56 -0400
+
+spamassassin (3.1.1-1) unstable; urgency=low
+
+  * New upstream release (Closes: #356995, #360994)
+    - Better error handling when DNS is broken (Closes: #340753)
+    - bayes_storage_module documented better (Closes: #333792)
+    - Fix typo in UPGRADE (Closes: #335794)
+    - Better exception handling (Closes: #333330, #333131)
+    - Fix sa-learn --restore with SDBM (Closes: #333793)
+  * Document broken identd servers (Closes: #355475)
+  * Now depends on libarchive-tar-perl (Closes: #348884)
+  * Add reference on how to force bayes expiry using a cronjob (Closes: #334829, #300490)
+  * Drop logcheck files -- these should/will be in the logcheck-database package. (See bug #)
+  * Move libnet-dns-perl back to a Recommends:. The loud warnings should
+    have been silenced upstream.
+  
+ -- Duncan Findlay <duncf@debian.org>  Wed,  9 Nov 2005 16:55:03 -0500
+
+spamassassin (3.1.0a-2) unstable; urgency=low
+
+  * Greatly improved the usefulness of spamassassin's README.Debian
+  * Moved libnet-dns-perl to a dependency and added libsocket6-perl as a
+    dependency to avoid an obscure IPv6 related bug, and loud warnings
+    (Closes: #332906, #335279, #335671, #327832)
+  * Fixed the logcheck filters (Closes: #333430, #304363)
+
+ -- Duncan Findlay <duncf@debian.org>  Wed,  9 Nov 2005 16:52:41 -0500
+
+spamassassin (3.1.0a-1) unstable; urgency=low
+
+  * Upload to unstable
+  * Clean up NEWS.Debian, so it isn't so verbose for people upgrading from
+    3.0.x
+
+ -- Duncan Findlay <duncf@debian.org>  Wed,  5 Oct 2005 17:03:50 -0400
+
+spamassassin (3.1.0-1) experimental; urgency=low
+
+  * New upstream release.
+  * Add libdigest-sha1-perl to Build-Depends.
+
+ -- Jesus Climent <jesus.climent@hispalinux.es>  Sun, 25 Sep 2005 17:19:15 +0300
+
+spamassassin (3.0.99pre3.1.0+rc2-1) experimental; urgency=low
+
+  * New upstream release
+  * Upstream bug fixes:
+    - MIME boundary regexp improved (Closes: #288617)
+
+ -- Duncan Findlay <duncf@debian.org>  Tue, 30 Aug 2005 00:01:11 -0400
+
+spamassassin (3.0.99pre3.1.0+rc1-1) experimental; urgency=low
+
+  * New major upstream release:
+    - More Bayes storage options -- SDBM, MySQL, PostgreSQL
+    - Apache preforking algorithm; number of children scaled according to
+    demand
+    - New plugins: DomainKeys (off by default), MIMEHeader, ReplaceTags,
+    WhiteListSubject
+    - Razor2, DCC disabled by deafult because they are no longer free for
+    non-personal use
+    - AWL is now a plugin (Closes: #292610)
+    - Includes sa-update which can be used to update rules between
+    releases (currently must be manually invoked)
+
+  * Bugs in BTS fixed upstream:
+    - Stop checking for long descriptions (Closes: #274194)
+    - No longer uses Storable (Closes: #293485)
+    - Minor doc fixes (Closes: #276621, #290660)
+    - Avoid unitialized value error in Reporter.pm (Closes: #290615)
+    - Logging and error messages improved throughout (Closes: #318349)
+    - SIGHUP now works when running with -u on a privileged port (Closes:
+    #296682)
+    - Avoid ALL_TRUSTED misfire when Received: parsing fails (Closes:
+    #300809)
+    - Fix __FROM_PHONE to be more permissive (Closes: #238613)
+    - Avoid MSN Groups FPs (Closes: #290978)
+    - Better handling of UTF-8 (Closes: #291093, #297899, #306496,
+    #319014)
+    - BAYES_* scores manually set (Closes: #292327)
+    - local.cf has more comments (Closes: #271869)
+    - sa-learn is quieter (Closes: #268035)
+    - spamassassin --debug more verbose, displays files read (Closes:
+    #276778)
+
+  * No longer support the upgrade path for versions prior to
+    sarge. Including:
+    - Debconf questions about upgrading from 2.20-1woody and 2.4x
+    - Explanation of the libdb problems caused by upgrades from perl 5.6
+    to 5.8 recent versions of spamassassin (not an issue with
+    woody->testing) (Closes: #318360, #298372)
+    - Downgrade spamassassin's Depends: on spamc to Recommends: (Closes:
+    #316368)
+    - Remove the woody build hack with debconf
+
+  * Correct Suggest: on libnet-smtp-perl to libnet-perl (Closes: #317355)
+  * Upgrade to Standards Version 3.6.2.0 (by incrementing the number in
+    debian/control)
+  * Updated the way debian/rules uses dpatch to be the "new
+    way". (i.e. calls dpatch directly)
+  * No longer use debconf *at all*. As soon as I find questions worth
+    asking, we'll go back.
+
+ -- Duncan Findlay <duncf@debian.org>  Fri, 19 Aug 2005 02:22:22 -0400
+
+spamassassin (3.0.4-2) unstable; urgency=high
+
+   * Added Russian debconf translation from Yuriy Talakan
+     <yt@amur.elektra.ru> (Closes: #311920)
+
+ -- Duncan Findlay <duncf@debian.org>  Wed,  8 Jun 2005 00:53:18 -0400
+
+spamassassin (3.0.4-1) unstable; urgency=high
+
+  * New upstream release
+    - Fixed parsing to not rely on MIME boundary (Closes: #307526, #281756)
+    - Improfed FORGED_YAHOO_RCVD to not FP (Closes: #310958)
+
+ -- Duncan Findlay <duncf@debian.org>  Tue,  7 Jun 2005 00:30:18 -0400
+
+spamassassin (3.0.3-1) unstable; urgency=low
+
+  * New upstream release (Closes: #307904)
+    - Fixed possible memory bloat from large AutoWhitelist db files
+    - Fixed where user defined rules scores became ignored (Closes: #291561)
+    - Updated parsing code for several Received: header formats
+    - Document plugin API for set/get tags (Closes: #299118)
+    - More bug fixes
+  * Added note about needing libnet-dns-perl to README.Debian (Closes: #293502)
+  * Would like this to get to sarge, if all goes well.
+
+ -- Duncan Findlay <duncf@debian.org>  Fri, 29 Apr 2005 14:09:56 -0400
+
+spamassassin (3.0.2-1) unstable; urgency=low
+
+  * New upstream release (Closes: #284663, #286595)
+    - Number of URLs now limited for URIDNSBL plugin (Closes: #279180)
+    - Handles obscure exim Recieved: header format (Closes: #279504)
+  * Updated logcheck messages (Closes: #281560)
+  * Updated README.Debian to explain a bit more about configuring
+    spamd as non-root and for sitewide bayes. (Closes: #271870, #273187)
+  * Updated README.Debian to explain issues with performance and spamd
+    (Closes: #279981)
+  * Updated watch file to handle the apache.org layout better. (Closes: #281468)
+	
+ -- Duncan Findlay <duncf@debian.org>  Sat,  1 Jan 2005 15:29:19 -0500
+
+spamassassin (3.0.1-1) unstable; urgency=low
+
+  * New upstream release
+    - Fix problems with broken configs with spamd (Closes: #276366)
+    - Fixes some memory consuming bugs (Closes: #275232, #222783)
+    - Fixes file descriptior issue with pyzor or dccifd and amavis (Closes: #273290)
+  * Conflict with packages broken with SpamAssassin 3.0.0 (Closes:
+    #274993)
+  * Create PIDFILE option in /etc/default/spamassassin so that init
+    script works with spamd -u (Closes: #275370)
+  * Note in /etc/default/spamassassin to use --max-children with no
+    more than 5 due to preforking. (Closes: #275308)
+  * Rewrote package dependencies in control, added Suggests: on
+    dcc-client (Closes: #276729), versioned recommends on
+    libnet-dns-perl (Closes: #274825)
+  * Include procmailrc.example again (Closes: #276152)
+  * Fix muttrc example to use --no-sync instead of --no-rebuild (Closes:
+    #273670)
+  * Fixed typo in README.Debian for spamassassin -- if
+    /usr/share/spamassassin is edited you will NOT be prompted about it.
+    (Closes: #275675)
+
+ -- Duncan Findlay <duncf@debian.org>  Wed, 27 Oct 2004 00:28:33 -0400
 
 spamassassin (3.0.0-1) unstable; urgency=low
 
-  * Initial Release.
+  * New upstream release
+  * Features since 2.6x:
+    - New license (Now Apache Software License 2.0)
+    - Support for Sender Policy Framework (SPF)
+    - Web links checked against SURBL and SBL (Closes: #265604)
+    - Third party plug-in support
+    - Optional SQL storage for Bayes and automatic-whitelist
+    - More accurate MIME + HTML handling
 
- -- Daniel Quinlan <quinlan@pathname.com>  Mon, 13 Sep 2004 12:20:49 -0700
+  * Bugfixes (not yet documented here)
+    - Document --home-helper-dir option in SYNOPSIS (Closes: #265887)
+    - More documentation fixes: --user-config is on by default (Closes: #263845, #263846)
+    - Doc: Typo "on" -> "or" (Closes: #271865)
+	
+  * Changed /etc/default/spamassassin to be more verbose (Closes: #265518)
+  * Got rid of spamassassin-tools since it was more pain than it was worth.
 
-Local variables:
-mode: debian-changelog
-End:
+ -- Duncan Findlay <duncf@debian.org>  Sun,  5 Sep 2004 22:05:47 -0400
+
+spamassassin (2.99pre3.0.0+rc2-2) experimental; urgency=low
+
+  * sysv-rc has a bug in the man page: use "defaults XX YY" instead of
+    "defaults NN-start NN-stop" as stated in the man. Filling bug...
+    Well, is more complicated than that. See #268713
+
+ -- Jesus Climent <jesus.climent@hispalinux.es>  Sat, 28 Aug 2004 17:28:44 +0000
+
+spamassassin (2.99pre3.0.0+rc2-1) experimental; urgency=low
+
+  * New upstream release candidate.
+  * Upstream closed the following bugs:
+    - sa-learn should have a long option for -f (Closes: #265888)
+    - ignore X-Bogosity (Closes: #265899)
+
+ -- Jesus Climent <jesus.climent@hispalinux.es>  Sat, 28 Aug 2004 07:53:33 +0000
+
+spamassassin (2.99pre3.0.0+rc1-1) experimental; urgency=low
+
+  * New upstream release candidate.
+  * init.d script starts at S19 and now stops at K21 (Closes: #267540).
+
+ -- Jesus Climent <jesus.climent@hispalinux.es>  Mon, 23 Aug 2004 09:47:47 +0000
+
+spamassassin (2.99pre3.0.0+pre4-2) experimental; urgency=low
+
+  * libdigest-sha1-perl is also a requirement for building the package.
+
+ -- Jesus Climent <jesus.climent@hispalinux.es>  Thu,  5 Aug 2004 22:28:55 +0300
+
+spamassassin (2.99pre3.0.0+pre4-1) experimental; urgency=low
+
+  * New upstream pre-release.
+  * Man pages reorganized (Closes: #263481)
+
+ -- Jesus Climent <jesus.climent@hispalinux.es>  Thu,  5 Aug 2004 12:22:55 +0300
+
+spamassassin (2.99pre3.0.0+pre2-1) experimental; urgency=low
+
+  * New upstream pre-release.
+  * debian/control
+    - Added dependency on libdigest-sha1-perl
+
+ -- Jesus Climent <jesus.climent@hispalinux.es>  Sat, 10 Jul 2004 21:03:28 -0300
+
+spamassassin (2.99pre3.0.0+pre1-2) experimental; urgency=low
+
+  * Fix bad upload (bad changelog, stupid svn-buildpackage...)
+
+ -- Duncan Findlay <duncf@debian.org>  Sun, 20 Jun 2004 23:17:45 -0400
+
+spamassassin (2.99pre3.0.0+pre1-1) experimental; urgency=low
+
+  * New upstream release
+
+ -- Duncan Findlay <duncf@debian.org>  Thu, 17 Jun 2004 00:50:06 -0400
+
+spamassassin (2.99pre3.0.0svn20040616-1) experimental; urgency=low
+
+  * New upstream release
+  * Includes preliminary scores (not great, but better)
+  * Created spamassassin-tools package, containing stuff to make your own rules.
+  * Added logcheck violations.ignore.d file for "result:" lines (Closes:
+    #252375)
+  * Changed logcheck for processing messages to allow unknown message
+    ids (Closes: #252406)
+  * Added german debconf translation from Helge Kreutzmann
+    <kreutzm@itp.uni-hannover.de> (Closes: #253589)
+
+ -- Duncan Findlay <duncf@debian.org>  Thu, 17 Jun 2004 00:20:08 -0400
+
+spamassassin (2.99pre3.0.0svn20040529-2) experimental; urgency=low
+
+  * Added logcheck entry for lines like:
+      spamd[19233]: result Y 997 GTUBE.....
+
+ -- Duncan Findlay <duncf@debian.org>  Sat, 29 May 2004 21:50:44 -0400
+
+spamassassin (2.99pre3.0.0svn20040529-1) experimental; urgency=low
+
+  * New upstream release
+  * Added italian debconf translation from Luca Monducci <luca.mo@tiscali.it>
+      (Closes: #251279)
+  * Fix /etc/init.d/spamassassin to actually exit when ENABLED=0.
+      (Closes: #251481, #251598)
+
+ -- Duncan Findlay <duncf@debian.org>  Sat, 29 May 2004 21:18:01 -0400
+
+spamassassin (2.99pre3.0.0svn20040525-1) experimental; urgency=low
+
+  * New upstream release
+    Many many changes...
+      API changed drastically, new plugin interface and plugins (Like
+      SURBL (Closes: #243546)), LDAP + SQL config
+      (Closes: #242121, #177012), ident authentication for spamd
+      (Closes: #242148), New license (ASL 2.0), ...
+    Bug Fixes:
+      Fix handling of empty User: line (Closes: #225139)
+      Handle out of diskspace in Bayes (Closes: #202422)
+      Fix how spamc handles bad hostnames (Closes: #214008)
+      Fix sa-learn on filenames with spaces (Closes: #218004)
+      Fixed which IPs to lookup in DNSBLs (Closes: #227828)
+      _STARS_ works in Subject line (Closes: #239979)
+      Make --lint catch misspeld scores (Closes: #214880)
+      Allow combining of spamassassin -d and -t (Closes: #192779)
+      Removed -w option from spamassassin (Closes: #216255)
+      Remove -P from spamassassin manpage (Closes: #234584)
+      FAKED_HOTMAIL_DAV removed (Closes: #233600)
+      Fix BUGGY_CGI to allow NMS FormMail (Closes: #209377)
+      Split ok_languages zh into zh.gb2312, zh.big5 (Closes: #224116)
+      Put all error output on one fd for spamc (Closes: #197879)
+      man Mail::SpamAssassin::Conf clearer about raw headers (Closes: #236431)
+	
+  * Converted packaging to use dpatch in order to allow for easier
+    creation of SVN packages (Because Daniel Quinlan has been bugging
+    me to do figure out a better system!)
+	
+  * Improved debian specific rules in 65_debian.cf (Closes: #237995, #240983)
+  * Changed dependencies for 3.0.0. Now suggest pyzor (Closes: #242456)
+  * Fixed logcheck files for whitespace (Closes: #243820)
+  * Changed /etc/init.d/spamassassin to warn when disabled (Closes: #247058)
+  * Changed /etc/default/spamassassin to not say "/etc/default/spamd.conf"
+    (Closes: #243431)
+  * Include Danish debconf translation from Claus Hindsgaul <claus_h@image.dk>
+    (Closes: #233072)
+  * Added courier integration example (from Charles Fry + Jeronimo Pellegrini)
+    (Closes: #229393)
+
+ -- Duncan Findlay <duncf@debian.org>  Sun, 23 May 2004 23:51:34 -0400
+
+spamassassin (2.63-1) unstable; urgency=low
+
+  * New upstream release (Closes: #228366)
+  * Fixed logcheck file for users with hyphens (Closes: #226316)
+
+ -- Duncan Findlay <duncf@debian.org>  Wed, 21 Jan 2004 00:03:16 -0500
+
+spamassassin (2.61-2) unstable; urgency=low
+
+  * Improve copyright file in response to mail from Peter Palfrader
+    <weasel@debian.org> to debian-devel-announce
+  * Drop versioned libhtml-parser-perl -- it was incorrect. (Closes: #224933)
+	
+  * Added patch from Colin Watson / Marc Haber to ease backports. (Closes: #224237)
+  * Added patch from Francesco Potorti <pot@gnu.org> to allow setting of spamd's nice level (Closes: #224369)
+	
+ -- Duncan Findlay <duncf@debian.org>  Sun, 28 Dec 2003 16:46:53 -0500
+
+spamassassin (2.61-1) unstable; urgency=low
+
+  * The "We really don't need lame release names" release
+  * New upstream release (Closes: #224088)
+      Messages that hit BAYES_99 will not be autolearned as ham (Closes: #217528)
+      Microsoft related forgery issues should be fixed (Closes: #198106, #188480)
+      Remove gnus notation in Bayes.pm (Closes: #211741)
+  * New/updated translations:
+      nl    Luk Claes <luk.claes@ugent.be>            (Closes: #217248)
+      pt_BR Andre Luis Lopes <andrelop@debian.org>    (Closes: #220904)
+      es    Carlos Valdivia <valyag@dat.etsit.upm.es> (Closes: #220927)
+  * Move sample-spam.txt and sample-nonspam.txt to examples/ (Closes: #223032)
+
+ -- Duncan Findlay <duncf@debian.org>  Mon, 15 Dec 2003 20:49:35 -0500
+
+spamassassin (2.60-2) unstable; urgency=low
+
+  * The "Where is Duncan?" release ;)
+  * Small FRIEND_AT_PUBLIC change (Closes: #212722)
+  * README modified to reflect the actual status of Razor2 (Closes: #212799)
+  * Versioned dependency on libhtml-parser-perl (Closes: #214019)
+  * Modified postinst to avoid critical session (Closes: #213023)
+
+ -- Jesus Climent <jesus.climent@hispalinux.es>  Thu, 23 Oct 2003 13:10:29 +0000
+
+spamassassin (2.60-1) unstable; urgency=low
+
+  * New upstream release
+      Fixes blacklist problems caused by verisign (Closes: #211233, #211157)
+  * Many fixes since previous testing/unstable release, see below.
+
+ -- Duncan Findlay <duncf@debian.org>  Tue, 23 Sep 2003 14:57:02 -0400
+
+spamassassin (2.59pre2.60rc5-1) experimental; urgency=low
+
+  * New upstream release
+
+ -- Duncan Findlay <duncf@debian.org>  Tue, 16 Sep 2003 10:48:16 -0400
+
+spamassassin (2.59pre2.60rc4-1) experimental; urgency=low
+
+  * New upstream release
+  * Enabled SSL in spamc (Closes: #194701)
+  * Kenshi Muto's Japanese debconf translations installed. (Closes: #210722)
+
+ -- Duncan Findlay <duncf@debian.org>  Sat, 13 Sep 2003 15:07:22 -0400
+
+spamassassin (2.59pre2.60rc3-1) experimental; urgency=low
+
+  * New upstream release (candidate) includes:
+      Numerous rule improvements and bug fixes.
+      GA-assigned scores (previous cvs packages did not).
+      New Bayes backend with different DB format (automatic upgrade).
+      dccifd support added.
+      Better support for personal installation (Closes: #199217)
+      Dropped support for database formats other than DB_File (which most
+      should already be using). (See README.Upgrade)
+  * Works around symlinks being left behind in /etc/logcheck on upgrade.
+    (Closes: #201324)
+  * Added symlink from /etc/mail/spamassassin to /etc/spamassassin
+    (Closes: #207233, #207234)
+
+ -- Duncan Findlay <duncf@debian.org>  Thu, 28 Aug 2003 20:59:24 -0400
+
+spamassassin (2.59pre2.60pre3-1) experimental; urgency=low
+
+  * New upstream pre-release, before mass-check verification. Use at your own
+    risk.
+  * This version solves:
+    + French typo (Closes: #200468)
+  * Added README.postfix which explains how to integrate spamassassin with
+    postfix for incoming tagging.
+  * Spamd supports unix sockets (Closes: #204853)
+
+ -- Jesus Climent <jesus.climent@hispalinux.es>  Thu,  7 Aug 2003 22:39:30 +0000
+
+spamassassin (2.59pre2.60cvs20030619-1) experimental; urgency=low
+
+  * Pre-release 2.60 packages. Use at own risk! :-) (Hence, experimental)
+  * Also experimental since the scores in this release are very
+    sub-optimal. You will probably want to use a higher threshold, as
+    all the negative scoring tests have been removed.
+  * This upload is to facilitate the transition of maintenance (temporarily)
+    to Jesus Climent <jesus.climent@hispalinux.es> (Added to the
+    Uploaders: field)
+  * New upstream version includes:
+      Better rules to thwart new spam tactics (Closes: #192953)
+      Fix some bugs relating to autolearning (Closes: #191371)
+      Fix problem with reloading and syslog-ng (Closes: #191837)
+      More verbose error from spamassassin -r (Closes: #192133, #197881)
+      Improved configurability of headers (Closes: #178648, #193872)
+      Able to add charset to safe reports (Closes: #183810)
+  * Added a few more "default" options to spamd in /etc/default/spamassassin
+  * Fixed spamc's manpage to refer to spamd(8) not spamd(1) (Closes: #197880)
+  * Added doc on integrating spamassassin sitewide with Exim3 from
+    John Girash <girash@skyron.harvard.edu> (Closes: #196706)
+  * Added example configuration for gnus from Andreas Kneib 
+    <Andreas.Kneib@t-online.de> (Closes: #196557)
+  * Noted the perl5.6->perl5.8 upgrade bug in README.Debian
+
+ -- Duncan Findlay <duncf@debian.org>  Thu, 19 Jun 2003 21:02:34 -0400
+
+spamassassin (2.55-2) unstable; urgency=medium
+
+  * Really fix warnings in spamassassin.config (D'oh!)
+    (Closes: #194989, #195076, #195076, #195335)
+  * Set TMPDIR in init script (Closes: #195290)
+  * urgency=medium because 2.55-1 is 9 days old, and testing deserves 2.55
+    soon, and these changes are fairly simple
+  * Updated french debconf templates (Closes: #195011)
+
+ -- Duncan Findlay <duncf@debian.org>  Fri, 30 May 2003 23:57:06 -0400
+
+spamassassin (2.55-1) unstable; urgency=low
+
+  * New upstream release
+  * Fix warning in spamassassin.config (Closes: #193770)
+
+ -- Duncan Findlay <duncf@debian.org>  Tue, 20 May 2003 17:53:18 -0400
+
+spamassassin (2.54-3) unstable; urgency=low
+
+  * Handle the possibility of debconf not being installed when
+    spamassassin.preinst is run. (Why didn't lintian catch this?)
+
+ -- Duncan Findlay <duncf@debian.org>  Sat, 17 May 2003 18:38:58 -0400
+
+spamassassin (2.54-2) unstable; urgency=low
+
+  * Improves debconf handling of upgrade from previous versions (like
+      woody). (Closes: #191872, #192721)
+  * Rewritten spamassassin.config in perl
+  * This no longer bends over backwards to fix stuff I broke in 2.11
+    (which was never in a stable release, and is over a year old)
+
+ -- Duncan Findlay <duncf@debian.org>  Wed, 14 May 2003 18:39:53 -0400
+
+spamassassin (2.54-1) unstable; urgency=low
+
+  * New upstream release
+      Include improved Bayes documentation (Closes: #185221)
+      Updates documentation in USAGE.gz (Closes: #185763)
+      Better scores (Closes: #191280)
+      Added rule TOO_MANY_MUA (Closes: #190380)
+      Fixed pyzor reporting (Closes: #184574)
+  * Tightened up logcheck messages, for use in
+    /etc/logcheck/ignore.d.paranoid (Closes: #187742)
+  * Applied patch from Andre Luis Lopes to fix pt_BR tranlations.
+      (Closes: #187745)
+  * Added french debconf translation (From Christian Perrier
+      <bubulle@debian.org>) (Closes: #190113)
+  * Added automatic call to debconf-updatepo in debian/rules
+  * Added example .muttrc snippet (Closes: #192713)
+
+ -- Duncan Findlay <duncf@debian.org>  Wed, 14 May 2003 00:24:42 -0400
+
+spamassassin (2.53-1) unstable; urgency=low
+
+  * New upstream release (Closes: #185887)
+      Fixes false positives in SUBJ_ALL_CAPS from KOI8 mail (Closes:
+       #168682)
+      Fixes problems with --syslog-socket=none (Closes: #179925)
+      Fixes --nouser-config (Closes: #164284)
+      base64 and utf-8 no longer penalized (Closes: #165393)
+      spamd now does setgid in addition to setuid (Closes: #182869)
+      sa-learn docs explain ham as non-spam (Closes: #183286)
+      Fixes some Bayes corruption
+  * Fixes logcheck format. (Closes: #182838)
+  * Added -m option by default. (Closes: #183323)
+  * Added po-debconf support (Patch from Andre Luis Lopes
+    <andrelop@ig.com.br>) (Closes: #184126)
+  * Added a debian/watch file for uscan
+
+ -- Duncan Findlay <duncf@debian.org>  Thu,  3 Apr 2003 19:23:43 -0500
+
+spamassassin (2.50-1) unstable; urgency=low
+
+  * New upstream release: (Closes: #181836)
+      Bayesian learner component
+      Better scores (Closes: #177317)
+      New (and improved!) report format
+      Bugfixes!
+      Closes: #179641, #166567, #180115, #180117, #164367, #161067,
+      #165428, #165731, #170881, #154812, #163179, #164960, #161696,
+      #163297, #163328
+	
+  * Added rules/STATISTICS.txt to /usr/share/doc/spamassassin (Closes: #179799)
+
+ -- Duncan Findlay <duncf@debian.org>  Wed, 26 Feb 2003 22:58:58 -0500
+
+spamassassin (2.44-1) unstable; urgency=low
+
+  * New upstream release (mainly bugfixes) (Closes: #160206)
+  * Acknowledge NMU (Closes: #178936)
+  * Bumped priority of debconf question to high
+    (Closes: #167451, #167452, #169751
+  * Removed dependency on libnet-smtp-server-perl (Closes: #175129)
+  * Fixed debian/rules CFLAGS with patch from <tino.keitel@web.de>
+    (Closes: #176659)
+  * Fix lintian warning:
+    "W: spamassassin: init-script-suggests-versioned-depends postinst"
+
+ -- Duncan Findlay <duncf@debian.org>  Fri, 31 Jan 2003 19:19:25 -0500
+
+spamassassin (2.43-1.1) unstable; urgency=high
+
+  * Non-maintainer upload at maintainer request
+  * Apply patch for overflow as reported to BUGTRAQ
+    "SpamAssassin / spamc+BSMTP remote buffer overflow"
+    (spamd/libspamc.c)
+  * Depending on how spamc is built, this may or may not be
+    exploitable
+
+ -- Matt Zimmerman <mdz@debian.org>  Wed, 29 Jan 2003 11:08:12 -0500
+
+spamassassin (2.43-1) unstable; urgency=low
+
+  * New upstream release
+  * The -m option is no longer recommended. It is buggy.
+
+ -- Duncan Findlay <duncf@debian.org>  Tue, 15 Oct 2002 23:18:01 -0400
+
+spamassassin (2.42-1) unstable; urgency=low
+
+  * New upstream release
+    (Closes: #160309, #160901, #162013, #159704, #163143, #156263)
+      Various AWL fixes
+      -m fixed (better)
+      Various misc bug fixes.
+  * Added SENT_BY_AFBACKUP and SENT_BY_APTLC to 65_debian.cf
+    (Closes: #155527, #155634)
+  * Added --oknodo's in /etc/init.d/spamassassin (Closes: #161981)
+
+ -- Duncan Findlay <duncf@debian.org>  Fri,  4 Oct 2002 18:18:10 -0400
+
+spamassassin (2.41-2) unstable; urgency=low
+
+  * Applies perl-5.8 / -m patch for spamd.
+    (Closes: #159826, #159038, #159984)
+  * Adds debconf note for removal of spamproxyd (Closes: #159930)
+
+ -- Duncan Findlay <duncf@debian.org>  Sat,  7 Sep 2002 11:23:40 -0400
+
+spamassassin (2.41-1) unstable; urgency=low
+
+  * New upstream release
+
+ -- Duncan Findlay <duncf@debian.org>  Thu,  5 Sep 2002 18:07:13 -0400
+
+spamassassin (2.40-1) unstable; urgency=low
+
+  * New upstream release:
+    Spamproxyd removed -- WILL BREAK CONFIGS -- sorry! (Closes: #156938)
+    Spamassassin will no longer deliver mail, only filter (-P flag by
+     default/can't negate)
+    all_spam_to improved to be smarter (Closes: #151320)
+    config option to avoid checking dns before use (Closes: #153245)
+
+  * Init script will not fail on stop if spamd not running
+    (Closes: #158913)
+  * Logcheck files fixed (symlinks removed, messages updated)
+    (Closes: #146221, #155295)
+  * "N16" fix applied. (Will be in upstream 2.41)
+  * Added link to dman's exim integration stuff in README.Debian
+    (Closes: #151526)
+
+ -- Duncan Findlay <duncf@debian.org>  Tue,  3 Sep 2002 01:47:17 -0400
+
+spamassassin (2.31-2) unstable; urgency=low
+
+  * Changed Recommends: spamc to Depends: spamc
+
+ -- Duncan Findlay <duncf@debian.org>  Tue, 25 Jun 2002 13:38:15 -0400
+
+spamassassin (2.31-1) unstable; urgency=low
+
+  * New upstream release
+
+ -- Duncan Findlay <duncf@debian.org>  Thu, 20 Jun 2002 23:09:42 -0400
+
+spamassassin (2.30-2) unstable; urgency=low
+
+  * Changed init script to use /var/run/spamd.pid
+  * Fixed logcheck file to match setuid succeeded messages
+  * Split spamc into a separate package. Let the bug reports begin!
+    (Closes: #137140)
+
+ -- Duncan Findlay <duncf@debian.org>  Mon, 17 Jun 2002 14:49:38 -0400
+
+spamassassin (2.30-1) unstable; urgency=low
+
+  * New upstream release (Closes: #140300, #147625, #144482, #143316,
+    #146588, #13977)
+  * Added debconf e-mails to whitelist (Closes: #147465)
+  * Added depends on libtime-hires-perl
+  * Moved to section mail (interpreters doesn't make sense - spamassassin
+    isn't just a perl module)
+  * Removed README.Upgrade. I doubt anyone still uses 1.15
+
+ -- Duncan Findlay <duncf@debian.org>  Sat, 15 Jun 2002 01:24:15 -0400
+
+spamassassin (2.20-2) unstable; urgency=low
+
+  * Added depends on libnet-smtp-server-perl (Closes: #145297). Depending on
+    the outcome of bug 119517, this may be downgraded to a Recommends:.
+  * Removed extra empty dir /usr/share/spamassassin (Closes: #145323)
+  * Added recommends: for libmailtools-perl (Closes: #143935)
+
+ -- Duncan Findlay <duncf@rogers.com>  Fri, 10 May 2002 20:37:08 -0400
+
+spamassassin (2.20-1) unstable; urgency=medium
+
+  * New upstream release. (Closess: #140300, #140910, #143324, #134669,
+    #136329, #140422, #140910)
+  * This fixes the "razor 1.20-1 bug" (143324)
+  * New features. Yay! (including the -S (short-ciruit) flag for spamd)
+  * Urgency=medium to beat razor 1.20-1 to woody.
+
+ -- Duncan Findlay <duncf@rogers.com>  Sat, 20 Apr 2002 00:05:40 -0400
+
+spamassassin (2.11-4) unstable; urgency=medium
+
+  * "Fixes" configuration files "problem"/"bug." I'm really not happy with
+    putting upstream rules and scores in /etc/spamassassin. But I guess I
+    don't have a choice. Do I? (Closes: #141484)
+  * Fixes pathes in Mail::SpamAssassin::Conf docs. (Closes: #141172)
+  * Fixes "spelling" mistake in description. (Closes: #141512)
+
+ -- Duncan Findlay <duncf@rogers.com>  Sun,  7 Apr 2002 22:02:29 -0400
+
+spamassassin (2.11-3) unstable; urgency=low
+
+  * Fixes, and undoes previous damage relating to the logcheck bug (Closes:
+    #140773)
+
+ -- Duncan Findlay <duncf@rogers.com>  Tue,  2 Apr 2002 17:57:17 -0500
+
+spamassassin (2.11-2) unstable; urgency=low
+
+  * Fixes the logcheck bug (Closes: #139201)
+  * Set SUBJ_FULL_OF_8BITS to 0 (Closes: #140344)
+  * Set RCVD_IN_ORBZ to 0 (Closes: #139204)
+
+ -- Duncan Findlay <duncf@rogers.com>  Sat, 30 Mar 2002 14:48:22 -0500
+
+spamassassin (2.11-1) unstable; urgency=medium
+
+  * New upstream release (mainly saner scores)
+  * Fixed description in user_prefs file to be less confusing (Closes:
+    #136648)
+  * urgency=medium since the last upload never quite got to testing
+
+ -- Duncan Findlay <duncf@rogers.com>  Mon,  4 Mar 2002 19:23:08 -0500
+
+spamassassin (2.10-1) unstable; urgency=medium
+
+  * New upstream release
+    Closes: #131442, #131317, #133026, #131438, #131193, #136047, #134660,
+    #134557
+  * New features: _HITS_ and _REQD_ in subject_tag display number
+    of hits/required hits, more tests, etc.
+  * Fixed minor dependency thing (Closes: #131797)
+  * Included logcheck files (Closes: #131161)
+  * Actually added README.Upgrade (Closes: #131188)
+  * Fixed some postrm to purge old files (from 1.5)
+  * Added a line to /etc/init.d/spamassassin to clarify (stupid)
+    misconceptions (Closes: #134566)
+  * Moved manpages to their proper place (ie. .3perl and .8)
+  * Included (fixed) check_whitelist in examples dir (Closes: #135383)
+  * Put daemons in /usr/sbin (Closes: #135703)
+
+ -- Duncan Findlay <duncf@rogers.com>  Sun, 17 Feb 2002 19:49:28 -0500
+
+spamassassin (2.01-1) unstable; urgency=low
+
+  * New upstream release (lots of new features!)
+    Closes: #129738, #130260, #126461, #123630, #123886, #123889, #128415
+  * Added Debian specific config.  (Closes: #126073)
+  * Moved spamd to boot up earlier than exim (i.e. 19)  (Closes: #131028)
+
+ -- Duncan Findlay <duncf@rogers.com>  Sat, 26 Jan 2002 17:24:05 -0500
+
+spamassassin (1.5-5) unstable; urgency=low
+
+  * Fixed postinst (Closes: #123954)
+  * Fixed typo in init. (I really need to learn to spel!) (Closes: #124077)
+  * Fixed the dpkg dependency to 1.8.1 (Closes: #123320 again!)
+  * Disables foreign character set tests by default (bug 126073, but
+    still have to deal with other half)
+
+ -- Duncan Findlay <duncf@rogers.com>  Sat, 22 Dec 2001 16:28:56 -0500
+
+spamassassin (1.5-4) unstable; urgency=low
+
+  * Fixed my (ahem...) little typo (that caused spamassassin to not work at
+    all) (Closes: #123721)
+  * Moved /etc/default/spamd.conf to /etc/default/spamassassin (Closes:
+    #123722)
+  * Fixed hang bug in spamassassin.cf (VERY_SUSP_RECIPS and
+    VERY_SUSP_CC_RECIPS)
+
+ -- Duncan Findlay <duncf@rogers.com>  Wed, 12 Dec 2001 21:09:21 -0500
+
+spamassassin (1.5-3) unstable; urgency=low
+
+  * Changed the regexp for SUBJ_HAS_UNIQ_ID so it doesn't get triggered on
+    stuff like "Subject: Broken: tar -zxvf" (Closes: #123196)
+  * Moved /usr/share/perl5/spamassassin.cf and .prefs to
+    /usr/share/spamassassin/ (Closes: #123475)
+  * Fixed "name" in init script to spamd (not spamassassin) like it was in
+    1.5-1 (Closes: #123545)
+  * Fixed -e option.  (Closes: #123551)
+  * Added Depends on dpkg >= 1.9.0  (I still don't know what version it
+    should be. (Closes: #123320 (again!)
+  * Got rid of the Conflicts and Replaces on libmail-spamassassin-perl.  I
+    figure everyone has upgraded by now, or can figure it out!
+  * Got rid of explicit razor depends, now just librazor-perl
+
+ -- Duncan Findlay <duncf@rogers.com>  Tue, 11 Dec 2001 20:14:07 -0500
+
+spamassassin (1.5-2) unstable; urgency=low
+
+  * Added Build-Depends for ia64 (bind-dev)  (Closes some bug yet to be
+    filed)
+  * Clarfied README.Debian (Closes: #123194, #123240)
+  * Fixed word_in_dictionary bug
+  * Added warning to spamd users using an old version of dpkg
+    (Closes: #123320)
+  * Added mass-check to examples (for bug 123290)
+
+ -- Duncan Findlay <duncf@rogers.com>  Mon, 10 Dec 2001 11:37:57 -0500
+
+spamassassin (1.5-1) unstable; urgency=low
+
+  * Initial Release. (Closes: #120975)
+
+ -- Duncan Findlay <duncf@rogers.com>  Fri,  7 Dec 2001 20:54:03 -0500
