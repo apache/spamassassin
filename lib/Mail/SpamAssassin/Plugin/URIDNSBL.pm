@@ -1017,8 +1017,9 @@ sub lookup_dnsbl_for_ip {
     my $rulecf = $conf->{uridnsbls}->{$rulename};
 
     # ips_only/domains_only lookups should not act on this kind of BL
-    next if ($tflags->{$rulename} =~ /\b(?:ips_only|domains_only)\b/);
-    
+    next  if defined $tflags->{$rulename} &&
+             $tflags->{$rulename} =~ /\b(?:ips_only|domains_only)\b/;
+
     $self->lookup_single_dnsbl($scanner, $obj, $rulename,
 			       $revip, $rulecf->{zone}, $rulecf->{type});
   }
