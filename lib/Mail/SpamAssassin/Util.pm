@@ -324,6 +324,8 @@ sub exit_status_str($;$) {
   my $str;
   if (!defined($stat)) {
     $str = '(no status)';
+  } elsif (am_running_on_windows()) { 
+    $str = 'exit (running under Windows, cannot determine exit status)'
   } elsif (WIFEXITED($stat)) {
     $str = sprintf("exit %d", WEXITSTATUS($stat));
   } elsif (WIFSTOPPED($stat)) {
