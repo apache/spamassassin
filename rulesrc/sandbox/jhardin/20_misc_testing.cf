@@ -53,7 +53,7 @@ endif
 
 body           DEAR_EMAIL_USER          /^\s?(?:Dear\s|Attention:?\s?)(?:E|Web)-?mail\s(?:account\s)?User\b/i
 describe       DEAR_EMAIL_USER          Dear Email User:
-score          DEAR_EMAIL_USER          3.0
+#score          DEAR_EMAIL_USER          3.0
 
 
 # from users list spamples 8/2009
@@ -114,11 +114,11 @@ endif
 
 meta           FROM_MISSP_MSFT       __FROM_RUNON && (__ANY_OUTLOOK_MUA || __HAS_MIMEOLE || __MIMEOLE_MS)
 describe       FROM_MISSP_MSFT       From misspaced + supposed Microsoft tool
-score          FROM_MISSP_MSFT       3.5
+#score          FROM_MISSP_MSFT       3.5
 
 meta           FROM_MISSP_DYNIP      __FROM_RUNON && RDNS_DYNAMIC
 describe       FROM_MISSP_DYNIP      From misspaced + dynamic rDNS
-score          FROM_MISSP_DYNIP      2.0
+#score          FROM_MISSP_DYNIP      2.0
 
 
 # observed in spam 8/2009
@@ -154,11 +154,11 @@ describe       MDN_BOTCHED           Malformed return receipt header
 # observed in spam 9/2009
 header         HDRS_MISSP            ALL =~ /\n(?:Subject|From|To):\S/ism
 describe       HDRS_MISSP            Misspaced headers
-score          HDRS_MISSP            2.0
+#score          HDRS_MISSP            2.0
 
 header         SPAMMY_MIME_BDRY_01  Content-Type =~ /boundary="\@\@BOUNDARY"/
 describe       SPAMMY_MIME_BDRY_01  Spammy MIME boundary string
-score          SPAMMY_MIME_BDRY_01  0.10
+#score          SPAMMY_MIME_BDRY_01  0.10
 
 # testing
 header         __TB_MIME_BDRY_NO_Z   Content-Type =~ /boundary="-{8,}(?:[1-9]){16}/
@@ -168,13 +168,13 @@ describe       TBIRD_SUSP_MIME_BDRY  Unlikely Thunderbird MIME boundary
 # seen in a few HTML fraud spams
 rawbody        RUNON_SHY          /(?:\&shy;){3}/i
 describe       RUNON_SHY          Repeating soft hyphens
-score          RUNON_SHY          0.1
+#score          RUNON_SHY          0.1
 tflags         RUNON_SHY          nopublish
 
 # Seen all too often
 header         LAZY_LISTWASHING   To =~ /\@(?:example\.com|example\.domain|your\.domain|some\.domain|domain\.dom|somewhere\.tld|somewhere\.com|your\.?domain\.com|your\.favorite\.machine)\b/i
 describe       LAZY_LISTWASHING   Lazy spammer, painfully obvious bogus addresses
-score          LAZY_LISTWASHING   0.25
+#score          LAZY_LISTWASHING   0.25
 
 # Little to work with
 body           __PLS_REVIEW       /\b(?:please|kindly)\s(?:(?:re)?view|see)(?:\s\w+)?\sattach(?:ed|ment)\b/i
@@ -244,7 +244,7 @@ meta           __MANY_SPAN_IN_TEXT   (__SPAN_BEG_TEXT > 4) && (__SPAN_END_TEXT >
 meta           MANY_SPAN_IN_TEXT   __MANY_SPAN_IN_TEXT && !__VIA_ML
 describe       MANY_SPAN_IN_TEXT   Many <SPAN> tags embedded within text
 tflags         MANY_SPAN_IN_TEXT   publish
-score          MANY_SPAN_IN_TEXT   2.50
+#score          MANY_SPAN_IN_TEXT   2.50
 
 uri            __FEEDPROXY_URI     m;http://feedproxy\.google\.com/;i
 rawbody        __FEEDPROXY         m;http://feedproxy\.google\.com/;i
@@ -254,7 +254,7 @@ describe       MANY_GOOG_PROXY     Many Google feedproxy URIs
 
 rawbody        TINY_FLOAT         /\bstyle\s*=\s*"[^"]{0,40}?(?:(?:FONT-SIZE\s*:\s+\dpx|FLOAT\s*:\s+(?:right|left))(?:;\s+)?(?:(?!(?:FONT-SIZE|FLOAT))\w+:\s+\w+;?\s*)*){2}/i
 describe       TINY_FLOAT         Has small-font floating HTML - text obfuscation?
-score          TINY_FLOAT         2.00
+#score          TINY_FLOAT         2.00
 
 
 # endless requests on the users list...
@@ -363,11 +363,11 @@ header         __APPARENTLY_TO            Apparently-To =~ /<.*>/
 tflags         __APPARENTLY_TO            multiple nopublish
 meta           HAS_APPARENTLY_TO          __APPARENTLY_TO > 0
 describe       HAS_APPARENTLY_TO          Has deprecated Apparently-To header
-score          HAS_APPARENTLY_TO          0.50
+#score          HAS_APPARENTLY_TO          0.50
 tflags         HAS_APPARENTLY_TO          nopublish
 meta           MANY_APPARENTLY_TO         __APPARENTLY_TO > 20
 describe       MANY_APPARENTLY_TO         Has many Apparently-To headers
-score          MANY_APPARENTLY_TO         2.00
+#score          MANY_APPARENTLY_TO         2.00
 tflags         MANY_APPARENTLY_TO         nopublish
 
 # obfuscation of "opt out"
@@ -533,7 +533,7 @@ describe    GZ_PILL_SQUATTERS      Found a link to rogue pill pusher content
 # observed in multiple spam
 header      TO_JOHNZY              TO =~ /johnzy_the_king\@hotmail\.com/i
 describe    TO_JOHNZY              To a spammy recipent	
-score       TO_JOHNZY              3.00
+#score       TO_JOHNZY              3.00
 
 # Discussed on list and observed in spam 10/15/2010
 header      TO_ONE_CHAR            To =~ /^\s*"<"\s*</
@@ -566,7 +566,7 @@ body        __FORGED_FB_USERCP_01  /This message was intended for Want to contro
 # Javascript obfuscation noted by J. Brennan on the Users list 09/2010
 rawbody     OBFU_JVSCR_ESC         /document\.write\(unescape\("(?:%[0-9a-f]{2}){10}/i
 describe    OBFU_JVSCR_ESC         Injects content using obfuscated javascript
-score       OBFU_JVSCR_ESC         2.75
+#score       OBFU_JVSCR_ESC         2.75
 tflags      OBFU_JVSCR_ESC         publish
 
 # Starting to observe in spam
@@ -582,11 +582,11 @@ describe    __UCOZ_URI             URI contains ucoz.org
 body        __ARTHUR_SIMMONS       /Arthur Simmons/
 body        __INTRUST_DOMS         /In[Tt]rust Domains/
 meta        ARTHUR_INTRUST         __ARTHUR_SIMMONS && __INTRUST_DOMS
-score       ARTHUR_INTRUST         4.5
+#score       ARTHUR_INTRUST         4.5
 describe    ARTHUR_INTRUST         Arthur Simmons - registrar spammer extraordinaire
 
 header      ART_NAMES_ORG          Received =~ /\bart\.names\.org\b/i
-score       ART_NAMES_ORG          4.0
+#score       ART_NAMES_ORG          4.0
 describe    ART_NAMES_ORG          Arthur Simmons - registrar spammer extraordinaire
 
 # Causes infinite loops if compiled on some systems (users list 2011-03-20)
@@ -609,22 +609,22 @@ endif
 # More from Ned Slider
 meta        NSL_FREEMAIL_SUBJ      (FREEMAIL_FROM && MISSING_SUBJECT)
 describe    NSL_FREEMAIL_SUBJ      From freemail with missing subject
-score       NSL_FREEMAIL_SUBJ      0.1
+#score       NSL_FREEMAIL_SUBJ      1.0
 tflags      NSL_FREEMAIL_SUBJ      nopublish
 
 meta        NSL_FREEMAIL_M1        (NSL_FREEMAIL_SUBJ && (__HAS_ANY_URI || __MANY_RECIPS))
 describe    NSL_FREEMAIL_M1        From freemail, missing subject and uri or many recips
-score       NSL_FREEMAIL_M1        0.1
+#score       NSL_FREEMAIL_M1        1.0
 tflags      NSL_FREEMAIL_M1        nopublish
 
 meta        NSL_FREEMAIL_M2        (FREEMAIL_FROM && __HAS_ANY_URI && __MANY_RECIPS)
 describe    NSL_FREEMAIL_M2        From freemail with uri and many recips
-score       NSL_FREEMAIL_M2        0.1
+#score       NSL_FREEMAIL_M2        1.0
 tflags      NSL_FREEMAIL_M2        nopublish
 
 header      NSL_TO_ENDS_COMMA      To =~ /,$/
 describe    NSL_TO_ENDS_COMMA      To: ends with a comma
-score       NSL_TO_ENDS_COMMA      0.001
+#score       NSL_TO_ENDS_COMMA      0.001
 tflags      NSL_TO_ENDS_COMMA      nopublish
 
 
