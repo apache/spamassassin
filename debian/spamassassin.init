@@ -1,54 +1,88 @@
-#!/bin/sh
+#! /bin/sh
 
-# set variables
-SERVICE=spamassassin
+### BEGIN INIT INFO
+# Provides:       spamassassin
+# Required-Start: $remote_fs
+# Required-Stop:  $remote_fs
+# Should-Start:   $network $syslog
+# Default-Start:  2 3 4 5
+# Default-Stop:   0 1 6
+### END INIT INFO
+
+# Spamd init script
+# June 2002
+# Duncan Findlay
+
+# Based on skeleton by Miquel van Smoorenburg and Ian Murdock
+
+PATH=/sbin:/bin:/usr/sbin:/usr/bin
+DAEMON=/usr/sbin/spamd
 NAME=spamd
-DEFAULTS=/etc/default/$SERVICE
-DAEMON=/usr/bin/$NAME
-PIDFILE=/var/run/$NAME.pid
-INITFILE=/etc/init.d/$SERVICE
+SNAME=spamassassin
+DESC="SpamAssassin Mail Filter Daemon"
+PIDFILE="/var/run/$NAME.pid"
+XNAME=/usr/bin/perl
 
-# set default spamd configuration
-# change these in /etc/default/$SERVICE instead of here
-OPTIONS="-c -m5 -H"
+export TMPDIR=/tmp
+# Apparently people have trouble if this isn't explicitly set...
+
+# Defaults - don't touch, edit /etc/default/spamassassin
 ENABLED=0
+OPTIONS=""
+NICE=
 
-# source defaults
-test -f $DEFAULTS && . $DEFAULTS
+. /lib/lsb/init-functions
 
-# exit if we have nothing to do
-test -x $DAEMON -a "$ENABLED" != "0" || exit 0
+test -f /etc/default/spamassassin && . /etc/default/spamassassin
 
-PATH=$PATH:/usr/bin:/usr/local/bin
+DOPTIONS="-d --pidfile=$PIDFILE"
 
-# see how we were called
+if [ "$ENABLED" = "0" ]; then
+    echo "$DESC: disabled, see /etc/default/spamassassin"
+    exit 0
+fi
+
+test -f $DAEMON || exit 0
+
+set -e
+
 case "$1" in
-    start)
-	echo -n "Starting: $SERVICE"
-	start-stop-daemon --start --quiet --pidfile $PIDFILE --name $NAME --startas $DAEMON -- $OPTIONS -d -r $PIDFILE
-	echo "."
-    ;;
-    stop)
-	echo -n "Stopping: $SERVICE"
-	start-stop-daemon --stop --quiet --pidfile $PIDFILE --name $NAME
-	echo "."
-    ;;
-    reload|force-reload)
-	echo -n "Reloading: $SERVICE"
-	start-stop-daemon --stop --quiet --pidfile $PIDFILE --name $NAME --signal HUP
-	echo "."
-    ;;
-    restart)
-	echo -n "Restarting: $SERVICE"
-	start-stop-daemon --stop --quiet --pidfile $PIDFILE --name $NAME
-	start-stop-daemon --start --quiet --pidfile $PIDFILE --name $NAME --startas $DAEMON -- $OPTIONS -d -r $PIDFILE
-	echo "."
-    ;;
+  start)
+	echo -n "Starting $DESC: "
+	start-stop-daemon --start --pidfile $PIDFILE --exec $XNAME \
+	    $NICE --oknodo --startas $DAEMON -- $OPTIONS $DOPTIONS
+	echo "$NAME."
+	;;
 
-    *)
-	echo "Usage: $INITFILE {start|stop|reload|restart|force-reload}" >&2
+  stop)
+	echo -n "Stopping $DESC: "
+	start-stop-daemon --stop --pidfile $PIDFILE --exec $XNAME --oknodo
+	echo "$NAME."
+	;;
+
+  reload|force-reload)
+	echo -n "Reloading $DESC: "
+	start-stop-daemon --stop --pidfile $PIDFILE --signal HUP --exec $XNAME
+	echo "$NAME."
+	;;
+
+  restart)
+	echo -n "Restarting $DESC: "
+	start-stop-daemon --stop --pidfile $PIDFILE --exec $XNAME \
+	    --retry 5 --oknodo
+	start-stop-daemon --start --pidfile $PIDFILE --exec $XNAME \
+	    $NICE --oknodo --startas $DAEMON -- $OPTIONS $DOPTIONS
+
+	echo "$NAME."
+	;;
+  status)
+        status_of_proc -p $PIDFILE $DAEMON $NAME && exit 0 || exit $?
+        ;;
+  *)
+	N=/etc/init.d/$SNAME
+	echo "Usage: $N {start|stop|restart|reload|force-reload|status}" >&2
 	exit 1
-    ;;
+	;;
 esac
 
 exit 0

@@ -1,93 +1,184 @@
 #!/usr/bin/make -f
-#-*- makefile -*-
-# Made with the aid of dh_make, by Craig Small
-# Sample debian/rules that uses debhelper, by Joey Hess
-# Some lines taken from debmake, by Christoph Lameter
 
-# Uncomment this to turn on verbose mode.
+# SpamAssassin debian/rules
+# Duncan Findlay
+
+# Based on sample debian/rules by Joey Hess
+# And patches from various people (see changelog)
+
 #export DH_VERBOSE=1
-export DH_COMPAT=3
 
-PACKAGE=$(shell dh_listpackages)
+# The architecture-dependent portion of this package can be built separately
+# (i.e. without building the rest).
 
-ifndef PERL
-PERL = /usr/bin/perl
-endif
+# Bad things could probably happen if we run this in parallel
+.NOTPARALLEL:
 
-ifndef DESTDIR
-DESTDIR=..
-endif
-TMP     =`pwd`/debian/$(PACKAGE)
+CFLAGS=-O2 -Wall
 
-OPTIMIZE = -O2 -Wall
 ifneq (,$(findstring debug,$(DEB_BUILD_OPTIONS)))
-OPTIMIZE += -g
+	CFLAGS += -g
+endif
+ifeq (,$(findstring nostrip,$(DEB_BUILD_OPTIONS)))
+	INSTALL_PROGRAM += -s
 endif
 
-build: build-stamp
-build-stamp:
+# For building both spamc and spamassassin
+configure: configure-stamp
+configure-stamp:
+
 	dh_testdir
 
-	# Add here commands to compile the package.
-	$(PERL) Makefile.PL INSTALLDIRS=vendor SYSCONFDIR=/etc \
-		< /dev/null
-	$(MAKE) OPTIMIZE="$(OPTIMIZE)" LD_RUN_PATH=""
+	perl Makefile.PL INSTALLDIRS=vendor \
+	 DESTDIR=$(CURDIR)/debian/spamassassin \
+	 CONFDIR=/etc/spamassassin \
+	 ENABLE_SSL=yes < /dev/null
 
-	touch build-stamp
+	touch configure-stamp
 
-clean:
+build: build-indep build-arch
+
+install: install-indep install-arch
+
+binary: binary-indep binary-arch
+
+clean: clean1
+clean1:
 	dh_testdir
 	dh_testroot
-	rm -f build-stamp
+	rm -f build-indep-stamp build-arch-stamp configure-stamp
 
-	# Add here commands to clean up after the build process.
-	-$(MAKE) veryclean
+	[ ! -f Makefile ] || $(MAKE) veryclean
+
+	rm -f spamd/spamc.1p sa-awl.1p sa-check_spamd.1p
+	rm -Rf t/log/*
+	rm -f debian/semantic.cache
 
 	dh_clean
 
-install:
+#debian/po/templates.pot: debian/spamassassin.templates
+#	-debconf-updatepo
+
+# Spamassassin ONLY
+
+build-indep: build-indep-stamp
+#build-indep-stamp: configure debian/po/templates.pot
+build-indep-stamp: configure
+
+	dh_testdir
+
+	$(MAKE) CFOPTIMIZE="$(CFLAGS)" CFCCFLAGS="" CFLIBS="" CFLDFLAGS=""
+
+	pod2man sa-awl.raw sa-awl.1p
+	pod2man sa-check_spamd.raw sa-check_spamd.1p
+
+	touch build-arch-stamp
+
+	touch build-indep-stamp
+
+
+install-indep: install-spamassassin
+
+# SpamAssassin
+
+install-spamassassin: build-indep
 	dh_testdir
 	dh_testroot
-	dh_clean -k
-	dh_installdirs
+	dh_prep
+	dh_installdirs -i
 
-	# Add here commands to install the package into debian/tmp.
-	#$(MAKE) install DESTDIR=`pwd`/debian/tmp
-	$(MAKE) install PREFIX=$(TMP)/usr SYSCONFDIR=$(TMP)/etc
+	$(MAKE) install DESTDIR=`pwd`/debian/spamassassin
 
 
-# Build architecture-independent files here.
-binary-indep: build install
-# We have nothing to do by default.
+#	Get rid of SPAMC stuff.
+	rm debian/spamassassin/usr/bin/spamc debian/spamassassin/usr/share/man/man1/spamc.1p
 
-# Build architecture-dependent files here.
-binary-arch: build install
-#	dh_testversion
+
+#	Move spamd to /usr/sbin + fix the man file
+	sed 's#SPAMD 1#SPAMD 8#' \
+	 debian/spamassassin/usr/share/man/man1/spamd.1p \
+	 > debian/spamassassin/usr/share/man/man8/spamd.8p
+	rm debian/spamassassin/usr/share/man/man1/spamd.1p
+
+	mv debian/spamassassin/usr/bin/spamd debian/spamassassin/usr/sbin/
+
+#	Install Debian specific files
+	cp debian/65_debian.cf debian/spamassassin/etc/spamassassin/65_debian.cf
+
+	-rmdir -p debian/spamassassin/usr/lib/perl5
+
+#	dh_installdocs isn't flexible enough to install all the docs to the right place
+#	Do it here!
+	cp debian/copyright debian/GPG.KEY		debian/spamassassin/usr/share/doc/spamassassin/
+	cp debian/spamassassin.README.Debian		debian/spamassassin/usr/share/doc/spamassassin/README.Debian
+	cp CREDITS README TRADEMARK UPGRADE USAGE NOTICE 	debian/spamassassin/usr/share/doc/spamassassin/
+	cp ldap/README 					debian/spamassassin/usr/share/doc/spamassassin/README.ldap
+	cp rules/STATISTICS*.txt 			debian/spamassassin/usr/share/doc/spamassassin/rules/
+	cp spamd/README 				debian/spamassassin/usr/share/doc/spamassassin/README.spamd
+	cp spamd/README.vpopmail 			debian/spamassassin/usr/share/doc/spamassassin/README.spamd-vpopmail
+	cp -r sql/ 					debian/spamassassin/usr/share/doc/spamassassin/
+
+	cp pkgrules/* debian/spamassassin/usr/share/spamassassin
+
+binary-indep: build-indep install-indep
+	dh_testdir -i
+	dh_testroot -i
+#	dh_installdebconf -i
+#	dh_installlogcheck -i
+	dh_installman -i sa-awl.1p sa-check_spamd.1p
+	dh_installdocs -i
+	dh_installexamples -i
+	dh_installinit -i -- defaults 19 21
+	dh_installcron -i
+	dh_installchangelogs Changes -i
+	dh_link -i
+	dh_compress -i -XGPG.KEY
+	dh_fixperms -i
+	dh_installdeb -i
+	dh_perl -i
+	dh_gencontrol -i
+	dh_md5sums -i
+	dh_builddeb -i
+
+# spamc ONLY
+
+build-arch: build-arch-stamp
+#build-arch-stamp: configure debian/po/templates.pot
+build-arch-stamp: configure
+
+	dh_testdir
+
+	-mkdir -p blib/man1
+
+	$(MAKE) CFOPTIMIZE="$(CFLAGS)" CFCCFLAGS="" CFLIBS="" CFLDFLAGS="" spamc/spamc
+
+	pod2man spamc/spamc.pod blib/man1/spamc.1p
+
+	touch build-arch-stamp
+
+install-arch: DH_OPTIONS=
+install-arch: build-arch
 	dh_testdir
 	dh_testroot
-	dh_installdocs README ldap/README ldap/README.testing spamc/README.win spamc/README.qmail spamd/README.vpopmail spamd/README sql/README.awl sql/README.bayes sql/README
-	dh_installexamples
-	dh_installmenu
-#	dh_installemacsen
-	dh_installinit
-	dh_installcron
-	dh_installman
-#	dh_undocumented
-	dh_installchangelogs
-	dh_link
-	dh_strip
-	dh_compress
-	dh_fixperms
-#	dh_makeshlibs
-	dh_installdeb
-	dh_perl
-	dh_shlibdeps
-	dh_gencontrol
-	dh_md5sums
-	dh_builddeb --destdir=$(DESTDIR)
+	dh_prep
+	dh_installdirs -a
 
-source diff:
-	@echo >&2 'source and diff are obsolete - use dpkg-source -b'; false
+	cp spamc/spamc debian/spamc/usr/bin/spamc
 
-binary: binary-indep binary-arch
-.PHONY: build clean binary-indep binary-arch binary
+binary-arch: build-arch install-arch
+	dh_testdir -a
+	dh_testroot -a
+#	dh_installlogcheck -a
+	dh_installdocs -a
+	dh_installman -a
+	dh_installchangelogs Changes -a
+	dh_strip -a
+	dh_compress -a
+	dh_fixperms -a
+	dh_installdeb -a
+	dh_shlibdeps -a
+	dh_gencontrol -a
+	dh_md5sums -a
+	dh_builddeb -a
+
+.PHONY: build build-indep build-arch clean clean1 binary-indep binary-arch binary install configure install-indep install-indep-docs install-arch
