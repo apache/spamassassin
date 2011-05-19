@@ -1,0 +1,330 @@
+Index: spamassassin-3.3.1/INSTALL
+===================================================================
+--- spamassassin-3.3.1.orig/INSTALL	2010-03-21 23:13:02.000000000 -0700
++++ spamassassin-3.3.1/INSTALL	2010-03-21 23:14:12.000000000 -0700
+@@ -455,7 +455,7 @@
+     perl interpreter.  Version 2.83 or later fixes this.
+ 
+     If you do not plan to use this plugin, be sure to comment out
+-    its loadplugin line in "/etc/mail/spamassassin/v310.pre".
++    its loadplugin line in "/etc/spamassassin/v310.pre".
+ 
+ 
+ What Next?
+Index: spamassassin-3.3.1/README
+===================================================================
+--- spamassassin-3.3.1.orig/README	2010-03-21 23:13:01.000000000 -0700
++++ spamassassin-3.3.1/README	2010-03-21 23:14:12.000000000 -0700
+@@ -111,13 +111,13 @@
+         not modify these, as they are overwritten when you run
+         "sa-update".
+ 
+-  - /etc/mail/spamassassin/*.cf:
++  - /etc/spamassassin/*.cf:
+ 
+   	Site config files, for system admins to create, modify, and
+ 	add local rules and scores to.  Modifications here will be
+ 	appended to the config loaded from the above directory.
+ 
+-  - /etc/mail/spamassassin/*.pre:
++  - /etc/spamassassin/*.pre:
+ 
+         Plugin control files, installed from the distribution. These are
+         used to control what plugins are loaded.  Modifications here will
+@@ -126,7 +126,7 @@
+         
+         You want to modify these files if you want to load additional
+         plugins, or inhibit loading a plugin that is enabled by default.
+-        If the files exist in /etc/mail/spamassassin, they will not
++        If the files exist in /etc/spamassassin, they will not
+         be overwritten during future installs.
+ 
+   - /usr/share/spamassassin/user_prefs.template:
+@@ -134,14 +134,14 @@
+ 	Distributed default user preferences. Do not modify this, as it is
+ 	overwritten when you upgrade.
+ 
+-  - /etc/mail/spamassassin/user_prefs.template:
++  - /etc/spamassassin/user_prefs.template:
+ 
+ 	Default user preferences, for system admins to create, modify, and
+ 	set defaults for users' preferences files.  Takes precedence over
+ 	the above prefs file, if it exists.
+ 
+         Do not put system-wide settings in here; put them in a file in the
+-        "/etc/mail/spamassassin" directory ending in ".cf". This file is
++        "/etc/spamassassin" directory ending in ".cf". This file is
+         just a template, which will be copied to a user's home directory
+         for them to change.
+ 
+Index: spamassassin-3.3.1/UPGRADE
+===================================================================
+--- spamassassin-3.3.1.orig/UPGRADE	2010-03-21 23:13:01.000000000 -0700
++++ spamassassin-3.3.1/UPGRADE	2010-03-21 23:14:12.000000000 -0700
+@@ -49,7 +49,7 @@
+   perldoc Mail::SpamAssassin::Plugin::* (ie AWL, DCC, etc)
+ 
+ - There are now multiple files read to enable plugins in the
+-  /etc/mail/spamassassin directory; previously only one, "init.pre" was
++  /etc/spamassassin directory; previously only one, "init.pre" was
+   read.  Now both "init.pre", "v310.pre", and any other files ending
+   in ".pre" will be read.  As future releases are made, new plugins
+   will be added to new files named according to the release they're
+@@ -207,7 +207,7 @@
+ - If you are using a UNIX machine with all database files on local disks,
+   and no sharing of those databases across NFS filesystems, you can use a
+   more efficient, but non-NFS-safe, locking mechanism.   Do this by adding
+-  the line "lock_method flock" to the /etc/mail/spamassassin/local.cf
++  the line "lock_method flock" to the /etc/spamassassin/local.cf
+   file. This is strongly recommended if you're not using NFS, as it is
+   much faster than the NFS-safe locker.
+ 
+Index: spamassassin-3.3.1/USAGE
+===================================================================
+--- spamassassin-3.3.1.orig/USAGE	2010-03-21 23:13:02.000000000 -0700
++++ spamassassin-3.3.1/USAGE	2010-03-21 23:14:12.000000000 -0700
+@@ -117,7 +117,7 @@
+     CPU-intensive task before they can send mail to you, so we give that
+     some bonus points.  However, it requires that you list what addresses
+     you expect to receive mail for, by adding 'hashcash_accept' lines to
+-    your ~/.spamassassin/user_prefs or /etc/mail/spamassassin/local.cf
++    your ~/.spamassassin/user_prefs or /etc/spamassassin/local.cf
+     files.  See the Mail::SpamAssassin::Plugin::Hashcash manual page for
+     details on how to specify these.
+ 
+@@ -129,14 +129,14 @@
+ 
+ 
+   - You can create your own system-wide rules files in
+-    /etc/mail/spamassassin; their filenames should end in ".cf".  Multiple
++    /etc/spamassassin; their filenames should end in ".cf".  Multiple
+     files will be read, and SpamAssassin will not overwrite these files
+     when installing a new version.
+ 
+ 
+   - You should not modify the files in /usr/share/spamassassin; these
+     will be overwritten when you upgrade.  Any changes you make in
+-    files in the /etc/mail/spamassassin directory,  however, will
++    files in the /etc/spamassassin directory,  however, will
+     override these files.
+ 
+ 
+Index: spamassassin-3.3.1/ldap/README
+===================================================================
+--- spamassassin-3.3.1.orig/ldap/README	2010-03-21 23:13:02.000000000 -0700
++++ spamassassin-3.3.1/ldap/README	2010-03-21 23:14:12.000000000 -0700
+@@ -13,7 +13,7 @@
+ database or LDAP server.
+ 
+ SpamAssassin will check the global configuration file (ie. any file matching
+-/etc/mail/spamassassin/*.cf) for the following settings:
++/etc/spamassassin/*.cf) for the following settings:
+ 
+   user_scores_dsn ldap://host:port/dc=basedn,dc=de?attr?scope?uid=__USERNAME__
+   user_scores_ldap_username	bind dn
+Index: spamassassin-3.3.1/lib/Mail/SpamAssassin/Conf.pm
+===================================================================
+--- spamassassin-3.3.1.orig/lib/Mail/SpamAssassin/Conf.pm	2010-03-21 23:13:02.000000000 -0700
++++ spamassassin-3.3.1/lib/Mail/SpamAssassin/Conf.pm	2010-03-21 23:14:12.000000000 -0700
+@@ -40,7 +40,7 @@
+ =head1 DESCRIPTION
+ 
+ SpamAssassin is configured using traditional UNIX-style configuration files,
+-loaded from the C</usr/share/spamassassin> and C</etc/mail/spamassassin>
++loaded from the C</usr/share/spamassassin> and C</etc/spamassassin>
+ directories.
+ 
+ The following web page lists the most important configuration settings
+@@ -1951,7 +1951,7 @@
+ 
+ These settings differ from the ones above, in that they are considered
+ 'privileged'.  Only users running C<spamassassin> from their procmailrc's or
+-forward files, or sysadmins editing a file in C</etc/mail/spamassassin>, can
++forward files, or sysadmins editing a file in C</etc/spamassassin>, can
+ use them.   C<spamd> users cannot use them in their C<user_prefs> files, for
+ security and efficiency reasons, unless C<allow_user_rules> is enabled (and
+ then, they may only add rules from below).
+Index: spamassassin-3.3.1/lib/Mail/SpamAssassin/Plugin/Test.pm
+===================================================================
+--- spamassassin-3.3.1.orig/lib/Mail/SpamAssassin/Plugin/Test.pm	2010-03-21 23:13:02.000000000 -0700
++++ spamassassin-3.3.1/lib/Mail/SpamAssassin/Plugin/Test.pm	2010-03-21 23:14:12.000000000 -0700
+@@ -27,7 +27,7 @@
+ =head1 DESCRIPTION
+ 
+ To try this plugin, write the above two lines in the synopsis to
+-C</etc/mail/spamassassin/plugintest.cf>.
++C</etc/spamassassin/plugintest.cf>.
+ 
+ =cut
+ 
+Index: spamassassin-3.3.1/lib/spamassassin-run.pod
+===================================================================
+--- spamassassin-3.3.1.orig/lib/spamassassin-run.pod	2010-03-21 23:13:02.000000000 -0700
++++ spamassassin-3.3.1/lib/spamassassin-run.pod	2010-03-21 23:14:12.000000000 -0700
+@@ -41,7 +41,7 @@
+  -p prefs, --prefspath=file, --prefs-file=file
+                                    Set user preferences file
+  --siteconfigpath=path             Path for site configs
+-                                   (def: /etc/mail/spamassassin)
++                                   (def: /etc/spamassassin)
+  --cf='config line'                Additional line of configuration
+  -x, --nocreate-prefs              Don't create user preferences file
+  -e, --exit-code                   Exit with a non-zero exit code if the
+@@ -239,7 +239,7 @@
+ =item B<--siteconfigpath>=I<path>
+ 
+ Use the specified path for locating site-specific configuration files.  Ignore
+-the default directories (usually C</etc/mail/spamassassin> or similar).
++the default directories (usually C</etc/spamassassin> or similar).
+ 
+ =item B<--cf='config line'>
+ 
+Index: spamassassin-3.3.1/rules/user_prefs.template
+===================================================================
+--- spamassassin-3.3.1.orig/rules/user_prefs.template	2010-03-21 23:13:02.000000000 -0700
++++ spamassassin-3.3.1/rules/user_prefs.template	2010-03-21 23:14:12.000000000 -0700
+@@ -5,7 +5,7 @@
+ #* directory. At runtime, if a user has no preferences in their home directory
+ #* already, it will be copied for them, allowing them to perform personalised
+ #* customisation.  If you want to make changes to the site-wide defaults,
+-#* create a file in /etc/spamassassin or /etc/mail/spamassassin instead.
++#* create a file in /etc/spamassassin instead.
+ ###########################################################################
+ 
+ # How many points before a mail is considered spam.
+Index: spamassassin-3.3.1/sa-compile.raw
+===================================================================
+--- spamassassin-3.3.1.orig/sa-compile.raw	2010-03-21 23:13:02.000000000 -0700
++++ spamassassin-3.3.1/sa-compile.raw	2010-03-21 23:14:12.000000000 -0700
+@@ -674,7 +674,7 @@
+   -p prefs, --prefspath=file, --prefs-file=file
+                                 Set user preferences file
+   --siteconfigpath=path         Path for site configs
+-                                (default: /etc/mail/spamassassin)
++                                (default: /etc/spamassassin)
+   --updatedir=path              Directory to place updates
+           (default: @@LOCAL_STATE_DIR@@/compiled/<perlversion>/@@VERSION@@)
+   --cf='config line'            Additional line of configuration
+@@ -736,7 +736,7 @@
+ =item B<--siteconfigpath>=I<path>
+ 
+ Use the specified path for locating site-specific configuration files.  Ignore
+-the default directories (usually C</etc/mail/spamassassin> or similar).
++the default directories (usually C</etc/spamassassin> or similar).
+ 
+ =item B<--updatedir>
+ 
+Index: spamassassin-3.3.1/sa-learn.raw
+===================================================================
+--- spamassassin-3.3.1.orig/sa-learn.raw	2010-03-21 23:13:02.000000000 -0700
++++ spamassassin-3.3.1/sa-learn.raw	2010-03-21 23:14:12.000000000 -0700
+@@ -643,7 +643,7 @@
+  -p prefs, --prefspath=file, --prefs-file=file
+                        Set user preferences file
+  --siteconfigpath=path Path for site configs
+-                       (default: /etc/mail/spamassassin)
++                       (default: /etc/spamassassin)
+  --cf='config line'    Additional line of configuration
+  -D, --debug [area=n,...]  Print debugging messages
+  -V, --version         Print version
+@@ -800,7 +800,7 @@
+ =item B<--siteconfigpath>=I<path>
+ 
+ Use the specified path for locating site-specific configuration files.  Ignore
+-the default directories (usually C</etc/mail/spamassassin> or similar).
++the default directories (usually C</etc/spamassassin> or similar).
+ 
+ =item B<--cf='config line'>
+ 
+Index: spamassassin-3.3.1/spamc/spamc.pod
+===================================================================
+--- spamassassin-3.3.1.orig/spamc/spamc.pod	2010-03-21 23:13:01.000000000 -0700
++++ spamassassin-3.3.1/spamc/spamc.pod	2010-03-21 23:14:12.000000000 -0700
+@@ -273,8 +273,8 @@
+ 
+ If the B<-F> switch is specified, that file will be used.  Otherwise,
+ C<spamc> will attempt to load spamc.conf in C<SYSCONFDIR> (default:
+-/etc/mail/spamassassin). If that file doesn't exist, and the B<-F>
+-switch is not specified, no configuration file will be read.
++/etc/spamassassin). If that file doesn't exist, and the B<-F> switch
++is not specified, no configuration file will be read.
+ 
+ Example:
+ 
+Index: spamassassin-3.3.1/spamd/README
+===================================================================
+--- spamassassin-3.3.1.orig/spamd/README	2010-03-21 23:13:02.000000000 -0700
++++ spamassassin-3.3.1/spamd/README	2010-03-21 23:14:12.000000000 -0700
+@@ -105,7 +105,7 @@
+ If you plan to use Bayesian classification (the BAYES rules) with spamd,
+ you will need to either
+ 
+-  1. modify /etc/mail/spamassassin/local.cf to use a shared database of
++  1. modify /etc/spamassassin/local.cf to use a shared database of
+   tokens, by setting the 'bayes_path' setting to a path all users can read
+   and write to.  You will also need to set the 'bayes_file_mode' setting
+   to 0666 so that created files are shared, too.
+Index: spamassassin-3.3.1/spamd/README.vpopmail
+===================================================================
+--- spamassassin-3.3.1.orig/spamd/README.vpopmail	2010-03-21 23:13:02.000000000 -0700
++++ spamassassin-3.3.1/spamd/README.vpopmail	2010-03-21 23:14:12.000000000 -0700
+@@ -43,7 +43,7 @@
+ 	/home/vpopmail/domains/somedomain.net/4/userid/.spamassassin/user_prefs
+ 
+ 5. One gotcha - cannot have personal AWL dbs - only a sitewide AWL will work.
+-This is specified in your /etc/mail/spamassassin/local.cf file.  Perhaps a
++This is specified in your /etc/spamassassin/local.cf file.  Perhaps a
+ future enhancement would be to add the capability to have personal AWL db.
+ 
+ 6. Of course vpopmail must have the seekable patch installed (see 
+Index: spamassassin-3.3.1/spamd/spamd.raw
+===================================================================
+--- spamassassin-3.3.1.orig/spamd/spamd.raw	2010-03-21 23:13:02.000000000 -0700
++++ spamassassin-3.3.1/spamd/spamd.raw	2010-03-21 23:14:12.000000000 -0700
+@@ -2895,7 +2895,7 @@
+ =item B<--siteconfigpath>=I<path>
+ 
+ Use the specified path for locating site-specific configuration files.  Ignore
+-the default directories (usually C</etc/mail/spamassassin> or similar).
++the default directories (usually C</etc/spamassassin> or similar).
+ 
+ =item B<--cf='config line'>
+ 
+Index: spamassassin-3.3.1/sql/README
+===================================================================
+--- spamassassin-3.3.1.orig/sql/README	2010-03-21 23:13:02.000000000 -0700
++++ spamassassin-3.3.1/sql/README	2010-03-21 23:14:12.000000000 -0700
+@@ -18,7 +18,7 @@
+ SQL preferences.
+ 
+ SpamAssassin will check the global configuration file (ie. any file matching
+-/etc/mail/spamassassin/*.cf) for the following settings:
++/etc/spamassassin/*.cf) for the following settings:
+ 
+   user_scores_dsn		DBI:driver:connection
+   user_scores_sql_username	dbusername
+Index: spamassassin-3.3.1/sql/README.awl
+===================================================================
+--- spamassassin-3.3.1.orig/sql/README.awl	2010-03-21 23:13:02.000000000 -0700
++++ spamassassin-3.3.1/sql/README.awl	2010-03-21 23:14:12.000000000 -0700
+@@ -15,7 +15,7 @@
+ auto_whitelist_factory Mail::SpamAssassin::SQLBasedAddrList
+ 
+ SpamAssassin will check the global configuration file (ie. any file
+-matching /etc/mail/spamassassin/*.cf) for the following settings:
++matching /etc/spamassassin/*.cf) for the following settings:
+ 
+ user_awl_dsn                 DBI:driver:database:hostname[:port]
+ user_awl_sql_username        dbusername
+Index: spamassassin-3.3.1/t/data/testplugin.pm
+===================================================================
+--- spamassassin-3.3.1.orig/t/data/testplugin.pm	2010-03-21 23:13:02.000000000 -0700
++++ spamassassin-3.3.1/t/data/testplugin.pm	2010-03-21 23:14:12.000000000 -0700
+@@ -1,6 +1,6 @@
+ =head1 testplugin.pm
+ 
+-To try this out, write these lines to /etc/mail/spamassassin/plugintest.cf:
++To try this out, write these lines to /etc/spamassassin/plugintest.cf:
+ 
+   loadplugin     myTestPlugin
+   header         MY_TEST_PLUGIN eval:check_test_plugin()

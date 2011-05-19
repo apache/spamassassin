@@ -1,0 +1,30 @@
+#!/bin/sh
+
+set -e
+
+sa_compile() {
+    # Compile, if rules have previously been compiled, and it's possible
+    if [ -x /usr/bin/re2c -a -x /usr/bin/sa-compile -a -d /var/lib/spamassassin/compiled ]; then
+        echo "Running sa-compile (may take a long time)"
+        sa-compile --quiet
+    fi
+}
+
+sa_fix_broken_gpg_key () {
+    # Work around broken key caused by gpg upgrade
+    if [ -f /etc/spamassassin/sa-update-keys/pubring.gpg -a -f /usr/share/doc/spamassassin/GPG.KEY ]; then
+        sa-update --import /usr/share/doc/spamassassin/GPG.KEY
+    fi
+}
+
+if [ "$1" = "configure" ]; then
+    sa_compile
+    sa_fix_broken_gpg_key
+fi
+
+if [ "$1" = "triggered" ] && [ "$2" = "perl-major-upgrade" ]; then
+    sa_compile
+    invoke-rc.d spamassassin restart
+fi
+
+#DEBHELPER#

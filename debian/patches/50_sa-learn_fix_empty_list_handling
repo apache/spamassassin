@@ -1,0 +1,13 @@
+Index: b/sa-learn.raw
+===================================================================
+--- a/sa-learn.raw	2010-01-26 23:16:56.000000000 -0500
++++ b/sa-learn.raw	2010-01-26 23:16:57.000000000 -0500
+@@ -412,7 +412,7 @@
+ 
+   my $tempfile; # will be defined if stdin -> tempfile
+   push(@targets, @ARGV);
+-  @targets = ('-') unless @targets;
++  @targets = ('-') unless @targets || $opt{folders};
+ 
+   for(my $elem = 0; $elem <= $#targets; $elem++) {
+     # ArchiveIterator doesn't really like STDIN, so if "-" is specified
