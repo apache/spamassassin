@@ -350,13 +350,17 @@ if [ $UPDATED_VERSIONS -gt 0 ]; then
   # name servers will probably update and reload via a commit hook trigger or
   # on a set interval
 
-  # delete any existing jobs in at queue 'n' used for named reloads
-  for JOB in `at -l -q n | cut -d" " -f1`; do atrm $JOB; done
+  if [ $AUTOUPDATESDISABLED -eq 1 -a $REVERT_REVISION -eq 0 ]; then
+    echo "DNS updating disabled (auto update publishing disabled), skipping DNS reload"
+  else
+    # delete any existing jobs in at queue 'n' used for named reloads
+    for JOB in `at -l -q n | cut -d" " -f1`; do atrm $JOB; done
 
-  # schedule a job to tick the zone serial and reload named in 16 minutes
-  # (mirror rsyncs are done every 15 minutes)
-  cd
-  echo "/export/home/updatesd/svn/spamassassin/build/mkupdates/tick_zone_serial" | at -q n now + 16min
+    # schedule a job to tick the zone serial and reload named in 16 minutes
+    # (mirror rsyncs are done every 15 minutes)
+    cd
+    echo "/export/home/updatesd/svn/spamassassin/build/mkupdates/tick_zone_serial" | at -q n now + 16min
+  fi
 fi
 
 cd
