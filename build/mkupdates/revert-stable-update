@@ -21,7 +21,7 @@
 #
 # 3. sudo su - updatesd
 #
-# 4. /home/updatesd/svn/new-rule-score-gen/revert-stable-update 1234567
+# 4. /home/updatesd/svn/mkupdates-with-scores/revert-stable-update 1234567
 #
 # The script will copy the supplied update version 1234567 to a new
 # update version in order that it will superseed the current update.
@@ -32,7 +32,7 @@
 
 . /etc/profile
 PATH=/home/jm/sabuildtools/bin:$PATH
-cd /home/updatesd/svn/new-rule-score-gen
+cd /home/updatesd/svn/mkupdates-with-scores
 
 set -e
 umask 022
