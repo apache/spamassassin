@@ -21,11 +21,7 @@
 #
 # 3. sudo su - updatesd
 #
-# 4. cd              (to home dir of updatesd)
-#
-# 5. cd svn/mkupdates-with-scores
-#
-# 6. ./revert-stable-update 1234567
+# 4. /home/updatesd/svn/new-rule-score-gen/revert-stable-update 1234567
 #
 # The script will copy the supplied update version 1234567 to a new
 # update version in order that it will superseed the current update.
@@ -33,6 +29,10 @@
 # then update DNS records accordingly.  A cron job will be set to
 # update DNS in 16 minutes after completion of testing to give the
 # mirrors time to update.
+
+. /etc/profile
+PATH=/home/jm/sabuildtools/bin:$PATH
+cd /home/updatesd/svn/new-rule-score-gen
 
 set -e
 umask 022
