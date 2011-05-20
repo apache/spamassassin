@@ -16,6 +16,23 @@
 #   of the zone soa and rndc reload using the tick_zone_serial script
 #
 # This script is similar to the run_part2 script used for trunk rule updates.
+#
+# Update May 19, 2011: this script now also takes a fourth parameter to do a
+# reversion to an existing rule update.  This is useful for releasing an
+# emergency update to correct a bad update that was automatically (or
+# otherwise) released.
+#
+# The script also takes three initial parameters that are used for testing
+# purposes.  The first is a root prefix for testing.  The second is a keydir.
+# The third is a flag to update the local svn co of this script's directory.
+#
+# If https://svn.apache.org/repos/asf/spamassassin/trunk/rulesrc/scores/DISABLE-AUTOMATIC-UPDATES 
+# exists then DNS updates will be skipped so that update publishing is
+# effectively disabled.  Note that generated updates will still be visible
+# on the mirrors but will not be published in DNS for sa-update clients.
+# ALSO NOTE that this only applies to update generation.  DNS *will* be
+# update when the script is run with a fourth parameter to revert to an
+# existing version/revision update.
 
 set -e
 set -x
@@ -26,9 +43,10 @@ UPDATEDIR=/var/www/buildbot.spamassassin.org/updatestage
 DNSDIR=/var/named/updates.spamassassin.org.d
 KEYDIR=/home/updatesd/key
 UPDATE_BUILD_DIR=0
+REVERT_REVISION=0
 
 # if $1 is present redirect output files to a test directory structure
-if [ $1 ]; then
+if [ ${#1} -gt 1 ]; then
   UPDATEDIR=$1$UPDATEDIR
   DNSDIR=$1$DNSDIR
 
@@ -37,17 +55,22 @@ if [ $1 ]; then
   mkdir -p $DNSDIR
 fi
 
-if [ $2 ]; then
+if [ ${#2} -gt 1 ]; then
   KEYDIR=$2
 fi
 
-if [ $3 ]; then
+if [ ${#3} -gt 1 ]; then
   UPDATE_BUILD_DIR=1
+fi
+
+if [ $4 ]; then
+  REVERT_REVISION=$4
 fi
 
 echo "UPDATEDIR=$UPDATEDIR"
 echo "DNSDIR=$DNSDIR"
 echo "KEYDIR=$KEYDIR"
+echo "REVERT_REVISION=$REVERT_REVISION"
 
 test_version() {
   SA_VERSION=$1
@@ -79,6 +102,11 @@ update_dns_record() {
   SA_VERSION=$1
   UPDATE_REVISION=$2
 
+  if [ $AUTOUPDATESDISABLED -eq 1 -a $REVERT_REVISION -eq 0 ]; then
+    echo "DNS updating disabled (auto update publishing disabled), skipping DNS record update"
+    return 0
+  fi
+
   # turn "3.2.0" into "0.2.3"
   RVERS=`echo $SA_VERSION | perl -pe 's/^(\d+)\.(\d+)\.(\d+)$/$3.$2.$1/'`
 
@@ -102,6 +130,11 @@ update_dns_record() {
 
 revert_dns_record() {
   SA_VERSION=$1
+
+  if [ $AUTOUPDATESDISABLED -eq 1 -a $REVERT_REVISION -eq 0 ]; then
+    echo "DNS updating disabled (auto update publishing disabled), skipping DNS record revert"
+    return 0
+  fi
 
   DNSFILE="$DNSDIR/$SA_VERSION"
 
@@ -183,14 +216,91 @@ make_rule_update_from_trunk() {
   gpg --batch --homedir $KEYDIR -bas $TMPDIR/${REVISION}.tar.gz || exit $?
 }
 
+copy_existing_update_for_reversion_testing() {
+  EXIT=0
+  (
+    copy_update_paranoid "$UPDATEDIR/$REVERT_REVISION.tar.gz"      "$TMPDIR/$REVISION.tar.gz" &&
+    copy_update_paranoid "$UPDATEDIR/$REVERT_REVISION.tar.gz.asc"  "$TMPDIR/$REVISION.tar.gz.asc" &&
+    copy_update_paranoid "$UPDATEDIR/$REVERT_REVISION.tar.gz.sha1" "$TMPDIR/$REVISION.tar.gz.sha1"
+  ) || EXIT=6
+
+  # copying the update files went wrong exit
+  if [ $EXIT -gt 0 ]; then
+    echo "Could not copy existing revision $REVERT_REVISION, to temporary testing directory, aborting!"
+    exit $EXIT
+  fi
+}
+
+check_for_disable-automatic-update_file_in_svn() {
+  rm -rf $TMPDIR/svn-scores-latest
+  # checkout the latest scores directory
+  svn co https://svn.apache.org/repos/asf/spamassassin/trunk/rulesrc/scores/ $TMPDIR/svn-scores-latest
+
+  AUTOUPDATESDISABLED=0
+
+  if [ -f $TMPDIR/svn-scores-latest/DISABLE-AUTOMATIC-UPDATES ]; then
+    echo "Auto-updates have been previously disabled... continuing with manual update reversion"
+    AUTOUPDATESDISABLED=1
+  fi
+
+  return $AUTOUPDATESDISABLED
+}
+
+disable_auto_update_publishing_and_get_new_update_revision_number() {
+  date > $TMPDIR/svn-scores-latest/DISABLE-AUTOMATIC-UPDATES
+  echo "Automatic sa-update rule update publishing has been disabled via the revert-stable-update script." >> $TMPDIR/svn-scores-latest/DISABLE-AUTOMATIC-UPDATES
+  echo "Current stable update is being reverted to update $1." >> $TMPDIR/svn-scores-latest/DISABLE-AUTOMATIC-UPDATES
+  echo "Update version $1 will be republished using this commit's revision number as the new version number." >> $TMPDIR/svn-scores-latest/DISABLE-AUTOMATIC-UPDATES
+  echo "To re-enable updates: publish the latest update using the 'revert-stable-update' script (this is optional)" >> $TMPDIR/svn-scores-latest/DISABLE-AUTOMATIC-UPDATES
+  echo "and then delete this file from SVN to re-enable DNS publishing of generated updates." >> $TMPDIR/svn-scores-latest/DISABLE-AUTOMATIC-UPDATES
+
+  if [ $AUTOUPDATESDISABLED ]; then
+    svn add $TMPDIR/svn-scores-latest/DISABLE-AUTOMATIC-UPDATES
+  fi
+
+  svn ci $TMPDIR/svn-scores-latest/* -m "sa-update auto-update disabled; reversion to version $1 in progress; version $1 will be republished as the same version number of this commit revision number" > $TMPDIR/NEW-REVERT-REVISION 2>&1
+
+  set +e
+  grep revision $TMPDIR/NEW-REVERT-REVISION
+  if [ $? -ne 0 ]; then
+    echo "Failed to obtain a new revision number to use as the new update version number."
+    exit 7
+  fi
+  set -e
+
+  REVISION=`cat $TMPDIR/NEW-REVERT-REVISION | grep revision | cut -d" " -f3 | cut -d "." -f1`
+
+  echo "New update version/revision will be $REVISION"
+}
+
 TMPDIR="/tmp/sa-mkupdate-$$"
 rm -rf $TMPDIR
 mkdir $TMPDIR
 cd $TMPDIR
 
-# generate a rule update using rules from trunk at a revision
-# that we have generated scores for
-make_rule_update_from_trunk
+if [ $REVERT_REVISION -eq 0 ]; then
+  set +e
+  check_for_disable-automatic-update_file_in_svn
+  AUTOUPDATESDISABLED=$?
+  set -e
+
+  # generate a rule update using rules from trunk at a revision
+  # that we have generated scores for
+  make_rule_update_from_trunk
+else
+  if [ ! -f $UPDATEDIR/$REVERT_REVISION.tar.gz -a ! -f $UPDATEDIR/$REVERT_REVISION.tar.gz.asc -a ! -f $UPDATEDIR/$REVERT_REVISION.tar.gz.sha1 ]; then
+    echo "Could not find update files for update revision $REVERT_REVISION, aborting."
+    exit 8
+  fi
+  set +e
+  check_for_disable-automatic-update_file_in_svn
+  AUTOUPDATESDISABLED=$?
+  set -e
+
+  disable_auto_update_publishing_and_get_new_update_revision_number
+  echo "Copying existing version/revision $REVERT_REVISION to new version/revision $REVISION for testing."
+  copy_existing_update_for_reversion_testing
+fi
 
 # test to make sure it works with sa-update --install
 UPDATED_VERSIONS=0
