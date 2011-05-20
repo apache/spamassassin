@@ -249,8 +249,8 @@ check_for_disable-automatic-update_file_in_svn() {
 disable_auto_update_publishing_and_get_new_update_revision_number() {
   date > $TMPDIR/svn-scores-latest/DISABLE-AUTOMATIC-UPDATES
   echo "Automatic sa-update rule update publishing has been disabled via the revert-stable-update script." >> $TMPDIR/svn-scores-latest/DISABLE-AUTOMATIC-UPDATES
-  echo "Current stable update is being reverted to update $1." >> $TMPDIR/svn-scores-latest/DISABLE-AUTOMATIC-UPDATES
-  echo "Update version $1 will be republished using this commit's revision number as the new version number." >> $TMPDIR/svn-scores-latest/DISABLE-AUTOMATIC-UPDATES
+  echo "Current stable update is being reverted to update $REVERT_REVISION." >> $TMPDIR/svn-scores-latest/DISABLE-AUTOMATIC-UPDATES
+  echo "Update version $REVERT_REVISION will be republished using this commit's revision number as the new version number." >> $TMPDIR/svn-scores-latest/DISABLE-AUTOMATIC-UPDATES
   echo "To re-enable updates: publish the latest update using the 'revert-stable-update' script (this is optional)" >> $TMPDIR/svn-scores-latest/DISABLE-AUTOMATIC-UPDATES
   echo "and then delete this file from SVN to re-enable DNS publishing of generated updates." >> $TMPDIR/svn-scores-latest/DISABLE-AUTOMATIC-UPDATES
 
@@ -258,7 +258,7 @@ disable_auto_update_publishing_and_get_new_update_revision_number() {
     svn add $TMPDIR/svn-scores-latest/DISABLE-AUTOMATIC-UPDATES
   fi
 
-  svn ci $TMPDIR/svn-scores-latest/* -m "sa-update auto-update disabled; reversion to version $1 in progress; version $1 will be republished as the same version number of this commit revision number" > $TMPDIR/NEW-REVERT-REVISION 2>&1
+  svn ci $TMPDIR/svn-scores-latest/* -m "sa-update auto-update disabled; reversion to version $REVERT_REVISION in progress; version $REVERT_REVISION will be republished as the same version number of this commit revision number" > $TMPDIR/NEW-REVERT-REVISION 2>&1
 
   set +e
   grep revision $TMPDIR/NEW-REVERT-REVISION
