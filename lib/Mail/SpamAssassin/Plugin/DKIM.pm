@@ -471,7 +471,9 @@ sub _check_dkim_policy {
         dbg("dkim: policy: none");
       } else {
         my $policy_result = $policy->apply($verifier);
-        dbg("dkim: policy result $policy_result: ".$policy->as_string());
+
+      # Mail::DKIM::DkimPolicy::as_string was removed in Mail::DKIM 0.34
+        dbg("dkim: policy result $policy_result");  # $policy->as_string
 
         # extract the flags we expose, from the policy
         my $pol_o = $policy->policy();
