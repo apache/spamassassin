@@ -623,6 +623,15 @@ static void _clear_message(struct message *m)
     m->content_length = -1;
 }
 
+static void _free_zlib_buffer(unsigned char **zlib_buf, int *zlib_bufsiz)
+{
+	if(*zlib_buf) {
+	free(*zlib_buf);
+	*zlib_buf=NULL;
+	}
+	*zlib_bufsiz=0;
+}
+
 static void _use_msg_for_out(struct message *m)
 {
     if (m->outbuf)
@@ -1233,6 +1242,7 @@ int message_filter(struct transport *tp, const char *username,
     if (zlib_on) {
         if (_zlib_compress(m->msg, m->msg_len, &zlib_buf, &zlib_bufsiz, flags) != EX_OK)
         {
+            _free_zlib_buffer(&zlib_buf, &zlib_bufsiz);
             return EX_OSERR;
         }
         towrite_buf = zlib_buf;
@@ -1243,6 +1253,9 @@ int message_filter(struct transport *tp, const char *username,
       if (username != NULL) {
 	if (strlen(username) + 8 >= (bufsiz - len)) {
           _use_msg_for_out(m);
+	   if (zlib_on) {
+          _free_zlib_buffer(&zlib_buf, &zlib_bufsiz);
+	   }
           return EX_OSERR;
 	}
 	strcpy(buf + len, "User: ");
@@ -1255,6 +1268,9 @@ int message_filter(struct transport *tp, const char *username,
       }
       if ((m->msg_len > SPAMC_MAX_MESSAGE_LEN) || ((len + 27) >= (bufsiz - len))) {
 	_use_msg_for_out(m);
+	if (zlib_on) {
+	_free_zlib_buffer(&zlib_buf, &zlib_bufsiz);
+	}
 	return EX_DATAERR;
       }
       len += snprintf(buf + len, 8192-len, "Content-length: %d\r\n\r\n", (int) towrite_len);
@@ -1269,6 +1285,9 @@ int message_filter(struct transport *tp, const char *username,
 
     if (rc != EX_OK) {
 	_use_msg_for_out(m);
+	if (zlib_on) {
+	_free_zlib_buffer(&zlib_buf, &zlib_bufsiz);
+	}
 	return rc;      /* use the error code try_to_connect_*() gave us. */
     }
 
@@ -1291,6 +1310,13 @@ int message_filter(struct transport *tp, const char *username,
 	full_write(sock, 0, buf, len);
 	full_write(sock, 0, towrite_buf, towrite_len);
 	shutdown(sock, SHUT_WR);
+    }
+
+    /* free zlib buffer
+    * bug 6025: zlib buffer not freed if compression is used
+    */
+    if (zlib_on) {
+    _free_zlib_buffer(&zlib_buf, &zlib_bufsiz);
     }
 
     /* ok, now read and parse it.  SPAMD/1.2 line first... */
