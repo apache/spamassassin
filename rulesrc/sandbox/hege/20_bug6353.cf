@@ -6,4 +6,5 @@ header T_BUG6353_5 From:addr !~ /\@[^@]+\.(?:[a-z]{2,}|xn--[a-z0-9]+(?:-[a-z0-9]
 header T_BUG6353_6 From:addr !~ /\@[^@]+\.(?:[a-z0-9-]+)$/i
 header T_BUG6353_7 From:addr !~ /\@[^@]+\.(?:[a-z0-9-]+)$/i [if-unset: foo@bar.com]
 header T_MISSING_FROM From =~ /^UNSET$/ [if-unset: UNSET]
-header T_MISSING_FROM2 exists:From
+header __HAS_FROM exists:From
+meta T_MISSING_FROM2 !__HAS_FROM
