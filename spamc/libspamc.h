@@ -119,7 +119,7 @@
 /* Jan 1, 2007 sidney: added SSL protocol versions */
 /* no flags means use default of SSL_v23 */
 /* Set both flags to specify TSL_v1 */
-#define SPAMC_SSLV2 (1<<18)
+#define SPAMC_TLSV1 (1<<18)
 #define SPAMC_SSLV3 (1<<17)
 
 /* Nov 30, 2006 jm: add -z, zlib support */
