@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus-trap darxus dos grenier jarif kgolding llanga nbebout wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1; day 2: bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus-trap darxus dos grenier hege jarif kgolding llanga nbebout wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1; day 3: bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus-trap darxus dos grenier jarif llanga nbebout wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1
+# with results from: day 1: bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus-trap darxus dos grenier jarif kgolding llanga nbebout wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1; day 2: bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus-trap darxus dos grenier jarif kgolding llanga nbebout wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1; day 3: bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus-trap darxus dos grenier hege jarif kgolding llanga nbebout wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1
 
 # tflags 
 ADVANCE_FEE_2_NEW_FORM
@@ -433,6 +433,9 @@ HASHCASH_HIGH
 # good enough
 HDRS_LCASE_1K
 
+# good enough
+HDRS_MISSP
+
 # tflags userconf
 HEAD_LONG
 
@@ -447,6 +450,9 @@ HELO_OEM
 
 # good enough
 HK_NAME_DRUGS
+
+# good enough
+HK_NAME_FM_MR_MRS
 
 # good enough
 HK_PNIS
@@ -914,10 +920,7 @@ TVD_RCVD_SINGLE
 TVD_VISIT_PHARMA
 
 # good enough
-HDRS_MISSP
-
-# good enough
-HK_NAME_FM_MR_MRS
+HK_SCAM_N15
 
 # tflags userconf
 UNPARSEABLE_RELAY
@@ -1101,6 +1104,9 @@ XMAILER_MIMEOLE_OL_F6D01
 
 # good enough
 XMAILER_MIMEOLE_OL_FF5C8
+
+# good enough
+X_MAILER_CME_6543_MSN
 
 # tflags net
 __DKIMDOMAIN_IN_DWL_ANY
