@@ -1204,14 +1204,10 @@ int message_filter(struct transport *tp, const char *username,
     if (flags & SPAMC_USE_SSL) {
 #ifdef SPAMC_SSL
 	SSLeay_add_ssl_algorithms();
-	if ((flags & SPAMC_SSLV2) && (flags & SPAMC_SSLV3)) {
-	  meth = TLSv1_client_method(); /* both flag bits on means use TLSv1 */
-	} else if (flags & SPAMC_SSLV2) {
-	  meth = SSLv2_client_method();
-	} else if (flags & SPAMC_SSLV3) {
-	  meth = SSLv3_client_method();
+	if (flags & SPAMC_TLSV1) {
+	    meth = TLSv1_client_method();
 	} else {
-	  meth = SSLv23_client_method(); /* no flag bits, default SSLv23 */
+	    meth = SSLv3_client_method(); /* default */
 	}
 	SSL_load_error_strings();
 	ctx = SSL_CTX_new(meth);
@@ -1599,7 +1595,7 @@ int message_tell(struct transport *tp, const char *username, int flags,
     if (flags & SPAMC_USE_SSL) {
 #ifdef SPAMC_SSL
 	SSLeay_add_ssl_algorithms();
-	meth = SSLv2_client_method();
+	meth = SSLv3_client_method();
 	SSL_load_error_strings();
 	ctx = SSL_CTX_new(meth);
 #else

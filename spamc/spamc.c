@@ -359,17 +359,11 @@ read_args(int argc, char **argv,
             case 'S':
             {
                 flags |= SPAMC_USE_SSL;
-		if (!spamc_optarg || (strcmp(spamc_optarg,"sslv23") == 0)) {
-		  /* this is the default */
-		}
-	        else if (strcmp(spamc_optarg,"sslv2") == 0) {
-		  flags |= SPAMC_SSLV2;
-		}
-		else if (strcmp(spamc_optarg,"sslv3") == 0) {
-		  flags |= SPAMC_SSLV3;
+		if (!spamc_optarg || (strcmp(spamc_optarg,"sslv3") == 0)) {
+		    flags |= SPAMC_SSLV3;
 		}
 		else if (strcmp(spamc_optarg,"tlsv1") == 0) {
-		  flags |= (SPAMC_SSLV2 | SPAMC_SSLV3);
+		    flags |= SPAMC_TLSV1;
 		}
 		else {
 		    libspamc_log(flags, LOG_ERR, "Please specify a legal ssl version (%s)", spamc_optarg);
