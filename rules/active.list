@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus-trap darxus dos grenier hege jarif kgolding llanga nbebout wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1; day 2: bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus-trap darxus dos grenier jarif kgolding llanga nbebout wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1; day 3: bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus-trap darxus dos grenier jarif kgolding llanga nbebout wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1
+# with results from: day 1: bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus-trap darxus dos grenier jarif kgolding llanga nbebout wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1 zmi; day 2: bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus-trap darxus dos grenier hege jarif kgolding llanga nbebout wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1; day 3: bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus-trap darxus dos grenier jarif kgolding llanga nbebout wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1
 
 # tflags 
 ADVANCE_FEE_2_NEW_FORM
@@ -91,9 +91,6 @@ CHARSET_FARAWAY_HEADER
 # good enough
 CN_B2B_SPAMMER
 
-# tflags 
-CORRUPT_FROM_LINE_IN_HDRS
-
 # good enough
 DATE_IN_FUTURE_96_Q
 
@@ -157,9 +154,6 @@ DNS_FROM_RFC_BOGUSMX
 # tflags net
 DNS_FROM_RFC_DSN
 
-# tflags 
-DOS_ANAL_SPAM_MAILER
-
 # good enough
 DOS_OE_TO_MX
 
@@ -186,9 +180,6 @@ END_FUTURE_EMAILS
 
 # tflags userconf
 ENV_AND_HDR_SPF_MATCH
-
-# good enough
-FAKE_REPLY_C
 
 # good enough
 FB_CIALIS_LEO3
@@ -289,9 +280,6 @@ FROM_LOCAL_NOVOWEL
 # good enough
 FROM_MISSPACED
 
-# tflags net
-FROM_MISSP_DKIM
-
 # good enough
 FROM_MISSP_DYNIP
 
@@ -333,9 +321,6 @@ FRT_ROLEX
 
 # good enough
 FR_DOT_FEVER_5
-
-# good enough
-FR_WATCHES_HTTP
 
 # good enough
 FSL_CTYPE_WIN1251
@@ -433,9 +418,6 @@ HASHCASH_HIGH
 # good enough
 HDRS_LCASE_1K
 
-# good enough
-HDRS_MISSP
-
 # tflags userconf
 HEAD_LONG
 
@@ -470,6 +452,9 @@ HK_SCAM_N15
 HK_SCAM_N2
 
 # good enough
+HK_SCAM_N3
+
+# good enough
 HK_SCAM_N8
 
 # tflags userconf
@@ -477,12 +462,6 @@ HTML_CHARSET_FARAWAY
 
 # good enough
 JM_FAKE_PSMTP_RCVD
-
-# good enough
-KAM_LOTTO1
-
-# good enough
-KAM_LOTTO2
 
 # good enough
 KB_DATE_CONTAINS_TAB
@@ -529,9 +508,6 @@ MISSING_HB_SEP
 # good enough
 MONEY_ATM_CARD
 
-# good enough
-MONEY_FORM
-
 # tflags 
 MONEY_FRAUD_3
 
@@ -550,6 +526,12 @@ MONEY_LOTTERY
 # good enough
 MSOE_MID_WRONG_CASE
 
+# good enough
+MS_XYMOSG_4K
+
+# good enough
+MS_XYMOSG_5K
+
 # tflags net
 NO_DNS_FOR_FROM
 
@@ -567,9 +549,6 @@ NULL_IN_BODY
 
 # good enough
 OBFU_ATTACH_MISSP
-
-# tflags 
-OBFU_JVSCR_ESC
 
 # tflags 
 OBFU_TEXT_ATTACH
@@ -593,9 +572,6 @@ RAZOR2_CHECK
 RCVD_IN_BL_SPAMCOP_NET
 
 # tflags net
-RCVD_IN_CSS
-
-# tflags net
 RCVD_IN_DNSWL_HI
 
 # tflags net
@@ -614,55 +590,22 @@ RCVD_IN_IADB_DK
 RCVD_IN_IADB_DOPTIN
 
 # tflags net
-RCVD_IN_IADB_DOPTIN_GT50
-
-# tflags net
 RCVD_IN_IADB_DOPTIN_LT50
-
-# tflags net
-RCVD_IN_IADB_EDDB
-
-# tflags net
-RCVD_IN_IADB_EPIA
-
-# tflags net
-RCVD_IN_IADB_GOODMAIL
 
 # tflags net
 RCVD_IN_IADB_LISTED
 
 # tflags net
-RCVD_IN_IADB_LOOSE
-
-# tflags net
 RCVD_IN_IADB_MI_CPEAR
 
 # tflags net
-RCVD_IN_IADB_MI_CPR_30
-
-# tflags net
 RCVD_IN_IADB_MI_CPR_MAT
-
-# tflags net
-RCVD_IN_IADB_ML_DOPTIN
-
-# tflags net
-RCVD_IN_IADB_NOCONTROL
-
-# tflags net
-RCVD_IN_IADB_OOO
 
 # tflags net
 RCVD_IN_IADB_OPTIN
 
 # tflags net
 RCVD_IN_IADB_OPTIN_GT50
-
-# tflags net
-RCVD_IN_IADB_OPTIN_LT50
-
-# tflags net
-RCVD_IN_IADB_OPTOUTONLY
 
 # tflags net
 RCVD_IN_IADB_RDNS
@@ -674,16 +617,7 @@ RCVD_IN_IADB_SENDERID
 RCVD_IN_IADB_SPF
 
 # tflags net
-RCVD_IN_IADB_UNVERIFIED_1
-
-# tflags net
-RCVD_IN_IADB_UNVERIFIED_2
-
-# tflags net
 RCVD_IN_IADB_UT_CPEAR
-
-# tflags net
-RCVD_IN_IADB_UT_CPR_30
 
 # tflags net
 RCVD_IN_IADB_UT_CPR_MAT
@@ -728,15 +662,6 @@ RCVD_IN_PBL
 RCVD_IN_PSBL
 
 # tflags net
-RCVD_IN_RP_CERTIFIED
-
-# tflags net
-RCVD_IN_RP_RNBL
-
-# tflags net
-RCVD_IN_RP_SAFE
-
-# tflags net
 RCVD_IN_SBL
 
 # tflags net
@@ -771,9 +696,6 @@ RISK_FREE
 
 # good enough
 RP_8BIT
-
-# good enough
-S25R_4
 
 # good enough
 SB_GIF_AND_NO_URIS
@@ -905,9 +827,6 @@ TVD_INCREASE_SIZE
 TVD_PH_BODY_META
 
 # good enough
-TVD_PH_SUBJ_URGENT
-
-# good enough
 TVD_QUAL_MEDS
 
 # good enough
@@ -923,13 +842,16 @@ TVD_RCVD_SINGLE
 TVD_VISIT_PHARMA
 
 # good enough
-HK_SCAM_N3
+DECEASED_NO_ML
 
 # good enough
-MS_XYMOSG_4K
+FAKE_REPLY_A1
 
 # good enough
-MS_XYMOSG_5K
+FSL_FAKE_YAHOO_RCVD
+
+# good enough
+MS_XYMOSG_2K
 
 # tflags userconf
 UNPARSEABLE_RELAY
@@ -960,9 +882,6 @@ URIBL_PH_SURBL
 
 # tflags net
 URIBL_RED
-
-# tflags net
-URIBL_RHS_DOB
 
 # tflags net
 URIBL_SBL
@@ -1128,12 +1047,6 @@ __DNS_FROM_RFC_POST
 
 # tflags net
 __DNS_FROM_RFC_WHOIS
-
-# tflags net
-__RCVD_IN_BRBL
-
-# tflags net
-__RCVD_IN_DNSWL
 
 # tflags net
 __RCVD_IN_IADB
