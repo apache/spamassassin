@@ -412,7 +412,7 @@ eval {
 
   my $tempfile; # will be defined if stdin -> tempfile
   push(@targets, @ARGV);
-  @targets = ('-') unless @targets;
+  @targets = ('-') unless @targets || $opt{folders};
 
   for(my $elem = 0; $elem <= $#targets; $elem++) {
     # ArchiveIterator doesn't really like STDIN, so if "-" is specified
