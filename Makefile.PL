@@ -155,6 +155,7 @@ my %makefile = (
         'sa-learn'         => '$(INST_MAN1DIR)/sa-learn.$(MAN1EXT)',
         'sa-update'        => '$(INST_MAN1DIR)/sa-update.$(MAN1EXT)',
         'sa-compile'       => '$(INST_MAN1DIR)/sa-compile.$(MAN1EXT)',
+        'sa-awl'           => '$(INST_MAN1DIR)/sa-awl.$(MAN1EXT)',
         'spamc/spamc.pod'  => '$(INST_MAN1DIR)/spamc.$(MAN1EXT)',
         'spamd/spamd'      => '$(INST_MAN1DIR)/spamd.$(MAN1EXT)',
     },
