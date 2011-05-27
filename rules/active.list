@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus-trap darxus dos grenier jarif kgolding llanga nbebout wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1 zmi; day 2: bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus-trap darxus dos grenier hege jarif kgolding llanga nbebout wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1; day 3: bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus-trap darxus dos grenier jarif kgolding llanga nbebout wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1
+# with results from: day 1: bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus-trap darxus dos grenier jarif kgolding llanga nbebout wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1 zmi; day 2: bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus-trap darxus dos grenier jarif kgolding llanga nbebout wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1 zmi; day 3: bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus-trap darxus dos grenier hege jarif kgolding llanga nbebout wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1
 
 # tflags 
 ADVANCE_FEE_2_NEW_FORM
@@ -109,6 +109,9 @@ DEAR_NOBODY
 # good enough
 DEAR_WINNER
 
+# good enough
+DECEASED_NO_ML
+
 # tflags net
 DIGEST_MULTIPLE
 
@@ -180,6 +183,9 @@ END_FUTURE_EMAILS
 
 # tflags userconf
 ENV_AND_HDR_SPF_MATCH
+
+# good enough
+FAKE_REPLY_A1
 
 # good enough
 FB_CIALIS_LEO3
@@ -327,6 +333,9 @@ FSL_CTYPE_WIN1251
 
 # good enough
 FSL_FAKE_HOTMAIL_RVCD
+
+# good enough
+FSL_FAKE_YAHOO_RCVD
 
 # good enough
 FSL_HELO_BARE_IP_1
@@ -525,6 +534,9 @@ MONEY_LOTTERY
 
 # good enough
 MSOE_MID_WRONG_CASE
+
+# good enough
+MS_XYMOSG_2K
 
 # good enough
 MS_XYMOSG_4K
@@ -842,16 +854,10 @@ TVD_RCVD_SINGLE
 TVD_VISIT_PHARMA
 
 # good enough
-DECEASED_NO_ML
+FSL_HELO_FIREWALL
 
 # good enough
-FAKE_REPLY_A1
-
-# good enough
-FSL_FAKE_YAHOO_RCVD
-
-# good enough
-MS_XYMOSG_2K
+MS_XYMOSG_3K
 
 # tflags userconf
 UNPARSEABLE_RELAY
