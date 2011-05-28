@@ -270,6 +270,11 @@ header __HAS_SUBJECT		exists:Subject
 meta MISSING_SUBJECT		!__HAS_SUBJECT
 describe MISSING_SUBJECT	Missing Subject: header
 
+# bug 6353
+header __HAS_FROM		exists:From
+meta MISSING_FROM		!__HAS_FROM
+describe MISSING_FROM		Missing From: header
+
 # bug 6149: avoid common .jp false positives
 header __GAPPY_SUBJECT		Subject =~ /\b(?:[a-z]([-_. =~\/:,*!\@\#\$\%\^&+;\"\'<>\\])\1{0,2}){4}/i
 meta GAPPY_SUBJECT              (__GAPPY_SUBJECT && !__ISO_2022_JP_DELIM)
