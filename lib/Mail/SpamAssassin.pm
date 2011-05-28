@@ -104,11 +104,22 @@ $IS_DEVEL_BUILD = 1;        # change for release versions
 @ISA = qw();
 
 # SUB_VERSION is now just <yyyy>-<mm>-<dd>
-$SUB_VERSION = (split(/\s+/,'$LastChangedDate$ updated by SVN'))[1];
+$SUB_VERSION = 'svnunknown';
+if ('$LastChangedDate$' =~ ':') {
+  # Subversion keyword "$LastChangedDate$" has been successfully expanded.
+  # Doesn't happen with automated launchpad builds:
+  # https://bugs.launchpad.net/launchpad/+bug/780916
+  $SUB_VERSION = (split(/\s+/,'$LastChangedDate$ updated by SVN'))[1];
+}
+
 
 if (defined $IS_DEVEL_BUILD && $IS_DEVEL_BUILD) {
-  push(@EXTRA_VERSION,
-       ('r' . qw{$LastChangedRevision$ updated by SVN}[1]));
+  if ('$LastChangedRevision$' =~ ':') {
+    # Subversion keyword "$LastChangedRevision$" has been successfully expanded.
+    push(@EXTRA_VERSION, ('r' . qw{$LastChangedRevision$ updated by SVN}[1]));
+  } else {
+    push(@EXTRA_VERSION, ('r' . 'svnunknown'));
+  }
 }
 
 sub Version {

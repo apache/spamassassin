@@ -17,8 +17,14 @@
 # limitations under the License.
 # </@LICENSE>
 
-my $VERSION = 'svn' . (split(/\s+/,
-	'$Id$'))[2];
+my $VERSION = 'svnunknown';
+if ('$Id$' =~ ':') {
+  # Subversion keyword "$Id$" has been successfully expanded.
+  # Doesn't happen with automated launchpad builds:
+  # https://bugs.launchpad.net/launchpad/+bug/780916
+  $VERSION = 'svn' . (split(/\s+/, '$Id$'))[2];
+}
+
 
 my $PREFIX          = '@@PREFIX@@';             # substituted at 'make' time
 my $DEF_RULES_DIR   = '@@DEF_RULES_DIR@@';      # substituted at 'make' time
