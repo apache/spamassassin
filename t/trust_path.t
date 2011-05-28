@@ -626,7 +626,7 @@ while (1) {
   my $netset_warn = 0;
   my $fh;
   if ($expected =~ s/^\s*Netset-Warn\s*//) {    
-    # create a file descriptior for logging STDERR
+    # create a file descriptor for logging STDERR
     # (we do not want warnings for regexps we know are invalid)
     $fh = IO::File->new_tmpfile();
     open(STDERR, ">&".fileno($fh)) || die "Cannot create LOGERR temp file";

@@ -48,6 +48,10 @@ add_header spam Flag _YESNOCAPS_
 add_header all Level _STARS(*)_
 add_header all Status "_YESNO_, score=_SCORE_ required=_REQD_ tests=_TESTS_ autolearn=_AUTOLEARN_ version=_VERSION_"
 
+clear_originating_ip_headers
+originating_ip_headers X-Yahoo-Post-IP X-Originating-IP X-Apparently-From
+originating_ip_headers X-SenderIP
+
 required_score           5
 ok_locales              all
 ifplugin Mail::SpamAssassin::Plugin::TextCat
