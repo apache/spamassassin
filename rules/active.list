@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus-trap darxus dos grenier jarif kgolding llanga nbebout wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1 zmi; day 2: bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus-trap darxus dos grenier jarif kgolding llanga nbebout wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1 zmi; day 3: bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus-trap darxus dos grenier hege jarif kgolding llanga nbebout wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1
+# with results from: day 1: bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus-trap darxus dos grenier jarif kgolding llanga nbebout wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1 zmi; day 2: bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus-trap darxus dos grenier jarif kgolding llanga nbebout wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1 zmi; day 3: bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus-trap darxus dos grenier jarif kgolding llanga nbebout wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1 zmi
 
 # tflags 
 ADVANCE_FEE_2_NEW_FORM
@@ -235,6 +235,9 @@ FH_HELO_EQ_D_D_D_D
 # good enough
 FH_HOST_EQ_DYNAMICIP
 
+# good enough
+FH_HOST_EQ_PACBELL_D
+
 # tflags 
 FILL_THIS_FORM
 
@@ -347,6 +350,9 @@ FSL_HELO_BARE_IP_2
 FSL_HELO_DEVICE
 
 # good enough
+FSL_HELO_FIREWALL
+
+# good enough
 FSL_HELO_NON_FQDN_1
 
 # good enough
@@ -360,9 +366,6 @@ FSL_XM_419
 
 # good enough
 FS_GET_LAID
-
-# good enough
-FS_LARGE_PERCENT2
 
 # good enough
 FS_MAKE_MONEY
@@ -432,6 +435,9 @@ HEAD_LONG
 
 # good enough
 HELO_LH_HOME
+
+# good enough
+HELO_LOCALHOST
 
 # good enough
 HELO_NO_DOMAIN
@@ -537,6 +543,9 @@ MSOE_MID_WRONG_CASE
 
 # good enough
 MS_XYMOSG_2K
+
+# good enough
+MS_XYMOSG_3K
 
 # good enough
 MS_XYMOSG_4K
@@ -716,6 +725,9 @@ SB_GIF_AND_NO_URIS
 SHARE_50_50
 
 # good enough
+SHORT_HELO_AND_INLINE_IMAGE
+
+# good enough
 SINGLE_HEADER_2K
 
 # good enough
@@ -854,10 +866,13 @@ TVD_RCVD_SINGLE
 TVD_VISIT_PHARMA
 
 # good enough
-FSL_HELO_FIREWALL
+FAKE_REPLY_B
 
 # good enough
-MS_XYMOSG_3K
+HDRS_LCASE_IMGONLY
+
+# good enough
+SINGLE_HEADER_1K
 
 # tflags userconf
 UNPARSEABLE_RELAY
