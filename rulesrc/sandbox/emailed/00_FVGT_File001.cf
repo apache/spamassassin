@@ -1953,7 +1953,8 @@ describe FH_FROM_CASH           From name has "cash"
 #counts   FH_FROM_CASH             113s/0h of 47019 corpus (37183s/9836h FVGT) 12/23/06
 
 
-header   FH_FROMEML_NOTLD       From:addr !~ /\./ [if-unset: foo@bar.com]
+# Bug 6353
+header   FH_FROMEML_NOTLD       From:addr !~ /\@[^@]+\.(?:[a-z]{2,}|xn--[a-z0-9]+(?:-[a-z0-9]*)?)$/i [if-unset: foo@bar.com]
 describe FH_FROMEML_NOTLD       E-mail address doesn't have TLD (.com, etc.)
 ##score    FH_FROMEML_NOTLD     2.268
 #counts   FH_FROMEML_NOTLD         104s/0h of 32518 corpus (23261s/9257h FVGT) 11/14/06
