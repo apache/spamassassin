@@ -1,16 +1,24 @@
 #!/bin/sh -xe
 
-# Now running on a Hudson/Jenkins slave running freebsd as of May 30, 2011 as a test case
-which perl
-
-
 # really clean everything first
 rm -rf t/log t/log.* artifacts testxml Mail-SpamAssassin* || true
 make distclean < /dev/null || true
 mkdir artifacts testxml
 
-# Infra is installing modules for us in a separate dir.  Adding  -I /export/home/jenkins/tools/perl/lib/site_perl/ to see if that works for NetAddr::IP.
-perl -I /export/home/jenkins/tools/perl/lib/site_perl/ Makefile.PL < /dev/null
+
+#FREEBSD SLAVE
+#perl Makefile.PL < /dev/null
+
+#SOLARIS1 SLAVE w/JM's PERL
+PATH=/export/home/jm/tools/perl586/bin:/usr/ccs/bin:/sbin:/usr/sbin:/etc:/usr/etc:/usr/local/bin:/usr/bin/mh:/export/home/jm/bin:/sbin:/usr/sbin:/etc:/usr/etc:/usr/local/bin:/usr/bin/mh:/export/home/jm/bin:/sbin:/usr/sbin:/etc:/usr/etc:/usr/local/bin:/usr/bin/mh:/usr/bin:/opt/sfw/bin:/opt/SUNWspro/bin
+export PATH
+
+perl Makefile.PL < /dev/null
+
+# SOLARIS1 SLAVE w/Infra installing modules for us in a separate dir. 
+#perl -I /export/home/jenkins/tools/perl/lib/site_perl/ Makefile.PL < /dev/null
+
+
 make
 
 # ensure a lint failure generates shouty mails to the dev list
