@@ -15,13 +15,11 @@ export PATH
 
 #INSTALL NETADDR USING JM's PERL
 #echo "o conf makepl_arg PREFIX=/export/home/hudson/tools/sa_perl\ninstall NetAddr::IP" | cpan
-cd /tmp/
-mkdir 1
-cd 1
-curl -o netaddr.tar.gz http://www.peregrinehw.com/downloads/SpamAssassin/NetAddr-IP-4.044.tar.gz
-ls -al /tmp/1
-gunzip netaddr.tar.gz
-tar xvf netaddr.tar.gz
+cd /tmp/1
+#curl -o netaddr.tar.gz http://www.peregrinehw.com/downloads/SpamAssassin/NetAddr-IP-4.044.tar.gz
+#ls -al /tmp/1
+#gunzip netaddr.tar.gz
+tar xvf netaddr.tar
 cd NetAddr-IP-4.044/
 perl Makefile.PL PREFIX=/export/home/hudson/tools/sa_perl
 make test && make install 
