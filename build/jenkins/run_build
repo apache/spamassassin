@@ -14,7 +14,17 @@ PATH=/export/home/jm/tools/perl586/bin:/usr/ccs/bin:/sbin:/usr/sbin:/etc:/usr/et
 export PATH
 
 #INSTALL NETADDR USING JM's PERL
-echo "o conf makepl_arg PREFIX=/export/home/hudson/tools/sa_perl\ninstall NetAddr::IP" | cpan
+#echo "o conf makepl_arg PREFIX=/export/home/hudson/tools/sa_perl\ninstall NetAddr::IP" | cpan
+cd /tmp/
+curl -o netaddr.tar.gz http://www.peregrinehw.com/downloads/SpamAssassin/NetAddr-IP-4.044.tar.gz
+gunzip netaddr.tar.gz
+tar xvf /tmp/netaddr.tar
+cd NetAddr-IP-4.044/
+perl Makefile.PL PREFIX=/export/home/hudson/tools/sa_perl
+make test && make install 
+
+
+perl -e 'if (require NetAddr::IP) { print "NetAddr::IP Version is: $NetAddr::IP::VERSION\n"; exit 0;} else {exit 1;}'
 
 exit
 perl -I /export/home/hudson/tools/sa_perl/lib/site_perl/ Makefile.PL < /dev/null
