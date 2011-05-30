@@ -14,6 +14,7 @@ BEGIN {
   if (-e 'test_dir') {
     unshift(@INC, '../blib/lib');
   }
+
 };
 
 # -------------------------------------------------------------------
@@ -29,6 +30,28 @@ sub system_or_die;
 system_or_die "cd .. && make tardist";
 system_or_die "cd $builddir && gunzip -cd $cwd/../Mail-SpamAssassin-*.tar.gz | tar xf -";
 system_or_die "cd $builddir && mv Mail-SpamAssassin-* x";
+
+#Fix for RH/Fedora using lib64 instead of lib - bug 6609
+$x64_bit_lib_test = 0;
+if (-e '/bin/rpm') {
+  $command = '/bin/rpm --showrc';
+
+  @output = `$command`;
+
+  foreach $output (@output) {
+    if ($output =~ /-\d+: _lib(dir)?\t(.*)$/) {
+      if ($2 && $2 =~ /64/) {
+        $x64_bit_lib_test++;
+      }
+    }
+  }
+}
+
+if ($x64_bit_lib_test) {
+  print "\nEnabling checks for 64 bit lib directories.\n";
+} else {
+  print "\nDisabling checks for 64 bit lib directories.\n";
+}
 
 sub new_instdir {
   $instdir = $instbase.".".(shift);
@@ -49,7 +72,12 @@ new_instdir(__LINE__);
 run_makefile_pl "PREFIX=$instdir/foo";
 
 ok -d "$instdir/foo/bin";
-ok -d "$instdir/foo/lib";
+if ($x64_bit_lib_test) {
+  ok -d "$instdir/foo/lib64";
+} else {
+  ok -d "$instdir/foo/lib";
+}
+
 ok -e "$instdir/foo/share/spamassassin";
 ok -e "$instdir/foo/etc/mail/spamassassin";
 
@@ -94,8 +122,12 @@ ok !-e "$instdir/foo/etc/mail/spamassassin";
 new_instdir(__LINE__);
 run_makefile_pl "DESTDIR=$instdir/dest PREFIX=/foo";
 
-ok -e "$instdir/dest/foo/bin";
-ok -e "$instdir/dest/foo/etc/mail/spamassassin";
-ok -e "$instdir/dest/foo/lib";
+ok -d "$instdir/dest/foo/bin";
+ok -d "$instdir/dest/foo/etc/mail/spamassassin";
+if ($x64_bit_lib_test) {
+  ok -d "$instdir/dest/foo/lib64";
+} else {
+  ok -d "$instdir/dest/foo/lib";
+}
 ok -e "$instdir/dest/foo/share/spamassassin/sa-update-pubkey.txt";
 
