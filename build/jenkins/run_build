@@ -12,7 +12,10 @@ mkdir artifacts testxml
 #SOLARIS1 SLAVE w/JM's PERL
 PATH=/export/home/jm/tools/perl586/bin:/usr/ccs/bin:/sbin:/usr/sbin:/etc:/usr/etc:/usr/local/bin:/usr/bin/mh:/export/home/jm/bin:/sbin:/usr/sbin:/etc:/usr/etc:/usr/local/bin:/usr/bin/mh:/export/home/jm/bin:/sbin:/usr/sbin:/etc:/usr/etc:/usr/local/bin:/usr/bin/mh:/usr/bin:/opt/sfw/bin:/opt/SUNWspro/bin:/usr/ucb/
 export PATH
-alias perl="/usr/local/bin/perl -I /export/home/hudson/tools/sa_perl/lib/site_perl/"
+
+alias perl="/export/home/jm/tools/perl586/bin/perl -I /export/home/hudson/tools/sa_perl/lib/site_perl/"
+
+perl -e 'foreach $inc (@INC) { print "$inc\n";}'
 
 
 #INSTALL NETADDR USING JM's PERL USING COMPLETE SILLINESS
