@@ -5,11 +5,9 @@ rm -rf t/log t/log.* artifacts testxml Mail-SpamAssassin* || true
 make distclean < /dev/null || true
 mkdir artifacts testxml
 
+#SOLARIS1 SLAVE BUILD FILE
 
-#FREEBSD SLAVE
-#perl Makefile.PL < /dev/null
-
-#SOLARIS1 SLAVE w/JM's PERL
+#SOLARIS1 SLAVE w/JM's PERL - WORKS AS OF 5/30/2011
 PATH=/export/home/jm/tools/perl586/bin:/usr/ccs/bin:/sbin:/usr/sbin:/etc:/usr/etc:/usr/local/bin:/usr/bin/mh:/export/home/jm/bin:/sbin:/usr/sbin:/etc:/usr/etc:/usr/local/bin:/usr/bin/mh:/export/home/jm/bin:/sbin:/usr/sbin:/etc:/usr/etc:/usr/local/bin:/usr/bin/mh:/usr/bin:/opt/sfw/bin:/opt/SUNWspro/bin:/usr/ucb/
 PERL5LIB=/export/home/hudson/tools/sa_perl/lib/site_perl/
 export PATH PERL5LIB
@@ -26,11 +24,14 @@ export PATH PERL5LIB
 #make test && make install 
 #perl -I /export/home/hudson/tools/sa_perl/lib/site_perl/ -e 'if (require NetAddr::IP) { print "NetAddr::IP Version is: $NetAddr::IP::VERSION\n"; exit 0;} else {exit 1;}'
 #exit
+
 perl Makefile.PL < /dev/null
 
 # SOLARIS1 SLAVE w/Infra installing modules for us in a separate dir. 
-#alias perl="/usr/local/bin/perl -I /export/home/hudson/tools/perl/lib/site_perl/"
-#perl -I /export/home/jenkins/tools/perl/lib/site_perl/ Makefile.PL < /dev/null
+#PERL5LIB=/export/home/hudson/tools/perl/lib/site_perl/
+#export PERL5LIB
+
+perl Makefile.PL < /dev/null
 
 make
 
