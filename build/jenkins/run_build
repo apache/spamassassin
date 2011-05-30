@@ -66,9 +66,9 @@ mv t/log artifacts/t.log.make_test
 mv Mail-SpamAssassin*/t/log artifacts/t.log.make_disttest
 
 # generate XML test reports (multifile)
-perl ./build/jenkins/tap-to-junit-xml \
+perl -I /export/home/hudson/tools/sa_perl/lib/site_perl/ ./build/jenkins/tap-to-junit-xml \
     "make test" testxml/make_test < artifacts/make_test.log
-perl ./build/jenkins/tap-to-junit-xml \
+perl -I /export/home/hudson/tools/sa_perl/lib/site_perl/ ./build/jenkins/tap-to-junit-xml \
     "make disttest" testxml/make_disttest < artifacts/make_disttest.log
 
 # -------------------------------------------------------------------------- 
