@@ -1,20 +1,5 @@
 #!/bin/sh -xe
 
-# The build script relies on a perl installation and modules that live in 
-# Justin Mason's home dir.
-#
-# Previously, running /export/home/jm/tools/setenvs would set the path to:
-# PATH=/export/home/jm/tools/perl586/bin:/usr/ccs/bin:/sbin:/usr/sbin:/etc:/usr/etc:/usr/local/bin:/usr/bin/mh:/export/home/jm/bin:/sbin:/usr/sbin:/etc:/usr/etc:/usr/local/bin:/usr/bin/mh:/export/home/jm/bin:/sbin:/usr/sbin:/etc:/usr/etc:/usr/local/bin:/usr/bin/mh:/usr/bin:/opt/sfw/bin:/opt/SUNWspro/bin
-# which perl
-# . /export/home/jm/tools/setenvs
-#
-# which perl
-#
-# Overriding the path from the setenvs script to try and place an 
-# Infrastructure maintained perl into the path first.
-# PATH=/export/home/hudson/tools/perl/bin:/usr/ccs/bin:/sbin:/usr/sbin:/etc:/usr/etc:/usr/local/bin:/usr/bin/mh:/sbin:/usr/sbin:/etc:/usr/etc:/usr/local/bin:/usr/bin/mh:/export/home/jm/bin:/sbin:/usr/sbin:/etc:/usr/etc:/usr/local/bin:/usr/bin/mh:/usr/bin:/opt/sfw/bin:/opt/SUNWspro/bin
-#export PATH
-
 # Now running on a Hudson/Jenkins slave running freebsd as of May 30, 2011 as a test case
 which perl
 
@@ -24,8 +9,8 @@ rm -rf t/log t/log.* artifacts testxml Mail-SpamAssassin* || true
 make distclean < /dev/null || true
 mkdir artifacts testxml
 
-# Infra is installing modules for us in a separate dir.  Adding  -I /export/home/hudson/tools/perl/lib/site_perl/ to see if that works for NetAddr::IP.
-perl -I /export/home/hudson/tools/perl/lib/site_perl/ Makefile.PL < /dev/null
+# Infra is installing modules for us in a separate dir.  Adding  -I /export/home/jenkins/tools/perl/lib/site_perl/ to see if that works for NetAddr::IP.
+perl -I /export/home/jenkins/tools/perl/lib/site_perl/ Makefile.PL < /dev/null
 make
 
 # ensure a lint failure generates shouty mails to the dev list
@@ -61,9 +46,9 @@ mv t/log artifacts/t.log.make_test
 mv Mail-SpamAssassin*/t/log artifacts/t.log.make_disttest
 
 # generate XML test reports (multifile)
-perl ./build/hudson/tap-to-junit-xml \
+perl ./build/jenkins/tap-to-junit-xml \
     "make test" testxml/make_test < artifacts/make_test.log
-perl ./build/hudson/tap-to-junit-xml \
+perl ./build/jenkins/tap-to-junit-xml \
     "make disttest" testxml/make_disttest < artifacts/make_disttest.log
 
 # -------------------------------------------------------------------------- 
@@ -75,18 +60,18 @@ perl ./build/hudson/tap-to-junit-xml \
 ###make test TEST_VERBOSE=1 \
     ###2>&1 | tee artifacts/make_test_p561.log
 ###mv t/log artifacts/t.log.make_test_p561
-###perl ./build/hudson/tap-to-junit-xml \
+###perl ./build/jenkins/tap-to-junit-xml \
     ###"make test with perl561" testxml/make_test_p561 < artifacts/make_test_p561.log
 
 # -------------------------------------------------------------------------- 
 # generate XML test reports (single file, runs into Hudson bug where it
 # cannot read <system-out> correctly)
 
-# perl ./build/hudson/tap-to-junit-xml \
+# perl ./build/jenkins/tap-to-junit-xml \
     # "make test" < artifacts/make_test.log > testxml/make_test.xml
-# perl ./build/hudson/tap-to-junit-xml \
+# perl ./build/jenkins/tap-to-junit-xml \
     # "make disttest" < artifacts/make_disttest.log > testxml/make_disttest.xml
-# perl ./build/hudson/tap-to-junit-xml \
+# perl ./build/jenkins/tap-to-junit-xml \
     # "make test p561" < artifacts/make_test_p561.log > testxml/make_test_p561.xml
 
 # -------------------------------------------------------------------------- 
