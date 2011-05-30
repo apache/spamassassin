@@ -5,19 +5,17 @@
 #
 # Previously, running /export/home/jm/tools/setenvs would set the path to:
 # PATH=/export/home/jm/tools/perl586/bin:/usr/ccs/bin:/sbin:/usr/sbin:/etc:/usr/etc:/usr/local/bin:/usr/bin/mh:/export/home/jm/bin:/sbin:/usr/sbin:/etc:/usr/etc:/usr/local/bin:/usr/bin/mh:/export/home/jm/bin:/sbin:/usr/sbin:/etc:/usr/etc:/usr/local/bin:/usr/bin/mh:/usr/bin:/opt/sfw/bin:/opt/SUNWspro/bin
-
-which perl
-
-. /export/home/jm/tools/setenvs
-
-which perl
-
+# which perl
+# . /export/home/jm/tools/setenvs
+#
+# which perl
+#
 # Overriding the path from the setenvs script to try and place an 
 # Infrastructure maintained perl into the path first.
-PATH=/export/home/hudson/tools/perl/bin:/usr/ccs/bin:/sbin:/usr/sbin:/etc:/usr/etc:/usr/local/bin:/usr/bin/mh:/sbin:/usr/sbin:/etc:/usr/etc:/usr/local/bin:/usr/bin/mh:/export/home/jm/bin:/sbin:/usr/sbin:/etc:/usr/etc:/usr/local/bin:/usr/bin/mh:/usr/bin:/opt/sfw/bin:/opt/SUNWspro/bin
+# PATH=/export/home/hudson/tools/perl/bin:/usr/ccs/bin:/sbin:/usr/sbin:/etc:/usr/etc:/usr/local/bin:/usr/bin/mh:/sbin:/usr/sbin:/etc:/usr/etc:/usr/local/bin:/usr/bin/mh:/export/home/jm/bin:/sbin:/usr/sbin:/etc:/usr/etc:/usr/local/bin:/usr/bin/mh:/usr/bin:/opt/sfw/bin:/opt/SUNWspro/bin
+#export PATH
 
-export PATH
-
+# Now running on a Hudson/Jenkins slave running freebsd as of May 30, 2011 as a test case
 which perl
 
 
