@@ -100,7 +100,7 @@ $VERSION = "3.003002";      # update after release (same format as perl $])
 # process. If you hacked up your SA, you should add a version_tag to your .cf
 # files; this variable should not be modified.
 #@EXTRA_VERSION = qw();
-@EXTRA_VERSION = qw(rc1);
+@EXTRA_VERSION = qw(rc2);
 
 @ISA = qw();
 

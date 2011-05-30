@@ -1,4 +1,86 @@
 ------------------------------------------------------------------------
+r1129411 | wtogami | 2011-05-30 22:33:37 +0000 (Mon, 30 May 2011) | 3 lines
+
+Bug #6609: Fix for RH/Fedora using lib64 instead of lib
+           (The original test was broken, it was working fine.)
+
+------------------------------------------------------------------------
+r1128754 | hege | 2011-05-28 18:53:23 +0000 (Sat, 28 May 2011) | 2 lines
+
+Bug 6353: Fix FH_FROMEML_NOTLD, add MISSING_FROM
+
+------------------------------------------------------------------------
+r1128579 | kmcgrail | 2011-05-28 09:37:48 +0000 (Sat, 28 May 2011) | 1 line
+
+fix for t/spamd_sql_prefs.t tests 14 from Trunk revision 1124333 bug 6592
+------------------------------------------------------------------------
+r1128573 | kmcgrail | 2011-05-28 09:02:47 +0000 (Sat, 28 May 2011) | 1 line
+
+trunk commits for revision 1124270 and 1124386 applied in that order to 3.3 branch to fix failed t/trusted_path.t tests 69, 72, 75, 78 bug 6591
+------------------------------------------------------------------------
+r1128481 | kmcgrail | 2011-05-27 21:56:25 +0000 (Fri, 27 May 2011) | 1 line
+
+Spamc windows header library missing two defines.  bug 6427.
+------------------------------------------------------------------------
+r1128477 | kmcgrail | 2011-05-27 21:53:03 +0000 (Fri, 27 May 2011) | 1 line
+
+patch to fix missing sa-awl man page bug 6476
+------------------------------------------------------------------------
+r1128470 | kmcgrail | 2011-05-27 21:39:08 +0000 (Fri, 27 May 2011) | 1 line
+
+Reverting META.yml accidentally submitted with change to 3.3.2 version
+------------------------------------------------------------------------
+r1128465 | kmcgrail | 2011-05-27 21:27:36 +0000 (Fri, 27 May 2011) | 1 line
+
+Small change in windows to exit stating that the exit status is unknown.  Thanks to Daniel Lemke for many of these small win32 patches.  Bug #6470.
+------------------------------------------------------------------------
+r1104661 | wtogami | 2011-05-18 02:08:17 +0000 (Wed, 18 May 2011) | 2 lines
+
+Bug #6314: Remove more spamassassin.spec
+
+------------------------------------------------------------------------
+r1104659 | wtogami | 2011-05-18 02:05:39 +0000 (Wed, 18 May 2011) | 2 lines
+
+Bug #6314: Complete removal of spamassassin.spec
+
+------------------------------------------------------------------------
+r1104578 | wtogami | 2011-05-17 21:43:57 +0000 (Tue, 17 May 2011) | 2 lines
+
+Bug #6314: Remove spamassassin.spec 
+
+------------------------------------------------------------------------
+r1104448 | kmcgrail | 2011-05-17 18:19:52 +0000 (Tue, 17 May 2011) | 1 line
+
+More small fixes to pod files
+------------------------------------------------------------------------
+r1104235 | mmartinec | 2011-05-17 13:29:13 +0000 (Tue, 17 May 2011) | 1 line
+
+Bug 6589: Errors in man pages
+------------------------------------------------------------------------
+r1103917 | kmcgrail | 2011-05-16 21:47:39 +0000 (Mon, 16 May 2011) | 1 line
+
+Small bug in the regexp caught by Jose Borges Ferreira in bug 6588
+------------------------------------------------------------------------
+r1102986 | wtogami | 2011-05-14 09:41:11 +0000 (Sat, 14 May 2011) | 2 lines
+
+Properly set EXTRA_VERSION for 3.3.2-rc1
+
+------------------------------------------------------------------------
+r1102929 | wtogami | 2011-05-13 23:59:30 +0000 (Fri, 13 May 2011) | 2 lines
+
+Update Changes for 3.3.2-rc1
+
+------------------------------------------------------------------------
+r1102926 | wtogami | 2011-05-13 23:37:27 +0000 (Fri, 13 May 2011) | 2 lines
+
+Prep 3.3.2-rc1
+
+------------------------------------------------------------------------
+r1102535 | wtogami | 2011-05-13 01:30:15 +0000 (Fri, 13 May 2011) | 2 lines
+
+Test commit
+
+------------------------------------------------------------------------
 r1102410 | mmartinec | 2011-05-12 18:26:15 +0000 (Thu, 12 May 2011) | 1 line
 
 Bug 6515: spamd timeout_child option overrides time_limit configuration option with nastier behaviour
