@@ -12,6 +12,8 @@ mkdir artifacts testxml
 #SOLARIS1 SLAVE w/JM's PERL
 PATH=/export/home/jm/tools/perl586/bin:/usr/ccs/bin:/sbin:/usr/sbin:/etc:/usr/etc:/usr/local/bin:/usr/bin/mh:/export/home/jm/bin:/sbin:/usr/sbin:/etc:/usr/etc:/usr/local/bin:/usr/bin/mh:/export/home/jm/bin:/sbin:/usr/sbin:/etc:/usr/etc:/usr/local/bin:/usr/bin/mh:/usr/bin:/opt/sfw/bin:/opt/SUNWspro/bin:/usr/ucb/
 export PATH
+alias perl="/usr/local/bin/perl -I /export/home/hudson/tools/sa_perl/lib/site_perl/"
+
 
 #INSTALL NETADDR USING JM's PERL USING COMPLETE SILLINESS
 #echo "o conf makepl_arg PREFIX=/export/home/hudson/tools/sa_perl\ninstall NetAddr::IP" | cpan
@@ -25,9 +27,10 @@ export PATH
 #make test && make install 
 #perl -I /export/home/hudson/tools/sa_perl/lib/site_perl/ -e 'if (require NetAddr::IP) { print "NetAddr::IP Version is: $NetAddr::IP::VERSION\n"; exit 0;} else {exit 1;}'
 #exit
-perl -I /export/home/hudson/tools/sa_perl/lib/site_perl/ Makefile.PL < /dev/null
+perl Makefile.PL < /dev/null
 
 # SOLARIS1 SLAVE w/Infra installing modules for us in a separate dir. 
+#alias perl="/usr/local/bin/perl -I /export/home/hudson/tools/perl/lib/site_perl/"
 #perl -I /export/home/jenkins/tools/perl/lib/site_perl/ Makefile.PL < /dev/null
 
 
@@ -66,9 +69,9 @@ mv t/log artifacts/t.log.make_test
 mv Mail-SpamAssassin*/t/log artifacts/t.log.make_disttest
 
 # generate XML test reports (multifile)
-perl -I /export/home/hudson/tools/sa_perl/lib/site_perl/ ./build/jenkins/tap-to-junit-xml \
+perl ./build/jenkins/tap-to-junit-xml \
     "make test" testxml/make_test < artifacts/make_test.log
-perl -I /export/home/hudson/tools/sa_perl/lib/site_perl/ ./build/jenkins/tap-to-junit-xml \
+perl ./build/jenkins/tap-to-junit-xml \
     "make disttest" testxml/make_disttest < artifacts/make_disttest.log
 
 # -------------------------------------------------------------------------- 
