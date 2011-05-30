@@ -32,6 +32,7 @@ perl -e 'foreach $inc (@INC) { print "$inc\n";}'
 #exit
 perl Makefile.PL < /dev/null
 
+exit
 # SOLARIS1 SLAVE w/Infra installing modules for us in a separate dir. 
 #alias perl="/usr/local/bin/perl -I /export/home/hudson/tools/perl/lib/site_perl/"
 #perl -I /export/home/jenkins/tools/perl/lib/site_perl/ Makefile.PL < /dev/null
