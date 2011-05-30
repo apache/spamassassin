@@ -13,11 +13,6 @@ mkdir artifacts testxml
 PATH=/export/home/jm/tools/perl586/bin:/usr/ccs/bin:/sbin:/usr/sbin:/etc:/usr/etc:/usr/local/bin:/usr/bin/mh:/export/home/jm/bin:/sbin:/usr/sbin:/etc:/usr/etc:/usr/local/bin:/usr/bin/mh:/export/home/jm/bin:/sbin:/usr/sbin:/etc:/usr/etc:/usr/local/bin:/usr/bin/mh:/usr/bin:/opt/sfw/bin:/opt/SUNWspro/bin:/usr/ucb/
 export PATH
 
-alias perl="/export/home/jm/tools/perl586/bin/perl -I /export/home/hudson/tools/sa_perl/lib/site_perl/"
-
-perl -e 'foreach $inc (@INC) { print "$inc\n";}'
-
-
 #INSTALL NETADDR USING JM's PERL USING COMPLETE SILLINESS
 #echo "o conf makepl_arg PREFIX=/export/home/hudson/tools/sa_perl\ninstall NetAddr::IP" | cpan
 #cd /tmp/1
@@ -30,7 +25,7 @@ perl -e 'foreach $inc (@INC) { print "$inc\n";}'
 #make test && make install 
 #perl -I /export/home/hudson/tools/sa_perl/lib/site_perl/ -e 'if (require NetAddr::IP) { print "NetAddr::IP Version is: $NetAddr::IP::VERSION\n"; exit 0;} else {exit 1;}'
 #exit
-perl Makefile.PL < /dev/null
+perl Makefile.PL INC='-I/export/home/hudson/tools/sa_perl/lib/site_perl/' < /dev/null
 
 exit
 # SOLARIS1 SLAVE w/Infra installing modules for us in a separate dir. 
