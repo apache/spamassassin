@@ -12,7 +12,6 @@ mkdir artifacts testxml
 #SOLARIS1 SLAVE w/JM's PERL
 PATH=/export/home/jm/tools/perl586/bin:/usr/ccs/bin:/sbin:/usr/sbin:/etc:/usr/etc:/usr/local/bin:/usr/bin/mh:/export/home/jm/bin:/sbin:/usr/sbin:/etc:/usr/etc:/usr/local/bin:/usr/bin/mh:/export/home/jm/bin:/sbin:/usr/sbin:/etc:/usr/etc:/usr/local/bin:/usr/bin/mh:/usr/bin:/opt/sfw/bin:/opt/SUNWspro/bin
 export PATH
-
 perl Makefile.PL < /dev/null
 
 # SOLARIS1 SLAVE w/Infra installing modules for us in a separate dir. 
