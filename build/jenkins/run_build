@@ -15,10 +15,10 @@ export PATH
 
 which perl
 /usr/ucb/whoami
-/usr/bin/ls -al /export/home/jm/tools/
+/usr/bin/ls -al /export/home/jm/tools/ /export/home/jenkins/tools/
 
 exit
-perl Makefile.PL < /dev/null
+perl  -I /export/home/jenkins/tools/perl/lib/site_perl/ Makefile.PL < /dev/null
 
 # SOLARIS1 SLAVE w/Infra installing modules for us in a separate dir. 
 #perl -I /export/home/jenkins/tools/perl/lib/site_perl/ Makefile.PL < /dev/null
