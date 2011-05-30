@@ -11,10 +11,10 @@ mkdir artifacts testxml
 
 #SOLARIS1 SLAVE w/JM's PERL
 PATH=/export/home/jm/tools/perl586/bin:/usr/ccs/bin:/sbin:/usr/sbin:/etc:/usr/etc:/usr/local/bin:/usr/bin/mh:/export/home/jm/bin:/sbin:/usr/sbin:/etc:/usr/etc:/usr/local/bin:/usr/bin/mh:/export/home/jm/bin:/sbin:/usr/sbin:/etc:/usr/etc:/usr/local/bin:/usr/bin/mh:/usr/bin:/opt/sfw/bin:/opt/SUNWspro/bin:/usr/ucb/
-PERL5LIB=/export/home/hudson/tools/sa_perl/lib/site_perl/
+PERL5LIB=/export/home/hudson/tools/sa_perl/lib/site_perl/5.8.6/
 export PATH
 
-/usr/bin/ls -al /export/home/hudson/tools/sa_perl/lib/site_perl/
+/usr/bin/ls -al /export/home/hudson/tools/sa_perl/lib/site_perl/5.8.6/
 
 
 #INSTALL NETADDR USING JM's PERL USING COMPLETE SILLINESS
