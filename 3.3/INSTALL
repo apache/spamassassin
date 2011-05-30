@@ -1,0 +1,474 @@
+Upgrading SpamAssassin?
+-----------------------
+
+Please be sure to read the UPGRADE file for important changes that
+have been made since previous versions.  In particular, 3.3.0 no
+longer includes a default ruleset.
+
+
+Installing or Upgrading SpamAssassin
+------------------------------------
+
+Using CPAN via CPAN.pm:
+
+	perl -MCPAN -e shell                    [as root]
+	o conf prerequisites_policy ask
+	install Mail::SpamAssassin
+	quit
+
+Using Linux:
+
+	Debian unstable: apt-get install spamassassin
+	Gentoo: emerge mail-filter/spamassassin
+	Fedora: yum install spamassassin
+
+Alternatively download the tarfile, zipfile, and/or build your own RPM
+from http://spamassassin.apache.org/.  Building from tar/zip file is
+usually as simple as:
+
+	[unzip/untar the archive]
+	cd Mail-SpamAssassin-*
+	perl Makefile.PL
+	[option: add -DSPAMC_SSL to $CFLAGS to build an SSL-enabled spamc]
+	make
+	make install                            [as root]
+
+After installing SpamAssassin, you need to download and install the
+SpamAssassin ruleset using "sa-update".  See the "Installing Rules"
+section below.
+
+Please make sure to read this whole document before installing, especially
+the prerequisite information further down.
+
+To install as non-root, see the directions below.
+
+If you are running AFS, you may also need to specify INSTALLSITELIB and
+SITELIBEXP.
+
+Note that you can upgrade SpamAssassin using these instructions, as long
+as you take care to read the caveats in the file UPGRADE.   Upgrading
+will not delete your learnt Bayes data or local rule modifications.
+
+If you're using SunOS 4.1.x, see
+http://wiki.spamassassin.org/w/BuildingOnSunOS4 for build tips.
+
+
+Installing SpamAssassin for Personal Use (Not System-Wide)
+----------------------------------------------------------
+
+These steps assume the following, so substitute as necessary:
+  - Your UNIX login is "user"
+  - Your home directory is /home/user
+  - The location of the procmail executable is /usr/bin/procmail
+
+Many more details of this process are at
+http://wiki.apache.org/spamassassin/SingleUserUnixInstall
+
+1. Uncompress and extract the SpamAssassin archive, using "unzip" or
+   "tar xvfz", in a temporary directory.
+
+2. change directory into it:
+
+	cd Mail-SpamAssassin-*
+
+3. Make SpamAssassin as normal, but using your home directory as the
+   target:
+
+	perl Makefile.PL PREFIX=$HOME
+	make
+	make install
+
+   Please see the file PACKAGING, sections "Changing paths in the Makefile"
+   and "Setting further options on the command line" for more informations
+   on available command line variables.
+
+4. Install the SpamAssassin ruleset using "sa-update":
+
+        $HOME/bin/sa-update
+
+   See the "Installing Rules" section below if you do not wish to download
+   the rules directly from the internet.
+
+5. If you already use procmail, skip to step 7.  If not, ensure procmail
+   is installed using "which procmail" or install it from www.procmail.org.
+
+6. Create a .forward file in your home directory containing the below
+   lines:
+
+"|IFS=' ' && exec /usr/bin/procmail -f- || exit 75 #user"
+
+7. Edit or create a .procmailrc file in your home directory containing the
+   below lines.  If you already have a .procmailrc file, add the lines to
+   the top of your .procmailrc file:
+
+:0fw: spamassassin.lock
+| /home/user/bin/spamassassin
+
+   The above line filters all incoming mail through SpamAssassin and tags
+   probable spam with a unique header.  If you would prefer to have spam
+   blocked and saved to a file called "caughtspam" in your home directory,
+   instead of passed through and tagged, append this directly below the above
+   lines:
+
+:0:
+* ^X-Spam-Status: Yes
+caughtspam
+
+Also, see the file procmailrc.example and
+http://wiki.apache.org/spamassassin/UsedViaProcmail
+
+8. Now, you should be ready to send some test emails and ensure everything
+   works as expected.  First, send yourself a test email that doesn't
+   contain anything suspicious.  You should receive it normally, but there
+   will be a header containing "X-Spam-Status: No".  If you are only
+   tagging your spam, send yourself a copy of the GTUBE test string to
+   check to be sure it is marked as spam.  GTUBE is located in the
+   sample-spam.txt message distributed with SpamAssassin and also at:
+
+     http://spamassassin.apache.org/gtube/
+
+   If your test emails don't get through to you, immediately rename your
+   .forward file until you figure out cause of the the problem, so you
+   don't lose incoming email.
+
+   Note: one possible cause for this is the use of smrsh on the MTA system;
+   see http://wiki.spamassassin.org/w/ProcmailVsSmrsh for details.
+
+9. You can now customize SpamAssassin.  See README for more information.
+
+
+Installing Rules
+----------------
+
+Rules are normally installed by running a sa-update command.
+The version of sa-update program should match the version of SpamAssassin
+modules, so invoking sa-update should be performed only after installing
+or upgrading SpamAssassin code, not before.
+
+Installing rules from network is done with a single command:
+
+        sa-update
+
+This is normally run as root.
+
+If you wish to install rules from downloaded files, rather than "live" from
+the latest online ruleset, here is how to do it.
+
+Obtain all the following files:
+
+    Mail-SpamAssassin-rules-xxx.tgz
+    Mail-SpamAssassin-rules-xxx.tgz.asc
+    Mail-SpamAssassin-rules-xxx.tgz.md5
+    Mail-SpamAssassin-rules-xxx.tgz.sha1
+      (where xxx may look something like '3.3.0-rc1.r893295')
+
+Save them all to the current directory.
+Obtain a rules-signing public key:
+
+    curl -O http://spamassassin.apache.org/updates/GPG.KEY
+
+Import the signing key to the SpamAssassin gpg keyring, so that the rules
+files can be verified safely:
+
+    sa-update --import GPG.KEY
+
+Install rules from a compressed tar archive:
+
+    sa-update --install Mail-SpamAssassin-rules-xxx.tgz
+
+Note that the ".tgz.asc", ".tgz.md5" and ".tgz.sha1" files all need to
+be in the same directory, otherwise sa-update will fail.
+
+
+If the intended rules destination directory differs from a default location
+as assumed by sa-update and SpamAssassin, such as when running a content
+filter within a Unix jail or on an unusual installation, please supply the
+rules destination directory to sa-update through its option --updatedir,
+such as:
+
+    sa-update --updatedir /var/jail/var/db/spamassassin/3.003000
+
+
+CPAN
+----
+
+Most of the modules listed below are available via the Comprehensive Perl
+Archive Network (CPAN, see http://www.cpan.org/ for more information).
+While each module is different, most can be installed via a few simple
+commands such as:
+
+	$ perl -MCPAN -e shell
+	cpan> o conf prerequisites_policy ask
+	cpan> install Module::Name
+	cpan> quit
+
+If there are problems or questions regarding the installation any of the
+modules, please see the CPAN and relevant module's documentation for more
+information.  We can't provide documentation or installation support for
+third party modules.
+
+Additional information about the CPAN module is also available via
+"perldoc CPAN".
+
+Most Linux distributions also offer the CPAN modules in their own native
+formats (RPMs, Debian packages, etc.), so you should be able to find these
+through those mechanisms, too, if you prefer.
+
+
+Required Perl Interpreter
+-------------------------
+
+Perl 5.8.1 or a later version is required.
+Preferred versions are 5.8.8, or 5.10.1 or later.
+
+Most of the functions might still work with Perl 5.6.1 or 5.6.2,
+but 5.6.* is no longer a supported version.
+
+
+Required Perl Modules
+---------------------
+
+In addition to the modules associated with Perl, some additional modules
+need to be installed or upgraded depending on the version of Perl that you
+are running.
+
+You can get an immediate report on which of these modules you may need (or
+want) to upgrade, by running "perl build/check_dependencies" from the
+SpamAssassin build directory.
+
+The list of required modules that do not ship with Perl and must be
+installed:
+
+  - Digest::SHA1 (from CPAN),
+    or the newer Digest::SHA which is a perl base module since Perl 5.10.0
+
+    The Digest::SHA1 module is used as a cryptographic hash for some
+    tests and the Bayes subsystem if Digest::SHA module is not available.
+
+    An external perl module razor-agents-2.84 as used by a Razor2 plugin
+    seems to be the only remaining component depending on Digest::SHA1
+    (note that a packager may ship a patched version of razor-agents which
+    can use Digest::SHA instead)
+
+    Debian: apt-get install libdigest-sha1-perl
+    Gentoo: emerge dev-perl/Digest-SHA1
+    Fedora: yum install perl-Digest-SHA1
+
+  - HTML::Parser >= 3.43 (from CPAN)
+
+    HTML is used for an ever-increasing amount of email so this dependency
+    is unavoidable.  Run "perldoc -q html" for additional information.
+
+    Debian: apt-get install libhtml-parser-perl
+    Gentoo: emerge dev-perl/HTML-Parser
+    Fedora: yum install perl-HTML-Parser
+
+  - Net::DNS (from CPAN)
+
+    Used for all DNS-based tests (SBL, XBL, SpamCop, DSBL, etc.),
+    perform MX checks, used when manually reporting spam to SpamCop,
+    and used by sa-update to gather version information.
+
+    You need to make sure the Net::DNS version is sufficiently up-to-date:
+
+      - version 0.34 or higher on Unix systems
+      - version 0.46 or higher on Windows systems
+
+    Debian/Ubuntu: apt-get install libnet-dns-perl
+    Fedora: yum install perl-Net-DNS
+
+  - NetAddr::IP (from CPAN)
+
+    Used to parse IP addresses and IP address ranges for
+    "trusted_networks".
+
+    Debian/Ubuntu: apt-get install libnetaddr-ip-perl
+    Fedora: yum install perl-NetAddr-IP
+
+  - Time::HiRes (from CPAN)
+
+    Used by asynchronous DNS lookups to operate timeouts with subsecond
+    precision and to report processing times accurately.
+
+  - LWP (aka libwww-perl) (from CPAN)
+
+    This set of modules will include both the LWP::UserAgent and
+    HTTP::Date modules, used by sa-update to retrieve update archives.
+
+    Fedora: yum install perl-libwww-perl
+
+  - HTTP::Date (from CPAN)
+
+    Used by sa-update to deal with certain Date requests.
+
+  - IO::Zlib (from CPAN)
+
+    Used by sa-update to uncompress update archives.
+    Version 1.04 or later is required.
+
+    Fedora: yum install perl-IO-Zlib
+
+  - Archive::Tar (from CPAN)
+
+    Used by sa-update to expand update archives.
+    Version 1.23 or later is required.
+
+    Fedora: yum install perl-Archive-Tar
+
+
+Optional Modules
+----------------
+
+In addition, the following modules will be used for some checks, if
+available and the version is high enough.  If they are not available or if
+their version is too low, SpamAssassin will still work, just not as
+effectively because some of the spam-detection tests will have to be
+skipped.
+
+Note: SpamAssassin will not warn you if these are installed, but the
+version is too low for them to be used.
+
+  - MIME::Base64
+
+    This module is highly recommended to increase the speed with which
+    Base64 encoded messages/mail parts are decoded.
+
+
+  - DB_File (from CPAN, included in many distributions)
+
+    Used to store data on-disk, for the Bayes-style logic and
+    auto-whitelist.  *Much* more efficient than the other standard Perl
+    database packages.  Strongly recommended.
+
+    There seems to be a bug in libdb 4.1.25, which is
+    distributed by default on some versions of Linux.  See
+    http://wiki.apache.org/spamassassin/DbFileSleepBug for details.
+
+
+  - Net::SMTP (from CPAN)
+
+    Used when manually reporting spam to SpamCop.
+
+
+  - Mail::SPF (from CPAN)
+
+    Used to check DNS Sender Policy Framework (SPF) records to fight email
+    address forgery and make it easier to identify spams.  This module
+    makes Mail::SPF::Query obsolete.
+
+    Net::DNS version 0.58 or higher is required.
+
+    Note that NetAddr::IP (required by Mail::SPF) versions up to and
+    including version 4.006 include a bug that will slow down the entire
+    perl interpreter.  NetAddr::IP version 4.007 or later fixes this.
+
+
+  - IP::Country::Fast (from CPAN)
+
+    Used by the RelayCountry plugin (not enabled by default) to determine
+    the domain country codes of each relay in the path of an email.
+
+
+  - Net::Ident (from CPAN)
+
+    If you plan to use the --auth-ident option to spamd, you will need
+    to install this module.
+
+
+  - IO::Socket::INET6 (from CPAN)
+
+    This is required if the first nameserver listed in your IP
+    configuration or /etc/resolv.conf file is available only via an IPv6
+    address.
+
+    Fedora: yum install perl-IO-Socket-INET6
+
+
+  - IO::Socket::SSL (from CPAN)
+
+    If you wish to use SSL encryption to communicate between spamc and
+    spamd (the --ssl option to spamd), you need to install this
+    module. (You will need the OpenSSL libraries and use the
+    ENABLE_SSL="yes" argument to Makefile.PL to build and run an SSL
+    compatibile spamc.)
+
+    Fedora: yum install perl-IO-Socket-SSL
+
+
+  - Compress::Zlib (from CPAN)
+
+    If you wish to use the optional zlib compression for communication
+    between spamc and spamd (the -z option to spamc), useful for
+    long-distance use of spamc over the internet, you need to install
+    this module.
+
+    Fedora: yum install perl-Compress-Zlib
+
+
+  - Mail::DKIM (from CPAN)
+
+    If this module is installed, and you enable the DKIM plugin,
+    SpamAssassin will perform DKIM lookups when a DKIM-Signature header is
+    present in the message headers.  Current versions of Mail::DKIM (0.20
+    or later) also perform Domain Key lookups on DomainKey-Signature headers,
+    without requiring the Mail::DomainKeys module, which is now obsolete.
+    Version 0.37 or later is preferred, the absolute minimal version is 0.31.
+    
+    Note that the Mail::DKIM module in turn requires the Digest::SHA module
+    and OpenSSL libraries.
+
+
+  - DBI *and* DBD driver/modules for your database (from CPAN)
+
+    If you intend to use SpamAssassin with an SQL database backend for
+    user configuration data, Bayes storage, or other storage, you will need
+    to have these installed; both the basic DBI module and the driver for
+    your database.
+
+
+  - Encode::Detect (from CPAN)
+
+    If you plan to use the normalize_charset config setting to detect
+    charsets and convert them into Unicode, you will need to install
+    this module.
+
+
+  - Apache::Test (from CPAN)
+
+    If you plan to run the Apache2 version of spamd in the
+    "spamd-apache2" directory, you will need to install this
+    module.
+
+
+  - Apache 2 and mod_perl
+
+    If you plan to run the Apache2 version of spamd in the "spamd-apache2"
+    directory, you will need to ensure these are installed.
+
+    Ubuntu: sudo apt-get install apache2 libapache2-mod-perl2
+
+
+  - Razor2
+
+    If you plan to use Vipul's Razor, note that versions up to and
+    including version 2.82 include a bug that will slow down the entire
+    perl interpreter.  Version 2.83 or later fixes this.
+
+    If you do not plan to use this plugin, be sure to comment out
+    its loadplugin line in "/etc/mail/spamassassin/v310.pre".
+
+
+What Next?
+----------
+
+Take a look at the USAGE document for more information on how to use
+SpamAssassin.
+
+The SpamAssassin Wiki <http://wiki.spamassassin.org/> contains
+information on custom plugins, extensions, and other optional modules
+included with SpamAssassin.
+
+
+(end of INSTALL)
+
+// vim:tw=74:

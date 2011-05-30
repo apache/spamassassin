@@ -1,0 +1,75 @@
+#!/usr/bin/bash
+#
+# Increment the spamassassin.org DNS zone's serial number, and trigger
+# a zone update against the DNS server.
+#
+# usage: sudo -u updatesd /home/updatesd/svn/spamassassin/build/mkupdates/tick_zone_serial
+#
+# required setup, in /etc/sudoers or /opt/sfw/etc/sudoers:
+#   updatesd     ALL = NOPASSWD: /usr/sbin/rndc reload
+
+set -x
+
+[ -d /home/updatesd/svn/spamassassin ] && cd /home/updatesd/svn/spamassassin
+
+
+. /etc/profile
+PERL=/local/perl586/bin/perl
+export PERL
+
+# directory where "counter", "soa_line.tmpl", "soa_line" live.
+# it's assumed that the *real* zone $INCLUDEs files from this dir.
+# it must be writable by the user this script runs as.
+#
+soadir=/var/named/spamassassin.org.d
+if [ "$#" -gt 0 ]; then
+  soadir="$1"
+fi
+
+# ---------------------------------------------------------------------------
+
+# increment the zone serial.  we use a counter, with rollover at 100,
+# and a datestamp too.
+
+oldcount=`cat $soadir/counter`
+
+# avoid issues where oldcount=99 and then we can't do any other updates that
+# day.  if the old counter was last updated before midnight, reset counter to
+# 0.
+if perl -e 'use Time::Local; @t=localtime; $mn=timelocal 0,0,0,@t[3..6]; ($mtime) = (stat("'"$soadir"'/counter"))[9]; exit($mn<=$mtime);'; then
+  oldcount=-1
+fi
+
+newserial=`perl -e '
+
+  my $count = (($ARGV[0] + 1) % 100);
+  my @t = localtime time;
+  printf "%04d%02d%02d%02d", $t[5]+1900, $t[4]+1, $t[3], $count;
+
+  open (INCR, ">'"$soadir"'/counter") or die "open failed $soadir";
+  print INCR $count,"\n"; close INCR or die "close failed $soadir";
+
+' -- $oldcount`
+
+soafile=$soadir/soa_line
+rm -f $soafile.bak \
+      $soafile.new
+
+touch $soafile # this must exist
+if sed -e 's/__SERIAL__/'"$newserial"'/' \
+	< $soafile.tmpl > $soafile.new && \
+    [ -s $soafile.new ] && \
+    mv $soafile     $soafile.bak && \
+    mv $soafile.new $soafile
+then
+  true
+else
+  [ -f $soafile.bak ] && mv $soafile.bak $soafile
+  echo "failed to create new $soafile" 1>&2 ; exit 1
+fi
+
+
+# trigger a named reload
+sudo rndc reload || exit $?
+
+exit 0

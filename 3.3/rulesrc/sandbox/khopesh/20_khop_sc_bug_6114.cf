@@ -1,0 +1,122 @@
+## khop-sc-neighbors.cf	v 2010011519
+## Khopesh's syndication of SpamCop's top offenders and top offending networks.
+## 
+## Spamassassin rules written by Adam Katz <antispamATkhopiscom>
+## http://khopesh.com/Anti-spam
+## khopesh on irc://irc.freenode.net/#spamassassin
+## 
+## sa-update --channel khop-bl.sa.khopesh.com --gpgkey F4AD9292
+## 
+## These rules are Copyright 2001-2009 by Adam Katz <antispamATkhopiscom>
+## Licensed under the Creative Commons Non-Commercial Share-alike License 2.0.
+## The code that generated this output is GNU Affero General Public License v3.
+## Source data (copyright Cisco subsidiary SpamCop.net) taken from links below.
+## The author is receptive to relicensing requests for this and its generator.
+
+
+# http://spamcop.net/w3m?action=map;net=0;sort=spamcnt
+header   KHOP_SC_CIDR8  Received =~ /(?-xism:\b(?:9[35]|200|89)(?:\.[012]?[0-9]{1,2}){3}\b)/
+describe KHOP_SC_CIDR8  Relay listed in SpamCop top 8 IP/8 CIDRs
+score    KHOP_SC_CIDR8  0.2 0.1 0.3 0.2
+
+header   KHOP_SC_TOP_CIDR8  Received =~ /(?-xism:\b(?:1(?:23|89|90)|201)(?:\.[012]?[0-9]{1,2}){3}\b)/
+describe KHOP_SC_TOP_CIDR8  Relay listed in SpamCop top 4 IP/8 CIDRs
+score    KHOP_SC_TOP_CIDR8  0.5 0.4 0.8 0.6
+# http://ruleqa.spamassassin.org/week/KHOP_SC_TOP_CIDR8/detail
+# 0.00000ms 22.7242%s 0.5009%h 0.978s/o 0.76rank 1.00score
+#counts  KHOP_SC_TOP_CIDR8  229488s/280h of 1065604 corpus (1009702s/55902h) 05/25/09
+#counts  KHOP_SC_TOP_CIDR8  457506s/457h of 2102483 corpus (2015322s/87161h) 05/25/09
+#counts  KHOP_SC_TOP_CIDR8  22495s/2h of 101483 corpus (99912s/1571h bb-jm) 05/25/09
+#counts  KHOP_SC_TOP_CIDR8  205146s/170h of 928863 corpus (899498s/29365h dos) 05/25/09
+#counts  KHOP_SC_TOP_CIDR8  1807s/108h of 35258 corpus (10292s/24966h jm) 05/25/09
+# notable overlap: 84% of hits also hit RCVD_IN_PBL (0.905)
+
+
+# http://www.spamcop.net/w3m?action=map;net=bmaxcnt;mask=16777215;sort=spamcnt
+header   KHOP_SC_CIDR16  Received =~ /(?-xism:\b(?:1(?:2(?:3\.(?:16|23)|2\.168)|13\.169)|9(?:2\.84|3\.41))(?:\.[012]?[0-9]{1,2}){2}\b)/
+describe KHOP_SC_CIDR16  Relay listed in SpamCop top 12 IP/16 CIDRs
+score    KHOP_SC_CIDR16  0.6 0.5 0.9 0.75
+
+header   KHOP_SC_TOP_CIDR16  Received =~ /(?-xism:\b(?:1(?:(?:17\.19|23\.2)7|87\.4)|222\.25[34]|59\.94)(?:\.[012]?[0-9]{1,2}){2}\b)/
+describe KHOP_SC_TOP_CIDR16  Relay listed in SpamCop top 6 IP/16 CIDRs
+score    KHOP_SC_TOP_CIDR16  0.9 0.8 1.3 1.2
+# http://ruleqa.spamassassin.org/week/KHOP_SC_TOP_CIDR16/detail
+# 0.00000ms 0.6947%s 0.0000%h 1.000s/o 0.85rank 1.0score
+#counts  KHOP_SC_TOP_CIDR16  7015s/0h of 1065604 corpus (1009702s/55902h) 05/25/09
+#counts  KHOP_SC_TOP_CIDR16  14059s/0h of 2102483 corpus (2015322s/87161h) 05/25/09
+#counts  KHOP_SC_TOP_CIDR16  845s/0h of 101483 corpus (99912s/1571h bb-jm) 05/25/09
+#counts  KHOP_SC_TOP_CIDR16  6137s/0h of 928863 corpus (899498s/29365h dos) 05/25/09
+#counts  KHOP_SC_TOP_CIDR16  33s/0h of 35258 corpus (10292s/24966h jm) 05/25/09
+# notable overlap: 91% of hits also hit RCVD_IN_PBL (0.905)
+# notable overlap: 85% of hits also hit RAZOR2_CHECK (0.5)
+# notable overlap: 84% of hits also hit RAZOR2_CF_RANGE_51_100 (0.5)
+
+
+# http://spamcop.net/w3m?action=map;net=cmaxcnt;mask=65535;sort=spamcnt
+header   KHOP_SC_CIDR24  Received =~ /(?-xism:\b(?:77\.(?:24(?:1\.45|4\.40)|73\.139)|1(?:11\.224\.250|93\.108\.38)|93\.91\.196)\.[012]?[0-9]{1,2}\b)/
+describe KHOP_SC_CIDR24  Relay listed in SpamCop top 12 IP/24 CIDRs
+score    KHOP_SC_CIDR24  0.9 0.8 1.3 1.2
+# http://ruleqa.spamassassin.org/week/KHOP_SC_CIDR24/detail
+# 0.00000ms 0.0239%s 0.0000%h 1.000s/o 0.57rank 1.00score
+#counts  KHOP_SC_CIDR24  241s/0h of 1065604 corpus (1009702s/55902h) 05/25/09
+#counts  KHOP_SC_CIDR24  486s/0h of 2102483 corpus (2015322s/87161h) 05/25/09
+#counts  KHOP_SC_CIDR24  1s/0h of 101483 corpus (99912s/1571h bb-jm) 05/25/09
+#counts  KHOP_SC_CIDR24  240s/0h of 928863 corpus (899498s/29365h dos) 05/25/09
+#counts  KHOP_SC_CIDR24  0s/0h of 35258 corpus (10292s/24966h jm) 05/25/09
+
+header   KHOP_SC_TOP_CIDR24  Received =~ /(?-xism:\b(?:2(?:03\.82\.(?:80|92)|18\.38\.12)|121\.54\.32|93\.186\.96|0\.0\.0)\.[012]?[0-9]{1,2}\b)/
+describe KHOP_SC_TOP_CIDR24  Relay listed in SpamCop top 6 IP/24 CIDRs
+score    KHOP_SC_TOP_CIDR24  1.7 1.5 1.9 1.8
+
+
+# http://www.spamcop.net/w3m?action=hoshame
+header   KHOP_SC_TOP200  Received =~ /(?-xism:\b(?:2(?:0(?:0\.(?:8(?:0\.140\.61|7\.103\.18)|3(?:0\.70\.20|3\.214\.)2|27\.138\.74|95\.162\.53|54\.72\.30|6\.193\.89|70\.23\.51)|2\.(?:1(?:26\.109\.18|54\.81\.242)|75\.37\.(?:24[578]|125)|43\.18(?:2\.178|1\.7)|87\.47\.130)|3\.(?:1(?:3(?:0\.231\.169|1\.169\.166)|46\.252\.242)|82\.91\.10[14]|76\.137\.137)|1\.(?:2(?:20\.232\.61|51\.76\.132)|144\.87\.36)|9\.(?:212\.106\.145|94\.196\.170)|4\.2(?:27\.175\.236|02\.243\.9)|5\.1(?:78\.144\.146|34\.239\.4)|7\.57\.101\.107|8\.46\.105\.195)|1(?:7\.(?:1(?:50\.4(?:1\.16|5\.)5|99\.231\.249)|6(?:4\.104\.107|3\.76\.226)|7(?:3\.31\.11|6\.2\.129)|27\.150\.198)|2\.(?:1(?:50\.22\.143|75\.122\.46)|(?:55\.66\.17|63\.221\.1)0|24(?:4\.153\.45|\.173\.66))|1\.(?:1(?:91\.174\.141|15\.89\.126)|2(?:47\.239\.239|34\.93\.154))|3\.(?:1(?:3(?:0\.16\.20|1\.157\.1)|47\.118\.113)|251\.134\.138)|6\.(?:230\.133\.69|105\.93\.60)|0\.109\.102\.139|8\.38\.12\.246|9\.252\.48\.67)|2(?:2\.(?:12(?:2\.1(?:42\.189|60\.123)|4\.198\.131)|252\.223\.2)|0\.(?:80\.108\.138|95\.232\.26)|1\.143\.4(?:9\.246|6\.33)))|1(?:9(?:3\.(?:1(?:08\.38\.2(?:28|31)|11\.156\.182|6\.45\.254)|2(?:01\.171\.127|27\.98\.4))|5\.(?:2(?:30\.140\.18|4\.93\.252|2\.107\.1)|(?:189\.45\.1|58\.9\.)1)|6\.2(?:5\.120\.17|0\.66\.26|8\.240\.2)|0\.1(?:82\.43\.47|2\.66\.25)|8\.106\.60\.189|4\.63\.136\.18)|2(?:4\.(?:1(?:24\.4(?:3\.32|4\.11)|04\.140\.82)|217\.(?:216\.(?:49|86)|198\.233))|2\.(?:252\.234\.74|55\.106\.18)|1\.1\.37\.14[567]|0\.28\.78\.141)|1(?:7\.(?:121\.237\.17|25\.129\.20)0|0\.(?:45\.144\.227|172\.179\.3)|1\.224\.250\.64|8\.175\.6\.138|4\.141\.5\.3)|8(?:9\.(?:1(?:12\.218\.234|20\.68\.102)|210\.14\.33)|6\.2(?:4\.(?:1[6789]|2[0123])\.3|8\.228\.1))|4(?:8\.2(?:33\.150\.147|43\.142\.24)|0\.111\.153\.4)|(?:30\.94\.158\.12|74\.51\.89\.10)4|65\.132\.230\.253)|8(?:3\.1(?:4(?:3\.(?:40\.59|32\.2)|2\.111\.228)|6\.1(?:49\.50|67\.14)|3\.218\.106|70\.105\.42)|0\.(?:93\.12(?:5\.186|6\.10|4\.1)|23(?:5\.105\.140|7\.31\.1)|179\.155\.30)|9\.(?:2(?:51\.107\.(?:21|30)|06\.152\.226)|190\.197\.14)|5\.(?:1(?:18\.193\.158|7\.3\.164)|234\.177\.253)|7\.(?:226\.22(?:2\.22|3\.26)|106\.60\.136)|4\.(?:17\.11\.114|204\.136\.3)|1\.109\.180\.80|2\.114\.73\.162|8\.255\.156\.46)|9(?:1\.(?:1(?:21\.(?:1(?:5(?:0\.6|8\.7)0|05\.224|36\.218|83\.49)|74\.105|90\.153)|9(?:4\.235\.54|7\.5\.1))|20(?:6\.30\.146|7\.42\.7)|92\.230\.227)|4\.23(?:\.(?:25\.83|37\.55)|6\.206\.130)|3\.(?:91\.196\.9[19]|186\.96\.150)|0\.191\.17\.109|2\.125\.202\.61|5\.154\.240\.98)|6(?:6\.(?:1(?:10\.122\.126|35\.41\.121)|242\.21\.64|46\.179\.10)|1\.(?:(?:100\.14\.23|97\.32\.10)4|4\.104\.38)|2\.1(?:49\.(?:166\.45|226\.69)|28\.42\.5)|(?:0\.213\.48\.25|3\.247\.77\.1)0|4\.187\.119\.101|7\.228\.17\.195|9\.162\.71\.156)|7(?:0\.(?:85\.140\.114|38\.37\.38)|7\.(?:236\.64\.198|73\.139\.2)|9\.171\.120\.23|4\.7\.71\.220|8\.56\.5\.75)|5(?:8\.(?:120\.227\.149|248\.4\.67)|9\.160\.177\.27)|41\.204\.190\.12)\b)/
+describe KHOP_SC_TOP200  Relay listed in SpamCop top 200 spammer IPs
+score    KHOP_SC_TOP200  3.4 3.2 3.7 3.5
+# http://ruleqa.spamassassin.org/week/KHOP_SC_TOP200/detail
+# 0.00000ms 0.1230%s 0.0000%h 1.000s/o 0.69rank 1.00score
+#counts  KHOP_SC_TOP200  1250s/0h of 1072123 corpus (1015898s/56225h) 05/25/09
+#counts  KHOP_SC_TOP200  4s/0h of 101470 corpus (99923s/1547h bb-jm) 05/25/09
+#counts  KHOP_SC_TOP200  1245s/0h of 935409 corpus (905697s/29712h dos) 05/25/09
+#counts  KHOP_SC_TOP200  1s/0h of 35244 corpus (10278s/24966h jm) 05/25/09
+# assumed overlap: 98+% of hits also hit RCVD_IN_BL_SPAMCOP_NET (1.960)
+
+#header   KHOP_SC_TOP100  Received =~ /(?-xism:\b(?:2(?:0(?:0\.(?:27\.138\.74|80\.140\.61|6\.193\.89)|(?:4\.227\.175\.23|5\.178\.144\.14)6|2\.(?:75\.37\.125|43\.181\.7)|3\.82\.91\.10[14]|7\.57\.101\.107|8\.46\.105\.195|9\.94\.196\.170)|1(?:2\.(?:1(?:50\.22\.143|75\.122\.46)|24\.173\.66|63\.221\.10)|7\.(?:(?:199\.231\.24|76\.2\.12)9|63\.76\.226)|(?:1\.247\.239\.23|6\.230\.133\.6)9|3\.130\.16\.20)|2(?:2\.122\.1(?:42\.189|60\.123)|0\.80\.108\.138|1\.143\.46\.33))|1(?:9(?:5\.(?:230\.140\.18|189\.45\.11)|8\.106\.60\.189|6\.25\.120\.17|3\.227\.98\.4)|8(?:6\.2(?:4\.(?:1[6789]|2[0123])\.3|8\.228\.1)|9\.112\.218\.234)|2(?:4\.(?:217\.216\.86|124\.43\.32)|1\.1\.37\.14[567])|1(?:0\.45\.144\.227|1\.224\.250\.64)|40\.111\.153\.4)|6(?:1\.(?:(?:100\.14\.23|97\.32\.10)4|4\.104\.38)|(?:4\.187\.119\.10|6\.135\.41\.12)1|(?:0\.213\.48\.25|3\.247\.77\.1)0|2\.1(?:49\.166\.4|28\.42\.)5|9\.162\.71\.156)|8(?:7\.(?:106\.60\.136|226\.222\.22)|0\.(?:235\.105\.14|93\.126\.1)0|3\.1(?:43\.40\.59|6\.149\.50)|4\.204\.136\.3|5\.17\.3\.164)|9(?:1\.(?:121\.(?:1(?:05\.224|58\.70|83\.49)|74\.105|90\.153)|92\.230\.227)|3\.186\.96\.150|5\.154\.240\.98|4\.23\.25\.83)|7(?:0\.38\.37\.38|4\.7\.71\.220|8\.56\.5\.75)|58\.120\.227\.149)\b)/
+#describe KHOP_SC_TOP100  Relay listed in SpamCop top 100 spammer IPs
+#score    KHOP_SC_TOP100  1.4 1.3 1.8 1.7
+# http://ruleqa.spamassassin.org/week/KHOP_SC_TOP100/detail
+# 0.00000ms 0.2880%s 0.0000%h 1.000s/o 0.76rank 1.00score
+#counts  KHOP_SC_TOP100  2908s/0h of 1065604 corpus (1009702s/55902h) 05/25/09
+#counts  KHOP_SC_TOP100  5897s/0h of 2102483 corpus (2015322s/87161h) 05/25/09
+#counts  KHOP_SC_TOP100  6s/0h of 101483 corpus (99912s/1571h bb-jm) 05/25/09
+#counts  KHOP_SC_TOP100  2901s/0h of 928863 corpus (899498s/29365h dos) 05/25/09
+#counts  KHOP_SC_TOP100  1s/0h of 35258 corpus (10292s/24966h jm) 05/25/09
+# notable overlap: 99% of hits also hit RCVD_IN_BL_SPAMCOP_NET (1.960) (duh)
+# notable overlap: 98% of hits also hit RCVD_IN_XBL (3.033)
+# notable overlap: 80% of hits also hit RCVD_IN_SORBS_WEB (0.619)
+
+#header   KHOP_SC_TOP20  Received =~ /(?-xism:\b(?:2(?:11\.234\.93\.154|20\.95\.232\.26)|1(?:18\.175\.6\.138|74\.51\.89\.104)|7(?:9\.171\.120\.23|7\.73\.139\.2)|5(?:9\.160\.177\.2|8\.248\.4\.6)7|67\.228\.17\.195|89\.190\.197\.14)\b)/
+#describe KHOP_SC_TOP20  Relay listed in SpamCop top 20 spammer IPs
+#score    KHOP_SC_TOP20  1.9 1.7 2.2 2.0
+# assumed overlap: 99+% of hits also hit RCVD_IN_BL_SPAMCOP_NET (1.960)
+
+#header   KHOP_SC_TOP10  Received =~ /(?-xism:\b(?:2(?:1(?:(?:1\.191\.174\.14|7\.73\.31\.1)1|8\.38\.12\.246)|05\.134\.239\.4)|1(?:24\.217\.198\.23|14\.141\.5\.)3|6(?:2\.149\.226\.69|6\.46\.179\.10)|77\.236\.64\.198|93\.91\.196\.99)\b)/
+#describe KHOP_SC_TOP10  Relay listed in SpamCop top 10 spammer IPs
+#score    KHOP_SC_TOP10  2.2 2.0 2.6 2.4
+# assumed overlap: 99+% of hits also hit RCVD_IN_BL_SPAMCOP_NET (1.960)
+
+
+# Bump these up to compensate for expected but absent overlap
+if (! plugin(Mail::SpamAssassin::Plugin::DNSEval) )
+  score  KHOP_SC_CIDR8		(0.1)
+  score  KHOP_SC_TOP_CIDR8	(0.2)	# RCVD_IN_PBL
+  score  KHOP_SC_CIDR16 	(0.8)	# RCVD_IN_PBL
+  score  KHOP_SC_TOP_CIDR16	(0.9)	# RCVD_IN_PBL
+  score  KHOP_SC_CIDR24 	(0.9)	# RCVD_IN_PBL
+  score  KHOP_SC_TOP_CIDR24	(1.5)	# RCVD_IN_PBL ++
+  score  KHOP_SC_TOP200 	 4.6	# RCVD_IN_BL_SPAMCOP_NET + RCVD_IN_XBL++
+  #score KHOP_SC_TOP100 	 4.7 	# RCVD_IN_BL_SPAMCOP_NET ++
+  #score KHOP_SC_TOP20  	 4.8 	# RCVD_IN_BL_SPAMCOP_NET + RCVD_IN_XBL++
+  #score KHOP_SC_TOP10  	 4.9 	# RCVD_IN_BL_SPAMCOP_NET + RCVD_IN_XBL++
+endif
+

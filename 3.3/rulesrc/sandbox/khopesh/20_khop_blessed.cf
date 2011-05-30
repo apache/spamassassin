@@ -1,0 +1,40 @@
+# From Adam Katz (khopesh) testing grounds and live channels
+# http://khopesh.com/Anti-spam
+
+### select rules from khop-blessed
+
+# 2007/02/27 - Syntax taken from the OpenPGP standard, RFC 2440 section 6.2
+if ! plugin (Mail::SpamAssassin::Plugin::OpenPGP)
+  # moved from rawbody to body 20091021
+  body     __KHOP_PGP_I1	/-----BEGIN PGP (?:SIGNATURE|MESSAGE|PUBLIC|PRIVATE)(?:, PART [0-9]{1,4}\/[0-9]{1,4}| KEY BLOCK)?-----/
+  tflags   __KHOP_PGP_I1	nice
+  body     __KHOP_PGP_I2	/-----END PGP/
+  tflags   __KHOP_PGP_I2	nice
+  meta     __PGP_INLINE	( __KHOP_PGP_I1 && __KHOP_PGP_I2 )
+  tflags   __PGP_INLINE	nice noautolearn
+  meta     KHOP_PGP_INLINE	__PGP_INLINE
+  describe KHOP_PGP_INLINE	BODY: Contains PGP data
+  tflags   KHOP_PGP_INLINE	nice noautolearn nopublish
+  #score    KHOP_PGP_INLINE	-2 -2 -3 -3
+
+  # 2005/12/14 - worthwhile even though we're not verifying the sig
+  header   __PGP_SIGNED	Content-Type =~ /multipart\/signed;.*\/pgp-signature/s
+  tflags   __PGP_SIGNED	nice noautolearn
+  meta     KHOP_PGP_SIGNED	__PGP_SIGNED
+  describe KHOP_PGP_SIGNED	Message seems to contain PGP signature
+  tflags   KHOP_PGP_SIGNED	nice noautolearn nopublish
+  #score    KHOP_PGP_SIGNED	-2 -2 -3 -3     # none net bayes net+bayes
+endif
+
+# 20091016 after much testing, has yet to hit a SINGLE spam (hits ~38% of ham)
+# 20091121 masscheck features 1.0255% spam to 39.3385% ham (S/O=0.025)
+# NOTE: This may soon move to khop-general if it is needed as a dependency
+#meta	 KHOP_THREADED	!__MISSING_REF || !__MISSING_REPLY || !__MISSING_THREAD
+meta	 __THREADED	(!__MISSING_REPLY && !__NO_INR_YES_REF) || (__MISSING_REPLY && !__MISSING_REF)
+tflags	 __THREADED	nice
+meta	 KHOP_THREADED	__THREADED
+# Note that this does NOT verify legitimacy of referenced MSGIDs.
+describe KHOP_THREADED	Message references or replies to another message
+tflags	 KHOP_THREADED	nice nopublish
+#score	 KHOP_THREADED	-0.5 -0.5 -1.5 -1.5 # EASILY abused -- keep minimal
+

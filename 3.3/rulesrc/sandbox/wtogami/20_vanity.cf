@@ -1,0 +1,39 @@
+# VANTIY SPAM
+# Who's Who and other types of fake or vanity awards.
+# TODO: Simplify to fewer patterns after some nightly masscheck results.
+meta VANITY		(__KNOWN_VANITY && (__NO_COST + __INFORM_YOU + __INNERCIRCLE + __SHMUCK + __EXECS_PROS + __PUB_DEADLINE + __REGISTRY + __NOMINATION + __BIOGRAPHY + __ACCOLADES + __RECOGNITION + __DISTINGUISHED + __EXCELLENCE + __ACHIEVEMENT + __CBNVANITY > 3)) || (__BESTOFAWARD && (__SBCAVANITY || __USCAVANITY))
+describe VANITY Vanity or fake awards
+score VANITY 2.3
+
+# Known Vanity Spammers
+meta __KNOWN_VANITY	__PRINCETONPRE || __WHOSWHO || __DPHPVANITY
+body __PRINCETONPRE	/\bPrinceton Premier/
+body __WHOSWHO		/\bWho.s Who\b/
+# 20091203
+body __DPHPVANITY	/\bDistinguished Professionals Hardcover Publication\b/
+# # 20091211
+body __CBNVANITY	/\bContinental Broadcasting Network\b/
+
+# Typical Patterns
+body __NO_COST		/\b(?:no costs?|cost-? *free|free of costs?|no fees?|neither cost nor obligation)\b/i
+body __INFORM_YOU	/\b(?:pleased?|pleasure) to inform you\b/
+body __INNERCIRCLE	/\bInner Circle\b/
+# Honored People
+body __SHMUCK		/\b(?:accomplished|distinguished|exceptional|talented|calibre of) +(?:professionals?|individuals?)\b/i
+body __EXECS_PROS	/\bexecutives? (?:and|&) professionals?\b/i
+# Registry Application
+body __PUB_DEADLINE	/\bpublication deadlines?\b/i
+body __REGISTRY	/\bregistry\b/i
+body __NOMINATION	/\b(?:nominated|nomination)\b/i
+body __BIOGRAPHY	/\b(?:biography|biographies|biographical)\b/i
+# Flattery
+body __ACCOLADES	/\baccolades?\b/i
+body __RECOGNITION	/\brecognition\b/i
+body __DISTINGUISHED	/\bdistinguished\b/i
+body __EXCELLENCE	/\b(?:demonstrated|commitment to) excellence\b/i
+body __ACHIEVEMENT	/\bbenchmark of achievement\b/i
+# SBCA 20091023
+body __BESTOFAWARD	/\bBest of \w+ Award/
+body __SBCAVANITY	/\bSmall Business Commerce Association/
+# USCA 20091024
+body __USCAVANITY	/\bUS Commerce Association/

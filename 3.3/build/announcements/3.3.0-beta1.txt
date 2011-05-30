@@ -1,0 +1,609 @@
+To: users, dev, announce
+Subject: ANNOUNCE: Apache SpamAssassin 3.3.0-beta1 available
+
+[DRAFT DRAFT DRAFT - NOT YET RELEASED - DRAFT DRAFT DRAFT]
+
+Apache SpamAssassin 3.3.0-beta1 is now available for testing.
+
+Downloads are available from:
+  http://people.apache.org/~wtogami/devel/
+
+md5sum of archive files:
+
+9b39e4e4fad09cfe9eff974f3d5a01ea  Mail-SpamAssassin-3.3.0-beta1.tar.bz2
+530fb1bd28977271f30b348bc2b68db1  Mail-SpamAssassin-3.3.0-beta1.tar.gz
+637f6495b28e9ab9580206ee344a2074  Mail-SpamAssassin-3.3.0-beta1.zip
+cbd092c4e0e71b531f7aca81d4eb2781  Mail-SpamAssassin-rules-3.3.0-beta1.r886683.tgz
+
+sha1sum of archive files:
+
+b6aa2f21610e1de87bf21b629b98df9bddfa0988  Mail-SpamAssassin-3.3.0-beta1.tar.bz2
+6750417097ce289a5b295c75bfc20a877bea87e6  Mail-SpamAssassin-3.3.0-beta1.tar.gz
+95a54095f6e201a1b582f3715c81c9485aab5325  Mail-SpamAssassin-3.3.0-beta1.zip
+3e2b23828dd3a7575ced80b2d6571995aebd7299  Mail-SpamAssassin-rules-3.3.0-beta1.r886683.tgz
+
+Note that the *-rules-*.tgz files are only necessary if you cannot, or do not
+wish to, run "sa-update" after install to download the latest fresh rules.
+
+The release files also have a .asc accompanying them.  The file serves
+as an external GPG signature for the given release file.  The signing
+key is available via the wwwkeys.pgp.net key server, as well as
+http://www.apache.org/dist/spamassassin/KEYS
+
+The key information is:
+
+pub   4096R/F7D39814 2009-12-02
+      Key fingerprint = D809 9BC7 9E17 D7E4 9BC2  1E31 FDE5 2F40 F7D3 9814
+uid                  SpamAssassin Project Management Committee <private@spamassassin.apache.org>
+uid                  SpamAssassin Signing Key (Code Signing Key, replacement for 1024D/265FA05B) <dev@spamassassin.apache.org>
+sub   4096R/7B3265A5 2009-12-02
+
+See the INSTALL and UPGRADE files in the distribution for important
+installation notes.
+
+
+Summary of major changes since 3.2.5
+------------------------------------
+
+COMPATIBILITY WITH 3.2.5
+
+- rules are no longer distributed with the package, but installed by
+  sa-update - either automatically fetched from the network (preferably),
+  or from a tar archive, which is available for downloading separately
+
+- CPAN module requirements:
+  - minimum required version of ExtUtils::MakeMaker is 6.17
+  - modules now required: Time::HiRes, NetAddr::IP, Archive::Tar
+  - minimal version of Mail::DKIM is 0.31 (preferred: 0.37 or later);
+    expect some tests in t/dkim2.t to fail with versions older than 0.36_5;
+  - no longer used: Mail::DomainKeys, Mail::SPF::Query
+  - if module Digest::SHA is not available, a module Digest::SHA1
+    will be used, but at least one of them must be installed;
+    a DKIM plugin requires Digest::SHA (the older Digest::SHA1 does not
+    support sha256 hashes), so in practice the Digest::SHA is required
+
+- if keeping AWL database in SQL, the field awl.ip must be extended to
+  40 characters. The change is necessary to allow AWL to keep track of IPv6
+  addresses which may appear in a mail header even on non-IPv6 -enabled host.
+  While at it, consider also adding a field 'signedby' to the SQL table 'awl'
+  (and adding 'auto_whitelist_distinguish_signed 1' to local.cf);
+  See sql/README.awl for details. The change need not be undone even if
+  downgrading back to 3.2.* for some reason;
+
+- fixing a protocol implementation error regarding a PING command required
+  bumping up the SPAMC protocol version to 1.5.  Spamd retains compatibility
+  with older spamc clients. Combining new spamc clients with pre-3.3 versions
+  of a spamd daemon is not supported (but happens to work, except for the
+  PING and SKIP commands).
+
+- it may be worth mentioning that a rule DKIM_VERIFIED has been renamed
+  to DKIM_VALID, to match its semantics;
+
+- support for versions of perl 5.6.* is being gradually revoked
+  (may still work, but no promises and no support)
+
+- preferred versions of perl are 5.8.8, 5.8.9, and 5.10.1 or later
+
+
+MAIN NEW FEATURES
+
+- IPv6 support was substantially improved (see below);
+
+- many improvements to the DKIM plugin (understands author domain signatures,
+  supports multiple signatures, ADSP support with overrides) - (see below);
+
+- added 'if can(Class::method)' conditional statement, allowing configuration
+  settings to be conditionalised on plugin capabilities without requiring
+  new version releases to do so;
+
+- added a configuration option 'time_limit', defaulting to 300 seconds
+  or whatever the caller (like spamd) provides; attempting to gracefully
+  terminate the checking when a time limit is reached, reporting the score
+  and test hits that were collected so far, along with an added hit on
+  a rule TIME_LIMIT_EXCEEDED;
+
+- more expensive code sections are now instrumented with timing measurements;
+  timing report is logged as a debug message by the end of processing,
+  and made available to a caller and to 'add_header' directives through
+  a TIMING tag;
+
+- added a configuration option skip_uribl_checks to the URIDNSBL plugin,
+  cross-document it with skip_rbl_checks;
+
+- preserve order of declared 'add_header' header fields;
+
+- configurable network mask length for the AWL plugin (see below);
+
+- added support for DCC reputations (see below);
+
+- improved error handling and robustness (see below);
+
+- added timestamps when logging on stderr;
+
+- allowed debug areas to be excluded from debugging,
+  e.g.: -D all,norules,noconfig,nodcc
+
+
+BUILDING AND PACKAGING
+
+- rules are no longer distributed with the package, but installed by
+  sa-update
+
+- Makefile.PL has been simplified and a bug fixed in a DESTDIR support
+  by increasing the minimum required version of ExtUtils::MakeMaker to 6.17
+
+- tools check_whitelist and check_spamd are now included in the distribution,
+  now called 'sa-awl' and 'sa-check_spamd'
+
+
+WORKAROUNDS TO PERL BUGS AND LIMITATIONS
+
+- modified the Check.pm plugin to produce smaller chunks of source code
+  from rules (60 kB) to avoid Perl compiler crashing on exceeding stack size
+
+- localized global variables $1, $2, etc at several places, avoiding taint
+  issue from propagating
+
+- avoided Perl I/O bug by replacing line-by-line reading with read() where
+  suitable, or played down the EBADF status in other places and only report
+  it as a dbg instead of a die - while also providing a little speedup
+  (10 .. 25 %) on reading a message
+
+- provided a new sub Message::split_into_array_of_short_lines to split
+  a text into array of paragraph chunks of sizes between 1 kB and 2 kB,
+  giving less opportunity to runaway regular expressions in rules;
+  fixes bugs: 5717, 5644, 5795, 5486, 5801, 5041
+
+
+MEMORY FOOTPRINT
+
+- as a side-effect of compiling rules in smaller chunks (to avoid compiler
+  crashes), virtual memory footprint of SpamAssassin is reduced;
+
+- saved some memory by not importing the Pod::Usage unless it is needed;
+
+- saved 350k+ of memory in sa-compile by replacing DynaLoader with XSLoader;
+
+- removed unneeded index from MySQL bayes_token table;
+
+
+IPv6 SUPPORT
+
+- added IPv6 support for trusted_networks, internal_networks, msa_networks,
+  whitelist_from_rcvd, and other stuff that uses NetSet and the Received
+  header field parser, using NetAddr::IP;
+
+- allowed usage of a remote dccifd host through an INET or INET6 socket;
+
+- added IPv6 support to AWL plugin and its utility modules; a network
+  mask length is now configurable and defaults to /48, which controls
+  what data is stored in an AWL database;
+
+- sql/README.awl and sql/awl_*.sql: increased suggested awl.ip field width
+  to 40 characters to be able to hold IPv6 addresses;
+
+- IP_PRIVATE now includes ipv6 variants of private address space,
+  as well as the ipv6-mapped ipv4 addresses.
+
+- NetSet now understands that ::ffff:192.168.1.2 and 192.168.1.2 are
+  the same address;
+
+- IPv6 addresses are now recognised in Received header fields;
+
+- when reading Received header fields, the "IPv6:" prefix is stripped from
+  IPv6 addresses, and "::ffff:" is removed from IPv6-mapped IPv4 addresses
+  (so strings can match them as simply IPv4 addresses);
+
+- ::1/128 is always included in the trusted_networks/internal_networks set
+  similar to 127.0.0.0/8;
+
+- some of the IPv6 functionality in SpamAssassin requires that a perl module
+  IO::Socket::INET6 is available (like accessing a DNS resolver over inet6,
+  talking to a dccifd host over inet6 socket, SPAMC protocol);
+
+
+SPAMC
+
+- Mail::SpamAssasin::Client ping may erroneously result in broken pipe;
+  bump spamc protocol version to 1.5, updated spamd, spamc and Client.pm;
+
+- added -n / --connect-timeout switch to spamc, allowing separate
+  connection timeout from communication timeout;
+
+- added --filter-retries and --filter-retry-sleep
+
+- spamc would not time out connections to a hung spamd, fixed
+
+- spamc client library leaked the zlib compression buffer if compression
+  is used
+
+- spamc long option '--dest' was broken
+
+
+SPAMD
+
+- when spamd is started with the daemonize option do not exit the parent
+  until a child signals that it has logged the pid, to allow a wrapper
+  script to simply continue immediately after starting spamd;
+
+- additional tempfile cleanup in kill_handler;
+
+- added SPAMD_LOCALHOST option to "make test" to allow specifying
+  non-127.0.0.1 IP address for use in FreeBSD jail
+
+
+API
+
+- adding one optional argument to Mail::SpamAssassin::parse allows caller
+  to pass additional out-of-band information to SpamAssassin (such as a
+  deadline time, DKIM verification results, information about a SMTP session,
+  or dynamic rule hits); this information is made available to plugins and
+  the rest of the code through a 'suppl_attrib' hash;
+
+- Plugin::Check - pick up 'rule_hits' from caller via the new mechanism
+  and call got_hit() on them;
+
+- simplified adding dynamic score hits and dynamic rules by plugins
+  (such as AWL, CRM114, FuzzyOcr, Check) by letting got_hit() accept
+  options tflags and description, and letting it store a supplied
+  dynamic score for proper reporting;
+
+- let the timing breakdown information be accessible to a caller through
+  the existing get_tag mechanism (tag TIMING);
+
+- let the generated header fields ('add_header' configuration options)
+  be accessible to a caller through the existing get_tag mechanism
+  (tags ADDEDHEADER, ADDEDHEADERHAM, ADDEDHEADERSPAM);
+
+
+RULES
+
+- rules are no longer distributed with the package;
+
+- new scores have been generated by a GA algorithm and then manually tweaked,
+  based on cleaned datasets supplied by a dozen of volunteers;
+
+- dropped redundant rules or rules causing too many false positives;
+
+- added or updated many rules; incomplete list in no particular order:
+  vbounce, lotsa_money, muchmoney, image spam, fill_this_form, FreeMail,
+  European Parliament, HTML attachments, uri_obfu*, urinsrhsbl, urinsrhssub,
+  urifullnsrhsbl, URI_OBFU_X9_WS, rDNS=localhost, INVALID_DATE_TZ_ABSURD,
+  KHOP_SC, RCVD_IN_PSBL, FRT_VALIUM*, BOUNCE_MESSAGE, VBOUNCE_MESSAGE,
+  __BOUNCE_UNDELIVERABLE, HELO_STATIC_HOST, FILL_THIS_FORM_FRAUD_PHISH,
+  CHALLENGE_RESPONSE, DKIM_VALID, DKIM_VALID_AU, DKIM_ADSP_*,
+  NML_ADSP_CUSTOM_{LOW,MED,HIGH}, __VIA_ML, MIME_BASE64_TEXT, LOTTO_URI,
+  FORGED_MUA_THEBAT_BOUN, FORGED_MUA_THEBAT_CS, UNRESOLVED_TEMPLATE,
+  __THEBAT_MUA, __ANY_OUTLOOK_MUA, RP_MATCHES_RCVD, one-word X-Mailer,
+  advance_fee update, tweak SPAN rules, tweak skype and misquoted-HTML rules,
+  added some new HTML obfuscation and Google feedproxy URI rules, 
+  tweak reevolved advance fee second-order metarules,
+  added a test rule for postmaster+abuse missing, FROM_MISSPACED, 
+  fix FROM_CONTAINS_TAB, added Facebook redirector pattern,
+  avoided ISO-2022-JP FPs on TVD_SPACE_RATIO, GAPPY_SUBJECT, PLING_QUERY
+  and FM_FRM_RN_L_BRACK rules, FP fix for one-word mails on TVD_SPACE_RATIO,
+  RATWARE_BOUNDARY plus variant, supersede all previous RATWARE_OUTLOOK
+  stuff, added exclusion for __ISO_2022_JP_DELIM to OBFUSCATING_COMMENT,
+  FP in obfuscated URI rule, fixed breakage in tbird image rule, fixed
+  SUBJECT_FUZZY_MEDS FP on unobfuscated "meds", added misspaced From header
+  field rule, numeric+cctld URI rule, ...
+
+- added PSBL blacklist - http://psbl.surriel.com/
+
+- added support for http://www.spamhaus.org/css/
+
+- added rule for plain text attachments with octet-stream MIME type;
+
+- avoided false positives on ISO-2022-JP messages in several rules;
+
+- removed massmailers from uridnsbl_skip_domain in 25_uribl.cf;
+
+- updated various default whitelists, uridnsbl_skip_domain, adsp_override, ...
+
+
+PLUGINS
+
+- new plugins: FreeMail, PhishTag, Reuse
+  
+- now enabled by default: DKIM
+
+- now disabled by default: AWL
+
+- retired plugin: DomainKeys
+
+
+AWL PLUGIN
+
+- plugin AWL is now disabled by default;
+
+- added new configuration options auto_whitelist_ipv4_mask_len and
+  auto_whitelist_ipv6_mask_len to allow more control on what part of
+  an IP address is stored into an AWL database;
+
+- README.awl: increased a suggested awl.ip field width to 40 characters
+  to support IPv6 addresses;
+
+- AutoWhitelist.pm: allowed storing a canonicalized IPv6 address, cropped
+  to a configurable network mask (previously causing SQL server errors:
+  'value too long')
+
+- let AWL with SQL keep separate records for DKIM-signed and unsigned mail
+  (when auto_whitelist_distinguish_signed configuration option is true,
+  and a field awl.signedby exists);
+
+- avoided a race condition in SQLBasedAddrList.pm when multiple processes
+  try to insert-or-update an awl SQL record: trying INSERT first, and if
+  that fails go for UPDATE;
+
+- gracefully handle NaN from corrupted database or a broken emulator or
+  virtualizer;
+
+
+DCC PLUGIN
+
+- added support for DCC reputations, added setting dcc_rep_percent,
+  new test check_dcc_reputation_range(), new tag DCCREP
+  (DCC servers supply reputation data only to licensed clients);
+
+- allowed usage of a remote dccifd host through an INET or INET6 socket;
+
+
+DKIM PLUGIN
+
+- the plugin is now enabled by default;
+
+- absolute minimal version of Mail::DKIM is 0.31;
+  support for ADSP requires Mail::DKIM 0.34;
+  a DNS test (and rule) for NXDOMAIN is operational since Mail::DKIM 0.36_5
+
+- a perl module Digest::SHA is required if the DKIM plugin is enabled
+  (if a perl module Digest::SHA is available, the module Digest::SHA1
+  becomes optional as far as SpamAssassin is concerned (but is still
+  needed by Razor agents));
+
+- added support for multiple signatures (useful for whitelisting);
+
+- plugin now distinguishes author domain signatures from third party
+  signatures (useful for whitelisting);
+
+- provides a tag DKIMIDENTITY (in addition to DKIMDOMAIN);
+
+- DKIM now supports Author Domain Signing Practices - ADSP (RFC 5617);
+
+- use the Mail::DKIM::AuthorDomainPolicy instead of Mail::DKIM::DkimPolicy,
+  when available (since Mail::DKIM 0.34);
+
+- implements an 'adsp_override' configuration directive and adds
+  an eval:check_dkim_adsp check, which is used by new DKIM_ADSP_* rules;
+
+- rules contain an initial set of 'adsp_override' directives, listing
+  some of the more popular target domains for phishing (applicable only to
+  domains which sign all their direct mail with a DKIM or DK signature);
+
+- this plugin can now re-use Mail::DKIM verification results if made
+  available by a caller, which saves resources and makes it possible
+  for SpamAssassin to work on a truncated large mail without breaking
+  DKIM signatures;
+
+- check_dkim_signed and check_dkim_adsp eval rules can now take an optional
+  list of domain names, which limits their action to listed domains only.
+  It facilitates building DKIM-based rules for specific domains, without
+  having to resort to meta rules;
+
+- draft-ietf-dkim-ssp-10/RFC-5617 made Author Domain Signature based on 'd':
+  updated ADSP code accordingly; changed whitelisting code to be based on
+  SDID ('d') instead of AUID ('i');
+
+- Plugin/DKIM.pm: terminology changes in comments and logging according
+  to RFC 5617 and draft-ietf-dkim-rfc4871-errata-07;
+
+
+BUG FIXES
+
+- fixed Rule2XSBody segfaults;
+
+- no longer treat user data as perl booleans (a string "0" is a false);
+
+- avoid data from the wild be interpreted as perl regular expressions;
+
+- ArchiveIterator: prevent _scan_directory from passing directories
+  to _scan_file (on NFS it would fail with EISDIR on read(2);
+
+- fixed vpopmail support;
+
+- fixed incorrect mode bits when creating lock files for AWL;
+
+- fixed some cases where :addr headers were parsed incorrectly;
+
+- fixed leakage of 'whitelist_from_rcvd' entries between spamd users;
+
+- fixing run_and_catch, which failed to catch a non-timed run;
+
+- 127/8 isn't an illegal IP;
+
+- reworked the M::S::Timeout module to deal with nested timers as one would
+  expect: an inner timer shouldn't be able to extend an outer timer's limit;
+  account for time elapsed in the submitted subroutine when restarting an
+  outer timer; reset() should have accounted for time already spent;
+
+- the 'exists:' evaluator in HEADER rules now works as documented
+  and tests for existence of a header field, instead of testing for
+  a header field body being nonempty; internally, the pms->get can
+  also now distinguish between empty and nonexistent header fields;
+
+- applied fixes to header fields parsing in several places: header field
+  names are case-insensitive, whitespace is not required after a colon,
+  obsolete rfc822 syntax allowed whitespace before a colon;
+  VBounce: match "Received:" only at the beginning of a line;
+
+- fixed bug 6237: 2.0.0.0/8 is now an allocated address range,
+  fixed RCVD_ILLEGAL_IP with IP 2.0.0.0/8 (and 223.0.0.0/8);
+
+- fixed bug 6205 comment 5 in URIDetail.pm;
+
+- 'pyzor_options' in Plugin/Pyzor.pm was not untainted;
+
+- URIDetail plugin was not taint safe, fixed;
+
+- fixed parsing of multi-line Received header fields for
+  BOUNCE_MESSAGE/VBOUNCE_MESSAGE et al;
+
+- Bug 6206, Bug 2536: spamd: untaint directory as obtained from a password
+  file or from vpopmail utilities, avoid implicit untainting; report error
+  if user preferences file exists but cannot be accessed;
+
+- avoid using raw data from DNS as a regexp in Plugin/ASN.pm;
+
+- ensured the dbg() and info() calls always return the same value (true)
+  regardless of log level;
+
+- suppress logging of $& when its value is not available (i.e. when
+  no regexp has been evaluated during rule evaluation);
+
+- Exporter never really worked in SA, was not enclosed in BEGIN {};
+
+- masses/runGA and masses/mk-baseline-results: prevent a shell 'source'
+  command from loading an unrelated file named 'config' which happens to be
+  in the current PATH - must use a ./ in an arg to a 'source' command;
+
+
+ERROR HANDLING, ROBUSTNESS
+
+- improved error detection and reporting: test status of all system calls
+  and I/O operations (or explicitly document where not), and report
+  unexpected failures;
+
+- eval calls now check for eval result instead of testing the $@, which
+  is not always reliable;
+
+- localized $@ and $! in DESTROY methods to prevent potential calls to eval
+  and calls to system routines in code executed from a DESTROY method
+  from clobbering global variables $@ and $!;
+
+- Util::helper_app_pipe_open_unix: contain a failing exec with an eval
+  to prevent additional cases of process cloning. The exec could fail
+  this way when given tainted arguments;
+
+- Util::helper_app_pipe_open_unix: flush stdout and stderr before forking,
+  otherwise an error reported by exec (such as 'insecure dependency')
+  was lost in a buffer;
+
+- eval-protected an open($fh,'-|') to capture implied fork failures
+  due to lack of system resource;
+
+- explicit untainting: combine "use re 'taint'" with untaint_var(),
+  avoiding implicit perl untainting, along with workarounds to prevent it;
+
+- added 'use strict' where missing;
+
+- avoided a bunch of warnings on "Use of uninitialized value"
+
+- clearly report reasons for helper application process failures
+
+- t/SATest.pm: provide information about the process failure reason
+  if a system() call fails;  improved its reporting of failures;
+
+- improved error reporting in Plugin/DCC.pm on finding a DCC home directory
+  to facilitate troubleshooting;
+
+
+OTHER CHANGES
+
+- pseudoheader "ALL:raw" returns a pristine header section,
+  and pseudoheader "ALL" returns a cleaned header section
+
+- total rewrite of URI detection in plain text body;
+
+- many updates to the list of top level domains;
+
+- added 'util_rb_3tld', allowing 3-level TLDs to be listed in URIBLs and
+  allowing new 3TLDs to be added from rule updates;
+
+- avoided trusted_networks bog down due to O(n^2) loop with millions
+  of entries;
+
+- applied fixes to Plugin/VBounce.pm, updated VBounce ruleset;
+
+- added support for a 'Communigate Pro' Received header field;
+
+- parse Communigate Pro "with HTTPU" auth token;
+
+- provided a workaround for Net::DNS::Packet::new inconsistency;
+
+- let SpamAssassin use either Digest::SHA or Digest::SHA1, whichever is
+  available (the Digest::SHA is now a base module since perl 5.10.0);
+
+- improved parsing of eval-type rules: allow unquoted domain names,
+  disallow unmatched quotes;
+
+- provided a new module Mail::SpamAssassin::BayesStore::BDB. It should be
+  treated as alpha-quality (needs more testing) and is not yet ready for
+  production use;
+
+- exposed existing function 'received_within_months' as an eval function
+  in Plugin/HeaderEval.pm;
+
+- use /var/lock/subsys/spamd instead of /var/lock/subsys/spamassassin for
+  rc script, so that 'service spamd status' will work;
+
+- re-download MIRRRORED.BY files at least once a week, or if
+  'sa-update --refreshmirrors' switch is used;
+
+- input delimiter $/ can be corrupted by a plugin, localize $/ and $\ before
+  calling a plugin;
+
+- takes almost a minute to start spamd on a slow machine, bumped up the
+  retry counter to 90 seconds;
+
+- resolved Bug 5325: syslog severity level in spamc/libspamc.c for max
+  message size (changed LOG_ERR into LOG_NOTICE for the message:
+  "skipped message, greater than max message size");
+
+- avoid taint warnings if hostname is returned as '(none)';
+
+- produce an error message if an sa-update channel doesn't exist;
+
+- Bug 6150, Bug 6127, Bug 5981, Bug 5950, Bug 6191: let spamd log/report
+  a child process exit status or aborting condition in an informative way;
+
+- detect accidental match-everything regexps in rules;
+
+- updated garescorer for 3.3.0: use more epochs in GA runs for better scores;
+  clarify some mass-check warning output, ensure rule name always appears at
+  start of line; if a rule had no default/existing score in 50_scores.cf,
+  don't tell the GA that 1.0 is an appropriate default value, instead pick
+  the midway point of its score range. this produces better results;
+  remove some dead code from masses/score-ranges-from-freqs;
+
+- report performance as iterations per second in garescorer.c;
+
+- added test to ensure that all config settings are correctly handled when
+  switching between users; added more config setting type metadata to enable
+  those tests to work; and fix URIDetail to store config on the {conf} object,
+  not on the plugin;
+
+- moved 'release tests' to xt/ directory; mirror long-running, net-tests and
+  stress tests with xt/50_testname.t scripts to enforce their run before a
+  release;
+
+- numerous additional and updated self-tests;
+
+- added a Test::Perl::Critic release-test;
+
+- some code cleanups based on suggestions by a perl module Test::Perl::Critic,
+  among others:
+  . enable TestingAndDebugging::ProhibitNoStrict test but allow the
+    use of 'no strict "refs"';
+  . deal with BuiltinFunctions::RequireGlobFunction;
+  . deal with ControlStructures::ProhibitMutatingListFunctions
+    removing this exception from xt/60_perlcritic.t;
+  . deal with BayesStore/BDB.pm, Variables::ProhibitConditionalDeclarations
+  . now that the module Time::HiRes is a required module, we can afford
+    to replace a select() with Time::HiRes::sleep, and remove exception
+    BuiltinFunctions::ProhibitSleepViaSelect from xt/60_perlcritic.t
+
+- documentation was updated, fixing numerous typos and mistakes in
+  documentation text and in log messages;
+
+- extensive improvements to development process:
+  automated testing through Hudson, improvements to mass-check and rules

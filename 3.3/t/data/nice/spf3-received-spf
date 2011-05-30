@@ -1,0 +1,32 @@
+Return-Path: <newsalerts-noreply@dnsbltest.spamassassin.org>
+X-Comment: Yeah, the Received-SPF headers make no sense, there just there to test that the SPF plugin will parse the results from them... the IPs and comments are bogus
+Received: from dnsbltest.spamassassin.org (dnsbltest.spamassassin.org [65.214.43.158]) by dnsbltest.spamassassin.org (Postfix) with SMTP id B9B2931016D for <jm-google-news-alerts@jmason.org>; Tue, 10 Feb 2004 18:18:49 +0000 (GMT)
+Received: from dnsbltest.spamassassin.org (dnsbltest.spamassassin.org [64.142.3.173]) by dnsbltest.spamassassin.org (Postfix) with SMTP id B9B2931016D for <jm-google-news-alerts@jmason.org>; Tue, 10 Feb 2004 18:18:49 +0000 (GMT)
+Received-SPF: fail (dostech.ca: 69.61.78.188 is authorized to use 'spamassassin@dostech.ca' in 'mfrom' identity (mechanism 'mx' matched)) receiver=FC5-VPC; identity=mfrom; envelope-from="spamassassin@dostech.ca"; helo=smtp.dostech.net; client-ip=69.61.78.188
+Received-SPF: softfail (dostech.ca: 69.61.78.188 is authorized to use 'dostech.ca' in 'helo' identity (mechanism 'mx' matched)) receiver=FC5-VPC; identity=helo; helo=dostech.ca; client-ip=69.61.78.188
+Received-SPF: neutral (herse.apache.org: domain of spamassassin@dostech.ca designates 69.61.78.188 as permitted sender)
+Received: from dnsbltest.spamassassin.org (dnsbltest.spamassassin.org [65.214.43.155]) by dnsbltest.spamassassin.org (Postfix) with SMTP id B9B2931016D for <jm-google-news-alerts@jmason.org>; Tue, 10 Feb 2004 18:18:49 +0000 (GMT)
+Received: from dnsbltest.spamassassin.org (dnsbltest.spamassassin.org [65.214.43.156]) by dnsbltest.spamassassin.org (Postfix) with SMTP id B9B2931016D for <jm-google-news-alerts@jmason.org>; Tue, 10 Feb 2004 18:18:49 +0000 (GMT)
+Received: from dnsbltest.spamassassin.org (dnsbltest.spamassassin.org [65.214.43.157]) by amgod.boxhost.net (Postfix) with SMTP id B9B2931016D for <jm-google-news-alerts@jmason.org>; Tue, 10 Feb 2004 18:18:49 +0000 (GMT)
+Received: by proxy.google.com with SMTP id so1951389 for <jm-google-news-alerts@jmason.org>; Tue, 10 Feb 2004 10:14:01 -0800 (PST)
+Received: by abbulk2 with SMTP id mr733125; Tue, 10 Feb 2004 10:14:01 -0800 (PST)
+Message-ID: <1076436841.67074.8fa05ccdc458abe5.1446041b@persist.google.com>
+Date: Tue, 10 Feb 2004 10:14:01 -0800 (PST)
+From: newsalerts-noreply@dnsbltest.spamassassin.org
+To: jm-google-news-alerts@jmason.org
+Subject: Google News Alert - spamassassin
+MIME-Version: 1.0
+Content-Type: text/plain; charset="ISO-8859-1";
+
+SWSOFT Unveils Plesk 7, Deployed by 1&1
+Web Host Industry Review - USA
+... The software also features a newly designed Windows XP-like user interface,
+is equipped SpamAssassin, an open source anti-spam tool, and includes
+"Application ...
+<http://thewhir.com/marketwatch/sws021004.cfm>
+See all stories on this topic:
+<http://news.google.com/news?hl=en&lr=&ie=UTF-8&oe=utf8&client=google&num=30&newsc
+lusterurl=http://thewhir.com/marketwatch/sws021004.cfm>
+
+"v=spf1 ip4:64.142.3.173 -ip4:65.214.43.155 ~ip4:65.214.43.156 ?ip4:65.214.43.157 -all"
+

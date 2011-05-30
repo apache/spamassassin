@@ -1,0 +1,34 @@
+#!/usr/bin/perl
+
+my $args = join (' ',@ARGV);
+my $ss = 0;
+my $sh = 0;
+my $hs = 0;
+my $hh = 0;
+
+while (<STDIN>) {
+  my ($overall, $spam, $ham, $so, $rank, $score, $name) = split;
+  next if (!defined $name);
+  next if ($name !~ /BAYES_(\d+)/);
+  my $brange = $1;
+
+  if ($score < 0) {
+    $sh += $spam;
+    $hh += $ham;
+  } elsif ($score == 0) {
+    next;		# ignore
+  } else {
+    $ss += $spam;
+    $hs += $ham;
+  }
+}
+
+$ss *= 10000;	# promote to integers
+$sh *= 10000;
+$hs *= 10000;
+$hh *= 10000;
+
+$cmd = "./fp-fn-to-tcr $args -spam $ss -ham $hh -fn $sh -fp $hs";
+print "TCR for bayes:\n[$cmd]\n";
+system $cmd;
+

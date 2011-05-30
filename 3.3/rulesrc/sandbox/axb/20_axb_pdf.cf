@@ -1,0 +1,15 @@
+ifplugin Mail::SpamAssassin::Plugin::PDFInfo
+
+
+# 8/23/2009
+body            AXB_PDF_FUZZY1_OEM1             eval:pdf_match_fuzzy_md5('2BDA96267AD8ED27FD583669CC76C4F7')
+describe        AXB_PDF_FUZZY1_OEM1             Fuzzy MD5 Match 2BDA96267AD8ED27FD583669CC76C4F7
+score           AXB_PDF_FUZZY1_OEM1             5.0
+
+# 8/24/2009
+body            AXB_PDF_FUZZY1_OEM2             eval:pdf_match_fuzzy_md5('CE46CE748DD314A742F7AEA05575F379')
+describe        AXB_PDF_FUZZY1_OEM2             Fuzzy MD5 Match CE46CE748DD314A742F7AEA05575F379
+score           AXB_PDF_FUZZY1_OEM2             5.0
+
+
+endif

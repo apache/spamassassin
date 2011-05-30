@@ -1,0 +1,32 @@
+#!/bin/sh
+
+echo "Using ssh-nightly-slave settings from $HOME/.corpus"
+. $HOME/.corpus
+
+host=`echo "$1" | perl -ne 's/:-j(\S+)$//;print'`
+[ "$clienttree" = "" ] && clienttree=tree
+
+set -x
+
+# a rather rough-and-ready way to ensure any hangover mass-checks
+# from the previous set are killed, before we start these ones
+ssh $host \
+    pkill -15 -f perl
+
+# and clean out the client-side caches of old cached mail
+ssh $host \
+    find $clienttree/cs_cache/. -type f -mtime +180 -print > o
+if [ -s o ] ; then
+  ssh $host xargs rm < o
+else
+  true
+fi
+
+ssh $host \
+    find $clienttree/cs_cache/. -depth -type d -empty -print > o
+if [ -s o ] ; then
+  ssh $host xargs rmdir < o
+else
+  true
+fi
+

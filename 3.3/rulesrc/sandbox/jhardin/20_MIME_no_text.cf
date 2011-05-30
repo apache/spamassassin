@@ -1,0 +1,21 @@
+
+# John Hardin <jhardin@impsec.org>
+# Spams without a text body part first started appearing in 5/2009
+
+# These should be generally useful to other rules as well
+header  __CTYPE_MULTIPART_MXD Content-Type =~ /multipart\/mixed/i
+header  __CTYPE_MULTIPART_ANY Content-Type =~ /multipart\/\w+/i
+header  __XM_PHP  X-Mailer =~ /^PHP\s?v?\/?\d\./
+
+ifplugin Mail::SpamAssassin::Plugin::MIMEHeader
+  mimeheader  __ANY_TEXT_ATTACH Content-Type =~ /text\/\w+/i
+
+  meta        MIME_NO_TEXT  (__CTYPE_MULTIPART_ANY && !__ANY_TEXT_ATTACH)
+  score       MIME_NO_TEXT  1.00
+  describe    MIME_NO_TEXT  No text body parts
+
+  meta        MIME_PHP_NO_TEXT  (MIME_NO_TEXT && __XM_PHP)
+  score       MIME_PHP_NO_TEXT  2.00
+  describe    MIME_PHP_NO_TEXT  No text body parts, X-Mailer: PHP
+endif
+

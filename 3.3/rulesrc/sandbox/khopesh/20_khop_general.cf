@@ -1,0 +1,92 @@
+# From Adam Katz (khopesh) testing grounds and live channels
+# http://khopesh.com/Anti-spam
+
+### select rules from khop-general
+
+# Now looks for two DIFFERENT IPs, be they HELO or rDNS or real IP.  20091008
+# This does NOT hit assumed HELOs like Received: [10.2.3.4] (foo [1.2.3.4])
+# Note \n is needed: https://issues.apache.org/SpamAssassin/show_bug.cgi?id=6224
+header	 __TWO_IPS_RCVD	Received =~ /[\[\(\s]((?!(?:10|127|169\.254|172\.(?:1[6-9]|2[0-9]|3[01])|192\.168)\.)(?:[12]?\d\d?\.){3}[12]?\d\d?)[\[\(\s][^\[\n;,]{0,99}\[(?!\1)\d/
+meta	 TWO_IPS_RCVD	__TWO_IPS_RCVD && !ALL_TRUSTED
+describe TWO_IPS_RCVD	Received: Relay identifies itself as wrong IP
+#score	 1.25	# 20050729
+# 100% overlap with RCVD_NUMERIC_HELO ...
+
+# Sendmail's FCrDNS, see http://www.sendmail.org/faq/section3#3.38
+header __MAY_BE_FORGED	Received =~ /\(may be forged\)/
+meta	 MAY_BE_FORGED	__LAST_EXTERNAL_RELAY_NO_AUTH && __MAY_BE_FORGED && !__NOT_SPOOFED
+describe MAY_BE_FORGED	Relay IP's reverse DNS does not resolve to IP
+#score	 MAY_BE_FORGED	0.8 # 20050802, raised 0.15->0.8 20090603
+
+# Note: unfair regarding RFC 2821, see http://en.wikipedia.org/wiki/FCrDNS#Uses
+header __HELO_NOT_RDNS	X-Spam-Relays-External =~ /^[^\]]+ rdns=(\S+) helo=(?!\1)\S/
+meta	 KHOP_HELO_FCRDNS	__HELO_NOT_RDNS && !(__VIA_ML || __freemail_safe || __RCVD_IN_DNSWL || __NOT_SPOOFED)
+describe KHOP_HELO_FCRDNS	Relay HELO differs from its IP's reverse DNS
+#score	 KHOP_HELO_FCRDNS	0.4 # 20090603, currently scoring 0.001
+score	 KHOP_HELO_FCRDNS	0.001
+
+meta     HELO_NO_DOMAIN	__HELO_NO_DOMAIN && !HELO_LOCALHOST
+describe HELO_NO_DOMAIN	Relay reports its domain incorrectly
+#score	 HELO_NO_DOMAIN	2.375 0.327 1.497 0.884
+# scores derived from 90% of RDNS_DYNAMIC's sa3.3 proposal (attachment 4565)
+# because they have such similar definitions, numbers, and merits
+
+# This doesn't fire often after greylisting ... how about w/out it?
+# renamed from KHOP_NO_FQDN
+meta	 KHOP_HELO_BOT	__HELO_NO_DOMAIN && KHOP_BOTNET_2
+describe KHOP_HELO_BOT	Suspect botnet sender claims no domain name
+tflags   KHOP_HELO_BOT	nopublish
+#score	 KHOP_HELO_BOT	0.5	# 20090603
+
+header __NAME_IS_EMAIL	From:raw =~ /\w\@[\w.-]+\.\w\w+["'`]*\s*<\w+\@\w/
+header __NAME_EQ_EMAIL	From:raw =~ /([\w+.-]+\@[\w.-]+\.\w\w+)["'`\s]*<\s*\1>/
+meta	 NAME_EMAIL_DIFF	__NAME_IS_EMAIL && ! __NAME_EQ_EMAIL
+describe NAME_EMAIL_DIFF	Sender NAME is an unrelated email address
+#score	 NAME_EMAIL_DIFF	0.375 # tot=0.5, low for noreply@dom  20090811
+
+header	 ADV_SUBJ	Subject =~ /\[ ?(?:ADV|A D V) ?\]/i
+describe ADV_SUBJ	Marked by sender as an advertisement
+tflags	 ADV_SUBJ	nopublish
+#score	 ADV_SUBJ 1.5 # 20090304
+
+body	 DEAR_EMAIL	/^\s*Dear\b.{0,70}\w\@\w/i
+describe DEAR_EMAIL	Message contains Dear email address
+#score	 DEAR_EMAIL	0.5 # 20090424
+
+body	 DEAR_NOBODY	/^\s*Dear\b[^a-zA-Z]{0,70}$/i
+describe DEAR_NOBODY	Message contains Dear but with no name
+#score	 DEAR_NOBODY	1.25	# 20090408
+
+# uri_detail lacks support for carrying matches across consecutive regexps
+#uri_detail SPOOFED_URL	raw =~ /^https?:..(.{6,50})/ text =~ /\bhttps?:..(?!$1).{5}/
+# reduced to 30 chars (35 w/ http:) for URL wrapping, e.g. LeadLander wraps @35
+rawbody  __SPOOFED_URL	m/<a\s[^>]{0,99}\bhref=(?:3D)?.?(https?:[^>"' ]{8,30})[^>]{0,99}>(?:[^<]{0,99}<(?!\/a)[^>]{1,99}>)*(?!\1)https?:\/\/[^<]{5}/i
+meta	 SPOOFED_URL	__SPOOFED_URL && !(__VIA_ML || __SENDER_BOT || __YAHOO_BULK || __UNSUB_LINK || __THREADED)
+describe SPOOFED_URL	Has a link whose text is a different URL
+#score	 SPOOFED_URL	2.0	# 20090408, beware of 'legit' tracking bugs
+
+uri	 __FORGED_URL_DOM_1	m'https?://[^/]{0,40}\.(?:com|org|edu|net|gov|com?\.[a-z]{2})\.[^/]{5}'i
+body	 __FORGED_URL_DOM_2	m'(^|\W)https?://[\w.-]{0,40}\.(?:com|org|edu|net|gov|com?\.[a-z]{2})\.[^/]{5}'i
+meta	 FORGED_URL_DOM	__FORGED_URL_DOM_1 || __FORGED_URL_DOM_2
+describe FORGED_URL_DOM	Link domain has a TLD as a subdomain
+
+ifplugin Mail::SpamAssassin::Plugin::MIMEHeader # {
+
+  mimeheader DSCL4_PNG    Content-Type =~ /name\=\"DS[CL]\d{4,5}\.(?:png|PNG)\"/
+  describe   DSCL4_PNG		Digital camera filename is PNG
+  score      DSCL4_PNG		0.9 # 1.6->0.9 20091019 no recent hits
+
+  ifplugin Mail::SpamAssassin::Plugin::ImageInfo
+    # __JPEG_ATTACH is in sandbox/jhardin/20_tbird_image_spam.cf
+    # __GIF_ATTACH is in sandbox/felicity/70_other.cf
+    mimeheader	__PNG_ATTACH	Content-Type =~ /^image\/png\b/i
+    body	__GIF_EXISTS	eval:image_count('gif',1)
+    body	__PNG_EXISTS	eval:image_count('png',1)
+    body	__JPEG_EXISTS	eval:image_count('jpeg',1)
+
+    meta	IMAGE_MISMATCH	(__GIF_ATTACH && !__GIF_EXISTS) || (__PNG_ATTACH && !__PNG_EXISTS) || (__JPEG_ATTACH && !__JPEG_EXISTS)
+    describe	IMAGE_MISMATCH	Contains wrong image format for MIME header
+    #score	IMAGE_MISMATCH	1.0 # 20090610, proposed to sa-users @20090524
+  endif
+endif # }
+

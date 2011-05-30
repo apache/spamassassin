@@ -1,0 +1,66 @@
+#!/usr/bin/perl
+#
+
+# These types of tests will always be enabled in the "xt" test suite.
+my @enable_in_xt_test_suite = qw(
+
+  run_root_tests
+  run_long_tests
+  run_spamd_prefork_stress_test
+  run_net_tests
+  run_dcc_tests
+
+);
+
+my $template_redir = q{
+#!/usr/bin/perl
+  (-d "../t") and chdir "..";
+  system(<<SUDO>> "$^X", "<<ORIG_SCRIPT>>",
+        "--override", "<<CONDITION>>", "1", @ARGV);
+  ($? >> 8 == 0) or die "exec failed";
+  <<SUDO_CLEANUP>>
+
+};
+
+use File::Basename;
+
+my %enable_in_xt_test_suite;
+foreach my $c (@enable_in_xt_test_suite) { $enable_in_xt_test_suite{$c}++; }
+foreach my $f (<t/*.t>) {
+  open IN, "<$f" or warn "cannot open $f";
+  while (<IN>) {
+    /conf_bool\s*\(\s*['"](\S+)['"]\s*\)/ or next;
+    my $condition = $1;
+
+    if (!$enable_in_xt_test_suite{$condition}) {
+      print "$f: ignored, '$condition'\n";
+      next;
+    }
+
+    $new = basename $f;
+    my $new = "xt/50_$new";
+
+    my $sudo = '';
+    my $sudo_cleanup = '';
+    if ($condition eq 'run_root_tests') {
+      my @x = getpwuid($<); my $username = $x[0];
+      $sudo = '"sudo", ';
+      $sudo_cleanup = "system('sudo chown -R $username t/log');";
+    }
+
+    open (REDIR, ">$new") or die "cannot write to $new";
+
+    my $redir = $template_redir;
+    $redir =~ s/<<ORIG_SCRIPT>>/$f/gs;
+    $redir =~ s/<<CONDITION>>/$condition/gs;
+    $redir =~ s/<<SUDO>>/$sudo/gs;
+    $redir =~ s/<<SUDO_CLEANUP>>/$sudo_cleanup/gs;
+
+    print REDIR $redir;
+    close REDIR or die "cannot write to $new";
+    # print "$f: added as $new\n";
+
+    chmod 0755, $new or die "chmod $new failed";
+  }
+  close IN;
+}

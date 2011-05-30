@@ -1,0 +1,99 @@
+#!/bin/sh
+
+# settings are located in $HOME/.corpus
+
+echo "Using corpus-nightly settings from $HOME/.corpus at"
+date
+. /etc/profile
+. $HOME/.corpus
+
+# use $PERL from env if unset
+[ "x${PERL:-}" = x ] && PERL=perl
+export PERL
+
+set -x
+
+renice -n +10 -p $$
+
+set -e          # after renice, which typically fails
+
+# ensure we're running after 0900 UTC; complex due to daylight savings.
+# If we're running in the 08xx UTC hour-space, sleep for 1 hour; when
+# we wake, we will be in 09xx.
+(
+  TIME="%e,%U,%S"; TZ=UTC; export TIME TZ
+  if date | egrep '^... ... .. 08:'; then
+    date; echo "sleeping for 1 hour to compensate for DST"
+    sleep 3600 ; date 
+  fi
+)
+
+# day of week
+net=""
+if date | egrep '^Sat' || [ "$1" = "net" ]; then net="net-" ; fi
+
+# enter tree
+if [ -d $tree ] ; then 
+  cd $tree
+else
+  echo "$tree does not exist yet. you need to check it out first" 1>&2
+  exit 2
+fi
+
+# find current revision
+rm -f weekly-versions.txt nightly-versions.txt
+if ! wget --tries=120 --wait=30 \
+    http://rsync.spamassassin.org/weekly-versions.txt \
+    http://rsync.spamassassin.org/nightly-versions.txt
+then
+	echo "wget failed" 1>&2
+	exit 0
+fi
+
+if [ -n "$net" ]; then
+	revision=$(tail -1 weekly-versions.txt|awk '{print $2}')
+else
+	revision=$(tail -1 nightly-versions.txt|awk '{print $2}')
+fi
+
+# update
+# TODO: replace all this with rsync, it's much safer ;)
+set +e
+retry=0
+while true; do
+        rm -rf rules    # causing trouble for some reason
+        rm -rf rulesrc/sandbox
+
+	if svn update -r $revision < /dev/null && \
+            svn update -r $revision rulesrc < /dev/null
+        then
+		break;
+	fi
+
+        # if that failed, get aggressive about getting a full
+        # checkout, regardless of what may have been here already;
+        # delete most of the checkout to do so, and just use "svn co"
+        # instead of "svn up".
+
+        svnpath=`svn info .| grep -i ^URL: | cut -d ' ' -f 2`
+
+        rm -rf rules lib build rulesrc spamd spamc
+        svn cleanup < /dev/null
+        svn co --non-interactive $svnpath .
+
+        # just 10 times; our SVN repo shouldn't be *that* unreliable!
+	if [ $retry -eq 20 ]; then
+		echo "svn update/co failed" 1>&2
+		exit 1
+	fi
+
+	retry=$(( $retry + 1 ))
+
+        # longer and longer between retries
+	sleep `expr 20 '*' $retry`
+done
+set -e
+
+# once we have everything checked out, run "part 2"
+exec bash $tree/masses/rule-qa/corpus-nightly.post-svn
+

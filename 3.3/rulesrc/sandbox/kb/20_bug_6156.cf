@@ -1,0 +1,16 @@
+
+header   RCVD_IN_PSBL  eval:check_rbl('psbl-lastexternal', 'psbl.surriel.com.')
+describe RCVD_IN_PSBL  Received via a relay in PSBL
+tflags   RCVD_IN_PSBL  net
+# score    RCVD_IN_PSBL  0 1.00 0 1.00
+
+# RCVD_IN_PSBL_2WEEKS
+# This rule is only useful in masschecks to measure safety, because
+# PSBL times out addresses in 2 weeks testing older mail is not useful.
+# 0.46/month is roughly 2 weeks in an average month
+ifplugin Mail::SpamAssassin::Plugin::HeaderEval
+header __RCVD_IN_2WEEKS        eval:received_within_months('0', '0.46')
+describe __RCVD_IN_2WEEKS      Received: within the past 2 weeks
+meta RCVD_IN_PSBL_2WEEKS       RCVD_IN_PSBL && __RCVD_IN_2WEEKS
+tflags RCVD_IN_PSBL_2WEEKS     net nopublish
+endif

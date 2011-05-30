@@ -1,0 +1,176 @@
+
+Using SpamAssassin Auto-Whitelists With An SQL Database
+-------------------------------------------------------
+
+SpamAssassin can now load users' auto-whitelists from a SQL database.
+The most common use for a system like this would be for users to be
+able to have per user auto-whitelists on systems where users may not
+have a home directory to store the whitelist DB files.
+
+In order to activate the SQL based auto-whitelist you have to
+configure spamassassin and spamd to use a different whitelist factory.
+This is done with the auto_whitelist_factory config variable, like
+so:
+
+auto_whitelist_factory Mail::SpamAssassin::SQLBasedAddrList
+
+SpamAssassin will check the global configuration file (ie. any file
+matching /etc/mail/spamassassin/*.cf) for the following settings:
+
+user_awl_dsn                 DBI:driver:database:hostname[:port]
+user_awl_sql_username        dbusername
+user_awl_sql_password        dbpassword
+
+The first option, user_awl_dsn, describes the data source name that
+will be used to create the connection to your SQL server.  It MUST be
+in the format as listed above.  <driver> should be the DBD driver that
+you have installed to access your database (initially tested with
+MySQL (driver is 'mysql'), PostgreSQL ('Pg') and SQLite ('SQLite')).
+<database> must be the name of the database that you created to store
+the auto-whitelist table. <hostname> is the name of the host that contains
+the SQL database server.  <port> is the optional port number where your
+database server is listening.
+
+user_awl_dsn                DBI:mysql:spamassassin:localhost
+
+Would tell SpamAssassin to connect to the database named spamassassin using
+MySQL on the local server, and since <port> is omitted, the driver will use the
+default port number.  The other two required options tells SpamAssassin to use 
+the defined username and password to establish the connection.
+
+If the user_awl_dsn option does not exist, SpamAssassin will not attempt
+to use SQL for the auto-whitelist.
+
+One additional configuration option exists that allows you to set the
+table name for the auto-whitelist table.
+
+user_awl_sql_table           awl
+
+For an example of connecting to a PostgreSQL database, see the README file.
+
+Requirements
+------------
+
+In order for SpamAssassin to work with your SQL database, you must have
+the perl DBI module installed, AS WELL AS the DBD driver/module for your
+specific database.  For example, if using MySQL as your RDBMS, you must have
+the Msql-Mysql (DBD::mysql) module installed.  Check CPAN for the latest
+versions of DBI and your database driver/module. 
+
+We are currently using:
+
+DBI-1.60.9
+DBD-mysql-4.012
+perl v5.10.1
+
+But older versions should work fine.
+
+
+Database Schema
+---------------
+
+The database must contain a table named by 'user_awl_sql_table' (default
+setting: "awl") with at least these fields:
+
+  username varchar(100)	  # this is the username whose e-mail is being filtered
+  email varchar(200)      # this is the address key
+  ip    varchar(40)       # this is the ip key (fits IPv4 or IPv6)
+  count int(11)           # this is the message counter
+  totscore float          # this is the total calculated score
+  signedby varchar(255)   # a DKIM or DomainKeys signing domain(s)
+
+You can add as many other fields you wish as long as the above fields are
+contained in the table.
+
+The 'signedby' field was introduced in version 3.3.0 and is only needed
+if auto_whitelist_distinguish_signed is true, e.g. (in local.cf):
+  auto_whitelist_distinguish_signed 1
+and is only useful if a plugin DKIM is enabled. If the setting is off
+the field is not used, but it does no harm to have it in a table.
+The new field makes AWL keep separate records for author addresses with
+valid DKIM or DomainKeys signatures, and separate records for unsigned mail,
+which does a good job for popular domains such as gmail.com and yahoo.com
+where most of the spam claiming to be from such domain does not come from
+a freemail provider and therefore can not carry a valid signature.
+
+Included is a default table that can be safely used in your own setup.
+To use the default table, you must first create a database, and a
+username/password that can access that database.  (See "Creating A Database",
+in "sql/README", if you don't have a suitable database ready.)
+
+To install the table, use the following command:
+
+mysql -h <hostname> -u <adminusername> -p <databasename> < awl_mysql.sql
+Enter password: <adminpassword>
+
+This will create the following table:
+
+CREATE TABLE awl (
+  username varchar(100) NOT NULL default '',
+  email varchar(255) NOT NULL default '',
+  ip varchar(40) NOT NULL default '',
+  count int(11) NOT NULL default '0',
+  totscore float NOT NULL default '0',
+  signedby varchar(255) NOT NULL default '',
+  PRIMARY KEY (username,email,signedby,ip)
+) TYPE=MyISAM;
+
+
+For PostgreSQL, use the following:
+
+psql -U <username> -f awl_pg.sql <databasename>
+
+
+To add a field 'signedby' to an existing table and to modify a primary key:
+under MySQL:
+  ALTER TABLE awl
+    DROP PRIMARY KEY,
+    ADD signedby varchar(255) NOT NULL DEFAULT '',
+    ADD PRIMARY KEY (username,email,signedby,ip);
+under PostgreSQL:
+  DROP INDEX awl_pkey;
+  ALTER TABLE awl
+    ADD signedby varchar(255) NOT NULL DEFAULT '',
+    ADD PRIMARY KEY (username,email,signedby,ip);
+then add the following to local.cf to let SpamAssassin start using the
+newly added field 'signedby' :
+  auto_whitelist_distinguish_signed 1
+
+To extend a field awl.ip on an existing table to be able to fit
+an IPv6 addresses (39 characters would suffice) or an IPv4 address:
+under MySQL:
+  ALTER TABLE awl MODIFY ip varchar(40);
+under PostgreSQL:
+  ALTER TABLE awl ALTER ip TYPE varchar(40);
+
+
+Once you have created the database and added the table, just add the
+required lines to your global configuration file (local.cf).  Note that
+you must specify the proper whitelist factory in the config file in order
+for this to work and the current username must be passed to spamd.
+
+Testing SpamAssassin/SQL
+------------------------
+
+To test your SQL setup, and debug any possible problems, you should start
+spamd with the -D option, which will keep spamd in the foreground, and will
+output debug message to the terminal. You should then test spamd with a
+message by calling spamc.  You can use the sample-spam.txt file with the
+following command:
+
+cat sample-spam.txt | spamc
+
+Watch the debug output from spamd and look for the following debug line:
+
+SQL Based AWL: Connected to <your dsn>
+
+If you do not see the above text, then the SQL query was not successful,
+and you should consult any error messages reported.
+
+This code has been tested using MySQL as the RDBMS, with basic tests
+against PostgreSQL and SQLite.  It has been written with the utmost
+simplicity using DBI, and any database driver that conforms to the DBI
+interface and allows you to refer to a column on the right hand side
+of an expression (ie update foo set bar = bar + 1) should work with
+little or no problems.  If you find a driver that has issues, please
+report them to the SADev list.

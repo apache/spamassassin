@@ -1,0 +1,18 @@
+
+# From discussion on the users list 6/09
+
+#
+# This depends on bugfixes in ReplaceTags.pm for proper operation
+#
+# If you are using this with 3.2.5, make sure you get this as well:
+# http://svn.apache.org/viewvc/spamassassin/branches/3.2/lib/Mail/SpamAssassin/Plugin/ReplaceTags.pm
+#
+
+ifplugin Mail::SpamAssassin::Plugin::ReplaceTags
+
+body          URI_OBFU_WWW  /(?<!http:\/\/)\b_*w{2,3}(?!\.[-\w]+\.(?:com|net|org|biz|info))[^[:alnum:]]{1,3}(?:<D><O><T>+[^[:alnum:]]{1,3})?[[:alnum:]][-\w]{1,20}[[:alnum:]](?!\.[[:alnum:]])[^[:alnum:]]{1,3}(?:<D><O><T>+[^[:alnum:]]{1,3})?(?:c\s?o\s?m|n\s?e\s?t|o\s?r\s?g|b\s?i\s?z|i\s?n\s?f\s?o)_*\b/i
+describe      URI_OBFU_WWW  Obfuscated URI
+replace_rules URI_OBFU_WWW
+
+endif
+

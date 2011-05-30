@@ -1,0 +1,68 @@
+#!/usr/bin/env bash
+# This script assumes it's being run from the root of the SA code tree
+set -ex
+
+umask 002
+
+WEBDIR=$HOME/public_html
+
+if [ ! -d $WEBDIR ] ; then
+  echo "WARNING: $WEBDIR does not exist" 1>&2
+  echo 1>&2
+fi
+
+RELDIR=$WEBDIR/devel
+mkdir -p $RELDIR
+
+DISTNAME=Mail-SpamAssassin
+
+rm -rf $DISTNAME-*               # otherwise make will fail
+
+test -f Makefile && make distclean
+perl Makefile.PL < /dev/null || exit $?
+
+make version.env || exit $?
+. version.env
+
+# "3.1.0-pre2-r202405" should appear as "3.1.0-pre2" after this!
+VERSION=`echo $FULL_VERSION | perl -pe 's/-r\d+$//'`
+
+DISTDNAME=$DISTNAME-$DIST_VERSION
+DISTVNAME=$DISTNAME-$VERSION
+
+make || exit $?
+
+make text_html_doc
+make distcheck
+
+echo $VERSION > $WEBDIR/latest_version
+
+rm -f $DISTVNAME.*
+
+make distdir || exit $?
+tar -cvf   $DISTVNAME.tar $DISTDNAME         || exit $?
+
+gzip  -f9vc $DISTVNAME.tar > $DISTVNAME.tar.gz  || exit $?
+bzip2 -f9vc $DISTVNAME.tar > $DISTVNAME.tar.bz2 || exit $?
+zip   -rv - $DISTDNAME     > $DISTVNAME.zip     || exit $?
+
+for ext in tar.bz2 tar.gz zip ; do
+  cp $DISTVNAME.$ext $RELDIR
+
+  perl build/md5sum.pl $DISTVNAME.$ext > $RELDIR/$DISTVNAME.$ext.md5  || exit $?
+  perl build/sha1sum.pl $DISTVNAME.$ext > $RELDIR/$DISTVNAME.$ext.sha1 || exit $?
+
+  rm -f $DISTVNAME.$ext.asc*
+  if [ -d $HOME/sabuildtools/sasigningkey ]; then
+    $HOME/sabuildtools/bin/gpg --homedir $HOME/sabuildtools/sasigningkey -bsa $DISTVNAME.$ext || exit $?
+    mv $DISTVNAME.$ext.asc $RELDIR/$DISTVNAME.$ext.asc || exit $?
+  fi
+
+  rm -f $DISTVNAME.$ext
+done
+
+test -f Makefile && make distclean
+rm -f $DISTVNAME.*
+
+chgrp -R spamassassin $RELDIR || true
+ls -l $RELDIR

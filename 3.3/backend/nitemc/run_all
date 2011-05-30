@@ -1,0 +1,35 @@
+#!/bin/sh
+#
+# driver for nightly mass-checks on the zone. run from cron as:
+# 0 9 * * * /export/home/svn-trunk/backend/nitemc/run_all
+#
+# details: http://wiki.apache.org/spamassassin/NightlyMassCheck
+
+# Ensure we're running after 0900 UTC; complex due to daylight savings. If
+# we're running in the 08xx UTC hour-space, sleep for 1 hour; when we wake, we
+# will be in 09xx.  By doing it this way, we'll work both for (a) mass-checks
+# set to run from cron at 09xx (cron doesn't understand DST/UTC issues) and (b)
+# mass-checks starting at other times that != 09xx.
+(
+  TIME="%e,%U,%S"; TZ=UTC; export TIME TZ
+  if date | egrep '^... ... .. 08:'; then
+    date; echo "sleeping for 1 hour to compensate for DST"
+    sleep 3600 ; date
+  fi
+)
+
+echo "nitemc run_all starting at" ; date
+
+pkill -15 -f -u nitemc perl
+pkill -15 -f -u nitemc ssh
+
+all_users=`ls /export/home/bbmass/uploadedcorpora`
+nitedir=/export/home/svn-trunk/backend/nitemc
+workdir=/export/home/nitemc
+
+$nitedir/svn_checkout
+
+for user in $all_users ; do
+  $nitedir/run_one_nitemc $user
+done
+

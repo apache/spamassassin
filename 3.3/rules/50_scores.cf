@@ -1,0 +1,1244 @@
+# SpamAssassin score file
+#
+# Please don't modify this file as your changes will be overwritten with
+# the next update. Use @@LOCAL_RULES_DIR@@/local.cf instead.
+# See 'perldoc Mail::SpamAssassin::Conf' for details.
+#
+# <@LICENSE>
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to you under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at:
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# </@LICENSE>
+#
+###########################################################################
+# Default scores.   Note that if a test is named in the files, but a score is
+# not assigned here, the default score will be set to 1.
+
+# The following block of scores were generated using the mass-checking
+# scripts, and a perceptron to determine the optimum scores which
+# resulted in minimum false positives or negatives.  The scores are
+# weighted to produce roughly 1 false positive in 2500 non-spam messages
+# using the default threshold of 5.0.
+
+# Start of generated scores.  <gen:mutable>
+
+score ACT_NOW_CAPS 1.404 2.399 0.925 2.211
+score ADVANCE_FEE_2 2.314 2.294 1.198 1.053
+score ADVANCE_FEE_3 2.686 1.898 3.505 3.817
+score ADVANCE_FEE_4 0.001 0.001 0.001 0.271
+score ALL_TRUSTED -1.000
+score APOSTROPHE_FROM 0.148 0.786 0.651 0.545 # n=2
+score AXB_HELO_LH_HOME 3.406 2.059 3.458 3.619
+score AXB_XMID_1212 0 # n=0 n=1 n=2 n=3
+score AXB_XMID_1510 0 # n=0 n=1 n=2 n=3
+score AXB_XMID_OEGOESNULL 0 # n=0 n=1 n=2 n=3
+score AXB_XM_SENDMAIL_NOT 0 # n=0 n=1 n=2 n=3
+score AXB_XR_STULDAP 0 # n=0 n=1 n=2 n=3
+score BAD_CREDIT 2.799 1.658 1.279 2.415
+score BANG_GUAR 2.202 2.377 1.690 2.704
+score BANG_OPRAH 0 # n=0 n=1 n=2 n=3
+score BANKING_LAWS 2.399 2.004 2.157 1.099 # n=2
+score BILLION_DOLLARS 0.001 1.451 1.229 1.638
+score BODY_ENHANCEMENT 0.927 1.611 0.974 0.001
+score BODY_ENHANCEMENT2 1.691 1.507 1.865 1.541
+score BUG6152_INVALID_DATE_TZ_ABSURD 1.802 1.448 0.024 0.766
+score CONFIRMED_FORGED 0 # n=0 n=1 n=2 n=3
+score CORRUPT_FROM_LINE_IN_HDRS 0 # n=0 n=1 n=2 n=3
+score CTYPE_001C_A 0 # n=0 n=1 n=2 n=3
+score CTYPE_001C_B 0.001 0.001 0.001 0.001  # n=1
+score CUM_SHOT 0 # n=0 n=1 n=2 n=3
+score CURR_PRICE 0.001 # n=0 n=1 n=2 n=3
+score DATE_SPAMWARE_Y2K 0 # n=0 n=1 n=2 n=3
+score DEAR_FRIEND 2.683 2.604 1.801 2.577
+score DEAR_SOMETHING 1.999 1.731 1.787 1.973
+score DEAR_WINNER 3.099 3.099 2.309 3.099 # n=2
+score DIET_1 0.714 0.000 0.399 0.001
+score DIGEST_MULTIPLE 0 0.001 0 0.293 # n=0 n=2
+score DOS_ANAL_SPAM_MAILER 0 # n=0 n=1 n=2
+score DOS_FIX_MY_URI 0 # n=0 n=1 n=2 n=3
+score DOS_HIGH_BAT_TO_MX 0 # n=0 n=1 n=2
+score DOS_LET_GO_JOB 0 # n=0 n=1 n=2 n=3
+score DOS_OE_TO_MX 2.602 3.086 2.265 2.523
+score DOS_OE_TO_MX_IMAGE 2.886 1.886 2.425 3.699
+score DOS_OUTLOOK_TO_MX 2.636 1.449 1.737 2.845
+score DOS_RCVD_IP_TWICE_C 2.599 2.060 3.292 0.096
+score DOS_STOCK_BAT 0.001 # n=0 n=1 n=2 n=3
+score DOS_STOCK_BAT2 0 # n=0 n=1 n=2 n=3
+score DOS_URI_ASTERISK 0 # n=0 n=1 n=2 n=3
+score DOS_YOUR_PLACE 0 # n=0 n=1 n=2 n=3
+score DRUGS_ANXIETY 2.699 0.685 2.212 1.483
+score DRUGS_ANXIETY_EREC 0 # n=0 n=1 n=2 n=3
+score DRUGS_ANXIETY_OBFU 0 # n=0 n=1 n=2 n=3
+score DRUGS_DIET 2.660 0.757 1.831 0.337
+score DRUGS_DIET_OBFU 0 # n=0 n=1 n=2 n=3
+score DRUGS_ERECTILE 1.778 2.221 1.299 1.994
+score DRUGS_ERECTILE_OBFU 1.324 1.309 2.935 1.109
+score DRUGS_HDIA 0 # n=0 n=1 n=2 n=3
+score DRUGS_MANYKINDS 2.001 1.473 0.841 0.342
+score DRUGS_MUSCLE 0.001 2.499 0.392 0.164
+score DRUGS_SLEEP_EREC 0 # n=0 n=1 n=2 n=3
+score DRUGS_SMEAR1 3.300 2.051 3.148 0.235 # n=0
+score DRUGS_STOCK_MIMEOLE 2.699 1.681 2.478 1.321 # n=2
+score DRUG_DOSAGE 0 # n=0 n=1 n=2 n=3
+score DRUG_ED_CAPS 2.799 1.023 2.516 0.936
+score DRUG_ED_GENERIC 0 # n=0 n=1 n=2 n=3
+score DRUG_ED_ONLINE 0.696 1.152 1.221 0.608 # n=0
+score DRUG_ED_SILD 0.001 0.170 0.113 1.794
+score DYN_RDNS_AND_INLINE_IMAGE 1.345 1.344 1.434 1.168 # n=2
+score DYN_RDNS_SHORT_HELO_HTML 0.001 0.001 0.000 0.001 # n=2
+score DYN_RDNS_SHORT_HELO_IMAGE 1.825 2.516 2.285 1.013 # n=2
+score EMAIL_ROT13 0 # n=0 n=1 n=2 n=3
+score EMPTY_MESSAGE 2.195 2.344 1.552 2.320
+score EM_ROLEX 0.595 1.309 2.068 0.618 # n=0
+score ENGLISH_UCE_SUBJECT 0.953 1.542 2.569 2.899 # n=0
+score EXCUSE_24 2.799
+score EXCUSE_4 2.399 1.687 2.399 1.325
+score EXCUSE_REMOVE 2.907 2.992 3.299 3.299
+score FAKE_HELO_MAIL_COM_DOM 1.887 0.152 1.370 2.136
+score FAKE_OUTBLAZE_RCVD 0 # n=0 n=1 n=2 n=3
+score FAKE_REPLY_C 0.688 0.001 2.553 1.486 # n=2
+score FB_ADD_INCHES 0 # n=0 n=1 n=2 n=3
+score FB_ALMOST_SEX 0 # n=0 n=1 n=2 n=3
+score FB_ANA_TRIM 0 # n=0 n=1 n=2 n=3
+score FB_ANUI 0 # n=0 n=1 n=2 n=3
+score FB_BILLI0N 0 # n=0 n=1 n=2 n=3
+score FB_C0MPANY 0 # n=0 n=1 n=2 n=3
+score FB_CAN_LONGER 0 # n=0 n=1 n=2 n=3
+score FB_CIALIS_LEO3 1.688 3.055 2.465 3.245 # n=2
+score FB_DOUBLE_0WORDS 0 # n=0 n=1 n=2 n=3
+score FB_EMAIL_HIER 0 # n=0 n=1 n=2 n=3
+score FB_EXTRA_INCHES 0.289 0.000 2.603 0.001 # n=2
+score FB_FAKE_NUMBERS 0 # n=0 n=1 n=2 n=3
+score FB_FAKE_NUMS4 0 # n=0 n=1 n=2 n=3
+score FB_FHARMACY 0 # n=0 n=1 n=2 n=3
+score FB_FORWARD_LOOK 0 # n=0 n=1 n=2 n=3
+score FB_GAPPY_ADDRESS 0 # n=0 n=1 n=2 n=3
+score FB_GET_MEDS 2.314 2.027 1.195 0.935 # n=2
+score FB_GVR 2.340 0.691 2.568 2.301 # n=2
+score FB_HEY_BRO_COMMA 0 # n=0 n=1 n=2 n=3
+score FB_HG_H_CAP 0 # n=0 n=1 n=2
+score FB_HOMELOAN 0 # n=0 n=1 n=2 n=3
+score FB_IMPRESS_GIRL 0 # n=0 n=1 n=2 n=3
+score FB_INCREASE_YOUR 2.699 2.700 2.335 2.343 # n=2
+score FB_INDEPEND_RWD 2.799 # n=2
+score FB_L0AN 0 # n=0 n=1 n=2 n=3
+score FB_LETTERS_21B 0 # n=0 n=1 n=2 n=3
+score FB_LOSE_WEIGHT_CAP 0.001 0.001 2.187 0.001
+score FB_LOWER_PAYM 0 # n=0 n=1 n=2 n=3
+score FB_MORE_SIZE 0 # n=0 n=1 n=2 n=3
+score FB_NOT_PHONE_NUM1 0 # n=0 n=1 n=2 n=3
+score FB_NOT_PHONE_NUM3 0 # n=0 n=1 n=2 n=3
+score FB_NOT_SCHOOL 0 # n=0 n=1 n=2 n=3
+score FB_NO_SCRIP_NEEDED 1.656 1.469 2.133 0.922 # n=2
+score FB_NUMYO 0 # n=0 n=1 n=2 n=3
+score FB_NUMYO2 0 # n=0 n=1 n=2 n=3
+score FB_ODD_SPACED_MONEY 0 # n=0 n=1 n=2 n=3
+score FB_ONIINE 0 # n=0 n=1 n=2 n=3
+score FB_P1LL 0 # n=0 n=1 n=2 n=3
+score FB_PENIS_GROWTH 0 # n=0 n=1 n=2 n=3
+score FB_PIPEDOLLAR 0 # n=0 n=1 n=2 n=3
+score FB_PIPE_ILLION 0 # n=0 n=1 n=2 n=3
+score FB_PROLONGED_HARD 0 # n=0 n=1 n=2 n=3
+score FB_QUALITY_REPLICA 3.313 3.149 2.005 2.308 # n=2
+score FB_REF_CODE_SPACE 0 # n=0 n=1 n=2 n=3
+score FB_REPLICA_ROLEX 1.674 0.710 1.115 3.175
+score FB_REPLIC_CAP 0 # n=0 n=1 n=2 n=3
+score FB_RE_FI 0 # n=0 n=1 n=2 n=3
+score FB_ROLLER_IS_T 0 # n=0 n=1 n=2 n=3
+score FB_ROLX 0 # n=0 n=1 n=2 n=3
+score FB_SAVE_PERSC 2.799 0.367 1.864 1.492
+score FB_SOFTTABS 2.887 3.174 3.378 1.584 # n=2
+score FB_SPACED_FREE 2.499 2.499 2.203 0.395 # n=1
+score FB_SPACED_PHN_3B 0.001 # n=0 n=1 n=2 n=3
+score FB_SPACEY_ZIP 0 # n=0 n=1 n=2 n=3
+score FB_SPUR_M 0 # n=0 n=1 n=2 n=3
+score FB_SSEX 0 # n=0 n=1 n=2 n=3
+score FB_STOCK_EXPLODE 0 # n=0 n=1 n=2 n=3
+score FB_SYMBLO 0 # n=0 n=1 n=2 n=3
+score FB_THIS_ADVERT 3.599 3.600 2.999 3.599 # n=1
+score FB_THOUS_PERSONAL 0 # n=0 n=1 n=2 n=3
+score FB_TO_STOP_DISTRO 3.399 # n=2
+score FB_ULTRA_ALLURE 2.352 1.074 2.334 0.829 # n=2
+score FB_UNLOCK_YOUR_G 0 # n=0 n=1 n=2 n=3
+score FB_UNRESOLV_PROV 0 # n=0 n=1 n=2 n=3
+score FB_YOURSELF_MASTER 0 # n=0 n=1 n=2 n=3
+score FB_YOUR_REFI 0 # n=0 n=1 n=2 n=3
+score FH_BAD_OEV1441 0 # n=0 n=1 n=2 n=3
+score FH_DATE_IS_19XX 0.000 1.598 2.373 0.277 # n=2
+score FH_FAKE_RCVD_LINE 2.167 1.431 2.525 1.778 # n=2
+score FH_FAKE_RCVD_LINE_B 4.000 3.372 3.999 3.999
+score FH_FROMEML_NOTLD 1.708 0.180 0.975 1.082 # n=2
+score FH_FROM_CASH 2.599 2.436 2.599 1.739 # n=2
+score FH_FROM_GET_NAME 2.699 # n=1
+score FH_FROM_GIVEAWAY 2.599 1.817 1.810 1.655 # n=2
+score FH_FROM_HOODIA 0 # n=0 n=1 n=2 n=3
+score FH_HAS_XAIMC 1.602 1.899 0.561 1.899 # n=2
+score FH_HAS_XID 3.299 3.215 3.003 1.782 # n=2
+score FH_HELO_ALMOST_IP 3.699 3.268 3.457 0.688 # n=2
+score FH_HELO_ENDS_DOT 0 # n=0 n=1 n=2 n=3
+score FH_HELO_EQ_610HEX 0 # n=0 n=1 n=2 n=3
+score FH_HELO_EQ_CHARTER 0.607 0.286 0.093 2.683 # n=2
+score FH_HELO_EQ_D_D_D_D 2.361 1.117 2.815 3.177 # n=2
+score FH_HELO_GMAILSMTP 0 # n=0 n=1 n=2 n=3
+score FH_HOST_EQ_DYNAMICIP 2.632 2.454 3.299 3.298 # n=2
+score FH_HOST_EQ_PACBELL_D 0.001 0.927 0.559 1.703 # n=2
+score FH_HOST_EQ_VERIZON_P 2.681 1.237 3.671 1.323 # n=2
+score FH_HOST_IN_ADDRARPA 3.199 2.933 2.452 2.157
+score FH_MSGID_000000 0 # n=0 n=1 n=2 n=3
+score FH_MSGID_01C67 0 # n=0 n=1 n=2 n=3
+score FH_MSGID_01C70XXX 0 # n=0 n=1 n=2 n=3
+score FH_MSGID_REPLACE 0 # n=0 n=1 n=2 n=3
+score FH_MSGID_XXBLAH 0 # n=0 n=1 n=2 n=3
+score FH_MSGID_XXX 2.399 1.632 2.376 1.482 # n=2
+score FH_RE_NEW_DDD 0 # n=0 n=1 n=2 n=3
+score FH_XMAIL_REPLACE 0 # n=0 n=1 n=2 n=3
+score FILL_THIS_FORM_FRAUD_PHISH 1.195 0.396 0.615 0.334
+score FILL_THIS_FORM_LOAN 2.092 2.237 1.836 2.880
+score FILL_THIS_FORM_LONG 3.800 3.476 2.300 3.404
+score FIN_FREE 2.699 2.289 2.699 2.700
+score FM_DOESNT_SAY_STOCK 0 # n=0 n=1 n=2 n=3
+score FM_FAKE_53COM_SPOOF 0 # n=0 n=1 n=2 n=3
+score FM_FAKE_HELO_HOTMAIL 0 # n=0 n=1 n=2 n=3
+score FM_FAKE_HELO_VERIZON 0 # n=0 n=1 n=2 n=3
+score FM_FRM_RN_L_BRACK 0.001 # n=0 n=1 n=2 n=3
+score FM_IS_IT_OUR_ACCOUNT 2.000 2.169 2.299 2.299 # n=1
+score FM_LIKE_STOCKS 0 # n=0 n=1 n=2 n=3
+score FM_LOTTO_YOU_WON 3.299 3.299 2.999 3.299
+score FM_LUX_GIFTS_REDUCED 0 # n=0 n=1 n=2 n=3
+score FM_MANY_DRUG_WORDS 0 # n=0 n=1 n=2 n=3
+score FM_MORTGAGE5PLUS 0 # n=0 n=1 n=2 n=3
+score FM_MORTGAGE6PLUS 0 # n=0 n=1 n=2 n=3
+score FM_MULTI_LUX_GIFTS 0 # n=0 n=1 n=2 n=3
+score FM_PHN_NODNS 0 # n=0 n=1 n=2 n=3
+score FM_RATSIGN_1106 0 # n=0 n=1 n=2 n=3
+score FM_RE_HELLO_SPAM 0 # n=0 n=1 n=2 n=3
+score FM_ROLEX_ADS 0 # n=0 n=1 n=2 n=3
+score FM_SCHOOLING 2.357 1.651 3.276 2.132 # n=2
+score FM_SCHOOL_DIPLOMA 2.399 1.287 0.625 0.277 # n=2
+score FM_SCHOOL_TYPES 0 # n=0 n=1 n=2 n=3
+score FM_SEX_HELODDDD 0.233 1.085 1.915 0.053 # n=2
+score FM_SUBJ_APPROVE 1.664 1.464 1.323 0.269 # n=1
+score FM_TRUE_LOV_ALL_N 0 # n=0 n=1 n=2 n=3
+score FM_VEGAS_CASINO 3.399 0.748 3.186 0.851 # n=1
+score FM_VIAGRA_SPAM1114 0 # n=0 n=1 n=2 n=3
+score FM_XMAIL_F_OUT 0 # n=0 n=1 n=2 n=3
+score FORGED_IMS_HTML 0 # n=0 n=1 n=2 n=3
+score FORGED_IMS_TAGS 0 # n=0 n=1 n=2 n=3
+score FORGED_MSGID_AOL 0 # n=0 n=1 n=2 n=3
+score FORGED_MSGID_EXCITE 2.399 1.899 1.649 0.528 # n=0
+score FORGED_MSGID_HOTMAIL 0 # n=0 n=1 n=2 n=3
+score FORGED_MSGID_MSN 0 # n=0 n=1 n=2 n=3
+score FORGED_MSGID_YAHOO 2.699 2.244 2.093 1.549
+score FORGED_MUA_EUDORA 2.828 2.510 1.962 0.001
+score FORGED_MUA_IMS 2.399 2.399 2.399 1.943
+score FORGED_MUA_MOZILLA 2.399 1.596 2.399 2.309
+score FORGED_MUA_OIMO 2.600 2.599 2.599 2.599
+score FORGED_MUA_OUTLOOK 3.999 2.785 2.500 1.927
+score FORGED_MUA_THEBAT_BOUN 3.046 3.220 3.207 3.399
+score FORGED_MUA_THEBAT_CS 0 # n=0 n=1 n=2 n=3
+score FORGED_OUTLOOK_HTML 0.001 0.001 0.001 0.021
+score FORGED_OUTLOOK_TAGS 0.003 0.565 0.001 0.052
+score FORGED_QUALCOMM_TAGS 0 # n=0 n=1 n=2 n=3
+score FORGED_TELESP_RCVD 2.499 2.499 2.499 1.841 # n=0
+score FORGED_THEBAT_HTML 0 # n=0 n=1 n=2 n=3
+score FORWARD_LOOKING 0 # n=0 n=1 n=2 n=3
+score FRAGMENTED_MESSAGE 0 # n=0 n=1 n=2
+score FREEMAIL_FORGED_REPLYTO 1.199 2.503 1.204 2.095
+score FREEMAIL_REPLY 2.499 2.499 1.788 1.929
+score FREEMAIL_REPLYTO 3.257 2.775 1.811 2.398
+score FREEMAIL_REPLYTO_END_DIGIT 1.221 0.980 1.179 1.151
+score FREE_PORN 0 # n=0 n=1 n=2 n=3
+score FREE_QUOTE_INSTANT 2.700 2.699 2.699 1.297 # n=2
+score FROM_BLANK_NAME 2.099 2.099 2.099 0.723
+score FROM_DOMAIN_NOVOWEL 0.500
+score FROM_EXCESS_BASE64 0.000 0.105 0.001 0.979
+score FROM_LOCAL_DIGITS 0.001
+score FROM_LOCAL_HEX 0.000 0.331 0.001 0.006
+score FROM_LOCAL_NOVOWEL 0.500
+score FROM_NO_USER 0.001 2.599 0.019 0.798
+score FROM_OFFERS 2.699 2.699 2.510 2.699
+score FROM_STARTS_WITH_NUMS 2.801 0.553 1.201 0.738
+score FRT_APPROV 2.499
+score FR_3TAG_3TAG 0 # n=0 n=1 n=2 n=3
+score FR_ALMOST_VIAG2 2.299 1.594 2.299 1.531 # n=2
+score FR_CANTSEETEXT 0 # n=0 n=1 n=2 n=3
+score FR_MIDER 0 # n=0 n=1 n=2 n=3
+score FR_TITLE_NUMS 2.899 2.695 2.899 2.899
+score FSL_FAKE_GMAIL_RCVD 3.099 2.974 1.002 2.104
+score FSL_FAKE_HOTMAIL_RVCD 2.631 1.816 2.011 2.365
+score FSL_GEO_ABUSE 2.699 2.699 2.313 2.167
+score FSL_HELO_BARE_IP_1 2.598 1.426 3.099 2.347
+score FSL_HELO_DEVICE 1.682 0.001 0.884 0.806
+score FSL_HELO_NON_FQDN_1 2.361 0.001 1.783 0.001
+score FSL_HELO_SETUP 0 # n=0 n=1 n=2
+score FSL_INTERIA_ABUSE 3.899 2.664 3.080 3.106
+score FSL_YG_ABUSE 4.199
+score FS_ABIGGER 1.693 1.354 2.477 1.112
+score FS_APPROVE_YOU 2.499 1.272 1.942 1.873
+score FS_AT_NO_COST 2.499 # n=2
+score FS_CHEAP_CAP 0 # n=0 n=1 n=2 n=3
+score FS_DOLLAR_BONUS 0 # n=0 n=1 n=2 n=3
+score FS_EJACULA 0 # n=0 n=1 n=2 n=3
+score FS_ERECTION 0 # n=0 n=1 n=2 n=3
+score FS_HUGECOCK 0 # n=0 n=1 n=2 n=3
+score FS_LARGE_PERCENT2 2.645 2.699 0.001 1.960 # n=2
+score FS_LOW_RATES 0 # n=0 n=1 n=2 n=3
+score FS_NEW_SOFT_UPLOAD 0 # n=0 n=1 n=2 n=3
+score FS_NEW_XXX 0 # n=0 n=1 n=2 n=3
+score FS_NO_SCRIP 0 # n=0 n=1 n=2 n=3
+score FS_NUDE 2.399 1.653 1.288 1.101
+score FS_OBFU_PRMCY 2.400 0.384 0.204 1.248 # n=2
+score FS_PERSCRIPTION 0 # n=0 n=1 n=2 n=3
+score FS_PHARMASUB2 2.980 1.345 2.956 0.549 # n=2
+score FS_RAMROD 0 # n=0 n=1 n=2 n=3
+score FS_REPLICA 1.630 3.599 2.028 3.599 # n=2
+score FS_REPLICAWATCH 3.237 1.715 1.733 3.015 # n=2
+score FS_RE_APPROV 0 # n=0 n=1 n=2 n=3
+score FS_START_DOYOU2 2.799 2.799 2.799 2.800 # n=2
+score FS_START_LOSE 0.249 0.176 1.424 1.809 # n=2
+score FS_TEEN_BAD 0 # n=0 n=1 n=2 n=3
+score FS_TIP_DDD 0 # n=0 n=1 n=2 n=3
+score FS_WEIGHT_LOSS 1.894 1.541 2.501 2.036
+score FS_WILL_HELP 2.599 0.893 2.484 0.734 # n=2
+score FS_WITH_SMALL 0 # n=0 n=1 n=2 n=3
+score FU_COMMON_SUBS2 2.801 2.650 2.823 0.292 # n=2
+score FU_ENDS_NUMS_DOTS_CLK 0 # n=0 n=1 n=2 n=3
+score FU_END_ET 0 # n=0 n=1 n=2 n=3
+score FU_HOODIA 0 # n=0 n=1 n=2 n=3
+score FU_LONG_QUERY3 0 # n=0 n=1 n=2 n=3
+score FU_MIDER 0 # n=0 n=1 n=2 n=3
+score FU_UKGEOCITIES 0 # n=0 n=1 n=2 n=3
+score FU_URI_TRACKER_T 0 # n=0 n=1 n=2 n=3
+score GAPPY_SUBJECT 0.594 1.312 1.210 1.954
+score GEO_QUERY_STRING 0 # n=0 n=1 n=2 n=3
+score GUARANTEED_100_PERCENT 2.699 2.699 2.480 2.699
+score HDR_ORDER_FTSDMCXX_001C 0 # n=0 n=1 n=2 n=3
+score HDR_ORDER_FTSDMCXX_BAT 0 # n=0 n=1 n=2 n=3
+score HEADER_SPAM 2.499 2.499 1.994 0.585
+score HEAD_LONG 0 # n=0 n=1 n=2
+score HELO_DYNAMIC_CHELLO_NL 2.412 1.918 2.019 2.428
+score HELO_DYNAMIC_DHCP 2.602 0.841 1.537 0.206
+score HELO_DYNAMIC_DIALIN 2.629 3.233 2.186 1.366
+score HELO_DYNAMIC_HCC 4.299 2.514 2.931 2.762
+score HELO_DYNAMIC_HEXIP 2.321 0.511 1.773 1.789
+score HELO_DYNAMIC_HOME_NL 2.385 1.530 1.024 1.459
+score HELO_DYNAMIC_IPADDR 2.633 3.243 3.680 1.951
+score HELO_DYNAMIC_IPADDR2 2.815 3.888 3.728 3.607
+score HELO_DYNAMIC_ROGERS 0 # n=0 n=1 n=2 n=3
+score HELO_DYNAMIC_SPLIT_IP 3.031 2.893 4.225 3.482
+score HELO_FRIEND 0 # n=0 n=1 n=2 n=3
+score HELO_LH_HOME 0.001 2.023 0.537 1.736 # n=2
+score HELO_LH_LD 0 # n=0 n=1 n=2 n=3
+score HELO_LOCALHOST 2.639 3.603 2.915 3.828 # n=2
+score HELO_OEM 2.899 2.899 1.234 0.270 # n=2
+score HIDE_WIN_STATUS 0.001 1.353 0.754 1.380
+score HIGH_CODEPAGE_URI 0 # n=0 n=1 n=2
+score HK_FAKENAME_EBAY 2.899
+score HK_LOTTO 3.599 2.755 2.993 3.599
+score HK_NAME_DRUGS 4.299 0.001 3.077 0.552
+score HK_RANDOM_ENVFROM 2.638 0.626 1.798 0.001
+score HS_BOBAX_MID_2 2.762 2.612 1.243 1.437
+score HS_BODY_UPLOADED_SOFTWARE 0 # n=0 n=1 n=2 n=3
+score HS_DRUG_DOLLAR_1 0.001 # n=0 n=1 n=2 n=3
+score HS_DRUG_DOLLAR_2 0.001 # n=0 n=1 n=2 n=3
+score HS_DRUG_DOLLAR_3 0.001 # n=0 n=1 n=2 n=3
+score HS_DRUG_DOLLAR_MANY 0 # n=0 n=1 n=2 n=3
+score HS_FORGED_OE_FW 0.482 2.252 1.565 2.011 # n=2
+score HS_GETMEOFF 0 # n=0 n=1 n=2 n=3
+score HS_INDEX_PARAM 1.105 0.023 1.203 0.574 # n=1
+score HS_MEETUP_FOR_SEX 0 # n=0 n=1 n=2 n=3
+score HS_SUBJ_NEW_SOFTWARE 0 # n=0 n=1 n=2 n=3
+score HS_SUBJ_ONLINE_PHARMACEUTICAL 0 # n=0 n=1 n=2 n=3
+score HS_VPXL 3.211 1.399 2.696 1.948
+score HTML_MIME_NO_HTML_TAG 0.001 0.635 0.001 0.377
+score HTML_MISSING_CTYPE 0 # n=0 n=1 n=2 n=3
+score HTML_SHORT_CENTER 3.799 3.421 2.611 0.743
+score HTML_SHORT_LINK_IMG_1 2.215 0.139 0.480 0.001
+score HTML_SHORT_LINK_IMG_2 1.419 0.259 0.603 0.001
+score HTML_SHORT_LINK_IMG_3 0.691 0.328 0.001 0.148
+score HTML_TITLE_SUBJ_DIFF 1.149 2.171 1.801 2.036
+score HTTP_77 0 # n=0 n=1 n=2 n=3
+score HTTP_ESCAPED_HOST 0.807 1.621 0.483 1.125
+score HTTP_EXCESSIVE_ESCAPES 0.001 1.516 0.000 1.572
+score IMPOTENCE 1.539 2.144 3.028 1.374
+score INVALID_DATE 1.701 0.432 1.200 1.096
+score INVALID_DATE_TZ_ABSURD 0.262 0.632 0.706 0.491
+score INVALID_MSGID 2.602 1.167 1.328 0.568
+score INVALID_TZ_CST 0 # n=0 n=1 n=2 n=3
+score INVALID_TZ_EST 0 # n=0 n=1 n=2 n=3
+score INVESTMENT_ADVICE 0.200 2.160 2.199 2.199
+score IP_LINK_PLUS 0.001 0.001 0.246 0.012
+score JAPANESE_UCE_BODY 0 # n=0 n=1 n=2 n=3
+score JAPANESE_UCE_SUBJECT 0 # n=0 n=1 n=2 n=3
+score JM_I_FEEL_LUCKY 0 # n=0 n=1 n=2
+score JM_RCVD_QMAILV1 0 # n=0 n=1 n=2 n=3
+score JM_TORA_XM 0 # n=0 n=1 n=2 n=3
+score JOIN_MILLIONS 0.700 0.128 1.549 1.026
+score JS_FROMCHARCODE 0 # n=0 n=1 n=2 n=3
+score KAM_LOTTO1 3.006 3.499 1.778 3.162
+score KAM_LOTTO2 1.620 1.034 0.538 3.007
+score KAM_STOCKOTC 0 # n=0 n=1 n=2 n=3
+score KAM_STOCKTIP15 0 # n=0 n=1 n=2 n=3
+score KAM_STOCKTIP20 0 # n=0 n=1 n=2 n=3
+score KAM_STOCKTIP21 0 # n=0 n=1 n=2 n=3
+score KAM_STOCKTIP4 0 # n=0 n=1 n=2 n=3
+score KAM_STOCKTIP6 0 # n=0 n=1 n=2 n=3
+score KB_DATE_CONTAINS_TAB 3.800 3.799 3.799 2.751
+score KB_FAKED_THE_BAT 2.432 3.441 2.008 2.694
+score KB_RATWARE_MSGID 4.099 2.987 2.108 1.700
+score KB_RATWARE_OUTLOOK_MID 4.400 4.400 2.503 1.499
+score KOREAN_UCE_SUBJECT 0 # n=0 n=1 n=2 n=3
+score LIVEFILESTORE 3.300 2.570 3.183 0.771
+score LIVE_PORN 0 # n=0 n=1 n=2 n=3
+score LONGWORDS 2.199 1.844 1.819 2.035
+score LONG_TERM_PRICE 0.001 # n=0 n=1 n=2 n=3
+score LOOPHOLE_1 0 # n=0 n=1 n=2 n=3
+score LOTTERY_1 0.001 1.488 1.630 0.087 # n=2
+score LOTTERY_PH_004470 3.299 3.300 3.299 3.299
+score LOW_PRICE 0.161 0.600 0.001 1.464
+score L_SPAM_TOOL_13 0.539 0.485 0.494 1.333 # n=2
+score MALE_ENHANCE 3.100 3.099 3.099 0.851
+score MARKETING_PARTNERS 0.553 0.235 0.689 0.001
+score MID_DEGREES 0 # n=0 n=1 n=2 n=3
+score MILLION_USD 3.799 2.477 3.221 3.247
+score MIME_BOUND_DD_DIGITS 3.016 0.349 2.417 1.373
+score MIME_BOUND_DIGITS_15 0.432 1.225 1.241 0.798
+score MIME_BOUND_EQ_REL 0 # n=0 n=1 n=2 n=3
+score MIME_BOUND_MANY_HEX 0 # n=0 n=1 n=2 n=3
+score MIME_HEADER_CTYPE_ONLY 3.299 1.996 1.801 0.717
+score MIME_HTML_ONLY_MULTI 0.000 0.001 0.001 0.001
+score MIME_PHP_NO_TEXT 2.800 2.799 2.799 2.799
+score MISSING_DATE 2.739 1.396 1.800 1.360 # n=0
+score MISSING_HB_SEP 0 # n=0 n=1 n=2
+score MISSING_MID 0.552 0.140 1.199 0.497 # n=1
+score MISSING_MIMEOLE 0.392 1.843 0.571 1.899
+score MISSING_SUBJECT 0.001 1.767 1.300 1.799
+score MONEY_BACK 2.910 2.486 0.601 1.232
+score MORE_SEX 2.799 2.765 2.568 1.413
+score MSGID_DOLLARS_RANDOM 0 # n=0 n=1 n=2 n=3
+score MSGID_FROM_MTA_HEADER 0.401 0.001 0.473 0.001
+score MSGID_RANDY 2.196 2.599 2.599 2.599
+score MSGID_SHORT 0.001 0.337 0.001 0.001
+score MSGID_SPAM_CAPS 2.366 1.997 3.099 3.099
+score MSGID_SPAM_LETTERS 0 # n=0 n=1 n=2 n=3
+score MSGID_YAHOO_CAPS 0.797 1.413 2.278 1.411
+score MSOE_MID_WRONG_CASE 0.993 3.373 0.960 2.584 # n=2
+score MULTI_FORGED 0 # n=0 n=1 n=2 n=3
+score NA_DOLLARS 3.599
+score NONEXISTENT_CHARSET 0 # n=0 n=1 n=2 n=3
+score NORMAL_HTTP_TO_IP 0.159 0.001 0.795 0.001
+score NOT_ADVISOR 0 # n=0 n=1 n=2 n=3
+score NO_MEDICAL 2.199 1.254 2.199 1.773 # n=0
+score NO_PRESCRIPTION 1.915 1.102 2.280 2.399
+score NULL_IN_BODY 0.511 0.498 2.056 1.596 # n=2
+score NUMERIC_HTTP_ADDR 0.000 0.001 0.001 1.242
+score OBFUSCATING_COMMENT 0.000 0.000 0.001 0.723
+score OBSCURED_EMAIL 0 # n=0 n=1 n=2 n=3
+score ONE_TIME 1.840 1.175 1.830 0.714 # n=0
+score ONLINE_PHARMACY 0.843 2.371 0.008 0.650
+score PERCENT_RANDOM 2.999 2.837 2.983 1.838
+score PLING_QUERY 0.774 0.279 0.686 0.994
+score PREST_NON_ACCREDITED 0 # n=0 n=1 n=2 n=3
+score PREVENT_NONDELIVERY 0 # n=0 n=1 n=2 n=3
+score PRICES_ARE_AFFORDABLE 0.794 0.851 1.112 0.551
+score RATWARE_EGROUPS 1.898 1.258 1.406 1.621
+score RATWARE_GECKO_BUILD 0 # n=0 n=1 n=2 n=3
+score RATWARE_HASH_DASH 0 # n=0 n=1 n=2 n=3
+score RATWARE_MOZ_MALFORMED 0 # n=0 n=1 n=2 n=3
+score RATWARE_MPOP_WEBMAIL 1.153 1.338 1.229 1.999 # n=0
+score RATWARE_MS_HASH 2.036 3.692 0.454 2.148
+score RATWARE_OE_MALFORMED 0 # n=0 n=1 n=2 n=3
+score RATWARE_OUTLOOK_NONAME 2.964 0.033 2.685 2.950
+score RATWARE_RCVD_AT 0 # n=0 n=1 n=2 n=3
+score RATWARE_RCVD_PF 0 # n=0 n=1 n=2 n=3
+score RATWARE_ZERO_TZ 2.392 2.535 0.265 1.781 # n=0
+score RCVD_AM_PM 0 # n=0 n=1 n=2 n=3
+score RCVD_BAD_ID 0 # n=0 n=1 n=2 n=3
+score RCVD_DOUBLE_IP_LOOSE 1.150 0.960 1.042 1.012
+score RCVD_DOUBLE_IP_SPAM 2.411 2.777 1.912 1.808
+score RCVD_FAKE_HELO_DOTCOM 2.799 2.389 2.605 1.189
+score RCVD_FORGED_WROTE 0 # n=0 n=1 n=2 n=3
+score RCVD_FORGED_WROTE2 0 # n=0 n=1 n=2 n=3
+score RCVD_IN_BRBL_LASTEXT 0 1.644 0 1.449 # n=0 n=2
+score RCVD_IN_PSBL 0 2.700 0 2.700 # n=0 n=2
+score RCVD_IN_RP_RNBL 0 1.284 0 1.310 # n=0 n=2
+score RCVD_MAIL_COM 0 # n=0 n=1 n=2 n=3
+score RDNS_DYNAMIC 2.639 0.363 1.663 0.982
+score RDNS_LOCALHOST 3.700 0.969 2.345 0.001
+score RDNS_NONE 2.399 1.274 1.228 0.793
+score REFINANCE_NOW 0 # n=0 n=1 n=2 n=3
+score REFINANCE_YOUR_HOME 0 # n=0 n=1 n=2 n=3
+score REMOVE_BEFORE_LINK 0.406 1.587 1.799 1.800
+score REPLICA_WATCH 3.487 3.164 4.074 3.775
+score REPLYTO_WITHOUT_TO_CC 2.399 1.946 0.607 1.552
+score REPTO_QUOTE_AOL 0 # n=0 n=1 n=2 n=3
+score REPTO_QUOTE_IMS 0 # n=0 n=1 n=2 n=3
+score REPTO_QUOTE_MSN 0 # n=0 n=1 n=2 n=3
+score REPTO_QUOTE_QUALCOMM 0 # n=0 n=1 n=2 n=3
+score REPTO_QUOTE_YAHOO 0.001 0.490 0.001 0.646
+score RUDE_HTML 0 # n=0 n=1 n=2 n=3
+score SANE_04e8bf28eb445199a7f11b943c44d209 1.712 3.185 2.654 1.337
+score SANE_1c4f3286fa4aed6424ced88bfaf8b09c 3.199 2.040 3.199 1.502
+score SANE_2b173a7fb7518c75ac8a2d294d773fd8 2.976 1.117 1.951 0.942
+score SANE_3b92eda751c992f230f215fb7eb36844 0.001 0.626 0.585 3.040
+score SANE_4ef8302546bf270a19baf98508afacc4 2.231 3.464 2.266 3.543
+score SANE_7429530a7398f43f1f1b795f9420714e 3.999 1.655 2.776 1.479
+score SANE_91eb43f705d25c804374a746d7519660 3.099 2.803 2.746 1.572
+score SANE_d0d2b0f6373bf91253d66dd74c594b87 3.799 2.040 2.710 1.494
+score SB_GIF_AND_NO_URIS 2.199 2.199 2.200 2.199 # n=2
+score SHORT_HELO_AND_INLINE_IMAGE 0.237 0.160 0.013 1.390 # n=2
+score SHORT_TERM_PRICE 0.001 # n=0 n=1 n=2 n=3
+score SPAMMY_XMAILER 2.650 0.862 1.993 2.491 # n=2
+score SPOOF_COM2COM 0.001 1.632 1.952 2.048
+score SPOOF_COM2OTH 2.999 2.999 2.877 2.723
+score SPOOF_NET2COM 0 # n=0 n=1 n=2 n=3
+score STOCK_ALERT 0 # n=0 n=1 n=2 n=3
+score STOCK_IMG_CTYPE 0.001 0.005 0.001 0.001 # n=2
+score STOCK_IMG_HDR_FROM 0.001 0.001 0.001 0.021 # n=2
+score STOCK_IMG_HTML 0.000 0.028 0.000 0.005 # n=2
+score STOCK_IMG_OUTLOOK 0.001 0.702 0.413 0.190 # n=2
+score STOCK_PRICES 0 # n=0 n=1 n=2 n=3
+score STOX_AND_PRICE 0 # n=0 n=1 n=2 n=3
+score STOX_REPLY_TYPE 1.898 0.212 0.141 0.439 # n=1
+score STOX_REPLY_TYPE_WITHOUT_QUOTES 3.099 1.860 1.629 1.757
+score STRONG_BUY 0 # n=0 n=1 n=2 n=3
+score SUBJECT_DIET 1.927 1.563 0.817 1.466
+score SUBJECT_DRUG_GAP_C 2.108 0.989 1.348 2.140
+score SUBJECT_DRUG_GAP_L 2.799 2.304 1.402 1.561
+score SUBJECT_DRUG_GAP_S 0 # n=0 n=1 n=2 n=3
+score SUBJECT_DRUG_GAP_VA 0 # n=0 n=1 n=2 n=3
+score SUBJECT_DRUG_GAP_X 0 # n=0 n=1 n=2 n=3
+score SUBJECT_NEEDS_ENCODING 0.498 0.100 0.804 0.049 # n=2
+score SUBJECT_SEXUAL 0 # n=0 n=1 n=2 n=3
+score SUBJ_AS_SEEN 2.711 3.099 3.099 1.461 # n=0
+score SUBJ_BUY 0.594 1.498 0.001 0.639
+score SUBJ_DOLLARS 0.600 0.001 0.601 1.800
+score SUBJ_YOUR_DEBT 3.299 3.045 1.199 0.987
+score SUBJ_YOUR_FAMILY 2.910 2.999 2.999 2.999
+score TBIRD_SUSP_MIME_BDRY 2.400 2.400 2.399 2.399
+score THEBAT_UNREG 2.599 1.843 2.324 1.524
+score TO_MALFORMED 0.892 1.247 2.099 2.099
+score TRACKER_ID 2.026 1.102 1.750 1.306
+score TT_MSGID_TRUNC 0.748 0.023 1.434 1.448 # n=2
+score TT_OBSCURED_VALIUM 0 # n=0 n=1 n=2 n=3
+score TT_OBSCURED_VIAGRA 0 # n=0 n=1 n=2 n=3
+score TVD_ACT_193 0 # n=0 n=1 n=2 n=3
+score TVD_APPROVED 2.356 2.599 2.599 2.090 # n=2
+score TVD_DEAR_HOMEOWNER 0 # n=0 n=1 n=2 n=3
+score TVD_EB_PHISH 0 # n=0 n=1 n=2 n=3
+score TVD_ENVFROM_APOST 0 # n=0 n=1 n=2 n=3
+score TVD_FINGER_02 0.001 1.544 1.394 1.215 # n=2
+score TVD_FLOAT_GENERAL 0 # n=0 n=1 n=2 n=3
+score TVD_INCREASE_SIZE 1.529 0.601 1.055 0.001 # n=1
+score TVD_LINK_SAVE 0 # n=0 n=1 n=2 n=3
+score TVD_PH_BODY_ACCOUNTS_PRE 1.201 1.527 1.327 2.393 # n=1
+score TVD_PH_REC 3.127 2.026 3.266 1.784 # n=2
+score TVD_PH_SEC 0.291 1.498 0.869 1.764 # n=1
+score TVD_PH_SUBJ_ACCOUNTS_POST 2.602 2.607 2.497 3.099 # n=2
+score TVD_PH_SUBJ_SEC_MEASURES 2.284 1.522 1.675 1.145
+score TVD_PH_SUBJ_URGENT 1.251 2.326 2.255 2.800 # n=2
+score TVD_PP_PHISH 0 # n=0 n=1 n=2 n=3
+score TVD_QUAL_MEDS 2.697 2.397 2.799 2.483 # n=2
+score TVD_RATWARE_CB 0 # n=0 n=1 n=2 n=3
+score TVD_RATWARE_CB_2 0 # n=0 n=1 n=2 n=3
+score TVD_RATWARE_MSGID_02 0 # n=0 n=1 n=2 n=3
+score TVD_RCVD_SINGLE 0.242 1.213 0.001 2.172 # n=2
+score TVD_RCVD_SPACE_BRACKET 0.001 0.001 0.001 0.001 # n=1
+score TVD_SECTION 0 # n=0 n=1 n=2 n=3
+score TVD_SILLY_URI_OBFU 0 # n=0 n=1 n=2 n=3
+score TVD_SPACED_SUBJECT_WORD3 0 # n=0 n=1 n=2 n=3
+score TVD_SUBJ_ACC_NUM 0.001 2.199 2.199 2.198 # n=1
+score TVD_SUBJ_FINGER_03 0 # n=0 n=1 n=2 n=3
+score TVD_SUBJ_OWE 0 # n=0 n=1 n=2 n=3
+score TVD_SUBJ_WIPE_DEBT 2.599 2.291 2.599 1.004 # n=2
+score TVD_VISIT_PHARMA 1.957 1.196 0.417 1.406 # n=2
+score TVD_VIS_HIDDEN 0 # n=0 n=1 n=2 n=3
+score UNCLAIMED_MONEY 2.699 2.699 2.699 2.427
+score UNCLOSED_BRACKET 2.699 1.329 1.425 1.496
+score UPPERCASE_50_75 0.001 0.791 0.001 0.008
+score UPPERCASE_75_100 1.480 1.189 0.001 0.001
+score URG_BIZ 1.750 0.941 0.568 0.573
+score URI_HEX 2.800 1.313 1.206 1.122
+score URI_NOVOWEL 0.500
+score URI_NO_WWW_BIZ_CGI 2.399 2.399 2.400 2.399 # n=0
+score URI_NO_WWW_INFO_CGI 2.299 2.299 0.292 2.071
+score URI_OBFU_WWW 3.099 3.099 2.306 2.475
+score URI_UNSUBSCRIBE 0 # n=0 n=1 n=2 n=3
+score US_DOLLARS_3 2.599 2.523 1.780 1.754
+score VANITY 2.1
+score VIA_GAP_GRA 0 # n=0 n=1 n=2 n=3
+score WEIRD_PORT 0.001 0.001 0.097 0.001
+score WEIRD_QUOTING 0.001 0.001 0.001 0.001
+score WITH_LC_SMTP 0 # n=0 n=1 n=2 n=3
+score XMAILER_MIMEOLE_OL_015D5 2.358 0.123 1.311 1.206 # n=2
+score XMAILER_MIMEOLE_OL_07794 1.918 2.399 2.283 1.312 # n=2
+score XMAILER_MIMEOLE_OL_09BB4 1.296 0.375 1.528 0.001 # n=2
+score XMAILER_MIMEOLE_OL_1ECD5 2.300 2.448 2.204 2.772 # n=2
+score XMAILER_MIMEOLE_OL_20C99 2.599 0.001 2.018 0.671 # n=2
+score XMAILER_MIMEOLE_OL_22B61 3.199 3.199 3.199 3.159 # n=2
+score XMAILER_MIMEOLE_OL_25340 2.415 1.777 0.971 1.556 # n=2
+score XMAILER_MIMEOLE_OL_32D97 0 # n=0 n=1 n=2 n=3
+score XMAILER_MIMEOLE_OL_3857F 1.134 2.360 0.790 1.639 # n=2
+score XMAILER_MIMEOLE_OL_3AC1D 3.399 3.399 1.225 2.273 # n=2
+score XMAILER_MIMEOLE_OL_3D61D 2.599 0.838 1.615 2.305 # n=2
+score XMAILER_MIMEOLE_OL_465CD 0 # n=0 n=1 n=2 n=3
+score XMAILER_MIMEOLE_OL_4B815 2.497 1.907 2.080 1.591 # n=2
+score XMAILER_MIMEOLE_OL_4BF4C 2.499 1.558 2.499 0.768 # n=2
+score XMAILER_MIMEOLE_OL_4EEDB 2.499 0.652 1.805 0.385 # n=2
+score XMAILER_MIMEOLE_OL_4F240 2.096 0.351 2.227 1.852 # n=2
+score XMAILER_MIMEOLE_OL_58CB5 2.005 1.162 2.079 1.917 # n=2
+score XMAILER_MIMEOLE_OL_5B79A 1.581 1.913 0.959 0.076 # n=2
+score XMAILER_MIMEOLE_OL_6554A 2.499 0.535 2.221 2.437 # n=2
+score XMAILER_MIMEOLE_OL_72641 0 # n=0 n=1 n=2 n=3
+score XMAILER_MIMEOLE_OL_7533E 2.699 2.022 1.890 2.283 # n=2
+score XMAILER_MIMEOLE_OL_812FF 2.499 2.223 2.026 0.612 # n=2
+score XMAILER_MIMEOLE_OL_83BF7 2.599 1.242 2.599 1.212 # n=2
+score XMAILER_MIMEOLE_OL_8627E 2.549 2.550 2.531 2.422 # n=2
+score XMAILER_MIMEOLE_OL_8E893 0 # n=0 n=1 n=2 n=3
+score XMAILER_MIMEOLE_OL_91287 2.522 2.417 1.544 1.873 # n=2
+score XMAILER_MIMEOLE_OL_9B90B 2.499 1.615 2.499 2.056 # n=2
+score XMAILER_MIMEOLE_OL_A50F8 0 # n=0 n=1 n=2 n=3
+score XMAILER_MIMEOLE_OL_A842E 0 # n=0 n=1 n=2 n=3
+score XMAILER_MIMEOLE_OL_ADFF7 1.652 2.389 1.949 0.245 # n=2
+score XMAILER_MIMEOLE_OL_B30D1 2.599 2.103 1.644 1.425 # n=2
+score XMAILER_MIMEOLE_OL_B4B40 2.168 1.820 2.255 1.825 # n=2
+score XMAILER_MIMEOLE_OL_B9B11 0 # n=0 n=1 n=2 n=3
+score XMAILER_MIMEOLE_OL_BC7E6 1.588 0.402 1.313 0.807 # n=2
+score XMAILER_MIMEOLE_OL_C65FA 2.237 1.313 1.593 1.527 # n=2
+score XMAILER_MIMEOLE_OL_CAC8F 1.431 1.729 0.712 1.577 # n=2
+score XMAILER_MIMEOLE_OL_CF0C0 2.499 0.831 0.576 0.324 # n=2
+score XMAILER_MIMEOLE_OL_EF20B 0 # n=0 n=1 n=2 n=3
+score XMAILER_MIMEOLE_OL_EF222 0 # n=0 n=1 n=2 n=3
+score XMAILER_MIMEOLE_OL_F3B05 2.499 1.219 2.176 1.873 # n=2
+score XMAILER_MIMEOLE_OL_F475E 2.499 1.124 2.271 0.142 # n=2
+score XMAILER_MIMEOLE_OL_F6D01 2.499 1.773 1.190 2.162 # n=2
+score XMAILER_MIMEOLE_OL_FF5C8 2.499 1.804 2.239 1.134 # n=2
+score X_IP 0.001 0.001 0.001 0.001
+score X_MAILER_CME_6543_MSN 2.886 2.004 3.002 3.348
+score X_MESSAGE_INFO 0 # n=0 n=1 n=2 n=3
+score X_PRIORITY_CC 0 # n=0 n=1 n=2 n=3
+score YAHOO_DRS_REDIR 0 # n=0 n=1 n=2 n=3
+score YAHOO_RD_REDIR 0 # n=0 n=1 n=2 n=3
+
+# End of generated scores.  </gen:mutable>
+
+# Bug 6394, score 1.5 is too high, depends on local traffic
+score FREEMAIL_ENVFROM_END_DIGIT 0.1
+# Bug 6022, settle at informative score
+score TVD_RCVD_IP 0.001
+score TVD_RCVD_IP4 0.001
+# Bug 6280, 5690, settle at informative score
+score BAD_ENC_HEADER 0.001
+
+###########################################################################
+
+ifplugin Mail::SpamAssassin::Plugin::Shortcircuit
+score SHORTCIRCUIT 0
+endif
+
+###########################################################################
+
+ifplugin Mail::SpamAssassin::Plugin::AccessDB
+score ACCESSDB 0
+endif
+
+###########################################################################
+
+ifplugin Mail::SpamAssassin::Plugin::BodyEval
+# <gen:mutable>
+score BLANK_LINES_80_90 0 # n=0 n=1 n=2 n=3
+score MPART_ALT_DIFF 2.246 0.724 0.595 0.790
+score MPART_ALT_DIFF_COUNT 2.799 1.483 1.199 1.112
+score TVD_STOCK1 0 # n=0 n=1 n=2 n=3
+# </gen:mutable>
+score TVD_SPACE_RATIO 0.001
+endif
+
+###########################################################################
+
+ifplugin Mail::SpamAssassin::Plugin::HTMLEval
+# <gen:mutable>
+score HTML_COMMENT_SAVED_URL 0.198 0.357 0.899 1.391
+score HTML_COMMENT_SHORT 0 # n=0 n=1 n=2 n=3
+score HTML_EMBEDS 0.001 0.001 1.171 1.799
+score HTML_EXTRA_CLOSE 0.001
+score HTML_FONT_FACE_BAD 0.001 0.289 0.286 0.981
+score HTML_FONT_LOW_CONTRAST 0.713 0.001 0.786 0.001
+score HTML_FONT_SIZE_HUGE 0.001
+score HTML_FONT_SIZE_LARGE 0.001
+score HTML_FORMACTION_MAILTO 0 # n=0 n=1 n=2 n=3
+score HTML_IFRAME_SRC 0 # n=0 n=1 n=2 n=3
+score HTML_IMAGE_ONLY_04 1.680 0.342 1.799 1.172
+score HTML_IMAGE_ONLY_08 0.585 1.781 1.845 1.651
+score HTML_IMAGE_ONLY_12 1.381 1.629 1.400 2.059
+score HTML_IMAGE_ONLY_16 1.969 1.048 1.199 1.092
+score HTML_IMAGE_ONLY_20 2.109 0.700 1.300 1.546
+score HTML_IMAGE_ONLY_24 2.799 1.282 1.328 1.618
+score HTML_IMAGE_ONLY_28 2.799 0.726 1.512 1.404
+score HTML_IMAGE_ONLY_32 2.196 0.001 1.172 0.001
+score HTML_IMAGE_RATIO_02 2.199 0.805 1.200 0.437
+score HTML_IMAGE_RATIO_04 2.089 0.610 0.607 0.556
+score HTML_IMAGE_RATIO_06 0.001 0.001 0.001 0.001
+score HTML_IMAGE_RATIO_08 0.001 0.001 0.001 0.001
+score HTML_OBFUSCATE_05_10 0.601 0.001 0.718 0.260
+score HTML_OBFUSCATE_10_20 0.174 1.162 0.588 0.093
+score HTML_OBFUSCATE_20_30 2.499 2.441 1.449 1.999
+score HTML_OBFUSCATE_30_40 0 # n=0 n=1 n=2 n=3
+score HTML_OBFUSCATE_50_60 0 # n=0 n=1 n=2 n=3
+score HTML_OBFUSCATE_70_80 0 # n=0 n=1 n=2 n=3
+score HTML_OBFUSCATE_90_100 0 # n=0 n=1 n=2 n=3
+score HTML_BADTAG_40_50 0 # n=0 n=1 n=2 n=3
+score HTML_BADTAG_50_60 0 # n=0 n=1 n=2 n=3
+score HTML_BADTAG_60_70 0 # n=0 n=1 n=2 n=3
+score HTML_BADTAG_90_100 0 # n=0 n=1 n=2 n=3
+score HTML_NONELEMENT_30_40 0.000 0.001 0.308 0.001
+score HTML_NONELEMENT_40_50 0 # n=0 n=1 n=2 n=3
+score HTML_NONELEMENT_60_70 0 # n=0 n=1 n=2 n=3
+score HTML_NONELEMENT_80_90 0 # n=0 n=1 n=2 n=3
+score HTML_TAG_BALANCE_BODY 1.247 0.712 0.628 1.157
+score HTML_TAG_BALANCE_HEAD 0.520 0.000 0.600 0.817
+score HTML_TAG_EXIST_BGSOUND 0 # n=0 n=1 n=2 n=3
+# </gen:mutable>
+
+# HTML control test
+score HTML_MESSAGE 0.001
+
+endif
+
+###########################################################################
+
+ifplugin Mail::SpamAssassin::Plugin::DNSEval
+# <gen:mutable>
+score RCVD_IN_BL_SPAMCOP_NET 0 1.246 0 1.347 # n=0 n=2
+score RCVD_IN_IADB_DK 0 -0.223 0 -0.095 # n=0 n=1 n=2
+score RCVD_IN_IADB_DOPTIN_GT50 0 # n=0 n=1 n=2 n=3
+score RCVD_IN_IADB_DOPTIN_LT50 0 -0.001 0 -0.001 # n=0 n=1 n=2
+score RCVD_IN_IADB_EDDB 0 # n=0 n=1 n=2 n=3
+score RCVD_IN_IADB_EPIA 0 # n=0 n=1 n=2 n=3
+score RCVD_IN_IADB_GOODMAIL 0 # n=0 n=1 n=2 n=3
+score RCVD_IN_IADB_LISTED 0 -0.380 0 -0.001 # n=0 n=2
+score RCVD_IN_IADB_LOOSE 0 # n=0 n=1 n=2 n=3
+score RCVD_IN_IADB_MI_CPEAR 0 # n=0 n=1 n=2 n=3
+score RCVD_IN_IADB_MI_CPR_30 0 # n=0 n=1 n=2 n=3
+score RCVD_IN_IADB_MI_CPR_MAT 0 -0.332 0 -0.000 # n=0 n=1 n=2
+score RCVD_IN_IADB_NOCONTROL 0 # n=0 n=1 n=2 n=3
+score RCVD_IN_IADB_OOO 0 # n=0 n=1 n=2 n=3
+score RCVD_IN_IADB_OPTIN 0 -2.057 0 -1.470 # n=0 n=1 n=2
+score RCVD_IN_IADB_OPTIN_GT50 0 -1.208 0 -0.007 # n=0 n=2
+score RCVD_IN_IADB_OPTIN_LT50 0 # n=0 n=1 n=2 n=3
+score RCVD_IN_IADB_OPTOUTONLY 0 # n=0 n=1 n=2 n=3
+score RCVD_IN_IADB_RDNS 0 -0.167 0 -0.235 # n=0 n=1 n=2
+score RCVD_IN_IADB_SENDERID 0 -0.001 0 -0.001 # n=0 n=2
+score RCVD_IN_IADB_SPF 0 -0.001 0 -0.059 # n=0 n=2
+score RCVD_IN_IADB_UNVERIFIED_1 0 # n=0 n=1 n=2 n=3
+score RCVD_IN_IADB_UNVERIFIED_2 0 # n=0 n=1 n=2 n=3
+score RCVD_IN_IADB_UT_CPEAR 0 # n=0 n=1 n=2 n=3
+score RCVD_IN_IADB_UT_CPR_30 0 # n=0 n=1 n=2 n=3
+score RCVD_IN_IADB_UT_CPR_MAT 0 -0.095 0 -0.001 # n=0 n=1 n=2
+score RCVD_IN_NJABL_CGI 0 # n=0 n=1 n=2 n=3
+score RCVD_IN_NJABL_MULTI 0 # n=0 n=1 n=2 n=3
+score RCVD_IN_NJABL_PROXY 0 0.208 0 2.224 # n=0 n=2
+score RCVD_IN_NJABL_RELAY 0 1.881 0 2.499 # n=0 n=2
+score RCVD_IN_NJABL_SPAM 0 1.466 0 1.249 # n=0 n=2
+score RCVD_IN_SBL 0 2.596 0 0.141 # n=0 n=2
+score RCVD_IN_SORBS_BLOCK 0 # n=0 n=1 n=2 n=3
+score RCVD_IN_SORBS_DUL 0 0.001 0 0.001 # n=0 n=2
+score RCVD_IN_SORBS_HTTP 0 2.499 0 0.001 # n=0 n=2
+score RCVD_IN_SORBS_MISC 0 # n=0 n=1 n=2 n=3
+score RCVD_IN_SORBS_SMTP 0 # n=0 n=1 n=2 n=3
+score RCVD_IN_SORBS_SOCKS 0 2.443 0 1.927 # n=0 n=2
+score RCVD_IN_SORBS_WEB 0 0.614 0 0.770 # n=0 n=2
+score RCVD_IN_SORBS_ZOMBIE 0 # n=0 n=1 n=2 n=3
+score RCVD_IN_XBL 0 0.724 0 0.375 # n=0 n=2
+score RCVD_IN_PBL 0 3.558 0 3.335 # n=0 n=2
+score DNS_FROM_AHBL_RHSBL 0 2.438 0 2.699 # n=0 n=2
+score NO_DNS_FOR_FROM 0 0.379 0 0.001 # n=0 n=2
+# </gen:mutable>
+
+# rfc-ignorant.org, disabled May 2011 due to poor hit rate and accuracy:
+# https://issues.apache.org/SpamAssassin/show_bug.cgi?id=6526
+score DNS_FROM_RFC_BOGUSMX 0
+score DNS_FROM_RFC_DSN 0
+
+# Spamhaus CSS does not appear in masschecks thus cannot be
+# scored by automated means.  Set an explicit score.
+score RCVD_IN_CSS 0 1.0 0 1.0
+
+# ReturnPath Certified
+# http://www.returnpath.net/internetserviceprovider/certification/
+# CERTIFIED is a subset of SAFE, thus the score is cumulative.
+# -2 + -3 = -5 points for CERTIFIED
+score RCVD_IN_RP_CERTIFIED 0.0 -3.0 0.0 -3.0
+score RCVD_IN_RP_SAFE 0.0 -2.0 0.0 -2.0
+
+# DNSWL
+score RCVD_IN_DNSWL_NONE 0 -0.0001 0 -0.0001
+score RCVD_IN_DNSWL_LOW 0 -0.7 0 -0.7
+score RCVD_IN_DNSWL_MED 0 -2.3 0 -2.3
+score RCVD_IN_DNSWL_HI 0 -5 0 -5
+
+# IADB
+score RCVD_IN_IADB_VOUCHED 0 -2.2 0 -2.2
+score RCVD_IN_IADB_DOPTIN 0 -4 0 -4
+score RCVD_IN_IADB_ML_DOPTIN 0 -6 0 -6
+
+# MAPS
+# MAPS is a commercial service.  If you pay for these, assign a score
+# so they will be checked.
+score RCVD_IN_MAPS_RBL 0
+score RCVD_IN_MAPS_DUL 0
+score RCVD_IN_MAPS_RSS 0
+score RCVD_IN_MAPS_OPS 0
+score RCVD_IN_MAPS_NML 0
+
+endif
+
+###########################################################################
+
+ifplugin Mail::SpamAssassin::Plugin::HeaderEval
+# <gen:mutable>
+score DATE_IN_FUTURE_03_06 3.399 2.426 2.997 3.027
+score DATE_IN_FUTURE_06_12 2.899 0.001 2.222 1.947
+score DATE_IN_FUTURE_12_24 2.603 2.489 3.199 3.199
+score DATE_IN_FUTURE_24_48 2.598 1.248 0.001 2.048
+score DATE_IN_FUTURE_48_96 2.384 0.813 1.078 2.181
+score DATE_IN_FUTURE_96_XX 2.614 3.028 2.851 3.087
+score DATE_IN_PAST_03_06 2.399 1.076 1.200 1.592
+score DATE_IN_PAST_06_12 1.699 1.103 1.274 1.543
+score DATE_IN_PAST_12_24 0.001 0.804 1.190 1.049
+score DATE_IN_PAST_24_48 1.109 0.485 0.624 1.340
+score DATE_IN_PAST_96_XX 2.600 2.070 1.233 3.405
+score FORGED_HOTMAIL_RCVD2 0.001 1.187 0.698 0.874
+score FORGED_YAHOO_RCVD 2.397 1.022 2.599 1.630
+score FROM_ILLEGAL_CHARS 2.192 2.059 0.240 0.036
+score HEADER_COUNT_CTYPE 0 # n=0 n=1 n=2 n=3
+score HEADER_COUNT_SUBJECT 0 # n=0 n=1 n=2 n=3
+score HEAD_ILLEGAL_CHARS 0 # n=0 n=1 n=2 n=3
+score LOCALPART_IN_SUBJECT 0.001 0.730 1.199 1.107
+score MISSING_HEADERS 0.915 1.207 1.204 1.021
+score MSGID_OUTLOOK_INVALID 3.899
+score RATWARE_EFROM 2.999
+score RATWARE_NAME_ID 3.099 0.309 3.099 0.247 # n=0
+score SORTED_RECIPS 1.801 2.474 1.791 2.499
+score SUBJ_ALL_CAPS 0.518 1.625 1.197 1.506
+score SUBJ_ILLEGAL_CHARS 0.620 1.105 0.448 1.518
+score SUSPICIOUS_RECIPS 2.499 2.497 2.139 2.510
+score UNRESOLVED_TEMPLATE 3.035 0.716 2.424 1.252
+# </gen:mutable>
+
+# ok_locales
+score CHARSET_FARAWAY_HEADER 3.200
+
+endif
+
+###########################################################################
+
+ifplugin Mail::SpamAssassin::Plugin::ImageInfo
+# <gen:mutable>
+score DC_GIF_UNO_LARGO 0.001 1.323 0.053 2.176 # n=2
+score DC_IMAGE_SPAM_HTML 0.500 0.141 1.808 0.810 # n=2
+score DC_IMAGE_SPAM_TEXT 0.100 0.123 0.323 0.242 # n=2
+score DC_PNG_UNO_LARGO 0.001 # n=0 n=1 n=2 n=3
+# </gen:mutable>
+
+endif
+
+###########################################################################
+
+ifplugin Mail::SpamAssassin::Plugin::MIMEEval
+# <gen:mutable>
+score BASE64_LENGTH_78_79 2.370 2.636 0.762 2.667 # n=2
+score BASE64_LENGTH_79_INF 1.379 2.019 0.583 1.502 # n=2
+score MIME_BAD_ISO_CHARSET 0 # n=0 n=1 n=2 n=3
+score MIME_BASE64_BLANKS 0.001 0.001 0.001 0.001
+score MIME_BASE64_TEXT 0.001 0.001 0.001 1.741
+score MIME_HTML_MOSTLY 0.354 0.001 0.725 0.428
+score MIME_HTML_ONLY 2.199 1.105 1.199 0.723
+score MISSING_MIME_HB_SEP 0.001 0.001 0.001 0.001
+score MULTIPART_ALT_NON_TEXT 0 # n=0 n=1 n=2 n=3
+# </gen:mutable>
+score MIME_QP_LONG_LINE 0.001
+
+# ok_locales
+score CHARSET_FARAWAY 3.200
+
+# we dare you
+# score HEAD_LONG 2.5
+# score MISSING_HB_SEP 2.5
+
+endif
+
+###########################################################################
+
+ifplugin Mail::SpamAssassin::Plugin::RelayEval
+# <gen:mutable>
+score NO_RDNS_DOTCOM_HELO 3.100 0.433 3.099 0.823
+score RCVD_HELO_IP_MISMATCH 1.680 1.186 2.362 2.368
+score RCVD_ILLEGAL_IP 3.399
+score RCVD_NUMERIC_HELO 0.001 0.865 0.001 1.164
+# </gen:mutable>
+
+# Informational rules about Received header parsing
+score NO_RELAYS -0.001
+score UNPARSEABLE_RELAY 0.001
+score HELO_STATIC_HOST -0.001
+
+# immutable (due to tflags userconf), see bug 5544
+# score ALL_TRUSTED -1.360 -1.440 -1.665 -1.800
+
+endif
+
+###########################################################################
+
+ifplugin Mail::SpamAssassin::Plugin::URIEval
+# <gen:mutable>
+score HTTPS_IP_MISMATCH 0 # n=0 n=1 n=2 n=3
+# </gen:mutable>
+score URI_TRUNCATED 0.001
+endif
+
+###########################################################################
+
+# Scores for tests that are scored manually or with isolated rescore runs.
+# Most are net tests, userconf tests, tests occuring with very low frequency,
+# or tests with many false positives.
+
+# GTUBE - Generic Test for Unsolicited Bulk Email
+score GTUBE 1000.000
+
+# we dare you
+# score FRAGMENTED_MESSAGE 2.5
+# score HIGH_CODEPAGE_URI 2.5
+
+# make the Bayes scores unmutable (as discussed in bug 4505)
+ifplugin Mail::SpamAssassin::Plugin::Bayes
+score BAYES_00  0  0 -1.5   -1.9
+score BAYES_05  0  0 -0.3   -0.5
+score BAYES_20  0  0 -0.001 -0.001
+score BAYES_40  0  0 -0.001 -0.001
+score BAYES_50  0  0  2.0    0.8
+score BAYES_60  0  0  2.5    1.5
+score BAYES_80  0  0  2.7    2.0
+score BAYES_95  0  0  3.2    3.0
+score BAYES_99  0  0  3.8    3.5
+endif
+
+# Informational rules about Received header parsing
+score NO_RECEIVED -0.001
+
+# Informational rule, URI parsing encountered an overlong URI
+
+# Informational rule, typically means corrupt corpus/input
+score NO_HEADERS_MESSAGE 0.001
+
+# ok_locales
+score HTML_CHARSET_FARAWAY 0.500
+score MIME_CHARSET_FARAWAY 2.450
+
+# rescore never changes the whitelist/blacklist scores
+ifplugin Mail::SpamAssassin::Plugin::WLBLEval
+score USER_IN_BLACKLIST 100.000
+score USER_IN_WHITELIST -100.000
+score USER_IN_DEF_WHITELIST -15.000
+score USER_IN_BLACKLIST_TO 10.000
+
+# not really false positives but the user wants spam!
+score USER_IN_WHITELIST_TO -6.000
+score USER_IN_MORE_SPAM_TO -20.000
+score USER_IN_ALL_SPAM_TO -100.000
+endif
+
+ifplugin Mail::SpamAssassin::Plugin::WhiteListSubject
+score SUBJECT_IN_WHITELIST -100
+score SUBJECT_IN_BLACKLIST 100
+endif # Mail::SpamAssassin::Plugin::WhiteListSubject
+
+ifplugin Mail::SpamAssassin::Plugin::SPF
+score USER_IN_SPF_WHITELIST -100.000
+score USER_IN_DEF_SPF_WL -7.500
+score ENV_AND_HDR_SPF_MATCH -0.5
+endif # Mail::SpamAssassin::Plugin::SPF
+
+# DKIM
+ifplugin Mail::SpamAssassin::Plugin::DKIM
+score USER_IN_DKIM_WHITELIST -100.000
+score USER_IN_DEF_DKIM_WL -7.500
+score DKIM_SIGNED 0.1
+score DKIM_VALID -0.1
+score DKIM_VALID_AU -0.1
+score DKIM_VERIFIED 0
+score DKIM_POLICY_SIGNALL 0
+score DKIM_POLICY_SIGNSOME 0
+score DKIM_POLICY_TESTING 0
+score DKIM_ADSP_CUSTOM_LOW 0.001
+score DKIM_ADSP_CUSTOM_MED 0.001
+score DKIM_ADSP_CUSTOM_HIGH 0.001
+score NML_ADSP_CUSTOM_LOW  0 0.7 0 0.7
+score NML_ADSP_CUSTOM_MED  0 1.2 0 0.9
+score NML_ADSP_CUSTOM_HIGH 0 2.6 0 2.5
+# <gen:mutable>
+score DKIM_ADSP_ALL        0 1.1 0 0.8
+score DKIM_ADSP_DISCARD    0 1.8 0 1.8
+score DKIM_ADSP_NXDOMAIN   0 0.8 0 0.9
+# </gen:mutable>
+endif # Mail::SpamAssassin::Plugin::DKIM
+
+ifplugin Mail::SpamAssassin::Plugin::AskDNS
+# <gen:mutable>
+score DKIMDOMAIN_IN_DWL 0 -3.5 0 -3.5
+score DKIMDOMAIN_IN_DWL_UNKNOWN  0 -0.01 0 -0.01
+# </gen:mutable>
+endif
+
+# Hashcash
+ifplugin Mail::SpamAssassin::Plugin::Hashcash
+score HASHCASH_20 -0.5
+score HASHCASH_21 -0.7
+score HASHCASH_22 -1.0
+score HASHCASH_23 -2.0
+score HASHCASH_24 -3.0
+score HASHCASH_25 -4.0
+score HASHCASH_HIGH -5.0
+score HASHCASH_2SPEND 0.1
+endif # Mail::SpamAssassin::Plugin::Hashcash
+
+# SPF
+# Note that the benefit for a valid SPF record is deliberately minimal; it's
+# likely that more spammers would quickly move to setting valid SPF records
+# otherwise.  The penalties for an *incorrect* record, however, are large.  ;)
+ifplugin Mail::SpamAssassin::Plugin::SPF
+score SPF_PASS -0.001
+score SPF_HELO_PASS -0.001
+# <gen:mutable>
+score SPF_FAIL 0 0.919 0 0.001 # n=0 n=2
+score SPF_HELO_FAIL 0 0.001 0 0.001 # n=0 n=2
+score SPF_HELO_NEUTRAL 0 0.001 0 0.112 # n=0 n=2
+score SPF_HELO_SOFTFAIL 0 0.896 0 0.732 # n=0 n=2
+score SPF_NEUTRAL 0 0.652 0 0.779 # n=0 n=2
+score SPF_SOFTFAIL 0 0.972 0 0.665 # n=0 n=2
+# </gen:mutable>
+endif # Mail::SpamAssassin::Plugin::SPF
+
+# URIDNSBL
+ifplugin Mail::SpamAssassin::Plugin::URIDNSBL
+# <gen:mutable>
+score URIBL_AB_SURBL 0 4.499 0 4.499 # n=0 n=2
+score URIBL_JP_SURBL 0 1.948 0 1.250 # n=0 n=2
+score URIBL_OB_SURBL 0 0.785 0 0.122 # n=0 n=2
+score URIBL_PH_SURBL 0 0.001 0 0.610 # n=0 n=2
+score URIBL_RHS_DOB 0 0.276 0 1.514 # n=0 n=2
+score URIBL_SBL 0 0.644 0 1.623 # n=0 n=2
+score URIBL_SC_SURBL 0 0.001 0 0.568 # n=0 n=2
+score URIBL_WS_SURBL 0 1.659 0 1.608 # n=0 n=2
+score URIBL_BLACK 0 1.775 0 1.725 # n=0 n=2
+score URIBL_GREY 0 1.084 0 0.424 # n=0 n=2
+score URIBL_DBL_SPAM 0 1.7 0 1.7
+# </gen:mutable>
+# score URIBL_GREY 0.25
+score URIBL_RED 0.001
+score URIBL_DBL_ERROR 0 0.001 0 0.001
+endif # Mail::SpamAssassin::Plugin::URIDNSBL
+
+# ReplaceTags
+ifplugin Mail::SpamAssassin::Plugin::ReplaceTags
+# <gen:mutable>
+score FRT_ADOBE2 0.001 1.099 0.221 0.877 # n=1
+score FRT_BIGGERMEM1 2.523 0.146 2.372 1.758 # n=2
+score FRT_DIPLOMA 0.000 1.548 0.787 1.599 # n=1
+score FRT_DISCOUNT 0 # n=0 n=1 n=2 n=3
+score FRT_DOLLAR 0 # n=0 n=1 n=2 n=3
+score FRT_ESTABLISH2 0 # n=0 n=1 n=2 n=3
+score FRT_FUCK2 0 # n=0 n=1 n=2 n=3
+score FRT_GUARANTEE1 0 # n=0 n=1 n=2 n=3
+score FRT_INVESTOR 0 # n=0 n=1 n=2 n=3
+score FRT_LEVITRA 0 # n=0 n=1 n=2 n=3
+score FRT_MEETING 0 # n=0 n=1 n=2 n=3
+score FRT_OFFER2 1.681 1.109 2.048 0.926 # n=2
+score FRT_OPPORTUN2 0 # n=0 n=1 n=2 n=3
+score FRT_PENIS1 2.299 2.293 1.029 0.731 # n=2
+score FRT_PRICE 0.001 # n=0 n=1 n=2 n=3
+score FRT_REFINANCE1 0 # n=0 n=1 n=2 n=3
+score FRT_ROLEX 2.699 2.183 1.440 2.699 # n=2
+score FRT_SEXUAL 0 # n=0 n=1 n=2 n=3
+score FRT_SOMA 0.000 3.280 2.099 2.871 # n=1
+score FRT_SOMA2 0.001 0.001 0.001 0.001 # n=1
+score FRT_STRONG1 0 # n=0 n=1 n=2 n=3
+score FRT_STRONG2 0 # n=0 n=1 n=2 n=3
+score FRT_SYMBOL 0 # n=0 n=1 n=2 n=3
+score FRT_TODAY2 0.480 0.693 1.988 0.905 # n=2
+score FRT_VALIUM1 0 # n=0 n=1 n=2 n=3
+score FRT_VALIUM2 0 # n=0 n=1 n=2 n=3
+score FRT_WEIGHT2 0 # n=0 n=1 n=2 n=3
+score FRT_XANAX1 0 # n=0 n=1 n=2 n=3
+score FRT_XANAX2 0 # n=0 n=1 n=2 n=3
+score FUZZY_AFFORDABLE 0 # n=0 n=1 n=2 n=3
+score FUZZY_AMBIEN 2.199 1.851 0.925 0.552
+score FUZZY_BILLION 0 # n=0 n=1 n=2 n=3
+score FUZZY_CPILL 0.001 0.001 0.001 0.001
+score FUZZY_CREDIT 1.699 1.413 0.601 1.678
+score FUZZY_ERECT 2.356 1.306 2.360 1.859
+score FUZZY_GUARANTEE 0 # n=0 n=1 n=2 n=3
+score FUZZY_MEDICATION 0 # n=0 n=1 n=2 n=3
+score FUZZY_MERIDIA 0 # n=0 n=1 n=2 n=3
+score FUZZY_MILLION 2.599 2.599 1.659 2.505
+score FUZZY_MONEY 0 # n=0 n=1 n=2 n=3
+score FUZZY_MORTGAGE 0 # n=0 n=1 n=2 n=3
+score FUZZY_OBLIGATION 0 # n=0 n=1 n=2 n=3
+score FUZZY_OFFERS 0 # n=0 n=1 n=2 n=3
+score FUZZY_PHARMACY 2.960 3.299 1.967 1.353
+score FUZZY_PHENT 2.799 1.647 1.540 2.662 # n=0
+score FUZZY_PRESCRIPT 0 # n=0 n=1 n=2 n=3
+score FUZZY_PRICES 1.821 0.720 2.210 2.311
+score FUZZY_REFINANCE 0 # n=0 n=1 n=2 n=3
+score FUZZY_REMOVE 0 # n=0 n=1 n=2 n=3
+score FUZZY_ROLEX 3.399 1.038 3.399 1.964 # n=0
+score FUZZY_SOFTWARE 0 # n=0 n=1 n=2 n=3
+score FUZZY_THOUSANDS 0 # n=0 n=1 n=2 n=3
+score FUZZY_VLIUM 0 # n=0 n=1 n=2 n=3
+score FUZZY_VIOXX 0 # n=0 n=1 n=2 n=3
+score FUZZY_VPILL 0.001 0.494 0.796 1.014
+score FUZZY_XPILL 2.202 1.752 2.799 2.799
+score SUBJECT_FUZZY_CHEAP 0.641 1.831 0.833 0.001 # n=0
+score SUBJECT_FUZZY_MEDS 0 # n=0 n=1 n=2 n=3
+score SUBJECT_FUZZY_PENIS 0 # n=0 n=1 n=2 n=3
+score SUBJECT_FUZZY_TION 0 # n=0 n=1 n=2 n=3
+score SUBJECT_FUZZY_VPILL 0 # n=0 n=1 n=2 n=3
+score TVD_FUZZY_DEGREE 0 # n=0 n=1 n=2 n=3
+score TVD_FUZZY_FINANCE 0 # n=0 n=1 n=2 n=3
+score TVD_FUZZY_FIXED_RATE 0 # n=0 n=1 n=2 n=3
+score TVD_FUZZY_MICROCAP 0 # n=0 n=1 n=2 n=3
+score TVD_FUZZY_PHARMACEUTICAL 0 # n=0 n=1 n=2 n=3
+score TVD_FUZZY_SYMBOL 0 # n=0 n=1 n=2 n=3
+# </gen:mutable>
+endif # Mail::SpamAssassin::Plugin::ReplaceTags
+
+# DCC
+ifplugin Mail::SpamAssassin::Plugin::DCC
+score DCC_CHECK        0  1.1   0  1.1
+score DCC_REPUT_00_12  0 -0.8   0 -0.4
+score DCC_REPUT_13_19  0 -0.1   0 -0.1
+score DCC_REPUT_70_89  0  0.1   0  0.1
+score DCC_REPUT_90_94  0  0.4   0  0.6
+score DCC_REPUT_95_98  0  0.7   0  1.0
+score DCC_REPUT_99_100 0  1.2   0  1.4
+endif # Mail::SpamAssassin::Plugin::DCC
+
+# Pyzor
+ifplugin Mail::SpamAssassin::Plugin::Pyzor
+# <gen:mutable>
+score PYZOR_CHECK 0 1.985 0 1.392 # n=0 n=2
+# </gen:mutable>
+endif # Mail::SpamAssassin::Plugin::Pyzor
+
+# Razor2
+ifplugin Mail::SpamAssassin::Plugin::Razor2
+# <gen:mutable>
+score RAZOR2_CHECK 0 1.729 0 0.922 # n=0 n=2
+score RAZOR2_CF_RANGE_51_100 0 0.365 0 0.500 # n=0 n=2
+score RAZOR2_CF_RANGE_E4_51_100 0 0.467 0 0.642 # n=0 n=2
+score RAZOR2_CF_RANGE_E8_51_100 0 2.430 0 1.886 # n=0 n=2
+# </gen:mutable>
+endif # Mail::SpamAssassin::Plugin::Razor2
+
+# TextCat
+ifplugin Mail::SpamAssassin::Plugin::TextCat
+score UNWANTED_LANGUAGE_BODY 2.800
+score BODY_8BITS 1.500
+endif # Mail::SpamAssassin::Plugin::TextCat
+
+# AntiVirus
+ifplugin Mail::SpamAssassin::Plugin::AntiVirus
+score MICROSOFT_EXECUTABLE 0.1
+score MIME_SUSPECT_NAME 0.1
+endif # Mail::SpamAssassin::Plugin::AntiVirus
+
+# VBounce - anti-bounce message ruleset.  All of these are informational,
+# and should not be scored as antispam rules; instead the user needs
+# to detect messages that hit ANY_BOUNCE_MESSAGE, and filter them aside
+# as spurious bounces.
+#
+score BOUNCE_MESSAGE     0.1
+score CRBOUNCE_MESSAGE   0.1
+score VBOUNCE_MESSAGE    0.1
+score ANY_BOUNCE_MESSAGE 0.1
+
+# another informational rule: this is for C/R responses to mail the user
+# really did sent -- the opposite of CRBOUNCE_MESSAGE.  some users might
+# like to block all C/R bounces, or filter them separately.
+#
+score CHALLENGE_RESPONSE 0.1
+
+# It's still quite common for non-spam senders to send mail from hosts with
+# no rDNS, or "dynamic-looking" rDNS.  Lock these down to low values;
+# some sites can increase them as a matter of local policy, and they
+# make great fodder for meta rules, too.
+#
+# score RDNS_NONE     0 1.1 0 0.7
+# score RDNS_DYNAMIC  0 0.5 0 0.5
+
+# bug 5110: lock to a static score to avoid FPs
+score EXTRA_MPART_TYPE     1.0
+
+
+ifplugin Mail::SpamAssassin::Plugin::MIMEHeader
+# <gen:mutable>
+score CTYPE_8SPACE_GIF 0 # n=0 n=1 n=2 n=3
+# </gen:mutable>
+endif
+
+ifplugin Mail::SpamAssassin::Plugin::HTTPSMismatch
+# <gen:mutable>
+score HTTPS_HTTP_MISMATCH 0.557 0.000 1.778 1.989 # n=1
+# </gen:mutable>
+endif
+
+ifplugin Mail::SpamAssassin::Plugin::MIMEHeader
+# <gen:mutable>
+score PART_CID_STOCK 0.001 0.001 0.001 0.000 # n=2
+# </gen:mutable>
+endif
+
+ifplugin Mail::SpamAssassin::Plugin::MIMEHeader
+# <gen:mutable>
+score PART_CID_STOCK_LESS 0.000 0.036 0.745 0.894 # n=2
+# </gen:mutable>
+endif
+
+ifplugin Mail::SpamAssassin::Plugin::MIMEHeader
+# <gen:mutable>
+score TVD_FW_GRAPHIC_NAME_LONG 0.001 0.648 0.836 1.293 # n=2
+# </gen:mutable>
+endif
+
+ifplugin Mail::SpamAssassin::Plugin::MIMEHeader
+# <gen:mutable>
+score TVD_FW_GRAPHIC_NAME_MID 0.600 0.001 0.389 0.095 # n=2
+# </gen:mutable>
+endif
+
+score JM_SOUGHT_FRAUD_1 0
+score JM_SOUGHT_FRAUD_2 0
+score JM_SOUGHT_FRAUD_3 0
+#score JM_SOUGHT_FRAUD_1 2.2
+#score JM_SOUGHT_FRAUD_2 2.2
+#score JM_SOUGHT_FRAUD_3 2.2
+
+score FREEMAIL_FROM     0.001
+score MSGID_MULTIPLE_AT 0.001
+
+# Bug 6155 c115
+score KB_RATWARE_OUTLOOK_08  0
+score KB_RATWARE_OUTLOOK_12  0
+score KB_RATWARE_OUTLOOK_16  0
+score KB_RATWARE_BOUNDARY    0

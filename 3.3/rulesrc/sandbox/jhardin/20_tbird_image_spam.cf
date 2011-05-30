@@ -1,0 +1,83 @@
+
+# 08/2009 image spams using specific pattern indicating tbird MUA forgery?
+# FP rate is _UNKNOWN_ so do NOT score this rule very high without testing!
+# Originally by John Hardin <jhardin@impsec.org>
+# with input from Alex Broens and Karsten Bräckelmann
+
+ifplugin Mail::SpamAssassin::Plugin::MIMEHeader
+  mimeheader __JPEG_ATTACH           Content-Type =~ /image\/jpeg/i
+endif
+
+header     __MUA_TBIRD             User-Agent =~ /Thunderbird/
+header     __MIME_BDRY_0D0D        Content-Type =~ /boundary="-{12}(?:0[1-9]){12}/
+
+meta       __FORGED_TBIRD_IMG      __MUA_TBIRD && __JPEG_ATTACH && __MIME_BDRY_0D0D
+
+describe   __FORGED_TBIRD_IMG      Possibly forged Thunderbird image spam
+
+
+# Additional meta spotted by Alex Broens.  Still might FP on legit mail with
+# manually typed addresses or undisclosed recipients.
+
+header     __TO_UNDISCLOSED        To =~ /undisclosed-recipients:/i
+header     __TO_NO_ARROWS_R        To !~ />$/
+
+meta       FORGED_TBIRD_IMG_ARROW  __FORGED_TBIRD_IMG && __TO_NO_ARROWS_R && !__TO_UNDISCLOSED
+
+describe   FORGED_TBIRD_IMG_ARROW  Likely forged Thunderbird image spam
+score      FORGED_TBIRD_IMG_ARROW  0.8
+
+# Try it against other stuff, too,
+# "To without <>" might be useful outside the context of image spam
+meta       TO_NO_BRKTS_HTML_IMG    __TO_NO_ARROWS_R && !__TO_UNDISCLOSED && HTML_MESSAGE && __ONE_IMG
+score      TO_NO_BRKTS_HTML_IMG    0.20
+
+meta       TO_NO_BRKTS_HTML_ONLY   __TO_NO_ARROWS_R && !__TO_UNDISCLOSED && MIME_HTML_ONLY
+score      TO_NO_BRKTS_HTML_ONLY   0.20
+
+meta       TO_NO_BRKTS_DYNIP       __TO_NO_ARROWS_R && !__TO_UNDISCLOSED && RDNS_DYNAMIC
+score      TO_NO_BRKTS_DYNIP       0.20
+
+meta       TO_NO_BRKTS_NORDNS      __TO_NO_ARROWS_R && !__TO_UNDISCLOSED && RDNS_NONE
+score      TO_NO_BRKTS_NORDNS      0.20
+
+ifplugin Mail::SpamAssassin::Plugin::FreeMail
+#  meta       TO_NO_BRKTS_FREEMAIL    __TO_NO_ARROWS_R && !__TO_UNDISCLOSED && (FREEMAIL_FROM || FREEMAIL_REPLYTO)
+  meta       TO_NO_BRKTS_FREEMAIL    __TO_NO_ARROWS_R && (FREEMAIL_FROM || FREEMAIL_REPLYTO)
+  score      TO_NO_BRKTS_FREEMAIL    0.20
+endif
+
+meta       TO_NO_BRKTS_FROM_RUNON   __TO_NO_ARROWS_R && !__TO_UNDISCLOSED && __FROM_RUNON
+meta       TO_NO_BRKTS_FROM_MSSP   __TO_NO_ARROWS_R && !__TO_UNDISCLOSED && FROM_MISSPACED
+score      TO_NO_BRKTS_FROM_MSSP   1.00
+describe   TO_NO_BRKTS_FROM_MSSP   Multiple formatting errors
+
+
+
+# The boundary *does* FP on legit mail.  However, all of KB's recent samples
+# have another thing in common -- direct MUA to MX spam!  Most unlikely with
+# an MUA like Thunderbird.
+
+meta       FORGED_TBIRD_IMG_TO_MX  __FORGED_TBIRD_IMG && __DOS_DIRECT_TO_MX
+
+describe   FORGED_TBIRD_IMG_TO_MX  Likely forged Thunderbird image spam
+score      FORGED_TBIRD_IMG_TO_MX  2.5
+
+
+# Another constraint.  No tiny images, and larger ones up to "less than
+# 640x480", as observed in the wild.
+
+ifplugin Mail::SpamAssassin::Plugin::ImageInfo
+  body       __ONE_IMG               eval:image_count('all',1,1)
+  body       __IMG_LE_300K           eval:pixel_coverage('all',62500,300000)
+
+  meta       FORGED_TBIRD_IMG_SIZE   __FORGED_TBIRD_IMG && __ONE_IMG && __IMG_LE_300K
+
+  describe   FORGED_TBIRD_IMG_SIZE   Likely forged Thunderbird image spam
+  score      FORGED_TBIRD_IMG_SIZE   0.8
+endif
+
+# Try some combinations not related to tbird forgery
+meta       IMG_DIRECT_TO_MX        __DOS_DIRECT_TO_MX && __JPEG_ATTACH && __ONE_IMG && __IMG_LE_300K
+score      IMG_DIRECT_TO_MX        0.20
+

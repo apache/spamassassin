@@ -1,0 +1,244 @@
+#
+#header		REPLYTO_MANY_AT	Reply-To =~ /\@.+\@/
+#describe	REPLYTO_MANY_AT	More than one @ in Reply-To:
+#
+#header		SENDER_MANY_AT	Sender =~ /\@.+\@/
+#describe	SENDER_MANY_AT	More than one @ in Sender:
+#
+#header		FROM_MANY_AT	From =~ /\@.+\@/
+#describe	FROM_MANY_AT	More than one @ in From:
+#
+
+header         RDNS_LOCALHOST  X-Spam-Relays-External =~ /^\[ ip=(?!127)\d+\.\d+\.\d+\.\d+ rdns=localhost(?:\.localdomain)? /i
+describe       RDNS_LOCALHOST  Sender's public rDNS is "localhost"
+
+#body		EU_SPAM_LAW	m,Directive 2000/31/EC of the European Parliament,i
+#describe	EU_SPAM_LAW	Quoting "European Parliament" spam law
+
+ifplugin Mail::SpamAssassin::Plugin::MIMEHeader
+  mimeheader   HTML_ATTACH    Content-Type =~ m,text/html;.+\.html?\b,i
+  describe     HTML_ATTACH    HTML attachment to bypass scanning?
+
+  mimeheader   OBFU_HTML_ATTACH    Content-Type =~ m,application/octet-stream;.+\.html?\b,i
+  describe     OBFU_HTML_ATTACH    HTML attachment with non-text MIME type
+
+  mimeheader   OBFU_TEXT_ATTACH    Content-Type =~ m,application/octet-stream;.+\.txt\b,i
+  describe     OBFU_TEXT_ATTACH    Text attachment with non-text MIME type
+
+  mimeheader   OBFU_DOC_ATTACH     Content-Type =~ m,application/octet-stream;.+\.(?:doc|rtf)\b,i
+  describe     OBFU_DOC_ATTACH     MS Document attachment with generic MIME type
+  score        OBFU_DOC_ATTACH     0.25
+
+  mimeheader   OBFU_PDF_ATTACH     Content-Type =~ m,application/octet-stream;.+\.pdf\b,i
+  describe     OBFU_PDF_ATTACH     PDF attachment with generic MIME type
+  score        OBFU_PDF_ATTACH     0.25
+endif
+
+# general case of spample observation
+#header         MUA_ONE_WORD       X-Mailer =~ /^[A-Za-z][a-z]*$/
+#describe       MUA_ONE_WORD       Single word X-Mailer: not CamelCase
+
+body           DEAR_BENEFICIARY		/^\s?(?:Dear\s|At+(?:ention|n):?\s?)Beneficiary\b/i
+describe       DEAR_BENEFICIARY		Dear Beneficiary:
+score          DEAR_BENEFICIARY		2.0
+
+body           DEAR_EMAIL_USER		/^\s?(?:Dear\s|Attention:?\s?)(?:E|Web)-?mail\s(?:account\s)?User\b/i
+describe       DEAR_EMAIL_USER		Dear Email User:
+score          DEAR_EMAIL_USER		3.0
+
+
+# from users list spamples 8/2009
+uri            URI_NUMERIC_CCTLD     m;^[a-z]+://(?:\d+\.){2,}[a-z][a-z]/;i
+describe       URI_NUMERIC_CCTLD     CCTLD URI with multiple numeric subdomains
+
+
+# From should have whitespace between the comment and the address
+# Better S/O, good enough for standalone rule
+header         FROM_MISSPACED        From =~ /^\s*"[^"]*"</
+describe       FROM_MISSPACED        From: missing whitespace
+
+# Poorer S/O than FROM_MISSPACED but better performance in metas
+header         __FROM_RUNON          From =~ /\S+<\w+/
+
+## To the same
+#header         TO_MISSPACED          To =~ /^\s*"[^"]*"</
+#describe       TO_MISSPACED          To: missing whitespace
+#score          TO_MISSPACED          0.25
+
+ifplugin Mail::SpamAssassin::Plugin::FreeMail
+  meta         FROM_MISSP_FREEMAIL   __FROM_RUNON && (FREEMAIL_FROM || FREEMAIL_REPLYTO)
+  describe     FROM_MISSP_FREEMAIL   From misspaced + freemail provider
+  score        FROM_MISSP_FREEMAIL   2.0
+endif
+
+meta           FROM_MISSP_MSFT       __FROM_RUNON && (__ANY_OUTLOOK_MUA || __HAS_MIMEOLE || __MIMEOLE_MS)
+describe       FROM_MISSP_MSFT       From misspaced + supposed Microsoft tool
+score          FROM_MISSP_MSFT       3.5
+
+meta           FROM_MISSP_DYNIP      __FROM_RUNON && RDNS_DYNAMIC
+describe       FROM_MISSP_DYNIP      From misspaced + dynamic rDNS
+score          FROM_MISSP_DYNIP      2.0
+
+
+# observed in spam 8/2009
+header         __MUA_EQ_ORG_1        ALL =~ /\nX-Mailer: ([^\n]+)\n.*Organization: \1\n/ism
+header         __MUA_EQ_ORG_2        ALL =~ /\nOrganization: ([^\n]+)\n.*X-Mailer: \1\n/ism
+meta           MAILER_EQ_ORG         __MUA_EQ_ORG_1 || __MUA_EQ_ORG_2
+describe       MAILER_EQ_ORG         X-Mailer: same as Organization:
+
+# observed in UCE 9/2009
+#header         __HDRS_LCASE          ALL =~ /\n(?:Reply-to|Message-id|Content-type|X-MSMail-priority|from|subject|to|Disposition-notification-to):/sm
+header         __HDRS_LCASE          ALL =~ /\n(?:Message-id|Content-type|X-MSMail-priority|from|subject|to|Disposition-notification-to):/sm
+tflags         __HDRS_LCASE          multiple
+meta           HDRS_LCASE            __HDRS_LCASE > 1
+describe       HDRS_LCASE            Odd capitalization of multiple message headers
+
+# observed in UCE from India, 9/2009
+header         MDN_BOTCHED           Disposition-notification-to =~ /<>/
+describe       MDN_BOTCHED           Malformed return receipt header
+
+# observed in spam 9/2009
+header         HDRS_MISSP            ALL =~ /\n(?:Subject|From):\S/ism
+describe       HDRS_MISSP            Misspaced headers
+score          HDRS_MISSP            2.0
+
+header         SPAMMY_MIME_BDRY_01  Content-Type =~ /boundary="\@\@BOUNDARY"/
+describe       SPAMMY_MIME_BDRY_01  Spammy MIME boundary string
+score          SPAMMY_MIME_BDRY_01  0.10
+
+# testing
+header         __TB_MIME_BDRY_NO_Z   Content-Type =~ /boundary="-{8,}(?:[1-9]){16}/
+meta           TBIRD_SUSP_MIME_BDRY  __MUA_TBIRD && __TB_MIME_BDRY_NO_Z
+describe       TBIRD_SUSP_MIME_BDRY  Unlikely Thunderbird MIME boundary
+
+# seen in a few HTML fraud spams
+rawbody        RUNON_SHY          /(?:\&shy;){3}/i
+describe       RUNON_SHY          Repeating soft hyphens
+score          RUNON_SHY          0.1
+
+# Seen all too often
+header         LAZY_LISTWASHING   To =~ /\@(?:example\.com|example\.domain|your\.domain|some\.domain|domain\.dom|somewhere\.tld|somewhere\.com|your\.?domain\.com|your\.favorite\.machine)\b/i
+describe       LAZY_LISTWASHING   Lazy spammer, painfully obvious bogus addresses
+score          LAZY_LISTWASHING   0.25
+
+# Little to work with
+body           __PLS_REVIEW       /\b(?:please|kindly)\s(?:(?:re)?view|see)(?:\s\w+)?\sattach(?:ed|ment)\b/i
+body           __DLND_ATTACH      /\bdownload\sthe\sattach(?:ed|ment)\b/i
+
+ifplugin Mail::SpamAssassin::Plugin::MIMEHeader
+  mimeheader   __DOC_ATTACH_MT    Content-Type =~ m,\bapplication/(?:msword|rtf|vnd\.ms-word|vnd\.openxmlformats-officedocument\.wordprocessingml\.document)\b,i
+  mimeheader   __DOC_ATTACH_FN1   Content-Type =~ /="[^"]+\.(?:docx?|rtf)"/i
+  mimeheader   __DOC_ATTACH_FN2   Content-Disposition =~ /="[^"]+\.(?:docx?|rtf)"/i
+  meta         __DOC_ATTACH       (__DOC_ATTACH_MT || __DOC_ATTACH_FN1 || __DOC_ATTACH_FN2)
+  mimeheader   __PDF_ATTACH_MT    Content-Type =~ m,\bapplication/pdf\b,i
+  mimeheader   __PDF_ATTACH_FN1   Content-Type =~ /="[^"]+\.pdf"/i
+  mimeheader   __PDF_ATTACH_FN2   Content-Disposition =~ /="[^"]+\.pdf"/i
+  meta         __PDF_ATTACH       (__PDF_ATTACH_MT || __PDF_ATTACH_FN1 || __PDF_ATTACH_FN2)
+endif
+
+ifplugin Mail::SpamAssassin::Plugin::FreeMail
+  meta         FREEMAIL_DOC_PDF     (__DOC_ATTACH || __PDF_ATTACH) && (FREEMAIL_FROM || FREEMAIL_REPLYTO)
+  describe     FREEMAIL_DOC_PDF     MS document or PDF attachment, from freemail
+  score        FREEMAIL_DOC_PDF     1.0
+
+  meta         FREEMAIL_RVW_ATTCH   (__PLS_REVIEW || __DLND_ATTACH) && FREEMAIL_DOC_PDF
+  describe     FREEMAIL_RVW_ATTCH   Please review attached document, from freemail
+  score        FREEMAIL_RVW_ATTCH   1.0
+endif
+
+body           END_FUTURE_EMAILS   /\bend future emails\b/i
+score          END_FUTURE_EMAILS   0.50
+describe       END_FUTURE_EMAILS   Unsubscribe
+
+body           AD_COMPLAINTS       /\bcomplaints about this ad+\b/i
+score          AD_COMPLAINTS       1.0
+describe       AD_COMPLAINTS       Complain about this spam
+
+# observed in bank phishing 09/2009
+rawbody        MISQ_HTML           /<\w{2,20}[^>=]{1,30}=[^"][^">]{1,30}[^=]"[\s>]/
+describe       MISQ_HTML           Unbalanced quotes in HTML tag
+
+# observed in bank phishing 09/2009
+uri            WIKI_IMG            m,^https?://[^/]+wiki[mp]edia\.org/.+\.(?:png|gif|jpe?g),i
+describe       WIKI_IMG            Image from wikipedia
+
+# observed in spam 09/2009
+header         SUBJ_RE_CLNCLN      Subject =~ /^\s*RE::/
+describe       SUBJ_RE_CLNCLN      Subject RE::
+
+uri            MANY_SUBDOM         m;^https?://(?:[^\./]{1,30}\.){6};
+describe       MANY_SUBDOM         Lots and lots of subdomain parts in a URI
+
+# by request of Benny Pedersen <me@junc.org> on the users list 10/9/2009
+meta           RFC_ABUSE_POST      (__DNS_FROM_RFC_ABUSE && __DNS_FROM_RFC_POST)
+describe       RFC_ABUSE_POST      Both abuse and postmaster missing on sender domain
+score          RFC_ABUSE_POST      0.01
+
+body           CALL_SKYPE            /\bCall this phone number [\w\s]{0,30}with Skype\b/
+
+# <SPAN> tags shouldn't appear in the midst of text
+rawbody        __SPAN_BEG_TEXT     /[a-z]{2}<(?i:span)\s/
+tflags         __SPAN_BEG_TEXT     multiple
+rawbody        __SPAN_END_TEXT     /[^;>]<\/(?i:span)>[a-z]{3}/
+tflags         __SPAN_END_TEXT     multiple
+meta           MANY_SPAN_IN_TEXT   (__SPAN_BEG_TEXT > 5) && (__SPAN_END_TEXT > 5)
+describe       MANY_SPAN_IN_TEXT   Many <SPAN> tags embedded within text
+
+rawbody        __FEEDPROXY         m;http://feedproxy\.google\.com/;
+tflags         __FEEDPROXY         multiple
+meta           MANY_GOOG_PROXY     __FEEDPROXY > 5
+describe       MANY_GOOG_PROXY     Many Google feedproxy URIs
+
+rawbody        __TINY_FLOAT         /\bstyle\s*=\s*"[^"]{0,40}?(?:(?:FONT-SIZE\s*:\s+\dpx|FLOAT\s*:\s+(?:right|left))(?:;\s+)?(?:(?!(?:FONT-SIZE|FLOAT))\w+:\s+\w+;?\s*)*){2}/i
+tflags         __TINY_FLOAT         multiple
+meta           MANY_TINY_FLOAT      __TINY_FLOAT > 5
+describe       MANY_TINY_FLOAT      Many small-font floating HTML elements - text obfuscation?
+
+
+# endless requests on the users list...
+header         __TO_EQ_FROM_1       ALL =~ /\nFrom:\s+(?:[^\n<]{0,80}<)?([^\n\s>]+)>?\n(?:[^\n]{1,100}\n)*To:\s+(?:[^\n]+<)?\1[>,\s\n]/ism
+header         __TO_EQ_FROM_2       ALL =~ /\nTo:\s+(?:[^\n<]{0,80}<)?([^\n\s>]+)>?\n(?:[^\n]{1,100}\n)*From:\s+(?:[^\n]+<)?\1[>,\s\n]/ism
+meta           __TO_EQ_FROM         (__TO_EQ_FROM_1 || __TO_EQ_FROM_2)
+describe       __TO_EQ_FROM         To: same as From:
+
+meta           TO_EQ_FM_HTML_ONLY   (__TO_EQ_FROM && MIME_HTML_ONLY)
+describe       TO_EQ_FM_HTML_ONLY   To == From and HTML only
+
+meta           TO_EQ_FM_DIRECT_MX   (__TO_EQ_FROM && __DOS_DIRECT_TO_MX)
+describe       TO_EQ_FM_DIRECT_MX   To == From and direct-to-MX
+
+meta           TO_EQ_FM_HTML_DIRECT  (__TO_EQ_FROM && MIME_HTML_ONLY && __DOS_DIRECT_TO_MX)
+describe       TO_EQ_FM_HTML_DIRECT  To == From and HTML only, direct-to-MX
+
+
+# Evaluate ReturnPath and blacklist collisions
+meta           __RP_SAFE_BRBL             RCVD_IN_RP_SAFE && __RCVD_IN_BRBL
+meta           __RP_CERTIFIED_BRBL        RCVD_IN_RP_CERTIFIED && __RCVD_IN_BRBL
+tflags         __RP_SAFE_BRBL             net nopublish
+tflags         __RP_CERTIFIED_BRBL        net nopublish
+meta           __RP_SAFE_ZEN              RCVD_IN_RP_SAFE && __RCVD_IN_ZEN
+meta           __RP_CERTIFIED_ZEN         RCVD_IN_RP_CERTIFIED && __RCVD_IN_ZEN
+tflags         __RP_SAFE_ZEN              net nopublish
+tflags         __RP_CERTIFIED_ZEN         net nopublish
+meta           __RP_SAFE_SORBS            RCVD_IN_RP_SAFE && __RCVD_IN_SORBS
+meta           __RP_CERTIFIED_SORBS       RCVD_IN_RP_CERTIFIED && __RCVD_IN_SORBS
+tflags         __RP_SAFE_SORBS            net nopublish
+tflags         __RP_CERTIFIED_SORBS       net nopublish
+meta           __RP_SAFE_NJABL            RCVD_IN_RP_SAFE && __RCVD_IN_NJABL
+meta           __RP_CERTIFIED_NJABL       RCVD_IN_RP_CERTIFIED && __RCVD_IN_NJABL
+tflags         __RP_SAFE_NJABL            net nopublish
+tflags         __RP_CERTIFIED_NJABL       net nopublish
+meta           __RP_SAFE_XBL              RCVD_IN_RP_SAFE && RCVD_IN_XBL
+meta           __RP_CERTIFIED_XBL         RCVD_IN_RP_CERTIFIED && RCVD_IN_XBL
+tflags         __RP_SAFE_XBL              net nopublish
+tflags         __RP_CERTIFIED_XBL         net nopublish
+meta           __RP_SAFE_PSBL             RCVD_IN_RP_SAFE && RCVD_IN_PSBL
+meta           __RP_CERTIFIED_PSBL        RCVD_IN_RP_CERTIFIED && RCVD_IN_PSBL
+tflags         __RP_SAFE_PSBL             net nopublish
+tflags         __RP_CERTIFIED_PSBL        net nopublish
+meta           __RP_SAFE_ANBREP_L3        RCVD_IN_RP_SAFE && RCVD_IN_ANBREP_L3
+meta           __RP_CERTIFIED_ANBREP_L3   RCVD_IN_RP_CERTIFIED && RCVD_IN_ANBREP_L3
+tflags         __RP_SAFE_ANBREP_L3        net nopublish
+tflags         __RP_CERTIFIED_ANBREP_L3   net nopublish
+
+

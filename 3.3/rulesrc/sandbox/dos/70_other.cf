@@ -1,0 +1,310 @@
+########################################################################
+#
+# <@LICENSE>
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to you under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at:
+# 
+#     http://www.apache.org/licenses/LICENSE-2.0
+# 
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# </@LICENSE>
+#
+########################################################################
+
+
+# Russian dating spams that usually have email addresses at domains listed
+# by URIBL and sometimes SURBL -- that we won't check
+body	__DOS_COMING_TO_YOUR_PLACE	/I (?:am|might(?: be)?) c[a-z]?o[a-z]?m[a-z]?(?:i[a-z]?n[a-z]?g[a-z]{0,2}|e down) to y[!a-z]{2,4}r (?:city|place[a-z]{0,2}|co[a-z]?u[a-z]?n[a-z]?t[a-z]?ry) in (?:f[a-z]?e[a-z]?w|\d{1,2}) (?:day|week)s/
+body	__DOS_MEET_EACH_OTHER		/(?:meet each other|[Mm]ay ?be we can meet)/
+body	__DOS_DROP_ME_A_LINE		/Drop me a line at/
+body	__DOS_CORRESPOND_EMAIL		/correspond with me using my email/
+body	__DOS_EMAIL_DIRECTLY		/(?:Email m[a-z]?e|address) direc(?:tl|lt)y at/
+body	__DOS_WRITE_ME_AT		/[Ww].?r.?i.?t.?e me at/
+body	__DOS_PERSONAL_EMAIL		/personal email at/
+body	__DOS_I_AM_25			/I a.?m 25/
+meta	DOS_YOUR_PLACE	(__DOS_COMING_TO_YOUR_PLACE && __DOS_MEET_EACH_OTHER && (__DOS_DROP_ME_A_LINE || __DOS_CORRESPOND_EMAIL || __DOS_EMAIL_DIRECTLY || __DOS_I_AM_25 || __DOS_WRITE_ME_AT || __DOS_PERSONAL_EMAIL))
+describe	DOS_YOUR_PLACE		Russian dating spam
+
+
+# Domain Listing Center
+body	__DOS_DOM_LIST_CENTER		/Domain Listing Center/
+body	__DOS_NOT_A_BILL		/THIS IS NOT A BILL/
+body	__DOS_SUB_SEARCH_ENGINE		/Submission to \d{2,4} search engines/
+header  __DOS_FINAL_NOTICE_DL		Subject =~ /Final Notice of Domain Listing/
+meta	DOS_DOM_LIST_CENTER		(__DOS_DOM_LIST_CENTER && __DOS_NOT_A_BILL && __DOS_SUB_SEARCH_ENGINE && __DOS_FINAL_NOTICE_DL)
+describe	DOS_DOM_LIST_CENTER	Final notice for search engine submission
+
+
+# Stock's with prices containing 'O'
+body	__DOS_STOCK_COMPANY		/Company: /
+body	__DOS_STOCK_TICKER		/Ticker: /
+body	__DOS_STOCK_O_PRICE		/(?:Current|Target)(?: Price)?:\s+\$(?:O\.|\d\.O)/
+meta	DOS_STOCK_O_PRICE		(__DOS_STOCK_COMPANY && __DOS_STOCK_TICKER && __DOS_STOCK_O_PRICE)
+describe	DOS_STOCK_O_PRICE	Stocks with 'oh', rather than 'zero' values
+
+
+# http://www.squirrelmail.org/docs/user/user-3.html#ss3.1
+# mids: 1123.145.23.250.17.squirrel@webserveraddress
+# Message-ID: <1252.10.145.1.219.1157357908.squirrel@cyan.dostech.net>
+# X-Mailer: SquirrelMail (version 1.2.11)
+# User-Agent: SquirrelMail/1.4.4
+header __DOS_UA_SM	User-Agent =~ /SquirrelMail/
+header __DOS_MAILER_SM	X-Mailer =~ /SquirrelMail/
+header __DOS_RELAY_SM	Received =~ /SquirrelMail authenticated/
+header __DOS_SM_MID	Message-ID =~ /^<\d{4,8}(?:\.\d{1,3}){4}(?:\.\d{10})?\.squirrel\@[A-Za-z0-9._-]+>$/
+
+meta DOS_FAKE_SQUIRREL		(__DOS_MAILER_SM || __DOS_UA_SM) && (!__DOS_RELAY_SM || !__DOS_SM_MID)
+describe DOS_FAKE_SQUIRREL	Message contains faked SquirrelMail headers
+
+
+# your job must suck if you count how long you've had it by months after 10 or 20+ years
+body __DOS_LET_GO_JOB	/I was (?:let go|fired|layed off|dismissed) from a job I h(?:el|a)d for (?:2\d years|\d{3} months)/
+body __DOS_MY_OLD_JOB	/my old job/
+body __DOS_I_DRIVE_A	/I drive a/
+body __DOS_TAKING_HOME	/Taking home \d (?:digit level|figures) in \d{1,2} months/
+
+meta DOS_LET_GO_JOB	__DOS_LET_GO_JOB && __DOS_MY_OLD_JOB && __DOS_I_DRIVE_A && __DOS_TAKING_HOME
+describe DOS_LET_GO_JOB	Let go from their job and now makes lots of dough!
+
+
+# these shouldn't last long, but I'm curious... and need a mortgage
+body __DOS_488K_FIXED	/\$488,?\d{3}(?:\.00)? at a [0-3]\.\d{2}% fixed/
+body __DOS_372K_VARI	/\$372,?\d{3}(?:\.00)? at a [0-3]\.\d{2}% variable/
+body __DOS_492K_INT	/\$492,?\d{3}(?:\.00)? at a [0-3]\.\d{2}% interest/
+body __DOS_248K_FIXED	/\$248,?\d{3}(?:\.00)? at a [0-3]\.\d{2}% fixed/
+body __DOS_198K_VARI	/\$198,?\d{3}(?:\.00)? at a [0-3]\.\d{2}% variable/
+
+meta DOS_MORTGAGE	__DOS_488K_FIXED + __DOS_372K_VARI + __DOS_492K_INT + __DOS_248K_FIXED + __DOS_198K_VARI > 1
+
+
+# I won't be buying stocks from a stock broker who manages to spell stock wrong twice in a row
+body DOS_DOUBLE_SOTCK		/\b(s(?:otc|tco)k)\b.{15,50}\b\1\b/
+describe DOS_DOUBLE_SOTCK	Stock spelt wrong the same way twice in a row
+
+body DOS_TWO_MIS_STOCK		/\bs(?:otc|tco)k\b.{15,50}\bs(?:otc|tco)k\b/
+describe DOS_TWO_MIS_STOCK	Stock spelt wrong twice in a row
+
+
+# small bodied stock spams - Oct 19, 2006
+header __DOS_HAVE_TO_READ	Subject =~ /have to read/
+header __DOS_REQ_TO_READ	Subject =~ /require to read/
+
+body __DOS_TOLD_DAY		/have been told that (?:Mon|Tues|Wednes|Thurs|Fri)day is the day/
+body __DOS_OIL_EXCEED		/oil \w{2,20} exceeded all its expectations/
+body __DOS_DEAL_MAKE_MONEY	/is the \w{2,20} deal and those who knows it is making money/
+body __DOS_GREAT_DRAWN_UP	/great \w{2,20} are drawn up/
+body __DOS_KEY_GET_IN_EARLY	/key is getting in early/
+body __DOS_INCREASE_UP		/increase is up/
+body __DOS_WASTE_TIME_MISS	/(?:waste time|loss moment) and miss out/
+body __DOS_NO_STOPPING		/no stopping this one/
+
+meta DOS_TO_READ_STOCK		(__DOS_HAVE_TO_READ || __DOS_REQ_TO_READ) + __DOS_TOLD_DAY + __DOS_OIL_EXCEED + __DOS_DEAL_MAKE_MONEY + __DOS_GREAT_DRAWN_UP + __DOS_KEY_GET_IN_EARLY + __DOS_INCREASE_UP + __DOS_WASTE_TIME_MISS + __DOS_NO_STOPPING > 4
+
+describe DOS_TO_READ_STOCK	Stock pumping you just have to read
+## score DOS_TO_READ_STOCK		2.0
+
+
+# text messages from my phone to email addresses often end up with a score of 4.9+
+header		__BELL_MOBILITY_RELAY	X-Spam-Relays-External =~ /^[^\]]+ rdns=mail\.txt\.bellmobilite\.ca helo=erwdbmgweb02\.bellmobilite\.ca /
+meta		BELL_MOBILITY_TXT_MSG	INVALID_DATE && MISSING_SUBJECT && FROM_STARTS_WITH_NUMS && __BELL_MOBILITY_RELAY
+describe	BELL_MOBILITY_TXT_MSG	Adjustment for poorly formatted text->email messages
+tflags		BELL_MOBILITY_TXT_MSG	nice
+## score		BELL_MOBILITY_TXT_MSG	-4.0
+
+
+# <puppyforslae.com@rfidalliancelabs.com>
+header		DOS_DOT_COM_AT	Envelope-From:addr =~ /^[^=]+\.com\@[^\@]+$/
+describe	DOS_DOT_COM_AT	Envelope-From has a domain.com@anotherdomain.com
+
+
+# pump and dump stock spam claiming to be sent by The Bat!
+header	__DOS_RCVD_MON	Received =~ / Mon, /
+header	__DOS_RCVD_TUE	Received =~ / Tue, /
+header	__DOS_RCVD_WED	Received =~ / Wed, /
+header	__DOS_RCVD_THU	Received =~ / Thu, /
+header	__DOS_RCVD_FRI	Received =~ / Fri, /
+header	__DOS_RCVD_SAT	Received =~ / Sat, /
+header	__DOS_RCVD_SUN	Received =~ / Sun, /
+
+body	__DOS_BODY_MON	/\bmon(?:day)?\b/i
+body	__DOS_BODY_TUE	/\btue(?:s(?:day)?)?\b/i
+body	__DOS_BODY_WED	/\bwed(?:nesday)?\b/i
+body	__DOS_BODY_THU	/\bthu(?:r(?:s(?:day)?)?)?\b/i
+body	__DOS_BODY_FRI	/\bfri(?:day)?\b/i
+body	__DOS_BODY_SAT	/\bsat(?:day)?\b/i
+body	__DOS_BODY_SUN	/\bsun(?:day)?\b/i
+
+meta	__DOS_REF_TODAY		(__DOS_RCVD_MON && __DOS_BODY_MON) || (__DOS_RCVD_TUE && __DOS_BODY_TUE) || (__DOS_RCVD_WED && __DOS_BODY_WED) || (__DOS_RCVD_THU && __DOS_BODY_THU) || (__DOS_RCVD_FRI && __DOS_BODY_FRI) || (__DOS_RCVD_SAT && __DOS_BODY_SAT) || (__DOS_RCVD_SUN && __DOS_BODY_SUN)
+
+meta	__DOS_REF_NEXT_WK_DAY	(__DOS_RCVD_MON && __DOS_BODY_TUE) || (__DOS_RCVD_TUE && __DOS_BODY_WED) || (__DOS_RCVD_WED && __DOS_BODY_THU) || (__DOS_RCVD_THU && __DOS_BODY_FRI) || (__DOS_RCVD_FRI && __DOS_BODY_MON) || (__DOS_RCVD_SAT && __DOS_BODY_MON) || (__DOS_RCVD_SUN && __DOS_BODY_MON)
+
+meta	__DOS_REF_2_WK_DAYS	(__DOS_RCVD_MON && __DOS_BODY_WED) || (__DOS_RCVD_TUE && __DOS_BODY_THU) || (__DOS_RCVD_WED && __DOS_BODY_FRI) || (__DOS_RCVD_THU && __DOS_BODY_MON) || (__DOS_RCVD_FRI && __DOS_BODY_TUE) || (__DOS_RCVD_SAT && __DOS_BODY_TUE) || (__DOS_RCVD_SUN && __DOS_BODY_TUE)
+
+body		__DOS_BODY_STOCK	/\bstock\b/i
+body		__DOS_BODY_TICKER	/\b[A-Z]{4}\.(?:OB|PK)\b/
+
+meta		DOS_STOCK_BAT		__THEBAT_MUA && (__DOS_BODY_STOCK || __DOS_BODY_TICKER) && (__DOS_REF_TODAY || __DOS_REF_NEXT_WK_DAY || __DOS_REF_2_WK_DAYS)
+describe	DOS_STOCK_BAT		Probable pump and dump stock spam
+
+body		__DOS_FIN_ADVANTAGE	/\bfinancial advantage/i
+body		__DOS_STRONG_CF		/\bstrong cash flow/i
+body		__DOS_STEADY_COURSE	/\bsteady (?:and increasing )?course\b/i
+
+meta		DOS_STOCK_BAT2		DOS_STOCK_BAT && (__DOS_FIN_ADVANTAGE + __DOS_STRONG_CF + __DOS_STEADY_COURSE > 2)
+
+
+# http://www.fod*rx.com
+# http://www.rx555*com
+uri DOS_URI_ASTERISK    m{^[Hh][Tt]{2}[Pp][Ss]?://[^/:]+(?:\*[A-Za-z0-9-]*\.|\*)[A-Za-z]{2,3}(?:\.[A-Za-z]{2})?(?:$|:|/)}
+describe DOS_URI_ASTERISK       Found an asterisk in a URI
+## score DOS_URI_ASTERISK  1.5
+
+
+header __DOS_SINGLE_EXT_RELAY   X-Spam-Relays-External =~ /^\[ [^\]]+ \]$/
+body __DOS_HI                   /^Hi,$/
+body __DOS_LINK                 /\blink\b/
+uri __DOS_HAS_ANY_URI		/./
+
+meta DOS_FIX_MY_URI             __MIMEOLE_1106 && __DOS_HAS_ANY_URI && __DOS_SINGLE_EXT_RELAY && __DOS_HI && __DOS_LINK
+describe DOS_FIX_MY_URI         Looks like a "fix my obfu'd URI please" spam
+#score DOS_FIX_MY_URI            1.2
+
+
+# 20070405 - pump and dump income statement spam
+body __DOS_SYMBOL_4	/\bSymbol [A-Z]{4}\b/
+body __DOS_HEADLINES	/\bHeadlines\b/
+
+body DOS_PROVISION4	/\bProvisionfor income taxes\b/
+describe DOS_PROVISION4	Provision for income taxes
+score DOS_PROVISION4	1.5
+
+body DOS_REPORT_FIN_INC		/\bReport of financial income\b/
+describe DOS_REPORT_FIN_INC	Report of financial income
+score DOS_REPORT_FIN_INC	0.5
+
+meta DOS_STOCK_INCOME_STATEMENT		DOS_REPORT_FIN_INC && DOS_PROVISION4 && __DOS_SYMBOL_4 && __DOS_HEADLINES
+describe DOS_STOCK_INCOME_STATEMENT	Pump and dump stock income statement spam
+score DOS_STOCK_INCOME_STATEMENT	1.5
+
+# 20070405 - pump and dump spam CDYV, generic version ([A-Z]{4} for CDYV)
+body DOS_STOCK_CDYV_GENERIC	/(?:Lookup|Sym8oL|Search for|Promoting sym|S\.umbol|Target sym|Campaign for): [A-Z]{4},?.{1,50}\b[Pp]rice/
+describe DOS_STOCK_CDYV_GENERIC	Pump and dump stock spam
+score DOS_STOCK_CDYV_GENERIC	2.5
+
+# 20070905 - GIF spam
+header __DOS_HAS_LIST_ID	exists:List-ID
+header __DOS_HAS_LIST_UNSUB	exists:List-Unsubscribe
+header __DOS_HAS_MAILING_LIST	exists:Mailing-List
+# we complete ignore(!) received headers we can't get "useful" info from, which screws up detecting direct-to-mx
+header __DOS_RELAYED_EXT	ALL-EXTERNAL =~ /(?:^|\n)[Rr][eE][cC][eE][iI][vV][eE][dD]:\s.+\n[Rr][eE][cC][eE][iI][vV][eE][dD]:\s/s
+meta __DOS_DIRECT_TO_MX		__DOS_SINGLE_EXT_RELAY && !__DOS_HAS_LIST_ID && !__DOS_HAS_LIST_UNSUB && !__DOS_HAS_MAILING_LIST && !__DOS_RELAYED_EXT
+
+meta DOS_OUTLOOK_TO_MX		__ANY_OUTLOOK_MUA && !__OE_MUA && __DOS_DIRECT_TO_MX && !DOS_OUTLOOK_TO_MX_IMAGE
+describe DOS_OUTLOOK_TO_MX	Delivered direct to MX with Outlook headers
+
+meta DOS_OUTLOOK_TO_MX_IMAGE		__ANY_OUTLOOK_MUA && !__OE_MUA && __DOS_DIRECT_TO_MX && __ANY_IMAGE_ATTACH
+describe DOS_OUTLOOK_TO_MX_IMAGE	Direct to MX with Outlook headers and an image
+
+meta DOS_OE_TO_MX		__OE_MUA && __DOS_DIRECT_TO_MX && !DOS_OE_TO_MX_IMAGE
+describe DOS_OE_TO_MX		Delivered direct to MX with OE headers
+
+meta DOS_OE_TO_MX_IMAGE		__OE_MUA && __DOS_DIRECT_TO_MX && __ANY_IMAGE_ATTACH
+describe DOS_OE_TO_MX_IMAGE	Direct to MX with OE headers and an image
+
+# 20070907 - Google "I'm feeling lucky" redirect
+uri DOS_GOOGLE_LUCKY_REDIRECT	  	m{^http://[^/]\.google\.[^/]/search?(?:.*&|&?)btnI=?}
+describe DOS_GOOGLE_LUCKY_REDIRECT	Invisible Google redirect using the "lucky button"
+
+# 20070911 - new-ish anal porn site spam
+# force publish it for scoring, it's the only spam I get that isn't caught
+header DOS_ANAL_SPAM_MAILER	X-mailer =~ /^[A-Z][a-z]{6}e \d\.\d{2}$/
+describe DOS_ANAL_SPAM_MAILER	X-mailer pattern common to anal porn site spam
+tflags DOS_ANAL_SPAM_MAILER	publish
+
+# 20071004 - new variant in the last few days
+header DOS_ANAL_SPAM_MAILER2	X-mailer =~ /^[A-Z][a-z]{6}e .* \d\.\d{2}$/
+describe DOS_ANAL_SPAM_MAILER2	X-mailer pattern common to porn site spam
+#tflags DOS_ANAL_SPAM_MAILER2	publish
+
+# 20070927 - sendmail specific check to detect forged received headers
+header DOS_FORGED_RCVD_QUADS    ALL-EXTERNAL =~ /(?:^|\n)Received:\s+from \[(\d{2,3}\.\d{1,3}.\d{1,3}\.\d{1,3})\] .+\nReceived:\s+from \[\1\] by \S+; /
+describe DOS_FORGED_RCVD_QUADS  Probable forged received header
+
+# 20080213 - generic DOS_FORGED_RCVD_QUADS_x
+header DOS_RCVD_IP_TWICE_A	X-Spam-Relays-External =~ /\[ ip=(?!127)([\d.]+) [^\[]*\bhelo=\S+ [^\[]*\[ ip=\1 /
+describe DOS_RCVD_IP_TWICE_A	Received from the same IP twice in a row
+
+header DOS_RCVD_IP_TWICE_B	X-Spam-Relays-External =~ /^\s*\[ ip=(?!127)([\d.]+) [^\[]*\[ ip=\1 [^\]]*\]\s*$/
+describe DOS_RCVD_IP_TWICE_B	Received from the same IP twice in a row (only one external relay)
+
+header DOS_RCVD_IP_TWICE_C	X-Spam-Relays-External =~ /^\s*\[ ip=(?!127)([\d.]+) [^\[]*\bhelo=(?:![\d.]{7,15}!)? [^\[]*\[ ip=\1 [^\]]*\]\s*$/
+describe DOS_RCVD_IP_TWICE_C	Received from the same IP twice in a row (only one external relay; empty or IP helo)
+
+# 20071108 - asks you to remove the dot from the end of the domain name
+body DOS_REMOVE_DOMAIN_DOT		/e(?:mov|let)e the (?:dot|period|point) from the end/
+meta DOS_REMOVE_DOMAIN_DOT_YAHOO	DOS_REMOVE_DOMAIN_DOT && FORGED_YAHOO_RCVD
+
+# 20071118 - web pharmacy spam
+body __DOS_MED_WHAT_COULD       /\bwhat (?:more|else) could you /i
+body __DOS_MED_NO_DIRECTION     /\bN0 (?:(?:medicinal|doctor) (?:directions|instructions|recommendations)|prescriptions needed)\b/
+body __DOS_MED_CAN_WEB_PHARM    /\b(?:Web-Based Canadian|Canadian On-Line) Pharmacy\b/i
+body __DOS_MED_MARK_DOWN        /\d{2}% (?:mark down|reduction)/i
+meta DOS_MED_CAN_PHARM_NOV07    __OE_MSGID_2 && __DOS_HAS_ANY_URI && ((__DOS_MED_WHAT_COULD && __DOS_MED_NO_DIRECTION) || ( __DOS_MED_CAN_WEB_PHARM && __DOS_MED_MARK_DOWN))
+
+# 20071220
+ifplugin Mail::SpamAssassin::Plugin::MIMEHeader
+  mimeheader    DOS_ZIP_HARDCORE        Content-Type =~ /^application\/zip;\sname="hardcore\.zip"$/
+  describe      DOS_ZIP_HARDCORE        hardcore.zip file attached; quite certainly a virus
+  score         DOS_ZIP_HARDCORE        2.5
+endif
+
+body            DOS_PLAYED_IN_HARDCORE  /played in hardcore porn/
+describe        DOS_PLAYED_IN_HARDCORE  Claims someone played in hardcore porn
+score           DOS_PLAYED_IN_HARDCORE  1.5
+
+meta DOS_HC_ZIP_VIRUS           DOS_ZIP_HARDCORE && DOS_PLAYED_IN_HARDCORE
+describe DOS_HC_ZIP_VIRUS       Hardcore porn virus spam
+score DOS_HC_ZIP_VIRUS          3.5
+
+# 20071227
+header DOS_PORN_BOUNDARY        Content-Type =~ /\bboundary="----\#(?:SUBSTANCE|CONTENT)_BOUNDARY"$/
+describe DOS_PORN_BOUNDARY      Content boundary common to porn spam
+score DOS_PORN_BOUNDARY         1.0
+
+# 20070225
+header X_MAILER_CME_6543_MSN	X-Mailer =~ /^CME-V6\.5\.4\.3; MSN\s*$/
+
+
+# 20070723
+header DOS_FAKE_UPS_TRACK_NUM	Subject =~ /UPS Tracking Number \d{10}/
+describe DOS_FAKE_UPS_TRACK_NUM	Invalid UPS Tracking Number in Subject
+
+# 2000818
+header __DOS_MSGID_DIGITS9 Message-ID =~ /<\d{9}\@.*>/
+header __DOS_MSGID_DIGITS10 Message-ID =~ /<1[013-9]\d{8}\@.*>/
+
+meta DOS_DEREK_AUG08    __DOS_SINGLE_EXT_RELAY && __DOS_HAS_ANY_URI && __NAKED_TO && __LAST_UNTRUSTED_RELAY_NO_AUTH && SPF_PASS && __TVD_MIME_ATT_TP && __CT_TEXT_PLAIN && (__DOS_MSGID_DIGITS9 || __DOS_MSGID_DIGITS10)
+
+# 20081030 - high bit mail sent direct to MX claiming to be The Bat!
+meta DOS_HIGH_BAT_TO_MX		__DOS_DIRECT_TO_MX && __HIGHBITS && __LAST_UNTRUSTED_RELAY_NO_AUTH && __THEBAT_MUA
+describe DOS_HIGH_BAT_TO_MX	The Bat! Direct to MX with High Bits
+
+# 20081101 - domain expiration/maintenance phishes
+uri DOS_PHISH_WWW_COM_BIZ	/^http:\/\/www\.[^.]+\.com\.[^.]+\.biz$/
+uri DOS_PHISH_WWW_COM_RU	/^http:\/\/www\.[^.]+\.com\.[^.]+\.ru$/
+
+# 20081105 - high bit body with no message id header
+meta DOS_BODY_HIGH_NO_MID       __HIGHBITS && MISSING_MID
+describe DOS_BODY_HIGH_NO_MID   High bit body and no message ID header
+
+# 20081111 - less conservative shot at highbit spam
+meta DOS_HIGHBIT_HDRS_BODY      __FROM_NEEDS_MIME && __SUBJECT_ENCODED_B64 && __FROM_ENCODED_B64 && __SUBJECT_NEEDS_MIME && __HIGHBITS
+describe DOS_HIGHBIT_HDRS_BODY  Headers need encoding and body is highbit

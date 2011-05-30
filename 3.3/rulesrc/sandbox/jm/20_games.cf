@@ -1,0 +1,7 @@
+
+header __GAMES_SUBJ   Subject =~ /^(?:GAMES|take 15 min and play a game|this is to cool|did you get your copy yet|This is completely free\.|Something for free\.\.\.\.\.|10 seconds to check out these games|No games, just free games\.|STOp\.\.\.\. Its FREE|you'll love this|here ya go|cool arcade games|Cool games, for free|Hot online games, all free\.|play games online|this is for you|you name it we got it|come on, you know you love online games|come get your games|free arcade games|dude, its free|come get it|HOT Games for real players|Stop, time to play!)$/
+
+body __GAMES_BODY     /(?: All the games you will ever want to play in one program\.|Come get your free games\. Over 1000 to choose from!|Want to get all the games you want\? Want them Free\? Check us out\.|Get on board and get all your free games in one place\.|FUN FUN FUN, 1000 way to have fun, all for free\.|Finally get all your game free online\. Come on in!|Now the internet is free\. Get over 1000 free games online\.|Come get your games for free, no gimmicks just free fun\.|Time to stop paying for the net, get ONE THOUSAND FREE GAMES!|The Net ROCKS! Get 1000 games for free, no tricks just GAMES!|Over a 1000 games for free\. Come check it out\.|What can we say, we got free games\. over 1000 of them\. check it out! This is no joke, 1000 games for FREE\. Click here!|No membership, no tricks, no gimmicks, just 1000 free games\.|Get your free games\.\.\. FOr FREE!|Free games, What more do we need to say?)/
+
+meta GAMES (__GAMES_SUBJ && __GAMES_BODY)
+

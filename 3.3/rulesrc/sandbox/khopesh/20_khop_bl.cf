@@ -1,0 +1,83 @@
+# From Adam Katz (khopesh) testing grounds and live channels
+# http://khopesh.com/Anti-spam
+
+### select rules from khop-bl
+# (warren's work has already covered most of what I'd add here)
+
+# Detect milter-greylist, scam-grey, postgrey, SQLgrey, and hopefully others
+header	 __GREYLISTING	ALL =~ /(?:^|\n)X-(?:Scam-Grey|Greylist(?:ing)?):\s/m
+header	 __GREYLISTED	ALL =~ /(?:^|\n)X-(?:Scam-Grey|Greylist(?:ing)?):\s+delay(?:ed)? (?:for )?\d+(?: ?s(?:ec(?:ond)?s?)?|:\d\d)/im
+
+meta KHOP_GREYED __GREYLISTED && (RDNS_NONE || RDNS_DYNAMIC || __HELO_NO_DOMAIN)
+describe KHOP_GREYED	Greylisted and sent from dynamically-named relay
+score	 KHOP_GREYED	0.1
+
+header	 __DKIM_EXISTS	exists:DKIM-Signature
+ifplugin Mail::SpamAssassin::Plugin::DKIM
+  meta	   DKIM_INVALID	__DKIM_EXISTS && !DKIM_VALID
+  describe DKIM_INVALID	DKIM-Signature header exists but is not valid
+endif
+
+#ifplugin Mail::SpamAssassin::Plugin::SPF
+# ifplugin Mail::SpamAssassin::Plugin::DKIM
+#   meta   __NOT_SPOOFED	ALL_TRUSTED || SPF_PASS || DKIM_VALID
+# else
+#   meta   __NOT_SPOOFED	ALL_TRUSTED || SPF_PASS
+# endif
+#else
+# ifplugin Mail::SpamAssassin::Plugin::DKIM
+#    meta   __NOT_SPOOFED	ALL_TRUSTED || DKIM_VALID
+# else
+#   # Neither DKIM nor SPF ... ugh.  Approximate by looking for just the header.
+#   header __DKIM_EXISTS        exists:DKIM-Signature
+#   meta   __NOT_SPOOFED       ALL_TRUSTED || __DKIM_EXISTS
+# endif
+#endif
+#
+meta       __NOT_SPOOFED	ALL_TRUSTED || SPF_PASS || DKIM_VALID
+tflags	   __NOT_SPOOFED	nice
+
+
+# Some tests:
+
+# This should be a cleaner representation of __DOS_RELAYED_EXT
+# ... but it is not ... its 10.3/66.1 pales vs DOS's 35.3/83.7 ... why?
+#header	 __MULTIPLE_EXT 	X-Spam-Relays-External =~ /...\[/
+# turns out I can just use !__DOS_SINGLE_EXT_RELAY and not need my own rule
+
+ifplugin Mail::SpamAssassin::Plugin::DNSEval # {
+
+# The DNSBL side of the Manitu iXhash zone, http://www.dnsbl.manitu.net/
+# Out-performs PSBL (72.98/0.12 spam/ham to PSBL's 48.69/0.36) at Intra2net:
+# http://www.intra2net.com/en/support/antispam/blacklist.php_dnsbl=RCVD_IN_NIX_SPAM.html
+# Since this is run by Heise and already decently advertised, I don't anticipate
+# problems testing here.  Flagged 'nopublish' to keep it in testing for now.
+header	 RCVD_IN_NIX_SPAM	eval:check_rbl('nix-spam-lastexternal','ix.dnsbl.manitu.net.')
+describe RCVD_IN_NIX_SPAM	Received via a relay in NiX Spam (heise.de)
+tflags	 RCVD_IN_NIX_SPAM	net nopublish	# 20091123
+
+# Limit SpamCop to LASTEXT like every other DNSBL ... why haven't we tried this?
+# ... and what a difference! @20091204, 21.59/2.59 became 3.80/0.07
+# ...                        @20091128, 18.87/2.16 became 5.30/0.09
+#header	 RCVD_IN_SPAMCOP	eval:check_rbl('spamcop-lastexternal', 'bl.spamcop.net.')
+header	 RCVD_IN_SPAMCOP	eval:check_rbl_txt('spamcop-lastexternal', 'bl.spamcop.net.', '(?i:spamcop)')
+describe RCVD_IN_SPAMCOP	Received via a relay in bl.spamcop.net
+tflags	 RCVD_IN_SPAMCOP	net nopublish	# 20091123
+
+# we have the non-lastext data; let's see how good it is if we clean it up a bit
+# we'll exclude anything that might have too much info relaying (mailling lists
+# and freemail).  my intuition is 35-50% spam, 2-4% ham, but we could get lucky.
+# the original version ensured multiple external relays and a hit in either 
+# spamcop or barracuda.  now i've added zen, and sorbs.
+#meta	 DNSBL_INDIRECT		!__DOS_SINGLE_EXT_RELAY && (RCVD_IN_BL_SPAMCOP_NET||__RCVD_IN_BRBL) && !(__VIA_ML||__DOS_HAS_LIST_UNSUB||__SENDER_BOT||__freemail_safe||RCVD_IN_SPAMCOP||RCVD_IN_BRBL_LASTEXT)
+meta	 DNSBL_INDIRECT		!__DOS_SINGLE_EXT_RELAY && (RCVD_IN_BL_SPAMCOP_NET||__RCVD_IN_BRBL||__RCVD_IN_ZEN||__RCVD_IN_SORBS) && !(__VIA_ML||__DOS_HAS_LIST_UNSUB||__SENDER_BOT||__freemail_safe||ALL_TRUSTED||RCVD_IN_SPAMCOP||RCVD_IN_BRBL_LASTEXT||RCVD_IN_SORBS_DUL)
+describe DNSBL_INDIRECT		Received indirectly through a relay in a DNSBL
+tflags	 DNSBL_INDIRECT		net nopublish	# 20091203
+meta	 DNSBL_INDIRECT_UNSAFE	(RCVD_IN_BL_SPAMCOP_NET||__RCVD_IN_BRBL||__RCVD_IN_ZEN||__RCVD_IN_SORBS) && !(ALL_TRUSTED||RCVD_IN_SPAMCOP||RCVD_IN_BRBL_LASTEXT||RCVD_IN_SORBS_DUL)
+describe DNSBL_INDIRECT_UNSAFE	Received ~indirectly through a relay in a DNSBL
+tflags	 DNSBL_INDIRECT_UNSAFE	net nopublish	# 20091207
+meta	 DNSBL_INDIRECT_UNSAFE_2	!(ALL_TRUSTED||RCVD_IN_SPAMCOP||RCVD_IN_BRBL_LASTEXT||RCVD_IN_SORBS_DUL) && (RCVD_IN_BL_SPAMCOP_NET+__RCVD_IN_BRBL+__RCVD_IN_ZEN+__RCVD_IN_SORBS+__RCVD_IN_NJABL >1)
+describe DNSBL_INDIRECT_UNSAFE_2	Received ~indirectly through a relay in 2+ DNSBLs
+tflags	 DNSBL_INDIRECT_UNSAFE_2	net nopublish	# 20091207
+
+endif # } Mail::SpamAssassin::Plugin::DNSEval

@@ -1,0 +1,8 @@
+# additional settings for JM_SOUGHT rules for SVN only; ensure that they are
+# not promoted into the main SpamAssassin ruleset, since they're distributed as
+# a much more frequently-updated optional add-on.
+
+tflags JM_SOUGHT_1  nopublish
+tflags JM_SOUGHT_2  nopublish
+tflags JM_SOUGHT_3  nopublish
+

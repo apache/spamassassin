@@ -1,0 +1,17 @@
+
+# the top-level directory for the automc stuff; ie. this dir
+TOP=/export/home/svn-trunk/masses/rule-qa/automc
+
+# a writable directory where automc can store its state
+MCTMP=/home/automc/tmp/automc
+
+# where the SVN checkout of SpamAssassin is.  This must be writable
+# by the automc user
+SADIR=/export/home/svn-trunk/
+
+# URL of the "ruleqa.cgi" script as installed
+RULEQA_URL=http://buildbot.spamassassin.org/ruleqa
+
+# these must match what's in ~/.corpus, cf. "masses/rule-qa/README.nightly"
+html=/home/automc/corpus/html
+

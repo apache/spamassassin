@@ -1,0 +1,61 @@
+#!/bin/sh
+
+echo "Using ssh-nightly-slave settings from $HOME/.corpus"
+. $HOME/.corpus
+
+host=`echo "$1" | perl -ne 's/:-j(\S+)$//;print'`
+opts=`echo "$1" | perl -ne 's/:-j(\S+)$// and print "-j $1"'`
+
+set -x
+set -e
+
+tar=tar
+[ -x /usr/sfw/bin/gtar ] && tar=/usr/sfw/bin/gtar
+
+cd $tree
+$tar cfz $tmp/tf \
+        --exclude="*.log" \
+        --exclude=".svn" \
+        --exclude="tmp" \
+        .
+
+[ "$clienttree" = "" ] && clienttree=tree
+
+# a rather rough-and-ready way to ensure any hangover mass-checks
+# from the previous set are killed, before we start these ones;
+# ||true ensures we carry on even if this fails.  ". envs" allows
+# host-specific aliases/paths to workaround platform issues
+ssh $host . envs \; \
+    pkill -15 -f perl || true
+ssh $host . envs \; \
+    pkill -9 -f perl || true
+
+ssh $host . envs \; \
+    rm -rf $clienttree/code \; \
+    mkdir -p $clienttree/code \; \
+    cd $clienttree/code \; \
+    tar xfz - < $tmp/tf 
+
+# source $HOME/envs to get whatever $PATH we need to use the correct perl.
+# (some hosts need to use /usr/local/bin/perl or $HOME/perl588/bin/perl
+# instead of /usr/bin/perl).  Host admins: if your host needs a custom
+# perl, here's where to prepend that to the $PATH!
+
+# rebuild to compile the blib modules for this platform.
+
+ssh $host . envs \; \
+    cd $clienttree/code \; \
+    perl Makefile.PL \; \
+    make clean \; \
+    perl Makefile.PL \; \
+    make < /dev/null > $tmp/remote_build.$host.log
+
+# use a cs_cache in $clienttree/cs_cache -- this is not removed
+# with the above "rm -rf" command
+ssh $host . envs \; \
+    cd $clienttree/code/masses \; \
+    TZ=UTC perl mass-check \
+        --cs_ssl --cs_verbose --cs_schedule_cache --cs_cachedir=../../cs_cache \
+        --reuse $opts \
+        --client $serverhost &
+

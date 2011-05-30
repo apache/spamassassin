@@ -1,0 +1,886 @@
+#!/usr/bin/perl -w
+
+# <@LICENSE>
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to you under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at:
+# 
+#     http://www.apache.org/licenses/LICENSE-2.0
+# 
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# </@LICENSE>
+
+use strict;
+use warnings;
+use re 'taint';
+
+use File::Spec;
+
+my $PREFIX          = '@@PREFIX@@';             # substituted at 'make' time
+my $DEF_RULES_DIR   = '@@DEF_RULES_DIR@@';      # substituted at 'make' time
+my $LOCAL_RULES_DIR = '@@LOCAL_RULES_DIR@@';    # substituted at 'make' time
+my $LOCAL_STATE_DIR = '@@LOCAL_STATE_DIR@@';    # substituted at 'make' time
+
+use lib '@@INSTALLSITELIB@@';                   # substituted at 'make' time
+
+BEGIN {
+  # Locate locally installed SA libraries *without* using FindBin, which
+  # generates warnings and causes more trouble than its worth.  We don't
+  # need to be too smart about this BTW.
+  my @bin = File::Spec->splitpath($0);
+  my $bin = (
+    $bin[0]
+    ? File::Spec->catpath( @bin[ 0 .. 1 ] )
+    : $bin[1]
+    )                                           # /home/jm/foo -> /home/jm
+    || File::Spec->curdir;                      # foo          -> .
+
+  # check to make sure it wasn't just installed in the normal way.
+  # note that ./lib/Mail/SpamAssassin.pm takes precedence, for
+  # building SpamAssassin on a machine where an old version is installed.
+  if (-e $bin.'/lib/Mail/SpamAssassin.pm'
+        || !-e '@@INSTALLSITELIB@@/Mail/SpamAssassin.pm' )
+  {
+    my $searchrelative;
+    $searchrelative = 1;    # disabled during "make install": REMOVEFORINST
+
+    # Firstly, are we running "make test" in the "t" dir?  the test files
+    # *need* to use 'blib', so that 'use bytes' is removed for pre-5.6 perls
+    # beforehand by the preproc.  However, ./spamassassin does not, as the
+    # preproc will have stripped out the "use rule files from cwd" code from
+    # Mail::SpamAssassin.  So we want to use blib just for the t scripts.
+    # This is disabled during the "make install" process.
+    if ($searchrelative && $bin eq '../' && -e '../blib/lib/Mail/SpamAssassin.pm')
+    {
+      unshift ( @INC, '../blib/lib' );
+    } else {
+      # These are common paths where the SA libs might be found.
+      foreach ( qw(lib ../lib/site_perl
+                ../lib/spamassassin ../share/spamassassin/lib))
+      {
+        my $dir = File::Spec->catdir( $bin, split ( '/', $_ ) );
+        if ( -f File::Spec->catfile( $dir, "Mail", "SpamAssassin.pm" ) )
+        { unshift ( @INC, $dir ); last; }
+      }
+    }
+  }
+}
+
+use Getopt::Long;
+use Pod::Usage;
+use Mail::SpamAssassin;
+use Mail::SpamAssassin::ArchiveIterator;
+use Mail::SpamAssassin::Util::Progress;
+use Mail::SpamAssassin::Logger qw(log_message);
+
+BEGIN {
+  # redirect __WARN__, but NOT until after the
+  # Mail::SpamAssassin::Logger class has been parsed.
+  # do not trap warnings here based on eval scope; evals are very
+  # common throughout.  die()s can be trapped in future though.
+  $SIG{__WARN__} = sub {
+    log_message("warn", $_[0]);
+  };
+};
+
+my %resphash = (
+  EX_OK          => 0,     # no problems
+  EX_USAGE       => 64,    # command line usage error
+  EX_DATAERR     => 65,    # data format error
+  EX_NOINPUT     => 66,    # cannot open input
+  EX_NOUSER      => 67,    # addressee unknown
+  EX_NOHOST      => 68,    # host name unknown
+  EX_UNAVAILABLE => 69,    # service unavailable
+  EX_SOFTWARE    => 70,    # internal software error
+  EX_OSERR       => 71,    # system error (e.g., can't fork)
+  EX_OSFILE      => 72,    # critical OS file missing
+  EX_CANTCREAT   => 73,    # can't create (user) output file
+  EX_IOERR       => 74,    # input/output error
+  EX_TEMPFAIL    => 75,    # temp failure; user is invited to retry
+  EX_PROTOCOL    => 76,    # remote error in protocol
+  EX_NOPERM      => 77,    # permission denied
+  EX_CONFIG      => 78,    # configuration error
+);
+
+
+sub print_version {
+  print "SpamAssassin version " . Mail::SpamAssassin::Version() . "\n"
+      . "  running on Perl version " . join(".", map { $_||=0; $_*1 } ($] =~ /(\d)\.(\d{3})(\d{3})?/ )) . "\n"
+    or die "error writing: $!";
+}
+
+sub print_usage_and_exit {
+  my ( $message, $respnam ) = @_;
+  $respnam ||= 'EX_USAGE';
+
+  if ($respnam eq 'EX_OK' ) {
+    print_version();
+    print("\n")  or die "error writing: $!";
+  }
+  pod2usage(
+    -verbose => 0,
+    -message => $message,
+    -exitval => $resphash{$respnam},
+    -input => "spamassassin-run.pod",
+    -pathlist => \@INC,
+  );
+}
+
+
+
+sub usage {
+  my ( $verbose, $message ) = @_;
+  my $ver = Mail::SpamAssassin::Version();
+
+  print "SpamAssassin version $ver\n"  or die "error writing: $!";
+  pod2usage( -verbose => $verbose, -message => $message, -exitval => 64, -input => "spamassassin-run.pod", -pathlist => \@INC );
+
+}
+
+# Check to make sure the script version and the module version matches.
+# If not, die here!  Also, deal with unchanged VERSION macro.
+if ($Mail::SpamAssassin::VERSION ne '@@VERSION@@' && '@@VERSION@@' ne "\@\@VERSION\@\@") {
+  die 'spamassassin: spamassassin script is v@@VERSION@@, but using modules v'.$Mail::SpamAssassin::VERSION."\n";
+}
+
+# by default:
+# - create user preference files
+# - have ArchiveIterator detect the input message format (file vs dir)
+#
+my %opt = ( 'create-prefs' => 1, 'format' => 'detect', cf => [] );
+
+my $doing_whitelist_operation = 0;
+my $count                     = 0;
+my @targets                   = ();
+my $exitvalue;
+
+my $init_results              = 0;
+my $progress;
+my $total_messages            = 0;
+
+# gnu_getopt is not available in Getopt::Long 2.24, see bug 732
+# gnu_compat neither.
+Getopt::Long::Configure(
+  qw(bundling no_getopt_compat no_auto_abbrev no_ignore_case));
+GetOptions(
+  'add-addr-to-blacklist=s'                 => \$opt{'add-addr-to-blacklist'},
+  'add-addr-to-whitelist=s'                 => \$opt{'add-addr-to-whitelist'},
+  'add-to-blacklist'                        => \$opt{'add-to-blacklist'},
+  'add-to-whitelist|W'                      => \$opt{'add-to-whitelist'},
+  'configpath|config-file|config-dir|c|C=s' => \$opt{'configpath'},
+  'create-prefs!'                           => \$opt{'create-prefs'},
+  'cf=s'                                    => \@{$opt{'cf'}},
+  'debug|D:s'                               => \$opt{'debug'},
+  'error-code|exit-code|e:i'                => \$opt{'error-code'},
+  'help|h|?'                                => \$opt{'help'},
+  'ipv4only|ipv4-only|ipv4'                 => \$opt{'force_ipv4'},
+  'lint'                                    => \$opt{'lint'},
+  'local-only|local|L'                      => \$opt{'local'},
+  'mbox'                                    => sub { $opt{'format'} = 'mbox'; },
+  'mbx'                                     => sub { $opt{'format'} = 'mbx'; },
+  'prefspath|prefs-file|p=s'                => \$opt{'prefspath'},
+  'remove-addr-from-whitelist=s'            => \$opt{'remove-addr-from-whitelist'},
+  'remove-from-whitelist|R'                 => \$opt{'remove-from-whitelist'},
+  'remove-markup|despamassassinify|d'       => \$opt{'remove-markup'},
+  'report|r'                                => \$opt{'report'},
+  'revoke|k'                                => \$opt{'revoke'},
+  'siteconfigpath=s'                        => \$opt{'siteconfigpath'},
+  'test-mode|test|t'                        => \$opt{'test-mode'},
+  'progress'                                => \$opt{'progress'},
+  'version|V'                               => \$opt{'version'},
+  'x'                                       => sub { $opt{'create-prefs'} = 0 },
+
+  #
+  # NOTE: These are old options.  We should ignore (but warn about)
+  # the ones that are now defaults.  Everything else gets a die (see note2)
+  # so the user doesn't get us doing something they didn't expect.
+  #
+  # NOTE2: 'die' doesn't actually stop the process, GetOptions() catches
+  # it, then passes the error on, so we'll end up doing a Usage statement.
+  # You can avoid that by doing an explicit exit in the sub.
+  #
+
+  # last in 2.3
+  'pipe|P'                => sub { warn "The -P option is deprecated as 'pipe mode' is now the default behavior, ignoring.\n" },
+  'F:i'                   => sub { warn "The -F option has been removed from spamassassin, please remove from your commandline and re-run.\n"; exit 2; },
+  'add-from!'             => sub { warn "The --add-from option has been removed from spamassassin, please remove from your commandline and re-run.\n"; exit 2; },
+
+  # last in 2.4
+  'stop-at-threshold|S'   => sub { warn "The -S option has been deprecated and is no longer supported, ignoring.\n" },
+
+  # last in 2.6
+  'log-to-mbox|l:s'       => sub { warn "The -l option has been deprecated and is no longer supported, ignoring.\n" },
+  'warning-from|w:s'      => sub { warn "The -w option has been removed from spamassassin, please remove from your commandline and re-run.\n"; exit 2; }, 
+  'whitelist-factory|M:s' => sub { warn "The -M option has been removed from spamassassin, please remove from your commandline and re-run.\n"; exit 2; },
+
+) or print_usage_and_exit();
+
+if ( defined $opt{'help'} ) {
+  print_usage_and_exit("For more information read the spamassassin man page.\n", 'EX_OK');
+}
+if ( defined $opt{'version'} ) {
+  print_version();
+  exit($resphash{'EX_OK'});
+}
+
+# set debug areas, if any specified (only useful for command-line tools)
+if (defined $opt{'debug'}) {
+  $opt{'debug'} ||= 'all';
+}
+
+if (Mail::SpamAssassin::Util::am_running_on_windows()) {
+  binmode(STDIN)  or die "cannot set binmode on STDIN: $!";  # bug 4363
+  binmode(STDOUT) or die "cannot set binmode on STDOUT: $!";
+}
+
+# bug 5048: --lint should not cause network accesses
+if ($opt{'lint'}) { $opt{'local'} = 1; }
+
+# create the tester factory
+my $spamtest = new Mail::SpamAssassin(
+  {
+    rules_filename      => $opt{'configpath'},
+    site_rules_filename => $opt{'siteconfigpath'},
+    userprefs_filename  => $opt{'prefspath'},
+    force_ipv4          => $opt{'force_ipv4'},
+    local_tests_only    => $opt{'local'},
+    debug               => $opt{'debug'},
+    dont_copy_prefs     => ( $opt{'create-prefs'} ? 0 : 1 ),
+    post_config_text    => join("\n", @{$opt{'cf'}})."\n",
+    require_rules       => 1,
+    PREFIX              => $PREFIX,
+    DEF_RULES_DIR       => $DEF_RULES_DIR,
+    LOCAL_RULES_DIR     => $LOCAL_RULES_DIR,
+    LOCAL_STATE_DIR     => $LOCAL_STATE_DIR,
+  }
+);
+
+if ($opt{'lint'}) {
+  $spamtest->debug_diagnostics();
+  my $res = $spamtest->lint_rules();
+  warn "lint: $res issues detected, please rerun with debug enabled for more information\n" if ($res);
+  # make sure we notice any write errors while flushing output buffer
+  close STDOUT  or die "error closing STDOUT: $!";
+  close STDIN   or die "error closing STDIN: $!";
+  exit $res ? 1 : 0;
+}
+
+if ($opt{'remove-addr-from-whitelist'} ||
+    $opt{'add-addr-to-whitelist'} ||
+    $opt{'add-addr-to-blacklist'})
+{
+  $spamtest->init(1);
+
+  if ( $opt{'add-addr-to-whitelist'} ) {
+    $spamtest->add_address_to_whitelist($opt{'add-addr-to-whitelist'}, 1);
+  }
+  elsif ( $opt{'remove-addr-from-whitelist'} ) {
+    $spamtest->remove_address_from_whitelist($opt{'remove-addr-from-whitelist'}, 1);
+  }
+  elsif ( $opt{'add-addr-to-blacklist'} ) {
+    $spamtest->add_address_to_blacklist($opt{'add-addr-to-blacklist'}, 1);
+  }
+  else {
+    die "spamassassin: oops! unhandled whitelist operation";
+  }
+
+  $spamtest->finish();
+  # make sure we notice any write errors while flushing output buffer
+  close STDOUT  or die "error closing STDOUT: $!";
+  close STDIN   or die "error closing STDIN: $!";
+  exit(0);
+}
+
+# if we're going to do white/black-listing, let's prep now...
+if ( $opt{'remove-from-whitelist'}
+  or $opt{'add-to-whitelist'}
+  or $opt{'add-to-blacklist'} )
+{
+  $doing_whitelist_operation = 1;
+  $spamtest->init(1);
+}
+
+# if we're doing things in test mode, force disable long-term memory
+# functions like autowhitelist and bayes autolearn.
+# XXX - feels like we need a plugin hook here so plugins can be made
+# aware and take appropriate action.
+if ($opt{'test-mode'}) {
+  $spamtest->{'conf'}->{'use_auto_whitelist'} = 0;
+  $spamtest->{'conf'}->{'bayes_auto_learn'} = 0;
+}
+
+###########################################################################
+# Deal with the target listing, and STDIN -> tempfile
+
+my $tempfile; # will be defined if stdin -> tempfile
+push(@targets, @ARGV);
+@targets = ('-') unless @targets;
+
+for(my $elem = 0; $elem <= $#targets; $elem++) {
+  # ArchiveIterator doesn't really like STDIN, so if "-" is specified
+  # as a target, make it a temp file instead.
+  if ( $targets[$elem] =~ /(?:^|:)-$/ ) {
+    if (defined $tempfile) {
+      # uh-oh, stdin specified multiple times?
+      warn "skipping extra stdin target (".$targets[$elem].")\n";
+      splice @targets, $elem, 1;
+      $elem--; # go back to this element again
+      next;
+    }
+    else {
+      my $handle;
+      ( $tempfile, $handle ) = Mail::SpamAssassin::Util::secure_tmpfile();
+      binmode $handle  or die "cannot set binmode on file $tempfile: $!";
+
+      # avoid slurping the whole file into memory, copy chunk by chunk
+      my($inbuf,$nread);
+      while ( $nread=sysread(STDIN,$inbuf,16384) )
+        { print {$handle} $inbuf  or die "error writing to $tempfile: $!" }
+      defined $nread  or die "error reading from STDIN: $!";
+      close $handle   or die "cannot close $tempfile: $!";
+
+      # re-aim the targets at the tempfile instead of STDIN
+      $targets[$elem] =~ s/-$/$tempfile/;
+    }
+  }
+
+  # make sure the target list is in the normal AI format
+  if ($targets[$elem] !~ /^[^:]*:[a-z]+:/) {
+    my $format = $opt{'format'} || 'detect';
+    $targets[$elem] = join ( ":", '', $format, $targets[$elem] );
+  }
+}
+
+###########################################################################
+
+setup_sig_handlers();
+
+# Everything below here needs ArchiveIterator ...
+my $iter = new Mail::SpamAssassin::ArchiveIterator(
+  {
+    'opt_all' => 1,
+    'opt_want_date' => 0
+  }
+);
+
+$iter->set_functions( \&wanted, \&result );
+
+# Go run the messages!
+# bug 4930: use a temp variable since "||=" decides whether or not to set the
+# value before the RHS is actually run, so if the RHS separately sets the LHS
+# variable, things don't work right.  Stupid global variables. ;)
+my $eval_stat;
+eval {
+  my $runreturn = !$iter->run(@targets);  $exitvalue ||= $runreturn;  1;
+} or do {
+  $eval_stat = $@ ne '' ? $@ : "errno=$!";  chomp $eval_stat;
+};
+
+$progress->final() if ($opt{progress} && $progress);
+
+# If we needed to make a tempfile, go delete it now.
+if (defined $tempfile) {
+  unlink $tempfile  or die "cannot unlink temporary file $tempfile: $!";
+  undef $tempfile;
+}
+
+# Let folks know how many messages were handled, as long as the handling
+# didn't produce output (ala: check, test, or remove_markup ...)
+if ( $opt{'report'} || $opt{'revoke'} || $doing_whitelist_operation ) {
+  print "$count message(s) examined.\n"  or die "error writing: $!";
+}
+
+# if the eval died from something, report it here and return an error.
+if (defined $eval_stat) { die $eval_stat; }
+
+$spamtest->finish()  if $spamtest;
+
+# make sure we notice any write errors while flushing output buffer
+close STDOUT  or die "error closing STDOUT: $!";
+close STDIN   or die "error closing STDIN: $!";
+# Ok, exit!
+exit( $exitvalue || 0 );
+
+###########################################################################
+
+sub init_results {
+  $init_results = 1;
+
+  return unless $opt{'progress'};
+
+  $total_messages = $Mail::SpamAssassin::ArchiveIterator::MESSAGES;
+
+  $progress = Mail::SpamAssassin::Util::Progress->new({total => $total_messages,});
+}
+
+###########################################################################
+
+sub result {
+  my ($class, $result, $time) = @_;
+
+  # don't open results files until we get here to avoid overwriting files
+  &init_results if !$init_results;
+
+  $progress->update($count) if ($opt{progress} && $progress);
+}
+
+###########################################################################
+
+my $mail;       # global, so signal handler can clean it up; bug 5626
+
+# make sure it only returns false values so that result_sub() isn't called...
+sub wanted {
+  my $dataref = $_[3];
+  $mail       = $spamtest->parse($dataref);
+  $count++;
+
+  # This is a short cut -- doing white/black-list?  Do it and return quickly.
+  if ($doing_whitelist_operation) {
+    if ( $opt{'add-to-whitelist'} ) {
+      $spamtest->add_all_addresses_to_whitelist($mail, 1);
+    }
+    elsif ( $opt{'remove-from-whitelist'} ) {
+      $spamtest->remove_all_addresses_from_whitelist($mail, 1);
+    }
+    elsif ( $opt{'add-to-blacklist'} ) {
+      $spamtest->add_all_addresses_to_blacklist($mail, 1);
+    }
+    else {
+      warn "spamassassin: oops! unhandled whitelist operation";
+    }
+
+    $mail->finish();
+    $mail = undef;
+    return 1;
+  }
+
+  # handle removing reports
+  if ( $opt{'remove-markup'} ) {
+
+    # If we're not going to retest, just remove the markup and print it out
+    if ( !$opt{'test-mode'} ) {
+      print $spamtest->remove_spamassassin_markup ($mail);
+      $mail->finish();
+      $mail = undef;
+      return 1;
+    }
+    else {
+
+      # remove the markup and retest it...  a little more tricky ...
+      # go ahead and remove the markup, then fake that the clean version
+      # was what was sent in
+      #
+      my $new_mail =
+        $spamtest->parse( $spamtest->remove_spamassassin_markup($mail) );
+
+      $mail->finish();
+      $mail = $new_mail;
+    }
+  }
+
+  # handle reporting and revoking
+  if ( $opt{'report'} || $opt{'revoke'} ) {
+
+    # Make sure the message is clean first ...
+    my $new_mail =
+      $spamtest->parse( $spamtest->remove_spamassassin_markup($mail) );
+    $mail->finish();
+    $mail = $new_mail;
+
+    my $failed;
+    if ( $opt{'report'} && !$spamtest->report_as_spam($mail) ) {
+      $failed = 'report';
+    }
+
+    if ( $opt{'revoke'} && !$spamtest->revoke_as_spam($mail) ) {
+      $failed = 'revoke';
+    }
+
+    if ($failed) {
+      warn "spamassassin: warning, unable to $failed message\n";
+      warn "spamassassin: for more information, re-run with -D option to see debug output\n";
+    }
+
+    $mail->finish();
+    $mail = undef;
+    return 1;
+  }
+
+  # OK, do checks and put out the message.
+  my $status = $spamtest->check($mail);
+  print $status->rewrite_mail()  or die "error writing: $!";
+
+  if ( $opt{'test-mode'} ) {
+    use bytes;
+    print $status->get_report()  or die "error writing: $!";
+  }
+
+  # if this message was spam, set the exit value appropriately.
+  if ( defined $opt{'error-code'} && $status->is_spam() && !defined $exitvalue )
+  {
+    $exitvalue = $opt{'error-code'} || 5;
+  }
+
+  # clean up after ourselves
+  $mail->finish();
+  $mail = undef;
+
+  $status->finish();
+
+  return 1;
+}
+
+###########################################################################
+
+sub setup_sig_handlers {
+  $SIG{HUP}  = \&kill_handler;
+  $SIG{INT}  = \&kill_handler;
+  $SIG{TERM} = \&kill_handler;
+# $SIG{PIPE} = \&kill_handler;
+  $SIG{PIPE} = 'IGNORE';
+}
+
+sub kill_handler {
+  my ($sig) = @_;
+  warn "spamassassin: killed by SIG$sig\n";
+  if ($mail) {
+    $mail->finish();      # bug 5626: remove temp files etc.
+    $mail = undef;
+  }
+  if (defined $tempfile) {      # bug 5557: additional paranoia about tmpfiles
+    unlink $tempfile  or warn "cannot unlink temporary file $tempfile: $!";
+    undef $tempfile;
+  }
+  close STDOUT; close STDIN;  # ignoring status
+  exit 15;
+}
+
+__END__
+
+# ---------------------------------------------------------------------------
+
+=head1 NAME
+
+spamassassin - extensible email filter used to identify spam
+
+=head1 DESCRIPTION
+
+SpamAssassin is an intelligent email filter which uses a diverse range of
+tests to identify unsolicited bulk email, more commonly known as "spam".
+These tests are applied to email headers and content to classify email
+using advanced statistical methods.  In addition, SpamAssassin has a
+modular architecture that allows other technologies to be quickly wielded
+against spam and is designed for easy integration into virtually any email
+system.
+
+=head1 SYNOPSIS
+
+For ease of access, the SpamAssassin manual has been split up into
+several sections.  If you're intending to read these straight through
+for the first time, the suggested order will tend to reduce the number
+of forward references.
+
+Extensive additional documentation for SpamAssassin is available,
+primarily on the SpamAssassin web site and wiki.
+
+You should be able to view SpamAssassin's documentation with your man(1)
+program or perldoc(1).
+
+=head2 OVERVIEW
+
+    spamassassin              SpamAssassin overview (this section)
+
+=head2 CONFIGURATION
+
+    Mail::SpamAssassin::Conf  SpamAssassin configuration files
+
+=head2 USAGE
+
+    spamassassin-run          "spamassassin" front-end filtering script
+    sa-learn                  train SpamAssassin's Bayesian classifier
+    spamc                     client for spamd (faster than spamassassin)
+    spamd                     spamassassin server (needed by spamc)
+
+=head2 DEFAULT PLUGINS
+
+@@PLUGIN_POD@@
+
+=head1 WEB SITES
+
+    SpamAssassin web site:     http://spamassassin.apache.org/
+    Wiki-based documentation:  http://wiki.apache.org/spamassassin/
+
+=head1 USER MAILING LIST
+
+A users mailing list exists where other experienced users are often able
+to help and provide tips and advice.  Subscription instructions are
+located on the SpamAssassin web site.
+
+=head1 CONFIGURATION FILES
+
+The SpamAssassin rule base, text templates, and rule description text
+are loaded from configuration files.
+
+Default configuration data is loaded from the first existing directory
+in:
+
+=over 4
+
+=item @@LOCAL_STATE_DIR@@/@@VERSION@@
+
+=item @@DEF_RULES_DIR@@
+
+=item @@PREFIX@@/share/spamassassin
+
+=item /usr/local/share/spamassassin
+
+=item /usr/share/spamassassin
+
+=back
+
+Site-specific configuration data is used to override any values which had
+already been set.  This is loaded from the first existing directory in:
+
+=over 4
+
+=item @@LOCAL_RULES_DIR@@
+
+=item @@PREFIX@@/etc/mail/spamassassin
+
+=item @@PREFIX@@/etc/spamassassin
+
+=item /usr/local/etc/spamassassin
+
+=item /usr/pkg/etc/spamassassin
+
+=item /usr/etc/spamassassin
+
+=item /etc/mail/spamassassin
+
+=item /etc/spamassassin
+
+=back
+
+From those three directories, SpamAssassin will first read files ending in
+".pre" in lexical order and then it will read files ending in ".cf" in
+lexical order (most files begin with two numbers to make the sorting
+order obvious).
+
+In other words, it will read F<init.pre> first, then F<10_default_prefs.cf> before
+F<50_scores.cf> and F<20_body_tests.cf> before F<20_head_tests.cf>.
+Options in later files will override earlier files.
+
+Individual user preferences are loaded from the location specified on
+the C<spamassassin>, C<sa-learn>, or C<spamd> command line (see respective
+manual page for details).  If the location is not specified,
+F<~/.spamassassin/user_prefs> is used if it exists.  SpamAssassin will
+create that file if it does not already exist, using
+F<user_prefs.template> as a template.  That file will be looked for in:
+
+=over 4
+
+=item @@LOCAL_RULES_DIR@@
+
+=item @@PREFIX@@/etc/mail/spamassassin
+
+=item @@PREFIX@@/share/spamassassin
+
+=item /etc/spamassassin
+
+=item /etc/mail/spamassassin
+
+=item /usr/local/share/spamassassin
+
+=item /usr/share/spamassassin
+
+=back
+
+=head1 TAGGING
+
+The following two sections detail the default tagging and markup that
+takes place for messages when running C<spamassassin> or C<spamc> with
+C<spamd> in the default configuration.
+
+Note: before header modification and addition, all headers beginning
+with C<X-Spam-> are removed to prevent spammer mischief and also to
+avoid potential problems caused by prior invocations of SpamAssassin.
+
+=head2 TAGGING FOR SPAM MAILS
+
+By default, all messages with a calculated score of 5.0 or higher are
+tagged as spam.
+
+If an incoming message is tagged as spam, instead of modifying the
+original message, SpamAssassin will create a new report message and
+attach the original message as a message/rfc822 MIME part (ensuring the
+original message is completely preserved and easier to recover).
+
+The new report message inherits the following headers (if they are
+present) from the original spam message:
+
+=over 4
+
+=item From: header
+
+=item To: header
+
+=item Cc: header
+
+=item Subject: header
+
+=item Date: header
+
+=item Message-ID: header
+
+=back
+
+The above headers can be modified if the relevant C<rewrite_header>
+option is given (see C<Mail::SpamAssassin::Conf> for more information).
+
+By default these message headers are added to spam:
+
+=over 4
+
+=item X-Spam-Flag: header
+
+Set to C<YES>.
+
+=back
+
+The headers that added are fully configurable via the C<add_header>
+option (see C<Mail::SpamAssassin::Conf> for more information).
+
+=over 4
+
+=item spam mail body text
+
+The SpamAssassin report is added to top of the mail message body,
+if the message is marked as spam.
+
+=back
+
+=head2 DEFAULT TAGGING FOR ALL MAILS
+
+These headers are added to all messages, both spam and ham (non-spam).
+
+=over 4
+
+=item X-Spam-Checker-Version: header
+
+The version and subversion of SpamAssassin and the host where
+SpamAssassin was run.
+
+=item X-Spam-Level: header
+
+A series of "*" charactes where each one represents a full score point.
+
+=item X-Spam-Status: header
+
+A string, C<(Yes|No), score=nn required=nn tests=xxx,xxx
+autolearn=(ham|spam|no|unavailable|failed)> is set in this header to
+reflect the filter status.  For the first word, "Yes" means spam and
+"No" means ham (non-spam).
+
+=back
+
+The headers that added are fully configurable via the C<add_header>
+option (see C<Mail::SpamAssassin::Conf> for more information).
+
+=head1 INSTALLATION
+
+The B<spamassassin> command is part of the B<Mail::SpamAssassin> Perl module.
+Install this as a normal Perl module, using C<perl -MCPAN -e shell>, or by
+hand.
+
+Note that it is not possible to use the C<PERL5LIB> environment variable
+to affect where SpamAssassin finds its perl modules, due to limitations
+imposed by perl's "taint" security checks.
+
+For further details on how to install, please read the C<INSTALL> file
+from the SpamAssassin distribution.
+
+=head1 DEVELOPER DOCUMENTATION
+
+    Mail::SpamAssassin
+	Spam detector and markup engine
+
+    Mail::SpamAssassin::ArchiveIterator
+	find and process messages one at a time
+
+    Mail::SpamAssassin::AutoWhitelist
+	auto-whitelist handler for SpamAssassin
+
+    Mail::SpamAssassin::Bayes
+	determine spammishness using a Bayesian classifier
+
+    Mail::SpamAssassin::BayesStore
+	Bayesian Storage Module
+
+    Mail::SpamAssassin::BayesStore::SQL
+	SQL Bayesian Storage Module Implementation
+
+    Mail::SpamAssassin::Conf::LDAP
+	load SpamAssassin scores from LDAP database
+
+    Mail::SpamAssassin::Conf::Parser
+	parse SpamAssassin configuration
+
+    Mail::SpamAssassin::Conf::SQL
+	load SpamAssassin scores from SQL database
+
+    Mail::SpamAssassin::Message
+	decode, render, and hold an RFC-2822 message
+
+    Mail::SpamAssassin::Message::Metadata
+	extract metadata from a message
+
+    Mail::SpamAssassin::Message::Node
+	decode, render, and make available MIME message parts
+
+    Mail::SpamAssassin::PerMsgLearner
+	per-message status (spam or not-spam)
+
+    Mail::SpamAssassin::PerMsgStatus
+	per-message status (spam or not-spam)
+
+    Mail::SpamAssassin::PersistentAddrList
+	persistent address list base class
+
+    Mail::SpamAssassin::Plugin
+	SpamAssassin plugin base class
+
+    Mail::SpamAssassin::Plugin::Hashcash
+	perform hashcash verification tests
+
+    Mail::SpamAssassin::Plugin::RelayCountry
+	add message metadata indicating the country code of each relay
+
+    Mail::SpamAssassin::Plugin::SPF
+	perform SPF verification tests
+
+    Mail::SpamAssassin::Plugin::URIDNSBL
+	look up URLs against DNS blocklists
+
+    Mail::SpamAssassin::SQLBasedAddrList
+	SpamAssassin SQL Based Auto Whitelist
+
+=head1 BUGS
+
+See <http://issues.apache.org/SpamAssassin/>
+
+=head1 AUTHORS
+
+The SpamAssassin(tm) Project <http://spamassassin.apache.org/>
+
+=head1 COPYRIGHT
+
+SpamAssassin is distributed under the Apache License, Version 2.0, as
+described in the file C<LICENSE> included with the distribution.
+

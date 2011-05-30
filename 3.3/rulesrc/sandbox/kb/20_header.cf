@@ -1,0 +1,39 @@
+
+# bug 5830 -- Forged Outlook Message-Id
+
+# NOTE  Depends on bug 5774 be fixed, or a custom Outlook MUA rule.
+#       header __KB_OUTLOOK_MUA  X-Mailer =~ /^Microsoft (?:Office )?Outlook\b/
+
+header __KB_MSGID_OUTLOOK_888  Message-Id =~ /^<[0-9a-f]{8}(?:\$[0-9a-f]{8}){2}\@/
+meta   KB_RATWARE_MSGID        (__KB_MSGID_OUTLOOK_888 && __ANY_OUTLOOK_MUA)
+
+
+# bug 5817 -- Forged Relay, direct MUA to MX
+
+header FORGED_RELAY_MUA_TO_MX         X-Spam-Relays-External =~ /^\[ ip=(?!127)([\d.]+) [^\[]*\[ ip=\1 [^\[]+ helo=(!(?!(?:10|127|169\.254|172\.(?:1[6-9]|2[0-9]|3[01])|192\.168)\.)| )[^\[]+$/
+
+# Plus quite a few devel variants and accompanying tests.  This mess needs
+# cleaning up, probably after re-investigation.  See dos/70_bugs.cf for history.
+
+# header FORGED_RELAY_MUA_TO_MX_A   X-Spam-Relays-External =~ /^\[ ip=(?!127)([\d.]+) [^\[]*\[ ip=\1 [^\[]+ helo=(!(?!127)| )[^\[]+$/
+
+# header __RELAYS_IP_MATCH            X-Spam-Relays-External =~ /^\[ ip=(?!127)([\d.]+) [^\[]*\[ ip=\1 /
+# header __RELAYS_THREE_PLUS          X-Spam-Relays-External =~ /(\[.+){3}/
+# header __RELAY_MUA_HELO_IP_OR_NONE  X-Spam-Relays-External =~ / helo=(!(?!127)| )[^\[]+$/
+
+# meta   FORGED_RELAY_MUA_TO_MX_B     __RELAYS_IP_MATCH && !__RELAYS_THREE_PLUS && __RELAY_MUA_HELO_IP_OR_NONE
+
+# header __RDNS_EQ_BY                 X-Spam-Relays-External =~ /^[^\]]+ rdns=([^ ]*) [^\]]+][^\]]+ by=\1 /
+
+# meta   FORGED_RELAY_MUA_TO_MX_C     __RELAYS_IP_MATCH && !__RELAYS_THREE_PLUS && __RELAY_MUA_HELO_IP_OR_NONE && !__RDNS_EQ_BY
+
+
+# bug 5800 -- Date header containing a tab, Usually comes with forged The Bat!
+
+# NOTE  Depends on some header rule code fixes for 3.3.x to remove the leading
+#       space that was showing up in header rules.  For 3.2.x releases the
+#       pattern must be changed to /^ \t/.
+
+header   KB_DATE_CONTAINS_TAB  Date:raw =~ /^\t/
+meta     KB_FAKED_THE_BAT      (__THEBAT_MUA && KB_DATE_CONTAINS_TAB)
+

@@ -1,0 +1,30 @@
+# 6/28/2009
+# http://www.sun.com/cgi-bin/go.cgi?dest=http://thevintagecars.eu/names89/sound/recent91.php
+redirector_pattern      /^http\:\/\/sun\.com\/cgi\-bin\/go\.cgi\?dest\=(.*)$/i
+
+# 9/1/2009
+# http://www.att.net/s/context.dll?redirecturl=nuevohan.com/?xxxxxxxxxxxxxxxxx
+redirector_pattern      /^http\:\/\/www\.att\.net\/s\/context\.dll\?redirecturl\=(.*)$/i
+
+header   AXB_419_FROM_C1        From =~ /\@mailtoreach\.com/i
+describe AXB_419_FROM_C1        Legacy domain abused by AF UBE
+#score    AXB_419_FROM_C1       1.5
+
+
+uri              AXB_ESP_ABUSE01         /freetrial\.icontact\.com/
+describe        AXB_ESP_ABUSE01         Possible ESP Trial Abuse
+#score           AXB_ESP_ABUSE01         1.5
+
+
+uri             AXB_URI_APE_ABUSE1     /profiles\.yahooo\.com/
+describe        AXB_URI_APE_ABUSE1     Gorilla Syndrome
+#score           AXB_URI_APE_ABUSE1     2.5
+
+uri             AXB_URI_APE_ABUSE2     /feedproxy\.google\.com/
+describe        AXB_URI_APE_ABUSE2     Gorilla Syndrome
+#score           AXB_URI_APE_ABUSE2     2.5
+
+
+header          AXB_HELO_HOME_UN        X-Spam-Relays-Untrusted =~ /^[^\]]+ helo=\w+\.(lan|home) /i
+describe        AXB_HELO_HOME_UN        HELO from home  - untrusted
+#score          AXB_HELO_HOME_UN        1.0

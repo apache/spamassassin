@@ -1,0 +1,26 @@
+#TEST RULES FOR RETURN PATH RULE CHANGES PRE 3.3.0 RELEASE - 12-7-2009
+# https://issues.apache.org/SpamAssassin/show_bug.cgi?id=6247#add_comment
+
+# Return Path Certified:
+# http://www.returnpath.net/internetserviceprovider/certification/
+# (replaces RCVD_IN_BSP_TRUSTED, RCVD_IN_BSP_OTHER, RCVD_IN_SSC_TRUSTED_COI)
+header RCVD_IN_RP_CERTIFIED     eval:check_rbl_txt('ssc-firsttrusted', 'sa-trusted.bondedsender.org.')
+describe RCVD_IN_RP_CERTIFIED   Sender is in Return Path Certified (trusted relay)
+tflags RCVD_IN_RP_CERTIFIED     net nice
+
+# Return Path Safe:
+# http://www.returnpath.net/internetserviceprovider/certification/
+# (replaces HABEAS_ACCREDITED_COI, HABEAS_ACCREDITED_SOI, HABEAS_CHECKED)
+header RCVD_IN_RP_SAFE     eval:check_rbl_txt('ssc-firsttrusted','sa-accredit.habeas.com.')
+describe RCVD_IN_RP_SAFE   Sender is in Return Path Safe (trusted relay)
+tflags RCVD_IN_RP_SAFE     net nice
+
+# Return Path Reputation Network Blacklist (RNBL):
+# https://senderscore.org/blacklistlookup/
+header RCVD_IN_RP_RNBL         eval:check_rbl('rnbl-lastexternal','bl.score.senderscore.com.')
+describe RCVD_IN_RP_RNBL       Relay in RNBL, https://senderscore.org/blacklistlookup/
+tflags RCVD_IN_RP_RNBL         net
+
+# Proposed Scores after this is checked in weekly masscheck
+#score RCVD_IN_RP_CERTIFIED 0.0 -5.0 0.0 -5.0
+#score RCVD_IN_RP_SAFE 0.0 -3.0 0.0 -3.0

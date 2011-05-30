@@ -1,0 +1,68 @@
+#!/usr/bin/perl
+
+# NOTE: this script is used by generate-new-scores; it is meant to be copied
+#       to and called from the masses/ directory of the checkout being used
+#       for the score generation run for the particular scoreset; you
+#       shouldn't need to call this script manually
+#
+# <@LICENSE>
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to you under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at:
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# </@LICENSE>
+
+use strict;
+use warnings;
+
+my $scoreset = 0; # default
+my $ham_pref = 5.0;
+my $threshold = 5.0;
+my $epochs = 100;
+my $note = '';
+
+my %original_rules;
+
+open(CONFIG, "config") or die "Cannot open config file: $!";
+while (<CONFIG>) {
+  $scoreset = $1 if /^\s*SCORESET=(\d)\s*$/;
+  $ham_pref = $1 if /^\s*HAM_PREFERENCE=([\d.-]+)/;
+  $threshold = $1 if /^\s*THRESHOLD=([\d.-]+)/;
+  $epochs = $1 if /^\s*EPOCHS=(\d)\s*$/;
+  $note = "-$1" if /^\s*NOTE=(.+)$/;
+
+
+}
+close CONFIG;
+
+print "Removing scores for base release rules from newly generated scores\n";
+
+open(ORIG, "../rules/50_scores.cf") or die "Cannot open original score file: $!";
+while(<ORIG>) {
+  if (/^score\s+(\S+)/) {
+    $original_rules{$1} = undef;
+  }
+}
+close ORIG;
+
+
+open(ORIG, "gen-set$scoreset-$ham_pref-$threshold-$epochs-ga$note/scores") or die "Cannot open original scores file: $!";
+open(NEW, ">gen-set$scoreset-$ham_pref-$threshold-$epochs-ga$note/scores-new") or die "Cannot open scores-new file: $!";
+while (<ORIG>) {
+  if (/^score\s+(\S+)/) {
+    next if exists $original_rules{$1};
+    print NEW $_;
+  }
+}
+close ORIG;
+close NEW;

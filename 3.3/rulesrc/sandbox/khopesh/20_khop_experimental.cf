@@ -1,0 +1,84 @@
+# experiments based on masscheck results
+
+meta	 MALFORMED_FREEMAIL	(MISSING_HEADERS||__HDRS_LCASE) && FREEMAIL_FROM
+describe MALFORMED_FREEMAIL	Bad headers on message from free email service
+#score	 MALFORMED_FREEMAIL	0.1
+
+header	 __FROM_THE	From:name =~ /\b(?:THE|[Tt]he)\b/
+meta	 FROM_THE	__FROM_THE && !(__VIA_ML || __SENDER_BOT || __DOS_HAS_LIST_UNSUB || __REPLYTO_EXISTS)
+describe FROM_THE	Non-bulk sender is "The" something
+# I don't actually expect this to do well.  maybe s/o around 0.450?
+# There's also the argument that Bayes should handle this, since (iirc) it codifies tokens like "from:the" indicating that "the" occurs in "From" headers...
+
+header	 KHOP_BIG_TO_CC      ToCc =~ /(?:[^,\@]{1,60}\@[^,]{4,25},){10}/
+describe KHOP_BIG_TO_CC      Sent to 10+ recipients instaed of Bcc or a list
+score	 KHOP_BIG_TO_CC      0.3 # 20090527
+
+header	 __KHOP_EBAY_ADDY	From:addr =~ /\@(?:.+\.)?ebay\..{3,5}$/i
+meta	 KHOP_FAKE_EBAY 	__KHOP_EBAY_ADDY && !__NOT_SPOOFED
+describe KHOP_FAKE_EBAY 	Sender falsely claims to be from eBay
+#score	 KHOP_FAKE_EBAY 	2.25 # 20090408
+
+ifplugin Mail::SpamAssassin::Plugin::URIDetail
+  uri_detail KHOP_FOREIGN_CLICK	text =~ /\b(?:cliquez\Wici\b|clic aqu[^<.,a ])/i
+else
+  rawbody    KHOP_FOREIGN_CLICK	m{\bhref=[^>]{9,199}>[^<]{0,80}(?:<(?!/a\b)[^>]{0,299}>[^<]{0,80}){0,9}[^<]{0,80}\b(?:cliquez\Wici\b|clic aqu[^<.,a ])}si
+endif
+describe KHOP_FOREIGN_CLICK	Click here link in French or Spanish
+#score	 KHOP_FOREIGN_CLICK	1.1	# 20090526 see also SARE_UN7
+
+# I don't think this ever fires
+uri	 URI_HIDDEN	m'.{7}\/\.\.?/?\w'
+describe URI_HIDDEN	Contains a hidden directory
+#score	 URI_HIDDEN	0.7 # 20090515 13:29 by Adam Katz (me) on sa-users list
+
+# no subdomain; sent by example.com rather than server.example.com
+header __RDNS_NO_SUBDOM	X-Spam-Relays-External =~ /^[^\]]+ rdns=[^. ]*\.\w+ /
+
+# Relays with 5+ subdomains.
+# My data (post-greylisting) is 1.7869/0.0682 spam/ham, s/o = .897
+# Those should be significantly better sans-greylisting (they can't get worse).
+# @ 20091214, 5.7617/0.0344 spam/ham, 0.994 s/o.
+header __5_SUBDOM X-Spam-Relays-External =~ /^[^\]]+ rdns=(?:[^. ]*\.){6,}\w+ /
+
+# Probably too similar to __S25R_1
+header __NUM_LTR_3 X-Spam-Relays-External =~ /^[^\]]+ rdns=\S*(?:\d\S*[^0-9. ]\S*\d){3,} /
+
+# IP address in relay's rDNS or HELO
+header __IP_IN_RELAY  X-Spam-Relays-External =~ /^\[ ip=(\d+)\.(\d+)\.(\d+)\.(\d+) (?:[^\]]* )?(?:rdns|helo)=\S*(?:\1\D\2\D\3\D\4|\4\D\3\D\2\D\1)/
+header __IP_PART_IN_RELAY X-Spam-Relays-External =~ /^\[ ip=\d+\.\d+\.(\d+)\.(\d+) (?:[^\]]* )?(?:rdns|helo)=\S*(?:\1\W\2\W|\2\W\1)\b/
+
+header __MSGID_DOTZERO	Message-ID =~ /\.0\.0\./
+
+header __MSGID_JAVAMAIL	Message-ID =~ /\.JavaMail\./
+tflags __MSGID_JAVAMAIL	nice
+
+
+meta	 AOL_ALL_CAPS	__AT_AOL_MSGID && UPPERCASE_75_100
+describe AOL_ALL_CAPS	AOL users sometimes write mail in all uppercase
+tflags	 AOL_ALL_CAPS	nice
+
+# from http://lacnic.net/en/registro/ at 20100115
+header	 __RCVD_VIA_LACNIC	X-Spam-Relays-External =~ /\[ ip=(?:1(?:90|8[679]|20(?:[01]\.|6\.223\.1(?:24|30))))\./
+tflags	 __RCVD_VIA_LACNIC	nopublish
+header	 __RCVD_VIA_LACNIC_LE	X-Spam-Relays-External =~ /^\[ ip=(?:1(?:90|8[679]|20(?:[01]\.|6\.223\.1(?:24|30))))\./
+tflags	 __RCVD_VIA_LACNIC_LE	nopublish
+
+# __RCVD_VIA_APNIC is from my khop-bl and was adopted into warren's sandbox
+
+# just to test ... E + I should equal the original, LE should be the useful one
+header __RCVD_VIA_APNIC_E X-Spam-Relays-External =~ /\[ ip=(?-xism:0?5[89]|6[01]|1(?:[12][0-6]|1[7-9]|75|8[0123])|2(?:03|1[0189]|2[012]|02(?!\.123\.0?(?:[012]\d|3[01])))|169\.2(?:0[89]|1\d|2[01]|223)|169\.2(?:1[04]|22))\./
+tflags __RCVD_VIA_APNIC_E nopublish
+header __RCVD_VIA_APNIC_I X-Spam-Relays-Internal =~ /\[ ip=(?-xism:0?5[89]|6[01]|1(?:[12][0-6]|1[7-9]|75|8[0123])|2(?:03|1[0189]|2[012]|02(?!\.123\.0?(?:[012]\d|3[01])))|169\.2(?:0[89]|1\d|2[01]|223)|169\.2(?:1[04]|22))\./
+tflags __RCVD_VIA_APNIC_I nopublish
+
+header __RCVD_VIA_APNIC_LE X-Spam-Relays-External =~ /^\[ ip=(?-xism:0?5[89]|6[01]|1(?:[12][0-6]|1[7-9]|75|8[0123])|2(?:03|1[0189]|2[012]|02(?!\.123\.0?(?:[012]\d|3[01])))|169\.2(?:0[89]|1\d|2[01]|223)|169\.2(?:1[04]|22))\./
+tflags __RCVD_VIA_APNIC_LE nopublish
+
+# testing warren's theory from "Uppercase E-mail in Latin America" 2009-10-06
+# http://old.nabble.com/Uppercase-E-mail-in-Latin-America-td25748291.html
+# note, masscheck probably doesn't have enough LACNIC ham for this test
+meta	 LACNIC_ALL_CAPS __RCVD_VIA_LACNIC && UPPERCASE_75_100
+describe LACNIC_ALL_CAPS Latino users sometimes write mail in all uppercase
+tflags	 LACNIC_ALL_CAPS nice nopublish
+

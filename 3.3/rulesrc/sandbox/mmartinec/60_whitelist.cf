@@ -1,0 +1,8 @@
+# SpamAssassin rules file: default whitelists
+
+ifplugin Mail::SpamAssassin::Plugin::WLBLEval
+
+def_whitelist_from_rcvd abuse@yahoo.com		 yahoo.com
+def_whitelist_from_rcvd MAILER-DAEMON@yahoo.com  yahoo.com
+
+endif

@@ -1,0 +1,32 @@
+#!/usr/bin/perl
+
+my $active = $ARGV[0]; # "rules/active.list";
+my $out = $ARGV[1]; # "rulesrc/10_force_active.cf";
+
+die "usage: force-publish-active-rules active.list rulesrc/10_force_active.cf\n"
+        unless $out;
+
+open (IN, "<$active");
+open (OUT, ">$out") or die "cannot write to $out";
+
+my $lsinfo = `ls -l $active`;
+chop $lsinfo;
+
+print OUT qq{# 
+# Force some sandbox rules to be active, since they have scores assigned
+# by the GA/Perceptron evolver.  If you want to remove a rule from
+# this list, be sure to remove its 'score' line in rules/50_scores.cf
+# too.
+#
+# Built from:
+# $lsinfo
+
+};
+
+while (<IN>) {
+  /^([A-Z]\S+)$/ or next;
+  print OUT "publish $1\n";
+}
+
+close IN;
+close OUT or die;

@@ -1,0 +1,26 @@
+# SEM-BLACK
+header RCVD_IN_SEMBLACK eval:check_rbl('semblack-lastexternal', 'bl.spameatingmonkey.net')
+describe RCVD_IN_SEMBLACK Received from an IP listed by SEM-BLACK
+tflags RCVD_IN_SEMBLACK net nopublish
+
+ifplugin Mail::SpamAssassin::Plugin::URIDNSBL
+# SEM-URI
+urirhssub SEM_URI uribl.spameatingmonkey.net. A 2
+body SEM_URI eval:check_uridnsbl('SEM_URI')
+describe SEM_URI Contains a URI listed by SEM-URI
+tflags SEM_URI net nopublish
+
+# SEM-URIRED
+urirhssub SEM_URIRED urired.spameatingmonkey.net. A 2
+body SEM_URIRED eval:check_uridnsbl('SEM_URIRED')
+describe SEM_URIRED Contains a URI listed by SEM-URIRED
+tflags SEM_URIRED net nopublish
+
+# SEM-FRESH
+urirhssub SEM_FRESH fresh.spameatingmonkey.net. A 2
+body SEM_FRESH eval:check_uridnsbl('SEM_FRESH')
+describe SEM_FRESH Contains a domain registered less than 5 days ago
+tflags SEM_FRESH net nopublish
+endif
+
+

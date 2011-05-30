@@ -1,0 +1,13 @@
+#!/bin/sh
+
+# gzip old files
+cd /export/home/ruleqadb
+find . -mtime +200 -name '*.???' -print | \
+        egrep '(age|all|new)$' | \
+        xargs gzip -9
+
+# clean up a temporary dir; these dirs are used for interchange
+# of log results between preflight mass-check mc-fast and freqsd
+cd /home/bbmass/tmp
+find . -type d -mtime +7 -print | xargs rm -rf
+

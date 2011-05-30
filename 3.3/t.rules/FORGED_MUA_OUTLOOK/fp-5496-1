@@ -1,0 +1,98 @@
+Return-Path: <kerberos-bounces@mit.edu>
+X-Spam-Flag: YES
+X-Spam-Checker-Version: SpamAssassin 3.1.7 (2006-10-05) on fnord.ir.bbn.com
+X-Spam-Level: *
+X-Spam-Status: Yes, score=1.5 required=1.0 tests=AWL,BAYES_00,
+	FORGED_MUA_OUTLOOK autolearn=no version=3.1.7
+X-Spam-Report: 
+	* -2.6 BAYES_00 BODY: Bayesian spam probability is 0 to 1%
+	*      [score: 0.0000]
+	*  4.1 FORGED_MUA_OUTLOOK Forged mail pretending to be from MS Outlook
+	*  0.0 AWL AWL: From: address is in the auto white-list
+X-Original-To: gdt@ir.bbn.com
+Delivered-To: gdt@ir.bbn.com
+Received: from pch.mit.edu (PCH.MIT.EDU [18.7.21.90])
+	by fnord.ir.bbn.com (Postfix) with ESMTP id 7BF955289
+	for <gdt@ir.bbn.com>; Thu, 31 May 2007 22:58:24 -0400 (EDT)
+Received: from pch.mit.edu (pch.mit.edu [127.0.0.1])
+	by pch.mit.edu (8.13.6/8.12.8) with ESMTP id l512p83e016021;
+	Thu, 31 May 2007 22:51:13 -0400
+Received: from fort-point-station.mit.edu (FORT-POINT-STATION.MIT.EDU
+	[18.7.7.76])
+	by pch.mit.edu (8.13.6/8.12.8) with ESMTP id l512p6wJ016018
+	for <kerberos@PCH.mit.edu>; Thu, 31 May 2007 22:51:06 -0400
+Received: from mit.edu (M24-004-BARRACUDA-3.MIT.EDU [18.7.7.114])
+	by fort-point-station.mit.edu (8.13.6/8.9.2) with ESMTP id
+	l512p3up028645
+	for <kerberos@mit.edu>; Thu, 31 May 2007 22:51:04 -0400 (EDT)
+Received: from smtp106.sbc.mail.re2.yahoo.com (smtp106.sbc.mail.re2.yahoo.com
+	[68.142.229.99]) by mit.edu (Spam Firewall) with SMTP id 9CCD95F4294
+	for <kerberos@mit.edu>; Thu, 31 May 2007 22:51:03 -0400 (EDT)
+Received: (qmail 70635 invoked from network); 1 Jun 2007 02:51:03 -0000
+Received: from unknown (HELO CDCHOME) (chrisclausen@sbcglobal.net@76.199.3.163
+	with login)
+	by smtp106.sbc.mail.re2.yahoo.com with SMTP; 1 Jun 2007 02:51:03 -0000
+X-YMail-OSG: eYUkWSMVM1nnl.I9AnuqtOSMg4YD5A.qrPW4QhV0fgw221IdC8nQ5qvp7wst92meohNFSYt_oC8fZ522R6UeMjky3pcFmrSs1.dybQ0ChRPNDnihx5jCjS2vG1ZxACSXxIyqsjOHO61r3Ss-
+Message-ID: <8C51A835039D48A6A1CFA74053B91DE0@CDCHOME>
+From: "Christopher D. Clausen" <cclausen@acm.org>
+To: <kerberos@mit.edu>
+References: <x3vee8zahx.fsf@nowhere.com>
+Subject: Re: Use ssh key to acquire TGT?
+Date: Thu, 31 May 2007 21:51:02 -0500
+X-Priority: 3
+X-MSMail-Priority: Normal
+X-Mailer: Microsoft Outlook Express 6.00.3790.3959
+X-RFC2646: Format=Flowed; Original
+X-MimeOLE: Produced By Microsoft MimeOLE V6.00.3790.3959
+X-Scanned-By: MIMEDefang 2.42
+X-BeenThere: kerberos@mit.edu
+X-Mailman-Version: 2.1.6
+Precedence: list
+List-Id: The Kerberos Authentication System Mailing List <kerberos.mit.edu>
+List-Unsubscribe: <https://mailman.mit.edu/mailman/listinfo/kerberos>,
+	<mailto:kerberos-request@mit.edu?subject=unsubscribe>
+List-Archive: <http://mailman.mit.edu/pipermail/kerberos>
+List-Post: <mailto:kerberos@mit.edu>
+List-Help: <mailto:kerberos-request@mit.edu?subject=help>
+List-Subscribe: <https://mailman.mit.edu/mailman/listinfo/kerberos>,
+	<mailto:kerberos-request@mit.edu?subject=subscribe>
+MIME-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Sender: kerberos-bounces@mit.edu
+Errors-To: kerberos-bounces@mit.edu
+X-Greylist: Sender is SPF-compliant, not delayed by milter-greylist-3.0 (fnord.ir.bbn.com [0.0.0.0]); Thu, 31 May 2007 22:58:24 -0400 (EDT)
+
+Adam Megacz <megacz@hcoop.net> wrote:
+> Our (hcoop.net) users love their new AFS homedirs, but are complaining
+> a lot about ssh public keys not working the way they're accustomed to.
+> Telling them to "kinit" after logging in doesn't quite cut it either.
+>
+> We're aware that this goes against the grain of kerberos security, but
+> without something like this users will just start hardcoding their
+> plaintext password into scripts, which is even worse.  At least with
+> ssh keys we can urge them to password-encrypt their on-disk private
+> keys.
+
+How exactly is having a private key password different from simply 
+telling the user to kinit ONCE on their local machine before attempting 
+to SSH to your Kerberized machines?
+
+Also, you could rig up a login script (or PAM) that used a local keytab 
+file to obtain AFS tickets automatically at sucessful login.  Not sure 
+if you'd have to assume that someone logging as the local UNIX user 
+automatically means that user would have to the matching AFS identity. 
+You would also have issues of users keeping their passwords and the 
+keytabs up to date or otherwise differentiating between the keytab login 
+and their real Kerberos identity.
+
+This might be question to ask on the AFS mailing lists instead of the 
+Kerberos ones.
+
+<<CDC 
+
+
+________________________________________________
+Kerberos mailing list           Kerberos@mit.edu
+https://mailman.mit.edu/mailman/listinfo/kerberos
+

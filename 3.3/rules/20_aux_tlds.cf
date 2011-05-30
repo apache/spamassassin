@@ -1,0 +1,266 @@
+# SpamAssassin - Auxiliary TLD Definitions
+#
+# Please don't modify this file as your changes will be overwritten with
+# the next update. Use @@LOCAL_RULES_DIR@@/local.cf instead.
+# See 'perldoc Mail::SpamAssassin::Conf' for details.
+#
+# <@LICENSE>
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to you under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at:
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# </@LICENSE>
+#
+###########################################################################
+
+# This file replaces the SARE http://www.rulesemporium.com/rules/90_2tld.cf
+# which will be deprecated as from 2010-05-01
+
+# util_rb_2tld 2tld-1.tld 2tld-2.tld ...
+#            This option allows the addition of new 2nd-level TLDs (2TLD) to
+#            the RegistrarBoundaries code. Updates to the list usually happen
+#            when new versions of SpamAssassin are released, but sometimes
+#            it's necessary to add in new 2TLDs faster than a release can
+#            occur.
+#
+# util_rb_3tld is supported by SA 3.3.x , eg: foo.bay.livefilestore.com
+#
+
+
+# Last Update:2010-03-09-AXB
+
+
+
+# SA > 3.3.0
+if (version >= 3.003000)
+
+util_rb_3tld bay.livefilestore.com
+util_rb_3tld blu.livefilestore.com
+util_rb_3tld groups.live.com
+util_rb_3tld spaces.live.com
+util_rb_3tld profile.live.com
+util_rb_3tld web.aplus.net
+util_rb_3tld cloud.prohosting.com
+util_rb_3tld skydrive.live.com
+util_rb_3tld docs.google.com
+util_rb_3tld spaces.msn.com
+util_rb_3tld blog.friendster.com
+util_rb_3tld sakura.ne.jp
+util_rb_3tld web.officelive.com
+util_rb_3tld com.sapo.pt
+util_rb_3tld paginas.sapo.pt
+util_rb_3tld no.sapo.pt
+util_rb_3tld home.sapo.pt
+util_rb_3tld do.sapo.pt
+util_rb_3tld homepage.t-online.de
+util_rb_3tld web.fc2.com
+util_rb_3tld co.uk.pn
+util_rb_3tld com.au.pn
+util_rb_3tld co.at.pn
+util_rb_3tld co.at.lv
+util_rb_3tld or.at.lv
+util_rb_3tld co.at.tc
+
+endif
+
+# SA > 3.2.4
+#
+util_rb_2tld 110mb.com
+util_rb_2tld 9k.com
+util_rb_2tld addr.com
+util_rb_2tld altervista.org
+util_rb_2tld biz.tm
+util_rb_2tld blogspot.com
+util_rb_2tld bravehost.com
+util_rb_2tld by.ru
+util_rb_2tld chat.ru
+util_rb_2tld cjb.net
+util_rb_2tld es.tl
+util_rb_2tld extra.hu
+util_rb_2tld freehostia.com
+util_rb_2tld front.ru
+util_rb_2tld geocities.com
+util_rb_2tld getmyip.com
+util_rb_2tld googlepages.com
+util_rb_2tld helloweb.eu
+util_rb_2tld host.sk
+util_rb_2tld hotbox.ru
+util_rb_2tld hotmail.ru
+util_rb_2tld hu2.ru
+util_rb_2tld hut2.ru
+util_rb_2tld iblogger.org
+util_rb_2tld ic.cz
+util_rb_2tld id.ru
+util_rb_2tld kwik.to
+util_rb_2tld land.ru
+util_rb_2tld mine.nu
+util_rb_2tld mooo.com
+util_rb_2tld narod.ru
+util_rb_2tld netsolhost.com
+util_rb_2tld na.by
+util_rb_2tld newmail.ru
+util_rb_2tld nextmail.ru
+util_rb_2tld nightmail.ru
+util_rb_2tld nm.ru
+util_rb_2tld notlong.com
+util_rb_2tld page.tl
+util_rb_2tld pochta.ru
+util_rb_2tld pochtamt.ru
+util_rb_2tld pop3.ru
+util_rb_2tld proboards.com
+util_rb_2tld rbcmail.ru
+util_rb_2tld rm.ru
+util_rb_2tld smtp.ru
+util_rb_2tld sol.ru
+util_rb_2tld t35.com
+util_rb_2tld tripod.com
+util_rb_2tld uk.to
+util_rb_2tld unblog.fr
+util_rb_2tld us.to
+util_rb_2tld web-soft.ru
+util_rb_2tld wz.cz
+util_rb_2tld zmail.ru
+util_rb_2tld t35.net
+util_rb_2tld t35.com
+util_rb_2tld wordpress.com
+util_rb_2tld jino-net.ru
+util_rb_2tld 6a.org
+util_rb_2tld xf.cz
+util_rb_2tld fr.tc
+util_rb_2tld googlegroups.com
+util_rb_2tld 150m.com
+util_rb_2tld bravepages.com
+util_rb_2tld ucoz.ru
+util_rb_2tld szm.com
+util_rb_2tld geocities.jp
+util_rb_2tld gmxhome.de
+util_rb_2tld freeservercity.com
+util_rb_2tld iquebec.com
+util_rb_2tld mail2k.ru
+util_rb_2tld mail.ru
+util_rb_2tld ath.cx
+util_rb_2tld go.ro
+util_rb_2tld z8.ru
+util_rb_2tld appspot.com
+util_rb_2tld gigazu.net
+util_rb_2tld weebly.com
+util_rb_2tld ifrance.com
+util_rb_2tld jimdo.com
+util_rb_2tld kimsufi.com
+util_rb_2tld mail333.su
+util_rb_2tld pisem.su
+util_rb_2tld mail15.su
+util_rb_2tld prserv.net
+util_rb_2tld angelfire.com
+util_rb_2tld 163.to
+util_rb_2tld home.pl
+util_rb_2tld redirectme.net
+util_rb_2tld interia.pl
+util_rb_2tld co.kg
+util_rb_2tld ning.com
+util_rb_2tld xorg.pl
+util_rb_2tld free.fr
+util_rb_2tld we.bs
+util_rb_2tld net.tc
+util_rb_2tld isuisse.com
+util_rb_2tld de.ki
+util_rb_2tld funpic.de
+util_rb_2tld interii.pl
+util_rb_2tld selfip.com
+util_rb_2tld livejournal.com
+util_rb_2tld t3.to
+util_rb_2tld fx.to
+util_rb_2tld iespana.es
+util_rb_2tld go.com
+util_rb_2tld hostevo.com
+util_rb_2tld iwebsource.com
+util_rb_2tld one.pl
+util_rb_2tld gratishost.com
+util_rb_2tld netfirms.com
+util_rb_2tld ibelgique.com
+util_rb_2tld to.it
+util_rb_2tld whsites.net
+util_rb_2tld home.ro
+util_rb_2tld 1blu.de
+util_rb_2tld co.cc
+util_rb_2tld cc.cc
+util_rb_2tld webs.com
+util_rb_2tld webcindario.com
+util_rb_2tld idoo.com
+util_rb_2tld selfip.net
+util_rb_2tld ovh.net
+util_rb_2tld sapo.pt
+util_rb_2tld clickbank.net
+util_rb_2tld homeip.net
+util_rb_2tld unlugar.com
+util_rb_2tld nov.ru
+util_rb_2tld republika.pl
+util_rb_2tld blog.com
+util_rb_2tld sosblog.com
+util_rb_2tld servebbs.com
+util_rb_2tld serveftp.com
+util_rb_2tld radikal.ru
+util_rb_2tld gob.ve
+util_rb_2tld xanga.com
+util_rb_2tld com.vc
+util_rb_2tld net.vc
+util_rb_2tld org.vc
+util_rb_2tld kickme.to
+util_rb_2tld asso.ws
+util_rb_2tld url.st
+util_rb_2tld at.pn
+util_rb_2tld au.pn
+util_rb_2tld ca.pn
+util_rb_2tld ch.pn
+util_rb_2tld cn.pn
+util_rb_2tld co.pn
+util_rb_2tld corp.st
+util_rb_2tld societe.st
+util_rb_2tld de.pn
+util_rb_2tld es.pn
+util_rb_2tld euro.tm
+util_rb_2tld fr.pn
+util_rb_2tld gov.pn
+util_rb_2tld government.pn
+util_rb_2tld it.pn
+util_rb_2tld jp.pn
+util_rb_2tld perso.tc
+util_rb_2tld site.tc
+util_rb_2tld societe.st
+util_rb_2tld url.st
+util_rb_2tld blog.ru
+util_rb_2tld eu.tc
+util_rb_2tld us.tc
+util_rb_2tld pro.tc
+util_rb_2tld de.tc
+util_rb_2tld at.tc
+util_rb_2tld it.tc
+util_rb_2tld es.tc
+util_rb_2tld ru.tc
+util_rb_2tld se.tc
+util_rb_2tld dk.tc
+util_rb_2tld be.tc
+util_rb_2tld no.tc
+util_rb_2tld int.tc
+util_rb_2tld pl.tc
+util_rb_2tld bg.tc
+util_rb_2tld cz.tc
+util_rb_2tld mx.tc
+util_rb_2tld br.tc
+util_rb_2tld hk.tc
+util_rb_2tld kr.tc
+util_rb_2tld th.tc
+util_rb_2tld ph.tc
+util_rb_2tld at.lv
+util_rb_2tld de.lv
+util_rb_2tld ch.lv

@@ -1,0 +1,16 @@
+#!/usr/bin/perl
+
+my $score_cutoff = 12;
+my $lasttext = '';
+
+while (<>) {
+  /^#/ and next;
+  /^text: / and $lasttext = $_;
+
+  if (/^\S+\s+(\d+) /) {
+    my $s = $1;
+    if ($s < $score_cutoff) {
+      print $lasttext, $_;
+    }
+  }
+}

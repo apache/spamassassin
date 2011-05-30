@@ -1,0 +1,1657 @@
+#!/usr/bin/perl -w -T
+
+# <@LICENSE>
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to you under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at:
+# 
+#     http://www.apache.org/licenses/LICENSE-2.0
+# 
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# </@LICENSE>
+
+my $VERSION = 'svn' . (split(/\s+/,
+	'$Id$'))[2];
+
+my $PREFIX          = '@@PREFIX@@';             # substituted at 'make' time
+my $DEF_RULES_DIR   = '@@DEF_RULES_DIR@@';      # substituted at 'make' time
+my $LOCAL_RULES_DIR = '@@LOCAL_RULES_DIR@@';    # substituted at 'make' time
+my $LOCAL_STATE_DIR = '@@LOCAL_STATE_DIR@@';    # substituted at 'make' time
+use lib '@@INSTALLSITELIB@@';                   # substituted at 'make' time
+
+# We want to do a small amount of macro processing during channel installs,
+# based on the values as passed in via 'make'
+my %MACRO_VALUES = (
+	'VERSION'		=> '@@VERSION@@',
+	'CONTACT_ADDRESS'	=> '@@CONTACT_ADDRESS@@',
+	'PREFIX'		=> '@@PREFIX@@',
+	'DEF_RULES_DIR'		=> '@@DEF_RULES_DIR@@',
+	'LOCAL_RULES_DIR'	=> '@@LOCAL_RULES_DIR@@',
+	'LOCAL_STATE_DIR'	=> '@@LOCAL_STATE_DIR@@',
+	'INSTALLSITELIB'	=> '@@INSTALLSITELIB@@',
+);
+
+# Standard perl modules
+use Errno qw(ENOENT EACCES);
+use File::Spec;
+use File::Path;
+use Getopt::Long;
+use Pod::Usage;
+use Config;
+use strict;
+use warnings;
+use re 'taint';
+
+BEGIN {                          # see comments in "spamassassin.raw" for doco
+  my @bin = File::Spec->splitpath($0);
+  my $bin = ($bin[0] ? File::Spec->catpath(@bin[0..1]) : $bin[1])
+            || File::Spec->curdir;
+
+  if (-e $bin.'/lib/Mail/SpamAssassin.pm'
+        || !-e '@@INSTALLSITELIB@@/Mail/SpamAssassin.pm' )
+  {
+    my $searchrelative;
+    $searchrelative = 1;    # disabled during "make install": REMOVEFORINST
+    if ($searchrelative && $bin eq '../' && -e '../blib/lib/Mail/SpamAssassin.pm')
+    {
+      unshift ( @INC, '../blib/lib' );
+    } else {
+      foreach ( qw(lib ../lib/site_perl
+                ../lib/spamassassin ../share/spamassassin/lib))
+      {
+        my $dir = File::Spec->catdir( $bin, split ( '/', $_ ) );
+        if ( -f File::Spec->catfile( $dir, "Mail", "SpamAssassin.pm" ) )
+        { unshift ( @INC, $dir ); last; }
+      }
+    }
+  }
+}
+
+# These are the non-standard required modules
+use Net::DNS;
+use LWP::UserAgent;
+use HTTP::Date qw(time2str);
+use Archive::Tar 1.23;
+use IO::Zlib 1.04;
+
+BEGIN {
+  eval { require Digest::SHA; import Digest::SHA qw(sha1_hex); 1 }
+  or do { require Digest::SHA1; import Digest::SHA1 qw(sha1_hex) }
+}
+
+# These should already be available
+use Mail::SpamAssassin;
+
+# Make the main dbg() accessible in our package w/o an extra function
+*dbg=\&Mail::SpamAssassin::dbg;
+sub dbg;
+
+# Clean up PATH appropriately
+Mail::SpamAssassin::Util::clean_path_in_taint_mode();
+
+##############################################################################
+
+# Default list of GPG keys allowed to sign update releases
+#
+# pub   1024D/265FA05B 2003-06-09
+#       Key fingerprint = 26C9 00A4 6DD4 0CD5 AD24  F6D7 DEE0 1987 265F A05B
+# uid                  SpamAssassin Signing Key <release@spamassassin.org>
+# sub   1024D/FC51569B 2003-08-21
+#
+# pub   4096R/5244EC45 2005-12-20
+#       Key fingerprint = 5E54 1DC9 59CB 8BAC 7C78  DFDC 4056 A61A 5244 EC45
+# uid                  updates.spamassassin.org Signing Key <release@spamassassin.org>
+# sub   4096R/24F434CE 2005-12-20
+#
+# note for gpg newbs: these are "long" gpg keyids.  It's common to also
+# use the last 8 hex digits as a shorter keyid string.
+#
+my %valid_GPG = ( 
+  '26C900A46DD40CD5AD24F6D7DEE01987265FA05B' => 1,
+  '0C2B1D7175B852C64B3CDC716C55397824F434CE' => 1,
+  '5E541DC959CB8BAC7C78DFDC4056A61A5244EC45' => 1,
+);
+
+# Default list of channels to update against
+#
+my @channels = ( 'updates.spamassassin.org' );
+
+my $IGNORE_MIRBY_OLDER_THAN = (24 * 60 * 60 * 7);       # 1 week
+
+##############################################################################
+
+use constant MIRBY_DOWNLOADED => -1;
+
+my %opt = ();
+@{$opt{'gpgkey'}} = ();
+@{$opt{'channel'}} = ();
+my $GPG_ENABLED = 1;
+
+$opt{'gpghomedir'} = File::Spec->catfile($LOCAL_RULES_DIR, 'sa-update-keys');
+
+Getopt::Long::Configure(
+  qw(bundling no_getopt_compat no_auto_abbrev no_ignore_case));
+GetOptions(
+  'debug|D:s'                           => \$opt{'debug'},
+  'version|V'                           => \$opt{'version'},
+  'help|h|?'                            => \$opt{'help'},
+  'verbose|v'                           => \$opt{'verbose'},
+  'checkonly'                           => \$opt{'checkonly'},
+  'allowplugins'                        => \$opt{'allowplugins'},
+  'refreshmirrors'                      => \$opt{'refreshmirrors'},
+
+  # allow multiple of these on the commandline
+  'gpgkey=s'				=> $opt{'gpgkey'},
+  'gpghomedir=s'			=> \$opt{'gpghomedir'},
+  'channel=s'				=> $opt{'channel'},
+
+  'install=s'                           => \$opt{'install'},
+  'import=s'			        => \$opt{'import'},
+  'gpgkeyfile=s'			=> \$opt{'gpgkeyfile'},
+  'channelfile=s'			=> \$opt{'channelfile'},
+  'updatedir=s'				=> \$opt{'updatedir'},
+  'gpg!'				=> \$GPG_ENABLED,
+
+  # backward compatibility
+  'usegpg'				=> \$GPG_ENABLED,
+) or print_usage_and_exit();
+
+if ( defined $opt{'help'} ) {               
+  print_usage_and_exit("For more information read the sa-update man page.\n", 0);
+} 
+if ( defined $opt{'version'} ) {            
+  print_version();
+  exit(0);
+}
+
+
+# Figure out what version of SpamAssassin we're using, and also figure out the
+# reverse of it for the DNS query.  Handle x.yyyzzz as well as x.yz.
+my $SAVersion = $Mail::SpamAssassin::VERSION;
+if ($SAVersion =~ /^(\d+)\.(\d{3})(\d{3})$/) {
+  $SAVersion = join(".", $1+0, $2+0, $3+0);
+}
+elsif ($SAVersion =~ /^(\d)\.(\d)(\d)$/) {
+  $SAVersion = "$1.$2.$3";
+}
+else {
+  die "fatal: SpamAssassin version number '$SAVersion' is in an unknown format!\n";
+}
+my $RevSAVersion = join(".", reverse split(/\./, $SAVersion));
+
+  
+# set debug areas, if any specified (only useful for command-line tools)
+$SAVersion =~ /^(\d+\.\d+)/;
+if ($1+0 > 3.0) {
+  $opt{'debug'} ||= 'all' if (defined $opt{'debug'});
+}
+else {
+  $opt{'debug'} = defined $opt{'debug'};
+}
+
+
+# Find the default site rule directory, also setup debugging and other M::SA bits
+my $SA = new Mail::SpamAssassin({
+  debug => $opt{'debug'},
+  local_tests_only => 1,
+  dont_copy_prefs => 1,
+
+  PREFIX          => $PREFIX,
+  DEF_RULES_DIR   => $DEF_RULES_DIR,
+  LOCAL_RULES_DIR => $LOCAL_RULES_DIR,
+  LOCAL_STATE_DIR => $LOCAL_STATE_DIR,
+});
+
+if (defined $opt{'updatedir'}) {
+  $opt{'updatedir'} = Mail::SpamAssassin::Util::untaint_file_path($opt{'updatedir'});
+}
+else {
+  $opt{'updatedir'} = $SA->sed_path('__local_state_dir__/__version__');
+}
+
+dbg("generic: sa-update version $VERSION");
+dbg("generic: using update directory: $opt{'updatedir'}");
+
+# doesn't really display useful things for this script, but we do want
+# a module/version listing, etc. sa-update may be used for older versions
+# of SA that don't include this function, so eval around it.
+eval { $SA->debug_diagnostics(); 1; };
+
+$SA->finish();
+
+# untaint the command-line args; since the root user supplied these, and
+# we're not a setuid script, we trust them
+foreach my $optkey (keys %opt) {
+  next if ref $opt{$optkey};
+  Mail::SpamAssassin::Util::untaint_var(\$opt{$optkey});
+}
+
+##############################################################################
+
+# Deal with gpg-related options
+
+if (@{$opt{'gpgkey'}}) {
+  $GPG_ENABLED = 1;
+  foreach my $key (@{$opt{'gpgkey'}}) {
+    unless (is_valid_gpg_key_id($key)) {
+      dbg("gpg: invalid gpgkey parameter $key");
+      next;
+    }
+    $key = uc $key;
+    dbg("gpg: adding key id $key");
+    $valid_GPG{$key} = 1;
+  }
+}
+
+if (defined $opt{'gpgkeyfile'}) {
+  $GPG_ENABLED = 1;
+  unless (open(GPG, $opt{'gpgkeyfile'})) {
+    die "Can't open ".$opt{'gpgkeyfile'}." for reading: $!\n";
+  }
+
+  dbg("gpg: reading in gpgfile ".$opt{'gpgkeyfile'});
+  while(my $key = <GPG>) {
+    chomp $key;
+
+    $key =~ s/#.*$//;   # remove comments
+    $key =~ s/^\s+//;   # remove leading whitespace
+    $key =~ s/\s+$//;   # remove tailing whitespace
+    next unless ($key); # skip empty lines
+
+    unless (is_valid_gpg_key_id($key)) {
+      dbg("gpg: invalid key id $key");
+      next;
+    }
+    $key = uc $key;
+    dbg("gpg: adding key id $key");
+    $valid_GPG{$key} = 1;
+  }
+  close(GPG);
+}
+
+# At this point, we need to know where GPG is ...
+my $GPGPath;
+if ($GPG_ENABLED || $opt{'import'}) {
+  # find GPG in the PATH
+  # bug 4958: for *NIX it's "gpg", in Windows it's "gpg.exe"
+  $GPGPath = 'gpg' . $Config{_exe};
+  dbg("gpg: Searching for '$GPGPath'");
+
+  if ($GPGPath = Mail::SpamAssassin::Util::find_executable_in_env_path($GPGPath)) {
+    dbg("gpg: found $GPGPath");
+
+    # bug 5030: if GPGPath has a space, put it in quotes
+    if ($GPGPath =~ / /) {
+      $GPGPath =~ s/"/\\"/g;
+      $GPGPath = qq/"$GPGPath"/;
+      dbg("gpg: path changed to $GPGPath");
+    }
+  }
+  else {
+    die "error: gpg required but not found!\n";
+  }
+
+  # GPG was found, and we've been asked to import a key only
+  if ( $opt{'import'} ) {
+    my $ex = import_gpg_key($opt{'import'});
+    exit $ex;
+  }
+
+  # does the sa-update keyring exist?  if not, import it
+  if(!-f File::Spec->catfile($opt{'gpghomedir'}, "secring.gpg")) {
+    import_default_keyring();
+    # attempt to continue even if this fails, anyway
+  }
+
+  # specify which keys are trusted
+  dbg("gpg: release trusted key id list: ".join(" ", keys %valid_GPG));
+
+  # convert fingerprint gpg ids to keyids
+  foreach (keys %valid_GPG) {
+    my $id = substr $_, -8;
+    $valid_GPG{$id} = 1;
+  }
+}
+
+##############################################################################
+
+# Deal with channel-related options
+if (defined $opt{'channel'} && scalar @{$opt{'channel'}} > 0) {
+  @channels = @{$opt{'channel'}};
+}
+if (defined $opt{'channelfile'}) {
+  unless (open(CHAN, $opt{'channelfile'})) {
+    die "Can't open ".$opt{'channelfile'}." for reading: $!\n";
+  }
+
+  dbg("channel: reading in channelfile ".$opt{'channelfile'});
+  @channels = ();
+  while(my $chan = <CHAN>) {
+    chomp $chan;
+
+    $chan =~ s/#.*$//;   # remove comments
+    $chan =~ s/^\s+//;   # remove leading whitespace
+    $chan =~ s/\s+$//;   # remove tailing whitespace
+    next unless ($chan); # skip empty lines
+
+    $chan = lc $chan;
+    dbg("channel: adding $chan");
+    push(@channels, $chan);
+  }
+  close(CHAN);
+}
+
+# untaint the channel listing
+for(my $ind = 0; $ind < @channels; $ind++) {
+  local($1); # bug 5061: prevent random taint flagging of $1
+  if ($channels[$ind] =~ /^([a-zA-Z0-9._-]+)$/) {
+    Mail::SpamAssassin::Util::untaint_var(\$channels[$ind]);
+  }
+  else {
+    dbg("channel: skipping invalid channel: $channels[$ind]");
+    splice @channels, $ind, 1;
+    $ind--; # the next element takes the place of the deleted one
+  }
+}
+
+my ($res, $ua);
+
+if ($opt{'install'}) {
+  if (scalar @channels > 1) {
+    die "fatal: --install cannot be used with multiple --channel switches.\n";
+  }
+
+} else {
+  $res = Net::DNS::Resolver->new();
+
+  $ua = LWP::UserAgent->new();
+  $ua->agent("sa-update/$VERSION/$SAVersion");
+  $ua->timeout(60);      # a good long timeout; 10 is too short for Coral!
+  $ua->env_proxy;
+}
+
+# Generate a temporary file to put channel content in for later use ...
+my ($content_file, $tfh) = Mail::SpamAssassin::Util::secure_tmpfile();
+if ( !defined $content_file ) {
+  die "fatal: could not create temporary channel content file: $!\n";
+}
+close($tfh);
+
+# by default, exit code is 1, to indicate no updates occurred
+my $exit = 1;
+
+# Use a temporary directory for all update channels
+my $UPDTmp;
+
+# we only need to lint the site pre files once
+my $site_pre_linted = 0;
+
+# Go ahead and loop through all of the channels
+foreach my $channel (@channels) {
+  dbg("channel: attempting channel $channel");
+
+  # Convert the channel to a nice-for-filesystem version
+  my $nicechannel = $channel;
+  $nicechannel =~ tr/A-Za-z0-9-/_/cs;
+
+  my $UPDDir = File::Spec->catfile($opt{'updatedir'}, $nicechannel);
+  my $CFFile = "$UPDDir.cf";
+  my $PREFile = "$UPDDir.pre";
+
+  dbg("channel: update directory $UPDDir");
+  dbg("channel: channel cf file $CFFile");
+  dbg("channel: channel pre file $PREFile");
+
+  my $instfile;
+  if ($opt{'install'}) {
+    $instfile = $opt{'install'};
+    dbg("channel: installing from file $instfile");
+  }
+
+  my($mirby, $mirby_time);
+  my $mirby_path = File::Spec->catfile($UPDDir, "MIRRORED.BY");
+
+  # try to read metadata from channel.cf file
+  my $currentV = -1;
+  if (open(CF, $CFFile)) {
+    while(<CF>) {
+      local($1,$2);
+      last unless /^# UPDATE\s+([A-Za-z]+)\s+(\S+)/;
+      my($type, $value) = (lc $1,$2);
+
+      dbg("channel: metadata $type = $value");
+
+      if ($type eq 'version') {
+        $value =~ /^(\d+)/;
+        $currentV = $1;
+      }
+    }
+    close(CF);
+  }
+
+  my $newV;
+  if (!$instfile) {
+    # Setup the channel version DNS query
+    my $DNSQ = "$RevSAVersion.$channel";
+
+    my $dnsV = join(' ', do_txt_query($DNSQ));
+    local($1);
+    if (defined $dnsV && $dnsV =~ /^(\d+)/) {
+      $newV = $1 if (!defined $newV || $1 > $newV);
+      dbg("dns: $DNSQ => $dnsV, parsed as $1");
+    }
+
+    # Not getting a response isn't a failure, there may just not be any updates
+    # for this SA version yet.
+    if (!defined $newV) {
+      my @mirs = do_txt_query("mirrors.$channel");
+      if (defined shift @mirs) {
+        dbg("channel: no updates available, skipping channel");
+      } else {
+        channel_failed("channel: no 'mirrors.$channel' record found");
+      }
+      next;
+    }
+
+    # If this channel hasn't been installed before, or it's out of date,
+    # keep going.  Otherwise, skip it.
+    if ($currentV >= $newV) {
+      dbg("channel: current version is $currentV, new version is $newV, skipping channel");
+      next;
+    }
+
+    print "Update available for channel $channel\n"  if $opt{'verbose'};
+
+    # If we are only checking for update availability, exit now
+    if ( defined $opt{'checkonly'} ) {            
+      dbg("channel: $channel: update available, not downloading in checkonly mode");
+      $exit = 0;
+      next;
+    }
+
+  } else {  # $instfile
+    # the /.*/ ensures we use the 3-digit string nearest to the end of string, otherwise
+    # we might pick up something from the middle of the directory path
+    local($1);
+    if ($instfile !~ /(?:.*\D|^)(\d{3,})/) {        
+      # this is a requirement
+      die "channel: $channel: --install file $instfile does not contain a 3-digit version number!\n";
+    }
+    $newV = $1;
+
+#   print "Update available for channel $channel\n"  if $opt{'verbose'};
+
+    if ( defined $opt{'checkonly'} ) {            
+      dbg("channel: $channel: --install and --checkonly, claiming update available");
+      $exit = 0;
+      next;
+    }
+  }
+
+  # we need a directory we control that we can use to aviod loading any rules
+  # when we lint the site pre files, we might as well use the channel temp dir
+  dbg("channel: preparing temp directory for new channel");
+  if (!$UPDTmp) {
+    $UPDTmp = Mail::SpamAssassin::Util::secure_tmpdir();
+    dbg("generic: update tmp directory $UPDTmp");
+  }
+  elsif (!clean_update_dir($UPDTmp)) {
+    die "channel: attempt to clean update dir failed, aborting";
+  }
+
+  # lint the site pre files (that will be used when lint checking the channel)
+  # before downloading the channel update
+  unless ($site_pre_linted) {
+    dbg("generic: lint checking site pre files once before attempting channel updates");
+    unless (lint_check_dir(File::Spec->catfile($UPDTmp, "doesnotexist"))) {
+      dbg("generic: lint of site pre files failed, cannot continue"); 
+      print "Lint of site pre files failed, cannot continue\n"  if $opt{'verbose'};
+      $exit = 2;
+      last;
+    }
+    dbg("generic: lint check of site pre files succeeded, continuing with channel updates");
+    $site_pre_linted = 1;
+  }
+
+  my $content;
+  my $SHA1;
+  my $GPG;
+  if (!$instfile) {
+    # Read in the MIRRORED.BY file if it exists
+    if (open(MIRBY, $mirby_path)) {
+      $mirby_time = (stat $mirby_path)[9];
+
+      if ($opt{'refreshmirrors'}) {
+        dbg("channel: --refreshmirrors used, forcing refresh");
+        $mirby = $mirby_time = undef;
+      } elsif (time - $mirby_time > $IGNORE_MIRBY_OLDER_THAN) {
+        dbg("channel: MIRRORED.BY file is too old, forcing refresh");
+        $mirby = $mirby_time = undef;
+      }
+      else {
+        local $/ = undef;
+        $mirby = <MIRBY>;
+      }
+      close(MIRBY);
+    }
+
+    if (!defined $mirby) {
+      # We don't currently have the list of mirrors, so go grab it.
+      dbg("channel: no MIRRORED.BY file available");
+      my @mirrors = do_txt_query("mirrors.$channel");
+      unless (@mirrors) {
+        warn "error: no mirror data available for channel $channel\n";
+        channel_failed("channel: MIRRORED.BY file location was not in DNS");
+        next;
+      }
+      foreach my $mirror (@mirrors) {
+        $mirby = http_get($mirror);
+        unless ($mirby) {
+          dbg("channel: no mirror data available for channel $channel from $mirror");
+          next;
+        }
+        last;
+      }
+      unless ($mirby) {
+        warn "error: no mirror data available for channel $channel\n";
+        channel_failed("channel: MIRRORED.BY contents were missing");
+        next;
+      }
+      $mirby_time = MIRBY_DOWNLOADED;
+
+      dbg("channel: MIRRORED.BY file retrieved");
+    }
+
+    # Read in the list of mirrors
+    dbg("channel: reading MIRRORED.BY file");
+    my %mirrors = ();
+    my @mirrors = split(/^/, $mirby);
+    while(my $mirror = shift @mirrors) {
+      chomp $mirror;
+
+      $mirror =~ s/#.*$//;   # remove comments
+      $mirror =~ s/^\s+//;   # remove leading whitespace
+      $mirror =~ s/\s+$//;   # remove tailing whitespace
+      next unless ($mirror); # skip empty lines
+
+      # We only support HTTP right now
+      if ($mirror !~ m@^http://@i) {
+        dbg("channel: skipping non-HTTP mirror: $mirror");
+        next;
+      }
+
+      my @data;
+
+      dbg("channel: found mirror $mirror");
+
+      ($mirror,@data) = split(/\s+/, $mirror);
+      $mirror =~ s@/+$@@; # http://example.com/updates/ -> .../updates
+      $mirrors{$mirror}->{weight} = 1;
+      foreach (@data) {
+        my($k,$v) = split(/=/, $_, 2);
+        $mirrors{$mirror}->{$k} = $v;
+      }
+    }
+
+    unless (keys %mirrors) {
+      warn "error: no mirrors available for channel $channel\n";
+      channel_failed("channel: no mirrors available");
+      next;
+    }
+
+    # Now that we've laid the foundation, go grab the appropriate files
+    #
+
+    # Loop through all available mirrors, choose from them randomly
+    # if the archive get fails, choose another mirror,
+    # if the get for the sha1 or gpg signature files, the channel fails
+    while (my $mirror = choose_mirror(\%mirrors)) {
+      # Grab the data hash for this mirror, then remove it from the list
+      my $mirror_info = $mirrors{$mirror};
+      delete $mirrors{$mirror};
+
+      dbg("channel: selected mirror $mirror");
+
+      # Actual archive file
+      $content = http_get("$mirror/$newV.tar.gz");
+      next unless $content;
+
+      # SHA1 of the archive file
+      $SHA1 = http_get("$mirror/$newV.tar.gz.sha1");
+      last unless $SHA1;
+
+      # if GPG is enabled, the GPG detached signature of the archive file
+      if ($GPG_ENABLED) {
+        $GPG = http_get("$mirror/$newV.tar.gz.asc");
+        last unless $GPG;
+      }
+
+      # try to update our list of mirrors.
+      # a failure here doesn't cause channel failure.
+      if ($mirby_time != MIRBY_DOWNLOADED) {
+        my $mirby_tmp = http_get("$mirror/MIRRORED.BY", $mirby_time);
+        if ($mirby_tmp) {
+          $mirby = $mirby_tmp;
+          $mirby_time = MIRBY_DOWNLOADED;
+        }
+      }
+
+      last;
+    }
+
+  } else {      # $instfile
+    dbg("channel: using --install files $instfile\{,.sha1,.asc\}");
+    $content = read_install_file($instfile);
+    $SHA1 = read_install_file($instfile.".sha1");
+    $GPG = read_install_file($instfile.".asc") if $GPG_ENABLED;
+  }
+
+  unless ($content && $SHA1 && (!$GPG_ENABLED || $GPG)) {
+    channel_failed("channel: could not find working mirror");
+    next;
+  }
+
+  # Validate the SHA1 signature before going forward with more complicated
+  # operations.
+  # The SHA1 file may be "signature filename" ala sha1sum, just use the signature
+  { local($1);
+    $SHA1 =~ /^([a-fA-F0-9]{40})/;
+    $SHA1 = $1 || 'INVALID';
+  }
+  my $digest = sha1_hex($content);
+  dbg("sha1: verification wanted: $SHA1");
+  dbg("sha1: verification result: $digest");
+  unless ($digest eq $SHA1) {
+    channel_failed("channel: SHA1 verification failed");
+    next;
+  }
+
+  # Write the content out to a temp file for GPG/Archive::Tar interaction
+  dbg("channel: populating temp content file");
+  open(TMP, ">$content_file") || die "fatal: can't write to content temp file $content_file: $!\n";
+  binmode TMP;
+  print TMP $content;
+  close(TMP);
+
+  # to sign  : gpg -bas file
+  # to verify: gpg --verify --batch --no-tty --status-fd=1 -q --logger-fd=1 file.asc file
+  # look for : [GNUPG:] GOODSIG 6C55397824F434CE updates.spamassassin.org [...]
+  #            [GNUPG:] VALIDSIG 0C2B1D7175B852C64B3CDC716C55397824F434CE [...]
+  #            [GNUPG:] NO_PUBKEY 6C55397824F434CE
+  if ($GPG) {
+    dbg("gpg: populating temp signature file");
+    my $sig_file;
+    ($sig_file, $tfh) = Mail::SpamAssassin::Util::secure_tmpfile();
+    if ( !defined $sig_file ) {
+      die "fatal: couldn't create temp file for GPG signature: $!\n";
+    }
+    binmode $tfh;
+    print $tfh $GPG;
+    close($tfh);
+
+    dbg("gpg: calling gpg");
+
+    my $gpghome = interpolate_gpghomedir();
+
+    # TODO: we could also use "--keyserver pgp.mit.edu" or similar,
+    # to autodownload missing keys...
+    my $CMD = "$GPGPath $gpghome --verify --batch ".
+        "--no-tty --status-fd=1 -q --logger-fd=1";
+
+    unless (open(CMD, "$CMD $sig_file $content_file|")) {
+      unlink $sig_file || warn "error: can't unlink $sig_file: $!\n";
+      die "fatal: couldn't execute $GPGPath: $!\n";
+    }
+
+    # Determine the fate of the signature
+    my $signer = '';
+    my $missingkeys = '';
+    while(my $GNUPG = <CMD>) {
+      chop $GNUPG;
+      dbg ("gpg: $GNUPG");
+
+      if ($GNUPG =~ /^gpg: fatal:/) {
+        warn $GNUPG."\n";        # report bad news
+      }
+
+      local($1);
+      if ($GNUPG =~ /^\Q[GNUPG:]\E NO_PUBKEY \S+(\S{8})$/) {
+        $missingkeys .= $1." ";
+      }
+
+      next unless ($GNUPG =~ /^\Q[GNUPG:]\E (?:VALID|GOOD)SIG (\S{8,40})/);
+      my $key = $1;
+
+      # we want either a keyid (8) or a fingerprint (40)
+      if (length $key > 8 && length $key < 40) {
+        substr($key, 8) = '';
+      }
+
+      # use the longest match we can find
+      $signer = $key if (length $key > length $signer);
+    }
+
+    close(CMD);
+    unlink $sig_file || warn "Can't unlink $sig_file: $!\n";
+
+    if ($signer) {
+      my $keyid = substr $signer, -8;
+      dbg("gpg: found signature made by key $signer");
+      if (exists $valid_GPG{$signer}) {
+	dbg("gpg: key id $signer is release trusted");
+      }
+      elsif (exists $valid_GPG{$keyid}) {
+	dbg("gpg: key id $keyid is release trusted");
+      }
+      else {
+	dbg("gpg: key id $keyid is not release trusted");
+	$signer = undef;
+      }
+    }
+
+    unless ($signer) {
+      warn "error: GPG validation failed!\n";
+
+      if ($missingkeys) {
+
+        warn <<ENDOFVALIDATIONERR;
+The update downloaded successfully, but it was not signed with a trusted GPG
+key.  Instead, it was signed with the following keys:
+
+    $missingkeys
+
+Perhaps you need to import the channel's GPG key?  For example:
+
+    wget http://spamassassin.apache.org/updates/GPG.KEY
+    sa-update --import GPG.KEY
+
+ENDOFVALIDATIONERR
+
+      } else {
+
+        warn <<ENDOFVALIDATIONERR;
+The update downloaded successfully, but the GPG signature verification
+failed.
+ENDOFVALIDATIONERR
+
+      }
+
+      channel_failed("channel: GPG validation failed");
+      next;
+    }
+  }
+
+  # OK, we're all validated at this point, install the new version
+  dbg("channel: file verification passed, testing update");
+
+  dbg("channel: extracting archive");
+  if (!taint_safe_archive_extract($UPDTmp, $content_file)) {
+    channel_failed("channel: archive extraction failed");
+    next;
+  }
+
+  # check --lint
+
+  if (!lint_check_dir($UPDTmp)) {
+    channel_failed("channel: lint check of update failed");
+    next;
+  }
+
+  dbg("channel: lint check succeeded, extracting archive to $UPDDir...");
+
+  my @totry = (
+    {
+      'try' => sub {
+        if (-d $UPDDir) {
+          # ok that worked, too late to stop now!   At this stage, if there are
+          # errors, we have to attempt to carry on regardless, since we've already
+          # blown away the old ruleset.
+          dbg("channel: point of no return for existing $UPDDir");
+
+          # clean out the previous channel files, if they exist
+          if (-f $PREFile && ! unlink $PREFile ) {
+            warn("channel: attempt to rm channel pre file failed, attempting to continue anyway");
+          }
+          if (-f $CFFile && ! unlink $CFFile ) {
+            warn("channel: attempt to rm channel cf file failed, attempting to continue anyway");
+          }
+          if (!clean_update_dir($UPDDir)) {
+            warn("channel: attempt to rm channel directory failed, attempting to continue anyway");
+          }
+        }
+        else {
+          # create the dir, if it doesn't exist
+          dbg("channel: creating $UPDDir");
+          if (!mkpath([$UPDDir], 0, 0777)) {
+            warn "channel: can't create channel directory $UPDDir: $!\n";
+	    return 0;
+          }
+
+          # ok, that test worked.  it's now likely that the .cf's will
+          # similarly be ok to rename, too.   Too late to stop from here on
+          dbg("channel: point of no return for new $UPDDir");
+        }
+
+	return 1;
+      },
+
+      'rollback' => sub {
+	dbg("channel: attempting to remove the channel and update directories");
+
+        # bug 4941: try to get rid of the empty directories to avoid leaving SA
+        # with no rules.
+        rmdir $UPDDir;
+        rmdir $opt{'updatedir'};
+      },
+    },
+
+    {
+      'try' => sub {
+        # extract the files again for the last time
+        if (!taint_safe_archive_extract($UPDDir, $content_file)) {
+          channel_failed("channel: archive extraction failed");
+	  return 0;
+        }
+
+	return 1;
+      },
+
+      'rollback' => sub {
+	dbg("channel: attempting to clean out the channel update directory");
+
+        # bug 4941: try to get rid of the empty directories to avoid leaving SA
+        # with no rules.
+        if (!clean_update_dir($UPDDir)) {
+          warn "channel: attempt to clean up failed extraction also failed!\n";
+        }
+      },
+    },
+
+    {
+      'try' => sub {
+        if ($instfile) {
+          dbg("channel: not creating MIRRORED.BY file due to --install");
+          return 1;
+        }
+
+        # Write out the mirby file, not fatal if it doesn't work
+        dbg("channel: creating MIRRORED.BY file");
+        if (open(MBY, ">$mirby_path")) {
+          print MBY $mirby;
+          close(MBY);
+        }
+        else {
+          warn "error: can't write new MIRRORED.BY file: $!\n";
+        }
+
+	return 1;
+      },
+
+      'rollback' => sub {
+      },
+    },
+
+    {
+      'try' => sub {
+        # the last step is to create the .cf and .pre files to include the
+        # channel files
+        my @CF = ();
+        my @PRE = ();
+
+        dbg("channel: creating update cf/pre files");
+
+        # Put in whatever metadata we need
+        push(@CF, "# UPDATE version $newV\n");
+
+
+        # Find all of the cf and pre files
+        unless (opendir(DIR, $UPDDir)) {
+          die "fatal: can't access $UPDDir: $!\n";
+        }
+
+        my @files = ();
+        while(my $file = readdir(DIR)) {
+	  next if $file eq '.' || $file eq '..';
+          Mail::SpamAssassin::Util::untaint_var(\$file);
+          my $path = File::Spec->catfile($UPDDir, $file);
+          next unless (-f $path);   # shouldn't ever happen
+          push(@files, $file);
+        }
+
+        # bug 5371: ensure files are sorted
+        foreach my $file ( sort @files ) {
+          if ($file =~ /\.cf$/) {
+            push(@CF, "include $nicechannel/$file\n");
+          }
+          elsif ($file =~ /\.pre$/) {
+            push(@PRE, "include $nicechannel/$file\n");
+          }
+          else {
+            next;
+          }
+
+          dbg("channel: adding $file");
+        }
+        closedir(DIR);
+
+        # Finally, write out the files to include the update files
+        if (!write_channel_file($PREFile, \@PRE)) {
+          channel_failed("channel: writing of $PREFile failed");
+          return 0;
+        }
+        if (!write_channel_file($CFFile, \@CF)) {
+          channel_failed("channel: writing of $CFFile failed");
+          return 0;
+        }
+
+        $exit = 0;            # "exit 0" means an update occurred
+        dbg("channel: update complete");
+
+	return 1;
+      },
+
+      'rollback' => sub {
+      },
+    },
+
+  );
+
+  my $error;
+  for(my $elem = 0; $elem <= $#totry; $elem++) {
+    if (!&{$totry[$elem]->{'try'}}()) {
+      $error = $elem;
+      last;
+    }
+  }
+  if (defined $error) {
+    dbg("channel: channel failed, attempting rollback");
+    for(my $elem = $error; $elem >= 0; $elem--) {
+      &{$totry[$elem]->{'rollback'}}();
+    }
+  }
+}
+
+##############################################################################
+
+# clean out the temp dir
+if ($UPDTmp) {
+  dbg("generic: cleaning up temporary directory/files");
+  if (!clean_update_dir($UPDTmp)) {
+    warn "error: unable to clean out the files in $UPDTmp\n";
+  }
+}
+
+# clear out the temp files if they still exist
+foreach ( $content_file, $UPDTmp ) {
+  next unless defined $_;
+  my $stat_errn = stat($_) ? 0 : 0+$!;
+  next if $stat_errn == ENOENT;
+
+  if ($stat_errn != 0) {
+    warn "error: can't access $_: $!\n";
+  }
+  elsif (-d _) {
+    rmdir $_ || warn "error: can't remove directory $_: $!\n";
+  }
+  elsif (-f _) {
+    unlink $_ || warn "error: can't remove file $_: $!\n";
+  }
+  else {
+    warn "error: '$_' isn't a file nor a directory, skipping\n";
+  }
+}
+
+dbg("diag: updates complete, exiting with code $exit");
+
+if ($opt{'verbose'}) {
+  if (!$exit) {
+    if (defined $opt{'checkonly'}) {
+      print "Update was available, but not installed in checkonly mode\n";
+    } else {
+      print "Update was available, and was downloaded and installed successfully\n";
+    }
+  } elsif ($exit == 1) {
+    print "Update finished, no fresh updates were available\n";
+  } else {
+    print "Update failed, exiting with code $exit\n";
+  }
+}
+
+exit $exit;
+
+##############################################################################
+
+sub read_install_file {
+  my ($file) = @_;
+  open (IN, "<$file") or die "cannot open $file\n";
+  my $all = join('', <IN>);
+  close IN;
+  return $all;
+}
+
+##############################################################################
+
+sub write_channel_file {
+  my ($filename, $contents) = @_;
+
+  return 1 unless @{$contents};
+
+  if (open(FILE, ">$filename")) {
+    print FILE @{$contents};
+    close FILE or return 0;
+    return 1;
+  }
+
+  return 0;
+}
+
+##############################################################################
+
+sub channel_failed {
+  my $reason = shift;
+  warn("$reason, channel failed\n");
+  if ($exit > 4) {
+    $exit++;
+  } else {
+    $exit = 4;      # 4 or higher means channel failed
+  }
+}
+
+##############################################################################
+
+sub taint_safe_archive_extract {
+  my $todir = shift;
+  my $input = shift;
+
+  my $tfh = IO::Zlib->new($input, "rb");
+  die "fatal: couldn't read content tmpfile $content_file: $!\n" unless $tfh;
+
+  my $tar = Archive::Tar->new($tfh);
+  die "fatal: couldn't create Archive::Tar object!\n" unless $tar;
+
+  # stupid Archive::Tar is not natively taint-safe! duh.
+  # return $tar->extract();
+  # instead, get the file list, untaint, and extract one-by-one.
+
+  my @files = $tar->list_files();
+  foreach my $file (@files) {
+    next if ($file =~ /^\/$/);  # ignore dirs
+
+    local($1);
+    $file =~ /^([-\.\,\/a-zA-Z0-9_]+)$/;
+    my $outfname = $1;
+    $outfname =~ s/\.\.\//__\//gs;      # avoid "../" dir traversal attacks
+    $outfname = File::Spec->catfile($todir, $outfname);
+
+    dbg "extracting: $outfname";
+    if (open OUT, ">".$outfname) {
+      my $content = $tar->get_content($file);
+
+      if ($outfname =~ /\.(?:pre|cf)$/) {
+        # replace macros in the update files if it's a .pre or .cf
+        local($1);
+        $content =~ s/\@\@([^\@]+)\@\@/$MACRO_VALUES{$1} || "\@\@$1\@\@"/ge;
+
+        # also, if --allowplugins is not specified, comment out
+        # all loadplugin or tryplugin lines
+        if ( !$opt{'allowplugins'} ) {
+          $content =~ s{^\s*((?:load|try)plugin|bayes_store_module|auto_whitelist_factory)\b}
+            {#(commented by sa-update, no --allowplugins switch specified)# $1}gmx;
+        }
+      }
+
+      print OUT $content;
+      if (!close OUT) {
+        warn "error: write failed to $outfname: $!";
+        goto failed;
+      }
+    } else {
+      warn "error: failed to open $outfname for write: $!";
+      goto failed;
+    }
+  }
+
+  return @files;
+
+failed:
+  return;       # undef = failure
+}
+
+##############################################################################
+
+# Do a generic TXT query
+sub do_txt_query {
+  my($query) = shift;
+
+  my $RR = $res->query($query, 'TXT');
+  my @result;
+
+  if ($RR) {
+    foreach my $rr ($RR->answer) {
+      my $text = $rr->rdatastr;
+      local($1);
+      $text =~ /^"(.*)"$/;
+      push @result, $1;
+    }
+  }
+  else {
+    dbg("dns: query failed: $query => " . $res->errorstring);
+  }
+
+  return @result;
+}
+
+##############################################################################
+
+# Do a GET request via HTTP for a certain URL
+# Use the optional time_t value to do an IMS GET
+sub http_get {
+  my($url, $ims) = @_;
+
+  my $response;
+  my $text;
+
+  # retry 3 times; this works better with Coral
+  foreach my $retries (1 .. 3) {
+    my $request = HTTP::Request->new("GET");
+    $request->url($url);
+
+    if (defined $ims) {
+      my $str = time2str($ims);
+      $request->header('If-Modified-Since', $str);
+      dbg("http: IMS GET request, $url, $str");
+    }
+    else {
+      dbg("http: GET request, $url");
+    }
+
+    $response = $ua->request($request);
+
+    if ($response->is_success) {
+      return $response->content;
+    }
+
+    # could be a "304 not modified" or similar.
+    # TODO: should use a special return type for "not modified" here
+    # instead of overloading the failure return type
+    if ($ims && $response->status_line =~ /^3/) {
+      return;
+    }
+
+    # include the text in the debug output; it's useful in some cases,
+    # e.g. proxies that require authentication, diagnosing fascist
+    # filtering false positives, etc.
+    $text = $response->content;
+    $text ||= "(no body)";
+    $text =~ s/\s+/ /gs;
+
+    dbg ("http: GET $url request failed, retrying: " .
+                    $response->status_line.": ".$text);
+  }
+
+  # this should be a user-readable warning without --debug
+  warn "http: GET $url request failed: " .
+                    $response->status_line.": ".$text."\n";
+  return;
+}
+
+##############################################################################
+
+# choose a random integer between 0 and the total weight of all mirrors
+# loop through the mirrors from largest to smallest weight
+# if random number is < largest weight, use it
+# otherwise, random number -= largest, remove mirror from list, try again
+# eventually, there'll just be 1 mirror left in $mirrors[0] and it'll be used
+# 
+sub choose_mirror {
+  my($mirror_list) = @_;
+
+  # Sort the mirror list by reverse weight (largest first)
+  my @mirrors = sort { $mirror_list->{$b}->{weight} <=> $mirror_list->{$a}->{weight} } keys %{$mirror_list};
+
+  return unless @mirrors;
+
+  if (keys %{$mirror_list} > 1) {
+    # Figure out the total weight
+    my $weight_total = 0;
+    foreach (@mirrors) {
+      $weight_total += $mirror_list->{$_}->{weight};
+    }
+
+    # Pick a random int
+    my $value = int(rand($weight_total));
+
+    # loop until we find the right mirror, or there's only 1 left
+    while (@mirrors > 1) {
+      if ($value < $mirror_list->{$mirrors[0]}->{weight}) {
+        last;
+      }
+      $value -= $mirror_list->{$mirrors[0]}->{weight};
+      shift @mirrors;
+    }
+  }
+
+  return $mirrors[0];
+}
+
+##############################################################################
+
+sub print_version {
+  print "sa-update version $VERSION\n"
+      . "  running on Perl version " . join(".", map { $_||=0; $_*1 } ($] =~ /(\d)\.(\d{3})(\d{3})?/ )) . "\n";
+}
+
+##############################################################################
+
+sub print_usage_and_exit {
+  my ( $message, $exitval ) = @_;
+  $exitval ||= 64;
+  
+  if ($exitval == 0) {
+    print_version();
+    print("\n");
+  }
+  pod2usage(
+    -verbose => 0,
+    -message => $message,
+    -exitval => $exitval,
+  );
+}
+
+##############################################################################
+
+sub usage {
+  my ( $verbose, $message ) = @_;
+  print "sa-update version $VERSION\n";
+  pod2usage( -verbose => $verbose, -message => $message, -exitval => 64 );
+}
+
+##############################################################################
+
+sub interpolate_gpghomedir {
+  my $gpghome = '';
+  if ($opt{'gpghomedir'}) {
+    $gpghome = $opt{'gpghomedir'};
+    if (Mail::SpamAssassin::Util::am_running_on_windows()) {
+      # windows is single-quote-phobic; bug 4958 cmt 7
+      $gpghome =~ s/\"/\\\"/gs;
+      $gpghome = "--homedir=\"$gpghome\"";
+    } else {
+      $gpghome =~ s/\'/\\\'/gs;
+      $gpghome = "--homedir='$gpghome'";
+    }
+  }
+  return $gpghome;
+}
+
+##############################################################################
+
+sub import_gpg_key {
+  my $keyfile = shift;
+
+  my $gpghome = interpolate_gpghomedir();
+
+  my $CMD = "$GPGPath $gpghome --batch ".
+      "--no-tty --status-fd=1 -q --logger-fd=1 --import";
+
+  unless (open(CMD, "$CMD $keyfile|")) {
+    die "fatal: couldn't execute $GPGPath: $!\n";
+  }
+
+  # Determine the fate of the signature
+  while(my $GNUPG = <CMD>) {
+    chop $GNUPG;
+    dbg ("gpg: $GNUPG");
+
+    if ($GNUPG =~ /^gpg: /) {
+      warn $GNUPG."\n";        # report bad news
+    }
+
+    if ($GNUPG =~ /^IMPORTED /) {
+      dbg("gpg: gpg key imported successfully");
+    }
+  }
+
+  close(CMD);
+  return ($? >> 8);
+}
+
+##############################################################################
+
+sub import_default_keyring {
+  my $defkey = File::Spec->catfile ($DEF_RULES_DIR, "sa-update-pubkey.txt");
+  unless (-f $defkey) {
+    dbg("gpg: import of default keyring failed, couldn't find sa-update-pubkey.txt");
+    return;
+  }
+
+  dbg("gpg: importing default keyring to ".$opt{gpghomedir});
+  unless (-d $opt{gpghomedir}) {
+    # use 0700 to avoid "unsafe permissions" warning
+    mkpath([$opt{'gpghomedir'}], 0, 0700) or die "cannot mkpath $opt{gpghomedir}: $!";
+  } 
+  import_gpg_key($defkey);
+}
+
+##############################################################################
+
+sub is_valid_gpg_key_id {
+  # either a keyid (8 bytes) or a fingerprint (40 bytes)
+  return ($_[0] =~ /^[a-fA-F0-9]+$/ && (length $_[0] == 8 || length $_[0] == 40));
+}
+
+##############################################################################
+
+sub clean_update_dir {
+  my $dir = shift;
+
+  unless (opendir(DIR, $dir)) {
+    warn "error: can't opendir $dir: $!\n";
+    dbg("generic: attempt to opendir ($dir) failed");
+    return;
+  }
+  while(my $file = readdir(DIR)) {
+    next if $file eq '.' || $file eq '..';
+    Mail::SpamAssassin::Util::untaint_var(\$file);
+
+    my $path = File::Spec->catfile($dir, $file);
+    next unless (-f $path);
+
+    dbg("generic: unlinking $file");
+    if (!unlink $path) {
+      warn "error: can't remove file $path: $!\n";
+      closedir(DIR);
+      return;
+    }
+  }
+  closedir(DIR);
+  return 1;
+}
+
+##############################################################################
+
+sub lint_check_dir {
+  my $dir = shift;
+
+  # due to the Logger module's globalness (all M::SA objects share the same
+  # Logger setup), we can't change the debug level here to only include
+  # "config" or otherwise be more terse. :(
+  my $spamtest = new Mail::SpamAssassin( {
+    rules_filename       => $dir,
+    site_rules_filename  => $LOCAL_RULES_DIR,
+    ignore_site_cf_files => 1,
+    userprefs_filename   => File::Spec->catfile($dir, "doesnotexist"),
+
+    local_tests_only     => 1,
+    dont_copy_prefs      => 1,
+
+    PREFIX               => $PREFIX,
+    DEF_RULES_DIR        => $DEF_RULES_DIR,
+    LOCAL_RULES_DIR      => $LOCAL_RULES_DIR,
+    LOCAL_STATE_DIR      => $LOCAL_STATE_DIR,
+  });
+
+  # need to kluge disabling bayes since it may try to expire the DB, and
+  # without the proper config it's not going to be good.
+  $spamtest->{conf}->{use_bayes} = 0;
+
+  my $res = $spamtest->lint_rules();
+  $spamtest->finish();
+
+  return $res == 0;
+}
+
+##############################################################################
+
+=head1 NAME
+
+sa-update - automate SpamAssassin rule updates
+
+=head1 SYNOPSIS
+
+B<sa-update> [options]
+
+Options:
+
+  --channel channel       Retrieve updates from this channel
+                          Use multiple times for multiple channels
+  --channelfile file      Retrieve updates from the channels in the file
+  --checkonly             Check for update availability, do not install
+  --install filename      Install updates directly from this file. Signature
+                          verification will use "file.asc" and "file.sha1"
+  --allowplugins          Allow updates to load plugin code
+  --gpgkey key            Trust the key id to sign releases
+                          Use multiple times for multiple keys
+  --gpgkeyfile file       Trust the key ids in the file to sign releases
+  --gpghomedir path       Store the GPG keyring in this directory
+  --gpg and --nogpg       Use (or do not use) GPG to verify updates
+                          (--gpg is assumed by use of the above
+                          --gpgkey and --gpgkeyfile options)
+  --import file           Import GPG key(s) from file into sa-update's
+                          keyring. Use multiple times for multiple files
+  --updatedir path        Directory to place updates, defaults to the
+                          SpamAssassin site rules directory
+                          (default: @@LOCAL_STATE_DIR@@/@@VERSION@@)
+  --refreshmirrors        Force the MIRRORED.BY file to be updated
+  -D, --debug [area=n,...]  Print debugging messages
+  -v, --verbose           Be more verbose, like print updated channel names
+  -V, --version           Print version
+  -h, --help              Print usage message
+
+=head1 DESCRIPTION
+
+sa-update automates the process of downloading and installing new rules and
+configuration, based on channels.  The default channel is
+I<updates.spamassassin.org>, which has updated rules since the previous
+release.
+
+Update archives are verified using SHA1 hashes and GPG signatures, by default.
+
+Note that C<sa-update> will not restart C<spamd> or otherwise cause
+a scanner to reload the now-updated ruleset automatically.  Instead,
+C<sa-update> is typically used in something like the following manner:
+
+        sa-update && /etc/init.d/spamassassin reload
+
+This works because C<sa-update> only returns an exit status of C<0> if
+it has successfully downloaded and installed an updated ruleset.
+
+=head1 OPTIONS
+
+=over 4
+
+=item B<--channel>
+
+sa-update can update multiple channels at the same time.  By default, it will
+only access "updates.spamassassin.org", but more channels can be specified via
+this option.  If there are multiple additional channels, use the option
+multiple times, once per channel.  i.e.:
+
+	sa-update --channel foo.example.com --channel bar.example.com
+
+=item B<--channelfile>
+
+Similar to the B<--channel> option, except specify the additional channels in a
+file instead of on the commandline.  This is useful when there are a
+lot of additional channels.
+
+=item B<--checkonly>
+
+Only check if an update is available, don't actually download and install it.
+The exit code will be C<0> or C<1> as described below.
+
+=item B<--install>
+
+Install updates "offline", from the named tar.gz file, instead of performing
+DNS lookups and HTTP invocations.
+
+Files named B<file>.sha1 and B<file>.asc will be used for the SHA-1 and GPG
+signature, respectively.  The filename provided must contain a version number
+of at least 3 digits, which will be used as the channel's update version
+number.
+
+Multiple B<--channel> switches cannot be used with B<--install>.  To install
+multiple channels from tarballs, run C<sa-update> multiple times with different
+B<--channel> and B<--install> switches, e.g.:
+
+        sa-update --channel foo.example.com --install foo-34958.tgz
+        sa-update --channel bar.example.com --install bar-938455.tgz
+
+=item B<--allowplugins>
+
+Allow downloaded updates to activate plugins.  The default is not to
+activate plugins; any C<loadplugin> or C<tryplugin> lines will be commented
+in the downloaded update rules files.
+
+=item B<--gpg>, B<--nogpg>
+
+sa-update by default will verify update archives by use of a SHA1 checksum
+and GPG signature.  SHA1 hashes can verify whether or not the downloaded
+archive has been corrupted, but it does not offer any form of security
+regarding whether or not the downloaded archive is legitimate (aka:
+non-modifed by evildoers).  GPG verification of the archive is used to
+solve that problem.
+
+If you wish to skip GPG verification, you can use the B<--nogpg> option
+to disable its use.  Use of the following gpgkey-related options will
+override B<--nogpg> and keep GPG verification enabled.
+
+Note: Currently, only GPG itself is supported (ie: not PGP).  v1.2 has been
+tested, although later versions ought to work as well.
+
+=item B<--gpgkey>
+
+sa-update has the concept of "release trusted" GPG keys.  When an archive is
+downloaded and the signature verified, sa-update requires that the signature
+be from one of these "release trusted" keys or else verification fails.  This
+prevents third parties from manipulating the files on a mirror, for instance,
+and signing with their own key.
+
+By default, sa-update trusts key id C<265FA05B>, which is the standard
+SpamAssassin release key.  Use this option to trust additional keys.  See the
+B<--import> option for how to add keys to sa-update's keyring.  For sa-update
+to use a key it must be in sa-update's keyring and trusted.
+
+For multiple keys, use the option multiple times.  i.e.:
+
+	sa-update --gpgkey E580B363 --gpgkey 298BC7D0
+
+Note: use of this option automatically enables GPG verification.
+
+=item B<--gpgkeyfile>
+
+Similar to the B<--gpgkey> option, except specify the additional keys in a file
+instead of on the commandline.  This is extremely useful when there are a lot
+of additional keys that you wish to trust.
+
+=item B<--gpghomedir>
+
+Specify a directory path to use as a storage area for the C<sa-update> GPG
+keyring.  By default, this is
+
+        @@LOCAL_RULES_DIR@@/sa-update-keys
+
+=item B<--import>
+
+Use to import GPG key(s) from a file into the sa-update keyring which is
+located in the directory specified by B<--gpghomedir>.  Before using channels
+from third party sources, you should use this option to import the GPG key(s)
+used by those channels.  You must still use the B<--gpgkey> or B<--gpgkeyfile>
+options above to get sa-update to trust imported keys.
+
+To import multiple keys, use the option multiple times.  i.e.:
+
+	sa-update --import channel1-GPG.KEY --import channel2-GPG.KEY
+
+Note: use of this option automatically enables GPG verification.
+
+=item B<--refreshmirrors>
+
+Force the list of sa-update mirrors for each channel, stored in the MIRRORED.BY
+file, to be updated.  By default, the MIRRORED.BY file will be cached for up to
+7 days after each time it is downloaded.
+
+=item B<--updatedir>
+
+By default, C<sa-update> will use the system-wide rules update directory:
+
+        @@LOCAL_STATE_DIR@@/@@VERSION@@
+
+If the updates should be stored in another location, specify it here.
+
+Note that use of this option is not recommended; if you're just using sa-update
+to download updated rulesets for a scanner, and sa-update is placing updates in
+the wrong directory, you probably need to rebuild SpamAssassin with different
+C<Makefile.PL> arguments, instead of overriding sa-update's runtime behaviour.
+
+=item B<-D> [I<area,...>], B<--debug> [I<area,...>]
+
+Produce debugging output.  If no areas are listed, all debugging information is
+printed.  Diagnostic output can also be enabled for each area individually;
+I<area> is the area of the code to instrument. For example, to produce
+diagnostic output on channel, gpg, and http, use:
+
+        sa-update -D channel,gpg,http
+
+For more information about which areas (also known as channels) are
+available, please see the documentation at
+L<http://wiki.apache.org/spamassassin/DebugChannels>.
+
+=item B<-h>, B<--help>
+
+Print help message and exit.
+
+=item B<-V>, B<--version>
+
+Print sa-update version and exit.
+
+=back
+
+=head1 EXIT CODES
+
+An exit code of C<0> means an update was available, and was downloaded and
+installed successfully if --checkonly was not specified.
+
+An exit code of C<1> means no fresh updates were available.
+
+An exit code of C<2> means that at least one update is available but that a
+lint check of the site pre files failed.  The site pre files must pass a lint
+check before any updates are attempted.
+
+An exit code of C<4> or higher, indicates that errors occurred while
+attempting to download and extract updates.
+
+=head1 SEE ALSO
+
+Mail::SpamAssassin(3)
+Mail::SpamAssassin::Conf(3)
+spamassassin(1)
+spamd(1)
+<http://wiki.apache.org/spamassassin/RuleUpdates>
+
+=head1 PREREQUESITES
+
+C<Mail::SpamAssassin>
+
+=head1 BUGS
+
+See <http://issues.apache.org/SpamAssassin/>
+
+=head1 AUTHORS
+
+The Apache SpamAssassin(tm) Project <http://spamassassin.apache.org/>
+
+=head1 COPYRIGHT
+
+SpamAssassin is distributed under the Apache License, Version 2.0, as
+described in the file C<LICENSE> included with the distribution.
+
+=cut
+

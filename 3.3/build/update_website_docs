@@ -1,0 +1,34 @@
+#!/bin/sh
+
+WEBDIR=/www/spamassassin.apache.org
+vers=3.3.x
+
+if [ -z "$PERL" ]; then
+  if [ -x /home/jm/perl584/bin/perl ]; then
+    PERL=/home/jm/perl584/bin/perl
+  else
+    PERL=perl
+  fi
+fi
+
+fulldir=$WEBDIR/full/$vers
+[ -d $fulldir ] || mkdir -p $fulldir
+
+$PERL Makefile.PL PERL=$PERL < /dev/null
+make
+make text_html_doc || exit 1
+
+rm -rf $fulldir/doc
+mkdir $fulldir
+tar cf - \
+        --exclude='.#*'  \
+        --exclude=.svn \
+        --exclude='logs' --exclude='*.tar.gz' --exclude='*.zip' \
+        --exclude='*.log' --exclude='*.o' \
+        --exclude='o' --exclude='out' \
+        --exclude='tst' \
+        --exclude='blib' --exclude='Mail-SpamAssassin-*' \
+        doc | ( cd $fulldir ; tar xf - )
+        
+chmod -R g+w $fulldir
+

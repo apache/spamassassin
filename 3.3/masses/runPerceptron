@@ -1,0 +1,103 @@
+#!/bin/sh
+
+# set SCORESET
+. config
+
+LEARN_RATE="${LEARN_RATE:-2.0}"
+
+NAME="set$SCORESET"
+LOGDIR="gen-$NAME-$HAM_PREFERENCE-$THRESHOLD-$EPOCHS-$LEARN_RATE"
+
+[ -d gen-cache ] || mkdir gen-cache     # a cache, woo
+
+if [ "$NOTE" != "" ]; then
+	LOGDIR="$LOGDIR-$NOTE"
+fi
+
+if [ ! -f "ORIG/ham-$NAME.log" -o ! -f "ORIG/spam-$NAME.log" ]; then
+	echo "Couldn't find logs for $NAME" >&2
+	exit 1
+fi
+
+if [ "x$1" = "x" ]; then
+# This should be in here instead.  Prevents testing.
+svn revert ../rules/50_scores.cf
+
+# fix all scores to non-zero (avoid bug)
+perl -pi.bak \
+  -e 's/[ \t]/ /gs; s/ 0$/ 3/; s/ 0 / 3 /g; s/ 0 / 3 /g' \
+  ../rules/50_scores.cf
+
+echo "[Doing a scoreset $SCORESET score-generation run]"
+
+# Clean out old runs
+echo "[Cleaning up]"
+rm -rf spam-test.log ham-test.log spam.log ham.log \
+	NSBASE SPBASE tmp make.output freqs perceptron.scores \
+	$LOGDIR
+make clean >/dev/null
+
+# Create a directory to organize the logs with this group of settings
+mkdir $LOGDIR
+mkdir $LOGDIR/NSBASE $LOGDIR/SPBASE
+
+# Generate 90/10 split logs
+# keep the *-split*.logs in cwd so it's cacheable
+echo "[Generating 90/10 split ham]"
+perl tenpass/split-log-into-buckets-cached \
+    9:gen-cache/ham-split9.log 1:gen-cache/ham-split1.log ORIG/ham-$NAME.log
+ln gen-cache/ham-split9.log $LOGDIR/NSBASE/ham.log
+ln gen-cache/ham-split1.log $LOGDIR/NSBASE/ham-test.log
+
+echo "[Generating 90/10 split spam]"
+perl tenpass/split-log-into-buckets-cached \
+    9:gen-cache/spam-split9.log 1:gen-cache/spam-split1.log ORIG/spam-$NAME.log
+ln gen-cache/spam-split9.log $LOGDIR/SPBASE/spam.log
+ln gen-cache/spam-split1.log $LOGDIR/SPBASE/spam-test.log
+
+echo "[Setting up for gen run]"
+# Ok, setup for a run
+ln -s $LOGDIR/SPBASE/spam.log .
+ln -s $LOGDIR/NSBASE/ham.log .
+ln -s $LOGDIR/SPBASE/spam-test.log .
+ln -s $LOGDIR/NSBASE/ham-test.log .
+
+# try to find number of processors
+numcpus=`cpucount 2>/dev/null || egrep -c '^processor\b' /proc/cpuinfo 2>/dev/null || echo 1`
+
+echo "[Generating perceptron]"
+# Generate perceptron with full logs
+make -j $numcpus SCORESET=$SCORESET > $LOGDIR/make.output 2>&1
+cp freqs $LOGDIR/freqs
+
+(
+echo "[config]"
+cat config
+echo "[gen run start]"
+pwd
+date
+./perceptron -p $HAM_PREFERENCE -t $THRESHOLD -e $EPOCHS -l $LEARN_RATE
+mv perceptron.scores $LOGDIR/scores
+echo "[gen run end]"
+) | tee $LOGDIR/log
+
+svn revert ../rules/50_scores.cf
+./rewrite-cf-with-new-scores $SCORESET ../rules/50_scores.cf $LOGDIR/scores > /tmp/runGA.$$
+mv /tmp/runGA.$$ ../rules/50_scores.cf
+cp ../rules/50_scores.cf $LOGDIR/50_scores.cf
+
+./fp-fn-statistics --ham ham-test.log --spam spam-test.log --scoreset $SCORESET --fnlog $LOGDIR/false_negatives --fplog $LOGDIR/false_positives > $LOGDIR/test
+
+else
+
+# This needs to have 50_scores.cf in place first ...
+echo "[gen test results]"
+./fp-fn-statistics --spam=spam-test.log \
+	--ham=ham-test.log \
+	--cffile=../rules --scoreset=$SCORESET | tee $LOGDIR/test
+
+echo "[STATISTICS file generation]"
+./mk-baseline-results $SCORESET | tee $LOGDIR/statistics
+fi
+
+exit 0

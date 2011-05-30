@@ -1,0 +1,24 @@
+#!/bin/sh
+# 
+# run-multiple
+
+for dir in $* ; do
+  (
+    cd $dir 
+    echo "RUNNING 10PCV DRIVER in $dir"
+
+    # make sure we have a link to the corpus mbox dir
+    rm -f cor
+    ln -s ../../cor cor
+
+    # and copy in the test code
+    if [ -d lib ] ; then
+      ( tar cf - lib ) | ( cd $SADIR ; tar xfp - )
+    else
+      cp -pr *.pm $SADIR/lib/Mail/SpamAssassin
+    fi
+    ( cd $SADIR ; make )
+
+    $SADIR/masses/bayes-testing/bayes-10pcv-driver
+  )
+done

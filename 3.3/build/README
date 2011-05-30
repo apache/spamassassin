@@ -1,0 +1,468 @@
+SPAMASSASSIN DEVELOPMENT SNAPSHOT PROCEDURE
+===========================================
+
+- cd to the directory for the codebase you want the devel tree to
+  come from
+
+    ssh spamassassin.zones.apache.org
+    cd [checkedoutdir]
+
+- ensure the required code and data is available for the build scripts:
+
+    $HOME/sabuildtools
+
+  All can be copied (or symlinked) from ~jm on spamassassin.zones.apache.org if
+  required.
+
+- ensure your PATH is correct:
+
+    PATH=$HOME/sabuildtools/bin:$PATH
+
+- run "./build/update_devel" to build the tar.gz files.
+
+- next run "./build/update_devel_rules" to build the rules tarball,
+  or run "./build/repackage_latest_update_rules" to repackage the
+  latest file on updates.spamassassin.org.
+
+- by default, they're written to ~/public_html/devel/ . 
+  Copy them to wherever you want, yourself.
+
+
+SPAMASSASSIN RELEASE PROCEDURE
+==============================
+
+- First off, log in to spamassassin.zones.apache.org for some preliminary tool
+  checks.
+
+    ssh spamassassin.zones.apache.org
+
+- ensure the required code and data is available for the build scripts:
+  see above.
+
+- ensure your PATH is correct:
+
+    PATH=$HOME/sabuildtools/bin:$PATH
+
+- ensure ExtUtils::MakeMaker is version 6.46 or later, to create
+  a detailed-enough META.yml (TODO: this should not be required.)
+
+    perl -MExtUtils::MakeMaker -e 'print $ExtUtils::MakeMaker::VERSION'
+
+- In your own, writable, checkout (this may be on another host instead
+  of spamassassin.zones.apache.org, such as your home machine):
+
+  Run "svn status" to ensure you're building/releasing from a pristine
+  checkout:
+
+    cd [checkedoutdir]
+    svn status
+
+  The output should look like this:
+
+  ?      rules/SIQ.pm
+  ?      rules/EmailBL.pm
+  ?      rules/sandbox-hstern.pm
+  ?      rules/sandbox-felicity.pm
+
+  (ie., no "M" or "C" files; any files marked "M" have been locally
+  modified, and should be "svn revert"ed before you continue.)
+
+- edit lib/Mail/SpamAssassin.pm and comment the $IS_DEVEL_BUILD
+  line.   Ensure the correct version number is present in $VERSION
+  and $EXTRA_VERSION.
+
+  Prereleases: formatted like this: "pre4" -- in $EXTRA_VERSION, and
+  $IS_DEVEL_BUILD is left as 1 instead of commented. When referred to in
+  full, it's "3.1.0-pre4".
+
+  Release candidates: formatted like this: "rc2" -- in $EXTRA_VERSION, and
+  $IS_DEVEL_BUILD is commented. When referred to in full, it's "3.1.0-rc2".
+
+  [NOTE: when editing files in these instructions, you may have to
+  use another checkout somewhere else, check in the changes there,
+  then 'svn update' in the release account -- since I think it
+  builds from a read-only checkout.]
+
+- Ensure the new version number takes hold:
+
+    make clean ; perl Makefile.PL < /dev/null ; make
+    ./spamassassin -L -t < sample-nonspam.txt | grep X-Spam-
+
+  Verify that the X-Spam-* headers use the correct version string,
+  without an SVN revision number (those are only for dev builds).
+
+- Temporary kludge check until bug 6297 is fixed properly:
+
+    grep nopublish rules/72_active.cf
+
+  This should return nothing.  If not, edit the rulesrc files and
+  add "tflags nopublish" lines as necessary.
+
+- create the Changes file.  Do this step on your own checkout, as
+  the release checkout is read-only.   There are two options here:
+
+  - For releases on a maintainance branch (e.g. 3.0.1, .2, etc.):
+
+      TZ=UTC svn log --non-interactive --stop-on-copy > Changes
+
+    This will output all of the changes since the .0 release in the
+    current branch (the last copy -- note, if a copy was done
+    afterwards (move between repositories, etc, you'll need to
+    modify that command).
+
+  - For releases on the trunk (e.g. a .0 release):
+
+      TZ=UTC svn log -r HEAD:497472 --non-interactive > Changes
+
+    r497472 was the release of 3.2.0-pre1; r233108 was the start of 3.2.0,
+    just after the 3.1.0 branch was created; r46030 was the start of the
+    3.1.0 work (created 3.0 branch); replace with the correct rev number
+    for the point you want to start at if different.
+
+- run "make distcheck" to ensure all files are included in the
+  distribution that should be, and to ensure all files that are listed
+  in the MANIFEST also exist in SVN.
+
+    make distcheck
+
+- run "make disttest" to ensure all default tests pass once the
+  distribution is fully packaged.  (this'll take a minute or two.)
+
+    make disttest < /dev/null
+
+- run the release test suite, which forces all tests to run and also
+  applies an additional, more stringent set of tests.  This may require
+  "sudo" privileges on your test box, and unusual CPAN modules like
+  "Devel::SawAmpersand", so you may have to skip some of this or ignore
+  some spurious failures.
+
+    prove -v xt
+
+- Check in the updated Changes file, and SpamAssassin.pm.
+
+    svn commit -m "preparing to release X.Y.Z"
+
+  (If you are privately preparing a security release, and don't wish to
+  perform commits to public SVN repos, you can defer this step until
+  later.)
+
+- SVN tag the release files.  This is done using "svn copy".
+  For a maintainance release (x.y.1, x.y.2):
+
+    vers=3_1_7
+
+  For a trunk release (x.y.0):
+
+    vers=3_0_0
+
+  For a trunk pre-release (x.y.0-preZ) or alpha (x.y.0-alphaZ):
+
+    vers=3_3_0_alpha_2
+
+  Then run
+
+    repo=https://svn.apache.org/repos/asf/spamassassin
+    svn delete -m "replaced old tag" $repo/tags/spamassassin_release_$vers
+    svn copy -m "creating tag for release $vers" \
+	$repo/branches/3.3 $repo/tags/spamassassin_release_$vers
+
+  This will do a completely server-side tagging (which is the same as
+  a branch really) of whatever the latest branch revision to be the new
+  base of the tag release.
+
+  (If you are privately preparing a security release, and don't wish to
+  perform commits to public SVN repos, you can defer this step until
+  later.)
+
+
+- In your checkout on spamassassin.zones.apache.org (may be read-only):
+
+  Check out the code from the tag you just made:
+
+    vers=3_3_0_alpha_2
+    repo=https://svn.apache.org/repos/asf/spamassassin
+    rm -rf ~/relbuild
+    svn co $repo/tags/spamassassin_release_$vers ~/relbuild
+    cd ~/relbuild
+
+  (If you are privately preparing a security release, you will need
+  to ensure that the code in this build directory matches up using
+  some other mechanism, since SVN is public.)
+
+- run "./build/update_stable" to build the tar.gz files.
+
+    PATH=$HOME/sabuildtools/bin:$PATH
+    ./build/update_stable
+
+  WARNING: this will use the most recently-created "sa-update" tarball for
+  the rules tgz, so if changes have been committed to the "rules" dir in
+  SVN since then, they will not be released!
+
+  if you get "gpg-agent" errors about not connecting to the PIN entry
+  module, you didn't update your $PATH.
+
+- take a copy of the MD5sum line output.
+
+- test the tar.gz and zip files!  redo until they work!! ;)
+
+- Write the release announcement mail!  This is a simple matter of copying
+  the previous release's announcement, updating the version numbers and
+  links, fixing the MD5 and SHA1 checksums in this mail, and summarising
+  the important changes from the Changes file.
+
+    cp build/announcements/3.1.7.txt build/announcements/3.1.8.txt
+    svn add !$
+    vi !$
+
+- (for any rc, prerelease, or full release) Place the tarballs in a
+  discreet location (discreet means not linked from the "downloads" page
+  of the website, but included in the vote mail) and request a vote on the
+  development mailing list to make the release.  Post the URL,
+  md5sums/sha1sums, and proposed release announcement mail to the dev
+  list.  The default location -- ~/public_html/devel/ , or
+  http://people.apache.org/~jm/devel/ , qualifies as "discreet".
+
+  If you build on the zone, you will need to scp them over:
+
+    scp ~/public_html/devel/Mail-SpamAssassin-* people.apache.org:public_html/devel/
+
+  While doing this, also upload a copy of the proposed release
+  announcement to the website:
+
+    ssh people.apache.org
+    version=3.3.0
+    cp build/announcements/$version.txt ~/public_html/devel/PROPOSED-$version.txt
+
+  Pre-releases and RCs require just lazy consensus -- ie. no objections.
+
+- (for a full release) You need 3 +1's from PMC members. The release
+  manager (that's you) may vote as well.  Once there are three or more +1
+  votes, you may proceed.
+
+- If you've been doing some steps in private, for a security release,
+  now's the time to perform them publicly; tagging etc.
+
+- Edit lib/Mail/SpamAssassin.pm, and uncomment the $IS_DEVEL_BUILD line.
+  SVN commit it (and the release announcement file from above, if
+  you made one):
+
+	svn commit -m "X.Y.Z RELEASED"
+
+- [X.Y.0 RELEASES ONLY]: Now, start the new development codebase.  For
+  minor updates of a 2.x tree (e.g. 2.x.1, 2.x.2), you don't need to
+  branch; for major updates (2.x.0) you need to create a new development
+  branch, off the trunk.
+
+    repo=https://svn.apache.org/repos/asf/spamassassin
+    svn copy $repo/tags/spamassassin_release_3_1_0 \
+           $repo/branches/3.1
+
+  "trunk" is SVN's concept of head.  Typically, our branches are named
+  for their minor version number.  In the example above, b3_1_0 is the
+  branch for the stable 3.1.x releases.
+
+- In the new development codeline, edit lib/Mail/SpamAssassin.pm
+  and bump the $VERSION line to the correct version.
+
+- then, commit the new version number to the new branch:
+
+        svn commit -m "X.Y.N devel cycle started"
+
+	(where X.Y.N is the new version number)
+
+- [X.Y.0 RELEASES ONLY]: in trunk, bump the version to the correct
+  version in the following files (just as above for the branch):
+
+  - lib/Mail/SpamAssassin.pm
+
+- [X.Y.0 RELEASES ONLY]: NOTE: This may change, make sure this info is
+  still accurate before changing this (preferrably find out BEFORE doing
+  an X.Y.0 release.  Update the mkupdates stuff:
+
+  - In build/mkupdates/run_part2 change versions="X.Y.0" to the new
+    development version (X.Y+1.0).
+
+  - Create an empty file for the new version number in
+    /var/named/updates.dev.spamassassin.org.d/ on the zone
+
+  - Add "$INCLUDE /var/named/updates.spamassassin.org.d/X.Y+1.0" to the
+    spamassassin.org zone file in spamassassin/dns/
+
+  - commit the changes, update the zone (if not doing above on the zone)
+    and tick the zone file using build/mkupdates/tick_zone_serial
+
+- !WARNING! After the next step, the version number will be considered
+  "burned". The number is locked for this particular code.  The same
+  number cannot be used for a future different release.  So make sure
+  you're happy before you go on!
+
+  If you need to redo something, re-comment the $IS_DEVEL_BUILD line,
+  revert the $VERSION bump, and go back to 'Ensure the new version number
+  takes hold'.  You can retag with the normal 'svn copy' command used in
+  'SVN tag the release files', even if that tag already existed; but be
+  sure to check in another commit message to note what happened, e.g.:
+
+    svn commit -m "oops, had to redo: THIS IS THE REAL X.Y.Z RELEASE"
+
+- Release a new rules update matching the released code:
+
+        ssh spamassassin.zones.apache.org
+        cd /home/updatesd/svn/spamassassin/build/mkupdates
+        sudo -u updatesd ./update-rules-3.3 3.3
+
+- publish the tarballs.
+
+  (for rc and prerelease builds) copy the tarballs to the website.
+  ASF bylaws prohibit the distribution of files claiming to be
+  releases from the website, without 3 PMC +1 votes, so you need to
+  make it clear that this is an unofficial "test build" by placing it
+  in your public_html dir:
+
+        http://people.apache.org/~jm/rc/
+
+  this command will do it:
+
+        version=X.Y.Z
+        cp -p ~/public_html/devel/Mail-SpamAssassin*-$version.* \
+            ~/public_html/rc/
+
+  (for full release builds) copy the tarballs to www.apache.org/dist:
+
+        version=X.Y.Z
+        cp -p ~/public_html/devel/Mail-SpamAssassin*-$version.* \
+            /www/www.apache.org/dist/spamassassin/source
+
+        cd /www/www.apache.org/dist/spamassassin
+        cp -p source/Mail-SpamAssassin*-$version.* .
+
+        chmod -R g+w /www/www.apache.org/dist/spamassassin
+
+  [note: the ASF archives documentation claims that symlinks are
+  supported. This is not the case for some mirrors, so use "cp" instead.]
+
+- (for full release builds) update the main website "downloads" page:
+
+        ssh spamassassin.zones.apache.org
+        cd /var/www/buildbot.spamassassin.org/staging/website
+        vi main.wmk
+
+  See the comment at the top of the file; you'll need to change at
+  least one variable ("relversion") to the new version number, and
+  possibly more, depending on if this is the first release of a new
+  release line.
+
+  When changing the timestamp in the downloads.cgi link URL, ensure you
+  use a time 2 hours from now.  The ASF websites are synced internally to
+  the public HTTP servers on a bi-hourly basis, so it may take up to this
+  long for a file-download link to become valid and not a 404.
+
+- rebuild the SpamAssassin website with webmake:
+
+        PATH=$HOME/sabuildtools/bin:$PATH
+        cd /var/www/buildbot.spamassassin.org/staging/website
+        webmake -F
+
+- update the 'doc' tree in the SpamAssassin website (WARNING: if you're
+  moving to a new major release, x.y.0, you need to edit
+  'build/update_website_docs' beforehand and set the "vers" line):
+
+        cd /var/www/buildbot.spamassassin.org/staging/website
+        svn up
+        svn delete --force full/3.3.x
+        svn commit -m "removing old doc tree from website" full
+
+        cd [checkedoutdir]
+        build/update_website_docs
+
+        cd /var/www/buildbot.spamassassin.org/staging/website
+        svn add full/3.3.x
+        svn commit -m "updating new doc tree on website" full
+
+- and check the entire website into SVN (see bug 4998 for reasons why).
+  Note that you may need to resolve conflicts and ensure the contents of
+  'full/3.3.x' are all added successfully:
+
+        svn up
+        svn commit -m "added new release to website"
+
+- Push to live:
+
+        ssh people.apache.org
+        cd /www/spamassassin.apache.org
+        svn up
+
+- update the tag used to point to "current release":
+
+    repo=https://svn.apache.org/repos/asf/spamassassin
+    svn delete -m "updating for new release" \
+	$repo/tags/spamassassin_current_release_3.3.x
+    svn copy -m "updating for new release" \
+	$repo/tags/spamassassin_release_3_3_0 \
+	$repo/tags/spamassassin_current_release_3.3.x
+
+- upload release .tar.gz (not .bz2) tarball to CPAN at http://pause.cpan.org/:
+
+        https://pause.perl.org/pause/authenquery?ACTION=add_uri
+
+  (Note that recently, PAUSE has started indexing sub-modules under
+  Mail::SpamAssassin::, and it can't deal with our multi-maintainer
+  setup.  You may receive mail indicating that "indexing failed" after
+  the upload; as long as the main Mail::SpamAssassin module was indexed
+  correctly, this is fine.  However, it would help if you could visit
+
+        https://pause.perl.org/pause/authenquery?ACTION=share_perms
+
+  select 3.1 ("Make someone else co-maintainer"), and ensure that the
+  other releasers (JMASON, DOS, FELICITY, others?) all have permissions as
+  'co-maintainer' on the full set of your listed modules in the
+  "Mail::SpamAssassin::" namespace.
+
+- announce on the users, dev, and announce mailing lists using the
+  previously-prepared release announcement.
+
+  NOTE: you must send this mail with a "From:" address @apache.org,
+  otherwise it'll be bounced by the ASF's custom spam filtering
+  rules.
+
+- Before doing the next step, run through the release summary mail, and
+  write up a really short summary of the important changes in
+  human-readable format.  This should be less than 600 chars to fit into
+  Freshmeat's format, and to be easily understandable.
+
+- announce to Freshmeat at http://freshmeat.net/:
+
+        http://freshmeat.net/projects/spamassassin/releases/new
+
+- Approve the posting to the announce list (the list admins will get a
+  mail indicating how to do this.)
+
+- Add the new version to the Bugzilla versions list:
+
+        http://issues.apache.org/SpamAssassin/editversions.cgi?product=Spamassassin&action=add
+
+- Add a milestone for the next version to the Bugzilla milestones list:
+
+        https://issues.apache.org/SpamAssassin/editmilestones.cgi?action=add&product=Spamassassin
+        (use a sortkey of "0")
+
+- Change the sortkey for the previous release's milestone from "0" to "10":
+
+        https://issues.apache.org/SpamAssassin/editmilestones.cgi?product=Spamassassin
+
+- (for full release builds) remove release tarballs from now-obsolete
+  versions from dist:
+
+        ssh people.apache.org
+        cd /www/www.apache.org/dist/spamassassin
+        prev=X.Y.notZ
+        rm -f source/Mail-SpamAssassin*-$prev.* Mail-SpamAssassin*-$prev.*
+        rm -f binaries/*/Mail-SpamAssassin*-$prev.*
+
+  (Archive copies are automatically kept on archive.apache.org/dist/ .)
+
+  (TODO: it may be better to wait a while before doing this; it appears to
+  take a while for the spamassassin.apache.org website mirror script to
+  run, so the old downloads page will stick around for a while before it's
+  safe to do so.)
+
+// vim:tw=74:

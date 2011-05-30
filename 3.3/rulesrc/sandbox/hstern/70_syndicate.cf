@@ -1,0 +1,70 @@
+###########################################################################
+#
+# <@LICENSE>
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to you under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at:
+# 
+#     http://www.apache.org/licenses/LICENSE-2.0
+# 
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# </@LICENSE>
+#
+###########################################################################
+
+header __HS_SUBJ_UC_FW Subject =~ /^FW:/
+meta HS_FORGED_OE_FW __HS_SUBJ_UC_FW && __OE_MUA
+describe HS_FORGED_OE_FW Outlook does not prefix forwards with "FW:"
+##score HS_FORGED_OE_FW 1.5
+
+header __HS_SUBJ_RE_FW Subject =~ /^(?i:re|fw):/
+rawbody __HS_QUOTE /^> /
+meta __HS_NONDEFAULT_OE_QUOTE __CT_TEXT_PLAIN && __HS_SUBJ_RE_FW && __OE_MUA && ! __HS_QUOTE
+#describe HS_NONDEFAULT_OE_QUOTE Outlook Express user has changed their quote pattern.
+#score HS_NONDEFAULT_OE_QUOTE 0.5
+
+rawbody __HS_ODD_ORIGINAL_MESSAGE /^\s?-{6,}\s?Original Message\s?-{6,}/
+meta HS_ODD_OE_ORIGINAL_MESSAGE __HS_ODD_ORIGINAL_MESSAGE && __HS_SUBJ_RE_FW && __OE_MUA
+describe HS_ODD_OE_ORIGINAL_MESSAGE Outlook quoted message has odd "Original message" pattern.
+##score HS_ODD_OE_ORIGINAL_MESSAGE 1.5
+
+rawbody __HS_FUNNY_BODY_FROM /^From: [A-Z][a-z]+ \[mailto:.*?\]/
+meta HS_OE_FUNNY_BODY_FROM __HS_FUNNY_BODY_FROM && __OE_MUA
+describe HS_OE_FUNNY_BODY_FROM Outlook quoted message does not have Outlook From pattern.
+##score HS_OE_FUNNY_BODY_FROM 1.5
+
+loadplugin Mail::SpamAssassin::Plugin::Sandbox::hstern sandbox-hstern.pm
+
+# not sure why this doesn't work...
+ifplugin Mail::SpamAssassin::Plugin::Sandbox::hstern
+body HS_FAST_FORWARD eval:check_fast_forward()
+describe HS_FAST_FORWARD Message was forwarded or replied to the same minute.
+##score HS_FAST_FORWARD 1.0
+endif
+
+meta HS_SYNDICATE_P1 HS_FORGED_OE_FW && __HS_FREEHOST_URI
+describe HS_SYNDICATE_P1 Common "Syndicate" spam pattern 1
+##score HS_SYNDICATE_P1 2.0
+
+meta HS_SYNDICATE_P2 __HS_NONDEFAULT_OE_QUOTE && __HS_FREEHOST_URI
+describe HS_SYNDICATE_P2 Common "Syndicate" spam pattern 2
+##score HS_SYNDICATE_P2 2.0
+
+meta HS_SYNDICATE_P3 HS_ODD_OE_ORIGINAL_MESSAGE && __HS_FREEHOST_URI
+describe HS_SYNDICATE_P3 Common "Syndicate" spam pattern 3
+##score HS_SYNDICATE_P3 2.0
+
+meta HS_SYNDICATE_P4 HS_OE_FUNNY_BODY_FROM && __HS_FREEHOST_URI
+describe HS_SYNDICATE_P4 Common "Syndicate" spam pattern 4
+##score HS_SYNDICATE_P4 2.0
+
+meta HS_SYNDICATE_P5 HS_FAST_FORWARD && __HS_FREEHOST_URI
+describe HS_SYNDICATE_P5 Common "Syndicate" spam pattern 5
+##score HS_SYNDICATE_P5 2.0

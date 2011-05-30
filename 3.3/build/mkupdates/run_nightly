@@ -1,0 +1,75 @@
+#!/bin/sh
+#
+# driver for cron.
+# 30 8 * * * bash /home/updatesd/svn/spamassassin/build/mkupdates/run_nightly > /var/www/buildbot.spamassassin.org/updatesd/mkupdates.txt 2>&1
+
+set -x
+
+cd /home/updatesd/svn/spamassassin
+
+. /etc/profile
+PERL=/local/perl586/bin/perl
+export PERL 
+
+# Will this script be updated?  If so, re-run it after updating.
+FLAG=NO
+if [ "`svn status -uq build/mkupdates/run_nightly | head -1 | cut -b8`" = "*" ]; then
+  FLAG=YES
+fi
+
+svn cleanup     # paranoia
+svn update || exit $?
+
+# Do the restart if we need to ...
+if [ "$FLAG" = "YES" ]; then
+  exec $0 "$@"
+
+  # It shouldn't get here, but just in case ...
+  exit 2
+fi
+
+$PERL ./build/mkupdates/listpromotable > rules/active.list.new || exit $?
+mv rules/active.list.new rules/active.list
+
+(
+echo "
+
+To commit this and proceed with update tarball creation:
+
+    ssh spamassassin.zones.apache.org
+    sudo -u updatesd /home/updatesd/svn/spamassassin/build/mkupdates/run_part2
+
+"
+
+svn diff
+) > /home/updatesd/LATEST
+
+cat /home/updatesd/LATEST
+# mailx -s "[admin] planned commit for active.list" \
+#              dev@Spamassassin.apache.org < /home/updatesd/LATEST
+
+# cycle the logfiles; keep 6 (3 days worth I think)
+(
+  cd /var/www/buildbot.spamassassin.org/updatesd
+  rm mkupdates_6.txt
+  mv mkupdates_5.txt  mkupdates_6.txt
+  mv mkupdates_4.txt  mkupdates_5.txt
+  mv mkupdates_3.txt  mkupdates_4.txt
+  mv mkupdates_2.txt  mkupdates_3.txt
+  mv mkupdates_1.txt  mkupdates_2.txt
+  mv mkupdates.txt    mkupdates_1.txt
+)
+
+# create a list of "bad" rules in the current sandboxes, updated daily
+$PERL masses/rule-qa/list-bad-rules \
+    > /var/www/ruleqa.spamassassin.org/reports/badrules.txt 2>&1
+
+if [ `date +%w` = 3 ] ; then
+  (
+    echo "From: nobody@spamassassin.apache.org (Rules Report Cron)"
+    echo "Subject: [auto] bad sandbox rules report"
+    echo
+    cat /var/www/ruleqa.spamassassin.org/reports/badrules.txt
+  ) | /usr/sbin/sendmail -oi dev@spamassassin.apache.org
+fi
+

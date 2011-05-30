@@ -1,0 +1,614 @@
+------------------------------------------------------------------------
+r1129411 | wtogami | 2011-05-30 22:33:37 +0000 (Mon, 30 May 2011) | 3 lines
+
+Bug #6609: Fix for RH/Fedora using lib64 instead of lib
+           (The original test was broken, it was working fine.)
+
+------------------------------------------------------------------------
+r1128754 | hege | 2011-05-28 18:53:23 +0000 (Sat, 28 May 2011) | 2 lines
+
+Bug 6353: Fix FH_FROMEML_NOTLD, add MISSING_FROM
+
+------------------------------------------------------------------------
+r1128579 | kmcgrail | 2011-05-28 09:37:48 +0000 (Sat, 28 May 2011) | 1 line
+
+fix for t/spamd_sql_prefs.t tests 14 from Trunk revision 1124333 bug 6592
+------------------------------------------------------------------------
+r1128573 | kmcgrail | 2011-05-28 09:02:47 +0000 (Sat, 28 May 2011) | 1 line
+
+trunk commits for revision 1124270 and 1124386 applied in that order to 3.3 branch to fix failed t/trusted_path.t tests 69, 72, 75, 78 bug 6591
+------------------------------------------------------------------------
+r1128481 | kmcgrail | 2011-05-27 21:56:25 +0000 (Fri, 27 May 2011) | 1 line
+
+Spamc windows header library missing two defines.  bug 6427.
+------------------------------------------------------------------------
+r1128477 | kmcgrail | 2011-05-27 21:53:03 +0000 (Fri, 27 May 2011) | 1 line
+
+patch to fix missing sa-awl man page bug 6476
+------------------------------------------------------------------------
+r1128470 | kmcgrail | 2011-05-27 21:39:08 +0000 (Fri, 27 May 2011) | 1 line
+
+Reverting META.yml accidentally submitted with change to 3.3.2 version
+------------------------------------------------------------------------
+r1128465 | kmcgrail | 2011-05-27 21:27:36 +0000 (Fri, 27 May 2011) | 1 line
+
+Small change in windows to exit stating that the exit status is unknown.  Thanks to Daniel Lemke for many of these small win32 patches.  Bug #6470.
+------------------------------------------------------------------------
+r1104661 | wtogami | 2011-05-18 02:08:17 +0000 (Wed, 18 May 2011) | 2 lines
+
+Bug #6314: Remove more spamassassin.spec
+
+------------------------------------------------------------------------
+r1104659 | wtogami | 2011-05-18 02:05:39 +0000 (Wed, 18 May 2011) | 2 lines
+
+Bug #6314: Complete removal of spamassassin.spec
+
+------------------------------------------------------------------------
+r1104578 | wtogami | 2011-05-17 21:43:57 +0000 (Tue, 17 May 2011) | 2 lines
+
+Bug #6314: Remove spamassassin.spec 
+
+------------------------------------------------------------------------
+r1104448 | kmcgrail | 2011-05-17 18:19:52 +0000 (Tue, 17 May 2011) | 1 line
+
+More small fixes to pod files
+------------------------------------------------------------------------
+r1104235 | mmartinec | 2011-05-17 13:29:13 +0000 (Tue, 17 May 2011) | 1 line
+
+Bug 6589: Errors in man pages
+------------------------------------------------------------------------
+r1103917 | kmcgrail | 2011-05-16 21:47:39 +0000 (Mon, 16 May 2011) | 1 line
+
+Small bug in the regexp caught by Jose Borges Ferreira in bug 6588
+------------------------------------------------------------------------
+r1102986 | wtogami | 2011-05-14 09:41:11 +0000 (Sat, 14 May 2011) | 2 lines
+
+Properly set EXTRA_VERSION for 3.3.2-rc1
+
+------------------------------------------------------------------------
+r1102929 | wtogami | 2011-05-13 23:59:30 +0000 (Fri, 13 May 2011) | 2 lines
+
+Update Changes for 3.3.2-rc1
+
+------------------------------------------------------------------------
+r1102926 | wtogami | 2011-05-13 23:37:27 +0000 (Fri, 13 May 2011) | 2 lines
+
+Prep 3.3.2-rc1
+
+------------------------------------------------------------------------
+r1102535 | wtogami | 2011-05-13 01:30:15 +0000 (Fri, 13 May 2011) | 2 lines
+
+Test commit
+
+------------------------------------------------------------------------
+r1102410 | mmartinec | 2011-05-12 18:26:15 +0000 (Thu, 12 May 2011) | 1 line
+
+Bug 6515: spamd timeout_child option overrides time_limit configuration option with nastier behaviour
+------------------------------------------------------------------------
+r1102348 | kmcgrail | 2011-05-12 15:22:08 +0000 (Thu, 12 May 2011) | 1 line
+
+removing v332.pre from MANIFEST
+------------------------------------------------------------------------
+r1102298 | kmcgrail | 2011-05-12 13:43:47 +0000 (Thu, 12 May 2011) | 1 line
+
+remove v332.pre which contained only rules which is not correct
+------------------------------------------------------------------------
+r1101815 | mmartinec | 2011-05-11 10:15:11 +0000 (Wed, 11 May 2011) | 1 line
+
+Bug 6490: Mail::SpamAssassin::Plugin::SPF - Two enhancement issues
+------------------------------------------------------------------------
+r1101612 | kmcgrail | 2011-05-10 19:29:52 +0000 (Tue, 10 May 2011) | 1 line
+
+NULL reference bug in libspamc. Quick workaround to avoid a crash. bug 6562.
+------------------------------------------------------------------------
+r1101556 | mmartinec | 2011-05-10 17:30:59 +0000 (Tue, 10 May 2011) | 1 line
+
+Bug 6454: wrong status test on $sth->rows in BayesStore::PgSQL
+------------------------------------------------------------------------
+r1101555 | mmartinec | 2011-05-10 17:26:58 +0000 (Tue, 10 May 2011) | 1 line
+
+Bug 6418: Cannot Log to stderr without timestamps
+------------------------------------------------------------------------
+r1101128 | mmartinec | 2011-05-09 18:09:28 +0000 (Mon, 09 May 2011) | 1 line
+
+Bug 6403: GMail should use ESMTPSA to indicate that it is in fact authenticated, but doesn't
+------------------------------------------------------------------------
+r1101127 | hege | 2011-05-09 18:04:40 +0000 (Mon, 09 May 2011) | 2 lines
+
+Bug 6229: TextCat is too case sensitive
+
+------------------------------------------------------------------------
+r1101121 | mmartinec | 2011-05-09 17:25:05 +0000 (Mon, 09 May 2011) | 1 line
+
+forgot to "svn add" the t/mkrules_else.t
+------------------------------------------------------------------------
+r1101053 | mmartinec | 2011-05-09 15:07:07 +0000 (Mon, 09 May 2011) | 1 line
+
+Bug 6241: mkrules does not understand newer options and "else"
+------------------------------------------------------------------------
+r1101030 | mmartinec | 2011-05-09 13:59:26 +0000 (Mon, 09 May 2011) | 1 line
+
+20_dnsbl_tests.cf: updated a comment on ZEN
+------------------------------------------------------------------------
+r1101026 | mmartinec | 2011-05-09 13:51:48 +0000 (Mon, 09 May 2011) | 1 line
+
+Bug 6382: add missing unwhitelist_from_dkim, remove facebook and linkedin from dkim whitelisting
+------------------------------------------------------------------------
+r1101024 | hege | 2011-05-09 13:47:05 +0000 (Mon, 09 May 2011) | 2 lines
+
+Bug 5744: some documentation fixes
+
+------------------------------------------------------------------------
+r1100854 | mmartinec | 2011-05-09 00:46:35 +0000 (Mon, 09 May 2011) | 1 line
+
+Bug 6447: new feature to bayes autolearning: learn-on-error
+------------------------------------------------------------------------
+r1100851 | mmartinec | 2011-05-09 00:38:55 +0000 (Mon, 09 May 2011) | 1 line
+
+Bug 6566: X-Ham-Report default wording ("has identified this incoming email as possible spam") is confusing and inaccurate
+------------------------------------------------------------------------
+r1100849 | mmartinec | 2011-05-09 00:34:02 +0000 (Mon, 09 May 2011) | 1 line
+
+Bug 6468: splice() offset past end of array in HTML.pm
+------------------------------------------------------------------------
+r1100820 | mmartinec | 2011-05-08 21:24:18 +0000 (Sun, 08 May 2011) | 1 line
+
+Bug 6377: win32: spamd signal handling
+------------------------------------------------------------------------
+r1100818 | mmartinec | 2011-05-08 21:19:43 +0000 (Sun, 08 May 2011) | 1 line
+
+Bug 6376: win32: consider negative pids under windows in spamds waitpid
+------------------------------------------------------------------------
+r1100817 | mmartinec | 2011-05-08 21:15:26 +0000 (Sun, 08 May 2011) | 1 line
+
+Bug 6375: win32: posix macro not implemented - spamd
+------------------------------------------------------------------------
+r1100816 | mmartinec | 2011-05-08 21:10:14 +0000 (Sun, 08 May 2011) | 1 line
+
+Bug 6336: "Illegal octal digit 9" received during rules compile
+------------------------------------------------------------------------
+r1100357 | kmcgrail | 2011-05-06 20:14:53 +0000 (Fri, 06 May 2011) | 1 line
+
+Patch to disable rfc-ignorant.org per bug 6526.  adding the v332.pre file.
+------------------------------------------------------------------------
+r1100355 | kmcgrail | 2011-05-06 20:14:02 +0000 (Fri, 06 May 2011) | 1 line
+
+Patch to disable rfc-ignorant.org per bug 6526.  Also added rules/v332.pre to MANIFEST
+------------------------------------------------------------------------
+r1100210 | mmartinec | 2011-05-06 13:34:37 +0000 (Fri, 06 May 2011) | 1 line
+
+Bug 6531: clear_uridnsbl_skip_domain feature to allow admin override of default configuration
+------------------------------------------------------------------------
+r1100008 | mmartinec | 2011-05-06 00:33:08 +0000 (Fri, 06 May 2011) | 1 line
+
+Bug 6500: a workaround for "make disttest" in t/originating_ip_hdr.t
+------------------------------------------------------------------------
+r1100005 | mmartinec | 2011-05-06 00:18:05 +0000 (Fri, 06 May 2011) | 1 line
+
+Bug 5491: MIME_QP_LONG_LINE triggering on valid email
+------------------------------------------------------------------------
+r1100002 | mmartinec | 2011-05-05 23:43:39 +0000 (Thu, 05 May 2011) | 1 line
+
+Bug 6558: body rules having "tflags multiple" may cause infinite loop when compiled - a workaround
+------------------------------------------------------------------------
+r1099925 | mmartinec | 2011-05-05 19:14:58 +0000 (Thu, 05 May 2011) | 1 line
+
+Bug 6557: Use same age limits in ruleqa as in sa-updates
+------------------------------------------------------------------------
+r1099882 | mmartinec | 2011-05-05 17:27:43 +0000 (Thu, 05 May 2011) | 1 line
+
+Bug 6548: spamd protocol examples are wrong
+------------------------------------------------------------------------
+r1099867 | mmartinec | 2011-05-05 16:37:11 +0000 (Thu, 05 May 2011) | 1 line
+
+Bug 6500: clear_originating_ip_headers seems to be broken
+------------------------------------------------------------------------
+r1099851 | mmartinec | 2011-05-05 15:48:42 +0000 (Thu, 05 May 2011) | 1 line
+
+Bug 6500: clear_originating_ip_headers seems to be broken - updating MANIFEST
+------------------------------------------------------------------------
+r1099848 | mmartinec | 2011-05-05 15:42:03 +0000 (Thu, 05 May 2011) | 1 line
+
+Bug 6565: check_rbl_sub rules - all dots need to be escaped - commit felicity/70_dnswl.cf and felicity/70_iadb.cf too
+------------------------------------------------------------------------
+r1099844 | mmartinec | 2011-05-05 15:36:46 +0000 (Thu, 05 May 2011) | 1 line
+
+Bug 6500: clear_originating_ip_headers seems to be broken - added a test
+------------------------------------------------------------------------
+r1099766 | mmartinec | 2011-05-05 12:10:28 +0000 (Thu, 05 May 2011) | 1 line
+
+Bug 6565: check_rbl_sub rules - all dots need to be escaped
+------------------------------------------------------------------------
+r1099571 | hege | 2011-05-04 19:46:05 +0000 (Wed, 04 May 2011) | 2 lines
+
+Bug 6578: Move TLD regexp to RegistrarBoundaries and make FreeMail use it
+
+------------------------------------------------------------------------
+r1099478 | mmartinec | 2011-05-04 15:06:56 +0000 (Wed, 04 May 2011) | 3 lines
+
+Bug 6392: fix one more case of a 'goto into a construct'
+this one occured with sa-compile
+
+------------------------------------------------------------------------
+r1099474 | mmartinec | 2011-05-04 14:57:29 +0000 (Wed, 04 May 2011) | 1 line
+
+Bug 6443: Metadata Headers are Case-Sensitive
+------------------------------------------------------------------------
+r1098402 | hege | 2011-05-01 20:25:48 +0000 (Sun, 01 May 2011) | 2 lines
+
+Bug 5690: tune BAD_ENC_HEADER score down
+
+------------------------------------------------------------------------
+r1098395 | hege | 2011-05-01 19:39:12 +0000 (Sun, 01 May 2011) | 2 lines
+
+Bug 6022, tune TVD_RCVD_IP score down
+
+------------------------------------------------------------------------
+r1098387 | hege | 2011-05-01 19:05:13 +0000 (Sun, 01 May 2011) | 2 lines
+
+Use my test rules in trunk only
+
+------------------------------------------------------------------------
+r1098380 | hege | 2011-05-01 18:06:16 +0000 (Sun, 01 May 2011) | 2 lines
+
+Bug 6394: too high score for FREEMAIL_ENVFROM_END_DIGIT
+
+------------------------------------------------------------------------
+r1053364 | mmartinec | 2010-12-28 14:48:52 +0000 (Tue, 28 Dec 2010) | 4 lines
+
+Bug 6499 and mailing list: wrapped scores for rules DKIMDOMAIN_IN_DWL*,
+ACCESSDB and SHORTCIRCUIT into a suitable ifplugin/endif to avoid
+lint warnings; removed score for nonexistent rule SUBJ_RE_NUM.
+
+------------------------------------------------------------------------
+r1049651 | fanf | 2010-12-15 17:45:15 +0000 (Wed, 15 Dec 2010) | 2 lines
+
+Bug 6242: merge the boundary fix in r931527 to the 3.3 branch
+
+------------------------------------------------------------------------
+r1044428 | kmcgrail | 2010-12-10 16:43:36 +0000 (Fri, 10 Dec 2010) | 1 line
+
+Trivial Documentation Update for Bug 6523
+------------------------------------------------------------------------
+r1042265 | mmartinec | 2010-12-04 23:53:14 +0000 (Sat, 04 Dec 2010) | 1 line
+
+Bug 6460: RCVD_ILLEGAL_IP false positives
+------------------------------------------------------------------------
+r1040740 | mmartinec | 2010-11-30 19:54:59 +0000 (Tue, 30 Nov 2010) | 1 line
+
+Bug 6506: Modifying a list while traversing it with a foreach
+------------------------------------------------------------------------
+r1028151 | mmartinec | 2010-10-28 00:42:05 +0000 (Thu, 28 Oct 2010) | 2 lines
+
+Bug 6488 - Lint errors with Perl 5.12.1 in AntiVirus.pm
+
+------------------------------------------------------------------------
+r967092 | kb | 2010-07-23 13:33:40 +0000 (Fri, 23 Jul 2010) | 1 line
+
+Bug 6467: Remove assigned 223/8 from RCVD_ILLEGAL_IP
+------------------------------------------------------------------------
+r966357 | kmcgrail | 2010-07-21 18:53:07 +0000 (Wed, 21 Jul 2010) | 1 line
+
+Bug 6419 patch commit to resolve rounding issue irregularity with spamd/spamc
+------------------------------------------------------------------------
+r950219 | mmartinec | 2010-06-01 19:23:19 +0000 (Tue, 01 Jun 2010) | 2 lines
+
+avoid undef warning: Use of uninitialized value $opt{"syslog-socket"} in lc at spamd line 444
+
+------------------------------------------------------------------------
+r949514 | mmartinec | 2010-05-30 13:01:59 +0000 (Sun, 30 May 2010) | 2 lines
+
+Bug 5894: spamd doesn't use vpopmail virtual users' dirs - removed one extra space
+
+------------------------------------------------------------------------
+r949432 | mmartinec | 2010-05-29 18:13:30 +0000 (Sat, 29 May 2010) | 3 lines
+
+Bug 6416: avoid undef warnings in AutoWhitelist.pm as a result
+of incorrect Received header field or its incorrect parsing
+
+------------------------------------------------------------------------
+r949430 | mmartinec | 2010-05-29 18:07:58 +0000 (Sat, 29 May 2010) | 2 lines
+
+Bug 6415: Open of auto-whitelist file failed: Insecure dependency in eval
+
+------------------------------------------------------------------------
+r948261 | khopesh | 2010-05-26 00:07:57 +0000 (Wed, 26 May 2010) | 1 line
+
+(3.3 branch) update, enhance, and expand RCVD_ILLEGAL_IP from bug 6299
+------------------------------------------------------------------------
+r945924 | mmartinec | 2010-05-18 22:07:03 +0000 (Tue, 18 May 2010) | 2 lines
+
+Avoid using legit domain ress.com in the docs: add@ress.com -> user@example.com
+
+------------------------------------------------------------------------
+r943933 | mmartinec | 2010-05-13 16:47:08 +0000 (Thu, 13 May 2010) | 2 lines
+
+Bug 6392: Test suite fails with perl 5.12.0
+
+------------------------------------------------------------------------
+r943371 | jhardin | 2010-05-12 04:59:14 +0000 (Wed, 12 May 2010) | 1 line
+
+Fix erroneous TO_EQ_FROM in 3.3 branch
+------------------------------------------------------------------------
+r936594 | mmartinec | 2010-04-22 01:47:53 +0000 (Thu, 22 Apr 2010) | 2 lines
+
+Bug 6404: Fix perldoc errors
+
+------------------------------------------------------------------------
+r935241 | sidney | 2010-04-17 19:55:46 +0000 (Sat, 17 Apr 2010) | 1 line
+
+bug 6412 remove .yu TLD and add .me SLDs
+------------------------------------------------------------------------
+r935237 | sidney | 2010-04-17 19:46:27 +0000 (Sat, 17 Apr 2010) | 1 line
+
+bug 6408 backported to branch 3.3
+------------------------------------------------------------------------
+r931636 | sidney | 2010-04-07 18:30:35 +0000 (Wed, 07 Apr 2010) | 1 line
+
+Bug 6395 backport - improved URI parsing
+------------------------------------------------------------------------
+r929544 | mmartinec | 2010-03-31 14:05:34 +0000 (Wed, 31 Mar 2010) | 2 lines
+
+Fix two undef warnings in SA::Plugin::ImageInfo
+
+------------------------------------------------------------------------
+r929478 | jm | 2010-03-31 11:12:20 +0000 (Wed, 31 Mar 2010) | 1 line
+
+bug 6393: make File::Copy module load conditional on 'sa-learn --upgrade' with DBM files, not very commonly used
+------------------------------------------------------------------------
+r929343 | mmartinec | 2010-03-31 00:04:14 +0000 (Wed, 31 Mar 2010) | 2 lines
+
+Bug 6396: Use of uninitialized value in lc at lib/Mail/SpamAssassin/Plugin/MIMEEval.pm
+
+------------------------------------------------------------------------
+r925296 | jm | 2010-03-19 16:08:00 +0000 (Fri, 19 Mar 2010) | 1 line
+
+starting 3.3.2 devel cycle
+------------------------------------------------------------------------
+r925295 | jm | 2010-03-19 16:07:36 +0000 (Fri, 19 Mar 2010) | 1 line
+
+update build script used
+------------------------------------------------------------------------
+r925294 | jm | 2010-03-19 16:06:16 +0000 (Fri, 19 Mar 2010) | 1 line
+
+3.3.1 RELEASED
+------------------------------------------------------------------------
+r924711 | jm | 2010-03-18 11:19:27 +0000 (Thu, 18 Mar 2010) | 1 line
+
+add warning about the deprecation of SARE ruleset http://www.rulesemporium.com/rules/90_2tld.cf to the 3.3.1 announcement mail
+------------------------------------------------------------------------
+r923802 | jm | 2010-03-16 15:17:04 +0000 (Tue, 16 Mar 2010) | 1 line
+
+update proposed 3.3.1 announcement text
+------------------------------------------------------------------------
+r923781 | jm | 2010-03-16 14:48:49 +0000 (Tue, 16 Mar 2010) | 1 line
+
+preparing to release 3.3.1 (redo)
+------------------------------------------------------------------------
+r923775 | jm | 2010-03-16 14:43:51 +0000 (Tue, 16 Mar 2010) | 1 line
+
+add new script to packaging skip list
+------------------------------------------------------------------------
+r923773 | jm | 2010-03-16 14:40:53 +0000 (Tue, 16 Mar 2010) | 1 line
+
+update build procedure to use repackaging method for the rules tarball (backport from trunk)
+------------------------------------------------------------------------
+r923725 | mmartinec | 2010-03-16 13:15:21 +0000 (Tue, 16 Mar 2010) | 3 lines
+
+Backported docs spelling fixes and CREDITS update from trunk,
+one trivial fix to URIDNSBL.pm to avoid undef warnings
+
+------------------------------------------------------------------------
+r923262 | jm | 2010-03-15 14:38:27 +0000 (Mon, 15 Mar 2010) | 1 line
+
+add proposed 3.3.1 release mail
+------------------------------------------------------------------------
+r923250 | jm | 2010-03-15 14:24:38 +0000 (Mon, 15 Mar 2010) | 1 line
+
+preparing to release 3.3.1
+------------------------------------------------------------------------
+r923170 | jm | 2010-03-15 11:11:09 +0000 (Mon, 15 Mar 2010) | 1 line
+
+bug 6311: add release script to push an immediate rule updates tarball, similar to update-rules script, but based on old run_part2. this should work to release 3.3.1.  update release process README to use it. sync that file with up-to-date trunk
+------------------------------------------------------------------------
+r922831 | mmartinec | 2010-03-14 12:52:52 +0000 (Sun, 14 Mar 2010) | 2 lines
+
+Bug 6374 comment 2, reverted r922719
+
+------------------------------------------------------------------------
+r922719 | mmartinec | 2010-03-14 01:50:47 +0000 (Sun, 14 Mar 2010) | 2 lines
+
+Bug 6374: adding xs.surbl.org into the 128th bit of multi.surbl.org
+
+------------------------------------------------------------------------
+r922698 | mmartinec | 2010-03-14 00:42:24 +0000 (Sun, 14 Mar 2010) | 2 lines
+
+Bug 6370: update ImageInfo plugin to latest release
+
+------------------------------------------------------------------------
+r922695 | mmartinec | 2010-03-14 00:02:01 +0000 (Sun, 14 Mar 2010) | 2 lines
+
+Bug 6335: avoid non-deterministic test issue
+
+------------------------------------------------------------------------
+r922274 | jm | 2010-03-12 14:30:19 +0000 (Fri, 12 Mar 2010) | 1 line
+
+bug 6361: backport 20_aux_tlds.cf to 3.3.x.  List 2tld and 3tld sub-domain hosters for URIBL/SURBL/DBL queries
+------------------------------------------------------------------------
+r922019 | mmartinec | 2010-03-11 21:00:03 +0000 (Thu, 11 Mar 2010) | 2 lines
+
+Bug 6340: a trivial improvement from Andrej Sossi
+
+------------------------------------------------------------------------
+r922008 | mmartinec | 2010-03-11 20:22:43 +0000 (Thu, 11 Mar 2010) | 2 lines
+
+Bug 6369: win32: spamd childs do not receive SIGINT
+
+------------------------------------------------------------------------
+r921874 | mmartinec | 2010-03-11 14:43:39 +0000 (Thu, 11 Mar 2010) | 4 lines
+
+Bug 6373: avoid user checks for win32;
+plus: import a sub am_running_on_windows() where it is
+more heavily used, reducing the clutter in calls
+
+------------------------------------------------------------------------
+r921873 | jm | 2010-03-11 14:41:05 +0000 (Thu, 11 Mar 2010) | 1 line
+
+bug 6335: add Spamhaus DBL as URIBL_DBL_SPAM rule, leaving room for future DBL subtypes like phish or malware; add URIBL_DBL_ERROR to detect lookups of IP addresses due to possible future bugs
+------------------------------------------------------------------------
+r921800 | mmartinec | 2010-03-11 11:05:50 +0000 (Thu, 11 Mar 2010) | 2 lines
+
+Bug 6362: extend the syntax of a sub-test parameter in URIDNSBL tests
+
+------------------------------------------------------------------------
+r921797 | mmartinec | 2010-03-11 10:52:52 +0000 (Thu, 11 Mar 2010) | 2 lines
+
+Bug 6359, no POSIX::SIGALRM on Windows, just use %SIG
+
+------------------------------------------------------------------------
+r921471 | mmartinec | 2010-03-10 17:40:53 +0000 (Wed, 10 Mar 2010) | 3 lines
+
+Bug 6340, small updates according to offline correspondence
+with Andrej Sossi, the original patch author
+
+------------------------------------------------------------------------
+r921213 | mmartinec | 2010-03-10 02:52:59 +0000 (Wed, 10 Mar 2010) | 2 lines
+
+Bug 6267: Solaris 10 requires --syslog-socket=native
+
+------------------------------------------------------------------------
+r918467 | kmcgrail | 2010-03-03 13:33:49 +0000 (Wed, 03 Mar 2010) | 1 line
+
+bug 6304 spamd is spawning and killing processes too often - Added spamd adjustments to info level and more information for administrators + small fix to Makefile.PL
+------------------------------------------------------------------------
+r918242 | mmartinec | 2010-03-02 23:04:28 +0000 (Tue, 02 Mar 2010) | 2 lines
+
+Bug 6310: sa-learn --import gives Insecure dependency in open
+
+------------------------------------------------------------------------
+r918151 | mmartinec | 2010-03-02 18:57:30 +0000 (Tue, 02 Mar 2010) | 3 lines
+
+Bug 6313: -Q or -q AND -x should not result in creation of a ~/.spamassasin dir;
+plus: taint issues fixed
+
+------------------------------------------------------------------------
+r918118 | mmartinec | 2010-03-02 17:24:37 +0000 (Tue, 02 Mar 2010) | 2 lines
+
+Bug 6342: make test failure on if_can under perl 5.6
+
+------------------------------------------------------------------------
+r918042 | mmartinec | 2010-03-02 14:00:47 +0000 (Tue, 02 Mar 2010) | 2 lines
+
+Bug 6340: Impossible to find user home directory of VPOPMAIL alias
+
+------------------------------------------------------------------------
+r917954 | mmartinec | 2010-03-02 10:55:03 +0000 (Tue, 02 Mar 2010) | 2 lines
+
+Bug 6072: (more) POD warnings
+
+------------------------------------------------------------------------
+r917785 | jm | 2010-03-01 23:15:12 +0000 (Mon, 01 Mar 2010) | 1 line
+
+bug 6356: work around win32 perl bug with pack('N') by switching to pack('l')
+------------------------------------------------------------------------
+r917779 | jm | 2010-03-01 22:57:30 +0000 (Mon, 01 Mar 2010) | 2 lines
+
+bug 6215, bug 6294: RCVD_IN_CSS rule was broken.  the
+check_rbl_sub() syntax was incorrect, resulting in missing hits
+------------------------------------------------------------------------
+r917669 | mmartinec | 2010-03-01 19:39:03 +0000 (Mon, 01 Mar 2010) | 2 lines
+
+Bug 6343: trivial doc fix: replace two occurances of ::Plugins:: with ::Plugin:: in Conf.pm POD
+
+------------------------------------------------------------------------
+r917659 | mmartinec | 2010-03-01 19:24:41 +0000 (Mon, 01 Mar 2010) | 2 lines
+
+Bug 6072: fix POD warnings
+
+------------------------------------------------------------------------
+r911900 | mmartinec | 2010-02-19 18:37:16 +0000 (Fri, 19 Feb 2010) | 4 lines
+
+Bug 6304 (trivial), reduce sysadmin's stress level by lowercasing
+the 'INTERRUPTED' in a logged message:
+ spamd: handled cleanup of child pid [...] due to SIGCHLD: INTERRUPTED
+
+------------------------------------------------------------------------
+r910641 | mmartinec | 2010-02-16 18:28:00 +0000 (Tue, 16 Feb 2010) | 5 lines
+
+Dns.pm: shouldn't use a debug facility "info:" which
+has reserved semantics - change it to "dns:" for a
+debug message "entering/leaving helper-app run mode"
+(trivial)
+
+------------------------------------------------------------------------
+r910577 | mmartinec | 2010-02-16 16:20:31 +0000 (Tue, 16 Feb 2010) | 3 lines
+
+Bug 6329: POSIX::strftime in call under Win32 ActivePerl causes Perl to hang up;
+formatting option %e is not in a POSIX standard, use %d instead and edit
+
+------------------------------------------------------------------------
+r909551 | mmartinec | 2010-02-12 18:31:45 +0000 (Fri, 12 Feb 2010) | 2 lines
+
+Bug 6322: In DKIM ADSP eval test check_dkim_adsp() the '*' is handled incorrectly
+
+------------------------------------------------------------------------
+r908595 | mmartinec | 2010-02-10 17:26:22 +0000 (Wed, 10 Feb 2010) | 2 lines
+
+Bug 6327: Fix calling argument in utility used to determine DCC's homedir
+
+------------------------------------------------------------------------
+r906193 | mmartinec | 2010-02-03 19:23:40 +0000 (Wed, 03 Feb 2010) | 4 lines
+
+Bug 6316: DCC.pm, wrong options for dcc_proc,
+(plus: avoid a warning on undef in logger when
+dccifd socket is not provided)
+
+------------------------------------------------------------------------
+r906163 | mmartinec | 2010-02-03 18:28:08 +0000 (Wed, 03 Feb 2010) | 1 line
+
+Bug 6287: improved DKIM plugin debugging
+------------------------------------------------------------------------
+r906120 | mmartinec | 2010-02-03 16:44:07 +0000 (Wed, 03 Feb 2010) | 3 lines
+
+Bug 6321 - _TOKENSUMMARY_ not working in 3.3.0
+(Plugin/Bayes.pm looks-up a tag from wrong location)
+
+------------------------------------------------------------------------
+r905461 | mmartinec | 2010-02-01 23:39:31 +0000 (Mon, 01 Feb 2010) | 6 lines
+
+Bug 6312 - uninitialized value $start_time:
+- change spamd to provide a missing start time in dotell;
+- moved assigning to $msg->{master_deadline} earlier in
+  Message.pm for more obvious logging and to avoid future
+  surprises if parsing would implement a time limit
+
+------------------------------------------------------------------------
+r903676 | jm | 2010-01-27 15:24:17 +0000 (Wed, 27 Jan 2010) | 1 line
+
+bug 5761: trivial doc fix: document SPAMD_LOCALHOST test-control env variable
+------------------------------------------------------------------------
+r903615 | mmartinec | 2010-01-27 11:43:13 +0000 (Wed, 27 Jan 2010) | 1 line
+
+Bug 6307 - exists in header rule fails if underscore present in pattern
+------------------------------------------------------------------------
+r903317 | jm | 2010-01-26 16:43:22 +0000 (Tue, 26 Jan 2010) | 1 line
+
+remove 'DRAFT' warning
+------------------------------------------------------------------------
+r903276 | jm | 2010-01-26 15:36:30 +0000 (Tue, 26 Jan 2010) | 1 line
+
+backport fixes from trunk to update-rules script made during release
+------------------------------------------------------------------------
+r903270 | jm | 2010-01-26 15:31:10 +0000 (Tue, 26 Jan 2010) | 1 line
+
+move to std location so links are correct
+------------------------------------------------------------------------
+r903193 | jm | 2010-01-26 12:15:08 +0000 (Tue, 26 Jan 2010) | 1 line
+
+3.3.1 devel cycle started
+------------------------------------------------------------------------
+r903191 | jm | 2010-01-26 12:13:41 +0000 (Tue, 26 Jan 2010) | 2 lines
+
+Creating maintainance branch for 3.3.x
+
+------------------------------------------------------------------------

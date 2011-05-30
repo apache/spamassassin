@@ -1,0 +1,17 @@
+#!/usr/bin/perl
+
+use Pod::Html;
+use Pod::Text ();
+
+foreach (@ARGV) {
+  $in = $_;
+  s,^(lib|spamd|spamc)/|\.(pod|pm)$,,g;
+  tr,/,_,;
+
+  # convert to HTML: doc/foo.html
+  pod2html ("--infile=$in", "--outfile=doc/$_.html");
+
+  # and to text: doc/foo.txt
+  my $parser = Pod::Text->new ();
+  $parser->parse_from_file ($in, "doc/$_.txt");
+}

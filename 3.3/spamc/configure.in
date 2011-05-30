@@ -1,0 +1,212 @@
+AC_PREREQ(2.50)
+
+dnl Autoconf. ick.
+dnl Here's how to rebuild the "configure" script from this source file:
+dnl
+dnl   cd spamc; autoconf; autoheader
+
+AC_INIT
+
+AC_ARG_ENABLE(ssl,
+	AC_HELP_STRING([--enable-ssl],
+		[build spamc with ssl support ('yes'/'no', default is 'no')]),
+	[sa_ssl_enabled=${enableval:-no}],
+	[sa_ssl_enabled=${enableval:-no}])
+AC_CONFIG_SRCDIR([Makefile.PL])
+AC_CONFIG_HEADER(config.h)
+
+dnl ensure Makefile.PL has been run too
+if test -f Makefile.PL -a ! -f Makefile ; then
+  perl Makefile.PL || exit 1
+fi
+
+AC_PROG_CC
+
+# off: breaks gcc 3.3.x!  doh
+# if test "x$GCC" = "xyes" ; then
+# CFLAGS="-Wall -Wextra -Wdeclaration-after-statement $CFLAGS"
+# fi
+
+AC_EXEEXT
+
+dnl ----------------------------------------------------------------------
+
+AC_HEADER_STDC
+AC_CHECK_HEADERS(sys/time.h syslog.h unistd.h errno.h sys/errno.h)
+AC_CHECK_HEADERS(time.h sysexits.h sys/socket.h netdb.h netinet/in.h)
+AC_CHECK_HEADERS(pwd.h signal.h openssl/crypto.h zlib.h)
+dnl AC_CHECK_HEADERS(getopt.h)
+
+AC_C_CONST
+AC_TYPE_OFF_T
+AC_TYPE_PID_T
+AC_TYPE_UID_T
+AC_TYPE_SIZE_T
+
+dnl ----------------------------------------------------------------------
+
+AC_CACHE_CHECK([for SHUT_RD],
+       shutrd, [
+                AC_TRY_COMPILE([#include <sys/types.h>
+#include <sys/socket.h>],
+                        [printf ("%d", SHUT_RD); return 0;],
+                                        [shutrd=yes],
+                                        [shutrd=no]),
+       ])
+if test $shutrd = yes ; then
+  AC_DEFINE(HAVE_SHUT_RD)
+fi
+
+dnl ----------------------------------------------------------------------
+
+AC_CHECK_LIB(socket, socket)
+
+SSLLIBS=""
+SSLCFLAGS=""
+if test yes = "$sa_ssl_enabled"; then
+	AC_CHECK_LIB(crypto, CRYPTO_lock,[SSLLIBS="-lcrypto $SSLLIBS"])
+	AC_CHECK_LIB(ssl, SSL_CTX_free,[SSLLIBS="-lssl $SSLLIBS"],,-lcrypto)
+
+	# before defining SPAMC_SSL check that all its requirements are
+	# actually available
+	if test yes = "$ac_cv_header_openssl_crypto_h" && \
+	   test yes = "$ac_cv_lib_crypto_CRYPTO_lock" && \
+	   test yes = "$ac_cv_lib_ssl_SSL_CTX_free"; then
+		SSLCFLAGS="-DSPAMC_SSL"
+	else
+		AC_MSG_ERROR([Cannot use SSL; libraries or header files are missing.
+You may try using 'configure --disable-ssl'.])
+	fi
+fi
+AC_CHECK_LIB(inet, connect)
+AC_CHECK_LIB(nsl, t_accept)
+AC_CHECK_LIB(z, deflate)
+AC_CHECK_LIB(dl, dlopen)
+
+AC_CHECK_FUNCS(socket strdup strtod strtol snprintf shutdown)
+
+dnl ----------------------------------------------------------------------
+
+AC_CACHE_CHECK([for h_errno],
+        herrno, [
+                AC_TRY_COMPILE([#include <netdb.h>],
+                        [printf ("%d", h_errno); return 0;],
+                                        [herrno=yes],
+                                        [herrno=no]),
+        ])
+if test $herrno = yes ; then
+  AC_DEFINE(HAVE_H_ERRNO)
+fi
+
+dnl ----------------------------------------------------------------------
+
+dnl AC_CACHE_CHECK([for optarg],
+dnl         haveoptarg, [
+dnl                 AC_TRY_COMPILE([#include <getopt.h>],
+dnl                         [if (optarg == (char *) 0L) { return 0; } return 1;],
+dnl                                         [haveoptarg=yes],
+dnl                                         [haveoptarg=no]),
+dnl         ])
+dnl if test $haveoptarg = yes ; then
+dnl   AC_DEFINE(HAVE_OPTARG)
+dnl fi
+
+dnl ----------------------------------------------------------------------
+
+AC_CACHE_CHECK([for in_addr_t],
+        inaddrt, [
+                AC_TRY_COMPILE([#include <sys/types.h>
+#include <netinet/in.h>],
+                        [in_addr_t foo; return 0;],
+                                        [inaddrt=yes],
+                                        [inaddrt=no]),
+        ])
+if test $inaddrt = no ; then
+  AC_CHECK_TYPE(in_addr_t, unsigned long)
+fi
+
+dnl ----------------------------------------------------------------------
+
+AC_CACHE_CHECK([for INADDR_NONE],
+        haveinaddrnone, [
+                AC_TRY_COMPILE([#include <sys/types.h>
+#include <netinet/in.h>],
+                        [in_addr_t foo = INADDR_NONE; return 0;],
+                                        [haveinaddrnone=yes],
+                                        [haveinaddrnone=no]),
+        ])
+if test $haveinaddrnone = yes ; then
+  AC_DEFINE(HAVE_INADDR_NONE)
+fi
+
+dnl ----------------------------------------------------------------------
+
+AC_CACHE_CHECK([for EX__MAX],
+        haveexmax, [
+                AC_TRY_COMPILE([#ifdef HAVE_SYSEXITS_H
+#include <sysexits.h>
+#endif
+#include <errno.h>],
+                        [int foo = EX__MAX; return 0;],
+                                        [haveexmax=yes],
+                                        [haveexmax=no]),
+        ])
+if test $haveexmax = yes ; then
+  AC_DEFINE(HAVE_EX__MAX)
+fi
+
+dnl ----------------------------------------------------------------------
+
+AC_CACHE_CHECK([for EAI_ADDRFAMILY],
+        haveitem, [
+                AC_TRY_COMPILE([#include <sys/types.h>
+#include <sys/socket.h>
+#include <netdb.h>],
+                        [int foo = EAI_ADDRFAMILY; return 0;],
+                                        [haveitem=yes],
+                                        [haveitem=no]),
+        ])
+if test $haveitem = yes ; then
+  AC_DEFINE(HAVE_EAI_ADDRFAMILY, 1, [Define if EAI_ADDRFAMILY is valid.])
+fi
+
+AC_CACHE_CHECK([for EAI_SYSTEM],
+        haveitem, [
+                AC_TRY_COMPILE([#include <sys/types.h>
+#include <sys/socket.h>
+#include <netdb.h>],
+                        [int foo = EAI_SYSTEM; return 0;],
+                                        [haveitem=yes],
+                                        [haveitem=no]),
+        ])
+if test $haveitem = yes ; then
+  AC_DEFINE(HAVE_EAI_SYSTEM, 1, [Define if EAI_SYSTEM is valid.])
+fi
+
+AC_CACHE_CHECK([for EAI_NODATA],
+        haveitem, [
+                AC_TRY_COMPILE([#include <sys/types.h>
+#include <sys/socket.h>
+#include <netdb.h>],
+                        [int foo = EAI_NODATA; return 0;],
+                                        [haveitem=yes],
+                                        [haveitem=no]),
+        ])
+if test $haveitem = yes ; then
+  AC_DEFINE(HAVE_EAI_NODATA, 1, [Define if EAI_NODATA is valid.])
+fi
+
+dnl ----------------------------------------------------------------------
+
+# we cheat, since we *know* we have Perl installed ;)
+CCCDLFLAGS=`perl -e 'use Config; print $Config::Config{cccdlflags}'`
+LDDLFLAGS=`perl -e 'use Config; print $Config::Config{lddlflags}'`
+AC_SUBST([SSLLIBS])
+AC_SUBST([SSLCFLAGS])
+AC_SUBST(CCCDLFLAGS)
+AC_SUBST(LDDLFLAGS)
+AC_SUBST(HAVE_SHUT_RD)
+
+AC_CONFIG_FILES([Makefile])
+AC_CONFIG_FILES([spamc.h])
+AC_OUTPUT

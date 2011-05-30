@@ -1,0 +1,6 @@
+#!/bin/bash
+
+DIRNAME=`dirname $0`
+
+echo "[Determining tables size for pgsql tables]"
+psql -U sapostgres -f $DIRNAME/analyze.sql spamassassin

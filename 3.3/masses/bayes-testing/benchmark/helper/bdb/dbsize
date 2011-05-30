@@ -1,0 +1,5 @@
+#!/bin/bash
+
+DBDIR=$1/dbdir
+echo "[Determining BDB bayes database size - $DBDIR]"
+du -sk $DBDIR
