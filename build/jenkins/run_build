@@ -13,12 +13,11 @@ mkdir artifacts testxml
 PATH=/export/home/jm/tools/perl586/bin:/usr/ccs/bin:/sbin:/usr/sbin:/etc:/usr/etc:/usr/local/bin:/usr/bin/mh:/export/home/jm/bin:/sbin:/usr/sbin:/etc:/usr/etc:/usr/local/bin:/usr/bin/mh:/export/home/jm/bin:/sbin:/usr/sbin:/etc:/usr/etc:/usr/local/bin:/usr/bin/mh:/usr/bin:/opt/sfw/bin:/opt/SUNWspro/bin:/usr/ucb/
 export PATH
 
-which perl
-/usr/ucb/whoami
-/usr/bin/ls -al /export/home/jm/tools/ /export/home/jenkins/tools/
+#INSTALL NETADDR USING JM's PERL
+echo "o conf makepl_arg PREFIX=/export/home/hudson/tools/sa_perl\ninstall NetAddr::IP" | cpan
 
 exit
-perl  -I /export/home/jenkins/tools/perl/lib/site_perl/ Makefile.PL < /dev/null
+perl -I /export/home/hudson/tools/sa_perl/lib/site_perl/ Makefile.PL < /dev/null
 
 # SOLARIS1 SLAVE w/Infra installing modules for us in a separate dir. 
 #perl -I /export/home/jenkins/tools/perl/lib/site_perl/ Makefile.PL < /dev/null
