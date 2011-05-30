@@ -13,7 +13,7 @@ mkdir artifacts testxml
 PATH=/export/home/jm/tools/perl586/bin:/usr/ccs/bin:/sbin:/usr/sbin:/etc:/usr/etc:/usr/local/bin:/usr/bin/mh:/export/home/jm/bin:/sbin:/usr/sbin:/etc:/usr/etc:/usr/local/bin:/usr/bin/mh:/export/home/jm/bin:/sbin:/usr/sbin:/etc:/usr/etc:/usr/local/bin:/usr/bin/mh:/usr/bin:/opt/sfw/bin:/opt/SUNWspro/bin:/usr/ucb/
 export PATH
 
-#INSTALL NETADDR USING JM's PERL
+#INSTALL NETADDR USING JM's PERL USING COMPLETE SILLINESS
 #echo "o conf makepl_arg PREFIX=/export/home/hudson/tools/sa_perl\ninstall NetAddr::IP" | cpan
 #cd /tmp/1
 #curl -o netaddr.tar.gz http://www.peregrinehw.com/downloads/SpamAssassin/NetAddr-IP-4.044.tar.gz
@@ -23,11 +23,8 @@ export PATH
 #cd NetAddr-IP-4.044/
 #perl Makefile.PL PREFIX=/export/home/hudson/tools/sa_perl
 #make test && make install 
-
-
-perl -I /export/home/hudson/tools/sa_perl/lib/site_perl/ -e 'if (require NetAddr::IP) { print "NetAddr::IP Version is: $NetAddr::IP::VERSION\n"; exit 0;} else {exit 1;}'
-
-exit
+#perl -I /export/home/hudson/tools/sa_perl/lib/site_perl/ -e 'if (require NetAddr::IP) { print "NetAddr::IP Version is: $NetAddr::IP::VERSION\n"; exit 0;} else {exit 1;}'
+#exit
 perl -I /export/home/hudson/tools/sa_perl/lib/site_perl/ Makefile.PL < /dev/null
 
 # SOLARIS1 SLAVE w/Infra installing modules for us in a separate dir. 
