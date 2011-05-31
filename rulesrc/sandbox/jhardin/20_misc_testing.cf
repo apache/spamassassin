@@ -696,14 +696,16 @@ body        __GAPPY_PHONE_NA       /1 - \d \d \d - \d \d \d - \d \d \d \d/
 meta        GAPPY_PHONE_NA         __GAPPY_PHONE_NA
 describe    GAPPY_PHONE_NA         Phone number with lots of spaces
 
-rawbody     __GAPPY_HTML_01        m;</?[a-z]{1,6}(?:\s[^>]{0,40})?>\s{0,80}(?:(?!\d)[\w'()\#,.:!]{1,15}\s{4,80}){7}\S;
-rawbody     __GAPPY_HTML_02        m;\S(?:\s{4,80}(?!\d)[\w'()\#,.:!]{1,15}){7}\s{0,5}</?[a-z]{1,6}/?>;
-meta        __GAPPY_HTML           __GAPPY_HTML_01 || __GAPPY_HTML_02
+rawbody     __GAPPY_HTML_01        m;</?[a-z]{1,6}(?:\s[^>]{0,40})?>(?:\s|=09){0,80}(?:(?!\d)[\w'()\#,.:!]{1,15}(?:\s|=09){4,80}){7}\S;
+rawbody     __GAPPY_HTML_02        m;\S(?:(?:\s|=09){4,80}(?!\d)[\w'()\#,.:!]{1,15}){7}(?:\s|=09){0,5}</?[a-z]{1,6}/?>;
+rawbody     __GAPPY_HTML_03        /^(?:=09){3,20}</m
+tflags      __GAPPY_HTML_03        multiple
+meta        __GAPPY_HTML           __MIME_HTML && (__GAPPY_HTML_01 || __GAPPY_HTML_02 || (__GAPPY_HTML_03 > 10))
 meta        GAPPY_HTML             __GAPPY_HTML && !__UNSUB_LINK
 describe    GAPPY_HTML             HTML body with much useless whitespace
 
 # Try to improve S/O per bug 6119
-meta        TVD_SPACE_RATIO_MINFP  __TVD_SPACE_RATIO && !__OBFUSCATING_COMMENT_B && !WEIRD_QUOTING && !__NOT_SPOOFED && !__BUGGED_IMG && !__ML1 && !__DOS_HAS_LIST_UNSUB && !__RP_MATCHES_RCVD && !__MUA_TBIRD && !__HS_SUBJ_RE_FW
+meta        TVD_SPACE_RATIO_MINFP  __TVD_SPACE_RATIO && !__OBFUSCATING_COMMENT_B && !WEIRD_QUOTING && !__NOT_SPOOFED && !__BUGGED_IMG && !__ML1 && !__DOS_HAS_LIST_UNSUB && !__RP_MATCHES_RCVD && !__MUA_TBIRD && !__HS_SUBJ_RE_FW && !__RCD_RDNS_MAIL_MESSY && !__ISO_2022_JP_DELIM
 tflags      TVD_SPACE_RATIO_MINFP  nopublish
 
 
