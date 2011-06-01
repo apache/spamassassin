@@ -1,4 +1,9 @@
 
+# 2011-06-01
+header   AXB_XM_RCVD_ZERO   Received =~ /^from 0\./
+describe AXB_XM_RCVD_ZERO   fingerprint
+#score    AXB_XM_RCVD_ZERO   1.5
+
 
 header          AXB_HELO_HOME_UN        X-Spam-Relays-Untrusted =~ /^[^\]]+ helo=\w+\.(lan|home) /i
 describe        AXB_HELO_HOME_UN        HELO from home  - untrusted
@@ -12,5 +17,6 @@ header          __UA_NT4                User-Agent =~ /U\; NT4\.0\;/
 meta            AXB_TRACK_MOZ           (__UA_MOZ5 && __UA_NIX && __UA_NT4)
 describe        AXB_TRACK_MOZ           MozTrack
 #score           AXB_TRACK_MOZ           1.5
+
 
 
