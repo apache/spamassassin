@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus-trap darxus dos grenier jarif kgolding llanga nbebout wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1 zmi; day 2: bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus-trap darxus dos grenier jarif kgolding llanga nbebout wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1 zmi; day 3: bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus-trap darxus dos grenier jarif kgolding llanga nbebout wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1 zmi
+# with results from: day 1: bernie-fsf bernie-it_batt bernie-mix danmcdonald dos grenier hege jarif kgolding llanga nbebout wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1 zmi; day 2: bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus-trap darxus dos grenier hege jarif kgolding llanga nbebout wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1 zmi; day 3: bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus-trap darxus dos grenier hege jarif kgolding llanga nbebout wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1 zmi
 
 # tflags 
 ADVANCE_FEE_2_NEW_FORM
@@ -188,6 +188,9 @@ ENV_AND_HDR_SPF_MATCH
 FAKE_REPLY_A1
 
 # good enough
+FAKE_REPLY_B
+
+# good enough
 FB_CIALIS_LEO3
 
 # good enough
@@ -235,9 +238,6 @@ FH_HELO_EQ_D_D_D_D
 # good enough
 FH_HOST_EQ_DYNAMICIP
 
-# good enough
-FH_HOST_EQ_PACBELL_D
-
 # tflags 
 FILL_THIS_FORM
 
@@ -251,13 +251,13 @@ FILL_THIS_FORM_LONG
 FM_LOTTO_YOU_WON
 
 # good enough
+FM_SCHOOLING
+
+# good enough
 FM_SCHOOL_DIPLOMA
 
 # good enough
 FM_SEX_HELODDDD
-
-# good enough
-FM_SUBJ_APPROVE
 
 # good enough
 FM_VEGAS_CASINO
@@ -320,9 +320,6 @@ FROM_MISSP_URI
 FROM_MISSP_USER
 
 # good enough
-FROM_ONE_CHAR
-
-# good enough
 FRT_BIGGERMEM1
 
 # good enough
@@ -350,9 +347,6 @@ FSL_HELO_BARE_IP_2
 FSL_HELO_DEVICE
 
 # good enough
-FSL_HELO_FIREWALL
-
-# good enough
 FSL_HELO_NON_FQDN_1
 
 # good enough
@@ -366,9 +360,6 @@ FSL_XM_419
 
 # good enough
 FS_GET_LAID
-
-# good enough
-FS_MAKE_MONEY
 
 # good enough
 FS_OBFU_PRMCY
@@ -430,6 +421,9 @@ HASHCASH_HIGH
 # good enough
 HDRS_LCASE_1K
 
+# good enough
+HDRS_LCASE_IMGONLY
+
 # tflags userconf
 HEAD_LONG
 
@@ -455,12 +449,6 @@ HK_NAME_FM_MR_MRS
 HK_PNIS
 
 # good enough
-HK_RANDOM_ENVFROM
-
-# good enough
-HK_RANDOM_FROM
-
-# good enough
 HK_SCAM_N15
 
 # good enough
@@ -483,9 +471,6 @@ KB_DATE_CONTAINS_TAB
 
 # good enough
 KB_FAKED_THE_BAT
-
-# good enough
-KB_FORGED_MOZ4
 
 # good enough
 KB_RATWARE_MSGID
@@ -848,9 +833,6 @@ TVD_FROM_1
 TVD_INCREASE_SIZE
 
 # good enough
-TVD_PH_BODY_META
-
-# good enough
 TVD_QUAL_MEDS
 
 # good enough
@@ -866,13 +848,10 @@ TVD_RCVD_SINGLE
 TVD_VISIT_PHARMA
 
 # good enough
-FAKE_REPLY_B
+FRT_HEALTH
 
 # good enough
-HDRS_LCASE_IMGONLY
-
-# good enough
-SINGLE_HEADER_1K
+MAILER_EQ_ORG
 
 # tflags userconf
 UNPARSEABLE_RELAY
@@ -971,10 +950,7 @@ XMAILER_MIMEOLE_OL_1ECD5
 XMAILER_MIMEOLE_OL_20C99
 
 # good enough
-XMAILER_MIMEOLE_OL_25340
-
-# good enough
-XMAILER_MIMEOLE_OL_3857F
+XMAILER_MIMEOLE_OL_22B61
 
 # good enough
 XMAILER_MIMEOLE_OL_3AC1D
@@ -987,18 +963,6 @@ XMAILER_MIMEOLE_OL_4B815
 
 # good enough
 XMAILER_MIMEOLE_OL_4BF4C
-
-# good enough
-XMAILER_MIMEOLE_OL_4EEDB
-
-# good enough
-XMAILER_MIMEOLE_OL_4F240
-
-# good enough
-XMAILER_MIMEOLE_OL_58CB5
-
-# good enough
-XMAILER_MIMEOLE_OL_5B79A
 
 # good enough
 XMAILER_MIMEOLE_OL_6554A
@@ -1025,16 +989,7 @@ XMAILER_MIMEOLE_OL_9B90B
 XMAILER_MIMEOLE_OL_ADFF7
 
 # good enough
-XMAILER_MIMEOLE_OL_B30D1
-
-# good enough
 XMAILER_MIMEOLE_OL_B4B40
-
-# good enough
-XMAILER_MIMEOLE_OL_BC7E6
-
-# good enough
-XMAILER_MIMEOLE_OL_C65FA
 
 # good enough
 XMAILER_MIMEOLE_OL_CAC8F
@@ -1044,9 +999,6 @@ XMAILER_MIMEOLE_OL_CF0C0
 
 # good enough
 XMAILER_MIMEOLE_OL_F3B05
-
-# good enough
-XMAILER_MIMEOLE_OL_F475E
 
 # good enough
 XMAILER_MIMEOLE_OL_F6D01
