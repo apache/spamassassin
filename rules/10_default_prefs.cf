@@ -11,9 +11,9 @@
 # The ASF licenses this file to you under the Apache License, Version 2.0
 # (the "License"); you may not use this file except in compliance with
 # the License.  You may obtain a copy of the License at:
-# 
+#
 #     http://www.apache.org/licenses/LICENSE-2.0
-# 
+#
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -37,9 +37,9 @@ report has been attached to this so you can view it (if it isn't spam) or label
 endif
 report similar future email.  If you have any questions, see
 report _CONTACTADDRESS_ for details.
-report 
+report
 report Content preview:  _PREVIEW_
-report 
+report
 report Content analysis details:   (_SCORE_ points, _REQD_ required)
 report
 report " pts rule name              description"
@@ -50,7 +50,7 @@ report _SUMMARY_
 
 # A 'contact address' users should contact for more info. (replaces
 # _CONTACTADDRESS_ above if present)
-report_contact	@@CONTACT_ADDRESS@@
+report_contact  @@CONTACT_ADDRESS@@
 
 ###########################################################################
 
@@ -74,9 +74,9 @@ unsafe_report it, it may be safer to save it to a file and open it with an edito
 # user_scores_sql_username is the authorized username to connect to DSN
 # user_scores_sql_password is the password for the database username
 
-#user_scores_dsn		DBI:mysql:spamassassin:localhost
-#user_scores_sql_username	spam
-#user_scores_sql_password	spamfilter
+#user_scores_dsn                DBI:mysql:spamassassin:localhost
+#user_scores_sql_username       spam
+#user_scores_sql_password       spamfilter
 
 ##########################################################################
 # Headers to be added to mail (can be overriden by users in
@@ -102,7 +102,7 @@ add_header all Level _STARS(*)_
 add_header all Status "_YESNO_, score=_SCORE_ required=_REQD_ tests=_TESTS_ autolearn=_AUTOLEARN_ version=_VERSION_"
 
 ###########################################################################
-# Default prefs values: users can override these in their 
+# Default prefs values: users can override these in their
 # ~/.spamassassin/user_prefs files.
 
 # How many points before a mail is considered spam.
@@ -122,12 +122,12 @@ endif # Mail::SpamAssassin::Plugin::TextCat
 # Mail which scores outside this range will be fed back into SpamAssassin's
 # learning system automatically, to train the Bayesian scanner.
 ifplugin Mail::SpamAssassin::Plugin::AutoLearnThreshold
-bayes_auto_learn_threshold_nonspam	0.1
-bayes_auto_learn_threshold_spam		12.0
+bayes_auto_learn_threshold_nonspam      0.1
+bayes_auto_learn_threshold_spam         12.0
 endif # Mail::SpamAssassin::Plugin::AutoLearnThreshold
 
 # Set this to 0 to turn off auto-learning.
-bayes_auto_learn			1
+bayes_auto_learn                        1
 
 # report_safe controls the markup of spam. If you set it to 0, the message
 # body of spam messages will not be modified
@@ -137,7 +137,7 @@ report_safe           1
 if (can(Mail::SpamAssassin::Conf::feature_originating_ip_headers))
 clear_originating_ip_headers
 originating_ip_headers X-Yahoo-Post-IP X-Originating-IP X-Apparently-From
-originating_ip_headers X-SenderIP
+originating_ip_headers X-SenderIP X-AOL-IP
 endif
 
 if (can(Mail::SpamAssassin::Conf::feature_dns_local_ports_permit_avoid))
