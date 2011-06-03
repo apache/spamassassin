@@ -106,11 +106,6 @@ Mail::SpamAssassin::Util::clean_path_in_taint_mode();
 
 # Default list of GPG keys allowed to sign update releases
 #
-# pub   1024D/265FA05B 2003-06-09
-#       Key fingerprint = 26C9 00A4 6DD4 0CD5 AD24  F6D7 DEE0 1987 265F A05B
-# uid                  SpamAssassin Signing Key <release@spamassassin.org>
-# sub   1024D/FC51569B 2003-08-21
-#
 # pub   4096R/5244EC45 2005-12-20
 #       Key fingerprint = 5E54 1DC9 59CB 8BAC 7C78  DFDC 4056 A61A 5244 EC45
 # uid                  updates.spamassassin.org Signing Key <release@spamassassin.org>
@@ -120,7 +115,6 @@ Mail::SpamAssassin::Util::clean_path_in_taint_mode();
 # use the last 8 hex digits as a shorter keyid string.
 #
 my %valid_GPG = ( 
-  '26C900A46DD40CD5AD24F6D7DEE01987265FA05B' => 1,
   '0C2B1D7175B852C64B3CDC716C55397824F434CE' => 1,
   '5E541DC959CB8BAC7C78DFDC4056A61A5244EC45' => 1,
 );
@@ -1553,10 +1547,11 @@ be from one of these "release trusted" keys or else verification fails.  This
 prevents third parties from manipulating the files on a mirror, for instance,
 and signing with their own key.
 
-By default, sa-update trusts key id C<265FA05B>, which is the standard
-SpamAssassin release key.  Use this option to trust additional keys.  See the
-B<--import> option for how to add keys to sa-update's keyring.  For sa-update
-to use a key it must be in sa-update's keyring and trusted.
+By default, sa-update trusts key ids C<24F434CE> and C<5244EC45>, which are
+the standard SpamAssassin release key and its sub-key.  Use this option to
+trust additional keys.  See the B<--import> option for how to add keys to
+sa-update's keyring.  For sa-update to use a key it must be in sa-update's
+keyring and trusted.
 
 For multiple keys, use the option multiple times.  i.e.:
 
