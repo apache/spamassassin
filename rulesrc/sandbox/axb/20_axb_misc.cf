@@ -1,3 +1,8 @@
+#2011-06-05
+header   AXB_XRCVD_EYOU_SEND    Received =~ /^\(eyou send program\)/
+describe AXB_XRCVD_EYOU_SEND    fingerprint
+#score   AXB_XRCVD_EYOU_SEND    1.0
+
 # 2011-06-02
 header   AXB_XMIME_OLEV         X-MimeOLE =~ /Produced By Microsoft MimeOLE V$/
 describe AXB_XMIME_OLEV         fingerprint
