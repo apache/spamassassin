@@ -99,8 +99,7 @@ $VERSION = "3.003002";      # update after release (same format as perl $])
 # Used during the prerelease/release-candidate part of the official release
 # process. If you hacked up your SA, you should add a version_tag to your .cf
 # files; this variable should not be modified.
-#@EXTRA_VERSION = qw();
-@EXTRA_VERSION = qw(rc2);
+@EXTRA_VERSION = qw();
 
 @ISA = qw();
 
