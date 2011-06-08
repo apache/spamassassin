@@ -341,9 +341,6 @@ describe RCVD_FAKE_HELO_DOTCOM  Received contains a faked HELO hostname
 header SUBJECT_DIET		Subject =~ /\bLose .*(?:pounds|lbs|weight)/i
 describe SUBJECT_DIET		Subject talks about losing pounds
 
-header EXTRA_MPART_TYPE         Content-Type =~ /(?:\s*multipart\/)?.* type=/i
-describe EXTRA_MPART_TYPE       Header has extraneous Content-type:...type= entry
-
 
 # MIME boundary tests; spam tools use distinctive patterns.
 header MIME_BOUND_DD_DIGITS	Content-Type =~ /boundary=\"--\d+\"/
