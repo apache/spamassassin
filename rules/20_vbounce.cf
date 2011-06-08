@@ -200,7 +200,7 @@ describe CRBOUNCE_MESSAGE   Challenge-Response bounce message
 body __VBOUNCE_EXIM      /a potentially executable attachment /
 body __VBOUNCE_STRIP_ATTACH  /\bhas stripped one or more attachments from the following message\b/
 body __VBOUNCE_GUIN      /message contains file attachments that are not permitted/
-body __VBOUNCE_CISCO     /^Found virus \S+ in file \S+/m
+body __VBOUNCE_CISCO     /^Found virus \S+ in file \S/m
 body __VBOUNCE_SMTP      /host \S+ said: 5\d\d\s+Error: Message content rejected/
 body __VBOUNCE_AOL       /TRANSACTION FAILED - Unrepairable Virus Detected. /
 body __VBOUNCE_DUTCH     /bevatte bijlage besmet welke besmet was met een virus/
@@ -215,7 +215,7 @@ body __VBOUNCE_VALERT      /The mail message \S+ \S+ you sent to \S+ contains th
 body __VBOUNCE_REJ_FILT    /Reason: Rejected by filter/
 header __VBOUNCE_YOUSENT   Subject =~ /^Warning - You sent a Virus Infected Email to /
 body __VBOUNCE_MAILSWEEP   /MAILsweeper has found that a \S+ \S+ \S+ \S+ one or more virus/
-header   __VBOUNCE_SCREENSAVER Subject =~ /(Re: ?)+Wicked screensaver\b/i
+header   __VBOUNCE_SCREENSAVER Subject =~ /\b(?:Re: ?)Wicked screensaver\b/i
 header   __VBOUNCE_DISALLOWED Subject =~ /^Disallowed attachment type found/
 header   __VBOUNCE_FROMPT From =~ /Security.?Scan Anti.?Virus/
 header   __VBOUNCE_WARNING Subject =~ /^Warning:\s*E-?mail virus(es)? detected/i
