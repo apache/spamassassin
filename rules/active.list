@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus-trap darxus dos grenier hege jarif kgolding llanga wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1 zmi; day 2: bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus-trap darxus dos grenier hege jarif kgolding llanga wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1 zmi; day 3: bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus-trap darxus dos grenier hege jarif llanga wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1 zmi
+# with results from: day 1: bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus-trap darxus dos grenier hege jarif kgolding llanga wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1 zmi; day 2: bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus-trap darxus dos grenier hege jarif kgolding wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1 zmi; day 3: bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus-trap darxus dos grenier hege jarif kgolding llanga wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1 zmi
 
 # tflags 
 ADVANCE_FEE_2_NEW_FORM
@@ -335,6 +335,9 @@ FROM_MISSP_URI
 FROM_MISSP_USER
 
 # good enough
+FROM_ONE_CHAR
+
+# good enough
 FRT_BIGGERMEM1
 
 # good enough
@@ -362,6 +365,9 @@ FSL_HELO_BARE_IP_2
 FSL_HELO_DEVICE
 
 # good enough
+FSL_HELO_FIREWALL
+
+# good enough
 FSL_HELO_NON_FQDN_1
 
 # good enough
@@ -375,6 +381,9 @@ FSL_XM_419
 
 # good enough
 FS_GET_LAID
+
+# good enough
+FS_MAKE_MONEY
 
 # good enough
 FS_OBFU_PRMCY
@@ -470,6 +479,9 @@ HK_PNIS
 HK_RANDOM_ENVFROM
 
 # good enough
+HK_RANDOM_FROM
+
+# good enough
 HK_SCAM_N15
 
 # good enough
@@ -492,6 +504,9 @@ KB_DATE_CONTAINS_TAB
 
 # good enough
 KB_FAKED_THE_BAT
+
+# good enough
+KB_FORGED_MOZ4
 
 # good enough
 KB_RATWARE_MSGID
@@ -725,6 +740,9 @@ RISK_FREE
 RP_8BIT
 
 # good enough
+S25R_6
+
+# good enough
 SB_GIF_AND_NO_URIS
 
 # good enough
@@ -872,22 +890,13 @@ TVD_SPACE_RATIO_MINFP
 TVD_VISIT_PHARMA
 
 # good enough
-FROM_ONE_CHAR
+MS_XYMOSG_2K
 
 # good enough
-FSL_HELO_FIREWALL
+SINGLE_HEADER_1K
 
 # good enough
-FS_MAKE_MONEY
-
-# good enough
-HK_RANDOM_FROM
-
-# good enough
-KB_FORGED_MOZ4
-
-# good enough
-S25R_6
+TVD_PH_BODY_META
 
 # tflags userconf
 UNPARSEABLE_RELAY
@@ -998,9 +1007,6 @@ XMAILER_MIMEOLE_OL_4B815
 XMAILER_MIMEOLE_OL_4BF4C
 
 # good enough
-XMAILER_MIMEOLE_OL_6554A
-
-# good enough
 XMAILER_MIMEOLE_OL_7533E
 
 # good enough
@@ -1014,9 +1020,6 @@ XMAILER_MIMEOLE_OL_8627E
 
 # good enough
 XMAILER_MIMEOLE_OL_91287
-
-# good enough
-XMAILER_MIMEOLE_OL_9B90B
 
 # good enough
 XMAILER_MIMEOLE_OL_B4B40
