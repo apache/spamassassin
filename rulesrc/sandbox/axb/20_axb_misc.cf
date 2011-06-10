@@ -1,5 +1,10 @@
+# 2011-06-10
+header          AXB_FORGED_ORIGIN255    X-Originating-IP =~ /\[255\.255\.255\.255\]/
+describe        AXB_FORGED_ORIGIN255    Forged Origin IP
+
+
 # 2011-06-06
-header          AXB_X_ANTIBUSE_HACKED    X-AntiAbuse =~ /^Originator\/Caller UID\/GID \- \[99 99\]/
+header          AXB_X_ANTIBUSE_HACKED    X-AntiAbuse =~ /^Originator\/Caller UID\/GID \- \[99/
 describe        AXB_X_ANTIBUSE_HACKED    Possibly hacked web server
 
 
