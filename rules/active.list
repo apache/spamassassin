@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus-trap darxus grenier hege jarif kgolding llanga wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1 zmi; day 2: bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus-trap darxus dos grenier hege jarif kgolding llanga wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1 zmi; day 3: bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus-trap darxus dos grenier hege jarif kgolding llanga wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1 zmi
+# with results from: day 1: bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus-trap darxus grenier hege jarif llanga wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1 zmi; day 2: bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus-trap darxus dos grenier hege jarif kgolding llanga wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1 zmi; day 3: bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus-trap darxus dos grenier hege jarif kgolding llanga wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1 zmi
 
 # tflags 
 ADVANCE_FEE_2_NEW_FORM
@@ -91,6 +91,9 @@ CHARSET_FARAWAY_HEADER
 # good enough
 CN_B2B_SPAMMER
 
+# tflags 
+CORRUPT_FROM_LINE_IN_HDRS
+
 # good enough
 DATE_IN_FUTURE_96_Q
 
@@ -156,6 +159,9 @@ DNS_FROM_RFC_BOGUSMX
 
 # tflags net
 DNS_FROM_RFC_DSN
+
+# tflags 
+DOS_ANAL_SPAM_MAILER
 
 # good enough
 DOS_OE_TO_MX
@@ -353,6 +359,9 @@ FRT_PHARMAC
 FR_DOT_FEVER_5
 
 # good enough
+FSL_BOTSPAM_1
+
+# good enough
 FSL_CTYPE_WIN1251
 
 # good enough
@@ -480,9 +489,6 @@ HK_NAME_FM_MR_MRS
 
 # good enough
 HK_PNIS
-
-# good enough
-HK_RANDOM_ENVFROM
 
 # good enough
 HK_RANDOM_FROM
@@ -620,6 +626,9 @@ RAZOR2_CHECK
 RCVD_IN_BL_SPAMCOP_NET
 
 # tflags net
+RCVD_IN_CSS
+
+# tflags net
 RCVD_IN_DNSWL_HI
 
 # tflags net
@@ -638,19 +647,55 @@ RCVD_IN_IADB_DK
 RCVD_IN_IADB_DOPTIN
 
 # tflags net
+RCVD_IN_IADB_DOPTIN_GT50
+
+# tflags net
 RCVD_IN_IADB_DOPTIN_LT50
+
+# tflags net
+RCVD_IN_IADB_EDDB
+
+# tflags net
+RCVD_IN_IADB_EPIA
+
+# tflags net
+RCVD_IN_IADB_GOODMAIL
 
 # tflags net
 RCVD_IN_IADB_LISTED
 
 # tflags net
+RCVD_IN_IADB_LOOSE
+
+# tflags net
+RCVD_IN_IADB_MI_CPEAR
+
+# tflags net
+RCVD_IN_IADB_MI_CPR_30
+
+# tflags net
 RCVD_IN_IADB_MI_CPR_MAT
+
+# tflags net
+RCVD_IN_IADB_ML_DOPTIN
+
+# tflags net
+RCVD_IN_IADB_NOCONTROL
+
+# tflags net
+RCVD_IN_IADB_OOO
 
 # tflags net
 RCVD_IN_IADB_OPTIN
 
 # tflags net
 RCVD_IN_IADB_OPTIN_GT50
+
+# tflags net
+RCVD_IN_IADB_OPTIN_LT50
+
+# tflags net
+RCVD_IN_IADB_OPTOUTONLY
 
 # tflags net
 RCVD_IN_IADB_RDNS
@@ -660,6 +705,18 @@ RCVD_IN_IADB_SENDERID
 
 # tflags net
 RCVD_IN_IADB_SPF
+
+# tflags net
+RCVD_IN_IADB_UNVERIFIED_1
+
+# tflags net
+RCVD_IN_IADB_UNVERIFIED_2
+
+# tflags net
+RCVD_IN_IADB_UT_CPEAR
+
+# tflags net
+RCVD_IN_IADB_UT_CPR_30
 
 # tflags net
 RCVD_IN_IADB_UT_CPR_MAT
@@ -702,6 +759,15 @@ RCVD_IN_PBL
 
 # tflags net
 RCVD_IN_PSBL
+
+# tflags net
+RCVD_IN_RP_CERTIFIED
+
+# tflags net
+RCVD_IN_RP_RNBL
+
+# tflags net
+RCVD_IN_RP_SAFE
 
 # tflags net
 RCVD_IN_SBL
@@ -789,9 +855,6 @@ SPF_SOFTFAIL
 
 # good enough
 STOCK_IMG_CTYPE
-
-# good enough
-STOCK_IMG_HDR_FROM
 
 # good enough
 STYLE_GIBBERISH
@@ -892,8 +955,14 @@ TVD_SPACE_RATIO_MINFP
 # good enough
 TVD_VISIT_PHARMA
 
+# tflags net
+FROM_MISSP_DKIM
+
 # good enough
-FSL_BOTSPAM_1
+FS_SILDENAFIL
+
+# tflags 
+OBFU_JVSCR_ESC
 
 # tflags userconf
 UNPARSEABLE_RELAY
@@ -924,6 +993,9 @@ URIBL_PH_SURBL
 
 # tflags net
 URIBL_RED
+
+# tflags net
+URIBL_RHS_DOB
 
 # tflags net
 URIBL_SBL
@@ -1038,6 +1110,12 @@ __DNS_FROM_RFC_POST
 
 # tflags net
 __DNS_FROM_RFC_WHOIS
+
+# tflags net
+__RCVD_IN_BRBL
+
+# tflags net
+__RCVD_IN_DNSWL
 
 # tflags net
 __RCVD_IN_IADB
