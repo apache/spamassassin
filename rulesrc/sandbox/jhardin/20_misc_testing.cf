@@ -714,5 +714,11 @@ tflags      __SUBJ_BROKEN_WORD     multiple
 meta        SUBJ_BROKEN_WORDS      __SUBJ_BROKEN_WORD > 2
 describe    SUBJ_BROKEN_WORDS      Subject contains odd word breaks
 
+# felicity TVD_SUBJ_NUM_OBFU as subrule
+header      __TVD_SUBJ_NUM_OBFU    Subject =~ /[a-z]{3,}\d+[a-z]{2,}/i
+meta        SUBJ_BRKN_WORDNUMS     __SUBJ_BROKEN_WORD && __TVD_SUBJ_NUM_OBFU
+describe    SUBJ_BRKN_WORDNUMS     Subject contains odd word breaks and numbers
+
+meta        TVD_SUBJ_NUM_OBFU_MINFP   __TVD_SUBJ_NUM_OBFU && !__RP_MATCHES_RCVD && !__RCD_RDNS_MAIL_MESSY && !__VIA_ML && !__ISO_2022_JP_DELIM
 
 
