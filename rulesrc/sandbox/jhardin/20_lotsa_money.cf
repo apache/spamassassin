@@ -151,7 +151,7 @@ body     __NEXT_OF_KIN    /\bnext[-\s]of[-\s]kin\b/i
 body     __EX_CUSTOMER    /\b(?:(?:dead|deceased|late|verstorbenen)\s(?:[ck]lient|customer|ac+ount|invest[eo]r|beneficiary|mr\.|kunde|engr?\.?)|titulaire\sdu\scompte\sest\s(?:d[\xe9]c[\xe9]d[\xe9]|d[\xc3][\xa9]c[\xc3][\xa9]d[\xc3][\xa9])|invest[eo]r\sdied|[\xe9]tranger\sd[\xe9]c[\xe9]d[\xe9]|(?:[ck]lient|customer|ac+ount|invest[eo]r|beneficiary|mr\.|kunde|engr?\.?)\s(?:[a-z]{1,10}\s)?(?:dead|deceased|verstorbenen))/i
 body     __DECEASED       /\b(?:the|my|der|du|le)\s(?:deceased|late|verstorbenen|d[\xe9]funt|d[\xc3][\xa9]nt)\b/i
 body     __SURVIVORS      /\b(?:widow|son|daughter|husband|wife|brother|sister|attorney)\s(?:of|to)\s(?:the\s)?late\s\w+\b/i
-body     __DEAD_PARENT    /\bmy\s(?:deceased|dead)\s(?:father|mother)/i
+body     __DEAD_PARENT    /\bmy\s(?:(?:deceased|dead)\s(?:father|mother)|(?:father|mother)(?:'?s)?\s(?:death|died|murder|was\s(?:killed|murdered|poisoned)))/i
 body     __DORMANT_ACCT   /\b(?:(?:dormant|abandoned|left\s?over)\s(?:account|fund|transaction|sum|deposit)|fonds\sdorment)/i
 body     __WILL_LEGAL     /\b(?:codicil|last\stestament|probate|executor|intestate|bequest|mandamus)\b/i
 body     __EARLY_DEMISE   /\buntimely\sdeath\b/i
@@ -169,7 +169,7 @@ describe DECEASED_NO_ML   Dead not via mailing list
 body     __WIRE_XFR       /\b(?:wire|telegraph(?:ic)?|bank)\s?transfer/i
 body     __TRUSTED_CHECK  /\b(?:cashier'?s?|certified)\sche(?:ck|que)/i
 body     __BANK_DRAFT     /\bbank\sdraft/i
-body     __MOVE_MONEY     /\b(?:(?:receive|re-?profile|repatriate|rapatrier|secure|r[\xe9]clamation|possession|virer)\s(?:th(?:e|is)|das|sur ce|de ces|cet)|re-?profiling)\s(?:proceeds|funds?|money|balance|account|geld|compte|fonds|argent)\b/i
+body     __MOVE_MONEY     /\b(?:(?:receive|re-?profile|repatriate|rapatrier|secure|r[\xe9]clamation|possession|virer)\s(?:th(?:e(?:se)?|is)|das|sur ce|de ces|cet)|re-?profiling)\s(?:proceeds|funds?|money|balance|account|g[eo]ld|compte|fonds|argent)\b/i
 meta     __XFER_MONEY     (__WIRE_XFR || __TRUSTED_CHECK || __BANK_DRAFT || __MOVE_MONEY)
 
 body     __INTL_BANK      /\b(?:international\s(?:\w+\s)?bank|banque\sinternationale)\b/i
