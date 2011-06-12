@@ -711,12 +711,13 @@ meta        TVD_SPACE_RATIO_MINFP  __TVD_SPACE_RATIO && !__OBFUSCATING_COMMENT_B
 # sample from users list:   Subject: Sta ffWork sFastToSen dTab le tsGood s
 header      __SUBJ_BROKEN_WORD     Subject =~ /\s(?!i[PT])[a-z]{1,3}[A-Z][a-z]{2}/
 tflags      __SUBJ_BROKEN_WORD     multiple
-meta        SUBJ_BROKEN_WORDS      __SUBJ_BROKEN_WORD > 2
+meta        SUBJ_BROKEN_WORDS      __SUBJ_BROKEN_WORD > 1
 describe    SUBJ_BROKEN_WORDS      Subject contains odd word breaks
 
 # felicity TVD_SUBJ_NUM_OBFU as subrule
 header      __TVD_SUBJ_NUM_OBFU    Subject =~ /[a-z]{3,}\d+[a-z]{2,}/i
-meta        SUBJ_BRKN_WORDNUMS     __SUBJ_BROKEN_WORD && __TVD_SUBJ_NUM_OBFU
+meta        __SUBJ_BRKN_WORDNUMS   __SUBJ_BROKEN_WORD && __TVD_SUBJ_NUM_OBFU
+meta        SUBJ_BRKN_WORDNUMS     __SUBJ_BRKN_WORDNUMS && !DKIM_SIGNED
 describe    SUBJ_BRKN_WORDNUMS     Subject contains odd word breaks and numbers
 
 meta        TVD_SUBJ_NUM_OBFU_MINFP   __TVD_SUBJ_NUM_OBFU && !__RP_MATCHES_RCVD && !__RCD_RDNS_MAIL_MESSY && !__VIA_ML && !__ISO_2022_JP_DELIM
