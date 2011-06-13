@@ -1803,7 +1803,7 @@ sub get {
 # The goals are to find URIs in plain text spam that are intended to be clicked on or copy/pasted, but
 # ignore random strings that might look like URIs, for example in uuencoded files, and to ignore
 # URIs that spammers might seed in spam in ways not visible or clickable to add work to spam filters.
-# When we extract a domain and look it up in an RBL, an FP on decding that the text is a URI is not much
+# When we extract a domain and look it up in an RBL, an FP on deciding that the text is a URI is not much
 # of a problem, as the only cost is an extra RBL lookup. The same FP is worse if the URI is used in matching rule
 # because it could lead to a rule FP, as in bug 5780 with WIERD_PORT matching random uuencoded strings.
 # The principles of the following code are 1) if ThunderBird or Outlook Express would linkify a string,

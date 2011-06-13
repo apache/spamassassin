@@ -28,8 +28,8 @@ AskDNS - form a DNS query using tag values, and look up the DNSxL lists
 
 Using a DNS query template as specified in a parameter of a askdns rule,
 the plugin replaces tag names as found in the template with their values
-and launches DNS queries, as soon as tag values become available. When DNS
-responses trickle in, filters them according the requested DNS resource
+and launches DNS queries as soon as tag values become available. When DNS
+responses trickle in, filters them according to the requested DNS resource
 record type and optional subrule filtering expression, yielding a rule hit
 if a response meets filtering conditions.
 

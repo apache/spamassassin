@@ -446,7 +446,7 @@ sub parsed_metadata {
       if ($skip_domains->{$domain}) {
         dbg("uridnsbl: domain $domain in skip list");
       } else {
-        # use hostname as a key, and drag along the stipped domain name part
+        # use hostname as a key, and drag along the stripped domain name part
         $uri_ordered[$entry]->{$host} = $domain;
       }
     }
