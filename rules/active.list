@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus-trap darxus grenier hege jarif llanga wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1 zmi; day 2: bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus-trap darxus dos grenier hege jarif kgolding llanga wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1 zmi; day 3: bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus-trap darxus dos grenier hege jarif kgolding llanga wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1 zmi
+# with results from: day 1: bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus-trap darxus dos grenier hege jarif kgolding llanga wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1 zmi; day 2: bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus-trap darxus dos grenier hege jarif kgolding llanga wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1 zmi; day 3: bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus-trap darxus dos grenier hege jarif kgolding llanga wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1 zmi
 
 # tflags 
 ADVANCE_FEE_2_NEW_FORM
@@ -194,13 +194,13 @@ ENV_AND_HDR_SPF_MATCH
 FAKE_REPLY_A1
 
 # good enough
-FAKE_REPLY_B
-
-# good enough
 FB_ACHIEVE_BACH
 
 # good enough
 FB_CIALIS_LEO3
+
+# good enough
+FB_GET_MEDS
 
 # good enough
 FB_GREAT_BEST_SEX
@@ -219,9 +219,6 @@ FB_REPLICA_ROLEX
 
 # good enough
 FB_SOFTTABS
-
-# good enough
-FB_STAMINA_IN_BED
 
 # good enough
 FB_YOUR_REFILL
@@ -252,9 +249,6 @@ FH_HELO_EQ_D_D_D_D
 
 # good enough
 FH_HOST_EQ_DYNAMICIP
-
-# good enough
-FH_HOST_EQ_PACBELL_D
 
 # tflags 
 FILL_THIS_FORM
@@ -310,6 +304,9 @@ FROM_LOCAL_NOVOWEL
 # good enough
 FROM_MISSPACED
 
+# tflags net
+FROM_MISSP_DKIM
+
 # good enough
 FROM_MISSP_DYNIP
 
@@ -356,6 +353,9 @@ FRT_HEALTH
 FRT_PHARMAC
 
 # good enough
+FRT_ROLEX
+
+# good enough
 FR_DOT_FEVER_5
 
 # good enough
@@ -396,6 +396,9 @@ FSL_XM_419
 
 # good enough
 FS_GET_LAID
+
+# good enough
+FS_LARGE_PERCENT2
 
 # good enough
 FS_MAKE_MONEY
@@ -463,17 +466,11 @@ HASHCASH_HIGH
 # good enough
 HDRS_LCASE_1K
 
-# good enough
-HDRS_LCASE_IMGONLY
-
 # tflags userconf
 HEAD_LONG
 
 # good enough
 HELO_LH_HOME
-
-# good enough
-HELO_LOCALHOST
 
 # good enough
 HELO_NO_DOMAIN
@@ -489,6 +486,9 @@ HK_NAME_FM_MR_MRS
 
 # good enough
 HK_PNIS
+
+# good enough
+HK_RANDOM_ENVFROM
 
 # good enough
 HK_RANDOM_FROM
@@ -603,6 +603,9 @@ NULL_IN_BODY
 
 # good enough
 OBFU_ATTACH_MISSP
+
+# tflags 
+OBFU_JVSCR_ESC
 
 # tflags 
 OBFU_TEXT_ATTACH
@@ -815,9 +818,6 @@ SB_GIF_AND_NO_URIS
 SHARE_50_50
 
 # good enough
-SHORT_HELO_AND_INLINE_IMAGE
-
-# good enough
 SINGLE_HEADER_2K
 
 # good enough
@@ -855,6 +855,9 @@ SPF_SOFTFAIL
 
 # good enough
 STOCK_IMG_CTYPE
+
+# good enough
+STOCK_IMG_HDR_FROM
 
 # good enough
 STYLE_GIBBERISH
@@ -955,14 +958,29 @@ TVD_SPACE_RATIO_MINFP
 # good enough
 TVD_VISIT_PHARMA
 
-# tflags net
-FROM_MISSP_DKIM
+# good enough
+FSL_NEW_HELO_USER
 
 # good enough
-FS_SILDENAFIL
+HDRS_MISSP
 
-# tflags 
-OBFU_JVSCR_ESC
+# good enough
+HK_SCAM_N3
+
+# good enough
+MONEY_FORM
+
+# good enough
+S25R_4
+
+# good enough
+SINGLE_HEADER_5K
+
+# good enough
+SUBJ_BRKN_WORDNUMS
+
+# good enough
+TVD_SUBJ_NUM_OBFU_MINFP
 
 # tflags userconf
 UNPARSEABLE_RELAY
@@ -1049,9 +1067,6 @@ USER_IN_WHITELIST
 USER_IN_WHITELIST_TO
 
 # good enough
-XMAILER_MIMEOLE_OL_07794
-
-# good enough
 XMAILER_MIMEOLE_OL_09BB4
 
 # good enough
@@ -1073,9 +1088,6 @@ XMAILER_MIMEOLE_OL_3D61D
 XMAILER_MIMEOLE_OL_4B815
 
 # good enough
-XMAILER_MIMEOLE_OL_4BF4C
-
-# good enough
 XMAILER_MIMEOLE_OL_7533E
 
 # good enough
@@ -1091,7 +1103,7 @@ XMAILER_MIMEOLE_OL_8627E
 XMAILER_MIMEOLE_OL_91287
 
 # good enough
-XMAILER_MIMEOLE_OL_B4B40
+XMAILER_MIMEOLE_OL_ADFF7
 
 # good enough
 XMAILER_MIMEOLE_OL_CAC8F
