@@ -97,14 +97,23 @@ and B is (xx,yy,zz), will result in queries: 11.xx.example.11.com,
 22.xx.example.22.com, 11.yy.example.11.com, 22.yy.example.22.com,
 11.zz.example.11.com, 22.zz.example.22.com .
 
-A parameter following the query template is a DNS resource record (RR)
-type. A DNS result may bring resource records of multiple types, but only
-those resource records matching the type specified in a rule are considered,
-returned resource records with non-matching types are ignored for this rule.
-Currently the RR type parameter determines the DNS query type as well as a
-filter for the resulting RR types, although in future similar queries could
-be combined, launching a query of type 'ANY'. Currently allowed RR types
-are: A, AAAA, MX, TXT, PTR, NS, SOA, CNAME, HINFO, MINFO, WKS, SRV, SPF.
+A parameter rr_type following the query template is a comma-separated list
+of expected DNS resource record (RR) types. Missing rr_type parameter implies
+an 'A'. A DNS result may bring resource records of multiple types, but only
+resource records of a type found in the rr_type parameter list are considered,
+other resource records found in the answer section of a DNS reply are ignored
+for this rule. A value ANY in the rr_type parameter list matches any resource
+record type. An empty DNS answer section does not match ANY.
+
+The rr_type parameter not only provides a filter for RR types found in
+the DNS answer, but also determines the DNS query type. If only a single
+RR type is specified in the parameter (e.g. TXT), than this is also the RR
+type of a query. When more than one RR type is specified (e.g. A,AAAA,TXT)
+or if ANY is specified, then the DNS query type will be ANY and the rr_type
+parameter will only act as a filter on a result.
+
+Currently allowed RR types in the rr_type parameter are: ANY, A, AAAA, MX,
+TXT, PTR, NS, SOA, CNAME, HINFO, MINFO, WKS, SRV, SPF.
 
 The last optional parameter of a rule is a filtering expression, a.k.a. a
 subrule. Its function is much like the subrule in URIDNSBL plugin rules,
@@ -294,14 +303,19 @@ sub set_config {
       if (!defined $value || $value =~ /^$/) {
         return $Mail::SpamAssassin::Conf::MISSING_REQUIRED_VALUE;
       } elsif ($value !~ /^ (\S+) \s+ (\S+)
-                            (?: \s+ (A|AAAA|MX|TXT|PTR|NS|SOA|CNAME|
-                                     HINFO|MINFO|WKS|SRV|SPF)
+                            (?: \s+ ([A-Za-z0-9,]+)
                                 (?: \s+ (.*?) )?  )? \s* $/xs) {
         return $Mail::SpamAssassin::Conf::INVALID_VALUE;
       } else {
         my($rulename,$query_template,$query_type,$subtest) = ($1,$2,$3,$4);
         $query_type = 'A' if !defined $query_type;
         $query_type = uc $query_type;
+        my @answer_types = split(/,/, $query_type);
+        if (grep(!/^(?:ANY|A|AAAA|MX|TXT|PTR|NS|SOA|CNAME|
+                       HINFO|MINFO|WKS|SRV|SPF)\z/x, @answer_types)) {
+          return $Mail::SpamAssassin::Conf::INVALID_VALUE;
+        }
+        $query_type = 'ANY' if @answer_types > 1 || $answer_types[0] eq 'ANY';
         if (defined $subtest) {
           $subtest = parse_and_canonicalize_subtest($subtest);
           defined $subtest or return $Mail::SpamAssassin::Conf::INVALID_VALUE;
@@ -317,7 +331,10 @@ sub set_config {
         my $query_template_key = $query_type . ':' . $query_template;
 
         $self->{askdns}{$depends_on_tags}{$query_template_key} ||=
-          { query => $query_template, type => $query_type, rules => {} };
+          { query => $query_template, rules => {}, q_type => $query_type,
+            a_types =>  # optimization: undef means "same as q_type"
+              @answer_types == 1 && $answer_types[0] eq $query_type ? undef
+                                                           : \@answer_types };
         $self->{askdns}{$depends_on_tags}{$query_template_key}{rules}{$rulename}
           = $subtest;
       # dbg("askdns: rule: %s, config dep: %s, domkey: %s, subtest: %s",
@@ -383,19 +400,22 @@ sub launch_queries {
   # and launch DNS queries
   while ( my($query_template_key, $struct) =
             each %{$conf->{askdns}{$depends_on_tags}} ) {
-    my($query_template, $query_type, $rules) = @$struct{qw(query type rules)};
+    my($query_template, $query_type, $answer_types_ref, $rules) =
+      @$struct{qw(query q_type a_types rules)};
 
     my @rulenames = keys %$rules;
     if (grep($conf->{scores}->{$_}, @rulenames)) {
       dbg("askdns: query template %s, type %s, rules: %s",
-          $query_template, $query_type, join(', ', @rulenames));
+          $query_template,
+          !$answer_types_ref ? $query_type
+            : $query_type.'/'.join(',',@$answer_types_ref),
+          join(', ', @rulenames));
     } else {
       dbg("askdns: query template %s, type %s, all rules disabled: %s",
           $query_template, $query_type, join(', ', @rulenames));
       next;
     }
 
-    local $1;
     # collect all tag names from a template, each may occur more than once
     my @templ_tags = $query_template =~ /_([A-Z][A-Z0-9]*)_/gs;
 
@@ -412,7 +432,7 @@ sub launch_queries {
       $templ_vals{$t} = [ grep(!$seen{$_}++, split(' ',$tags{$t})) ];
     }
 
-    # count through all tag values
+    # count through all tag value tuples
     my @digit = (0) x @templ_tags;  # counting accumulator
 OUTER:
     for (;;) {
@@ -421,22 +441,27 @@ OUTER:
         my $t = $templ_tags[$j];
         $current_tag_val{$t} = $templ_vals{$t}[$digit[$j]];
       }
+      local $1;
       my $query_domain = $query_template;
-      $query_domain =~ s{_([A-Z][A-Z0-9]*)_}{$current_tag_val{$1}}g;
+      $query_domain =~ s{_([A-Z][A-Z0-9]*)_}
+                        { defined $current_tag_val{$1} ? $current_tag_val{$1}
+                                                       : '' }ge;
 
       # the $dnskey identifies this query in AsyncLoop's pending_lookups
       my $dnskey = join(':', 'askdns', $query_type, $query_domain);
       dbg("askdns: expanded query %s, dns key %s", $query_domain, $dnskey);
 
-      if ($pms->{async}->get_lookup($dnskey)) {  # already underway?
+      if ($query_domain eq '') {
+        # ignore, just in case
+      } elsif ($pms->{async}->get_lookup($dnskey)) {  # already underway?
         warn "askdns: such lookup has already been issued: ".$dnskey;
       } else {
         if (!exists $pms->{askdns_map_dnskey_to_rules}{$dnskey}) {
           $pms->{askdns_map_dnskey_to_rules}{$dnskey} =
-             [ [$query_type, $rules] ];
+             [ [$query_type, $answer_types_ref, $rules] ];
         } else {
           push(@{$pms->{askdns_map_dnskey_to_rules}{$dnskey}},
-               [$query_type, $rules] );
+               [$query_type, $answer_types_ref, $rules] );
         }
         if (exists $pms->{askdns_dnskey_to_response}{$dnskey}) {
           # answer already available by some earlier query, or query underway
@@ -524,6 +549,7 @@ sub process_response_packet {
         }
       }
       # decode DNS presentation format as returned by Net::DNS
+      local $1;
       $rr_rdatastr =~ s/\\([0-9]{3}|.)/length($1)==1 ? $1 : chr($1)/gse;
     # dbg("askdns: received rr type %s, data: %s", $rr_type, $rr_rdatastr);
     }
@@ -531,8 +557,10 @@ sub process_response_packet {
     my $j = 0;
     for my $q_tuple (!ref $queries_ref ? () : @$queries_ref) {
       next  if !$q_tuple;
-      my($query_type, $rules) = @$q_tuple;
+      my($query_type, $answer_types_ref, $rules) = @$q_tuple;
+
       next  if $query_type ne $qtype;
+      $answer_types_ref = [$query_type]  if !defined $answer_types_ref;
 
       # mark rule as done
       $pms->{askdns_map_dnskey_to_rules}{$dnskey}[$j++] = undef;
@@ -542,8 +570,10 @@ sub process_response_packet {
         local($1,$2,$3);
         if (ref $subtest eq 'HASH') {  # a list of DNS rcodes (as hash keys)
           $match = 1  if $subtest->{$rcode};
-        } elsif ($rcode != 0 || $rr_type ne $query_type) {
-          # skip remaining tests on DNS error or wrong RR type
+        } elsif ($rcode != 0) {
+          # skip remaining tests on DNS error
+        } elsif (!grep($_ eq 'ANY' || $_ eq $rr_type, @$answer_types_ref) ) {
+          # skip remaining tests on wrong RR type
         } elsif (!defined $subtest) {
           $match = 1;  # any valid response of the requested RR type matches
         } elsif (ref $subtest eq 'Regexp') {  # a regular expression

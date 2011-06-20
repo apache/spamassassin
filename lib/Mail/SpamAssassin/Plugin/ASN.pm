@@ -419,11 +419,13 @@ sub process_dns_result {
     $pms->{msg}->put_metadata('X-ASN', join(' ',@asn_tag_data));
     my $prefix = $pms->{conf}->{asn_prefix};
     if (defined $prefix && $prefix ne '') { s/^/$prefix/ for @asn_tag_data }
-    $pms->set_tag($asn_tag, join(' ',@asn_tag_data));
+    $pms->set_tag($asn_tag,
+                  @asn_tag_data == 1 ? $asn_tag_data[0] : \@asn_tag_data);
   }
   if ($any_route_updates && @route_tag_data) {
     $pms->{msg}->put_metadata('X-ASN-Route', join(' ',@route_tag_data));
-    $pms->set_tag($route_tag, join(' ',@route_tag_data));
+    $pms->set_tag($route_tag,
+                  @route_tag_data == 1 ? $route_tag_data[0] : \@route_tag_data);
   }
 }
 

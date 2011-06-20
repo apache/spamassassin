@@ -482,6 +482,13 @@ sub parsed_metadata {
     }
   }
 
+  my @hnames = keys %hostlist;
+  $scanner->set_tag('URIHOSTS',
+                    @hnames == 1 ? $hnames[0] : \@hnames)  if @hnames;
+  my @dnames = values %hostlist;
+  $scanner->set_tag('URIDOMAINS',
+                    @dnames == 1 ? $dnames[0] : \@dnames)  if @dnames;
+
   # and query
   $self->query_hosts_or_domains($scanner, \%hostlist);
 

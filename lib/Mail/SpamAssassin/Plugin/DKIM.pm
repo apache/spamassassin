@@ -848,12 +848,10 @@ sub _check_dkim_signature {
                             map($_->identity, @valid_signatures));
       @domain_list =   grep(defined $_ && $_ ne '' && !$seen2{$_}++,
                             map($_->domain, @valid_signatures));
-      $pms->set_tag('DKIMIDENTITY', !@identity_list ? ''
-                                  :  @identity_list == 1 ? $identity_list[0]
-                                  : \@identity_list);
-      $pms->set_tag('DKIMDOMAIN',   !@domain_list ? ''
-                                  :  @domain_list == 1 ? $domain_list[0]
-                                  : \@domain_list);
+      $pms->set_tag('DKIMIDENTITY',
+                    @identity_list == 1 ? $identity_list[0] : \@identity_list);
+      $pms->set_tag('DKIMDOMAIN',
+                    @domain_list == 1   ? $domain_list[0]   : \@domain_list);
     } elsif (@signatures) {
       $pms->{dkim_signed} = 1;
       my $sig = $signatures[0];
