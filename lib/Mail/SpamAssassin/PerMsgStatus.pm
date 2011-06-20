@@ -1889,6 +1889,7 @@ sub get_uri_list {
   }
 
   $self->{uri_list} = \@uris;
+# $self->set_tag('URILIST', @uris == 1 ? $uris[0] : \@uris)  if @uris;
 
   return @uris;
 }
