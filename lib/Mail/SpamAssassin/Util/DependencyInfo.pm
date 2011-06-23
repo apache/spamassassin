@@ -35,7 +35,7 @@ use bytes;
 use re 'taint';
 
 use vars qw (
-  @MODULES @OPTIONAL_MODULES $EXIT_STATUS $WARNINGS
+  @MODULES @OPTIONAL_MODULES $EXIT_STATUS $WARNINGS @OPTIONAL_BINARIES @BINARIES
 );
 
 my $have_sha  = eval { require Digest::SHA  };
@@ -238,6 +238,21 @@ $have_sha ? {
 },
 );
 
+my @BINARIES = ();
+
+my @OPTIONAL_BINARIES = (
+{
+  binary => 'gpg',
+  version => '0',
+  recommended_min_version => '1.0.6',
+  version_check_params => '--version',
+  version_check_regex => 'gpg \(GnuPG\) ([\d\.]*)',
+  desc => 'The "sa-update" program requires this executable to verify  
+  encryption signatures.  It is not recommended, but you can use 
+  "sa-update" with the --no-gpg to skip the verification. ',
+}
+);
+
 ###########################################################################
 
 =head1 METHODS
@@ -292,12 +307,194 @@ sub long_diagnostics {
     try_module(0, $moddef, \$summary);
   }
 
+  print "checking binary dependencies and their versions...\n";
+
+  foreach my $bindef (@BINARIES) {
+    try_binary(0, $bindef, \$summary);
+  }
+
+  foreach my $bindef (@OPTIONAL_BINARIES) {
+    try_binary(0, $bindef, \$summary);
+  } 
+
+  print "dependency check complete...\n\n";
+
   print $summary;
   if ($EXIT_STATUS || $WARNINGS) {
     print "\nwarning: some functionality may not be available,\n".
             "please read the above report before continuing!\n\n";
   }
   return $EXIT_STATUS;
+}
+
+
+sub try_binary {
+  my ($required, $bindef, $summref) = @_;
+
+  my $binary_version;
+  my $installed = 0;
+  my $version_meets_required = 0;
+  my $version_meets_recommended = 0;
+  my $required_version = $bindef->{version};
+  my $recommended_version = $bindef->{recommended_min_version};
+  my $errtype;
+  my ($command, $output);
+
+
+  # only viable on unix based systems, so exclude windows, etc. here
+  if ($^O =~ /^(mswin|dos|os2)/i) {
+    $$summref .= "Warning: Unable to test on this platform for the optional \"$bindef->{'binary'}\" binary\n";
+    $errtype = 'is unknown for this platform';
+  } else {
+    $command = "which $bindef->{'binary'} 2>&1";
+    $output = `$command`;
+
+    if ($output =~ /which: no $bindef->{'binary'} in/i) {
+      $installed = 0;
+    } else {
+      #COMMAND APPEARS TO EXIST
+      $command = $output;
+      chomp ($command);
+
+      $installed = 1;
+    }
+  }
+
+
+  if ($installed) {
+    #SANITIZE THE RETURNED COMMAND JUST IN CASE
+    $command =~ s/[^a-z0-9\/]//ig;
+
+    #GET THE VERSION
+    $command .= " $bindef->{'version_check_params'} 2>&1";
+    $output = `$command`;
+
+    $output =~ m/$bindef->{'version_check_regex'}/;
+    $binary_version = $1;
+
+    #TEST IF VERSION IS GREATER THAN REQUIRED
+    if (defined $required_version) {
+      $version_meets_required = test_version($binary_version, $required_version);
+    }
+    if (defined $recommended_version) {
+      $version_meets_recommended = test_version($binary_version, $recommended_version);
+    }
+  }
+
+  unless (defined $errtype) {
+    if (!$installed) {
+      $errtype = "is not installed";
+      if ($required_version || $recommended_version) {
+        $errtype .= ",\n";
+        if ($required_version) {
+          $errtype .= "minimum required version is $required_version";
+        }
+        if ($recommended_version) {
+          $errtype .= ", "  if $required_version;
+          $errtype .= "recommended version is $recommended_version or higher";
+        }
+      }
+      $errtype .= ".";
+    } elsif (!$version_meets_required) {
+      $errtype = "is installed ($binary_version),\nbut is below the ".
+                 "minimum required version $required_version,\n".
+                 "some functionality will not be available.";
+      $errtype .= "\nRecommended version is $recommended_version or higher."
+        if $recommended_version;
+    } elsif (!$version_meets_recommended) {
+      $errtype = "is installed ($binary_version),\nbut is below the ".
+                 "recommended version $recommended_version,\n".
+                 "some functionality may not be available,\n".
+                 "and some of the tests in the SpamAssassin test suite may fail.";
+    }
+  }
+
+  if (defined $errtype) {
+    my $pretty_name = $bindef->{alt_name} || $bindef->{binary};
+    my $desc = $bindef->{desc}; $desc =~ s/^(\S)/  $1/gm;
+    my $pretty_min_version =
+      !$required_version ? '' : "(version $required_version) ";
+
+    print "\n", ("*" x 75), "\n";
+
+    if ($errtype =~ /unknown/i) {
+      $WARNINGS++;
+      print "NOTE: the optional $pretty_name binary $errtype\n";
+      $$summref .= "optional binary status could not be determined: $pretty_name\n";
+    } 
+    elsif ($required) {
+      $EXIT_STATUS++;
+      warn "\aERROR: the required $pretty_name binary $errtype\n";
+      if (!$installed) {
+        $$summref .= "REQUIRED binary missing: $pretty_name\n";
+      } elsif (!$version_meets_required) {
+        $$summref .= "REQUIRED binary out of date: $pretty_name\n";
+      } else {
+        $$summref .= "REQUIRED binary older than recommended: $pretty_name\n";
+      }
+    }
+    else {
+      $WARNINGS++;
+      print "NOTE: the optional $pretty_name binary $errtype\n";
+      if (!$installed) {
+        $$summref .= "optional binary missing: $pretty_name\n";
+      } elsif (!$version_meets_required) {
+        $$summref .= "optional binary out of date: $pretty_name\n";
+      } else {
+        $$summref .= "optional binary older than recommended: $pretty_name\n";
+      }
+    }
+
+    print "\n".$desc."\n\n";
+  }
+}
+
+sub test_version {
+  #returns 1 if version1 is equal or greater than $version2
+  #returns -1 for an unknown test;
+  my ($version1, $version2) = @_;
+
+  my (@version1, @version2);
+  my ($count1, $count2, $i, $fail);
+
+  #CAN'T TEST NON NUMERIC VERSIONS
+  if ($version1 =~ /[^0-9\.]/ or $version2 =~ /[^0-9\.]/) {
+    return -1;
+  }
+
+  $fail = 0;
+
+  #check if the numbers have the same number of sub versions
+  $_ = $version1;
+  $count1 = (s/\.//g);
+
+  #check if the numbers have the same number of sub versions
+  $_ = $version2;
+  $count2 = (s/\.//g);
+
+  if ($count1 != $count2) {
+    #NEED TO ADD .0's to balance the two
+    if ($count1 > $count2) {
+      for ($i = 0; $i < ($count1-$count2); $i++) {
+        $version2 .= '.0';
+      }
+    } else {
+      for ($i = 0; $i < ($count2-$count1); $i++) {
+        $version1 .= '.0';
+      }
+    }
+  }
+
+  @version1 = split(/\./,$version1);
+  @version2 = split(/\./,$version2);
+
+  for ($i = 0; $i < scalar(@version1); $i++) {
+    if ($version1[$i] < $version2[$i]) {
+      $fail++;
+    }
+  }
+
+  return ($fail == 0);
 }
 
 sub try_module {

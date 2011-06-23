@@ -161,6 +161,7 @@ GetOptions(
 
   # backward compatibility
   'usegpg'				=> \$GPG_ENABLED,
+
 ) or print_usage_and_exit();
 
 if ( defined $opt{'help'} ) {               
@@ -170,7 +171,6 @@ if ( defined $opt{'version'} ) {
   print_version();
   exit(0);
 }
-
 
 # Figure out what version of SpamAssassin we're using, and also figure out the
 # reverse of it for the DNS query.  Handle x.yyyzzz as well as x.yz.
@@ -215,6 +215,15 @@ if (defined $opt{'updatedir'}) {
 else {
   $opt{'updatedir'} = $SA->sed_path('__local_state_dir__/__version__');
 }
+
+
+# check only disabled gpg
+# https://issues.apache.org/SpamAssassin/show_bug.cgi?id=5854
+if ( defined $opt{'checkonly'}) {
+  $GPG_ENABLED=0;
+  dbg("gpg: Disabling gpg requirement due to checkonly flag.");
+}
+
 
 dbg("generic: sa-update version $VERSION");
 dbg("generic: using update directory: $opt{'updatedir'}");
@@ -295,7 +304,7 @@ if ($GPG_ENABLED || $opt{'import'}) {
     }
   }
   else {
-    die "error: gpg required but not found!\n";
+    die "error: gpg required but not found!  It is not recommended, but you can use \"sa-update\" with the --no-gpg to skip the verification. \n";
   }
 
   # GPG was found, and we've been asked to import a key only
