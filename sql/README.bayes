@@ -17,26 +17,36 @@ The directives required to turn on the SQL based bayesian storage are:
 bayes_store_module		   Mail::SpamAssassin::BayesStore::SQL
 
 This directive is used by the Bayes module to determine which storage
-module should be used.  If not set it will default to:
+module should be used. If not set it will default to:
 Mail::SpamAssassin::BayesStore::DBM
 
-PostgreSQL users will want to use the PostgreSQL specific storage
-module:
-bayes_store_module               Mail::SpamAssassin::BayesStore::PgSQL
-This module provides a slightly different interface to makes better
-use of the resources that PostgreSQL offers.  In addition, please make
-sure that you follow the instructions below for loading the proper
-procedural language and installing the tables and stored procedure.
+The storage module Mail::SpamAssassin::BayesStore::SQL is an older generic
+SQL module which can be also be used with versions of MySQL which did not
+have support for an InnoDB engine and transactions. If choosing this module
+consider replacing the InnoDB engine with MyISAM (explicitly or defaulted)
+in the schema (files bayes_mysql.sql and awl_mysql.sql). Note that old
+versions of MySQL expect syntax TYPE=MyISAM instead of ENGINE=MyISAM,
+while newer versions throw a syntax error on TYPE and only allow ENGINE.
+In short: replace ENGINE=InnoDB with TYPE=MyISAM (or just leave it out)
+in the bayes_mysql.sql and awl_mysql.sql schemas if ENGINE=InnoDB is not
+accepted.
 
 There is also a MySQL specific storage driver available to provides a
 small boost in performance.  It requires version 4.1 or above of the
 MySQL database software to work properly.  In addition, it provides
-rollback on error functionality if you create your bayes database
-table using the InnoDB storage engine (ie s/MyISAM/InnoDB/ on the
-bayes_mysql.sql file).  WARNING: Using this module with a version of
-MySQL < 4.1 could have unexpected results.  To use the MySQL 4.1+
+rollback on error functionality if you create your bayes database table
+using the InnoDB storage engine. WARNING: Using this module with a version
+of MySQL < 4.1 could have unexpected results.  To use the MySQL 4.1+
 specific module set your bayes_store_module directive accordingly:
-bayes_store_module               Mail::SpamAssassin::BayesStore::MySQL
+  bayes_store_module               Mail::SpamAssassin::BayesStore::MySQL
+
+PostgreSQL users will want to use the PostgreSQL specific storage
+module:
+  bayes_store_module               Mail::SpamAssassin::BayesStore::PgSQL
+This module provides a slightly different interface to makes better
+use of the resources that PostgreSQL offers.  In addition, please make
+sure that you follow the instructions below for loading the proper
+procedural language and installing the tables and stored procedure.
 
 Additional configuration directives provided by BayesSQL:
 
