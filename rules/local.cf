@@ -82,14 +82,3 @@ ifplugin Mail::SpamAssassin::Plugin::Shortcircuit
 # shortcircuit BAYES_00                ham
 
 endif # Mail::SpamAssassin::Plugin::Shortcircuit
-
-#RULES DISABLED BY DEFAULT FOR ADMINISTRATOR CONSIDERATION
-
-# SPF_NONE - As discussed in Bug 6490, this rule allows you to penalize
-# senders for not implementing SPF. It is provided for the administrator
-# to enable and score at their own risk.
-# https://issues.apache.org/SpamAssassin/show_bug.cgi?id=6490
-#
-#header    SPF_NONE    eval:check_for_spf_none()
-#describe  SPF_NONE    SPF: sender SPF record missing
-#score     SPF_NONE    0.1
