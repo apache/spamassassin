@@ -700,7 +700,9 @@ rawbody     __GAPPY_HTML_01        m;</?[a-z]{1,6}(?:\s[^>]{0,40})?>(?:\s|=09){0
 rawbody     __GAPPY_HTML_02        m;\S(?:(?:\s|=09){4,80}(?!\d)[\w'()\#,.:!]{1,15}){7}(?:\s|=09){0,5}</?[a-z]{1,6}/?>;
 rawbody     __GAPPY_HTML_03        /^(?:=09){3,20}</m
 tflags      __GAPPY_HTML_03        multiple
-meta        __GAPPY_HTML           __MIME_HTML && (__GAPPY_HTML_01 || __GAPPY_HTML_02 || (__GAPPY_HTML_03 > 10))
+rawbody     __GAPPY_HTML_04        /^(?:=0A){4,20}/m
+tflags      __GAPPY_HTML_04        multiple
+meta        __GAPPY_HTML           __MIME_HTML && (__GAPPY_HTML_01 || __GAPPY_HTML_02 || (__GAPPY_HTML_03 > 10) || (__GAPPY_HTML_04 > 10))
 meta        GAPPY_HTML             __GAPPY_HTML && !__UNSUB_LINK
 describe    GAPPY_HTML             HTML body with much useless whitespace
 
