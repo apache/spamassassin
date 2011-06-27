@@ -36,18 +36,19 @@ score FILL_THIS_FORM           0.001
 #score ADVANCE_FEE_2_NEW_MONEY  0.50
 #score ADVANCE_FEE_2_NEW_FORM   0.75
 #score ADVANCE_FEE_3_NEW        0.50
-score ADVANCE_FEE_3_NEW_MONEY  1.00
+#score ADVANCE_FEE_3_NEW_MONEY  1.00
 #score ADVANCE_FEE_3_NEW_FORM   1.00
-score ADVANCE_FEE_4_NEW        1.00
-score ADVANCE_FEE_5_NEW        1.50
+#score ADVANCE_FEE_4_NEW        1.00
+#score ADVANCE_FEE_5_NEW        1.50
 
 # jhardin
 # metas using Advance Fee component rules
-score FORM_FRAUD_3             0.50
+# Commented out if GA is scoring reasonably
+#score FORM_FRAUD_3             0.50
 score FORM_FRAUD_5             0.50
 #score MONEY_FRAUD_3            1.00
-score MONEY_FRAUD_5            0.50
-score MONEY_FRAUD_8            1.00
+#score MONEY_FRAUD_5            0.50
+score MONEY_FRAUD_8            0.50
 
 # jhardin
 # misc rules
