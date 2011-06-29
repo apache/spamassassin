@@ -76,7 +76,9 @@ describe   TO_NO_BRKTS_NOTLIST      To: misformatted and not a mailing list
 
 ifplugin Mail::SpamAssassin::Plugin::FreeMail
 #  meta       TO_NO_BRKTS_FREEMAIL    __TO_NO_ARROWS_R && !__TO_UNDISCLOSED && (FREEMAIL_FROM || FREEMAIL_REPLYTO)
-  meta       TO_NO_BRKTS_FREEMAIL    __TO_NO_ARROWS_R && (FREEMAIL_FROM || FREEMAIL_REPLYTO)
+  meta       __TO_NO_BRKTS_FREEMAIL  __TO_NO_ARROWS_R && (FREEMAIL_FROM || FREEMAIL_REPLYTO)
+  meta       TO_NO_BRKTS_FREEMAIL    __TO_NO_BRKTS_FREEMAIL && !__TO_EQ_FROM_DOM
+  describe   TO_NO_BRKTS_FREEMAIL    To: misformatted and free email service
   #score      TO_NO_BRKTS_FREEMAIL    0.20
 endif
 
