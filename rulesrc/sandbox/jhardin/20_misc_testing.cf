@@ -107,7 +107,8 @@ describe       FROM_MISSP_REPLYTO    From misspaced, has Reply-To
 #score          TO_MISSPACED          0.25
 
 ifplugin Mail::SpamAssassin::Plugin::FreeMail
-  meta         FROM_MISSP_FREEMAIL   __FROM_RUNON && (FREEMAIL_FROM || FREEMAIL_REPLYTO)
+  meta         __FROM_MISSP_FREEMAIL __FROM_RUNON && (FREEMAIL_FROM || FREEMAIL_REPLYTO)
+  meta         FROM_MISSP_FREEMAIL   __FROM_MISSP_FREEMAIL && !__TO_EQ_FROM_DOM
   describe     FROM_MISSP_FREEMAIL   From misspaced + freemail provider
   score        FROM_MISSP_FREEMAIL   2.0
 endif
