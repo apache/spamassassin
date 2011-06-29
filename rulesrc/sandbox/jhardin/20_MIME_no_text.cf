@@ -11,11 +11,11 @@ ifplugin Mail::SpamAssassin::Plugin::MIMEHeader
   mimeheader  __ANY_TEXT_ATTACH Content-Type =~ /text\/\w+/i
 
   meta        MIME_NO_TEXT  (__CTYPE_MULTIPART_ANY && !__ANY_TEXT_ATTACH)
-  score       MIME_NO_TEXT  1.00
+  #score       MIME_NO_TEXT  1.00
   describe    MIME_NO_TEXT  No text body parts
 
   meta        MIME_PHP_NO_TEXT  (MIME_NO_TEXT && __XM_PHP)
-  score       MIME_PHP_NO_TEXT  2.00
+  #score       MIME_PHP_NO_TEXT  2.00
   describe    MIME_PHP_NO_TEXT  No text body parts, X-Mailer: PHP
 endif
 

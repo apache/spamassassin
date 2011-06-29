@@ -24,24 +24,24 @@ ifplugin Mail::SpamAssassin::Plugin::MIMEHeader
 
   mimeheader   OBFU_TEXT_ATTACH    Content-Type =~ m,application/octet-stream;.+\.txt\b,i
   describe     OBFU_TEXT_ATTACH    Text attachment with non-text MIME type
-  score        OBFU_TEXT_ATTACH    2.5
+  #score        OBFU_TEXT_ATTACH    2.5
   tflags       OBFU_TEXT_ATTACH    publish
 
   mimeheader   OBFU_DOC_ATTACH     Content-Type =~ m,application/octet-stream;.+\.(?:doc|rtf)\b,i
   describe     OBFU_DOC_ATTACH     MS Document attachment with generic MIME type
-  score        OBFU_DOC_ATTACH     0.25
+  #score        OBFU_DOC_ATTACH     0.25
 
   mimeheader   OBFU_PDF_ATTACH     Content-Type =~ m,application/octet-stream;.+\.pdf\b,i
   describe     OBFU_PDF_ATTACH     PDF attachment with generic MIME type
-  score        OBFU_PDF_ATTACH     0.25
+  #score        OBFU_PDF_ATTACH     0.25
 
   mimeheader   OBFU_JPG_ATTACH     Content-Type =~ m,application/octet-stream;.+\.jpe?g\b,i
   describe     OBFU_JPG_ATTACH     JPG attachment with generic MIME type
-  score        OBFU_JPG_ATTACH     1.50
+  #score        OBFU_JPG_ATTACH     1.50
 
   mimeheader   OBFU_GIF_ATTACH     Content-Type =~ m,application/octet-stream;.+\.gif\b,i
   describe     OBFU_GIF_ATTACH     GIF attachment with generic MIME type
-  score        OBFU_GIF_ATTACH     1.50
+  #score        OBFU_GIF_ATTACH     1.50
 
   meta         OBFU_ATTACH_MISSP   __FROM_RUNON && (OBFU_HTML_ATTACH || OBFU_TEXT_ATTACH || OBFU_DOC_ATTACH || OBFU_PDF_ATTACH || OBFU_JPG_ATTACH || OBFU_GIF_ATTACH)
   describe     OBFU_ATTACH_MISSP   Obfuscated attachment type and misspaced From
@@ -110,7 +110,7 @@ ifplugin Mail::SpamAssassin::Plugin::FreeMail
   meta         __FROM_MISSP_FREEMAIL __FROM_RUNON && (FREEMAIL_FROM || FREEMAIL_REPLYTO)
   meta         FROM_MISSP_FREEMAIL   __FROM_MISSP_FREEMAIL && !__TO_EQ_FROM_DOM
   describe     FROM_MISSP_FREEMAIL   From misspaced + freemail provider
-  score        FROM_MISSP_FREEMAIL   2.0
+  #score        FROM_MISSP_FREEMAIL   2.0
 endif
 
 meta           FROM_MISSP_MSFT       __FROM_RUNON && (__ANY_OUTLOOK_MUA || __HAS_MIMEOLE || __MIMEOLE_MS)

@@ -26,7 +26,7 @@ endif
 ifplugin Mail::SpamAssassin::Plugin::FreeMail
   meta     MONEY_FREEMAIL   LOTS_OF_MONEY && (FREEMAIL_FROM || FREEMAIL_REPLYTO)
   describe MONEY_FREEMAIL   Lots of money from someone using free email?
-  score    MONEY_FREEMAIL   0.5
+  #score    MONEY_FREEMAIL   0.5
   tflags   MONEY_FREEMAIL   nopublish
 endif
 

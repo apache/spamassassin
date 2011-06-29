@@ -59,7 +59,7 @@ ifplugin Mail::SpamAssassin::Plugin::ReplaceTags
   meta     __FILL_THIS_FORM_LONG          __FILL_THIS_FORM_LONG1 || __FILL_THIS_FORM_LONG2
   meta     FILL_THIS_FORM_LONG            __FILL_THIS_FORM_LONG && !__VIA_ML && !__DOS_HAS_LIST_UNSUB && !__THREADED
   describe FILL_THIS_FORM_LONG            Fill in a form with personal information
-  score    FILL_THIS_FORM_LONG            1.00
+  #score    FILL_THIS_FORM_LONG            1.00
 
   # 5+ fields that body paragraph processing didn't paste together
   body     __FILL_THIS_FORM_PARTIAL       /^\s*<FF_LNNO>?<FF_YOUR>(?:<FF_ALL><ANDOR>?){1,3}<FF_SUFFIX>(?:<FF_BLANK1>|(?:[-=_.,:;*\s]|=20){1,4}$)/im
@@ -85,7 +85,7 @@ ifplugin Mail::SpamAssassin::Plugin::ReplaceTags
   meta     __FILL_THIS_FORM_SHORT         !__FILL_THIS_FORM && (__FILL_THIS_FORM_SHORT1 || __FILL_THIS_FORM_SHORT2 || __FILL_THIS_FORM_PARTIAL > 2 || __FILL_THIS_FORM_PARTIAL_RAW > 2)
   meta     FILL_THIS_FORM_SHORT           __FILL_THIS_FORM_SHORT && !__VIA_ML && !__MSGID_JAVAMAIL
   describe FILL_THIS_FORM_SHORT           Fill in a short form with personal information
-  score    FILL_THIS_FORM_SHORT           0.25
+  #score    FILL_THIS_FORM_SHORT           0.25
 
   # Add to score if loan question is present
   body     __FILL_THIS_FORM_LOAN1         /<FF_YOUR><FF_L1><FF_SUFFIX>(?:<FF_BLANK1>|<FF_BLANK2>$)/i
@@ -93,7 +93,7 @@ ifplugin Mail::SpamAssassin::Plugin::ReplaceTags
   meta     __FILL_THIS_FORM_LOAN          __FILL_THIS_FORM && __FILL_THIS_FORM_LOAN1
   meta     FILL_THIS_FORM_LOAN            __FILL_THIS_FORM_LOAN && !__COMMENT_EXISTS && !__HTML_LINK_IMAGE
   describe FILL_THIS_FORM_LOAN            Answer loan question(s)
-  score    FILL_THIS_FORM_LOAN            0.50
+  #score    FILL_THIS_FORM_LOAN            0.50
 
   # Add to score if fraud/phishing question is present
   body     __FILL_THIS_FORM_FRAUD_PHISH1   /<FF_YOUR>(?:<FF_F1>|<FF_F2>|<FF_F3>|<FF_F4>|<FF_F5>)<FF_SUFFIX>(?:<FF_BLANK1>|<FF_BLANK2>$)/i
@@ -101,6 +101,6 @@ ifplugin Mail::SpamAssassin::Plugin::ReplaceTags
   meta     __FILL_THIS_FORM_FRAUD_PHISH   (__FILL_THIS_FORM || __FILL_THIS_FORM_SHORT) && __FILL_THIS_FORM_FRAUD_PHISH1
   meta     FILL_THIS_FORM_FRAUD_PHISH     __FILL_THIS_FORM_FRAUD_PHISH && !__UNSUB_LINK && !__SPOOFED_URL && !__DOS_LINK && !__CAN_HELP && !__VIA_ML
   describe FILL_THIS_FORM_FRAUD_PHISH     Answer suspicious question(s)
-  score    FILL_THIS_FORM_FRAUD_PHISH     1.50
+  #score    FILL_THIS_FORM_FRAUD_PHISH     1.50
 
 endif   # Mail::SpamAssassin::Plugin::ReplaceTags
