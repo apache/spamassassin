@@ -4,11 +4,6 @@ header          AXB_X_GOOGRP_DIRADD        X-Google-Loop =~ /^sub_directadd$/
 describe        AXB_X_GOOGRP_DIRADD        Google Groups: You've been added to spammy group?
 
 
-# 2011-06-10
-header          AXB_FORGED_ORIGIN255    X-Originating-IP =~ /\[255\.255\.255\.255\]/
-describe        AXB_FORGED_ORIGIN255    Forged Origin IP
-
-
 #2011-06-05
 header   AXB_XRCVD_EYOU_SEND    Received =~ /\(eyou send program\)/
 describe AXB_XRCVD_EYOU_SEND    fingerprint
@@ -30,14 +25,6 @@ header          AXB_HELO_HOME_UN        X-Spam-Relays-Untrusted =~ /^[^\]]+ helo
 describe        AXB_HELO_HOME_UN        HELO from home  - untrusted
 #score          AXB_HELO_HOME_UN        1.0
 
-
-# 2010-12-29
-header          __UA_MOZ5               User-Agent =~ /^Mozilla\/5/
-header          __UA_NIX                User-Agent =~ /(?:Macintosh|X11)/
-header          __UA_NT4                User-Agent =~ /U\; NT4\.0\;/
-meta            AXB_TRACK_MOZ           (__UA_MOZ5 && __UA_NIX && __UA_NT4)
-describe        AXB_TRACK_MOZ           MozTrack
-#score           AXB_TRACK_MOZ           1.5
 
 
 
