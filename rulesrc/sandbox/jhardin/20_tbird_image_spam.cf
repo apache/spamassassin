@@ -77,7 +77,7 @@ describe   TO_NO_BRKTS_NOTLIST      To: misformatted and not a mailing list
 ifplugin Mail::SpamAssassin::Plugin::FreeMail
 #  meta       TO_NO_BRKTS_FREEMAIL    __TO_NO_ARROWS_R && !__TO_UNDISCLOSED && (FREEMAIL_FROM || FREEMAIL_REPLYTO)
   meta       TO_NO_BRKTS_FREEMAIL    __TO_NO_ARROWS_R && (FREEMAIL_FROM || FREEMAIL_REPLYTO)
-  score      TO_NO_BRKTS_FREEMAIL    0.20
+  #score      TO_NO_BRKTS_FREEMAIL    0.20
 endif
 
 meta       __TO_NO_BRKTS_FROM_RUNON  __TO_NO_ARROWS_R && !__TO_UNDISCLOSED && __FROM_RUNON
@@ -107,7 +107,7 @@ ifplugin Mail::SpamAssassin::Plugin::ImageInfo
   meta       FORGED_TBIRD_IMG_SIZE   __FORGED_TBIRD_IMG && __ONE_IMG && __IMG_LE_300K
 
   describe   FORGED_TBIRD_IMG_SIZE   Likely forged Thunderbird image spam
-  score      FORGED_TBIRD_IMG_SIZE   0.8
+  #score      FORGED_TBIRD_IMG_SIZE   0.8
 endif
 
 # Try some combinations not related to tbird forgery
