@@ -426,8 +426,8 @@ sub _get_autolearn_points {
       }
     }
 
-    # ignore tests with 0 score in this scoreset
-    next if ($scores->{$test} == 0);
+    # ignore tests with 0 score (or undefined) in this scoreset
+    next if !$scores->{$test};
 
     # Go ahead and add points to the proper locations
     if (!$self->{conf}->maybe_header_only ($test)) {
@@ -1356,13 +1356,12 @@ sub _get_tag {
               my $arg = (shift || ",");
               my $line = '';
               foreach my $test (sort @{$self->{test_names_hit}}) {
-                if (!$line) {
-                  $line .= $test . "=" . $self->{conf}->{scores}->{$test};
-                } else {
-                  $line .= $arg . $test . "=" . $self->{conf}->{scores}->{$test};
-                }
+                my $score = $self->{conf}->{scores}->{$test};
+                $score = '0'  if !defined $score;
+                $line .= $arg  if $line ne '';
+                $line .= $test . "=" . $score;
               }
-              $line ? $line : 'none';
+              $line ne '' ? $line : 'none';
             },
 
             PREVIEW => sub { $self->get_content_preview() },
