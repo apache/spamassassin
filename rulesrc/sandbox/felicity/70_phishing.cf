@@ -104,18 +104,21 @@ endif
 
 # Look at subjects for phishing
 
-# 0.214   0.2574   0.0000    1.000   0.93    0.01  T_TVD_PH_SUBJ_ACCOUNTS_POST
-# 0.158   0.1906   0.0000    1.000   1.00    0.01  T_TVD_PH_SUBJ_ACCOUNTS_PRE
-# 0.102   0.1226   0.0000    1.000   0.79    0.01  T_TVD_PH_SUBJ_SEC_MEASURES
-# 0.095   0.1144   0.0000    1.000   0.71    0.01  T_TVD_PH_SUBJ_UPDATE
-# 0.180   0.2165   0.0000    1.000   0.86    0.01  T_TVD_PH_SUBJ_URGENT
-header TVD_PH_SUBJ_ACCOUNTS_PRE		Subject =~ /\baccounts? (?:[a-z_,-]+ )*?(?:record[a-z]*|suspen[a-z]+|notif(?:y|ication)|security|updated?|verifications?|confirm[a-z]+)\b/i
-header TVD_PH_SUBJ_SEC_MEASURES		Subject =~ /\bsecurity (?:[a-z_,-]+ )*?measures?\b/i
-header TVD_PH_SUBJ_UPDATE		Subject =~ /\bupdate (?:[a-z_,-]+ )*?(?:access|credit|records?|info(?:rmation)?)\b/i
-header TVD_PH_SUBJ_URGENT		Subject =~ /^urgent(?:[\s\W]*$|.{1,40}(?:alert|response|assistance|proposal|reply|warning|noti(?:ce|fication)|greeting|matter))/i
-header TVD_PH_SUBJ_ACCOUNTS_POST	Subject =~ /\b(?:(?:re-?)?activat[a-z]*|secure|verify|restore|flagged|limited|unusual|update|report|notif(?:y|ication)|suspen(?:d|ded|sion)|co(?:n|m)firm[a-z]*) (?:[a-z_,-]+ )*?accounts?\b/i
+# 2011-07-01 Changed by KAM - https://issues.apache.org/SpamAssassin/show_bug.cgi?id=6579
 
-meta TVD_PH_SUBJ_META_ALL	TVD_PH_SUBJ_META || TVD_PH_SUBJ_ACCOUNTS_PRE || TVD_PH_SUBJ_SEC_MEASURES || TVD_PH_SUBJ_UPDATE || TVD_PH_SUBJ_URGENT || TVD_PH_SUBJ_ACCOUNTS_POST
+#Changed to Sub Rules
+header __TVD_PH_SUBJ_ACCOUNTS_PRE	Subject =~ /\baccounts? (?:[a-z_,-]+ )*?(?:record[a-z]*|suspen[a-z]+|notif(?:y|ication)|security|updated?|verifications?|confirm[a-z]+)\b/i
+header __TVD_PH_SUBJ_SEC_MEASURES	Subject =~ /\bsecurity (?:[a-z_,-]+ )*?measures?\b/i
+header __TVD_PH_SUBJ_UPDATE		Subject =~ /\bupdate (?:[a-z_,-]+ )*?(?:access|credit|records?|info(?:rmation)?)\b/i
+header __TVD_PH_SUBJ_URGENT		Subject =~ /^urgent(?:[\s\W]*$|.{1,40}(?:alert|response|assistance|proposal|reply|warning|noti(?:ce|fication)|greeting|matter))/i
+header __TVD_PH_SUBJ_ACCOUNTS_POST	Subject =~ /\b(?:(?:re-?)?activat[a-z]*|secure|verify|restore|flagged|limited|unusual|update|report|notif(?:y|ication)|suspen(?:d|ded|sion)|co(?:n|m)firm[a-z]*) (?:[a-z_,-]+ )*?accounts?\b/i
+
+#REMOVED TVD_PH_SUBJ_META_ALL
+
+#ADDED A META TAG FOR SCORING THE ABOVE RULES SO WE CAN HAVE A SCORE SET.
+meta 		TVD_PH_SUBJ_META1	(TVD_PH_SUBJ_ACCOUNTS_PRE + TVD_PH_SUBJ_SEC_MEASURES + TVD_PH_SUBJ_UPDATE + TVD_PH_SUBJ_URGENT + TVD_PH_SUBJ_ACCOUNTS_POST > 0)
+score 		TVD_PH_SUBJ_META1	1.25
+describe 	TVD_PH_SUBJ_META1	Email has a Phishy looking subject line
 
 ########################################################################
 
