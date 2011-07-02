@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus-trap darxus dos grenier hege jarif kgolding llanga wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1 zmi; day 2: bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus-trap darxus dos grenier hege jarif kgolding llanga wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1 zmi; day 3: bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus-trap darxus dos grenier hege jarif kgolding llanga wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1 zmi
+# with results from: day 1: bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus-trap darxus dos grenier hege jarif llanga wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1 zmi; day 2: bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus-trap darxus dos grenier hege jarif kgolding llanga wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1 zmi; day 3: bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus-trap darxus dos grenier hege jarif kgolding llanga wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1 zmi
 
 # tflags 
 ADVANCE_FEE_2_NEW_FORM
@@ -167,6 +167,9 @@ DOS_OE_TO_MX_IMAGE
 DOS_OUTLOOK_TO_MX
 
 # good enough
+DOS_PHISH_WWW_COM_RU
+
+# good enough
 DOS_RCVD_IP_TWICE_B
 
 # good enough
@@ -329,9 +332,6 @@ FROM_MISSP_URI
 FROM_MISSP_USER
 
 # good enough
-FROM_ONE_CHAR
-
-# good enough
 FRT_BIGGERMEM1
 
 # good enough
@@ -439,9 +439,6 @@ HASHCASH_2SPEND
 # tflags userconf
 HASHCASH_HIGH
 
-# good enough
-HDRS_LCASE_1K
-
 # tflags userconf
 HEAD_LONG
 
@@ -456,9 +453,6 @@ HELO_OEM
 
 # good enough
 HK_NAME_DRUGS
-
-# good enough
-HK_NAME_FM_MR_MRS
 
 # good enough
 HK_PNIS
@@ -791,6 +785,9 @@ SINGLE_HEADER_3K
 SINGLE_HEADER_4K
 
 # good enough
+SINGLE_HEADER_5K
+
+# good enough
 SPAMMY_XMAILER
 
 # tflags net
@@ -918,15 +915,6 @@ TVD_SPACE_RATIO_MINFP
 
 # good enough
 TVD_VISIT_PHARMA
-
-# good enough
-DOS_PHISH_WWW_COM_RU
-
-# good enough
-SINGLE_HEADER_5K
-
-# good enough
-TVD_SUBJ_NUM_OBFU_MINFP
 
 # tflags userconf
 UNPARSEABLE_RELAY
