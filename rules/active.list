@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus-trap darxus dos grenier hege jarif llanga wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1 zmi; day 2: bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus-trap darxus dos grenier hege jarif kgolding llanga wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1 zmi; day 3: bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus-trap darxus dos grenier hege jarif kgolding llanga wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1 zmi
+# with results from: day 1: bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus-trap darxus dos grenier jarif kgolding llanga wt-en1 wt-en3 wt-jp1 zmi; day 2: bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus-trap darxus dos grenier hege jarif kgolding llanga wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1 zmi; day 3: bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus-trap darxus dos grenier hege jarif kgolding llanga wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1 zmi
 
 # tflags 
 ADVANCE_FEE_2_NEW_FORM
@@ -104,9 +104,6 @@ DATE_IN_FUTURE_Q_PLUS
 DEAR_BENEFICIARY
 
 # good enough
-DEAR_EMAIL
-
-# good enough
 DEAR_WINNER
 
 # tflags net
@@ -161,13 +158,7 @@ DOS_ANAL_SPAM_MAILER
 DOS_OE_TO_MX
 
 # good enough
-DOS_OE_TO_MX_IMAGE
-
-# good enough
 DOS_OUTLOOK_TO_MX
-
-# good enough
-DOS_PHISH_WWW_COM_RU
 
 # good enough
 DOS_RCVD_IP_TWICE_B
@@ -183,9 +174,6 @@ END_FUTURE_EMAILS
 
 # tflags userconf
 ENV_AND_HDR_SPF_MATCH
-
-# good enough
-FB_ACHIEVE_BACH
 
 # good enough
 FB_BOOST_CONFIDEN
@@ -255,9 +243,6 @@ FM_FRM_RN_L_BRACK
 
 # good enough
 FM_LOTTO_YOU_WON
-
-# good enough
-FM_SCHOOLING
 
 # good enough
 FM_SCHOOL_DIPLOMA
@@ -332,9 +317,6 @@ FROM_MISSP_URI
 FROM_MISSP_USER
 
 # good enough
-FRT_BIGGERMEM1
-
-# good enough
 FRT_ERECTION
 
 # good enough
@@ -342,9 +324,6 @@ FRT_HEALTH
 
 # good enough
 FRT_PHARMAC
-
-# good enough
-FRT_ROLEX
 
 # good enough
 FR_DOT_FEVER_5
@@ -362,9 +341,6 @@ FSL_HELO_BARE_IP_1
 FSL_HELO_DEVICE
 
 # good enough
-FSL_HELO_NON_FQDN_1
-
-# good enough
 FSL_MID_419
 
 # good enough
@@ -372,9 +348,6 @@ FSL_UA
 
 # good enough
 FSL_XM_419
-
-# good enough
-FS_LARGE_PERCENT2
 
 # good enough
 FS_MAKE_MONEY
@@ -498,9 +471,6 @@ LOTTERY_PH_004470
 
 # good enough
 LOTTO_AGENT
-
-# good enough
-LOTTO_AGENT_RPLY
 
 # good enough
 MAILER_EQ_ORG
@@ -764,16 +734,10 @@ RCVD_IN_XBL
 RISK_FREE
 
 # good enough
-RP_8BIT
-
-# good enough
 S25R_4
 
 # good enough
 S25R_6
-
-# good enough
-SB_GIF_AND_NO_URIS
 
 # good enough
 SINGLE_HEADER_2K
@@ -783,9 +747,6 @@ SINGLE_HEADER_3K
 
 # good enough
 SINGLE_HEADER_4K
-
-# good enough
-SINGLE_HEADER_5K
 
 # good enough
 SPAMMY_XMAILER
@@ -815,9 +776,6 @@ SPF_PASS
 SPF_SOFTFAIL
 
 # good enough
-STOCK_IMG_CTYPE
-
-# good enough
 STYLE_GIBBERISH
 
 # tflags userconf
@@ -828,9 +786,6 @@ SUBJECT_IN_WHITELIST
 
 # good enough
 TAB_IN_FROM
-
-# good enough
-THEBAT_UNREG
 
 # good enough
 TINY_FLOAT
@@ -887,9 +842,6 @@ TT_MSGID_TRUNC
 TVD_DOLLARS_US
 
 # good enough
-TVD_FINGER_02
-
-# good enough
 TVD_FROM_1
 
 # good enough
@@ -905,16 +857,16 @@ TVD_QUAL_MEDS
 TVD_RCVD_IP
 
 # good enough
-TVD_RCVD_IP4
-
-# good enough
-TVD_RCVD_SINGLE
-
-# good enough
 TVD_SPACE_RATIO_MINFP
 
 # good enough
 TVD_VISIT_PHARMA
+
+# good enough
+MS_XYMOSG_5K
+
+# good enough
+TVD_SUBJ_NUM_OBFU_MINFP
 
 # tflags userconf
 UNPARSEABLE_RELAY
@@ -963,9 +915,6 @@ URI_NOVOWEL
 
 # good enough
 URI_OBFU_DOM
-
-# good enough
-URI_OBFU_TLD
 
 # tflags userconf
 USER_IN_ALL_SPAM_TO
@@ -1020,9 +969,6 @@ XMAILER_MIMEOLE_OL_3D61D
 
 # good enough
 XMAILER_MIMEOLE_OL_4B815
-
-# good enough
-XMAILER_MIMEOLE_OL_4EEDB
 
 # good enough
 XMAILER_MIMEOLE_OL_7533E
