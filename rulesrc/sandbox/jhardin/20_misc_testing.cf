@@ -398,12 +398,17 @@ endif
 # describe       GAPPY_DOLLARS              Possible obfuscated stock disclaimer
 
 
-rawbody        __STYLE_GIBBERISH        /<style[^>]{0,30}>(?:\s{0,80}[^\s:;<]){150}/im
-meta           STYLE_GIBBERISH          __STYLE_GIBBERISH && !__THREADED && !__MIME_QP && !__RCD_RDNS_MAIL_MESSY && !MPART_ALT_DIFF
+body           __STYLE_TAG_IN_BODY      /<style>/i
+rawbody        __STYLE_GIBBERISH_1      /<style[^>]{0,30}>(?:\s{0,80}[^\s:;<]){150}/im
+rawbody        __STYLE_GIBBERISH_2      /\.style\w{0,20}\s{1,10}\{[^:;]{200}/im
+meta           __STYLE_GIBBERISH        (__STYLE_GIBBERISH_1 || __STYLE_GIBBERISH_2)
+meta           STYLE_GIBBERISH          __STYLE_GIBBERISH && !__STYLE_TAG_IN_BODY && !__THREADED && !__RCD_RDNS_MAIL_MESSY && !__RCD_RDNS_DIAL_MESSY && !__HAS_REPLY_TO && !MIME_HTML_MOSTLY
+describe       STYLE_GIBBERISH          Nonsense in HTML <STYLE> tag
 
 body           __SCRIPT_TAG_IN_BODY     /<script>/i
 rawbody        __SCRIPT_GIBBERISH       /<script>[^;<]{100}/im
 meta           SCRIPT_GIBBERISH         __SCRIPT_GIBBERISH && !__SCRIPT_TAG_IN_BODY && !__TAG_EXISTS_META
+describe       SCRIPT_GIBBERISH         Nonsense in HTML <SCRIPT> tag
 
 #rawbody        MANY_DIV_5                   /(?:<div[^>]{0,30}>\s{0,80}){5}/im
 #tflags         MANY_DIV_5                    nopublish
