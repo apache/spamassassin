@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus-trap darxus dos grenier jarif kgolding llanga wt-en1 wt-en3 wt-jp1 zmi; day 2: bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus-trap darxus dos grenier hege jarif kgolding llanga wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1 zmi; day 3: bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus-trap darxus dos grenier hege jarif kgolding llanga wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1 zmi
+# with results from: day 1: bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus-trap darxus dos grenier hege jarif kgolding llanga wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1 zmi; day 2: bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus-trap darxus dos grenier jarif kgolding llanga wt-en1 wt-en3 wt-jp1 zmi; day 3: bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus-trap darxus dos grenier hege jarif kgolding llanga wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1 zmi
 
 # tflags 
 ADVANCE_FEE_2_NEW_FORM
@@ -48,9 +48,6 @@ ADVANCE_FEE_5_NEW_MONEY
 
 # tflags userconf
 ALL_TRUSTED
-
-# good enough
-AXB_HELO_HOME_UN
 
 # tflags learn
 BAYES_00
@@ -514,6 +511,9 @@ MONEY_LOTTERY
 # good enough
 MSOE_MID_WRONG_CASE
 
+# good enough
+MS_XYMOSG_5K
+
 # tflags net
 NO_DNS_FOR_FROM
 
@@ -734,9 +734,6 @@ RCVD_IN_XBL
 RISK_FREE
 
 # good enough
-S25R_4
-
-# good enough
 S25R_6
 
 # good enough
@@ -860,13 +857,31 @@ TVD_RCVD_IP
 TVD_SPACE_RATIO_MINFP
 
 # good enough
+TVD_SUBJ_NUM_OBFU_MINFP
+
+# good enough
 TVD_VISIT_PHARMA
 
 # good enough
-MS_XYMOSG_5K
+DEAR_EMAIL
 
 # good enough
-TVD_SUBJ_NUM_OBFU_MINFP
+DOS_PHISH_WWW_COM_RU
+
+# good enough
+FB_ACHIEVE_BACH
+
+# good enough
+LOTTO_AGENT_RPLY
+
+# good enough
+RP_8BIT
+
+# good enough
+SINGLE_HEADER_5K
+
+# good enough
+URI_OBFU_TLD
 
 # tflags userconf
 UNPARSEABLE_RELAY
