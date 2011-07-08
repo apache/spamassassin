@@ -11,8 +11,9 @@ describe        AXB_XMID_EXIM_CTRIP     possibly forged ctrip sender - exim
 header          AXB_X_PHPS_CTRIP        X-PHP-Script =~ /\bctrip\.com\/sendmail\.php\b/
 describe        AXB_X_PHPS_CTRIP        possibly forged ctrip sender - php
 
+########### ARG.. when will I learn to copy/paste :-(
 header          AXB_XRCVD_FRMCTRIP      Received =~ /from ctrip\.com\b/
-describe        AXB_XRCVD_FFMCTRIP      possibly forged ctrip sender - rcvd
+describe        AXB_XRCVD_FRMCTRIP      possibly forged ctrip sender - rcvd
 
 #
 
