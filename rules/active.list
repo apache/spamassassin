@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus-trap darxus dos grenier hege jarif kgolding llanga wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1 zmi; day 2: bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus-trap darxus dos grenier jarif kgolding llanga wt-en1 wt-en3 wt-jp1 zmi; day 3: bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus-trap darxus dos grenier hege jarif kgolding llanga wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1 zmi
+# with results from: day 1: bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus-trap darxus dos grenier hege jarif kgolding llanga wt-en1 wt-en3 wt-jp1 zmi; day 2: bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus-trap darxus dos grenier hege jarif kgolding llanga wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1 zmi; day 3: bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus-trap darxus dos grenier jarif kgolding llanga wt-en1 wt-en3 wt-jp1 zmi
 
 # tflags 
 ADVANCE_FEE_2_NEW_FORM
@@ -75,9 +75,6 @@ BAYES_95
 
 # tflags learn
 BAYES_99
-
-# good enough
-BUG6152_INVALID_DATE_TZ_ABSURD
 
 # tflags userconf
 CHARSET_FARAWAY
@@ -156,9 +153,6 @@ DOS_OE_TO_MX
 
 # good enough
 DOS_OUTLOOK_TO_MX
-
-# good enough
-DOS_RCVD_IP_TWICE_B
 
 # good enough
 DOS_RCVD_IP_TWICE_C
@@ -842,9 +836,6 @@ TVD_DOLLARS_US
 TVD_FROM_1
 
 # good enough
-TVD_INCREASE_SIZE
-
-# good enough
 TVD_PH_BODY_META
 
 # good enough
@@ -863,25 +854,13 @@ TVD_SUBJ_NUM_OBFU_MINFP
 TVD_VISIT_PHARMA
 
 # good enough
-DEAR_EMAIL
+AXB_HELO_HOME_UN
 
 # good enough
-DOS_PHISH_WWW_COM_RU
+FSL_NEW_HELO_USER
 
 # good enough
-FB_ACHIEVE_BACH
-
-# good enough
-LOTTO_AGENT_RPLY
-
-# good enough
-RP_8BIT
-
-# good enough
-SINGLE_HEADER_5K
-
-# good enough
-URI_OBFU_TLD
+S25R_4
 
 # tflags userconf
 UNPARSEABLE_RELAY
