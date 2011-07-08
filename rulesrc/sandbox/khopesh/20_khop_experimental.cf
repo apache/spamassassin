@@ -144,6 +144,10 @@ score	 KHOP_HELO_FCRDNS	0.001
 # 40.5025/2.1738 spam/ham, 0.949 s/o @ 20100417 net
 # 44.5263/5.6620 spam/ham, 0.887 s/o @ 20100514.  Added rdns_short 5/17.
 
+# This *really* needs properly defined trusted networks.
+header	 __HELO_AS_VICTIM 	X-Spam-Relays-External =~ /^[^\]]+ helo=(\S+) [^\]]*\bby=\1 /
+meta	 KHOP_HELO_AS_VICTIM	__HELO_AS_VICTIM && !__BOTNET_NOTRUST
+
 meta     HELO_NO_DOMAIN	__HELO_NO_DOMAIN && !HELO_LOCALHOST
 describe HELO_NO_DOMAIN	Relay reports its domain incorrectly
 #score	 HELO_NO_DOMAIN	2.375 0.327 1.497 0.884
