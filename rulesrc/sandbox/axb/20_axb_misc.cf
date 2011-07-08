@@ -1,3 +1,21 @@
+# 2011-07-08
+header          AXB_XRCVD_APACHE_CTRIP  Received =~ /^from apache by ctrip\.com\b/i
+describe        AXB_XRCVD_APACHE_CTRIP  possibly forged ctrip sender - apache
+
+header          AXB_XMID_PFIX_CTRIP     Message-ID =~ /^\<[A-F0-9]{8}.[0-9]{6}\@ctrip\.com\>/
+describe        AXB_XMID_PFIX_CTRIP     possibly forged ctrip sender - postfix
+
+header          AXB_XMID_EXIM_CTRIP     Message-ID =~ /^\<[A-F0-9]{32}\@ctrip\.com\>/
+describe        AXB_XMID_EXIM_CTRIP     possibly forged ctrip sender - exim
+
+header          AXB_X_PHPS_CTRIP        X-PHP-Script =~ /^ctrip\.com\/sendmail\.php\b/
+describe        AXB_X_PHPS_CTRIP        possibly forged ctrip sender - php
+
+header          AXB_XRCVD_FRMCTRIP      Received =~ /^from ctrip\.com\b/
+describe        AXB_XRCVD_FFMCTRIP      possibly forged ctrip sender - rcvd
+
+#
+
 # 2011-07-05
 rawbody         AXB_SSCECCF     /\bSandboxScopeClass ExternalClass\b/
 describe        AXB_SSCECCF     unidentified fingerprint
