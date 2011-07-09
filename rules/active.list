@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus-trap darxus dos grenier hege jarif kgolding llanga wt-en1 wt-en3 wt-jp1 zmi; day 2: bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus-trap darxus dos grenier hege jarif kgolding llanga wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1 zmi; day 3: bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus-trap darxus dos grenier jarif kgolding llanga wt-en1 wt-en3 wt-jp1 zmi
+# with results from: day 1: bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus-trap darxus dos grenier hege jarif kgolding llanga wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1 zmi; day 2: bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus-trap darxus dos grenier hege jarif kgolding llanga wt-en1 wt-en3 wt-jp1 zmi; day 3: bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus-trap darxus dos grenier hege jarif kgolding llanga wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1 zmi
 
 # tflags 
 ADVANCE_FEE_2_NEW_FORM
@@ -335,6 +335,9 @@ FSL_HELO_DEVICE
 FSL_MID_419
 
 # good enough
+FSL_NEW_HELO_USER
+
+# good enough
 FSL_UA
 
 # good enough
@@ -405,9 +408,6 @@ HASHCASH_HIGH
 
 # tflags userconf
 HEAD_LONG
-
-# good enough
-HELO_LH_HOME
 
 # good enough
 HELO_NO_DOMAIN
@@ -830,9 +830,6 @@ TO_NO_BRKTS_PCNT
 TT_MSGID_TRUNC
 
 # good enough
-TVD_DOLLARS_US
-
-# good enough
 TVD_FROM_1
 
 # good enough
@@ -854,13 +851,25 @@ TVD_SUBJ_NUM_OBFU_MINFP
 TVD_VISIT_PHARMA
 
 # good enough
-AXB_HELO_HOME_UN
+DEAR_EMAIL
 
 # good enough
-FSL_NEW_HELO_USER
+DOS_PHISH_WWW_COM_RU
 
 # good enough
-S25R_4
+DOS_RCVD_IP_TWICE_B
+
+# good enough
+FB_ACHIEVE_BACH
+
+# good enough
+LOTTO_AGENT_RPLY
+
+# good enough
+RP_8BIT
+
+# good enough
+URI_OBFU_TLD
 
 # tflags userconf
 UNPARSEABLE_RELAY
