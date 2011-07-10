@@ -634,7 +634,7 @@ describe    NSL_TO_ENDS_COMMA      To: ends with a comma
 tflags      NSL_TO_ENDS_COMMA      nopublish
 
 
-body        CN_B2B_SPAMMER         /We are a China[-\s]based/i
+body        CN_B2B_SPAMMER         /We are (?:a )?China[-\s]based/i
 describe    CN_B2B_SPAMMER         Chinese company introducing itself
 
 # __ version of khopesh UPPERCASE_URI, for use in metas
