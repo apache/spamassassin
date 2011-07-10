@@ -6,7 +6,7 @@ ifplugin Mail::SpamAssassin::Plugin::ReplaceTags
   body     __LOTSA_MONEY_00   /<CURRENCY>[\s\.]?\d[\dO][,\.][\dO]{3}(?:(?!\d)|\b)/
   body     __LOTSA_MONEY_01   /(?:(?i:sum\sof\s)[\(\[]?|<CURRENCY>\s?)[\s\.]?\d[\d.,\sO]{5,20}[\dO]/
   body     __LOTSA_MONEY_02   /\d[\d.,\sO]{5,20}[\dO][\)\]\(]?\s?(?:<CURRENCY>|Pounds|(?i:dollars?|bucks))\b/
-  body     __LOTSA_MONEY_03   /(?:(?i:sum\sof\s)[\(\[]?|<CURRENCY>\s?)\d(?:[\d.,\sO]{0,5})?[\)\]]?\s?(?i:M(?i:il)?\b|mil+(?i:io|<O>)n|hund?[re]+a?[dt]|thousand|tausend)/
+  body     __LOTSA_MONEY_03   /(?:(?i:sum\sof\s)[\(\[]?|<CURRENCY>\s?)\d[\d.,\sO]{0,5}[\)\]]?\s?(?i:M(?i:il)?\b|mil+(?i:io|<O>)n|hund?[re]+a?[dt]|thousand|tausend|milh[\xf5]es)/
   body     __LOTSA_MONEY_04   /(?:\d[\d\.]{0,4}M|million(?!s)|mill<O>n|hund?rea?d(?!s)[^\.]{1,25}thousand(?!s)|cents?[^\.]{1,25}mille|hundert[^\.]{1,30}tausend|ientos?[^\.]{1,20}mil|cent[a-z\s]{1,20}mil\s[a-z]{1,20}centos)[^\.\$]{0,50}(?:(?:U\.?\s?S\.?\s?(?:A\.?\s?)?|united\s?states?|canad(?:ian|a)\s)?dollars?|bucks|USD|GBP|<GB_UK>\spounds?|(?:<GB_UK>\s)?pounds?\ssterling|pounds(?!\sof)|(?:d'\s?)?euros?|francs?)\b/i
   body     __LOTSA_MONEY_05   /(?:(?:sum|value|amount)\sof\s)\d[\d.,\sO]{7,20}[\dO\.][\)\]\(\s]{0,3}(?:pounds?|dollars?|euros?|bucks)\b/i
   replace_rules   __LOTSA_MONEY_00 __LOTSA_MONEY_01 __LOTSA_MONEY_02 __LOTSA_MONEY_03 __LOTSA_MONEY_04
@@ -142,16 +142,16 @@ meta     MONEY_ATM_CARD   LOTS_OF_MONEY && __ATM_CARD
 describe MONEY_ATM_CARD   Lots of money on an ATM card
 
 body     __YOU_INHERIT    /\byour\s[a-z\s]{0,30}inherit+ance\b/i
-body     __I_INHERIT      /\bI\s[a-z\s]{0,30}inherited\b/i
+body     __I_INHERIT      /\b(?:I|eu)\s[a-z\s]{0,30}(?:inherited|herdei)\b/i
 body     __THEY_INHERIT   /\binherit\sth(?:e|is)\smoney\b/i
 body     __NOT_DEAD_YET   /\bwill\sinherit\b/i
 body     __AM_DYING       /\bam\s(?:\S+\s)?dying\b/i
 body     __I_WILL_YOU     /\bwill(?:ed)?\s(?:[a-z\s]{0,20}\s(?:fortune|money)\s)?to\syou\b/i
 body     __NEXT_OF_KIN    /\bnext[-\s]of[-\s]kin\b/i
 body     __EX_CUSTOMER    /\b(?:(?:dead|deceased|late|verstorbenen)\s(?:[ck]lient|customer|ac+ount|invest[eo]r|beneficiary|mr\.|kunde|engr?\.?)|titulaire\sdu\scompte\sest\s(?:d[\xe9]c[\xe9]d[\xe9]|d[\xc3][\xa9]c[\xc3][\xa9]d[\xc3][\xa9])|invest[eo]r\sdied|[\xe9]tranger\sd[\xe9]c[\xe9]d[\xe9]|(?:[ck]lient|customer|ac+ount|invest[eo]r|beneficiary|mr\.|kunde|engr?\.?)\s(?:[a-z]{1,10}\s)?(?:dead|deceased|verstorbenen))/i
-body     __DECEASED       /\b(?:the|my|der|du|le)\s(?:deceased|late|verstorbenen|d[\xe9]funt|d[\xc3][\xa9]nt)\b/i
-body     __SURVIVORS      /\b(?:widow|son|daughter|husband|wife|brother|sister|attorney)\s(?:of|to)\s(?:the\s)?late\s\w+\b/i
-body     __DEAD_PARENT    /\bmy\s(?:(?:deceased|dead)\s(?:father|mother)|(?:father|mother)(?:'?s)?\s(?:death|died|murder|was\s(?:killed|murdered|poisoned)))/i
+body     __DECEASED       /\b(?:the|my|der|du|le|meu)\s(?:deceased|late|verstorbenen|d[\xe9]funt|d[\xc3][\xa9]nt|falecido)\b/i
+body     __SURVIVORS      /\b(?:widow|son|daughter|husband|wife|brother|sister|attorney|vi[\xfa]va)\s(?:of|to|do)\s(?:the\s)?(?:late|falecido)\s\w+\b/i
+body     __DEAD_PARENT    /\b(?:my|meu)\s(?:(?:deceased|dead)\s(?:father|mother|husband)|(?:father|mother|husband|marido)(?:'?s)?\s(?:death|died|murder|was\s(?:killed|murdered|poisoned)|faleceu))/i
 body     __DORMANT_ACCT   /\b(?:(?:dormant|abandoned|left\s?over)\s(?:account|fund|transaction|sum|deposit)|fonds\sdorment)/i
 body     __WILL_LEGAL     /\b(?:codicil|last\stestament|probate|executor|intestate|bequest|mandamus)\b/i
 body     __EARLY_DEMISE   /\buntimely\sdeath\b/i
@@ -170,7 +170,8 @@ body     __WIRE_XFR       /\b(?:wire|telegraph(?:ic)?|bank)\s?transfer/i
 body     __TRUSTED_CHECK  /\b(?:cashier'?s?|certified)\sche(?:ck|que)/i
 body     __BANK_DRAFT     /\bbank\sdraft/i
 body     __MOVE_MONEY     /\b(?:(?:receive|re-?profile|repatriate|rapatrier|secure|r[\xe9]clamation|possession|virer)\s(?:th(?:e(?:se)?|is)|das|sur ce|de ces|cet)|re-?profiling)\s(?:proceeds|funds?|money|balance|account|g[eo]ld|compte|fonds|argent)\b/i
-meta     __XFER_MONEY     (__WIRE_XFR || __TRUSTED_CHECK || __BANK_DRAFT || __MOVE_MONEY)
+body     __TO_YOUR_ACCT   /\b(?:funds|money|fundo|dinheiro)\s(?:\w{1,10}\s){0,4}(?:transfer(?:red)?|transferido)\s(?:to|para)\s(?:your|sua)\s(?:account|conta)/i
+meta     __XFER_MONEY     (__WIRE_XFR || __TRUSTED_CHECK || __BANK_DRAFT || __MOVE_MONEY || __TO_YOUR_ACCT)
 
 body     __INTL_BANK      /\b(?:international\s(?:\w+\s)?bank|banque\sinternationale)\b/i
 body     __YOUR_BANK      /\byour?\s(?:full\s)?bank(?:ing)?\sinformations?\b/i
