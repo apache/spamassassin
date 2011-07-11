@@ -21,8 +21,8 @@ ifplugin Mail::SpamAssassin::Plugin::ReplaceTags
   replace_tag ANDOR     (?:\s?[\/&+,]\s?|\sor\s|\sand?\s)
   replace_tag NUMBER    (?:(?:ruf)?num(?:[bm]er)?s?|nos?\.|no\b|\#s?|nbrs?\.?)
   replace_tag FF_SUFFIX (?:\sin\s(?:full|words)|\scompleto)?:?(?:\s?[({][^)}]{1,30}[)}])?
-  replace_tag FF_BLANK1 (?:[\s:;]{0,4}(?:(?:[-=_.,:;*\s]|&\#\d{1,3};){3,100}))
-  replace_tag FF_BLANK2 (?:[^-=_.,:;*\w]{0,3}(?:[-=_.,:;*\s]|&\#\d{1,3};){1,100})
+  replace_tag FF_BLANK1 (?:[\s:;]{0,4}(?:(?:[-=_.,:;*\s\x85]|&\#\d{1,3};|[\xe2][\x80][\xa6]){3,100}))
+  replace_tag FF_BLANK2 (?:[^-=_.,:;*\w]{0,3}(?:[-=_.,:;*\s\x85]|&\#\d{1,3};|[\xe2][\x80][\xa6]){1,100})
 
   # Address variations
   replace_tag FF_A1 (?:(?:countr?y|city|province|ter+itory|(?:zip|postal)(?:\s?code)?|st?ates?|ad+res+e?)<ANDOR>?){1,3}(?:\sof\s(?:residence|birth|employment|citizenship|origin))?
