@@ -122,12 +122,13 @@ ifplugin Mail::SpamAssassin::Plugin::ReplaceTags
 
   body     __PCT_FOR_YOU_1  /<PERCENT>[\s)]{0,3}(?:of\s[\w\s]{0,35}?)?(?:for|to|as)\syour?/i
   body     __PCT_FOR_YOU_2  /\b(?:(?:give|offer)\syou|vous\saurez\sdroit\s[\xe0]|ihnen)\s<PERCENT>/i
-  body     __PCT_FOR_YOU_3  /\byour?\s(?!can)[\w\s]{6,20}?(?:(?:share|entitle|assist|comp[ea]nsate|reward|renumerate|paid|deduct|account|tage|keep)[\w\s]{1,25}?)?\s(?<!by\s)(?<!up\sto\s)<PERCENT>/i
+  body     __PCT_FOR_YOU_3  /\byour?\s(?!can)(?:(?!you)\w{1,15}\s){0,10}(?:(?:share|entiti?le(?:d|ment)?|percentage|assist(?:ance)?|comp[ea]nsat(?:ed?|tion)|reward(?:ed)?|renumerat(?:e|tion)|com+is+ion|paid|deduct|account|tage|(?:will|shall|(?:are|stand|going)\sto)\s(?:take|earn|get)|keep|receive|retain|have|half|given|paid|give\s(?:me|you|him)|bank\saccount|time\sand\efforts?|ratio\sof)(?:\s(?!you)\w{1,15}){0,10})\s(?<!by\s)(?<!up\sto\s)<PERCENT>/i
+  body     __PCT_FOR_YOU_4  /\byour\s<PERCENT>/i
   body     __PCT_OF_PMTS    /<PERCENT>[\s)]+(?:of\s[\w\s]{0,35}?)?of\s(?:the\s)?(?:payments?|rem+it+ances?|chec(?:k|que)s?)/i
 
-  replace_rules  __PCT_FOR_YOU_1 __PCT_FOR_YOU_2 __PCT_FOR_YOU_3 __PCT_OF_PMTS
+  replace_rules  __PCT_FOR_YOU_1 __PCT_FOR_YOU_2 __PCT_FOR_YOU_3 __PCT_FOR_YOU_4 __PCT_OF_PMTS
 
-  meta     __PCT_FOR_YOU    __PCT_FOR_YOU_1 || __PCT_FOR_YOU_2 || __PCT_FOR_YOU_3 || SHARE_50_50
+  meta     __PCT_FOR_YOU    __PCT_FOR_YOU_1 || __PCT_FOR_YOU_2 || __PCT_FOR_YOU_3 || __PCT_FOR_YOU_4 || SHARE_50_50
 
   meta     MONEY_PERCENT    LOTS_OF_MONEY && (__PCT_FOR_YOU || __PCT_OF_PMTS || __FIFTY_FIFTY)
   describe MONEY_PERCENT    X% of a lot of money for you
