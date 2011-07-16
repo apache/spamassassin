@@ -122,8 +122,8 @@ ifplugin Mail::SpamAssassin::Plugin::ReplaceTags
 
   body     __PCT_FOR_YOU_1  /<PERCENT>[\s)]{0,3}(?:of\s[\w\s]{0,35}?)?(?:for|to|as)\syour?/i
   body     __PCT_FOR_YOU_2  /\b(?:(?:give|offer)\syou|vous\saurez\sdroit\s[\xe0]|ihnen)\s<PERCENT>/i
-  body     __PCT_FOR_YOU_3  /\byour?\s(?!can)(?:(?!you)\w{1,15}\s){0,10}(?:(?:share|entiti?le(?:d|ment)?|percentage|assist(?:ance)?|comp[ea]nsat(?:ed?|tion)|reward(?:ed)?|renumerat(?:e|tion)|com+is+ion|paid|deduct|account|tage|(?:will|shall|(?:are|stand|going)\sto)\s(?:take|earn|get)|keep|receive|retain|have|half|given|paid|give\s(?:me|you|him)|bank\saccount|time\sand\efforts?|ratio\sof)(?:\s(?!you)\w{1,15}){0,10})\s(?<!by\s)(?<!up\sto\s)<PERCENT>/i
-  body     __PCT_OF_PMTS    /<PERCENT>[\s)]+(?:of\s[\w\s]{0,35}?)?of\s(?:the\s)?(?:payments?|rem+it+ances?|chec(?:k|que)s?)/i
+  body     __PCT_FOR_YOU_3  /\byour?\s(?!can)(?:(?!you)\w{1,15}\s){0,10}(?:(?:share|entiti?le(?:d|ment)?|percentage|fee|assist(?:ance)?|comp[ea]nsat(?:ed?|tion)|reward(?:ed)?|renumerat(?:e|tion)|com+is+ion|paid|deduct|account|tage|(?:will|shall|would|(?:are|stand|going)\sto)\s(?:be\s)?(?:tak(?:e|ing)|earn|get(?:ting)?|remit|subtract|with+old)|(?:deduct|taken?|subtract(?:ed)?)\syour|keep(?:ing)?|receiv(?:e|ing)|retain(?:ing)?|have|half|giv(?:en|ing)|paid|(?:give|pay|offer)\s(?:me|you|him)|bank\saccount|to\s(?:take|use)|(?:time|country)\sand|ratio\sof)(?:\s(?!you)\w{1,15}){0,10})\s(?<!by\s)(?<!up\sto\s)<PERCENT>/i
+  body     __PCT_OF_PMTS    /<PERCENT>[\s)]+(?:of\s[\w\s]{0,35}?)?of\s(?:the\s)?(?:payments?|rem+it+ances?|chec(?:k|que)s?|mon(?:ey|ies))/i
 
   replace_rules  __PCT_FOR_YOU_1 __PCT_FOR_YOU_2 __PCT_FOR_YOU_3 __PCT_OF_PMTS
 
@@ -146,7 +146,7 @@ body     __I_INHERIT      /\b(?:I|eu)\s[a-z\s]{0,30}(?:inherited|herdei)\b/i
 body     __THEY_INHERIT   /\binherit\sth(?:e|is)\smoney\b/i
 body     __NOT_DEAD_YET   /\bwill\sinherit\b/i
 body     __AM_DYING       /\bam\s(?:\S+\s)?dying\b/i
-body     __I_WILL_YOU     /\bwill(?:ed)?\s(?:[a-z\s]{0,20}\s(?:fortune|money)\s)?to\syou\b/i
+body     __I_WILL_YOU     /\bwill(?:ed)?\s(?:[a-z\s]{0,20}(?:fortune|money|\$\d+[a-z]{0,9})\s)?to\syou\b/i
 body     __NEXT_OF_KIN    /\bnext[-\s]of[-\s]kin\b/i
 body     __EX_CUSTOMER    /\b(?:(?:dead|deceased|late|verstorbenen)\s(?:[ck]lient|customer|ac+ount|invest[eo]r|beneficiary|mr\.|kunde|engr?\.?)|titulaire\sdu\scompte\sest\s(?:d[\xe9]c[\xe9]d[\xe9]|d[\xc3][\xa9]c[\xc3][\xa9]d[\xc3][\xa9])|invest[eo]r\sdied|[\xe9]tranger\sd[\xe9]c[\xe9]d[\xe9]|(?:[ck]lient|customer|ac+ount|invest[eo]r|beneficiary|mr\.|kunde|engr?\.?)\s(?:[a-z]{1,10}\s)?(?:dead|deceased|verstorbenen))/i
 body     __DECEASED       /\b(?:the|my|der|du|le|meu)\s(?:deceased|late|verstorbenen|d[\xe9]funt|d[\xc3][\xa9]nt|falecido)\b/i
