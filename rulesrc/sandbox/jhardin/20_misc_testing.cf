@@ -730,4 +730,12 @@ describe    SUBJ_BRKN_WORDNUMS     Subject contains odd word breaks and numbers
 
 meta        TVD_SUBJ_NUM_OBFU_MINFP   __TVD_SUBJ_NUM_OBFU && !__RP_MATCHES_RCVD && !__RCD_RDNS_MAIL_MESSY && !__VIA_ML && !__ISO_2022_JP_DELIM && !__NOT_SPOOFED && !__X_CRON_ENV && !__NOT_A_PERSON && !__HAS_THREAD_INDEX
 
+# from spample on users list 7/20/2011
+header      __XM_PHPMAILER_FORGED  X-Mailer =~ /PHPMailer\s.*version\D+$/
+meta        XM_PHPMAILER_FORGED    __XM_PHPMAILER_FORGED
+describe    XM_PHPMAILER_FORGED    Apparently forged header
+
+
+
+
 
