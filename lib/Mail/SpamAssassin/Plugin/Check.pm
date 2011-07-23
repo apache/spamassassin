@@ -344,13 +344,13 @@ sub run_generic_tests {
     $self->add_evalstr($pms,
                        $self->start_rules_plugin_code($ruletype, $priority) );
     while (my($rulename, $test) = each %{$opts{testhash}->{$priority}}) {
-      if ($do_timing > 0 && $ruletype ne "meta") {
+      if ($do_timing > 1 && $ruletype ne "meta") {
         $self->add_evalstr($pms, '
           $time = time;
         ');
       }
       $opts{loop_body}->($self, $pms, $conf, $rulename, $test, %nopts);
-      if ($do_timing > 0 && $ruletype ne "meta") {
+      if ($do_timing > 1 && $ruletype ne "meta") {
         $self->add_evalstr($pms, '
           $time = time - $time;
           dbg(sprintf("ruletimes: '.$ruletype.' '.$rulename.' %.4f s", $time));
