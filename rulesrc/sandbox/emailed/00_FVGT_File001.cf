@@ -2400,7 +2400,7 @@ describe FS_CHEAP_CAP           Phrase: Cheap in Caps in Subject.
 #counts   FS_CHEAP_CAP             8s/0h of 47019 corpus (37183s/9836h FVGT) 12/23/06
 
 
-header   FS_CAILIS              Subject =~ /cailis/i
+header   FS_CAILIS              Subject =~ /\bcailis\b/i
 describe FS_CAILIS              Subject says cailis
 ##score    FS_CAILIS            10.357
 #counts   FS_CAILIS                13s/0h of 206859 corpus (199363s/7496h FT) 12/13/05
@@ -2694,7 +2694,8 @@ describe FS_REFI                Subject says "refi"
 #counts   FS_REFI                  8s/0h of 47019 corpus (37183s/9836h FVGT) 12/23/06
 
 
-header   FS_REPLICA             Subject =~ /replica/i
+header   __FS_REPLICA           Subject =~ /\breplica\b/i
+meta     FS_REPLICA             __FS_REPLICA && !FS_REPLICAWATCH
 describe FS_REPLICA             Subject says "replica"
 ##score    FS_REPLICA           0.994
 #counts   FS_REPLICA               335s/0h of 70341 corpus (31030s/39311h DOC) 12/13/05
@@ -2704,7 +2705,7 @@ describe FS_REPLICA             Subject says "replica"
 #counts   FS_REPLICA               92s/0h of 47019 corpus (37183s/9836h FVGT) 12/23/06
 
 
-header   FS_REPLICAWATCH        Subject =~ /replica watch/i
+header   FS_REPLICAWATCH        Subject =~ /replica watch\b/i
 describe FS_REPLICAWATCH        Subject says Replica watch
 ##score    FS_REPLICAWATCH      10.357
 #counts   FS_REPLICAWATCH          110s/0h of 206859 corpus (199363s/7496h FT) 12/13/05
