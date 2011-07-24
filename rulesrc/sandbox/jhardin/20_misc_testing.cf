@@ -45,6 +45,10 @@ ifplugin Mail::SpamAssassin::Plugin::MIMEHeader
 
   meta         OBFU_ATTACH_MISSP   __FROM_RUNON && (OBFU_HTML_ATTACH || OBFU_TEXT_ATTACH || OBFU_DOC_ATTACH || OBFU_PDF_ATTACH || OBFU_JPG_ATTACH || OBFU_GIF_ATTACH)
   describe     OBFU_ATTACH_MISSP   Obfuscated attachment type and misspaced From
+
+#  mimeheader   ECMSNGR_MH          X-ecm-part-format =~ /./
+#  describe     ECMSNGR_MH          eC-Messenger header
+
 endif
 
 # general case of spample observation
@@ -702,11 +706,11 @@ body        __GAPPY_PHONE_NA       /1 - \d \d \d - \d \d \d - \d \d \d \d/
 meta        GAPPY_PHONE_NA         __GAPPY_PHONE_NA
 describe    GAPPY_PHONE_NA         Phone number with lots of spaces
 
-rawbody     __GAPPY_HTML_01        m;</?[a-z]{1,6}(?:\s[^>]{0,40})?>(?:\s|=09){0,80}(?:(?!\d)[\w'()\#,.:!]{1,15}(?:\s|=09){4,80}){7}\S;
-rawbody     __GAPPY_HTML_02        m;\S(?:(?:\s|=09){4,80}(?!\d)[\w'()\#,.:!]{1,15}){7}(?:\s|=09){0,5}</?[a-z]{1,6}/?>;
-rawbody     __GAPPY_HTML_03        /^(?:=09){3,20}</m
+full        __GAPPY_HTML_01        m;</?[a-z]{1,6}(?:\s[^>]{0,40})?>(?:\s|=09){0,80}(?:(?!\d)[\w'()\#,.:!]{1,15}(?:\s|=09){4,80}){7}\S;
+full        __GAPPY_HTML_02        m;\S(?:(?:\s|=09){4,80}(?!\d)[\w'()\#,.:!]{1,15}){7}(?:\s|=09){0,5}</?[a-z]{1,6}/?>;
+full        __GAPPY_HTML_03        /^(?:=09){3,20}</m
 tflags      __GAPPY_HTML_03        multiple
-rawbody     __GAPPY_HTML_04        /^(?:=0A){4,20}/m
+full        __GAPPY_HTML_04        /^(?:=0A){4,20}/m
 tflags      __GAPPY_HTML_04        multiple
 meta        __GAPPY_HTML           __MIME_HTML && (__GAPPY_HTML_01 || __GAPPY_HTML_02 || (__GAPPY_HTML_03 > 10) || (__GAPPY_HTML_04 > 10))
 meta        GAPPY_HTML             __GAPPY_HTML && !__UNSUB_LINK
@@ -735,6 +739,10 @@ header      __XM_PHPMAILER_FORGED  X-Mailer =~ /PHPMailer\s.*version\D+$/
 meta        XM_PHPMAILER_FORGED    __XM_PHPMAILER_FORGED
 describe    XM_PHPMAILER_FORGED    Apparently forged header
 
+# from spample on users list 7/24/2011
+header      __XM_EC_MESSENGER      X-Mailer =~ /\beC-Messenger\b/
+meta        XM_EC_MESSENGER        __XM_EC_MESSENGER
+describe    XM_EC_MESSENGER        eC-Messenger bulk mail service
 
 
 
