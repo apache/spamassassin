@@ -34,6 +34,7 @@ usage: seek-phrases-in-log [--reqhitrate n] [--reqpatlength n]
 --reqhitrate: percentage hit-rate against spam required (default: 0.5)
    (multiple values can be specified, separated by spaces)
 --reqpatlength: required pattern length, in characters (default: 0)
+--maxreqpatlength: maximum pattern length, in characters (default: 2048)
 --maxtextread: bytes of message text examined (default: 32768)
 --rules: generate SpamAssassin rule output (default: 0)
 --ruleprefix: specify prefix string for rules (default: 'SEEK_')
@@ -102,7 +103,7 @@ my $asmstate;
 
 if ($opt{phase2}) {
   $asmstate = load_state($opt{phase2});
-} 
+}
 else {
   logmsg "reading $fs...";
   open IN, "<$fs" or die "cannot open spam log $fs";
@@ -151,7 +152,7 @@ sub proc_text_spam {
     $text = substr $text, 0, $opt{maxtextread};      # chop!
   }
 
-  $text =~ s/  +/ /gs;			# single spaces, please
+  $text =~ s/  +/ /gs;                  # single spaces, please
 
   # we only need to save spam samples in memory, ignore ham samples
   push @text_string, $text;
@@ -183,7 +184,7 @@ sub proc_text_spam {
       # simple bayesian N-grams to start
       $tokens{"$w3.$w2.$w1"} = $tokens{"$w3.$w2"} = 1;
     }
-    
+
     # deal with leftovers
     if ($w2 && $w1) {
       $tokens{"$w2.$w1"} = 1;
@@ -234,7 +235,7 @@ sub proc_text_ham {
 
       $tokens{"$w3.$w2.$w1"} = $tokens{"$w3.$w2"} = $tokens{".$w3"} = 1;
     }
-    
+
     # deal with leftovers
     if ($w2 && $w1) {
       $tokens{"$w2.$w1"} = 1;
@@ -242,7 +243,7 @@ sub proc_text_ham {
   }
 
   foreach my $tok (keys %tokens) {
-    # we're not tracking hits; we're killing false positives. 
+    # we're not tracking hits; we're killing false positives.
     # as soon as a single FP appears, kill all record of that token,
     # it cannot be used
     remove_fp_ing_token($tok);
@@ -301,7 +302,7 @@ sub filter_into_message_subsets {
   }
 
   logmsg "message subsets found: ".(scalar
-				keys %{$asmstate->{all_patterns_for_set}});
+                                keys %{$asmstate->{all_patterns_for_set}});
 
   $asmstate->{ngram_count} = \%ngram_count;
   $asmstate->{msg_subset_hit} = \%msg_subset_hit;
@@ -364,8 +365,8 @@ sub assemble_regexps {
   my $count = 0;
   my $count_out = 0;
   foreach my $id (sort {
-	      $asmstate->{ngram_count}->{$b} <=> $asmstate->{ngram_count}->{$a}
-	  } keys %{$asmstate->{ngram_count}})
+              $asmstate->{ngram_count}->{$b} <=> $asmstate->{ngram_count}->{$a}
+          } keys %{$asmstate->{ngram_count}})
   {
     my $set = $asmstate->{msg_subset_hit}->{$id};
     next if $done_set{$set}; $done_set{$set}++;
@@ -392,12 +393,12 @@ sub assemble_regexps {
     foreach my $pat (@pats) {
       my $subsumed = 0;
       foreach my $done (@done_pats, @pats_new) {
-	# pattern == existing pattern, or existing pattern is contained by
-	# pattern, or pattern is contained in existing pattern
+        # pattern == existing pattern, or existing pattern is contained by
+        # pattern, or pattern is contained in existing pattern
         if ($pat eq $done || $pat =~ /\Q${done}\E/ || $done =~ /\Q${pat}\E/)
-					{ $subsumed=1; last; }
-	# or one pattern contains the other (but interpreted as a regexp!)
-	# this deals with /foo.{0,10} bar/ vs /foo ish bar/
+                                        { $subsumed=1; last; }
+        # or one pattern contains the other (but interpreted as a regexp!)
+        # this deals with /foo.{0,10} bar/ vs /foo ish bar/
         if ($pat =~ /$done/) { $subsumed=1; last; }
         if ($done =~ /$pat/) { $subsumed=1; last; }
       }
@@ -435,15 +436,15 @@ sub assemble_regexps {
       foreach my $pat (sort @pats) {
         my $name = generate_rule_name($pat);
 
-	if ($opt{ruletype} eq 'header') {
-	  # deal with header-specific munging.
-	  # "\[\\n\]" is the result of "[\n]", at this stage
-	  $pat =~ s/\Q\[\\n\]\E/\\n/gs;
-	  $pat =~ s/\Q\[\\t\]\E/\\t/gs;
-	}
+        if ($opt{ruletype} eq 'header') {
+          # deal with header-specific munging.
+          # "\[\\n\]" is the result of "[\n]", at this stage
+          $pat =~ s/\Q\[\\n\]\E/\\n/gs;
+          $pat =~ s/\Q\[\\t\]\E/\\t/gs;
+        }
 
         print "$opt{ruletype} $opt{ruleprefix}${name}  /$pat/\n";
-	$count_out++;
+        $count_out++;
       }
 
     } else {
@@ -576,7 +577,7 @@ sub subsume_with_dotstars {
     foreach my $p2 (@working) {
       next if ($p1 eq $p2);
 
-      DOTLOOP: for my $dotstar 
+      DOTLOOP: for my $dotstar
             ( ".", ".?", ".{0,3}", ".{0,5}", ".{0,20}", ".{0,40}" )
       {
         my $newpatcapture = $p1."(".$dotstar.")".$p2;
@@ -671,8 +672,8 @@ sub expand_with_dots {
 sub ensure_reqpatlength {
   my @ret = @_;
   if ($opt{reqpatlength}) {
-    @ret = grep { length($_) >= $opt{reqpatlength} } @ret;
-    return () unless @ret;
+        @ret = grep { (length($_) >= $opt{reqpatlength}) && (length($_) < $opt{maxreqpatlength}) } @ret;
+        return () unless @ret;
   }
   return @ret;
 }
