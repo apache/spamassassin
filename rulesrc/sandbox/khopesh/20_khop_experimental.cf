@@ -240,8 +240,8 @@ describe LONG_HEADER_LINE_320	A header line contains 320-399 characters
 describe LONG_HEADER_LINE_400	A header line contains 400-499 characters
 describe LONG_HEADER_LINE_500	A header line contains 500+ characters
 
-header   __SINGLE_HEADER_1K	ALL:raw =~ /(?-xim:(?=(?!X-Spam|X-MailScan)(?:^|\n)[^\s\n]+:(?:.(?!\n\S)){1024,2047}.(?:\n\S|$)))/s
-meta     SINGLE_HEADER_1K	__SINGLE_HEADER_1K && !__VIA_ML && !__DOS_HAS_LIST_ID && !__THREADED
+header   __SINGLE_HEADER_1K	ALL:raw =~ /(?-xim:(?=(?!X-Spam|X-MailScan|D\w{3,8}-Signature)(?:^|\n)[^\s\n]+:(?:.(?!\n\S)){1024,2047}.(?:\n\S|$)))/s
+meta     SINGLE_HEADER_1K	__SINGLE_HEADER_1K && !__VIA_ML && !__THREADED
 
 header   SINGLE_HEADER_2K	ALL:raw =~ /(?-xim:(?=(?:^|\n)[^\s\n]+:(?:.(?!\n\S)){2048,3071}.(?:\n\S|$)))/s
 header   SINGLE_HEADER_3K	ALL:raw =~ /(?-xim:(?=(?:^|\n)[^\s\n]+:(?:.(?!\n\S)){3072,4095}.(?:\n\S|$)))/s
