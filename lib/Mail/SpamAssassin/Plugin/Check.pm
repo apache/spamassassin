@@ -310,8 +310,6 @@ sub run_generic_tests {
   my $package_name = __PACKAGE__;
   my $methodname = $package_name."::_".$ruletype."_tests_".$clean_priority;
 
-  my $do_timing = would_log('dbg', 'ruletimes');
-
   if (!defined &{$methodname} || $doing_user_rules) {
 
     # use %nopts for named parameter-passing; it's more friendly
@@ -336,7 +334,6 @@ sub run_generic_tests {
     $self->push_evalstr_prefix($pms, '
         # start_rules_plugin_code '.$ruletype.' '.$priority.'
         my $scoresptr = $self->{conf}->{scores};
-        my $time = time;
     ');
     if (defined $opts{pre_loop_body}) {
       $opts{pre_loop_body}->($self, $pms, $conf, %nopts);
@@ -344,18 +341,7 @@ sub run_generic_tests {
     $self->add_evalstr($pms,
                        $self->start_rules_plugin_code($ruletype, $priority) );
     while (my($rulename, $test) = each %{$opts{testhash}->{$priority}}) {
-      if ($do_timing > 1 && $ruletype ne "meta") {
-        $self->add_evalstr($pms, '
-          $time = time;
-        ');
-      }
       $opts{loop_body}->($self, $pms, $conf, $rulename, $test, %nopts);
-      if ($do_timing > 1 && $ruletype ne "meta") {
-        $self->add_evalstr($pms, '
-          $time = time - $time;
-          dbg(sprintf("ruletimes: '.$ruletype.' '.$rulename.' %.4f s", $time));
-        ');
-      }
     }
     if (defined $opts{post_loop_body}) {
       $opts{post_loop_body}->($self, $pms, $conf, %nopts);
@@ -437,7 +423,6 @@ sub begin_evalstr_chunk {
   my $package_name = __PACKAGE__;
   my $evalstr = <<"EOT";
 package $package_name;
-use Time::HiRes qw(time);
 sub $chunk_methodname {
   my \$self = shift;
 EOT
