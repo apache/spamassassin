@@ -326,8 +326,8 @@ tflags         TO_EQ_FM_DOM_SPF_FAIL    net
 
 
 # Evaluate ReturnPath and blacklist collisions
-meta           __RP_SAFE_BRBL             RCVD_IN_RP_SAFE && __RCVD_IN_BRBL
-meta           __RP_CERTIFIED_BRBL        RCVD_IN_RP_CERTIFIED && __RCVD_IN_BRBL
+meta           __RP_SAFE_BRBL             RCVD_IN_RP_SAFE && RCVD_IN_BRBL_LASTEXT
+meta           __RP_CERTIFIED_BRBL        RCVD_IN_RP_CERTIFIED && RCVD_IN_BRBL_LASTEXT
 tflags         __RP_SAFE_BRBL             net nopublish
 tflags         __RP_CERTIFIED_BRBL        net nopublish
 meta           __RP_SAFE_ZEN              RCVD_IN_RP_SAFE && __RCVD_IN_ZEN
