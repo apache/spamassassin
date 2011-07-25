@@ -645,7 +645,7 @@ describe    CN_B2B_SPAMMER         Chinese company introducing itself
 uri         __UPPERCASE_URI        /^[^:A-Z]+[A-Z]/
 
 # __ version of khopesh SINGLE_HEADER_1K, for use in metas
-header      __SINGLE_HEADER_1K     ALL:raw =~ /(?-xim:(?=(?!X-Spam|X-MailScan)(?:^|\n)[^\s\n]+:(?:.(?!\n\S)){1024,2047}.(?:\n\S|$)))/s 
+#header      __SINGLE_HEADER_1K     ALL:raw =~ /(?-xim:(?=(?!X-Spam|X-MailScan)(?:^|\n)[^\s\n]+:(?:.(?!\n\S)){1024,2047}.(?:\n\S|$)))/s 
 
 # __ version of mmartinec RP_MATCHES_RCVD, for use in metas
 
