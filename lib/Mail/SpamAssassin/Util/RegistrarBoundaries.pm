@@ -163,7 +163,7 @@ foreach(qw/
   gov.ie
   ac.il co.il gov.il idf.il k12.il muni.il net.il org.il
   ac.im co.im gov.im net.im nic.im org.im
-  ac.in co.in edu.in ernet.in gov.in ind.in mil.in net.in nic.in org.in res.in
+  ac.in co.in edu.in ernet.in gov.in ind.in mil.in nic.in org.in res.in
   com.io gov.io mil.io net.io org.io
   ac.ir co.ir gov.ir id.ir net.ir org.ir sch.ir
   edu.it gov.it
