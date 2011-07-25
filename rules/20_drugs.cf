@@ -210,7 +210,7 @@ meta __DRUGS_SLEEP (__DRUGS_SLEEP1 || __DRUGS_SLEEP2 || __DRUGS_SLEEP3 ||__DRUGS
 
 #muscle relaxants
 #soma
-body __DRUGS_MUSCLE1	/(?:\b|\s)[_\W]{0,3}s[_\W]{0,3}[o0\xF2-\xF6][_\W]{0,3}m[_\W]{0,3}[a4\xE0-\xE6@][_\W]{0,3}(?:\b|\s)/i
+body __DRUGS_MUSCLE1	/(?:\b|\s)[_\W]{0,3}s[_\W]{0,3}[o0\xF2-\xF6][_\W]{0,3}m[_\W]{0,3}[a4\xE0-\xE3\xE5\xE6@][_\W]{0,3}(?:\b|\s)/i
 #cyclobenzaprine
 body __DRUGS_MUSCLE2	/\b_{0,3}cycl[o0\xF2-\xF6]b[e3\xE8-\xEB]nz[a4\xE0-\xE6@]pr[i1!|l\xEC-\xEF]n[e3\xE8-\xEB]_{0,3}(?:\b|\s)/i
 #flexeril

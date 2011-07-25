@@ -3902,7 +3902,7 @@ replace_rules FRT_SLUT
 #counts   FRT_SLUT                 11s/0h of 47019 corpus (37183s/9836h FVGT) 12/23/06
 
 
-body     FRT_SOMA               /<post P2>\b(?!soma|500mg)<SX><O><M><A>\b/i
+body     FRT_SOMA               /<post P2>\b(?!soma|sommar|500mg)<SX><O><M><A>\b/i
 describe FRT_SOMA               ReplaceTags: Soma
 ##score    FRT_SOMA             2.264
 replace_rules FRT_SOMA
@@ -3911,7 +3911,7 @@ replace_rules FRT_SOMA
 #counts   FRT_SOMA                 234s/0h of 47019 corpus (37183s/9836h FVGT) 12/23/06
 
 
-body     FRT_SOMA2              /<inter SP2><post P2>\b(?!soma|500? ?mg)<SX><O><M><A>\b/i
+body     FRT_SOMA2              /<inter SP2><post P2>\b(?!soma|som[m\s]\xE4|sommar|500? ?mg)<SX><O><M><A>\b/i
 describe FRT_SOMA2              ReplaceTags: Soma (2)
 ##score    FRT_SOMA2            2.199
 replace_rules FRT_SOMA2
