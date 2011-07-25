@@ -8,9 +8,9 @@
 # The ASF licenses this file to you under the Apache License, Version 2.0
 # (the "License"); you may not use this file except in compliance with
 # the License.  You may obtain a copy of the License at:
-# 
+#
 #     http://www.apache.org/licenses/LICENSE-2.0
-# 
+#
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -60,7 +60,7 @@ foreach (qw/
   sr st su sv sy sz tc td tel tf tg th tj tk tl tm tn to tp tr travel tt
   tv tw tz ua ug uk us uy uz va vc ve vg vi vn vu wf ws ye za
   zm zw
-  /) { 
+  /) {
   $VALID_TLDS{$_} = 1;
 }
 
@@ -163,7 +163,7 @@ foreach(qw/
   gov.ie
   ac.il co.il gov.il idf.il k12.il muni.il net.il org.il
   ac.im co.im gov.im net.im nic.im org.im
-  ac.in co.in edu.in ernet.in firm.in gen.in gov.in ind.in mil.in net.in nic.in org.in res.in
+  ac.in co.in edu.in ernet.in gov.in ind.in mil.in net.in nic.in org.in res.in
   com.io gov.io mil.io net.io org.io
   ac.ir co.ir gov.ir id.ir net.ir org.ir sch.ir
   edu.it gov.it
@@ -278,8 +278,8 @@ foreach(qw/
 # below.
 #
 foreach (qw/
-  ak al ar az ca co ct dc de fl ga gu hi ia id il in ks ky la ma md me mi 
-  mn mo ms mt nc nd ne nh nj nm nv ny oh ok or pa pr ri sc sd tn tx ut va vi 
+  ak al ar az ca co ct dc de fl ga gu hi ia id il in ks ky la ma md me mi
+  mn mo ms mt nc nd ne nh nj nm nv ny oh ok or pa pr ri sc sd tn tx ut va vi
   vt wa wi wv wy
   /) {
   $US_STATES{$_} = 1;
@@ -327,32 +327,32 @@ sub split_domain {
 
     while (@domparts > 1) { # go until we find the TLD
       if (@domparts == 4) {
-	if ($domparts[3] eq 'us' &&
-	    (($domparts[0] eq 'pvt' && $domparts[1] eq 'k12') ||
-	     ($domparts[0] =~ /^c[io]$/)))
-	{
+        if ($domparts[3] eq 'us' &&
+            (($domparts[0] eq 'pvt' && $domparts[1] eq 'k12') ||
+             ($domparts[0] =~ /^c[io]$/)))
+        {
           # http://www.neustar.us/policies/docs/rfc_1480.txt
           # "Fire-Dept.CI.Los-Angeles.CA.US"
           # "<school-name>.PVT.K12.<state>.US"
           last if ($US_STATES{$domparts[2]});
-	}
+        }
       }
       elsif (@domparts == 3) {
         # http://www.neustar.us/policies/docs/rfc_1480.txt
-	# demon.co.uk
-	# esc.edu.ar
-	# [^\.]+\.${US_STATES}\.us
-	if ($domparts[2] eq 'us') {
+        # demon.co.uk
+        # esc.edu.ar
+        # [^\.]+\.${US_STATES}\.us
+        if ($domparts[2] eq 'us') {
           last if ($US_STATES{$domparts[1]});
-	}
+        }
         else {
           my $temp = join(".", @domparts);
           last if ($THREE_LEVEL_DOMAINS{$temp});
         }
       }
       elsif (@domparts == 2) {
-	# co.uk, etc.
-	my $temp = join(".", @domparts);
+        # co.uk, etc.
+        my $temp = join(".", @domparts);
         last if ($TWO_LEVEL_DOMAINS{$temp});
       }
       push(@hostname, shift @domparts);
@@ -380,8 +380,8 @@ part, returning just the domain.
 
 Examples:
 
-    "www.foo.com" => "foo.com" 
-    "www.foo.co.uk" => "foo.co.uk" 
+    "www.foo.com" => "foo.com"
+    "www.foo.co.uk" => "foo.co.uk"
 
 =cut
 
