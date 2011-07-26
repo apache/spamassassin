@@ -22,7 +22,7 @@ if ( $EVAL_ERROR ) {
     plan( skip_all => $msg );
 }
 
-open RC, ">../t/log/perlcritic.rc" or die "cannot write t/log/perlcritic.rc";
+open RC, ">../t/log/perlcritic.rc" or die "cannot create t/log/perlcritic.rc";
 
 # we should remove some of these excludes if/when we feel like fixing 'em!
 print RC q{
@@ -34,8 +34,8 @@ print RC q{
   [TestingAndDebugging::ProhibitNoStrict]
   allow = refs
 
-};
-close RC;
+}  or die "cannot write t/log/perlcritic.rc";
+close RC  or die "cannot close t/log/perlcritic.rc";
 
 Test::Perl::Critic->import( -profile => "../t/log/perlcritic.rc" );
 all_critic_ok("../blib");

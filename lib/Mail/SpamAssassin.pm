@@ -2063,9 +2063,8 @@ sub _get_cf_pre_files_in_dir {
       my $eval_stat = $@ ne '' ? $@ : "errno=$!";  chomp $eval_stat;
       die "_get_cf_pre_files_in_dir error: $eval_stat";
     };
-    return sort { $a cmp $b } @cfs;
-
-    die "oops! $@";     # should never get here
+    @cfs = sort { $a cmp $b } @cfs;
+    return @cfs;
   }
   else {
     opendir(SA_CF_DIR, $dir) or warn "config: cannot opendir $dir: $!\n";
