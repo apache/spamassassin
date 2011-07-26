@@ -157,7 +157,7 @@ sub update {
 sub finish {
   my ($self) = @_;
 
-  return undef unless $self->{dirty};
+  return unless $self->{dirty};
 
   # Cache is dirty, so write out new file
 
@@ -193,7 +193,7 @@ sub finish {
     }
   }
 
-  return undef;
+  return;
 }
 
 sub canon {

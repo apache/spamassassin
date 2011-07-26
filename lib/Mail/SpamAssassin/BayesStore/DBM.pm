@@ -1005,7 +1005,7 @@ sub set_last_expire {
 sub get_running_expire_tok {
   my ($self) = @_;
   my $running = $self->{db_toks}->{$RUNNING_EXPIRE_MAGIC_TOKEN};
-  if (!$running || $running =~ /\D/) { return undef; }
+  if (!$running || $running =~ /\D/) { return; }
   return $running;
 }
 

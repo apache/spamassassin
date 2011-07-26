@@ -263,7 +263,7 @@ sub parse_and_canonicalize_subtest {
     # a comma-separated list of rcode names or their decimal values
     my @rcodes = split(/\s*,\s*/, uc $1);
     for (@rcodes) { $_ = $rcode_value{$_}  if exists $rcode_value{$_} }
-    return undef  if grep(!/^\d+\z/, @rcodes);
+    return  if grep(!/^\d+\z/, @rcodes);
     # a hashref indicates a list of DNS rcodes (stored as hash keys)
     $result = { map( ($_,1), @rcodes) };
   } elsif ($subtest =~ m{^ ([^/-]+) (?: ([/-]) (.+) )? \z}xs) {
@@ -280,7 +280,7 @@ sub parse_and_canonicalize_subtest {
         $_ = Mail::SpamAssassin::Util::my_inet_aton($_);  # quad-dot -> number
         $any_quad_dot = 1;
       } else {
-        return undef;
+        return;
       }
     }
     $result = defined $n2 ? $n1.$delim.$n2

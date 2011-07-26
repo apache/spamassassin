@@ -123,7 +123,7 @@ sub check_address {
   my ($self, $addr, $origip, $signedby) = @_;
 
   if (!defined $self->{checker}) {
-    return undef;		# no factory defined; we can't check
+    return;		# no factory defined; we can't check
   }
 
   $self->{entry} = undef;
@@ -192,11 +192,11 @@ sub add_score {
   my ($self,$score) = @_;
 
   if (!defined $self->{checker}) {
-    return undef;		# no factory defined; we can't check
+    return;		# no factory defined; we can't check
   }
   if ($score != $score) {
     warn "auto-whitelist: attempt to add a $score to AWL entry ignored\n";
-    return undef;		# don't try to add a NaN
+    return;		# don't try to add a NaN
   }
 
   $self->{entry}->{count} ||= 0;
@@ -248,7 +248,7 @@ sub modify_address {
   my ($self, $addr, $score, $signedby) = @_;
 
   if (!defined $self->{checker}) {
-    return undef;		# no factory defined; we can't check
+    return;		# no factory defined; we can't check
   }
 
   my $fulladdr = $self->pack_addr ($addr, undef);
@@ -275,7 +275,7 @@ sub modify_address {
 sub finish {
   my $self = shift;
 
-  if (!defined $self->{checker}) { return undef; }
+  return  if !defined $self->{checker};
   $self->{checker}->finish();
 }
 

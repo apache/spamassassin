@@ -299,9 +299,7 @@ sub decode {
   if ( !exists $self->{'decoded'} ) {
     # Someone is looking for a decoded part where there is no raw data
     # (multipart or subparsed message, etc.)  Just return undef.
-    if (!exists $self->{'raw'}) {
-      return undef;
-    }
+    return  if !exists $self->{'raw'};
 
     my $raw;
 

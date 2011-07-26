@@ -47,7 +47,8 @@ BEGIN {
     require IO::Socket::INET;
     *new_io_socket_inetx = sub { IO::Socket::INET->new(@_); };
     *ip_or_name_to_ip    = sub {
-      my $in_addr = (gethostbyname(shift))[4] or return undef;
+      my $in_addr = (gethostbyname(shift))[4];
+      $in_addr or return;
       Socket::inet_ntoa($in_addr);
     };
     *peer_info_from_socket = sub {
@@ -66,8 +67,8 @@ BEGIN {
         Socket6::getaddrinfo(
           shift, '', Socket::AF_UNSPEC(), Socket::SOCK_STREAM()
         )
-        )[3]
-        or return undef;
+        )[3];
+      $addr or return;
       $addr = (Socket6::getnameinfo($addr, Socket6::NI_NUMERICHOST()))[0];
     };
     *peer_info_from_socket = sub {
@@ -2745,7 +2746,7 @@ sub syswrite_full_buffer {
 		  || (exists &Errno::EWOULDBLOCK && $! == &Errno::EWOULDBLOCK))
 	  {
 	      # an error that wasn't non-blocking I/O-related.  that's serious
-	      return undef;
+	      return;
 	  }
 	  # errcode says to try again
       }

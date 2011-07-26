@@ -572,7 +572,7 @@ sub cond_clause_can_or_has {
     $self->lint_warn("bad 'if' line, cannot find '::' in $fn_name($method), ".
                      "in \"$self->{currentfile}\"", undef);
   }
-  return undef;
+  return;
 }
 
 # Let's do some linting here ...
