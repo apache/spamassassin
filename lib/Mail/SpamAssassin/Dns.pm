@@ -475,7 +475,7 @@ sub lookup_ns {
     } or do {
       my $eval_stat = $@ ne '' ? $@ : "errno=$!";  chomp $eval_stat;
       dbg("dns: NS lookup failed horribly, perhaps bad resolv.conf setting? (%s)", $eval_stat);
-      return undef;
+      return;
     };
   }
 
@@ -509,7 +509,7 @@ sub lookup_mx {
     } or do {
       my $eval_stat = $@ ne '' ? $@ : "errno=$!";  chomp $eval_stat;
       dbg("dns: MX lookup failed horribly, perhaps bad resolv.conf setting? (%s)", $eval_stat);
-      return undef;
+      return;
     };
   }
 
@@ -521,7 +521,7 @@ sub lookup_mx_exists {
 
   my $ret = 0;
   my $recs = $self->lookup_mx ($dom);
-  if (!defined $recs) { return undef; }
+  if (!defined $recs) { return; }
   if (scalar @{$recs}) { $ret = 1; }
 
   dbg("dns: MX for '$dom' exists? $ret");
@@ -531,17 +531,17 @@ sub lookup_mx_exists {
 sub lookup_ptr {
   my ($self, $dom) = @_;
 
-  return undef unless $self->load_resolver();
+  return unless $self->load_resolver();
   if ($self->{main}->{local_tests_only}) {
     dbg("dns: local tests only, not looking up PTR");
-    return undef;
+    return;
   }
 
   my $IP_PRIVATE = IP_PRIVATE;
 
   if ($dom =~ /${IP_PRIVATE}/) {
     dbg("dns: IP is private, not looking up PTR: $dom");
-    return undef;
+    return;
   }
 
   return if ($self->server_failed_to_respond_for_domain ($dom));
@@ -567,7 +567,7 @@ sub lookup_ptr {
     } or do {
       my $eval_stat = $@ ne '' ? $@ : "errno=$!";  chomp $eval_stat;
       dbg("dns: PTR lookup failed horribly, perhaps bad resolv.conf setting? (%s)", $eval_stat);
-      return undef;
+      return;
     };
   }
   dbg("dns: PTR for '$dom': '$name'");
@@ -579,10 +579,10 @@ sub lookup_ptr {
 sub lookup_a {
   my ($self, $name) = @_;
 
-  return undef unless $self->load_resolver();
+  return unless $self->load_resolver();
   if ($self->{main}->{local_tests_only}) {
     dbg("dns: local tests only, not looking up A records");
-    return undef;
+    return;
   }
 
   return if ($self->server_failed_to_respond_for_domain ($name));
@@ -609,7 +609,7 @@ sub lookup_a {
     } or do {
       my $eval_stat = $@ ne '' ? $@ : "errno=$!";  chomp $eval_stat;
       dbg("dns: A lookup failed horribly, perhaps bad resolv.conf setting? (%s)", $eval_stat);
-      return undef;
+      return;
     };
   }
 

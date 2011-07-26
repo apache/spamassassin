@@ -86,7 +86,7 @@ sub new {
 
   if (!exists($args->{total}) || $args->{total} < 1) {
     warn "progress: must provide a total value > 1";
-    return undef;
+    return;
   }
 
   my $self = {

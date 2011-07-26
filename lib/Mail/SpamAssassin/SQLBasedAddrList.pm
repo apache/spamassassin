@@ -126,7 +126,7 @@ sub new_checker {
   if (!$main->{conf}->{user_awl_dsn} ||
       !$main->{conf}->{user_awl_sql_table}) {
     dbg("auto-whitelist: sql-based invalid config");
-    return undef;
+    return;
   }
 
   my $dsn    = $main->{conf}->{user_awl_dsn};
@@ -138,7 +138,7 @@ sub new_checker {
   if(!$dbh) {
     info("auto-whitelist: sql-based unable to connect to database (%s) : %s",
          $dsn, DBI::errstr);
-    return undef;
+    return;
   }
 
   dbg("auto-whitelist: sql-based connected to $dsn");

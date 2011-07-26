@@ -454,11 +454,11 @@ sub body_charset_is_likely_to_fp {
 
 sub get_charset_from_ct_line {
   my $type = shift;
-  if (!defined $type) { return undef; }
+  if (!defined $type) { return; }
   if ($type =~ /charset="([^"]+)"/i) { return $1; }
   if ($type =~ /charset='([^']+)'/i) { return $1; }
   if ($type =~ /charset=(\S+)/i) { return $1; }
-  return undef;
+  return;
 }
 
 # came up on the users@ list, look for multipart/alternative parts which

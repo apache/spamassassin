@@ -108,7 +108,7 @@ use constant RUNNING_ON_WINDOWS => ($^O =~ /^(?:mswin|dos|os2)/oi);
         }
       }
     }
-    return undef;
+    return;
   }
 }
 
@@ -272,7 +272,7 @@ sub untaint_hostname {
 sub untaint_var {
   no re 'taint';  # override a  "use re 'taint'"  from outer scope
   local ($_) = @_;
-  return undef unless defined;
+  return unless defined;
 
   unless (ref) {
     local($1); # avoid Perl taint bug: tainted global $1 propagates taintedness
@@ -459,7 +459,7 @@ sub parse_rfc822_date {
     $dd = $1; $mon = lc($2); $yyyy = $3;
   } else {
     dbg("util: time cannot be parsed: $date");
-    return undef;
+    return;
   }
 
   # handle two and three digit dates as specified by RFC 2822
@@ -547,7 +547,7 @@ sub parse_rfc822_date {
   } or do {
     my $eval_stat = $@ ne '' ? $@ : "errno=$!";  chomp $eval_stat;
     dbg("util: time cannot be parsed: $date, $yyyy-$mmm-$dd $hh:$mm:$ss, $eval_stat");
-    return undef;
+    return;
   };
 
   if ($tzoff =~ /([-+])(\d\d)(\d\d)$/)	# convert to seconds difference
@@ -1366,7 +1366,7 @@ sub first_date {
     my $time = parse_rfc822_date($string);
     return $time if defined($time) && $time;
   }
-  return undef;
+  return;
 }
 
 sub receive_date {
@@ -1614,7 +1614,7 @@ sub regexp_remove_delimiters {
   my $delim;
   if (!defined $re || $re eq '') {
     warn "cannot remove delimiters from null regexp";
-    return undef;   # invalid
+    return;  # invalid
   }
   elsif ($re =~ s/^m{//) {              # m{foo/bar}
     $delim = '}';

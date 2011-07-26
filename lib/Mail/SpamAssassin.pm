@@ -1990,7 +1990,7 @@ sub expand_name ($) {
 
 sub sed_path {
   my ($self, $path) = @_;
-  return undef if (!defined $path);
+  return if !defined $path;
 
   if (exists($self->{conf}->{sed_path_cache}->{$path})) {
     return $self->{conf}->{sed_path_cache}->{$path};

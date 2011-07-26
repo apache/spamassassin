@@ -515,7 +515,7 @@ sub order_idle_child_to_accept {
   }
   else {
     dbg("prefork: no spare children to accept, waiting for one to complete");
-    return undef;
+    return;
   }
 }
 
@@ -529,7 +529,7 @@ sub wait_for_child_to_accept {
       return 1;     # 1 == success
     }
     if ($state == PFSTATE_ERROR) {
-      return undef;
+      return;
     }
     else {
       warn "prefork: ordered child $kid to accept, but they reported state '$state', killing rogue";
@@ -537,7 +537,7 @@ sub wait_for_child_to_accept {
       $self->adapt_num_children();
       sleep 1;
 
-      return undef;
+      return;
     }
   }
 }
@@ -635,7 +635,7 @@ retry_read:
         || (exists &Errno::EWOULDBLOCK && $! == &Errno::EWOULDBLOCK))
     {
       # an error that wasn't non-blocking I/O-related.  that's serious
-      return undef;
+      return;
     }
 
     # ok, we didn't get it first time.  we'll have to start using
@@ -652,7 +652,7 @@ retry_read:
     elsif ($now > $deadline) {
       # timed out!  report failure
       warn "prefork: sysread(".$sock->fileno.") failed after $timeout secs";
-      return undef;
+      return;
     }
     else {
       $tout = $deadline - $now;     # the remaining timeout
@@ -703,7 +703,7 @@ retry_write:
     warn "prefork: syswrite(".$sock->fileno.") to $targetname failed on try $try";
     if ($try > $numretries) {
       warn "prefork: giving up";
-      return undef;
+      return;
     }
     else {
       # give it 1 second to recover
@@ -729,7 +729,7 @@ retry_write:
         || (exists &Errno::EWOULDBLOCK && $! == &Errno::EWOULDBLOCK))
     {
       # an error that wasn't non-blocking I/O-related.  that's serious
-      return undef;
+      return;
     }
 
     warn "prefork: retrying syswrite(): $!";

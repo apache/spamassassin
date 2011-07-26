@@ -303,7 +303,7 @@ sub set_running_expire_tok {
   unless (defined($rows)) {
     dbg("bayes: set_running_expire_tok: SQL error: ".$self->{_dbh}->errstr());
     $self->{_dbh}->rollback();
-    return undef;
+    return;
   }
 
   $self->{_dbh}->commit();

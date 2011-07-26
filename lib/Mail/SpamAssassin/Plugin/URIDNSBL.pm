@@ -529,7 +529,7 @@ sub parse_and_canonicalize_subtest {
         $_ = Mail::SpamAssassin::Util::my_inet_aton($_);  # quad-dot -> number
         $any_quad_dot = 1;
       } else {
-        return undef;
+        return;
       }
     }
     $digested_subtest = defined $n2 ? $n1.$delim.$n2

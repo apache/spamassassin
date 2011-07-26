@@ -171,7 +171,7 @@ sub _convert_ipv4_cidr_to_ipv6 {
   my ($self, $cidr) = @_;
 
   # only do this for IPv4 addresses
-  return undef unless ($cidr =~ /^\d+[.\/]/);
+  return unless $cidr =~ /^\d+[.\/]/;
 
   if ($cidr !~ /\//) {      # no mask
     return NetAddr::IP->new6("::ffff:".$cidr);
@@ -186,7 +186,7 @@ sub _convert_ipv4_cidr_to_ipv6 {
   # now, move that from 0:0:0:0:0:0: space to 0:0:0:0:0:ffff: space
   if (!defined $ip6 || $ip6 !~ /^0:0:0:0:0:0:(.*)$/) {
     warn "oops! unparseable IPv6 address for $cidr: $ip6";
-    return undef;
+    return;
   }
 
   return NetAddr::IP->new6("::ffff:$1");

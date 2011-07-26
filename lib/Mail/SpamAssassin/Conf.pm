@@ -1122,7 +1122,7 @@ Unicode.  Requires the Encode::Detect module, HTML::Parser version
 	unless (defined $value && $value !~ /^$/) {
 	    return $MISSING_REQUIRED_VALUE;
 	}
-	return undef if $value == 0;
+	return  if $value == 0;
 	return $INVALID_VALUE unless $value == 1;
 
 	unless ($] > 5.008004) {
@@ -4011,7 +4011,7 @@ sub get_rule_value {
         return $self->{$test_type}->{$pri}->{$rulename};
       }
     }
-    return undef; # if we get here we didn't find the rule
+    return;  # if we get here we didn't find the rule
   }
 }
 
@@ -4032,7 +4032,7 @@ sub delete_rule {
         return delete($self->{$test_type}->{$pri}->{$rulename});
       }
     }
-    return undef; # if we get here we didn't find the rule
+    return;  # if we get here we didn't find the rule
   }
 }
 
