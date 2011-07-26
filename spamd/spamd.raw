@@ -16,6 +16,10 @@
 # limitations under the License.
 # </@LICENSE>
 
+use strict;
+use warnings;
+use re 'taint';
+
 my $PREFIX          = '@@PREFIX@@';             # substituted at 'make' time
 my $DEF_RULES_DIR   = '@@DEF_RULES_DIR@@';      # substituted at 'make' time
 my $LOCAL_RULES_DIR = '@@LOCAL_RULES_DIR@@';    # substituted at 'make' time
@@ -31,10 +35,6 @@ BEGIN {
     unshift ( @INC, '../lib' );                     # REMOVEFORINST
   }                                                 # REMOVEFORINST
 }
-
-use strict;
-use warnings;
-use re 'taint';
 
 # Big Ugly Hack; purpose: don't force requirement on IO::Socket::INET6
 BEGIN {

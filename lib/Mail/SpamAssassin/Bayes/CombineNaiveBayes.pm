@@ -17,6 +17,8 @@
 # limitations under the License.
 # </@LICENSE>
 
+use strict;  # make Test::Perl::Critic happy
+
 # this package is a no-op; the real impl code is in another pkg.
 package Mail::SpamAssassin::Bayes::CombineNaiveBayes; 1;
 

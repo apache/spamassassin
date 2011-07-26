@@ -1,4 +1,5 @@
 package Mail::SpamAssassin::Plugin::FreeMail;
+use strict;
 my $VERSION = 2.001;
 
 ### About:
@@ -108,7 +109,6 @@ my $VERSION = 2.001;
 use Mail::SpamAssassin::Plugin;
 use Mail::SpamAssassin::PerMsgStatus;
 use Mail::SpamAssassin::Util::RegistrarBoundaries;
-use strict;
 use vars qw(@ISA);
 @ISA = qw(Mail::SpamAssassin::Plugin);
 

@@ -15,8 +15,8 @@
 # limitations under the License.
 # </@LICENSE>
 
-package Mail::SpamAssassin::Dns;
-1;
+use strict;  # make Test::Perl::Critic happy
+package Mail::SpamAssassin::Dns; 1;
 
 package Mail::SpamAssassin::PerMsgStatus;
 
