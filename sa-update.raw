@@ -17,6 +17,10 @@
 # limitations under the License.
 # </@LICENSE>
 
+use strict;
+use warnings;
+use re 'taint';
+
 my $VERSION = 'svnunknown';
 if ('$Id$' =~ ':') {
   # Subversion keyword "$Id$" has been successfully expanded.
@@ -24,7 +28,6 @@ if ('$Id$' =~ ':') {
   # https://bugs.launchpad.net/launchpad/+bug/780916
   $VERSION = 'svn' . (split(/\s+/, '$Id$'))[2];
 }
-
 
 my $PREFIX          = '@@PREFIX@@';             # substituted at 'make' time
 my $DEF_RULES_DIR   = '@@DEF_RULES_DIR@@';      # substituted at 'make' time
@@ -51,9 +54,6 @@ use File::Path;
 use Getopt::Long;
 use Pod::Usage;
 use Config;
-use strict;
-use warnings;
-use re 'taint';
 
 BEGIN {                          # see comments in "spamassassin.raw" for doco
   my @bin = File::Spec->splitpath($0);

@@ -17,8 +17,8 @@
 
 # Eval Tests to detect genuine mailing lists.
 
-package Mail::SpamAssassin::MailingList;
-1;
+use strict;  # make Test::Perl::Critic happy
+package Mail::SpamAssassin::MailingList; 1;
 
 package Mail::SpamAssassin::PerMsgStatus;
 
