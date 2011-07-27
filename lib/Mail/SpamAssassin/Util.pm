@@ -319,7 +319,7 @@ sub taint_var {
 # append optional mesage (dual-valued errno or a string or a number),
 # returning the resulting string
 #
-sub exit_status_str($;$) {
+sub exit_status_str {
   my($stat,$errno) = @_;
   my $str;
   if (!defined($stat)) {
@@ -349,7 +349,7 @@ sub exit_status_str($;$) {
 # check errno to be 0 and a process exit status to be in the list of success
 # status codes, returning true if both are ok, and false otherwise
 #
-sub proc_status_ok($;$@) {
+sub proc_status_ok {
   my($exit_status,$errno,@success) = @_;
   my $ok = 0;
   if ((!defined $errno || $errno == 0) && WIFEXITED($exit_status)) {

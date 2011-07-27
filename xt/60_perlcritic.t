@@ -29,7 +29,7 @@ print RC q{
 
   severity = 5
   verbose = 10
-  exclude = ValuesAndExpressions::ProhibitLeadingZeros InputOutput::ProhibitBarewordFileHandles InputOutput::ProhibitTwoArgOpen Subroutines::ProhibitSubroutinePrototypes BuiltinFunctions::ProhibitStringyEval InputOutput::ProhibitInteractiveTest
+  exclude = ValuesAndExpressions::ProhibitLeadingZeros InputOutput::ProhibitBarewordFileHandles InputOutput::ProhibitTwoArgOpen BuiltinFunctions::ProhibitStringyEval InputOutput::ProhibitInteractiveTest
 
   [TestingAndDebugging::ProhibitNoStrict]
   allow = refs

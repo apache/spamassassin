@@ -1967,7 +1967,7 @@ sub create_default_prefs {
 
 ###########################################################################
 
-sub expand_name ($) {
+sub expand_name {
   my ($self, $name) = @_;
   my $home = $self->{user_dir} || $ENV{HOME} || '';
 
