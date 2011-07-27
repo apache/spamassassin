@@ -709,7 +709,7 @@ sub _fixup_report_line_endings {
   }
 }
 
-sub _get_added_headers($) {
+sub _get_added_headers {
   my ($self, $which) = @_;
   my $str = '';
   # use string appends to put this back together -- I finally benchmarked it.
