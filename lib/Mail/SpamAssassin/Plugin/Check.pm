@@ -629,11 +629,11 @@ sub do_meta_tests {
 
     # If there are any rules left, we can't solve the dependencies so complain
     my %metas = map { $_ => 1 } @metas; # keep a small cache for fast lookups
-    foreach $rulename (@metas) {
+    foreach my $rulename_t (@metas) {
       $pms->{rule_errors}++; # flag to --lint that there was an error ...
       my $msg =
-          "rules: excluding meta test $rulename, unsolved meta dependencies: " .
-              join(", ", grep($metas{$_}, @{ $rule_deps{$rulename} }));
+          "rules: excluding meta test $rulename_t, unsolved meta dependencies: " .
+              join(", ", grep($metas{$_}, @{ $rule_deps{$rulename_t} }));
       if ($self->{main}->{lint_rules}) {
         warn $msg."\n";
       }

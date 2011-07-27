@@ -2124,7 +2124,7 @@ sub find_all_addrs_in_mail {
   my @ret;
   my %done;
 
-  foreach $_ (@addrlist) {
+  foreach (@addrlist) {
     s/^mailto://;       # from Outlook "forwarded" message
     next if defined ($done{$_}); $done{$_} = 1;
     push (@ret, $_);
