@@ -22,7 +22,7 @@ if ( $EVAL_ERROR ) {
     plan( skip_all => $msg );
 }
 
-open RC, ">../t/log/perlcritic.rc" or die "cannot create t/log/perlcritic.rc";
+open RC, ">../t/log/perlcritic.rc"  or die "cannot create t/log/perlcritic.rc";
 
 # we should remove some of these excludes if/when we feel like fixing 'em!
 print RC q{
