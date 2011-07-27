@@ -4045,9 +4045,8 @@ sub trim_rules {
   my ($self, $regexp) = @_;
 
   my @all_rules;
-  my $rule_type;
 
-  foreach $rule_type ($self->get_rule_types()) {
+  foreach my $rule_type ($self->get_rule_types()) {
     push(@all_rules, $self->get_rule_keys($rule_type));
   }
 
@@ -4068,7 +4067,7 @@ sub trim_rules {
     $rules_to_keep_hash{$rule} = 1;
   }
 
-  foreach $rule_type ($self->get_rule_types()) {
+  foreach my $rule_type ($self->get_rule_types()) {
     foreach my $rulekey ($self->get_rule_keys($rule_type)) {
       $self->delete_rule($rule_type, $rulekey)
                     if (!$rules_to_keep_hash{$rulekey});

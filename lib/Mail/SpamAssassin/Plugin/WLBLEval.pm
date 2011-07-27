@@ -58,8 +58,7 @@ sub new {
 
 sub check_from_in_blacklist {
   my ($self, $pms) = @_;
-  local ($_);
-  foreach $_ ($pms->all_from_addrs()) {
+  foreach ($pms->all_from_addrs()) {
     if ($self->_check_whitelist ($self->{main}->{conf}->{blacklist_from}, $_)) {
       return 1;
     }
@@ -68,8 +67,7 @@ sub check_from_in_blacklist {
 
 sub check_to_in_blacklist {
   my ($self, $pms) = @_;
-  local ($_);
-  foreach $_ ($pms->all_to_addrs()) {
+  foreach ($pms->all_to_addrs()) {
     if ($self->_check_whitelist ($self->{main}->{conf}->{blacklist_to}, $_)) {
       return 1;
     }
@@ -78,8 +76,7 @@ sub check_to_in_blacklist {
 
 sub check_to_in_whitelist {
   my ($self, $pms) = @_;
-  local ($_);
-  foreach $_ ($pms->all_to_addrs()) {
+  foreach ($pms->all_to_addrs()) {
     if ($self->_check_whitelist ($self->{main}->{conf}->{whitelist_to}, $_)) {
       return 1;
     }
@@ -88,8 +85,7 @@ sub check_to_in_whitelist {
 
 sub check_to_in_more_spam {
   my ($self, $pms) = @_;
-  local ($_);
-  foreach $_ ($pms->all_to_addrs()) {
+  foreach ($pms->all_to_addrs()) {
     if ($self->_check_whitelist ($self->{main}->{conf}->{more_spam_to}, $_)) {
       return 1;
     }
@@ -98,8 +94,7 @@ sub check_to_in_more_spam {
 
 sub check_to_in_all_spam {
   my ($self, $pms) = @_;
-  local ($_);
-  foreach $_ ($pms->all_to_addrs()) {
+  foreach ($pms->all_to_addrs()) {
     if ($self->_check_whitelist ($self->{main}->{conf}->{all_spam_to}, $_)) {
       return 1;
     }
@@ -192,8 +187,7 @@ sub check_forged_in_default_whitelist {
 sub _check_from_in_whitelist {
   my ($self, $pms) = @_;
   my $found_match = 0;
-  local ($_);
-  foreach $_ ($pms->all_from_addrs()) {
+  foreach ($pms->all_from_addrs()) {
     if ($self->_check_whitelist ($self->{main}->{conf}->{whitelist_from}, $_)) {
       $pms->{from_in_whitelist} = 1;
       return;
@@ -217,8 +211,7 @@ sub _check_from_in_whitelist {
 sub _check_from_in_default_whitelist {
   my ($self, $pms) = @_;
   my $found_match = 0;
-  local ($_);
-  foreach $_ ($pms->all_from_addrs()) {
+  foreach ($pms->all_from_addrs()) {
     my $wh = $self->_check_whitelist_rcvd ($pms, $self->{main}->{conf}->{def_whitelist_from_rcvd}, $_);
     if ($wh == 1) {
       $pms->{from_in_default_whitelist} = 1;

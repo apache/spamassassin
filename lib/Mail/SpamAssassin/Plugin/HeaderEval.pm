@@ -765,11 +765,9 @@ sub _get_received_header_times {
     unshift @received, (shift @local);
   }
 
-  my $rcvd;
-
   if (scalar(@local)) {
     my (@fetchmail_times);
-    foreach $rcvd (@local) {
+    foreach my $rcvd (@local) {
       if ($rcvd =~ m/(\s.?\d+ \S\S\S \d+ \d+:\d+:\d+ \S+)/) {
 	my $date = $1;
         dbg2("eval: trying Received fetchmail header date for real time: $date");
@@ -789,7 +787,7 @@ sub _get_received_header_times {
   }
 
   my (@header_times);
-  foreach $rcvd (@received) {
+  foreach my $rcvd (@received) {
     if ($rcvd =~ m/(\s.?\d+ \S\S\S \d+ \d+:\d+:\d+ \S+)/) {
       my $date = $1;
       dbg2("eval: trying Received header date for real time: $date");

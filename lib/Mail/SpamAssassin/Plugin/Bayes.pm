@@ -386,25 +386,25 @@ sub _learn_trapped {
     @msgid = $self->get_msgid($msg);
   }
 
-  foreach $msgid ( @msgid ) {
-    my $seen = $self->{store}->seen_get ($msgid);
+  foreach my $msgid_t ( @msgid ) {
+    my $seen = $self->{store}->seen_get ($msgid_t);
 
     if (defined ($seen)) {
       if (($seen eq 's' && $isspam) || ($seen eq 'h' && !$isspam)) {
-        dbg("bayes: $msgid already learnt correctly, not learning twice");
+        dbg("bayes: $msgid_t already learnt correctly, not learning twice");
         return 0;
       } elsif ($seen !~ /^[hs]$/) {
-        warn("bayes: db_seen corrupt: value='$seen' for $msgid, ignored");
+        warn("bayes: db_seen corrupt: value='$seen' for $msgid_t, ignored");
       } else {
         # bug 3704: If the message was already learned, don't try learning it again.
         # this prevents, for instance, manually learning as spam, then autolearning
         # as ham, or visa versa.
         if ($self->{main}->{learn_no_relearn}) {
-	  dbg("bayes: $msgid already learnt as opposite, not re-learning");
+	  dbg("bayes: $msgid_t already learnt as opposite, not re-learning");
 	  return 0;
 	}
 
-        dbg("bayes: $msgid already learnt as opposite, forgetting first");
+        dbg("bayes: $msgid_t already learnt as opposite, forgetting first");
 
         # kluge so that forget() won't untie the db on us ...
         my $orig = $self->{main}->{learn_caller_will_untie};
