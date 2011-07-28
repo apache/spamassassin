@@ -72,6 +72,9 @@ header         __FROM_MISSPACED      From =~ /^\s*"[^"]*"</
 meta           FROM_MISSPACED        __FROM_MISSPACED && !__RCD_RDNS_MTA_MESSY && !__CTYPE_MULTIPART_ALT && !__REPTO_QUOTE && !__MIME_QP && !__UNSUB_LINK && !__TO___LOWER && !__BUGGED_IMG && !__DOS_HAS_LIST_UNSUB && !__TO_EQ_FROM_DOM && !__MAIL_LINK
 describe       FROM_MISSPACED        From: missing whitespace
 
+# Encrypted mail provider unable to properly format their headers (as of 07/2011)
+header         __RCVD_ZIXMAIL        X-Spam-Relays-Untrusted =~ / helo=smtpout\.zixmail\.net /
+
 # Poorer S/O than FROM_MISSPACED but better performance in metas
 header         __FROM_RUNON          From =~ /\S+<\w+/
 
@@ -81,8 +84,9 @@ meta           FROM_MISSP_SPF_FAIL  (__FROM_RUNON && SPF_FAIL)
 tflags         FROM_MISSP_SPF_FAIL  net
 
 meta           __FROM_MISSP_EH_MATCH __FROM_RUNON && __ENV_AND_HDR_FROM_MATCH
-meta           FROM_MISSP_EH_MATCH   __FROM_MISSP_EH_MATCH && !__RCD_RDNS_MTA_MESSY && !__UNSUB_LINK && !__COMMENT_EXISTS && !__TO___LOWER && !__MIME_QP && !__TO_EQ_FROM_DOM && !__BUGGED_IMG && !__DKIM_EXISTS
+meta           FROM_MISSP_EH_MATCH   __FROM_MISSP_EH_MATCH && !__RCD_RDNS_MTA_MESSY && !__UNSUB_LINK && !__COMMENT_EXISTS && !__TO___LOWER && !__MIME_QP && !__TO_EQ_FROM_DOM && !__BUGGED_IMG && !__DKIM_EXISTS && !__RCVD_ZIXMAIL
 describe       FROM_MISSP_EH_MATCH   From misspaced, matches envelope
+score          FROM_MISSP_EH_MATCH   2.5	# max
 
 meta           __FROM_MISSP_URI      __FROM_RUNON && __HAS_ANY_URI
 meta           FROM_MISSP_URI        __FROM_MISSP_URI && !__NOT_SPOOFED && !__RCD_RDNS_MTA_MESSY && !MISSING_MIMEOLE && !__COMMENT_EXISTS && !__REPTO_QUOTE && !__UNSUB_LINK && !__TO___LOWER && !__MSGID_OK_HEX && !__MAIL_LINK && !__MIME_QP && !__BUGGED_IMG && !MIME_BASE64_TEXT
