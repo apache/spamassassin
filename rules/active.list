@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus-trap darxus dos grenier hege jarif kgolding llanga wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1 zmi; day 2: bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus-trap darxus dos grenier hege jarif kgolding llanga wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1 zmi; day 3: bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus-trap darxus dos grenier hege jarif kgolding llanga wt-en1 wt-en3 wt-jp1 zmi
+# with results from: day 1: bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus-trap darxus dos grenier hege jarif kgolding llanga wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1 zmi; day 2: bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus-trap darxus dos grenier hege jarif kgolding llanga wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1 zmi; day 3: bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus-trap darxus dos grenier hege jarif kgolding llanga wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1 zmi
 
 # tflags 
 ADVANCE_FEE_2_NEW_FORM
@@ -88,6 +88,9 @@ BAYES_95
 # tflags learn
 BAYES_99
 
+# good enough
+BUG6152_INVALID_DATE_TZ_ABSURD
+
 # tflags userconf
 CHARSET_FARAWAY
 
@@ -164,6 +167,18 @@ DOS_ANAL_SPAM_MAILER
 DOS_OE_TO_MX
 
 # good enough
+DOS_OE_TO_MX_IMAGE
+
+# good enough
+DOS_OUTLOOK_TO_MX
+
+# good enough
+DOS_PHISH_WWW_COM_RU
+
+# good enough
+DOS_RCVD_IP_TWICE_C
+
+# good enough
 DYN_RDNS_SHORT_HELO_HTML
 
 # good enough
@@ -231,6 +246,9 @@ FILL_THIS_FORM_LONG
 
 # good enough
 FM_LOTTO_YOU_WON
+
+# good enough
+FM_SCHOOL_DIPLOMA
 
 # good enough
 FM_SEX_HELODDDD
@@ -305,6 +323,9 @@ FRT_ERECTION
 FRT_HEALTH
 
 # good enough
+FRT_PHARMAC
+
+# good enough
 FRT_ROLEX
 
 # good enough
@@ -318,6 +339,12 @@ FSL_HELO_BARE_IP_1
 
 # good enough
 FSL_HELO_DEVICE
+
+# good enough
+FSL_HELO_NON_FQDN_1
+
+# good enough
+FSL_MID_419
 
 # good enough
 FSL_UA
@@ -382,6 +409,9 @@ HASHCASH_2SPEND
 # tflags userconf
 HASHCASH_HIGH
 
+# good enough
+HDRS_LCASE_IMGONLY
+
 # tflags userconf
 HEAD_LONG
 
@@ -395,10 +425,16 @@ HELO_OEM
 HK_NAME_DRUGS
 
 # good enough
+HK_NAME_FM_FROM
+
+# good enough
 HK_PNIS
 
 # good enough
 HK_RANDOM_ENVFROM
+
+# good enough
+HK_RANDOM_FROM
 
 # good enough
 HK_SCAM_N15
@@ -408,6 +444,15 @@ HK_SCAM_N2
 
 # good enough
 HK_SCAM_N8
+
+# good enough
+HK_SCAM_S15
+
+# good enough
+HK_SCAM_S25
+
+# good enough
+HS_VPXL
 
 # tflags userconf
 HTML_CHARSET_FARAWAY
@@ -695,10 +740,22 @@ RCVD_IN_XBL
 RISK_FREE
 
 # good enough
+RP_8BIT
+
+# good enough
 RP_MATCHES_RCVD
 
 # good enough
 S25R_6
+
+# good enough
+SB_GIF_AND_NO_URIS
+
+# good enough
+SHORT_HELO_AND_INLINE_IMAGE
+
+# good enough
+SINGLE_HEADER_1K
 
 # good enough
 SINGLE_HEADER_2K
@@ -737,6 +794,12 @@ SPF_PASS
 SPF_SOFTFAIL
 
 # good enough
+STOCK_IMG_CTYPE
+
+# good enough
+STOCK_IMG_OUTLOOK
+
+# good enough
 STYLE_GIBBERISH
 
 # tflags userconf
@@ -747,6 +810,12 @@ SUBJECT_IN_WHITELIST
 
 # good enough
 TAB_IN_FROM
+
+# good enough
+THEBAT_UNREG
+
+# good enough
+TINY_FLOAT
 
 # good enough
 TO_EQ_FM_DIRECT_MX
@@ -797,6 +866,12 @@ TO_NO_BRKTS_PCNT
 TT_MSGID_TRUNC
 
 # good enough
+TVD_ENHANCE
+
+# good enough
+TVD_FROM_1
+
+# good enough
 TVD_INCREASE_SIZE
 
 # good enough
@@ -809,6 +884,12 @@ TVD_QUAL_MEDS
 TVD_RCVD_IP
 
 # good enough
+TVD_RCVD_IP4
+
+# good enough
+TVD_RCVD_SINGLE
+
+# good enough
 TVD_SPACE_RATIO_MINFP
 
 # good enough
@@ -818,46 +899,7 @@ TVD_SUBJ_NUM_OBFU_MINFP
 TVD_VISIT_PHARMA
 
 # good enough
-DOS_PHISH_WWW_COM_RU
-
-# good enough
-FRT_PHARMAC
-
-# good enough
-FSL_MID_419
-
-# good enough
-HDRS_LCASE_IMGONLY
-
-# good enough
-HK_NAME_FM_FROM
-
-# good enough
-HK_RANDOM_FROM
-
-# good enough
-HK_SCAM_S15
-
-# good enough
-HK_SCAM_S25
-
-# good enough
-RP_8BIT
-
-# good enough
-SINGLE_HEADER_1K
-
-# good enough
-TINY_FLOAT
-
-# good enough
-TVD_ENHANCE
-
-# good enough
-TVD_FROM_1
-
-# good enough
-URI_OBFU_TLD
+HK_SCAM_N3
 
 # tflags userconf
 UNPARSEABLE_RELAY
@@ -906,6 +948,9 @@ URI_NOVOWEL
 
 # good enough
 URI_OBFU_DOM
+
+# good enough
+URI_OBFU_TLD
 
 # tflags userconf
 USER_IN_ALL_SPAM_TO
