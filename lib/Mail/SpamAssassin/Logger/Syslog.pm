@@ -39,8 +39,15 @@ use Time::HiRes ();
 use Sys::Syslog qw(:DEFAULT setlogsock);
 use Mail::SpamAssassin::Logger;
 
-use vars qw(@ISA);
+use vars qw(@ISA %prio_map);
 @ISA = ();
+
+BEGIN {
+  %prio_map = (dbg => 'debug', debug => 'debug', info => 'info',
+               notice => 'notice', warn => 'warning', warning => 'warning',
+               error => 'err', err => 'err', crit => 'crit', alert => 'alert',
+               emerg => 'emerg');
+}
 
 sub new {
   my $class = shift;
@@ -128,10 +135,11 @@ sub log_message {
   return if $self->{disabled};
 
   # map level names
-  # info is already info
-  $level = 'debug' if $level eq 'dbg';
-  $level = 'warning' if $level eq 'warn';
-  $level = 'err' if $level eq 'error';
+  $level = $prio_map{$level};
+  if (!defined $level) {  # just in case
+    $level = 'err';
+    $msg = '(bad prio: ' . $_[1] . ') ' . $msg;
+  }
 
   # install a new handler for SIGPIPE -- this signal has been
   # found to occur with syslog-ng after syslog-ng restarts.
