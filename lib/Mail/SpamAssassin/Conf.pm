@@ -2893,7 +2893,7 @@ B<Mail::SpamAssassin::Plugin::Reuse>.
     }
   });
 
-=item tflags SYMBOLIC_TEST_NAME [ {net|nice|learn|userconf|noautolearn|multiple|ips_only|domains_only|a|ns} ]
+=item tflags SYMBOLIC_TEST_NAME [ {net|nice|learn|userconf|noautolearn|multiple|maxhits=N|ips_only|domains_only|a|ns} ]
 
 Used to set flags on a test. Parameter is a space-separated list of flag names.
 These flags are used in the score-determination back end system for details
@@ -2930,6 +2930,12 @@ learning systems.
 
 The test will be evaluated multiple times, for use with meta rules.
 Only affects header, body, rawbody, uri, and full tests.
+
+=item  maxhits=N
+
+If B<multiple> is specified, limit the number of hits found to N.
+If the rule is used in a meta that counts the hits (e.g. __RULENAME > 5),
+this is a way to avoid wasted extra work (use "tflags multiple maxhits=6").
 
 =item  ips_only
 
