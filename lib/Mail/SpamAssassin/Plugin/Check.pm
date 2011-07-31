@@ -347,6 +347,8 @@ sub run_generic_tests {
       $opts{post_loop_body}->($self, $pms, $conf, %nopts);
     }
 
+   # dbg("rules: generated matching code:\n".$self->{evalstr});
+
     $self->flush_evalstr($pms, 'run_generic_tests');
     $self->free_ruleset_source($pms, $ruletype, $priority);
 
@@ -425,6 +427,7 @@ sub begin_evalstr_chunk {
 package $package_name;
 sub $chunk_methodname {
   my \$self = shift;
+  my \$hits = 0;
 EOT
   $evalstr .= '  '.$_  for @{$self->{evalstr_chunk_prefix}};
   $self->{evalstr} = $evalstr;
@@ -760,6 +763,7 @@ sub do_head_tests {
           my $ifwhile = 'if';
           my $hitdone = '';
           my $matchg = '';
+          my $whlimit = '';
 
           my $matching_string_unavailable = 0;
           my $expr;
@@ -771,10 +775,13 @@ sub do_head_tests {
             if (! ($op eq '=~' || $op eq '!~') ) { # not a pattern matching op.
               $matching_string_unavailable = 1;
             } elsif ( ($conf->{tflags}->{$rulename}||'') =~ /\bmultiple\b/ ) {
-              $posline = 'pos $hval = 0;';
+              $posline = 'pos $hval = 0; $hits = 0;';
               $ifwhile = 'while';
               $hitdone = 'last';
               $matchg = 'g';
+              my ($max) = ($pms->{conf}->{tflags}->{$rulename}||'') =~ /\bmaxhits=(\d+)\b/;
+              $max = untaint_var($max);
+              $whlimit = ' && $hits++ < '.$max if $max;
             }
             $expr = '$hval ' . $op . ' ' . $pat . $matchg;
           }
@@ -783,7 +790,7 @@ sub do_head_tests {
           if ($scoresptr->{q{'.$rulename.'}}) {
             '.$posline.'
             '.$self->hash_line_for_rule($pms, $rulename).'
-            '.$ifwhile.' ('.$expr.') {
+            '.$ifwhile.' ('.$expr.$whlimit.') {
               $self->got_hit(q{'.$rulename.'}, "", ruletype => "header");
               '.$self->hit_rule_plugin_code($pms, $rulename, "header", $hitdone,
                                             $matching_string_unavailable).'
@@ -819,15 +826,19 @@ sub do_body_tests {
     {
       # support multiple matches
       $loopid++;
+      my ($max) = ($pms->{conf}->{tflags}->{$rulename}||'') =~ /\bmaxhits=(\d+)\b/;
+      $max = untaint_var($max);
       $sub = '
+      $hits = 0;
       body_'.$loopid.': foreach my $l (@_) {
         pos $l = 0;
         '.$self->hash_line_for_rule($pms, $rulename).'
-        while ($l =~ '.$pat.'g) { 
+        while ($l =~ '.$pat.'g'. ($max? ' && $hits++ < '.$max:'') .') { 
           $self->got_hit(q{'.$rulename.'}, "BODY: ", ruletype => "body"); 
           '. $self->hit_rule_plugin_code($pms, $rulename, 'body',
 					 "last body_".$loopid) . '
         }
+        '. ($max? 'last body_'.$loopid.' if $hits > '. $max .';':'') .'
       }
       ';
     }
@@ -890,15 +901,19 @@ sub do_uri_tests {
     my $sub;
     if (($conf->{tflags}->{$rulename}||'') =~ /\bmultiple\b/) {
       $loopid++;
+      my ($max) = ($pms->{conf}->{tflags}->{$rulename}||'') =~ /\bmaxhits=(\d+)\b/;
+      $max = untaint_var($max);
       $sub = '
+      $hits = 0;
       uri_'.$loopid.': foreach my $l (@_) {
         pos $l = 0;
         '.$self->hash_line_for_rule($pms, $rulename).'
-        while ($l =~ '.$pat.'g) { 
+        while ($l =~ '.$pat.'g'. ($max? ' && $hits++ < '.$max:'') .') { 
            $self->got_hit(q{'.$rulename.'}, "URI: ", ruletype => "uri");
            '. $self->hit_rule_plugin_code($pms, $rulename, "uri",
 					  "last uri_".$loopid) . '
         }
+        '. ($max? 'last uri_'.$loopid.' if $hits > '. $max .';':'') .'
       }
       ';
     } else {
@@ -960,15 +975,19 @@ sub do_rawbody_tests {
     {
       # support multiple matches
       $loopid++;
+      my ($max) = ($pms->{conf}->{tflags}->{$rulename}||'') =~ /\bmaxhits=(\d+)\b/;
+      $max = untaint_var($max);
       $sub = '
+      $hits = 0;
       rawbody_'.$loopid.': foreach my $l (@_) {
         pos $l = 0;
         '.$self->hash_line_for_rule($pms, $rulename).'
-        while ($l =~ '.$pat.'g) { 
+        while ($l =~ '.$pat.'g'. ($max? ' && $hits++ < '.$max:'') .') { 
            $self->got_hit(q{'.$rulename.'}, "RAW: ", ruletype => "rawbody");
            '. $self->hit_rule_plugin_code($pms, $rulename, "rawbody",
 					  "last rawbody_".$loopid) . '
         }
+        '. ($max? 'last rawbody_'.$loopid.' if $hits > '. $max .';':'') .'
       }
       ';
     }
@@ -1033,11 +1052,14 @@ sub do_full_tests {
   {
     my ($self, $pms, $conf, $rulename, $pat, %opts) = @_;
     $pat = untaint_var($pat);  # presumably checked
+    my ($max) = ($pms->{conf}->{tflags}->{$rulename}||'') =~ /\bmaxhits=(\d+)\b/;
+    $max = untaint_var($max);
     $self->add_evalstr($pms, '
       if ($scoresptr->{q{'.$rulename.'}}) {
         pos $$fullmsgref = 0;
         '.$self->hash_line_for_rule($pms, $rulename).'
-        while ($$fullmsgref =~ '.$pat.'g) {
+        $hits = 0;
+        while ($$fullmsgref =~ '.$pat.'g'. ($max? ' && $hits++ < '.$max:'') .') {
           $self->got_hit(q{'.$rulename.'}, "FULL: ", ruletype => "full");
           '. $self->hit_rule_plugin_code($pms, $rulename, "full", "last") . '
         }
