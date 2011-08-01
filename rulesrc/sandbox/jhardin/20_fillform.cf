@@ -64,10 +64,10 @@ ifplugin Mail::SpamAssassin::Plugin::ReplaceTags
   # 5+ fields that body paragraph processing didn't paste together
   body     __FILL_THIS_FORM_PARTIAL       /^\s?<FF_LNNO>?<FF_YOUR>(?:<FF_ALL><ANDOR>?){1,3}<FF_SUFFIX>(?:<FF_BLANK1>|(?:[-=_.,:;*\s]|=20){1,4}$)/im
   replace_rules   __FILL_THIS_FORM_PARTIAL
-  tflags   __FILL_THIS_FORM_PARTIAL multiple
+  tflags   __FILL_THIS_FORM_PARTIAL       multiple maxhits=5
   rawbody  __FILL_THIS_FORM_PARTIAL_RAW   /^(?>\s{0,50})<FF_LNNO>?<FF_YOUR>(?:<FF_ALL><ANDOR>?){1,3}<FF_SUFFIX>(?:<FF_BLANK1>|(?:[-=_.,:;*\s]|=20|&nbsp;|<\/\w+>){0,4}$)/im
   replace_rules   __FILL_THIS_FORM_PARTIAL_RAW
-  tflags   __FILL_THIS_FORM_PARTIAL_RAW multiple
+  tflags   __FILL_THIS_FORM_PARTIAL_RAW   multiple maxhits=5
 
   # 5+ fields in either format
   # For easy use in metas
