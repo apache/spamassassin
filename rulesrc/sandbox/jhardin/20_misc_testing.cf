@@ -140,10 +140,10 @@ describe       MAILER_EQ_ORG         X-Mailer: same as Organization:
 # observed in UCE 9/2009
 #header         __HDRS_LCASE          ALL =~ /\n(?:Reply-to|Message-id|Content-type|X-MSMail-priority|from|subject|to|Disposition-notification-to):/sm
 header         __HDRS_LCASE          ALL =~ /\n(?:Message-id|Content-type|X-MSMail-priority|from|subject|to|cc|Disposition-notification-to):/sm
-tflags         __HDRS_LCASE          multiple
-meta           HDRS_LCASE            __HDRS_LCASE && !__VIA_ML && !__freemail_safe && !__THREADED && !__DOS_HAS_LIST_ID  && !__UNUSABLE_MSGID
+tflags         __HDRS_LCASE          multiple maxhits=2
+meta           HDRS_LCASE            __HDRS_LCASE && !__VIA_ML && !__freemail_safe && !__THREADED && !__UNUSABLE_MSGID
 meta           __MANY_HDRS_LCASE     __HDRS_LCASE > 1
-meta           MANY_HDRS_LCASE       __MANY_HDRS_LCASE && !__VIA_ML && !__freemail_safe && !__THREADED && !__DOS_HAS_LIST_ID  && !__UNUSABLE_MSGID
+meta           MANY_HDRS_LCASE       __MANY_HDRS_LCASE && !__VIA_ML && !__freemail_safe && !__THREADED && !__UNUSABLE_MSGID
 describe       MANY_HDRS_LCASE       Odd capitalization of multiple message headers
 
 # Some metas that appear to perform well in masscheck
@@ -246,20 +246,20 @@ body           CALL_SKYPE            /\bCall this phone number [\w\s]{0,30}with 
 
 # <SPAN> tags shouldn't appear in the midst of text
 rawbody        __SPAN_BEG_TEXT     /[a-z]{2}<(?i:span)\s/
-tflags         __SPAN_BEG_TEXT     multiple
+tflags         __SPAN_BEG_TEXT     multiple maxhits=5
 rawbody        __SPAN_END_TEXT     /[^;>]<\/(?i:span)>[a-z]{3}/
-tflags         __SPAN_END_TEXT     multiple
+tflags         __SPAN_END_TEXT     multiple maxhits=5
 meta           __MANY_SPAN_IN_TEXT   (__SPAN_BEG_TEXT > 4) && (__SPAN_END_TEXT > 4)
 meta           MANY_SPAN_IN_TEXT   __MANY_SPAN_IN_TEXT && !__VIA_ML
 describe       MANY_SPAN_IN_TEXT   Many <SPAN> tags embedded within text
 tflags         MANY_SPAN_IN_TEXT   publish
 #score          MANY_SPAN_IN_TEXT   2.50
 
-uri            __FEEDPROXY_URI     m;http://feedproxy\.google\.com/;i
-rawbody        __FEEDPROXY         m;http://feedproxy\.google\.com/;i
-tflags         __FEEDPROXY         multiple
-meta           MANY_GOOG_PROXY     __FEEDPROXY > 4
-describe       MANY_GOOG_PROXY     Many Google feedproxy URIs
+#uri            __FEEDPROXY_URI     m;http://feedproxy\.google\.com/;i
+#rawbody        __FEEDPROXY         m;http://feedproxy\.google\.com/;i
+#tflags         __FEEDPROXY         multiple maxhits=5
+#meta           MANY_GOOG_PROXY     __FEEDPROXY > 4
+#describe       MANY_GOOG_PROXY     Many Google feedproxy URIs
 
 rawbody        TINY_FLOAT         /\bstyle\s*=\s*"[^"]{0,40}?(?:(?:FONT-SIZE\s*:\s+\dpx|FLOAT\s*:\s+(?:right|left))(?:;\s+)?(?:(?!(?:FONT-SIZE|FLOAT))\w+:\s+\w+;?\s*)*){2}/i
 describe       TINY_FLOAT         Has small-font floating HTML - text obfuscation?
@@ -369,7 +369,7 @@ describe       FROM_URI                   URI or www. in From
 # observed in spam feb 2010
 # Apparently-To per RFC2821 SHOULD NOT be used
 header         __APPARENTLY_TO            Apparently-To =~ /<.*>/
-tflags         __APPARENTLY_TO            multiple nopublish
+tflags         __APPARENTLY_TO            multiple maxhits=21 nopublish
 meta           HAS_APPARENTLY_TO          __APPARENTLY_TO > 0
 describe       HAS_APPARENTLY_TO          Has deprecated Apparently-To header
 #score          HAS_APPARENTLY_TO          0.50
@@ -490,10 +490,10 @@ describe        DATE_DOTS               Periods in date header
 uri             IMAGESHACK_URI          /\.imageshack\.us\//i
 describe        IMAGESHACK_URI          URI contains imageshack.us
 
-uri             __DYNDNS_URI            /\.dyndns\.org(?:\/.*)?/i
-tflags          __DYNDNS_URI            multiple
-meta            DYNDNS_URIS             __DYNDNS_URI > 1
-describe        DYNDNS_URIS             Has multiple dyndns.org URIs
+#uri             __DYNDNS_URI            /\.dyndns\.org(?:\/.*)?/i
+#tflags          __DYNDNS_URI            multiple maxhits=2
+#meta            DYNDNS_URIS             __DYNDNS_URI > 1
+#describe        DYNDNS_URIS             Has multiple dyndns.org URIs
 
 uri             __BITLY_URI             /\/\/bit\.ly\//i
 #describe        __BITLY_URI             URI contains bit.ly
@@ -523,18 +523,18 @@ header          RPT_SPAM_HDR            Report-SPAM =~ /./
 #header          LONG_FROM               From =~ /<[^<@]{40,}\w\@/
 
 
-if can(Mail::SpamAssassin::Conf::feature_bug6558_free)
-  body            __MANY_RECORDS_1        /\s[A-Z][a-z]{1,30}s(?:\sDatabase)?[-:\s]{2,5}(?i:1\smillion\s|\d[\d,.]{1,8}[Kk]?\s(?i:thousand\s|million\s)?)(?i:total\s|full\sdata\s)?(?i:email|record)s/
-  tflags          __MANY_RECORDS_1        multiple
-  body            __MANY_RECORDS_2        /\W{1,4}\s(?:[a-z\/]{1,20}\s){0,4}(?:doctor|physician|provider|therapist|counselor|dentist|veterinarian|clinic|hospital|agent|chiropractor|psychologist|companie|supplier)s/i
-  tflags          __MANY_RECORDS_2        multiple
-  body            __MANY_RECORDS_3        /\W{1,4}\s(?:(?:[A-Z]{1,2}[a-z\/]{0,20}|and)\s){0,4}[A-Z][a-z]{1,20}s Database/
-  tflags          __MANY_RECORDS_3        multiple
-  #meta            BIG_LISTS               (__MANY_RECORDS_1 + __MANY_RECORDS_2 + __MANY_RECORDS_3) > 5
-  meta            __MANY_BIG_LISTS        (__MANY_RECORDS_1 + __MANY_RECORDS_2 + __MANY_RECORDS_3) > 15
-  meta            MANY_BIG_LISTS          __MANY_BIG_LISTS && !HTML_MESSAGE && !__CTYPE_MULTIPART_ANY && !__HS_SUBJ_RE_FW && !__HAS_THREAD_INDEX
-  describe        MANY_BIG_LISTS          Lots of mailing lists / databases available!
-endif
+#if can(Mail::SpamAssassin::Conf::feature_bug6558_free)
+#  body            __MANY_RECORDS_1        /\s[A-Z][a-z]{1,30}s(?:\sDatabase)?[-:\s]{2,5}(?i:1\smillion\s|\d[\d,.]{1,8}[Kk]?\s(?i:thousand\s|million\s)?)(?i:total\s|full\sdata\s)?(?i:email|record)s/
+#  tflags          __MANY_RECORDS_1        multiple maxhits=16
+#  body            __MANY_RECORDS_2        /\W{1,4}\s(?:[a-z\/]{1,20}\s){0,4}(?:doctor|physician|provider|therapist|counselor|dentist|veterinarian|clinic|hospital|agent|chiropractor|psychologist|companie|supplier)s/i
+#  tflags          __MANY_RECORDS_2        multiple maxhits=16
+#  body            __MANY_RECORDS_3        /\W{1,4}\s(?:(?:[A-Z]{1,2}[a-z\/]{0,20}|and)\s){0,4}[A-Z][a-z]{1,20}s Database/
+#  tflags          __MANY_RECORDS_3        multiple maxhits=16
+#  #meta            BIG_LISTS               (__MANY_RECORDS_1 + __MANY_RECORDS_2 + __MANY_RECORDS_3) > 5
+#  meta            __MANY_BIG_LISTS        (__MANY_RECORDS_1 + __MANY_RECORDS_2 + __MANY_RECORDS_3) > 15
+#  meta            MANY_BIG_LISTS          __MANY_BIG_LISTS && !HTML_MESSAGE && !__CTYPE_MULTIPART_ANY && !__HS_SUBJ_RE_FW && !__HAS_THREAD_INDEX
+#  describe        MANY_BIG_LISTS          Lots of mailing lists / databases available!
+#endif
 
 
 # Suggested by Gerard Z 2010-08-15
@@ -603,19 +603,11 @@ header      ART_NAMES_ORG          Received =~ /\bart\.names\.org\b/i
 #score       ART_NAMES_ORG          4.0
 describe    ART_NAMES_ORG          Arthur Simmons - registrar spammer extraordinaire
 
-# Causes infinite loops if compiled on some systems (users list 2011-03-20)
-#body        __PILL_PRICE_1_EVIL         m;\$?[\d .]{3,8}(?:/|per|each) ?(?:pill|tablet|cap(?:sule|let));i
-#body        __PILL_PRICE_2_EVIL         /(?:pill|tablet|cap(?:sule|let))s \$?[\d .]{3,8}/i
-#body        __PILL_PRICE_3_EVIL         /free (?:pill|tablet|cap(?:sule|let))s/i
-#tflags      __PILL_PRICE_1_EVIL         multiple
-#tflags      __PILL_PRICE_2_EVIL         multiple
-#tflags      __PILL_PRICE_3_EVIL         multiple
-#meta        MANY_PILL_PRICE        (__PILL_PRICE_1_EVIL + __PILL_PRICE_2_EVIL + __PILL_PRICE_3_EVIL) > 2
 if can(Mail::SpamAssassin::Conf::feature_bug6558_free)
   body        __PILL_PRICE_01        m;(?=[\d .f])(?:free|[\d .]{3}(?:/|per|each)) ?(?=[ptc])(?:pill|tablet|cap(?:sule|let))s?\b;i
   body        __PILL_PRICE_02        /(?=[ptc])(?:pill|tablet|cap(?:sule|let))s[ :-]{1,5}\$?[\d .]{3}/i
-  tflags      __PILL_PRICE_01        multiple
-  tflags      __PILL_PRICE_02        multiple
+  tflags      __PILL_PRICE_01        multiple maxhits=3
+  tflags      __PILL_PRICE_02        multiple maxhits=3
   meta        MANY_PILL_PRICE        (__PILL_PRICE_01 + __PILL_PRICE_02) > 2
   describe    MANY_PILL_PRICE        Prices for pills
 endif
@@ -662,38 +654,38 @@ endif
 # for sale newsletters
 if can(Mail::SpamAssassin::Conf::feature_bug6558_free)
   body        __FOR_SALE_OBO            /\bor best offer\b/i
-  tflags      __FOR_SALE_OBO            multiple
+  tflags      __FOR_SALE_OBO            multiple maxhits=6
   meta        __FOR_SALE_OBO_MANY       __FOR_SALE_OBO > 5
 
   body        __FOR_SALE_PRC_1K         /\bprice:? \$\d,?\d\d\d[.\s]/i
-  tflags      __FOR_SALE_PRC_1K         multiple
+  tflags      __FOR_SALE_PRC_1K         multiple maxhits=11
   meta        __FOR_SALE_PRC_1K_MANY    __FOR_SALE_PRC_1K > 10
 
   body        __FOR_SALE_PRC_10K        /\bprice:? \$\d\d,\d\d\d/i
-  tflags      __FOR_SALE_PRC_10K        multiple
+  tflags      __FOR_SALE_PRC_10K        multiple maxhits=11
   meta        __FOR_SALE_PRC_10K_MANY   __FOR_SALE_PRC_10K > 10
 
   body        __FOR_SALE_PRC_100K       /\bprice:? \$\d\d\d,\d\d\d/i
-  tflags      __FOR_SALE_PRC_100K       multiple
+  tflags      __FOR_SALE_PRC_100K       multiple maxhits=11
   meta        __FOR_SALE_PRC_100K_MANY  __FOR_SALE_PRC_100K > 5
 
   meta        __FOR_SALE_PRC_MANY       (__FOR_SALE_PRC_1K + __FOR_SALE_PRC_10K + __FOR_SALE_PRC_100K) > 20
 
   body        __FOR_SALE_LTP            /00\.? (?:less 10%|LTP)/i
-  tflags      __FOR_SALE_LTP            multiple
+  tflags      __FOR_SALE_LTP            multiple maxhits=11
   meta        __FOR_SALE_LTP_MANY       __FOR_SALE_LTP > 10
 
   body        __FOR_SALE_NET            /00\.? NET/i
-  tflags      __FOR_SALE_NET            multiple
+  tflags      __FOR_SALE_NET            multiple maxhits=11
   meta        __FOR_SALE_NET_MANY       __FOR_SALE_NET > 10
 
   rawbody     __FOR_SALE_PRC_EOL        /\s\$\d{1,3},\d00(?:\.00)?$/m
-  tflags      __FOR_SALE_PRC_EOL        multiple
+  tflags      __FOR_SALE_PRC_EOL        multiple maxhits=11
   meta        __FOR_SALE_PRC_EOL_MANY   __FOR_SALE_PRC_EOL > 10
 endif
 
 uri         __URI_MAILTO              /^mailto:/
-tflags      __URI_MAILTO              multiple
+tflags      __URI_MAILTO              multiple maxhits=16
 meta        __URI_MAILTO_MANY         __URI_MAILTO > 15
 
 
@@ -713,11 +705,11 @@ describe    GAPPY_PHONE_NA         Phone number with lots of spaces
 full        __GAPPY_HTML_01        m;</?[a-z]{1,6}(?:\s[^>]{0,40})?>(?:\s|=09){0,80}(?:(?!\d)[\w'()\#,.:!]{1,15}(?:\s|=09){4,80}){7}\S;
 full        __GAPPY_HTML_02        m;\S(?:(?:\s|=09){4,80}(?!\d)[\w'()\#,.:!]{1,15}){7}(?:\s|=09){0,5}</?[a-z]{1,6}/?>;
 full        __GAPPY_HTML_03        /^(?:=09){3,20}</m
-tflags      __GAPPY_HTML_03        multiple
+tflags      __GAPPY_HTML_03        multiple maxhits=11
 full        __GAPPY_HTML_04        /^(?:=0A){4,20}/m
-tflags      __GAPPY_HTML_04        multiple
+tflags      __GAPPY_HTML_04        multiple maxhits=11
 meta        __GAPPY_HTML           __MIME_HTML && (__GAPPY_HTML_01 || __GAPPY_HTML_02 || (__GAPPY_HTML_03 > 10) || (__GAPPY_HTML_04 > 10))
-meta        GAPPY_HTML             __GAPPY_HTML && !__UNSUB_LINK
+meta        GAPPY_HTML             __GAPPY_HTML && !__UNSUB_LINK && !__RP_MATCHES_RCVD && !__RCD_RDNS_MAIL_MESSY
 describe    GAPPY_HTML             HTML body with much useless whitespace
 
 # Try to improve S/O per bug 6119
@@ -726,7 +718,7 @@ meta        TVD_SPACE_RATIO_MINFP  __TVD_SPACE_RATIO && !__OBFUSCATING_COMMENT_B
 
 # sample from users list:   Subject: Sta ffWork sFastToSen dTab le tsGood s
 header      __SUBJ_BROKEN_WORD     Subject =~ /\s(?!i[PT])[a-z]{1,3}[A-Z][a-z]{2}/
-tflags      __SUBJ_BROKEN_WORD     multiple
+tflags      __SUBJ_BROKEN_WORD     multiple maxhits=2
 meta        SUBJ_BROKEN_WORDS      __SUBJ_BROKEN_WORD > 1
 describe    SUBJ_BROKEN_WORDS      Subject contains odd word breaks
 
