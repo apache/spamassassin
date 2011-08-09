@@ -23,6 +23,19 @@ header __RCD_RDNS_OB X-Spam-Relays-External =~ /^[^\]]+ rdns=\S*\boutbounds?[^a-
 header __RCD_RDNS_MAIL_MESSY X-Spam-Relays-External =~ /^[^\]]+ rdns=\S*mail/i
 header __RCD_RDNS_MAIL X-Spam-Relays-External =~ /^[^\]]+ rdns=\S*\bmail[^a-z]/i
 
+tflags __RCD_RDNS_MX_MESSY nice
+tflags __RCD_RDNS_MX nice
+tflags __RCD_RDNS_SMTP_MESSY nice
+tflags __RCD_RDNS_SMTP nice
+tflags __RCD_RDNS_MTA_MESSY nice
+tflags __RCD_RDNS_MTA nice
+tflags __RCD_RDNS_STATIC_MESSY nice
+tflags __RCD_RDNS_STATIC nice
+tflags __RCD_RDNS_OB_MESSY nice
+tflags __RCD_RDNS_OB nice
+tflags __RCD_RDNS_MAIL_MESSY nice
+tflags __RCD_RDNS_MAIL nice
+
 meta RCD_RDNS_SERVER __RCD_RDNS_MX || __RCD_RDNS_SMTP || __RCD_RDNS_MTA || __RCD_RDNS_STATIC || __RCD_RDNS_OB || __RCD_RDNS_MAIL
 tflags RCD_RDNS_SERVER nice nopublish
 meta RCD_RDNS_SERVER_MESSY __RCD_RDNS_MX_MESSY_MESSY || __RCD_RDNS_SMTP_MESSY || __RCD_RDNS_MTA_MESSY || __RCD_RDNS_STATIC_MESSY || __RCD_RDNS_OB_MESSY || __RCD_RDNS_MAIL_MESSY

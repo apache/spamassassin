@@ -83,20 +83,6 @@ meta	 KHOP_FROM_WWW	(__RDNS_IS_WWW || __RELAY_THRU_WWW) && ! (__FROM_WEB_DAEMON 
 header __RDNS_LONG	X-Spam-Relays-External =~ /^[^\]]+ rdns=\S{30}/
 header __RDNS_SHORT	X-Spam-Relays-External =~ /^[^\]]+ rdns=\S{4,14} /
 
-# Relays with 5+ subdomains in their rDNS.
-header __5_SUBDOM X-Spam-Relays-External =~ /^[^\]]+ rdns=(?:[^. ]*\.){6,}\w+ /
-# 5.7617/0.0344 spam/ham, 0.994 s/o @ 20091214
-# 6.8885/0.0129 spam/ham, 0.998 s/o @ 20100417
-# 6.8984/0.0251 spam/ham, 0.996 s/o @ 20100420
-# 20100420 results for 4_subdom=6.8577/2.0856, 3=15.3590/8.4512
-# which means 4+ was 13.7561/2.1106@0.866 and 3+ was 29.1151/10.5619@0.734
-# 6.8205/0.0232 spam/ham, 0.997 s/o @ 20100514
-
-# IP address in relay's rDNS or HELO
-header __IP_IN_RELAY  X-Spam-Relays-External =~ /^\[ ip=(\d+)\.(\d+)\.(\d+)\.(\d+) (?:[^\]]* )?(?:rdns|helo)=\S*(?:\1\D\2\D\3\D\4|\4\D\3\D\2\D\1)/
-# 49.0895/0.4994 spam/ham, 0.990 s/o @ 20100514
-
-
 
 # Rough nonplugin regexs from John Rudd's Botnet plugin (v0.8, 2007-08-05).
 # http://people.ucsc.edu/~jrudd/spamassassin/Botnet-0.8.tar

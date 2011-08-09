@@ -42,7 +42,7 @@ score    DEAR_EMAIL	1.5 # 20090424
 # 0.4706/0.0077 spam/ham, 0.984 s/o @ 20100329 1.5
 # 0.1097/0.0107 spam/ham, 0.911 s/o @ 20100417 net
 
-body	 DEAR_NOBODY	/^\s*Dear\b[^a-zA-Z]{0,70}$/i
+rawbody	 DEAR_NOBODY	/^\s*Dear\b[^a-zA-Z]{1,70}\n/mi
 describe DEAR_NOBODY	Message contains Dear but with no name
 #score    DEAR_NOBODY	0.001 # 20090408
 # 0.8729/0.0108 spam/ham, 0.988 s/o @ 20091201
@@ -69,26 +69,4 @@ describe FROM_WWW	Sender name appears to be a website
 # 0.3219/0.0052 spam/ham, 0.984 s/o @ 20100313
 # 0.4949/0.0189 spam/ham, 0.963 s/o @ 20100318
 # 0.2273/0.0080 spam/ham, 0.966 s/o @ 20100417 net.  1.75 -> 0.75
-
-ifplugin Mail::SpamAssassin::Plugin::MIMEHeader # {
-
-  mimeheader DSCL4_PNG    Content-Type =~ /name\=\"DS[CL]\d{4,5}\.(?:png|PNG)\"/
-  describe   DSCL4_PNG		Digital camera filename is PNG
-  score      DSCL4_PNG		0.9 # 1.6->0.9 20091019 no recent hits
-
-  ifplugin Mail::SpamAssassin::Plugin::ImageInfo
-    # __JPEG_ATTACH is in sandbox/jhardin/20_tbird_image_spam.cf
-    # __GIF_ATTACH is in sandbox/felicity/70_other.cf
-    mimeheader	__PNG_ATTACH	Content-Type =~ /^image\/png\b/i
-    body	__JPEG_EXISTS	eval:image_count('jpeg',1)
-    body	__GIF_EXISTS	eval:image_count('gif',1)
-    body	__PNG_EXISTS	eval:image_count('png',1)
-
-    meta	IMAGE_MISMATCH	(__GIF_ATTACH && !__GIF_EXISTS) || (__PNG_ATTACH && !__PNG_EXISTS) || (__JPEG_ATTACH && !__JPEG_EXISTS)
-    describe	IMAGE_MISMATCH	Contains wrong image format for MIME header
-    #score	IMAGE_MISMATCH	0.5 # 20090610, proposed to sa-users @20090524
-    # in SA masscheck, no hits to date, probably because ifplugin never fires
-  endif # ImageInfo
-
-endif # } MIMEHeader
 

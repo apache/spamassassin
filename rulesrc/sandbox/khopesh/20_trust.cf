@@ -1,4 +1,4 @@
-## khop-trust.cf	v 2010042500
+## khop-trust.cf	v 2011021521
 ## Khopesh's Trust metrics, used as a dependency for several channels.
 ## 
 ## Spamassassin rules written by Adam Katz <antispamATkhopiscom>
@@ -14,6 +14,7 @@
 
 # Detect milter-greylist, postgrey, SQLgrey, scam-grey, and hopefully others
 header	 __GREYLISTING	ALL =~ /(?:^|\n)X-(?:Scam-Grey|Greylist(?:ing)?):\s/m
+tflags	 __GREYLISTING	nice
 
 header	 __DKIM_EXISTS	exists:DKIM-Signature
 tflags	 __DKIM_EXISTS	nice
