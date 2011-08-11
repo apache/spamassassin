@@ -87,7 +87,17 @@ describe LOTTO_AGENT_RPLY Claims Agent
 body     __LOTTO_ADMITS_1 /\b(?:on-?line|e-?mail|ballot|(?:inter)?national|state|(?:UK|euro)[- ]?(?:mil+ions?|PW)|Canada|Microsoft|MSN|internet|mega|jackpot|Royal Heritage|foundation|cash\sgrant|mercato|univers|staatsloterij|bill\s?gates|swiss|this|esta)(?:\s(?!lot|swe|prom)\w{1,20}){0,3}\s?(?:lot(?:to|tery|eri[ea])|sweepstakes?|promo(?:tion|cao|cion)?)\b/i
 body     __LOTTO_ADMITS_2 /\b(?:free)?(?:lot(?:to|tery|erie)|sweepstakes)\s(?:(?:inter)?na[tz]ional|department|bureau|group|award)/i
 uri      __LOTTO_ADMITS_3 /lottery/i
-meta     __LOTTO_ADMITS     __LOTTO_ADMITS_1 || __LOTTO_ADMITS_2 || __LOTTO_ADMITS_3
+
+ifplugin Mail::SpamAssassin::Plugin::MIMEHeader
+  mimeheader   __LOTTO_ATTACH_1   Content-Type =~ /lott(?:o|ery)/i
+  mimeheader   __LOTTO_ATTACH_2   Content-Disposition =~ /lott(?:o|ery)/i
+else
+  meta         __LOTTO_ATTACH_1   0
+  meta         __LOTTO_ATTACH_2   0
+endif
+
+meta     __LOTTO_ADMITS     __LOTTO_ADMITS_1 || __LOTTO_ADMITS_2 || __LOTTO_ADMITS_3 || __LOTTO_ATTACH_1 || __LOTTO_ATTACH_2
+
 
 body     __LOTTO_RELATED    /\b(?:lott(?:o|ery)|sweepstakes)\s(?:prize|draw(?:s|ing)?|(?:ge)?win(?:n?er|n?ing)?|jackpot|award|fund|com+it+e+|com+is+ion|guild|promotion|promocao|program|day|online|company|(?:in)?corporat|agent|co[-,]?ordinator|team)/i
 

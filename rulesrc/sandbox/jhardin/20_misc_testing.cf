@@ -511,9 +511,11 @@ describe        LH_URI_DOM_IN_PATH      Long-host URI having a domain name in th
 # observed in phish 4/10/10
 uri             URI_1234                m,//1\.2\.3\.4/,
 
-# requested by Benny Pedersen 17 Apr 2010
+# requested by Benny Pedersen 17 Apr 2010, 10 Aug 2011
 meta            __SPF_FULL_PASS         (SPF_PASS && SPF_HELO_PASS)
 tflags          __SPF_FULL_PASS         net
+meta            __SPF_RANDOM_SENDER     (SPF_HELO_PASS && !SPF_PASS)
+tflags          __SPF_RANDOM_SENDER     net
 
 # Spam from ZA
 header          CAN_SPAM_HDR            CAN-SPAM_Compliant =~ /./
@@ -608,8 +610,10 @@ if can(Mail::SpamAssassin::Conf::feature_bug6558_free)
   body        __PILL_PRICE_02        /(?=[ptc])(?:pill|tablet|cap(?:sule|let))s[ :-]{1,5}\$?[\d .]{3}/i
   tflags      __PILL_PRICE_01        multiple maxhits=3
   tflags      __PILL_PRICE_02        multiple maxhits=3
+  meta        ANY_PILL_PRICE         (__PILL_PRICE_01 || __PILL_PRICE_02) && !__NOT_A_PERSON
+  describe    ANY_PILL_PRICE         Prices for pills
   meta        MANY_PILL_PRICE        (__PILL_PRICE_01 + __PILL_PRICE_02) > 2
-  describe    MANY_PILL_PRICE        Prices for pills
+  describe    MANY_PILL_PRICE        Prices for many pills
 endif
 
 # More from Ned Slider
@@ -704,9 +708,9 @@ describe    GAPPY_PHONE_NA         Phone number with lots of spaces
 
 full        __GAPPY_HTML_01        m;</?[a-z]{1,6}(?:\s[^>]{0,40})?>(?:\s|=09){0,80}(?:(?!\d)[\w'()\#,.:!]{1,15}(?:\s|=09){4,80}){7}\S;
 full        __GAPPY_HTML_02        m;\S(?:(?:\s|=09){4,80}(?!\d)[\w'()\#,.:!]{1,15}){7}(?:\s|=09){0,5}</?[a-z]{1,6}/?>;
-full        __GAPPY_HTML_03        /^(?:=09){3,20}</m
+full        __GAPPY_HTML_03        /^(?:=09){5,20}</m
 tflags      __GAPPY_HTML_03        multiple maxhits=11
-full        __GAPPY_HTML_04        /^(?:=0A){4,20}/m
+full        __GAPPY_HTML_04        /^(?:=0A){5,20}/m
 tflags      __GAPPY_HTML_04        multiple maxhits=11
 meta        __GAPPY_HTML           __MIME_HTML && (__GAPPY_HTML_01 || __GAPPY_HTML_02 || (__GAPPY_HTML_03 > 10) || (__GAPPY_HTML_04 > 10))
 meta        GAPPY_HTML             __GAPPY_HTML && !__UNSUB_LINK && !__RP_MATCHES_RCVD && !__RCD_RDNS_MAIL_MESSY
