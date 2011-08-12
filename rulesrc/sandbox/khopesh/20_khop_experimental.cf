@@ -116,19 +116,19 @@ header	 __BOTNET_NOTRUST	X-Spam-Relays-Trusted !~ /ip=/i
 tflags	 __BOTNET_NOTRUST	nopublish # confirm license with author first
 
 
-# O'Reilly Sendmail 3e p396 10.7.2 "Forging with SMTP" http://tinyurl.com/pb8vje
-# This had problems with the first hop, which *always* fails FCrDNS.
-#header   KHOP_HELO_FCRDNS Received =~/from (\S+) \((?!\1)\S+\.\w{2,6} \[[0-9.]/
-
 # Note: unfair regarding RFC 2821, see http://en.wikipedia.org/wiki/FCrDNS#Uses
 header __HELO_NOT_RDNS	X-Spam-Relays-External =~ /^[^\]]+ rdns=(\S+) helo=(?!\1)\S/
 meta	 KHOP_HELO_FCRDNS	__HELO_NOT_RDNS && !(__VIA_ML || __freemail_safe || __RCVD_IN_DNSWL || __NOT_SPOOFED || __RDNS_SHORT)
 describe KHOP_HELO_FCRDNS	Relay HELO differs from its IP's reverse DNS
-#score	 KHOP_HELO_FCRDNS	0.4 # 20090603, currently scoring 0.001
-score	 KHOP_HELO_FCRDNS	0.001
+score	 KHOP_HELO_FCRDNS	0.4 # 20090603
 # 33.9858/7.3415 spam/ham, 0.822 s/o @ 20100203
 # 40.5025/2.1738 spam/ham, 0.949 s/o @ 20100417 net
 # 44.5263/5.6620 spam/ham, 0.887 s/o @ 20100514.  Added rdns_short 5/17.
+# 38.8872/2.9614 spam/ham, 0.929 s/o @ 20110812 @302k spam
+
+# inspired by SPF HELO portion of http://www.chaosreigns.com/mtx/#comparisons
+meta	 FORGED_SPF_HELO	__HELO_NOT_RDNS && SPF_HELO_PASS && !SPF_PASS
+# nice theory, expecting poor practice, maybe 0.0453/0.1227 s/h @ 0.270 s/o
 
 # This *really* needs properly defined trusted networks.
 header	 __HELO_AS_VICTIM 	X-Spam-Relays-External =~ /^[^\]]+ helo=(\S+) [^\]]*\bby=\1 /
