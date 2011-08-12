@@ -1,7 +1,7 @@
-Index: spamassassin-3.3.1/INSTALL
+Index: spamassassin_release_3_3_2_rc_1/INSTALL
 ===================================================================
---- spamassassin-3.3.1.orig/INSTALL	2010-03-21 23:13:02.000000000 -0700
-+++ spamassassin-3.3.1/INSTALL	2010-03-21 23:14:12.000000000 -0700
+--- spamassassin_release_3_3_2_rc_1.orig/INSTALL	2011-05-14 09:04:39.000000000 -0700
++++ spamassassin_release_3_3_2_rc_1/INSTALL	2011-05-14 11:55:36.000000000 -0700
 @@ -455,7 +455,7 @@
      perl interpreter.  Version 2.83 or later fixes this.
  
@@ -11,10 +11,10 @@ Index: spamassassin-3.3.1/INSTALL
  
  
  What Next?
-Index: spamassassin-3.3.1/README
+Index: spamassassin_release_3_3_2_rc_1/README
 ===================================================================
---- spamassassin-3.3.1.orig/README	2010-03-21 23:13:01.000000000 -0700
-+++ spamassassin-3.3.1/README	2010-03-21 23:14:12.000000000 -0700
+--- spamassassin_release_3_3_2_rc_1.orig/README	2011-05-14 09:04:39.000000000 -0700
++++ spamassassin_release_3_3_2_rc_1/README	2011-05-14 11:55:36.000000000 -0700
 @@ -111,13 +111,13 @@
          not modify these, as they are overwritten when you run
          "sa-update".
@@ -57,10 +57,10 @@ Index: spamassassin-3.3.1/README
          just a template, which will be copied to a user's home directory
          for them to change.
  
-Index: spamassassin-3.3.1/UPGRADE
+Index: spamassassin_release_3_3_2_rc_1/UPGRADE
 ===================================================================
---- spamassassin-3.3.1.orig/UPGRADE	2010-03-21 23:13:01.000000000 -0700
-+++ spamassassin-3.3.1/UPGRADE	2010-03-21 23:14:12.000000000 -0700
+--- spamassassin_release_3_3_2_rc_1.orig/UPGRADE	2011-05-14 09:04:39.000000000 -0700
++++ spamassassin_release_3_3_2_rc_1/UPGRADE	2011-05-14 11:55:36.000000000 -0700
 @@ -49,7 +49,7 @@
    perldoc Mail::SpamAssassin::Plugin::* (ie AWL, DCC, etc)
  
@@ -79,10 +79,10 @@ Index: spamassassin-3.3.1/UPGRADE
    file. This is strongly recommended if you're not using NFS, as it is
    much faster than the NFS-safe locker.
  
-Index: spamassassin-3.3.1/USAGE
+Index: spamassassin_release_3_3_2_rc_1/USAGE
 ===================================================================
---- spamassassin-3.3.1.orig/USAGE	2010-03-21 23:13:02.000000000 -0700
-+++ spamassassin-3.3.1/USAGE	2010-03-21 23:14:12.000000000 -0700
+--- spamassassin_release_3_3_2_rc_1.orig/USAGE	2011-05-14 09:04:39.000000000 -0700
++++ spamassassin_release_3_3_2_rc_1/USAGE	2011-05-14 11:55:36.000000000 -0700
 @@ -117,7 +117,7 @@
      CPU-intensive task before they can send mail to you, so we give that
      some bonus points.  However, it requires that you list what addresses
@@ -109,10 +109,10 @@ Index: spamassassin-3.3.1/USAGE
      override these files.
  
  
-Index: spamassassin-3.3.1/ldap/README
+Index: spamassassin_release_3_3_2_rc_1/ldap/README
 ===================================================================
---- spamassassin-3.3.1.orig/ldap/README	2010-03-21 23:13:02.000000000 -0700
-+++ spamassassin-3.3.1/ldap/README	2010-03-21 23:14:12.000000000 -0700
+--- spamassassin_release_3_3_2_rc_1.orig/ldap/README	2011-05-14 09:04:33.000000000 -0700
++++ spamassassin_release_3_3_2_rc_1/ldap/README	2011-05-14 11:55:36.000000000 -0700
 @@ -13,7 +13,7 @@
  database or LDAP server.
  
@@ -122,10 +122,10 @@ Index: spamassassin-3.3.1/ldap/README
  
    user_scores_dsn ldap://host:port/dc=basedn,dc=de?attr?scope?uid=__USERNAME__
    user_scores_ldap_username	bind dn
-Index: spamassassin-3.3.1/lib/Mail/SpamAssassin/Conf.pm
+Index: spamassassin_release_3_3_2_rc_1/lib/Mail/SpamAssassin/Conf.pm
 ===================================================================
---- spamassassin-3.3.1.orig/lib/Mail/SpamAssassin/Conf.pm	2010-03-21 23:13:02.000000000 -0700
-+++ spamassassin-3.3.1/lib/Mail/SpamAssassin/Conf.pm	2010-03-21 23:14:12.000000000 -0700
+--- spamassassin_release_3_3_2_rc_1.orig/lib/Mail/SpamAssassin/Conf.pm	2011-05-14 09:04:33.000000000 -0700
++++ spamassassin_release_3_3_2_rc_1/lib/Mail/SpamAssassin/Conf.pm	2011-05-14 11:55:36.000000000 -0700
 @@ -40,7 +40,7 @@
  =head1 DESCRIPTION
  
@@ -135,7 +135,7 @@ Index: spamassassin-3.3.1/lib/Mail/SpamAssassin/Conf.pm
  directories.
  
  The following web page lists the most important configuration settings
-@@ -1951,7 +1951,7 @@
+@@ -1956,7 +1956,7 @@
  
  These settings differ from the ones above, in that they are considered
  'privileged'.  Only users running C<spamassassin> from their procmailrc's or
@@ -144,10 +144,10 @@ Index: spamassassin-3.3.1/lib/Mail/SpamAssassin/Conf.pm
  use them.   C<spamd> users cannot use them in their C<user_prefs> files, for
  security and efficiency reasons, unless C<allow_user_rules> is enabled (and
  then, they may only add rules from below).
-Index: spamassassin-3.3.1/lib/Mail/SpamAssassin/Plugin/Test.pm
+Index: spamassassin_release_3_3_2_rc_1/lib/Mail/SpamAssassin/Plugin/Test.pm
 ===================================================================
---- spamassassin-3.3.1.orig/lib/Mail/SpamAssassin/Plugin/Test.pm	2010-03-21 23:13:02.000000000 -0700
-+++ spamassassin-3.3.1/lib/Mail/SpamAssassin/Plugin/Test.pm	2010-03-21 23:14:12.000000000 -0700
+--- spamassassin_release_3_3_2_rc_1.orig/lib/Mail/SpamAssassin/Plugin/Test.pm	2011-05-14 09:04:33.000000000 -0700
++++ spamassassin_release_3_3_2_rc_1/lib/Mail/SpamAssassin/Plugin/Test.pm	2011-05-14 11:55:36.000000000 -0700
 @@ -27,7 +27,7 @@
  =head1 DESCRIPTION
  
@@ -157,10 +157,10 @@ Index: spamassassin-3.3.1/lib/Mail/SpamAssassin/Plugin/Test.pm
  
  =cut
  
-Index: spamassassin-3.3.1/lib/spamassassin-run.pod
+Index: spamassassin_release_3_3_2_rc_1/lib/spamassassin-run.pod
 ===================================================================
---- spamassassin-3.3.1.orig/lib/spamassassin-run.pod	2010-03-21 23:13:02.000000000 -0700
-+++ spamassassin-3.3.1/lib/spamassassin-run.pod	2010-03-21 23:14:12.000000000 -0700
+--- spamassassin_release_3_3_2_rc_1.orig/lib/spamassassin-run.pod	2011-05-14 09:04:33.000000000 -0700
++++ spamassassin_release_3_3_2_rc_1/lib/spamassassin-run.pod	2011-05-14 11:55:36.000000000 -0700
 @@ -41,7 +41,7 @@
   -p prefs, --prefspath=file, --prefs-file=file
                                     Set user preferences file
@@ -179,10 +179,10 @@ Index: spamassassin-3.3.1/lib/spamassassin-run.pod
  
  =item B<--cf='config line'>
  
-Index: spamassassin-3.3.1/rules/user_prefs.template
+Index: spamassassin_release_3_3_2_rc_1/rules/user_prefs.template
 ===================================================================
---- spamassassin-3.3.1.orig/rules/user_prefs.template	2010-03-21 23:13:02.000000000 -0700
-+++ spamassassin-3.3.1/rules/user_prefs.template	2010-03-21 23:14:12.000000000 -0700
+--- spamassassin_release_3_3_2_rc_1.orig/rules/user_prefs.template	2011-05-14 09:04:34.000000000 -0700
++++ spamassassin_release_3_3_2_rc_1/rules/user_prefs.template	2011-05-14 11:55:36.000000000 -0700
 @@ -5,7 +5,7 @@
  #* directory. At runtime, if a user has no preferences in their home directory
  #* already, it will be copied for them, allowing them to perform personalised
@@ -192,10 +192,10 @@ Index: spamassassin-3.3.1/rules/user_prefs.template
  ###########################################################################
  
  # How many points before a mail is considered spam.
-Index: spamassassin-3.3.1/sa-compile.raw
+Index: spamassassin_release_3_3_2_rc_1/sa-compile.raw
 ===================================================================
---- spamassassin-3.3.1.orig/sa-compile.raw	2010-03-21 23:13:02.000000000 -0700
-+++ spamassassin-3.3.1/sa-compile.raw	2010-03-21 23:14:12.000000000 -0700
+--- spamassassin_release_3_3_2_rc_1.orig/sa-compile.raw	2011-05-14 09:04:39.000000000 -0700
++++ spamassassin_release_3_3_2_rc_1/sa-compile.raw	2011-05-14 11:55:36.000000000 -0700
 @@ -674,7 +674,7 @@
    -p prefs, --prefspath=file, --prefs-file=file
                                  Set user preferences file
@@ -214,10 +214,10 @@ Index: spamassassin-3.3.1/sa-compile.raw
  
  =item B<--updatedir>
  
-Index: spamassassin-3.3.1/sa-learn.raw
+Index: spamassassin_release_3_3_2_rc_1/sa-learn.raw
 ===================================================================
---- spamassassin-3.3.1.orig/sa-learn.raw	2010-03-21 23:13:02.000000000 -0700
-+++ spamassassin-3.3.1/sa-learn.raw	2010-03-21 23:14:12.000000000 -0700
+--- spamassassin_release_3_3_2_rc_1.orig/sa-learn.raw	2011-05-14 09:04:39.000000000 -0700
++++ spamassassin_release_3_3_2_rc_1/sa-learn.raw	2011-05-14 11:55:36.000000000 -0700
 @@ -643,7 +643,7 @@
   -p prefs, --prefspath=file, --prefs-file=file
                         Set user preferences file
@@ -236,10 +236,10 @@ Index: spamassassin-3.3.1/sa-learn.raw
  
  =item B<--cf='config line'>
  
-Index: spamassassin-3.3.1/spamc/spamc.pod
+Index: spamassassin_release_3_3_2_rc_1/spamc/spamc.pod
 ===================================================================
---- spamassassin-3.3.1.orig/spamc/spamc.pod	2010-03-21 23:13:01.000000000 -0700
-+++ spamassassin-3.3.1/spamc/spamc.pod	2010-03-21 23:14:12.000000000 -0700
+--- spamassassin_release_3_3_2_rc_1.orig/spamc/spamc.pod	2011-05-14 09:04:36.000000000 -0700
++++ spamassassin_release_3_3_2_rc_1/spamc/spamc.pod	2011-05-14 11:55:36.000000000 -0700
 @@ -273,8 +273,8 @@
  
  If the B<-F> switch is specified, that file will be used.  Otherwise,
@@ -251,10 +251,10 @@ Index: spamassassin-3.3.1/spamc/spamc.pod
  
  Example:
  
-Index: spamassassin-3.3.1/spamd/README
+Index: spamassassin_release_3_3_2_rc_1/spamd/README
 ===================================================================
---- spamassassin-3.3.1.orig/spamd/README	2010-03-21 23:13:02.000000000 -0700
-+++ spamassassin-3.3.1/spamd/README	2010-03-21 23:14:12.000000000 -0700
+--- spamassassin_release_3_3_2_rc_1.orig/spamd/README	2011-05-14 09:04:39.000000000 -0700
++++ spamassassin_release_3_3_2_rc_1/spamd/README	2011-05-14 11:55:36.000000000 -0700
 @@ -105,7 +105,7 @@
  If you plan to use Bayesian classification (the BAYES rules) with spamd,
  you will need to either
@@ -264,10 +264,10 @@ Index: spamassassin-3.3.1/spamd/README
    tokens, by setting the 'bayes_path' setting to a path all users can read
    and write to.  You will also need to set the 'bayes_file_mode' setting
    to 0666 so that created files are shared, too.
-Index: spamassassin-3.3.1/spamd/README.vpopmail
+Index: spamassassin_release_3_3_2_rc_1/spamd/README.vpopmail
 ===================================================================
---- spamassassin-3.3.1.orig/spamd/README.vpopmail	2010-03-21 23:13:02.000000000 -0700
-+++ spamassassin-3.3.1/spamd/README.vpopmail	2010-03-21 23:14:12.000000000 -0700
+--- spamassassin_release_3_3_2_rc_1.orig/spamd/README.vpopmail	2011-05-14 09:04:39.000000000 -0700
++++ spamassassin_release_3_3_2_rc_1/spamd/README.vpopmail	2011-05-14 11:55:36.000000000 -0700
 @@ -43,7 +43,7 @@
  	/home/vpopmail/domains/somedomain.net/4/userid/.spamassassin/user_prefs
  
@@ -277,11 +277,11 @@ Index: spamassassin-3.3.1/spamd/README.vpopmail
  future enhancement would be to add the capability to have personal AWL db.
  
  6. Of course vpopmail must have the seekable patch installed (see 
-Index: spamassassin-3.3.1/spamd/spamd.raw
+Index: spamassassin_release_3_3_2_rc_1/spamd/spamd.raw
 ===================================================================
---- spamassassin-3.3.1.orig/spamd/spamd.raw	2010-03-21 23:13:02.000000000 -0700
-+++ spamassassin-3.3.1/spamd/spamd.raw	2010-03-21 23:14:12.000000000 -0700
-@@ -2895,7 +2895,7 @@
+--- spamassassin_release_3_3_2_rc_1.orig/spamd/spamd.raw	2011-05-14 09:04:39.000000000 -0700
++++ spamassassin_release_3_3_2_rc_1/spamd/spamd.raw	2011-05-14 11:55:36.000000000 -0700
+@@ -2951,7 +2951,7 @@
  =item B<--siteconfigpath>=I<path>
  
  Use the specified path for locating site-specific configuration files.  Ignore
@@ -290,10 +290,10 @@ Index: spamassassin-3.3.1/spamd/spamd.raw
  
  =item B<--cf='config line'>
  
-Index: spamassassin-3.3.1/sql/README
+Index: spamassassin_release_3_3_2_rc_1/sql/README
 ===================================================================
---- spamassassin-3.3.1.orig/sql/README	2010-03-21 23:13:02.000000000 -0700
-+++ spamassassin-3.3.1/sql/README	2010-03-21 23:14:12.000000000 -0700
+--- spamassassin_release_3_3_2_rc_1.orig/sql/README	2011-05-14 09:04:35.000000000 -0700
++++ spamassassin_release_3_3_2_rc_1/sql/README	2011-05-14 11:55:36.000000000 -0700
 @@ -18,7 +18,7 @@
  SQL preferences.
  
@@ -303,10 +303,10 @@ Index: spamassassin-3.3.1/sql/README
  
    user_scores_dsn		DBI:driver:connection
    user_scores_sql_username	dbusername
-Index: spamassassin-3.3.1/sql/README.awl
+Index: spamassassin_release_3_3_2_rc_1/sql/README.awl
 ===================================================================
---- spamassassin-3.3.1.orig/sql/README.awl	2010-03-21 23:13:02.000000000 -0700
-+++ spamassassin-3.3.1/sql/README.awl	2010-03-21 23:14:12.000000000 -0700
+--- spamassassin_release_3_3_2_rc_1.orig/sql/README.awl	2011-05-14 09:04:35.000000000 -0700
++++ spamassassin_release_3_3_2_rc_1/sql/README.awl	2011-05-14 11:55:36.000000000 -0700
 @@ -15,7 +15,7 @@
  auto_whitelist_factory Mail::SpamAssassin::SQLBasedAddrList
  
@@ -316,10 +316,10 @@ Index: spamassassin-3.3.1/sql/README.awl
  
  user_awl_dsn                 DBI:driver:database:hostname[:port]
  user_awl_sql_username        dbusername
-Index: spamassassin-3.3.1/t/data/testplugin.pm
+Index: spamassassin_release_3_3_2_rc_1/t/data/testplugin.pm
 ===================================================================
---- spamassassin-3.3.1.orig/t/data/testplugin.pm	2010-03-21 23:13:02.000000000 -0700
-+++ spamassassin-3.3.1/t/data/testplugin.pm	2010-03-21 23:14:12.000000000 -0700
+--- spamassassin_release_3_3_2_rc_1.orig/t/data/testplugin.pm	2011-05-14 09:04:37.000000000 -0700
++++ spamassassin_release_3_3_2_rc_1/t/data/testplugin.pm	2011-05-14 11:55:36.000000000 -0700
 @@ -1,6 +1,6 @@
  =head1 testplugin.pm
  
