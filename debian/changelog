@@ -1,3 +1,13 @@
+spamassassin (3.3.2-1) unstable; urgency=low
+
+  * New upstream rc release. (Closes: 615590, 626191, 630327, 626751, 631583)
+  * Bump standards version to 3.9.2 (no changes)
+  * Add a README.source indicating that our orig.tar.gz differs from
+    upstream in that we need to delete their debian/ subdirectory.
+  * Delete patches that have been incorporated upstream.
+
+ -- Noah Meyerhans <noahm@debian.org>  Sat, 14 May 2011 12:06:12 -0700
+
 spamassassin (3.3.1-2) unstable; urgency=low
 
   * Disable SSLv2 support due to its removal from OpenSSL (Closes: 622053)
