@@ -49,6 +49,10 @@ ifplugin Mail::SpamAssassin::Plugin::MIMEHeader
 #  mimeheader   ECMSNGR_MH          X-ecm-part-format =~ /./
 #  describe     ECMSNGR_MH          eC-Messenger header
 
+  mimeheader   __CTYPE_NULL        Content-Type =~ /^\s*;/
+  meta         CTYPE_NULL          __CTYPE_NULL
+  describe     CTYPE_NULL          Malformed Content-Type header
+
 endif
 
 # general case of spample observation
