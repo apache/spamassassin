@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus-trap darxus dos grenier hege jarif kgolding llanga wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1 zmi; day 2: bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus-trap darxus dos hege jarif kgolding llanga wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1 zmi; day 3: bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus-trap darxus dos grenier hege jarif llanga wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1 zmi
+# with results from: day 1: bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus-trap darxus dos grenier hege jarif kgolding llanga wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1 zmi; day 2: bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus-trap darxus dos grenier hege jarif kgolding llanga wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1 zmi; day 3: bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus-trap darxus dos hege jarif kgolding llanga wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1 zmi
 
 # tflags 
 ADVANCE_FEE_2_NEW_FORM
@@ -99,6 +99,9 @@ CHARSET_FARAWAY_HEADER
 
 # tflags 
 CORRUPT_FROM_LINE_IN_HDRS
+
+# good enough
+CTYPE_NULL
 
 # good enough
 DATE_IN_FUTURE_96_Q
@@ -416,6 +419,9 @@ HK_NAME_DRUGS
 HK_PNIS
 
 # good enough
+HK_SCAM_N13
+
+# good enough
 HK_SCAM_N15
 
 # good enough
@@ -716,9 +722,6 @@ RCVD_IN_XBL
 RISK_FREE
 
 # good enough
-RP_8BIT
-
-# good enough
 RP_MATCHES_RCVD
 
 # good enough
@@ -809,6 +812,9 @@ TO_EQ_FM_SPF_FAIL
 TO_IN_SUBJ
 
 # good enough
+TO_NO_BRKTS_DIRECT
+
+# good enough
 TO_NO_BRKTS_DYNIP
 
 # good enough
@@ -860,16 +866,10 @@ TVD_SUBJ_NUM_OBFU_MINFP
 TVD_VISIT_PHARMA
 
 # good enough
-CTYPE_NULL
+CN_B2B_SPAMMER
 
 # good enough
-HK_SCAM_N13
-
-# good enough
-TO_NO_BRKTS_DIRECT
-
-# good enough
-URI_OBFU_DOM
+TVD_PH_BODY_META
 
 # tflags userconf
 UNPARSEABLE_RELAY
@@ -915,6 +915,9 @@ URIBL_WS_SURBL
 
 # tflags userconf
 URI_NOVOWEL
+
+# good enough
+URI_OBFU_DOM
 
 # good enough
 URI_OBFU_TLD
