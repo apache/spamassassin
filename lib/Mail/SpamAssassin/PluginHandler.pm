@@ -207,9 +207,10 @@ sub callback {
       warn "plugin: eval failed: $eval_stat\n";
     };
 
-    if ($ret) {
-      #dbg("plugin: ${plugin}->${methodref} => $ret");
-      $overallret = $ret;
+    if (defined $ret) {
+      # dbg("plugin: ${plugin}->${methodref} => $ret");
+      # we are interested in defined but false results too
+      $overallret = $ret  if $ret || !defined $overallret;
     }
 
     if ($plugin->{_inhibit_further_callbacks}) {
@@ -218,7 +219,6 @@ sub callback {
     }
   }
 
-  $overallret ||= $ret;
   return $overallret;
 }
 
