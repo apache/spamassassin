@@ -469,7 +469,7 @@ eval {
 
   # if exit_status isn't already set to non-zero, set it to the reverse of the
   # run result (0 is bad, 1+ is good -- the opposite of exit status codes)
-  eval { $exit_status ||= ! $iter->run(@targets); };
+  my $run_ok = eval { $exit_status ||= ! $iter->run(@targets); 1 };
 
   print STDERR "\n" if ($opt{showdots});
   $progress->final() if ($opt{progress} && $progress);
@@ -483,7 +483,7 @@ eval {
     undef $tempfile;
   }
 
-  if ($@) { die $@ unless ( $@ =~ /HITLIMIT/ ); }
+  if (!$run_ok && $@ !~ /HITLIMIT/) { die $@ }
   1;
 } or do {
   my $eval_stat = $@ ne '' ? $@ : "errno=$!";  chomp $eval_stat;
