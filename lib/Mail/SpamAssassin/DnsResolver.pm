@@ -85,8 +85,7 @@ sub load_resolver {
   if (defined $self->{res}) { return 1; }
   $self->{no_resolver} = 1;
   # force only ipv4 if no IO::Socket::INET6 or ipv6 doesn't work
-  # to be safe test both ipv6 and ipv4 addresses in INET6
-  my $force_ipv4 = (!HAS_SOCKET_INET6) || $self->{main}->{force_ipv4} ||
+  my $force_ipv4 = !HAS_SOCKET_INET6 || $self->{main}->{force_ipv4} ||
     !eval {
       my $sock6 = IO::Socket::INET6->new(
                                          LocalAddr => "::",
@@ -94,26 +93,15 @@ sub load_resolver {
                                          );
       if ($sock6) {
         $sock6->close()  or die "error closing inet6 socket: $!";
-        1;
       }
-    } ||
-    !eval {
-      my $sock6 = IO::Socket::INET6->new(
-                                         LocalAddr => "0.0.0.0",
-                                         PeerAddr => "0.0.0.0",
-					 PeerPort => 53,
-                                         Proto     => 'udp',
-                                         );
-      if ($sock6) {
-        $sock6->close()  or die "error closing inet4 socket: $!";
-        1;
-      }
+      $sock6;
     };
   
   eval {
     require Net::DNS;
-    # force_v4 is set in new() to avoid error in older versions of Net::DNS that don't have it
-    # other options are set by function calls so a typo or API change will cause an error here
+    # force_v4 is set in new() to avoid error in older versions of Net::DNS
+    # that don't have it; other options are set by function calls so a typo
+    # or API change will cause an error here
     $self->{res} = Net::DNS::Resolver->new(force_v4 => $force_ipv4);
     if (defined $self->{res}) {
       $self->{no_resolver} = 0;
