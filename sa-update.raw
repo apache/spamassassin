@@ -683,9 +683,9 @@ foreach my $channel (@channels) {
 
   # Write the content out to a temp file for GPG/Archive::Tar interaction
   dbg("channel: populating temp content file");
-  open(TMP, ">$content_file") || die "fatal: can't write to content temp file $content_file: $!\n";
+  open(TMP, ">$content_file") || die "fatal: couldn't create content temp file $content_file: $!\n";
   binmode TMP;
-  print TMP $content;
+  print TMP $content || die "fatal: can't write to content temp file $content_file: $!\n";
   close(TMP);
 
   # to sign  : gpg -bas file
@@ -701,7 +701,7 @@ foreach my $channel (@channels) {
       die "fatal: couldn't create temp file for GPG signature: $!\n";
     }
     binmode $tfh;
-    print $tfh $GPG;
+    print $tfh $GPG || die "fatal: can't write temp file for GPG signature: $!\n";
     close($tfh);
 
     dbg("gpg: calling gpg");
