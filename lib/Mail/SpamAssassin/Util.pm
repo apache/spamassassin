@@ -1057,6 +1057,8 @@ sub secure_tmpfile {
     return;
   }
 
+  opendir(my $dh, $tmpdir) || die "Could not open $tmpdir: $!";
+  closedir $dh;
   my ($reportfile, $tmpfile);
   my $umask = umask 077;
 
@@ -1084,7 +1086,10 @@ sub secure_tmpfile {
 
     # ensure the file handle is not semi-open in some way
     if ($tmpfile) {
-      close $tmpfile  or info("error closing $reportfile: $!");
+      if (! close $tmpfile) {
+       info("error closing $reportfile: $!");
+       $tmpfile=undef;
+      }
     }
   }
 
