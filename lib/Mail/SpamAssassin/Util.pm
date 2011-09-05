@@ -59,7 +59,7 @@ BEGIN {
   @EXPORT = ();
   @EXPORT_OK = qw(&local_tz &base64_decode &untaint_var &untaint_file_path
                   &exit_status_str &proc_status_ok &am_running_on_windows
-                  &reverse_ip_address);
+                  &reverse_ip_address &secure_tmpfile &secure_tmpdir);
 }
 
 use Mail::SpamAssassin;
@@ -1049,19 +1049,13 @@ If it cannot open a file after 20 tries, it returns C<undef>.
 sub secure_tmpfile {
   my $tmpdir = untaint_file_path($ENV{'TMPDIR'} || File::Spec->tmpdir());
 
-  if (!$tmpdir) {
-    # Note: we would prefer to keep this fatal, as not being able to
-    # find a writable tmpdir is a big deal for the calling code too.
-    # That would be quite a psychotic case, also.
-    warn "util: cannot find a temporary directory, set TMP or TMPDIR in environment";
-    return;
-  }
+  defined $tmpdir && $tmpdir ne ''
+    or die "util: cannot find a temporary directory, set TMP or TMPDIR in environment";
 
-  opendir(my $dh, $tmpdir) || die "Could not open $tmpdir: $!";
-  closedir $dh;
-  my ($reportfile, $tmpfile);
-  my $umask = umask 077;
+  opendir(my $dh, $tmpdir) or die "Could not open directory $tmpdir: $!";
+  closedir $dh or die "Error closing directory $tmpdir: $!";
 
+  my ($reportfile, $tmpfh);
   for (my $retries = 20; $retries > 0; $retries--) {
     # we do not rely on the obscurity of this name for security,
     # we use a average-quality PRG since this is all we need
@@ -1071,36 +1065,34 @@ sub secure_tmpfile {
 
     # instead, we require O_EXCL|O_CREAT to guarantee us proper
     # ownership of our file, read the open(2) man page
-    if (sysopen($tmpfile, $reportfile, O_RDWR|O_CREAT|O_EXCL, 0600)) {
-      binmode $tmpfile  or die "cannot set $reportfile to binmode: $!";
+    if (sysopen($tmpfh, $reportfile, O_RDWR|O_CREAT|O_EXCL, 0600)) {
+      binmode $tmpfh  or die "cannot set $reportfile to binmode: $!";
       last;
     }
-
-    if ($!{EEXIST}) {
-      # it is acceptable if $tmpfile already exists, try another
-      next;
-    }
-    
-    # error, maybe "out of quota" or "too many open files" (bug 4017)
-    warn "util: secure_tmpfile failed to create file '$reportfile': $!\n";
+    my $errno = $!;
 
     # ensure the file handle is not semi-open in some way
-    if ($tmpfile) {
-      if (! close $tmpfile) {
+    if ($tmpfh) {
+      if (! close $tmpfh) {
        info("error closing $reportfile: $!");
-       $tmpfile=undef;
+       undef $tmpfh;
       }
     }
+
+    # it is acceptable if $tmpfh already exists, try another
+    next if $errno == EEXIST;
+
+    # error, maybe "out of quota", "too many open files", "Permission denied"
+    # (bug 4017); makes no sense retrying
+    die "util: failed to create a temporary file '$reportfile': $errno";
   }
 
-  umask $umask;
-
-  if (!$tmpfile) {
-    warn "util: secure_tmpfile failed to create file, giving up";
-    return;	# undef
+  if (!$tmpfh) {
+    warn "util: secure_tmpfile failed to create a temporary file, giving up";
+    return;
   }
 
-  return ($reportfile, $tmpfile);
+  return ($reportfile, $tmpfh);
 }
 
 =item my ($dirpath) = secure_tmpdir();

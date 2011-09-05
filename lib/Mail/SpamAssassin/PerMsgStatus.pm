@@ -2662,6 +2662,7 @@ sub create_fulltext_tmpfile {
   }
 
   my ($tmpf, $tmpfh) = Mail::SpamAssassin::Util::secure_tmpfile();
+  $tmpfh  or die "failed to create a temporary file";
   print $tmpfh $$fulltext  or die "error writing to $tmpf: $!";
   close $tmpfh  or die "error closing $tmpf: $!";
 

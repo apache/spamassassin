@@ -963,20 +963,26 @@ sub _parse_normal {
   # up RAM with something we're not going to use?
   #
   if ($msg->{'type'} !~ m@^(?:text/(?:plain|html)$|message\b)@) {
-    my $filepath;
-    ($filepath, $msg->{'raw'}) = Mail::SpamAssassin::Util::secure_tmpfile();
-
-    if ($filepath) {
+    my($filepath, $fh);
+    eval {
+      ($filepath, $fh) = Mail::SpamAssassin::Util::secure_tmpfile();  1;
+    } or do {
+      my $eval_stat = $@ ne '' ? $@ : "errno=$!";  chomp $eval_stat;
+      info("message: failed to create a temp file: %s", $eval_stat);
+    };
+    if ($fh) {
       # The temp file was created, add it to the list of pending deletions
       # we cannot just delete immediately in the POSIX idiom, as this is
       # unportable (to win32 at least)
       push @{$self->{tmpfiles}}, $filepath;
-      $msg->{'raw'}->print(@{$body})  or die "error writing to $filepath: $!";
+      $fh->print(@{$body})  or die "error writing to $filepath: $!";
+      $msg->{'raw'} = $fh;
     }
   }
 
   # if the part didn't get a temp file, go ahead and store the data in memory
-  if (!exists $msg->{'raw'}) {
+  if (!defined $msg->{'raw'}) {
+    dbg("message: storing a body to memory");
     $msg->{'raw'} = $body;
   }
 }

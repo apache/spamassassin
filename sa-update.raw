@@ -94,6 +94,9 @@ BEGIN {
 
 # These should already be available
 use Mail::SpamAssassin;
+use Mail::SpamAssassin::Util qw(untaint_var untaint_file_path
+                           proc_status_ok exit_status_str am_running_on_windows
+                           secure_tmpfile secure_tmpdir);
 
 # Make the main dbg() accessible in our package w/o an extra function
 *dbg=\&Mail::SpamAssassin::dbg;
@@ -142,7 +145,7 @@ GetOptions(
   'debug|D:s'                           => \$opt{'debug'},
   'version|V'                           => \$opt{'version'},
   'help|h|?'                            => \$opt{'help'},
-  'verbose|v'                           => \$opt{'verbose'},
+  'verbose|v+'                          => \$opt{'verbose'},
   'checkonly'                           => \$opt{'checkonly'},
   'allowplugins'                        => \$opt{'allowplugins'},
   'refreshmirrors'                      => \$opt{'refreshmirrors'},
@@ -210,7 +213,7 @@ my $SA = new Mail::SpamAssassin({
 });
 
 if (defined $opt{'updatedir'}) {
-  $opt{'updatedir'} = Mail::SpamAssassin::Util::untaint_file_path($opt{'updatedir'});
+  $opt{'updatedir'} = untaint_file_path($opt{'updatedir'});
 }
 else {
   $opt{'updatedir'} = $SA->sed_path('__local_state_dir__/__version__');
@@ -239,7 +242,7 @@ $SA->finish();
 # we're not a setuid script, we trust them
 foreach my $optkey (keys %opt) {
   next if ref $opt{$optkey};
-  Mail::SpamAssassin::Util::untaint_var(\$opt{$optkey});
+  untaint_var(\$opt{$optkey});
 }
 
 ##############################################################################
@@ -261,9 +264,8 @@ if (@{$opt{'gpgkey'}}) {
 
 if (defined $opt{'gpgkeyfile'}) {
   $GPG_ENABLED = 1;
-  unless (open(GPG, $opt{'gpgkeyfile'})) {
-    die "Can't open ".$opt{'gpgkeyfile'}." for reading: $!\n";
-  }
+  open(GPG, $opt{'gpgkeyfile'})
+    or die "cannot open $opt{'gpgkeyfile'} for reading: $!\n";
 
   dbg("gpg: reading in gpgfile ".$opt{'gpgkeyfile'});
   while(my $key = <GPG>) {
@@ -282,7 +284,7 @@ if (defined $opt{'gpgkeyfile'}) {
     dbg("gpg: adding key id $key");
     $valid_GPG{$key} = 1;
   }
-  close(GPG);
+  close(GPG) or die "cannot close $opt{'gpgkeyfile'}: $!";
 }
 
 # At this point, we need to know where GPG is ...
@@ -336,9 +338,8 @@ if (defined $opt{'channel'} && scalar @{$opt{'channel'}} > 0) {
   @channels = @{$opt{'channel'}};
 }
 if (defined $opt{'channelfile'}) {
-  unless (open(CHAN, $opt{'channelfile'})) {
-    die "Can't open ".$opt{'channelfile'}." for reading: $!\n";
-  }
+  open(CHAN, $opt{'channelfile'})
+    or die "cannot open $opt{'channelfile'} for reading: $!\n";
 
   dbg("channel: reading in channelfile ".$opt{'channelfile'});
   @channels = ();
@@ -354,14 +355,14 @@ if (defined $opt{'channelfile'}) {
     dbg("channel: adding $chan");
     push(@channels, $chan);
   }
-  close(CHAN);
+  close(CHAN) or die "cannot close $opt{'channelfile'}: $!";
 }
 
 # untaint the channel listing
 for(my $ind = 0; $ind < @channels; $ind++) {
   local($1); # bug 5061: prevent random taint flagging of $1
   if ($channels[$ind] =~ /^([a-zA-Z0-9._-]+)$/) {
-    Mail::SpamAssassin::Util::untaint_var(\$channels[$ind]);
+    untaint_var(\$channels[$ind]);
   }
   else {
     dbg("channel: skipping invalid channel: $channels[$ind]");
@@ -387,11 +388,12 @@ if ($opt{'install'}) {
 }
 
 # Generate a temporary file to put channel content in for later use ...
-my ($content_file, $tfh) = Mail::SpamAssassin::Util::secure_tmpfile();
-if ( !defined $content_file ) {
-  die "fatal: could not create temporary channel content file: $!\n";
-}
-close($tfh);
+my ($content_file, $tfh) = secure_tmpfile();
+$tfh
+  or die "fatal: could not create temporary channel content file: $!\n";
+close $tfh
+  or die "cannot close temporary channel content file $content_file: $!";
+undef $tfh;
 
 my $lint_failures = 0;
 my $channel_failures = 0;
@@ -443,7 +445,7 @@ foreach my $channel (@channels) {
         $currentV = $1;
       }
     }
-    close(CF);
+    close(CF) or die "cannot close $CFFile: $!";
   }
 
   my $newV;
@@ -507,7 +509,7 @@ foreach my $channel (@channels) {
   # when we lint the site pre files, we might as well use the channel temp dir
   dbg("channel: preparing temp directory for new channel");
   if (!$UPDTmp) {
-    $UPDTmp = Mail::SpamAssassin::Util::secure_tmpdir();
+    $UPDTmp = secure_tmpdir();
     dbg("generic: update tmp directory $UPDTmp");
   }
   elsif (!clean_update_dir($UPDTmp)) {
@@ -547,7 +549,7 @@ foreach my $channel (@channels) {
         local $/ = undef;
         $mirby = <MIRBY>;
       }
-      close(MIRBY);
+      close(MIRBY) or die "cannot close $mirby_path: $!";
     }
 
     if (!defined $mirby) {
@@ -682,11 +684,15 @@ foreach my $channel (@channels) {
   }
 
   # Write the content out to a temp file for GPG/Archive::Tar interaction
-  dbg("channel: populating temp content file");
-  open(TMP, ">$content_file") || die "fatal: couldn't create content temp file $content_file: $!\n";
-  binmode TMP;
-  print TMP $content || die "fatal: can't write to content temp file $content_file: $!\n";
-  close(TMP);
+  dbg("channel: populating temp content file %s", $content_file);
+  open(TMP, ">$content_file")
+    or die "fatal: cannot create content temp file $content_file: $!\n";
+  binmode TMP
+    or die "fatal: cannot set binmode on content temp file $content_file: $!\n";
+  print TMP $content
+    or die "fatal: cannot write to content temp file $content_file: $!\n";
+  close TMP
+    or die "fatal: cannot close content temp file $content_file: $!\n";
 
   # to sign  : gpg -bas file
   # to verify: gpg --verify --batch --no-tty --status-fd=1 -q --logger-fd=1 file.asc file
@@ -696,13 +702,16 @@ foreach my $channel (@channels) {
   if ($GPG) {
     dbg("gpg: populating temp signature file");
     my $sig_file;
-    ($sig_file, $tfh) = Mail::SpamAssassin::Util::secure_tmpfile();
-    if ( !defined $sig_file ) {
-      die "fatal: couldn't create temp file for GPG signature: $!\n";
-    }
-    binmode $tfh;
-    print $tfh $GPG || die "fatal: can't write temp file for GPG signature: $!\n";
-    close($tfh);
+    ($sig_file, $tfh) = secure_tmpfile();
+    $tfh
+      or die "fatal: couldn't create temp file for GPG signature: $!\n";
+    binmode $tfh
+      or die "fatal: cannot set binmode on temp file for GPG signature: $!\n";
+    print $tfh $GPG
+      or die "fatal: cannot write temp file for GPG signature: $!\n";
+    close $tfh
+      or die "fatal: cannot close temp file for GPG signature: $!\n";
+    undef $tfh;
 
     dbg("gpg: calling gpg");
 
@@ -714,7 +723,7 @@ foreach my $channel (@channels) {
         "--no-tty --status-fd=1 -q --logger-fd=1";
 
     unless (open(CMD, "$CMD $sig_file $content_file|")) {
-      unlink $sig_file || warn "error: can't unlink $sig_file: $!\n";
+      unlink $sig_file or warn "error: cannot unlink $sig_file: $!\n";
       die "fatal: couldn't execute $GPGPath: $!\n";
     }
 
@@ -746,8 +755,8 @@ foreach my $channel (@channels) {
       $signer = $key if (length $key > length $signer);
     }
 
-    close(CMD);
-    unlink $sig_file || warn "Can't unlink $sig_file: $!\n";
+    close(CMD) or die "cannot close pipe to $GPGPath: $!";
+    unlink $sig_file or warn "cannot unlink $sig_file: $!\n";
 
     if ($signer) {
       my $keyid = substr $signer, -8;
@@ -837,10 +846,8 @@ ENDOFVALIDATIONERR
         else {
           # create the dir, if it doesn't exist
           dbg("channel: creating $UPDDir");
-          if (!mkpath([$UPDDir], 0, 0777)) {
-            warn "channel: can't create channel directory $UPDDir: $!\n";
-	    return 0;
-          }
+          mkpath([$UPDDir], 0, 0777)
+            or die "channel: cannot create channel directory $UPDDir: $!\n";
 
           # ok, that test worked.  it's now likely that the .cf's will
           # similarly be ok to rename, too.   Too late to stop from here on
@@ -855,8 +862,10 @@ ENDOFVALIDATIONERR
 
         # bug 4941: try to get rid of the empty directories to avoid leaving SA
         # with no rules.
-        rmdir $UPDDir;
-        rmdir $opt{'updatedir'};
+        rmdir $UPDDir
+          or dbg("channel: error removing dir %s: %s", $UPDDir, $!);
+        rmdir $opt{'updatedir'}
+          or dbg("channel: error removing dir %s: %s", $opt{'updatedir'}, $!);
       },
     },
 
@@ -891,13 +900,10 @@ ENDOFVALIDATIONERR
 
         # Write out the mirby file, not fatal if it doesn't work
         dbg("channel: creating MIRRORED.BY file");
-        if (open(MBY, ">$mirby_path")) {
-          print MBY $mirby;
-          close(MBY);
-        }
-        else {
-          warn "error: can't write new MIRRORED.BY file: $!\n";
-        }
+        open(MBY, ">$mirby_path")
+          or die "cannot create a new MIRRORED.BY file: $!\n";
+        print MBY $mirby or die "error writing to $mirby_path: $!";
+        close(MBY) or die "cannot close $mirby_path: $!";
 
 	return 1;
       },
@@ -920,14 +926,13 @@ ENDOFVALIDATIONERR
 
 
         # Find all of the cf and pre files
-        unless (opendir(DIR, $UPDDir)) {
-          die "fatal: can't access $UPDDir: $!\n";
-        }
+        opendir(DIR, $UPDDir)
+          or die "fatal: cannot access $UPDDir: $!\n";
 
         my @files;
         while(my $file = readdir(DIR)) {
 	  next if $file eq '.' || $file eq '..';
-          Mail::SpamAssassin::Util::untaint_var(\$file);
+          untaint_var(\$file);
           my $path = File::Spec->catfile($UPDDir, $file);
           next unless (-f $path);   # shouldn't ever happen
           push(@files, $file);
@@ -947,7 +952,7 @@ ENDOFVALIDATIONERR
 
           dbg("channel: adding $file");
         }
-        closedir(DIR);
+        closedir(DIR) or die "cannot close directory $UPDDir: $!";
 
         # Finally, write out the files to include the update files
         if (!write_channel_file($PREFile, \@PRE)) {
@@ -972,14 +977,22 @@ ENDOFVALIDATIONERR
   );
 
   my $error;
+  my $eval_stat;
   for(my $elem = 0; $elem <= $#totry; $elem++) {
-    if (!&{$totry[$elem]->{'try'}}()) {
+    my $success;
+    eval {
+      $success = &{$totry[$elem]->{'try'}}();  1;
+    } or do {
+      $eval_stat = $@ ne '' ? $@ : "errno=$!";  chomp $eval_stat;
+    };
+    if (!$success) {
       $error = $elem;
+      $eval_stat = "step $elem unsuccessful"  if !defined $eval_stat;
       last;
     }
   }
   if (defined $error) {
-    dbg("channel: channel failed, attempting rollback");
+    dbg("channel: channel failed, attempting rollback: %s", $eval_stat);
     for(my $elem = $error; $elem >= 0; $elem--) {
       &{$totry[$elem]->{'rollback'}}();
     }
@@ -1003,13 +1016,13 @@ foreach ( $content_file, $UPDTmp ) {
   next if $stat_errn == ENOENT;
 
   if ($stat_errn != 0) {
-    warn "error: can't access $_: $!\n";
+    warn "error: cannot access $_: $!\n";
   }
   elsif (-d _) {
-    rmdir $_ || warn "error: can't remove directory $_: $!\n";
+    rmdir $_ or warn "error: cannot remove directory $_: $!\n";
   }
   elsif (-f _) {
-    unlink $_ || warn "error: can't remove file $_: $!\n";
+    unlink $_ or warn "error: cannot remove file $_: $!\n";
   }
   else {
     warn "error: '$_' isn't a file nor a directory, skipping\n";
@@ -1058,7 +1071,7 @@ sub read_install_file {
   my ($file) = @_;
   open (IN, "<$file") or die "cannot open $file\n";
   my $all = join('', <IN>);
-  close IN;
+  close IN or die "cannot close $file: $!";
   return $all;
 }
 
@@ -1070,7 +1083,7 @@ sub write_channel_file {
   return 1 unless @{$contents};
 
   if (open(FILE, ">$filename")) {
-    print FILE @{$contents};
+    print FILE @{$contents} or die "cannot write to $filename: $!";
     close FILE or return 0;
     return 1;
   }
@@ -1093,10 +1106,10 @@ sub taint_safe_archive_extract {
   my $input = shift;
 
   my $tfh = IO::Zlib->new($input, "rb");
-  die "fatal: couldn't read content tmpfile $content_file: $!\n" unless $tfh;
+  $tfh or die "fatal: couldn't read content tmpfile $content_file: $!\n";
 
   my $tar = Archive::Tar->new($tfh);
-  die "fatal: couldn't create Archive::Tar object!\n" unless $tar;
+  $tar or die "fatal: couldn't open tar archive!\n";
 
   # stupid Archive::Tar is not natively taint-safe! duh.
   # return $tar->extract();
@@ -1113,7 +1126,10 @@ sub taint_safe_archive_extract {
     $outfname = File::Spec->catfile($todir, $outfname);
 
     dbg "extracting: $outfname";
-    if (open OUT, ">".$outfname) {
+    if (!open OUT, ">".$outfname) {
+      warn "error: failed to create $outfname: $!";
+      goto failed;
+    } else {
       my $content = $tar->get_content($file);
 
       if ($outfname =~ /\.(?:pre|cf)$/) {
@@ -1129,14 +1145,10 @@ sub taint_safe_archive_extract {
         }
       }
 
-      print OUT $content;
-      if (!close OUT) {
-        warn "error: write failed to $outfname: $!";
-        goto failed;
-      }
-    } else {
-      warn "error: failed to open $outfname for write: $!";
-      goto failed;
+      print OUT $content
+        or do { warn "error writing to $outfname: $!"; goto failed };
+      close OUT
+        or do { warn "error: write failed to $outfname: $!"; goto failed }
     }
   }
 
@@ -1157,14 +1169,20 @@ sub do_txt_query {
 
   if ($RR) {
     foreach my $rr ($RR->answer) {
+      next if !$rr;  # no answer records, only rcode
+      next if $rr->type ne 'TXT';  # only interested in TXT fields
       my $text = $rr->rdatastr;
       local($1);
       $text =~ /^"(.*)"$/;
       push @result, $1;
     }
+    printf("DNS TXT query: %s -> %s\n", $query, join(", ",@result))
+      if $opt{'verbose'} && $opt{'verbose'} > 1;
   }
   else {
     dbg("dns: query failed: $query => " . $res->errorstring);
+    printf("DNS TXT query %s failed: %s\n", $query, $res->errorstring)
+      if $opt{'verbose'} && $opt{'verbose'} > 1;
   }
 
   return @result;
@@ -1195,6 +1213,11 @@ sub http_get {
     }
 
     $response = $ua->request($request);
+
+    printf("http: %sGET %s, %s\n",
+           defined $ims ? 'IMS ' : '',  $url,
+           !$response ? '(no response)' : $response->status_line)
+           if $opt{'verbose'} && $opt{'verbose'} > 1;
 
     if ($response->is_success) {
       return $response->content;
@@ -1301,7 +1324,7 @@ sub interpolate_gpghomedir {
   my $gpghome = '';
   if ($opt{'gpghomedir'}) {
     $gpghome = $opt{'gpghomedir'};
-    if (Mail::SpamAssassin::Util::am_running_on_windows()) {
+    if (am_running_on_windows()) {
       # windows is single-quote-phobic; bug 4958 cmt 7
       $gpghome =~ s/\"/\\\"/gs;
       $gpghome = "--homedir=\"$gpghome\"";
@@ -1341,7 +1364,10 @@ sub import_gpg_key {
     }
   }
 
-  close(CMD);
+  my $errno = 0;  close CMD or $errno = $!;
+  proc_status_ok($?,$errno)
+    or warn("gpg: process '$CMD' finished: ".exit_status_str($?,$errno)."\n");
+
   return ($? >> 8);
 }
 
@@ -1357,7 +1383,8 @@ sub import_default_keyring {
   dbg("gpg: importing default keyring to ".$opt{gpghomedir});
   unless (-d $opt{gpghomedir}) {
     # use 0700 to avoid "unsafe permissions" warning
-    mkpath([$opt{'gpghomedir'}], 0, 0700) or die "cannot mkpath $opt{gpghomedir}: $!";
+    mkpath([$opt{'gpghomedir'}], 0, 0700)
+      or die "cannot mkpath $opt{gpghomedir}: $!";
   } 
   import_gpg_key($defkey);
 }
@@ -1375,25 +1402,25 @@ sub clean_update_dir {
   my $dir = shift;
 
   unless (opendir(DIR, $dir)) {
-    warn "error: can't opendir $dir: $!\n";
+    warn "error: cannot opendir $dir: $!\n";
     dbg("generic: attempt to opendir ($dir) failed");
     return;
   }
   while(my $file = readdir(DIR)) {
     next if $file eq '.' || $file eq '..';
-    Mail::SpamAssassin::Util::untaint_var(\$file);
+    untaint_var(\$file);
 
     my $path = File::Spec->catfile($dir, $file);
     next unless (-f $path);
 
     dbg("generic: unlinking $file");
     if (!unlink $path) {
-      warn "error: can't remove file $path: $!\n";
-      closedir(DIR);
+      warn "error: cannot remove file $path: $!\n";
+      closedir(DIR) or die "cannot close directory $dir: $!";
       return;
     }
   }
-  closedir(DIR);
+  closedir(DIR) or die "cannot close directory $dir: $!";
   return 1;
 }
 
@@ -1463,7 +1490,8 @@ Options:
                           (default: @@LOCAL_STATE_DIR@@/@@VERSION@@)
   --refreshmirrors        Force the MIRRORED.BY file to be updated
   -D, --debug [area=n,...]  Print debugging messages
-  -v, --verbose           Be more verbose, like print updated channel names
+  -v, --verbose           Be verbose, like print updated channel names;
+                          For more verbosity specify multiple times
   -V, --version           Print version
   -h, --help              Print usage message
 

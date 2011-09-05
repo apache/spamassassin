@@ -510,6 +510,7 @@ sub extract_hints {
   $rule =~ s/(?<!\\)(\w)\?/\($1\|\)/gs;
 
   my ($tmpf, $tmpfh) = Mail::SpamAssassin::Util::secure_tmpfile();
+  $tmpfh  or die "failed to create a temporary file";
   untaint_var(\$tmpf);
 
   # attempt to find a safe regexp delimiter...
