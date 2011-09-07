@@ -91,6 +91,10 @@ that a value be set, but one was not provided.
 C<$Mail::SpamAssassin::Conf::INVALID_VALUE> -- this setting requires a value
 from a set of 'valid' values, but the user provided an invalid one.
 
+C<$Mail::SpamAssassin::Conf::INVALID_HEADER_FIELD_NAME> -- this setting
+requires a syntactically valid header field name, but the user provided
+an invalid one.
+
 Any other values -- including C<undef> -- returned from the subroutine are
 considered to mean 'success'.
 
@@ -427,6 +431,13 @@ sub parse {
       {
         $parse_error = "config: SpamAssassin failed to parse line, ".
                         "\"$value\" is not valid for \"$key\", ".
+                        "skipping: $line";
+        goto failed_line;
+      }
+      elsif ($ret && $ret eq $Mail::SpamAssassin::Conf::INVALID_HEADER_FIELD_NAME)
+      {
+        $parse_error = "config: SpamAssassin failed to parse line, ".
+                        "\"$value\" does not specify a valid header field name for \"$key\", ".
                         "skipping: $line";
         goto failed_line;
       }

@@ -98,7 +98,7 @@ use vars qw{
   $CONF_TYPE_ADDRLIST $CONF_TYPE_TEMPLATE
   $CONF_TYPE_STRINGLIST $CONF_TYPE_IPADDRLIST
   $CONF_TYPE_NOARGS
-  $INVALID_VALUE $MISSING_REQUIRED_VALUE
+  $MISSING_REQUIRED_VALUE $INVALID_VALUE $INVALID_HEADER_FIELD_NAME
   @MIGRATED_SETTINGS
   $COLLECT_REGRESSION_TESTS
 
@@ -145,8 +145,9 @@ $CONF_TYPE_TEMPLATE         =  6;
 $CONF_TYPE_NOARGS           =  7;
 $CONF_TYPE_STRINGLIST       =  8;
 $CONF_TYPE_IPADDRLIST       =  9;
-$MISSING_REQUIRED_VALUE     = -99999999999999;
-$INVALID_VALUE              = -99999999999998;
+$MISSING_REQUIRED_VALUE     = '-99999999999999';  # string expected by parser
+$INVALID_VALUE              = '-99999999999998';
+$INVALID_HEADER_FIELD_NAME  = '-99999999999997';
 
 # set to "1" by the test suite code, to record regression tests
 # $Mail::SpamAssassin::Conf::COLLECT_REGRESSION_TESTS = 1;
@@ -2526,11 +2527,13 @@ If you add or modify a test, please be sure to run a sanity check afterwards
 by running C<spamassassin --lint>.  This will avoid confusing error
 messages, or other tests being skipped as a side-effect.
 
-=item header SYMBOLIC_TEST_NAME exists:name_of_header
+=item header SYMBOLIC_TEST_NAME exists:header_field_name
 
-Define a header existence test.  C<name_of_header> is the name of a
-header field to test for existence.  This is just a very simple version
-of the above header tests.
+Define a header field existence test.  C<header_field_name> is the name
+of a header field to test for existence.  Not to be confused with a
+test for an empty header field body, which can be implemented with a
+C<header SYMBOLIC_TEST_NAME header_field_name op /pattern/modifiers>
+rule described above.
 
 =item header SYMBOLIC_TEST_NAME eval:name_of_eval_method([arguments])
 
@@ -2644,19 +2647,26 @@ name.
       my ($self, $key, $value, $line) = @_;
       local ($1,$2);
       if ($value =~ /^(\S+)\s+(?:rbl)?eval:(.*)$/) {
-        my ($name, $fn) = ($1, $2);
+        my ($rulename, $fn) = ($1, $2);
 
         if ($fn =~ /^check_(?:rbl|dns)/) {
-          $self->{parser}->add_test ($name, $fn, $TYPE_RBL_EVALS);
+          $self->{parser}->add_test ($rulename, $fn, $TYPE_RBL_EVALS);
         }
         else {
-          $self->{parser}->add_test ($name, $fn, $TYPE_HEAD_EVALS);
+          $self->{parser}->add_test ($rulename, $fn, $TYPE_HEAD_EVALS);
         }
       }
-      elsif ($value =~ /^(\S+)\s+exists:([!-9;-\176]+)$/) {
+      elsif ($value =~ /^(\S+)\s+exists:(.*)$/) {
+        my ($rulename, $header_name) = ($1, $2);
         # RFC 5322 section 3.6.8, ftext printable US-ASCII ch not including ":"
-        $self->{parser}->add_test ($1, "defined($2)", $TYPE_HEAD_TESTS);
-        $self->{descriptions}->{$1} = "Found a $2 header";
+        if ($header_name !~ /\S/) {
+	  return $MISSING_REQUIRED_VALUE;
+        } elsif ($header_name !~ /^([!-9;-\176]+)$/) {
+          return $INVALID_HEADER_FIELD_NAME;
+        }
+        $self->{parser}->add_test ($rulename, "defined($header_name)",
+                                   $TYPE_HEAD_TESTS);
+        $self->{descriptions}->{$rulename} = "Found a $header_name header";
       }
       else {
 	my @values = split(/\s+/, $value, 2);
