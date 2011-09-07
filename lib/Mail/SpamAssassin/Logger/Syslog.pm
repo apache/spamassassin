@@ -43,6 +43,9 @@ use vars qw(@ISA %prio_map);
 @ISA = ();
 
 BEGIN {
+  # %prio_map maps Logger.pm log level names (warn, error, info, dbg)
+  # into standard Sys::Syslog::syslog() log level names
+  #
   %prio_map = (dbg => 'debug', debug => 'debug', info => 'info',
                notice => 'notice', warn => 'warning', warning => 'warning',
                error => 'err', err => 'err', crit => 'crit', alert => 'alert',
