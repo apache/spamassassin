@@ -2531,9 +2531,8 @@ messages, or other tests being skipped as a side-effect.
 
 Define a header field existence test.  C<header_field_name> is the name
 of a header field to test for existence.  Not to be confused with a
-test for an empty header field body, which can be implemented with a
-C<header SYMBOLIC_TEST_NAME header_field_name op /pattern/modifiers>
-rule described above.
+test for a nonempty header field body, which can be implemented by a
+C<header SYMBOLIC_TEST_NAME header =~ /\S/> rule as described above.
 
 =item header SYMBOLIC_TEST_NAME eval:name_of_eval_method([arguments])
 
