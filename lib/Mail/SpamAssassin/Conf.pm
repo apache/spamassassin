@@ -2660,7 +2660,8 @@ name.
         # RFC 5322 section 3.6.8, ftext printable US-ASCII ch not including ":"
         if ($header_name !~ /\S/) {
 	  return $MISSING_REQUIRED_VALUE;
-        } elsif ($header_name !~ /^([!-9;-\176]+)$/) {
+      # } elsif ($header_name !~ /^([!-9;-\176]+)$/) {
+        } elsif ($header_name !~ /^([^: \t]+)$/) {  # be generous
           return $INVALID_HEADER_FIELD_NAME;
         }
         $self->{parser}->add_test ($rulename, "defined($header_name)",
