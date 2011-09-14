@@ -437,8 +437,8 @@ sub parse {
       elsif ($ret && $ret eq $Mail::SpamAssassin::Conf::INVALID_HEADER_FIELD_NAME)
       {
         $parse_error = "config: SpamAssassin failed to parse line, ".
-                        "\"$value\" does not specify a valid header field name for \"$key\", ".
-                        "skipping: $line";
+                       "it does not specify a valid header field name, ".
+                       "skipping: $line";
         goto failed_line;
       }
       elsif ($ret && $ret eq $Mail::SpamAssassin::Conf::MISSING_REQUIRED_VALUE)
