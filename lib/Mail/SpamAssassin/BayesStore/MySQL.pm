@@ -526,7 +526,7 @@ sub tok_touch_all {
 public instance (Boolean) cleanup ()
 
 Description:
-This method peroms any cleanup necessary before moving onto the next
+This method perfoms any cleanup necessary before moving onto the next
 operation.
 
 =cut
