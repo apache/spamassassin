@@ -470,7 +470,7 @@ describe        __NSL_ORIG_FROM_41        Originates from 41.0.0.0/8
 
 # Catch spam injected from 41.0.0.0/8 (Africa, incl S.Africa)
 # Ned Slider, SAU list, 3/11/2010
-header          __NSL_RCVD_FROM_41        Received =~ /\[41\./
+header          __NSL_RCVD_FROM_41        Received =~ /[([]41\./
 describe        __NSL_RCVD_FROM_41        Received from 41.0.0.0/8
 
 # some metas with the above, maybe reduce FPs
