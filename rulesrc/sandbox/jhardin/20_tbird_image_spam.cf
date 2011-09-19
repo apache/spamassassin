@@ -31,7 +31,7 @@ describe   FORGED_TBIRD_IMG_ARROW  Likely forged Thunderbird image spam
 # "To without <>" might be useful outside the context of image spam
 meta       __TO_NO_BRKTS_HTML_IMG  __TO_NO_ARROWS_R && !__TO_UNDISCLOSED && HTML_MESSAGE && __ONE_IMG
 meta       TO_NO_BRKTS_HTML_IMG    __TO_NO_BRKTS_HTML_IMG && !__FM_TO_ALL_NUMS
-#score      TO_NO_BRKTS_HTML_IMG    0.20
+score      TO_NO_BRKTS_HTML_IMG    0.20
 describe   TO_NO_BRKTS_HTML_IMG    To: misformatted and HTML and one image
 
 meta       __TO_NO_BRKTS_HTML_ONLY __TO_NO_ARROWS_R && !__TO_UNDISCLOSED && MIME_HTML_ONLY
@@ -80,6 +80,7 @@ ifplugin Mail::SpamAssassin::Plugin::FreeMail
   meta       TO_NO_BRKTS_FREEMAIL    __TO_NO_BRKTS_FREEMAIL && !__TO_EQ_FROM_DOM
   describe   TO_NO_BRKTS_FREEMAIL    To: misformatted and free email service
   #score      TO_NO_BRKTS_FREEMAIL    0.20
+  tflags     TO_NO_BRKTS_FREEMAIL    nopublish
 endif
 
 meta       __TO_NO_BRKTS_FROM_RUNON  __TO_NO_ARROWS_R && !__TO_UNDISCLOSED && __FROM_RUNON
