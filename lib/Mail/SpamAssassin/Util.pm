@@ -1158,16 +1158,16 @@ sub uri_to_domain {
   # Javascript is not going to help us, so return.
   return if ($uri =~ /^javascript:/i);
 
-  $uri =~ s,#.*$,,gs;			# drop fragment
-  $uri =~ s#^[a-z]+:/{0,2}##gsi;	# drop the protocol
-  $uri =~ s,^[^/]*\@,,gs;		# username/passwd
+  $uri =~ s{\#.*$}{}gs;			# drop fragment
+  $uri =~ s{^[a-z]+:/{0,2}}{}gsi;	# drop the protocol
+  $uri =~ s{^[^/]*\@}{}gs;		# username/passwd
 
   # strip path and CGI params.  note: bug 4213 shows that "&" should
   # *not* be likewise stripped here -- it's permitted in hostnames by
   # some common MUAs!
-  $uri =~ s,[/\?].*$,,gs;              
+  $uri =~ s{[/?].*$}{}gs;              
 
-  $uri =~ s,:\d*$,,gs;			# port, bug 4191: sometimes the # is missing
+  $uri =~ s{:\d*$}{}gs;		# port, bug 4191: sometimes the # is missing
 
   # skip undecoded URIs if the encoded bits shouldn't be.
   # we'll see the decoded version as well.  see url_encode()

@@ -514,7 +514,7 @@ foreach my $channel (@channels) {
       next;
     }
 
-    print "Update available for channel $channel\n"  if $opt{'verbose'};
+    print "Update available for channel $channel: $currentV -> $newV\n"  if $opt{'verbose'};
 
     # If we are only checking for update availability, exit now
     if ( defined $opt{'checkonly'} ) {            
