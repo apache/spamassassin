@@ -313,7 +313,7 @@ sub split_domain {
   my $domain = lc shift;
   my $hostname = '';
 
-  if ($domain) {
+  if (defined $domain && $domain ne '') {
     # www..spamassassin.org -> www.spamassassin.org
     $domain =~ tr/././s;
 

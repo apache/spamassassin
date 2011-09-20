@@ -444,7 +444,7 @@ sub parsed_metadata {
     # take the usable domains and add them to the ordered list
     while (my($host,$domain) = each( %{$info->{hosts}} )) {
       if ($skip_domains->{$domain}) {
-        dbg("uridnsbl: domain $domain in skip list");
+        dbg("uridnsbl: domain $domain in skip list, host $host");
       } else {
         # use hostname as a key, and drag along the stripped domain name part
         $uri_ordered[$entry]->{$host} = $domain;
