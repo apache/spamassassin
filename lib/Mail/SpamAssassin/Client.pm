@@ -21,13 +21,13 @@ Mail::SpamAssassin::Client - Client for spamd Protocol
 
 =head1 SYNOPSIS
 
-  my $client = new Mail::SpamAssassin::Client({
+  my $client = Mail::SpamAssassin::Client->new({
                                 port => 783,
                                 host => 'localhost',
                                 username => 'someuser'});
   or
 
-  my $client = new Mail::SpamAssassin::Client({
+  my $client = Mail::SpamAssassin::Client->new({
                                 socketpath => '/path/to/socket',
                                 username => 'someuser'});
 
@@ -59,6 +59,22 @@ use re 'taint';
 
 use IO::Socket;
 use Errno qw(EBADF);
+
+our($have_inet4, $have_inet6);
+BEGIN {
+  $have_inet4 = eval {
+    require IO::Socket::INET;
+    my $sock = IO::Socket::INET->new(LocalAddr => '0.0.0.0', Proto => 'udp');
+    $sock->close or die "error closing inet socket: $!"  if $sock;
+    $sock ? 1 : undef;
+  };
+  $have_inet6 = eval {
+    require IO::Socket::INET6;
+    my $sock = IO::Socket::INET6->new(LocalAddr => '::', Proto => 'udp');
+    $sock->close or die "error closing inet6 socket: $!"  if $sock;
+    $sock ? 1 : undef;
+  };
+}
 
 my $EOL = "\015\012";
 my $BLANK = $EOL x 2;
@@ -449,11 +465,17 @@ sub _create_connection {
 				   );
   }
   else {
-    $remote = IO::Socket::INET->new( Proto     => "tcp",
-				     PeerAddr  => $self->{host},
-				     PeerPort  => $self->{port},
-				     Timeout   => $self->{timeout},
-				   );
+    my %params = ( Proto    => "tcp",
+		   PeerAddr => $self->{host},
+		   PeerPort => $self->{port},
+		   Timeout  => $self->{timeout},
+		  );
+    my $is_inet4 = $self->{host} =~ /^\d+\.\d+\.\d+\.\d+\z/;
+    if ($have_inet4 && ($is_inet4 || !$have_inet6)) {
+      $remote = IO::Socket::INET->new( %params );
+    } else {
+      $remote = IO::Socket::INET6->new( %params );
+    }
   }
 
   unless ($remote) {

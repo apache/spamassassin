@@ -392,7 +392,7 @@ if ( not defined $opt{'socketpath'} ) {
     set_allowed_ip( grep length, map { split /,/ } @{ $opt{'allowed-ip'} } );
   }
   else {
-    set_allowed_ip('127.0.0.1'); #, '::1'); M::SA::NetSet needs fixing for IPv6
+    set_allowed_ip('127.0.0.1', '::1');
   }
 }
 
@@ -3216,7 +3216,8 @@ C<10.200.300.*>.
 
 B<-A 10.> -- allow connections from any machine in the range C<10.*.*.*>.
 
-By default, connections are only accepted from localhost [127.0.0.1].
+By default, connections are only accepted from localhost (IP address 127.0.0.1
+or ::1 ).
 
 =item B<-D> [I<area,...>], B<--debug> [I<area,...>]
 

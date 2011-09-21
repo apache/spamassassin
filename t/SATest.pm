@@ -16,7 +16,11 @@ BEGIN {
   #   <http://www.mail-archive.com/dev%40perl.apache.org/msg05466.html>
   #  -- mss, 2004-01-13
   our $RUNNING_ON_WINDOWS = ($^O =~ /^(mswin|dos|os2)/oi);
-  our $SKIP_SPAMD_TESTS = ($RUNNING_ON_WINDOWS || ($ENV{'SPAMD_HOST'} && ($ENV{'SPAMD_HOST'} ne '127.0.0.1')));
+  our $SKIP_SPAMD_TESTS =
+        $RUNNING_ON_WINDOWS ||
+        ( $ENV{'SPAMD_HOST'} && !($ENV{'SPAMD_HOST'} eq '127.0.0.1' ||
+                                  $ENV{'SPAMD_HOST'} eq '::1' ||
+                                  $ENV{'SPAMD_HOST'} eq 'localhost') );
   our $NO_SPAMC_EXE;
   our $SKIP_SPAMC_TESTS;
   our $SSL_AVAILABLE;
