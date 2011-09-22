@@ -348,6 +348,7 @@ sub rule2xs {
   my $force = 1;
   my $FILE = shift;
 
+  if (!$quiet) { print "reading $FILE\n" or die "error writing: $!" }
   open(my $fh, $FILE)  or die "cannot open $FILE: $!";
 # read ruleset name from the first line in the file
   my $ruleset_name;

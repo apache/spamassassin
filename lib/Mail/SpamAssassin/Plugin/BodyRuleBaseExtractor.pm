@@ -145,6 +145,7 @@ sub extract_set_pri {
 
   if ($self->{main}->{bases_cache_dir}) {
     $cachefile = $self->{main}->{bases_cache_dir}."/rules.$ruletype";
+    dbg("zoom: reading cache file $cachefile");
     $cached = $self->read_cachefile($cachefile);
   }
 
@@ -158,7 +159,7 @@ NEXT_RULE:
     my $cent = $cached->{rule_bases}->{$cachekey};
     if (defined $cent) {
       if (defined $cent->{g}) {
-        dbg("zoom: YES (cached) $rule");
+        dbg("zoom: YES (cached) $rule $name");
         foreach my $ent (@{$cent->{g}}) {
           # note: we have to copy these, since otherwise later
           # modifications corrupt the cached data
@@ -169,7 +170,7 @@ NEXT_RULE:
         $yes++;
       }
       else {
-        dbg("zoom: NO (cached) $rule");
+        dbg("zoom: NO (cached) $rule $name");
         push @failed, { orig => $rule };    # no need to cache this
         $no++;
       }
@@ -184,6 +185,7 @@ NEXT_RULE:
       eval {  # catch die()s
         my ($qr, $mods) = $self->simplify_and_qr_regexp($rule);
         ($lossy, @bases) = $self->extract_hints($rule, $qr, $mods);
+      # dbg("zoom: %s %s -> %s", $name, $rule, join(", ", @bases));
         1;
       } or do {
         my $eval_stat = $@ ne '' ? $@ : "errno=$!";  chomp $eval_stat;
@@ -513,20 +515,7 @@ sub extract_hints {
   $tmpfh  or die "failed to create a temporary file";
   untaint_var(\$tmpf);
 
-  # attempt to find a safe regexp delimiter...
-  # TODO: would prob be easier to just read this from $rawrule
-  my $quos = "/"; if ($rule =~ m/\Q${quos}\E/) {
-    $quos = "#"; if ($rule =~ m/\Q${quos}\E/) {
-      $quos = "'"; if ($rule =~ m/\Q${quos}\E/) {
-        $quos = "@"; if ($rule =~ m/\Q${quos}\E/) {
-          $quos = "*"; if ($rule =~ m/\Q${quos}\E/) {
-            $quos = "!";
-          }
-        }
-      }
-    }
-  }
-  print $tmpfh "use bytes; m".$quos.$rule.$quos.$mods
+  print $tmpfh "use bytes; m{" . $rule . "}" . $mods
     or die "error writing to $tmpf: $!";
   close $tmpfh  or die "error closing $tmpf: $!";
 
@@ -556,7 +545,7 @@ sub extract_hints {
   $fullstr =~ s/^\S.*$//gm;
 
   if ($fullstr !~ /((?:\s[^\n]+\n)+)/m) {
-    die "failed to parse Mre=debug output: $fullstr m".$quos.$rule.$quos.$mods." $rawrule";
+    die "failed to parse Mre=debug output: $fullstr m{".$rule."}".$mods." $rawrule";
   }
   my $opsstr = $1;
 
@@ -575,7 +564,10 @@ sub extract_hints {
   my @ops;
   foreach my $op (split(/\n/s, $opsstr)) {
     next unless $op;
-    if ($op =~ /^\s+\d+: (\s*)([A-Z]\w+)\b(.*)(?:\(\d+\))?$/) {
+
+    if ($op =~ /^\s+\d+: (\s*)([A-Z]\w+)\b(.*?)\s*(?:\(\d+\))?$/) {
+      # perl 5.8:              <xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx...>(18)
+      # perl 5.10, 5.12, 5.14: <xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx>... (18)
       push @ops, [ $1, $2, $3 ];
     }
     elsif ($op =~ /^      (\s*)<(.*)>\.\.\.\s*$/) {
@@ -1066,7 +1058,7 @@ sub fixup_re {
 
   my $STATE;
   local ($1,$2);
-  while ($re =~ /\G(.*?)($TOK)/gc) {
+  while ($re =~ /\G(.*?)($TOK)/gcs) {
     my $pre = $1;
     my $tok = $2;
 
@@ -1078,15 +1070,15 @@ sub fixup_re {
       $output .= '"\\""';
     }
     elsif ($tok eq '\\') {
-      $re =~ /\G(x\{[^\}]+\}|\d{1,3}|.)/gc or die "\\ at end of string!";
+      $re =~ /\G(x\{[^\}]+\}|[0-7]{1,3}|.)/gcs or die "\\ at end of string!";
       my $esc = $1;
       if ($esc eq '"') {
         $output .= '"\\""';
       } elsif ($esc eq '\\') {
         $output .= '"**BACKSLASH**"';   # avoid hairy escape-parsing
-      } elsif ($esc =~ /^x\{(\S+)\}$/) {
+      } elsif ($esc =~ /^x\{(\S+)\}\z/) {
         $output .= '"'.chr(hex($1)).'"';
-      } elsif ($esc =~ /^\d+/) {
+      } elsif ($esc =~ /^[0-7]{1,3}\z/) {
         $output .= '"'.chr(oct($esc)).'"';
       } else {
         $output .= "\"$esc\"";
@@ -1100,13 +1092,16 @@ sub fixup_re {
   if (!defined(pos($re))) {
     # no matches
     $output .= "\"$re\"";
+    # Bug 6649: protect NL, NULL, ^Z, (and controls to stay on the safe side)
+    $output =~ s{([\000-\037\177\200\377])}{sprintf("\\%03o",ord($1))}gse;
   }
   elsif (pos($re) <= length($re)) {
+    $output =~ s{([\000-\037\177\200\377])}{sprintf("\\%03o",ord($1))}gse;
     $output .= fixup_re(substr($re, pos($re)));
   }
 
   $output =~ s/^""/"/;  # protect start and end quotes
-  $output =~ s/(?<!\\)""$/"/;
+  $output =~ s/(?<!\\)""\z/"/;
   $output =~ s/(?<!\\)""//g; # strip empty strings, or turn "abc""def" -> "abcdef"
   $output =~ s/\*\*BACKSLASH\*\*/\\\\/gs;
 
