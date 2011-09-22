@@ -1613,7 +1613,7 @@ sub regexp_remove_delimiters {
     warn "cannot remove delimiters from null regexp";
     return;  # invalid
   }
-  elsif ($re =~ s/^m{//) {              # m{foo/bar}
+  elsif ($re =~ s/^m\{//) {             # m{foo/bar}
     $delim = '}';
   }
   elsif ($re =~ s/^m\(//) {             # m(foo/bar)
