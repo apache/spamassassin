@@ -156,12 +156,12 @@ $have_sha ? {
   More info on installing and using Razor can be found
   at http://wiki.apache.org/spamassassin/InstallingRazor .',
 },
-{
-  module => 'Net::Ident',
-  version => 0,
-  desc => 'If you plan to use the --auth-ident option to spamd, you will need
-  to install this module.',
-},
+#{
+# module => 'Net::Ident',
+# version => 0,
+# desc => 'If you plan to use the --auth-ident option to spamd, you will need
+# to install this module.',
+#},
 {
   module => 'IO::Socket::INET6',
   version => 0,
@@ -271,13 +271,13 @@ problems.
 sub debug_diagnostics {
   my $out = "diag: perl platform: $] $^O\n";
 
-  # this avoids an unsightly warning due to a shortcoming of Net::Ident;
-  # "Net::Ident::_export_hooks() called too early to check prototype at
-  # /usr/share/perl5/Net/Ident.pm line 29."   It only needs to be
-  # called here.
-  eval '
-    sub Net::Ident::_export_hooks;
-  ';
+# # this avoids an unsightly warning due to a shortcoming of Net::Ident;
+# # "Net::Ident::_export_hooks() called too early to check prototype at
+# # /usr/share/perl5/Net/Ident.pm line 29."   It only needs to be
+# # called here.
+# eval '
+#   sub Net::Ident::_export_hooks;
+# ';
 
   foreach my $moddef (@MODULES, @OPTIONAL_MODULES) {
     my $module = $moddef->{module};
