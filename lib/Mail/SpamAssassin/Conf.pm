@@ -2424,8 +2424,9 @@ mainly applicable to header fields 'From', 'Sender', 'To', 'Cc' along with
 their 'Resent-*' counterparts, and the 'Return-Path'.
 
 Appending a modifier C<:name> to a header field name will cause everything
-except the first display name to be removed from the header field.  It is
-mainly applicable to header fields 'From' and 'Resent-From'.
+except the first display name to be removed from the header field. It is
+mainly applicable to header fields containing a single mail address: 'From',
+'Sender', along with their 'Resent-From' and 'Resent-Sender' counterparts.
 
 It is syntactically permitted to append more than one modifier to a header
 field name, although currently most combinations achieve no additional effect,
@@ -2433,6 +2434,9 @@ for example C<From:addr:raw> or C<From:raw:addr> is currently the same as
 C<From:addr> .
 
 =over 4
+
+For example, appending C<:addr> to a header name will result in example@foo
+in all of the following cases:
 
 =item example@foo
 
@@ -2450,9 +2454,8 @@ C<From:addr> .
 
 =back
 
-Appending C<:name> to the header name will cause everything except
-the first real name to be removed from the header.  For example,
-all of the following will result in "Foo Blah"
+For example, appending C<:name> to a header name will result in "Foo Blah"
+(without quotes) in all of the following cases:
 
 =over 4
 

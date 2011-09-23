@@ -1537,9 +1537,11 @@ C<header_name> does not exist.
 Appending C<:raw> to the header name will inhibit decoding of quoted-printable
 or base-64 encoded strings.
 
-Appending C<:addr> to the header name will cause everything except
-the first email address to be removed from the header.  For example,
-all of the following will result in "example@foo":
+Appending a modifier C<:addr> to a header field name will cause everything
+except the first email address to be removed from the header field.  It is
+mainly applicable to header fields 'From', 'Sender', 'To', 'Cc' along with
+their 'Resent-*' counterparts, and the 'Return-Path'. For example, all of
+the following will result in "example@foo":
 
 =over 4
 
@@ -1559,9 +1561,12 @@ all of the following will result in "example@foo":
 
 =back
 
-Appending C<:name> to the header name will cause everything except
-the first display name to be removed from the header.  For example,
-all of the following will result in "Foo Blah"
+Appending a modifier C<:name> to a header field name will cause everything
+except the first display name to be removed from the header field. It is
+mainly applicable to header fields containing a single mail address: 'From',
+'Sender', along with their 'Resent-From' and 'Resent-Sender' counterparts.
+For example, all of the following will result in "Foo Blah". One level of
+single quotes is stripped too, as it is often seen.
 
 =over 4
 
@@ -1755,10 +1760,11 @@ sub _get {
       $result =~ s/,.*$//;
     }
     elsif ($getname) {
-      # Get the real name out of the header
+      # Get the display name out of the header
       # All of these should result in "Foo Blah":
       #
       # jm@foo (Foo Blah)
+      # (Foo Blah) jm@foo
       # jm@foo (Foo Blah), jm@bar
       # display: jm@foo (Foo Blah), jm@bar ;
       # Foo Blah <jm@foo>
@@ -1766,8 +1772,24 @@ sub _get {
       # "'Foo Blah'" <jm@foo>
       #
       local $1;
-      $result =~ s/^[\'\"]*(.*?)[\'\"]*\s*<.+>\s*$/$1/g
-	  or $result =~ s/^.+\s\((.*?)\)\s*$/$1/g; # jm@foo (Foo Blah)
+my $orig = $result;
+      # does not handle mailbox-list or address-list well, to be improved
+      if ($result =~ /^ \s* (.*?) \s* < [^<>]* >/sx) {
+        $result = $1;  # display-name, RFC 5322
+        # name-addr    = [display-name] angle-addr
+        # display-name = phrase
+        # phrase       = 1*word / obs-phrase
+        # word         = atom / quoted-string
+        # obs-phrase   = word *(word / "." / CFWS)
+        $result =~ s{ " ( (?: [^"\\] | \\. )* ) " }
+                { my $s=$1; $s=~s{\\(.)}{$1}gs; $s }gsxe;
+      } elsif ($result =~ /^ [^(,]*? \( (.*?) \) /sx) {  # legacy form
+        # nested comments are not handled, to be improved
+        $result = $1;
+      } else {  # no display name
+        $result = '';
+      }
+      $result =~ s/^ \s* ' \s* (.*?) \s* ' \s* \z/$1/sx;
     }
   }
   return $result;
