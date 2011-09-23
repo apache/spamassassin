@@ -1772,7 +1772,6 @@ sub _get {
       # "'Foo Blah'" <jm@foo>
       #
       local $1;
-my $orig = $result;
       # does not handle mailbox-list or address-list well, to be improved
       if ($result =~ /^ \s* (.*?) \s* < [^<>]* >/sx) {
         $result = $1;  # display-name, RFC 5322
