@@ -398,9 +398,9 @@ if ( not defined $opt{'socketpath'} ) {
 
 # ident-based spamc user authentication
 if ( $opt{'auth-ident'} ) {
-  eval { require Net::Ident };
-  die "spamd: ident-based authentication requested, but Net::Ident is unavailable ($@)\n"
-    if ($@);
+  eval { require Net::Ident }
+  or die "spamd: ident-based authentication requested, ".
+         "but Net::Ident is unavailable: $@\n";
 
   $opt{'ident-timeout'} = undef if $opt{'ident-timeout'} <= 0.0;
   import Net::Ident qw(ident_lookup);
@@ -2877,7 +2877,7 @@ Options:
  -g groupname, --groupname=groupname  Run as groupname
  -v, --vpopmail                    Enable vpopmail config
  -x, --nouser-config               Disable user config files
- --auth-ident                      Use ident to authenticate spamc user
+ --auth-ident                      Use ident to identify spamc user (deprecated)
  --ident-timeout=timeout           Timeout for ident connections
  -A host,..., --allowed-ips=..,..  Limit ip addresses which can connect
  -D, --debug[=areas]               Print debugging messages (for areas)
@@ -3188,12 +3188,12 @@ running as the user it represents.  Connections are terminated
 immediately if authentication fails.  In this case, spamc will pass
 the mail through unchecked.  Failure to connect to an ident server,
 and response timeouts are considered authentication failures.  This
-requires that Net::Ident be installed.
+requires that Net::Ident be installed. Deprecated.
 
 =item B<--ident-timeout>=I<timeout>
 
 Wait at most I<timeout> seconds for a response to ident queries.
-Authentication that takes long that I<timeout> seconds will fail, and
+Ident query that takes longer that I<timeout> seconds will fail, and
 mail will not be processed.  Setting this to 0.0 or less results in no
 timeout, which is STRONGLY discouraged.  The default is 5 seconds.
 
