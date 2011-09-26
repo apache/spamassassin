@@ -10,8 +10,14 @@ use File::Path;
 use File::Spec;
 use POSIX qw(WIFEXITED WIFSIGNALED WIFSTOPPED WEXITSTATUS WTERMSIG WSTOPSIG);
 
-our($have_inet4, $have_inet6);
 BEGIN {
+  require Exporter;
+  use vars qw(@ISA @EXPORT @EXPORT_OK);
+  @ISA = qw(Exporter);
+
+  use vars qw($have_inet4 $have_inet6);
+  @EXPORT = qw($have_inet4 $have_inet6);
+
   # No spamd test in Windows unless env override says user figured out a way
   # If you want to know why these are vars and no constants, read this thread:
   #   <http://www.mail-archive.com/dev%40perl.apache.org/msg05466.html>
