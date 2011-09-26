@@ -29,20 +29,6 @@ use Errno qw(EADDRINUSE EACCES);
 use Net::DNS::Nameserver;
 use Mail::SpamAssassin;
 
-my $have_inet4 = eval {
-  require IO::Socket::INET;
-  my $sock = IO::Socket::INET->new(LocalAddr => '0.0.0.0', Proto => 'udp');
-  $sock->close or die "error closing inet socket: $!"  if $sock;
-  $sock ? 1 : undef;
-};
-
-my $have_inet6 = eval {
-  require IO::Socket::INET6;
-  my $sock = IO::Socket::INET6->new(LocalAddr => '::', Proto => 'udp');
-  $sock->close or die "error closing inet6 socket: $!"  if $sock;
-  $sock ? 1 : undef;
-};
-
 # Bug 5761 (no 127.0.0.1 in jail, use SPAMD_LOCALHOST if specified)
 my $dns_server_localaddr = $ENV{'SPAMD_LOCALHOST'};
 if (!$dns_server_localaddr) {
