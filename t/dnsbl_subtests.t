@@ -26,13 +26,32 @@ if (-e 'test_dir') {            # running from test directory, not ..
 }
 
 use Errno qw(EADDRINUSE EACCES);
-use IO::Socket::INET;
 use Net::DNS::Nameserver;
 use Mail::SpamAssassin;
 
+my $have_inet4 = eval {
+  require IO::Socket::INET;
+  my $sock = IO::Socket::INET->new(LocalAddr => '0.0.0.0', Proto => 'udp');
+  $sock->close or die "error closing inet socket: $!"  if $sock;
+  $sock ? 1 : undef;
+};
+
+my $have_inet6 = eval {
+  require IO::Socket::INET6;
+  my $sock = IO::Socket::INET6->new(LocalAddr => '::', Proto => 'udp');
+  $sock->close or die "error closing inet6 socket: $!"  if $sock;
+  $sock ? 1 : undef;
+};
+
 # Bug 5761 (no 127.0.0.1 in jail, use SPAMD_LOCALHOST if specified)
 my $dns_server_localaddr = $ENV{'SPAMD_LOCALHOST'};
-$dns_server_localaddr = '127.0.0.1'  if !$dns_server_localaddr;
+if (!$dns_server_localaddr) {
+  $dns_server_localaddr = $have_inet4 ? '127.0.0.1' : '::1';
+}
+
+my $use_inet4 =
+  !$have_inet6 ||
+  ($have_inet4 && $dns_server_localaddr =~ /^\d+\.\d+\.\d+\.\d+\z/);
 
 sub find_free_port($);  # prototype
 my($dns_server_localport, $sock_udp, $sock_tcp) =
@@ -40,7 +59,8 @@ my($dns_server_localport, $sock_udp, $sock_tcp) =
 
 $dns_server_localport  or die "Failed to obtain a free port number";
 
-printf("Using [%s]:%s for a spawned test DNS server\n",
+printf("Using %s [%s]:%s for a spawned test DNS server\n",
+       $use_inet4 ? 'inet' : 'inet6',
        $dns_server_localaddr, $dns_server_localport);
 
 # test zones
@@ -230,12 +250,15 @@ sub find_free_port($) {
   for (1..20) {  # choose a pair of free tcp & udp ports
     $port = 11001 + int(rand(65536-11001));
     my %args = (LocalAddr => $addr, LocalPort => $port);
-    $sock_udp = IO::Socket::INET->new(%args, Proto => 'udp');
+    $sock_udp = $use_inet4 ? IO::Socket::INET->new(%args, Proto => 'udp')
+                           : IO::Socket::INET6->new(%args, Proto => 'udp');
     $sock_udp || $! == EADDRINUSE || $! == EACCES
       or printf("Error creating UDP socket [%s]:%s: %s\n", $addr, $port, $!);
-    $sock_tcp = IO::Socket::INET->new(%args, Proto => 'tcp');
+    $sock_tcp = $use_inet4 ? IO::Socket::INET->new(%args, Proto => 'tcp')
+                           : IO::Socket::INET6->new(%args, Proto => 'tcp');
     $sock_tcp || $! == EADDRINUSE || $! == EACCES
-      or printf("Error creating TCP socket [%s]:%s: %s\n", $addr, $port, $!);
+      or printf("Error creating %s TCP socket [%s]:%s: %s\n",
+                $use_inet4 ? 'inet' : 'inet6', $addr, $port, $!);
     last if $sock_tcp && $sock_udp;
   }
   undef $port if !$sock_tcp || !$sock_udp;
