@@ -10,6 +10,7 @@ use File::Path;
 use File::Spec;
 use POSIX qw(WIFEXITED WIFSIGNALED WIFSTOPPED WEXITSTATUS WTERMSIG WSTOPSIG);
 
+our($have_inet4, $have_inet6);
 BEGIN {
   # No spamd test in Windows unless env override says user figured out a way
   # If you want to know why these are vars and no constants, read this thread:
@@ -26,6 +27,20 @@ BEGIN {
   our $SSL_AVAILABLE;
   our $SKIP_SETUID_NOBODY_TESTS = 0;
   our $SKIP_DNSBL_TESTS = 0;
+
+  $have_inet4 = eval {
+    require IO::Socket::INET;
+    my $sock = IO::Socket::INET->new(LocalAddr => '0.0.0.0', Proto => 'udp');
+    $sock->close or die "error closing inet socket: $!"  if $sock;
+    $sock ? 1 : undef;
+  };
+
+  $have_inet6 = eval {
+    require IO::Socket::INET6;
+    my $sock = IO::Socket::INET6->new(LocalAddr => '::', Proto => 'udp');
+    $sock->close or die "error closing inet6 socket: $!"  if $sock;
+    $sock ? 1 : undef;
+  };
 }
 
 # Set up for testing. Exports (as global vars):
@@ -77,7 +92,9 @@ sub sa_t_init {
   $salearn ||= "$perl_cmd ../sa-learn.raw";
 
   $spamdlocalhost = $ENV{'SPAMD_LOCALHOST'};
-  $spamdlocalhost ||= '127.0.0.1';
+  if (!$spamdlocalhost) {
+    $spamdlocalhost = $have_net4 || !$have_inet6 ? '127.0.0.1' : '::1';
+  }
   $spamdhost = $ENV{'SPAMD_HOST'};
   $spamdhost ||= $spamdlocalhost;
   $spamdport = $ENV{'SPAMD_PORT'};
