@@ -2,6 +2,10 @@
 # imported into main for ease of use.
 package main;
 
+# use strict;
+# use warnings;
+# use re 'taint';
+
 use Cwd;
 use Config;
 use File::Basename;
@@ -15,8 +19,8 @@ BEGIN {
   use vars qw(@ISA @EXPORT @EXPORT_OK);
   @ISA = qw(Exporter);
 
-  use vars qw($have_inet4 $have_inet6);
-  @EXPORT = qw($have_inet4 $have_inet6);
+  use vars qw($have_inet4 $have_inet6 $spamdhost $spamdport);
+  @EXPORT = qw($have_inet4 $have_inet6 $spamdhost $spamdport);
 
   # No spamd test in Windows unless env override says user figured out a way
   # If you want to know why these are vars and no constants, read this thread:
@@ -99,7 +103,7 @@ sub sa_t_init {
 
   $spamdlocalhost = $ENV{'SPAMD_LOCALHOST'};
   if (!$spamdlocalhost) {
-    $spamdlocalhost = $have_net4 || !$have_inet6 ? '127.0.0.1' : '::1';
+    $spamdlocalhost = $have_inet4 || !$have_inet6 ? '127.0.0.1' : '::1';
   }
   $spamdhost = $ENV{'SPAMD_HOST'};
   $spamdhost ||= $spamdlocalhost;
