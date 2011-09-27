@@ -21,10 +21,10 @@ ok(spamcrun("< data/spam/001", \&patterns_run_cb));
 ok_all_patterns();
 
 my $p = $spamdport;
-system("../sa-check_spamd --hostname 127.0.0.1 --port $p --verbose");
+system("../sa-check_spamd --hostname $spamdhost --port $p --verbose");
 ok (($? >> 8) == 0);
 
 ok(stop_spamd());
 
-system("../sa-check_spamd --hostname 127.0.0.1 --port $p --verbose");
+system("../sa-check_spamd --hostname $spamdhost --port $p --verbose");
 ok (($? >> 8) != 0);

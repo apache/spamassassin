@@ -53,13 +53,16 @@ exit;
 
 sub run_symbols {
   my($data, $proto10) = @_;
-
-  $socket = new IO::Socket::INET(
-                  PeerAddr => $spamdhost,
-                  PeerPort => $spamdport,
-                  Proto    => "tcp",
-                  Type     => SOCK_STREAM
-                ); 
+  my $use_inet4 =
+    !$have_inet6 ||
+    ($have_inet4 && $spamdhost =~ /^\d+\.\d+\.\d+\.\d+\z/);
+  my %args = ( PeerAddr => $spamdhost,
+               PeerPort => $spamdport,
+               Proto    => "tcp",
+               Type     => SOCK_STREAM
+             );
+  $socket = $use_inet4 ? IO::Socket::INET->new(%args)
+                       : IO::Socket::INET6->new(%args);
   unless ($socket) {
     warn("FAILED - Couldn't Connect to SpamCheck Host\n");
     return undef;

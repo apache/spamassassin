@@ -10,7 +10,7 @@ exit unless (!$SKIP_SPAMD_TESTS && !$RUNNING_ON_WINDOWS);
 # ---------------------------------------------------------------------------
 
 my $sockpath = mk_safe_tmpdir()."/spamd.sock";
-start_spamd("-D -L --socketpath=$sockpath --port $spamdport");
+start_spamd("-D -L --socketpath=$sockpath --port $spamdport -A $spamdhost -i $spamdhost");
 %patterns = (
   q{ Subject: There yours for FREE!}, 'subj',
   q{ X-Spam-Flag: YES}, 'flag',

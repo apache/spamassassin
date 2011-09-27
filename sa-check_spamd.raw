@@ -114,7 +114,7 @@ if (defined $opt{'critical'}) {
 }
 
 if (defined $opt{'hostname'}) {
-  if ($opt{'hostname'} =~ /^([A-Za-z0-9_.-]+)$/) {
+  if ($opt{'hostname'} =~ /^([A-Za-z0-9_.:-]+)$/) {
     $opt{'hostname'} = $1;
   } else {
     print "SPAMD UNKNOWN: invalid hostname config value provided\n";
