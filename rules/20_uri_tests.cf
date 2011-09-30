@@ -85,15 +85,15 @@ uri HTTP_77			/http:\/\/.{0,2}\%77/
 describe HTTP_77		Contains an URL-encoded hostname (HTTP77)
 
 # a.com.b.c
-uri SPOOF_COM2OTH	m{^https?://(?:\w+\.)+?com\.(?!s3\.amazonaws\.com)(?:\w+\.){2}}i
+uri SPOOF_COM2OTH	m{^https?://(?:\w+\.)+?com\.(?!(?:[a-z]{2}\.)?s3\.amazonaws\.com)(?:\w+\.){2}}i
 describe SPOOF_COM2OTH	URI contains ".com" in middle
 
 # a.com.b.com
-uri SPOOF_COM2COM	m{^https?://(?:\w+\.)+?com\.(?!s3\.amazonaws\.com)(?:\w+\.)+?com\b}i
+uri SPOOF_COM2COM	m{^https?://(?:\w+\.)+?com\.(?!(?:[a-z]{2}\.)?s3\.amazonaws\.com)(?:\w+\.)+?com\b}i
 describe SPOOF_COM2COM 	URI contains ".com" in middle and end
 
 # a.net.b.com
-uri SPOOF_NET2COM	m{^https?://(?:\w+\.)+?(?:net|org)\.(?!s3\.amazonaws\.com)(?:\w+\.)+?com\b}i
+uri SPOOF_NET2COM	m{^https?://(?:\w+\.)+?(?:net|org)\.(?!(?:[a-z]{2}\.)?s3\.amazonaws\.com)(?:\w+\.)+?com\b}i
 describe SPOOF_NET2COM 	URI contains ".net" or ".org", then ".com"
 
 uri URI_HEX		m%^https?://[^/?]*\b[0-9a-f]{6,}\b%i
