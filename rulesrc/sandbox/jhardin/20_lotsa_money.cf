@@ -153,8 +153,8 @@ describe MONEY_ATM_CARD   Lots of money on an ATM card
 
 body     __YOU_INHERIT    /\byour\s[a-z\s]{0,30}inherit+ance\b/i
 body     __I_INHERIT      /\b(?:I|eu)\s[a-z\s]{0,30}(?:inherited|herdei)\b/i
-body     __THEY_INHERIT   /\binherit\sth(?:e|is)\smoney\b/i
-body     __NOT_DEAD_YET   /\bwill\sinherit\b/i
+body     __THEY_INHERIT   /\b(?:inherit\sth(?:e|is)\smoney|herede\seste\sdinero)\b/i
+body     __NOT_DEAD_YET   /\b(?:will\sinherit|que\sherede)\b/i
 body     __AM_DYING       /\bam\s(?:\S+\s)?dying\b/i
 body     __I_WILL_YOU     /\bwill(?:ed)?\s(?:[a-z\s]{0,20}(?:fortune|money|\$\d+[a-z]{0,9})\s)?to\syou\b/i
 body     __NEXT_OF_KIN    /\bnext[-\s]of[-\s]kin\b/i
@@ -213,7 +213,7 @@ body     __FEES           /\b(?:security|safe\w*|courier|registration|pay|paid|u
 body     __LUCKY_WINNER   /\b(?:lucky|gl.cklich(?:en)?|afortunados)\s(?:(?:ge)?win+ers?|ganador(?:es)?)\b/i
 body     __YOUR_FUND      /\b(?:your|ihr)\s(?:unpaid\s|win+ing\s|ap+roved\s|foreign\s|overdue\s|outstanding\s|nicht\sausbezahlten\s){0,3}(?:fund|payment|geld)\b/i
 body     __NIGERIA        /\bnigeria\b/i
-body     __IVORY_COAST    /\b(?:Cote\s?D.Ivoire|Ivory\s?Coast)\b/i
+body     __IVORY_COAST    /\b(?:Cote\s?D.Ivoire|Ivory\s?Coast|Costa\sde\sMarfil)\b/i
 body     __BURKINA_FASO   /\bburkina\s?faso\b/i
 body     __GHANA          /\bghana\b/i
 body     __BENIN          /\bb(?:[e\xe9]|[\xc3][\xa9])nin\b/i
