@@ -470,13 +470,18 @@ describe        __NSL_ORIG_FROM_41        Originates from 41.0.0.0/8
 
 # Catch spam injected from 41.0.0.0/8 (Africa, incl S.Africa)
 # Ned Slider, SAU list, 3/11/2010
-header          __NSL_RCVD_FROM_41        Received =~ /[([]41\./
+# consider using khop __RCVD_VIA_AFRINIC_E instead
+#header          __NSL_RCVD_FROM_41        Received =~ /[([]41\./
+header          __NSL_RCVD_FROM_41        X-Spam-Relays-External =~ / ip=41\./
 describe        __NSL_RCVD_FROM_41        Received from 41.0.0.0/8
 
 # some metas with the above, maybe reduce FPs
 ifplugin Mail::SpamAssassin::Plugin::FreeMail
-  meta         __FROM_41_FREEMAIL         (__NSL_ORIG_FROM_41 || __NSL_RCVD_FROM_41) && (FREEMAIL_FROM || FREEMAIL_REPLYTO)
+  meta         __FROM_41_FREEMAIL         (__NSL_ORIG_FROM_41 || __NSL_RCVD_FROM_41) && (FREEMAIL_FROM || FREEMAIL_REPLYTO) && !__THREADED
   describe     __FROM_41_FREEMAIL         Sent from Africa + freemail provider
+
+#  meta         __FROM_AFR_FREEMAIL       __RCVD_VIA_AFRINIC_E && (FREEMAIL_FROM || FREEMAIL_REPLYTO) && !__THREADED
+#  describe     __FROM_AFR_FREEMAIL       Sent from Africa + freemail provider
 endif
 
 # More from Ned
