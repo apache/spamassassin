@@ -1911,8 +1911,7 @@ group bayes databases.
 =item bayes_use_hapaxes		(default: 1)
 
 Should the Bayesian classifier use hapaxes (words/tokens that occur only
-once) when classifying?  This produces significantly better hit-rates, but
-increases database size by about a factor of 8 to 10.
+once) when classifying?  This produces significantly better hit-rates.
 
 =cut
 
