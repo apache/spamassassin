@@ -18,7 +18,7 @@ describe KHOP_BSD_REPORT    Regular run output from a BSD system
 tflags	 KHOP_BSD_REPORT    nice noautolearn nopublish
 #score	 KHOP_BSD_REPORT    -8	# 20050822
 
-header	 __LOGWATCH_REPORT	Subject =~ /^LogWatch for /
+header	 __LOGWATCH_REPORT	Subject =~ /^Log[Ww]atch for /
 meta	 KHOP_LOGWATCH_REPORT	__LOGWATCH_REPORT && ALL_TRUSTED
 describe KHOP_LOGWATCH_REPORT   System report from LogWatch
 tflags	 KHOP_LOGWATCH_REPORT	nice noautolearn nopublish
