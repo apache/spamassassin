@@ -1,0 +1,5 @@
+#Based on khopesh's SPOOFED_URL.
+rawbody __SPOOFED_URL_HOST /<a\s[^>]{0,2048}\bhref=(?:3D)?.?(https?:\/\/?[^\/?>"'\# ]{8,29})[^>]{0,2048}>(?:[^<]{0,1024}<(?!\/a)[^>]{1,1024}>){0,99}\s{0,10}(?!\1)https?[^\w<]{1,3}[^<]{5}/i
+# Still doesn't handle 'legit' tracking redirectors.
+meta	 SPOOFED_URL_HOST	__SPOOFED_URL_HOST && !(__VIA_ML || __SENDER_BOT || __YAHOO_BULK || __UNSUB_LINK || __THREADED || URL_SHORTENER)
+describe SPOOFED_URL_HOST	Has a link whose text is URL with a different host
