@@ -274,3 +274,7 @@ header	 __TO_EQ_FROM_USR_NN_2	ALL =~ /\nTo:\s+(?:[^\n<]{0,80}<)?([^\n\s\@>]{4,80
 meta	 __TO_EQ_FROM_USR_NN	(__TO_EQ_FROM_USR_NN_1 || __TO_EQ_FROM_USR_NN_2) && !(__FROM_DNS || __FROM_INFO || __SENDER_BOT)
 describe __TO_EQ_FROM_USR_NN	To: username same as From: username sans trailing nums
 
+header	 __SUBJ_NOT_SHORT	Subject =~ /^.{16}/
+header	 __SUBJ_HAS_WORDS	Subject =~ /(?:^|\s)[^\W0-9_]{3,15}(?:\s|$)/
+meta	 SUBJ_LACKS_WORDS	__SUBJ_NOT_SHORT && !__SUBJ_HAS_WORDS && !__SUBJECT_ENCODED_B64
+describe SUBJ_LACKS_WORDS	Subject is not short yet lacks words
