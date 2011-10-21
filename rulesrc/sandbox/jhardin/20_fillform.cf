@@ -42,7 +42,7 @@ ifplugin Mail::SpamAssassin::Plugin::ReplaceTags
 
   # Financial/ID details (scams and phishing)
   replace_tag FF_F1 (?:(?:bank|beneficiary|billing|acc(?:oun)?t|rout(?:ing)?|swift|receiver|user)<ANDOR>?){1,3}\s(?:(?:name|ad+res+(?:es)?|location|code|details|a\/c|<NUMBER>)<ANDOR>?){1,3}
-  replace_tag FF_F2 (?:(?:(?:international\s)?driver'?s?\sli[sc]+(:?en[sc]e)?|pas+\s?port|id\scard|[ia]d(?:entification|entity)(?:\s(?:card|<NUMBER>|papers?))?)<ANDOR>?){1,3}(?:\s<NUMBER>)?
+  replace_tag FF_F2 (?:(?:(?:international\s)?driver'?s?\sli[sc]+(?:en[sc]e)?|pas+\s?port|id\scard|[ia]d(?:entification|entity)(?:\s(?:card|<NUMBER>|papers?))?)<ANDOR>?){1,3}(?:\s<NUMBER>)?
   replace_tag FF_F3 (?:picture|test\squestion|answer|amount\swon|(?:inheritance\s)?funds?\svalue|(?:e-?mail\s)?pas+word|e-?mai?l\sid|amount\s[\w\s]{0,30}lost[\w\s]{0,15})
   replace_tag FF_F4 (?:log[-\s]?in|(?:e-?mail\s)?user)\s?names?
   replace_tag FF_F5 (?:ref(?:erence)?|batch|win+ing|award|billet)[-\s]?<NUMBER>
