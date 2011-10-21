@@ -762,4 +762,14 @@ score       SUBJ_OBFU_PUNCT_FEW    0.500
 meta        SUBJ_OBFU_PUNCT_MANY   __SUBJ_OBFU_PUNCT > 4 && !__SUBJECT_ENCODED_B64 && !__VIA_ML && !__THREADED && !__RP_MATCHES_RCVD && !__DKIM_EXISTS
 describe    SUBJ_OBFU_PUNCT_MANY   Heavily punctuation-obfuscated Subject: header
 
+# A document was scanned and sentto you using a Hewlett-Packard HP Officejet 
+# A document was scanned and sent to you using a Hewlett-Packard HP Officejet 
+# Scan from Hewlet-Packard Officejet
+# Scan from a HP Officejet
+# Hewlett-Packard Officejet Location: machine location not set
+# Xerox WorkCentre
+# See http://isc.sans.edu/diary.html?storyid=11848#comment
+body        __SCANNED_HP           /(?:(?:document was scan+ed and sent ?to you using|Scan from)(?: a)? (?:Hewlet+-Packard |HP ){1,2}Officejet|Hewlet+-Packard Officejet Location: machine location not set)/i
+meta        SCANNED_EXTERNAL       __SCANNED_HP && !ALL_TRUSTED
+describe    SCANNED_EXTERNAL       "Scanned Document" email from external source - malware?
 
