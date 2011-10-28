@@ -4,8 +4,7 @@ Priority: optional
 Maintainer: Noah Meyerhans <noahm@debian.org>
 Uploaders: Jesus Climent <jesus.climent@hispalinux.es>
 Build-Depends: debhelper (>= 7), perl, libssl-dev,
- libhtml-parser-perl (>= 3.24), libdigest-sha1-perl,
- libnet-dns-perl (>= 0.34), libnetaddr-ip-perl
+ libhtml-parser-perl (>= 3.24), libnet-dns-perl (>= 0.34), libnetaddr-ip-perl
 Standards-Version: 3.9.2
 Homepage: http://www.spamassassin.org/
 Vcs-Svn: svn://svn.debian.org/svn/collab-maint/deb-maint/spamassassin/trunk
@@ -15,10 +14,9 @@ Package: spamassassin
 Architecture: all
 Conflicts: spamass-milter (<< 0.2.0-7), gotmail (<= 0.8.1-1)
 Depends: perl (>= 5.8.0), libhtml-parser-perl (>= 3.43),
- libdigest-sha1-perl, libsocket6-perl, libsys-hostname-long-perl,
- libarchive-tar-perl, libwww-perl, libnet-dns-perl (>=
- 0.34), perl-modules (>= 5.10) | libio-zlib-perl (>= 1.04), libnetaddr-ip-perl,
- ${misc:Depends}
+ libsocket6-perl, libsys-hostname-long-perl, libarchive-tar-perl, 
+ libwww-perl, libnet-dns-perl (>= 0.34), libnetaddr-ip-perl,
+ perl-modules (>= 5.10) | libio-zlib-perl (>= 1.04), ${misc:Depends}
 Recommends: spamc (>= 2.30), libmail-spf-perl,
  re2c, libsys-syslog-perl, gnupg, gcc, libc6-dev, make, libio-socket-inet6-perl
 Suggests: razor (>= 2.361-2),
