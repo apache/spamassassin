@@ -46,6 +46,11 @@ body            URIBL_DBL_SPAM   eval:check_uridnsbl('URIBL_DBL_SPAM')
 describe        URIBL_DBL_SPAM   Contains an URL listed in the DBL blocklist
 tflags          URIBL_DBL_SPAM   net domains_only
 
+urirhssub       URIBL_DBL_REDIR  dbl.spamhaus.org.       A   127.0.1.3
+body            URIBL_DBL_REDIR  eval:check_uridnsbl('URIBL_DBL_REDIRECTOR')
+describe        URIBL_DBL_REDIR  Contains a URL listed in the DBL as a spammed redirector domain
+tflags          URIBL_DBL_REDIR  net domains_only
+
 # this indicates that IP-address queries were sent to DBL, and should
 # never appear; if it does, something is wrong with SpamAssassin
 urirhssub       URIBL_DBL_ERROR  dbl.spamhaus.org.       A   127.0.1.255
