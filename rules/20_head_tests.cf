@@ -419,6 +419,13 @@ meta     __VIA_ML  __ML1 || __ML2 || __ML3 || __ML4 || __ML5
 describe __VIA_ML  Mail from a mailing list
 
 
+# some clueless mailing lists (like zmailer with an RFC822TABS option on)
+# are replacing a leading space by a TAB in header fields From, To,
+# Cc, Date (Bug 6429)
+header   __ML_TURNS_SP_TO_TAB  Received =~ /\(ORCPT <rfc822;/
+describe __ML_TURNS_SP_TO_TAB  A mailing list changing a space to a TAB
+
+
 # must keep it in sync with http://www.iana.org/assignments/ipv4-address-space/
 header RCVD_ILLEGAL_IP		X-Spam-Relays-Untrusted =~ / (?:by|ip)=(?=\d+\.\d+\.\d+\.\d+ )(?:0|2(?:2[4-9]|[3-5]\d)|192\.0\.2|198\.51\.100|203\.0\.113)\./
 describe RCVD_ILLEGAL_IP	Received: contains illegal IP address

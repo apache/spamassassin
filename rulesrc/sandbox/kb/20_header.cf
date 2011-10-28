@@ -34,6 +34,8 @@ header FORGED_RELAY_MUA_TO_MX         X-Spam-Relays-External =~ /^\[ ip=(?!127)(
 #       space that was showing up in header rules.  For 3.2.x releases the
 #       pattern must be changed to /^ \t/.
 
-header   KB_DATE_CONTAINS_TAB  Date:raw =~ /^\t/
+header   __KB_DATE_CONTAINS_TAB  Date:raw =~ /^\t/
+meta     KB_DATE_CONTAINS_TAB  __KB_DATE_CONTAINS_TAB && !__ML_TURNS_SP_TO_TAB 
+
 meta     KB_FAKED_THE_BAT      (__THEBAT_MUA && KB_DATE_CONTAINS_TAB)
 

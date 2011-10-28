@@ -111,7 +111,9 @@ body		HK_PNISES		/\bpenises\b/i
 score		HK_PNISES		1
 
 # From Mike Cappella
-header		TAB_IN_FROM		From:raw =~ /^\t/s
+header		__TAB_IN_FROM		From:raw =~ /^\t/s
+describe	__TAB_IN_FROM		From starts with a tab
+meta		TAB_IN_FROM		__TAB_IN_FROM && !__ML_TURNS_SP_TO_TAB 
 describe	TAB_IN_FROM		From starts with a tab
 
 
