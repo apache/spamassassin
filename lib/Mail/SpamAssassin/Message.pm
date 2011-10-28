@@ -63,10 +63,10 @@ use vars qw(@ISA);
 Creates a Mail::SpamAssassin::Message object.  Takes a hash reference
 as a parameter.  The used hash key/value pairs are as follows:
 
-C<message> is either undef (which will use STDIN), a scalar of the
-entire message, an array reference of the message with 1 line per array
-element, and either a file glob or IO::File object which holds the entire
-contents of the message.
+C<message> is either undef (which will use STDIN), a scalar - a string
+containing an entire message, a reference to such string, an array reference
+of the message with one line per array element, or either a file glob
+or an IO::File object which holds the entire contents of the message.
 
 Note: The message is expected to generally be in RFC 2822 format, optionally
 including an mbox message separator line (the "From " line) as the first line.
@@ -155,6 +155,9 @@ sub new {
         undef $raw_str;
       }
     }
+  }
+  elsif (ref $message eq 'SCALAR') {
+    @message = split(/^/m, $$message, -1);
   }
   elsif (ref $message) {
     dbg("message: Input is a reference of unknown type!");

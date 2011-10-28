@@ -460,11 +460,13 @@ sub create_locker {
 
 Parse will return a Mail::SpamAssassin::Message object with just the
 headers parsed.  When calling this function, there are two optional
-parameters that can be passed in: $message is either undef (which will
-use STDIN), a scalar of the entire message, an array reference of the
-message with 1 line per array element, or a file glob which holds the
-entire contents of the message; and $parse_now, which specifies whether
-or not to create the MIME tree at parse time or later as necessary.
+parameters that can be passed in: $message is either undef (which
+will use STDIN), a scalar - a string containing an entire message,
+a reference to such string, an array reference of the message with
+one line per array element, or either a file glob or an IO::File object
+which holds the entire contents of the message;  and $parse_now, which
+specifies whether or not to create a MIME tree at parse time or later
+as necessary.
 
 The I<$parse_now> option, by default, is set to false (0).  This
 allows SpamAssassin to not have to generate the tree of internal
