@@ -396,7 +396,8 @@ sub _run_mailbox {
   }
   seek(INPUT,$offset,0)  or die "cannot reposition file to $offset: $!";
   for ($!=0; <INPUT>; $!=0) {
-    last if (substr($_,0,5) eq "From " && @msg && /^From \S+  ?\S\S\S \S\S\S .\d .\d:\d\d:\d\d \d{4}/);
+    #Changed Regex to include boundaries for Communigate Pro versions (5.2.x and later). per Bug 6413
+    last if (substr($_,0,5) eq "From " && @msg && /^From \S+  ?(\S\S\S \S\S\S .\d .\d:\d\d:\d\d \d{4}|.\d-\d\d-\d{4}_\d\d:\d\d:\d\d_)/);
     push (@msg, $_);
 
     # skip too-big mails
@@ -908,8 +909,9 @@ sub _scan_mailbox {
 	      $header .= $_;
 	    }
 	  }
+          #Changed Regex to include boundaries for Communigate Pro versions (5.2.x and later). per Bug 6413
 	  if (substr($_,0,5) eq "From " &&
-	      /^From \S+  ?\S\S\S \S\S\S .\d .\d:\d\d:\d\d \d{4}/) {
+	      /^From \S+  ?(\S\S\S \S\S\S .\d .\d:\d\d:\d\d \d{4}|.\d-\d\d-\d{4}_\d\d:\d\d:\d\d_)/) {
 	    $in_header = 1;
 	    $first = $_;
 	    $start = $where;
