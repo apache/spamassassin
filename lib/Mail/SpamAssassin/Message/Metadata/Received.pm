@@ -428,8 +428,8 @@ sub parse_received_line {
   elsif (/\) \(Authenticated sender: \S+\) by \S+ \(Postfix\) with /) {
     $auth = 'Postfix';
   }
-  # Communigate Pro
-  elsif (/CommuniGate Pro SMTP/ && / \(account /) {
+  # Communigate Pro - Bug 6495 adds HTTP as possible transmission method
+  elsif (/CommuniGate Pro (HTTP|SMTP)/ && / \(account /) {
     $auth = 'Communigate';
   }
   # Microsoft Exchange (complete with syntax error)
