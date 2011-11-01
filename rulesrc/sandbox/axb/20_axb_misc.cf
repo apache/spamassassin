@@ -1,3 +1,7 @@
+# 2011-11-01
+header          AXB_XFR_FKTWT   From =~ /\@postmaster\.twit-\w+\.com\b/
+describe        AXB_XFR_FKTWT   Suspicious bird
+
 # 2011-10-28
 header          AXB_XF_34X_BLAH   From =~ /\@(?:[a-z]{3,15}[0-9]{1,4}\.){3,4}/
 describe        AXB_XF_34X_BLAH   Dicey From
@@ -28,7 +32,7 @@ describe        AXB_XM_SENTBY   Ratware fingerprint
 
 
 # 2011-09-14
-header          AXB_XPHP_ORISCRIPT_RC    X-PHP-Originating-Script =~ /0\:func\.inc/
+header          AXB_XPHP_ORISCRIPT_RC   X-PHP-Originating-Script =~ /0\:func\.inc/
 describe        AXB_XPHP_ORISCRIPT_RC   Possibly hacked webmail
 
 # 2011-08-02
