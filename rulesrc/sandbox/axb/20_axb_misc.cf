@@ -1,4 +1,8 @@
 # 2011-11-01
+header          AXB_AOLIP_CONFUSED      X-AOL-IP =~ /^[a-z0-9\-]{7,25}$/
+describe        AXB_AOLIP_CONFUSED      Confused IP
+
+# 2011-11-01
 header          AXB_XFR_FKTWT   From =~ /\@postmaster\.twit-\w+\.com\>/
 describe        AXB_XFR_FKTWT   Suspicious bird
 
