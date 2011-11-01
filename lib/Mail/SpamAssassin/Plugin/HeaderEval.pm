@@ -68,6 +68,7 @@ sub new {
   $self->register_eval_rule("check_ratware_envelope_from");
   $self->register_eval_rule("gated_through_received_hdr_remover");
   $self->register_eval_rule("received_within_months");
+  $self->register_eval_rule("check_equal_from_domains");
 
   return $self;
 }
@@ -1043,6 +1044,31 @@ sub check_ratware_envelope_from {
 
   return 0;
 }
+
+# ADDED FROM BUG 6487
+sub check_equal_from_domains {
+  my ($self, $pms) = @_;
+
+  my $from = $pms->get('From:addr');
+  my $envfrom = $pms->get('EnvelopeFrom:addr');
+
+  my $fromdomain = '';
+  $fromdomain = $1 if ($from =~ /^[^@]+@(.+)$/);
+  $fromdomain =~ s/^.+\.([^\.]+\.[^\.]+)$/$1/;
+  return 0 if $fromdomain eq '';
+
+  my $envfromdomain = '';
+  $envfromdomain = $1 if ($envfrom =~ /^[^@]+@(.+)$/);
+  $envfromdomain =~ s/^.+\.([^\.]+\.[^\.]+)$/$1/;
+  return 0 if $envfromdomain eq '';
+
+  dbg("eval: From 2nd level domain: $fromdomain, EnvelopeFrom 2nd level domain: $envfromdomain");
+  
+  return 1 if lc($fromdomain) ne lc($envfromdomain);
+
+  return 0;
+}
+
 
 ###########################################################################
 
