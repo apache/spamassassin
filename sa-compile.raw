@@ -706,6 +706,9 @@ file and ensure this line is uncommented:
 
   loadplugin Mail::SpamAssassin::Plugin::Rule2XSBody
 
+Additionally, "sa-compile" will not restart "spamd" or otherwise cause a scanner to
+reload the now-compiled ruleset automatically.
+
 =head1 OPTIONS
 
 =over 4
