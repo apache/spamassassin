@@ -59,10 +59,11 @@ lang pt_BR describe USER_IN_MORE_SPAM_TO Usuário está listado na 'more_spam_to'
 lang pt_BR describe USER_IN_ALL_SPAM_TO Usuário está listado na 'all_spam_to'
 lang pt_BR describe AWL Endereço do From: está na auto whitelist
 
+# CAUSE LINT ERROR FAILING TEST
 # 20_advance_fee.cf
-lang pt_BR describe ADVANCE_FEE_2 Aparenta ser fraude (Nigerian 419)
-lang pt_BR describe ADVANCE_FEE_3 Aparenta ser fraude (Nigerian 419)
-lang pt_BR describe ADVANCE_FEE_4 Aparenta ser fraude (Nigerian 419)
+#lang pt_BR describe ADVANCE_FEE_2 Aparenta ser fraude (Nigerian 419)
+#lang pt_BR describe ADVANCE_FEE_3 Aparenta ser fraude (Nigerian 419)
+#lang pt_BR describe ADVANCE_FEE_4 Aparenta ser fraude (Nigerian 419)
 	
 # 20_body_tests.cf
 lang pt_BR describe GTUBE Generic Test for Unsolicited Bulk Email
@@ -244,7 +245,8 @@ lang pt_BR describe SUBJ_YOUR_DEBT Assunto contém "Your Bills" ou algo parecido
 lang pt_BR describe SUBJ_YOUR_FAMILY Assunto contém "Your Family" ou algo parecido
 lang pt_BR describe RCVD_FAKE_HELO_DOTCOM Cabeçalho Received contém um hostname de HELO falso
 lang pt_BR describe SUBJECT_DIET Assunto fala sobre perda de peso
-lang pt_BR describe EXTRA_MPART_TYPE Cabeçalho possui Content-type:...type= malformado
+# CAUSE LINT ERROR FAILING TEST
+#lang pt_BR describe EXTRA_MPART_TYPE Cabeçalho possui Content-type:...type= malformado
 lang pt_BR describe MIME_BOUND_DD_DIGITS Padrão de spam conhecido em MIME boundary
 lang pt_BR describe MIME_BOUND_DIGITS_15 Padrão de spam conhecido em MIME boundary
 lang pt_BR describe MIME_BOUND_MANY_HEX Padrão de spam conhecido em MIME boundary
@@ -445,7 +447,8 @@ lang pt_BR describe FORGED_QUALCOMM_TAGS QUALCOMM não consegue enviar emails HTM
 lang pt_BR describe FORGED_IMS_TAGS IMS não consegue enviar emails HTML neste formato
 lang pt_BR describe FORGED_OUTLOOK_TAGS Outlook não consegue enviar emails HTML neste formato
 lang pt_BR describe RATWARE_HASH_DASH Contém hashbuster no formato Sender-Safe
-lang pt_BR describe RATWARE_GECKO_BUILD Detectado como email em massa já conhecido (Gecko faked)
+# CAUSE LINT ERROR FAILING TEST
+#lang pt_BR describe RATWARE_GECKO_BUILD Detectado como email em massa já conhecido (Gecko faked)
 lang pt_BR describe RATWARE_ZERO_TZ Detectado como email em massa já conhecido (+0000)
 lang pt_BR describe X_MESSAGE_INFO Detectado como email em massa já conhecido (X-Message-Info)
 lang pt_BR describe HEADER_SPAM Detectado como email em massa já conhecido (header-based)
@@ -494,19 +497,21 @@ lang pt_BR describe BAYES_95 Probabilidade de ser spam entre 95 to 99%
 lang pt_BR describe BAYES_99 Probabilidade de ser spam entre 99 to 100%
 
 # 25_accessdb.cf
-lang pt_BR describe ACCESSDB Mensagem teria sido pega pela accessdb
+# CAUSE LINT ERROR FAILING TEST
+#lang pt_BR describe ACCESSDB Mensagem teria sido pega pela accessdb
 
 # 25_antivirus.cf
-lang pt_BR describe MICROSOFT_EXECUTABLE Mensagem contém um programa executável Microsoft
-lang pt_BR describe MIME_SUSPECT_NAME Extensão do arquivo não corresponde ao seu conteúdo
+#lang pt_BR describe MICROSOFT_EXECUTABLE Mensagem contém um programa executável Microsoft
+#lang pt_BR describe MIME_SUSPECT_NAME Extensão do arquivo não corresponde ao seu conteúdo
 
+# CAUSE LINT ERROR FAILING TEST
 # 25_dcc.cf
-lang pt_BR describe DCC_CHECK Listado no DCC (http://rhyolite.com/anti-spam/dcc/)
-lang pt_BR describe DCC_REPUT_00_12 Reputação no DCC entre 0 e 12 %  (maioria não-spam)
-lang pt_BR describe DCC_REPUT_70_89 Reputação no DCC entre 70 and 89 %
-lang pt_BR describe DCC_REPUT_90_94 Reputação no DCC entre 90 and 94 %
-lang pt_BR describe DCC_REPUT_95_98 Reputação no DCC entre 95 and 98 %  (maioria de spam)
-lang pt_BR describe DCC_REPUT_99_100 Reputação no DCC entre 99 % ou mais (definitamente spam)
+#lang pt_BR describe DCC_CHECK Listado no DCC (http://rhyolite.com/anti-spam/dcc/)
+#lang pt_BR describe DCC_REPUT_00_12 Reputação no DCC entre 0 e 12 %  (maioria não-spam)
+#lang pt_BR describe DCC_REPUT_70_89 Reputação no DCC entre 70 and 89 %
+#lang pt_BR describe DCC_REPUT_90_94 Reputação no DCC entre 90 and 94 %
+#lang pt_BR describe DCC_REPUT_95_98 Reputação no DCC entre 95 and 98 %  (maioria de spam)
+#lang pt_BR describe DCC_REPUT_99_100 Reputação no DCC entre 99 % ou mais (definitamente spam)
 
 # 25_dkim.cf
 lang pt_BR describe DKIM_SIGNED Mensagem possui uma assinatura DKIM ou DK não necessariamente válida
@@ -588,9 +593,10 @@ lang pt_BR describe SPF_HELO_NEUTRAL SPF: HELO não confere com registro SPF (neu
 lang pt_BR describe SPF_HELO_FAIL SPF: HELO não confere com registro SPF (fail)
 lang pt_BR describe SPF_HELO_SOFTFAIL SPF: HELO não confere com registro SPF (softfail)
 
+# CAUSE LINT ERROR FAILING TEST
 # 25_textcat.cf
-lang pt_BR describe UNWANTED_LANGUAGE_BODY Mensagem está escrita em um idioma indesejado
-lang pt_BR describe BODY_8BITS Body contém 8 caracteres de 8-bit consecutivos
+#lang pt_BR describe UNWANTED_LANGUAGE_BODY Mensagem está escrita em um idioma indesejado
+#lang pt_BR describe BODY_8BITS Body contém 8 caracteres de 8-bit consecutivos
 
 # 25_uribl.cf
 lang pt_BR describe URIBL_SBL Contém uma URL listada na blacklist SBL
@@ -606,8 +612,9 @@ lang pt_BR describe URIBL_BLACK Contém uma URL listada na blacklist URIBL
 lang pt_BR describe URIBL_GREY Contém uma URL listada na greylist URIBL
 lang pt_BR describe URIBL_RED Contém uma URL listada na redlist URIBL
 
+# CAUSE LINT ERROR FAILING TEST
 # 60_shortcircuit.cf
-lang pt_BR describe SHORTCIRCUIT Nem todas as regras foram executadas por causa de um problema em uma delas
+#lang pt_BR describe SHORTCIRCUIT Nem todas as regras foram executadas por causa de um problema em uma delas
 
 # 60_whitelist_dkim.cf
 lang pt_BR describe USER_IN_DKIM_WHITELIST Endereço do From: está na whitelist de DKIM do usuário
