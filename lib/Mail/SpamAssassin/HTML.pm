@@ -52,7 +52,7 @@ my %tricks = map {; $_ => 1 }
 
 # elements that change text style
 my %elements_text_style = map {; $_ => 1 }
-  qw( body font table tr th td big small basefont marquee span ),
+  qw( body font table tr th td big small basefont marquee span p div ),
 ;
 
 # elements that insert whitespace
@@ -82,6 +82,8 @@ $ok_attributes{td}{$_} = 1 for qw( bgcolor );
 $ok_attributes{th}{$_} = 1 for qw( bgcolor );
 $ok_attributes{tr}{$_} = 1 for qw( bgcolor );
 $ok_attributes{span}{$_} = 1 for qw( style );
+$ok_attributes{p}{$_} = 1 for qw( style );
+$ok_attributes{div}{$_} = 1 for qw( style );
 
 sub new {
   my ($class) = @_;
