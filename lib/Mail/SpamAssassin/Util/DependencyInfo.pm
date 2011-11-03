@@ -80,7 +80,7 @@ $have_sha1 ? {
   and used by DNSxL rules for assembling DNS queries out of IPv6 addresses.
   4.010 fixes an issue where NetAddr::IP::full6() causes a full6.al include
   error.
-  Avoid versions 4.034 and 4.035.",
+  Avoid versions 4.034 to 4.035 and 4.045 to 4.054",
 },
 {
   module => 'Time::HiRes',
