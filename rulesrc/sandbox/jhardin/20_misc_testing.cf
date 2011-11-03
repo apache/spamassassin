@@ -776,3 +776,10 @@ body        __SCANNED_HP           /(?:(?:document was scan+ed and sent ?to you 
 meta        SCANNED_EXTERNAL       __SCANNED_HP && !ALL_TRUSTED
 describe    SCANNED_EXTERNAL       "Scanned Document" email from external source - malware?
 
+# real estate scam spams 11/2011
+# roughly similar to FS_LARGE_PERCENT2, better S/O?
+body        __LARGE_PERCENT_AFTER  /\d{4}% after/i
+tflags      __LARGE_PERCENT_AFTER  multiple maxhits=4
+meta        LARGE_PCT_AFTER_MANY   __LARGE_PERCENT_AFTER > 3
+describe    LARGE_PCT_AFTER_MANY   Many large percentages after...
+
