@@ -316,6 +316,27 @@ If set, the C<username> attribute will use this as the current user's name.
 Otherwise, the default is taken from the runtime environment (ie. this process'
 effective UID under UNIX).
 
+=item skip_prng_reseeding
+
+If skip_prng_reseeding is set to true, the SpamAssassin library will B<not>
+call srand() to reseed a pseudo-random number generator (PRNG). The srand()
+Perl function should be called during initialization of each child process,
+soon after forking.
+
+Prior to version 3.4.0, calling srand() was handled by the SpamAssassin
+library.
+
+This setting requires the caller to decide when to call srand().
+This choice may be desired to preserve the entropy of a PRNG.  The default
+value of skip_prng_reseeding is false to maintain backwards compatibility. 
+
+This option should only be set by a caller if it calls srand() upon spawning
+child processes.  Unless you are certain you need it, leave this setting as
+false.
+
+NOTE: The skip_prng_reseeding feature is implemented in spamd as of 3.4.0
+which allows spamd to call srand() right after forking a child process.
+
 =back
 
 If none of C<rules_filename>, C<site_rules_filename>, C<userprefs_filename>, or
@@ -1622,10 +1643,10 @@ sub init {
 
   # Allow init() to be called multiple times, but only run once.
   if (defined $self->{_initted}) {
-    # If the PID changes, reseed the PRNG and the DNS ID counter
+    # If the PID changes, reseed the PRNG (if permitted) and the DNS ID counter
     if ($self->{_initted} != $$) {
       $self->{_initted} = $$;
-      srand;
+      srand  if !$self->{skip_prng_reseeding};
       $self->{resolver}->reinit_post_fork();
     }
     return;
