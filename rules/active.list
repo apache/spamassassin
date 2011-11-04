@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus-trap darxus grenier hege jarif wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1 zmi; day 2: bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus-trap darxus grenier hege jarif llanga wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1 zmi; day 3: bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus-trap darxus grenier hege llanga wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1 zmi
+# with results from: day 1: bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus-trap darxus grenier hege jarif llanga wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1 zmi; day 2: bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus-trap darxus grenier hege jarif wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1 zmi; day 3: bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus-trap darxus grenier hege jarif llanga wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1 zmi
 
 # tflags 
 ADVANCE_FEE_2_NEW_FORM
@@ -93,6 +93,12 @@ CHARSET_FARAWAY
 
 # tflags userconf
 CHARSET_FARAWAY_HEADER
+
+# good enough
+CK_HELO_DYNAMIC_POOL
+
+# good enough
+CK_HELO_DYNAMIC_SPLIT_IP
 
 # good enough
 CN_B2B_SPAMMER
@@ -384,6 +390,9 @@ HEAD_LONG
 
 # good enough
 HELO_LH_HOME
+
+# good enough
+HELO_MISC_IP
 
 # good enough
 HELO_NO_DOMAIN
@@ -767,6 +776,9 @@ STOCK_IMG_HDR_FROM
 STOX_REPLY_TYPE
 
 # good enough
+STOX_REPLY_TYPE_WITHOUT_QUOTES
+
+# good enough
 STYLE_GIBBERISH
 
 # tflags userconf
@@ -777,6 +789,9 @@ SUBJECT_IN_WHITELIST
 
 # good enough
 SUBJ_OBFU_PUNCT_FEW
+
+# good enough
+SUBJ_OBFU_PUNCT_MANY
 
 # good enough
 TAB_IN_FROM
@@ -843,18 +858,6 @@ TVD_SPACE_RATIO_MINFP
 
 # good enough
 TVD_VISIT_PHARMA
-
-# good enough
-CK_HELO_DYNAMIC_POOL
-
-# good enough
-CK_HELO_DYNAMIC_SPLIT_IP
-
-# good enough
-HELO_MISC_IP
-
-# good enough
-SUBJ_OBFU_PUNCT_MANY
 
 # tflags userconf
 UNPARSEABLE_RELAY
@@ -969,9 +972,6 @@ XMAILER_MIMEOLE_OL_83BF7
 
 # good enough
 XMAILER_MIMEOLE_OL_8627E
-
-# good enough
-XMAILER_MIMEOLE_OL_91287
 
 # good enough
 XMAILER_MIMEOLE_OL_CAC8F
