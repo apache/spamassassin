@@ -663,9 +663,9 @@ e.g.
 =item enlist_uri_host (listname) host ...
 
 Adds one or more host names or domain names to a named list of URI domains.
-The named list can then be consulted through a check_uri_host_in_wblist()
-eval rule, which takes the list name as an argument. Parenthesis around
-a list name are literal - a required syntax.
+The named list can then be consulted through a check_uri_host_listed()
+eval rule implemented by the WLBLEval plugin, which takes the list name as
+an argument. Parenthesis around a list name are literal - a required syntax.
 
 Host names may optionally be prefixed by an exclamantion mark '!', which
 produces false as a result if this entry matches. This makes it easier
@@ -677,17 +677,19 @@ No wildcards are supported, but subdomains do match implicitly. Lists
 are independent. Search for each named list starts by looking up the
 full hostname first, then leading fields are progressively stripped off
 (e.g.: sub.example.com, example.com, com) until a match is found or we run
-out of fields. The first matching entry (the most specific) determines if
-a lookup yielded a true (no '!' prefix) or a false ('!'-prefixed) result.
+out of fields. The first matching entry (the most specific) determines if a
+lookup yielded a true (no '!' prefix) or a false (with a '!' prefix) result.
 
 If an URL found in a message contains an IP address in place of a host name,
 the given list must specify the exact same IP address (instead of a host name)
 in order to match.
 
 Use the delist_uri_host directive to neutralize previous enlist_uri_host
-settings. Listnames 'BLACK' and 'WHITE' have their shorthand directives
-blacklist_uri_host and whitelist_uri_host and default rules, but are
-otherwise not special or reserved.
+settings.
+
+Enlisting to lists named 'BLACK' and 'WHITE' have their shorthand directives
+blacklist_uri_host and whitelist_uri_host and corresponding default rules,
+but the names 'BLACK' and 'WHITE' are otherwise not special or reserved.
 
 =cut
 
