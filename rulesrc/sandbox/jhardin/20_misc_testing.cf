@@ -583,7 +583,8 @@ describe       FROM_12LTRDOM       From a 12-letter domain
 # spammer email addresses noted by D. German on users list 9/2010
 body        DG_SPAMMER_EMAIL_B     /\b[a-z]{10,30}\.[a-z]{3,10}\@[a-z]{3,10}\.[a-z]{6,30}\.[a-z]{2,4}\b/
 header      DG_SPAMMER_EMAIL_F     From =~ /\b[a-z]{10,30}\.[a-z]{3,10}\@[a-z]{3,10}\.[a-z]{6,30}\.[a-z]{2,4}\b/
-
+describe    DG_SPAMMER_EMAIL_B     Recognized spammer email address in body
+describe    DG_SPAMMER_EMAIL_F     Recognized spammer email address in From: header
 
 # Spammers can't include the real name successfully...
 body        __FORGED_FB_USERCP_01  /This message was intended for Want to control which emails you receive from Facebook\?/i
@@ -777,9 +778,9 @@ meta        SCANNED_EXTERNAL       __SCANNED_HP && !ALL_TRUSTED
 describe    SCANNED_EXTERNAL       "Scanned Document" email from external source - malware?
 
 if can(Mail::SpamAssassin::Conf::feature_bug6558_free)
-   # real estate scam spams 11/2011
+   # real estate / stock scam spams 11/2011
    # roughly similar to FS_LARGE_PERCENT2, better S/O?
-   body        __LARGE_PERCENT_AFTER  /\d{4}% after/i
+   body        __LARGE_PERCENT_AFTER  /\d{3}% after/i
    tflags      __LARGE_PERCENT_AFTER  multiple maxhits=4
    meta        LARGE_PCT_AFTER_MANY   __LARGE_PERCENT_AFTER > 3
    describe    LARGE_PCT_AFTER_MANY   Many large percentages after...
