@@ -3567,27 +3567,27 @@ replace_rules FRT_CONTACT
 #counts   FRT_CONTACT              10s/0h of 47019 corpus (37183s/9836h FVGT) 12/23/06
 
 
-body     FRT_DIPLOMA            /<inter SP2><post P2>\b(?!d[iy]pl[o\xe2\xc2]m)<D><IX><P><L><O><M><A>/i
-describe FRT_DIPLOMA            ReplaceTags: Diploma
+#body     FRT_DIPLOMA            /<inter SP2><post P2>\b(?!d[iy]pl[o\xe2\xc2]m)<D><IX><P><L><O><M><A>/i
+#describe FRT_DIPLOMA            ReplaceTags: Diploma
 ##score    FRT_DIPLOMA          1.499
-replace_rules FRT_DIPLOMA
+#replace_rules FRT_DIPLOMA
 #counts   FRT_DIPLOMA              2s/0h of 27206 corpus (18125s/9081h FVGT) 11/10/06
 #counts   FRT_DIPLOMA              2s/0h of 32386 corpus (23130s/9256h FVGT) 11/14/06
 #counts   FRT_DIPLOMA              2s/0h of 47019 corpus (37183s/9836h FVGT) 12/23/06
 
 
-body     FRT_DISCOUNT           /<inter SP2><post P2>\b(?!discount)<D><IX><SX><C><O><U><N><TX>/i
-describe FRT_DISCOUNT           ReplaceTags: Discount
+#body     FRT_DISCOUNT           /<inter SP2><post P2>\b(?!discount)<D><IX><SX><C><O><U><N><TX>/i
+#describe FRT_DISCOUNT           ReplaceTags: Discount
 ##score    FRT_DISCOUNT         4.495
 replace_rules FRT_DISCOUNT
 #counts   FRT_DISCOUNT             24s/0h of 27206 corpus (18125s/9081h FVGT) 11/10/06
 #counts   FRT_DISCOUNT             32s/0h of 47019 corpus (37183s/9836h FVGT) 12/23/06
 
 
-body     FRT_DOLLAR             /<inter SP2><post P2>\b(?!dollar)<D><O><L><L><A><R>/i
-describe FRT_DOLLAR             ReplaceTags: Dollar
+#body     FRT_DOLLAR             /<inter SP2><post P2>\b(?!dollar)<D><O><L><L><A><R>/i
+#describe FRT_DOLLAR             ReplaceTags: Dollar
 ##score    FRT_DOLLAR           2.410
-replace_rules FRT_DOLLAR
+#replace_rules FRT_DOLLAR
 #counts   FRT_DOLLAR               8s/0h of 27206 corpus (18125s/9081h FVGT) 11/10/06
 #counts   FRT_DOLLAR               10s/0h of 47019 corpus (37183s/9836h FVGT) 12/23/06
 
@@ -3608,10 +3608,10 @@ replace_rules FRT_ESTABLISH
 #counts   FRT_ESTABLISH            7s/0h of 47019 corpus (37183s/9836h FVGT) 12/23/06
 
 
-body     FRT_ESTABLISH2         /<inter W0><post P2>\b(?!estabi?lish)<E><SX><TX><A><B><L><IX><SX><H>/i
-describe FRT_ESTABLISH2         ReplaceTags: Establish (2)
+#body     FRT_ESTABLISH2         /<inter W0><post P2>\b(?!estabi?lish)<E><SX><TX><A><B><L><IX><SX><H>/i
+#describe FRT_ESTABLISH2         ReplaceTags: Establish (2)
 ##score    FRT_ESTABLISH2               2.492
-replace_rules FRT_ESTABLISH2
+#replace_rules FRT_ESTABLISH2
 #counts   FRT_ESTABLISH2           2s/0h of 40802 corpus (31109s/9693h FVGT) 11/20/06
 #counts   FRT_ESTABLISH2           7s/0h of 47019 corpus (37183s/9836h FVGT) 12/23/06
 
@@ -3664,18 +3664,18 @@ replace_rules FRT_FUCK1
 #counts   FRT_FUCK1                14s/0h of 47019 corpus (37183s/9836h FVGT) 12/23/06
 
 
-body     FRT_FUCK2              /<inter W0><post P2>\b(?!fuck)<F><U><C><K>/i
-describe FRT_FUCK2              ReplaceTags: Fuck (2)
+#body     FRT_FUCK2              /<inter W0><post P2>\b(?!fuck)<F><U><C><K>/i
+#describe FRT_FUCK2              ReplaceTags: Fuck (2)
 ##score    FRT_FUCK2            3.434
-replace_rules FRT_FUCK2
+#replace_rules FRT_FUCK2
 #counts   FRT_FUCK2                6s/0h of 27206 corpus (18125s/9081h FVGT) 11/10/06
 #counts   FRT_FUCK2                15s/0h of 47019 corpus (37183s/9836h FVGT) 12/23/06
 
 
-body     FRT_GUARANTEE1         /<inter SP2><post P2>(?!guarantee)<GX><U><A><R><A><N><TX><E><E>/i
-describe FRT_GUARANTEE1         ReplaceTags: Guarantee (1)
+#body     FRT_GUARANTEE1         /<inter SP2><post P2>(?!guarantee)<GX><U><A><R><A><N><TX><E><E>/i
+#describe FRT_GUARANTEE1         ReplaceTags: Guarantee (1)
 ##score    FRT_GUARANTEE1               4.599
-replace_rules FRT_GUARANTEE1
+#replace_rules FRT_GUARANTEE1
 #counts   FRT_GUARANTEE1           80s/0h of 27206 corpus (18125s/9081h FVGT) 11/10/06
 #counts   FRT_GUARANTEE1           89s/0h of 35048 corpus (25413s/9635h FVGT) 11/16/06
 #counts   FRT_GUARANTEE1           126s/0h of 47019 corpus (37183s/9836h FVGT) 12/23/06
@@ -3714,18 +3714,18 @@ replace_rules FRT_INTEREST
 #counts   FRT_INTEREST             5s/0h of 47019 corpus (37183s/9836h FVGT) 12/23/06
 
 
-body     FRT_INVESTOR           /<inter SP2><post P2>\b(?!investor)<IX><N><V><E><SX><TX><O><R>/i
-describe FRT_INVESTOR           ReplaceTags: Investor
+#body     FRT_INVESTOR           /<inter SP2><post P2>\b(?!investor)<IX><N><V><E><SX><TX><O><R>/i
+#describe FRT_INVESTOR           ReplaceTags: Investor
 ##score    FRT_INVESTOR         1.832
-replace_rules FRT_INVESTOR
+#replace_rules FRT_INVESTOR
 #counts   FRT_INVESTOR             13s/0h of 27206 corpus (18125s/9081h FVGT) 11/10/06
 #counts   FRT_INVESTOR             32s/0h of 47019 corpus (37183s/9836h FVGT) 12/23/06
 
 
-body     FRT_LEVITRA            /<inter W0><post P2>(?!levitra)<L><E><V><IX><TX><R><A>/i
-describe FRT_LEVITRA            ReplaceTags: Levitra
+#body     FRT_LEVITRA            /<inter W0><post P2>(?!levitra)<L><E><V><IX><TX><R><A>/i
+#describe FRT_LEVITRA            ReplaceTags: Levitra
 ##score    FRT_LEVITRA          1.812
-replace_rules FRT_LEVITRA
+#replace_rules FRT_LEVITRA
 #counts   FRT_LEVITRA              2s/0h of 27206 corpus (18125s/9081h FVGT) 11/10/06
 #counts   FRT_LEVITRA              3s/0h of 47019 corpus (37183s/9836h FVGT) 12/23/06
 
@@ -3746,10 +3746,10 @@ replace_rules FRT_LOLITA1
 #counts   FRT_LOLITA1              11s/0h of 47019 corpus (37183s/9836h FVGT) 12/23/06
 
 
-body     FRT_MEETING            /<inter SP2><post P2>\b(?!meeting)<M><E><E><TX><IX><N><GX>\b/i
-describe FRT_MEETING            ReplaceTags: Meeting
+#body     FRT_MEETING            /<inter SP2><post P2>\b(?!meeting)<M><E><E><TX><IX><N><GX>\b/i
+#describe FRT_MEETING            ReplaceTags: Meeting
 ##score    FRT_MEETING          2.697
-replace_rules FRT_MEETING
+#replace_rules FRT_MEETING
 #counts   FRT_MEETING              5s/0h of 34882 corpus (25258s/9624h FVGT) 11/16/06
 #counts   FRT_MEETING              8s/0h of 47019 corpus (37183s/9836h FVGT) 12/23/06
 
@@ -3770,10 +3770,10 @@ replace_rules FRT_OPPORTUN1
 #counts   FRT_OPPORTUN1            18s/0h of 47019 corpus (37183s/9836h FVGT) 12/23/06
 
 
-body     FRT_OPPORTUN2          /<inter W0><post P2>(?!opportun)<O><P><P><O><R><TX><U><N>/i
-describe FRT_OPPORTUN2          ReplaceTags: Oppertun (2)
+#body     FRT_OPPORTUN2          /<inter W0><post P2>(?!opportun)<O><P><P><O><R><TX><U><N>/i
+#describe FRT_OPPORTUN2          ReplaceTags: Oppertun (2)
 ##score    FRT_OPPORTUN2                1.397
-replace_rules FRT_OPPORTUN2
+#replace_rules FRT_OPPORTUN2
 #counts   FRT_OPPORTUN2            12s/0h of 27206 corpus (18125s/9081h FVGT) 11/10/06
 #counts   FRT_OPPORTUN2            15s/0h of 47019 corpus (37183s/9836h FVGT) 12/23/06
 
@@ -3818,10 +3818,10 @@ replace_rules FRT_POSSIBLE
 #counts   FRT_POSSIBLE             10s/0h of 47019 corpus (37183s/9836h FVGT) 12/23/06
 
 
-body     FRT_PRICE              /<inter SP2><post P2>\b(?!price)<P><R><IX><C><E>\b/i
-describe FRT_PRICE              ReplaceTags: Price
+#body     FRT_PRICE              /<inter SP2><post P2>\b(?!price)<P><R><IX><C><E>\b/i
+#describe FRT_PRICE              ReplaceTags: Price
 ##score    FRT_PRICE            3.897
-replace_rules FRT_PRICE
+#replace_rules FRT_PRICE
 #counts   FRT_PRICE                71s/0h of 27206 corpus (18125s/9081h FVGT) 11/10/06
 #counts   FRT_PRICE                86s/0h of 33966 corpus (24401s/9565h FVGT) 11/16/06
 #counts   FRT_PRICE                128s/0h of 47019 corpus (37183s/9836h FVGT) 12/23/06
@@ -3868,10 +3868,10 @@ replace_rules FRT_PUSSY
 #counts   FRT_PUSSY                2s/0h of 47019 corpus (37183s/9836h FVGT) 12/23/06
 
 
-body     FRT_REFINANCE1         /<inter SP2><post P2>\b(?!refinanc)<R><E><F><IX><N><A><N><C>/i
-describe FRT_REFINANCE1         ReplaceTags: Refinance (1)
+#body     FRT_REFINANCE1         /<inter SP2><post P2>\b(?!refinanc)<R><E><F><IX><N><A><N><C>/i
+#describe FRT_REFINANCE1         ReplaceTags: Refinance (1)
 ##score    FRT_REFINANCE1               2.934
-replace_rules FRT_REFINANCE1
+#replace_rules FRT_REFINANCE1
 #counts   FRT_REFINANCE1           18s/0h of 27206 corpus (18125s/9081h FVGT) 11/10/06
 #counts   FRT_REFINANCE1           24s/0h of 47019 corpus (37183s/9836h FVGT) 12/23/06
 
@@ -3884,10 +3884,10 @@ replace_rules FRT_ROLEX
 #counts   FRT_ROLEX                15s/0h of 47019 corpus (37183s/9836h FVGT) 12/23/06
 
 
-body     FRT_SEXUAL             /<inter SP2><post P2>\b(?!sexual)<SX><E><X><U><A><L>/i
-describe FRT_SEXUAL             ReplaceTags: Sexual
+#body     FRT_SEXUAL             /<inter SP2><post P2>\b(?!sexual)<SX><E><X><U><A><L>/i
+#describe FRT_SEXUAL             ReplaceTags: Sexual
 ##score    FRT_SEXUAL           3.777
-replace_rules FRT_SEXUAL
+#replace_rules FRT_SEXUAL
 #counts   FRT_SEXUAL               93s/0h of 27206 corpus (18125s/9081h FVGT) 11/10/06
 #counts   FRT_SEXUAL               95s/0h of 36007 corpus (26307s/9700h FVGT) 11/17/06
 #counts   FRT_SEXUAL               102s/0h of 47019 corpus (37183s/9836h FVGT) 12/23/06
@@ -3902,19 +3902,19 @@ replace_rules FRT_SLUT
 #counts   FRT_SLUT                 11s/0h of 47019 corpus (37183s/9836h FVGT) 12/23/06
 
 
-body     FRT_SOMA               /<post P2>\b(?!soma|sommar|500mg)<SX><O><M><A>\b/i
-describe FRT_SOMA               ReplaceTags: Soma
+#body     FRT_SOMA               /<post P2>\b(?!soma|sommar|500mg)<SX><O><M><A>\b/i
+#describe FRT_SOMA               ReplaceTags: Soma
 ##score    FRT_SOMA             2.264
-replace_rules FRT_SOMA
+#replace_rules FRT_SOMA
 #counts   FRT_SOMA                 54s/0h of 32386 corpus (23130s/9256h FVGT) 11/14/06
 #counts   FRT_SOMA                 141s/0h of 44480 corpus (34698s/9782h FVGT) 11/30/06
 #counts   FRT_SOMA                 234s/0h of 47019 corpus (37183s/9836h FVGT) 12/23/06
 
 
-body     FRT_SOMA2              /<inter SP2><post P2>\b(?!soma|som[m\s]\xE4|sommar|500? ?mg)<SX><O><M><A>\b/i
-describe FRT_SOMA2              ReplaceTags: Soma (2)
+#body     FRT_SOMA2              /<inter SP2><post P2>\b(?!soma|som[m\s]\xE4|sommar|500? ?mg)<SX><O><M><A>\b/i
+#describe FRT_SOMA2              ReplaceTags: Soma (2)
 ##score    FRT_SOMA2            2.199
-replace_rules FRT_SOMA2
+#replace_rules FRT_SOMA2
 #counts   FRT_SOMA2                96s/0h of 36007 corpus (26307s/9700h FVGT) 11/17/06
 #counts   FRT_SOMA2                107s/0h of 47019 corpus (37183s/9836h FVGT) 12/23/06
 
@@ -3937,52 +3937,52 @@ replace_rules FRT_STOCK2
 #counts   FRT_STOCK2               141s/0h of 47019 corpus (37183s/9836h FVGT) 12/23/06
 
 
-body     FRT_STRONG1            /<inter SP2><post P2>\b(?!stro\s?ng)<SX><TX><R><O><N><GX>\b/i
-describe FRT_STRONG1            ReplaceTags: Strong (1)
+#body     FRT_STRONG1            /<inter SP2><post P2>\b(?!stro\s?ng)<SX><TX><R><O><N><GX>\b/i
+#describe FRT_STRONG1            ReplaceTags: Strong (1)
 ##score    FRT_STRONG1          2.352
-replace_rules FRT_STRONG1
+#replace_rules FRT_STRONG1
 #counts   FRT_STRONG1              96s/0h of 27206 corpus (18125s/9081h FVGT) 11/10/06
 #counts   FRT_STRONG1              98s/0h of 47019 corpus (37183s/9836h FVGT) 12/23/06
 
 
-body     FRT_STRONG2            /<inter W0><post P2>\b(?!strong)<SX><TX><R><O><N><GX>\b/i
-describe FRT_STRONG2            ReplaceTags: Strong (2)
+#body     FRT_STRONG2            /<inter W0><post P2>\b(?!strong)<SX><TX><R><O><N><GX>\b/i
+#describe FRT_STRONG2            ReplaceTags: Strong (2)
 ##score    FRT_STRONG2          1.535
-replace_rules FRT_STRONG2
+#replace_rules FRT_STRONG2
 #counts   FRT_STRONG2              3s/0h of 27206 corpus (18125s/9081h FVGT) 11/10/06
 #counts   FRT_STRONG2              9s/0h of 47019 corpus (37183s/9836h FVGT) 12/23/06
 
 
-body     FRT_SYMBOL             /<inter SP2><post P2>\b(?!symbol)<SX><Y><M><B><O><L>/i
-describe FRT_SYMBOL             ReplaceTags: Symbol
+#body     FRT_SYMBOL             /<inter SP2><post P2>\b(?!symbol)<SX><Y><M><B><O><L>/i
+#describe FRT_SYMBOL             ReplaceTags: Symbol
 ##score    FRT_SYMBOL           2.932
-replace_rules FRT_SYMBOL
+#replace_rules FRT_SYMBOL
 #counts   FRT_SYMBOL               15s/0h of 27206 corpus (18125s/9081h FVGT) 11/10/06
 #counts   FRT_SYMBOL               21s/0h of 47019 corpus (37183s/9836h FVGT) 12/23/06
 
 
-body     FRT_TODAY2             /<inter W0><post P2>\b(?!today)<TX><O><D><A><Y>/i
-describe FRT_TODAY2             ReplaceTags: Today (2)
+#body     FRT_TODAY2             /<inter W0><post P2>\b(?!today)<TX><O><D><A><Y>/i
+#describe FRT_TODAY2             ReplaceTags: Today (2)
 ##score    FRT_TODAY2           2.648
-replace_rules FRT_TODAY2
+#replace_rules FRT_TODAY2
 #counts   FRT_TODAY2               16s/0h of 27206 corpus (18125s/9081h FVGT) 11/10/06
 #counts   FRT_TODAY2               16s/0h of 47019 corpus (37183s/9836h FVGT) 12/23/06
 
 
 
-body FRT_VALIUM1 /<inter W0><post P2>\b(?!valium|verifiquem|volturno|vollum)<V><A><L><I><U><M>\b/i
-describe FRT_VALIUM1            ReplaceTags: Valium
+#body FRT_VALIUM1 /<inter W0><post P2>\b(?!valium|verifiquem|volturno|vollum)<V><A><L><I><U><M>\b/i
+#describe FRT_VALIUM1            ReplaceTags: Valium
 ##score    FRT_VALIUM1          10.357
-replace_rules FRT_VALIUM1
+#replace_rules FRT_VALIUM1
 #counts   FRT_VALIUM1              159s/0h of 27206 corpus (18125s/9081h FVGT) 11/10/06
 #counts   FRT_VALIUM1              183s/0h of 36007 corpus (26307s/9700h FVGT) 11/17/06
 #counts   FRT_VALIUM1              183s/0h of 47019 corpus (37183s/9836h FVGT) 12/23/06
 
 
-body FRT_VALIUM2 /<inter SP2><post P2>\b(?!valium|verifiquem|volturno|vollum)<V><A><L><I><U><M>\b/i
-describe FRT_VALIUM2            ReplaceTags: Valium (2)
+#body FRT_VALIUM2 /<inter SP2><post P2>\b(?!valium|verifiquem|volturno|vollum)<V><A><L><I><U><M>\b/i
+#describe FRT_VALIUM2            ReplaceTags: Valium (2)
 ##score    FRT_VALIUM2          2.843
-replace_rules FRT_VALIUM2
+#replace_rules FRT_VALIUM2
 #counts   FRT_VALIUM2              112s/0h of 27206 corpus (18125s/9081h FVGT) 11/10/06
 #counts   FRT_VALIUM2              112s/0h of 36007 corpus (26307s/9700h FVGT) 11/17/06
 #counts   FRT_VALIUM2              108s/0h of 47019 corpus (37183s/9836h FVGT) 12/23/06
@@ -3996,27 +3996,27 @@ replace_rules FRT_VIRGIN1
 #counts   FRT_VIRGIN1              10s/0h of 47019 corpus (37183s/9836h FVGT) 12/23/06
 
 
-body     FRT_WEIGHT2            /<inter W0><post P2>\b(?!weight)<WX><E><IX><GX><H><TX>/i
-describe FRT_WEIGHT2            ReplaceTags: Weight (2)
+#body     FRT_WEIGHT2            /<inter W0><post P2>\b(?!weight)<WX><E><IX><GX><H><TX>/i
+#describe FRT_WEIGHT2            ReplaceTags: Weight (2)
 ##score    FRT_WEIGHT2          2.442
-replace_rules FRT_WEIGHT2
+#replace_rules FRT_WEIGHT2
 #counts   FRT_WEIGHT2              6s/0h of 27206 corpus (18125s/9081h FVGT) 11/10/06
 #counts   FRT_WEIGHT2              13s/0h of 44480 corpus (34698s/9782h FVGT) 11/30/06
 #counts   FRT_WEIGHT2              12s/0h of 47019 corpus (37183s/9836h FVGT) 12/23/06
 
 
-body     FRT_XANAX1             /<inter W0><post P2>\b(?!xanax)<X><A><N><A><X>\b/i
-describe FRT_XANAX1             ReplaceTags: Xanax (1)
+#body     FRT_XANAX1             /<inter W0><post P2>\b(?!xanax)<X><A><N><A><X>\b/i
+#describe FRT_XANAX1             ReplaceTags: Xanax (1)
 ##score    FRT_XANAX1           2.775
-replace_rules FRT_XANAX1
+#replace_rules FRT_XANAX1
 #counts   FRT_XANAX1               24s/0h of 32300 corpus (23052s/9248h FVGT) 11/14/06
 #counts   FRT_XANAX1               29s/0h of 47019 corpus (37183s/9836h FVGT) 12/23/06
 
 
-body     FRT_XANAX2             /<inter SP2><post P2>\b(?!xanax)<X><A><N><A><X>\b/i
-describe FRT_XANAX2             ReplaceTags: Xanax (2)
+#body     FRT_XANAX2             /<inter SP2><post P2>\b(?!xanax)<X><A><N><A><X>\b/i
+#describe FRT_XANAX2             ReplaceTags: Xanax (2)
 ##score    FRT_XANAX2           2.892
-replace_rules FRT_XANAX2
+#replace_rules FRT_XANAX2
 #counts   FRT_XANAX2               69s/0h of 27206 corpus (18125s/9081h FVGT) 11/10/06
 #counts   FRT_XANAX2               72s/0h of 47019 corpus (37183s/9836h FVGT) 12/23/06
 
