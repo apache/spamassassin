@@ -1027,14 +1027,6 @@ endif # Mail::SpamAssassin::Plugin::URIDNSBL
 # ReplaceTags
 ifplugin Mail::SpamAssassin::Plugin::ReplaceTags
 # <gen:mutable>
-score FRT_ADOBE2 0.001 1.099 0.221 0.877 # n=1
-score FRT_BIGGERMEM1 2.523 0.146 2.372 1.758 # n=2
-score FRT_OFFER2 1.681 1.109 2.048 0.926 # n=2
-score FRT_PENIS1 2.299 2.293 1.029 0.731 # n=2
-score FRT_PRICE 0.001 # n=0 n=1 n=2 n=3
-score FRT_ROLEX 2.699 2.183 1.440 2.699 # n=2
-score FRT_SOMA2 0.001 0.001 0.001 0.001 # n=1
-score FRT_TODAY2 0.480 0.693 1.988 0.905 # n=2
 score FUZZY_AFFORDABLE 0 # n=0 n=1 n=2 n=3
 score FUZZY_AMBIEN 2.199 1.851 0.925 0.552
 score FUZZY_BILLION 0 # n=0 n=1 n=2 n=3
