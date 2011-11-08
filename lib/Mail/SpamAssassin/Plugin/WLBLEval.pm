@@ -52,6 +52,10 @@ sub new {
   $self->register_eval_rule("check_forged_in_default_whitelist");
   $self->register_eval_rule("check_mailfrom_matches_rcvd");
   $self->register_eval_rule("check_uri_host_listed");
+  # same as: eval:check_uri_host_listed('BLACK') :
+  $self->register_eval_rule("check_uri_host_in_blacklist");
+  # same as: eval:check_uri_host_listed('WHITE') :
+  $self->register_eval_rule("check_uri_host_in_whitelist");
 
   return $self;
 }
