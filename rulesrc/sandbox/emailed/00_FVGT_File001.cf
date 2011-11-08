@@ -3818,10 +3818,10 @@ replace_rules FRT_POSSIBLE
 #counts   FRT_POSSIBLE             10s/0h of 47019 corpus (37183s/9836h FVGT) 12/23/06
 
 
-#body     FRT_PRICE              /<inter SP2><post P2>\b(?!price)<P><R><IX><C><E>\b/i
-#describe FRT_PRICE              ReplaceTags: Price
+body     FRT_PRICE              /<inter SP2><post P2>\b(?!price)<P><R><IX><C><E>\b/i
+describe FRT_PRICE              ReplaceTags: Price
 ##score    FRT_PRICE            3.897
-#replace_rules FRT_PRICE
+replace_rules FRT_PRICE
 #counts   FRT_PRICE                71s/0h of 27206 corpus (18125s/9081h FVGT) 11/10/06
 #counts   FRT_PRICE                86s/0h of 33966 corpus (24401s/9565h FVGT) 11/16/06
 #counts   FRT_PRICE                128s/0h of 47019 corpus (37183s/9836h FVGT) 12/23/06
