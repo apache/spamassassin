@@ -25,7 +25,6 @@
 
 #include "config.h"
 #include "libspamc.h"
-#include "utils.h"
 
 #include <stdarg.h>
 #include <stdlib.h>
@@ -68,6 +67,9 @@
 #ifdef HAVE_ZLIB_H
 #include <zlib.h>
 #endif
+
+/* must load *after* errno.h, Bug 6697 */
+#include "utils.h"
 
 /* RedHat 5.2 doesn't define Shutdown 2nd Parameter Constants */
 /* KAM 12-4-01 */
