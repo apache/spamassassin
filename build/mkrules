@@ -229,9 +229,10 @@ sub lint_output_files {
 sub lint_rule_text {
   my ($text) = @_;
 
-  # ensure we turn off slow/optional stuff for linting!
+  # ensure we turn off slow/optional stuff for linting, but keep the essentials
   my $pretext = q{
     loadplugin Mail::SpamAssassin::Plugin::Check
+    loadplugin Mail::SpamAssassin::Plugin::URIDNSBL
     use_bayes 0
   };
 
