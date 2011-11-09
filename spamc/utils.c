@@ -28,8 +28,9 @@
  4115 named type definition in parentheses
  4127 conditional expression is constant
  4514 unreferenced inline function removed
+ 4996 deprecated "unsafe" functions
  */
-#pragma warning( disable : 4115 4127 4514 )
+#pragma warning( disable : 4115 4127 4514 4996 )
 #endif
 
 #include <io.h>
