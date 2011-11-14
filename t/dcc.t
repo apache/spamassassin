@@ -37,7 +37,7 @@ ok_all_patterns();
 
 %patterns = (
 
-  q{ Listed in DCC }, 'dcc',
+  q{ Detected as bulk mail by DCC }, 'dcc',
 
 );
 
