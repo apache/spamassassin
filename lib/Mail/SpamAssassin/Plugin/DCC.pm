@@ -218,7 +218,7 @@ Try /var/dcc if that command fails.
     type => $Mail::SpamAssassin::Conf::CONF_TYPE_STRING,
     code => sub {
       my ($self, $key, $value, $line) = @_;
-      if (!defined $value || !length $value) {
+      if (!defined $value || $value eq '') {
 	return $Mail::SpamAssassin::Conf::MISSING_REQUIRED_VALUE;
       }
       $value = untaint_file_path($value);
@@ -319,7 +319,7 @@ The default is C<undef>.
     type => $Mail::SpamAssassin::Conf::CONF_TYPE_STRING,
     code => sub {
       my ($self, $key, $value, $line) = @_;
-      if (!defined $value || !length $value) {
+      if (!defined $value || $value eq '') {
 	return $Mail::SpamAssassin::Conf::MISSING_REQUIRED_VALUE;
       }
       $value = untaint_file_path($value);
@@ -492,37 +492,37 @@ sub dcc_pgm_path {
   my $pgmpath;
   my $conf = $self->{main}->{conf};
 
-  if ($pgmpath = $conf->{dcc_path}) {
+  $pgmpath = $conf->{dcc_path};
+  if (defined $pgmpath && $pgmpath ne '') {
     # accept explicit setting for dccproc
     return $pgmpath if $pgm eq 'dccproc';
     # try adapting it for cdcc and everything else
-    if ($pgmpath =~ s/[^\/]+$/$pgm/) {
+    if ($pgmpath =~ s{[^/]+\z}{$pgm}s) {
       $pgmpath = untaint_file_path($pgmpath);
-      return $pgmpath if (-x $pgmpath);
+      if (-x $pgmpath) {
+        dbg("dcc: dcc_pgm_path, found %s in dcc_path: %s", $pgm,$pgmpath);
+        return $pgmpath;
+      }
     }
   }
 
   $pgmpath = Mail::SpamAssassin::Util::find_executable_in_env_path($pgm);
-  return $pgmpath if $pgmpath;
-
-  # we might be looking for cdcc for $self->find_dcc_home()
-  my $home = $conf->{dcc_home} || '/var/dcc';
-
-  $pgmpath = untaint_file_path($conf->{dcc_home} . "/bin/" . $pgm);
-  return ($pgmpath) if (-x $pgmpath);
-
-  if ($conf->{dcc_libexec}) {
-    $pgmpath = $conf->{dcc_libexec} . "/" . $pgm;
-    return ($pgmpath) if (-x $pgmpath);
+  if (defined $pgmpath) {
+    dbg("dcc: dcc_pgm_path, found %s in env.path: %s", $pgm,$pgmpath);
+    return $pgmpath;
   }
 
-  # desperate last attempts
-  $pgmpath = '/usr/local/bin/' . $pgm;
-  return $pgmpath if (-x $pgmpath);
-  $pgmpath = '/var/dcc/' . $pgm;
-  return $pgmpath if (-x $pgmpath);
+  # try dcc_home/bin, dcc_libexec, and some desperate last attempts
+  foreach my $dir ($conf->{dcc_home}.'/bin',  $conf->{dcc_libexec},
+                   '/usr/local/bin', '/usr/local/dcc', '/var/dcc') {
+    $pgmpath = $dir . '/' . $pgm;
+    if (-x $pgmpath) {
+      dbg("dcc: dcc_pgm_path, found %s in %s: %s", $pgm,$dir,$pgmpath);
+      return $pgmpath;
+    }
+  }
 
-  return undef;
+  return;
 }
 
 sub is_dccifd_available {
@@ -566,7 +566,7 @@ sub is_dccproc_available {
   return $self->{dccproc_available} if  defined $self->{dccproc_available};
 
   my $dccproc = $conf->{dcc_path};
-  if (!$dccproc) {
+  if (!defined $dccproc || $dccproc eq '') {
     $dccproc = $self->dcc_pgm_path('dccproc');
     $conf->{dcc_path} = $dccproc;
     if (!$dccproc || ! -x $dccproc) {
