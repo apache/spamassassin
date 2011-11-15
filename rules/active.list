@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: bb-guenther_fraud grenier; day 2: bb-guenther_fraud grenier; day 3: bb-guenther_fraud grenier
+# with results from: day 1: bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus-trap darxus grenier hege jarif llanga wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1 zmi; day 2: axb-brasil axb-fraud axb-generic axb-ham; day 3: bb-guenther_fraud grenier
 
 # tflags 
 ADVANCE_FEE_2_NEW_FORM
@@ -49,9 +49,6 @@ ADVANCE_FEE_5_NEW_MONEY
 # tflags userconf
 ALL_TRUSTED
 
-# good enough
-BANKING_LAWS
-
 # tflags learn
 BAYES_00
 
@@ -96,9 +93,6 @@ DATE_IN_FUTURE_Q_PLUS
 
 # good enough
 DEAR_BENEFICIARY
-
-# good enough
-DEAR_WINNER
 
 # tflags net
 DIGEST_MULTIPLE
@@ -148,32 +142,14 @@ DNS_FROM_RFC_DSN
 # tflags 
 DOS_ANAL_SPAM_MAILER
 
-# good enough
-DOS_OE_TO_MX
-
-# good enough
-END_FUTURE_EMAILS
-
 # tflags userconf
 ENV_AND_HDR_SPF_MATCH
-
-# good enough
-FH_HAS_XAIMC
 
 # tflags 
 FILL_THIS_FORM
 
 # good enough
-FILL_THIS_FORM_FRAUD_PHISH
-
-# good enough
-FILL_THIS_FORM_LOAN
-
-# good enough
 FILL_THIS_FORM_LONG
-
-# good enough
-FM_FRM_RN_L_BRACK
 
 # good enough
 FM_LOTTO_YOU_WON
@@ -186,9 +162,6 @@ FORM_FRAUD_5
 
 # tflags userconf
 FRAGMENTED_MESSAGE
-
-# good enough
-FROM_12LTRDOM
 
 # tflags userconf
 FROM_DOMAIN_NOVOWEL
@@ -204,9 +177,6 @@ FROM_MISSPACED
 
 # tflags net
 FROM_MISSP_DKIM
-
-# good enough
-FROM_MISSP_DYNIP
 
 # good enough
 FROM_MISSP_EH_MATCH
@@ -234,9 +204,6 @@ FROM_MISSP_USER
 
 # good enough
 FSL_CTYPE_WIN1251
-
-# good enough
-FSL_INTERIA_ABUSE
 
 # good enough
 FSL_NEW_HELO_USER
@@ -278,22 +245,10 @@ HASHCASH_HIGH
 HEAD_LONG
 
 # good enough
-HELO_LH_HOME
-
-# good enough
-HK_LOTTO
-
-# good enough
 HK_SCAM_N2
-
-# good enough
-HK_SPAMMY_FILENAME
 
 # tflags userconf
 HTML_CHARSET_FARAWAY
-
-# good enough
-HTTPS_HTTP_MISMATCH
 
 # tflags 
 LOTS_OF_MONEY
@@ -551,16 +506,7 @@ RCVD_IN_SORBS_ZOMBIE
 RCVD_IN_XBL
 
 # good enough
-REPLYTO_WITHOUT_TO_CC
-
-# good enough
 RISK_FREE
-
-# good enough
-SINGLE_HEADER_1K
-
-# good enough
-SINGLE_HEADER_2K
 
 # tflags net
 SPF_FAIL
@@ -592,9 +538,6 @@ SUBJECT_IN_BLACKLIST
 # tflags userconf
 SUBJECT_IN_WHITELIST
 
-# good enough
-SUBJ_OBFU_PUNCT_FEW
-
 # tflags net
 TO_EQ_FM_DOM_SPF_FAIL
 
@@ -602,175 +545,46 @@ TO_EQ_FM_DOM_SPF_FAIL
 TO_EQ_FM_SPF_FAIL
 
 # good enough
-TO_IN_SUBJ
-
-# good enough
-TO_NO_BRKTS_DIRECT
-
-# good enough
 TO_NO_BRKTS_DYNIP
 
 # good enough
-TO_NO_BRKTS_NORDNS_HTML
+ANY_PILL_PRICE
 
 # good enough
-TVD_SPACE_RATIO_MINFP
+AXB_HELO_HOME_UN
 
 # good enough
-AXB_XM_SENTBY
+DATE_IN_FUTURE_96_Q
 
 # good enough
-AXB_XRCVD_EYOU_SEND
+FB_GREAT_BEST_SEX
 
 # good enough
-DATE_DOTS
+HK_LOTTO_NAME
 
 # good enough
-DEAR_EMAIL_USER
+HK_NAME_FREE
 
 # good enough
-DECEASED_NO_ML
+HK_PNIS
 
 # good enough
-DOS_RCVD_IP_TWICE_B
+JM_FAKE_PSMTP_RCVD
 
 # good enough
-FILL_THIS_FORM_SHORT
+MANY_PILL_PRICE
 
 # good enough
-FM_LOTTO_MONEY
+TINY_FLOAT
 
 # good enough
-FORGED_URL_DOM
+TO_NO_BRKTS_FROM_MSSP
+
+# tflags net
+URIBL_SBL_A
 
 # good enough
-FREEMAIL_DOC_PDF
-
-# good enough
-FREEMAIL_RVW_ATTCH
-
-# good enough
-FROM_URI
-
-# good enough
-FROM_WWW
-
-# good enough
-FRT_POSSIBLE
-
-# good enough
-FR_IMPORT_CSS
-
-# good enough
-FSL_HELO_FAKE
-
-# good enough
-FSL_MID_419
-
-# good enough
-FSL_MISSP_REPLYTO
-
-# good enough
-FSL_RCVD_USER
-
-# good enough
-HK_GOLDDUST
-
-# good enough
-HK_LOTTO_SUBJECT
-
-# good enough
-HK_NAME_DR
-
-# good enough
-HK_NAME_FM_MR_MRS
-
-# good enough
-HK_NAME_MR_MRS
-
-# good enough
-HK_RANDOM_FROM_NAME
-
-# good enough
-HK_RANDOM_REPLYTO
-
-# good enough
-HK_SCAM_N1
-
-# good enough
-HK_SCAM_N13
-
-# good enough
-HK_SCAM_N15
-
-# good enough
-HK_SCAM_N3
-
-# good enough
-HK_SCAM_N8
-
-# good enough
-HK_SCAM_S23
-
-# good enough
-HK_SCAM_S4
-
-# good enough
-IMG_ALT_HSPACE_CID_ALIGN
-
-# good enough
-KHOP_FROM_WWW
-
-# good enough
-KHOP_GREYED
-
-# good enough
-LOTTO_AGENT_FM
-
-# good enough
-LOTTO_AGENT_RPLY
-
-# good enough
-LOTTO_URI
-
-# good enough
-MAY_BE_FORGED
-
-# good enough
-MONEY_FORM
-
-# good enough
-MONEY_PERCENT
-
-# good enough
-NAME_EMAIL_DIFF
-
-# good enough
-PPMC_FROM_1
-
-# good enough
-SHORTENED_URL_HREF
-
-# good enough
-SINGLE_HEADER_5K
-
-# good enough
-TVD_FROM_1
-
-# good enough
-TVD_FUZZY_SECTOR
-
-# good enough
-TVD_PDF_FINGER01
-
-# good enough
-TVD_PDF_FINGER01_JO
-
-# good enough
-TVD_PH_1
-
-# good enough
-TVD_SUBJ_NUM_OBFU_MINFP
+URI_OBFU_TLD
 
 # tflags userconf
 UNPARSEABLE_RELAY
