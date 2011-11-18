@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-brasil axb-fraud axb-generic axb-ham bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus-trap darxus grenier hege jarif llanga wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1 zmi; day 2: axb-brasil axb-fraud axb-generic axb-ham bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm danmcdonald darxus-trap darxus grenier hege jarif llanga wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1 zmi; day 3: bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus-trap darxus grenier hege jarif llanga wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1 zmi
+# with results from: day 1: axb-brasil axb-fraud axb-generic axb-ham bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus-trap darxus grenier hege jarif llanga wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1 zmi; day 2: axb-brasil axb-fraud axb-generic axb-ham bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus-trap darxus grenier hege jarif llanga wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1 zmi; day 3: axb-brasil axb-fraud axb-generic axb-ham bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm danmcdonald darxus-trap darxus grenier hege jarif llanga wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1 zmi
 
 # tflags 
 ADVANCE_FEE_2_NEW_FORM
@@ -92,10 +92,19 @@ CHARSET_FARAWAY
 CHARSET_FARAWAY_HEADER
 
 # good enough
+CK_HELO_DYNAMIC_POOL
+
+# good enough
+CK_HELO_DYNAMIC_SPLIT_IP
+
+# good enough
 CN_B2B_SPAMMER
 
 # tflags 
 CORRUPT_FROM_LINE_IN_HDRS
+
+# good enough
+CTYPE_NULL
 
 # good enough
 DATE_IN_FUTURE_96_Q
@@ -105,6 +114,9 @@ DATE_IN_FUTURE_Q_PLUS
 
 # good enough
 DEAR_BENEFICIARY
+
+# good enough
+DEAR_WINNER
 
 # tflags net
 DIGEST_MULTIPLE
@@ -182,6 +194,9 @@ FB_GREAT_BEST_SEX
 FB_QUALITY_REPLICA
 
 # good enough
+FB_STAMINA_IN_BED
+
+# good enough
 FH_FAKE_RCVD_LINE
 
 # good enough
@@ -200,10 +215,19 @@ FH_HELO_EQ_D_D_D_D
 FILL_THIS_FORM
 
 # good enough
+FILL_THIS_FORM_FRAUD_PHISH
+
+# good enough
+FILL_THIS_FORM_LOAN
+
+# good enough
 FILL_THIS_FORM_LONG
 
 # good enough
 FM_LOTTO_YOU_WON
+
+# good enough
+FORGED_RELAY_MUA_TO_MX
 
 # tflags 
 FORM_FRAUD_3
@@ -245,6 +269,9 @@ FROM_MISSP_FREEMAIL
 FROM_MISSP_MSFT
 
 # good enough
+FROM_MISSP_NO_TO
+
+# good enough
 FROM_MISSP_REPLYTO
 
 # tflags net
@@ -258,6 +285,18 @@ FROM_MISSP_URI
 
 # good enough
 FROM_MISSP_USER
+
+# good enough
+FROM_UNBAL1
+
+# good enough
+FRT_ERECTION
+
+# good enough
+FR_DOT_FEVER_5
+
+# good enough
+FSL_BOTSPAM_1
 
 # good enough
 FSL_CTYPE_WIN1251
@@ -282,6 +321,12 @@ FS_START_LOSE
 
 # good enough
 FS_WEIGHT_LOSS
+
+# good enough
+GAPPY_HTML
+
+# good enough
+GAPPY_PHONE_NA
 
 # tflags userconf
 GTUBE
@@ -317,6 +362,12 @@ HEAD_LONG
 HELO_LH_HOME
 
 # good enough
+HELO_MISC_IP
+
+# good enough
+HELO_NO_DOMAIN
+
+# good enough
 HELO_OEM
 
 # good enough
@@ -344,10 +395,16 @@ JM_FAKE_PSMTP_RCVD
 KB_FAKED_THE_BAT
 
 # good enough
+KB_FORGED_MOZ4
+
+# good enough
 KB_RATWARE_MSGID
 
 # good enough
 KB_RATWARE_OUTLOOK_MID
+
+# good enough
+KHOP_DYNAMIC
 
 # tflags 
 LOTS_OF_MONEY
@@ -617,10 +674,28 @@ RCVD_IN_XBL
 RISK_FREE
 
 # good enough
+RP_8BIT
+
+# good enough
+RP_MATCHES_RCVD
+
+# good enough
+S25R_4
+
+# good enough
+SCANNED_EXTERNAL
+
+# good enough
 SINGLE_HEADER_1K
 
 # good enough
 SINGLE_HEADER_2K
+
+# good enough
+SINGLE_HEADER_3K
+
+# good enough
+SINGLE_HEADER_4K
 
 # good enough
 SPAMMY_XMAILER
@@ -652,6 +727,9 @@ SPF_SOFTFAIL
 # good enough
 STOCK_IMG_HDR_FROM
 
+# good enough
+STYLE_GIBBERISH
+
 # tflags userconf
 SUBJECT_IN_BLACKLIST
 
@@ -659,13 +737,25 @@ SUBJECT_IN_BLACKLIST
 SUBJECT_IN_WHITELIST
 
 # good enough
+SUBJ_OBFU_PUNCT_MANY
+
+# good enough
 THEBAT_UNREG
 
 # good enough
 TINY_FLOAT
 
+# good enough
+TO_EQ_FM_DIRECT_MX
+
 # tflags net
 TO_EQ_FM_DOM_SPF_FAIL
+
+# good enough
+TO_EQ_FM_HTML_DIRECT
+
+# good enough
+TO_EQ_FM_HTML_ONLY
 
 # tflags net
 TO_EQ_FM_SPF_FAIL
@@ -683,6 +773,12 @@ TO_NO_BRKTS_DYNIP
 TO_NO_BRKTS_FROM_MSSP
 
 # good enough
+TO_NO_BRKTS_HTML_ONLY
+
+# good enough
+TO_NO_BRKTS_MSFT
+
+# good enough
 TT_MSGID_TRUNC
 
 # good enough
@@ -695,91 +791,67 @@ TVD_RCVD_SINGLE
 TVD_VISIT_PHARMA
 
 # good enough
-CK_HELO_DYNAMIC_POOL
+DECEASED_NO_ML
 
 # good enough
-CK_HELO_DYNAMIC_SPLIT_IP
+FSL_MID_419
 
 # good enough
-CTYPE_NULL
+FSL_MISSP_REPLYTO
 
 # good enough
-FB_STAMINA_IN_BED
+HK_GOLDDUST
 
 # good enough
-FORGED_RELAY_MUA_TO_MX
+HK_NAME_FM_FROM
 
 # good enough
-FROM_MISSP_NO_TO
+HK_NAME_FM_MR_MRS
 
 # good enough
-FROM_UNBAL1
+HK_NAME_MR_MRS
 
 # good enough
-FRT_ERECTION
+HK_RANDOM_REPLYTO_NAME
 
 # good enough
-FR_DOT_FEVER_5
+HK_SCAM_N1
 
 # good enough
-FSL_BOTSPAM_1
+HK_SCAM_N15
 
 # good enough
-GAPPY_HTML
+HK_SCAM_N3
 
 # good enough
-GAPPY_PHONE_NA
+HK_SCAM_N4
 
 # good enough
-HELO_MISC_IP
+HK_SCAM_N8
 
 # good enough
-HELO_NO_DOMAIN
+HK_SCAM_S15
 
 # good enough
-KB_FORGED_MOZ4
+HK_SCAM_S25
 
 # good enough
-KHOP_DYNAMIC
+LOTTO_AGENT_RPLY
 
 # good enough
-RP_8BIT
+LOTTO_URI
 
 # good enough
-RP_MATCHES_RCVD
+MONEY_FORM
 
 # good enough
-S25R_4
+MSGID_WSP_TRAIL
 
 # good enough
-SCANNED_EXTERNAL
+SHARE_50_50
 
 # good enough
-SINGLE_HEADER_3K
-
-# good enough
-SINGLE_HEADER_4K
-
-# good enough
-STYLE_GIBBERISH
-
-# good enough
-SUBJ_OBFU_PUNCT_MANY
-
-# good enough
-TO_EQ_FM_DIRECT_MX
-
-# good enough
-TO_EQ_FM_HTML_DIRECT
-
-# good enough
-TO_EQ_FM_HTML_ONLY
-
-# good enough
-TO_NO_BRKTS_HTML_ONLY
-
-# good enough
-TO_NO_BRKTS_MSFT
+TVD_PH_BODY_META
 
 # tflags userconf
 UNPARSEABLE_RELAY
@@ -894,9 +966,6 @@ XMAILER_MIMEOLE_OL_7533E
 
 # good enough
 XMAILER_MIMEOLE_OL_8627E
-
-# good enough
-XMAILER_MIMEOLE_OL_CAC8F
 
 # good enough
 X_MAILER_CME_6543_MSN
