@@ -37,8 +37,8 @@ header          AXB_XPHP_ORISCRIPT_RC   X-PHP-Originating-Script =~ /0\:func\.in
 describe        AXB_XPHP_ORISCRIPT_RC   Possibly hacked webmail
 
 # 2011-08-02
-# header          AXB_XM_QCVR     X-Mailer =~ /\bQuickConveyor\b/
-# describe        AXB_XM_QCVR     Bulk fingerprint
+header          AXB_XM_QCVR     X-Mailer =~ /\bQuickConveyor\b/
+describe        AXB_XM_QCVR     Bulk fingerprint
 
 # 2011-07-27
 # header          AXB_XRCVD_XYZCRP         Received =~ /\(envelope\-sender \<\#\@\[\]\>\)/
@@ -46,20 +46,20 @@ describe        AXB_XPHP_ORISCRIPT_RC   Possibly hacked webmail
 
 
 # 2011-07-08
-# header          AXB_XRCVD_APACHE_CTRIP  Received =~ /\bfrom apache by ctrip\.com\b/i
-# describe        AXB_XRCVD_APACHE_CTRIP  possibly forged ctrip sender - apache
+header          AXB_XRCVD_APACHE_CTRIP  Received =~ /\bfrom apache by ctrip\.com\b/i
+describe        AXB_XRCVD_APACHE_CTRIP  possibly forged ctrip sender - apache
 
-# header          AXB_XMID_PFIX_CTRIP     Message-ID =~ /\<[A-F0-9]{8}.[0-9]{6}\@ctrip\.com\>/
-# describe        AXB_XMID_PFIX_CTRIP     possibly forged ctrip sender - postfix
+header          AXB_XMID_PFIX_CTRIP     Message-ID =~ /\<[A-F0-9]{8}.[0-9]{6}\@ctrip\.com\>/
+describe        AXB_XMID_PFIX_CTRIP     possibly forged ctrip sender - postfix
 
-# header          AXB_XMID_EXIM_CTRIP     Message-ID =~ /\<[A-F0-9]{32}\@ctrip\.com\>/
-# describe        AXB_XMID_EXIM_CTRIP     possibly forged ctrip sender - exim
+header          AXB_XMID_EXIM_CTRIP     Message-ID =~ /\<[A-F0-9]{32}\@ctrip\.com\>/
+describe        AXB_XMID_EXIM_CTRIP     possibly forged ctrip sender - exim
 
-# header          AXB_X_PHPS_CTRIP        X-PHP-Script =~ /\bctrip\.com\/sendmail\.php\b/
-# describe        AXB_X_PHPS_CTRIP        possibly forged ctrip sender - php
+header          AXB_X_PHPS_CTRIP        X-PHP-Script =~ /\bctrip\.com\/sendmail\.php\b/
+describe        AXB_X_PHPS_CTRIP        possibly forged ctrip sender - php
 
-# header          AXB_XRCVD_FRMCTRIP      Received =~ /from ctrip\.com\b/
-# describe        AXB_XRCVD_FRMCTRIP      possibly forged ctrip sender - rcvd
+header          AXB_XRCVD_FRMCTRIP      Received =~ /from ctrip\.com\b/
+describe        AXB_XRCVD_FRMCTRIP      possibly forged ctrip sender - rcvd
 
 #
 
