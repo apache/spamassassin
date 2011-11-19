@@ -1,13 +1,13 @@
 
 ifplugin Mail::SpamAssassin::Plugin::ReplaceTags
-  replace_tag  CURRENCY   [\(\[]?(?:\bUS[D\$]{0,2}|\$(?:US)?|usd|GBP|=[Aa][34]|\xa3|&\#16[34];|(?i:pounds\ssterling)|\xa4|EUR(?:OS)?|[Ee]uro?s?|(?i:eur)\sde|CHF|FCFA)[\]\)]?
+  replace_tag  CURRENCY   [\(\[]?(?:\bUS[D\$]{0,2}|\$(?:US)?|usd|GBP|=[Aa][34]|\xa3|&\#16[34];|(?i:pounds\ssterling)|\xa4|EUR(?:OS)?|[Ee]uro?s?|(?i:eur)\sde|CHF|FCFA|d[\xf3]lares\sde\slos\sE+\.\s?U+\.)[\]\)]?
   replace_tag  GB_UK      \b(?:U\.?K\.?|(?:Great\s)?Brit(?:ain|ish)|G\.?B\.?)\b
 
   body     __LOTSA_MONEY_00   /<CURRENCY>[\s\.]?\d[\dO][,\.][\dO]{3}(?:(?!\d)|\b)/
   body     __LOTSA_MONEY_01   /(?:(?i:sum\sof\s)[\(\[]?|<CURRENCY>\s?)[\s\.]?\d[\d.,\sO]{5,20}[\dO]/
   body     __LOTSA_MONEY_02   /\d[\d.,\sO]{5,20}[\dO][\)\]\(]?\s?(?:<CURRENCY>|Pounds|(?i:dollars?|bucks))\b/
   body     __LOTSA_MONEY_03   /(?:(?i:sum\sof\s)[\(\[]?|<CURRENCY>\s?)\d[\d.,\sO]{0,5}[\)\]]?\s?(?i:M(?i:il)?\b|mil+(?i:io|<O>)n|hund?[re]+a?[dt]|thousand|tausend|milh[\xf5]es)/
-  body     __LOTSA_MONEY_04   /(?:\d[\d\.]{0,4}M|million(?!s)|mill<O>n|hund?rea?d(?!s)[^\.]{1,25}thousand(?!s)|cents?[^\.]{1,25}mille|hundert[^\.]{1,30}tausend|ientos?[^\.]{1,20}mil|cent[a-z\s]{1,20}mil\s[a-z]{1,20}centos)[^\.\$]{0,50}(?:(?:U\.?\s?S\.?\s?(?:A\.?\s?)?|united\s?states?|canad(?:ian|a)\s)?dollars?|bucks|USD|GBP|<GB_UK>\spounds?|(?:<GB_UK>\s)?pounds?\ssterling|pounds(?!\sof)|(?:d'\s?)?euros?|francs?)\b/i
+  body     __LOTSA_MONEY_04   /(?:\d[\d\.]{0,4}M|million(?!s)|mill<O>n|hund?rea?d(?!s)[^\.]{1,25}thousand(?!s)|cents?[^\.]{1,25}mille|hundert[^\.]{1,30}tausend|ientos?[^\.]{1,20}mil|cent[a-z\s]{1,20}mil\s[a-z]{1,20}centos)[^\.\$]{0,50}(?:(?:U\.?\s?S\.?\s?(?:A\.?\s?)?|united\s?states\s|E\.\s?U\.\s|canad(?:ian|a)\s|ia\sde\s)?d[o\xf3]llare?s?|bucks|USD|GBP|<GB_UK>\spounds?|(?:<GB_UK>\s)?pounds?\ssterling|pounds(?!\sof)|(?:d'\s?)?euros?|francs?)\b/i
   body     __LOTSA_MONEY_05   /(?:(?:sum|value|amount)\sof\s)\d[\d.,\sO]{7,20}[\dO\.][\)\]\(\s]{0,3}(?:pounds?|dollars?|euros?|bucks)\b/i
   replace_rules   __LOTSA_MONEY_00 __LOTSA_MONEY_01 __LOTSA_MONEY_02 __LOTSA_MONEY_03 __LOTSA_MONEY_04
 
@@ -56,7 +56,7 @@ body     __LOTTO_WIN_01     /\bwin+ing\s(?:prize|number|notification|draw|check|
 
 body     __YOU_WON_01    /\byou(?:r|'re|'ve|'ll|\shave|\sdid)?\s(?:e-?mail\s)?(?:\w+\s){0,2}(?:a\s)?w[io]n+(?:er|ing)?(?!'t)\b/i
 body     __YOU_WON_02    /\bw[io]n\s(?:(?:for|by)\s)?your?\b/i
-body     __YOU_WON_03    /\b(?:your?|win+ing|win+ers?|beneficiaries|participants?|individuals?|address(?:es)?|accounts?)(?:\s[-a-z\s]{4,40})?\s(?:w(?:ere|as)|ha(?:ve|s) be(?:en)?)\s(?:automatically\s)?(?:(?:randomly|raffly)\s(?:selected|cho+sen|cho+sing|picked)|(?:selected|cho+sen|cho+sing|picked)\s(?:[a-z\s]{2,40}?\srandom|randomly|online|lottery|computer\s(?:ballot|wahlgang)))/i 
+body     __YOU_WON_03    /\b(?:your?|win+ing|win+ers?|beneficiaries|participants?|individuals?|address(?:es)?|accounts?|emails?)(?:\s[-a-z\s]{4,40})?\s(?:w(?:ere|as)|ha(?:ve|s) be(?:en)?)\s(?:automatically\s)?(?:(?:randomly|raffly)\s(?:selected|cho+sen|cho+sing|picked)|(?:selected|cho+sen|cho+sing|picked)\s(?:[a-z\s]{2,40}?\srandom(?:ly)?|online|lottery|computer\s(?:ballot|wahlgang)))/i 
 body     __HAS_WON_01    /\bque ha ganado\b/i
 meta     __YOU_WON       __YOU_WON_01 || __YOU_WON_02 || __YOU_WON_03 || __HAS_WON_01
 
@@ -84,7 +84,7 @@ describe LOTTO_AGENT_RPLY Claims Agent
 # body    HK_LOTTO                /(?:(?:(?:inter)?national|foundation|mercato|univers|euro million|e-?mail|euro-pw|bill gates|swiss) ?lo(?:tto|ttery|terie)|coca.?cola games|mega jackpot|staatsloterij|ukonline game promo|loto prestige|(?:fran.aise|e-?mail) sweepstakes|loterie (?:internationale|cristal|am.ricaine|coca.?cola|euromillions|bill gates)|(?:computer|internet) ballot|foundation internationale billgateslottery award|(?:promotional|online) draws?|lottery (?:fiduciary|department))/i
 # body            __KAM_LOTTO5    /(freelotto group|Royal Heritage Lottery|UK National (Online)? Lottery|U\.?K\.? Grand Promotions|Lottery Department UK|Euromillion Loteria|Luckyday International Lottery|International Lottery)/is
 
-body     __LOTTO_ADMITS_1 /\b(?:on-?line|e-?mail|ballot|(?:inter)?national|state|(?:UK|euro)[- ]?(?:mil+ions?|PW)|Canada|Microsoft|MSN|internet|mega|jackpot|Royal Heritage|foundation|cash\sgrant|mercato|univers|staatsloterij|bill\s?gates|Olympics?|swiss|this|esta)(?:\s(?!lot|swe|prom)\w{1,20}){0,3}\s?(?:lot(?:to|tery|eri[ea])|sweepstakes?|promo(?:tion|cao|cion)?)\b/i
+body     __LOTTO_ADMITS_1 /\b(?:on-?line|e-?mail|ballot|(?:inter)?national|state|(?:UK|euro)[- ]?(?:mil+ions?|PW)|Canada|Microsoft|MSN|internet|mega|jackpot|Royal Heritage|foundation|cash\sgrant|mercato|univers|staatsloterij|bill\s?gates|Olympics?|swiss|this|est[ea])(?:\s(?!lot|swe|prom)\w{1,20}){0,3}\s?(?:lot(?:to|tery|eri[ea])|sweepstakes?|promo(?:tion|cao|cion)?)\b/i
 body     __LOTTO_ADMITS_2 /\b(?:free)?(?:lot(?:to|tery|erie)|sweepstakes)\s(?:(?:inter)?na[tz]ional|department|bureau|group|award)/i
 uri      __LOTTO_ADMITS_3 /lottery/i
 
@@ -153,7 +153,7 @@ describe MONEY_ATM_CARD   Lots of money on an ATM card
 
 body     __YOU_INHERIT    /\byour\s[a-z\s]{0,30}inherit+ance\b/i
 body     __I_INHERIT      /\b(?:I|eu)\s[a-z\s]{0,30}(?:inherited|herdei)\b/i
-body     __THEY_INHERIT   /\b(?:inherit\sth(?:e|is)\smoney|herede\seste\sdinero)\b/i
+body     __THEY_INHERIT   /\b(?:inherit\sth(?:e|is)\smoney|herede\sest[ea]\sdinero)\b/i
 body     __NOT_DEAD_YET   /\b(?:will\sinherit|que\sherede)\b/i
 body     __AM_DYING       /\bam\s(?:\S+\s)?dying\b/i
 body     __I_WILL_YOU     /\bwill(?:ed)?\s(?:[a-z\s]{0,20}(?:fortune|money|\$\d+[a-z]{0,9})\s)?to\syou\b/i
@@ -179,8 +179,8 @@ describe DECEASED_NO_ML   Dead not via mailing list
 body     __WIRE_XFR       /\b(?:wire|telegraph(?:ic)?|bank)\s?transfer/i
 body     __TRUSTED_CHECK  /\b(?:cashier'?s?|certified)\sche(?:ck|que)/i
 body     __BANK_DRAFT     /\bbank\sdraft/i
-body     __MOVE_MONEY     /\b(?:(?:receive|re-?profile|transfer(?:ring)?|repatriate|rapatrier|secure|r[\xe9]clamation|possession|virer)\s(?:th(?:e(?:se)?|is)|das|sur ce|de ces|cet)|re-?profiling|re-?locat(?:e|ing)(?:\s\w{1,15})?)\s(?:sums?\sof\s)?(?:proceeds|funds?|money|balance|account|g[eo]ld|compte|fonds|argent)\b/i
-body     __TO_YOUR_ACCT   /\b(?:funds|money|fundo|dinheiro)\s(?:\w{1,10}\s){0,4}(?:transfer(?:red)?|transferido)\s(?:to|para)\s(?:your|sua)\s(?:account|conta)/i
+body     __MOVE_MONEY     /\b(?:(?:receive|re-?profile|transfer(?:ring)?|repatriate|rapatrier|secure|r[\xe9]clamation|possession|virer|dona(?:te|r))\s(?:th(?:e(?:se)?|is)|das|sur ce|de ces|cet|est[ea])|re-?profiling|re-?locat(?:e|ing)(?:\s\w{1,15})?)\s(?:sums?\sof\s)?(?:proceeds|funds?|money|balance|account|g[eo]ld|compte|fond[so]|argent)\b/i
+body     __TO_YOUR_ACCT   /\b(?:funds|money|f[uo]ndo|dinheiro)\s(?:\w{1,10}\s){0,4}(?:transfer(?:red)?|transferido)\s(?:to|para)\s(?:your|sua)\s(?:account|conta)/i
 meta     __XFER_MONEY     (__WIRE_XFR || __TRUSTED_CHECK || __BANK_DRAFT || __MOVE_MONEY || __TO_YOUR_ACCT)
 
 body     __INTL_BANK      /\b(?:international\s(?:\w+\s)?bank|banque\sinternationale)\b/i
@@ -204,7 +204,7 @@ body     __COURIER        /\bcourier\s(?:company|service)\b/i
 #describe MONEY_FRAUD_BOX  Lots of money in a box, lots of money from a fox
 #score    MONEY_FRAUD_BOX  1.0
  
-body     __SUM_OF_FUND      /\b(?:sum|release|freigabe)\s(?:of|der)\s(?:amount|fund|investment|mittel)\b/i
+body     __SUM_OF_FUND    /\b(?:sum|release|freigabe)\s(?:of|der)\s(?:amount|fund|investment|mittel)\b/i
 
 # [\xc3][\xa9] avoids "malformed UTF8" errors that plain \xc3\xa9 can experience.
 body     __BENEFICIARY    /\bb(?:[e\xe9]n[e\xe9]|[\xc3][\xa9]n[\xc3][\xa9])fi(?:c|sh)i?ai?r(?:y|ies|es?)/i
