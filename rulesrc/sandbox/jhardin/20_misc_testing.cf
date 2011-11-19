@@ -786,9 +786,3 @@ if can(Mail::SpamAssassin::Conf::feature_bug6558_free)
    describe    LARGE_PCT_AFTER_MANY   Many large percentages after...
 endif
 
-# by request for testing, for darxus@chaosreigns.com
-header      FROM_MYFANBOX          From:addr =~ /\@myfanbox\.com$/i
-tflags      FROM_MYFANBOX          nopublish
-describe    FROM_MYFANBOX          Known spammy From: domain
-
-
