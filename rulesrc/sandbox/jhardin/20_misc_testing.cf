@@ -786,3 +786,8 @@ if can(Mail::SpamAssassin::Conf::feature_bug6558_free)
    describe    LARGE_PCT_AFTER_MANY   Many large percentages after...
 endif
 
+# phish/malware 11/2011
+body        ACH_CANCELLED          /\b(?-i:ACH) (?:payment|transfer) cancel+ed/i
+describe    ACH_CANCELLED          "ACH cancelled" possible malware
+
+
