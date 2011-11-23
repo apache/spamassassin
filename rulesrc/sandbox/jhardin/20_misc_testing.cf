@@ -787,7 +787,9 @@ if can(Mail::SpamAssassin::Conf::feature_bug6558_free)
 endif
 
 # phish/malware 11/2011
-body        ACH_CANCELLED          /\b(?-i:ACH) (?:payment|transfer) cancel+ed/i
-describe    ACH_CANCELLED          "ACH cancelled" possible malware
+body        __ACH_CANCELLED_01     /\b(?-i:ACH) (?:payment|transfer|transaction) (?:rejected|cancel+ed)/i
+body        __ACH_CANCELLED_02     /(?:rejected|cancel+ed) (?-i:ACH) (?:payment|transfer|transaction)/i
+meta        ACH_CANCELLED          (__ACH_CANCELLED_01 || __ACH_CANCELLED_02) && __HAS_ANY_URI
+describe    ACH_CANCELLED          "ACH cancelled" probable malware
 
 
