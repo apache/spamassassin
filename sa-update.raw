@@ -1743,6 +1743,14 @@ C<sa-update> is typically used in something like the following manner:
 This works because C<sa-update> only returns an exit status of C<0> if
 it has successfully downloaded and installed an updated ruleset.
 
+The program sa-update uses the underlying operating system umask for the
+updated rule files it installs.  You may wish to run sa-update from a script
+that sets the umask prior to calling sa-update.  For example:
+
+	#!/bin/sh
+	umask 022
+	sa-update
+
 =head1 OPTIONS
 
 =over 4
