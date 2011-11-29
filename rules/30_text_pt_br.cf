@@ -10,9 +10,9 @@
 # The ASF licenses this file to you under the Apache License, Version 2.0
 # (the "License"); you may not use this file except in compliance with
 # the License.  You may obtain a copy of the License at:
-# 
+#
 #     http://www.apache.org/licenses/LICENSE-2.0
-# 
+#
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -44,9 +44,9 @@ lang pt_BR report  ---- ---------------------- ---------------------------------
 lang pt_BR report _SUMMARY_
 
 lang pt_BR clear_unsafe_report_template
-lang pt_BR unsafe_report A mensagem original não estava em texto puro e pode ser inseguro abrí-la 
+lang pt_BR unsafe_report A mensagem original não estava em texto puro e pode ser inseguro abrí-la
 lang pt_BR unsafe_report em alguns clientes de email; mais especificamente, ela pode conter um vírus
-lang pt_BR unsafe_report ou confirmar que seu endereço de email pode receber spam. 
+lang pt_BR unsafe_report ou confirmar que seu endereço de email pode receber spam.
 lang pt_BR unsafe_report Se quiser visualizar a mensagem, pode ser mais seguro salvá-la em um arquivo
 lang pt_BR unsafe_report e abrí-la com um editor.
 
@@ -64,7 +64,7 @@ lang pt_BR describe AWL Endereço do From: está na auto whitelist
 #lang pt_BR describe ADVANCE_FEE_2 Aparenta ser fraude (Nigerian 419)
 #lang pt_BR describe ADVANCE_FEE_3 Aparenta ser fraude (Nigerian 419)
 #lang pt_BR describe ADVANCE_FEE_4 Aparenta ser fraude (Nigerian 419)
-	
+
 # 20_body_tests.cf
 lang pt_BR describe GTUBE Generic Test for Unsolicited Bulk Email
 lang pt_BR describe TRACKER_ID Mensagem contém um código rastramento
@@ -177,7 +177,7 @@ lang pt_BR describe RDNS_NONE Entregue a uma rede interna por um host sem rDNS
 
 # 20_fake_helo_tests.cf
 lang pt_BR describe HELO_STATIC_HOST Comando HELO enviado usando hostname estatico
-lang pt_BR describe FAKE_HELO_MAIL_COM_DOM Comando HELO enviado usando hostname suspeito (mail.com)
+#lang pt_BR describe FAKE_HELO_MAIL_COM_DOM Comando HELO enviado usando hostname suspeito (mail.com)
 lang pt_BR describe HELO_DYNAMIC_IPADDR Comando HELO enviado usando hostname suspeito (IP addr 1)
 lang pt_BR describe HELO_DYNAMIC_DHCP Comando HELO enviado usando hostname suspeito (DHCP)
 lang pt_BR describe HELO_DYNAMIC_HCC Comando HELO enviado usando hostname suspeito (HCC)
@@ -278,7 +278,7 @@ lang pt_BR describe DATE_IN_PAST_03_06 Date: é 3 a 6 horas antes da data do Rece
 lang pt_BR describe DATE_IN_PAST_06_12 Date: é 6 a 12 horas antes da data Received:
 lang pt_BR describe DATE_IN_PAST_12_24 Date: é 12 a 24 horas antes da data do Received:
 lang pt_BR describe DATE_IN_PAST_24_48 Date: é 24 a 48 horas antes da data do Received:
-lang pt_BR describe DATE_IN_PAST_96_XX Date: é 96 horas ou mais antes da data do Received: 
+lang pt_BR describe DATE_IN_PAST_96_XX Date: é 96 horas ou mais antes da data do Received:
 lang pt_BR describe DATE_IN_FUTURE_03_06 Date: é 3 a 6 horas depois do Received:
 lang pt_BR describe DATE_IN_FUTURE_06_12 Date: é 6 a 12 horas depois do Received:
 lang pt_BR describe DATE_IN_FUTURE_12_24 Date: é 12 a 24 horas depois do Received:
@@ -300,7 +300,7 @@ lang pt_BR describe NO_RDNS_DOTCOM_HELO Comando HELO enviado como um provedor co
 # 20_html_tests.cf
 lang pt_BR describe HTML_SHORT_LINK_IMG_1 O código HTML é muito pequeno, com uma imagem com link
 lang pt_BR describe HTML_SHORT_LINK_IMG_2 O código HTML é muito pequeno, com uma imagem com link
-lang pt_BR describe HTML_SHORT_LINK_IMG_3 O código HTML é muito pequeno, com uma imagem com link 
+lang pt_BR describe HTML_SHORT_LINK_IMG_3 O código HTML é muito pequeno, com uma imagem com link
 lang pt_BR describe HTML_SHORT_CENTER O código HTML é muito curto e usa uma tag center.
 lang pt_BR describe HTML_CHARSET_FARAWAY Um idioma estrangeiro foi declarado no charset do HTML
 lang pt_BR describe HTML_MIME_NO_HTML_TAG A mensagem é em HTML, mas não há uma tag HTML
@@ -557,7 +557,7 @@ lang pt_BR describe SUBJECT_FUZZY_CHEAP Tentativa de esconder palavras no Subjec
 lang pt_BR describe SUBJECT_FUZZY_PENIS Tentativa de esconder palavras no Subject:
 lang pt_BR describe SUBJECT_FUZZY_TION Tentativa de esconder palavras no Subject:
 lang pt_BR describe FUZZY_AFFORDABLE Tentativa de esconder palavras na mensagem
-lang pt_BR describe FUZZY_AMBIEN Tentativa de esconder palavras na mensagem 
+lang pt_BR describe FUZZY_AMBIEN Tentativa de esconder palavras na mensagem
 lang pt_BR describe FUZZY_BILLION Tentativa de esconder palavras na mensagem
 lang pt_BR describe FUZZY_CPILL Tentativa de esconder palavras na mensagem
 lang pt_BR describe FUZZY_CREDIT Tentativa de esconder palavras na mensagem
