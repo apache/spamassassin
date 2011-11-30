@@ -1316,10 +1316,10 @@ sub http_get_lwp {
 
     $response = $ua->request($request);
 
-    printf("http: %sGET %s, %s\n",
+    printf("http: (lwp) %sGET %s, %s\n",
            defined $ims ? 'IMS ' : '',  $url,
-           !$response ? '(no response)' : $response->status_line)
-           if $opt{'verbose'} && $opt{'verbose'} > 1;
+           !$response ? '(no response)' : $response->status_line )
+           if $opt{'verbose'};
 
     if ($response->is_success) {
       return $response->content;
@@ -1444,9 +1444,10 @@ sub http_get {
   if (!$opt{'verbose'}) {
     # silent
   } elsif ($child_stat == 0) {
-    printf("http: GET %s, success\n", $url);
+    printf("http: (%s) GET %s, success\n", $ext_prog, $url);
   } else {
-    printf("http: GET %s, FAILED, status: %s\n", $url, $child_stat);
+    printf("http: (%s) GET %s, FAILED, status: %s\n",
+           $ext_prog, $url, $child_stat);
   }
 
   if ($child_stat == 0) {
