@@ -1,0 +1,15 @@
+# Check old rules - 2011-12-01
+
+
+header          AXB_XMID_DREAMOUT       Message-Id =~ /^DreamMailOutBox\b/
+
+header          AXB_X_RCPTCNT           X-Rcptcnt =~ /gt3/
+
+header          AXB_X_ORG_OLLOL         Organization =~ /\bMicrosoft Outlook\b/
+
+header          AXB_XM_UNKN_NOVER       X-Mailer =~ /^Unknown \(No Version\)^$/
+
+header          AXB_X_RCV_WLOCAL        Received=~ /with LOCAL\;/
+
+
+
