@@ -787,15 +787,16 @@ if can(Mail::SpamAssassin::Conf::feature_bug6558_free)
 endif
 
 # phish/malware 11/2011
-body        __ACH_CANCELLED_01     /\b(?-i:ACH) (?:payment|transfer|transaction) (?:rejected|cancel+ed|declined)/i
-body        __ACH_CANCELLED_02     /(?:rejected|cancel+ed|declined|your) (?-i:ACH) (?:payment|transfer|transaction)/i
+body        __ACH_CANCELLED_01     /\b(?-i:ACH)[-_ ](?:payment|transfer|transaction|was)[-_ ](?:rejected|cancel+ed|declined)/i
+body        __ACH_CANCELLED_02     /(?:rejected|cancel+ed|declined|your)[-_ ](?-i:ACH)[-_ ](?:payment|transfer|transaction)/i
 body        __ACH_CANCELLED_03     /(?:rejected|cancel+ed|declined) direct[-_ ]deposit[-_ ](?:payment|transfer|transaction)/i
+body        __ACH_CANCELLED_04     /\bregarding[-_ ]your[-_ ]direct[-_ ]deposit[-_ ]via[-_ ](?-i:ACH)/i
 
 ifplugin Mail::SpamAssassin::Plugin::MIMEHeader
 	mimeheader   __EXE_ATTACH        Content-Type =~ /\.exe\b/i
-	meta         __ACH_CANCELLED     (__ACH_CANCELLED_01 || __ACH_CANCELLED_02 || __ACH_CANCELLED_03) && (__HAS_ANY_URI || __EXE_ATTACH)
+	meta         __ACH_CANCELLED     (__ACH_CANCELLED_01 || __ACH_CANCELLED_02 || __ACH_CANCELLED_03 || __ACH_CANCELLED_04) && (__HAS_ANY_URI || __EXE_ATTACH)
 else
-	meta         __ACH_CANCELLED     (__ACH_CANCELLED_01 || __ACH_CANCELLED_02 || __ACH_CANCELLED_03) && __HAS_ANY_URI
+	meta         __ACH_CANCELLED     (__ACH_CANCELLED_01 || __ACH_CANCELLED_02 || __ACH_CANCELLED_03 || __ACH_CANCELLED_04) && __HAS_ANY_URI
 endif
 
 meta        ACH_CANCELLED          __ACH_CANCELLED && !__DOS_HAS_LIST_UNSUB
