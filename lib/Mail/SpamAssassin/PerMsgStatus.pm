@@ -1257,15 +1257,22 @@ sub _get_tag_value_for_yesno {
 }
 
 sub _get_tag_value_for_score {
-  #$pad parameter never used.  removed.
-  my ($self) = @_;
+  my ($self, $pad) = @_;
 
   my $score  = sprintf("%2.1f", $self->{score});
   my $rscore = $self->_get_tag_value_for_required_score();
 
   #Change due to bug 6419 to use Util function for consistency with spamd
   #and PerMessageStatus
-  return Mail::SpamAssassin::Util::get_tag_value_for_score($score, $rscore, $self->{is_spam});
+  $score = Mail::SpamAssassin::Util::get_tag_value_for_score($score, $rscore, $self->{is_spam});
+
+  #$pad IS PROVIDED BY THE _SCORE(PAD)_ tag
+  if (defined $pad && $pad =~ /^(0+| +)$/) {
+    my $count = length($1) + 3 - length($score);
+    $score = (substr($pad, 0, $count) . $score) if $count > 0;
+  }
+  return $score;
+
 }
 
 sub _get_tag_value_for_required_score {
