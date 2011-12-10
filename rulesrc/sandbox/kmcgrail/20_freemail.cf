@@ -24,16 +24,20 @@
 ###########################################################################
 
 #TESTING OF RULES FOR https://issues.apache.org/SpamAssassin/show_bug.cgi?id=6487
-# DISABLED 12/8 to see if https://issues.apache.org/SpamAssassin/show_bug.cgi?id=6702 is right about rules
 ifplugin Mail::SpamAssassin::Plugin::FreeMail
- 
-#meta     FREEMAIL_FORGED_FROMDOMAIN FREEMAIL_FROM && HEADER_FROM_DIFFERENT_DOMAINS
-#describe FREEMAIL_FORGED_FROMDOMAIN 2nd level domains in From and EnvelopeFrom freemail headers are different
-#score    FREEMAIL_FORGED_FROMDOMAIN 0.25
 
-#header HEADER_FROM_DIFFERENT_DOMAINS eval:check_equal_from_domains()
-#describe HEADER_FROM_DIFFERENT_DOMAINS From and EnvelopeFrom 2nd level mail domains are different
-#score HEADER_FROM_DIFFERENT_DOMAINS 0.25
+  #This Rule Requires check_equal_from_domains() which only exists in trunk.  Otherwise, updates fails.
+
+  if (version >= 3.400000)
+ 
+    meta     FREEMAIL_FORGED_FROMDOMAIN FREEMAIL_FROM && HEADER_FROM_DIFFERENT_DOMAINS
+    describe FREEMAIL_FORGED_FROMDOMAIN 2nd level domains in From and EnvelopeFrom freemail headers are different
+    score    FREEMAIL_FORGED_FROMDOMAIN 0.25
+
+    header HEADER_FROM_DIFFERENT_DOMAINS eval:check_equal_from_domains()
+    describe HEADER_FROM_DIFFERENT_DOMAINS From and EnvelopeFrom 2nd level mail domains are different
+    score HEADER_FROM_DIFFERENT_DOMAINS 0.25
+  endif
 
 endif
 
