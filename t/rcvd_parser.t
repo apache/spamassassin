@@ -53,16 +53,7 @@ my %data = (
   'from pop.vip.sc5.yahoo.com [216.136.173.10] by localhost with POP3 (fetchmail-5.9.13) for pppppppppp@hhhhhhhhh.net (single-drop); Sun, 22 Feb 2004 20:46:25 -0600 (CST)' =>
   '',
 
-  'from rc3.isc.org (rc3.isc.org [IPv6:2001:4f8:3:bb::25])       (using TLSv1 with cipher DHE-RSA-AES256-SHA (256/256 bits))        (No client certificate requested)  by sf1.isc.org (Postfix) with ESMTP id C986F284EE       for <jm@jmason.org>; Sat, 16 Oct 2004 21:30:02 +0000 (UTC) (envelope-from bind-users-bounce@isc.org)' =>
-  '[ ip=2001:4f8:3:bb::25 rdns=rc3.isc.org helo=rc3.isc.org by=sf1.isc.org ident= envfrom=bind-users-bounce@isc.org id=C986F284EE auth= msa=0 ]',
-
-  'from ausisaps301-dmz.aus.amer.dell.com ([143.166.226.16]) (SquirrelMail authenticated user hoolis); by www.penguintowne.org with HTTP; Mon, 22 Mar 2004 12:54:13 -0600 (CST)' =>
-  '',
-
   'from localhost [127.0.0.1] by localhost with IMAP (fetchmail-6.2.4) for zzzz@localhost (single-drop); Mon, 08 Mar 2004 16:02:50 -0800 (PST)' =>
-  '',
-
-  'from 153.90.199.141        (SquirrelMail authenticated user admin); by web1.cs.montana.edu with HTTP;        Thu, 23 Sep 2004 14:35:29 -0600 (MDT)' =>
   '',
 
   'from 156.56.111.196 by blazing.arsecandle.org (envelope-from <gentoo-announce-return-530-rod=arsecandle.org@lists.gentoo.org>, uid 502) with qmail-scanner-1.24 (clamdscan: 0.80/594. f-prot: 4.4.2/3.14.11.  Clear:RC:0(156.56.111.196):.  Processed in 0.288806 secs); 06 Feb 2005 21:11:38 -0000' =>
@@ -460,6 +451,15 @@ my %data = (
 
   'from  [140.211.11.9] (HELO example.com) by smtp-gw138.mailanyone.net with esmtp (MailAnyone incSMTP Exim) id f138m939701uh17Yipk65; Fri, 04 Dec 2009 09:15:01 -0600' =>
   '[ ip=140.211.11.9 rdns= helo=example.com by=smtp-gw138.mailanyone.net ident= envfrom= id=f138m939701uh17Yipk65 auth= msa=0 ]',
+
+  'from rc3.isc.org (rc3.isc.org [IPv6:2001:4f8:3:bb::25])       (using TLSv1 with cipher DHE-RSA-AES256-SHA (256/256 bits))        (No client certificate requested)  by sf1.isc.org (Postfix) with ESMTP id C986F284EE       for <jm@jmason.org>; Sat, 16 Oct 2004 21:30:02 +0000 (UTC) (envelope-from bind-users-bounce@isc.org)' =>
+  '[ ip=2001:4f8:3:bb::25 rdns=rc3.isc.org helo=rc3.isc.org by=sf1.isc.org ident= envfrom=bind-users-bounce@isc.org id=C986F284EE auth= msa=0 ]',
+
+  'from 153.90.199.141        (SquirrelMail authenticated user admin); by web1.cs.montana.edu with HTTP;        Thu, 23 Sep 2004 14:35:29 -0600 (MDT)' =>
+  '[ ip=153.90.199.141 rdns= helo= by=web1.cs.montana.edu ident= envfrom= id= auth= msa=0 ]',
+
+  'from ausisaps301-dmz.aus.amer.dell.com ([143.166.226.16]) (SquirrelMail authenticated user hoolis); by www.penguintowne.org with HTTP; Mon, 22 Mar 2004 12:54:13 -0600 (CST)' =>
+  '[ ip=143.166.226.16 rdns= helo= by=www.penguintowne.org ident= envfrom= id= auth=Sendmail msa=0 ]'
 
 );
 

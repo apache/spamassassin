@@ -445,12 +445,13 @@ sub parse_received_line {
       $envfrom = $1;
     }
 
-    # bug 3236: ignore Squirrelmail injection steps.
     # from 142.169.110.122 (SquirrelMail authenticated user synapse) by
     # mail.nomis80.org with HTTP; Sat, 3 Apr 2004 10:33:43 -0500 (EST)
     if (/ \(SquirrelMail authenticated user /) {
-      dbg("received-header: ignored SquirrelMail injection: $_");
-      return 0;
+      #REVERTING bug 3236 and implementing re: bug 6549
+      if (/(${IP_ADDRESS}).{10,80}by (\S+) with HTTP/) {
+        $ip = $1; $by = $2; goto enough;
+      }
     }
 
     # AOL WebMail headers
