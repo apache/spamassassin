@@ -82,10 +82,12 @@ header         __RCVD_ZIXMAIL        X-Spam-Relays-Untrusted =~ / helo=smtpout\.
 # Poorer S/O than FROM_MISSPACED but better performance in metas
 header         __FROM_RUNON          From =~ /\S+<\w+/
 
-#meta           FROM_MISSP_SPF_FAIL1  (__FROM_RUNON && !SPF_PASS)
-#tflags         FROM_MISSP_SPF_FAIL1  net
-meta           FROM_MISSP_SPF_FAIL  (__FROM_RUNON && SPF_FAIL)
-tflags         FROM_MISSP_SPF_FAIL  net
+ifplugin Mail::SpamAssassin::Plugin::SPF
+  #meta           FROM_MISSP_SPF_FAIL1  (__FROM_RUNON && !SPF_PASS)
+  #tflags         FROM_MISSP_SPF_FAIL1  net
+  meta           FROM_MISSP_SPF_FAIL  (__FROM_RUNON && SPF_FAIL)
+  tflags         FROM_MISSP_SPF_FAIL  net
+endif
 
 meta           __FROM_MISSP_EH_MATCH __FROM_RUNON && __ENV_AND_HDR_FROM_MATCH
 meta           FROM_MISSP_EH_MATCH   __FROM_MISSP_EH_MATCH && !__RCD_RDNS_MTA_MESSY && !__UNSUB_LINK && !__COMMENT_EXISTS && !__TO___LOWER && !__MIME_QP && !__TO_EQ_FROM_DOM && !__BUGGED_IMG && !__DKIM_EXISTS && !__RCVD_ZIXMAIL
@@ -303,11 +305,13 @@ meta           TO_EQ_FM_HTML_DIRECT  __TO_EQ_FM_HTML_DIRECT && !__HUSH_HUSH
 describe       TO_EQ_FM_HTML_DIRECT  To == From and HTML only, direct-to-MX
 #tflags         TO_EQ_FM_HTML_DIRECT  publish
 
-meta           __TO_EQ_FM_SPF_FAIL  __TO_EQ_FROM && SPF_FAIL
-tflags         __TO_EQ_FM_SPF_FAIL  net
-meta           TO_EQ_FM_SPF_FAIL    __TO_EQ_FM_SPF_FAIL && !__THREADED && !ALL_TRUSTED
-describe       TO_EQ_FM_SPF_FAIL    To == From and external SPF failed
-tflags         TO_EQ_FM_SPF_FAIL    net
+ifplugin Mail::SpamAssassin::Plugin::SPF
+  meta           __TO_EQ_FM_SPF_FAIL  __TO_EQ_FROM && SPF_FAIL
+  tflags         __TO_EQ_FM_SPF_FAIL  net
+  meta           TO_EQ_FM_SPF_FAIL    __TO_EQ_FM_SPF_FAIL && !__THREADED && !ALL_TRUSTED
+  describe       TO_EQ_FM_SPF_FAIL    To == From and external SPF failed
+  tflags         TO_EQ_FM_SPF_FAIL    net
+endif
 
 header         __FROM_ALL_NUMS      From:addr =~ /^\d+@/
 header         __TO_ALL_NUMS        To:addr =~ /^\d+@/
@@ -326,11 +330,13 @@ meta           __TO_EQ_FM_DOM_HTML_IMG  __TO_EQ_FROM_DOM && __HTML_LINK_IMAGE
 meta           TO_EQ_FM_DOM_HTML_IMG    __TO_EQ_FM_DOM_HTML_IMG && !__CTYPE_MULTIPART_ALT && !ALL_TRUSTED && !__MIME_QP && !__IS_EXCH && !__UNSUB_LINK && !__COMMENT_EXISTS && !__FM_TO_ALL_NUMS && !__DKIM_EXISTS && !__HAS_THREAD_INDEX
 describe       TO_EQ_FM_DOM_HTML_IMG    To domain == From domain and HTML image link
 
-meta           __TO_EQ_FM_DOM_SPF_FAIL  __TO_EQ_FROM_DOM && SPF_FAIL
-tflags         __TO_EQ_FM_DOM_SPF_FAIL  net
-meta           TO_EQ_FM_DOM_SPF_FAIL    __TO_EQ_FM_DOM_SPF_FAIL && !__THREADED && !ALL_TRUSTED
-describe       TO_EQ_FM_DOM_SPF_FAIL    To domain == From domain and external SPF failed
-tflags         TO_EQ_FM_DOM_SPF_FAIL    net
+ifplugin Mail::SpamAssassin::Plugin::SPF
+  meta           __TO_EQ_FM_DOM_SPF_FAIL  __TO_EQ_FROM_DOM && SPF_FAIL
+  tflags         __TO_EQ_FM_DOM_SPF_FAIL  net
+  meta           TO_EQ_FM_DOM_SPF_FAIL    __TO_EQ_FM_DOM_SPF_FAIL && !__THREADED && !ALL_TRUSTED
+  describe       TO_EQ_FM_DOM_SPF_FAIL    To domain == From domain and external SPF failed
+  tflags         TO_EQ_FM_DOM_SPF_FAIL    net
+endif
 
 
 # Evaluate ReturnPath and blacklist collisions
@@ -521,10 +527,12 @@ describe        LH_URI_DOM_IN_PATH      Long-host URI having a domain name in th
 uri             URI_1234                m,//1\.2\.3\.4/,
 
 # requested by Benny Pedersen 17 Apr 2010, 10 Aug 2011
-meta            __SPF_FULL_PASS         (SPF_PASS && SPF_HELO_PASS)
-tflags          __SPF_FULL_PASS         net
-meta            __SPF_RANDOM_SENDER     (SPF_HELO_PASS && !SPF_PASS)
-tflags          __SPF_RANDOM_SENDER     net
+ifplugin Mail::SpamAssassin::Plugin::SPF
+  meta            __SPF_FULL_PASS         (SPF_PASS && SPF_HELO_PASS)
+  tflags          __SPF_FULL_PASS         net
+  meta            __SPF_RANDOM_SENDER     (SPF_HELO_PASS && !SPF_PASS)
+  tflags          __SPF_RANDOM_SENDER     net
+endif
 
 # Spam from ZA
 header          CAN_SPAM_HDR            CAN-SPAM_Compliant =~ /./
