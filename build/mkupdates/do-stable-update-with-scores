@@ -1,0 +1,26 @@
+#!/bin/bash
+
+. /etc/profile
+
+PATH=/home/jm/sabuildtools/bin:$PATH
+
+cd /home/updatesd/svn/new-rule-score-gen
+
+#ADDING MORE EXIT STATUS CHECKS FOR BUG 6702
+echo 'Running do-nightly-rescore-example...'
+echo ''
+/home/updatesd/svn/new-rule-score-gen/do-nightly-rescore-example 
+
+RV=$?
+if [ $RV -ne 0 ] ; then 
+	echo "Exit Status $RV is not zero for do-nightly-resorce-example" 
+else
+	echo 'Running mkupdate-with-score...'
+	echo ''
+	/home/updatesd/svn/mkupdates-with-scores/mkupdate-with-score
+	RV=$?
+	if [ $RV -ne 0 ] ; then 
+		echo "Exit Status $RV is not zero for mkupdate-with-score" 
+	fi
+fi
+
