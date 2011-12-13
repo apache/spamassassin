@@ -1188,17 +1188,23 @@ score KB_RATWARE_OUTLOOK_12  0
 score KB_RATWARE_OUTLOOK_16  0
 score KB_RATWARE_BOUNDARY    0
 
+# MAILSPIKE RBL ENABLED FOR SA3.4 and above - BUG 6400
 if (version >= 3.400000)
-  #MAILSPIKE RBL ENABLED FOR SA3.4 and above - BUG 6400
-  score RCVD_IN_MSPIKE_ZBI     3.5
-  score RCVD_IN_MSPIKE_L5      3.1
-  score RCVD_IN_MSPIKE_L4      2.5
-  score RCVD_IN_MSPIKE_L3      1.9
-  score RCVD_IN_MSPIKE_L2      0.7
-  score RCVD_IN_MSPIKE_H2      -1.0
-  score RCVD_IN_MSPIKE_H3      -1.9
-  score RCVD_IN_MSPIKE_H4      -2.0
-  score RCVD_IN_MSPIKE_H5      -2.5
-  score RCVD_IN_MSPIKE_BL      1.0
-  score RCVD_IN_MSPIKE_WL      -1.0
+  # FLOATING SCORES FOR GA - adjust after GA to make L3 - L5 linear
+  # Probably adjust up slightly to make up for the "reuse" imperfection
+# <gen:mutable>
+  score RCVD_IN_MSPIKE_ZBI     2.7
+  score RCVD_IN_MSPIKE_L5      2.5
+  score RCVD_IN_MSPIKE_L4      1.7
+  score RCVD_IN_MSPIKE_L3      0.9
+# </gen:mutable>
+  # FIXED SCORES
+  # TEMPORARILY LOWERED - adjust these higher after GA is done
+  # (pending discussion: Whitelists need scores, but they shouldn't effect the scoring of spam detection rules.)
+  score RCVD_IN_MSPIKE_H3      -0.01
+  score RCVD_IN_MSPIKE_H4      -0.01
+  score RCVD_IN_MSPIKE_H5      -1.0
+  # FIXED SCORES - informational rules, useful only for statistical comparisons
+  score RCVD_IN_MSPIKE_BL      0.01
+  score RCVD_IN_MSPIKE_WL      -0.01
 endif
