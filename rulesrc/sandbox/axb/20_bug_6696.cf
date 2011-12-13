@@ -1,10 +1,10 @@
 
 if (version >= 3.400000)
-ifplugin Mail::SpamAssassin::Plugin::URIDNSBL
+  ifplugin Mail::SpamAssassin::Plugin::URIDNSBL
 
-uridnsbl        URIBL_SBL_A    sbl.spamhaus.org.   A
-body            URIBL_SBL_A    eval:check_uridnsbl('URIBL_SBL_A')
-describe        URIBL_SBL_A    Contains URL's A record listed in the SBL blocklist
-tflags          URIBL_SBL_A    net a nopublish
-
+    uridnsbl        URIBL_SBL_A    sbl.spamhaus.org.   A
+    body            URIBL_SBL_A    eval:check_uridnsbl('URIBL_SBL_A')
+    describe        URIBL_SBL_A    Contains URL's A record listed in the SBL blocklist
+    tflags          URIBL_SBL_A    net a nopublish
+  endif
 endif
