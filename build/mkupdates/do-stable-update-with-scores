@@ -15,12 +15,12 @@ RV=$?
 if [ $RV -ne 0 ] ; then 
 	echo "Exit Status $RV is not zero for do-nightly-resorce-example" 
 else
-	echo 'Running mkupdate-with-score...'
+	echo 'Running mkupdate-with-scores...'
 	echo ''
-	/home/updatesd/svn/mkupdates-with-scores/mkupdate-with-score
+	/home/updatesd/svn/mkupdates-with-scores/mkupdate-with-scores
 	RV=$?
 	if [ $RV -ne 0 ] ; then 
-		echo "Exit Status $RV is not zero for mkupdate-with-score" 
+		echo "Exit Status $RV is not zero for mkupdate-with-scores" 
 	fi
 fi
 
