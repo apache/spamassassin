@@ -1,11 +1,11 @@
 # 2011-12-08
-header  AXB_XM_BULK_SB  X-Mailer =~ /\bSendBlaster\b/
-score   AXB_XM_BULK_SB  Bulk mail tool
+header          AXB_XM_BULK_SB          X-Mailer =~ /SendBlaster/
+describe        AXB_XM_BULK_SB          Bulk mail tool
 
 
 # 2011-11-16
-header   AXB_XRCVD_OWN3D_FW     Received =~ /\bmy\.firewall\b/
-describe AXB_XRCVD_OWN3D_FW     Possibly abused consumer device
+header          AXB_XRCVD_OWN3D_FW     Received =~ /\bmy\.firewall\b/
+describe        AXB_XRCVD_OWN3D_FW     Possibly abused consumer device
 
 
 # 2011-11-01
