@@ -58,8 +58,9 @@ reuse  RCVD_IN_DNSWL_HI
 ## score RCVD_IN_DNSWL_MED		-4
 ## score RCVD_IN_DNSWL_HI		-8
 
-#reuse RCVD_IN_DNSWL_LOW
-#reuse RCVD_IN_DNSWL_MED
-#reuse RCVD_IN_DNSWL_HI
+header	RCVD_IN_DNSWL_BLOCKED	eval:check_rbl_sub('dnswl-firsttrusted', '^127\.0\.\d+\.255$')
+describe RCVD_IN_DNSWL_BLOCKED	ADMINISTRATOR NOTICE: The query to DNSWL was blocked.  See http://wiki.apache.org/spamassassin/DnsBlocklists\#dnsbl-block for more information.
+tflags RCVD_IN_DNSWL_BLOCKED	nice net noautolearn
+reuse  RCVD_IN_DNSWL_BLOCKED
 
 endif
