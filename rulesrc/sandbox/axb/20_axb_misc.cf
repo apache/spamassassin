@@ -22,7 +22,7 @@ describe        AXB_XF_34X_BLAH   Dicey From
 
 
 # 2011-10-18
-header          AXB_FR0M_FAKE    From:name =~ /\@[a-z]{3,15}\.c0m\.?/
+header          AXB_FR0M_FAKE    From:name =~ /\@\w+\.c0m/
 describe        AXB_FR0M_FAKE    Forged domain in name
 
 
