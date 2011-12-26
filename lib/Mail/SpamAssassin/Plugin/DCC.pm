@@ -860,7 +860,7 @@ sub ask_dcc {
       }
       if ($tag eq "dcc:") {
 	# query instead of report if there is an X-DCC header from upstream
-	unshift(@opts, '-Q', 'many') if defined $permsgstatus->{dcc_raw_x_dcc};
+	unshift(@opts, '-Q') if defined $permsgstatus->{dcc_raw_x_dcc};
       } else {
 	# learn or report spam
 	unshift(@opts, '-t', 'many');
