@@ -3,3 +3,6 @@ rawbody __SPOOFED_URL_HOST /<a\s[^>]{0,2048}\bhref=(?:3D)?.?(https?:\/\/?[^\/?>"
 # Still doesn't handle 'legit' tracking redirectors.
 meta	 SPOOFED_URL_HOST	__SPOOFED_URL_HOST && !(__VIA_ML || __SENDER_BOT || __YAHOO_BULK || __UNSUB_LINK || __THREADED || URL_SHORTENER)
 describe SPOOFED_URL_HOST	Has a link whose text is URL with a different host
+
+body COMPUTERS_JEWELRY /Electronics\s{0,5}Computers\s{0,5}Software\s{0,5}Home Essentials\s{0,5}Health & Beauty\s{0,5}Jewelry\s{0,5}More!/i
+describe COMPUTERS_JEWELRY Selling computers, jewelry, etc.
