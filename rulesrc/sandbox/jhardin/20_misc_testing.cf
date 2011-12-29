@@ -807,7 +807,7 @@ else
 	meta         __ACH_CANCELLED     (__ACH_CANCELLED_01 || __ACH_CANCELLED_02 || __ACH_CANCELLED_03 || __ACH_CANCELLED_04) && __HAS_ANY_URI
 endif
 
-meta        ACH_CANCELLED          __ACH_CANCELLED && !__DOS_HAS_LIST_UNSUB
+meta        ACH_CANCELLED          __ACH_CANCELLED
 describe    ACH_CANCELLED          "ACH cancelled" probable malware
 
 
