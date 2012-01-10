@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus-trap darxus grenier hege jarif llanga wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1 zmi; day 2: axb-brasil axb-generic axb-ham axb-ned-phish axb-ned-spam bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus-trap darxus grenier hege jarif llanga wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1 zmi; day 3: axb-brasil axb-generic axb-ham axb-ned-phish axb-ned-spam bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus-trap darxus grenier hege jarif llanga wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1 zmi
+# with results from: day 1: axb-brasil axb-generic axb-ham axb-ned-phish axb-ned-spam bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus-trap darxus grenier hege jarif llanga wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1 zmi; day 2: axb-brasil axb-generic axb-ham axb-ned-phish axb-ned-spam bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix darxus-trap darxus grenier hege jarif llanga wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1 zmi; day 3: bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus-trap darxus grenier hege jarif llanga wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1 zmi
 
 # good enough
 ACH_CANCELLED
@@ -179,9 +179,6 @@ DOS_OE_TO_MX
 DOS_RCVD_IP_TWICE_C
 
 # good enough
-DRUGS_STOCK_MIMEOLE
-
-# good enough
 DYN_RDNS_AND_INLINE_IMAGE
 
 # good enough
@@ -314,9 +311,6 @@ FROM_MISSP_USER
 FROM_UNBAL1
 
 # good enough
-FROM_UNBAL2
-
-# good enough
 FRT_ROLEX
 
 # good enough
@@ -332,9 +326,6 @@ FSL_CTYPE_WIN1251
 FSL_FAKE_GMAIL_RCVD
 
 # good enough
-FSL_HELO_BARE_IP_1
-
-# good enough
 FSL_HELO_DEVICE
 
 # good enough
@@ -342,9 +333,6 @@ FSL_HELO_NON_FQDN_1
 
 # good enough
 FSL_MID_419
-
-# good enough
-FSL_MISSP_REPLYTO
 
 # good enough
 FSL_NEW_HELO_USER
@@ -809,6 +797,9 @@ STOCK_IMG_HDR_FROM
 STOCK_IMG_OUTLOOK
 
 # good enough
+STOX_REPLY_TYPE
+
+# good enough
 STOX_REPLY_TYPE_WITHOUT_QUOTES
 
 # good enough
@@ -905,7 +896,10 @@ TVD_SPACE_RATIO_MINFP
 TVD_VISIT_PHARMA
 
 # good enough
-SERGIO_SUBJECT_PORN009
+AXB_X_AOL_SEZ_S
+
+# good enough
+FRT_PHARMAC
 
 # tflags userconf
 UNPARSEABLE_RELAY
@@ -1004,64 +998,10 @@ XMAILER_MIMEOLE_OL_1ECD5
 XMAILER_MIMEOLE_OL_22B61
 
 # good enough
-XMAILER_MIMEOLE_OL_25340
-
-# good enough
 XMAILER_MIMEOLE_OL_3AC1D
 
 # good enough
-XMAILER_MIMEOLE_OL_4BF4C
-
-# good enough
-XMAILER_MIMEOLE_OL_4EEDB
-
-# good enough
-XMAILER_MIMEOLE_OL_4F240
-
-# good enough
-XMAILER_MIMEOLE_OL_58CB5
-
-# good enough
-XMAILER_MIMEOLE_OL_5B79A
-
-# good enough
-XMAILER_MIMEOLE_OL_6554A
-
-# good enough
-XMAILER_MIMEOLE_OL_812FF
-
-# good enough
 XMAILER_MIMEOLE_OL_8627E
-
-# good enough
-XMAILER_MIMEOLE_OL_B30D1
-
-# good enough
-XMAILER_MIMEOLE_OL_B4B40
-
-# good enough
-XMAILER_MIMEOLE_OL_BC7E6
-
-# good enough
-XMAILER_MIMEOLE_OL_C65FA
-
-# good enough
-XMAILER_MIMEOLE_OL_CAC8F
-
-# good enough
-XMAILER_MIMEOLE_OL_F3B05
-
-# good enough
-XMAILER_MIMEOLE_OL_F475E
-
-# good enough
-XMAILER_MIMEOLE_OL_F6D01
-
-# good enough
-XMAILER_MIMEOLE_OL_FF5C8
-
-# good enough
-X_MAILER_CME_6543_MSN
 
 # tflags net
 __DKIMDOMAIN_IN_DWL_ANY
