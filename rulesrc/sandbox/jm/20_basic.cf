@@ -150,8 +150,8 @@ meta LOTTERY_1      (__DBLCLAIM && __CASHPRZ)
 # ---------------------------------------------------------------------------
 # Testing bit
 
-# quite a few FPs for this one: 
-# 9.1138  39580 of 434286 messages    0.0842  84 of 99747 messages    
+# quite a few FPs for this one:
+# 9.1138  39580 of 434286 messages    0.0842  84 of 99747 messages
 ifplugin Mail::SpamAssassin::Plugin::MIMEHeader
 mimeheader __CTYPE_ONETAB_GIF Content-Type:raw =~ /^image\/gif;\n\tname=\".+?\"$/s
 # mimeheader __CONT_LOC_GIF     Content-Location =~ /\.gif$/
@@ -207,7 +207,8 @@ header HELO_LH_HOME X-Spam-Relays-External =~ /^[^\]]+ helo=\S+\.(?:home|lan) /i
 # interesting template, thanks Jeff
 header TEMPLATE_203_RCVD    Received =~ /from 192.168.0.\d+ \(203-219-/
 
-full    AB_TEST_PDF4    /JVBERi0xLjMKJeLjz9MKMiAwIG9iago8PAovQ3JlYXR/
+# Pointless - obsolete - slow - AXB-2012-01-11
+#full    AB_TEST_PDF4    /JVBERi0xLjMKJeLjz9MKMiAwIG9iago8PAovQ3JlYXR/
 
 # good Message-ID pattern for recent stock spam
 header STOX_BOUND_090909_B Content-Type:raw =~ /;\n boundary=\"------------0[0-9]0[0-9]0[0-9]0[0-9]0[0-9]0[0-9]0[0-9]0[0-9]0[0-9]0[0-9]0[0-9]0[0-9]\"$/s
@@ -272,7 +273,7 @@ header __JM_REACTOR_MID     Message-ID =~ /^<000\S+\@[a-z0-9]+>$/
 #
 # - The dates in the headers are always shown in GMT time, regardless of the
 # local time zone of the bot
-# 
+#
 header __JM_REACTOR_DATE    Date =~ / \+0000$/
 #
 # - The X-Mailer is always Microsoft Outlook Express 6.00.3790.2663 (this doesn't
@@ -294,7 +295,7 @@ body MSHTML_6_00_2900_3199_C  /<META content=3?D?\"MSHTML 6\.00\.2900\.3199\" na
 
 # quick tip from Peter Gervai on the users list:
 # 'Just got a report about a false negative, which was caught by
-# ACommercialSpamFilter by using a rule which had high "points" given to the 
+# ACommercialSpamFilter by using a rule which had high "points" given to the
 # mail because it has contained a reply-to but neither To nor Cc.'
 header __REPLYTO_EXISTS             exists:Reply-To
 meta REPLYTO_WITHOUT_TO_CC     (__REPLYTO_EXISTS && !__TOCC_EXISTS)
