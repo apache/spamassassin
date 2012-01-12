@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus-trap darxus grenier hege jarif llanga wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1 zmi; day 2: axb-brasil axb-generic axb-ham axb-ned-phish axb-ned-spam bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus-trap darxus grenier hege jarif llanga wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1 zmi; day 3: axb-brasil axb-generic axb-ham axb-ned-phish axb-ned-spam bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix darxus-trap darxus grenier hege jarif llanga wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1 zmi
+# with results from: day 1: bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus-trap darxus grenier hege jarif llanga wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1 zmi; day 2: axb-brasil axb-generic axb-ham axb-ned-phish axb-ned-spam bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus-trap darxus grenier hege jarif llanga wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1 zmi; day 3: axb-brasil axb-generic axb-ham axb-ned-phish axb-ned-spam bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus-trap darxus grenier hege jarif llanga wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1 zmi
 
 # good enough
 ACH_CANCELLED
@@ -61,6 +61,9 @@ AXB_AOLIP_CONFUSED
 # good enough
 AXB_HELO_HOME_UN
 
+# good enough
+AXB_X_AOL_SEZ_S
+
 # tflags learn
 BAYES_00
 
@@ -108,9 +111,6 @@ COMPUTERS_JEWELRY
 
 # tflags 
 CORRUPT_FROM_LINE_IN_HDRS
-
-# good enough
-CTYPE_NULL
 
 # good enough
 DATE_IN_FUTURE_96_Q
@@ -194,6 +194,9 @@ END_FUTURE_EMAILS
 ENV_AND_HDR_SPF_MATCH
 
 # good enough
+FAKE_REPLY_A1
+
+# good enough
 FAKE_REPLY_C
 
 # good enough
@@ -246,6 +249,12 @@ FILL_THIS_FORM_LONG
 
 # good enough
 FM_LOTTO_YOU_WON
+
+# good enough
+FM_SCHOOLING
+
+# good enough
+FM_SCHOOL_DIPLOMA
 
 # good enough
 FM_SEX_HELODDDD
@@ -314,6 +323,9 @@ FROM_MISSP_USER
 FROM_UNBAL1
 
 # good enough
+FRT_PHARMAC
+
+# good enough
 FRT_ROLEX
 
 # good enough
@@ -324,6 +336,9 @@ FSL_BOTSPAM_1
 
 # good enough
 FSL_CTYPE_WIN1251
+
+# good enough
+FSL_HELO_BARE_IP_1
 
 # good enough
 FSL_HELO_DEVICE
@@ -896,13 +911,13 @@ TVD_SPACE_RATIO_MINFP
 TVD_VISIT_PHARMA
 
 # good enough
-AXB_X_AOL_SEZ_S
+AXB_XMA_BASP
 
 # good enough
-FAKE_REPLY_A1
+FB_ACHIEVE_BACH
 
 # good enough
-FRT_PHARMAC
+FS_PORN_STAR
 
 # tflags userconf
 UNPARSEABLE_RELAY
