@@ -795,7 +795,7 @@ if can(Mail::SpamAssassin::Conf::feature_bug6558_free)
 endif
 
 # phish/malware 11/2011
-body        __ACH_CANCELLED_01     /\b(?-i:ACH)[-_ ](?:payment|transfer|transaction|was)[-_ ](?:(?:was|is)[-_ ])?(?:rejected|cancel+ed|declined|disabled|not[-_ ]accepted)/i
+body        __ACH_CANCELLED_01     /\b(?:(?-i:ACH)|dividend)[-_ ](?:payment|transfer|transaction|was)[-_ ](?:(?:was|is)[-_ ])?(?:rejected|cancel+ed|declined|disabled|not[-_ ]accepted)/i
 body        __ACH_CANCELLED_02     /(?:rejected|cancel+ed|declined|your)[-_ ](?:(?-i:ACH)|direct[-_ ]deposit)[-_ ](?:payment|transfer|transaction|declin(?:ed|ing))/i
 body        __ACH_CANCELLED_03     /\bwire[-_ ]?(?:payment|transfer|transaction)[-_ ](?:(?:was|is)[-_ ])?(?:rejected|cancel+ed|declined|disabled|not[-_ ]accepted)/i
 body        __ACH_CANCELLED_04     /\bregarding[-_ ]your[-_ ]direct[-_ ]deposit[-_ ]via[-_ ](?-i:ACH)/i
