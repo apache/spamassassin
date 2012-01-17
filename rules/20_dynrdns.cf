@@ -13,9 +13,9 @@
 # The ASF licenses this file to you under the Apache License, Version 2.0
 # (the "License"); you may not use this file except in compliance with
 # the License.  You may obtain a copy of the License at:
-# 
+#
 #     http://www.apache.org/licenses/LICENSE-2.0
-# 
+#
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -196,7 +196,7 @@ header __RDNS_DYNAMIC_TTNET   X-Spam-Relays-External =~ /^[^\]]+ rdns=\S+[\-\.]d
 header __RDNS_DYNAMIC_ASAHI   X-Spam-Relays-External =~ /^[^\]]+ rdns=[a-z][0-9]+\.ppp\.asahi-net\.or\.jp/i
 
 # exceptions (bug 5397):
-header  __RDNS_STATIC         X-Spam-Relays-External =~ /^[^\]]+ rdns=\S*(?:static|fixip)/i
+header  __RDNS_STATIC         X-Spam-Relays-External =~ /^[^\]]+ rdns=\S*(?:fix|static|fixip)/i
 
 # bug 5586:
 header __CGATE_RCVD       Received =~ /by \S+ \(CommuniGate Pro/
