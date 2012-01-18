@@ -28,7 +28,7 @@ ifplugin Mail::SpamAssassin::Plugin::FreeMail
 
   #This Rule Requires check_equal_from_domains() which only exists in trunk.  Otherwise, updates fails.
 
-  if (version >= 3.400000)
+  if (version >= 3.004000)
  
     meta     FREEMAIL_FORGED_FROMDOMAIN FREEMAIL_FROM && HEADER_FROM_DIFFERENT_DOMAINS
     describe FREEMAIL_FORGED_FROMDOMAIN 2nd level domains in From and EnvelopeFrom freemail headers are different
