@@ -1,6 +1,6 @@
 
 # MailSpike is included in SpamAssassin 3.4+
-if (version >= 3.400000)
+if (version >= 3.004000)
 ## Spam sources
 header __RCVD_IN_MSPIKE_B	eval:check_rbl('mspikeb-lastexternal', 'bl.mailspike.net.')
 tflags __RCVD_IN_MSPIKE_B	net
