@@ -27,7 +27,9 @@
 
 #BLOCKING EMAILS ENCODED WITH UTF-7
 header 		__KAM_BLOCK_UTF7_1	Content-Type =~ /charset=(?:unicode-\d+-\d+-)?utf-7/i
+ifplugin Mail::SpamAssassin::Plugin::MIMEHeader
 mimeheader 	__KAM_BLOCK_UTF7_2     	Content-Type =~ /charset=(?:unicode-\d+-\d+-)?utf-7/i
+endif
 
 meta		KAM_BLOCK_UTF7		(__KAM_BLOCK_UTF7_1 + __KAM_BLOCK_UTF7_2 >= 1)
 describe	KAM_BLOCK_UTF7		Poison pill rule to block UTF-7 encoded e-mail
