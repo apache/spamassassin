@@ -946,18 +946,15 @@ sub get_msgid {
     push(@msgid, $msgid);
   }
 
-  # Modified 2012-01-17  per bug 5185 to remove last received from msg_id calculation
-
-  # Use sha1_hex(Date: and top N bytes of body)
+  # Use sha1_hex(Date:, last received: and top N bytes of body)
   # where N is MIN(1024 bytes, 1/2 of body length)
   #
   my $date = $msg->get_header("Date");
   $date = "None" if (!defined $date || $date eq ''); # No Date?
 
-  #Removed per bug 5185
-  #my @rcvd = $msg->get_header("Received");
-  #my $rcvd = $rcvd[$#rcvd];
-  #$rcvd = "None" if (!defined $rcvd || $rcvd eq ''); # No Received?
+  my @rcvd = $msg->get_header("Received");
+  my $rcvd = $rcvd[$#rcvd];
+  $rcvd = "None" if (!defined $rcvd || $rcvd eq ''); # No Received?
 
   # Make a copy since pristine_body is a reference ...
   my $body = join('', $msg->get_pristine_body());
@@ -966,7 +963,7 @@ sub get_msgid {
     substr($body, $keep) = '';
   }
 
-  unshift(@msgid, sha1_hex($date."\000".$body).'@sa_generated');
+  unshift(@msgid, sha1_hex($date."\000".$rcvd."\000".$body).'@sa_generated');
 
   return wantarray ? @msgid : $msgid[0];
 }
