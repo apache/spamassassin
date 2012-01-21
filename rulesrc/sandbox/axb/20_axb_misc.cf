@@ -1,4 +1,10 @@
-#
+
+# 2012-01-21
+header          __X_NO_AUTH             X-No-Auth =~ /unauthenticated sender/
+tflags          __X_NO_AUTH             multiple
+meta            AXB_X_NO_AUTH           (__X_NO_AUTH > 5)
+describe        AXB_X_NO_AUTH           Suspicious not authenticated sender
+
 
 # 2012-01-07
 header          AXB_XMA_BASP            X-Mail-Agent =~ /^BASP21/
