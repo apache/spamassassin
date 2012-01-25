@@ -1,4 +1,10 @@
 
+# 2012-01-25
+ifplugin Mail::SpamAssassin::Plugin::MIMEHeader
+mimeheader      AXB_XMIME_EMBED0        Content-ID =~ /\<embedding\-0\>/
+describe        AXB_XMIME_EMBED0        MimeHeader fingerprint
+endif
+
 # 2012-01-21
 header          __X_NO_AUTH             X-No-Auth =~ /unauthenticated sender/
 tflags          __X_NO_AUTH             multiple
