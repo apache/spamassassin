@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus-trap darxus grenier hege jarif llanga wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1 zmi; day 2: axb-brasil axb-generic axb-ham axb-ned-phish axb-ned-spam bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus-trap darxus grenier hege jarif llanga wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1 zmi; day 3: axb-brasil axb-generic axb-ham axb-ned-phish axb-ned-spam bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus-trap darxus grenier hege jarif llanga wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1 zmi
+# with results from: day 1: bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm danmcdonald darxus-trap darxus grenier hege jarif llanga wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1 zmi; day 2: axb-brasil axb-generic axb-ham axb-ned-phish axb-ned-spam bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus-trap darxus grenier hege jarif llanga wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1 zmi; day 3: axb-brasil axb-generic axb-ham axb-ned-phish axb-ned-spam bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus-trap darxus grenier hege jarif llanga wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1 zmi
 
 # good enough
 ACH_CANCELLED
@@ -125,9 +125,6 @@ DATE_IN_FUTURE_Q_PLUS
 DEAR_BENEFICIARY
 
 # good enough
-DEAR_WINNER
-
-# good enough
 DECEASED_NO_ML
 
 # tflags net
@@ -207,9 +204,6 @@ FB_ACHIEVE_BACH
 
 # good enough
 FB_CIALIS_LEO3
-
-# good enough
-FB_EXTRA_INCHES
 
 # good enough
 FB_GREAT_BEST_SEX
@@ -500,9 +494,6 @@ HTML_CHARSET_FARAWAY
 JM_FAKE_PSMTP_RCVD
 
 # good enough
-KAM_BLOCK_UTF7
-
-# good enough
 KB_DATE_CONTAINS_TAB
 
 # good enough
@@ -562,6 +553,9 @@ MONEY_LOTTERY
 # good enough
 MSOE_MID_WRONG_CASE
 
+# good enough
+NAME_EMAIL_DIFF
+
 # tflags net
 NO_DNS_FOR_FROM
 
@@ -588,9 +582,6 @@ OBFU_JVSCR_ESC
 
 # tflags 
 OBFU_TEXT_ATTACH
-
-# good enough
-PART_CID_STOCK
 
 # tflags net
 PYZOR_CHECK
@@ -950,9 +941,6 @@ TO_NO_BRKTS_HTML_ONLY
 TO_NO_BRKTS_MSFT
 
 # good enough
-TO_NO_BRKTS_NORDNS
-
-# good enough
 TO_NO_BRKTS_NORDNS_HTML
 
 # good enough
@@ -989,16 +977,7 @@ TVD_SUBJ_NUM_OBFU_MINFP
 TVD_VISIT_PHARMA
 
 # good enough
-DEAR_NOBODY
-
-# good enough
-FAKE_REPLY_A1
-
-# good enough
-HDRS_LCASE_IMGONLY
-
-# good enough
-NAME_EMAIL_DIFF
+FSL_MID_419
 
 # tflags userconf
 UNPARSEABLE_RELAY
