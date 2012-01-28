@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm danmcdonald darxus-trap darxus grenier hege jarif llanga wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1 zmi; day 2: axb-brasil axb-generic axb-ham axb-ned-phish axb-ned-spam bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus-trap darxus grenier hege jarif llanga wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1 zmi; day 3: axb-brasil axb-generic axb-ham axb-ned-phish axb-ned-spam bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus-trap darxus grenier hege jarif llanga wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1 zmi
+# with results from: day 1: bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm danmcdonald darxus-trap darxus grenier hege jarif llanga wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1 zmi; day 2: axb-brasil axb-generic axb-ham axb-ned-phish axb-ned-spam bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm danmcdonald darxus-trap darxus grenier hege jarif llanga wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1 zmi; day 3: axb-brasil axb-generic axb-ham axb-ned-phish axb-ned-spam bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus-trap darxus grenier hege jarif llanga wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1 zmi
 
 # good enough
 ACH_CANCELLED
@@ -365,13 +365,13 @@ FSL_HELO_DEVICE
 FSL_HELO_NON_FQDN_1
 
 # good enough
+FSL_MID_419
+
+# good enough
 FSL_MISSP_REPLYTO
 
 # good enough
 FSL_NEW_HELO_USER
-
-# good enough
-FSL_THIS_IS_ADV
 
 # good enough
 FSL_UA
@@ -552,9 +552,6 @@ MONEY_LOTTERY
 
 # good enough
 MSOE_MID_WRONG_CASE
-
-# good enough
-NAME_EMAIL_DIFF
 
 # tflags net
 NO_DNS_FOR_FROM
@@ -977,7 +974,13 @@ TVD_SUBJ_NUM_OBFU_MINFP
 TVD_VISIT_PHARMA
 
 # good enough
-FSL_MID_419
+DEAR_NOBODY
+
+# good enough
+HDRS_LCASE_IMGONLY
+
+# good enough
+TO_NO_BRKTS_NORDNS
 
 # tflags userconf
 UNPARSEABLE_RELAY
@@ -1030,9 +1033,6 @@ URIBL_SC_SURBL
 # tflags net
 URIBL_WS_SURBL
 
-# good enough
-URI_DEOBFU_INSTR
-
 # tflags userconf
 URI_NOVOWEL
 
@@ -1082,22 +1082,16 @@ XMAILER_MIMEOLE_OL_09BB4
 XMAILER_MIMEOLE_OL_1ECD5
 
 # good enough
-XMAILER_MIMEOLE_OL_22B61
+XMAILER_MIMEOLE_OL_20C99
 
 # good enough
-XMAILER_MIMEOLE_OL_25340
+XMAILER_MIMEOLE_OL_22B61
 
 # good enough
 XMAILER_MIMEOLE_OL_3AC1D
 
 # good enough
 XMAILER_MIMEOLE_OL_3D61D
-
-# good enough
-XMAILER_MIMEOLE_OL_4F240
-
-# good enough
-XMAILER_MIMEOLE_OL_5B79A
 
 # good enough
 XMAILER_MIMEOLE_OL_6554A
@@ -1107,12 +1101,6 @@ XMAILER_MIMEOLE_OL_83BF7
 
 # good enough
 XMAILER_MIMEOLE_OL_8627E
-
-# good enough
-XMAILER_MIMEOLE_OL_B4B40
-
-# good enough
-XMAILER_MIMEOLE_OL_F475E
 
 # tflags net
 __DKIMDOMAIN_IN_DWL_ANY
