@@ -1,5 +1,5 @@
 
-## 
+##
 # 2012-01-25
 ifplugin Mail::SpamAssassin::Plugin::MIMEHeader
 mimeheader      AXB_XMIME_EMBED0        Content-ID =~ /\<embedding\-0\>/
@@ -17,9 +17,6 @@ describe        AXB_X_NO_AUTH           Suspicious not authenticated sender
 header          AXB_XMA_BASP            X-Mail-Agent =~ /^BASP21/
 describe        AXB_XMA_BASP            Mailer fingerprint
 
-# 2012-01-05
-header          AXB_X_AOL_SEZ_G         x-aol-global-disposition =~ /^G$/
-describe        AXB_X_AOL_SEZ_G         AOL said this is G
 
 # 2012-01-04
 header          AXB_X_AOL_SEZ_S         x-aol-global-disposition =~ /^S$/
