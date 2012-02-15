@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-fraud-autofilter axb-fraud-feeds axb-generic axb-ham axb-ned-phish axb-ned-spam axb-phish bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm danmcdonald darxus-trap darxus grenier hege jarif llanga wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1 zmi; day 2: axb-fraud-autofilter axb-fraud-jwein axb-generic axb-ham axb-ned-phish axb-ned-spam axb-phish bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm danmcdonald darxus-trap darxus grenier hege jarif llanga wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1 zmi; day 3: bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm danmcdonald darxus-trap darxus grenier hege jarif llanga wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1 zmi
+# with results from: day 1: axb-fraud-autofilter axb-fraud-feeds axb-generic axb-ham axb-ned-phish axb-ned-spam axb-phish bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm danmcdonald darxus grenier jarif llanga wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1 zmi; day 2: axb-fraud-autofilter axb-fraud-feeds axb-generic axb-ham axb-ned-phish axb-ned-spam axb-phish bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm danmcdonald darxus grenier hege jarif llanga wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1 zmi; day 3: axb-fraud-autofilter axb-fraud-feeds axb-generic axb-ham axb-ned-phish axb-ned-spam axb-phish bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm danmcdonald darxus-trap darxus grenier hege jarif llanga wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1 zmi
 
 # good enough
 ACH_CANCELLED
@@ -128,6 +128,9 @@ DATE_IN_FUTURE_Q_PLUS
 DEAR_BENEFICIARY
 
 # good enough
+DEAR_WINNER
+
+# good enough
 DECEASED_NO_ML
 
 # tflags net
@@ -179,9 +182,6 @@ DNS_FROM_RFC_DSN
 DOS_ANAL_SPAM_MAILER
 
 # good enough
-DOS_OE_TO_MX
-
-# good enough
 DOS_RCVD_IP_TWICE_C
 
 # good enough
@@ -221,6 +221,9 @@ FB_QUALITY_REPLICA
 FB_REPLICA_ROLEX
 
 # good enough
+FB_SPACED_FREE
+
+# good enough
 FB_STAMINA_IN_BED
 
 # good enough
@@ -246,6 +249,12 @@ FH_HOST_EQ_DYNAMICIP
 
 # tflags 
 FILL_THIS_FORM
+
+# good enough
+FILL_THIS_FORM_FRAUD_PHISH
+
+# good enough
+FILL_THIS_FORM_LOAN
 
 # good enough
 FILL_THIS_FORM_LONG
@@ -455,6 +464,9 @@ HELO_NO_DOMAIN
 HELO_OEM
 
 # good enough
+HK_LOTTO
+
+# good enough
 HK_LOTTO_NAME
 
 # good enough
@@ -484,9 +496,6 @@ HK_SCAM_N2
 # good enough
 HK_SCAM_N3
 
-# good enough
-HK_SCAM_S23
-
 # tflags userconf
 HTML_CHARSET_FARAWAY
 
@@ -498,9 +507,6 @@ KB_DATE_CONTAINS_TAB
 
 # good enough
 KB_FAKED_THE_BAT
-
-# good enough
-KB_FORGED_MOZ4
 
 # good enough
 KB_RATWARE_MSGID
@@ -809,6 +815,9 @@ RCVD_IN_SORBS_ZOMBIE
 RCVD_IN_XBL
 
 # good enough
+RDNS_LOCALHOST
+
+# good enough
 RISK_FREE
 
 # good enough
@@ -967,6 +976,84 @@ TVD_SUBJ_NUM_OBFU_MINFP
 # good enough
 TVD_VISIT_PHARMA
 
+# good enough
+EMRCP
+
+# good enough
+FM_LOTTO_MONEY
+
+# good enough
+FROM_WSP_LEAD
+
+# good enough
+FSL_RCVD_USER
+
+# good enough
+HK_NAME_FM_FROM
+
+# good enough
+HK_NAME_FM_MR_MRS
+
+# good enough
+HK_NAME_FROM
+
+# good enough
+HK_NAME_MR_MRS
+
+# good enough
+HK_SCAM_N12
+
+# good enough
+HK_SCAM_N13
+
+# good enough
+HK_SCAM_N4
+
+# good enough
+HK_SCAM_N8
+
+# good enough
+HK_SCAM_S15
+
+# good enough
+HK_SCAM_S25
+
+# good enough
+HK_SCAM_S7
+
+# good enough
+HK_SPAMMY_FILENAME
+
+# good enough
+LOTTO_AGENT_FM
+
+# good enough
+LOTTO_AGENT_RPLY
+
+# good enough
+LOTTO_DEPT
+
+# good enough
+LOTTO_URI
+
+# good enough
+MONEY_FORM
+
+# good enough
+MONEY_PERCENT
+
+# good enough
+MSGID_WSP_TRAIL
+
+# good enough
+SHARE_50_50
+
+# good enough
+TVD_PH_BODY_META
+
+# good enough
+URI_DEOBFU_INSTR
+
 # tflags userconf
 UNPARSEABLE_RELAY
 
@@ -1077,9 +1164,6 @@ XMAILER_MIMEOLE_OL_4F240
 
 # good enough
 XMAILER_MIMEOLE_OL_8627E
-
-# good enough
-XMAILER_MIMEOLE_OL_91287
 
 # tflags net
 __DKIMDOMAIN_IN_DWL_ANY
