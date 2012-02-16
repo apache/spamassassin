@@ -1,0 +1,24 @@
+# "I hereby license them under the WTFPL which is GPL and Apache license
+# compatible." -- Thomas Rutter/neon_overload to SA-users, 2012-02-16 00:43 UTC
+# http://old.nabble.com/Some-rules-I-created-for-suspicious-Javascript-practices-tt33333130.html
+# 
+# WTFPL 2.0 basically says "rename things and they're essentially public domain"
+# Rules have been renamed and slightly tweaked
+
+rawbody  JS_EXTRA_UNESCAPE	/[+=]\s{0,9}unescape\s{0,9}\(\s{0,9}["']%(?i:6[1-9A-F]|7[0-9A])/
+describe JS_EXTRA_UNESCAPE	JavaScript: Unnecessary URI escaping
+#score LOCAL_UNNECESSARY_UNESCAPE 1.7
+
+rawbody  JS_EXTRA_CONCAT	/[+=]\s{0,9}["'][a-z0-9]{1,64}["']\+["'][a-z0-9]{1,64}["']/i
+describe JS_EXTRA_CONCAT	JavaScript: Unnecessary string concatination
+#score LOCAL_UNNECESSARY_STRCONCAT 0.5
+
+rawbody  JS_FROMCHARCODE	/=\s{0,9}String\.fromCharCode\b/
+describe JS_FROMCHARCODE	JavaScript: function String.fromCharCode
+#score LOCAL_HIDE_FROMCHARCODE 0.7
+
+#rawbody  LOCAL_HIDE_URL	/"h"\+"tt"\+"p:"\+"\/"/
+rawbody  JS_CONCATINATED_HTTP	m@(?!http:/)h["'+]{0,3}(?:t["'+]{0,3}){2}p['"+]{0,3}:['"+]{0,3}/@
+describe JS_CONCATINATED_HTTP	Contains concatenated URI like "htt"+"p://..."
+#score LOCAL_HIDE_URL 0.7
+
