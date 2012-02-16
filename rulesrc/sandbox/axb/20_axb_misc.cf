@@ -1,5 +1,10 @@
 
 ##
+
+# 2012-02-16
+body            AXB_BODYMAIL_SBL112884  /\@yeah\.net\b/
+describe        AXB_BODYMAIL_SBL112884  Spammer dropbox SBL112884
+
 # 2012-01-25
 ifplugin Mail::SpamAssassin::Plugin::MIMEHeader
 mimeheader      AXB_XMIME_EMBED0        Content-ID =~ /\<embedding\-0\>/
