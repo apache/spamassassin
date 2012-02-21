@@ -790,7 +790,7 @@ www.example.sk	^http://www.example.sk$
 www.example.sl	^http://www.example.sl$
 www.example.sm	^http://www.example.sm$
 www.example.sn	^http://www.example.sn$
-www.example.so	!^http://www.example.so$
+www.example.so	^http://www.example.so$
 www.example.sr	^http://www.example.sr$
 www.example.st	^http://www.example.st$
 www.example.su	^http://www.example.su$
