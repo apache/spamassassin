@@ -487,7 +487,7 @@ example.pg	^http://example.pg$
 example.ph	^http://example.ph$
 example.pk	^http://example.pk$
 example.pl	^http://example.pl$
-example.pm	!^http://example.pm$
+example.pm	^http://example.pm$
 example.pn	^http://example.pn$
 example.pr	^http://example.pr$
 example.pro	^http://example.pro$
@@ -514,7 +514,7 @@ example.sk	^http://example.sk$
 example.sl	^http://example.sl$
 example.sm	^http://example.sm$
 example.sn	^http://example.sn$
-example.so	!^http://example.so$
+example.so	^http://example.so$
 example.sr	^http://example.sr$
 example.st	^http://example.st$
 example.su	^http://example.su$
@@ -557,7 +557,7 @@ example.vu	^http://example.vu$
 example.wf	^http://example.wf$
 example.ws	^http://example.ws$
 example.ye	^http://example.ye$
-example.yt	!^http://example.yt$
+example.yt	^http://example.yt$
 example.yu	!^http://example.yu$
 example.za	^http://example.za$
 example.zm	^http://example.zm$
