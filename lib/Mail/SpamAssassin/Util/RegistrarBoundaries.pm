@@ -77,12 +77,12 @@ foreach (qw/
 $VALID_TLDS_RE = qr/
   (?=[abcdefghijklmnopqrstuvwyz])
   (?:a(?:e(?:ro)?|r(?:pa)?|s(?:ia)?|[cdfgilmnoqtuwxz])|b(?:iz?|[abdefghjmnorstwyz])
-    |c(?:at?|o(?:m|op)?|[cdfghiklmnruvxyz])|d[ejkmoz]|e(?:[cegrst]|d?u)|f[ijkmor]
-    |g(?:[adefghilmnpqrstuwy]|ov)|h[kmnrtu]|i(?:n(?:fo|t)?|[delmoqrst])|j(?:o(?:bs)?|[emp])
-    |k[eghimnprwyz]|l[abcikrstuvy]|m(?:o(?:bi)?|u(?:seum)?|[acdeghkmnpqrstvwxyz]|i?l)
-    |n(?:a(?:me)?|et?|[cfgilopruz])|o(?:m|rg)|p(?:ro?|[aefghklnstwy])|r[eosuw]
-    |s[abcdeghiklmnrtuvyz]|t(?:r(?:avel)?|[cdfghjkmnoptvwz]|e?l)|u[agksyz]
-    |v[aceginu]|w[fs]|z[amw]|qa|ye
+  |c(?:at?|o(?:m|op)?|[cdfghiklmnruvxyz])|d[ejkmoz]|e(?:[cegrst]|d?u)|f[ijkmor]
+  |g(?:[adefghilmnpqrstuwy]|ov)|h[kmnrtu]|i(?:n(?:fo|t)?|[delmoqrst])|j(?:o(?:bs)?|[emp])
+  |k[eghimnprwyz]|l[abcikrstuvy]|m(?:o(?:bi)?|u(?:seum)?|[acdeghkmnpqrstvwxyz]|i?l)
+  |n(?:a(?:me)?|et?|[cfgilopruz])|o(?:m|rg)|p(?:ro?|[aefghklmnstwy])|r[eosuw]
+  |s[abcdeghiklmnortuvyz]|t(?:r(?:avel)?|[cdfghjkmnoptvwz]|e?l)|u[agksyz]
+  |v[aceginu]|w[fs]|y[et]|z[amw]|qa)
   )/ix;
 
 # Two-Level TLDs
