@@ -763,7 +763,7 @@ www.example.pg	^http://www.example.pg$
 www.example.ph	^http://www.example.ph$
 www.example.pk	^http://www.example.pk$
 www.example.pl	^http://www.example.pl$
-www.example.pm	!^http://www.example.pm$
+www.example.pm	^http://www.example.pm$
 www.example.pn	^http://www.example.pn$
 www.example.pr	^http://www.example.pr$
 www.example.pro	^http://www.example.pro$
@@ -833,7 +833,7 @@ www.example.vu	^http://www.example.vu$
 www.example.wf	^http://www.example.wf$
 www.example.ws	^http://www.example.ws$
 www.example.ye	^http://www.example.ye$
-www.example.yt	!^http://www.example.yt$
+www.example.yt	^http://www.example.yt$
 www.example.yu	!^http://www.example.yu$
 www.example.za	^http://www.example.za$
 www.example.zm	^http://www.example.zm$
