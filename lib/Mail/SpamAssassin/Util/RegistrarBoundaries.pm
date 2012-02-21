@@ -44,6 +44,12 @@ use vars qw (
 # as of 2008-02-08, e.g. http://en.wikipedia.org/wiki/.so_%28domain_name%29
 #     bv gb pm sj so um yt
 #
+# As per bug #6734
+# Re-enable .so .pm .yt in 2012-02-21
+#   http://www.afnic.fr/fr/produits-et-services/autres-domaines-de-premier-niveau/
+
+#   http://www.iana.org/domains/root/db/so.html
+#
 # Remember to also change regexp below when updating!
 
 foreach (qw/
@@ -55,10 +61,10 @@ foreach (qw/
   in info int io iq ir is it je jm jo jobs jp ke kg kh ki km kn kp kr kw
   ky kz la lb lc li lk lr ls lt lu lv ly ma mc md me mg mh mil mk ml mm
   mn mo mobi mp mq mr ms mt mu museum mv mw mx my mz na name nc ne net
-  nf ng ni nl no np nr nu nz om org pa pe pf pg ph pk pl pn pr pro ps
-  pt pw py qa re ro rs ru rw sa sb sc sd se sg sh si sk sl sm sn
+  nf ng ni nl no np nr nu nz om org pa pe pf pg ph pk pl pm pn pr pro ps
+  pt pw py qa re ro rs ru rw sa sb sc sd se sg sh si sk sl sm sn so
   sr st su sv sy sz tc td tel tf tg th tj tk tl tm tn to tp tr travel tt
-  tv tw tz ua ug uk us uy uz va vc ve vg vi vn vu wf ws ye za
+  tv tw tz ua ug uk us uy uz va vc ve vg vi vn vu wf ws ye yt za
   zm zw
   /) {
   $VALID_TLDS{$_} = 1;
