@@ -82,7 +82,7 @@ $VALID_TLDS_RE = qr/
   |k[eghimnprwyz]|l[abcikrstuvy]|m(?:o(?:bi)?|u(?:seum)?|[acdeghkmnpqrstvwxyz]|i?l)
   |n(?:a(?:me)?|et?|[cfgilopruz])|o(?:m|rg)|p(?:ro?|[aefghklmnstwy])|r[eosuw]
   |s[abcdeghiklmnortuvyz]|t(?:r(?:avel)?|[cdfghjkmnoptvwz]|e?l)|u[agksyz]
-  |v[aceginu]|w[fs]|y[et]|z[amw]|qa)
+  |v[aceginu]|w[fs]|y[et]|z[amw]|qa
   )/ix;
 
 # Two-Level TLDs
