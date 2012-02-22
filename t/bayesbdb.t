@@ -68,7 +68,7 @@ my($msgid,$msgid_hdr) = getimpl->get_msgid($mail);
 
 # $msgid is the generated hash messageid
 # $msgid_hdr is the Message-Id header
-ok($msgid eq 'ce33e4a8bc5798c65428d6018380bae346c7c126@sa_generated')
+ok($msgid eq '4cf5cc4d53b22e94d3e55932a606b18641a54041@sa_generated')
     or warn "got: [$msgid]";
 ok($msgid_hdr eq '9PS291LhupY');
 
