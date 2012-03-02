@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-generic axb-ned-spam bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm danmcdonald darxus grenier hege jarif llanga wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1 zmi; day 2: axb-fraud-autofilter axb-fraud-feeds axb-generic axb-ham axb-ned-phish axb-ned-spam axb-phish bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm danmcdonald darxus grenier hege jarif llanga wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1 zmi; day 3: axb-fraud-feeds axb-generic axb-ham axb-ned-phish axb-ned-spam axb-phish bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm danmcdonald darxus grenier hege jarif llanga wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1 zmi
+# with results from: day 1: axb-generic axb-ham axb-ned-phish axb-ned-spam axb-phish bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm danmcdonald darxus grenier hege jarif llanga wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1 zmi; day 2: axb-generic axb-ned-spam bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm danmcdonald darxus grenier hege jarif llanga wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1 zmi; day 3: axb-fraud-autofilter axb-fraud-feeds axb-generic axb-ham axb-ned-phish axb-ned-spam axb-phish bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm danmcdonald darxus grenier hege jarif llanga wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1 zmi
 
 # good enough
 ACH_CANCELLED
@@ -63,6 +63,12 @@ AXB_BODYMAIL_SBL112884
 
 # good enough
 AXB_HELO_HOME_UN
+
+# good enough
+AXB_XMA_BASP
+
+# good enough
+AXB_XRCVD_OWN3D_FW
 
 # good enough
 AXB_X_AOL_SEZ_S
@@ -269,9 +275,6 @@ FH_HOST_EQ_DYNAMICIP
 FILL_THIS_FORM
 
 # good enough
-FILL_THIS_FORM_FRAUD_PHISH
-
-# good enough
 FILL_THIS_FORM_LOAN
 
 # good enough
@@ -383,6 +386,9 @@ FSL_HELO_BARE_IP_1
 FSL_HELO_DEVICE
 
 # good enough
+FSL_HELO_FIREWALL
+
+# good enough
 FSL_HELO_NON_FQDN_1
 
 # good enough
@@ -485,9 +491,6 @@ HK_LOTTO
 HK_LOTTO_NAME
 
 # good enough
-HK_LOTTO_SUBJECT
-
-# good enough
 HK_NAME_FM_FROM
 
 # good enough
@@ -522,6 +525,12 @@ HK_SCAM_N3
 
 # good enough
 HK_SCAM_N8
+
+# good enough
+HK_SPAMMY_FILENAME
+
+# good enough
+HTML_ATTACH
 
 # tflags userconf
 HTML_CHARSET_FARAWAY
@@ -615,9 +624,6 @@ NULL_IN_BODY
 
 # good enough
 OBFU_ATTACH_MISSP
-
-# good enough
-OBFU_HTML_ATTACH
 
 # tflags 
 OBFU_JVSCR_ESC
@@ -1025,16 +1031,10 @@ TVD_SUBJ_NUM_OBFU_MINFP
 TVD_VISIT_PHARMA
 
 # good enough
-AXB_XMA_BASP
+HK_SCAM_N13
 
 # good enough
-AXB_XRCVD_OWN3D_FW
-
-# good enough
-FSL_HELO_FIREWALL
-
-# good enough
-HK_SPAMMY_FILENAME
+SUBJ_OBFU_PUNCT_FEW
 
 # tflags userconf
 UNPARSEABLE_RELAY
@@ -1146,6 +1146,9 @@ XMAILER_MIMEOLE_OL_20C99
 
 # good enough
 XMAILER_MIMEOLE_OL_22B61
+
+# good enough
+XMAILER_MIMEOLE_OL_25340
 
 # good enough
 XMAILER_MIMEOLE_OL_3857F
