@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-generic axb-ham axb-ned-phish axb-ned-spam axb-phish bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm danmcdonald darxus grenier hege jarif llanga wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1 zmi; day 2: axb-generic axb-ned-spam bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm danmcdonald darxus grenier hege jarif llanga wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1 zmi; day 3: axb-fraud-autofilter axb-fraud-feeds axb-generic axb-ham axb-ned-phish axb-ned-spam axb-phish bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm danmcdonald darxus grenier hege jarif llanga wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1 zmi
+# with results from: day 1: axb-generic axb-ham axb-ned-phish axb-ned-spam axb-phish bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm danmcdonald darxus grenier hege jarif llanga wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1 zmi; day 2: axb-generic axb-ham axb-ned-phish axb-ned-spam axb-phish bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm danmcdonald darxus grenier hege jarif llanga wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1 zmi; day 3: axb-generic axb-ned-spam bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm danmcdonald darxus grenier hege jarif llanga wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1 zmi
 
 # good enough
 ACH_CANCELLED
@@ -106,6 +106,9 @@ BAYES_95
 # tflags learn
 BAYES_99
 
+# good enough
+BUG6152_INVALID_DATE_TZ_ABSURD
+
 # tflags userconf
 CHARSET_FARAWAY
 
@@ -138,9 +141,6 @@ DEAR_BENEFICIARY
 
 # good enough
 DEAR_WINNER
-
-# good enough
-DECEASED_NO_ML
 
 # tflags net
 DIGEST_MULTIPLE
@@ -407,6 +407,9 @@ FSL_UA
 FSL_XM_419
 
 # good enough
+FS_ABIGGER
+
+# good enough
 FS_OBFU_PRMCY
 
 # good enough
@@ -529,9 +532,6 @@ HK_SCAM_N8
 # good enough
 HK_SPAMMY_FILENAME
 
-# good enough
-HTML_ATTACH
-
 # tflags userconf
 HTML_CHARSET_FARAWAY
 
@@ -624,6 +624,9 @@ NULL_IN_BODY
 
 # good enough
 OBFU_ATTACH_MISSP
+
+# good enough
+OBFU_HTML_ATTACH
 
 # tflags 
 OBFU_JVSCR_ESC
@@ -1031,7 +1034,16 @@ TVD_SUBJ_NUM_OBFU_MINFP
 TVD_VISIT_PHARMA
 
 # good enough
-HK_SCAM_N13
+DOS_RCVD_IP_TWICE_B
+
+# good enough
+FM_LOTTO_MONEY
+
+# good enough
+KB_FORGED_MOZ4
+
+# good enough
+SHARE_50_50
 
 # good enough
 SUBJ_OBFU_PUNCT_FEW
