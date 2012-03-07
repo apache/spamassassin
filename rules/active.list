@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-generic axb-ham axb-ned-phish axb-ned-spam axb-phish bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm danmcdonald darxus grenier hege jarif llanga wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1 zmi; day 2: axb-generic axb-ham axb-ned-phish axb-ned-spam axb-phish bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm danmcdonald darxus grenier hege jarif llanga wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1 zmi; day 3: axb-generic axb-ned-spam bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm danmcdonald darxus grenier hege jarif llanga wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1 zmi
+# with results from: day 1: axb-generic axb-ned-spam bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm danmcdonald darxus grenier hege jarif llanga wt-en1 wt-en3 wt-jp1 zmi; day 2: axb-generic axb-ned-spam bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm danmcdonald darxus grenier hege jarif llanga wt-ackbar wt-en1 wt-en2-flh wt-en3 wt-hamtrap wt-homeone wt-jp1 zmi; day 3: axb-ham axb-ned-phish axb-phish bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm danmcdonald darxus grenier hege jarif llanga wt-en1 wt-en3 wt-jp1
 
 # good enough
 ACH_CANCELLED
@@ -56,19 +56,10 @@ ALL_TRUSTED
 ANY_PILL_PRICE
 
 # good enough
-AXB_AOLIP_CONFUSED
-
-# good enough
 AXB_BODYMAIL_SBL112884
 
 # good enough
 AXB_HELO_HOME_UN
-
-# good enough
-AXB_XMA_BASP
-
-# good enough
-AXB_XRCVD_OWN3D_FW
 
 # good enough
 AXB_X_AOL_SEZ_S
@@ -105,9 +96,6 @@ BAYES_95
 
 # tflags learn
 BAYES_99
-
-# good enough
-BUG6152_INVALID_DATE_TZ_ABSURD
 
 # tflags userconf
 CHARSET_FARAWAY
@@ -230,12 +218,6 @@ FB_EXTRA_INCHES
 FB_GREAT_BEST_SEX
 
 # good enough
-FB_IMAGIRL
-
-# good enough
-FB_NOT_SEXUAL
-
-# good enough
 FB_QUALITY_REPLICA
 
 # good enough
@@ -246,9 +228,6 @@ FB_STAMINA_IN_BED
 
 # good enough
 FH_FAKE_RCVD_LINE
-
-# good enough
-FH_FAKE_RCVD_LINE_B
 
 # good enough
 FH_FROM_CASH
@@ -273,6 +252,9 @@ FH_HOST_EQ_DYNAMICIP
 
 # tflags 
 FILL_THIS_FORM
+
+# good enough
+FILL_THIS_FORM_FRAUD_PHISH
 
 # good enough
 FILL_THIS_FORM_LOAN
@@ -306,9 +288,6 @@ FORM_FRAUD_5
 
 # tflags userconf
 FRAGMENTED_MESSAGE
-
-# good enough
-FRM_SILVER_GOLD
 
 # good enough
 FROM_12LTRDOM
@@ -359,15 +338,6 @@ FROM_MISSP_URI
 FROM_MISSP_USER
 
 # good enough
-FRT_ERECTION
-
-# good enough
-FRT_HEALTH
-
-# good enough
-FRT_PHARMAC
-
-# good enough
 FR_DOT_FEVER_5
 
 # good enough
@@ -377,16 +347,10 @@ FSL_BOTSPAM_1
 FSL_CTYPE_WIN1251
 
 # good enough
-FSL_FAKE_HOTMAIL_RVCD
-
-# good enough
 FSL_HELO_BARE_IP_1
 
 # good enough
 FSL_HELO_DEVICE
-
-# good enough
-FSL_HELO_FIREWALL
 
 # good enough
 FSL_HELO_NON_FQDN_1
@@ -408,9 +372,6 @@ FSL_XM_419
 
 # good enough
 FS_ABIGGER
-
-# good enough
-FS_OBFU_PRMCY
 
 # good enough
 FS_PHARMASUB2
@@ -469,9 +430,6 @@ HASHCASH_2SPEND
 # tflags userconf
 HASHCASH_HIGH
 
-# good enough
-HDRS_LCASE_1K
-
 # tflags userconf
 HEAD_LONG
 
@@ -494,13 +452,13 @@ HK_LOTTO
 HK_LOTTO_NAME
 
 # good enough
+HK_NAME_DRUGS
+
+# good enough
 HK_NAME_FM_FROM
 
 # good enough
 HK_NAME_FREE
-
-# good enough
-HK_NAME_FROM
 
 # good enough
 HK_NAME_MR_MRS
@@ -515,9 +473,6 @@ HK_RANDOM_ENVFROM
 HK_RANDOM_FROM
 
 # good enough
-HK_RANDOM_REPLYTO_NAME
-
-# good enough
 HK_SCAM_N15
 
 # good enough
@@ -528,9 +483,6 @@ HK_SCAM_N3
 
 # good enough
 HK_SCAM_N8
-
-# good enough
-HK_SPAMMY_FILENAME
 
 # tflags userconf
 HTML_CHARSET_FARAWAY
@@ -561,9 +513,6 @@ LOTTERY_PH_004470
 
 # good enough
 LOTTO_AGENT
-
-# good enough
-L_SPAM_TOOL_13
 
 # good enough
 MANY_PILL_PRICE
@@ -624,9 +573,6 @@ NULL_IN_BODY
 
 # good enough
 OBFU_ATTACH_MISSP
-
-# good enough
-OBFU_HTML_ATTACH
 
 # tflags 
 OBFU_JVSCR_ESC
@@ -866,16 +812,10 @@ RCVD_IN_SORBS_ZOMBIE
 RCVD_IN_XBL
 
 # good enough
-RDNS_LOCALHOST
-
-# good enough
 REPLYTO_WITHOUT_TO_CC
 
 # good enough
 RISK_FREE
-
-# good enough
-RP_8BIT
 
 # good enough
 SCANNED_EXTERNAL
@@ -926,16 +866,7 @@ SPF_PASS
 SPF_SOFTFAIL
 
 # good enough
-STOCK_IMG_CTYPE
-
-# good enough
 STOCK_IMG_HDR_FROM
-
-# good enough
-STOX_REPLY_TYPE
-
-# good enough
-STOX_REPLY_TYPE_WITHOUT_QUOTES
 
 # good enough
 STYLE_GIBBERISH
@@ -1013,16 +944,7 @@ TVD_FROM_1
 TVD_INCREASE_SIZE
 
 # good enough
-TVD_NOT_SATISFIED
-
-# good enough
-TVD_QUAL_MEDS
-
-# good enough
 TVD_RCVD_IP
-
-# good enough
-TVD_RCVD_IP4
 
 # good enough
 TVD_RCVD_SINGLE
@@ -1034,19 +956,31 @@ TVD_SUBJ_NUM_OBFU_MINFP
 TVD_VISIT_PHARMA
 
 # good enough
-DOS_RCVD_IP_TWICE_B
+DECEASED_NO_ML
 
 # good enough
-FM_LOTTO_MONEY
+EMRCP
 
 # good enough
-KB_FORGED_MOZ4
+FS_LOWER_YOUR
 
 # good enough
-SHARE_50_50
+HK_LOTTO_SUBJECT
 
 # good enough
-SUBJ_OBFU_PUNCT_FEW
+HK_SCAM_N13
+
+# good enough
+HTML_ATTACH
+
+# good enough
+SERGIO_SUBJECT_PORN009
+
+# good enough
+TR_JS_FROMCHARCODE
+
+# good enough
+TVD_SPACE_RATIO_MINFP
 
 # tflags userconf
 UNPARSEABLE_RELAY
@@ -1099,14 +1033,8 @@ URIBL_SC_SURBL
 # tflags net
 URIBL_WS_SURBL
 
-# good enough
-URI_DEOBFU_INSTR
-
 # tflags userconf
 URI_NOVOWEL
-
-# good enough
-URI_OBFU_TLD
 
 # tflags userconf
 USER_IN_ALL_SPAM_TO
@@ -1142,79 +1070,16 @@ USER_IN_WHITELIST
 USER_IN_WHITELIST_TO
 
 # good enough
-VANITY
-
-# good enough
-XMAILER_MIMEOLE_OL_015D5
-
-# good enough
-XMAILER_MIMEOLE_OL_09BB4
-
-# good enough
 XMAILER_MIMEOLE_OL_1ECD5
-
-# good enough
-XMAILER_MIMEOLE_OL_20C99
 
 # good enough
 XMAILER_MIMEOLE_OL_22B61
 
 # good enough
-XMAILER_MIMEOLE_OL_25340
-
-# good enough
-XMAILER_MIMEOLE_OL_3857F
-
-# good enough
-XMAILER_MIMEOLE_OL_3AC1D
-
-# good enough
-XMAILER_MIMEOLE_OL_3D61D
-
-# good enough
-XMAILER_MIMEOLE_OL_4B815
-
-# good enough
-XMAILER_MIMEOLE_OL_4EEDB
-
-# good enough
-XMAILER_MIMEOLE_OL_5B79A
-
-# good enough
-XMAILER_MIMEOLE_OL_6554A
-
-# good enough
-XMAILER_MIMEOLE_OL_812FF
-
-# good enough
 XMAILER_MIMEOLE_OL_8627E
 
 # good enough
-XMAILER_MIMEOLE_OL_91287
-
-# good enough
-XMAILER_MIMEOLE_OL_9B90B
-
-# good enough
-XMAILER_MIMEOLE_OL_B30D1
-
-# good enough
-XMAILER_MIMEOLE_OL_B4B40
-
-# good enough
 XMAILER_MIMEOLE_OL_C65FA
-
-# good enough
-XMAILER_MIMEOLE_OL_CF0C0
-
-# good enough
-XMAILER_MIMEOLE_OL_F3B05
-
-# good enough
-XMAILER_MIMEOLE_OL_F475E
-
-# good enough
-XMAILER_MIMEOLE_OL_FF5C8
 
 # tflags net
 __DKIMDOMAIN_IN_DWL_ANY
