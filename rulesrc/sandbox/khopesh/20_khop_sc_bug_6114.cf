@@ -1,4 +1,4 @@
-## khop-sc-neighbors.cf	v 201203102
+## khop-sc-neighbors.cf	v 201203109
 ## Khopesh's syndication of SpamCop's top offenders and top offending networks.
 ## 
 ## Spamassassin rules written by Adam Katz <antispamATkhopiscom>
@@ -164,7 +164,7 @@ score	 KHOP_SPAMHAUS_DROP_LE	2 0 2 0 	# adds to KHOP_SPAMHAUS_DROP
 
 # PSBL-neighbors:  any /24 with 73+ (2/7, 29%) IPs in the PSBL (not SpamCop),
 # as obtained from rsync://psbl-mirror.surriel.com::psbl/psbl.txt
-header	 KHOP_PSBL_CIDR24	X-Spam-Relays-Untrusted =~ /(?-xism:\b(?:1(?:1(?:4\.112\.2(?:2[456789]|3[016789])|2\.215\.6[345])|(?:22\.155\.3|97\.252\.1)6|80\.232\.105|76\.53\.121|03\.1\.29)|8(?:5\.(?:26\.(?:1(?:6[45]|8[34])|2[34]1)|115\.248)|3\.(?:149\.(?:21|3)|221\.160))|223\.252\.1(?:6[1578]|7[03])|41\.190\.3)\.[012]?\d{1,2}\b)/
+header	 KHOP_PSBL_CIDR24	X-Spam-Relays-Untrusted =~ /(?-xism:\b(?:1(?:1(?:4\.112\.2(?:2[456789]|3[016789])|2\.215\.6[345])|80\.232\.105)|8(?:3\.(?:221\.160|149\.3)|5\.26\.(?:184|241))|223\.252\.1(?:6[1578]|7[03])|41\.190\.3)\.[012]?\d{1,2}\b)/
 describe KHOP_PSBL_CIDR24	Relay's IP/24 CIDR contains many PSBL hits
 tflags	 KHOP_PSBL_CIDR24	nopublish
 score	 KHOP_PSBL_CIDR24	2 0.6 2 0.6
