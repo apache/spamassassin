@@ -1,0 +1,181 @@
+# Creation: 2012-03-15 17:51:15
+
+# Note: rule names are based on a hash of the content pattern.
+
+body __AXB_PHISH_LLDLYL  /We need your help resolving an issue with your account\. To give us time to work tog/
+body __AXB_PHISH_RPEGLT  / com grande satisfa.{0,3}o que a equipe d. /
+body __AXB_PHISH_VNC12D  /-Bloqueio do Cart\x{e3}o m\x{fa}ltiplo \(D\x{e9}bito e Cr\x{e9}dito\);/
+body __AXB_PHISH_IMHT7I  /-Senha do Dis.{0,3} Real ou Super Linha Bloqueada;/
+body __AXB_PHISH_SAQWQU  /-Usu\x{e1}rio Suspenso do acesso ao Internet Banking;/
+body __AXB_PHISH_RWOTDU  /A atualiza\x{e7}\x{e3}o de seus dados nas pr\x{f3}ximas horas \x{e9} fundamental, caso contr\x{e1}rio causar\x{e1} /
+body __AXB_PHISH_MTLQJA  /Para regularizar-se agora: Clique Aq/
+body __AXB_PHISH_WTF5BS  /Prazo estimado para conclus\x{e3}o da atualiza\x{e7}\x{e3}o: 2 minutos/
+body __AXB_PHISH_3M2G1W  /o e privada para voc.{0,20}o compartilhe este aplicativo\)/
+body __AXB_PHISH_KJPUTR  /A Computer Database Maint.{0,3}nance is currently going on/
+body __AXB_PHISH_X_C9OT  /nance is currently going on our Web/
+body __AXB_PHISH_RN1FPF  /pam mails we receive daily\. A Quarantine Maint.{0,3}nance will help us prevent this everyday dilemma\./
+body __AXB_PHISH_YFQKKP  /validate your mailbox will render your e-mail in-active f/
+# passed hit-rate threshold: 2.0
+
+meta AXB_AUTOGEN_PHISH1   (__AXB_PHISH_LLDLYL || __AXB_PHISH_RPEGLT || __AXB_PHISH_VNC12D || __AXB_PHISH_IMHT7I || __AXB_PHISH_SAQWQU || __AXB_PHISH_RWOTDU || __AXB_PHISH_MTLQJA || __AXB_PHISH_WTF5BS || __AXB_PHISH_3M2G1W || __AXB_PHISH_KJPUTR || __AXB_PHISH_X_C9OT || __AXB_PHISH_RN1FPF || __AXB_PHISH_YFQKKP)
+score AXB_AUTOGEN_PHISH1  4.5
+tflags AXB_AUTOGEN_PHISH1   nopublish
+describe AXB_AUTOGEN_PHISH1  Message contains phish text patterns
+
+body __AXB_PHISH_UAQVZX  /e recently reviewed your account, and /
+body __AXB_PHISH_SHEVBR  / determined that different computers /
+body __AXB_PHISH_VMVCBS  /and multiple password failures were present/
+body __AXB_PHISH_I_R2JH  /If you choose to ignore our request, you leave us no choi.e but to tempora.y suspend your account\./
+body __AXB_PHISH_7KBKOV  /\(Atualiza\x{e7}\x{e3}o e privada para voc\x{ea} cliente, n\x{e3}o compartilhe este aplicativo\)/
+body __AXB_PHISH_Q6XPJ3  /Important: Email Account Verification Update/
+body __AXB_PHISH_PMIQ3A  /e recently noticed one or more attempts to log in.{0,40} from a foreign .. address/
+body __AXB_PHISH_CPNU4K  /Wir m\x{f6}chten Sie dar\x{fc}ber informieren, dass Ihr Konto von einem nicht autorisierten Comp/
+body __AXB_PHISH_STDR6I  / Your account access have been blocked\./
+body __AXB_PHISH_YYSDDA  /In order to help us reset your security quickly and safely, we will need to ask you additional questions about your accounts\./
+body __AXB_PHISH_LLUOQS  /To ensure your protection, we have now blocked access to your accounts\. /
+body __AXB_PHISH_FET_WF  / para criar mais espa\x{c3}\x{a7}o para novas contas\./
+body __AXB_PHISH_7THLJS  /Caro Webmail \/ E-mail do usu\x{c3}\x{a1}rio,/
+body __AXB_PHISH_HHOBAQ  /Esta mensagem \x{c3}\x{a9} .?o nosso centro de mensagens /
+body __AXB_PHISH__TEPHW  /Para garantir que voc\x{c3}\x{aa} n\x{c3}\x{a3}o perca sua conta durante/
+body __AXB_PHISH_MVBMWA  /\. Gostar\x{c3}\x{ad}amos de informar a todos /
+body __AXB_PHISH_VOKRJG  /\*\*\* Important Notice from .{0,20} Billing Center \*\*\*/
+body __AXB_PHISH_A3QMGQ  /A atualiza\x{e7}\x{e3}o ser\x{e1} simples e r\x{e1}pida, Acesse pelo link abaixo\./
+body __AXB_PHISH_8Q4MFV  /st\x{e1} realizando uma atualiza\x{e7}\x{e3}o de seguran\x{e7}a em nossos servidores, onde ser\x{e1} ne/
+body __AXB_PHISH_Z3VIY_  /able to receive new emails\. Just before this message was sent, you are currently running .{0,3} 20\.9 GB, .ou have /
+body __AXB_PHISH_LFRWJP  /Confirmar a sua conta de e-mail agora\*\*\*\x{c3}\x{ba}ltima notifica\x{c3}\x{a7}\x{c3}\x{a3}o\!\*\*\*/
+body __AXB_PHISH_40OERH  / in attempts may have been initiated by you\./
+# passed hit-rate threshold: 1.0
+
+meta AXB_AUTOGEN_PHISH2   (__AXB_PHISH_UAQVZX || __AXB_PHISH_SHEVBR || __AXB_PHISH_VMVCBS || __AXB_PHISH_I_R2JH || __AXB_PHISH_7KBKOV || __AXB_PHISH_Q6XPJ3 || __AXB_PHISH_PMIQ3A || __AXB_PHISH_CPNU4K || __AXB_PHISH_STDR6I || __AXB_PHISH_YYSDDA || __AXB_PHISH_LLUOQS || __AXB_PHISH_FET_WF || __AXB_PHISH_7THLJS || __AXB_PHISH_HHOBAQ || __AXB_PHISH__TEPHW || __AXB_PHISH_MVBMWA || __AXB_PHISH_VOKRJG || __AXB_PHISH_A3QMGQ || __AXB_PHISH_8Q4MFV || __AXB_PHISH_Z3VIY_ || __AXB_PHISH_LFRWJP || __AXB_PHISH_40OERH)
+score AXB_AUTOGEN_PHISH2  3.5
+describe AXB_AUTOGEN_PHISH2  Message contains phish text patterns
+tflags AXB_AUTOGEN_PHISH2   nopublish
+
+body __AXB_PHISH_2Q44MR  / que n\x{e3}o tiver efetuado a sua atualiza\x{e7}\x{e3}o cadastral ter\x{e1} bloque/
+body __AXB_PHISH_1M4WLH  /Informamos que os clientes ter\x{e3}o 5 dias \x{fa}teis para realizar este processo/
+body __AXB_PHISH_P94LQX  /Someone with ip address 81\.102\.72\.19 tried to access your personal account\!/
+body __AXB_PHISH_DRFGR2  /For banking with a higher level of security, please /
+body __AXB_PHISH_WTNPBU  /\*\*\* Important Notice from US Bank Billing Center \*\*\*/
+body __AXB_PHISH_IJ1RHD  /Until we can collect .{0,20} information, your access to sensitive account fea/
+body __AXB_PHISH_E1NSOQ  /If you choose to ignore our request, you leave us no choise but to temporaly suspend your account\./
+body __AXB_PHISH_HWYFND  /We look forward to your urgent attention to this matter\./
+body __AXB_PHISH_3WMZRP  /Ihre Kreditkarte wurde ausgesetzt, weil wir /
+body __AXB_PHISH_NHJP7D  / address and we have reasons to beli.{0,40} hijacked by a third party/
+body __AXB_PHISH_QOR8WM  /al account from a foreign .. address and we have reasons to beli/
+body __AXB_PHISH_CJBVIS  / To re-validate your mailbox please/
+body __AXB_PHISH_C2RLAQ  / please proceed to our secure webform by clicking here\./
+body __AXB_PHISH_J2WY09  /We detected irregular activity on your /
+body __AXB_PHISH_R1QRUC  / procedures, we have detected a slight error /
+body __AXB_PHISH_XNSCFK  /To help us with this and to find out what you can and can\'t do with your account unti. /
+body __AXB_PHISH_VPWTKU  /Er vinden momenteel technische werkzaamheden plaats bij de afdeling/
+body __AXB_PHISH_NYBL_2  /er een automatische update plaatsvinden in ons systeem en zult u zo/
+body __AXB_PHISH_I2US1C  /met gebruikersnaam en wachtwoord\. Na de bevestiging van uw gegevens zal/
+body __AXB_PHISH_IGIXOW  /van de nieuwe beveiligings software voor 2012\. Met deze vernieuwing/
+body __AXB_PHISH_ULPC_W  /verlopen dient u via onderstaande link uw gegevens te bevestigen\./
+body __AXB_PHISH_GGT17R  /willen wij voor u het internet bankieren nog beter en veiliger maken,/
+body __AXB_PHISH_IQD0N8  /zodat u in de toekomst nog beter en vooral zorgenloos gebruik kunt/
+body __AXB_PHISH_PGVD6B  /which is 20GB as set up by our administrator service center,/
+body __AXB_PHISH_HL0V4I  /Aten\x{e7}\x{e3}o: Por medidas de seguran\x{e7}a caso a ades\x{e3}o de seguran\x{e7}a n\x{e3}o seja confirmada, su. /
+body __AXB_PHISH_OTOODR  /Caso n\x{e3}o consiga visualizar este email, clique aqui\./
+body __AXB_PHISH_GNRAUJ  /1\. A recent change in your personal information \(i/
+body __AXB_PHISH_JUAK94  /We are contacting you to remind you that /
+body __AXB_PHISH_XZKCYV  /lity to accurately verify your selected option of payment due to an internal error within our system/
+body __AXB_PHISH_MYD196  /Your account is suspended due to multiple number of incorrect login attempts\./
+body __AXB_PHISH_NH0Q7H  /You have 1 New Security Notification\!/
+body __AXB_PHISH_WVM6JJ  /Payment Notification Update\(customers Verification Required\)/
+body __AXB_PHISH_3NWX8X  /To ensure your account and money has not been violated please login below/
+body __AXB_PHISH_CRF2YQ  /Transfer date ; 04 :06 :2009 Transfer time : 10;45 am Amount transferred : \x{ef}\x{bf}\x{bd}1,564\.36 card no\. 4627 8549 xxxx xxxx/
+body __AXB_PHISH_J7KMNZ  /We are sorry for any inconveniencies this might cause you/
+body __AXB_PHISH_DO8HMI  /Yours sincerely, Online Customer Service/
+body __AXB_PHISH_ZIZ588  /Instant payment via ATM card notification /
+body __AXB_PHISH__DYCQJ  /Re-confirm your account information to us\./
+body __AXB_PHISH_QPHBUB  / accessed from an unauthorized computer\./
+body __AXB_PHISH_2FP8WW  / hijacked by a third party without your authorization\./
+body __AXB_PHISH_STPJMO  / account was accessed by a third party\. .{0,40} account is our primary concern, we have limited access to sensitive /
+body __AXB_PHISH_3_YWPN  /e have reason to believe that your /
+body __AXB_PHISH_9AUDKQ  /We recently contacted you after noticing an issue on your account\./
+body __AXB_PHISH_FBRQQK  /We requested information from you for /
+body __AXB_PHISH_OB2RZ2  /Click here to review your account\./
+body __AXB_PHISH_D3JX4X  /Important Alert : Review your online banking account/
+body __AXB_PHISH_B_SMJX  /L\'unico modo .{0,40}ail sapr\x{e0} il tuo account \x{e8} ancora attivo e in uso \x{e8}/
+body __AXB_PHISH_PTI9OX  /How can I restore my account access \?/
+body __AXB_PHISH_3RUUAX  / Remember: Always look for your SiteKey/
+body __AXB_PHISH_RXNHSI  /his means proving who you are and where you live\./
+body __AXB_PHISH_RM0A5C  /y, we will ask you to provide some original documents containing your name and address\. .h.. /
+body __AXB_PHISH_RQU_N_  /\. For security purpose, we are required to open an investigation into this matter\./
+body __AXB_PHISH_U5ROGO  /For your protection, you must verify /
+body __AXB_PHISH_TGYT4R  /During our regularly scheduled account maintenance and verification procedure.{0,3} we have detected a slight error in your /
+body __AXB_PHISH_FJ1JDT  / account access will remain limited until th/
+body __AXB_PHISH_GU3IO5  / Provide your urgent phone number\. /
+body __AXB_PHISH_NSFQR_  /To continue banking online we need you to:/
+body __AXB_PHISH_TWVBGM  /Thank you for being our customer\. /
+body __AXB_PHISH__LVTUW  /To do so we need you to click here to proceed to confirming your information\./
+body __AXB_PHISH_5GABS2  /Upgrade your existing current account ,/
+body __AXB_PHISH_JCJ_ZK  / votre facture internet d\x{92}octobre 2009 /
+body __AXB_PHISH_NWFET7  /Demande de remboursement de solde sur votre compte bancaire\!/
+body __AXB_PHISH_1KOCZ7  /Your account access has been limited/
+body __AXB_PHISH_5NLUKL  /If you choose to ignore our request, you leave us no choice but to temporary suspend your account\./
+body __AXB_PHISH_ACPTAH  /Please do not reply to this e-mail\. Mail sent to this address cannot be answ/
+body __AXB_PHISH_OUCBFX  /, we will be forced to suspend your account indefinitely, as it .a/
+body __AXB_PHISH_MFQGLN  /Mise \x{e0} jour de compte \/ Maintenance Tous les comptes Webmail/
+body __AXB_PHISH_YK3YQ2  /As this e-mail is an automated message, we can\'t reply to any e-mails sent by return\./
+body __AXB_PHISH_PHNGMN  /Atualiza\x{c3}\x{a7}\x{c3}\x{a3}o de dados cadastrais\./
+body __AXB_PHISH_F7Y6OZ  /Your account was accesed by a third part/
+body __AXB_PHISH_ZXGYDG  / you may not be able to receive or send new mails until you re-.alid/
+body __AXB_PHISH_VYADEM  /Dear user your mailbox has exceeded it quota\/limit /
+body __AXB_PHISH_MHJAA1  /Thank you for using Vonage\! Vonage Services DEP\./
+body __AXB_PHISH_AUWUVB  / address and we have reasons to believe that your account .a. /
+body __AXB_PHISH_QTY_CA  / before you can continue using your /
+body __AXB_PHISH_2QXEHS  /We apologise for any inconvenience caused by this action\./
+body __AXB_PHISH_WPPEBV  / E-mail intended for your account\./
+body __AXB_PHISH_OOMA5E  / activity before you can continue using/
+body __AXB_PHISH_JJ_1F_  /Attenzione valutato titolare del conto webmail\!/
+body __AXB_PHISH_GYCYKK  / Click here to Secure your account /
+body __AXB_PHISH_MTKNLG  /Your Intuit\.com order confirmation\./
+body __AXB_PHISH_4BIFM6  /\. If you could please take 5-10 minutes out of your online experience and renew your records/
+body __AXB_PHISH_NKX31H  / Protocolo de Atendimento:2945847643 Prezado cliente,/
+body __AXB_PHISH_8L1ZQH  /Comunicado Importante: Suspens\x{c3}\x{a3}o de seu acesso\./
+body __AXB_PHISH_FVHT0R  /Informamos que seu dispositivo Token se encontra desatualizado com o sistema Internet Banking Empresarial\./
+body __AXB_PHISH_Q_IZS4  / we will remove any restrictions plac/
+body __AXB_PHISH_HLJOL3  / Online Banking User Agreement and to ensure that your account has not b/
+body __AXB_PHISH_Q1YX7M  / limitations have been placed on your /
+body __AXB_PHISH_WOTJGE  / our Account Review Team identified some unusual activity in your account\. In accordance with /
+body __AXB_PHISH_3U0VCB  /Valentina Y Hahn commented on your photo\.\.\./
+body __AXB_PHISH_3J36ID  /Best Regards, Colette Nugent Head of Customer Communications/
+body __AXB_PHISH_EF88U9  /Once you log in, you will be provided with steps to restore your account access\./
+body __AXB_PHISH_BYXTJR  /\. To enable you continue accessing your online account it will only take you few minutes to /
+body __AXB_PHISH_UMND1N  /Your account has been temporarily limited\!/
+body __AXB_PHISH_LNIUTY  /wir m\x{f6}chten Sie h\x{f6}fflich daran erinnern dass Sie Ihren Online-Konto \x{fc}berpr\x{fc}fen m\x{fc}ssen\./
+body __AXB_PHISH_UWKQTI  /Urgente\! Problemas com seu acesso\./
+body __AXB_PHISH_FBGWCE  /M\x{c3}\x{a1}xima comodidad y seguridad para nuestra nueva sistema \./
+body __AXB_PHISH_BKOJCL  /comprobar informacion y ganar un regalo/
+body __AXB_PHISH_7KTNGO  / Mettre a jour de votre Carte Credit en ligne /
+body __AXB_PHISH_RYKWBZ  /Veuillez mettre a jour votre compte/
+body __AXB_PHISH_UWGGCF  /-- La nostra attenzione valutata titolare del conto WebMail\!/
+body __AXB_PHISH_CS1DH8  /Se non si riesce a verificare, il tuo account verr\x{e0} cancellato in modo permanente e non \x{e8} possibile accedere la prossima volta\!/
+body __AXB_PHISH_SKL2KA  /This is a reminder to restore your account as soon as possible\./
+body __AXB_PHISH_ZRFHBM  / online service has expired\. If your intention is to /
+body __AXB_PHISH_15_5PK  /Prezado \(a\) Cliente - Comunicado Urgente/
+body __AXB_PHISH_E4DXDR  /1 New Message \(Security Updates Notification\)/
+body __AXB_PHISH_3VQWK1  /Sincerely, Account Review Department/
+body __AXB_PHISH_QIIXZX  /We thank you for your prompt attention to this matter and apologize for any inconvenience\./
+body __AXB_PHISH_IM8STV  / Your account has open issues : Click to Resolve /
+body __AXB_PHISH_YLFLQA  /\x{a9} Western Union: You Have \(1\) New Message alert\!/
+body __AXB_PHISH_0MK6W5  /For your protection, we\'ve suspended your account \./
+body __AXB_PHISH_CLSQHI  /Your account has been suspended \!\!/
+body __AXB_PHISH_GZFSQ4  /Please do not reply to this auto-answer message/
+body __AXB_PHISH_OG33AD  / Vermerk: Wenn diese nicht vollst\x{e4}ndig ist , werden wir gezwungen sein, Ihre Karte aussetzen/
+body __AXB_PHISH_S9JBOE  /Wir bedanken uns fur Ihre Zusammenarbeit in dieser Angelegenheit\./
+body __AXB_PHISH_Z5N2XL  /Um weiterhin unsere Dienste ununterbrochen benutzen zu k\x{f6}nnen, durfen wir Sie bieten Ihre Daten zu aktualisieren\./
+body __AXB_PHISH_WBZZ_V  /\* Please do not reply to this email/
+body __AXB_PHISH_WNAJCO  / part of our ongoing commitment to /
+body __AXB_PHISH_C0WRV2  /We have been notified that a card as/
+body __AXB_PHISH_0V_4GC  /Your account has been temporarily limited\./
+body __AXB_PHISH_EPKLUT  /Caro cliente Poste\.it , Lo staff di Poste /
+body __AXB_PHISH_ENAKQV  /Mail sent to this address cannot be answered\. For assistance, log in to your .o/
+
+meta AXB_AUTOGEN_PHISH3   (__AXB_PHISH_2Q44MR || __AXB_PHISH_1M4WLH || __AXB_PHISH_P94LQX || __AXB_PHISH_DRFGR2 || __AXB_PHISH_WTNPBU || __AXB_PHISH_IJ1RHD || __AXB_PHISH_E1NSOQ || __AXB_PHISH_HWYFND || __AXB_PHISH_3WMZRP || __AXB_PHISH_NHJP7D || __AXB_PHISH_QOR8WM || __AXB_PHISH_CJBVIS || __AXB_PHISH_C2RLAQ || __AXB_PHISH_J2WY09 || __AXB_PHISH_R1QRUC || __AXB_PHISH_XNSCFK || __AXB_PHISH_VPWTKU || __AXB_PHISH_NYBL_2 || __AXB_PHISH_I2US1C || __AXB_PHISH_IGIXOW || __AXB_PHISH_ULPC_W || __AXB_PHISH_GGT17R || __AXB_PHISH_IQD0N8 || __AXB_PHISH_PGVD6B || __AXB_PHISH_HL0V4I || __AXB_PHISH_OTOODR || __AXB_PHISH_GNRAUJ || __AXB_PHISH_JUAK94 || __AXB_PHISH_XZKCYV || __AXB_PHISH_MYD196 || __AXB_PHISH_NH0Q7H || __AXB_PHISH_WVM6JJ || __AXB_PHISH_3NWX8X || __AXB_PHISH_CRF2YQ || __AXB_PHISH_J7KMNZ || __AXB_PHISH_DO8HMI || __AXB_PHISH_ZIZ588 || __AXB_PHISH__DYCQJ || __AXB_PHISH_QPHBUB || __AXB_PHISH_2FP8WW || __AXB_PHISH_STPJMO || __AXB_PHISH_3_YWPN || __AXB_PHISH_9AUDKQ || __AXB_PHISH_FBRQQK || __AXB_PHISH_OB2RZ2 || __AXB_PHISH_D3JX4X || __AXB_PHISH_B_SMJX || __AXB_PHISH_PTI9OX || __AXB_PHISH_3RUUAX || __AXB_PHISH_RXNHSI || __AXB_PHISH_RM0A5C || __AXB_PHISH_RQU_N_ || __AXB_PHISH_U5ROGO || __AXB_PHISH_TGYT4R || __AXB_PHISH_FJ1JDT || __AXB_PHISH_GU3IO5 || __AXB_PHISH_NSFQR_ || __AXB_PHISH_TWVBGM || __AXB_PHISH__LVTUW || __AXB_PHISH_5GABS2 || __AXB_PHISH_JCJ_ZK || __AXB_PHISH_NWFET7 || __AXB_PHISH_1KOCZ7 || __AXB_PHISH_5NLUKL || __AXB_PHISH_ACPTAH || __AXB_PHISH_OUCBFX || __AXB_PHISH_MFQGLN || __AXB_PHISH_YK3YQ2 || __AXB_PHISH_PHNGMN || __AXB_PHISH_F7Y6OZ || __AXB_PHISH_ZXGYDG || __AXB_PHISH_VYADEM || __AXB_PHISH_MHJAA1 || __AXB_PHISH_AUWUVB || __AXB_PHISH_QTY_CA || __AXB_PHISH_2QXEHS || __AXB_PHISH_WPPEBV || __AXB_PHISH_OOMA5E || __AXB_PHISH_JJ_1F_ || __AXB_PHISH_GYCYKK || __AXB_PHISH_MTKNLG || __AXB_PHISH_4BIFM6 || __AXB_PHISH_NKX31H || __AXB_PHISH_8L1ZQH || __AXB_PHISH_FVHT0R || __AXB_PHISH_Q_IZS4 || __AXB_PHISH_HLJOL3 || __AXB_PHISH_Q1YX7M || __AXB_PHISH_WOTJGE || __AXB_PHISH_3U0VCB || __AXB_PHISH_3J36ID || __AXB_PHISH_EF88U9 || __AXB_PHISH_BYXTJR || __AXB_PHISH_UMND1N || __AXB_PHISH_LNIUTY || __AXB_PHISH_UWKQTI || __AXB_PHISH_FBGWCE || __AXB_PHISH_BKOJCL || __AXB_PHISH_7KTNGO || __AXB_PHISH_RYKWBZ || __AXB_PHISH_UWGGCF || __AXB_PHISH_CS1DH8 || __AXB_PHISH_SKL2KA || __AXB_PHISH_ZRFHBM || __AXB_PHISH_15_5PK || __AXB_PHISH_E4DXDR || __AXB_PHISH_3VQWK1 || __AXB_PHISH_QIIXZX || __AXB_PHISH_IM8STV || __AXB_PHISH_YLFLQA || __AXB_PHISH_0MK6W5 || __AXB_PHISH_CLSQHI || __AXB_PHISH_GZFSQ4 || __AXB_PHISH_OG33AD || __AXB_PHISH_S9JBOE || __AXB_PHISH_Z5N2XL || __AXB_PHISH_WBZZ_V || __AXB_PHISH_WNAJCO || __AXB_PHISH_C0WRV2 || __AXB_PHISH_0V_4GC || __AXB_PHISH_EPKLUT || __AXB_PHISH_ENAKQV)
+score AXB_AUTOGEN_PHISH3  2.5
+describe AXB_AUTOGEN_PHISH3  Message contains phish text patterns
+tflags AXB_AUTOGEN_PHISH3   nopublish
+
