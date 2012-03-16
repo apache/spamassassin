@@ -75,6 +75,7 @@ header         __FROM_MISSPACED      From =~ /^\s*"[^"]*"</
 # meta with some stuff to reduce FPs
 meta           FROM_MISSPACED        __FROM_MISSPACED && !__RCD_RDNS_MTA_MESSY && !__CTYPE_MULTIPART_ALT && !__REPTO_QUOTE && !__MIME_QP && !__UNSUB_LINK && !__TO___LOWER && !__BUGGED_IMG && !__DOS_HAS_LIST_UNSUB && !__TO_EQ_FROM_DOM && !__MAIL_LINK
 describe       FROM_MISSPACED        From: missing whitespace
+score          FROM_MISSPACED        2.00
 
 # Encrypted mail provider unable to properly format their headers (as of 07/2011)
 header         __RCVD_ZIXMAIL        X-Spam-Relays-Untrusted =~ / helo=smtpout\.zixmail\.net /
