@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-fraud-autofilter axb-fraud-feeds axb-generic axb-ham axb-ned-phish axb-ned-spam axb-phish bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm danmcdonald darxus grenier jarif llanga wt-en1 wt-en3 wt-jp1 zmi; day 2: axb-fraud-autofilter axb-fraud-feeds axb-generic axb-ham axb-ned-phish axb-ned-spam axb-phish bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm danmcdonald darxus grenier jarif llanga wt-en1 wt-en3 wt-jp1 zmi; day 3: axb-fraud-feeds axb-generic axb-ham axb-ned-phish axb-ned-spam axb-phish bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm danmcdonald darxus grenier jarif llanga nbebout wt-en1 wt-en3 wt-jp1 zmi
+# with results from: day 1: axb-fraud-autofilter axb-fraud-feeds axb-generic axb-ham axb-ned-phish axb-ned-spam axb-phish bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm danmcdonald darxus grenier jarif llanga wt-en1 wt-en3 wt-jp1 zmi; day 2: axb-fraud-autofilter axb-fraud-feeds axb-generic axb-ham axb-ned-phish axb-ned-spam axb-phish bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm danmcdonald darxus grenier jarif llanga wt-en1 wt-en3 wt-jp1 zmi; day 3: axb-fraud-autofilter axb-fraud-feeds axb-generic axb-ham axb-ned-phish axb-ned-spam axb-phish bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm danmcdonald darxus grenier jarif llanga wt-en1 wt-en3 wt-jp1 zmi
 
 # good enough
 ACH_CANCELLED
@@ -374,6 +374,9 @@ FSL_MISSP_REPLYTO
 FSL_NEW_HELO_USER
 
 # good enough
+FSL_RCVD_USER
+
+# good enough
 FSL_UA
 
 # good enough
@@ -482,6 +485,9 @@ HK_PNIS
 HK_RANDOM_FROM
 
 # good enough
+HK_SCAM_N1
+
+# good enough
 HK_SCAM_N13
 
 # good enough
@@ -543,9 +549,6 @@ LOTTO_AGENT_RPLY
 
 # good enough
 LOTTO_URI
-
-# good enough
-L_SPAM_TOOL_13
 
 # good enough
 MANY_PILL_PRICE
@@ -956,6 +959,9 @@ TVD_FROM_1
 TVD_INCREASE_SIZE
 
 # good enough
+TVD_PH_1
+
+# good enough
 TVD_PH_BODY_META
 
 # good enough
@@ -968,16 +974,25 @@ TVD_SUBJ_NUM_OBFU_MINFP
 TVD_VISIT_PHARMA
 
 # good enough
-FSL_RCVD_USER
+FROM_WSP_LEAD
 
 # good enough
-HK_NAME_FROM
+FSL_FREEMAIL_1
 
 # good enough
-HK_SCAM_N1
+FSL_FREEMAIL_2
 
 # good enough
-TVD_PH_1
+HDRS_LCASE_1K
+
+# good enough
+HK_SCAM_N12
+
+# good enough
+MONEY_PERCENT
+
+# good enough
+OBFU_HTML_ATTACH
 
 # tflags userconf
 UNPARSEABLE_RELAY
