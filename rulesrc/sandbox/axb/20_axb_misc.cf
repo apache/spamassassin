@@ -1,6 +1,13 @@
 
 ##
 
+# 2012-03-17
+header		__AXB_LI_U	List-Unsubscribe =~ /\@em\.linkedin\.com\b/
+header		__AXB_LI_CLASS	exists:X-LinkedIn-Class
+header		__AXB_LI_FBL	exists:X-LinkedIn-fbl
+meta		AXB_OBFU_MULE	(__AXB_LI_U && !__AXB_LI_CLASS && !__AXB_LI_FBL)
+describe	AXB_OBFU_MULE	spacey mules
+
 # 2012-03-08
 header		AXB_XM_PPS	X-Mailer =~ /^Power Sending Sockets\b/
 describe	AXB_XM_PPS	Mailer fingerprint
