@@ -134,8 +134,9 @@ describe MSGID_FROM_MTA_HEADER	Message-Id was added by a relay
 header MSGID_SHORT		MESSAGEID =~ /^.{1,15}$|<.{0,4}\@/
 describe MSGID_SHORT		Message-ID is unusually short
 
-header MSGID_MULTIPLE_AT	MESSAGEID =~ /<[^>]*\@[^>]*\@/
-describe MSGID_MULTIPLE_AT	Message-ID contains multiple '@' characters
+#DEMOTED TO SANDBOX - 2012-03-21
+#header MSGID_MULTIPLE_AT	MESSAGEID =~ /<[^>]*\@[^>]*\@/
+#describe MSGID_MULTIPLE_AT	Message-ID contains multiple '@' characters
 
 ###########################################################################
 
