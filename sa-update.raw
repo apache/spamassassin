@@ -1389,7 +1389,7 @@ sub http_get {
   if (defined $ext_prog && $ext_prog eq 'curl') {
     push(@args, qw(-s -L -O --remote-time -g --max-redirs 2
                    --connect-timeout 15 --max-time 300
-                   --fail --retry 3 --retry-delay 20 -o), $out_fname_short);
+                   --fail -o), $out_fname_short);
     push(@args, '-z', $out_fname_short)  if $out_fname_exists && !$force_reload;
   } elsif (defined $ext_prog && $ext_prog eq 'wget') {
     push(@args, qw(-q -N --max-redirect=2 --tries=3 --wait=20 --random-wait
