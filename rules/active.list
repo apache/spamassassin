@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-fraud-autofilter axb-fraud-feeds axb-generic axb-ham axb-ned-phish axb-ned-spam axb-phish bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm danmcdonald darxus grenier jarif llanga wt-en1 wt-en3 wt-jp1; day 2: axb-fraud-autofilter axb-fraud-feeds axb-generic axb-ham axb-ned-phish axb-ned-spam axb-phish bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm danmcdonald darxus grenier jarif llanga wt-en1 wt-en3 wt-jp1 zmi; day 3: axb-fraud-autofilter axb-fraud-feeds axb-generic axb-ham axb-ned-phish axb-ned-spam axb-phish bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm danmcdonald darxus grenier jarif llanga wt-en1 wt-en3 wt-jp1 zmi
+# with results from: day 1: axb-fraud-autofilter axb-fraud-feeds axb-generic axb-ham axb-ned-phish axb-ned-spam axb-phish bb-jhardin bb-jhardin_fraud bb-jm danmcdonald darxus grenier jarif llanga wt-en1 wt-en3 wt-jp1 zmi; day 2: axb-fraud-autofilter axb-fraud-feeds axb-generic axb-ham axb-ned-phish axb-ned-spam axb-phish bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm danmcdonald darxus grenier jarif llanga wt-en1 wt-en3 wt-jp1; day 3: axb-fraud-autofilter axb-fraud-feeds axb-generic axb-ham axb-ned-phish axb-ned-spam axb-phish bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm danmcdonald darxus grenier jarif llanga wt-en1 wt-en3 wt-jp1 zmi
 
 # tflags userconf
 ALL_TRUSTED
@@ -110,9 +110,6 @@ DOS_OE_TO_MX
 DOS_RCVD_IP_TWICE_C
 
 # good enough
-DRUGS_STOCK_MIMEOLE
-
-# good enough
 DYN_RDNS_AND_INLINE_IMAGE
 
 # good enough
@@ -164,6 +161,9 @@ FH_HELO_EQ_CHARTER
 FH_HELO_EQ_D_D_D_D
 
 # good enough
+FH_HOST_EQ_DYNAMICIP
+
+# good enough
 FILL_THIS_FORM_FRAUD_PHISH
 
 # good enough
@@ -177,12 +177,6 @@ FM_FRM_RN_L_BRACK
 
 # good enough
 FM_LOTTO_YOU_WON
-
-# good enough
-FM_SCHOOLING
-
-# good enough
-FM_SCHOOL_DIPLOMA
 
 # good enough
 FM_SEX_HELODDDD
@@ -201,6 +195,9 @@ FSL_HELO_BARE_IP_1
 
 # good enough
 FSL_HELO_DEVICE
+
+# good enough
+FSL_HELO_NON_FQDN_1
 
 # good enough
 FS_ABIGGER
@@ -273,6 +270,9 @@ KB_FAKED_THE_BAT
 
 # good enough
 KB_RATWARE_MSGID
+
+# good enough
+LOTTERY_1
 
 # good enough
 LOTTERY_PH_004470
@@ -743,6 +743,9 @@ FROM_MISSP_USER
 FROM_WSP_LEAD
 
 # good enough
+FRT_PROFIT2
+
+# good enough
 FR_DOT_FEVER_5
 
 # good enough
@@ -857,6 +860,9 @@ HK_SCAM_N4
 HK_SCAM_N8
 
 # good enough
+HK_SCAM_S1
+
+# good enough
 HK_SCAM_S15
 
 # good enough
@@ -920,6 +926,9 @@ MONEY_LOTTERY
 MONEY_PERCENT
 
 # good enough
+MSGID_WSP_TRAIL
+
+# good enough
 NSL_RCVD_FROM_USER
 
 # good enough
@@ -927,9 +936,6 @@ NSL_RCVD_HELO_USER
 
 # good enough
 OBFU_ATTACH_MISSP
-
-# good enough
-OBFU_HTML_ATTACH
 
 # tflags 
 OBFU_JVSCR_ESC
@@ -942,6 +948,9 @@ RISK_FREE
 
 # good enough
 SCANNED_EXTERNAL
+
+# good enough
+SERGIO_SUBJECT_PORN005
 
 # good enough
 SERGIO_SUBJECT_PORN009
@@ -960,6 +969,9 @@ SINGLE_HEADER_2K
 
 # good enough
 SINGLE_HEADER_3K
+
+# good enough
+SINGLE_HEADER_4K
 
 # good enough
 STYLE_GIBBERISH
@@ -1125,6 +1137,9 @@ XMAILER_MIMEOLE_OL_22B61
 
 # good enough
 XMAILER_MIMEOLE_OL_8627E
+
+# good enough
+XMAILER_MIMEOLE_OL_9B90B
 
 # tflags net
 __DKIMDOMAIN_IN_DWL_ANY
