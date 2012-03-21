@@ -3,9 +3,10 @@
 
 # ---------------------------------------------------------------------------
 # Run time-consuming tests during 'make test'.  (These tests take longer
-# than 10 seconds each on a reasonably fast box.)
+# than 10 seconds each on a reasonably fast box circa year 2000.)
 
-run_long_tests=n
+# Defaulting to run long tests per bug 6776
+run_long_tests=y
 
 # ---------------------------------------------------------------------------
 # Run network rule tests during 'make test'.
