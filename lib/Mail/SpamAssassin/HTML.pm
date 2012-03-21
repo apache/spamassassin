@@ -543,6 +543,7 @@ sub html_font_invisible {
 
   # invisibility
   if (substr($fg,-6) eq substr($bg,-6)) {
+    $self->put_results(font_low_contrast => 1);
     return 1;
   }
   # near-invisibility
@@ -935,7 +936,7 @@ my %html_color = (
   yellowgreen => 0x9acd32,
 );
 
-sub name_to_rgb {
+sub name_to_rgb_old {
   my $color = lc $_[0];
 
   # note: Mozilla strips leading and trailing whitespace at this point,
@@ -964,6 +965,89 @@ sub name_to_rgb {
 
   return "#" . $color;
 }
+
+sub name_to_rgb {
+  my $color = lc $_[0];
+  my $before = $color;
+
+  # strip leading and ending whitespace
+  $color =~ s/^\s*//;
+  $color =~ s/\s*$//;
+
+  # named colors
+  my $hex = $html_color{$color};
+  if (defined $hex) {
+    return sprintf("#%06x", $hex);
+  }
+
+  # IF NOT A NAME, IT SHOULD BE A HEX COLOR, HEX SHORTHAND or rgb values
+  if ($color =~ m/^[#a-f0-9]*$|rgb\([\d%, ]*\)/i) {
+
+    #Convert the RGB values to hex values so we can fall through on the programming
+
+    #RGB PERCENTS TO HEX
+    if ($color =~ m/rgb\((\d+)%,\s*(\d+)%,\s*(\d+)%\s*\)/i) {
+      $color = "#".dec2hex(int($1/100*255)).dec2hex(int($2/100*255)).dec2hex(int($3/100*255));
+    }
+
+    #RGB DEC TO HEX
+    if ($color =~ m/rgb\((\d+),\s*(\d+),\s*(\d+)\s*\)/i) {
+      $color = "#".dec2hex($1).dec2hex($2).dec2hex($3);
+    }
+
+    #PARSE THE HEX
+    if ($color =~ m/^#/) {
+      # strip to hex only
+      $color =~ s/[^a-f0-9]//ig;
+
+      # strip to 6 if greater than 6
+      if (length($color) > 6) {
+        $color=substr($color,0,6);
+      }
+
+      # strip to 3 if length < 6)
+      if (length($color) > 3 && length($color) < 6) {
+        $color=substr($color,0,3);
+      }
+
+      # pad right-hand-side to a multiple of three
+      $color .= "0" x (3 - (length($color) % 3)) if (length($color) % 3);
+
+      #DUPLICATE SHORTHAND HEX
+      if (length($color) == 3) {
+        $color =~ m/(.)(.)(.)/;
+        $color = "$1$1$2$2$3$3";
+      }
+
+    } else {
+      return "invalid";
+    } 
+
+  } else {
+    #INVALID 
+
+    #??RETURN BLACK SINCE WE DO NOT KNOW HOW THE MUA / BROWSER WILL PARSE
+    #$color = "000000";
+
+    return "invalid";
+  }
+
+  #print "DEBUG: before/after name_to_rgb new version: $before/$color\n";
+
+  return "#" . $color;
+}
+
+sub dec2hex($) {
+  my ($dec) = @_;
+  my ($pre) = '';
+
+  if ($dec < 16) {
+    $pre = '0';
+  }
+
+  return sprintf("$pre%lx", $dec);
+}
+
 
 use constant URI_STRICT => 0;
 

@@ -20,7 +20,7 @@ use Test;
 use Mail::SpamAssassin;
 use Mail::SpamAssassin::HTML;
 
-plan tests => 24;
+plan tests => 28;
 
 sub try {
   my ($data, $want) = @_;
@@ -33,30 +33,34 @@ sub try {
   return 1;
 }
 
-# normal colors with various whitespace
+#Tests were based on Flex Hex: John Graham-Cumming, http://www.jgc.org/pdf/lisa2004.pdf until 2012-03-08
+# SEE BUG 6760
+
 ok(try('black', '#000000'));
 ok(try('white', '#ffffff'));
 ok(try('peachpuff', '#ffdab9'));
 ok(try('#abcdef', '#abcdef'));
-ok(try('123456', '#123456'));
-
-# Flex Hex
-ok(try('black ', '#b0ac00'));
-ok(try(' white ', '#000000'));
-ok(try(' peachpuff', '#00c0ff'));
-ok(try('#peachpuff', '#0ec00f'));
-ok(try('#0f0', '#000f00'));
-ok(try('0f0f', '#0f0f00'));
-ok(try('#1234567890abcde1234567890abcde', '#34cd89'));
-ok(try('6db6ec49efd278cd0bc92d1e5e072d68', '#6ecde0'));
-ok(try('#f', '#0f0000'));
-ok(try('zft', '#000f00'));
-ok(try('#zftygn', '#0f0000'));
-ok(try('zqbttv', '#00b000'));
-ok(try('fffffff', '#fffff0'));
-ok(try('fffff39', '#ffff90'));
-ok(try('fffffg', '#fffff0'));
-ok(try('fffff', '#fffff0'));
-ok(try('fxfefu', '#f0fef0'));
-ok(try('fafufb', '#faf0fb'));
-ok(try('fofcff', '#f0fcff'));
+ok(try('123456', 'invalid'));
+ok(try(' peachpuff', '#ffdab9'));
+ok(try('#peachpuff', 'invalid'));
+ok(try('#0f0', '#00ff00'));
+ok(try('0f0f', 'invalid'));
+ok(try('#1234567890abcde1234567890abcde', '#123456'));
+ok(try('6db6ec49efd278cd0bc92d1e5e072d68', 'invalid'));
+ok(try('#f', '#ff0000')); 
+ok(try('zft', 'invalid'));
+ok(try('#789', '#778899'));
+ok(try('#zftygn', 'invalid'));
+ok(try('zqbttv', 'invalid'));
+ok(try('fffffff', 'invalid'));
+ok(try('fffff39', 'invalid'));
+ok(try('fffffg', 'invalid'));
+ok(try('fffff', 'invalid'));
+ok(try('fxfefu', 'invalid'));
+ok(try('fafufb', 'invalid'));
+ok(try('fofcff', 'invalid'));
+ok(try('#black', 'invalid'));
+ok(try('rgb(100%,100%,100%)', '#ffffff'));
+ok(try('rgb(100,100,100)', '#646464'));
+ok(try('rgb(33%,33%,33%)', '#545454'));
+ok(try('rgb(255,100,100)', '#ff6464'));
