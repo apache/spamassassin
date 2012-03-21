@@ -545,9 +545,8 @@ sub html_font_invisible {
   if (substr($fg,-6) eq substr($bg,-6)) {
     $self->put_results(font_low_contrast => 1);
     return 1;
-  }
   # near-invisibility
-  elsif ($fg =~ /^\#?([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/) {
+  } elsif ($fg =~ /^\#?([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/) {
     my ($r1, $g1, $b1) = (hex($1), hex($2), hex($3));
 
     if ($bg =~ /^\#?([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/) {
@@ -570,6 +569,13 @@ sub html_font_invisible {
 	return 1;
       }
     }
+  }
+
+  
+  # invalid color
+  if ($fg eq 'invalid' or $bg eq 'invalid') {
+    $self->put_results(font_invalid_color => 1);
+    return 1;
   }
 
   # size too small
