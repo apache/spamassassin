@@ -1,14 +1,80 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-fraud-autofilter axb-fraud-feeds axb-generic axb-ham axb-ned-phish axb-ned-spam axb-phish bb-jhardin bb-jhardin_fraud bb-jm danmcdonald darxus grenier jarif llanga wt-en1 wt-en3 wt-jp1 zmi; day 2: axb-fraud-autofilter axb-fraud-feeds axb-generic axb-ham axb-ned-phish axb-ned-spam axb-phish bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm danmcdonald darxus grenier jarif llanga wt-en1 wt-en3 wt-jp1; day 3: axb-fraud-autofilter axb-fraud-feeds axb-generic axb-ham axb-ned-phish axb-ned-spam axb-phish bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm danmcdonald darxus grenier jarif llanga wt-en1 wt-en3 wt-jp1 zmi
+# with results from: day 1: axb-fraud-autofilter axb-fraud-feeds axb-generic axb-ham axb-ned-phish axb-ned-spam axb-phish bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm danmcdonald darxus grenier jarif llanga wt-en1 wt-en3 wt-jp1 zmi; day 2: axb-fraud-autofilter axb-fraud-feeds axb-generic axb-ham axb-ned-phish axb-ned-spam axb-phish bb-jhardin bb-jhardin_fraud bb-jm danmcdonald darxus grenier jarif llanga wt-en1 wt-en3 wt-jp1 zmi; day 3: axb-fraud-autofilter axb-fraud-feeds axb-generic axb-ham axb-ned-phish axb-ned-spam axb-phish bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm danmcdonald darxus grenier jarif llanga wt-en1 wt-en3 wt-jp1
+
+# good enough
+ACH_CANCELLED
+
+# tflags 
+ADVANCE_FEE_2_NEW_FORM
+
+# good enough
+ADVANCE_FEE_2_NEW_FRM_MNY
+
+# tflags 
+ADVANCE_FEE_2_NEW_MONEY
+
+# tflags 
+ADVANCE_FEE_3_NEW
+
+# tflags 
+ADVANCE_FEE_3_NEW_FORM
+
+# good enough
+ADVANCE_FEE_3_NEW_FRM_MNY
+
+# tflags 
+ADVANCE_FEE_3_NEW_MONEY
+
+# tflags 
+ADVANCE_FEE_4_NEW
+
+# good enough
+ADVANCE_FEE_4_NEW_FORM
+
+# good enough
+ADVANCE_FEE_4_NEW_FRM_MNY
+
+# good enough
+ADVANCE_FEE_4_NEW_MONEY
+
+# good enough
+ADVANCE_FEE_5_NEW
+
+# good enough
+ADVANCE_FEE_5_NEW_FORM
+
+# good enough
+ADVANCE_FEE_5_NEW_FRM_MNY
+
+# good enough
+ADVANCE_FEE_5_NEW_MONEY
 
 # tflags userconf
 ALL_TRUSTED
 
 # good enough
+ANY_PILL_PRICE
+
+# good enough
+AXB_BODYMAIL_SBL112884
+
+# good enough
+AXB_HELO_HOME_UN
+
+# good enough
 AXB_OBFU_MULE
 
 # good enough
+AXB_XMA_BASP
+
+# good enough
 AXB_XRCVD_EYOU_SEND
+
+# good enough
+AXB_X_AOL_SEZ_S
+
+# good enough
+AXB_X_RCV_WLOCAL
 
 # good enough
 BANKING_LAWS
@@ -49,11 +115,32 @@ CHARSET_FARAWAY
 # tflags userconf
 CHARSET_FARAWAY_HEADER
 
+# good enough
+CK_HELO_DYNAMIC_SPLIT_IP
+
+# good enough
+CN_B2B_SPAMMER
+
 # tflags 
 CORRUPT_FROM_LINE_IN_HDRS
 
 # good enough
+DATE_DOTS
+
+# good enough
+DATE_IN_FUTURE_96_Q
+
+# good enough
+DATE_IN_FUTURE_Q_PLUS
+
+# good enough
+DEAR_BENEFICIARY
+
+# good enough
 DEAR_WINNER
+
+# good enough
+DECEASED_NO_ML
 
 # tflags net
 DIGEST_MULTIPLE
@@ -115,11 +202,17 @@ DYN_RDNS_AND_INLINE_IMAGE
 # good enough
 DYN_RDNS_SHORT_HELO_HTML
 
+# good enough
+EMRCP
+
 # tflags userconf
 ENV_AND_HDR_SPF_MATCH
 
 # good enough
 FAKE_REPLY_C
+
+# good enough
+FB_ACHIEVE_BACH
 
 # good enough
 FB_CIALIS_LEO3
@@ -128,13 +221,22 @@ FB_CIALIS_LEO3
 FB_EXTRA_INCHES
 
 # good enough
+FB_GREAT_BEST_SEX
+
+# good enough
 FB_IMAGIRL
+
+# good enough
+FB_NOT_CREDIT
 
 # good enough
 FB_QUALITY_REPLICA
 
 # good enough
 FB_REPLICA_ROLEX
+
+# good enough
+FB_STAMINA_IN_BED
 
 # good enough
 FH_FAKE_RCVD_LINE
@@ -163,6 +265,9 @@ FH_HELO_EQ_D_D_D_D
 # good enough
 FH_HOST_EQ_DYNAMICIP
 
+# tflags 
+FILL_THIS_FORM
+
 # good enough
 FILL_THIS_FORM_FRAUD_PHISH
 
@@ -176,19 +281,97 @@ FILL_THIS_FORM_LONG
 FM_FRM_RN_L_BRACK
 
 # good enough
+FM_LOTTO_MONEY
+
+# good enough
 FM_LOTTO_YOU_WON
 
 # good enough
 FM_SEX_HELODDDD
 
+# good enough
+FORGED_RELAY_MUA_TO_MX
+
+# tflags 
+FORM_FRAUD_3
+
+# tflags 
+FORM_FRAUD_5
+
 # tflags userconf
 FRAGMENTED_MESSAGE
+
+# good enough
+FROM_12LTRDOM
 
 # tflags userconf
 FROM_DOMAIN_NOVOWEL
 
+# tflags 
+FROM_IN_TO_AND_SUBJ
+
 # tflags userconf
 FROM_LOCAL_NOVOWEL
+
+# good enough
+FROM_MISSPACED
+
+# tflags net
+FROM_MISSP_DKIM
+
+# good enough
+FROM_MISSP_DYNIP
+
+# good enough
+FROM_MISSP_EH_MATCH
+
+# good enough
+FROM_MISSP_FREEMAIL
+
+# good enough
+FROM_MISSP_MSFT
+
+# good enough
+FROM_MISSP_NO_TO
+
+# good enough
+FROM_MISSP_REPLYTO
+
+# tflags net
+FROM_MISSP_SPF_FAIL
+
+# good enough
+FROM_MISSP_TO_UNDISC
+
+# good enough
+FROM_MISSP_URI
+
+# good enough
+FROM_MISSP_USER
+
+# good enough
+FROM_WSP_LEAD
+
+# good enough
+FR_DOT_FEVER_5
+
+# good enough
+FR_TITLE_CONS_6
+
+# good enough
+FR_WATCHES_HTTP
+
+# good enough
+FSL_BOTSPAM_1
+
+# good enough
+FSL_CTYPE_WIN1251
+
+# good enough
+FSL_FREEMAIL_1
+
+# good enough
+FSL_FREEMAIL_2
 
 # good enough
 FSL_HELO_BARE_IP_1
@@ -200,10 +383,34 @@ FSL_HELO_DEVICE
 FSL_HELO_NON_FQDN_1
 
 # good enough
+FSL_MID_419
+
+# good enough
+FSL_MISSP_REPLYTO
+
+# good enough
+FSL_NEW_HELO_USER
+
+# good enough
+FSL_RCVD_USER
+
+# good enough
+FSL_UA
+
+# good enough
+FSL_XM_419
+
+# good enough
 FS_ABIGGER
 
 # good enough
 FS_PHARMASUB2
+
+# good enough
+FS_PORN_STAR
+
+# good enough
+FS_REFI
 
 # good enough
 FS_REPLICA
@@ -216,6 +423,9 @@ FS_START_LOSE
 
 # good enough
 FS_WEIGHT_LOSS
+
+# good enough
+GAPPY_HTML
 
 # tflags userconf
 GTUBE
@@ -244,6 +454,9 @@ HASHCASH_2SPEND
 # tflags userconf
 HASHCASH_HIGH
 
+# good enough
+HDRS_LCASE_1K
+
 # tflags userconf
 HEAD_LONG
 
@@ -251,16 +464,94 @@ HEAD_LONG
 HELO_LH_HOME
 
 # good enough
+HELO_MISC_IP
+
+# good enough
+HELO_NO_DOMAIN
+
+# good enough
 HELO_OEM
+
+# good enough
+HK_GOLDDUST
 
 # good enough
 HK_LOTTO
 
 # good enough
+HK_LOTTO_NAME
+
+# good enough
+HK_LOTTO_SUBJECT
+
+# good enough
+HK_NAME_FM_DR
+
+# good enough
+HK_NAME_FM_FROM
+
+# good enough
+HK_NAME_FM_MR_MRS
+
+# good enough
+HK_NAME_FREE
+
+# good enough
+HK_NAME_FROM
+
+# good enough
+HK_NAME_MR_MRS
+
+# good enough
+HK_PNIS
+
+# good enough
+HK_RANDOM_FROM
+
+# good enough
 HK_RANDOM_REPLYTO
+
+# good enough
+HK_SCAM_N1
+
+# good enough
+HK_SCAM_N12
+
+# good enough
+HK_SCAM_N13
+
+# good enough
+HK_SCAM_N15
+
+# good enough
+HK_SCAM_N2
+
+# good enough
+HK_SCAM_N3
+
+# good enough
+HK_SCAM_N4
+
+# good enough
+HK_SCAM_N8
+
+# good enough
+HK_SCAM_S15
+
+# good enough
+HK_SCAM_S25
+
+# good enough
+HK_SCAM_S7
+
+# good enough
+HK_SPAMMY_FILENAME
 
 # tflags userconf
 HTML_CHARSET_FARAWAY
+
+# good enough
+JM_FAKE_PSMTP_RCVD
 
 # good enough
 KB_DATE_CONTAINS_TAB
@@ -272,16 +563,64 @@ KB_FAKED_THE_BAT
 KB_RATWARE_MSGID
 
 # good enough
+KHOP_JS_OBFUSCATION
+
+# tflags 
+LOTS_OF_MONEY
+
+# good enough
 LOTTERY_1
 
 # good enough
 LOTTERY_PH_004470
+
+# good enough
+LOTTO_AGENT
+
+# good enough
+LOTTO_AGENT_RPLY
+
+# good enough
+LOTTO_DEPT
+
+# good enough
+LOTTO_URI
+
+# good enough
+MANY_PILL_PRICE
+
+# tflags 
+MANY_SPAN_IN_TEXT
 
 # tflags userconf
 MIME_CHARSET_FARAWAY
 
 # tflags userconf
 MISSING_HB_SEP
+
+# good enough
+MONEY_ATM_CARD
+
+# good enough
+MONEY_FORM
+
+# tflags 
+MONEY_FRAUD_3
+
+# tflags 
+MONEY_FRAUD_5
+
+# tflags 
+MONEY_FRAUD_8
+
+# good enough
+MONEY_FROM_MISSP
+
+# good enough
+MONEY_LOTTERY
+
+# good enough
+MONEY_PERCENT
 
 # good enough
 MSOE_MID_WRONG_CASE
@@ -296,7 +635,25 @@ NO_RECEIVED
 NO_RELAYS
 
 # good enough
+NSL_RCVD_FROM_USER
+
+# good enough
+NSL_RCVD_HELO_USER
+
+# good enough
 NULL_IN_BODY
+
+# good enough
+OBFU_ATTACH_MISSP
+
+# good enough
+OBFU_HTML_ATTACH
+
+# tflags 
+OBFU_JVSCR_ESC
+
+# tflags 
+OBFU_TEXT_ATTACH
 
 # tflags net
 PYZOR_CHECK
@@ -526,6 +883,30 @@ RCVD_IN_SORBS_ZOMBIE
 # tflags net
 RCVD_IN_XBL
 
+# good enough
+RISK_FREE
+
+# good enough
+SCANNED_EXTERNAL
+
+# good enough
+SERGIO_SUBJECT_PORN009
+
+# good enough
+SERGIO_SUBJECT_VIAGRA01
+
+# good enough
+SHARE_50_50
+
+# good enough
+SINGLE_HEADER_1K
+
+# good enough
+SINGLE_HEADER_2K
+
+# good enough
+SINGLE_HEADER_3K
+
 # tflags net
 SPF_FAIL
 
@@ -553,428 +934,14 @@ SPF_SOFTFAIL
 # good enough
 STOCK_IMG_HDR_FROM
 
+# good enough
+STYLE_GIBBERISH
+
 # tflags userconf
 SUBJECT_IN_BLACKLIST
 
 # tflags userconf
 SUBJECT_IN_WHITELIST
-
-# good enough
-TT_MSGID_TRUNC
-
-# good enough
-TVD_FINGER_02
-
-# good enough
-TVD_INCREASE_SIZE
-
-# good enough
-TVD_PH_SUBJ_META1
-
-# good enough
-TVD_RCVD_SINGLE
-
-# good enough
-TVD_VISIT_PHARMA
-
-# good enough
-ACH_CANCELLED
-
-# tflags 
-ADVANCE_FEE_2_NEW_FORM
-
-# good enough
-ADVANCE_FEE_2_NEW_FRM_MNY
-
-# tflags 
-ADVANCE_FEE_2_NEW_MONEY
-
-# tflags 
-ADVANCE_FEE_3_NEW
-
-# tflags 
-ADVANCE_FEE_3_NEW_FORM
-
-# good enough
-ADVANCE_FEE_3_NEW_FRM_MNY
-
-# tflags 
-ADVANCE_FEE_3_NEW_MONEY
-
-# tflags 
-ADVANCE_FEE_4_NEW
-
-# good enough
-ADVANCE_FEE_4_NEW_FORM
-
-# good enough
-ADVANCE_FEE_4_NEW_FRM_MNY
-
-# good enough
-ADVANCE_FEE_4_NEW_MONEY
-
-# good enough
-ADVANCE_FEE_5_NEW
-
-# good enough
-ADVANCE_FEE_5_NEW_FORM
-
-# good enough
-ADVANCE_FEE_5_NEW_FRM_MNY
-
-# good enough
-ADVANCE_FEE_5_NEW_MONEY
-
-# good enough
-ANY_PILL_PRICE
-
-# good enough
-AXB_BODYMAIL_SBL112884
-
-# good enough
-AXB_HELO_HOME_UN
-
-# good enough
-AXB_XMA_BASP
-
-# good enough
-AXB_X_AOL_SEZ_S
-
-# good enough
-AXB_X_RCV_WLOCAL
-
-# good enough
-CK_HELO_DYNAMIC_SPLIT_IP
-
-# good enough
-CN_B2B_SPAMMER
-
-# good enough
-DATE_DOTS
-
-# good enough
-DATE_IN_FUTURE_96_Q
-
-# good enough
-DATE_IN_FUTURE_Q_PLUS
-
-# good enough
-DEAR_BENEFICIARY
-
-# good enough
-DECEASED_NO_ML
-
-# good enough
-EMRCP
-
-# good enough
-END_FUTURE_EMAILS
-
-# good enough
-FB_ACHIEVE_BACH
-
-# good enough
-FB_GREAT_BEST_SEX
-
-# good enough
-FB_NOT_CREDIT
-
-# good enough
-FB_STAMINA_IN_BED
-
-# tflags 
-FILL_THIS_FORM
-
-# good enough
-FM_LOTTO_MONEY
-
-# good enough
-FORGED_RELAY_MUA_TO_MX
-
-# tflags 
-FORM_FRAUD_3
-
-# tflags 
-FORM_FRAUD_5
-
-# good enough
-FROM_12LTRDOM
-
-# tflags 
-FROM_IN_TO_AND_SUBJ
-
-# good enough
-FROM_MISSPACED
-
-# tflags net
-FROM_MISSP_DKIM
-
-# good enough
-FROM_MISSP_DYNIP
-
-# good enough
-FROM_MISSP_EH_MATCH
-
-# good enough
-FROM_MISSP_FREEMAIL
-
-# good enough
-FROM_MISSP_MSFT
-
-# good enough
-FROM_MISSP_NO_TO
-
-# good enough
-FROM_MISSP_REPLYTO
-
-# tflags net
-FROM_MISSP_SPF_FAIL
-
-# good enough
-FROM_MISSP_TO_UNDISC
-
-# good enough
-FROM_MISSP_URI
-
-# good enough
-FROM_MISSP_USER
-
-# good enough
-FROM_WSP_LEAD
-
-# good enough
-FRT_PROFIT2
-
-# good enough
-FR_DOT_FEVER_5
-
-# good enough
-FR_TITLE_CONS_6
-
-# good enough
-FR_WATCHES_HTTP
-
-# good enough
-FSL_BOTSPAM_1
-
-# good enough
-FSL_CTYPE_WIN1251
-
-# good enough
-FSL_FREEMAIL_1
-
-# good enough
-FSL_FREEMAIL_2
-
-# good enough
-FSL_MID_419
-
-# good enough
-FSL_MISSP_REPLYTO
-
-# good enough
-FSL_NEW_HELO_USER
-
-# good enough
-FSL_RCVD_USER
-
-# good enough
-FSL_UA
-
-# good enough
-FSL_XM_419
-
-# good enough
-FS_PORN_STAR
-
-# good enough
-FS_REFI
-
-# good enough
-GAPPY_HTML
-
-# good enough
-HDRS_LCASE_1K
-
-# good enough
-HELO_MISC_IP
-
-# good enough
-HELO_NO_DOMAIN
-
-# good enough
-HK_GOLDDUST
-
-# good enough
-HK_LOTTO_NAME
-
-# good enough
-HK_LOTTO_SUBJECT
-
-# good enough
-HK_NAME_FM_DR
-
-# good enough
-HK_NAME_FM_FROM
-
-# good enough
-HK_NAME_FM_MR_MRS
-
-# good enough
-HK_NAME_FREE
-
-# good enough
-HK_NAME_FROM
-
-# good enough
-HK_NAME_MR_MRS
-
-# good enough
-HK_PNIS
-
-# good enough
-HK_RANDOM_FROM
-
-# good enough
-HK_SCAM_N1
-
-# good enough
-HK_SCAM_N12
-
-# good enough
-HK_SCAM_N13
-
-# good enough
-HK_SCAM_N15
-
-# good enough
-HK_SCAM_N2
-
-# good enough
-HK_SCAM_N3
-
-# good enough
-HK_SCAM_N4
-
-# good enough
-HK_SCAM_N8
-
-# good enough
-HK_SCAM_S1
-
-# good enough
-HK_SCAM_S15
-
-# good enough
-HK_SCAM_S25
-
-# good enough
-HK_SCAM_S7
-
-# good enough
-HK_SPAMMY_FILENAME
-
-# good enough
-JM_FAKE_PSMTP_RCVD
-
-# good enough
-KHOP_JS_OBFUSCATION
-
-# tflags 
-LOTS_OF_MONEY
-
-# good enough
-LOTTO_AGENT
-
-# good enough
-LOTTO_AGENT_RPLY
-
-# good enough
-LOTTO_DEPT
-
-# good enough
-LOTTO_URI
-
-# good enough
-MANY_PILL_PRICE
-
-# tflags 
-MANY_SPAN_IN_TEXT
-
-# good enough
-MONEY_ATM_CARD
-
-# good enough
-MONEY_FORM
-
-# tflags 
-MONEY_FRAUD_3
-
-# tflags 
-MONEY_FRAUD_5
-
-# tflags 
-MONEY_FRAUD_8
-
-# good enough
-MONEY_FROM_MISSP
-
-# good enough
-MONEY_LOTTERY
-
-# good enough
-MONEY_PERCENT
-
-# good enough
-MSGID_WSP_TRAIL
-
-# good enough
-NSL_RCVD_FROM_USER
-
-# good enough
-NSL_RCVD_HELO_USER
-
-# good enough
-OBFU_ATTACH_MISSP
-
-# tflags 
-OBFU_JVSCR_ESC
-
-# tflags 
-OBFU_TEXT_ATTACH
-
-# good enough
-RISK_FREE
-
-# good enough
-SCANNED_EXTERNAL
-
-# good enough
-SERGIO_SUBJECT_PORN005
-
-# good enough
-SERGIO_SUBJECT_PORN009
-
-# good enough
-SERGIO_SUBJECT_VIAGRA01
-
-# good enough
-SHARE_50_50
-
-# good enough
-SINGLE_HEADER_1K
-
-# good enough
-SINGLE_HEADER_2K
-
-# good enough
-SINGLE_HEADER_3K
-
-# good enough
-SINGLE_HEADER_4K
-
-# good enough
-STYLE_GIBBERISH
 
 # good enough
 TAB_IN_FROM
@@ -1022,7 +989,16 @@ TO_NO_BRKTS_PCNT
 TR_JS_FROMCHARCODE
 
 # good enough
+TT_MSGID_TRUNC
+
+# good enough
+TVD_FINGER_02
+
+# good enough
 TVD_FROM_1
+
+# good enough
+TVD_INCREASE_SIZE
 
 # good enough
 TVD_PH_1
@@ -1031,16 +1007,34 @@ TVD_PH_1
 TVD_PH_BODY_META
 
 # good enough
+TVD_PH_SUBJ_META1
+
+# good enough
+TVD_RCVD_SINGLE
+
+# good enough
 TVD_SUBJ_NUM_OBFU_MINFP
 
 # good enough
-URI_DEOBFU_INSTR
+TVD_VISIT_PHARMA
 
 # good enough
-URI_OBFU_TLD
+FRT_PROFIT2
 
 # good enough
-XM_PHPMAILER_FORGED
+FS_LOW_INTMOR
+
+# good enough
+MONEY_FORM_SHORT
+
+# good enough
+MSGID_WSP_TRAIL
+
+# good enough
+SERGIO_SUBJECT_PORN005
+
+# good enough
+SINGLE_HEADER_4K
 
 # tflags userconf
 UNPARSEABLE_RELAY
@@ -1093,8 +1087,14 @@ URIBL_SC_SURBL
 # tflags net
 URIBL_WS_SURBL
 
+# good enough
+URI_DEOBFU_INSTR
+
 # tflags userconf
 URI_NOVOWEL
+
+# good enough
+URI_OBFU_TLD
 
 # tflags userconf
 USER_IN_ALL_SPAM_TO
@@ -1133,13 +1133,10 @@ USER_IN_WHITELIST_TO
 XMAILER_MIMEOLE_OL_1ECD5
 
 # good enough
-XMAILER_MIMEOLE_OL_22B61
-
-# good enough
 XMAILER_MIMEOLE_OL_8627E
 
 # good enough
-XMAILER_MIMEOLE_OL_9B90B
+XM_PHPMAILER_FORGED
 
 # tflags net
 __DKIMDOMAIN_IN_DWL_ANY
