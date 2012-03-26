@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-fraud-autofilter axb-fraud-feeds axb-generic axb-ham axb-ned-phish axb-ned-spam axb-phish bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm danmcdonald darxus grenier jarif llanga wt-en1 wt-en3 wt-jp1 zmi; day 2: axb-fraud-autofilter axb-fraud-feeds axb-generic axb-ham axb-ned-phish axb-ned-spam axb-phish bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm danmcdonald darxus grenier jarif llanga wt-en1 wt-en3 wt-jp1 zmi; day 3: axb-fraud-autofilter axb-fraud-feeds axb-generic axb-ham axb-ned-phish axb-ned-spam axb-phish bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm danmcdonald darxus grenier jarif llanga wt-en1 wt-en3 wt-jp1 zmi
+# with results from: day 1: bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm danmcdonald darxus grenier jarif llanga wt-en1 wt-en3 wt-jp1 zmi; day 2: axb-fraud-autofilter axb-fraud-feeds axb-generic axb-ham axb-ned-phish axb-ned-spam axb-phish bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm danmcdonald darxus grenier jarif llanga wt-en1 wt-en3 wt-jp1 zmi; day 3: axb-fraud-autofilter axb-fraud-feeds axb-generic axb-ham axb-ned-phish axb-ned-spam axb-phish bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm danmcdonald darxus grenier jarif llanga wt-en1 wt-en3 wt-jp1 zmi
 
 # good enough
 ACH_CANCELLED
@@ -62,22 +62,10 @@ AXB_BODYMAIL_SBL112884
 AXB_HELO_HOME_UN
 
 # good enough
-AXB_OBFU_MULE
-
-# good enough
-AXB_XMA_BASP
-
-# good enough
-AXB_XRCVD_EYOU_SEND
-
-# good enough
 AXB_X_AOL_SEZ_S
 
 # good enough
 AXB_X_RCV_WLOCAL
-
-# good enough
-BANKING_LAWS
 
 # good enough
 BASE64_LENGTH_79_INF
@@ -344,15 +332,6 @@ FROM_MISSP_URI
 FROM_MISSP_USER
 
 # good enough
-FROM_WSP_LEAD
-
-# good enough
-FRT_PROFIT2
-
-# good enough
-FR_DOT_FEVER_5
-
-# good enough
 FR_TITLE_CONS_6
 
 # good enough
@@ -363,12 +342,6 @@ FSL_BOTSPAM_1
 
 # good enough
 FSL_CTYPE_WIN1251
-
-# good enough
-FSL_FREEMAIL_1
-
-# good enough
-FSL_FREEMAIL_2
 
 # good enough
 FSL_HELO_BARE_IP_1
@@ -389,9 +362,6 @@ FSL_MISSP_REPLYTO
 FSL_NEW_HELO_USER
 
 # good enough
-FSL_RCVD_USER
-
-# good enough
 FSL_UA
 
 # good enough
@@ -399,9 +369,6 @@ FSL_XM_419
 
 # good enough
 FS_ABIGGER
-
-# good enough
-FS_LOW_INTMOR
 
 # good enough
 FS_PHARMASUB2
@@ -423,9 +390,6 @@ FS_START_LOSE
 
 # good enough
 FS_WEIGHT_LOSS
-
-# good enough
-GAPPY_HTML
 
 # tflags userconf
 GTUBE
@@ -453,9 +417,6 @@ HASHCASH_2SPEND
 
 # tflags userconf
 HASHCASH_HIGH
-
-# good enough
-HDRS_LCASE_1K
 
 # tflags userconf
 HEAD_LONG
@@ -512,12 +473,6 @@ HK_RANDOM_FROM
 HK_RANDOM_REPLYTO
 
 # good enough
-HK_SCAM_N1
-
-# good enough
-HK_SCAM_N12
-
-# good enough
 HK_SCAM_N13
 
 # good enough
@@ -569,9 +524,6 @@ KHOP_JS_OBFUSCATION
 LOTS_OF_MONEY
 
 # good enough
-LOTTERY_1
-
-# good enough
 LOTTERY_PH_004470
 
 # good enough
@@ -579,9 +531,6 @@ LOTTO_AGENT
 
 # good enough
 LOTTO_AGENT_RPLY
-
-# good enough
-LOTTO_DEPT
 
 # good enough
 LOTTO_URI
@@ -604,9 +553,6 @@ MONEY_ATM_CARD
 # good enough
 MONEY_FORM
 
-# good enough
-MONEY_FORM_SHORT
-
 # tflags 
 MONEY_FRAUD_3
 
@@ -621,9 +567,6 @@ MONEY_FROM_MISSP
 
 # good enough
 MONEY_LOTTERY
-
-# good enough
-MONEY_PERCENT
 
 # good enough
 MSGID_WSP_TRAIL
@@ -1007,13 +950,7 @@ TVD_FROM_1
 TVD_INCREASE_SIZE
 
 # good enough
-TVD_PH_1
-
-# good enough
 TVD_PH_BODY_META
-
-# good enough
-TVD_PH_SUBJ_META1
 
 # good enough
 TVD_RCVD_SINGLE
@@ -1025,7 +962,13 @@ TVD_SUBJ_NUM_OBFU_MINFP
 TVD_VISIT_PHARMA
 
 # good enough
-FU_ENDS_SG
+DEAR_EMAIL_USER
+
+# good enough
+OBFU_HTML_ATTACH
+
+# good enough
+SINGLE_HEADER_4K
 
 # tflags userconf
 UNPARSEABLE_RELAY
@@ -1078,14 +1021,8 @@ URIBL_SC_SURBL
 # tflags net
 URIBL_WS_SURBL
 
-# good enough
-URI_DEOBFU_INSTR
-
 # tflags userconf
 URI_NOVOWEL
-
-# good enough
-URI_OBFU_TLD
 
 # tflags userconf
 USER_IN_ALL_SPAM_TO
@@ -1125,9 +1062,6 @@ XMAILER_MIMEOLE_OL_1ECD5
 
 # good enough
 XMAILER_MIMEOLE_OL_8627E
-
-# good enough
-XM_PHPMAILER_FORGED
 
 # tflags net
 __DKIMDOMAIN_IN_DWL_ANY
