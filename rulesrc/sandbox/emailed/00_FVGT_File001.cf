@@ -3389,14 +3389,14 @@ describe FM_SCHOOL_DIPLOMA      Meta for Schooling + Diploma.
 #counts   FM_SCHOOL_DIPLOMA        15s/0h of 47019 corpus (37183s/9836h FVGT) 12/23/06
 
 
-body     __WORD_SEX             /\bsex(?:iest|y)?\b/i
-body     __WORD_CUM             /\bcum\b/i
-body     __WORD_SPERM           /\bsperm\b/i
-body     __WORD_SLUTS           /\bsluts?\b/i
-body     __WORD_RAPED           /\braped?\b/i
-meta     __SEX_WRDS             (__WORD_SEX || __WORD_CUM || __WORD_SPERM || __WORD_SLUTS || __WORD_RAPED)
-meta     FM_SEX_HELODDDD        (__SEX_WRDS && FH_HELO_EQ_D_D_D_D)
-describe FM_SEX_HELODDDD        Sex words + helo = dddd
+#body     __WORD_SEX             /\bsex(?:iest|y)?\b/i
+#body     __WORD_CUM             /\bcum\b/i
+#body     __WORD_SPERM           /\bsperm\b/i
+#body     __WORD_SLUTS           /\bsluts?\b/i
+#body     __WORD_RAPED           /\braped?\b/i
+#meta     __SEX_WRDS             (__WORD_SEX || __WORD_CUM || __WORD_SPERM || __WORD_SLUTS || __WORD_RAPED)
+#meta     FM_SEX_HELODDDD        (__SEX_WRDS && FH_HELO_EQ_D_D_D_D)
+#describe FM_SEX_HELODDDD        Sex words + helo = dddd
 ##score    FM_SEX_HELODDDD      10.357
 #counts   FM_SEX_HELODDDD          105s/0h of 33966 corpus (24401s/9565h FVGT) 11/16/06
 #counts   FM_SEX_HELODDDD          108s/0h of 35048 corpus (25413s/9635h FVGT) 11/16/06
