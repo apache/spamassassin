@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm danmcdonald darxus grenier jarif llanga wt-en1 wt-en3 wt-jp1 zmi; day 2: bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm danmcdonald darxus grenier jarif llanga wt-en1 wt-en3 wt-jp1 zmi; day 3: axb-fraud-autofilter axb-fraud-feeds axb-generic axb-ham axb-ned-phish axb-ned-spam axb-phish bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm danmcdonald darxus grenier jarif llanga wt-en1 wt-en3 wt-jp1 zmi
+# with results from: day 1: axb-generic axb-ned-spam bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm danmcdonald darxus grenier jarif llanga nbebout wt-en1 wt-en3 wt-jp1 zmi; day 2: bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm danmcdonald darxus grenier jarif llanga wt-en1 wt-en3 wt-jp1 zmi; day 3: bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm danmcdonald darxus grenier jarif llanga wt-en1 wt-en3 wt-jp1 zmi
 
 # good enough
 ACH_CANCELLED
@@ -54,6 +54,9 @@ ALL_TRUSTED
 
 # good enough
 ANY_PILL_PRICE
+
+# good enough
+APOSTROPHE_FROM
 
 # good enough
 AXB_BODYMAIL_SBL112884
@@ -123,6 +126,9 @@ DATE_IN_FUTURE_Q_PLUS
 
 # good enough
 DEAR_BENEFICIARY
+
+# good enough
+DEAR_EMAIL_USER
 
 # good enough
 DEAR_WINNER
@@ -245,7 +251,7 @@ FH_HELO_ALMOST_IP
 FH_HELO_EQ_CHARTER
 
 # good enough
-FH_HELO_EQ_D_D_D_D
+FH_HOST_EQ_DYNAMICIP
 
 # tflags 
 FILL_THIS_FORM
@@ -269,7 +275,7 @@ FM_LOTTO_MONEY
 FM_LOTTO_YOU_WON
 
 # good enough
-FM_SEX_HELODDDD
+FM_SCHOOLING
 
 # good enough
 FORGED_RELAY_MUA_TO_MX
@@ -332,6 +338,12 @@ FROM_MISSP_URI
 FROM_MISSP_USER
 
 # good enough
+FRT_ROLEX
+
+# good enough
+FR_ALMOST_VIAG2
+
+# good enough
 FR_TITLE_CONS_6
 
 # good enough
@@ -384,6 +396,9 @@ FS_REPLICA
 
 # good enough
 FS_REPLICAWATCH
+
+# good enough
+FS_START_DOYOU2
 
 # good enough
 FS_START_LOSE
@@ -446,6 +461,9 @@ HK_LOTTO_NAME
 HK_LOTTO_SUBJECT
 
 # good enough
+HK_NAME_DRUGS
+
+# good enough
 HK_NAME_FM_DR
 
 # good enough
@@ -465,6 +483,9 @@ HK_NAME_MR_MRS
 
 # good enough
 HK_PNIS
+
+# good enough
+HK_RANDOM_ENVFROM
 
 # good enough
 HK_RANDOM_FROM
@@ -489,9 +510,6 @@ HK_SCAM_N4
 
 # good enough
 HK_SCAM_N8
-
-# good enough
-HK_SCAM_S15
 
 # good enough
 HK_SCAM_S25
@@ -592,11 +610,17 @@ NULL_IN_BODY
 # good enough
 OBFU_ATTACH_MISSP
 
+# good enough
+OBFU_HTML_ATTACH
+
 # tflags 
 OBFU_JVSCR_ESC
 
 # tflags 
 OBFU_TEXT_ATTACH
+
+# good enough
+PART_CID_STOCK
 
 # tflags net
 PYZOR_CHECK
@@ -827,6 +851,9 @@ RCVD_IN_SORBS_ZOMBIE
 RCVD_IN_XBL
 
 # good enough
+REPLYTO_WITHOUT_TO_CC
+
+# good enough
 RISK_FREE
 
 # good enough
@@ -845,6 +872,9 @@ SERGIO_SUBJECT_VIAGRA01
 SHARE_50_50
 
 # good enough
+SHORT_HELO_AND_INLINE_IMAGE
+
+# good enough
 SINGLE_HEADER_1K
 
 # good enough
@@ -852,6 +882,12 @@ SINGLE_HEADER_2K
 
 # good enough
 SINGLE_HEADER_3K
+
+# good enough
+SINGLE_HEADER_4K
+
+# good enough
+SPAMMY_XMAILER
 
 # tflags net
 SPF_FAIL
@@ -891,6 +927,9 @@ SUBJECT_IN_WHITELIST
 
 # good enough
 TAB_IN_FROM
+
+# good enough
+TBIRD_SUSP_MIME_BDRY
 
 # good enough
 TINY_FLOAT
@@ -950,16 +989,67 @@ TVD_INCREASE_SIZE
 TVD_PH_BODY_META
 
 # good enough
+TVD_RCVD_IP
+
+# good enough
 TVD_SUBJ_NUM_OBFU_MINFP
 
 # good enough
 TVD_VISIT_PHARMA
 
 # good enough
-DEAR_EMAIL_USER
+AXB_OBFU_MULE
 
 # good enough
-SINGLE_HEADER_4K
+AXB_XMA_BASP
+
+# good enough
+CK_HELO_GENERIC
+
+# good enough
+DEAR_EMAIL
+
+# good enough
+END_FUTURE_EMAILS
+
+# good enough
+FB_CONSOL_YOUR
+
+# good enough
+FRT_PROFIT2
+
+# good enough
+HTML_ATTACH
+
+# good enough
+IMAGESHACK_URI
+
+# good enough
+LOTTO_DEPT
+
+# good enough
+MS_XYMOSG_5K
+
+# good enough
+OBFU_DOC_ATTACH
+
+# good enough
+RP_8BIT
+
+# good enough
+TO_NO_BRKTS_NORDNS
+
+# good enough
+TO_NO_BRKTS_NORDNS_HTML
+
+# good enough
+TVD_SPACE_RATIO_MINFP
+
+# good enough
+URI_DEOBFU_INSTR
+
+# good enough
+URI_OBFU_TLD
 
 # tflags userconf
 UNPARSEABLE_RELAY
@@ -1049,7 +1139,13 @@ USER_IN_WHITELIST
 USER_IN_WHITELIST_TO
 
 # good enough
+VANITY
+
+# good enough
 XMAILER_MIMEOLE_OL_1ECD5
+
+# good enough
+XMAILER_MIMEOLE_OL_22B61
 
 # good enough
 XMAILER_MIMEOLE_OL_8627E
