@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-generic axb-ned-spam bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm danmcdonald darxus grenier jarif llanga nbebout wt-en1 wt-en3 wt-jp1 zmi; day 2: bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm danmcdonald darxus grenier jarif llanga wt-en1 wt-en3 wt-jp1 zmi; day 3: bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm danmcdonald darxus grenier jarif llanga wt-en1 wt-en3 wt-jp1 zmi
+# with results from: day 1: axb-generic axb-ned-spam bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm danmcdonald darxus grenier jarif llanga wt-en1 wt-en3 wt-jp1 zmi; day 2: axb-generic axb-ned-spam bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm danmcdonald darxus grenier jarif llanga nbebout wt-en1 wt-en3 wt-jp1 zmi; day 3: bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm danmcdonald darxus grenier jarif llanga wt-en1 wt-en3 wt-jp1 zmi
 
 # good enough
 ACH_CANCELLED
@@ -110,6 +110,9 @@ CHARSET_FARAWAY_HEADER
 CK_HELO_DYNAMIC_SPLIT_IP
 
 # good enough
+CK_HELO_GENERIC
+
+# good enough
 CN_B2B_SPAMMER
 
 # tflags 
@@ -126,6 +129,9 @@ DATE_IN_FUTURE_Q_PLUS
 
 # good enough
 DEAR_BENEFICIARY
+
+# good enough
+DEAR_EMAIL
 
 # good enough
 DEAR_EMAIL_USER
@@ -198,6 +204,9 @@ DYN_RDNS_SHORT_HELO_HTML
 
 # good enough
 EMRCP
+
+# good enough
+END_FUTURE_EMAILS
 
 # tflags userconf
 ENV_AND_HDR_SPF_MATCH
@@ -339,9 +348,6 @@ FROM_MISSP_USER
 
 # good enough
 FRT_ROLEX
-
-# good enough
-FR_ALMOST_VIAG2
 
 # good enough
 FR_TITLE_CONS_6
@@ -521,6 +527,9 @@ HK_SPAMMY_FILENAME
 HTML_CHARSET_FARAWAY
 
 # good enough
+IMAGESHACK_URI
+
+# good enough
 JM_FAKE_PSMTP_RCVD
 
 # good enough
@@ -589,6 +598,9 @@ MSGID_WSP_TRAIL
 # good enough
 MSOE_MID_WRONG_CASE
 
+# good enough
+MS_XYMOSG_5K
+
 # tflags net
 NO_DNS_FOR_FROM
 
@@ -609,9 +621,6 @@ NULL_IN_BODY
 
 # good enough
 OBFU_ATTACH_MISSP
-
-# good enough
-OBFU_HTML_ATTACH
 
 # tflags 
 OBFU_JVSCR_ESC
@@ -857,6 +866,9 @@ REPLYTO_WITHOUT_TO_CC
 RISK_FREE
 
 # good enough
+RP_8BIT
+
+# good enough
 SCANNED_EXTERNAL
 
 # good enough
@@ -867,12 +879,6 @@ SERGIO_SUBJECT_PORN009
 
 # good enough
 SERGIO_SUBJECT_VIAGRA01
-
-# good enough
-SHARE_50_50
-
-# good enough
-SHORT_HELO_AND_INLINE_IMAGE
 
 # good enough
 SINGLE_HEADER_1K
@@ -968,6 +974,12 @@ TO_NO_BRKTS_FROM_MSSP
 TO_NO_BRKTS_MSFT
 
 # good enough
+TO_NO_BRKTS_NORDNS
+
+# good enough
+TO_NO_BRKTS_NORDNS_HTML
+
+# good enough
 TO_NO_BRKTS_PCNT
 
 # good enough
@@ -992,64 +1004,13 @@ TVD_PH_BODY_META
 TVD_RCVD_IP
 
 # good enough
+TVD_SPACE_RATIO_MINFP
+
+# good enough
 TVD_SUBJ_NUM_OBFU_MINFP
 
 # good enough
 TVD_VISIT_PHARMA
-
-# good enough
-AXB_OBFU_MULE
-
-# good enough
-AXB_XMA_BASP
-
-# good enough
-CK_HELO_GENERIC
-
-# good enough
-DEAR_EMAIL
-
-# good enough
-END_FUTURE_EMAILS
-
-# good enough
-FB_CONSOL_YOUR
-
-# good enough
-FRT_PROFIT2
-
-# good enough
-HTML_ATTACH
-
-# good enough
-IMAGESHACK_URI
-
-# good enough
-LOTTO_DEPT
-
-# good enough
-MS_XYMOSG_5K
-
-# good enough
-OBFU_DOC_ATTACH
-
-# good enough
-RP_8BIT
-
-# good enough
-TO_NO_BRKTS_NORDNS
-
-# good enough
-TO_NO_BRKTS_NORDNS_HTML
-
-# good enough
-TVD_SPACE_RATIO_MINFP
-
-# good enough
-URI_DEOBFU_INSTR
-
-# good enough
-URI_OBFU_TLD
 
 # tflags userconf
 UNPARSEABLE_RELAY
