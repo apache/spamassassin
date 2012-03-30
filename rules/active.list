@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-generic axb-ned-spam bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm danmcdonald darxus grenier jarif llanga wt-en1 wt-en3 wt-jp1 zmi; day 2: axb-generic axb-ned-spam bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm danmcdonald darxus grenier jarif llanga nbebout wt-en1 wt-en3 wt-jp1 zmi; day 3: bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm danmcdonald darxus grenier jarif llanga wt-en1 wt-en3 wt-jp1 zmi
+# with results from: day 1: axb-generic axb-ned-spam bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm danmcdonald darxus grenier jarif llanga wt-en1 wt-en3 wt-jp1 zmi; day 2: axb-generic axb-ned-spam bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm danmcdonald darxus grenier jarif llanga wt-en1 wt-en3 wt-jp1 zmi; day 3: axb-generic axb-ned-spam bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm danmcdonald darxus grenier jarif llanga nbebout wt-en1 wt-en3 wt-jp1 zmi
 
 # good enough
 ACH_CANCELLED
@@ -63,6 +63,12 @@ AXB_BODYMAIL_SBL112884
 
 # good enough
 AXB_HELO_HOME_UN
+
+# good enough
+AXB_OBFU_MULE
+
+# good enough
+AXB_XMA_BASP
 
 # good enough
 AXB_X_AOL_SEZ_S
@@ -194,7 +200,13 @@ DOS_ANAL_SPAM_MAILER
 DOS_OE_TO_MX
 
 # good enough
+DOS_OUTLOOK_TO_MX
+
+# good enough
 DOS_RCVD_IP_TWICE_C
+
+# good enough
+DRUGS_STOCK_MIMEOLE
 
 # good enough
 DYN_RDNS_AND_INLINE_IMAGE
@@ -243,6 +255,9 @@ FH_FAKE_RCVD_LINE
 
 # good enough
 FH_FAKE_RCVD_LINE_B
+
+# good enough
+FH_FROMEML_NOTLD
 
 # good enough
 FH_FROM_CASH
@@ -389,6 +404,9 @@ FSL_XM_419
 FS_ABIGGER
 
 # good enough
+FS_LARGE_PERCENT2
+
+# good enough
 FS_PHARMASUB2
 
 # good enough
@@ -411,6 +429,9 @@ FS_START_LOSE
 
 # good enough
 FS_WEIGHT_LOSS
+
+# good enough
+FS_WILL_HELP
 
 # tflags userconf
 GTUBE
@@ -523,6 +544,9 @@ HK_SCAM_S25
 # good enough
 HK_SPAMMY_FILENAME
 
+# good enough
+HTML_ATTACH
+
 # tflags userconf
 HTML_CHARSET_FARAWAY
 
@@ -542,6 +566,9 @@ KB_FAKED_THE_BAT
 KB_RATWARE_MSGID
 
 # good enough
+KB_RATWARE_OUTLOOK_MID
+
+# good enough
 KHOP_JS_OBFUSCATION
 
 # tflags 
@@ -555,6 +582,9 @@ LOTTO_AGENT
 
 # good enough
 LOTTO_AGENT_RPLY
+
+# good enough
+LOTTO_DEPT
 
 # good enough
 LOTTO_URI
@@ -621,6 +651,12 @@ NULL_IN_BODY
 
 # good enough
 OBFU_ATTACH_MISSP
+
+# good enough
+OBFU_DOC_ATTACH
+
+# good enough
+OBFU_HTML_ATTACH
 
 # tflags 
 OBFU_JVSCR_ESC
@@ -869,6 +905,9 @@ RISK_FREE
 RP_8BIT
 
 # good enough
+SB_GIF_AND_NO_URIS
+
+# good enough
 SCANNED_EXTERNAL
 
 # good enough
@@ -1004,6 +1043,9 @@ TVD_PH_BODY_META
 TVD_RCVD_IP
 
 # good enough
+TVD_RCVD_SINGLE
+
+# good enough
 TVD_SPACE_RATIO_MINFP
 
 # good enough
@@ -1011,6 +1053,9 @@ TVD_SUBJ_NUM_OBFU_MINFP
 
 # good enough
 TVD_VISIT_PHARMA
+
+# good enough
+FS_MAKE_MONEY
 
 # tflags userconf
 UNPARSEABLE_RELAY
@@ -1063,8 +1108,14 @@ URIBL_SC_SURBL
 # tflags net
 URIBL_WS_SURBL
 
+# good enough
+URI_DEOBFU_INSTR
+
 # tflags userconf
 URI_NOVOWEL
+
+# good enough
+URI_OBFU_TLD
 
 # tflags userconf
 USER_IN_ALL_SPAM_TO
@@ -1110,6 +1161,12 @@ XMAILER_MIMEOLE_OL_22B61
 
 # good enough
 XMAILER_MIMEOLE_OL_8627E
+
+# good enough
+XMAILER_MIMEOLE_OL_C65FA
+
+# good enough
+XMAILER_MIMEOLE_OL_CF0C0
 
 # tflags net
 __DKIMDOMAIN_IN_DWL_ANY
