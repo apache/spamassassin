@@ -12,25 +12,9 @@ header		__AXB_LI_FBL	exists:X-LinkedIn-fbl
 meta		AXB_OBFU_MULE	(__AXB_LI_U && !__AXB_LI_CLASS && !__AXB_LI_FBL)
 describe	AXB_OBFU_MULE	spacey mules
 
-# 2012-03-08
-header		AXB_XM_PPS	X-Mailer =~ /^Power Sending Sockets\b/
-describe	AXB_XM_PPS	Mailer fingerprint
-
 # 2012-02-16
 body            AXB_BODYMAIL_SBL112884  /\@yeah\.net\b/
 describe        AXB_BODYMAIL_SBL112884  Spammer dropbox SBL112884
-
-# 2012-01-25
-ifplugin Mail::SpamAssassin::Plugin::MIMEHeader
-mimeheader      AXB_XMIME_EMBED0        Content-ID =~ /\<embedding\-0\>/
-describe        AXB_XMIME_EMBED0        MimeHeader fingerprint
-endif
-
-# 2012-01-21
-header          __X_NO_AUTH             X-No-Auth =~ /unauthenticated sender/
-tflags          __X_NO_AUTH             multiple
-meta            AXB_X_NO_AUTH           (__X_NO_AUTH > 5)
-describe        AXB_X_NO_AUTH           Suspicious not authenticated sender
 
 
 # 2012-01-07
@@ -46,10 +30,6 @@ describe        AXB_X_AOL_SEZ_S         AOL said this is S
 uri             AXB_URI_BIG5    /\¡[CDO]/
 describe        AXB_URI_BIG5    Uri contains big5 encoding
 
-# 2011-12-27
-header          AXB_XM_BULK_SECTRANS    X-Mailer =~ /\bSecure\-Transmitter\b/
-describe        AXB_XM_BULK_SECTRANS    Bulk mail tool
-
 # 2011-12-08
 header          AXB_XM_BULK_SB          X-Mailer =~ /SendBlaster/
 describe        AXB_XM_BULK_SB          Bulk mail tool
@@ -64,19 +44,6 @@ describe        AXB_XRCVD_OWN3D_FW     Possibly abused consumer device
 header          AXB_AOLIP_CONFUSED      X-AOL-IP =~ /^[a-z0-9\-]{7,25}$/
 describe        AXB_AOLIP_CONFUSED      Confused IP
 
-# 2011-11-01
-header          AXB_XFR_FKTWT   From =~ /\@postmaster\.twit-\w+\.com\>/
-describe        AXB_XFR_FKTWT   Suspicious bird
-
-# 2011-10-28
-header          AXB_XF_34X_BLAH   From =~ /\@(?:[a-z]{3,15}[0-9]{1,4}\.){3,4}/
-describe        AXB_XF_34X_BLAH   Dicey From
-
-
-# 2011-10-18
-header          AXB_FR0M_FAKE    From:name =~ /\@\w+\.c0m/
-describe        AXB_FR0M_FAKE    Forged domain in name
-
 
 # 2011-09-26
 rawbody         AXB_B_RAW_CTRLCLICK  /\bControl\.invoke\(\'MessagePartBody\'\,\'_onBodyClick\'\,event\)\;\"\>/
@@ -87,15 +54,6 @@ describe        AXB_B_RAW_CTRLCLICK  Suspicious fingerprint
 # 2011-09-14 - Suggested by rfg / patternity
 header          AXB_XM_SENTBY   exists:X-Mailer-Sent-By
 describe        AXB_XM_SENTBY   Ratware fingerprint
-
-
-# 2011-09-14
-header          AXB_XPHP_ORISCRIPT_RC   X-PHP-Originating-Script =~ /0\:func\.inc/
-describe        AXB_XPHP_ORISCRIPT_RC   Possibly hacked webmail
-
-# 2011-08-02
-header          AXB_XM_QCVR     X-Mailer =~ /\bQuickConveyor\b/
-describe        AXB_XM_QCVR     Bulk fingerprint
 
 # 2011-07-27
 # header          AXB_XRCVD_XYZCRP         Received =~ /\(envelope\-sender \<\#\@\[\]\>\)/
@@ -125,26 +83,12 @@ rawbody         AXB_SSCECCF     /\bSandboxScopeClass ExternalClass\b/
 describe        AXB_SSCECCF     unidentified fingerprint
 
 
-# 2011-06-28
-header          AXB_X_GOOGRP_DIRADD        X-Google-Loop =~ /^sub_directadd$/
-describe        AXB_X_GOOGRP_DIRADD        Google Groups: You've been added to spammy group?
-
 
 #2011-06-05
 header   AXB_XRCVD_EYOU_SEND    Received =~ /\(eyou send program\)/
 describe AXB_XRCVD_EYOU_SEND    fingerprint
 #score   AXB_XRCVD_EYOU_SEND    1.0
 
-# 2011-06-02
-header   AXB_XMIME_OLEV         X-MimeOLE =~ /Produced By Microsoft MimeOLE V$/
-describe AXB_XMIME_OLEV         fingerprint
-#score    AXB_XMIME_OLEV         0.1
-
-
-# 2011-06-01
-header   AXB_XM_RCVD_ZERO   Received =~ /^from 0\./
-describe AXB_XM_RCVD_ZERO   fingerprint
-#score    AXB_XM_RCVD_ZERO   1.5
 
 
 header          AXB_HELO_HOME_UN        X-Spam-Relays-Untrusted =~ /^[^\]]+ helo=\w+\.(lan|home) /i
