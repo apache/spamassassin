@@ -811,4 +811,9 @@ endif
 meta        ACH_CANCELLED          __ACH_CANCELLED
 describe    ACH_CANCELLED          "ACH cancelled" probable malware
 
+# spams from users list query 03/2012
+uri         URI_DBL_DOM_1          m,^https?://([^/]+)/.*https?://(?:[^.]+\.)?\1/,i
+describe    URI_DBL_DOM_1          domain appears twice
+uri         URI_DBL_DOM_2          m,^https?://[^.]+\.([^/]+)/.*https?://[^.]+\.\1/,i
+describe    URI_DBL_DOM_2          domain appears twice
 
