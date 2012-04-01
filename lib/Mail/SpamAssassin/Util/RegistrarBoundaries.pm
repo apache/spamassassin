@@ -47,8 +47,9 @@ use vars qw (
 # As per bug #6734
 # Re-enable .so .pm .yt in 2012-02-21
 #   http://www.afnic.fr/fr/produits-et-services/autres-domaines-de-premier-niveau/
-
 #   http://www.iana.org/domains/root/db/so.html
+#
+# Bug 5048: Re-enable .xxx 2012-04-01
 #
 # Remember to also change regexp below when updating!
 
@@ -64,7 +65,7 @@ foreach (qw/
   nf ng ni nl no np nr nu nz om org pa pe pf pg ph pk pl pm pn pr pro ps
   pt pw py qa re ro rs ru rw sa sb sc sd se sg sh si sk sl sm sn so
   sr st su sv sy sz tc td tel tf tg th tj tk tl tm tn to tp tr travel tt
-  tv tw tz ua ug uk us uy uz va vc ve vg vi vn vu wf ws ye yt za
+  tv tw tz ua ug uk us uy uz va vc ve vg vi vn vu wf ws xxx ye yt za
   zm zw
   /) {
   $VALID_TLDS{$_} = 1;
@@ -73,16 +74,16 @@ foreach (qw/
 # %VALID_TLDS as Regexp::List optimized regexp, for use in Plugins etc
 # Paste above list to:
 #  perl -MRegexp::List -e '$/=undef; $_=<>; $r = Regexp::List->new; push @l, $_ for (split); print $r->list2re(@l)'
-# Verified up to date 20110501
+# Verified up to date 20120401
 $VALID_TLDS_RE = qr/
-  (?=[abcdefghijklmnopqrstuvwyz])
+  (?=[abcdefghijklmnopqrstuvwxyz])
   (?:a(?:e(?:ro)?|r(?:pa)?|s(?:ia)?|[cdfgilmnoqtuwxz])|b(?:iz?|[abdefghjmnorstwyz])
   |c(?:at?|o(?:m|op)?|[cdfghiklmnruvxyz])|d[ejkmoz]|e(?:[cegrst]|d?u)|f[ijkmor]
   |g(?:[adefghilmnpqrstuwy]|ov)|h[kmnrtu]|i(?:n(?:fo|t)?|[delmoqrst])|j(?:o(?:bs)?|[emp])
   |k[eghimnprwyz]|l[abcikrstuvy]|m(?:o(?:bi)?|u(?:seum)?|[acdeghkmnpqrstvwxyz]|i?l)
   |n(?:a(?:me)?|et?|[cfgilopruz])|o(?:m|rg)|p(?:ro?|[aefghklmnstwy])|r[eosuw]
   |s[abcdeghiklmnortuvyz]|t(?:r(?:avel)?|[cdfghjkmnoptvwz]|e?l)|u[agksyz]
-  |v[aceginu]|w[fs]|y[et]|z[amw]|qa
+  |v[aceginu]|w[fs]|y[et]|z[amw]|qa|xxx
   )/ix;
 
 # Two-Level TLDs
