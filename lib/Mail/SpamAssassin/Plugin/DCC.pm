@@ -425,7 +425,6 @@ sub ck_dir {
 
 sub find_dcc_home {
   my ($self) = @_;
-  my $dcc_libexec;
 
   # just once
   return if defined $self->{dcc_version};
@@ -515,6 +514,7 @@ sub dcc_pgm_path {
   # try dcc_home/bin, dcc_libexec, and some desperate last attempts
   foreach my $dir ($conf->{dcc_home}.'/bin',  $conf->{dcc_libexec},
                    '/usr/local/bin', '/usr/local/dcc', '/var/dcc') {
+    next unless defined $dir;
     $pgmpath = $dir . '/' . $pgm;
     if (-x $pgmpath) {
       dbg("dcc: dcc_pgm_path, found %s in %s: %s", $pgm,$dir,$pgmpath);
