@@ -1,5 +1,6 @@
 package Mail::SpamAssassin::Plugin::FreeMail;
-my $VERSION = 2.001;
+use strict;
+my $VERSION = 2.002;
 
 ### About:
 #
@@ -80,6 +81,7 @@ my $VERSION = 2.001;
 # 1.999 - default whitelist undisclosed-recipient@yahoo.com etc
 # 2.000 - some cleaning up
 # 2.001 - fix freemail_whitelist
+# 2.002 - _add_desc -> _got_hit, fix description email append bug
 #
 
 ### Blah:
@@ -108,7 +110,6 @@ my $VERSION = 2.001;
 use Mail::SpamAssassin::Plugin;
 use Mail::SpamAssassin::PerMsgStatus;
 use Mail::SpamAssassin::Util::RegistrarBoundaries;
-use strict;
 use vars qw(@ISA);
 @ISA = qw(Mail::SpamAssassin::Plugin);
 
@@ -178,7 +179,7 @@ sub new {
 
 sub set_config {
     my ($self, $conf) = @_;
-    my @cmds = ();
+    my @cmds;
     push(@cmds, {
         setting => 'freemail_max_body_emails',
         default => 5,
@@ -328,7 +329,7 @@ sub _parse_body {
         my $parsed = $pms->get_uri_detail_list();
         while (my($uri, $info) = each %{$parsed}) {
             if (defined $info->{types}->{a} and not defined $info->{types}->{parsed}) {
-                if ($uri =~ /^mailto:${email_regex}/) {
+                if ($uri =~ /^(?:(?i)mailto):${email_regex}/) {
                     my $email = lc($1);
                     push(@body_emails, $email) unless defined $seen{$email};
                     $seen{$email} = 1;
@@ -384,16 +385,21 @@ sub _parse_body {
     return 1;
 }
 
-sub _add_desc {
+sub _got_hit {
     my ($self, $pms, $email, $desc) = @_;
 
     my $rulename = $pms->get_current_eval_rule_name();
-    if (not defined $pms->{conf}->{descriptions}->{$rulename}) {
-        $pms->{conf}->{descriptions}->{$rulename} = $desc;
+
+    if (defined $pms->{conf}->{descriptions}->{$rulename}) {
+        $desc = $pms->{conf}->{descriptions}->{$rulename};
     }
+
     if ($pms->{main}->{conf}->{freemail_add_describe_email}) {
         $email =~ s/\@/[at]/g;
-        $pms->{conf}->{descriptions}->{$rulename} .= " ($email)";
+        $pms->got_hit($rulename, "", description => $desc." ($email)", ruletype => 'eval');
+    }
+    else {
+        $pms->got_hit($rulename, "", description => $desc, ruletype => 'eval');
     }
 }
 
@@ -435,8 +441,8 @@ sub check_freemail_header {
         else {
             dbg("HIT! $email is freemail");
         }
-        $self->_add_desc($pms, $email, "Header $header is freemail");
-        return 1;
+        $self->_got_hit($pms, $email, "Header $header is freemail");
+        return 0;
     }
 
     return 0;
@@ -465,16 +471,16 @@ sub check_freemail_body {
         foreach my $email (keys %{$pms->{freemail_cache}{body}}) {
             if ($email =~ $re) {
                 dbg("HIT! email from body is freemail and matches regex: $email");
-                $self->_add_desc($pms, $email, "Email from body is freemail");
-                return 1;
+                $self->_got_hit($pms, $email, "Email from body is freemail");
+                return 0;
             }
         }
     }
     elsif (scalar keys %{$pms->{freemail_cache}{body}}) {
         my $emails = join(', ', keys %{$pms->{freemail_cache}{body}});
         dbg("HIT! body has freemails: $emails");
-        $self->_add_desc($pms, $emails, "Body contains freemails");
-        return 1;
+        $self->_got_hit($pms, $emails, "Body contains freemails");
+        return 0;
     }
 
     return 0;
@@ -516,8 +522,8 @@ sub check_freemail_from {
         else {
             dbg("HIT! $email is freemail");
         }
-        $self->_add_desc($pms, $email, "Sender address is freemail");
-        return 1;
+        $self->_got_hit($pms, $email, "Sender address is freemail");
+        return 0;
     }
 
     return 0;
@@ -560,8 +566,8 @@ sub check_freemail_replyto {
 
     if ($from_is_fm and $replyto_is_fm and ($from ne $replyto)) {
         dbg("HIT! From and Reply-To are different freemails");
-        $self->_add_desc($pms, "$from, $replyto", "From and Reply-To are different freemails");
-        return 1;
+        $self->_got_hit($pms, "$from, $replyto", "From and Reply-To are different freemails");
+        return 0;
     }
 
     if ($what eq 'replyto') {
@@ -591,8 +597,8 @@ sub check_freemail_replyto {
         foreach my $email (keys %{$pms->{freemail_cache}{body}}) {
             if ($email ne $check) {
                 dbg("HIT! $check and $email are different freemails");
-                $self->_add_desc($pms, "$check, $email", "Different freemails in reply header and body");
-                return 1;
+                $self->_got_hit($pms, "$check, $email", "Different freemails in reply header and body");
+                return 0;
             }
         }
     }
