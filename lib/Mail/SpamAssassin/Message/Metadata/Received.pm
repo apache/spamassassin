@@ -48,7 +48,6 @@ use re 'taint';
 
 use Mail::SpamAssassin::Dns;
 use Mail::SpamAssassin::PerMsgStatus;
-use Mail::SpamAssassin::Util::RegistrarBoundaries;
 use Mail::SpamAssassin::Constants qw(:ip);
 
 # ---------------------------------------------------------------------------
