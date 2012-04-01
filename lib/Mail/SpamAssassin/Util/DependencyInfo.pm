@@ -138,8 +138,7 @@ $have_sha ? {
   address forgery and make it easier to identify spams.',
 },
 {
-  module => 'IP::Country::Fast',
-  alt_name => 'IP::Country',
+  module => 'Geo::IP',
   version => 0,
   desc => 'Used by the RelayCountry plugin (not enabled by default) to determine
   the domain country codes of each relay in the path of an email.',

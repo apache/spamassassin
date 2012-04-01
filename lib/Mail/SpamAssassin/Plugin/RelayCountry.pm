@@ -32,7 +32,8 @@ the C<_RELAYCOUNTRY_> header markup.
 
 =head1 REQUIREMENT
 
-This plugin requires the IP::Country module from CPAN.
+This plugin requires the Geo::IP module from CPAN. For backwards
+compatibility IP::Country::Fast is used if Geo::IP is not installed.
 
 =cut
 
@@ -40,6 +41,7 @@ package Mail::SpamAssassin::Plugin::RelayCountry;
 
 use Mail::SpamAssassin::Plugin;
 use Mail::SpamAssassin::Logger;
+use Mail::SpamAssassin::Constants qw(:ip);
 use strict;
 use warnings;
 use bytes;
@@ -47,6 +49,52 @@ use re 'taint';
 
 use vars qw(@ISA);
 @ISA = qw(Mail::SpamAssassin::Plugin);
+
+my ($db, $dbv6);
+my $ip_to_cc; # will hold a sub() for the lookup
+my $db_info;  # will hold a sub() for database info
+
+# Try to load Geo::IP first
+eval {
+  require Geo::IP;
+  $db = Geo::IP->open_type(Geo::IP->GEOIP_COUNTRY_EDITION, Geo::IP->GEOIP_STANDARD);
+  die "GeoIP.dat not found" unless $db;
+  # IPv6 requires version Geo::IP 1.39+ with GeoIP C API 1.4.7+
+  if (Geo::IP->VERSION >= 1.39 && Geo::IP->api eq 'CAPI') {
+    $dbv6 = Geo::IP->open_type(Geo::IP->GEOIP_COUNTRY_EDITION_V6, Geo::IP->GEOIP_STANDARD);
+    if (!$dbv6) {
+      dbg("metadata: RelayCountry: IPv6 support not enabled, GeoIPv6.dat not found");
+    }
+  } else {
+    dbg("metadata: RelayCountry: IPv6 support not enabled, versions Geo::IP 1.39, GeoIP C API 1.4.7 required");
+  }
+  $ip_to_cc = sub {
+    if ($dbv6 && $_[0] =~ /:/) {
+      return $dbv6->country_code_by_addr_v6($_[0]) || "XX";
+    } else {
+      return $db->country_code_by_addr($_[0]) || "XX";
+    }
+  };
+  $db_info = sub { return "Geo::IP ".$db->database_info; };
+  1;
+} or do {
+  my $eval_stat = $@ ne '' ? $@ : "errno=$!";  chomp $eval_stat;
+  dbg("metadata: RelayCountry: failed to load 'Geo::IP', skipping: $eval_stat");
+  # Try IP::Country::Fast as backup
+  eval {
+    require IP::Country::Fast;
+    $db = IP::Country::Fast->new();
+    $ip_to_cc = sub {
+      return $db->inet_atocc($_[0]) || "XX";
+    };
+    $db_info = sub { return "IP::Country::Fast ".localtime($db->db_time()); };
+    1;
+  } or do {
+    my $eval_stat = $@ ne '' ? $@ : "errno=$!";  chomp $eval_stat;
+    dbg("metadata: RelayCountry: failed to load 'IP::Country::Fast', skipping: $eval_stat");
+    return 1;
+  };
+};
 
 # constructor: register the eval rule
 sub new {
@@ -63,24 +111,17 @@ sub new {
 sub extract_metadata {
   my ($self, $opts) = @_;
 
-  my $reg;
+  return 1 unless $db;
 
-  eval {
-    require IP::Country::Fast;
-    $reg = IP::Country::Fast->new();
-    1;
-  } or do {
-    my $eval_stat = $@ ne '' ? $@ : "errno=$!";  chomp $eval_stat;
-    dbg("metadata: failed to load 'IP::Country::Fast', skipping: $eval_stat");
-    return 1;
-  };
-
+  dbg("metadata: RelayCountry: Using database: ".$db_info->());
   my $msg = $opts->{msg};
 
   my $countries = '';
+  my $IP_PRIVATE = IP_PRIVATE;
   foreach my $relay (@{$msg->{metadata}->{relays_untrusted}}) {
     my $ip = $relay->{ip};
-    my $cc = $reg->inet_atocc($ip) || "XX";
+    # Private IPs will always be returned as '**'
+    my $cc = $ip =~ /^$IP_PRIVATE$/o ? '**' : $ip_to_cc->($ip);
     $countries .= $cc." ";
   }
 
@@ -93,6 +134,9 @@ sub extract_metadata {
 
 sub parsed_metadata {
   my ($self, $opts) = @_;
+
+  return 1 unless $db;
+
   $opts->{permsgstatus}->set_tag ("RELAYCOUNTRY",
           $opts->{permsgstatus}->get_message->get_metadata('X-Relay-Countries'));
   return 1;

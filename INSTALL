@@ -363,10 +363,13 @@ version is too low for them to be used.
     perl interpreter.  NetAddr::IP version 4.007 or later fixes this.
 
 
-  - IP::Country::Fast (from CPAN)
+  - Geo::IP (from CPAN)
 
     Used by the RelayCountry plugin (not enabled by default) to determine
     the domain country codes of each relay in the path of an email.
+
+    IP::Country::Fast is used as alternative if Geo::IP is not installed.
+    This is not recommended as it's obsolete.
 
 
   - Net::Ident (from CPAN)

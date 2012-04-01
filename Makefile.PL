@@ -343,7 +343,7 @@ foreach my $file (@FILES_THAT_MUST_EXIST) {
     'DB_File' =>                   0,
     'Net::SMTP' =>                 0,
     'Mail::SPF' =>                 0,
-    'IP::Country::Fast' =>         0,
+    'Geo::IP' =>                   0,
     'Razor2::Client::Agent' =>     2.61,
     'Net::Ident' =>                0,
     'IO::Socket::INET6' =>         0,
