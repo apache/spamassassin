@@ -446,7 +446,8 @@ sub parse_received_line {
 
     # from 142.169.110.122 (SquirrelMail authenticated user synapse) by
     # mail.nomis80.org with HTTP; Sat, 3 Apr 2004 10:33:43 -0500 (EST)
-    if (/ \(SquirrelMail authenticated user /) {
+    # Expanded to NaSMail Bug 6783
+    if (/ \((?:SquirrelMail|NaSMail) authenticated user /) {
       #REVERTING bug 3236 and implementing re: bug 6549
       if (/(${IP_ADDRESS}).{10,80}by (\S+) with HTTP/) {
         $ip = $1; $by = $2; goto enough;
