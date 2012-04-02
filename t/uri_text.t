@@ -290,7 +290,7 @@ donotignorethiswww.delimtest14.com	donotignorethiswww.delimtest14.com
 
 # first confirm that it will not match on not a TLD
 example.foo	!^http://example.foo$
-example.xxx	!^http://example.xxx$
+example.zzf	!^http://example.zzf$
 
 example.ac	^http://example.ac$
 example.ad	^http://example.ad$
@@ -566,7 +566,7 @@ example.zw	^http://example.zw$
 # with www. prefix tests a different table of TLDs
 
 www.example.foo	!^http://www.example.foo$
-www.example.xxx	!^http://www.example.xxx$
+www.example.zzf	!^http://www.example.zzf$
 
 www.example.ac	^http://www.example.ac$
 www.example.ad	^http://www.example.ad$

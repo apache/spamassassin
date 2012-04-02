@@ -37,6 +37,8 @@ use vars qw (
 
 # The list of currently-valid TLDs for the DNS system.
 #
+# When updating domain lists, also modify t/uri_text.t accordingly
+#
 # http://data.iana.org/TLD/tlds-alpha-by-domain.txt
 # Version 2008020601, Last Updated Thu Feb  7 09:07:00 2008 UTC
 # The following have been removed from the list because they are
