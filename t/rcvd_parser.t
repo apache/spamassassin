@@ -18,7 +18,7 @@ if (-e 'test_dir') {            # running from test directory, not ..
 
 use lib '.'; use lib 't';
 use SATest; sa_t_init("rcvd_parser");
-use Test; BEGIN { plan tests => 142 };
+use Test; BEGIN { plan tests => 143 };
 use strict;
 
 # format is:
@@ -459,7 +459,11 @@ my %data = (
   '[ ip=153.90.199.141 rdns= helo= by=web1.cs.montana.edu ident= envfrom= id= auth= msa=0 ]',
 
   'from ausisaps301-dmz.aus.amer.dell.com ([143.166.226.16]) (SquirrelMail authenticated user hoolis); by www.penguintowne.org with HTTP; Mon, 22 Mar 2004 12:54:13 -0600 (CST)' =>
-  '[ ip=143.166.226.16 rdns= helo= by=www.penguintowne.org ident= envfrom= id= auth=Sendmail msa=0 ]'
+  '[ ip=143.166.226.16 rdns= helo= by=www.penguintowne.org ident= envfrom= id= auth=Sendmail msa=0 ]',
+
+  #ADDED PER Bug 6783
+  'from 67.85.219.192 (NaSMail authenticated user john.doe) by webmail.example.com with HTTP; Fri, 30 Mar 2012 12:39:58 +0100 (BST)' => 
+  '[ ip=67.85.219.192 rdns= helo= by=webmail.example.com ident= envfrom= id= auth= msa=0 ]'
 
 );
 
