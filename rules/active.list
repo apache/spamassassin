@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-generic axb-ned-spam bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm danmcdonald darxus grenier jarif llanga wt-en1 wt-en3 wt-jp1 zmi; day 2: axb-generic axb-ned-spam bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm danmcdonald darxus grenier jarif llanga wt-en1 wt-en3 wt-jp1 zmi; day 3: axb-generic axb-ned-spam bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm danmcdonald darxus grenier jarif llanga wt-en1 wt-en3 wt-jp1 zmi
+# with results from: day 1: axb-generic axb-ned-spam bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm danmcdonald darxus grenier jarif llanga zmi; day 2: axb-generic axb-ned-spam bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm danmcdonald darxus grenier jarif llanga wt-en1 wt-en3 wt-jp1 zmi; day 3: axb-generic axb-ned-spam bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm danmcdonald darxus grenier jarif llanga wt-en1 wt-en3 wt-jp1 zmi
 
 # good enough
 ACH_CANCELLED
@@ -54,9 +54,6 @@ ALL_TRUSTED
 
 # good enough
 ANY_PILL_PRICE
-
-# good enough
-APOSTROPHE_FROM
 
 # good enough
 AXB_BODYMAIL_SBL112884
@@ -140,6 +137,9 @@ DATE_IN_FUTURE_Q_PLUS
 DEAR_BENEFICIARY
 
 # good enough
+DEAR_EMAIL
+
+# good enough
 DEAR_EMAIL_USER
 
 # good enough
@@ -211,9 +211,6 @@ DYN_RDNS_SHORT_HELO_HTML
 # good enough
 EMRCP
 
-# good enough
-END_FUTURE_EMAILS
-
 # tflags userconf
 ENV_AND_HDR_SPF_MATCH
 
@@ -227,19 +224,13 @@ FB_ACHIEVE_BACH
 FB_CIALIS_LEO3
 
 # good enough
-FB_EXTRA_INCHES
-
-# good enough
-FB_NOT_CREDIT
-
-# good enough
 FB_QUALITY_REPLICA
 
 # good enough
 FB_REPLICA_ROLEX
 
 # good enough
-FB_STAMINA_IN_BED
+FB_TO_STOP_DISTRO
 
 # good enough
 FH_FAKE_RCVD_LINE
@@ -374,9 +365,6 @@ FSL_HELO_BARE_IP_1
 FSL_HELO_DEVICE
 
 # good enough
-FSL_HELO_NON_FQDN_1
-
-# good enough
 FSL_MID_419
 
 # good enough
@@ -392,16 +380,7 @@ FSL_UA
 FSL_XM_419
 
 # good enough
-FS_ABIGGER
-
-# good enough
 FS_PHARMASUB2
-
-# good enough
-FS_PORN_STAR
-
-# good enough
-FS_REFI
 
 # good enough
 FS_REPLICA
@@ -458,9 +437,6 @@ HELO_MISC_IP
 HELO_NO_DOMAIN
 
 # good enough
-HELO_OEM
-
-# good enough
 HK_LOTTO
 
 # good enough
@@ -480,9 +456,6 @@ HK_NAME_FM_FROM
 
 # good enough
 HK_NAME_FM_MR_MRS
-
-# good enough
-HK_NAME_FREE
 
 # good enough
 HK_NAME_MR_MRS
@@ -515,22 +488,19 @@ HK_SCAM_N4
 HK_SCAM_N8
 
 # good enough
+HK_SCAM_S15
+
+# good enough
 HK_SCAM_S25
+
+# good enough
+HK_SCAM_S7
 
 # good enough
 HK_SPAMMY_FILENAME
 
-# good enough
-HTML_ATTACH
-
 # tflags userconf
 HTML_CHARSET_FARAWAY
-
-# good enough
-IMAGESHACK_URI
-
-# good enough
-JM_FAKE_PSMTP_RCVD
 
 # good enough
 KB_DATE_CONTAINS_TAB
@@ -627,12 +597,6 @@ NULL_IN_BODY
 
 # good enough
 OBFU_ATTACH_MISSP
-
-# good enough
-OBFU_DOC_ATTACH
-
-# good enough
-OBFU_HTML_ATTACH
 
 # tflags 
 OBFU_JVSCR_ESC
@@ -881,28 +845,10 @@ RISK_FREE
 RP_8BIT
 
 # good enough
-SB_GIF_AND_NO_URIS
-
-# good enough
 SCANNED_EXTERNAL
 
 # good enough
-SERGIO_SUBJECT_PORN005
-
-# good enough
-SERGIO_SUBJECT_PORN009
-
-# good enough
 SERGIO_SUBJECT_VIAGRA01
-
-# good enough
-SINGLE_HEADER_1K
-
-# good enough
-SINGLE_HEADER_2K
-
-# good enough
-SINGLE_HEADER_3K
 
 # good enough
 SINGLE_HEADER_4K
@@ -1001,9 +947,6 @@ TR_JS_FROMCHARCODE
 TT_MSGID_TRUNC
 
 # good enough
-TVD_FINGER_02
-
-# good enough
 TVD_FROM_1
 
 # good enough
@@ -1031,13 +974,19 @@ TVD_SUBJ_NUM_OBFU_MINFP
 TVD_VISIT_PHARMA
 
 # good enough
-DEAR_EMAIL
+FB_GREAT_BEST_SEX
 
 # good enough
-HK_SCAM_S15
+HK_NAME_FROM
 
 # good enough
-HK_SCAM_S7
+HK_SCAM_N1
+
+# good enough
+LOTTO_DEPT
+
+# good enough
+SERGIO_SUBJECT_PORN011
 
 # tflags userconf
 UNPARSEABLE_RELAY
@@ -1131,9 +1080,6 @@ USER_IN_WHITELIST
 
 # tflags userconf
 USER_IN_WHITELIST_TO
-
-# good enough
-VANITY
 
 # good enough
 XMAILER_MIMEOLE_OL_1ECD5
