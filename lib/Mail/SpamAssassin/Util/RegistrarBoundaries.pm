@@ -276,7 +276,7 @@ foreach(qw/
   com.ws edu.ws gov.ws net.ws org.ws
   com.ye edu.ye gov.ye mil.ye net.ye org.ye
   ac.za alt.za bourse.za city.za co.za edu.za gov.za law.za mil.za net.za ngo.za nom.za org.za school.za tm.za web.za
-  ac.zm co.zm gov.zm org.zm sch.zm
+  ac.zm co.zm  com.zm edu.zm gov.zm org.zm sch.zm
   ac.zw co.zw gov.zw org.zw
 
  /) {
