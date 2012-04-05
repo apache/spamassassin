@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-generic axb-ned-spam bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm danmcdonald darxus grenier jarif llanga zmi; day 2: axb-generic axb-ned-spam bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm danmcdonald darxus grenier jarif llanga wt-en1 wt-en3 wt-jp1 zmi; day 3: axb-generic axb-ned-spam bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm danmcdonald darxus grenier jarif llanga wt-en1 wt-en3 wt-jp1 zmi
+# with results from: day 1: axb-generic axb-ned-spam bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm danmcdonald darxus grenier jarif llanga zmi; day 2: axb-generic axb-ned-spam bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm danmcdonald darxus grenier jarif llanga zmi; day 3: axb-generic axb-ned-spam bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm danmcdonald darxus grenier jarif llanga wt-en1 wt-en3 wt-jp1 zmi
 
 # good enough
 ACH_CANCELLED
@@ -135,9 +135,6 @@ DATE_IN_FUTURE_Q_PLUS
 
 # good enough
 DEAR_BENEFICIARY
-
-# good enough
-DEAR_EMAIL
 
 # good enough
 DEAR_EMAIL_USER
@@ -499,6 +496,9 @@ HK_SCAM_S7
 # good enough
 HK_SPAMMY_FILENAME
 
+# good enough
+HTML_ATTACH
+
 # tflags userconf
 HTML_CHARSET_FARAWAY
 
@@ -569,9 +569,6 @@ MONEY_FROM_MISSP
 MONEY_LOTTERY
 
 # good enough
-MSGID_WSP_TRAIL
-
-# good enough
 MSOE_MID_WRONG_CASE
 
 # good enough
@@ -593,10 +590,13 @@ NSL_RCVD_FROM_USER
 NSL_RCVD_HELO_USER
 
 # good enough
-NULL_IN_BODY
+OBFU_ATTACH_MISSP
 
 # good enough
-OBFU_ATTACH_MISSP
+OBFU_DOC_ATTACH
+
+# good enough
+OBFU_HTML_ATTACH
 
 # tflags 
 OBFU_JVSCR_ESC
@@ -977,7 +977,13 @@ TVD_VISIT_PHARMA
 FB_GREAT_BEST_SEX
 
 # good enough
+HK_GOLDDUST
+
+# good enough
 HK_NAME_FROM
+
+# good enough
+HK_RANDOM_REPLYTO_NAME
 
 # good enough
 HK_SCAM_N1
@@ -1083,6 +1089,9 @@ USER_IN_WHITELIST_TO
 
 # good enough
 XMAILER_MIMEOLE_OL_1ECD5
+
+# good enough
+XMAILER_MIMEOLE_OL_3AC1D
 
 # good enough
 XMAILER_MIMEOLE_OL_8627E
