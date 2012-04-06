@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-generic axb-ned-spam bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm danmcdonald darxus grenier jarif llanga zmi; day 2: axb-generic axb-ned-spam bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm danmcdonald darxus grenier jarif llanga zmi; day 3: axb-generic axb-ned-spam bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm danmcdonald darxus grenier jarif llanga wt-en1 wt-en3 wt-jp1 zmi
+# with results from: day 1: axb-generic axb-ned-spam bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm danmcdonald darxus grenier jarif llanga zmi; day 2: axb-generic axb-ned-spam bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm danmcdonald darxus grenier jarif llanga zmi; day 3: axb-generic axb-ned-spam bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm danmcdonald darxus grenier jarif llanga zmi
 
 # good enough
 ACH_CANCELLED
@@ -72,6 +72,9 @@ AXB_X_AOL_SEZ_S
 
 # good enough
 AXB_X_RCV_WLOCAL
+
+# good enough
+BASE64_LENGTH_78_79
 
 # good enough
 BASE64_LENGTH_79_INF
@@ -197,7 +200,13 @@ DOS_ANAL_SPAM_MAILER
 DOS_OE_TO_MX
 
 # good enough
+DOS_OUTLOOK_TO_MX
+
+# good enough
 DOS_RCVD_IP_TWICE_C
+
+# good enough
+DOS_STOCK_BAT
 
 # good enough
 DYN_RDNS_AND_INLINE_IMAGE
@@ -221,10 +230,16 @@ FB_ACHIEVE_BACH
 FB_CIALIS_LEO3
 
 # good enough
+FB_GREAT_BEST_SEX
+
+# good enough
 FB_QUALITY_REPLICA
 
 # good enough
 FB_REPLICA_ROLEX
+
+# good enough
+FB_THIS_ADVERT
 
 # good enough
 FB_TO_STOP_DISTRO
@@ -377,6 +392,9 @@ FSL_UA
 FSL_XM_419
 
 # good enough
+FS_NUDE
+
+# good enough
 FS_PHARMASUB2
 
 # good enough
@@ -455,6 +473,9 @@ HK_NAME_FM_FROM
 HK_NAME_FM_MR_MRS
 
 # good enough
+HK_NAME_FROM
+
+# good enough
 HK_NAME_MR_MRS
 
 # good enough
@@ -465,6 +486,9 @@ HK_RANDOM_ENVFROM
 
 # good enough
 HK_RANDOM_FROM
+
+# good enough
+HK_SCAM_N1
 
 # good enough
 HK_SCAM_N13
@@ -496,9 +520,6 @@ HK_SCAM_S7
 # good enough
 HK_SPAMMY_FILENAME
 
-# good enough
-HTML_ATTACH
-
 # tflags userconf
 HTML_CHARSET_FARAWAY
 
@@ -528,6 +549,9 @@ LOTTO_AGENT
 
 # good enough
 LOTTO_AGENT_RPLY
+
+# good enough
+LOTTO_DEPT
 
 # good enough
 LOTTO_URI
@@ -591,12 +615,6 @@ NSL_RCVD_HELO_USER
 
 # good enough
 OBFU_ATTACH_MISSP
-
-# good enough
-OBFU_DOC_ATTACH
-
-# good enough
-OBFU_HTML_ATTACH
 
 # tflags 
 OBFU_JVSCR_ESC
@@ -878,7 +896,16 @@ SPF_PASS
 SPF_SOFTFAIL
 
 # good enough
+STOCK_IMG_CTYPE
+
+# good enough
 STOCK_IMG_HDR_FROM
+
+# good enough
+STOX_REPLY_TYPE
+
+# good enough
+STOX_REPLY_TYPE_WITHOUT_QUOTES
 
 # good enough
 STYLE_GIBBERISH
@@ -947,6 +974,9 @@ TR_JS_FROMCHARCODE
 TT_MSGID_TRUNC
 
 # good enough
+TVD_APPROVED
+
+# good enough
 TVD_FROM_1
 
 # good enough
@@ -954,6 +984,9 @@ TVD_INCREASE_SIZE
 
 # good enough
 TVD_PH_BODY_META
+
+# good enough
+TVD_QUAL_MEDS
 
 # good enough
 TVD_RCVD_IP
@@ -974,25 +1007,85 @@ TVD_SUBJ_NUM_OBFU_MINFP
 TVD_VISIT_PHARMA
 
 # good enough
-FB_GREAT_BEST_SEX
+AXB_XRCVD_EYOU_SEND
+
+# good enough
+DQ_URI_DOM_IN_PATH
+
+# good enough
+FREEMAIL_RVW_ATTCH
+
+# good enough
+FRT_CLICK
+
+# good enough
+FRT_CONTACT
+
+# good enough
+FSL_HELO_BARE_IP_2
+
+# good enough
+FSL_RCVD_USER
+
+# good enough
+HDRS_LCASE_1K
 
 # good enough
 HK_GOLDDUST
 
 # good enough
-HK_NAME_FROM
-
-# good enough
 HK_RANDOM_REPLYTO_NAME
 
 # good enough
-HK_SCAM_N1
+HS_OUTLOOK_MID_NOBRK
 
 # good enough
-LOTTO_DEPT
+KHOP_GREYED
 
 # good enough
-SERGIO_SUBJECT_PORN011
+KHOP_HELO_AS_VICTIM
+
+# good enough
+MONEY_FORM_SHORT
+
+# good enough
+MONEY_PERCENT
+
+# good enough
+MS_XYMOSG_4K
+
+# good enough
+OBFU_JPG_ATTACH
+
+# good enough
+OBFU_PDF_ATTACH
+
+# good enough
+POSTCARD_09
+
+# good enough
+S25R_6
+
+# good enough
+SHARE_50_50
+
+# good enough
+TO_NO_BRKTS_HTML_ONLY
+
+# good enough
+TVD_DOLLARS_US
+
+# good enough
+TVD_PDF_FINGER01
+
+# good enough
+TVD_PDF_FINGER01_JO
+
+# good enough
+TVD_PH_1
+
+# good enough
+XM_PHPMAILER_FORGED
 
 # tflags userconf
 UNPARSEABLE_RELAY
@@ -1092,6 +1185,9 @@ XMAILER_MIMEOLE_OL_1ECD5
 
 # good enough
 XMAILER_MIMEOLE_OL_3AC1D
+
+# good enough
+XMAILER_MIMEOLE_OL_5B79A
 
 # good enough
 XMAILER_MIMEOLE_OL_8627E
