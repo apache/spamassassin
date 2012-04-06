@@ -133,6 +133,7 @@ meta	 FORGED_SPF_HELO	__HELO_NOT_RDNS && SPF_HELO_PASS && !SPF_PASS
 # This *really* needs properly defined trusted networks.
 header	 __HELO_AS_VICTIM 	X-Spam-Relays-External =~ /^[^\]]+ helo=(\S+) [^\]]*\bby=\1 /
 meta	 KHOP_HELO_AS_VICTIM	__HELO_AS_VICTIM && !__BOTNET_NOTRUST
+tflags   KHOP_HELO_AS_VICTIM    nopublish # confirm license with author first for __BOTNET_NOTRUST
 
 meta     HELO_NO_DOMAIN	__HELO_NO_DOMAIN && !HELO_LOCALHOST
 describe HELO_NO_DOMAIN	Relay reports its domain incorrectly
