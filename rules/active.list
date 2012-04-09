@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-fraud axb-generic axb-ned-spam bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus grenier jarif llanga zmi; day 2: axb-generic axb-ned-spam bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm danmcdonald darxus grenier jarif llanga zmi; day 3: axb-generic axb-ned-spam bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm danmcdonald darxus grenier jarif llanga zmi
+# with results from: day 1: axb-fraud axb-generic bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus grenier jarif llanga zmi; day 2: axb-fraud axb-generic axb-ned-spam bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus grenier jarif llanga zmi; day 3: axb-generic axb-ned-spam bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm danmcdonald darxus grenier jarif llanga zmi
 
 # good enough
 ACH_CANCELLED
@@ -66,6 +66,9 @@ AXB_OBFU_MULE
 
 # good enough
 AXB_XMA_BASP
+
+# good enough
+AXB_XRCVD_EYOU_SEND
 
 # good enough
 AXB_X_AOL_SEZ_S
@@ -280,6 +283,9 @@ FORM_FRAUD_5
 # tflags userconf
 FRAGMENTED_MESSAGE
 
+# good enough
+FREEMAIL_RVW_ATTCH
+
 # tflags userconf
 FROM_DOMAIN_NOVOWEL
 
@@ -350,6 +356,9 @@ FSL_MISSP_REPLYTO
 FSL_NEW_HELO_USER
 
 # good enough
+FSL_RCVD_USER
+
+# good enough
 FSL_UA
 
 # good enough
@@ -366,6 +375,9 @@ FS_START_LOSE
 
 # good enough
 FS_WEIGHT_LOSS
+
+# good enough
+FS_WILL_HELP
 
 # tflags userconf
 GTUBE
@@ -393,6 +405,9 @@ HASHCASH_2SPEND
 
 # tflags userconf
 HASHCASH_HIGH
+
+# good enough
+HDRS_LCASE_1K
 
 # tflags userconf
 HEAD_LONG
@@ -479,9 +494,6 @@ HK_SPAMMY_FILENAME
 HTML_CHARSET_FARAWAY
 
 # good enough
-KB_DATE_CONTAINS_TAB
-
-# good enough
 KB_FAKED_THE_BAT
 
 # good enough
@@ -526,6 +538,9 @@ MONEY_ATM_CARD
 # good enough
 MONEY_FORM
 
+# good enough
+MONEY_FORM_SHORT
+
 # tflags 
 MONEY_FRAUD_3
 
@@ -542,7 +557,13 @@ MONEY_FROM_MISSP
 MONEY_LOTTERY
 
 # good enough
+MONEY_PERCENT
+
+# good enough
 MSOE_MID_WRONG_CASE
+
+# good enough
+MS_XYMOSG_4K
 
 # good enough
 MS_XYMOSG_5K
@@ -812,7 +833,7 @@ SCANNED_EXTERNAL
 SERGIO_SUBJECT_VIAGRA01
 
 # good enough
-SPAMMY_XMAILER
+SHARE_50_50
 
 # tflags net
 SPF_FAIL
@@ -849,9 +870,6 @@ SUBJECT_IN_BLACKLIST
 
 # tflags userconf
 SUBJECT_IN_WHITELIST
-
-# good enough
-TAB_IN_FROM
 
 # good enough
 TBIRD_SUSP_MIME_BDRY
@@ -917,31 +935,16 @@ TVD_RCVD_SINGLE
 TVD_VISIT_PHARMA
 
 # good enough
-AXB_XRCVD_EYOU_SEND
+FSL_BOTSPAM_1
 
 # good enough
-FREEMAIL_RVW_ATTCH
+HK_RANDOM_FROM
 
 # good enough
-FSL_RCVD_USER
+OBFU_DOC_ATTACH
 
 # good enough
-HDRS_LCASE_1K
-
-# good enough
-MONEY_FORM_SHORT
-
-# good enough
-MONEY_PERCENT
-
-# good enough
-MS_XYMOSG_4K
-
-# good enough
-SHARE_50_50
-
-# good enough
-XM_PHPMAILER_FORGED
+OBFU_HTML_ATTACH
 
 # tflags userconf
 UNPARSEABLE_RELAY
@@ -1044,6 +1047,9 @@ XMAILER_MIMEOLE_OL_5B79A
 
 # good enough
 XMAILER_MIMEOLE_OL_8627E
+
+# good enough
+XM_PHPMAILER_FORGED
 
 # tflags net
 __DKIMDOMAIN_IN_DWL_ANY
