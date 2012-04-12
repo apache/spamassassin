@@ -144,7 +144,7 @@ foreach(qw/
   com.dm edu.dm gov.dm net.dm org.dm
   art.do com.do edu.do gob.do gov.do mil.do net.do org.do sld.do web.do
   art.dz asso.dz com.dz edu.dz gov.dz net.dz org.dz pol.dz
-  com.ec edu.ec fin.ec gov.ec info.ec k12.ec med.ec mil.ec net.ec org.ec pro.ec
+  com.ec edu.ec fin.ec gov.ec info.ec k12.ec med.ec mil.ec net.ec org.ec pro.ec gob.ec
   co.ee com.ee edu.ee fie.ee med.ee org.ee pri.ee
   com.eg edu.eg eun.eg gov.eg mil.eg net.eg org.eg sci.eg
   com.er edu.er gov.er ind.er mil.er net.er org.er
