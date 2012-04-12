@@ -817,3 +817,8 @@ describe    URI_DBL_DOM_1          domain appears twice
 uri         URI_DBL_DOM_2          m,^https?://[^.]+\.([^/]+)/.*https?://[^.]+\.\1/,i
 describe    URI_DBL_DOM_2          domain appears twice
 
+
+# suggestion on users list 04/2012
+header      SUBJ_ODD_CASE      ALL =~ /\n(?!(?:Subject:|SUBJECT:|subject:))(?i:subject:)/sm
+describe    SUBJ_ODD_CASE      Oddly mixed-case Subject: header
+
