@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-fraud axb-generic bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix darxus grenier jarif llanga zmi; day 2: axb-fraud axb-generic bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus grenier jarif llanga zmi; day 3: axb-fraud axb-generic bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus grenier jarif llanga zmi
+# with results from: day 1: axb-fraud axb-generic bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus grenier jarif llanga zmi; day 2: axb-fraud axb-generic bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix darxus grenier jarif llanga zmi; day 3: axb-fraud axb-generic bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus grenier jarif llanga zmi
 
 # good enough
 ACH_CANCELLED
@@ -194,9 +194,6 @@ DNS_FROM_RFC_DSN
 DOS_ANAL_SPAM_MAILER
 
 # good enough
-DOS_OE_TO_MX
-
-# good enough
 DOS_STOCK_BAT
 
 # good enough
@@ -273,9 +270,6 @@ FORM_FRAUD_5
 
 # tflags userconf
 FRAGMENTED_MESSAGE
-
-# good enough
-FREEMAIL_RVW_ATTCH
 
 # tflags userconf
 FROM_DOMAIN_NOVOWEL
@@ -362,9 +356,6 @@ FSL_UA
 FSL_XM_419
 
 # good enough
-FS_LARGE_PERCENT2
-
-# good enough
 FS_PHARMASUB2
 
 # good enough
@@ -428,9 +419,6 @@ HK_LOTTO
 HK_LOTTO_NAME
 
 # good enough
-HK_LOTTO_SUBJECT
-
-# good enough
 HK_NAME_DRUGS
 
 # good enough
@@ -441,9 +429,6 @@ HK_NAME_FM_FROM
 
 # good enough
 HK_NAME_FM_MR_MRS
-
-# good enough
-HK_NAME_FREE
 
 # good enough
 HK_NAME_FROM
@@ -948,6 +933,15 @@ TVD_UNDER_VALUED
 
 # good enough
 TVD_VISIT_PHARMA
+
+# good enough
+LOTTO_AGENT_FM
+
+# good enough
+MSGID_WSP_TRAIL
+
+# good enough
+OBFU_HTML_ATTACH
 
 # tflags userconf
 UNPARSEABLE_RELAY
