@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-fraud axb-generic bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus grenier jarif llanga zmi; day 2: axb-fraud axb-generic bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus grenier jarif llanga zmi; day 3: axb-fraud axb-generic bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus grenier jarif llanga zmi
+# with results from: day 1: axb-coi-bulk axb-fraud axb-generic bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus grenier jarif llanga zmi; day 2: axb-fraud axb-generic bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus grenier jarif llanga zmi; day 3: axb-fraud axb-generic bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus grenier jarif llanga zmi
 
 # good enough
 ACH_CANCELLED
@@ -113,6 +113,9 @@ CHARSET_FARAWAY_HEADER
 CK_HELO_DYNAMIC_SPLIT_IP
 
 # good enough
+CK_HELO_GENERIC
+
+# good enough
 CN_B2B_SPAMMER
 
 # tflags 
@@ -188,6 +191,9 @@ DNS_FROM_RFC_DSN
 DOS_ANAL_SPAM_MAILER
 
 # good enough
+DYN_RDNS_AND_INLINE_IMAGE
+
+# good enough
 EMRCP
 
 # tflags userconf
@@ -228,6 +234,9 @@ FH_HELO_ALMOST_IP
 
 # good enough
 FH_HELO_EQ_CHARTER
+
+# good enough
+FH_MSGID_XXX
 
 # tflags 
 FILL_THIS_FORM
@@ -306,6 +315,9 @@ FROM_MISSP_USER
 
 # good enough
 FROM_WSP_LEAD
+
+# good enough
+FRT_PROFIT2
 
 # good enough
 FR_TITLE_CONS_6
@@ -830,6 +842,9 @@ SERGIO_SUBJECT_VIAGRA01
 SHARE_50_50
 
 # good enough
+SHORTENED_URL_SRC
+
+# good enough
 SINGLE_HEADER_1K
 
 # good enough
@@ -861,6 +876,12 @@ SPF_SOFTFAIL
 
 # good enough
 STOCK_IMG_HDR_FROM
+
+# good enough
+STOX_REPLY_TYPE
+
+# good enough
+STOX_REPLY_TYPE_WITHOUT_QUOTES
 
 # good enough
 STYLE_GIBBERISH
@@ -932,16 +953,13 @@ TVD_RCVD_SINGLE
 TVD_VISIT_PHARMA
 
 # good enough
-CK_HELO_GENERIC
+AXB_OBFU_MULE
 
 # good enough
-FRT_PROFIT2
+HK_RANDOM_REPLYTO
 
 # good enough
-OBFU_HTML_ATTACH
-
-# good enough
-SHORTENED_URL_SRC
+JM_FAKE_PSMTP_RCVD
 
 # tflags userconf
 UNPARSEABLE_RELAY
@@ -1035,6 +1053,12 @@ USER_IN_WHITELIST_TO
 
 # good enough
 XMAILER_MIMEOLE_OL_1ECD5
+
+# good enough
+XMAILER_MIMEOLE_OL_22B61
+
+# good enough
+XMAILER_MIMEOLE_OL_5B79A
 
 # good enough
 XMAILER_MIMEOLE_OL_8627E
