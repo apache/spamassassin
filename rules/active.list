@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-coi-bulk axb-fraud axb-generic bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus grenier jarif llanga zmi; day 2: axb-fraud axb-generic bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus grenier jarif llanga zmi; day 3: axb-fraud axb-generic bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus grenier jarif llanga zmi
+# with results from: day 1: axb-coi-bulk axb-fraud axb-generic bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus grenier jarif llanga zmi; day 2: axb-coi-bulk axb-fraud axb-generic bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus grenier jarif llanga zmi; day 3: axb-fraud axb-generic bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus grenier jarif llanga zmi
 
 # good enough
 ACH_CANCELLED
@@ -191,9 +191,6 @@ DNS_FROM_RFC_DSN
 DOS_ANAL_SPAM_MAILER
 
 # good enough
-DYN_RDNS_AND_INLINE_IMAGE
-
-# good enough
 EMRCP
 
 # tflags userconf
@@ -258,6 +255,12 @@ FM_LOTTO_MONEY
 
 # good enough
 FM_LOTTO_YOU_WON
+
+# good enough
+FM_SCHOOLING
+
+# good enough
+FM_SCHOOL_DIPLOMA
 
 # tflags 
 FORM_FRAUD_3
@@ -592,6 +595,9 @@ NSL_RCVD_HELO_USER
 # good enough
 OBFU_ATTACH_MISSP
 
+# good enough
+OBFU_HTML_ATTACH
+
 # tflags 
 OBFU_JVSCR_ESC
 
@@ -896,9 +902,6 @@ SUBJECT_IN_WHITELIST
 TBIRD_SUSP_MIME_BDRY
 
 # good enough
-TINY_FLOAT
-
-# good enough
 TO_EQ_FM_DOM_HTML_IMG
 
 # good enough
@@ -954,6 +957,9 @@ TVD_VISIT_PHARMA
 
 # good enough
 AXB_OBFU_MULE
+
+# good enough
+FB_ACHIEVE_BACH
 
 # good enough
 HK_RANDOM_REPLYTO
