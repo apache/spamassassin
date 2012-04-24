@@ -80,27 +80,41 @@ if ($opt_clean) {
       or die "Cannot open file $db: $!\n";
 }
 
-my @k = grep(!/totscore$/,keys(%h));
-for my $key (@k)
-{
-  my $totscore = $h{"$key|totscore"};
-  my $count = $h{$key};
-  next unless defined($totscore);
-
-  if ($opt_clean) {
-    if ($count >= $opt_min) { next; }
-    print "cleaning: ";
+if (!$opt_clean) {  # just pretend to be cleaning
+  while (my($key, $count) = each %h) {
+    next if $key =~ /totscore$/;
+    my $totscore = $h{"$key|totscore"};
+    next unless defined($totscore);
+    printf("%8.1f %15s  --  %s\n",
+	   $totscore/$count, sprintf("(%.1f/%d)",$totscore,$count), $key);
   }
 
-  printf "% 8.1f %15s  --  %s\n",
-		  $totscore/$count, (sprintf "(%.1f/%d)",$totscore,$count),
-		  $key;
-
-  if ($opt_clean) {
-    delete $h{"$key|totscore"};
-    delete $h{$key};
+} else {  # really do the cleaning
+  for (;;) {
+    my @delete_keys;
+    my $more;
+    while (my($key, $count) = each %h) {
+      next if $key =~ /totscore$/;
+      my $totscore = $h{"$key|totscore"};
+      next unless defined($totscore);
+      next if $count >= $opt_min;
+      printf("cleaning: %8.1f %15s  --  %s\n",
+             $totscore/$count, sprintf("(%.1f/%d)",$totscore,$count), $key);
+      # according to perlfunc man page:
+      #   If you add or delete a hash's elements while iterating over it,
+      #   entries may be skipped or duplicated -- so don't do that.
+      #   Exception: It is always safe to delete the item most recently
+      #   returned by each(),
+      delete $h{$key};  # this is safe
+      push(@delete_keys, "$key|totscore");  # this should be postponed
+      # see Bug 6793 - reduce sa-awl memory usage
+      if (@delete_keys >= 10000) { $more = 1; last }  # avoid worst case
+    }
+    delete $h{$_}  for @delete_keys;
+    last if !$more;
   }
 }
+
 untie %h;
 
 =head1 NAME
