@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-coi-bulk axb-fraud axb-generic bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus grenier jarif llanga zmi; day 2: axb-coi-bulk axb-fraud axb-generic bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus grenier jarif llanga zmi; day 3: axb-coi-bulk axb-fraud axb-generic bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus grenier jarif llanga nbebout zmi
+# with results from: day 1: axb-coi-bulk axb-fraud axb-generic bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus grenier jarif llanga zmi; day 2: axb-coi-bulk axb-fraud axb-generic bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus grenier jarif llanga zmi; day 3: axb-coi-bulk axb-fraud axb-generic bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus grenier jarif llanga zmi
 
 # good enough
 ACH_CANCELLED
@@ -317,9 +317,6 @@ FROM_MISSP_USER
 FROM_WSP_LEAD
 
 # good enough
-FRT_PROFIT2
-
-# good enough
 FR_TITLE_CONS_6
 
 # good enough
@@ -417,9 +414,6 @@ HK_LOTTO
 
 # good enough
 HK_LOTTO_NAME
-
-# good enough
-HK_NAME_DRUGS
 
 # good enough
 HK_NAME_FM_DR
@@ -887,9 +881,6 @@ SUBJECT_IN_BLACKLIST
 SUBJECT_IN_WHITELIST
 
 # good enough
-TBIRD_SUSP_MIME_BDRY
-
-# good enough
 TO_EQ_FM_DOM_HTML_IMG
 
 # good enough
@@ -944,10 +935,19 @@ TVD_PH_REC
 TVD_RCVD_SINGLE
 
 # good enough
+TVD_SUBJ_FINGER_04
+
+# good enough
 TVD_VISIT_PHARMA
 
 # good enough
-TVD_SUBJ_FINGER_04
+JM_FAKE_PSMTP_RCVD
+
+# good enough
+OBFU_HTML_ATTACH
+
+# good enough
+TO_EQ_FM_HTML_ONLY
 
 # tflags userconf
 UNPARSEABLE_RELAY
@@ -1041,6 +1041,9 @@ USER_IN_WHITELIST_TO
 
 # good enough
 XMAILER_MIMEOLE_OL_1ECD5
+
+# good enough
+XMAILER_MIMEOLE_OL_22B61
 
 # good enough
 XMAILER_MIMEOLE_OL_8627E
