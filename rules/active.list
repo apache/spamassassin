@@ -1,8 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-coi-bulk axb-fraud axb-generic bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus grenier llanga zmi; day 2: axb-coi-bulk axb-fraud axb-generic bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus grenier jarif llanga zmi; day 3: axb-coi-bulk axb-fraud axb-generic bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus grenier jarif llanga zmi
-
-# good enough
-ACH_CANCELLED
+# with results from: day 1: axb-coi-bulk axb-fraud axb-generic bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus grenier jarif zmi; day 2: axb-coi-bulk axb-fraud axb-generic bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus grenier llanga zmi; day 3: axb-coi-bulk axb-fraud axb-generic bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus grenier jarif llanga zmi
 
 # tflags 
 ADVANCE_FEE_2_NEW_FORM
@@ -74,9 +71,6 @@ AXB_XRCVD_EYOU_SEND
 AXB_X_AOL_SEZ_S
 
 # good enough
-AXB_X_RCV_WLOCAL
-
-# good enough
 BANKING_LAWS
 
 # tflags learn
@@ -114,9 +108,6 @@ CHARSET_FARAWAY_HEADER
 
 # good enough
 CK_HELO_DYNAMIC_SPLIT_IP
-
-# good enough
-CK_HELO_GENERIC
 
 # good enough
 CN_B2B_SPAMMER
@@ -206,9 +197,6 @@ FAKE_REPLY_C
 FB_CIALIS_LEO3
 
 # good enough
-FB_GVR
-
-# good enough
 FB_IMAGIRL
 
 # good enough
@@ -229,12 +217,6 @@ FH_HAS_XAIMC
 # good enough
 FH_HELO_ALMOST_IP
 
-# good enough
-FH_HELO_EQ_CHARTER
-
-# good enough
-FH_MSGID_XXX
-
 # tflags 
 FILL_THIS_FORM
 
@@ -246,9 +228,6 @@ FILL_THIS_FORM_LOAN
 
 # good enough
 FILL_THIS_FORM_LONG
-
-# good enough
-FM_FRM_RN_L_BRACK
 
 # good enough
 FM_LOTTO_MONEY
@@ -347,9 +326,6 @@ FSL_UA
 FSL_XM_419
 
 # good enough
-FS_PHARMASUB2
-
-# good enough
 FS_REPLICA
 
 # good enough
@@ -398,12 +374,6 @@ HDRS_LCASE_1K
 HEAD_LONG
 
 # good enough
-HELO_LH_HOME
-
-# good enough
-HELO_MISC_IP
-
-# good enough
 HK_GOLDDUST
 
 # good enough
@@ -426,9 +396,6 @@ HK_NAME_FROM
 
 # good enough
 HK_NAME_MR_MRS
-
-# good enough
-HK_RANDOM_REPLYTO
 
 # good enough
 HK_SCAM_N1
@@ -480,12 +447,6 @@ HTTPS_HTTP_MISMATCH
 
 # good enough
 KB_FAKED_THE_BAT
-
-# good enough
-KB_RATWARE_MSGID
-
-# good enough
-KHOP_JS_OBFUSCATION
 
 # tflags 
 LOTS_OF_MONEY
@@ -576,9 +537,6 @@ NSL_RCVD_HELO_USER
 
 # good enough
 OBFU_ATTACH_MISSP
-
-# good enough
-OBFU_HTML_ATTACH
 
 # tflags 
 OBFU_JVSCR_ESC
@@ -818,19 +776,10 @@ RCVD_IN_XBL
 RISK_FREE
 
 # good enough
-RP_8BIT
-
-# good enough
 SERGIO_SUBJECT_VIAGRA01
 
 # good enough
 SHARE_50_50
-
-# good enough
-SHORTENED_URL_SRC
-
-# good enough
-SINGLE_HEADER_1K
 
 # good enough
 SINGLE_HEADER_2K
@@ -860,9 +809,6 @@ SPF_PASS
 SPF_SOFTFAIL
 
 # good enough
-STOCK_IMG_HDR_FROM
-
-# good enough
 STOX_REPLY_TYPE
 
 # good enough
@@ -877,17 +823,8 @@ SUBJECT_IN_BLACKLIST
 # tflags userconf
 SUBJECT_IN_WHITELIST
 
-# good enough
-TO_EQ_FM_DOM_HTML_IMG
-
-# good enough
-TO_EQ_FM_DOM_HTML_ONLY
-
 # tflags net
 TO_EQ_FM_DOM_SPF_FAIL
-
-# good enough
-TO_EQ_FM_HTML_DIRECT
 
 # tflags net
 TO_EQ_FM_SPF_FAIL
@@ -911,9 +848,6 @@ TT_MSGID_TRUNC
 TVD_APPROVED
 
 # good enough
-TVD_FROM_1
-
-# good enough
 TVD_PH_BODY_META
 
 # good enough
@@ -927,12 +861,6 @@ TVD_RCVD_SINGLE
 
 # good enough
 TVD_SUBJ_FINGER_04
-
-# good enough
-TVD_VISIT_PHARMA
-
-# good enough
-HELO_NO_DOMAIN
 
 # tflags userconf
 UNPARSEABLE_RELAY
@@ -1026,9 +954,6 @@ USER_IN_WHITELIST_TO
 
 # good enough
 XMAILER_MIMEOLE_OL_1ECD5
-
-# good enough
-XMAILER_MIMEOLE_OL_8627E
 
 # good enough
 XM_PHPMAILER_FORGED
