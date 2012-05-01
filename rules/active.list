@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-coi-bulk axb-fraud axb-generic bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus grenier jarif zmi; day 2: axb-coi-bulk axb-fraud axb-generic bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus grenier llanga zmi; day 3: axb-coi-bulk axb-fraud axb-generic bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus grenier jarif llanga zmi
+# with results from: day 1: axb-coi-bulk axb-fraud axb-generic bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus grenier jarif llanga zmi; day 2: axb-coi-bulk axb-fraud axb-generic bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus grenier jarif zmi; day 3: axb-coi-bulk axb-fraud axb-generic bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus grenier llanga zmi
 
 # tflags 
 ADVANCE_FEE_2_NEW_FORM
@@ -234,6 +234,12 @@ FM_LOTTO_MONEY
 
 # good enough
 FM_LOTTO_YOU_WON
+
+# good enough
+FM_SCHOOLING
+
+# good enough
+FM_SCHOOL_DIPLOMA
 
 # tflags 
 FORM_FRAUD_3
@@ -538,6 +544,9 @@ NSL_RCVD_HELO_USER
 # good enough
 OBFU_ATTACH_MISSP
 
+# good enough
+OBFU_HTML_ATTACH
+
 # tflags 
 OBFU_JVSCR_ESC
 
@@ -809,12 +818,6 @@ SPF_PASS
 SPF_SOFTFAIL
 
 # good enough
-STOX_REPLY_TYPE
-
-# good enough
-STOX_REPLY_TYPE_WITHOUT_QUOTES
-
-# good enough
 STYLE_GIBBERISH
 
 # tflags userconf
@@ -861,6 +864,12 @@ TVD_RCVD_SINGLE
 
 # good enough
 TVD_SUBJ_FINGER_04
+
+# good enough
+FB_ACHIEVE_BACH
+
+# good enough
+PPMC_FROM_1
 
 # tflags userconf
 UNPARSEABLE_RELAY
