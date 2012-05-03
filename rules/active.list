@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-coi-bulk axb-fraud axb-generic bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus grenier jarif llanga zmi; day 2: axb-coi-bulk axb-fraud axb-generic bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus grenier jarif llanga zmi; day 3: axb-coi-bulk axb-fraud axb-generic bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus grenier jarif zmi
+# with results from: day 1: axb-coi-bulk axb-fraud axb-generic bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus grenier jarif llanga zmi; day 2: axb-coi-bulk axb-fraud axb-generic bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus grenier jarif llanga zmi; day 3: axb-coi-bulk axb-fraud axb-generic bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus grenier jarif llanga zmi
 
 # tflags 
 ADVANCE_FEE_2_NEW_FORM
@@ -203,6 +203,9 @@ FB_ACHIEVE_BACH
 FB_CIALIS_LEO3
 
 # good enough
+FB_GVR
+
+# good enough
 FB_IMAGIRL
 
 # good enough
@@ -226,6 +229,9 @@ FH_HAS_XAIMC
 # good enough
 FH_HELO_ALMOST_IP
 
+# good enough
+FH_HELO_EQ_CHARTER
+
 # tflags 
 FILL_THIS_FORM
 
@@ -237,6 +243,9 @@ FILL_THIS_FORM_LOAN
 
 # good enough
 FILL_THIS_FORM_LONG
+
+# good enough
+FM_FRM_RN_L_BRACK
 
 # good enough
 FM_LOTTO_MONEY
@@ -341,6 +350,9 @@ FSL_UA
 FSL_XM_419
 
 # good enough
+FS_PHARMASUB2
+
+# good enough
 FS_REPLICA
 
 # good enough
@@ -387,6 +399,9 @@ HDRS_LCASE_1K
 
 # tflags userconf
 HEAD_LONG
+
+# good enough
+HELO_LH_HOME
 
 # good enough
 HK_GOLDDUST
@@ -462,6 +477,9 @@ HTTPS_HTTP_MISMATCH
 
 # good enough
 KB_FAKED_THE_BAT
+
+# good enough
+KB_RATWARE_MSGID
 
 # tflags 
 LOTS_OF_MONEY
@@ -552,6 +570,9 @@ NSL_RCVD_HELO_USER
 
 # good enough
 OBFU_ATTACH_MISSP
+
+# good enough
+OBFU_HTML_ATTACH
 
 # tflags 
 OBFU_JVSCR_ESC
@@ -827,6 +848,9 @@ SPF_PASS
 SPF_SOFTFAIL
 
 # good enough
+STOCK_IMG_HDR_FROM
+
+# good enough
 STYLE_GIBBERISH
 
 # tflags userconf
@@ -869,10 +893,10 @@ TVD_PH_BODY_META_ALL
 TVD_PH_REC
 
 # good enough
-TVD_RCVD_SINGLE
+TVD_SUBJ_FINGER_04
 
 # good enough
-TVD_SUBJ_FINGER_04
+TVD_VISIT_PHARMA
 
 # good enough
 ACH_CANCELLED
@@ -884,13 +908,13 @@ AXB_X_RCV_WLOCAL
 CK_HELO_GENERIC
 
 # good enough
+FILL_THIS_FORM_SHORT
+
+# good enough
 HELO_MISC_IP
 
 # good enough
 HELO_NO_DOMAIN
-
-# good enough
-HK_RANDOM_REPLYTO
 
 # good enough
 KHOP_JS_OBFUSCATION
@@ -914,7 +938,13 @@ TO_EQ_FM_DOM_HTML_ONLY
 TO_EQ_FM_HTML_DIRECT
 
 # good enough
+TO_EQ_FM_HTML_ONLY
+
+# good enough
 TVD_FROM_1
+
+# good enough
+TVD_PH_7
 
 # tflags userconf
 UNPARSEABLE_RELAY
