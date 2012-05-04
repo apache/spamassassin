@@ -196,7 +196,7 @@ foreach(qw/
   gov.lt mil.lt
   asn.lv com.lv conf.lv edu.lv gov.lv id.lv mil.lv net.lv org.lv
   biz.ly com.ly edu.ly gov.ly id.ly med.ly net.ly org.ly plc.ly sch.ly
-  ac.ma co.ma gov.ma net.ma org.ma press.ma
+  ac.ma co.ma gov.ma net.ma org.ma press.ma                                                                                    ·
   asso.mc tm.mc
   ac.me co.me edu.me gov.me its.me net.me org.me priv.me
   com.mg edu.mg gov.mg mil.mg nom.mg org.mg prd.mg tm.mg
@@ -206,6 +206,7 @@ foreach(qw/
   edu.mn gov.mn org.mn
   com.mo edu.mo gov.mo net.mo org.mo
   music.mobi weather.mobi
+  co.mp edu.mp gov.mp net.mp org.mp
   com.mt edu.mt gov.mt net.mt org.mt tm.mt uu.mt
   co.mu com.mu
   aero.mv biz.mv com.mv coop.mv edu.mv gov.mv info.mv int.mv mil.mv museum.mv name.mv net.mv org.mv pro.mv
