@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-coi-bulk axb-fraud axb-generic bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus grenier jarif llanga zmi; day 2: axb-coi-bulk axb-fraud axb-generic bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus grenier jarif llanga zmi; day 3: axb-coi-bulk axb-fraud axb-generic bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus grenier jarif llanga zmi
+# with results from: day 1: axb-coi-bulk axb-fraud axb-generic bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus grenier jarif llanga; day 2: axb-coi-bulk axb-fraud axb-generic bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus grenier jarif llanga zmi; day 3: axb-coi-bulk axb-fraud axb-generic bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus grenier jarif llanga zmi
 
 # good enough
 ACH_CANCELLED
@@ -68,6 +68,9 @@ AXB_OBFU_MULE
 AXB_XMAILER_MIMEOLE_OL_1ECD5
 
 # good enough
+AXB_XMAILER_MIMEOLE_OL_22B61
+
+# good enough
 AXB_XMAILER_MIMEOLE_OL_8627E
 
 # good enough
@@ -132,9 +135,6 @@ DATE_DOTS
 
 # good enough
 DATE_IN_FUTURE_96_Q
-
-# good enough
-DATE_IN_FUTURE_Q_PLUS
 
 # good enough
 DEAR_BENEFICIARY
@@ -206,9 +206,6 @@ ENV_AND_HDR_SPF_MATCH
 FAKE_REPLY_C
 
 # good enough
-FB_ACHIEVE_BACH
-
-# good enough
 FB_CIALIS_LEO3
 
 # good enough
@@ -228,12 +225,6 @@ FH_FAKE_RCVD_LINE
 
 # good enough
 FH_FAKE_RCVD_LINE_B
-
-# good enough
-FH_FROM_GET_NAME
-
-# good enough
-FH_HAS_XAIMC
 
 # good enough
 FH_HELO_ALMOST_IP
@@ -264,12 +255,6 @@ FM_LOTTO_MONEY
 
 # good enough
 FM_LOTTO_YOU_WON
-
-# good enough
-FM_SCHOOLING
-
-# good enough
-FM_SCHOOL_DIPLOMA
 
 # tflags 
 FORM_FRAUD_3
@@ -324,9 +309,6 @@ FROM_MISSP_URI
 
 # good enough
 FROM_MISSP_USER
-
-# good enough
-FR_TITLE_CONS_6
 
 # good enough
 FSL_CTYPE_WIN1251
@@ -484,14 +466,14 @@ HK_SCAM_S3
 # good enough
 HK_SCAM_S7
 
-# good enough
-HK_SPAMMY_FILENAME
-
 # tflags userconf
 HTML_CHARSET_FARAWAY
 
 # good enough
 HTTPS_HTTP_MISMATCH
+
+# good enough
+JM_FAKE_PSMTP_RCVD
 
 # good enough
 KB_DATE_CONTAINS_TAB
@@ -528,6 +510,9 @@ LOTTO_DEPT
 
 # good enough
 LOTTO_URI
+
+# good enough
+MALFORMED_FREEMAIL
 
 # good enough
 MANY_PILL_PRICE
@@ -570,9 +555,6 @@ MONEY_PERCENT
 
 # good enough
 MSOE_MID_WRONG_CASE
-
-# good enough
-MS_XYMOSG_5K
 
 # tflags net
 NO_DNS_FOR_FROM
@@ -877,14 +859,14 @@ SPF_SOFTFAIL
 # good enough
 STOCK_IMG_HDR_FROM
 
-# good enough
-STYLE_GIBBERISH
-
 # tflags userconf
 SUBJECT_IN_BLACKLIST
 
 # tflags userconf
 SUBJECT_IN_WHITELIST
+
+# good enough
+TAB_IN_FROM
 
 # good enough
 TO_EQ_FM_DOM_HTML_IMG
@@ -897,9 +879,6 @@ TO_EQ_FM_HTML_DIRECT
 
 # tflags net
 TO_EQ_FM_SPF_FAIL
-
-# good enough
-TO_NO_BRKTS_DIRECT
 
 # good enough
 TO_NO_BRKTS_FROM_MSSP
@@ -941,22 +920,34 @@ TVD_SUBJ_FINGER_04
 TVD_VISIT_PHARMA
 
 # good enough
-AXB_XMAILER_MIMEOLE_OL_22B61
+AXB_XMAILER_MIMEOLE_OL_024C2
 
 # good enough
-AXB_XMAILER_MIMEOLE_OL_C9CC0
+AXB_XMAILER_MIMEOLE_OL_12495
 
 # good enough
-JM_FAKE_PSMTP_RCVD
+AXB_XMAILER_MIMEOLE_OL_4F11E
 
 # good enough
-MALFORMED_FREEMAIL
+AXB_XMAILER_MIMEOLE_OL_62CA2
 
 # good enough
-TAB_IN_FROM
+AXB_XMAILER_MIMEOLE_OL_7EB15
 
 # good enough
-URI_OBFU_DOM
+AXB_XMAILER_MIMEOLE_OL_E023A
+
+# good enough
+FILL_THIS_FORM_SHORT
+
+# good enough
+MANY_SUBDOM
+
+# good enough
+OBFU_HTML_ATTACH
+
+# good enough
+TO_EQ_FM_DOM_HTML_ONLY
 
 # tflags userconf
 UNPARSEABLE_RELAY
@@ -1011,6 +1002,9 @@ URIBL_WS_SURBL
 
 # tflags userconf
 URI_NOVOWEL
+
+# good enough
+URI_OBFU_DOM
 
 # good enough
 URI_OBFU_TLD
