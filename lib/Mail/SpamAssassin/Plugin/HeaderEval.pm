@@ -1052,6 +1052,7 @@ sub check_equal_from_domains {
   my $from = $pms->get('From:addr');
   my $envfrom = $pms->get('EnvelopeFrom:addr');
 
+  local $1;
   my $fromdomain = '';
   #Revised regexp from 6487 comment 3
   $fromdomain = $1  if $from =~ /\@([^@]*)\z/;
@@ -1059,7 +1060,7 @@ sub check_equal_from_domains {
   return 0 if $fromdomain eq '';
 
   my $envfromdomain = '';
-  $envfromdomain = $1 if ($envfrom =~ /^[^@]+@(.+)$/);
+  $envfromdomain = $1  if $envfrom =~ /\@([^@]*)\z/;
   $envfromdomain =~ s/^.+\.([^\.]+\.[^\.]+)$/$1/;
   return 0 if $envfromdomain eq '';
 
