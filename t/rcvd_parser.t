@@ -456,14 +456,14 @@ my %data = (
   '[ ip=2001:4f8:3:bb::25 rdns=rc3.isc.org helo=rc3.isc.org by=sf1.isc.org ident= envfrom=bind-users-bounce@isc.org id=C986F284EE auth= msa=0 ]',
 
   'from 153.90.199.141        (SquirrelMail authenticated user admin); by web1.cs.montana.edu with HTTP;        Thu, 23 Sep 2004 14:35:29 -0600 (MDT)' =>
-  '[ ip=153.90.199.141 rdns= helo= by=web1.cs.montana.edu ident= envfrom= id= auth= msa=0 ]',
+  '[ ip=153.90.199.141 rdns= helo= by=web1.cs.montana.edu ident= envfrom= id= auth=HTTP msa=0 ]',
 
   'from ausisaps301-dmz.aus.amer.dell.com ([143.166.226.16]) (SquirrelMail authenticated user hoolis); by www.penguintowne.org with HTTP; Mon, 22 Mar 2004 12:54:13 -0600 (CST)' =>
-  '[ ip=143.166.226.16 rdns= helo= by=www.penguintowne.org ident= envfrom= id= auth=Sendmail msa=0 ]',
+  '[ ip=143.166.226.16 rdns= helo= by=www.penguintowne.org ident= envfrom= id= auth=HTTP msa=0 ]',
 
   #ADDED PER Bug 6783
   'from 67.85.219.192 (NaSMail authenticated user john.doe) by webmail.example.com with HTTP; Fri, 30 Mar 2012 12:39:58 +0100 (BST)' => 
-  '[ ip=67.85.219.192 rdns= helo= by=webmail.example.com ident= envfrom= id= auth= msa=0 ]'
+  '[ ip=67.85.219.192 rdns= helo= by=webmail.example.com ident= envfrom= id= auth=HTTP msa=0 ]'
 
 );
 
