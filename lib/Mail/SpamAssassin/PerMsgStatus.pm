@@ -137,6 +137,11 @@ sub new {
   $self;
 }
 
+sub DESTROY {
+  my ($self) = shift;
+  eval { $self->delete_fulltext_tmpfile() };  # Bug 5808
+}
+
 ###########################################################################
 
 =item $status->check ()
