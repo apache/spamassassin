@@ -651,7 +651,8 @@ retry_read:
     }
     elsif ($now > $deadline) {
       # timed out!  report failure
-      warn "prefork: sysread(".$sock->fileno.") failed after $timeout secs";
+      dbg("prefork: sysread(%d) failed after %.1f secs",
+          $sock->fileno, $timeout);
       return;
     }
     else {
@@ -659,7 +660,8 @@ retry_read:
       $tout = 1 if ($tout <= 0);    # ensure it's > 0
     }
 
-    dbg("prefork: sysread(".$sock->fileno.") not ready, wait max $tout secs");
+    dbg("prefork: sysread(%d) not ready, wait max %.1f secs",
+        $sock->fileno, $tout);
     my $rin = '';
     vec($rin, $sock->fileno, 1) = 1;
     select($rin, undef, undef, $tout);
