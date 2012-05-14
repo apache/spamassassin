@@ -399,11 +399,12 @@ sub parse_received_line {
 
   # try to catch authenticated message identifier
   #
-  # with ESMTPA, ESMTPSA, LMTPA, LMTPSA should cover RFC 3848 compliant MTAs
+  # with ESMTPA, ESMTPSA, LMTPA, LMTPSA should cover RFC 3848 compliant MTAs,
+  # UTF8SMTPA and UTF8LMTPA are covered by RFC 4954 and RFC 6531,
   # with ASMTP (Authenticated SMTP) is used by Earthlink, Exim 4.34, and others
   # with HTTP should only be authenticated webmail sessions
   # with HTTPU is used by Communigate Pro with Pronto! webmail interface
-  if (/ by / && / with (ESMTPA|ESMTPSA|LMTPA|LMTPSA|ASMTP|HTTPU?)(?: |$)/i) {
+  if (/ by / && / with ((?:ES|L|UTF8S|UTF8L)MTPS?A|ASMTP|HTTPU?)(?: |;|$)/i) {
     $auth = $1;
   }
   # GMail should use ESMTPSA to indicate that it is in fact authenticated,
