@@ -8,7 +8,7 @@ use constant HAS_DBD_SQLITE => eval { require DBD::SQLite; };
 our $DO_RUN = !$SKIP_SPAMD_TESTS && conf_bool('run_sql_pref_tests')
     && HAS_DBI && HAS_DBD_SQLITE;
 
-use Test; plan tests => ($DO_RUN ? 30 : 0);
+use Test; plan tests => ($DO_RUN ? 32 : 0);
 
 exit unless $DO_RUN;
 
@@ -22,6 +22,8 @@ $dbh->{AutoCommit} = 1;
 ok($dbh->do("CREATE TABLE userpref (username, preference, value)"));
 ok($dbh->do("INSERT INTO userpref VALUES('\@GLOBAL', 'add_header', 'all tTEST1 FOO1')"));
 ok($dbh->do("INSERT INTO userpref VALUES('testuser', 'score', 'GTUBE 0')"));
+ok($dbh->do("INSERT INTO userpref VALUES('testuser', 'score', 'MSGID_RANDY 0')"));
+ok($dbh->do("INSERT INTO userpref VALUES('testuser', 'score', 'DATE_IN_PAST_03_06 0')"));
 ok($dbh->do("INSERT INTO userpref VALUES('testuser', 'add_header', 'all tTEST2 FOO2')"));
 
 tstlocalrules ("
