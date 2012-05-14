@@ -167,17 +167,21 @@ sub log_message {
   }
   $msg = $timestamp . ' ' . $msg  if $timestamp ne '';
 
-  # important: do not call syslog() from the SIGCHLD handler
-  # child_handler().   otherwise we can get into a loop if syslog()
-  # forks a process -- as it does in syslog-ng apparently! (bug 3625)
-  $Mail::SpamAssassin::Logger::LOG_SA{INHIBIT_LOGGING_IN_SIGCHLD_HANDLER} = 1;
+# no longer needed since a patch to bug 6745:
+# # important: do not call syslog() from the SIGCHLD handler
+# # child_handler().   otherwise we can get into a loop if syslog()
+# # forks a process -- as it does in syslog-ng apparently! (bug 3625)
+# $Mail::SpamAssassin::Logger::LOG_SA{INHIBIT_LOGGING_IN_SIGCHLD_HANDLER} = 1;
+
   my $eval_stat;
   eval {
     syslog($level, "%s", $msg); 1;
   } or do {
     $eval_stat = $@ ne '' ? $@ : "errno=$!";  chomp $eval_stat;
   };
-  $Mail::SpamAssassin::Logger::LOG_SA{INHIBIT_LOGGING_IN_SIGCHLD_HANDLER} = 0;
+
+# no longer needed since a patch to bug 6745:
+# $Mail::SpamAssassin::Logger::LOG_SA{INHIBIT_LOGGING_IN_SIGCHLD_HANDLER} = 0;
 
   if (defined $eval_stat) {
     if ($self->check_syslog_sigpipe($msg)) {
