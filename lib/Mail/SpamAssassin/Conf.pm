@@ -1434,7 +1434,7 @@ which controls the URIDNSBL plugin (documented in the URIDNSBL man page).
     type => $CONF_TYPE_BOOL,
   });
 
-=item dns_available { yes | no | test[: domain1 domain2...] }   (default: test)
+=item dns_available { yes | no | test[: domain1 domain2...] }   (default: yes)
 
 Tells SpamAssassin whether DNS resolving is available or not. A value I<yes>
 indicates DNS resolving is available, a value I<no> indicates DNS resolving
@@ -1458,11 +1458,14 @@ DNS-dependent tests.
 Please note, the DNS test queries for NS records, so specify domain names,
 not host names.
 
+Since version 3.4.0 of SpamAssassin a default setting for option
+I<dns_available> is I<yes>. A default in older versions was I<test>.
+
 =cut
 
   push (@cmds, {
     setting => 'dns_available',
-    default => 'test',
+    default => 'yes',
     type => $CONF_TYPE_STRING,
     code => sub {
       my ($self, $key, $value, $line) = @_;
