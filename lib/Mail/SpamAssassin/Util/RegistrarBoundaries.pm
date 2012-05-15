@@ -133,7 +133,7 @@ foreach(qw/
   ab.ca bc.ca gc.ca mb.ca nb.ca nf.ca nl.ca ns.ca nt.ca nu.ca on.ca pe.ca qc.ca sk.ca yk.ca
   co.ck edu.ck gov.ck net.ck org.ck
   ac.cn ah.cn bj.cn com.cn cq.cn edu.cn fj.cn gd.cn gov.cn gs.cn gx.cn gz.cn ha.cn hb.cn he.cn hi.cn hk.cn hl.cn hn.cn jl.cn js.cn jx.cn ln.cn mo.cn net.cn nm.cn nx.cn org.cn qh.cn sc.cn sd.cn sh.cn sn.cn sx.cn tj.cn tw.cn xj.cn xz.cn yn.cn zj.cn
-  arts.co com.co edu.co firm.co gov.co info.co int.co mil.co net.co nom.co org.co rec.co store.co web.co
+  arts.co com.co edu.co firm.co gov.co info.co int.co mil.co net.co nom.co org.co rec.co web.co
   lkd.co.im ltd.co.im plc.co.im
   au.com br.com cn.com de.com eu.com gb.com hu.com no.com qc.com ru.com sa.com se.com uk.com us.com uy.com za.com
   ac.cr co.cr ed.cr fi.cr go.cr or.cr sa.cr
@@ -153,7 +153,7 @@ foreach(qw/
   aland.fi
   ac.fj biz.fj com.fj gov.fj id.fj info.fj mil.fj name.fj net.fj org.fj pro.fj school.fj
   ac.fk co.fk com.fk gov.fk net.fk nom.fk org.fk
-  aeroport.fr assedic.fr asso.fr avocat.fr avoues.fr barreau.fr cci.fr chambagri.fr chirurgiens-dentistes.fr com.fr experts-comptables.fr geometre-expert.fr gouv.fr greta.fr huissier-justice.fr medecin.fr nom.fr notaires.fr pharmacien.fr port.fr prd.fr presse.fr tm.fr veterinaire.fr
+  tm.fr asso.fr nom.fr prd.fr presse.fr com.fr gouv.fr
   com.ge edu.ge gov.ge mil.ge net.ge org.ge pvt.ge
   ac.gg alderney.gg co.gg gov.gg guernsey.gg ind.gg ltd.gg net.gg org.gg sark.gg sch.gg
   com.gh edu.gh gov.gh mil.gh org.gh
@@ -167,7 +167,7 @@ foreach(qw/
   com.hn edu.hn gob.hn mil.hn net.hn org.hn
   com.hr from.hr iz.hr name.hr
   adult.ht art.ht asso.ht com.ht coop.ht edu.ht firm.ht gouv.ht info.ht med.ht net.ht org.ht perso.ht pol.ht pro.ht rel.ht shop.ht
-  2000.hu ac.hu agrar.hu bolt.hu casino.hu city.hu co.hu edu.hu erotica.hu erotika.hu film.hu forum.hu games.hu gov.hu hotel.hu info.hu ingatlan.hu jogasz.hu konyvelo.hu lakas.hu media.hu news.hu org.hu priv.hu reklam.hu sex.hu shop.hu sport.hu suli.hu szex.hu tm.hu tozsde.hu utazas.hu video.hu
+  2000.hu agrar.hu bolt.hu casino.hu city.hu co.hu erotica.hu erotika.hu film.hu forum.hu games.hu hotel.hu info.hu ingatlan.hu jogasz.hu konyvelo.hu lakas.hu media.hu news.hu org.hu priv.hu reklam.hu sex.hu shop.hu sport.hu suli.hu szex.hu tm.hu tozsde.hu utazas.hu video.hu
   ac.id co.id go.id mil.id net.id or.id sch.id web.id
   gov.ie
   ac.il co.il gov.il idf.il k12.il muni.il net.il org.il
@@ -230,7 +230,7 @@ foreach(qw/
   ac.pg com.pg net.pg
   com.ph edu.ph gov.ph mil.ph net.ph ngo.ph org.ph
   biz.pk com.pk edu.pk fam.pk gob.pk gok.pk gon.pk gop.pk gos.pk gov.pk net.pk org.pk web.pk
-  agro.pl aid.pl art.pl atm.pl auto.pl bialystok.pl biz.pl com.pl edu.pl gda.pl gdansk.pl gmina.pl gov.pl gsm.pl info.pl katowice.pl krakow.pl lodz.pl lublin.pl mail.pl media.pl miasta.pl mil.pl net.pl ngo.pl nieruchomosci.pl nom.pl olsztyn.pl opole.pl org.pl pc.pl powiat.pl poznan.pl priv.pl realestate.pl rel.pl sex.pl shop.pl sklep.pl slupsk.pl sos.pl szczecin.pl szkola.pl targi.pl tm.pl torun.pl tourism.pl travel.pl turystyka.pl warszawa.pl waw.pl wroc.pl wroclaw.pl za.pl zgora.pl
+  art.pl biz.pl com.pl edu.pl gov.pl info.pl mil.pl net.pl ngo.pl org.pl
   biz.pr com.pr edu.pr gov.pr info.pr isla.pr name.pr net.pr org.pr pro.pr
   cpa.pro law.pro med.pro
   com.ps edu.ps gov.ps net.ps org.ps plo.ps sec.ps
@@ -240,7 +240,7 @@ foreach(qw/
   asso.re com.re nom.re
   arts.ro com.ro firm.ro info.ro nom.ro nt.ro org.ro rec.ro store.ro tm.ro www.ro
   ac.rs co.rs edu.rs gov.rs in.rs org.rs
-  ac.ru adygeya.ru altai.ru amur.ru amursk.ru arkhangelsk.ru astrakhan.ru baikal.ru bashkiria.ru belgorod.ru bir.ru bryansk.ru buryatia.ru cbg.ru chel.ru chelyabinsk.ru chita.ru chukotka.ru chuvashia.ru cmw.ru com.ru dagestan.ru dudinka.ru e-burg.ru edu.ru fareast.ru gov.ru grozny.ru int.ru irkutsk.ru ivanovo.ru izhevsk.ru jamal.ru jar.ru joshkar-ola.ru k-uralsk.ru kalmykia.ru kaluga.ru kamchatka.ru karelia.ru kazan.ru kchr.ru kemerovo.ru khabarovsk.ru khakassia.ru khv.ru kirov.ru kms.ru koenig.ru komi.ru kostroma.ru krasnoyarsk.ru kuban.ru kurgan.ru kursk.ru kustanai.ru kuzbass.ru lipetsk.ru magadan.ru magnitka.ru mari-el.ru mari.ru marine.ru mil.ru mordovia.ru mosreg.ru msk.ru murmansk.ru mytis.ru nakhodka.ru nalchik.ru net.ru nkz.ru nnov.ru norilsk.ru nov.ru novosibirsk.ru nsk.ru omsk.ru orenburg.ru org.ru oryol.ru oskol.ru palana.ru penza.ru perm.ru pp.ru pskov.ru ptz.ru pyatigorsk.ru rnd.ru rubtsovsk.ru ryazan.ru sakhalin.ru samara.ru saratov.ru simbirsk.ru smolensk.ru snz.ru spb.ru stavropol.ru stv.ru surgut.ru syzran.ru tambov.ru tatarstan.ru test.ru tom.ru tomsk.ru tsaritsyn.ru tsk.ru tula.ru tuva.ru tver.ru tyumen.ru udm.ru udmurtia.ru ulan-ude.ru vdonsk.ru vladikavkaz.ru vladimir.ru vladivostok.ru volgograd.ru vologda.ru voronezh.ru vrn.ru vyatka.ru yakutia.ru yamal.ru yaroslavl.ru yekaterinburg.ru yuzhno-sakhalinsk.ru zgrad.ru
+  ac.ru com.ru edu.ru gov.ru int.ru mil.ru net.ru org.ru pp.ru
   ac.rw co.rw com.rw edu.rw gouv.rw gov.rw int.rw mil.rw net.rw
   com.sa edu.sa gov.sa med.sa net.sa org.sa pub.sa sch.sa
   com.sb edu.sb gov.sb net.sb org.sb
