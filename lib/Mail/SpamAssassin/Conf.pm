@@ -1434,20 +1434,29 @@ which controls the URIDNSBL plugin (documented in the URIDNSBL man page).
     type => $CONF_TYPE_BOOL,
   });
 
-=item dns_available { yes | test[: name1 name2...] | no }   (default: test)
+=item dns_available { yes | no | test[: domain1 domain2...] }   (default: test)
 
-By default, SpamAssassin will query some default hosts on the internet to
-attempt to check if DNS is working or not. The problem is that it can
-introduce some delay if your network connection is down, and in some cases it
-can wrongly guess that DNS is unavailable because the test connections failed.
-SpamAssassin includes a default set of 13 servers, among which 3 are picked
-randomly.
+Tells SpamAssassin whether DNS resolving is available or not. A value I<yes>
+indicates DNS resolving is available, a value I<no> indicates DNS resolving
+is not available - both of these values apply unconditionally and skip initial
+DNS tests, which can be slow or unreliable.
 
-You can however specify your own list by specifying
+When the option value is a I<test> (with or without arguments), SpamAssassin
+will query some domain names on the internet during initialization, attempting
+to determine if DNS resolving is working or not. A space-separated list
+of domain names may be specified explicitly, or left to a built-in default
+of a dozen or so domain names. From an explicit or a default list a subset
+of three domain names is picked randomly for checking. The test queries for
+NS records of these domain: if at least one query returns a success then
+SpamAssassin considers DNS resolving as available, otherwise not.
 
-  dns_available test: domain1.tld domain2.tld domain3.tld
+The problem is that the test can introduce some startup delay if a network
+connection is down, and in some cases it can wrongly guess that DNS is
+unavailable because a test connections failed, what causes disabling several
+DNS-dependent tests.
 
-Please note, the DNS test queries for NS records.
+Please note, the DNS test queries for NS records, so specify domain names,
+not host names.
 
 =cut
 
@@ -1457,7 +1466,7 @@ Please note, the DNS test queries for NS records.
     type => $CONF_TYPE_STRING,
     code => sub {
       my ($self, $key, $value, $line) = @_;
-      if ($value =~ /^test(?::\s+.+)?$/) {
+      if ($value =~ /^test(?::\s*\S.*)?$/) {
         $self->{dns_available} = $value;
       }
       elsif ($value =~ /^(?:yes|1)$/) {
