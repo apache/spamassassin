@@ -679,14 +679,13 @@ sub is_dns_available {
     return $IS_DNS_AVAILABLE;
   }
 
-  if ($dnsopt =~ /test:\s+(.+)$/) {
-    my $servers=$1;
-    dbg("dns: servers: $servers");
-    @domains = split (/\s+/, $servers);
-    dbg("dns: looking up NS records for user specified servers: " .
+  if ($dnsopt =~ /^test:\s*(\S.*)$/) {
+    @domains = split (/\s+/, $1);
+    dbg("dns: looking up NS records for user specified domains: %s",
         join(", ", @domains));
   } else {
     @domains = @EXISTING_DOMAINS;
+    dbg("dns: looking up NS records for built-in domains");
   }
 
   # do the test with a full set of configured nameservers
