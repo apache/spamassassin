@@ -98,6 +98,7 @@ $VALID_TLDS_RE = qr/
 # The freeapp.net site now says that information on the site is obsolete
 # See discussion and sources in comments of bug 5677
 # updated as per bug 5815
+# cleanup per bug 6795 (axb)
 foreach(qw/
 
   com.ac edu.ac gov.ac mil.ac net.ac org.ac
