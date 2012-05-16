@@ -1452,7 +1452,7 @@ SpamAssassin considers DNS resolving as available, otherwise not.
 
 The problem is that the test can introduce some startup delay if a network
 connection is down, and in some cases it can wrongly guess that DNS is
-unavailable because a test connections failed, what causes disabling several
+unavailable because a test connection failed, what causes disabling several
 DNS-dependent tests.
 
 Please note, the DNS test queries for NS records, so specify domain names,
@@ -1678,8 +1678,8 @@ See also directives I<dns_local_ports_permit> and I<dns_local_ports_avoid>.
 
 =item dns_test_interval n   (default: 600 seconds)
 
-If dns_available is set to 'test' (which is the default), the dns_test_interval
-time in number of seconds will tell SpamAssassin how often to retest for working DNS.
+If dns_available is set to I<test>, the dns_test_interval time in number
+of seconds will tell SpamAssassin how often to retest for working DNS.
 
 =cut
 
