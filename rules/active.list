@@ -1,9 +1,6 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
 # with results from: day 1: axb-coi-bulk axb-fraud axb-generic bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus grenier jarif llanga; day 2: axb-coi-bulk axb-fraud axb-generic bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus grenier jarif llanga; day 3: axb-coi-bulk axb-fraud axb-generic bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus grenier jarif llanga
 
-# good enough
-ACH_CANCELLED
-
 # tflags 
 ADVANCE_FEE_2_NEW_FORM
 
@@ -59,9 +56,6 @@ ANY_PILL_PRICE
 AXB_BODYMAIL_SBL112884
 
 # good enough
-AXB_HELO_HOME_UN
-
-# good enough
 AXB_OBFU_MULE
 
 # good enough
@@ -98,9 +92,6 @@ AXB_XRCVD_EYOU_SEND
 AXB_X_AOL_SEZ_S
 
 # good enough
-AXB_X_RCV_WLOCAL
-
-# good enough
 BANKING_LAWS
 
 # tflags learn
@@ -135,9 +126,6 @@ CHARSET_FARAWAY
 
 # tflags userconf
 CHARSET_FARAWAY_HEADER
-
-# good enough
-CK_HELO_DYNAMIC_SPLIT_IP
 
 # good enough
 CN_B2B_SPAMMER
@@ -224,25 +212,13 @@ FB_ACHIEVE_BACH
 FB_CIALIS_LEO3
 
 # good enough
-FB_GVR
-
-# good enough
 FB_QUALITY_REPLICA
-
-# good enough
-FB_REPLICA_ROLEX
 
 # good enough
 FH_FAKE_RCVD_LINE
 
 # good enough
 FH_FAKE_RCVD_LINE_B
-
-# good enough
-FH_HELO_ALMOST_IP
-
-# good enough
-FH_HELO_EQ_CHARTER
 
 # tflags 
 FILL_THIS_FORM
@@ -258,9 +234,6 @@ FILL_THIS_FORM_LONG
 
 # good enough
 FILL_THIS_FORM_SHORT
-
-# good enough
-FM_FRM_RN_L_BRACK
 
 # good enough
 FM_IS_IT_OUR_ACCOUNT
@@ -362,13 +335,7 @@ FSL_UA
 FSL_XM_419
 
 # good enough
-FS_PHARMASUB2
-
-# good enough
 FS_REPLICA
-
-# good enough
-FS_REPLICAWATCH
 
 # good enough
 FS_START_LOSE
@@ -416,12 +383,6 @@ HDRS_LCASE_1K
 HEAD_LONG
 
 # good enough
-HELO_LH_HOME
-
-# good enough
-HELO_MISC_IP
-
-# good enough
 HK_GOLDDUST
 
 # good enough
@@ -447,6 +408,9 @@ HK_NAME_FROM
 
 # good enough
 HK_NAME_MR_MRS
+
+# good enough
+HK_RANDOM_ENVFROM
 
 # good enough
 HK_RANDOM_REPLYTO_NAME
@@ -506,7 +470,7 @@ KB_FAKED_THE_BAT
 KB_RATWARE_MSGID
 
 # good enough
-KHOP_JS_OBFUSCATION
+KB_RATWARE_OUTLOOK_MID
 
 # tflags 
 LOTS_OF_MONEY
@@ -838,9 +802,6 @@ SHARE_50_50
 # good enough
 SHORTENED_URL_SRC
 
-# good enough
-SINGLE_HEADER_1K
-
 # tflags net
 SPF_FAIL
 
@@ -865,9 +826,6 @@ SPF_PASS
 # tflags net
 SPF_SOFTFAIL
 
-# good enough
-STOCK_IMG_HDR_FROM
-
 # tflags userconf
 SUBJECT_IN_BLACKLIST
 
@@ -877,14 +835,8 @@ SUBJECT_IN_WHITELIST
 # good enough
 TAB_IN_FROM
 
-# good enough
-TO_EQ_FM_DOM_HTML_IMG
-
 # tflags net
 TO_EQ_FM_DOM_SPF_FAIL
-
-# good enough
-TO_EQ_FM_HTML_DIRECT
 
 # tflags net
 TO_EQ_FM_SPF_FAIL
@@ -917,16 +869,13 @@ TVD_PH_REC
 TVD_SUBJ_FINGER_04
 
 # good enough
-TVD_VISIT_PHARMA
+FB_NO_MORE_MAIL
 
 # good enough
-AXB_XMAILER_MIMEOLE_OL_22B61
+FROM_WSP_LEAD
 
 # good enough
-MALFORMED_FREEMAIL
-
-# good enough
-OBFU_HTML_ATTACH
+HK_RANDOM_FROM
 
 # tflags userconf
 UNPARSEABLE_RELAY
@@ -981,9 +930,6 @@ URIBL_WS_SURBL
 
 # tflags userconf
 URI_NOVOWEL
-
-# good enough
-URI_OBFU_DOM
 
 # good enough
 URI_OBFU_TLD
