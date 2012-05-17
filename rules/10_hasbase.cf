@@ -27,14 +27,38 @@
 
 # Header rules
 
-header   __HAS_SENDER exists:Sender
 
-header 	__HAS_FROM exists:From
+header   __HAS_SENDER 		exists:Sender
 
-header 	__HAS_TO exists:To
+header 	__HAS_FROM 		exists:From
 
-header	__HAS_CC exists:CC
+header 	__HAS_TO		exists:To
 
+header	__HAS_CC		exists:CC
+
+# Webmail
+
+# MUA & User Agents
+header  __HAS_UA                exists:User-Agent
+header  __HAS_XMAIL             exists:X-Mailer
+
+
+# Other
+header  __HAS_DKIM_SIGHD	exists:DKIM-Signature
+
+header  __HAS_TNEF		exists:X-MS-TNEF-Correlator
+
+header  __HAS_ERRORS_TO         exists:Errors-To
+header  __HAS_ORIGINALLY        exists:X-Originally-To
+header  __HAS_LIST_ID           exists:List-Id
+header  __HAS_X_BEEN_THERE      exists:X-BeenThere
+header  __HAS_X_REF             exists:References
+header  __HAS_IN_REPLY_TO       exists:In-Reply-To
+header  __XPRIO                 exists:X-Priority
+header  __DISPONOT              exists:Disposition-Notification-To
+header  __RRCPTO                exists:Return-Receipt-To
+header  __OLDPEG                exists:X-Confirm-Reading-To
+header  __AOL_IP                exists:X-AOL-IP
 
 
 # Rawbody rules
