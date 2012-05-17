@@ -29,13 +29,11 @@
 
 header   __HAS_SENDER exists:Sender
 
-header __HAS_FROM   exists:From
+header 	__HAS_FROM exists:From
 
-header __HAS_TO     exists:To
+header 	__HAS_TO exists:To
 
-header __HAS_CC     exists:CC
-
-
+header	__HAS_CC exists:CC
 
 
 
@@ -46,9 +44,16 @@ header __HAS_CC     exists:CC
 # Mimeheader rules
 # should be encapsulated in if ... endif
 
+ifplugin Mail::SpamAssassin::Plugin::MIMEHeader
+# Put rules below
+
+
+#
+endif
+
 
 
 
 # URI rules
 
-uri __HAS_URI	/./
+uri 	__HAS_URI /./
