@@ -80,7 +80,7 @@ sub is_charset_ok_for_locales {
   $cs =~ s/^3D//gs;		# broken by quoted-printable
   $cs =~ s/:.*$//gs;            # trim off multiple charsets, just use 1st
 
-  study $cs;
+  study $cs;  # study is a no-op since perl 5.16.0, eliminating related bugs
   #warn "JMD $cs";
 
   # always OK (the net speaks mostly roman charsets)
