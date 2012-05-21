@@ -139,7 +139,7 @@ sub check_for_unique_subject_id {
   my ($self, $pms) = @_;
   local ($_);
   $_ = lc $pms->get('Subject');
-  study;
+  study;  # study is a no-op since perl 5.16.0, eliminating related bugs
 
   my $id = 0;
   if (/[-_\.\s]{7,}([-a-z0-9]{4,})$/

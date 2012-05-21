@@ -136,7 +136,7 @@ sub _check_subject {
 
   return 1 if defined($list->{$subject});
 
-  study $subject;
+  study $subject;  # study is a no-op since perl 5.16.0, eliminating bugs
   foreach my $regexp (values %{$list}) {
     if ($subject =~ qr/$regexp/i) {
       return 1;

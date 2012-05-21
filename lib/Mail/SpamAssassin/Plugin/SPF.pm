@@ -822,7 +822,7 @@ sub _wlcheck {
   if (defined ($scanner->{conf}->{$param}->{$scanner->{sender}})) {
     return 1;
   } else {
-    study $scanner->{sender};
+    study $scanner->{sender};  # study is a no-op since perl 5.16.0
     foreach my $regexp (values %{$scanner->{conf}->{$param}}) {
       if ($scanner->{sender} =~ qr/$regexp/i) {
         return 1;
