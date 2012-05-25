@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-coi-bulk axb-fraud axb-generic bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm danmcdonald darxus grenier jarif llanga zmi; day 2: axb-coi-bulk axb-fraud axb-generic bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm danmcdonald darxus grenier jarif llanga zmi; day 3: axb-coi-bulk axb-fraud axb-generic bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm danmcdonald darxus grenier jarif llanga zmi
+# with results from: day 1: axb-coi-bulk axb-fraud axb-generic bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm danmcdonald darxus grenier jarif llanga; day 2: axb-coi-bulk axb-fraud axb-generic bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm danmcdonald darxus grenier jarif llanga zmi; day 3: axb-coi-bulk axb-fraud axb-generic bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm danmcdonald darxus grenier jarif llanga zmi
 
 # tflags 
 ADVANCE_FEE_2_NEW_FORM
@@ -66,9 +66,6 @@ AXB_XMAILER_MIMEOLE_OL_015D5
 
 # good enough
 AXB_XMAILER_MIMEOLE_OL_024C2
-
-# good enough
-AXB_XMAILER_MIMEOLE_OL_12495
 
 # good enough
 AXB_XMAILER_MIMEOLE_OL_1ECD5
@@ -194,13 +191,13 @@ AXB_XMAILER_MIMEOLE_OL_FF5C8
 AXB_XMA_BASP
 
 # good enough
+AXB_XRCVD_EYOU_SEND
+
+# good enough
 AXB_X_AOL_SEZ_S
 
 # good enough
 AXB_X_RCV_WLOCAL
-
-# good enough
-BANKING_LAWS
 
 # tflags learn
 BAYES_00
@@ -243,9 +240,6 @@ CORRUPT_FROM_LINE_IN_HDRS
 
 # good enough
 DATE_DOTS
-
-# good enough
-DATE_IN_FUTURE_96_Q
 
 # good enough
 DATE_IN_FUTURE_Q_PLUS
@@ -481,9 +475,6 @@ FS_START_LOSE
 # good enough
 FS_WEIGHT_LOSS
 
-# good enough
-GAPPY_HTML
-
 # tflags userconf
 GTUBE
 
@@ -539,9 +530,6 @@ HK_NAME_FM_FROM
 HK_NAME_FM_MR_MRS
 
 # good enough
-HK_NAME_FROM
-
-# good enough
 HK_NAME_MR_MRS
 
 # good enough
@@ -586,14 +574,8 @@ HK_SCAM_S7
 # good enough
 HK_SPAMMY_FILENAME
 
-# good enough
-HS_FORGED_OE_FW
-
 # tflags userconf
 HTML_CHARSET_FARAWAY
-
-# good enough
-HTTPS_HTTP_MISMATCH
 
 # good enough
 JM_FAKE_PSMTP_RCVD
@@ -690,6 +672,9 @@ NSL_RCVD_HELO_USER
 
 # good enough
 OBFU_ATTACH_MISSP
+
+# good enough
+OBFU_HTML_ATTACH
 
 # tflags 
 OBFU_JVSCR_ESC
@@ -971,6 +956,9 @@ SPF_SOFTFAIL
 STOCK_IMG_HDR_FROM
 
 # good enough
+STOX_REPLY_TYPE
+
+# good enough
 STOX_REPLY_TYPE_WITHOUT_QUOTES
 
 # tflags userconf
@@ -1010,10 +998,25 @@ TVD_PH_SUBJ_META1
 TVD_SUBJ_NUM_OBFU_MINFP
 
 # good enough
+AXB_XMAILER_MIMEOLE_OL_07794
+
+# good enough
 AXB_XMAILER_MIMEOLE_OL_25340
 
 # good enough
+AXB_XMAILER_MIMEOLE_OL_3857F
+
+# good enough
+AXB_XMAILER_MIMEOLE_OL_57545
+
+# good enough
+AXB_XMAILER_MIMEOLE_OL_6554A
+
+# good enough
 AXB_XMAILER_MIMEOLE_OL_7F4F5
+
+# good enough
+AXB_XMAILER_MIMEOLE_OL_BC7E6
 
 # good enough
 FROM_12LTRDOM
