@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-coi-bulk axb-fraud axb-generic bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm danmcdonald darxus grenier jarif llanga; day 2: axb-coi-bulk axb-fraud axb-generic bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm danmcdonald darxus grenier jarif llanga zmi; day 3: axb-coi-bulk axb-fraud axb-generic bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm danmcdonald darxus grenier jarif llanga zmi
+# with results from: day 1: axb-coi-bulk axb-fraud axb-generic bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm danmcdonald darxus grenier jarif llanga; day 2: axb-coi-bulk axb-fraud axb-generic bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm danmcdonald darxus grenier jarif llanga; day 3: axb-coi-bulk axb-fraud axb-generic bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm danmcdonald darxus grenier jarif llanga zmi
 
 # tflags 
 ADVANCE_FEE_2_NEW_FORM
@@ -56,9 +56,6 @@ ANY_PILL_PRICE
 AXB_BODYMAIL_SBL112884
 
 # good enough
-AXB_HELO_HOME_UN
-
-# good enough
 AXB_OBFU_MULE
 
 # good enough
@@ -68,10 +65,16 @@ AXB_XMAILER_MIMEOLE_OL_015D5
 AXB_XMAILER_MIMEOLE_OL_024C2
 
 # good enough
+AXB_XMAILER_MIMEOLE_OL_07794
+
+# good enough
 AXB_XMAILER_MIMEOLE_OL_1ECD5
 
 # good enough
 AXB_XMAILER_MIMEOLE_OL_22B61
+
+# good enough
+AXB_XMAILER_MIMEOLE_OL_25340
 
 # good enough
 AXB_XMAILER_MIMEOLE_OL_2535D
@@ -89,6 +92,9 @@ AXB_XMAILER_MIMEOLE_OL_35FFA
 AXB_XMAILER_MIMEOLE_OL_37431
 
 # good enough
+AXB_XMAILER_MIMEOLE_OL_3857F
+
+# good enough
 AXB_XMAILER_MIMEOLE_OL_4379D
 
 # good enough
@@ -98,6 +104,9 @@ AXB_XMAILER_MIMEOLE_OL_4CBE5
 AXB_XMAILER_MIMEOLE_OL_4EEDB
 
 # good enough
+AXB_XMAILER_MIMEOLE_OL_57545
+
+# good enough
 AXB_XMAILER_MIMEOLE_OL_58CB5
 
 # good enough
@@ -105,6 +114,9 @@ AXB_XMAILER_MIMEOLE_OL_5933D
 
 # good enough
 AXB_XMAILER_MIMEOLE_OL_616F8
+
+# good enough
+AXB_XMAILER_MIMEOLE_OL_6554A
 
 # good enough
 AXB_XMAILER_MIMEOLE_OL_787D6
@@ -117,6 +129,9 @@ AXB_XMAILER_MIMEOLE_OL_7C3E5
 
 # good enough
 AXB_XMAILER_MIMEOLE_OL_7EB15
+
+# good enough
+AXB_XMAILER_MIMEOLE_OL_7F4F5
 
 # good enough
 AXB_XMAILER_MIMEOLE_OL_812FF
@@ -156,6 +171,9 @@ AXB_XMAILER_MIMEOLE_OL_B30D1
 
 # good enough
 AXB_XMAILER_MIMEOLE_OL_B4B40
+
+# good enough
+AXB_XMAILER_MIMEOLE_OL_BC7E6
 
 # good enough
 AXB_XMAILER_MIMEOLE_OL_C0C83
@@ -198,6 +216,9 @@ AXB_X_AOL_SEZ_S
 
 # good enough
 AXB_X_RCV_WLOCAL
+
+# good enough
+BASE64_LENGTH_79_INF
 
 # tflags learn
 BAYES_00
@@ -305,16 +326,16 @@ DNS_FROM_RFC_DSN
 DOS_ANAL_SPAM_MAILER
 
 # good enough
-DOS_RCVD_IP_TWICE_C
+DOS_OE_TO_MX
 
 # good enough
 DRUGS_STOCK_MIMEOLE
 
-# good enough
-EMRCP
-
 # tflags userconf
 ENV_AND_HDR_SPF_MATCH
+
+# good enough
+FAKE_REPLY_C
 
 # good enough
 FB_ACHIEVE_BACH
@@ -339,9 +360,6 @@ FH_FAKE_RCVD_LINE_B
 
 # good enough
 FH_HELO_ALMOST_IP
-
-# good enough
-FH_HELO_EQ_CHARTER
 
 # tflags 
 FILL_THIS_FORM
@@ -375,6 +393,9 @@ FORM_FRAUD_5
 
 # tflags userconf
 FRAGMENTED_MESSAGE
+
+# good enough
+FROM_12LTRDOM
 
 # tflags userconf
 FROM_DOMAIN_NOVOWEL
@@ -422,10 +443,10 @@ FROM_MISSP_URI
 FROM_MISSP_USER
 
 # good enough
-FROM_WSP_LEAD
+FRT_BIGGERMEM1
 
 # good enough
-FRT_BIGGERMEM1
+FR_TITLE_CONS_6
 
 # good enough
 FSL_CTYPE_WIN1251
@@ -456,12 +477,6 @@ FSL_UA
 
 # good enough
 FSL_XM_419
-
-# good enough
-FS_ABIGGER
-
-# good enough
-FS_PHARMASUB2
 
 # good enough
 FS_REPLICA
@@ -542,9 +557,6 @@ HK_RANDOM_FROM
 HK_RANDOM_REPLYTO_NAME
 
 # good enough
-HK_SCAM_N1
-
-# good enough
 HK_SCAM_N12
 
 # good enough
@@ -571,14 +583,14 @@ HK_SCAM_S25
 # good enough
 HK_SCAM_S7
 
-# good enough
-HK_SPAMMY_FILENAME
-
 # tflags userconf
 HTML_CHARSET_FARAWAY
 
 # good enough
 JM_FAKE_PSMTP_RCVD
+
+# good enough
+KB_DATE_CONTAINS_TAB
 
 # good enough
 KB_FAKED_THE_BAT
@@ -599,12 +611,6 @@ LOTTERY_PH_004470
 LOTTO_AGENT
 
 # good enough
-LOTTO_AGENT_FM
-
-# good enough
-LOTTO_AGENT_RPLY
-
-# good enough
 LOTTO_DEPT
 
 # good enough
@@ -612,6 +618,9 @@ LOTTO_URI
 
 # good enough
 MALFORMED_FREEMAIL
+
+# good enough
+MANY_HDRS_LCASE
 
 # good enough
 MANY_PILL_PRICE
@@ -650,9 +659,6 @@ MONEY_FROM_MISSP
 MONEY_LOTTERY
 
 # good enough
-MONEY_PERCENT
-
-# good enough
 MSOE_MID_WRONG_CASE
 
 # tflags net
@@ -672,9 +678,6 @@ NSL_RCVD_HELO_USER
 
 # good enough
 OBFU_ATTACH_MISSP
-
-# good enough
-OBFU_HTML_ATTACH
 
 # tflags 
 OBFU_JVSCR_ESC
@@ -923,9 +926,6 @@ SERGIO_SUBJECT_VIAGRA01
 SHARE_50_50
 
 # good enough
-SHORTENED_URL_SRC
-
-# good enough
 SINGLE_HEADER_1K
 
 # tflags net
@@ -953,13 +953,13 @@ SPF_PASS
 SPF_SOFTFAIL
 
 # good enough
-STOCK_IMG_HDR_FROM
-
-# good enough
 STOX_REPLY_TYPE
 
 # good enough
 STOX_REPLY_TYPE_WITHOUT_QUOTES
+
+# good enough
+STYLE_GIBBERISH
 
 # tflags userconf
 SUBJECT_IN_BLACKLIST
@@ -977,9 +977,6 @@ TO_EQ_FM_SPF_FAIL
 TO_NO_BRKTS_FROM_MSSP
 
 # good enough
-TO_NO_BRKTS_MSFT
-
-# good enough
 TO_NO_BRKTS_PCNT
 
 # good enough
@@ -992,46 +989,49 @@ TVD_APPROVED
 TVD_PH_BODY_META
 
 # good enough
-TVD_PH_SUBJ_META1
+TVD_PH_REC
+
+# good enough
+TVD_SPACE_RATIO_MINFP
 
 # good enough
 TVD_SUBJ_NUM_OBFU_MINFP
 
 # good enough
-AXB_XMAILER_MIMEOLE_OL_07794
+AXB_XMAILER_MIMEOLE_OL_12495
 
 # good enough
-AXB_XMAILER_MIMEOLE_OL_25340
+AXB_XMAILER_MIMEOLE_OL_4F240
 
 # good enough
-AXB_XMAILER_MIMEOLE_OL_3857F
+AXB_XMAILER_MIMEOLE_OL_82046
 
 # good enough
-AXB_XMAILER_MIMEOLE_OL_57545
+AXB_XMAILER_MIMEOLE_OL_A6545
 
 # good enough
-AXB_XMAILER_MIMEOLE_OL_6554A
+AXB_XMAILER_MIMEOLE_OL_DBCA3
 
 # good enough
-AXB_XMAILER_MIMEOLE_OL_7F4F5
+AXB_XMAILER_MIMEOLE_OL_F5C60
 
 # good enough
-AXB_XMAILER_MIMEOLE_OL_BC7E6
+AXB_XMAILER_MIMEOLE_OL_F6D01
 
 # good enough
-FROM_12LTRDOM
+DATE_IN_FUTURE_96_Q
 
 # good enough
-FR_TITLE_CONS_6
+GAPPY_PHONE_NA
 
 # good enough
-MANY_HDRS_LCASE
+HK_SCAM_N13
 
 # good enough
-STYLE_GIBBERISH
+TAB_IN_FROM
 
 # good enough
-TVD_SPACE_RATIO_MINFP
+TVD_IP_HEX
 
 # tflags userconf
 UNPARSEABLE_RELAY
