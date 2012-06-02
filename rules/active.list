@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-coi-bulk axb-fraud axb-generic bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm danmcdonald darxus grenier jarif llanga; day 2: axb-coi-bulk axb-fraud axb-generic bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm danmcdonald darxus grenier jarif llanga; day 3: axb-coi-bulk axb-fraud axb-generic bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm danmcdonald darxus grenier jarif llanga zmi
+# with results from: day 1: axb-coi-bulk axb-fraud axb-generic axb-sa-feed bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm danmcdonald darxus grenier jarif llanga zmi; day 2: axb-coi-bulk axb-fraud axb-generic bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm danmcdonald darxus grenier jarif llanga; day 3: axb-coi-bulk axb-fraud axb-generic bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm danmcdonald darxus grenier jarif llanga
 
 # tflags 
 ADVANCE_FEE_2_NEW_FORM
@@ -490,6 +490,9 @@ FS_START_LOSE
 # good enough
 FS_WEIGHT_LOSS
 
+# good enough
+FS_WILL_HELP
+
 # tflags userconf
 GTUBE
 
@@ -554,9 +557,6 @@ HK_RANDOM_ENVFROM
 HK_RANDOM_FROM
 
 # good enough
-HK_RANDOM_REPLYTO_NAME
-
-# good enough
 HK_SCAM_N12
 
 # good enough
@@ -611,10 +611,10 @@ LOTTERY_PH_004470
 LOTTO_AGENT
 
 # good enough
-LOTTO_DEPT
+LOTTO_AGENT_RPLY
 
 # good enough
-LOTTO_URI
+LOTTO_DEPT
 
 # good enough
 MALFORMED_FREEMAIL
@@ -659,6 +659,9 @@ MONEY_FROM_MISSP
 MONEY_LOTTERY
 
 # good enough
+MONEY_PERCENT
+
+# good enough
 MSOE_MID_WRONG_CASE
 
 # tflags net
@@ -678,6 +681,9 @@ NSL_RCVD_HELO_USER
 
 # good enough
 OBFU_ATTACH_MISSP
+
+# good enough
+OBFU_HTML_ATTACH
 
 # tflags 
 OBFU_JVSCR_ESC
@@ -1004,6 +1010,9 @@ AXB_XMAILER_MIMEOLE_OL_12495
 AXB_XMAILER_MIMEOLE_OL_4F240
 
 # good enough
+AXB_XMAILER_MIMEOLE_OL_62CA2
+
+# good enough
 AXB_XMAILER_MIMEOLE_OL_82046
 
 # good enough
@@ -1019,10 +1028,10 @@ AXB_XMAILER_MIMEOLE_OL_F5C60
 AXB_XMAILER_MIMEOLE_OL_F6D01
 
 # good enough
-DATE_IN_FUTURE_96_Q
+GAPPY_PHONE_NA
 
 # good enough
-GAPPY_PHONE_NA
+HK_LOTTO_SUBJECT
 
 # good enough
 HK_SCAM_N13
