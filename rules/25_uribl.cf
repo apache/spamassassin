@@ -39,6 +39,16 @@ describe        URIBL_SBL        Contains an URL listed in the SBL blocklist
 tflags          URIBL_SBL        net
 reuse           URIBL_SBL
 
+if (version >= 3.004000)
+  ifplugin Mail::SpamAssassin::Plugin::URIDNSBL
+
+    uridnsbl        URIBL_SBL_A    sbl.spamhaus.org.   A
+    body            URIBL_SBL_A    eval:check_uridnsbl('URIBL_SBL_A')
+    describe        URIBL_SBL_A    Contains URL's A record listed in the SBL blocklist
+    tflags          URIBL_SBL_A    net a
+  endif
+endif
+
 # DBL, http://www.spamhaus.org/dbl/
 if can(Mail::SpamAssassin::Plugin::URIDNSBL::has_tflags_domains_only)
 urirhssub       URIBL_DBL_SPAM   dbl.spamhaus.org.       A   127.0.1.2
