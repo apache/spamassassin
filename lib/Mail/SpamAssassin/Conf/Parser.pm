@@ -266,6 +266,13 @@ sub parse {
       next;
     }
 
+    # bug 6800: let X-Spam-Checker-Version also show what sa-update we are at
+    if ($line =~ /^\# UPDATE version (\d+)$/) {
+      for ($self->{currentfile}) {  # just aliasing, not a loop
+        $conf->{update_version}{$_} = $1  if defined $_ && $_ ne '(no file)';
+      }
+    }
+
     $line =~ s/(?<!\\)#.*$//; # remove comments
     $line =~ s/\\#/#/g; # hash chars are escaped, so unescape them
     $line =~ s/^\s+//;  # remove leading whitespace

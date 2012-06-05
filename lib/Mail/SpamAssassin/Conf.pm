@@ -3728,6 +3728,10 @@ optional, and the default is shown below.
  _REQD_            message threshold
  _VERSION_         version (eg. 3.0.0 or 3.1.0-r26142-foo1)
  _SUBVERSION_      sub-version/code revision date (eg. 2004-01-10)
+ _RULESVERSION_    comma-separated list of rules versions, retrieved from
+                   an '# UPDATE version' comment in rules files; if there is
+                   more than one set of rules (update channels) the order
+                   is unspecified (currently sorted by names of files);
  _HOSTNAME_        hostname of the machine the mail was processed on
  _REMOTEHOSTNAME_  hostname of the machine the mail was sent from, only
                    available with spamd
