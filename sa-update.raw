@@ -819,7 +819,11 @@ foreach my $channel (@channels) {
       $signer = $key if (length $key > length $signer);
     }
 
-    close(CMD) or die "cannot close pipe to $GPGPath: $!";
+    my $errno = 0;  close CMD or $errno = $!;
+    proc_status_ok($?,$errno)
+      or warn("gpg: process '$GPGPath' finished: ".
+              exit_status_str($?,$errno)."\n");
+
     unlink $sig_file or warn "cannot unlink $sig_file: $!\n";
 
     if ($signer) {
