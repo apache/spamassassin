@@ -1308,6 +1308,15 @@ sub _get_tag {
 
             SUBVERSION => sub { $Mail::SpamAssassin::SUB_VERSION },
 
+            RULESVERSION => sub {
+              my @fnames;  my $conf = $self->{conf};
+              @fnames = grep { m{(?:^|/)(.+)\z}s ? $1 : () }
+                             keys %{$conf->{update_version}}
+                          if $conf->{update_version};
+              @fnames = sort @fnames  if @fnames > 1;
+              join(',', map($conf->{update_version}{$_}, @fnames));
+            },
+
             HOSTNAME => sub {
 	      $self->{conf}->{report_hostname} ||
 	      Mail::SpamAssassin::Util::fq_hostname();
