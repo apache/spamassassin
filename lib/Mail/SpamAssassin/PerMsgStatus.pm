@@ -1310,9 +1310,8 @@ sub _get_tag {
 
             RULESVERSION => sub {
               my @fnames;  my $conf = $self->{conf};
-              @fnames = grep { m{(?:^|/)(.+)\z}s ? $1 : () }
-                             keys %{$conf->{update_version}}
-                          if $conf->{update_version};
+              @fnames =
+                keys %{$conf->{update_version}}  if $conf->{update_version};
               @fnames = sort @fnames  if @fnames > 1;
               join(',', map($conf->{update_version}{$_}, @fnames));
             },
