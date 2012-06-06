@@ -82,6 +82,16 @@ use POSIX qw(:sys_wait_h WIFEXITED WIFSIGNALED WIFSTOPPED WEXITSTATUS
 use constant HAS_MIME_BASE64 => eval { require MIME::Base64; };
 use constant RUNNING_ON_WINDOWS => ($^O =~ /^(?:mswin|dos|os2)/oi);
 
+# These are not implemented on windows (see bug 6798 and 6470)
+BEGIN {
+  if (RUNNING_ON_WINDOWS) {
+    *WIFEXITED   = sub { not $_[0] & 127 };
+    *WEXITSTATUS = sub { $_[0] >> 8 };
+    *WIFSIGNALED = sub { ($_[0] & 127) && ($_[0] & 127 != 127) };
+    *WTERMSIG    = sub { $_[0] & 127 };
+  }
+}
+
 ###########################################################################
 
 # find an executable in the current $PATH (or whatever for that platform)
@@ -324,8 +334,6 @@ sub exit_status_str {
   my $str;
   if (!defined($stat)) {
     $str = '(no status)';
-  } elsif (am_running_on_windows()) { 
-    $str = 'exit (running under Windows, cannot determine exit status)'
   } elsif (WIFEXITED($stat)) {
     $str = sprintf("exit %d", WEXITSTATUS($stat));
   } elsif (WIFSTOPPED($stat)) {
