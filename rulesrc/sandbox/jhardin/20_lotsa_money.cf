@@ -38,13 +38,15 @@ describe MONEY_FROM_MISSP   Lots of money and misspaced From
 #meta     MONEY_TO_NO_R    LOTS_OF_MONEY && __TO_NO_ARROWS_R
 #describe MONEY_TO_NO_R    Lots of money and bare, missing or undisclosed To
 
-meta     MONEY_FORM        LOTS_OF_MONEY && __FILL_THIS_FORM && !__FB_TOUR && !__FM_MY_PRICE && !__FR_SPACING_8 && !__COMMENT_EXISTS && !__CAN_HELP
-describe MONEY_FORM        Lots of money if you fill out a form
-#score    MONEY_FORM        3.0
+meta     __MONEY_FORM        LOTS_OF_MONEY && __FILL_THIS_FORM
+meta     MONEY_FORM          __MONEY_FORM && !__FB_TOUR && !__FM_MY_PRICE && !__FR_SPACING_8 && !__COMMENT_EXISTS && !__CAN_HELP
+describe MONEY_FORM          Lots of money if you fill out a form
+#score    MONEY_FORM          3.0
 
-meta     MONEY_FORM_SHORT  LOTS_OF_MONEY && __FILL_THIS_FORM_SHORT
-describe MONEY_FORM_SHORT  Lots of money if you fill out a short form
-#score    MONEY_FORM_SHORT  0.5
+meta     __MONEY_FORM_SHORT  LOTS_OF_MONEY && __FILL_THIS_FORM_SHORT
+meta     MONEY_FORM_SHORT    __MONEY_FORM_SHORT && !__DOS_HAS_LIST_UNSUB && !__VIA_ML
+describe MONEY_FORM_SHORT    Lots of money if you fill out a short form
+#score    MONEY_FORM_SHORT    0.5
 
 #meta     MONEY_ACCOUNT    LOTS_OF_MONEY && __YOUR_ACCOUNT
 #describe MONEY_ACCOUNT    Lots of money to your account
@@ -172,7 +174,7 @@ body     __INHERIT_PMT    /\binheritance\spayment\s/i
 body     __CONTACT_ATTY   /\bcontact\smy\s(?:barrister|attou?rney)\b/i
 body     __TRTMT_DEFILED  /\bdefiled\sall\s(?:forms\sof\s)?(?:medical\s)?treatments?\b/i
 
-meta     DECEASED_NO_ML   __DECEASED && !__VIA_ML && !__UNSUB_LINK && !__DOS_HAS_LIST_UNSUB && !__HAS_THREAD_INDEX && !__THREAD_INDEX_GOOD && !__HS_SUBJ_RE_FW && !__IMS_MSGID && !__IS_EXCH && !__COMMENT_EXISTS
+meta     DECEASED_NO_ML   __DECEASED && !__VIA_ML && !__UNSUB_LINK && !__DOS_HAS_LIST_UNSUB && !__HAS_THREAD_INDEX && !__THREAD_INDEX_GOOD && !__HS_SUBJ_RE_FW && !__IMS_MSGID && !__IS_EXCH && !__COMMENT_EXISTS && !__DOS_SINGLE_EXT_RELAY
 describe DECEASED_NO_ML   Dead not via mailing list
 #tflags   DECEASED_NO_ML   nopublish
  

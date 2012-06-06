@@ -585,7 +585,7 @@ header         __RPATH_12LTRDOM    Return-Path =~ /\@[a-z]{12}\./
 uri            __URI_12LTRDOM      m,://(?:[^./]+\.)*[a-z]{12}\.[^./]+/,
 
 header         __FROM_12LTRDOM_1   From =~ /\@[a-z]{12}\./
-meta           FROM_12LTRDOM       __FROM_12LTRDOM_1 && !__VIA_ML && !__TO___LOWER && !__FS_SUBJ_RE && !__RCD_RDNS_MAIL_MESSY && !__freemail_safe && !__UNSUB_LINK && !NO_RELAYS && !__UNUSABLE_MSGID && !DATE_IN_PAST_96_XX && !ALL_TRUSTED && !__MSGID_APPLEMAIL && !__RCD_RDNS_SMTP_MESSY && !__FB_NATIONAL && !__MAIL_LINK && !__NAME_EMAIL_DIFF && !__RCD_RDNS_MX_MESSY && !__RCD_RDNS_MX && !__SENDER_BOT && !__IMS_MSGID && !__HS_SUBJ_RE_FW && !__DOS_HAS_LIST_UNSUB && !__THREAD_INDEX_GOOD
+meta           FROM_12LTRDOM       __FROM_12LTRDOM_1 && !__VIA_ML && !__TO___LOWER && !__FS_SUBJ_RE && !__RCD_RDNS_MAIL_MESSY && !__freemail_safe && !__UNSUB_LINK && !NO_RELAYS && !__UNUSABLE_MSGID && !DATE_IN_PAST_96_XX && !ALL_TRUSTED && !__MSGID_APPLEMAIL && !__RCD_RDNS_SMTP_MESSY && !__FB_NATIONAL && !__MAIL_LINK && !__NAME_EMAIL_DIFF && !__RCD_RDNS_MX_MESSY && !__RCD_RDNS_MX && !__SENDER_BOT && !__IMS_MSGID && !__HS_SUBJ_RE_FW && !__DOS_HAS_LIST_UNSUB && !__THREAD_INDEX_GOOD && !__TO_EQ_FROM_DOM
 describe       FROM_12LTRDOM       From a 12-letter domain
 #tflags         FROM_12LTRDOM       nopublish
 
@@ -737,7 +737,7 @@ meta        GAPPY_HTML             __GAPPY_HTML && !__UNSUB_LINK && !__RP_MATCHE
 describe    GAPPY_HTML             HTML body with much useless whitespace
 
 # Try to improve S/O per bug 6119
-meta        TVD_SPACE_RATIO_MINFP  __TVD_SPACE_RATIO && !__OBFUSCATING_COMMENT_B && !WEIRD_QUOTING && !__NOT_SPOOFED && !__BUGGED_IMG && !__ML1 && !__DOS_HAS_LIST_UNSUB && !__RP_MATCHES_RCVD && !__MUA_TBIRD && !__HS_SUBJ_RE_FW && !__RCD_RDNS_MAIL_MESSY && !__ISO_2022_JP_DELIM
+meta        TVD_SPACE_RATIO_MINFP  __TVD_SPACE_RATIO && !__OBFUSCATING_COMMENT_B && !WEIRD_QUOTING && !__NOT_SPOOFED && !__BUGGED_IMG && !__ML1 && !__DOS_HAS_LIST_UNSUB && !__RP_MATCHES_RCVD && !__MUA_TBIRD && !__HS_SUBJ_RE_FW && !__RCD_RDNS_MAIL_MESSY && !__ISO_2022_JP_DELIM && !__MIME_QP
 #tflags      TVD_SPACE_RATIO_MINFP  nopublish
 
 # sample from users list:   Subject: Sta ffWork sFastToSen dTab le tsGood s
@@ -803,13 +803,14 @@ body        __ACH_CANCELLED_04     /\bregarding[-_ ]your[-_ ]direct[-_ ]deposit[
 
 ifplugin Mail::SpamAssassin::Plugin::MIMEHeader
 	mimeheader   __EXE_ATTACH        Content-Type =~ /\.exe\b/i
-	meta         __ACH_CANCELLED     (__ACH_CANCELLED_01 || __ACH_CANCELLED_02 || __ACH_CANCELLED_03 || __ACH_CANCELLED_04) && (__HAS_ANY_URI || __EXE_ATTACH)
-else
-	meta         __ACH_CANCELLED     (__ACH_CANCELLED_01 || __ACH_CANCELLED_02 || __ACH_CANCELLED_03 || __ACH_CANCELLED_04) && __HAS_ANY_URI
+	meta         __ACH_CANCELLED_EXE (__ACH_CANCELLED_01 || __ACH_CANCELLED_02 || __ACH_CANCELLED_03 || __ACH_CANCELLED_04) && __EXE_ATTACH
+	meta         ACH_CANCELLED_EXE   __ACH_CANCELLED_EXE
+	describe     ACH_CANCELLED_EXE   "ACH cancelled" probable malware
 endif
 
+meta        __ACH_CANCELLED        (__ACH_CANCELLED_01 || __ACH_CANCELLED_02 || __ACH_CANCELLED_03 || __ACH_CANCELLED_04) && (__HAS_ANY_URI || LOTS_OF_MONEY)
 meta        ACH_CANCELLED          __ACH_CANCELLED
-describe    ACH_CANCELLED          "ACH cancelled" probable malware
+describe    ACH_CANCELLED          "ACH cancelled" fraud / phish
 
 # spams from users list query 03/2012
 uri         URI_DBL_DOM_1          m,^https?://([^/]+)/.*https?://(?:[^.]+\.)?\1/,i
