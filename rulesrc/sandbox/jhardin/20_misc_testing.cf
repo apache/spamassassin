@@ -96,7 +96,7 @@ describe       FROM_MISSP_EH_MATCH   From misspaced, matches envelope
 score          FROM_MISSP_EH_MATCH   2.5	# max
 
 meta           __FROM_MISSP_URI      __FROM_RUNON && __HAS_ANY_URI
-meta           FROM_MISSP_URI        __FROM_MISSP_URI && !__NOT_SPOOFED && !__RCD_RDNS_MTA_MESSY && !MISSING_MIMEOLE && !__COMMENT_EXISTS && !__REPTO_QUOTE && !__UNSUB_LINK && !__TO___LOWER && !__MSGID_OK_HEX && !__MAIL_LINK && !__MIME_QP && !__BUGGED_IMG && !MIME_BASE64_TEXT
+meta           FROM_MISSP_URI        __FROM_MISSP_URI && !__NOT_SPOOFED && !__RCD_RDNS_MTA_MESSY && !MISSING_MIMEOLE && !__REPTO_QUOTE && !__UNSUB_LINK && !__MSGID_OK_HEX && !__MAIL_LINK && !__MIME_QP && !__BUGGED_IMG && !MIME_BASE64_TEXT
 describe       FROM_MISSP_URI        From misspaced, has URI
 
 meta           FROM_MISSP_USER       (__FROM_RUNON && NSL_RCVD_FROM_USER)
@@ -108,9 +108,10 @@ describe       FROM_MISSP_NO_TO      From misspaced, To missing
 meta           FROM_MISSP_TO_UNDISC  (__FROM_RUNON && __TO_UNDISCLOSED)
 describe       FROM_MISSP_TO_UNDISC  From misspaced, To undisclosed
 
-meta           FROM_MISSP_DKIM       (__FROM_RUNON && __DKIM_DEPENDABLE)
+meta           __FROM_MISSP_DKIM     (__FROM_RUNON && __DKIM_DEPENDABLE)
+tflags         __FROM_MISSP_DKIM     net
+meta           FROM_MISSP_DKIM       __FROM_MISSP_DKIM && !__CTYPE_MULTIPART_ALT && !__MIME_QP && !__BUGGED_IMG && !__DOS_HAS_LIST_UNSUB
 describe       FROM_MISSP_DKIM       From misspaced, DKIM dependable
-tflags         FROM_MISSP_DKIM       net
 
 meta           __FROM_MISSP_REPLYTO  __FROM_RUNON && __REPLYTO_EXISTS
 meta           FROM_MISSP_REPLYTO    __FROM_MISSP_REPLYTO && !__NOT_SPOOFED && !__RCD_RDNS_MTA_MESSY && !__TO___LOWER && !__COMMENT_EXISTS && !__UNSUB_LINK && !__MIME_QP && !__CTYPE_MULTIPART_ALT && !__JM_REACTOR_DATE && !__PLING_QUERY
