@@ -60,7 +60,7 @@ describe   TO_NO_BRKTS_MSFT         To: misformatted and supposed Microsoft tool
 #score      TO_NO_BRKTS_MSFT         0.20
 
 meta       __TO_NO_BRKTS_PCNT       __TO_NO_ARROWS_R && __FB_NUM_PERCNT
-meta       TO_NO_BRKTS_PCNT         __TO_NO_BRKTS_PCNT && !__SUBJECT_ENCODED_B64 && !__COMMENT_EXISTS && !__DOS_HAS_LIST_UNSUB && !__VIA_ML && !__ISO_2022_JP_DELIM && !__IMS_MSGID && !__THREAD_INDEX_GOOD && !__RCD_RDNS_MAIL_MESSY && !__NOT_SPOOFED && !__DKIM_EXISTS && !__RCD_RDNS_MX_MESSY && !__UNSUB_LINK && !__LONGLINE && !URI_HEX && !__SENDER_BOT && !__RP_MATCHES_RCVD && !__CTYPE_MULTIPART_ALT
+meta       TO_NO_BRKTS_PCNT         __TO_NO_BRKTS_PCNT && !__SUBJECT_ENCODED_B64 && !__COMMENT_EXISTS && !__DOS_HAS_LIST_UNSUB && !__VIA_ML && !__ISO_2022_JP_DELIM && !__IMS_MSGID && !__THREAD_INDEX_GOOD && !__RCD_RDNS_MAIL_MESSY && !__NOT_SPOOFED && !__DKIM_EXISTS && !__RCD_RDNS_MX_MESSY && !__UNSUB_LINK && !__LONGLINE && !URI_HEX && !__SENDER_BOT && !__RP_MATCHES_RCVD && !__CTYPE_MULTIPART_ALT && !__MIME_QP && !__MAIL_LINK && !__BUGGED_IMG
 describe   TO_NO_BRKTS_PCNT         To: misformatted + percentage
 #score      TO_NO_BRKTS_PCNT         0.20
 
