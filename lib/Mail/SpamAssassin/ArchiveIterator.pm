@@ -168,6 +168,17 @@ Reference to a subroutine which will be called intermittently during
 the 'scan' phase of the mass-check.  No guarantees are made as to
 how frequently this may happen, mind you.
 
+=item opt_from_regex
+
+This setting allows for flexibility in specifying the mbox format From seperator.
+
+It defaults to the regular expression:
+
+/^From \S+  ?(\S\S\S \S\S\S .\d .\d:\d\d:\d\d \d{4}|.\d-\d\d-\d{4}_\d\d:\d\d:\d\d_)/
+
+Some SpamAssassin programs such as sa-learn will use the configuration option 
+'mbox_format_from_regex' to override the default regular expression.
+
 =back
 
 =cut
@@ -396,8 +407,8 @@ sub _run_mailbox {
   }
   seek(INPUT,$offset,0)  or die "cannot reposition file to $offset: $!";
   for ($!=0; <INPUT>; $!=0) {
-    #Changed Regex to include boundaries for Communigate Pro versions (5.2.x and later). per Bug 6413
-    last if (substr($_,0,5) eq "From " && @msg && /^From \S+  ?(\S\S\S \S\S\S .\d .\d:\d\d:\d\d \d{4}|.\d-\d\d-\d{4}_\d\d:\d\d:\d\d_)/);
+    #Changed Regex to use option Per bug 6703
+    last if (substr($_,0,5) eq "From " && @msg && /$self->{opt_from_regex}/);
     push (@msg, $_);
 
     # skip too-big mails
@@ -615,6 +626,14 @@ sub _set_default_message_selection_opts {
   $self->{opt_scanprob} = 1.0 unless (defined $self->{opt_scanprob});
   $self->{opt_want_date} = 1 unless (defined $self->{opt_want_date});
   $self->{opt_cache} = 0 unless (defined $self->{opt_cache});
+  #Changed Regex to include boundaries for Communigate Pro versions (5.2.x and later). per Bug 6413
+  $self->{opt_from_regex} = '^From \S+  ?(\S\S\S \S\S\S .\d .\d:\d\d:\d\d \d{4}|.\d-\d\d-\d{4}_\d\d:\d\d:\d\d_)' unless (defined $self->{opt_from_regex});
+
+  #STRIP LEADING AND TRIALING / FROM REGEX FOR OPTION
+  $self->{opt_from_regex} =~ s/^\///;
+  $self->{opt_from_regex} =~ s/\/$//;
+
+  dbg("archive-iterator: From seperator regular expression [/$self->{opt_from_regex}/]");
 }
 
 ############################################################################
@@ -909,9 +928,8 @@ sub _scan_mailbox {
 	      $header .= $_;
 	    }
 	  }
-          #Changed Regex to include boundaries for Communigate Pro versions (5.2.x and later). per Bug 6413
-	  if (substr($_,0,5) eq "From " &&
-	      /^From \S+  ?(\S\S\S \S\S\S .\d .\d:\d\d:\d\d \d{4}|.\d-\d\d-\d{4}_\d\d:\d\d:\d\d_)/) {
+          #Changed Regex to use option Per bug 6703
+	  if (substr($_,0,5) eq "From " && /$self->{opt_from_regex}/) {
 	    $in_header = 1;
 	    $first = $_;
 	    $start = $where;
