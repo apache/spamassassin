@@ -151,7 +151,7 @@ header         __HDRS_LCASE          ALL =~ /\n(?:Message-id|Content-type|X-MSMa
 tflags         __HDRS_LCASE          multiple maxhits=2
 meta           HDRS_LCASE            __HDRS_LCASE && !__VIA_ML && !__freemail_safe && !__THREADED && !__UNUSABLE_MSGID && !__DOS_SINGLE_EXT_RELAY && !__DKIM_EXISTS && !__NOT_SPOOFED && !__BUGGED_IMG
 meta           __MANY_HDRS_LCASE     __HDRS_LCASE > 1
-meta           MANY_HDRS_LCASE       __MANY_HDRS_LCASE && !__VIA_ML && !__freemail_safe && !__THREADED && !__UNUSABLE_MSGID && !__DOS_SINGLE_EXT_RELAY && !__DKIM_EXISTS && !__NOT_SPOOFED && !__BUGGED_IMG
+meta           MANY_HDRS_LCASE       __MANY_HDRS_LCASE && !__VIA_ML && !__freemail_safe && !__THREADED && !__UNUSABLE_MSGID && !__DOS_SINGLE_EXT_RELAY && !__DKIM_EXISTS && !__NOT_SPOOFED && !__BUGGED_IMG && !__MIME_QP
 describe       MANY_HDRS_LCASE       Odd capitalization of multiple message headers
 
 # Some metas that appear to perform well in masscheck
