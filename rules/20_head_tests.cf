@@ -559,10 +559,12 @@ endif
 
 ifplugin Mail::SpamAssassin::Plugin::RelayEval
 
-header UNPARSEABLE_RELAY        eval:check_relays_unparseable()
-tflags UNPARSEABLE_RELAY        userconf
-describe UNPARSEABLE_RELAY      Informational: message has unparseable relay lines
+header __UNPARSEABLE_RELAY_COUNT        eval:check_relays_unparseable()
+tflags __UNPARSEABLE_RELAY_COUNT        userconf
 
+meta	 UNPARSEABLE_RELAY	(__UNPARSEABLE_RELAY >= 1)
+tflags	 UNPARSEABLE_RELAY	userconf
+describe UNPARSEABLE_RELAY      Informational: message has unparseable relay lines
 
 
 header RCVD_HELO_IP_MISMATCH	eval:helo_ip_mismatch()
