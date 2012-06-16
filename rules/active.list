@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-coi-bulk axb-fraud axb-generic axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus grenier jarif llanga nbebout zmi; day 2: axb-coi-bulk axb-fraud axb-generic axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus grenier jarif llanga zmi; day 3: axb-coi-bulk axb-fraud axb-generic axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus grenier jarif llanga
+# with results from: day 1: axb-coi-bulk axb-fraud axb-generic axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus grenier jarif llanga nbebout zmi; day 2: axb-coi-bulk axb-fraud axb-generic axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus grenier jarif llanga nbebout zmi; day 3: axb-coi-bulk axb-fraud axb-generic axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus grenier jarif llanga zmi
 
 # tflags 
 ADVANCE_FEE_2_NEW_FORM
@@ -301,6 +301,9 @@ FM_LOTTO_MONEY
 # good enough
 FM_LOTTO_YOU_WON
 
+# good enough
+FM_SCHOOL_DIPLOMA
+
 # tflags 
 FORM_FRAUD_3
 
@@ -365,9 +368,6 @@ FSL_CTYPE_WIN1251
 FSL_FREEMAIL_1
 
 # good enough
-FSL_FREEMAIL_2
-
-# good enough
 FSL_HELO_DEVICE
 
 # good enough
@@ -393,9 +393,6 @@ FS_REPLICA
 
 # good enough
 FS_START_LOSE
-
-# good enough
-FS_WEIGHT_LOSS
 
 # good enough
 FS_WILL_HELP
@@ -534,6 +531,9 @@ LOTTO_URI
 
 # good enough
 MALFORMED_FREEMAIL
+
+# good enough
+MANY_HDRS_LCASE
 
 # good enough
 MANY_PILL_PRICE
@@ -926,10 +926,13 @@ TVD_SUBJ_NUM_OBFU_MINFP
 TVD_VISIT_PHARMA
 
 # good enough
-AXB_XMAILER_MIMEOLE_OL_82046
+AXB_XMAILER_MIMEOLE_OL_5A17A
 
 # good enough
-MANY_HDRS_LCASE
+OBFU_HTML_ATTACH
+
+# good enough
+SINGLE_HEADER_2K
 
 # tflags userconf
 UNPARSEABLE_RELAY
