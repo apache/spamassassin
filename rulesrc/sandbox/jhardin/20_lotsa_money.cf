@@ -44,7 +44,7 @@ describe MONEY_FORM          Lots of money if you fill out a form
 #score    MONEY_FORM          3.0
 
 meta     __MONEY_FORM_SHORT  LOTS_OF_MONEY && __FILL_THIS_FORM_SHORT
-meta     MONEY_FORM_SHORT    __MONEY_FORM_SHORT && !__DOS_HAS_LIST_UNSUB && !__VIA_ML && !__HTML_LINK_IMAGE
+meta     MONEY_FORM_SHORT    __MONEY_FORM_SHORT && !__DOS_HAS_LIST_UNSUB && !__VIA_ML && !__HTML_LINK_IMAGE && !__UPPERCASE_URI && !__THREADED
 describe MONEY_FORM_SHORT    Lots of money if you fill out a short form
 #score    MONEY_FORM_SHORT    0.5
 
