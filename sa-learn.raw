@@ -457,7 +457,7 @@ eval {
     {
       'opt_all' => 0,       # skip messages over 250k
       'opt_want_date' => 0,
-      'opt_from_regex' => $spamtest->{conf}->{mbox_format_from_regex}
+      'opt_from_regex' => $spamtest->{conf}->{mbox_format_from_regex},
     }
   );
 

@@ -2332,9 +2332,10 @@ Clear the unsafe_report template.
 
 =item mbox_format_from_regex
 
-Set a specific regular expression to be used for mbox file From seperators.
+Set a specific regular expression to be used for mbox file From separators.
 
-For example, this setting will allow sa-learn to process emails stored in a kmail 2 mbox:
+For example, this setting will allow sa-learn to process emails stored in
+a kmail 2 mbox:
 
 mbox_format_from_regex /^From \S+  ?[[:upper:]][[:lower:]]{2}(?:, \d\d [[:upper:]][[:lower:]]{2} \d{4} [0-2]\d:\d\d:\d\d [+-]\d{4}| [[:upper:]][[:lower:]]{2} [ 1-3]\d [ 0-2]\d:\d\d:\d\d \d{4})/
 
