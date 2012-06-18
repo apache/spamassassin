@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-coi-bulk axb-fraud axb-generic axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus grenier jarif llanga nbebout zmi; day 2: axb-coi-bulk axb-fraud axb-generic axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus grenier jarif llanga nbebout zmi; day 3: axb-coi-bulk axb-fraud axb-generic axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus grenier jarif llanga zmi
+# with results from: day 1: axb-coi-bulk axb-fraud axb-generic axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus grenier jarif llanga; day 2: axb-coi-bulk axb-fraud axb-generic axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus grenier jarif llanga nbebout zmi; day 3: axb-coi-bulk axb-fraud axb-generic axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus grenier jarif llanga nbebout zmi
 
 # tflags 
 ADVANCE_FEE_2_NEW_FORM
@@ -244,9 +244,6 @@ DOS_ANAL_SPAM_MAILER
 # good enough
 DRUGS_STOCK_MIMEOLE
 
-# good enough
-EMRCP
-
 # tflags userconf
 ENV_AND_HDR_SPF_MATCH
 
@@ -272,13 +269,7 @@ FH_FAKE_RCVD_LINE
 FH_FAKE_RCVD_LINE_B
 
 # good enough
-FH_FROM_GET_NAME
-
-# good enough
 FH_HAS_XAIMC
-
-# good enough
-FH_HELO_ALMOST_IP
 
 # good enough
 FH_MSGID_XXX
@@ -300,6 +291,9 @@ FM_LOTTO_MONEY
 
 # good enough
 FM_LOTTO_YOU_WON
+
+# good enough
+FM_SCHOOLING
 
 # good enough
 FM_SCHOOL_DIPLOMA
@@ -359,10 +353,10 @@ FROM_MISSP_URI
 FROM_MISSP_USER
 
 # good enough
-FRT_BIGGERMEM1
+FSL_CTYPE_WIN1251
 
 # good enough
-FSL_CTYPE_WIN1251
+FSL_FAKE_HOTMAIL_RVCD
 
 # good enough
 FSL_FREEMAIL_1
@@ -839,7 +833,7 @@ SERGIO_SUBJECT_VIAGRA01
 SHARE_50_50
 
 # good enough
-SINGLE_HEADER_1K
+SINGLE_HEADER_2K
 
 # tflags net
 SPF_FAIL
@@ -871,9 +865,6 @@ STOX_REPLY_TYPE
 # good enough
 STOX_REPLY_TYPE_WITHOUT_QUOTES
 
-# good enough
-STYLE_GIBBERISH
-
 # tflags userconf
 SUBJECT_IN_BLACKLIST
 
@@ -883,17 +874,11 @@ SUBJECT_IN_WHITELIST
 # good enough
 TAB_IN_FROM
 
-# good enough
-TO_EQ_FM_DOM_HTML_IMG
-
 # tflags net
 TO_EQ_FM_DOM_SPF_FAIL
 
 # tflags net
 TO_EQ_FM_SPF_FAIL
-
-# good enough
-TO_IN_SUBJ
 
 # good enough
 TO_NO_BRKTS_FROM_MSSP
@@ -926,10 +911,13 @@ TVD_SUBJ_NUM_OBFU_MINFP
 TVD_VISIT_PHARMA
 
 # good enough
-AXB_XMAILER_MIMEOLE_OL_5A17A
+AXB_XMAILER_MIMEOLE_OL_12495
 
 # good enough
-SINGLE_HEADER_2K
+FSL_FREEMAIL_2
+
+# good enough
+OBFU_HTML_ATTACH
 
 # tflags userconf
 UNPARSEABLE_RELAY
@@ -1089,3 +1077,6 @@ __TO_EQ_FM_DOM_SPF_FAIL
 
 # tflags net
 __TO_EQ_FM_SPF_FAIL
+
+# tflags userconf
+__UNPARSEABLE_RELAY_COUNT
