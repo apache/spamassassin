@@ -47,6 +47,11 @@ if (-e '/bin/rpm') {
   }
 }
 
+#Fix for x86/64 Gentoo
+if (-e '/usr/bin/emerge' && -d '/usr/lib64') {
+  $x64_bit_lib_test++;
+}
+
 if ($x64_bit_lib_test) {
   print "\nEnabling checks for 64 bit lib directories.\n";
 } else {
