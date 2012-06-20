@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-coi-bulk axb-fraud axb-generic axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus grenier jarif llanga; day 2: axb-coi-bulk axb-fraud axb-generic axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus grenier jarif llanga; day 3: axb-coi-bulk axb-fraud axb-generic axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus grenier jarif llanga nbebout zmi
+# with results from: day 1: axb-coi-bulk axb-fraud axb-generic axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus grenier jarif llanga; day 2: axb-coi-bulk axb-fraud axb-generic axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus grenier jarif llanga; day 3: axb-coi-bulk axb-fraud axb-generic axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus grenier jarif llanga
 
 # tflags 
 ADVANCE_FEE_2_NEW_FORM
@@ -298,6 +298,9 @@ FM_SCHOOLING
 # good enough
 FM_SCHOOL_DIPLOMA
 
+# good enough
+FM_SUBJ_APPROVE
+
 # tflags 
 FORM_FRAUD_3
 
@@ -384,6 +387,9 @@ FS_REPLICA
 
 # good enough
 FS_START_LOSE
+
+# good enough
+FS_WEIGHT_LOSS
 
 # good enough
 FS_WILL_HELP
@@ -474,6 +480,9 @@ HK_SCAM_S7
 
 # tflags userconf
 HTML_CHARSET_FARAWAY
+
+# good enough
+HTTPS_HTTP_MISMATCH
 
 # good enough
 JM_FAKE_PSMTP_RCVD
@@ -576,6 +585,9 @@ NSL_RCVD_HELO_USER
 
 # good enough
 OBFU_ATTACH_MISSP
+
+# good enough
+OBFU_HTML_ATTACH
 
 # tflags 
 OBFU_JVSCR_ESC
@@ -893,13 +905,31 @@ TVD_PH_BODY_META
 TVD_PH_REC
 
 # good enough
+TVD_RCVD_SPACE_BRACKET
+
+# good enough
 TVD_SUBJ_NUM_OBFU_MINFP
 
 # good enough
 TVD_VISIT_PHARMA
 
 # good enough
+AXB_XMAILER_MIMEOLE_OL_3AC1D
+
+# good enough
+AXB_XMAILER_MIMEOLE_OL_A50F8
+
+# good enough
 AXB_XMAILER_MIMEOLE_OL_FB17C
+
+# good enough
+FRT_PROFIT2
+
+# good enough
+HDRS_LCASE
+
+# good enough
+HK_SCAM_S3
 
 # good enough
 KB_FORGED_MOZ4
