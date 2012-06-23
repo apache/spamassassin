@@ -149,14 +149,14 @@ describe       MAILER_EQ_ORG         X-Mailer: same as Organization:
 #header         __HDRS_LCASE          ALL =~ /\n(?:Reply-to|Message-id|Content-type|X-MSMail-priority|from|subject|to|Disposition-notification-to):/sm
 header         __HDRS_LCASE          ALL =~ /\n(?:Message-id|Content-type|X-MSMail-priority|from|subject|to|cc|Disposition-notification-to):/sm
 tflags         __HDRS_LCASE          multiple maxhits=2
-meta           HDRS_LCASE            __HDRS_LCASE && !__VIA_ML && !__freemail_safe && !__THREADED && !__UNUSABLE_MSGID && !__DOS_SINGLE_EXT_RELAY && !__DKIM_EXISTS && !__NOT_SPOOFED && !__BUGGED_IMG && !__SUBSCRIPTION_INFO && !NO_RELAYS
+meta           HDRS_LCASE            __HDRS_LCASE && !__VIA_ML && !__freemail_safe && !__THREADED && !__UNUSABLE_MSGID && !__DOS_SINGLE_EXT_RELAY && !__DKIM_EXISTS && !__NOT_SPOOFED && !__BUGGED_IMG && !__SUBSCRIPTION_INFO && !NO_RELAYS && !__RDNS_NONE && !__MIME_BASE64 && !__SUBJECT_ENCODED_B64
 meta           __MANY_HDRS_LCASE     __HDRS_LCASE > 1
 meta           MANY_HDRS_LCASE       __MANY_HDRS_LCASE && !__VIA_ML && !__freemail_safe && !__THREADED && !__UNUSABLE_MSGID && !__DOS_SINGLE_EXT_RELAY && !__DKIM_EXISTS && !__NOT_SPOOFED && !__BUGGED_IMG && !__MIME_QP && !__RDNS_NONE
 describe       MANY_HDRS_LCASE       Odd capitalization of multiple message headers
 
 # Some metas that appear to perform well in masscheck
 meta           __HDRS_LCASE_1K       __HDRS_LCASE && __SINGLE_HEADER_1K
-meta           HDRS_LCASE_1K         __HDRS_LCASE_1K && !__VIA_ML && !__MIME_QP && !__BUGGED_IMG && !__BOUNCE_RPATH_NULL && !__NOT_SPOOFED && !__DKIM_EXISTS
+meta           HDRS_LCASE_1K         __HDRS_LCASE_1K && !__VIA_ML && !__MIME_QP && !__BUGGED_IMG && !__BOUNCE_RPATH_NULL && !__NOT_SPOOFED && !__DKIM_EXISTS && !__RDNS_NONE
 describe       HDRS_LCASE_1K         Odd capitalization of message headers + long header
 meta           HDRS_LCASE_IMGONLY    __HDRS_LCASE && __HTML_IMG_ONLY
 describe       HDRS_LCASE_IMGONLY    Odd capitalization of message headers + image-only HTML
