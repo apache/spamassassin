@@ -45,6 +45,7 @@ tflags USER_IN_DEF_DKIM_WL	nice noautolearn net
 # Whitelist and blacklist addresses are file-glob-style patterns, so
 # "friend@somewhere.com", "*@isp.com", or "*.domain.net" will all work.
 
+def_whitelist_from_dkim  *@*.ebay.com		ebay.com
 def_whitelist_from_dkim  *@ebay.com
 def_whitelist_from_dkim  *@*.ebay.com
 def_whitelist_from_dkim  *@ebay.co.uk
