@@ -408,7 +408,7 @@ sub _run_mailbox {
   seek(INPUT,$offset,0)  or die "cannot reposition file to $offset: $!";
   for ($!=0; <INPUT>; $!=0) {
     #Changed Regex to use option Per bug 6703
-    last if (substr($_,0,5) eq "From " && @msg && /$self->{opt_from_regex}/);
+    last if (substr($_,0,5) eq "From " && @msg && /$self->{opt_from_regex}/o);
     push (@msg, $_);
 
     # skip too-big mails
@@ -929,7 +929,7 @@ sub _scan_mailbox {
 	    }
 	  }
           #Changed Regex to use option Per bug 6703
-	  if (substr($_,0,5) eq "From " && /$self->{opt_from_regex}/) {
+	  if (substr($_,0,5) eq "From " && /$self->{opt_from_regex}/o) {
 	    $in_header = 1;
 	    $first = $_;
 	    $start = $where;
