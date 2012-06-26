@@ -170,13 +170,13 @@ C<$obj> is returned by this method.
 sub start_lookup {
   my ($self, $ent, $master_deadline) = @_;
 
-  die "oops, no id"   unless $ent->{id}   ne '';
-  die "oops, no key"  unless $ent->{key}  ne '';
-  die "oops, no type" unless $ent->{type} ne '';
+  my $id  = $ent->{id};
+  my $key = $ent->{key};
+  defined $id && $id ne ''  or die "oops, no id";
+  $key                      or die "oops, no key";
+  $ent->{type}              or die "oops, no type";
 
   my $now = time;
-  my $key = $ent->{key};
-  my $id  = $ent->{id};
   $ent->{status} = 'STARTED';
   $ent->{start_time} = $now  if !defined $ent->{start_time};
 
