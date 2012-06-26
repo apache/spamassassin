@@ -425,14 +425,17 @@ sub _run_mailbox {
     return;
   }
 
-  dbg("archive-iterator: _run_mailbox %s, ofs %d", $file, $offset);
+  my $opt_max_size = $self->{opt_max_size};
+  dbg("archive-iterator: _run_mailbox %s, ofs %d, limit %d",
+      $file, $offset, $opt_max_size||0);
+
   seek(INPUT,$offset,0)  or die "cannot reposition file to $offset: $!";
 
-  my $opt_max_size = $self->{opt_max_size};
   my $size = 0;
   for ($!=0; <INPUT>; $!=0) {
     #Changed Regex to use option Per bug 6703
     last if (substr($_,0,5) eq "From " && @msg && /$self->{opt_from_regex}/o);
+    $size += length($_);
     push (@msg, $_);
 
     # skip mails that are too big
@@ -472,10 +475,12 @@ sub _run_mbx {
     return;
   }
 
-  dbg("archive-iterator: _run_mbx %s, ofs %d", $file, $offset);
+  my $opt_max_size = $self->{opt_max_size};
+  dbg("archive-iterator: _run_mbx %s, ofs %d, limit %d",
+      $file, $offset, $opt_max_size||0);
+
   seek(INPUT,$offset,0)  or die "cannot reposition file to $offset: $!";
     
-  my $opt_max_size = $self->{opt_max_size};
   my $size = 0;
   for ($!=0; <INPUT>; $!=0) {
     last if ($_ =~ MBX_SEPARATOR);
