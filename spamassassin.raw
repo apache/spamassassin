@@ -365,7 +365,7 @@ setup_sig_handlers();
 # Everything below here needs ArchiveIterator ...
 my $iter = new Mail::SpamAssassin::ArchiveIterator(
   {
-    'opt_all' => 1,
+    'opt_max_size' => 0,  # no limit
     'opt_want_date' => 0
   }
 );

@@ -30,8 +30,8 @@ use Mail::SpamAssassin::Constants qw(:sa);
 use Mail::SpamAssassin::Logger;
 use Mail::SpamAssassin::AICache;
 
-use constant BIG_BYTES => 256*1024;	# 256k is a big email
-use constant BIG_LINES => BIG_BYTES/65;	# 65 bytes/line is a good approximation
+# 256 KiB is a big email, unless stated otherwise
+use constant BIG_BYTES => 256*1024;
 
 use vars qw {
   $MESSAGES
@@ -50,7 +50,7 @@ Mail::SpamAssassin::ArchiveIterator - find and process messages one at a time
 
   my $iter = new Mail::SpamAssassin::ArchiveIterator(
     { 
-      'opt_all'   => 1,
+      'opt_max_size' => 256 * 1024,  # 0 implies no limit
       'opt_cache' => 1,
     }
   );
@@ -90,10 +90,20 @@ optional unless otherwise noted.
 
 =over 4
 
+=item opt_max_size
+
+A value of option I<opt_max_size> determines a limit (number of bytes)
+beyond which a message is considered large and is skipped by ArchiveIterator.
+
+A value 0 implies no size limit, all messages are examined. An undefined
+value implies a default limit of 256 KiB.
+
 =item opt_all
 
-Typically messages over 250k are skipped by ArchiveIterator.  Use this option
-to keep from skipping messages based on size.
+Setting this option to true implicitly sets I<opt_max_size> to 0, i.e.
+no limit of a message size, all messages are processes by ArchiveIterator.
+For compatibility with SpamAssassin versions older than 3.4.0 which
+lacked option I<opt_max_size>.
 
 =item opt_scanprob
 
@@ -201,6 +211,12 @@ sub new {
   $self->{h} = [ ];		# ham, as if you couldn't guess
 
   $self->{access_problem} = 0;
+
+  if ($self->{opt_all}) {
+    $self->{opt_max_size} = 0;
+  } elsif (!defined $self->{opt_max_size}) {
+    $self->{opt_max_size} = BIG_BYTES;
+  }
 
   $self;
 }
@@ -354,14 +370,16 @@ sub _run_file {
     return;
   }
 
-  if ($self->{opt_all}) {
+  my $opt_max_size = $self->{opt_max_size};
+  if (!$opt_max_size) {
     # process any size
   } elsif (!-f _) {
     # must check size while reading
-  } elsif (-s _ > BIG_BYTES) {
+  } elsif (-s _ > $opt_max_size) {
     # skip too-big mails
     # note that -s can only deal with files, it returns 0 on char.spec. STDIN
-    info("archive-iterator: skipping large message\n");
+    info("archive-iterator: skipping large message: ".
+         "file size %d, limit %d bytes", -s _, $opt_max_size);
     close INPUT  or die "error closing input file: $!";
     return;
   }
@@ -373,8 +391,9 @@ sub _run_file {
   my($inbuf,$nread);
   while ( $nread=read(INPUT,$inbuf,16384) ) {
     $len += $nread;
-    if (($len > BIG_BYTES) && !$self->{opt_all}) {
-      info("archive-iterator: skipping large message\n");
+    if ($opt_max_size && $len > $opt_max_size) {
+      info("archive-iterator: skipping large message: read %d, limit %d bytes",
+           $len, $opt_max_size);
       close INPUT  or die "error closing input file: $!";
       return;
     }
@@ -405,15 +424,22 @@ sub _run_mailbox {
     $self->{access_problem} = 1;
     return;
   }
+
+  dbg("archive-iterator: _run_mailbox %s, ofs %d", $file, $offset);
   seek(INPUT,$offset,0)  or die "cannot reposition file to $offset: $!";
+
+  my $opt_max_size = $self->{opt_max_size};
+  my $size = 0;
   for ($!=0; <INPUT>; $!=0) {
     #Changed Regex to use option Per bug 6703
     last if (substr($_,0,5) eq "From " && @msg && /$self->{opt_from_regex}/o);
     push (@msg, $_);
 
-    # skip too-big mails
-    if (! $self->{opt_all} && @msg > BIG_LINES) {
-      info("archive-iterator: skipping large message\n");
+    # skip mails that are too big
+    if ($opt_max_size && $size > $opt_max_size) {
+      info("archive-iterator: skipping large message: ".
+           "%d lines, %d bytes, limit %d bytes",
+           scalar @msg, $size, $opt_max_size);
       close INPUT  or die "error closing input file: $!";
       return;
     }
@@ -446,15 +472,21 @@ sub _run_mbx {
     return;
   }
 
+  dbg("archive-iterator: _run_mbx %s, ofs %d", $file, $offset);
   seek(INPUT,$offset,0)  or die "cannot reposition file to $offset: $!";
     
+  my $opt_max_size = $self->{opt_max_size};
+  my $size = 0;
   for ($!=0; <INPUT>; $!=0) {
     last if ($_ =~ MBX_SEPARATOR);
+    $size += length($_);
     push (@msg, $_);
 
     # skip mails that are too big
-    if (! $self->{opt_all} && @msg > BIG_LINES) {
-      info("archive-iterator: skipping large message\n");
+    if ($opt_max_size && $size > $opt_max_size) {
+      info("archive-iterator: skipping large message: ".
+           "%d lines, %d bytes, limit %d bytes",
+           scalar @msg, $size, $opt_max_size);
       close INPUT  or die "error closing input file: $!";
       return;
     }
