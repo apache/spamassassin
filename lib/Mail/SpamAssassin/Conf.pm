@@ -2344,7 +2344,6 @@ mbox_format_from_regex /^From \S+  ?[[:upper:]][[:lower:]]{2}(?:, \d\d [[:upper:
 
   push (@cmds, {
     setting => 'mbox_format_from_regex',
-    default => '',
     type => $CONF_TYPE_STRING
   });
 
