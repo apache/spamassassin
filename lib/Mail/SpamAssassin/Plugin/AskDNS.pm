@@ -147,9 +147,10 @@ the rule hits. Examples: /^127\.0\.0\.\d+$/, m{\bdial up\b}i .
 
 A single numerical value can be a decimal number, or a hexadecimal number
 prefixed by 0x. Such numeric filtering expression is typically used with
-RR type-A DNS queries. The returned value (an IPv4 address) is masked with
-a specified filtering value, and the rule hits if the result is nonzero:
-(r & n) != 0 .  An example: 0x10 .
+RR type-A DNS queries. The returned value (an IPv4 address) is masked
+with a specified filtering value and tested to fall within a 127.0.0.0/8
+network range - the rule hits if the result is nonzero:
+((r & n) != 0) && ((r & 0xff000000) == 0x7f000000).  An example: 0x10 .
 
 A pair of numerical values (each a decimal, hexadecimal or quad-dotted)
 delimited by a '-' specifies an IPv4 address range, and a pair of values
@@ -584,7 +585,8 @@ sub process_response_packet {
                  $subtest =~ m{^ (\d+) (?: ([/-]) (\d+) )? \z}x) {
           my($n1,$delim,$n2) = ($1,$2,$3);
           $match =
-            !defined $n2  ? $rdatanum & $n1                       # mask only
+            !defined $n2  ? ($rdatanum & $n1) &&                  # mask only
+                              (($rdatanum & 0xff000000) == 0x7f000000)  # 127/8
           : $delim eq '-' ? $rdatanum >= $n1 && $rdatanum <= $n2  # range
           : $delim eq '/' ? ($rdatanum & $n2) == ($n1 & $n2)      # value/mask
           : 0;  

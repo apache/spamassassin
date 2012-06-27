@@ -130,7 +130,8 @@ the specified sub-test as follows:
 for a range n1-n2 the following must be true: (r >= n1 && r <= n2);
 for a n/m form the following must be true: (r & m) == (n & m);
 for a single value in quad-dot form the following must be true: r == n;
-for a single decimal or hex form the following must be true: (r & n) != 0.
+for a single decimal or hex form the following must be true:
+  ((r & n) != 0) && ((r & 0xff000000) == 0x7f000000), i.e. within 127.0.0.0/8
 
 Some typical examples of a sub-test are: 127.0.1.2, 127.0.1.20-127.0.1.39,
 127.0.1.0/255.255.255.0, 0.0.0.16/0.0.0.16, 0x10/0x10, 16, 0x10 .
@@ -179,7 +180,8 @@ the specified sub-test as follows:
 for a range n1-n2 the following must be true: (r >= n1 && r <= n2);
 for a n/m form the following must be true: (r & m) == (n & m);
 for a single value in quad-dot form the following must be true: r == n;
-for a single decimal or hex form the following must be true: (r & n) != 0.
+for a single decimal or hex form the following must be true:
+  ((r & n) != 0) && ((r & 0xff000000) == 0x7f000000), i.e. within 127.0.0.0/8
 
 Some typical examples of a sub-test are: 127.0.1.2, 127.0.1.20-127.0.1.39,
 127.2.3.0/255.255.255.0, 0.0.0.16/0.0.0.16, 0x10/0x10, 16, 0x10 .
@@ -1075,7 +1077,7 @@ sub complete_dnsbl_lookup {
     if (!$rulecf->{is_subrule}) {
       # this zone is a simple rule, not a set of subrules
       # skip any A record that isn't on 127/8
-      if ($rr->type eq 'A' && $rr->rdatastr !~ /^127\./) {
+      if ($rr->type eq 'A' && $rdatastr !~ /^127\./) {
 	warn("uridnsbl: bogus rr for domain=$dom, rule=$rulename, id=" .
             $packet->header->id." rr=".$rr->string);
 	next;
@@ -1091,11 +1093,13 @@ sub complete_dnsbl_lookup {
         } elsif ($subtest =~ m{^ (\d+) (?: ([/-]) (\d+) )? \z}x) {
           my($n1,$delim,$n2) = ($1,$2,$3);
           $match =
-            !defined $n2  ? $rdatanum & $n1                       # mask only
+            !defined $n2  ? ($rdatanum & $n1) &&                  # mask only
+                              (($rdatanum & 0xff000000) == 0x7f000000)  # 127/8
           : $delim eq '-' ? $rdatanum >= $n1 && $rdatanum <= $n2  # range
           : $delim eq '/' ? ($rdatanum & $n2) == ($n1 & $n2)      # value/mask
           : 0;  
-        # dbg("uridnsbl: %s %s/%s/%s, %s, %s", $match?'Y':'N', $dom, $rulename,
+        # dbg("uridnsbl: %s %s/%s/%s, %08x, %s",
+        #     $match?'Y':'N', $dom, $rulename,
         #     join('.',@{$uridnsbl_subs->{$subtest}->{rulenames}}),
         #     $rdatanum, !defined $n2 ? $n1 : "$n1 $delim $n2");
         }
