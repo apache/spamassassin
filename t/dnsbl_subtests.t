@@ -11,7 +11,7 @@ use SATest; sa_t_init("dnsbl_subtests");
 use Test;
 
 use vars qw(%patterns %anti_patterns);
-use constant num_tests => 47;
+use constant num_tests => 46;
 use constant DO_RUN => 1;
 
 BEGIN {
@@ -354,9 +354,11 @@ test_samples(
 test_samples(
   [q{ X_URIBL_Y_2A X_URIBL_Y_2B X_URIBL_Y_2C X_URIBL_Y_2D X_URIBL_Y_2E
       X_URIBL_Y_2F X_URIBL_Y_2G X_URIBL_Y_FFA X_URIBL_Y_FFB X_URIBL_Y_FFC
-      X_URIBL_Y_FFD X_URIBL_Y_255A X_URIBL_Y_255B / X_URIBL_N_0A X_URIBL_N_0B
+      X_URIBL_Y_255A X_URIBL_Y_255B / X_URIBL_N_0A X_URIBL_N_0B
       X_URIBL_N_255A X_URIBL_N_255B }],
   [qw( http://DBLtest.COM/ http://dbltestFF.CoM/ http://140.211.11.130/ )]);
+# X_URIBL_Y_FFD no longer hits intentionally (not in the 127.0.0.0/8 range),
+# see Bug 6803
 
 if ($pid) {
   kill('TERM',$pid) or die "Cannot stop a DNS server [$pid]: $!";
