@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-coi-bulk axb-fraud axb-generic axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus grenier jarif; day 2: axb-coi-bulk axb-fraud axb-generic axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus grenier jarif; day 3: axb-coi-bulk axb-fraud axb-generic axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus grenier jarif
+# with results from: day 1: axb-coi-bulk axb-fraud axb-generic axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm danmcdonald darxus grenier jarif llanga; day 2: axb-coi-bulk axb-fraud axb-generic axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus grenier jarif; day 3: axb-coi-bulk axb-fraud axb-generic axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus grenier jarif
 
 # tflags 
 ADVANCE_FEE_2_NEW_FORM
@@ -292,6 +292,9 @@ CHARSET_FARAWAY
 # tflags userconf
 CHARSET_FARAWAY_HEADER
 
+# good enough
+CN_B2B_SPAMMER
+
 # tflags 
 CORRUPT_FROM_LINE_IN_HDRS
 
@@ -455,6 +458,9 @@ FROM_MISSP_URI
 FROM_MISSP_USER
 
 # good enough
+FRT_PROFIT2
+
+# good enough
 FSL_CTYPE_WIN1251
 
 # good enough
@@ -602,9 +608,6 @@ KHOP_JS_OBFUSCATION
 LOTS_OF_MONEY
 
 # good enough
-LOTTERY_1
-
-# good enough
 LOTTERY_PH_004470
 
 # good enough
@@ -657,6 +660,9 @@ MONEY_FRAUD_8
 
 # good enough
 MONEY_FROM_MISSP
+
+# good enough
+MONEY_PERCENT
 
 # good enough
 MSOE_MID_WRONG_CASE
@@ -1011,9 +1017,6 @@ AXB_XMAILER_MIMEOLE_OL_CD271
 
 # good enough
 HK_NAME_FM_FROM
-
-# good enough
-OBFU_HTML_ATTACH
 
 # good enough
 TVD_IP_HEX
