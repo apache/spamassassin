@@ -323,7 +323,8 @@ sub process_dnsbl_set {
     }
     # bitmask
     elsif ($subtest =~ /^\d+$/) {
-      if ($rdatastr =~ m/^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/ &&
+      # Bug 6803: response should be within 127.0.0.0/8, ignore otherwise
+      if ($rdatastr =~ m/^127\.\d{1,3}\.\d{1,3}\.\d{1,3}$/ &&
 	  Mail::SpamAssassin::Util::my_inet_aton($rdatastr) & $subtest)
       {
 	$self->dnsbl_hit($rule, $question, $answer);
