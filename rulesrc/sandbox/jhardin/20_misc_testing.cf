@@ -153,7 +153,7 @@ meta           HDRS_LCASE            __HDRS_LCASE && !__VIA_ML && !__freemail_sa
 describe       HDRS_LCASE            Odd capitalization of message header
 score          HDRS_LCASE            3.75	# limit
 meta           __MANY_HDRS_LCASE     __HDRS_LCASE > 1
-meta           MANY_HDRS_LCASE       __MANY_HDRS_LCASE && !__VIA_ML && !__freemail_safe && !__THREADED && !__UNUSABLE_MSGID && !__DOS_SINGLE_EXT_RELAY && !__DKIM_EXISTS && !__NOT_SPOOFED && !__BUGGED_IMG && !__MIME_QP && !__RDNS_NONE
+meta           MANY_HDRS_LCASE       __MANY_HDRS_LCASE && !__VIA_ML && !__freemail_safe && !__THREADED && !__UNUSABLE_MSGID && !__DOS_SINGLE_EXT_RELAY && !__DKIM_EXISTS && !__NOT_SPOOFED && !__BUGGED_IMG && !__MIME_QP && !__RDNS_NONE && !__MSGID_JAVAMAIL
 describe       MANY_HDRS_LCASE       Odd capitalization of multiple message headers
 score          MANY_HDRS_LCASE       3.75	# limit
 
