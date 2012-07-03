@@ -201,7 +201,7 @@ foreach(qw/
   gov.lt mil.lt
   asn.lv com.lv conf.lv edu.lv gov.lv id.lv mil.lv net.lv org.lv
   biz.ly com.ly edu.ly gov.ly id.ly med.ly net.ly org.ly plc.ly sch.ly
-  ac.ma co.ma gov.ma net.ma org.ma press.ma                                                                                    ·
+  ac.ma co.ma gov.ma net.ma org.ma press.ma
   asso.mc tm.mc
   ac.me co.me edu.me gov.me its.me net.me org.me priv.me
   com.mg edu.mg gov.mg mil.mg nom.mg org.mg prd.mg tm.mg
