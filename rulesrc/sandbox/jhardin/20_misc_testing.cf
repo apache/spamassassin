@@ -151,11 +151,11 @@ header         __HDRS_LCASE          ALL =~ /\n(?:Message-id|Content-type|X-MSMa
 tflags         __HDRS_LCASE          multiple maxhits=2
 meta           HDRS_LCASE            __HDRS_LCASE && !__VIA_ML && !__freemail_safe && !__THREADED && !__UNUSABLE_MSGID && !__DOS_SINGLE_EXT_RELAY && !__DKIM_EXISTS && !__BUGGED_IMG && !__SUBSCRIPTION_INFO && !NO_RELAYS && !__RDNS_NONE && !__MIME_BASE64 && !__SUBJECT_ENCODED_B64 && !__RCD_RDNS_MX_MESSY && !__HTML_LINK_IMAGE && !__RDNS_SHORT && !__TAG_EXISTS_STYLE && !ALL_TRUSTED && !__NOT_SPOOFED && !__MSGID_JAVAMAIL && !__RCD_RDNS_SMTP_MESSY && !__NAKED_TO
 describe       HDRS_LCASE            Odd capitalization of message header
-score          HDRS_LCASE            3.75	# limit
+score          HDRS_LCASE            0.10	# limit
 meta           __MANY_HDRS_LCASE     __HDRS_LCASE > 1
 meta           MANY_HDRS_LCASE       __MANY_HDRS_LCASE && !__VIA_ML && !__freemail_safe && !__THREADED && !__UNUSABLE_MSGID && !__DOS_SINGLE_EXT_RELAY && !__DKIM_EXISTS && !__NOT_SPOOFED && !__BUGGED_IMG && !__MIME_QP && !__RDNS_NONE && !__MSGID_JAVAMAIL
 describe       MANY_HDRS_LCASE       Odd capitalization of multiple message headers
-score          MANY_HDRS_LCASE       3.75	# limit
+score          MANY_HDRS_LCASE       0.10	# limit
 
 # Some metas that appear to perform well in masscheck
 meta           __HDRS_LCASE_1K       __HDRS_LCASE && __SINGLE_HEADER_1K
@@ -592,7 +592,7 @@ header         __FROM_12LTRDOM_1   From =~ /\@[a-z]{12}\./
 meta           FROM_12LTRDOM       __FROM_12LTRDOM_1 && !__VIA_ML && !__TO___LOWER && !__FS_SUBJ_RE && !__RCD_RDNS_MAIL_MESSY && !__freemail_safe && !__UNSUB_LINK && !NO_RELAYS && !__UNUSABLE_MSGID && !DATE_IN_PAST_96_XX && !ALL_TRUSTED && !__MSGID_APPLEMAIL && !__RCD_RDNS_SMTP_MESSY && !__FB_NATIONAL && !__MAIL_LINK && !__NAME_EMAIL_DIFF && !__RCD_RDNS_MX_MESSY && !__RCD_RDNS_MX && !__SENDER_BOT && !__IMS_MSGID && !__HS_SUBJ_RE_FW && !__DOS_HAS_LIST_UNSUB && !__THREAD_INDEX_GOOD && !__TO_EQ_FROM_DOM && !__URI_MAILTO && !__SUBSCRIPTION_INFO
 describe       FROM_12LTRDOM       From a 12-letter domain
 #tflags         FROM_12LTRDOM       nopublish
-score          FROM_12LTRDOM       3.5   	# limit
+score          FROM_12LTRDOM       0.10  	# limit
 
 # spammer email addresses noted by D. German on users list 9/2010
 body        DG_SPAMMER_EMAIL_B     /\b[a-z]{10,30}\.[a-z]{3,10}\@[a-z]{3,10}\.[a-z]{6,30}\.[a-z]{2,4}\b/
