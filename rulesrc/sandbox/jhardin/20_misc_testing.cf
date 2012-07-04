@@ -161,8 +161,10 @@ score          MANY_HDRS_LCASE       0.10	# limit
 meta           __HDRS_LCASE_1K       __HDRS_LCASE && __SINGLE_HEADER_1K
 meta           HDRS_LCASE_1K         __HDRS_LCASE_1K && !__VIA_ML && !__MIME_QP && !__BUGGED_IMG && !__BOUNCE_RPATH_NULL && !__NOT_SPOOFED && !__DKIM_EXISTS && !__RDNS_NONE
 describe       HDRS_LCASE_1K         Odd capitalization of message headers + long header
+score          HDRS_LCASE_1K         0.50	# limit
 meta           HDRS_LCASE_IMGONLY    __HDRS_LCASE && __HTML_IMG_ONLY
 describe       HDRS_LCASE_IMGONLY    Odd capitalization of message headers + image-only HTML
+score          HDRS_LCASE_IMGONLY    0.10	# limit
 
 
 
