@@ -1,5 +1,8 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-coi-bulk axb-fraud axb-generic axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus grenier jarif llanga; day 2: axb-coi-bulk axb-fraud axb-generic axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus grenier jarif llanga; day 3: axb-coi-bulk axb-fraud axb-generic axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus grenier jarif
+# with results from: day 1: axb-coi-bulk axb-fraud axb-generic axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus grenier llanga; day 2: axb-coi-bulk axb-fraud axb-generic axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus grenier jarif llanga; day 3: axb-coi-bulk axb-fraud axb-generic axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus grenier jarif llanga
+
+# good enough
+ACH_CANCELLED
 
 # tflags 
 ADVANCE_FEE_2_NEW_FORM
@@ -116,9 +119,6 @@ AXB_XMAILER_MIMEOLE_OL_4379D
 AXB_XMAILER_MIMEOLE_OL_44FE0
 
 # good enough
-AXB_XMAILER_MIMEOLE_OL_47200
-
-# good enough
 AXB_XMAILER_MIMEOLE_OL_4BF4C
 
 # good enough
@@ -201,6 +201,9 @@ AXB_XMAILER_MIMEOLE_OL_A275F
 
 # good enough
 AXB_XMAILER_MIMEOLE_OL_A50F8
+
+# good enough
+AXB_XMAILER_MIMEOLE_OL_A6545
 
 # good enough
 AXB_XMAILER_MIMEOLE_OL_A7B9C
@@ -318,6 +321,9 @@ CHARSET_FARAWAY_HEADER
 
 # tflags 
 CORRUPT_FROM_LINE_IN_HDRS
+
+# good enough
+CTYPE_NULL
 
 # good enough
 DATE_DOTS
@@ -575,9 +581,6 @@ HK_LOTTO
 HK_LOTTO_NAME
 
 # good enough
-HK_NAME_FM_DR
-
-# good enough
 HK_NAME_FM_FROM
 
 # good enough
@@ -723,6 +726,9 @@ NSL_RCVD_HELO_USER
 
 # good enough
 OBFU_ATTACH_MISSP
+
+# good enough
+OBFU_HTML_ATTACH
 
 # tflags 
 OBFU_JVSCR_ESC
@@ -1046,19 +1052,19 @@ TVD_QUAL_MEDS
 TVD_RCVD_SPACE_BRACKET
 
 # good enough
-ACH_CANCELLED
+AXB_XMAILER_MIMEOLE_OL_B9D6C
 
 # good enough
-AXB_XMAILER_MIMEOLE_OL_5A17A
-
-# good enough
-AXB_XMAILER_MIMEOLE_OL_A6545
-
-# good enough
-CTYPE_NULL
+FSL_FREEMAIL_2
 
 # good enough
 FS_GIFT_CARD_OFF
+
+# good enough
+HDRS_MISSP
+
+# good enough
+SINGLE_HEADER_1K
 
 # tflags userconf
 UNPARSEABLE_RELAY
