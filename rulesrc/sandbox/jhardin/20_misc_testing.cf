@@ -145,24 +145,31 @@ meta           MAILER_EQ_ORG         __MUA_EQ_ORG_1 || __MUA_EQ_ORG_2
 describe       MAILER_EQ_ORG         X-Mailer: same as Organization:
 #tflags         MAILER_EQ_ORG         publish
 
+
 # observed in UCE 9/2009
 #header         __HDRS_LCASE          ALL =~ /\n(?:Reply-to|Message-id|Content-type|X-MSMail-priority|from|subject|to|Disposition-notification-to):/sm
 header         __HDRS_LCASE          ALL =~ /\n(?:Message-id|Content-type|X-MSMail-priority|from|subject|to|cc|Disposition-notification-to):/sm
-tflags         __HDRS_LCASE          multiple maxhits=2
-meta           HDRS_LCASE            __HDRS_LCASE && !__VIA_ML && !__freemail_safe && !__THREADED && !__UNUSABLE_MSGID && !__DOS_SINGLE_EXT_RELAY && !__DKIM_EXISTS && !__BUGGED_IMG && !__SUBSCRIPTION_INFO && !NO_RELAYS && !__RDNS_NONE && !__MIME_BASE64 && !__SUBJECT_ENCODED_B64 && !__RCD_RDNS_MX_MESSY && !__HTML_LINK_IMAGE && !__RDNS_SHORT && !__TAG_EXISTS_STYLE && !ALL_TRUSTED && !__NOT_SPOOFED && !__MSGID_JAVAMAIL && !__RCD_RDNS_SMTP_MESSY && !__NAKED_TO
+tflags         __HDRS_LCASE          multiple maxhits=3
+
+# MUAs and MTAs known or suspected to do this
+header         __UA_MSOMAC           User-Agent =~ /^Microsoft-MacOutlook\/(?:\d+\.){3}/
+meta           __HDRS_LCASE_KNOWN    __MSGID_JAVAMAIL || __UA_MSOEMAC || __UA_MSOMAC
+
+meta           HDRS_LCASE            __HDRS_LCASE && !__HDRS_LCASE_KNOWN && !__VIA_ML && !__freemail_safe && !__THREADED && !__UNUSABLE_MSGID && !__DOS_SINGLE_EXT_RELAY && !__DKIM_EXISTS && !__BUGGED_IMG && !__SUBSCRIPTION_INFO && !NO_RELAYS && !__RDNS_NONE && !__MIME_BASE64 && !__SUBJECT_ENCODED_B64 && !__RCD_RDNS_MX_MESSY && !__HTML_LINK_IMAGE && !__RDNS_SHORT && !__TAG_EXISTS_STYLE && !ALL_TRUSTED && !__NOT_SPOOFED && !__RCD_RDNS_SMTP_MESSY && !__NAKED_TO
 describe       HDRS_LCASE            Odd capitalization of message header
 score          HDRS_LCASE            0.10	# limit
 meta           __MANY_HDRS_LCASE     __HDRS_LCASE > 1
-meta           MANY_HDRS_LCASE       __MANY_HDRS_LCASE && !__VIA_ML && !__freemail_safe && !__THREADED && !__UNUSABLE_MSGID && !__DOS_SINGLE_EXT_RELAY && !__DKIM_EXISTS && !__NOT_SPOOFED && !__BUGGED_IMG && !__MIME_QP && !__RDNS_NONE && !__MSGID_JAVAMAIL
+meta           __TOOMANY_HDRS_LCASE  __HDRS_LCASE > 2
+meta           MANY_HDRS_LCASE       __MANY_HDRS_LCASE && !__HDRS_LCASE_KNOWN && !__VIA_ML && !__freemail_safe && !__THREADED && !__UNUSABLE_MSGID && !__DOS_SINGLE_EXT_RELAY && !__DKIM_EXISTS && !__NOT_SPOOFED && !__BUGGED_IMG && !__MIME_QP && !__RDNS_NONE
 describe       MANY_HDRS_LCASE       Odd capitalization of multiple message headers
 score          MANY_HDRS_LCASE       0.10	# limit
 
 # Some metas that appear to perform well in masscheck
 meta           __HDRS_LCASE_1K       __HDRS_LCASE && __SINGLE_HEADER_1K
-meta           HDRS_LCASE_1K         __HDRS_LCASE_1K && !__VIA_ML && !__MIME_QP && !__BUGGED_IMG && !__BOUNCE_RPATH_NULL && !__NOT_SPOOFED && !__DKIM_EXISTS && !__RDNS_NONE
+meta           HDRS_LCASE_1K         __HDRS_LCASE_1K && !__HDRS_LCASE_KNOWN && !__VIA_ML && !__MIME_QP && !__BUGGED_IMG && !__BOUNCE_RPATH_NULL && !__NOT_SPOOFED && !__DKIM_EXISTS && !__RDNS_NONE
 describe       HDRS_LCASE_1K         Odd capitalization of message headers + long header
 score          HDRS_LCASE_1K         0.50	# limit
-meta           HDRS_LCASE_IMGONLY    __HDRS_LCASE && __HTML_IMG_ONLY
+meta           HDRS_LCASE_IMGONLY    __HDRS_LCASE && __HTML_IMG_ONLY && !__HDRS_LCASE_KNOWN
 describe       HDRS_LCASE_IMGONLY    Odd capitalization of message headers + image-only HTML
 score          HDRS_LCASE_IMGONLY    0.10	# limit
 
@@ -488,6 +495,11 @@ describe        __NSL_ORIG_FROM_41        Originates from 41.0.0.0/8
 header          __NSL_RCVD_FROM_41        X-Spam-Relays-External =~ / ip=41\./
 describe        __NSL_RCVD_FROM_41        Received from 41.0.0.0/8
 
+meta            __MONEY_FROM_41           __NSL_RCVD_FROM_41 && LOTS_OF_MONEY
+meta            MONEY_FROM_41             __MONEY_FROM_41
+describe        MONEY_FROM_41             Lots of money from Africa
+
+
 # some metas with the above, maybe reduce FPs
 ifplugin Mail::SpamAssassin::Plugin::FreeMail
   meta         __FROM_41_FREEMAIL         (__NSL_ORIG_FROM_41 || __NSL_RCVD_FROM_41) && (FREEMAIL_FROM || FREEMAIL_REPLYTO) && !__THREADED
@@ -595,6 +607,12 @@ meta           FROM_12LTRDOM       __FROM_12LTRDOM_1 && !__VIA_ML && !__TO___LOW
 describe       FROM_12LTRDOM       From a 12-letter domain
 #tflags         FROM_12LTRDOM       nopublish
 score          FROM_12LTRDOM       0.10  	# limit
+
+# promising masscheck results
+meta           __MONEY_12LTRDOM    __FROM_12LTRDOM_1 && __LOTSA_MONEY_00
+meta           MONEY_12LTRDOM      __MONEY_12LTRDOM
+score          MONEY_12LTRDOM      0.10		# limit
+describe       MONEY_12LTRDOM      Mentions lots of money and from a 12-letter domain
 
 # spammer email addresses noted by D. German on users list 9/2010
 body        DG_SPAMMER_EMAIL_B     /\b[a-z]{10,30}\.[a-z]{3,10}\@[a-z]{3,10}\.[a-z]{6,30}\.[a-z]{2,4}\b/
@@ -830,4 +848,11 @@ describe    URI_DBL_DOM_2          domain appears twice
 # suggestion on users list 04/2012
 header      SUBJ_ODD_CASE      ALL =~ /\n(?!(?:Subject:|SUBJECT:|subject:))(?i:subject:)/sm
 describe    SUBJ_ODD_CASE      Oddly mixed-case Subject: header
+
+
+# Somebody's resurrecting the dead 07/1012
+body        BILL_1618          /Under Bills?.1618(?: Title III)? passed by the 105th U\.S\. Congress/i
+describe    BILL_1618          Mentions proposed US law supposedly permitting spam
+body        NOT_LEGALLY_SPAM   /this mail cannot be considered Spam/i
+describe    NOT_LEGALLY_SPAM   Claims legitimacy under a law that was never passed
 
