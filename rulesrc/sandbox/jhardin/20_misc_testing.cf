@@ -151,9 +151,18 @@ describe       MAILER_EQ_ORG         X-Mailer: same as Organization:
 header         __HDRS_LCASE          ALL =~ /\n(?:Message-id|Content-type|X-MSMail-priority|from|subject|to|cc|Disposition-notification-to):/sm
 tflags         __HDRS_LCASE          multiple maxhits=3
 
+# __MSGID_APPLEMAIL is uppercase-only GUID message_id. This may be redundant.
+header         __MSGID_GUID          Message-ID =~ /^<?[0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12}\@/i
+header         __MSGID_GUID_LOOSE    Message-ID =~ /^<?[0-9A-Z]{8}-(?:[0-9A-Z]{3,4}-){3}[0-9A-Z]{11,12}\@/
+meta           __MSGID_GUID_FAKE     __MSGID_GUID_LOOSE && !__MSGID_GUID
+# It would be nice if somebody could identify the MUA/MTA that generates this:
+header         __MSGID_HEX_UID       Message-ID =~ /^<?[0-9A-F]{8}\.[0-9A-F]{2,5}%[a-zA-Z]/
+# It would be nice if somebody could identify the MUA/MTA that generates this:
+header         __MSGID_HEXISH        Message-ID =~ /^<?OF[0-9A-F]{8}\.[0-9A-F]{8}-ON[0-9A-F]{8}\.[0-9A-F]{8}(?:-[0-9A-F]{8}\.[0-9A-F]{8})?\@/
+
 # MUAs and MTAs known or suspected to do this
 header         __UA_MSOMAC           User-Agent =~ /^Microsoft-MacOutlook\/(?:\d+\.){3}/
-meta           __HDRS_LCASE_KNOWN    __MSGID_JAVAMAIL || __UA_MSOEMAC || __UA_MSOMAC
+meta           __HDRS_LCASE_KNOWN    __MSGID_JAVAMAIL || __UA_MSOEMAC || __UA_MSOMAC || __MSGID_APPLEMAIL
 
 meta           HDRS_LCASE            __HDRS_LCASE && !__HDRS_LCASE_KNOWN && !__VIA_ML && !__freemail_safe && !__THREADED && !__UNUSABLE_MSGID && !__DOS_SINGLE_EXT_RELAY && !__DKIM_EXISTS && !__BUGGED_IMG && !__SUBSCRIPTION_INFO && !NO_RELAYS && !__RDNS_NONE && !__MIME_BASE64 && !__SUBJECT_ENCODED_B64 && !__RCD_RDNS_MX_MESSY && !__HTML_LINK_IMAGE && !__RDNS_SHORT && !__TAG_EXISTS_STYLE && !ALL_TRUSTED && !__NOT_SPOOFED && !__RCD_RDNS_SMTP_MESSY && !__NAKED_TO
 describe       HDRS_LCASE            Odd capitalization of message header
