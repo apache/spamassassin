@@ -317,7 +317,7 @@ header MSNBC_MESSAGEGUID        exists:messageGUID
 body JM_HOODIA      /Hoodia has been showned on/
 
 # "BBC news headlines" botnet uses this broken template
-header BBC_RCVD_NCHAR_RAW     Received =~ / with (?:esmtp|ESMTP) \({nChar\[8-12\]} {nChar\[4-6\]}\)/
+header BBC_RCVD_NCHAR_RAW     Received =~ / with (?:esmtp|ESMTP) \(\{nChar\[8-12\]} \{nChar\[4-6\]}\)/
 
 # thanks to Ray for this tip
 header RATWARE_HELO_DM     X-Spam-Relays-External =~ / helo=DM /
