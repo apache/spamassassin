@@ -1289,7 +1289,7 @@ sub is_regexp_valid {
   my $safere = $re;
   my $mods = '';
   local ($1,$2);
-  if ($re =~ s/^m{//) {
+  if ($re =~ s/^m\{//) {
     $re =~ s/}([a-z]*)$//; $mods = $1;
   }
   elsif ($re =~ s/^m\(//) {
