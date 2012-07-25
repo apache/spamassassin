@@ -162,7 +162,7 @@ header         __MSGID_HEXISH        Message-ID =~ /^<?OF[0-9A-F]{8}\.[0-9A-F]{8
 
 # MUAs and MTAs known or suspected to do this
 header         __UA_MSOMAC           User-Agent =~ /^Microsoft-MacOutlook\/(?:\d+\.){3}/
-meta           __HDRS_LCASE_KNOWN    __MSGID_JAVAMAIL || __UA_MSOEMAC || __UA_MSOMAC || __MSGID_APPLEMAIL
+meta           __HDRS_LCASE_KNOWN    __MSGID_JAVAMAIL || __UA_MSOEMAC || __UA_MSOMAC || __MSGID_APPLEMAIL || __MSGID_HEX_UID || __MSGID_HEXISH
 
 meta           HDRS_LCASE            __HDRS_LCASE && !__HDRS_LCASE_KNOWN && !__VIA_ML && !__freemail_safe && !__THREADED && !__UNUSABLE_MSGID && !__DOS_SINGLE_EXT_RELAY && !__DKIM_EXISTS && !__BUGGED_IMG && !__SUBSCRIPTION_INFO && !NO_RELAYS && !__RDNS_NONE && !__MIME_BASE64 && !__SUBJECT_ENCODED_B64 && !__RCD_RDNS_MX_MESSY && !__HTML_LINK_IMAGE && !__RDNS_SHORT && !__TAG_EXISTS_STYLE && !ALL_TRUSTED && !__NOT_SPOOFED && !__RCD_RDNS_SMTP_MESSY && !__NAKED_TO
 describe       HDRS_LCASE            Odd capitalization of message header
