@@ -16,8 +16,10 @@ describe       RDNS_LOCALHOST  Sender's public rDNS is "localhost"
 #describe       EU_SPAM_LAW     Quoting "European Parliament" spam law
 
 ifplugin Mail::SpamAssassin::Plugin::MIMEHeader
-  mimeheader   HTML_ATTACH    Content-Type =~ m,text/html;.+\.html?\b,i
-  describe     HTML_ATTACH    HTML attachment to bypass scanning?
+  mimeheader   __HTML_ATTACH_01    Content-Type =~ m,text/html;.+\.html?\b,i
+  mimeheader   __HTML_ATTACH_02    Content-Disposition =~ m,\bfilename="?[^"]+\.html?\b,i
+  meta         HTML_ATTACH         __HTML_ATTACH_01 || __HTML_ATTACH_02
+  describe     HTML_ATTACH         HTML attachment to bypass scanning?
 
   mimeheader   OBFU_HTML_ATTACH    Content-Type =~ m,application/octet-stream;.+\.html?\b,i
   describe     OBFU_HTML_ATTACH    HTML attachment with non-text MIME type
@@ -52,6 +54,10 @@ ifplugin Mail::SpamAssassin::Plugin::MIMEHeader
   mimeheader   __CTYPE_NULL        Content-Type =~ /^\s*;/
   meta         CTYPE_NULL          __CTYPE_NULL
   describe     CTYPE_NULL          Malformed Content-Type header
+
+  mimeheader   __ZIP_ATTACH_NOFN   Content-Type =~ m,application/zip$,i
+  meta         OBFU_HTML_ATT_MALW  __ZIP_ATTACH_NOFN && __HTML_ATTACH_02
+  describe     OBFU_HTML_ATT_MALW  HTML attachment with incorrect MIME type - possible malware
 
 endif
 
