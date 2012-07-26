@@ -1,13 +1,13 @@
 
 ifplugin Mail::SpamAssassin::Plugin::ReplaceTags
-  replace_tag  CURRENCY   [\(\[]?(?:\bUS[D\$]{0,2}|\$(?:US)?|usd|GBP|=[Aa][34]|\xa3|&\#16[34];|(?i:pounds\ssterling)|\xa4|EUR(?:OS)?|[Ee]uro?s?|(?i:eur)\sde|CHF|FCFA|d[\xf3]lares\sde\slos\sE+\.\s?U+\.)[\]\)]?
+  replace_tag  CURRENCY   [\(\[]?(?:\bUS[D\$]{0,2}|\$(?:US)?|usd|GBP|=[Aa][34]|\xa3|&\#16[34];|(?i:pounds\ssterling)|\xa4|EUR(?:OS)?|(?:d')?[Ee]uro?s?|(?i:eur)\sde|CHF|FCFA|d[\xf3]lares\sde\slos\sE+\.\s?U+\.)[\]\)]?
   replace_tag  GB_UK      \b(?:U\.?K\.?|(?:Great\s)?Brit(?:ain|ish)|G\.?B\.?)\b
 
   body     __LOTSA_MONEY_00   /<CURRENCY>[\s\.]?\d[\dO][,\.][\dO]{3}(?:(?!\d)|\b)/
   body     __LOTSA_MONEY_01   /(?:(?i:sum\sof\s)[\(\[]?|<CURRENCY>\s?)[\s\.]?\d[\d.,\sO]{5,20}[\dO]/
   body     __LOTSA_MONEY_02   /\d[\d.,\sO]{5,20}[\dO][\)\]\(]?\s?(?:<CURRENCY>|Pounds|(?i:dollars?|bucks))\b/
   body     __LOTSA_MONEY_03   /(?:(?i:sum\sof\s)[\(\[]?|<CURRENCY>\s?)\d[\d.,\sO]{0,5}[\)\]]?\s?(?i:M(?i:il)?\b|mil+(?i:io|<O>)n|hund?[re]+a?[dt]|thousand|tausend|milh[\xf5]es)/
-  body     __LOTSA_MONEY_04   /(?:\d[\d\.]{0,4}M|million(?!s)|mill<O>n|hund?rea?d(?!s)[^\.]{1,25}thousand(?!s)|cents?[^\.]{1,25}mille|hundert[^\.]{1,30}tausend|ientos?[^\.]{1,20}mil|cent[a-z\s]{1,20}mil\s[a-z]{1,20}centos)[^\.\$]{0,50}(?:(?:U\.?\s?S\.?\s?(?:A\.?\s?)?|united\s?states\s|E\.\s?U\.\s|canad(?:ian|a)\s|ia\sde\s)?d[o\xf3]llare?s?|bucks|USD|GBP|<GB_UK>\spounds?|(?:<GB_UK>\s)?pounds?\ssterling|pounds(?!\sof)|(?:d'\s?)?euros?|francs?)\b/i
+  body     __LOTSA_MONEY_04   /(?:\d[\d\.]{0,4}(?:M|\smillions)|million(?!s)|mill<O>n|hund?rea?d(?!s)[^\.]{1,25}thousand(?!s)|cents?[^\.]{1,25}mille|hundert[^\.]{1,30}tausend|ientos?[^\.]{1,20}mil|cent[a-z\s]{1,20}mil\s[a-z]{1,20}centos)[^\.\$]{0,50}(?:(?:U\.?\s?S\.?\s?(?:A\.?\s?)?|united\s?states\s|E\.\s?U\.\s|canad(?:ian|a)\s|ia\sde\s)?d[o\xf3]llare?s?|bucks|USD|GBP|<GB_UK>\spounds?|(?:<GB_UK>\s)?pounds?\ssterling|pounds(?!\sof)|(?:d'\s?)?euros?|francs?)\b/i
   body     __LOTSA_MONEY_05   /(?:(?:sum|value|amount)\sof\s)\d[\d.,\sO]{7,20}[\dO\.][\)\]\(\s]{0,3}(?:pounds?|dollars?|euros?|bucks)\b/i
   replace_rules   __LOTSA_MONEY_00 __LOTSA_MONEY_01 __LOTSA_MONEY_02 __LOTSA_MONEY_03 __LOTSA_MONEY_04
 
@@ -136,7 +136,7 @@ ifplugin Mail::SpamAssassin::Plugin::ReplaceTags
   body     __PCT_FOR_YOU_1  /<PERCENT>[\s)]{0,3}(?:of\s[\w\s]{0,35}?)?(?:for|to|as)\syour?/i
   body     __PCT_FOR_YOU_2  /\b(?:(?:give|offer)\syou|vous\saurez\sdroit\s[\xe0]|ihnen)\s<PERCENT>/i
   body     __PCT_FOR_YOU_3  /\byour?\s(?!can)(?:(?!you)\w{1,15}\s){0,10}(?:(?:share|entiti?le(?:d|ment)?|percentage|fee|assist(?:ance)?|comp[ea]nsat(?:ed?|tion)|reward(?:ed)?|renumerat(?:e|tion)|com+is+ion|paid|deduct|account|tage|(?:will|shall|would|(?:are|stand|going)\sto)\s(?:be\s)?(?:tak(?:e|ing)|earn|get(?:ting)?|remit|subtract|with+old)|(?:deduct|taken?|subtract(?:ed)?)\syour|keep(?:ing)?|receiv(?:e|ing)|retain(?:ing)?|have|half|giv(?:en|ing)|paid|(?:give|pay|offer)\s(?:me|you|him)|bank\saccount|to\s(?:take|use)|(?:time|country)\sand|ratio\sof)(?:\s(?!you)\w{1,15}){0,10})\s(?<!by\s)(?<!up\sto\s)<PERCENT>/i
-  body     __PCT_OF_PMTS    /<PERCENT>[\s)]+(?:of\s[\w\s]{0,35}?)?of\s(?:the\s)?(?:payments?|rem+it+ances?|chec(?:k|que)s?|mon(?:ey|ies))/i
+  body     __PCT_OF_PMTS    /<PERCENT>[\s)]+(?:of\s[\w\s]{0,35}?)?(?:of|du)\s(?:the\s)?(?:payments?|rem+it+ances?|capital|chec(?:k|que)s?|mon(?:ey|ies))/i
 
   replace_rules  __PCT_FOR_YOU_1 __PCT_FOR_YOU_2 __PCT_FOR_YOU_3 __PCT_OF_PMTS
 
@@ -182,7 +182,7 @@ describe DECEASED_NO_ML   Dead not via mailing list
 body     __WIRE_XFR       /\b(?:wire|telegraph(?:ic)?|bank)\s?transfer/i
 body     __TRUSTED_CHECK  /\b(?:cashier'?s?|certified)\sche(?:ck|que)/i
 body     __BANK_DRAFT     /\bbank\sdraft/i
-body     __MOVE_MONEY     /\b(?:(?:receive|re-?profile|transfer(?:ring)?|repatriate|rapatrier|secure|r[\xe9]clamation|possession|virer|dona(?:te|r))\s(?:th(?:e(?:se)?|is)|das|sur ce|de ces|cet|est[ea])|re-?profiling|re-?locat(?:e|ing)(?:\s\w{1,15})?)\s(?:sums?\sof\s)?(?:proceeds|funds?|money|balance|account|g[eo]ld|compte|fond[so]|argent)\b/i
+body     __MOVE_MONEY     /\b(?:(?:receive|re-?profile|transfer(?:ring|t)?|repatriate|rapatrier|secure|r[\xe9]clamation|possession|virer|dona(?:te|r))\s(?:th(?:e(?:se)?|is)|d[ae]s|sur ce|de ces|cet|est[ea])|re-?profiling|re-?locat(?:e|ing)(?:\s\w{1,15})?)\s(?:sums?\sof\s)?(?:proceeds|funds?|money|balance|account|g[eo]ld|compte|fond[so]|argent)\b/i
 body     __TO_YOUR_ACCT   /\b(?:funds|money|f[uo]ndo|dinheiro)\s(?:\w{1,10}\s){0,4}(?:transfer(?:red)?|transferido)\s(?:to|para)\s(?:your|sua)\s(?:account|conta)/i
 meta     __XFER_MONEY     (__WIRE_XFR || __TRUSTED_CHECK || __BANK_DRAFT || __MOVE_MONEY || __TO_YOUR_ACCT)
 
@@ -224,7 +224,7 @@ meta     __AFRICAN_STATE  (__NIGERIA || __IVORY_COAST || __BURKINA_FASO || __GHA
 body     __YOUR_PERM      /\byour\spermission\b/i
 body     __CONTACT_YOU    /\b(?:contact(?:ing)\syou|vous\scontacter)\b/i
 body     __FOUND_YOU      /\b(?:I|we)\sfound\syour?\b/i
-body     __INVEST_MONEY   /\binvest\sthis\smoney\b/i
+body     __INVEST_MONEY   /\binvest(?:ir)?\s(?:this|ces|d[ae]s|sur ce|de ces)\s(?:money|f[ou]nds?)\b/i
 body     __INVEST_COUNTRY /\binvest\sin\syour?\scountry\b/i
 body     __RANDOM_PICK    /\b(?:random(?:ly)?\s(?:\w+\s)?(?:select(?:ion|ed)|pick(?:ed)?|computer)|(?:select|pick)ed\s(?:at\s)?random(?:ly)?|(?:esco(?:g|lh)idos|seleccion) (?:aleatoria(?:mente)?|al azar))\b/i
 body     __CHARITY        /\bcharit(?:y|[ai]ble)\b/i
