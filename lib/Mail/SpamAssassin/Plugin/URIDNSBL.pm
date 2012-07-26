@@ -995,12 +995,19 @@ sub complete_a_lookup {
   my ($self, $scanner, $ent, $hname) = @_;
 
   my $packet = $ent->{response_packet};
-  my @answer = !defined $packet ? () : $packet->answer;
+  my @answer;
+  @answer = $packet->answer  if $packet;
   my $j = 0;
   foreach my $rr (@answer) {
     $j++;
     my $str = $rr->string;
-    dbg("uridnsbl: got($j) A for $hname: $str");
+    if (!defined $hname) {
+      warn "complete_a_lookup-1: $j, (hname is undef), $str";
+    } elsif (!defined $str) {
+      warn "complete_a_lookup-2: $j, $hname, (str is undef)";
+      next;
+    }
+    dbg("uridnsbl: complete_a_lookup got(%d) A for %s: %s", $j,$hname,$str);
 
     local $1;
     if ($str =~ /IN\s+A\s+(\S+)/) {
@@ -1168,7 +1175,14 @@ sub completed_lookup_callback {
   my ($self, $scanner, $ent) = @_;
   my $type = $ent->{type};
   my $key = $ent->{key};
-  local $1; $key =~ /:(\S+?)$/; my $val = $1;
+  my $val = $key; $val =~ s/^[^:]*://s;
+
+  # key could be:  "A:link.software-dispa tch.intel.com"
+  #                "A:reba b324.storedrugs.ru"
+  #   <a href="http://Reba B324.storedrugs.ru/item/...>
+  #
+  dbg("uridnsbl: completed_lookup_callback type=%s, key=%s, val=%s",
+      $type, $key, $val);
 
   if ($type eq 'URI-NS') {
     $self->complete_ns_lookup ($scanner, $ent, $val);

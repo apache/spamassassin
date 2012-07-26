@@ -463,14 +463,17 @@ sub new_dns_packet {
     $packet = Net::DNS::Packet->new($host, $type, $class);
 
     # a bit noisy, so commented by default...
-    #dbg("dns: new DNS packet time=%s host=%s type=%s id=%s",
+    #dbg("dns: new DNS packet time=%.3f host=%s type=%s id=%s",
     #    time, $host, $type, $packet->id);
     1;
   } or do {
-    my $eval_stat = $@ ne '' ? $@ : "errno=$!";  chomp $eval_stat;
     # this can happen if Net::DNS isn't available -- but in this
     # case this function should never be called!
-    warn "dns: cannot create Net::DNS::Packet, but new_dns_packet() was called: $eval_stat";
+    # another possible failure reason: "unexpected null domain label"
+    my $eval_stat = $@ ne '' ? $@ : "errno=$!";  chomp $eval_stat;
+    warn sprintf("dns: new_dns_packet (host=%s type=%s class=%s id=%s): ".
+                 "cannot create Net::DNS::Packet: %s",
+                 $host, $type, $class, $packet->id, $eval_stat);
   };
 
   return $packet;
@@ -549,6 +552,7 @@ sub bgsend {
   $self->{send_timed_out} = 0;
 
   my $pkt = $self->new_dns_packet($host, $type, $class);
+  return if !$pkt;  # just bail out, new_dns_packet already reported a failure
 
   my @ns_addr_port = $self->available_nameservers();
   dbg("dns: bgsend, DNS servers: %s", join(', ',@ns_addr_port));
