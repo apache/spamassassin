@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-coi-bulk axb-fraud axb-generic axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus grenier; day 2: axb-coi-bulk axb-fraud axb-generic axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus llanga; day 3: axb-coi-bulk axb-fraud axb-generic axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus grenier llanga
+# with results from: day 1: axb-coi-bulk axb-fraud axb-generic axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus grenier; day 2: axb-coi-bulk axb-fraud axb-generic axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus grenier llanga; day 3: axb-coi-bulk axb-fraud axb-generic axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus llanga
 
 # good enough
 ACH_CANCELLED
@@ -417,9 +417,6 @@ FSL_MISSP_REPLYTO
 
 # good enough
 FSL_NEW_HELO_USER
-
-# good enough
-FSL_RCVD_USER
 
 # good enough
 FSL_UA
@@ -842,6 +839,9 @@ RISK_FREE
 SERGIO_SUBJECT_VIAGRA01
 
 # good enough
+SINGLE_HEADER_1K
+
+# good enough
 SPAMMY_XMAILER
 
 # tflags net
@@ -923,10 +923,10 @@ TVD_QUAL_MEDS
 TVD_RCVD_SINGLE
 
 # good enough
-OBFU_HTML_ATTACH
+DATE_IN_FUTURE_Q_PLUS
 
 # good enough
-SINGLE_HEADER_1K
+HK_SCAM_S25
 
 # tflags userconf
 UNPARSEABLE_RELAY
