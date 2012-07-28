@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-coi-bulk axb-fraud axb-generic axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus grenier; day 2: axb-coi-bulk axb-fraud axb-generic axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus grenier llanga; day 3: axb-coi-bulk axb-fraud axb-generic axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus llanga
+# with results from: day 1: axb-coi-bulk axb-fraud axb-generic axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus; day 2: axb-coi-bulk axb-fraud axb-generic axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus grenier llanga; day 3: axb-coi-bulk axb-fraud axb-generic axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus grenier llanga
 
 # good enough
 ACH_CANCELLED
@@ -54,9 +54,6 @@ ALL_TRUSTED
 
 # good enough
 AXB_HELO_HOME_UN
-
-# good enough
-AXB_SSCECCF
 
 # good enough
 AXB_XMAILER_MIMEOLE_OL_024C2
@@ -230,6 +227,9 @@ CORRUPT_FROM_LINE_IN_HDRS
 DATE_DOTS
 
 # good enough
+DATE_IN_FUTURE_Q_PLUS
+
+# good enough
 DEAR_BENEFICIARY
 
 # good enough
@@ -287,25 +287,16 @@ DOS_ANAL_SPAM_MAILER
 ENV_AND_HDR_SPF_MATCH
 
 # good enough
-FAKE_REPLY_C
-
-# good enough
 FB_ACHIEVE_BACH
 
 # good enough
 FB_CIALIS_LEO3
 
 # good enough
-FB_IMAGIRL
-
-# good enough
 FH_FAKE_RCVD_LINE
 
 # good enough
 FH_FAKE_RCVD_LINE_B
-
-# good enough
-FH_FROM_CASH
 
 # good enough
 FH_HELO_ALMOST_IP
@@ -485,9 +476,6 @@ HK_NAME_FROM
 HK_NAME_MR_MRS
 
 # good enough
-HK_RANDOM_REPLYTO
-
-# good enough
 HK_SCAM_N15
 
 # good enough
@@ -501,6 +489,9 @@ HK_SCAM_N8
 
 # good enough
 HK_SCAM_S15
+
+# good enough
+HK_SCAM_S25
 
 # good enough
 HK_SCAM_S7
@@ -923,10 +914,19 @@ TVD_QUAL_MEDS
 TVD_RCVD_SINGLE
 
 # good enough
-DATE_IN_FUTURE_Q_PLUS
+AXB_XMAILER_MIMEOLE_OL_BC7E6
 
 # good enough
-HK_SCAM_S25
+DATE_IN_FUTURE_96_Q
+
+# good enough
+FS_WE_WANT
+
+# good enough
+HK_RANDOM_FROM
+
+# good enough
+OBFU_HTML_ATTACH
 
 # tflags userconf
 UNPARSEABLE_RELAY
