@@ -473,7 +473,7 @@ sub new_dns_packet {
     my $eval_stat = $@ ne '' ? $@ : "errno=$!";  chomp $eval_stat;
     warn sprintf("dns: new_dns_packet (host=%s type=%s class=%s id=%s): ".
                  "cannot create Net::DNS::Packet: %s",
-                 $host, $type, $class, $packet->id, $eval_stat);
+                 $host, $type, $class, !$packet?'-':$packet->id, $eval_stat);
   };
 
   return $packet;
