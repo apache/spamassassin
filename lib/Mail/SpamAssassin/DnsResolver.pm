@@ -456,9 +456,21 @@ sub new_dns_packet {
       $type = 'PTR';
     }
   }
+  $type  = 'A'   if !defined $type;   # a Net::DNS::Packet default
+  $class = 'IN'  if !defined $class;  # a Net::DNS::Packet default
 
   my $packet;
   eval {
+    $host =~ s/\.*\z/./s;
+    if (length($host) > 255) {
+      die "domain name longer than 255 bytes\n";
+    } elsif ($host !~ /^ (?: [^.]{1,63} \. )+ \z/sx) {
+      if ($host !~ /^ (?: [^.]+ \. )+ \z/sx) {
+        die "a domain name contains a null label\n";
+      } else {
+        die "a label in a domain name is longer than 63 bytes\n";
+      }
+    }
     $host = dnsext_dns0x20($host)  if $self->{conf}->{dns_options}->{dns0x20};
     $packet = Net::DNS::Packet->new($host, $type, $class);
 
@@ -471,9 +483,8 @@ sub new_dns_packet {
     # case this function should never be called!
     # another possible failure reason: "unexpected null domain label"
     my $eval_stat = $@ ne '' ? $@ : "errno=$!";  chomp $eval_stat;
-    warn sprintf("dns: new_dns_packet (host=%s type=%s class=%s id=%s): ".
-                 "cannot create Net::DNS::Packet: %s",
-                 $host, $type, $class, !$packet?'-':$packet->id, $eval_stat);
+    warn sprintf("dns: new_dns_packet (host=%s type=%s class=%s) failed: %s\n",
+                 $host, $type, $class, $eval_stat);
   };
 
   return $packet;
