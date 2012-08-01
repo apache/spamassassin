@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-coi-bulk axb-fraud axb-generic axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus; day 2: axb-coi-bulk axb-fraud axb-generic axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus grenier llanga; day 3: axb-coi-bulk axb-fraud axb-generic axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus grenier llanga
+# with results from: day 1: axb-fraud axb-generic axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm danmcdonald darxus grenier; day 2: axb-fraud axb-generic axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus grenier llanga; day 3: axb-coi-bulk axb-fraud axb-generic axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus grenier llanga
 
 # good enough
 ACH_CANCELLED
@@ -53,13 +53,7 @@ ADVANCE_FEE_5_NEW_MONEY
 ALL_TRUSTED
 
 # good enough
-AXB_HELO_HOME_UN
-
-# good enough
 AXB_XMAILER_MIMEOLE_OL_024C2
-
-# good enough
-AXB_XMAILER_MIMEOLE_OL_07794
 
 # good enough
 AXB_XMAILER_MIMEOLE_OL_1ECD5
@@ -68,31 +62,10 @@ AXB_XMAILER_MIMEOLE_OL_1ECD5
 AXB_XMAILER_MIMEOLE_OL_22B61
 
 # good enough
-AXB_XMAILER_MIMEOLE_OL_2535D
-
-# good enough
-AXB_XMAILER_MIMEOLE_OL_2E645
-
-# good enough
-AXB_XMAILER_MIMEOLE_OL_35FFA
-
-# good enough
-AXB_XMAILER_MIMEOLE_OL_3857F
-
-# good enough
 AXB_XMAILER_MIMEOLE_OL_3AC1D
 
 # good enough
 AXB_XMAILER_MIMEOLE_OL_4379D
-
-# good enough
-AXB_XMAILER_MIMEOLE_OL_47200
-
-# good enough
-AXB_XMAILER_MIMEOLE_OL_4F240
-
-# good enough
-AXB_XMAILER_MIMEOLE_OL_58CB5
 
 # good enough
 AXB_XMAILER_MIMEOLE_OL_616F8
@@ -101,28 +74,10 @@ AXB_XMAILER_MIMEOLE_OL_616F8
 AXB_XMAILER_MIMEOLE_OL_62CA2
 
 # good enough
-AXB_XMAILER_MIMEOLE_OL_6554A
-
-# good enough
-AXB_XMAILER_MIMEOLE_OL_787D6
-
-# good enough
-AXB_XMAILER_MIMEOLE_OL_79A9A
-
-# good enough
 AXB_XMAILER_MIMEOLE_OL_7EB15
 
 # good enough
-AXB_XMAILER_MIMEOLE_OL_812FF
-
-# good enough
 AXB_XMAILER_MIMEOLE_OL_8627E
-
-# good enough
-AXB_XMAILER_MIMEOLE_OL_8B970
-
-# good enough
-AXB_XMAILER_MIMEOLE_OL_964DE
 
 # good enough
 AXB_XMAILER_MIMEOLE_OL_A275F
@@ -134,49 +89,19 @@ AXB_XMAILER_MIMEOLE_OL_A6545
 AXB_XMAILER_MIMEOLE_OL_A7B9C
 
 # good enough
-AXB_XMAILER_MIMEOLE_OL_ADFF7
-
-# good enough
 AXB_XMAILER_MIMEOLE_OL_B292B
-
-# good enough
-AXB_XMAILER_MIMEOLE_OL_B30D1
 
 # good enough
 AXB_XMAILER_MIMEOLE_OL_C485C
 
 # good enough
-AXB_XMAILER_MIMEOLE_OL_C65FA
-
-# good enough
-AXB_XMAILER_MIMEOLE_OL_C95DC
-
-# good enough
-AXB_XMAILER_MIMEOLE_OL_C9CC0
-
-# good enough
-AXB_XMAILER_MIMEOLE_OL_CC6B7
-
-# good enough
-AXB_XMAILER_MIMEOLE_OL_CF0C0
-
-# good enough
-AXB_XMAILER_MIMEOLE_OL_F3B05
-
-# good enough
 AXB_XMAILER_MIMEOLE_OL_FB17C
-
-# good enough
-AXB_XMA_BASP
 
 # good enough
 AXB_XM_RAINBOW
 
 # good enough
 AXB_XRCVD_EYOU_SEND
-
-# good enough
-AXB_X_AOL_SEZ_S
 
 # good enough
 AXB_X_RCV_WLOCAL
@@ -214,23 +139,20 @@ CHARSET_FARAWAY
 # tflags userconf
 CHARSET_FARAWAY_HEADER
 
-# good enough
-CK_HELO_DYNAMIC_SPLIT_IP
-
-# good enough
-CK_HELO_GENERIC
-
 # tflags 
 CORRUPT_FROM_LINE_IN_HDRS
+
+# good enough
+CURR_PRICE
 
 # good enough
 DATE_DOTS
 
 # good enough
-DATE_IN_FUTURE_Q_PLUS
+DEAR_BENEFICIARY
 
 # good enough
-DEAR_BENEFICIARY
+DEAR_WINNER
 
 # good enough
 DECEASED_NO_ML
@@ -283,14 +205,14 @@ DNS_FROM_RFC_DSN
 # tflags 
 DOS_ANAL_SPAM_MAILER
 
+# good enough
+DOS_RCVD_IP_TWICE_C
+
 # tflags userconf
 ENV_AND_HDR_SPF_MATCH
 
 # good enough
-FB_ACHIEVE_BACH
-
-# good enough
-FB_CIALIS_LEO3
+FAKE_REPLY_C
 
 # good enough
 FH_FAKE_RCVD_LINE
@@ -299,10 +221,7 @@ FH_FAKE_RCVD_LINE
 FH_FAKE_RCVD_LINE_B
 
 # good enough
-FH_HELO_ALMOST_IP
-
-# good enough
-FH_MSGID_XXX
+FH_FROM_CASH
 
 # tflags 
 FILL_THIS_FORM
@@ -321,9 +240,6 @@ FM_LOTTO_MONEY
 
 # good enough
 FM_LOTTO_YOU_WON
-
-# good enough
-FM_SCHOOLING
 
 # good enough
 FM_SCHOOL_DIPLOMA
@@ -380,22 +296,7 @@ FROM_MISSP_URI
 FROM_MISSP_USER
 
 # good enough
-FROM_UNBAL1
-
-# good enough
-FRT_ROLEX
-
-# good enough
-FR_TITLE_CONS_6
-
-# good enough
-FSL_BOTSPAM_1
-
-# good enough
 FSL_CTYPE_WIN1251
-
-# good enough
-FSL_HELO_BARE_IP_2
 
 # good enough
 FSL_HELO_DEVICE
@@ -416,10 +317,7 @@ FSL_UA
 FSL_XM_419
 
 # good enough
-FS_GIFT_CARD_OFF
-
-# good enough
-FS_WEIGHT_LOSS
+FS_LARGE_PERCENT2
 
 # good enough
 FS_WILL_HELP
@@ -470,9 +368,6 @@ HK_LOTTO_NAME
 HK_NAME_FM_MR_MRS
 
 # good enough
-HK_NAME_FROM
-
-# good enough
 HK_NAME_MR_MRS
 
 # good enough
@@ -512,13 +407,7 @@ KB_FAKED_THE_BAT
 KB_FORGED_MOZ4
 
 # good enough
-KB_RATWARE_MSGID
-
-# good enough
-KB_RATWARE_OUTLOOK_MID
-
-# good enough
-LIVEFILESTORE
+LONG_TERM_PRICE
 
 # tflags 
 LOTS_OF_MONEY
@@ -571,9 +460,6 @@ MONEY_FROM_MISSP
 # good enough
 MSOE_MID_WRONG_CASE
 
-# good enough
-NAME_EMAIL_DIFF
-
 # tflags net
 NO_DNS_FOR_FROM
 
@@ -588,9 +474,6 @@ NSL_RCVD_FROM_USER
 
 # good enough
 NSL_RCVD_HELO_USER
-
-# good enough
-OBFU_ATTACH_MISSP
 
 # tflags 
 OBFU_JVSCR_ESC
@@ -827,7 +710,7 @@ RCVD_IN_XBL
 RISK_FREE
 
 # good enough
-SERGIO_SUBJECT_VIAGRA01
+SHORT_TERM_PRICE
 
 # good enough
 SINGLE_HEADER_1K
@@ -872,13 +755,7 @@ SUBJECT_IN_BLACKLIST
 SUBJECT_IN_WHITELIST
 
 # good enough
-SUBJ_OBFU_PUNCT_MANY
-
-# good enough
 TAB_IN_FROM
-
-# good enough
-TO_EQ_FM_DOM_HTML_IMG
 
 # tflags net
 TO_EQ_FM_DOM_SPF_FAIL
@@ -887,43 +764,34 @@ TO_EQ_FM_DOM_SPF_FAIL
 TO_EQ_FM_SPF_FAIL
 
 # good enough
-TO_NO_BRKTS_DIRECT
-
-# good enough
 TO_NO_BRKTS_FROM_MSSP
 
 # good enough
 TT_MSGID_TRUNC
 
 # good enough
-TVD_PH_1
-
-# good enough
-TVD_PH_7
-
-# good enough
 TVD_PH_BODY_META
 
 # good enough
-TVD_PH_REC
+AXB_XMAILER_MIMEOLE_OL_12495
 
 # good enough
-TVD_QUAL_MEDS
+AXB_XMAILER_MIMEOLE_OL_F5C60
 
 # good enough
-TVD_RCVD_SINGLE
+DEAR_NOBODY
 
 # good enough
-AXB_XMAILER_MIMEOLE_OL_BC7E6
+FILL_THIS_FORM_SHORT
 
 # good enough
-DATE_IN_FUTURE_96_Q
+FREEMAIL_RVW_ATTCH
 
 # good enough
-FS_WE_WANT
+HK_RANDOM_REPLYTO
 
 # good enough
-HK_RANDOM_FROM
+MANY_HDRS_LCASE
 
 # tflags userconf
 UNPARSEABLE_RELAY
@@ -979,12 +847,6 @@ URIBL_WS_SURBL
 # tflags userconf
 URI_NOVOWEL
 
-# good enough
-URI_OBFU_DOM
-
-# good enough
-URI_OBFU_TLD
-
 # tflags userconf
 USER_IN_ALL_SPAM_TO
 
@@ -1017,9 +879,6 @@ USER_IN_WHITELIST
 
 # tflags userconf
 USER_IN_WHITELIST_TO
-
-# good enough
-XM_PHPMAILER_FORGED
 
 # tflags net
 __DKIMDOMAIN_IN_DWL_ANY
