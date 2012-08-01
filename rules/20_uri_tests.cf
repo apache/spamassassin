@@ -96,7 +96,7 @@ describe SPOOF_COM2COM 	URI contains ".com" in middle and end
 uri SPOOF_NET2COM	m{^https?://(?:\w+\.)+?(?:net|org)\.(?!(?:[a-z]{2}\.)?s3\.amazonaws\.com)(?:\w+\.)+?com\b}i
 describe SPOOF_NET2COM 	URI contains ".net" or ".org", then ".com"
 
-uri URI_HEX		m%^https?://[^/?]*\b[0-9a-f]{6,}\b%i
+uri URI_HEX		m%^https?://[^/?]*\b(?![0-9a-f]{0,12}[a-f]{3})[0-9a-f]{6,}\b%i
 describe URI_HEX	URI hostname has long hexadecimal sequence
 
 uri URI_NOVOWEL		m%^https?://[^/?]*[bcdfgjklmnpqrstvwxz]{7}%i
