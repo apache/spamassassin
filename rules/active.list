@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-fraud axb-generic axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm danmcdonald darxus grenier; day 2: axb-fraud axb-generic axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus grenier llanga; day 3: axb-coi-bulk axb-fraud axb-generic axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus grenier llanga
+# with results from: day 1: axb-fraud axb-generic axb-sa-users axb-sonic axb-woas bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus grenier; day 2: axb-fraud axb-generic axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus grenier llanga; day 3: axb-fraud axb-generic axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus grenier llanga
 
 # good enough
 ACH_CANCELLED
@@ -56,6 +56,9 @@ ALL_TRUSTED
 AXB_XMAILER_MIMEOLE_OL_024C2
 
 # good enough
+AXB_XMAILER_MIMEOLE_OL_12495
+
+# good enough
 AXB_XMAILER_MIMEOLE_OL_1ECD5
 
 # good enough
@@ -93,6 +96,9 @@ AXB_XMAILER_MIMEOLE_OL_B292B
 
 # good enough
 AXB_XMAILER_MIMEOLE_OL_C485C
+
+# good enough
+AXB_XMAILER_MIMEOLE_OL_F5C60
 
 # good enough
 AXB_XMAILER_MIMEOLE_OL_FB17C
@@ -150,6 +156,9 @@ DATE_DOTS
 
 # good enough
 DEAR_BENEFICIARY
+
+# good enough
+DEAR_NOBODY
 
 # good enough
 DEAR_WINNER
@@ -236,13 +245,13 @@ FILL_THIS_FORM_LOAN
 FILL_THIS_FORM_LONG
 
 # good enough
+FILL_THIS_FORM_SHORT
+
+# good enough
 FM_LOTTO_MONEY
 
 # good enough
 FM_LOTTO_YOU_WON
-
-# good enough
-FM_SCHOOL_DIPLOMA
 
 # tflags 
 FORM_FRAUD_3
@@ -252,6 +261,9 @@ FORM_FRAUD_5
 
 # tflags userconf
 FRAGMENTED_MESSAGE
+
+# good enough
+FREEMAIL_RVW_ATTCH
 
 # good enough
 FROM_12LTRDOM
@@ -371,6 +383,9 @@ HK_NAME_FM_MR_MRS
 HK_NAME_MR_MRS
 
 # good enough
+HK_RANDOM_REPLYTO
+
+# good enough
 HK_SCAM_N15
 
 # good enough
@@ -420,6 +435,9 @@ LOTTO_AGENT
 
 # good enough
 LOTTO_DEPT
+
+# good enough
+MANY_HDRS_LCASE
 
 # tflags 
 MANY_SPAN_IN_TEXT
@@ -773,25 +791,25 @@ TT_MSGID_TRUNC
 TVD_PH_BODY_META
 
 # good enough
-AXB_XMAILER_MIMEOLE_OL_12495
+TVD_RCVD_SPACE_BRACKET
 
 # good enough
-AXB_XMAILER_MIMEOLE_OL_F5C60
+AXB_XMAILER_MIMEOLE_OL_5A17A
 
 # good enough
-DEAR_NOBODY
+DATE_IN_FUTURE_96_Q
 
 # good enough
-FILL_THIS_FORM_SHORT
+DATE_IN_FUTURE_Q_PLUS
 
 # good enough
-FREEMAIL_RVW_ATTCH
+FS_WE_WANT
 
 # good enough
-HK_RANDOM_REPLYTO
+HK_NAME_FROM
 
 # good enough
-MANY_HDRS_LCASE
+XM_PHPMAILER_FORGED
 
 # tflags userconf
 UNPARSEABLE_RELAY
