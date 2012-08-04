@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-fraud axb-generic axb-sa-users axb-woas bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus grenier; day 2: axb-fraud axb-generic axb-sa-users axb-sonic axb-woas bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus grenier llanga; day 3: axb-fraud axb-generic axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus grenier llanga
+# with results from: day 1: axb-fraud axb-generic axb-sa-users axb-woas bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus grenier; day 2: axb-fraud axb-generic axb-sa-users axb-woas bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus grenier llanga; day 3: axb-fraud axb-generic axb-sa-users axb-sonic axb-woas bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus grenier llanga
 
 # good enough
 ACH_CANCELLED
@@ -63,6 +63,9 @@ AXB_XMAILER_MIMEOLE_OL_22B61
 
 # good enough
 AXB_XMAILER_MIMEOLE_OL_3AC1D
+
+# good enough
+AXB_XMAILER_MIMEOLE_OL_5DFA0
 
 # good enough
 AXB_XMAILER_MIMEOLE_OL_62CA2
@@ -203,9 +206,6 @@ DNS_FROM_RFC_DSN
 DOS_ANAL_SPAM_MAILER
 
 # good enough
-DOS_OE_TO_MX
-
-# good enough
 DOS_RCVD_IP_TWICE_C
 
 # tflags userconf
@@ -311,6 +311,12 @@ FRT_ROLEX
 FSL_CTYPE_WIN1251
 
 # good enough
+FSL_FREEMAIL_1
+
+# good enough
+FSL_FREEMAIL_2
+
+# good enough
 FSL_HELO_DEVICE
 
 # good enough
@@ -321,6 +327,9 @@ FSL_MISSP_REPLYTO
 
 # good enough
 FSL_NEW_HELO_USER
+
+# good enough
+FSL_RCVD_USER
 
 # good enough
 FSL_UA
@@ -377,6 +386,9 @@ HK_LOTTO
 HK_LOTTO_NAME
 
 # good enough
+HK_NAME_FM_FROM
+
+# good enough
 HK_NAME_FM_MR_MRS
 
 # good enough
@@ -389,7 +401,13 @@ HK_NAME_MR_MRS
 HK_RANDOM_REPLYTO
 
 # good enough
+HK_SCAM_N1
+
+# good enough
 HK_SCAM_N15
+
+# good enough
+HK_SCAM_N16
 
 # good enough
 HK_SCAM_N2
@@ -401,13 +419,22 @@ HK_SCAM_N3
 HK_SCAM_N8
 
 # good enough
+HK_SCAM_S1
+
+# good enough
 HK_SCAM_S15
 
 # good enough
 HK_SCAM_S25
 
 # good enough
+HK_SCAM_S3
+
+# good enough
 HK_SCAM_S7
+
+# good enough
+HK_SPAMMY_FILENAME
 
 # tflags userconf
 HTML_CHARSET_FARAWAY
@@ -425,6 +452,9 @@ KB_FAKED_THE_BAT
 KB_FORGED_MOZ4
 
 # good enough
+KHOP_JS_OBFUSCATION
+
+# good enough
 LONG_TERM_PRICE
 
 # tflags 
@@ -437,10 +467,10 @@ LOTTERY_PH_004470
 LOTTO_AGENT
 
 # good enough
-LOTTO_DEPT
+LOTTO_AGENT_RPLY
 
 # good enough
-MANY_HDRS_LCASE
+LOTTO_DEPT
 
 # tflags 
 MANY_SPAN_IN_TEXT
@@ -474,6 +504,12 @@ MONEY_FROM_41
 
 # good enough
 MONEY_FROM_MISSP
+
+# good enough
+MONEY_PERCENT
+
+# good enough
+MSGID_WSP_TRAIL
 
 # good enough
 MSOE_MID_WRONG_CASE
@@ -788,49 +824,10 @@ TVD_APPROVED
 TVD_PH_BODY_META
 
 # good enough
-AXB_XMAILER_MIMEOLE_OL_5DFA0
+DATE_IN_FUTURE_Q_PLUS
 
 # good enough
-AXB_XMAILER_MIMEOLE_OL_992A3
-
-# good enough
-FSL_FREEMAIL_1
-
-# good enough
-FSL_FREEMAIL_2
-
-# good enough
-FSL_RCVD_USER
-
-# good enough
-HK_NAME_FM_FROM
-
-# good enough
-HK_SCAM_N1
-
-# good enough
-HK_SCAM_N16
-
-# good enough
-HK_SCAM_S1
-
-# good enough
-HK_SCAM_S3
-
-# good enough
-HK_SPAMMY_FILENAME
-
-# good enough
-KHOP_JS_OBFUSCATION
-
-# good enough
-LOTTO_AGENT_RPLY
-
-# good enough
-MONEY_PERCENT
-
-# good enough
-MSGID_WSP_TRAIL
+FS_WE_WANT
 
 # tflags userconf
 UNPARSEABLE_RELAY
