@@ -140,6 +140,7 @@ foreach(qw/
   ac.cn ah.cn bj.cn com.cn cq.cn edu.cn fj.cn gd.cn gov.cn gs.cn gx.cn gz.cn ha.cn hb.cn he.cn hi.cn hk.cn hl.cn hn.cn jl.cn js.cn jx.cn ln.cn mo.cn net.cn nm.cn nx.cn org.cn qh.cn sc.cn sd.cn sh.cn sn.cn sx.cn tj.cn tw.cn xj.cn xz.cn yn.cn zj.cn
   arts.co com.co edu.co firm.co gov.co info.co int.co mil.co net.co nom.co org.co rec.co web.co
   lkd.co.im ltd.co.im plc.co.im
+  co.cm com.cm net.cm
   au.com br.com cn.com de.com eu.com gb.com hu.com no.com qc.com ru.com sa.com se.com uk.com us.com uy.com za.com
   ac.cr co.cr ed.cr fi.cr go.cr or.cr sa.cr
   com.cu edu.cu gov.cu inf.cu net.cu org.cu
