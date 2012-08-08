@@ -209,7 +209,7 @@ foreach my $plistkey (sort keys %{$plist->[1]}) {
   if ($tfs) {
     next if ($tfs =~ /\bnopublish\b/);
 
-    if ($tfs =~ /\bpublish\b/) {
+    if ($tfs =~ /\b(publish)\b/) {
       if (defined $1) {
         $notes = "tflags ".$1;
       } else {
