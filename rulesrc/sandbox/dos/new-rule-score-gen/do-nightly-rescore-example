@@ -22,11 +22,14 @@ set -e
 rm -rf scores scores-set0 scores-set1 scores-set2 scores-set3 stats-set0 stats-set1 stats-set2 stats-set3 trunk-rulesrc-scores
 svn up
 
+#ON 1st day of the week, THIS RUNS 0 first and then 1.  1 would be the net tests.
 if [ `date +%w` -eq 0 ]; then
+  echo 'Beginning of Week.  Running with 0 first.'
   ./generate-new-scores 0
   ./generate-new-scores 1
   REVISION=`grep "revision .*" scores-set1 | cut -d" " -f9`
 else
+  echo 'Not Beginning of Week.  Running with 1 first.'
   ./generate-new-scores 1
   ./generate-new-scores 0
   REVISION=`grep "revision .*" scores-set0 | cut -d" " -f9`

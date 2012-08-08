@@ -101,6 +101,10 @@ if [ "$REVISION" == "" ]; then
   exit 1
 fi
 
+# DEBUG
+#echo "test"
+#exit 1
+
 for FILE in `find corpus/usable-corpus-set$SCORESET -type f`;
 do
   echo "Checking $FILE for SVN $REVISION..."
