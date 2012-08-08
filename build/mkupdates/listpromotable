@@ -210,7 +210,12 @@ foreach my $plistkey (sort keys %{$plist->[1]}) {
     next if ($tfs =~ /\bnopublish\b/);
 
     if ($tfs =~ /\bpublish\b/) {
-      $notes = "tflags ".$1;
+      if (defined $1) {
+        $notes = "tflags ".$1;
+      } else {
+        #BUG 6820: What's this supposed to do because I don't see a possibility that $1 is set
+        print "DEBUG: \$1 isn't defined - $tfs\n";
+      }
       goto publish;
     }
   }
