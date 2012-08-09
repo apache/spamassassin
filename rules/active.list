@@ -1,31 +1,31 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-coi-bulk axb-fraud axb-generic axb-sa-users axb-woas bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus grenier; day 2: axb-coi-bulk axb-fraud axb-generic axb-sa-users axb-woas bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus grenier llanga; day 3: axb-coi-bulk axb-fraud axb-generic axb-sa-users axb-woas bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus grenier llanga
+# with results from: day 1: axb-coi-bulk axb-fraud axb-generic axb-sa-users axb-woas bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus grenier jarif; day 2: axb-coi-bulk axb-fraud axb-generic axb-sa-users axb-woas bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus grenier llanga; day 3: axb-coi-bulk axb-fraud axb-generic axb-sa-users axb-woas bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus grenier llanga
 
 # good enough
 ACH_CANCELLED
 
-# tflags 
+# tflags publish
 ADVANCE_FEE_2_NEW_FORM
 
 # good enough
 ADVANCE_FEE_2_NEW_FRM_MNY
 
-# tflags 
+# tflags publish
 ADVANCE_FEE_2_NEW_MONEY
 
-# tflags 
+# tflags publish
 ADVANCE_FEE_3_NEW
 
-# tflags 
+# tflags publish
 ADVANCE_FEE_3_NEW_FORM
 
 # good enough
 ADVANCE_FEE_3_NEW_FRM_MNY
 
-# tflags 
+# tflags publish
 ADVANCE_FEE_3_NEW_MONEY
 
-# tflags 
+# tflags publish
 ADVANCE_FEE_4_NEW
 
 # good enough
@@ -53,7 +53,13 @@ ADVANCE_FEE_5_NEW_MONEY
 ALL_TRUSTED
 
 # good enough
+AXB_SSCECCF
+
+# good enough
 AXB_XMAILER_MIMEOLE_OL_024C2
+
+# good enough
+AXB_XMAILER_MIMEOLE_OL_12495
 
 # good enough
 AXB_XMAILER_MIMEOLE_OL_1ECD5
@@ -62,16 +68,31 @@ AXB_XMAILER_MIMEOLE_OL_1ECD5
 AXB_XMAILER_MIMEOLE_OL_22B61
 
 # good enough
+AXB_XMAILER_MIMEOLE_OL_2E645
+
+# good enough
 AXB_XMAILER_MIMEOLE_OL_3AC1D
 
 # good enough
 AXB_XMAILER_MIMEOLE_OL_62CA2
 
 # good enough
+AXB_XMAILER_MIMEOLE_OL_6554A
+
+# good enough
+AXB_XMAILER_MIMEOLE_OL_787D6
+
+# good enough
+AXB_XMAILER_MIMEOLE_OL_79A9A
+
+# good enough
 AXB_XMAILER_MIMEOLE_OL_7EB15
 
 # good enough
 AXB_XMAILER_MIMEOLE_OL_8627E
+
+# good enough
+AXB_XMAILER_MIMEOLE_OL_964DE
 
 # good enough
 AXB_XMAILER_MIMEOLE_OL_A275F
@@ -83,10 +104,19 @@ AXB_XMAILER_MIMEOLE_OL_A7B9C
 AXB_XMAILER_MIMEOLE_OL_B292B
 
 # good enough
+AXB_XMAILER_MIMEOLE_OL_C95DC
+
+# good enough
+AXB_XMAILER_MIMEOLE_OL_C9CC0
+
+# good enough
 AXB_XMAILER_MIMEOLE_OL_F5C60
 
 # good enough
 AXB_XMAILER_MIMEOLE_OL_FB17C
+
+# good enough
+AXB_XMA_BASP
 
 # good enough
 AXB_XM_RAINBOW
@@ -130,7 +160,7 @@ CHARSET_FARAWAY
 # tflags userconf
 CHARSET_FARAWAY_HEADER
 
-# tflags 
+# tflags publish
 CORRUPT_FROM_LINE_IN_HDRS
 
 # good enough
@@ -196,7 +226,7 @@ DNS_FROM_RFC_BOGUSMX
 # tflags net
 DNS_FROM_RFC_DSN
 
-# tflags 
+# tflags publish
 DOS_ANAL_SPAM_MAILER
 
 # good enough
@@ -210,6 +240,9 @@ FAKE_REPLY_C
 
 # good enough
 FB_CIALIS_LEO3
+
+# good enough
+FB_IMAGIRL
 
 # good enough
 FH_FAKE_RCVD_LINE
@@ -226,7 +259,7 @@ FH_FROM_GET_NAME
 # good enough
 FH_HOST_EQ_PACBELL_D
 
-# tflags 
+# tflags publish
 FILL_THIS_FORM
 
 # good enough
@@ -244,10 +277,10 @@ FM_LOTTO_MONEY
 # good enough
 FM_LOTTO_YOU_WON
 
-# tflags 
+# tflags publish
 FORM_FRAUD_3
 
-# tflags 
+# tflags publish
 FORM_FRAUD_5
 
 # tflags userconf
@@ -259,7 +292,7 @@ FROM_12LTRDOM
 # tflags userconf
 FROM_DOMAIN_NOVOWEL
 
-# tflags 
+# tflags publish
 FROM_IN_TO_AND_SUBJ
 
 # tflags userconf
@@ -329,9 +362,6 @@ FSL_UA
 FSL_XM_419
 
 # good enough
-FS_LARGE_PERCENT2
-
-# good enough
 FS_WE_WANT
 
 # good enough
@@ -395,6 +425,9 @@ HK_NAME_MR_MRS
 HK_RANDOM_REPLYTO
 
 # good enough
+HK_RANDOM_REPLYTO_NAME
+
+# good enough
 HK_SCAM_N1
 
 # good enough
@@ -445,7 +478,7 @@ KHOP_JS_OBFUSCATION
 # good enough
 LONG_TERM_PRICE
 
-# tflags 
+# tflags publish
 LOTS_OF_MONEY
 
 # good enough
@@ -460,7 +493,10 @@ LOTTO_AGENT_RPLY
 # good enough
 LOTTO_DEPT
 
-# tflags 
+# good enough
+MANY_HDRS_LCASE
+
+# tflags publish
 MANY_SPAN_IN_TEXT
 
 # tflags userconf
@@ -478,13 +514,13 @@ MONEY_FORM
 # good enough
 MONEY_FORM_SHORT
 
-# tflags 
+# tflags publish
 MONEY_FRAUD_3
 
-# tflags 
+# tflags publish
 MONEY_FRAUD_5
 
-# tflags 
+# tflags publish
 MONEY_FRAUD_8
 
 # good enough
@@ -498,6 +534,9 @@ MSGID_WSP_TRAIL
 
 # good enough
 MSOE_MID_WRONG_CASE
+
+# good enough
+NAME_EMAIL_DIFF
 
 # tflags net
 NO_DNS_FOR_FROM
@@ -514,10 +553,13 @@ NSL_RCVD_FROM_USER
 # good enough
 NSL_RCVD_HELO_USER
 
-# tflags 
+# good enough
+OBFU_ATTACH_MISSP
+
+# tflags publish
 OBFU_JVSCR_ESC
 
-# tflags 
+# tflags publish
 OBFU_TEXT_ATTACH
 
 # tflags net
@@ -749,6 +791,9 @@ RCVD_IN_XBL
 RISK_FREE
 
 # good enough
+SERGIO_SUBJECT_VIAGRA01
+
+# good enough
 SHORT_TERM_PRICE
 
 # good enough
@@ -809,6 +854,12 @@ TT_MSGID_TRUNC
 TVD_APPROVED
 
 # good enough
+TVD_PH_1
+
+# good enough
+TVD_PH_7
+
+# good enough
 TVD_PH_BODY_ACCOUNTS_PRE
 
 # good enough
@@ -818,70 +869,28 @@ TVD_PH_BODY_META
 TVD_PH_REC
 
 # good enough
+TVD_PH_SUBJ_META1
+
+# good enough
 TVD_QUAL_MEDS
 
 # good enough
-AXB_SSCECCF
+AXB_BODYMAIL_SBL112884
 
 # good enough
-AXB_XMAILER_MIMEOLE_OL_12495
+DEAR_NOBODY
 
 # good enough
-AXB_XMAILER_MIMEOLE_OL_2E645
+FB_ACHIEVE_BACH
 
 # good enough
-AXB_XMAILER_MIMEOLE_OL_6554A
+FREEMAIL_RVW_ATTCH
 
 # good enough
-AXB_XMAILER_MIMEOLE_OL_787D6
+FSL_BOTSPAM_1
 
 # good enough
-AXB_XMAILER_MIMEOLE_OL_79A9A
-
-# good enough
-AXB_XMAILER_MIMEOLE_OL_964DE
-
-# good enough
-AXB_XMAILER_MIMEOLE_OL_C95DC
-
-# good enough
-AXB_XMAILER_MIMEOLE_OL_C9CC0
-
-# good enough
-AXB_XMA_BASP
-
-# good enough
-FB_IMAGIRL
-
-# good enough
-HK_RANDOM_REPLYTO_NAME
-
-# good enough
-MANY_HDRS_LCASE
-
-# good enough
-NAME_EMAIL_DIFF
-
-# good enough
-OBFU_ATTACH_MISSP
-
-# good enough
-OBFU_HTML_ATTACH
-
-# good enough
-SERGIO_SUBJECT_VIAGRA01
-
-# good enough
-TVD_PH_1
-
-# good enough
-TVD_PH_7
-
-# good enough
-TVD_PH_BODY_META_ALL
-
-# good enough
-TVD_PH_SUBJ_META1
+HK_SPAMMY_FILENAME
 
 # tflags userconf
 UNPARSEABLE_RELAY
