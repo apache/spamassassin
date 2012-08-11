@@ -223,7 +223,7 @@ foreach(qw/
   com.nc net.nc org.nc
   de.net gb.net uk.net
   ac.ng com.ng edu.ng gov.ng net.ng org.ng sch.ng
-  com.ni edu.ni gob.ni net.ni nom.ni org.ni
+  ac.ni biz.ni com.ni edu.ni gob.ni in.ni info.ni int.ni mil.ni net.ni nom.ni org.ni web.ni
   fhs.no folkebibl.no fylkesbibl.no herad.no idrett.no kommune.no mil.no museum.no priv.no stat.no tel.no vgs.no
   com.np edu.np gov.np mil.np net.np org.np
   biz.nr co.nr com.nr edu.nr fax.nr gov.nr info.nr mob.nr mobil.nr mobile.nr net.nr org.nr tel.nr tlf.nr
