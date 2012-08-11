@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-brasil axb-coi-bulk axb-fraud axb-generic axb-sa-users axb-woas bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus grenier vk5ztv; day 2: axb-coi-bulk axb-fraud axb-generic axb-sa-users axb-woas bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus grenier jarif llanga; day 3: axb-coi-bulk axb-fraud axb-generic axb-sa-users axb-woas bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus grenier llanga
+# with results from: day 1: axb-brasil axb-coi-bulk axb-fraud axb-generic axb-sa-users axb-woas bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus dlemke-spam grenier jarif; day 2: axb-brasil axb-coi-bulk axb-fraud axb-generic axb-sa-users axb-woas bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus grenier llanga vk5ztv; day 3: axb-coi-bulk axb-fraud axb-generic axb-sa-users axb-woas bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus grenier jarif llanga
 
 # good enough
 ACH_CANCELLED
@@ -177,6 +177,9 @@ DATE_IN_FUTURE_Q_PLUS
 
 # good enough
 DEAR_BENEFICIARY
+
+# good enough
+DEAR_NOBODY
 
 # good enough
 DEAR_WINNER
@@ -803,9 +806,6 @@ SERGIO_SUBJECT_VIAGRA01
 SHORT_TERM_PRICE
 
 # good enough
-SINGLE_HEADER_1K
-
-# good enough
 SPAMMY_XMAILER
 
 # tflags net
@@ -860,9 +860,6 @@ TT_MSGID_TRUNC
 TVD_APPROVED
 
 # good enough
-TVD_PH_1
-
-# good enough
 TVD_PH_BODY_META
 
 # good enough
@@ -872,13 +869,151 @@ TVD_PH_REC
 TVD_QUAL_MEDS
 
 # good enough
+TVD_RCVD_SPACE_BRACKET
+
+# good enough
+AXB_XMAILER_MIMEOLE_OL_07794
+
+# good enough
+AXB_XMAILER_MIMEOLE_OL_0A08A
+
+# good enough
+AXB_XMAILER_MIMEOLE_OL_326A6
+
+# good enough
+AXB_XMAILER_MIMEOLE_OL_32D97
+
+# good enough
+AXB_XMAILER_MIMEOLE_OL_35FFA
+
+# good enough
+AXB_XMAILER_MIMEOLE_OL_37431
+
+# good enough
+AXB_XMAILER_MIMEOLE_OL_3857F
+
+# good enough
+AXB_XMAILER_MIMEOLE_OL_4204A
+
+# good enough
+AXB_XMAILER_MIMEOLE_OL_448E3
+
+# good enough
+AXB_XMAILER_MIMEOLE_OL_44FE0
+
+# good enough
+AXB_XMAILER_MIMEOLE_OL_4BF4C
+
+# good enough
+AXB_XMAILER_MIMEOLE_OL_4CBE5
+
+# good enough
+AXB_XMAILER_MIMEOLE_OL_4EEDB
+
+# good enough
+AXB_XMAILER_MIMEOLE_OL_4F240
+
+# good enough
+AXB_XMAILER_MIMEOLE_OL_56DF6
+
+# good enough
+AXB_XMAILER_MIMEOLE_OL_57545
+
+# good enough
+AXB_XMAILER_MIMEOLE_OL_58CB5
+
+# good enough
+AXB_XMAILER_MIMEOLE_OL_5933D
+
+# good enough
+AXB_XMAILER_MIMEOLE_OL_5A31E
+
+# good enough
+AXB_XMAILER_MIMEOLE_OL_6237B
+
+# good enough
+AXB_XMAILER_MIMEOLE_OL_7C3E5
+
+# good enough
+AXB_XMAILER_MIMEOLE_OL_7F4F5
+
+# good enough
+AXB_XMAILER_MIMEOLE_OL_812FF
+
+# good enough
 AXB_XMAILER_MIMEOLE_OL_8B970
 
 # good enough
-DATE_IN_FUTURE_96_Q
+AXB_XMAILER_MIMEOLE_OL_8E871
+
+# good enough
+AXB_XMAILER_MIMEOLE_OL_8E893
+
+# good enough
+AXB_XMAILER_MIMEOLE_OL_9B90B
+
+# good enough
+AXB_XMAILER_MIMEOLE_OL_A50F8
+
+# good enough
+AXB_XMAILER_MIMEOLE_OL_ADFF7
+
+# good enough
+AXB_XMAILER_MIMEOLE_OL_B30D1
+
+# good enough
+AXB_XMAILER_MIMEOLE_OL_B4B40
+
+# good enough
+AXB_XMAILER_MIMEOLE_OL_B9B11
+
+# good enough
+AXB_XMAILER_MIMEOLE_OL_BC7E6
+
+# good enough
+AXB_XMAILER_MIMEOLE_OL_C0C83
+
+# good enough
+AXB_XMAILER_MIMEOLE_OL_C65FA
+
+# good enough
+AXB_XMAILER_MIMEOLE_OL_CC6B7
+
+# good enough
+AXB_XMAILER_MIMEOLE_OL_CF0C0
+
+# good enough
+AXB_XMAILER_MIMEOLE_OL_D2603
+
+# good enough
+AXB_XMAILER_MIMEOLE_OL_DDE5D
+
+# good enough
+AXB_XMAILER_MIMEOLE_OL_E9F46
+
+# good enough
+AXB_XMAILER_MIMEOLE_OL_F3B05
+
+# good enough
+AXB_XMAILER_MIMEOLE_OL_F475E
+
+# good enough
+AXB_XMAILER_MIMEOLE_OL_F6D01
+
+# good enough
+AXB_XMAILER_MIMEOLE_OL_FF5C8
 
 # good enough
 FILL_THIS_FORM_SHORT
+
+# good enough
+POSTCARD_05
+
+# good enough
+POSTCARD_08
+
+# good enough
+POSTCARD_09
 
 # tflags userconf
 UNPARSEABLE_RELAY
