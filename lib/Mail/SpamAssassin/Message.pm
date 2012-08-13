@@ -806,14 +806,30 @@ sub _parse_multipart {
   my $in_body = 0;
   my $header;
   my $part_array;
+  my $found_end_boundary;
 
   my $line_count = @{$body};
   foreach ( @{$body} ) {
     # if we're on the last body line, or we find any boundary marker,
     # deal with the mime part
-    if ( --$line_count == 0 || (defined $boundary && /^--\Q$boundary\E(?:--)?\s*$/) ) {
+    $found_end_boundary = defined $boundary && /^--\Q$boundary\E(?:--)?\s*$/;
+    if ( --$line_count == 0 || $found_end_boundary ) {
       my $line = $_; # remember the last line
 
+      # If at last line and no end boundary found, the line belongs to body
+      # TODO:
+      #  Is $self->{mime_boundary_state}->{$boundary}-- needed here?
+      #  Could "missing end boundary" be a useful rule? Mark it somewhere?
+      #  If SA processed truncated message from amavis etc, this could also
+      #  be hit legimately..
+      if (!$found_end_boundary) {
+        # TODO: This is duplicate code from few pages down below..
+        while (length ($_) > MAX_BODY_LINE_LENGTH) {
+          push (@{$part_array}, substr($_, 0, MAX_BODY_LINE_LENGTH)."\n");
+          substr($_, 0, MAX_BODY_LINE_LENGTH) = '';
+        }
+        push ( @{$part_array}, $_ );
+      }
       # per rfc 1521, the CRLF before the boundary is part of the boundary:
       # NOTE: The CRLF preceding the encapsulation line is conceptually
       # attached to the boundary so that it is possible to have a part
@@ -822,7 +838,7 @@ sub _parse_multipart {
       # CRLFs preceding the encapsulation line, the first of which is part
       # of the preceding body part, and the second of which is part of the
       # encapsulation boundary.
-      if ($part_array) {
+      elsif ($part_array) {
         chomp( $part_array->[-1] );  # trim the CRLF that's part of the boundary
         splice @{$part_array}, -1 if ( $part_array->[-1] eq '' ); # blank line for the boundary only ...
       }
