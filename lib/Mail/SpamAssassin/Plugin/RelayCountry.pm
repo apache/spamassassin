@@ -25,10 +25,10 @@ RelayCountry - add message metadata indicating the country code of each relay
 
 =head1 DESCRIPTION
 
-By the RelayCountry plugin attempts to determine the domain country
-codes of each relay used in the delivery path of messages and add that
-information to the message metadata as "X-Relay-Countries", or 
-the C<_RELAYCOUNTRY_> header markup.
+The RelayCountry plugin attempts to determine the domain country codes
+of each relay used in the delivery path of messages and add that information
+to the message metadata as "X-Relay-Countries", or the C<_RELAYCOUNTRY_>
+header markup.
 
 =head1 REQUIREMENT
 
