@@ -323,10 +323,14 @@ sub _check_rbl_addresses {
   return 0 unless $pms->is_dns_available();
 
   my %hosts;
-  for my $address (@addresses) {
-    if (defined $address && $address =~ m/ \@ ( [^\@\s]+ \. [^\@\s]+ )/x) {
-      $hosts{lc($1)} = 1;
-    }
+  for (@addresses) {
+    next if !defined($_) || !/ \@ ( [^\@\s]+ )/x;
+    my $address = $1;
+    # strip leading & trailing dots (as seen in some e-mail addresses)
+    $address =~ s/^\.+//; $address =~ s/\.+\z//;
+    # squash duplicate dots to avoid an invalid DNS query with a null label
+    $address =~ tr/.//s;
+    $hosts{lc($address)} = 1  if $address =~ /\./;  # must by a FQDN
   }
   return unless scalar keys %hosts;
 
