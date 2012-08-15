@@ -419,6 +419,9 @@ else {
   $iter->set_functions(\&wanted, \&result);
 }
 
+#AFTER SETTING ALL OPTS, RUN _set_default_message_selection_opts() TO GET SANE DEFAULTS
+$iter->_set_default_message_selection_opts();
+
 my $messages;
 
 # normal mode as well as a server do scan mode and get a temp file
