@@ -660,6 +660,7 @@ sub _mail_open {
 
 sub _set_default_message_selection_opts {
   my ($self) = @_;
+ 
   $self->{opt_scanprob} = 1.0 unless (defined $self->{opt_scanprob});
   $self->{opt_want_date} = 1 unless (defined $self->{opt_want_date});
   $self->{opt_cache} = 0 unless (defined $self->{opt_cache});
@@ -670,7 +671,8 @@ sub _set_default_message_selection_opts {
   $self->{opt_from_regex} =~ s/^\///;
   $self->{opt_from_regex} =~ s/\/$//;
 
-  dbg("archive-iterator: From seperator regular expression [/$self->{opt_from_regex}/]");
+  dbg("archive-iterator: _set_default_message_selection_opts After: Scanprob[$self->{opt_scanprob}], want_date[$self->{opt_want_date}], cache[$self->{opt_cache}], from_regex[$self->{opt_from_regex}]");
+
 }
 
 ############################################################################
