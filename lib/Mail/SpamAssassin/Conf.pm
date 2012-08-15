@@ -1159,6 +1159,9 @@ Unicode.  Requires the Encode::Detect module, HTML::Parser version
 
 =item trusted_networks ip.add.re.ss[/mask] ...   (default: none)
 
+NOTE: The syntax for Net::Patricia is not as flexible as NetAddr::IP with 
+      overlapping networks and is not supported in all configurations.
+
 What networks or hosts are 'trusted' in your setup.  B<Trusted> in this case
 means that relay hosts on these networks are considered to not be potentially
 operated by spammers, open relays, or open proxies.  A trusted host could
@@ -1247,6 +1250,9 @@ Empty the list of trusted networks.
 
 =item internal_networks ip.add.re.ss[/mask] ...   (default: none)
 
+NOTE: The syntax for Net::Patricia is not as flexible as NetAddr::IP with 
+      overlapping networks and is not supported in all configurations.
+
 What networks or hosts are 'internal' in your setup.   B<Internal> means
 that relay hosts on these networks are considered to be MXes for your
 domain(s), or internal relays.  This uses the same format as
@@ -1300,6 +1306,9 @@ Empty the list of internal networks.
   });
 
 =item msa_networks ip.add.re.ss[/mask] ...   (default: none)
+
+NOTE: The syntax for Net::Patricia is not as flexible as NetAddr::IP with 
+      overlapping networks and is not supported in all configurations.
 
 The networks or hosts which are acting as MSAs in your setup (but not also as
 MX relays).  B<MSA> means that the relay hosts on these networks accept mail

@@ -11,6 +11,14 @@ BEGIN {
   }
 }
 
+our $have_patricia = 0;
+eval {
+  require Net::Patricia;
+  Net::Patricia->VERSION(1.16);  # need AF_INET6 support
+  import Net::Patricia;
+  $have_patricia = 1;
+};
+
 my $prefix = '.';
 if (-e 'test_dir') {            # running from test directory, not ..
   $prefix = '..';
@@ -39,7 +47,7 @@ my @data = (
 
 # ---------------------------------------------------------------------------
 
-# 127/8 implicitly trusted as default
+# 127/8 implicitly trusted as default - #1
 q{
 
   Received: from sender.net (127.0.1.2) by receiver.net
@@ -54,7 +62,7 @@ Untrusted:
 
 # ---------------------------------------------------------------------------
 
-# 127/8 explicitly trusted
+# 127/8 explicitly trusted - #2
 q{
 
   trusted_networks 127/8
@@ -69,7 +77,9 @@ Untrusted:
 
 },
 
-# 127/8 explicitly trusted along with others
+# ---------------------------------------------------------------------------
+
+# 127/8 explicitly trusted along with others #3
 q{
 
   trusted_networks 127/8 1.2.2.1
@@ -86,7 +96,7 @@ Untrusted:
 
 # ---------------------------------------------------------------------------
 
-# 127/8 explicitly untrusted -- which is not possible to do
+# 127/8 explicitly untrusted -- which is not possible to do - #4
 q{
 
   trusted_networks 1.2/16 !127/8
@@ -97,6 +107,7 @@ q{
 } => q{
 
 Netset-Warn
+Patricia-Failure
 Trusted: [ ip=127.0.1.2 rdns=sender.net helo=sender.net by=receiver.net ident= envfrom= intl=1 id= auth= msa=0 ]
 Untrusted: 
 
@@ -104,7 +115,7 @@ Untrusted:
 
 # ---------------------------------------------------------------------------
 
-# 127/8 implicitly trusted
+# 127/8 implicitly trusted #5
 q{
 
   trusted_networks 1.2/16
@@ -120,7 +131,7 @@ Untrusted:
 
 # ---------------------------------------------------------------------------
 
-# 10/8 implicitly trusted by auto-detection
+# 10/8 implicitly trusted by auto-detection - #6
 # note: it should also be internal!
 q{
 
@@ -136,7 +147,7 @@ Untrusted:
 
 # ---------------------------------------------------------------------------
 
-# trusted, then not (which is trusted, we do first match wins)
+# trusted, then not (which is trusted, we do first match wins) - #7
 q{
 
   trusted_networks 1.2/16 !1.2/16
@@ -146,6 +157,7 @@ q{
 } => q{
 
 Netset-Warn
+Patricia-Failure
 Trusted: [ ip=1.2.3.2 rdns=sender.net helo=sender.net by=receiver.net ident= envfrom= intl=1 id= auth= msa=0 ]
 Untrusted:
 
@@ -153,6 +165,7 @@ Untrusted:
 
 # ---------------------------------------------------------------------------
 
+# #8
 q{
 
   trusted_networks 1.2/16
@@ -168,6 +181,7 @@ Untrusted: [ ip=1.1.1.2 rdns=sender.net helo=sender.net by=receiver.net ident= e
 
 # ---------------------------------------------------------------------------
 
+# #9
 q{
 
   trusted_networks 1.1/16
@@ -183,6 +197,7 @@ Untrusted:
 
 # ---------------------------------------------------------------------------
 
+# #10
 q{
 
   trusted_networks 1.1/16
@@ -200,7 +215,7 @@ Untrusted:
 # ---------------------------------------------------------------------------
 
 # with an unset trusted_networks, internal_networks is documented to
-# be used instead
+# be used instead - #11
 q{
 
   internal_networks 1.1/16
@@ -216,6 +231,7 @@ Untrusted:
 
 # ---------------------------------------------------------------------------
 
+# #12
 q{
 
   trusted_networks 1.1/16 1.2/16
@@ -235,6 +251,7 @@ Untrusted:
 # this should be a lint error; internal_networks is not a subset of trusted.
 # note: "intl=0" is expected; even though the internal_networks config is
 # invalid it was still defined by the user, so we do not use trusted for internal
+# #13
 q{
 
   trusted_networks 1.1/16
@@ -255,6 +272,7 @@ Untrusted:
 # this should be a lint error; internal_networks is not a subset of trusted.
 # note: "intl=0" is expected; even though the internal_networks config is
 # invalid it was still defined by the user, so we do not use trusted for internal
+# #14
 q{
 
   trusted_networks 1.1.1/24
@@ -265,6 +283,7 @@ q{
 } => q{
 
 Lint-Error
+Patricia-Failure
 Trusted: [ ip=1.1.1.2 rdns=sender.net helo=sender.net by=receiver.net ident= envfrom= intl=0 id= auth= msa=0 ]
 Untrusted:
 
@@ -275,6 +294,7 @@ Untrusted:
 # this should be a lint error; internal_networks is not a subset of trusted.
 # note: "intl=0" is expected; even though the internal_networks config is
 # invalid it was still defined by the user, so we do not use trusted for internal
+# #15
 q{
 
   trusted_networks !1.1.1.1 1.1/16
@@ -294,6 +314,7 @@ Untrusted:
 
 # this should be a lint error; you can't exclude a network after you've already
 # included it (TODO: it is currently not a lint error, netset just warns about it)
+# #16
 q{
 
   trusted_networks 1/8 !1.1.1.2
@@ -303,6 +324,7 @@ q{
 } => q{
 
 Netset-Warn
+Patricia-Failure
 Trusted: [ ip=1.1.1.2 rdns=sender.net helo=sender.net by=receiver.net ident= envfrom= intl=1 id= auth= msa=0 ]
 Untrusted:
 
@@ -310,7 +332,7 @@ Untrusted:
 
 # ---------------------------------------------------------------------------
 
-# internal_networks are valid, even if the !4.3.2.1 is pointless
+# internal_networks are valid, even if the !4.3.2.1 is pointless - #17
 q{
 
   trusted_networks 1.1/16
@@ -327,7 +349,7 @@ Untrusted:
 
 # ---------------------------------------------------------------------------
 
-# test msa_networks functionality, MSA trusted+internal
+# test msa_networks functionality, MSA trusted+internal - #18
 q{
 
   trusted_networks 1.1/16
@@ -348,7 +370,7 @@ Untrusted:
 
 # ---------------------------------------------------------------------------
 
-# test msa_networks functionality, MSA trusted
+# test msa_networks functionality, MSA trusted - #19
 q{
 
   trusted_networks 1.1/16
@@ -370,7 +392,7 @@ Untrusted:
 
 # ---------------------------------------------------------------------------
 
-# test msa_networks functionality, 5.5.5.5 outside of trust boundary
+# test msa_networks functionality, 5.5.5.5 outside of trust boundary  #20
 q{
 
   trusted_networks !1.1.1.2 1.1/16 5.5.5.5
@@ -391,7 +413,7 @@ Untrusted: [ ip=1.1.1.2 rdns=sender.net helo=sender.net by=receiver.net ident= e
 
 # ---------------------------------------------------------------------------
 
-# test msa_networks functionality, 5.5.5.5 not trusted, so cannot be an MSA
+# test msa_networks functionality, 5.5.5.5 not trusted, so cannot be an MSA #21
 q{
 
   trusted_networks 1.1/16
@@ -413,7 +435,7 @@ Untrusted: [ ip=5.5.5.5 rdns=sender.net helo=sender.net by=receiver.net ident= e
 
 # ---------------------------------------------------------------------------
 
-# test to make sure netset is detecting overlap correctly when using short CIDR notations
+# test to make sure netset is detecting overlap correctly when using short CIDR notations #22
 q{
 
   trusted_networks 1/8 !1/8
@@ -423,6 +445,7 @@ q{
 } => q{
 
 Netset-Warn
+Patricia-Failure
 Trusted: [ ip=1.1.1.1 rdns=sender.net helo=sender.net by=receiver.net ident= envfrom= intl=1 id= auth= msa=0 ]
 Untrusted:
 
@@ -430,7 +453,7 @@ Untrusted:
 
 # ---------------------------------------------------------------------------
 
-# bug 5680: 'X-Originating-IP'
+# bug 5680: 'X-Originating-IP' - #23
 q{
 
   trusted_networks 1/8
@@ -447,7 +470,7 @@ Untrusted: [ ip=2.2.2.2 rdns= helo= by= ident= envfrom= intl=0 id= auth= msa=0 ]
 
 # ---------------------------------------------------------------------------
 
-# bug 5680: 'X-Originating-IP', trusted
+# bug 5680: 'X-Originating-IP', trusted - #24
 q{
 
   trusted_networks 1/8 2/8
@@ -465,7 +488,7 @@ Untrusted:
 
 # ---------------------------------------------------------------------------
 
-# bug 5680: 'X-Originating-IP', msa
+# bug 5680: 'X-Originating-IP', msa - #25
 q{
 
   trusted_networks 1/8
@@ -483,7 +506,7 @@ Untrusted:
 
 # ---------------------------------------------------------------------------
 
-# bug 5680: 'X-Originating-IP', internal
+# bug 5680: 'X-Originating-IP', internal - #26
 q{
 
   trusted_networks 1/8 2/8
@@ -501,7 +524,7 @@ Untrusted:
 
 # ---------------------------------------------------------------------------
 
-# test to make sure netset is detecting overlap correctly when using short CIDR notations
+# test to make sure netset is detecting overlap correctly when using short CIDR notations - #27
 q{
 
   trusted_networks !1/8 1/8
@@ -511,13 +534,14 @@ q{
 } => q{
 
 Netset-Warn
+Patricia-Failure
 Trusted:
 Untrusted: [ ip=1.1.1.1 rdns=sender.net helo=sender.net by=receiver.net ident= envfrom= intl=0 id= auth= msa=0 ]
 
 },
 
 # ---------------------------------------------------------------------------
-# IPv6
+# IPv6 - 28
 
 q{
 
@@ -534,7 +558,7 @@ Untrusted:
 },
 
 # ---------------------------------------------------------------------------
-# bug 4503
+# bug 4503 - #29
 
 q{
 
@@ -552,7 +576,7 @@ Untrusted: [ ip=2002:abcd:ef10::1 rdns=sender.net helo=sender.net by=receiver.ne
 
 # ---------------------------------------------------------------------------
 
-# ::1 implicitly trusted as default
+# ::1 implicitly trusted as default - #30
 q{
 
   Received: from sender.net (::1) by receiver.net
@@ -567,6 +591,7 @@ Untrusted:
 
 # ---------------------------------------------------------------------------
 
+# #31
 q{
 
   trusted_networks DEAD:BEEF:0000:0102:0304:0506:0708:0000/108
@@ -576,6 +601,7 @@ q{
 
 } => q{
 
+Patricia-Failure
 Trusted: [ ip=DEAD:BEEF:0000:0102:0304:0506:0708:0a0b rdns=sender.net helo=sender.net by=receiver.net ident= envfrom= intl=1 id=A96E18BD97 auth= msa=0 ]
 Untrusted:
 
@@ -583,6 +609,7 @@ Untrusted:
 
 # ---------------------------------------------------------------------------
 
+# #32
 q{
 
   trusted_networks DEAD:BEEF:0000:0102:0304:0506:0708:0a0c
@@ -602,10 +629,19 @@ Untrusted: [ ip=DEAD:BEEF:0000:0102:0304:0506:0708:0a0b rdns=sender.net helo=sen
 );
 
 
+my ($i);
 while (1) {
   my $hdrs = shift @data;
   my $expected = shift @data;
+  $i++;
+  print "Data Set: #$i\n"; 
   last unless defined $expected;
+
+  #SKIP TESTS FOR TESTING PURPOSES
+  #my $test_data_set = 4;
+  #if ($i < $test_data_set or $i > $test_data_set) {
+  #  ok (1); ok (1); ok (1); next;
+  #}
 
   my $test_failure = 0;
 
@@ -642,6 +678,8 @@ while (1) {
               userprefs_filename => "log/tst.cf",
               # debug => 1
             });
+
+  #TEST #1 - OBJECT CREATION
   ok($sa);
 
   $sa->{lint_callback} = sub {
@@ -649,6 +687,8 @@ while (1) {
     print "lint error: $opts{msg}\n";
   };
 
+
+  #TEST #2 - LINT TEST
   if ($expected =~ s/^\s*Lint-Error\s*//) {
     print "[lint error expected here...]\n";
     ok ($sa->lint_rules() != 0) or $test_failure=1;
@@ -660,8 +700,6 @@ while (1) {
   $msg =~ s/^\s+(Received|X-\S+): /$1: /gm;
   my $status = $sa->check_message_text ($msg);
   my $result = $status->rewrite_mail();
-
-  # warn "JMD $result";
 
   if ($netset_warn) {
     open(STDERR, ">&=OLDERR") || die "Cannot reopen STDERR";
@@ -695,15 +733,33 @@ while (1) {
   $relays =~ s/^ //gs; $expected =~ s/^ //gs;
   $relays =~ s/ $//gs; $expected =~ s/ $//gs;
 
-  ok ($relays eq $expected) or $test_failure = 1;
+
+  my $skip_test = 0;
+  if ($expected =~ s/^\s*Patricia-Failure\s*//) {
+    if ($have_patricia > 0) {
+      $skip_test = 1;
+    }
+  } 
+
+  #TEST #3 - RESULTS VS EXPECTED RESULTS
+  if ($skip_test) {
+    #SKIP TEST KNOWN TO FAIL WITH NET::PATRICIA
+    print "[skipping test known error with Net::Patricia - Bug 6508...]\n";
+    ok (1);
+  } else {
+    unless (ok ($relays eq $expected)) {
+      $test_failure = 1;
+    }
+  }
 
   if ($test_failure) {
     print "conf: ", ('-' x 67), "\n", $conf;
     print "hdr sample: ", ('-' x 67), $hdrs, ('-' x 78), "\n\n";
     print "expected: $expected\n";
     print "got     : $relays\n\n";
+    print "msg     : $msg\n\n";
 
-    # die "dying on first test failure";
+    die "Dying on first test failure.";
   }
 
   $status->finish();

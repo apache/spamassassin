@@ -233,7 +233,9 @@ $have_sha ? {
   desc => 'If this module is available, it will be used for IP address lookups
   in tables internal_networks, trusted_networks, and msa_networks. Recommended
   when the number of entries in these tables is large, i.e. in hundreds or
-  thousands.',
+  thousands. However, the syntax for Net::Patricia is not as flexible as 
+  NetAddr::IP with overlapping networks and is not supported in all 
+  configurations.',
 },
 );
 
