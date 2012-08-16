@@ -1,6 +1,10 @@
 ##
 
 
+# # 2012-08-16 - Patternity pattern
+header          AXB_XMID_PATTERNITY1    Message-ID =~ /^[0-9a-f]{6}\-[0-9a-f]{4}\-[0-9a-f]{4}\-[0-9a-f]{4}\-[0-9a-f]{12}\@/
+describe        AXB_XMID_PATTERNITY1    Possible bulkware fingerprint
+
 # # 2012-08-15 SA user case
 header          __RDNS_AUTHORIZE_NET            X-Spam-Relays-External =~ /rdns=\S+\.authorize\.net/
 header          __FROM_AUTHORIZE_NET            From=~ /authorize\.net/
