@@ -350,7 +350,9 @@ sub try_binary {
     $command = "which $bindef->{'binary'} 2>&1";
     $output = `$command`;
 
-    if ($output =~ /which: no $bindef->{'binary'} in/i) {
+    if (!defined $output || $output eq '') {
+      $installed = 0;
+    } elsif ($output =~ /which: no \Q$bindef->{'binary'}\E in/i) {
       $installed = 0;
     } else {
       #COMMAND APPEARS TO EXIST
@@ -459,7 +461,8 @@ sub test_version {
   my ($count1, $count2, $i, $fail);
 
   #CAN'T TEST NON NUMERIC VERSIONS
-  if ($version1 =~ /[^0-9\.]/ or $version2 =~ /[^0-9\.]/) {
+  if (!defined($version1) or !defined($version2) or
+      $version1 !~ /^[0-9][0-9.]*\z/ or $version2 !~ /^[0-9][0-9.]*\z/) {
     return -1;
   }
 
