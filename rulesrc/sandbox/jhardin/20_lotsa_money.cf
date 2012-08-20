@@ -182,7 +182,7 @@ describe DECEASED_NO_ML   Dead not via mailing list
 body     __WIRE_XFR       /\b(?:wire|telegraph(?:ic)?|bank)\s?transfer/i
 body     __TRUSTED_CHECK  /\b(?:cashier'?s?|certified)\sche(?:ck|que)/i
 body     __BANK_DRAFT     /\bbank\sdraft/i
-body     __MOVE_MONEY     /\b(?:(?:receive|re-?profile|transfer(?:ring|t)?|repatriate|rapatrier|secure|r[\xe9]clamation|possession|virer|dona(?:te|r))\s(?:th(?:e(?:se)?|is)|d[ae]s|sur ce|de ces|cet|est[ea])|re-?profiling|re-?locat(?:e|ing)(?:\s\w{1,15})?)\s(?:sums?\sof\s)?(?:proceeds|funds?|money|balance|account|g[eo]ld|compte|fond[so]|argent)\b/i
+body     __MOVE_MONEY     /\b(?:(?:receive|re-?profile|transfer(?:ring|t)?|release|repatriate|rapatrier|secure|r[\xe9]clamation|possession|virer|dona(?:te|r))\s(?:th(?:e(?:se)?|is)|d[ae]s|sur ce|de ces|cet|est[ea])|re-?profiling|re-?locat(?:e|ing)(?:\s\w{1,15})?)\s(?:sums?\sof\s)?(?:proceeds|funds?|money|balance|account|g[eo]ld|compte|fond[so]|argent)\b/i
 body     __TO_YOUR_ACCT   /\b(?:funds|money|f[uo]ndo|dinheiro)\s(?:\w{1,10}\s){0,4}(?:transfer(?:red)?|transferido)\s(?:to|para)\s(?:your|sua)\s(?:account|conta)/i
 meta     __XFER_MONEY     (__WIRE_XFR || __TRUSTED_CHECK || __BANK_DRAFT || __MOVE_MONEY || __TO_YOUR_ACCT)
 
