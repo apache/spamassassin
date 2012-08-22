@@ -292,6 +292,7 @@ sub new {
   # Store the pristine body for later -- store as a copy since @message
   # will get modified below
   $self->{'pristine_body'} = join('', @message);
+  $self->{'pristine_body_length'} = length($self->{'pristine_body'});
 
   # CRLF -> LF
   # also merge multiple blank lines into a single one

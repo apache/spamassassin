@@ -45,6 +45,7 @@ sub new {
   $self->register_eval_rule("check_blank_line_ratio");
   $self->register_eval_rule("tvd_vertical_words");
   $self->register_eval_rule("check_stock_info");
+  $self->register_eval_rule("check_body_length");
 
   return $self;
 }
@@ -282,5 +283,18 @@ sub _check_stock_info {
   return;
 }
 
+sub check_body_length {
+  my ($self, $pms, undef, $min) = @_;
+
+  #print "DEBUG: KAM $min - $pms->{msg}->{pristine_body_length}\n";
+
+  dbg("eval: body_length - $pms->{msg}->{pristine_body_length} - check for min of $min");
+
+  if (defined($pms->{msg}->{pristine_body_length}) and $pms->{msg}->{pristine_body_length} <= $min) {
+    return 1;
+  } else {
+    return 0;
+  }
+}
 
 1;
