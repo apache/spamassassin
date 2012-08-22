@@ -301,10 +301,10 @@ header __REPLYTO_EXISTS             exists:Reply-To
 meta REPLYTO_WITHOUT_TO_CC     (__REPLYTO_EXISTS && !__TOCC_EXISTS)
 
 # thanks to Suresh for these tips
-header FAKE_OUTBLAZE_RCVD_168     X-Spam-Relays-External =~ /^[^\]]+168city\./
-header FAKE_OUTBLAZE_RCVD_PURIN   X-Spam-Relays-External =~ /^[^\]]+purinmail\./
-header FAKE_OUTBLAZE_RCVD_168_2   X-Spam-Relays-External =~ /168city\./
-header FAKE_OUTBLAZE_RCVD_PURIN_2 X-Spam-Relays-External =~ /purinmail\./
+# header FAKE_OUTBLAZE_RCVD_168     X-Spam-Relays-External =~ /^[^\]]+168city\./
+# header FAKE_OUTBLAZE_RCVD_PURIN   X-Spam-Relays-External =~ /^[^\]]+purinmail\./
+# header FAKE_OUTBLAZE_RCVD_168_2   X-Spam-Relays-External =~ /168city\./
+# header FAKE_OUTBLAZE_RCVD_PURIN_2 X-Spam-Relays-External =~ /purinmail\./
 
 # some rules from the MSNBC spam run (Rustock trojan)
 header __MSNBC_THREAD_INDEX     ALL =~ /\nthread-index: /s
