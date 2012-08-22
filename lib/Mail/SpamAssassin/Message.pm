@@ -292,6 +292,8 @@ sub new {
   # Store the pristine body for later -- store as a copy since @message
   # will get modified below
   $self->{'pristine_body'} = join('', @message);
+  # This is currently used by an eval test check_body_length.  
+  # Possible To-Do: Base the length on the @message array later down?  Or a different copy of the message post decoding?
   $self->{'pristine_body_length'} = length($self->{'pristine_body'});
 
   # CRLF -> LF
