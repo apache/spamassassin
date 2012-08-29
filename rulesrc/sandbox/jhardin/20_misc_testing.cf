@@ -877,3 +877,9 @@ uri         URI_MALWARE_BH     /\.\w{2,4}\/[\d\w]{8}\/index\.html/
 describe    URI_MALWARE_BH     Possible BlackHole malware links / phishing
 score       URI_MALWARE_BH     1.0	# limit
 
+# suggested by https://isc.sans.edu/diary.html?storyid=13996
+uri         URI_DATA           /^data:[a-z]/i
+describe    URI_DATA           "data:" URI - possible malware or phish
+score       URI_DATA           1.0	# limit
+
+
