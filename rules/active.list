@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-brasil axb-coi-bulk axb-fraud axb-generic axb-ham-misc axb-sa-users axb-woas bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bernie-mix bpoliakoff danmcdonald darxus grenier jarif kpg-gah mas zmi; day 2: axb-brasil axb-coi-bulk axb-fraud axb-generic axb-ham-misc axb-sa-users axb-woas bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bernie-mix bpoliakoff danmcdonald darxus grenier jarif kpg-gah llanga mas zmi; day 3: axb-brasil axb-coi-bulk axb-fraud axb-ham-misc axb-sa-users axb-woas bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bernie-mix bpoliakoff danmcdonald darxus grenier jarif kpg-gah llanga mas
+# with results from: day 1: axb-brasil axb-coi-bulk axb-fraud axb-generic axb-ham-misc axb-sa-users axb-woas bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bernie-mix bpoliakoff danmcdonald darxus grenier jarif kpg-gah mas zmi; day 2: axb-brasil axb-coi-bulk axb-fraud axb-generic axb-ham-misc axb-sa-users axb-woas bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bernie-mix bpoliakoff danmcdonald darxus grenier jarif kpg-gah llanga mas zmi; day 3: axb-brasil axb-coi-bulk axb-fraud axb-generic axb-ham-misc axb-sa-users axb-woas bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bernie-mix bpoliakoff danmcdonald darxus grenier jarif kpg-gah llanga mas zmi
 
 # tflags publish
 ADVANCE_FEE_2_NEW_FORM
@@ -50,6 +50,9 @@ ADVANCE_FEE_5_NEW_MONEY
 ALL_TRUSTED
 
 # good enough
+ANY_PILL_PRICE
+
+# good enough
 AXB_XMAILER_MIMEOLE_OL_024C2
 
 # good enough
@@ -59,10 +62,40 @@ AXB_XMAILER_MIMEOLE_OL_12495
 AXB_XMAILER_MIMEOLE_OL_1ECD5
 
 # good enough
+AXB_XMAILER_MIMEOLE_OL_22B61
+
+# good enough
+AXB_XMAILER_MIMEOLE_OL_326A6
+
+# good enough
+AXB_XMAILER_MIMEOLE_OL_32D97
+
+# good enough
+AXB_XMAILER_MIMEOLE_OL_3AC1D
+
+# good enough
+AXB_XMAILER_MIMEOLE_OL_4204A
+
+# good enough
+AXB_XMAILER_MIMEOLE_OL_56DF6
+
+# good enough
 AXB_XMAILER_MIMEOLE_OL_6237B
 
 # good enough
 AXB_XMAILER_MIMEOLE_OL_7EB15
+
+# good enough
+AXB_XMAILER_MIMEOLE_OL_8627E
+
+# good enough
+AXB_XMAILER_MIMEOLE_OL_8E893
+
+# good enough
+AXB_XMAILER_MIMEOLE_OL_A50F8
+
+# good enough
+AXB_XMAILER_MIMEOLE_OL_B9B11
 
 # good enough
 AXB_XMAILER_MIMEOLE_OL_C485C
@@ -71,7 +104,16 @@ AXB_XMAILER_MIMEOLE_OL_C485C
 AXB_XMAILER_MIMEOLE_OL_E9F46
 
 # good enough
+AXB_XMAILER_MIMEOLE_OL_FB17C
+
+# good enough
+AXB_XMA_BASP
+
+# good enough
 AXB_XRCVD_EYOU_SEND
+
+# good enough
+AXB_X_RCV_WLOCAL
 
 # tflags learn
 BAYES_00
@@ -111,6 +153,12 @@ CORRUPT_FROM_LINE_IN_HDRS
 
 # good enough
 DATE_DOTS
+
+# good enough
+DATE_IN_FUTURE_96_Q
+
+# good enough
+DATE_IN_FUTURE_Q_PLUS
 
 # good enough
 DEAR_BENEFICIARY
@@ -179,6 +227,9 @@ ENV_AND_HDR_SPF_MATCH
 FB_CIALIS_LEO3
 
 # good enough
+FH_FAKE_RCVD_LINE
+
+# good enough
 FH_FAKE_RCVD_LINE_B
 
 # good enough
@@ -202,6 +253,12 @@ FM_LOTTO_MONEY
 # good enough
 FM_LOTTO_YOU_WON
 
+# good enough
+FM_SCHOOLING
+
+# good enough
+FM_SCHOOL_DIPLOMA
+
 # tflags publish
 FORM_FRAUD_3
 
@@ -210,6 +267,9 @@ FORM_FRAUD_5
 
 # tflags userconf
 FRAGMENTED_MESSAGE
+
+# good enough
+FROM_12LTRDOM
 
 # tflags userconf
 FROM_DOMAIN_NOVOWEL
@@ -254,9 +314,6 @@ FROM_MISSP_USER
 FSL_CTYPE_WIN1251
 
 # good enough
-FSL_HELO_DEVICE
-
-# good enough
 FSL_MID_419
 
 # good enough
@@ -270,6 +327,9 @@ FSL_UA
 
 # good enough
 FSL_XM_419
+
+# good enough
+FS_REPLICAWATCH
 
 # good enough
 FS_WILL_HELP
@@ -360,6 +420,9 @@ KB_FAKED_THE_BAT
 
 # good enough
 KB_FORGED_MOZ4
+
+# good enough
+KB_RATWARE_MSGID
 
 # good enough
 KB_RATWARE_OUTLOOK_MID
@@ -665,7 +728,13 @@ RCVD_IN_XBL
 RISK_FREE
 
 # good enough
+RP_MATCHES_RCVD
+
+# good enough
 SERGIO_SUBJECT_VIAGRA01
+
+# good enough
+SPAMMY_XMAILER
 
 # tflags net
 SPF_FAIL
@@ -691,6 +760,9 @@ SPF_PASS
 # tflags net
 SPF_SOFTFAIL
 
+# good enough
+STYLE_GIBBERISH
+
 # tflags userconf
 SUBJECT_IN_BLACKLIST
 
@@ -710,7 +782,16 @@ TO_EQ_FM_SPF_FAIL
 TO_NO_BRKTS_FROM_MSSP
 
 # good enough
+TT_MSGID_TRUNC
+
+# good enough
 TVD_PH_BODY_META
+
+# good enough
+AXB_XMAILER_MIMEOLE_OL_62CA2
+
+# good enough
+AXB_XMAILER_MIMEOLE_OL_C3E2E
 
 # good enough
 SHARE_50_50
