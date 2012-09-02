@@ -1,4 +1,4 @@
-## khop-sc-neighbors.cf	v 2012042013
+## khop-sc-neighbors.cf	v 20120912
 ## Khopesh's syndication of SpamCop's top offenders and top offending networks.
 ## 
 ## Spamassassin rules written by Adam Katz <antispamATkhopiscom>
@@ -8,10 +8,9 @@
 ## sa-update --gpgkey E8B493D6 --channel khop-bl.sa.khopesh.com
 ## 
 ## These rules are Copyright 2001-2009 by Adam Katz <antispamATkhopiscom>
-## Licensed under the Creative Commons Non-Commercial Share-alike License 2.0.
+## Licensed under the Apache License 2.0.
 ## The code that generated this output is GNU Affero General Public License v3.
-## Source data (copyright Cisco subsidiary SpamCop.net) taken from links below.
-## The author is receptive to relicensing requests for this and its generator.
+## Source data (copyright Cisco) was taken from links below.
 ## 
 ## Frequent updates are needed for these rules, so they are marked 'nopublish'
 ## This keeps them from being automatically promoted to SpamAssassin proper 
@@ -21,7 +20,7 @@
 
 # http://spamcop.net/w3m?action=map;mask=4294967295;net=0;sort=56
 # Due to the massive block size, this rule only examines the last untrusted
-header __KHOP_SC_CIDR8  X-Spam-Relays-Untrusted =~ /^[^\]]* (?:by|ip)=(?-xism:\b1(?:15|23|78|90)(?:\.[012]?\d{1,2}){3}\b) /
+header __KHOP_SC_CIDR8  X-Spam-Relays-Untrusted =~ /^[^\]]* (?:by|ip)=___ FAILED TO POPULATE ___ /
 # and gets cleaned up a bit
 meta	 KHOP_SC_CIDR8	__KHOP_SC_CIDR8 && !(__VIA_ML||__freemail_safe||__RCVD_IN_DNSWL||RCVD_IN_HOSTKARMA_WL)
 describe KHOP_SC_CIDR8  Relay CIDR /8 is among worst in SpamCop
@@ -40,7 +39,7 @@ score	 KHOP_SC_CIDR8	0.3 0.1 0.3 0.1
 # 12.1449/0.0139 0.999 20100410  net, solo=12.1966/0.0197@0.998, ->.2 .1 .3 .2
 # 10.3554/0.0112 0.999 20110227@510k  solo=10.3717/0.0119@0.999, ->.3 .1 .3 .1
 
-header __KHOP_SC_TOP_CIDR8  X-Spam-Relays-Untrusted =~ /^[^\]]* (?:by|ip)=(?-xism:\b(?:1(?:1[37]|82)|41)(?:\.[012]?\d{1,2}){3}\b) /
+header __KHOP_SC_TOP_CIDR8  X-Spam-Relays-Untrusted =~ /^[^\]]* (?:by|ip)=___ FAILED TO POPULATE ___ /
 meta	 KHOP_SC_TOP_CIDR8  __KHOP_SC_TOP_CIDR8 && !(__VIA_ML||__freemail_safe||__RCVD_IN_DNSWL||RCVD_IN_HOSTKARMA_WL)
 describe KHOP_SC_TOP_CIDR8  Relay CIDR /8 leads SpamCop in worst /8s
 tflags	 KHOP_SC_TOP_CIDR8  nopublish
@@ -75,7 +74,7 @@ score	 KHOP_SC_CIDR16  1.0 0.2 1.0 0.2
 # crap, still empty   20100410  bad scrape, script failed to populate rule
 # crap, still empty   20110227  this is due to safety net exclusions -> 1 .2 1 .2
 
-header	 KHOP_SC_TOP_CIDR16  Received =~ /(?-xism:\b(?:1(?:(?:82\.17|4\.9)7|13\.162)|203\.163|84\.121)(?:\.[012]?\d{1,2}){2}\b)/
+header	 KHOP_SC_TOP_CIDR16  Received =~ /___ FAILED TO POPULATE ___/
 describe KHOP_SC_TOP_CIDR16  Relay CIDR /16 leads SpamCop in worst /16s
 tflags	 KHOP_SC_TOP_CIDR16  nopublish
 score	 KHOP_SC_TOP_CIDR16  2.0 0.3 2.0 0.4
@@ -93,7 +92,7 @@ score	 KHOP_SC_TOP_CIDR16  2.0 0.3 2.0 0.4
 
 
 # http://spamcop.net/w3m?action=map;net=cmaxcnt;mask=65535;sort=spamcnt
-header	 KHOP_SC_CIDR24  Received =~ /(?-xism:\b(?:1(?:1(?:3\.162\.(?:7[47]|254|97)|2\.168\.206|8\.97\.95)|8(?:0\.232\.104|9\.108\.118)|94\.126\.183|21\.54\.54)|21(?:0\.(?:168\.50|4\.75)|3\.233\.64|9\.70\.43)|61\.136\.59|84\.235\.73)\.[012]?\d{1,2}\b)/
+header	 KHOP_SC_CIDR24  Received =~ /___ FAILED TO POPULATE ___/
 describe KHOP_SC_CIDR24  Relay CIDR /24 is among worst in SpamCop
 tflags	 KHOP_SC_CIDR24  nopublish
 score	 KHOP_SC_CIDR24  0.1 0 0.1 0
@@ -112,7 +111,7 @@ score	 KHOP_SC_CIDR24  0.1 0 0.1 0
 # 0.4157/0.5009 0.454 20110227  something is wrong here! -> .1 0 .1 0
 
 
-header	 KHOP_SC_TOP_CIDR24  Received =~ /(?-xism:\b(?:1(?:1(?:2\.215\.6[345]|3\.162\.246|8\.233\.129)|(?:8(?:0\.232\.10|9\.84\.21)|09\.100\.13)4|23\.(?:1(?:31\.165|94\.4)|205\.139)|97\.252\.0)|6(?:6\.165\.246|0\.217\.32|2\.33\.191)|2(?:02\.126\.91|19\.70\.48)|41\.254\.5|83\.149\.3)\.[012]?\d{1,2}\b)/
+header	 KHOP_SC_TOP_CIDR24  Received =~ /___ FAILED TO POPULATE ___/
 describe KHOP_SC_TOP_CIDR24  Relay CIDR /24 leads SpamCop in worst /24s
 tflags	 KHOP_SC_TOP_CIDR24  nopublish
 score	 KHOP_SC_TOP_CIDR24  2.7 0.5 2.7 0.5
@@ -130,7 +129,7 @@ score	 KHOP_SC_TOP_CIDR24  2.7 0.5 2.7 0.5
 
 
 # http://www.spamcop.net/w3m?action=hoshame
-header	 KHOP_SC_TOP200  Received =~ /(?-xism:\b(?:1(?:1(?:8\.(?:2(?:12\.129\.175|33\.129\.57)|97\.(?:96\.235|61\.66)|123\.199\.222|40\.236\.153|39\.6\.130)|2\.(?:1(?:45\.80\.173|68\.206\.11)|65\.225\.55)|9\.(?:198\.118\.125|57\.77\.163)|6\.(?:112\.66\.102|242\.32\.64)|3\.(?:171\.16\.116|28\.180\.1)|1\.68\.111\.194|4\.113\.158\.29|5\.118\.5\.11|7\.34\.92\.43)|8(?:7\.(?:1(?:85\.197\.228|20\.209\.14|15\.73\.66|\.119\.80)|5(?:9\.87\.82|\.215\.24)|72\.86\.146|38\.127\.5)|9\.(?:2(?:(?:04\.66\.2|7\.213\.)26|14\.43\.162)|10(?:0\.226\.175|8\.118\.194)|84\.214\.163|59\.5\.162)|6\.1(?:20\.141\.188|8\.179\.101)|4\.(?:17\.69\.238|22\.115\.4)|8\.227\.85\.100)|2(?:3\.(?:1(?:31\.165\.15[46]|94\.4\.159)|205\.139\.(?:2[15]|32)|49\.(?:35\.122|1\.90))|1\.(?:1(?:80\.108\.216|46\.165\.69)|52\.147\.11|6\.188\.177)|2\.(?:147\.162\.24|252\.234\.75|57\.192\.248)|0\.151\.186\.78|4\.137\.20\.253)|9(?:0\.(?:2(?:19\.163\.109|55\.166\.28|6\.118\.123)|1(?:67\.213\.228|57\.108\.99))|3\.(?:25(?:3\.178\.162|5\.143\.63)|151\.13\.34)|4\.1(?:26\.183\.117|58\.204\.250)|5\.117\.219\.10|7\.220\.97\.34)|7(?:8\.(?:7(?:9\.1(?:2\.251|3\.222)|4\.54\.174)|37\.176\.185|148\.44\.42)|(?:5\.203\.171\.3|4\.57\.6\.)1|6\.195\.190\.79)|09\.(?:2(?:03\.203\.60|38\.31\.219)|1(?:00\.134\.246|95\.66\.2)|98\.7\.228)|4\.(?:140\.(?:105\.33|0\.178)|36\.12\.227)|53\.19\.108\.41)|2(?:1(?:0\.(?:1(?:68\.50\.1[56]|90\.119\.145)|212\.(?:144\.214|20\.173)|61\.125\.211|4\.75\.229|51\.44\.48)|8\.(?:2(?:2(?:5\.75\.139|\.80\.61)|06\.76\.235|47\.138\.40)|189\.26\.158|85\.137\.11)|2\.(?:1(?:16\.178\.249|56\.155\.130|74\.243\.174)|62\.116\.82)|9\.(?:70\.4(?:3\.245|8\.52)|83\.100\.204|94\.224\.189)|1\.4(?:1\.202\.213|7\.104\.236|4\.183\.97|5\.126\.81)|7\.219\.123\.59)|0(?:0\.(?:1(?:1(?:1\.62\.242|6\.10\.11)|37\.174\.178|78\.153\.62)|208\.81\.245|6\.237\.147)|1\.(?:1(?:86\.118\.236|51\.156\.89)|245\.175\.177|48\.230\.33)|2\.1(?:6(?:1\.188\.107|2\.219\.215)|(?:16\.62|58\.77)\.218)|3\.(?:1(?:63\.255\.12|42\.65\.11)|78\.115\.11)6|5\.251\.131\.31)|2(?:2\.(?:1(?:71\.60\.156|24\.16\.34|84\.9\.242)|255\.(?:132\.5|28\.33)|42\.45\.51)|1\.(?:169\.239\.9|2\.159\.175)|0\.227\.90\.238)|4\.(?:2(?:12\.210\.166|31\.187\.50)|6\.176\.93)|\.90\.221\.221)|6(?:0\.(?:2(?:17\.32\.14[38]|8\.245\.251)|191\.232\.230)|1\.(?:4(?:7\.57\.234|9\.31\.83)|136\.59\.177)|7\.(?:133\.133\.1|238\.1\.177|77\.92\.244)|(?:2\.33\.191\.|8\.204\.2\.1)66|6\.165\.246\.18[01]|4\.212\.73\.53|5\.51\.47\.107)|8(?:9\.(?:12(?:2\.161\.212|3\.93\.179)|37\.(?:109\.|68\.1)3|76\.225\.137)|(?:1\.202\.116\.10|0\.80\.108\.3)5|2\.1(?:00\.80\.36|6\.159\.61)|7\.(?:98\.143\.74|117\.6\.18)|4\.121\.245\.180|5\.185\.25\.227|6\.122\.61\.204)|7(?:7\.(?:2(?:48\.62\.213|55\.75\.155)|12(?:7\.56\.237|1\.43\.83))|5\.(?:(?:72\.232\.17|64\.24\.3)7|145\.98\.90)|8\.(?:3(?:6\.238\.11|8\.213\.45)|58\.167\.39)|2\.42\.186\.137|4\.93\.147\.138|1\.82\.41\.90)|9(?:4\.(?:2(?:02\.253\.121|3\.209\.218)|73\.245\.48)|(?:3\.75\.246\.11|2\.242\.10\.)8|8\.234\.164\.131)|4(?:6\.(?:185\.62\.10|48\.135\.3)9|1\.137\.2[04]\.4)|5(?:8\.(?:248\.245\.22|182\.173\.3)5|9\.163\.11\.66))\b)/
+header	 KHOP_SC_TOP200  Received =~ /___ FAILED TO POPULATE ___/
 describe KHOP_SC_TOP200  Relay listed in SpamCop top 200 spammer IPs
 tflags	 KHOP_SC_TOP200  nopublish
 score	 KHOP_SC_TOP200  4 0 4 0	# unnecessary if DNSBLs work
@@ -164,7 +163,7 @@ score	 KHOP_SPAMHAUS_DROP_LE	2 0 2 0 	# adds to KHOP_SPAMHAUS_DROP
 
 # PSBL-neighbors:  any /24 with 73+ (2/7, 29%) IPs in the PSBL (not SpamCop),
 # as obtained from rsync://psbl-mirror.surriel.com::psbl/psbl.txt
-header	 KHOP_PSBL_CIDR24	X-Spam-Relays-Untrusted =~ /(?-xism:\b(?:1(?:12\.215\.6[345]|80\.232\.105)|223\.252\.1(?:6[1578]|7[03]))\.[012]?\d{1,2}\b)/
+header	 KHOP_PSBL_CIDR24	X-Spam-Relays-Untrusted =~ /(?-xism:\b(?:1(?:8(?:8\.(?:5(?:1\.(?:1(?:26|4)|6[469]|9[36]|31|53)|3\.(?:1(?:09|22)|36|47|61|90)|2\.(?:8[34]|33|55|78|94)|0\.(?:118|65|80|9)|5\.(?:2[46]|97)|4\.(?:82|95))|4(?:9\.(?:1(?:1[01]|06)|7?3|45|52|99)|8\.(?:1[12]2|5[48]|48|66|97))|3\.224)|4\.105\.190)|7(?:6\.4(?:5\.(?:6[018]|7[13]?|8[017]|3[34]|121|58?|97|4)|4\.(?:49?|20))|3\.211\.(?:119|63)|7\.47\.106)|1(?:2\.(?:215\.(?:6[345]|4[45])|79\.36)|0\.52\.[67])|0(?:9\.(?:98\.(?:9[89]|107)|102\.184)|3\.1\.30)|2(?:1\.63\.1[789]|2\.155\.36)|9(?:4\.27\.24[01]|7\.252\.0)|30\.193\.14[57]|\.38\.16)|2(?:0(?:(?:7\.152\.14|5\.251\.7)7|4\.(?:74\.249|8\.87))|1(?:2\.96\.64|7\.76\.69)|\.88\.(?:[79]|32))|6(?:3\.141\.202|6\.227\.104|8\.170\.198|7\.221\.46)|8(?:5\.26\.(?:18[34]|241)|3\.149\.(?:48|3))|41\.(?:2(?:23\.162|54\.5)|190\.[23])|37\.1(?:0(?:5\.36|6\.13)|10\.211)|7(?:7\.30\.6[04]|9\.170\.53)|9(?:4\.98\.156|5\.65\.241))\.[012]?\d{1,2}\b)/
 describe KHOP_PSBL_CIDR24	Relay's IP/24 CIDR contains many PSBL hits
 tflags	 KHOP_PSBL_CIDR24	nopublish
 score	 KHOP_PSBL_CIDR24	2 0.6 2 0.6
