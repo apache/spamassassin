@@ -24,6 +24,8 @@
 ###########################################################################
 
 ifplugin Mail::SpamAssassin::Plugin::BodyEval
+  if (version >= 3.004000)
+
 	body            __KAM_BODY_LENGTH_LT_128        eval:check_body_length('128')
         describe        __KAM_BODY_LENGTH_LT_128        The length of the body of the email is less than 128 bytes.
 
@@ -35,6 +37,7 @@ ifplugin Mail::SpamAssassin::Plugin::BodyEval
 
         body            __KAM_BODY_LENGTH_LT_1024       eval:check_body_length('1024')
         describe        __KAM_BODY_LENGTH_LT_1024       The length of the body of the email is less than 1024 bytes.
+  endif
 endif
 
 #EOF
