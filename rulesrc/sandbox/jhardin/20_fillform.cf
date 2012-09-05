@@ -85,7 +85,7 @@ ifplugin Mail::SpamAssassin::Plugin::ReplaceTags
   meta     __FILL_THIS_FORM_SHORT         !__FILL_THIS_FORM && (__FILL_THIS_FORM_SHORT1 || __FILL_THIS_FORM_SHORT2 || __FILL_THIS_FORM_PARTIAL > 2 || __FILL_THIS_FORM_PARTIAL_RAW > 2)
   meta     FILL_THIS_FORM_SHORT           __FILL_THIS_FORM_SHORT && !__VIA_ML && !__MSGID_JAVAMAIL
   describe FILL_THIS_FORM_SHORT           Fill in a short form with personal information
-  #score    FILL_THIS_FORM_SHORT           0.25
+  score    FILL_THIS_FORM_SHORT           1.0	# limit
 
   # Add to score if loan question is present
   body     __FILL_THIS_FORM_LOAN1         /<FF_YOUR><FF_L1><FF_SUFFIX>(?:<FF_BLANK1>|<FF_BLANK2>$)/i
