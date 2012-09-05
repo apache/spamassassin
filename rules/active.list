@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-brasil axb-coi-bulk axb-fraud axb-generic axb-ham-misc axb-sa-users axb-woas bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bernie-mix bpoliakoff danmcdonald darxus grenier jarif kpg-gah mas zmi; day 2: axb-brasil axb-coi-bulk axb-fraud axb-generic axb-ham-misc axb-sa-users axb-woas bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bernie-mix bpoliakoff danmcdonald darxus grenier jarif kpg-gah llanga mas zmi; day 3: axb-brasil axb-coi-bulk axb-fraud axb-generic axb-ham-misc axb-sa-users axb-woas bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bernie-mix bpoliakoff danmcdonald darxus grenier jarif kpg-gah llanga mas zmi
+# with results from: day 1: axb-brasil axb-coi-bulk axb-fraud axb-generic axb-ham-misc axb-sa-users axb-woas bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bernie-mix bpoliakoff danmcdonald darxus grenier jarif kpg-gah mas zmi; day 2: axb-brasil axb-coi-bulk axb-fraud axb-generic axb-ham-misc axb-sa-users axb-woas bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bernie-mix bpoliakoff danmcdonald darxus grenier jarif kpg-gah llanga mas zmi; day 3: axb-brasil axb-coi-bulk axb-fraud axb-generic axb-ham-misc axb-sa-users axb-woas bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bernie-mix bpoliakoff danmcdonald darxus grenier jarif kpg-gah llanga zmi
 
 # tflags publish
 ADVANCE_FEE_2_NEW_FORM
@@ -62,6 +62,9 @@ AXB_XMAILER_MIMEOLE_OL_12495
 AXB_XMAILER_MIMEOLE_OL_1ECD5
 
 # good enough
+AXB_XMAILER_MIMEOLE_OL_4379D
+
+# good enough
 AXB_XMAILER_MIMEOLE_OL_6237B
 
 # good enough
@@ -84,6 +87,9 @@ AXB_X_AOL_SEZ_S
 
 # good enough
 AXB_X_RCV_WLOCAL
+
+# good enough
+BANKING_LAWS
 
 # tflags learn
 BAYES_00
@@ -226,9 +232,6 @@ FM_LOTTO_MONEY
 # good enough
 FM_LOTTO_YOU_WON
 
-# good enough
-FM_SCHOOL_DIPLOMA
-
 # tflags publish
 FORM_FRAUD_3
 
@@ -296,6 +299,9 @@ FSL_FREEMAIL_1
 FSL_FREEMAIL_2
 
 # good enough
+FSL_HELO_DEVICE
+
+# good enough
 FSL_MID_419
 
 # good enough
@@ -312,6 +318,9 @@ FSL_UA
 
 # good enough
 FSL_XM_419
+
+# good enough
+FS_WE_WANT
 
 # good enough
 FS_WILL_HELP
@@ -372,6 +381,9 @@ HK_NAME_FROM
 
 # good enough
 HK_NAME_MR_MRS
+
+# good enough
+HK_RANDOM_REPLYTO
 
 # good enough
 HK_SCAM_N1
@@ -441,6 +453,9 @@ LOTTO_AGENT_RPLY
 
 # good enough
 LOTTO_DEPT
+
+# good enough
+LOTTO_URI
 
 # tflags publish
 MANY_SPAN_IN_TEXT
@@ -788,22 +803,61 @@ TO_NO_BRKTS_FROM_MSSP
 TO_NO_BRKTS_MSFT
 
 # good enough
+TT_MSGID_TRUNC
+
+# good enough
 TVD_APPROVED
 
 # good enough
 TVD_PH_BODY_META
 
 # good enough
-AXB_XMAILER_MIMEOLE_OL_4379D
+TVD_PH_REC
 
 # good enough
-FS_WE_WANT
+AXB_BODYMAIL_SBL112884
 
 # good enough
-HK_RANDOM_REPLYTO
+AXB_XMAILER_MIMEOLE_OL_22B61
 
 # good enough
-LOTTO_URI
+AXB_XMAILER_MIMEOLE_OL_2E645
+
+# good enough
+AXB_XMAILER_MIMEOLE_OL_3AC1D
+
+# good enough
+AXB_XMAILER_MIMEOLE_OL_8627E
+
+# good enough
+CN_B2B_SPAMMER
+
+# good enough
+EMRCP
+
+# good enough
+FB_IMAGIRL
+
+# good enough
+FROM_MISSP_NO_TO
+
+# good enough
+MANY_PILL_PRICE
+
+# good enough
+OBFU_HTML_ATTACH
+
+# good enough
+RP_MATCHES_RCVD
+
+# good enough
+SHORTENED_URL_SRC
+
+# good enough
+TINY_FLOAT
+
+# good enough
+YOUR_PERMISSION
 
 # tflags userconf
 UNPARSEABLE_RELAY
