@@ -292,9 +292,19 @@ sub new {
   # Store the pristine body for later -- store as a copy since @message
   # will get modified below
   $self->{'pristine_body'} = join('', @message);
-  # This is currently used by an eval test check_body_length.  
-  # Possible To-Do: Base the length on the @message array later down?  Or a different copy of the message post decoding?
-  $self->{'pristine_body_length'} = length($self->{'pristine_body'});
+
+  # pristine_body_length is currently used by an eval test check_body_length.  
+  # Possible To-Do: Base the length on the @message array later down?
+  # Or a different copy of the message post decoding?
+  if ($self->{suppl_attrib} && defined $self->{suppl_attrib}{body_size}) {
+    # optional info provided by a caller; should reflect the original
+    # message body size if provided, and as such it may differ from the
+    # $self->{pristine_body} size, e.g. when the caller passed a truncated
+    # message to SpamAssassin, or when counting line-endings differently
+    $self->{'pristine_body_length'} = $self->{suppl_attrib}{body_size};
+  } else {
+    $self->{'pristine_body_length'} = length($self->{'pristine_body'});
+  }
 
   # CRLF -> LF
   # also merge multiple blank lines into a single one
