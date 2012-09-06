@@ -286,15 +286,16 @@ sub _check_stock_info {
 sub check_body_length {
   my ($self, $pms, undef, $min) = @_;
 
-  #print "DEBUG: KAM $min - $pms->{msg}->{pristine_body_length}\n";
+  my $body_length = $pms->{msg}->{pristine_body_length};
+  dbg("eval: body_length - %s - check for min of %s", $body_length, $min);
 
-  dbg("eval: body_length - $pms->{msg}->{pristine_body_length} - check for min of $min");
-
-  if (defined($pms->{msg}->{pristine_body_length}) and $pms->{msg}->{pristine_body_length} <= $min) {
-    return 1;
-  } else {
-    return 0;
-  }
+  return (defined $body_length && $body_length <= $min) ? 1 : 0;
 }
+
+# ---------------------------------------------------------------------------
+
+# capability checks for "if can()":
+#
+sub has_check_body_length { 1 }
 
 1;
