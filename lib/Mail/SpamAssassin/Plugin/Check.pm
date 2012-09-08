@@ -821,14 +821,19 @@ sub do_body_tests {
   {
     my ($self, $pms, $conf, $rulename, $pat, %opts) = @_;
     $pat = untaint_var($pat);  # presumably checked
-    my $sub;
+    my $sub = '';
+    if (would_log('dbg', 'rules-all') == 2) {
+      $sub .= '
+      dbg("rules-all: running body rule %s", q{'.$rulename.'});
+      ';
+    }
     if (($conf->{tflags}->{$rulename}||'') =~ /\bmultiple\b/)
     {
       # support multiple matches
       $loopid++;
       my ($max) = ($pms->{conf}->{tflags}->{$rulename}||'') =~ /\bmaxhits=(\d+)\b/;
       $max = untaint_var($max);
-      $sub = '
+      $sub .= '
       $hits = 0;
       body_'.$loopid.': foreach my $l (@_) {
         pos $l = 0;
@@ -845,7 +850,7 @@ sub do_body_tests {
     else {
       # omitting the "pos" call, "body_loopid" label, use of while()
       # instead of if() etc., shaves off 8 perl OPs.
-      $sub = '
+      $sub .= '
       foreach my $l (@_) {
         '.$self->hash_line_for_rule($pms, $rulename).'
         if ($l =~ '.$pat.') { 
@@ -898,12 +903,17 @@ sub do_uri_tests {
   {
     my ($self, $pms, $conf, $rulename, $pat, %opts) = @_;
     $pat = untaint_var($pat);  # presumably checked
-    my $sub;
+    my $sub = '';
+    if (would_log('dbg', 'rules-all') == 2) {
+      $sub .= '
+      dbg("rules-all: running uri rule %s", q{'.$rulename.'});
+      ';
+    }
     if (($conf->{tflags}->{$rulename}||'') =~ /\bmultiple\b/) {
       $loopid++;
       my ($max) = ($pms->{conf}->{tflags}->{$rulename}||'') =~ /\bmaxhits=(\d+)\b/;
       $max = untaint_var($max);
-      $sub = '
+      $sub .= '
       $hits = 0;
       uri_'.$loopid.': foreach my $l (@_) {
         pos $l = 0;
@@ -917,7 +927,7 @@ sub do_uri_tests {
       }
       ';
     } else {
-      $sub = '
+      $sub .= '
       foreach my $l (@_) {
         '.$self->hash_line_for_rule($pms, $rulename).'
         if ($l =~ '.$pat.') { 
@@ -970,14 +980,19 @@ sub do_rawbody_tests {
   {
     my ($self, $pms, $conf, $rulename, $pat, %opts) = @_;
     $pat = untaint_var($pat);  # presumably checked
-    my $sub;
+    my $sub = '';
+    if (would_log('dbg', 'rules-all') == 2) {
+      $sub .= '
+      dbg("rules-all: running rawbody rule %s", q{'.$rulename.'});
+      ';
+    }
     if (($pms->{conf}->{tflags}->{$rulename}||'') =~ /\bmultiple\b/)
     {
       # support multiple matches
       $loopid++;
       my ($max) = ($pms->{conf}->{tflags}->{$rulename}||'') =~ /\bmaxhits=(\d+)\b/;
       $max = untaint_var($max);
-      $sub = '
+      $sub .= '
       $hits = 0;
       rawbody_'.$loopid.': foreach my $l (@_) {
         pos $l = 0;
@@ -992,7 +1007,7 @@ sub do_rawbody_tests {
       ';
     }
     else {
-      $sub = '
+      $sub .= '
       foreach my $l (@_) {
         '.$self->hash_line_for_rule($pms, $rulename).'
         if ($l =~ '.$pat.') { 
@@ -1058,6 +1073,7 @@ sub do_full_tests {
       if ($scoresptr->{q{'.$rulename.'}}) {
         pos $$fullmsgref = 0;
         '.$self->hash_line_for_rule($pms, $rulename).'
+        dbg("rules-all: running full rule %s", q{'.$rulename.'});
         $hits = 0;
         while ($$fullmsgref =~ '.$pat.'g'. ($max? ' && $hits++ < '.$max:'') .') {
           $self->got_hit(q{'.$rulename.'}, "FULL: ", ruletype => "full");
