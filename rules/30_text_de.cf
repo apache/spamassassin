@@ -323,6 +323,9 @@ lang de describe WEIRD_PORT Ungewöhnliche Portnummer in HTTP-Hyperlink
 lang de describe YAHOO_RD_REDIR URL mit Umleitung über Yahoo
 lang de describe YAHOO_DRS_REDIR URL mit Umleitung über Yahoo
 lang de describe HTTP_77 Enthält URL mit kodiertem Rechnernamen
+
+# 23_bayes.cf
+ifplugin Mail::SpamAssassin::Plugin::Bayes
 lang de describe BAYES_00 Spamwahrscheinlichkeit nach Bayes-Test: 0-1%
 lang de describe BAYES_05 Spamwahrscheinlichkeit nach Bayes-Test: 1-5%
 lang de describe BAYES_20 Spamwahrscheinlichkeit nach Bayes-Test: 5-20%
@@ -332,6 +335,8 @@ lang de describe BAYES_60 Spamwahrscheinlichkeit nach Bayes-Test: 60-80%
 lang de describe BAYES_80 Spamwahrscheinlichkeit nach Bayes-Test: 80-95%
 lang de describe BAYES_95 Spamwahrscheinlichkeit nach Bayes-Test: 95-99%
 lang de describe BAYES_99 Spamwahrscheinlichkeit nach Bayes-Test: 99-100%
+endif
+#
 lang de describe USER_IN_BLACKLIST Absenderadresse steht in Ihrer persönlichen schwarzen Liste
 lang de describe USER_IN_WHITELIST Absenderadresse steht in Ihrer persönlichen weißen Liste
 lang de describe USER_IN_DEF_WHITELIST Absenderadresse steht in der allgemeinen weißen Liste
