@@ -34,7 +34,7 @@ lang pl report zablokowaæ na  przysz³o¶æ. Je¿eli masz jakie¶ w±tpliwo¶ci, to kie
 lang pl report adres _CONTACTADDRESS_
 lang pl report
 lang pl report Przegl±d zawarto¶ci:  _PREVIEW_
-lang pl report 
+lang pl report
 lang pl report Szczegó³y analizy zawarto¶ci: (_HITS_ zaliczonych, _REQD_ wymaganych)
 lang pl report
 lang pl report "pkt  nazwa regu³y           krótki opis"
@@ -43,7 +43,7 @@ lang pl report _SUMMARY_
 ############## ........................................................................
 
 ###########################################################################
-# szablon raportu wiadomo¶ci niebezpieczne-do-wgl±du 
+# szablon raportu wiadomo¶ci niebezpieczne-do-wgl±du
 #
 ##################### ......................................................................
 lang pl clear_unsafe_report_template
@@ -62,6 +62,9 @@ lang pl describe ACT_NOW_CAPS		Tekst 'ACTING NOW'
 lang pl describe BAD_CREDIT		Likwidacja problemów kredytowych
 lang pl describe BANG_GUAR		Dobitna gwarancja czego¶
 lang pl describe BANG_OPRAH		Tre¶æ: o Oprah z wykrzyknikiem!
+
+# 23_bayes.cf
+ifplugin Mail::SpamAssassin::Plugin::Bayes
 lang pl describe BAYES_00		Bayesowskie prawdopodobieñstwo spamu wynosi 0 do 1%
 lang pl describe BAYES_05		Bayesowskie prawdopodobieñstwo spamu wynosi 1 do 5%
 lang pl describe BAYES_20		Bayesowskie prawdopodobieñstwo spamu wynosi 5 do 20%
@@ -71,6 +74,8 @@ lang pl describe BAYES_60		Bayesowskie prawdopodobieñstwo spamu wynosi 60 do 80%
 lang pl describe BAYES_80		Bayesowskie prawdopodobieñstwo spamu wynosi 80 do 95%
 lang pl describe BAYES_95		Bayesowskie prawdopodobieñstwo spamu wynosi 95 do 99%
 lang pl describe BAYES_99		Bayesowskie prawdopodobieñstwo spamu wynosi 99 do 100%
+endif
+#
 lang pl describe BILLION_DOLLARS	Tre¶æ: o niesamowitej ilo¶ci pieniêdzy
 lang pl describe BLANK_LINES_80_90	Tre¶æ zawiera 80-90% pustych linii
 lang pl describe CHARSET_FARAWAY_HEADER	Obcojêzyczny zestaw znaków w nag³ówkach

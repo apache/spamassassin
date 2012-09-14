@@ -484,6 +484,7 @@ lang pt_BR describe VBOUNCE_MESSAGE Bounce de mensagem de antivirus
 lang pt_BR describe ANY_BOUNCE_MESSAGE Mensagem é um bounce de algum email
 
 # 23_bayes.cf
+ifplugin Mail::SpamAssassin::Plugin::Bayes
 lang pt_BR describe BAYES_00 Probabilidade de ser spam entre 0 to 1%
 lang pt_BR describe BAYES_05 Probabilidade de ser spam entre 1 to 5%
 lang pt_BR describe BAYES_20 Probabilidade de ser spam entre 5 to 20%
@@ -493,7 +494,8 @@ lang pt_BR describe BAYES_60 Probabilidade de ser spam entre 60 to 80%
 lang pt_BR describe BAYES_80 Probabilidade de ser spam entre 80 to 95%
 lang pt_BR describe BAYES_95 Probabilidade de ser spam entre 95 to 99%
 lang pt_BR describe BAYES_99 Probabilidade de ser spam entre 99 to 100%
-
+endif
+#
 # 25_accessdb.cf
 ifplugin Mail::SpamAssassin::Plugin::AccessDB
 lang pt_BR describe ACCESSDB Mensagem teria sido pega pela accessdb

@@ -10,9 +10,9 @@
 # The ASF licenses this file to you under the Apache License, Version 2.0
 # (the "License"); you may not use this file except in compliance with
 # the License.  You may obtain a copy of the License at:
-# 
+#
 #     http://www.apache.org/licenses/LICENSE-2.0
-# 
+#
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -30,9 +30,9 @@ lang nl report als mogelijke spam aangemerkt. Het originele bericht is bijgevoeg
 lang nl report bijlage bij dit bericht zodat u het kunt bekijken (als het geen spam is)
 lang nl report of soortgelijke toekomstige berichten blokkeren. Zie _CONTACTADDRESS_
 lang nl report voor meer details
-lang nl report 
+lang nl report
 lang nl report Gedeelte van de inhoud:  _PREVIEW_
-lang nl report 
+lang nl report
 lang nl report Analyse details:   (_SCORE_ punten, _REQD_ vereist)
 lang nl report
 lang nl report " pnt regel naam             omschrijving"
@@ -41,10 +41,10 @@ lang nl report _SUMMARY_
 #              ..............................................................................
 
 #                    ........................................................................
-lang nl unsafe_report Het originele bericht bestond niet geheel uit tekst en is mogelijk 
-lang nl unsafe_report onveilig om te openen im sommige emailprogramma's. Het bericht bevat 
-lang nl unsafe_report mogelijk een virus of code om te verifieren dat uw adres spam 
-lang nl unsafe_report berichten kan ontvangen. Het is veiliger om het bericht op te slaan 
+lang nl unsafe_report Het originele bericht bestond niet geheel uit tekst en is mogelijk
+lang nl unsafe_report onveilig om te openen im sommige emailprogramma's. Het bericht bevat
+lang nl unsafe_report mogelijk een virus of code om te verifieren dat uw adres spam
+lang nl unsafe_report berichten kan ontvangen. Het is veiliger om het bericht op te slaan
 lang nl unsafe_report en het te bekijken in een tekstbewerkingsprogramma.
 #                    ........................................................................
 
@@ -209,7 +209,7 @@ lang nl describe ONE_TIME                        Eenmalige afzettingspraktijk
 lang nl describe JOIN_MILLIONS                   Voeg je bij miljoenen Amerikanen
 lang nl describe ONLINE_PHARMACY                 Online apotheek
 lang nl describe MARKETING_PARTNERS              Zegt dat je je bij een partner bedrijf hebt geregistreerd
-lang nl describe LOW_PRICE                       Laagste prijzen 
+lang nl describe LOW_PRICE                       Laagste prijzen
 lang nl describe UNCLAIMED_MONEY                 Mensen laten het geld rondslingeren
 lang nl describe OBSCURED_EMAIL                  Bevat een rot13ed adres
 lang nl describe BANG_OPRAH                      Iets met Oprah!
@@ -240,6 +240,9 @@ lang nl describe IP_LINK_PLUS                    "Dotted-decimal" IP address gev
 lang nl describe WEIRD_PORT                      Gebruikt een afwijkend poort nummer voor HTTP
 lang nl describe YAHOO_RD_REDIR                  Bevat een Yahoo Redirect URI
 lang nl describe YAHOO_DRS_REDIR                 Bevat een Yahoo Redirect URI
+
+# 23_bayes.cf
+ifplugin Mail::SpamAssassin::Plugin::Bayes
 lang nl describe BAYES_00                        Bayesiaanse kans op spam is 0 tot 1%
 lang nl describe BAYES_05                        Bayesiaanse kans op spam is 1 tot 5%
 lang nl describe BAYES_20                        Bayesiaanse kans op spam is 5 tot 20%
@@ -249,6 +252,8 @@ lang nl describe BAYES_60                        Bayesiaanse kans op spam is 60 
 lang nl describe BAYES_80                        Bayesiaanse kans op spam is 80 tot 95%
 lang nl describe BAYES_95                        Bayesiaanse kans op spam is 95 tot 99%
 lang nl describe BAYES_99                        Bayesiaanse kans op spam is 99 tot 100%
+endif
+#
 lang nl describe DRUG_DOSAGE			Heeft het over een prijs per dosis
 
 ifplugin Mail::SpamAssassin::Plugin::AntiVirus
