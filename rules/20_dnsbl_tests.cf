@@ -165,31 +165,18 @@ reuse  RCVD_IN_PBL              RCVD_IN_PBL T_RCVD_IN_PBL_WITH_NJABL_DUL RCVD_IN
 # ---------------------------------------------------------------------------
 # RFC-Ignorant blacklists (both name and IP based)
 
-header __RFC_IGNORANT_ENVFROM   eval:check_rbl_envfrom('rfci_envfrom', 'fulldom.rfc-ignorant.org.')
-tflags __RFC_IGNORANT_ENVFROM   net
+# REMOVED ALL RULES:
 
-header DNS_FROM_RFC_DSN         eval:check_rbl_sub('rfci_envfrom', '127.0.0.2')
-describe DNS_FROM_RFC_DSN       Envelope sender in dsn.rfc-ignorant.org
-tflags DNS_FROM_RFC_DSN         net
-reuse  DNS_FROM_RFC_DSN
+# SEE http://rfc-ignorant.org/endofanera.php
 
-header DNS_FROM_RFC_BOGUSMX     eval:check_rbl_sub('rfci_envfrom', '127.0.0.8')
-describe DNS_FROM_RFC_BOGUSMX   Envelope sender in bogusmx.rfc-ignorant.org
-tflags DNS_FROM_RFC_BOGUSMX     net
-reuse  DNS_FROM_RFC_BOGUSMX
+# Effective 9/15/2012 - All publicly visible DNS slaves have been removed from the NS-set other than SONIC.NET's primary RBL servers, a change that is percolating through DNS caches now
+# Effective 9/20/2012 - we will no longer accept submissions of new domains
+# Effective 9/30/2012 - All entries currently marked as "Listed" in the databases will be marked as "Deprecated", which will cause them to not generate DNSBL entries. This will, effectively, mean that lookups of any domain in our database will always return "false", i.e., "clean".
+# Effective 10/15/2012 - The rsync service for slaving of zones will be shut down
+# Effective 10/30/2012 - All sub zones will have their NS-set set to "localhost.rfc-ignorant.org", with lengthy TTLS, which will direct all DNS traffic back onto the server requesting it.
+# Effective 11/30/2012 - The root NS set for "rfc-ignorant.org" will be deleted entirely, preventing any resolution
 
-# bug 4628: these rules are too unreliable to assign scores to
-header __DNS_FROM_RFC_POST      eval:check_rbl_sub('rfci_envfrom', '127.0.0.3')
-tflags __DNS_FROM_RFC_POST      net
-reuse  __DNS_FROM_RFC_POST      DNS_FROM_RFC_POST
 
-header __DNS_FROM_RFC_ABUSE     eval:check_rbl_sub('rfci_envfrom', '127.0.0.4')
-tflags __DNS_FROM_RFC_ABUSE     net
-reuse  __DNS_FROM_RFC_ABUSE     DNS_FROM_RFC_ABUSE
-
-header __DNS_FROM_RFC_WHOIS     eval:check_rbl_sub('rfci_envfrom', '127.0.0.5')
-tflags __DNS_FROM_RFC_WHOIS     net
-reuse  __DNS_FROM_RFC_WHOIS     DNS_FROM_RFC_WHOIS
 
 # ---------------------------------------------------------------------------
 # Now, single zone BLs follow:
