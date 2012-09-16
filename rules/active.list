@@ -223,12 +223,6 @@ DKIM_VALID_AU
 # tflags net
 DNS_FROM_AHBL_RHSBL
 
-# tflags net
-DNS_FROM_RFC_BOGUSMX
-
-# tflags net
-DNS_FROM_RFC_DSN
-
 # tflags publish
 DOS_ANAL_SPAM_MAILER
 
@@ -582,6 +576,9 @@ NSL_RCVD_HELO_USER
 
 # good enough
 OBFU_ATTACH_MISSP
+
+# good enough
+OBFU_HTML_ATTACH
 
 # tflags publish
 OBFU_JVSCR_ESC
@@ -1031,15 +1028,6 @@ YOUR_PERMISSION
 __DKIMDOMAIN_IN_DWL_ANY
 
 # tflags net
-__DNS_FROM_RFC_ABUSE
-
-# tflags net
-__DNS_FROM_RFC_POST
-
-# tflags net
-__DNS_FROM_RFC_WHOIS
-
-# tflags net
 __FROM_MISSP_DKIM
 
 # tflags net
@@ -1074,9 +1062,6 @@ __RESIGNER1
 
 # tflags net
 __RESIGNER2
-
-# tflags net
-__RFC_IGNORANT_ENVFROM
 
 # tflags net
 __SPF_FULL_PASS
