@@ -342,19 +342,6 @@ score HIGH_CODEPAGE_URI 0 # n=0 n=1 n=2
 score HK_LOTTO 3.599 2.755 2.993 3.599
 score HK_NAME_DRUGS 4.299 0.001 3.077 0.552
 score HK_RANDOM_ENVFROM 2.638 0.626 1.798 0.001
-score HS_BOBAX_MID_2 2.762 2.612 1.243 1.437
-score HS_BODY_UPLOADED_SOFTWARE 0 # n=0 n=1 n=2 n=3
-score HS_DRUG_DOLLAR_1 0.001 # n=0 n=1 n=2 n=3
-score HS_DRUG_DOLLAR_2 0.001 # n=0 n=1 n=2 n=3
-score HS_DRUG_DOLLAR_3 0.001 # n=0 n=1 n=2 n=3
-score HS_DRUG_DOLLAR_MANY 0 # n=0 n=1 n=2 n=3
-score HS_FORGED_OE_FW 0.482 2.252 1.565 2.011 # n=2
-score HS_GETMEOFF 0 # n=0 n=1 n=2 n=3
-score HS_INDEX_PARAM 1.105 0.023 1.203 0.574 # n=1
-score HS_MEETUP_FOR_SEX 0 # n=0 n=1 n=2 n=3
-score HS_SUBJ_NEW_SOFTWARE 0 # n=0 n=1 n=2 n=3
-score HS_SUBJ_ONLINE_PHARMACEUTICAL 0 # n=0 n=1 n=2 n=3
-score HS_VPXL 3.211 1.399 2.696 1.948
 score HTML_MIME_NO_HTML_TAG 0.001 0.635 0.001 0.377
 score HTML_MISSING_CTYPE 0 # n=0 n=1 n=2 n=3
 score HTML_SHORT_CENTER 3.799 3.421 2.611 0.743
@@ -696,10 +683,6 @@ score RCVD_IN_PBL 0 3.558 0 3.335 # n=0 n=2
 score DNS_FROM_AHBL_RHSBL 0 2.438 0 2.699 # n=0 n=2
 score NO_DNS_FOR_FROM 0 0.379 0 0.001 # n=0 n=2
 # </gen:mutable>
-
-# Spamhaus CSS does not appear in masschecks thus cannot be
-# scored by automated means.  Set an explicit score.
-score RCVD_IN_CSS 0 1.0 0 1.0
 
 # ReturnPath Certified
 # http://www.returnpath.net/internetserviceprovider/certification/
