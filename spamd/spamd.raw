@@ -113,19 +113,6 @@ if ($Mail::SpamAssassin::VERSION ne '@@VERSION@@' && '@@VERSION@@' ne "\@\@VERSI
   die 'spamd: spamd script is v@@VERSION@@, but using modules v'.$Mail::SpamAssassin::VERSION."\n";
 }
 
-BEGIN {
-  # redirect __WARN__ and __DIE__
-  # do not trap warnings here based on eval scope; evals are very
-  # common throughout.  die()s can be trapped though.
-  $SIG{__WARN__} = sub {
-    log_message("warn", $_[0]);
-  };
-  $SIG{__DIE__} = sub {
-    # see http://use.perl.org/comments.pl?mode=flat&sid=33872 for $^S
-    log_message("error", $_[0]) unless $^S;
-  };
-}
-
 my %resphash = (
   EX_OK          => 0,     # no problems
   EX_USAGE       => 64,    # command line usage error
@@ -945,6 +932,23 @@ unless ($clients_per_child > 1) {
   # after closing the connection
   $copy_config_p = 0;
 }
+
+# See Bug 6837: establishing a __DIE__ handler should be done after
+# most modules have been loaded, as the $^S cannot distinguish
+# true failures from eval attempt failures within a 'require'-d module.
+# If the problem persists in some late-lodaded modules, we may need
+# to tighten the condition to something like 'if defined $^S && !$^S'.
+#
+# redirect __WARN__ and __DIE__
+# do not trap warnings here based on eval scope; evals are very
+# common throughout.  die()s can be trapped though.
+$SIG{__WARN__} = sub {
+  log_message("warn", $_[0]);
+};
+$SIG{__DIE__} = sub {
+  # see http://use.perl.org/comments.pl?mode=flat&sid=33872 for $^S
+  log_message("error", $_[0]) unless $^S;
+};
 
 ## DAEMONIZE! ##
 
