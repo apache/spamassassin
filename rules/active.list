@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-brasil axb-coi-bulk axb-fraud axb-generic axb-ham-misc axb-sa-users axb-woas bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bernie-mix bpoliakoff danmcdonald darxus grenier kpg-gah zmi; day 2: axb-brasil axb-coi-bulk axb-fraud axb-generic axb-ham-misc axb-sa-users axb-woas bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bernie-mix bpoliakoff danmcdonald darxus grenier kpg-gah llanga zmi; day 3: axb-brasil axb-coi-bulk axb-fraud axb-generic axb-ham-misc axb-sa-users axb-woas bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bernie-mix bpoliakoff danmcdonald darxus grenier jarif kpg-gah llanga zmi
+# with results from: day 1: axb-brasil axb-coi-bulk axb-fraud axb-generic axb-ham-misc axb-sa-users axb-woas bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bernie-mix bpoliakoff danmcdonald darxus grenier jarif kpg-gah zmi; day 2: axb-brasil axb-coi-bulk axb-fraud axb-generic axb-ham-misc axb-sa-users axb-woas bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bernie-mix bpoliakoff danmcdonald darxus grenier kpg-gah llanga zmi; day 3: axb-brasil axb-coi-bulk axb-fraud axb-generic axb-ham-misc axb-sa-users axb-woas bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bernie-mix bpoliakoff danmcdonald darxus grenier kpg-gah llanga zmi
 
 # tflags publish
 ADVANCE_FEE_2_NEW_FORM
@@ -81,9 +81,6 @@ AXB_XMAILER_MIMEOLE_OL_3AC1D
 
 # good enough
 AXB_XMAILER_MIMEOLE_OL_4204A
-
-# good enough
-AXB_XMAILER_MIMEOLE_OL_4379D
 
 # good enough
 AXB_XMAILER_MIMEOLE_OL_56DF6
@@ -190,6 +187,9 @@ BAYES_95
 # tflags learn
 BAYES_99
 
+# good enough
+BILLION_OVERLAP
+
 # tflags userconf
 CHARSET_FARAWAY
 
@@ -280,9 +280,6 @@ FB_CIALIS_LEO3
 # good enough
 FH_FAKE_RCVD_LINE
 
-# good enough
-FH_FAKE_RCVD_LINE_B
-
 # tflags publish
 FILL_THIS_FORM
 
@@ -318,9 +315,6 @@ FORM_FRAUD_5
 
 # tflags userconf
 FRAGMENTED_MESSAGE
-
-# good enough
-FREEMAIL_RVW_ATTCH
 
 # good enough
 FROM_12LTRDOM
@@ -446,6 +440,9 @@ HK_LOTTO
 HK_LOTTO_NAME
 
 # good enough
+HK_LOTTO_SUBJECT
+
+# good enough
 HK_NAME_FM_DR
 
 # good enough
@@ -495,9 +492,6 @@ HK_SCAM_S25
 
 # good enough
 HK_SCAM_S7
-
-# good enough
-HK_SPAMMY_FILENAME
 
 # tflags userconf
 HTML_CHARSET_FARAWAY
@@ -848,9 +842,6 @@ SHARE_50_50
 SHORTENED_URL_SRC
 
 # good enough
-SINGLE_HEADER_1K
-
-# good enough
 SINGLE_HEADER_2K
 
 # good enough
@@ -879,9 +870,6 @@ SPF_PASS
 
 # tflags net
 SPF_SOFTFAIL
-
-# good enough
-STOCK_IMG_HDR_FROM
 
 # good enough
 STYLE_GIBBERISH
@@ -929,52 +917,10 @@ TVD_RCVD_IP
 TVD_RCVD_IP4
 
 # good enough
-AXB_XMAILER_MIMEOLE_OL_2535D
+HK_GOLDDUST
 
 # good enough
-AXB_XMAILER_MIMEOLE_OL_44FE0
-
-# good enough
-AXB_XMAILER_MIMEOLE_OL_4F240
-
-# good enough
-AXB_XMAILER_MIMEOLE_OL_57545
-
-# good enough
-AXB_XMAILER_MIMEOLE_OL_5B79A
-
-# good enough
-AXB_XMAILER_MIMEOLE_OL_7F4F5
-
-# good enough
-AXB_XMAILER_MIMEOLE_OL_8E871
-
-# good enough
-AXB_XMAILER_MIMEOLE_OL_964DE
-
-# good enough
-AXB_XMAILER_MIMEOLE_OL_ADFF7
-
-# good enough
-AXB_XMAILER_MIMEOLE_OL_BC7E6
-
-# good enough
-AXB_XMAILER_MIMEOLE_OL_C65FA
-
-# good enough
-AXB_XMAILER_MIMEOLE_OL_D2603
-
-# good enough
-AXB_XMAILER_MIMEOLE_OL_F6D01
-
-# good enough
-BILLION_OVERLAP
-
-# good enough
-HK_LOTTO_SUBJECT
-
-# good enough
-KHOP_JS_OBFUSCATION
+OBFU_HTML_ATTACH
 
 # tflags userconf
 UNPARSEABLE_RELAY
