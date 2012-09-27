@@ -88,28 +88,28 @@ header  __REPLY_FREEMAIL Reply-To =~ /\@(?:googlemail|gmail|yahoo|hotmail|msn|ao
 meta    FSL_FREEMAIL_1 (__HAS_REPLY_TO && __REPLY_FREEMAIL)
 score   FSL_FREEMAIL_1 0.001
 meta    FSL_FREEMAIL_2 (__HAS_REPLY_TO && __REPLY_FREEMAIL && __FROM_FREEMAIL)
-score   FSL_FREEMAIL_2 0.001
+# score   FSL_FREEMAIL_2 0.001
 
 header  FSL_HELO_BARE_IP_1      X-Spam-Relays-External =~ /^[^\]]+ helo=\d+\.\d+\.\d+\.\d+ /i
-score   FSL_HELO_BARE_IP_1      0.001
+# score   FSL_HELO_BARE_IP_1      0.001
 
 header  FSL_HELO_BARE_IP_2      X-Spam-Relays-External =~ /\bhelo=\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b/i
-score   FSL_HELO_BARE_IP_2      0.001
+# score   FSL_HELO_BARE_IP_2      0.001
 
 header  FSL_HELO_NON_FQDN_1     X-Spam-Relays-External =~ /^[^\]]+ helo=[a-zA-Z0-9-_]+ /i
-score   FSL_HELO_NON_FQDN_1     0.001
+# score   FSL_HELO_NON_FQDN_1     0.001
 
 header  FSL_HELO_NON_FQDN_2     X-Spam-Relays-External =~ /\bhelo=[a-zA-Z0-9-_]+\b/i
-score   FSL_HELO_NON_FQDN_2     0.001
+# score   FSL_HELO_NON_FQDN_2     0.001
 
 header  FSL_FAKE_HOTMAIL_RVCD   X-Spam-Relays-External =~ /mx[1234]\.hotmail\.com/
-score   FSL_FAKE_HOTMAIL_RCVD   0.001
+# score   FSL_FAKE_HOTMAIL_RCVD   0.001
 
 header  FSL_FAKE_YAHOO_RCVD     X-Spam-Relays-External =~ /mx\.mail\.yahoo.com/
-score   FSL_FAKE_YAHOO_RCVD     0.001
+# score   FSL_FAKE_YAHOO_RCVD     0.001
 
 header  FSL_FAKE_GMAIL_RCVD     X-Spam-Relays-External =~ /gmail-smtp-in\.l\.google\.com/
-score   FSL_FAKE_GMAIL_RCVD     0.001
+# score   FSL_FAKE_GMAIL_RCVD     0.001
 
 # uri   FSL_SPAMWARE_STRING_1   /\{\S+\}/
 # score FSL_SPAMWARE_STRING_1   5.0
@@ -118,16 +118,16 @@ header  FSL_RCVD_USER           Received =~ /\bUser\b/i
 # score   FSL_RCVD_USER         0.001
 
 header  FSL_HELO_LITERAL        X-Spam-Relays-External =~ /\bhelo=\[\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\]\b/i
-score   FSL_HELO_LITERAL        0.001
+# score   FSL_HELO_LITERAL        0.001
 
 header  FSL_HELO_UNKNOWN        X-Spam-Relays-External =~ /\bhelo=unkown\b/i
-score   FSL_HELO_UNKNOWN        0.001
+# score   FSL_HELO_UNKNOWN        0.001
 
 header  FSL_HELO_HOME           X-Spam-Relays-External =~ /\bhelo=\S+\.home\b/i
-score   FSL_HELO_HOME           0.001
+# score   FSL_HELO_HOME           0.001
 
 header  FSL_HELO_SETUP          X-Spam-Relays-External =~ /\bhelo=\S+\.setup\b/i
-score   FSL_HELO_SETUP          0.001
+# score   FSL_HELO_SETUP          0.001
 
 header  FSL_HELO_FIREWALL       X-Spam-Relays-External =~ /\bhelo=\S+\.firewall\b/i
 # score FSL_HELO_FIREWALL       0.001
@@ -140,4 +140,4 @@ header  FSL_HELO_FAKE           X-Spam-Relays-External =~ /\bhelo=(?:yandex.ru|(
 
 # Testing
 header  FSL_FAKE_RCVD           Received =~ /^from \S+ by \S+; \S+, \d+ \S+ \d{4} \d+:\d+:\d+ \+\d+$/
-score   FSL_FAKE_RCVD           0.001
+# score   FSL_FAKE_RCVD           0.001
