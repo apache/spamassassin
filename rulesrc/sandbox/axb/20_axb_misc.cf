@@ -1,23 +1,21 @@
 ##
 
+# 2012-08-29
+
+# 2012-09-27
+# Overlap test
+header          __AXB_XM_OL_2600  X-Mailer =~ /Microsoft\ Outlook\ Express\ 6\.00\.2600\.0000/
+header          __AXB_MO_OL_2600  X-MimeOLE =~ /Produced\ By\ Microsoft\ MimeOLE\ V6\.00\.2600\.0000/
+meta            AXB_XM_FORGED_OL2600    (__AXB_XM_OL_2600  && !__AXB_MO_OL_2600 )
+describe        AXB_XM_FORGED_OL2600     Forged OE v. 6.2600
+tflags          AXB_XM_FORGED_OL2600     nopublish
+
+header          AXB_X_TREND_AS          X-TM-AS-Result =~ /^Yes/
+describe        AXB_X_TREND_AS          Trendmicro said this is S
 
 # 2012-08-29
 header          AXB_XM_TURBOM           X-Mailer =~ /TurboMailer/
 describe        AXB_XM_TURBOM           Mailer fingerprint
-
-# 2012-08-22
-header          AXB_XM_ACHIK            X-Mailer =~ /^Achi-KochiMail/
-describe        AXB_XM_ACHIK            Mailer fingerprint
-
-# # 2012-08-16 - Patternity pattern
-header          AXB_XMID_PATTERNITY1    Message-ID =~ /^[0-9a-f]{6}\-[0-9a-f]{4}\-[0-9a-f]{4}\-[0-9a-f]{4}\-[0-9a-f]{12}\@/
-describe        AXB_XMID_PATTERNITY1    Possible bulkware fingerprint
-
-# # 2012-08-15 SA user case
-header          __RDNS_AUTHORIZE_NET            X-Spam-Relays-External =~ /rdns=\S+\.authorize\.net/
-header          __FROM_AUTHORIZE_NET            From=~ /authorize\.net/
-meta            AXB_M_FORGE_AUTHORIZE_NET       (__FROM_AUTHORIZE_NET && !__RDNS_AUTHORIZE_NET)
-describe        AXB_M_FORGE_AUTHORIZE_NET       Possible authorize.net forgery
 
 # 2012-08-15
 header          AXB_X_XM_MMAGIC         X-Mailer =~ /\bMailMagic/
@@ -26,14 +24,6 @@ describe        AXB_X_XM_MMAGIC         Mailer fingerprint
 # 2012-07-24
 header          AXB_X_MSEX_ANONYMOUS     X-MS-Exchange-Organization-AuthAs =~ /^Anonymous$/
 describe        AXB_X_MSEX_ANONYMOUS     Seen in exploited MTA msgs
-
-# 2012-06-28
-header		AXB_XM_RAINBOW		X-Mailer =~ /^RAINBOW\b/
-describe	AXB_XM_RAINBOW		Mailer fingerprint
-
-# 2012-04-24
-uri		AXB_ABUSE_TUMBLR	/[a-z0-9]{4,30}\.tumblr\.com/
-describe	AXB_ABUSE_TUMBLR	Abused subdomain
 
 # 2012-03-19
 header		AXB_XM_GETRSP	X-Mailer =~ /^GetResponse\b/
@@ -67,22 +57,6 @@ describe        AXB_X_AOL_SEZ_S         AOL said this is S
 # 2011-12-08
 header          AXB_XM_BULK_SB          X-Mailer =~ /SendBlaster/
 describe        AXB_XM_BULK_SB          Bulk mail tool
-
-
-# 2011-11-16
-header          AXB_XRCVD_OWN3D_FW     Received =~ /\bmy\.firewall\b/
-describe        AXB_XRCVD_OWN3D_FW     Possibly abused consumer device
-
-
-# 2011-11-01
-header          AXB_AOLIP_CONFUSED      X-AOL-IP =~ /^[a-z0-9\-]{7,25}$/
-describe        AXB_AOLIP_CONFUSED      Confused IP
-
-
-# 2011-09-26
-# rawbody         AXB_B_RAW_CTRLCLICK  /\bControl\.invoke\(\'MessagePartBody\'\,\'_onBodyClick\'\,event\)\;\"\>/
-# describe        AXB_B_RAW_CTRLCLICK  Suspicious fingerprint
-
 
 
 # 2011-09-14 - Suggested by rfg / patternity
