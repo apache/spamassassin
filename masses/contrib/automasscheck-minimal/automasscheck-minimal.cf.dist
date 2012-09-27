@@ -1,0 +1,72 @@
+# <@LICENSE>
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to you under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at:
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# </@LICENSE>
+#
+###########################################################################
+
+
+# automasscheck-minimal configuration file
+# axb 0.02
+
+
+# COPY THIS TO ~/.automasscheck-minimal.cf
+
+### BEGIN CONFIGURATION ###
+
+LOGPREFIX="YOUR-USERNAME"
+RSYNC_USERNAME="YOUR-USERNAME"
+RSYNC_PASSWORD="YOUR-PASSWORD"
+
+# If your corpus is huge, to speed up processing you can use a ramdisk for WORKDIR
+# It doesn't need to survive boots - it will be automagically recreated
+WORKDIR=~/masscheckwork
+
+# HOW MANY MASSCHECK SIMULTANEOUS THREADS CAN YOUR BOX HANDLE?
+# Default = 8
+# If using on an older PC you may want to lower to 6 or less
+# If load is still too high - decrease some more.
+# A well equipped 8 core server can easily handle 10 or more.
+# In automasscheck-minimal.sh change to
+# JOBS=10
+
+# Leave these blank if you do not want trusted_networks
+# and/or internal_networks to be set
+TRUSTED_NETWORKS=
+INTERNAL_NETWORKS=
+
+run_all_masschecks() {
+### sample: single corpus ###
+#run_masscheck single-corpus \
+#        ham:dir:/home/user1/Maildir/.Sorted.Saved/ \
+#        spam:dir:/home/user1/Maildir/.Sorted.Spam/
+
+# If you have multiple separate corpa, you can specify as many run_masscheck lines as you want below.
+### user2 ###
+#run_masscheck user2 \
+#             ham:mbox:/home/user2/mail/HAM
+#             spam:mbox:/home/user2/mail/SPAM
+# This is an example of Maildir instead of mbox
+### user3 ###
+#run_masscheck user3 \
+#             ham:dir:/home/user3/mail/HAM/cur \
+#             spam:dir:/home/user3/mail/SPAM/cur \
+
+
+
+}
+
+
+### END CONFIGURATION ###
