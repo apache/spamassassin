@@ -325,9 +325,9 @@ describe SUBJ_DOLLARS           Subject starts with dollar amount
 
 
 
-
-header SUBJ_YOUR_DEBT		Subject =~ /Your (?:Bills|Debt|Credit)/i
-describe SUBJ_YOUR_DEBT		Subject contains "Your Bills" or similar
+#DISABLING DUE TO POOR S/O 2012-09-27
+#header SUBJ_YOUR_DEBT		Subject =~ /Your (?:Bills|Debt|Credit)/i
+#describe SUBJ_YOUR_DEBT		Subject contains "Your Bills" or similar
 
 header SUBJ_YOUR_FAMILY		Subject =~ /Your Family/i
 describe SUBJ_YOUR_FAMILY	Subject contains "Your Family"
