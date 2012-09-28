@@ -1,5 +1,8 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-coi-bulk axb-fraud axb-generic axb-ham-misc axb-sa-users axb-woas bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi danmcdonald darxus grenier jarif kpg-gah mas zmi; day 2: axb-coi-bulk axb-fraud axb-generic axb-ham-misc axb-sa-users axb-woas bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi danmcdonald darxus grenier jarif kpg-gah llanga zmi; day 3: axb-coi-bulk axb-fraud axb-generic axb-ham-misc axb-sa-users axb-woas bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bernie-mix danmcdonald darxus grenier jarif kpg-gah llanga zmi
+# with results from: day 1: axb-coi-bulk axb-fraud axb-generic axb-ham-misc axb-sa-users axb-woas bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi danmcdonald darxus grenier jarif kpg-gah mas zmi; day 2: axb-coi-bulk axb-fraud axb-generic axb-ham-misc axb-sa-users axb-woas bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi danmcdonald darxus grenier jarif kpg-gah llanga mas zmi; day 3: axb-coi-bulk axb-fraud axb-generic axb-ham-misc axb-sa-users axb-woas bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi danmcdonald darxus grenier jarif kpg-gah llanga zmi
+
+# good enough
+ACH_CANCELLED
 
 # tflags publish
 ADVANCE_FEE_2_NEW_FORM
@@ -53,6 +56,9 @@ ALL_TRUSTED
 AXB_XMAILER_MIMEOLE_OL_024C2
 
 # good enough
+AXB_XMAILER_MIMEOLE_OL_0ECF8
+
+# good enough
 AXB_XMAILER_MIMEOLE_OL_12495
 
 # good enough
@@ -60,6 +66,9 @@ AXB_XMAILER_MIMEOLE_OL_1ECD5
 
 # good enough
 AXB_XMAILER_MIMEOLE_OL_22B61
+
+# good enough
+AXB_XMAILER_MIMEOLE_OL_2E645
 
 # good enough
 AXB_XMAILER_MIMEOLE_OL_326A6
@@ -74,7 +83,19 @@ AXB_XMAILER_MIMEOLE_OL_3AC1D
 AXB_XMAILER_MIMEOLE_OL_4204A
 
 # good enough
+AXB_XMAILER_MIMEOLE_OL_4379D
+
+# good enough
 AXB_XMAILER_MIMEOLE_OL_56DF6
+
+# good enough
+AXB_XMAILER_MIMEOLE_OL_616F8
+
+# good enough
+AXB_XMAILER_MIMEOLE_OL_787D6
+
+# good enough
+AXB_XMAILER_MIMEOLE_OL_79A9A
 
 # good enough
 AXB_XMAILER_MIMEOLE_OL_8627E
@@ -83,13 +104,43 @@ AXB_XMAILER_MIMEOLE_OL_8627E
 AXB_XMAILER_MIMEOLE_OL_8E893
 
 # good enough
+AXB_XMAILER_MIMEOLE_OL_A275F
+
+# good enough
 AXB_XMAILER_MIMEOLE_OL_A50F8
+
+# good enough
+AXB_XMAILER_MIMEOLE_OL_A6545
 
 # good enough
 AXB_XMAILER_MIMEOLE_OL_A7B9C
 
 # good enough
 AXB_XMAILER_MIMEOLE_OL_B9B11
+
+# good enough
+AXB_XMAILER_MIMEOLE_OL_B9D6C
+
+# good enough
+AXB_XMAILER_MIMEOLE_OL_C1698
+
+# good enough
+AXB_XMAILER_MIMEOLE_OL_C3E2E
+
+# good enough
+AXB_XMAILER_MIMEOLE_OL_C95DC
+
+# good enough
+AXB_XMAILER_MIMEOLE_OL_C9CC0
+
+# good enough
+AXB_XMAILER_MIMEOLE_OL_CD271
+
+# good enough
+AXB_XMAILER_MIMEOLE_OL_DBCA3
+
+# good enough
+AXB_XMAILER_MIMEOLE_OL_E023A
 
 # good enough
 AXB_XMAILER_MIMEOLE_OL_E9F46
@@ -147,6 +198,9 @@ CHARSET_FARAWAY
 
 # tflags userconf
 CHARSET_FARAWAY_HEADER
+
+# good enough
+CN_B2B_SPAMMER
 
 # tflags publish
 CORRUPT_FROM_LINE_IN_HDRS
@@ -228,9 +282,6 @@ FH_FAKE_RCVD_LINE
 
 # good enough
 FH_FROMEML_NOTLD
-
-# good enough
-FH_FROM_GET_NAME
 
 # good enough
 FH_HELO_ALMOST_IP
@@ -339,6 +390,9 @@ FSL_MISSP_REPLYTO
 
 # good enough
 FSL_NEW_HELO_USER
+
+# good enough
+FS_WILL_HELP
 
 # tflags userconf
 GTUBE
@@ -458,6 +512,9 @@ KB_RATWARE_MSGID
 KB_RATWARE_OUTLOOK_MID
 
 # good enough
+KHOP_JS_OBFUSCATION
+
+# good enough
 LONG_TERM_PRICE
 
 # tflags publish
@@ -543,6 +600,9 @@ OBFU_JVSCR_ESC
 
 # tflags publish
 OBFU_TEXT_ATTACH
+
+# good enough
+POSTCARD_09
 
 # tflags net
 PYZOR_CHECK
@@ -857,73 +917,13 @@ TVD_RCVD_IP
 TVD_RCVD_IP4
 
 # good enough
-ACH_CANCELLED
+OBFU_HTML_ATTACH
 
 # good enough
-AXB_XMAILER_MIMEOLE_OL_0ECF8
+TO_NO_BRKTS_HTML_ONLY
 
 # good enough
-AXB_XMAILER_MIMEOLE_OL_2E645
-
-# good enough
-AXB_XMAILER_MIMEOLE_OL_335D0
-
-# good enough
-AXB_XMAILER_MIMEOLE_OL_4379D
-
-# good enough
-AXB_XMAILER_MIMEOLE_OL_616F8
-
-# good enough
-AXB_XMAILER_MIMEOLE_OL_787D6
-
-# good enough
-AXB_XMAILER_MIMEOLE_OL_79A9A
-
-# good enough
-AXB_XMAILER_MIMEOLE_OL_8B970
-
-# good enough
-AXB_XMAILER_MIMEOLE_OL_A275F
-
-# good enough
-AXB_XMAILER_MIMEOLE_OL_A6545
-
-# good enough
-AXB_XMAILER_MIMEOLE_OL_B9D6C
-
-# good enough
-AXB_XMAILER_MIMEOLE_OL_C1698
-
-# good enough
-AXB_XMAILER_MIMEOLE_OL_C3E2E
-
-# good enough
-AXB_XMAILER_MIMEOLE_OL_C95DC
-
-# good enough
-AXB_XMAILER_MIMEOLE_OL_C9CC0
-
-# good enough
-AXB_XMAILER_MIMEOLE_OL_CD271
-
-# good enough
-AXB_XMAILER_MIMEOLE_OL_DBCA3
-
-# good enough
-AXB_XMAILER_MIMEOLE_OL_E023A
-
-# good enough
-CN_B2B_SPAMMER
-
-# good enough
-FB_IMAGIRL
-
-# good enough
-KHOP_JS_OBFUSCATION
-
-# good enough
-POSTCARD_09
+YOUR_PERMISSION
 
 # tflags userconf
 UNPARSEABLE_RELAY
