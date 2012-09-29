@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-coi-bulk axb-fraud axb-generic axb-ham-misc axb-sa-users axb-woas bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi danmcdonald darxus grenier jarif kpg-gah mas zmi; day 2: axb-coi-bulk axb-fraud axb-generic axb-ham-misc axb-sa-users axb-woas bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi danmcdonald darxus grenier jarif kpg-gah llanga mas zmi; day 3: axb-coi-bulk axb-fraud axb-generic axb-ham-misc axb-sa-users axb-woas bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi danmcdonald darxus grenier jarif kpg-gah llanga zmi
+# with results from: day 1: axb-coi-bulk axb-fraud axb-generic axb-ham-misc axb-sa-users axb-woas bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi danmcdonald darxus grenier jarif kpg-gah mas zmi; day 2: axb-coi-bulk axb-fraud axb-generic axb-ham-misc axb-sa-users axb-woas bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi danmcdonald darxus grenier jarif kpg-gah llanga mas zmi; day 3: axb-coi-bulk axb-fraud axb-generic axb-ham-misc axb-sa-users axb-woas bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi danmcdonald darxus grenier jarif kpg-gah llanga mas zmi
 
 # good enough
 ACH_CANCELLED
@@ -137,12 +137,6 @@ AXB_XMAILER_MIMEOLE_OL_C9CC0
 AXB_XMAILER_MIMEOLE_OL_CD271
 
 # good enough
-AXB_XMAILER_MIMEOLE_OL_DBCA3
-
-# good enough
-AXB_XMAILER_MIMEOLE_OL_E023A
-
-# good enough
 AXB_XMAILER_MIMEOLE_OL_E9F46
 
 # good enough
@@ -153,9 +147,6 @@ AXB_XMA_BASP
 
 # good enough
 AXB_XM_TURBOM
-
-# good enough
-AXB_X_AOL_SEZ_S
 
 # good enough
 AXB_X_RCV_WLOCAL
@@ -264,6 +255,12 @@ DNS_FROM_AHBL_RHSBL
 
 # tflags publish
 DOS_ANAL_SPAM_MAILER
+
+# good enough
+DOS_RCVD_IP_TWICE_C
+
+# good enough
+DRUGS_STOCK_MIMEOLE
 
 # good enough
 EMRCP
@@ -459,9 +456,6 @@ HK_RANDOM_FROM
 
 # good enough
 HK_SCAM_N1
-
-# good enough
-HK_SCAM_N13
 
 # good enough
 HK_SCAM_N15
@@ -850,6 +844,9 @@ SINGLE_HEADER_2K
 # good enough
 SINGLE_HEADER_4K
 
+# good enough
+SPAMMY_XMAILER
+
 # tflags net
 SPF_FAIL
 
@@ -899,6 +896,9 @@ TO_EQ_FM_SPF_FAIL
 TO_NO_BRKTS_FROM_MSSP
 
 # good enough
+TO_NO_BRKTS_HTML_ONLY
+
+# good enough
 TO_NO_BRKTS_MSFT
 
 # good enough
@@ -917,13 +917,31 @@ TVD_RCVD_IP
 TVD_RCVD_IP4
 
 # good enough
-OBFU_HTML_ATTACH
+ANY_PILL_PRICE
 
 # good enough
-TO_NO_BRKTS_HTML_ONLY
+AXB_XMAILER_MIMEOLE_OL_335D0
 
 # good enough
-YOUR_PERMISSION
+AXB_XMAILER_MIMEOLE_OL_7F4F5
+
+# good enough
+AXB_XMAILER_MIMEOLE_OL_8B970
+
+# good enough
+AXB_XMAILER_MIMEOLE_OL_C7115
+
+# good enough
+AXB_XM_FORGED_OL2600
+
+# good enough
+AXB_X_TREND_AS
+
+# good enough
+FS_REFI
+
+# good enough
+SCANNED_EXTERNAL
 
 # tflags userconf
 UNPARSEABLE_RELAY
@@ -1014,6 +1032,9 @@ USER_IN_WHITELIST_TO
 
 # good enough
 XM_PHPMAILER_FORGED
+
+# good enough
+YOUR_PERMISSION
 
 # tflags net
 __DKIMDOMAIN_IN_DWL_ANY
