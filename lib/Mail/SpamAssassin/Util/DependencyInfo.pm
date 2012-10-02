@@ -372,15 +372,22 @@ sub try_binary {
     $command .= " $bindef->{'version_check_params'} 2>&1";
     $output = `$command`;
 
-    $output =~ m/$bindef->{'version_check_regex'}/;
-    $binary_version = $1;
+    if (!defined $output) {
+      $installed = 0;
 
-    #TEST IF VERSION IS GREATER THAN REQUIRED
-    if (defined $required_version) {
-      $version_meets_required = test_version($binary_version, $required_version);
-    }
-    if (defined $recommended_version) {
-      $version_meets_recommended = test_version($binary_version, $recommended_version);
+    } else {
+      $output =~ m/$bindef->{'version_check_regex'}/;
+      $binary_version = $1;
+
+      #TEST IF VERSION IS GREATER THAN REQUIRED
+      if (defined $required_version) {
+        $version_meets_required =
+          test_version($binary_version, $required_version);
+      }
+      if (defined $recommended_version) {
+        $version_meets_recommended =
+          test_version($binary_version, $recommended_version);
+      }
     }
   }
 
@@ -429,7 +436,7 @@ sub try_binary {
       $EXIT_STATUS++;
       warn "\aERROR: the required $pretty_name binary $errtype\n";
       if (!$installed) {
-        $$summref .= "REQUIRED binary missing: $pretty_name\n";
+        $$summref .= "REQUIRED binary missing or nonfunctional: $pretty_name\n";
       } elsif (!$version_meets_required) {
         $$summref .= "REQUIRED binary out of date: $pretty_name\n";
       } else {
@@ -440,7 +447,7 @@ sub try_binary {
       $WARNINGS++;
       print "NOTE: the optional $pretty_name binary $errtype\n";
       if (!$installed) {
-        $$summref .= "optional binary missing: $pretty_name\n";
+        $$summref .= "optional binary missing or nonfunctional: $pretty_name\n";
       } elsif (!$version_meets_required) {
         $$summref .= "optional binary out of date: $pretty_name\n";
       } else {
