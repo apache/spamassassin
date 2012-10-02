@@ -82,13 +82,18 @@ meta    FSL_STACKED_TEXT (__TWO_WORD_LINES > 10)
 ##meta  FSL_SINGLE_URI  (__ANY_HTTP_URI == 1)
 ##score FSL_SINGLE_URI  0.001
 
-header  __HAS_REPLY_TO  exists:Reply-To
-header  __FROM_FREEMAIL From =~ /\@(?:googlemail|gmail|yahoo|hotmail|msn|aol|aim)\./
-header  __REPLY_FREEMAIL Reply-To =~ /\@(?:googlemail|gmail|yahoo|hotmail|msn|aol|aim)\./
-meta    FSL_FREEMAIL_1 (__HAS_REPLY_TO && __REPLY_FREEMAIL)
-score   FSL_FREEMAIL_1 0.001
-meta    FSL_FREEMAIL_2 (__HAS_REPLY_TO && __REPLY_FREEMAIL && __FROM_FREEMAIL)
+#### This is handled by Freemail plugin
+# header  __HAS_REPLY_TO  exists:Reply-To
+# header  __FROM_FREEMAIL From =~ /\@(?:googlemail|gmail|yahoo|hotmail|msn|aol|aim)\./
+# header  __REPLY_FREEMAIL Reply-To =~ /\@(?:googlemail|gmail|yahoo|hotmail|msn|aol|aim)\./
+
+# meta    FSL_FREEMAIL_1 (__HAS_REPLY_TO && __REPLY_FREEMAIL)
+#  score   FSL_FREEMAIL_1 0.001
+
+
+#meta    FSL_FREEMAIL_2 (__HAS_REPLY_TO && __REPLY_FREEMAIL && __FROM_FREEMAIL)
 # score   FSL_FREEMAIL_2 0.001
+####
 
 header  FSL_HELO_BARE_IP_1      X-Spam-Relays-External =~ /^[^\]]+ helo=\d+\.\d+\.\d+\.\d+ /i
 # score   FSL_HELO_BARE_IP_1      0.001
