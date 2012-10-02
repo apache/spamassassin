@@ -210,6 +210,8 @@ print_usage(void)
     usg("  -z                  Compress mail message sent to spamd.\n");
 #endif
     usg("  -f                  (Now default, ignored.)\n");
+    usg("  -4                  Use IPv4 only for connecting to server.\n");
+    usg("  -6                  Use IPv6 only for connecting to server.\n");
 
     usg("\n");
 }
@@ -227,9 +229,9 @@ read_args(int argc, char **argv,
           struct transport *ptrn)
 {
 #ifndef _WIN32
-    const char *opts = "-BcrRd:e:fyp:n:t:s:u:L:C:xzSHU:ElhVKF:0:1:2";
+    const char *opts = "-BcrR46d:e:fyp:n:t:s:u:L:C:xzSHU:ElhVKF:0:1:2";
 #else
-    const char *opts = "-BcrRd:fyp:n:t:s:u:L:C:xzSHElhVKF:0:1:2";
+    const char *opts = "-BcrR46d:fyp:n:t:s:u:L:C:xzSHElhVKF:0:1:2";
 #endif
     int opt;
     int ret = EX_OK;
@@ -471,6 +473,18 @@ read_args(int argc, char **argv,
 #endif
                 break;
             }
+            case '4':
+            {
+                flags |=  SPAMC_USE_INET4;
+                flags &= ~SPAMC_USE_INET6;
+                break;
+            }
+            case '6':
+            {
+                flags |=  SPAMC_USE_INET6;
+                flags &= ~SPAMC_USE_INET4;
+                break;
+            }
             case 0:
             {
                 ptrn->connect_retries = atoi(spamc_optarg);
@@ -503,6 +517,12 @@ read_args(int argc, char **argv,
         libspamc_log(flags, LOG_ERR, "-s parameter is beyond max of %d",
                         SPAMC_MAX_MESSAGE_LEN);
         ret = EX_USAGE;
+    }
+
+    if ( !(flags & (SPAMC_USE_INET4 | SPAMC_USE_INET6)) ) {
+      /* allow any protocol family (INET or INET6) by default */
+      flags |= SPAMC_USE_INET4;
+      flags |= SPAMC_USE_INET6;
     }
 
     /* learning action has to block some parameters */
