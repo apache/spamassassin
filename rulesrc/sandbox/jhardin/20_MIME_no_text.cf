@@ -3,7 +3,7 @@
 # Spams without a text body part first started appearing in 5/2009
 
 # These should be generally useful to other rules as well
-header  __CTYPE_MULTIPART_MXD Content-Type =~ /multipart\/mixed/i
+
 header  __CTYPE_MULTIPART_ANY Content-Type =~ /multipart\/\w+/i
 header  __XM_PHP  X-Mailer =~ /^PHP\s?v?\/?\d\./
 
