@@ -170,12 +170,20 @@ header         __MSGID_HEXISH        Message-ID =~ /^<?OF[0-9A-F]{8}\.[0-9A-F]{8
 header         __UA_MSOMAC           User-Agent =~ /^Microsoft-MacOutlook\/(?:\d+\.){3}/
 meta           __HDRS_LCASE_KNOWN    __MSGID_JAVAMAIL || __UA_MSOEMAC || __UA_MSOMAC || __MSGID_APPLEMAIL || __MSGID_HEX_UID || __MSGID_HEXISH
 
-meta           HDRS_LCASE            __HDRS_LCASE && !__HDRS_LCASE_KNOWN && !__VIA_ML && !__freemail_safe && !__THREADED && !__UNUSABLE_MSGID && !__DOS_SINGLE_EXT_RELAY && !__DKIM_EXISTS && !__BUGGED_IMG && !__SUBSCRIPTION_INFO && !NO_RELAYS && !__RDNS_NONE && !__MIME_BASE64 && !__SUBJECT_ENCODED_B64 && !__RCD_RDNS_MX_MESSY && !__HTML_LINK_IMAGE && !__RDNS_SHORT && !__TAG_EXISTS_STYLE && !ALL_TRUSTED && !__NOT_SPOOFED && !__RCD_RDNS_SMTP_MESSY && !__NAKED_TO
+ifplugin Mail::SpamAssassin::Plugin::FreeMail
+  meta         HDRS_LCASE            __HDRS_LCASE && !__HDRS_LCASE_KNOWN && !__VIA_ML && !__freemail_safe && !__THREADED && !__UNUSABLE_MSGID && !__DOS_SINGLE_EXT_RELAY && !__DKIM_EXISTS && !__BUGGED_IMG && !__SUBSCRIPTION_INFO && !NO_RELAYS && !__RDNS_NONE && !__MIME_BASE64 && !__SUBJECT_ENCODED_B64 && !__RCD_RDNS_MX_MESSY && !__HTML_LINK_IMAGE && !__RDNS_SHORT && !__TAG_EXISTS_STYLE && !ALL_TRUSTED && !__NOT_SPOOFED && !__RCD_RDNS_SMTP_MESSY && !__NAKED_TO
+else
+  meta         HDRS_LCASE            __HDRS_LCASE && !__HDRS_LCASE_KNOWN && !__VIA_ML && !__THREADED && !__UNUSABLE_MSGID && !__DOS_SINGLE_EXT_RELAY && !__DKIM_EXISTS && !__BUGGED_IMG && !__SUBSCRIPTION_INFO && !NO_RELAYS && !__RDNS_NONE && !__MIME_BASE64 && !__SUBJECT_ENCODED_B64 && !__RCD_RDNS_MX_MESSY && !__HTML_LINK_IMAGE && !__RDNS_SHORT && !__TAG_EXISTS_STYLE && !ALL_TRUSTED && !__NOT_SPOOFED && !__RCD_RDNS_SMTP_MESSY && !__NAKED_TO
+endif
 describe       HDRS_LCASE            Odd capitalization of message header
 score          HDRS_LCASE            0.10	# limit
 meta           __MANY_HDRS_LCASE     __HDRS_LCASE > 1
 meta           __TOOMANY_HDRS_LCASE  __HDRS_LCASE > 2
-meta           MANY_HDRS_LCASE       __MANY_HDRS_LCASE && !__HDRS_LCASE_KNOWN && !__VIA_ML && !__freemail_safe && !__THREADED && !__UNUSABLE_MSGID && !__DOS_SINGLE_EXT_RELAY && !__DKIM_EXISTS && !__NOT_SPOOFED && !__BUGGED_IMG && !__MIME_QP && !__RDNS_NONE
+ifplugin Mail::SpamAssassin::Plugin::FreeMail
+  meta         MANY_HDRS_LCASE       __MANY_HDRS_LCASE && !__HDRS_LCASE_KNOWN && !__VIA_ML && !__freemail_safe && !__THREADED && !__UNUSABLE_MSGID && !__DOS_SINGLE_EXT_RELAY && !__DKIM_EXISTS && !__NOT_SPOOFED && !__BUGGED_IMG && !__MIME_QP && !__RDNS_NONE
+else
+  meta         MANY_HDRS_LCASE       __MANY_HDRS_LCASE && !__HDRS_LCASE_KNOWN && !__VIA_ML && !__THREADED && !__UNUSABLE_MSGID && !__DOS_SINGLE_EXT_RELAY && !__DKIM_EXISTS && !__NOT_SPOOFED && !__BUGGED_IMG && !__MIME_QP && !__RDNS_NONE
+endif
 describe       MANY_HDRS_LCASE       Odd capitalization of multiple message headers
 score          MANY_HDRS_LCASE       0.10	# limit
 
@@ -618,7 +626,11 @@ header         __RPATH_12LTRDOM    Return-Path =~ /\@[a-z]{12}\./
 uri            __URI_12LTRDOM      m,://(?:[^./]+\.)*[a-z]{12}\.[^./]+/,
 
 header         __FROM_12LTRDOM_1   From =~ /\@(?!facebookmail)[a-z]{12}\./
-meta           FROM_12LTRDOM       __FROM_12LTRDOM_1 && !__VIA_ML && !__TO___LOWER && !__FS_SUBJ_RE && !__RCD_RDNS_MAIL_MESSY && !__freemail_safe && !__UNSUB_LINK && !NO_RELAYS && !__UNUSABLE_MSGID && !DATE_IN_PAST_96_XX && !ALL_TRUSTED && !__MSGID_APPLEMAIL && !__RCD_RDNS_SMTP_MESSY && !__FB_NATIONAL && !__MAIL_LINK && !__NAME_EMAIL_DIFF && !__RCD_RDNS_MX_MESSY && !__RCD_RDNS_MX && !__SENDER_BOT && !__IMS_MSGID && !__HS_SUBJ_RE_FW && !__DOS_HAS_LIST_UNSUB && !__THREAD_INDEX_GOOD && !__TO_EQ_FROM_DOM && !__URI_MAILTO && !__SUBSCRIPTION_INFO
+ifplugin Mail::SpamAssassin::Plugin::FreeMail
+  meta         FROM_12LTRDOM       __FROM_12LTRDOM_1 && !__VIA_ML && !__TO___LOWER && !__FS_SUBJ_RE && !__RCD_RDNS_MAIL_MESSY && !__freemail_safe && !__UNSUB_LINK && !NO_RELAYS && !__UNUSABLE_MSGID && !DATE_IN_PAST_96_XX && !ALL_TRUSTED && !__MSGID_APPLEMAIL && !__RCD_RDNS_SMTP_MESSY && !__FB_NATIONAL && !__MAIL_LINK && !__NAME_EMAIL_DIFF && !__RCD_RDNS_MX_MESSY && !__RCD_RDNS_MX && !__SENDER_BOT && !__IMS_MSGID && !__HS_SUBJ_RE_FW && !__DOS_HAS_LIST_UNSUB && !__THREAD_INDEX_GOOD && !__TO_EQ_FROM_DOM && !__URI_MAILTO && !__SUBSCRIPTION_INFO
+else
+  meta         FROM_12LTRDOM       __FROM_12LTRDOM_1 && !__VIA_ML && !__TO___LOWER && !__FS_SUBJ_RE && !__RCD_RDNS_MAIL_MESSY && !__UNSUB_LINK && !NO_RELAYS && !__UNUSABLE_MSGID && !DATE_IN_PAST_96_XX && !ALL_TRUSTED && !__MSGID_APPLEMAIL && !__RCD_RDNS_SMTP_MESSY && !__FB_NATIONAL && !__MAIL_LINK && !__NAME_EMAIL_DIFF && !__RCD_RDNS_MX_MESSY && !__RCD_RDNS_MX && !__SENDER_BOT && !__IMS_MSGID && !__HS_SUBJ_RE_FW && !__DOS_HAS_LIST_UNSUB && !__THREAD_INDEX_GOOD && !__TO_EQ_FROM_DOM && !__URI_MAILTO && !__SUBSCRIPTION_INFO
+endif
 describe       FROM_12LTRDOM       From a 12-letter domain
 #tflags         FROM_12LTRDOM       nopublish
 score          FROM_12LTRDOM       0.10  	# limit
@@ -676,20 +688,22 @@ if can(Mail::SpamAssassin::Conf::feature_bug6558_free)
 endif
 
 # More from Ned Slider
-meta        NSL_FREEMAIL_SUBJ      (FREEMAIL_FROM && MISSING_SUBJECT)
-describe    NSL_FREEMAIL_SUBJ      From freemail with missing subject
-#score       NSL_FREEMAIL_SUBJ      1.0
-tflags      NSL_FREEMAIL_SUBJ      nopublish
-
-meta        NSL_FREEMAIL_M1        (NSL_FREEMAIL_SUBJ && (__HAS_ANY_URI || __MANY_RECIPS))
-describe    NSL_FREEMAIL_M1        From freemail, missing subject and uri or many recips
-#score       NSL_FREEMAIL_M1        1.0
-tflags      NSL_FREEMAIL_M1        nopublish
-
-meta        NSL_FREEMAIL_M2        (FREEMAIL_FROM && __HAS_ANY_URI && __MANY_RECIPS)
-describe    NSL_FREEMAIL_M2        From freemail with uri and many recips
-#score       NSL_FREEMAIL_M2        1.0
-tflags      NSL_FREEMAIL_M2        nopublish
+ifplugin Mail::SpamAssassin::Plugin::FreeMail
+  meta        NSL_FREEMAIL_SUBJ      (FREEMAIL_FROM && MISSING_SUBJECT)
+  describe    NSL_FREEMAIL_SUBJ      From freemail with missing subject
+#  score       NSL_FREEMAIL_SUBJ      1.0
+  tflags      NSL_FREEMAIL_SUBJ      nopublish
+  
+  meta        NSL_FREEMAIL_M1        (NSL_FREEMAIL_SUBJ && (__HAS_ANY_URI || __MANY_RECIPS))
+  describe    NSL_FREEMAIL_M1        From freemail, missing subject and uri or many recips
+#  score       NSL_FREEMAIL_M1        1.0
+  tflags      NSL_FREEMAIL_M1        nopublish
+  
+  meta        NSL_FREEMAIL_M2        (FREEMAIL_FROM && __HAS_ANY_URI && __MANY_RECIPS)
+  describe    NSL_FREEMAIL_M2        From freemail with uri and many recips
+#  score       NSL_FREEMAIL_M2        1.0
+  tflags      NSL_FREEMAIL_M2        nopublish
+endif
 
 header      NSL_TO_ENDS_COMMA      To =~ /,$/
 describe    NSL_TO_ENDS_COMMA      To: ends with a comma
