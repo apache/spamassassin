@@ -1,6 +1,6 @@
 
 ifplugin Mail::SpamAssassin::Plugin::ReplaceTags
-  replace_tag  CURRENCY   [\(\[]?(?:\bUS[D\$]{0,2}|\$(?:US)?|usd|GBP|=[Aa][34]|\xa3|&\#16[34];|(?i:pounds\ssterling)|\xa4|EUR(?:OS)?|(?:d')?[Ee]uro?s?|(?i:eur)\sde|CHF|FCFA|d[\xf3]lares\sde\slos\sE+\.\s?U+\.)[\]\)]?
+  replace_tag  CURRENCY   [\(\[]?(?:\bU[Ss][D\$]{0,2}|\$(?:US)?|usd|GBP|=[Aa][34]|\xa3|&\#16[34];|(?i:pounds\ssterling)|\xa4|EUR(?:OS)?|(?:d')?[Ee]uro?s?|(?i:eur)\sde|CHF|FCFA|d[\xf3]lares\sde\slos\sE+\.\s?U+\.)[\]\)]?
   replace_tag  GB_UK      \b(?:U\.?K\.?|(?:Great\s)?Brit(?:ain|ish)|G\.?B\.?)\b
 
   body     __LOTSA_MONEY_00   /<CURRENCY>[\s\.]?\d[\dO][,\.][\dO]{3}(?:(?!\d)|\b)/
@@ -111,7 +111,7 @@ meta     MONEY_LOTTERY    __MONEY_LOTTERY && !__CAN_HELP && !__HTML_LINK_IMAGE &
 describe MONEY_LOTTERY    Lots of money from a lottery
 #score    MONEY_LOTTERY    1.5
 
-body     __DEAL           /\b(?:business|financial|this|the|mutual|die(?:se)?r?|cette|profitable)\s(?:deal|transa[ck]tion|proposal|offer|venture|suggestion|partnership)/i
+body     __DEAL           /\b(?:business|financial|this|the|mutual|die(?:se)?r?|cette|profitable)\s(?:deal|transa[ck]tion|proposal|offer|offre|venture|suggestion|partnership)/i
 body     __HUSH_HUSH      /\b(?:confiden[tc]i[ae]l(?:\b|ity\b|it(?:[\xe9]|[\xc3][\xa9]))|private\b|secr[e\xe8](?:te?|cy)\b|sensitive\b|concealed\b|obscured?\b|discre(?:et|tion)\b|top\ssecret|vertraulich(?:en)?\b|geheim\b|priv(?:[\xe9]|[\xc3][\xa9]))/i
 body     __IS_LEGAL       /\b(?:this\s(?:deal|offer|transaction|proposal|exchange|arrangement|work)|it)?\sis\s(?:(?:guaranteed|completely|absolutely|perfectly|100%|very|fully)\s)?(?:legal|hitch-free)\b/i
 body     __NOT_SCAM       /\bnot\sa\sscam\b/i
@@ -158,7 +158,7 @@ body     __YOU_INHERIT    /\byour\s[a-z\s]{0,30}inherit+ance\b/i
 body     __I_INHERIT      /\b(?:I|eu)\s[a-z\s]{0,30}(?:inherited|herdei)\b/i
 body     __THEY_INHERIT   /\b(?:inherit\sth(?:e|is)\smoney|herede\sest[ea]\sdinero)\b/i
 body     __NOT_DEAD_YET   /\b(?:will\sinherit|que\sherede)\b/i
-body     __AM_DYING       /\bam\s(?:\S+\s)?dying\b/i
+body     __AM_DYING       /\b(?:am\s(?:\S+\s)?dying|terminally\sill|cancer|en\sphase\sterminale)\b/i
 body     __I_WILL_YOU     /\bwill(?:ed)?\s(?:[a-z\s]{0,20}(?:fortune|money|\$\d+[a-z]{0,9})\s)?to\syou\b/i
 body     __NEXT_OF_KIN    /\bnext[-\s]of[-\s]kin\b/i
 body     __EX_CUSTOMER    /\b(?:(?:dead|deceased|late|verstorbenen)\s(?:[ck]lient|customer|ac+ount|invest[eo]r|beneficiary|mr\.|kunde|engr?\.?)|titulaire\sdu\scompte\sest\s(?:d[\xe9]c[\xe9]d[\xe9]|d[\xc3][\xa9]c[\xc3][\xa9]d[\xc3][\xa9])|invest[eo]r\sdied|[\xe9]tranger\sd[\xe9]c[\xe9]d[\xe9]|(?:[ck]lient|customer|ac+ount|invest[eo]r|beneficiary|mr\.|kunde|engr?\.?)\s(?:[a-z]{1,10}\s)?(?:dead|deceased|verstorbenen))/i
@@ -168,7 +168,7 @@ body     __DEAD_PARENT    /\b(?:my|meu)\s(?:(?:deceased|dead)\s(?:father|mother|
 body     __DORMANT_ACCT   /\b(?:(?:dormant|abandoned|left\s?over)\s(?:account|fund|transaction|sum|deposit)|fonds\sdorment)/i
 body     __WILL_LEGAL     /\b(?:codicil|last\stestament|probate|executor|intestate|bequest|mandamus)\b/i
 body     __EARLY_DEMISE   /\buntimely\sdeath\b/i
-body     __WIDOW          /\bwidow(?:e[rd])'?s?\b/i
+body     __WIDOW          /\b(?:widow(?:e[rd])'?s?|veuve)\b/i
 body     __MY_FORTUNE     /\b(?:my|his|her)\s(?:fortune|heritage)\b/i
 body     __DIED_IN        /\bdied\sin\b/i
 body     __INHERIT_PMT    /\binheritance\spayment\s/i
@@ -227,7 +227,7 @@ body     __FOUND_YOU      /\b(?:I|we)\sfound\syour?\b/i
 body     __INVEST_MONEY   /\binvest(?:ir)?\s(?:this|ces|d[ae]s|sur ce|de ces)\s(?:money|f[ou]nds?)\b/i
 body     __INVEST_COUNTRY /\binvest\sin\syour?\scountry\b/i
 body     __RANDOM_PICK    /\b(?:random(?:ly)?\s(?:\w+\s)?(?:select(?:ion|ed)|pick(?:ed)?|computer)|(?:select|pick)ed\s(?:at\s)?random(?:ly)?|(?:esco(?:g|lh)idos|seleccion) (?:aleatoria(?:mente)?|al azar))\b/i
-body     __CHARITY        /\bcharit(?:y|[ai]ble)\b/i
+body     __CHARITY        /\b(?:charit(?:y|[ai]ble)|orphans?|homeless|orphelins|sans\sabri)\b/i
 
 body     __UC_MONEY       /\bMONEY\b/
 
