@@ -45,7 +45,7 @@ ok_all_patterns();
 
 test_spamc(); ok_all_patterns();
 
-my @bgpids = ();
+my @bgpids;
 
 $SIG{INT} = sub {
   kill 15, @bgpids;

@@ -486,7 +486,7 @@ sub try_extraction {
   foreach my $key1 (sort keys %{$conf->{base_orig}->{$ruletype}}) {
     print "INPUT: $key1 $conf->{base_orig}->{$ruletype}->{$key1}\n";
   }
-  my %found = ();
+  my %found;
   foreach my $key (sort keys %{$conf->{base_string}->{$ruletype}}) {
     my $str = "$key:$conf->{base_string}->{$ruletype}->{$key}";
     print "BASES: '$str'\n";
