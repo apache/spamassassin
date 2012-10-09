@@ -51,7 +51,7 @@ sub new {
 
 sub set_config {
   my ($self, $conf) = @_;
-  my @cmds = ();
+  my @cmds;
 
   # reuse CURRENT_NAME ADDITIONAL_NAMES_IN_INPUT ...
   # e.g.

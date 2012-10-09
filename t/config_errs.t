@@ -50,7 +50,7 @@ my $sa = create_saobj({'dont_copy_prefs' => 1});
 
 $sa->init(0); # parse rules
 
-my @want = ();
+my @want;
 my $cf = '';
 
 foreach my $cmd (@{$sa->{conf}{registered_commands}}) {
