@@ -36,50 +36,125 @@ BEGIN {
   }                                                 # REMOVEFORINST
 }
 
-# Big Ugly Hack; purpose: don't force requirement on IO::Socket::INET6
+# don't force requirement on IO::Socket::IP or IO::Socket::INET6
+use vars qw($have_socket_ip $io_socket_module_name);
 BEGIN {
-  use Socket;
-  eval {
-    require IO::Socket::INET6;
-    require Socket6;
+  use Socket qw(:DEFAULT IPPROTO_TCP);
+  &SOCK_STREAM; &IPPROTO_TCP;
+
+  $have_socket_ip = eval {
+    require IO::Socket::IP;
+    Socket->VERSION(1.97);
+    import Socket qw(/^(?:AI|NI|NIx|EAI)_/);
+    # see Exporter man page: AUTOLOADing 'constants' here enables inlining
+    &AI_ADDRCONFIG; &AI_PASSIVE;
+    &NI_NUMERICHOST; &NI_NUMERICSERV; &NI_NAMEREQD; 1;
   };
-  if ($@) {    # IPv4 only
+
+  if ($have_socket_ip) {
+    $io_socket_module_name = 'IO::Socket::IP';
+    *new_io_socket_inetx = sub { IO::Socket::IP->new(@_) };
+    *ip_or_name_to_ip_addresses = sub {
+      my($addr, $ai_family) = @_;
+      # Socket::getaddrinfo returns a list of hashrefs
+      my($error, @res) =
+        Socket::getaddrinfo($addr, 0,
+          { family => $ai_family, flags => &AI_ADDRCONFIG | &AI_PASSIVE, 
+            socktype => &SOCK_STREAM, protocol => &IPPROTO_TCP });
+      my(@ip_addrs);
+      if (!$error) {
+        for my $a (@res) {
+          my($err, $ip_addr) =
+            Socket::getnameinfo($a->{addr}, &NI_NUMERICHOST, &NIx_NOSERV);
+          if (!$err) { push(@ip_addrs, $ip_addr) }
+          elsif (!$error) { $error = $err }
+        }
+      }
+      return ($error, @ip_addrs);
+    };
+    *peer_info_from_socket = sub {
+      my $sock = shift;
+      my $peer_addr = $sock->peerhost;
+      $peer_addr or return;
+      return ($sock->peerport, $peer_addr, $sock->peerhostname||$peer_addr,
+              $sock->sockport);
+    };
+
+  } elsif (eval { require Socket6; import Socket6 qw(/^(?:AI|NI|NIx|EAI)_/);
+                  require IO::Socket::INET6;
+                  # see Exporter: AUTOLOADing 'constants' here enables inlining
+                  &AI_ADDRCONFIG; &AI_PASSIVE;
+                  &NI_NUMERICHOST; &NI_NUMERICSERV; &NI_NAMEREQD; 1 }) {
+    $io_socket_module_name = 'IO::Socket::INET6';
+    *new_io_socket_inetx = sub { IO::Socket::INET6->new(@_) };
+    *ip_or_name_to_ip_addresses = sub {
+      my($addr, $ai_family) = @_;
+      # Socket6::getaddrinfo returns a list of quintuples
+      my @res = Socket6::getaddrinfo($addr, '',
+                                     $ai_family, &SOCK_STREAM, &IPPROTO_TCP,
+                                     &AI_ADDRCONFIG | &AI_PASSIVE);
+      my($error, @ip_addrs);
+      if (@res < 5) {
+        $error = $res[0];
+      } else {
+        my($family, $socktype, $proto, $saddr, $canonname);
+        while (@res >= 5) {
+          ($family, $socktype, $proto, $saddr, $canonname, @res) = @res;
+          my(@resinfo) =
+            Socket6::getnameinfo($saddr, &NI_NUMERICHOST | &NI_NUMERICSERV);
+          if (@resinfo >= 2) { push(@ip_addrs, $resinfo[0]) }
+          elsif (!$error) { $error = $resinfo[0] }
+        }
+      }
+      return ($error, @ip_addrs);
+    };
+    *peer_info_from_socket = sub {
+      my $sock = shift;
+      my $peer_addr = $sock->peerhost;
+      $peer_addr or return;
+      my @resinfo = (Socket6::getnameinfo($sock->peername, &NI_NAMEREQD))[0];
+      my $peer_hostname = @resinfo > 1 ? $resinfo[0] : undef;
+      return ($sock->peerport, $peer_addr, $peer_hostname||$peer_addr,
+              $sock->sockport);
+    };
+
+  } else {  # legacy, IPv4 only, no getaddrinfo() assumed
+    $io_socket_module_name = 'IO::Socket::INET';
     require IO::Socket::INET;
-    *new_io_socket_inetx = sub { IO::Socket::INET->new(@_); };
-    *ip_or_name_to_ip    = sub {
-      my $in_addr = (gethostbyname(shift))[4];
-      $in_addr or return;
-      Socket::inet_ntoa($in_addr);
+    *new_io_socket_inetx = sub { IO::Socket::INET->new(@_) };
+    *ip_or_name_to_ip_addresses = sub {
+      my($addr, $ai_family) = @_;
+      $ai_family == &AF_UNSPEC || $ai_family == &AF_INET
+        or die "Protocol family $ai_family not supported on this platform";
+      my($error, @ip_addrs, @binaddr);
+      $! = 0; my @res = gethostbyname($addr);
+      if (!@res) {
+        $error = "no results from gethostbyname $!";
+      } else {
+        my($name,$aliases,$addrtype,$length);
+        ($name,$aliases,$addrtype,$length,@binaddr) = @res;
+      }
+      if (!@binaddr) {
+        $error = "no such host";
+      } else {
+        for (@binaddr) {
+          my $ip_addr = Socket::inet_ntoa($_);
+          push(@ip_addrs, $ip_addr)  if $ip_addr;
+        }
+      }
+      return ($error, @ip_addrs);
     };
     *peer_info_from_socket = sub {
       my $sock = shift;
-      my ($port, $in_addr) = Socket::sockaddr_in($sock->peername)
+      my ($peer_port, $in_addr) = Socket::sockaddr_in($sock->peername)
         or return;
-      my $addr = Socket::inet_ntoa($in_addr) or return;
-      my $host = gethostbyaddr($in_addr, Socket::AF_INET()) || $addr;
-      return ($port, $addr, $host);
+      my $peer_addr = Socket::inet_ntoa($in_addr) or return;
+      my $peer_hostname = gethostbyaddr($in_addr, &AF_INET);
+      return ($peer_port, $peer_addr, $peer_hostname||$peer_addr,
+              $sock->sockport);
     };
   }
-  else {    # IPv4+IPv6
-    *new_io_socket_inetx = sub { IO::Socket::INET6->new(@_); };
-    *ip_or_name_to_ip    = sub {
-      my $addr = (
-        Socket6::getaddrinfo(
-          shift, '', Socket::AF_UNSPEC(), Socket::SOCK_STREAM()
-        )
-        )[3];
-      $addr or return;
-      $addr = (Socket6::getnameinfo($addr, Socket6::NI_NUMERICHOST()))[0];
-    };
-    *peer_info_from_socket = sub {
-      my $sock = shift;
-      my $addr = $sock->peerhost or return;
-      my $host =
-        (Socket6::getnameinfo($sock->peername, Socket6::NI_NAMEREQD()))[0]
-        || $addr;
-      return ($sock->peerport(), $addr, $host);
-    };
-  }
+
 }
 
 use IO::Handle;
@@ -214,9 +289,12 @@ GetOptions(
   'helper-home-dir|H:s'      => \$opt{'home_dir_for_helpers'},
   'help|h'                   => \$opt{'help'},
   'ident-timeout=f'          => \$opt{'ident-timeout'},
-  '4|ipv4only|ipv4-only|ipv4'=> \$opt{'force_ipv4'},
+  '4|ipv4only|ipv4-only|ipv4'=> sub { $opt{'force_ipv4'} = 1;
+                                      $opt{'force_ipv6'} = 0; },
+  '6'                        => sub { $opt{'force_ipv6'} = 1;
+                                      $opt{'force_ipv4'} = 0; },
   'ldap-config!'             => \$opt{'ldap-config'},
-  'listen-ip|ip-address|i:s' => \$opt{'listen-ip'},
+  'listen|listen-ip|ip-address|i:s' => \@{ $opt{'listen-sockets'} },
   'local!'                   => \$opt{'local'},
   'L'                        => \$opt{'local'},
   'l'                        => \$opt{'tell'},
@@ -325,62 +403,12 @@ foreach my $opt (
   ) if ( $opt{$opt} );
 }
 
-# sanity checking on parameters: if --socketpath is used, and --port or
-# --ssl-port is NOT specified, it means that we're using UNIX domain sockets,
-# none of the IP params are allowed. The code would probably work ok if we
-# didn't check it, but it's better if we detect the error and report it lest
-# the admin find surprises.
-
-my $listen_unix = 1;
-my $listen_inet = 1;
-my $listen_ssl  = 0;
-if (!defined $opt{'socketpath'}) {
-  $listen_unix = 0;
-} else {
-  $listen_inet = 0;
-}
-
-if (
-  ( @{ $opt{'allowed-ip'} } > 0 )
-    or defined $opt{'auth-ident'}
-    or defined $opt{'port'}
-  )
-{
-  $listen_inet = 1;
-}
-
-if (
-    defined $opt{'ssl'}
-    or defined $opt{'ssl-port'}
-    or defined $opt{'ssl-version'}
-  )
-{
-  $listen_ssl = 1;
-  if (!defined $opt{'ssl-port'}) {
-    $listen_inet = 0;
-  }
-}
-
-if (
-  !$opt{'socketpath'}
-  and ( $opt{'socketowner'}
-    or $opt{'socketgroup'}
-    or $opt{'socketmode'})
-  )
-{
-  print_usage_and_exit("ERROR: --socketowner/group/mode requires --socketpath param");
-}
-
 # These can be changed on command line with -A flag
-# but only if we're not using UNIX domain sockets
 my $allowed_nets = Mail::SpamAssassin::NetSet->new();
-if ( not defined $opt{'socketpath'} ) {
-  if ( @{ $opt{'allowed-ip'} } ) {
-    set_allowed_ip( grep length, map { split /,/ } @{ $opt{'allowed-ip'} } );
-  }
-  else {
-    set_allowed_ip('127.0.0.1', '::1');
-  }
+if ( @{ $opt{'allowed-ip'} } ) {
+  set_allowed_ip( grep length, map { split /,/ } @{ $opt{'allowed-ip'} } );
+} else {
+  set_allowed_ip('127.0.0.1', '::1');
 }
 
 # ident-based spamc user authentication
@@ -391,22 +419,6 @@ if ( $opt{'auth-ident'} ) {
 
   $opt{'ident-timeout'} = undef if $opt{'ident-timeout'} <= 0.0;
   import Net::Ident qw(ident_lookup);
-}
-
-# Check for server certs
-$opt{'server-key'}  ||= "$LOCAL_RULES_DIR/certs/server-key.pem";
-$opt{'server-cert'} ||= "$LOCAL_RULES_DIR/certs/server-cert.pem";
-if ( $listen_ssl ) {
-  eval { require IO::Socket::SSL };
-  die "spamd: SSL encryption requested, but IO::Socket::SSL is unavailable ($@)\n"
-    if ($@);
-
-  if ( !-e $opt{'server-key'} ) {
-    die "spamd: server key file $opt{'server-key'} does not exist\n";
-  }
-  if ( !-e $opt{'server-cert'} ) {
-    die "spamd: server certificate file $opt{'server-cert'} does not exist\n";
-  }
 }
 
 ### Begin initialization of logging ########################
@@ -646,25 +658,97 @@ if ( defined $ENV{'HOME'} ) {
 
 # Do whitelist later in tmp dir. Side effect: this will be done as -u user.
 
-my ( $sslport, $sslversion, $inetport, $addr, $proto );
+my $sslversion = $opt{'ssl-version'} || 'sslv3';
+if ($sslversion !~ /^(?:sslv3|tlsv1)$/) {
+  die "spamd: invalid ssl-version: $opt{'ssl-version'}\n";
+}
 
-if ( $listen_inet || $listen_ssl ) {
-  $proto = getprotobyname('tcp') or die "getprotobyname(tcp): $!";
+$opt{'server-key'}  ||= "$LOCAL_RULES_DIR/certs/server-key.pem";
+$opt{'server-cert'} ||= "$LOCAL_RULES_DIR/certs/server-cert.pem";
 
-  $addr = $opt{'listen-ip'};
-  if (defined $addr) {
-    if ($addr ne '') {
-      $addr = ip_or_name_to_ip($addr);
-      die "spamd: invalid address: $opt{'listen-ip'}\n" unless $addr;
-    }
-    else {
-      $addr = '0.0.0.0';    # FIXME: this won't bind to IPv6 sockets
-    }
-  }
-  else {
-    $addr = '127.0.0.1';
+# ---------------------------------------------------------------------------
+# Server (listening) socket setup for the various supported types
+
+dbg("spamd: socket module of choice: $io_socket_module_name");
+
+my $have_ssl_module;
+my @listen_sockets;  # list of hashrefs, contains info on all listen sockets
+my $server_select_mask;
+
+my @listen_socket_specs = @{$opt{'listen-sockets'}};
+
+{ # merge legacy option --socketpath into @listen_socket_specs
+  my $socketpath = $opt{'socketpath'};
+  if (defined $socketpath && $socketpath ne '') {
+    $socketpath =~ m{^/}
+      or die "socketpath option should specify an absolute path: $socketpath";
+    push(@listen_socket_specs, $socketpath);
   }
 }
+
+# supply a default socket (loopback IP address) if none specified
+push(@listen_socket_specs, 'localhost')  if !@listen_socket_specs;
+
+for (@listen_socket_specs) {
+  my $socket_specs = $_;
+
+  $socket_specs = '*'  if $socket_specs eq '';  # empty implies all interfaces
+
+  local($1,$2,$3,$4,$5,$6);
+  if ($socket_specs =~
+           m{^ (?: (ssl) : )?
+               ( / .* ) \z }xsi) {  # unix socket - absolute path
+    my($proto,$path) = ($1, $2);
+  # $proto = 'ssl'  if defined $opt{'ssl'} || defined $opt{'ssl-port'};
+    $proto = !defined($proto) ? '' : lc($proto);
+    # abstracted out the setup-retry code
+    dbg("spamd: unix socket: %s", $path);
+    server_sock_setup(\&server_sock_setup_unix, $socket_specs, $path);
+
+  } elsif ($socket_specs =~
+           m{^ (?: (ssl) : )?
+               (?: \[ ( [^\]]* ) \]
+                 | ( [a-z0-9._-]* )
+                 | ( [a-f0-9]* : [a-f0-9]* : [a-f0-9:]* \z )
+                 | ( \* )
+               )?
+               (?: : ( [a-z0-9-]* ) )? \z }xsi) {
+    my($proto,$addr,$port) = ($1, $2||$3||$4||$5, $6);
+    $addr = 'localhost'  if !defined $addr;
+    $proto = 'ssl'  if defined $opt{'ssl'} || defined $opt{'ssl-port'};
+    $proto = !defined($proto) ? '' : lc($proto);
+    $port = $opt{'ssl-port'}  if !defined $port && $proto eq 'ssl';
+    $port = $opt{'port'}      if !defined $port || $port eq '';
+    $port = '783'             if !defined $port || $port eq '';
+    if ($port ne '' && $port !~ /^(\d+)\z/) {
+      $port = ( getservbyname($port,'tcp') )[2];
+      $port or die "spamd: invalid port: $port, socket: $socket_specs\n";
+    }
+    # abstracted out the setup-retry code
+    dbg('spamd: %s socket specification: "%s", IP address: %s, port: %s',
+        $proto, $socket_specs, $addr, $port);
+    server_sock_setup(\&server_sock_setup_inet,
+                      $socket_specs, $addr, $port, $proto eq 'ssl' ? 1 : 0);
+  } else {
+    die "Invalid socket specification syntax: $socket_specs\n";
+  }
+}
+
+@listen_sockets  or die "No listen sockets specified, aborting\n";
+
+# ---------------------------------------------------------------------------
+
+# Check for server certs
+if ( $have_ssl_module ) {
+  if ( !-e $opt{'server-key'} ) {
+    die "spamd: server key file $opt{'server-key'} does not exist\n";
+  }
+  if ( !-e $opt{'server-cert'} ) {
+    die "spamd: server certificate file $opt{'server-cert'} does not exist\n";
+  }
+}
+
+# ---------------------------------------------------------------------------
 
 my $backchannel = Mail::SpamAssassin::SubProcBackChannel->new();
 my $scaling;
@@ -691,65 +775,37 @@ if (!$opt{'round-robin'})
 
 # ---------------------------------------------------------------------------
 
-my $listeninfo = compose_listen_info_string();
-
 sub compose_listen_info_string {
   my @listeninfo;
 
-  if ( $listen_unix ) {
-    push @listeninfo, "UNIX domain socket " . $opt{'socketpath'};
-  }
+  for my $socket_info (@listen_sockets) {
+    next if !$socket_info;
+    my $socket = $socket_info->{socket};
+    next if !$socket;
+    my $socket_specs = $socket_info->{specs};
 
-  if ( $listen_ssl ) {
-    $sslport = $opt{'ssl-port'} || $opt{'port'} || 783;
-    if ($sslport !~ /^(\d+)$/ ) {
-      $sslport = ( getservbyname($sslport, 'tcp') )[2];
-      die "spamd: invalid ssl-port: $opt{'port'}\n" unless $sslport;
+    if ($socket->isa('IO::Socket::UNIX')) {
+      push(@listeninfo, "UNIX domain socket " . $socket_info->{path});
+
+    } elsif ( $socket->isa('IO::Socket::INET')  ||
+              $socket->isa('IO::Socket::INET6') ||
+              $socket->isa('IO::Socket::IP') ) {
+      push(@listeninfo, sprintf("%s [%s]:%s", ref $socket,
+                      $socket_info->{ip_addr}, $socket_info->{port}));
+
+    } elsif ($socket->isa('IO::Socket::SSL')) {
+      push(@listeninfo, sprintf("SSL [%s]:%s, ssl version %s",
+                      $socket_info->{ip_addr}, $socket_info->{port},
+                      $opt{'ssl-version'}||'sslv3'));
     }
-    $sslversion = $opt{'ssl-version'} || 'sslv3';
-    if ($sslversion !~ /^(?:sslv3|tlsv1)$/) {
-      die "spamd: invalid ssl-version: $opt{'ssl-version'}\n";
-    }
-
-    push @listeninfo, "SSL port $sslport/tcp";
-    push @listeninfo, "SSL version $sslversion";
-  }
-
-  if ( $listen_inet ) {
-    $inetport = $opt{'port'} || 783;
-    if ($inetport !~ /^(\d+)$/ ) {
-      $inetport = ( getservbyname($inetport, 'tcp') )[2];
-      die "spamd: invalid port: $opt{'port'}\n" unless $inetport;
-    }
-
-    push @listeninfo, "port $inetport/tcp";
   }
 
   # just for reporting at startup
-  $listeninfo = join ', ', @listeninfo;
-}
-
-# ---------------------------------------------------------------------------
-# Server (listening) socket setup for the various supported types
-
-my ( $server_inet, $server_unix, $server_ssl );
-my ( $fd_inet, $fd_unix, $fd_ssl );
-my $have_multiple_server_socks;
-my $server_select_mask;
-
-# abstract out the setup-retry code
-if ( $listen_unix ) {
-  server_sock_setup(sub { server_sock_setup_unix(); });
-}
-if ( $listen_ssl ) {
-  server_sock_setup(sub { server_sock_setup_ssl(); });
-}
-if ( $listen_inet ) {
-  server_sock_setup(sub { server_sock_setup_inet(); });
+  return join(', ', @listeninfo);
 }
 
 sub server_sock_setup {
-  my $sub = shift;
+  my($sub, @args) = @_;
 
   # retry 3 times to bind to the listening socket; 3 seconds delay,
   # max, but should allow a little time for any existing shutting-down
@@ -758,8 +814,7 @@ sub server_sock_setup {
   for my $retry (1 .. $lastretry) {
     if ($retry > 1) { sleep 1; }
 
-    eval { $sub->(); };
-    last unless ($@);       # success => break
+    eval { &$sub(@args) } and last;  # success => break
 
     if ($retry == $lastretry) {
       die $@;               # this is fatal
@@ -774,7 +829,7 @@ sub server_sock_setup {
 
 # Create the sockets
 sub server_sock_setup_unix {
-  my $path = $opt{'socketpath'};
+  my($socket_specs, $path) = @_;
 
   # see if the socket is in use: if we connect to the current socket, it
   # means that spamd is already running, so we have to bail on our own.
@@ -786,11 +841,11 @@ sub server_sock_setup_unix {
       die "spamd: file $path exists but is no socket, exiting\n";
     }
   
-    if ( new IO::Socket::UNIX( Peer => $path, Type => SOCK_STREAM ) ) {
-      # we connected successfully: must alreadybe running
+    if ( new IO::Socket::UNIX( Peer => $path, Type => &SOCK_STREAM ) ) {
+      # socket bind successful: must already be running
 
-      undef $opt{'socketpath'};    # so exit handlers won't unlink it!
-
+      # make sure not to enter this socket into @listen_sockets,
+      # otherwise exit handlers would unlink it!
       die "spamd: already running on $path, exiting\n";
     }
     else {
@@ -804,11 +859,11 @@ sub server_sock_setup_unix {
 
   my %socket = (
     Local  => $path,
-    Type   => SOCK_STREAM,
+    Type   => &SOCK_STREAM,
     Listen => SOMAXCONN,
   );
   dbg("spamd: creating UNIX socket:\n" . join("\n", map { " $_: " . (defined $socket{$_} ? $socket{$_} : "(undef)") } sort keys %socket));
-  $server_unix = IO::Socket::UNIX->new(%socket);
+  my $server_unix = IO::Socket::UNIX->new(%socket);
   
   # sanity check!  cf. bug 3490
   if (not $server_unix or not -S $path) {
@@ -857,38 +912,80 @@ sub server_sock_setup_unix {
   if (!chmod $mode, $path) {    # make sure everybody can talk to it
     die "spamd: could not chmod $path to $mode: $!";
   }
-}
 
-sub server_sock_setup_ssl {
-  my %socket = (
-    LocalAddr       => $addr,
-    LocalPort       => $sslport,
-    Proto           => $proto,
-    Type            => SOCK_STREAM,
-    ReuseAddr       => 1,
-    Listen          => SOMAXCONN,
-    SSL_version     => $sslversion,
-    SSL_verify_mode => 0x00,
-    SSL_key_file    => $opt{'server-key'},
-    SSL_cert_file   => $opt{'server-cert'}
-  );
-  dbg("spamd: creating SSL socket:\n" . join("\n", map { " $_:  " . (defined $socket{$_} ? $socket{$_} : "(undef)") } sort keys %socket));
-  $server_ssl = new IO::Socket::SSL(%socket)
-       || die "spamd: could not create SSL socket on $addr:$sslport: $!\n";
+  push(@listen_sockets, { specs => $socket_specs,
+                          path => $path,
+                          socket => $server_unix,
+                          fd => $server_unix->fileno })  if $server_unix;
+  1;
 }
 
 sub server_sock_setup_inet {
-  my %socket = (
-    LocalAddr => $addr,
-    LocalPort => $inetport,
-    Proto     => $proto,
-    Type      => SOCK_STREAM,
-    ReuseAddr => 1,
-    Listen    => SOMAXCONN
-  );
-  dbg("spamd: creating INET socket:\n" . join("\n", map { " $_: " . (defined $socket{$_} ? $socket{$_} : "(undef)") } sort keys %socket));
-  $server_inet = new_io_socket_inetx(%socket)
-       || die "spamd: could not create INET socket on $addr:$inetport: $!\n";
+  my($socket_specs, $addr, $port, $ssl) = @_;
+
+  my $ai_family = &AF_UNSPEC;
+  if    ($opt{'force_ipv6'} && !$opt{'force_ipv4'}) { $ai_family = &AF_INET6 }
+  elsif ($opt{'force_ipv4'} && !$opt{'force_ipv6'}) { $ai_family = &AF_INET }
+  elsif (!$ssl && $io_socket_module_name eq 'IO::Socket::INET')
+                                                    { $ai_family = &AF_INET }
+  my($error, @addresses);
+  if (!defined $addr || lc $addr eq 'localhost') {  # loopback interface
+    push(@addresses, '127.0.0.1')
+      if $ai_family == &AF_UNSPEC || $ai_family == &AF_INET;
+    push(@addresses, '::1')
+      if $ai_family == &AF_UNSPEC || $ai_family == &AF_INET6;
+  } elsif ($addr eq '*' || $addr eq '') {  # any address
+    push(@addresses, '0.0.0.0')
+      if $ai_family == &AF_UNSPEC || $ai_family == &AF_INET;
+    push(@addresses, '::')
+      if $ai_family == &AF_UNSPEC || $ai_family == &AF_INET6;
+  } else {
+    ($error, @addresses) = ip_or_name_to_ip_addresses($addr, $ai_family);
+  }
+  die "spamd: invalid address for a listen socket: \"$socket_specs\": $error\n"
+    if $error;
+  die "spamd: invalid address for a listen socket: \"$socket_specs\"\n"
+    if !@addresses;
+
+  dbg("spamd: attempting to listen on IP addresses: %s, port %d",
+      join(', ',@addresses), $port);
+  for my $adr (@addresses) {
+    my %sockopt = (
+      LocalAddr => $adr,
+      LocalPort => $port,
+      Type      => &SOCK_STREAM,
+      Proto     => 'tcp',
+      ReuseAddr => 1,
+      Listen    => SOMAXCONN,
+      V6Only    => 1,
+    );
+    %sockopt = (%sockopt, (
+      SSL_version     => $sslversion,
+      SSL_verify_mode => 0x00,
+      SSL_key_file    => $opt{'server-key'},
+      SSL_cert_file   => $opt{'server-cert'},
+    ))  if $ssl;
+    dbg("spamd: creating %s socket: %s",
+        $ssl ? 'IO::Socket::SSL' : $io_socket_module_name,
+        join(', ', map("$_: ".(defined $sockopt{$_} ? $sockopt{$_} : "(undef)"),
+                       sort keys %sockopt)));
+    if ($ssl && !$have_ssl_module) {
+      eval { require IO::Socket::SSL }
+      or die "spamd: SSL encryption requested, but IO::Socket::SSL is unavailable ($@)\n";
+      $have_ssl_module = 1;
+    }
+    my $server_inet = $ssl ? IO::Socket::SSL->new(%sockopt)
+                           : new_io_socket_inetx(%sockopt);
+    $server_inet
+      or die sprintf("spamd: could not create %s socket on [%s]:%s: %s\n",
+                     $ssl ? 'IO::Socket::SSL' : $io_socket_module_name,
+                     $adr, $port, $!);
+    push(@listen_sockets, { specs => $socket_specs,
+                            ip_addr => $adr, port => $port,
+                            socket => $server_inet,
+                            fd => $server_inet->fileno }) if $server_inet;
+  }
+  1;
 }
 
 # ---------------------------------------------------------------------------
@@ -995,8 +1092,8 @@ $SIG{USR2} = \&backtrace_handler  if !am_running_on_windows();
 # log server started, but processes watching the log to wait for connect
 # should wait until they see the pid, after signal handlers are in place
 # FIXME: two calls are one too much
-info("spamd: server started on $listeninfo (running version "
-     . Mail::SpamAssassin::Version() . ")" );
+info("spamd: server started on %s (running version %s)",
+     compose_listen_info_string(), Mail::SpamAssassin::Version());
 
 my $remote_port;
 
@@ -1022,7 +1119,7 @@ for ( 1 .. $childlimit ) {
 }
 
 if ($scaling) {
-  $scaling->set_server_fh($server_inet, $server_unix, $server_ssl);
+  $scaling->set_server_fh(map($_->{socket},@listen_sockets));
 }
 
 while (1) {
@@ -1204,36 +1301,54 @@ sub spawn {
 }
 
 sub accept_from_any_server_socket {
+  my($client, $selected_socket_info);
 
-  my $fdvec = $server_select_mask;
+  if (!@listen_sockets) {
+    # nothing?
+    die "accept_a_conn: no sockets?";
 
-  if ($have_multiple_server_socks) {
+  } elsif (@listen_sockets == 1) {
+    $selected_socket_info = $listen_sockets[0];
+
+  } else {
     # determine which of our server FDs is ready using select().
     # We only need to do this if we have more than one server
     # socket supported, since otherwise there can only be one socket
     # with a client waiting.
     # (TODO: we could extend the prefork protocol to pass this data)
+
+    my $fdvec = $server_select_mask;
     my $nfound = select($fdvec, undef, undef, 0.1);
-    die "oops? accept_a_conn: no fds ready" unless $nfound;
+    die "oops? accept_a_conn: no fds ready"  if !$nfound;
+
+    for my $socket_info (@listen_sockets) {
+      my $fd = $socket_info->{fd};
+      if (defined($fd) && vec($fdvec,$fd,1)) {
+        $selected_socket_info = $socket_info;
+        last;
+      }
+    }
+    $selected_socket_info
+      or die "accept_a_conn: no fds ready by vec: $fdvec";
   }
 
-  if ($fd_inet && vec $fdvec, $fd_inet, 1) {
-    $client = $server_inet->accept;
+  if ($selected_socket_info) {
+    my $socket = $selected_socket_info->{socket};
+    $socket or die "accept_a_conn: no socket???, impossible";
+    $client = $socket->accept;
+    $client or die sprintf("accept_a_conn: %s accept failed: %s",
+                           ref $socket,
+                           !$socket->isa('IO::Socket::SSL') ? $!
+                             : $socket->errstr.", $!");
   }
-  elsif ($fd_unix && vec $fdvec, $fd_unix, 1) {
-    $client = $server_unix->accept;
-  }
-  elsif ($fd_ssl && vec $fdvec, $fd_ssl, 1) {
-    $client = $server_ssl->accept;
-  }
-  else {
-    die "accept_a_conn: no fds ready by vec: $fdvec";
-  }
-  return $client;
+  return ($client, $selected_socket_info);
 }
 
 sub accept_a_conn {
-  $client = accept_from_any_server_socket();
+
+  my $socket_info;
+  # $client is a global variable
+  ($client, $socket_info) = accept_from_any_server_socket();
 
   if ($scaling) {
     $scaling->update_child_status_busy();
@@ -1245,10 +1360,6 @@ sub accept_a_conn {
     # this can happen when interrupted by SIGCHLD on Solaris,
     # perl 5.8.0, and some other platforms with -m.
     if ( $! == &Errno::EINTR ) {
-      return 0;
-    }
-    elsif ( $! == 0 && $listen_ssl ) {
-      warn("spamd: SSL failure: " . &IO::Socket::SSL::errstr());
       return 0;
     }
     else {
@@ -1263,19 +1374,22 @@ sub accept_a_conn {
   $spamtest->timer_reset;
   my $start = time;
 
-  my ($remote_hostname, $remote_hostaddr);
-  if ($opt{'socketpath'}) {
+  my ($remote_hostname, $remote_hostaddr, $local_port);
+
+  if ($client->isa('IO::Socket::UNIX')) {
     $remote_hostname = 'localhost';
     $remote_hostaddr = '127.0.0.1';
-    $remote_port = $opt{'socketpath'};
-    info("spamd: got connection over " . $opt{'socketpath'});
+    $remote_port = $socket_info->{path};
+    info("spamd: got connection over %s", $socket_info->{path});
   }
   else {
-    ($remote_port, $remote_hostaddr, $remote_hostname) =
-      peer_info_from_socket($client)
-      or die 'failed to obtain port and ip from socket';
+    ($remote_port, $remote_hostaddr, $remote_hostname, $local_port) =
+      peer_info_from_socket($client);
+    $remote_hostaddr or die 'failed to obtain port and ip from socket';
 
-    my $msg = "connection from ${remote_hostname} [${remote_hostaddr}] at port ${remote_port}";
+    my $msg = sprintf("connection from %s [%s]:%s to port %d",
+                      $remote_hostname, $remote_hostaddr, $remote_port,
+                      $local_port);
     if (ip_is_allowed($remote_hostaddr)) {
       info("spamd: $msg");
     }
@@ -2500,17 +2614,22 @@ sub setup_child_sig_handlers {
 sub kill_handler {
   my ($sig) = @_;
   info("spamd: server killed by SIG$sig, shutting down");
-  $server_inet and $server_inet->close;
-  $server_unix and $server_unix->close;
-  $server_ssl  and $server_ssl->close;
 
-  if (defined($opt{'pidfile'})) {
-    unlink($opt{'pidfile'}) || warn "spamd: cannot unlink $opt{'pidfile'}: $!\n";
+  for my $socket_info (@listen_sockets) {
+    next if !$socket_info;
+
+    my $socket = $socket_info->{socket};
+    $socket->close  if $socket;  # ignoring status
+
+    my $path = $socket_info->{path};
+    if (defined $path) {  # unlink a UNIX domain socket
+      unlink($path) or warn "spamd: cannot unlink $path: $!\n";
+    }
   }
 
-  # the UNIX domain socket
-  if (defined($opt{'socketpath'})) {
-    unlink($opt{'socketpath'}) || warn "spamd: cannot unlink $opt{'socketpath'}: $!\n";
+  if (defined($opt{'pidfile'})) {
+    unlink($opt{'pidfile'})
+      or warn "spamd: cannot unlink $opt{'pidfile'}: $!\n";
   }
 
   $SIG{CHLD} = 'DEFAULT';    # we're going to kill our children
@@ -2596,26 +2715,20 @@ sub restart_handler {
   }
   %children = ();
 
-  unless ( !$server_inet || $server_inet->eof ) {
-    $server_inet->shutdown(2);
-    $server_inet->close;
-    info("spamd: server INET socket closed");
-  }
-
-  unless ( !$server_unix || $server_unix->eof ) {
-    $server_unix->shutdown(2);
-    $server_unix->close;
-    if (defined($opt{'socketpath'})) {
-      unlink($opt{'socketpath'}) || warn "spamd: cannot unlink $opt{'socketpath'}: $!\n";
+  for my $socket_info (@listen_sockets) {
+    next if !$socket_info;
+    my $socket = $socket_info->{socket};
+    next if !$socket;
+    my $socket_specs = $socket_info->{specs};
+    $socket->shutdown(2) if !$socket->eof;
+    $socket->close;
+    if ($socket->isa('IO::Socket::UNIX') && defined $socket_specs) {
+      unlink($socket_specs)
+        or warn "spamd: cannot unlink $socket_specs: $!\n";
     }
-    info("spamd: server UNIX socket closed");
+    info("spamd: server socket closed, type %s", ref $socket);
   }
 
-  unless ( !$server_ssl || $server_ssl->eof ) {
-    $server_ssl->shutdown(2);
-    $server_ssl->close;
-    info("spamd: server SSL socket closed");
-  }
   $got_sighup = 1;
 }
 
@@ -2677,7 +2790,14 @@ sub daemonize {
 
 sub set_allowed_ip {
   foreach (@_) {
-    $allowed_nets->add_cidr($_) or die "spamd: aborting due to add_cidr error\n";
+    my $ip = $_;
+    local($1,$2);
+    # strip optional square brackets
+    $ip =~ s{^ \[ (.*) \] \z}{$1}xs
+    || $ip =~ s{^ \[ (.*) \] ( / \d+ ) \z}{$1$2}xs;
+  # dbg("spamd: set_allowed_ip %s", $ip);
+    $allowed_nets->add_cidr($ip)
+      or die "spamd: aborting due to add_cidr error\n";
   }
 }
 
@@ -2783,23 +2903,16 @@ sub syswrite_full_buffer {
 }
 
 sub map_server_sockets {
-  $fd_inet = $server_inet ? $server_inet->fileno : undef;
-  $fd_unix = $server_unix ? $server_unix->fileno : undef;
-  $fd_ssl  = $server_ssl  ? $server_ssl->fileno  : undef;
 
   $server_select_mask = '';
-  $server_inet and vec($server_select_mask, $fd_inet, 1) = 1;
-  $server_unix and vec($server_select_mask, $fd_unix, 1) = 1;
-  $server_ssl  and vec($server_select_mask, $fd_ssl,  1) = 1;
+  for my $socket_info (@listen_sockets) {
+    next if !$socket_info;
+    my $fd = $socket_info->{fd};
+    vec($server_select_mask, $fd, 1) = 1  if defined $fd;
+  }
 
   my $back_selector = $server_select_mask;
   $backchannel->set_selector(\$back_selector);
-
-  # and set a boolean indicating whether or not we have > 1 server socket
-  $have_multiple_server_socks =
-      ((defined $fd_inet ? 1 : 0) +
-      (defined $fd_unix ? 1 : 0) +
-      (defined $fd_ssl  ? 1 : 0)) > 1;
 }
 
 # do this in advance, since we want to minimize work when SIGHUP
@@ -2866,13 +2979,15 @@ Options:
  --cf='config line'                Additional line of configuration
  -d, --daemonize                   Daemonize
  -h, --help                        Print usage message
- -i [ipaddr], --listen-ip=ipaddr   Listen on the IP ipaddr
- -4, --ipv4only, --ipv4-only, --ipv4  Disable attempted use of ipv6 for DNS
- -p port, --port=port              Listen on specified port
+ -i [ip_or_name[:port]], --listen=[ip_or_name[:port]] Listen on IP addr and port
+ -p port, --port=port              Listen on specified port, may be overridden by -i
+ -4, --ipv4-only, --ipv4           Use IPv4 where applicable, disables IPv6
+ -6                                Use IPv6 where applicable, disables IPv4
+ -A host,..., --allowed-ips=..,..  Restrict to IP addresses which can connect
  -m num, --max-children=num        Allow maximum num children
  --min-children=num                Allow minimum num children
- --min-spare=num                Lower limit for number of spare children
- --max-spare=num                Upper limit for number of spare children
+ --min-spare=num                   Lower limit for number of spare children
+ --max-spare=num                   Upper limit for number of spare children
  --max-conn-per-child=num	   Maximum connections accepted by child 
                                    before it is respawned
  --round-robin                     Use traditional prefork algorithm
@@ -2897,21 +3012,29 @@ Options:
  -x, --nouser-config               Disable user config files
  --auth-ident                      Use ident to identify spamc user (deprecated)
  --ident-timeout=timeout           Timeout for ident connections
- -A host,..., --allowed-ips=..,..  Limit ip addresses which can connect
  -D, --debug[=areas]               Print debugging messages (for areas)
  -L, --local                       Use local tests only (no DNS)
  -P, --paranoid                    Die upon user errors
- -H [dir], --helper-home-dir[=dir]  Specify a different HOME directory
- --ssl                             Run an SSL server
- --ssl-port port                   Listen on port for SSL connections
+ -H [dir], --helper-home-dir[=dir] Specify a different HOME directory
+ --ssl                             Enable SSL on TCP connections
+ --ssl-port port                   Override --port setting for SSL connections
  --ssl-version sslversion          Specify SSL protocol version to use
  --server-key keyfile              Specify an SSL keyfile
  --server-cert certfile            Specify an SSL certificate
- --socketpath=path                 Listen on given UNIX domain socket
+ --socketpath=path                 Listen on a given UNIX domain socket
  --socketowner=name                Set UNIX domain socket file's owner
  --socketgroup=name                Set UNIX domain socket file's group
  --socketmode=mode                 Set UNIX domain socket file's mode
  -V, --version                     Print version and exit
+
+The --listen option (or -i) may be specified multiple times, its syntax
+is: [ ssl: ] [ host-name-or-IP-address ] [ : port ]  or an absolute path
+(filename) of a Unix socket.  If port is omitted it defaults to --port or
+to 783.  Option --ssl implies a prefix 'ssl:'.  An IPv6 address should be
+enclosed in square brackets, e.g. [::1]:783, an IPv4 address may be but
+need not be enclosed in square brackets.  An asterisk '*' in place of a
+hostname implies an unspecified address, ('0.0.0.0' or '::'), i.e. it
+binds to all interfaces. An empty option value implies '*'.
 
 =head1 DESCRIPTION
 
@@ -2991,12 +3114,20 @@ Print a brief help message, then exit without further action.
 
 Print version information, then exit without further action.
 
-=item B<-i> [I<ipaddress>], B<--listen-ip>[=I<ipaddress>], B<--ip-address>[=I<ipaddress>]
+=item B<-i> [I<ipaddress>[:<port>]], B<--listen>[=I<ipaddress>[:<port>]]
 
-Tells spamd to listen on the specified IP address (defaults to 127.0.0.1).  If
-you specify no IP address after the switch, spamd will listen on all interfaces.
-(This is equal to the address 0.0.0.0).  You can also use a valid hostname which
-will make spamd listen on the first address that name resolves to.
+Additional alias names for this option are --listen-ip and --ip-address.
+Tells spamd to listen on the specified IP address (defaults to a loopback
+address).  If no value is specified after the switch, or an asterisk '*'
+stands in place of <ipaddress>, spamd will listen on all interfaces - this
+is equivalent to address '0.0.0.0' for IPv4 and to '::' for IPv6.
+You can also use a valid hostname which will make spamd listen on all
+addresses that a name resolves to. The option may be specified multiple
+times. See also options -4 and -6 for restricting address family to IPv4
+or to IPv6. If a port is specified it overrides the --port (and --ssl-port)
+setting for this socket. An IPv6 addresses should be enclosed in square
+brackets, e.g. [::1]:783. For compatibility the square brackets on an IPv6
+address may be omitted if a port number specification is also omitted.
 
 =item B<-p> I<port>, B<--port>=I<port>
 
@@ -3256,8 +3387,16 @@ please see the documentation at:
 
 =item B<-4>, B<--ipv4only>, B<--ipv4-only>, B<--ipv4>
 
-Do not use IPv6 for DNS tests. Use if the existing tests
-for IPv6 availability produce incorrect results or crashes.
+Use IPv4 where applicable, do not use IPv6.
+The option affects a set of listen sockets (see option C<--listen>)
+and disables IPv6 for DNS tests.
+
+=item B<-6>
+
+Use IPv6 where applicable, do not use IPv4.
+The option currently only affects a set of listen sockets,
+see option C<--listen>. Installing a module IO::Socket::IP is
+recommended if spamd is expected to receive requests over IPv6.
 
 =item B<-L>, B<--local>
 
@@ -3378,17 +3517,23 @@ Specify the SSL certificate file to use for SSL connections.
 
 =item B<--socketpath> I<pathname>
 
-Listen on UNIX domain path I<pathname> instead of a TCP socket.
+Listen on a UNIX domain socket at path I<pathname>, in addition to
+sockets specified with a C<--listen> option. This option is provided
+for compatibility with older versions of spamd. Starting with version
+3.4.0 the C<--listen> option can also take a UNIX domain socket as its
+value (an absolute path name). Unlike C<--socketpath>, the C<--listen>
+option may be specified multiple times if spamd needs to listen on
+multiple UNIX or INET or INET6 sockets.
 
 Warning: the Perl support on BSD platforms for UNIX domain sockets seems to
-have a bug regarding paths of over 100 bytes or so (SpamAssassin bug 4380).  If
-you see a 'could not find newly-created UNIX socket' error message, and the
-path appears truncated, this may be the cause.  Try using a shorter path
+have a bug regarding paths of over 100 bytes or so (SpamAssassin bug 4380).
+If you see a 'could not find newly-created UNIX socket' error message, and
+the path appears truncated, this may be the cause.  Try using a shorter path
 to the socket.
 
-By default, use of B<--socketpath> will inhibit SSL connections and unencrypted
-TCP connections.  To enable them, specify B<--port> and/or B<--ssl-port>
-explicitly.
+By default, use of B<--socketpath> without B<--listen> will inhibit
+SSL connections and unencrypted TCP connections.  To add other sockets,
+specify them with B<--listen>, e.g. '--listen=:' or '--listen=*:'
 
 =item B<--socketowner> I<name>
 
