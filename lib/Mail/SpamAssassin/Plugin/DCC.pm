@@ -512,7 +512,8 @@ sub dcc_pgm_path {
   }
 
   # try dcc_home/bin, dcc_libexec, and some desperate last attempts
-  foreach my $dir ($conf->{dcc_home}.'/bin',  $conf->{dcc_libexec},
+  foreach my $dir (!defined $conf->{dcc_home} ? () : $conf->{dcc_home}.'/bin',
+                   $conf->{dcc_libexec},
                    '/usr/local/bin', '/usr/local/dcc', '/var/dcc') {
     next unless defined $dir;
     $pgmpath = $dir . '/' . $pgm;
@@ -588,7 +589,7 @@ sub dccifd_connect {
   if (defined $sockpath) {
     $sock = IO::Socket::UNIX->new(Type => SOCK_STREAM, Peer => $sockpath);
     if ($sock) {
-      dbg("$tag connected to local socket %s", $sockpath);
+      dbg("%s connected to local socket %s", $tag, $sockpath);
       return $sock;
     }
     $self->{dccifd_available} = 0;
@@ -602,13 +603,13 @@ sub dccifd_connect {
 
   if ($conf->{dcc_dccifd_IPv6}) {
     # try IPv6 if we can with a host name or non-IPv4 address
-    dbg("$tag connecting to inet6 socket [%s]:%s", $host,$port);
+    dbg("%s connecting to inet6 socket [%s]:%s", $tag,$host,$port);
     $sock = IO::Socket::INET6->new(
 		  Proto => 'tcp', PeerAddr => $host, PeerPort => $port);
     # fall back to IPv4 if that failed
   }
   if (!$sock) {
-    dbg("$tag connecting to inet4 socket [%s]:%s", $host, $port);
+    dbg("%s connecting to inet4 socket [%s]:%s", $tag,$host,$port);
     $sock = IO::Socket::INET->new(
 		Proto => 'tcp', PeerAddr => $host, PeerPort => $port);
   }
@@ -866,12 +867,13 @@ sub ask_dcc {
 	unshift(@opts, '-t', 'many');
       }
 
-      dbg("$tag opening pipe to %s",
+      defined $path  or die "no dcc_path found\n";
+      dbg("%s opening pipe to %s", $tag,
 	  join(' ', $path, "-C", "-x", "0", @opts, "<$tmpf"));
 
       $pid = Mail::SpamAssassin::Util::helper_app_pipe_open(*DCC,
 		$tmpf, 1, $path, "-C", "-x", "0", @opts);
-      $pid or die "$!\n";
+      $pid or die "DCC: $!\n";
 
       # read+split avoids a Perl I/O bug (Bug 5985)
       my($inbuf,$nread,$resp); $resp = '';
@@ -887,7 +889,7 @@ sub ask_dcc {
     }
   });
 
-  if ($pgm eq 'dccproc') {
+  if (defined $pgm && $pgm eq 'dccproc') {
     if (defined(fileno(*DCC))) {	# still open
       if ($pid) {
 	if (kill('TERM',$pid)) {
@@ -920,7 +922,7 @@ sub ask_dcc {
     info("$tag instead of X-DCC header, $pgm returned '%s'", $raw_x_dcc);
     return (undef, undef);
   }
-  dbg("$tag %s responded with '%s'", $pgm, $raw_x_dcc);
+  dbg("%s %s responded with '%s'", $tag, $pgm, $raw_x_dcc);
   return ($raw_x_dcc, $cksums);
 }
 
