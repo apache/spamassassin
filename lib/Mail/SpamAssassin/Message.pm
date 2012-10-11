@@ -338,6 +338,24 @@ sub new {
   ($self->{'type'}, $boundary) = Mail::SpamAssassin::Util::parse_content_type($self->header('content-type'));
   dbg("message: main message type: ".$self->{'type'});
 
+#  dbg("message: \$message[0]: \"" . $message[0] . "\"");
+
+  # bug 6845: if main message type is multipart and the message body does not begin with
+  # either a blank line or the boundary (if defined), insert a blank line
+  # to ensure proper parsing - do not consider MIME headers at the beginning of the body
+  # to be part of the message headers.
+  if ($self->{'type'} =~ /^multipart\//i && $#message > 0 && $message[0] =~ /\S/)
+  {
+    if (!defined $boundary || $message[0] !~ /^--\Q$boundary\E/)
+    {
+      dbg("message: Inserting blank line at top of body to ensure correct multipart MIME parsing");
+      unshift(@message, "\012");
+    }
+  }
+
+#  dbg("message: \$message[0]: \"" . $message[0] . "\"");
+#  dbg("message: \$message[1]: \"" . $message[1] . "\"");
+
   # parse queue, simple array of parts to parse:
   # 0: part object, already in the tree
   # 1: boundary used to focus body parsing
@@ -791,6 +809,7 @@ sub _parse_multipart {
     my $line;
     my $tmp_line = @{$body};
     for ($line=0; $line < $tmp_line; $line++) {
+#      dbg("message: multipart line $line: \"" . $body->[$line] . "\"");
       # specifically look for an opening boundary
       if ($body->[$line] =~ /^--\Q$boundary\E\s*$/) {
 	# Make note that we found the opening boundary
