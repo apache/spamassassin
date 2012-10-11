@@ -83,6 +83,11 @@ my %files = (
 	  'e6e71e824aec0e204367bfdc9a9e227039f42815'
 	],
 
+	"$prefix/t/data/spam/badmime3.txt" => [
+	  join("\n",'multipart/alternative','text/plain'),
+	  '1c9972d2708b27f4da2e2ef87dd64d53bd11d086'
+	],
+
 	"$prefix/t/data/nice/mime9" => [
 	  join("\n",'multipart/mixed','text/plain','message/rfc822,message/rfc822,multipart/mixed,multipart/alternative,text/plain,text/html,image/jpeg'),
 	  '5cdcabdb89c5fbb3a5e0c0473599668927045d9c',
