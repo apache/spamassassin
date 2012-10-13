@@ -7,13 +7,13 @@ ifplugin  Mail::SpamAssassin::Plugin::URIDetail
 uri_detail      AJB_CANPOST_BADLINK     raw !~ /canadapost\./ text =~ /(?:https?:\/\/|www\.)canadapost\./ type =~ /^a$/
 describe        AJB_CANPOST_BADLINK     Found a mismatch between href and anchored text pretending to link to www.canadapost.ca
 # score         AJB_UTUBE_BADLINK       1.0
-tflags          AJB_UTUBE_BADLINK       nopublish
+#tflags          AJB_UTUBE_BADLINK       nopublish
 
 ## youtube
 uri_detail      AJB_UTUBE_BADLINK       raw !~ /youtube\./ text =~ /(?:https?:\/\/|www\.)youtube\./ type =~ /^a$/
 describe        AJB_UTUBE_BADLINK       Found a mismatch between href and anchored text pretending to link to www.youtube.com
 #score          AJB_UTUBE_BADLINK       0.5
-tflags          AJB_UTUBE_BADLINK       nopublish
+#tflags          AJB_UTUBE_BADLINK       nopublish
 
 
 
