@@ -548,6 +548,7 @@ sub try_module {
         ($module_version && $module_version >= $recommended_version)) {
       $version_meets_recommended = 1;
     }
+    $module_version = '' if !defined $module_version;
   }
 
   my $errtype;
