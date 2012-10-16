@@ -3399,9 +3399,9 @@ and disables IPv6 for DNS tests.
 =item B<-6>
 
 Use IPv6 where applicable, do not use IPv4.
-The option currently only affects a set of listen sockets,
-see option C<--listen>. Installing a module IO::Socket::IP is
-recommended if spamd is expected to receive requests over IPv6.
+The option affects a set of listen sockets (see option C<--listen>)
+and disables IPv4 for DNS tests. Installing a module IO::Socket::IP
+is recommended if spamd is expected to receive requests over IPv6.
 
 =item B<-L>, B<--local>
 
