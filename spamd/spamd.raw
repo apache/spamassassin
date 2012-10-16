@@ -3348,12 +3348,14 @@ timeout, which is STRONGLY discouraged.  The default is 5 seconds.
 
 =item B<-A> I<host,...>, B<--allowed-ips>=I<host,...>
 
-Specify a list of authorized hosts or networks which can connect to this spamd
-instance. Single IP addresses can be given, ranges of IP addresses in
-address/masklength CIDR format, or ranges of IP addresses by listing 3 or less
-octets with a trailing dot.  Hostnames are not supported, only IP addresses.
+Specify a comma-separated list of authorized hosts or networks which
+can connect to this spamd instance. Each element of the list is either a
+single IP addresses, or a range of IP addresses in address/masklength CIDR
+notation, or ranges of IPv4 addresses by specifying 3 or less octets with
+a trailing dot.  Hostnames are not supported, only IPv4 or IPv6 addresses.
 This option can be specified multiple times, or can take a list of addresses
-separated by commas.  Examples:
+separated by commas.  IPv6 addresses may be (but need not be) enclosed
+in square brackets for consistency with option B<--listen>.  Examples:
 
 B<-A 10.11.12.13> -- only allow connections from C<10.11.12.13>.
 
@@ -3365,8 +3367,11 @@ C<10.200.300.*>.
 
 B<-A 10.> -- allow connections from any machine in the range C<10.*.*.*>.
 
-By default, connections are only accepted from localhost (IP address 127.0.0.1
-or ::1 ).
+B<-A [2001:db8::]/32,192.0.2.0/24,::1,127.0.0.0/8> -- only accept
+connections from specified test networks and from localhost.
+
+In absence of the B<-A> option, connections are only accepted from
+IP address 127.0.0.1 or ::1, i.e. from localhost on a loopback interface.
 
 =item B<-D> [I<area,...>], B<--debug> [I<area,...>]
 
