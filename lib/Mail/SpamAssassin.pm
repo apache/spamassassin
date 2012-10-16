@@ -238,8 +238,15 @@ override of config files.
 
 =item force_ipv4
 
-If set to 1, DNS tests will not attempt to use IPv6. Use if the existing tests
-for IPv6 availability produce incorrect results or crashes.
+If set to 1, DNS or other network tests will prefer IPv4 and not attempt
+to use IPv6. Use if the existing tests for IPv6 availability produce
+incorrect results or crashes.
+
+=item force_ipv6
+
+For symmetry with force_ipv4: if set to 1, DNS or other network tests
+will prefer IPv6 and not attempt to use IPv4. Some plugins may disregard
+this setting and use whatever protocol family they are comfortable with.
 
 =item require_rules
 

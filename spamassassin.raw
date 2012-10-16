@@ -180,7 +180,10 @@ GetOptions(
   'debug|D:s'                               => \$opt{'debug'},
   'error-code|exit-code|e:i'                => \$opt{'error-code'},
   'help|h|?'                                => \$opt{'help'},
-  'ipv4only|ipv4-only|ipv4'                 => \$opt{'force_ipv4'},
+  '4|ipv4only|ipv4-only|ipv4'               => sub { $opt{'force_ipv4'} = 1;
+                                                     $opt{'force_ipv6'} = 0; },
+  '6'                                       => sub { $opt{'force_ipv6'} = 1;
+                                                     $opt{'force_ipv4'} = 0; },
   'lint'                                    => \$opt{'lint'},
   'local-only|local|L'                      => \$opt{'local'},
   'mbox'                                    => sub { $opt{'format'} = 'mbox'; },
@@ -250,6 +253,7 @@ my $spamtest = new Mail::SpamAssassin(
     site_rules_filename => $opt{'siteconfigpath'},
     userprefs_filename  => $opt{'prefspath'},
     force_ipv4          => $opt{'force_ipv4'},
+    force_ipv6          => $opt{'force_ipv6'},
     local_tests_only    => $opt{'local'},
     debug               => $opt{'debug'},
     dont_copy_prefs     => ( $opt{'create-prefs'} ? 0 : 1 ),

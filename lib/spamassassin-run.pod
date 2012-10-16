@@ -58,7 +58,8 @@ Options:
  --add-addr-to-whitelist=addr      Add addr to persistent address whitelist
  --add-addr-to-blacklist=addr      Add addr to persistent address blacklist
  --remove-addr-from-whitelist=addr Remove addr from persistent address list
- --ipv4only, --ipv4-only, --ipv4   Disable attempted use of ipv6 for DNS
+ -4 --ipv4only, --ipv4-only, --ipv4 Use IPv4, disable use of IPv6 for DNS etc.
+ -6                                Use IPv6, disable use of IPv4 where possible
  --progress                        Print progress bar
  -D, --debug [area=n,...]          Print debugging messages
  -V, --version                     Print version
