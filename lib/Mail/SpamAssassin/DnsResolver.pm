@@ -42,15 +42,24 @@ use re 'taint';
 
 use Mail::SpamAssassin;
 use Mail::SpamAssassin::Logger;
+use Mail::SpamAssassin::Constants qw(:ip);
 
 use Socket;
-use IO::Socket::INET;
 use Errno qw(EADDRINUSE EACCES);
 use Time::HiRes qw(time);
 
-use constant HAS_SOCKET_INET6 => eval { require IO::Socket::INET6; };
-
 our @ISA = qw();
+
+use vars qw($io_socket_module_name);
+BEGIN {
+  if (eval { require IO::Socket::IP }) {
+    $io_socket_module_name = 'IO::Socket::IP';
+  } elsif (eval { require IO::Socket::INET6 }) {
+    $io_socket_module_name = 'IO::Socket::INET6';
+  } elsif (eval { require IO::Socket::INET }) {
+    $io_socket_module_name = 'IO::Socket::INET';
+  }
+}
 
 ###########################################################################
 
@@ -84,18 +93,31 @@ sub load_resolver {
 
   if (defined $self->{res}) { return 1; }
   $self->{no_resolver} = 1;
+
   # force only ipv4 if no IO::Socket::INET6 or ipv6 doesn't work
-  my $force_ipv4 = !HAS_SOCKET_INET6 || $self->{main}->{force_ipv4} ||
-    !eval {
-      my $sock6 = IO::Socket::INET6->new(
-                                         LocalAddr => "::",
-                                         Proto     => 'udp',
-                                         );
-      if ($sock6) {
-        $sock6->close()  or die "error closing inet6 socket: $!";
+  my $force_ipv4 = $self->{main}->{force_ipv4};
+  my $force_ipv6 = $self->{main}->{force_ipv6};
+
+  if (!$force_ipv4 && $io_socket_module_name eq 'IO::Socket::INET') {
+    dbg("dns: socket module for IPv6 support not available");
+    die "Use of IPv6 requested, but not available\n"  if $force_ipv6;
+    $force_ipv4 = 1; $force_ipv6 = 0;
+  }
+  if (!$force_ipv4) {  # test drive IPv6
+    eval {
+      my $sock6;
+      if ($io_socket_module_name) {
+        $sock6 = $io_socket_module_name->new(LocalAddr=>'::', Proto=>'udp');
       }
+      if ($sock6) { $sock6->close() or warn "error closing socket: $!" }
       $sock6;
-    };
+    } or do {
+      dbg("dns: socket module %s is available, but no host support for IPv6",
+          $io_socket_module_name);
+      die "Use of IPv6 requested, but not available\n"  if $force_ipv6;
+      $force_ipv4 = 1; $force_ipv6 = 0;
+    }
+  }
   
   eval {
     require Net::DNS;
@@ -106,6 +128,7 @@ sub load_resolver {
     if (defined $self->{res}) {
       $self->{no_resolver} = 0;
       $self->{force_ipv4} = $force_ipv4;
+      $self->{force_ipv6} = $force_ipv6;
       $self->{retry} = 1;               # retries for non-backgrounded query
       $self->{retrans} = 3;   # initial timeout for "non-backgrounded" query run in background
       $self->{res}->retry(1);           # If it fails, it fails
@@ -123,7 +146,9 @@ sub load_resolver {
     dbg("dns: eval failed: $eval_stat");
   };
 
-  dbg("dns: no ipv6") if $force_ipv4;
+  dbg("dns: using socket module: %s%s", $io_socket_module_name,
+      $self->{force_ipv4} ? ', forced IPv4' :
+      $self->{force_ipv6} ? ', forced IPv6' : '');
   dbg("dns: is Net::DNS::Resolver available? %s",
       $self->{no_resolver} ? "no" : "yes" );
   if (!$self->{no_resolver} && defined $Net::DNS::VERSION) {
@@ -184,6 +209,30 @@ sub available_nameservers {
     # a list of configured name servers: [addr]:port entries
     $self->{available_dns_servers} = [ $self->configured_nameservers() ];
   }
+  if ($self->{force_ipv4} || $self->{force_ipv6}) {
+    # filter the list according to a chosen protocol family
+    my $ip4_re = IPV4_ADDRESS;
+    my(@filtered_addr_port);
+    for (@{$self->{available_dns_servers}}) {
+      local($1,$2);
+      /^ \[ (.*) \] : (\d+) \z/xs  or next;
+      my($addr,$port) = ($1,$2);
+      if ($addr =~ /^${ip4_re}\z/o) {
+        push(@filtered_addr_port, $_)  unless $self->{force_ipv6};
+      } elsif ($addr =~ /:.*:/) {
+        push(@filtered_addr_port, $_)  unless $self->{force_ipv4};
+      } else {
+        warn "Unrecognized DNS specification: $_";
+      }
+    }
+    if (@filtered_addr_port < @{$self->{available_dns_servers}}) {
+      dbg("dns: filtered DNS servers according to protocol family: %s",
+          join(", ",@filtered_addr_port));
+    }
+    @{$self->{available_dns_servers}} = @filtered_addr_port;
+  }
+  die "available_nameservers: No DNS servers available!\n"
+    if !@{$self->{available_dns_servers}};
   return @{$self->{available_dns_servers}};
 }
 
@@ -281,6 +330,9 @@ sub connect_sock {
   dbg("dns: connect_sock, resolver: %s", $self->{no_resolver} ? "no" : "yes");
   return if $self->{no_resolver};
 
+  $io_socket_module_name
+    or die "No Perl modules for network socket available";
+
   if ($self->{sock}) {
     $self->{sock}->close()  or die "error closing socket: $!";
   }
@@ -293,23 +345,26 @@ sub connect_sock {
   my($ns_addr,$ns_port); local($1,$2);
   ($ns_addr,$ns_port) = ($1,$2)  if $ns_addr_port[0] =~ /^\[(.*)\]:(\d+)\z/;
 
-  # IO::Socket::INET6 may choose wrong LocalAddr if family is unspecified,
-  # causing EINVAL failure when automatically assigned local IP address
-  # and remote address do not belong to the same address family:
-  use Mail::SpamAssassin::Constants qw(:ip);
-  my $ip64 = IP_ADDRESS;
-  my $ip4 = IPV4_ADDRESS;
-  my $ipv6opt = !($self->{force_ipv4});
-
-  # ensure families of src and dest addresses match (bug 4412 comment 29)
+  # Ensure families of src and dest addresses match (bug 4412 comment 29).
+  # Older IO::Socket::INET6 may choose a wrong LocalAddr if protocol family
+  # is unspecified, causing EINVAL failure when automatically assigned local
+  # IP address and a remote address do not belong to the same address family.
+  # Let's choose a suitable source address if possible.
+  my $ip4_re = IPV4_ADDRESS;
   my $srcaddr;
-  if ($ipv6opt && $ns_addr =~ /^${ip64}$/o && $ns_addr !~ /^${ip4}$/o) {
-    $srcaddr = "::";
-  } else {
+  if ($self->{force_ipv4}) {
     $srcaddr = "0.0.0.0";
+  } elsif ($self->{force_ipv6}) {
+    $srcaddr = "::";
+  } elsif ($ns_addr =~ /^${ip4_re}\z/o) {
+    $srcaddr = "0.0.0.0";
+  } elsif ($ns_addr =~ /:.*:/) {
+    $srcaddr = "::";
+  } else {  # unrecognized
+    # unspecified address, unspecified protocol family
   }
   dbg("dns: LocalAddr: %s, name server(s): %s",
-      $srcaddr, join(', ',@ns_addr_port));
+      $srcaddr||'', join(', ',@ns_addr_port));
 
   # find a free local random port from a set of declared-to-be-available ports
   my $lport;
@@ -329,20 +384,19 @@ sub connect_sock {
     my %args = (
         PeerAddr => $ns_addr,
         PeerPort => $ns_port,
-        Proto => 'udp',
+        LocalAddr => $srcaddr,
         LocalPort => $lport,
         Type => SOCK_DGRAM,
-        LocalAddr => $srcaddr,
+        Proto => 'udp',
     );
-    if ($ipv6opt) {
-      $sock = IO::Socket::INET6->new(%args);
-    } else {
-      $sock = IO::Socket::INET->new(%args);
-    }
-    $errno = $!;
-    if (defined $sock) {  # ok, got it
-      last;
-    } elsif ($! == EADDRINUSE || $! == EACCES) {
+    $sock = $io_socket_module_name->new(%args);
+
+    last if $sock;  # ok, got it
+
+    # IO::Socket::IP constructor provides full error messages in $@
+    $errno = $io_socket_module_name eq 'IO::Socket::IP' ? $@ : $!;
+
+    if ($! == EADDRINUSE || $! == EACCES) {
       # in use, let's try another source port
       dbg("dns: UDP port $lport already in use, trying another port");
       if ($self->{conf}->{dns_available_portscount} > 100) {  # still abundant
@@ -353,7 +407,7 @@ sub connect_sock {
       goto no_sock;
     }
   }
-  if (!defined $sock) {
+  if (!$sock) {
     warn "could not create a DNS resolver socket in $attempts attempts: $errno";
     goto no_sock;
   }
