@@ -898,3 +898,33 @@ describe    URI_DATA           "data:" URI - possible malware or phish
 score       URI_DATA           1.0	# limit
 
 
+header      __SUBJ_ATTENTION     Subject =~ /ATTENTION/
+meta        SUBJ_ATTENTION       __SUBJ_ATTENTION && !ALL_TRUSTED
+describe    SUBJ_ATTENTION       ATTENTION in Subject
+score       SUBJ_ATTENTION       0.500	# limit
+
+header      __IRS_FM_NAME        From:name =~ /internal\srevenue\sservice/i
+header      __IRS_FM_DOM         From:addr =~ /\birs\.gov$/
+header      __IRS_RCVD_DOM       X-Spam-Relays-External =~ / rdns=\S+\birs\.gov /
+meta        __IRS_SPOOF          __IRS_FM_NAME && !__IRS_FM_DOM && !__IRS_RCVD_DOM
+meta        IRS_SPOOF            __IRS_SPOOF
+describe    IRS_SPOOF            Claims to be IRS, but not from IRS domain
+score       IRS_SPOOF            1.00	# limit
+
+
+header      __FROM_AMEX          From =~ /american\s?express/i
+header      __FROM_BANK_LOOSE    From =~ /ban(?:k|co)/i
+header      __FROM_CHASE         From:addr =~ /chase(?:2?-?paymentech)\.com$/i
+header      __FROM_EBAY_LOOSE    From =~ /\be-?bay\b/i
+header      __FROM_HSBC          From:addr =~ /\bhsbc\.co\.uk$/i
+header      __FROM_LLOYDSTSB     From:addr =~ /\blloyds(?:tsb)\.(?:co\.uk|com)$/i
+header      __FROM_PAYPAL_LOOSE  From:name =~ /paypal/i
+header      __FROM_WELLSFARGO    From:addr =~ /wellsfargo\.com$/i
+header      __FROM_WESTERNUNION  From:addr =~ /westernunion\.com$/i
+
+meta        __FROM_MISSP_PHISH   __FROM_MISSPACED && (__FROM_AMEX || __FROM_BANK_LOOSE || __FROM_CHASE || __FROM_EBAY_LOOSE || __FROM_HSBC || __FROM_LLOYDSTSB || __FROM_PAYPAL_LOOSE || __FROM_WELLSFARGO || __FROM_WESTERNUNION)
+meta        FROM_MISSP_PHISH     __FROM_MISSP_PHISH
+describe    FROM_MISSP_PHISH     From misspaced, apparently from financial organization - possible phish
+score       FROM_MISSP_PHISH     2.00	# limit
+
+
