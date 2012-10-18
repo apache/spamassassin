@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-coi-bulk axb-fraud axb-generic axb-ham-misc axb-sa-users axb-woas bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi danmcdonald darxus grenier jarif kpg-gah mas zmi; day 2: axb-coi-bulk axb-fraud axb-generic axb-ham-misc axb-sa-users axb-woas bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi danmcdonald darxus grenier jarif kpg-gah llanga mas zmi; day 3: axb-coi-bulk axb-fraud axb-generic axb-ham-misc axb-sa-users axb-woas bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi danmcdonald darxus grenier jarif kpg-gah llanga mas zmi
+# with results from: day 1: axb-coi-bulk axb-fraud axb-generic axb-ham-misc axb-sa-users axb-woas bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi danmcdonald darxus grenier jarif kpg-gah zmi; day 2: axb-coi-bulk axb-fraud axb-generic axb-ham-misc axb-sa-users axb-woas bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi danmcdonald darxus grenier jarif kpg-gah llanga mas zmi; day 3: axb-coi-bulk axb-fraud axb-generic axb-ham-misc axb-sa-users axb-woas bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi danmcdonald darxus grenier jarif kpg-gah llanga mas zmi
 
 # good enough
 ACH_CANCELLED
@@ -383,7 +383,7 @@ DRUGS_STOCK_MIMEOLE
 ENV_AND_HDR_SPF_MATCH
 
 # good enough
-FB_CIALIS_LEO3
+FB_ACHIEVE_BACH
 
 # good enough
 FH_FAKE_RCVD_LINE
@@ -477,6 +477,9 @@ FRT_ERECTION
 
 # good enough
 FSL_CTYPE_WIN1251
+
+# good enough
+FSL_HELO_BARE_IP_1
 
 # good enough
 FSL_HELO_DEVICE
@@ -597,9 +600,6 @@ KB_FORGED_MOZ4
 
 # good enough
 KB_RATWARE_MSGID
-
-# good enough
-KB_RATWARE_OUTLOOK_MID
 
 # good enough
 KHOP_JS_OBFUSCATION
@@ -964,6 +964,9 @@ SUBJECT_IN_WHITELIST
 # good enough
 TAB_IN_FROM
 
+# good enough
+TINY_FLOAT
+
 # tflags net
 TO_EQ_FM_DOM_SPF_FAIL
 
@@ -1004,13 +1007,28 @@ TVD_RCVD_IP
 TVD_RCVD_IP4
 
 # good enough
-FB_ACHIEVE_BACH
-
-# good enough
-TINY_FLOAT
-
-# good enough
 TVD_SUBJ_NUM_OBFU_MINFP
+
+# good enough
+AXB_XMAILER_MIMEOLE_OL_25340
+
+# good enough
+AXB_XMAILER_MIMEOLE_OL_C65FA
+
+# good enough
+AXB_XMID_PFIX_CTRIP
+
+# good enough
+MAILER_EQ_ORG
+
+# good enough
+MANY_PILL_PRICE
+
+# good enough
+SINGLE_HEADER_2K
+
+# good enough
+SINGLE_HEADER_3K
 
 # tflags userconf
 UNPARSEABLE_RELAY
