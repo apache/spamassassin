@@ -165,20 +165,22 @@ $have_sha ? {
   module => 'IO::Socket::IP',
   version => 0,
   desc => 'Installing this module is recommended if spamd is to listen
-  on IPv6 sockets. If IO::Socket::IP is not available, using an older
-  module IO::Socket::INET6 will be attempted, and in its absence the
-  support for IPv6 will not be available. Some plugins and underlying
+  on IPv6 sockets or if DNS queries should go to an IPv6 name server.
+  If IO::Socket::IP is not available, using an older module
+  IO::Socket::INET6 will be attempted, and in its absence the support
+  for IPv6 will not be available. Some plugins and underlying
   modules may also prefer IO::Socket::IP over IO::Socket::INET6.',
 },
 {
   module => 'IO::Socket::INET6',
   version => 0,
   desc => 'This module is an older alternative to IO::Socket::IP.
-  Spamd, as well as some underlying modules, will fall back to
+  Spamd, as well some underlying modules, will fall back to using
   IO::Socket::INET6 if IO::Socket::IP is unavailable. One or the other
-  module is required to support IPv6 (e.g. in DNS lookups or in plugins
-  like DCC). Some plugins or underlying modules may still require
-  IO::Socket::INET6 for IPv6 support even if IO::Socket::IP is available',
+  module is required to support IPv6 (e.g. in spamd/spamc protocol,
+  for DNS lookups or in plugins like DCC). Some plugins or underlying
+  modules may still require IO::Socket::INET6 for IPv6 support even
+  if IO::Socket::IP is available.',
 },
 {
   module => 'IO::Socket::SSL',
