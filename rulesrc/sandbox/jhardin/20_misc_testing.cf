@@ -924,7 +924,7 @@ header      __FROM_WESTERNUNION  From:addr =~ /westernunion\.com$/i
 
 meta        __FROM_MISSP_PHISH   __FROM_MISSPACED && (__FROM_AMEX || __FROM_BANK_LOOSE || __FROM_CHASE || __FROM_EBAY_LOOSE || __FROM_HSBC || __FROM_LLOYDSTSB || __FROM_PAYPAL_LOOSE || __FROM_WELLSFARGO || __FROM_WESTERNUNION)
 meta        FROM_MISSP_PHISH     __FROM_MISSP_PHISH
-describe    FROM_MISSP_PHISH     From misspaced, apparently from financial organization - possible phish
+describe    FROM_MISSP_PHISH     Malformed, claims to be from financial organization - possible phish
 score       FROM_MISSP_PHISH     2.00	# limit
 
 
