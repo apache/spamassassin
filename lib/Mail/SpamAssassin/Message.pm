@@ -208,8 +208,8 @@ sub new {
 
   # bug 4363
   # Check to see if we should do CRLF instead of just LF
-  # For now, just check the first header and do whatever it does
-  if (@message && $message[0] =~ /\015\012/) {
+  # For now, just check the first and last line and do whatever it does
+  if (@message && ($message[0] =~ /\015\012/ || $message[-1] =~ /\015\012/)) {
     $self->{line_ending} = "\015\012";
     dbg("message: line ending changed to CRLF");
   }
@@ -306,15 +306,17 @@ sub new {
     $self->{'pristine_body_length'} = length($self->{'pristine_body'});
   }
 
-  # CRLF -> LF
+  # CRLF -> LF  (but avoid expensive operation unless necessary)
   # also merge multiple blank lines into a single one
+  my $squash_crlf = $self->{line_ending} eq "\015\012";
   my $start;
   # iterate over lines in reverse order
   for (my $cnt=$#message; $cnt>=0; $cnt--) {
-    $message[$cnt] =~ s/\015\012/\012/;
+    $message[$cnt] =~ s/\015\012/\012/  if $squash_crlf;
 
     # line is blank
-    if ($message[$cnt] !~ /\S/) {
+    if ($message[$cnt] =~ /^\s*$/) {
+      # /^\s*$/ is about 5% faster then !/\S/, but still expensive here
       if (!defined $start) {
         $start=$cnt;
       }
@@ -809,9 +811,10 @@ sub _parse_multipart {
     my $line;
     my $tmp_line = @{$body};
     for ($line=0; $line < $tmp_line; $line++) {
-#      dbg("message: multipart line $line: \"" . $body->[$line] . "\"");
+#     dbg("message: multipart line $line: \"" . $body->[$line] . "\"");
       # specifically look for an opening boundary
-      if ($body->[$line] =~ /^--\Q$boundary\E\s*$/) {
+      if (substr($body->[$line],0,2) eq '--'  # triage
+          && $body->[$line] =~ /^--\Q$boundary\E\s*$/) {
 	# Make note that we found the opening boundary
 	$self->{mime_boundary_state}->{$boundary} = 1;
 
@@ -843,8 +846,10 @@ sub _parse_multipart {
   my $line_count = @{$body};
   foreach ( @{$body} ) {
     # if we're on the last body line, or we find any boundary marker,
-    # deal with the mime part
-    $found_end_boundary = defined $boundary && /^--\Q$boundary\E(?:--)?\s*$/;
+    # deal with the mime part;
+    # a triage before an unlikely-to-match regexp avoids a CPU hotspot
+    $found_end_boundary = defined $boundary && substr($_,0,2) eq '--'
+                          && /^--\Q$boundary\E(?:--)?\s*$/;
     if ( --$line_count == 0 || $found_end_boundary ) {
       my $line = $_; # remember the last line
 

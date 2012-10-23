@@ -944,11 +944,13 @@ sub _meta_deps_recurse {
   my @tokens = ($rule =~ m/$lexer/g);
 
   # Go through each token in the meta rule
+  my $conf_tests = $conf->{tests};
   foreach my $token (@tokens) {
     # has to be an alpha+numeric token
-    next if ($token =~ /^(?:\W+|[+-]?\d+(?:\.\d+)?)$/);
+  # next if $token =~ /^(?:\W+|[+-]?\d+(?:\.\d+)?)$/;
+    next if $token !~ /^_*[A-Za-z][A-Za-z0-9_]*\z/s;  # faster
     # and has to be a rule name
-    next unless exists $conf->{tests}->{$token};
+    next unless exists $conf_tests->{$token};
 
     # add and recurse
     push(@{$deps}, untaint_var($token));

@@ -92,12 +92,14 @@ C<whitelist_bounce_relays> lines are also OK.
 
 sub have_any_bounce_relays {
   my ($self, $pms) = @_;
-  return (defined $pms->{conf}->{whitelist_bounce_relays} &&
-      (scalar values %{$pms->{conf}->{whitelist_bounce_relays}} != 0));
+  return $pms->{conf}->{whitelist_bounce_relays} &&
+         %{$pms->{conf}->{whitelist_bounce_relays}};
 }
 
 sub check_whitelist_bounce_relays {
   my ($self, $pms) = @_;
+
+  return 0  if !$self->have_any_bounce_relays($pms);
 
   my $body = $pms->get_decoded_stripped_body_text_array();
   my $res;
@@ -118,6 +120,10 @@ sub check_whitelist_bounce_relays {
   # fixed, otherwise we'll miss some messages due to their MIME structure
 
   my $pristine = $pms->{msg}->get_pristine_body();
+
+  # triage, avoids expensive loop through large mail with attachments
+  return 0  if $pristine !~ /Received:/i;
+
   my $found_received = 0;
   my $fullhdr = '';
   foreach my $line ($pristine =~ /^(.*)$/gm) {
