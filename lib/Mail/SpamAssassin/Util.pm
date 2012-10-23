@@ -280,36 +280,43 @@ sub untaint_hostname {
 #  untaint_var(\%ENV);
 #
 sub untaint_var {
-  no re 'taint';  # override a  "use re 'taint'"  from outer scope
-  local ($_) = @_;
-  return unless defined;
-
-  unless (ref) {
+# my $arg = $_[0];  # avoid copying unnecessarily
+  my $r = ref $_[0];
+  if (!$r) {
+    no re 'taint';  # override a  "use re 'taint'"  from outer scope
+    return if !defined $_[0];
     local($1); # avoid Perl taint bug: tainted global $1 propagates taintedness
-    /^(.*)\z/s;
+    $_[0] =~ /^(.*)\z/s;
     return $1;
   }
-  elsif (ref eq 'ARRAY') {
-    $_ = untaint_var($_)  for @{$_};
-    return @{$_} if wantarray;
+  elsif ($r eq 'ARRAY') {
+    my $arg = $_[0];
+    $_ = untaint_var($_)  for @{$arg};
+    return @{$arg} if wantarray;
   }
-  elsif (ref eq 'HASH') {
-    while (my ($k, $v) = each %{$_}) {
-      if (!defined $v && $_ == \%ENV) {
-	delete ${$_}{$k};
-	next;
+  elsif ($r eq 'HASH') {
+    my $arg = $_[0];
+    if ($arg == \%ENV) {  # purge undefs from %ENV, untaint the rest
+      while (my($k, $v) = each %{$arg}) {
+        # It is safe to delete the item most recently returned by each()
+        if (!defined $v) { delete ${$arg}{$k}; next }
+        ${$arg}{untaint_var($k)} = untaint_var($v);
       }
-      ${$_}{untaint_var($k)} = untaint_var($v);
+    } else {
+      while (my($k, $v) = each %{$arg}) {
+        ${$arg}{untaint_var($k)} = untaint_var($v);
+      }
     }
-    return %{$_} if wantarray;
+    return %{$arg} if wantarray;
   }
-  elsif (ref eq 'SCALAR' or ref eq 'REF') {
-    ${$_} = untaint_var(${$_});
+  elsif ($r eq 'SCALAR' || $r eq 'REF') {
+    my $arg = $_[0];
+    ${$arg} = untaint_var(${$arg});
   }
   else {
-    warn "util: can't untaint a " . ref($_) . "!\n";
+    warn "util: can't untaint a $r !\n";
   }
-  return $_;
+  return $_[0];
 }
 
 ###########################################################################
