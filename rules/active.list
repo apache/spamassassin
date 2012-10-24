@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-coi-bulk axb-fraud axb-generic axb-ham-misc axb-sa-users axb-woas bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bpoliakoff danmcdonald darxus grenier jarif kpg-gah; day 2: axb-coi-bulk axb-fraud axb-generic axb-ham-misc axb-sa-users axb-woas bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi danmcdonald darxus grenier kpg-gah llanga zmi; day 3: axb-coi-bulk axb-fraud axb-generic axb-ham-misc axb-sa-users axb-woas bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi danmcdonald darxus grenier jarif kpg-gah llanga zmi
+# with results from: day 1: axb-coi-bulk axb-fraud axb-generic axb-ham-misc axb-sa-users axb-woas bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bpoliakoff danmcdonald darxus grenier jarif kpg-gah mas zmi; day 2: axb-coi-bulk axb-fraud axb-generic axb-ham-misc axb-sa-users axb-woas bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bpoliakoff danmcdonald darxus grenier jarif kpg-gah llanga mas zmi; day 3: axb-coi-bulk axb-fraud axb-generic axb-ham-misc axb-sa-users axb-woas bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi danmcdonald darxus grenier jarif kpg-gah llanga mas zmi
 
 # good enough
 ACH_CANCELLED
@@ -56,9 +56,6 @@ ALL_TRUSTED
 ANY_PILL_PRICE
 
 # good enough
-AXB_XMAILER_MIMEOLE_OL_015D5
-
-# good enough
 AXB_XMAILER_MIMEOLE_OL_024C2
 
 # good enough
@@ -75,9 +72,6 @@ AXB_XMAILER_MIMEOLE_OL_1ECD5
 
 # good enough
 AXB_XMAILER_MIMEOLE_OL_22B61
-
-# good enough
-AXB_XMAILER_MIMEOLE_OL_25340
 
 # good enough
 AXB_XMAILER_MIMEOLE_OL_2E645
@@ -114,9 +108,6 @@ AXB_XMAILER_MIMEOLE_OL_44FE0
 
 # good enough
 AXB_XMAILER_MIMEOLE_OL_4BF4C
-
-# good enough
-AXB_XMAILER_MIMEOLE_OL_4CBE5
 
 # good enough
 AXB_XMAILER_MIMEOLE_OL_4EEDB
@@ -170,9 +161,6 @@ AXB_XMAILER_MIMEOLE_OL_8E871
 AXB_XMAILER_MIMEOLE_OL_8E893
 
 # good enough
-AXB_XMAILER_MIMEOLE_OL_99813
-
-# good enough
 AXB_XMAILER_MIMEOLE_OL_9B90B
 
 # good enough
@@ -186,9 +174,6 @@ AXB_XMAILER_MIMEOLE_OL_A6545
 
 # good enough
 AXB_XMAILER_MIMEOLE_OL_A7B9C
-
-# good enough
-AXB_XMAILER_MIMEOLE_OL_ADFF7
 
 # good enough
 AXB_XMAILER_MIMEOLE_OL_B30D1
@@ -227,22 +212,13 @@ AXB_XMAILER_MIMEOLE_OL_CC6B7
 AXB_XMAILER_MIMEOLE_OL_CD271
 
 # good enough
-AXB_XMAILER_MIMEOLE_OL_D2603
-
-# good enough
 AXB_XMAILER_MIMEOLE_OL_DDE5D
-
-# good enough
-AXB_XMAILER_MIMEOLE_OL_E023A
 
 # good enough
 AXB_XMAILER_MIMEOLE_OL_E9F46
 
 # good enough
 AXB_XMAILER_MIMEOLE_OL_F475E
-
-# good enough
-AXB_XMAILER_MIMEOLE_OL_F6D01
 
 # good enough
 AXB_XMAILER_MIMEOLE_OL_FB17C
@@ -306,9 +282,6 @@ CORRUPT_FROM_LINE_IN_HDRS
 
 # good enough
 CURR_PRICE
-
-# good enough
-DATE_DOTS
 
 # good enough
 DEAR_BENEFICIARY
@@ -437,6 +410,9 @@ FROM_MISSP_MSFT
 FROM_MISSP_NO_TO
 
 # good enough
+FROM_MISSP_PHISH
+
+# good enough
 FROM_MISSP_REPLYTO
 
 # tflags net
@@ -453,9 +429,6 @@ FROM_MISSP_USER
 
 # good enough
 FROM_WSP_LEAD
-
-# good enough
-FROM_WSP_TRAIL
 
 # good enough
 FRT_ERECTION
@@ -477,9 +450,6 @@ FSL_NEW_HELO_USER
 
 # good enough
 FS_MAKE_MONEY
-
-# good enough
-FS_WILL_HELP
 
 # good enough
 GAPPY_HTML
@@ -527,9 +497,6 @@ HK_LOTTO
 HK_LOTTO_NAME
 
 # good enough
-HK_NAME_FM_MR_MRS
-
-# good enough
 HK_NAME_FROM
 
 # good enough
@@ -566,6 +533,9 @@ HTML_CHARSET_FARAWAY
 HTTPS_HTTP_MISMATCH
 
 # good enough
+IRS_SPOOF
+
+# good enough
 JM_FAKE_PSMTP_RCVD
 
 # good enough
@@ -579,6 +549,9 @@ KB_FORGED_MOZ4
 
 # good enough
 KB_RATWARE_MSGID
+
+# good enough
+KHOP_BIG_TO_CC
 
 # good enough
 KHOP_JS_OBFUSCATION
@@ -989,16 +962,10 @@ TVD_RCVD_IP
 TVD_RCVD_IP4
 
 # good enough
-FROM_MISSP_PHISH
+FILL_THIS_FORM_SHORT
 
 # good enough
-HK_SCAM_N4
-
-# good enough
-IRS_SPOOF
-
-# good enough
-KHOP_BIG_TO_CC
+FSL_HELO_FIREWALL
 
 # tflags userconf
 UNPARSEABLE_RELAY
@@ -1026,9 +993,6 @@ URIBL_GREY
 
 # tflags net
 URIBL_JP_SURBL
-
-# tflags net
-#URIBL_OB_SURBL - REMOVED BUG 6853
 
 # tflags net
 URIBL_PH_SURBL
