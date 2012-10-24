@@ -545,10 +545,11 @@ sub do_meta_tests {
     foreach my $token (@tokens) {
 
       # Numbers can't be rule names
-      if ($token =~ /^(?:\W+|[+-]?\d+(?:\.\d+)?)$/) {
+    # if ($token =~ /^(?:\W+|[+-]?\d+(?:\.\d+)?)$/) {
+      if ($token !~ /^[A-Za-z_][A-Za-z0-9_]*\z/s) {  # faster
         $meta{$rulename} .= "$token ";
       }
-      else {
+      else {  # token is a rule name
         # the " || 0" formulation is to avoid "use of uninitialized value"
         # warnings; this is better than adding a 0 to a hash for every
         # rule referred to in a meta...
