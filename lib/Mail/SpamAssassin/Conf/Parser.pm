@@ -948,7 +948,7 @@ sub _meta_deps_recurse {
   foreach my $token (@tokens) {
     # has to be an alpha+numeric token
   # next if $token =~ /^(?:\W+|[+-]?\d+(?:\.\d+)?)$/;
-    next if $token !~ /^_*[A-Za-z][A-Za-z0-9_]*\z/s;  # faster
+    next if $token !~ /^[A-Za-z_][A-Za-z0-9_]*\z/s;  # faster
     # and has to be a rule name
     next unless exists $conf_tests->{$token};
 
@@ -1250,7 +1250,7 @@ sub is_meta_valid {
   # Go through each token in the meta rule
   foreach my $token (@tokens) {
     # Numbers can't be rule names
-    if ($token =~ /^(?:\W+|[+-]?\d+(?:\.\d+)?)$/) {
+    if ($token !~ /^[A-Za-z_][A-Za-z0-9_]*\z/s) {
       $meta .= "$token ";
     }
     # Zero will probably cause more errors
