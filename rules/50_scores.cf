@@ -1058,10 +1058,12 @@ endif # Mail::SpamAssassin::Plugin::AntiVirus
 # to detect messages that hit ANY_BOUNCE_MESSAGE, and filter them aside
 # as spurious bounces.
 #
+ifplugin Mail::SpamAssassin::Plugin::VBounce
 score BOUNCE_MESSAGE     0.1
 score CRBOUNCE_MESSAGE   0.1
 score VBOUNCE_MESSAGE    0.1
 score ANY_BOUNCE_MESSAGE 0.1
+endif # Mail::SpamAssassin::Plugin::VBounce
 
 # another informational rule: this is for C/R responses to mail the user
 # really did sent -- the opposite of CRBOUNCE_MESSAGE.  some users might
