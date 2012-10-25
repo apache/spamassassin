@@ -93,7 +93,7 @@ C<whitelist_bounce_relays> lines are also OK.
 sub have_any_bounce_relays {
   my ($self, $pms) = @_;
   return $pms->{conf}->{whitelist_bounce_relays} &&
-         %{$pms->{conf}->{whitelist_bounce_relays}};
+         %{$pms->{conf}->{whitelist_bounce_relays}} ? 1 : 0;
 }
 
 sub check_whitelist_bounce_relays {
