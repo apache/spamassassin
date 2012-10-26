@@ -19,7 +19,7 @@
 
 
 # WORK IN PROGRESS - axb-2012-09
-# Feel free to edit/add/ or even remove thi·s file
+# Feel free to edit/add/ or even remove this file
 
 A minimalistic version for Warren Togami's (CLA) "auto-mass-check" routine
 
