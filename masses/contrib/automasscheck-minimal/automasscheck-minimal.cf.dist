@@ -31,7 +31,7 @@ RSYNC_USERNAME="YOUR-USERNAME"
 RSYNC_PASSWORD="YOUR-PASSWORD"
 
 # If your corpus is huge, to speed up processing you can use a ramdisk for WORKDIR
-# It doesn't need to survive boots - it will be automagically recreated
+# It doesn't need to survive a reboot - it will be automagically recreated
 WORKDIR=~/masscheckwork
 
 # HOW MANY MASSCHECK SIMULTANEOUS THREADS CAN YOUR BOX HANDLE?

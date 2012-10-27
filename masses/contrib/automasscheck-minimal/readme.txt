@@ -24,7 +24,7 @@
 A minimalistic version for Warren Togami's (CLA) "auto-mass-check" routine
 
 More documentation see:
-http://wiki.apache.org/spamassassin/....... (TBA)
+http://wiki.apache.org/spamassassin/NightlyMassCheck
 
 # Usage··
 
@@ -37,6 +37,6 @@ cp automasscheck-minimal.sh ~/bin/automasscheck-minimal.sh
 if required edit ~/bin/automasscheck-minimal.sh to configure
 "JOBS"
 
-setup a cron job to run "automasscheck-minimal.sh", everyday after 10 AM GMT
+setup a cron job to run "automasscheck-minimal.sh", everyday after 9AM UTC
 
 
