@@ -111,7 +111,7 @@ header __TVD_PH_SUBJ_ACCOUNTS_PRE	Subject =~ /\baccounts? (?:[a-z_,-]+ )*?(?:rec
 header __TVD_PH_SUBJ_SEC_MEASURES	Subject =~ /\bsecurity (?:[a-z_,-]+ )*?measures?\b/i
 header __TVD_PH_SUBJ_UPDATE		Subject =~ /\bupdate (?:[a-z_,-]+ )*?(?:access|credit|records?|info(?:rmation)?)\b/i
 header __TVD_PH_SUBJ_URGENT		Subject =~ /^urgent(?:[\s\W]*$|.{1,40}(?:alert|response|assistance|proposal|reply|warning|noti(?:ce|fication)|greeting|matter))/i
-header __TVD_PH_SUBJ_ACCOUNTS_POST	Subject =~ /\b(?:(?:re-?)?activat[a-z]*|secure|verify|restore|flagged|limited|unusual|update|report|notif(?:y|ication)|suspen(?:d|ded|sion)|co(?:n|m)firm[a-z]*) (?:[a-z_,-]+ )*?accounts?\b/i
+header __TVD_PH_SUBJ_ACCOUNTS_POST	Subject =~ /\b(?:(?:re-?)?(?:activat[a-z]*|verify|validate)|secure|restore|flagged|limited|unusual|update|report|notif(?:y|ication)|suspen(?:d|ded|sion)|co(?:n|m)firm[a-z]*) (?:[-a-z_,]+ )*?accounts?\b/i
 
 #REMOVED TVD_PH_SUBJ_META_ALL
 
@@ -125,7 +125,8 @@ describe 	TVD_PH_SUBJ_META1	Email has a Phishy looking subject line
 # Look for lesser matched REs and meta them together
 
 # 0.251   0.3023   0.0000    1.000   1.00    0.01  T_TVD_PH_SUBJ_META
-meta TVD_PH_SUBJ_META __TVD_PH_SUBJ_00 || __TVD_PH_SUBJ_02 || __TVD_PH_SUBJ_04 || __TVD_PH_SUBJ_15 || __TVD_PH_SUBJ_17 || __TVD_PH_SUBJ_18 || __TVD_PH_SUBJ_19 || __TVD_PH_SUBJ_29 || __TVD_PH_SUBJ_31 || __TVD_PH_SUBJ_36 || __TVD_PH_SUBJ_37 || __TVD_PH_SUBJ_38 || __TVD_PH_SUBJ_39 || __TVD_PH_SUBJ_41 || __TVD_PH_SUBJ_52 || __TVD_PH_SUBJ_54 || __TVD_PH_SUBJ_56 || __TVD_PH_SUBJ_58 || __TVD_PH_SUBJ_59 || __TVD_PH_SUBJ_ACCESS_POST
+meta __TVD_PH_SUBJ_META		__TVD_PH_SUBJ_00 || __TVD_PH_SUBJ_02 || __TVD_PH_SUBJ_04 || __TVD_PH_SUBJ_15 || __TVD_PH_SUBJ_17 || __TVD_PH_SUBJ_18 || __TVD_PH_SUBJ_19 || __TVD_PH_SUBJ_29 || __TVD_PH_SUBJ_31 || __TVD_PH_SUBJ_36 || __TVD_PH_SUBJ_37 || __TVD_PH_SUBJ_38 || __TVD_PH_SUBJ_39 || __TVD_PH_SUBJ_41 || __TVD_PH_SUBJ_52 || __TVD_PH_SUBJ_54 || __TVD_PH_SUBJ_56 || __TVD_PH_SUBJ_58 || __TVD_PH_SUBJ_59 || __TVD_PH_SUBJ_ACCESS_POST
+meta TVD_PH_SUBJ_META		__TVD_PH_SUBJ_META
 
 header __TVD_PH_SUBJ_00		Subject =~ /\brewards? survey\b/i
 
@@ -151,8 +152,9 @@ header __TVD_PH_SUBJ_ACCESS_POST	Subject =~ /\b(?:(?:re-?)?activat[a-z]*|secure|
 
 ########################################################################
 
-meta TVD_PH_BODY_META		__TVD_PH_BODY_01 || __TVD_PH_BODY_02 || __TVD_PH_BODY_03 || __TVD_PH_BODY_04 || __TVD_PH_BODY_05 || __TVD_PH_BODY_06 || __TVD_PH_BODY_07 || __TVD_PH_BODY_08
-meta TVD_PH_BODY_META_ALL	TVD_PH_BODY_META || TVD_PH_BODY_ACCOUNTS_PRE || TVD_PH_BODY_ACCOUNTS_POST
+meta __TVD_PH_BODY_META		__TVD_PH_BODY_01 || __TVD_PH_BODY_02 || __TVD_PH_BODY_03 || __TVD_PH_BODY_04 || __TVD_PH_BODY_05 || __TVD_PH_BODY_06 || __TVD_PH_BODY_07 || __TVD_PH_BODY_08
+meta TVD_PH_BODY_META		__TVD_PH_BODY_META
+meta TVD_PH_BODY_META_ALL	__TVD_PH_BODY_META || __TVD_PH_BODY_ACCOUNTS_PRE || __TVD_PH_BODY_ACCOUNTS_POST
 body __TVD_PH_BODY_01		/\baccount .{0,20}placed? [io]n restricted status/i
 body __TVD_PH_BODY_02		/\brecords (?:[a-z_,-]+ )+?(?:feature|(?:a|re)ward)/i
 body __TVD_PH_BODY_03		/\byou(?:'ve| have) been (?:[a-z_,-]+ )+?payment/i
@@ -162,5 +164,10 @@ body __TVD_PH_BODY_06		/Dear [a-z]+ bank (?:member|customer)/i
 body __TVD_PH_BODY_07		/\bguarantee the safety of your (?:[a-z_,-]+ )*?account/i
 body __TVD_PH_BODY_08		/\bmultiple password failures/i
 
-body TVD_PH_BODY_ACCOUNTS_PRE	/\baccounts? (?:[a-z_,-]+ )+?(?:record[a-z]*|suspen[a-z]+|notif(?:y|ication)|updated|verifications?|credited)\b/i
-body TVD_PH_BODY_ACCOUNTS_POST	/\b(?:(?:re-?)?activat[a-z]*|(?:re-?)?validate|secure|restore|confirm|update|suspend) (?!your)(?:[a-z_,-]+ )+?accounts?\b/i
+body __TVD_PH_BODY_ACCOUNTS_PRE		/\baccounts? (?:[a-z_,-]+ )+?(?:record[a-z]*|suspen[a-z]+|notif(?:y|ication)|updated|verifications?|credited)\b/i
+meta TVD_PH_BODY_ACCOUNTS_PRE		__TVD_PH_BODY_ACCOUNTS_PRE
+body __TVD_PH_BODY_ACCOUNTS_POST	/\b(?:(?:re-?)?activat[a-z]*|(?:re-?)?validate|secure|restore|confirm|update|suspend) (?!your)(?:[a-z_,-]+ )+?accounts?\b/i
+meta TVD_PH_BODY_ACCOUNTS_POST		__TVD_PH_BODY_ACCOUNTS_POST
+
+
+
