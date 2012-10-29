@@ -527,6 +527,7 @@ describe        __NSL_RCVD_FROM_41        Received from 41.0.0.0/8
 meta            __MONEY_FROM_41           __NSL_RCVD_FROM_41 && LOTS_OF_MONEY
 meta            MONEY_FROM_41             __MONEY_FROM_41
 describe        MONEY_FROM_41             Lots of money from Africa
+score           MONEY_FROM_41             2.00	# limit
 
 
 # some metas with the above, maybe reduce FPs
@@ -936,7 +937,7 @@ header      __FROM_WESTERNUNION  From:addr =~ /westernunion\.com$/i
 meta        __FROM_MISSP_PHISH   __FROM_MISSPACED && (__FROM_AMEX || __FROM_BANK_LOOSE || __FROM_CHASE || __FROM_EBAY_LOOSE || __FROM_HSBC || __FROM_LLOYDSTSB || __FROM_PAYPAL_LOOSE || __FROM_WELLSFARGO || __FROM_WESTERNUNION)
 meta        FROM_MISSP_PHISH     __FROM_MISSP_PHISH
 describe    FROM_MISSP_PHISH     Malformed, claims to be from financial organization - possible phish
-score       FROM_MISSP_PHISH     2.00	# limit
+score       FROM_MISSP_PHISH     4.00	# limit
 
 # see also DOS_GOOGLE_DOCS
 uri         __URI_GOOGLE_DOC     m,^https?://docs\.google\.com/(?:[^/]+/)*view(?:form)?\?(?:id|formkey)=,i
