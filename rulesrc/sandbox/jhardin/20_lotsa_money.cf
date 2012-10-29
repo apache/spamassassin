@@ -111,9 +111,9 @@ meta     MONEY_LOTTERY    __MONEY_LOTTERY && !__CAN_HELP && !__HTML_LINK_IMAGE &
 describe MONEY_LOTTERY    Lots of money from a lottery
 #score    MONEY_LOTTERY    1.5
 
-body     __DEAL           /\b(?:business|financial|this|the|mutual|die(?:se)?r?|cette|profitable)\s(?:deal|transa[ck]tion|proposal|offer|offre|venture|suggestion|partnership)/i
-body     __HUSH_HUSH      /\b(?:confiden[tc]i[ae]l(?:\b|ity\b|it(?:[\xe9]|[\xc3][\xa9]))|private\b|secr[e\xe8](?:te?|cy)\b|sensitive\b|concealed\b|obscured?\b|discre(?:et|tion)\b|top\ssecret|vertraulich(?:en)?\b|geheim\b|priv(?:[\xe9]|[\xc3][\xa9]))/i
-body     __IS_LEGAL       /\b(?:(this|esta)\s(?:deal|offer|transac[tc]i(?:o|[\xc3][\xb3])n|proposal|exchange|arrangement|work)|it)?\s[ie]s\s(?:(?:guaranteed|completely|absolutely|perfectly|100%|very|fully)\s)?(?:legal|hitch-free|seguro)\b/i
+body     __DEAL           /\b(?:(?:business|financial|this|the|mutual|die(?:se)?r?|cette|profitable)\s(?:deal|transa[ck]tion|proposal|off[er]{2}|venture|suggestion|partnership)|your\spartnership)/i
+body     __HUSH_HUSH      /\b(?:confiden[tc]i[ae]l(?:\b|ity\b|it(?:[\xe9]|[\xc3][\xa9]))|private\b|secr[e\xe8](?:te?|cy)\b|sensitive\b|concealed\b|obscured?\b|discre(?:et|tion)\b|very\sdiscrete|top\ssecret|vertraulich(?:en)?\b|geheim\b|priv(?:[\xe9]|[\xc3][\xa9]))/i
+body     __IS_LEGAL       /\b(?:(?:(this|esta)\s(?:deal|offer|transac[tc]i(?:o|[\xc3][\xb3])n|proposal|exchange|arrangement|work)|it)?\s[ie]s\s(?:(?:guaranteed|completely|absolutely|perfectly|100%|very|fully)\s)?(?:legal|hitch-free|seguro|legitimate)|legitimate\sarrangement)\b/i
 body     __NOT_SCAM       /\bnot\sa\sscam\b/i
 body     __BACK_SCRATCH   /\bmutual+y?\s(?:benefi(?:t|cial)|interest)\b/i
 body     __LUCRATIVE      /\b(?:lucrative|profitable|tr[\xe8]s\ssalutaire)\b/i
@@ -136,7 +136,7 @@ ifplugin Mail::SpamAssassin::Plugin::ReplaceTags
   body     __PCT_FOR_YOU_1  /<PERCENT>[\s)]{0,3}(?:of\s[\w\s]{0,35}?)?(?:for|to|as)\syour?/i
   body     __PCT_FOR_YOU_2  /\b(?:(?:give|offer)\syou|vous\saurez\sdroit\s[\xe0]|ihnen)\s<PERCENT>/i
   body     __PCT_FOR_YOU_3  /\byour?\s(?!can)(?:(?!you)\w{1,15}\s){0,10}(?:(?:share|entiti?le(?:d|ment)?|percentage|fee|assist(?:ance)?|comp[ea]nsat(?:ed?|tion)|reward(?:ed)?|renumerat(?:e|tion)|com+is+ion|paid|deduct|account|tage|(?:will|shall|would|(?:are|stand|going)\sto)\s(?:be\s)?(?:tak(?:e|ing)|earn|get(?:ting)?|remit|subtract|with+old)|(?:deduct|taken?|subtract(?:ed)?)\syour|keep(?:ing)?|receiv(?:e|ing)|retain(?:ing)?|have|half|giv(?:en|ing)|paid|(?:give|pay|offer)\s(?:me|you|him)|bank\saccount|to\s(?:take|use)|(?:time|country)\sand|ratio\sof)(?:\s(?!you)\w{1,15}){0,10})\s(?<!by\s)(?<!up\sto\s)<PERCENT>/i
-  body     __PCT_OF_PMTS    /<PERCENT>[\s)]+(?:of\s[\w\s]{0,35}?)?(?:of|du|de)\s(?:(?:the|la)\s)?(?:payments?|rem+it+ances?|capital|chec(?:k|que)s?|mon(?:ey|ies)|suma?)/i
+  body     __PCT_OF_PMTS    /<PERCENT>[\s)]+(?:of\s[\w\s]{0,35}?)?(?:of|du|de)\s(?:(?:the|la)\s)?(?:total\s)?(?:payments?|rem+it+ances?|capital|chec(?:k|que)s?|mon(?:ey|ies)|suma?)/i
 
   replace_rules  __PCT_FOR_YOU_1 __PCT_FOR_YOU_2 __PCT_FOR_YOU_3 __PCT_OF_PMTS
 
@@ -150,7 +150,7 @@ endif
 #describe MONEY_DEAL       Lots of money in a suspicious deal
 #score    MONEY_DEAL       1.5
 
-body     __ATM_CARD       /\b(?:your|the|this|through|via|by\smeans\sof)\s(?:\w{1,20}\s)?(?:atm|debit|(?:money[\s-]?gram\s)?fast\scash)(?:\smaster|swift|value?)?\scard/i
+body     __ATM_CARD       /\b(?:your|the|this|through|via|by\smeans\sof\|that\sa)\s(?:\w{1,20}\s)?(?:atm|debit|(?:money[\s-]?gram\s)?fast\scash)(?:\smaster|swift|value?|cash)?\scard/i
 meta     MONEY_ATM_CARD   LOTS_OF_MONEY && __ATM_CARD
 describe MONEY_ATM_CARD   Lots of money on an ATM card
 
@@ -161,7 +161,7 @@ body     __NOT_DEAD_YET   /\b(?:will\sinherit|que\sherede)\b/i
 body     __AM_DYING       /\b(?:am\s(?:\S+\s)?dying|terminally\sill|cancer|en\sphase\sterminale)\b/i
 body     __I_WILL_YOU     /\bwill(?:ed)?\s(?:[a-z\s]{0,20}(?:fortune|money|\$\d+[a-z]{0,9})\s)?to\syou\b/i
 body     __NEXT_OF_KIN    /\bnext[-\s]of[-\s]kin\b/i
-body     __EX_CUSTOMER    /\b(?:(?:dead|deceased|late|verstorbenen)\s(?:[ck]lient|customer|ac+ount|invest[eo]r|beneficiary|mr\.|kunde|engr?\.?)|titulaire\sdu\scompte\sest\s(?:d[\xe9]c[\xe9]d[\xe9]|d[\xc3][\xa9]c[\xc3][\xa9]d[\xc3][\xa9])|invest[eo]r\sdied|[\xe9]tranger\sd[\xe9]c[\xe9]d[\xe9]|(?:[ck]lient|customer|ac+ount|invest[eo]r|beneficiary|mr\.|kunde|engr?\.?)\s(?:[a-z]{1,10}\s)?(?:dead|deceased|verstorbenen))/i
+body     __EX_CUSTOMER    /\b(?:(?:dead|deceased|late|verstorbenen|death\sof\sthe)\s(?:[ck]lient|customer|ac+ount|invest[eo]r|beneficiary|depositor|mr\.|kunde|engr?\.?)|titulaire\sdu\scompte\sest\s(?:d[\xe9]c[\xe9]d[\xe9]|d[\xc3][\xa9]c[\xc3][\xa9]d[\xc3][\xa9])|invest[eo]r\sdied|[\xe9]tranger\sd[\xe9]c[\xe9]d[\xe9]|(?:[ck]lient|customer|ac+ount|invest[eo]r|beneficiary|mr\.|kunde|engr?\.?)\s(?:[a-z]{1,10}\s)?(?:dead|deceased|verstorbenen))/i
 body     __DECEASED       /\b(?:the|my|der|du|le|meu?)\s(?:deceased|late|verstorbenen|d[i\xe9]funto?|d[\xc3][\xa9]nt|falecido)\b/i
 body     __SURVIVORS      /\b(?:widow|son|daughter|husband|wife|brother|sister|attorney|vi[\xfa]va|esposa)\s(?:of|to|do|de)\s(?:the\s)?(?:late|falecido|finales)\s\w+\b/i
 body     __DEAD_PARENT    /\b(?:my|meu)\s(?:(?:deceased|dead)\s(?:father|mother|husband)|(?:father|dad|mother|mom|husband|marido)(?:'?s)?\s(?:death|died|passed\saway|murder|was\s(?:killed|murdered|poisoned)|faleceu))/i
@@ -245,7 +245,7 @@ body     __MILLIONS       /\bmillions\sof\s(?:dollar|euro|pound)/i
 
 # Adjust __FRAUD_PTS __FRAUD_XVW __FRAUD_IOU
 body __FRAUD_PTX	/\b(?:ass?ass?inat(?:ed|ion)|murder(?:e?d)?|poison(?:e?d)?|kill(?:ed|ing)\b[^.]{0,99}\b(?:war veterans|rebels?))\b/i
-body __FRAUD_XWW	/\b(?:honest(?:ly)?\sco(?:-?operat(?:e|ion)|llaborat(?:e|ion))|ehrliche\szusammenarbeit)\b/i
+body __FRAUD_XWW	/\b(?:honest(?:ly)?\sco(?:-?operat(?:e|ion)|llaborat(?:e|ion))|ehrliche\szusammenarbeit|col+aboration\swith\sme)\b/i
 body __FRAUD_IOV	/\b(?:no risks?|risky?[- ]{0,3}free|free of risks?|100% safe|v.llig Risikofrei ist)\b/i
 
 meta     RISK_FREE      __FRAUD_IOV && !__UNSUB_LINK && !__VIA_ML && !__HTML_LINK_IMAGE && !__SUBSCRIPTION_INFO && !__HS_SUBJ_RE_FW
