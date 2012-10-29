@@ -16,32 +16,32 @@ describe       RDNS_LOCALHOST  Sender's public rDNS is "localhost"
 #describe       EU_SPAM_LAW     Quoting "European Parliament" spam law
 
 ifplugin Mail::SpamAssassin::Plugin::MIMEHeader
-  mimeheader   __HTML_ATTACH_01    Content-Type =~ m,text/html;.+\.html?\b,i
+  mimeheader   __HTML_ATTACH_01    Content-Type =~ m,\btext/html\b.+\.html?\b,i
   mimeheader   __HTML_ATTACH_02    Content-Disposition =~ m,\bfilename="?[^"]+\.html?\b,i
   meta         HTML_ATTACH         __HTML_ATTACH_01 || __HTML_ATTACH_02
   describe     HTML_ATTACH         HTML attachment to bypass scanning?
 
-  mimeheader   OBFU_HTML_ATTACH    Content-Type =~ m,application/octet-stream;.+\.html?\b,i
+  mimeheader   OBFU_HTML_ATTACH    Content-Type =~ m,\bapplication/octet-stream\b.+\.html?\b,i
   describe     OBFU_HTML_ATTACH    HTML attachment with non-text MIME type
 
-  mimeheader   OBFU_TEXT_ATTACH    Content-Type =~ m,application/octet-stream;.+\.txt\b,i
+  mimeheader   OBFU_TEXT_ATTACH    Content-Type =~ m,\bapplication/octet-stream\b.+\.txt\b,i
   describe     OBFU_TEXT_ATTACH    Text attachment with non-text MIME type
   #score        OBFU_TEXT_ATTACH    2.5
   tflags       OBFU_TEXT_ATTACH    publish
 
-  mimeheader   OBFU_DOC_ATTACH     Content-Type =~ m,application/octet-stream;.+\.(?:doc|rtf)\b,i
+  mimeheader   OBFU_DOC_ATTACH     Content-Type =~ m,\bapplication/octet-stream\b.+\.(?:doc|rtf)\b,i
   describe     OBFU_DOC_ATTACH     MS Document attachment with generic MIME type
   #score        OBFU_DOC_ATTACH     0.25
 
-  mimeheader   OBFU_PDF_ATTACH     Content-Type =~ m,application/octet-stream;.+\.pdf\b,i
+  mimeheader   OBFU_PDF_ATTACH     Content-Type =~ m,\bapplication/octet-stream\b.+\.pdf\b,i
   describe     OBFU_PDF_ATTACH     PDF attachment with generic MIME type
   #score        OBFU_PDF_ATTACH     0.25
 
-  mimeheader   OBFU_JPG_ATTACH     Content-Type =~ m,application/octet-stream;.+\.jpe?g\b,i
+  mimeheader   OBFU_JPG_ATTACH     Content-Type =~ m,\bapplication/octet-stream\b.+\.jpe?g\b,i
   describe     OBFU_JPG_ATTACH     JPG attachment with generic MIME type
   #score        OBFU_JPG_ATTACH     1.50
 
-  mimeheader   OBFU_GIF_ATTACH     Content-Type =~ m,application/octet-stream;.+\.gif\b,i
+  mimeheader   OBFU_GIF_ATTACH     Content-Type =~ m,\bapplication/octet-stream\b.+\.gif\b,i
   describe     OBFU_GIF_ATTACH     GIF attachment with generic MIME type
   #score        OBFU_GIF_ATTACH     1.50
 
@@ -55,9 +55,15 @@ ifplugin Mail::SpamAssassin::Plugin::MIMEHeader
   meta         CTYPE_NULL          __CTYPE_NULL
   describe     CTYPE_NULL          Malformed Content-Type header
 
-  mimeheader   __ZIP_ATTACH_NOFN   Content-Type =~ m,application/zip$,i
+  mimeheader   __ZIP_ATTACH_NOFN   Content-Type =~ m,\bapplication/zip[;\s]*$,i
   meta         OBFU_HTML_ATT_MALW  __ZIP_ATTACH_NOFN && __HTML_ATTACH_02
   describe     OBFU_HTML_ATT_MALW  HTML attachment with incorrect MIME type - possible malware
+
+  mimeheader   __PDF_ATTACH        Content-Type =~ m,\bapplication/pdf\b,i
+
+  mimeheader   __ATTACH_NAME_NO_EXT Content-Type =~ m,\bname\s?=\s?"(?!=\?)[^."]+",i
+  meta         DOC_ATTACH_NO_EXT   __ATTACH_NAME_NO_EXT && (__PDF_ATTACH || __DOC_ATTACH_MT)
+  describe     DOC_ATTACH_NO_EXT   Document attachment with suspicious name
 
 endif
 
@@ -868,11 +874,16 @@ meta        ACH_CANCELLED          __ACH_CANCELLED
 describe    ACH_CANCELLED          "ACH cancelled" fraud / phish
 
 # spams from users list query 03/2012
-uri         URI_DBL_DOM_1          m,^https?://([^/]+)/.*https?://(?:[^.]+\.)?\1/,i
-describe    URI_DBL_DOM_1          domain appears twice
-uri         URI_DBL_DOM_2          m,^https?://[^.]+\.([^/]+)/.*https?://[^.]+\.\1/,i
-describe    URI_DBL_DOM_2          domain appears twice
+# Not useful as scored rules, may be useful meta'd with something else
+uri         __URI_DBL_SUBDOM   m,^https?://(?!www\.amazon\.com)([^/]+)/.*https?://(?:[^.]+\.)?\1/,i
+uri         __URI_DBL_DOM      m,^https?://[^.]+\.(?!amazon\.com)([^/]+)/.*https?://[^.]+\.\1/,i
 
+uri         __URI_DBL_INDIR    m,(?:=https?://(?!www\.amazon\.com).*?){2},i
+meta        URI_DBL_INDIR      __URI_DBL_INDIR && !__URI_TRPL_INDIR
+describe    URI_DBL_INDIR      A URI with two levels of indirection
+uri         __URI_TRPL_INDIR   m,(?:=https?://(?!www\.amazon\.com).*?){3},i
+meta        URI_TRPL_INDIR     __URI_TRPL_INDIR
+describe    URI_TRPL_INDIR     A URI with at least three levels of indirection
 
 # suggestion on users list 04/2012
 header      SUBJ_ODD_CASE      ALL =~ /\n(?!(?:Subject:|SUBJECT:|subject:))(?i:subject:)/sm
@@ -927,4 +938,19 @@ meta        FROM_MISSP_PHISH     __FROM_MISSP_PHISH
 describe    FROM_MISSP_PHISH     Malformed, claims to be from financial organization - possible phish
 score       FROM_MISSP_PHISH     2.00	# limit
 
+# see also DOS_GOOGLE_DOCS
+uri         __URI_GOOGLE_DOC     m,^https?://docs\.google\.com/(?:[^/]+/)*view(?:form)?\?(?:id|formkey)=,i
+
+body        __WEBMAIL_ACCT       /\byour web ?mail account/i
+body        __MAILBOX_FULL       /\b(?:you(?:r (?:mailbox|(?:e-?|web ?)mail))? (?:is (?:almost )?full|(?:quota )?ha(?:s|ve) (?:reached|exceeded|passed) (?:the|your|it'?s?) (?:size|storage|set|(?:e-?|web ?)mail|quota|folder|mail ?box) (?:limit|quota))|over your mailbox (?:size )?(?:limit|quota))\b/i
+body        __CLEAN_MAILBOX      /\b(?:(?:e-?mail|mailbox|violation:|(?-i:CLICK)) (?:quota size|clean(?:-?up))|clean ?up click ?here)\b/i
+body        __VALIDATE_MAILBOX   /\b(?:re-?)?validate your mailbox\b/i
+body        __UPGR_MAILBOX       /\bupg[ra]+d(?:e|ing) (?:your )?(?:mailbox|(?:web ?|e-?)mail)\b/i
+body        __SYSADMIN           /\b(?:help?[- ]?desk|sys(?:tem )?admin(?:istrator)|local[- ]host|support team)\b/i
+
+# Google Docs observed on LOTS of phishes 2012
+meta        __GOOGLE_DOCS_PHISH_1  __URI_GOOGLE_DOC && (TVD_PH_1 || __TVD_PH_SUBJ_META || __TVD_PH_BODY_META || __TVD_PH_BODY_ACCOUNTS_PRE || __TVD_PH_BODY_ACCOUNTS_POST)
+meta        __GOOGLE_DOCS_PHISH_2  __URI_GOOGLE_DOC && (__WEBMAIL_ACCT + __MAILBOX_FULL + __CLEAN_MAILBOX + __VALIDATE_MAILBOX + __UPGR_MAILBOX + __SYSADMIN > 1)
+meta        GOOGLE_DOCS_PHISH    (__GOOGLE_DOCS_PHISH_1 || __GOOGLE_DOCS_PHISH_2)
+score       GOOGLE_DOCS_PHISH    2.00	# limit, until reviewed
 
