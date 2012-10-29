@@ -1279,12 +1279,13 @@ enough:
     $rdns = '';		# some MTAs seem to do this
   }
   
-  $ip =~ s/^\[//; $ip =~ s/\]$//;
-
-  $ip =~ s/^ipv6://i;   # remove optional "IPv6:" prefix
+  $ip =~ s/^ipv6://i;   # remove "IPv6:" prefix
+  $ip =~ s/^\[//; $ip =~ s/\]\z//;
+  $ip =~ s/%[A-Z0-9:._-]*\z//si;  # scoped address? remove interface specs
 
   # remove "::ffff:" prefix from IPv4-mapped-in-IPv6 addresses,
-  # so we can treat them as simply IPv4 addresses
+  # so we can treat them simply as IPv4 addresses
+  # (only handles 'alternative form', not 'preferred form' - to be improved)
   $ip =~ s/^0*:0*:(?:0*:)*ffff:(\d+\.\d+\.\d+\.\d+)$/$1/i;
 
   $envfrom =~ s/^\s*<*//gs; $envfrom =~ s/>*\s*$//gs;

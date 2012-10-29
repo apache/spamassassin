@@ -79,58 +79,83 @@ sub add_cidr {
   my $numadded = 0;
   delete $self->{cache};  # invalidate cache (in case of late additions)
 
-  foreach my $cidr (@nets) {
+  foreach my $cidr_orig (@nets) {
+    my $cidr = $cidr_orig;  # leave original unchanged, useful for logging
 
-    if ($self->{pt}) {
-      local $_ = $cidr;
-      local($1,$2,$3,$4); my($masklen);
-      if (s{ / ([0-9.]+) \z }{}x) {
-        $masklen = $1;
-        $masklen =~ /^\d{1,3}\z/
-          or die "Network mask not supported, use a CIDR syntax: $cidr";
-      }
-      my $neg = s/^!//;  # strip negation from a key, will be retained in data
-      $_ = $1  if /^ \[ ( [^\]]* ) \] \z/xs;  # discard optional brackets
-      s/%[A-Z0-9:._-]+\z//si;     # discard interface specification
-      if (/^ \d+ (\. | \z) /x) {  # triage for an IPv4 network address
-        if (/^ (\d+) \. (\d+) \. (\d+) \. (\d+) \z/x) {
-          # also strips leading zeroes, not liked by inet_pton
-          $_ = sprintf('::ffff:%d.%d.%d.%d', $1,$2,$3,$4);
-          $masklen = 32  if !defined $masklen;
-        } elsif (/^ (\d+) \. (\d+) \. (\d+) \.? \z/x) {
-          $_ = sprintf('::ffff:%d.%d.%d.0', $1,$2,$3);
-          $masklen = 24  if !defined $masklen;
-        } elsif (/^ (\d+) \. (\d+) \.? \z/x) {
-          $_ = sprintf('::ffff:%d.%d.0.0', $1,$2);
-          $masklen = 16  if !defined $masklen;
-        } elsif (/^ (\d+) \.? \z/x) {
-          $_ = sprintf('::ffff:%d.0.0.0', $1);
-          $masklen = 8  if !defined $masklen;
-        }
-        $masklen += 96  if defined $masklen;
-      }
-      $masklen = 128  if !defined $masklen;
-      $_ .= '/' . $masklen;
-      defined eval { $self->{pt}->add_string($_, $neg ? '!'.$_ : $_) }
-        or warn "netset: illegal network address given (patricia trie): ".
-                "'$cidr': $@\n";
+    # recognizes syntax:
+    #   [IPaddr%scope]/len or IPaddr%scope/len or IPv4addr/mask
+    # optionally prefixed by a '!' to indicate negation (exclusion);
+    # the %scope (i.e. interface), /len or /mask are optional
+
+    local($1,$2,$3,$4);
+    $cidr =~ s/^\s+//;
+    my $exclude = ($cidr =~ s/^!\s*//) ? 1 : 0;
+
+    my $masklen;  # netmask or a prefix length
+    $masklen = $1  if $cidr =~ s{ / (.*) \z }{}xs;
+
+    # discard optional brackets
+    $cidr = $1  if $cidr =~ /^ \[ ( [^\]]* ) \] \z/xs;
+
+    my $scope;
+    if ($cidr =~ s/ % ( [A-Z0-9:._-]* ) \z //xsi) {  # link-local scope?
+      $scope = $1;  # interface specification
+      # discard interface specification, currently just ignored
+      info("netset: ignoring interface scope '%%%s' in IP address %s",
+           $scope, $cidr_orig);
     }
 
-    my $exclude = ($cidr =~ s/^\s*!//) ? 1 : 0;
-
     my $is_ip4 = 0;
-    if ($cidr =~ /^\d+[\.\/]/) {
-      if ($cidr =~ /^(\d+)\.(\d+)\.(\d+)\.$/) { $cidr = "$1.$2.$3.0/24"; }
-      elsif ($cidr =~ /^(\d+)\.(\d+)\.$/) { $cidr = "$1.$2.0.0/16"; }
-      elsif ($cidr =~ /^(\d+)\.$/) { $cidr = "$1.0.0.0/8"; }
+    if ($cidr =~ /^ \d+ (\. | \z) /x) {  # looks like an IPv4 address
+      if ($cidr =~ /^ (\d+) \. (\d+) \. (\d+) \. (\d+) \z/x) {
+        # also strips leading zeroes, not liked by inet_pton
+        $cidr = sprintf('%d.%d.%d.%d', $1,$2,$3,$4);
+        $masklen = 32  if !defined $masklen;
+      } elsif ($cidr =~ /^ (\d+) \. (\d+) \. (\d+) \.? \z/x) {
+        $cidr = sprintf('%d.%d.%d.0', $1,$2,$3);
+        $masklen = 24  if !defined $masklen;
+      } elsif ($cidr =~ /^ (\d+) \. (\d+) \.? \z/x) {
+        $cidr = sprintf('%d.%d.0.0', $1,$2);
+        $masklen = 16  if !defined $masklen;
+      } elsif ($cidr =~ /^ (\d+) \.? \z/x) {
+        $cidr = sprintf('%d.0.0.0', $1);
+        $masklen = 8  if !defined $masklen;
+      } else {
+        warn "netset: illegal IPv4 address given: '$cidr_orig'\n";
+        next;
+      }
       $is_ip4 = 1;
     }
 
+    if ($self->{pt}) {
+      if (defined $masklen) {
+        $masklen =~ /^\d{1,3}\z/
+          or die "Network mask not supported, use a CIDR syntax: '$cidr_orig'";
+      }
+      my $key = $cidr;
+      my $prefix_len = $masklen;
+      if ($is_ip4) {
+        $key = '::ffff:' . $key;  # turn it into an IPv4-mapped IPv6 addresses
+        $prefix_len += 96  if defined $prefix_len;
+      }
+      $prefix_len = 128  if !defined $prefix_len;
+      $key .= '/' . $prefix_len;
+    # dbg("netset: add_cidr (patricia trie) %s => %s",
+    #     $cidr_orig, $exclude ? '!'.$key : $key);
+      defined eval {
+        $self->{pt}->add_string($key, $exclude ? '!'.$key : $key)
+      } or warn "netset: illegal IP address given (patricia trie): ".
+                "'$key': $@\n";
+    }
+
+    $cidr .= '/' . $masklen  if defined $masklen;
+
     my $ip = NetAddr::IP->new($cidr);
     if (!defined $ip) {
-      warn "netset: illegal network address given: '$cidr'\n";
+      warn "netset: illegal IP address given: '$cidr_orig'\n";
       next;
     }
+  # dbg("netset: add_cidr %s => %s => %s", $cidr_orig, $cidr, $ip);
 
     # if this is an IPv4 address, create an IPv6 representation, too
     my ($ip4, $ip6);
@@ -153,7 +178,7 @@ sub add_cidr {
       exclude => $exclude,
       ip4     => $ip4,
       ip6     => $ip6,
-      as_string => $cidr
+      as_string => $cidr_orig,
     };
     $numadded++;
   }
@@ -202,10 +227,10 @@ sub _nets_contains_network {
     my $in4 = defined $net4 && defined $net->{ip4} && $net->{ip4}->contains($net4);
     my $in6 = defined $net6 && defined $net->{ip6} && $net->{ip6}->contains($net6);
     if ($in4 || $in6) {
-      warn "netset: cannot " . ($exclude ? "exclude" : "include") 
-	 . " $netname as it has already been "
-	 . ($net->{exclude} ? "excluded" : "included") . "\n" unless $quiet;
-
+      warn sprintf("netset: cannot %s %s as it has already been %s\n",
+                   $exclude ? "exclude" : "include",
+                   $netname,
+                   $net->{exclude} ? "excluded" : "included") unless $quiet;
       # a network that matches an excluded network isn't contained by "nets"
       # return 0 if we're not just looking to see if the network was declared
       return 0 if (!$declared && $net->{exclude});
