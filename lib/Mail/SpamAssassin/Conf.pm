@@ -1157,10 +1157,7 @@ Unicode.  Requires the Encode::Detect module, HTML::Parser version
 
 =over 4
 
-=item trusted_networks ip.add.re.ss[/mask] ...   (default: none)
-
-NOTE: The syntax for Net::Patricia is not as flexible as NetAddr::IP with 
-      overlapping networks and is not supported in all configurations.
+=item trusted_networks IPaddress[/masklen] ...   (default: none)
 
 What networks or hosts are 'trusted' in your setup.  B<Trusted> in this case
 means that relay hosts on these networks are considered to not be potentially
@@ -1175,24 +1172,41 @@ the C<internal_networks> setting. When there are 'trusted' hosts that
 are not MXes or internal relays for your domain(s) they should B<only> be
 specified in C<trusted_networks>.
 
-If a C</mask> is specified, it's considered a CIDR-style 'netmask', specified
-in bits.  If it is not specified, but less than 4 octets are specified with a
-trailing dot, that's considered a mask to allow all addresses in the remaining
-octets.  If a mask is not specified, and there is not trailing dot, then just
-the single IP address specified is used, as if the mask was C</32>.
+The C<IPaddress> can be an IPv4 address (in a dot-quad form), or an IPv6
+address optionally enclosed in square brackets. Scoped link-local IPv6
+addresses are syntactically recognized but the interface scope is currently
+ignored (e.g. [fe80::1234%eth0] ) and should be avoided.
 
-If a network or host address is prefaced by a C<!> the network or host will be
-excluded (or included) in a first listed match fashion.
+If a C</masklen> is specified, it is considered a CIDR-style 'netmask' length,
+specified in bits.  If it is not specified, but less than 4 octets of an IPv4
+address are specified with a trailing dot, an implied netmask length covers
+all addresses in remaining octets (i.e. implied masklen is /8 or /16 or /24).
+If masklen is not specified, and there is not trailing dot, then just a single
+IP address specified is used, as if the masklen were C</32> with an IPv4
+address, or C</128> in case of an IPv6 address.
 
-Note: 127/8 and ::1 are always included in trusted_networks, regardless of
-your config.
+If a network or host address is prefaced by a C<!> the matching network or
+host will be excluded from the list even if a less specific (shorter netmask
+length) subnet is later specified in the list. This allows a subset of
+a wider network to be exempt. In case of specifying overlapping subnets,
+specify more specific subnets first (tighter matching, i.e. with a longer
+netmask length), followed by less specific (shorter netmask length) subnets
+to get predictable results regarless of the search algorithm used - when
+Net::Patricia module is installed the search finds the tightest matching
+entry in the list, while a sequential search as used in absence of the
+module Net::Patricia will find the first matching entry in the list.
+
+Note: 127.0.0.0/8 and ::1 are always included in trusted_networks, regardless
+of your config.
 
 Examples:
 
-   trusted_networks 192.168/16            # all in 192.168.*.*
+   trusted_networks 192.168.0.0/16        # all in 192.168.*.*
+   trusted_networks 192.168.              # all in 192.168.*.*
    trusted_networks 212.17.35.15          # just that host
    trusted_networks !10.0.1.5 10.0.1/24   # all in 10.0.1.* but not 10.0.1.5
-   trusted_networks DEAD:BEEF::/32        # all in that ipv6 prefix
+   trusted_networks 2001:db8:1::1 !2001:db8:1::/64 2001:db8::/32
+     # 2001:db8::/32 and 2001:db8:1::1/128, except the rest of 2001:db8:1::/64
 
 This operates additively, so a C<trusted_networks> line after another one
 will append new entries to the list of trusted networks.  To clear out the
@@ -1248,15 +1262,12 @@ Empty the list of trusted networks.
     }
   });
 
-=item internal_networks ip.add.re.ss[/mask] ...   (default: none)
-
-NOTE: The syntax for Net::Patricia is not as flexible as NetAddr::IP with 
-      overlapping networks and is not supported in all configurations.
+=item internal_networks IPaddress[/masklen] ...   (default: none)
 
 What networks or hosts are 'internal' in your setup.   B<Internal> means
 that relay hosts on these networks are considered to be MXes for your
-domain(s), or internal relays.  This uses the same format as
-C<trusted_networks>, above.
+domain(s), or internal relays.  This uses the same syntax as
+C<trusted_networks>, above - see there for details.
 
 This value is used when checking 'dial-up' or dynamic IP address
 blocklists, in order to detect direct-to-MX spamming.
@@ -1305,16 +1316,16 @@ Empty the list of internal networks.
     }
   });
 
-=item msa_networks ip.add.re.ss[/mask] ...   (default: none)
+=item msa_networks IPaddress[/masklen] ...   (default: none)
 
-NOTE: The syntax for Net::Patricia is not as flexible as NetAddr::IP with 
-      overlapping networks and is not supported in all configurations.
+The networks or hosts which are acting as MSAs in your setup (but not also
+as MX relays). This uses the same syntax as C<trusted_networks>, above - see
+there for details.
 
-The networks or hosts which are acting as MSAs in your setup (but not also as
-MX relays).  B<MSA> means that the relay hosts on these networks accept mail
-from your own users and authenticates them appropriately.  These relays
-will never accept mail from hosts that aren't authenticated in some way.
-Examples of authentication include, IP lists, SMTP AUTH, POP-before-SMTP, etc.
+B<MSA> means that the relay hosts on these networks accept mail from your
+own users and authenticates them appropriately.  These relays will never
+accept mail from hosts that aren't authenticated in some way. Examples of
+authentication include, IP lists, SMTP AUTH, POP-before-SMTP, etc.
 
 All relays found in the message headers after the MSA relay will take
 on the same trusted and internal classifications as the MSA relay itself,
