@@ -601,7 +601,6 @@ q{
 
 } => q{
 
-Patricia-Failure
 Trusted: [ ip=DEAD:BEEF:0000:0102:0304:0506:0708:0a0b rdns=sender.net helo=sender.net by=receiver.net ident= envfrom= intl=1 id=A96E18BD97 auth= msa=0 ]
 Untrusted:
 
@@ -744,6 +743,10 @@ while (1) {
   #TEST #3 - RESULTS VS EXPECTED RESULTS
   if ($skip_test) {
     #SKIP TEST KNOWN TO FAIL WITH NET::PATRICIA
+    # These test failures follow a garbage-in / garbage-out principle:
+    # when configuration specifies invalid or conflicting data, then
+    # the outcome is unspecified, tests can return different results
+    # depending on modules installed
     print "[skipping test known error with Net::Patricia - Bug 6508...]\n";
     ok (1);
   } else {
