@@ -398,12 +398,10 @@ sub try_binary {
 
       #TEST IF VERSION IS GREATER THAN REQUIRED
       if (defined $required_version) {
-        $version_meets_required =
-          test_version($binary_version, $required_version);
+        $version_meets_required = test_version($binary_version, $required_version);
       }
       if (defined $recommended_version) {
-        $version_meets_recommended =
-          test_version($binary_version, $recommended_version);
+        $version_meets_recommended = test_version($binary_version, $recommended_version);
       }
     }
   }
@@ -513,14 +511,30 @@ sub test_version {
     }
   }
 
+  #print "DEBUG: $version1 vs $version2\n";
+
+  #This would fail comparing 1.4.3 to 1.0.6 because three was less than 6.
+  #Need to compare and if greater, on more major versions, skip the less minor versions
   @version1 = split(/\./,$version1);
   @version2 = split(/\./,$version2);
 
   for ($i = 0; $i < scalar(@version1); $i++) {
+    #print "DEBUG: $version1[$i] vs $version2[$i]\n";
+
+    #LESS - NO NEED TO TEST MORE
     if ($version1[$i] < $version2[$i]) {
       $fail++;
+      $i = scalar(@version1); 
+    #EQUAL - KEEP TESTING
+    } elsif ($version1[$i] == $version2[$i]) {
+      # Do Nothing
+    #GREATER - NO NEED TO TEST MORE
+    } else {
+      $i = scalar(@version1);
     }
   }
+
+  #print "DEBUG: ".($fail==0)."\n\n";
 
   return ($fail == 0);
 }
