@@ -1538,7 +1538,7 @@ sub finish {
     delete $self->{bayes_scanner};
   }
 
-  $self->{resolver}->finish();
+  $self->{resolver}->finish()  if $self->{resolver};
 
   $self->timer_end("finish");
   %{$self} = ();
