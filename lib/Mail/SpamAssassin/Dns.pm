@@ -446,6 +446,7 @@ sub load_resolver {
 
 sub clear_resolver {
   my ($self) = @_;
+  dbg("dns: clear_resolver");
   $self->{main}->{resolver}->{res} = undef;
   return 0;
 }

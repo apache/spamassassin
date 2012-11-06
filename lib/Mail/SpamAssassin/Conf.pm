@@ -1716,11 +1716,25 @@ of seconds will tell SpamAssassin how often to retest for working DNS.
 
 =item dns_options opts   (default: empty)
 
-Provides a (whitespace or comma -separated) list of options applying to
-DNS resolving. Available options are 'rotate' and 'dns0x20' (without quotes).
-Option name may be negated by prepending a 'no' (e.g. 'norotate') to
-counteract previously enabled option. The last setting in configuration
-files prevails. By default options 'rotate' and 'dns0x20' are disabled.
+Provides a (whitespace or comma -separated) list of options applying
+to DNS resolving. Available options are 'rotate', 'dns0x20' and 'edns'
+(without quotes). Option name may be negated by prepending a 'no' (e.g.
+'norotate', 'noEDNS') to counteract previously enabled option. Option
+names are not case-sensitive.
+
+The last setting in configuration files prevails. By default options
+'rotate', 'dns0x20' and 'edns' are disabled.
+
+Option 'edns' may take a value which specifies a requestor's UDP payload
+size according to EDNS0 specifications (RFC 2671bis draft), e.g. edns=4096.
+When the option is enabled but a value is not provided, a conservative default
+of 1280 bytes is implied. It is recommended to enable 'edns' when using a
+local recursive DNS server which supports EDNS0 (like most modern DNS servers
+do). This may avoid a need for a DNS query to fail-over to a TCP query when
+an answer DNS UDP packet would exceed 512 bytes. The option should remain
+disabled when a recursive DNS resolver is only reachable through some
+old-fashioned firewall which cannot cope with DNS UDP packets longer than
+512 bytes or which discards IP fragments.
 
 Option 'rotate' causes SpamAssassin to choose a DNS server at random
 from all servers listed in C</etc/resolv.conf> every 'dns_test_interval'
@@ -1745,10 +1759,17 @@ do not work for no apparent reason.
     type => $CONF_TYPE_HASH_KEY_VALUE,
     code => sub {
       my ($self, $key, $value, $line) = @_;
-      foreach my $option (split (/[\s,]+/, $value)) {
+      foreach my $option (split (/[\s,]+/, lc $value)) {
         local($1,$2);
-        if (lc($option) =~ /^(no)?(rotate|dns0x20)\z/) {
-          $self->{dns_options}->{$2} = $1 ? 0 : 1;
+        if ($option =~ /^no(rotate|dns0x20|edns)\z/) {
+          $self->{dns_options}->{$1} = 0;
+        } elsif ($option =~ /^(rotate|dns0x20)\z/) {
+          $self->{dns_options}->{$1} = 1;
+        } elsif ($option =~ /^(edns) (?: = (\d+) )? \z/x) {
+          # RFC 2671 bis - EDNS0, value is a requestor's UDP payload size
+          # defaults to some UDP packet size likely to fit into a single packet
+          # which is more likely to pass firewalls which choke on IP fragments
+          $self->{dns_options}->{$1} = $2 ? $2 : 1280;
         } else {
           return $INVALID_VALUE;
         }
@@ -4518,6 +4539,7 @@ sub feature_bayes_auto_learn_on_error { 1 }
 sub feature_uri_host_listed { 1 }
 sub feature_yesno_takes_args { 1 }
 sub feature_bug6558_free { 1 }
+sub feature_edns { 1 }  # supports 'dns_options edns'
 
 ###########################################################################
 

@@ -91,7 +91,7 @@ Load the C<Net::DNS::Resolver> object.  Returns 0 if Net::DNS cannot be used,
 sub load_resolver {
   my ($self) = @_;
 
-  if (defined $self->{res}) { return 1; }
+  if ($self->{res}) { return 1; }
   $self->{no_resolver} = 1;
 
   # force only ipv4 if no IO::Socket::INET6 or ipv6 doesn't work
@@ -124,21 +124,39 @@ sub load_resolver {
     # force_v4 is set in new() to avoid error in older versions of Net::DNS
     # that don't have it; other options are set by function calls so a typo
     # or API change will cause an error here
-    $self->{res} = Net::DNS::Resolver->new(force_v4 => $force_ipv4);
-    if (defined $self->{res}) {
+    my $res = $self->{res} = Net::DNS::Resolver->new(force_v4 => $force_ipv4);
+    if ($res) {
       $self->{no_resolver} = 0;
       $self->{force_ipv4} = $force_ipv4;
       $self->{force_ipv6} = $force_ipv6;
-      $self->{retry} = 1;               # retries for non-backgrounded query
-      $self->{retrans} = 3;   # initial timeout for "non-backgrounded" query run in background
-      $self->{res}->retry(1);           # If it fails, it fails
-      $self->{res}->retrans(0);         # If it fails, it fails
-      $self->{res}->dnsrch(0);          # ignore domain search-list
-      $self->{res}->defnames(0);        # don't append stuff to end of query
-      $self->{res}->tcp_timeout(3);     # timeout of 3 seconds only
-      $self->{res}->udp_timeout(3);     # timeout of 3 seconds only
-      $self->{res}->persistent_tcp(0);  # bug 3997
-      $self->{res}->persistent_udp(0);  # bug 3997
+      $self->{retry} = 1;       # retries for non-backgrounded query
+      $self->{retrans} = 3;     # initial timeout for "non-backgrounded"
+                                #   query run in background
+
+      $res->retry(1);           # If it fails, it fails
+      $res->retrans(0);         # If it fails, it fails
+      $res->dnsrch(0);          # ignore domain search-list
+      $res->defnames(0);        # don't append stuff to end of query
+      $res->tcp_timeout(3);     # timeout of 3 seconds only
+      $res->udp_timeout(3);     # timeout of 3 seconds only
+      $res->persistent_tcp(0);  # bug 3997
+      $res->persistent_udp(0);  # bug 3997
+
+      # RFC 2671 bis - EDNS0, value is a requestor's UDP payload size
+      my $edns = $self->{conf}->{dns_options}->{edns};
+      if ($edns && $edns > 512) {
+        $res->udppacketsize($edns);
+        dbg("dns: EDNS, UDP message size %d", $edns);
+      }
+
+      # set $res->nameservers for the benefit of plugins which don't use
+      # our send/bgsend infrastructure but rely on Net::DNS::Resolver entirely
+      my @ns_addr_port = $self->available_nameservers();
+      local($1,$2);
+      # drop port numbers, Net::DNS::Resolver can't take them
+      @ns_addr_port = map(/^\[(.*)\]:(\d+)\z/ ? $1 : $_, @ns_addr_port);
+      dbg("dns: nameservers set to %s", join(', ', @ns_addr_port));
+      $res->nameservers(@ns_addr_port);
     }
     1;
   } or do {
