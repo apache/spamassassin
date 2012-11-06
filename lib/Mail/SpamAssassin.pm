@@ -443,8 +443,6 @@ sub new {
 
   $self->create_locker();
 
-  $self->{resolver} = Mail::SpamAssassin::DnsResolver->new($self);
-
   $self;
 }
 
@@ -1793,6 +1791,9 @@ sub init {
       if ($hf_ref->[1] =~ /_TIMING_/) { $self->timer_enable(); last }
     }
   }
+
+  # should be called only after configuration has been parsed
+  $self->{resolver} = Mail::SpamAssassin::DnsResolver->new($self);
 
   # TODO -- open DNS cache etc. if necessary
 }

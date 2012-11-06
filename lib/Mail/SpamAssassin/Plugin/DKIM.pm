@@ -742,7 +742,10 @@ sub _check_dkim_signature {
     # signature objects not provided by the caller, must verify for ourselves
     my $timemethod = $self->{main}->UNIVERSAL::can("time_method") &&
                      $self->{main}->time_method("check_dkim_signature");
-    $verifier = Mail::DKIM::Verifier->new();
+    # get our Net::DNS::Resolver object, let Mail::DKIM use the same resolver
+    my $res = $self->{main}->{resolver}->get_resolver;
+    # the DnsResolver option is recognized by Mail::DKIM::Verifier since 0.40
+    $verifier = Mail::DKIM::Verifier->new(DnsResolver => $res);
     if (!$verifier) {
       dbg("dkim: cannot create Mail::DKIM::Verifier object");
       return;
@@ -970,8 +973,11 @@ sub _check_dkim_adsp {
               if (Mail::DKIM::AuthorDomainPolicy->UNIVERSAL::can("fetch")) {
                 dbg("dkim: adsp: performing lookup on _adsp._domainkey.%s",
                     $author_domain);
+                # get our Net::DNS::Resolver object
+                my $res = $self->{main}->{resolver}->get_resolver;
                 $practices = Mail::DKIM::AuthorDomainPolicy->fetch(
-                               Protocol => "dns", Domain => $author_domain);
+                               Protocol => "dns", Domain => $author_domain,
+                               DnsResolver => $res);
               }
               1;
             } or do {
