@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-coi-bulk axb-fraud axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bpoliakoff danmcdonald darxus foo-woas grenier jarif kpg-gah zmi; day 2: axb-coi-bulk axb-fraud axb-generic axb-ham-misc axb-sa-users axb-woas bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bpoliakoff danmcdonald darxus grenier jarif kpg-gah llanga zmi; day 3: axb-coi-bulk axb-fraud axb-generic axb-ham-misc axb-sa-users axb-woas bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bpoliakoff danmcdonald darxus grenier jarif kpg-gah llanga zmi
+# with results from: day 1: axb-coi-bulk axb-foo axb-fraud axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bpoliakoff danmcdonald darxus grenier jarif kpg-gah zmi; day 2: axb-coi-bulk axb-foo axb-fraud axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bpoliakoff danmcdonald darxus grenier jarif kpg-gah llanga zmi; day 3: axb-coi-bulk axb-foo axb-fraud axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bpoliakoff danmcdonald darxus grenier jarif kpg-gah llanga zmi
 
 # good enough
 ACH_CANCELLED
@@ -53,9 +53,6 @@ ADVANCE_FEE_5_NEW_MONEY
 ALL_TRUSTED
 
 # good enough
-ANY_PILL_PRICE
-
-# good enough
 AXB_XMAILER_MIMEOLE_OL_024C2
 
 # good enough
@@ -66,9 +63,6 @@ AXB_XMAILER_MIMEOLE_OL_1ECD5
 
 # good enough
 AXB_XMAILER_MIMEOLE_OL_22B61
-
-# good enough
-AXB_XMAILER_MIMEOLE_OL_2E645
 
 # good enough
 AXB_XMAILER_MIMEOLE_OL_326A6
@@ -89,22 +83,10 @@ AXB_XMAILER_MIMEOLE_OL_4379D
 AXB_XMAILER_MIMEOLE_OL_56DF6
 
 # good enough
-AXB_XMAILER_MIMEOLE_OL_616F8
-
-# good enough
-AXB_XMAILER_MIMEOLE_OL_787D6
-
-# good enough
-AXB_XMAILER_MIMEOLE_OL_79A9A
-
-# good enough
 AXB_XMAILER_MIMEOLE_OL_7EB15
 
 # good enough
 AXB_XMAILER_MIMEOLE_OL_8627E
-
-# good enough
-AXB_XMAILER_MIMEOLE_OL_8B970
 
 # good enough
 AXB_XMAILER_MIMEOLE_OL_8E893
@@ -125,21 +107,6 @@ AXB_XMAILER_MIMEOLE_OL_A7B9C
 AXB_XMAILER_MIMEOLE_OL_B9B11
 
 # good enough
-AXB_XMAILER_MIMEOLE_OL_C1698
-
-# good enough
-AXB_XMAILER_MIMEOLE_OL_C95DC
-
-# good enough
-AXB_XMAILER_MIMEOLE_OL_C9CC0
-
-# good enough
-AXB_XMAILER_MIMEOLE_OL_CD271
-
-# good enough
-AXB_XMAILER_MIMEOLE_OL_E023A
-
-# good enough
 AXB_XMAILER_MIMEOLE_OL_E9F46
 
 # good enough
@@ -147,9 +114,6 @@ AXB_XMAILER_MIMEOLE_OL_FB17C
 
 # good enough
 AXB_XMA_BASP
-
-# good enough
-AXB_XMID_PFIX_CTRIP
 
 # good enough
 AXB_XM_FORGED_OL2600
@@ -195,9 +159,6 @@ CHARSET_FARAWAY_HEADER
 
 # tflags publish
 CORRUPT_FROM_LINE_IN_HDRS
-
-# good enough
-CURR_PRICE
 
 # good enough
 DEAR_BENEFICIARY
@@ -254,9 +215,6 @@ DOS_ANAL_SPAM_MAILER
 ENV_AND_HDR_SPF_MATCH
 
 # good enough
-FB_ACHIEVE_BACH
-
-# good enough
 FH_FAKE_RCVD_LINE
 
 # good enough
@@ -282,12 +240,6 @@ FM_LOTTO_MONEY
 
 # good enough
 FM_LOTTO_YOU_WON
-
-# good enough
-FM_SCHOOLING
-
-# good enough
-FM_SCHOOL_DIPLOMA
 
 # tflags publish
 FORM_FRAUD_3
@@ -368,9 +320,6 @@ FSL_MISSP_REPLYTO
 FSL_NEW_HELO_USER
 
 # good enough
-FS_MAKE_MONEY
-
-# good enough
 FS_WILL_HELP
 
 # good enough
@@ -419,6 +368,9 @@ HK_LOTTO
 HK_LOTTO_NAME
 
 # good enough
+HK_NAME_FM_MR_MRS
+
+# good enough
 HK_NAME_FROM
 
 # good enough
@@ -426,6 +378,9 @@ HK_NAME_MR_MRS
 
 # good enough
 HK_RANDOM_FROM
+
+# good enough
+HK_SCAM_N1
 
 # good enough
 HK_SCAM_N15
@@ -444,12 +399,6 @@ HK_SCAM_S7
 
 # tflags userconf
 HTML_CHARSET_FARAWAY
-
-# good enough
-HTTPS_HTTP_MISMATCH
-
-# good enough
-IRS_SPOOF
 
 # good enough
 JM_FAKE_PSMTP_RCVD
@@ -474,6 +423,9 @@ LONG_TERM_PRICE
 
 # tflags publish
 LOTS_OF_MONEY
+
+# good enough
+LOTTERY_1
 
 # good enough
 LOTTERY_PH_004470
@@ -776,6 +728,9 @@ RISK_FREE
 RP_MATCHES_RCVD
 
 # good enough
+SCANNED_EXTERNAL
+
+# good enough
 SERGIO_SUBJECT_VIAGRA01
 
 # good enough
@@ -826,9 +781,6 @@ SUBJECT_IN_WHITELIST
 # good enough
 TAB_IN_FROM
 
-# good enough
-TINY_FLOAT
-
 # tflags net
 TO_EQ_FM_DOM_SPF_FAIL
 
@@ -872,16 +824,61 @@ TVD_RCVD_IP4
 TVD_SUBJ_ACC_NUM
 
 # good enough
-HK_NAME_FM_MR_MRS
+TVD_VISIT_PHARMA
 
 # good enough
-HK_SCAM_N1
+AXB_XMAILER_MIMEOLE_OL_B9D6C
 
 # good enough
-MANY_PILL_PRICE
+AXB_X_AOL_SEZ_S
 
 # good enough
-SCANNED_EXTERNAL
+DATE_DOTS
+
+# good enough
+FB_IMAGIRL
+
+# good enough
+HK_GOLDDUST
+
+# good enough
+HK_NAME_FM_DR
+
+# good enough
+HK_NAME_FM_FROM
+
+# good enough
+HK_SCAM_N4
+
+# good enough
+HK_SCAM_S15
+
+# good enough
+HK_SCAM_S25
+
+# good enough
+KHOP_JS_OBFUSCATION
+
+# good enough
+LOTTO_AGENT_RPLY
+
+# good enough
+MONEY_PERCENT
+
+# good enough
+SINGLE_HEADER_2K
+
+# good enough
+SINGLE_HEADER_3K
+
+# good enough
+SUBJ_ATTENTION
+
+# good enough
+TVD_PH_BODY_META_ALL
+
+# good enough
+XM_PHPMAILER_FORGED
 
 # tflags userconf
 UNPARSEABLE_RELAY
@@ -966,9 +963,6 @@ USER_IN_WHITELIST
 
 # tflags userconf
 USER_IN_WHITELIST_TO
-
-# good enough
-YOUR_PERMISSION
 
 # tflags net
 __DKIMDOMAIN_IN_DWL_ANY
