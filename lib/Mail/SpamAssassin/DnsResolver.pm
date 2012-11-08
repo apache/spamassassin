@@ -146,7 +146,7 @@ sub load_resolver {
       my $edns = $self->{conf}->{dns_options}->{edns};
       if ($edns && $edns > 512) {
         $res->udppacketsize($edns);
-        dbg("dns: EDNS, UDP message size %d", $edns);
+        dbg("dns: EDNS, UDP payload size %d", $edns);
       }
 
       # set $res->nameservers for the benefit of plugins which don't use
@@ -515,6 +515,8 @@ sub dnsext_dns0x20 {
   return $result;
 }
 
+# this subroutine mimics the Net::DNS::Resolver::Base::make_query_packet()
+#
 sub new_dns_packet {
   my ($self, $host, $type, $class) = @_;
 
@@ -558,6 +560,17 @@ sub new_dns_packet {
     warn sprintf("dns: new_dns_packet (host=%s type=%s class=%s) failed: %s\n",
                  $host, $type, $class, $eval_stat);
   };
+
+  if ($packet) {
+  # my $udp_payload_size = $self->{res}->udppacketsize;
+    my $udp_payload_size = $self->{conf}->{dns_options}->{edns};
+    if ($udp_payload_size && $udp_payload_size > 512) {
+    # dbg("dns: adding EDNS ext, UDP payload size %d", $udp_payload_size);
+      my $optrr = Net::DNS::RR->new(Type => 'OPT', Name => '', TTL => 0,
+                                    Class => $udp_payload_size);
+      $packet->push('additional', $optrr);
+    }
+  }
 
   return $packet;
 }
