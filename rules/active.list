@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-coi-bulk axb-foo axb-fraud axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bpoliakoff danmcdonald darxus grenier jarif kpg-gah mas zmi; day 2: axb-coi-bulk axb-foo axb-fraud axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bpoliakoff danmcdonald darxus grenier jarif kpg-gah llanga mas zmi; day 3: axb-coi-bulk axb-foo axb-fraud axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bpoliakoff danmcdonald darxus grenier jarif kpg-gah llanga zmi
+# with results from: day 1: axb-coi-bulk axb-foo axb-fraud axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-zmi bpoliakoff danmcdonald darxus grenier jarif kpg-gah mas zmi; day 2: axb-coi-bulk axb-foo axb-fraud axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bpoliakoff danmcdonald darxus grenier jarif kpg-gah llanga mas zmi; day 3: axb-coi-bulk axb-foo axb-fraud axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bpoliakoff danmcdonald darxus grenier jarif kpg-gah llanga mas zmi
 
 # good enough
 ACH_CANCELLED
@@ -216,6 +216,9 @@ DNS_FROM_AHBL_RHSBL
 
 # tflags publish
 DOS_ANAL_SPAM_MAILER
+
+# good enough
+DOS_RCVD_IP_TWICE_C
 
 # tflags userconf
 ENV_AND_HDR_SPF_MATCH
