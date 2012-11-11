@@ -94,22 +94,25 @@ header         __RCVD_ZIXMAIL        X-Spam-Relays-Untrusted =~ / helo=smtpout\.
 
 # Poorer S/O than FROM_MISSPACED but better performance in metas
 header         __FROM_RUNON          From =~ /\S+<\w+/
+header         __FROM_RUNON_UNCODED  From:raw =~ /\S+(?<!\?=)<\w+/
 
 ifplugin Mail::SpamAssassin::Plugin::SPF
   #meta           FROM_MISSP_SPF_FAIL1  (__FROM_RUNON && !SPF_PASS)
   #tflags         FROM_MISSP_SPF_FAIL1  net
   meta           FROM_MISSP_SPF_FAIL  (__FROM_RUNON && SPF_FAIL)
   tflags         FROM_MISSP_SPF_FAIL  net
+  score          FROM_MISSP_SPF_FAIL  2.00	# limit
 endif
 
-meta           __FROM_MISSP_EH_MATCH __FROM_RUNON && __ENV_AND_HDR_FROM_MATCH
+meta           __FROM_MISSP_EH_MATCH __FROM_RUNON_UNCODED && __ENV_AND_HDR_FROM_MATCH
 meta           FROM_MISSP_EH_MATCH   __FROM_MISSP_EH_MATCH && !__RCD_RDNS_MTA_MESSY && !__UNSUB_LINK && !__COMMENT_EXISTS && !__TO___LOWER && !__MIME_QP && !__TO_EQ_FROM_DOM && !__BUGGED_IMG && !__DKIM_EXISTS && !__RCVD_ZIXMAIL
 describe       FROM_MISSP_EH_MATCH   From misspaced, matches envelope
-score          FROM_MISSP_EH_MATCH   2.5	# max
+score          FROM_MISSP_EH_MATCH   2.00	# max
 
-meta           __FROM_MISSP_URI      __FROM_RUNON && __HAS_ANY_URI
+meta           __FROM_MISSP_URI      __FROM_RUNON_UNCODED && __HAS_ANY_URI
 meta           FROM_MISSP_URI        __FROM_MISSP_URI && !__NOT_SPOOFED && !__RCD_RDNS_MTA_MESSY && !MISSING_MIMEOLE && !__REPTO_QUOTE && !__UNSUB_LINK && !__MSGID_OK_HEX && !__MAIL_LINK && !__MIME_QP && !__BUGGED_IMG && !MIME_BASE64_TEXT && !__CTYPE_MULTIPART_ALT
 describe       FROM_MISSP_URI        From misspaced, has URI
+score          FROM_MISSP_URI        2.00	# max
 
 meta           FROM_MISSP_USER       (__FROM_RUNON && NSL_RCVD_FROM_USER)
 describe       FROM_MISSP_USER       From misspaced, from "User"
@@ -281,7 +284,7 @@ header         TO_SEM_SEM          To =~ /;;/
 describe       TO_SEM_SEM          To has ";;"
 tflags         TO_SEM_SEM          nopublish
 
-uri            __MANY_SUBDOM       m;^https?://(?:[^\./]{1,30}\.){6};
+uri            __MANY_SUBDOM       m;^https?://(?:[^\./]{1,30}\.){6};i
 meta           MANY_SUBDOM         __MANY_SUBDOM && !__JM_REACTOR_DATE && !__UNSUB_LINK && !__VIA_ML && !NO_RELAYS && !__UPPERCASE_URI && !__MIME_QP
 describe       MANY_SUBDOM         Lots and lots of subdomain parts in a URI
 
@@ -484,14 +487,17 @@ describe       SCRIPT_GIBBERISH         Nonsense in HTML <SCRIPT> tag
 #rawbody        MANY_DIV_10                   /(?:<div[^>]{0,30}>\s{0,80}){10}/im
 #tflags         MANY_DIV_10                   nopublish
 
-header         FROM_TRL_UNDR              From =~ /_\@/
-tflags         FROM_TRL_UNDR              nopublish
+#header         FROM_TRL_UNDR              From =~ /_\@/
+#tflags         FROM_TRL_UNDR              nopublish
 
-body           LOTSA_EMAILS               /\b(?:thousand|million)\se-?mail(?:\saddresse)?s?\b/i
-tflags         LOTSA_EMAILS               nopublish
+#body           LOTSA_EMAILS               /\b(?:thousand|million)\se-?mail(?:\saddresse)?s?\b/i
+#tflags         LOTSA_EMAILS               nopublish
 
-body           NUM_EMAILS                 /\b\d[,\d]{3,}\s(?:(?!and|or)\w+\s)?e-?mail\saddress(?:es)?\b/i
-tflags         NUM_EMAILS                 nopublish
+body           __BIGNUM_EMAILS            /\b(?:thousand|million|\d[,\d]{4,})\s(?:(?!and|or|your)\w+\s)?(?:e-?mail\saddresses|leads|names)\b/i
+meta           BIGNUM_EMAILS              __BIGNUM_EMAILS && !__SPOOFED_URL && !__BUGGED_IMG
+describe       BIGNUM_EMAILS              Lots of email addresses/leads
+score          BIGNUM_EMAILS              3.00		# limti
+#tflags         BIGNUM_EMAILS              nopublish
 
 #rawbody        __HTML_ELEM_OBFU           /[a-z\s]&\#[91]\d\d?[a-z]/
 #tflags         __HTML_ELEM_OBFU           multiple nopublish
@@ -504,8 +510,8 @@ tflags         NUM_EMAILS                 nopublish
 #meta           HTML_ELEM_OBFU_150         __HTML_ELEM_OBFU > 150
 #tflags         HTML_ELEM_OBFU_150         nopublish
 
-header         PPMC_FROM_1                From =~ /\bPayPa[IL](?:\.Com)?\b/
-describe       PPMC_FROM_1                Paypal phishing sign
+#header         PPMC_FROM_1                From =~ /\bPayPa[IL](?:\.Com)?\b/
+#describe       PPMC_FROM_1                Paypal phishing sign
 
 uri            URI_HIDDEN_2               m;.{8}(?:[/\\]|%(?i:5c|2f))(?!\.\.?[/%\\])\..;
 describe       URI_HIDDEN_2               URI contains a hidden file or directory
@@ -606,8 +612,8 @@ header          RPT_SPAM_HDR            Report-SPAM =~ /./
 
 
 # Suggested by Gerard Z 2010-08-15
-uri         __GZ_PILL_SQUAT1       /\/[a-z]{3,8}\d{2}\.html/
-uri         __GZ_PILL_SQUAT2       /\/[a-z]{3,8}\d{2}\.jpg/
+uri         __GZ_PILL_SQUAT1       /\/[a-z]{3,8}\d{2}\.html/i
+uri         __GZ_PILL_SQUAT2       /\/[a-z]{3,8}\d{2}\.jpg/i
 meta        __GZ_PILL_SQUATTERS    __GZ_PILL_SQUAT1 && __GZ_PILL_SQUAT2
 meta        GZ_PILL_SQUATTERS      __GZ_PILL_SQUATTERS && !__DOS_RELAYED_EXT && !__FROM_ISO_2022_JP && !__RCD_RDNS_MX_MESSY
 describe    GZ_PILL_SQUATTERS      Found a link to rogue pill pusher content
@@ -630,7 +636,7 @@ meta           __NAME_EMAIL_DIFF   __NAME_IS_EMAIL && ! __NAME_EQ_EMAIL
 # 12-letter domain names, suggested by Len Conrad on the users list
 header         __RCVD_12LTRDOM     Received =~ /[(\s.][a-z]{12}\./
 header         __RPATH_12LTRDOM    Return-Path =~ /\@[a-z]{12}\./
-uri            __URI_12LTRDOM      m,://(?:[^./]+\.)*[a-z]{12}\.[^./]+/,
+uri            __URI_12LTRDOM      m,://(?:[^./]+\.)*[a-z]{12}\.[^./]+/,i
 
 header         __FROM_12LTRDOM_1   From =~ /\@(?!facebookmail)[a-z]{12}\./
 ifplugin Mail::SpamAssassin::Plugin::FreeMail
@@ -768,7 +774,7 @@ if can(Mail::SpamAssassin::Conf::feature_bug6558_free)
   meta        __FOR_SALE_PRC_EOL_MANY   __FOR_SALE_PRC_EOL > 10
 endif
 
-uri         __URI_MAILTO              /^mailto:/
+uri         __URI_MAILTO              /^mailto:/i
 tflags      __URI_MAILTO              multiple maxhits=16
 meta        __URI_MAILTO_MANY         __URI_MAILTO > 15
 
@@ -899,13 +905,13 @@ describe    NOT_LEGALLY_SPAM   Claims legitimacy under a law that was never pass
 
 
 # suggested by http://isc.sans.edu/diary.html?storyid=13921
-uri         URI_MALWARE_BH     /\.\w{2,4}\/[\d\w]{8}\/index\.html/
+uri         URI_MALWARE_BH     /\.\w{2,4}\/[\d\w]{8}\/index\.html/i
 describe    URI_MALWARE_BH     Possible BlackHole malware links / phishing
 score       URI_MALWARE_BH     1.0	# limit
 
 # suggested by https://isc.sans.edu/diary.html?storyid=13996
 uri         __URI_DATA         /^data:[a-z]/i
-meta        URI_DATA           __URI_DATA
+meta        URI_DATA           __URI_DATA && !ALL_TRUSTED
 describe    URI_DATA           "data:" URI - possible malware or phish
 score       URI_DATA           1.0	# limit
 
@@ -918,26 +924,42 @@ score       SUBJ_ATTENTION       0.500	# limit
 header      __IRS_FM_NAME        From:name =~ /internal\srevenue\sservice/i
 header      __IRS_FM_DOM         From:addr =~ /\birs\.gov$/
 header      __IRS_RCVD_DOM       X-Spam-Relays-External =~ / rdns=\S+\birs\.gov /
-meta        __IRS_SPOOF          __IRS_FM_NAME && !__IRS_FM_DOM && !__IRS_RCVD_DOM
+meta        __IRS_SPOOF          (__IRS_FM_NAME || __IRS_FM_DOM) && !__IRS_RCVD_DOM && __REPLYTO_EXISTS
 meta        IRS_SPOOF            __IRS_SPOOF
 describe    IRS_SPOOF            Claims to be IRS, but not from IRS domain
-score       IRS_SPOOF            1.00	# limit
+score       IRS_SPOOF            2.00	# limit
 
 
+header      __FBI_FM_NAME        From:name =~ /federal\sbureau\sof\sinvestigation/i
+header      __FBI_FM_DOM         From:addr =~ /\bfbi\.gov$/
+header      __FBI_RCVD_DOM       X-Spam-Relays-External =~ / rdns=\S+\bfbi\.gov /
+body        __FBI_BODY_SHOUT_1   /^FEDERAL BUREAU OF INVESTIGATIONS?\b/
+rawbody     __FBI_BODY_SHOUT_2   /^FEDERAL BUREAU OF INVESTIGATIONS?\b/m
+meta        __FBI_SPOOF          (__FBI_FM_NAME || __FBI_FM_DOM || __FBI_BODY_SHOUT_1 || __FBI_BODY_SHOUT_2) && !__FBI_RCVD_DOM && __REPLYTO_EXISTS
+meta        FBI_SPOOF            __FBI_SPOOF
+describe    FBI_SPOOF            Claims to be FBI, but not from FBI domain
+score       FBI_SPOOF            2.00	# limit
+
+meta        FBI_MONEY            __FBI_SPOOF && LOTS_OF_MONEY
+describe    FBI_MONEY            The FBI wants to give you lots of money?
+score       FBI_MONEY            2.00	# limit
+
+
+header      __FROM_ASB_BANK      From:addr =~ /\basb\.co\.nz$/i
 header      __FROM_AMEX          From =~ /american\s?express/i
 header      __FROM_BANK_LOOSE    From =~ /ban(?:k|co)/i
 header      __FROM_CHASE         From:addr =~ /chase(?:2?-?paymentech)\.com$/i
 header      __FROM_EBAY_LOOSE    From =~ /\be-?bay\b/i
 header      __FROM_HSBC          From:addr =~ /\bhsbc\.co\.uk$/i
 header      __FROM_LLOYDSTSB     From:addr =~ /\blloyds(?:tsb)\.(?:co\.uk|com)$/i
-header      __FROM_PAYPAL_LOOSE  From:name =~ /paypal/i
+header      __FROM_PAYPAL_LOOSE  From =~ /paypal/i
 header      __FROM_WELLSFARGO    From:addr =~ /wellsfargo\.com$/i
 header      __FROM_WESTERNUNION  From:addr =~ /westernunion\.com$/i
 
-meta        __FROM_MISSP_PHISH   __FROM_MISSPACED && (__FROM_AMEX || __FROM_BANK_LOOSE || __FROM_CHASE || __FROM_EBAY_LOOSE || __FROM_HSBC || __FROM_LLOYDSTSB || __FROM_PAYPAL_LOOSE || __FROM_WELLSFARGO || __FROM_WESTERNUNION)
+meta        __FROM_MISSP_PHISH   __FROM_MISSPACED && (__FROM_ASB_BANK || __FROM_AMEX || __FROM_BANK_LOOSE || __FROM_CHASE || __FROM_EBAY_LOOSE || __FROM_HSBC || __FROM_LLOYDSTSB || __FROM_PAYPAL_LOOSE || __FROM_WELLSFARGO || __FROM_WESTERNUNION)
 meta        FROM_MISSP_PHISH     __FROM_MISSP_PHISH
 describe    FROM_MISSP_PHISH     Malformed, claims to be from financial organization - possible phish
-score       FROM_MISSP_PHISH     4.00	# limit
+score       FROM_MISSP_PHISH     4.75	# limit
 
 # see also DOS_GOOGLE_DOCS
 uri         __URI_GOOGLE_DOC     m,^https?://docs\.google\.com/(?:[^/]+/)*view(?:form)?\?(?:id|formkey)=,i
@@ -948,10 +970,23 @@ body        __CLEAN_MAILBOX      /\b(?:(?:e-?mail|mailbox|violation:|(?-i:CLICK)
 body        __VALIDATE_MAILBOX   /\b(?:re-?)?validate your mailbox\b/i
 body        __UPGR_MAILBOX       /\bupg[ra]+d(?:e|ing) (?:your )?(?:mailbox|(?:web ?|e-?)mail)\b/i
 body        __SYSADMIN           /\b(?:help?[- ]?desk|sys(?:tem )?admin(?:istrator)|local[- ]host|support team)\b/i
+meta        __EMAIL_PHISH        (__WEBMAIL_ACCT + __MAILBOX_FULL + __CLEAN_MAILBOX + __VALIDATE_MAILBOX + __UPGR_MAILBOX + __SYSADMIN > 1)
 
 # Google Docs observed on LOTS of phishes 2012
 meta        __GOOGLE_DOCS_PHISH_1  __URI_GOOGLE_DOC && (TVD_PH_1 || __TVD_PH_SUBJ_META || __TVD_PH_BODY_META || __TVD_PH_BODY_ACCOUNTS_PRE || __TVD_PH_BODY_ACCOUNTS_POST)
-meta        __GOOGLE_DOCS_PHISH_2  __URI_GOOGLE_DOC && (__WEBMAIL_ACCT + __MAILBOX_FULL + __CLEAN_MAILBOX + __VALIDATE_MAILBOX + __UPGR_MAILBOX + __SYSADMIN > 1)
+meta        __GOOGLE_DOCS_PHISH_2  __URI_GOOGLE_DOC && __EMAIL_PHISH
 meta        GOOGLE_DOCS_PHISH    (__GOOGLE_DOCS_PHISH_1 || __GOOGLE_DOCS_PHISH_2)
+describe    GOOGLE_DOCS_PHISH    E-mail account phishing via a Google Docs form
 score       GOOGLE_DOCS_PHISH    2.00	# limit, until reviewed
+
+meta        __EMAIL_URI_PHISH    __HAS_ANY_URI && !__URI_GOOGLE_DOC && __EMAIL_PHISH
+meta        EMAIL_URI_PHISH      __EMAIL_URI_PHISH
+score       EMAIL_URI_PHISH      2.00	# limit
+describe    EMAIL_URI_PHISH      Email account phishing using hosted form
+
+# suggested by MPerkel on the users list 11/10/2012
+uri         __URI_PROTO_MC       /^(?!(?-i:[Hh]ttps?:))https?:/i
+uri         __URI_TLD_MC         /\.(?!(?-i:com|net|org|biz|info))(?:com|net|org|biz|info)\b/i
+uri         __URI_GOOG_MC        /(?!(?-i:google))google/i
+
 
