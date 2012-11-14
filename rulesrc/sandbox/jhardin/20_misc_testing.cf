@@ -985,9 +985,9 @@ score       EMAIL_URI_PHISH      2.00	# limit
 describe    EMAIL_URI_PHISH      Email account phishing using hosted form
 
 # suggested by MPerkel on the users list 11/10/2012
-uri         __URI_PROTO_MC       /^(?!(?-i:[Hh]ttps?:))https?:/i
-uri         __URI_WWW_MC         m,://(?!(?-i:www))www\.,i
-uri         __URI_TLD_MC         /\.(?!(?-i:com|net|org|biz|info))(?:com|net|org|biz|info)\b/i
-uri         __URI_GOOG_MC        /(?!(?-i:google))google/i
+uri         __URI_PROTO_MC       /^(?!(?-i:(?:[Hh]ttps?|HTTPS?):))https?:/i
+uri         __URI_WWW_MC         m,://(?!(?-i:www|WWW))www\.,i
+uri         __URI_TLD_MC         /\.(?!(?-i:com|net|org|biz|info|COM|NET|ORG))(?:com|net|org|biz|info)\b/i
+uri         __URI_GOOG_MC        /(?!(?-i:[Gg]oogle))google/i
 
 
