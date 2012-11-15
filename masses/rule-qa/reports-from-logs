@@ -493,8 +493,15 @@ sub start_hit_frequencies_at_rev {
 
   my $needs_checkout = 0;
   if (-d $hfdir && chdir $hfdir) {
-    runcmd("svn up -r$rev");
-    if ($?>>8 != 0 || !-f $expected_svn_file) {
+    eval {
+      # "svn up" has been observed to wedge on the ruleqa zone VM, put a timeout so we can recover
+      local $SIG{ALRM} = sub { die "alarm\n" }; # NB: \n required
+      alarm 60*60;	# an hour should be generous enough
+      runcmd("svn up -r$rev");
+      alarm 0;
+    };
+
+    if ($@ || $?>>8 != 0 || !-f $expected_svn_file) {
       print "simple 'svn update' failed. performing full checkout instead...\n";
       $needs_checkout = 1;
     }
@@ -505,8 +512,13 @@ sub start_hit_frequencies_at_rev {
   if ($needs_checkout) {
     my $svnurl = get_svn_url();
     runcmd("rm -rf $hfdir");
-    runcmd("svn co $svnurl\@$rev $hfdir");
-    if ($?>>8 != 0 || !-f $expected_svn_file) { die "svn co failed"; }
+    eval {
+      local $SIG{ALRM} = sub { die "alarm\n" }; # NB: \n required
+      alarm 60*60;	# an hour should be generous enough
+      runcmd("svn co $svnurl\@$rev $hfdir");
+      alarm 0;
+    };
+    if ($@ || $?>>8 != 0 || !-f $expected_svn_file) { die "svn co failed"; }
   }
   chdir "$hfdir" or die "cannot chdir $hfdir";
 
