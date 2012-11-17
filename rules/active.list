@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-foo axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bpoliakoff darxus grenier jarif kpg-gah mas zmi; day 2: axb-foo axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bpoliakoff darxus grenier jarif kpg-gah llanga mas zmi; day 3: axb-coi-bulk axb-foo axb-fraud axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bpoliakoff darxus grenier jarif kpg-gah llanga mas zmi
+# with results from: day 1: axb-coi-bulk axb-foo axb-fraud axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bpoliakoff darxus grenier jarif kpg-gah mas zmi; day 2: axb-foo axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bpoliakoff darxus grenier jarif kpg-gah llanga mas zmi; day 3: axb-foo axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bpoliakoff darxus grenier jarif kpg-gah llanga mas zmi
 
 # tflags publish
 ADVANCE_FEE_2_NEW_FORM
@@ -72,9 +72,6 @@ AXB_XMAILER_MIMEOLE_OL_A7B9C
 
 # good enough
 AXB_X_PHPS_CTRIP
-
-# good enough
-AXB_X_RCV_WLOCAL
 
 # tflags learn
 BAYES_00
@@ -246,12 +243,6 @@ FSL_MID_419
 
 # good enough
 FSL_MISSP_REPLYTO
-
-# good enough
-FS_START_DOYOU2
-
-# good enough
-FS_WE_WANT
 
 # good enough
 FS_WILL_HELP
@@ -605,6 +596,9 @@ RCVD_IN_SORBS_ZOMBIE
 RCVD_IN_XBL
 
 # good enough
+REPLYTO_WITHOUT_TO_CC
+
+# good enough
 RP_MATCHES_RCVD
 
 # good enough
@@ -644,6 +638,9 @@ SPF_PASS
 SPF_SOFTFAIL
 
 # good enough
+STOX_REPLY_TYPE_WITHOUT_QUOTES
+
+# good enough
 STYLE_GIBBERISH
 
 # tflags userconf
@@ -671,9 +668,6 @@ TO_NO_BRKTS_MSFT
 TVD_PH_BODY_ACCOUNTS_PRE
 
 # good enough
-TVD_PH_BODY_META_ALL
-
-# good enough
 TVD_PH_REC
 
 # good enough
@@ -681,6 +675,12 @@ TVD_RCVD_IP
 
 # good enough
 TVD_RCVD_IP4
+
+# good enough
+DECEASED_NO_ML
+
+# good enough
+HK_NAME_MR_MRS
 
 # tflags userconf
 UNPARSEABLE_RELAY
