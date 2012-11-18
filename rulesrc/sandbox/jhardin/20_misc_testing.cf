@@ -979,6 +979,10 @@ meta        GOOGLE_DOCS_PHISH    (__GOOGLE_DOCS_PHISH_1 || __GOOGLE_DOCS_PHISH_2
 describe    GOOGLE_DOCS_PHISH    E-mail account phishing via a Google Docs form
 score       GOOGLE_DOCS_PHISH    2.00	# limit, until reviewed
 
+meta        URI_GOOGLE_DOCS      __URI_GOOGLE_DOC && !__DKIM_EXISTS && !__TO_EQ_FROM_DOM && !__DOS_REF_TODAY && !__DOS_BODY_FRI && !__DOS_BODY_WED && !__freemail_safe_fwd && !__TO_EQ_FROM_DOM && !__HAS_ERRORS_TO
+describe    URI_GOOGLE_DOCS      URI for Google Docs, common in phishing
+score       URI_GOOGLE_DOCS      1.00	# limit
+
 meta        __EMAIL_URI_PHISH    __HAS_ANY_URI && !__URI_GOOGLE_DOC && __EMAIL_PHISH
 meta        EMAIL_URI_PHISH      __EMAIL_URI_PHISH
 score       EMAIL_URI_PHISH      2.00	# limit
