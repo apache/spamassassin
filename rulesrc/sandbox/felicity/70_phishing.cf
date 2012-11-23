@@ -166,7 +166,7 @@ body __TVD_PH_BODY_08		/\bmultiple password failures/i
 
 body __TVD_PH_BODY_ACCOUNTS_PRE		/\baccounts? (?:[a-z_,-]+ )+?(?:record[a-z]*|suspen[a-z]+|notif(?:y|ication)|updated|verifications?|credited)\b/i
 meta TVD_PH_BODY_ACCOUNTS_PRE		__TVD_PH_BODY_ACCOUNTS_PRE
-body __TVD_PH_BODY_ACCOUNTS_POST	/\b(?:(?:re-?)?activat[a-z]*|(?:re-?)?validate|secure|restore|confirm|update|suspend) (?!your)(?:[a-z_,-]+ )+?accounts?\b/i
+body __TVD_PH_BODY_ACCOUNTS_POST	/\b(?:(?:[dr]e-?)?activat[a-z]*|(?:re-?)?validate|secure|restore|confirm|update|suspend) (?!your)(?:[a-z_,-]+ )+?accounts?\b/i
 meta TVD_PH_BODY_ACCOUNTS_POST		__TVD_PH_BODY_ACCOUNTS_POST
 
 
