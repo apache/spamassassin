@@ -968,12 +968,15 @@ body        __WEBMAIL_ACCT       /\byour web ?mail account/i
 body        __MAILBOX_FULL       /\b(?:you(?:r (?:mailbox|(?:e-?|web ?)mail))? (?:is (?:almost )?full|(?:quota )?ha(?:s|ve) (?:reached|exceeded|passed) (?:the|your|it'?s?) (?:size|storage|set|(?:e-?|web ?)mail|quota|folder|mail ?box) (?:limit|quota))|over your mailbox (?:size )?(?:limit|quota))\b/i
 body        __CLEAN_MAILBOX      /\b(?:(?:e-?mail|mailbox|violation:|(?-i:CLICK)) (?:quota size|clean(?:-?up))|clean ?up click ?here)\b/i
 body        __VALIDATE_MAILBOX   /\b(?:re-?)?validate your mailbox\b/i
-body        __UPGR_MAILBOX       /\bupg[ra]+d(?:e|ing) (?:your )?(?:mailbox|(?:web ?|e-?)mail)\b/i
+body        __UPGR_MAILBOX       /\bup(?:g[ra]+d(?:e|ing)|date) (?:your )?(?:mailbox|(?:web ?|e-?)mail)\b/i
 body        __SYSADMIN           /\b(?:help?[- ]?desk|sys(?:tem )?admin(?:istrator)|local[- ]host|support team)\b/i
-meta        __EMAIL_PHISH        (__WEBMAIL_ACCT + __MAILBOX_FULL + __CLEAN_MAILBOX + __VALIDATE_MAILBOX + __UPGR_MAILBOX + __SYSADMIN > 1)
+body        __ATTN_MAIL_USER     /\batt(?:entio)?n (?:web|e-?)?mail user[:;]/i
+body        __MAIL_ACCT_ACCESS   /\byour (?:web|e-?)?mail (?:account|log-?in) (?:has )?been accessed\b/i
+
+meta        __EMAIL_PHISH        (__WEBMAIL_ACCT + __MAILBOX_FULL + __CLEAN_MAILBOX + __VALIDATE_MAILBOX + __UPGR_MAILBOX + __SYSADMIN + __ATTN_MAIL_USER + __MAIL_ACCT_ACCESS > 1)
 
 # Google Docs observed on LOTS of phishes 2012
-meta        __GOOGLE_DOCS_PHISH_1  __URI_GOOGLE_DOC && (TVD_PH_1 || __TVD_PH_SUBJ_META || __TVD_PH_BODY_META || __TVD_PH_BODY_ACCOUNTS_PRE || __TVD_PH_BODY_ACCOUNTS_POST)
+meta        __GOOGLE_DOCS_PHISH_1  __URI_GOOGLE_DOC && (__TVD_PH_SUBJ_META || __TVD_PH_BODY_META || __TVD_PH_BODY_ACCOUNTS_PRE || __TVD_PH_BODY_ACCOUNTS_POST)
 meta        __GOOGLE_DOCS_PHISH_2  __URI_GOOGLE_DOC && __EMAIL_PHISH
 meta        GOOGLE_DOCS_PHISH    (__GOOGLE_DOCS_PHISH_1 || __GOOGLE_DOCS_PHISH_2)
 describe    GOOGLE_DOCS_PHISH    E-mail account phishing via a Google Docs form
