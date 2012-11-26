@@ -55,9 +55,9 @@ meta       TO_NO_BRKTS_NORDNS_HTML      __TO_NO_BRKTS_NORDNS_HTML && !ALL_TRUSTE
 describe   TO_NO_BRKTS_NORDNS_HTML      To: misformatted and no rDNS and HTML only
 
 meta       __TO_NO_BRKTS_MSFT       __TO_NO_ARROWS_R && !__TO_UNDISCLOSED && (__ANY_OUTLOOK_MUA || __HAS_MIMEOLE || __MIMEOLE_MS)
-meta       TO_NO_BRKTS_MSFT         __TO_NO_BRKTS_MSFT && !__VIA_ML && !__LYRIS_EZLM_REMAILER && !__THREAD_INDEX_GOOD && !__IS_EXCH && !__UNSUB_LINK && !__NOT_SPOOFED && !__DOS_HAS_LIST_UNSUB && !__NAME_EQ_EMAIL && !__SUBJECT_ENCODED_QP
+meta       TO_NO_BRKTS_MSFT         __TO_NO_BRKTS_MSFT && !__VIA_ML && !__LYRIS_EZLM_REMAILER && !__THREAD_INDEX_GOOD && !__IS_EXCH && !__UNSUB_LINK && !__NOT_SPOOFED && !__DOS_HAS_LIST_UNSUB && !__NAME_EQ_EMAIL && !__SUBJECT_ENCODED_QP && !__THREADED && !__HAS_THREAD_INDEX && !__HAS_X_REF && !__HAS_IN_REPLY_TO
 describe   TO_NO_BRKTS_MSFT         To: misformatted and supposed Microsoft tool
-#score      TO_NO_BRKTS_MSFT         0.20
+score      TO_NO_BRKTS_MSFT         3.50	# limit
 
 meta       __TO_NO_BRKTS_PCNT       __TO_NO_ARROWS_R && __FB_NUM_PERCNT
 meta       TO_NO_BRKTS_PCNT         __TO_NO_BRKTS_PCNT && !__SUBJECT_ENCODED_B64 && !__DOS_HAS_LIST_UNSUB && !__VIA_ML && !__ISO_2022_JP_DELIM && !__IMS_MSGID && !__THREAD_INDEX_GOOD && !__RCD_RDNS_MX_MESSY && !__UNSUB_LINK && !__LONGLINE && !URI_HEX && !__RP_MATCHES_RCVD && !__MAIL_LINK && !__BUGGED_IMG
