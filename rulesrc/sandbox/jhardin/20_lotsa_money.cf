@@ -203,7 +203,7 @@ meta     UN_NO_ML         __UN && !__VIA_ML && !__UNSUB_LINK && !__COMMENT_EXIST
 describe UN_NO_ML         United Nations not via mailing list
 tflags   UN_NO_ML         nopublish
 
-meta     COMPENSATION     __COMPENSATION && (__TO_NO_ARROWS_R || __FROM_RUNON) && !__DOS_HAS_LIST_UNSUB && !__HAS_X_LOOP && !__HAS_ERRORS_TO && !__UNSUB_LINK && !__OPERA_MID_NON_OP && !__FB_S_STOCK && !__COMMENT_EXISTS && !__NOT_SPOOFED
+meta     COMPENSATION     __COMPENSATION && !__DOS_HAS_LIST_UNSUB && !__HAS_X_LOOP && !__HAS_ERRORS_TO && !__UNSUB_LINK && !__OPERA_MID_NON_OP && !__FB_S_STOCK && !__COMMENT_EXISTS && !__NOT_SPOOFED && !__LOCAL_PP_NONPPURL && !__NOT_A_PERSON && !__DKIM_DEPENDABLE && !__SUBSCRIPTION_INFO && !__DKIM_EXISTS && !__HAS_SENDER && !__RP_MATCHES_RCVD
 describe COMPENSATION     "Compensation"
 score    COMPENSATION     1.50	# limit
  
