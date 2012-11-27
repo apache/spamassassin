@@ -221,7 +221,7 @@ sub _log {
 
   # it's faster to access this as the $_[1] alias, and not to perform
   # string mods until we're sure we actually want to log anything
-  if ($_[1] =~ /^([^:]+?):/) {
+  if ($_[1] =~ /^([a-z0-9_-]*):/i) {
     $facility = $1;
   } else {
     $facility = "generic";
@@ -236,9 +236,9 @@ sub _log {
   }
 
   my ($level, $message, @args) = @_;
-  $message =~ s/^([^:]+?):\s*//;
+  $message =~ s/^([a-z0-9_-]*):\s*//i;
 
-  if (@args && index($message,'%') >= 0) { $message = sprintf($message,@args) }
+  $message = sprintf($message,@args)  if @args;
   $message =~ s/\n+$//s;
   $message =~ s/^/${facility}: /mg;
 
