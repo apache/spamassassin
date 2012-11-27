@@ -589,7 +589,7 @@ sub dccifd_connect {
   if (defined $sockpath) {
     $sock = IO::Socket::UNIX->new(Type => SOCK_STREAM, Peer => $sockpath);
     if ($sock) {
-      dbg("%s connected to local socket %s", $tag, $sockpath);
+      dbg("$tag connected to local socket $sockpath");
       return $sock;
     }
     $self->{dccifd_available} = 0;
@@ -603,13 +603,13 @@ sub dccifd_connect {
 
   if ($conf->{dcc_dccifd_IPv6}) {
     # try IPv6 if we can with a host name or non-IPv4 address
-    dbg("%s connecting to inet6 socket [%s]:%s", $tag,$host,$port);
+    dbg("$tag connecting to inet6 socket [$host]:$port");
     $sock = IO::Socket::INET6->new(
 		  Proto => 'tcp', PeerAddr => $host, PeerPort => $port);
     # fall back to IPv4 if that failed
   }
   if (!$sock) {
-    dbg("%s connecting to inet4 socket [%s]:%s", $tag,$host,$port);
+    dbg("$tag connecting to inet4 socket [$host]:$port");
     $sock = IO::Socket::INET->new(
 		Proto => 'tcp', PeerAddr => $host, PeerPort => $port);
   }
@@ -868,7 +868,7 @@ sub ask_dcc {
       }
 
       defined $path  or die "no dcc_path found\n";
-      dbg("%s opening pipe to %s", $tag,
+      dbg("$tag opening pipe to " .
 	  join(' ', $path, "-C", "-x", "0", @opts, "<$tmpf"));
 
       $pid = Mail::SpamAssassin::Util::helper_app_pipe_open(*DCC,
@@ -919,10 +919,10 @@ sub ask_dcc {
 
   my ($raw_x_dcc, $cksums) = $self->parse_dcc_response(\@resp);
   if (!defined $raw_x_dcc || $raw_x_dcc !~ /^X-DCC/) {
-    info("$tag instead of X-DCC header, $pgm returned '%s'", $raw_x_dcc);
+    info("$tag instead of X-DCC header, $pgm returned '$raw_x_dcc'");
     return (undef, undef);
   }
-  dbg("%s %s responded with '%s'", $tag, $pgm, $raw_x_dcc);
+  dbg("$tag $pgm responded with '$raw_x_dcc'");
   return ($raw_x_dcc, $cksums);
 }
 
