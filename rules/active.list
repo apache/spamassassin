@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-coi-bulk axb-foo axb-fraud axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bpoliakoff darxus grenier jarif kpg-gah mas zmi; day 2: axb-coi-bulk axb-foo axb-fraud axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bpoliakoff darxus grenier jarif kpg-gah llanga mas mmiroslaw-spam zmi; day 3: axb-coi-bulk axb-foo axb-fraud axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bpoliakoff darxus grenier jarif kpg-gah mas zmi
+# with results from: day 1: axb-coi-bulk axb-foo axb-fraud axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bpoliakoff darxus grenier jarif kpg-gah mas zmi; day 2: axb-coi-bulk axb-foo axb-fraud axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bpoliakoff darxus grenier jarif kpg-gah llanga mas zmi; day 3: axb-coi-bulk axb-foo axb-fraud axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bpoliakoff darxus grenier jarif kpg-gah llanga mas mmiroslaw-spam zmi
 
 # good enough
 ACH_CANCELLED
@@ -53,6 +53,9 @@ ADVANCE_FEE_5_NEW_MONEY
 ALL_TRUSTED
 
 # good enough
+ANY_PILL_PRICE
+
+# good enough
 AXB_XMAILER_MIMEOLE_OL_024C2
 
 # good enough
@@ -84,9 +87,6 @@ AXB_XMAILER_MIMEOLE_OL_A6545
 
 # good enough
 AXB_XMAILER_MIMEOLE_OL_A7B9C
-
-# good enough
-AXB_XMAILER_MIMEOLE_OL_B9B11
 
 # good enough
 AXB_XMAILER_MIMEOLE_OL_C9F34
@@ -439,6 +439,9 @@ MONEY_ATM_CARD
 # good enough
 MONEY_FORM
 
+# good enough
+MONEY_FORM_SHORT
+
 # tflags publish
 MONEY_FRAUD_3
 
@@ -722,6 +725,9 @@ SHARE_50_50
 SHORT_TERM_PRICE
 
 # good enough
+SINGLE_HEADER_2K
+
+# good enough
 SPAMMY_XMAILER
 
 # tflags net
@@ -747,6 +753,9 @@ SPF_PASS
 
 # tflags net
 SPF_SOFTFAIL
+
+# good enough
+STOX_REPLY_TYPE
 
 # good enough
 STOX_REPLY_TYPE_WITHOUT_QUOTES
@@ -800,13 +809,7 @@ TVD_RCVD_IP
 TVD_RCVD_IP4
 
 # good enough
-ANY_PILL_PRICE
-
-# good enough
-MONEY_FORM_SHORT
-
-# good enough
-SINGLE_HEADER_2K
+TVD_ENHANCE
 
 # tflags userconf
 UNPARSEABLE_RELAY
