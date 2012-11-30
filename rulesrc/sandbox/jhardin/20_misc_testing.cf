@@ -84,8 +84,12 @@ describe       URI_NUMERIC_CCTLD     CCTLD URI with multiple numeric subdomains
 # From should have whitespace between the comment and the address
 # Better S/O, good enough for standalone rule
 header         __FROM_MISSPACED      From =~ /^\s*"[^"]*"</
+
+# legit mailers known to misspace from
+header         __MTLANDROID_MUA    X-Mailer =~ /\bMotorola android mail \d+\.\d/
+
 # meta with some stuff to reduce FPs
-meta           FROM_MISSPACED        __FROM_MISSPACED && !__RCD_RDNS_MTA_MESSY && !__CTYPE_MULTIPART_ALT && !__REPTO_QUOTE && !__MIME_QP && !__UNSUB_LINK && !__TO___LOWER && !__BUGGED_IMG && !__DOS_HAS_LIST_UNSUB && !__TO_EQ_FROM_DOM && !__MAIL_LINK
+meta           FROM_MISSPACED        __FROM_MISSPACED && !__RCD_RDNS_MTA_MESSY && !__CTYPE_MULTIPART_ALT && !__REPTO_QUOTE && !__MIME_QP && !__UNSUB_LINK && !__TO___LOWER && !__BUGGED_IMG && !__DOS_HAS_LIST_UNSUB && !__TO_EQ_FROM_DOM && !__MAIL_LINK && !__MTLANDROID_MUA
 describe       FROM_MISSPACED        From: missing whitespace
 score          FROM_MISSPACED        2.00
 
@@ -105,12 +109,12 @@ ifplugin Mail::SpamAssassin::Plugin::SPF
 endif
 
 meta           __FROM_MISSP_EH_MATCH __FROM_RUNON_UNCODED && __ENV_AND_HDR_FROM_MATCH
-meta           FROM_MISSP_EH_MATCH   __FROM_MISSP_EH_MATCH && !__RCD_RDNS_MTA_MESSY && !__UNSUB_LINK && !__COMMENT_EXISTS && !__TO___LOWER && !__MIME_QP && !__TO_EQ_FROM_DOM && !__BUGGED_IMG && !__DKIM_EXISTS && !__RCVD_ZIXMAIL
+meta           FROM_MISSP_EH_MATCH   __FROM_MISSP_EH_MATCH && !__RCD_RDNS_MTA_MESSY && !__UNSUB_LINK && !__COMMENT_EXISTS && !__TO___LOWER && !__MIME_QP && !__TO_EQ_FROM_DOM && !__BUGGED_IMG && !__DKIM_EXISTS && !__RCVD_ZIXMAIL && !__MTLANDROID_MUA
 describe       FROM_MISSP_EH_MATCH   From misspaced, matches envelope
 score          FROM_MISSP_EH_MATCH   2.00	# max
 
 meta           __FROM_MISSP_URI      __FROM_RUNON_UNCODED && __HAS_ANY_URI
-meta           FROM_MISSP_URI        __FROM_MISSP_URI && !__NOT_SPOOFED && !__RCD_RDNS_MTA_MESSY && !MISSING_MIMEOLE && !__REPTO_QUOTE && !__UNSUB_LINK && !__MSGID_OK_HEX && !__MAIL_LINK && !__MIME_QP && !__BUGGED_IMG && !MIME_BASE64_TEXT && !__CTYPE_MULTIPART_ALT
+meta           FROM_MISSP_URI        __FROM_MISSP_URI && !__NOT_SPOOFED && !__RCD_RDNS_MTA_MESSY && !MISSING_MIMEOLE && !__REPTO_QUOTE && !__UNSUB_LINK && !__MSGID_OK_HEX && !__MAIL_LINK && !__MIME_QP && !__BUGGED_IMG && !MIME_BASE64_TEXT && !__CTYPE_MULTIPART_ALT && !__MTLANDROID_MUA
 describe       FROM_MISSP_URI        From misspaced, has URI
 score          FROM_MISSP_URI        2.00	# max
 
@@ -125,7 +129,7 @@ describe       FROM_MISSP_TO_UNDISC  From misspaced, To undisclosed
 
 meta           __FROM_MISSP_DKIM     (__FROM_RUNON && __DKIM_DEPENDABLE)
 tflags         __FROM_MISSP_DKIM     net
-meta           FROM_MISSP_DKIM       __FROM_MISSP_DKIM && !__CTYPE_MULTIPART_ALT && !__MIME_QP && !__BUGGED_IMG && !__DOS_HAS_LIST_UNSUB && !__MIME_BASE64
+meta           FROM_MISSP_DKIM       __FROM_MISSP_DKIM && !__CTYPE_MULTIPART_ALT && !__MIME_QP && !__BUGGED_IMG && !__DOS_HAS_LIST_UNSUB && !__MIME_BASE64 && !__MTLANDROID_MUA
 describe       FROM_MISSP_DKIM       From misspaced, DKIM dependable
 
 meta           __FROM_MISSP_REPLYTO  __FROM_RUNON && __REPLYTO_EXISTS
@@ -139,7 +143,7 @@ describe       FROM_MISSP_REPLYTO    From misspaced, has Reply-To
 
 ifplugin Mail::SpamAssassin::Plugin::FreeMail
   meta         __FROM_MISSP_FREEMAIL __FROM_RUNON && (FREEMAIL_FROM || FREEMAIL_REPLYTO)
-  meta         FROM_MISSP_FREEMAIL   __FROM_MISSP_FREEMAIL && !__TO_EQ_FROM_DOM
+  meta         FROM_MISSP_FREEMAIL   __FROM_MISSP_FREEMAIL && !__TO_EQ_FROM_DOM && !__MTLANDROID_MUA
   describe     FROM_MISSP_FREEMAIL   From misspaced + freemail provider
   #score        FROM_MISSP_FREEMAIL   2.0
 endif
