@@ -45,10 +45,10 @@ score FILL_THIS_FORM           0.001
 # metas using Advance Fee component rules
 # Commented out if GA is scoring reasonably
 #score FORM_FRAUD_3             0.50
-score FORM_FRAUD_5             0.50
+#score FORM_FRAUD_5             0.50
 #score MONEY_FRAUD_3            1.00
 #score MONEY_FRAUD_5            0.50
-score MONEY_FRAUD_8            0.50
+#score MONEY_FRAUD_8            0.50
 
 # jhardin
 # misc rules
@@ -56,6 +56,11 @@ score MONEY_FRAUD_8            0.50
 #score FROM_MISSP_MSFT          0.50
 #score TO_NO_BRKTS_DYNIP        0.50
 #score LOTTO_AGENT              0.50
+
+# jhardin
+# 1.000 S/O, hits only <= 6 points, but GA is not publishing it!
+# perhaps because very few examples in spam corpus
+score GOOGLE_DOCS_PHISH        3.00
 
 # hege
 # FPs reported [bug 6417], GA assigning 3+ points
