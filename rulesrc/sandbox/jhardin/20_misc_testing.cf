@@ -980,11 +980,11 @@ body        __WEBMAIL_ACCT       /\byour web ?mail account/i
 body        __MAILBOX_FULL       /\b(?:you(?:r (?:mailbox|(?:e-?|web ?)mail))? (?:is (?:almost )?full|(?:quota )?ha(?:s|ve) (?:reached|exceeded|passed) (?:the|your|it'?s?) (?:size|storage|set|(?:e-?|web ?)mail|quota|folder|mail ?box) (?:limit|quota))|over your mailbox (?:size )?(?:limit|quota))\b/i
 body        __CLEAN_MAILBOX      /\b(?:(?:e-?mail|mailbox|violation:|(?-i:CLICK)) (?:quota size|clean(?:-?up))|clean ?up click ?here)\b/i
 body        __VALIDATE_MAILBOX   /\b(?:re-?)?validate your mailbox\b/i
-body        __UPGR_MAILBOX       /\bup(?:g[ra]+d(?:e|ing)|date) (?:o[nf] )?(?:your )?(?:mailbox|(?:web ?|e-?)mail)\b/i
+body        __UPGR_MAILBOX       /\bup(?:g[ra]+d(?:e|ing)|date) (?:[hw]as\s(?:[a-z]+\s){1,5})?(?:o[nf] )?(?:your )?(?:mailbox|(?:web ?|e-?)mail)\b/i
 body        __SYSADMIN           /\b(?:help?[- ]?desk|sys(?:tem )?admin(?:istrator)|local[- ]host|support team|message from administrator)\b/i
 body        __ATTN_MAIL_USER     /\batt(?:entio)?n (?:web|e-?)?mail user[:;]/i
 body        __MAIL_ACCT_ACCESS1  /\byour (?:web|e-?)?mail (?:account|log-?in) (?:has )?been accessed\b/i
-body        __MAIL_ACCT_ACCESS2  /\blo+se ac+es+ to your (?:web|e-?)?mail (?:account|log-?in|box)\b/i
+body        __MAIL_ACCT_ACCESS2  /\blo+se ac+es+ to your (?:web|e-?)?mail (?:account|log-?in|box|address)\b/i
 
 meta        __EMAIL_PHISH        (__WEBMAIL_ACCT + __MAILBOX_FULL + __CLEAN_MAILBOX + __VALIDATE_MAILBOX + __UPGR_MAILBOX + __SYSADMIN + __ATTN_MAIL_USER + __MAIL_ACCT_ACCESS1 + __MAIL_ACCT_ACCESS2 > 1)
 
