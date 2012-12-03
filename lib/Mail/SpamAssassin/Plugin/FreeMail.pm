@@ -425,7 +425,7 @@ sub check_freemail_header {
         }
     }
 
-    my $email = lc($pms->get(index($header,':') ? $header : $header.":addr"));
+    my $email = lc($pms->get(index($header,':') >= 0 ? $header : $header.":addr"));
 
     if ($email eq '') {
         dbg("header $header not found from mail");
