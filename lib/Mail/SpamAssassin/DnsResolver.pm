@@ -723,15 +723,17 @@ sub poll_responses {
     last  if $nfound == 0;
 
     my $packet = $self->{res}->bgread($self->{sock});
-    my $err = $self->{res}->errorstring;
 
-    if (defined $packet &&
-        defined $packet->header &&
-        defined $packet->question &&
-        defined $packet->answer)
-    {
+    if (!$packet) {
+      dbg("dns: no packet! err: %s", $self->{res}->errorstring);
+    } elsif (!$packet->header) {
+      dbg("dns: dns response is missing a header section");
+    } elsif (!$packet->answer) {
+      dbg("dns: dns response is missing an answer section");
+    } elsif (!$packet->question) {
+      dbg("dns: dns response is missing a question section");
+    } else {
       my $id = $self->_packet_id($packet);
-
       my $cb = delete $self->{id_to_callback}->{$id};
       if (!$cb) {
         info("dns: no callback for id: %s, ignored; packet: %s",
@@ -740,10 +742,6 @@ sub poll_responses {
         $cb->($packet, $id, $now);
         $cnt++;
       }
-    }
-    else {
-      dbg("dns: no packet! err=%s packet=%s",
-          $err,  $packet ? $packet->string : "undef" );
     }
   }
 

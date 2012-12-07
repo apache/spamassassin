@@ -187,8 +187,8 @@ sub dnsbl_hit {
   } elsif ($answer->type eq 'TXT') {
     local $1;
     $log = $answer->rdatastr;
-    $log =~ s/^"(.*)"$/$1/;
-    $log =~ s/(?<![<([])(https?:\/\/\S+)/<$1>/gi;
+    $log =~ s/^"(.*)"\z/$1/s;
+    $log =~ s{ (?<! [<(\[] ) (https? : // \S+)}{<$1>}xgi;
   } else {  # assuming $answer->type eq 'A'
     local($1,$2,$3,$4,$5);
     if ($question->string =~ m/^((?:[0-9a-fA-F]\.){32})(\S+\w)/) {
@@ -269,10 +269,11 @@ sub process_dnsbl_result {
     next if !defined $answer;
     # track all responses
     $self->dnsbl_uri($question, $answer);
+    my $answ_type = $answer->type;
     # TODO: there are some CNAME returns that might be useful
-    next if ($answer->type ne 'A' && $answer->type ne 'TXT');
+    next if ($answ_type ne 'A' && $answ_type ne 'TXT');
     # skip any A record that isn't on 127/8
-    next if ($answer->type eq 'A' && $answer->rdatastr !~ /^127\./);
+    next if ($answ_type eq 'A' && $answer->rdatastr !~ /^127\./);
     for my $rule (@{$rules}) {
       $self->dnsbl_hit($rule, $question, $answer);
     }
