@@ -1248,8 +1248,11 @@ sub do_dns_query {
       next if !$rr;  # no answer records, only rcode
       next if $rr->type ne $rr_type;
       my $text = $rr->rdatastr;
-      local($1);
-      push(@result,$1) if $text =~ /^"(.*)"$/;
+      if (defined $text && $text ne '') {
+        local($1);
+        $text =~ s/^"(.*)"\z/$1/s;
+        push(@result,$text);
+      }
     }
     printf("DNS %s query: %s -> %s\n", $rr_type, $query, join(", ",@result))
       if $opt{'verbose'} && $opt{'verbose'} > 1;

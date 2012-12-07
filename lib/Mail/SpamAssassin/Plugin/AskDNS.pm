@@ -108,12 +108,15 @@ record type. An empty DNS answer section does not match ANY.
 The rr_type parameter not only provides a filter for RR types found in
 the DNS answer, but also determines the DNS query type. If only a single
 RR type is specified in the parameter (e.g. TXT), than this is also the RR
-type of a query. When more than one RR type is specified (e.g. A,AAAA,TXT)
+type of a query. When more than one RR type is specified (e.g. A, AAAA, TXT)
 or if ANY is specified, then the DNS query type will be ANY and the rr_type
 parameter will only act as a filter on a result.
 
-Currently allowed RR types in the rr_type parameter are: ANY, A, AAAA, MX,
-TXT, PTR, NS, SOA, CNAME, HINFO, MINFO, WKS, SRV, SPF.
+Currently recognized RR types in the rr_type parameter are: ANY, A, AAAA,
+MX, TXT, PTR, NAPTR, NS, SOA, CERT, CNAME, DNAME, DHCID, HINFO, MINFO,
+RP, HIP, IPSECKEY, KX, LOC, SRV, SSHFP, SPF.
+
+http://www.iana.org/assignments/dns-parameters/dns-parameters.xml
 
 The last optional parameter of a rule is a filtering expression, a.k.a. a
 subrule. Its function is much like the subrule in URIDNSBL plugin rules,
@@ -192,7 +195,7 @@ use Mail::SpamAssassin::Logger;
 use vars qw(@ISA %rcode_value);
 @ISA = qw(Mail::SpamAssassin::Plugin);
 
-%rcode_value = (  # http://www.iana.org/assignments/dns-parameters
+%rcode_value = (  # http://www.iana.org/assignments/dns-parameters, RFC 6195
   NOERROR => 0,  FORMERR => 1, SERVFAIL => 2, NXDOMAIN => 3, NOTIMP => 4,
   REFUSED => 5,  YXDOMAIN => 6, YXRRSET => 7, NXRRSET => 8, NOTAUTH => 9,
   NOTZONE => 10, BADVERS => 16, BADSIG => 16, BADKEY => 17, BADTIME => 18,
@@ -244,18 +247,19 @@ sub parse_and_canonicalize_subtest {
   my $result;
 
   local($1,$2,$3);
-  # modifiers /a, /d, /l, /u in suffix form were added with perl 5.13.10
-  if (     $subtest =~ m{^ / (.+) / ([msixoadlu]*) \z}xs) {
+  # modifiers /a, /d, /l, /u in suffix form were added with perl 5.13.10 (5.14)
+  # currently known modifiers are [msixoadlu], but let's not be too picky here
+  if (     $subtest =~ m{^       /  (.+) /  ([a-z]*) \z}xs) {
     $result = $2 ne '' ? qr{(?$2)$1} : qr{$1};
-  } elsif ($subtest =~ m{^ m \s* \( (.+) \) ([msixoadlu]*) \z}xs) {
+  } elsif ($subtest =~ m{^ m \s* \( (.+) \) ([a-z]*) \z}xs) {
     $result = $2 ne '' ? qr{(?$2)$1} : qr{$1};
-  } elsif ($subtest =~ m{^ m \s* \[ (.+) \] ([msixoadlu]*) \z}xs) {
+  } elsif ($subtest =~ m{^ m \s* \[ (.+) \] ([a-z]*) \z}xs) {
     $result = $2 ne '' ? qr{(?$2)$1} : qr{$1};
-  } elsif ($subtest =~ m{^ m \s* \{ (.+) \} ([msixoadlu]*) \z}xs) {
+  } elsif ($subtest =~ m{^ m \s* \{ (.+) \} ([a-z]*) \z}xs) {
     $result = $2 ne '' ? qr{(?$2)$1} : qr{$1};
-  } elsif ($subtest =~ m{^ m \s*  < (.+)  > ([msixoadlu]*) \z}xs) {
+  } elsif ($subtest =~ m{^ m \s*  < (.+)  > ([a-z]*) \z}xs) {
     $result = $2 ne '' ? qr{(?$2)$1} : qr{$1};
-  } elsif ($subtest =~ m{^ m \s* (\S) (.+) \1 ([msixoadlu]*) \z}xs) {
+  } elsif ($subtest =~ m{^ m \s* (\S) (.+) \1 ([a-z]*) \z}xs) {
     $result = $2 ne '' ? qr{(?$2)$1} : qr{$1};
   } elsif ($subtest =~ m{^ (["']) (.*) \1 \z}xs) {  # quoted string
     $result = $2;
@@ -312,8 +316,10 @@ sub set_config {
         $query_type = 'A' if !defined $query_type;
         $query_type = uc $query_type;
         my @answer_types = split(/,/, $query_type);
-        if (grep(!/^(?:ANY|A|AAAA|MX|TXT|PTR|NS|SOA|CNAME|
-                       HINFO|MINFO|WKS|SRV|SPF)\z/x, @answer_types)) {
+        # http://www.iana.org/assignments/dns-parameters/dns-parameters.xml
+        if (grep(!/^(?:ANY|A|AAAA|MX|TXT|PTR|NAPTR|NS|SOA|CERT|CNAME|DNAME|
+                       DHCID|HINFO|MINFO|RP|HIP|IPSECKEY|KX|LOC|SRV|
+                       SSHFP|SPF)\z/x, @answer_types)) {
           return $Mail::SpamAssassin::Conf::INVALID_VALUE;
         }
         $query_type = 'ANY' if @answer_types > 1 || $answer_types[0] eq 'ANY';
