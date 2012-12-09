@@ -59,8 +59,14 @@ body     __LOTTO_WIN_01     /\bwin+ing\s(?:prize|number|notification|draw|check|
 body     __YOU_WON_01    /\byou(?:r|'re|'ve|'ll|\shave|\sdid)?\s(?:e-?mail\s)?(?:\w+\s){0,2}(?:a\s)?w[io]n+(?:er|ing)?(?!'t)\b/i
 body     __YOU_WON_02    /\bw[io]n\s(?:(?:for|by)\s)?your?\b/i
 body     __YOU_WON_03    /\b(?:your?|win+ing|win+ers?|beneficiaries|participants?|individuals?|address(?:es)?|accounts?|emails?)(?:\s[-a-z\s]{4,40})?\s(?:w(?:ere|as)|ha(?:ve|s) be(?:en)?)\s(?:automatically\s)?(?:(?:randomly|raffly)\s(?:selected|cho+sen|cho+sing|picked)|(?:selected|cho+sen|cho+sing|picked)\s(?:[a-z\s]{2,40}?\srandom(?:ly)?|online|lottery|computer\s(?:ballot|wahlgang)))/i 
+body     __YOU_WON_04    /\bque\s?vous (?:[\xc3][\xaa]|=C3=AA|\xea|e)tes\s?gagnant\b/i
 body     __HAS_WON_01    /\bque ha ganado\b/i
-meta     __YOU_WON       __YOU_WON_01 || __YOU_WON_02 || __YOU_WON_03 || __HAS_WON_01
+meta     __YOU_WON       __YOU_WON_01 || __YOU_WON_02 || __YOU_WON_03 || __YOU_WON_04 || __HAS_WON_01
+
+ifplugin Mail::SpamAssassin::Plugin::MIMEHeader
+  meta       WON_MONEY_ATTACH   __YOU_WON && LOTS_OF_MONEY && (__PDF_ATTACH || __DOC_ATTACH)
+  describe   WON_MONEY_ATTACH   You won lots of money! See attachment.
+endif
 
 body     LOTTO_AGENT      /\b(?:(?:(?:the|y?our)(?:\s\w{1,20})?|contact|accredited|listed)\sclaim(?:s|ing)?(?:\sprocessing)?|fiducia\w+|reimbursement|(?:prize|international|intl|foreign|win+ing)(?:[\s,.]+(?:rem+it+ance|settlement|payment|payout|award|transfer))+|payment|payout|immunity|(?<!memory\s)grants?)\s?(?:agent|manager|officer|secretary|director|mgr\b)/i
 describe LOTTO_AGENT      Claims Agent
