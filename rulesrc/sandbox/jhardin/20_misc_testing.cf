@@ -261,6 +261,11 @@ ifplugin Mail::SpamAssassin::Plugin::MIMEHeader
   mimeheader   __PDF_ATTACH_FN1   Content-Type =~ /="[^"]+\.pdf"/i
   mimeheader   __PDF_ATTACH_FN2   Content-Disposition =~ /="[^"]+\.pdf"/i
   meta         __PDF_ATTACH       (__PDF_ATTACH_MT || __PDF_ATTACH_FN1 || __PDF_ATTACH_FN2)
+
+  # observed in 419 spam
+  mimeheader   CDISP_SZ_MANY      Content-Disposition =~ /\bsize\s?=\s?\d.*\bsize\s?=\s?\d/
+  describe     CDISP_SZ_MANY      Suspicious MIME header
+  score        CDISP_SZ_MANY      2.0  # limit
 endif
 
 ifplugin Mail::SpamAssassin::Plugin::FreeMail
@@ -981,12 +986,16 @@ body        __MAILBOX_FULL       /\b(?:you(?:r (?:mailbox|(?:e-?|web ?)mail))? (
 body        __CLEAN_MAILBOX      /\b(?:(?:e-?mail|mailbox|violation:|(?-i:CLICK)) (?:quota size|clean(?:-?up))|clean ?up click ?here)\b/i
 body        __VALIDATE_MAILBOX   /\b(?:re-?)?validate your mailbox\b/i
 body        __UPGR_MAILBOX       /\bup(?:g[ra]+d(?:e|ing)|date) (?:[hw]as\s(?:[a-z]+\s){1,5})?(?:o[nf] )?(?:your )?(?:mailbox|(?:web ?|e-?)mail)\b/i
-body        __SYSADMIN           /\b(?:help?[- ]?desk|sys(?:tem )?admin(?:istrator)|local[- ]host|support team|message from administrator)\b/i
+body        __LOCK_MAILBOX       /\b(?:(?:deactivate|lock) (?:your )?(?:mailbox|(?:web ?|e-?)mail)|ditt konto vara "?deaktiverad"?|begr(?:=E4|\xe4|[\xc3][\xa4])nsad tillg(?:=E5|\xe5|[\xc3][\xa5])ng till din brevl(?:=E5|\xe5|[\xc3][\xa5])da)\b/i
+body        __SYSADMIN           /\b(?:help?[- ]?desk|(?:(?:web)?mail ?|sys(?:tem )?)admin(?:istrator)|local[- ]host|support team|message from administrator)\b/i
 body        __ATTN_MAIL_USER     /\batt(?:entio)?n (?:web|e-?)?mail user[:;]/i
 body        __MAIL_ACCT_ACCESS1  /\byour (?:web|e-?)?mail (?:account|log-?in) (?:has )?been accessed\b/i
 body        __MAIL_ACCT_ACCESS2  /\blo+se ac+es+ to your (?:web|e-?)?mail (?:account|log-?in|box|address)\b/i
 
-meta        __EMAIL_PHISH        (__WEBMAIL_ACCT + __MAILBOX_FULL + __CLEAN_MAILBOX + __VALIDATE_MAILBOX + __UPGR_MAILBOX + __SYSADMIN + __ATTN_MAIL_USER + __MAIL_ACCT_ACCESS1 + __MAIL_ACCT_ACCESS2 > 1)
+body        __MAILBOX_FULL_SE    /(?:\b=F6|\xf6|[\xc3][\xb6])verskridit gr(?:=E4|\xe4|[\xc3][\xa4])nsen f(?:=F6|\xf6|[\xc3][\xb6])r din postl(?:=E5|\xe5|[\xc3][\xa5])da\b/i
+body        __VALIDATE_MBOX_SE   /(?:\b=E5|\xe5|[\xc3][\xa5])terst(?:=E4|\xe4|[\xc3][\xa4])lla ditt konto\b/i
+
+meta        __EMAIL_PHISH        (__WEBMAIL_ACCT + __MAILBOX_FULL + __MAILBOX_FULL_SE + __CLEAN_MAILBOX + __VALIDATE_MAILBOX + __VALIDATE_MBOX_SE + __UPGR_MAILBOX + __LOCK_MAILBOX + __SYSADMIN + __ATTN_MAIL_USER + __MAIL_ACCT_ACCESS1 + __MAIL_ACCT_ACCESS2 + (__TVD_PH_SUBJ_META || __TVD_PH_BODY_META || __TVD_PH_BODY_ACCOUNTS_PRE || __TVD_PH_BODY_ACCOUNTS_POST) > 1)
 
 # Google Docs observed on LOTS of phishes 2012
 meta        __GOOGLE_DOCS_PHISH_1  __URI_GOOGLE_DOC && (__TVD_PH_SUBJ_META || __TVD_PH_BODY_META || __TVD_PH_BODY_ACCOUNTS_PRE || __TVD_PH_BODY_ACCOUNTS_POST)
