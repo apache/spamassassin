@@ -115,6 +115,7 @@ header		__TAB_IN_FROM		From:raw =~ /^\t/s
 describe	__TAB_IN_FROM		From starts with a tab
 meta		TAB_IN_FROM		__TAB_IN_FROM && !__ML_TURNS_SP_TO_TAB 
 describe	TAB_IN_FROM		From starts with a tab
+score		TAB_IN_FROM		0.5
 
 
 ####
