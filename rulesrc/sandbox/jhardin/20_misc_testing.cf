@@ -1025,4 +1025,8 @@ meta        HTML_FONT_TINY       __HTML_FONT_TINY_01 && __TAG_EXISTS_BODY
 describe    HTML_FONT_TINY       Font too small to read
 score       HTML_FONT_TINY       1.00	# limit
 
+body        __BODY_TEXT_LINE     /^\s*\S/
+tflags      __BODY_TEXT_LINE     multiple
+meta        __EMPTY_BODY         __BODY_TEXT_LINE < 2
+
 
