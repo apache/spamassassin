@@ -743,15 +743,15 @@ sub poll_responses {
           # NOERROR, may or may not have answer records
           dbg("dns: dns response %s is OK, %d answer records",
               $packet_id, $header->ancount);
-          my $id = $self->_packet_id($packet);
-          my $cb = delete $self->{id_to_callback}->{$id};
-          if (!$cb) {
-            info("dns: no callback for id %s, ignored; packet: %s",
-                 $id,  $packet ? $packet->string : "undef" );
-          } else {
-            $cb->($packet, $id, $now);
-            $cnt++;
-          }
+        }
+        my $id = $self->_packet_id($packet);
+        my $cb = delete $self->{id_to_callback}->{$id};
+        if (!$cb) {
+          info("dns: no callback for id %s, ignored; packet: %s",
+               $id,  $packet ? $packet->string : "undef" );
+        } else {
+          $cb->($packet, $id, $now);
+          $cnt++;
         }
       }
     }
