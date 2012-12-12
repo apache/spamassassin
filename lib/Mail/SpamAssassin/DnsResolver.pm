@@ -726,21 +726,33 @@ sub poll_responses {
 
     if (!$packet) {
       dbg("dns: no packet! err: %s", $self->{res}->errorstring);
-    } elsif (!$packet->header) {
-      dbg("dns: dns response is missing a header section");
-    } elsif (!$packet->answer) {
-      dbg("dns: dns response is missing an answer section");
-    } elsif (!$packet->question) {
-      dbg("dns: dns response is missing a question section");
     } else {
-      my $id = $self->_packet_id($packet);
-      my $cb = delete $self->{id_to_callback}->{$id};
-      if (!$cb) {
-        info("dns: no callback for id: %s, ignored; packet: %s",
-             $id,  $packet ? $packet->string : "undef" );
+      my $header = $packet->header;
+      if (!$header) {
+        info("dns: dns response is missing a header section");
       } else {
-        $cb->($packet, $id, $now);
-        $cnt++;
+        my $rcode = $header->rcode;
+        my $packet_id = $header->id;
+        if ($rcode ne 'NOERROR') {
+          # some failure, e.g. NXDOMAIN, SERVFAIL, FORMERR, REFUSED, ...
+          dbg("dns: dns response %s, %s, %s", $packet_id, $rcode,
+              join(', ', map { my $qn = $_->qname;
+                $qn =~ s/\\([0-9]{3}|.)/length($1)==1 ? $1 : chr($1)/gse;
+                $qn.'/'.$_->qtype .'/'.$_->qclass} $packet->question));
+        } else {
+          # NOERROR, may or may not have answer records
+          dbg("dns: dns response %s is OK, %d answer records",
+              $packet_id, $header->ancount);
+          my $id = $self->_packet_id($packet);
+          my $cb = delete $self->{id_to_callback}->{$id};
+          if (!$cb) {
+            info("dns: no callback for id %s, ignored; packet: %s",
+                 $id,  $packet ? $packet->string : "undef" );
+          } else {
+            $cb->($packet, $id, $now);
+            $cnt++;
+          }
+        }
       }
     }
   }
