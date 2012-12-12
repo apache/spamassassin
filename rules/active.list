@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-coi-bulk axb-foo axb-fraud axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bpoliakoff darxus grenier jarif kpg-gah mas zmi; day 2: axb-coi-bulk axb-foo axb-fraud axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bpoliakoff darxus grenier jarif kpg-gah llanga mas zmi; day 3: axb-coi-bulk axb-foo axb-fraud axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bpoliakoff darxus grenier jarif kpg-gah llanga zmi
+# with results from: day 1: axb-coi-bulk axb-foo axb-fraud axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-kmcgrail bb-zmi bpoliakoff darxus grenier jarif kpg-gah mas zmi; day 2: axb-coi-bulk axb-foo axb-fraud axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bpoliakoff darxus grenier jarif kpg-gah llanga mas zmi; day 3: axb-coi-bulk axb-foo axb-fraud axb-generic axb-ham-misc axb-sa-users bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bpoliakoff darxus jarif kpg-gah llanga mas zmi
 
 # good enough
 ACH_CANCELLED
@@ -71,7 +71,7 @@ AXB_XMAILER_MIMEOLE_OL_3AC1D
 AXB_XMAILER_MIMEOLE_OL_4379D
 
 # good enough
-AXB_XMAILER_MIMEOLE_OL_616F8
+AXB_XMAILER_MIMEOLE_OL_754BB
 
 # good enough
 AXB_XMAILER_MIMEOLE_OL_7EB15
@@ -93,6 +93,9 @@ AXB_XMAILER_MIMEOLE_OL_A6545
 
 # good enough
 AXB_XMAILER_MIMEOLE_OL_A7B9C
+
+# good enough
+AXB_XMAILER_MIMEOLE_OL_B9B11
 
 # good enough
 AXB_XMAILER_MIMEOLE_OL_C9F34
@@ -141,6 +144,9 @@ BAYES_95
 
 # tflags learn
 BAYES_99
+
+# good enough
+BIGNUM_EMAILS
 
 # tflags userconf
 CHARSET_FARAWAY
@@ -215,9 +221,6 @@ DOS_RCVD_IP_TWICE_C
 ENV_AND_HDR_SPF_MATCH
 
 # good enough
-FAKE_REPLY_B
-
-# good enough
 FBI_MONEY
 
 # good enough
@@ -255,6 +258,9 @@ FM_LOTTO_MONEY
 
 # good enough
 FM_LOTTO_YOU_WON
+
+# good enough
+FM_SCHOOLING
 
 # tflags publish
 FORM_FRAUD_3
@@ -314,6 +320,9 @@ FROM_MISSP_USER
 FSL_CTYPE_WIN1251
 
 # good enough
+FSL_FAKE_HOTMAIL_RVCD
+
+# good enough
 FSL_HELO_DEVICE
 
 # good enough
@@ -324,6 +333,12 @@ FSL_MISSP_REPLYTO
 
 # good enough
 FSL_NEW_HELO_USER
+
+# good enough
+FS_REPLICA
+
+# good enough
+FS_REPLICAWATCH
 
 # good enough
 FS_WILL_HELP
@@ -368,10 +383,7 @@ HDRS_LCASE_1K
 HEAD_LONG
 
 # good enough
-HK_LOTTO
-
-# good enough
-HK_NAME_FM_MR_MRS
+HK_NAME_DRUGS
 
 # good enough
 HK_NAME_FROM
@@ -432,6 +444,9 @@ LONG_TERM_PRICE
 
 # tflags publish
 LOTS_OF_MONEY
+
+# good enough
+LOTTERY_1
 
 # good enough
 LOTTERY_PH_004470
@@ -821,13 +836,34 @@ TVD_RCVD_IP
 TVD_RCVD_IP4
 
 # good enough
-AXB_XMAILER_MIMEOLE_OL_754BB
+ANY_PILL_PRICE
 
 # good enough
-AXB_XMAILER_MIMEOLE_OL_B9B11
+AXB_XMAILER_MIMEOLE_OL_5A17A
 
 # good enough
-BIGNUM_EMAILS
+AXB_XMAILER_MIMEOLE_OL_F5C60
+
+# good enough
+FROM_MISSP_DYNIP
+
+# good enough
+HK_NAME_FM_FROM
+
+# good enough
+HK_SCAM_N1
+
+# good enough
+LOTTO_AGENT_RPLY
+
+# good enough
+SINGLE_HEADER_3K
+
+# good enough
+XM_PHPMAILER_FORGED
+
+# good enough
+YOUR_PERMISSION
 
 # tflags userconf
 UNPARSEABLE_RELAY
