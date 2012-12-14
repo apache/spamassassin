@@ -992,7 +992,7 @@ body        __ATTN_MAIL_USER     /\batt(?:entio)?n (?:web|e-?)?mail user[:;]/i
 body        __MAIL_ACCT_ACCESS1  /\byour (?:web|e-?)?mail (?:account|log-?in) (?:has )?been accessed\b/i
 body        __MAIL_ACCT_ACCESS2  /\blo+se ac+es+ to your (?:web|e-?)?mail (?:account|log-?in|box|address)\b/i
 
-body        __MAILBOX_FULL_SE    /(?:\b=F6|\xf6|[\xc3][\xb6])verskridit gr(?:=E4|\xe4|[\xc3][\xa4])nsen f(?:=F6|\xf6|[\xc3][\xb6])r din postl(?:=E5|\xe5|[\xc3][\xa5])da\b/i
+body        __MAILBOX_FULL_SE    /(?:\b=F6|[\xf6]|[\xc3][\xb6])verskridit gr(?:=E4|[\xe4]|[\xc3][\xa4])nsen f(?:=F6|[\xf6]|[\xc3][\xb6])r din postl(?:=E5|[\xe5]|[\xc3][\xa5])da\b/i
 body        __VALIDATE_MBOX_SE   /(?:\b=E5|\xe5|[\xc3][\xa5])terst(?:=E4|\xe4|[\xc3][\xa4])lla ditt konto\b/i
 
 meta        __EMAIL_PHISH        (__WEBMAIL_ACCT + __MAILBOX_FULL + __MAILBOX_FULL_SE + __CLEAN_MAILBOX + __VALIDATE_MAILBOX + __VALIDATE_MBOX_SE + __UPGR_MAILBOX + __LOCK_MAILBOX + __SYSADMIN + __ATTN_MAIL_USER + __MAIL_ACCT_ACCESS1 + __MAIL_ACCT_ACCESS2 + (__TVD_PH_SUBJ_META || __TVD_PH_BODY_META || __TVD_PH_BODY_ACCOUNTS_PRE || __TVD_PH_BODY_ACCOUNTS_POST) > 1)
