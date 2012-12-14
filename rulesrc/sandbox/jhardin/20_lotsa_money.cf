@@ -59,7 +59,7 @@ body     __LOTTO_WIN_01     /\bwin+ing\s(?:prize|number|notification|draw|check|
 body     __YOU_WON_01    /\byou(?:r|'re|'ve|'ll|\shave|\sdid)?\s(?:e-?mail\s)?(?:\w+\s){0,2}(?:a\s)?w[io]n+(?:er|ing)?(?!'t)\b/i
 body     __YOU_WON_02    /\bw[io]n\s(?:(?:for|by)\s)?your?\b/i
 body     __YOU_WON_03    /\b(?:your?|win+ing|win+ers?|beneficiaries|participants?|individuals?|address(?:es)?|accounts?|emails?)(?:\s[-a-z\s]{4,40})?\s(?:w(?:ere|as)|ha(?:ve|s) be(?:en)?)\s(?:automatically\s)?(?:(?:randomly|raffly)\s(?:selected|cho+sen|cho+sing|picked)|(?:selected|cho+sen|cho+sing|picked)\s(?:[a-z\s]{2,40}?\srandom(?:ly)?|online|lottery|computer\s(?:ballot|wahlgang)))/i 
-body     __YOU_WON_04    /\bqu[ei]\s?(?:vous (?:[\xc3][\xaa]|=C3=AA|\xea|e)tes\s?gagnant|en\scons(?:e|=E9|\xe9|[\xc3][\xa9])quence\sgagne)\b/i
+body     __YOU_WON_04    /\bqu[ei]\s?(?:vous (?:[\xc3][\xaa]|=C3=AA|[\xea]|e)tes\s?gagnant|en\scons(?:e|=E9|[\xe9]|[\xc3][\xa9])quence\sgagne)\b/i
 body     __HAS_WON_01    /\bque ha ganado\b/i
 meta     __YOU_WON       __YOU_WON_01 || __YOU_WON_02 || __YOU_WON_03 || __YOU_WON_04 || __HAS_WON_01
 
@@ -144,7 +144,7 @@ ifplugin Mail::SpamAssassin::Plugin::ReplaceTags
   replace_tag  PERCENT      \b(?:\d\d|ten|[a-z]+teen|(?:twen|thir|fou?r|fif)ty(?:-?[a-z]+)?)\s?(?:%|percent)
 
   body     __PCT_FOR_YOU_1  /<PERCENT>[\s)]{0,3}(?:of\s[\w\s]{0,35}?)?(?:for|to|as)\syour?/i
-  body     __PCT_FOR_YOU_2  /\b(?:(?:give|offer)\syou|vous\s(?:aurez\sdroit\s(?:=E0|[\xe0])|donnerai|all(?:e|=E9|\xe9|[\xc3][\xa9])\srecevoir\sautour\sde)|ihnen)\s<PERCENT>/i
+  body     __PCT_FOR_YOU_2  /\b(?:(?:give|offer)\syou|vous\s(?:aurez\sdroit\s(?:=E0|[\xe0])|donnerai|all(?:e|=E9|[\xe9]|[\xc3][\xa9])\srecevoir\sautour\sde)|ihnen)\s<PERCENT>/i
   body     __PCT_FOR_YOU_3  /\byour?\s(?!can)(?:(?!you)\w{1,15}\s){0,10}(?:(?:share|entiti?le(?:d|ment)?|percentage|fee|assist(?:ance)?|comp[ea]nsat(?:ed?|tion)|reward(?:ed)?|renumerat(?:e|tion)|com+is+ion|paid|deduct|account|tage|(?:will|shall|would|(?:are|stand|going)\sto)\s(?:be\s)?(?:tak(?:e|ing)|earn|get(?:ting)?|remit|subtract|with+old)|(?:deduct|taken?|subtract(?:ed)?)\syour|keep(?:ing)?|receiv(?:e|ing)|retain(?:ing)?|have|half|giv(?:en|ing)|paid|(?:give|pay|offer)\s(?:me|you|him)|bank\saccount|to\s(?:take|use)|(?:time|country)\sand|ratio\sof)(?:\s(?!you)\w{1,15}){0,10})\s(?<!by\s)(?<!up\sto\s)<PERCENT>/i
   body     __PCT_OF_PMTS    /<PERCENT>[\s)]+(?:of\s[\w\s]{0,35}?)?(?:of|du|de)\s(?:(?:the|la)\s)?(?:total\s)?(?:payments?|rem+it+ances?|capital|chec(?:k|que)s?|mon(?:ey|ies)|suma?)/i
 
@@ -172,9 +172,9 @@ body     __NOT_DEAD_YET   /\b(?:will\sinherit|que\sherede)\b/i
 body     __AM_DYING       /\b(?:am\s(?:\S+\s)?dying|terminally\sill|cancer|en\sphase\sterminale|(?:become|is|devenu|maladie)\sincurable|que\sje\smeurs)\b/i
 body     __I_WILL_YOU     /\bwill(?:ed)?\s(?:[a-z\s]{0,20}(?:fortune|money|\$\d+[a-z]{0,9})\s)?to\syou\b/i
 body     __NEXT_OF_KIN    /\bnext[-\s]of[-\s]kin\b/i
-body     __EX_CUSTOMER    /\b(?:(?:dead|deceased|late|verstorbenen|death\sof\sthe)\s(?:[ck]lient|customer|ac+ount|invest[eo]r|beneficiary|depositor|mr\.|kunde|engr?\.?)|titulaire\sdu\scompte\sest\sd(?:e|=E9|\xe9|[\xc3][\xa9])c(?:e|=E9|\xe9|[\xc3][\xa9])d(?:e|=E9|\xe9|[\xc3][\xa9])|invest[eo]r\sdied|(?:e|=E9|\xe9|[\xc3][\xa9])tranger\sd(?:e|=E9|\xe9|[\xc3][\xa9])c(?:e|=E9|\xe9|[\xc3][\xa9])d(?:e|=E9|\xe9|[\xc3][\xa9])|(?:[ck]lient|customer|ac+ount|invest[eo]r|beneficiary|mr\.|kunde|engr?\.?)\s(?:[a-z]{1,10}\s)?(?:dead|deceased|verstorbenen))/i
-body     __DECEASED       /\b(?:the|my|der|du|le|meu?)\s(?:deceased|late|verstorbenen|d(?:i|e|=E9|\xe9|[\xc3][\xa9])funto?|d(?:e|=E9|\xe9|[\xc3][\xa9])nt|falecido)\b/i
-body     __SURVIVORS      /\b(?:widow|son|daughter|husband|wife|brother|sister|attorney|vi[\xfa]va|esposa|veuve)\s(?:of|to|do|de)\s(?:the\s)?(?:late|falecido|finales|feu|d(?:e|=E9|\xe9|[\xc3][\xa9])funt|mr\.?)\s\w+\b/i
+body     __EX_CUSTOMER    /\b(?:(?:dead|deceased|late|verstorbenen|death\sof\sthe)\s(?:[ck]lient|customer|ac+ount|invest[eo]r|beneficiary|depositor|mr\.|kunde|engr?\.?)|titulaire\sdu\scompte\sest\sd(?:e|=E9|[\xe9]|[\xc3][\xa9])c(?:e|=E9|[\xe9]|[\xc3][\xa9])d(?:e|=E9|[\xe9]|[\xc3][\xa9])|invest[eo]r\sdied|(?:e|=E9|[\xe9]|[\xc3][\xa9])tranger\sd(?:e|=E9|[\xe9]|[\xc3][\xa9])c(?:e|=E9|[\xe9]|[\xc3][\xa9])d(?:e|=E9|[\xe9]|[\xc3][\xa9])|(?:[ck]lient|customer|ac+ount|invest[eo]r|beneficiary|mr\.|kunde|engr?\.?)\s(?:[a-z]{1,10}\s)?(?:dead|deceased|verstorbenen))/i
+body     __DECEASED       /\b(?:the|my|der|du|le|meu?)\s(?:deceased|late|verstorbenen|d(?:i|e|=E9|[\xe9]|[\xc3][\xa9])funto?|d(?:e|=E9|[\xe9]|[\xc3][\xa9])nt|falecido)\b/i
+body     __SURVIVORS      /\b(?:widow|son|daughter|husband|wife|brother|sister|attorney|vi[\xfa]va|esposa|veuve)\s(?:of|to|do|de)\s(?:the\s)?(?:late|falecido|finales|feu|d(?:e|=E9|[\xe9]|[\xc3][\xa9])funt|mr\.?)\s\w+\b/i
 body     __DEAD_PARENT    /\b(?:my|meu)\s(?:(?:deceased|dead)\s(?:father|mother|husband)|(?:father|dad|mother|mom|husband|marido)(?:'?s)?\s(?:death|died|passed\saway|murder|was\s(?:killed|murdered|poisoned)|faleceu))/i
 body     __DORMANT_ACCT   /\b(?:(?:dormant|abandoned|left\s?over)\s(?:account|fund|transaction|sum|deposit)|fonds\sdorment)/i
 body     __WILL_LEGAL     /\b(?:codicil|last\stestament|probate|executor|intestate|bequest|mandamus)\b/i
@@ -193,7 +193,7 @@ describe DECEASED_NO_ML   Dead not via mailing list
 body     __WIRE_XFR       /\b(?:wire|telegraph(?:ic)?|bank)\s?transfer/i
 body     __TRUSTED_CHECK  /\b(?:cashier'?s?|certified)\sche(?:ck|que)/i
 body     __BANK_DRAFT     /\bbank\sdraft/i
-body     __MOVE_MONEY     /\b(?:(?:receive|re-?profile|transfer(?:ring|t)?|release|repatriate|rapatrier|secure|r(?:e|=E9|\xe9|[\xc3][\xa9])clamation|possession|virer|dona(?:te|r)|depositante|dep[\xc3][\xb3]sito)\s(?:th(?:e(?:se)?|is)|d[ae]s|sur ce|de ce[st]|cet|est[ea]|del?)|re-?profiling|receive|re-?locat(?:e|ing)(?:\s\w{1,15})?)\s(?:sums?\sof\s)?(?:proceeds|funds?|money|balance|account|g[eo]ld|compte|fond[so]{1,2}|argent)\b/i
+body     __MOVE_MONEY     /\b(?:(?:receive|re-?profile|transfer(?:ring|t)?|release|repatriate|rapatrier|secure|r(?:e|=E9|[\xe9]|[\xc3][\xa9])clamation|possession|virer|dona(?:te|r)|depositante|dep[\xc3][\xb3]sito)\s(?:th(?:e(?:se)?|is)|d[ae]s|sur ce|de ce[st]|cet|est[ea]|del?)|re-?profiling|receive|re-?locat(?:e|ing)(?:\s\w{1,15})?)\s(?:sums?\sof\s)?(?:proceeds|funds?|money|balance|account|g[eo]ld|compte|fond[so]{1,2}|argent)\b/i
 body     __TO_YOUR_ACCT   /\b(?:f[uo]nds|money|f[uo]ndo|dinheiro|bank)\s(?:\w{1,10}\s){0,4}(?:transfer(?:red)?|transferido|sont)\s(?:to|para|en)\s(?:your|sua|votre)\s(?:account|conta|pos+es+ion)/i
 body     __PAY_YOU        /\bpay\syou\b/
 body     __GIVE_MONEY     /\b(?:give\syou\s(?:this\s)?(?:money|fund|inheritance)|donated?\s(?:\w\+\s){0,3}(?:the\ssum\sof|(?:the|this|some)\s(?:money|funds?|inheritance)|to\s)(?:you|(?:(?:the|a)\s)?church|charit(?:y|ies)|humanit\w+|needy|poor|orphan(?:age)?s?|philanthropists\?)|de vous donner cet argent|faire don de la somme|voudrais en faire don)\b/i
@@ -218,7 +218,7 @@ meta     COMPENSATION     __COMPENSATION && !__DOS_HAS_LIST_UNSUB && !__HAS_X_LO
 describe COMPENSATION     "Compensation"
 score    COMPENSATION     1.50	# limit
  
-body     __TRUNK_BOX      /\b(?:(?:trunk|metallic|proof|security|consignment)\sbox(?:es)?|sealed\ssafe|une mallette m(?:e|=E9|\xe9|[\xc3][\xa9])tallique)\b/i
+body     __TRUNK_BOX      /\b(?:(?:trunk|metallic|proof|security|consignment)\sbox(?:es)?|sealed\ssafe|une mallette m(?:e|=E9|[\xe9]|[\xc3][\xa9])tallique)\b/i
 body     __COURIER        /\bcourier\s(?:company|service)\b/i
 #meta     MONEY_FRAUD_BOX  LOTS_OF_MONEY && __TRUNK_BOX && __COURIER
 #describe MONEY_FRAUD_BOX  Lots of money in a box, lots of money from a fox
@@ -227,7 +227,7 @@ body     __COURIER        /\bcourier\s(?:company|service)\b/i
 body     __SUM_OF_FUND    /\b(?:sum|release|freigabe)\s(?:of|der)\s(?:amount|fund|investment|mittel)\b/i
 
 # [\xc3][\xa9] avoids "malformed UTF8" errors that plain \xc3\xa9 can experience.
-body     __BENEFICIARY    /\bb(?:e|=E9|\xe9|[\xc3][\xa9])n(?:e|=E9|\xe9|[\xc3][\xa9])fi(?:c|sh)i?ai?r(?:y|ies|es?)/i
+body     __BENEFICIARY    /\bb(?:e|=E9|[\xe9]|[\xc3][\xa9])n(?:e|=E9|[\xe9]|[\xc3][\xa9])fi(?:c|sh)i?ai?r(?:y|ies|es?)/i
 body     __DIPLOMATIC     /\bdiplomatic\b/i
 body     __FEES           /\b(?:security|safe\w*|courier|registration|pay|paid|up-?front|processing|delivery|transfer|keeping)[\s\w]{0,15}\s(?:fee|charge)s?\b/i 
 body     __LUCKY_WINNER   /\b(?:lucky|gl.cklich(?:en)?|afortunados)\s(?:(?:ge)?win+ers?|ganador(?:es)?)\b/i
@@ -236,7 +236,7 @@ body     __NIGERIA        /\bnigeria\b/i
 body     __IVORY_COAST    /\b(?:Cote\s?D.Ivoire|Ivory\s?Coast|Costa\sde\sMarfil)\b/i
 body     __BURKINA_FASO   /\bburkina\s?faso\b/i
 body     __GHANA          /\bghana\b/i
-body     __BENIN          /\bb(?:e|=E9|\xe9|[\xc3][\xa9])nin\b/i
+body     __BENIN          /\bb(?:e|=E9|[\xe9]|[\xc3][\xa9])nin\b/i
 meta     __AFRICAN_STATE  (__NIGERIA || __IVORY_COAST || __BURKINA_FASO || __GHANA || __BENIN || __AFR_UNION)
 body     __YOUR_PERM      /\byour\spermission\b/i
 body     __CONTACT_YOU    /\b(?:contact(?:ing)\syou|vous\scontacter?)\b/i
