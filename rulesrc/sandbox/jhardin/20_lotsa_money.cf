@@ -170,7 +170,7 @@ body     __I_INHERIT      /\b(?:I|eu)\s[a-z\s]{0,30}(?:inherited|herdei)\b/i
 body     __THEY_INHERIT   /\b(?:inherit\sth(?:e|is)\smoney|herede\sest[ea]\sdinero)\b/i
 body     __NOT_DEAD_YET   /\b(?:will\sinherit|que\sherede)\b/i
 body     __AM_DYING       /\b(?:am\s(?:\S+\s)?dying|terminally\sill|cancer|en\sphase\sterminale|(?:become|is|devenu|maladie)\sincurable|que\sje\smeurs)\b/i
-body     __I_WILL_YOU     /\bwill(?:ed)?\s(?:[a-z\s]{0,20}(?:fortune|money|\$\d+[a-z]{0,9})\s)?to\syou\b/i
+body     __I_WILL_YOU     /\bwill(?:ed)?\s(?:[a-z\s]{0,20}(?:fortune|money|\$[\d,]+[a-z]{0,9})\s)?to\syou\b/i
 body     __NEXT_OF_KIN    /\bnext[-\s]of[-\s]kin\b/i
 body     __EX_CUSTOMER    /\b(?:(?:dead|deceased|late|verstorbenen|death\sof\sthe)\s(?:[ck]lient|customer|ac+ount|invest[eo]r|beneficiary|depositor|mr\.|kunde|engr?\.?)|titulaire\sdu\scompte\sest\sd(?:e|=E9|[\xe9]|[\xc3][\xa9])c(?:e|=E9|[\xe9]|[\xc3][\xa9])d(?:e|=E9|[\xe9]|[\xc3][\xa9])|invest[eo]r\sdied|(?:e|=E9|[\xe9]|[\xc3][\xa9])tranger\sd(?:e|=E9|[\xe9]|[\xc3][\xa9])c(?:e|=E9|[\xe9]|[\xc3][\xa9])d(?:e|=E9|[\xe9]|[\xc3][\xa9])|(?:[ck]lient|customer|ac+ount|invest[eo]r|beneficiary|mr\.|kunde|engr?\.?)\s(?:[a-z]{1,10}\s)?(?:dead|deceased|verstorbenen))/i
 body     __DECEASED       /\b(?:the|my|der|du|le|meu?)\s(?:deceased|late|verstorbenen|d(?:i|e|=E9|[\xe9]|[\xc3][\xa9])funto?|d(?:e|=E9|[\xe9]|[\xc3][\xa9])nt|falecido)\b/i
@@ -183,7 +183,7 @@ body     __WIDOW          /\b(?:widow(?:e[rd])'?s?|veuve)\b/i
 body     __MY_FORTUNE     /\b(?:my|his|her)\s(?:fortune|heritage)\b/i
 body     __DIED_IN        /\bdied\sin\b/i
 body     __INHERIT_PMT    /\binheritance\spayment\s/i
-body     __CONTACT_ATTY   /\bcontact(?:er)?\s(?:my|(?:de\s)?mon)\s(?:barrister|attou?rney|avocat|gestionnaire)\b/i
+body     __CONTACT_ATTY   /\bcontact(?:er)?\s(?:my|(?:de\s)?mon)\s(?:barrister|attou?rney|lawyer|avocat|gestionnaire)\b/i
 body     __TRTMT_DEFILED  /\bdefiled\sall\s(?:forms\sof\s)?(?:medical\s)?treatments?\b/i
 
 meta     DECEASED_NO_ML   __DECEASED && !__VIA_ML && !__UNSUB_LINK && !__DOS_HAS_LIST_UNSUB && !__HAS_THREAD_INDEX && !__THREAD_INDEX_GOOD && !__HS_SUBJ_RE_FW && !__IMS_MSGID && !__IS_EXCH && !__COMMENT_EXISTS && !__DOS_SINGLE_EXT_RELAY
@@ -196,7 +196,7 @@ body     __BANK_DRAFT     /\bbank\sdraft/i
 body     __MOVE_MONEY     /\b(?:(?:receive|re-?profile|transfer(?:ring|t)?|release|repatriate|rapatrier|secure|r(?:e|=E9|[\xe9]|[\xc3][\xa9])clamation|possession|virer|dona(?:te|r)|depositante|dep[\xc3][\xb3]sito)\s(?:th(?:e(?:se)?|is)|d[ae]s|sur ce|de ce[st]|cet|est[ea]|del?)|re-?profiling|receive|re-?locat(?:e|ing)(?:\s\w{1,15})?)\s(?:sums?\sof\s)?(?:proceeds|funds?|money|balance|account|g[eo]ld|compte|fond[so]{1,2}|argent)\b/i
 body     __TO_YOUR_ACCT   /\b(?:f[uo]nds|money|f[uo]ndo|dinheiro|bank)\s(?:\w{1,10}\s){0,4}(?:transfer(?:red)?|transferido|sont)\s(?:to|para|en)\s(?:your|sua|votre)\s(?:account|conta|pos+es+ion)/i
 body     __PAY_YOU        /\bpay\syou\b/
-body     __GIVE_MONEY     /\b(?:give\syou\s(?:this\s)?(?:money|fund|inheritance)|donated?\s(?:\w\+\s){0,3}(?:the\ssum\sof|(?:the|this|some)\s(?:money|funds?|inheritance)|to\s)(?:you|(?:(?:the|a)\s)?church|charit(?:y|ies)|humanit\w+|needy|poor|orphan(?:age)?s?|philanthropists\?)|de vous donner cet argent|faire don de la somme|voudrais en faire don)\b/i
+body     __GIVE_MONEY     /\b(?:(?:give\syou\s(?:this\s)?(?:money|fund|inheritance))|(?:donated?\s(?:\w\+\s){0,3}(?:the\ssum\sof|(?:(?:the|this|some)\s(?:money|funds?|inheritance)|to\s)(?:you|(?:(?:the|a)\s)?church|charit(?:y|ies)|humanit\w+|needy|poor|orphan(?:age)?s?|philanthropists\?)))|de vous donner cet argent|faire don de la somme|voudrais en faire don)\b/i
 meta     __XFER_MONEY     (__WIRE_XFR || __TRUSTED_CHECK || __BANK_DRAFT || __MOVE_MONEY || __TO_YOUR_ACCT || __PAY_YOU || __GIVE_MONEY)
 
 body     __INTL_BANK      /\b(?:international\s(?:\w+\s)?bank|banque\sinternationale)\b/i
