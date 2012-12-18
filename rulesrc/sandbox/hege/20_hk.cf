@@ -124,15 +124,25 @@ score		TAB_IN_FROM		0.5
 
 ifplugin Mail::SpamAssassin::Plugin::FreeMail
 
-header		__HK_NAME_MR_MRS	From:name =~ /^M(?:RS?|ISS)\b/mi
+#REQUIRING VERSION 3.4 BECAUSE From:name works improperly prior to that version.
+if (version >= 3.004000)
+  header		__HK_NAME_MR_MRS	From:name =~ /^M(?:RS?|ISS)\b/mi
+  meta            HK_NAME_MR_MRS          __HK_NAME_MR_MRS && !FREEMAIL_FROM
+  score           HK_NAME_MR_MRS          1.0
+  meta            HK_NAME_FM_MR_MRS       __HK_NAME_MR_MRS && FREEMAIL_FROM
+  score           HK_NAME_FM_MR_MRS       1.5
+endif
+
 header		__HK_NAME_DR		From:name =~ /^DR\b/mi
 header		__HK_NAME_FROM		From:name =~ /^FROM\b/mi
-meta		HK_NAME_MR_MRS		__HK_NAME_MR_MRS && !FREEMAIL_FROM
-meta		HK_NAME_FM_MR_MRS	__HK_NAME_MR_MRS && FREEMAIL_FROM
 meta		HK_NAME_DR		__HK_NAME_DR && !FREEMAIL_FROM
+score           HK_NAME_DR	        1.0
 meta		HK_NAME_FM_DR		__HK_NAME_DR && FREEMAIL_FROM
+score           HK_NAME_FM_DR           1.5
 meta		HK_NAME_FROM		__HK_NAME_FROM && !FREEMAIL_FROM
+score           HK_NAME_FROM            1.0
 meta		HK_NAME_FM_FROM		__HK_NAME_FROM && FREEMAIL_FROM
+score           HK_NAME_FM_FROM         1.5
 
 endif
 
