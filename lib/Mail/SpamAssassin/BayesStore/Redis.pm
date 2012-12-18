@@ -59,7 +59,6 @@ use re 'taint';
 use Errno qw(EBADF);
 use Mail::SpamAssassin::Util qw(untaint_var);
 use Mail::SpamAssassin::Timeout;
-use Redis;
 
 BEGIN {
   eval { require Digest::SHA; import Digest::SHA qw(sha1); 1 }
@@ -72,6 +71,8 @@ use Mail::SpamAssassin::Logger;
 use vars qw( @ISA );
 
 @ISA = qw( Mail::SpamAssassin::BayesStore );
+
+use constant HAS_REDIS => eval { require Redis; };
 
 =head1 METHODS
 
@@ -90,6 +91,10 @@ sub new {
   my $class = shift;
   $class = ref($class) || $class;
   my $self = $class->SUPER::new(@_);
+
+  unless (HAS_REDIS) {
+    dbg("bayes: unable to connect to database: DBI module not available: $!");
+  }
 
   push @{$self->{redis_conf}}, 'encoding' => undef;
 
@@ -138,6 +143,8 @@ working.
 sub tie_db_readonly {
   my($self) = @_;
 
+  return 0 unless (HAS_REDIS);
+
   my $result = $self->{is_really_open} || $self->_open_db();
   $self->{is_writable} = 0 if $result;
 
@@ -157,6 +164,8 @@ begin using the database immediately.
 
 sub tie_db_writable {
   my($self) = @_;
+
+  return 0 unless (HAS_REDIS);
 
   my $result = $self->{is_really_open} || $self->_open_db();
   $self->{is_writable} = 1 if $result;
