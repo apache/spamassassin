@@ -1010,7 +1010,7 @@ describe    URI_GOOGLE_DOCS      URI for Google Docs, common in phishing
 score       URI_GOOGLE_DOCS      1.00	# limit
 
 meta        __EMAIL_URI_PHISH    __HAS_ANY_URI && !__URI_GOOGLE_DOC && __EMAIL_PHISH
-meta        EMAIL_URI_PHISH      __EMAIL_URI_PHISH && !ALL_TRUSTED && !__CAN_HELP
+meta        EMAIL_URI_PHISH      __EMAIL_URI_PHISH && !ALL_TRUSTED && !__UNSUB_LINK && !__TAG_EXISTS_CENTER && !__HAS_SENDER && !__CAN_HELP && !__VIA_ML && !__RCD_RDNS_MTA_MESSY
 score       EMAIL_URI_PHISH      2.00	# limit
 describe    EMAIL_URI_PHISH      Email account phishing using hosted form
 
