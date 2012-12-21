@@ -1075,7 +1075,13 @@ sub complete_dnsbl_lookup {
     next if ($rr->type ne 'A' && $rr->type ne 'TXT');
 
     my $dom = $ent->{obj}->{dom};
-    my $rdatastr = $rr->rdatastr;
+
+    # txtdata returns a non- zone-file-format encoded result, unlike rdatastr;
+    # avoid space-separated RDATA <character-string> fields if possible,
+    # txtdata provides a list of strings in a list context since Net::DNS 0.69
+    #
+    my $rdatastr = $rr->type eq 'TXT' ? join('',$rr->txtdata) : $rr->rdatastr;
+
     my $rdatanum;
     if ($rdatastr =~ m/^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/) {
       $rdatanum = Mail::SpamAssassin::Util::my_inet_aton($rdatastr);

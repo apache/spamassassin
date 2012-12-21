@@ -192,7 +192,7 @@ use Mail::SpamAssassin::Plugin;
 use Mail::SpamAssassin::Util;
 use Mail::SpamAssassin::Logger;
 
-use vars qw(@ISA %rcode_value);
+use vars qw(@ISA %rcode_value $txtdata_can_provide_a_list);
 @ISA = qw(Mail::SpamAssassin::Plugin);
 
 %rcode_value = (  # http://www.iana.org/assignments/dns-parameters, RFC 6195
@@ -210,6 +210,8 @@ sub new {
   bless($self, $class);
 
   $self->set_config($sa_main->{conf});
+
+  $txtdata_can_provide_a_list = Net::DNS->VERSION >= 0.69;
 
   return $self;
 }
@@ -534,20 +536,40 @@ sub process_response_packet {
     # evaluate also rules which only care for rcode status
     @answer = ( undef );
   }
+
+  # NOTE:  $rr->rdatastr returns the result encoded in a DNS zone file
+  # format, i.e. enclosed in double quotes if a result contains whitespace
+  # (or other funny characters), and may use \DDD encoding or \X quoting as
+  # per RFC 1035.  Using $rr->txtdata instead avoids this unnecessary encoding
+  # step and a need for decoding by a caller, returning an unmodified string.
+  # Caveat: in case of multiple RDATA <character-string> fields contained
+  # in a resource record (TXT, SPF, HINFO), starting with Net::DNS 0.69
+  # the $rr->txtdata in a list context returns these strings as a list.
+  # The $rr->txtdata in a scalar context always returns a single string
+  # with <character-string> fields joined by a single space character as
+  # a separator.  The $rr->txtdata in Net::DNS 0.68 and older returned
+  # such joined space-separated string even in a list context.
+
+  # RFC 5518: If the RDATA in the TXT record contains multiple
+  # character-strings (as defined in Section 3.3 of [RFC1035]),
+  # the code handling that reply from DNS MUST assemble all of these
+  # marshaled text blocks into a single one before any syntactical
+  # verification takes place.
+  # The same goes for RFC 4408 (SPF), RFC 4871 (DKIM), RFC 5617 (ADSP) ...
+
   for my $rr (@answer) {
     my($rr_rdatastr, $rdatanum, $rr_type);
     if (!$rr) {
       # special case, no answer records, only rcode can be tested
     } else {
       $rr_type = uc $rr->type;
-      if ($rr_type eq 'TXT' || $rr_type eq 'SPF') {
-        # RFC 5518: If the RDATA in the TXT record contains multiple
-        # character-strings (as defined in Section 3.3 of [RFC1035]),
-        # the code handling that reply from DNS MUST assemble all of these
-        # marshaled text blocks into a single one before any syntactical
-        # verification takes place.
-        # The same goes for RFC 4408 (SPF), RFC 4871 (DKIM), RFC 5617 (ADSP) ...
-        $rr_rdatastr = join('', $rr->char_str_list);  # as per RFC 5518
+      if ($rr->UNIVERSAL::can('txtdata')) {  # TXT, SPF
+        # join with no intervening spaces, as per RFC 5518
+        if ($txtdata_can_provide_a_list || $rr_type ne 'TXT') {
+          $rr_rdatastr = join('', $rr->txtdata);  # txtdata() in list context!
+        } else {  # char_str_list() is only available for TXT records
+          $rr_rdatastr = join('', $rr->char_str_list);  # historical
+        }
       } else {
         $rr_rdatastr = $rr->rdatastr;
         if ($rr_type eq 'A' &&
@@ -555,9 +577,6 @@ sub process_response_packet {
           $rdatanum = Mail::SpamAssassin::Util::my_inet_aton($rr_rdatastr);
         }
       }
-      # decode DNS presentation format as returned by Net::DNS
-      local $1;
-      $rr_rdatastr =~ s/\\([0-9]{3}|.)/length($1)==1 ? $1 : chr($1)/gse;
     # dbg("askdns: received rr type %s, data: %s", $rr_type, $rr_rdatastr);
     }
 

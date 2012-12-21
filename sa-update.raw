@@ -1243,16 +1243,32 @@ sub do_dns_query {
   my $RR = $res->query($query, $rr_type);
   my @result;
 
+  # NOTE:  $rr->rdatastr returns the result encoded in a DNS zone file
+  # format, i.e. enclosed in double quotes if a result contains whitespace
+  # (or other funny characters), and may use \DDD encoding or \X quoting as
+  # per RFC 1035.  Using $rr->txtdata instead avoids this unnecessary encoding
+  # step and a need for decoding by a caller, returning an unmodified string.
+  # Caveat: in case of multiple RDATA <character-string> fields contained
+  # in a resource record (TXT, SPF, HINFO), starting with Net::DNS 0.69
+  # the $rr->txtdata in a list context returns these strings as a list.
+  # The $rr->txtdata in a scalar context always returns a single string
+  # with <character-string> fields joined by a single space character as
+  # a separator.  The $rr->txtdata in Net::DNS 0.68 and older returned
+  # such joined space-separated string even in a list context.
+  #
+  # From Net::DNS maintainers (Willem Toorop, NLnet Labs):
+  #   I encourage you to use txtdata for getting the values of
+  # <version>.updates.spamassassin.org and mirros.updates.spamassassin.org.
+  # As those records have only a single rdata field, txtdata would return
+  # the same value since Net::DNS 0.34.
+  #
   if ($RR) {
     foreach my $rr ($RR->answer) {
       next if !$rr;  # no answer records, only rcode
       next if $rr->type ne $rr_type;
-      my $text = $rr->rdatastr;
-      if (defined $text && $text ne '') {
-        local($1);
-        $text =~ s/^"(.*)"\z/$1/s;
-        push(@result,$text);
-      }
+      # scalar context!
+      my $text = $rr->UNIVERSAL::can('txtdata') ? $rr->txtdata : $rr->rdatastr;
+      push(@result,$text)  if defined $text && $text ne '';
     }
     printf("DNS %s query: %s -> %s\n", $rr_type, $query, join(", ",@result))
       if $opt{'verbose'} && $opt{'verbose'} > 1;
