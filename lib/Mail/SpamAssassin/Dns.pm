@@ -185,9 +185,11 @@ sub dnsbl_hit {
   if (substr($rule, 0, 2) eq "__") {
     # don't bother with meta rules
   } elsif ($answer->type eq 'TXT') {
+    # txtdata returns a non- zone-file-format encoded result, unlike rdatastr;
+    # avoid space-separated RDATA <character-string> fields if possible,
+    # txtdata provides a list of strings in a list context since Net::DNS 0.69
+    $log = join('',$answer->txtdata);
     local $1;
-    $log = $answer->rdatastr;
-    $log =~ s/^"(.*)"\z/$1/s;
     $log =~ s{ (?<! [<(\[] ) (https? : // \S+)}{<$1>}xgi;
   } else {  # assuming $answer->type eq 'A'
     local($1,$2,$3,$4,$5);
@@ -226,8 +228,13 @@ sub dnsbl_uri {
   my ($self, $question, $answer) = @_;
 
   my $qname = $question->qname;
-  my $rdatastr = $answer->rdatastr;
 
+  # txtdata returns a non- zone-file-format encoded result, unlike rdatastr;
+  # avoid space-separated RDATA <character-string> fields if possible,
+  # txtdata provides a list of strings in a list context since Net::DNS 0.69
+  #
+  my $rdatastr = $answer->UNIVERSAL::can('txtdata') ? join('',$answer->txtdata)
+                                                    : $answer->rdatastr;
   if (defined $qname && defined $rdatastr) {
     my $qclass = $question->qclass;
     my $qtype = $question->qtype;
@@ -289,7 +296,13 @@ sub process_dnsbl_result {
 sub process_dnsbl_set {
   my ($self, $set, $question, $answer) = @_;
 
-  my $rdatastr = $answer->rdatastr;
+  # txtdata returns a non- zone-file-format encoded result, unlike rdatastr;
+  # avoid space-separated RDATA <character-string> fields if possible,
+  # txtdata provides a list of strings in a list context since Net::DNS 0.69
+  #
+  my $rdatastr = $answer->UNIVERSAL::can('txtdata') ? join('',$answer->txtdata)
+                                                    : $answer->rdatastr;
+
   while (my ($subtest, $rule) = each %{ $self->{dnspost}->{$set} }) {
     next if $self->{tests_already_hit}->{$rule};
 
@@ -305,8 +318,7 @@ sub process_dnsbl_set {
         next;
       }
 
-      $rdatastr =~ s/^"?\d+-//;
-      $rdatastr =~ s/"$//;
+      $rdatastr =~ s/^\d+-//;
       my %sb = ($rdatastr =~ m/(?:^|\|)(\d+)=([^|]+)/g);
       my $undef = 0;
       while ($subtest =~ m/\bS(\d+)\b/g) {

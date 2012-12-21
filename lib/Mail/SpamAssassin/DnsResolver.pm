@@ -596,7 +596,7 @@ sub _packet_id {
     # Net::DNS::Packet::dn_expand and Net::DNS::wire2presentation in turn.
     # Let's undo the effect of the wire2presentation routine here to make
     # sure the query section of an answer packet matches the query section
-    # in our packet formed by new_dns_packet():
+    # in our packet as formed by new_dns_packet():
     #
     my $qname = $ques->qname;
     $qname =~ s/\\([0-9]{3}|.)/length($1)==1 ? $1 : chr($1)/gse;
