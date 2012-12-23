@@ -137,6 +137,15 @@ sub locate_input {
       elsif ($line =~ m/^# Date:\s*(\S+)/) {
         # a better way to do the above.  TODO: parse it instead
         $dateline{$file} = $1;
+        if (!defined $time{$file}) {
+          # if time line unparseable (localized?) use this instead
+          my ($yyyy, $mm, $dd, $h, $m, $s) = $dateline{$file} =~ /(\d\d\d\d)(\d\d)(\d\d)T(\d\d)(\d\d)(\d\d)Z/;
+          
+          my $timet = Time::ParseDate::parsedate("${yyyy}/${mm}/${dd} ${h}:${m}:${s} GMT+0",
+                    GMT => 1, PREFER_PAST => 1);
+
+          $time{$file} = $timet;
+        }
       }
       elsif ($line =~ m/^# SVN revision:\s*(\S+)/) {
         $revision{$file} = $1;
