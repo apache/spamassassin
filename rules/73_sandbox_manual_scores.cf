@@ -60,7 +60,10 @@ score FILL_THIS_FORM           0.001
 # jhardin
 # 1.000 S/O, hits only <= 6 points, but GA is not publishing it!
 # perhaps because very few examples in spam corpus
-score GOOGLE_DOCS_PHISH        3.00
+# 12/24/12 GA likes it now
+#score GOOGLE_DOCS_PHISH        3.00
+# similar: .990 S/O, hits primarily spam <= 3 points
+score EMAIL_URI_PHISH 	       2.50
 
 # hege
 # FPs reported [bug 6417], GA assigning 3+ points
