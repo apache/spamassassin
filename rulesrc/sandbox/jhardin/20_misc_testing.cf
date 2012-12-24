@@ -1002,7 +1002,7 @@ meta        __GOOGLE_DOCS_PHISH_1  __URI_GOOGLE_DOC && (__TVD_PH_SUBJ_META || __
 meta        __GOOGLE_DOCS_PHISH_2  __URI_GOOGLE_DOC && __EMAIL_PHISH
 meta        GOOGLE_DOCS_PHISH    (__GOOGLE_DOCS_PHISH_1 || __GOOGLE_DOCS_PHISH_2)
 describe    GOOGLE_DOCS_PHISH    E-mail account phishing via a Google Docs form
-score       GOOGLE_DOCS_PHISH    3.00	# limit, until reviewed
+score       GOOGLE_DOCS_PHISH    3.00	# limit
 tflags      GOOGLE_DOCS_PHISH    publish	# Force publication - great S/O, hits only <= 6 points
 
 meta        URI_GOOGLE_DOCS      __URI_GOOGLE_DOC && !__DKIM_EXISTS && !__TO_EQ_FROM_DOM && !__DOS_REF_TODAY && !__DOS_BODY_FRI && !__DOS_BODY_WED && !__freemail_safe_fwd && !__TO_EQ_FROM_DOM && !__HAS_ERRORS_TO
@@ -1011,8 +1011,9 @@ score       URI_GOOGLE_DOCS      1.00	# limit
 
 meta        __EMAIL_URI_PHISH    __HAS_ANY_URI && !__URI_GOOGLE_DOC && __EMAIL_PHISH
 meta        EMAIL_URI_PHISH      __EMAIL_URI_PHISH && !ALL_TRUSTED && !__UNSUB_LINK && !__TAG_EXISTS_CENTER && !__HAS_SENDER && !__CAN_HELP && !__VIA_ML && !__RCD_RDNS_MTA_MESSY && !__UPPERCASE_URI && !__HAS_CC
-score       EMAIL_URI_PHISH      2.00	# limit
+score       EMAIL_URI_PHISH      2.50	# limit
 describe    EMAIL_URI_PHISH      Email account phishing using hosted form
+tflags      EMAIL_URI_PHISH      publish	# Force publication - very good S/O, hits mainly <= 3 points
 
 # suggested by MPerkel on the users list 11/10/2012
 uri         __URI_PROTO_MC       /^(?!(?-i:(?:[Hh]ttps?|HTTPS?):))https?:/i
