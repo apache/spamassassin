@@ -982,14 +982,14 @@ score       FROM_MISSP_PHISH     4.75	# limit
 uri         __URI_GOOGLE_DOC     m,^https?://docs\.google\.com/(?:[^/]+/)*view(?:form)?\?(?:id|formkey)=,i
 
 body        __WEBMAIL_ACCT       /\byour web ?mail account/i
-body        __MAILBOX_FULL       /\b(?:you(?:r (?:mailbox|(?:e-?|web ?)mail))? (?:is (?:almost )?full|(?:quota )?ha(?:s|ve) (?:reached|exceeded|passed) (?:the|your|it'?s?) (?:size|storage|set|(?:e-?|web ?)mail|quota|folder|mail ?box) (?:limit|quota))|over your mailbox (?:size )?(?:limit|quota))\b/i
+body        __MAILBOX_FULL       /\b(?:you(?:r (?:mailbox|(?:e-?|web ?)mail))? (?:is (?:almost )?full|(?:quota )?ha(?:s|ve) (?:reached|exceeded|passed) (?:the|your|it'?s?) (?:size|storage|set|(?:e-?|web ?)mail|quota|folder|mail ?box) (?:limit|quota))|over your mailbox (?:size )?(?:limit|quota)|sua conta de (?:e-?|web ?)mail excedeu sua limite)\b/i
 body        __CLEAN_MAILBOX      /\b(?:(?:e-?mail|mailbox|violation:|(?-i:CLICK)) (?:quota size|clean(?:-?up))|clean ?up click ?here)\b/i
 body        __VALIDATE_MAILBOX   /\b(?:(?:re-?)?(?:validate|confirm) your mailbox)|(?:confirmar (?:que )?a sua conta (?:de e-?mail|ainda est(?:=E1|[\xe1]|[\xc3][\xa1]) ativa))\b/i
-body        __UPGR_MAILBOX       /\bup(?:g[ra]+d(?:e|ing)|date) (?:[hw]as\s(?:[a-z]+\s){1,5})?(?:o[nf] )?(?:your )?(?:mailbox|(?:web ?|e-?)mail)\b/i
-body        __LOCK_MAILBOX       /\b(?:(?:deactivate|lock) (?:your )?(?:mailbox|(?:web ?|e-?)mail)|ditt konto vara "?deaktiverad"?|begr(?:=E4|\xe4|[\xc3][\xa4])nsad tillg(?:=E5|[\xe5]|[\xc3][\xa5])ng till din brevl(?:=E5|[\xe5]|[\xc3][\xa5])da|sua conta de e-mail ser(?:=E1|[\xe1]|[\xc3][\xa1]) desativado)\b/i
-body        __SYSADMIN           /\b(?:help?[- ]?desk|(?:(?:web)?mail ?|sys(?:tem )?)admin(?:istrator)|local[- ]host|support team|message from administrator|suporte t(?:=E9|[\xe9]|[\xc3][\xa9])cnico)\b/i
-body        __ATTN_MAIL_USER     /\b(?:att(?:entio)?n|dear|caro) (?:web(?:mail)?\s\S\s)?(?:web|e-?)?mail (?:user|DO USU(?:=E1|[\xe1]|[\xc3][\xa1])RIO)[:;,]/i
-body        __MAIL_ACCT_ACCESS1  /\byour (?:web|e-?)?mail (?:account|log-?in) (?:has )?been accessed\b/i
+body        __UPGR_MAILBOX       /\b(?:up(?:g[ra]+d(?:e|ing)|date) (?:[hw]as\s(?:[a-z]+\s){1,5})?(?:o[nf] )?(?:your )?(?:mailbox|(?:web ?|e-?)mail)|(?:web ?|e-?)mail Upgrade cuenta|atualize sua caixa de correio)\b/i
+body        __LOCK_MAILBOX       /\b(?:(?:deactivate|lock) (?:your )?(?:mailbox|(?:web ?|e-?)mail)|ditt konto vara "?deaktiverad"?|begr(?:=E4|\xe4|[\xc3][\xa4])nsad tillg(?:=E5|[\xe5]|[\xc3][\xa5])ng till din brevl(?:=E5|[\xe5]|[\xc3][\xa5])da|conta de (?:web ?|e-?)mail (?:ser(?:=E1|[\xe1]|[\xc3][\xa1]) desativado|(?:=E9|[\xe9]|[\xc3][\xa9]) exclu(?:=ED|[\xed]|[\xc3][\xad])do)|destruir a sua caixa de correio)\b/i
+body        __SYSADMIN           /\b(?:help?[- ]?desk|(?:(?:web ?)?mail ?|sys(?:tem )?)admin(?:istrator)|local[- ]host|support team|message from administrator|suporte t(?:=E9|[\xe9]|[\xc3][\xa9])cnico|administrador do sistema)\b/i
+body        __ATTN_MAIL_USER     /\b(?:att(?:entio)?n|dear|caro) (?:web ?(?:mail)?\s\S\s)?(?:web ?|e-?)?mail (?:user|DO USU(?:=E1|[\xe1]|[\xc3][\xa1])RIO)[:;,]/i
+body        __MAIL_ACCT_ACCESS1  /\byour (?:web ?|e-?)?mail (?:account|log-?in) (?:has )?been accessed\b/i
 body        __MAIL_ACCT_ACCESS2  /\blo+se ac+es+ to your (?:web|e-?)?mail (?:account|log-?in|box|address)\b/i
 
 body        __MAILBOX_FULL_SE    /(?:\b=F6|[\xf6]|[\xc3][\xb6])verskridit gr(?:=E4|[\xe4]|[\xc3][\xa4])nsen f(?:=F6|[\xf6]|[\xc3][\xb6])r din postl(?:=E5|[\xe5]|[\xc3][\xa5])da\b/i
@@ -1010,7 +1010,7 @@ describe    URI_GOOGLE_DOCS      URI for Google Docs, common in phishing
 score       URI_GOOGLE_DOCS      1.00	# limit
 
 meta        __EMAIL_URI_PHISH    __HAS_ANY_URI && !__URI_GOOGLE_DOC && __EMAIL_PHISH
-meta        EMAIL_URI_PHISH      __EMAIL_URI_PHISH && !ALL_TRUSTED && !__UNSUB_LINK && !__TAG_EXISTS_CENTER && !__HAS_SENDER && !__CAN_HELP && !__VIA_ML && !__RCD_RDNS_MTA_MESSY && !__UPPERCASE_URI && !__HAS_CC
+meta        EMAIL_URI_PHISH      __EMAIL_URI_PHISH && !ALL_TRUSTED && !__UNSUB_LINK && !__TAG_EXISTS_CENTER && !__HAS_SENDER && !__CAN_HELP && !__VIA_ML && !__UPPERCASE_URI && !__HAS_CC && !__NUMBERS_IN_SUBJ && !__PCT_FOR_YOU
 score       EMAIL_URI_PHISH      2.50	# limit
 describe    EMAIL_URI_PHISH      Email account phishing using hosted form
 tflags      EMAIL_URI_PHISH      publish	# Force publication - very good S/O, hits mainly <= 3 points
