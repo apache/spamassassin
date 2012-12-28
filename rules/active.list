@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-coi-bulk axb-foo axb-fraud axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bpoliakoff darxus grenier jarif kpg-gah mas-cps mas-mas zmi; day 2: axb-coi-bulk axb-foo axb-fraud axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bpoliakoff darxus grenier jarif kpg-gah llanga zmi; day 3: axb-coi-bulk axb-foo axb-fraud axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bpoliakoff darxus grenier jarif kpg-gah llanga mas-cps mas-mas zmi
+# with results from: day 1: axb-coi-bulk axb-foo axb-fraud axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bpoliakoff darxus grenier jarif kpg-gah mas-cps mas-mas mmiroslaw-ham mmiroslaw-spam zmi; day 2: axb-coi-bulk axb-foo axb-fraud axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bpoliakoff darxus grenier jarif kpg-gah llanga mas-cps mas-mas zmi; day 3: axb-coi-bulk axb-foo axb-fraud axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bpoliakoff darxus grenier jarif kpg-gah llanga zmi
 
 # good enough
 ACH_CANCELLED
@@ -146,13 +146,13 @@ AXB_XMA_BASP
 AXB_XM_FORGED_OL2600
 
 # good enough
+AXB_XRCVD_EYOU_SEND
+
+# good enough
 AXB_X_AOL_SEZ_S
 
 # good enough
 AXB_X_RCV_WLOCAL
-
-# good enough
-BANKING_LAWS
 
 # tflags learn
 BAYES_00
@@ -261,9 +261,6 @@ DNS_FROM_AHBL_RHSBL
 
 # tflags publish
 DOS_ANAL_SPAM_MAILER
-
-# good enough
-DOS_BODY_HIGH_NO_MID
 
 # good enough
 DOS_RCVD_IP_TWICE_C
@@ -533,6 +530,9 @@ KB_RATWARE_MSGID
 KB_RATWARE_OUTLOOK_MID
 
 # good enough
+KHOP_BIG_TO_CC
+
+# good enough
 LONG_TERM_PRICE
 
 # tflags publish
@@ -585,6 +585,9 @@ MONEY_FROM_41
 
 # good enough
 MONEY_FROM_MISSP
+
+# good enough
+MSGID_WSP_TRAIL
 
 # good enough
 MSOE_MID_WRONG_CASE
@@ -941,22 +944,16 @@ TVD_SUBJ_ACC_NUM
 TVD_VISIT_PHARMA
 
 # good enough
-AXB_XRCVD_EYOU_SEND
+AXB_XMAILER_MIMEOLE_OL_1E8FC
 
 # good enough
-DATE_IN_FUTURE_Q_PLUS
+AXB_XMAILER_MIMEOLE_OL_8B970
 
 # good enough
-KHOP_BIG_TO_CC
+AXB_XMAILER_MIMEOLE_OL_D96F1
 
 # good enough
-KHOP_JS_OBFUSCATION
-
-# good enough
-MSGID_WSP_TRAIL
-
-# good enough
-OBFU_HTML_ATTACH
+AXB_X_WUM_TAG
 
 # tflags userconf
 UNPARSEABLE_RELAY
