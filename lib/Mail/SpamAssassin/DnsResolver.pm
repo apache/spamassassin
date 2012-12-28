@@ -43,6 +43,7 @@ use re 'taint';
 use Mail::SpamAssassin;
 use Mail::SpamAssassin::Logger;
 use Mail::SpamAssassin::Constants qw(:ip);
+use Mail::SpamAssassin::Util qw(untaint_var);
 
 use Socket;
 use Errno qw(EADDRINUSE EACCES);
@@ -203,7 +204,8 @@ sub configured_nameservers {
     @ns_addr_port = @{$self->{conf}->{dns_servers}};
     dbg("dns: servers set by config to: %s", join(', ',@ns_addr_port));
   } elsif ($res) {  # default as provided by Net::DNS, e.g. /etc/resolv.conf
-    @ns_addr_port = map { "[$_]:" . $res->{port} } @{$res->{nameservers}};
+    @ns_addr_port = map(untaint_var("[$_]:" . $res->{port}),
+                        @{$res->{nameservers}});
     dbg("dns: servers obtained from Net::DNS : %s", join(', ',@ns_addr_port));
   }
   return @ns_addr_port;
@@ -566,9 +568,13 @@ sub new_dns_packet {
     my $udp_payload_size = $self->{conf}->{dns_options}->{edns};
     if ($udp_payload_size && $udp_payload_size > 512) {
     # dbg("dns: adding EDNS ext, UDP payload size %d", $udp_payload_size);
-      my $optrr = Net::DNS::RR->new(Type => 'OPT', Name => '', TTL => 0,
-                                    Class => $udp_payload_size);
-      $packet->push('additional', $optrr);
+      if ($packet->UNIVERSAL::can('edns')) {  # available since Net::DNS 0.69
+        $packet->edns->size($udp_payload_size);
+      } else {
+        my $optrr = Net::DNS::RR->new(Type => 'OPT', Name => '', TTL => 0,
+                                      Class => $udp_payload_size);
+        $packet->push('additional', $optrr);
+      }
     }
   }
 
