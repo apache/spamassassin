@@ -37,6 +37,7 @@ lib/Mail/SpamAssassin/BayesStore/BDB.pm
 lib/Mail/SpamAssassin/BayesStore/DBM.pm
 lib/Mail/SpamAssassin/BayesStore/MySQL.pm
 lib/Mail/SpamAssassin/BayesStore/PgSQL.pm
+lib/Mail/SpamAssassin/BayesStore/Redis.pm
 lib/Mail/SpamAssassin/BayesStore/SDBM.pm
 lib/Mail/SpamAssassin/BayesStore/SQL.pm
 lib/Mail/SpamAssassin/Client.pm
@@ -347,6 +348,7 @@ t/data/spam/badctype1
 t/data/spam/badctype2
 t/data/spam/badmime.txt
 t/data/spam/badmime2.txt
+t/data/spam/badmime3.txt
 t/data/spam/base64.txt
 t/data/spam/bsmtp
 t/data/spam/bsmtpnull
