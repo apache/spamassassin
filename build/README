@@ -91,12 +91,13 @@ SPAMASSASSIN RELEASE PROCEDURE
   Verify that the X-Spam-* headers use the correct version string,
   without an SVN revision number (those are only for dev builds).
 
-- Temporary kludge check until bug 6297 is fixed properly:
-
-    grep nopublish rules/72_active.cf
-
-  This should return nothing.  If not, edit the rulesrc files and
-  add "tflags nopublish" lines as necessary.
+#- Temporary kludge check until bug 6297 is fixed properly:
+# NOTE: BUG IS MARKED RESOLVED / FIXED 
+#
+#    grep nopublish rules/72_active.cf
+#
+#  This should return nothing.  If not, edit the rulesrc files and
+#  add "tflags nopublish" lines as necessary.
 
 - create the Changes file.  Do this step on your own checkout, as
   the release checkout is read-only.   There are two options here:
@@ -147,25 +148,34 @@ SPAMASSASSIN RELEASE PROCEDURE
   later.)
 
 - SVN tag the release files.  This is done using "svn copy".
-  For a maintainance release (x.y.1, x.y.2):
+
+  - For a maintainance release (x.y.1, x.y.2):
 
     vers=3_1_7
 
-  For a trunk release (x.y.0):
-
-    vers=3_0_0
-
-  For a trunk pre-release (x.y.0-preZ) or alpha (x.y.0-alphaZ):
-
-    vers=3_3_0_alpha_2
-
-  Then run
+    Then run:
 
     repo=https://svn.apache.org/repos/asf/spamassassin
     svn delete -m "replaced old tag" $repo/tags/spamassassin_release_$vers
     svn copy -m "creating tag for release $vers" \
 	$repo/branches/3.3 $repo/tags/spamassassin_release_$vers
 
+  - For a trunk release (x.y.0):
+
+    vers=3_0_0
+
+  - For a trunk pre-release (x.y.0-preZ) or alpha (x.y.0-alphaZ):
+
+    vers=3_3_0_alpha_2
+
+    Then run:
+
+    repo=https://svn.apache.org/repos/asf/spamassassin
+    svn delete -m "replaced old tag" $repo/tags/spamassassin_release_$vers
+    svn copy -m "creating tag for release $vers" \
+        $repo/trunk $repo/tags/spamassassin_release_$vers
+
+    
   This will do a completely server-side tagging (which is the same as
   a branch really) of whatever the latest branch revision to be the new
   base of the tag release.
@@ -179,8 +189,9 @@ SPAMASSASSIN RELEASE PROCEDURE
 
   Check out the code from the tag you just made:
 
-    vers=3_3_0_alpha_2
-    repo=https://svn.apache.org/repos/asf/spamassassin
+    #These should be set from the previous command
+    #vers=3_3_0_alpha_2 
+    #repo=https://svn.apache.org/repos/asf/spamassassin
     rm -rf ~/relbuild
     svn co $repo/tags/spamassassin_release_$vers ~/relbuild
     cd ~/relbuild
@@ -201,7 +212,10 @@ SPAMASSASSIN RELEASE PROCEDURE
   if you get "gpg-agent" errors about not connecting to the PIN entry
   module, you didn't update your $PATH.
 
-- take a copy of the MD5sum line output.
+#THIS STEP APPEARS TO SERVE NO PURPOSE.  WHY? - take a copy of the MD5sum line output.
+
+- run "./build/repackage_latest_update_rules" to repackage the
+  latest file on updates.spamassassin.org.
 
 - test the tar.gz and zip files!  redo until they work!! ;)
 
@@ -210,7 +224,7 @@ SPAMASSASSIN RELEASE PROCEDURE
   links, fixing the MD5 and SHA1 checksums in this mail, and summarising
   the important changes from the Changes file.
 
-    cp build/announcements/3.1.7.txt build/announcements/3.1.8.txt
+    cp build/announcements/3.3.2.txt build/announcements/3.4.0.txt
     svn add !$
     vi !$
 
@@ -234,6 +248,8 @@ SPAMASSASSIN RELEASE PROCEDURE
     cp build/announcements/$version.txt ~/public_html/devel/PROPOSED-$version.txt
 
   Pre-releases and RCs require just lazy consensus -- ie. no objections.
+
+***TESTED BY KAM TO THIS POINT AS OF 12-31-2012****
 
 - (for a full release) 3 +1's votes from PMC members are required to 
   proceed with an official (not pre-release) ASF software release.
