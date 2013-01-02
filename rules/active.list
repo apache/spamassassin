@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-coi-bulk axb-foo axb-fraud axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bpoliakoff darxus grenier jarif kpg-gah mas-cps mas-mas mmiroslaw-ham mmiroslaw-spam zmi; day 2: axb-coi-bulk axb-foo axb-fraud axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bpoliakoff darxus grenier jarif kpg-gah llanga mas-cps mas-mas mmiroslaw-ham mmiroslaw-spam zmi; day 3: axb-coi-bulk axb-foo axb-fraud axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bpoliakoff darxus grenier jarif kpg-gah llanga mas-cps mas-mas zmi
+# with results from: day 1: axb-coi-bulk axb-foo axb-fraud axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bpoliakoff darxus grenier jarif kpg-gah zmi; day 2: axb-coi-bulk axb-foo axb-fraud axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bpoliakoff darxus grenier jarif kpg-gah llanga zmi; day 3: axb-coi-bulk axb-foo axb-fraud axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bpoliakoff darxus grenier jarif kpg-gah llanga mas-cps mas-mas mmiroslaw-ham mmiroslaw-spam zmi
 
 # good enough
 ACH_CANCELLED
@@ -62,12 +62,6 @@ AXB_BODYMAIL_SBL112884
 AXB_XMAILER_MIMEOLE_OL_024C2
 
 # good enough
-AXB_XMAILER_MIMEOLE_OL_09BB4
-
-# good enough
-AXB_XMAILER_MIMEOLE_OL_12495
-
-# good enough
 AXB_XMAILER_MIMEOLE_OL_1C90E
 
 # good enough
@@ -87,9 +81,6 @@ AXB_XMAILER_MIMEOLE_OL_4379D
 
 # good enough
 AXB_XMAILER_MIMEOLE_OL_49E58
-
-# good enough
-AXB_XMAILER_MIMEOLE_OL_4B815
 
 # good enough
 AXB_XMAILER_MIMEOLE_OL_5A17A
@@ -215,6 +206,9 @@ DATE_DOTS
 DATE_IN_FUTURE_96_Q
 
 # good enough
+DATE_IN_FUTURE_Q_PLUS
+
+# good enough
 DEAR_BENEFICIARY
 
 # good enough
@@ -287,9 +281,6 @@ FBI_SPOOF
 FB_ACHIEVE_BACH
 
 # good enough
-FB_CIALIS_LEO3
-
-# good enough
 FB_IMAGIRL
 
 # good enough
@@ -300,9 +291,6 @@ FH_FAKE_RCVD_LINE
 
 # good enough
 FH_FAKE_RCVD_LINE_B
-
-# good enough
-FH_FROM_GET_NAME
 
 # good enough
 FH_HAS_XAIMC
@@ -392,9 +380,6 @@ FROM_MISSP_URI
 FROM_MISSP_USER
 
 # good enough
-FRT_BIGGERMEM1
-
-# good enough
 FSL_CTYPE_WIN1251
 
 # good enough
@@ -467,9 +452,6 @@ HEAD_LONG
 HK_LOTTO
 
 # good enough
-HK_NAME_DRUGS
-
-# good enough
 HK_NAME_FM_FROM
 
 # good enough
@@ -538,14 +520,8 @@ KB_RATWARE_OUTLOOK_MID
 # good enough
 KHOP_BIG_TO_CC
 
-# good enough
-LONG_TERM_PRICE
-
 # tflags publish
 LOTS_OF_MONEY
-
-# good enough
-LOTTERY_1
 
 # good enough
 LOTTERY_PH_004470
@@ -558,6 +534,9 @@ LOTTO_AGENT_RPLY
 
 # good enough
 LOTTO_DEPT
+
+# good enough
+LOTTO_URI
 
 # good enough
 MAILER_EQ_ORG
@@ -845,9 +824,6 @@ RCVD_IN_SORBS_ZOMBIE
 RCVD_IN_XBL
 
 # good enough
-RDNS_LOCALHOST
-
-# good enough
 REPLYTO_WITHOUT_TO_CC
 
 # good enough
@@ -858,9 +834,6 @@ SERGIO_SUBJECT_VIAGRA01
 
 # good enough
 SHARE_50_50
-
-# good enough
-SHORT_TERM_PRICE
 
 # good enough
 SINGLE_HEADER_2K
@@ -941,13 +914,13 @@ TVD_PH_BODY_META
 TVD_PH_SUBJ_META1
 
 # good enough
+TVD_QUAL_MEDS
+
+# good enough
 TVD_RCVD_IP
 
 # good enough
 TVD_RCVD_IP4
-
-# good enough
-TVD_RCVD_SINGLE
 
 # good enough
 TVD_SUBJ_ACC_NUM
@@ -956,13 +929,34 @@ TVD_SUBJ_ACC_NUM
 TVD_VISIT_PHARMA
 
 # good enough
-DATE_IN_FUTURE_Q_PLUS
+AXB_XMAILER_MIMEOLE_OL_F790C
 
 # good enough
-KHOP_JS_OBFUSCATION
+AXB_XRCVD_EYOU_SEND
 
 # good enough
-LOTTO_URI
+FRT_ERECTION
+
+# good enough
+FS_LITTLE_PILL
+
+# good enough
+HK_GOLDDUST
+
+# good enough
+HK_LOTTO_NAME
+
+# good enough
+HK_RANDOM_REPLYTO
+
+# good enough
+OBFU_HTML_ATTACH
+
+# good enough
+SINGLE_HEADER_4K
+
+# good enough
+TVD_SUBJ_NUM_OBFU_MINFP
 
 # tflags userconf
 UNPARSEABLE_RELAY
