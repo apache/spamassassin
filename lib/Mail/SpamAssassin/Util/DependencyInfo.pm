@@ -258,6 +258,10 @@ $have_sha ? {
 
 my @BINARIES = ();
 
+my $lwp_note = "   Because LWP does not support IPv6, sa-update as of 3.4.0 will use
+   the binaries curl, wget or fetch to download rule updates with LWP used 
+   as a fallback if none of the binaries exist.";
+
 my @OPTIONAL_BINARIES = (
 {
   binary => 'gpg',
@@ -268,6 +272,23 @@ my @OPTIONAL_BINARIES = (
   desc => 'The "sa-update" program requires this executable to verify  
   encryption signatures.  It is not recommended, but you can use 
   "sa-update" with the --no-gpg to skip the verification. ',
+},
+{
+  binary => 'wget',
+  version => '0',
+  recommended_min_version => '1.8.2',
+  version_check_params => '--version',
+  version_check_regex => 'Gnu Wget ([\d\.]*)',
+  desc => $lwp_note,
+},
+
+# I DO NOT HAVE FETCH TO CHECK.
+{
+  binary => 'fetch',
+  version => '0',
+  version_check_params => '--version',
+  version_check_regex => 'fetch ([\d\.]*)',
+  desc => $lwp_note,
 }
 );
 
