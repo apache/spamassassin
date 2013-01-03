@@ -228,6 +228,13 @@ let the MTA queue up the mails for a retry later.  See also L<"EXIT CODES">.
 
 This also disables the TCP fail-over behaviour from B<-d>.
 
+=item B<-X>, B<--unavailable-tempfail>
+
+When disabling 'safe fallback' with B<-x>, this option will turn EX_UNAVAILABLE
+errors into EX_TEMPFAIL. This may allow your MTA to defer mails with a 
+temporary SMTP error instead of bouncing them with a permanent SMTP error. 
+See also L<"EXIT CODES">.
+
 =item B<-y>, B<--tests>
 
 Just output the names of the tests hit to stdout, on one line, separated

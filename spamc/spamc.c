@@ -197,6 +197,12 @@ print_usage(void)
 
     usg("  -x, --no-safe-fallback\n"
         "                      Don't fallback safely.\n");
+    usg("  -X, --unavailable-tempfail\n"
+        "                      When using -x, turn 'unavailable' error into\n"
+        "                      'tempfail'. This may be useful for an MTAs\n"
+        "                      to defer emails with a temporary SMTP error\n"
+	"                      instead of bouncing with a permanent SMTP\n"
+        "                      error.\n");
     usg("  -l, --log-to-stderr Log errors and warnings to stderr.\n");
 #ifndef _WIN32
     usg("  -e, --pipe-to command [args]\n"
@@ -229,9 +235,9 @@ read_args(int argc, char **argv,
           struct transport *ptrn)
 {
 #ifndef _WIN32
-    const char *opts = "-BcrR46d:e:fyp:n:t:s:u:L:C:xzSHU:ElhVKF:0:1:2";
+    const char *opts = "-BcrR46d:e:fyp:n:t:s:u:L:C:xXzSHU:ElhVKF:0:1:2";
 #else
-    const char *opts = "-BcrR46d:fyp:n:t:s:u:L:C:xzSHElhVKF:0:1:2";
+    const char *opts = "-BcrR46d:fyp:n:t:s:u:L:C:xXzSHElhVKF:0:1:2";
 #endif
     int opt;
     int ret = EX_OK;
@@ -262,6 +268,7 @@ read_args(int argc, char **argv,
        { "headers", no_argument, 0, 2 },
        { "exitcode", no_argument, 0, 'E' },
        { "no-safe-fallback", no_argument, 0, 'x' },
+       { "unavailable-tempfail", no_argument, 0, 'X' },
        { "log-to-stderr", no_argument, 0, 'l' },
        { "pipe-to", required_argument, 0, 'e' },
        { "help", no_argument, 0, 'h' },
@@ -437,6 +444,16 @@ read_args(int argc, char **argv,
             {
                 flags &= (~SPAMC_SAFE_FALLBACK);
                 break;
+            }
+            case 'X':
+            {
+		/* Only activates if -x is also used */
+	        if (!(flags & SPAMC_SAFE_FALLBACK)) {
+                	flags |= SPAMC_UNAVAIL_TEMPFAIL;
+		} else {
+			libspamc_log(flags, LOG_ERR, "This option is only valid if -x is set first");
+		}
+		break;
             }
             case 'y':
             {
@@ -1038,6 +1055,11 @@ main(int argc, char *argv[])
         }
         else if (use_exit_code) {
             ret = result;
+	}
+	
+        /* If -x and -X are used, change from EX_UNAVAILABLE TO EX_TEMPFAIL - bug 6717 */
+	if ((!(flags & SPAMC_SAFE_FALLBACK)) && (flags & SPAMC_UNAVAIL_TEMPFAIL) && (ret == EX_UNAVAILABLE)) {
+	    ret = EX_TEMPFAIL;
 	}
     }
     

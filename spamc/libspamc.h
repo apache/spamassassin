@@ -134,6 +134,11 @@
 /* December 5, 2007 duncf: send log messages to callback */
 #define SPAMC_LOG_TO_CALLBACK (1<<14)
 
+/* December 6, 2011 Sebastian Wiesinger <sebastian@karotte.org>:
+ * Turn EX_UNAVAILABLE into EX_TEMPFAIL - bug 6717
+ * */
+#define SPAMC_UNAVAIL_TEMPFAIL (1<<13)
+
 #define SPAMC_MESSAGE_CLASS_SPAM 1
 #define SPAMC_MESSAGE_CLASS_HAM  2
 
