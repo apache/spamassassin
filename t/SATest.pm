@@ -1004,9 +1004,13 @@ sub can_use_net_dns_safely {
   # on non-Linux unices as root, due to a bug in Sys::Hostname::Long
   # (which is used by Net::DNS)
 
-  return 1 if eval { require Sys::Hostname::Long; Sys::Hostname::Long->VERSION(1.4) };
   return 1 if ($< != 0);
   return 1 if ($^O =~ /^(linux|mswin|dos|os2)/oi);
+
+  my $has_unsafe_hostname =
+    eval { require Sys::Hostname::Long && Sys::Hostname::Long->VERSION < 1.4 };
+  return 1 if !$has_unsafe_hostname;
+
   return;
 }
 
