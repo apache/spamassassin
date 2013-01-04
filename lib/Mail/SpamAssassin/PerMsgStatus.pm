@@ -2469,7 +2469,10 @@ sub got_hit {
   } else {
     $rule_descr = $conf_ref->get_description_for_rule($rule);  # static
   }
-  $rule_descr = $rule  if !defined $rule_descr || $rule_descr eq '';
+  # Bug 6880 Set Rule Description to something that says no rule
+  #$rule_descr = $rule  if !defined $rule_descr || $rule_descr eq '';
+  $rule_descr = "No description available." if !defined $rule_descr || $rule_descr eq '';
+
   $self->_handle_hit($rule,
             $score,
             $area,

@@ -495,6 +495,7 @@ failed_line:
 
   $self->lint_check();
   $self->set_default_scores();
+  $self->check_for_missing_descriptions();
 
   delete $self->{scoresonly};
 }
@@ -635,6 +636,21 @@ sub set_default_scores {
       $set_score = -$set_score if ( ($conf->{tflags}->{$k}||'') =~ /\bnice\b/ );
       for my $index (0..3) {
         $conf->{scoreset}->[$index]->{$k} = $set_score;
+      }
+    }
+  }
+}
+
+# loop through all the tests and if we are missing a description with debug
+# set, throw a warning except for testing T_ or meta __ rules.
+sub check_for_missing_descriptions {
+  my ($self) = @_;
+  my $conf = $self->{conf};
+
+  while ( my $k = each %{$conf->{tests}} ) {
+    if ($k !~ m/^(?:T_|__)/i) {
+      if ( ! exists $conf->{descriptions}->{$k} ) {
+        dbg("config: warning: no description set for $k");
       }
     }
   }
