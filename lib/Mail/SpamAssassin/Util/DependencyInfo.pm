@@ -281,13 +281,20 @@ my @OPTIONAL_BINARIES = (
   version_check_regex => 'Gnu Wget ([\d\.]*)',
   desc => $lwp_note,
 },
-
-# I DO NOT HAVE FETCH TO CHECK.
+{
+  binary => 'curl',
+  version => '0',
+  recommended_min_version => '7.2.14',
+  version_check_params => '--version',
+  version_check_regex => 'curl ([\d\.]*)',
+  desc => $lwp_note,
+},
+#Fetch is a FreeBSD Product. We do not believe it has any way to check the version from
+#the command line.  It has been tested with FreeBSD version 8 through 9.1.
 {
   binary => 'fetch',
   version => '0',
-  version_check_params => '--version',
-  version_check_regex => 'fetch ([\d\.]*)',
+  
   desc => $lwp_note,
 }
 );
@@ -372,8 +379,8 @@ sub try_binary {
 
   my $binary_version;
   my $installed = 0;
-  my $version_meets_required = 0;
-  my $version_meets_recommended = 0;
+  my $version_meets_required = 1;
+  my $version_meets_recommended = 1;
   my $required_version = $bindef->{version};
   my $recommended_version = $bindef->{recommended_min_version};
   my $errtype;
@@ -407,15 +414,21 @@ sub try_binary {
     $command =~ s/[^a-z0-9\/]//ig;
 
     #GET THE VERSION
-    $command .= " $bindef->{'version_check_params'} 2>&1";
+    $command .= " ";
+    if (defined $bindef->{'version_check_params'}) {
+      $command .= $bindef->{'version_check_params'};
+    }
+    $command .= " 2>&1";
     $output = `$command`;
 
     if (!defined $output) {
       $installed = 0;
 
     } else {
-      $output =~ m/$bindef->{'version_check_regex'}/;
-      $binary_version = $1;
+      if (defined $bindef->{'version_check_regex'}) {
+        $output =~ m/$bindef->{'version_check_regex'}/;
+        $binary_version = $1;
+      }
 
       #TEST IF VERSION IS GREATER THAN REQUIRED
       if (defined $required_version) {
