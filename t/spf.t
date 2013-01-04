@@ -10,16 +10,17 @@ use constant HAS_MAILSPF => eval { require Mail::SPF; };
 # bug 3806:
 # Do not run this test with version of Sys::Hostname::Long older than 1.4
 # on non-Linux unices as root, due to a bug in Sys::Hostname::Long
-# (which is used by Net::DNS and by Mail::SPF::Query)
+# (it is used by Mail::SPF::Query, which is now obsoleted by Mail::SPF)
 use constant IS_LINUX   => $^O eq 'linux';
 use constant IS_WINDOWS => ($^O =~ /^(mswin|dos|os2)/oi);
 use constant AM_ROOT    => $< == 0;
-use constant HAS_SAFE_HOSTNAME =>
-  eval { require Sys::Hostname::Long; Sys::Hostname::Long->VERSION(1.4) };
+
+use constant HAS_UNSAFE_HOSTNAME =>  # Bug 3806 - module exists and is old
+  eval { require Sys::Hostname::Long && Sys::Hostname::Long->VERSION < 1.4 };
 
 use constant DO_RUN =>
   TEST_ENABLED && (HAS_SPFQUERY || HAS_MAILSPF) &&
-  (HAS_SAFE_HOSTNAME || !AM_ROOT || IS_LINUX || IS_WINDOWS);
+  (!HAS_UNSAFE_HOSTNAME || !AM_ROOT || IS_LINUX || IS_WINDOWS);
 
 BEGIN {
 
