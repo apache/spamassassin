@@ -15,9 +15,10 @@ if (-e 'test_dir') {            # running from test directory, not ..
   $prefix = '..';
 }
 
-use strict;
+use lib '.'; use lib 't';
 use SATest; sa_t_init("rule_names");
-use Test;
+
+use strict;
 use Mail::SpamAssassin;
 
 BEGIN {
@@ -25,10 +26,25 @@ BEGIN {
   or do { require Digest::SHA1; import Digest::SHA1 qw(sha1) }
 }
 
+our $RUN_THIS_TEST;
+
+BEGIN {
+  $RUN_THIS_TEST = conf_bool('run_rule_name_tests');
+};
+
+if (!$RUN_THIS_TEST) {
+  print "NOTE: this test requires 'run_rule_name_tests' set to 'y'.\n";
+  exit;
+}
+
 use vars qw(%patterns %anti_patterns);
 
 # initialize SpamAssassin
 my $sa = create_saobj({'dont_copy_prefs' => 1});
+
+# allow_user_rules, otherwise $sa->{conf}->{test_types} will be
+# deleted by SA::Conf::Parser::finish_parsing()
+$sa->{conf}->{allow_user_rules} = 1;
 
 $sa->init(0); # parse rules
 
@@ -55,10 +71,9 @@ for my $test (@tests) {
   $anti_patterns{"$test,"} = "P_" . $i++;
 }
 
-our $RUN_THIS_TEST;
-
-BEGIN {
-  $RUN_THIS_TEST = conf_bool('run_rule_name_tests');
+use Test;
+{ # don't run this in a BEGIN phase, the %patterns and %anti_patterns
+  # must be assembled first in order to get the planned test count
 
   plan tests => (!$RUN_THIS_TEST ? 0 : 
                   scalar(keys %anti_patterns) + scalar(keys %patterns)),
@@ -67,9 +82,6 @@ BEGIN {
       "\n        but must be fixed before release\n\n";
   };
 };
-
-print "NOTE: this test requires 'run_rule_name_tests' set to 'y'.\n";
-exit unless $RUN_THIS_TEST;
 
 # ---------------------------------------------------------------------------
 
