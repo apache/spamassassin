@@ -233,8 +233,11 @@ sub probably_unused_spamd_port {
   return 0 if $NO_SPAMD_REQUIRED;
 
   my $port;
-  my @nstat = ();
-  if (open(NSTAT, "netstat -a -n 2>&1 |")) {
+  my @nstat;
+  local $ENV{'PATH'} = '/bin:/usr/bin:/usr/local/bin';  # must not be tainted
+  if (!open(NSTAT, "netstat -a -n 2>&1 |")) {
+    # not too bad if failing on some architecture, with some luck should be alright
+  } else {
     @nstat = grep(/^\s*tcp/i, <NSTAT>);
     close(NSTAT);
   }
