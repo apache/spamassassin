@@ -420,6 +420,10 @@ sub parse_received_line {
   elsif (/authenticated/ && /^from .*?(?:\](?: \([^)]*\))?\)|\)\]) .*?\(.*?authenticated.*?\).*? by/) {
     $auth = 'Sendmail';
   }
+  # workaround for GMX, which authenticates users but does not indicate it properly - # SMTP version
+  elsif (/from \S* \((?:HELO|EHLO) (\S*)\) \[(${IP_ADDRESS})\] by (mail\.gmx\.(?:net|com)) \([^\)]+\) with ((?:ESMTP|SMTP))/) {
+    $auth = "GMX ($4 / $3)";
+  }
   # Critical Path Messaging Server
   elsif (/ \(authenticated as /&&/\) by .+ \(\d{1,2}\.\d\.\d{3}(?:\.\d{1,3})?\) \(authenticated as .+\) id /) {
     $auth = 'CriticalPath';

@@ -18,7 +18,7 @@ if (-e 'test_dir') {            # running from test directory, not ..
 
 use lib '.'; use lib 't';
 use SATest; sa_t_init("rcvd_parser");
-use Test; BEGIN { plan tests => 143 };
+use Test; BEGIN { plan tests => 144 };
 use strict;
 
 # format is:
@@ -404,8 +404,14 @@ my %data = (
   'from gate.jakob.de ([217.145.101.130]:60178 helo=gate2.jakob.de) by vps832469583.serverpool.info (envelope-from <support@verleihshop.de>) with esmtps (TLS-1.0:DHE_RSA_3DES_EDE_CBC_SHA:24) (Exim 4.50) id 1H3KFP-0005pI-08 for dvd@axelcity.de; Sat, 06 Jan 2007 23:42:55 +0100' =>
   '[ ip=217.145.101.130 rdns=gate.jakob.de helo=gate2.jakob.de by=vps832469583.serverpool.info ident= envfrom=support@verleihshop.de intl=0 id=1H3KFP-0005pI-08 auth= msa=0 ]',
 
-  'from dslb-082-083-045-064.pools.arcor-ip.net (EHLO homepc) [82.83.45.64] by mail.gmx.net (mp010) with SMTP; 03 Feb 2007 13:13:47 +0100' =>
-  '[ ip=82.83.45.64 rdns=dslb-082-083-045-064.pools.arcor-ip.net helo=homepc by=mail.gmx.net ident= envfrom= intl=0 id= auth= msa=0 ]',
+  #6877 SMTP 
+  'from stgt-5f70f8a3.pool.mediaWays.net (EHLO user588a01834c) [95.112.248.163] by mail.gmx.net (mp033) with SMTP; 23 Nov 2012 19:06:20 +0100' =>
+  '[ ip=95.112.248.163 rdns=stgt-5f70f8a3.pool.mediaWays.net helo=user588a01834c by=mail.gmx.net ident= envfrom= id= auth=GMX (SMTP / mail.gmx.net) msa=0 ]',
+
+  #6877 HTTP - NO NEW EXEMPTION NEEDED
+  'from 37.5.238.154 by www001.gmx.net with HTTP; Wed, 28 Nov 2012 00:57:41 +0100 (CET)',
+  '[ ip=37.5.238.154 rdns= helo= by=www001.gmx.net ident= envfrom= id= auth=HTTP msa=0 ]',
+
 
   'from [86.122.158.69] by mta2.iomartmail.com; Thu, 2 Aug 2007 21:50:04 -0200' =>
   '[ ip=86.122.158.69 rdns= helo=!86.122.158.69! by=mta2.iomartmail.com ident= envfrom= id= auth= msa=0 ]',
