@@ -44,25 +44,36 @@ tstprefs (qq{
    loadplugin Mail::SpamAssassin::Plugin::Test
 
    body FOO1 /click here and e= nter your/i
+   describe FOO1 Test rule
    body FOO2 /click here and e= nter your/i
+   describe FOO2 Test rule
 
    # should not be found, not a dup (/i)
    body FOO3 /click here and e= nter your/
+   describe FOO3 Test rule
 
    # should not be found, not dup since different type
    rawbody RAWFOO /click here and e= nter your/i
+   describe RAWFOO Test rule
 
    header HDR1 Subject =~ /stained/
+   describe HDR1 Test rule
    header HDR2 Subject =~ /stained/
+   describe HDR2 Test rule
 
    # should not be merged -- eval rules (bug 5959)
-   header HDREVAL1 eval:check_test_plugin()
+   header HDREVAL1 eval:check_test_plugin() 
+   describe HDREVAL1 Test rule
    header HDREVAL2 eval:check_test_plugin()
+   describe HDREVAL2 Test rule
 
    meta META1 (1)
+   describe META1 Test rule
    meta META2 (META1 && META3)
+   describe META2 Test rule
    meta META3 (1)
    priority META3 -500
+   describe META3 Test rule
 
 });
 
