@@ -28,8 +28,11 @@ BEGIN {
 
 our $RUN_THIS_TEST;
 
+use Test;
 BEGIN {
   $RUN_THIS_TEST = conf_bool('run_rule_name_tests');
+
+  plan tests => 0  if !$RUN_THIS_TEST;
 };
 
 if (!$RUN_THIS_TEST) {
@@ -71,12 +74,11 @@ for my $test (@tests) {
   $anti_patterns{"$test,"} = "P_" . $i++;
 }
 
-use Test;
-{ # don't run this in a BEGIN phase, the %patterns and %anti_patterns
+{ # couldn't call Test::plan in a BEGIN phase, the %patterns and %anti_patterns
   # must be assembled first in order to get the planned test count
 
-  plan tests => (!$RUN_THIS_TEST ? 0 : 
-                  scalar(keys %anti_patterns) + scalar(keys %patterns)),
+  plan tests => scalar(keys %anti_patterns) + scalar(keys %patterns),
+
   onfail => sub {
       warn "\n\n   Note: rule_name failures may be only cosmetic" .
       "\n        but must be fixed before release\n\n";
