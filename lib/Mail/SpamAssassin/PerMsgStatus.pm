@@ -53,6 +53,7 @@ use strict;
 use warnings;
 use re 'taint';
 
+use Errno qw(ENOENT);
 use Time::HiRes qw(time);
 
 use Mail::SpamAssassin::Constants qw(:sa);
@@ -2726,8 +2727,11 @@ temporary file and uncaches the filename.
 sub delete_fulltext_tmpfile {
   my ($self) = @_;
   if (defined $self->{fulltext_tmpfile}) {
-    unlink $self->{fulltext_tmpfile}
-      or die "cannot unlink ".$self->{fulltext_tmpfile}.": $!";
+    if (!unlink $self->{fulltext_tmpfile}) {
+      my $msg = sprintf("cannot unlink %s: %s", $self->{fulltext_tmpfile}, $!);
+      # don't fuss too much if file is missing, perhaps it wasn't even created
+      if ($! == ENOENT) { warn $msg } else { die $msg }
+    }
     $self->{fulltext_tmpfile} = undef;
   }
 }
