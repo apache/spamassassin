@@ -84,6 +84,16 @@ describe       URI_NUMERIC_CCTLD     CCTLD URI with multiple numeric subdomains
 header  __PHP_NOVER_MUA       X-Mailer =~ /^PHP$/
 header  __PHPMAILER_MUA       X-Mailer =~ /^PHPMailer\b/
 
+# __PHP_NOVER_MUA most spam hits are on messages scoring < 5 points
+ifplugin Mail::SpamAssassin::Plugin::DKIM
+  meta    PHP_NOVER_MUA       __PHP_NOVER_MUA && !__DKIM_DEPENDABLE && !__TO_NO_BRKTS_HTML_ONLY && !__MSGID_OK_DIGITS && !__UPPERCASE_25_50 
+else
+  meta    PHP_NOVER_MUA       __PHP_NOVER_MUA && !__TO_NO_BRKTS_HTML_ONLY && !__MSGID_OK_DIGITS && !__UPPERCASE_25_50 && !
+endif
+score     PHP_NOVER_MUA       3.50	# limit
+describe  PHP_NOVER_MUA       Mail from PHP with no version number
+
+
 # From should have whitespace between the comment and the address
 # Better S/O, good enough for standalone rule
 header         __FROM_MISSPACED      From =~ /^\s*"[^"]*"</

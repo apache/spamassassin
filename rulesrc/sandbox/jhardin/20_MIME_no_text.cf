@@ -12,9 +12,10 @@ meta    __PHP_MUA             __PHP_MUA_1 || __PHP_MUA_2
 ifplugin Mail::SpamAssassin::Plugin::MIMEHeader
   mimeheader  __ANY_TEXT_ATTACH Content-Type =~ /text\/\w+/i
 
-  meta        MIME_NO_TEXT  (__CTYPE_MULTIPART_ANY && !__ANY_TEXT_ATTACH)
-  score       MIME_NO_TEXT  2.00	# limit
-  describe    MIME_NO_TEXT  No text body parts
+  meta        __MIME_NO_TEXT    (__CTYPE_MULTIPART_ANY && !__ANY_TEXT_ATTACH)
+  meta        MIME_NO_TEXT      __MIME_NO_TEXT && !__MSGID_APPLEMAIL && !__USER_AGENT_APPLEMAIL && !__HAS_IN_REPLY_TO && !__HAS_X_REF && !__HS_SUBJ_RE_FW
+  score       MIME_NO_TEXT      2.00	# limit
+  describe    MIME_NO_TEXT      No (properly identified) text body parts
 
   meta        MIME_PHP_NO_TEXT  (MIME_NO_TEXT && __PHP_MUA)
   #score       MIME_PHP_NO_TEXT  2.00
