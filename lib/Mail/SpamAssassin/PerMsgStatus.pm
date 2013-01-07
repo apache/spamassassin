@@ -1990,14 +1990,19 @@ sub get_uri_detail_list {
   # do this so we're sure metadata->html is setup
   my %parsed = map { $_ => 'parsed' } $self->_get_parsed_uri_list();
 
+
+  # This parses of DKIM for URIs disagrees with documentation and bug 6700 votes to disable
+  # this functionality
+  # 2013-01-07
+
   # Look for the domain in DK/DKIM headers
-  my $dk = join(" ", grep {defined} ( $self->get('DomainKey-Signature',undef),
-                                      $self->get('DKIM-Signature',undef) ));
-  while ($dk =~ /\bd\s*=\s*([^;]+)/g) {
-    my $dom = $1;
-    $dom =~ s/\s+//g;
-    $parsed{$dom} = 'domainkeys';
-  }
+  #my $dk = join(" ", grep {defined} ( $self->get('DomainKey-Signature',undef),
+  #                                    $self->get('DKIM-Signature',undef) ));
+  #while ($dk =~ /\bd\s*=\s*([^;]+)/g) {
+  #  my $dom = $1;
+  #  $dom =~ s/\s+//g;
+  #  $parsed{$dom} = 'domainkeys';
+  #}
 
   # get URIs from HTML parsing
   # use the metadata version since $self->{html} may not be setup
