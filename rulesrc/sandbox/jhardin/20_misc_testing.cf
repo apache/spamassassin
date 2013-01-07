@@ -88,7 +88,7 @@ header  __PHPMAILER_MUA       X-Mailer =~ /^PHPMailer\b/
 ifplugin Mail::SpamAssassin::Plugin::DKIM
   meta    PHP_NOVER_MUA       __PHP_NOVER_MUA && !__DKIM_DEPENDABLE && !__TO_NO_BRKTS_HTML_ONLY && !__MSGID_OK_DIGITS && !__UPPERCASE_25_50 
 else
-  meta    PHP_NOVER_MUA       __PHP_NOVER_MUA && !__TO_NO_BRKTS_HTML_ONLY && !__MSGID_OK_DIGITS && !__UPPERCASE_25_50 && !
+  meta    PHP_NOVER_MUA       __PHP_NOVER_MUA && !__TO_NO_BRKTS_HTML_ONLY && !__MSGID_OK_DIGITS && !__UPPERCASE_25_50
 endif
 score     PHP_NOVER_MUA       3.50	# limit
 describe  PHP_NOVER_MUA       Mail from PHP with no version number
