@@ -120,6 +120,10 @@ SPAMASSASSIN RELEASE PROCEDURE
     3.1.0 work (created 3.0 branch); replace with the correct rev number
     for the point you want to start at if different.
 
+- Word wrap the Changes file with something like 
+
+    'fold -sw 74 Changes'
+
 - run "make distcheck" to ensure all files are included in the
   distribution that should be, and to ensure all files that are listed
   in the MANIFEST also exist in SVN.
@@ -250,6 +254,16 @@ SPAMASSASSIN RELEASE PROCEDURE
   Pre-releases and RCs require just lazy consensus -- ie. no objections.
 
 ***TESTED BY KAM TO THIS POINT AS OF 12-31-2012****
+
+- (for a pre or rc release), - upload .tar.gz (not .bz2) tarball to CPAN
+  at http://pause.cpan.org/:
+
+        https://pause.perl.org/pause/authenquery?ACTION=add_uri
+
+  See notes below for issues on indexing but the tar should be named in a 
+  manner that CPAN will process it as a Developer Release per
+
+  http://www.cpan.org/modules/04pause.html#developerreleases
 
 - (for a full release) 3 +1's votes from PMC members are required to 
   proceed with an official (not pre-release) ASF software release.
