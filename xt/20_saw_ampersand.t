@@ -12,13 +12,41 @@ BEGIN {
   }
 }
 
-use lib '.'; use lib '../t';
-use SATest; sa_t_init("saw_ampersand");
+use lib '../t';
+use SATest; 
+sa_t_init("saw_ampersand");
 
-use Test::More;
-plan tests => 37;
+use Test;
 
 use Carp qw(croak);
+
+# Starting with perl 5.17.7, this entire test becomes irrelevant:
+# perldelta 5.17.7:
+#
+#  Core Enhancements
+#  $&, $` and $' are no longer slow       '
+#
+#  These three infamous variables have been redeemed and no longer slow
+#  down your program when used. Hence, the /p regular expression flag
+#  now does nothing.
+
+our $RUN_THIS_TEST;
+
+BEGIN {
+  $RUN_THIS_TEST = 1;
+  if ($] >= 5.017007) {
+    $RUN_THIS_TEST = 0;
+  }
+
+  plan tests => 0 if !$RUN_THIS_TEST;
+}
+
+if (!$RUN_THIS_TEST) {
+  print "NOTE: This test is unnecessary as of perl 5.17.7.\n";
+  exit;
+}
+
+plan tests => 37;
 
 # ---------------------------------------------------------------------------
 
