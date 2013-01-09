@@ -1284,7 +1284,7 @@ sub do_dns_query {
 
 ##############################################################################
 
-sub init_lwp() {
+sub init_lwp {
   if ($have_inet6 && (!$opt{'force_pf'} || $opt{'force_pf'} eq 'inet6')) {
     # LWP module has no support yet for IPv6.
     # Use hotpatching, copying IO::Socket::INET6 to IO::Socket::INET.

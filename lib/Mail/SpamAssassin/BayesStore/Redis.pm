@@ -50,7 +50,6 @@ shown zero in statistics.
 =cut
 
 package Mail::SpamAssassin::BayesStore::Redis;
-my $VERSION = 0.09;
 
 use strict;
 use warnings;
@@ -59,6 +58,8 @@ use re 'taint';
 use Errno qw(EBADF);
 use Mail::SpamAssassin::Util qw(untaint_var);
 use Mail::SpamAssassin::Timeout;
+
+my $VERSION = 0.09;
 
 BEGIN {
   eval { require Digest::SHA; import Digest::SHA qw(sha1); 1 }

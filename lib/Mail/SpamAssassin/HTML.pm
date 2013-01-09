@@ -1043,7 +1043,7 @@ sub name_to_rgb {
   return "#" . $color;
 }
 
-sub dec2hex($) {
+sub dec2hex {
   my ($dec) = @_;
   my ($pre) = '';
 
