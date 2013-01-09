@@ -842,7 +842,25 @@ sub read_config {
     shift @ARGV;
     my $k = shift @ARGV;
     my $v = shift @ARGV;
-    $conf{$k} = $v;
+
+    # Override only allows setting one variable.  Some xt tests need to set more
+    # config variables.  Adding : as a delimeter for config variable and value 
+    # parameters
+
+    @k = split (/:/,$k);
+    @v = split (/:/,$v);
+
+    if (scalar(@k) != scalar(@v)) {
+      print "Error: The number of override arguments for variables and values did not match\n!";
+      exit;
+    } else {
+      print "\nProcessing Overrides:\n\n";
+    }
+
+    for (my $i = 0; $i < scalar(@k); $i++) {
+      $conf{$k[$i]} = $v[$i];
+      print "Overriding $k[$i] with value $v[$i]\n";
+    }
   }
   close CF;
 }
