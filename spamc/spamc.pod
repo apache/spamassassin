@@ -295,7 +295,7 @@ Example:
 =head1 EXIT CODES
 
 By default, spamc will use the 'safe fallback' error recovery method.  That 
-means, it will always exit with an exit code if C<0>, even if an error was 
+means, it will always exit with an exit code of C<0>, even if an error was 
 encountered.  If any error occurrs, it will simply pass through the unaltered 
 message.
 
@@ -322,6 +322,10 @@ follows:
     EX_PROTOCOL     76  remote error in protocol
     EX_NOPERM       77  permission denied
     EX_CONFIG       78  configuration error
+
+    * The EX_TOOBIG error level is never used.  If spamc receives a message 
+      that is too big, the exit code will be 0.
+
     EX_TOOBIG       98  message was too big to process (see --max-size)
 
 =head1 SEE ALSO
