@@ -20,6 +20,8 @@ exit unless (DO_RUN);
 %patterns = (
 
    q{ X_URIBL_IPSONLY [URIs: 144.137.3.98] } => 'X_URIBL_IPSONLY',
+
+   # can be either uribl-example-b.com or uribl-example-c.com
    q{ X_URIBL_DOMSONLY [URIs: uribl-example} => 'X_URIBL_DOMSONLY',
 
 );

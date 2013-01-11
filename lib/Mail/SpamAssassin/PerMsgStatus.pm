@@ -87,7 +87,7 @@ sub new {
     'main'              => $main,
     'msg'               => $msg,
     'score'             => 0,
-    'test_logs'         => '',
+    'test_log_msgs'     => { },
     'test_names_hit'    => [ ],
     'subtest_names_hit' => [ ],
     'spamd_result_log_items' => [ ],
@@ -2282,7 +2282,7 @@ ENDOFEVAL
 #
 # the clearing of the test state is now inlined as:
 #
-# $self->{test_log_msgs} = ();        # clear test state
+# %{$self->{test_log_msgs}} = ();        # clear test state
 #
 # except for this public API for plugin use:
 
@@ -2294,7 +2294,7 @@ Clear test state, including test log messages from C<$status-E<gt>test_log()>.
 
 sub clear_test_state {
     my ($self) = @_;
-    $self->{test_log_msgs} = ();
+    %{$self->{test_log_msgs}} = ();
 }
 
 # internal API, called only by get_hit()
@@ -2352,7 +2352,7 @@ sub _handle_hit {
                   3+length($rule)+length($score)+length($area), " " x 28),
               ($self->{test_log_msgs}->{LONG} || ''));
 
-    $self->{test_log_msgs} = ();        # clear test logs
+    %{$self->{test_log_msgs}} = ();        # clear test logs
 }
 
 sub _wrap_desc {
@@ -2501,6 +2501,7 @@ sub got_hit {
 # TODO: this needs API doc
 sub test_log {
   my ($self, $msg) = @_;
+  local $1;
   while ($msg =~ s/^(.{30,48})\s//) {
     $self->_test_log_line ($1);
   }
@@ -2718,6 +2719,9 @@ sub create_fulltext_tmpfile {
   close $tmpfh  or die "error closing $tmpf: $!";
 
   $self->{fulltext_tmpfile} = $tmpf;
+
+  dbg("check: create_fulltext_tmpfile, written %d bytes to file %s",
+      length($$fulltext), $tmpf);
 
   return $self->{fulltext_tmpfile};
 }
