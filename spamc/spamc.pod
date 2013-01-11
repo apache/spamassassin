@@ -304,8 +304,9 @@ of C<1> if the message is determined to be spam.
 
 If one of the C<-x>, C<-L> or C<-C> options are specified, 'safe fallback' will
 be disabled, and certain error conditions related to communication between
-spamc and spamd will result in an error code.  The exit codes used are as
-follows:
+spamc and spamd will result in an error code.  
+
+The exit codes used are as follows:
 
     EX_USAGE        64  command line usage error
     EX_DATAERR      65  data format error       
