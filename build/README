@@ -138,10 +138,21 @@ SPAMASSASSIN RELEASE PROCEDURE
 - run the release test suite, which forces all tests to run and also
   applies an additional, more stringent set of tests.  This may require
   "sudo" privileges on your test box, and unusual CPAN modules like
-  "Devel::SawAmpersand", so you may have to skip some of this or ignore
-  some spurious failures.
+  "Devel::SawAmpersand", so you might have to skip some of this or ignore
+  some spurious failures. For example, I don't have re2c or dcc installed
+  on my devel system so I fail xt/50_dcc & xt/50_sa_compile.
 
-    prove -v xt
+
+  Additionally, this will run tests such as the spamd prefork which will
+  kill all running spamd processes.  This release test suite is intended
+  for a development environment.
+
+    OLD: run "prove -v xt".
+
+    NEW: running " make test TEST_FILES="xt/*.t" " is likely better.
+
+    Note: As of 2013-01-11, all of these tests can pass test 
+          with no tests skipped.
 
 - Check in the updated Changes file, and SpamAssassin.pm.
 
