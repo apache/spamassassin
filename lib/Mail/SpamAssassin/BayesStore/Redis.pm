@@ -59,8 +59,6 @@ use Errno qw(EBADF);
 use Mail::SpamAssassin::Util qw(untaint_var);
 use Mail::SpamAssassin::Timeout;
 
-my $VERSION = 0.09;
-
 BEGIN {
   eval { require Digest::SHA; import Digest::SHA qw(sha1); 1 }
   or do { require Digest::SHA1; import Digest::SHA1 qw(sha1) }
@@ -69,9 +67,12 @@ BEGIN {
 use Mail::SpamAssassin::BayesStore;
 use Mail::SpamAssassin::Logger;
 
-use vars qw( @ISA );
+use vars qw( @ISA $VERSION );
 
-@ISA = qw( Mail::SpamAssassin::BayesStore );
+BEGIN {
+  $VERSION = 0.09;
+  @ISA = qw( Mail::SpamAssassin::BayesStore );
+}
 
 use constant HAS_REDIS => eval { require Redis; };
 
