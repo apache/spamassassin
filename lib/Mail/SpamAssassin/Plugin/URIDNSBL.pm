@@ -921,7 +921,8 @@ sub complete_ns_lookup {
   my $conf = $scanner->{conf};
 
   my $packet = $ent->{response_packet};
-  my @answer = !defined $packet ? () : $packet->answer;
+  my @answer;
+  @answer = $packet->answer  if $packet;
 
   my $IPV4_ADDRESS = IPV4_ADDRESS;
   my $IP_PRIVATE = IP_PRIVATE;
@@ -1061,36 +1062,43 @@ sub lookup_single_dnsbl {
 sub complete_dnsbl_lookup {
   my ($self, $scanner, $ent, $dnsblip) = @_;
 
+  my(@answer,@subtests);
   my $conf = $scanner->{conf};
-  my @subtests;
+
+  my $zone = $ent->{zone};
+  my $dom = $ent->{obj}->{dom};
   my $rulename = $ent->{rulename};
+  my $packet = $ent->{response_packet};
+  @answer = $packet->answer  if $packet;
+
   my $rulecf = $conf->{uridnsbls}->{$rulename};
 
-  my $packet = $ent->{response_packet};
-  my @answer = !defined $packet ? () : $packet->answer;
+  # subrule tests (filters) for a given zone
+  my $uridnsbl_subs = $conf->{uridnsbl_subs}->{$zone};
 
-  my $uridnsbl_subs = $conf->{uridnsbl_subs}->{$ent->{zone}};
   foreach my $rr (@answer)
   {
-    next if ($rr->type ne 'A' && $rr->type ne 'TXT');
+    my($rdatastr,$rdatanum);
+    my $rr_type = $rr->type;
 
-    my $dom = $ent->{obj}->{dom};
-
-    # txtdata returns a non- zone-file-format encoded result, unlike rdatastr;
-    # avoid space-separated RDATA <character-string> fields if possible,
-    # txtdata provides a list of strings in a list context since Net::DNS 0.69
-    #
-    my $rdatastr = $rr->type eq 'TXT' ? join('',$rr->txtdata) : $rr->rdatastr;
-
-    my $rdatanum;
-    if ($rdatastr =~ m/^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/) {
-      $rdatanum = Mail::SpamAssassin::Util::my_inet_aton($rdatastr);
+    if ($rr_type eq 'A') {
+      $rdatastr = $rr->rdatastr;
+      if ($rdatastr =~ m/^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/) {
+        $rdatanum = Mail::SpamAssassin::Util::my_inet_aton($rdatastr);
+      }
+    } elsif ($rr_type eq 'TXT') {
+      # txtdata returns a non- zone-file-format encoded result, unlike rdatastr;
+      # avoid space-separated RDATA <character-string> fields if possible;
+      # txtdata provides a list of strings in list context since Net::DNS 0.69
+      $rdatastr = join('',$rr->txtdata);
+    } else {
+      next;
     }
 
     if (!$rulecf->{is_subrule}) {
       # this zone is a simple rule, not a set of subrules
       # skip any A record that isn't on 127/8
-      if ($rr->type eq 'A' && $rdatastr !~ /^127\./) {
+      if ($rr_type eq 'A' && $rdatastr !~ /^127\./) {
 	warn("uridnsbl: bogus rr for domain=$dom, rule=$rulename, id=" .
             $packet->header->id." rr=".$rr->string);
 	next;
@@ -1100,6 +1108,11 @@ sub complete_dnsbl_lookup {
     else {
       local($1,$2,$3);
       foreach my $subtest (keys (%{$uridnsbl_subs})) {
+
+      # dbg("uridnsbl: %s . %s -> %s, %s, sub:%s",
+      #     $dom, $zone, $rdatastr, $rulename,
+      #     join('.',@{$uridnsbl_subs->{$subtest}->{rulenames}}) );
+
         my $match;
         if ($subtest eq $rdatastr) {
           $match = 1;
@@ -1111,10 +1124,14 @@ sub complete_dnsbl_lookup {
           : $delim eq '-' ? $rdatanum >= $n1 && $rdatanum <= $n2  # range
           : $delim eq '/' ? ($rdatanum & $n2) == ($n1 & $n2)      # value/mask
           : 0;  
-        # dbg("uridnsbl: %s %s/%s/%s, %08x, %s",
-        #     $match?'Y':'N', $dom, $rulename,
-        #     join('.',@{$uridnsbl_subs->{$subtest}->{rulenames}}),
-        #     $rdatanum, !defined $n2 ? $n1 : "$n1 $delim $n2");
+
+        # dbg("uridnsbl: %s . %s -> %s, %s, %08x %s %s",
+        #     $dom, $zone, $rdatastr, $rulename, $rdatanum,
+        #     !defined $n2 ? sprintf('& %08x', $n1)
+        #     : $n1 == $n2 ? sprintf('== %08x', $n1)
+        #     :              sprintf('%08x%s%08x', $n1,$delim,$n2),
+        #     $match ? 'match' : 'no');
+
         }
         if ($match) {
           foreach my $subrulename (@{$uridnsbl_subs->{$subtest}->{rulenames}}) {

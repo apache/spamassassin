@@ -262,7 +262,7 @@ sub run_rbl_eval_tests {
     my $score = $pms->{conf}->{scores}->{$rulename};
     next unless $score;
 
-    $pms->{test_log_msgs} = ();        # clear test state
+    %{$pms->{test_log_msgs}} = ();        # clear test state
 
     my ($function, @args) = @{$test};
 
@@ -298,7 +298,7 @@ sub run_generic_tests {
 
   my $ruletype = $opts{type};
   dbg("rules: running $ruletype tests; score so far=".$pms->{score});
-  $pms->{test_log_msgs} = ();        # clear test state
+  %{$pms->{test_log_msgs}} = ();        # clear test state
 
   my $conf = $pms->{conf};
   my $doing_user_rules = $conf->{want_rebuild_for_type}->{$opts{consttype}};
@@ -1217,7 +1217,7 @@ sub run_eval_tests {
     $evalstr .= '
     if ($scoresptr->{q#'.$rulename.'#}) {
       $rulename = q#'.$rulename.'#;
-      $self->{test_log_msgs} = ();
+      %{$self->{test_log_msgs}} = ();
     ';
  
     # only need to set current_rule_name for plugin evals
