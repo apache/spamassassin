@@ -5,7 +5,7 @@ use warnings;
 use re 'taint';
 use lib '.'; use lib 't';
 
-use SATest; sa_t_init("dkim2");
+use SATest; sa_t_init("dkim");
 use Test;
 
 use vars qw(%patterns %anti_patterns);
