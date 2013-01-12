@@ -60,7 +60,6 @@ SPAMASSASSIN RELEASE PROCEDURE
   The output should look like this:
 
   ?      rules/SIQ.pm
-  ?      rules/EmailBL.pm
   ?      rules/sandbox-hstern.pm
   ?      rules/sandbox-felicity.pm
 
@@ -89,15 +88,7 @@ SPAMASSASSIN RELEASE PROCEDURE
     ./spamassassin -L -t < sample-nonspam.txt | grep X-Spam-
 
   Verify that the X-Spam-* headers use the correct version string,
-  without an SVN revision number (those are only for dev builds).
-
-#- Temporary kludge check until bug 6297 is fixed properly:
-# NOTE: BUG IS MARKED RESOLVED / FIXED 
-#
-#    grep nopublish rules/72_active.cf
-#
-#  This should return nothing.  If not, edit the rulesrc files and
-#  add "tflags nopublish" lines as necessary.
+  without an SVN revision number (those are only for dev and pre builds).
 
 - create the Changes file.  Do this step on your own checkout, as
   the release checkout is read-only.   There are two options here:
@@ -118,7 +109,8 @@ SPAMASSASSIN RELEASE PROCEDURE
     r497472 was the release of 3.2.0-pre1; r233108 was the start of 3.2.0,
     just after the 3.1.0 branch was created; r46030 was the start of the
     3.1.0 work (created 3.0 branch); replace with the correct rev number
-    for the point you want to start at if different.
+    for the point you want to start at if different. I used r1149751 to
+    produce the first 3.4.0-pre release, for example.
 
 - Word wrap the Changes file with something like 
 
