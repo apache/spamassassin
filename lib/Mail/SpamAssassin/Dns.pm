@@ -106,7 +106,6 @@ sub do_rbl_lookup {
 
   # only make a specific query once
   if (!$existing) {
-    dbg("dns: launching DNS $type query for $host in background");
 
     my $ent = {
       key => $key,
@@ -123,23 +122,29 @@ sub do_rbl_lookup {
         $self->{async}->report_id_complete($id,$key,$timestamp);
       });
 
-    $ent->{id} = $id;     # tie up the loose end
-    $existing =
-      $self->{async}->start_lookup($ent, $self->{master_deadline});
+    if (!defined $id) {
+      dbg("dns: SKIPPED launching of DNS $type query for $host");
+    } else {
+      dbg("dns: launched DNS $type query for $host in background");
+      $ent->{id} = $id;     # tie up the loose end
+      $existing =
+        $self->{async}->start_lookup($ent, $self->{master_deadline});
+    }
   }
 
-  # always add set
-  push @{$existing->{sets}}, $set;
+  if ($existing) {
+    # always add set
+    push @{$existing->{sets}}, $set;
 
-  # sometimes match or always match
-  if (defined $subtest) {
-    $self->{dnspost}->{$set}->{$subtest} = $rule;
-  }
-  else {
-    push @{$existing->{rules}}, $rule;
-  }
+    # sometimes match or always match
+    if (defined $subtest) {
+      $self->{dnspost}->{$set}->{$subtest} = $rule;
+    } else {
+      push @{$existing->{rules}}, $rule;
+    }
 
-  $self->{rule_to_rblkey}->{$rule} = $key;
+    $self->{rule_to_rblkey}->{$rule} = $key;
+  }
 }
 
 # TODO: these are constant so they should only be added once at startup
@@ -156,8 +161,6 @@ sub do_dns_lookup {
   # only make a specific query once
   return if $self->{async}->get_lookup($key);
 
-  dbg("dns: launching DNS $type query for $host in background");
-
   my $ent = {
     key => $key,
     zone => $host,  # serves to fetch other per-zone settings
@@ -172,8 +175,13 @@ sub do_dns_lookup {
       $self->{async}->report_id_complete($id,$key,$timestamp);
     });
 
-  $ent->{id} = $id;     # tie up the loose end
-  $self->{async}->start_lookup($ent, $self->{master_deadline});
+  if (!defined $id) {
+    dbg("dns: SKIPPED launching of DNS $type query for $host");
+  } else {
+    dbg("dns: launched DNS $type query for $host in background");
+    $ent->{id} = $id;     # tie up the loose end
+    $self->{async}->start_lookup($ent, $self->{master_deadline});
+  }
 }
 
 ###########################################################################

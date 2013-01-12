@@ -644,6 +644,7 @@ sub askdns_hit {
 sub start_lookup {
   my($self, $pms, $query_type, $query_domain, $id, $dnskey) = @_;
 
+  return if !defined $id;
   my $ent = {
     key => $dnskey,
     domain => $query_domain,  # used for logging and reporting

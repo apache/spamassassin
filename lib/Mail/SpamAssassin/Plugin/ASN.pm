@@ -299,15 +299,19 @@ sub parsed_metadata {
       $pms->{async}->set_response_packet($id, $pkt, $key, $timestamp);
       $self->process_dns_result($pms, $pkt, $zone_index);
     });
-    my $ent = {
-      key=>$key, id=>$id, type=>'TXT',
-      zone => $zone,  # serves to fetch other per-zone settings
-    };
-    $pms->{async}->start_lookup($ent, $pms->{master_deadline});
-    dbg("asn: launched DNS TXT query for %s.%s in background",
-        $reversed_ip, $entry->{zone});
-
-    $index++;
+    if (!defined $id) {
+      dbg("asn: SKIPPED launching of DNS TXT query for %s.%s",
+          $reversed_ip, $entry->{zone});
+    } else {
+      my $ent = {
+        key=>$key, id=>$id, type=>'TXT',
+        zone => $zone,  # serves to fetch other per-zone settings
+      };
+      $pms->{async}->start_lookup($ent, $pms->{master_deadline});
+      dbg("asn: launched DNS TXT query for %s.%s in background",
+          $reversed_ip, $entry->{zone});
+      $index++;
+    }
   }
 }
 
