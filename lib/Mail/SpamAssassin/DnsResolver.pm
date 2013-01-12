@@ -804,10 +804,12 @@ sub send {
 
     $timeout = 1 if ($timeout < 1);
     # note nifty use of a closure here.  I love closures ;)
-    $self->bgsend($name, $type, $class, sub {
+    my $id = $self->bgsend($name, $type, $class, sub {
       my ($reply, $reply_id, $timestamp) = @_;
       $answerpkt = $reply; $answerpkt_avail = 1;
     });
+
+    last if !defined $id;  # perhaps a restricted zone or a serious failure
 
     my $now = time;
     my $deadline = $now + $timeout;

@@ -913,7 +913,7 @@ sub lookup_domain_ns {
   my $ent = $self->start_lookup($scanner, $dom, 'NS',
                                 $self->res_bgsend($scanner, $dom, 'NS', $key),
                                 $key);
-  $ent->{obj} = $obj;
+  $ent->{obj} = $obj  if $ent;
 }
 
 sub complete_ns_lookup {
@@ -989,7 +989,7 @@ sub lookup_a_record {
   my $ent = $self->start_lookup($scanner, $hname, 'A',
                                 $self->res_bgsend($scanner, $hname, 'A', $key),
                                 $key);
-  $ent->{obj} = $obj;
+  $ent->{obj} = $obj  if $ent;
 }
 
 sub complete_a_lookup {
@@ -1054,9 +1054,11 @@ sub lookup_single_dnsbl {
   my $ent = $self->start_lookup($scanner, $item, 'DNSBL',
                             $self->res_bgsend($scanner, $item, $qtype, $key),
                             $key);
-  $ent->{obj} = $obj;
-  $ent->{rulename} = $rulename;
-  $ent->{zone} = $dnsbl;
+  if ($ent) {
+    $ent->{obj} = $obj;
+    $ent->{rulename} = $rulename;
+    $ent->{zone} = $dnsbl;
+  }
 }
 
 sub complete_dnsbl_lookup {
@@ -1178,6 +1180,7 @@ sub got_dnsbl_hit {
 sub start_lookup {
   my ($self, $scanner, $zone, $type, $id, $key) = @_;
 
+  return if !defined $id;
   my $ent = {
     key => $key,
     zone => $zone,  # serves to fetch other per-zone settings
