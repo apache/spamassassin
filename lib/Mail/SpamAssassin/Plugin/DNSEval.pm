@@ -268,7 +268,7 @@ sub check_rbl_backend {
   eval {
     foreach my $ip (@ips) {
       my $revip = reverse_ip_address($ip);
-      $pms->do_rbl_lookup($rule, $set, $type, $rbl_server,
+      $pms->do_rbl_lookup($rule, $set, $type,
                           $revip.'.'.$rbl_server, $subtest) if defined $revip;
     }
   };
@@ -344,7 +344,7 @@ sub _check_rbl_addresses {
   dbg("dns: _check_rbl_addresses RBL $rbl_server, set $set");
 
   for my $host (keys %hosts) {
-    $pms->do_rbl_lookup($rule, $set, 'A', $rbl_server, "$host.$rbl_server");
+    $pms->do_rbl_lookup($rule, $set, 'A', "$host.$rbl_server");
   }
 }
 
