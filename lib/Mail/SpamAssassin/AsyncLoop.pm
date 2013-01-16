@@ -73,18 +73,45 @@ sub new {
     total_queries_completed => 0,
     pending_lookups     => { },
     timing_by_query     => { },
+    all_lookups         => { },  # keyed by "rr_type/domain"
   };
 
   bless ($self, $class);
   $self;
 }
 
+# Given a domain name, produces a listref of successively stripped down
+# parent domains, e.g. a domain '2.10.Example.COM' would produce a list:
+# '2.10.example.com', '10.example.com', 'example.com', 'com', ''
+#
+sub domain_to_search_list($) {
+  my ($domain) = @_;
+  $domain =~ s/^\.+//; $domain =~ s/\.+\z//;  # strip leading and trailing dots
+  my @search_keys;
+  if ($domain =~ /\[/) {  # don't split address literals
+    @search_keys = ( $domain, '' );  # presumably an address literal
+  } else {
+    local $1;
+    $domain = lc $domain;
+    for (;;) {
+      push(@search_keys, $domain);
+      last  if $domain eq '';
+      # strip one level
+      $domain = ($domain =~ /^ (?: [^.]* ) \. (.*) \z/xs) ? $1 : '';
+    }
+    if (@search_keys > 20) {  # enforce some sanity limit
+      @search_keys = @search_keys[$#search_keys-19 .. $#search_keys];
+    }
+  }
+  return \@search_keys;
+}
+
 # ---------------------------------------------------------------------------
 
-=item $obj = $async->start_lookup($obj)
+=item $ent = $async->start_lookup($ent, $master_deadline)
 
-Register the start of a long-running asynchronous lookup operation. C<$obj>
-is a hash reference containing the following items:
+Register the start of a long-running asynchronous lookup operation.
+C<$ent> is a hash reference containing the following items:
 
 =over 4
 
@@ -111,9 +138,9 @@ messages, such as C<DNSBL>, C<MX>, C<TXT>.
 A code reference, which will be called periodically during the
 background-processing period.  If you will be performing an async lookup on a
 non-DNS-based service, you will need to implement this so that it checks for
-new responses and calls C<set_response_packet()> or C<report_id_complete()> as
-appropriate.   DNS-based lookups can leave it undefined, since
-DnsResolver::poll_responses() will be called automatically anyway.
+new responses and calls C<set_response_packet()>. DNS-based lookups can leave
+it undefined, since DnsResolver::poll_responses() will be called automatically
+anyway.
 
 The code reference will be called with one argument, the C<$ent> object.
 
@@ -125,7 +152,7 @@ DNS lookup) is completed, either normally, or aborted, e.g. by a timeout.
 When a task has been reported as completed via C<set_response_packet()>
 the response (as provided to C<set_response_packet()>) is stored in
 $ent->{response_packet} (possibly undef, its semantics is defined by the
-caller). When completion is reported via C<report_id_complete()> or a
+caller). When completion is reported via C<set_response_packet()> or a
 task was aborted, the $ent->{response_packet} is guaranteed to be undef.
 If it is necessary to distinguish between the last two cases, the
 $ent->{status} may be examined for a string 'ABORTING' or 'FINISHED'.
@@ -163,7 +190,8 @@ Defaults to 0.2 * timeout_initial.
 
 =back
 
-C<$obj> is returned by this method.
+C<$ent> is returned by this method, with its contents augmented by additional
+information.
 
 =cut
 
@@ -190,7 +218,6 @@ sub start_lookup {
     for (;;) {  # 2.10.example.com, 10.example.com, example.com, com, ''
       if (exists $conf_by_zone->{$zone}) {
         $settings = $conf_by_zone->{$zone};
-        dbg("async: applying by_zone settings for $zone");
         last;
       } elsif ($zone eq '') {
         last;
@@ -200,6 +227,8 @@ sub start_lookup {
       }
     }
   }
+
+  dbg("async: applying by_zone settings for %s", $zone)  if $settings;
 
   my $t_init = $ent->{timeout_initial};  # application-specified has precedence
   $t_init = $settings->{rbl_timeout}  if $settings && !defined $t_init;
@@ -241,15 +270,112 @@ sub start_lookup {
 
 # ---------------------------------------------------------------------------
 
-=item $obj = $async->get_lookup($key)
+=item $ent = $async->bgsend_and_start_lookup($domain, $type, $class, $ent, $cb, %options)
+
+A common idiom: calls C<bgsend>, followed by a call to C<start_lookup>,
+returning the argument $ent object as modified by C<start_lookup> and
+filled-in with a query ID.
+
+=cut
+
+sub bgsend_and_start_lookup {
+  my($self, $domain, $type, $class, $ent, $cb, %options) = @_;
+  $ent = {}  if !$ent;
+  $ent->{id} = undef;
+  $ent->{query_type} = $type;
+  $ent->{query_domain} = $domain;
+  $ent->{type} = $type  if !exists $ent->{type};
+  my $key = $ent->{key} || '';
+
+  my $dnskey = uc($type) . '/' . lc($domain);
+  my $dns_query_info = $self->{all_lookups}{$dnskey};
+
+  if ($dns_query_info) {  # DNS query already underway or completed
+    my $id = $ent->{id} = $dns_query_info->{id};  # re-use existing query
+    return if !defined $id;  # presumably blocked, or other fatal failure
+    my $id_tail = $id; $id_tail =~ s{^\d+/IN/}{};
+    lc($id_tail) eq lc($dnskey)
+      or warn "async: unmatched id $id, key=$dnskey\n";
+    my $pkt = $dns_query_info->{pkt};
+    if (!$pkt) {  # DNS query underway, still waiting for results
+      # just add our query to the existing one
+      push(@{$dns_query_info->{applicants}}, [$ent,$cb]);
+      dbg("async: query %s already underway, adding no.%d %s",
+          $id, scalar @{$dns_query_info->{applicants}},
+          $ent->{rulename} || $key);
+    } else {  # DNS query already completed, re-use results
+      # answer already known, just do our callback and be done with it
+      if (!$cb) {
+        dbg("async: query %s already done, re-using for %s", $id, $key);
+      } else {
+        dbg("async: query %s already done, re-using for %s, callback",
+             $id, $key);
+        eval { $cb->($ent, $pkt); 1 }
+        or do { chomp $@;
+          warn sprintf("query %s completed, callback %s failed: %s\n",
+                       $id, $key, $@) };
+      }
+    }
+  }
+
+  else {  # no existing query, open a new DNS query
+    $dns_query_info = $self->{all_lookups}{$dnskey} = {};  # new query needed
+    my($id, $blocked);
+    my $dns_query_blockages = $self->{main}->{conf}->{dns_query_blocked};
+    if ($dns_query_blockages) {
+      my $search_list = domain_to_search_list($domain);
+      foreach my $parent_domain (@$search_list) {
+        $blocked = $dns_query_blockages->{$parent_domain};
+        last if defined $blocked; # stop at first defined, can be true or false
+      }
+    }
+    if ($blocked) {
+      dbg("async: blocked by dns_query_restriction: %s", $dnskey);
+    } else {
+      dbg("async: launching %s for %s", $dnskey, $key);
+      $id = $self->{main}->{resolver}->bgsend($domain, $type, $class, sub {
+          my($pkt, $pkt_id, $timestamp) = @_;
+          if ($pkt_id ne $id) {
+            warn "async: mismatched dns id: got $pkt_id, expected $id\n";
+            return;
+          }
+          $self->set_response_packet($pkt_id, $pkt, $ent->{key}, $timestamp);
+          $dns_query_info->{pkt} = $pkt;
+          my @cb_displ_names;
+          foreach my $tuple (@{$dns_query_info->{applicants}}) {
+            my($appl_ent, $appl_cb) = @$tuple;
+            if ($appl_cb) {
+              push(@cb_displ_names,
+                   $appl_ent->{rulename} || $appl_ent->{key} || '');
+              eval { $appl_cb->($appl_ent, $pkt); 1 }
+              or do { chomp $@;
+                warn sprintf("query %s completed, callback %s failed: %s\n",
+                             $id, $appl_ent->{key}, $@) };
+            }
+          }
+          dbg("async: query %s completed, %s", $id,
+              !@cb_displ_names ? 'no callbacks'
+                               : 'callbacks: '.join(', ',@cb_displ_names));
+        });
+    }
+    return if !defined $id;
+    $dns_query_info->{id} = $ent->{id} = $id;
+    push(@{$dns_query_info->{applicants}}, [$ent,$cb]);
+    $self->start_lookup($ent, $options{master_deadline});
+  }
+  return $ent;
+}
+
+# ---------------------------------------------------------------------------
+
+=item $ent = $async->get_lookup($key)
 
 Retrieve the pending-lookup object for the given key C<$key>.
 
 If the lookup is complete, this will return C<undef>.
 
 Note that a lookup is still considered "pending" until C<complete_lookups()> is
-called, even if it has been reported as complete via C<set_response_packet()>
-or C<report_id_complete()>.
+called, even if it has been reported as complete via C<set_response_packet()>.
 
 =cut
 
@@ -265,8 +391,7 @@ sub get_lookup {
 Retrieve the lookup objects for all pending lookups.
 
 Note that a lookup is still considered "pending" until C<complete_lookups()> is
-called, even if it has been reported as complete via C<set_response_packet()>
-or C<report_id_complete()>.
+called, even if it has been reported as complete via C<set_response_packet()>.
 
 =cut
 
@@ -365,7 +490,7 @@ sub complete_lookups {
       if (defined $ent->{poll_callback}) {  # call a "poll_callback" if exists
         # be nice, provide fresh info to a callback routine
         $ent->{status} = 'FINISHED'  if exists $self->{finished}->{$id};
-        # a callback might call set_response_packet() or report_id_complete()
+        # a callback might call set_response_packet()
       # dbg("async: calling poll_callback on key $key");
         $ent->{poll_callback}->($ent);
       }
@@ -482,11 +607,10 @@ packet object for the response. A parameter C<$key> identifies an entry in a
 hash %{$self->{pending_lookups}} where the object which spawned this query can
 be found, and through which futher information about the query is accessible.
 
-If this was called, C<$pkt> will be available in the C<completed_callback>
-function as C<$ent-<gt>{response_packet}>.
-
-One or the other of C<set_response_packet()> or C<report_id_complete()>
-should be called, but not both.
+C<$pkt> may be undef, indicating that no response packet is available, but a
+query has completed (e.g. was aborted or dismissed) and is no longer "pending".
+The C<$pkt> will be available in the C<completed_callback> function as
+C<$ent-<gt>{response_packet}>.
 
 =cut
 
@@ -522,8 +646,10 @@ sub set_response_packet {
 
 =item $async->report_id_complete($id,$key,$key,$timestamp)
 
-Register that a query has completed, and is no longer "pending". C<$id> is the
-ID for the query, and must match the C<id> supplied in C<start_lookup()>.
+Legacy. Equivalent to $self->set_response_packet($id,undef,$key,$timestamp),
+i.e. providing undef as a response packet. Register that a query has
+completed, and is no longer "pending". C<$id> is the ID for the query,
+and must match the C<id> supplied in C<start_lookup()>.
 
 One or the other of C<set_response_packet()> or C<report_id_complete()>
 should be called, but not both.

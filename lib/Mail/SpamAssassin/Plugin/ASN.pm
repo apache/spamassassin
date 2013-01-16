@@ -294,20 +294,13 @@ sub parsed_metadata {
     my $zone_index = $index;
     my $zone = $reversed_ip . '.' . $entry->{zone};
     my $key = "asnlookup-${zone_index}-$entry->{zone}";
-    my $id = $pms->{main}->{resolver}->bgsend($zone, 'TXT', undef, sub {
-      my ($pkt, $id, $timestamp) = @_;
-      $pms->{async}->set_response_packet($id, $pkt, $key, $timestamp);
-      $self->process_dns_result($pms, $pkt, $zone_index);
-    });
-    if (!defined $id) {
-      dbg("asn: SKIPPED launching of DNS TXT query for %s.%s",
-          $reversed_ip, $entry->{zone});
-    } else {
-      my $ent = {
-        key=>$key, id=>$id, type=>'TXT',
-        zone => $zone,  # serves to fetch other per-zone settings
-      };
-      $pms->{async}->start_lookup($ent, $pms->{master_deadline});
+    my $ent = $pms->{async}->bgsend_and_start_lookup(
+        $zone, 'TXT', undef,
+        { key => $key, zone => $zone },
+        sub { my($ent, $pkt) = @_;
+              $self->process_dns_result($pms, $pkt, $zone_index) },
+      master_deadline => $pms->{master_deadline} );
+    if ($ent) {
       dbg("asn: launched DNS TXT query for %s.%s in background",
           $reversed_ip, $entry->{zone});
       $index++;

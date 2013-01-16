@@ -482,17 +482,17 @@ sub get_sock {
 
 ###########################################################################
 
-=item $packet = new_dns_packet ($host, $type, $class)
+=item $packet = new_dns_packet ($domain, $type, $class)
 
 A wrapper for C<Net::DNS::Packet::new()> which traps a die thrown by it.
 
 To use this, change calls to C<Net::DNS::Resolver::bgsend> from:
 
-    $res->bgsend($hostname, $type);
+    $res->bgsend($domain, $type);
 
 to:
 
-    $res->bgsend(Mail::SpamAssassin::DnsResolver::new_dns_packet($hostname, $type, $class));
+    $res->bgsend(Mail::SpamAssassin::DnsResolver::new_dns_packet($domain, $type, $class));
 
 =cut
 
@@ -520,15 +520,15 @@ sub dnsext_dns0x20 {
 # this subroutine mimics the Net::DNS::Resolver::Base::make_query_packet()
 #
 sub new_dns_packet {
-  my ($self, $host, $type, $class) = @_;
+  my ($self, $domain, $type, $class) = @_;
 
   return if $self->{no_resolver};
 
   # construct a PTR query if it looks like an IPv4 address
   if (!defined($type) || $type eq 'PTR') {
     local($1,$2,$3,$4);
-    if ($host =~ /^(\d+)\.(\d+)\.(\d+)\.(\d+)$/) {
-      $host = "$4.$3.$2.$1.in-addr.arpa.";
+    if ($domain =~ /^(\d+)\.(\d+)\.(\d+)\.(\d+)$/) {
+      $domain = "$4.$3.$2.$1.in-addr.arpa.";
       $type = 'PTR';
     }
   }
@@ -537,30 +537,33 @@ sub new_dns_packet {
 
   my $packet;
   eval {
-    $host =~ s/\.*\z/./s;
-    if (length($host) > 255) {
+    $domain =~ s/\.*\z/./s;
+    if (length($domain) > 255) {
       die "domain name longer than 255 bytes\n";
-    } elsif ($host !~ /^ (?: [^.]{1,63} \. )+ \z/sx) {
-      if ($host !~ /^ (?: [^.]+ \. )+ \z/sx) {
+    } elsif ($domain !~ /^ (?: [^.]{1,63} \. )+ \z/sx) {
+      if ($domain !~ /^ (?: [^.]+ \. )+ \z/sx) {
         die "a domain name contains a null label\n";
       } else {
         die "a label in a domain name is longer than 63 bytes\n";
       }
     }
-    $host = dnsext_dns0x20($host)  if $self->{conf}->{dns_options}->{dns0x20};
-    $packet = Net::DNS::Packet->new($host, $type, $class);
+    if ($self->{conf}->{dns_options}->{dns0x20}) {
+      $domain = dnsext_dns0x20($domain);
+    }
+    $packet = Net::DNS::Packet->new($domain, $type, $class);
 
     # a bit noisy, so commented by default...
-    #dbg("dns: new DNS packet time=%.3f host=%s type=%s id=%s",
-    #    time, $host, $type, $packet->id);
+    #dbg("dns: new DNS packet time=%.3f domain=%s type=%s id=%s",
+    #    time, $domain, $type, $packet->id);
     1;
   } or do {
     # this can happen if Net::DNS isn't available -- but in this
     # case this function should never be called!
     # another possible failure reason: "unexpected null domain label"
     my $eval_stat = $@ ne '' ? $@ : "errno=$!";  chomp $eval_stat;
-    warn sprintf("dns: new_dns_packet (host=%s type=%s class=%s) failed: %s\n",
-                 $host, $type, $class, $eval_stat);
+    warn sprintf(
+           "dns: new_dns_packet (domain=%s type=%s class=%s) failed: %s\n",
+           $domain, $type, $class, $eval_stat);
   };
 
   if ($packet) {
@@ -607,7 +610,7 @@ sub _packet_id {
     my $qname = $ques->qname;
     $qname =~ s/\\([0-9]{3}|.)/length($1)==1 ? $1 : chr($1)/gse;
     $qname = lc $qname  if !$self->{conf}->{dns_options}->{dns0x20};
-    return join '/', $id, $qname, $ques->qtype, $ques->qclass;
+    return join '/', $id, $ques->qclass, $ques->qtype, $qname;
 
   } else {
     # odd.  this should not happen, but clearly some DNS servers
@@ -616,13 +619,13 @@ sub _packet_id {
     # (safe) ID part, along with a text token indicating that
     # the packet had no question part.
     #
-    return $id . "NO_QUESTION_IN_PACKET";
+    return $id . "/NO_QUESTION_IN_PACKET";
   }
 }
 
 ###########################################################################
 
-=item $id = $res->bgsend($host, $type, $class, $cb)
+=item $id = $res->bgsend($domain, $type, $class, $cb)
 
 Quite similar to C<Net::DNS::Resolver::bgsend>, except that when a response
 packet eventually arrives, and C<poll_responses> is called, the callback
@@ -637,7 +640,7 @@ reply. The third argument is a timestamp (Unix time, floating point), captured
 at the time the packet was collected. It is expected that a closure callback
 be used, like so:
 
-  my $id = $self->{resolver}->bgsend($host, $type, undef, sub {
+  my $id = $self->{resolver}->bgsend($domain, $type, undef, sub {
         my ($reply, $reply_id, $timestamp) = @_;
         $self->got_a_reply ($reply, $reply_id);
       });
@@ -648,12 +651,12 @@ port if the reply id does not match the return value from bgsend.
 =cut
 
 sub bgsend {
-  my ($self, $host, $type, $class, $cb) = @_;
+  my ($self, $domain, $type, $class, $cb) = @_;
   return if $self->{no_resolver};
 
   $self->{send_timed_out} = 0;
 
-  my $pkt = $self->new_dns_packet($host, $type, $class);
+  my $pkt = $self->new_dns_packet($domain, $type, $class);
   return if !$pkt;  # just bail out, new_dns_packet already reported a failure
 
   my @ns_addr_port = $self->available_nameservers();

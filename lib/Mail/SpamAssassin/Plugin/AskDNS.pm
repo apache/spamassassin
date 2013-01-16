@@ -369,7 +369,6 @@ sub extract_metadata {
 
   return if !$pms->is_dns_available;
   $pms->{askdns_map_dnskey_to_rules} = {};
-  $pms->{askdns_dnskey_to_response} = {};
 
   # walk through all collected askdns rules, obtain tag values whenever
   # they may become available, and launch DNS queries right after
@@ -462,8 +461,6 @@ OUTER:
 
       if ($query_domain eq '') {
         # ignore, just in case
-      } elsif ($pms->{async}->get_lookup($dnskey)) {  # already underway?
-        warn "askdns: such lookup has already been issued: ".$dnskey;
       } else {
         if (!exists $pms->{askdns_map_dnskey_to_rules}{$dnskey}) {
           $pms->{askdns_map_dnskey_to_rules}{$dnskey} =
@@ -472,28 +469,16 @@ OUTER:
           push(@{$pms->{askdns_map_dnskey_to_rules}{$dnskey}},
                [$query_type, $answer_types_ref, $rules] );
         }
-        if (exists $pms->{askdns_dnskey_to_response}{$dnskey}) {
-          # answer already available by some earlier query, or query underway
-          my $packet = $pms->{askdns_dnskey_to_response}{$dnskey};
-          if (!defined $packet) {
-            dbg("askdns: dns query %s already launched by some previous query",
-                $dnskey);
-          } else {
-            dbg("askdns: dns answer from some earlier query already available");
-            $self->process_response_packet($pms, $packet, $dnskey,
-                                           $query_type, $query_domain);
-          }
-        } else {
-          # lauch a new DNS query for $query_type and $query_domain
-          $pms->{askdns_dnskey_to_response}{$dnskey} = undef;  # exists, undef
-          my $ent = $self->start_lookup(
-                  $pms, $query_type, $query_domain,
-                  $self->res_bgsend($pms, $query_domain, $query_type, $dnskey),
-                  $dnskey);
-          # these rules are now underway;  unless the rule hits, these will
-          # not be considered "finished" until harvest_dnsbl_queries() completes
-          $pms->register_async_rule_start($dnskey);
-        }
+        # lauch a new DNS query for $query_type and $query_domain
+        my $ent = $pms->{async}->bgsend_and_start_lookup(
+          $query_domain, $query_type, undef,
+          { key => $dnskey, zone => $query_domain },
+          sub { my ($ent2,$pkt) = @_;
+                $self->process_response_packet($pms, $ent2, $pkt, $dnskey) },
+          master_deadline => $pms->{master_deadline} );
+        # these rules are now underway;  unless the rule hits, these will
+        # not be considered "finished" until harvest_dnsbl_queries() completes
+        $pms->register_async_rule_start($dnskey) if $ent;
       }
 
       last  if !@templ_tags;
@@ -508,7 +493,8 @@ OUTER:
 }
 
 sub process_response_packet {
-  my($self, $pms, $packet, $dnskey, $query_type, $query_domain) = @_;
+  my($self, $pms, $ent, $pkt, $dnskey) = @_;
+
   my $conf = $pms->{conf};
   my %rulenames_hit;
 
@@ -516,10 +502,10 @@ sub process_response_packet {
   my $queries_ref = $pms->{askdns_map_dnskey_to_rules}{$dnskey};
 
   my($header, @question, @answer, $qtype, $rcode);
-  if ($packet) {
-    @answer = $packet->answer;
-    $header = $packet->header;
-    @question = $packet->question;
+  if ($pkt) {
+    @answer = $pkt->answer;
+    $header = $pkt->header;
+    @question = $pkt->question;
     $qtype = uc $question[0]->qtype  if @question;
     my $query_str = join(', ',map($_->qtype.' '.$_->qname, @question));
     $rcode = uc $header->rcode  if $header;  # 'NOERROR', 'NXDOMAIN', ...
@@ -617,7 +603,8 @@ sub process_response_packet {
           : 0;  
         }
         if ($match) {
-          $self->askdns_hit($pms,$query_domain,$qtype,$rr_rdatastr,$rulename);
+          $self->askdns_hit($pms, $ent->{query_domain}, $qtype,
+                            $rr_rdatastr, $rulename);
           $rulenames_hit{$rulename} = 1;
         }
       }
@@ -639,42 +626,6 @@ sub askdns_hit {
   $pms->clear_test_state;
   $pms->test_log(sprintf("%s %s:%s", $query_domain,$qtype,$rr_rdatastr));
   $pms->got_hit($rulename, 'ASKDNS: ', ruletype => 'askdns');  # score=>$score
-}
-
-sub start_lookup {
-  my($self, $pms, $query_type, $query_domain, $id, $dnskey) = @_;
-
-  return if !defined $id;
-  my $ent = {
-    key => $dnskey,
-    domain => $query_domain,  # used for logging and reporting
-    zone => $query_domain,    # serves to fetch per-zone settings
-    type => 'ASKDNS-' . $query_type,
-    id => $id,
-    completed_callback => sub {
-      my $ent = shift;
-      my $packet = $ent->{response_packet};
-      if (defined $packet) {  # not aborted or empty
-        my $dnskey = $ent->{key};
-        # save the response, in case a later generated query would want
-        # to make the same lookup
-        $pms->{askdns_dnskey_to_response}{$dnskey} = $packet;
-        $self->process_response_packet($pms, $packet, $dnskey,
-                                       $query_type, $query_domain);
-      }
-    }
-  };
-  $pms->{async}->start_lookup($ent, $pms->{master_deadline});
-  return $ent;
-}
-
-sub res_bgsend {
-  my($self, $pms, $query_domain, $query_type, $dnskey) = @_;
-
-  return $self->{main}->{resolver}->bgsend($query_domain, $query_type, undef,
-    sub { my($pkt, $id, $timestamp) = @_;
-          $pms->{async}->set_response_packet($id, $pkt, $dnskey, $timestamp);
-        });
 }
 
 1;

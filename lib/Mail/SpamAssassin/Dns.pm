@@ -97,16 +97,15 @@ BEGIN {
 
 ###########################################################################
 
-# TODO: $server is currently unused
 sub do_rbl_lookup {
-  my ($self, $rule, $set, $type, $server, $host, $subtest) = @_;
+  my ($self, $rule, $set, $type, $host, $subtest) = @_;
 
+  $host =~ s/\.\z//s;  # strip a redundant trailing dot
   my $key = "dns:$type:$host";
-  my $existing = $self->{async}->get_lookup($key);
+  my $existing_ent = $self->{async}->get_lookup($key);
 
   # only make a specific query once
-  if (!$existing) {
-
+  if (!$existing_ent) {
     my $ent = {
       key => $key,
       zone => $host,  # serves to fetch other per-zone settings
@@ -115,32 +114,21 @@ sub do_rbl_lookup {
       rules => [ ], # filled in below
       # id is filled in after we send the query below
     };
-
-    my $id = $self->{resolver}->bgsend($host, $type, undef, sub {
-        my ($pkt, $id, $timestamp) = @_;
-        $self->process_dnsbl_result($ent, $pkt);
-        $self->{async}->report_id_complete($id,$key,$timestamp);
-      });
-
-    if (!defined $id) {
-      dbg("dns: SKIPPED launching of DNS $type query for $host");
-    } else {
-      dbg("dns: launched DNS $type query for $host in background");
-      $ent->{id} = $id;     # tie up the loose end
-      $existing =
-        $self->{async}->start_lookup($ent, $self->{master_deadline});
-    }
+    $existing_ent = $self->{async}->bgsend_and_start_lookup(
+        $host, $type, undef, $ent,
+        sub { my($ent, $pkt) = @_; $self->process_dnsbl_result($ent, $pkt) },
+      master_deadline => $self->{master_deadline} );
   }
 
-  if ($existing) {
+  if ($existing_ent) {
     # always add set
-    push @{$existing->{sets}}, $set;
+    push @{$existing_ent->{sets}}, $set;
 
     # sometimes match or always match
     if (defined $subtest) {
       $self->{dnspost}->{$set}->{$subtest} = $rule;
     } else {
-      push @{$existing->{rules}}, $rule;
+      push @{$existing_ent->{rules}}, $rule;
     }
 
     $self->{rule_to_rblkey}->{$rule} = $key;
@@ -156,6 +144,7 @@ sub register_rbl_subtest {
 sub do_dns_lookup {
   my ($self, $rule, $type, $host) = @_;
 
+  $host =~ s/\.\z//s;  # strip a redundant trailing dot
   my $key = "dns:$type:$host";
 
   # only make a specific query once
@@ -168,20 +157,11 @@ sub do_dns_lookup {
     rules => [ $rule ],
     # id is filled in after we send the query below
   };
-
-  my $id = $self->{resolver}->bgsend($host, $type, undef, sub {
-      my ($pkt, $id, $timestamp) = @_;
-      $self->process_dnsbl_result($ent, $pkt);
-      $self->{async}->report_id_complete($id,$key,$timestamp);
-    });
-
-  if (!defined $id) {
-    dbg("dns: SKIPPED launching of DNS $type query for $host");
-  } else {
-    dbg("dns: launched DNS $type query for $host in background");
-    $ent->{id} = $id;     # tie up the loose end
-    $self->{async}->start_lookup($ent, $self->{master_deadline});
-  }
+  $ent = $self->{async}->bgsend_and_start_lookup(
+      $host, $type, undef, $ent,
+      sub { my($ent, $pkt) = @_; $self->process_dnsbl_result($ent, $pkt) },
+    master_deadline => $self->{master_deadline} );
+  $ent;
 }
 
 ###########################################################################
@@ -259,19 +239,19 @@ sub dnsbl_uri {
 # called as a completion routine to bgsend by DnsResolver::poll_responses;
 # returns 1 on successful packet processing
 sub process_dnsbl_result {
-  my ($self, $query, $packet) = @_;
+  my ($self, $ent, $pkt) = @_;
 
-  my $question = ($packet->question)[0];
+  my $question = ($pkt->question)[0];
   return if !defined $question;
 
-  my $sets = $query->{sets} || [];
-  my $rules = $query->{rules};
+  my $sets = $ent->{sets} || [];
+  my $rules = $ent->{rules};
 
   # NO_DNS_FOR_FROM
   if ($self->{sender_host} &&
       $question->qname eq $self->{sender_host} &&
       $question->qtype =~ /^(?:A|MX)$/ &&
-      $packet->header->rcode =~ /^(?:NXDOMAIN|SERVFAIL)$/ &&
+      $pkt->header->rcode =~ /^(?:NXDOMAIN|SERVFAIL)$/ &&
       ++$self->{sender_host_fail} == 2)
   {
     for my $rule (@{$rules}) {
@@ -280,8 +260,8 @@ sub process_dnsbl_result {
   }
 
   # DNSBL tests are here
-  foreach my $answer ($packet->answer) {
-    next if !defined $answer;
+  foreach my $answer ($pkt->answer) {
+    next if !$answer;
     # track all responses
     $self->dnsbl_uri($question, $answer);
     my $answ_type = $answer->type;
@@ -452,7 +432,6 @@ sub rbl_finish {
 
   $self->set_rbl_tag_data();
 
-  delete $self->{dnscache};
   delete $self->{dnspost};
   delete $self->{dnsuri};
 }
@@ -481,163 +460,23 @@ sub lookup_ns {
   my $nsrecords;
   dbg("dns: looking up NS for '$dom'");
 
-  if (exists $self->{dnscache}->{NS}->{$dom}) {
-    $nsrecords = $self->{dnscache}->{NS}->{$dom};
-
-  } else {
-    eval {
-      my $query = $self->{resolver}->send($dom, 'NS');
-      my @nses;
-      if ($query) {
-	foreach my $rr ($query->answer) {
-	  if ($rr->type eq "NS") { push (@nses, $rr->nsdname); }
-	}
+  eval {
+    my $query = $self->{resolver}->send($dom, 'NS');
+    my @nses;
+    if ($query) {
+      foreach my $rr ($query->answer) {
+        if ($rr->type eq "NS") { push (@nses, $rr->nsdname); }
       }
-      $nsrecords = $self->{dnscache}->{NS}->{$dom} = [ @nses ];
-      1;
-    } or do {
-      my $eval_stat = $@ ne '' ? $@ : "errno=$!";  chomp $eval_stat;
-      dbg("dns: NS lookup failed horribly, perhaps bad resolv.conf setting? (%s)", $eval_stat);
-      return;
-    };
-  }
+    }
+    $nsrecords = [ @nses ];
+    1;
+  } or do {
+    my $eval_stat = $@ ne '' ? $@ : "errno=$!";  chomp $eval_stat;
+    dbg("dns: NS lookup failed horribly, perhaps bad resolv.conf setting? (%s)", $eval_stat);
+    return;
+  };
 
   $nsrecords;
-}
-
-sub lookup_mx {
-  my ($self, $dom) = @_;
-
-  return unless $self->load_resolver();
-  return if ($self->server_failed_to_respond_for_domain ($dom));
-
-  my $mxrecords;
-  dbg("dns: looking up MX for '$dom'");
-
-  if (exists $self->{dnscache}->{MX}->{$dom}) {
-    $mxrecords = $self->{dnscache}->{MX}->{$dom};
-
-  } else {
-    eval {
-      my $query = $self->{resolver}->send($dom, 'MX');
-      my @ips;
-      if ($query) {
-	foreach my $rr ($query->answer) {
-          # just keep the IPs, drop the preferences.
-	  if ($rr->type eq "MX") { push (@ips, $rr->exchange); }
-	}
-      }
-      $mxrecords = $self->{dnscache}->{MX}->{$dom} = [ @ips ];
-      1;
-    } or do {
-      my $eval_stat = $@ ne '' ? $@ : "errno=$!";  chomp $eval_stat;
-      dbg("dns: MX lookup failed horribly, perhaps bad resolv.conf setting? (%s)", $eval_stat);
-      return;
-    };
-  }
-
-  $mxrecords;
-}
-
-sub lookup_mx_exists {
-  my ($self, $dom) = @_;
-
-  my $ret = 0;
-  my $recs = $self->lookup_mx ($dom);
-  if (!defined $recs) { return; }
-  if (scalar @{$recs}) { $ret = 1; }
-
-  dbg("dns: MX for '$dom' exists? $ret");
-  return $ret;
-}
-
-sub lookup_ptr {
-  my ($self, $dom) = @_;
-
-  return unless $self->load_resolver();
-  if ($self->{main}->{local_tests_only}) {
-    dbg("dns: local tests only, not looking up PTR");
-    return;
-  }
-
-  my $IP_PRIVATE = IP_PRIVATE;
-
-  if ($dom =~ /${IP_PRIVATE}/) {
-    dbg("dns: IP is private, not looking up PTR: $dom");
-    return;
-  }
-
-  return if ($self->server_failed_to_respond_for_domain ($dom));
-
-  dbg("dns: looking up PTR record for '$dom'");
-  my $name = '';
-
-  if (exists $self->{dnscache}->{PTR}->{$dom}) {
-    $name = $self->{dnscache}->{PTR}->{$dom};
-
-  } else {
-    eval {
-      my $query = $self->{resolver}->send($dom);
-      if ($query) {
-	foreach my $rr ($query->answer) {
-	  if ($rr->type eq "PTR") {
-	    $name = $rr->ptrdname; last;
-	  }
-	}
-      }
-      $name = $self->{dnscache}->{PTR}->{$dom} = $name;
-      1;
-    } or do {
-      my $eval_stat = $@ ne '' ? $@ : "errno=$!";  chomp $eval_stat;
-      dbg("dns: PTR lookup failed horribly, perhaps bad resolv.conf setting? (%s)", $eval_stat);
-      return;
-    };
-  }
-  dbg("dns: PTR for '$dom': '$name'");
-
-  # note: undef is never returned, unless DNS is unavailable.
-  return $name;
-}
-
-sub lookup_a {
-  my ($self, $name) = @_;
-
-  return unless $self->load_resolver();
-  if ($self->{main}->{local_tests_only}) {
-    dbg("dns: local tests only, not looking up A records");
-    return;
-  }
-
-  return if ($self->server_failed_to_respond_for_domain ($name));
-
-  dbg("dns: looking up A records for '$name'");
-  my @addrs;
-
-  if (exists $self->{dnscache}->{A}->{$name}) {
-    my $addrptr = $self->{dnscache}->{A}->{$name};
-    @addrs = @{$addrptr};
-
-  } else {
-    eval {
-      my $query = $self->{resolver}->send($name);
-      if ($query) {
-	foreach my $rr ($query->answer) {
-	  if ($rr->type eq "A") {
-	    push (@addrs, $rr->address);
-	  }
-	}
-      }
-      $self->{dnscache}->{A}->{$name} = [ @addrs ];
-      1;
-    } or do {
-      my $eval_stat = $@ ne '' ? $@ : "errno=$!";  chomp $eval_stat;
-      dbg("dns: A lookup failed horribly, perhaps bad resolv.conf setting? (%s)", $eval_stat);
-      return;
-    };
-  }
-
-  dbg("dns: A records for '$name': " . join(' ',@addrs));
-  return @addrs;
 }
 
 sub is_dns_available {
@@ -877,8 +716,8 @@ sub is_rule_complete {
     return 0;       # not yet complete
   }
 
-  my $obj = $self->{async}->get_lookup($key);
-  if (!defined $obj) {
+  my $ent = $self->{async}->get_lookup($key);
+  if (!defined $ent) {
     dbg("dns: $rule lookup complete, $key no longer pending");
     return 1;
   }
