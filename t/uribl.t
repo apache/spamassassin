@@ -19,8 +19,11 @@ exit unless (DO_RUN);
  q{ X_URIBL_A } => 'A',
  q{ X_URIBL_B } => 'B',
  q{ X_URIBL_NS } => 'NS',
- q{ X_URIBL_FULL_NS } => 'FULL_NS',
  q{ X_URIBL_DOMSONLY } => 'X_URIBL_DOMSONLY',
+);
+
+%anti_patterns = (
+ q{ X_URIBL_FULL_NS } => 'FULL_NS',
 );
 
 tstlocalrules(q{
