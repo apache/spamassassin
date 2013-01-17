@@ -4,7 +4,13 @@ use lib '.'; use lib 't';
 use SATest; sa_t_init("whitelist_addrs");
 use IO::File;
 
+use constant HAS_MODULES => eval {
+  require DB_File;
+};
+
 use constant TEST_ENABLED => conf_bool('run_long_tests');
+
+use constant DO_RUN => TEST_ENABLED && HAS_MODULES;
 
 use Test;
 BEGIN { 
@@ -16,10 +22,10 @@ BEGIN {
     unshift(@INC, '../blib/lib');
   }
 
-  plan tests => (TEST_ENABLED ? 35 : 0);
+  plan tests => (DO_RUN ? 35 : 0);
  };
 
-exit unless TEST_ENABLED;
+exit unless DO_RUN;
 
 # ---------------------------------------------------------------------------
 
