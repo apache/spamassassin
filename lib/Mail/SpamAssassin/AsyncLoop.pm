@@ -84,7 +84,7 @@ sub new {
 # parent domains, e.g. a domain '2.10.Example.COM' would produce a list:
 # '2.10.example.com', '10.example.com', 'example.com', 'com', ''
 #
-sub domain_to_search_list($) {
+sub domain_to_search_list {
   my ($domain) = @_;
   $domain =~ s/^\.+//; $domain =~ s/\.+\z//;  # strip leading and trailing dots
   my @search_keys;
