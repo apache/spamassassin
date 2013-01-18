@@ -114,7 +114,7 @@ SPAMASSASSIN RELEASE PROCEDURE
 
 - Word wrap the Changes file with something like 
 
-    'fold -sw 74 Changes'
+    'fold -sw 74 Changes > Changes.2; mv Changes.2 Changes'
 
 - run "make distcheck" to ensure all files are included in the
   distribution that should be, and to ensure all files that are listed
@@ -139,11 +139,9 @@ SPAMASSASSIN RELEASE PROCEDURE
   kill all running spamd processes.  This release test suite is intended
   for a development environment.
 
-    OLD: run "prove -v xt".
+    make test TEST_FILES="xt/*.t"
 
-    NEW: running " make test TEST_FILES="xt/*.t" " is likely better.
-
-    Note: As of 2013-01-11, all of these tests can pass test 
+    Note: As of 2013-01-18, all of these tests can pass test 
           with no tests skipped.
 
 - Check in the updated Changes file, and SpamAssassin.pm.
@@ -219,8 +217,6 @@ SPAMASSASSIN RELEASE PROCEDURE
   if you get "gpg-agent" errors about not connecting to the PIN entry
   module, you didn't update your $PATH.
 
-#THIS STEP APPEARS TO SERVE NO PURPOSE.  WHY? - take a copy of the MD5sum line output.
-
 - run "./build/repackage_latest_update_rules" to repackage the
   latest file on updates.spamassassin.org.
 
@@ -256,7 +252,7 @@ SPAMASSASSIN RELEASE PROCEDURE
 
   Pre-releases and RCs require just lazy consensus -- ie. no objections.
 
-***TESTED BY KAM TO THIS POINT AS OF 12-31-2012****
+***RE-TESTED BY KAM TO THIS POINT AS OF 2013-01-12****
 
 - (for a pre or rc release), - upload .tar.gz (not .bz2) tarball to CPAN
   at http://pause.cpan.org/:
