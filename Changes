@@ -1,4 +1,147 @@
 ------------------------------------------------------------------------
+r1435054 | spamassassin_role | 2013-01-18 08:50:02 +0000 (Fri, 18 Jan 
+2013) | 1 line
+
+promotions validated
+------------------------------------------------------------------------
+r1435048 | khopesh | 2013-01-18 07:57:44 +0000 (Fri, 18 Jan 2013) | 1 line
+
+auto-generated rules
+------------------------------------------------------------------------
+r1435012 | spamassassin_role | 2013-01-18 03:11:34 +0000 (Fri, 18 Jan 
+2013) | 1 line
+
+updated scores for revision 1434591 active rules added since last 
+mass-check
+------------------------------------------------------------------------
+r1434591 | spamassassin_role | 2013-01-17 08:50:02 +0000 (Thu, 17 Jan 
+2013) | 1 line
+
+promotions validated
+------------------------------------------------------------------------
+r1434583 | khopesh | 2013-01-17 07:58:36 +0000 (Thu, 17 Jan 2013) | 1 line
+
+auto-generated rules
+------------------------------------------------------------------------
+r1434571 | axb | 2013-01-17 07:22:35 +0000 (Thu, 17 Jan 2013) | 1 line
+
+
+------------------------------------------------------------------------
+r1434556 | jhardin | 2013-01-17 04:51:34 +0000 (Thu, 17 Jan 2013) | 1 line
+
+More FP avoidance
+------------------------------------------------------------------------
+r1434544 | spamassassin_role | 2013-01-17 03:18:52 +0000 (Thu, 17 Jan 
+2013) | 1 line
+
+updated scores for revision 1433857 active rules added since last 
+mass-check
+------------------------------------------------------------------------
+r1434534 | kmcgrail | 2013-01-17 01:51:13 +0000 (Thu, 17 Jan 2013) | 1 
+line
+
+Changes for t/whitelist_addrs.t to check for DB_File - bug 6884
+------------------------------------------------------------------------
+r1434367 | mmartinec | 2013-01-16 20:25:51 +0000 (Wed, 16 Jan 2013) | 1 
+line
+
+Bug 6884, forgot to checkin t/uribl.t
+------------------------------------------------------------------------
+r1434360 | mmartinec | 2013-01-16 20:13:47 +0000 (Wed, 16 Jan 2013) | 15 
+lines
+
+Bug 6884:
+- a new subroutine AsyncLoop::bgsend_and_start_lookup() implements a
+  commonly used idiom of calling bgsend(), followed by start_lookup(),
+  while implementing a mechanism for grouping equal DNS queries,
+  simplifying several other code sections;
+- rewrite URIDNSBL.pm to put the new mechanism to good use,
+  fixing the particular Bug 6884 and test 5 in t/uribl.t;
+- fix the t/uribl.t, moving X_URIBL_FULL_NS from %patterns
+  to %anti_patterns;
+- add a dns_query_restriction configuration option;
+- some cosmetic edits, like renaming some variables for consistency.
+
+PR:		6884
+Submitted by:	Mark.Martinec@ijs.si
+
+------------------------------------------------------------------------
+r1434118 | jhardin | 2013-01-16 19:18:07 +0000 (Wed, 16 Jan 2013) | 1 line
+
+tweak email phishing rules - add more brazilian variants
+------------------------------------------------------------------------
+r1433857 | spamassassin_role | 2013-01-16 08:50:03 +0000 (Wed, 16 Jan 
+2013) | 1 line
+
+promotions validated
+------------------------------------------------------------------------
+r1433845 | khopesh | 2013-01-16 07:57:47 +0000 (Wed, 16 Jan 2013) | 1 line
+
+auto-generated rules
+------------------------------------------------------------------------
+r1433811 | spamassassin_role | 2013-01-16 03:12:28 +0000 (Wed, 16 Jan 
+2013) | 1 line
+
+updated scores for revision 1433312 active rules added since last 
+mass-check
+------------------------------------------------------------------------
+r1433303 | khopesh | 2013-01-15 07:58:08 +0000 (Tue, 15 Jan 2013) | 1 line
+
+auto-generated rules
+------------------------------------------------------------------------
+r1433273 | spamassassin_role | 2013-01-15 03:14:11 +0000 (Tue, 15 Jan 
+2013) | 1 line
+
+updated scores for revision 1432840 active rules added since last 
+mass-check
+------------------------------------------------------------------------
+r1432826 | khopesh | 2013-01-14 07:57:45 +0000 (Mon, 14 Jan 2013) | 1 line
+
+auto-generated rules
+------------------------------------------------------------------------
+r1432793 | spamassassin_role | 2013-01-14 03:13:37 +0000 (Mon, 14 Jan 
+2013) | 1 line
+
+updated scores for revision 1432568 active rules added since last 
+mass-check
+------------------------------------------------------------------------
+r1432750 | jhardin | 2013-01-13 22:03:44 +0000 (Sun, 13 Jan 2013) | 1 line
+
+Tune LOTSA_MONEY and email phishing, more FP avoidance
+------------------------------------------------------------------------
+r1432712 | jhardin | 2013-01-13 19:25:27 +0000 (Sun, 13 Jan 2013) | 1 line
+
+Build destabilized by 'SPOOFED_URL_HOST depends on T_URL_SHORTENER which 
+is nonexistent' - split khopesh URL_SHORTENER into __subrule and scored 
+rule and fix dependencies to stabilize the build. KAM, darxus and Adam 
+please review these rules. Also, URL_SHORTENER is explicitly marked 
+'nopublish' so this problem should have manifested much earlier - 
+'nopublish' rules appear to still be leaking out.
+------------------------------------------------------------------------
+r1432568 | spamassassin_role | 2013-01-13 08:50:03 +0000 (Sun, 13 Jan 
+2013) | 1 line
+
+promotions validated
+------------------------------------------------------------------------
+r1432565 | khopesh | 2013-01-13 07:57:42 +0000 (Sun, 13 Jan 2013) | 1 line
+
+auto-generated rules
+------------------------------------------------------------------------
+r1432546 | jhardin | 2013-01-13 04:14:01 +0000 (Sun, 13 Jan 2013) | 1 line
+
+Split REMOTE_IMAGE into __REMOTE_IMAGE for use in metas
+------------------------------------------------------------------------
+r1432544 | spamassassin_role | 2013-01-13 03:17:12 +0000 (Sun, 13 Jan 
+2013) | 1 line
+
+updated scores for revision 1432400 active rules added since last 
+mass-check
+------------------------------------------------------------------------
+r1432496 | kmcgrail | 2013-01-12 20:01:49 +0000 (Sat, 12 Jan 2013) | 1 
+line
+
+preparing to release 3.4.0-pre2
+------------------------------------------------------------------------
 r1432400 | spamassassin_role | 2013-01-12 08:50:02 +0000 (Sat, 12 Jan 
 2013) | 1 line
 
