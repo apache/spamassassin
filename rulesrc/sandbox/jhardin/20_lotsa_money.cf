@@ -60,8 +60,9 @@ body     __YOU_WON_01    /\byou(?:r|'re|'ve|'ll|\shave|\sdid)?\s(?:e-?mail\s)?(?
 body     __YOU_WON_02    /\bw[io]n\s(?:(?:for|by)\s)?your?\b/i
 body     __YOU_WON_03    /\b(?:your?|win+ing|win+ers?|beneficiaries|participants?|individuals?|address(?:es)?|accounts?|emails?)(?:\s[-a-z\s]{4,40})?\s(?:w(?:ere|as)|ha(?:ve|s) be(?:en)?)\s(?:automatically\s)?(?:(?:randomly|raffly)\s(?:selected|cho+sen|cho+sing|picked)|(?:selected|cho+sen|cho+sing|picked)\s(?:[a-z\s]{2,40}?\srandom(?:ly)?|online|lottery|computer\s(?:ballot|wahlgang)))/i 
 body     __YOU_WON_04    /\bqu[ei]\s?(?:vous (?:[\xc3][\xaa]|=C3=AA|[\xea]|e)tes\s?gagnant|en\scons(?:e|=E9|[\xe9]|[\xc3][\xa9])quence\sgagne)\b/i
+body     __YOU_WON_05    /\bI won\b/i
 body     __HAS_WON_01    /\bque ha ganado\b/i
-meta     __YOU_WON       __YOU_WON_01 || __YOU_WON_02 || __YOU_WON_03 || __YOU_WON_04 || __HAS_WON_01
+meta     __YOU_WON       __YOU_WON_01 || __YOU_WON_02 || __YOU_WON_03 || __YOU_WON_04 || __HAS_WON_01 || (__YOU_WON_05 && (__MOVE_MONEY || __GIVE_MONEY))
 
 ifplugin Mail::SpamAssassin::Plugin::MIMEHeader
   meta       WON_MONEY_ATTACH   __YOU_WON && LOTS_OF_MONEY && (__PDF_ATTACH || __DOC_ATTACH)
@@ -96,7 +97,7 @@ describe LOTTO_AGENT_RPLY Claims Agent
 # body    HK_LOTTO                /(?:(?:(?:inter)?national|foundation|mercato|univers|euro million|e-?mail|euro-pw|bill gates|swiss) ?lo(?:tto|ttery|terie)|coca.?cola games|mega jackpot|staatsloterij|ukonline game promo|loto prestige|(?:fran.aise|e-?mail) sweepstakes|loterie (?:internationale|cristal|am.ricaine|coca.?cola|euromillions|bill gates)|(?:computer|internet) ballot|foundation internationale billgateslottery award|(?:promotional|online) draws?|lottery (?:fiduciary|department))/i
 # body            __KAM_LOTTO5    /(freelotto group|Royal Heritage Lottery|UK National (Online)? Lottery|U\.?K\.? Grand Promotions|Lottery Department UK|Euromillion Loteria|Luckyday International Lottery|International Lottery)/is
 
-body     __LOTTO_ADMITS_1 /\b(?:on-?line|e-?mail|ballot|(?:inter)?national|state|(?:UK|euro)[- ]?(?:mil+ions?|PW)|Canada|Microsoft|MSN|internet|mega|jackpot|Royal Heritage|foundation|cash\sgrant|mercato|univers|staatsloterij|bill\s?gates|Olympics?|swiss|this|est[ea]|internationaux de gagnants de)(?:\s(?!lot|swe|prom)\w{1,20}){0,3}\s?(?:lot(?:to|tery|eri[ea])|sweepstakes?|promo(?:tion|cao|cion)?)\b/i
+body     __LOTTO_ADMITS_1 /\b(?:on-?line|e-?mail|ballot|(?:inter)?national|state|(?:UK|euro)[- ]?(?:mil+ions?|PW)|Canada|Microsoft|MSN|internet|mega|jackpot|Royal Heritage|foundation|cash\sgrant|mercato|univers|staatsloterij|bill\s?gates|Olympics?|swiss|this|est[ea]|internationaux de gagnants de)(?:\s(?!lot|swe|prom)\w{1,20}){0,3}\s?(?:lot(?:to|tery|eri[ea])|sweepstakes?|promo(?:tion|cao|cion)?|jackpot)\b/i
 body     __LOTTO_ADMITS_2 /\b(?:free)?(?:lot(?:to|tery|erie)|sweepstakes)\s(?:(?:inter)?na[tz]ional|department|bureau|group|award|microsoft)/i
 uri      __LOTTO_ADMITS_3 /lottery/i
 
@@ -230,7 +231,7 @@ body     __SUM_OF_FUND    /\b(?:sum|release|freigabe)\s(?:of|der)\s(?:amount|fun
 body     __BENEFICIARY    /\bb(?:e|=E9|[\xe9]|[\xc3][\xa9])n(?:e|=E9|[\xe9]|[\xc3][\xa9])fi(?:c|sh)i?ai?r(?:y|ies|es?)/i
 body     __DIPLOMATIC     /\bdiplomatic\b/i
 body     __FEES           /\b(?:security|safe\w*|courier|registration|pay|paid|up-?front|processing|delivery|transfer|keeping)[\s\w]{0,15}\s(?:fee|charge)s?\b/i 
-body     __LUCKY_WINNER   /\b(?:lucky|gl.cklich(?:en)?|afortunados)\s(?:(?:ge)?win+ers?|ganador(?:es)?)\b/i
+body     __LUCKY_WINNER   /\b(?:lucky|gl.cklich(?:en)?|afortunados)\s(?:(?:ge)?win+ers?|ganador(?:es)?|individuals?)\b/i
 body     __YOUR_FUND      /\b(?:your|ihr)\s(?:unpaid\s|win+ing\s|ap+roved\s|foreign\s|overdue\s|outstanding\s|nicht\sausbezahlten\s){0,3}(?:fund|payment|geld)\b/i
 body     __NIGERIA        /\bnigeria\b/i
 body     __IVORY_COAST    /\b(?:Cote\s?D.Ivoire|Ivory\s?Coast|Costa\sde\sMarfil)\b/i
