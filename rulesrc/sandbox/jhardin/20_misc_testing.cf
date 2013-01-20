@@ -144,10 +144,12 @@ describe       FROM_MISSP_NO_TO      From misspaced, To missing
 meta           FROM_MISSP_TO_UNDISC  (__FROM_RUNON && __TO_UNDISCLOSED)
 describe       FROM_MISSP_TO_UNDISC  From misspaced, To undisclosed
 
-meta           __FROM_MISSP_DKIM     (__FROM_RUNON_UNCODED && __DKIM_DEPENDABLE)
-tflags         __FROM_MISSP_DKIM     net
-meta           FROM_MISSP_DKIM       __FROM_MISSP_DKIM && !__CTYPE_MULTIPART_ALT && !__MIME_QP && !__BUGGED_IMG && !__DOS_HAS_LIST_UNSUB && !__MIME_BASE64 && !__MTLANDROID_MUA && !__XEROXWORKCTR_MUA && !__PHP_MUA && !__AMADEUSMS_MUA && !__FLASHMAIL_MUA
-describe       FROM_MISSP_DKIM       From misspaced, DKIM dependable
+ifplugin Mail::SpamAssassin::Plugin::DKIM
+  meta         __FROM_MISSP_DKIM     (__FROM_RUNON_UNCODED && __DKIM_DEPENDABLE)
+  tflags       __FROM_MISSP_DKIM     net
+  meta         FROM_MISSP_DKIM       __FROM_MISSP_DKIM && !__CTYPE_MULTIPART_ALT && !__MIME_QP && !__BUGGED_IMG && !__DOS_HAS_LIST_UNSUB && !__MIME_BASE64 && !__MTLANDROID_MUA && !__XEROXWORKCTR_MUA && !__PHP_MUA && !__AMADEUSMS_MUA && !__FLASHMAIL_MUA
+  describe     FROM_MISSP_DKIM       From misspaced, DKIM dependable
+endif
 
 meta           __FROM_MISSP_REPLYTO  __FROM_RUNON && __REPLYTO_EXISTS
 meta           FROM_MISSP_REPLYTO    __FROM_MISSP_REPLYTO && !__NOT_SPOOFED && !__RCD_RDNS_MTA_MESSY && !__TO___LOWER && !__COMMENT_EXISTS && !__UNSUB_LINK && !__MIME_QP && !__CTYPE_MULTIPART_ALT && !__JM_REACTOR_DATE && !__PLING_QUERY
