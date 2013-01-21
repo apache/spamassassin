@@ -190,8 +190,8 @@ sub autolearn_discriminator {
 
     #Set a lower threshold of "just has to be spam" if autolearn_force was set on a rule
     if ($force_autolearn) {
-      $required_body_points = 0;
-      $required_head_points = 0;
+      $required_body_points = -99;
+      $required_head_points = -99;
       dbg("learn: auto-learn: autolearn_force flagged for a rule.  Removing seperate body and head point threshold.  Body Only Points: $body_only_points ($required_body_points req'd) / Head Only Points: $head_only_points ($required_head_points req'd)");
     } else {
       dbg("learn: auto-learn: autolearn_force not flagged for a rule. Body Only Points: $body_only_points ($required_body_points req'd) / Head Only Points: $head_only_points ($required_head_points req'd)");

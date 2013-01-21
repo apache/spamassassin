@@ -924,7 +924,8 @@ sub finish_parsing {
     # free up stuff we no longer need
     delete $conf->{tests};
     delete $conf->{priority};
-    delete $conf->{test_types};
+    #test_types are needed - see bug 5503
+    #delete $conf->{test_types};
   }
 }
 
@@ -1200,6 +1201,12 @@ sub add_test {
 
   $conf->{tests}->{$name} = $text;
   $conf->{test_types}->{$name} = $type;
+
+  if ($name =~ /AUTOLEARNTEST/i) {
+     dbg("config: auto-learn: $name has type $type = $conf->{test_types}->{$name} during add_test\n");
+  }
+
+  
   if ($type == $Mail::SpamAssassin::Conf::TYPE_META_TESTS) {
     $conf->{priority}->{$name} ||= 500;
   }
