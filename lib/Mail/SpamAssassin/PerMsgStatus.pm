@@ -455,12 +455,16 @@ sub _get_autolearn_points {
     # ignore tests with 0 score (or undefined) in this scoreset
     next if !$scores->{$test};
 
-    # Go ahead and add points to the proper locations - Changed to elsif because in testing, 
-    # I was getting both head and body.
-    if (!$self->{conf}->maybe_header_only ($test)) {
-      $self->{body_only_points} += $scores->{$test};
-    } elsif (!$self->{conf}->maybe_body_only ($test)) {
+    # Go ahead and add points to the proper locations 
+    # Changed logic because in testing, I was getting both head and body. Bug 5503
+    if ($self->{conf}->maybe_header_only ($test)) {
       $self->{head_only_points} += $scores->{$test};
+      dbg("learn: auto-learn: adding head_only points $scores->{$test}");
+    } elsif ($self->{conf}->maybe_body_only ($test)) {
+      $self->{body_only_points} += $scores->{$test};
+      dbg("learn: auto-learn: adding body_only points $scores->{$test}");
+    } else {
+      dbg("learn: auto-learn: not considered head or body scores: $scores->{$test}");
     }
 
     $points += $scores->{$test};

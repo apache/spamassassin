@@ -17,9 +17,9 @@ q{ autolearn=spam } => 'autolearned as spam'
 
 tstprefs ('
 
-body	WEIGHT	/EVOLUTION PREVIEW RELEASE/
-score	WEIGHT	7.0
-tflags	WEIGHT	autolearn_force
+body	AUTOLEARNTEST_BODY	/EVOLUTION PREVIEW RELEASE/
+score	AUTOLEARNTEST_BODY	7.0
+tflags	AUTOLEARNTEST_BODY	autolearn_force
 
 use_bayes 1
 bayes_auto_learn 1

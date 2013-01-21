@@ -4389,6 +4389,11 @@ sub get_description_for_rule {
 sub maybe_header_only {
   my($self,$rulename) = @_;
   my $type = $self->{test_types}->{$rulename};
+
+  if ($rulename =~ /AUTOLEARNTEST/i) {
+    dbg("config: auto-learn: $rulename - Test type is $self->{test_types}->{$rulename}.");
+  }
+ 
   return 0 if (!defined ($type));
 
   if (($type == $TYPE_HEAD_TESTS) || ($type == $TYPE_HEAD_EVALS)) {
@@ -4410,6 +4415,11 @@ sub maybe_header_only {
 sub maybe_body_only {
   my($self,$rulename) = @_;
   my $type = $self->{test_types}->{$rulename};
+
+  if ($rulename =~ /AUTOLEARNTEST/i) {
+    dbg("config: auto-learn: $rulename - Test type is $self->{test_types}->{$rulename}.");
+  }
+
   return 0 if (!defined ($type));
 
   if (($type == $TYPE_BODY_TESTS) || ($type == $TYPE_BODY_EVALS)

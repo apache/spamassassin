@@ -16,8 +16,9 @@ q{ autolearn=spam } => 'autolearned as spam',
 
 tstprefs ('
 
-header	WEIGHT	From =~ /@/
-score	WEIGHT	13.0
+header	 AUTOLEARNTEST_FROM_HEADER	From =~ /@/
+score	 AUTOLEARNTEST_FROM_HEADER	13.0
+describe AUTOLEARNTEST_FROM_HEADER	Test rule for Autolearning 
 
 use_bayes 1
 bayes_auto_learn 1
