@@ -50,5 +50,5 @@ bayes_auto_learn_threshold_spam 6.0
 
 ');
 
-ok (sarun ("-D -L -t < data/nice/001 2>&1", \&patterns_run_cb));
+ok (sarun ("-L -t < data/nice/001", \&patterns_run_cb));
 ok_all_patterns();
