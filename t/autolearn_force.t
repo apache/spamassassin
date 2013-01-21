@@ -2,7 +2,16 @@
 
 use lib '.'; use lib 't';
 use SATest; sa_t_init("autolearn_force");
-use Test; BEGIN { plan tests => 2 };
+use Test;
+
+use constant TEST_ENABLED => eval { require DB_File; };
+
+BEGIN {
+  plan tests => (TEST_ENABLED ? 2 : 0);
+};
+
+exit unless TEST_ENABLED;
+
 
 # ---------------------------------------------------------------------------
 
