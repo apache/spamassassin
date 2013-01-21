@@ -386,6 +386,19 @@ sub get_body_only_points {
   return $self->{body_only_points};
 }
 
+=item $score = $status->get_autolearn_force_status()
+
+Return whether a message's score included any rules that flagged as 
+autolearn_force.
+  
+=cut
+
+sub get_autolearn_force_status {
+  my ($self) = @_;
+  $self->_get_autolearn_points();
+  return $self->{autolearn_force};
+} 
+
 sub _get_autolearn_points {
   my ($self) = @_;
 
@@ -416,6 +429,7 @@ sub _get_autolearn_points {
   $self->{learned_points} = 0;
   $self->{body_only_points} = 0;
   $self->{head_only_points} = 0;
+  $self->{autolearn_force} = 0;
 
   foreach my $test (@{$self->{test_names_hit}}) {
     # According to the documentation, noautolearn, userconf, and learn
@@ -431,16 +445,21 @@ sub _get_autolearn_points {
         $self->{learned_points} += $self->{conf}->{scoreset}->[$orig_scoreset]->{$test};
 	next;
       }
+    
+      #IF ANY RULES ARE AUTOLEARN FORCE, SET THAT FLAG  
+      if ($tflags->{$test} =~ /\bautolearn_force\b/) {
+        $self->{autolearn_force}++;
+      }
     }
 
     # ignore tests with 0 score (or undefined) in this scoreset
     next if !$scores->{$test};
 
-    # Go ahead and add points to the proper locations
+    # Go ahead and add points to the proper locations - Changed to elsif because in testing, 
+    # I was getting both head and body.
     if (!$self->{conf}->maybe_header_only ($test)) {
       $self->{body_only_points} += $scores->{$test};
-    }
-    if (!$self->{conf}->maybe_body_only ($test)) {
+    } elsif (!$self->{conf}->maybe_body_only ($test)) {
       $self->{head_only_points} += $scores->{$test};
     }
 
