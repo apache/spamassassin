@@ -3050,7 +3050,7 @@ B<Mail::SpamAssassin::Plugin::Reuse>.
     }
   });
 
-=item tflags SYMBOLIC_TEST_NAME [ {net|nice|learn|userconf|noautolearn|multiple|maxhits=N|ips_only|domains_only|a|ns} ]
+=item tflags SYMBOLIC_TEST_NAME [ {net|nice|learn|userconf|noautolearn|autolearn_force|multiple|maxhits=N|ips_only|domains_only|a|ns} ]
 
 Used to set flags on a test. Parameter is a space-separated list of flag names.
 These flags are used in the score-determination back end system for details
@@ -3082,6 +3082,10 @@ The test requires training before it can be used.
 
 The test will explicitly be ignored when calculating the score for
 learning systems.
+
+=item  autolearn_force
+
+The test will be subject to less stringent autolearn thresholds.
 
 =item  multiple
 
@@ -4391,7 +4395,8 @@ sub maybe_header_only {
     return 1;
 
   } elsif ($type == $TYPE_META_TESTS) {
-    my $tflags = $self->{tflags}->{$rulename}; $tflags ||= '';
+    my $tflags = $self->{tflags}->{$rulename}; 
+    $tflags ||= '';
     if ($tflags =~ m/\bnet\b/i) {
       return 0;
     } else {

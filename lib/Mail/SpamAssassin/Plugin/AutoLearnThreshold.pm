@@ -106,6 +106,12 @@ Note: SpamAssassin requires at least 3 points from the header, and 3
 points from the body to auto-learn as spam.  Therefore, the minimum
 working value for this option is 6.
 
+If the test option autolearn_force is set, the minimum value will 
+remain at 6 points but there is no requirement that the points come
+from body and header rules.  This option is useful for autolearning
+with rules that are considered to be extremely safe indicators of 
+the spaminess of a message.
+
 =cut
 
   push (@cmds, {
@@ -157,6 +163,9 @@ sub autolearn_discriminator {
   my $head_only_points = $scan->get_head_only_points();
   my $learned_points = $scan->get_learned_points();
 
+  # find out if any of the tests added an autolearn_force status
+  my $force_autolearn = $scan->get_autolearn_force_status();
+
   dbg("learn: auto-learn? ham=$min, spam=$max, ".
                 "body-points=".$body_only_points.", ".
                 "head-points=".$head_only_points.", ".
@@ -178,6 +187,15 @@ sub autolearn_discriminator {
   if ($isspam) {
     my $required_body_points = 3;
     my $required_head_points = 3;
+
+    #Set a lower threshold of "just has to be spam" if autolearn_force was set on a rule
+    if ($force_autolearn) {
+      $required_body_points = 0;
+      $required_head_points = 0;
+      dbg("learn: auto-learn: autolearn_force flagged for a rule.  Removing seperate body and head point threshold.  Body Only Points: $body_only_points ($required_body_points req'd) / Head Only Points: $head_only_points ($required_head_points req'd)");
+    } else {
+      dbg("learn: auto-learn: autolearn_force not flagged for a rule. Body Only Points: $body_only_points ($required_body_points req'd) / Head Only Points: $head_only_points ($required_head_points req'd)");
+    }
 
     if ($body_only_points < $required_body_points) {
       dbg("learn: auto-learn? no: scored as spam but too few body points (".
