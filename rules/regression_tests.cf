@@ -45,10 +45,10 @@ test TRACKER_ID     ok          ofsknxxdqgtgqvsoiytkivajvtj
 test TRACKER_ID     fail        <!-- ADMINISTRIVIA -->
 test TRACKER_ID     fail        Donau-Dampfschifffahrts-Kapitaen
 
-test __OBFUSCATING_COMMENT ok     This is a te<!--foo-->st
-test __OBFUSCATING_COMMENT fail   Not a <!-- problem --> here
-test __OBFUSCATING_COMMENT fail   or<!--problem--> here
-test __OBFUSCATING_COMMENT fail   This <tag><!-- neither --></tag> I hope
+test __OBFUSCATING_COMMENT_A ok     This is a te<!--foo-->st
+test __OBFUSCATING_COMMENT_A fail   Not a <!-- problem --> here
+test __OBFUSCATING_COMMENT_A fail   or<!--problem--> here
+test __OBFUSCATING_COMMENT_A fail   This <tag><!-- neither --></tag> I hope
 
 test HIDE_WIN_STATUS ok <a href=foo onMouseOver="window.status='bar';>
 test HIDE_WIN_STATUS fail attributes like href=foo onMouseOver="window.status='bar'"
