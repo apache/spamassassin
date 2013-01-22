@@ -1032,4 +1032,40 @@ sub can_use_net_dns_safely {
   return;
 }
 
+sub debug_hash {
+  my ($hash) = @_;
+  my ($string, $key, @keys, @sorted, $i);
+
+  if (uc(ref($hash)) eq "HASH") {
+    foreach $key (keys %$hash) {
+      push (@keys, $key);
+    }
+    @sorted = sort @keys;
+  
+    for ($i=0; $i < scalar(@sorted); $i++) {
+      if (uc(ref($hash->{$sorted[$i]})) eq 'HASH') {
+        $string .= "$sorted[$i] = ".debug_hash($hash->{$sorted[$i]})."\n";
+      } else {
+        $string .= "$sorted[$i] = $hash->{$sorted[$i]}\n";
+      }
+    }
+  } else {
+    warn (uc(ref($hash)) . " is not a HASH\n");
+  }
+  return $string;
+}
+
+sub debug_array {
+  my ($array) = @_;
+
+  my ($string, $i);
+
+  if (uc(ref($array)) eq "ARRAY") {
+    for ($i =0; $i < scalar(@$array); $i++) {
+      $string .= "Array Element $i = $array->[$i]\n";
+    }
+  }
+  return $string;
+}
+
 1;
