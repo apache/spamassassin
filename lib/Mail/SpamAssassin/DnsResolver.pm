@@ -573,7 +573,7 @@ sub new_dns_packet {
     # dbg("dns: adding EDNS ext, UDP payload size %d", $udp_payload_size);
       if ($packet->UNIVERSAL::can('edns')) {  # available since Net::DNS 0.69
         $packet->edns->size($udp_payload_size);
-      } else {
+      } else {  # legacy mechanism
         my $optrr = Net::DNS::RR->new(Type => 'OPT', Name => '', TTL => 0,
                                       Class => $udp_payload_size);
         $packet->push('additional', $optrr);
