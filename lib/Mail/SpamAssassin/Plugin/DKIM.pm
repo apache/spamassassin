@@ -1152,7 +1152,7 @@ sub _wlcheck_list {
       $expired = !$signature->check_expiration;
     }
     my $sdid = $signature->domain;
-    my $sdid = lc $sdid  if defined $sdid;
+    $sdid = lc $sdid  if defined $sdid;
 
     my $info = $valid ? 'VALID' : 'FAILED';
     $info .= ' EXPIRED'  if $expired;
