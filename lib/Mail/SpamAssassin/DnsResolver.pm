@@ -354,7 +354,9 @@ sub connect_sock {
     or die "No Perl modules for network socket available";
 
   if ($self->{sock}) {
-    $self->{sock}->close()  or die "error closing socket: $!";
+    $self->{sock}->close()
+      or warn "connect_sock: error closing socket $self->{sock}: $!";
+    $self->{sock} = undef;
   }
   my $sock;
   my $errno;
@@ -857,7 +859,8 @@ Reset socket when done with it.
 sub finish_socket {
   my ($self) = @_;
   if ($self->{sock}) {
-    $self->{sock}->close()  or warn "error closing socket: $!";
+    $self->{sock}->close()
+      or warn "finish_socket: error closing socket $self->{sock}: $!";
     undef $self->{sock};
   }
 }
