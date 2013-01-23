@@ -663,7 +663,9 @@ sub _check_dkim_signed_by {
       next if $sig->UNIVERSAL::can("check_expiration") &&
               !$sig->check_expiration;
     }
-    my $sdid = lc($sig->domain);
+    my $sdid = $sig->domain;
+    next if !defined $sdid;  # a signature with a missing required tag 'd' ?
+    $sdid = lc $sdid;
     if ($must_be_author_domain_signature) {
       next if !$pms->{dkim_author_domains}->{$sdid};
     }
@@ -815,14 +817,20 @@ sub _check_dkim_signature {
       }
       push(@valid_signatures, $signature)  if $valid && !$expired;
       # check if we have a potential Author Domain Signature, valid or not
-      my $d = lc($signature->domain);
-      if ($pms->{dkim_author_domains}->{$d}) {  # SDID matches author domain
-        $pms->{dkim_has_any_author_sig}->{$d} = 1;
-        if ($valid && !$expired) {
-          $pms->{dkim_has_valid_author_sig}->{$d} = 1;
-        } elsif ( ($sig_result_supported ?$signature :$verifier)->result_detail
-                 =~ /\b(?:timed out|SERVFAIL)\b/i) {
-          $pms->{dkim_author_sig_tempfailed}->{$d} = 1;
+      my $d = $signature->domain;
+      if (!defined $d) {
+        # can be undefined on a broken signatures with missing required tags
+      } else {
+        $d = lc $d;
+        if ($pms->{dkim_author_domains}->{$d}) {  # SDID matches author domain
+          $pms->{dkim_has_any_author_sig}->{$d} = 1;
+          if ($valid && !$expired) {
+            $pms->{dkim_has_valid_author_sig}->{$d} = 1;
+          } elsif ( ($sig_result_supported ? $signature
+                                           : $verifier)->result_detail
+                   =~ /\b(?:timed out|SERVFAIL)\b/i) {
+            $pms->{dkim_author_sig_tempfailed}->{$d} = 1;
+          }
         }
       }
       if (would_log("dbg","dkim")) {
@@ -833,8 +841,10 @@ sub _check_dkim_signature {
           $signature->algorithm, scalar($signature->canonicalization),
           ($sig_result_supported ? $signature : $verifier)->result,
           !$expired ? '' : ', expired',
-          $pms->{dkim_author_domains}->{$d} ? 'matches author domain' :
-                                              'does not match author domain');
+          defined $d && $pms->{dkim_author_domains}->{$d}
+            ? 'matches author domain'
+            : 'does not match author domain'
+        );
       }
     }
     if (@valid_signatures) {
@@ -1141,7 +1151,8 @@ sub _wlcheck_list {
     if ($valid && $signature->UNIVERSAL::can("check_expiration")) {
       $expired = !$signature->check_expiration;
     }
-    my $sdid = lc($signature->domain);
+    my $sdid = $signature->domain;
+    my $sdid = lc $sdid  if defined $sdid;
 
     my $info = $valid ? 'VALID' : 'FAILED';
     $info .= ' EXPIRED'  if $expired;
@@ -1160,8 +1171,10 @@ sub _wlcheck_list {
       $tried_authors{$author} = 1;  # for logging purposes
 
       my $matches = 0;
-      if (!defined $acceptable_sdid || $acceptable_sdid eq '') {
+      if (!defined $sdid) {
+        # don't bother, invalid signature with a missing 'd' tag
 
+      } elsif (!defined $acceptable_sdid || $acceptable_sdid eq '') {
         # An "Author Domain Signature" (sometimes called a first-party
         # signature) is a Valid Signature in which the domain name of the
         # DKIM signing entity, i.e., the d= tag in the DKIM-Signature header
@@ -1170,9 +1183,8 @@ sub _wlcheck_list {
 
         # checking for Author Domain Signature
         $matches = 1  if $sdid eq $author_domain;
-      }
-      else {  # checking for verifier-acceptable signature
 
+      } else {  # checking for verifier-acceptable signature
         # The second argument to a 'whitelist_from_dkim' option is now (since
         # version 3.3.0) supposed to be a signing domain (SDID), no longer an
         # identity (AUID). Nevertheless, be prepared to accept the full e-mail
@@ -1204,7 +1216,8 @@ sub _wlcheck_list {
       }
     }
     dbg("dkim: %s signature by %s, author %s, no valid matches",
-        $info, $sdid, join(", ", keys %tried_authors))  if !$any_match_at_all;
+        $info,  defined $sdid ? $sdid : '(undef)',
+        join(", ", keys %tried_authors))  if !$any_match_at_all;
   }
   return ($any_match_at_all, \%any_match_by_wl);
 }
