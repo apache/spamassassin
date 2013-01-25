@@ -295,7 +295,7 @@ sub bgsend_and_start_lookup {
     return if !defined $id;  # presumably blocked, or other fatal failure
     my $id_tail = $id; $id_tail =~ s{^\d+/IN/}{};
     lc($id_tail) eq lc($dnskey)
-      or warn "async: unmatched id $id, key=$dnskey\n";
+      or info("async: unmatched id %s, key=%s", $id, $dnskey);
     my $pkt = $dns_query_info->{pkt};
     if (!$pkt) {  # DNS query underway, still waiting for results
       # just add our query to the existing one

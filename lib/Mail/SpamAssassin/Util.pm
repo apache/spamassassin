@@ -59,7 +59,8 @@ BEGIN {
   @EXPORT = ();
   @EXPORT_OK = qw(&local_tz &base64_decode &untaint_var &untaint_file_path
                   &exit_status_str &proc_status_ok &am_running_on_windows
-                  &reverse_ip_address &secure_tmpfile &secure_tmpdir);
+                  &reverse_ip_address &fmt_dns_question_entry
+                  &secure_tmpfile &secure_tmpdir);
 }
 
 use Mail::SpamAssassin;
@@ -911,6 +912,21 @@ sub reverse_ip_address {
 ###########################################################################
 
 sub my_inet_aton { unpack("N", pack("C4", split(/\./, $_[0]))) }
+
+###########################################################################
+
+sub fmt_dns_question_entry {
+  # converts a @{Net::DNS::Packet->question} entry to a presentable format,
+  # returning a triple: class, type, label
+  #
+  my $q = $_[0];
+  my $qname = $q->qname;
+  local $1;
+  # Net::DNS provides a query in encoded RFC 1035 zone file format, decode it!
+  $qname =~ s{ \\ ( [0-9]{3} | [^0-9] ) }
+             { length($1)==1 ? $1 : $1 <= 255 ? chr($1) : "\\$1" }xgse;
+  return ($q->qclass, $q->qtype, $qname);
+}
 
 ###########################################################################
 
