@@ -189,7 +189,7 @@ use warnings;
 use re 'taint';
 
 use Mail::SpamAssassin::Plugin;
-use Mail::SpamAssassin::Util;
+use Mail::SpamAssassin::Util qw(fmt_dns_question_entry);
 use Mail::SpamAssassin::Logger;
 
 use vars qw(@ISA %rcode_value $txtdata_can_provide_a_list);
@@ -507,10 +507,14 @@ sub process_response_packet {
     $header = $pkt->header;
     @question = $pkt->question;
     $qtype = uc $question[0]->qtype  if @question;
-    my $query_str = join(', ',map($_->qtype.' '.$_->qname, @question));
     $rcode = uc $header->rcode  if $header;  # 'NOERROR', 'NXDOMAIN', ...
+
+    # NOTE: qname is encoded in RFC 1035 zone format, decode it
     dbg("askdns: answer received, rcode %s, query %s, answer has %d records",
-        $rcode, $query_str, scalar @answer);
+        $rcode,
+        join(', ', map(join('/', fmt_dns_question_entry($_)), @question)),
+        scalar @answer);
+
     if (defined $rcode && exists $rcode_value{$rcode}) {
       # Net::DNS return a rcode name for codes it knows about,
       # and returns a number for the rest; we deal with numbers from here on

@@ -43,7 +43,7 @@ use re 'taint';
 use Mail::SpamAssassin;
 use Mail::SpamAssassin::Logger;
 use Mail::SpamAssassin::Constants qw(:ip);
-use Mail::SpamAssassin::Util qw(untaint_var);
+use Mail::SpamAssassin::Util qw(untaint_var fmt_dns_question_entry);
 
 use Socket;
 use Errno qw(EADDRINUSE EACCES);
@@ -552,6 +552,8 @@ sub new_dns_packet {
     if ($self->{conf}->{dns_options}->{dns0x20}) {
       $domain = dnsext_dns0x20($domain);
     }
+    # Net::DNS expects RFC 1035 zone format encoding even in its API, silly!
+    $domain =~ s{\\}{\\\\}gs;
     $packet = Net::DNS::Packet->new($domain, $type, $class);
 
     # a bit noisy, so commented by default...
@@ -596,9 +598,8 @@ sub _packet_id {
   my $header = $packet->header;
   my $id = $header->id;
   my @questions = $packet->question;
-  my $ques = $questions[0];
 
-  if (defined $ques) {
+  if ($questions[0]) {
     # Bug 6232: Net::DNS::Packet::new is not consistent in keeping data in
     # sections of a packet either as original bytes or presentation-encoded:
     # creating a query packet as above in new_dns_packet() keeps label in
@@ -609,10 +610,8 @@ sub _packet_id {
     # sure the query section of an answer packet matches the query section
     # in our packet as formed by new_dns_packet():
     #
-    my $qname = $ques->qname;
-    $qname =~ s/\\([0-9]{3}|.)/length($1)==1 ? $1 : chr($1)/gse;
-    $qname = lc $qname  if !$self->{conf}->{dns_options}->{dns0x20};
-    return join '/', $id, $ques->qclass, $ques->qtype, $qname;
+       # $qname = lc $qname  if !$self->{conf}->{dns_options}->{dns0x20};
+    return join('/', $id, fmt_dns_question_entry($questions[0]));
 
   } else {
     # odd.  this should not happen, but clearly some DNS servers
@@ -746,10 +745,10 @@ sub poll_responses {
         my $packet_id = $header->id;
         if ($rcode ne 'NOERROR') {
           # some failure, e.g. NXDOMAIN, SERVFAIL, FORMERR, REFUSED, ...
+          # NOTE: qname is encoded in RFC 1035 zone format, decode it
           dbg("dns: dns response %s, %s, %s", $packet_id, $rcode,
-              join(', ', map { my $qn = $_->qname;
-                $qn =~ s/\\([0-9]{3}|.)/length($1)==1 ? $1 : chr($1)/gse;
-                $qn.'/'.$_->qtype .'/'.$_->qclass} $packet->question));
+              join(', ', map(join('/', fmt_dns_question_entry($_)),
+                             $packet->question)));
         } else {
           # NOERROR, may or may not have answer records
           dbg("dns: dns response %s is OK, %d answer records",
