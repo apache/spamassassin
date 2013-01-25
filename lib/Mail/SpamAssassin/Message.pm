@@ -1234,7 +1234,7 @@ sub split_into_array_of_short_lines {
   my @result;
   foreach my $line (split (/^/m, $_[0])) {
     while (length ($line) > MAX_BODY_LINE_LENGTH) {
-      # try splitting "nicely" so that we don't chop an url in half or
+      # try splitting "nicely" so that we don't chop a url in half or
       # something.  if there's no space, then just split at max length.
       my $length = rindex($line, ' ', MAX_BODY_LINE_LENGTH) + 1;
       $length ||= MAX_BODY_LINE_LENGTH;

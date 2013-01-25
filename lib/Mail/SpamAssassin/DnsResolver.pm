@@ -587,7 +587,7 @@ sub new_dns_packet {
 }
 
 # Internal function used only in this file
-## compute an unique ID for a packet to match the query to the reply
+## compute a unique ID for a packet to match the query to the reply
 ## It must use only data that is returned unchanged by the nameserver.
 ## Argument is a Net::DNS::Packet that has a non-empty question section,
 ## return is an (opaque) string that can be used as a hash key
