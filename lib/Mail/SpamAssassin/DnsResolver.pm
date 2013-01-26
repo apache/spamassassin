@@ -756,12 +756,20 @@ sub poll_responses {
         }
         my $id = $self->_packet_id($packet);
         my $cb = delete $self->{id_to_callback}->{$id};
-        if (!$cb) {
-          info("dns: no callback for id %s, ignored; packet: %s",
-               $id,  $packet ? $packet->string : "undef" );
-        } else {
+        if ($cb) {
           $cb->($packet, $id, $now);
           $cnt++;
+        } else {  # no match, report the problem
+          info("dns: no callback for id %s, ignored; packet: %s",
+               $id,  $packet ? $packet->string : "undef" );
+          # report a likely matching query for diagnostic purposes
+          local $1;
+          if ($id =~ m{^(\d+)/}) {
+            my $dnsid = $1;  # the raw DNS packet id
+            info("dns: a likely matching query: %s",
+                 join(', ', grep(m{^\Q$dnsid\E/},
+                                 keys %{$self->{id_to_callback}})));
+          }
         }
       }
     }
