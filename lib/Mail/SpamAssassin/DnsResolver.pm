@@ -553,7 +553,10 @@ sub new_dns_packet {
       $domain = dnsext_dns0x20($domain);
     }
     # Net::DNS expects RFC 1035 zone format encoding even in its API, silly!
-    $domain =~ s{\\}{\\\\}gs;
+    # Since 0.68 it also assumes that domain names containing characters
+    # with codes above 0177 imply that IDN translation is to be performed.
+    $domain =~ s{ ( [\200-\377\\] ) }
+                { ord($1) < 0200 ? "\\$1" : sprintf("\\%03d",ord($1)) }xgse;
     $packet = Net::DNS::Packet->new($domain, $type, $class);
 
     # a bit noisy, so commented by default...
@@ -766,9 +769,13 @@ sub poll_responses {
           local $1;
           if ($id =~ m{^(\d+)/}) {
             my $dnsid = $1;  # the raw DNS packet id
-            info("dns: a likely matching query: %s",
-                 join(', ', grep(m{^\Q$dnsid\E/},
-                                 keys %{$self->{id_to_callback}})));
+            my @matches =
+              grep(m{^\Q$dnsid\E/}, keys %{$self->{id_to_callback}});
+            if (!@matches) {
+              info("dns: no likely matching queries for id %s", $dnsid);
+            } else {
+              info("dns: a likely matching query: %s", join(', ', @matches));
+            }
           }
         }
       }
