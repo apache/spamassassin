@@ -603,6 +603,9 @@ sub _packet_id {
   my $id = $header->id;
   my @questions = $packet->question;
 
+  @questions <= 1
+    or warn "dns: packet has multiple questions: " . $packet->string . "\n";
+
   if ($questions[0]) {
     # Bug 6232: Net::DNS::Packet::new is not consistent in keeping data in
     # sections of a packet either as original bytes or presentation-encoded:
