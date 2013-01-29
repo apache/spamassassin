@@ -555,8 +555,9 @@ sub new_dns_packet {
     # Net::DNS expects RFC 1035 zone format encoding even in its API, silly!
     # Since 0.68 it also assumes that domain names containing characters
     # with codes above 0177 imply that IDN translation is to be performed.
-    $domain =~ s{ ( [\200-\377\\] ) }
-                { ord($1) < 0200 ? "\\$1" : sprintf("\\%03d",ord($1)) }xgse;
+    # Protect also nonprintable characters just in case, ensuring transparency.
+    $domain =~ s{ ( [\000-\037\177-\377\\] ) }
+                { $1 eq '\\' ? "\\$1" : sprintf("\\%03d",ord($1)) }xgse;
     $packet = Net::DNS::Packet->new($domain, $type, $class);
 
     # a bit noisy, so commented by default...
