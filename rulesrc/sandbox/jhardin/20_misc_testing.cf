@@ -912,7 +912,7 @@ describe    ACH_CANCELLED          "ACH cancelled" fraud / phish
 # spams from users list query 03/2012
 # Not useful as scored rules, may be useful meta'd with something else
 uri         __URI_DBL_SUBDOM   m,^https?://(?!www\.amazon\.com)([^/]+)/.*https?://(?:[^.]+\.)?\1/,i
-meta        URI_DBL_SUBDOM     __URI_DBL_SUBDOM && !__NOT_A_PERSON && !__BUGGED_IMG && !__COMMENT_EXISTS && !__SUBSCRIPTION_INFO && !__UNSUB_LINK && !__MSGID_JAVAMAIL && !__RP_MATCHES_RCVD
+meta        URI_DBL_SUBDOM     __URI_DBL_SUBDOM && !__NOT_A_PERSON && !__BUGGED_IMG && !__COMMENT_EXISTS && !__SUBSCRIPTION_INFO && !__UNSUB_LINK && !__MSGID_JAVAMAIL && !__RP_MATCHES_RCVD && !__FROM_LOWER
 score       URI_DBL_SUBDOM     2.50	# limit
 uri         __URI_DBL_DOM      m,^https?://[^.]+\.(?!amazon\.com)([^/]+)/.*https?://[^.]+\.\1/,i
 
@@ -1054,8 +1054,8 @@ body        __BODY_TEXT_LINE     /^\s*\S/
 tflags      __BODY_TEXT_LINE     multiple maxhits=3
 meta        __EMPTY_BODY         __BODY_TEXT_LINE < 2
 # this hits 13% of masscheck corpus spam, 50% of that only scores 2 points
-meta        EMPTY_BODY           __EMPTY_BODY && !__NUMBERS_IN_SUBJ && !__CTE && !__RP_MATCHES_RCVD && !__VIA_ML && !__MIME_ATTACHMENT && !__HAS_THREAD_INDEX && !__TO_EQ_FROM_DOM && !__ENV_AND_HDR_FROM_MATCH 
-score       EMPTY_BODY           3.50	# limit
+meta        EMPTY_BODY           __EMPTY_BODY && !__NUMBERS_IN_SUBJ && !__CTE && !__RP_MATCHES_RCVD && !__VIA_ML && !__MIME_ATTACHMENT && !__HAS_THREAD_INDEX && !__TO_EQ_FROM_DOM && !__ENV_AND_HDR_FROM_MATCH && !__FROM_LOWER
+score       EMPTY_BODY           3.00	# limit
 
 
 #ifplugin Mail::SpamAssassin::Plugin::DKIM
