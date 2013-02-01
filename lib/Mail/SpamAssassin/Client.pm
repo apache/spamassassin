@@ -60,20 +60,15 @@ use re 'taint';
 use IO::Socket;
 use Errno qw(EBADF);
 
-our($have_inet4, $have_inet6);
+our($io_socket_module_name);
 BEGIN {
-  $have_inet4 = eval {
-    require IO::Socket::INET;
-    my $sock = IO::Socket::INET->new(LocalAddr => '0.0.0.0', Proto => 'udp');
-    $sock->close or die "error closing inet socket: $!"  if $sock;
-    $sock ? 1 : undef;
-  };
-  $have_inet6 = eval {
-    require IO::Socket::INET6;
-    my $sock = IO::Socket::INET6->new(LocalAddr => '::', Proto => 'udp');
-    $sock->close or die "error closing inet6 socket: $!"  if $sock;
-    $sock ? 1 : undef;
-  };
+  if (eval { require IO::Socket::IP }) {
+    $io_socket_module_name = 'IO::Socket::IP';
+  } elsif (eval { require IO::Socket::INET6 }) {
+    $io_socket_module_name = 'IO::Socket::INET6';
+  } elsif (eval { require IO::Socket::INET }) {
+    $io_socket_module_name = 'IO::Socket::INET';
+  }
 }
 
 my $EOL = "\015\012";
@@ -469,13 +464,8 @@ sub _create_connection {
 		   PeerAddr => $self->{host},
 		   PeerPort => $self->{port},
 		   Timeout  => $self->{timeout},
-		  );
-    my $is_inet4 = $self->{host} =~ /^\d+\.\d+\.\d+\.\d+\z/;
-    if ($have_inet4 && ($is_inet4 || !$have_inet6)) {
-      $remote = IO::Socket::INET->new( %params );
-    } else {
-      $remote = IO::Socket::INET6->new( %params );
-    }
+		 );
+    $remote = $io_socket_module_name->new(%params);
   }
 
   unless ($remote) {
