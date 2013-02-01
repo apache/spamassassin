@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-coi-bulk axb-foo axb-fraud axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bernie-mix bpoliakoff darxus grenier jarif kpg-gah mas-cps mas-mas zmi; day 2: axb-coi-bulk axb-foo axb-fraud axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bernie-mix bpoliakoff darxus grenier jarif kpg-gah llanga zmi; day 3: axb-coi-bulk axb-foo axb-fraud axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bernie-mix bpoliakoff darxus grenier jarif kpg-gah llanga mas-cps mas-mas zmi
+# with results from: day 1: axb-coi-bulk axb-foo axb-fraud axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bernie-mix bpoliakoff darxus grenier jarif kpg-gah mas-cps mas-mas zmi; day 2: axb-coi-bulk axb-foo axb-fraud axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bernie-mix bpoliakoff darxus grenier jarif kpg-gah llanga mas-cps mas-mas zmi; day 3: axb-coi-bulk axb-foo axb-fraud axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bernie-mix bpoliakoff darxus grenier jarif kpg-gah llanga zmi
 
 # good enough
 ACH_CANCELLED
@@ -141,6 +141,9 @@ AXB_X_AOL_SEZ_S
 
 # good enough
 AXB_X_RCV_WLOCAL
+
+# good enough
+BANKING_LAWS
 
 # tflags learn
 BAYES_00
@@ -405,6 +408,9 @@ FS_REPLICAWATCH
 
 # tflags publish
 GOOGLE_DOCS_PHISH
+
+# tflags publish
+GOOGLE_DOCS_PHISH_MANY
 
 # tflags userconf
 GTUBE
@@ -890,10 +896,10 @@ TO_NO_BRKTS_MSFT
 TT_MSGID_TRUNC
 
 # good enough
-TVD_PH_BODY_META
+TVD_FINGER_01
 
 # good enough
-TVD_QUAL_MEDS
+TVD_PH_BODY_META
 
 # good enough
 TVD_RCVD_IP
@@ -904,14 +910,20 @@ TVD_RCVD_IP4
 # good enough
 TVD_SUBJ_NUM_OBFU_MINFP
 
-# tflags publish
-GOOGLE_DOCS_PHISH_MANY
-
-# good enough
-TVD_FINGER_01
-
 # good enough
 TVD_UNDER_VALUED
+
+# good enough
+AXB_XMAILER_MIMEOLE_OL_E023A
+
+# good enough
+AXB_XMAILER_MIMEOLE_OL_F5C60
+
+# good enough
+OBFU_HTML_ATTACH
+
+# good enough
+TVD_FROM_1
 
 # tflags userconf
 UNPARSEABLE_RELAY
