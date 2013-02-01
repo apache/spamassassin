@@ -754,18 +754,13 @@ sub poll_responses {
           # NOERROR, may or may not have answer records
           dbg("dns: dns response %s is OK, %d answer records",
               $packet_id, $header->ancount);
-        } elsif ($rcode eq 'NXDOMAIN') {  # fairly common, no big deal
+        } else {
+          # some failure, e.g. NXDOMAIN, SERVFAIL, FORMERR, REFUSED, ...
+          # btw, one reason for SERVFAIL is an RR signature failure in DNSSEC
           # NOTE: qname is encoded in RFC 1035 zone format, decode it
           dbg("dns: dns response %s, %s, %s", $packet_id, $rcode,
               join(', ', map(join('/', fmt_dns_question_entry($_)),
                              $packet->question)));
-        } else {
-          # some failure, e.g. SERVFAIL, FORMERR, REFUSED, ...
-          # btw, one reason for SERVFAIL is an RR signature failure in DNSSEC
-          # NOTE: qname is encoded in RFC 1035 zone format, decode it
-          info("dns: dns response %s, %s, %s", $packet_id, $rcode,
-               join(', ', map(join('/', fmt_dns_question_entry($_)),
-                              $packet->question)));
         }
         my $id = $self->_packet_id($packet);
         my $cb = delete $self->{id_to_callback}->{$id};
