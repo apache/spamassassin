@@ -130,16 +130,18 @@ meta           FROM_MISSP_EH_MATCH   __FROM_MISSP_EH_MATCH && !__RCD_RDNS_MTA_ME
 describe       FROM_MISSP_EH_MATCH   From misspaced, matches envelope
 score          FROM_MISSP_EH_MATCH   2.00	# max
 
-meta           __FROM_MISSP_URI      __FROM_RUNON_UNCODED && __HAS_ANY_URI
-meta           FROM_MISSP_URI        __FROM_MISSP_URI && !__NOT_SPOOFED && !__RCD_RDNS_MTA_MESSY && !MISSING_MIMEOLE && !__REPTO_QUOTE && !__UNSUB_LINK && !__MSGID_OK_HEX && !__MAIL_LINK && !__MIME_QP && !__BUGGED_IMG && !MIME_BASE64_TEXT && !__CTYPE_MULTIPART_ALT && !__MTLANDROID_MUA && !__XEROXWORKCTR_MUA && !__PHP_MUA && !__AMADEUSMS_MUA && !__FLASHMAIL_MUA && !__DKIM_EXISTS && !__HAS_SENDER
-describe       FROM_MISSP_URI        From misspaced, has URI
-score          FROM_MISSP_URI        2.00	# max
+# most hits > 10 points already
+#meta           __FROM_MISSP_URI      __FROM_RUNON_UNCODED && __HAS_ANY_URI
+#meta           FROM_MISSP_URI        __FROM_MISSP_URI && !__NOT_SPOOFED && !__RCD_RDNS_MTA_MESSY && !MISSING_MIMEOLE && !__REPTO_QUOTE && !__UNSUB_LINK && !__MSGID_OK_HEX && !__MAIL_LINK && !__MIME_QP && !__BUGGED_IMG && !MIME_BASE64_TEXT && !__CTYPE_MULTIPART_ALT && !__MTLANDROID_MUA && !__XEROXWORKCTR_MUA && !__PHP_MUA && !__AMADEUSMS_MUA && !__FLASHMAIL_MUA && !__DKIM_EXISTS && !__HAS_SENDER && !__RP_MATCHES_RCVD && !__THREADED && !__TAG_EXISTS_META 
+#describe       FROM_MISSP_URI        From misspaced, has URI
+#score          FROM_MISSP_URI        2.00	# max
 
 meta           FROM_MISSP_USER       (__FROM_RUNON && NSL_RCVD_FROM_USER)
 describe       FROM_MISSP_USER       From misspaced, from "User"
 
-meta           FROM_MISSP_NO_TO      (__FROM_RUNON && MISSING_HEADERS)
-describe       FROM_MISSP_NO_TO      From misspaced, To missing
+# all hits > 10 points already
+#meta           FROM_MISSP_NO_TO      (__FROM_RUNON && MISSING_HEADERS)
+#describe       FROM_MISSP_NO_TO      From misspaced, To missing
 
 meta           FROM_MISSP_TO_UNDISC  (__FROM_RUNON && __TO_UNDISCLOSED)
 describe       FROM_MISSP_TO_UNDISC  From misspaced, To undisclosed
@@ -832,7 +834,7 @@ meta        GAPPY_HTML             __GAPPY_HTML && !__UNSUB_LINK && !__RP_MATCHE
 describe    GAPPY_HTML             HTML body with much useless whitespace
 
 # Try to improve S/O per bug 6119
-meta        TVD_SPACE_RATIO_MINFP  __TVD_SPACE_RATIO && !__OBFUSCATING_COMMENT_B && !WEIRD_QUOTING && !__NOT_SPOOFED && !__BUGGED_IMG && !__ML1 && !__DOS_HAS_LIST_UNSUB && !__RP_MATCHES_RCVD && !__MUA_TBIRD && !__HS_SUBJ_RE_FW && !__RCD_RDNS_MAIL_MESSY && !__ISO_2022_JP_DELIM && !__MIME_QP && !__NOT_A_PERSON && __HAS_THREAD_INDEX && !__MIME_ATTACHMENT && !__CTYPE_MULTIPART_MIXED
+meta        TVD_SPACE_RATIO_MINFP  __TVD_SPACE_RATIO && !__OBFUSCATING_COMMENT_B && !WEIRD_QUOTING && !__NOT_SPOOFED && !__BUGGED_IMG && !__ML1 && !__DOS_HAS_LIST_UNSUB && !__RP_MATCHES_RCVD && !__MUA_TBIRD && !__HS_SUBJ_RE_FW && !__RCD_RDNS_MAIL_MESSY && !__ISO_2022_JP_DELIM && !__MIME_QP && !__NOT_A_PERSON && __HAS_THREAD_INDEX && !__MIME_ATTACHMENT && !__CTYPE_MULTIPART_MIXED && !__THREADED && !__NAKED_TO
 #tflags      TVD_SPACE_RATIO_MINFP  nopublish
 score       TVD_SPACE_RATIO_MINFP  3.5		# limit
 
@@ -1054,7 +1056,7 @@ body        __BODY_TEXT_LINE     /^\s*\S/
 tflags      __BODY_TEXT_LINE     multiple maxhits=3
 meta        __EMPTY_BODY         __BODY_TEXT_LINE < 2
 # this hits 13% of masscheck corpus spam, 50% of that only scores 2 points
-meta        EMPTY_BODY           __EMPTY_BODY && !__NUMBERS_IN_SUBJ && !__CTE && !__RP_MATCHES_RCVD && !__VIA_ML && !__MIME_ATTACHMENT && !__HAS_THREAD_INDEX && !__TO_EQ_FROM_DOM && !__ENV_AND_HDR_FROM_MATCH && !__FROM_LOWER && !__NOT_SPOOFED && !__MSGID_APPLEMAIL && !__RCD_RDNS_MAIL_MESSY
+meta        EMPTY_BODY           __EMPTY_BODY && !__NUMBERS_IN_SUBJ && !__CTE && !__RP_MATCHES_RCVD && !__VIA_ML && !__MIME_ATTACHMENT && !__HAS_THREAD_INDEX && !__TO_EQ_FROM_DOM && !__ENV_AND_HDR_FROM_MATCH && !__FROM_LOWER && !__NOT_SPOOFED && !__MSGID_APPLEMAIL && !__RCD_RDNS_MAIL_MESSY && !NO_RELAYS
 describe    EMPTY_BODY           No body text in message
 score       EMPTY_BODY           3.00	# limit
 
