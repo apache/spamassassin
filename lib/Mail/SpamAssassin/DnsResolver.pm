@@ -549,15 +549,20 @@ sub new_dns_packet {
         die "a label in a domain name is longer than 63 bytes\n";
       }
     }
+
     if ($self->{conf}->{dns_options}->{dns0x20}) {
       $domain = dnsext_dns0x20($domain);
+    } else {
+      $domain =~ tr/A-Z/a-z/;  # lowercase, limited to plain ASCII
     }
+
     # Net::DNS expects RFC 1035 zone format encoding even in its API, silly!
     # Since 0.68 it also assumes that domain names containing characters
     # with codes above 0177 imply that IDN translation is to be performed.
     # Protect also nonprintable characters just in case, ensuring transparency.
     $domain =~ s{ ( [\000-\037\177-\377\\] ) }
                 { $1 eq '\\' ? "\\$1" : sprintf("\\%03d",ord($1)) }xgse;
+
     $packet = Net::DNS::Packet->new($domain, $type, $class);
 
     # a bit noisy, so commented by default...
@@ -617,8 +622,9 @@ sub _packet_id {
     # sure the query section of an answer packet matches the query section
     # in our packet as formed by new_dns_packet():
     #
-       # $qname = lc $qname  if !$self->{conf}->{dns_options}->{dns0x20};
-    return join('/', $id, fmt_dns_question_entry($questions[0]));
+    my($class,$type,$qname) = fmt_dns_question_entry($questions[0]);
+    $qname =~ tr/A-Z/a-z/  if !$self->{conf}->{dns_options}->{dns0x20};
+    return join('/', $id, $class, $type, $qname);
 
   } else {
     # odd.  this should not happen, but clearly some DNS servers
@@ -763,7 +769,13 @@ sub poll_responses {
                              $packet->question)));
         }
         my $id = $self->_packet_id($packet);
+
+        # A hash lookup: the id must match exactly (case-sensitively).
+        # The domain name part of the id was lowercased if dns0x20 is off,
+        # and case-randomized when dns0x20 option is on.
+        #
         my $cb = delete $self->{id_to_callback}->{$id};
+
         if ($cb) {
           $cb->($packet, $id, $now);
           $cnt++;
