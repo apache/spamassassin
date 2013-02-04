@@ -1728,7 +1728,7 @@ The last setting in configuration files prevails. By default options
 Option 'edns' may take a value which specifies a requestor's UDP payload
 size according to EDNS0 specifications (RFC 2671bis draft), e.g. edns=4096.
 When the option is enabled but a value is not provided, a conservative default
-of 1280 bytes is implied. It is recommended to enable 'edns' when using a
+of 1240 bytes is implied. It is recommended to enable 'edns' when using a
 local recursive DNS server which supports EDNS0 (like most modern DNS servers
 do). This may avoid a need for a DNS query to fail-over to a TCP query when
 an answer DNS UDP packet would exceed 512 bytes. The option should remain
@@ -1768,8 +1768,9 @@ do not work for no apparent reason.
         } elsif ($option =~ /^(edns) (?: = (\d+) )? \z/x) {
           # RFC 2671 bis - EDNS0, value is a requestor's UDP payload size
           # defaults to some UDP packet size likely to fit into a single packet
-          # which is more likely to pass firewalls which choke on IP fragments
-          $self->{dns_options}->{$1} = $2 ? $2 : 1280;
+          # which is more likely to pass firewalls which choke on IP fragments.
+          # RFC 2460 min MTU is 1280 for IPv6, minus 40 bytes for basic header
+          $self->{dns_options}->{$1} = $2 ? $2 : 1240;
         } else {
           return $INVALID_VALUE;
         }
