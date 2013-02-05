@@ -96,7 +96,7 @@ body FUZZY_AFFORDABLE	/<inter W1><post P2>(?!affordable)<A><F><F><O><R><D><A><B>
 describe FUZZY_AFFORDABLE	Attempt to obfuscate words in spam
 replace_rules FUZZY_AFFORDABLE
 
-body FUZZY_AMBIEN	/<inter W1><post P2>(?!ambien)(?!ombien)<A><M><B><I><E><N>/i
+body FUZZY_AMBIEN	/<inter W1><post P2>(?<!t)(?!ambien)(?!ombien)<A><M><B><I><E><N>/i
 describe FUZZY_AMBIEN	Attempt to obfuscate words in spam
 replace_rules FUZZY_AMBIEN
 
