@@ -746,8 +746,11 @@ sub _check_dkim_signature {
                      $self->{main}->time_method("check_dkim_signature");
     # get our Net::DNS::Resolver object, let Mail::DKIM use the same resolver
     my $res = $self->{main}->{resolver}->get_resolver;
-    # the DnsResolver option is recognized by Mail::DKIM::Verifier since 0.40
-    $verifier = Mail::DKIM::Verifier->new(DnsResolver => $res);
+    # the DnsResolver option is recognized by Mail::DKIM::Verifier since 0.40;
+    # avoid a perl warning "used only once: possible typo"
+    $Mail::DKIM::DNS::RESOLVER = undef;
+    $Mail::DKIM::DNS::RESOLVER = $res;
+    $verifier = Mail::DKIM::Verifier->new;
     if (!$verifier) {
       dbg("dkim: cannot create Mail::DKIM::Verifier object");
       return;
