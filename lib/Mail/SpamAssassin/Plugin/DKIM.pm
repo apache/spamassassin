@@ -744,12 +744,11 @@ sub _check_dkim_signature {
     # signature objects not provided by the caller, must verify for ourselves
     my $timemethod = $self->{main}->UNIVERSAL::can("time_method") &&
                      $self->{main}->time_method("check_dkim_signature");
-    # get our Net::DNS::Resolver object, let Mail::DKIM use the same resolver
-    my $res = $self->{main}->{resolver}->get_resolver;
-    # the DnsResolver option is recognized by Mail::DKIM::Verifier since 0.40;
-    # avoid a perl warning "used only once: possible typo"
-    $Mail::DKIM::DNS::RESOLVER = undef;
-    $Mail::DKIM::DNS::RESOLVER = $res;
+    if (Mail::DKIM::Verifier->VERSION >= 0.40) {
+      # get our Net::DNS::Resolver object, let Mail::DKIM use the same resolver
+      my $res = $self->{main}->{resolver}->get_resolver;
+      Mail::DKIM::DNS::resolver($res);
+    }
     $verifier = Mail::DKIM::Verifier->new;
     if (!$verifier) {
       dbg("dkim: cannot create Mail::DKIM::Verifier object");
