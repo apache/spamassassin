@@ -18,7 +18,7 @@ if (-e 'test_dir') {            # running from test directory, not ..
 
 use lib '.'; use lib 't';
 use SATest; sa_t_init("rcvd_parser");
-use Test; BEGIN { plan tests => 144 };
+use Test; BEGIN { plan tests => 145 };
 use strict;
 
 # format is:
@@ -469,7 +469,11 @@ my %data = (
 
   #ADDED PER Bug 6783
   'from 67.85.219.192 (NaSMail authenticated user john.doe) by webmail.example.com with HTTP; Fri, 30 Mar 2012 12:39:58 +0100 (BST)' => 
-  '[ ip=67.85.219.192 rdns= helo= by=webmail.example.com ident= envfrom= id= auth=HTTP msa=0 ]'
+  '[ ip=67.85.219.192 rdns= helo= by=webmail.example.com ident= envfrom= id= auth=HTTP msa=0 ]',
+
+  #ADDED PER Bug 6900
+  'from unknown (HELO ?151.80.38.67?) (myuser@mydomain.it@151.80.38.67) by mail.it-connect.it with SMTP; 28 Jan 2013 21:50:51 +0100' => 
+  '[ ip=151.80.38.67 rdns= helo=?151.80.38.67? by=mail.it-connect.it ident=myuser@mydomain.it envfrom= id= auth= msa=0 ]'
 
 );
 
