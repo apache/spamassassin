@@ -393,6 +393,7 @@ sub try_binary {
     $errtype = 'is unknown for this platform';
   } else {
     $command = "which $bindef->{'binary'} 2>&1";
+    print "DEBUG: running $command\n";
     $output = `$command`;
 
     if (!defined $output || $output eq '') {
@@ -406,6 +407,7 @@ sub try_binary {
 
       $installed = 1;
     }
+    print "DEBUG: $command completed and output parsed\n";
   }
 
 
