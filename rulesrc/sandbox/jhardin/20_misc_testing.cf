@@ -251,6 +251,11 @@ header         __TB_MIME_BDRY_NO_Z   Content-Type =~ /boundary="-{8,}(?:[1-9]){1
 meta           TBIRD_SUSP_MIME_BDRY  __MUA_TBIRD && __TB_MIME_BDRY_NO_Z
 describe       TBIRD_SUSP_MIME_BDRY  Unlikely Thunderbird MIME boundary
 
+meta           TBIRD_SUSP_MSGID      __MUA_TBIRD && !__SANE_MSGID
+describe       TBIRD_SUSP_MSGID      Claims to be from Thunderbird, but bad Message-ID
+score          TBIRD_SUSP_MSGID      3.50	# limit
+
+
 # seen in a few HTML fraud spams
 rawbody        RUNON_SHY          /(?:\&shy;){3}/i
 describe       RUNON_SHY          Repeating soft hyphens
@@ -852,7 +857,7 @@ meta        __SUBJ_BRKN_WORDNUMS   __SUBJ_BROKEN_WORD && __TVD_SUBJ_NUM_OBFU
 meta        SUBJ_BRKN_WORDNUMS     __SUBJ_BRKN_WORDNUMS && !DKIM_SIGNED && !__TO___LOWER
 describe    SUBJ_BRKN_WORDNUMS     Subject contains odd word breaks and numbers
 
-meta        TVD_SUBJ_NUM_OBFU_MINFP   __TVD_SUBJ_NUM_OBFU && !__RP_MATCHES_RCVD && !__RCD_RDNS_MAIL_MESSY && !__VIA_ML && !__ISO_2022_JP_DELIM && !__NOT_SPOOFED && !__X_CRON_ENV && !__NOT_A_PERSON && !__HAS_THREAD_INDEX && !__THREADED
+meta        TVD_SUBJ_NUM_OBFU_MINFP   __TVD_SUBJ_NUM_OBFU && !__RP_MATCHES_RCVD && !__RCD_RDNS_MAIL_MESSY && !__VIA_ML && !__ISO_2022_JP_DELIM && !__NOT_SPOOFED && !__X_CRON_ENV && !__NOT_A_PERSON && !__HAS_THREAD_INDEX && !__THREADED && !__NUMBERS_IN_SUBJ && !__URI_MAILTO
 
 # from spample on users list 7/20/2011
 header      __XM_PHPMAILER_FORGED  X-Mailer =~ /PHPMailer\s.*version\D+$/
@@ -1067,7 +1072,7 @@ score       EMPTY_BODY           3.00	# limit
 #  meta      __DKIM_MALFORMED	DKIM_SIGNED && !DKIM_VALID
 #endif
 
-body        __YOUR_PHOTOS       /\byour photos (?:as promised )?(?:- )?https?:/i
+body        __YOUR_PHOTOS       /\byour photos (?:as p[rw]omised )?(?:here )?(?:- )?https?:/i
 meta        YOUR_PHOTOS         __YOUR_PHOTOS && !__HAS_ANY_EMAIL && !__HAS_REPLY_TO && !__DOS_HAS_LIST_UNSUB 
 describe    YOUR_PHOTOS         "Your Photos" phishing or malware
 score       YOUR_PHOTOS         4.00	# limit
