@@ -393,7 +393,7 @@ sub try_binary {
     $errtype = 'is unknown for this platform';
   } else {
     $command = "which $bindef->{'binary'} 2>&1";
-    print "DEBUG: running $command\n";
+    #print "DEBUG: running $command\n";
     $output = `$command`;
 
     if (!defined $output || $output eq '') {
@@ -407,7 +407,7 @@ sub try_binary {
 
       $installed = 1;
     }
-    print "DEBUG: $command completed and output parsed\n";
+    #print "DEBUG: $command completed and output parsed\n";
   }
 
 
@@ -422,7 +422,7 @@ sub try_binary {
     }
     $command .= " 2>&1";
 
-    print "DEBUG: running $command to check the version\n";
+    #print "DEBUG: running $command to check the version\n";
     $output = `$command`;
 
     if (!defined $output) {
@@ -442,7 +442,7 @@ sub try_binary {
         $version_meets_recommended = test_version($binary_version, $recommended_version);
       }
     }
-    print "DEBUG: $command completd and output parsed\n";
+    #print "DEBUG: $command completd and output parsed\n";
   }
 
   unless (defined $errtype) {
