@@ -421,6 +421,8 @@ sub try_binary {
       $command .= $bindef->{'version_check_params'};
     }
     $command .= " 2>&1";
+
+    print "DEBUG: running $command to check the version\n";
     $output = `$command`;
 
     if (!defined $output) {
@@ -440,6 +442,7 @@ sub try_binary {
         $version_meets_recommended = test_version($binary_version, $recommended_version);
       }
     }
+    print "DEBUG: $command completd and output parsed\n";
   }
 
   unless (defined $errtype) {
