@@ -251,6 +251,10 @@ header         __TB_MIME_BDRY_NO_Z   Content-Type =~ /boundary="-{8,}(?:[1-9]){1
 meta           TBIRD_SUSP_MIME_BDRY  __MUA_TBIRD && __TB_MIME_BDRY_NO_Z
 describe       TBIRD_SUSP_MIME_BDRY  Unlikely Thunderbird MIME boundary
 
+meta           TBIRD_SPOOF           __MUA_TBIRD && !__HAS_IN_REPLY_TO && !__HAS_X_REF  && !__THREADED  && !__VIA_ML && !__NOT_SPOOFED && !__HAS_SENDER && !__HAS_ERRORS_TO && !__HAS_X_BEEN_THERE && !__RP_MATCHES_RCVD && !ALL_TRUSTED && !__TO_EQ_FROM_DOM 
+describe       TBIRD_SPOOF           Claims Thunderbird mail client but looks suspicious
+score          TBIRD_SPOOF           3.00	# limit
+
 # seen in a few HTML fraud spams
 rawbody        RUNON_SHY          /(?:\&shy;){3}/i
 describe       RUNON_SHY          Repeating soft hyphens
