@@ -251,11 +251,6 @@ header         __TB_MIME_BDRY_NO_Z   Content-Type =~ /boundary="-{8,}(?:[1-9]){1
 meta           TBIRD_SUSP_MIME_BDRY  __MUA_TBIRD && __TB_MIME_BDRY_NO_Z
 describe       TBIRD_SUSP_MIME_BDRY  Unlikely Thunderbird MIME boundary
 
-meta           TBIRD_SUSP_MSGID      __MUA_TBIRD && !__SANE_MSGID
-describe       TBIRD_SUSP_MSGID      Claims to be from Thunderbird, but bad Message-ID
-score          TBIRD_SUSP_MSGID      3.50	# limit
-
-
 # seen in a few HTML fraud spams
 rawbody        RUNON_SHY          /(?:\&shy;){3}/i
 describe       RUNON_SHY          Repeating soft hyphens
