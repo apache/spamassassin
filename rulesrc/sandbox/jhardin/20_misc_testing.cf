@@ -88,7 +88,7 @@ header  __PHPMAILER_MUA       X-Mailer =~ /^PHPMailer\b/
 ifplugin Mail::SpamAssassin::Plugin::DKIM
   meta    PHP_NOVER_MUA       __PHP_NOVER_MUA && !__DKIM_DEPENDABLE && !__TO_NO_BRKTS_HTML_ONLY && !__MSGID_OK_DIGITS && !__UPPERCASE_25_50 && !__RP_MATCHES_RCVD
 else
-  meta    PHP_NOVER_MUA       __PHP_NOVER_MUA && !__TO_NO_BRKTS_HTML_ONLY && !__MSGID_OK_DIGITS && !__UPPERCASE_25_50&& !__RP_MATCHES_RCVD
+  meta    PHP_NOVER_MUA       __PHP_NOVER_MUA && !__TO_NO_BRKTS_HTML_ONLY && !__MSGID_OK_DIGITS && !__UPPERCASE_25_50 && !__RP_MATCHES_RCVD
 endif
 score     PHP_NOVER_MUA       3.50	# limit
 describe  PHP_NOVER_MUA       Mail from PHP with no version number
@@ -772,7 +772,11 @@ uri         __UPPERCASE_URI        /^[^:A-Z]+[A-Z]/
 if version >= 3.003000
 ifplugin Mail::SpamAssassin::Plugin::WLBLEval
   header      __RP_MATCHES_RCVD      eval:check_mailfrom_matches_rcvd()
+else
+  meta        __RP_MATCHES_RCVD      0
 endif
+else
+  meta        __RP_MATCHES_RCVD      0
 endif
 
 # for sale newsletters
@@ -1007,7 +1011,7 @@ body        __CLEAN_MAILBOX      /\b(?:(?:e-?mail|mail\s?box|violation:|(?-i:CLI
 body        __VALIDATE_MAILBOX   /\b(?:(?:re-?)?(?:valida(?:te|r)|confirm)(?:\S?(?:increase|raise))? (?:your|(?:a )?sua) (?:mail\s?box|(?:e-?)?mail quota|caixa)|confirmar (?:que )?a sua conta (?:de e-?mail|ainda est(?:=E1|[\xe1]|[\xc3][\xa1]) ativa)|wprowadz dane konta ponizej|utrzymania aktywnego konta e-?mail|weryfikacji konta)\b/i
 body        __UPGR_MAILBOX       /\b(?:up(?:g[ra]+d(?:e|ing)|date) (?:[hw]as\s(?:[a-z]+\s){1,5})?(?:o[nf] )?(?:your )?(?:mail\s?box|(?:web ?|e-?)mail)|(?:web ?|e-?)mail Upgrade cuenta|atualize sua caixa de correio|click\S{0,10} (?:here(?:[:\.\s]{0,5}\S{0,10}http\S{10,80})?|below)(?: link)? to (?:(?:complete|finish|increase) )?(?:(?:the|this|your)\s)?(?:up(?:date|grade)|(?:web ?|e-?)?mail(?:\s?box)? (?:size|quota|limit))|utrzymania aktywnego konta)\b/i
 body        __LOCK_MAILBOX       /\b(?:(?:deactivate|lock|lose access to|los[se] (?:of )?(?:important )?(?:information|mail|messages) in) (?:your )?(?:mail\s?box|(?:web ?|e-?)mail)|ditt konto vara "?deaktiverad"?|begr(?:=E4|\xe4|[\xc3][\xa4])nsad tillg(?:=E5|[\xe5]|[\xc3][\xa5])ng till din brevl(?:=E5|[\xe5]|[\xc3][\xa5])da|conta de (?:web ?|e-?)mail (?:ser(?:=E1|[\xe1]|[\xc3][\xa1]) desativado|(?:=E9|[\xe9]|[\xc3][\xa9]) exclu(?:=ED|[\xed]|[\xc3][\xad])do)|destruir a sua caixa de correio|tw(?:=F3|[\xf3])j konto zostalo ograniczone|straci swoje e-?mail na sta[\xc5][\x82]e|konto zostanie automatycznie wy[\xc5][\x82][\xc4][\x85]czona)/i
-body        __SYSADMIN           /\b(?:help?[- ]?desk|(?:(?:web ?)?mail ?|sys(?:tem )?)admin(?:istrator)|local[- ]host|(?:support|upgrade|management) team|message from administrator|university mail server copyright|suporte t(?:=E9|[\xe9]|[\xc3][\xa9])cnico|administrador do sistema)\b/i
+body        __SYSADMIN           /\b(?:help?[- ]?desk|(?:(?:web ?)?mail ?|sys(?:tem )?)admin(?:istrator)|local[- ]host|(?:support|upgrade|management) (?:team|center)|message from administrator|university mail server copyright|suporte t(?:=E9|[\xe9]|[\xc3][\xa9])cnico|administrador do sistema)\b/i
 body        __ATTN_MAIL_USER     /\b(?:att(?:entio)?n|dear|caro) (?:web ?(?:mail)?\s\S\s)?(?:web ?|e-?)?mail (?:user|DO USU(?:=E1|[\xe1]|[\xc3][\xa1])RIO)[:;,]/i
 body        __MAIL_ACCT_ACCESS1  /\b(?:your (?:web ?|e-?)?mail (?:account|log-?in) (?:has )?been accessed|r(?:=F3|[\xf3])zne komputery zalogowaniu sie)\b/i
 body        __MAIL_ACCT_ACCESS2  /\blo+se ac+es+ to your (?:web|e-?)?mail (?:account|log-?in|box|address)\b/i
