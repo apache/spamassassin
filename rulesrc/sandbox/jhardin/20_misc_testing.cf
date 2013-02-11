@@ -1080,7 +1080,7 @@ meta        YOUR_PHOTOS         __YOUR_PHOTOS && !__HAS_ANY_EMAIL && !__HAS_REPL
 describe    YOUR_PHOTOS         "Your Photos" phishing or malware
 score       YOUR_PHOTOS         4.00	# limit
 
-body        __UNSUBSCRIBE_ES   /\bPara darte de baja y no recibir ning(?:=FA|[\xfa]|[\xc3][\xba])n\b/i
+body        __UNSUBSCRIBE_ES   /\b(?:Para darte de baja y no recibir ning(?:=FA|[\xfa]|[\xc3][\xba])n|Si no desea que le enviemos publicidad|solicitar su baja)\b/i
 body        __UNSUBSCRIBE_PT   /\bSe n(?:a|=E3|[\xe3]|[\xc3][\xa3])o desejar mais receber nossos e-?mails?\b/i
 
 body        __URI_DBL_PROTO    m,\b(?:https?:/+){2},i
