@@ -86,9 +86,9 @@ header  __PHPMAILER_MUA       X-Mailer =~ /^PHPMailer\b/
 
 # __PHP_NOVER_MUA most spam hits are on messages scoring < 5 points
 ifplugin Mail::SpamAssassin::Plugin::DKIM
-  meta    PHP_NOVER_MUA       __PHP_NOVER_MUA && !__DKIM_DEPENDABLE && !__TO_NO_BRKTS_HTML_ONLY && !__MSGID_OK_DIGITS && !__UPPERCASE_25_50 && !__RP_MATCHES_RCVD
+  meta    PHP_NOVER_MUA       __PHP_NOVER_MUA && !__DKIM_DEPENDABLE && !__TO_NO_BRKTS_HTML_ONLY && !__MSGID_OK_DIGITS && !__UPPERCASE_25_50 && !__RP_MATCHES_RCVD && !__GIF_ATTACH 
 else
-  meta    PHP_NOVER_MUA       __PHP_NOVER_MUA && !__TO_NO_BRKTS_HTML_ONLY && !__MSGID_OK_DIGITS && !__UPPERCASE_25_50 && !__RP_MATCHES_RCVD
+  meta    PHP_NOVER_MUA       __PHP_NOVER_MUA && !__TO_NO_BRKTS_HTML_ONLY && !__MSGID_OK_DIGITS && !__UPPERCASE_25_50 && !__RP_MATCHES_RCVD && !__GIF_ATTACH 
 endif
 score     PHP_NOVER_MUA       3.50	# limit
 describe  PHP_NOVER_MUA       Mail from PHP with no version number
@@ -1002,6 +1002,9 @@ meta        FROM_MISSP_PHISH     __FROM_MISSP_PHISH
 describe    FROM_MISSP_PHISH     Malformed, claims to be from financial organization - possible phish
 score       FROM_MISSP_PHISH     4.75	# limit
 
+# another upload-a-document-for-public-access site
+uri         __URI_YOUSENDIT      m,^https?://www\.yousendit\.com/directdownload,i
+
 # see also DOS_GOOGLE_DOCS
 uri         __URI_GOOGLE_DOC     m,^https?://docs\.google\.com/(?:[^/]+/)*view(?:form)?\?(?:id|formkey)=,i
 
@@ -1070,7 +1073,7 @@ score       EMPTY_BODY           3.00	# limit
 
 
 #ifplugin Mail::SpamAssassin::Plugin::DKIM
-#  # malformed DKIM signatures seenin the wild - see bug#6895
+#  # malformed DKIM signatures seen in the wild - see bug#6895
 #  # see how well this performs
 #  meta      __DKIM_MALFORMED	DKIM_SIGNED && !DKIM_VALID
 #endif
@@ -1088,7 +1091,7 @@ body        __URI_DBL_PROTO    m,\b(?:https?:/+){2},i
 uri         __URI_DOS_FILE     /^[A-Z]:\\/i
 
 meta        __FORM_LOW_CONTRAST   (__FILL_THIS_FORM_SHORT2 || __FILL_THIS_FORM_SHORT2) && HTML_FONT_LOW_CONTRAST 
-meta        FORM_LOW_CONTRAST     __FORM_LOW_CONTRAST && !__BUGGED_IMG && !__HAS_REPLY_TO && !__DKIM_EXISTS && !__DOS_HAS_LIST_UNSUB 
+meta        FORM_LOW_CONTRAST     __FORM_LOW_CONTRAST && !__BUGGED_IMG && !__HAS_REPLY_TO && !__DKIM_EXISTS && !__DOS_HAS_LIST_UNSUB && !__MSGID_JAVAMAIL
 describe    FORM_LOW_CONTRAST     Fill in a form with hidden text
 score       FORM_LOW_CONTRAST     3.00	# Limit
 
