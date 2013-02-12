@@ -473,7 +473,7 @@ my %data = (
 
   #ADDED PER Bug 6900
   'from unknown (HELO ?151.80.38.67?) (myuser@mydomain.it@151.80.38.67) by mail.it-connect.it with SMTP; 28 Jan 2013 21:50:51 +0100' => 
-  '[ ip=151.80.38.67 rdns= helo=?151.80.38.67? by=mail.it-connect.it ident=myuser@mydomain.it envfrom= id= auth= msa=0 ]'
+  '[ ip=151.80.38.67 rdns= helo=?151.80.38.67? by=mail.it-connect.it ident=myuser@mydomain.it envfrom= id= auth= msa=0 ]',
 
 );
 
