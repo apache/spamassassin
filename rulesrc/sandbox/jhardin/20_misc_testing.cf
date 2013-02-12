@@ -253,7 +253,7 @@ describe       TBIRD_SUSP_MIME_BDRY  Unlikely Thunderbird MIME boundary
 
 meta           TBIRD_SPOOF           __MUA_TBIRD && !__HAS_IN_REPLY_TO && !__HAS_X_REF  && !__THREADED  && !__VIA_ML && !__NOT_SPOOFED && !__HAS_SENDER && !__HAS_ERRORS_TO && !__HAS_X_BEEN_THERE && !__RP_MATCHES_RCVD && !ALL_TRUSTED && !__TO_EQ_FROM_DOM && !__RCD_RDNS_MAIL_MESSY && !__MIME_BASE64 && !__S25R_1 
 describe       TBIRD_SPOOF           Claims Thunderbird mail client but looks suspicious
-score          TBIRD_SPOOF           3.00	# limit
+score          TBIRD_SPOOF           2.00	# limit
 
 # seen in a few HTML fraud spams
 rawbody        RUNON_SHY          /(?:\&shy;){3}/i
