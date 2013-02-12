@@ -25,7 +25,7 @@
 #   dccproc now uses -w /var/dcc/whiteclnt so it acts more like dccifd
 #   warn about the use of ancient versions of dccproc and dccifd
 #   turn off dccifd greylisting
-#   query instead of reporting mail messages that contain X-DCC headers and
+#   query instead of reporting mail messages that contain X-DCC headers
 #     and so has probably already been reported
 #   try harder to find dccproc and cdcc when not explicitly configured
 #	Rhyolite Software DCC 2.3.140-1.4 $Revision$
