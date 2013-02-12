@@ -251,9 +251,10 @@ header         __TB_MIME_BDRY_NO_Z   Content-Type =~ /boundary="-{8,}(?:[1-9]){1
 meta           TBIRD_SUSP_MIME_BDRY  __MUA_TBIRD && __TB_MIME_BDRY_NO_Z
 describe       TBIRD_SUSP_MIME_BDRY  Unlikely Thunderbird MIME boundary
 
-meta           TBIRD_SPOOF           __MUA_TBIRD && !__HAS_IN_REPLY_TO && !__HAS_X_REF  && !__THREADED  && !__VIA_ML && !__NOT_SPOOFED && !__HAS_SENDER && !__HAS_ERRORS_TO && !__HAS_X_BEEN_THERE && !__RP_MATCHES_RCVD && !ALL_TRUSTED && !__TO_EQ_FROM_DOM && !__RCD_RDNS_MAIL_MESSY && !__MIME_BASE64 && !__S25R_1 
-describe       TBIRD_SPOOF           Claims Thunderbird mail client but looks suspicious
-score          TBIRD_SPOOF           2.00	# limit
+# too dangerous even if it has a good S/O and hits >20% of spam in masschecks
+#meta           TBIRD_SPOOF           __MUA_TBIRD && !__HAS_IN_REPLY_TO && !__HAS_X_REF  && !__THREADED  && !__VIA_ML && !__NOT_SPOOFED && !__HAS_SENDER && !__HAS_ERRORS_TO && !__HAS_X_BEEN_THERE && !__RP_MATCHES_RCVD && !ALL_TRUSTED && !__TO_EQ_FROM_DOM && !__RCD_RDNS_MAIL_MESSY && !__MIME_BASE64 && !__S25R_1 
+#describe       TBIRD_SPOOF           Claims Thunderbird mail client but looks suspicious
+#score          TBIRD_SPOOF           2.00	# limit
 
 # seen in a few HTML fraud spams
 rawbody        RUNON_SHY          /(?:\&shy;){3}/i
@@ -293,6 +294,9 @@ ifplugin Mail::SpamAssassin::Plugin::FreeMail
   meta         FREEMAIL_RVW_ATTCH   (__PLS_REVIEW || __DLND_ATTACH) && FREEMAIL_DOC_PDF
   describe     FREEMAIL_RVW_ATTCH   Please review attached document, from freemail
 endif
+
+meta           EMPTY_RVM_ATTCH      (__PLS_REVIEW || __DLND_ATTACH) && __EMPTY_BODY
+describe       EMPTY_RVM_ATTCH      Please review attached document, empty message
 
 body           END_FUTURE_EMAILS   /\bend future (?:email|alert)s?\b/i
 describe       END_FUTURE_EMAILS   Pump-and-dump unsubscribe
