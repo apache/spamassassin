@@ -187,9 +187,10 @@ body     __INHERIT_PMT    /\binheritance\spayment\s/i
 body     __CONTACT_ATTY   /\bcontact(?:er)?\s(?:my|(?:de\s)?mon)\s(?:barrister|attou?rney|lawyer|avocat|gestionnaire)\b/i
 body     __TRTMT_DEFILED  /\bdefiled\sall\s(?:forms\sof\s)?(?:medical\s)?treatments?\b/i
 
-meta     DECEASED_NO_ML   __DECEASED && !__VIA_ML && !__UNSUB_LINK && !__DOS_HAS_LIST_UNSUB && !__HAS_THREAD_INDEX && !__THREAD_INDEX_GOOD && !__HS_SUBJ_RE_FW && !__IMS_MSGID && !__IS_EXCH && !__COMMENT_EXISTS && !__DOS_SINGLE_EXT_RELAY
-describe DECEASED_NO_ML   Dead not via mailing list
-#tflags   DECEASED_NO_ML   nopublish
+# most hits at > 10 points, not useful
+#meta     DECEASED_NO_ML   __DECEASED && !__VIA_ML && !__UNSUB_LINK && !__DOS_HAS_LIST_UNSUB && !__HAS_THREAD_INDEX && !__THREAD_INDEX_GOOD && !__HS_SUBJ_RE_FW && !__IMS_MSGID && !__IS_EXCH && !__COMMENT_EXISTS && !__DOS_SINGLE_EXT_RELAY
+#describe DECEASED_NO_ML   Dead not via mailing list
+##tflags   DECEASED_NO_ML   nopublish
  
 body     __WIRE_XFR       /\b(?:wire|telegraph(?:ic)?|bank)\s?transfer/i
 body     __TRUSTED_CHECK  /\b(?:cashier'?s?|certified)\sche(?:ck|que)/i
