@@ -1716,25 +1716,31 @@ of seconds will tell SpamAssassin how often to retest for working DNS.
 
 =item dns_options opts   (default: empty)
 
-Provides a (whitespace or comma -separated) list of options applying
-to DNS resolving. Available options are 'rotate', 'dns0x20' and 'edns'
-(without quotes). Option name may be negated by prepending a 'no' (e.g.
-'norotate', 'noEDNS') to counteract previously enabled option. Option
-names are not case-sensitive.
+Provides a (whitespace or comma -separated) list of options applying to
+DNS resolving. Available options are (without quotes): 'rotate', 'dns0x20'
+and 'edns' (or 'edns0'). Option name may be negated by prepending a 'no'
+(e.g. 'norotate', 'noEDNS') to counteract previously enabled option.
+Option names are not case-sensitive.
 
 The last setting in configuration files prevails. By default options
 'rotate', 'dns0x20' and 'edns' are disabled.
 
-Option 'edns' may take a value which specifies a requestor's UDP payload
-size according to EDNS0 specifications (RFC 2671bis draft), e.g. edns=4096.
-When the option is enabled but a value is not provided, a conservative default
-of 1240 bytes is implied. It is recommended to enable 'edns' when using a
-local recursive DNS server which supports EDNS0 (like most modern DNS servers
-do). This may avoid a need for a DNS query to fail-over to a TCP query when
-an answer DNS UDP packet would exceed 512 bytes. The option should remain
-disabled when a recursive DNS resolver is only reachable through some
-old-fashioned firewall which cannot cope with DNS UDP packets longer than
-512 bytes or which discards IP fragments.
+Option 'edns' (or 'edsn0') may take a value which specifies a requestor's
+acceptable UDP payload size according to EDNS0 specifications (RFC 2671bis
+draft), e.g. edns=4096. In absence of an 'edns' option a traditional implied
+UDP payload size is 512 bytes. When the option is specified but a value
+is not provided, a conservative default of 1240 bytes is implied. It is
+recommended to enable 'edns' when using a local recursive DNS server which
+supports EDNS0 (like most modern DNS servers do), a suitable setting in
+this case is edns=4096. Allowing packets larger than 512 bytes can avoid
+truncation of answer resource records in large DNS responses (like in TXT
+records of some SPF and DKIM responses, or when an unreasonable number of
+A records is published by some domain). The option should remain disabled
+when a recursive DNS server is only reachable through some old-fashioned
+firewall which bans DNS UDP packets larger than 512 bytes. A suitable value
+when a non-local recursive DNS server is used and a firewall allows EDNS0
+but blocks fragmented IP packets is perhaps 1240 bytes, allowing a DNS UDP
+packet to fit within a single IP packet in most cases.
 
 Option 'rotate' causes SpamAssassin to choose a DNS server at random
 from all servers listed in C</etc/resolv.conf> every 'dns_test_interval'
@@ -1761,16 +1767,18 @@ do not work for no apparent reason.
       my ($self, $key, $value, $line) = @_;
       foreach my $option (split (/[\s,]+/, lc $value)) {
         local($1,$2);
-        if ($option =~ /^no(rotate|dns0x20|edns)\z/) {
+        if ($option =~ /^no(rotate|dns0x20)\z/) {
+          $self->{dns_options}->{$1} = 0;
+        } elsif ($option =~ /^no(edns)0?\z/) {
           $self->{dns_options}->{$1} = 0;
         } elsif ($option =~ /^(rotate|dns0x20)\z/) {
           $self->{dns_options}->{$1} = 1;
-        } elsif ($option =~ /^(edns) (?: = (\d+) )? \z/x) {
+        } elsif ($option =~ /^(edns)0? (?: = (\d+) )? \z/x) {
           # RFC 2671 bis - EDNS0, value is a requestor's UDP payload size
           # defaults to some UDP packet size likely to fit into a single packet
           # which is more likely to pass firewalls which choke on IP fragments.
           # RFC 2460 min MTU is 1280 for IPv6, minus 40 bytes for basic header
-          $self->{dns_options}->{$1} = $2 ? $2 : 1240;
+          $self->{dns_options}->{$1} = $2 || 1240;
         } else {
           return $INVALID_VALUE;
         }

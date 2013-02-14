@@ -281,6 +281,7 @@ filled-in with a query ID.
 sub bgsend_and_start_lookup {
   my($self, $domain, $type, $class, $ent, $cb, %options) = @_;
   $ent = {}  if !$ent;
+  $domain =~ s/\.+\z//s;  # strip trailing dots, these sometimes still sneak in
   $ent->{id} = undef;
   $ent->{query_type} = $type;
   $ent->{query_domain} = $domain;

@@ -242,7 +242,7 @@ sub available_nameservers {
       } elsif ($addr =~ /:.*:/) {
         push(@filtered_addr_port, $_)  unless $self->{force_ipv4};
       } else {
-        warn "Unrecognized DNS specification: $_";
+        warn "Unrecognized DNS server specification: $_";
       }
     }
     if (@filtered_addr_port < @{$self->{available_dns_servers}}) {
@@ -355,7 +355,7 @@ sub connect_sock {
 
   if ($self->{sock}) {
     $self->{sock}->close()
-      or warn "connect_sock: error closing socket $self->{sock}: $!";
+      or info("connect_sock: error closing socket %s: %s", $self->{sock}, $!);
     $self->{sock} = undef;
   }
   my $sock;
@@ -641,7 +641,7 @@ sub _packet_id {
 
 =item $id = $res->bgsend($domain, $type, $class, $cb)
 
-Quite similar to C<Net::DNS::Resolver::bgsend>, except that when a response
+Quite similar to C<Net::DNS::Resolver::bgsend>, except that when a reply
 packet eventually arrives, and C<poll_responses> is called, the callback
 sub reference C<$cb> will be called.
 
@@ -709,7 +709,7 @@ sub bgsend {
 
 =item $nfound = $res->poll_responses()
 
-See if there are any C<bgsend> response packets ready, and return
+See if there are any C<bgsend> reply packets ready, and return
 the number of such packets delivered to their callbacks.
 
 =cut
@@ -748,27 +748,32 @@ sub poll_responses {
     my $packet = $self->{res}->bgread($self->{sock});
 
     if (!$packet) {
-      dbg("dns: no packet! err: %s", $self->{res}->errorstring);
+      info("dns: bad dns reply: %s", $self->{res}->errorstring);
     } else {
       my $header = $packet->header;
       if (!$header) {
-        info("dns: dns response is missing a header section");
+        info("dns: dns reply is missing a header section");
       } else {
         my $rcode = $header->rcode;
         my $packet_id = $header->id;
+        my $id = $self->_packet_id($packet);
+
         if ($rcode eq 'NOERROR') {  # success
           # NOERROR, may or may not have answer records
-          dbg("dns: dns response %s is OK, %d answer records",
+          dbg("dns: dns reply %s is OK, %d answer records",
               $packet_id, $header->ancount);
+          if ($header->tc) {  # truncation flag turned on
+            my $edns = $self->{conf}->{dns_options}->{edns} || 512;
+            info("dns: reply to %s truncated (%s), %d answer records", $id,
+                 $edns == 512 ? "EDNS off" : "EDNS $edns bytes",
+                 $header->ancount);
+          }
         } else {
           # some failure, e.g. NXDOMAIN, SERVFAIL, FORMERR, REFUSED, ...
           # btw, one reason for SERVFAIL is an RR signature failure in DNSSEC
           # NOTE: qname is encoded in RFC 1035 zone format, decode it
-          dbg("dns: dns response %s, %s, %s", $packet_id, $rcode,
-              join(', ', map(join('/', fmt_dns_question_entry($_)),
-                             $packet->question)));
+          dbg("dns: dns reply to %s: %s", $id, $rcode);
         }
-        my $id = $self->_packet_id($packet);
 
         # A hash lookup: the id must match exactly (case-sensitively).
         # The domain name part of the id was lowercased if dns0x20 is off,
