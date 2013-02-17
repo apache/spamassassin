@@ -926,8 +926,9 @@ describe    ACH_CANCELLED          "ACH cancelled" fraud / phish
 # spams from users list query 03/2012
 # Not useful as scored rules, may be useful meta'd with something else
 uri         __URI_DBL_SUBDOM   m,^https?://(?!www\.amazon\.com)([^/]+)/.*https?://(?:[^.]+\.)?\1/,i
-meta        URI_DBL_SUBDOM     __URI_DBL_SUBDOM && !__NOT_A_PERSON && !__BUGGED_IMG && !__COMMENT_EXISTS && !__SUBSCRIPTION_INFO && !__UNSUB_LINK && !__MSGID_JAVAMAIL && !__RP_MATCHES_RCVD && !__FROM_LOWER && !__HAS_ERRORS_TO && !__NOT_SPOOFED && !__TO_EQ_FROM_DOM 
-score       URI_DBL_SUBDOM     1.00	# limit
+#meta        URI_DBL_SUBDOM     __URI_DBL_SUBDOM && !__RP_MATCHES_RCVD && !__FROM_LOWER && !__HAS_ERRORS_TO && !__TO_EQ_FROM_DOM 
+#score       URI_DBL_SUBDOM     1.00	# limit
+
 uri         __URI_DBL_DOM      m,^https?://[^.]+\.(?!amazon\.com)([^/]+)/.*https?://[^.]+\.\1/,i
 
 uri         __URI_DBL_INDIR    m,(?:=https?://(?!www\.amazon\.com).*?){2},i
