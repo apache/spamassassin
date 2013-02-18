@@ -2374,8 +2374,6 @@ sub _handle_hit {
               $self->_wrap_desc($desc,
                   3+length($rule)+length($score)+length($area), " " x 28),
               ($self->{test_log_msgs}->{LONG} || ''));
-
-    %{$self->{test_log_msgs}} = ();        # clear test logs
 }
 
 sub _wrap_desc {
@@ -2462,7 +2460,10 @@ sub got_hit {
 
   # adding a hit does nothing if we don't have a score -- we probably
   # shouldn't have run it in the first place
-  return unless $score;
+  if (!$score) {
+    %{$self->{test_log_msgs}} = ();
+    return;
+  }
 
   # ensure that rule values always result in an *increase*
   # of $self->{tests_already_hit}->{$rule}:
@@ -2479,6 +2480,7 @@ sub got_hit {
   my $already_hit = $self->{tests_already_hit}->{$rule} || 0;
   # don't count hits multiple times, unless 'tflags multiple' is on
   if ($already_hit && ($tflags_ref->{$rule}||'') !~ /\bmultiple\b/) {
+    %{$self->{test_log_msgs}} = ();
     return;
   }
 
@@ -2516,6 +2518,7 @@ sub got_hit {
     }
   }
 
+  %{$self->{test_log_msgs}} = ();  # clear test logs
   return 1;
 }
 
