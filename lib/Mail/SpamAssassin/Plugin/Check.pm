@@ -271,6 +271,7 @@ sub run_rbl_eval_tests {
       $result = $pms->$function($rulename, @args);  1;
     } or do {
       my $eval_stat = $@ ne '' ? $@ : "errno=$!";  chomp $eval_stat;
+      die "rules: $eval_stat\n"  if $eval_stat =~ /__alarm__ignore__/;
       warn "rules: failed to run $rulename RBL test, skipping:\n".
            "\t($eval_stat)\n";
       $pms->{rule_errors}++;
@@ -1253,6 +1254,7 @@ sub run_eval_tests {
         $result = $self->' . $function . ' (@extraevalargs '. $argstr .' );  1;
       } or do {
         $result = 0;
+        die "rules: $@\n"  if $@ =~ /__alarm__ignore__/;
         $self->handle_eval_rule_errors($rulename);
       };
 
