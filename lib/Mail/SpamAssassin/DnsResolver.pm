@@ -570,10 +570,11 @@ sub new_dns_packet {
     #    time, $domain, $type, $packet->id);
     1;
   } or do {
-    # this can happen if Net::DNS isn't available -- but in this
-    # case this function should never be called!
-    # another possible failure reason: "unexpected null domain label"
+    # this can if a domain name in a query is invalid, or if a timeout signal
+    # happened to be trapped by this eval, or if Net::DNS signalled an error
     my $eval_stat = $@ ne '' ? $@ : "errno=$!";  chomp $eval_stat;
+    # resignal if alarm went off
+    die "dns: (1) $eval_stat\n"  if $eval_stat =~ /__alarm__ignore__\(.*\)/s;
     warn sprintf(
            "dns: new_dns_packet (domain=%s type=%s class=%s) failed: %s\n",
            $domain, $type, $class, $eval_stat);
@@ -724,16 +725,25 @@ sub poll_responses {
   my $rout;
 
   for (;;) {
-    my ($nfound, $timeleft);
-    { my $timer;  # collects timestamp when variable goes out of scope
+    my ($nfound, $timeleft, $eval_stat);
+    eval {  # use eval to catch alarm signal
+      my $timer;  # collects timestamp when variable goes out of scope
       if (!defined($timeout) || $timeout > 0)
         { $timer = $self->{main}->time_method("poll_dns_idle") }
       $! = 0;
       ($nfound, $timeleft) = select($rout=$rin, undef, undef, $timeout);
-    }
-    if (!defined $nfound || $nfound < 0) {
+      1;
+    } or do {
+      $eval_stat = $@ ne '' ? $@ : "errno=$!";  chomp $eval_stat;
+    };
+    if (defined $eval_stat) {
+      # most likely due to an alarm signal, resignal if so
+      die "dns: (2) $eval_stat\n"  if $eval_stat =~ /__alarm__ignore__\(.*\)/s;
+      warn "dns: select aborted: $eval_stat\n";
+      return;
+    } elsif (!defined $nfound || $nfound < 0) {
       if ($!) { warn "dns: select failed: $!\n" }
-      else    { info("dns: select interrupted") }
+      else    { info("dns: select interrupted") }  # shouldn't happen
       return;
     } elsif (!$nfound) {
       if (!defined $timeout) { warn("dns: select returned empty-handed\n") }
@@ -748,7 +758,10 @@ sub poll_responses {
     my $packet = $self->{res}->bgread($self->{sock});
 
     if (!$packet) {
-      info("dns: bad dns reply: %s", $self->{res}->errorstring);
+      my $dns_err = $self->{res}->errorstring;
+      # resignal if alarm went off
+      die "dns (3) $dns_err\n"  if $dns_err =~ /__alarm__ignore__\(.*\)/s;
+      info("dns: bad dns reply: $dns_err");
     } else {
       my $header = $packet->header;
       if (!$header) {
