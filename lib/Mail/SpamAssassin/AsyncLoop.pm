@@ -311,10 +311,15 @@ sub bgsend_and_start_lookup {
       } else {
         dbg("async: query %s already done, re-using for %s, callback",
              $id, $key);
-        eval { $cb->($ent, $pkt); 1 }
-        or do { chomp $@;
+        eval {
+          $cb->($ent, $pkt); 1;
+        } or do {
+          chomp $@;
+          # resignal if alarm went off
+          die "async: (1) $@\n"  if $@ =~ /__alarm__ignore__\(.*\)/s;
           warn sprintf("query %s completed, callback %s failed: %s\n",
-                       $id, $key, $@) };
+                       $id, $key, $@);
+        };
       }
     }
   }
@@ -348,10 +353,15 @@ sub bgsend_and_start_lookup {
             if ($appl_cb) {
               push(@cb_displ_names,
                    $appl_ent->{rulename} || $appl_ent->{key} || '');
-              eval { $appl_cb->($appl_ent, $pkt); 1 }
-              or do { chomp $@;
+              eval {
+                $appl_cb->($appl_ent, $pkt); 1;
+              } or do {
+                chomp $@;
+                # resignal if alarm went off
+                die "async: (2) $@\n"  if $@ =~ /__alarm__ignore__\(.*\)/s;
                 warn sprintf("query %s completed, callback %s failed: %s\n",
-                             $id, $appl_ent->{key}, $@) };
+                             $id, $appl_ent->{key}, $@);
+              };
             }
           }
           dbg("async: query %s completed, %s", $id,
@@ -553,6 +563,8 @@ sub complete_lookups {
 
   } or do {
     my $eval_stat = $@ ne '' ? $@ : "errno=$!";  chomp $eval_stat;
+    # resignal if alarm went off
+    die "async: (3) $eval_stat\n"  if $eval_stat =~ /__alarm__ignore__\(.*\)/s;
     dbg("async: caught complete_lookups death, aborting: %s", $eval_stat);
     $alldone = 1;      # abort remaining
   };
@@ -635,8 +647,13 @@ sub set_response_packet {
     info("async: no key, response packet not remembered, id $id");
   } else {
     my $ent = $pending->{$key};
-    if ($id ne $ent->{id}) {
-      info("async: ignoring response, mismatched id $id, expected $ent->{id}");
+    my $ent_id = $ent->{id};
+    if (!defined $ent_id) {
+      # should not happen, troubleshooting
+      info("async: ignoring response, id $id, ent_id is undef: %s",
+           join(', ', %$ent));
+    } elsif ($id ne $ent_id) {
+      info("async: ignoring response, mismatched id $id, expected $ent_id");
     } else {
       $ent->{finish_time} = $timestamp;
       $ent->{response_packet} = $pkt;
