@@ -75,7 +75,7 @@ eval {
       return $db->country_code_by_addr($_[0]) || "XX";
     }
   };
-  $db_info = sub { return "Geo::IP ".$db->database_info; };
+  $db_info = sub { return "Geo::IP " . ($db->database_info || '?') };
   1;
 } or do {
   my $eval_stat = $@ ne '' ? $@ : "errno=$!";  chomp $eval_stat;
