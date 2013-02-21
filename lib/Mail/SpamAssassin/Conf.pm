@@ -1714,40 +1714,39 @@ of seconds will tell SpamAssassin how often to retest for working DNS.
     }
   });
 
-=item dns_options opts   (default: empty)
+=item dns_options opts   (default: norotate, nodns0x20, edns=4096)
 
-Provides a (whitespace or comma -separated) list of options applying to
-DNS resolving. Available options are (without quotes): 'rotate', 'dns0x20'
-and 'edns' (or 'edns0'). Option name may be negated by prepending a 'no'
-(e.g. 'norotate', 'noEDNS') to counteract previously enabled option.
-Option names are not case-sensitive.
+Provides a (whitespace or comma -separated) list of options applying
+to DNS resolving. Available options are: I<rotate>, I<dns0x20> and
+I<edns> (or I<edns0>). Option name may be negated by prepending a I<no>
+(e.g. I<norotate>, I<NoEDNS>) to counteract a previously enabled option.
+Option names are not case-sensitive. The I<dns_options> directive may
+appear in configuration files multiple times, the last setting prevails.
 
-The last setting in configuration files prevails. By default options
-'rotate', 'dns0x20' and 'edns' are disabled.
-
-Option 'edns' (or 'edsn0') may take a value which specifies a requestor's
+Option I<edns> (or I<edsn0>) may take a value which specifies a requestor's
 acceptable UDP payload size according to EDNS0 specifications (RFC 2671bis
-draft), e.g. edns=4096. In absence of an 'edns' option a traditional implied
-UDP payload size is 512 bytes. When the option is specified but a value
-is not provided, a conservative default of 1240 bytes is implied. It is
-recommended to enable 'edns' when using a local recursive DNS server which
-supports EDNS0 (like most modern DNS servers do), a suitable setting in
-this case is edns=4096. Allowing packets larger than 512 bytes can avoid
-truncation of answer resource records in large DNS responses (like in TXT
-records of some SPF and DKIM responses, or when an unreasonable number of
-A records is published by some domain). The option should remain disabled
-when a recursive DNS server is only reachable through some old-fashioned
-firewall which bans DNS UDP packets larger than 512 bytes. A suitable value
-when a non-local recursive DNS server is used and a firewall allows EDNS0
-but blocks fragmented IP packets is perhaps 1240 bytes, allowing a DNS UDP
-packet to fit within a single IP packet in most cases.
+draft), e.g. I<edns=4096>. When EDNS0 is off (I<noedns> or I<edns=512>)
+a traditional implied UDP payload size is 512 bytes. When the option is
+specified but a value is not provided, a conservative default of 1240 bytes
+is implied. It is recommended to keep I<edns> enabled when using a local
+recursive DNS server which supports EDNS0 (like most modern DNS servers do),
+a suitable setting in this case is I<edns=4096>, which is also a default.
+Allowing packets larger than 512 bytes can avoid truncation of answer
+resource records in large DNS responses (like in TXT records of some SPF
+and DKIM responses, or when an unreasonable number of A records is published
+by some domain). The option should be disabled when a recursive DNS server
+is only reachable through some old-fashioned firewall which bans DNS UDP
+packets larger than 512 bytes. A suitable value when a non-local recursive
+DNS server is used and a firewall does allow EDNS0 but blocks fragmented
+IP packets is perhaps 1240 bytes, allowing a DNS UDP packet to fit within
+a single IP packet in most cases.
 
-Option 'rotate' causes SpamAssassin to choose a DNS server at random
-from all servers listed in C</etc/resolv.conf> every 'dns_test_interval'
+Option I<rotate> causes SpamAssassin to choose a DNS server at random
+from all servers listed in C</etc/resolv.conf> every I<dns_test_interval>
 seconds, effectively spreading the load over all currently available DNS
 servers when there are many spamd workers. 
 
-Option 'dns0x20' enables randomization of letters in a DNS query label
+Option I<dns0x20> enables randomization of letters in a DNS query label
 according to draft-vixie-dnsext-dns0x20, decreasing a chance of collisions
 of responses (by chance or by a malicious intent) by increasing spread
 as provided by a 16-bit query ID and up to 16 bits of a port number,
@@ -4104,6 +4103,8 @@ sub new {
     push(@{$self->{headers_spam}}, $r);
     push(@{$self->{headers_ham}},  $r);
   }
+
+  $self->{dns_options}->{edns} = 4096;
 
   # these should potentially be settable by end-users
   # perhaps via plugin?

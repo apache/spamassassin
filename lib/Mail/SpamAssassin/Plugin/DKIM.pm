@@ -745,9 +745,15 @@ sub _check_dkim_signature {
     my $timemethod = $self->{main}->UNIVERSAL::can("time_method") &&
                      $self->{main}->time_method("check_dkim_signature");
     if (Mail::DKIM::Verifier->VERSION >= 0.40) {
-      # get our Net::DNS::Resolver object, let Mail::DKIM use the same resolver
-      my $res = $self->{main}->{resolver}->get_resolver;
-      Mail::DKIM::DNS::resolver($res);
+      my $edns = $pms->{conf}->{dns_options}->{edns};
+      if ($edns && $edns >= 1024) {
+        # Let Mail::DKIM use our interface to Net::DNS::Resolver.
+        # Only do so if EDNS0 provides a reasonably-sized UDP payload size,
+        # as our interface does not provide a DNS fallback to TCP, unlike
+        # the Net::DNS::Resolver::send which does provide it.
+        my $res = $self->{main}->{resolver}->get_resolver;
+        Mail::DKIM::DNS::resolver($res);
+      }
     }
     $verifier = Mail::DKIM::Verifier->new;
     if (!$verifier) {
