@@ -72,7 +72,9 @@ ifplugin Mail::SpamAssassin::Plugin::MIMEHeader
   describe   WON_NBDY_ATTACH    You won lots of money! See attachment.
 endif
 
-body     LOTTO_AGENT      /\b(?:(?:(?:the|y?our)(?:\s\w{1,20})?|contact|accredited|listed)\sclaim(?:s|ing)?(?:\sprocessing)?|fiducia\w+|reimbursement|(?:prize|international|intl|foreign|win+ing)(?:[\s,.]+(?:rem+it+ance|settlement|payment|payout|award|transfer))+|payment|payout|immunity|(?<!memory\s)grants?)\s?(?:agent|manager|officer|secretary|director|mgr\b)/i
+body     __LOTTO_AGENT_01 /\b(?:(?:(?:the|y?our)(?:\s\w{1,20})?|contact|accredited|listed)\sclaim(?:s|ing)?(?:\sprocessing)?|fiducia\w+|reimbursement|(?:prize|international|intl|foreign|win+ing)(?:[\s,.]+(?:rem+it+ance|settlement|payment|payout|award|transfer))+|payment|payout|immunity|(?<!memory\s)grants?)\s?(?:agent|manager|officer|secretary|director|mgr\b)/i
+body     __LOTTO_AGENT_02 /\blot+ery[^\.]{1,40} ticket agent/i
+meta     LOTTO_AGENT      __LOTTO_AGENT_01 || __LOTTO_AGENT_02
 describe LOTTO_AGENT      Claims Agent
 score    LOTTO_AGENT      3.50		# limit
 
@@ -97,9 +99,9 @@ describe LOTTO_AGENT_RPLY Claims Agent
 # body    HK_LOTTO                /(?:(?:(?:inter)?national|foundation|mercato|univers|euro million|e-?mail|euro-pw|bill gates|swiss) ?lo(?:tto|ttery|terie)|coca.?cola games|mega jackpot|staatsloterij|ukonline game promo|loto prestige|(?:fran.aise|e-?mail) sweepstakes|loterie (?:internationale|cristal|am.ricaine|coca.?cola|euromillions|bill gates)|(?:computer|internet) ballot|foundation internationale billgateslottery award|(?:promotional|online) draws?|lottery (?:fiduciary|department))/i
 # body            __KAM_LOTTO5    /(freelotto group|Royal Heritage Lottery|UK National (Online)? Lottery|U\.?K\.? Grand Promotions|Lottery Department UK|Euromillion Loteria|Luckyday International Lottery|International Lottery)/is
 
-body     __LOTTO_ADMITS_1 /\b(?:on-?line|e-?mail|ballot|(?:inter)?national|state|(?:UK|euro)[- ]?(?:mil+ions?|PW)|Canada|Microsoft|MSN|internet|mega|jackpot|Royal Heritage|foundation|cash\sgrant|mercato|univers|staatsloterij|bill\s?gates|Olympics?|swiss|this|est[ea]|internationaux de gagnants de)(?:\s(?!lot|swe|prom)\w{1,20}){0,3}\s?(?:lot(?:to|tery|eri[ea])|sweepstakes?|promo(?:tion|cao|cion)?|jackpot)\b/i
+body     __LOTTO_ADMITS_1 /\b(?:on-?line|e-?mail|ballot|(?:inter)?national|state|(?:UK|euro)[- ]?(?:mil+ions?|PW)|Canada|Microsoft|MSN|internet|mega|jackpot+|Royal Heritage|foundation|cash\sgrant|mercato|univers|staatsloterij|bill\s?gates|Olympics?|swiss|this|est[ea]|internationaux de gagnants de)(?:\s(?!lot|swe|prom)\w{1,20}){0,3}\s?(?:lot(?:to|t+ery|eri[ea])|sweepstakes?|promo(?:tion|cao|cion)?|jackpot+)\b/i
 body     __LOTTO_ADMITS_2 /\b(?:free)?(?:lot(?:to|tery|erie)|sweepstakes)\s(?:(?:inter)?na[tz]ional|department|bureau|group|award|microsoft)/i
-uri      __LOTTO_ADMITS_3 /lottery/i
+uri      __LOTTO_ADMITS_3 /lott+ery/i
 
 ifplugin Mail::SpamAssassin::Plugin::MIMEHeader
   mimeheader   __LOTTO_ATTACH_1   Content-Type =~ /lott(?:o|ery)/i
@@ -112,12 +114,12 @@ endif
 meta     __LOTTO_ADMITS     __LOTTO_ADMITS_1 || __LOTTO_ADMITS_2 || __LOTTO_ADMITS_3 || __LOTTO_ATTACH_1 || __LOTTO_ATTACH_2
 
 
-body     __LOTTO_RELATED    /\b(?:lott(?:o|ery)|sweepstakes)\s(?:prize|draw(?:s|ing)?|(?:ge)?win(?:n?er|n?ing)?|jackpot|award|fund|com+it+e+|com+is+ion|guild|promotion|promocao|program|day|online|company|(?:in)?corporat|agent|co[-,]?ordinator|team)/i
+body     __LOTTO_RELATED    /\b(?:lot+(?:o|ery)|sweepstakes)\s(?:prize|draw(?:s|ing)?|(?:ge)?win(?:n?er|n?ing)?|jackpot+|award|fund|com+it+e+|com+is+ion|guild|promotion|promocao|program|day|online|company|(?:in)?corporat|agent|co[-,]?ordinator|team)/i
 
 body     __LOTTO_VERIFY     /\bpromo\sverification/i
+body     __GET_TICKET       /\bget\syour\sticket+\b/i
 
-
-meta     __MONEY_LOTTERY  LOTS_OF_MONEY && (__LOTTO_WINNINGS + __LOTTO_WIN_01 + __YOU_WON + LOTTO_AGENT + __LOTTO_DEPT + LOTTO_AGENT_FM + LOTTO_AGENT_RPLY + __LOTTO_ADMITS + __LOTTO_RELATED + DEAR_WINNER + __LOTTO_VERIFY > 1)
+meta     __MONEY_LOTTERY  LOTS_OF_MONEY && (__LOTTO_WINNINGS + __LOTTO_WIN_01 + __YOU_WON + __LOTTO_AGENT_01 + __LOTTO_AGENT_02 + __LOTTO_DEPT + LOTTO_AGENT_FM + LOTTO_AGENT_RPLY + __LOTTO_ADMITS + __LOTTO_RELATED + DEAR_WINNER + __LOTTO_VERIFY + __GET_TICKET > 1)
 meta     MONEY_LOTTERY    __MONEY_LOTTERY && !__CAN_HELP && !__HTML_LINK_IMAGE && !__DOS_HAS_LIST_UNSUB && !__MSGID_APPLEMAIL && __THREADED
 describe MONEY_LOTTERY    Lots of money from a lottery
 #score    MONEY_LOTTERY    1.5
