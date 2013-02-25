@@ -407,11 +407,11 @@ meta           __TO_EQ_FROM_DOM     (__TO_EQ_FROM_DOM_1 || __TO_EQ_FROM_DOM_2)
 describe       __TO_EQ_FROM_DOM     To: domain same as From: domain
 
 meta           __TO_EQ_FM_DOM_HTML_ONLY __TO_EQ_FROM_DOM && MIME_HTML_ONLY
-meta           TO_EQ_FM_DOM_HTML_ONLY   __TO_EQ_FM_DOM_HTML_ONLY && !__NOT_SPOOFED && !__CTYPE_MULTIPART_ALT && !HTML_MIME_NO_HTML_TAG && !ALL_TRUSTED && !__MIME_QP && !__IS_EXCH && !__MSGID_BEFORE_RECEIVED && !__RCD_RDNS_MAIL_MESSY && !__FM_TO_ALL_NUMS && !__FROM_LOWER && !__LOCAL_PP_NONPPURL && !__NOT_A_PERSON && !__HAS_IN_REPLY_TO
+meta           TO_EQ_FM_DOM_HTML_ONLY   __TO_EQ_FM_DOM_HTML_ONLY && !__NOT_SPOOFED && !__CTYPE_MULTIPART_ALT && !HTML_MIME_NO_HTML_TAG && !__IS_EXCH && !__MSGID_BEFORE_RECEIVED && !__FM_TO_ALL_NUMS && !__FROM_LOWER && !__HAS_IN_REPLY_TO && !__BUGGED_IMG && !__FROM_ENCODED_QP && !__MSGID_OK_HEX 
 describe       TO_EQ_FM_DOM_HTML_ONLY   To domain == From domain and HTML only
 
 meta           __TO_EQ_FM_DOM_HTML_IMG  __TO_EQ_FROM_DOM && __HTML_LINK_IMAGE
-meta           TO_EQ_FM_DOM_HTML_IMG    __TO_EQ_FM_DOM_HTML_IMG && !__NOT_SPOOFED && !__CTYPE_MULTIPART_ALT && !ALL_TRUSTED && !__MIME_QP && !__IS_EXCH && !__UNSUB_LINK && !__COMMENT_EXISTS && !__FM_TO_ALL_NUMS && !__DKIM_EXISTS && !__HAS_THREAD_INDEX
+meta           TO_EQ_FM_DOM_HTML_IMG    __TO_EQ_FM_DOM_HTML_IMG && !__NOT_SPOOFED && !__CTYPE_MULTIPART_ALT && !__IS_EXCH && !__UNSUB_LINK && !__COMMENT_EXISTS && !__FM_TO_ALL_NUMS && !__DKIM_EXISTS && !__HAS_THREAD_INDEX && !__MSGID_JAVAMAIL && !__RP_MATCHES_RCVD 
 describe       TO_EQ_FM_DOM_HTML_IMG    To domain == From domain and HTML image link
 
 ifplugin Mail::SpamAssassin::Plugin::SPF
