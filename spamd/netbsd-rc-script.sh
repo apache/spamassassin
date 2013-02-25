@@ -10,7 +10,7 @@
 # of spam
 #
 # PLEASE read the file
-#   @PREFIX@/share/doc/spamassassin/spamd/README.spamd
+#   @PREFIX@/share/doc/spamassassin/spamd/README
 # especially the section about security.
 
 ## only for DragonFlyBSD/NetBSD
