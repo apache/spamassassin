@@ -628,11 +628,14 @@ sub _packet_id {
     return join('/', $id, $class, $type, $qname);
 
   } else {
-    # odd.  this should not happen, but clearly some DNS servers
-    # can return something that Net::DNS interprets as having no
-    # question section.  Better support it; just return the
-    # (safe) ID part, along with a text token indicating that
-    # the packet had no question part.
+    # Odd, this should not happen, a DNS servers is supposed to retain
+    # a question section in its reply.  There is a bug in Net::DNS 0.72
+    # and earlier where a signal (e.g. a timeout alarm) during decoding
+    # of a reply packet produces a seemingly valid packet object, but
+    # with missing sections - see [rt.cpan.org #83451] .
+    #
+    # Better support it; just return the (safe) ID part, along with
+    # a text token indicating that the packet had no question part.
     #
     return $id . "/NO_QUESTION_IN_PACKET";
   }
