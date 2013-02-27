@@ -163,7 +163,7 @@ $have_sha ? {
 #},
 {
   module => 'IO::Socket::IP',
-  version => 0,
+  version => 0.09,
   desc => 'Installing this module is recommended if spamd is to listen
   on IPv6 sockets or if DNS queries should go to an IPv6 name server.
   If IO::Socket::IP is not available, using an older module

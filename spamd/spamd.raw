@@ -38,24 +38,42 @@ BEGIN {
   }                                                 # REMOVEFORINST
 }
 
+use vars qw($have_getaddrinfo_in_core $have_getaddrinfo_legacy
+            $io_socket_module_name);
 # don't force requirement on IO::Socket::IP or IO::Socket::INET6
-use vars qw($have_socket_ip $io_socket_module_name);
 BEGIN {
   use Socket qw(:DEFAULT IPPROTO_TCP);
-  &SOCK_STREAM; &IPPROTO_TCP;
 
-  $have_socket_ip = eval {
-    require IO::Socket::IP;
-    Socket->VERSION(1.97);
+  # AUTOLOADing 'constants' here enables inlining - see Exporter man page
+  &SOCK_STREAM; &IPPROTO_TCP; &SOMAXCONN;
+
+  $have_getaddrinfo_in_core = eval {
+    # The Socket module (1.94) bundled with Perl 5.14.* provides
+    # new affordances for IPv6, including implementations of the
+    # Socket::getaddrinfo() and Socket::getnameinfo() functions,
+    # along with related constants and a handful of new functions.
+    # Perl 5.16.0 upgrades the core Socket module to version 2.001.
+  # Socket->VERSION(1.94);  # provides getaddrinfo() and getnameinfo()
+  # Socket->VERSION(1.95);  # provides AI_ADDRCONFIG
+    Socket->VERSION(1.96);  # provides NIx_NOSERV
+  # Socket->VERSION(1.97);  # IO::Socket::IP depends on Socket 1.97
     import Socket qw(/^(?:AI|NI|NIx|EAI)_/);
-    # see Exporter man page: AUTOLOADing 'constants' here enables inlining
-    &AI_ADDRCONFIG; &AI_PASSIVE;
+    &AI_ADDRCONFIG; &AI_PASSIVE;  # enable inlining
+    &NI_NUMERICHOST, &NI_NUMERICSERV; &NIx_NOSERV; 1;
+  };
+
+  $have_getaddrinfo_legacy = !$have_getaddrinfo_in_core && eval {
+    require Socket6;
+  # Socket6->VERSION(0.13);  # provides NI_NAMEREQD
+    Socket6->VERSION(0.18);  # provides AI_NUMERICSERV
+    import Socket6 qw(/^(?:AI|NI|NIx|EAI)_/);
+    &AI_ADDRCONFIG; &AI_PASSIVE;  # enable inlining
     &NI_NUMERICHOST; &NI_NUMERICSERV; &NI_NAMEREQD; 1;
   };
 
-  if ($have_socket_ip) {
-    $io_socket_module_name = 'IO::Socket::IP';
-    *new_io_socket_inetx = sub { IO::Socket::IP->new(@_) };
+  if ($have_getaddrinfo_in_core) {
+    # using a modern Socket module
+
     *ip_or_name_to_ip_addresses = sub {
       my($addr, $ai_family) = @_;
       # Socket::getaddrinfo returns a list of hashrefs
@@ -67,13 +85,15 @@ BEGIN {
       if (!$error) {
         for my $a (@res) {
           my($err, $ip_addr) =
-            Socket::getnameinfo($a->{addr}, &NI_NUMERICHOST, &NIx_NOSERV);
+            Socket::getnameinfo($a->{addr},
+                                &NI_NUMERICHOST | &NI_NUMERICSERV, &NIx_NOSERV);
           if (!$err) { push(@ip_addrs, $ip_addr) }
           elsif (!$error) { $error = $err }
         }
       }
       return ($error, @ip_addrs);
     };
+
     *peer_info_from_socket = sub {
       my $sock = shift;
       my $peer_addr = $sock->peerhost;
@@ -82,13 +102,10 @@ BEGIN {
               $sock->sockport);
     };
 
-  } elsif (eval { require Socket6; import Socket6 qw(/^(?:AI|NI|NIx|EAI)_/);
-                  require IO::Socket::INET6;
-                  # see Exporter: AUTOLOADing 'constants' here enables inlining
-                  &AI_ADDRCONFIG; &AI_PASSIVE;
-                  &NI_NUMERICHOST; &NI_NUMERICSERV; &NI_NAMEREQD; 1 }) {
-    $io_socket_module_name = 'IO::Socket::INET6';
-    *new_io_socket_inetx = sub { IO::Socket::INET6->new(@_) };
+  } elsif ($have_getaddrinfo_legacy) {
+    # using a legacy Socket6 module; somewhat different API on getaddrinfo()
+    # and getnameinfo() compared to these functions in a module Socket
+
     *ip_or_name_to_ip_addresses = sub {
       my($addr, $ai_family) = @_;
       # Socket6::getaddrinfo returns a list of quintuples
@@ -110,6 +127,7 @@ BEGIN {
       }
       return ($error, @ip_addrs);
     };
+
     *peer_info_from_socket = sub {
       my $sock = shift;
       my $peer_addr = $sock->peerhost;
@@ -120,10 +138,8 @@ BEGIN {
               $sock->sockport);
     };
 
-  } else {  # legacy, IPv4 only, no getaddrinfo() assumed
-    $io_socket_module_name = 'IO::Socket::INET';
-    require IO::Socket::INET;
-    *new_io_socket_inetx = sub { IO::Socket::INET->new(@_) };
+  } else {  # IPv4 only, no getaddrinfo() available
+
     *ip_or_name_to_ip_addresses = sub {
       my($addr, $ai_family) = @_;
       $ai_family == &AF_UNSPEC || $ai_family == &AF_INET
@@ -146,6 +162,7 @@ BEGIN {
       }
       return ($error, @ip_addrs);
     };
+
     *peer_info_from_socket = sub {
       my $sock = shift;
       my ($peer_port, $in_addr) = Socket::sockaddr_in($sock->peername)
@@ -155,6 +172,21 @@ BEGIN {
       return ($peer_port, $peer_addr, $peer_hostname||$peer_addr,
               $sock->sockport);
     };
+
+  }
+
+  if (eval { require IO::Socket::IP }) {  # handles IPv6 and IPv4
+    IO::Socket::IP->VERSION(0.09);  # implements IPV6_V6ONLY
+    $io_socket_module_name = 'IO::Socket::IP';
+    *new_io_socket_inetx = sub { IO::Socket::IP->new(@_) };
+
+  } elsif (eval { require IO::Socket::INET6 }) {  # handles IPv6 and IPv4
+    $io_socket_module_name = 'IO::Socket::INET6';
+    *new_io_socket_inetx = sub { IO::Socket::INET6->new(@_) };
+
+  } elsif (eval { require IO::Socket::INET }) {  # IPv4 only
+    $io_socket_module_name = 'IO::Socket::INET';
+    *new_io_socket_inetx = sub { IO::Socket::INET->new(@_) };
   }
 
 }
@@ -671,7 +703,11 @@ $opt{'server-cert'} ||= "$LOCAL_RULES_DIR/certs/server-cert.pem";
 # ---------------------------------------------------------------------------
 # Server (listening) socket setup for the various supported types
 
-dbg("spamd: socket module of choice: $io_socket_module_name");
+dbg("spamd: socket module of choice: %s %s, Socket %s, %s",
+    $io_socket_module_name, $io_socket_module_name->VERSION, Socket->VERSION,
+    $have_getaddrinfo_in_core ? 'using a modern Socket::getaddrinfo'
+    : $have_getaddrinfo_legacy ? 'using legacy Socket6::getaddrinfo'
+    : 'no getaddrinfo, using gethostbyname, IPv4-only');
 
 my $have_ssl_module;
 my @listen_sockets;  # list of hashrefs, contains info on all listen sockets
@@ -862,7 +898,7 @@ sub server_sock_setup_unix {
   my %socket = (
     Local  => $path,
     Type   => &SOCK_STREAM,
-    Listen => SOMAXCONN,
+    Listen => &SOMAXCONN,
   );
   dbg("spamd: creating UNIX socket:\n" . join("\n", map { " $_: " . (defined $socket{$_} ? $socket{$_} : "(undef)") } sort keys %socket));
   my $server_unix = IO::Socket::UNIX->new(%socket);
@@ -958,8 +994,8 @@ sub server_sock_setup_inet {
       Type      => &SOCK_STREAM,
       Proto     => 'tcp',
       ReuseAddr => 1,
-      Listen    => SOMAXCONN,
-      V6Only    => 1,
+      Listen    => &SOMAXCONN,
+      V6Only    => 1,  # since IO::Socket::IP 0.09
     );
     %sockopt = (%sockopt, (
       SSL_version     => $sslversion,
