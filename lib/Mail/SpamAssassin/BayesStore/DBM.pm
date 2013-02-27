@@ -175,8 +175,11 @@ sub tie_db_readonly {
     my $db_var = 'db_'.$dbname;
     dbg("bayes: tie-ing to DB file R/O $name");
 
-    # untie %{$self->{$db_var}} if (tied %{$self->{$db_var}});
-    if (!tie %{$self->{$db_var}},$self->DBM_MODULE, $name, O_RDONLY,
+    # Bug 6901, [rt.cpan.org #83060]
+    # DB_File: Repeated tie to the same hash with no untie causes corruption
+    untie %{$self->{$db_var}};  # has no effect if the variable is not tied
+
+    if (!tie %{$self->{$db_var}}, $self->DBM_MODULE, $name, O_RDONLY,
 		 (oct($main->{conf}->{bayes_file_mode}) & 0666))
     {
       # bug 2975: it's acceptable for the db_seen to not be present,
@@ -185,7 +188,9 @@ sub tie_db_readonly {
       # be writing to it; let the R/W api deal with that case.
 
       if ($dbname eq 'seen') {
-        tie %{$self->{$db_var}},$self->DBM_MODULE, $name, O_RDWR|O_CREAT,
+        # Bug 6901, [rt.cpan.org #83060]
+        untie %{$self->{$db_var}};  # has no effect if the variable is not tied
+        tie %{$self->{$db_var}}, $self->DBM_MODULE, $name, O_RDWR|O_CREAT,
                     (oct($main->{conf}->{bayes_file_mode}) & 0666)
           or goto failed_to_tie;
       }
@@ -290,7 +295,9 @@ sub tie_db_writable {
     ($self->DBM_MODULE eq 'DB_File') and
          Mail::SpamAssassin::Util::avoid_db_file_locking_bug ($name);
 
-    tie %{$self->{$db_var}},$self->DBM_MODULE, $name, O_RDWR|O_CREAT,
+    # Bug 6901, [rt.cpan.org #83060]
+    untie %{$self->{$db_var}};  # has no effect if the variable is not tied
+    tie %{$self->{$db_var}}, $self->DBM_MODULE, $name, O_RDWR|O_CREAT,
 		 (oct($main->{conf}->{bayes_file_mode}) & 0666)
        or goto failed_to_tie;
   }
@@ -416,8 +423,10 @@ sub _upgrade_db {
     # anyway)
     my %new_toks;
     $umask = umask 0;
-    $res = tie %new_toks, $self->DBM_MODULE, "${name}.new", O_RDWR|O_CREAT|O_EXCL,
-          (oct($main->{conf}->{bayes_file_mode}) & 0666);
+
+    $res = tie %new_toks, $self->DBM_MODULE, "${name}.new",
+             O_RDWR|O_CREAT|O_EXCL,
+             (oct($main->{conf}->{bayes_file_mode}) & 0666);
     umask $umask;
     return 0 unless $res;
     undef $res;
@@ -482,7 +491,9 @@ sub _upgrade_db {
 
     # re-tie to the new db in read-write mode ...
     $umask = umask 0;
-    $res = tie %{$self->{db_toks}},$self->DBM_MODULE, $name, O_RDWR|O_CREAT,
+    # Bug 6901, [rt.cpan.org #83060]
+    untie %{$self->{db_toks}};  # has no effect if the variable is not tied
+    $res = tie %{$self->{db_toks}}, $self->DBM_MODULE, $name, O_RDWR|O_CREAT,
 	 (oct($main->{conf}->{bayes_file_mode}) & 0666);
     umask $umask;
     return 0 unless $res;
@@ -568,7 +579,9 @@ sub _upgrade_db {
 
     # re-tie to the new db in read-write mode ...
     $umask = umask 0;
-    $res = tie %{$self->{db_toks}},$self->DBM_MODULE, $name, O_RDWR|O_CREAT,
+    # Bug 6901, [rt.cpan.org #83060]
+    untie %{$self->{db_toks}};  # has no effect if the variable is not tied
+    $res = tie %{$self->{db_toks}}, $self->DBM_MODULE, $name, O_RDWR|O_CREAT,
 	 (oct ($main->{conf}->{bayes_file_mode}) & 0666);
     umask $umask;
     return 0 unless $res;
