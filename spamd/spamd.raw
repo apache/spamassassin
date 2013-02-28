@@ -39,7 +39,7 @@ BEGIN {
 }
 
 use vars qw($have_getaddrinfo_in_core $have_getaddrinfo_legacy
-            $io_socket_module_name);
+            $io_socket_module_name $have_inet4 $have_inet6);
 # don't force requirement on IO::Socket::IP or IO::Socket::INET6
 BEGIN {
   use Socket qw(:DEFAULT IPPROTO_TCP);
@@ -70,6 +70,8 @@ BEGIN {
     &AI_ADDRCONFIG; &AI_PASSIVE;  # enable inlining
     &NI_NUMERICHOST; &NI_NUMERICSERV; &NI_NAMEREQD; 1;
   };
+
+  &AF_UNSPEC; &AF_INET; &AF_INET6;  # enable inlining
 
   if ($have_getaddrinfo_in_core) {
     # using a modern Socket module
@@ -188,6 +190,24 @@ BEGIN {
     $io_socket_module_name = 'IO::Socket::INET';
     *new_io_socket_inetx = sub { IO::Socket::INET->new(@_) };
   }
+
+  $have_inet4 =  # can we create a PF_INET socket?
+    defined $io_socket_module_name && eval {  
+      my $sock =
+        $io_socket_module_name->new(LocalAddr => '0.0.0.0', Proto => 'tcp');
+      $sock->close or die "error closing socket: $!"  if $sock;
+      $sock ? 1 : undef;
+    };
+
+  $have_inet6 =  # can we create a PF_INET6 socket?
+    defined $io_socket_module_name &&
+    $io_socket_module_name ne 'IO::Socket::INET' &&
+    eval {
+      my $sock =
+        $io_socket_module_name->new(LocalAddr => '::', Proto => 'tcp');
+      $sock->close or die "error closing socket: $!"  if $sock;
+      $sock ? 1 : undef;
+    };
 
 }
 
@@ -703,11 +723,17 @@ $opt{'server-cert'} ||= "$LOCAL_RULES_DIR/certs/server-cert.pem";
 # ---------------------------------------------------------------------------
 # Server (listening) socket setup for the various supported types
 
-dbg("spamd: socket module of choice: %s %s, Socket %s, %s",
-    $io_socket_module_name, $io_socket_module_name->VERSION, Socket->VERSION,
-    $have_getaddrinfo_in_core ? 'using a modern Socket::getaddrinfo'
+dbg("spamd: socket module of choice: %s %s, Socket %s".
+    ", %s PF_INET, %s PF_INET6, %s",
+    $io_socket_module_name,
+    $io_socket_module_name->VERSION,
+    Socket->VERSION,
+    $have_inet4 ? 'have' : 'no',
+    $have_inet6 ? 'have' : 'no',
+    $have_getaddrinfo_in_core ? 'using Socket::getaddrinfo'
     : $have_getaddrinfo_legacy ? 'using legacy Socket6::getaddrinfo'
-    : 'no getaddrinfo, using gethostbyname, IPv4-only');
+    : 'no getaddrinfo, using gethostbyname, IPv4-only',
+);
 
 my $have_ssl_module;
 my @listen_sockets;  # list of hashrefs, contains info on all listen sockets
@@ -961,11 +987,16 @@ sub server_sock_setup_unix {
 sub server_sock_setup_inet {
   my($socket_specs, $addr, $port, $ssl) = @_;
 
-  my $ai_family = &AF_UNSPEC;
-  if    ($opt{'force_ipv6'} && !$opt{'force_ipv4'}) { $ai_family = &AF_INET6 }
-  elsif ($opt{'force_ipv4'} && !$opt{'force_ipv6'}) { $ai_family = &AF_INET }
-  elsif (!$ssl && $io_socket_module_name eq 'IO::Socket::INET')
-                                                    { $ai_family = &AF_INET }
+  $have_inet4 || $have_inet6
+    or warn "spamd: neither the PF_INET (IPv4) nor the PF_INET6 (IPv6) ".
+            "protocol families seem to be available, pushing our luck anyway\n";
+
+  my $ai_family = &AF_UNSPEC;  # defaults to any address family (i.e. both)
+  if      ($have_inet6 && (!$have_inet4 || $opt{'force_ipv6'})) {
+    $ai_family = &AF_INET6;
+  } elsif ($have_inet4 && (!$have_inet6 || $opt{'force_ipv4'})) {
+    $ai_family = &AF_INET;
+  }
   my($error, @addresses);
   if (!defined $addr || lc $addr eq 'localhost') {  # loopback interface
     push(@addresses, '127.0.0.1')
@@ -982,7 +1013,7 @@ sub server_sock_setup_inet {
   }
   die "spamd: invalid address for a listen socket: \"$socket_specs\": $error\n"
     if $error;
-  die "spamd: invalid address for a listen socket: \"$socket_specs\"\n"
+  die "spamd: no valid address for a listen socket: \"$socket_specs\"\n"
     if !@addresses;
 
   dbg("spamd: attempting to listen on IP addresses: %s, port %d",
@@ -1009,7 +1040,8 @@ sub server_sock_setup_inet {
                        sort keys %sockopt)));
     if ($ssl && !$have_ssl_module) {
       eval { require IO::Socket::SSL }
-      or die "spamd: SSL encryption requested, but IO::Socket::SSL is unavailable ($@)\n";
+        or die "spamd: SSL encryption requested, ".
+               "but IO::Socket::SSL is unavailable ($@)\n";
       $have_ssl_module = 1;
     }
     my $server_inet = $ssl ? IO::Socket::SSL->new(%sockopt)
@@ -3072,7 +3104,9 @@ to 783.  Option --ssl implies a prefix 'ssl:'.  An IPv6 address should be
 enclosed in square brackets, e.g. [::1]:783, an IPv4 address may be but
 need not be enclosed in square brackets.  An asterisk '*' in place of a
 hostname implies an unspecified address, ('0.0.0.0' or '::'), i.e. it
-binds to all interfaces. An empty option value implies '*'.
+binds to all interfaces. An empty option value implies '*'. A default
+is '--listen localhost', which binds to a loopback interface only.
+
 
 =head1 DESCRIPTION
 
@@ -3155,17 +3189,17 @@ Print version information, then exit without further action.
 =item B<-i> [I<ipaddress>[:<port>]], B<--listen>[=I<ipaddress>[:<port>]]
 
 Additional alias names for this option are --listen-ip and --ip-address.
-Tells spamd to listen on the specified IP address (defaults to a loopback
-address).  If no value is specified after the switch, or an asterisk '*'
-stands in place of <ipaddress>, spamd will listen on all interfaces - this
-is equivalent to address '0.0.0.0' for IPv4 and to '::' for IPv6.
-You can also use a valid hostname which will make spamd listen on all
-addresses that a name resolves to. The option may be specified multiple
-times. See also options -4 and -6 for restricting address family to IPv4
-or to IPv6. If a port is specified it overrides the --port (and --ssl-port)
-setting for this socket. An IPv6 addresses should be enclosed in square
-brackets, e.g. [::1]:783. For compatibility the square brackets on an IPv6
-address may be omitted if a port number specification is also omitted.
+Tells spamd to listen on the specified IP address, defaults to a loopback
+interface, i.e. C<--listen localhost>).  If no value is specified after the
+switch, or if an asterisk '*' stands in place of an <ipaddress>, spamd will
+listen on all interfaces - this is equivalent to address '0.0.0.0' for IPv4
+and to '::' for IPv6. You can also use a valid hostname which will make spamd
+listen on all addresses that a name resolves to. The option may be specified
+multiple times. See also options -4 and -6 for restricting address family
+to IPv4 or to IPv6. If a port is specified it overrides for this socket the
+global --port (and --ssl-port) setting. An IPv6 addresses should be enclosed
+in square brackets, e.g. [::1]:783. For compatibility square brackets on an
+IPv6 address may be omitted if a port number specification is also omitted.
 
 =item B<-p> I<port>, B<--port>=I<port>
 
