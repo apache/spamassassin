@@ -94,7 +94,8 @@ Read configuration paramaters from LDAP server and parse scores from it.
 sub load {
    my ($self, $username) = @_;
 
-   my $url = $self->{main}->{conf}->{user_scores_dsn}; # an ldap URI
+   my $conf = $self->{main}->{conf};
+   my $url = $conf->{user_scores_dsn}; # an ldap URI
    dbg("ldap: URL is $url");
    if(!defined($url) || $url eq '') {
      dbg("ldap: No URL defined; skipping LDAP");
@@ -110,7 +111,16 @@ sub load {
      1;
    } or do {
      my $eval_stat = $@ ne '' ? $@ : "errno=$!";  chomp $eval_stat;
-     warn "ldap: failed to load user ($username) scores from LDAP server, ignored: $eval_stat\n";
+     if ($conf->{user_scores_fail_to_global}) {
+       info("ldap: failed to load user (%s) scores from LDAP server, ".
+            "using a global default: %s", $username, $eval_stat);
+       return 1;
+     } else {
+       warn sprintf(
+              "ldap: failed to load user (%s) scores from LDAP server: %s\n",
+               $username, $eval_stat);
+       return 0;
+     }
    };
 }
 
@@ -140,8 +150,9 @@ sub load_with_ldap {
   dbg("ldap: host=$host, port=$port, base='$base', attr=${attr[0]}, scope=$scope, filter='$filter'");
 
   my $main = $self->{main};
-  my $ldapuser = $main->{conf}->{user_scores_ldap_username};
-  my $ldappass = $main->{conf}->{user_scores_ldap_password};
+  my $conf = $main->{conf};
+  my $ldapuser = $conf->{user_scores_ldap_username};
+  my $ldappass = $conf->{user_scores_ldap_password};
 
   if(!$ldapuser) {
       undef($ldapuser);
@@ -174,17 +185,19 @@ sub load_with_ldap {
 			      attrs => \@attr
                             );
 
-  my $conf = '';
+  my $config_text = '';
   foreach my $entry ($result->all_entries) {
     my @v = $entry->get_value($f_attribute);
     foreach my $v (@v) {
       dbg("ldap: retrieving prefs for $username: $v");
-      $conf .= $v."\n";
+      $config_text .= $v."\n";
     }
   }
-  $main->{conf}->{main} = $main;
-  $main->{conf}->parse_scores_only($conf);
-  delete $main->{conf}->{main};
+  if ($config_text ne '') {
+    $conf->{main} = $main;
+    $conf->parse_scores_only($config_text);
+    delete $conf->{main};
+  }
   return;
 }
 
