@@ -92,7 +92,8 @@ Read configuration paramaters from SQL database and parse scores from it.
 sub load {
    my ($self, $username) = @_;
 
-   my $dsn = $self->{main}->{conf}->{user_scores_dsn};
+   my $conf = $self->{main}->{conf};
+   my $dsn = $conf->{user_scores_dsn};
    if (!defined($dsn) || $dsn eq '') {
      dbg("config: no DSN defined; skipping sql");
      return 1;
@@ -106,8 +107,16 @@ sub load {
      1;
    } or do {
      my $eval_stat = $@ ne '' ? $@ : "errno=$!";  chomp $eval_stat;
-     warn "config: failed to load user ($username) scores from SQL database: $eval_stat\n";
-     return 0;
+     if ($conf->{user_scores_fail_to_global}) {
+       info("config: failed to load user (%s) scores from SQL database, ".
+            "using a global default: %s", $username, $eval_stat);
+       return 1;
+     } else {
+       warn sprintf(
+            "config: failed to load user (%s) scores from SQL database: %s\n",
+            $username, $eval_stat);
+       return 0;
+     }
    };
    return 1;
 }
@@ -116,9 +125,10 @@ sub load_with_dbi {
    my ($self, $username, $dsn) = @_;
 
    my $main = $self->{main};
-   my $dbuser = $main->{conf}->{user_scores_sql_username};
-   my $dbpass = $main->{conf}->{user_scores_sql_password};
-   my $custom_query = $main->{conf}->{user_scores_sql_custom_query};
+   my $conf = $main->{conf};
+   my $dbuser = $conf->{user_scores_sql_username};
+   my $dbpass = $conf->{user_scores_sql_password};
+   my $custom_query = $conf->{user_scores_sql_custom_query};
 
    my $f_preference = 'preference';
    my $f_value = 'value';
@@ -153,15 +163,15 @@ sub load_with_dbi {
        if ($rv) {
 	 dbg("config: retrieving prefs for $username from SQL server");
 	 my @row;
-	 my $text = '';
+	 my $config_text = '';
 	 while (@row = $sth->fetchrow_array()) {
-	   $text .= (defined($row[0]) ? $row[0] : '') . "\t" .
+	   $config_text .= (defined($row[0]) ? $row[0] : '') . "\t" .
 	       (defined($row[1]) ? $row[1] : '')  . "\n";
 	 }
-	 if ($text ne '') {
-	   $main->{conf}->{main} = $main;
-	   $main->{conf}->parse_scores_only(join('', $text));
-	   delete $main->{conf}->{main};
+	 if ($config_text ne '') {
+	   $conf->{main} = $main;
+	   $conf->parse_scores_only($config_text);
+	   delete $conf->{main};
 	 }
 	 $sth->finish();
 	 undef $sth;

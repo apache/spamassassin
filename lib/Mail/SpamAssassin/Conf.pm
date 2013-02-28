@@ -3657,6 +3657,20 @@ to the empty string ("").
     type => $CONF_TYPE_STRING,
   });
 
+=item user_scores_fallback_to_global        (default: 1)
+
+Fall back to global scores and settings if userprefs can't be loaded
+from SQL or LDAP, instead of passing the message through unprocessed.
+
+=cut
+
+  push (@cmds, {
+    setting => 'user_scores_fallback_to_global',
+    is_admin => 1,
+    default => 1,
+    type => $CONF_TYPE_BOOL,
+  });
+
 =item loadplugin PluginModuleName [/path/module.pm]
 
 Load a SpamAssassin plugin module.  The C<PluginModuleName> is the perl module
