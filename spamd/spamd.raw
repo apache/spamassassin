@@ -225,7 +225,7 @@ use Mail::SpamAssassin::Timeout;
 
 use Getopt::Long;
 use POSIX qw(:sys_wait_h);
-use POSIX qw(setsid sigprocmask _exit);
+use POSIX qw(locale_h setsid sigprocmask _exit);
 use Errno;
 
 use Cwd ();
@@ -241,6 +241,9 @@ use constant RUNNING_ON_MACOS => ($^O =~ /^darwin/oi);
 if ($Mail::SpamAssassin::VERSION ne '@@VERSION@@' && '@@VERSION@@' ne "\@\@VERSION\@\@") {
   die 'spamd: spamd script is v@@VERSION@@, but using modules v'.$Mail::SpamAssassin::VERSION."\n";
 }
+
+# Bug 3062: SpamAssassin should be "locale safe"
+POSIX::setlocale(LC_TIME,'C');
 
 my %resphash = (
   EX_OK          => 0,     # no problems
