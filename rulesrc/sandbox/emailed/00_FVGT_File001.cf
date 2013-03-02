@@ -3167,7 +3167,7 @@ describe FM_GOOD_ENF_CREDIT     Meta Good enough credit
 
 
 body     __YOUR_ACCOUNT         /your account/i
-header   __MANY_RECIPS          ToCc =~ /(?:\@[^@]{5,30}){3}/
+header   __MANY_RECIPS          ToCc =~ /(?:\@[^@]{5,100}){3}/
 meta     FM_IS_IT_OUR_ACCOUNT   (__YOUR_ACCOUNT && __MANY_RECIPS)
 describe FM_IS_IT_OUR_ACCOUNT   Is it our account?
 ##score    FM_IS_IT_OUR_ACCOUNT 4.20
