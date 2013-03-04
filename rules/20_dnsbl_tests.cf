@@ -39,45 +39,6 @@ ifplugin Mail::SpamAssassin::Plugin::DNSEval
 # DNSBLs do not return the A type (127.0.0.x) as part of the TXT reply.
 # Well, at least NJABL doesn't, it seems, as of Apr 7 2003.
 
-# ---------------------------------------------------------------------------
-
-# DISABLED March 1st, 2013 as per Bug 6913
-# https://issues.apache.org/SpamAssassin/show_bug.cgi?id=6913
-
-# NJABL
-# URL: http://www.dnsbl.njabl.org/
-
-# header __RCVD_IN_NJABL          eval:check_rbl('njabl', 'combined.njabl.org.')
-# describe __RCVD_IN_NJABL        Received via a relay in combined.njabl.org
-# tflags __RCVD_IN_NJABL          net
-# reuse  __RCVD_IN_NJABL
-
-# header RCVD_IN_NJABL_RELAY      eval:check_rbl_sub('njabl', '127.0.0.2')
-# describe RCVD_IN_NJABL_RELAY    NJABL: sender is confirmed open relay
-# tflags RCVD_IN_NJABL_RELAY      net
-# reuse  RCVD_IN_NJABL_RELAY
-
-# NJABL DUL: obsoleted by PBL (bug 5187)
-
-# header RCVD_IN_NJABL_SPAM       eval:check_rbl_sub('njabl', '127.0.0.4')
-# describe RCVD_IN_NJABL_SPAM     NJABL: sender is confirmed spam source
-# tflags RCVD_IN_NJABL_SPAM       net
-# reuse  RCVD_IN_NJABL_SPAM
-
-# header RCVD_IN_NJABL_MULTI      eval:check_rbl_sub('njabl', '127.0.0.5')
-# describe RCVD_IN_NJABL_MULTI    NJABL: sent through multi-stage open relay
-# tflags RCVD_IN_NJABL_MULTI      net
-# reuse  RCVD_IN_NJABL_MULTI
-
-# header RCVD_IN_NJABL_CGI        eval:check_rbl_sub('njabl', '127.0.0.8')
-# describe RCVD_IN_NJABL_CGI      NJABL: sender is an open formmail
-# tflags RCVD_IN_NJABL_CGI        net
-# reuse  RCVD_IN_NJABL_CGI
-
-# header RCVD_IN_NJABL_PROXY      eval:check_rbl_sub('njabl', '127.0.0.9')
-# describe RCVD_IN_NJABL_PROXY    NJABL: sender is an open proxy
-# tflags RCVD_IN_NJABL_PROXY      net
-# reuse  RCVD_IN_NJABL_PROXY
 
 # ---------------------------------------------------------------------------
 # SORBS
