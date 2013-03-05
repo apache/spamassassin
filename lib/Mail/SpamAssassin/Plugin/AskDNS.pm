@@ -146,7 +146,7 @@ filtering parameter: "127.0.0.1", "transaction", 'list' .
 A regular expression follows a familiar perl syntax like /.../ or m{...}
 optionally followed by regexp flags (such as 'i' for case-insensitivity).
 If a DNS response matches the requested RR type and the regular expression,
-the rule hits. Examples: /^127\.0\.0\.\d+$/, m{\bdial up\b}i .
+the rule hits.  Examples: /^127\.0\.0\.\d+$/, m{\bdial up\b}i .
 
 A single numerical value can be a decimal number, or a hexadecimal number
 prefixed by 0x. Such numeric filtering expression is typically used with
@@ -540,9 +540,9 @@ sub process_response_packet {
   # a separator.  The $rr->txtdata in Net::DNS 0.68 and older returned
   # such joined space-separated string even in a list context.
 
-  # RFC 5518: If the RDATA in the TXT record contains multiple
+  # RFC 5518: If the RDATA in a TXT record contains multiple
   # character-strings (as defined in Section 3.3 of [RFC1035]),
-  # the code handling that reply from DNS MUST assemble all of these
+  # the code handling such reply from DNS MUST assemble all of these
   # marshaled text blocks into a single one before any syntactical
   # verification takes place.
   # The same goes for RFC 4408 (SPF), RFC 4871 (DKIM), RFC 5617 (ADSP) ...
