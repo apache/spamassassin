@@ -37,7 +37,6 @@ ifplugin Mail::SpamAssassin::Plugin::DNSEval
 #
 # Note that currently TXT queries cannot be used for these, since the
 # DNSBLs do not return the A type (127.0.0.x) as part of the TXT reply.
-# Well, at least NJABL doesn't, it seems, as of Apr 7 2003.
 
 
 # ---------------------------------------------------------------------------
@@ -126,21 +125,6 @@ header RCVD_IN_PBL              eval:check_rbl('zen-lastexternal', 'zen.spamhaus
 describe RCVD_IN_PBL            Received via a relay in Spamhaus PBL
 tflags RCVD_IN_PBL              net
 reuse  RCVD_IN_PBL              
-
-# ---------------------------------------------------------------------------
-# RFC-Ignorant blacklists (both name and IP based)
-
-# REMOVED ALL RULES:
-
-# SEE http://rfc-ignorant.org/endofanera.php
-
-# Effective 9/15/2012 - All publicly visible DNS slaves have been removed from the NS-set other than SONIC.NET's primary RBL servers, a change that is percolating through DNS caches now
-# Effective 9/20/2012 - we will no longer accept submissions of new domains
-# Effective 9/30/2012 - All entries currently marked as "Listed" in the databases will be marked as "Deprecated", which will cause them to not generate DNSBL entries. This will, effectively, mean that lookups of any domain in our database will always return "false", i.e., "clean".
-# Effective 10/15/2012 - The rsync service for slaving of zones will be shut down
-# Effective 10/30/2012 - All sub zones will have their NS-set set to "localhost.rfc-ignorant.org", with lengthy TTLS, which will direct all DNS traffic back onto the server requesting it.
-# Effective 11/30/2012 - The root NS set for "rfc-ignorant.org" will be deleted entirely, preventing any resolution
-
 
 
 # ---------------------------------------------------------------------------
