@@ -836,27 +836,30 @@ skip:
   $permsgstatus->set_tag ('BAYESTC', $tcount_total);
 
   $permsgstatus->set_tag ('HAMMYTOKENS', sub {
+              my $pms = shift;
               $self->bayes_report_make_list
-                ($permsgstatus, $permsgstatus->{bayes_token_info_hammy}, shift);
+                ($pms, $pms->{bayes_token_info_hammy}, shift);
             });
 
   $permsgstatus->set_tag ('SPAMMYTOKENS', sub {
+              my $pms = shift;
               $self->bayes_report_make_list
-                ($permsgstatus, $permsgstatus->{bayes_token_info_spammy}, shift);
+                ($pms, $pms->{bayes_token_info_spammy}, shift);
             });
 
   $permsgstatus->set_tag ('TOKENSUMMARY', sub {
-              if ( defined $permsgstatus->{tag_data}{BAYESTC} )
+              my $pms = shift;
+              if ( defined $pms->{tag_data}{BAYESTC} )
                 {
-                  my $tcount_neutral = $permsgstatus->{tag_data}{BAYESTCLEARNED}
-                                    - $permsgstatus->{tag_data}{BAYESTCSPAMMY}
-                                    - $permsgstatus->{tag_data}{BAYESTCHAMMY};
-                  my $tcount_new = $permsgstatus->{tag_data}{BAYESTC}
-                                    - $permsgstatus->{tag_data}{BAYESTCLEARNED};
+                  my $tcount_neutral = $pms->{tag_data}{BAYESTCLEARNED}
+                                     - $pms->{tag_data}{BAYESTCSPAMMY}
+                                     - $pms->{tag_data}{BAYESTCHAMMY};
+                  my $tcount_new = $pms->{tag_data}{BAYESTC}
+                                 - $pms->{tag_data}{BAYESTCLEARNED};
                   "Tokens: new, $tcount_new; "
-                    ."hammy, $permsgstatus->{tag_data}{BAYESTCHAMMY}; "
+                    ."hammy, $pms->{tag_data}{BAYESTCHAMMY}; "
                     ."neutral, $tcount_neutral; "
-                    ."spammy, $permsgstatus->{tag_data}{BAYESTCSPAMMY}."
+                    ."spammy, $pms->{tag_data}{BAYESTCSPAMMY}."
                 } else {
                   "Bayes not run.";
                 }

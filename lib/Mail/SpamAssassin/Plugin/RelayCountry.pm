@@ -137,8 +137,11 @@ sub parsed_metadata {
 
   return 1 unless $db;
 
-  $opts->{permsgstatus}->set_tag ("RELAYCOUNTRY",
-          $opts->{permsgstatus}->get_message->get_metadata('X-Relay-Countries'));
+  my $countries =
+    $opts->{permsgstatus}->get_message->get_metadata('X-Relay-Countries');
+  my @c_list = split(' ', $countries);
+  $opts->{permsgstatus}->set_tag("RELAYCOUNTRY",
+                                 @c_list == 1 ? $c_list[0] : \@c_list);
   return 1;
 }
 
