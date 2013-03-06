@@ -1,4 +1,9 @@
 
+# added meta dependencies from hstern's sandbox
+rawbody __HS_QUOTE /^> /
+header __HS_SUBJ_RE_FW Subject =~ /^(?i:re|fw):/
+#
+
 ifplugin Mail::SpamAssassin::Plugin::ReplaceTags
   replace_tag  CURRENCY   [\(\[]?(?:\bU[Ss][D\$]{0,2}|\$(?:US)?|usd|GBP|=[Aa][34]|\xa3|&\#16[34];|(?i:pounds\ssterling)|\xa4|EUR(?:OS)?|(?:d')?[Ee]uro?s?|(?i:eur)\sde|CHF|FCFA|d[\xf3]lares\sde\slos\sE+\.\s?U+\.)[\]\)]?
   replace_tag  GB_UK      \b(?:U\.?K\.?|(?:Great\s)?Brit(?:ain|ish)|G\.?B\.?)\b
