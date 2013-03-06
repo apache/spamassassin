@@ -498,7 +498,7 @@ sub extract_message_metadata {
   my ($self, $permsgstatus) = @_;
 
   # do this only once per message, it can be expensive
-  if ($self->{already_extracted_metadata}) { return; }
+  return  if $self->{already_extracted_metadata};
   $self->{already_extracted_metadata} = 1;
 
   $self->{metadata}->extract ($self, $permsgstatus);

@@ -78,6 +78,181 @@ use vars qw{
 
 ###########################################################################
 
+use vars qw( %common_tags );
+
+BEGIN {
+  %common_tags = (
+
+    YESNO => sub {
+      my $pms = shift;
+      $pms->_get_tag_value_for_yesno(@_);
+    },
+  
+    YESNOCAPS => sub {
+      my $pms = shift;
+      uc $pms->_get_tag_value_for_yesno(@_);
+    },
+
+    SCORE => sub {
+      my $pms = shift;
+      $pms->_get_tag_value_for_score(@_);
+    },
+
+    HITS => sub {
+      my $pms = shift;
+      $pms->_get_tag_value_for_score(@_);
+    },
+
+    REQD => sub {
+      my $pms = shift;
+      $pms->_get_tag_value_for_required_score(@_);
+    },
+
+    VERSION => \&Mail::SpamAssassin::Version,
+
+    SUBVERSION => sub { $Mail::SpamAssassin::SUB_VERSION },
+
+    RULESVERSION => sub {
+      my $pms = shift;
+      my $conf = $pms->{conf};
+      my @fnames;
+      @fnames =
+        keys %{$conf->{update_version}}  if $conf->{update_version};
+      @fnames = sort @fnames  if @fnames > 1;
+      join(',', map($conf->{update_version}{$_}, @fnames));
+    },
+
+    HOSTNAME => sub {
+      my $pms = shift;
+      $pms->{conf}->{report_hostname} ||
+        Mail::SpamAssassin::Util::fq_hostname();
+    },
+
+    REMOTEHOSTNAME => sub {
+      my $pms = shift;
+      $pms->{tag_data}->{'REMOTEHOSTNAME'} || "localhost";
+    },
+
+    REMOTEHOSTADDR => sub {
+      my $pms = shift;
+      $pms->{tag_data}->{'REMOTEHOSTADDR'} || "127.0.0.1";
+    },
+
+    LASTEXTERNALIP => sub {
+      my $pms = shift;
+      my $lasthop = $pms->{relays_external}->[0];
+      $lasthop ? $lasthop->{ip} : '';
+    },
+
+    LASTEXTERNALRDNS => sub {
+      my $pms = shift;
+      my $lasthop = $pms->{relays_external}->[0];
+      $lasthop ? $lasthop->{rdns} : '';
+    },
+
+    LASTEXTERNALHELO => sub {
+      my $pms = shift;
+      my $lasthop = $pms->{relays_external}->[0];
+      $lasthop ? $lasthop->{helo} : '';
+    },
+
+    CONTACTADDRESS => sub {
+      my $pms = shift;
+      $pms->{conf}->{report_contact};
+    },
+
+    BAYES => sub {
+      my $pms = shift;
+      defined $pms->{bayes_score} ? sprintf("%3.4f", $pms->{bayes_score})
+                                   : "0.5";
+    },
+
+    DATE => \&Mail::SpamAssassin::Util::time_to_rfc822_date,
+
+    STARS => sub {
+      my $pms = shift;
+      my $arg = (shift || "*");
+      my $length = int($pms->{score});
+      $length = 50 if $length > 50;
+      $arg x $length;
+    },
+
+    AUTOLEARN => sub {
+      my $pms = shift;
+      $pms->get_autolearn_status();
+    },
+
+    AUTOLEARNSCORE => sub {
+      my $pms = shift;
+      $pms->get_autolearn_points();
+    },
+
+    TESTS => sub {
+      my $pms = shift;
+      my $arg = (shift || ',');
+      join($arg, sort(@{$pms->{test_names_hit}})) || "none";
+    },
+
+    SUBTESTS => sub {
+      my $pms = shift;
+      my $arg = (shift || ',');
+      join($arg, sort(@{$pms->{subtest_names_hit}})) || "none";
+    },
+
+    TESTSSCORES => sub {
+      my $pms = shift;
+      my $arg = (shift || ",");
+      my $line = '';
+      foreach my $test (sort @{$pms->{test_names_hit}}) {
+        my $score = $pms->{conf}->{scores}->{$test};
+        $score = '0'  if !defined $score;
+        $line .= $arg  if $line ne '';
+        $line .= $test . "=" . $score;
+      }
+      $line ne '' ? $line : 'none';
+    },
+
+    PREVIEW => sub {
+      my $pms = shift;
+      $pms->get_content_preview();
+    },
+
+    REPORT => sub {
+      my $pms = shift;
+      "\n" . ($pms->{tag_data}->{REPORT} || "");
+    },
+
+    HEADER => sub {
+      my $pms = shift;
+      my $hdr = shift;
+      return if !$hdr;
+      $pms->get($hdr,undef);
+    },
+
+    TIMING => sub {
+      my $pms = shift;
+      $pms->{main}->timer_report();
+    },
+
+    ADDEDHEADERHAM => sub {
+      my $pms = shift;
+      $pms->_get_added_headers('headers_ham');
+    },
+
+    ADDEDHEADERSPAM => sub {
+      my $pms = shift;
+      $pms->_get_added_headers('headers_spam');
+    },
+
+    ADDEDHEADER => sub {
+      my $pms = shift;
+      $pms->_get_added_headers(
+                $pms->{is_spam} ? 'headers_spam' : 'headers_ham');
+    },
+
+  );
+}
+
 sub new {
   my $class = shift;
   $class = ref($class) || $class;
@@ -1074,7 +1249,8 @@ sub _replace_tags {
           # Bug 6278: break infinite recursion through _get_added_headers and
           # _get_tag on an attempt to use such tag in add_header template
         } else {
-          $result = $self->_get_tag($tag,$3);
+          $result = $self->get_tag_raw($tag,$3);
+          $result = join(' ',@$result)  if ref $result eq 'ARRAY';
         }
         defined $result ? $result : $full;
       }ge;
@@ -1190,22 +1366,31 @@ sub report_unsatisfied_actions {
 
 =item $status->set_tag($tagname, $value)
 
-Set a template tag, as used in C<add_header>, report templates, etc. This API
-is intended for use by plugins.   Tag names will be converted to an
-all-uppercase representation internally.
+Set a template tag, as used in C<add_header>, report templates, etc.
+This API is intended for use by plugins.  Tag names will be converted
+to an all-uppercase representation internally.
 
-C<$value> can be a subroutine reference, which will be evaluated each time
-the template is expanded.  Note that perl supports closures, which means
-that variables set in the caller's scope can be accessed inside this C<sub>.
-For example:
+C<$value> can be a simple scalar (string or number), or a reference to an
+array, in which case the public method get_tag will join array elements
+using a space as a separator, returning a single string for backward
+compatibility.
+
+C<$value> can also be a subroutine reference, which will be evaluated
+each time the template is expanded. The first argument passed by get_tag
+to a called subroutine will be a PerMsgStatus object (this module's object),
+followed by optional arguments provided by a caller to get_tag.
+
+Note that perl supports closures, which means that variables set in the
+caller's scope can be accessed inside this C<sub>. For example:
 
     my $text = "hello world!";
     $status->set_tag("FOO", sub {
+              my $pms = shift;
               return $text;
             });
 
-See C<Mail::SpamAssassin::Conf>'s C<TEMPLATE TAGS> section for more details on
-how template tags are used.
+See C<Mail::SpamAssassin::Conf>'s C<TEMPLATE TAGS> section for more details
+on how template tags are used.
 
 C<undef> will be returned if a tag by that name has not been defined.
 
@@ -1232,8 +1417,51 @@ C<undef> will be returned if a tag by that name has not been defined.
 =cut
 
 sub get_tag {
-  # expose this previously-private API
-  return shift->_get_tag(uc shift);
+  my($self, $tag, @args) = @_;
+
+  return if !defined $tag;
+  $tag = uc $tag;
+  my $data;
+  if (exists $common_tags{$tag}) {
+    # tag data from traditional pre-defined tag subroutines
+    $data = $common_tags{$tag};
+    $data = $data->($self,@args)  if ref $data eq 'CODE';
+    $data = join(' ',@$data)  if ref $data eq 'ARRAY';
+    $data = ""  if !defined $data;
+  } elsif (exists $self->{tag_data}->{$tag}) {
+    # tag data comes from $self->{tag_data}->{TAG}, typically from plugins
+    $data = $self->{tag_data}->{$tag};
+    $data = $data->($self,@args)  if ref $data eq 'CODE';
+    $data = join(' ',@$data)  if ref $data eq 'ARRAY';
+    $data = ""  if !defined $data;
+  }
+  return $data;
+}
+
+=item $string = $status->get_tag_raw($tagname, @args)
+
+Similar to C<get_tag>, but keeps a tag name unchanged (does not uppercase it),
+and does not convert arrayref tag values into a single string.
+
+=cut
+
+sub get_tag_raw {
+  my($self, $tag, @args) = @_;
+
+  return if !defined $tag;
+  my $data;
+  if (exists $common_tags{$tag}) {
+    # tag data from traditional pre-defined tag subroutines
+    $data = $common_tags{$tag};
+    $data = $data->($self,@args)  if ref $data eq 'CODE';
+    $data = ""  if !defined $data;
+  } elsif (exists $self->{tag_data}->{$tag}) {
+    # tag data comes from $self->{tag_data}->{TAG}, typically from plugins
+    $data = $self->{tag_data}->{$tag};
+    $data = $data->($self,@args)  if ref $data eq 'CODE';
+    $data = ""  if !defined $data;
+  }
+  return $data;
 }
 
 ###########################################################################
@@ -1306,145 +1534,10 @@ sub _get_tag_value_for_score {
 }
 
 sub _get_tag_value_for_required_score {
-  my $self  = shift;
+  my $self = shift;
   return sprintf("%2.1f", $self->{conf}->{required_score});
 }
 
-sub _get_tag {
-  my $self = shift;
-  my $tag = shift;
-  my %tags;
-
-  # tag data also comes from $self->{tag_data}->{TAG}
-
-  $tag = "" unless defined $tag; # can be "0", so use a defined test
-
-  %tags = ( YESNO     => sub {    $self->_get_tag_value_for_yesno(@_) },
-  
-            YESNOCAPS => sub { uc $self->_get_tag_value_for_yesno(@_) },
-
-            SCORE => sub { $self->_get_tag_value_for_score(shift) },
-            HITS  => sub { $self->_get_tag_value_for_score(shift) },
-
-            REQD  => sub { $self->_get_tag_value_for_required_score() },
-
-            VERSION => \&Mail::SpamAssassin::Version,
-
-            SUBVERSION => sub { $Mail::SpamAssassin::SUB_VERSION },
-
-            RULESVERSION => sub {
-              my @fnames;  my $conf = $self->{conf};
-              @fnames =
-                keys %{$conf->{update_version}}  if $conf->{update_version};
-              @fnames = sort @fnames  if @fnames > 1;
-              join(',', map($conf->{update_version}{$_}, @fnames));
-            },
-
-            HOSTNAME => sub {
-	      $self->{conf}->{report_hostname} ||
-	      Mail::SpamAssassin::Util::fq_hostname();
-	    },
-
-	    REMOTEHOSTNAME => sub {
-	      $self->{tag_data}->{'REMOTEHOSTNAME'} || "localhost";
-	    },
-	    REMOTEHOSTADDR => sub {
-	      $self->{tag_data}->{'REMOTEHOSTADDR'} || "127.0.0.1";
-	    },
-
-            LASTEXTERNALIP => sub {
-              my $lasthop = $self->{relays_external}->[0];
-              $lasthop ? $lasthop->{ip} : '';
-            },
-
-            LASTEXTERNALRDNS => sub {
-              my $lasthop = $self->{relays_external}->[0];
-              $lasthop ? $lasthop->{rdns} : '';
-            },
-
-            LASTEXTERNALHELO => sub {
-              my $lasthop = $self->{relays_external}->[0];
-              $lasthop ? $lasthop->{helo} : '';
-            },
-
-            CONTACTADDRESS => sub { $self->{conf}->{report_contact} },
-
-            BAYES => sub {
-              defined($self->{bayes_score}) ?
-                        sprintf("%3.4f", $self->{bayes_score}) : "0.5"
-            },
-
-            DATE => \&Mail::SpamAssassin::Util::time_to_rfc822_date,
-
-            STARS => sub {
-              my $arg = (shift || "*");
-              my $length = int($self->{score});
-              $length = 50 if $length > 50;
-              $arg x $length;
-            },
-
-            AUTOLEARN => sub { $self->get_autolearn_status() },
-
-            AUTOLEARNSCORE => sub { $self->get_autolearn_points() },
-
-            TESTS => sub {
-              my $arg = (shift || ',');
-              join($arg, sort(@{$self->{test_names_hit}})) || "none";
-            },
-
-            SUBTESTS => sub {
-              my $arg = (shift || ',');
-              join($arg, sort(@{$self->{subtest_names_hit}})) || "none";
-            },
-
-            TESTSSCORES => sub {
-              my $arg = (shift || ",");
-              my $line = '';
-              foreach my $test (sort @{$self->{test_names_hit}}) {
-                my $score = $self->{conf}->{scores}->{$test};
-                $score = '0'  if !defined $score;
-                $line .= $arg  if $line ne '';
-                $line .= $test . "=" . $score;
-              }
-              $line ne '' ? $line : 'none';
-            },
-
-            PREVIEW => sub { $self->get_content_preview() },
-
-            REPORT => sub { "\n" . ($self->{tag_data}->{REPORT} || "") },
-
-	    HEADER => sub {
-	      my $hdr = shift || return;
-	      $self->get($hdr,undef);
-	    },
-
-            TIMING => sub { $self->{main}->timer_report() },
-
-            ADDEDHEADERHAM => sub { $self->_get_added_headers('headers_ham') },
-
-            ADDEDHEADERSPAM=> sub { $self->_get_added_headers('headers_spam') },
-
-            ADDEDHEADER => sub {
-              $self->_get_added_headers(
-                        $self->{is_spam} ? 'headers_spam' : 'headers_ham');
-            },
-
-          );
-
-  my $data;
-  if (exists $tags{$tag}) {
-    $data = $tags{$tag};
-    $data = $data->(@_)  if ref $data eq 'CODE';
-    $data = join(' ',@$data)  if ref $data eq 'ARRAY';
-    $data = ""  if !defined $data;
-  } elsif (exists $self->{tag_data}->{$tag}) {
-    $data = $self->{tag_data}->{$tag};
-    $data = $data->(@_)  if ref $data eq 'CODE';
-    $data = join(' ',@$data)  if ref $data eq 'ARRAY';
-    $data = ""  if !defined $data;
-  }
-  return $data;
-}
 
 ###########################################################################
 

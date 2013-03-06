@@ -84,16 +84,21 @@ sub extract {
   # pre-chew Received headers
   $self->parse_received_headers ($permsgstatus, $msg);
 
-  foreach ( [$self->{relays_external},  'LASTEXTERNALREVIP'],
-            [$self->{relays_untrusted}, 'FIRSTTRUSTEDREVIP'] ) {
-    my($rly, $tag) = @$_;
-    if (ref $rly && @$rly) {
-      my($r0, $ip, $revip);
-      $r0 = $rly->[0];
-      $ip = $r0->{ip}  if ref $r0 && !$r0->{ip_private};
+  foreach my $tuple (
+      [$self->{relays_trusted},   'RELAYSTRUSTEDREVIP'  ],
+      [$self->{relays_untrusted}, 'RELAYSUNTRUSTEDREVIP'],
+      [$self->{relays_internal},  'RELAYSINTERNALREVIP' ],
+      [$self->{relays_external},  'RELAYSEXTERNALREVIP' ])
+  { my($rly, $tag) = @$tuple;
+    my @revips;
+    @revips = map {
+      my($ip,$revip);
+      $ip = $_->{ip}  if ref $_ && !$_->{ip_private};
       $revip = reverse_ip_address($ip)  if defined $ip && $ip ne '';
-      $permsgstatus->set_tag($tag,$revip)  if defined $revip && $revip ne '';
-    }
+      defined $revip && $revip ne '' ? $revip : ();
+    } @$rly  if $rly;
+    $permsgstatus->set_tag($tag,
+                           @revips == 1 ? $revips[0] : \@revips) if @revips;
   }
 
   $permsgstatus->{main}->call_plugins("extract_metadata",
