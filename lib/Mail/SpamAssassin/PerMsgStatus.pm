@@ -1378,7 +1378,7 @@ compatibility.
 C<$value> can also be a subroutine reference, which will be evaluated
 each time the template is expanded. The first argument passed by get_tag
 to a called subroutine will be a PerMsgStatus object (this module's object),
-followed by optional arguments provided by a caller to get_tag.
+followed by optional arguments provided a caller to get_tag.
 
 Note that perl supports closures, which means that variables set in the
 caller's scope can be accessed inside this C<sub>. For example:
