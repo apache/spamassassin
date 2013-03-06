@@ -251,6 +251,11 @@ body JM_NICE_GIRL       /I am nice girl that would like to chat with you\. /
 # http://dvlabs.tippingpoint.com/blog/2007/10/26/stopgap-detection-for-the-gozi-pdf-dropper
 full DVLABS_GOZI_PDF    /bWFpbHRvOiUvLi4vLi4vLi4vLi4vLi4vLi4v/
 
+
+
+header __HS_SUBJ_RE_FW Subject =~ /^(?i:re|fw):/
+rawbody __HS_QUOTE /^> /
+
 meta STOX_REPLY_TYPE_WITHOUT_QUOTES (STOX_REPLY_TYPE && !(__HS_SUBJ_RE_FW || __HS_QUOTE))
 
 rawbody IMG_CID_PART1   /<img alt=\"\S*\" src=\"cid:part1\.\d/
