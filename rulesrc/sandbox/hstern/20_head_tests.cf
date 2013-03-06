@@ -19,8 +19,10 @@
 #
 ###########################################################################
 
-header HS_SUBJ_ONLINE_PHARMACEUTICAL Subject =~ /\bOnline Pharmaceutical/i
-describe HS_SUBJ_ONLINE_PHARMACEUTICAL Subject contains the phrase 'Online pharmaceutical'
+#  Disabled 0 hit rules and/or bad performers - unmantained/abandoned - Axb -2013-03-06
+
+# header HS_SUBJ_ONLINE_PHARMACEUTICAL Subject =~ /\bOnline Pharmaceutical/i
+# describe HS_SUBJ_ONLINE_PHARMACEUTICAL Subject contains the phrase 'Online pharmaceutical'
 ##score HS_SUBJ_ONLINE_PHARMACEUTICAL 1
 
 # header HS_SUBJ_NEW_SOFTWARE Subject =~ /^New software uploaded by/
