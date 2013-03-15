@@ -180,15 +180,12 @@ BEGIN {
   if (eval { require IO::Socket::IP }) {  # handles IPv6 and IPv4
     IO::Socket::IP->VERSION(0.09);  # implements IPV6_V6ONLY
     $io_socket_module_name = 'IO::Socket::IP';
-    *new_io_socket_inetx = sub { IO::Socket::IP->new(@_) };
 
   } elsif (eval { require IO::Socket::INET6 }) {  # handles IPv6 and IPv4
     $io_socket_module_name = 'IO::Socket::INET6';
-    *new_io_socket_inetx = sub { IO::Socket::INET6->new(@_) };
 
   } elsif (eval { require IO::Socket::INET }) {  # IPv4 only
     $io_socket_module_name = 'IO::Socket::INET';
-    *new_io_socket_inetx = sub { IO::Socket::INET->new(@_) };
   }
 
   $have_inet4 =  # can we create a PF_INET socket?
@@ -908,7 +905,7 @@ sub server_sock_setup_unix {
       die "spamd: file $path exists but is no socket, exiting\n";
     }
   
-    if ( new IO::Socket::UNIX( Peer => $path, Type => &SOCK_STREAM ) ) {
+    if ( IO::Socket::UNIX->new( Peer => $path, Type => &SOCK_STREAM ) ) {
       # socket bind successful: must already be running
 
       # make sure not to enter this socket into @listen_sockets,
@@ -1048,7 +1045,7 @@ sub server_sock_setup_inet {
       $have_ssl_module = 1;
     }
     my $server_inet = $ssl ? IO::Socket::SSL->new(%sockopt)
-                           : new_io_socket_inetx(%sockopt);
+                           : $io_socket_module_name->new(%sockopt);
     $server_inet
       or die sprintf("spamd: could not create %s socket on [%s]:%s: %s\n",
                      $ssl ? 'IO::Socket::SSL' : $io_socket_module_name,
