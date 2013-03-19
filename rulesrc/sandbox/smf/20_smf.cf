@@ -24,9 +24,9 @@ meta     FSL_NOT_FROM_AOL       __FSL_ENVFROM_AOL && !__FSL_RELAY_AOL
 score    FSL_NOT_FROM_AOL       2.0
 describe FSL_NOT_FROM_AOL       Envelope-From AOL but not originated from AOL systems
 
-body     FSL_DONT_REPLY         /do not reply/i
+body     FSL_DONT_REPLY         /\bdo(?:n't| not) reply\b/i
 score    FSL_DONT_REPLY	        1.0
-describe FSL_DONT_REPLY         Contains the phrase 'do not reply'
+describe FSL_DONT_REPLY         Asks that you don't reply to the message
 
 rawbody  FSL_IMAGE_SHORT        /<img src="?http:\/\/(?:bitly\.com|bit\.ly|j\.mp|amzn\.to)\//i
 score    FSL_IMAGE_SHORT        1.0
@@ -36,7 +36,7 @@ meta     FSL_IMAGE_SHORT_FM     (FREEMAIL_FROM && FSL_IMAGE_SHORT)
 score    FSL_IMAGE_SHORT_FM     2.0
 describe FSL_IMAGE_SHORT_FM     Contains an image pointing to a URL shortener and is from a freemail address
 
-rawbody  FSL_LINK_AWS_S3_WEB	/(?:href|src)="?http:\/\/[^. ]+\.s3-website-[^. ]+\.amazonaws\.com/i
+uri      FSL_LINK_AWS_S3_WEB	/http:\/\/[^. ]+\.s3-website-[^. ]+\.amazonaws\.com/i
 score    FSL_LINK_AWS_S3_WEB    1.0
 describe FSL_LINK_AWS_S3_WEB    Contains a link to Amazon S3 website
 
@@ -44,43 +44,71 @@ meta     FSL_LINK_AWS_S3_WEB_FM (FREEMAIL_FROM && FSL_LINK_AWS_S3_WEB)
 score    FSL_LINK_AWS_S3_WEB_FM 10.0
 describe FSL_LINK_AWS_S3_WEB_FM Contains a link to Amazon S3 website and from a freemail address
 
-header   FSL_REPLYTO_NOREPLY    Reply-To:addr =~ /^noreply\@/i
-score    FSL_REPLYTO_NOREPLY    1.0
-describe FSL_REPLYTO_NOREPLY    Can't reply to the message
-
-header   FSL_FROM_INFO          From:addr =~ /^info\@/i
-score    FSL_FROM_INFO          1.0
-describe FSL_FROM_INFO          From info@domain.com address
-
-header   FSL_FROM_NEWS          From:addr =~ /^news\@/i
-score    FSL_FROM_NEWS          1.0
-describe FSL_FROM_NEWS          From news@domain.com address
+rawbody  FSL_HTTP_OBFU          /(?!http|HTTP|Http)[hH][tT][tT][pP]:/
+score    FSL_HTTP_OBFU          3.0
+describe FSL_HTTP_OBFU          Weird HTTP capitalization
 
 header   FSL_AOL_SPAM           X-AOL-Global-Disposition =~ /^S/
 score    FSL_AOL_SPAM           2.0
 describe FSL_AOL_SPAM           AOL thinks the message is spam
 
 header   FSL_PRECEDENCE_JUNK    Precedence =~ /junk/i
-score    FSL_PRECEDENCE_JUNK    1.0
+score    FSL_PRECEDENCE_JUNK    0.01
 describe FSL_PRECEDENCE_JUNK    Sender set the precedence header to 'junk'
 
-header   FSL_UNDISCLOSED_RCPTS  To =~ /Undisclosed[- ]recipients/i
-score    FSL_UNDISCLOSED_RCPTS  2.0
-describe FSL_UNDISCLOSED_RCPTS  To undisclosed recipients
+header   FSL_PRECEDENCE_BULK    Precedence =~ /bulk/i
+score    FSL_PRECEDENCE_BULK    0.01
+describe FSL_PRECEDENCE_BULK    Sender set the precedence header to 'bulk'
 
-meta     FSL_SCAM_1             (FREEMAIL_FROM && LOTS_OF_MONEY)
-score    FSL_SCAM_1             2.0
-describe FSL_SCAM_1             Freemail account discussing lots of money
+header   FSL_UNDISCLOSED_RCPTS  To =~ /\bundisclosed[- ]recipients\b/i
+score    FSL_UNDISCLOSED_RCPTS  0.01
+describe FSL_UNDISCLOSED_RCPTS  To undisclosed recipients
 
 header   FSL_FROM_INFO_DOM      From:addr =~ /\.info$/
 score    FSL_FROM_INFO_DOM      1.0
 describe FSL_FROM_INFO_DOM      From address is in .info
 
-body     FSL_ADV                /This is an advertisement/i
+body     FSL_ADV                /\bThis(?:\s*is an)? advert(?:isement)?\b/i
 score    FSL_ADV                1.0
 describe FSL_ADV                This is an advertisement
 
-body     FSL_OPEN_ATTACH        /OPEN THE ATTACHMENT/
+body     FSL_OPEN_ATTACH        /\b(?:OPEN|VIEW|READ|SEE|YOUR|ARE)\s*(?:THE\s*)?ATTACH(?:ED|MENT)\b?/
 score    FSL_OPEN_ATTACH        2.0
-describe FSL_OPEN_ATTACH        Demands that you open the attachment
+describe FSL_OPEN_ATTACH        DEMANDS that you open the attachment!
+
+ifplugin Mail::SpamAssassin::Plugin::MIMEHeader
+mimeheader FSL_OPEN_ATTACH_MH   Content-Disposition =~ /\b(?:OPEN|VIEW|READ|SEE|YOUR|ARE)\s*(?:THE\s*)?ATTACH(?:ED|MENT)\b?/
+score      FSL_OPEN_ATTACH_MH   2.0
+describe   FSL_OPEN_ATTACH_MH   Filename demands that you open the attachment!
+endif
+
+body     __FSL_PHISH_UN         /\buser\s*name\s*:/i
+body     __FSL_PHISH_PW         /\bpass\s*word\s*:/i
+body     __FSL_PHISH_DE         /\bdeactivat(?:ed?|ion)\b/i
+body     __FSL_PHISH_MB         /\b(?:this|your|you're) (?:e|e-)?mailbox (?:has|is)\b/i
+body     __FSL_PHISH_RV         /\bre-?validat(?:ed?|ion)\b/i
+header   __FSL_PHISH_ADMIN      From:name =~ /admin(?:istrator)?\b/i
+meta     FSL_PHISH_EMAIL        (__FSL_PHISH_UN + __FSL_PHISH_PW + __FSL_PHISH_DE + __FSL_PHISH_MB + __FSL_PHISH_RV + __FSL_PHISH_ADMIN) >= 3
+score    FSL_PHISH_EMAIL        1.0
+describe FSL_PHISH_EMAIL        Likely phishing for e-mail account details
+
+header   FSL_ABUSED_WEB_1       exists:X-AntiAbuse
+score    FSL_ABUSED_WEB_1       0.01
+describe FSL_ABUSED_WEB_1       Has X-AntiAbuse header
+
+header   FSL_ABUSED_WEB_2       exists:X-PHP-Script
+score    FSL_ABUSED_WEB_2       0.01
+describe FSL_ABUSED_WEB_2       Has X-PHP-Script header
+
+header   FSL_ABUSED_WEB_3       exists:X-PHP-Originating-Script
+score    FSL_ABUSED_WEB_3       0.01
+describe FSL_ABUSED_WEB_3       Has X-PHP-Originating-Script header
+
+# BUG 6919
+header   __BUG6919_RDNS_STATIC  X-Spam-Relays-External =~ /^[^\]]+ rdns=\S*(?:fix|fixip|static|dedicated|business)/i
+meta     BUG6919_RDNS_DYNAMIC   (__LAST_EXTERNAL_RELAY_NO_AUTH && !__RDNS_STATIC && (__RDNS_DYNAMIC_IPADDR || __RDNS_DYNAMIC_DHCP || __RDNS_DYNAMIC_HCC || __RDNS_DYNAMIC_ATTBI || __RDNS_DYNAMIC_ROGERS || __RDNS_DYNAMIC_ADELPHIA || __RDNS_DYNAMIC_DIALIN || __RDNS_DYNAMIC_HEXIP || __RDNS_DYNAMIC_SPLIT_IP || __RDNS_DYNAMIC_YAHOOBB || __RDNS_DYNAMIC_OOL || __RDNS_DYNAMIC_RR2   || __RDNS_DYNAMIC_COMCAST || __RDNS_DYNAMIC_TELIA || __RDNS_DYNAMIC_VTR || __RDNS_DYNAMIC_CHELLO_NO  || __RDNS_DYNAMIC_CHELLO_NL  || __RDNS_DYNAMIC_VELOX  || __RDNS_DYNAMIC_NTL  || __RDNS_DYNAMIC_HOME_NL  || __RDNS_DYNAMIC_TDS || __RDNS_DYNAMIC_VIRTUA || __RDNS_DYNAMIC_SPACELAN || __RDNS_INDICATOR_DYN || __RDNS_INDICATOR_RES || __RDNS_INDICATOR_TYPE2 || __RDNS_DYNAMIC_TTNET || __RDNS_DYNAMIC_ASAHI))
+score    BUG6919_RDNS_DYNAMIC   0.01
+
+meta     BUG6919_RDNS_GENERIC   (__LAST_EXTERNAL_RELAY_NO_AUTH && (__RDNS_DYNAMIC_IPADDR || __RDNS_DYNAMIC_DHCP || __RDNS_DYNAMIC_HCC || __RDNS_DYNAMIC_ATTBI || __RDNS_DYNAMIC_ROGERS || __RDNS_DYNAMIC_ADELPHIA || __RDNS_DYNAMIC_DIALIN || __RDNS_DYNAMIC_HEXIP || __RDNS_DYNAMIC_SPLIT_IP || __RDNS_DYNAMIC_YAHOOBB || __RDNS_DYNAMIC_OOL || __RDNS_DYNAMIC_RR2   || __RDNS_DYNAMIC_COMCAST || __RDNS_DYNAMIC_TELIA || __RDNS_DYNAMIC_VTR || __RDNS_DYNAMIC_CHELLO_NO  || __RDNS_DYNAMIC_CHELLO_NL  || __RDNS_DYNAMIC_VELOX  || __RDNS_DYNAMIC_NTL  || __RDNS_DYNAMIC_HOME_NL  || __RDNS_DYNAMIC_TDS || __RDNS_DYNAMIC_VIRTUA || __RDNS_DYNAMIC_SPACELAN || __RDNS_INDICATOR_DYN || __RDNS_INDICATOR_RES || __RDNS_INDICATOR_TYPE2 || __RDNS_DYNAMIC_TTNET || __RDNS_DYNAMIC_ASAHI))            
+score    BUG6919_RDNS_GENERIC   0.01
 
