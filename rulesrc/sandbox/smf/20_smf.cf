@@ -1,40 +1,28 @@
 #testrules
-header   __FSL_RELAY_GOOGLE	X-Spam-Relays-External =~ /\brdns=[^ ]+\.google\.com\b/i
-header   __FSL_ENVFROM_GOOGLE	X-Spam-Relays-External =~ /\benvfrom=[^\@ ]+\@g(?:mail|oogle)\.com\b/i
+header   __FSL_RELAY_GOOGLE	X-Spam-Relays-External =~ /^[^\]]+ rdns=[^ ]+\.google\.com /i
+header   __FSL_ENVFROM_GOOGLE	X-Spam-Relays-External =~ /^[^\]]+ envfrom=[^\@ ]+\@g(?:mail|oogle)\.com /i
 meta     FSL_NOT_FROM_GOOGLE	__FSL_ENVFROM_GOOGLE && !__FSL_RELAY_GOOGLE
 score    FSL_NOT_FROM_GOOGLE	2.0
 describe FSL_NOT_FROM_GOOGLE    Envelope-From GMail or Google but not originated from Google systems
 
-header   __FSL_RELAY_YAHOO      X-Spam-Relays-External =~ /\brdns=[^ ]+\.yahoo(?:dns)?\.co(?:m|\.jp)\b/i
-header   __FSL_ENVFROM_YAHOO    X-Spam-Relays-External =~ /\benvfrom=[^\@ ]+\@yahoo(?:groups)?\./i
+header   __FSL_RELAY_YAHOO      X-Spam-Relays-External =~ /^[^\]]+ rdns=[^ ]+\.yahoo(?:dns)?\.co(?:m|\.jp) /i
+header   __FSL_ENVFROM_YAHOO    X-Spam-Relays-External =~ /^[^\]]+ envfrom=[^\@ ]+\@yahoo(?:groups)?\./i
 meta     FSL_NOT_FROM_YAHOO     __FSL_ENVFROM_YAHOO && !__FSL_RELAY_YAHOO
 score    FSL_NOT_FROM_YAHOO     2.0
 describe FSL_NOT_FROM_YAHOO     Envelope-From Yahoo or Yahoo Groups but not originated from Yahoo systems
 
-header   __FSL_RELAY_HOTMAIL    X-Spam-Relays-External =~ /\brdns=[^ ]+\.hotmail\.com\b/i
-header   __FSL_ENVFROM_HOTMAIL  X-Spam-Relays-External =~ /\benvfrom=[^\@ ]+\@hotmail\./i
-header   __FSL_ENVFROM_LIVE     X-Spam-Relays-External =~ /\benvfrom=[^\@ ]+\@live\./i
+header   __FSL_RELAY_HOTMAIL    X-Spam-Relays-External =~ /^[^\]]+ rdns=[^ ]+\.hotmail\.com /i
+header   __FSL_ENVFROM_HOTMAIL  X-Spam-Relays-External =~ /^[^\]]+ envfrom=[^\@ ]+\@hotmail\./i
+header   __FSL_ENVFROM_LIVE     X-Spam-Relays-External =~ /^[^\]]+ envfrom=[^\@ ]+\@live\./i
 meta     FSL_NOT_FROM_HOTMAIL   (__FSL_ENVFROM_HOTMAIL || __FSL_ENVFROM_LIVE) && !__FSL_RELAY_HOTMAIL
 score    FSL_NOT_FROM_HOTMAIL   2.0
 describe FSL_NOT_FROM_HOTMAIL   Envelope-From Hotmail/Live but not originated from Hotmail systems
 
-header   __FSL_RELAY_AOL        X-Spam-Relays-External =~ /\brdns=[^ ]+\.aol\.com\b/i
-header   __FSL_ENVFROM_AOL      X-Spam-Relays-External =~ /\benvfrom=[^\@ ]+\@aol\./i
+header   __FSL_RELAY_AOL        X-Spam-Relays-External =~ /^[^\]]+ rdns=[^ ]+\.aol\.com/i
+header   __FSL_ENVFROM_AOL      X-Spam-Relays-External =~ /^[^\]]+ envfrom=[^\@ ]+\@aol\./i
 meta     FSL_NOT_FROM_AOL       __FSL_ENVFROM_AOL && !__FSL_RELAY_AOL
 score    FSL_NOT_FROM_AOL       2.0
 describe FSL_NOT_FROM_AOL       Envelope-From AOL but not originated from AOL systems
-
-body     FSL_DONT_REPLY         /\bdo(?:n't| not) reply\b/i
-score    FSL_DONT_REPLY	        1.0
-describe FSL_DONT_REPLY         Asks that you don't reply to the message
-
-rawbody  FSL_IMAGE_SHORT        /<img src="?http:\/\/(?:bitly\.com|bit\.ly|j\.mp|amzn\.to)\//i
-score    FSL_IMAGE_SHORT        1.0
-describe FSL_IMAGE_SHORT        Contains an image pointing to a URL shortener
-
-meta     FSL_IMAGE_SHORT_FM     (FREEMAIL_FROM && FSL_IMAGE_SHORT)
-score    FSL_IMAGE_SHORT_FM     2.0
-describe FSL_IMAGE_SHORT_FM     Contains an image pointing to a URL shortener and is from a freemail address
 
 uri      FSL_LINK_AWS_S3_WEB	/http:\/\/[^. ]+\.s3-website-[^. ]+\.amazonaws\.com/i
 score    FSL_LINK_AWS_S3_WEB    1.0
@@ -43,22 +31,6 @@ describe FSL_LINK_AWS_S3_WEB    Contains a link to Amazon S3 website
 meta     FSL_LINK_AWS_S3_WEB_FM (FREEMAIL_FROM && FSL_LINK_AWS_S3_WEB)
 score    FSL_LINK_AWS_S3_WEB_FM 10.0
 describe FSL_LINK_AWS_S3_WEB_FM Contains a link to Amazon S3 website and from a freemail address
-
-rawbody  FSL_HTTP_OBFU          /(?!http|HTTP|Http)[hH][tT][tT][pP]:/
-score    FSL_HTTP_OBFU          3.0
-describe FSL_HTTP_OBFU          Weird HTTP capitalization
-
-header   FSL_AOL_SPAM           X-AOL-Global-Disposition =~ /^S/
-score    FSL_AOL_SPAM           2.0
-describe FSL_AOL_SPAM           AOL thinks the message is spam
-
-header   FSL_PRECEDENCE_JUNK    Precedence =~ /junk/i
-score    FSL_PRECEDENCE_JUNK    0.01
-describe FSL_PRECEDENCE_JUNK    Sender set the precedence header to 'junk'
-
-header   FSL_PRECEDENCE_BULK    Precedence =~ /bulk/i
-score    FSL_PRECEDENCE_BULK    0.01
-describe FSL_PRECEDENCE_BULK    Sender set the precedence header to 'bulk'
 
 header   FSL_UNDISCLOSED_RCPTS  To =~ /\bundisclosed[- ]recipients\b/i
 score    FSL_UNDISCLOSED_RCPTS  0.01
