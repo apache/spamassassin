@@ -76,4 +76,45 @@ header   FSL_ABUSED_WEB_3       exists:X-PHP-Originating-Script
 score    FSL_ABUSED_WEB_3       0.01
 describe FSL_ABUSED_WEB_3       Has X-PHP-Originating-Script header
 
+body     FSL_MY_NAME_IS        /\bmy name is\b/i
+describe FSL_MY_NAME_IS        My name is ...
+score    FSL_MY_NAME_IS        1.0
+
+body     FSL_SUPPLY            /\b(?:i|we|company)\s*(?:can|is|am|are)?\s*(?:sell(?:ing)?|offer(?:ing)?|provid(?:es?|ing|supply(?:ing)))\b/i
+describe FSL_SUPPLY            Something can be supplied
+score    FSL_SUPPLY            1.0
+
+meta     FSL_SUPPLY_FM         (FREEMAIL_FROM && FSL_SUPPLY)
+describe FSL_SUPPLY_FM         Something can be supplied and from Freemail account
+score    FSL_SUPPLY_FM         1.0
+
+header   __FSL_SUBJ_SEO_1      Subject =~ /\bSEO\b/i
+header   __FSL_SUBJ_SEO_2      Subject =~ /\bsearch engine optimi[sz]ation\b/i
+meta     FSL_SUBJ_SEO          (__FSL_SUBJ_SEO_1 || __FSL_SUBJ_SEO_2)
+describe FSL_SUBJ_SEO          Search engine optimisation
+score    FSL_SUBJ_SEO          1.0
+
+body     __FSL_BODY_SEO_1      /\bSEO\b/
+body     __FSL_BODY_SEO_2      /\bsearch engine optimi[sz]ation\b/i
+meta     FSL_BODY_SEO          (__FSL_BODY_SEO_1 || __FSL_BODY_SEO_2)
+describe FSL_BODY_SEO          Search engine optimisation
+score    FSL_BODY_SEO          1.0
+
+meta     FSL_FREEMAIL_SEO      (FREEMAIL_FROM && (FSL_SUBJ_SEO || FSL_BODY_SEO))
+describe FSL_FREEMAIL_SEO      Freemail account offering SEO
+score    FSL_FREEMAIL_SEO      5.0
+
+meta     FSL_UNDISCLOSED_BULK  (FSL_UNDISCLOSED_RCPTS && (DCC_CHECK || RAZOR2_CHECK || PYZOR_CHECK))
+describe FSL_UNDISCLOSED_BULK  Undisclosed recipients and bulk signature
+score    FSL_UNDISCLOSED_BULK  3.0
+
+header   __FSL_HAS_LIST_UNSUB  exists:List-Unsubscribe
+meta     FSL_BULK_SIG          ((DCC_CHECK || RAZOR2_CHECK || PYZOR_CHECK) && !__FSL_HAS_LIST_UNSUB)
+describe FSL_BULK_SIG          Bulk signature with no Unsubscribe
+score    FSL_BULK_SIG          1.0
+
+header   __FSL_TO_COMMON_ROLE  To:addr =~ /^((?:post|web|domain)master|info|sales|(?:tech)?support|(?:sys)?admin(?:istrator)?|abuse|noc|root|security|compliance|registrar)@/i
+meta     FSL_TO_ROLE_BULK      (__FSL_TO_COMMON_ROLE && (DCC_CHECK || RAZOR2_CHECK || PYZOR_CHECK))
+describe FSL_TO_ROLE_BULK      Bulk signature and to a role account
+score    FSL_TO_ROLE_BULK      1.0
 
