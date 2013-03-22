@@ -118,3 +118,14 @@ meta     FSL_TO_ROLE_BULK      (__FSL_TO_COMMON_ROLE && (DCC_CHECK || RAZOR2_CHE
 describe FSL_TO_ROLE_BULK      Bulk signature and to a role account
 score    FSL_TO_ROLE_BULK      1.0
 
+# Received: from hwyhsxwaxz (amandacallow@113.162.65.176 with login) by
+header   __FSL_YAHOO_AUTH1      Received =~ /from [a-z]{10} \([^\@ ]+\@\d+\.\d+\.\d+\.\d+ with (?:plain|login)\) /
+# Received: from localhost (rhinotrick@46.185.178.15 with login) by
+header   __FSL_YAHOO_AUTH2      Received =~ /from localhost \([^\@ ]+\@\d+\.\d+\.\d+\.\d+ with (?:plain|login)\) /
+meta     FSL_YAHOO_AUTH_SIG     (__FSL_RELAY_YAHOO && (__FSL_YAHOO_AUTH1 || __FSL_YAHOO_AUTH2))
+describe FSL_YAHOO_AUTH_SIG     Yahoo SMTP AUTH observed patterns
+score    FSL_YAHOO_AUTH_SIG     5.0
+
+header   FSL_PHP_EXPLOIT_41    X-PHP-Script =~ / 41\.\d+\.\d+\.\d+\b/
+describe FSL_PHP_EXPLOIT_41    PHP Script being run by someone in Africa
+score    FSL_PHP_EXPLOIT_41    3.0
