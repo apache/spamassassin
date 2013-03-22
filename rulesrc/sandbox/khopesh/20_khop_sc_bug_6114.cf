@@ -1,4 +1,4 @@
-## khop-sc-neighbors.cf	v 201303213
+## khop-sc-neighbors.cf	v 201303222
 ## Khopesh's syndication of SpamCop's top offenders and top offending networks.
 ## 
 ## Spamassassin rules written by Adam Katz <antispamATkhopiscom>
@@ -92,7 +92,7 @@ score	 KHOP_SC_TOP_CIDR16  2.0 0.3 2.0 0.4
 
 
 # http://spamcop.net/w3m?action=map;net=cmaxcnt;mask=65535;sort=spamcnt
-header	 KHOP_SC_CIDR24  Received =~ /(?-xism:\b(?:1(?:(?:88\.165\.19|99\.229\.25)0|03\.9\.157|44\.76\.38|\.226\.83)|21(?:1\.196\.186|3\.230\.128|0\.51\.44)|(?:66\.35\.7|75\.102\.)9)\.[012]?\d{1,2}\b)/
+header	 KHOP_SC_CIDR24  Received =~ /(?-xism:\b(?:2(?:1(?:1\.196\.186|3\.230\.128|0\.51\.44|7\.23\.2)|21\.143\.46)|1(?:0(?:8\.163\.23|3\.9\.15)6|(?:18\.123\.1|\.226\.8)3)|94\.242\.243)\.[012]?\d{1,2}\b)/
 describe KHOP_SC_CIDR24  Relay CIDR /24 is among worst in SpamCop
 tflags	 KHOP_SC_CIDR24  nopublish
 score	 KHOP_SC_CIDR24  0.1 0 0.1 0
@@ -111,7 +111,7 @@ score	 KHOP_SC_CIDR24  0.1 0 0.1 0
 # 0.4157/0.5009 0.454 20110227  something is wrong here! -> .1 0 .1 0
 
 
-header	 KHOP_SC_TOP_CIDR24  Received =~ /(?-xism:\b(?:1(?:2(?:0\.(?:1(?:43\.16|28\.2)|84\.13)|5\.(?:60\.156|91\.11))|8(?:3\.(?:10\.8[0123]|221\.1[23]|8\.7[6789])|5\.5\.54)|1(?:0\.52\.[08]|2\.97\.24)|03\.9\.156|97\.252\.0)|21(?:7\.(?:23\.12|76\.69)|0\.21\.225)|8(?:0\.36\.130|9\.218\.68)|41\.254\.[15])\.[012]?\d{1,2}\b)/
+header	 KHOP_SC_TOP_CIDR24  Received =~ /(?-xism:\b(?:1(?:2(?:0\.(?:1(?:43\.16|28\.2)|84\.13)|5\.(?:60\.156|91\.11))|8(?:3\.(?:10\.8[0123]|221\.1[23]|8\.7[69])|5\.5\.54)|9(?:9\.229\.25|7\.252\.)0|1(?:2\.97\.24|0\.52\.8)|03\.9\.156)|21(?:7\.(?:23\.12|76\.69)|0\.21\.225)|8(?:0\.36\.130|9\.218\.68))\.[012]?\d{1,2}\b)/
 describe KHOP_SC_TOP_CIDR24  Relay CIDR /24 leads SpamCop in worst /24s
 tflags	 KHOP_SC_TOP_CIDR24  nopublish
 score	 KHOP_SC_TOP_CIDR24  2.7 0.5 2.7 0.5
