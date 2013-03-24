@@ -76,10 +76,6 @@ header   FSL_ABUSED_WEB_3       exists:X-PHP-Originating-Script
 score    FSL_ABUSED_WEB_3       0.01
 describe FSL_ABUSED_WEB_3       Has X-PHP-Originating-Script header
 
-body     FSL_MY_NAME_IS        /\bmy name is\b/i
-describe FSL_MY_NAME_IS        My name is ...
-score    FSL_MY_NAME_IS        1.0
-
 body     FSL_SUPPLY            /\b(?:i|we|company)\s*(?:can|is|am|are)?\s*(?:sell(?:ing)?|offer(?:ing)?|provid(?:es?|ing|supply(?:ing)))\b/i
 describe FSL_SUPPLY            Something can be supplied
 score    FSL_SUPPLY            1.0
@@ -108,11 +104,6 @@ meta     FSL_UNDISCLOSED_BULK  (FSL_UNDISCLOSED_RCPTS && (DCC_CHECK || RAZOR2_CH
 describe FSL_UNDISCLOSED_BULK  Undisclosed recipients and bulk signature
 score    FSL_UNDISCLOSED_BULK  3.0
 
-header   __FSL_HAS_LIST_UNSUB  exists:List-Unsubscribe
-meta     FSL_BULK_SIG          ((DCC_CHECK || RAZOR2_CHECK || PYZOR_CHECK) && !__FSL_HAS_LIST_UNSUB)
-describe FSL_BULK_SIG          Bulk signature with no Unsubscribe
-score    FSL_BULK_SIG          1.0
-
 header   __FSL_TO_COMMON_ROLE  To:addr =~ /^((?:post|web|domain)master|info|sales|(?:tech)?support|(?:sys)?admin(?:istrator)?|abuse|noc|root|security|compliance|registrar)@/i
 meta     FSL_TO_ROLE_BULK      (__FSL_TO_COMMON_ROLE && (DCC_CHECK || RAZOR2_CHECK || PYZOR_CHECK))
 describe FSL_TO_ROLE_BULK      Bulk signature and to a role account
@@ -129,3 +120,14 @@ score    FSL_YAHOO_AUTH_SIG     5.0
 header   FSL_PHP_EXPLOIT_41    X-PHP-Script =~ / 41\.\d+\.\d+\.\d+\b/
 describe FSL_PHP_EXPLOIT_41    PHP Script being run by someone in Africa
 score    FSL_PHP_EXPLOIT_41    3.0
+
+uri      FSL_UNSUB_RATWARE     /unsubscribe\.php\?M=[0-9]+&C=[^& ]+&L=[0-9]+&N=[0-9]+/
+describe FSL_UNSUB_RATWARE     Unsubscribe ratware signature
+score    FSL_UNSUB_RATWARE     3.0
+
+# Based on John Hardin's MONEY_FROM_41
+header   __FSL_IPV4_41         ALL =~ / \[?41\.(?:[0-9]{1,3}\.){2}[0-9]{1,3}\]?/
+body     __FSL_URGENT_ASSIST   /your urgent assist/i
+body     __FSL_MAIL_HAS        /your mail has/i
+meta     FSL_FRAUD_FROM_41     (__FSL_IPV4_41 && (LOTS_OF_MONEY || FSL_MY_NAME_IS || __FSL_URGENT_ASSIST || __FSL_MAIL_HAS))
+score    FSL_FRAUD_FROM_41     1.0
