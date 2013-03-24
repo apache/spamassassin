@@ -1105,6 +1105,9 @@ meta        __HTML_FONT_LOW_CONTRAST_MINFP	HTML_FONT_LOW_CONTRAST && !__RCD_RDNS
 
 uri         __URI_DOM_DOTDOT      m,://[^/]+\.\.,
 
-
+# suggested by ratio for __FOUND_YOU: spam 4.2514% ham 0.0176% - most spam hits at 2-3 points
+meta        FOUND_YOU          __FOUND_YOU && !__MIME_QP && !__CTYPE_HAS_BOUNDARY && !__LOCAL_PP_NONPPURL && !__RCD_RDNS_MAIL_MESSY && !__DKIM_EXISTS && !__SUBJ_RE && !__HAS_X_REF && !__RP_MATCHES_RCVD && !__TO_NO_ARROWS_R
+score       FOUND_YOU          3.25	# limit
+describe    FOUND_YOU          I found you...
 
 
