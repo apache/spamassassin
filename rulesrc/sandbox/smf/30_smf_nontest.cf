@@ -3,9 +3,9 @@
 
 body     FSL_MY_NAME_IS        /\bmy name is\b/i
 describe FSL_MY_NAME_IS        My name is ...
-score    FSL_MY_NAME_IS        1.0
+#score    FSL_MY_NAME_IS        1.0
 
 header   __FSL_HAS_LIST_UNSUB  exists:List-Unsubscribe
 meta     FSL_BULK_SIG          ((DCC_CHECK || RAZOR2_CHECK || PYZOR_CHECK) && !__FSL_HAS_LIST_UNSUB)
 describe FSL_BULK_SIG          Bulk signature with no Unsubscribe
-score    FSL_BULK_SIG          1.0
+#score    FSL_BULK_SIG          1.0
