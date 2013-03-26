@@ -7,7 +7,9 @@ describe FSL_NOT_FROM_GOOGLE    Envelope-From GMail or Google but not originated
 
 header   __FSL_RELAY_YAHOO      X-Spam-Relays-External =~ /^[^\]]+ rdns=[^ ]+\.yahoo(?:dns)?\.co(?:m|\.jp) /i
 header   __FSL_ENVFROM_YAHOO    X-Spam-Relays-External =~ /^[^\]]+ envfrom=[^\@ ]+\@yahoo(?:groups)?\./i
-meta     FSL_NOT_FROM_YAHOO     __FSL_ENVFROM_YAHOO && !__FSL_RELAY_YAHOO
+header   __FSL_ENVFROM_YMAIL    X-Spam-Relays-External =~ /^[^\]]+ envfrom=[^\@ ]+\@ymail\.com /i
+header   __FSL_ENVFROM_ROCKET   X-Spam-Relays-External =~ /^[^\]]+ envfrom=[^\@ ]+\@rocketmail\.com /i
+meta     FSL_NOT_FROM_YAHOO     ((__FSL_ENVFROM_YAHOO || __FSL_ENVFROM_YMAIL || __FSL_ENVFROM_ROCKET) && !__FSL_RELAY_YAHOO)
 score    FSL_NOT_FROM_YAHOO     2.0
 describe FSL_NOT_FROM_YAHOO     Envelope-From Yahoo or Yahoo Groups but not originated from Yahoo systems
 
@@ -112,8 +114,9 @@ score    FSL_TO_ROLE_BULK      1.0
 # Received: from hwyhsxwaxz (amandacallow@113.162.65.176 with login) by
 header   __FSL_YAHOO_AUTH1      Received =~ /from [a-z]{10} \([^\@ ]+\@\d+\.\d+\.\d+\.\d+ with (?:plain|login)\) /
 # Received: from localhost (rhinotrick@46.185.178.15 with login) by
-header   __FSL_YAHOO_AUTH2      Received =~ /from localhost \([^\@ ]+\@\d+\.\d+\.\d+\.\d+ with (?:plain|login)\) /
-meta     FSL_YAHOO_AUTH_SIG     (__FSL_RELAY_YAHOO && (__FSL_YAHOO_AUTH1 || __FSL_YAHOO_AUTH2))
+header   __FSL_YAHOO_AUTH2      Received =~ /from localhost \([^\@ ]+\@\d+\.\d+\.\d+\.\d+ with (?:plain|login)\) /i
+header   __FSL_YAHOO_AUTH3      Received =~ /from user \([^\@ ]+\@\d+\.\d+\.\d+\.\d+ with (?:plain|login)\) /i
+meta     FSL_YAHOO_AUTH_SIG     (__FSL_RELAY_YAHOO && (__FSL_YAHOO_AUTH1 || __FSL_YAHOO_AUTH2 || __FSL_YAHOO_AUTH3))
 describe FSL_YAHOO_AUTH_SIG     Yahoo SMTP AUTH observed patterns
 score    FSL_YAHOO_AUTH_SIG     5.0
 
@@ -126,8 +129,15 @@ describe FSL_UNSUB_RATWARE     Unsubscribe ratware signature
 score    FSL_UNSUB_RATWARE     3.0
 
 # Based on John Hardin's MONEY_FROM_41
-header   __FSL_IPV4_41         ALL =~ / \[?41\.(?:[0-9]{1,3}\.){2}[0-9]{1,3}\]?/
+header   __FSL_IPV4_41         ALL =~ /(?:\(|\s+)?\[?41\.(?:[0-9]{1,3}\.){2}[0-9]{1,3}\]?/
 body     __FSL_URGENT_ASSIST   /your urgent assist/i
 body     __FSL_MAIL_HAS        /your mail has/i
-meta     FSL_FRAUD_FROM_41     (__FSL_IPV4_41 && (LOTS_OF_MONEY || FSL_MY_NAME_IS || __FSL_URGENT_ASSIST || __FSL_MAIL_HAS))
+header   __FSL_SUBJECT_EMAIL   Subject =~ /\b[^\@ ]+\@[^\@ ]+\b/
+body     __FSL_ATM_CARD        /\bATM [Cc][Aa][Rr][Dd]\b/
+meta     FSL_FRAUD_FROM_41     (__FSL_IPV4_41 && (LOTS_OF_MONEY || FSL_MY_NAME_IS || __FSL_URGENT_ASSIST || __FSL_MAIL_HAS || __FSL_SUBJECT_EMAIL || __FSL_ATM_CARD))
 score    FSL_FRAUD_FROM_41     1.0
+
+uri      __FSL_PAYPAL_URI      /\.paypal/i
+header   __FSL_FROM_PAYPAL     X-Spam-Relays-External =~ / envfrom=[^\@ ]+\@paypal\.\S+ /i
+meta     FSL_PAYPAL_PHISH      (__FSL_PAYPAL_URI && !__FSL_FROM_PAYPAL)
+score    FSL_PAYPAL_PHISH      10.0
