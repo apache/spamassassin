@@ -128,16 +128,23 @@ uri      FSL_UNSUB_RATWARE     /unsubscribe\.php\?M=[0-9]+&C=[^& ]+&L=[0-9]+&N=[
 describe FSL_UNSUB_RATWARE     Unsubscribe ratware signature
 score    FSL_UNSUB_RATWARE     3.0
 
+body     FSL_I_AM              /^I(?:'m| am)(?! a | by | pretty | very | excited | seeking )\s*[a-zA-Z.-]+(?:\s*\S+){1,3}(?:\s*from\s*\S+[,.]|[,.])/
+describe FSL_I_AM              I am ...
+score    FSL_I_AM              0.1
+
 # Based on John Hardin's MONEY_FROM_41
 header   __FSL_IPV4_41         ALL =~ /(?:\(|\s+)?\[?41\.(?:[0-9]{1,3}\.){2}[0-9]{1,3}\]?/
 body     __FSL_URGENT_ASSIST   /your urgent assist/i
 body     __FSL_MAIL_HAS        /your mail has/i
 header   __FSL_SUBJECT_EMAIL   Subject =~ /\b[^\@ ]+\@[^\@ ]+\b/
 body     __FSL_ATM_CARD        /\bATM [Cc][Aa][Rr][Dd]\b/
-meta     FSL_FRAUD_FROM_41     (__FSL_IPV4_41 && (LOTS_OF_MONEY || FSL_MY_NAME_IS || __FSL_URGENT_ASSIST || __FSL_MAIL_HAS || __FSL_SUBJECT_EMAIL || __FSL_ATM_CARD))
+meta     FSL_FRAUD_FROM_41     (__FSL_IPV4_41 && (LOTS_OF_MONEY || FSL_MY_NAME_IS || FSL_I_AM || __FSL_URGENT_ASSIST || __FSL_MAIL_HAS || __FSL_SUBJECT_EMAIL || __FSL_ATM_CARD))
 score    FSL_FRAUD_FROM_41     1.0
 
-uri      __FSL_PAYPAL_URI      /\.paypal/i
-header   __FSL_FROM_PAYPAL     X-Spam-Relays-External =~ / envfrom=[^\@ ]+\@paypal\.\S+ /i
-meta     FSL_PAYPAL_PHISH      (__FSL_PAYPAL_URI && !__FSL_FROM_PAYPAL)
-score    FSL_PAYPAL_PHISH      10.0
+rawbody  FSL_CSS_NO_DISPLAY      /display:[^:]+\bnone\b/i
+rawbody  FSL_HTML_COMMENT        /<!--/
+
+header   __FSL_FROM_EQ_REPTO     ALL =~ /(?:Reply-To|From):\s*([^<]+)\s*<[^\@ ]+@[^> ]+>.*(?:From|Reply-To):\s*\1/msi
+body     __FSL_FRIEND_SPAM       /^\s*h(?:i|ello)\s+\S+\s+http:\/\//mi
+meta     FSL_FRIEND_SPAM         (__FSL_FROM_EQ_REPTO && __FSL_FRIEND_SPAM && FREEMAIL_REPLYTO)
+score    FSL_FRIEND_SPAM         10.0
