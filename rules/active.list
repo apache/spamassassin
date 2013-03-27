@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bernie-mix bpoliakoff grenier jarif kpg-gah mas-cps mas-mas zmi; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bernie-mix bpoliakoff grenier jarif kpg-gah llanga mas-cps mas-mas zmi; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bernie-fsf bernie-it_batt bernie-mix bpoliakoff grenier jarif kpg-gah llanga mas-cps mas-mas zmi
+# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bernie-mix bpoliakoff grenier jarif kpg-gah mas-cps mas-mas zmi; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bernie-mix bpoliakoff grenier jarif kpg-gah llanga mas-cps mas-mas zmi; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bernie-mix bpoliakoff grenier jarif kpg-gah llanga zmi
 
 # tflags publish
 ADVANCE_FEE_2_NEW_FORM
@@ -128,6 +128,9 @@ CORRUPT_FROM_LINE_IN_HDRS
 CURR_PRICE
 
 # good enough
+DATE_IN_FUTURE_96_Q
+
+# good enough
 DEAR_BENEFICIARY
 
 # tflags net
@@ -188,6 +191,9 @@ ENV_AND_HDR_SPF_MATCH
 FB_ACHIEVE_BACH
 
 # good enough
+FB_CIALIS_LEO3
+
+# good enough
 FH_FAKE_RCVD_LINE
 
 # good enough
@@ -204,6 +210,9 @@ FH_MSGID_XXX
 
 # tflags publish
 FILL_THIS_FORM
+
+# good enough
+FM_LOTTO_YOU_WON
 
 # good enough
 FM_SCHOOLING
@@ -282,9 +291,6 @@ FSL_MID_419
 
 # good enough
 FSL_MISSP_REPLYTO
-
-# good enough
-FS_LARGE_PERCENT2
 
 # tflags publish
 GOOGLE_DOCS_PHISH
@@ -631,6 +637,9 @@ RP_MATCHES_RCVD
 # good enough
 SHORT_TERM_PRICE
 
+# good enough
+SPAMMY_XMAILER
+
 # tflags net
 SPF_FAIL
 
@@ -671,6 +680,12 @@ SUBJECT_IN_BLACKLIST
 SUBJECT_IN_WHITELIST
 
 # good enough
+SUBJ_BROKEN_WORD
+
+# good enough
+SUBJ_BROKEN_WORDS
+
+# good enough
 TAB_IN_FROM
 
 # tflags net
@@ -701,16 +716,28 @@ TVD_RCVD_IP4
 TVD_UNDER_VALUED
 
 # good enough
-DATE_IN_FUTURE_96_Q
+TVD_VISIT_PHARMA
 
 # good enough
-DATE_IN_FUTURE_Q_PLUS
+ANY_PILL_PRICE
 
 # good enough
-SUBJ_BROKEN_WORD
+BILLION_OVERLAP
 
 # good enough
-SUBJ_BROKEN_WORDS
+COMPENSATION
+
+# good enough
+FSL_MY_NAME_IS
+
+# good enough
+KHOP_JS_OBFUSCATION
+
+# good enough
+LOTTO_DEPT
+
+# good enough
+MANY_PILL_PRICE
 
 # tflags userconf
 UNPARSEABLE_RELAY
