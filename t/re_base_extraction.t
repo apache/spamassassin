@@ -462,7 +462,7 @@ sub try_extraction {
   unlink(<log/test_rules_copy/*.cf>);
 
   { # suppress unnecessary warning:
-    #   "Filehandle STDIN reopened as OUT only for output"
+    #   "Filehandle STDIN reopened as STDOUT only for output"
     # See https://rt.perl.org/rt3/Public/Bug/Display.html?id=23838
     no warnings 'io';
     open (OUT, ">log/test_rules_copy/00_test.cf")

@@ -36,7 +36,9 @@ for $retry (0 .. 9) {
         });
 
   dbgprint "Waiting for spamd at pid $pid1 to restart...\n";
-  wait_for_file_to_appear ($pid_file, 20);
+    # 26 iterations is 98 seconds, RPi ARM6 takes about 66 seconds
+  wait_for_file_to_appear ($pid_file, 26);
+
   ok (-e $pid_file) or warn "$pid_file does not exist post restart";
   ok (!-z $pid_file) or warn "$pid_file is empty post restart";
 
