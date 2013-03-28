@@ -26,14 +26,6 @@ meta     FSL_NOT_FROM_AOL       __FSL_ENVFROM_AOL && !__FSL_RELAY_AOL
 score    FSL_NOT_FROM_AOL       2.0
 describe FSL_NOT_FROM_AOL       Envelope-From AOL but not originated from AOL systems
 
-uri      FSL_LINK_AWS_S3_WEB	/http:\/\/[^. ]+\.s3-website-[^. ]+\.amazonaws\.com/i
-score    FSL_LINK_AWS_S3_WEB    1.0
-describe FSL_LINK_AWS_S3_WEB    Contains a link to Amazon S3 website
-
-meta     FSL_LINK_AWS_S3_WEB_FM (FREEMAIL_FROM && FSL_LINK_AWS_S3_WEB)
-score    FSL_LINK_AWS_S3_WEB_FM 10.0
-describe FSL_LINK_AWS_S3_WEB_FM Contains a link to Amazon S3 website and from a freemail address
-
 header   FSL_UNDISCLOSED_RCPTS  To =~ /\bundisclosed[- ]recipients\b/i
 score    FSL_UNDISCLOSED_RCPTS  0.01
 describe FSL_UNDISCLOSED_RCPTS  To undisclosed recipients
@@ -119,10 +111,6 @@ header   __FSL_YAHOO_AUTH3      Received =~ /from user \([^\@ ]+\@\d+\.\d+\.\d+\
 meta     FSL_YAHOO_AUTH_SIG     (__FSL_RELAY_YAHOO && (__FSL_YAHOO_AUTH1 || __FSL_YAHOO_AUTH2 || __FSL_YAHOO_AUTH3))
 describe FSL_YAHOO_AUTH_SIG     Yahoo SMTP AUTH observed patterns
 score    FSL_YAHOO_AUTH_SIG     5.0
-
-header   FSL_PHP_EXPLOIT_41    X-PHP-Script =~ / 41\.\d+\.\d+\.\d+\b/
-describe FSL_PHP_EXPLOIT_41    PHP Script being run by someone in Africa
-score    FSL_PHP_EXPLOIT_41    3.0
 
 uri      FSL_UNSUB_RATWARE     /unsubscribe\.php\?M=[0-9]+&C=[^& ]+&L=[0-9]+&N=[0-9]+/
 describe FSL_UNSUB_RATWARE     Unsubscribe ratware signature
