@@ -1,6 +1,9 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
 # with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bernie-mix bpoliakoff grenier jarif kpg-gah mas-cps mas-mas zmi; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bernie-mix bpoliakoff grenier jarif kpg-gah llanga mas-cps mas-mas zmi; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bernie-mix bpoliakoff grenier jarif kpg-gah llanga mas-cps mas-mas zmi
 
+# good enough
+ACH_CANCELLED
+
 # tflags publish
 ADVANCE_FEE_2_NEW_FORM
 
@@ -137,6 +140,9 @@ CURR_PRICE
 DATE_IN_FUTURE_96_Q
 
 # good enough
+DATE_IN_FUTURE_Q_PLUS
+
+# good enough
 DEAR_BENEFICIARY
 
 # good enough
@@ -203,6 +209,12 @@ FB_ACHIEVE_BACH
 FB_CIALIS_LEO3
 
 # good enough
+FB_NOT_SEXUAL
+
+# good enough
+FB_YOU_CAN_BECOME
+
+# good enough
 FH_FAKE_RCVD_LINE
 
 # good enough
@@ -266,6 +278,9 @@ FROM_MISSP_FREEMAIL
 FROM_MISSP_MSFT
 
 # good enough
+FROM_MISSP_PHISH
+
+# good enough
 FROM_MISSP_REPLYTO
 
 # tflags net
@@ -294,9 +309,6 @@ FSL_MID_419
 
 # good enough
 FSL_MISSP_REPLYTO
-
-# good enough
-FSL_MY_NAME_IS
 
 # good enough
 FS_WILL_HELP
@@ -336,9 +348,6 @@ HASHCASH_HIGH
 
 # good enough
 HDRS_LCASE
-
-# good enough
-HDRS_LCASE_1K
 
 # tflags userconf
 HEAD_LONG
@@ -722,9 +731,6 @@ TO_NO_BRKTS_MSFT
 TT_MSGID_TRUNC
 
 # good enough
-TVD_FROM_1
-
-# good enough
 TVD_RCVD_IP
 
 # good enough
@@ -737,22 +743,19 @@ TVD_UNDER_VALUED
 TVD_VISIT_PHARMA
 
 # good enough
-ACH_CANCELLED
+FILL_THIS_FORM_SHORT
 
 # good enough
-AXB_XMA_BASP
+FSL_PHP_EXPLOIT_41
 
 # good enough
-DATE_IN_FUTURE_Q_PLUS
+JM_FAKE_PSMTP_RCVD
 
 # good enough
-FB_NOT_SEXUAL
+KHOP_BIG_TO_CC
 
 # good enough
-FB_YOU_CAN_BECOME
-
-# good enough
-FROM_MISSP_PHISH
+TVD_ENHANCE
 
 # tflags userconf
 UNPARSEABLE_RELAY
