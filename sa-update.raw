@@ -596,6 +596,10 @@ foreach my $channel (@channels) {
       } elsif (time - $mirby_time > $IGNORE_MIRBY_OLDER_THAN) {
         dbg("channel: MIRRORED.BY file is too old, forcing refresh");
         $mirby_force_reload = 1;
+      } elsif (-s $mirby_path == 0) {
+        unlink $mirby_path or warn "error: cannot unlink $mirby_path: $!\n";
+        dbg("channel: MIRRORED.BY file is zero bytes, forcing refresh");
+        $mirby_force_reload = 1;
       } else {
         dbg("channel: reading MIRRORED.BY file $mirby_path");
         local $/ = undef;
