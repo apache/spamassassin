@@ -74,22 +74,24 @@ use constant DUMP_BACKUP => 8;
 # from them; however we do not, so we should ignore them.
 # 
 # sources:
-#   IANA  = <http://www.iana.org/assignments/ipv4-address-space>,
-#           <http://duxcw.com/faq/network/privip.htm>,
-#   APIPA = <http://duxcw.com/faq/network/autoip.htm>,
-#   3330  = <ftp://ftp.rfc-editor.org/in-notes/rfc3330.txt>
+#   IANA  = <http://www.iana.org/numbers>,
+#   5735  = <http://tools.ietf.org/html/rfc5735>
+#   6598  = <http://tools.ietf.org/html/rfc6598>
 #   CYMRU = <http://www.cymru.com/Documents/bogon-list.html>
 #
-# This also includes IPv6 link-local space, fe80::/10, the IPv4
-# spaces mapped in IPv6, and the IPv6 host-local address, ::1.
+# This includes:
+#   host-local address space 127.0.0.0/8 and ::1,
+#   link-local address space 169.254.0.0/16 and fe80::/10,
+#   private-use address space 10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16,
+#   IPv4-mapped IPv6 addresses.
 #
 use constant IP_PRIVATE => qr{^(?:
   (?:   # IPv4 addresses
-    10|				    # 10/8:             Private Use (3330)
-    127|                            # 127/8:            Private Use (localhost)
-    169\.254|			    # 169.254/16:       Private Use (APIPA)
-    172\.(?:1[6-9]|2[0-9]|3[01])|   # 172.16-172.31/16: Private Use (3330)
-    192\.168 			    # 192.168/16:       Private Use (3330)
+    10|				    # 10.0.0.0/8      Private Use (5735, 1918)
+    127|                            # 127.0.0.0/8     Host-local  (5735, 1122)
+    169\.254|			    # 169.254.0.0/16  Link-local  (5735, 3927)
+    172\.(?:1[6-9]|2[0-9]|3[01])|   # 172.16.0.0/12   Private Use (5735, 1918)
+    192\.168			    # 192.168.0.0/16  Private Use (5735, 1918)
     )\..*
 |
   (?:   # IPv6 addresses

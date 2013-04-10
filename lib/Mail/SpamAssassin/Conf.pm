@@ -2709,7 +2709,7 @@ Private IPs are those listed in
 <http://www.iana.org/assignments/ipv4-address-space>,
 <http://duxcw.com/faq/network/privip.htm>,
 <http://duxcw.com/faq/network/autoip.htm>, or
-<ftp://ftp.rfc-editor.org/in-notes/rfc3330.txt> as private.
+<http://tools.ietf.org/html/rfc5735> as private.
 
 =item the 'set' argument
 
