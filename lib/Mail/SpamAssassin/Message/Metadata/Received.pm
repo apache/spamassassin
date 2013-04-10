@@ -1290,7 +1290,9 @@ enough:
   
   $ip =~ s/^ipv6://i;   # remove "IPv6:" prefix
   $ip =~ s/^\[//; $ip =~ s/\]\z//;
-  $ip =~ s/%[A-Z0-9:._-]*\z//si;  # scoped address? remove interface specs
+
+  # IPv6 Scoped Address (RFC 4007, RFC 6874, RFC 3986 "unreserved" charset)
+  $ip =~ s/%[A-Z0-9._~-]*\z//si;  # scoped address? remove <zone_id>
 
   # remove "::ffff:" prefix from IPv4-mapped-in-IPv6 addresses,
   # so we can treat them simply as IPv4 addresses

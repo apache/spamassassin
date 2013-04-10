@@ -98,7 +98,8 @@ sub add_cidr {
     $cidr = $1  if $cidr =~ /^ \[ ( [^\]]* ) \] \z/xs;
 
     my $scope;
-    if ($cidr =~ s/ % ( [A-Z0-9:._-]* ) \z //xsi) {  # link-local scope?
+    # IPv6 Scoped Address (RFC 4007, RFC 6874, RFC 3986 "unreserved" charset)
+    if ($cidr =~ s/ % ( [A-Z0-9._~-]* ) \z //xsi) {  # scope <zone_id> ?
       $scope = $1;  # interface specification
       # discard interface specification, currently just ignored
       info("netset: ignoring interface scope '%%%s' in IP address %s",
