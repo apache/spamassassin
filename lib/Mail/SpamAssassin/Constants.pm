@@ -77,13 +77,16 @@ use constant DUMP_BACKUP => 8;
 #   IANA  = <http://www.iana.org/numbers>,
 #   5735  = <http://tools.ietf.org/html/rfc5735>
 #   6598  = <http://tools.ietf.org/html/rfc6598>
+#   4193  = <http://tools.ietf.org/html/rfc4193>
 #   CYMRU = <http://www.cymru.com/Documents/bogon-list.html>
 #
 # This includes:
 #   host-local address space 127.0.0.0/8 and ::1,
 #   link-local address space 169.254.0.0/16 and fe80::/10,
 #   private-use address space 10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16,
-#   IPv4-mapped IPv6 addresses.
+#     TODO: Unique Local Unicast Addresses fc00::/7 (RFC 4193)
+#   shared address space 100.64.0.0/10 (RFC 6598 - for use in CGN),
+#   IPv4-mapped IPv6 address ::ffff:0:0/96 (RFC 3513)
 #
 use constant IP_PRIVATE => qr{^(?:
   (?:   # IPv4 addresses
@@ -91,7 +94,8 @@ use constant IP_PRIVATE => qr{^(?:
     127|                            # 127.0.0.0/8     Host-local  (5735, 1122)
     169\.254|			    # 169.254.0.0/16  Link-local  (5735, 3927)
     172\.(?:1[6-9]|2[0-9]|3[01])|   # 172.16.0.0/12   Private Use (5735, 1918)
-    192\.168			    # 192.168.0.0/16  Private Use (5735, 1918)
+    192\.168| 			    # 192.168.0.0/16  Private Use (5735, 1918)
+    100\.(?:6[4-9]|[7-9][0-9]|1[01][0-9]|12[0-7])  # 100.64.0.0/10 CGN (6598)
     )\..*
 |
   (?:   # IPv6 addresses
@@ -130,7 +134,8 @@ use constant IP_PRIVATE => qr{^(?:
         127|			    
         169\.254|			    
         172\.(?:1[6-9]|2[0-9]|3[01])|   
-        192\.168
+        192\.168|
+        100\.(?:6[4-9]|[7-9][0-9]|1[01][0-9]|12[0-7])
       )\..*
 
     | # or IPv6 link-local address space, fe80::/10
