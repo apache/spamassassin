@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bernie-mix bpoliakoff grenier jarif kpg-gah mas-cps mas-mas zmi; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bernie-mix bpoliakoff grenier jarif kpg-gah llanga mas-cps mas-mas zmi; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bernie-mix bpoliakoff grenier jarif kpg-gah llanga zmi
+# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bernie-mix bpoliakoff grenier jarif kpg-gah zmi; day 2: axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bernie-mix bpoliakoff grenier jarif kpg-gah llanga mas-cps mas-mas zmi; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bernie-mix bpoliakoff grenier jarif kpg-gah llanga mas-cps mas-mas zmi
 
 # tflags publish
 ADVANCE_FEE_2_NEW_FORM
@@ -181,6 +181,9 @@ DOS_ANAL_SPAM_MAILER
 # good enough
 DOS_OE_TO_MX
 
+# good enough
+DRUGS_STOCK_MIMEOLE
+
 # tflags publish
 EMAIL_URI_PHISH
 
@@ -192,9 +195,6 @@ ENV_AND_HDR_SPF_MATCH
 
 # good enough
 FB_ACHIEVE_BACH
-
-# good enough
-FH_FAKE_RCVD_LINE
 
 # good enough
 FH_FAKE_RCVD_LINE_B
@@ -209,13 +209,16 @@ FH_MSGID_XXX
 FILL_THIS_FORM
 
 # good enough
-FM_LOTTO_YOU_WON
+FILL_THIS_FORM_LONG
 
 # good enough
 FM_SCHOOLING
 
 # good enough
 FM_SCHOOL_DIPLOMA
+
+# good enough
+FM_SUBJ_YOU_PROFIT
 
 # tflags publish
 FORM_FRAUD_3
@@ -270,6 +273,9 @@ FSL_CTYPE_WIN1251
 
 # good enough
 FSL_HELO_BARE_IP_1
+
+# good enough
+FSL_HELO_BARE_IP_2
 
 # good enough
 FSL_HELO_DEVICE
@@ -336,9 +342,6 @@ KB_FAKED_THE_BAT
 
 # good enough
 KB_RATWARE_OUTLOOK_MID
-
-# good enough
-KHOP_JS_OBFUSCATION
 
 # good enough
 LONG_TERM_PRICE
@@ -623,9 +626,6 @@ RISK_FREE
 RP_MATCHES_RCVD
 
 # good enough
-SERGIO_SUBJECT_VIAGRA01
-
-# good enough
 SHORT_TERM_PRICE
 
 # good enough
@@ -713,13 +713,13 @@ TVD_RCVD_IP4
 TVD_UNDER_VALUED
 
 # good enough
-TVD_VISIT_PHARMA
+HK_RANDOM_FROM
 
 # good enough
-FM_SUBJ_YOU_PROFIT
+HK_SCAM_S23
 
 # good enough
-FSL_HELO_BARE_IP_2
+TO_EQ_FM_HTML_DIRECT
 
 # tflags userconf
 UNPARSEABLE_RELAY
