@@ -87,7 +87,7 @@ use HTTP::Date qw(time2str);
 use Archive::Tar 1.23;
 use IO::Zlib 1.04;
 
-use vars qw($have_lwp $have_inet4 $have_inet6);
+use vars qw($have_lwp $io_socket_module_name $have_inet4 $have_inet6);
 
 BEGIN {
   # Deal with optional modules
@@ -99,19 +99,33 @@ BEGIN {
     require LWP::UserAgent;
   };
 
-  $have_inet4 = eval {
-    require IO::Socket::INET;
-    my $sock = IO::Socket::INET->new(LocalAddr => '0.0.0.0', Proto => 'udp');
-    $sock->close or die "error closing inet socket: $!"  if $sock;
-    $sock ? 1 : undef;
-  };
+  if (eval { require IO::Socket::IP }) {  # handles IPv6 and IPv4
+    $io_socket_module_name = 'IO::Socket::IP';
+ 
+  } elsif (eval { require IO::Socket::INET6 }) {  # handles IPv6 and IPv4
+    $io_socket_module_name = 'IO::Socket::INET6';
 
-  $have_inet6 = eval {
-    require IO::Socket::INET6;
-    my $sock = IO::Socket::INET6->new(LocalAddr => '::', Proto => 'udp');
-    $sock->close or die "error closing inet6 socket: $!"  if $sock;
-    $sock ? 1 : undef;
-  };
+  } elsif (eval { require IO::Socket::INET }) {  # IPv4 only
+    $io_socket_module_name = 'IO::Socket::INET';
+  }
+
+  $have_inet4 =  # can we create a PF_INET socket?
+    defined $io_socket_module_name && eval {  
+      my $sock =
+        $io_socket_module_name->new(LocalAddr => '0.0.0.0', Proto => 'tcp');
+      $sock->close or die "error closing socket: $!"  if $sock;
+      $sock ? 1 : undef;
+    };
+
+  $have_inet6 =  # can we create a PF_INET6 socket?
+    defined $io_socket_module_name &&
+    $io_socket_module_name ne 'IO::Socket::INET' &&
+    eval {
+      my $sock =
+        $io_socket_module_name->new(LocalAddr => '::', Proto => 'tcp');
+      $sock->close or die "error closing socket: $!"  if $sock;
+      $sock ? 1 : undef;
+    };
 }
 
 # These should already be available
@@ -123,6 +137,8 @@ use Mail::SpamAssassin::Util qw(untaint_var untaint_file_path
 # Make the main dbg() accessible in our package w/o an extra function
 *dbg=\&Mail::SpamAssassin::dbg;
 sub dbg;
+
+$| = 1;  # autoflushing STDOUT makes verbose output consistent with warnings
 
 # Clean up PATH appropriately
 Mail::SpamAssassin::Util::clean_path_in_taint_mode();
@@ -620,10 +636,10 @@ foreach my $channel (@channels) {
       }
       foreach my $mirror (@mirrors) {
         my $result_fname;
-        ($mirby, $result_fname) =
-          http_get($mirror, $UPDDir, $mirby_path);
+        ($mirby, $result_fname) = http_get($mirror, $UPDDir, $mirby_path);
         unless ($mirby) {
-          dbg("channel: no mirror data available for channel $channel from $mirror");
+          dbg("channel: no mirror data available for channel %s from %s",
+              $channel, $mirror);
           next;
         }
         last;
@@ -636,11 +652,11 @@ foreach my $channel (@channels) {
 
       $mirby_just_downloaded = 1;
       $preserve_files{$mirby_path} = 1;
-      dbg("channel: MIRRORED.BY file retrieved");
+      dbg("channel: MIRRORED.BY file for channel %s retrieved", $channel);
     }
 
     # Parse the list of mirrors
-    dbg("channel: parsing MIRRORED.BY file");
+    dbg("channel: parsing MIRRORED.BY file for channel %s", $channel);
     my %mirrors;
     my @mirrors = split(/^/, $mirby);
     while(my $mirror = shift @mirrors) {
@@ -1289,30 +1305,45 @@ sub do_dns_query {
 ##############################################################################
 
 sub init_lwp {
-  if ($have_inet6 && (!$opt{'force_pf'} || $opt{'force_pf'} eq 'inet6')) {
-    # LWP module has no support yet for IPv6.
-    # Use hotpatching, copying IO::Socket::INET6 to IO::Socket::INET.
+  if ($have_inet6 &&
+      (!$opt{'force_pf'} || $opt{'force_pf'} eq 'inet6') &&
+      ($io_socket_module_name eq 'IO::Socket::IP' ||
+       $io_socket_module_name eq 'IO::Socket::INET6') )
+  {
+    # LWP module has no support for IPv6.  Use hotpatching,
+    # copying IO::Socket::IP or IO::Socket::INET6 to IO::Socket::INET.
     # 'Borrowed' from Net::INET6Glue::INET_is_INET6 :
-    $INC{'IO/Socket/INET.pm'} = $INC{'IO/Socket/INET6.pm'};
+
+    printf("http: (lwp) hotpatching IO::Socket::INET by module %s\n",
+           $io_socket_module_name) if $opt{'verbose'};
+    my $io_socket_module_hash_name = $io_socket_module_name . '::';
+    my $io_socket_module_path = $io_socket_module_name . '.pm';
+    $io_socket_module_path =~ s{::}{/}g;
+    $INC{'IO/Socket/INET.pm'} = $INC{$io_socket_module_path};
     no strict 'refs';
     no warnings 'redefine';
-    for ( keys %{IO::Socket::INET6::} ) {
-      ref(my $v = $IO::Socket::INET6::{$_}) and next;
+    for ( keys %{$io_socket_module_hash_name} ) {
+      ref(my $v = $io_socket_module_hash_name->{$_}) and next;
       *{ 'IO::Socket::INET::'.$_ } =
-        \&{ 'IO::Socket::INET6::'.$_ } if *{$v}{CODE};
+        \&{ $io_socket_module_hash_name . $_ } if *{$v}{CODE};
     }
   }
   my $ua = LWP::UserAgent->new();
   $ua->agent("sa-update/$VERSION/$SAVersion");
   $ua->timeout(60);      # a good long timeout; 10 is too short for Coral!
   $ua->env_proxy;
-  if ($opt{'force_pf'}) {
-    if ($have_inet4 && $opt{'force_pf'} eq 'inet') {
-      $ua->local_address('0.0.0.0');
-    } elsif ($have_inet6 && $opt{'force_pf'} eq 'inet6') {
-      $ua->local_address('::');
-    }
-  }
+
+# if ($opt{'force_pf'}) {
+#   # No longer needed and can be harmful as we don't know which address family
+#   # will be picked by the IO::Socket::* module in case of multihomed servers.
+#   # The IO::Socket::IP should choose the right protocol family automatically.
+#   if ($have_inet4 && $opt{'force_pf'} eq 'inet') {
+#     $ua->local_address('0.0.0.0');
+#   } elsif ($have_inet6 && $opt{'force_pf'} eq 'inet6') {
+#     $ua->local_address('::');
+#   }
+# }
+
   return $ua;
 }
 
@@ -1402,7 +1433,9 @@ sub http_get {
   my $out_fname_short = $out_fname;
   $out_fname_short =~ s{^\Q$dir\E/*}{};
 
+  printf("fetching %s\n", $url)  if $opt{'verbose'} && $opt{'verbose'} > 1;
   dbg("http: url: %s", $url);
+
   my $out_fname_exists = -e $out_fname;
   dbg("http: downloading to: %s, %s", $out_fname,
       !$out_fname_exists ? 'new' : $force_reload ? 'replace' : 'update');
@@ -1439,12 +1472,18 @@ sub http_get {
       or die "Cannot create a file $out_fname: $!";
     binmode($out_fh) or die "Can't set binmode on $out_fname: $!";
     $content = http_get_lwp($url, $ims, $dir);
-    $out_fh->print($content) or die "Error writing to $out_fname: $!";
+    if (!defined $content) {
+      dbg("http: (lwp) no content downloaded from %s", $url);
+    } else {
+      $out_fh->print($content) or die "Error writing to $out_fname: $!";
+    }
     $out_fh->close or die "Error closing file $out_fname: $!";
     return ($content, $out_fname);
   } else {
     die "http: no downloading tool available";
   }
+
+  # only reached if invoking an external program is needed (not lwp)
   if ($opt{'force_pf'}) {
     if    ($opt{'force_pf'} eq 'inet')  { push(@args, '-4') }
     elsif ($opt{'force_pf'} eq 'inet6') { push(@args, '-6') }
