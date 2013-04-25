@@ -480,7 +480,7 @@ foreach my $channel (@channels) {
     dbg("channel: installing from file $instfile");
   }
 
-  my($mirby, $mirby_just_downloaded, $mirby_force_reload);
+  my($mirby, $mirby_force_reload, $mirby_file_is_ok);
   my $mirby_path = File::Spec->catfile($UPDDir, "MIRRORED.BY");
 
   # try to read metadata from channel.cf file
@@ -504,8 +504,24 @@ foreach my $channel (@channels) {
     close(CF) or die "cannot close $CFFile: $!";
   }
 
+  # obtain a version number which should be installed
   my $newV;
-  if (!$instfile) {
+  if ($instfile) {
+    # the /.*/ ensures we use the 3-digit string nearest to the end of string,
+    # otherwise we might pick up something from the middle of the directory path
+    local($1);
+    if ($instfile !~ /(?:.*\D|^)(\d{3,})/) {        
+      # this is a requirement
+      die "channel: $channel: --install file $instfile does not contain a 3-digit version number!\n";
+    }
+    $newV = $1;
+
+    if ( defined $opt{'checkonly'} ) {            
+      dbg("channel: $channel: --install and --checkonly, claiming update available");
+      next;
+    }
+
+  } else {  # not an install file, get the latest version number from network
     # Setup the channel version DNS query
     my $DNSQ = "$RevSAVersion.$channel";
 
@@ -531,7 +547,8 @@ foreach my $channel (@channels) {
     # If this channel hasn't been installed before, or it's out of date,
     # keep going.  Otherwise, skip it.
     if ($currentV >= $newV) {
-      dbg("channel: current version is $currentV, new version is $newV, skipping channel");
+      dbg("channel: current version is $currentV, new version is $newV, ".
+          "skipping channel");
       next;
     }
 
@@ -539,26 +556,11 @@ foreach my $channel (@channels) {
 
     # If we are only checking for update availability, exit now
     if ( defined $opt{'checkonly'} ) {            
-      dbg("channel: $channel: update available, not downloading in checkonly mode");
+      dbg("channel: $channel: update available, not downloading ".
+          "in checkonly mode");
       next;
     }
 
-  } else {  # $instfile
-    # the /.*/ ensures we use the 3-digit string nearest to the end of string, otherwise
-    # we might pick up something from the middle of the directory path
-    local($1);
-    if ($instfile !~ /(?:.*\D|^)(\d{3,})/) {        
-      # this is a requirement
-      die "channel: $channel: --install file $instfile does not contain a 3-digit version number!\n";
-    }
-    $newV = $1;
-
-#   print "Update available for channel $channel\n"  if $opt{'verbose'};
-
-    if ( defined $opt{'checkonly'} ) {            
-      dbg("channel: $channel: --install and --checkonly, claiming update available");
-      next;
-    }
   }
 
   # we need a directory we control that we can use to avoid loading any rules
@@ -592,67 +594,100 @@ foreach my $channel (@channels) {
   my $content;
   my $SHA1;
   my $GPG;
-  if (!$instfile) {
 
+  if ($instfile) {
+    dbg("channel: using --install files $instfile\{,.sha1,.asc\}");
+    $content = read_install_file($instfile);
+    $SHA1 = read_install_file($instfile.".sha1");
+    $GPG = read_install_file($instfile.".asc") if $GPG_ENABLED;
+
+  } else {  # not an install file, obtain fresh rules from network
     dbg("channel: protocol family available: %s%s",
         join(',', $have_inet4 ? 'inet'  : (),
                   $have_inet6 ? 'inet6' : ()),
         $opt{'force_pf'} ? '; force '.$opt{'force_pf'} : '' );
 
-    # Read in the MIRRORED.BY file if it exists
-    if (!open(MIRBY, $mirby_path)) {
-      dbg("channel: error opening file %s: %s",
-          $mirby_path, $!)  unless $! == ENOENT;
-    } else {
-      my $mirby_time = (stat $mirby_path)[9];
+    # test if the MIRRORED.BY file for this channel exists,
+    # is nonempty, and is reasonably fresh
 
-      if ($opt{'refreshmirrors'}) {
-        dbg("channel: --refreshmirrors used, forcing refresh");
-        $mirby_force_reload = 1;
-      } elsif (time - $mirby_time > $IGNORE_MIRBY_OLDER_THAN) {
-        dbg("channel: MIRRORED.BY file is too old, forcing refresh");
-        $mirby_force_reload = 1;
-      } elsif (-s $mirby_path == 0) {
-        unlink $mirby_path or warn "error: cannot unlink $mirby_path: $!\n";
-        dbg("channel: MIRRORED.BY file is zero bytes, forcing refresh");
-        $mirby_force_reload = 1;
+    my(@mirr_stat_list) = stat($mirby_path);
+    if (!@mirr_stat_list) {
+      if ($! == ENOENT) {
+        dbg("channel: no mirror file %s, will fetch it", $mirby_path);
       } else {
-        dbg("channel: reading MIRRORED.BY file $mirby_path");
-        local $/ = undef;
-        $mirby = <MIRBY>;
+        # protection error, misconfiguration, file system error, ...
+        warn "error: error accessing mirrors file $mirby_path: $!\n";
+        channel_failed("channel: error accessing mirrors file $mirby_path: $!");
+        next;
       }
-      close(MIRBY) or die "cannot close $mirby_path: $!";
-      $preserve_files{$mirby_path} = 1;
+    } elsif (-z _) {
+      dbg("channel: file %s is empty, refreshing mirrors file", $mirby_path);
+      $mirby_force_reload = 1;
+    } elsif ($opt{'refreshmirrors'}) {
+      dbg("channel: --refreshmirrors used, forcing mirrors file refresh ".
+          "on channel $channel");
+      $mirby_force_reload = 1;
+    } elsif (time - $mirr_stat_list[9] > $IGNORE_MIRBY_OLDER_THAN) {
+      dbg("channel: file %s is too old, refreshing mirrors file", $mirby_path);
+      $mirby_file_is_ok = 1;  # mirrors file seems fine, but is old
+      $mirby_force_reload = 1;
+    } else {
+      # mirror file $mirby_path exists, is nonempty, and is reasonably fresh
+      $mirby_file_is_ok = 1;
     }
 
-    if (!defined $mirby) {
-      # We don't currently have the list of mirrors, so go grab it.
-      dbg("channel: MIRRORED.BY not available");
+    if (!$mirby_file_is_ok || $mirby_force_reload) {
+      # fetch a fresh list of mirrors
+      dbg("channel: DNS lookup on mirrors.$channel");
       my @mirrors = do_dns_query("mirrors.$channel");
       unless (@mirrors) {
         warn "error: no mirror data available for channel $channel\n";
-        channel_failed("channel: MIRRORED.BY file location was not in DNS");
+        channel_failed("channel: MIRRORED.BY file URL was not in DNS");
         next;
       }
       foreach my $mirror (@mirrors) {
         my $result_fname;
-        ($mirby, $result_fname) = http_get($mirror, $UPDDir, $mirby_path);
-        unless ($mirby) {
-          dbg("channel: no mirror data available for channel %s from %s",
-              $channel, $mirror);
-          next;
-        }
-        last;
-      }
-      unless ($mirby) {
-        warn "error: no mirror data available for channel $channel\n";
-        channel_failed("channel: MIRRORED.BY contents were missing");
-        next;
-      }
+        ($mirby, $result_fname) =
+          http_get($mirror, $UPDDir, $mirby_path, $mirby_force_reload);
 
-      $mirby_just_downloaded = 1;
+        if ($mirby) {
+          dbg("channel: MIRRORED.BY file for channel %s retrieved", $channel);
+          $mirby_file_is_ok = 1;
+          $mirby_force_reload = 0;
+          $preserve_files{$mirby_path} = 1;
+
+          # set file creation time to now, otherwise we'll keep refreshing
+          # (N.B.: curl preserves time of a downloaded file)
+          my $now = time;
+          utime($now, $now, $mirby_path)
+            or warn "error: error setting creation time of $mirby_path: $!\n";
+
+          last;
+        }
+        dbg("channel: no mirror data available for channel %s from %s",
+            $channel, $mirror);
+      }
+      if ($mirby_force_reload) {  # not refreshed?
+        warn "error: unable to refresh mirrors file for channel $channel, ".
+             "using old file\n";
+      }
+    }
+
+    if (!$mirby_file_is_ok) {
+      warn "error: no mirror data available for channel $channel\n";
+      channel_failed("channel: MIRRORED.BY file contents were missing");
+      next;
+    } elsif ($mirby) {
+      # file contents already in memory, no need to read it from a file
+    } elsif (!open(MIRBY, $mirby_path)) {
+      warn "error: error opening mirrors file $mirby_path: $!\n";
+      channel_failed("channel: error opening mirrors file $mirby_path: $!");
+      next;
+    } else {
+      dbg("channel: reading MIRRORED.BY file %s", $mirby_path);
+      { local $/ = undef; $mirby = <MIRBY> }
+      close(MIRBY) or die "cannot close $mirby_path: $!";
       $preserve_files{$mirby_path} = 1;
-      dbg("channel: MIRRORED.BY file for channel %s retrieved", $channel);
     }
 
     # Parse the list of mirrors
@@ -725,26 +760,9 @@ foreach my $channel (@channels) {
         $preserve_files{$result_fname} = 1;
       }
 
-      # try to update our list of mirrors.
-      # a failure here doesn't cause channel failure.
-      if (!$mirby_just_downloaded) {
-        my($mirby_tmp, $result_fname) =
-          http_get("$mirror/MIRRORED.BY", $UPDDir, undef, $mirby_force_reload);
-        if ($mirby_tmp) {
-          $mirby = $mirby_tmp;
-          $mirby_just_downloaded = 1;
-          $preserve_files{$result_fname} = 1;
-        }
-      }
-
       last;
     }
 
-  } else {      # $instfile
-    dbg("channel: using --install files $instfile\{,.sha1,.asc\}");
-    $content = read_install_file($instfile);
-    $SHA1 = read_install_file($instfile.".sha1");
-    $GPG = read_install_file($instfile.".asc") if $GPG_ENABLED;
   }
 
   unless ($content && $SHA1 && (!$GPG_ENABLED || $GPG)) {
