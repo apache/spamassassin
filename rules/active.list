@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bernie-mix bpoliakoff grenier jarif kpg-gah zmi; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bernie-mix bpoliakoff grenier jarif kpg-gah llanga zmi; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bernie-mix bpoliakoff grenier jarif kpg-gah llanga mas-cps mas-mas zmi
+# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bernie-mix bpoliakoff grenier jarif kpg-gah zmi; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bernie-mix bpoliakoff grenier jarif kpg-gah llanga zmi; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bernie-mix bpoliakoff grenier jarif kpg-gah llanga zmi
 
 # tflags publish
 ADVANCE_FEE_2_NEW_FORM
@@ -77,7 +77,13 @@ AXB_XMAILER_MIMEOLE_OL_A275F
 AXB_XMAILER_MIMEOLE_OL_A7B9C
 
 # good enough
+AXB_XMAILER_MIMEOLE_OL_E9F46
+
+# good enough
 AXB_XMA_BASP
+
+# good enough
+AXB_X_RCV_WLOCAL
 
 # tflags learn
 BAYES_00
@@ -168,6 +174,9 @@ EMPTY_BODY
 
 # tflags userconf
 ENV_AND_HDR_SPF_MATCH
+
+# good enough
+FB_ACHIEVE_BACH
 
 # good enough
 FB_CIALIS_LEO3
@@ -303,6 +312,9 @@ HK_RANDOM_FROM
 
 # good enough
 HK_SCAM_N2
+
+# good enough
+HK_SCAM_S23
 
 # tflags userconf
 HTML_CHARSET_FARAWAY
@@ -590,9 +602,6 @@ RCVD_IN_SORBS_ZOMBIE
 RCVD_IN_XBL
 
 # good enough
-RISK_FREE
-
-# good enough
 RP_MATCHES_RCVD
 
 # good enough
@@ -638,6 +647,9 @@ SUBJECT_IN_BLACKLIST
 SUBJECT_IN_WHITELIST
 
 # good enough
+SUBJ_BROKEN_WORD
+
+# good enough
 SUBJ_BROKEN_WORDS
 
 # good enough
@@ -674,19 +686,10 @@ TVD_RCVD_IP4
 TVD_UNDER_VALUED
 
 # good enough
-AXB_XMAILER_MIMEOLE_OL_E9F46
+AXB_XM_FORGED_OL2600
 
 # good enough
-AXB_X_RCV_WLOCAL
-
-# good enough
-FB_ACHIEVE_BACH
-
-# good enough
-HK_SCAM_S23
-
-# good enough
-SUBJ_BROKEN_WORD
+TO_EQ_FM_HTML_ONLY
 
 # tflags userconf
 UNPARSEABLE_RELAY
