@@ -90,12 +90,11 @@ describe        URIBL_PH_SURBL  Contains an URL listed in the PH SURBL blocklist
 tflags          URIBL_PH_SURBL  net
 reuse           URIBL_PH_SURBL
 
-#DEPRECATED 10/22/2012 - BUG 6853 - TO BECOME MW 5-1-2013
-#urirhssub       URIBL_MW_SURBL  multi.surbl.org.        A   16
-#body            URIBL_MW_SURBL  eval:check_uridnsbl('URIBL_MW_SURBL')
-#describe        URIBL_MW_SURBL  Contains a Malware Domain or IP listed in the MW SURBL blocklist
-#tflags          URIBL_MW_SURBL  net
-#reuse           URIBL_MW_SURBL
+urirhssub       URIBL_MW_SURBL  multi.surbl.org.        A   16
+body            URIBL_MW_SURBL  eval:check_uridnsbl('URIBL_MW_SURBL')
+describe        URIBL_MW_SURBL  Contains a Malware Domain or IP listed in the MW SURBL blocklist
+tflags          URIBL_MW_SURBL  net
+reuse           URIBL_MW_SURBL
 
 urirhssub       URIBL_AB_SURBL  multi.surbl.org.        A   32
 body            URIBL_AB_SURBL  eval:check_uridnsbl('URIBL_AB_SURBL')
