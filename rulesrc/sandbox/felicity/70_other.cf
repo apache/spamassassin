@@ -93,6 +93,8 @@ header DRUGS_HDIA       Subject =~ /\bhoodia\b/i
 
 # 0.197   0.2525   0.0066    0.974   0.67    0.01  T_TVD_FROM_1
 header TVD_FROM_1       From:addr =~ /[^\@0-9]{2}\d{3}\.(?:com|net|org|info|biz)$/i
+#KAM: 2013-05-17 added 1.0 to put a ceiling on this score because it's currently hitting 3.5 which is far too high
+score  TVD_FROM_1	1.0
 
 # doesn't hit a lot, but seems to hit mostly on phishing mails
 # 0.062   0.0800   0.0000    1.000   0.58    0.01  T_TVD_RATWARE_CB
