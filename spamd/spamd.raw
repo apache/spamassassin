@@ -1026,8 +1026,9 @@ sub server_sock_setup_inet {
       Proto     => 'tcp',
       ReuseAddr => 1,
       Listen    => &SOMAXCONN,
-      V6Only    => 1,  # since IO::Socket::IP 0.09
     );
+    $sockopt{V6Only} = 1  if $io_socket_module_name eq 'IO::Socket::IP'
+                             && IO::Socket::IP->VERSION >= 0.09;
     %sockopt = (%sockopt, (
       SSL_version     => $sslversion,
       SSL_verify_mode => 0x00,
