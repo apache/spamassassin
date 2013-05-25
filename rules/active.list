@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bernie-mix bpoliakoff grenier jarif kpg-gah mas-cps mas-mas zmi; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bernie-mix bpoliakoff grenier jarif kpg-gah llanga mas-cps mas-mas zmi; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bernie-mix bpoliakoff grenier jarif kpg-gah llanga mas-cps mas-mas zmi
+# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bernie-mix bpoliakoff grenier jarif kpg-gah zmi; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bernie-mix bpoliakoff grenier jarif kpg-gah llanga mas-cps mas-mas zmi; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bernie-mix bpoliakoff grenier jarif kpg-gah llanga mas-cps mas-mas zmi
 
 # tflags publish
 ADVANCE_FEE_2_NEW_FORM
@@ -54,6 +54,9 @@ AXB_XMAILER_MIMEOLE_OL_024C2
 
 # good enough
 AXB_XMAILER_MIMEOLE_OL_1ECD5
+
+# good enough
+AXB_XMAILER_MIMEOLE_OL_22B61
 
 # good enough
 AXB_XMAILER_MIMEOLE_OL_4379D
@@ -197,6 +200,9 @@ FH_HELO_ALMOST_IP
 FILL_THIS_FORM
 
 # good enough
+FILL_THIS_FORM_LOAN
+
+# good enough
 FILL_THIS_FORM_LONG
 
 # good enough
@@ -242,6 +248,9 @@ FROM_MISSP_FREEMAIL
 FROM_MISSP_MSFT
 
 # good enough
+FROM_MISSP_PHISH
+
+# good enough
 FROM_MISSP_REPLYTO
 
 # tflags net
@@ -269,10 +278,13 @@ FSL_HELO_BARE_IP_2
 FSL_HELO_DEVICE
 
 # good enough
+FSL_HELO_NON_FQDN_1
+
+# good enough
 FSL_MISSP_REPLYTO
 
 # good enough
-FS_LARGE_PERCENT2
+FSL_NEW_HELO_USER
 
 # tflags publish
 GOOGLE_DOCS_PHISH
@@ -319,9 +331,6 @@ HK_NAME_MR_MRS
 # good enough
 HK_SCAM_N2
 
-# good enough
-HK_SCAM_S23
-
 # tflags userconf
 HTML_CHARSET_FARAWAY
 
@@ -330,9 +339,6 @@ KB_DATE_CONTAINS_TAB
 
 # good enough
 KB_FAKED_THE_BAT
-
-# good enough
-KB_RATWARE_OUTLOOK_MID
 
 # tflags publish
 LOTS_OF_MONEY
@@ -683,9 +689,6 @@ TT_MSGID_TRUNC
 TVD_FROM_1
 
 # good enough
-TVD_PH_REC
-
-# good enough
 TVD_RCVD_IP
 
 # good enough
@@ -698,13 +701,28 @@ TVD_RCVD_SINGLE
 TVD_UNDER_VALUED
 
 # good enough
-AXB_XMAILER_MIMEOLE_OL_22B61
+FSL_MID_419
 
 # good enough
-FROM_MISSP_PHISH
+FS_GET_LAID
 
 # good enough
-FSL_NEW_HELO_USER
+FS_MAKE_MONEY
+
+# good enough
+HDRS_LCASE
+
+# good enough
+HDRS_LCASE_1K
+
+# good enough
+HELO_NO_DOMAIN
+
+# good enough
+MIME_NO_TEXT
+
+# good enough
+TVD_SUBJ_NUM_OBFU_MINFP
 
 # tflags userconf
 UNPARSEABLE_RELAY
