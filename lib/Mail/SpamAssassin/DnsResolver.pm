@@ -844,6 +844,11 @@ sub bgabort {
 
 Emulates C<Net::DNS::Resolver::send()>.
 
+This subroutine is a simple synchronous leftover from SpamAssassin version
+3.3 and does not participate in packet query caching and callback grouping
+as implemented by AsyncLoop::bgsend_and_start_lookup().  As such it should
+be avoided for mainstream usage.
+
 =cut
 
 sub send {

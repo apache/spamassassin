@@ -61,6 +61,8 @@ BEGIN {
 #############################################################################
 
 sub new {
+  # called from PerMsgStatus, a new AsyncLoop object is created
+  # for each new message processing
   my $class = shift;
   $class = ref($class) || $class;
 
@@ -133,32 +135,6 @@ should be OK to just reuse C<key>.
 A string, typically one word, used to describe the type of lookup in log
 messages, such as C<DNSBL>, C<MX>, C<TXT>.
 
-=item poll_callback (optional)
-
-A code reference, which will be called periodically during the
-background-processing period.  If you will be performing an async lookup on a
-non-DNS-based service, you will need to implement this so that it checks for
-new responses and calls C<set_response_packet()>. DNS-based lookups can leave
-it undefined, since DnsResolver::poll_responses() will be called automatically
-anyway.
-
-The code reference will be called with one argument, the C<$ent> object.
-
-=item completed_callback (optional)
-
-A code reference which will be called when an asynchronous task (e.g. a
-DNS lookup) is completed, either normally, or aborted, e.g. by a timeout.
-
-When a task has been reported as completed via C<set_response_packet()>
-the response (as provided to C<set_response_packet()>) is stored in
-$ent->{response_packet} (possibly undef, its semantics is defined by the
-caller). When completion is reported via C<set_response_packet()> or a
-task was aborted, the $ent->{response_packet} is guaranteed to be undef.
-If it is necessary to distinguish between the last two cases, the
-$ent->{status} may be examined for a string 'ABORTING' or 'FINISHED'.
-
-The code reference will be called with one argument, the C<$ent> object.
-
 =item zone (optional)
 
 A zone specification (typically a DNS zone name - e.g. host, domain, or RBL)
@@ -205,7 +181,6 @@ sub start_lookup {
   $ent->{type}              or die "oops, no type";
 
   my $now = time;
-  $ent->{status} = 'STARTED';
   $ent->{start_time} = $now  if !defined $ent->{start_time};
 
   # are there any applicable per-zone settings?
@@ -258,13 +233,14 @@ sub start_lookup {
                map { ref $ent->{$_} ? @{$ent->{$_}} : $ent->{$_} }
                qw(sets rules rulename type key) );
 
-  $self->{queries_started}++;
-  $self->{total_queries_started}++;
   $self->{pending_lookups}->{$key} = $ent;
 
+  $self->{queries_started}++;
+  $self->{total_queries_started}++;
   dbg("async: starting: %s (timeout %.1fs, min %.1fs)%s",
       $ent->{display_id}, $ent->{timeout_initial}, $ent->{timeout_min},
       !$clipped_by_master_deadline ? '' : ', capped by time limit');
+
   $ent;
 }
 
@@ -286,6 +262,8 @@ sub bgsend_and_start_lookup {
   $ent->{query_type} = $type;
   $ent->{query_domain} = $domain;
   $ent->{type} = $type  if !exists $ent->{type};
+  $cb = $ent->{completed_callback}  if !$cb;  # compatibility with SA < 3.4
+
   my $key = $ent->{key} || '';
 
   my $dnskey = uc($type) . '/' . lc($domain);
@@ -297,6 +275,8 @@ sub bgsend_and_start_lookup {
     my $id_tail = $id; $id_tail =~ s{^\d+/IN/}{};
     lc($id_tail) eq lc($dnskey)
       or info("async: unmatched id %s, key=%s", $id, $dnskey);
+
+    my $now = time;
     my $pkt = $dns_query_info->{pkt};
     if (!$pkt) {  # DNS query underway, still waiting for results
       # just add our query to the existing one
@@ -304,13 +284,15 @@ sub bgsend_and_start_lookup {
       dbg("async: query %s already underway, adding no.%d %s",
           $id, scalar @{$dns_query_info->{applicants}},
           $ent->{rulename} || $key);
+
     } else {  # DNS query already completed, re-use results
-      # answer already known, just do our callback and be done with it
+      $ent->{start_time} = $ent->{finish_time} = $now;
+      # answer already known, just do the callback and be done with it
       if (!$cb) {
         dbg("async: query %s already done, re-using for %s", $id, $key);
       } else {
         dbg("async: query %s already done, re-using for %s, callback",
-             $id, $key);
+            $id, $key);
         eval {
           $cb->($ent, $pkt); 1;
         } or do {
@@ -341,18 +323,22 @@ sub bgsend_and_start_lookup {
       dbg("async: launching %s for %s", $dnskey, $key);
       $id = $self->{main}->{resolver}->bgsend($domain, $type, $class, sub {
           my($pkt, $pkt_id, $timestamp) = @_;
+          # this callback sub is called from DnsResolver::poll_responses()
+        # dbg("async: in a bgsend_and_start_lookup callback, id %s", $pkt_id);
           if ($pkt_id ne $id) {
             warn "async: mismatched dns id: got $pkt_id, expected $id\n";
             return;
           }
           $self->set_response_packet($pkt_id, $pkt, $ent->{key}, $timestamp);
           $dns_query_info->{pkt} = $pkt;
-          my @cb_displ_names;
+          my $cb_count = 0;
           foreach my $tuple (@{$dns_query_info->{applicants}}) {
             my($appl_ent, $appl_cb) = @$tuple;
             if ($appl_cb) {
-              push(@cb_displ_names,
-                   $appl_ent->{rulename} || $appl_ent->{key} || '');
+              dbg("async: calling callback on key %s%s", $key,
+                  !defined $appl_ent->{rulename} ? ''
+                    : ", rule ".$appl_ent->{rulename});
+              $cb_count++;
               eval {
                 $appl_cb->($appl_ent, $pkt); 1;
               } or do {
@@ -364,9 +350,8 @@ sub bgsend_and_start_lookup {
               };
             }
           }
-          dbg("async: query %s completed, %s", $id,
-              !@cb_displ_names ? 'no callbacks'
-                               : 'callbacks: '.join(', ',@cb_displ_names));
+          delete $dns_query_info->{applicants};
+          dbg("async: query $id completed, no callbacks run")  if !$cb_count;
         });
     }
     return if !defined $id;
@@ -397,22 +382,6 @@ sub get_lookup {
 
 # ---------------------------------------------------------------------------
 
-=item @objs = $async->get_pending_lookups()
-
-Retrieve the lookup objects for all pending lookups.
-
-Note that a lookup is still considered "pending" until C<complete_lookups()> is
-called, even if it has been reported as complete via C<set_response_packet()>.
-
-=cut
-
-sub get_pending_lookups {
-  my ($self) = @_;
-  return values %{$self->{pending_lookups}};
-}
-
-# ---------------------------------------------------------------------------
-
 =item $async->log_lookups_timing()
 
 Log sorted timing for all completed lookups.
@@ -431,12 +400,11 @@ sub log_lookups_timing {
 
 =item $alldone = $async->complete_lookups()
 
-Perform a poll of the pending lookups, to see if any are completed; if they
-are, their <completed_callback> is called with the entry object for that
-lookup.
+Perform a poll of the pending lookups, to see if any are completed.
+Callbacks on completed queries will be called from poll_responses().
 
-If there are no lookups remaining, or if too long has elapsed since any results
-were returned, C<1> is returned, otherwise C<0>.
+If there are no lookups remaining, or if too much time has elapsed since
+any results were returned, C<1> is returned, otherwise C<0>.
 
 =cut
 
@@ -496,29 +464,19 @@ sub complete_lookups {
     }
     $now = time;  # capture new timestamp, after possible sleep in 'select'
 
+    # A callback routine may generate another DNS query, which may insert
+    # an entry into the %$pending hash thus invalidating the each() context.
+    # So, make sure that callbacks are not called while the each() context
+    # is open. [Bug 6937]
+    #
     while (my($key,$ent) = each %$pending) {
       my $id = $ent->{id};
-      if (defined $ent->{poll_callback}) {  # call a "poll_callback" if exists
-        # be nice, provide fresh info to a callback routine
-        $ent->{status} = 'FINISHED'  if exists $self->{finished}->{$id};
-        # a callback might call set_response_packet()
-      # dbg("async: calling poll_callback on key $key");
-        $ent->{poll_callback}->($ent);
-      }
-      my $finished = exists $self->{finished}->{$id};
-      if ($finished) {
-        $anydone = 1;
+      if (exists $self->{finished}->{$id}) {
         delete $self->{finished}->{$id};
-        $ent->{status} = 'FINISHED';
+        $anydone = 1;
         $ent->{finish_time} = $now  if !defined $ent->{finish_time};
         my $elapsed = $ent->{finish_time} - $ent->{start_time};
         dbg("async: completed in %.3f s: %s", $elapsed, $ent->{display_id});
-
-        # call a "completed_callback" sub, if one exists
-        if (defined $ent->{completed_callback}) {
-        # dbg("async: calling completed_callback on key $key");
-          $ent->{completed_callback}->($ent);
-        }
         $self->{timing_by_query}->{". $key"} += $elapsed;
         $self->{queries_completed}++;
         $self->{total_queries_completed}++;
@@ -586,6 +544,7 @@ sub abort_remaining_lookups {
   my $pending = $self->{pending_lookups};
   my $foundcnt = 0;
   my $now = time;
+
   while (my($key,$ent) = each %$pending) {
     dbg("async: aborting after %.3f s, %s: %s",
         $now - $ent->{start_time},
@@ -595,15 +554,37 @@ sub abort_remaining_lookups {
         $ent->{display_id} );
     $foundcnt++;
     $self->{timing_by_query}->{"X $key"} = $now - $ent->{start_time};
-
-    if (defined $ent->{completed_callback}) {
-      $ent->{finish_time} = $now  if !defined $ent->{finish_time};
-      $ent->{response_packet} = undef;
-      $ent->{status} = 'ABORTING';
-      $ent->{completed_callback}->($ent);
-    }
+    $ent->{finish_time} = $now  if !defined $ent->{finish_time};
     delete $pending->{$key};
   }
+
+  # call any remaining callbacks, indicating the query has been aborted
+  #
+  my $all_lookups_ref = $self->{all_lookups};
+  foreach my $dnskey (keys %$all_lookups_ref) {
+    my $dns_query_info = $all_lookups_ref->{$dnskey};
+    my $cb_count = 0;
+    foreach my $tuple (@{$dns_query_info->{applicants}}) {
+      my($ent, $cb) = @$tuple;
+      if ($cb) {
+        dbg("async: calling callback/abort on key %s%s", $dnskey,
+            !defined $ent->{rulename} ? '' : ", rule ".$ent->{rulename});
+        $cb_count++;
+        eval {
+          $cb->($ent, undef); 1;
+        } or do {
+          chomp $@;
+          # resignal if alarm went off
+          die "async: (2) $@\n"  if $@ =~ /__alarm__ignore__\(.*\)/s;
+          warn sprintf("query %s aborted, callback %s failed: %s\n",
+                       $dnskey, $ent->{key}, $@);
+        };
+      }
+      dbg("async: query $dnskey aborted, no callbacks run")  if !$cb_count;
+    }
+    delete $dns_query_info->{applicants};
+  }
+
   dbg("async: aborted %d remaining lookups", $foundcnt)  if $foundcnt > 0;
   delete $self->{last_poll_responses_time};
   $self->{main}->{resolver}->bgabort();
@@ -622,8 +603,9 @@ be found, and through which futher information about the query is accessible.
 
 C<$pkt> may be undef, indicating that no response packet is available, but a
 query has completed (e.g. was aborted or dismissed) and is no longer "pending".
-The C<$pkt> will be available in the C<completed_callback> function as
-C<$ent-<gt>{response_packet}>.
+
+The DNS resolver's response packet C<$pkt> will be made available to a callback
+subroutine through its argument as well as in C<$ent-<gt>{response_packet}>.
 
 =cut
 
@@ -666,7 +648,7 @@ sub set_response_packet {
 
 Legacy. Equivalent to $self->set_response_packet($id,undef,$key,$timestamp),
 i.e. providing undef as a response packet. Register that a query has
-completed, and is no longer "pending". C<$id> is the ID for the query,
+completed and is no longer "pending". C<$id> is the ID for the query,
 and must match the C<id> supplied in C<start_lookup()>.
 
 One or the other of C<set_response_packet()> or C<report_id_complete()>

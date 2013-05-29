@@ -502,6 +502,7 @@ sub process_response_packet {
   my $queries_ref = $pms->{askdns_map_dnskey_to_rules}{$dnskey};
 
   my($header, @question, @answer, $qtype, $rcode);
+  # NOTE: $pkt will be undef if the DNS query was aborted (e.g. timed out)
   if ($pkt) {
     @answer = $pkt->answer;
     $header = $pkt->header;
@@ -575,7 +576,7 @@ sub process_response_packet {
       next  if !$q_tuple;
       my($query_type, $answer_types_ref, $rules) = @$q_tuple;
 
-      next  if $query_type ne $qtype;
+      next  if !defined $qtype || $query_type ne $qtype;
       $answer_types_ref = [$query_type]  if !defined $answer_types_ref;
 
       # mark rule as done
