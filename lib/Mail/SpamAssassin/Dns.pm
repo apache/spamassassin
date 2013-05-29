@@ -147,9 +147,6 @@ sub do_dns_lookup {
   $host =~ s/\.\z//s;  # strip a redundant trailing dot
   my $key = "dns:$type:$host";
 
-  # only make a specific query once
-  return if $self->{async}->get_lookup($key);
-
   my $ent = {
     key => $key,
     zone => $host,  # serves to fetch other per-zone settings
@@ -241,8 +238,9 @@ sub dnsbl_uri {
 sub process_dnsbl_result {
   my ($self, $ent, $pkt) = @_;
 
+  return if !$pkt;
   my $question = ($pkt->question)[0];
-  return if !defined $question;
+  return if !$question;
 
   my $sets = $ent->{sets} || [];
   my $rules = $ent->{rules};

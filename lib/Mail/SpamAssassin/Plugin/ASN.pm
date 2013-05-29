@@ -319,7 +319,7 @@ sub parsed_metadata {
 #       be no CIDR field in that case.
 #
 sub process_dns_result {
-  my ($self, $pms, $response, $zone_index) = @_;
+  my ($self, $pms, $pkt, $zone_index) = @_;
 
   my $conf = $self->{main}->{conf};
 
@@ -348,7 +348,8 @@ sub process_dns_result {
     %route_tag_data_seen = map(($_,1), @route_tag_data);
   }
 
-  my @answer = !defined $response ? () : $response->answer;
+  # NOTE: $pkt will be undef if the DNS query was aborted (e.g. timed out)
+  my @answer = !defined $pkt ? () : $pkt->answer;
 
   foreach my $rr (@answer) {
     dbg("asn: %s: lookup result packet: %s", $zone, $rr->string);

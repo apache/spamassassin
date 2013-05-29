@@ -919,11 +919,16 @@ sub lookup_domain_ns {
 
 sub complete_ns_lookup {
   my ($self, $pms, $ent, $pkt, $dom) = @_;
-  my $conf = $pms->{conf};
+
+  if (!$pkt) {
+    # $pkt will be undef if the DNS query was aborted (e.g. timed out)
+    dbg("uridnsbl: complete_ns_lookup aborted %s", $ent->{key});
+    return;
+  }
 
   dbg("uridnsbl: complete_ns_lookup %s", $ent->{key});
-  my @answer;
-  @answer = $pkt->answer  if $pkt;
+  my $conf = $pms->{conf};
+  my @answer = $pkt->answer;
 
   my $IPV4_ADDRESS = IPV4_ADDRESS;
   my $IP_PRIVATE = IP_PRIVATE;
@@ -1001,9 +1006,14 @@ sub lookup_a_record {
 sub complete_a_lookup {
   my ($self, $pms, $ent, $pkt, $hname) = @_;
 
+  if (!$pkt) {
+    # $pkt will be undef if the DNS query was aborted (e.g. timed out)
+    dbg("uridnsbl: complete_a_lookup aborted %s", $ent->{key});
+    return;
+  }
+
   dbg("uridnsbl: complete_a_lookup %s", $ent->{key});
-  my @answer;
-  @answer = $pkt->answer  if $pkt;
+  my @answer = $pkt->answer;
   my $j = 0;
   foreach my $rr (@answer) {
     $j++;
@@ -1068,17 +1078,23 @@ sub lookup_single_dnsbl {
 sub complete_dnsbl_lookup {
   my ($self, $pms, $ent, $pkt) = @_;
 
+  if (!$pkt) {
+    # $pkt will be undef if the DNS query was aborted (e.g. timed out)
+    dbg("uridnsbl: complete_dnsbl_lookup aborted %s %s",
+        $ent->{rulename}, $ent->{key});
+    return;
+  }
+
   dbg("uridnsbl: complete_dnsbl_lookup %s %s", $ent->{rulename}, $ent->{key});
-  my(@answer,@subtests);
   my $conf = $pms->{conf};
 
   my $zone = $ent->{zone};
   my $dom = $ent->{obj}->{dom};
   my $rulename = $ent->{rulename};
-  @answer = $pkt->answer  if $pkt;
-
   my $rulecf = $conf->{uridnsbls}->{$rulename};
 
+  my @subtests;
+  my @answer = $pkt->answer;
   foreach my $rr (@answer)
   {
     my($rdatastr,$rdatanum);
