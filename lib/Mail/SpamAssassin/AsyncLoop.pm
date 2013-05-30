@@ -276,7 +276,6 @@ sub bgsend_and_start_lookup {
     lc($id_tail) eq lc($dnskey)
       or info("async: unmatched id %s, key=%s", $id, $dnskey);
 
-    my $now = time;
     my $pkt = $dns_query_info->{pkt};
     if (!$pkt) {  # DNS query underway, still waiting for results
       # just add our query to the existing one
@@ -286,7 +285,6 @@ sub bgsend_and_start_lookup {
           $ent->{rulename} || $key);
 
     } else {  # DNS query already completed, re-use results
-      $ent->{start_time} = $ent->{finish_time} = $now;
       # answer already known, just do the callback and be done with it
       if (!$cb) {
         dbg("async: query %s already done, re-using for %s", $id, $key);

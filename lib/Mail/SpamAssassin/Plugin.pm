@@ -873,7 +873,7 @@ Indicate if the call is being made from a command line interface.
 
 =item $plugin->spamd_child_init ()
 
-Called when a new child starts up under spamd.
+Called in each new child process when it starts up under spamd.
 
 =item $plugin->log_scan_result ( { options ... } )
 

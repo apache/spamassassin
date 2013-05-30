@@ -88,8 +88,8 @@ sub DB_VERSION {
 public instance () read_db_configs ()
 
 Description:
-This method reads any needed config variables from the configuration
-object and then calls the Mail::SpamAssassin::Plugin::Plugin::Bayes read_db_configs method.
+This method reads any needed config variables from the configuration object
+and then calls the Mail::SpamAssassin::Plugin::Bayes read_db_configs method.
 
 =cut
 
