@@ -1315,18 +1315,18 @@ sub is_regexp_valid {
   my $mods = '';
   local ($1,$2);
   if ($re =~ s/^m\{//) {
-    $re =~ s/}([a-z]*)$//; $mods = $1;
+    $re =~ s/\}([a-z]*)\z//; $mods = $1;
   }
   elsif ($re =~ s/^m\(//) {
-    $re =~ s/\)([a-z]*)$//; $mods = $1;
+    $re =~ s/\)([a-z]*)\z//; $mods = $1;
   }
   elsif ($re =~ s/^m<//) {
-    $re =~ s/>([a-z]*)$//; $mods = $1;
+    $re =~ s/>([a-z]*)\z//; $mods = $1;
   }
   elsif ($re =~ s/^m(\W)//) {
-    $re =~ s/\Q$1\E([a-z]*)$//; $mods = $1;
+    $re =~ s/\Q$1\E([a-z]*)\z//; $mods = $1;
   }
-  elsif ($re =~ s/^\/(.*)\/([a-z]*)$/$1/) {
+  elsif ($re =~ s{^/(.*)/([a-z]*)\z}{$1}) {
     $mods = $2;
   }
   else {
@@ -1350,14 +1350,14 @@ sub is_regexp_valid {
 
   # now prepend the modifiers, in order to check if they're valid
   if ($mods) {
-    $re = "(?".$mods.")".$re;
+    $re = "(?" . $mods . ")" . $re;
   }
 
   # note: this MUST use m/...${re}.../ in some form or another, ie.
   # interpolation of the $re variable into a code regexp, in order to test the
   # security of the regexp.  simply using ("" =~ $re) will NOT do that, and
   # will therefore open a hole!
-  if (eval { ("" =~ m#${re}#); 1; }) {
+  if (eval { ("" =~ m{$re}); 1; }) {
     return 1;
   }
   my $err = $@ ne '' ? $@ : "errno=$!";  chomp $err;
