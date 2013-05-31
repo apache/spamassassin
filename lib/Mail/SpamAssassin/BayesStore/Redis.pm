@@ -722,6 +722,8 @@ if the existing token atime is < C<$atime>.
 sub tok_touch_all {
   my($self, $tokens, $newatime) = @_;
 
+  return 1 unless defined $self->{expire_token};
+
   # We just refresh TTL on all
   foreach (@$tokens) {
     $self->_expire_p("t:$_", $self->{expire_token});
@@ -1177,7 +1179,9 @@ sub _del_p {
 sub _expire_p {
   my ($self, $key, $expire) = @_;
 
-  $self->{redis}->expire($key, $expire, sub {});
+  if (defined $expire) {
+    $self->{redis}->expire($key, $expire, sub {});
+  }
 
   return 1;
 }
