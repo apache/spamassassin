@@ -117,6 +117,33 @@ sub read_db_configs {
   $self->{bayes}->read_db_configs();
 }
 
+=item prefork_init
+
+public instance (Boolean) prefork_init ()
+
+Description:
+This optional method is called in the parent process shortly before
+forking off child processes.
+
+=cut
+
+# sub prefork_init {
+#   my ($self) = @_;
+# }
+
+=item spamd_child_init
+
+public instance (Boolean) spamd_child_init ()
+
+Description:
+This optional method is called in a child process shortly after being spawned.
+
+=cut
+
+# sub spamd_child_init {
+#   my ($self) = @_;
+# }
+
 =item tie_db_readonly
 
 public instance (Boolean) tie_db_readonly ()
