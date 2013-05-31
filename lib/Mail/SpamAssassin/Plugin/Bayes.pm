@@ -249,6 +249,8 @@ sub finish {
   %{$self} = ();
 }
 
+###########################################################################
+
 # Plugin hook.
 # Return this implementation object, for callers that need to know
 # it.  TODO: callers shouldn't *need* to know it! 
@@ -258,6 +260,31 @@ sub learner_get_implementation { return shift; }
 
 ###########################################################################
 
+# Plugin hook.
+# Called in the parent process shortly before forking off child processes.
+sub prefork_init {
+  my ($self) = @_;
+
+  if ($self->{store} && $self->{store}->UNIVERSAL::can('prefork_init')) {
+    $self->{store}->prefork_init;
+  }
+}
+
+###########################################################################
+
+# Plugin hook.
+# Called in a child process shortly after being spawned.
+sub spamd_child_init {
+  my ($self) = @_;
+
+  if ($self->{store} && $self->{store}->UNIVERSAL::can('spamd_child_init')) {
+    $self->{store}->spamd_child_init;
+  }
+}
+
+###########################################################################
+
+# Plugin hook.
 sub check_bayes {
   my ($self, $pms, $fulltext, $min, $max) = @_;
 
@@ -349,6 +376,7 @@ sub learn_message {
 
   eval {
     local $SIG{'__DIE__'};	# do not run user die() traps in here
+    my $timer = $self->{main}->time_method("b_learn");
 
     my $ok;
     if ($self->{main}->{learn_to_journal}) {
@@ -484,6 +512,7 @@ sub forget_message {
   # synchronously
   eval {
     local $SIG{'__DIE__'};	# do not run user die() traps in here
+    my $timer = $self->{main}->time_method("b_learn");
 
     my $ok;
     if ($self->{main}->{learn_to_journal}) {

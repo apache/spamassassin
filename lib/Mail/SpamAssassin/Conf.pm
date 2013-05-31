@@ -2089,7 +2089,9 @@ equivalent to a 8Mb database file.
 
 If enabled, the Bayes system will try to automatically expire old tokens
 from the database.  Auto-expiry occurs when the number of tokens in the
-database surpasses the bayes_expiry_max_db_size value.
+database surpasses the bayes_expiry_max_db_size value. If a bayes datastore
+backend does not implement individual key/value expirations, the setting
+is silently ignored.
 
 =cut
 
@@ -2097,6 +2099,39 @@ database surpasses the bayes_expiry_max_db_size value.
     setting => 'bayes_auto_expire',
     default => 1,
     type => $CONF_TYPE_BOOL,
+  });
+
+=item bayes_token_ttl       		(default: 1814400, i.e. 3 weeks)
+
+If bayes_auto_expire is true and a Bayes datastore backend supports it
+(currently only Redis), this is a time-to-live / expiration time in seconds
+(since the last time they were touched) for tokens kept in a Bayes database.
+The value is observed on a best-effort basis, exact timing promises are not
+necessarily kept. If a bayes datastore backend does not implement individual
+key/value expirations, the setting is silently ignored.
+
+=cut
+
+  push (@cmds, {
+    setting => 'bayes_token_ttl',
+    default => 3*7*24*60*60,  # seconds
+    type => $CONF_TYPE_NUMERIC,
+  });
+
+=item bayes_seen_ttl       		(default: 691200, i.e. 8 days)
+
+If bayes_auto_expire is true and a Bayes datastore backend supports it
+(currently only Redis), this is a time-to-live / expiration time in seconds
+for 'seen' entries (i.e. mail message digests with their status) kept in a
+Bayes database. The value is observed on a best-effort basis, exact timing
+promises are not necessarily kept.
+
+=cut
+
+  push (@cmds, {
+    setting => 'bayes_token_ttl',
+    default => 8*24*60*60,  # seconds
+    type => $CONF_TYPE_NUMERIC,
   });
 
 =item bayes_learn_to_journal  	(default: 0)
