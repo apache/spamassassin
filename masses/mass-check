@@ -338,6 +338,7 @@ my $spamtest = create_spamtest();
 $spamtest->compile_now(0);      # 0 since we will be reading more configs
 $spamtest->read_scoreonly_config("$FindBin::Bin/mass-check.cf");
 $spamtest->read_scoreonly_config($user_prefs);
+$spamtest->call_plugins("prefork_init");  # since SA 3.4.0
 
 my $who = `id -un 2>/dev/null`;
 my $where = `uname -n 2>/dev/null`;
