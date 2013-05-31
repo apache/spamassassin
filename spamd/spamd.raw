@@ -1179,6 +1179,13 @@ if (defined $opt{'pidfile'}) {
   }
 }
 
+# The "prefork_init" plugin callback is called in the parent process shortly
+# before forking off child processes. It allows plugins which were activated
+# by the master spamd process to prepare for a fork, e.g. by closing or
+# dropping some resources which won't be of any use by a child process.
+#
+$spamtest->call_plugins("prefork_init");  # since SA 3.4.0
+
 # now allow waiting processes to connect, if they're watching the log.
 # The test suite does this!
 info("spamd: server pid: $$");
