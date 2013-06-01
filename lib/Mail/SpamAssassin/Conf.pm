@@ -2129,7 +2129,7 @@ promises are not necessarily kept.
 =cut
 
   push (@cmds, {
-    setting => 'bayes_token_ttl',
+    setting => 'bayes_seen_ttl',
     default => 8*24*60*60,  # seconds
     type => $CONF_TYPE_NUMERIC,
   });
