@@ -425,7 +425,7 @@ static int _try_to_connect_unix(struct transport *tp, int *sockptr)
 	return EX_OK;
     }
 
-    libspamc_log(tp->flags, LOG_ERR, "connect(AF_UNIX) to spamd %s failed: %s",
+    libspamc_log(tp->flags, LOG_ERR, "connect(AF_UNIX) to spamd using --socket='%s' failed: %s",
 	   addrbuf.sun_path, strerror(origerr));
     closesocket(mysock);
 
