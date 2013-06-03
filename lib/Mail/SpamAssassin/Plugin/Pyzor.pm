@@ -118,7 +118,9 @@ set this to a relatively low value, e.g. C<5>.
 =item pyzor_timeout n		(default: 3.5)
 
 How many seconds you wait for Pyzor to complete, before scanning continues
-without the Pyzor results.
+without the Pyzor results. A numeric value is optionally suffixed by a
+time unit (s, m, h, d, w, indicating seconds (default), minutes, hours,
+days, weeks).
 
 You can configure Pyzor to have its own per-server timeout.  Set this
 plugin's timeout with that in mind.  This plugin's timeout is a maximum
@@ -142,7 +144,7 @@ removing one of them.
     setting => 'pyzor_timeout',
     is_admin => 1,
     default => 3.5,
-    type => $Mail::SpamAssassin::Conf::CONF_TYPE_NUMERIC
+    type => $Mail::SpamAssassin::Conf::CONF_TYPE_DURATION
   });
 
 =item pyzor_options options

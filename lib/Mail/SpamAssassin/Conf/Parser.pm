@@ -65,6 +65,9 @@ The type of this setting:
  - $CONF_TYPE_HASH_KEY_VALUE: hash key/value pair, like "describe" or tflags
  - $CONF_TYPE_STRINGLIST list of strings, stored as an array
  - $CONF_TYPE_IPADDRLIST list of IP addresses, stored as an array of SA::NetSet
+ - $CONF_TYPE_DURATION a nonnegative time interval in seconds - a numeric value
+                      (float or int), optionally suffixed by a time unit (s, m,
+                      h, d, w), seconds are implied if unit is missing
 
 If this is set, and a 'code' block does not already exist, a 'code' block is
 assigned based on the type.
@@ -689,6 +692,9 @@ sub setup_default_code_cb {
   elsif ($type == $Mail::SpamAssassin::Conf::CONF_TYPE_IPADDRLIST) {
     $cmd->{code} = \&set_ipaddr_list;
   }
+  elsif ($type == $Mail::SpamAssassin::Conf::CONF_TYPE_DURATION) {
+    $cmd->{code} = \&set_duration_value;
+  }
   else {
     warn "config: unknown conf type $type!";
     return 0;
@@ -710,11 +716,28 @@ sub set_numeric_value {
   unless (defined $value && $value !~ /^$/) {
     return $Mail::SpamAssassin::Conf::MISSING_REQUIRED_VALUE;
   }
-  unless ($value =~ /^-?\d+(?:\.\d+)?$/) {
+  unless ($value =~ /^ [+-]? \d+ (?: \. \d* )? \z/sx) {
     return $Mail::SpamAssassin::Conf::INVALID_VALUE;
   }
-  # it is safe to untaint now that we now the syntax is a valid number
-  $conf->{$key} = untaint_var($value) + 0.0;
+  # it is safe to untaint now that we know the syntax is a valid number
+  $conf->{$key} = untaint_var($value) + 0;
+}
+
+sub set_duration_value {
+  my ($conf, $key, $value, $line) = @_;
+
+  local ($1,$2);
+  unless (defined $value && $value !~ /^$/) {
+    return $Mail::SpamAssassin::Conf::MISSING_REQUIRED_VALUE;
+  }
+  unless ($value =~ /^( \+? \d+ (?: \. \d* )? ) (?: \s* ([smhdw]))? \z/sxi) {
+    return $Mail::SpamAssassin::Conf::INVALID_VALUE;
+  }
+  $value = $1;
+  $value *= { s => 1, m => 60, h => 3600,
+              d => 24*3600, w => 7*24*3600 }->{lc $2}  if defined $2;
+  # it is safe to untaint now that we know the syntax is a valid time interval
+  $conf->{$key} = untaint_var($value) + 0;
 }
 
 sub set_bool_value {

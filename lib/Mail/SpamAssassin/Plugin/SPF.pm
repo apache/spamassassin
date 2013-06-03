@@ -131,7 +131,9 @@ these are often targets for spammer spoofing.
 =item spf_timeout n		(default: 5)
 
 How many seconds to wait for an SPF query to complete, before scanning
-continues without the SPF result.
+continues without the SPF result. A numeric value is optionally suffixed
+by a time unit (s, m, h, d, w, indicating seconds (default), minutes, hours,
+days, weeks).
 
 =cut
 
@@ -139,7 +141,7 @@ continues without the SPF result.
     setting => 'spf_timeout',
     is_admin => 1,
     default => 5,
-    type => $Mail::SpamAssassin::Conf::CONF_TYPE_NUMERIC
+    type => $Mail::SpamAssassin::Conf::CONF_TYPE_DURATION
   });
 
 =item do_not_use_mail_spf (0|1)		(default: 0)

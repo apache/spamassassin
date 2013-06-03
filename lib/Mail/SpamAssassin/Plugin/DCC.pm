@@ -192,7 +192,9 @@ The default is C<90>.
 =item dcc_timeout n		(default: 8)
 
 How many seconds you wait for DCC to complete, before scanning continues
-without the DCC results.
+without the DCC results. A numeric value is optionally suffixed by a
+time unit (s, m, h, d, w, indicating seconds (default), minutes, hours,
+days, weeks).
 
 =cut
 
@@ -200,7 +202,7 @@ without the DCC results.
     setting => 'dcc_timeout',
     is_admin => 1,
     default => 8,
-    type => $Mail::SpamAssassin::Conf::CONF_TYPE_NUMERIC,
+    type => $Mail::SpamAssassin::Conf::CONF_TYPE_DURATION,
   });
 
 =item dcc_home STRING

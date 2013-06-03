@@ -71,6 +71,7 @@ my $EXPECTED_VAL_ADDRLIST       = '__test_expected_foo@bar.com';
 my $EXPECTED_VAL_NOARGS         = '__test_expected_noargs';
 my $EXPECTED_VAL_STRINGLIST     = [qw(__test_expected_s1 __test_expected_s2)];
 my $EXPECTED_VAL_IPADDRLIST     = '__test_expected_';
+my $EXPECTED_VAL_DURATION       = 9438234;
 
 my %expected_val;
 my %ignored_command;
@@ -158,6 +159,9 @@ sub set_all_confs {
     elsif ($cmd->{type} == $Mail::SpamAssassin::Conf::CONF_TYPE_NUMERIC) {
       $conf->{$k} = $EXPECTED_VAL_NUMERIC;
     }
+    elsif ($cmd->{type} == $Mail::SpamAssassin::Conf::CONF_TYPE_DURATION) {
+      $conf->{$k} = $EXPECTED_VAL_NUMERIC;
+    }
     elsif ($cmd->{type} == $Mail::SpamAssassin::Conf::CONF_TYPE_TEMPLATE) {
       $conf->{$k} = $EXPECTED_VAL_TEMPLATE;
     }
@@ -215,6 +219,9 @@ sub validate_all_confs {
       assert_validation($conf->{$k}, $expected_val{$k});
     }
     elsif ($cmd->{type} == $Mail::SpamAssassin::Conf::CONF_TYPE_NUMERIC) {
+      assert_validation($conf->{$k}, $expected_val{$k});
+    }
+    elsif ($cmd->{type} == $Mail::SpamAssassin::Conf::CONF_TYPE_DURATION) {
       assert_validation($conf->{$k}, $expected_val{$k});
     }
     elsif ($cmd->{type} == $Mail::SpamAssassin::Conf::CONF_TYPE_TEMPLATE) {
