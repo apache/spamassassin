@@ -458,8 +458,10 @@ Example:
 
 =item dkim_timeout n             (default: 5)
 
-How many seconds to wait for a DKIM query to complete, before
-scanning continues without the DKIM result.
+How many seconds to wait for a DKIM query to complete, before scanning
+continues without the DKIM result. A numeric value is optionally suffixed
+by a time unit (s, m, h, d, w, indicating seconds (default), minutes, hours,
+days, weeks).
 
 =back
 
@@ -469,7 +471,7 @@ scanning continues without the DKIM result.
     setting => 'dkim_timeout',
     is_admin => 1,
     default => 5,
-    type => $Mail::SpamAssassin::Conf::CONF_TYPE_NUMERIC
+    type => $Mail::SpamAssassin::Conf::CONF_TYPE_DURATION
   });
 
   $conf->{parser}->register_commands(\@cmds);

@@ -326,7 +326,7 @@ The file mode bits used for the automatic-whitelist directory or file.
 
 Make sure you specify this using the 'x' mode bits set, as it may also be used
 to create directories.  However, if a file is created, the resulting file will
-not have any execute bits set (the umask is set to 111).
+not have any execute bits set (the umask is set to 0111).
 
 =cut
 
@@ -337,7 +337,7 @@ not have any execute bits set (the umask is set to 111).
 		type => $Mail::SpamAssassin::Conf::CONF_TYPE_NUMERIC,
 		code => sub {
 		  my ($self, $key, $value, $line) = @_;
-		  if ($value !~ /^0?\d{3}$/) {
+		  if ($value !~ /^0?[0-7]{3}$/) {
                     return $Mail::SpamAssassin::Conf::INVALID_VALUE;
                   }
 		  $self->{auto_whitelist_file_mode} = untaint_var($value);

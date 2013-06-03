@@ -97,7 +97,7 @@ use vars qw{
   $CONF_TYPE_NUMERIC $CONF_TYPE_HASH_KEY_VALUE
   $CONF_TYPE_ADDRLIST $CONF_TYPE_TEMPLATE
   $CONF_TYPE_STRINGLIST $CONF_TYPE_IPADDRLIST
-  $CONF_TYPE_NOARGS
+  $CONF_TYPE_DURATION $CONF_TYPE_NOARGS
   $MISSING_REQUIRED_VALUE $INVALID_VALUE $INVALID_HEADER_FIELD_NAME
   @MIGRATED_SETTINGS
   $COLLECT_REGRESSION_TESTS
@@ -145,6 +145,7 @@ $CONF_TYPE_TEMPLATE         =  6;
 $CONF_TYPE_NOARGS           =  7;
 $CONF_TYPE_STRINGLIST       =  8;
 $CONF_TYPE_IPADDRLIST       =  9;
+$CONF_TYPE_DURATION         = 10;
 $MISSING_REQUIRED_VALUE     = '-99999999999999';  # string expected by parser
 $INVALID_VALUE              = '-99999999999998';
 $INVALID_HEADER_FIELD_NAME  = '-99999999999997';
@@ -1700,18 +1701,15 @@ See also directives I<dns_local_ports_permit> and I<dns_local_ports_avoid>.
 
 If dns_available is set to I<test>, the dns_test_interval time in number
 of seconds will tell SpamAssassin how often to retest for working DNS.
+A numeric value is optionally suffixed by a time unit (s, m, h, d, w,
+indicating seconds (default), minutes, hours, days, weeks).
 
 =cut
 
   push (@cmds, {
     setting => 'dns_test_interval',
     default => 600,
-    type => $CONF_TYPE_NUMERIC,
-    code => sub {
-      my ($self, $key, $value, $line) = @_;
-      if ($value !~ /^\d+$/) { return $INVALID_VALUE; }
-      $self->{dns_test_interval} = $value;
-    }
+    type => $CONF_TYPE_DURATION,
   });
 
 =item dns_options opts   (default: norotate, nodns0x20, edns=4096)
@@ -2101,37 +2099,47 @@ is silently ignored.
     type => $CONF_TYPE_BOOL,
   });
 
-=item bayes_token_ttl       		(default: 1814400, i.e. 3 weeks)
+=item bayes_token_ttl       		(default: 3w, i.e. 3 weeks)
+
+Time-to-live / expiration time in seconds for tokens kept in a Bayes database.
+A numeric value is optionally suffixed by a time unit (s, m, h, d, w,
+indicating seconds (default), minutes, hours, days, weeks).
 
 If bayes_auto_expire is true and a Bayes datastore backend supports it
-(currently only Redis), this is a time-to-live / expiration time in seconds
-(since the last time they were touched) for tokens kept in a Bayes database.
-The value is observed on a best-effort basis, exact timing promises are not
-necessarily kept. If a bayes datastore backend does not implement individual
-key/value expirations, the setting is silently ignored.
+(currently only Redis), this setting controls deletion of expired tokens
+from a bayes database. The value is observed on a best-effort basis, exact
+timing promises are not necessarily kept. If a bayes datastore backend
+does not implement individual key/value expirations, the setting is silently
+ignored.
 
 =cut
 
   push (@cmds, {
     setting => 'bayes_token_ttl',
-    default => 3*7*24*60*60,  # seconds
-    type => $CONF_TYPE_NUMERIC,
+    default => 3*7*24*60*60,  # seconds (3 weeks)
+    type => $CONF_TYPE_DURATION,
   });
 
-=item bayes_seen_ttl       		(default: 691200, i.e. 8 days)
+=item bayes_seen_ttl       		(default: 8d, i.e. 8 days)
+
+Time-to-live / expiration time in seconds for 'seen' entries
+(i.e. mail message digests with their status) kept in a Bayes database.
+A numeric value is optionally suffixed by a time unit (s, m, h, d, w,
+indicating seconds (default), minutes, hours, days, weeks).
 
 If bayes_auto_expire is true and a Bayes datastore backend supports it
-(currently only Redis), this is a time-to-live / expiration time in seconds
-for 'seen' entries (i.e. mail message digests with their status) kept in a
-Bayes database. The value is observed on a best-effort basis, exact timing
-promises are not necessarily kept.
+(currently only Redis), this setting controls deletion of expired 'seen'
+entries from a bayes database. The value is observed on a best-effort basis,
+exact timing promises are not necessarily kept. If a bayes datastore backend
+does not implement individual key/value expirations, the setting is silently
+ignored.
 
 =cut
 
   push (@cmds, {
     setting => 'bayes_seen_ttl',
-    default => 8*24*60*60,  # seconds
-    type => $CONF_TYPE_NUMERIC,
+    default => 8*24*60*60,  # seconds (8 days)
+    type => $CONF_TYPE_DURATION,
   });
 
 =item bayes_learn_to_journal  	(default: 0)
@@ -2209,14 +2217,7 @@ maybe 50 seconds, assuming that clients are willing to wait at least a minute.
   push (@cmds, {
     setting => 'time_limit',
     default => 300,
-    type => $CONF_TYPE_NUMERIC,
-    code => sub {
-      my ($self, $key, $value, $line) = @_;
-      if ($value !~ /^\d+(?:\.\d*)?$/) { return $INVALID_VALUE }
-      $value = 0+$value;
-      if ($value < 0) { return $INVALID_VALUE }
-      $self->{time_limit} = $value;
-    }
+    type => $CONF_TYPE_DURATION,
   });
 
 =item lock_method type
@@ -3302,24 +3303,31 @@ subdomain of the specified zone.
 	return $MISSING_REQUIRED_VALUE;
       }
       local ($1,$2,$3);
-      unless ($value =~ /^        ( [+-]? \d+ (?: \. \d*)? )
-                          (?: \s+ ( [+-]? \d+ (?: \. \d*)? ) )?
-                          (?: \s+ (\S* [a-zA-Z]) )? $/xs) {
+      unless ($value =~ /^        ( \+? \d+ (?: \. \d*)? [smhdw]? )
+                          (?: \s+ ( \+? \d+ (?: \. \d*)? [smhdw]? ) )?
+                          (?: \s+ (\S* [a-zA-Z]) )? $/xsi) {
 	return $INVALID_VALUE;
       }
-      my $zone = $3;
+      my($timeout, $timeout_min, $zone) = ($1, $2, $3);
+      foreach ($timeout, $timeout_min) {
+        if (defined $_ && s/\s*([smhdw])\z//i) {
+          $_ *= { s => 1, m => 60, h => 3600,
+                  d => 24*3600, w => 7*24*3600 }->{lc $1};
+        }
+      }
       if (!defined $zone) {  # a global setting
-        $self->{rbl_timeout}     = $1+0;
-        $self->{rbl_timeout_min} = $2+0  if defined $2;
+        $self->{rbl_timeout}     = 0 + $timeout;
+        $self->{rbl_timeout_min} = 0 + $timeout_min  if defined $timeout_min;
       }
       else {  # per-zone settings
         $zone =~ s/^\.//;  $zone =~ s/\.\z//;  # strip leading and trailing dot
         $zone = lc $zone;
-        $self->{by_zone}{$zone}{rbl_timeout}     = $1+0;
-        $self->{by_zone}{$zone}{rbl_timeout_min} = $2+0  if defined $2;
+        $self->{by_zone}{$zone}{rbl_timeout} = 0 + $timeout;
+        $self->{by_zone}{$zone}{rbl_timeout_min} =
+                                     0 + $timeout_min  if defined $timeout_min;
       }
     },
-    type => $CONF_TYPE_NUMERIC,
+    type => $CONF_TYPE_DURATION,
   });
 
 =item util_rb_tld tld1 tld2 ...
@@ -3451,7 +3459,7 @@ string of octal digits, it is converted to a numeric value internally.
     type => $CONF_TYPE_NUMERIC,
     code => sub {
       my ($self, $key, $value, $line) = @_;
-      if ($value !~ /^0?\d{3}$/) { return $INVALID_VALUE }
+      if ($value !~ /^0?[0-7]{3}$/) { return $INVALID_VALUE }
       $self->{bayes_file_mode} = untaint_var($value);
     }
   });
