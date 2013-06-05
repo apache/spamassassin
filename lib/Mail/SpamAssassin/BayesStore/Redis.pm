@@ -1236,7 +1236,7 @@ sub _del {
   }
   elsif ($err) {
     $err =~ s{ at /.*}{}s; # skip full trace
-    die("bayes: mset failed: $err");
+    die("bayes: del failed: $err");
   }
 
   return 1;
