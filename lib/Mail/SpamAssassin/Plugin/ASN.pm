@@ -23,7 +23,7 @@
 # Modifications by D. Stussy, 2010-12-15 (SpamAssassin enhancement #6484):
 #
 # Since SA 3.4.0 a fixed text prefix (such as AS) to each ASN is configurable
-# through an asn_prefix directive. Its value is 'AS' by default for backwards
+# through an asn_prefix directive. Its value is 'AS' by default for backward
 # compatibility with SA 3.3.*, but is rather redundant and can be set to an
 # empty string for clarity if desired.
 #
@@ -185,7 +185,7 @@ Removes any previously declared I<asn_lookup> entries from a list of queries.
 
 The string specified in the argument is prepended to each ASN when storing
 it as a tag. This prefix is rather redundant, but its default value 'AS'
-is kept for backwards compatibility with versions of SpamAssassin earlier
+is kept for backward compatibility with versions of SpamAssassin earlier
 than 3.4.0. A sensible setting is an empty string. The argument may be (but
 need not be) enclosed in single or double quotes for clarity.
 

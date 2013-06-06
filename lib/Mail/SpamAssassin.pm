@@ -281,7 +281,7 @@ value will be empty. Currently no built-in tags start with 'NO'. A later
 entry overrides previous one, e.g. ASN,NOASN,ASN,TIMING,NOASN is equivalent
 to TIMING,NOASN.
 
-For backwards compatibility, all tags available as of version 3.2.4 will
+For backward compatibility, all tags available as of version 3.2.4 will
 be available by default (unless disabled by NOtag), even if not requested
 through need_tags option. Future versions may provide new tags conditionally
 available.
@@ -335,7 +335,7 @@ library.
 
 This setting requires the caller to decide when to call srand().
 This choice may be desired to preserve the entropy of a PRNG.  The default
-value of skip_prng_reseeding is false to maintain backwards compatibility. 
+value of skip_prng_reseeding is false to maintain backward compatibility. 
 
 This option should only be set by a caller if it calls srand() upon spawning
 child processes.  Unless you are certain you need it, leave this setting as
@@ -395,7 +395,7 @@ sub new {
   if (!defined $self) { $self = { }; }
   bless ($self, $class);
 
-  # basic backwards compatibility; debug used to be a boolean.
+  # basic backward compatibility; debug used to be a boolean.
   # translate that into 'all', which is what it meant before 3.1.0.
   if ($self->{debug} && $self->{debug} eq '1') {
     $self->{debug} = 'all';

@@ -86,7 +86,7 @@ sub log_message {
   my $timestamp;
   my $fmt = $self->{timestamp_fmt};
   if (!defined $fmt) {
-    $timestamp = scalar localtime;  # default, backwards compatibility
+    $timestamp = scalar localtime;  # default, backward compatibility
   } elsif ($fmt eq '') {
     $timestamp = '';
   } else {
