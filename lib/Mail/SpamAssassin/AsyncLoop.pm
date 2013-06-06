@@ -612,7 +612,7 @@ sub set_response_packet {
   $self->{finished}->{$id} = 1;  # only key existence matters, any value
   $timestamp = time  if !defined $timestamp;
   my $pending = $self->{pending_lookups};
-  if (!defined $key) {  # backwards compatibility with 3.2.3 and older plugins
+  if (!defined $key) {  # backward compatibility with 3.2.3 and older plugins
     # a third-party plugin did not provide $key in a call, search for it:
     if ($id eq $pending->{$id}->{id}) {  # I feel lucky, key==id ?
       $key = $id;

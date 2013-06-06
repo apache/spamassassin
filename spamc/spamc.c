@@ -321,7 +321,7 @@ read_args(int argc, char **argv,
 #endif
             case 'f':
             {
-                /* obsolete, backwards compat */
+                /* obsolete, backward compat */
                 break;
             }
             case 'K':

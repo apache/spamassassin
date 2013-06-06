@@ -2531,7 +2531,7 @@ description is used.
 
 =back
 
-Backwards compatibility: the two mandatory arguments have been part of this API
+Backward compatibility: the two mandatory arguments have been part of this API
 since SpamAssassin 2.x.  The optional I<name=<gt>value> pairs, however, are a
 new addition in SpamAssassin 3.2.0.
 

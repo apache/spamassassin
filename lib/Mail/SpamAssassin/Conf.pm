@@ -185,7 +185,7 @@ name is still accepted, but is deprecated.
 
   push (@cmds, {
     setting => 'required_score',
-    aliases => ['required_hits'],       # backwards compat
+    aliases => ['required_hits'],       # backward compatible
     default => 5,
     type => $CONF_TYPE_NUMERIC,
   });

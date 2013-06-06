@@ -32,7 +32,7 @@ header markup.
 
 =head1 REQUIREMENT
 
-This plugin requires the Geo::IP module from CPAN. For backwards
+This plugin requires the Geo::IP module from CPAN. For backward
 compatibility IP::Country::Fast is used if Geo::IP is not installed.
 
 =cut

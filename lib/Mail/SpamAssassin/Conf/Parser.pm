@@ -393,7 +393,7 @@ sub parse {
       # "3.0.x" versions:
       ## make sure it's a numeric value
       #$value += 0.0;
-      ## convert 3.000000 -> 3.0, stay backwards compatible ...
+      ## convert 3.000000 -> 3.0, stay backward compatible ...
       #$ver =~ s/^(\d+)\.(\d{1,3}).*$/sprintf "%d.%d", $1, $2/e;
       #$value =~ s/^(\d+)\.(\d{1,3}).*$/sprintf "%d.%d", $1, $2/e;
 
