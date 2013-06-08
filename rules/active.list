@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bernie-mix bpoliakoff grenier jarif kpg-gah mas-cps mas-mas zmi; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bernie-mix bpoliakoff grenier jarif kpg-gah llanga mas-cps mas-mas zmi; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bernie-mix bpoliakoff grenier jarif kpg-gah llanga mas-cps mas-mas zmi
+# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bernie-mix bpoliakoff grenier jarif kpg-gah zmi; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bernie-mix bpoliakoff grenier jarif kpg-gah llanga mas-cps mas-mas zmi; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bernie-mix bpoliakoff grenier jarif kpg-gah llanga mas-cps mas-mas zmi
 
 # tflags publish
 ADVANCE_FEE_2_NEW_FORM
@@ -71,9 +71,6 @@ AXB_XMAILER_MIMEOLE_OL_7EB15
 AXB_XMAILER_MIMEOLE_OL_8627E
 
 # good enough
-AXB_XMAILER_MIMEOLE_OL_A275F
-
-# good enough
 AXB_XMA_BASP
 
 # tflags learn
@@ -123,6 +120,9 @@ COMPENSATION
 
 # tflags publish
 CORRUPT_FROM_LINE_IN_HDRS
+
+# good enough
+DATE_DOTS
 
 # good enough
 DATE_IN_FUTURE_Q_PLUS
@@ -181,11 +181,17 @@ DRUGS_STOCK_MIMEOLE
 # tflags publish
 EMAIL_URI_PHISH
 
+# good enough
+EMPTY_BODY
+
 # tflags userconf
 ENV_AND_HDR_SPF_MATCH
 
 # good enough
 FB_CIALIS_LEO3
+
+# good enough
+FB_GREAT_BEST_SEX
 
 # good enough
 FH_FAKE_RCVD_LINE
@@ -195,6 +201,9 @@ FH_FAKE_RCVD_LINE_B
 
 # good enough
 FH_HELO_ALMOST_IP
+
+# good enough
+FH_HELO_EQ_CHARTER
 
 # tflags publish
 FILL_THIS_FORM
@@ -258,9 +267,6 @@ FROM_MISSP_TO_UNDISC
 
 # good enough
 FROM_MISSP_USER
-
-# good enough
-FR_TITLE_NUMS
 
 # good enough
 FSL_CTYPE_WIN1251
@@ -361,14 +367,14 @@ LOTTO_AGENT
 # good enough
 LOTTO_DEPT
 
-# good enough
-MANY_PILL_PRICE
-
 # tflags publish
 MANY_SPAN_IN_TEXT
 
 # tflags userconf
 MIME_CHARSET_FARAWAY
+
+# good enough
+MIME_NO_TEXT
 
 # tflags userconf
 MISSING_HB_SEP
@@ -632,9 +638,6 @@ RCVD_IN_SORBS_ZOMBIE
 RCVD_IN_XBL
 
 # good enough
-RDNS_LOCALHOST
-
-# good enough
 RISK_FREE
 
 # good enough
@@ -725,19 +728,19 @@ TVD_RCVD_SINGLE
 TVD_UNDER_VALUED
 
 # good enough
-DATE_DOTS
+AXB_BODYMAIL_SBL112884
 
 # good enough
-EMPTY_BODY
+FROM_MISSP_PHISH
 
 # good enough
-FB_GREAT_BEST_SEX
+FS_MAKE_MONEY
 
 # good enough
-MIME_NO_TEXT
+HDRS_LCASE
 
 # good enough
-OBFU_HTML_ATTACH
+TVD_FROM_1
 
 # tflags userconf
 UNPARSEABLE_RELAY
