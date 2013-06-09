@@ -1063,7 +1063,7 @@ uri         __URI_WWW_MC         m,://(?!(?-i:www|WWW))www\.,i
 uri         __URI_TLD_MC         /\.(?!(?-i:com|net|org|biz|info|COM|NET|ORG))(?:com|net|org|biz|info)\b/i
 uri         __URI_GOOG_MC        /(?!(?-i:[Gg]oogle))google/i
 
-rawbody     __HTML_FONT_TINY_01  /font-size:\s?[0-4]px;/i
+rawbody     __HTML_FONT_TINY_01  /font-size:\s{0,5}[0-4]px;/i
 meta        HTML_FONT_TINY       __HTML_FONT_TINY_01 && __TAG_EXISTS_BODY
 describe    HTML_FONT_TINY       Font too small to read
 score       HTML_FONT_TINY       1.00	# limit
@@ -1110,6 +1110,14 @@ uri         __URI_DOM_DOTDOT      m,://[^/]+\.\.,
 meta        FOUND_YOU          __FOUND_YOU && !__MIME_QP && !__CTYPE_HAS_BOUNDARY && !__LOCAL_PP_NONPPURL && !__RCD_RDNS_MAIL_MESSY && !__DKIM_EXISTS && !__SUBJ_RE && !__HAS_X_REF && !__RP_MATCHES_RCVD && !__TO_NO_ARROWS_R
 score       FOUND_YOU          3.25	# limit
 describe    FOUND_YOU          I found you...
+
+
+rawbody     __HTML_FONT_ONE_WORD_01   />\s{0,5}\S{1,15}\s{0,5}<\/font>/i
+tflags      __HTML_FONT_ONE_WORD_01   multiple maxhits=26
+meta        HTML_FONT_ONE_WORD_MANY   __HTML_FONT_ONE_WORD_01 > 25
+describe    HTML_FONT_ONE_WORD_MANY   Many one-word font changes
+score       HTML_FONT_ONE_WORD_MANY   0.50	# limit (initial)
+
 
 
 
