@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bernie-mix bpoliakoff grenier jarif kpg-gah zmi; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bernie-mix bpoliakoff grenier jarif kpg-gah llanga mas-cps mas-mas zmi; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bernie-mix bpoliakoff grenier jarif kpg-gah llanga mas-cps mas-mas zmi
+# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bernie-mix bpoliakoff grenier jarif kpg-gah mas-cps mas-mas zmi; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bernie-mix bpoliakoff grenier jarif kpg-gah llanga mas-cps mas-mas zmi; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bernie-mix bpoliakoff grenier jarif kpg-gah llanga zmi
 
 # tflags publish
 ADVANCE_FEE_2_NEW_FORM
@@ -53,13 +53,13 @@ ALL_TRUSTED
 ANY_PILL_PRICE
 
 # good enough
+AXB_BODYMAIL_SBL112884
+
+# good enough
 AXB_XMAILER_MIMEOLE_OL_024C2
 
 # good enough
 AXB_XMAILER_MIMEOLE_OL_1ECD5
-
-# good enough
-AXB_XMAILER_MIMEOLE_OL_22B61
 
 # good enough
 AXB_XMAILER_MIMEOLE_OL_4379D
@@ -122,9 +122,6 @@ COMPENSATION
 CORRUPT_FROM_LINE_IN_HDRS
 
 # good enough
-DATE_DOTS
-
-# good enough
 DATE_IN_FUTURE_Q_PLUS
 
 # good enough
@@ -176,22 +173,19 @@ DOS_ANAL_SPAM_MAILER
 DOS_OE_TO_MX
 
 # good enough
+DOS_RCVD_IP_TWICE_C
+
+# good enough
 DRUGS_STOCK_MIMEOLE
 
 # tflags publish
 EMAIL_URI_PHISH
-
-# good enough
-EMPTY_BODY
 
 # tflags userconf
 ENV_AND_HDR_SPF_MATCH
 
 # good enough
 FB_CIALIS_LEO3
-
-# good enough
-FB_GREAT_BEST_SEX
 
 # good enough
 FH_FAKE_RCVD_LINE
@@ -201,9 +195,6 @@ FH_FAKE_RCVD_LINE_B
 
 # good enough
 FH_HELO_ALMOST_IP
-
-# good enough
-FH_HELO_EQ_CHARTER
 
 # tflags publish
 FILL_THIS_FORM
@@ -216,9 +207,6 @@ FILL_THIS_FORM_LONG
 
 # good enough
 FM_LOTTO_YOU_WON
-
-# good enough
-FM_SUBJ_YOU_PROFIT
 
 # tflags publish
 FORM_FRAUD_3
@@ -281,13 +269,13 @@ FSL_HELO_BARE_IP_2
 FSL_HELO_DEVICE
 
 # good enough
+FSL_HELO_NON_FQDN_1
+
+# good enough
 FSL_MID_419
 
 # good enough
 FSL_MISSP_REPLYTO
-
-# good enough
-FS_LARGE_PERCENT2
 
 # tflags publish
 GOOGLE_DOCS_PHISH
@@ -332,9 +320,6 @@ HEAD_LONG
 HK_NAME_DRUGS
 
 # good enough
-HK_NAME_MR_MRS
-
-# good enough
 HK_RANDOM_FROM
 
 # good enough
@@ -342,9 +327,6 @@ HK_RANDOM_REPLYTO
 
 # good enough
 HK_SCAM_N2
-
-# good enough
-HK_SCAM_S23
 
 # tflags userconf
 HTML_CHARSET_FARAWAY
@@ -417,9 +399,6 @@ NSL_RCVD_FROM_USER
 
 # good enough
 NSL_RCVD_HELO_USER
-
-# good enough
-OBFU_HTML_ATTACH
 
 # tflags publish
 OBFU_JVSCR_ESC
@@ -689,9 +668,6 @@ SUBJECT_IN_BLACKLIST
 SUBJECT_IN_WHITELIST
 
 # good enough
-SUBJ_BROKEN_WORD
-
-# good enough
 TAB_IN_FROM
 
 # tflags net
@@ -719,6 +695,9 @@ TT_MSGID_TRUNC
 TVD_FINGER_02
 
 # good enough
+TVD_FROM_1
+
+# good enough
 TVD_RCVD_IP
 
 # good enough
@@ -728,22 +707,40 @@ TVD_RCVD_IP4
 TVD_RCVD_SINGLE
 
 # good enough
-TVD_UNDER_VALUED
+TVD_VISIT_PHARMA
 
 # good enough
-AXB_BODYMAIL_SBL112884
+AXB_XMAILER_MIMEOLE_OL_A275F
 
 # good enough
-FROM_MISSP_PHISH
+AXB_XM_FORGED_OL2600
 
 # good enough
-FS_MAKE_MONEY
+CN_B2B_SPAMMER
 
 # good enough
-HDRS_LCASE
+FORGED_RELAY_MUA_TO_MX
 
 # good enough
-TVD_FROM_1
+FSL_HELO_FIREWALL
+
+# good enough
+FSL_MY_NAME_IS
+
+# good enough
+HELO_NO_DOMAIN
+
+# good enough
+KHOP_DYNAMIC
+
+# good enough
+MANY_PILL_PRICE
+
+# good enough
+TO_EQ_FM_HTML_ONLY
+
+# good enough
+TVD_SPACE_RATIO_MINFP
 
 # tflags userconf
 UNPARSEABLE_RELAY
