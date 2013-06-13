@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bernie-mix bpoliakoff grenier jarif kpg-gah mas-cps mas-mas zmi; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bernie-mix bpoliakoff grenier jarif kpg-gah llanga mas-cps mas-mas zmi; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bernie-mix bpoliakoff grenier jarif kpg-gah llanga zmi
+# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bpoliakoff grenier jarif kpg-gah mas-cps mas-mas zmi; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bernie-mix bpoliakoff grenier jarif kpg-gah llanga mas-cps mas-mas zmi; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bernie-mix bpoliakoff grenier jarif kpg-gah llanga mas-cps mas-mas zmi
 
 # tflags publish
 ADVANCE_FEE_2_NEW_FORM
@@ -73,6 +73,9 @@ AXB_XMAILER_MIMEOLE_OL_8627E
 # good enough
 AXB_XMA_BASP
 
+# good enough
+AXB_XM_FORGED_OL2600
+
 # tflags learn
 BAYES_00
 
@@ -114,6 +117,9 @@ CK_HELO_DYNAMIC_SPLIT_IP
 
 # good enough
 CK_HELO_GENERIC
+
+# good enough
+CN_B2B_SPAMMER
 
 # good enough
 COMPENSATION
@@ -269,13 +275,16 @@ FSL_HELO_BARE_IP_2
 FSL_HELO_DEVICE
 
 # good enough
-FSL_HELO_NON_FQDN_1
+FSL_HELO_FIREWALL
 
 # good enough
 FSL_MID_419
 
 # good enough
 FSL_MISSP_REPLYTO
+
+# good enough
+FSL_MY_NAME_IS
 
 # tflags publish
 GOOGLE_DOCS_PHISH
@@ -317,6 +326,9 @@ HDRS_LCASE_1K
 HEAD_LONG
 
 # good enough
+HELO_NO_DOMAIN
+
+# good enough
 HK_NAME_DRUGS
 
 # good enough
@@ -340,6 +352,9 @@ KB_DATE_CONTAINS_TAB
 # good enough
 KB_FAKED_THE_BAT
 
+# good enough
+KHOP_DYNAMIC
+
 # tflags publish
 LOTS_OF_MONEY
 
@@ -349,23 +364,20 @@ LOTTO_AGENT
 # good enough
 LOTTO_DEPT
 
+# good enough
+MANY_PILL_PRICE
+
 # tflags publish
 MANY_SPAN_IN_TEXT
 
 # tflags userconf
 MIME_CHARSET_FARAWAY
 
-# good enough
-MIME_NO_TEXT
-
 # tflags userconf
 MISSING_HB_SEP
 
 # good enough
 MONEY_ATM_CARD
-
-# good enough
-MONEY_FORM
 
 # good enough
 MONEY_FORM_SHORT
@@ -620,6 +632,9 @@ RCVD_IN_SORBS_ZOMBIE
 RCVD_IN_XBL
 
 # good enough
+RDNS_LOCALHOST
+
+# good enough
 RISK_FREE
 
 # good enough
@@ -673,6 +688,9 @@ TAB_IN_FROM
 # tflags net
 TO_EQ_FM_DOM_SPF_FAIL
 
+# good enough
+TO_EQ_FM_HTML_ONLY
+
 # tflags net
 TO_EQ_FM_SPF_FAIL
 
@@ -707,40 +725,19 @@ TVD_RCVD_IP4
 TVD_RCVD_SINGLE
 
 # good enough
+TVD_SPACE_RATIO_MINFP
+
+# good enough
 TVD_VISIT_PHARMA
 
 # good enough
-AXB_XMAILER_MIMEOLE_OL_A275F
+FM_SUBJ_YOU_PROFIT
 
 # good enough
-AXB_XM_FORGED_OL2600
+FS_MAKE_MONEY
 
 # good enough
-CN_B2B_SPAMMER
-
-# good enough
-FORGED_RELAY_MUA_TO_MX
-
-# good enough
-FSL_HELO_FIREWALL
-
-# good enough
-FSL_MY_NAME_IS
-
-# good enough
-HELO_NO_DOMAIN
-
-# good enough
-KHOP_DYNAMIC
-
-# good enough
-MANY_PILL_PRICE
-
-# good enough
-TO_EQ_FM_HTML_ONLY
-
-# good enough
-TVD_SPACE_RATIO_MINFP
+TVD_UNDER_VALUED
 
 # tflags userconf
 UNPARSEABLE_RELAY
