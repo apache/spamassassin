@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bernie-mix bpoliakoff grenier kpg-gah mas-cps mas-mas zmi; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bpoliakoff grenier jarif kpg-gah llanga mas-cps mas-mas zmi; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bernie-mix bpoliakoff grenier jarif kpg-gah llanga mas-cps mas-mas zmi
+# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bernie-mix bpoliakoff grenier kpg-gah mas-cps mas-mas zmi; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bernie-mix bpoliakoff grenier kpg-gah llanga mas-cps mas-mas zmi; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bpoliakoff grenier jarif kpg-gah llanga mas-cps mas-mas zmi
 
 # tflags publish
 ADVANCE_FEE_2_NEW_FORM
@@ -48,9 +48,6 @@ ADVANCE_FEE_5_NEW_MONEY
 
 # tflags userconf
 ALL_TRUSTED
-
-# good enough
-AXB_BODYMAIL_SBL112884
 
 # good enough
 AXB_XMAILER_MIMEOLE_OL_024C2
@@ -208,6 +205,9 @@ FM_LOTTO_YOU_WON
 # good enough
 FM_SUBJ_YOU_PROFIT
 
+# good enough
+FORGED_RELAY_MUA_TO_MX
+
 # tflags publish
 FORM_FRAUD_3
 
@@ -278,9 +278,6 @@ FSL_MID_419
 FSL_MISSP_REPLYTO
 
 # good enough
-FSL_MY_NAME_IS
-
-# good enough
 FS_LARGE_PERCENT2
 
 # tflags publish
@@ -317,6 +314,9 @@ HASHCASH_2SPEND
 HASHCASH_HIGH
 
 # good enough
+HDRS_LCASE
+
+# good enough
 HDRS_LCASE_1K
 
 # tflags userconf
@@ -349,17 +349,11 @@ KB_DATE_CONTAINS_TAB
 # good enough
 KB_FAKED_THE_BAT
 
-# good enough
-KHOP_DYNAMIC
-
 # tflags publish
 LOTS_OF_MONEY
 
 # good enough
 LOTTO_AGENT
-
-# good enough
-LOTTO_DEPT
 
 # tflags publish
 MANY_SPAN_IN_TEXT
@@ -626,12 +620,6 @@ RCVD_IN_SORBS_ZOMBIE
 RCVD_IN_XBL
 
 # good enough
-RDNS_LOCALHOST
-
-# good enough
-RISK_FREE
-
-# good enough
 RP_MATCHES_RCVD
 
 # good enough
@@ -725,10 +713,7 @@ TVD_UNDER_VALUED
 TVD_VISIT_PHARMA
 
 # good enough
-FORGED_RELAY_MUA_TO_MX
-
-# good enough
-HDRS_LCASE
+TO_EQ_FM_HTML_ONLY
 
 # tflags userconf
 UNPARSEABLE_RELAY
