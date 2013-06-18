@@ -340,11 +340,10 @@ sub _open_db {
 
   if (!$self->{db_version}) {
     $self->{db_version} = $self->DB_VERSION;
-    my $ret = $self->{redis}->mset(['v:DB_VERSION', $self->{db_version},
-                                    'v:NSPAM', 0,
-                                    'v:NHAM', 0,
-                                    'v:TOKEN_FORMAT', 2,
-                                   ]);
+    my $ret = $self->{redis}->mset('v:DB_VERSION', $self->{db_version},
+                                   'v:NSPAM', 0,
+                                   'v:NHAM', 0,
+                                   'v:TOKEN_FORMAT', 2 );
     unless ($ret) {
       warn("bayes: failed to initialize database");
       return 0;
