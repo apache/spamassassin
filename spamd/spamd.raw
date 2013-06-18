@@ -55,7 +55,7 @@ BEGIN {
     # Perl 5.16.0 upgrades the core Socket module to version 2.001.
   # Socket->VERSION(1.94);  # provides getaddrinfo() and getnameinfo()
   # Socket->VERSION(1.95);  # provides AI_ADDRCONFIG
-    Socket->VERSION(1.96);  # provides NIx_NOSERV
+    Socket->VERSION(1.96);  # provides NIx_NOSERV, and Exporter tag :addrinfo
   # Socket->VERSION(1.97);  # IO::Socket::IP depends on Socket 1.97
     import Socket qw(/^(?:AI|NI|NIx|EAI)_/);
     &AI_ADDRCONFIG; &AI_PASSIVE;  # enable inlining
