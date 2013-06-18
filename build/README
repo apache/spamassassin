@@ -148,8 +148,9 @@ SPAMASSASSIN RELEASE PROCEDURE
 
     make test TEST_FILES="xt/*.t"
 
-    Note: As of 2013-01-18, all of these tests can pass test 
-          with no tests skipped.
+    Note: As of 2013-06-17, all of these tests can pass test 
+          with no tests skipped except dcc.t which doesn't
+          properly test if dcc is available - Bug 6944.
 
 - Check in the updated Changes file, and SpamAssassin.pm.
 
@@ -176,7 +177,7 @@ SPAMASSASSIN RELEASE PROCEDURE
 
     vers=3_0_0
 
-  - For a trunk pre-release (x.y.0-preZ) or alpha (x.y.0-alphaZ):
+  - For a trunk release candidate (x.y.0-rc1), pre-release (x.y.0-preZ) or alpha (x.y.0-alphaZ):
 
     vers=3_3_0_alpha_2
 
@@ -227,6 +228,9 @@ SPAMASSASSIN RELEASE PROCEDURE
 - run "./build/repackage_latest_update_rules" to repackage the
   latest file on updates.spamassassin.org.
 
+    PATH=$HOME/sabuildtools/bin:$PATH
+    ./build/repackage_latest_update_rules
+
 - test the tar.gz and zip files!  redo until they work!! ;)
 
 - Write the release announcement mail!  This is a simple matter of copying
@@ -259,7 +263,7 @@ SPAMASSASSIN RELEASE PROCEDURE
 
   Pre-releases and RCs require just lazy consensus -- ie. no objections.
 
-***RE-TESTED BY KAM TO THIS POINT AS OF 2013-01-18****
+***RE-TESTED BY KAM TO THIS POINT AS OF 2013-06-17****
 
 - (for a pre or rc release), - upload .tar.gz (not .bz2) tarball to CPAN
   at http://pause.cpan.org/:
