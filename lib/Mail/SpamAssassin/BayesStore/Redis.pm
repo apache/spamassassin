@@ -595,6 +595,7 @@ sub tok_get_all {
       $r->hmget('w:'.$token, 's', 'h', sub {
         my($values, $error) = @_;
         return if !$values || @$values != 2;
+        return if !$values->[0] && !$values->[1];
         push(@values, [$token, $values->[0]||0, $values->[1]||0, 0]);
         1;
       });
@@ -703,20 +704,21 @@ sub multi_tok_count_change {
         if ($dspam < 0) {
           my $result = $self->_hincrby('w:'.$token, 's', int $dspam);
           if (!$result || $result <= 0) {
-            $self->hdel('w:'.$token, 's');
+            $self->_hdel_p('w:'.$token, 's');
           } elsif ($ttl) {
-            $self->expire('w:'.$token, $ttl);
+            $self->_expire_p('w:'.$token, $ttl);
           }
         }
         if ($dham < 0) {
           my $result = $self->_hincrby('w:'.$token, 'h', int $dham);
           if (!$result || $result <= 0) {
-            $self->hdel('w:'.$token, 'h');
+            $self->_hdel_p('w:'.$token, 'h');
           } elsif ($ttl) {
-            $self->expire('w:'.$token, $ttl);
+            $self->_expire_p('w:'.$token, $ttl);
           }
         }
       }
+      $self->_wait_all_responses;
     }
   }
 
@@ -1362,6 +1364,15 @@ sub _del_p {
   my ($self, $key) = @_;
 
   $self->{redis}->del($key, sub {});
+
+  return 1;
+}
+
+# Pipelined hdel, must call _wait_all_responses after
+sub _hdel_p {
+  my ($self, $key, $field) = @_;
+
+  $self->{redis}->hdel($key, $field, sub {});
 
   return 1;
 }
