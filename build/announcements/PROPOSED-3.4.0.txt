@@ -6,8 +6,25 @@ Release Notes -- Apache SpamAssassin -- Version 3.4.0
 Introduction
 ------------
 
-This is a major release.  It introduces nearly 18 months of bug fixes and
-introduces native IPv6 functionality.
+This is a major release.  It introduces nearly two years of bug fixes and
+features including the Bayes Redis back-end (bug 6879), eDNS changes (bug
+6910), Native IPv6 Support, numerous URIBL.pm changes/features and a 
+small API change in libspamc (bug 6562) with many other subtle changes.
+
+IPv6 Note: This was tested on an IPv6-only host (works fine except Razor,
+using an external DNS recursive server on a dual-stack host).
+
+And SpamAssassin was tested on a Raspberry PI (ARM6, Raspbian / Debian 7.0 
+Wheezy, perl 5.14.2) ... yes it's 20 times slower than an i7-960, but all 
+tests pass! (all long & network tests, some stress tests need increased 
+timing margins).
+
+Overall, this release has been tested in many production-level 
+environments for nearly a year.  It is highly recommended and stable.
+
+NOTE: Complete changes are available at
+http://svn.apache.org/repos/asf/spamassassin/branches/3.4/Changes
+
 
 
 Downloading and availability
@@ -19,17 +36,17 @@ http://spamassassin.apache.org/downloads.cgi
 
 md5sum of archive files:
 
-406d3d096c3bfd290dce28ffdbb2a630  Mail-SpamAssassin-3.4.0-pre3.tar.bz2
-b4aafbabb4d3e78fdef47df11a9e7343  Mail-SpamAssassin-3.4.0-pre3.tar.gz
-2f0747ca36caa70eda2662f4e527804e  Mail-SpamAssassin-3.4.0-pre3.zip
-5e1cc2427b2d3d8ef58e8929704a2a3b  Mail-SpamAssassin-rules-3.4.0-pre3.r1434591.tgz
+c3db9e19cce2faddf00d35ee192325c0  Mail-SpamAssassin-3.4.0-rc1.tar.bz2
+1ea0d12068e58eef3fc1fc2a2583292d  Mail-SpamAssassin-3.4.0-rc1.tar.gz
+2951e48fe0f88f24e3c7140f0a875f6c  Mail-SpamAssassin-3.4.0-rc1.zip
+0c1b9f4caa4c8a0e86ec1ea4f09c8a98  Mail-SpamAssassin-rules-3.4.0-rc1.r1493476.tgz
 
 sha1sum of archive files:
 
-8d58628910fa276ade1ef69370b61e9057fc489c  Mail-SpamAssassin-3.4.0-pre3.tar.bz2
-4908ac3453a01f05a8bbf979e61ec2f312e35509  Mail-SpamAssassin-3.4.0-pre3.tar.gz
-b5cbf092d125164f4fcfcab0ec3261889b4b6eca  Mail-SpamAssassin-3.4.0-pre3.zip
-bf4f9e26ec70be76010d8b7f3ba47421f31bcd9f  Mail-SpamAssassin-rules-3.4.0-pre3.r1434591.tgz
+34845717f796111b6ec072ec06e17a2ccfa9c2a6  Mail-SpamAssassin-3.4.0-rc1.tar.bz2
+b1fee565fcc50183f974bd2df8413e4082bc9589  Mail-SpamAssassin-3.4.0-rc1.tar.gz
+8b436c6d8a7c683534ac05c614715647d7abec27  Mail-SpamAssassin-3.4.0-rc1.zip
+1fe6b7318c3320fefe03e1a0b9216d1628a60408  Mail-SpamAssassin-rules-3.4.0-rc1.r1493476.tgz
 
 Note that the *-rules-*.tar.gz files are only necessary if you cannot, or do not
 wish to, run "sa-update" after install to download the latest fresh rules.
@@ -64,16 +81,6 @@ Note that older versions of gnupg may not be able to complete the steps above.
 Specifically, GnuPG v1.0.6, 1.0.7 & 1.2.6 failed while v1.4.11 worked flawlessly.
 
 See http://www.apache.org/info/verification.html for more information on verifying Apache releases.
-
-
-
-Summary of major changes since 3.3.2
-------------------------------------
-
-NOTE: Complete changes are available at 
-http://svn.apache.org/repos/asf/spamassassin/branches/3.4/Changes
-
-<TBD>
 
 About Apache SpamAssassin
 -------------------------
