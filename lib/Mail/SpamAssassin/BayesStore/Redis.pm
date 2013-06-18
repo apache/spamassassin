@@ -315,6 +315,7 @@ sub _open_db {
   }
   elsif ($err) {
     $err =~ s{ at /.*}{}s; # skip full trace
+    $self->{is_really_open} = 0;
     warn("bayes: Redis connection failed: $err");
     return 0;
   }
@@ -498,14 +499,14 @@ Only 1,2,6 are used with Redis, others return zero always.
 =cut
 
 sub get_storage_variables {
-  my($self) = @_;
+  my($self, @varnames) = @_;
 
-  my @tokens = map {"v:$_"}
-               qw{LAST_JOURNAL_SYNC NSPAM NHAM NTOKENS LAST_EXPIRE
-                  OLDEST_TOKEN_AGE DB_VERSION LAST_JOURNAL_SYNC
-                  LAST_ATIME_DELTA LAST_EXPIRE_REDUCE NEWEST_TOKEN_AGE
-                  TOKEN_FORMAT};
-  my $values = $self->_mget(\@tokens);
+  @varnames = qw{LAST_JOURNAL_SYNC NSPAM NHAM NTOKENS LAST_EXPIRE
+                 OLDEST_TOKEN_AGE DB_VERSION LAST_JOURNAL_SYNC
+                 LAST_ATIME_DELTA LAST_EXPIRE_REDUCE NEWEST_TOKEN_AGE
+                 TOKEN_FORMAT}  if !@varnames;
+  @varnames = map("v:$_", @varnames);
+  my $values = $self->_mget(\@varnames);
   return if !$values;
   return map(defined $_ ? $_ : 0, @$values);
 }
@@ -737,8 +738,9 @@ ham learned.
 sub nspam_nham_get {
   my($self) = @_;
 
-  my @vars = $self->get_storage_variables();
-  ($vars[1], $vars[2]);
+  my @vars = $self->get_storage_variables('NSPAM', 'NHAM');
+  dbg("bayes: nspam_nham_get nspam=%s, nham=%s", @vars);
+  @vars;
 }
 
 =head2 nspam_nham_change
@@ -766,6 +768,7 @@ sub nspam_nham_change {
   }
   elsif ($err) {
     $err =~ s{ at /.*}{}s; # skip full trace
+    $self->{is_really_open} = 0;
     die("bayes: failed to increment nspam $ds nham $dh: $err");
   }
 
@@ -925,8 +928,8 @@ sub backup_database {
   return 0 unless $self->tie_db_writable;
 
   my $atime = time;
-  my @vars = $self->get_storage_variables;
-  print "v\t$vars[6]\tdb_version # this must be the first line!!!\n";
+  my @vars = $self->get_storage_variables(qw(DB_VERSION NSPAM NHAM));
+  print "v\t$vars[0]\tdb_version # this must be the first line!!!\n";
   print "v\t$vars[1]\tnum_spam\n";
   print "v\t$vars[2]\tnum_nonspam\n";
 
@@ -1251,6 +1254,7 @@ sub _get {
   }
   elsif ($err) {
     $err =~ s{ at /.*}{}s; # skip full trace
+    $self->{is_really_open} = 0;
     die("bayes: get failed: $err");
   }
 
@@ -1271,6 +1275,7 @@ sub _mget {
   }
   elsif ($err) {
     $err =~ s{ at /.*}{}s; # skip full trace
+    $self->{is_really_open} = 0;
     die("bayes: mget failed: $err");
   }
 
@@ -1290,6 +1295,7 @@ sub _hmget {
   }
   elsif ($err) {
     $err =~ s{ at /.*}{}s; # skip full trace
+    $self->{is_really_open} = 0;
     die("bayes: hmget failed: $err");
   }
 
@@ -1312,6 +1318,7 @@ sub _set {
   }
   elsif ($err) {
     $err =~ s{ at /.*}{}s; # skip full trace
+    $self->{is_really_open} = 0;
     die("bayes: set failed: $err");
   }
 
@@ -1330,6 +1337,7 @@ sub _hincrby {
   }
   elsif ($err) {
     $err =~ s{ at /.*}{}s; # skip full trace
+    $self->{is_really_open} = 0;
     die("bayes: hincrby failed: $err");
   }
 
@@ -1400,6 +1408,7 @@ sub _wait_all_responses {
   }
   elsif ($err) {
     $err =~ s{ at /.*}{}s; # skip full trace
+    $self->{is_really_open} = 0;
     die sprintf("bayes: wait_all_responses failed: %s, called from line %s\n",
                 $err, (caller)[2]);
   }
@@ -1419,6 +1428,7 @@ sub _del {
   }
   elsif ($err) {
     $err =~ s{ at /.*}{}s; # skip full trace
+    $self->{is_really_open} = 0;
     die("bayes: del failed: $err");
   }
 
