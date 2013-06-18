@@ -112,9 +112,16 @@ SPAMASSASSIN RELEASE PROCEDURE
     for the point you want to start at if different. I used r1149751 to
     produce the first 3.4.0-pre release, for example.
 
+- Exclude some automated changes from the logs
+
+    cat Changes | perl -ne ' BEGIN{$/=("-"x72)."\n"}
+    chomp; @ln=split/^/;
+    next if @ln==3 && $ln[2]=~/^\s*(promotions validated|auto-generated rules|)\s*$/;
+    print "@ln$/"' > Changes.tmp
+
 - Word wrap the Changes file with something like 
 
-    'fold -sw 74 Changes > Changes.2; mv Changes.2 Changes'
+    fold -sw 74 Changes.tmp > Changes && rm Changes.tmp
 
 - run "make distcheck" to ensure all files are included in the
   distribution that should be, and to ensure all files that are listed
