@@ -500,15 +500,21 @@ body           __STYLE_TAG_IN_BODY      /<style(?:[^>]{0,30})?>/i
 body           __BODY_XHTML             /<x-html>/i
 rawbody        __STYLE_GIBBERISH_1      /<style[^>]{0,30}>(?:\s{0,80}[^\s:;<]){150}/im
 rawbody        __STYLE_GIBBERISH_2      /\.style\w{0,20}\s{1,10}\{[^:;]{200}/im
-rawbody        __STYLE_GIBBERISH_3      /<style[^>]{0,30}>\s{0,30}(?:[a-z0-9_:]{1,30}\s{0,10}\{[^}]{1,50}\}\s{0,80}){1,5}(?:\w{1,30}\s{1,10}){30}/im
+rawbody        __STYLE_GIBBERISH_3      /<style[^>]{0,30}>\s{0,30}(?:[\w:]{1,30}\s{0,10}\{[^}]{1,50}\}\s{0,80}){1,5}(?:[\w,.']{1,30}\s{1,10}){40}/im
 meta           __STYLE_GIBBERISH        (__STYLE_GIBBERISH_1 || __STYLE_GIBBERISH_2 || __STYLE_GIBBERISH_3)
 meta           STYLE_GIBBERISH          __STYLE_GIBBERISH && (__BODY_XHTML || !__STYLE_TAG_IN_BODY) && !__THREADED && !__RCD_RDNS_MAIL_MESSY && !__RCD_RDNS_DIAL_MESSY && !__HAS_REPLY_TO && !MIME_HTML_MOSTLY
 describe       STYLE_GIBBERISH          Nonsense in HTML <STYLE> tag
+score          STYLE_GIBBERISH          4.00	# limit
 
 body           __SCRIPT_TAG_IN_BODY     /<script>/i
 rawbody        __SCRIPT_GIBBERISH       /<script>[^;<]{100}/im
-meta           SCRIPT_GIBBERISH         __SCRIPT_GIBBERISH && !__SCRIPT_TAG_IN_BODY && !__TAG_EXISTS_META
+meta           SCRIPT_GIBBERISH         __SCRIPT_GIBBERISH && (__BODY_XHTML || !__SCRIPT_TAG_IN_BODY) && !__TAG_EXISTS_META
 describe       SCRIPT_GIBBERISH         Nonsense in HTML <SCRIPT> tag
+
+rawbody        __COMMENT_GIBBERISH      /<!--(?:\s{1,10}[\w']{1,40}){100}/im
+meta           COMMENT_GIBBERISH        __COMMENT_GIBBERISH
+describe       COMMENT_GIBBERISH        Nonsense in long HTML comment
+score          COMMENT_GIBBERISH        1.00	# limit
 
 #rawbody        MANY_DIV_5                   /(?:<div[^>]{0,30}>\s{0,80}){5}/im
 #tflags         MANY_DIV_5                    nopublish
