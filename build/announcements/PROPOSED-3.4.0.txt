@@ -11,13 +11,13 @@ features including the Bayes Redis back-end (bug 6879), eDNS changes (bug
 6910), Native IPv6 Support, numerous URIBL.pm changes/features and a 
 small API change in libspamc (bug 6562) with many other subtle changes.
 
-IPv6 Note: This was tested on an IPv6-only host (works fine except Razor,
-using an external DNS recursive server on a dual-stack host).
+IPv6 note: Besides testing on a dual-protocol hosts, this was also tested
+on an IPv6-only host (works fine except Razor, using an external recursive
+DNS server running on a dual-protocol host).
 
-And SpamAssassin was tested on a Raspberry PI (ARM6, Raspbian / Debian 7.0 
-Wheezy, perl 5.14.2) ... yes it's 20 times slower than an i7-960, but all 
-tests pass! (all long & network tests, some stress tests need increased 
-timing margins).
+SpamAssassin was tested on perl 5.18.0, and (out of curiosity) also
+on a Raspberry PI (ARM6, Raspbian / Debian 7.0 Wheezy, perl 5.14.2)
+... yes it is 20 times slower than on an i7-960, but all tests pass!
 
 Overall, this release has been tested in many production-level 
 environments for nearly a year.  It is highly recommended and stable.
@@ -33,8 +33,46 @@ Beyond the ability to use redis as a Bayes backend server, Bug 5185 changed
 the way that message IDs were calculated for emails.  
 
 Because of this change, you can't unlearn a message if you upgrade from 
-3.3.X to 3.4.0 and you might learn emails twice.  It is likely best to 
-clear your Bayes store and start from scratch to avoid any issues.
+3.3.X to 3.4.0 and you might learn emails twice (which is not a big deal
+is it does not occur frequently).  If unlearning a message is important,
+consider just clearing your Bayes store and starting from scratch.
+
+
+Redis database backend for a Bayes database
+-------------------------------------------
+
+In addition to existing backends, the 3.4.0 introduces support for keeping
+a Bayes database on a redis server, either running locally, or accessed
+over network. Similar to SQL backends, the database may be concurrently
+used by several hosts running SpamAssassin.
+
+The current implementation only supports a global Bayes database, i.e.
+per-recipient sub-databases are not supported. Due to current limitations
+in redis 2.6.* server, accessing it is not possible over IPv6, but one may
+chose connection over IPv4 or over a Unix socket. Bear in mind that redis
+server only offers limited access controls, so it is advisable to let the
+redis server bind to a loopback interface only, or to use other mechanisms
+to limit access, such as local firewall rules.
+
+The Redis backend can put a Lua scripting support in a redis server to good
+use, significantly reducing network packet rate and improving performance.
+The Lua support is available in redis server since version 2.6.  In absence
+of a Lua support, the Redis backend uses multiple traditional redis command
+so in principle it should work with a redis server version 2.4, although
+this is not recommended for busy sites.
+
+Expiration of token and 'seen' message id entries is left to the redis server.
+There is no provision for manually expiring a database, so it is highly
+recommended to leave the setting bayes_auto_expire to its default value 1
+(i.e. enabled).
+
+Example configuration:
+
+  bayes_store_module  Mail::SpamAssassin::BayesStore::Redis
+  bayes_sql_dsn       server=localhost:6379
+  bayes_token_ttl 21d
+  bayes_seen_ttl   8d
+  bayes_auto_expire 1
 
 
 Downloading and availability
