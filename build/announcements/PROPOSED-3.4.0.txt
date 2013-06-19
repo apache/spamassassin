@@ -60,20 +60,20 @@ used by several hosts running SpamAssassin.
 
 The current implementation only supports a global Bayes database, i.e.
 per-recipient sub-databases are not supported. Due to current limitations
-in redis 2.6.* server, accessing it is not possible over IPv6, but one may
-chose connection over IPv4 or over a Unix socket. Bear in mind that redis
+in Redis 2.6.* server, accessing it is not possible over IPv6, but one may
+chose connection over IPv4 or over a Unix socket. Bear in mind that Redis
 server only offers limited access controls, so it is advisable to let the
-redis server bind to a loopback interface only, or to use other mechanisms
+Redis server bind to a loopback interface only, or to use other mechanisms
 to limit access, such as local firewall rules.
 
-The Redis backend can put a Lua scripting support in a redis server to good
+The Redis backend can put a Lua scripting support in a Redis server to good
 use, significantly reducing network packet rate and improving performance.
-The Lua support is available in redis server since version 2.6.  In absence
-of a Lua support, the Redis backend uses multiple traditional redis command
-so in principle it should work with a redis server version 2.4, although
+The Lua support is available in Redis server since version 2.6.  In absence
+of a Lua support, the Redis backend uses multiple traditional Redis command
+so in principle it should work with a Redis server version 2.4, although
 this is not recommended for busy sites.
 
-Expiration of token and 'seen' message id entries is left to the redis server.
+Expiration of token and 'seen' message id entries is left to the Redis server.
 There is no provision for manually expiring a database, so it is highly
 recommended to leave the setting bayes_auto_expire to its default value 1
 (i.e. enabled).
