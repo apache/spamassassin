@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bernie-mix bpoliakoff grenier kpg-gah mas-cps mas-mas zmi; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bernie-mix bpoliakoff grenier kpg-gah llanga mas-cps mas-mas zmi; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bpoliakoff grenier jarif kpg-gah llanga mas-cps mas-mas zmi
+# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bernie-mix bpoliakoff grenier jarif kpg-gah mas-cps mas-mas zmi; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bernie-mix bpoliakoff grenier jarif llanga mas-cps mas-mas zmi; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bernie-mix bpoliakoff grenier jarif kpg-gah llanga mas-cps mas-mas
 
 # tflags publish
 ADVANCE_FEE_2_NEW_FORM
@@ -96,9 +96,6 @@ BAYES_95
 
 # tflags learn
 BAYES_99
-
-# good enough
-BITLY_URI
 
 # tflags userconf
 CHARSET_FARAWAY
@@ -233,9 +230,6 @@ FROM_LOCAL_NOVOWEL
 FROM_MISSPACED
 
 # good enough
-FROM_MISSP_DYNIP
-
-# good enough
 FROM_MISSP_EH_MATCH
 
 # good enough
@@ -267,9 +261,6 @@ FSL_HELO_BARE_IP_2
 
 # good enough
 FSL_HELO_DEVICE
-
-# good enough
-FSL_HELO_FIREWALL
 
 # good enough
 FSL_MID_419
@@ -314,22 +305,13 @@ HASHCASH_2SPEND
 HASHCASH_HIGH
 
 # good enough
-HDRS_LCASE
-
-# good enough
 HDRS_LCASE_1K
 
 # tflags userconf
 HEAD_LONG
 
 # good enough
-HELO_NO_DOMAIN
-
-# good enough
 HK_NAME_DRUGS
-
-# good enough
-HK_RANDOM_FROM
 
 # good enough
 HK_RANDOM_REPLYTO
@@ -349,6 +331,9 @@ KB_DATE_CONTAINS_TAB
 # good enough
 KB_FAKED_THE_BAT
 
+# good enough
+KB_RATWARE_OUTLOOK_MID
+
 # tflags publish
 LOTS_OF_MONEY
 
@@ -363,9 +348,6 @@ MIME_CHARSET_FARAWAY
 
 # tflags userconf
 MISSING_HB_SEP
-
-# good enough
-MONEY_ATM_CARD
 
 # good enough
 MONEY_FORM_SHORT
@@ -650,13 +632,13 @@ SPF_PASS
 SPF_SOFTFAIL
 
 # good enough
+STOCK_IMG_CTYPE
+
+# good enough
 STOX_REPLY_TYPE
 
 # good enough
 STOX_REPLY_TYPE_WITHOUT_QUOTES
-
-# good enough
-STYLE_GIBBERISH
 
 # tflags userconf
 SUBJECT_IN_BLACKLIST
@@ -689,19 +671,10 @@ TO_NO_BRKTS_PCNT
 TT_MSGID_TRUNC
 
 # good enough
-TVD_FINGER_02
-
-# good enough
-TVD_FROM_1
-
-# good enough
 TVD_RCVD_IP
 
 # good enough
 TVD_RCVD_IP4
-
-# good enough
-TVD_RCVD_SINGLE
 
 # good enough
 TVD_SPACE_RATIO_MINFP
@@ -713,7 +686,16 @@ TVD_UNDER_VALUED
 TVD_VISIT_PHARMA
 
 # good enough
-TO_EQ_FM_HTML_ONLY
+DOS_RCVD_IP_TWICE_B
+
+# good enough
+FB_GREAT_BEST_SEX
+
+# good enough
+FRT_ABSOLUT
+
+# good enough
+TVD_SUBJ_NUM_OBFU_MINFP
 
 # tflags userconf
 UNPARSEABLE_RELAY
