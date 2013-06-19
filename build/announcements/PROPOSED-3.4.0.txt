@@ -32,10 +32,22 @@ Important Bayes Change
 Beyond the ability to use redis as a Bayes backend server, Bug 5185 changed
 the way that message IDs were calculated for emails.  
 
-Because of this change, you can't unlearn a message if you upgrade from 
-3.3.X to 3.4.0 and you might learn emails twice (which is not a big deal
-is it does not occur frequently).  If unlearning a message is important,
-consider just clearing your Bayes store and starting from scratch.
+Because of this change, if you use Bayes and you are upgrading from a version
+prior to 3.4.0, you should be consider wiping your database tokens and
+starting fresh.
+
+However, this is not mandatory.  If you choose to keep your current database
+tokens, these are the ramifications:
+
+1 - If you re-process emails that have already been learned before, it will 
+    create duplicate entries because of the new msg_id format.  The duplicates
+    will expire, eventually, and should cause minimal impact unless it occurs
+    frequently.
+
+2 - If you try and unlearn or reclassify an email processed prior to the
+    upgrade, the system will be unable to do so because of the new msg_id 
+    format. If unlearning a message is important, consider just clearing your 
+    Bayes store and starting from scratch.
 
 
 Redis database backend for a Bayes database
