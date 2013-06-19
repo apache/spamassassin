@@ -33,8 +33,8 @@ Beyond the ability to use Redis as a Bayes backend server, Bug 5185 changed
 the way that message IDs were calculated for emails.  
 
 Because of this change, if you use Bayes and you are upgrading from a version
-prior to 3.4.0, you should be consider wiping your database tokens and
-starting fresh.
+prior to 3.4.0, you should consider wiping your Bayes database and starting 
+fresh.
 
 However, this is not mandatory.  If you choose to keep your current database
 tokens, these are the ramifications:
