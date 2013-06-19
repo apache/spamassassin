@@ -26,6 +26,16 @@ NOTE: Complete changes are available at
 http://svn.apache.org/repos/asf/spamassassin/branches/3.4/Changes
 
 
+Important Bayes Change
+----------------------
+
+Beyond the ability to use redis as a Bayes backend server, Bug 5185 changed
+the way that message IDs were calculated for emails.  
+
+Because of this change, you can't unlearn a message if you upgrade from 
+3.3.X to 3.4.0 and you might learn emails twice.  It is likely best to 
+clear your Bayes store and start from scratch to avoid any issues.
+
 
 Downloading and availability
 ----------------------------
