@@ -92,7 +92,7 @@ use Mail::SpamAssassin::Util qw(untaint_var);
 use File::Spec;
 
 use vars qw{
-  @ISA $VERSION
+  @ISA 
   $CONF_TYPE_STRING $CONF_TYPE_BOOL
   $CONF_TYPE_NUMERIC $CONF_TYPE_HASH_KEY_VALUE
   $CONF_TYPE_ADDRLIST $CONF_TYPE_TEMPLATE
@@ -131,7 +131,8 @@ my @rule_types = ("body_tests", "uri_tests", "uri_evals",
                   "full_evals", "rawbody_tests", "rawbody_evals",
 		  "rbl_evals", "meta_tests");
 
-$VERSION = 'bogus';     # avoid CPAN.pm picking up version strings later
+#Removed $VERSION per BUG 6422
+#$VERSION = 'bogus';     # avoid CPAN.pm picking up version strings later
 
 # these are variables instead of constants so that other classes can
 # access them; if they're constants, they'd have to go in Constants.pm

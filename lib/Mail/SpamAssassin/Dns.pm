@@ -36,7 +36,7 @@ use IO::Socket;
 use POSIX ":sys_wait_h";
 
 use vars qw{
-  $KNOWN_BAD_DIALUP_RANGES @EXISTING_DOMAINS $IS_DNS_AVAILABLE $LAST_DNS_CHECK $VERSION
+  $KNOWN_BAD_DIALUP_RANGES @EXISTING_DOMAINS $IS_DNS_AVAILABLE $LAST_DNS_CHECK 
 };
 
 # use very well-connected domains (fast DNS response, many DNS servers,
@@ -66,7 +66,8 @@ use vars qw{
 
 $IS_DNS_AVAILABLE = undef;
 
-$VERSION = 'bogus';     # avoid CPAN.pm picking up razor ver
+#Removed $VERSION per BUG 6422
+#$VERSION = 'bogus';     # avoid CPAN.pm picking up razor ver
 
 ###########################################################################
 
