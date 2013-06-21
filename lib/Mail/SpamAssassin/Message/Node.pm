@@ -175,7 +175,7 @@ sub header {
     $dec_value =~ s/\n[ \t]+/ /gs;
     $dec_value =~ s/\s+$//s;
     $dec_value =~ s/^\s+//s;
-    push @{ $self->{'headers'}->{$key} },     $self->_decode_header($dec_value);
+    push @{ $self->{'headers'}->{$key} }, $self->_decode_header($dec_value,$key);
 
     push @{ $self->{'raw_headers'}->{$key} }, $raw_value;
 
@@ -585,25 +585,39 @@ sub __decode_header {
 # Decode base64 and quoted-printable in headers according to RFC2047.
 #
 sub _decode_header {
-  my($self, $header) = @_;
+  my($self, $header_field_body, $header_field_name) = @_;
 
-  return '' unless defined $header && $header ne '';
+  return '' unless defined $header_field_body && $header_field_body ne '';
 
   # deal with folding and cream the newlines and such
-  $header =~ s/\n[ \t]+/\n /g;
-  $header =~ s/\015?\012//gs;
+  $header_field_body =~ s/\n[ \t]+/\n /g;
+  $header_field_body =~ s/\015?\012//gs;
+
+  # Bug 6945: some header fields must not be processed for MIME encoding
+  if ($header_field_name =~
+       /^ (?: (?: Received | (?:Resent-)? (?: Message-ID | Date ) |
+                  MIME-Version | References | In-Reply-To ) \z
+            | (?: List- | Content- ) ) /xsi ) {
+    return $header_field_body;
+  }
 
   # multiple encoded sections must ignore the interim whitespace.
   # to avoid possible FPs with (\s+(?==\?))?, look for the whole RE
   # separated by whitespace.
-  1 while ($header =~ s/(=\?[\w_-]+\?[bqBQ]\?[^?]+\?=)\s+(=\?[\w_-]+\?[bqBQ]\?[^?]+\?=)/$1$2/g);
+  1 while ($header_field_body =~ s/(=\?[\w_-]+\?[bqBQ]\?[^?]+\?=)\s+(=\?[\w_-]+\?[bqBQ]\?[^?]+\?=)/$1$2/g);
 
-  unless ($header =~
-	  s/=\?([\w_-]+)\?([bqBQ])\?([^?]+)\?=/$self->__decode_header($1, uc($2), $3)/ge) {
-    $header = $self->_normalize($header);
-  }
+# unless ($header_field_body =~
+#	  s/=\?([\w_-]+)\?([bqBQ])\?([^?]+)\?=/$self->__decode_header($1, uc($2), $3)/ge) {
+#   $header_field_body = $self->_normalize($header_field_body);
+# }
 
-  return $header;
+  # Bug 6945: header fields have no inherent character set;
+  # only decode and normalize properly encoded RFC 2047 substrings,
+  # leave the rest as plain octets
+  $header_field_body =~ s{ = \? ([A-Za-z0-9_-]+) \? ([bqBQ]) \? ([^?]+) \? = }
+                         { $self->__decode_header($1, uc($2), $3) }xge;
+
+  return $header_field_body;
 }
 
 =item get_header()
