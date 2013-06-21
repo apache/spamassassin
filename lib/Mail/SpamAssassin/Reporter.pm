@@ -26,11 +26,13 @@ use re 'taint';
 use Mail::SpamAssassin::Logger;
 
 use vars qw{
-  @ISA $VERSION
+  @ISA 
 };
 
 @ISA = qw();
-$VERSION = 'bogus';	# avoid CPAN.pm picking up razor ver
+
+#Removed $VERSION per BUG 6422
+#$VERSION = 'bogus';	# avoid CPAN.pm picking up razor ver
 
 ###########################################################################
 
