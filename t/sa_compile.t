@@ -51,7 +51,7 @@ if ($INST_FROM_SCRATCH) {
   system_or_die "cd .. && make tardist";
   system("rm -rf $builddir");
   system("mkdir -p $builddir");
-  system_or_die "cd $builddir && gunzip -cd $cwd/../Mail-SpamAssassin-*.tar.gz | tar xf -";
+  system_or_die "cd $builddir && gunzip -c $cwd/../Mail-SpamAssassin-*.tar.gz | tar xf -";
   system_or_die "cd $builddir && mv Mail-SpamAssassin-* x";
 }
 
