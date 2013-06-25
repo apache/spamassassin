@@ -1085,6 +1085,11 @@ describe    EMPTY_BODY           No body text in message
 score       EMPTY_BODY           3.00	# limit
 
 
+meta        __BODY_URI_ONLY      __BODY_TEXT_LINE < 3 && __HAS_ANY_URI
+meta        BODY_URI_ONLY        __BODY_URI_ONLY
+describe    BODY_URI_ONLY        Message body is only one line containing a URI
+score       BODY_URI_ONLY        0.25	# limit during testing
+
 #ifplugin Mail::SpamAssassin::Plugin::DKIM
 #  # malformed DKIM signatures seen in the wild - see bug#6895
 #  # see how well this performs
