@@ -39,7 +39,8 @@ BEGIN {
 }
 
 use vars qw($have_getaddrinfo_in_core $have_getaddrinfo_legacy
-            $io_socket_module_name $have_inet4 $have_inet6);
+            $io_socket_module_name $have_inet4 $have_inet6
+            $ai_addrconfig_flag);
 # don't force requirement on IO::Socket::IP or IO::Socket::INET6
 BEGIN {
   use Socket qw(:DEFAULT IPPROTO_TCP);
@@ -73,15 +74,25 @@ BEGIN {
 
   &AF_UNSPEC; &AF_INET; &AF_INET6;  # enable inlining
 
+  $ai_addrconfig_flag = 0;
+
   if ($have_getaddrinfo_in_core) {
     # using a modern Socket module
+
+    eval {  # does the operating system recognize an AI_ADDRCONFIG flag?
+      if (&AI_ADDRCONFIG && &EAI_BADFLAGS) {
+        my($err, @res) = Socket::getaddrinfo("localhost", 0,
+                           { family => &AF_UNSPEC, flags => &AI_ADDRCONFIG });
+        $ai_addrconfig_flag = &AI_ADDRCONFIG if !$err || $err != &EAI_BADFLAGS;
+      }
+    };
 
     *ip_or_name_to_ip_addresses = sub {
       my($addr, $ai_family) = @_;
       # Socket::getaddrinfo returns a list of hashrefs
       my($error, @res) =
         Socket::getaddrinfo($addr, 0,
-          { family => $ai_family, flags => &AI_ADDRCONFIG | &AI_PASSIVE, 
+          { family => $ai_family, flags => $ai_addrconfig_flag | &AI_PASSIVE, 
             socktype => &SOCK_STREAM, protocol => &IPPROTO_TCP });
       my(@ip_addrs);
       if (!$error) {
@@ -98,9 +109,17 @@ BEGIN {
 
     *peer_info_from_socket = sub {
       my $sock = shift;
-      my $peer_addr = $sock->peerhost;
+      my $peer_addr = $sock->peerhost;  # textual representation of an IP addr
       $peer_addr or return;
-      return ($sock->peerport, $peer_addr, $sock->peerhostname||$peer_addr,
+      my $peer_hostname;
+      if ($sock->UNIVERSAL::can('peerhostname')) {
+        $peer_hostname = $sock->peerhostname;  # provided by IO::Socket::IP
+      } else {
+        my($err, $host) = Socket::getnameinfo($sock->peername,
+                                              &NI_NAMEREQD, &NIx_NOSERV);
+        $peer_hostname = $host  if !$err;
+      }
+      return ($sock->peerport, $peer_addr, $peer_hostname||$peer_addr,
               $sock->sockport);
     };
 
@@ -108,12 +127,21 @@ BEGIN {
     # using a legacy Socket6 module; somewhat different API on getaddrinfo()
     # and getnameinfo() compared to these functions in a module Socket
 
+    eval {  # does the operating system recognize an AI_ADDRCONFIG flag?
+      if (&AI_ADDRCONFIG && &EAI_BADFLAGS) {
+        my @res = Socket6::getaddrinfo("localhost", "", 0, &SOCK_STREAM,
+                                       &IPPROTO_TCP, &AI_ADDRCONFIG);
+        my $err = @res >= 5 ? 0 : $res[0];
+        $ai_addrconfig_flag = &AI_ADDRCONFIG if !$err || $err != &EAI_BADFLAGS;
+      }
+    };
+
     *ip_or_name_to_ip_addresses = sub {
       my($addr, $ai_family) = @_;
       # Socket6::getaddrinfo returns a list of quintuples
       my @res = Socket6::getaddrinfo($addr, '',
                                      $ai_family, &SOCK_STREAM, &IPPROTO_TCP,
-                                     &AI_ADDRCONFIG | &AI_PASSIVE);
+                                     $ai_addrconfig_flag | &AI_PASSIVE);
       my($error, @ip_addrs);
       if (@res < 5) {
         $error = $res[0];
@@ -724,7 +752,7 @@ $opt{'server-cert'} ||= "$LOCAL_RULES_DIR/certs/server-cert.pem";
 # Server (listening) socket setup for the various supported types
 
 dbg("spamd: socket module of choice: %s %s, Socket %s".
-    ", %s PF_INET, %s PF_INET6, %s",
+    ", %s PF_INET, %s PF_INET6, %s, AI_ADDRCONFIG %s",
     $io_socket_module_name,
     $io_socket_module_name->VERSION,
     Socket->VERSION,
@@ -733,6 +761,7 @@ dbg("spamd: socket module of choice: %s %s, Socket %s".
     $have_getaddrinfo_in_core ? 'using Socket::getaddrinfo'
     : $have_getaddrinfo_legacy ? 'using legacy Socket6::getaddrinfo'
     : 'no getaddrinfo, using gethostbyname, IPv4-only',
+    $ai_addrconfig_flag ? "is supported" : "not supported",
 );
 
 my $have_ssl_module;
