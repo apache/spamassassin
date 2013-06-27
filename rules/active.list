@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bernie-mix bpoliakoff grenier jarif kpg-gah mas-cps mas-mas zmi; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bernie-mix bpoliakoff grenier jarif kpg-gah llanga zmi; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bernie-mix bpoliakoff grenier jarif kpg-gah llanga zmi
+# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bernie-mix bpoliakoff grenier jarif mas-cps mas-mas zmi; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bernie-mix bpoliakoff grenier jarif kpg-gah llanga mas-cps mas-mas zmi; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bernie-mix bpoliakoff grenier jarif kpg-gah llanga zmi
 
 # tflags publish
 ADVANCE_FEE_2_NEW_FORM
@@ -166,9 +166,6 @@ DOS_RCVD_IP_TWICE_B
 # good enough
 DOS_RCVD_IP_TWICE_C
 
-# good enough
-DRUGS_STOCK_MIMEOLE
-
 # tflags publish
 EMAIL_URI_PHISH
 
@@ -228,6 +225,9 @@ FROM_LOCAL_NOVOWEL
 
 # good enough
 FROM_MISSPACED
+
+# good enough
+FROM_MISSP_DYNIP
 
 # good enough
 FROM_MISSP_EH_MATCH
@@ -305,9 +305,6 @@ HASHCASH_HIGH
 HEAD_LONG
 
 # good enough
-HELO_NO_DOMAIN
-
-# good enough
 HK_NAME_DRUGS
 
 # good enough
@@ -318,9 +315,6 @@ HK_RANDOM_REPLYTO
 
 # good enough
 HK_SCAM_N2
-
-# good enough
-HK_SCAM_S23
 
 # tflags userconf
 HTML_CHARSET_FARAWAY
@@ -345,6 +339,9 @@ MANY_SPAN_IN_TEXT
 
 # tflags userconf
 MIME_CHARSET_FARAWAY
+
+# good enough
+MIME_NO_TEXT
 
 # tflags userconf
 MISSING_HB_SEP
@@ -686,13 +683,16 @@ TVD_RCVD_IP4
 TVD_UNDER_VALUED
 
 # good enough
-FROM_MISSP_DYNIP
+FB_GREAT_BEST_SEX
 
 # good enough
-MIME_NO_TEXT
+LOTTO_DEPT
 
 # good enough
-OBFU_GIF_ATTACH
+OBFU_HTML_ATTACH
+
+# good enough
+TVD_FROM_1
 
 # tflags userconf
 UNPARSEABLE_RELAY
