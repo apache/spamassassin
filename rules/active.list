@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bernie-mix bpoliakoff grenier jarif mas-cps mas-mas zmi; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bernie-mix bpoliakoff grenier jarif kpg-gah llanga mas-cps mas-mas zmi; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bernie-mix bpoliakoff grenier jarif kpg-gah llanga zmi
+# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bernie-mix bpoliakoff grenier jarif mas-cps mas-mas zmi; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bernie-mix bpoliakoff grenier jarif llanga mas-cps mas-mas zmi; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bernie-mix bpoliakoff grenier jarif kpg-gah llanga mas-cps mas-mas zmi
 
 # tflags publish
 ADVANCE_FEE_2_NEW_FORM
@@ -180,9 +180,6 @@ FH_FAKE_RCVD_LINE_B
 
 # good enough
 FH_HELO_ALMOST_IP
-
-# good enough
-FH_MSGID_XXX
 
 # tflags publish
 FILL_THIS_FORM
@@ -674,6 +671,9 @@ TO_NO_BRKTS_PCNT
 TT_MSGID_TRUNC
 
 # good enough
+TVD_FROM_1
+
+# good enough
 TVD_RCVD_IP
 
 # good enough
@@ -683,16 +683,10 @@ TVD_RCVD_IP4
 TVD_UNDER_VALUED
 
 # good enough
-FB_GREAT_BEST_SEX
+FSL_HELO_FIREWALL
 
 # good enough
-LOTTO_DEPT
-
-# good enough
-OBFU_HTML_ATTACH
-
-# good enough
-TVD_FROM_1
+HK_SCAM_S23
 
 # tflags userconf
 UNPARSEABLE_RELAY
