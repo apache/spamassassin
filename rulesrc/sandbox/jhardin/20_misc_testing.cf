@@ -1135,4 +1135,14 @@ score       HTML_FONT_ONE_WORD_MANY   0.50	# limit (initial)
 body        ADMITS_CANSPAM    /\bThis is a CANSPAM ACT compliant advertising broadcast\b/i
 describe    ADMITS_CANSPAM    Admits to being spam
 
+body        __SEO_REGISTER    /\bsearch engine (?:registration|subscription|submission)\b/i
+tflags      __SEO_REGISTER    multiple maxhits=5
+meta        SEO_REGISTER      __SEO_REGISTER > 4
+score       SEO_REGISTER      2.50	# limit
+
+
+
+
+
+
 
