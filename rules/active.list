@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bernie-mix bpoliakoff grenier jarif mas-cps mas-mas zmi; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bernie-mix bpoliakoff grenier jarif llanga mas-cps mas-mas zmi; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bernie-mix bpoliakoff grenier jarif kpg-gah llanga mas-cps mas-mas zmi
+# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bernie-mix bpoliakoff grenier jarif kpg-gah mas-cps mas-mas zmi; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bernie-mix bpoliakoff grenier jarif llanga mas-cps mas-mas zmi; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bernie-mix bpoliakoff grenier jarif llanga mas-cps mas-mas zmi
 
 # tflags publish
 ADVANCE_FEE_2_NEW_FORM
@@ -166,6 +166,9 @@ DOS_RCVD_IP_TWICE_B
 # good enough
 DOS_RCVD_IP_TWICE_C
 
+# good enough
+DRUGS_STOCK_MIMEOLE
+
 # tflags publish
 EMAIL_URI_PHISH
 
@@ -260,6 +263,9 @@ FSL_HELO_BARE_IP_2
 FSL_HELO_DEVICE
 
 # good enough
+FSL_HELO_FIREWALL
+
+# good enough
 FSL_MID_419
 
 # good enough
@@ -312,6 +318,9 @@ HK_RANDOM_REPLYTO
 
 # good enough
 HK_SCAM_N2
+
+# good enough
+HK_SCAM_S23
 
 # tflags userconf
 HTML_CHARSET_FARAWAY
@@ -683,10 +692,16 @@ TVD_RCVD_IP4
 TVD_UNDER_VALUED
 
 # good enough
-FSL_HELO_FIREWALL
+EMPTY_BODY
 
 # good enough
-HK_SCAM_S23
+FSL_MISSP_REPLYTO
+
+# good enough
+HK_NAME_MR_MRS
+
+# good enough
+LOTTO_DEPT
 
 # tflags userconf
 UNPARSEABLE_RELAY
