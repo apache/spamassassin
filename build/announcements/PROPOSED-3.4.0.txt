@@ -1,239 +1,3 @@
-<TO-DO: UNEDITED SECTION>
-
-Improved support for IPv6
--------------------------
-
-- make it possible to run SpamAssassin on an IPv6-only host:
-  affects installation, self-tests, rule updates, client, server,
-  and a command-line spamassassin
-
-- Make sa-update and its infrastructure usable over IPv6 (Bug 6654)
-
-- added options -4 and -6 to prefer/choose/force IPv4 or IPv6
-  in programs spamassassin, spamd, spamc, and sa-update
-
-- if a module IO::Socket::IP is available, use it for network
-  communications regardless of a protocol family for DNS queries,
-  by spamd and in Mail/SpamAssassin/Client.pm. As a fallback when
-  IO::Socket::IP is unavailable, the IO::Socket::INET6 or eventually
-  the IO::Socket::INET are used
-
-- allow spamd to simultaneously listen on multiple sockets, possibly
-  in different protocol domains (Unix sockets, INET or INET6 protocol
-  families)
-
-- DnsResolver was updated allowing it to work on an IPv6-only host (Bug 6653)
-
-- plugin RelayCountry now uses module Geo::IP and its database
-  of IPv6 addresses GEOIP_COUNTRY_EDITION_V6 if available
-
-- command line options --listen and --allowed-ips in spamd now accept
-  IPv6 addresses
-
-- the following configuration options were extended to accept IPv6
-  addresses: dns_server, trusted_networks, internal_networks, msa_networks, 
-  (but not yet the whitelist_from_rcvd); their defaults were adjusted
-  accordingly
-
-- parser of Received header fields can now deal with IPv6 addresses
-
-- AutoWhitelist plugin can now deal with IPv6 addresses
-
-- installation unit tests were updated to prevent them from failing
-  on an net6 -only host.
-
-
-Optimizations
--------------
-
-Several smaller performance optimizations were introduced,
-among others: Bug 6508 (uses Net::Patricia if available),
-Bug 6854 (base64 attachments), Bug 6915 (get_tag speedup).
-
-
-New command-line options
--------------------------
-
- - sa-update can now take multiple -v or --verbose options to increase
-   verbosity
-
- - spamd: can listen on multiple sockets as documented at option --listen
-
- - new sa-learn command option  --max-size
-
-New command-line options for spamd:
-- added an option --listen (or -i), which can be specified multiple
-  times and allows spamd to accept requests over multiple INET (IPv4)
-  or INET6 (IPv6) or UNIX sockets; (Bug 6841); see also option --port
-
-New command-line options for spamc:
-- adding option -X (or --unavailable-tempfail) to allow spamc to return
-  EX_TEMPFAIL instead of EX_UNAVAILABLE when using option -x
-
-As already noted in the IPv6 section, options -4 and -6 were added
-to programs spamassassin, spamd, spamc, and sa-update.
-
-
-New configuration options
--------------------------
-
-Plugin/URIDNSBL: new tflags options 'a' and 'ns'
-
-Plugin/AutoLearnThreshold: new option autolearn_force
-
-Plugin/ASN: new options asn_prefix and clear_asn_lookups
-
-Plugin/WLBLEval: new configuration options: enlist_uri_host, delist_uri_host,
-with shorthands blacklist_uri_host and whitelist_uri_host and
-an associated eval rule check_uri_host_listed
-
-added configuration options dns_query_restriction (allow|deny) and
-clear_dns_query_restriction (Bug 6884)
-
-
-added sub-options dns0x20 and edns to the dns_options setting
-
-
-added option dns_server which specifies an IP address of a DNS server
-and optionally its port number.
-
-added options dns_local_ports_permit, dns_local_ports_avoid and
-dns_local_ports_none to control source port local ranges available to
-DNS queries
-
-added the following sub-options to the tflags setting:
-autolearn_force, maxhits=N, ips_only, domains_only, a, ns.
-
-the option whitelist_from_rcvd can now take an IP address as its second
-argument (instead of a domain name), which can be useful for whitelisting
-a sending mailer which has no reverse DNS mapping
-
-
-ArchiveIterator: new options opt_max_size and opt_from_regex
-
-added a tag (macro) _RULESVERSION_  which is a comma-separated list of
-rules versions, retrieved from an '# UPDATE version' comment in rules files
-
-New eval rules:
-Plugin/BodyEval: check_body_length
-Plugin/HeaderEval: check_equal_from_domains
-
-
-Notable bug fixes
-
-sa-update: avoid repeatedly downloading rules if subsequent unpacking
-of rules and updating fails (Bug 6655)
-
-fixed several incompatibilities with newer versions of Net::DNS
-in sa-update and in the SpamAssassin library
-Net::DNS bug [rt.cpan.org #83451]
-
-Plugin/Razor2.pm: preserve entropy of a random numbers generator
-across calls to Razor2 agent which clobbers it
-
-added a workaround in BayesStore/MySQL.pm for MySQL server bug
-( http://bugs.mysql.com/bug.php?id=46675 ):
-
-fixed documentation: trailing dots in DNSBL zone names are not
-required since version 3.1.0 of Mail::SpamAssassin (September 2005).
-
-
-Compatibility - changes since 3.3.2:
-
-A default setting for option 'dns_available' was changed from
-'test' to 'yes' (Bug 6770, Bug 6769)
-
-DNS queries generated by SpamAssassin now enable option EDNS0
-in query packets and specify a buffer length of 4096 bytes.
-This allows DNS replies larger than 512 bytes to be returned
-in one packet, avoiding a need for re-issuing a failed query
-using a TCP protocol. This default setting is well suited
-if a DNS resolver (i.e. a recursive DNS server) is located
-on the same LAN as a host running SpamAssassin (which is the
-usual setup for all but perhaps a home use of SpamAssassin).
-The  but may not
-be suitable if a DNS server is 
-
-- EDNS=4096
- Bug 6862: Allow a DNS resolver to use EDNS
-
-- bayes seen change
-
-
-Dependency changes since 3.3.2:
-
-- dropped dependency on a Perl module Net::Ident
-
-- dropped dependency on a Perl module IP::Country::Fast (or IP::Country)
-
-- new optional dependency on Geo::IP in a RelayCountry plugin (Bug 6599).
-  For backward compatibility IP::Country::Fast is used if Geo::IP is
-  not installed
-
-- new optional dependency on IO::Socket::IP for a cleaner IP support
-  regardless of a protocol family (IPv4 or IPv6)
-
-- new optional dependency on Net::Patricia to speed up lookups on
-  internal_networks, trusted_networks or msa_networks when these lists
-  contain a largen number of entries
-
-- new optional dependency on a perl module Redis, which is used if
-  a Bayes data store backend is chosen
-
-- new optional dependency on programs curl, wget, or a FreeBSD fetch;
-  sa-update will use any of these external programs to download rule
-  updates, either over IPv6 or over IPv4
-
-- a perl module LWP::UserAgent as used by sa-update is now optional
-  if any of programs curl, wget, or fetch are available;
-
-- minimal required version of NetAddr::IP was bumped to 4.010
-
-
-
-Internal changes potentially affecting third party software
-using Mail::SpamAssassin library
-
- Bug 6690: Give a caller a choice to call srand() by itself or let a
-   SpamAssassin library do it. Controlled by option skip_prng_reseeding
-   in SpamAssassin.pm
-
- Bug 6686: Allow Mail::SpamAssassin::parser to accept a message
-   also as a string ref, avoiding one copy in memory
-
- Bug 6830: a caller may pass the original mail body size to
-   SpamAssassin through {suppl_attrib}{body_size}, which is
-   accessible to the eval rule check_body_length
-
- Bug 6942: A new plugin callback "prefork_init" was introduced,
- which should  be called by a master process (e.g. spamd) before
- forking multiple child processes. For compatibility this call is
- currently optional, but recommended for new versions. Currently
- only a Redis backend for Bayes checks will benefit from being
- notified before a fork.
-
-
-New plugins:
-  AskDNS.pm
-
-multiple improvements and bug fixed in Plugin DCC.pm
-
-+=item can(Name::Of::Package::function_name)
-+This is a function call that returns C<1> if the perl package named
-+C<Name::Of::Package> includes a function called C<function_name>
-+B<and> that function returns a true value when called with no arguments,
-+otherwise C<undef> is returned.
-+Is similar to C<has>, except that it also calls the named function,
-+testing its return value (unlike the perl function UNIVERSAL::can).
-+This makes it possible for a 'feature' function to determine its result
-+value at run time.
-
-</TO-DO: UNEDITED SECTION>
-
-=========================================
-
-
-
 To: users, dev, announce
 Subject: ANNOUNCE: Apache SpamAssassin 3.4.0 available
 
@@ -244,56 +8,176 @@ Introduction
 
 This is a major release.  It introduces nearly two years of bug fixes and
 features including the Bayes Redis (http://redis.io/) back-end (bug 6879),
-eDNS changes (bug 6910), Native IPv6 Support, numerous URIBL.pm changes or
-features and a small API change in libspamc (bug 6562) with many other
+EDNS0 changes (bug 6910), native IPv6 support, numerous URIBL.pm changes
+or features and a small API change in libspamc (bug 6562) with many other
 subtle changes.
 
-IPv6 note: Besides testing on a dual-protocol hosts, this was also tested
-on an IPv6-only host (works fine except Razor, using an external recursive
-DNS server running on a dual-protocol host).
-
 SpamAssassin was tested on perl 5.18.0, and (out of curiosity) also
-on a Raspberry PI (ARM6, Raspbian / Debian 7.0 Wheezy, perl 5.14.2)
-... yes it is 20 times slower than on an i7-960, but all tests pass!
+on a Raspberry Pi (ARM6, Raspbian / Debian 7.0 Wheezy, perl 5.14.2)
+... yes it is 20 times slower compared to i7-960 CPU, but all tests pass!
 
-Overall, this release has been tested in many production-level 
-environments for nearly a year.  It is highly recommended and stable.
+Overall, this release has been tested in many production-level
+environments for nearly a year, including testing on an IPv6-only host.
+It is highly recommended and stable.
 
 NOTE: Complete changes are available at
 http://svn.apache.org/repos/asf/spamassassin/branches/3.4/Changes
 
 
-Important Sendmail Bug
-----------------------
-Sendmail 8.14.5 and below contain a canonicalization bug that can cause
-DKIM failures.
+Notable Sendmail Bug
+--------------------
+
+Sendmail 8.14.5 and below contain a canonicalization misfeature / bug
+that can cause DKIM failures.
 See https://issues.apache.org/SpamAssassin/show_bug.cgi?id=6462.
 
 
-Important Bayes Change
-----------------------
+Compatibility with version 3.3.2
+--------------------------------
 
-Beyond the ability to use Redis as a Bayes backend server, Bug 5185
-changed the way that message IDs were calculated for emails.  
+* DNS queries generated by SpamAssassin now enable option EDNS0 in query
+packets and specify a buffer size of 4096 bytes by default. This allows
+DNS replies larger than 512 bytes to be returned in one UDP datagram, 
+avoiding a need for re-issuing a failed query over a TCP protocol. This
+default setting is well suited if a DNS resolver (i.e. a recursive DNS
+server) is located on the same LAN as a host running SpamAssassin, which
+is the usual setup for all but perhaps some home uses of SpamAssassin.
+
+The option should be disabled (by 'dns_options noedns0') when a recursive
+DNS server is only reachable through some old-fashioned firewall or through
+some picky router with deep packet inspection which bans DNS UDP messages
+larger than 512 bytes, or blocks fragmented UDP datagrams.
+
+The 'dns_options' setting is documented in Mail::SpamAssassin::Conf POD
+or man page, more details in bug 6910 and bug 6862.
+
+
+* A default setting for option 'dns_available' was changed from 'test' to
+'yes' (bug 6770, bug 6769), so SpamAssassin now assumes by default that
+it is running on a host with an internet connection and a working DNS
+resolver. If this is not the case, please configure this option explicitly.
+
+The change avoids surprises on an otherwise well connected host which may
+experience a temporary DNS unavailability at the system startup time or a
+temporary network outage when spamd was starting, and the initial failed
+test would disable DNS test permanently. The option is documented in
+Mail::SpamAssassin::Conf POD or man page.
+
+
+* When Bayes classification is in use and messages are 'learned' as spam
+or ham and stored in a database, the Bayes plugin generates internal
+message IDs of learned messages and stores them in a 'seen' database to
+avoid re-learning duplicates and accidental un-learning messages that
+were not previously learned. With changes in bug 5185, the calculation
+of message IDs in a bayes 'seen' database has changed, so new code can
+no longer associate new messages with those learned before the change.
+
+Note that this change does not affect recognition of old tokens and the
+classification algorithm, only duplicate detection and unlearning of old
+messages is affected.
 
 Because of this change, if you use Bayes and you are upgrading from a
-version prior to 3.4.0, you should consider wiping your Bayes database
+version prior to 3.4.0, you may consider wiping your Bayes database
 and starting fresh.
 
 However, this is not mandatory.  If you choose to keep your current
 database tokens, these are the ramifications:
 
-1 - If you re-process emails that have already been learned before, it
-    will create duplicate entries because of the new msg_id format.
+1 - If you re-process emails that have already been learned before,
+    it will create duplicate entries because of the new msg_id format.
     The duplicates will expire, eventually, and should cause minimal
     impact unless it occurs frequently.
 
 2 - If you try and unlearn or reclassify an email processed prior to the
     upgrade, the system will be unable to do so because of the new msg_id 
-    format. If unlearning a message is important, consider just clearing
-    your Bayes store and starting from scratch.
+    format. If unlearning a message (that was learned before the change)
+    is important, consider just clearing your Bayes store and starting
+    from scratch.
 
 
+Dependency changes since version 3.3.2
+--------------------------------------
+
+Dependency on the following Perl modules were dropped: Net::Ident,
+IP::Country::Fast and IP::Country.
+
+Dependency on a perl module LWP::UserAgent as used by sa-update is now
+made optional if any of programs curl, wget, or fetch are available.
+
+New optional dependencies on the following Perl modules were introduced:
+
+- new optional dependency on Geo::IP in a RelayCountry plugin (bug 6599);
+  for backward compatibility IP::Country::Fast is used if Geo::IP is
+  not installed
+
+- new optional dependency on IO::Socket::IP for a cleaner IP support
+  regardless of a protocol family (IPv4 and IPv6)
+
+- new optional dependency on Net::Patricia to speed up lookups on
+  internal_networks, trusted_networks or msa_networks when these lists
+  contain a larger number of entries
+
+- new optional dependency on a perl module Redis, which is used if
+  a redis server is chosen as a Bayes data store backend
+
+- new optional dependency on programs curl, wget, or a FreeBSD fetch.
+  sa-update will use any of these external programs to download rule
+  updates, either over IPv6 or over IPv4. Any of these three programs
+  suffices - the installation procedure is currently unclear on this,
+  its warning may be understood as if all three programs are needed,
+  which is not the case
+
+- minimal required version of NetAddr::IP was bumped to 4.010
+
+
+Internal changes potentially affecting third party software
+using Mail::SpamAssassin library
+-----------------------------------------------------------
+
+A caller is now given a choice to call srand() by itself or let a
+SpamAssassin library do it as before. This can avoid unnecessary entropy
+loss in a perl's random number generator. It is controlled by option
+skip_prng_reseeding in a call to Mail::SpamAssassin::new(). The change
+was documented in bug 6690.
+
+The Mail::SpamAssassin::parser can now accept a message also as a string
+reference, avoiding one copy in memory. Documented in bug 6686.
+
+A caller may pass the original mail body size to Mail::SpamAssassin::parse
+through the suppl_attrib argument's field 'body_size'. This mail body size
+is accessible to the eval rule check_body_length. It can be useful when a
+caller only passes a truncated message to SpamAssassin. Documented in bug
+6830.
+
+A new plugin callback "prefork_init" was introduced, which should be called
+by a master process (e.g. spamd) before forking multiple child processes.
+For compatibility this call is currently optional, but recommended for new
+versions. Currently only a Redis backend for Bayes checks will benefit from
+being notified before a fork. Documented in bug 6942.
+
+
+Notable bug fixes
+-----------------
+
+The sa-update program now avoids repeatedly downloading same rules if
+subsequent unpacking of rules and updating fails. Documented in bug 6655.
+
+Several incompatibilities with newer versions of a perl module Net::DNS
+as used by sa-update and by the SpamAssassin library were fixed.
+See Net::DNS problem [rt.cpan.org #83451].
+
+A perl module Razor agent clobbers entropy of a random numbers generator by
+re-initializing the generator on every call. The SpamAssassin Razor plugin
+now provides a workaround, preserving entropy across calls to Razor2 agent.
+
+A workaround in BayesStore/MySQL.pm was added for a MySQL server bug,
+see http://bugs.mysql.com/bug.php?id=46675 .
+
+Documentation was fixed: trailing dots in DNSBL zone names are not required
+since version 3.1.0 of Mail::SpamAssassin (September 2005).
+
+
+Notable features:
 Redis database backend for a Bayes database
 -------------------------------------------
 
@@ -329,6 +213,148 @@ Example configuration:
   bayes_token_ttl 21d
   bayes_seen_ttl   8d
   bayes_auto_expire 1
+
+
+Notable features:
+Improved support for IPv6
+-------------------------
+
+The rules-updating program sa-update and its infrastructure is now usable
+over either IPv4 or IPv6, including from an IPv6-only hosts (bug 6654).
+
+SpamAssassin is now usable on an IPv6-only host: affects installation,
+self-tests, rule updates, client, server, and a command-line spamassassin.
+
+Command line options -4 and -6 were added to prefer/choose/force IPv4 or
+IPv6 in programs spamassassin, spamd, spamc, and sa-update.
+
+Command line options --listen and --allowed-ips in spamd can now accept
+IPv6 addresses.
+
+Preferably a perl module IO::Socket::IP is used (if it is available) for
+network communication regardless of a protocol family - for DNS queries,
+by spamd server side, and by a client code in Mail::SpamAssassin::Client.
+As a fallback when the module IO::Socket::IP is unavailable, an older
+module IO::Socket::INET6 is used, or eventually the IO::Socket::INET is
+used as last resort.
+
+The spamd server can now simultaneously listen on multiple sockets,
+possibly in different protocol domains (Unix sockets, INET or INET6
+protocol families.
+
+DnsResolver was updated allowing it to work on an IPv6-only host (bug 6653)
+
+A plugin RelayCountry now uses module Geo::IP and its database of IPv6
+addresses GEOIP_COUNTRY_EDITION_V6 when available.
+
+The following configuration options were extended to accept IPv6 addresses:
+dns_server, trusted_networks, internal_networks, msa_networks, (but not yet
+the whitelist_from_rcvd), and their defaults were adjusted accordingly.
+
+The parser code of Received header fields can now deal with IPv6 addresses
+in a mail header section.
+
+The AutoWhitelist plugin was updated and can now deal with IPv6 addresses.
+
+Installation unit tests were updated to prevent them from failing on an
+INET6 -only host.
+
+
+New command-line options
+------------------------
+
+New command-line option for spamd: added an option --listen (or -i),
+which can be specified multiple times and allows spamd to accept requests
+over multiple INET (IPv4) or INET6 (IPv6) or UNIX sockets. See bug 6841,
+and see also option --port.
+
+New command-line option for spamc: -X (or --unavailable-tempfail) allows
+spamc to return EX_TEMPFAIL instead of EX_UNAVAILABLE when using option -x.
+
+As already noted in the 'Improved support for IPv6' section, options -4
+and -6 were added to programs spamassassin, spamd, spamc, and sa-update.
+
+The sa-update utility can now take multiple -v or --verbose options to
+increase verbosity.
+
+The sa-learn command has a new option option --max-size .
+
+
+New configuration options
+-------------------------
+
+Plugin/URIDNSBL: new tflags options 'a' and 'ns' were introduced. They are
+documented in the Mail::SpamAssassin::Plugin::URIDNSBL POD or man page.
+
+Plugin/AutoLearnThreshold: new option autolearn_force was added. It is
+documented in the Mail::SpamAssassin::Plugin::AutoLearnThreshold POD or
+man page.
+
+Plugin/ASN: new options asn_prefix and clear_asn_lookups were added.
+They are documented in Mail::SpamAssassin::Plugin::ASN POD or man page.
+
+
+The following new options, as implemented by various plugins or by
+other modules, are all documented in the Mail::SpamAssassin::Conf POD
+or man page:
+
+- Plugin/WLBLEval: new configuration options were added: enlist_uri_host,
+delist_uri_host, with shorthands blacklist_uri_host and whitelist_uri_host
+and an associated eval rule check_uri_host_listed.
+
+- Configuration options dns_query_restriction (allow|deny) and
+clear_dns_query_restriction were added (bug 6884).
+
+- A 'dns_options' setting received new sub-options 'dns0x20' and 'edns'.
+
+- Added option 'dns_server' which specifies an IP address of a DNS server
+and optionally its port number.
+
+- Added options dns_local_ports_permit, dns_local_ports_avoid and
+dns_local_ports_none to control source port local ranges available to
+DNS queries
+
+- Added the following sub-options to the tflags setting: autolearn_force,
+maxhits=N, ips_only, domains_only, a, ns.
+
+- The option whitelist_from_rcvd can now take an IP address as its second
+argument (instead of a domain name), which can be useful for whitelisting
+a sending mailer which has no reverse DNS mapping.
+
+
+
+ArchiveIterator has new options opt_max_size and opt_from_regex. They are
+documented in Mail::SpamAssassin::ArchiveIterator POD or man page.
+
+A new tag (macro) _RULESVERSION_ was added. It is a comma-separated list of
+rules versions, retrieved from an '# UPDATE version' comment in rules files
+and can be used in an 'add_header' configuration setting.
+
+
+New plugins
+-----------
+
+A new plugin AskDNS was introduced.
+
+Using a DNS query template as specified in a parameter of an askdns rule,
+the plugin replaces tag names as found in the template with their values
+and launches DNS queries as soon as tag values become available. When DNS
+responses trickle in, filters them according to the requested DNS resource
+record type and optional subrule filtering expression, yielding a rule hit
+if a response meets filtering conditions.
+
+
+Optimizations
+-------------
+
+Several smaller performance optimizations were introduced, among others:
+bug 6508 (uses Net::Patricia if available), bug 6854 (base64 attachments),
+bug 6915 (get_tag speedup).
+
+The DNS client code module now caches queries and replies for the duration
+of processing one mail message. Duplicate DNS queries by different rules
+which happen to query the same DNS resource are now avoided.
+
 
 
 Downloading and availability
