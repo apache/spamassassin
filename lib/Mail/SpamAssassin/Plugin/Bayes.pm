@@ -723,7 +723,7 @@ sub scan {
 
   # If none of the tokens were found in the DB, we're going to skip
   # this message...
-  if (!keys %pw) {
+  if (!%pw) {
     dbg("bayes: cannot use bayes on this message; none of the tokens were found in the database");
     goto skip;
   }
@@ -748,7 +748,7 @@ sub scan {
   my $tinfo_spammy = $permsgstatus->{bayes_token_info_spammy} = [];
   my $tinfo_hammy = $permsgstatus->{bayes_token_info_hammy} = [];
 
-  my %tok_strength = map { $_ => (abs($pw{$_}->{prob} - 0.5)) } keys %pw;
+  my %tok_strength = map( ($_, abs($pw{$_}->{prob} - 0.5)), keys %pw);
   my $log_each_token = (would_log('dbg', 'bayes') > 1);
 
   foreach my $tok (sort {

@@ -612,12 +612,13 @@ sub tok_get_all {
       $self->_define_lua_scripts;
       @results = $r->evalsha($self->{multi_hmget_script}, scalar @_, @_);
     };
+    @results = split(' ', $results[0])  if @results == 1;
     @results == @_
       or die sprintf("bayes: tok_get_all got %d results, expected %d\n",
                      scalar @results, scalar @_);
     foreach my $token (@_) {
       my($s,$h) = split(m{/}, shift @results, 2);
-      push(@values, [$token, 0+$s, 0+$h, 0])  if $s || $h;
+      push(@values, [$token, ($s||0)+0, ($h||0)+0, 0])  if $s || $h;
     }
   }
 
@@ -951,10 +952,12 @@ sub backup_database {
       my @tokens = map(substr($_,2), @keys[$i .. $end]);  # strip leading "w:"
       my @results = $r->evalsha($self->{multi_hmget_script},
                                 scalar @tokens, @tokens);
+      @results = split(' ', $results[0])  if @results == 1;
       foreach my $token (@tokens) {
         my($s,$h) = split(m{/}, shift @results, 2);
         my $encoded = unpack("H*", $token);
-        printf("t\t%d\t%d\t%s\t%s\n", $s, $h, $atime, $encoded)  if $s || $h;
+        printf("t\t%d\t%d\t%s\t%s\n",
+               $s||0, $h||0, $atime, $encoded)  if $s || $h;
       }
 
     } else {   # no Lua, slower
@@ -1192,19 +1195,31 @@ sub _define_lua_scripts {
   my $r = $self->{redis};
 
   $self->{multi_hmget_script} = $r->script_load(<<'END');
+    local rcall = redis.call
     local r = {}
     for j = 1, #KEYS do
-      local sh = redis.call("hmget", "w:" .. KEYS[j], "s", "h")
-      -- returns counts as "spam/ham" pairs
-      table.insert(r, (sh[1] or 0) .. "/" .. (sh[2] or 0))
+      local sh = rcall("HMGET", "w:" .. KEYS[j], "s", "h")
+      -- returns counts as a list of spam/ham pairs, zeroes may be omitted
+      local s, h = sh[1] or "0", sh[2] or "0"
+      local pair
+      if h == "0" then
+        pair = s  -- just a spam field, possibly zero; a ham field omitted
+      elseif s == "0" then
+        pair = "/" .. h  -- just a ham field, zero in spam suppressed
+      else
+        pair = s .. "/" .. h
+      end
+      r[#r+1] = pair
     end
-    return r
+    -- return as a single string, avoids overhead of multiresult parsing
+    return table.concat(r, " ")
 END
 
   $self->{multi_expire_script} = $r->script_load(<<'END');
     local ttl = ARGV[1]
+    local rcall = redis.call
     for j = 1, #KEYS do
-      redis.call("expire", "w:" .. KEYS[j], ttl)
+      rcall("EXPIRE", "w:" .. KEYS[j], ttl)
     end
     return #KEYS
 END
@@ -1212,25 +1227,26 @@ END
   $self->{multi_hincrby} = $r->script_load(<<'END');
     local s, h, ttl = ARGV[1], ARGV[2], ARGV[3]
     local set_expire = ttl and tonumber(ttl) > 0
-    if s ~= 0 then
+    local rcall = redis.call
+    if tonumber(s) ~= 0 then
       for j = 1, #KEYS do
         local token = "w:" .. KEYS[j]
-        local cnt = redis.call("hincrby", token, "s", s)
+        local cnt = rcall("HINCRBY", token, "s", s)
         if cnt <= 0 then
-          redis.call("hdel", token, "s")
+          rcall("HDEL", token, "s")
         elseif set_expire then
-          redis.call("expire", token, ttl)
+          rcall("EXPIRE", token, ttl)
         end
       end
     end
-    if h ~= 0 then
+    if tonumber(h) ~= 0 then
       for j = 1, #KEYS do
         local token = "w:" .. KEYS[j]
-        local cnt = redis.call("hincrby", token, "h", h)
+        local cnt = rcall("HINCRBY", token, "h", h)
         if cnt <= 0 then
-          redis.call("hdel", token, "h")
+          rcall("HDEL", token, "h")
         elseif set_expire then
-          redis.call("expire", token, ttl)
+          rcall("EXPIRE", token, ttl)
         end
       end
     end
