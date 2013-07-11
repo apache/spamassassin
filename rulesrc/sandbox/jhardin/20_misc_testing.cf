@@ -1132,7 +1132,8 @@ describe    HTML_FONT_ONE_WORD_MANY   Many one-word font changes
 score       HTML_FONT_ONE_WORD_MANY   0.50	# limit (initial)
 
 
-body        ADMITS_CANSPAM    /\bThis is a CANSPAM ACT compliant advertising broadcast\b/i
+body        __ADMITS_CANSPAM  /\bThis is a CANSPAM ACT compliant advertising broadcast\b/i
+meta        ADMITS_CANSPAM    __ADMITS_CANSPAM && !__VIA_ML
 describe    ADMITS_CANSPAM    Admits to being spam
 
 body        __SEO_REGISTER    /\bsearch engine (?:registration|subscription|submission)\b/i
