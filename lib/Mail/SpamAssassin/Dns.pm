@@ -248,7 +248,8 @@ sub process_dnsbl_result {
 
   # NO_DNS_FOR_FROM
   if ($self->{sender_host} &&
-      $question->qname eq $self->{sender_host} &&
+        # fishy, qname should have been "RFC 1035 zone format" -decoded first
+      lc($question->qname) eq lc($self->{sender_host}) &&
       $question->qtype =~ /^(?:A|MX)$/ &&
       $pkt->header->rcode =~ /^(?:NXDOMAIN|SERVFAIL)$/ &&
       ++$self->{sender_host_fail} == 2)

@@ -189,7 +189,7 @@ use warnings;
 use re 'taint';
 
 use Mail::SpamAssassin::Plugin;
-use Mail::SpamAssassin::Util qw(fmt_dns_question_entry);
+use Mail::SpamAssassin::Util qw(decode_dns_question_entry);
 use Mail::SpamAssassin::Logger;
 
 use vars qw(@ISA %rcode_value $txtdata_can_provide_a_list);
@@ -513,7 +513,7 @@ sub process_response_packet {
     # NOTE: qname is encoded in RFC 1035 zone format, decode it
     dbg("askdns: answer received, rcode %s, query %s, answer has %d records",
         $rcode,
-        join(', ', map(join('/', fmt_dns_question_entry($_)), @question)),
+        join(', ', map(join('/', decode_dns_question_entry($_)), @question)),
         scalar @answer);
 
     if (defined $rcode && exists $rcode_value{$rcode}) {
