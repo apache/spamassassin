@@ -43,7 +43,7 @@ use re 'taint';
 use Mail::SpamAssassin;
 use Mail::SpamAssassin::Logger;
 use Mail::SpamAssassin::Constants qw(:ip);
-use Mail::SpamAssassin::Util qw(untaint_var fmt_dns_question_entry);
+use Mail::SpamAssassin::Util qw(untaint_var decode_dns_question_entry);
 
 use Socket;
 use Errno qw(EADDRINUSE EACCES);
@@ -539,6 +539,11 @@ sub new_dns_packet {
 
   my $packet;
   eval {
+
+    if (utf8::is_utf8($domain)) {  # since Perl 5.8.1
+      info("dns: new_dns_packet: domain is utf8 flagged: %s", $domain);
+    }
+
     $domain =~ s/\.*\z/./s;
     if (length($domain) > 255) {
       die "domain name longer than 255 bytes\n";
@@ -623,7 +628,7 @@ sub _packet_id {
     # sure the query section of an answer packet matches the query section
     # in our packet as formed by new_dns_packet():
     #
-    my($class,$type,$qname) = fmt_dns_question_entry($questions[0]);
+    my($class,$type,$qname) = decode_dns_question_entry($questions[0]);
     $qname =~ tr/A-Z/a-z/  if !$self->{conf}->{dns_options}->{dns0x20};
     return join('/', $id, $class, $type, $qname);
 
@@ -787,7 +792,6 @@ sub poll_responses {
         } else {
           # some failure, e.g. NXDOMAIN, SERVFAIL, FORMERR, REFUSED, ...
           # btw, one reason for SERVFAIL is an RR signature failure in DNSSEC
-          # NOTE: qname is encoded in RFC 1035 zone format, decode it
           dbg("dns: dns reply to %s: %s", $id, $rcode);
         }
 
@@ -854,6 +858,14 @@ be avoided for mainstream usage.
 sub send {
   my ($self, $name, $type, $class) = @_;
   return if $self->{no_resolver};
+
+  # Avoid passing utf8 character strings to DNS, as it has no notion of
+  # character set encodings - encode characters somehow to plain bytes
+  # using some arbitrary encoding (they are normally just 7-bit ascii
+  # characters anyway, just need to get rid of the utf8 flag).  Bug 6959
+  # Most if not all af these come from a SPF plugin.
+  #
+  utf8::encode($name);
 
   my $retrans = $self->{retrans};
   my $retries = $self->{retry};

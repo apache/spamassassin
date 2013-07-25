@@ -59,7 +59,7 @@ BEGIN {
   @EXPORT = ();
   @EXPORT_OK = qw(&local_tz &base64_decode &untaint_var &untaint_file_path
                   &exit_status_str &proc_status_ok &am_running_on_windows
-                  &reverse_ip_address &fmt_dns_question_entry
+                  &reverse_ip_address &decode_dns_question_entry
                   &secure_tmpfile &secure_tmpdir);
 }
 
@@ -915,12 +915,17 @@ sub my_inet_aton { unpack("N", pack("C4", split(/\./, $_[0]))) }
 
 ###########################################################################
 
-sub fmt_dns_question_entry {
-  # converts a @{Net::DNS::Packet->question} entry to a presentable format,
+sub decode_dns_question_entry {
+  # decodes a Net::DNS::Packet->question entry,
   # returning a triple: class, type, label
   #
   my $q = $_[0];
   my $qname = $q->qname;
+
+  # Bug 6959, Net::DNS flags a domain name in a query section as utf8, while
+  # still keeping it "RFC 1035 zone file format"-encoded, silly and harmful
+  utf8::encode($qname) if utf8::is_utf8($qname);  # since Perl 5.8.1
+
   local $1;
   # Net::DNS provides a query in encoded RFC 1035 zone file format, decode it!
   $qname =~ s{ \\ ( [0-9]{3} | [^0-9] ) }
