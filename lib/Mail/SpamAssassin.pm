@@ -1633,7 +1633,7 @@ sub timer_report {
   foreach my $name (@{$self->{timers_order}}) {
     my $elapsed = $self->{timers}->{$name}->{elapsed} || 0;
     my $pc = $total <= 0 || $elapsed >= $total ? 100 : ($elapsed/$total)*100;
-    my $fmt = $elapsed >= 0.002 ? "%.0f" : "%.2f";
+    my $fmt = $elapsed >= 0.005 ? "%.0f" : $elapsed >= 0.002 ? "%.1f" : "%.2f";
     push @str, sprintf("%s: $fmt (%.1f%%)", $name, $elapsed*1000, $pc);
   }
 
