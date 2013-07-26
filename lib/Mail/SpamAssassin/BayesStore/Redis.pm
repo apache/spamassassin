@@ -24,14 +24,17 @@ Mail::SpamAssassin::BayesStore::Redis - Redis Bayesian Storage Module Implementa
 =head1 DESCRIPTION
 
 This module implementes a Redis based bayesian storage module.
-!! IT IS STILL EXPERIMENTAL AND SUBJECT TO CHANGE !!
 
-The following config variable has been hijacked for our purposes:
+A redis server with a Lua support (2.6 or higher) is strongly recommended
+for performance reasons.
+
+The bayes_sql_dsn config variable has been hijacked for our purposes:
 
   bayes_sql_dsn
 
     Optional config parameters sent as is to Redis->new().
-    Example: server=localhost:6379;password=foo
+    Example: server=localhost:6379;password=foo;reconnect=20
+
     By default encoding=undef is set as suggested by Redis module.
 
     To use non-default database id, use "database=x". This is not passed
@@ -49,10 +52,16 @@ The following config variable has been hijacked for our purposes:
     when bayes_auto_expire is true. Default value is 8 days (but check
     Mail::SpamAssassin::Conf.pm to make sure).
 
-Expiry is done internally in Redis using _ttl values mentioned above,
-but only if bayes_auto_expire is true (which is a default). This is
+Expiry is done internally in Redis using *_ttl settings mentioned above,
+but only if bayes_auto_expire is true (which is a default).  This is
 why --force-expire etc does nothing and token counts and atime values
 are shown zero in statistics.
+
+LIMITATIONS: Only global bayes storage is implemented, per-user bayes is
+not available. Dumping (sa-learn --backup) of a very large database may
+not be possible due to memory limitations and inefficient full database
+traversal mechanism. This backend storage module is new with SpamAssassin
+3.4.0 and may be revised in future versions as more experience is gained.
 
 =cut
 
