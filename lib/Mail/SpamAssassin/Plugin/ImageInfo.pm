@@ -228,7 +228,7 @@ sub _get_images {
 
   foreach my $p ($pms->{msg}->find_parts(qr@^image/(?:gif|png|jpeg)$@, 1)) {
     # make sure its base64 encoded
-    my $cte = lc $p->get_header('content-transfer-encoding') || '';
+    my $cte = lc($p->get_header('content-transfer-encoding') || '');
     next if ($cte !~ /^base64$/);
 
     my ($type) = $p->{'type'} =~ m@/(\w+)$@;
