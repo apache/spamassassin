@@ -923,6 +923,76 @@ sub clear_database {
   return 1;
 }
 
+=head2 dump_db_toks
+
+public instance () dump_db_toks (String $template, String $regex, Array @vars)
+
+Description:
+This method loops over all tokens, computing the probability for the token
+and then printing it out according to the passed in token.
+
+=cut
+
+sub dump_db_toks {
+  my ($self, $template, $regex, @vars) = @_;
+
+  return 0 unless $self->tie_db_readonly;
+  my $r = $self->{redis};
+  my $atime = time;  # fake
+
+  # Sadly it's impossible to prevent Redis-module itself keeping all
+  # resulting keys in memory.
+  my @keys;
+
+  # let's get past this terrible command as fast as possible
+  # (ignoring $regex which makes no sense with SHA digests)
+  @keys = $r->keys('w:*');
+  dbg("bayes: fetched %d token keys", scalar @keys);
+
+  # process tokens in chunks of 1000
+  for (my $i = 0; $i <= $#keys; $i += 1000) {
+    my $end = $i + 999 >= $#keys ? $#keys : $i + 999;
+
+    my @tokensdata;
+    if ($self->{have_lua}) {
+      my @tokens = map(substr($_,2), @keys[$i .. $end]);  # strip leading "w:"
+      my @results = $r->evalsha($self->{multi_hmget_script},
+                                scalar @tokens, @tokens);
+      @results = split(' ', $results[0])  if @results == 1;
+      @tokensdata = map { my($s,$h) = split(m{/}, shift @results, 2);
+                          [ $_, $s||0, $h||0 ] } @tokens;
+
+    } else {  # no Lua, 3-times slower
+      for (my $j = $i; $j <= $end; $j++) {
+        my $token = $keys[$j];
+        $r->hmget($token, 's', 'h', sub {
+          my($val, $error) = @_;
+          push(@tokensdata, [ substr($token,2), $val->[0]||0, $val->[1]||0 ])
+            if $val && @$val == 2;
+          1;
+        });
+      }
+      $self->_wait_all_responses;
+    }
+
+    foreach my $tokendata (@tokensdata) {
+      my($token, $s, $h) = @$tokendata;
+      next if !$s && !$h;
+      my $prob =
+        $self->{bayes}->_compute_prob_for_token($token, $vars[1], $vars[2],
+                                                $s, $h);
+      $prob = 0.5  if !defined $prob;
+      my $encoded = unpack("H*", $token);
+      printf($template, $prob, $s, $h, $atime, $encoded)
+        or die "Error writing tokens: $!";
+    }
+  }
+
+  $self->untie_db();
+
+  return;
+}
+
 =head2 backup_database
 
 public instance (Boolean) backup_database ()
@@ -935,9 +1005,9 @@ This method will dump the users database in a machine readable format.
 sub backup_database {
   my($self) = @_;
 
-  return 0 unless $self->tie_db_writable;
+  return 0 unless $self->tie_db_readonly;
 
-  my $atime = time;
+  my $atime = time;  # fake
   my @vars = $self->get_storage_variables(qw(DB_VERSION NSPAM NHAM));
   print "v\t$vars[0]\tdb_version # this must be the first line!!!\n";
   print "v\t$vars[1]\tnum_spam\n";
@@ -964,9 +1034,9 @@ sub backup_database {
       @results = split(' ', $results[0])  if @results == 1;
       foreach my $token (@tokens) {
         my($s,$h) = split(m{/}, shift @results, 2);
+        next if !$s && !$h;
         my $encoded = unpack("H*", $token);
-        printf("t\t%d\t%d\t%s\t%s\n",
-               $s||0, $h||0, $atime, $encoded)  if $s || $h;
+        printf("t\t%d\t%d\t%s\t%s\n", $s||0, $h||0, $atime, $encoded);
       }
 
     } else {   # no Lua, slower
