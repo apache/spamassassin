@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-8mile axb-coi-bulk axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-zmi bernie-fsf bernie-it_batt bpoliakoff grenier jarif kpg-core mas-cps mas-mas zmi; day 2: axb-8mile axb-coi-bulk axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bpoliakoff grenier jarif kpg-core llanga mas-cps mas-mas zmi; day 3: axb-8mile axb-coi-bulk axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bernie-mix bpoliakoff grenier jarif kpg-core llanga mas-cps mas-mas zmi
+# with results from: day 1: axb-8mile axb-coi-bulk axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bernie-fsf bernie-it_batt bpoliakoff grenier jarif kpg-core zmi; day 2: axb-8mile axb-coi-bulk axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bpoliakoff grenier jarif kpg-core llanga mas-cps mas-mas zmi; day 3: axb-8mile axb-coi-bulk axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bpoliakoff grenier jarif kpg-core llanga mas-cps mas-mas zmi
 
 # tflags publish
 ADVANCE_FEE_2_NEW_FORM
@@ -54,9 +54,6 @@ AXB_BODYMAIL_SBL112884
 
 # good enough
 AXB_XMAILER_MIMEOLE_OL_024C2
-
-# good enough
-AXB_XMAILER_MIMEOLE_OL_4379D
 
 # good enough
 AXB_XMAILER_MIMEOLE_OL_7EB15
@@ -176,9 +173,6 @@ EMAIL_URI_PHISH
 ENV_AND_HDR_SPF_MATCH
 
 # good enough
-FB_CIALIS_LEO3
-
-# good enough
 FH_FAKE_RCVD_LINE_B
 
 # good enough
@@ -186,9 +180,6 @@ FH_HELO_ALMOST_IP
 
 # tflags publish
 FILL_THIS_FORM
-
-# good enough
-FILL_THIS_FORM_LONG
 
 # good enough
 FM_LOTTO_YOU_WON
@@ -308,9 +299,6 @@ HK_NAME_DR
 HK_RANDOM_FROM
 
 # good enough
-HK_SCAM_N2
-
-# good enough
 HK_SCAM_S23
 
 # tflags userconf
@@ -345,9 +333,6 @@ MIME_NO_TEXT
 
 # tflags userconf
 MISSING_HB_SEP
-
-# good enough
-MONEY_ATM_CARD
 
 # good enough
 MONEY_FORM_SHORT
@@ -638,13 +623,7 @@ SPF_PASS
 SPF_SOFTFAIL
 
 # good enough
-STOX_REPLY_TYPE
-
-# good enough
 STOX_REPLY_TYPE_WITHOUT_QUOTES
-
-# good enough
-STYLE_GIBBERISH
 
 # tflags userconf
 SUBJECT_IN_BLACKLIST
@@ -686,7 +665,16 @@ TVD_RCVD_IP4
 TVD_UNDER_VALUED
 
 # good enough
-MONEY_FORM
+OBFU_GIF_ATTACH
+
+# good enough
+REMOVE_YEAHNET
+
+# good enough
+TVD_GET_STOCK
+
+# good enough
+TVD_PH_BODY_META
 
 # tflags userconf
 UNPARSEABLE_RELAY
