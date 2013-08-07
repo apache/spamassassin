@@ -91,7 +91,8 @@ BEGIN {
 }
 
 # Support for "SCRIPT LOAD" command is needed, provided by Redis version 1.954
-use constant HAS_REDIS => eval { require Redis; Redis->VERSION(1.954) };
+# Method on_connect() is available since Redis version 1.956 .
+use constant HAS_REDIS => eval { require Redis; Redis->VERSION(1.956) };
 
 =head1 METHODS
 
@@ -116,7 +117,6 @@ sub new {
   }
 
   my $bconf = $self->{bayes}->{conf};
-  push @{$self->{redis_conf}}, 'encoding' => undef;
 
   foreach (split(';', $bconf->{bayes_sql_dsn})) {
     my ($a, $b) = split('=');
@@ -147,22 +147,80 @@ sub new {
   }
 
   $self->{supported_db_version} = 3;
-  $self->{is_really_open} = 0;
-  $self->{is_writable} = 0;
+  $self->{connected} = 0;
   $self->{is_officially_open} = 0;
+  $self->{is_writable} = 0;
 
   $self->{timer} = Mail::SpamAssassin::Timeout->new({
-    secs => $self->{conf}->{redis_timeout} || 2
+    secs => $self->{conf}->{redis_timeout} || 10
   });
 
   return $self;
 }
 
+sub disconnect {
+  my($self) = @_;
+  if ($self->{connected}) {
+    local($@, $!, $_);
+    dbg("bayes: Redis disconnect");
+    $self->{connected} = 0; undef $self->{redis};
+  }
+}
+
 sub DESTROY {
   my($self) = @_;
-  if ($self->{is_really_open} && $self->{redis}) {
-    eval { $self->{redis}->quit };  # close session, ignoring any failures
+  local($@, $!, $_);
+  $self->{connected} = 0; undef $self->{redis};
+}
+
+# called from a Redis module on Redis->new and on automatic re-connect
+sub on_connect {
+  my($self, $r) = @_;
+
+  dbg("bayes: Redis on-connect");
+
+  if ($self->{db_id}) {  # defined and nonzero
+    # work around a Redis module bug:
+    #   Select new database doesn't survive after reconnect.
+    #   https://github.com/melo/perl-redis/issues/38
+    eval {
+      $r->select($self->{db_id}); 1;
+    } or do {
+      $@ =~ s{\s+at /.*}{}s;
+      $self->disconnect;
+      die "Redis error during database select(): $@\n";
+    };
   }
+  1;
+}
+
+sub connect {
+  my($self) = @_;
+
+  $self->disconnect if $self->{connected};
+  undef $self->{redis};  # just in case
+
+  my $err = $self->{timer}->run_and_catch(sub {
+    my $mypid = $self->{opened_from_pid} = $$;
+    # will keep a persistent session open to a redis server
+    $self->{redis} = Redis->new(
+                       name => 'sa[' . $mypid . ']',
+                       @{$self->{redis_conf}},
+                       encoding => undef,
+                       on_connect => sub { my($r) = @_; $self->on_connect($r) },
+                     );
+  });
+  if ($self->{timer}->timed_out()) {
+    warn("bayes: Redis connection timed out!");
+    undef $self->{redis};
+    return;
+  } elsif ($err) {
+    $err =~ s{ at /.*}{}s; # skip full trace
+    warn("bayes: Redis connection failed: $err");
+    undef $self->{redis};
+    return;
+  }
+  $self->{connected} = 1;
 }
 
 =head2 prefork_init
@@ -187,15 +245,11 @@ sub prefork_init {
   # it is no longer of any use by now, so we shut it down here in the master
   # process, letting a spawned child process re-establish it later.
 
-  if ($self->{is_really_open}) {
+  if ($self->{connected}) {
     dbg("bayes: prefork_init, closing a session ".
         "with a Redis server in a parent process");
     $self->untie_db;
-    if ($self->{redis}) {
-      eval { $self->{redis}->quit };  # close session, ignoring any failures
-    }
-    undef $self->{redis};
-    $self->{is_really_open} = 0;
+    $self->disconnect;
   }
 }
 
@@ -223,12 +277,11 @@ sub spamd_child_init {
   # software (or a pre-3.4.0 version of spamd) is somehow using this plugin.
   # Better safe than sorry...
 
-  if ($self->{is_really_open}) {
+  if ($self->{connected}) {
     dbg("bayes: spamd_child_init, closing a parent's session ".
         "with a Redis server in a child process");
     $self->untie_db;
-    undef $self->{redis};  # just drop it, don't shut down parent's session
-    $self->{is_really_open} = 0;
+    $self->disconnect;  # just drop it, don't shut down parent's session
   }
 }
 
@@ -237,25 +290,24 @@ sub spamd_child_init {
 public instance (Boolean) tie_db_readonly ();
 
 Description:
-This method ensures that the database connection is properly setup and
-working.
+This method ensures that the database connection is properly setup and working.
 
 =cut
 
 sub tie_db_readonly {
   my($self) = @_;
 
-  return 0 unless (HAS_REDIS);
+  HAS_REDIS or return;
 
-  my $really_open = $self->{is_really_open};
-  if ($really_open) {
-    $self->{is_officially_open} = 1;
-  } else {
-    $really_open = $self->_open_db();
-  }
   $self->{is_writable} = 0;
+  my $success;
+  if ($self->{connected}) {
+    $success = $self->{is_officially_open} = 1;
+  } else {
+    $success = $self->_open_db();
+  }
 
-  return $really_open;
+  return $success;
 }
 
 =head2 tie_db_writable
@@ -272,18 +324,19 @@ begin using the database immediately.
 sub tie_db_writable {
   my($self) = @_;
 
-  return 0 unless (HAS_REDIS);
+  HAS_REDIS or return;
 
-  my $really_open = $self->{is_really_open};
-  if ($really_open) {
-    $self->{is_officially_open} = 1;
+  $self->{is_writable} = 0;
+  my $success;
+  if ($self->{connected}) {
+    $success = $self->{is_officially_open} = 1;
   } else {
-    $really_open = $self->_open_db();
+    $success = $self->_open_db();
   }
 
-  $self->{is_writable} = 1 if $really_open;
+  $self->{is_writable} = 1 if $success;
 
-  return $really_open;
+  return $success;
 }
 
 =head2 _open_db
@@ -292,8 +345,8 @@ private instance (Boolean) _open_db (Boolean $writable)
 
 Description:
 This method ensures that the database connection is properly setup and
-working.  It will initialize a users bayes variables so that they
-can begin using the database immediately.
+working.  It will initialize bayes variables so that they can begin using
+the database immediately.
 
 =cut
 
@@ -301,33 +354,17 @@ sub _open_db {
   my($self) = @_;
 
   dbg("bayes: _open_db(%s); Redis %s",
-      $self->{is_really_open} ? 'already open' : 'not yet open',
+      $self->{connected} ? 'already connected' : 'not yet connected',
       Redis->VERSION);
 
-  if ($self->{is_really_open}) {
+  if ($self->{connected}) {
     $self->{is_officially_open} = 1;
     return 1;
   }
 
   $self->read_db_configs();
 
-  my $err = $self->{timer}->run_and_catch(sub {
-    $self->{opened_from_pid} = $$;
-    # will keep a persistent session open to a redis server
-    $self->{redis} = Redis->new(@{$self->{redis_conf}});
-    $self->{redis}->select($self->{db_id}) if defined $self->{db_id};
-  });
-
-  if ($self->{timer}->timed_out()) {
-    warn("bayes: Redis connection timed out!");
-    return 0;
-  }
-  elsif ($err) {
-    $err =~ s{ at /.*}{}s; # skip full trace
-    $self->{is_really_open} = 0;
-    warn("bayes: Redis connection failed: $err");
-    return 0;
-  }
+  $self->connect;
 
   my $have_lua = $self->{have_lua};
   if (!$self->{redis_server_version}) {
@@ -378,7 +415,6 @@ sub _open_db {
     $self->_define_lua_scripts;
   }
 
-  $self->{is_really_open} = 1;
   $self->{is_officially_open} = 1;
 
   return 1;
@@ -396,8 +432,7 @@ Closes any open db handles.  You can safely call this at any time.
 sub untie_db {
   my $self = shift;
 
-  $self->{is_officially_open} = 0;
-  $self->{is_writable} = 0;
+  $self->{is_officially_open} = $self->{is_writable} = 0;
   return;
 }
 
@@ -597,9 +632,11 @@ sub tok_get_all {
 # my @keys = @_;  # avoid copying strings unnecessarily
 
   my @values;
+  $self->connect if !$self->{connected};
   my $r = $self->{redis};
 
   if (! $self->{have_lua} ) {
+
     foreach my $token (@_) {
       $r->hmget('w:'.$token, 's', 'h', sub {
         my($values, $error) = @_;
@@ -612,22 +649,45 @@ sub tok_get_all {
     $self->_wait_all_responses;
 
   } else {  # have Lua, faster
+
+    # no need for cryptographical strength, just checking for protocol errors
+    my $nonce = sprintf("%06x", rand(0xffffff));
+
     my @results;
     eval {
-      @results = $r->evalsha($self->{multi_hmget_script}, scalar @_, @_);
+      @results = $r->evalsha($self->{multi_hmget_script},
+                             scalar @_, @_, $nonce);
       1;
     } or do {  # Lua script probably not cached, define again and re-try
-      $@ =~ /^\Q[evalsha] NOSCRIPT\E/ or die "bayes: Redis LUA error: $@\n";
+      if ($@ !~ /^\Q[evalsha] NOSCRIPT\E/) {
+        $self->disconnect;
+        die "bayes: Redis LUA error: $@\n";
+      }
       $self->_define_lua_scripts;
-      @results = $r->evalsha($self->{multi_hmget_script}, scalar @_, @_);
+      @results = $r->evalsha($self->{multi_hmget_script},
+                             scalar @_, @_, $nonce);
     };
-    @results = split(' ', $results[0])  if @results == 1;
-    @results == @_
-      or die sprintf("bayes: tok_get_all got %d results, expected %d\n",
-                     scalar @results, scalar @_);
-    foreach my $token (@_) {
-      my($s,$h) = split(m{/}, shift @results, 2);
-      push(@values, [$token, ($s||0)+0, ($h||0)+0, 0])  if $s || $h;
+    my $r_nonce = $results[1];
+    if (@results != 2) {
+      $self->disconnect;
+      die sprintf("bayes: tok_get_all expected 2 results, got %d\n",
+                  scalar @results);
+    } elsif ($r_nonce ne $nonce) {
+      # check for redis protocol falling out of step
+      $self->disconnect;
+      die sprintf("bayes: tok_get_all nonce mismatch, expected %s, got %s\n",
+                  $nonce, defined $r_nonce ? $r_nonce : 'UNDEF');
+    } else {
+      @results = split(' ', $results[0]);
+      if (@results != @_) {
+        $self->disconnect;
+        die sprintf("bayes: tok_get_all got %d entries, expected %d\n",
+                    scalar @results, scalar @_);
+      }
+      foreach my $token (@_) {
+        my($s,$h) = split(m{/}, shift @results, 2);
+        push(@values, [$token, ($s||0)+0, ($h||0)+0, 0])  if $s || $h;
+      }
     }
   }
 
@@ -679,24 +739,32 @@ sub multi_tok_count_change {
   dbg("bayes: multi_tok_count_change learning %d spam, %d ham",
       $dspam, $dham);
 
+  $self->connect if !$self->{connected};
+
   if ($self->{have_lua}) {
 
     my $r = $self->{redis};
-    my $ntokens = scalar keys %$tokens;
+    my @tokens_list = keys %$tokens;
+    my $ntokens = scalar @tokens_list;
     my $cnt;
     eval {
       $cnt = $r->evalsha($self->{multi_hincrby},
-                         $ntokens, keys %$tokens, $dspam, $dham, $ttl);
+                         $ntokens, @tokens_list, $dspam, $dham, $ttl);
       1;
     } or do {  # Lua script probably not cached, define again and re-try
-      $@ =~ /^\Q[evalsha] NOSCRIPT\E/ or die "bayes: Redis LUA error: $@\n";
+      if ($@ !~ /^\Q[evalsha] NOSCRIPT\E/) {
+        $self->disconnect;
+        die "bayes: Redis LUA error: $@\n";
+      }
       $self->_define_lua_scripts;
       $cnt = $r->evalsha($self->{multi_hincrby},
-                         $ntokens, keys %$tokens, $dspam, $dham, $ttl);
+                         $ntokens, @tokens_list, $dspam, $dham, $ttl);
     };
-    $cnt == $ntokens
-      or die sprintf("bayes: multi_tok_count_change got %d, expected %d\n",
-                     $cnt, $ntokens);
+    if ($cnt != $ntokens) {
+      $self->disconnect;
+      die sprintf("bayes: multi_tok_count_change got %d, expected %d\n",
+                  $cnt, $ntokens);
+    }
 
   } else {  # no Lua, slower
 
@@ -768,17 +836,20 @@ sub nspam_nham_change {
 
   return 1 unless $ds || $dh;
 
+  $self->connect if !$self->{connected};
+
   my $err = $self->{timer}->run_and_catch(sub {
     $self->{redis}->incrby("v:NSPAM", $ds) if $ds;
     $self->{redis}->incrby("v:NHAM", $dh) if $dh;
   });
 
   if ($self->{timer}->timed_out()) {
+    $self->disconnect;
     die("bayes: Redis connection timed out!");
   }
   elsif ($err) {
     $err =~ s{ at /.*}{}s; # skip full trace
-    $self->{is_really_open} = 0;
+    $self->disconnect;
     die("bayes: failed to increment nspam $ds nham $dh: $err");
   }
 
@@ -825,12 +896,16 @@ sub tok_touch_all {
   dbg("bayes: tok_touch_all setting expire to %s on %d tokens",
       $ttl, scalar @$tokens);
 
+  $self->connect if !$self->{connected};
+
   # We just refresh TTL on all
   if (! $self->{have_lua} ) {
+
     $self->_expire_p("w:$_", $ttl) for @$tokens;
     $self->_wait_all_responses;
 
   } else {  # have Lua, faster
+
     my $r = $self->{redis};
     my $cnt;
     eval {
@@ -838,14 +913,19 @@ sub tok_touch_all {
                          scalar @$tokens, @$tokens, $ttl);
       1;
     } or do {  # Lua script probably not cached, define again and re-try
-      $@ =~ /^\Q[evalsha] NOSCRIPT\E/ or die "bayes: Redis LUA error: $@\n";
+      if ($@ !~ /^\Q[evalsha] NOSCRIPT\E/) {
+        $self->disconnect;
+        die "bayes: Redis LUA error: $@\n";
+      }
       $self->_define_lua_scripts;
       $cnt = $r->evalsha($self->{multi_expire_script},
                          scalar @$tokens, @$tokens, $ttl);
     };
-    $cnt == @$tokens
-      or die sprintf("bayes: tok_touch_all got %d, expected %d\n",
-                     $cnt, scalar @$tokens);
+    if ($cnt != @$tokens) {
+      $self->disconnect;
+      die sprintf("bayes: tok_touch_all got %d, expected %d\n",
+                  $cnt, scalar @$tokens);
+    }
   }
   return 1;
 }
@@ -937,7 +1017,9 @@ sub dump_db_toks {
   my ($self, $template, $regex, @vars) = @_;
 
   return 0 unless $self->tie_db_readonly;
+  $self->connect if !$self->{connected};
   my $r = $self->{redis};
+
   my $atime = time;  # fake
 
   # Sadly it's impossible to prevent Redis-module itself keeping all
@@ -954,15 +1036,8 @@ sub dump_db_toks {
     my $end = $i + 999 >= $#keys ? $#keys : $i + 999;
 
     my @tokensdata;
-    if ($self->{have_lua}) {
-      my @tokens = map(substr($_,2), @keys[$i .. $end]);  # strip leading "w:"
-      my @results = $r->evalsha($self->{multi_hmget_script},
-                                scalar @tokens, @tokens);
-      @results = split(' ', $results[0])  if @results == 1;
-      @tokensdata = map { my($s,$h) = split(m{/}, shift @results, 2);
-                          [ $_, $s||0, $h||0 ] } @tokens;
+    if (! $self->{have_lua}) {  # no Lua, 3-times slower
 
-    } else {  # no Lua, 3-times slower
       for (my $j = $i; $j <= $end; $j++) {
         my $token = $keys[$j];
         $r->hmget($token, 's', 'h', sub {
@@ -973,14 +1048,43 @@ sub dump_db_toks {
         });
       }
       $self->_wait_all_responses;
+
+    } else {  # have_lua
+
+      my $nonce = sprintf("%06x", rand(0xffffff));
+      my @tokens = map(substr($_,2), @keys[$i .. $end]);  # strip leading "w:"
+      my @results = $r->evalsha($self->{multi_hmget_script},
+                                scalar @tokens, @tokens, $nonce);
+      my $r_nonce = $results[1];
+      if (@results != 2) {
+        $self->disconnect;
+        die sprintf("bayes: dump_db_toks expected 2 results, got %d\n",
+                    scalar @results);
+      } elsif ($r_nonce ne $nonce) {
+        # check for redis protocol falling out of step
+        $self->disconnect;
+        die sprintf("bayes: dump_db_toks nonce mismatch, expected %s, got %s\n",
+                    $nonce, defined $r_nonce ? $r_nonce : 'UNDEF');
+      } else {
+        @results = split(' ', $results[0]);
+        if (@results != @tokens) {
+          $self->disconnect;
+          die sprintf("bayes: dump_db_toks got %d entries, expected %d\n",
+                         scalar @results, scalar @tokens);
+        }
+        @results = split(' ', $results[0]);
+        @tokensdata = map { my($s,$h) = split(m{/}, shift @results, 2);
+                            [ $_, $s||0, $h||0 ] } @tokens;
+      }
     }
 
+    my $probabilities_ref =
+      $self->{bayes}->_compute_prob_for_all_tokens(\@tokensdata,
+                                                   $vars[1], $vars[2]);
     foreach my $tokendata (@tokensdata) {
+      my $prob = shift(@$probabilities_ref);
       my($token, $s, $h) = @$tokendata;
       next if !$s && !$h;
-      my $prob =
-        $self->{bayes}->_compute_prob_for_token($token, $vars[1], $vars[2],
-                                                $s, $h);
       $prob = 0.5  if !defined $prob;
       my $encoded = unpack("H*", $token);
       printf($template, $prob, $s, $h, $atime, $encoded)
@@ -1006,14 +1110,14 @@ sub backup_database {
   my($self) = @_;
 
   return 0 unless $self->tie_db_readonly;
+  $self->connect if !$self->{connected};
+  my $r = $self->{redis};
 
   my $atime = time;  # fake
   my @vars = $self->get_storage_variables(qw(DB_VERSION NSPAM NHAM));
   print "v\t$vars[0]\tdb_version # this must be the first line!!!\n";
   print "v\t$vars[1]\tnum_spam\n";
   print "v\t$vars[2]\tnum_nonspam\n";
-
-  my $r = $self->{redis};
 
   # Sadly it's impossible to prevent Redis-module itself keeping all
   # resulting keys in memory.
@@ -1027,19 +1131,8 @@ sub backup_database {
   for (my $i = 0; $i <= $#keys; $i += 1000) {
     my $end = $i + 999 >= $#keys ? $#keys : $i + 999;
 
-    if ($self->{have_lua}) {
-      my @tokens = map(substr($_,2), @keys[$i .. $end]);  # strip leading "w:"
-      my @results = $r->evalsha($self->{multi_hmget_script},
-                                scalar @tokens, @tokens);
-      @results = split(' ', $results[0])  if @results == 1;
-      foreach my $token (@tokens) {
-        my($s,$h) = split(m{/}, shift @results, 2);
-        next if !$s && !$h;
-        my $encoded = unpack("H*", $token);
-        printf("t\t%d\t%d\t%s\t%s\n", $s||0, $h||0, $atime, $encoded);
-      }
+    if (! $self->{have_lua}) {  # no Lua, slower
 
-    } else {   # no Lua, slower
       for (my $j = $i; $j <= $end; $j++) {
         my $token = $keys[$j];
         $r->hmget($token, 's', 'h', sub {
@@ -1053,6 +1146,38 @@ sub backup_database {
         });
       }
       $self->_wait_all_responses;
+
+    } else {  # have_lua
+
+      my $nonce = sprintf("%06x", rand(0xffffff));
+      my @tokens = map(substr($_,2), @keys[$i .. $end]);  # strip leading "w:"
+      my @results = $r->evalsha($self->{multi_hmget_script},
+                                scalar @tokens, @tokens, $nonce);
+      my $r_nonce = $results[1];
+      if (@results != 2) {
+        $self->disconnect;
+        die sprintf("bayes: backup_database expected 2 results, got %d\n",
+                    scalar @results);
+      } elsif ($r_nonce ne $nonce) {
+        # check for redis protocol falling out of step
+        $self->disconnect;
+        die sprintf("bayes: backup_database nonce mismatch, ".
+                    "expected %s, got %s\n",
+                    $nonce, defined $r_nonce ? $r_nonce : 'UNDEF');
+      } else {
+        @results = split(' ', $results[0]);
+        if (@results != @tokens) {
+          $self->disconnect;
+          die sprintf("bayes: backup_database got %d entries, expected %d\n",
+                         scalar @results, scalar @tokens);
+        }
+        foreach my $token (@tokens) {
+          my($s,$h) = split(m{/}, shift @results, 2);
+          next if !$s && !$h;
+          my $encoded = unpack("H*", $token);
+          printf("t\t%d\t%d\t%s\t%s\n", $s||0, $h||0, $atime, $encoded);
+        }
+      }
     }
   }
 
@@ -1063,7 +1188,10 @@ sub backup_database {
     my $end = $i + 999 >= $#keys ? $#keys : $i + 999;
     my @t = @keys[$i .. $end];
     my $v = $self->_mget(\@t);
-    die "bayes: seen fetch failed" unless $v && @$v;
+    if (!$v || !@$v) {
+      $self->disconnect;
+      die "bayes: seen fetch failed";
+    }
     for (my $i = 0; $i < @$v; $i++) {
       next unless defined $v->[$i];
       printf("s\t%s\t%s\n", $v->[$i], substr($t[$i], 2));
@@ -1107,9 +1235,8 @@ sub restore_database {
     return 0;
   }
 
-  unless ($self->tie_db_writable()) {
-    return 0;
-  }
+  return 0 unless $self->tie_db_writable;
+  $self->connect if !$self->{connected};
 
   my $token_count = 0;
   my $db_version;
@@ -1244,7 +1371,7 @@ readable state.
 sub db_readable {
   my($self) = @_;
 
-  return $self->{is_really_open} && $self->{is_officially_open};
+  return $self->{is_officially_open};
 }
 
 =head2 db_writable
@@ -1260,8 +1387,7 @@ writable state.
 sub db_writable {
   my($self) = @_;
 
-  return $self->{is_really_open} && $self->{is_officially_open} &&
-         $self->{is_writable};
+  return $self->{is_officially_open} && $self->{is_writable};
 }
 
 #
@@ -1271,11 +1397,13 @@ sub db_writable {
 sub _define_lua_scripts {
   my $self = shift;
   dbg("bayes: defining Lua scripts");
+  $self->connect if !$self->{connected};
   my $r = $self->{redis};
 
   $self->{multi_hmget_script} = $r->script_load(<<'END');
     local rcall = redis.call
     local r = {}
+    local nonce = ARGV[1]
     for j = 1, #KEYS do
       local sh = rcall("HMGET", "w:" .. KEYS[j], "s", "h")
       -- returns counts as a list of spam/ham pairs, zeroes may be omitted
@@ -1290,8 +1418,8 @@ sub _define_lua_scripts {
       end
       r[#r+1] = pair
     end
-    -- return as a single string, avoids overhead of multiresult parsing
-    return table.concat(r, " ")
+    -- return counts as a single string, avoids overhead of multiresult parsing
+    return { table.concat(r," "), nonce }
 END
 
   $self->{multi_expire_script} = $r->script_load(<<'END');
@@ -1345,11 +1473,12 @@ sub _get {
   });
 
   if ($self->{timer}->timed_out()) {
+    $self->disconnect;
     die("bayes: get timed out!");
   }
   elsif ($err) {
     $err =~ s{ at /.*}{}s; # skip full trace
-    $self->{is_really_open} = 0;
+    $self->disconnect;
     die("bayes: get failed: $err");
   }
 
@@ -1366,11 +1495,12 @@ sub _mget {
   });
 
   if ($self->{timer}->timed_out()) {
+    $self->disconnect;
     die("bayes: mget timed out!");
   }
   elsif ($err) {
     $err =~ s{ at /.*}{}s; # skip full trace
-    $self->{is_really_open} = 0;
+    $self->disconnect;
     die("bayes: mget failed: $err");
   }
 
@@ -1386,11 +1516,12 @@ sub _hmget {
   });
 
   if ($self->{timer}->timed_out()) {
+    $self->disconnect;
     die("bayes: hmget timed out!");
   }
   elsif ($err) {
     $err =~ s{ at /.*}{}s; # skip full trace
-    $self->{is_really_open} = 0;
+    $self->disconnect;
     die("bayes: hmget failed: $err");
   }
 
@@ -1409,11 +1540,12 @@ sub _set {
   });
 
   if ($self->{timer}->timed_out()) {
+    $self->disconnect;
     die("bayes: set timed out!");
   }
   elsif ($err) {
     $err =~ s{ at /.*}{}s; # skip full trace
-    $self->{is_really_open} = 0;
+    $self->disconnect;
     die("bayes: set failed: $err");
   }
 
@@ -1428,11 +1560,12 @@ sub _hincrby {
   });
 
   if ($self->{timer}->timed_out()) {
+    $self->disconnect;
     die("bayes: hincrby timed out!");
   }
   elsif ($err) {
     $err =~ s{ at /.*}{}s; # skip full trace
-    $self->{is_really_open} = 0;
+    $self->disconnect;
     die("bayes: hincrby failed: $err");
   }
 
@@ -1498,12 +1631,13 @@ sub _wait_all_responses {
   });
 
   if ($self->{timer}->timed_out()) {
+    $self->disconnect;
     die sprintf("bayes: wait_all_responses timed out! called from line %s\n",
                 (caller)[2]);
   }
   elsif ($err) {
     $err =~ s{ at /.*}{}s; # skip full trace
-    $self->{is_really_open} = 0;
+    $self->disconnect;
     die sprintf("bayes: wait_all_responses failed: %s, called from line %s\n",
                 $err, (caller)[2]);
   }
@@ -1519,17 +1653,16 @@ sub _del {
   });
 
   if ($self->{timer}->timed_out()) {
+    $self->disconnect;
     die("bayes: del timed out!");
   }
   elsif ($err) {
     $err =~ s{ at /.*}{}s; # skip full trace
-    $self->{is_really_open} = 0;
+    $self->disconnect;
     die("bayes: del failed: $err");
   }
 
   return 1;
 }
-
-sub sa_die { Mail::SpamAssassin::sa_die(@_); }
 
 1;

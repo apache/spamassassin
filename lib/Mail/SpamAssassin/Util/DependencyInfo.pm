@@ -218,7 +218,7 @@ $have_sha ? {
 },
 {
   module => 'Redis',
-  version => 1.954,
+  version => 1.956,
   desc => 'If you intend to use SpamAssassin with a Redis database backend for
   Bayes storage, you will need to have this module installed.',
 },
