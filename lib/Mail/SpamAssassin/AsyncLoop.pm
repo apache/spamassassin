@@ -630,8 +630,8 @@ sub set_response_packet {
     my $ent_id = $ent->{id};
     if (!defined $ent_id) {
       # should not happen, troubleshooting
-      info("async: ignoring response, id $id, ent_id is undef: %s",
-           join(', ', %$ent));
+      info("async: ignoring response, id %s, ent_id is undef: %s",
+           $id, join(', ', %$ent));
     } elsif ($id ne $ent_id) {
       info("async: ignoring response, mismatched id $id, expected $ent_id");
     } else {
