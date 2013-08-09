@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-8mile axb-coi-bulk axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bpoliakoff grenier jarif kpg-core mas-cps mas-mas; day 2: axb-8mile axb-coi-bulk axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bernie-fsf bernie-it_batt bpoliakoff grenier jarif kpg-core llanga zmi; day 3: axb-8mile axb-coi-bulk axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bpoliakoff grenier jarif kpg-core llanga mas-cps mas-mas zmi
+# with results from: day 1: axb-8mile axb-coi-bulk axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bpoliakoff grenier jarif kpg-core mas-cps mas-mas zmi; day 2: axb-8mile axb-coi-bulk axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bpoliakoff grenier jarif kpg-core llanga mas-cps mas-mas zmi; day 3: axb-8mile axb-coi-bulk axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bernie-fsf bernie-it_batt bpoliakoff grenier jarif kpg-core llanga zmi
 
 # tflags publish
 ADVANCE_FEE_2_NEW_FORM
@@ -628,6 +628,9 @@ SPF_SOFTFAIL
 # good enough
 STOX_REPLY_TYPE_WITHOUT_QUOTES
 
+# good enough
+STYLE_GIBBERISH
+
 # tflags userconf
 SUBJECT_IN_BLACKLIST
 
@@ -672,9 +675,6 @@ TVD_RCVD_IP4
 
 # good enough
 TVD_UNDER_VALUED
-
-# good enough
-STYLE_GIBBERISH
 
 # tflags userconf
 UNPARSEABLE_RELAY
