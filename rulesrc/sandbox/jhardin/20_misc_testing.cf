@@ -512,7 +512,7 @@ meta           SCRIPT_GIBBERISH         __SCRIPT_GIBBERISH && (__BODY_XHTML || !
 describe       SCRIPT_GIBBERISH         Nonsense in HTML <SCRIPT> tag
 
 rawbody        __COMMENT_GIBBERISH      /<!--(?:\s{1,10}[-\w'"]{1,40}){100}/im
-meta           COMMENT_GIBBERISH        __COMMENT_GIBBERISH && !__JM_REACTOR_DATE && !__RCD_RDNS_MTA_MESSY
+meta           COMMENT_GIBBERISH        __COMMENT_GIBBERISH && !__JM_REACTOR_DATE && !__RCD_RDNS_MTA_MESSY && !__SENDER_BOT 
 describe       COMMENT_GIBBERISH        Nonsense in long HTML comment
 score          COMMENT_GIBBERISH        1.00	# limit
 
