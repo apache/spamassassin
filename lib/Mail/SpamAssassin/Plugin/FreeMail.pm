@@ -121,10 +121,10 @@ my $tlds = $Mail::SpamAssassin::Util::RegistrarBoundaries::VALID_TLDS_RE;
 # full email regex
 my $email_regex = qr/
   (?=.{0,64}\@)				# limit userpart to 64 chars (and speed up searching?)
-  (?<![a-z0-9!#$%&'*+\/=?^_`{|}~-])	# start boundary
+  (?<![a-z0-9!#\$%&'*+\/=?^_`{|}~-])	# start boundary
   (					# capture email
-  [a-z0-9!#$%&'*+\/=?^_`{|}~-]+		# no dot in beginning
-  (?:\.[a-z0-9!#$%&'*+\/=?^_`{|}~-]+)*	# no consecutive dots, no ending dot
+  [a-z0-9!#\$%&'*+\/=?^_`{|}~-]+	# no dot in beginning
+  (?:\.[a-z0-9!#\$%&'*+\/=?^_`{|}~-]+)*	# no consecutive dots, no ending dot
   \@
   (?:[a-z0-9](?:[a-z0-9-]{0,59}[a-z0-9])?\.){1,4} # max 4x61 char parts (should be enough?)
   ${tlds}				# ends with valid tld
