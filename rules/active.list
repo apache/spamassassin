@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-8mile axb-coi-bulk axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bpoliakoff grenier jarif kpg-core mmiroslaw-ham mmiroslaw-spam zmi; day 2: axb-8mile axb-coi-bulk axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bpoliakoff grenier jarif kpg-core mas-cps mas-mas mmiroslaw-ham mmiroslaw-spam zmi; day 3: axb-8mile axb-coi-bulk axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bpoliakoff grenier jarif kpg-core llanga mas-cps mas-mas mmiroslaw-ham mmiroslaw-spam zmi
+# with results from: day 1: axb-8mile axb-coi-bulk axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bpoliakoff grenier jarif kpg-core mmiroslaw-ham mmiroslaw-spam zmi; day 2: axb-8mile axb-coi-bulk axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bpoliakoff grenier jarif kpg-core llanga mmiroslaw-ham mmiroslaw-spam zmi; day 3: axb-8mile axb-coi-bulk axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bpoliakoff grenier jarif kpg-core mas-cps mas-mas mmiroslaw-ham mmiroslaw-spam zmi
 
 # tflags publish
 ADVANCE_FEE_2_NEW_FORM
@@ -104,9 +104,6 @@ CHARSET_FARAWAY_HEADER
 CK_HELO_DYNAMIC_SPLIT_IP
 
 # good enough
-CK_HELO_GENERIC
-
-# good enough
 CN_B2B_SPAMMER
 
 # good enough
@@ -190,9 +187,6 @@ FILL_THIS_FORM
 # good enough
 FILL_THIS_FORM_LONG
 
-# good enough
-FM_SUBJ_YOU_PROFIT
-
 # tflags publish
 FORM_FRAUD_3
 
@@ -239,6 +233,9 @@ FROM_MISSP_TO_UNDISC
 FROM_MISSP_USER
 
 # good enough
+FRT_ABSOLUT
+
+# good enough
 FSL_CTYPE_WIN1251
 
 # good enough
@@ -252,9 +249,6 @@ FSL_HELO_DEVICE
 
 # good enough
 FSL_MISSP_REPLYTO
-
-# good enough
-FS_MAKE_MONEY
 
 # good enough
 FS_START_LOSE
@@ -299,13 +293,7 @@ HASHCASH_HIGH
 HEAD_LONG
 
 # good enough
-HELO_MISC_IP
-
-# good enough
 HK_RANDOM_FROM
-
-# good enough
-HK_SCAM_N2
 
 # good enough
 HK_SCAM_S23
@@ -378,6 +366,9 @@ OBFU_JVSCR_ESC
 
 # tflags publish
 OBFU_TEXT_ATTACH
+
+# good enough
+PHP_NOVER_MUA
 
 # tflags net
 PYZOR_CHECK
@@ -665,13 +656,7 @@ TVD_RCVD_IP4
 TVD_UNDER_VALUED
 
 # good enough
-FRT_ABSOLUT
-
-# good enough
-MONEY_FORM
-
-# good enough
-PHP_NOVER_MUA
+FROM_MISSP_PHISH
 
 # tflags userconf
 UNPARSEABLE_RELAY
