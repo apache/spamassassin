@@ -129,7 +129,7 @@ foreach(qw/
   com.bm edu.bm gov.bm net.bm org.bm
   com.bn edu.bn net.bn org.bn
   com.bo edu.bo gob.bo gov.bo int.bo mil.bo net.bo org.bo tv.bo
-  adm.br adv.br agr.br am.br arq.br art.br ato.br bio.br bmd.br cim.br cng.br cnt.br com.br coop.br dpn.br ecn.br edu.br eng.br esp.br etc.br eti.br far.br fm.br fnd.br fot.br fst.br g12.br ggf.br gov.br imb.br ind.br inf.br jor.br lel.br mat.br med.br mil.br mus.br net.br nom.br not.br ntr.br odo.br org.br ppg.br pro.br psc.br psi.br qsl.br rec.br slg.br srv.br tmp.br trd.br tur.br tv.br vet.br zlg.br
+  adm.br adv.br agr.br am.br arq.br art.br ato.br bio.br bmd.br cim.br cng.br cnt.br com.br coop.br dpn.br eco.br ecn.br edu.br eng.br esp.br etc.br eti.br far.br fm.br fnd.br fot.br fst.br g12.br ggf.br gov.br imb.br ind.br inf.br jor.br lel.br mat.br med.br mil.br mus.br net.br nom.br not.br ntr.br odo.br org.br ppg.br pro.br psc.br psi.br qsl.br rec.br slg.br srv.br tmp.br trd.br tur.br tv.br vet.br zlg.br
   com.bs net.bs org.bs
   com.bt edu.bt gov.bt net.bt org.bt
   co.bw org.bw
