@@ -825,9 +825,12 @@ sub ask_dcc {
 	$opts = $self->{dccifd_report_options}
       } else {
 	$opts = $self->{dccifd_lookup_options};
-	# only query if there is an X-DCC header
-	$opts =~ s/grey-off/& query/ if defined $permsgstatus->{dcc_raw_x_dcc};
+	if (defined $permsgstatus->{dcc_raw_x_dcc}) {
+	  # only query if there is an X-DCC header
+	  $opts =~ s/grey-off/grey-off query/;
+	}
       }
+
       $sock->print($opts)	   or die "failed write options\n";
       $sock->print($client . "\n") or die "failed write SMTP client\n";
       $sock->print($helo . "\n")   or die "failed write HELO value\n";
