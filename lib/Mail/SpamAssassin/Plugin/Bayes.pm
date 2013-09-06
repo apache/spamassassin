@@ -459,12 +459,6 @@ sub _learn_trapped {
   # Now that we're sure we haven't seen this message before ...
   $msgid = $msgid[0];
 
-  if ($isspam) {
-    $self->{store}->nspam_nham_change (1, 0);
-  } else {
-    $self->{store}->nspam_nham_change (0, 1);
-  }
-
   my $msgatime = $msg->receive_date();
 
   # If the message atime comes back as being more than 1 day in the
@@ -475,10 +469,14 @@ sub _learn_trapped {
 
   my $tokens = $self->tokenize($msg, $msgdata);
 
-  if ($isspam) {
-    $self->{store}->multi_tok_count_change(1, 0, $tokens, $msgatime);
-  } else {
-    $self->{store}->multi_tok_count_change(0, 1, $tokens, $msgatime);
+  { my $timer = $self->{main}->time_method('b_count_change');
+    if ($isspam) {
+      $self->{store}->nspam_nham_change(1, 0);
+      $self->{store}->multi_tok_count_change(1, 0, $tokens, $msgatime);
+    } else {
+      $self->{store}->nspam_nham_change(0, 1);
+      $self->{store}->multi_tok_count_change(0, 1, $tokens, $msgatime);
+    }
   }
 
   $self->{store}->seen_put ($msgid, ($isspam ? 's' : 'h'));
