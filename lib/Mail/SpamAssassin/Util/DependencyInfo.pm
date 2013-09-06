@@ -217,12 +217,6 @@ $have_sha ? {
   your database.',
 },
 {
-  module => 'Redis',
-  version => 1.956,
-  desc => 'If you intend to use SpamAssassin with a Redis database backend for
-  Bayes storage, you will need to have this module installed.',
-},
-{
   module => 'Getopt::Long',
   version => '2.32',        # min version was included in 5.8.0, which works
   desc => 'The "sa-stats.pl" program included in "tools", used to generate

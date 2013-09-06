@@ -117,9 +117,6 @@ New optional dependencies on the following Perl modules were introduced:
   internal_networks, trusted_networks or msa_networks when these lists
   contain a larger number of entries
 
-- new optional dependency on a perl module Redis, which is used if
-  a redis server is chosen as a Bayes data store backend
-
 - new optional dependency on programs curl, wget, or a FreeBSD fetch.
   sa-update will use any of these external programs to download rule
   updates, either over IPv6 or over IPv4. Any of these three programs
@@ -187,19 +184,19 @@ over network. Similar to SQL backends, the database may be concurrently
 used by several hosts running SpamAssassin.
 
 The current implementation only supports a global Bayes database, i.e.
-per-recipient sub-databases are not supported. Due to current limitations
-in Redis 2.6.* server, accessing it is not possible over IPv6, but one may
-chose connection over IPv4 or over a Unix socket. Bear in mind that Redis
-server only offers limited access controls, so it is advisable to let the
-Redis server bind to a loopback interface only, or to use other mechanisms
-to limit access, such as local firewall rules.
+per-recipient sub-databases are not supported. The Redis 2.6.* server
+supports access over IPv4 or over a Unix socket, starting with version
+2.8.0 also IPv6 is supported. Bear in mind that Redis server only offers
+limited access controls, so it is advisable to let the Redis server bind
+to a loopback interface only, or to use other mechanisms to limit access,
+such as local firewall rules.
 
-The Redis backend can put a Lua scripting support in a Redis server to good
-use, significantly reducing network packet rate and improving performance.
-The Lua support is available in Redis server since version 2.6.  In absence
-of a Lua support, the Redis backend uses multiple traditional Redis command
-so in principle it should work with a Redis server version 2.4, although
-this is not recommended for busy sites.
+The Redis backend for Bayes can put a Lua scripting support in a Redis
+server to good use, improving performance. The Lua support is available
+in Redis server since version 2.6.  In absence of a Lua support, the Redis
+backend uses batched (pipelined) traditional Redis commands, so it should
+work with a Redis server version 2.4 (untested), although this is not
+recommended for busy sites.
 
 Expiration of token and 'seen' message id entries is left to the Redis
 server. There is no provision for manually expiring a database, so it is
@@ -209,7 +206,7 @@ value 1 (i.e. enabled).
 Example configuration:
 
   bayes_store_module  Mail::SpamAssassin::BayesStore::Redis
-  bayes_sql_dsn       server=localhost:6379
+  bayes_sql_dsn       server=127.0.0.1:6379;password=foo;database=2
   bayes_token_ttl 21d
   bayes_seen_ttl   8d
   bayes_auto_expire 1
