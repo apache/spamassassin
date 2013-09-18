@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-8mile axb-coi-bulk axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bpoliakoff grenier jarif kpg-core zmi; day 2: axb-8mile axb-coi-bulk axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bpoliakoff grenier jarif kpg-core llanga zmi; day 3: axb-8mile axb-coi-bulk axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bpoliakoff grenier jarif kpg-core llanga mmiroslaw-ham mmiroslaw-spam zmi
+# with results from: day 1: axb-8mile axb-coi-bulk axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bpoliakoff grenier jarif kpg-core; day 2: axb-8mile axb-coi-bulk axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bpoliakoff grenier kpg-core llanga mmiroslaw-ham mmiroslaw-spam zmi; day 3: axb-8mile axb-coi-bulk axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bpoliakoff grenier jarif kpg-core llanga
 
 # good enough
 ACH_CANCELLED
@@ -59,9 +59,6 @@ AXB_BODYMAIL_SBL112884
 AXB_XMAILER_MIMEOLE_OL_024C2
 
 # good enough
-AXB_XMAILER_MIMEOLE_OL_1ECD5
-
-# good enough
 AXB_XMAILER_MIMEOLE_OL_7EB15
 
 # good enough
@@ -94,9 +91,6 @@ BAYES_95
 # tflags learn
 BAYES_99
 
-# good enough
-BITLY_URI
-
 # tflags userconf
 CHARSET_FARAWAY
 
@@ -107,19 +101,13 @@ CHARSET_FARAWAY_HEADER
 CK_HELO_DYNAMIC_SPLIT_IP
 
 # good enough
-CK_HELO_GENERIC
-
-# good enough
 CN_B2B_SPAMMER
-
-# good enough
-COMMENT_GIBBERISH
-
-# good enough
-COMPENSATION
 
 # tflags publish
 CORRUPT_FROM_LINE_IN_HDRS
+
+# good enough
+CURR_PRICE
 
 # good enough
 DATE_IN_FUTURE_Q_PLUS
@@ -178,11 +166,11 @@ DOS_RCVD_IP_TWICE_C
 # good enough
 DSN_NO_MIMEVERSION
 
-# good enough
-DYN_RDNS_SHORT_HELO_HTML
-
 # tflags publish
 EMAIL_URI_PHISH
+
+# good enough
+EMPTY_BODY
 
 # tflags userconf
 ENV_AND_HDR_SPF_MATCH
@@ -193,8 +181,14 @@ FB_CIALIS_LEO3
 # good enough
 FH_HELO_ALMOST_IP
 
+# good enough
+FH_HOST_EQ_DYNAMICIP
+
 # tflags publish
 FILL_THIS_FORM
+
+# good enough
+FM_SUBJ_YOU_PROFIT
 
 # tflags publish
 FORM_FRAUD_3
@@ -221,9 +215,6 @@ FROM_LOCAL_NOVOWEL
 FROM_MISSPACED
 
 # good enough
-FROM_MISSP_DYNIP
-
-# good enough
 FROM_MISSP_EH_MATCH
 
 # good enough
@@ -245,9 +236,6 @@ FROM_MISSP_TO_UNDISC
 FROM_MISSP_USER
 
 # good enough
-FRT_ROLEX
-
-# good enough
 FSL_CTYPE_WIN1251
 
 # good enough
@@ -261,6 +249,12 @@ FSL_HELO_DEVICE
 
 # good enough
 FSL_MISSP_REPLYTO
+
+# good enough
+FS_LARGE_PERCENT2
+
+# good enough
+FS_MAKE_MONEY
 
 # good enough
 FS_WILL_HELP
@@ -302,9 +296,6 @@ HASHCASH_HIGH
 HEAD_LONG
 
 # good enough
-HELO_MISC_IP
-
-# good enough
 HK_NAME_DR
 
 # good enough
@@ -328,11 +319,11 @@ KB_FAKED_THE_BAT
 # good enough
 KHOP_BIG_TO_CC
 
+# good enough
+LONG_TERM_PRICE
+
 # tflags publish
 LOTS_OF_MONEY
-
-# good enough
-LOTTO_AGENT
 
 # tflags publish
 MANY_SPAN_IN_TEXT
@@ -613,6 +604,9 @@ RP_MATCHES_RCVD
 # good enough
 SERGIO_SUBJECT_VIAGRA01
 
+# good enough
+SHORT_TERM_PRICE
+
 # tflags net
 SPF_FAIL
 
@@ -636,12 +630,6 @@ SPF_PASS
 
 # tflags net
 SPF_SOFTFAIL
-
-# good enough
-STOX_REPLY_TYPE
-
-# good enough
-STOX_REPLY_TYPE_WITHOUT_QUOTES
 
 # tflags userconf
 SUBJECT_IN_BLACKLIST
@@ -680,16 +668,7 @@ TVD_RCVD_IP4
 TVD_UNDER_VALUED
 
 # good enough
-EMPTY_BODY
-
-# good enough
-FM_SUBJ_YOU_PROFIT
-
-# good enough
-FS_MAKE_MONEY
-
-# good enough
-TVD_SUBJ_NUM_OBFU_MINFP
+LUCRATIVE
 
 # tflags userconf
 UNPARSEABLE_RELAY
