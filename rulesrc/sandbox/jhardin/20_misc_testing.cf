@@ -830,11 +830,13 @@ meta        __URI_MAILTO_MANY         __URI_MAILTO > 15
 header      REPLYTO_EMPTY          Reply-To =~ /<>/
 describe    REPLYTO_EMPTY          Reply-To undeliverable
 
-header      __TO_TOO_MANY          To =~ /(?:,[^,]{1,80}){30}/
+header      __TO_MANY              To =~ /(?:,[^,]{1,90}){10}/
+header      __CC_MANY              Cc =~ /(?:,[^,]{1,90}){10}/
 
-header      __CC_TOO_MANY          Cc =~ /(?:,[^,]{1,80}){30}/
+header      __TO_TOO_MANY          To =~ /(?:,[^,]{1,90}){30}/
+header      __CC_TOO_MANY          Cc =~ /(?:,[^,]{1,90}){30}/
 
-header      __TO_WAY_TOO_MANY      ToCc =~ /(?:,[^,]{1,80}){50}/
+header      __TO_WAY_TOO_MANY      ToCc =~ /(?:,[^,]{1,90}){50}/
 
 body        __GAPPY_PHONE_NA       /1 - \d \d \d - \d \d \d - \d \d \d \d/
 meta        GAPPY_PHONE_NA         __GAPPY_PHONE_NA
