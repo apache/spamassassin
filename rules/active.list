@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-8mile axb-coi-bulk axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bpoliakoff grenier jarif kpg-core mmiroslaw-ham mmiroslaw-spam zmi; day 2: axb-8mile axb-coi-bulk axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bpoliakoff grenier jarif kpg-core llanga zmi; day 3: axb-8mile axb-coi-bulk axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bpoliakoff grenier jarif kpg-core llanga zmi
+# with results from: day 1: axb-8mile axb-coi-bulk axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bpoliakoff grenier jarif kpg-core mmiroslaw-ham mmiroslaw-spam zmi; day 2: axb-8mile axb-coi-bulk axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bpoliakoff grenier jarif kpg-core llanga mmiroslaw-ham mmiroslaw-spam zmi; day 3: axb-8mile axb-coi-bulk axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bpoliakoff grenier jarif kpg-core llanga zmi
 
 # tflags publish
 ADVANCE_FEE_2_NEW_FORM
@@ -85,6 +85,9 @@ BAYES_95
 # tflags learn
 BAYES_99
 
+# good enough
+BITLY_URI
+
 # tflags userconf
 CHARSET_FARAWAY
 
@@ -93,6 +96,9 @@ CHARSET_FARAWAY_HEADER
 
 # good enough
 CK_HELO_DYNAMIC_SPLIT_IP
+
+# good enough
+CK_HELO_GENERIC
 
 # good enough
 COMMENT_GIBBERISH
@@ -182,9 +188,6 @@ FH_HOST_EQ_DYNAMICIP
 FILL_THIS_FORM
 
 # good enough
-FILL_THIS_FORM_LONG
-
-# good enough
 FM_SUBJ_YOU_PROFIT
 
 # tflags publish
@@ -234,6 +237,9 @@ FROM_MISSP_USER
 
 # good enough
 FSL_CTYPE_WIN1251
+
+# good enough
+FSL_HAS_TINYURL
 
 # good enough
 FSL_HELO_BARE_IP_1
@@ -293,6 +299,9 @@ HEAD_LONG
 HELO_MISC_IP
 
 # good enough
+HK_RANDOM_FROM
+
+# good enough
 HK_SCAM_S23
 
 # tflags userconf
@@ -303,9 +312,6 @@ KB_DATE_CONTAINS_TAB
 
 # good enough
 KB_FAKED_THE_BAT
-
-# good enough
-KHOP_BIG_TO_CC
 
 # good enough
 LONG_TERM_PRICE
@@ -625,6 +631,9 @@ TAB_IN_FROM
 # tflags net
 TO_EQ_FM_DOM_SPF_FAIL
 
+# good enough
+TO_EQ_FM_HTML_ONLY
+
 # tflags net
 TO_EQ_FM_SPF_FAIL
 
@@ -653,19 +662,10 @@ TVD_RCVD_IP4
 TVD_UNDER_VALUED
 
 # good enough
-BITLY_URI
+EMPTY_BODY
 
 # good enough
-CK_HELO_GENERIC
-
-# good enough
-FSL_HAS_TINYURL
-
-# good enough
-HK_RANDOM_FROM
-
-# good enough
-TO_EQ_FM_HTML_ONLY
+FSL_MISSP_REPLYTO
 
 # tflags userconf
 UNPARSEABLE_RELAY
