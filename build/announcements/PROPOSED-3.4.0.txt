@@ -12,7 +12,7 @@ EDNS0 changes (bug 6910), native IPv6 support, numerous URIBL.pm changes
 or features and a small API change in libspamc (bug 6562) with many other
 subtle changes.
 
-SpamAssassin was tested on perl 5.18.0, and (out of curiosity) also
+SpamAssassin was tested on perl 5.18.1, and (out of curiosity) also
 on a Raspberry Pi (ARM6, Raspbian / Debian 7.0 Wheezy, perl 5.14.2)
 ... yes it is 20 times slower compared to i7-960 CPU, but all tests pass!
 
@@ -60,8 +60,8 @@ resolver. If this is not the case, please configure this option explicitly.
 The change avoids surprises on an otherwise well connected host which may
 experience a temporary DNS unavailability at the system startup time or a
 temporary network outage when spamd was starting, and the initial failed
-test would disable DNS test permanently. The option is documented in
-Mail::SpamAssassin::Conf POD or man page.
+test would disable DNS queries permanently. The option is documented in
+the Mail::SpamAssassin::Conf POD or man page.
 
 
 * When Bayes classification is in use and messages are 'learned' as spam
@@ -131,11 +131,11 @@ Internal changes potentially affecting third party software
 using Mail::SpamAssassin library
 -----------------------------------------------------------
 
-A caller is now given a choice to call srand() by itself or let a
-SpamAssassin library do it as before. This can avoid unnecessary entropy
-loss in a perl's random number generator. It is controlled by option
-skip_prng_reseeding in a call to Mail::SpamAssassin::new(). The change
-was documented in bug 6690.
+A caller is now given a choice of calling srand() by itself (e.g. before
+forking) or let a SpamAssassin library do it as before. Avoiding redundant
+initialization of a perl's random number generator can prevent unnecessary
+entropy loss. It is controlled by option skip_prng_reseeding in a call
+to Mail::SpamAssassin::new(). The change was documented in bug 6690.
 
 The Mail::SpamAssassin::parser can now accept a message also as a string
 reference, avoiding one copy in memory. Documented in bug 6686.
@@ -163,7 +163,7 @@ Several incompatibilities with newer versions of a perl module Net::DNS
 as used by sa-update and by the SpamAssassin library were fixed.
 See Net::DNS problem [rt.cpan.org #83451].
 
-A perl module Razor agent clobbers entropy of a random numbers generator by
+A perl module Razor agent clobbers entropy of a random number generator by
 re-initializing the generator on every call. The SpamAssassin Razor plugin
 now provides a workaround, preserving entropy across calls to Razor2 agent.
 
@@ -175,6 +175,8 @@ since version 3.1.0 of Mail::SpamAssassin (September 2005).
 
 
 Notable features:
+=================
+
 Redis database backend for a Bayes database
 -------------------------------------------
 
@@ -212,7 +214,6 @@ Example configuration:
   bayes_auto_expire 1
 
 
-Notable features:
 Improved support for IPv6
 -------------------------
 
@@ -235,6 +236,11 @@ As a fallback when the module IO::Socket::IP is unavailable, an older
 module IO::Socket::INET6 is used, or eventually the IO::Socket::INET is
 used as last resort.
 
+If spamd fails to start with an 'Address already in use' message, please
+install perl module IO::Socket::IP, or deintall IO::Socket::INET6, or
+specify a socket bind address explicitly with a spamd --listen option.
+See bug 6953 for details.
+
 The spamd server can now simultaneously listen on multiple sockets,
 possibly in different protocol domains (Unix sockets, INET or INET6
 protocol families.
@@ -254,7 +260,7 @@ in a mail header section.
 The AutoWhitelist plugin was updated and can now deal with IPv6 addresses.
 
 Installation unit tests were updated to prevent them from failing on an
-INET6 -only host.
+IPv6-only host.
 
 
 New command-line options
@@ -302,10 +308,10 @@ and an associated eval rule check_uri_host_listed.
 - Configuration options dns_query_restriction (allow|deny) and
 clear_dns_query_restriction were added (bug 6884).
 
-- A 'dns_options' setting received new sub-options 'dns0x20' and 'edns'.
+- A 'dns_options' setting accepts new sub-options 'dns0x20' and 'edns'.
 
-- Added option 'dns_server' which specifies an IP address of a DNS server
-and optionally its port number.
+- Added option 'dns_server' which specifies an IP address of a recursive
+DNS server (i.e. DNS resolver) and optionally its port number.
 
 - Added options dns_local_ports_permit, dns_local_ports_avoid and
 dns_local_ports_none to control source port local ranges available to
@@ -323,9 +329,9 @@ a sending mailer which has no reverse DNS mapping.
 ArchiveIterator has new options opt_max_size and opt_from_regex. They are
 documented in Mail::SpamAssassin::ArchiveIterator POD or man page.
 
-A new tag (macro) _RULESVERSION_ was added. It is a comma-separated list of
-rules versions, retrieved from an '# UPDATE version' comment in rules files
-and can be used in an 'add_header' configuration setting.
+A new tag (macro) _RULESVERSION_ was added. It expands to a comma-separated
+list of rules versions, retrieved from an '# UPDATE version' comment in
+rules files and can be used in an 'add_header' configuration setting.
 
 
 New plugins
@@ -337,8 +343,8 @@ Using a DNS query template as specified in a parameter of an askdns rule,
 the plugin replaces tag names as found in the template with their values
 and launches DNS queries as soon as tag values become available. When DNS
 responses trickle in, filters them according to the requested DNS resource
-record type and optional subrule filtering expression, yielding a rule hit
-if a response meets filtering conditions.
+record type and an optional subrule filtering expression, yielding a rule
+hit if a response meets filtering conditions.
 
 
 Optimizations
@@ -375,10 +381,12 @@ sha1sum of archive files:
 062c28135f4b2c2e1bd2f0119731d3c931b33374  Mail-SpamAssassin-3.4.0-rc3.zip
 e9290f51bc268d28e65210d26db7d5063ffd4aca  Mail-SpamAssassin-rules-3.4.0-rc3.r1530876.tgz
 
-Note that the *-rules-*.tar.gz files are only necessary if you cannot, or do not
-wish to, run "sa-update" after install to download the latest fresh rules.
+Note that the *-rules-*.tar.gz files are only necessary if you cannot,
+or do not wish to, run "sa-update" after install to download the latest
+fresh rules.
 
-See the INSTALL and UPGRADE files in the distribution for important installation notes.
+See the INSTALL and UPGRADE files in the distribution for important
+installation notes.
 
 
 GPG Verification Procedure
@@ -404,10 +412,13 @@ To verify a release file, download the file with the accompanying .asc file and 
 
 Then verify that the key matches the signature.
 
-Note that older versions of gnupg may not be able to complete the steps above.
-Specifically, GnuPG v1.0.6, 1.0.7 & 1.2.6 failed while v1.4.11 worked flawlessly.
+Note that older versions of gnupg may not be able to complete the steps
+above. Specifically, GnuPG v1.0.6, 1.0.7 & 1.2.6 failed while v1.4.11
+worked flawlessly.
 
-See http://www.apache.org/info/verification.html for more information on verifying Apache releases.
+See http://www.apache.org/info/verification.html for more information
+on verifying Apache releases.
+
 
 About Apache SpamAssassin
 -------------------------
