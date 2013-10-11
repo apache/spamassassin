@@ -1,7 +1,7 @@
 
 # added meta dependencies from hstern's sandbox
-rawbody __HS_QUOTE /^> /
-header __HS_SUBJ_RE_FW Subject =~ /^(?i:re|fw):/
+#rawbody __HS_QUOTE /^> /							# now in jm sandbox
+#header __HS_SUBJ_RE_FW Subject =~ /^(?i:re|fw):/	# now in jm sandbox
 #
 
 ifplugin Mail::SpamAssassin::Plugin::ReplaceTags
