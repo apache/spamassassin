@@ -2906,6 +2906,42 @@ sub all_from_addrs {
   return @addrs;
 }
 
+=item all_from_addrs_domains
+
+This function returns all the various from addresses in a message using all_from_addrs() 
+and then returns only the domain names.  
+
+=cut
+
+sub all_from_addrs_domains {
+  my ($self) = @_;
+
+  if (exists $self->{all_from_addrs_domains}) { 
+    return @{$self->{all_from_addrs_domains}};
+  }
+
+  #TEST POINT - my @addrs = ("test.voipquotes2.net","test.voipquotes2.co.uk"); 
+  #Start with all the normal from addrs
+  my @addrs = &all_from_addrs($self);
+
+  dbg("eval: all '*From' addrs domains (before): " . join(" ", @addrs));
+
+  #loop through and limit to just the domain with a dummy address
+  for (my $i = 0; $i < scalar(@addrs); $i++) {
+    $addrs[$i] = 'dummy@'.&Mail::SpamAssassin::Util::uri_to_domain($addrs[$i]);
+  }
+
+  #Remove duplicate domains
+  my %addrs = map { $_ => 1 } @addrs;
+  @addrs = keys %addrs;
+
+  dbg("eval: all '*From' addrs domains (after uri to domain): " . join(" ", @addrs));
+
+  $self->{all_from_addrs_domains} = \@addrs;
+
+  return @addrs;
+}
+
 sub all_to_addrs {
   my ($self) = @_;
 
