@@ -327,6 +327,13 @@ sub check_rbl_from_domain {
   _check_rbl_addresses(@_, $_[1]->all_from_addrs_domains());
 }
 
+=item has_check_rbl_from_domain
+
+Adds capability check for "if can()" for check_rbl_from_domain
+
+=cut
+sub has_check_rbl_from_domain { 1 }
+
 # this only checks the address host name and not the domain name because
 # using the domain name had much worse results for dsn.rfc-ignorant.org
 sub check_rbl_envfrom {
