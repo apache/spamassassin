@@ -30,9 +30,10 @@ header   FSL_UNDISCLOSED_RCPTS  To =~ /\bundisclosed[- ]recipients\b/i
 score    FSL_UNDISCLOSED_RCPTS  0.01
 describe FSL_UNDISCLOSED_RCPTS  To undisclosed recipients
 
-header   FSL_FROM_INFO_DOM      From:addr =~ /\.info$/
-score    FSL_FROM_INFO_DOM      1.0
-describe FSL_FROM_INFO_DOM      From address is in .info
+# JHardin: replaced with __FROM_DOM_INFO subrule
+#header   FSL_FROM_INFO_DOM      From:addr =~ /\.info$/
+#score    FSL_FROM_INFO_DOM      1.0
+#describe FSL_FROM_INFO_DOM      From address is in .info
 
 body     FSL_ADV                /\bThis(?:\s*is an)? advert(?:isement)?\b/i
 score    FSL_ADV                1.0
