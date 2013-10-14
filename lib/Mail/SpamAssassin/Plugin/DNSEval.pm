@@ -318,6 +318,8 @@ sub check_rbl_from_host {
   _check_rbl_addresses(@_, $_[1]->all_from_addrs());
 }
 
+=over 4
+
 =item check_rbl_from_domain
 
 This checks all the from addrs domain names as an alternate to check_rbl_from_host
