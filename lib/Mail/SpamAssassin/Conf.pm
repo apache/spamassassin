@@ -2620,10 +2620,10 @@ field name, although currently most combinations achieve no additional effect,
 for example C<From:addr:raw> or C<From:raw:addr> is currently the same as
 C<From:addr> .
 
-=over 4
-
 For example, appending C<:addr> to a header name will result in example@foo
 in all of the following cases:
+
+=over 4
 
 =item example@foo
 
