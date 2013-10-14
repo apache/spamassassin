@@ -3097,9 +3097,10 @@ B<Mail::SpamAssassin::Plugin::Reuse>.
     }
   });
 
-=item tflags SYMBOLIC_TEST_NAME [ {net|nice|learn|userconf|noautolearn|autolearn_force|multiple|maxhits=N|ips_only|domains_only|a|ns} ]
+=item tflags SYMBOLIC_TEST_NAME flags
 
-Used to set flags on a test. Parameter is a space-separated list of flag names.
+Used to set flags on a test. Parameter is a space-separated list of flag
+names or flag name = value pairs.
 These flags are used in the score-determination back end system for details
 of the test's behaviour.  Please see C<bayes_auto_learn> for more information
 about tflag interaction with those systems. The following flags can be set:
