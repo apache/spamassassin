@@ -405,7 +405,12 @@ sub on_connect {
       chomp $@; die "Redis error: $@";
     }
   };
-  $r->call('CLIENT', 'SETNAME', 'sa['.$$.']');
+  eval {
+    $r->call('CLIENT', 'SETNAME', 'sa['.$$.']');
+  } or do {
+    dbg("bayes: CLIENT SETNAME command failed, don't worry, ".
+        "possibly an old redis version: %s", $@);
+  };
   1;
 }
 
