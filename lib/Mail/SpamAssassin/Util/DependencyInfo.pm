@@ -258,9 +258,12 @@ $have_sha ? {
 
 my @BINARIES = ();
 
-my $lwp_note = "   Because LWP does not support IPv6, sa-update as of 3.4.0 will use
-   the binaries curl, wget or fetch to download rule updates with LWP used 
-   as a fallback if none of the binaries exist.";
+my $lwp_note = "   Sa-update will use curl, wget or fetch to download updates.  
+   Because LWP does not support IPv6, sa-update as of 3.4.0 will 
+   use these standard programs to download rule updates leaving LWP 
+   as a fallback if none of the programs are found.
+
+   *IMPORTANT NOTE*: You only need one of these programs.";
 
 my @OPTIONAL_BINARIES = (
 {
