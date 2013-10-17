@@ -1080,14 +1080,14 @@ score       HTML_FONT_TINY       1.00	# limit
 
 body        __BODY_TEXT_LINE     /^\s*\S/
 tflags      __BODY_TEXT_LINE     multiple maxhits=3
-meta        __EMPTY_BODY         __BODY_TEXT_LINE < 2
+meta        __EMPTY_BODY         __BODY_TEXT_LINE < 2 && !__SMIME_MESSAGE
 # this hits 13% of masscheck corpus spam, 50% of that only scores 2 points
 meta        EMPTY_BODY           __EMPTY_BODY && !__NUMBERS_IN_SUBJ && !__CTE && !__RP_MATCHES_RCVD && !__VIA_ML && !__MIME_ATTACHMENT && !__HAS_THREAD_INDEX && !__TO_EQ_FROM_DOM && !__ENV_AND_HDR_FROM_MATCH && !__FROM_LOWER && !__NOT_SPOOFED && !__MSGID_APPLEMAIL && !__RCD_RDNS_MAIL_MESSY && !NO_RELAYS && !__NOT_A_PERSON 
 describe    EMPTY_BODY           No body text in message
 score       EMPTY_BODY           3.00	# limit
 
 
-meta        __BODY_URI_ONLY      __BODY_TEXT_LINE < 3 && __HAS_ANY_URI
+meta        __BODY_URI_ONLY      __BODY_TEXT_LINE < 3 && __HAS_ANY_URI && !__SMIME_MESSAGE
 meta        BODY_URI_ONLY        __BODY_URI_ONLY
 describe    BODY_URI_ONLY        Message body is only one line containing a URI
 score       BODY_URI_ONLY        0.25	# limit during testing
@@ -1153,5 +1153,7 @@ header      __FROM_DOM_INFO    From:addr =~ /\.info$/i
 meta        ES_LIC_FROM_INFO   __FROM_LIC && __FROM_DOM_INFO && __UNSUBSCRIBE_ES
 describe    ES_LIC_FROM_INFO   Spanish-language spam from .info domain
 
+
+header      __SMIME_MESSAGE    Content-Type =~ /application\/pkcs7-mime;/i
 
 
