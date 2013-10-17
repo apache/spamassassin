@@ -1,11 +1,12 @@
 ##
 
-# 2013-09-06
+# 2013-10-17
+header          AXB_X_FF_SEZ_S           X-Forefront-Antispam-Report =~ /^SFV\:SPM/
+describe        AXB_X_FF_SEZ_S           Forefront sez this is spam
 
-# 2013-10-26
+# 2013-10-16
 header		AXB_X_ORIG_OMNIMS	X-OriginatorOrg =~ /\.onmicrosoft\.com$/
 describe	AXB_X_ORIG_OMNIMS	outbound.protection.outlook.com forwarders
-
 
 header		AXB_X_PROXYOLCOM	exists:ClientProxiedBy
 describe	AXB_X_PROXYOLCOM	"Proxied" by Outlook.com
