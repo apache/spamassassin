@@ -1082,15 +1082,24 @@ body        __BODY_TEXT_LINE     /^\s*\S/
 tflags      __BODY_TEXT_LINE     multiple maxhits=3
 meta        __EMPTY_BODY         __BODY_TEXT_LINE < 2 && !__SMIME_MESSAGE
 # this hits 13% of masscheck corpus spam, 50% of that only scores 2 points
-meta        EMPTY_BODY           __EMPTY_BODY && !__NUMBERS_IN_SUBJ && !__CTE && !__RP_MATCHES_RCVD && !__VIA_ML && !__MIME_ATTACHMENT && !__HAS_THREAD_INDEX && !__TO_EQ_FROM_DOM && !__ENV_AND_HDR_FROM_MATCH && !__FROM_LOWER && !__NOT_SPOOFED && !__MSGID_APPLEMAIL && !__RCD_RDNS_MAIL_MESSY && !NO_RELAYS && !__NOT_A_PERSON 
-describe    EMPTY_BODY           No body text in message
-score       EMPTY_BODY           3.00	# limit
+meta        BODY_EMPTY           __EMPTY_BODY && !__NUMBERS_IN_SUBJ && !__CTE && !__RP_MATCHES_RCVD && !__VIA_ML && !__MIME_ATTACHMENT && !__HAS_THREAD_INDEX && !__TO_EQ_FROM_DOM && !__ENV_AND_HDR_FROM_MATCH && !__FROM_LOWER && !__NOT_SPOOFED && !__MSGID_APPLEMAIL && !__RCD_RDNS_MAIL_MESSY && !NO_RELAYS && !__NOT_A_PERSON 
+describe    BODY_EMPTY           No body text in message
+score       BODY_EMPTY           3.00	# limit
 
 
 meta        __BODY_URI_ONLY      __BODY_TEXT_LINE < 3 && __HAS_ANY_URI && !__SMIME_MESSAGE
 meta        BODY_URI_ONLY        __BODY_URI_ONLY
-describe    BODY_URI_ONLY        Message body is only one line containing a URI
+describe    BODY_URI_ONLY        Message body is only a URI in one line of text or for an image
 score       BODY_URI_ONLY        0.25	# limit during testing
+
+
+body        __SINGLE_WORD_LINE  /^\s?\S{1,60}\s?$/
+tflags      __SINGLE_WORD_LINE  multiple maxhits=2
+header      __SINGLE_WORD_SUBJ  Subject =~ /^\s*\S{1,60}\s*$/
+meta        BODY_SINGLE_WORD    __BODY_TEXT_LINE < 3 && !__SMIME_MESSAGE && ((__SINGLE_WORD_LINE && !__SINGLE_WORD_SUBJ) || __SINGLE_WORD_LINE > 1)
+describe    BODY_SINGLE_WORD    Message body is only one word (no spaces)
+score       BODY_SINGLE_WORD    1.00	# limit
+
 
 #ifplugin Mail::SpamAssassin::Plugin::DKIM
 #  # malformed DKIM signatures seen in the wild - see bug#6895
@@ -1155,5 +1164,7 @@ describe    ES_LIC_FROM_INFO   Spanish-language spam from .info domain
 
 
 header      __SMIME_MESSAGE    Content-Type =~ /application\/pkcs7-mime;/i
+
+
 
 
