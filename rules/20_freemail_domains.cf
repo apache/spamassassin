@@ -26,6 +26,10 @@
 # List contains commonly abused end user mail providers
 # "freemail" is solely used for label purposes.
 
+# weed out domains that already exist given a FILE of one domain per line:
+#   perl -lane 'if (@F and shift(@F) eq "freemail_domains") {
+#                 for (@F) { s/\./\\./g; s/\?/./g; s/\*/[^.]*/g; print }
+#               }' rules/*.cf |grep -wvf- FILE
 
 ifplugin Mail::SpamAssassin::Plugin::FreeMail
 
@@ -391,7 +395,15 @@ freemail_domains clovermail.net mail-on.us chewiemail.com offcolormail.com powde
 freemail_domains openmail.cc expressmail.dk
 
 # Bug 6903 - powered by 5x2 Online 2013-02-19-AXB
-freemail_domains 5x2.de freemailen.de freemailn.de cyberkriminell.de 4xn.de vip-client.de zu-geil.de besser-als-du.de unendlich-schlau.de                                                                5x2.de freemailen.de freemailn.de cyberkriminell.de 4xn.de vip-client.de zu-geil.de besser-als-du.de unendlich-schlau.de super-gerissen.de nerd4life.de mega-schlau.de aufdrogen.de on-steroids.de auf-steroide.de staatsterrorist.de chillaxer.de scheint.so muss.so kann.so istecht.so ist-echt.so 5x2.me danneben.so will-keinen-spam.de ist-supersexy.de ist-schlauer.de ist-genialer.de ist-der-wahnsinn.de ist-der-mann.de brainsurfer.de mag-spam.net ohne-drogen-gehts.net
+freemail_domains 4xn.de 5x2.de 5x2.me aufdrogen.de auf-steroide.de
+freemail_domains besser-als-du.de brainsurfer.de chillaxer.de cyberkriminell.de
+freemail_domains danneben.so freemailen.de freemailn.de ist-der-mann.de
+freemail_domains ist-der-wahnsinn.de ist-echt.so istecht.so ist-genialer.de
+freemail_domains ist-schlauer.de ist-supersexy.de kann.so mag-spam.net
+freemail_domains mega-schlau.de muss.so nerd4life.de ohne-drogen-gehts.net
+freemail_domains on-steroids.de scheint.so staatsterrorist.de super-gerissen.de
+freemail_domains unendlich-schlau.de vip-client.de will-keinen-spam.de
+freemail_domains zu-geil.de
 
 # Bug 6903 - powered by Runbox - paid service, but offers 30 day free trial - 2013-02-19-AXB
 freemail_domains runbox.*
@@ -444,6 +456,83 @@ freemail_domains workingaroundthehouse.com workingonthehouse.com writesoon.com x
 
 freemail_domains arab.ir denmark.ir egypt.ir icq.ir ir.ae iraq.ir ire.ir ireland.ir irr.ir
 freemail_domains jpg.ir ksa.ir kuwait.ir london.ir paltalk.ir spain.ir sweden.ir tokyo.ir
+
+
+# scraped http://www.zemskov.net/free-email-domains.html 2013-10-18-khopesh
+
+# bigmailbox.com
+freemail_domains 111mail.com 123iran.com 37.com 420email.com 4degreez.com
+freemail_domains 4-music-today.com actingbiz.com allhiphop.com anatomicrock.com
+freemail_domains animeone.com asiancutes.com a-teens.net ausi.com autoindia.com
+freemail_domains autopm.com barriolife.com b-boy.com beautifulboy.com bgay.com
+freemail_domains bicycledata.com bicycling.com bigheavyworld.com bigmailbox.net
+freemail_domains bikerheaven.net bikermail.com billssite.com
+freemail_domains blackandchristian.com blackcity.net blackvault.com bmxtrix.com
+freemail_domains boarderzone.com boatnerd.com bolbox.com bongmail.com bowl.com
+freemail_domains butch-femme.org byke.com calle22.com cannabismail.com
+freemail_domains catlovers.com certifiedbitches.com championboxing.com
+freemail_domains chatway.com chillymail.com classprod.com classycouples.com
+freemail_domains congiu.net coolshit.com corpusmail.com cyberunlimited.org
+freemail_domains cycledata.com darkfear.com darkforces.com dirtythird.com
+freemail_domains dopefiends.com draac.com drakmail.net dr-dre.com dreamstop.com
+freemail_domains egypt.net emailfast.com envirocitizen.com escapeartist.com
+freemail_domains ezsweeps.com famous.as farts.com feelingnaughty.com
+freemail_domains firemyst.com freeonline.com fudge.com funkytimes.com
+freemail_domains gamerssolution.com gazabo.net glittergrrrls.com goatrance.com
+freemail_domains goddess.com gohip.com gospelcity.com gothicgirl.com
+freemail_domains grapemail.net greatautos.org guy.com haitisurf.com
+freemail_domains happyhippo.com hateinthebox.com houseofhorrors.com hugkiss.com
+freemail_domains hullnumber.com idunno4recipes.com ihatenetscape.com
+freemail_domains intimatefire.com irow.com jazzemail.com juanitabynum.com
+freemail_domains kanoodle.com kickboxing.com kidrock.com kinkyemail.com
+freemail_domains kool-things.com latinabarbie.com latinogreeks.com leesville.com
+freemail_domains loveemail.com lowrider.com lucky7lotto.net madeniggaz.net
+freemail_domains mailbomb.com marillion.net megarave.com mofa.com motley.com
+freemail_domains music.com musician.net musicsites.com netbroadcaster.com
+freemail_domains netfingers.com net-surf.com nocharge.com operationivy.com
+freemail_domains paidoffers.net pcbee.com persian.com petrofind.com
+freemail_domains phunkybitches.com pikaguam.com pinkcity.net pitbullmail.com
+freemail_domains planetsmeg.com poop.com poormail.com potsmokersnet.com
+freemail_domains primetap.com project420.com prolife.net puertoricowow.com
+freemail_domains puppetweb.com rapstar.com rapworld.com rastamall.com ratedx.net
+freemail_domains ravermail.com relapsecult.com remixer.com rockeros.com
+freemail_domains romance106fm.com singalongcenter.com sketchyfriends.com
+freemail_domains slayerized.com smartstocks.com soulja-beatz.org
+freemail_domains specialoperations.com speedymail.net spells.com
+freemail_domains streetracing.com subspacemail.com sugarray.com
+freemail_domains superbikeclub.com superintendents.net surfguiden.com
+freemail_domains sweetwishes.com tattoodesign.com teamster.net teenchatnow.com
+freemail_domains the5thquarter.com theblackmarket.com tombstone.ws troamail.org
+freemail_domains u2tours.com vitalogy.org whatisthis.com wrestlezone.com
+# gawab.com
+freemail_domains abha.cc agadir.cc ahsa.ws ajman.cc ajman.us ajman.ws albaha.cc
+freemail_domains algerie.cc alriyadh.cc amman.cc aqaba.cc arar.ws aswan.cc
+freemail_domains baalbeck.cc bahraini.cc banha.cc bizerte.cc blida.info
+freemail_domains buraydah.cc cameroon.cc dhahran.cc dhofar.cc djibouti.cc
+freemail_domains dominican.cc eritrea.cc falasteen.cc fujairah.cc fujairah.us
+freemail_domains fujairah.ws gabes.cc gafsa.cc giza.cc guinea.cc hamra.cc
+freemail_domains hasakah.com hebron.tv homs.cc ibra.cc irbid.ws ismailia.cc
+freemail_domains jadida.cc jadida.org jerash.cc jizan.cc jouf.cc kairouan.cc
+freemail_domains karak.cc khaimah.cc khartoum.cc khobar.cc kuwaiti.tv
+freemail_domains kyrgyzstan.cc latakia.cc lebanese.cc lubnan.cc lubnan.ws
+freemail_domains madinah.cc maghreb.cc manama.cc mansoura.tv marrakesh.cc
+freemail_domains mascara.ws meknes.cc muscat.tv muscat.ws nabeul.cc nabeul.info
+freemail_domains nablus.cc nador.cc najaf.cc omani.ws omdurman.cc oran.cc
+freemail_domains oued.info oued.org oujda.biz oujda.cc pakistani.ws palmyra.cc
+freemail_domains palmyra.ws portsaid.cc qassem.cc quds.cc rabat.cc rafah.cc
+freemail_domains ramallah.cc safat.biz safat.info safat.us safat.ws salalah.cc
+freemail_domains salmiya.biz sanaa.cc seeb.cc sfax.ws sharm.cc sinai.cc siria.cc
+freemail_domains sousse.cc sudanese.cc suez.cc tabouk.cc tajikistan.cc
+freemail_domains tangiers.cc tanta.cc tayef.cc tetouan.cc timor.cc tunisian.cc
+freemail_domains urdun.cc yanbo.cc yemeni.cc yunus.cc zagazig.cc zambia.cc
+# other
+freemail_domains 5005.lv a.org.ua bmx.lv company.org.ua coolmail.ru dino.lv
+freemail_domains eclub.lv e-mail.am fit.lv hacker.am human.lv iphon.biz
+freemail_domains latchess.com loveis.lv lv-inter.net pookmail.com sexriga.lv
+
+# Microsoft's new service 2013-10-18-khopesh
+freemail_domains *.onmicrosoft.com
+
 
 endif
 
