@@ -1088,7 +1088,7 @@ score       BODY_EMPTY           3.00	# limit
 
 
 meta        __BODY_URI_ONLY      __BODY_TEXT_LINE < 3 && __HAS_ANY_URI && !__SMIME_MESSAGE
-meta        BODY_URI_ONLY        __BODY_URI_ONLY
+meta        BODY_URI_ONLY        __BODY_URI_ONLY && !__THREAD_INDEX_GOOD && !__FSL_HELO_BARE_IP_2 && !__XM_MS_IN_GENERAL 
 describe    BODY_URI_ONLY        Message body is only a URI in one line of text or for an image
 score       BODY_URI_ONLY        0.25	# limit during testing
 
