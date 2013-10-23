@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-8mile axb-coi-bulk axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bpoliakoff grenier jarif kpg-core mas-cps mas-mas zmi; day 2: axb-8mile axb-coi-bulk axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bpoliakoff grenier jarif kpg-core llanga mas-cps mas-mas mmiroslaw-ham mmiroslaw-spam zmi; day 3: axb-8mile axb-coi-bulk axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bpoliakoff grenier jarif kpg-core llanga zmi
+# with results from: day 1: axb-8mile axb-coi-bulk axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bpoliakoff grenier jarif kpg-core mas-cps mas-mas mmiroslaw-ham mmiroslaw-spam zmi; day 2: axb-8mile axb-coi-bulk axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bpoliakoff grenier jarif kpg-core llanga mas-cps mas-mas mmiroslaw-ham mmiroslaw-spam zmi; day 3: axb-8mile axb-coi-bulk axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bpoliakoff grenier jarif kpg-core llanga mas-cps mas-mas zmi
 
 # tflags publish
 ADVANCE_FEE_2_NEW_FORM
@@ -175,14 +175,17 @@ FH_FAKE_RCVD_LINE
 # good enough
 FH_FROM_GET_NAME
 
-# good enough
-FH_HELO_ALMOST_IP
-
 # tflags publish
 FILL_THIS_FORM
 
 # good enough
+FILL_THIS_FORM_LOAN
+
+# good enough
 FILL_THIS_FORM_LONG
+
+# good enough
+FM_LOTTO_YOU_WON
 
 # good enough
 FM_SUBJ_YOU_PROFIT
@@ -255,12 +258,6 @@ FSL_HELO_DEVICE
 
 # good enough
 FSL_MISSP_REPLYTO
-
-# good enough
-FS_LARGE_PERCENT2
-
-# good enough
-FS_MAKE_MONEY
 
 # tflags publish
 GOOGLE_DOCS_PHISH
@@ -387,9 +384,6 @@ OBFU_TEXT_ATTACH
 
 # good enough
 PHP_NOVER_MUA
-
-# good enough
-POSTCARD_03
 
 # tflags net
 PYZOR_CHECK
@@ -634,6 +628,9 @@ SPF_PASS
 # tflags net
 SPF_SOFTFAIL
 
+# good enough
+STYLE_GIBBERISH
+
 # tflags userconf
 SUBJECT_IN_BLACKLIST
 
@@ -642,6 +639,9 @@ SUBJECT_IN_WHITELIST
 
 # good enough
 TAB_IN_FROM
+
+# good enough
+TBIRD_SUSP_MIME_BDRY
 
 # tflags net
 TO_EQ_FM_DOM_SPF_FAIL
@@ -668,6 +668,9 @@ TT_MSGID_TRUNC
 TVD_FROM_1
 
 # good enough
+TVD_QUAL_MEDS
+
+# good enough
 TVD_RCVD_IP
 
 # good enough
@@ -680,7 +683,31 @@ TVD_SUBJ_NUM_OBFU_MINFP
 TVD_UNDER_VALUED
 
 # good enough
-STYLE_GIBBERISH
+BODY_EMPTY
+
+# good enough
+COMPENSATION
+
+# good enough
+FROM_MISSP_PHISH
+
+# good enough
+FSL_HELO_FAKE
+
+# good enough
+HK_NAME_MR_MRS
+
+# good enough
+KHOP_BIG_TO_CC
+
+# good enough
+LOTTO_DEPT
+
+# good enough
+OBFU_HTML_ATTACH
+
+# good enough
+TO_EQ_FM_HTML_ONLY
 
 # tflags userconf
 UNPARSEABLE_RELAY
