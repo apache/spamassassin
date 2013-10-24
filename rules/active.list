@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-8mile axb-coi-bulk axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bpoliakoff grenier jarif kpg-core mas-cps mas-mas mmiroslaw-ham mmiroslaw-spam zmi; day 2: axb-8mile axb-coi-bulk axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bpoliakoff grenier jarif kpg-core llanga mas-cps mas-mas mmiroslaw-ham mmiroslaw-spam zmi; day 3: axb-8mile axb-coi-bulk axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bpoliakoff grenier jarif kpg-core llanga mas-cps mas-mas zmi
+# with results from: day 1: axb-8mile axb-coi-bulk axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bpoliakoff grenier jarif kpg-core mas-cps mas-mas mmiroslaw-ham mmiroslaw-spam zmi; day 2: axb-8mile axb-coi-bulk axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bpoliakoff grenier jarif kpg-core llanga mas-cps mas-mas mmiroslaw-ham mmiroslaw-spam zmi; day 3: axb-8mile axb-coi-bulk axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bpoliakoff grenier jarif kpg-core llanga mas-cps mas-mas mmiroslaw-ham mmiroslaw-spam zmi
 
 # tflags publish
 ADVANCE_FEE_2_NEW_FORM
@@ -167,13 +167,13 @@ EMAIL_URI_PHISH
 ENV_AND_HDR_SPF_MATCH
 
 # good enough
-FB_EXPLOSIVE
-
-# good enough
 FH_FAKE_RCVD_LINE
 
 # good enough
 FH_FROM_GET_NAME
+
+# good enough
+FH_HELO_ALMOST_IP
 
 # tflags publish
 FILL_THIS_FORM
@@ -186,9 +186,6 @@ FILL_THIS_FORM_LONG
 
 # good enough
 FM_LOTTO_YOU_WON
-
-# good enough
-FM_SUBJ_YOU_PROFIT
 
 # tflags publish
 FORM_FRAUD_3
@@ -242,13 +239,7 @@ FROM_MISSP_USER
 FRT_INCOME
 
 # good enough
-FRT_ROLEX
-
-# good enough
 FSL_CTYPE_WIN1251
-
-# good enough
-FSL_HELO_BARE_IP_1
 
 # good enough
 FSL_HELO_BARE_IP_2
@@ -301,9 +292,6 @@ HELO_MISC_IP
 # good enough
 HK_SCAM_N2
 
-# good enough
-HK_SCAM_S23
-
 # tflags userconf
 HTML_CHARSET_FARAWAY
 
@@ -323,10 +311,10 @@ LONG_TERM_PRICE
 LOTS_OF_MONEY
 
 # good enough
-LOTTO_AGENT
+LOTTERY_PH_004470
 
 # good enough
-LUCRATIVE
+LOTTO_AGENT
 
 # tflags publish
 MANY_SPAN_IN_TEXT
@@ -656,12 +644,6 @@ TO_NO_BRKTS_FROM_MSSP
 TO_NO_BRKTS_MSFT
 
 # good enough
-TO_NO_BRKTS_NORDNS
-
-# good enough
-TO_NO_BRKTS_PCNT
-
-# good enough
 TT_MSGID_TRUNC
 
 # good enough
@@ -671,22 +653,25 @@ TVD_FROM_1
 TVD_QUAL_MEDS
 
 # good enough
-TVD_RCVD_IP
-
-# good enough
-TVD_RCVD_IP4
-
-# good enough
 TVD_SUBJ_NUM_OBFU_MINFP
 
 # good enough
 TVD_UNDER_VALUED
 
 # good enough
+AXB_XM_FORGED_OL2600
+
+# good enough
 BODY_EMPTY
 
 # good enough
+CK_HELO_GENERIC
+
+# good enough
 COMPENSATION
+
+# good enough
+FBI_SPOOF
 
 # good enough
 FROM_MISSP_PHISH
@@ -695,19 +680,22 @@ FROM_MISSP_PHISH
 FSL_HELO_FAKE
 
 # good enough
-HK_NAME_MR_MRS
+FSL_NEW_HELO_USER
 
 # good enough
-KHOP_BIG_TO_CC
+HK_NAME_MR_MRS
 
 # good enough
 LOTTO_DEPT
 
 # good enough
-OBFU_HTML_ATTACH
+S25R_6
 
 # good enough
 TO_EQ_FM_HTML_ONLY
+
+# good enough
+TVD_PH_BODY_META
 
 # tflags userconf
 UNPARSEABLE_RELAY
