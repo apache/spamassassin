@@ -1166,5 +1166,13 @@ describe    ES_LIC_FROM_INFO   Spanish-language spam from .info domain
 header      __SMIME_MESSAGE    Content-Type =~ /application\/pkcs7-mime;/i
 
 
+uri         __JIMDO_PHISH      /(?:microsoft|outlook|access|helpdesk|upd?ates|newaccount)\w+\.jimdo\.com/i
+body        __CLICK_HERE       /\bclick\shere\b/i
+
+meta        JIMDO_PHISH        __JIMDO_PHISH && __CLICK_HERE
+describe    JIMDO_PHISH        Apparent phishing via webform hosted at jimdo.com
+score       JIMDO_PHISH        3.00	# limit
+
+
 
 
