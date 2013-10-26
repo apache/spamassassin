@@ -23,8 +23,8 @@
 # 0.159   0.2061   0.0000    1.000   0.66    0.01  T_PH_REC
 body TVD_PH_SEC		/\byour .{0,40}account .{0,40}security/i
 body TVD_PH_REC		/\byour .{0,40}account .{0,40}record/i
-describe TVD_PH_SEC	Message has a phrase standard for phishing mails
-describe TVD_PH_REC	Message has a phrase standard for phishing mails
+describe TVD_PH_SEC	Message includes a phrase commonly used in phishing mails
+describe TVD_PH_REC	Message includes a phrase commonly used in phishing mails
 
 # 0.234   0.2997   0.0123    0.961   0.68    0.01  T_PH_TVD_7
 # 0.112   0.1390   0.0012    0.992   0.61    0.01  T_PH_TVD_1
@@ -166,6 +166,8 @@ body __TVD_PH_BODY_08		/\bmultiple password failures/i
 
 body __TVD_PH_BODY_ACCOUNTS_PRE		/\baccounts? (?:[a-z_,-]+ )+?(?:record[a-z]*|suspen[a-z]+|notif(?:y|ication)|updated|verifications?|credited)\b/i
 meta TVD_PH_BODY_ACCOUNTS_PRE		__TVD_PH_BODY_ACCOUNTS_PRE
+describe TVD_PH_BODY_ACCOUNTS_PRE	The body matches phrases such as "accounts suspended", "account credited", "account verification"
+
 body __TVD_PH_BODY_ACCOUNTS_POST	/\b(?:(?:[dr]e-?)?activat[a-z]*|(?:re-?)?validate|secure|restore|confirm|update|suspend) (?!your)(?:[a-z_,-]+ )+?accounts?\b/i
 meta TVD_PH_BODY_ACCOUNTS_POST		__TVD_PH_BODY_ACCOUNTS_POST
 
