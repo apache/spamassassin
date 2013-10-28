@@ -8,6 +8,8 @@ tflags		AXB_X_FF_SEZ_S		nopublish
 # 2013-10-16
 header		AXB_X_ORIG_OMNIMS	X-OriginatorOrg =~ /\.onmicrosoft\.com$/
 describe	AXB_X_ORIG_OMNIMS	outbound.protection.outlook.com forwarders
+tflags 		AXB_X_ORIG_OMNIMS	nopublish
+
 
 header		AXB_X_PROXYOLCOM	exists:ClientProxiedBy
 describe	AXB_X_PROXYOLCOM	"Proxied" by Outlook.com
