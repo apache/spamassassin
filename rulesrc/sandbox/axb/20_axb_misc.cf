@@ -4,7 +4,7 @@
 # 2013-11-01
 header	__FROM_ONMS		From =~	 /\.onmicrosoft\.com/
 header	__TO_ONMS		To =~	 /\.onmicrosoft\.com/
-header	__TO_ONMS_RCPTS		To:name =~ /bRecipients\b/
+header	__TO_ONMS_RCPTS		To:name =~ /\bRecipients\b/
 
 meta	 AXB_ONMS_LEAKS		(__FROM_ONMS && __TO_ONMS && __TO_ONMS_RCPTS)
 describe AXB_ONMS_LEAKS		Onmicrosoft Leak Party
