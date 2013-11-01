@@ -1,15 +1,19 @@
 ##
 
+
+# 2013-11-01
+header	__FROM_ONMS		From =~	 /\.onmicrosoft\.com/
+header	__TO_ONMS		To =~	 /\.onmicrosoft\.com/
+header	__TO_ONMS_RCPTS		To:name =~ /bRecipients\b/
+
+meta	 AXB_ONMS_LEAKS		(__FROM_ONMS && __TO_ONMS && __TO_ONMS_RCPTS)
+describe AXB_ONMS_LEAKS		Onmicrosoft Leak Party
+
+
 # 2013-10-17
 header          AXB_X_FF_SEZ_S          X-Forefront-Antispam-Report =~ /^SFV\:SPM/
 describe        AXB_X_FF_SEZ_S          Forefront sez this is spam
 tflags		AXB_X_FF_SEZ_S		nopublish
-
-# 2013-10-16
-#header		AXB_X_ORIG_OMNIMS	X-OriginatorOrg =~ /\.onmicrosoft\.com$/
-#describe	AXB_X_ORIG_OMNIMS	outbound.protection.outlook.com forwarders
-#tflag		AXB_X_ORIG_OMNIMS	nopublish
-
 
 header		AXB_X_PROXYOLCOM	exists:ClientProxiedBy
 describe	AXB_X_PROXYOLCOM	"Proxied" by Outlook.com
