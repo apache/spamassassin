@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-8mile axb-coi-bulk axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bpoliakoff grenier jarif kpg-core zmi; day 2: axb-8mile axb-coi-bulk axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bpoliakoff grenier jarif kpg-core llanga zmi; day 3: axb-8mile axb-coi-bulk axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bpoliakoff grenier jarif kpg-core llanga mas-cps mas-mas zmi
+# with results from: day 1: axb-8mile axb-coi-bulk axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bpoliakoff grenier jarif kpg-core zmi; day 2: axb-8mile axb-coi-bulk axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bpoliakoff grenier jarif kpg-core llanga zmi; day 3: axb-8mile axb-coi-bulk axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bpoliakoff grenier jarif kpg-core llanga zmi
 
 # tflags publish
 ADVANCE_FEE_2_NEW_FORM
@@ -91,6 +91,9 @@ BAYES_99
 # good enough
 BODY_EMPTY
 
+# good enough
+BODY_SINGLE_WORD
+
 # tflags userconf
 CHARSET_FARAWAY
 
@@ -117,6 +120,9 @@ CORRUPT_FROM_LINE_IN_HDRS
 
 # good enough
 CURR_PRICE
+
+# good enough
+DATE_IN_FUTURE_96_Q
 
 # good enough
 DATE_IN_FUTURE_Q_PLUS
@@ -186,6 +192,12 @@ EMAIL_URI_PHISH
 
 # tflags userconf
 ENV_AND_HDR_SPF_MATCH
+
+# good enough
+FAKE_REPLY_A1
+
+# good enough
+FB_YOU_CAN_BECOME
 
 # good enough
 FH_FAKE_RCVD_LINE
@@ -263,6 +275,9 @@ FROM_MISSP_TO_UNDISC
 FROM_MISSP_USER
 
 # good enough
+FR_ALMOST_VIAG2
+
+# good enough
 FSL_CTYPE_WIN1251
 
 # good enough
@@ -320,7 +335,16 @@ HASHCASH_HIGH
 HEAD_LONG
 
 # good enough
+HELO_MISC_IP
+
+# good enough
 HK_NAME_MR_MRS
+
+# good enough
+HK_RANDOM_FROM
+
+# good enough
+HK_RANDOM_REPLYTO
 
 # good enough
 HK_SCAM_N2
@@ -330,6 +354,9 @@ HK_SCAM_S23
 
 # tflags userconf
 HTML_CHARSET_FARAWAY
+
+# good enough
+HTTPS_HTTP_MISMATCH
 
 # good enough
 KB_DATE_CONTAINS_TAB
@@ -402,9 +429,6 @@ NSL_RCVD_FROM_USER
 
 # good enough
 NSL_RCVD_HELO_USER
-
-# good enough
-OBFU_DOC_ATTACH
 
 # tflags publish
 OBFU_JVSCR_ESC
@@ -701,34 +725,28 @@ TT_MSGID_TRUNC
 TVD_FROM_1
 
 # good enough
+TVD_PDF_FINGER01
+
+# good enough
 TVD_UNDER_VALUED
 
 # good enough
-BODY_SINGLE_WORD
+AXB_XMAILER_MIMEOLE_OL_E9F46
 
 # good enough
-DATE_IN_FUTURE_96_Q
+AXB_XM_FORGED_OL2600
 
 # good enough
-FAKE_REPLY_A1
+FB_BE_MILLION
 
 # good enough
-FB_YOU_CAN_BECOME
+FS_MAKE_MONEY
 
 # good enough
-FM_SUBJ_YOU_PROFIT
+HDRS_LCASE_1K
 
 # good enough
-HELO_MISC_IP
-
-# good enough
-HK_RANDOM_FROM
-
-# good enough
-HK_RANDOM_REPLYTO
-
-# good enough
-TVD_PDF_FINGER01
+TVD_PDF_FINGER01_JO
 
 # tflags userconf
 UNPARSEABLE_RELAY
