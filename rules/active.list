@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-8mile axb-coi-bulk axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bpoliakoff grenier jarif kpg-core zmi; day 2: axb-8mile axb-coi-bulk axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bpoliakoff grenier jarif kpg-core llanga mas-cps mas-mas mmiroslaw-ham mmiroslaw-spam zmi; day 3: axb-8mile axb-coi-bulk axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bpoliakoff grenier jarif kpg-core llanga mas-cps mas-mas zmi
+# with results from: day 1: axb-8mile axb-coi-bulk axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bpoliakoff grenier jarif kpg-core mmiroslaw-ham mmiroslaw-spam zmi; day 2: axb-8mile axb-coi-bulk axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bpoliakoff grenier jarif kpg-core llanga zmi; day 3: axb-8mile axb-coi-bulk axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bpoliakoff grenier jarif kpg-core llanga mas-cps mas-mas mmiroslaw-ham mmiroslaw-spam zmi
 
 # tflags publish
 ADVANCE_FEE_2_NEW_FORM
@@ -63,9 +63,6 @@ AXB_XMA_BASP
 
 # good enough
 AXB_XM_FORGED_OL2600
-
-# good enough
-BASE64_LENGTH_79_INF
 
 # tflags learn
 BAYES_00
@@ -197,9 +194,6 @@ EMAIL_URI_PHISH
 ENV_AND_HDR_SPF_MATCH
 
 # good enough
-FB_BE_MILLION
-
-# good enough
 FH_FAKE_RCVD_LINE
 
 # good enough
@@ -216,9 +210,6 @@ FILL_THIS_FORM_LOAN
 
 # good enough
 FILL_THIS_FORM_LONG
-
-# good enough
-FM_IS_IT_OUR_ACCOUNT
 
 # good enough
 FM_LOTTO_YOU_WON
@@ -292,9 +283,6 @@ FSL_HELO_FIREWALL
 # good enough
 FSL_MISSP_REPLYTO
 
-# good enough
-FS_MAKE_MONEY
-
 # tflags publish
 GOOGLE_DOCS_PHISH
 
@@ -342,9 +330,6 @@ HK_SCAM_N2
 
 # tflags userconf
 HTML_CHARSET_FARAWAY
-
-# good enough
-HTTPS_HTTP_MISMATCH
 
 # good enough
 KB_DATE_CONTAINS_TAB
@@ -417,6 +402,9 @@ NSL_RCVD_FROM_USER
 
 # good enough
 NSL_RCVD_HELO_USER
+
+# good enough
+OBFU_DOC_ATTACH
 
 # tflags publish
 OBFU_JVSCR_ESC
@@ -677,9 +665,6 @@ SPF_PASS
 SPF_SOFTFAIL
 
 # good enough
-STOCK_IMG_CTYPE
-
-# good enough
 STYLE_GIBBERISH
 
 # tflags userconf
@@ -710,10 +695,10 @@ TO_NO_BRKTS_MSFT
 TT_MSGID_TRUNC
 
 # good enough
-TVD_FROM_1
+TVD_FINGER_02
 
 # good enough
-TVD_PDF_FINGER01
+TVD_FROM_1
 
 # good enough
 AXB_3LITTLE_PIGS
@@ -729,9 +714,6 @@ BIGNUM_EMAILS
 
 # good enough
 BITLY_URI
-
-# good enough
-DATE_DOTS
 
 # good enough
 DEAR_EMAIL_USER
@@ -767,10 +749,10 @@ KHOP_BIG_TO_CC
 MAILER_EQ_ORG
 
 # good enough
-MIME_MALF
+MALFORMED_FREEMAIL
 
 # good enough
-OBFU_HTML_ATTACH
+MIME_MALF
 
 # good enough
 XM_PHPMAILER_FORGED
