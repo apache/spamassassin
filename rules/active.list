@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-8mile axb-coi-bulk axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bpoliakoff grenier jarif kpg-core zmi; day 2: axb-8mile axb-coi-bulk axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bpoliakoff grenier jarif kpg-core llanga mmiroslaw-ham mmiroslaw-spam zmi; day 3: axb-8mile axb-coi-bulk axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bpoliakoff grenier jarif kpg-core llanga zmi
+# with results from: day 1: axb-8mile axb-coi-bulk axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bpoliakoff grenier jarif kpg-core mas-cps mas-mas mmiroslaw-ham mmiroslaw-spam zmi; day 2: axb-8mile axb-coi-bulk axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bpoliakoff grenier jarif kpg-core llanga zmi; day 3: axb-8mile axb-coi-bulk axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bpoliakoff grenier jarif kpg-core llanga mmiroslaw-ham mmiroslaw-spam zmi
 
 # tflags publish
 ADVANCE_FEE_2_NEW_FORM
@@ -109,9 +109,6 @@ BITLY_URI
 # good enough
 BODY_EMPTY
 
-# good enough
-BODY_SINGLE_WORD
-
 # tflags userconf
 CHARSET_FARAWAY
 
@@ -135,9 +132,6 @@ COMPENSATION
 
 # tflags publish
 CORRUPT_FROM_LINE_IN_HDRS
-
-# good enough
-DATE_DOTS
 
 # good enough
 DATE_IN_FUTURE_96_Q
@@ -205,9 +199,6 @@ DOS_OE_TO_MX_IMAGE
 # good enough
 DSN_NO_MIMEVERSION
 
-# good enough
-DYN_RDNS_SHORT_HELO_HTML
-
 # tflags publish
 EMAIL_URI_PHISH
 
@@ -237,6 +228,9 @@ FILL_THIS_FORM_LOAN
 
 # good enough
 FILL_THIS_FORM_LONG
+
+# good enough
+FM_FRM_RN_L_BRACK
 
 # good enough
 FM_LOTTO_YOU_WON
@@ -400,6 +394,9 @@ LOTTO_DEPT
 # good enough
 MAILER_EQ_ORG
 
+# good enough
+MALFORMED_FREEMAIL
+
 # tflags publish
 MANY_SPAN_IN_TEXT
 
@@ -452,7 +449,7 @@ NSL_RCVD_FROM_USER
 NSL_RCVD_HELO_USER
 
 # good enough
-OBFU_HTML_ATTACH
+OBFU_DOC_ATTACH
 
 # tflags publish
 OBFU_JVSCR_ESC
@@ -749,31 +746,34 @@ TVD_FINGER_02
 TVD_FROM_1
 
 # good enough
-TVD_PDF_FINGER01
-
-# good enough
-DOS_BODY_HIGH_NO_MID
+BILLION_OVERLAP
 
 # good enough
 FH_FROM_START_YOU
 
 # good enough
-HDRS_LCASE_1K
+HK_LOTTO_SUBJECT
 
 # good enough
-HELO_MISC_IP
+HK_NAME_FM_MR_MRS
 
 # good enough
-HK_RANDOM_REPLYTO_NAME
+HK_RANDOM_REPLYTO
 
 # good enough
-MALFORMED_FREEMAIL
+HK_SCAM_N1
 
 # good enough
-SINGLE_HEADER_4K
+SHARE_50_50
 
 # good enough
-TVD_PDF_FINGER01_JO
+TO_NO_BRKTS_PCNT
+
+# good enough
+TVD_PDF_FINGER01
+
+# good enough
+TVD_PH_BODY_META
 
 # tflags userconf
 UNPARSEABLE_RELAY
