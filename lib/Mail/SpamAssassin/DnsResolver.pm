@@ -143,7 +143,7 @@ sub load_resolver {
       $res->persistent_tcp(0);  # bug 3997
       $res->persistent_udp(0);  # bug 3997
 
-      # RFC 2671 bis - EDNS0, value is a requestor's UDP payload size
+      # RFC 6891 (ex RFC 2671): EDNS0, value is a requestor's UDP payload size
       my $edns = $self->{conf}->{dns_options}->{edns};
       if ($edns && $edns > 512) {
         $res->udppacketsize($edns);

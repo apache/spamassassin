@@ -1723,22 +1723,24 @@ Option names are not case-sensitive. The I<dns_options> directive may
 appear in configuration files multiple times, the last setting prevails.
 
 Option I<edns> (or I<edsn0>) may take a value which specifies a requestor's
-acceptable UDP payload size according to EDNS0 specifications (RFC 2671bis
-draft), e.g. I<edns=4096>. When EDNS0 is off (I<noedns> or I<edns=512>)
-a traditional implied UDP payload size is 512 bytes. When the option is
-specified but a value is not provided, a conservative default of 1240 bytes
-is implied. It is recommended to keep I<edns> enabled when using a local
-recursive DNS server which supports EDNS0 (like most modern DNS servers do),
-a suitable setting in this case is I<edns=4096>, which is also a default.
-Allowing packets larger than 512 bytes can avoid truncation of answer
-resource records in large DNS responses (like in TXT records of some SPF
-and DKIM responses, or when an unreasonable number of A records is published
-by some domain). The option should be disabled when a recursive DNS server
-is only reachable through some old-fashioned firewall which bans DNS UDP
-packets larger than 512 bytes. A suitable value when a non-local recursive
-DNS server is used and a firewall does allow EDNS0 but blocks fragmented
-IP packets is perhaps 1240 bytes, allowing a DNS UDP packet to fit within
-a single IP packet in most cases.
+acceptable UDP payload size according to EDNS0 specifications (RFC 6891,
+ex RFC 2671) e.g. I<edns=4096>. When EDNS0 is off (I<noedns> or I<edns=512>)
+a traditional implied UDP payload size is 512 bytes, which is also a minimum
+allowed value for this option. When the option is specified but a value
+is not provided, a conservative default of 1220 bytes is implied. It is
+recommended to keep I<edns> enabled when using a local recursive DNS server
+which supports EDNS0 (like most modern DNS servers do), a suitable setting
+in this case is I<edns=4096>, which is also a default. Allowing UDP payload
+size larger than 512 bytes can avoid truncation of resource records in large
+DNS responses (like in TXT records of some SPF and DKIM responses, or when
+an unreasonable number of A records is published by some domain). The option
+should be disabled when a recursive DNS server is only reachable through
+non- RFC 6891 compliant middleboxes (such as some old-fashioned firewall)
+which bans DNS UDP payload sizes larger than 512 bytes. A suitable value
+when a non-local recursive DNS server is used and a middlebox B<does> allow
+EDNS0 but blocks fragmented IP packets is perhaps 1220 bytes, allowing a
+DNS UDP packet to fit within a single IP packet in most cases (a slightly
+less conservative range would be 1280-1410 bytes).
 
 Option I<rotate> causes SpamAssassin to choose a DNS server at random
 from all servers listed in C</etc/resolv.conf> every I<dns_test_interval>
@@ -1772,11 +1774,16 @@ do not work for no apparent reason.
         } elsif ($option =~ /^(rotate|dns0x20)\z/) {
           $self->{dns_options}->{$1} = 1;
         } elsif ($option =~ /^(edns)0? (?: = (\d+) )? \z/x) {
-          # RFC 2671 bis - EDNS0, value is a requestor's UDP payload size
-          # defaults to some UDP packet size likely to fit into a single packet
-          # which is more likely to pass firewalls which choke on IP fragments.
-          # RFC 2460 min MTU is 1280 for IPv6, minus 40 bytes for basic header
-          $self->{dns_options}->{$1} = $2 || 1240;
+          # RFC 6891 (ex RFC 2671) - EDNS0, value is a requestor's UDP payload
+          # size, defaults to some UDP packet size likely to fit into a single
+          # IP packet which is more likely to pass firewalls which choke on IP
+          # fragments.  RFC 2460: min MTU is 1280 for IPv6, minus 40 bytes for
+          # basic header, yielding 1240.  RFC 3226 prescribes a min of 1220 for
+          # RFC 2535 compliant servers.  RFC 6891: choosing between 1280 and
+          # 1410 bytes for IP (v4 or v6) over Ethernet would be reasonable.
+          # 
+          $self->{dns_options}->{$1} = $2 || 1220;
+          return $INVALID_VALUE  if $self->{dns_options}->{$1} < 512;
         } else {
           return $INVALID_VALUE;
         }
@@ -4163,6 +4170,8 @@ sub new {
     push(@{$self->{headers_ham}},  $r);
   }
 
+  # RFC 6891: A good compromise may be the use of an EDNS maximum payload size
+  # of 4096 octets as a starting point.
   $self->{dns_options}->{edns} = 4096;
 
   # these should potentially be settable by end-users
