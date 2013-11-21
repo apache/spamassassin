@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-8mile axb-coi-bulk axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bpoliakoff grenier jarif kpg-core zmi; day 2: axb-8mile axb-coi-bulk axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bpoliakoff grenier jarif kpg-core llanga mas-cps mas-mas zmi; day 3: axb-8mile axb-coi-bulk axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bpoliakoff grenier jarif kpg-core llanga mas-cps mas-mas zmi
+# with results from: day 1: axb-8mile axb-coi-bulk axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bpoliakoff grenier jarif kpg-core zmi; day 2: axb-8mile axb-coi-bulk axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bpoliakoff grenier jarif kpg-core llanga zmi; day 3: axb-8mile axb-coi-bulk axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bpoliakoff grenier jarif kpg-core llanga mas-cps mas-mas zmi
 
 # tflags publish
 ADVANCE_FEE_2_NEW_FORM
@@ -98,9 +98,6 @@ BAYES_95
 BAYES_99
 
 # good enough
-BILLION_OVERLAP
-
-# good enough
 BODY_EMPTY
 
 # tflags userconf
@@ -186,6 +183,9 @@ DOS_OE_TO_MX_IMAGE
 
 # good enough
 DSN_NO_MIMEVERSION
+
+# good enough
+DYN_RDNS_SHORT_HELO_HTML
 
 # tflags publish
 EMAIL_URI_PHISH
@@ -275,7 +275,13 @@ FROM_MISSP_TO_UNDISC
 FROM_MISSP_USER
 
 # good enough
+FR_TITLE_NUMS
+
+# good enough
 FSL_CTYPE_WIN1251
+
+# good enough
+FSL_HELO_BARE_IP_1
 
 # good enough
 FSL_HELO_BARE_IP_2
@@ -695,13 +701,22 @@ TO_NO_BRKTS_MSFT
 TT_MSGID_TRUNC
 
 # good enough
+TVD_FINGER_02
+
+# good enough
 TVD_FROM_1
+
+# good enough
+TVD_RCVD_IP
 
 # good enough
 AXB_XMAILER_MIMEOLE_OL_4379D
 
 # good enough
 AXB_XM_FORGED_OL2600
+
+# good enough
+AXB_XRCVD_EYOU_SEND
 
 # good enough
 DOS_BODY_HIGH_NO_MID
@@ -713,25 +728,43 @@ FBI_MONEY
 FBI_SPOOF
 
 # good enough
+FB_STAMINA_IN_BED
+
+# good enough
+FH_FROM_START_YOU
+
+# good enough
 FM_LOTTO_MONEY
 
 # good enough
 FROM_WSP_LEAD
 
 # good enough
+FR_TEST_BASE64_BAD
+
+# good enough
+FSL_HELO_FIREWALL
+
+# good enough
 HDRS_LCASE_1K
+
+# good enough
+HK_LOTTO_SUBJECT
+
+# good enough
+HK_NAME_FM_FROM
 
 # good enough
 HK_NAME_FROM
 
 # good enough
+HK_RANDOM_FROM
+
+# good enough
+HK_SPAMMY_FILENAME
+
+# good enough
 MIME_NO_TEXT
-
-# good enough
-OBFU_DOC_ATTACH
-
-# good enough
-OBFU_HTML_ATTACH
 
 # good enough
 TO_NO_BRKTS_PCNT
@@ -741,6 +774,9 @@ TVD_PDF_FINGER01
 
 # good enough
 TVD_PDF_FINGER01_JO
+
+# good enough
+XM_PHPMAILER_FORGED
 
 # tflags userconf
 UNPARSEABLE_RELAY
