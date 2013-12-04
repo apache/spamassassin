@@ -1096,7 +1096,8 @@ score       BODY_URI_ONLY        0.25	# limit during testing
 body        __SINGLE_WORD_LINE  /^\s?\S{1,60}\s?$/
 tflags      __SINGLE_WORD_LINE  multiple maxhits=2
 header      __SINGLE_WORD_SUBJ  Subject =~ /^\s*\S{1,60}\s*$/
-meta        BODY_SINGLE_WORD    __BODY_TEXT_LINE < 3 && !__SMIME_MESSAGE && ((__SINGLE_WORD_LINE && !__SINGLE_WORD_SUBJ) || __SINGLE_WORD_LINE > 1)
+meta        __BODY_SINGLE_WORD    __BODY_TEXT_LINE < 3 && !__SMIME_MESSAGE && ((__SINGLE_WORD_LINE && !__SINGLE_WORD_SUBJ) || __SINGLE_WORD_LINE > 1)
+meta        BODY_SINGLE_WORD    __BODY_SINGLE_WORD && !ALL_TRUSTED && !__NOT_SPOOFED && !__MSGID_APPLEMAIL 
 describe    BODY_SINGLE_WORD    Message body is only one word (no spaces)
 score       BODY_SINGLE_WORD    1.00	# limit
 
@@ -1173,6 +1174,10 @@ meta        JIMDO_PHISH        __JIMDO_PHISH && __CLICK_HERE
 describe    JIMDO_PHISH        Apparent phishing via webform hosted at jimdo.com
 score       JIMDO_PHISH        3.00	# limit
 
-
+body        __TRAVEL_PROFILE   /\btravel+er\sprofile\b/i
+body        __TRAVEL_RESERV    /\b(?:reservation\s(?:confirmed|number)|travel\sreservations?)\b/i
+body        __TRAVEL_BUSINESS  /\bbusiness\stravel\b/i
+body        __TRAVEL_AGENT     /\btravel\sagen(?:t|cy)\b/i
+meta        __TRAVEL_MANY      (__TRAVEL_PROFILE + __TRAVEL_RESERV + __TRAVEL_BUSINESS + __TRAVEL_AGENT) > 2
 
 
