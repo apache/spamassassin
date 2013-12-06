@@ -21,10 +21,6 @@ describe AXB_ONMS_LEAKS		Onmicrosoft Leak Party
 header          AXB_X_FF_SEZ_S          X-Forefront-Antispam-Report =~ /^SFV\:SPM/
 describe        AXB_X_FF_SEZ_S          Forefront sez this is spam
 
-
-header		AXB_X_PROXYOLCOM	exists:ClientProxiedBy
-describe	AXB_X_PROXYOLCOM	"Proxied" by Outlook.com
-
 # 2013-06-17
 header		AXB_XM_OL_122		X-Mailer =~ /^Outlook 12\.2$/
 describe	AXB_XM_OL_122		Possibly forged OL version
