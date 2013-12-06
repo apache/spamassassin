@@ -20,7 +20,7 @@ describe AXB_ONMS_LEAKS		Onmicrosoft Leak Party
 # 2013-10-17
 header          AXB_X_FF_SEZ_S          X-Forefront-Antispam-Report =~ /^SFV\:SPM/
 describe        AXB_X_FF_SEZ_S          Forefront sez this is spam
-tflags		AXB_X_FF_SEZ_S		nopublish
+
 
 header		AXB_X_PROXYOLCOM	exists:ClientProxiedBy
 describe	AXB_X_PROXYOLCOM	"Proxied" by Outlook.com
