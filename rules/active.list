@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-8mile axb-coi-bulk axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bpoliakoff grenier jarif kpg-core mas-cps mas-mas mmiroslaw-ham mmiroslaw-spam zmi; day 2: axb-8mile axb-coi-bulk axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bpoliakoff grenier jarif kpg-core llanga mas-cps mas-mas mmiroslaw-ham mmiroslaw-spam zmi; day 3: axb-8mile axb-coi-bulk axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bpoliakoff grenier jarif kpg-core llanga mas-cps mas-mas zmi
+# with results from: day 1: axb-8mile axb-coi-bulk axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bpoliakoff grenier jarif kpg-core mas-cps mas-mas zmi; day 2: axb-8mile axb-coi-bulk axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bpoliakoff grenier jarif kpg-core llanga mas-cps mas-mas mmiroslaw-ham mmiroslaw-spam zmi; day 3: axb-8mile axb-coi-bulk axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bpoliakoff grenier jarif kpg-core llanga mas-cps mas-mas mmiroslaw-ham mmiroslaw-spam zmi
 
 # tflags publish
 ADVANCE_FEE_2_NEW_FORM
@@ -200,6 +200,9 @@ FBI_MONEY
 FBI_SPOOF
 
 # good enough
+FB_STAMINA_IN_BED
+
+# good enough
 FH_FAKE_RCVD_LINE
 
 # good enough
@@ -283,6 +286,12 @@ FSL_HELO_FAKE
 # good enough
 FSL_MISSP_REPLYTO
 
+# good enough
+FSL_NEW_HELO_USER
+
+# good enough
+FS_MAKE_MONEY
+
 # tflags publish
 GOOGLE_DOCS_PHISH
 
@@ -321,9 +330,6 @@ HEAD_LONG
 
 # good enough
 HELO_MISC_IP
-
-# good enough
-HK_NAME_FROM
 
 # good enough
 HK_NAME_MR_MRS
@@ -701,13 +707,13 @@ TVD_FROM_1
 TVD_UNDER_VALUED
 
 # good enough
-FB_STAMINA_IN_BED
+BILLION_OVERLAP
 
 # good enough
-FSL_NEW_HELO_USER
+HK_RANDOM_FROM
 
 # good enough
-FS_MAKE_MONEY
+STYLE_GIBBERISH
 
 # tflags userconf
 UNPARSEABLE_RELAY
