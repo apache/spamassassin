@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bpoliakoff grenier jarif kpg-core mas-cps mas-mas mmiroslaw-ham mmiroslaw-spam zmi; day 2: axb-8mile axb-coi-bulk axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bpoliakoff grenier jarif kpg-core llanga mas-cps mas-mas zmi; day 3: axb-8mile axb-coi-bulk axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bpoliakoff grenier jarif kpg-core llanga mas-cps mas-mas zmi
+# with results from: day 1: axb-8mile axb-coi-bulk axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bpoliakoff grenier jarif kpg-core mas-cps mas-mas mmiroslaw-ham mmiroslaw-spam zmi; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bpoliakoff grenier jarif kpg-core llanga mas-cps mas-mas mmiroslaw-ham mmiroslaw-spam zmi; day 3: axb-8mile axb-coi-bulk axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bpoliakoff grenier jarif kpg-core llanga mas-cps mas-mas zmi
 
 # tflags publish
 ADVANCE_FEE_2_NEW_FORM
@@ -257,13 +257,19 @@ FSL_CTYPE_WIN1251
 FSL_HELO_BARE_IP_2
 
 # good enough
-FSL_HELO_FAKE
+FSL_HELO_DEVICE
+
+# good enough
+FSL_MID_419
 
 # good enough
 FSL_MISSP_REPLYTO
 
 # good enough
 FSL_NEW_HELO_USER
+
+# good enough
+FS_LARGE_PERCENT2
 
 # good enough
 FS_MAKE_MONEY
@@ -646,9 +652,6 @@ SPF_PASS
 # tflags net
 SPF_SOFTFAIL
 
-# good enough
-STYLE_GIBBERISH
-
 # tflags userconf
 SUBJECT_IN_BLACKLIST
 
@@ -680,13 +683,25 @@ TT_MSGID_TRUNC
 TVD_UNDER_VALUED
 
 # good enough
-FSL_MID_419
+AXB_3LITTLE_PIGS
 
 # good enough
-HK_LOTTO_SUBJECT
+AXB_XMA_BASP
 
 # good enough
-MALFORMED_FREEMAIL
+AXB_XM_FORGED_OL2600
+
+# good enough
+CN_B2B_SPAMMER
+
+# good enough
+DATE_IN_FUTURE_96_Q
+
+# good enough
+DATE_IN_FUTURE_Q_PLUS
+
+# good enough
+TVD_FROM_1
 
 # tflags userconf
 UNPARSEABLE_RELAY
