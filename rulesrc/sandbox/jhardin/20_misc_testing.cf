@@ -169,7 +169,7 @@ ifplugin Mail::SpamAssassin::Plugin::FreeMail
   #score        FROM_MISSP_FREEMAIL   2.0
 endif
 
-meta           FROM_MISSP_MSFT       __FROM_RUNON && (__ANY_OUTLOOK_MUA || __HAS_MIMEOLE || __MIMEOLE_MS)
+meta           FROM_MISSP_MSFT       __FROM_RUNON && (__ANY_OUTLOOK_MUA || __MIMEOLE_MS)
 describe       FROM_MISSP_MSFT       From misspaced + supposed Microsoft tool
 #score          FROM_MISSP_MSFT       3.5
 
