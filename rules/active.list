@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-8mile axb-coi-bulk axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bpoliakoff grenier jarif kpg-core mas-cps mas-mas zmi; day 2: axb-8mile axb-coi-bulk axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bpoliakoff grenier jarif kpg-core llanga mas-cps mas-mas zmi; day 3: axb-8mile axb-coi-bulk axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bpoliakoff grenier jarif kpg-core llanga mas-cps mas-mas zmi
+# with results from: day 1: axb-8mile axb-coi-bulk axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bpoliakoff grenier jarif kpg-core mas-cps mas-mas zmi; day 2: axb-8mile axb-coi-bulk axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bpoliakoff grenier jarif kpg-core llanga mas-cps mas-mas zmi; day 3: axb-8mile axb-coi-bulk axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bpoliakoff grenier jarif kpg-core llanga mas-cps mas-mas mmiroslaw-ham mmiroslaw-spam zmi
 
 # tflags publish
 ADVANCE_FEE_2_NEW_FORM
@@ -104,6 +104,9 @@ BAYES_99
 BIGNUM_EMAILS
 
 # good enough
+BILLION_OVERLAP
+
+# good enough
 BITLY_URI
 
 # good enough
@@ -199,6 +202,9 @@ DOS_OE_TO_MX_IMAGE
 # good enough
 DSN_NO_MIMEVERSION
 
+# good enough
+DYN_RDNS_AND_INLINE_IMAGE
+
 # tflags publish
 EMAIL_URI_PHISH
 
@@ -207,6 +213,9 @@ EMRCP
 
 # tflags userconf
 ENV_AND_HDR_SPF_MATCH
+
+# good enough
+FAKE_REPLY_C
 
 # good enough
 FBI_MONEY
@@ -237,9 +246,6 @@ FM_LOTTO_MONEY
 
 # good enough
 FM_LOTTO_YOU_WON
-
-# good enough
-FM_SUBJ_YOU_PROFIT
 
 # tflags publish
 FORM_FRAUD_3
@@ -302,6 +308,9 @@ FSL_HELO_BARE_IP_2
 FSL_HELO_DEVICE
 
 # good enough
+FSL_HELO_FAKE
+
+# good enough
 FSL_HELO_FIREWALL
 
 # good enough
@@ -312,9 +321,6 @@ FSL_MISSP_REPLYTO
 
 # good enough
 FSL_NEW_HELO_USER
-
-# good enough
-FS_MAKE_MONEY
 
 # tflags publish
 GOOGLE_DOCS_PHISH
@@ -389,6 +395,9 @@ HK_SCAM_N4
 HK_SCAM_N8
 
 # good enough
+HK_SCAM_S1
+
+# good enough
 HK_SCAM_S15
 
 # good enough
@@ -413,6 +422,9 @@ HTML_CHARSET_FARAWAY
 IMG_ALT_HSPACE_CID_ALIGN
 
 # good enough
+IMG_DIRECT_TO_MX
+
+# good enough
 KB_DATE_CONTAINS_TAB
 
 # good enough
@@ -432,9 +444,6 @@ LOTTO_AGENT
 
 # good enough
 LOTTO_DEPT
-
-# good enough
-LUCRATIVE
 
 # tflags publish
 MANY_SPAN_IN_TEXT
@@ -719,6 +728,9 @@ RISK_FREE
 RP_MATCHES_RCVD
 
 # good enough
+SERGIO_SUBJECT_PORN011
+
+# good enough
 SHARE_50_50
 
 # good enough
@@ -809,25 +821,28 @@ TVD_RCVD_SINGLE
 TVD_UNDER_VALUED
 
 # good enough
-BILLION_OVERLAP
+AXB_X_RCV_WLOCAL
 
 # good enough
-FSL_HELO_FAKE
+CK_HELO_GENERIC
 
 # good enough
-HK_SCAM_S1
+FROM_12LTRDOM
 
 # good enough
-IMG_DIRECT_TO_MX
+FROM_WSP_LEAD
 
 # good enough
-OBFU_HTML_ATTACH
+HK_LOTTO_NAME
 
 # good enough
-SERGIO_SUBJECT_PORN011
+HK_RANDOM_FROM
 
 # good enough
-YOUR_PERMISSION
+HK_SCAM_N13
+
+# good enough
+LOTTO_AGENT_RPLY
 
 # tflags userconf
 UNPARSEABLE_RELAY
@@ -915,6 +930,9 @@ USER_IN_WHITELIST
 
 # tflags userconf
 USER_IN_WHITELIST_TO
+
+# good enough
+YOUR_PERMISSION
 
 # tflags net
 __DKIMDOMAIN_IN_DWL_ANY
