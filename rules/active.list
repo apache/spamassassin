@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-8mile axb-coi-bulk axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bpoliakoff grenier jarif kpg-core mas-cps mas-mas mmiroslaw-ham mmiroslaw-spam zmi; day 2: axb-8mile axb-coi-bulk axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bpoliakoff grenier jarif kpg-core llanga mas-cps mas-mas zmi; day 3: axb-8mile axb-coi-bulk axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bpoliakoff grenier jarif kpg-core llanga mas-cps mas-mas zmi
+# with results from: day 1: axb-8mile axb-coi-bulk axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bpoliakoff grenier jarif kpg-core mas-cps mas-mas zmi; day 2: axb-8mile axb-coi-bulk axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bpoliakoff grenier jarif kpg-core llanga mas-cps mas-mas mmiroslaw-ham mmiroslaw-spam zmi; day 3: axb-8mile axb-coi-bulk axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bpoliakoff grenier jarif kpg-core llanga mas-cps mas-mas zmi
 
 # tflags publish
 ADVANCE_FEE_2_NEW_FORM
@@ -383,6 +383,9 @@ HK_LOTTO_NAME
 HK_NAME_DRUGS
 
 # good enough
+HK_NAME_FM_DR
+
+# good enough
 HK_NAME_FM_FROM
 
 # good enough
@@ -453,9 +456,6 @@ KB_FAKED_THE_BAT
 
 # good enough
 KB_RATWARE_MSGID
-
-# good enough
-LIVEFILESTORE
 
 # tflags publish
 LOTS_OF_MONEY
@@ -764,6 +764,9 @@ SHARE_50_50
 SHORT_HELO_AND_INLINE_IMAGE
 
 # good enough
+SINGLE_HEADER_2K
+
+# good enough
 SINGLE_HEADER_3K
 
 # good enough
@@ -814,6 +817,9 @@ TBIRD_SUSP_MIME_BDRY
 # tflags net
 TO_EQ_FM_DOM_SPF_FAIL
 
+# good enough
+TO_EQ_FM_HTML_ONLY
+
 # tflags net
 TO_EQ_FM_SPF_FAIL
 
@@ -845,16 +851,13 @@ TVD_RCVD_IP
 TVD_RCVD_SINGLE
 
 # good enough
-HK_NAME_FM_DR
-
-# good enough
-SINGLE_HEADER_2K
-
-# good enough
-TO_EQ_FM_HTML_ONLY
-
-# good enough
 TVD_SUBJ_NUM_OBFU_MINFP
+
+# good enough
+HELO_MISC_IP
+
+# good enough
+OBFU_HTML_ATTACH
 
 # tflags userconf
 UNPARSEABLE_RELAY
