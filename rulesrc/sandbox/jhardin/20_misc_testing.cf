@@ -768,7 +768,7 @@ describe    NSL_TO_ENDS_COMMA      To: ends with a comma
 tflags      NSL_TO_ENDS_COMMA      nopublish
 
 
-body        CN_B2B_SPAMMER         /\bWe are (?:(?:a )?China[-\s]based|(?:one of the best|(?:a )?leading)[^\.]{10,90} (?:located in|from) China)\b/i
+body        CN_B2B_SPAMMER         /\bWe are (?:(?:a )?(?:China|Taiwan)[-\s]based|(?:one of (?:the )?best|(?:a )?leading) [^\.]{10,90} (?:in|from) (?:China|Taiwan))\b/i
 describe    CN_B2B_SPAMMER         Chinese company introducing itself
 
 # __ version of khopesh UPPERCASE_URI, for use in metas
