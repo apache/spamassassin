@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-8mile axb-coi-bulk axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bpoliakoff grenier jarif kpg-core mas-cps mas-mas mmiroslaw-ham mmiroslaw-spam zmi; day 2: axb-8mile axb-coi-bulk axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bpoliakoff grenier jarif kpg-core llanga mas-cps mas-mas zmi; day 3: axb-8mile axb-coi-bulk axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bpoliakoff grenier jarif kpg-core llanga mas-cps mas-mas zmi
+# with results from: day 1: axb-8mile axb-coi-bulk axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bpoliakoff grenier jarif kpg-core mas-cps mas-mas zmi; day 2: axb-8mile axb-coi-bulk axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bpoliakoff grenier jarif kpg-core llanga mas-cps mas-mas mmiroslaw-ham mmiroslaw-spam zmi; day 3: axb-8mile axb-coi-bulk axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bpoliakoff grenier jarif kpg-core llanga mas-cps mas-mas zmi
 
 # tflags publish
 ADVANCE_FEE_2_NEW_FORM
@@ -209,9 +209,6 @@ DSN_NO_MIMEVERSION
 DYN_RDNS_AND_INLINE_IMAGE
 
 # good enough
-DYN_RDNS_SHORT_HELO_HTML
-
-# good enough
 DYN_RDNS_SHORT_HELO_IMAGE
 
 # tflags publish
@@ -327,9 +324,6 @@ FSL_HELO_BARE_IP_2
 
 # good enough
 FSL_HELO_DEVICE
-
-# good enough
-FSL_HELO_FAKE
 
 # good enough
 FSL_HELO_FIREWALL
@@ -449,6 +443,9 @@ HK_SPAMMY_FILENAME
 HTML_CHARSET_FARAWAY
 
 # good enough
+IMG_ALT_HSPACE_CID_ALIGN
+
+# good enough
 IMG_DIRECT_TO_MX
 
 # good enough
@@ -459,9 +456,6 @@ KB_FAKED_THE_BAT
 
 # good enough
 KB_RATWARE_MSGID
-
-# good enough
-LIVEFILESTORE
 
 # tflags publish
 LOTS_OF_MONEY
@@ -770,9 +764,6 @@ SHARE_50_50
 SHORT_HELO_AND_INLINE_IMAGE
 
 # good enough
-SINGLE_HEADER_2K
-
-# good enough
 SINGLE_HEADER_3K
 
 # good enough
@@ -836,13 +827,13 @@ TO_NO_BRKTS_FROM_MSSP
 TO_NO_BRKTS_MSFT
 
 # good enough
-TO_NO_BRKTS_PCNT
-
-# good enough
 TT_MSGID_TRUNC
 
 # good enough
 TVD_APPROVED
+
+# good enough
+TVD_FINGER_02
 
 # good enough
 TVD_FROM_1
@@ -851,25 +842,25 @@ TVD_FROM_1
 TVD_PH_BODY_META
 
 # good enough
+TVD_RCVD_IP
+
+# good enough
 TVD_RCVD_SINGLE
 
 # good enough
 FB_CIALIS_LEO3
 
 # good enough
-FH_RANDOM_SURE
+FH_FROM_START_YOU
 
 # good enough
-HK_LOTTO_SUBJECT
+FH_RANDOM_SURE
 
 # good enough
 HK_RANDOM_REPLYTO
 
 # good enough
 MAILER_EQ_ORG
-
-# good enough
-OBFU_HTML_ATTACH
 
 # good enough
 SERGIO_SUBJECT_PORN005
