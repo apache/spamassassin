@@ -1,5 +1,13 @@
 ##
 
+# 2014-01-09
+header		AXB_XM_MYECLNT		X-Mailer =~ /^My e-mail client\b/
+describe	AXB_XM_MYECLNT		Ratas castellanas
+if (version >= 3.004000)
+tflags		AXB_XM_MYECLNT		autolearn_force	
+endif
+
+
 # 2013-11-02
 body		AXB_3LITTLE_PIGS	/\bwas sent by third-party independent marketing agent\./
 describe	AXB_3LITTLE_PIGS	chinny chin chin
