@@ -81,7 +81,7 @@ database may not be possible if all keys do not fit into process memory.
 
 =cut
 
-package Mail::SpamAssassin::BayesStore::TinyRedis;
+package Mail::SpamAssassin::BayesStore::Redis;
 # Implements the new unified request protocol, introduced in Redis 1.2 .
 
 use strict;
@@ -423,7 +423,7 @@ sub connect {
   my $err = $self->{timer}->run_and_catch(sub {
     $self->{opened_from_pid} = $$;
     # will keep a persistent session open to a redis server
-    $self->{redis} = Mail::SpamAssassin::BayesStore::TinyRedis->new(
+    $self->{redis} = Mail::SpamAssassin::BayesStore::Redis->new(
                        @{$self->{redis_conf}},
                        on_connect => sub { $self->on_connect(@_) },
                      );
