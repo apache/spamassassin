@@ -89,6 +89,7 @@ SPAMASSASSIN RELEASE PROCEDURE
 
   Verify that the X-Spam-* headers use the correct version string,
   without an SVN revision number (those are only for dev and pre builds).
+  NOTE: The date will change later...
 
 - create the Changes file.  Do this step on your own checkout, as
   the release checkout is read-only.   There are two options here:
@@ -104,7 +105,7 @@ SPAMASSASSIN RELEASE PROCEDURE
 
   - For releases on the trunk (e.g. a .0 release):
 
-      TZ=UTC svn log -r HEAD:497472 --non-interactive > Changes
+      TZ=UTC svn log -r HEAD:1149751 --non-interactive > Changes
 
     r497472 was the release of 3.2.0-pre1; r233108 was the start of 3.2.0,
     just after the 3.1.0 branch was created; r46030 was the start of the
@@ -148,7 +149,7 @@ SPAMASSASSIN RELEASE PROCEDURE
 
     make test TEST_FILES="xt/*.t"
 
-    Note: As of 2013-06-17, all of these tests can pass test 
+    Note: As of 2014-01-11, all of these tests can pass test 
           with no tests skipped except dcc.t which doesn't
           properly test if dcc is not available - Bug 6944.
 
