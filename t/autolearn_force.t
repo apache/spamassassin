@@ -17,7 +17,7 @@ exit unless TEST_ENABLED;
 
 %patterns = (
 
-q{ autolearn=spam } => 'autolearned as spam'
+q{ autolearn=spam autolearn_force=yes } => 'autolearned as spam with autolearn_force'
 
 );
 
