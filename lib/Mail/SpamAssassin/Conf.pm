@@ -3142,6 +3142,11 @@ learning systems.
 
 The test will be subject to less stringent autolearn thresholds.
 
+Normally, SpamAssassin will require 3 points from the header and 3
+points from the body to be auto-learned as spam. This option keeps
+the threshold at 6 points total but changes it to have no regard to the 
+source of the points.
+
 =item  multiple
 
 The test will be evaluated multiple times, for use with meta rules.
@@ -3152,6 +3157,21 @@ Only affects header, body, rawbody, uri, and full tests.
 If B<multiple> is specified, limit the number of hits found to N.
 If the rule is used in a meta that counts the hits (e.g. __RULENAME > 5),
 this is a way to avoid wasted extra work (use "tflags multiple maxhits=6").
+
+For example:
+
+  uri      __KAM_COUNT_URIS /^./
+  tflags   __KAM_COUNT_URIS multiple maxhits=16
+  describe __KAM_COUNT_URIS A multiple match used to count URIs in a message
+
+  meta __KAM_HAS_0_URIS (__KAM_COUNT_URIS == 0)
+  meta __KAM_HAS_1_URIS (__KAM_COUNT_URIS >= 1)
+  meta __KAM_HAS_2_URIS (__KAM_COUNT_URIS >= 2)
+  meta __KAM_HAS_3_URIS (__KAM_COUNT_URIS >= 3)
+  meta __KAM_HAS_4_URIS (__KAM_COUNT_URIS >= 4)
+  meta __KAM_HAS_5_URIS (__KAM_COUNT_URIS >= 5)
+  meta __KAM_HAS_10_URIS (__KAM_COUNT_URIS >= 10)
+  meta __KAM_HAS_15_URIS (__KAM_COUNT_URIS >= 15)
 
 =item  ips_only
 
@@ -3494,6 +3514,26 @@ module.
       local ($1);
       if ($value !~ /^([_A-Za-z0-9:]+)$/) { return $INVALID_VALUE; }
       $self->{bayes_store_module} = $1;
+    }
+  });
+
+=item bayes_store_module_additional Name::Of::Additional::BayesStore::Module
+
+If this option is set, the module given will loaded in addition to the 
+bayes_store_module such as Redis.pm which also requires TinyRedis.pm.
+
+=cut
+
+  push (@cmds, {
+    setting => 'bayes_store_module_additional',
+    is_admin => 1,
+    default => '',
+    type => $CONF_TYPE_STRING,
+    code => sub {
+      my ($self, $key, $value, $line) = @_;
+      local ($1);
+      if ($value !~ /^([_A-Za-z0-9:]+)$/) { return $INVALID_VALUE; }
+      $self->{bayes_store_module_additional} = $1;
     }
   });
 

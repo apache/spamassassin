@@ -1574,9 +1574,15 @@ sub learner_new {
   my $module = untaint_var($self->{conf}->{bayes_store_module});
   $module = 'Mail::SpamAssassin::BayesStore::DBM'  if !$module;
 
+  #DO WE NEED TO LOAD A SECONDARY MODULE?
+  my $additional_module = '';
+  if (defined($self->{conf}->{bayes_store_module_additional}) && $self->{conf}->{bayes_store_module_additional} ne '') {
+    $additional_module = "require ".untaint_var($self->{conf}->{bayes_store_module_additional}).";";
+  }
+
   dbg("bayes: learner_new self=%s, bayes_store_module=%s", $self,$module);
   eval '
-    require '.$module.';
+    require '.$module.'; '.$additional_module.'
     $store = '.$module.'->new($self);
     1;
   ' or do {
