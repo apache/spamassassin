@@ -7,16 +7,18 @@ Introduction
 ------------
 
 This is a major release.  It introduces over two years of bug fixes and
-features including the Bayes Redis (http://redis.io/) back-end (bug 6879),
+features since the release of SpamAssassin 3.3.2 on June 16, 2011.
+3.4.0 includes the Bayes Redis (http://redis.io/) back-end (bug 6879),
 EDNS0 changes (bug 6910), native IPv6 support, numerous URIBL.pm changes
 or features and a small API change in libspamc (bug 6562) with many other
 subtle changes.
 
 SpamAssassin was tested on perl 5.18.1, and (out of curiosity) also
 on a Raspberry Pi (ARM6, Raspbian / Debian 7.0 Wheezy, perl 5.14.2)
-... yes it is 20 times slower compared to i7-960 CPU, but all tests pass!
+... yes, it is 20 times slower compared to i7-960 CPU, but all tests 
+pass!
 
-Overall, this release has been tested in many production-level
+Overall, this release has been tested on many production-level
 environments for nearly a year, including testing on an IPv6-only host.
 It is highly recommended and stable.
 
