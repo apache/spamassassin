@@ -89,7 +89,8 @@ SPAMASSASSIN RELEASE PROCEDURE
 
   Verify that the X-Spam-* headers use the correct version string,
   without an SVN revision number (those are only for dev and pre builds).
-  NOTE: The date will change later...
+  NOTE: If the date is old, don't worry, it will change later with the
+        relbuild checkout.
 
 - create the Changes file.  Do this step on your own checkout, as
   the release checkout is read-only.   There are two options here:
