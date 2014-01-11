@@ -96,8 +96,9 @@ BEGIN {
   or do { require Digest::SHA1; import Digest::SHA1 qw(sha1) }
 }
 
-use Mail::SpamAssassin::BayesStore;
 use Mail::SpamAssassin::Logger;
+use Mail::SpamAssassin::BayesStore;
+use Mail::SpamAssassin::BayesStore::TinyRedis;
 
 use vars qw( @ISA $VERSION );
 
