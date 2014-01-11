@@ -272,6 +272,7 @@ sub new {
     'rule_errors'       => 0,
     'disable_auto_learning' => 0,
     'auto_learn_status' => undef,
+    'auto_learn_force_status' => undef,
     'conf'              => $main->{conf},
     'async'             => Mail::SpamAssassin::AsyncLoop->new($main),
     'master_deadline'   => $msg->{master_deadline},  # dflt inherited from msg
@@ -453,14 +454,30 @@ sub learn_timed {
     return;
   }
 
-  my $isspam = $self->{main}->call_plugins ("autolearn_discriminator", {
+  my ($isspam, $force_autolearn, $force_autolearn_names, $arrayref);
+  $arrayref = $self->{main}->call_plugins ("autolearn_discriminator", {
       permsgstatus => $self
     });
+
+  $isspam = $arrayref->[0];
+  $force_autolearn = $arrayref->[1];
+  $force_autolearn_names = $arrayref->[2];
+
+  #AUTOLEARN_FORCE FLAG INFORMATION
+  if (defined $force_autolearn and $force_autolearn > 0) {
+    $self->{auto_learn_force_status} = "yes";
+    if (defined $force_autolearn_names) {
+      $self->{auto_learn_force_status} .= " ($force_autolearn_names)";
+     }
+  } else {
+    $self->{auto_learn_force_status} = "no";
+  }
 
   if (!defined $isspam) {
     $self->{auto_learn_status} = 'no';
     return;
   }
+
 
   my $timer = $self->{main}->time_method("learn");
 
@@ -563,7 +580,7 @@ sub get_body_only_points {
 
 =item $score = $status->get_autolearn_force_status()
 
-Return whether a message's score included any rules that flagged as 
+Return whether a message's score included any rules that are flagged as 
 autolearn_force.
   
 =cut
@@ -573,6 +590,30 @@ sub get_autolearn_force_status {
   $self->_get_autolearn_points();
   return $self->{autolearn_force};
 } 
+
+=item $rule_names = $status->get_autolearn_force_names()
+
+Return a list of comma separated list of rule names if a message's 
+score included any rules that are flagged as autolearn_force.
+  
+=cut
+
+sub get_autolearn_force_names {
+  my ($self) = @_;
+  my ($names);
+
+  $self->_get_autolearn_points();
+  $names = $self->{autolearn_force_names};
+ 
+  if (defined $names) { 
+    #remove trailing comma
+    $names =~ s/,$//;
+  } else {
+    $names = "";
+  }
+
+  return $names;
+}
 
 sub _get_autolearn_points {
   my ($self) = @_;
@@ -624,6 +665,8 @@ sub _get_autolearn_points {
       #IF ANY RULES ARE AUTOLEARN FORCE, SET THAT FLAG  
       if ($tflags->{$test} =~ /\bautolearn_force\b/) {
         $self->{autolearn_force}++;
+        #ADD RULE NAME TO LIST
+        $self->{autolearn_force_names}.="$test,";
       }
     }
 
@@ -750,11 +793,20 @@ After a mail message has been checked, this method can be called.  It will
 return one of the following strings depending on whether the mail was
 auto-learned or not: "ham", "no", "spam", "disabled", "failed", "unavailable".
 
+It also returns is flagged with auto_learn_force, it will also include the status
+and the rules hit.  For example: "autolearn_force=yes (AUTOLEARNTEST_BODY)"
+
 =cut
 
 sub get_autolearn_status {
   my ($self) = @_;
-  return ($self->{auto_learn_status} || "unavailable");
+  my ($status) = $self->{auto_learn_status} || "unavailable";
+
+  if (defined $self->{auto_learn_force_status}) {
+    $status .= " autolearn_force=".$self->{auto_learn_force_status};
+  }
+
+  return $status;
 }
 
 ###########################################################################
