@@ -244,6 +244,9 @@ SPAMASSASSIN RELEASE PROCEDURE
     svn add !$
     vi !$
 
+  NOTE: Here's a quick example to concat the MD5 or SHA1 checksums:
+        ls *3.4.0*rc5* | grep sha1 | xargs cat --
+
 - (for any rc, prerelease, or full release) Place the tarballs in a
   discreet location (discreet means not linked from the "downloads" page
   of the website, but included in the vote mail) and request a vote on the
