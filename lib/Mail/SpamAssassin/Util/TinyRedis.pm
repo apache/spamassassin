@@ -15,7 +15,7 @@
 # limitations under the License.
 # </@LICENSE>
 
-package Mail::SpamAssassin::BayesStore::TinyRedis;
+package Mail::SpamAssassin::Util::TinyRedis;
 # Implements the new unified request protocol, introduced in Redis 1.2 .
 
 use strict;
