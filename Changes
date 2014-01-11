@@ -1,4 +1,738 @@
 ------------------------------------------------------------------------
+r1557311 | kmcgrail | 2014-01-11 04:46:45 +0000 (Sat, 11 Jan 2014) | 1 
+line
+ 
+ Adding TinyRedis.pm
+------------------------------------------------------------------------
+r1557310 | kmcgrail | 2014-01-11 04:46:11 +0000 (Sat, 11 Jan 2014) | 1 
+line
+ 
+ Added autolearn_force debugging and logging - bug 5503
+------------------------------------------------------------------------
+r1557309 | kmcgrail | 2014-01-11 04:45:35 +0000 (Sat, 11 Jan 2014) | 1 
+line
+ 
+ Split Redis.pm into two files including TinyRedis.pm, added 
+configuration option to load a second module bug 6990 - and documented 
+autolearn_force better for bug 5503 as well as documented the multiple 
+and maxhits tflags better
+------------------------------------------------------------------------
+r1557303 | spamassassin_role | 2014-01-11 03:01:00 +0000 (Sat, 11 Jan 
+2014) | 1 line
+ 
+ updated scores for revision 1557056 active rules added since last 
+mass-check
+------------------------------------------------------------------------
+r1557256 | kmcgrail | 2014-01-10 21:00:38 +0000 (Fri, 10 Jan 2014) | 1 
+line
+ 
+ renamed Redis Package to match filename to pass xt test - Bug 6990
+------------------------------------------------------------------------
+r1557018 | spamassassin_role | 2014-01-10 03:08:28 +0000 (Fri, 10 Jan 
+2014) | 1 line
+ 
+ updated scores for revision 1556762 active rules added since last 
+mass-check
+------------------------------------------------------------------------
+r1556959 | kmcgrail | 2014-01-09 21:39:16 +0000 (Thu, 09 Jan 2014) | 1 
+line
+ 
+ Changed Credits for Duncan
+------------------------------------------------------------------------
+r1556764 | axb | 2014-01-09 09:27:41 +0000 (Thu, 09 Jan 2014) | 1 line
+ 
+ added AXB_XM_MYECLNT
+------------------------------------------------------------------------
+r1556705 | spamassassin_role | 2014-01-09 03:04:44 +0000 (Thu, 09 Jan 
+2014) | 1 line
+ 
+ updated scores for revision 1556465 active rules added since last 
+mass-check
+------------------------------------------------------------------------
+r1556598 | jhardin | 2014-01-08 18:24:07 +0000 (Wed, 08 Jan 2014) | 1 line
+ 
+ tune CN_B2B_SPAMMER
+------------------------------------------------------------------------
+r1556457 | axb | 2014-01-08 07:34:47 +0000 (Wed, 08 Jan 2014) | 1 line
+ 
+ removed util_rb_2tld firm.in  - already in RB
+------------------------------------------------------------------------
+r1556452 | axb | 2014-01-08 07:19:14 +0000 (Wed, 08 Jan 2014) | 1 line
+ 
+ added util_rb_2tld firm.in
+------------------------------------------------------------------------
+r1556431 | spamassassin_role | 2014-01-08 03:12:29 +0000 (Wed, 08 Jan 
+2014) | 1 line
+ 
+ updated scores for revision 1556147 active rules added since last 
+mass-check
+------------------------------------------------------------------------
+r1556355 | kmcgrail | 2014-01-07 21:01:28 +0000 (Tue, 07 Jan 2014) | 1 
+line
+ 
+ moved Duncan to previous committers
+------------------------------------------------------------------------
+r1556113 | spamassassin_role | 2014-01-07 03:06:46 +0000 (Tue, 07 Jan 
+2014) | 1 line
+ 
+ updated scores for revision 1555697 active rules added since last 
+mass-check
+------------------------------------------------------------------------
+r1555649 | spamassassin_role | 2014-01-06 02:59:50 +0000 (Mon, 06 Jan 
+2014) | 1 line
+ 
+ updated scores for revision 1555471 active rules added since last 
+mass-check
+------------------------------------------------------------------------
+r1555450 | spamassassin_role | 2014-01-05 03:08:27 +0000 (Sun, 05 Jan 
+2014) | 1 line
+ 
+ updated scores for revision 1555333 active rules added since last 
+mass-check
+------------------------------------------------------------------------
+r1555311 | spamassassin_role | 2014-01-04 03:00:01 +0000 (Sat, 04 Jan 
+2014) | 1 line
+ 
+ updated scores for revision 1555032 active rules added since last 
+mass-check
+------------------------------------------------------------------------
+r1555003 | spamassassin_role | 2014-01-03 03:01:31 +0000 (Fri, 03 Jan 
+2014) | 1 line
+ 
+ updated scores for revision 1554768 active rules added since last 
+mass-check
+------------------------------------------------------------------------
+r1554725 | spamassassin_role | 2014-01-02 03:00:52 +0000 (Thu, 02 Jan 
+2014) | 1 line
+ 
+ updated scores for revision 1554602 active rules added since last 
+mass-check
+------------------------------------------------------------------------
+r1554697 | duncf | 2014-01-01 23:16:48 +0000 (Wed, 01 Jan 2014) | 1 line
+ 
+ Move me to "inactive committers".
+------------------------------------------------------------------------
+r1554598 | spamassassin_role | 2014-01-01 02:58:34 +0000 (Wed, 01 Jan 
+2014) | 1 line
+ 
+ updated scores for revision 1554386 active rules added since last 
+mass-check
+------------------------------------------------------------------------
+r1554362 | spamassassin_role | 2013-12-31 03:00:29 +0000 (Tue, 31 Dec 
+2013) | 1 line
+ 
+ updated scores for revision 1554166 active rules added since last 
+mass-check
+------------------------------------------------------------------------
+r1554308 | jhardin | 2013-12-30 20:17:16 +0000 (Mon, 30 Dec 2013) | 1 line
+ 
+ bug#6988: __HAS_MIMEOLE overlaps __MIMEOLE_MS, may hit non-MSFT MUA, 
+don't use __HAS_MIMEOLE in MSFT-only message rules
+------------------------------------------------------------------------
+r1554125 | spamassassin_role | 2013-12-30 03:02:08 +0000 (Mon, 30 Dec 
+2013) | 1 line
+ 
+ updated scores for revision 1554003 active rules added since last 
+mass-check
+------------------------------------------------------------------------
+r1553988 | spamassassin_role | 2013-12-29 03:03:46 +0000 (Sun, 29 Dec 
+2013) | 1 line
+ 
+ updated scores for revision 1553799 active rules added since last 
+mass-check
+------------------------------------------------------------------------
+r1553783 | spamassassin_role | 2013-12-28 02:59:18 +0000 (Sat, 28 Dec 
+2013) | 1 line
+ 
+ updated scores for revision 1553646 active rules added since last 
+mass-check
+------------------------------------------------------------------------
+r1553615 | spamassassin_role | 2013-12-27 03:01:44 +0000 (Fri, 27 Dec 
+2013) | 1 line
+ 
+ updated scores for revision 1553460 active rules added since last 
+mass-check
+------------------------------------------------------------------------
+r1553440 | spamassassin_role | 2013-12-26 03:00:10 +0000 (Thu, 26 Dec 
+2013) | 1 line
+ 
+ updated scores for revision 1553361 active rules added since last 
+mass-check
+------------------------------------------------------------------------
+r1553348 | spamassassin_role | 2013-12-25 03:03:40 +0000 (Wed, 25 Dec 
+2013) | 1 line
+ 
+ updated scores for revision 1553256 active rules added since last 
+mass-check
+------------------------------------------------------------------------
+r1553242 | spamassassin_role | 2013-12-24 03:04:49 +0000 (Tue, 24 Dec 
+2013) | 1 line
+ 
+ updated scores for revision 1553083 active rules added since last 
+mass-check
+------------------------------------------------------------------------
+r1553063 | spamassassin_role | 2013-12-23 03:11:25 +0000 (Mon, 23 Dec 
+2013) | 1 line
+ 
+ updated scores for revision 1552973 active rules added since last 
+mass-check
+------------------------------------------------------------------------
+r1552962 | spamassassin_role | 2013-12-22 03:15:55 +0000 (Sun, 22 Dec 
+2013) | 1 line
+ 
+ updated scores for revision 1552888 active rules added since last 
+mass-check
+------------------------------------------------------------------------
+r1552870 | spamassassin_role | 2013-12-21 03:12:02 +0000 (Sat, 21 Dec 
+2013) | 1 line
+ 
+ updated scores for revision 1552541 active rules added since last 
+mass-check
+------------------------------------------------------------------------
+r1552484 | spamassassin_role | 2013-12-20 03:02:57 +0000 (Fri, 20 Dec 
+2013) | 1 line
+ 
+ updated scores for revision 1552250 active rules added since last 
+mass-check
+------------------------------------------------------------------------
+r1552216 | spamassassin_role | 2013-12-19 03:12:12 +0000 (Thu, 19 Dec 
+2013) | 1 line
+ 
+ updated scores for revision 1551881 active rules added since last 
+mass-check
+------------------------------------------------------------------------
+r1551815 | spamassassin_role | 2013-12-18 03:05:44 +0000 (Wed, 18 Dec 
+2013) | 1 line
+ 
+ updated scores for revision 1551487 active rules added since last 
+mass-check
+------------------------------------------------------------------------
+r1551451 | spamassassin_role | 2013-12-17 02:56:08 +0000 (Tue, 17 Dec 
+2013) | 1 line
+ 
+ updated scores for revision 1551131 active rules added since last 
+mass-check
+------------------------------------------------------------------------
+r1551106 | spamassassin_role | 2013-12-16 02:57:07 +0000 (Mon, 16 Dec 
+2013) | 1 line
+ 
+ updated scores for revision 1551006 active rules added since last 
+mass-check
+------------------------------------------------------------------------
+r1550995 | spamassassin_role | 2013-12-15 02:58:43 +0000 (Sun, 15 Dec 
+2013) | 1 line
+ 
+ updated scores for revision 1550902 active rules added since last 
+mass-check
+------------------------------------------------------------------------
+r1550872 | spamassassin_role | 2013-12-14 03:01:33 +0000 (Sat, 14 Dec 
+2013) | 1 line
+ 
+ updated scores for revision 1550663 active rules added since last 
+mass-check
+------------------------------------------------------------------------
+r1550622 | spamassassin_role | 2013-12-13 02:54:59 +0000 (Fri, 13 Dec 
+2013) | 1 line
+ 
+ updated scores for revision 1550373 active rules added since last 
+mass-check
+------------------------------------------------------------------------
+r1550343 | spamassassin_role | 2013-12-12 03:56:55 +0000 (Thu, 12 Dec 
+2013) | 1 line
+ 
+ updated scores for revision 1550073 active rules added since last 
+mass-check
+------------------------------------------------------------------------
+r1550036 | spamassassin_role | 2013-12-11 02:57:18 +0000 (Wed, 11 Dec 
+2013) | 1 line
+ 
+ updated scores for revision 1549785 active rules added since last 
+mass-check
+------------------------------------------------------------------------
+r1549751 | spamassassin_role | 2013-12-10 03:04:21 +0000 (Tue, 10 Dec 
+2013) | 1 line
+ 
+ updated scores for revision 1549514 active rules added since last 
+mass-check
+------------------------------------------------------------------------
+r1549373 | spamassassin_role | 2013-12-09 02:59:24 +0000 (Mon, 09 Dec 
+2013) | 1 line
+ 
+ updated scores for revision 1549009 active rules added since last 
+mass-check
+------------------------------------------------------------------------
+r1549047 | jhardin | 2013-12-08 15:59:23 +0000 (Sun, 08 Dec 2013) | 1 line
+ 
+ GA score limit apparently not working for FILL_THIS_FORM_LONG, broken by 
+#ifplugin? Set manual score.
+------------------------------------------------------------------------
+r1548980 | spamassassin_role | 2013-12-08 03:00:00 +0000 (Sun, 08 Dec 
+2013) | 1 line
+ 
+ updated scores for revision 1548817 active rules added since last 
+mass-check
+------------------------------------------------------------------------
+r1548788 | spamassassin_role | 2013-12-07 02:55:57 +0000 (Sat, 07 Dec 
+2013) | 1 line
+ 
+ updated scores for revision 1548435 active rules added since last 
+mass-check
+------------------------------------------------------------------------
+r1548375 | spamassassin_role | 2013-12-06 02:54:18 +0000 (Fri, 06 Dec 
+2013) | 1 line
+ 
+ updated scores for revision 1548039 active rules added since last 
+mass-check
+------------------------------------------------------------------------
+r1547998 | spamassassin_role | 2013-12-05 02:51:28 +0000 (Thu, 05 Dec 
+2013) | 1 line
+ 
+ updated scores for revision 1547729 active rules added since last 
+mass-check
+------------------------------------------------------------------------
+r1547863 | jhardin | 2013-12-04 18:01:58 +0000 (Wed, 04 Dec 2013) | 1 line
+ 
+ Tweak BODY_SINGLE_WORD and FILL_THIS_FORM_LONG
+------------------------------------------------------------------------
+r1547695 | spamassassin_role | 2013-12-04 02:54:27 +0000 (Wed, 04 Dec 
+2013) | 1 line
+ 
+ updated scores for revision 1547315 active rules added since last 
+mass-check
+------------------------------------------------------------------------
+r1547264 | spamassassin_role | 2013-12-03 02:52:15 +0000 (Tue, 03 Dec 
+2013) | 1 line
+ 
+ updated scores for revision 1546929 active rules added since last 
+mass-check
+------------------------------------------------------------------------
+r1546879 | spamassassin_role | 2013-12-02 02:52:17 +0000 (Mon, 02 Dec 
+2013) | 1 line
+ 
+ updated scores for revision 1546791 active rules added since last 
+mass-check
+------------------------------------------------------------------------
+r1546775 | spamassassin_role | 2013-12-01 02:48:18 +0000 (Sun, 01 Dec 
+2013) | 1 line
+ 
+ updated scores for revision 1546700 active rules added since last 
+mass-check
+------------------------------------------------------------------------
+r1546681 | spamassassin_role | 2013-11-30 02:50:07 +0000 (Sat, 30 Nov 
+2013) | 1 line
+ 
+ updated scores for revision 1546520 active rules added since last 
+mass-check
+------------------------------------------------------------------------
+r1546494 | spamassassin_role | 2013-11-29 02:46:19 +0000 (Fri, 29 Nov 
+2013) | 1 line
+ 
+ updated scores for revision 1546311 active rules added since last 
+mass-check
+------------------------------------------------------------------------
+r1546259 | spamassassin_role | 2013-11-28 02:51:37 +0000 (Thu, 28 Nov 
+2013) | 1 line
+ 
+ updated scores for revision 1545965 active rules added since last 
+mass-check
+------------------------------------------------------------------------
+r1545914 | spamassassin_role | 2013-11-27 02:49:03 +0000 (Wed, 27 Nov 
+2013) | 1 line
+ 
+ updated scores for revision 1545569 active rules added since last 
+mass-check
+------------------------------------------------------------------------
+r1545516 | spamassassin_role | 2013-11-26 02:48:01 +0000 (Tue, 26 Nov 
+2013) | 1 line
+ 
+ updated scores for revision 1545174 active rules added since last 
+mass-check
+------------------------------------------------------------------------
+r1545138 | spamassassin_role | 2013-11-25 02:46:10 +0000 (Mon, 25 Nov 
+2013) | 1 line
+ 
+ updated scores for revision 1544945 active rules added since last 
+mass-check
+------------------------------------------------------------------------
+r1544903 | spamassassin_role | 2013-11-24 02:47:10 +0000 (Sun, 24 Nov 
+2013) | 1 line
+ 
+ updated scores for revision 1544761 active rules added since last 
+mass-check
+------------------------------------------------------------------------
+r1544738 | spamassassin_role | 2013-11-23 02:48:06 +0000 (Sat, 23 Nov 
+2013) | 1 line
+ 
+ updated scores for revision 1544436 active rules added since last 
+mass-check
+------------------------------------------------------------------------
+r1544397 | spamassassin_role | 2013-11-22 02:48:28 +0000 (Fri, 22 Nov 
+2013) | 1 line
+ 
+ updated scores for revision 1544065 active rules added since last 
+mass-check
+------------------------------------------------------------------------
+r1544010 | spamassassin_role | 2013-11-21 02:47:50 +0000 (Thu, 21 Nov 
+2013) | 1 line
+ 
+ updated scores for revision 1543736 active rules added since last 
+mass-check
+------------------------------------------------------------------------
+r1543698 | spamassassin_role | 2013-11-20 02:51:07 +0000 (Wed, 20 Nov 
+2013) | 1 line
+ 
+ updated scores for revision 1543347 active rules added since last 
+mass-check
+------------------------------------------------------------------------
+r1543295 | spamassassin_role | 2013-11-19 02:49:20 +0000 (Tue, 19 Nov 
+2013) | 1 line
+ 
+ updated scores for revision 1542949 active rules added since last 
+mass-check
+------------------------------------------------------------------------
+r1542882 | spamassassin_role | 2013-11-18 02:50:04 +0000 (Mon, 18 Nov 
+2013) | 1 line
+ 
+ updated scores for revision 1542661 active rules added since last 
+mass-check
+------------------------------------------------------------------------
+r1542636 | spamassassin_role | 2013-11-17 02:53:21 +0000 (Sun, 17 Nov 
+2013) | 1 line
+ 
+ updated scores for revision 1542483 active rules added since last 
+mass-check
+------------------------------------------------------------------------
+r1542453 | spamassassin_role | 2013-11-16 02:48:13 +0000 (Sat, 16 Nov 
+2013) | 1 line
+ 
+ updated scores for revision 1542202 active rules added since last 
+mass-check
+------------------------------------------------------------------------
+r1542160 | spamassassin_role | 2013-11-15 02:48:03 +0000 (Fri, 15 Nov 
+2013) | 1 line
+ 
+ updated scores for revision 1541849 active rules added since last 
+mass-check
+------------------------------------------------------------------------
+r1541789 | spamassassin_role | 2013-11-14 02:48:57 +0000 (Thu, 14 Nov 
+2013) | 1 line
+ 
+ updated scores for revision 1541424 active rules added since last 
+mass-check
+------------------------------------------------------------------------
+r1541479 | smf | 2013-11-13 11:41:58 +0000 (Wed, 13 Nov 2013) | 1 line
+ 
+ FP avoidance
+------------------------------------------------------------------------
+r1541365 | spamassassin_role | 2013-11-13 02:48:26 +0000 (Wed, 13 Nov 
+2013) | 1 line
+ 
+ updated scores for revision 1540972 active rules added since last 
+mass-check
+------------------------------------------------------------------------
+r1540990 | axb | 2013-11-12 10:04:35 +0000 (Tue, 12 Nov 2013) | 1 line
+ 
+ piggy tweak
+------------------------------------------------------------------------
+r1540928 | spamassassin_role | 2013-11-12 02:50:07 +0000 (Tue, 12 Nov 
+2013) | 1 line
+ 
+ updated scores for revision 1540636 active rules added since last 
+mass-check
+------------------------------------------------------------------------
+r1540791 | mmartinec | 2013-11-11 17:58:55 +0000 (Mon, 11 Nov 2013) | 1 
+line
+ 
+ Adjusted docs regarding EDNS0 dns option to refer to RFC 6891 instead of 
+RFC 2671bis draft, refine text, reduce conservative default from 1240 to 
+1220 bytes
+------------------------------------------------------------------------
+r1540588 | spamassassin_role | 2013-11-11 02:52:21 +0000 (Mon, 11 Nov 
+2013) | 1 line
+ 
+ updated scores for revision 1540453 active rules added since last 
+mass-check
+------------------------------------------------------------------------
+r1540435 | spamassassin_role | 2013-11-10 02:44:02 +0000 (Sun, 10 Nov 
+2013) | 1 line
+ 
+ updated scores for revision 1540279 active rules added since last 
+mass-check
+------------------------------------------------------------------------
+r1540246 | spamassassin_role | 2013-11-09 02:47:57 +0000 (Sat, 09 Nov 
+2013) | 1 line
+ 
+ updated scores for revision 1539950 active rules added since last 
+mass-check
+------------------------------------------------------------------------
+r1540110 | jhardin | 2013-11-08 16:35:48 +0000 (Fri, 08 Nov 2013) | 1 line
+ 
+ FROM_OFFERS: defer to nightly GA rescorer per bug 6580
+------------------------------------------------------------------------
+r1539514 | spamassassin_role | 2013-11-07 02:45:51 +0000 (Thu, 07 Nov 
+2013) | 1 line
+ 
+ updated scores for revision 1539273 active rules added since last 
+mass-check
+------------------------------------------------------------------------
+r1539217 | spamassassin_role | 2013-11-06 02:45:54 +0000 (Wed, 06 Nov 
+2013) | 1 line
+ 
+ updated scores for revision 1538906 active rules added since last 
+mass-check
+------------------------------------------------------------------------
+r1538858 | spamassassin_role | 2013-11-05 02:47:00 +0000 (Tue, 05 Nov 
+2013) | 1 line
+ 
+ updated scores for revision 1538529 active rules added since last 
+mass-check
+------------------------------------------------------------------------
+r1538498 | spamassassin_role | 2013-11-04 02:47:25 +0000 (Mon, 04 Nov 
+2013) | 1 line
+ 
+ updated scores for revision 1538327 active rules added since last 
+mass-check
+------------------------------------------------------------------------
+r1538310 | spamassassin_role | 2013-11-03 02:56:00 +0000 (Sun, 03 Nov 
+2013) | 1 line
+ 
+ updated scores for revision 1538154 active rules added since last 
+mass-check
+------------------------------------------------------------------------
+r1538132 | spamassassin_role | 2013-11-02 02:45:53 +0000 (Sat, 02 Nov 
+2013) | 1 line
+ 
+ updated scores for revision 1537852 active rules added since last 
+mass-check
+------------------------------------------------------------------------
+r1537808 | spamassassin_role | 2013-11-01 02:50:17 +0000 (Fri, 01 Nov 
+2013) | 1 line
+ 
+ updated scores for revision 1537405 active rules added since last 
+mass-check
+------------------------------------------------------------------------
+r1537471 | axb | 2013-10-31 12:44:57 +0000 (Thu, 31 Oct 2013) | 1 line
+ 
+ added AXB_X_ORIG_OMNIMS
+------------------------------------------------------------------------
+r1537367 | spamassassin_role | 2013-10-31 02:45:12 +0000 (Thu, 31 Oct 
+2013) | 1 line
+ 
+ updated scores for revision 1537009 active rules added since last 
+mass-check
+------------------------------------------------------------------------
+r1537303 | axb | 2013-10-30 21:02:34 +0000 (Wed, 30 Oct 2013) | 1 line
+ 
+ added util_rb_2tld com.de
+------------------------------------------------------------------------
+r1537189 | mmartinec | 2013-10-30 17:24:05 +0000 (Wed, 30 Oct 2013) | 1 
+line
+ 
+ Bug 6983: Uninitialized value in lc in t/dnsbl_subtests - perl bug, 
+fixed in 5.8.9
+------------------------------------------------------------------------
+r1536956 | spamassassin_role | 2013-10-30 02:48:58 +0000 (Wed, 30 Oct 
+2013) | 1 line
+ 
+ updated scores for revision 1536612 active rules added since last 
+mass-check
+------------------------------------------------------------------------
+r1536864 | mmartinec | 2013-10-29 19:44:28 +0000 (Tue, 29 Oct 2013) | 1 
+line
+ 
+ Bug 6984: r1531991 breaks perl.req script
+------------------------------------------------------------------------
+r1536582 | spamassassin_role | 2013-10-29 02:46:58 +0000 (Tue, 29 Oct 
+2013) | 1 line
+ 
+ updated scores for revision 1536284 active rules added since last 
+mass-check
+------------------------------------------------------------------------
+r1536408 | axb | 2013-10-28 16:58:22 +0000 (Mon, 28 Oct 2013) | 1 line
+ 
+ tflags 		AXB_X_ORIG_OMNIMS	nopublish
+------------------------------------------------------------------------
+r1536236 | spamassassin_role | 2013-10-28 02:50:15 +0000 (Mon, 28 Oct 
+2013) | 1 line
+ 
+ updated scores for revision 1536066 active rules added since last 
+mass-check
+------------------------------------------------------------------------
+r1536046 | spamassassin_role | 2013-10-27 02:46:33 +0000 (Sun, 27 Oct 
+2013) | 1 line
+ 
+ updated scores for revision 1535946 active rules added since last 
+mass-check
+------------------------------------------------------------------------
+r1535990 | kmcgrail | 2013-10-26 13:33:00 +0000 (Sat, 26 Oct 2013) | 1 
+line
+ 
+ A few small rule description updates
+------------------------------------------------------------------------
+r1535910 | jhardin | 2013-10-26 02:00:02 +0000 (Sat, 26 Oct 2013) | 1 line
+ 
+ Add jimdo.com phishing webform rule
+------------------------------------------------------------------------
+r1534966 | axb | 2013-10-23 09:40:11 +0000 (Wed, 23 Oct 2013) | 1 line
+ 
+ fixed typo
+------------------------------------------------------------------------
+r1533992 | jhardin | 2013-10-20 21:27:18 +0000 (Sun, 20 Oct 2013) | 1 line
+ 
+ More FP avoidance
+------------------------------------------------------------------------
+r1533681 | spamassassin_role | 2013-10-19 02:55:22 +0000 (Sat, 19 Oct 
+2013) | 1 line
+ 
+ updated scores for revision 1533363 active rules added since last 
+mass-check
+------------------------------------------------------------------------
+r1533678 | khopesh | 2013-10-19 02:18:58 +0000 (Sat, 19 Oct 2013) | 1 line
+ 
+ lots of new freemail domains
+------------------------------------------------------------------------
+r1533672 | jhardin | 2013-10-19 00:51:26 +0000 (Sat, 19 Oct 2013) | 1 line
+ 
+ Standardize minimal-body rule names, add BODY_SINGLE_WORD
+------------------------------------------------------------------------
+r1533492 | axb | 2013-10-18 15:15:24 +0000 (Fri, 18 Oct 2013) | 3 lines
+ 
+ removed "publish FB_CIALIS_LEO3"
+ low S/O - FP prone
+ let autopromotion decide
+------------------------------------------------------------------------
+r1533481 | axb | 2013-10-18 15:05:24 +0000 (Fri, 18 Oct 2013) | 4 lines
+ 
+ removed forced score for ancient FB_CIALIS_LEO3
+ was way too high (3.1) -  see ruleqa for SO info
+ autopromotion can take care of it.
+ Seee list thread *False positive in FB_CIALIS_LEO3 rule"
+------------------------------------------------------------------------
+r1533352 | axb | 2013-10-18 07:57:48 +0000 (Fri, 18 Oct 2013) | 1 line
+ 
+ added util_rb_2tld in.net
+------------------------------------------------------------------------
+r1533317 | spamassassin_role | 2013-10-18 02:55:07 +0000 (Fri, 18 Oct 
+2013) | 1 line
+ 
+ updated scores for revision 1533008 active rules added since last 
+mass-check
+------------------------------------------------------------------------
+r1533234 | jhardin | 2013-10-17 19:57:48 +0000 (Thu, 17 Oct 2013) | 1 line
+ 
+ minimal-body rules should not hit on S/MIME messages (bug#6979)
+------------------------------------------------------------------------
+r1533093 | axb | 2013-10-17 14:48:14 +0000 (Thu, 17 Oct 2013) | 2 lines
+ 
+ changed URIBL_SBL description
+ Note: changes  in rule name may break metas - leave as is.
+------------------------------------------------------------------------
+r1532955 | spamassassin_role | 2013-10-17 02:57:28 +0000 (Thu, 17 Oct 
+2013) | 1 line
+ 
+ updated scores for revision 1532689 active rules added since last 
+mass-check
+------------------------------------------------------------------------
+r1532709 | axb | 2013-10-16 10:34:24 +0000 (Wed, 16 Oct 2013) | 1 line
+ 
+ added AXB_X_ORIG_OMNIMS (Microsoft's outbound  419 spew engines)
+------------------------------------------------------------------------
+r1532635 | spamassassin_role | 2013-10-16 02:53:02 +0000 (Wed, 16 Oct 
+2013) | 1 line
+ 
+ updated scores for revision 1532248 active rules added since last 
+mass-check
+------------------------------------------------------------------------
+r1532171 | spamassassin_role | 2013-10-15 02:53:04 +0000 (Tue, 15 Oct 
+2013) | 1 line
+ 
+ updated scores for revision 1531815 active rules added since last 
+mass-check
+------------------------------------------------------------------------
+r1532100 | axb | 2013-10-14 21:12:33 +0000 (Mon, 14 Oct 2013) | 4 lines
+ 
+ added
+ 
+ jpn.com
+ yolasite.com  
+------------------------------------------------------------------------
+r1532010 | jhardin | 2013-10-14 18:12:43 +0000 (Mon, 14 Oct 2013) | 1 line
+ 
+ tweak UNSUBSCRIBE_ES
+------------------------------------------------------------------------
+r1532009 | jhardin | 2013-10-14 18:11:55 +0000 (Mon, 14 Oct 2013) | 1 line
+ 
+ FSL_FROM_INFO_DOM performing poorly as scored rule, converted to subrule 
+and relocated
+------------------------------------------------------------------------
+r1531995 | mmartinec | 2013-10-14 17:43:19 +0000 (Mon, 14 Oct 2013) | 1 
+line
+ 
+ Redis.pm: ignore error if an old redis server (e.g. 2.4) does not 
+recognize a CLIENT SETNAME command
+------------------------------------------------------------------------
+r1531991 | kmcgrail | 2013-10-14 17:38:18 +0000 (Mon, 14 Oct 2013) | 1 
+line
+ 
+ small tweak to dependency output for wget/curl/fetch
+------------------------------------------------------------------------
+r1531973 | mmartinec | 2013-10-14 16:41:22 +0000 (Mon, 14 Oct 2013) | 1 
+line
+ 
+ docs: change a very long title in the tflags description, avoiding a 
+warning in a man page resulting from the POD; reported by Andreas Schulze
+------------------------------------------------------------------------
+r1531966 | mmartinec | 2013-10-14 16:21:18 +0000 (Mon, 14 Oct 2013) | 1 
+line
+ 
+ docs: fix two POD errors, reported by Andreas Schulze
+------------------------------------------------------------------------
+r1531783 | spamassassin_role | 2013-10-14 02:59:58 +0000 (Mon, 14 Oct 
+2013) | 1 line
+ 
+ updated scores for revision 1531636 active rules added since last 
+mass-check
+------------------------------------------------------------------------
+r1531755 | kmcgrail | 2013-10-13 21:28:06 +0000 (Sun, 13 Oct 2013) | 1 
+line
+ 
+ added has capability function for check_rbl_from_domain
+------------------------------------------------------------------------
+r1531614 | spamassassin_role | 2013-10-13 02:51:15 +0000 (Sun, 13 Oct 
+2013) | 1 line
+ 
+ updated scores for revision 1531518 active rules added since last 
+mass-check
+------------------------------------------------------------------------
+r1531613 | jhardin | 2013-10-13 02:40:17 +0000 (Sun, 13 Oct 2013) | 1 line
+ 
+ FSL_HELO_BARE_IP_2 FP avoidance per reports on users list 10/12/2013
+------------------------------------------------------------------------
+r1531487 | spamassassin_role | 2013-10-12 02:43:05 +0000 (Sat, 12 Oct 
+2013) | 1 line
+ 
+ updated scores for revision 1531229 active rules added since last 
+mass-check
+------------------------------------------------------------------------
+r1531481 | jhardin | 2013-10-12 02:00:47 +0000 (Sat, 12 Oct 2013) | 1 line
+ 
+ Tweak some rules
+------------------------------------------------------------------------
+r1531372 | mmartinec | 2013-10-11 17:43:42 +0000 (Fri, 11 Oct 2013) | 1 
+line
+ 
+ some tweaks on PROPOSED-3.4.0.txt announcements
+------------------------------------------------------------------------
+r1531192 | kmcgrail | 2013-10-11 04:20:05 +0000 (Fri, 11 Oct 2013) | 1 
+line
+ 
+ updates to proposed 3.4.0.txt announcement and build/README
+------------------------------------------------------------------------
+r1531189 | kmcgrail | 2013-10-11 03:59:49 +0000 (Fri, 11 Oct 2013) | 1 
+line
+ 
+ preparing to release 3.4.0-rc3
+------------------------------------------------------------------------
 r1531183 | kmcgrail | 2013-10-11 03:24:27 +0000 (Fri, 11 Oct 2013) | 1 
 line
  
