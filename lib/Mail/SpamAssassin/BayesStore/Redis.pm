@@ -25,6 +25,40 @@ Mail::SpamAssassin::BayesStore::Redis - Redis Bayesian Storage Module Implementa
 
 This module implementes a Redis based bayesian storage module.
 
+Apache SpamAssassin v3.4.0 introduces support for keeping
+a Bayes database on a Redis server, either running locally, or accessed
+over network. Similar to SQL backends, the database may be concurrently
+used by several hosts running SpamAssassin.
+
+The current implementation only supports a global Bayes database, i.e.
+per-recipient sub-databases are not supported. The Redis 2.6.* server
+supports access over IPv4 or over a Unix socket, starting with Redis 
+version 2.8.0 also IPv6 is supported. Bear in mind that Redis server only 
+offers limited access controls, so it is advisable to let the Redis server 
+bind to a loopback interface only, or to use other mechanisms to limit 
+access, such as local firewall rules.
+
+The Redis backend for Bayes can put a Lua scripting support in a Redis
+server to good use, improving performance. The Lua support is available
+in Redis server since version 2.6.  In absence of a Lua support, the Redis
+backend uses batched (pipelined) traditional Redis commands, so it should
+work with a Redis server version 2.4 (untested), although this is not
+recommended for busy sites.
+
+Expiration of token and 'seen' message id entries is left to the Redis
+server. There is no provision for manually expiring a database, so it is
+highly recommended to leave the setting bayes_auto_expire to its default
+value 1 (i.e. enabled).
+
+Example configuration:
+
+  bayes_store_module  Mail::SpamAssassin::BayesStore::Redis
+  bayes_store_module_additional Mail::SpamAssassin::Util::TinyRedis
+  bayes_sql_dsn       server=127.0.0.1:6379;password=foo;database=2
+  bayes_token_ttl 21d
+  bayes_seen_ttl   8d
+  bayes_auto_expire 1
+
 A redis server with a Lua support (2.6 or higher) is recommended
 for performance reasons.
 
@@ -98,7 +132,7 @@ BEGIN {
 
 use Mail::SpamAssassin::Logger;
 use Mail::SpamAssassin::BayesStore;
-use Mail::SpamAssassin::BayesStore::TinyRedis;
+use Mail::SpamAssassin::Util::TinyRedis;
 
 use vars qw( @ISA $VERSION );
 
@@ -218,7 +252,7 @@ sub connect {
   my $err = $self->{timer}->run_and_catch(sub {
     $self->{opened_from_pid} = $$;
     # will keep a persistent session open to a redis server
-    $self->{redis} = Mail::SpamAssassin::BayesStore::TinyRedis->new(
+    $self->{redis} = Mail::SpamAssassin::Util::TinyRedis->new(
                        @{$self->{redis_conf}},
                        on_connect => sub { $self->on_connect(@_) },
                      );
