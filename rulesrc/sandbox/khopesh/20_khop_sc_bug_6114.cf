@@ -1,4 +1,4 @@
-## khop-sc-neighbors.cf	v 201401122
+## khop-sc-neighbors.cf	v 201401132
 ## Khopesh's syndication of SpamCop's top offenders and top offending networks.
 ## 
 ## Spamassassin rules written by Adam Katz <antispamATkhopiscom>
@@ -81,7 +81,7 @@ score	 KHOP_SC_CIDR16  0.4 0.1 0.4 0.1
 # crap, still empty   20130629@465k net
 # crap, still empty   20130705@376k net. lowering for low vol -> .4 .1 .4 .1
 
-header	 KHOP_SC_TOP_CIDR16  Received =~ /(?-xism:\b(?:190\.(?:194|247)|88\.249)(?:\.[012]?\d{1,2}){2}\b)/
+header	 KHOP_SC_TOP_CIDR16  Received =~ /(?-xism:\b190\.(?:194|247)(?:\.[012]?\d{1,2}){2}\b)/
 describe KHOP_SC_TOP_CIDR16  Relay CIDR /16 leads SpamCop in worst /16s
 tflags	 KHOP_SC_TOP_CIDR16  nopublish
 score	 KHOP_SC_TOP_CIDR16  0.6 0.2 0.7 0.3
@@ -101,7 +101,7 @@ score	 KHOP_SC_TOP_CIDR16  0.6 0.2 0.7 0.3
 
 
 # http://spamcop.net/w3m?action=map;net=cmaxcnt;mask=65535;sort=spamcnt
-header	 KHOP_SC_CIDR24  Received =~ /(?-xism:\b(?:1(?:73\.208\.(?:186|227)|99\.204\.46|07\.6\.173)|58\.25(?:4\.1(?:68|72)|1\.146)|2(?:06\.214\.87|19\.140\.69)|9(?:3\.119\.106|4\.77\.199)|46\.102\.186|70\.98\.78)\.[012]?\d{1,2}\b)/
+header	 KHOP_SC_CIDR24  Received =~ /(?-xism:\b(?:1(?:(?:73\.208\.18|99\.204\.4)6|21\.17\.125|07\.6\.173)|5(?:8\.25(?:4\.1(?:68|72)|1\.146)|0\.2\.43)|9(?:3\.119\.106|4\.77\.199)|206\.214\.87|46\.102\.186)\.[012]?\d{1,2}\b)/
 describe KHOP_SC_CIDR24  Relay CIDR /24 is among worst in SpamCop
 tflags	 KHOP_SC_CIDR24  nopublish
 score	 KHOP_SC_CIDR24  0.6 0 0.6 0
@@ -122,7 +122,7 @@ score	 KHOP_SC_CIDR24  0.6 0 0.6 0
 # 0.4428/0      1.000 20130705@376k  resume scores -> .6 0 .6 0
 
 
-header	 KHOP_SC_TOP_CIDR24  Received =~ /(?-xism:\b(?:1(?:0(?:3\.2(?:4(?:3\.154|6\.195)|0\.8)|1\.50\.12)|9(?:8\.143\.1(?:28|50)|0\.234\.10[56])|2(?:1\.17\.125|5\.60\.156|0\.84\.13)|8(?:1\.66\.15[67]|8\.73\.252)|6(?:3\.177\.132|2\.248\.79)|15\.80\.46)|9(?:1\.218\.115|4\.20\.224)|(?:46\.102\.18|37\.48\.6)6|222\.100\.234)\.[012]?\d{1,2}\b)/
+header	 KHOP_SC_TOP_CIDR24  Received =~ /(?-xism:\b(?:1(?:0(?:3\.2(?:4(?:3\.154|6\.195)|0\.8)|1\.(?:12\.38|50\.12))|9(?:8\.143\.1(?:28|50)|0\.234\.10[56])|6(?:3\.177\.132|2\.248\.79)|2(?:5\.60\.156|0\.84\.13)|81\.66\.15[67]|15\.80\.46)|9(?:1\.218\.115|4\.20\.224)|(?:46\.102\.18|37\.48\.6)6|222\.100\.234|70\.98\.78)\.[012]?\d{1,2}\b)/
 describe KHOP_SC_TOP_CIDR24  Relay CIDR /24 leads SpamCop in worst /24s
 tflags	 KHOP_SC_TOP_CIDR24  nopublish
 score	 KHOP_SC_TOP_CIDR24  1.7 0.5 1.7 0.5
