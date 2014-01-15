@@ -1180,4 +1180,6 @@ body        __TRAVEL_BUSINESS  /\bbusiness\stravel\b/i
 body        __TRAVEL_AGENT     /\btravel\sagen(?:t|cy)\b/i
 meta        __TRAVEL_MANY      (__TRAVEL_PROFILE + __TRAVEL_RESERV + __TRAVEL_BUSINESS + __TRAVEL_AGENT) > 2
 
+uri         __URI_WPADMIN      m,/wp-admin/\w+/,i
+
 
