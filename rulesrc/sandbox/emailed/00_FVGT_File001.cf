@@ -95,7 +95,8 @@ header   __ALL_RANDOM           ALL =~ /(?:[%\#\[\$]R?A?NDO?M?|\%(?:CUSTOM|FROM|
 rawbody  __RAW_RANDOM           /(?:[%\#\[\$]RA?NDO?M?|\%(?:CUSTOM|FROM|PROXY|X?MESSA|MAKE_TXT))/i
 meta     FH_RANDOM_SURE         (__ALL_RANDOM || __RAW_RANDOM)
 describe FH_RANDOM_SURE         SARE Random in one rule.
-##score    FH_RANDOM_SURE               10.333
+#Setting 0.50 score ceiling on 1/16/2014 due to FPs
+score    FH_RANDOM_SURE               0.50
 #counts   FH_RANDOM_SURE           221s/0h of 46241 corpus (36438s/9803h FVGT) 12/14/06
 #counts   FH_RANDOM_SURE           225s/0h of 47019 corpus (37183s/9836h FVGT) 12/23/06
 
