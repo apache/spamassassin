@@ -1182,4 +1182,44 @@ meta        __TRAVEL_MANY      (__TRAVEL_PROFILE + __TRAVEL_RESERV + __TRAVEL_BU
 
 uri         __URI_WPADMIN      m,/wp-admin/\w+/,i
 
+# subrules migrated from 00_FVGT_File001.cf
+
+header      __SUBJ_LOWER       ALL =~ /subject:\s\S{5}/ 
+header      __FROM_LOWER       ALL =~ /from:\s\S{5}/ 
+header      __TO___LOWER       ALL =~ /to:\s\S{5}/ 
+header      __DATE_LOWER       ALL =~ /date:\s\S{5}/ 
+
+header      __FH_HAS_XMSMAIL   exists:X-MSMail-Priority
+header      __FH_HAS_XPRIORITY exists:X-Priority
+
+header      __FS_SUBJ_RE       Subject =~ /^Re: /
+header      __NUMBERS_IN_SUBJ  Subject =~ /\d{3}/
+
+body        __CAN_HELP         /\bcan help\b/i
+body        __FB_COST          /\bcost\b/i
+body        __FB_NATIONAL      /national/i
+body        __FB_NUM_PERCNT    /\d\s?\%/
+body        __FB_S_STOCK       /\bstock/i
+body        __FB_TOUR          /\btour/i
+body        __SURVEY           /\bsurvey\b/i
+
+body        __FB_S_PRICE       /pri{1,2}c[a-z]?e/i
+
+ifplugin Mail::SpamAssassin::Plugin::ReplaceTags
+	body        __FRT_PRICE        /<inter SP2><post P2>\b(?!price)<P><R><IX><C><E>\b/i
+	replace_rules                  __FRT_PRICE
+
+	meta        __FM_MY_PRICE      (__FB_S_PRICE || __FRT_PRICE)
+else
+	meta        __FM_MY_PRICE      __FB_S_PRICE
+endif
+
+rawbody     __FR_SPACING_8     /[a-z0-9]{6}\s{8}[a-z0-9]{5}/i
+rawbody     __FR_SPACING_9     /[a-z0-9]{6}\s{9}[a-z0-9]{5}/i
+rawbody     __FR_SPACING_15    /[a-z0-9]{6}\s{15}[a-z0-9]{5}/i
+rawbody     __FR_SPACING_17    /[a-z0-9]{6}\s{17}[a-z0-9]{5}/i
+rawbody     __FR_SPACING_22    /[a-z0-9]{6}\s{22}[a-z0-9]{5}/i
+
+
+
 

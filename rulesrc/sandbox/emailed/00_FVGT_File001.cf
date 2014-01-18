@@ -5,6 +5,7 @@
 # Modified: 12/23/2006                                                 #
 # Current Maintainer: Frederic Tarasevicius - tech2@i-is.com           #
 # Current Home: http://www.rulesemporium.com/rules/00_FVGT_File001.cf  #
+# 01/2014: Some rules migrated to JHardin sandbox prior to file retirement #
 # License:  http://www.apache.org/licenses/LICENSE-2.0                 #
 ########################################################################
 # *** PLEASE READ ** PLEASE READ ** PLEASE READ ** PLEASE READ ******* #
@@ -51,7 +52,7 @@ meta     __FM_LARGE_MONEY       (__F_LARGE_MONEY || __F_LARGE_MONEY_2)
 body     __YOU_HAVE_WON         /you(?: \w+)? won/i
 body     __FB_CONGRADS          /Congratulations/i
 meta     __YOU_WON_SOMTIN       (__YOU_HAVE_WON || __FB_CONGRADS)
-body     __FB_NATIONAL          /national/i
+#body     __FB_NATIONAL          /national/i
 body     __FB_LOTTERY           /lottery/i
 meta     __FM_NAT_LOTTERY       (__FB_NATIONAL && __FB_LOTTERY)
 
@@ -272,9 +273,9 @@ describe FB_ADD_INCHES          Add / Gain inches
 #Message-ID: <01c70f73$c056fb10$de49f952@nomanvmb2qxoqa>
 #Message-ID: <01c70f9b$e98036f0$7ac1e455@anderssoe10f8c>
 header   __FH_MSGID_01C7        MESSAGEID =~ /^<0{1,5}1c7/
-header   __FH_HAS_XMSMAIL       exists:X-MSMail-Priority
-header   __FH_HAS_XPRIORITY     exists:X-Priority
-header   __FS_SUBJ_RE           Subject =~ /^Re: /
+#header   __FH_HAS_XMSMAIL       exists:X-MSMail-Priority
+#header   __FH_HAS_XPRIORITY     exists:X-Priority
+#header   __FS_SUBJ_RE           Subject =~ /^Re: /
 meta     FM_RE_HELLO_SPAM       (__FH_MSGID_01C7 && __FH_HAS_XMSMAIL && __FH_HAS_XPRIORITY && __FS_SUBJ_RE)
 describe FM_RE_HELLO_SPAM       Re: Hello / hi
 ##score    FM_RE_HELLO_SPAM     10 10 10 10
@@ -309,10 +310,10 @@ describe FB_IMAGIRL             Phrae: I am a girl
 #counts   FB_IMAGIRL               11s/0h of 47019 corpus (37183s/9836h FVGT) 12/23/06
 
 
-header   __SUBJ_LOWER           ALL =~ /subject:\s\S{5}/
-header   __FROM_LOWER           ALL =~ /from:\s\S{5}/
-header   __TO___LOWER           ALL =~ /to:\s\S{5}/
-header   __DATE_LOWER           ALL =~ /date:\s\S{5}/
+#header   __SUBJ_LOWER           ALL =~ /subject:\s\S{5}/
+#header   __FROM_LOWER           ALL =~ /from:\s\S{5}/
+#header   __TO___LOWER           ALL =~ /to:\s\S{5}/
+#header   __DATE_LOWER           ALL =~ /date:\s\S{5}/
 meta     FM_LOWER_CASE_HEAD     (__SUBJ_LOWER && __FROM_LOWER && __TO___LOWER && __DATE_LOWER)
 describe FM_LOWER_CASE_HEAD     Lots of headers with lower case.
 ##score    FM_LOWER_CASE_HEAD   10 5 5 4
@@ -454,7 +455,7 @@ describe FM_FAKE_53COM_SPOOF    Spoof mail from 53.com?
 
 
 body     __FB_HOWMUCH           /How Much/i
-body     __FB_COST              /cost/i
+#body     __FB_COST              /cost/i
 meta     __FM_HOW_COST          (__FB_HOWMUCH && __FB_COST)
 body     __FB_IDENTITY          /identity/i
 meta     __FM_HOW_COST_ID       (__FM_HOW_COST || __FB_IDENTITY)
@@ -495,7 +496,7 @@ endif   # Mail::SpamAssassin::Plugin::ReplaceTags
 
 
 body     __FB_LUX_GIFTS         /Luxury (?:\w+\s)?Gifts/i
-body     __FB_NUM_PERCNT        /\d\s?\%/
+#body     __FB_NUM_PERCNT        /\d\s?\%/
 meta     FM_LUX_GIFTS_REDUCED   (__FB_LUX_GIFTS && __FB_NUM_PERCNT)
 describe FM_LUX_GIFTS_REDUCED   Luxury Gifts with dd%
 ##score    FM_LUX_GIFTS_REDUCED 10 5 5 2.2
@@ -525,11 +526,11 @@ describe FM_HOW_IMG_COST        How much does your image cost?
 #counts   FM_HOW_IMG_COST          25s/0h of 47019 corpus (37183s/9836h FVGT) 12/23/06
 
 
-rawbody  __FR_SPACING_8         /[a-z0-9]{6}\s{8}[a-z0-9]{5}/i
-rawbody  __FR_SPACING_9         /[a-z0-9]{6}\s{9}[a-z0-9]{5}/i
-rawbody  __FR_SPACING_15        /[a-z0-9]{6}\s{15}[a-z0-9]{5}/i
-rawbody  __FR_SPACING_17        /[a-z0-9]{6}\s{17}[a-z0-9]{5}/i
-rawbody  __FR_SPACING_22        /[a-z0-9]{6}\s{22}[a-z0-9]{5}/i
+#rawbody  __FR_SPACING_8         /[a-z0-9]{6}\s{8}[a-z0-9]{5}/i
+#rawbody  __FR_SPACING_9         /[a-z0-9]{6}\s{9}[a-z0-9]{5}/i
+#rawbody  __FR_SPACING_15        /[a-z0-9]{6}\s{15}[a-z0-9]{5}/i
+#rawbody  __FR_SPACING_17        /[a-z0-9]{6}\s{17}[a-z0-9]{5}/i
+#rawbody  __FR_SPACING_22        /[a-z0-9]{6}\s{22}[a-z0-9]{5}/i
 meta     FM_ASCII_ART_SPACINGc  ((__FR_SPACING_8 + __FR_SPACING_9 + __FR_SPACING_15 + __FR_SPACING_17 + __FR_SPACING_22) > 3)
 describe FM_ASCII_ART_SPACINGc  Looks like might be ASCII
 ##score    FM_ASCII_ART_SPACINGc        0.833
@@ -539,9 +540,9 @@ describe FM_ASCII_ART_SPACINGc  Looks like might be ASCII
 
 header   __FS_S_TRADE           Subject =~ /\btrade\b/i
 body     __FB_S_SYMBOL          /Symb?o?l?:\s?[A-Z_,\.-]{4,8}/i
-body     __FB_S_PRICE           /Pri{1,2}c[a-z]?e/i
-meta     __FM_MY_PRICE          (__FB_S_PRICE || FRT_PRICE)
-body     __FB_S_STOCK           /Stock/i
+#body     __FB_S_PRICE           /Pri{1,2}c[a-z]?e/i
+#meta     __FM_MY_PRICE          (__FB_S_PRICE || FRT_PRICE)
+#body     __FB_S_STOCK           /Stock/i
 meta     FM_DOESNT_SAY_STOCK    (__FB_S_SYMBOL && __FM_MY_PRICE && !__FB_S_STOCK && !__FS_S_TRADE)
 describe FM_DOESNT_SAY_STOCK    It's a stock spam but doesn't say stock
 ##score    FM_DOESNT_SAY_STOCK  10.357
@@ -3001,7 +3002,7 @@ describe FU_URI_TRACKER_T       URI style tracker (T)
 
 #msg A
 body     __BEEN_APPROVED        /been approved/
-body     __CAN_HELP             /can help/
+#body     __CAN_HELP             /can help/
 body     __COMPLETE_REVIEW      /complete review/
 meta     FM_APPROVE_COMPLETE    (__BEEN_APPROVED && __CAN_HELP && __COMPLETE_REVIEW)
 describe FM_APPROVE_COMPLETE    Meta approved complete review
@@ -3064,7 +3065,7 @@ describe FM_CONG_GIFTCARD       Talks about gift cards and congrads.
 body      __OWN_LAND            /\bland\b/i
 body      __OWN_PROP            /propert/i
 body      __COSTA_RI            /Costa Rica/i
-body      __FB_TOUR             /\btour/i
+#body      __FB_TOUR             /\btour/i
 meta     FM_COSTA_RICA          ((__OWN_LAND || __OWN_PROP) && __COSTA_RI && __FB_TOUR)
 describe FM_COSTA_RICA          Looks like Costa Rica spams.
 ##score    FM_COSTA_RICA                10.357
@@ -3148,7 +3149,7 @@ describe FM_FRM_RN_L_BRACK      From name has > but not <
 #counts   FM_FRM_RN_L_BRACK        11s/0h of 47019 corpus (37183s/9836h FVGT) 12/23/06
 
 
-body     __SURVEY               /\bsurvey\b/i
+#body     __SURVEY               /\bsurvey\b/i
 meta     FM_GET_CASH_SURVEY     (FB_GET_XXX_CASH && __SURVEY)
 describe FM_GET_CASH_SURVEY     Meta Get Cash + Survey
 ##score    FM_GET_CASH_SURVEY   10.357
@@ -3177,7 +3178,7 @@ describe FM_IS_IT_OUR_ACCOUNT   Is it our account?
 #counts   FM_IS_IT_OUR_ACCOUNT     11s/0h of 47019 corpus (37183s/9836h FVGT) 12/23/06
 
 
-header   __NUMBERS_IN_SUBJ      Subject =~ /\d{3}/
+#header   __NUMBERS_IN_SUBJ      Subject =~ /\d{3}/
 header   __FS_LEND              Subject =~ /\blend\b/i
 meta     FM_LEND_MONEY          (__NUMBERS_IN_SUBJ && __FS_LEND)
 describe FM_LEND_MONEY          Subject has ddd + lend!
