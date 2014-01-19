@@ -1167,12 +1167,12 @@ describe    ES_LIC_FROM_INFO   Spanish-language spam from .info domain
 header      __SMIME_MESSAGE    Content-Type =~ /application\/pkcs7-mime;/i
 
 
-uri         __JIMDO_PHISH      /(?:microsoft|outlook|access|helpdesk|upd?ates|newaccount)\w+\.jimdo\.com/i
+#uri         __JIMDO_PHISH      /(?:microsoft|outlook|access|helpdesk|upd?ates|newaccount)\w+\.jimdo\.com/i
 body        __CLICK_HERE       /\bclick\shere\b/i
 
-meta        JIMDO_PHISH        __JIMDO_PHISH && __CLICK_HERE
-describe    JIMDO_PHISH        Apparent phishing via webform hosted at jimdo.com
-score       JIMDO_PHISH        3.00	# limit
+#meta        JIMDO_PHISH        __JIMDO_PHISH && __CLICK_HERE
+#describe    JIMDO_PHISH        Apparent phishing via webform hosted at jimdo.com
+#score       JIMDO_PHISH        3.00	# limit
 
 body        __TRAVEL_PROFILE   /\btravel+er\sprofile\b/i
 body        __TRAVEL_RESERV    /\b(?:reservation\s(?:confirmed|number)|travel\sreservations?)\b/i
@@ -1181,6 +1181,8 @@ body        __TRAVEL_AGENT     /\btravel\sagen(?:t|cy)\b/i
 meta        __TRAVEL_MANY      (__TRAVEL_PROFILE + __TRAVEL_RESERV + __TRAVEL_BUSINESS + __TRAVEL_AGENT) > 2
 
 uri         __URI_WPADMIN      m,/wp-admin/\w+/,i
+meta        URI_WPADMIN        __URI_WPADMIN
+describe    URI_WPADMIN        WordPress login/admin URI, possible phishing
 
 # subrules migrated from 00_FVGT_File001.cf
 
