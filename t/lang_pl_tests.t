@@ -10,7 +10,7 @@ use constant TEST_ENABLED => conf_bool('run_pl_tests');
 
 BEGIN { plan tests => (TEST_ENABLED ? 1 : 0) };
 
-exit unless RUN_TESTS;
+exit unless TEST_ENABLED;
 
 # ---------------------------------------------------------------------------
 
