@@ -94,9 +94,9 @@ reuse	 RCVD_IN_NIX_SPAM
 # ... and what a difference! @20091204, 21.59/2.59 became 3.80/0.07
 # ...                        @20091128, 18.87/2.16 became 5.30/0.09
 #header	 RCVD_IN_SPAMCOP	eval:check_rbl('spamcop-lastexternal', 'bl.spamcop.net.')
-header	 RCVD_IN_SPAMCOP	eval:check_rbl_txt('spamcop-lastexternal', 'bl.spamcop.net.', '(?i:spamcop)')
-describe RCVD_IN_SPAMCOP	Received via a relay in bl.spamcop.net
-tflags	 RCVD_IN_SPAMCOP	net nopublish	# 20091123
+#header	 RCVD_IN_SPAMCOP	eval:check_rbl_txt('spamcop-lastexternal', 'bl.spamcop.net.', '(?i:spamcop)')
+#describe RCVD_IN_SPAMCOP	Received via a relay in bl.spamcop.net
+#tflags	 RCVD_IN_SPAMCOP	net nopublish	# 20091123
 
 meta	 PUBLISHED_DNSBLS	RCVD_IN_XBL || RCVD_IN_PBL || RCVD_IN_PSBL || RCVD_IN_SORBS_DUL || RCVD_IN_SORBS_WEB || RCVD_IN_BL_SPAMCOP_NET || RCVD_IN_RP_RNBL
 tflags	 PUBLISHED_DNSBLS	net nopublish	# 20110127
