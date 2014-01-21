@@ -68,9 +68,11 @@
 ##
 #
 ## 20091016 after much testing, has yet to hit a SINGLE spam (hits ~38% of ham)
-#meta    __THREADED     (!__MISSING_REPLY && !__NO_INR_YES_REF) || (__MISSING_REPLY && !__MISSING_REF)
-#tflags  __THREADED     nice
+meta    __THREADED     (!__MISSING_REPLY && !__NO_INR_YES_REF) || (__MISSING_REPLY && !__MISSING_REF)
+tflags  __THREADED     nice
+
 #meta    KHOP_THREADED  __THREADED
+
 ## Note that this does NOT verify legitimacy of referenced MSGIDs.
 #describe KHOP_THREADED Message references or replies to another message
 #tflags  KHOP_THREADED  nice nopublish
