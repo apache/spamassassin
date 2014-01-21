@@ -147,9 +147,6 @@ score FROM_LOCAL_NOVOWEL 0.500
 score FROM_NO_USER 0.001 2.599 0.019 0.798
 #score FROM_OFFERS 2.699 2.699 2.510 2.699	# defer to nightly GA rescorer per bug 6580
 score FROM_STARTS_WITH_NUMS 2.801 0.553 1.201 0.738
-score FRT_APPROV 2.499
-score FRT_PRICE 0.001
-score FR_3TAG_3TAG 0 # n=0 n=1 n=2 n=3
 score FR_MIDER 0 # n=0 n=1 n=2 n=3
 score FR_TITLE_NUMS 2.899 2.695 2.899 2.899
 score FSL_FAKE_GMAIL_RCVD 3.099 2.974 1.002 2.104
@@ -161,40 +158,6 @@ score FSL_HELO_NON_FQDN_1 2.361 0.001 1.783 0.001
 score FSL_HELO_SETUP 0 # n=0 n=1 n=2
 score FSL_INTERIA_ABUSE 3.899 2.664 3.080 3.106
 score FSL_YG_ABUSE 4.199
-score FS_ABIGGER 1.693 1.354 2.477 1.112
-score FS_APPROVE_YOU 2.499 1.272 1.942 1.873
-score FS_AT_NO_COST 2.499 # n=2
-score FS_CHEAP_CAP 0 # n=0 n=1 n=2 n=3
-score FS_DOLLAR_BONUS 0 # n=0 n=1 n=2 n=3
-score FS_EJACULA 0 # n=0 n=1 n=2 n=3
-score FS_ERECTION 0 # n=0 n=1 n=2 n=3
-score FS_HUGECOCK 0 # n=0 n=1 n=2 n=3
-score FS_LARGE_PERCENT2 2.645 2.699 0.001 1.960 # n=2
-score FS_LOW_RATES 0 # n=0 n=1 n=2 n=3
-score FS_NEW_SOFT_UPLOAD 0 # n=0 n=1 n=2 n=3
-score FS_NEW_XXX 0 # n=0 n=1 n=2 n=3
-score FS_NO_SCRIP 0 # n=0 n=1 n=2 n=3
-score FS_NUDE 2.399 1.653 1.288 1.101
-score FS_OBFU_PRMCY 2.400 0.384 0.204 1.248 # n=2
-score FS_PERSCRIPTION 0 # n=0 n=1 n=2 n=3
-score FS_PHARMASUB2 2.980 1.345 2.956 0.549 # n=2
-score FS_RAMROD 0 # n=0 n=1 n=2 n=3
-score FS_RE_APPROV 0 # n=0 n=1 n=2 n=3
-score FS_START_DOYOU2 2.799 2.799 2.799 2.800 # n=2
-score FS_START_LOSE 0.249 0.176 1.424 1.809 # n=2
-score FS_TEEN_BAD 0 # n=0 n=1 n=2 n=3
-score FS_TIP_DDD 0 # n=0 n=1 n=2 n=3
-score FS_WEIGHT_LOSS 1.894 1.541 2.501 2.036
-score FS_WILL_HELP 2.599 0.893 2.484 0.734 # n=2
-score FS_WITH_SMALL 0 # n=0 n=1 n=2 n=3
-score FU_COMMON_SUBS2 2.801 2.650 2.823 0.292 # n=2
-score FU_ENDS_NUMS_DOTS_CLK 0 # n=0 n=1 n=2 n=3
-score FU_END_ET 0 # n=0 n=1 n=2 n=3
-score FU_HOODIA 0 # n=0 n=1 n=2 n=3
-score FU_LONG_QUERY3 0 # n=0 n=1 n=2 n=3
-score FU_MIDER 0 # n=0 n=1 n=2 n=3
-score FU_UKGEOCITIES 0 # n=0 n=1 n=2 n=3
-score FU_URI_TRACKER_T 0 # n=0 n=1 n=2 n=3
 score GAPPY_SUBJECT 0.594 1.312 1.210 1.954
 score GEO_QUERY_STRING 0 # n=0 n=1 n=2 n=3
 score GUARANTEED_100_PERCENT 2.699 2.699 2.480 2.699
