@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-8mile axb-coi-bulk axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bpoliakoff grenier jarif kpg-core mas-cps mas-mas zmi; day 2: axb-8mile axb-coi-bulk axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bpoliakoff grenier jarif kpg-core llanga mas-cps mas-mas zmi; day 3: axb-8mile axb-coi-bulk axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bpoliakoff grenier jarif kpg-core llanga mas-cps mas-mas zmi
+# with results from: day 1: axb-8mile axb-coi-bulk axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bpoliakoff grenier jarif kpg-core mas-cps mas-mas zmi; day 2: axb-8mile axb-coi-bulk axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt grenier jarif kpg-core llanga mas-cps mas-mas zmi; day 3: axb-8mile axb-coi-bulk axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bpoliakoff grenier jarif kpg-core llanga zmi
 
 # tflags publish
 ADVANCE_FEE_2_NEW_FORM
@@ -209,9 +209,6 @@ DOS_RCVD_IP_TWICE_C
 DSN_NO_MIMEVERSION
 
 # good enough
-DYN_RDNS_AND_INLINE_IMAGE
-
-# good enough
 DYN_RDNS_SHORT_HELO_HTML
 
 # tflags publish
@@ -224,16 +221,10 @@ EMRCP
 ENV_AND_HDR_SPF_MATCH
 
 # good enough
-FAKE_REPLY_C
-
-# good enough
 FBI_MONEY
 
 # good enough
 FBI_SPOOF
-
-# good enough
-FB_CIALIS_LEO3
 
 # good enough
 FB_IMAGIRL
@@ -255,9 +246,6 @@ FH_HELO_EQ_CHARTER
 
 # good enough
 FH_HOST_EQ_DYNAMICIP
-
-# good enough
-FH_RANDOM_SURE
 
 # tflags publish
 FILL_THIS_FORM
@@ -422,9 +410,6 @@ HK_RANDOM_FROM
 HK_SCAM_N1
 
 # good enough
-HK_SCAM_N13
-
-# good enough
 HK_SCAM_N15
 
 # good enough
@@ -459,9 +444,6 @@ HK_SPAMMY_FILENAME
 
 # tflags userconf
 HTML_CHARSET_FARAWAY
-
-# good enough
-IMG_ALT_HSPACE_CID_ALIGN
 
 # good enough
 KB_DATE_CONTAINS_TAB
@@ -785,6 +767,9 @@ SHARE_50_50
 SHORT_HELO_AND_INLINE_IMAGE
 
 # good enough
+SINGLE_HEADER_2K
+
+# good enough
 SINGLE_HEADER_3K
 
 # good enough
@@ -872,7 +857,16 @@ TVD_RCVD_IP
 TVD_RCVD_SINGLE
 
 # good enough
-SINGLE_HEADER_2K
+BODY_SINGLE_WORD
+
+# good enough
+FU_ENDS_SG
+
+# good enough
+OBFU_HTML_ATTACH
+
+# good enough
+URI_DATA
 
 # tflags userconf
 UNPARSEABLE_RELAY
