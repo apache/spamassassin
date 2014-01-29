@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-8mile axb-coi-bulk axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bpoliakoff grenier jarif kpg-core mas-cps mas-mas zmi; day 2: axb-8mile axb-coi-bulk axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bpoliakoff grenier jarif kpg-core llanga mas-cps mas-mas mmiroslaw-ham mmiroslaw-spam zmi; day 3: axb-8mile axb-coi-bulk axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bpoliakoff grenier jarif kpg-core llanga mas-cps mas-mas zmi
+# with results from: day 1: axb-8mile axb-coi-bulk axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bpoliakoff grenier jarif kpg-core mas-cps mas-mas zmi; day 2: axb-8mile axb-coi-bulk axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bpoliakoff grenier jarif kpg-core llanga mas-cps mas-mas zmi; day 3: axb-8mile axb-coi-bulk axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bpoliakoff grenier jarif kpg-core llanga mas-cps mas-mas zmi
 
 # tflags publish
 ADVANCE_FEE_2_NEW_FORM
@@ -115,6 +115,12 @@ BITLY_URI
 # good enough
 BODY_EMPTY
 
+# good enough
+BODY_SINGLE_WORD
+
+# good enough
+BUG6152_INVALID_DATE_TZ_ABSURD
+
 # tflags userconf
 CHARSET_FARAWAY
 
@@ -150,6 +156,9 @@ DATE_IN_FUTURE_Q_PLUS
 
 # good enough
 DEAR_BENEFICIARY
+
+# good enough
+DEAR_NOBODY
 
 # good enough
 DEAR_WINNER
@@ -200,12 +209,6 @@ DOS_ANAL_SPAM_MAILER
 DOS_OE_TO_MX
 
 # good enough
-DOS_OE_TO_MX_IMAGE
-
-# good enough
-DOS_RCVD_IP_TWICE_C
-
-# good enough
 DSN_NO_MIMEVERSION
 
 # tflags publish
@@ -216,9 +219,6 @@ EMRCP
 
 # tflags userconf
 ENV_AND_HDR_SPF_MATCH
-
-# good enough
-FAKE_REPLY_C
 
 # good enough
 FBI_MONEY
@@ -380,13 +380,13 @@ HASHCASH_HIGH
 HEAD_LONG
 
 # good enough
-HELO_MISC_IP
-
-# good enough
 HK_LOTTO
 
 # good enough
 HK_LOTTO_NAME
+
+# good enough
+HK_NAME_DRUGS
 
 # good enough
 HK_NAME_FM_DR
@@ -404,10 +404,10 @@ HK_NAME_FROM
 HK_NAME_MR_MRS
 
 # good enough
-HK_RANDOM_FROM
+HK_SCAM_N1
 
 # good enough
-HK_SCAM_N1
+HK_SCAM_N13
 
 # good enough
 HK_SCAM_N15
@@ -423,9 +423,6 @@ HK_SCAM_N4
 
 # good enough
 HK_SCAM_N8
-
-# good enough
-HK_SCAM_S1
 
 # good enough
 HK_SCAM_S15
@@ -525,9 +522,6 @@ NSL_RCVD_HELO_USER
 
 # good enough
 OBFU_ATTACH_MISSP
-
-# good enough
-OBFU_HTML_ATTACH
 
 # tflags publish
 OBFU_JVSCR_ESC
@@ -761,9 +755,6 @@ RP_MATCHES_RCVD
 SERGIO_SUBJECT_PORN005
 
 # good enough
-SERGIO_SUBJECT_PORN011
-
-# good enough
 SHARE_50_50
 
 # good enough
@@ -798,6 +789,9 @@ SPF_PASS
 
 # tflags net
 SPF_SOFTFAIL
+
+# good enough
+STOX_REPLY_TYPE_WITHOUT_QUOTES
 
 # good enough
 STYLE_GIBBERISH
@@ -842,6 +836,9 @@ TT_MSGID_TRUNC
 TVD_APPROVED
 
 # good enough
+TVD_FINGER_02
+
+# good enough
 TVD_FROM_1
 
 # good enough
@@ -854,22 +851,13 @@ TVD_PH_REC
 TVD_RCVD_IP
 
 # good enough
-TVD_RCVD_SINGLE
+FROM_ONE_CHAR
 
 # good enough
-BODY_SINGLE_WORD
+FSL_MY_NAME_IS
 
 # good enough
-DEAR_NOBODY
-
-# good enough
-HK_RANDOM_REPLYTO
-
-# good enough
-HK_SCAM_N13
-
-# good enough
-SERGIO_SUBJECT_VIAGRA01
+SINGLE_HEADER_2K
 
 # tflags userconf
 UNPARSEABLE_RELAY
@@ -963,9 +951,6 @@ USER_IN_WHITELIST_TO
 
 # good enough
 WON_MONEY_ATTACH
-
-# good enough
-XM_PHPMAILER_FORGED
 
 # good enough
 YOUR_PERMISSION
