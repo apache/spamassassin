@@ -370,7 +370,7 @@ sub _check_rbl_addresses {
   dbg("dns: _check_rbl_addresses RBL $rbl_server, set $set");
 
   for my $host (keys %hosts) {
-    #dbg("dns: checking [$host] / $rule / $set / $rbl_server");
+    dbg("dns: checking [$host] / $rule / $set / $rbl_server");
     $pms->do_rbl_lookup($rule, $set, 'A', "$host.$rbl_server");
   }
 }
