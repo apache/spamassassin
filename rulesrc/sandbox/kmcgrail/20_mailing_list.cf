@@ -25,7 +25,7 @@
 
 
 #Rule from Amir Caspi to catch spam with gibberish html tags
-rawbody 	AC_HTML_NONSENSE_TAGS	/(?:<[A-Za-z0-9]{4,}>\s*){10,}/
+rawbody 	AC_HTML_NONSENSE_TAGS	/(?:<[A-Za-z0-9]{4,}>\s*){10}/
 describe 	AC_HTML_NONSENSE_TAGS	Many consecutive multi-letter HTML tags, likely nonsense/spam
 score 		AC_HTML_NONSENSE_TAGS	2.0
 
