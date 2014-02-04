@@ -3517,26 +3517,6 @@ module.
     }
   });
 
-=item bayes_store_module_additional Name::Of::Additional::BayesStore::Module
-
-If this option is set, the module given will loaded in addition to the 
-bayes_store_module such as Redis.pm which also requires TinyRedis.pm.
-
-=cut
-
-  push (@cmds, {
-    setting => 'bayes_store_module_additional',
-    is_admin => 1,
-    default => '',
-    type => $CONF_TYPE_STRING,
-    code => sub {
-      my ($self, $key, $value, $line) = @_;
-      local ($1);
-      if ($value !~ /^([_A-Za-z0-9:]+)$/) { return $INVALID_VALUE; }
-      $self->{bayes_store_module_additional} = $1;
-    }
-  });
-
 =item bayes_sql_dsn DBI::databasetype:databasename:hostname:port
 
 Used for BayesStore::SQL storage implementation.
