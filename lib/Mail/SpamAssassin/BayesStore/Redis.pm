@@ -53,7 +53,6 @@ value 1 (i.e. enabled).
 Example configuration:
 
   bayes_store_module  Mail::SpamAssassin::BayesStore::Redis
-  bayes_store_module_additional Mail::SpamAssassin::Util::TinyRedis
   bayes_sql_dsn       server=127.0.0.1:6379;password=foo;database=2
   bayes_token_ttl 21d
   bayes_seen_ttl   8d
