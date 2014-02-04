@@ -24,6 +24,7 @@ use warnings;
 
 use Errno qw(EINTR EAGAIN EPIPE ENOTCONN ECONNRESET ECONNABORTED);
 use IO::Socket::UNIX;
+use Time::HiRes ();
 
 our $io_socket_module_name;
 BEGIN {
