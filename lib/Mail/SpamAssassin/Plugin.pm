@@ -107,7 +107,8 @@ use vars qw{
 };
 
 @ISA =                  qw();
-$VERSION =              'bogus';
+#Removed $VERSION per BUG 6422
+#$VERSION =              'bogus';
 
 ###########################################################################
 
