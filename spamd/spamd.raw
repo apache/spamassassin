@@ -861,6 +861,9 @@ if (!$opt{'round-robin'})
   if ($childlimit > $opt{'max-spare'}) {
     $childlimit = $opt{'max-spare'};
   }
+  if ($childlimit < $opt{'min-children'}) {
+    $childlimit = $opt{'min-children'};
+  }
 
   $scaling = Mail::SpamAssassin::SpamdForkScaling->new({
         backchannel => $backchannel,
