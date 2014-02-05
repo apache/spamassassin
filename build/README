@@ -245,7 +245,7 @@ SPAMASSASSIN RELEASE PROCEDURE
     vi !$
 
   NOTE: Here's a quick example to concat the MD5 or SHA1 checksums:
-        ls *3.4.0*rc5* | grep sha1 | xargs cat --
+        ls *3.4.0*rc6* | grep sha1 | xargs cat --
 
 - (for any rc, prerelease, or full release) Place the tarballs in a
   discreet location (discreet means not linked from the "downloads" page
@@ -260,15 +260,12 @@ SPAMASSASSIN RELEASE PROCEDURE
     scp ~/public_html/devel/Mail-SpamAssassin-* people.apache.org:public_html/devel/
 
   While doing this, also upload a copy of the proposed release
-  announcement to the website:
+  announcement to the website.  
 
-    ssh people.apache.org
-    version=3.3.0
-    cp build/announcements/$version.txt ~/public_html/devel/PROPOSED-$version.txt
+  As of 2014-02-04, this is done by adding announcement to the devel 
+  directory for the website and running webmake. See main.wmk in site svn.
 
   Pre-releases and RCs require just lazy consensus -- ie. no objections.
-
-***RE-TESTED BY KAM TO THIS POINT AS OF 2013-10-11****
 
 - (for a pre or rc release), - upload .tar.gz (not .bz2) tarball to CPAN
   at http://pause.cpan.org/:
@@ -279,6 +276,10 @@ SPAMASSASSIN RELEASE PROCEDURE
   manner that CPAN will process it as a Developer Release per
 
   http://www.cpan.org/modules/04pause.html#developerreleases
+
+  As of 2014-02-05, adding TRIAL to the filename should work
+
+***RE-TESTED BY KAM TO THIS POINT AS OF 2014-02-05***
 
 - (for a full release) 3 +1's votes from PMC members are required to 
   proceed with an official (not pre-release) ASF software release.
