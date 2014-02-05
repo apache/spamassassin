@@ -1,4 +1,346 @@
 ------------------------------------------------------------------------
+r1564626 | kmcgrail | 2014-02-05 04:10:03 +0000 (Wed, 05 Feb 2014) | 1 
+line
+ 
+ Removed tests for FM_FRM_RN_L_BRACK
+------------------------------------------------------------------------
+r1564613 | kmcgrail | 2014-02-05 03:20:26 +0000 (Wed, 05 Feb 2014) | 1 
+line
+ 
+ Fixing CREDITS to include Daniel Lemke and Henrik Krohns
+------------------------------------------------------------------------
+r1564612 | spamassassin_role | 2014-02-05 03:07:34 +0000 (Wed, 05 Feb 
+2014) | 1 line
+ 
+ updated scores for revision 1564230 active rules added since last 
+mass-check
+------------------------------------------------------------------------
+r1564604 | mmartinec | 2014-02-05 01:33:28 +0000 (Wed, 05 Feb 2014) | 1 
+line
+ 
+ Bug 6996 #11: spamd to honour --min-children
+------------------------------------------------------------------------
+r1564329 | mmartinec | 2014-02-04 15:00:15 +0000 (Tue, 04 Feb 2014) | 1 
+line
+ 
+ added a missing "use Time::HiRes" to TinyRedis.pm (not a bug, just a 
+"right thing" to do)
+------------------------------------------------------------------------
+r1564256 | axb | 2014-02-04 11:28:30 +0000 (Tue, 04 Feb 2014) | 1 line
+ 
+ added util_rb_2tld biz.ua
+------------------------------------------------------------------------
+r1564194 | kmcgrail | 2014-02-04 04:44:52 +0000 (Tue, 04 Feb 2014) | 1 
+line
+ 
+ reversal of r1557309 for bayes_store_module_additional conf option
+------------------------------------------------------------------------
+r1564168 | spamassassin_role | 2014-02-04 03:06:04 +0000 (Tue, 04 Feb 
+2014) | 1 line
+ 
+ updated scores for revision 1563802 active rules added since last 
+mass-check
+------------------------------------------------------------------------
+r1564078 | kmcgrail | 2014-02-03 21:45:42 +0000 (Mon, 03 Feb 2014) | 1 
+line
+ 
+ adding tflag publish per 
+http://wiki.apache.org/spamassassin/SaUpdateBackend
+------------------------------------------------------------------------
+r1563762 | spamassassin_role | 2014-02-03 03:00:47 +0000 (Mon, 03 Feb 
+2014) | 1 line
+ 
+ updated scores for revision 1563579 active rules added since last 
+mass-check
+------------------------------------------------------------------------
+r1563559 | spamassassin_role | 2014-02-02 03:09:12 +0000 (Sun, 02 Feb 
+2014) | 1 line
+ 
+ updated scores for revision 1563382 active rules added since last 
+mass-check
+------------------------------------------------------------------------
+r1563367 | spamassassin_role | 2014-02-01 03:06:58 +0000 (Sat, 01 Feb 
+2014) | 1 line
+ 
+ updated scores for revision 1563086 active rules added since last 
+mass-check
+------------------------------------------------------------------------
+r1563172 | mmartinec | 2014-01-31 16:54:36 +0000 (Fri, 31 Jan 2014) | 1 
+line
+ 
+ Bug 6996 - spamd --round-robin conflicts with multiple listen sockets
+------------------------------------------------------------------------
+r1563162 | kmcgrail | 2014-01-31 16:22:28 +0000 (Fri, 31 Jan 2014) | 1 
+line
+ 
+ optimized the gibberish rule
+------------------------------------------------------------------------
+r1563039 | spamassassin_role | 2014-01-31 03:18:11 +0000 (Fri, 31 Jan 
+2014) | 1 line
+ 
+ updated scores for revision 1562725 active rules added since last 
+mass-check
+------------------------------------------------------------------------
+r1562916 | kmcgrail | 2014-01-30 18:42:29 +0000 (Thu, 30 Jan 2014) | 1 
+line
+ 
+ Adding html tag gibberish tag rule for testing from Amir Caspi on the 
+mailing list
+------------------------------------------------------------------------
+r1562908 | kmcgrail | 2014-01-30 18:04:41 +0000 (Thu, 30 Jan 2014) | 1 
+line
+ 
+ Small debug enabled in rbl server lookup
+------------------------------------------------------------------------
+r1562705 | axb | 2014-01-30 07:17:05 +0000 (Thu, 30 Jan 2014) | 1 line
+ 
+ nailed URIBL_MW_SURBL
+------------------------------------------------------------------------
+r1562704 | axb | 2014-01-30 07:16:49 +0000 (Thu, 30 Jan 2014) | 1 line
+ 
+ set fixed score for URIBL_MW_SURBL
+------------------------------------------------------------------------
+r1562681 | spamassassin_role | 2014-01-30 03:16:01 +0000 (Thu, 30 Jan 
+2014) | 1 line
+ 
+ updated scores for revision 1562377 active rules added since last 
+mass-check
+------------------------------------------------------------------------
+r1562345 | spamassassin_role | 2014-01-29 03:11:17 +0000 (Wed, 29 Jan 
+2014) | 1 line
+ 
+ updated scores for revision 1562007 active rules added since last 
+mass-check
+------------------------------------------------------------------------
+r1561929 | spamassassin_role | 2014-01-28 03:08:10 +0000 (Tue, 28 Jan 
+2014) | 1 line
+ 
+ updated scores for revision 1561610 active rules added since last 
+mass-check
+------------------------------------------------------------------------
+r1561584 | spamassassin_role | 2014-01-27 03:05:14 +0000 (Mon, 27 Jan 
+2014) | 1 line
+ 
+ updated scores for revision 1561463 active rules added since last 
+mass-check
+------------------------------------------------------------------------
+r1561436 | spamassassin_role | 2014-01-26 03:11:59 +0000 (Sun, 26 Jan 
+2014) | 1 line
+ 
+ updated scores for revision 1561274 active rules added since last 
+mass-check
+------------------------------------------------------------------------
+r1561249 | spamassassin_role | 2014-01-25 03:03:21 +0000 (Sat, 25 Jan 
+2014) | 1 line
+ 
+ updated scores for revision 1560920 active rules added since last 
+mass-check
+------------------------------------------------------------------------
+r1560916 | axb | 2014-01-24 08:19:12 +0000 (Fri, 24 Jan 2014) | 3 lines
+ 
+ Jan 24 09:16:42.734 [9302] dbg: config: warning: score set for 
+non-existent rule FH_HAS_XID
+ 
+ removed score
+------------------------------------------------------------------------
+r1560894 | spamassassin_role | 2014-01-24 03:12:15 +0000 (Fri, 24 Jan 
+2014) | 1 line
+ 
+ updated scores for revision 1560608 active rules added since last 
+mass-check
+------------------------------------------------------------------------
+r1560576 | spamassassin_role | 2014-01-23 03:13:05 +0000 (Thu, 23 Jan 
+2014) | 1 line
+ 
+ updated scores for revision 1560283 active rules added since last 
+mass-check
+------------------------------------------------------------------------
+r1560289 | axb | 2014-01-22 09:13:23 +0000 (Wed, 22 Jan 2014) | 1 line
+ 
+ removed bad & no hits rules
+------------------------------------------------------------------------
+r1560282 | axb | 2014-01-22 08:46:08 +0000 (Wed, 22 Jan 2014) | 1 line
+ 
+  Disabled - "no hits at all" ancient rules  - Axb 2014-01-22
+------------------------------------------------------------------------
+r1560243 | spamassassin_role | 2014-01-22 03:18:39 +0000 (Wed, 22 Jan 
+2014) | 1 line
+ 
+ updated scores for revision 1559940 active rules added since last 
+mass-check
+------------------------------------------------------------------------
+r1559968 | axb | 2014-01-21 10:40:11 +0000 (Tue, 21 Jan 2014) | 1 line
+ 
+ we need  __THREADED for metas (will move to 10_hasbase.cf)
+------------------------------------------------------------------------
+r1559962 | axb | 2014-01-21 10:18:48 +0000 (Tue, 21 Jan 2014) | 1 line
+ 
+ disabled old nopublish rules - seems like pointless masscheck overhead
+------------------------------------------------------------------------
+r1559956 | axb | 2014-01-21 10:01:26 +0000 (Tue, 21 Jan 2014) | 1 line
+ 
+ disabled nopublish rules - seems like pointless masscheck overhead
+------------------------------------------------------------------------
+r1559955 | axb | 2014-01-21 09:57:08 +0000 (Tue, 21 Jan 2014) | 1 line
+ 
+ disabled "forgotten" RCVD_IN_SPAMCOP	net nopublish
+------------------------------------------------------------------------
+r1559954 | axb | 2014-01-21 09:36:26 +0000 (Tue, 21 Jan 2014) | 1 line
+ 
+ disabled "nopublish"
+------------------------------------------------------------------------
+r1559949 | axb | 2014-01-21 09:04:38 +0000 (Tue, 21 Jan 2014) | 1 line
+ 
+ disabled nopublish rules
+------------------------------------------------------------------------
+r1559948 | axb | 2014-01-21 09:03:21 +0000 (Tue, 21 Jan 2014) | 1 line
+ 
+ disabled nopublish rules 
+------------------------------------------------------------------------
+r1559940 | axb | 2014-01-21 08:49:23 +0000 (Tue, 21 Jan 2014) | 2 lines
+ 
+ removed more fixed scores for  00_FVGT_File001.cf rules
+ let ruleqa autopromote
+------------------------------------------------------------------------
+r1559938 | axb | 2014-01-21 08:32:03 +0000 (Tue, 21 Jan 2014) | 2 lines
+ 
+ removed fixed scores for 00_FVGT_File001.cf rules
+ let ruleqa decide
+------------------------------------------------------------------------
+r1559932 | axb | 2014-01-21 08:11:56 +0000 (Tue, 21 Jan 2014) | 4 lines
+ 
+ removed 
+ score FR_ALMOST_VIAG2 2.299 1.594 2.299 1.531 # n=2
+ score FR_CANTSEETEXT 0 # n=0 n=1 n=2 n=3
+ let ruleqa decide
+------------------------------------------------------------------------
+r1559931 | axb | 2014-01-21 08:10:23 +0000 (Tue, 21 Jan 2014) | 4 lines
+ 
+ removed
+ publish FR_ALMOST_VIAG2
+ publish FR_CANTSEETEXT
+ let ruleqa autopromote
+------------------------------------------------------------------------
+r1559913 | spamassassin_role | 2014-01-21 03:06:25 +0000 (Tue, 21 Jan 
+2014) | 1 line
+ 
+ updated scores for revision 1559645 active rules added since last 
+mass-check
+------------------------------------------------------------------------
+r1559639 | axb | 2014-01-20 08:06:41 +0000 (Mon, 20 Jan 2014) | 3 lines
+ 
+ removed fixed scores for rules in 00_FVGT_File001.cf
+ seems these were assigned before ruleqa autopromoted rules
+ 
+------------------------------------------------------------------------
+r1559622 | spamassassin_role | 2014-01-20 03:22:09 +0000 (Mon, 20 Jan 
+2014) | 1 line
+ 
+ updated scores for revision 1559481 active rules added since last 
+mass-check
+------------------------------------------------------------------------
+r1559593 | kmcgrail | 2014-01-19 22:52:03 +0000 (Sun, 19 Jan 2014) | 1 
+line
+ 
+ Fixing lang_pl_test rule disable condition
+------------------------------------------------------------------------
+r1559456 | spamassassin_role | 2014-01-19 03:16:52 +0000 (Sun, 19 Jan 
+2014) | 1 line
+ 
+ updated scores for revision 1559330 active rules added since last 
+mass-check
+------------------------------------------------------------------------
+r1559446 | jhardin | 2014-01-19 02:16:25 +0000 (Sun, 19 Jan 2014) | 1 line
+ 
+ Disable Jimdo phishing rule, add WordPress phishing rule
+------------------------------------------------------------------------
+r1559431 | jhardin | 2014-01-18 22:15:24 +0000 (Sat, 18 Jan 2014) | 1 line
+ 
+ Migrate some subrules from emailed/FVGT sandbox prior to dropping old 
+rules file entirely
+------------------------------------------------------------------------
+r1559309 | spamassassin_role | 2014-01-18 03:10:09 +0000 (Sat, 18 Jan 
+2014) | 1 line
+ 
+ updated scores for revision 1559048 active rules added since last 
+mass-check
+------------------------------------------------------------------------
+r1558999 | spamassassin_role | 2014-01-17 03:06:21 +0000 (Fri, 17 Jan 
+2014) | 1 line
+ 
+ updated scores for revision 1558716 active rules added since last 
+mass-check
+------------------------------------------------------------------------
+r1558958 | kmcgrail | 2014-01-16 23:15:24 +0000 (Thu, 16 Jan 2014) | 1 
+line
+ 
+ set score ceiling for FH_RANDOM_SURE rule of 0.5
+------------------------------------------------------------------------
+r1558682 | spamassassin_role | 2014-01-16 03:12:08 +0000 (Thu, 16 Jan 
+2014) | 1 line
+ 
+ updated scores for revision 1558319 active rules added since last 
+mass-check
+------------------------------------------------------------------------
+r1558475 | jhardin | 2014-01-15 17:23:56 +0000 (Wed, 15 Jan 2014) | 1 line
+ 
+ add URI_WPADMIN rule for evaluation, possible phishing sign
+------------------------------------------------------------------------
+r1558457 | hstern | 2014-01-15 16:43:28 +0000 (Wed, 15 Jan 2014) | 2 lines
+ 
+ sandbox/hstern/*: Removed my old garbage
+ 
+------------------------------------------------------------------------
+r1558271 | spamassassin_role | 2014-01-15 03:09:46 +0000 (Wed, 15 Jan 
+2014) | 1 line
+ 
+ updated scores for revision 1557976 active rules added since last 
+mass-check
+------------------------------------------------------------------------
+r1558190 | kmcgrail | 2014-01-14 21:00:22 +0000 (Tue, 14 Jan 2014) | 1 
+line
+ 
+ cleaned up PHW to PCCC references in Credits
+------------------------------------------------------------------------
+r1558095 | kmcgrail | 2014-01-14 16:17:40 +0000 (Tue, 14 Jan 2014) | 1 
+line
+ 
+ disabled lang_pl_tests.t by default - see bug 6992
+------------------------------------------------------------------------
+r1557912 | spamassassin_role | 2014-01-14 03:15:40 +0000 (Tue, 14 Jan 
+2014) | 1 line
+ 
+ updated scores for revision 1557663 active rules added since last 
+mass-check
+------------------------------------------------------------------------
+r1557645 | spamassassin_role | 2014-01-13 03:14:55 +0000 (Mon, 13 Jan 
+2014) | 1 line
+ 
+ updated scores for revision 1557499 active rules added since last 
+mass-check
+------------------------------------------------------------------------
+r1557490 | spamassassin_role | 2014-01-12 03:04:58 +0000 (Sun, 12 Jan 
+2014) | 1 line
+ 
+ updated scores for revision 1557327 active rules added since last 
+mass-check
+------------------------------------------------------------------------
+r1557425 | kmcgrail | 2014-01-11 17:19:21 +0000 (Sat, 11 Jan 2014) | 1 
+line
+ 
+  updated proposed txt with the sha1/md5sum of the rc5 build and more 
+tweaks to build README
+------------------------------------------------------------------------
+r1557421 | kmcgrail | 2014-01-11 17:12:00 +0000 (Sat, 11 Jan 2014) | 1 
+line
+ 
+ preparing to release 3.4.0 rc5
+------------------------------------------------------------------------
+r1557419 | kmcgrail | 2014-01-11 16:43:51 +0000 (Sat, 11 Jan 2014) | 1 
+line
+ 
+ Fixed MANIFEST for TinyRedis.pm move to Util
+------------------------------------------------------------------------
 r1557418 | kmcgrail | 2014-01-11 16:33:32 +0000 (Sat, 11 Jan 2014) | 1 
 line
  
