@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-8mile axb-coi-bulk axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bpoliakoff grenier jarif kpg-core mas-cps mas-mas zmi; day 2: axb-8mile axb-coi-bulk axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bpoliakoff grenier jarif kpg-core llanga mas-cps mas-mas zmi; day 3: axb-8mile axb-coi-bulk axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bpoliakoff grenier jarif kpg-core llanga mas-cps mas-mas zmi
+# with results from: day 1: axb-8mile axb-coi-bulk axb-generic axb-ham-misc axb-sa-users axb-trash bernie-fsf bernie-it_batt bpoliakoff grenier jarif kpg-core mas-cps mas-mas zmi; day 2: axb-8mile axb-coi-bulk axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bpoliakoff grenier jarif kpg-core llanga mas-cps mas-mas zmi; day 3: axb-8mile axb-coi-bulk axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bpoliakoff grenier jarif kpg-core llanga mas-cps mas-mas zmi
 
 # tflags publish
 ADVANCE_FEE_2_NEW_FORM
@@ -153,9 +153,6 @@ DATE_IN_FUTURE_Q_PLUS
 
 # good enough
 DEAR_BENEFICIARY
-
-# good enough
-DEAR_NOBODY
 
 # good enough
 DEAR_WINNER
@@ -386,9 +383,6 @@ HEAD_LONG
 HK_LOTTO
 
 # good enough
-HK_LOTTO_NAME
-
-# good enough
 HK_NAME_DRUGS
 
 # good enough
@@ -419,9 +413,6 @@ HK_SCAM_N2
 HK_SCAM_N3
 
 # good enough
-HK_SCAM_N4
-
-# good enough
 HK_SCAM_N8
 
 # good enough
@@ -450,9 +441,6 @@ KB_FAKED_THE_BAT
 
 # good enough
 KB_RATWARE_MSGID
-
-# good enough
-LIVEFILESTORE
 
 # tflags publish
 LOTS_OF_MONEY
@@ -752,16 +740,10 @@ RISK_FREE
 RP_MATCHES_RCVD
 
 # good enough
-SERGIO_SUBJECT_PORN005
-
-# good enough
 SHARE_50_50
 
 # good enough
 SHORT_HELO_AND_INLINE_IMAGE
-
-# good enough
-SINGLE_HEADER_2K
 
 # good enough
 SINGLE_HEADER_3K
@@ -792,6 +774,9 @@ SPF_PASS
 
 # tflags net
 SPF_SOFTFAIL
+
+# good enough
+STOX_REPLY_TYPE_WITHOUT_QUOTES
 
 # good enough
 STYLE_GIBBERISH
@@ -850,8 +835,26 @@ TVD_PH_REC
 # good enough
 TVD_RCVD_IP
 
+# tflags publish
+AC_HTML_NONSENSE_TAGS
+
 # good enough
-FSL_MY_NAME_IS
+DEAR_EMAIL_USER
+
+# good enough
+HK_NAME_DR
+
+# good enough
+HK_SCAM_N13
+
+# good enough
+KHOP_BIG_TO_CC
+
+# good enough
+OBFU_HTML_ATTACH
+
+# good enough
+XM_PHPMAILER_FORGED
 
 # tflags userconf
 UNPARSEABLE_RELAY
@@ -906,6 +909,9 @@ URIBL_WS_SURBL
 
 # tflags userconf
 URI_NOVOWEL
+
+# good enough
+URI_OBFU_WWW
 
 # tflags userconf
 USER_IN_ALL_SPAM_TO
