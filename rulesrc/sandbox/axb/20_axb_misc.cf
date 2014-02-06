@@ -44,10 +44,6 @@ endif
 header		AXB_BULK_SENDGRID	exists:X-Sendgrid-EID
 describe	AXB_BULK_SENDGRID	Bulk sent via Sendgrid
 
-# 2012-10-29
-header		AXB_X_FORGED_OE61	X-Mailer =~/^Microsoft Outlook Express 6\.1/
-describe	AXB_X_FORGED_OE61	Forged OE version
-
 # 2012-10-16
 header          AXB_BULK_ECO            exists:X-CSA-Complaints
 describe        AXB_BULK_ECO            Message sent by eco.de member
@@ -58,18 +54,6 @@ header          __AXB_XM_OL_2600  X-Mailer =~ /Microsoft\ Outlook\ Express\ 6\.0
 header          __AXB_MO_OL_2600  X-MimeOLE =~ /Produced\ By\ Microsoft\ MimeOLE\ V6\.00\.2600\.0000/
 meta            AXB_XM_FORGED_OL2600    (__AXB_XM_OL_2600  && !__AXB_MO_OL_2600 )
 describe        AXB_XM_FORGED_OL2600     Forged OE v. 6.2600
-
-# TrendMicro antispam outbound tagged? - could cause Fps due to dubious filter quality
-# header          AXB_X_TREND_AS          X-TM-AS-Result =~ /^Yes/
-# describe        AXB_X_TREND_AS          Trendmicro said this is S
-
-# 2012-08-15
-header          AXB_X_XM_MMAGIC         X-Mailer =~ /\bMailMagic/
-describe        AXB_X_XM_MMAGIC         Mailer fingerprint
-
-# 2012-03-19
-header		AXB_XM_GETRSP	X-Mailer =~ /^GetResponse\b/
-describe	AXB_XM_GETRSP	ESP Bulkware
 
 # 2012-03-17
 header		__AXB_LI_U	List-Unsubscribe =~ /\@em\.linkedin\.com\b/
@@ -100,16 +84,16 @@ describe        AXB_XM_BULK_SB          Bulk mail tool
 header          AXB_XM_SENTBY   exists:X-Mailer-Sent-By
 describe        AXB_XM_SENTBY   Ratware fingerprint
 
-header          AXB_XMID_PFIX_CTRIP     Message-ID =~ /\<[A-F0-9]{8}.[0-9]{6}\@ctrip\.com\>/
-describe        AXB_XMID_PFIX_CTRIP     possibly forged ctrip sender - postfix
+#header          AXB_XMID_PFIX_CTRIP     Message-ID =~ /\<[A-F0-9]{8}.[0-9]{6}\@ctrip\.com\>/
+#describe        AXB_XMID_PFIX_CTRIP     possibly forged ctrip sender - postfix
 
 # 2011-07-05
-rawbody         AXB_SSCECCF     /\bSandboxScopeClass ExternalClass\b/
-describe        AXB_SSCECCF     unidentified fingerprint
+#rawbody         AXB_SSCECCF     /\bSandboxScopeClass ExternalClass\b/
+#describe        AXB_SSCECCF     unidentified fingerprint
 
 #2011-06-05
-header   AXB_XRCVD_EYOU_SEND    Received =~ /\(eyou send program\)/
-describe AXB_XRCVD_EYOU_SEND    fingerprint
+#header   AXB_XRCVD_EYOU_SEND    Received =~ /\(eyou send program\)/
+#describe AXB_XRCVD_EYOU_SEND    fingerprint
 
 
 header          AXB_HELO_HOME_UN        X-Spam-Relays-Untrusted =~ /^[^\]]+ helo=\w+\.(lan|home) /i
