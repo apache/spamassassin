@@ -185,11 +185,11 @@ describe UPPERCASE_URI	Link protocol has unexpected mixed case
 
 
 # doesn't match enough, has a higher S/O than __GREYLISTING, therefore useless.
-header	 __GREYLISTED	ALL =~ /(?:^|\n)X-(?:Scam-Grey|Greylist(?:ing)?):\s+delay(?:ed)? (?:for )?\d+(?: ?s(?:ec(?:ond)?s?)?|:\d\d)/im
+# header	 __GREYLISTED	ALL =~ /(?:^|\n)X-(?:Scam-Grey|Greylist(?:ing)?):\s+delay(?:ed)? (?:for )?\d+(?: ?s(?:ec(?:ond)?s?)?|:\d\d)/im
 
-meta KHOP_GREYED __GREYLISTED && (RDNS_NONE||RDNS_DYNAMIC||__HELO_NO_DOMAIN)
-describe KHOP_GREYED	Greylisted and sent from dynamically-named relay
-score	 KHOP_GREYED	0.1
+# meta KHOP_GREYED __GREYLISTED && (RDNS_NONE||RDNS_DYNAMIC||__HELO_NO_DOMAIN)
+# describe KHOP_GREYED	Greylisted and sent from dynamically-named relay
+# score	 KHOP_GREYED	0.1
 
 
 # This is useless while __DKIM_EXISTS continues to perform so well.
@@ -211,10 +211,10 @@ ifplugin Mail::SpamAssassin::Plugin::MIMEHeader # {
 
 endif # }
 
-rawbody  __BUGGED_IMG	m{<img\b[^>]{0,100}\ssrc=.?https?://[^>]{6,80}(?:\?[^>]{8}|[^a-z](?![a-f]{3}|20\d\d[01]\d[0-3]\d)[0-9a-f]{8})}i
+# rawbody  __BUGGED_IMG	m{<img\b[^>]{0,100}\ssrc=.?https?://[^>]{6,80}(?:\?[^>]{8}|[^a-z](?![a-f]{3}|20\d\d[01]\d[0-3]\d)[0-9a-f]{8})}i
 
 # inspired by retired SA 2.x HTML_WEB_BUGS rule's eval:html_test('web_bugs')
-rawbody  __WEB_BUGS	m{<[^>]{4,100}\ssrc=[^>]{8,200}\.(?:pl|cgi|php\d?|asp|jsp|cfm|py|\?[^>]{4})\b}i
+# rawbody  __WEB_BUGS	m{<[^>]{4,100}\ssrc=[^>]{8,200}\.(?:pl|cgi|php\d?|asp|jsp|cfm|py|\?[^>]{4})\b}i
 
 # Idea from Michael Scheidell of SECNAP on SpamAssassin Users List 2010-05-08
 # http://old.nabble.com/yahoo-X-YMail-OSG-tp28496110p28496110.html
@@ -260,10 +260,10 @@ rawbody  __WEB_BUGS	m{<[^>]{4,100}\ssrc=[^>]{8,200}\.(?:pl|cgi|php\d?|asp|jsp|cf
 #header	 MS_XYMOSG_5K	X-YMail-OSG =~ /^(?=.{4096})/s
 
 # from mailing list, subject "Tonns of russian DOT info spam" 2011-02-21
-header __LISTID_DEBIAN	List-Id =~ /\.lists\.debian\.org>/
-body   __RAJONAA_INFO	m' rajonaa: http://www\.[\w-]{0,50}\.info !$'
-meta	 DEB_RAJONAA	__LISTID_DEBIAN && __RAJONAA_INFO
-describe DEB_RAJONAA	Latvian text with .info URI on Debian List
+#header __LISTID_DEBIAN	List-Id =~ /\.lists\.debian\.org>/
+#body   __RAJONAA_INFO	m' rajonaa: http://www\.[\w-]{0,50}\.info !$'
+#meta	 DEB_RAJONAA	__LISTID_DEBIAN && __RAJONAA_INFO
+#describe DEB_RAJONAA	Latvian text with .info URI on Debian List
 #score	 DEB_RAJONAA	3.0
 
 # Requested on sa-users list
