@@ -28,16 +28,16 @@ describe KHOP_FAKE_EBAY 	Sender falsely claims to be from eBay
 # 0.0095/0.0246 spam/ham, 0.278 s/o @ 20100517
 
 # masscheck doesn't cover ifplugin lines.  It takes the first hit anyway.
-if ! plugin (Mail::SpamAssassin::Plugin::URIDetail)
-  rawbody    KHOP_FOREIGN_CLICK	m{\bhref=[^>]{9,199}>[^<]{0,80}(?:<(?!/a\b)[^>]{0,299}>[^<]{0,80}){0,9}[^<]{0,80}\b(?:cli(?:quez\W|ck\Wa)ici\b|cli(?:cca\W|c\Wa|que\Wa)qu[^<.,a ]|klie?k(?:\Whi?er|ni(?:j|nite)\Wtu[tk]aj)\b)}si
-else
+#if ! plugin (Mail::SpamAssassin::Plugin::URIDetail)
+#  rawbody    KHOP_FOREIGN_CLICK	m{\bhref=[^>]{9,199}>[^<]{0,80}(?:<(?!/a\b)[^>]{0,299}>[^<]{0,80}){0,9}[^<]{0,80}\b(?:cli(?:quez\W|ck\Wa)ici\b|cli(?:cca\W|c\Wa|que\Wa)qu[^<.,a ]|klie?k(?:\Whi?er|ni(?:j|nite)\Wtu[tk]aj)\b)}si
+#else
   # uri_detail doesn't support m{foo}i notation
-  uri_detail KHOP_FOREIGN_CLICK	text =~ /\b(?:cli(?:quez\W|ck\Wa)ici\b|cli(?:cca\W|c\Wa|que\Wa)qu[^<.,a ]|klie?k(?:\Whi?er|ni(?:j|nite)\Wtu[tk]aj)\b)/i
-endif
+#  uri_detail KHOP_FOREIGN_CLICK	text =~ /\b(?:cli(?:quez\W|ck\Wa)ici\b|cli(?:cca\W|c\Wa|que\Wa)qu[^<.,a ]|klie?k(?:\Whi?er|ni(?:j|nite)\Wtu[tk]aj)\b)/i
+#endif
 # includes fr, es, it, pt, nl, da, ca, sl, af, and probably others
-describe KHOP_FOREIGN_CLICK	Click here link in non-English Latin text
+#describe KHOP_FOREIGN_CLICK	Click here link in non-English Latin text
 #score	 KHOP_FOREIGN_CLICK	0.01	# 20090526 see also SARE_UN7
-tflags	 KHOP_FOREIGN_CLICK	nopublish  # re-do ifplugin to publish
+#tflags	 KHOP_FOREIGN_CLICK	nopublish  # re-do ifplugin to publish
 # 20100319.  0.8 -> 0.3, re-enabled in masscheck w/out ifplugin, output pending
 # 0.0097/0.0100 spam/ham, 0.493 s/o @ 20100330  0.3 -> 0.1
 # 0.0176/0.0116 spam/ham, 0.603 s/o @ 20100417 net.  0.1 -> 0.01
@@ -211,7 +211,7 @@ ifplugin Mail::SpamAssassin::Plugin::MIMEHeader # {
 
 endif # }
 
-# rawbody  __BUGGED_IMG	m{<img\b[^>]{0,100}\ssrc=.?https?://[^>]{6,80}(?:\?[^>]{8}|[^a-z](?![a-f]{3}|20\d\d[01]\d[0-3]\d)[0-9a-f]{8})}i
+rawbody  __BUGGED_IMG	m{<img\b[^>]{0,100}\ssrc=.?https?://[^>]{6,80}(?:\?[^>]{8}|[^a-z](?![a-f]{3}|20\d\d[01]\d[0-3]\d)[0-9a-f]{8})}i
 
 # inspired by retired SA 2.x HTML_WEB_BUGS rule's eval:html_test('web_bugs')
 # rawbody  __WEB_BUGS	m{<[^>]{4,100}\ssrc=[^>]{8,200}\.(?:pl|cgi|php\d?|asp|jsp|cfm|py|\?[^>]{4})\b}i
