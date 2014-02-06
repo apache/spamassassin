@@ -1,5 +1,9 @@
 ##
 
+#  2014-02.06
+meta		AXB_NOQUIEROMAS		(FREEMAIL_FROM && __HAS_ORGANIZATION && ! __HAS_UA && ! __HAS_XMAIL) 
+describe	AXB_NOQUIEROMAS		Soy lo que soy
+
 # 2014-01-09
 header		AXB_XM_MYECLNT		X-Mailer =~ /^My e-mail client\b/
 describe	AXB_XM_MYECLNT		Ratas castellanas
@@ -23,27 +27,22 @@ header	__TO_ONMS_RCPTS		To:name =~ /\bRecipients\b/
 
 meta	 AXB_ONMS_LEAKS		(__FROM_ONMS && __TO_ONMS && __TO_ONMS_RCPTS)
 describe AXB_ONMS_LEAKS		Onmicrosoft Leak Party
+if (version >= 3.004000)
+tflags	AXB_ONMS_LEAKS		autolearn_force	
+endif
 
 
 # 2013-10-17
 header          AXB_X_FF_SEZ_S          X-Forefront-Antispam-Report =~ /^SFV\:SPM/
 describe        AXB_X_FF_SEZ_S          Forefront sez this is spam
 
-# 2013-06-17
-header		AXB_XM_OL_122		X-Mailer =~ /^Outlook 12\.2$/
-describe	AXB_XM_OL_122		Possibly forged OL version
-
 # 2013-01-30
 header		AXB_BULK_SENDGRID	exists:X-Sendgrid-EID
 describe	AXB_BULK_SENDGRID	Bulk sent via Sendgrid
 
-# 2012-12-01
-header		AXB_X_WUM_TAG		X-WUM-CCI =~ /[\|\~\|]{10}/
-describe	AXB_X_WUM_TAG		Possible Orange spam tag
-
 # 2012-10-29
 header		AXB_X_FORGED_OE61	X-Mailer =~/^Microsoft Outlook Express 6\.1/
-describe	AXB_X_FORGED_OE61	Forge OE version
+describe	AXB_X_FORGED_OE61	Forged OE version
 
 # 2012-10-16
 header          AXB_BULK_ECO            exists:X-CSA-Complaints
@@ -60,17 +59,9 @@ describe        AXB_XM_FORGED_OL2600     Forged OE v. 6.2600
 # header          AXB_X_TREND_AS          X-TM-AS-Result =~ /^Yes/
 # describe        AXB_X_TREND_AS          Trendmicro said this is S
 
-# 2012-08-29
-header          AXB_XM_TURBOM           X-Mailer =~ /TurboMailer/
-describe        AXB_XM_TURBOM           Mailer fingerprint
-
 # 2012-08-15
 header          AXB_X_XM_MMAGIC         X-Mailer =~ /\bMailMagic/
 describe        AXB_X_XM_MMAGIC         Mailer fingerprint
-
-# 2012-07-24
-header          AXB_X_MSEX_ANONYMOUS     X-MS-Exchange-Organization-AuthAs =~ /^Anonymous$/
-describe        AXB_X_MSEX_ANONYMOUS     Seen in exploited MTA msgs
 
 # 2012-03-19
 header		AXB_XM_GETRSP	X-Mailer =~ /^GetResponse\b/
@@ -97,58 +88,28 @@ describe        AXB_XMA_BASP            Mailer fingerprint
 header          AXB_X_AOL_SEZ_S         x-aol-global-disposition =~ /^S$/
 describe        AXB_X_AOL_SEZ_S         AOL said this is S
 
-# 2012-01-01
-# uri             AXB_URI_BIG5    /\¡[CDO]/
-# describe        AXB_URI_BIG5    Uri contains big5 encoding
-
 # 2011-12-08
 header          AXB_XM_BULK_SB          X-Mailer =~ /SendBlaster/
 describe        AXB_XM_BULK_SB          Bulk mail tool
-
 
 # 2011-09-14 - Suggested by rfg / patternity
 header          AXB_XM_SENTBY   exists:X-Mailer-Sent-By
 describe        AXB_XM_SENTBY   Ratware fingerprint
 
-# 2011-07-27
-# header          AXB_XRCVD_XYZCRP         Received =~ /\(envelope\-sender \<\#\@\[\]\>\)/
-# describe        AXB_XRCVD_XYZCRP         sender fingerprint
-
-
-# 2011-07-08
-#header          AXB_XRCVD_APACHE_CTRIP  Received =~ /\bfrom apache by ctrip\.com\b/i
-#describe        AXB_XRCVD_APACHE_CTRIP  possibly forged ctrip sender - apache
-
 header          AXB_XMID_PFIX_CTRIP     Message-ID =~ /\<[A-F0-9]{8}.[0-9]{6}\@ctrip\.com\>/
 describe        AXB_XMID_PFIX_CTRIP     possibly forged ctrip sender - postfix
-
-#header          AXB_XMID_EXIM_CTRIP     Message-ID =~ /\<[A-F0-9]{32}\@ctrip\.com\>/
-#describe        AXB_XMID_EXIM_CTRIP     possibly forged ctrip sender - exim
-
-header          AXB_X_PHPS_CTRIP        X-PHP-Script =~ /\bctrip\.com\/sendmail\.php\b/
-describe        AXB_X_PHPS_CTRIP        possibly forged ctrip sender - php
-
-#header          AXB_XRCVD_FRMCTRIP      Received =~ /from ctrip\.com\b/
-#describe        AXB_XRCVD_FRMCTRIP      possibly forged ctrip sender - rcvd
-
-#
 
 # 2011-07-05
 rawbody         AXB_SSCECCF     /\bSandboxScopeClass ExternalClass\b/
 describe        AXB_SSCECCF     unidentified fingerprint
 
-
-
 #2011-06-05
 header   AXB_XRCVD_EYOU_SEND    Received =~ /\(eyou send program\)/
 describe AXB_XRCVD_EYOU_SEND    fingerprint
-#score   AXB_XRCVD_EYOU_SEND    1.0
-
 
 
 header          AXB_HELO_HOME_UN        X-Spam-Relays-Untrusted =~ /^[^\]]+ helo=\w+\.(lan|home) /i
 describe        AXB_HELO_HOME_UN        HELO from home  - untrusted
-#score          AXB_HELO_HOME_UN        1.0
 
 
 
