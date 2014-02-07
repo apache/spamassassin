@@ -211,7 +211,7 @@ ifplugin Mail::SpamAssassin::Plugin::MIMEHeader # {
 
 endif # }
 
-rawbody  __BUGGED_IMG	m{<img\b[^>]{0,100}\ssrc=.?https?://[^>]{6,80}(?:\?[^>]{8}|[^a-z](?![a-f]{3}|20\d\d[01]\d[0-3]\d)[0-9a-f]{8})}i
+# rawbody  __BUGGED_IMG	m{<img\b[^>]{0,100}\ssrc=.?https?://[^>]{6,80}(?:\?[^>]{8}|[^a-z](?![a-f]{3}|20\d\d[01]\d[0-3]\d)[0-9a-f]{8})}i
 
 # inspired by retired SA 2.x HTML_WEB_BUGS rule's eval:html_test('web_bugs')
 # rawbody  __WEB_BUGS	m{<[^>]{4,100}\ssrc=[^>]{8,200}\.(?:pl|cgi|php\d?|asp|jsp|cfm|py|\?[^>]{4})\b}i
