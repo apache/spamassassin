@@ -2,6 +2,10 @@ CC=		gcc
 CFLAGS=		-g -O2 -Wall 
 LDFLAGS=	-lm
 
+PGAPACK=	/local/pgapack-1.0.0.1
+#PGAPACKLIBDIR=  $(PGAPACK)/lib/linux    # linux
+PGAPACKLIBDIR=  $(PGAPACK)/lib/sun4     # solaris
+
 # What rule scoreset are we using?
 include config
 
@@ -10,16 +14,21 @@ RULES=          ../rules
 
 #### Should be no need to modify below this line
 
-all: badrules perceptron
+all: perceptron
 
 perceptron: perceptron.o
 	$(CC) -o perceptron perceptron.o $(LDFLAGS)
 
-perceptron.o: tmp/rules.pl tmp/tests.h tmp/scores.h
+perceptron.o: tmp/rules_${SCORESET}.pl tmp/tests.h tmp/scores.h
 	$(CC) $(CFLAGS) -c -o perceptron.o perceptron.c
 
-tmp/rules.pl: tmp/.created parse-rules-for-masses
-	perl parse-rules-for-masses -d $(RULES) -s $(SCORESET)
+garescorer: tmp/rules_${SCORESET}.pl tmp/tests.h tmp/scores.h garescorer.c
+	$(CC) $(CFLAGS) -DWL=2 -DOPTIMIZE -L $(PGAPACKLIBDIR) \
+          -I $(PGAPACK)/include garescorer.c -o garescorer -lpgaO $(LDFLAGS)
+
+tmp/rules_${SCORESET}.pl: tmp/.created ../build/parse-rules-for-masses
+	perl ../build/parse-rules-for-masses -d $(RULES) -s $(SCORESET) \
+            -o tmp/rules_${SCORESET}.pl
 
 tmp/tests.h: tmp/.created tmp/ranges.data logs-to-c
 	perl logs-to-c --cffile=$(RULES) --scoreset=$(SCORESET)
@@ -40,5 +49,6 @@ tmp/.created:
 	touch tmp/.created
 
 clean:
-	rm -rf *.o perceptron tmp freqs
+	rm -rf *.o perceptron tmp freqs badrules \
+          perceptron.scores garescorer garescorer.scores
 

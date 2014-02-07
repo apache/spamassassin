@@ -112,11 +112,13 @@ you will need to either
 
   2. Alternatively, let the users train their individual Bayes database.
 
-We have implemented an auto-learning algorithm (option
-'bayes_auto_learn', on by default) which can use high-scoring
-and low-scoring (options 'bayes_auto_learn_threshold_spam' and
-'bayes_auto_learn_threshold_nonspam') mails to improve classification
-efficiency.
+http://wiki.apache.org/spamassassin/SiteWideBayesFeedback can be very
+helpful here.
+
+We have implemented an auto-learning algorithm (option 'bayes_auto_learn', on
+by default) which can use high-scoring and low-scoring (options
+'bayes_auto_learn_threshold_spam' and 'bayes_auto_learn_threshold_nonspam')
+mails to improve classification efficiency.
 
 
 Security And User-Spoofing Clients
@@ -185,22 +187,6 @@ processes running or sleeping, and many other amavis and sendmail processes
 active, the total memory used was around 350MB, plus about 200MB on swap.'
 
 
-Shared Library
---------------
-
-spamc can now be used as libspamc.so; simply run "make spamd/libspamc.so" at
-the top level.  Thanks to Liam Widdowson <liam@inodes.org> for this patch.
-
-
-SSL Support
------------
-
-If you have the OpenSSL headers and libraries installed, you can build an
-SSL-enabled version of spamc or the spamc shared library by running "make
-spamd/sslspamc" or "make spamd/libsslspamc.so".  Thanks to Nate
-<nate@cs.wisc.edu> for this patch.
-
-
 Bugs
 ----
 
@@ -208,7 +194,7 @@ There are no known bugs with this setup.  Several reasonable sized sites
 are now running it on their production mail systems.  However, you should
 still test it completely in *your environment* before trusting all your
 mail to it.  If you discover compilation, runtime, or load-performance
-bugs, please open a ticket at http://bugzilla.spamassassin.org/
+bugs, please open a ticket at http://issues.apache.org/SpamAssassin/
 
 There is an issue if you run spamd using the standard perl installation
 on Mac OS X and certain *BSD-flavored UNIX platforms.  spamd will change

@@ -5,11 +5,12 @@
 # See 'perldoc Mail::SpamAssassin::Conf' for details.
 #
 # <@LICENSE>
-# Copyright 2004 Apache Software Foundation
-# 
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to you under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at:
 # 
 #     http://www.apache.org/licenses/LICENSE-2.0
 # 
@@ -25,16 +26,22 @@
 
 require_version @@VERSION@@
 
-# support for Habeas sender-warranted email: http://www.habeas.com/
-header __HABEAS_SWE	eval:message_is_habeas_swe()
+header __HAS_RCVD       exists:Received
+meta NO_RECEIVED        (!__HAS_RCVD)
+tflags NO_RECEIVED      nice userconf
+describe NO_RECEIVED    Informational: message has no Received headers
 
-# example rule
-#meta HABEAS_SWE	(__HABEAS_SWE && !RCVD_BY_IP && !RCVD_DOUBLE_IP_LOOSE && !MIME_HTML_ONLY && !MPART_ALT_DIFF && !RCVD_IN_BL_SPAMCOP_NET && !RCVD_IN_DSBL && !RCVD_IN_XBL)
-#describe HABEAS_SWE	Has Habeas warrant mark (http://www.habeas.com/)
-#tflags HABEAS_SWE	nice
+###########################################################################
+
+ifplugin Mail::SpamAssassin::Plugin::RelayEval
 
 # The message was never sent via an untrustworthy host.
 header ALL_TRUSTED      eval:check_all_trusted()
-describe ALL_TRUSTED    Did not pass through any untrusted hosts
-tflags ALL_TRUSTED      nice
+describe ALL_TRUSTED    Passed through trusted hosts only via SMTP
+tflags ALL_TRUSTED      nice userconf
 
+header NO_RELAYS        eval:check_no_relays()
+tflags NO_RELAYS        nice userconf
+describe NO_RELAYS      Informational: message was not relayed via SMTP
+
+endif

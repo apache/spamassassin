@@ -10,8 +10,8 @@ exit if $SKIP_SPAMD_TESTS;
 
 %patterns = (
 
-q{ FROM_ENDS_IN_NUMS, }, 'endsinnums',
-q{ NO_REAL_NAME, }, 'noreal',
+q{ TEST_ENDSNUMS, }, 'endsinnums',
+q{ TEST_NOREALNAME, }, 'noreal',
 
 
 );

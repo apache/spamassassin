@@ -1,0 +1,68 @@
+## khop-general.cf	v 2010042011
+## Khopesh General purpose spam filters
+## 
+## Spamassassin rules written by Adam Katz <antispamATkhopiscom>
+## http://khopesh.com/Anti-spam
+## khopesh on irc://irc.freenode.net/#spamassassin
+## 
+## sa-learn --gpgkey E8B493D6 --channel khop-general.sa.khopesh.com
+
+# SVN version; minor tweaks, removed scores and published/redundant rules.
+
+# FCrDNS possibilities (4 and 5 aren't technically FCrDNS failures):
+# 1:  IP -> rDNS: Domain -> DNS: IP2 -> FAIL (mismatch) -> KHOP_MAYBE_FORGED
+# 2:  IP -> rDNS: [none] ->-> FAIL (no rDNS) -> RDNS_NONE
+# 3:  IP -> rDNS: Domain -> DNS: [none] -> FAIL (no DNS) -> uncaught
+# 4:  IP -> rDNS: Domain != HELO -> ~FAIL -> KHOP_HELO_FCRDNS
+# 5:  HELO -> DNS: IP2 != IP -> ~FAIL -> uncaught
+
+# Sendmail's FCrDNS, see http://www.sendmail.org/faq/section3#3.38
+header __MAY_BE_FORGED	Received =~ /\(may be forged\)/
+meta	 MAY_BE_FORGED	__MAY_BE_FORGED && !__NOT_SPOOFED && !__VIA_ML
+describe MAY_BE_FORGED	Relay IP's reverse DNS does not resolve to IP
+#score	 MAY_BE_FORGED	0.4 # 20050802
+# Note, masscheck lacks DKIM, so the numbers are dirtier than reality
+# 21.3121/0.5060 spam/ham, 0.977 s/o @ 20091201 0.8 -> 1.25
+# 24.8786/1.9789 spam/ham, 0.926 s/o @ 20100203 1.25 -> 0.8
+# 22.2650/0.4342 spam/ham, 0.982 s/o @ 20100318
+# 22.6304/0.3898 spam/ham, 0.983 s/o @ 20100329 0.4
+# 22.6600/0.3742 spam/ham, 0.984 s/o @ 20100417 net.  updated not_spoofed.
+
+body	 DEAR_EMAIL	/^\s*Dear\b.{0,70}\w\@\w/i
+describe DEAR_EMAIL	Message contains Dear email address
+score    DEAR_EMAIL	1.5 # 20090424
+# 3.6598/0.0083 spam/ham, 0.998 s/o @ 20091201 0.75 -> 1.75
+# 1.0903/0.0169 spam/ham, 0.985 s/o @ 20100203 removed KHOP_ prefix
+# 0.6115/0.0083 spam/ham, 0.987 s/o @ 20100318
+# published with sa3.3.1 at score  0.000 0.000 0.000 0.000 (!)
+# 0.4706/0.0077 spam/ham, 0.984 s/o @ 20100329 1.5
+# 0.1097/0.0107 spam/ham, 0.911 s/o @ 20100417 net
+
+rawbody	 DEAR_NOBODY	/^\s*Dear\b[^a-zA-Z]{1,70}\n/mi
+describe DEAR_NOBODY	Message contains Dear but with no name
+#score    DEAR_NOBODY	0.001 # 20090408
+# 0.8729/0.0108 spam/ham, 0.988 s/o @ 20091201
+# 0.5260/0.0175 spam/ham, 0.968 s/o @ 20100203
+# 0.1154/0.0087 spam/ham, 0.930 s/o @ 20100318
+# 0.0329/0.0080 spam/ham, 0.803 s/o @ 20100417 net
+# 0.0138/0.0084 spam/ham, 0.620 s/o @ 20100424 net.  oof, score 1.25->0.001
+
+uri	 __FORGED_URL_DOM_1	m'https?://[^/]{0,40}\.(?:com|org|edu|net|gov|com?\.[a-z]{2})\.\w[^/\s]{4}'i
+rawbody	 __FORGED_URL_DOM_2	m'(^|\W)https?://[\w.-]{0,40}\.(?:com|org|edu|net|gov|com?\.[a-z]{2})\.\w[^/\s]{5}'i
+meta	 FORGED_URL_DOM	__FORGED_URL_DOM_1 || __FORGED_URL_DOM_2
+describe FORGED_URL_DOM	Link domain has a TLD as a subdomain
+#score	 FORGED_URL_DOM	0.1	# 200904
+# 0.4626/0.0417 spam/ham, 0.917 s/o @ 20091201.  removed .mil
+# 0.5174/1.9899 spam/ham, 0.206 s/o @ 20100203.  1 -> 0.001, strip KHOP_, \s
+# 0.4389/0.0644 spam/ham, 0.872 s/o @ 20100318.  0.001 -> 0.1
+# 0.5010/0.0701 spam/ham, 0.877 s/o @ 20100417 net.
+
+header	 FROM_WWW	From:name =~ /\bwww\.[^\s"<\/\@]{4,60}\.\w\w/i
+describe FROM_WWW	Sender name appears to be a website
+#score	 FROM_WWW	0.75
+# 0.2425/0.0089 spam/ham, 0.965 s/o @ 20100130
+# 0.3716/0.0062 spam/ham, 0.984 s/o @ 20100203
+# 0.3219/0.0052 spam/ham, 0.984 s/o @ 20100313
+# 0.4949/0.0189 spam/ham, 0.963 s/o @ 20100318
+# 0.2273/0.0080 spam/ham, 0.966 s/o @ 20100417 net.  1.75 -> 0.75
+

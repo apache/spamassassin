@@ -2,7 +2,12 @@
 
 use lib '.'; use lib 't';
 use SATest; sa_t_init("whitelist_from");
-use Test; BEGIN { plan tests => 32 };
+
+use constant TEST_ENABLED => conf_bool('run_long_tests');
+
+use Test;
+BEGIN { plan tests => TEST_ENABLED ? 32 : 0 };
+exit unless TEST_ENABLED;
 
 # ---------------------------------------------------------------------------
 

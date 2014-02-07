@@ -5,11 +5,12 @@
 # See 'perldoc Mail::SpamAssassin::Conf' for details.
 #
 # <@LICENSE>
-# Copyright 2004 Apache Software Foundation
-# 
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to you under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at:
 # 
 #     http://www.apache.org/licenses/LICENSE-2.0
 # 
@@ -28,14 +29,8 @@
 # user slip-up could result in scribbling side-effects in the bayes
 # db as a result -- which is hard to remedy.
 
-# TODO: this test name is hard-coded several places, change everywhere
-header AWL			eval:check_from_in_auto_whitelist()
-describe AWL			From: address is in the auto white-list
-tflags AWL			userconf noautolearn
-priority AWL                    1000
+ifplugin Mail::SpamAssassin::Plugin::WLBLEval
 
-# we *do* allow the user to autolearn based on this, because it's hard
-# to accidentally blacklist someone's From address.
 header USER_IN_BLACKLIST	eval:check_from_in_blacklist()
 describe USER_IN_BLACKLIST	From: address is in the user's black-list
 tflags USER_IN_BLACKLIST	userconf noautolearn
@@ -50,7 +45,7 @@ tflags USER_IN_DEF_WHITELIST	userconf nice noautolearn
 
 header USER_IN_BLACKLIST_TO     eval:check_to_in_blacklist()
 describe USER_IN_BLACKLIST_TO   User is listed in 'blacklist_to'
-tflags USER_IN_BLACKLIST_TO     userconf nice noautolearn
+tflags USER_IN_BLACKLIST_TO     userconf noautolearn
 
 header USER_IN_WHITELIST_TO     eval:check_to_in_whitelist()
 describe USER_IN_WHITELIST_TO   User is listed in 'whitelist_to'
@@ -80,64 +75,30 @@ def_whitelist_from_rcvd  billing@networksolutions.com           networksolutions
 def_whitelist_from_rcvd  outbound-response@networksolutions.com networksolutions.com
 def_whitelist_from_rcvd  hostmaster@internic.net                internic.net
 def_whitelist_from_rcvd  support@register.com                   register.com
-def_whitelist_from_rcvd  nytdirect@nytimes.com                  nytimes.com
+
 def_whitelist_from_rcvd  petitions@petitiononline.com           petitiononline.com
-
-def_whitelist_from_rcvd  *@amazon.com                           amazon.com
-def_whitelist_from_rcvd  *@*.amazon.com                         amazon.com
-def_whitelist_from_rcvd  *@amazon.co.uk                         amazon.com
-def_whitelist_from_rcvd  *@*.amazon.co.uk                       amazon.com
-def_whitelist_from_rcvd  *@ora.com		                    oreilly.com
-def_whitelist_from_rcvd  *@*.ora.com                            oreilly.com
-def_whitelist_from_rcvd  *@walmart.com                          walmart.com
-def_whitelist_from_rcvd  *@bn.com                               bn.com
 def_whitelist_from_rcvd  *@online.telstra.com.au                telstra.com.au
-
 def_whitelist_from_rcvd  *@yahoo-inc.com                        yahoo-inc.com
 def_whitelist_from_rcvd  *@yahoo-inc.com                        yahoo.com
-def_whitelist_from_rcvd  *@mypoints.com                         mypoints.com
-def_whitelist_from_rcvd  *@*.mypoints.com                       mypoints.com
 def_whitelist_from_rcvd  *@orbitz.com                           orbitz.com
-def_whitelist_from_rcvd  *@paypal.com                           paypal.com
 
-# bugtraq: can contain malicious Javascript etc.
-def_whitelist_from_rcvd  *@securityfocus.com                    securityfocus.com
-def_whitelist_from_rcvd  *@LISTSERV.NTBUGTRAQ.COM		    lsoft.com
-
+def_whitelist_from_rcvd  *@LISTSERV.NTBUGTRAQ.COM                  lsoft.com
 def_whitelist_from_rcvd  freshmeat-news-admin@lists.freshmeat.net  freshmeat.net
 def_whitelist_from_rcvd  *@mailer.whitehat.com                     whitehat.com
-def_whitelist_from_rcvd  *@mediaunspun.imakenews.net               imakenews.com
 def_whitelist_from_rcvd  *@spamex.com                              spamex.com
+def_whitelist_from_rcvd  *enotify@usenix.org                       voyager.usenix.org
 
-def_whitelist_from_rcvd  *enotify@usenix.org                    voyager.usenix.org
-
-# sender of Cringley newsletter
-def_whitelist_from_rcvd *@bdcimail.com                          mailcontrol.bellevuedata.com
 # internet.com lists
-def_whitelist_from_rcvd listsupport@internet.com                lyris.net
-
-# Silicon.com newslettters - we see thousands of these
-def_whitelist_from_rcvd *@silicon.com                           lists.nmtv.net
+def_whitelist_from_rcvd  listsupport@internet.com               lyris.net
 
 # FT.com newsletters
-def_whitelist_from_rcvd *@newsbyemail.ft.com                    lodo.exactis.com
-
-# C|Net news.com newsletters
-def_whitelist_from_rcvd *@newsletter.online.com                 cnet.com
+def_whitelist_from_rcvd  *@newsbyemail.ft.com                   lodo.exactis.com
 
 # Friends re-united (popular UK old-school-network)
-def_whitelist_from_rcvd *@friendsreunited.co.uk                 friendsreunited.co.uk
+def_whitelist_from_rcvd  *@friendsreunited.co.uk                friendsreunited.co.uk
 
 # RFC Editor mails
-def_whitelist_from_rcvd rfc-editor@rfc-editor.org		    isi.edu
+def_whitelist_from_rcvd  rfc-editor@rfc-editor.org              isi.edu
+def_whitelist_from_rcvd  *@*.nsi-direct.com                     e-dialog.com
 
-# Verisign: bug 1056
-def_whitelist_from_rcvd *@*.nsi-direct.com		 	    e-dialog.com
-
-# bug 1348
-def_whitelist_from_rcvd *@warehouse.com			    warehouse.com
-def_whitelist_from_rcvd *@enews.buy.com			    enews.buy.com
-def_whitelist_from_rcvd *@palm.m0.net			    palm.m0.net
-def_whitelist_from_rcvd *@handspring.4at1.com		    handspring.4at1.com
-def_whitelist_from_rcvd *@*.efax.com			    efax.com
-
+endif

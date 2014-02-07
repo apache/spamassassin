@@ -1,0 +1,79 @@
+# Settings for SpamAssassin test suite.   These are the default settings.
+# Please copy this file to 'config' and edit to your taste.
+
+# ---------------------------------------------------------------------------
+# Run time-consuming tests during 'make test'.  (These tests take longer
+# than 10 seconds each on a reasonably fast box circa year 2000.)
+
+# Defaulting to run long tests per bug 6776
+run_long_tests=y
+
+# ---------------------------------------------------------------------------
+# Run network rule tests during 'make test'.
+# test scripts may fail due to network problems)
+
+run_net_tests=n
+
+# Run DCC Tests
+run_dcc_tests=n
+
+# ---------------------------------------------------------------------------
+# Run SQL-based user pref tests during 'make test' REQUIRES DBD::SQLite
+run_sql_pref_tests=n
+
+# ---------------------------------------------------------------------------
+# Run SQL-based Auto-whitelist tests during 'make test' (additional
+# information required, below:)
+run_awl_sql_tests=n
+
+# SQL AWL DSN
+user_awl_dsn=dbi:mysql:spamassassin:localhost
+# SQL AWL DB username
+user_awl_sql_username=
+# SQL AWL DB password
+user_awl_sql_password=
+# SQL AWL tablename
+user_awl_sql_table=awl
+
+# ---------------------------------------------------------------------------
+# Run Bayes SQL storage tests during 'make test' (additional
+# information required, below:)
+run_bayes_sql_tests=n
+
+# Bayes Store Module (bayes_store_module)
+bayes_store_module=Mail::SpamAssassin::BayesStore::SQL
+# Bayes SQL DSN (bayes_sql_dsn)
+bayes_sql_dsn=dbi:mysql:spamassassin:localhost
+# Bayes SQL DB username (bayes_sql_username)
+bayes_sql_username=
+# Bayes SQL DB password (bayes_sql_password)
+bayes_sql_password=
+
+# ---------------------------------------------------------------------------
+
+# This test will kill any processes on the system containing the string 'spamd
+# child' in their process title, so is not run by default.  Enable by setting
+# this to "y".
+run_spamd_prefork_stress_test=n
+
+# ---------------------------------------------------------------------------
+
+# rule_names.t fails continually due to changes in the rulesrc repository;
+# TODO: we need a better way to test this.
+run_rule_name_tests=n
+
+# ---------------------------------------------------------------------------
+
+# This test requires the Devel::SawAmpersand CPAN module, and may also fail
+# depending on changes in the third-party modules we import.
+run_saw_ampersand_test=n
+
+# ---------------------------------------------------------------------------
+
+# The "root_*.t" tests require root privileges, and may create files in
+# the filesystem as part of the test.  Disabled by default.
+run_root_tests=n
+
+# the lang_pl_tests.t checks for problems in Polish language locales. 
+# disabled per bug 6992
+run_pl_tests=n

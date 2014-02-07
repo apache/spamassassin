@@ -11,5 +11,5 @@ close IN;
 
 print $VERSION;
 print "-$EXTRA" if ( $EXTRA );
-print "-cvs" if ( $DEVEL );
+print "-svn" if ( $DEVEL );
 print "\n";

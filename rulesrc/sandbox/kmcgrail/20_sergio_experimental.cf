@@ -1,0 +1,73 @@
+# SpamAssassin rules file: kam sandbox
+#
+# Please don't modify this file as your changes will be overwritten with
+# the next update. Use @@LOCAL_RULES_DIR@@/local.cf instead.
+# See 'perldoc Mail::SpamAssassin::Conf' for details.
+#
+# <@LICENSE>
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to you under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at:
+# 
+#     http://www.apache.org/licenses/LICENSE-2.0
+# 
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# </@LICENSE>
+#
+###########################################################################
+
+# RULES FOR TESTING SUBMITTED BY Sergio secmas@gmail.com
+
+header   SERGIO_SUBJECT_VIAGRA01   Subject =~ /v[^a-zA-Z0-9]{0,3}[i1l][^a-zA-Z0-9]{0,3}a[^a-zA-Z0-9 ]{0,3}g[^a-zA-Z0-9]{0,3}r[^a-zA-Z0-9]{0,3}a/i
+describe SERGIO_SUBJECT_VIAGRA01   Viagra garbled subject
+
+header   SERGIO_SUBJECT_PORN002     Subject =~ /p[^a-zA-Z0-9]{0,3}[i1l][^a-zA-Z0-9]{0,3}c[^a-zA-Z0-9]{0,3}t[^a-zA-Z0-9]{0,3}u[^a-zA-Z0-9]{1,3}r[^a-zA-Z0-9]{0,3}e[^a-zA-Z0-9]{0,3}s/i
+describe SERGIO_SUBJECT_PORN002     Pictures garbled subject
+
+header   SERGIO_SUBJECT_PORN003     Subject =~ /v[^a-zA-Z0-9]{1,3}[i1l][^a-zA-Z0-9]{0,3}d[^a-zA-Z0-9]{0,3}e[^a-zA-Z0-9]{0,3}[o0][^a-zA-Z0-9]{0,3}s/i
+describe SERGIO_SUBJECT_PORN003     Videos garbled subject
+
+header   SERGIO_SUBJECT_PORN004     Subject =~ /a[^a-zA-Z0-9]{1,3}d[^a-zA-Z0-9]{1,3}[uv][^a-zA-Z0-9]{1,3}[l1\|][^a-zA-Z0-9]{1,3}t/i
+describe SERGIO_SUBJECT_PORN004     Adult garbled subject
+
+header   SERGIO_SUBJECT_PORN005     Subject =~ /\bp[^a-zA-Z0-9]{0,3}[o0][^a-zA-Z0-9]{1,3}r[^a-zA-Z0-9]{0,3}n/i
+describe SERGIO_SUBJECT_PORN005     Porn garbled subject
+
+header   SERGIO_SUBJECT_PORN006     Subject =~ /b[^a-zA-Z0-9]{0,3}l[^a-zA-Z0-9]{0,3}[o0][^a-zA-Z0-9]{0,3}w[^a-zA-Z0-9]{0,3}j[^a-zA-Z0-9]{0,3}[o0][^a-zA-Z0-9]{0,3}b/i
+describe SERGIO_SUBJECT_PORN006     B\*\*\* J\*\* garbled subject
+
+header   SERGIO_SUBJECT_PORN007     Subject =~ /bf[^a-zA-Z0-9]{0,3}[i1l][^a-zA-Z0-9]{1,3}[i1l][^a-zA-Z0-9]{0,3}m/i
+describe SERGIO_SUBJECT_PORN007     Film garbled subject
+
+header   SERGIO_SUBJECT_PORN008     Subject =~ /m[^a-zA-Z0-9]{0,3}a[^a-zA-Z0-9]{0,3}t[^a-zA-Z0-9]{0,3}[uv][^a-zA-Z0-9]{0,3}r[^a-zA-Z0-9]{0,3}e/i
+describe SERGIO_SUBJECT_PORN008     Mature garbled subject
+
+header   SERGIO_SUBJECT_PORN009     Subject =~ /u[^a-zA-Z0-9]{0,3}n[^a-zA-Z0-9]{0,3}d[^a-zA-Z0-9]{0,3}r[^a-zA-Z0-9]{0,3}e[^a-zA-Z0-9]{0,3}s[^a-zA-Z0-9]{0,3}s/i
+describe SERGIO_SUBJECT_PORN009     Undress garbled subject
+
+header   SERGIO_SUBJECT_PORN010     Subject =~ /m[^a-zA-Z0-9]{1,3}o[^a-zA-Z0-9]{1,3}v[^a-zA-Z0-9]{1,3}i[^a-zA-Z0-9]{1,3}e/i
+describe SERGIO_SUBJECT_PORN010     Movies garbled subject
+
+header   SERGIO_SUBJECT_PORN011     Subject =~ /s[^a-zA-Z0-9]{1,4}e[^a-zA-Z0-9]{1,4}x/i
+describe SERGIO_SUBJECT_PORN011     Sex garbled subject
+
+header   SERGIO_SUBJECT_PORN012     Subject =~ /s[^a-zA-Z0-9]{1,4}c[^a-zA-Z0-9]{0,4}h[^a-zA-Z0-9]{0,4}[o0][^a-zA-Z0-9]{0,4}[o0][^a-zA-Z0-9]{0,4}[1l|]/i
+describe SERGIO_SUBJECT_PORN012     School garbled subject
+
+header   SERGIO_SUBJECT_PORN013     Subject =~ /g[^a-zA-Z0-9]{1,3}[i1l][^a-zA-Z0-9]{1,3}r[^a-zA-Z0-9]{1,3}[1l\|]/i
+describe SERGIO_SUBJECT_PORN013     Girls garbled subject
+
+header   SERGIO_SUBJECT_PORN014     Subject =~ /f[^a-zA-Z0-9]{0,3}[uv][^a-zA-Z0-9]{0,3}c[^a-zA-Z0-9]{0,3}k/i
+describe SERGIO_SUBJECT_PORN014     F\*\*\* garbled subject
+
+header   SERGIO_SUBJECT_PORN015     Subject =~ /l[^a-zA-Z0-9]{0,3}e[^a-zA-Z0-9]{0,3}s[^a-zA-Z0-9]{0,3}b[^a-zA-Z0-9]{0,3}[i1l][^a-zA-Z0-9]{0,3}a[^a-zA-Z0-9]{0,3}n/i
+describe SERGIO_SUBJECT_PORN015     Lesbian garbled subject
+
+#EOF

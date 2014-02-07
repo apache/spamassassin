@@ -1,0 +1,9 @@
+opts_weekly="--net -j 8 --reuse"
+opts_nightly="--reuse"
+opts="--cache --cachedir=/tmpfs/aicache_nightly --restart=500 ham:detect:/export/home/bbmass/uploadedcorpora/__USERNAME__/ham/* --after=-15552000 --tail=50000 spam:detect:/export/home/bbmass/uploadedcorpora/__USERNAME__/spam/*"
+tmp=$HOME/tmp
+tree=$HOME/svn
+prefs_weekly=$HOME/user_prefs.weekly
+prefs_nightly=$HOME/user_prefs.nightly
+username=bb-__USERNAME__
+password=__RSYNC_PASSWORD__

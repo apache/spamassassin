@@ -54,6 +54,14 @@ switch:
 
  make test TEST_VERBOSE=1
 
+Options set using 'config'
+--------------------------
+
+The test suite accepts some configuration information to identify optional
+features that should be tested, or to provide environment-specific settings
+needed to test some features (such as an LDAP server or SQL server to use
+testing those subsystems).   See 'config.dist' for details.
+
 Options set using environment variables
 ---------------------------------------
 
@@ -64,15 +72,14 @@ do is beyond the scope of this README. If you need the degree of
 customisation that they offer, you should be able to read the code in
 SATest.pm to see how they are used.
 
-Only SPAMD_HOST and SPAMD_PORT provide customisation that might be
-required in common configurations. They are documented in the
-following section. All the variables are listed here to document the
-variables that will conflict with the regression tests if they happen
-to be set to arbitrary values.
+See the following sections for customisations that may be required in common
+configurations.  All the variables are listed here to document which may
+conflict with the regression tests if they happen to be set to arbitrary
+values.
 
 SPAMD_HOST
 SPAMD_PORT
-
+SPAMD_LOCALHOST
 SCRIPT
 SPAMC_SCRIPT
 SALEARN_SCRIPT
@@ -126,5 +133,12 @@ and then in a Windows CMD.EXE shell you could
  nmake test
 
 to run the spamc tests.
+
+Testing in a FreeBSD jail
+-------------------------
+
+see https://issues.apache.org/SpamAssassin/show_bug.cgi?id=5761 for details;
+basically, set SPAMD_LOCALHOST to indicate the IP address to use to contact
+processes running on the same host, instead of 127.0.0.1.
 
  ------------------------------

@@ -12,11 +12,12 @@
 # (as most of them do), please add it to rules/20_phrases.cf instead.
 #
 # <@LICENSE>
-# Copyright 2004 Apache Software Foundation
-# 
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to you under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at:
 # 
 #     http://www.apache.org/licenses/LICENSE-2.0
 # 
@@ -38,46 +39,9 @@ describe GTUBE		Generic Test for Unsolicited Bulk Email
 tflags GTUBE		userconf noautolearn
 
 ###########################################################################
-# Message digest tests
 
-full RAZOR2_CHECK	eval:check_razor2()
-describe RAZOR2_CHECK	Listed in Razor2 (http://razor.sf.net/)
-tflags RAZOR2_CHECK	net
-
-# cf (confidence level) is how likely the message is spam.  RAZOR2_CHECK
-# returns true if cf>=min_cf (as defined by user/config).  These return
-# true depending on what cf value the message has.  The algorithm goes:
-# check the message via razor, then go through each mime part and check
-# how razor scored it.  If the part is contested (ie: it's been reported
-# as both ham and spam) it's ignored.  SA takes the highest non-contested
-# part cf score and returns it for the range rules.  ie: This is essentially
-# Razor 2's logic_method 4.
-#
-# Note: Disabling RAZOR2_CHECK (score RAZOR2_CHECK 0) will also disable
-# these checks.
-#
-# Note: The scores are set to 0 on these tests right now until they get
-# better integrated with SA overall.
-#
-body	RAZOR2_CF_RANGE_51_100	eval:check_razor2_range('51','100')
-tflags  RAZOR2_CF_RANGE_51_100	net
-describe RAZOR2_CF_RANGE_51_100	Razor2 gives confidence level above 50%
-
-full DCC_CHECK		eval:check_dcc()
-describe DCC_CHECK	Listed in DCC (http://rhyolite.com/anti-spam/dcc/)
-tflags DCC_CHECK	net
-
-full PYZOR_CHECK	eval:check_pyzor()
-describe PYZOR_CHECK	Listed in Pyzor (http://pyzor.sf.net/)
-tflags PYZOR_CHECK	net
-
-# bug 2220. nice results
-meta DIGEST_MULTIPLE       RAZOR2_CHECK + DCC_CHECK + PYZOR_CHECK > 1
-describe DIGEST_MULTIPLE   Message hits more than one network digest check
-tflags DIGEST_MULTIPLE     net
-
-# this seems to be the new fashion (as of Jul 5 2002).  base64-encoded parts need to
-# be stripped before this match
+# this seems to be the new fashion (as of Jul 5 2002).  base64-encoded
+# parts need to be stripped before this match
 body TRACKER_ID		/^[a-z0-9]{6,24}[-_a-z0-9]{12,36}[a-z0-9]{6,24}\s*\z/is
 describe TRACKER_ID	Incorporates a tracking ID number
 
@@ -85,6 +49,71 @@ body WEIRD_QUOTING	/[\042\223\224\262\263\271]{2}\S{0,16}[\042\223\224\262\263\2
 describe WEIRD_QUOTING	Weird repeated double-quotation marks
 
 ###########################################################################
+# multipart/alternative has very good accuracy, other multipart types are
+# similar to MIME_HTML_ONLY so they don't need a separate rule
+header __CTYPE_MULTIPART_ALT	Content-Type =~ /multipart\/alternative/i
+meta MIME_HTML_ONLY_MULTI	(__CTYPE_MULTIPART_ALT && MIME_HTML_ONLY)
+describe MIME_HTML_ONLY_MULTI	Multipart message only has text/html MIME parts
+
+# note: __HIGHBITS is used in rules/20_html_tests.cf, HTML_CHARSET_FARAWAY
+meta MIME_CHARSET_FARAWAY	(__MIME_CHARSET_FARAWAY && __HIGHBITS)
+describe MIME_CHARSET_FARAWAY	MIME character set indicates foreign language
+tflags MIME_CHARSET_FARAWAY	userconf
+
+###########################################################################
+
+# duncf
+body EMAIL_ROT13     /\b[a-z(\]-]+\^[a-z-]+\([a-z]{2,3}\b/
+describe EMAIL_ROT13 Body contains a ROT13-encoded email address
+test EMAIL_ROT13 ok  qhabs^ebtref(pbz
+test EMAIL_ROT13 ok  zxrggyre^riv-vap(pbz
+test EMAIL_ROT13 fail	duncf-nospam@rogers.com
+
+# this could use more work
+body __LONGWORDS_A	/\b(?:[a-z]{8,}[\s\.]+){6}/
+body __LONGWORDS_B	/\b(?:[a-z]{6,}[\s\.]+){9}/
+body __LONGWORDS_C	/\b(?:[a-z]{5,}[\s\.]+){10}/
+meta LONGWORDS		(__LONGWORDS_A + __LONGWORDS_B + __LONGWORDS_C > 1)
+describe LONGWORDS	Long string of long words
+
+
+###########################################################################
+
+ifplugin Mail::SpamAssassin::Plugin::BodyEval
+
+
+# This rule uses a simple algorithm to determine if the text and html
+# parts of an multipart/alternative message are different.
+body MPART_ALT_DIFF	eval:multipart_alternative_difference('99', '100')
+describe MPART_ALT_DIFF	HTML and text parts are different
+
+body MPART_ALT_DIFF_COUNT	eval:multipart_alternative_difference_count('3', '1')
+describe MPART_ALT_DIFF_COUNT	HTML and text parts are different
+
+body BLANK_LINES_80_90	eval:check_blank_line_ratio('80','90','4')
+describe BLANK_LINES_80_90  Message body has 80-90% blank lines
+
+# it's the ratio of spaces to non-spaces in each paragraph.  apparently
+# messages where generally there are lots of spaces mean the message is spam.
+# 8.532  10.6051   0.1897    0.982   0.75    0.01  T_VERTICAL_WORDS_TVD_1
+# bug 6149: avoid common .jp false positives
+header __SUBJECT_UTF8_B_ENCODED     Subject:raw =~ /=\?UTF-8\?B\?/
+body __TVD_SPACE_RATIO	eval:tvd_vertical_words('0','10')
+meta TVD_SPACE_RATIO    (__TVD_SPACE_RATIO && !__ISO_2022_JP_DELIM && !__SUBJECT_UTF8_B_ENCODED && !__HIGHBITS)
+
+endif
+
+###########################################################################
+
+ifplugin Mail::SpamAssassin::Plugin::MIMEEval
+
+# 0.767   0.9097   0.0000    1.000   0.84    1.00  MULTIPART_ALT_NON_TEXT
+body MULTIPART_ALT_NON_TEXT	eval:check_ma_non_text()
+
+body CHARSET_FARAWAY		eval:check_for_faraway_charset()
+describe CHARSET_FARAWAY	Character set indicates a foreign language
+tflags CHARSET_FARAWAY		userconf
+
 # these tests doesn't actually use rawbody since rawbody isn't raw enough;
 # they must be written very carefully to avoid modifying the original content
 
@@ -98,14 +127,13 @@ describe __MIME_QP		Includes a quoted-printable attachment
 rawbody MIME_BASE64_BLANKS	eval:check_for_mime('mime_base64_blanks')
 describe MIME_BASE64_BLANKS	Extra blank lines in base64 encoding
 
-rawbody MIME_BASE64_NO_NAME	eval:check_for_mime('mime_base64_no_name')
-describe MIME_BASE64_NO_NAME	base64 attachment does not have a file name
 
 rawbody MIME_BASE64_TEXT	eval:check_for_mime('mime_base64_encoded_text')
 describe MIME_BASE64_TEXT	Message text disguised using base64 encoding
 
-rawbody  MIME_MISSING_BOUNDARY	eval:check_for_mime('mime_missing_boundary')
-describe MIME_MISSING_BOUNDARY	MIME section missing boundary
+
+body MISSING_MIME_HB_SEP	eval:check_msg_parse_flags('missing_mime_head_body_separator')
+describe MISSING_MIME_HB_SEP	Missing blank line between MIME header and body
 
 body MIME_HTML_MOSTLY		eval:check_mime_multipart_ratio('0.00','0.01')
 describe MIME_HTML_MOSTLY	Multipart message mostly text/html MIME
@@ -114,73 +142,24 @@ describe MIME_HTML_MOSTLY	Multipart message mostly text/html MIME
 body MIME_HTML_ONLY		eval:check_for_mime_html_only()
 describe MIME_HTML_ONLY		Message only has text/html MIME parts
 
-# multipart/alternative has very good accuracy, other multipart types are
-# similar to MIME_HTML_ONLY so they don't need a separate rule
-header __CTYPE_MULTIPART_ALT	Content-Type =~ /multipart\/alternative/i
-meta MIME_HTML_ONLY_MULTI	(__CTYPE_MULTIPART_ALT && MIME_HTML_ONLY)
-describe MIME_HTML_ONLY_MULTI	Multipart message only has text/html MIME parts
-
 rawbody  MIME_QP_LONG_LINE	eval:check_for_mime('mime_qp_long_line')
 describe MIME_QP_LONG_LINE	Quoted-printable line longer than 76 chars
 
-# actually indicates viruses, typically; just used here to clean corpora.
-rawbody  MIME_SUSPECT_NAME	eval:check_for_mime('mime_suspect_name')
-describe MIME_SUSPECT_NAME	MIME filename does not match content
-# todo: better tflags category for these tests
-tflags MIME_SUSPECT_NAME userconf
-
-# note: __HIGHBITS is used by HTML_CHARSET_FARAWAY
 rawbody __MIME_CHARSET_FARAWAY	eval:check_for_mime('mime_faraway_charset')
-body __HIGHBITS			/(?:[\x80-\xff].?){4,}/
-meta MIME_CHARSET_FARAWAY	(__MIME_CHARSET_FARAWAY && __HIGHBITS)
-describe MIME_CHARSET_FARAWAY	MIME character set indicates foreign language
-tflags MIME_CHARSET_FARAWAY	userconf
 
-# This rule uses a simple algorithm to determine if the text and html
-# parts of an multipart/alternative message are different.
-body MPART_ALT_DIFF	eval:multipart_alternative_difference('99', '100')
-describe MPART_ALT_DIFF	HTML and text parts are different
+body MIME_BAD_ISO_CHARSET	eval:check_for_mime('mime_bad_iso_charset')
+describe MIME_BAD_ISO_CHARSET	MIME character set is an unknown ISO charset
+
+endif
 
 ###########################################################################
 
-body CHARSET_FARAWAY		eval:check_for_faraway_charset()
-describe CHARSET_FARAWAY	Character set indicates a foreign language
-tflags CHARSET_FARAWAY		userconf
+ifplugin Mail::SpamAssassin::Plugin::URIEval
 
-body UNWANTED_LANGUAGE_BODY	eval:check_language()
-describe UNWANTED_LANGUAGE_BODY	Message written in an undesired language
-tflags UNWANTED_LANGUAGE_BODY	userconf
+body HTTPS_IP_MISMATCH	eval:check_https_ip_mismatch()
+describe HTTPS_IP_MISMATCH	IP to HTTPS link found in HTML
 
-body BODY_8BITS			eval:check_for_body_8bits()
-describe BODY_8BITS		Body includes 8 consecutive 8-bit characters
-tflags BODY_8BITS		userconf
+body URI_TRUNCATED	eval:check_uri_truncated()
+describe URI_TRUNCATED	Message contained a URI which was truncated
 
-# duncf
-body EMAIL_ROT13     /\b[a-z(\]-]+\^[a-z-]+\([a-z]{2,3}\b/
-describe EMAIL_ROT13 Body contains a ROT13-encoded email address
-test EMAIL_ROT13 ok  qhabs^ebtref(pbz
-test EMAIL_ROT13 ok  zxrggyre^riv-vap(pbz
-test EMAIL_ROT13 fail	duncf-nospam@rogers.com
-
-body BLANK_LINES_70_80	eval:check_blank_line_ratio('70','80','4')
-body BLANK_LINES_80_90	eval:check_blank_line_ratio('80','90','4')
-body BLANK_LINES_90_100	eval:check_blank_line_ratio('90','100','4')
-describe BLANK_LINES_70_80  Message body has 70-80% blank lines
-describe BLANK_LINES_80_90  Message body has 80-90% blank lines
-describe BLANK_LINES_90_100 Message body has 90-100% blank lines
-
-body UNIQUE_WORDS	eval:check_unique_words('0.946', '3.1')
-describe UNIQUE_WORDS	Message body has many words used only once
-
-body DOMAIN_RATIO	eval:check_domain_ratio('0.022')
-describe DOMAIN_RATIO	Message body mentions many internet domains
-
-# If these are too expensive as a whole, then delete __LONGWORDS_B and
-# __LONGWORDS_C and replace with (__LONGWORDS_D || __LONGWORDS_A) which
-# is very close in quality.
-body __LONGWORDS_A	/\b(?:[a-z]{8,}\s+){6}/
-body __LONGWORDS_B	/\b(?:[a-z]{7,}\s+){8}/
-body __LONGWORDS_C	/\b(?:[a-z]{6,}\s+){9}/
-body __LONGWORDS_D	/\b(?:[a-z]{5,}\s+){10}/
-meta LONGWORDS		(__LONGWORDS_A || __LONGWORDS_B || __LONGWORDS_C || __LONGWORDS_D)
-describe LONGWORDS	Long string of long words
+endif

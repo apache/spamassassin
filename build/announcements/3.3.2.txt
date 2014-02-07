@@ -1,0 +1,240 @@
+To: users, dev, announce
+Subject: ANNOUNCE: Apache SpamAssassin 3.3.2 available
+
+Release Notes -- Apache SpamAssassin -- Version 3.3.2
+
+Introduction
+------------
+
+This is a minor release, primarily to support perl-5.12 and later.
+Additionally several other minor bugs are fixed.
+
+
+Downloading and availability
+----------------------------
+
+Downloads are available from:
+
+http://spamassassin.apache.org/downloads.cgi
+
+md5sum of archive files:
+
+   253f8fcbeb6c8bfcab9d139865c1a404  Mail-SpamAssassin-3.3.2.tar.bz2
+   d1d62cc5c6eac57e88c4006d9633b81e  Mail-SpamAssassin-3.3.2.tar.gz
+   06d84d34834d9aecdcdffcc4de08b2a7  Mail-SpamAssassin-3.3.2.zip
+   72f8075499c618518c68c7399f02b458  Mail-SpamAssassin-rules-3.3.2-r1104058.tar.gz
+
+sha1sum of archive files:
+
+   f38480352935fe3bb849a27a52615e400dee7d66  Mail-SpamAssassin-3.3.2.tar.bz2
+   de954f69e190496eff4a796a9bab61747f03072b  Mail-SpamAssassin-3.3.2.tar.gz
+   edc6297dc651eeb7a4872f596ec5a54aeea85349  Mail-SpamAssassin-3.3.2.zip
+   a199d5f0f8c2381e3dfe421e7a774356b3ffda4b  Mail-SpamAssassin-rules-3.3.2-r1104058.tar.gz
+
+Note that the *-rules-*.tar.gz files are only necessary if you cannot, or do not
+wish to, run "sa-update" after install to download the latest fresh rules.
+
+See the INSTALL and UPGRADE files in the distribution for important installation notes.
+
+
+GPG Verification Procedure
+--------------------------
+The release files also have a .asc accompanying them.  The file serves
+as an external GPG signature for the given release file.  The signing
+key is available via the wwwkeys.pgp.net key server, as well as
+http://www.apache.org/dist/spamassassin/KEYS
+
+The key information is:
+
+pub   4096R/F7D39814 2009-12-02
+       Key fingerprint = D809 9BC7 9E17 D7E4 9BC2  1E31 FDE5 2F40 F7D3 9814
+uid                  SpamAssassin Project Management Committee <private@spamassassin.apache.org>
+uid                  SpamAssassin Signing Key (Code Signing Key, replacement for 1024D/265FA05B) <dev@spamassassin.apache.org>
+sub   4096R/7B3265A5 2009-12-02
+
+To verify a release file, download the file with the accompanying .asc file and run the following commands:
+
+  gpg -v --keyserver wwwkeys.pgp.net --recv-key F7D39814
+  gpg --verify Mail-SpamAssassin-3.3.2.tar.bz2.asc
+  gpg --fingerprint F7D39814
+
+Then verify that the key matches the signature.
+
+Note that older versions of gnupg may not be able to complete the steps above.
+Specifically, GnuPG v1.0.6, 1.0.7 & 1.2.6 failed while v1.4.11 worked flawlessly.
+
+See http://www.apache.org/info/verification.html for more information on verifying Apache releases.
+
+
+
+Summary of major changes since 3.3.1
+------------------------------------
+
+NOTE: Complete changes are available at 
+http://svn.apache.org/repos/asf/spamassassin/branches/3.3/Changes
+
+Bug #6353: Fix FH_FROMEML_NOTLD, add MISSING_FROM
+
+Bug #6427: Spamc windows header library missing two defines.
+
+Bug #6476: patch to fix missing sa-awl man page bug
+
+Bug #6470: Small change in windows to exit stating that the exit status
+is unknown.  Thanks to Daniel Lemke for many of these small win32 patches.
+
+Bug #6314: Complete removal of spamassassin.spec
+
+Bug #6589: Errors in man pages
+
+Bug #6588: Small bug in the regexp caught by Jose Borges Ferreira in
+
+Bug #6515: spamd timeout_child option overrides time_limit configuration
+option with nastier behaviour
+
+Bug #6490: Mail::SpamAssassin::Plugin::SPF - Two enhancement issues
+
+Bug #6562: NULL reference bug in libspamc. Quick workaround to avoid a 
+crash.
+
+Bug #6454: wrong status test on $sth->rows in BayesStore::PgSQL
+
+Bug #6418: Cannot Log to stderr without timestamps
+
+Bug #6403: GMail should use ESMTPSA to indicate that it is in fact 
+authenticated, but doesn't
+
+Bug #6229: TextCat is too case sensitive
+
+Bug #6241: mkrules does not understand newer options and "else"
+
+Bug #6382: add missing unwhitelist_from_dkim, remove facebook and
+linkedin from dkim whitelisting
+
+Bug #5744: some documentation fixes
+
+Bug #6447: new feature to bayes autolearning: learn-on-error
+
+Bug #6566: X-Ham-Report default wording ("has identified this incoming
+email as possible spam") is confusing and inaccurate
+
+Bug #6468: splice() offset past end of array in HTML.pm
+
+Bug #6377: win32: spamd signal handling
+
+Bug #6376: win32: consider negative pids under windows in spamds waitpid
+
+Bug #6375: win32: posix macro not implemented - spamd
+
+Bug #6336: "Illegal octal digit 9" received during rules compile
+
+Bug #6526: Disable rfc-ignorant.org
+
+Bug #6531: clear_uridnsbl_skip_domain feature to allow admin override of
+default configuration
+
+Bug #5491: MIME_QP_LONG_LINE triggering on valid email
+
+Bug #6558: body rules having "tflags multiple" may cause infinite loop
+when compiled - a workaround
+
+Bug #6557: Use same age limits in ruleqa as in sa-updates
+
+Bug #6548: spamd protocol examples are wrong
+
+Bug #6500: clear_originating_ip_headers seems to be broken
+
+Bug #6565: check_rbl_sub rules - all dots need to be escaped - commit
+felicity/70_dnswl.cf and felicity/70_iadb.cf too
+
+Bug #6565: check_rbl_sub rules - all dots need to be escaped
+
+Bug #6578: Move TLD regexp to RegistrarBoundaries and make FreeMail use it
+
+Bug #6392: fix one more case of a 'goto into a construct' this one
+occured with sa-compile
+
+Bug #6443: Metadata Headers are Case-Sensitive
+
+Bug #5690: tune BAD_ENC_HEADER score down
+
+Bug #6022, tune TVD_RCVD_IP score down
+
+Bug #6394: too high score for FREEMAIL_ENVFROM_END_DIGIT
+
+Bug #6499: and mailing list: wrapped scores for rules
+DKIMDOMAIN_IN_DWL*, ACCESSDB and SHORTCIRCUIT into a suitable
+ifplugin/endif to avoid lint warnings; removed score for nonexistent
+rule SUBJ_RE_NUM.
+
+Bug #6242: merge the boundary fix in r931527 to the 3.3 branch
+
+Bug #6460: RCVD_ILLEGAL_IP false positives
+
+Bug #6506: Modifying a list while traversing it with a foreach
+
+Bug #6488: Lint errors with Perl 5.12.1 in AntiVirus.pm
+
+Bug #6467: Remove assigned 223/8 from RCVD_ILLEGAL_IP
+
+Bug #6419: Resolve rounding issue irregularity with spamd/spamc
+
+Bug #5894: spamd doesn't use vpopmail virtual users' dirs - removed one
+extra space
+
+Bug #6416: avoid undef warnings in AutoWhitelist.pm as a result of
+incorrect Received header field or its incorrect parsing
+
+Bug #6415: Open of auto-whitelist file failed: Insecure dependency in eval
+
+Bug #6299: update, enhance, and expand RCVD_ILLEGAL_IP from
+
+Bug #6392: Test suite fails with perl 5.12.0
+
+Bug #6412: remove .yu TLD and add .me SLDs
+
+Bug #6395: backport - improved URI parsing
+
+Bug #6393: make File::Copy module load conditional on 'sa-learn
+--upgrade' with DBM files, not very commonly used
+
+Bug #6396: Use of uninitialized value in lc at
+lib/Mail/SpamAssassin/Plugin/MIMEEval.pm
+
+
+About Apache SpamAssassin
+-------------------------
+
+Apache SpamAssassin is a mature, widely-deployed open source project
+that serves as a mail filter to identify spam. SpamAssassin uses a
+variety of mechanisms including mail header and text analysis, Bayesian
+filtering, DNS blocklists, and collaborative filtering databases. In
+addition, Apache SpamAssassin has a modular architecture that allows
+other technologies to be quickly incorporated as an addition or as a
+replacement for existing methods.
+
+Apache SpamAssassin typically runs on a server, classifies and labels
+spam before it reaches your mailbox, while allowing other components of
+a mail system to act on its results.
+
+Most of the Apache SpamAssassin is written in Perl, with heavily
+traversed code paths carefully optimized. Benefits are portability,
+robustness and facilitated maintenance. It can run on a wide variety of
+POSIX platforms.
+
+The server and the Perl library feels at home on Unix and Linux
+platforms, and reportedly also works on MS Windows systems under ActivePerl.
+
+For more information, visit http://spamassassin.apache.org/
+
+
+About The Apache Software Foundation
+------------------------------------
+
+Established in 1999, The Apache Software Foundation provides
+organizational, legal, and financial support for more than 100
+freely-available, collaboratively-developed Open Source projects. The
+pragmatic Apache License enables individual and commercial users to
+easily deploy Apache software; the Foundation's intellectual property
+framework limits the legal exposure of its 2,500+ contributors.
+
+For more information, visit http://www.apache.org/

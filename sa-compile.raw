@@ -1,0 +1,815 @@
+#!/usr/bin/perl -w -T
+
+# <@LICENSE>
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to you under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at:
+# 
+#     http://www.apache.org/licenses/LICENSE-2.0
+# 
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# </@LICENSE>
+
+use strict;
+use warnings;
+use re 'taint';
+
+my $PREFIX          = '@@PREFIX@@';             # substituted at 'make' time
+my $DEF_RULES_DIR   = '@@DEF_RULES_DIR@@';      # substituted at 'make' time
+my $LOCAL_RULES_DIR = '@@LOCAL_RULES_DIR@@';    # substituted at 'make' time
+my $LOCAL_STATE_DIR = '@@LOCAL_STATE_DIR@@';    # substituted at 'make' time
+use lib '@@INSTALLSITELIB@@';                   # substituted at 'make' time
+
+use Errno qw(EBADF);
+use File::Spec;
+use Config;
+
+BEGIN {                          # see comments in "spamassassin.raw" for doco
+  my @bin = File::Spec->splitpath($0);
+  my $bin = ($bin[0] ? File::Spec->catpath(@bin[0..1]) : $bin[1])
+            || File::Spec->curdir;
+
+  if (-e $bin.'/lib/Mail/SpamAssassin.pm'
+        || !-e '@@INSTALLSITELIB@@/Mail/SpamAssassin.pm' )
+  {
+    my $searchrelative;
+    $searchrelative = 1;    # disabled during "make install": REMOVEFORINST
+    if ($searchrelative && $bin eq '../' && -e '../blib/lib/Mail/SpamAssassin.pm')
+    {
+      unshift ( @INC, '../blib/lib' );
+    } else {
+      foreach ( qw(lib ../lib/site_perl
+                ../lib/spamassassin ../share/spamassassin/lib))
+      {
+        my $dir = File::Spec->catdir( $bin, split ( '/', $_ ) );
+        if ( -f File::Spec->catfile( $dir, "Mail", "SpamAssassin.pm" ) )
+        { unshift ( @INC, $dir ); last; }
+      }
+    }
+  }
+}
+
+use Mail::SpamAssassin;
+use Mail::SpamAssassin::Util qw(untaint_var exit_status_str);
+use Mail::SpamAssassin::Logger;
+use Getopt::Long;
+use File::Copy;
+use File::Path;
+use Pod::Usage;
+use Data::Dumper;
+
+use vars qw( %opt );
+Mail::SpamAssassin::Util::clean_path_in_taint_mode();
+untaint_var( \%ENV );
+
+Getopt::Long::Configure(
+  qw(bundling no_getopt_compat
+    permute no_auto_abbrev no_ignore_case)
+);
+
+GetOptions(
+  'list'		=> \$opt{'list'},
+  'sudo'		=> \$opt{'sudo'},
+  'quiet'               => \$opt{'quiet'},
+  'keep-tmps'		=> \$opt{'keep-tmps'},
+
+  'configpath|config-file|config-dir|c|C=s' => \$opt{'configpath'},
+  'prefspath|prefs-file|p=s'                => \$opt{'prefspath'},
+  'siteconfigpath=s'                        => \$opt{'siteconfigpath'},
+  'updatedir=s'                             => \$opt{'updatedir'},
+  'cf=s'                                    => \@{$opt{'cf'}},
+  'debug|D:s'       => \$opt{'debug'},
+  'help|h|?'        => \$opt{'help'},
+  'version|V'       => \$opt{'version'},
+  )
+  or usage( 0, "Unknown option!" );
+
+if ( defined $opt{'help'} ) {
+  usage( 0, "For more information read the manual page" );
+}
+if ( defined $opt{'version'} ) {
+  print "SpamAssassin version " . Mail::SpamAssassin::Version() . "\n"
+    or die "error writing: $!";
+  exit 0;
+}
+
+# Check for some dependencies and provide useful error messages if they aren't
+# present
+eval("use ExtUtils::MakeMaker");
+if ($@) {
+  print "$0 requires ExtUtils::MakeMaker for proper operation.\n"
+    or die "error writing: $!";
+  exit 1;
+}
+unless (qx(re2c -V)) {
+  print "$0 requires re2c for proper operation.\n"
+    or die "error writing: $!";
+  exit 1;
+}
+
+sub usage {
+  my ( $exitval, $message ) = @_;
+  $exitval ||= 64;
+
+  if ($exitval == 0) {
+    print_version();
+    print("\n")  or die "error writing: $!";
+  }
+  pod2usage(
+    -verbose => 0,
+    -message => $message,
+    -exitval => $exitval,
+  );
+}
+
+# set debug areas, if any specified (only useful for command-line tools)
+if (defined $opt{'debug'}) {
+  $opt{'debug'} ||= 'all';
+}
+
+# at least info
+$opt{'debug'} ||= 'info';
+
+my $quiet = $opt{'quiet'} || 0;
+
+# ensure the body-rule base extractor plugin is loaded, we use that
+my $post_config = q(
+  loadplugin Mail::SpamAssassin::Plugin::BodyRuleBaseExtractor
+
+).join("\n", @{$opt{'cf'}})."\n";
+
+my $spamtest = new Mail::SpamAssassin(
+  {
+    rules_filename      => $opt{'configpath'},
+    site_rules_filename => $opt{'siteconfigpath'},
+    userprefs_filename  => $opt{'prefspath'},
+    debug               => $opt{'debug'},
+    local_tests_only    => 1,
+    dont_copy_prefs     => 1,
+    PREFIX              => $PREFIX,
+    DEF_RULES_DIR       => $DEF_RULES_DIR,
+    LOCAL_RULES_DIR     => $LOCAL_RULES_DIR,
+    LOCAL_STATE_DIR     => $LOCAL_STATE_DIR,
+    post_config_text    => $post_config,
+  }
+);
+
+# appropriate BodyRuleBaseExtractor settings for rule2xs usage
+$spamtest->{base_extract} = 1;
+$spamtest->{bases_must_be_casei} = 1;
+$spamtest->{bases_can_use_alternations} = 0;
+$spamtest->{bases_can_use_quantifiers} = 0;
+$spamtest->{bases_can_use_char_classes} = 0;
+$spamtest->{bases_split_out_alternations} = 1;
+$spamtest->{base_quiet} = $quiet;
+
+if (defined $opt{'updatedir'}) {
+  $opt{'updatedir'} = Mail::SpamAssassin::Util::untaint_file_path($opt{'updatedir'});
+}
+else {
+  $opt{'updatedir'} = $spamtest->sed_path('__local_state_dir__/compiled/__perl_major_ver__/__version__');
+}
+my $installdir = $opt{'updatedir'};
+if ((!defined $opt{'list'})
+        && !$opt{'sudo'}
+        && -d $installdir && !-w $installdir)
+{
+  die "sa-compile: cannot write to $installdir, aborting\n";
+}
+
+$spamtest->{bases_cache_dir} = $spamtest->get_and_create_userstate_dir()
+                        ."/sa-compile.cache";
+
+$spamtest->init(1);
+my $conf = $spamtest->{conf};
+
+# this actually extracts the base rules in the plugin, as a side-effect
+my $res = $spamtest->lint_rules();
+if ($res) {
+  die "sa-compile: not compiling; 'spamassassin --lint' check failed!\n";
+}
+
+if ( defined $opt{'list'} ) {
+  foreach my $ruletype (sort keys %{$conf->{base_orig}}) {
+    print dump_base_strings($ruletype);
+  }
+}
+else {
+  compile_base_strings();
+}
+
+$spamtest->finish();
+
+# make sure we notice any write errors while flushing output buffer
+close STDOUT  or die "error closing STDOUT: $!";
+close STDIN   or die "error closing STDIN: $!";
+
+exit;
+
+##############################################################################
+
+sub dump_base_strings {
+  my ($ruletype) = @_;
+
+  my $s = "name $ruletype\n";
+
+  foreach my $key1 (sort keys %{$conf->{base_orig}->{$ruletype}}) {
+    $s .= "orig $key1 $conf->{base_orig}->{$ruletype}->{$key1}\n";
+  }
+
+  foreach my $key (sort keys %{$conf->{base_string}->{$ruletype}}) {
+    $s .= "r $key:$conf->{base_string}->{$ruletype}->{$key}\n";
+  }
+  return $s;
+}
+
+##############################################################################
+
+sub dump_as_perl {
+  my ($ruletype) = @_;
+
+  my %todump = (
+    name => $ruletype,
+    base_orig => $conf->{base_orig}->{$ruletype},
+    base_string => $conf->{base_string}->{$ruletype}
+  );
+  my $s = Data::Dumper->Dump([ \%todump ], [qw(bases)]);
+  return $s;
+}
+
+##############################################################################
+
+sub compile_base_strings {
+  my $dirpath = Mail::SpamAssassin::Util::secure_tmpdir();
+  die "secure_tmpdir failed" unless $dirpath && -w $dirpath;
+
+  my $sudo = ($opt{sudo} ? 'sudo ' : '');
+
+  foreach my $ruletype (sort keys %{$conf->{base_orig}})
+  {
+    # create the bases.in file
+
+    my $basespath = "bases_$ruletype.in";
+    $basespath =~ s/[^A-Za-z0-9_\.]/_/gs;
+    open OUT, ">$dirpath/$basespath"
+      or die "cannot create $dirpath/$basespath: $!";
+    print OUT dump_base_strings($ruletype)
+      or die "error writing to $dirpath/$basespath: $!";
+    close OUT
+      or die "error closing $dirpath/$basespath: $!";
+
+    # compile it...
+
+    chdir $dirpath  or die "cannot chdir to $dirpath: $!";
+    if (!$quiet) { print "cd $dirpath\n"  or die "error writing: $!" }
+
+    rule2xs($basespath);
+
+    my $log = "";
+    if ($quiet) {
+      $log = ">>$dirpath/log";
+      # empty it
+      open(ZERO, ">$dirpath/log")  or die "cannot create $dirpath/log: $!";
+      close ZERO  or die "error closing $dirpath/log: $!";
+    }
+
+    run(get_perl()." Makefile.PL ".
+          "PREFIX=$dirpath/ignored INSTALLSITEARCH=$installdir $log");
+
+    run("make $log");
+    run($sudo."make install $log");	# into $installdir
+
+    # and generate the bases.pl file, for perl consumers
+
+    my $plpath = "bases_$ruletype.pl";
+    $plpath =~ s/[^A-Za-z0-9_\.]/_/gs;
+    open(OUT, ">$dirpath/$plpath")
+      or die "cannot create $dirpath/$plpath: $!";
+    print OUT dump_as_perl($ruletype)
+      or die "error writing to $dirpath/$plpath: $!";
+    close OUT
+      or die "error closing $dirpath/$plpath: $!";
+
+    run($sudo."cp $dirpath/$plpath $installdir/$plpath");
+  }
+
+  if (!$opt{'keep-tmps'}) {
+    chdir '/'; 
+    if (!$quiet) {
+      # saves trouble on MacOS, possibly
+      print "cd /\n"  or die "error writing: $!";
+    }
+    run($sudo."rm -rf $dirpath");       # cleanup
+  }
+  else {
+    print "temporary dir left due to --keep-tmps: $dirpath\n"
+      or die "error writing: $!";
+  }
+}
+
+sub run {
+  my @cmd = @_;
+  if (!$quiet) { print join(' ',@cmd)."\n"  or die "error writing: $!" }
+  if (system(@cmd) != 0) {
+    my $msg = $? == -1 ? "failed to execute: $!"
+                       : "failed: ".exit_status_str($?);
+    if (!$quiet) { die "command ".$msg."\n" }
+    else { die "command '".join(' ',@cmd)."' ".$msg."\n" }
+    return 0;
+  }
+  return 1;
+}
+
+sub get_perl {
+  my $perl;
+  if ($^X =~ m|^/|) {
+    $perl = $^X;
+  } else {
+    use Config;
+    $perl = $Config{perlpath};
+    $perl =~ s|/[^/]*$|/$^X|;
+  }
+  return untaint_var($perl);
+}
+
+##############################################################################
+
+use constant MAX_RULES_PER_C_FILE => 200;
+
+sub rule2xs {
+  my $modname;
+  my $force = 1;
+  my $FILE = shift;
+
+  if (!$quiet) { print "reading $FILE\n" or die "error writing: $!" }
+  open(my $fh, $FILE)  or die "cannot open $FILE: $!";
+# read ruleset name from the first line in the file
+  my $ruleset_name;
+  $_ = <$fh>;
+  defined $_  or die "error reading $FILE: $!";
+  local ($1);
+  if (/^name\s+(\S+)/) {
+    $ruleset_name = untaint_var($1);
+  }
+
+  if (!$modname) {
+    $modname = "Mail::SpamAssassin::CompiledRegexps::$ruleset_name";
+  }
+
+  our $PATH = $modname;
+  $PATH =~ s/::/-/g;
+  $PATH =~ s/[^-_A-Za-z0-9\.]/_/g;
+  our $PMFILE = $modname;
+  $PMFILE =~ s/.*:://;
+  $PMFILE .= ".pm";
+  our $XSFILE = $PMFILE;
+  $XSFILE =~ s/\.pm$/.xs/;
+
+  $force and system("rm -rf $PATH");
+  mkdir $PATH or (!$force and die "mkdir($PATH): $!");
+  chdir $PATH;
+  if (!$quiet) { print "cd $PATH\n" or die "error writing: $!" }
+
+  my $cprefix = $modname; $cprefix =~ s/[^A-ZA-z0-9]+/_/gs;
+
+  my $numscans = 0;
+  my $has_rules = '';
+
+  while (!eof($fh)) {
+    $numscans++;
+
+    open(my $re, ">scanner${numscans}.re")
+      or die "cannot create scanner${numscans}.re: $!";
+
+    print $re <<EOT  or die "error writing: $!";
+#define NULL            ((char*) 0)
+#define YYCTYPE         unsigned char
+#define YYCURSOR        *p
+#define YYLIMIT         *p
+#define YYMARKER        q
+#define YYFILL(n)
+
+/* backtrack to return other, semi-overlapped tokens; e.g.
+   allow "abcdef" to return both "abc" and "cde" as tokens */
+#define RET(x)          { YYCURSOR = YYMARKER; return (x); }
+EOT
+
+    print $re <<EOT  or die "error writing: $!";
+char *${cprefix}_scan${numscans}(unsigned char **p){
+unsigned char *q = 1 + *p;
+/*!re2c
+EOT
+
+    my $line = 0;
+    my $rulecount = 0;
+    for ($!=0; <$fh>; $!=0) {
+      next if /^#/;
+
+      local ($1,$2);
+      if (/^orig\s+(\S+)\s+(.*)$/) {
+	my $name = $1;
+	my $regexp = $2;
+	$name =~ s/#/[hash]/gs;
+	$regexp =~ s/#/[hash]/gs;
+	$has_rules .= "  q#$name# => q#$regexp#,\n";
+        $rulecount++;
+	next;
+      }
+
+      my ($regexp, $reason) = /^r (.*):(.*)$/;
+      die "no 'r REGEXP:REASON' in $_" unless defined $regexp;
+
+      eval {
+	print $re "\t",
+          Mail::SpamAssassin::Plugin::BodyRuleBaseExtractor::fixup_re($regexp),
+          "            {RET(\"$reason\");}\n"
+          or die "error writing: $!";
+	$line++; 1;
+      } or do {
+        my $eval_stat = $@ ne '' ? $@ : "errno=$!";  chomp $eval_stat;
+        handle_fixup_error($eval_stat, $regexp, $reason);
+      };
+      last if $line == MAX_RULES_PER_C_FILE;
+    }
+    defined $_ || $!==0  or
+      $!==EBADF ? dbg("error reading from $FILE: $!")
+                : die "error reading from $FILE: $!";
+
+    print $re <<EOT  or die "error writing: $!";
+  [\\000-\\377]        { return NULL; }
+*/
+}
+EOT
+
+  }
+
+  for (1..$numscans) {
+    my $cmd = "re2c -i -b -o scanner$_.c scanner$_.re";
+    if (!run($cmd)) {
+      # this must be fatal; it can result in corrupt output modules missing
+      # scannerN() functions
+      my $cwd = `pwd`; chop $cwd;
+      die "'$cmd' failed, dying!\n".
+          "Have you got a sufficiently-recent version of re2c?\n".
+	  "see $cwd/scanner$_.re\n";
+    }
+  }
+
+  my $ccopt = $Config{optimize};      # typically "-O2"
+
+  open(FILE, ">Makefile.PL")  or die "cannot create Makefile.PL: $!";
+  print FILE <<"EOT"  or die "error writing to Makefile.PL: $!";
+    use ExtUtils::MakeMaker;
+
+    WriteMakefile(
+	'NAME' => '$modname',
+	'VERSION_FROM' => '$PMFILE',
+	'ABSTRACT_FROM' => '$PMFILE',
+	'OBJECT' => '\$(O_FILES)',
+	'OPTIMIZE' => '$ccopt',
+	'AUTHOR' => 'A. U. Tomated <automated\@example.com>',
+    );
+EOT
+  close FILE  or die "error closing Makefile.PL: $!";
+
+  open(FILE, ">MANIFEST.SKIP")  or die "cannot create MANIFEST.SKIP: $!";
+  print FILE <<'EOT'  or die "error writing to MANIFEST.SKIP: $!";
+CVS/.*
+\.bak$
+\.sw[a-z]$
+\.tar$
+\.tgz$
+\.tar\.gz$
+\.o$
+\.xsi$
+\.bs$
+^.#
+^tmp/
+^blib/
+^Makefile$
+^Makefile\.[a-z]+$
+^pm_to_blib$
+~$
+EOT
+  close FILE  or die "error closing MANIFEST.SKIP: $!";
+
+  open(my $re, ">$XSFILE")  or die "cannot create $XSFILE: $!";
+  print $re <<"EOT"  or die "error writing to $XSFILE: $!";
+#include "EXTERN.h"
+#include "perl.h"
+#include "XSUB.h"
+
+  /* bug 5556: newSVpvn_share() is not a defined API in perl 5.6.x.
+   * Thankfully we can use newSVpvn() without much harm, losing only
+   * a tiny bit of performance (I'd reckon ;).
+   */
+#ifdef newSVpvn_share
+#define my_newSVpvn_share(x,y,z)    newSVpvn_share(x,y,z)
+#else
+#define my_newSVpvn_share(x,y,z)    newSVpvn(x,y)
+#endif
+
+  /* split single-space-separated result string */
+  static void
+  split_and_add (AV *results, char *match)
+  {
+      char *wordstart, *cp;
+
+      for (cp = wordstart = match; *cp != (unsigned char) 0; cp++) {
+	if (*cp == ' ') {
+	  av_push(results,
+	      my_newSVpvn_share(wordstart, cp-wordstart, (U32)0));
+	  wordstart = cp + 1;
+	}
+      }
+      av_push(results,
+	      my_newSVpvn_share(wordstart, cp-wordstart, (U32)0));
+  }
+
+EOT
+
+  # use a buffer string here instead of writing direct to the file,
+  # so we can prepend 'extern' statements (bug 5534)
+  my $xscode = <<"EOT";
+
+MODULE = $modname  PACKAGE = $modname
+
+PROTOTYPES: DISABLE
+
+SV *
+scan(psv)
+	SV* psv
+
+  PREINIT:
+	char *match;
+	unsigned char *cursor;
+	unsigned char *pstart;
+	unsigned char *pend;
+	STRLEN plen;
+	AV *results;
+
+  CODE:
+	pstart = (unsigned char *) SvPVutf8(psv, plen);
+	pend = pstart + plen;
+	results = (AV *) sv_2mortal((SV *) newAV());
+
+EOT
+
+  for (1..$numscans) {
+    my $funcname = $cprefix."_scan".$_;
+
+    $xscode =
+        # prepend this chunk
+        qq{
+
+	  extern char *${funcname} (unsigned char **);
+
+        }.$xscode.
+        # and append this one
+        qq{
+
+	  cursor = pstart;
+	  while (cursor < pend) {
+	    while ((match = ${funcname} (\&cursor)) != NULL) {
+	      split_and_add(results, match);
+	    }
+	  }
+
+        };
+
+  }
+
+  print $re $xscode  or die "error writing: $!";
+  print $re <<EOT  or die "error writing: $!";;
+	  RETVAL = newRV((SV *) results);
+      OUTPUT:
+	  RETVAL
+
+EOT
+
+  close($re)  or die "error closing $XSFILE: $!";
+
+  open(FILE, ">$PMFILE")  or die "cannot create $PMFILE: $!";
+  my $str =<<"EOT";
+
+package $modname;
+
+use strict;
+use vars qw(\$VERSION \@ISA \@EXPORT_OK);
+
+use XSLoader ();
+
+BEGIN {
+\$VERSION = '1.0';
+\@ISA = qw(XSLoader);
+\@EXPORT_OK = qw();
+
+our \$HAS_RULES = {
+  $has_rules
+};
+
+XSLoader::load '$modname', \$VERSION;
+}
+
+1;
+fnord__END__
+
+fnord=head1 NAME
+
+$modname - Efficient string matching for regexps found in $FILE
+
+fnord=head1 SYNOPSIS
+
+  use $modname;
+  
+  ...
+  my \$match = ${modname}::scan(\$string);
+
+fnord=head1 DESCRIPTION
+
+This module was created by SpamAssassin with the aid of re2xs, which uses re2c
+to create an XS library capable of scanning through a bunch of regular
+expressions as defined in F<$FILE>.
+
+See C<sa-compile> for more details.
+
+fnord=cut
+EOT
+
+  $str =~ s/^fnord//gm;
+  print FILE $str  or die "error writing to $PMFILE: $!";
+  close FILE  or die "error closing $PMFILE: $!";
+}
+
+sub handle_fixup_error {
+  my ($strat, $regexp, $reason) = @_;
+  if ($strat) {
+    warn "skipped: $regexp: $strat";
+  }
+}
+
+##############################################################################
+
+=head1 NAME
+
+sa-compile - compile SpamAssassin ruleset into native code
+
+=head1 SYNOPSIS
+
+B<sa-compile> [options]
+
+Options:
+
+  --list                        Output base string list to STDOUT
+  --sudo                        Use 'sudo' for privilege escalation
+  --keep-tmps                   Keep temporary files instead of deleting
+  -C path, --configpath=path, --config-file=path
+                                Path to standard configuration dir
+  -p prefs, --prefspath=file, --prefs-file=file
+                                Set user preferences file
+  --siteconfigpath=path         Path for site configs
+                                (default: /etc/mail/spamassassin)
+  --updatedir=path              Directory to place updates
+          (default: @@LOCAL_STATE_DIR@@/compiled/<perlversion>/@@VERSION@@)
+  --cf='config line'            Additional line of configuration
+  -D, --debug [area=n,...]	Print debugging messages
+  -V, --version			Print version
+  -h, --help			Print usage message
+
+=head1 DESCRIPTION
+
+sa-compile uses C<re2c> to compile the site-wide parts of the SpamAssassin
+ruleset. No part of user_prefs or any files included from user_prefs can be
+built into the compiled set.
+
+This compiled set is then used by the 
+C<Mail::SpamAssassin::Plugin::Rule2XSBody> plugin to speed up
+SpamAssassin's operation, where possible, and when that plugin is loaded.
+
+C<re2c> can match strings much faster than perl code, by constructing a DFA to
+match many simple strings in parallel, and compiling that to native object
+code.  Not all SpamAssassin rules are amenable to this conversion, however.
+
+This requires C<re2c> (see C<http://re2c.org/>), and the C
+compiler used to build Perl XS modules, be installed.
+
+Note that running this, and creating a compiled ruleset, will have no
+effect on SpamAssassin scanning speeds unless you also edit your C<v320.pre>
+file and ensure this line is uncommented:
+
+  loadplugin Mail::SpamAssassin::Plugin::Rule2XSBody
+
+Additionally, "sa-compile" will not restart "spamd" or otherwise cause a scanner to
+reload the now-compiled ruleset automatically.
+
+=head1 OPTIONS
+
+=over 4
+
+=item B<--list>
+
+Output the extracted base strings to STDOUT, instead of generating
+the C extension code.
+
+=item B<--sudo>
+
+Use C<sudo(8)> to run code as 'root' when writing files to the compiled-rules
+storage area (which is C<@@LOCAL_STATE_DIR@@/compiled/@@PERL_MAJOR_VER@@/@@VERSION@@> by default).
+
+=item B<--quiet>
+
+Produce less diagnostic output.  Errors will still be displayed.
+
+=item B<--keep-tmps>
+
+Keep temporary files after the script completes, instead of
+deleting them.
+
+=item B<-C> I<path>, B<--configpath>=I<path>, B<--config-file>=I<path>
+
+Use the specified path for locating the distributed configuration files.
+Ignore the default directories (usually C</usr/share/spamassassin> or similar).
+
+=item B<--siteconfigpath>=I<path>
+
+Use the specified path for locating site-specific configuration files.  Ignore
+the default directories (usually C</etc/mail/spamassassin> or similar).
+
+=item B<--updatedir>
+
+By default, C<sa-compile> will use the system-wide rules update directory:
+
+        @@LOCAL_STATE_DIR@@/compiled/@@PERL_MAJOR_VER@@/@@VERSION@@
+
+If the updates should be stored in another location, specify it here.
+
+Note that use of this option is not recommended; if sa-compile is placing the
+compiled rules the wrong directory, you probably need to rebuild SpamAssassin
+with different C<Makefile.PL> arguments, instead of overriding sa-compile's
+runtime behaviour.
+
+=item B<--cf='config line'>
+
+Add additional lines of configuration directly from the command-line, parsed
+after the configuration files are read.   Multiple B<--cf> arguments can be
+used, and each will be considered a separate line of configuration.
+
+=item B<-p> I<prefs>, B<--prefspath>=I<prefs>, B<--prefs-file>=I<prefs>
+
+Read user score preferences from I<prefs> (usually
+C<$HOME/.spamassassin/user_prefs>) .
+
+=item B<-D> [I<area,...>], B<--debug> [I<area,...>]
+
+Produce debugging output.  If no areas are listed, all debugging information is
+printed.  Diagnostic output can also be enabled for each area individually;
+I<area> is the area of the code to instrument.
+
+For more information about which areas (also known as channels) are
+available, please see the documentation at
+L<http://wiki.apache.org/spamassassin/DebugChannels>.
+
+=item B<-h>, B<--help>
+
+Print help message and exit.
+
+=item B<-V>, B<--version>
+
+Print sa-compile version and exit.
+
+=back
+
+=head1 SEE ALSO
+
+Mail::SpamAssassin(3)
+spamassassin(1)
+spamd(1)
+
+=head1 PREREQUESITES
+
+C<Mail::SpamAssassin>
+C<re2c>
+C<Mail::SpamAssassin::Plugin::Rule2XSBody>
+
+=head1 BUGS
+
+See <http://issues.apache.org/SpamAssassin/>
+
+=head1 AUTHORS
+
+The Apache SpamAssassin(tm) Project <http://spamassassin.apache.org/>
+
+=head1 COPYRIGHT
+
+SpamAssassin is distributed under the Apache License, Version 2.0, as
+described in the file C<LICENSE> included with the distribution.
+
+=cut
+

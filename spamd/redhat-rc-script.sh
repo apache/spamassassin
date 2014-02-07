@@ -2,7 +2,7 @@
 #
 # spamassassin This script starts and stops the spamd daemon
 #
-# chkconfig: - 80 30
+# chkconfig: - 78 30
 # processname: spamd
 # description: spamd is a daemon process which uses SpamAssassin to check \
 #              email messages for SPAM.  It is normally called by spamc \
@@ -10,6 +10,8 @@
 
 # Source function library.
 . /etc/rc.d/init.d/functions
+
+prog="spamd"
 
 # Source networking configuration.
 . /etc/sysconfig/network
@@ -19,6 +21,7 @@
 
 # Set default spamd configuration.
 SPAMDOPTIONS="-d -c -m5 -H"
+SPAMD_PID=/var/run/spamd.pid
 
 # Source spamd configuration.
 if [ -f /etc/sysconfig/spamassassin ] ; then
@@ -28,30 +31,41 @@ fi
 [ -f /usr/bin/spamd -o -f /usr/local/bin/spamd ] || exit 0
 PATH=$PATH:/usr/bin:/usr/local/bin
 
+# By default it's all good
+RETVAL=0
+
 # See how we were called.
 case "$1" in
   start)
+	# tell portreserve to release the port
+	[ -x /sbin/portrelease ] && /sbin/portrelease spamd &>/dev/null || :
 	# Start daemon.
-	echo -n "Starting spamd: "
-	daemon $NICELEVEL spamd $SPAMDOPTIONS
+	echo -n $"Starting $prog: "
+	daemon $NICELEVEL spamd $SPAMDOPTIONS -r $SPAMD_PID
 	RETVAL=$?
         echo
-        [ $RETVAL = 0 ] && touch /var/lock/subsys/spamassassin
+	if [ $RETVAL = 0 ]; then
+		touch /var/lock/subsys/spamd
+	fi
         ;;
   stop)
         # Stop daemons.
-        echo -n "Shutting down spamd: "
+        echo -n $"Stopping $prog: "
         killproc spamd
         RETVAL=$?
         echo
-        [ $RETVAL = 0 ] && rm -f /var/lock/subsys/spamassassin
+	if [ $RETVAL = 0 ]; then
+		rm -f /var/lock/subsys/spamd
+		rm -f $SPAMD_PID
+	fi
         ;;
   restart)
         $0 stop
+	sleep 3
         $0 start
         ;;
   condrestart)
-       [ -e /var/lock/subsys/spamassassin ] && $0 restart
+       [ -e /var/lock/subsys/spamd ] && $0 restart
        ;;
   status)
 	status spamd
@@ -59,7 +73,8 @@ case "$1" in
 	;;
   *)
 	echo "Usage: $0 {start|stop|restart|status|condrestart}"
-	exit 1
+	RETVAL=1
+	;;
 esac
 
-exit 0
+exit $RETVAL

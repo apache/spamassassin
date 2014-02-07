@@ -1,0 +1,37 @@
+#!/bin/sh
+
+set -e
+
+# Adapted from http://wiki.debian.org/DpkgConffileHandling
+
+# spamassassin no longer distributes logcheck files for spamd.
+# Luckily, the logcheck-database package which distributes these files
+# now doesn't reuse the same file names. This script now deletes old
+# (unchanged) versions of the file, but leaves and warns about changed
+# versions.
+
+# Remove a no-longer used conffile
+rm_conffile() {
+    PKGNAME="$1"
+    CONFFILE="$2"
+    if [ -e "$CONFFILE" ]; then
+        md5sum="`md5sum \"$CONFFILE\" | sed -e \"s/ .*//\"`"
+        old_md5sum="`dpkg-query -W -f='${Conffiles}' $PKGNAME | sed -n -e \"\\\\' $CONFFILE'{s/ obsolete$//;s/.* //p}\"`"
+        if [ "$md5sum" != "$old_md5sum" ]; then
+            echo "Obsolete conffile $CONFFILE has been modified by you."
+            echo "Leaving $CONFFILE in place; you may wish to remove it."
+        else
+            echo "Removing obsolete conffile $CONFFILE ..."
+            rm -f "$CONFFILE"
+        fi
+    fi
+}
+case "$1" in
+install|upgrade)
+    if dpkg --compare-versions "$2" le "3.2.3-1"; then
+        rm_conffile spamassassin "/etc/logcheck/ignore.d.paranoid/spamassassin"
+        rm_conffile spamassassin "/etc/logcheck/violations.ignore.d/spamassassin"
+    fi
+esac
+
+#DEBHELPER#

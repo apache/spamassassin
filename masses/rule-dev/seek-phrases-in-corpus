@@ -1,0 +1,126 @@
+#!/usr/bin/perl
+
+=head1 NAME
+
+seek-phrases-in-corpus - given a corpus of spam, seek out common phrases
+
+=head1 SYNOPSIS
+
+seek-phrases-in-corpus [--grep 'pattern'] ham:dir:/path spam:dir:/path2 ...
+
+=head1 DESCRIPTION
+
+Given a _small_ corpus of ham and spam mails (specified in mass-check format),
+this will attempt to find patterns that appear in at least 2 spams, then list
+out all the patterns that have a 1.0 S/O ratio (ie. hit spam and no ham).
+
+The output format looks like:
+
+ 1.000   8.633   0.000  /pattern/, /pattern2/, /pattern3/
+ 1.000   8.633   0.000  /pattern4/
+ 1.000  10.000   0.000  /pattern5/
+
+First field is S/O (and will always be 1.000).  Second, the SPAM%
+figure -- how much of the spam corpus, as a percentage, contains the
+pattern.  Third is the list of one or more pattern(s) that hit this
+subset of messages.
+
+Note that patterns that hit a different subset of the messages in the spam
+corpus, are listed on separate lines; e.g., in the example above, /pattern3/
+and /pattern4/ both hit 8.633% of the spam corpus -- however, they hit a
+different 8.633%, not the same subset of messages.  On the other hand,
+/pattern2/ and /pattern3/ are hitting exactly the same messages.
+
+The patterns are simple substrings, not regular expressions; don't
+be misled by the use of "/" as a delimiter.  The body text is rendered
+as SpamAssassin "body" rendering.
+
+=cut
+
+# <@LICENSE>
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to you under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at:
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# </@LICENSE>
+
+# ---------------------------------------------------------------------------
+
+use Getopt::Long;
+use Carp qw(croak);
+use FindBin;
+
+use strict;
+use warnings;
+
+my $sadir = "$FindBin::Bin/../..";
+my $tmpdir = "/tmp/findpats.tmp.$$";
+
+my %opt = ();
+GetOptions(
+  'grep=s'       => \$opt{grep},
+) or die "see perldoc for usage";
+
+my $mcargs = ' '.join(' ', @ARGV).' ';
+
+# extract just the ham or spam targets
+my $mcargs_h = $mcargs; $mcargs_h =~ s/ spam:\S+ //gs;
+my $mcargs_s = $mcargs; $mcargs_s =~ s/ ham:\S+ //gs;
+
+if ($mcargs_h !~ /\bham:/) {
+  die "seek-phrases-in-corpus: no 'ham:type:path' corpus specifier found!\n";
+}
+if ($mcargs_s !~ /\bspam:/) {
+  die "seek-phrases-in-corpus: no 'spam:type:path' corpus specifier found!\n";
+}
+
+my $re = $opt{grep};
+
+# ---------------------------------------------------------------------------
+
+(-d "$tmpdir/cor") and run ("rm -rf $tmpdir/cor");
+(-d "$tmpdir/cor") or run ("mkdir -p $tmpdir/cor");
+
+# note: -c=/dev/null so no rules ever run
+# don't grep the ham set!
+run("cd $sadir/masses && ".
+    "./mass-check --cf='loadplugin Dumptext plugins/Dumptext.pm' ".
+    " --cf='loadplugin Mail::SpamAssassin::Plugin::Check' ".
+    " --cf='loadplugin GrepRenderedBody plugins/GrepRenderedBody.pm' ".
+    " -n -o --showdots -c=/dev/null ".
+    " $mcargs_h > $tmpdir/w.h");
+
+# *do* grep the spam, though
+run("cd $sadir/masses && ".
+    "./mass-check --cf='loadplugin Dumptext plugins/Dumptext.pm' ".
+    " --cf='loadplugin Mail::SpamAssassin::Plugin::Check' ".
+    " --cf='loadplugin GrepRenderedBody plugins/GrepRenderedBody.pm' ".
+    ($re ? " --cf='grep $re' " : "").
+    " -n -o --showdots -c=/dev/null ".
+    " $mcargs_s > $tmpdir/w.s");
+
+run("perl -w $sadir/masses/rule-dev/seek-phrases-in-log ".
+        "--ham $tmpdir/w.h --spam $tmpdir/w.s > $tmpdir/result");
+
+run("cat $tmpdir/result");
+exit;
+
+# ---------------------------------------------------------------------------
+
+sub run {
+  my $cmd = shift;
+  warn "[$cmd]\n";
+  system $cmd;
+  ($? >> 8 != 0) and Carp::croak("command failed");
+}
+

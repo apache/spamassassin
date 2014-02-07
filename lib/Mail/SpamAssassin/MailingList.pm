@@ -1,11 +1,10 @@
-# $Id: MailingList.pm,v 1.12 2003/01/09 23:51:56 msquadrat Exp $
-
 # <@LICENSE>
-# Copyright 2004 Apache Software Foundation
-# 
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to you under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at:
 # 
 #     http://www.apache.org/licenses/LICENSE-2.0
 # 
@@ -18,14 +17,15 @@
 
 # Eval Tests to detect genuine mailing lists.
 
-package Mail::SpamAssassin::MailingList;
-1;
+use strict;  # make Test::Perl::Critic happy
+package Mail::SpamAssassin::MailingList; 1;
 
 package Mail::SpamAssassin::PerMsgStatus;
 
 use strict;
+use warnings;
 use bytes;
-
+use re 'taint';
 
 sub detect_mailing_list {
     my ($self) = @_;
@@ -46,10 +46,10 @@ sub detect_ml_ezmlm {
     my ($self) = @_;
     return 0 unless $self->get('mailing-list') =~ /ezmlm$/;
     return 0 unless $self->get('precedence') eq "bulk\n";
-    return 0 unless $self->get('list-post') =~ /^<mailto:/;
-    return 0 unless $self->get('list-help') =~ /^<mailto:/;
-    return 0 unless $self->get('list-unsubscribe') =~ /<mailto:[a-zA-Z\.-]+-unsubscribe\@/;
-    return 0 unless $self->get('list-subscribe') =~ /<mailto:[a-zA-Z\.-]+-subscribe\@/;
+    return 0 unless $self->get('list-post') =~ /^<mailto:/i;
+    return 0 unless $self->get('list-help') =~ /^<mailto:/i;
+    return 0 unless $self->get('list-unsubscribe') =~ /<mailto:[a-zA-Z\.-]+-unsubscribe\@/i;
+    return 0 unless $self->get('list-subscribe') =~ /<mailto:[a-zA-Z\.-]+-subscribe\@/i;
     return 1; # assume ezmlm then.
 }
 
@@ -63,7 +63,7 @@ sub detect_ml_ezmlm {
 #  List-Archive: 
 #  X-Mailman-Version: \d
 #
-# However, for for mailing list membership reminders, most of
+# However, for mailing list membership reminders, most of
 # those headers are gone, so we identify on the following:
 #
 #  Subject: ...... mailing list memberships reminder  (v1)
@@ -81,17 +81,17 @@ sub detect_ml_mailman {
     if ($self->get('x-list-administrivia') =~ /yes/ ||
         $self->get('subject') =~ /mailing list memberships reminder$/)
     {
-        return 0 unless $self->get('errors-to');
-        return 0 unless $self->get('x-beenthere');
+        return 0 unless defined $self->get('errors-to',undef);
+        return 0 unless defined $self->get('x-beenthere',undef);
         return 0 unless $self->get('x-no-archive') =~ /yes/;
         return 1;
     }
 
-    return 0 unless $self->get('list-id');
-    return 0 unless $self->get('list-help') =~ /^<mailto:/;
-    return 0 unless $self->get('list-post') =~ /^<mailto:/;
-    return 0 unless $self->get('list-subscribe') =~ /<mailto:.*=subscribe>/;
-    return 0 unless $self->get('list-unsubscribe') =~ /<mailto:.*=unsubscribe>/;
+    return 0 unless defined $self->get('list-id',undef);
+    return 0 unless $self->get('list-help') =~ /^<mailto:/i;
+    return 0 unless $self->get('list-post') =~ /^<mailto:/i;
+    return 0 unless $self->get('list-subscribe') =~ /<mailto:.*=subscribe>/i;
+    return 0 unless $self->get('list-unsubscribe') =~ /<mailto:.*=unsubscribe>/i;
     return 1; # assume this is a valid mailman list
 }
 
@@ -123,7 +123,7 @@ sub detect_ml_lyris {
 # sub detect_ml_listbuilder {
 #   my ($self, $full) = @_;
 # 
-#   my $reply = $self->get ('Reply-To:addr');
+#   my $reply = $self->get('Reply-To:addr');
 #   if ($reply !~ /\@lb.bcentral.com/) { return 0; }
 # 
 #   # Received: from unknown (HELO lbrout14.listbuilder.com) (204.71.191.9)

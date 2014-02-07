@@ -1,3 +1,20 @@
+# <@LICENSE>
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to you under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at:
+# 
+#     http://www.apache.org/licenses/LICENSE-2.0
+# 
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# </@LICENSE>
+
 =head1 NAME
 
 Mail::SpamAssassin::Plugin::Hashcash - perform hashcash verification tests
@@ -6,68 +23,15 @@ Mail::SpamAssassin::Plugin::Hashcash - perform hashcash verification tests
 
   loadplugin     Mail::SpamAssassin::Plugin::Hashcash
 
+=head1 DESCRIPTION
+
+Hashcash is a payment system for email where CPU cycles used as the
+basis for an e-cash system.  This plugin makes it possible to use valid
+hashcash tokens added by mail programs as a bonus for messages.
+
 =cut
 
-# <@LICENSE>
-# Copyright 2004 Apache Software Foundation
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-# </@LICENSE>
-
-package Mail::SpamAssassin::Plugin::Hashcash;
-
-use Mail::SpamAssassin::Plugin;
-use Digest::SHA1 qw(sha1);
-use Fcntl;
-use File::Path;
-use File::Basename;
-use strict;
-use bytes;
-
-use vars qw(@ISA);
-@ISA = qw(Mail::SpamAssassin::Plugin);
-
-use constant HAS_DB_FILE => eval { require DB_File; };
-
-# constructor: register the eval rule
-sub new {
-  my $class = shift;
-  my $mailsaobject = shift;
-
-  # some boilerplate...
-  $class = ref($class) || $class;
-  my $self = $class->SUPER::new($mailsaobject);
-  bless ($self, $class);
-
-  my $conf = $mailsaobject->{conf};
-  $conf->{use_hashcash} = 1;
-  $conf->{hashcash_accept} = { };
-  $conf->{hashcash_doublespend_path} = '__userstate__/hashcash_seen';
-  $conf->{hashcash_doublespend_file_mode} = "0700";
-
-  $self->register_eval_rule ("check_hashcash_value");
-  $self->register_eval_rule ("check_hashcash_double_spend");
-
-  return $self;
-}
-
-###########################################################################
-
-sub parse_config {
-  my ($self, $opts) = @_;
-  my $conf = $opts->{conf};
-  my $key = $opts->{key};
-  my $value = $opts->{value};
+=head1 USER SETTINGS
 
 =over 4
 
@@ -77,11 +41,7 @@ Whether to use hashcash, if it is available.
 
 =cut
 
-  if ( $key eq 'use_hashcash' ) {
-    $conf->{use_hashcash} = $value+0; return 1;
-  }
-
-=item hashcash_accept add@ress.com ...
+=item hashcash_accept user@example.com ...
 
 Used to specify addresses that we accept HashCash tokens for.  You should set
 it to match all the addresses that you may receive mail at.
@@ -99,10 +59,6 @@ C<hashcash_accept> lines is also OK.
 
 =cut
 
-  if ( $key eq 'hashcash_accept' ) {
-    $conf->add_to_addrlist ('hashcash_accept', split (/\s+/, $value)); return 1;
-  }
-
 =item hashcash_doublespend_path /path/to/file   (default: ~/.spamassassin/hashcash_seen)
 
 Path for HashCash double-spend database.  HashCash tokens are only usable once,
@@ -115,10 +71,6 @@ suitable for sharing between multiple users.
 
 =cut
 
-  if ( $key eq 'hashcash_doublespend_path' ) {
-    $conf->{hashcash_doublespend_path} = $value; return 1;
-  }
-
 =item hashcash_doublespend_file_mode            (default: 0700)
 
 The file mode bits used for the HashCash double-spend database file.
@@ -129,11 +81,81 @@ not have any execute bits set (the umask is set to 111).
 
 =cut
 
-  if ( $key eq 'hashcash_doublespend_file_mode' ) {
-    $conf->{hashcash_doublespend_file_mode} = $value+0; return 1;
-  }
+package Mail::SpamAssassin::Plugin::Hashcash;
 
-  return 0;
+use strict;
+use warnings;
+use bytes;
+use re 'taint';
+
+use Mail::SpamAssassin::Plugin;
+use Mail::SpamAssassin::Logger;
+use Mail::SpamAssassin::Util qw(untaint_var);
+
+use Errno qw(ENOENT EACCES);
+use Fcntl;
+use File::Path;
+use File::Basename;
+
+BEGIN {
+  eval { require Digest::SHA; import Digest::SHA qw(sha1); 1 }
+  or do { require Digest::SHA1; import Digest::SHA1 qw(sha1) }
+}
+
+use vars qw(@ISA);
+@ISA = qw(Mail::SpamAssassin::Plugin);
+
+use constant HAS_DB_FILE => eval { require DB_File; };
+
+# constructor: register the eval rule
+sub new {
+  my $class = shift;
+  my $mailsaobject = shift;
+
+  # some boilerplate...
+  $class = ref($class) || $class;
+  my $self = $class->SUPER::new($mailsaobject);
+  bless ($self, $class);
+
+  $self->register_eval_rule ("check_hashcash_value");
+  $self->register_eval_rule ("check_hashcash_double_spend");
+
+  $self->set_config($mailsaobject->{conf});
+
+  return $self;
+}
+
+###########################################################################
+
+sub set_config {
+  my($self, $conf) = @_;
+  my @cmds;
+
+  push(@cmds, {
+    setting => 'use_hashcash',
+    default => 1,
+    type => $Mail::SpamAssassin::Conf::CONF_TYPE_NUMERIC,
+  });
+
+  push(@cmds, {
+    setting => 'hashcash_doublespend_path',
+    default => '__userstate__/hashcash_seen',
+    type => $Mail::SpamAssassin::Conf::CONF_TYPE_STRING,
+  });
+
+  push(@cmds, {
+    setting => 'hashcash_doublespend_file_mode',
+    default => "0700",
+    type => $Mail::SpamAssassin::Conf::CONF_TYPE_NUMERIC,
+  });
+
+  push(@cmds, {
+    setting => 'hashcash_accept',
+    default => {},
+    type => $Mail::SpamAssassin::Conf::CONF_TYPE_ADDRLIST,
+  });
+
+  $conf->{parser}->register_commands(\@cmds);
 }
 
 ###########################################################################
@@ -168,6 +190,9 @@ sub _run_hashcash {
   # call down to {msg} so that we can get it as an array of
   # individual headers
   my @hdrs = $scanner->{msg}->get_header ("X-Hashcash");
+  if (scalar @hdrs == 0) {
+    @hdrs = $scanner->{msg}->get_header ("Hashcash");
+  }
 
   foreach my $hc (@hdrs) {
     my $value = $self->_run_hashcash_for_one_string($scanner, $hc);
@@ -189,7 +214,9 @@ sub _run_hashcash_for_one_string {
   $hc =~ s/\s+//gs;       # remove whitespace from multiline, folded tokens
 
   # untaint the string for paranoia, making sure not to allow \n \0 \' \"
-  $hc =~ /^([-A-Za-z0-9\xA0-\xFF:_\/\%\@\.\,\= \*\+]+)$/; $hc = $1;
+  if ($hc =~ /^[-A-Za-z0-9\xA0-\xFF:_\/\%\@\.\,\= \*\+\;]+$/) {
+    $hc = untaint_var($hc);
+  }
   if (!$hc) { return 0; }
 
   my ($ver, $bits, $date, $rsrc, $exts, $rand, $trial);
@@ -202,18 +229,18 @@ sub _run_hashcash_for_one_string {
     # extensions are, as yet, unused by SpamAssassin
   }
   else {
-    dbg ("hashcash: version $ver stamps not yet supported");
+    dbg("hashcash: version $ver stamps not yet supported");
     return 0;
   }
 
   if (!$trial) {
-    dbg ("hashcash: no trial in stamp '$hc'");
+    dbg("hashcash: no trial in stamp '$hc'");
     return 0;
   }
 
   my $accept = $scanner->{conf}->{hashcash_accept};
   if (!$self->_check_hashcash_resource ($scanner, $accept, $rsrc)) {
-    dbg ("hashcash: resource $rsrc not accepted here");
+    dbg("hashcash: resource $rsrc not accepted here");
     return 0;
   }
 
@@ -233,7 +260,7 @@ sub _run_hashcash_for_one_string {
     $value = $bits;
   }
 
-  dbg ("hashcash token value: $value");
+  dbg("hashcash: token value: $value");
 
   if ($self->was_hashcash_token_double_spent ($scanner, $hc)) {
     $scanner->{hashcash_double_spent} = 1;
@@ -249,17 +276,20 @@ sub was_hashcash_token_double_spent {
 
   my $main = $self->{main};
   if (!$main->{conf}->{hashcash_doublespend_path}) {
-    dbg ("hashcash_doublespend_path not defined or empty");
+    dbg("hashcash: hashcash_doublespend_path not defined or empty");
     return 0;
   }
   if (!HAS_DB_FILE) {
-    dbg ("hashcash: DB_File module not installed, cannot use double-spend db");
+    dbg("hashcash: DB_File module not installed, cannot use double-spend db");
     return 0;
   }
 
   my $path = $main->sed_path ($main->{conf}->{hashcash_doublespend_path});
   my $parentdir = dirname ($path);
-  if (!-d $parentdir) {
+  my $stat_errn = stat($parentdir) ? 0 : 0+$!;
+  if ($stat_errn == 0 && !-d _) {
+    dbg("hashcash: parent dir $parentdir exists but is not a directory");
+  } elsif ($stat_errn == ENOENT) {
     # run in an eval(); if mkpath has no perms, it calls die()
     eval {
       mkpath ($parentdir, 0, (oct ($main->{conf}->{hashcash_doublespend_file_mode}) & 0777));
@@ -270,18 +300,19 @@ sub was_hashcash_token_double_spent {
   if (!tie %spenddb, "DB_File", $path, O_RDWR|O_CREAT,
                 (oct ($main->{conf}->{hashcash_doublespend_file_mode}) & 0666))
   {
-    dbg ("hashcash: failed to tie to $path: $@ $!");
+    dbg("hashcash: failed to tie to $path: $@ $!");
     # not a serious error. TODO?
     return 0;
   }
 
   if (exists $spenddb{$token}) {
-    dbg ("hashcash: token '$token' spent already");
+    untie %spenddb;
+    dbg("hashcash: token '$token' spent already");
     return 1;
   }
 
   $spenddb{$token} = time;
-  dbg ("hashcash: marking token '$token' as spent");
+  dbg("hashcash: marking token '$token' as spent");
 
   # TODO: expiry?
 
@@ -294,7 +325,7 @@ sub _check_hashcash_resource {
   my ($self, $scanner, $list, $addr) = @_;
   $addr = lc $addr;
   if (defined ($list->{$addr})) { return 1; }
-  study $addr;
+  study $addr;  # study is a no-op since perl 5.16.0, eliminating related bugs
 
   foreach my $regexp (values %{$list})
   {
@@ -315,6 +346,8 @@ sub _check_hashcash_resource {
 
 ############################################################################
 
-sub dbg { Mail::SpamAssassin::dbg (@_); }
-
 1;
+
+=back
+
+=cut

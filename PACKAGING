@@ -6,8 +6,7 @@ The Makefile which is used to build SpamAssassin is created by calling
 	perl Makefile.PL
 
 This is the standard Perl way of building packages. It involves the
-Perl module ExtUtils::MakeMaker (which will hopefully be replaced by
-Module::Build one day) which creates a Makefile.
+Perl module ExtUtils::MakeMaker which creates a Makefile.
 
 ExtUtils::MakeMaker recognizes several variables which can be set at
 the command line to give the user the possibility to influence the
@@ -52,20 +51,8 @@ Perl Policy [DEBPERL]. But I've heard that the vendor stuff is either
 broken or not set on many other systems, especially Red Hat ones. Google
 might help to find out more on this topic.
 
-SpamAssassin needs some directories which normally aren't supported by
-ExtUtils::MakeMaker. So we had to extend its logic quite a bit. And to
-make it worse did the internal logic change extremely between the 5.x
-and 6.x series, especially for packaging stuff. We had to "backport"
-(ie. hack into) some of the functionality ExtUtils::MakeMaker 6.11 and
-later offers. It's obvious how error-prone this is. So the recommended
-version of ExtUtils::MakeMaker is 6.16 or later.
-
 The following ressources might help understanding this stuff:
 [MANEUMM616], [MM00779], [P5P94113].
-
-It's also possible to build SpamAssassin with a current version of
-ExtUtils::MakeMaker without upgrading the system. See the section
-"Building with another ExtUtils::MakeMaker" for details.
 
 
 Changing paths in the Makefile
@@ -156,6 +143,22 @@ CONFDIR (LOCALRULESDIR):
     try this:
     	perl Makefile.PL CONFDIR=/etc/spamassassin
 
+LOCALSTATEDIR:
+  "sa-update" will download rule updates into LOCALSTATEDIR/spamassassin.
+
+  The default depends on the PREFIX and is compliant to the FHS:
+    - if PREFIX is either /usr or /usr/local:
+      /var/lib
+    - if PREFIX starts with /opt:
+      /var/opt
+    - else:
+      PREFIX/var
+
+  Samples:
+    If you'd like to have the downloaded rules files in /var/spamassassin
+    try this:
+    	perl Makefile.PL LOCALSTATEDIR=/var
+
 
 Installing to a directory different from the final destination
 --------------------------------------------------------------
@@ -167,9 +170,8 @@ some final paths to the libs and the applications.
 
 Previous versions offered some complicated variables to achieve this. Those
 hacks weren't compatible to current versions of ExtUtils::MakeMaker. But
-ExtUtils::MakeMaker 6.06 introduced a feature (which is said to be buggy
-till 6.11) which is well known from the GNU build tools [GNUMAKECMD]: The
-variable DESTDIR.
+ExtUtils::MakeMaker 6.06 introduced a feature which is well known from the GNU
+build tools [GNUMAKECMD]: The variable DESTDIR.
 
 The value of DESTDIR is simply prepended to all other paths on make install.
 So if you wanted to create a SpamAssassin package for a system which will
@@ -181,13 +183,6 @@ dir, you would do something like this:
 	make install
 	cd /tmp/sa-build
 	build_some_package
-
-ATTENTION: This method heavily depends on a feature introduced with a newer
-version of ExtUtils::MakeMaker. So it's *strongly* recommended to use
-  ExtUtils::MakeMaker 6.16 or later
-when building packages. That module is available here [GETEUMM616]. If any
-problems occur with previous versions, please report them to [BUGZILLA].
-See also "Building with another ExtUtils::MakeMaker".
 
 
 Setting further options on the command line
@@ -255,44 +250,6 @@ PERL_BIN:
     Building with some weird perl:
     	/local/buildsys/perl-5.6.1/bin/perl Makefile.PL PERL_BIN=/usr/bin/perl
 
-PERL_VERSION:
-  The build system has to know the version of the Perl which will actually
-  call SpamAssassin. Normally the app given by PERL_BIN is executed and asked
-  for its version. If that fails, the version of the perl which called
-  Makefile.PL is used. Sometimes one might have to correct this.
-
-  Sample:
-    Building with Perl 5.8.0 for Perl 5.6.2:
-    	perl-5.8.0 Makefile.PL PERL_VERSION=5.6.2
-
-
-Building with another ExtUtils::MakeMaker
------------------------------------------
-
-It is possible to use a different version than the one which is installed.
-This is very useful if one wants to package SpamAssassin but can't or doesn't
-want to upgrade the module installed on his machine. Follow these steps to
-success:
-
-1. Go to CPAN and look for the latest ExtUtils::MakeMaker available.
-     <http://search.cpan.org/search?query=ExtUtils::MakeMaker>
-   The standalone package (currently maintained by Michael G. Schwern)
-   is needed.
-
-2. Get the tarball and extract it in some temporary directory. For
-   version 6.16:
-   	cd /tmp
-   	wget http://search.cpan.org/CPAN/authors/id/M/MS/MSCHWERN/ExtUtils-MakeMaker-6.16.tar.gz
-   	tar xvfz ExtUtils-MakeMaker-6.16.tar.gz
-
-3. You will now have a directory ExtUtils-MakeMaker-X.YY (where X.YY is the
-   version). Inside is a subdirectory 'lib'. Add that one to the environment
-   variable PERL5LIB, like this (when you use the Bash):
-   	export PERL5LIB="/tmp/ExtUtils-MakeMaker-6.16/lib:$PERL5LIB"
-
-4. Now build SpamAssassin. As long as the PERL5LIB variable is set, the
-   updated ExtUtils::MakeMaker is used.
-
 
 Obsolete Variables
 ------------------
@@ -328,17 +285,14 @@ If you think you need to use one of those nevertheless, you can set the
 variable IGNORE_CRUFT to "yes".
 
 
-Ressources
-----------
+Resources
+---------
 
 [BUGZILLA] SpamAssassin bug database:
-  <http://bugzilla.spamassassin.org>
+  <http://issues.apache.org/SpamAssassin/>
 
 [DEBPERL] Debian Perl Policy, Chapter 3: Packaged Modules:
   <http://www.debian.org/doc/packaging-manuals/perl-policy/ch-module_packages.html>
-
-[GETEUMM616] Get ExtUtils::MakeMaker 6.16 here:
-  <http://search.cpan.org/author/MSCHWERN/ExtUtils-MakeMaker-6.16/>
 
 [GNUMAKECMD] GNU make manual: Make Conventions: Variables for Specifying
   Commands
@@ -358,3 +312,4 @@ Ressources
 [RHBUG78053] Red Hat bug 78053: "incompatible changes in behavior of
   MakeMaker; affects rpm build process" (introduction of DESTDIR):
   <https://bugzilla.redhat.com/bugzilla/show_bug.cgi?id=78053>
+

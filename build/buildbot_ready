@@ -1,0 +1,54 @@
+#!/usr/bin/perl -w
+
+use strict;
+
+my $command = shift @ARGV;
+my $perl = shift @ARGV;
+my $syncfile = shift @ARGV;
+
+if ($command eq 'quickstart') {
+  quickstart();
+
+}
+elsif ($command eq 'start') {
+  quickstart();
+  if ($syncfile)
+  {
+    # sleep until it disappears, or times out.
+    # on second thoughts, just sleep a little bit if it exists,
+    # don't wait for it to disappear entirely.  this just gives us
+    # a little delay, to avoid overloading, without totally screwing
+    # up if a lockfile gets left lying around...
+
+    if (-f $syncfile && mtime_age_secs($syncfile) < 60*60) {
+      print "$syncfile exists with age ".mtime_age_secs($syncfile).", sleeping\n";
+      sleep 60*3 + rand(60*5);
+    }
+
+    open (TOUCH, ">$syncfile"); close TOUCH;
+  }
+
+  # ensure we're in a safe state to build
+  system ("$perl Makefile.PL < /dev/null");
+  system ("make distclean");
+  system ("rm -rf Mail-SpamAssassin*");
+
+}
+elsif ($command eq 'stop') {
+  if ($syncfile) {
+    unlink ($syncfile);
+    print "$syncfile removed\n";
+  }
+}
+exit;
+
+sub mtime_age_secs {
+  my $f = shift;
+  my @s = stat($f);
+  return (time - $s[9]);
+}
+
+sub quickstart {
+  # TODO
+}
+

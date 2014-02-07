@@ -3,16 +3,15 @@
 use lib '.'; use lib 't';
 use SATest; sa_t_init("dns");
 
-use constant TEST_ENABLED => (-e 't/do_net' || -e 'do_net');
-use constant HAS_NET_DNS => eval { require Net::DNS; };
-
+use constant TEST_ENABLED => conf_bool('run_net_tests') && conf_bool('run_long_tests');
+use constant DO_RUN => TEST_ENABLED && can_use_net_dns_safely();
 use Test;
 
 BEGIN {
-  plan tests => ((TEST_ENABLED && HAS_NET_DNS) ? 22 : 0),
+  plan tests => (DO_RUN ? 23 : 0),
 };
 
-exit unless (TEST_ENABLED && HAS_NET_DNS);
+exit unless (DO_RUN);
 
 # ---------------------------------------------------------------------------
 # bind configuration currently used to support this test
@@ -56,7 +55,7 @@ EOF
  q{ <dns:98.3.137.144.dnsbltest.spamassassin.org> [127.0.0.2] } => 'P_1',
  q{ <dns:134.88.73.210.dnsbltest.spamassassin.org> [127.0.0.4] } => 'P_2',
  q{ <dns:18.13.119.61.dnsbltest.spamassassin.org> [127.0.0.12] } => 'P_3',
- q{ <dns:14.35.17.212.dnsbltest.spamassassin.org> [127.0.0.1, 127.0.0.1] } => 'P_4',
+ q{ <dns:14.35.17.212.dnsbltest.spamassassin.org> [127.0.0.1] } => 'P_4',
  q{ <dns:226.149.120.193.dnsbltest.spamassassin.org> [127.0.0.1] } => 'P_5',
  q{ <dns:example.com.dnsbltest.spamassassin.org> [127.0.0.2] } => 'P_6',
  q{ <dns:134.88.73.210.sb.dnsbltest.spamassassin.org?type=TXT> } => 'P_7',
@@ -78,9 +77,16 @@ EOF
  q{ DNSBL_TXT_MISS } => 'P_20',
  q{ DNSBL_SB_UNDEF } => 'P_21',
  q{ DNSBL_SB_MISS } => 'P_22',
+ q{ launching DNS A query for 14.35.17.212.untrusted.dnsbltest.spamassassin.org. } => 'untrusted',
 );
 
 tstprefs("
+
+# we really do not want to timeout here. use a large value, as the
+# scaling code otherwise results in timing out after 7 seconds due
+# to the volume of lookups performed
+rbl_timeout 60
+
 add_header all RBL _RBL_
 add_header all Trusted _RELAYSTRUSTED_
 add_header all Untrusted _RELAYSUNTRUSTED_
@@ -94,9 +100,13 @@ header DNSBL_TEST_TOP	eval:check_rbl('test', 'dnsbltest.spamassassin.org.')
 describe DNSBL_TEST_TOP	DNSBL A record match
 tflags DNSBL_TEST_TOP	net
 
-header DNSBL_TEST_WHITELIST	eval:check_rbl('white-firsttrusted', 'dnsbltest.spamassassin.org', '127.0.0.1')
+header DNSBL_TEST_WHITELIST	eval:check_rbl('white-firsttrusted', 'dnsbltest.spamassassin.org.', '127.0.0.1')
 describe DNSBL_TEST_WHITELIST	DNSBL whitelist match
 tflags DNSBL_TEST_WHITELIST	net nice
+
+header DNSBL_TEST_UNTRUSTED	eval:check_rbl('white-untrusted', 'untrusted.dnsbltest.spamassassin.org.', '127.0.0.1')
+describe DNSBL_TEST_UNTRUSTED	DNSBL untrusted match
+tflags DNSBL_TEST_UNTRUSTED	net nice
 
 header DNSBL_TEST_DYNAMIC	eval:check_rbl_sub('test', '2')
 describe DNSBL_TEST_DYNAMIC	DNSBL dynamic match
@@ -154,5 +164,5 @@ describe DNSBL_SB_MISS	DNSBL SenderBase miss
 tflags DNSBL_SB_MISS	net
 ");
 
-sarun ("-t < data/spam/dnsbl.eml", \&patterns_run_cb);
+sarun ("-D -t < data/spam/dnsbl.eml 2>&1", \&patterns_run_cb);
 ok_all_patterns();

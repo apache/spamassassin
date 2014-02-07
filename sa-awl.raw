@@ -1,0 +1,178 @@
+#!/usr/bin/perl
+
+use strict;
+use warnings;
+use re 'taint';
+
+my $PREFIX          = '@@PREFIX@@';             # substituted at 'make' time
+my $DEF_RULES_DIR   = '@@DEF_RULES_DIR@@';      # substituted at 'make' time
+my $LOCAL_RULES_DIR = '@@LOCAL_RULES_DIR@@';    # substituted at 'make' time
+my $LOCAL_STATE_DIR = '@@LOCAL_STATE_DIR@@';    # substituted at 'make' time
+use lib '@@INSTALLSITELIB@@';                   # substituted at 'make' time
+
+use Errno qw(EBADF);
+use File::Spec;
+use Config;
+
+BEGIN {                          # see comments in "spamassassin.raw" for doco
+  my @bin = File::Spec->splitpath($0);
+  my $bin = ($bin[0] ? File::Spec->catpath(@bin[0..1]) : $bin[1])
+            || File::Spec->curdir;
+
+  if (-e $bin.'/lib/Mail/SpamAssassin.pm'
+        || !-e '@@INSTALLSITELIB@@/Mail/SpamAssassin.pm' )
+  {
+    my $searchrelative;
+    $searchrelative = 1;    # disabled during "make install": REMOVEFORINST
+    if ($searchrelative && $bin eq '../' && -e '../blib/lib/Mail/SpamAssassin.pm')
+    {
+      unshift ( @INC, '../blib/lib' );
+    } else {
+      foreach ( qw(lib ../lib/site_perl
+                ../lib/spamassassin ../share/spamassassin/lib))
+      {
+        my $dir = File::Spec->catdir( $bin, split ( '/', $_ ) );
+        if ( -f File::Spec->catfile( $dir, "Mail", "SpamAssassin.pm" ) )
+        { unshift ( @INC, $dir ); last; }
+      }
+    }
+  }
+}
+
+sub usage {
+  die "
+usage: sa-awl [--clean] [--min n] [dbfile]
+";
+}
+
+use Fcntl;
+use Getopt::Long;
+
+use vars qw(
+		$opt_clean $opt_min $opt_help
+	);
+
+GetOptions(
+  'clean'		=> \$opt_clean,
+  'min:i'		=> \$opt_min,
+  'help'		=> \$opt_help
+) or usage();
+$opt_help and usage();
+
+$opt_min ||= 2;
+
+BEGIN { @AnyDBM_File::ISA = qw(DB_File GDBM_File NDBM_File SDBM_File); }
+use AnyDBM_File ;
+
+my $db;
+if ($#ARGV == -1) {
+  $db = $ENV{HOME}."/.spamassassin/auto-whitelist";
+} else {
+  $db = $ARGV[0];
+}
+
+my %h;
+if ($opt_clean) {
+  tie %h, "AnyDBM_File",$db, O_RDWR,0600
+      or die "Cannot open r/w file $db: $!\n";
+} else {
+  tie %h, "AnyDBM_File",$db, O_RDONLY,0600
+      or die "Cannot open file $db: $!\n";
+}
+
+if (!$opt_clean) {  # just pretend to be cleaning
+  while (my($key, $count) = each %h) {
+    next if $key =~ /totscore$/;
+    my $totscore = $h{"$key|totscore"};
+    next unless defined($totscore);
+    printf("%8.1f %15s  --  %s\n",
+	   $totscore/$count, sprintf("(%.1f/%d)",$totscore,$count), $key);
+  }
+
+} else {  # really do the cleaning
+  for (;;) {
+    my @delete_keys;
+    my $more;
+    while (my($key, $count) = each %h) {
+      next if $key =~ /totscore$/;
+      my $totscore = $h{"$key|totscore"};
+      next unless defined($totscore);
+      next if $count >= $opt_min;
+      printf("cleaning: %8.1f %15s  --  %s\n",
+             $totscore/$count, sprintf("(%.1f/%d)",$totscore,$count), $key);
+      # according to perlfunc man page:
+      #   If you add or delete a hash's elements while iterating over it,
+      #   entries may be skipped or duplicated -- so don't do that.
+      #   Exception: It is always safe to delete the item most recently
+      #   returned by each(),
+      delete $h{$key};  # this is safe
+      push(@delete_keys, "$key|totscore");  # this should be postponed
+      # see Bug 6793 - reduce sa-awl memory usage
+      if (@delete_keys >= 10000) { $more = 1; last }  # avoid worst case
+    }
+    delete $h{$_}  for @delete_keys;
+    last if !$more;
+  }
+}
+
+untie %h;
+
+=head1 NAME
+
+sa-awl - examine and manipulate SpamAssassin's auto-whitelist db
+
+=head1 SYNOPSIS
+
+B<sa-awl> [--clean] [--min n] [dbfile]
+
+=head1 DESCRIPTION
+
+Check or clean a SpamAssassin auto-whitelist (AWL) database file.
+
+The name of the file is specified after any options, as C<dbfile>.
+The default is C<$HOME/.spamassassin/auto-whitelist>.
+
+=head1 OPTIONS
+
+=over 4
+
+=item --clean
+
+Clean out infrequently-used AWL entries.  The C<--min> switch can be
+used to select the threshold at which entries are kept or deleted.
+
+=item --min n
+
+Select the threshold at which entries are kept or deleted when C<--clean> is
+used.  The default is C<2>, so entries that have only been seen once are
+deleted.
+
+=back
+
+=head1 OUTPUT
+
+The output looks like this:
+
+     AVG  (TOTSCORE/COUNT)  --  EMAIL|ip=IPBASE
+
+For example:
+
+     0.0         (0.0/7)  --  dawson@example.com|ip=208.192
+    21.8        (43.7/2)  --  mcdaniel_2s2000@example.com|ip=200.106
+
+C<AVG> is the average score;  C<TOTSCORE> is the total score of all mails seen
+so far;  C<COUNT> is the number of messages seen from that sender;  C<EMAIL> is
+the sender's email address, and C<IPBASE> is the B<AWL base IP address>.
+
+B<AWL base IP address> is a way to identify the sender's IP address they
+frequently send from, in an approximate way, but remaining hard for spammers to
+spoof.  The algorithm is as follows:
+
+  - take the last Received header that contains a public IP address -- namely
+    one which is not in private, unrouted IP space.
+
+  - chop off the last two octets, assuming that the user may be in an ISP's
+    dynamic address pool.
+
+=cut
+

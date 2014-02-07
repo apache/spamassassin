@@ -1,6 +1,6 @@
 #!/bin/sh
 
-# Spamd init script for Slackware 9.0
+# Spamd init script for Slackware 10.0
 # August, 2th 2003
 # Martin Ostlund, nomicon
 
@@ -37,16 +37,13 @@ case "$1" in
 	;;
   stop)
 	echo -n "Stopping $DESC: "
-        $KILL -9 `cat $PIDFILE`
-	/bin/rm $PIDFILE
+        $KILL `cat $PIDFILE`
+	/bin/rm -f $PIDFILE
 	echo "$NAME."
 	;;
   restart|force-reload)
-	echo -n "Restarting $DESC: "
 	$0 stop
 	$0 start
-
-	echo "$NAME."
 	;;
   *)
 	ME=/etc/rc.d/$SNAME

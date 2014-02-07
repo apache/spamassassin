@@ -7,6 +7,7 @@ BEGIN {
 
   if (-e 'test_dir') {            # running from test directory, not ..
     unshift(@INC, '../blib/lib');
+    unshift(@INC, '../lib');
   }
 }
 
@@ -18,12 +19,16 @@ if (-e 'test_dir') {            # running from test directory, not ..
 use strict;
 use Test;
 use Mail::SpamAssassin;
-use Digest::SHA1;
+
+BEGIN {
+  eval { require Digest::SHA; import Digest::SHA qw(sha1_hex); 1 }
+  or do { require Digest::SHA1; import Digest::SHA1 qw(sha1_hex) }
+}
 
 my %files = (
 	"$prefix/t/data/nice/mime1" => [
 	  join("\n", 'multipart/alternative','text/plain',
-	             'multipart/mixed,text/richtext','application/andrew-inset'),
+	             'multipart/mixed,text/plain','application/andrew-inset'),
 	],
 
 	"$prefix/t/data/nice/mime2" => [
@@ -78,6 +83,11 @@ my %files = (
 	  'e6e71e824aec0e204367bfdc9a9e227039f42815'
 	],
 
+	"$prefix/t/data/spam/badmime3.txt" => [
+	  join("\n",'multipart/alternative','text/plain'),
+	  '1c9972d2708b27f4da2e2ef87dd64d53bd11d086'
+	],
+
 	"$prefix/t/data/nice/mime9" => [
 	  join("\n",'multipart/mixed','text/plain','message/rfc822,message/rfc822,multipart/mixed,multipart/alternative,text/plain,text/html,image/jpeg'),
 	  '5cdcabdb89c5fbb3a5e0c0473599668927045d9c',
@@ -87,7 +97,17 @@ my %files = (
 	],
 );
 
-my $numtests = 0;
+# initialize SpamAssassin
+my $sa = Mail::SpamAssassin->new({
+    rules_filename => "$prefix/t/log/test_rules_copy",
+    site_rules_filename => "$prefix/t/log/test_default.cf",
+    userprefs_filename  => "$prefix/masses/spamassassin/user_prefs",
+    local_tests_only    => 1,
+    debug             => 0,
+    dont_copy_prefs   => 1,
+});
+
+my $numtests = 5;
 while ( my($k,$v) = each %files ) {
   $numtests += @{$v};
 }
@@ -96,12 +116,13 @@ plan tests => $numtests;
 
 foreach my $k ( sort keys %files ) {
   open(INP, $k) || die "Can't find $k:$!";
-  my $mail = Mail::SpamAssassin->parse(\*INP, 1);
+  my $mail = $sa->parse(\*INP, 1);
   close(INP);
 
   my $res = join("\n",$mail->content_summary());
-# print "---\n$res\n---\n";
-  ok( $res eq shift @{$files{$k}} );
+  my $want = shift @{$files{$k}};
+#  print "---$k---\n---\nGOT: $res\n---\nEXPECTED: $want\n---\n";
+  ok( $res eq $want );
   if ( @{$files{$k}} ) {
     my @parts = $mail->find_parts(qr/./,1);
 
@@ -115,13 +136,49 @@ foreach my $k ( sort keys %files ) {
 	  $res = '';
 	}
 	else {
-	  $res = Digest::SHA1::sha1_hex($parts[0]->decode());
+	  $res = sha1_hex($parts[0]->decode());
 	}
 #	print ">> ",$parts[0]->{'type'}," = $res\n";
+#	print ">> ",$parts[0]->{'type'}," expected $_\n";
         $res = $res eq $_;
       }
       ok ( $res );
       shift @parts;
     }
   }
+  $mail->finish();
 }
+
+my @msg;
+my $subject;
+my $mail;
+
+@msg = ("Subject: =?ISO-8859-1?Q?a?=\n", "\n");
+$mail = $sa->parse(\@msg);
+$subject = $mail->get_header("Subject");
+$mail->finish();
+ok($subject eq "a\n");
+
+@msg = ("Subject: =?ISO-8859-1?Q?a?= b\n", "\n");
+$mail = $sa->parse(\@msg);
+$subject = $mail->get_header("Subject");
+$mail->finish();
+ok($subject eq "a b\n");
+
+@msg = ("Subject: =?ISO-8859-1?Q?a?=   \t =?ISO-8859-1?Q?b?=\n", "\n");
+$mail = $sa->parse(\@msg);
+$subject = $mail->get_header("Subject");
+$mail->finish();
+ok($subject eq "ab\n");
+
+@msg = ("Subject: =?ISO-8859-1?Q?a?=\n", " =?ISO-8859-1?Q?_b?=\n", "\n");
+$mail = $sa->parse(\@msg);
+$subject = $mail->get_header("Subject");
+$mail->finish();
+ok($subject eq "a b\n");
+
+@msg = ("Subject: =?ISO-8859-1?Q?a?=\n", " =?ISO-8859-1?Q?_b?= mem_brain =?  invalid ?=\n", "\n");
+$mail = $sa->parse(\@msg);
+$subject = $mail->get_header("Subject");
+$mail->finish();
+ok($subject eq "a b mem_brain =?  invalid ?=\n");

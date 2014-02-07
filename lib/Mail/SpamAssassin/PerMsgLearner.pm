@@ -1,9 +1,10 @@
 # <@LICENSE>
-# Copyright 2004 Apache Software Foundation
-# 
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to you under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at:
 # 
 #     http://www.apache.org/licenses/LICENSE-2.0
 # 
@@ -46,12 +47,14 @@ the learning process.
 package Mail::SpamAssassin::PerMsgLearner;
 
 use strict;
+use warnings;
 use bytes;
+use re 'taint';
 
 use Mail::SpamAssassin;
-use Mail::SpamAssassin::AutoWhitelist;
 use Mail::SpamAssassin::PerMsgStatus;
 use Mail::SpamAssassin::Bayes;
+use Mail::SpamAssassin::Logger;
 
 use vars qw{
   @ISA
@@ -70,6 +73,7 @@ sub new {
     'main'              => $main,
     'msg'               => $msg,
     'learned'		=> 0,
+    'master_deadline'   => $msg->{master_deadline},  # dflt inherited from msg
   };
 
   $self->{conf} = $self->{main}->{conf};
@@ -87,8 +91,8 @@ sub new {
 # Learn the message as spam.
 # 
 # C<$id> is an optional message-identification string, used internally
-# to tag the message.  If it is C<undef>, the Message-Id of the message
-# will be used.  It should be unique to that message.
+# to tag the message.  If it is C<undef>, one will be generated.
+# It should be unique to that message.
 # 
 # This is a semi-private API; callers should use
 # C<$spamtest-E<gt>learn($mail,$id,$isspam,$forget)> instead.
@@ -96,9 +100,10 @@ sub new {
 sub learn_spam {
   my ($self, $id) = @_;
 
-  if ($self->{main}->{learn_with_whitelist}) {
-    $self->{main}->add_all_addresses_to_blacklist ($self->{msg});
-  }
+  # bug 4096
+  # if ($self->{main}->{learn_with_whitelist}) {
+  # $self->{main}->add_all_addresses_to_blacklist ($self->{msg});
+  # }
 
   # use the real message-id here instead of mass-check's idea of an "id",
   # as we may deliver the msg into another mbox format but later need
@@ -113,8 +118,8 @@ sub learn_spam {
 # Learn the message as ham.
 # 
 # C<$id> is an optional message-identification string, used internally
-# to tag the message.  If it is C<undef>, the Message-Id of the message
-# will be used.  It should be unique to that message.
+# to tag the message.  If it is C<undef>, one will be generated.
+# It should be unique to that message.
 # 
 # This is a semi-private API; callers should use
 # C<$spamtest-E<gt>learn($mail,$id,$isspam,$forget)> instead.
@@ -122,9 +127,10 @@ sub learn_spam {
 sub learn_ham {
   my ($self, $id) = @_;
 
-  if ($self->{main}->{learn_with_whitelist}) {
-    $self->{main}->add_all_addresses_to_whitelist ($self->{msg});
-  }
+  # bug 4096
+  # if ($self->{main}->{learn_with_whitelist}) {
+  # $self->{main}->add_all_addresses_to_whitelist ($self->{msg});
+  # }
 
   $self->{learned} = $self->{bayes_scanner}->learn (0, $self->{msg}, $id);
 }
@@ -136,8 +142,8 @@ sub learn_ham {
 # Forget about a previously-learned message.
 # 
 # C<$id> is an optional message-identification string, used internally
-# to tag the message.  If it is C<undef>, the Message-Id of the message
-# will be used.  It should be unique to that message.
+# to tag the message.  If it is C<undef>, one will be generated.
+# It should be unique to that message.
 # 
 # This is a semi-private API; callers should use
 # C<$spamtest-E<gt>learn($mail,$id,$isspam,$forget)> instead.
@@ -145,9 +151,10 @@ sub learn_ham {
 sub forget {
   my ($self, $id) = @_;
 
-  if ($self->{main}->{learn_with_whitelist}) {
-    $self->{main}->remove_all_addresses_from_whitelist ($self->{msg});
-  }
+  # bug 4096
+  # if ($self->{main}->{learn_with_whitelist}) {
+  # $self->{main}->remove_all_addresses_from_whitelist ($self->{msg});
+  # }
 
   $self->{learned} = $self->{bayes_scanner}->forget ($self->{msg}, $id);
 }
@@ -156,7 +163,7 @@ sub forget {
 
 =item $didlearn = $status->did_learn()
 
-Returns C<1> if the message was learned from or forgotten succesfully.
+Returns C<1> if the message was learned from or forgotten successfully.
 
 =cut
 
@@ -175,15 +182,8 @@ Finish with the object.
 
 sub finish {
   my $self = shift;
-  delete $self->{main};
-  delete $self->{msg};
-  delete $self->{conf};
-  delete $self->{bayes_scanner};
+  %{$self} = ();
 }
-
-###########################################################################
-
-sub dbg { Mail::SpamAssassin::dbg (@_); }
 
 ###########################################################################
 

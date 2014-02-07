@@ -3,7 +3,7 @@
 use lib '.'; use lib 't';
 use SATest; sa_t_init("spamc_B");
 
-use Test; plan tests => ($SKIP_SPAMC_TESTS ? 0 : 8);
+use Test; plan tests => ($SKIP_SPAMC_TESTS ? 0 : 9);
 
 exit if $SKIP_SPAMC_TESTS;
 # ---------------------------------------------------------------------------
@@ -26,6 +26,7 @@ exit if $SKIP_SPAMC_TESTS;
 );
 
 start_spamd("-L");
+ok (spamcrun ("-B < data/spam/bsmtpnull", \&patterns_run_cb));
 ok (spamcrun ("-B < data/spam/bsmtp", \&patterns_run_cb));
 ok_all_patterns();
 stop_spamd();

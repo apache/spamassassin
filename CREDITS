@@ -1,34 +1,52 @@
-Project Management Committee:
+Project Management Committee (PMC):
 
   This list contains PMC members in alphabetical order (and their Amazon
-  wishlists).
+  wishlists).  The PMC can be reached at <private /at/ spamassassin.apache.org>
+  (for private correspondence) or <dev /at/ spamassassin.apache.org> (for
+  public contact); we request that the dev list should be used for all
+  non-confidential correspondence.
 
-   - Theo Van Dinter	http://www.amazon.com/o/registry/2ET4XKZ3OEDQW
-   - Duncan Findlay
-   - Justin Mason	http://www.amazon.com/o/registry/1M0UDEXT6A3I7
-   - Michael Parker	http://www.amazon.com/o/registry/10BBAR2M03T6F
-   - Daniel Quinlan	http://www.amazon.com/o/registry/3B3ST4DS9DTL0
-   - Malte S. Stretz
+   - Karsten Bräckelmann
+   - Alex Broens
+   - Adam Katz
+   - Sidney Markowitz     http://www.amazon.com/o/registry/1WJ8J7403BLTS
+   - Mark Martinec
+   - Kevin A. McGrail
+   - Michael Parker       http://www.amazon.com/o/registry/10BBAR2M03T6F
 
 Committers:
 
   This list contains committers in alphabetical order (and their Amazon
   wishlists).
 
-   - Sidney Markowitz
-   - Henry Stern
-   - Matt Yackley
+   - John Hardin
+   - Henrik Krohns
 
-Inactive committers:
+PMC Emeritus & inactive committers:
 
-  This list contains all inactive committers in alphabetical order (and their
-  Amazon wishlists).  They have not committed anything for six months, and so
-  are considered to have retired from active duty, although they may still be
-  involved in other aspects of the project.  We wish them well and hope to see
-  them return someday.
+  This list contains all PMC Emeritus & inactive committers in alphabetical order.
 
-   - Craig Hughes	http://www.amazon.com/o/registry/1G97F2FF1AWCK
+  We wish them well and hope to see them return someday.
+
+   - Matthew Cline
+   - Duncan Findlay - PMC Emeritus
+   - Tony Finch
+   - Steve Freegard
+   - Craig Hughes 
+   - Matt Kettler - PMC Emeritus
+   - Justin Mason - Creator & PMC Emeritus
+   - Robert Menschel
+   - Daryl C. W. O'Shea - PMC Emeritus
+   - John Gardiner Myers
+   - Daniel Quinlan - PMC Emeritus
+   - Dale 'Doc' Schneider - PMC Emeritus
    - Matt Sergeant
+   - Henry Stern
+   - Malte S. Stretz - PMC Emeritus
+   - Warren Togami
+   - Theo Van Dinter - PMC Emeritus
+   - Matt Yackley
+   - Daniel Lemke
 
 Spamc credits:
 
@@ -48,10 +66,10 @@ Spamd:
 
 Algorithms:
 
-  The Bayesian-style text classifier used by SpamAssassin's BAYES rules is
-  based on an approach outlined by Gary Robinson. Thanks, Gary!
+  The Bayesian-style probabilistic classifier used by SpamAssassin's BAYES
+  rules is based on an approach outlined by Gary Robinson. Thanks, Gary!
 
-	http://radio.weblogs.com/0101454/stories/2002/09/16/spamDetection.html
+    http://radio.weblogs.com/0101454/stories/2002/09/16/spamDetection.html
 
 
 Major contributions:
@@ -60,6 +78,8 @@ Major contributions:
 
   - Kelsey Cummings, <kgc(at)sonic.net>: client-ip-address security in spamd;
     sql-configs-with-setuid switch added to spamd.
+
+  - Dallas L. Engelken <dallase(at)nmgi.com>: ImageInfo plugin.
 
   - Justin England, <jengland(at)enetis.net>: SQL support.
 
@@ -78,19 +98,29 @@ Major contributions:
 
   - Kristian Koehntopp <kris(at)koehntopp.de>: LDAP support.
 
+  - Matthias Leisi <matthias(at)leisi.net>: Mail::SpamAssassin::Plugin::ASN
+    plugin.
+
+  - Daniel Lemke, <lemke(at)jam-software.com>: many Windows support fixes
+
+  - John Madden, <maddenj+spamassassin at skynet.ie>: spamc -F configuration
+    file support.
+
   - Sidney Markowitz, <sidney(at)sidney.com>: fix to DNS tests;
     message-size sanity-checking in spamc; language identification;
     Win32 build support.
-  
+
   - Marc Merlin, <marc_soft(at)merlins.org>: RBL ordering/timeouts;
     time-logging for debug speed testing.
+
+  - Bob Menschel: 'longwords' rules, some documentation.
 
   - Eugene/Yevgeniy Miretsky, <eugene(at)invision.net>: bug fix for
     spamc -c; Spamc timeout support; support for REPORT, REPORT_IFSPAM
     and SYMBOLS methods in spamc.
 
   - Gertjan van Noord, <vannoord(at)let.rug.nl>: TextCat language classifier
-    
+
   - Michael Parker, <parkerm(at)pobox.com>: Bayes-in-SQL and AWL-in-SQL;
     writing Bayes regression tests.
 
@@ -100,9 +130,12 @@ Major contributions:
   - Marc Perkel, <marc(at)perkel.com>: 30-or-so rules; about 20 of which are
     still in codebase.
 
+  - Nico Prenzel, <nico.prenzel(at)pn-systeme.de>: remote learning and
+    spam-reporting support in spamc/spamd.
+
   - Dustin Sallings, <dustin+spamassassin(at)spy.net>: support for
     virtual users in spamd.
-    
+
   - Ed Allen Smith, <easmith(at)beatrice.rutgers.edu>: GA improvements; 6
     rules.
 
@@ -110,10 +143,16 @@ Major contributions:
 
   - Liam Widdowson, <liam(at)inodes.org>: shared-library use of spamc.
 
+  - Radoslaw Zielinski, <radek(at)pld-linux.org>:
+    Mail::SpamAssassin::Spamd::Apache2, a mod_perl2 module implementing spamd,
+    contributed as a Google Summer of Code project.
+
 
 Translators:
 
   - Michel Bouissou, <michel(at)bouissou.net>: French translation.
+
+  - Olivier Nicole, <on(at)cs.ait.ac.th>: prior version of French translation.
 
   - Jesse Houwing, <j.houwing(at)student.utwente.nl>: Dutch translation.
 
@@ -130,7 +169,7 @@ Patch submitters:
 
   - Nick "Nix" Alcock, <nix(at)esperi.org.uk>: DCC fix
 
-  - Bob Apthorpe, <apthorpe+sa(at)cynistar.net>: tools/sa-stats.pl 
+  - Bob Apthorpe, <apthorpe+sa(at)cynistar.net>: tools/sa-stats.pl
 
   - Alan Barrett, <apb(at)cequrux.com>: base64 decoding code
 
@@ -201,6 +240,8 @@ Patch submitters:
   - Juergen Kreileder, <kreilede(at)issan.informatik.uni-dortmund.de>:
     misc fixes; Bayes ignore Gnus annotation
 
+  - Henrik Krohns, <hege@hege.li>, 'uridnssub' keyword for URIDNSBL plugin.
+
   - David M. Koppelman, <koppel(at)ece.lsu.edu>: bayes_score report
     fix; bayes expiry time bugfix.
 
@@ -220,8 +261,8 @@ Patch submitters:
   - Morgan Massena, <mmassena(at)ipowerplant.com>: patch to SQL support to
     allow installer to specify more table details.
 
-  - Kevin McGrail, <kmcgrail(at)peregrinehw.com>: portability fix for
-    Red Hat 5 suppor.
+  - Kevin McGrail, <kmcgrail(at)pccc.com>: portability fix for
+    Red Hat 5 support.
 
   - Rob McMillin, <rlm(at)pricegrabber.com> <rfm(at)scareduck.com>:
     rule fixes.
@@ -300,15 +341,31 @@ Patch submitters:
   - The Little Rubber Ninja Homepage <http://www.unsuave.com/ninja/>, owned
     by Mike Quinn: source of the original SpamAssassin logo.
 
-If your name is not here, and you've submitted a patch that was included, it's
-just an oversight. Please mail me at <jm /at/ jmason.org> and I'll add you to
-the list.
+  If your name is not here, and you've submitted a patch that was included,
+  it's just an oversight. Please mail me at <jm /at/ jmason.org> and I'll add
+  you to the list.
 
-Hosting:
+ASF Sponsorship:
 
-  Thanks to our mirrors: Peregrine Hardware, Inc. and Kevin A. McGrail, Jeremy
-  Zawodny, Mark Reynolds, RedIRIS, Hagen Herrschaft, and PlanetMirror.
-  
+  SpamAssassin is an Apache Software Foundation project.  The Apache Software
+  Foundation could not exist without the continued generous support from the
+  community.
+
+  Please take a moment to view the complete list of sponsors by visiting:
+
+    http://www.apache.org/foundation/thanks.html
+
+  If you are interested in sponsoring the ASF, please read the sponsorship page
+  by visiting:
+
+    http://www.apache.org/foundation/sponsorship.html for more information.
+
+Resources:
+
+  Thanks to our previous mirrors: Peregrine Computer Consultants Corporation
+  (previously Peregrine Hardware, Inc.) and Kevin A. McGrail, Jeremy Zawodny, 
+  Mark Reynolds, RedIRIS, Hagen Herrschaft, and PlanetMirror.
+
   Thanks to Mark Reynolds of Reynolds Technology (http://www.reynolds.net.au/)
   for the registration of spamassassin.org.
 
@@ -316,16 +373,18 @@ Hosting:
   significant contributions with network services, and on the back-end; our
   score-optimization systems would be significantly weedier without their help.
 
-	http://www.peregrinehw.com/
-	http://www.zawodny.com/
-	http://www.reynolds.net.au/
-	http://www.rediris.es/
-	http://www.hrxnet.de/
-	http://www.planetmirror.com/
-	http://sourceforge.net/
-	http://www.sonic.net/
+        http://www.pccc.com/
+        http://www.zawodny.com/
+        http://www.reynolds.net.au/
+        http://www.rediris.es/
+        http://www.hrxnet.de/
+        http://www.planetmirror.com/
+        http://sourceforge.net/
+        http://www.sonic.net/
 
 Finally:
 
-Thanks to Christian Rauh, winner of the SpamAssassin logo contest, who
-created, designed, and illustrated the Apache SpamAssassin logo.
+  Thanks to James Thompson at cPanel Inc who designed our new logo in 2014 and
+  to Christian Rauh, winner of the SpamAssassin logo contest, who created, 
+  designed, and illustrated our first the Apache SpamAssassin logo.
+

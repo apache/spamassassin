@@ -1,9 +1,10 @@
 # <@LICENSE>
-# Copyright 2004 Apache Software Foundation
-# 
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to you under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at:
 # 
 #     http://www.apache.org/licenses/LICENSE-2.0
 # 
@@ -16,32 +17,38 @@
 
 =head1 NAME
 
-Mail::SpamAssassin::BayesStore - Bayesian Storage Module
-
-=head1 SYNOPSIS
+Mail::SpamAssassin::BayesStore - Storage Module for default Bayes classifier
 
 =head1 DESCRIPTION
 
 This is the public API for the Bayesian store methods.  Any implementation of
-the storage module must implement these methods.
+the storage module for the default Bayes classifier must implement these methods.
 
 =cut
 
 package Mail::SpamAssassin::BayesStore;
 
 use strict;
+use warnings;
 use bytes;
+use re 'taint';
+use Mail::SpamAssassin::Logger;
+
+# TODO: if we ever get tuits, it'd be good to make these POD
+# method docs more perlish... hardly a biggie.
 
 =head1 METHODS
 
-=head2 new
+=over 4
 
-public class (Mail::SpamAssassin::BayesStore) new (Mail::SpamAssassin::Bayes $bayes)
+=item new
+
+public class (Mail::SpamAssassin::BayesStore) new (Mail::SpamAssassin::Plugin::Bayes $bayes)
 
 Description:
 This method creates a new instance of the Mail::SpamAssassin::BayesStore
-object.  You must pass in an instance of the Mail::SpamAssassin:Bayes object,
-which is stashed for use throughout the module.
+object.  You must pass in an instance of the Mail::SpamAssassin::Plugin::Bayes
+object, which is stashed for use throughout the module.
 
 =cut
 
@@ -61,7 +68,7 @@ sub new {
   $self;
 }
 
-=head2 DB_VERSION
+=item DB_VERSION
 
 public instance (Integer) DB_VERSION ()
 
@@ -76,13 +83,13 @@ sub DB_VERSION {
   return $self->{supported_db_version};
 }
 
-=head2 read_db_configs
+=item read_db_configs
 
 public instance () read_db_configs ()
 
 Description:
-This method reads any needed config variables from the configuration
-object and then calls the Mail::SpamAssassin::Bayes read_db_configs method.
+This method reads any needed config variables from the configuration object
+and then calls the Mail::SpamAssassin::Plugin::Bayes read_db_configs method.
 
 =cut
 
@@ -110,7 +117,34 @@ sub read_db_configs {
   $self->{bayes}->read_db_configs();
 }
 
-=head2 tie_db_readonly
+=item prefork_init
+
+public instance (Boolean) prefork_init ()
+
+Description:
+This optional method is called in the parent process shortly before
+forking off child processes.
+
+=cut
+
+# sub prefork_init {
+#   my ($self) = @_;
+# }
+
+=item spamd_child_init
+
+public instance (Boolean) spamd_child_init ()
+
+Description:
+This optional method is called in a child process shortly after being spawned.
+
+=cut
+
+# sub spamd_child_init {
+#   my ($self) = @_;
+# }
+
+=item tie_db_readonly
 
 public instance (Boolean) tie_db_readonly ()
 
@@ -121,10 +155,10 @@ This method opens up the database in readonly mode.
 
 sub tie_db_readonly {
   my ($self) = @_;
-  die "tie_db_readonly: not implemented\n";
+  die "bayes: tie_db_readonly: not implemented\n";
 }
 
-=head2 tie_db_writable
+=item tie_db_writable
 
 public instance (Boolean) tie_db_writable ()
 
@@ -138,10 +172,10 @@ afterwards.
 
 sub tie_db_writable {
   my ($self) = @_;
-  die "tie_db_writable: not implemented\n";
+  die "bayes: tie_db_writable: not implemented\n";
 }
 
-=head2 untie_db
+=item untie_db
 
 public instance () untie_db ()
 
@@ -152,10 +186,10 @@ This method unties the database.
 
 sub untie_db {
   my $self = shift;
-  die "untie_db: not implemented\n";
+  die "bayes: untie_db: not implemented\n";
 }
 
-=head2 calculate_expire_delta
+=item calculate_expire_delta
 
 public instance (%) calculate_expire_delta (Integer $newest_atime,
                                              Integer $start,
@@ -169,10 +203,10 @@ atime for token expiration.
 
 sub calculate_expire_delta {
   my ($self, $newest_atime, $start, $max_expire_mult) = @_;
-  die "calculate_expire_delta: not implemented\n";
+  die "bayes: calculate_expire_delta: not implemented\n";
 }
 
-=head2 token_expiration
+=item token_expiration
 
 public instance (Integer, Integer,
                  Integer, Integer) token_expiration(\% $opts,
@@ -187,10 +221,10 @@ the passed in C<$newest_atime> and C<$newdelta>.
 
 sub token_expiration {
   my ($self, $opts, $newest_atime, $newdelta) = @_;
-  die "token_expiration: not implemented\n";
+  die "bayes: token_expiration: not implemented\n";
 }
 
-=head2 expire_old_tokens
+=item expire_old_tokens
 
 public instance (Boolean) expire_old_tokens (\% hashref)
 
@@ -203,26 +237,29 @@ sub expire_old_tokens {
   my ($self, $opts) = @_;
   my $ret;
 
+  my $eval_stat;
   eval {
     local $SIG{'__DIE__'};	# do not run user die() traps in here
     if ($self->tie_db_writable()) {
       $ret = $self->expire_old_tokens_trapped ($opts);
     }
+    1;
+  } or do {
+    $eval_stat = $@ ne '' ? $@ : "errno=$!";  chomp $eval_stat;
   };
-  my $err = $@;
 
   if (!$self->{bayes}->{main}->{learn_caller_will_untie}) {
     $self->untie_db();
   }
 
-  if ($err) {		# if we died, untie the dbs.
-    warn "bayes expire_old_tokens: $err\n";
+  if (defined $eval_stat) {	# if we died, untie the dbs.
+    warn "bayes: expire_old_tokens: $eval_stat\n";
     return 0;
   }
   $ret;
 }
 
-=head2 expire_old_tokens_trapped
+=item expire_old_tokens_trapped
 
 public instance (Boolean) expire_old_tokens_trapped (\% $opts)
 
@@ -266,7 +303,7 @@ sub expire_old_tokens_trapped {
   dbg("bayes: token count: ".$vars[3].", final goal reduction size: $goal_reduction");
 
   if ( $goal_reduction < 1000 ) { # too few tokens to expire, abort.
-    dbg("bayes: reduction goal of $goal_reduction is under 1,000 tokens.  skipping expire.");
+    dbg("bayes: reduction goal of $goal_reduction is under 1,000 tokens, skipping expire");
     $self->set_last_expire(time());
     $self->remove_running_expire_tok(); # this won't be cleaned up, so do it now.
     return 1; # we want to indicate things ran as expected
@@ -287,7 +324,7 @@ sub expire_old_tokens_trapped {
   # count and the current goal removal count.
   my $ratio = ($vars[9] == 0 || $vars[9] > $goal_reduction) ? $vars[9]/$goal_reduction : $goal_reduction/$vars[9];
 
-  dbg("bayes: First pass?  Current: ".time().", Last: ".$vars[4].", atime: ".$vars[8].", count: ".$vars[9].", newdelta: $newdelta, ratio: $ratio, period: ".$self->{expiry_period});
+  dbg("bayes: first pass?  current: ".time().", Last: ".$vars[4].", atime: ".$vars[8].", count: ".$vars[9].", newdelta: $newdelta, ratio: $ratio, period: ".$self->{expiry_period});
 
   ## ESTIMATION PHASE
   #
@@ -306,7 +343,7 @@ sub expire_old_tokens_trapped {
   #
   if ( (time() - $vars[4] > 86400*30) || ($vars[8] < $self->{expiry_period}) || ($vars[9] < 1000)
        || ($newdelta < $self->{expiry_period}) || ($ratio > 1.5) ) {
-    dbg("bayes: Can't use estimation method for expiry, something fishy, calculating optimal atime delta (first pass)");
+    dbg("bayes: can't use estimation method for expiry, unexpected result, calculating optimal atime delta (first pass)");
 
     my $start = $self->{expiry_period}; # exponential search starting at ...?  1/2 day, 1, 2, 4, 8, 16, ...
     my $max_expire_mult = 2**$self->{expiry_max_exponent}; # $max_expire_mult * $start = max expire time (256 days), power of 2.
@@ -318,11 +355,11 @@ sub expire_old_tokens_trapped {
     return 0 unless (%delta);
 
     # This will skip the for loop if debugging isn't enabled ...
-    if ( $Mail::SpamAssassin::DEBUG->{'enabled'} ) {
+    if (would_log('dbg', 'bayes')) {
       dbg("bayes: atime\ttoken reduction");
       dbg("bayes: ========\t===============");
-      for( my $i = 1; $i<=$max_expire_mult; $i<<=1 ) {
-	  dbg("bayes: ".$start*$i."\t".(exists $delta{$i} ? $delta{$i} : 0));
+      for(my $i = 1; $i<=$max_expire_mult; $i <<= 1) {
+	dbg("bayes: ".$start*$i."\t".(exists $delta{$i} ? $delta{$i} : 0));
       }
     }
   
@@ -349,41 +386,43 @@ sub expire_old_tokens_trapped {
     # - reduction count < 1000, not enough tokens to be worth doing an expire.
     #
     if ( !exists $delta{$max_expire_mult} || $delta{$max_expire_mult} < 1000 ) {
-      dbg("bayes: couldn't find a good delta atime, need more token difference, skipping expire.");
+      dbg("bayes: couldn't find a good delta atime, need more token difference, skipping expire");
       $self->set_last_expire(time());
       $self->remove_running_expire_tok(); # this won't be cleaned up, so do it now.
       return 1; # we want to indicate things ran as expected
     }
 
     $newdelta = $start * $max_expire_mult;
-    dbg("bayes: First pass decided on $newdelta for atime delta");
+    dbg("bayes: first pass decided on $newdelta for atime delta");
   }
   else { # use the estimation method
-    dbg("bayes: Can do estimation method for expiry, skipping first pass.");
+    dbg("bayes: can do estimation method for expiry, skipping first pass");
   }
 
   my ($kept, $deleted, $num_hapaxes, $num_lowfreq) = $self->token_expiration($opts, $newdelta, @vars);
 
   my $done = time();
 
-  my $msg = "expired old Bayes database entries in ".($done - $started)." seconds";
+  my $msg = "expired old bayes database entries in ".($done - $started)." seconds";
   my $msg2 = "$kept entries kept, $deleted deleted";
 
   if ($opts->{verbose}) {
-
     my $hapax_pc = ($num_hapaxes * 100) / $kept;
     my $lowfreq_pc = ($num_lowfreq * 100) / $kept;
-    print "$msg\n$msg2\n";
-    printf "token frequency: 1-occurence tokens: %3.2f%%\n", $hapax_pc;
-    printf "token frequency: less than 8 occurrences: %3.2f%%\n", $lowfreq_pc;
-  } else {
-    dbg ("$msg: $msg2");
+    print "$msg\n$msg2\n"  or die "Error writing: $!";
+    printf "token frequency: 1-occurrence tokens: %3.2f%%\n", $hapax_pc
+      or die "Error writing: $!";
+    printf "token frequency: less than 8 occurrences: %3.2f%%\n", $lowfreq_pc
+      or die "Error writing: $!";
+  }
+  else {
+    dbg("bayes: $msg: $msg2");
   }
 
   return 1;
 }
 
-=head2 sync_due
+=item sync_due
 
 public instance (Boolean) sync_due ()
 
@@ -394,10 +433,10 @@ This methods determines if a sync is due.
 
 sub sync_due {
   my ($self) = @_;
-  die "sync_due: not implemented\n";
+  die "bayes: sync_due: not implemented\n";
 }
 
-=head2 expiry_due
+=item expiry_due
 
 public instance (Boolean) expiry_due ()
 
@@ -434,7 +473,7 @@ sub expiry_due {
     return 0 if ($last_expire < 300);
   }
 
-  dbg("Bayes DB expiry: Tokens in DB: $ntoks, Expiry max size: ".$self->{expiry_max_db_size}.", Oldest atime: ".$vars[5].", Newest atime: ".$vars[10].", Last expire: ".$vars[4].", Current time: ".time(),'bayes','-1');
+  dbg("bayes: DB expiry: tokens in DB: $ntoks, Expiry max size: ".$self->{expiry_max_db_size}.", Oldest atime: ".$vars[5].", Newest atime: ".$vars[10].", Last expire: ".$vars[4].", Current time: ".time());
 
   my $conf = $self->{bayes}->{main}->{conf};
   if ($ntoks <= 100000 ||			# keep at least 100k tokens
@@ -448,7 +487,7 @@ sub expiry_due {
   return 1;
 }
 
-=head2 seen_get
+=item seen_get
 
 public instance (Char) seen_get (String $msgid)
 
@@ -461,10 +500,10 @@ C<$msgid> is not found.
 
 sub seen_get {
   my ($self, $msgid) = @_;
-  die "seen_get: not implemented\n";
+  die "bayes: seen_get: not implemented\n";
 }
 
-=head2 seen_put
+=item seen_put
 
 public instance (Boolean) seen_put (String $msgid, Char $flag)
 
@@ -476,10 +515,10 @@ one of two values 's' for spam and 'h' for ham.
 
 sub seen_put {
   my ($self, $msgid, $flag) = @_;
-  die "seen_put: not implemented\n";
+  die "bayes: seen_put: not implemented\n";
 }
 
-=head2 seen_delete
+=item seen_delete
 
 public instance (Boolean) seen_delete (String $msgid)
 
@@ -490,10 +529,10 @@ This method removes C<$msgid> from storage.
 
 sub seen_delete {
   my ($self, $msgid) = @_;
-  die "seen_delete: not implemented\n";
+  die "bayes: seen_delete: not implemented\n";
 }
 
-=head2 get_storage_variables
+=item get_storage_variables
 
 public instance (@) get_storage_variables ()
 
@@ -529,10 +568,10 @@ The values returned in the array are in the following order:
 
 sub get_storage_variables {
   my ($self) = @_;
-  die "get_storage_variables: not implemented\n";
+  die "bayes: get_storage_variables: not implemented\n";
 }
 
-=head2 dump_db_toks
+=item dump_db_toks
 
 public instance () dump_db_toks (String $template, String $regex, @ @vars)
 
@@ -544,10 +583,10 @@ and then printing it out according to the passed in template.
 
 sub dump_db_toks {
   my ($self, $template, $regex, @vars) = @_;
-  die "dump_db_toks: not implemented\n";
+  die "bayes: dump_db_toks: not implemented\n";
 }
 
-=head2 set_last_expire
+=item set_last_expire
 
 public instance (Boolean) _set_last_expire (Integer $time)
 
@@ -558,10 +597,10 @@ This method sets the last expire time.
 
 sub set_last_expire {
   my ($self, $time) = @_;
-  die "set_last_expire: not implemented\n";
+  die "bayes: set_last_expire: not implemented\n";
 }
 
-=head2 get_running_expire_tok
+=item get_running_expire_tok
 
 public instance (Time) get_running_expire_tok ()
 
@@ -573,10 +612,10 @@ the expire started.
 
 sub get_running_expire_tok {
   my ($self) = @_;
-  die "get_running_expire_tok: not implemented\n";
+  die "bayes: get_running_expire_tok: not implemented\n";
 }
 
-=head2 set_running_expire_tok
+=item set_running_expire_tok
 
 public instance (Time) set_running_expire_tok ()
 
@@ -587,10 +626,10 @@ This method sets the running expire time to the current time.
 
 sub set_running_expire_tok {
   my ($self) = @_;
-  die "set_running_expire_tok: not implemented\n";
+  die "bayes: set_running_expire_tok: not implemented\n";
 }
 
-=head2 remove_running_expire_tok
+=item remove_running_expire_tok
 
 public instance (Boolean) remove_running_expire_tok ()
 
@@ -601,10 +640,10 @@ This method removes a currently set running expire time.
 
 sub remove_running_expire_tok {
   my ($self) = @_;
-  die "remove_running_expire_tok: not implemented\n";
+  die "bayes: remove_running_expire_tok: not implemented\n";
 }
 
-=head2 tok_get
+=item tok_get
 
 public instance (Integer, Integer, Time) tok_get (String $token)
 
@@ -616,25 +655,25 @@ it's spam count, ham acount and last access time.
 
 sub tok_get {
   my ($self, $token) = @_;
-  die "tok_get: not implemented\n";
+  die "bayes: tok_get: not implemented\n";
 }
 
-=head2 tok_get_all
+=item tok_get_all
 
 public instance (\@) tok_get_all (@ @tokens)
 
 Description:
-This method retrieves the specified tokens (C<@tokens>) from storage and returns
-an array ref of arrays spam count, ham acount and last access time.
+This method retrieves the specified tokens (C<@tokens>) from storage and
+returns an array ref of arrays spam count, ham count and last access time.
 
 =cut
 
 sub tok_get_all {
   my ($self, $tokens) = @_;
-  die "tok_get_all: not implemented\n";
+  die "bayes: tok_get_all: not implemented\n";
 }
 
-=head2 tok_count_change
+=item tok_count_change
 
 public instance (Boolean) tok_count_change (Integer $spam_count,
                                             Integer $ham_count,
@@ -649,25 +688,44 @@ C<$token> along with updating C<$token>s atime with C<$atime>.
 
 sub tok_count_change {
   my ($self, $spam_count, $ham_count, $token, $atime) = @_;
-  die "tok_count_change: not implemented\n";
+  die "bayes: tok_count_change: not implemented\n";
 }
 
-=head2 nspam_nham_get
+=item multi_tok_count_change
+
+public instance (Boolean) multi_tok_count_change (Integer $spam_count,
+ 					          Integer $ham_count,
+				 	          \% $tokens,
+					          String $atime)
+
+Description:
+This method takes a C<$spam_count> and C<$ham_count> and adds it to all
+of the tokens in the C<$tokens> hash ref along with updating each tokens
+atime with C<$atime>.
+
+=cut
+
+sub multi_tok_count_change {
+  my ($self, $spam_count, $ham_count, $tokens, $atime) = @_;
+  die "bayes: multi_tok_count_change: not implemented\n";
+}
+
+=item nspam_nham_get
 
 public instance (Integer, Integer) nspam_nham_get ()
 
 Description:
-This method retrieves the total number of spam and the total number of spam
+This method retrieves the total number of spam and the total number of ham
 currently under storage.
 
 =cut
 
 sub nspam_nham_get {
   my ($self) = @_;
-  die "nspam_nham_get: not implemented\n";
+  die "bayes: nspam_nham_get: not implemented\n";
 }
 
-=head2 nspam_nham_change
+=item nspam_nham_change
 
 public instance (Boolean) nspam_nham_change (Integer $num_spam,
                                              Integer $num_ham)
@@ -679,10 +737,10 @@ This method updates the number of spam and the number of ham in the database.
 
 sub nspam_nham_change {
   my ($self, $num_spam, $num_ham) = @_;
-  die "nspam_nham_change: not implemented\n";
+  die "bayes: nspam_nham_change: not implemented\n";
 }
 
-=head2 tok_touch
+=item tok_touch
 
 public instance (Boolean) tok_touch (String $token,
                                      Time $atime)
@@ -694,10 +752,10 @@ This method updates the given tokens (C<$token>) access time.
 
 sub tok_touch {
   my ($self, $token, $atime) = @_;
-  die "tok_touch: not implemanted\n";
+  die "bayes: tok_touch: not implemented\n";
 }
 
-=head2 tok_touch_all
+=item tok_touch_all
 
 public instance (Boolean) tok_touch_all (\@ $tokens,
                                          Time $atime)
@@ -710,10 +768,10 @@ atime is < C<$atime>.
 
 sub tok_touch_all {
   my ($self, $tokens, $atime) = @_;
-  die "tok_touch_all: not implemanted\n";
+  die "bayes: tok_touch_all: not implemented\n";
 }
 
-=head2 cleanup
+=item cleanup
 
 public instance (Boolean) cleanup ()
 
@@ -725,10 +783,10 @@ operation.
 
 sub cleanup {
   my ($self) = @_;
-  die "cleanup: not implemented\n";
+  die "bayes: cleanup: not implemented\n";
 }
 
-=head2 get_magic_re
+=item get_magic_re
 
 public instance get_magic_re (String)
 
@@ -739,10 +797,10 @@ This method returns a regexp which indicates a magic token.
 
 sub get_magic_re {
   my ($self) = @_;
-  die "get_magic_re: not implemented\n";
+  die "bayes: get_magic_re: not implemented\n";
 }
 
-=head2 sync
+=item sync
 
 public instance (Boolean) sync (\% $opts)
 
@@ -753,10 +811,10 @@ This method performs a sync of the database.
 
 sub sync {
   my ($self, $opts) = @_;
-  die "sync: not implemented\n";
+  die "bayes: sync: not implemented\n";
 }
 
-=head2 perform_upgrade
+=item perform_upgrade
 
 public instance (Boolean) perform_upgrade (\% $opts)
 
@@ -771,10 +829,10 @@ A true return value indicates success.
 
 sub perform_upgrade {
   my ($self, $opts) = @_;
-  die "perform_upgrade: not implemented\n";
+  die "bayes: perform_upgrade: not implemented\n";
 }
 
-=head2 clear_database
+=item clear_database
 
 public instance (Boolean) clear_database ()
 
@@ -788,24 +846,24 @@ could causes the database to be inconsistent for the given user.
 
 sub clear_database {
   my ($self) = @_;
-  die "clear_database: not implemented\n";
+  die "bayes: clear_database: not implemented\n";
 }
 
-=head2 backup_database
+=item backup_database
 
 public instance (Boolean) backup_database ()
 
 Description:
-This method will dump the users database in a marchine readable format.
+This method will dump the users database in a machine readable format.
 
 =cut
 
 sub backup_database {
   my ($self) = @_;
-  die "backup_database: not implemented\n";
+  die "bayes: backup_database: not implemented\n";
 }
 
-=head2 restore_database
+=item restore_database
 
 public instance (Boolean) restore_database (String $filename, Boolean $showdots)
 
@@ -819,10 +877,10 @@ could causes the database to be inconsistent for the given user.
 
 sub restore_database {
   my ($self, $filename, $showdots) = @_;
-  die "restore_database: not implemented\n";
+  die "bayes: restore_database: not implemented\n";
 }
 
-=head2 db_readable
+=item db_readable
 
 public instance (Boolean) db_readable ()
 
@@ -834,10 +892,10 @@ readable state.
 
 sub db_readable {
   my ($self) = @_;
-  die "db_readable: not implemented\n";
+  die "bayes: db_readable: not implemented\n";
 }
 
-=head2 db_writable
+=item db_writable
 
 public instance (Boolean) db_writable ()
 
@@ -849,11 +907,14 @@ writable state.
 
 sub db_writable {
   my ($self) = @_;
-  die "db_writable: not implemented\n";
+  die "bayes: db_writable: not implemented\n";
 }
 
 
-sub dbg { Mail::SpamAssassin::dbg (@_); }
-sub sa_die { Mail::SpamAssassin::sa_die (@_); }
+sub sa_die { Mail::SpamAssassin::sa_die(@_); }
 
 1;
+
+=back
+
+=cut

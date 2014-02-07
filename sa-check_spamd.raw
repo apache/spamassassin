@@ -1,0 +1,463 @@
+#!/usr/bin/perl -w
+
+########################################################################
+#
+# <@LICENSE>
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to you under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at:
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# </@LICENSE>
+#
+########################################################################
+
+# Written by Daryl C. W. O'Shea, DOS Technologies <spamassassin@dostech.ca>
+# See  perldoc sa-check_spamd  for program info.
+
+use strict;
+use warnings;
+use re 'taint';
+
+my $PREFIX          = '@@PREFIX@@';             # substituted at 'make' time
+my $DEF_RULES_DIR   = '@@DEF_RULES_DIR@@';      # substituted at 'make' time
+my $LOCAL_RULES_DIR = '@@LOCAL_RULES_DIR@@';    # substituted at 'make' time
+my $LOCAL_STATE_DIR = '@@LOCAL_STATE_DIR@@';    # substituted at 'make' time
+use lib '@@INSTALLSITELIB@@';                   # substituted at 'make' time
+
+use Errno qw(EBADF);
+use File::Spec;
+use Config;
+
+BEGIN {                          # see comments in "spamassassin.raw" for doco
+  my @bin = File::Spec->splitpath($0);
+  my $bin = ($bin[0] ? File::Spec->catpath(@bin[0..1]) : $bin[1])
+            || File::Spec->curdir;
+
+  if (-e $bin.'/lib/Mail/SpamAssassin.pm'
+        || !-e '@@INSTALLSITELIB@@/Mail/SpamAssassin.pm' )
+  {
+    my $searchrelative;
+    $searchrelative = 1;    # disabled during "make install": REMOVEFORINST
+    if ($searchrelative && $bin eq '../' && -e '../blib/lib/Mail/SpamAssassin.pm')
+    {
+      unshift ( @INC, '../blib/lib' );
+    } else {
+      foreach ( qw(lib ../lib/site_perl
+                ../lib/spamassassin ../share/spamassassin/lib))
+      {
+        my $dir = File::Spec->catdir( $bin, split ( '/', $_ ) );
+        if ( -f File::Spec->catfile( $dir, "Mail", "SpamAssassin.pm" ) )
+        { unshift ( @INC, $dir ); last; }
+      }
+    }
+  }
+}
+
+use Getopt::Long;
+
+use constant HAS_TIME_HIRES => eval { require Time::HiRes; };
+use constant HAS_MSA_CLIENT => eval { require Mail::SpamAssassin::Client; };
+use constant HAS_MSA_TIMEOUT => eval { require Mail::SpamAssassin::Timeout; };
+use Mail::SpamAssassin::Util;
+
+### nagios plugin return codes: 0 OK / 1 Warning / 2 Critical / 3 Unknown ###
+use constant EX_OK	 => 0;
+use constant EX_WARNING	 => 1;
+use constant EX_CRITICAL => 2;
+use constant EX_UNKNOWN	 => 3;
+
+my $VERSION = $Mail::SpamAssassin::VERSION;
+
+my %opt = (
+  'critical'	=> undef,
+  'hostname'	=> undef,
+  'port'	=> undef,
+  'socketpath'	=> undef,
+  'timeout'	=> 45,
+  'verbose'	=> undef,
+  'warning'	=> undef,
+);
+
+# Parse the command line
+Getopt::Long::Configure("bundling");
+GetOptions(
+  'critical|c=s'	=> \$opt{'critical'},
+  'help|h|?'		=> sub { print_usage_and_exit(); },
+  'hostname|H=s'	=> \$opt{'hostname'},
+  'port|p=s'		=> \$opt{'port'},
+  'socketpath=s'	=> \$opt{'socketpath'},
+  'timeout|t=s'		=> \$opt{'timeout'},
+  'verbose|v'		=> \$opt{'verbose'},
+  'version|V'		=> sub { print "sa-check_spamd version $VERSION\n"; exit EX_UNKNOWN; },
+  'warning|w=s'		=> \$opt{'warning'},
+
+) or print_usage_and_exit();
+
+
+if (defined $opt{'critical'}) {
+  if ($opt{'critical'} =~ /^(\d+(?:\.\d*)?)$/) {
+    $opt{'critical'} = $1;
+  } else {
+    print "SPAMD UNKNOWN: invalid critical config value provided\n";
+    exit EX_UNKNOWN;
+  }
+}
+
+if (defined $opt{'hostname'}) {
+  if ($opt{'hostname'} =~ /^([A-Za-z0-9_.:-]+)$/) {
+    $opt{'hostname'} = $1;
+  } else {
+    print "SPAMD UNKNOWN: invalid hostname config value provided\n";
+    exit EX_UNKNOWN;
+  }
+}
+
+if (defined $opt{'port'}) {
+  if ($opt{'port'} =~ /^(\d+)$/) {
+    $opt{'port'} = $1;
+  } else {
+    print "SPAMD UNKNOWN: invalid port config value provided\n";
+    exit EX_UNKNOWN;
+  }
+}
+
+# TODO: --socketpath isn't checked, suboptimal
+
+if ($opt{'timeout'} =~ /^(\d+(?:\.\d*)?)$/ && $opt{'timeout'} >= 1) {
+  $opt{'timeout'} = $1;
+} else {
+  print "SPAMD UNKNOWN: invalid timeout config value provided\n";
+  exit EX_UNKNOWN;
+}
+
+if (defined $opt{'warning'}) {
+  if ($opt{'warning'} =~ /^(\d+(?:\.\d*)?)$/) {
+    $opt{'warning'} = $1;
+  } else {
+    print "SPAMD UNKNOWN: invalid warning config value provided\n";
+    exit EX_UNKNOWN;
+  }
+}
+
+# logic checking
+if (defined $opt{'critical'} && defined $opt{'warning'} &&
+	$opt{'critical'} < $opt{'warning'}) {
+  print "SPAMD UNKNOWN: critical value is less than warning value, config not valid\n";
+  exit EX_UNKNOWN;
+}
+
+if (defined $opt{'critical'} && defined $opt{'timeout'} &&
+	$opt{'critical'} > $opt{'timeout'}) {
+  print "SPAMD UNKNOWN: critical value is greater than timeout value, config not valid\n";
+  exit EX_UNKNOWN;
+}
+
+if (defined $opt{'warning'} && defined $opt{'timeout'} &&
+	$opt{'warning'} > $opt{'timeout'}) {
+  print "SPAMD UNKNOWN: warning value is greater than timeout value, config not valid\n";
+  exit EX_UNKNOWN;
+}
+
+# check to make sure that both TCP and UNIX domain socket info wasn't provided
+if ((defined $opt{'hostname'} || defined $opt{'port'}) && defined $opt{'socketpath'}) {
+  print "SPAMD UNKNOWN: both TCP and UNIX domain socket info provided, only one can be used\n";
+  exit EX_UNKNOWN;
+}
+
+# if not provided with a spamd service to connect to set some defaults
+unless (defined $opt{'socketpath'}) {
+  $opt{'hostname'} ||= 'localhost';
+  $opt{'port'} ||= 783;
+}
+
+
+if ($opt{'verbose'}) {
+  print ((HAS_MSA_CLIENT ? "loaded" : "failed to load") ." Mail::SpamAssassin::Client\n");
+  print ((HAS_MSA_TIMEOUT ? "loaded" : "failed to load") ." Mail::SpamAssassin::Timeout\n");
+}
+
+# If there's no client available, there's no way to check the service...
+unless (HAS_MSA_CLIENT && HAS_MSA_TIMEOUT) {
+  # Nagios will only display the first line printed.
+  print "SPAMD UNKNOWN: could not load M:SA::Client\n" unless HAS_MSA_CLIENT;
+  print "SPAMD UNKNOWN: could not load M:SA::Timeout\n" unless HAS_MSA_TIMEOUT;
+  print "cannot continue\n" if $opt{'verbose'};
+  exit EX_UNKNOWN;
+}
+
+
+# untaint the command-line args; since the root user supplied these, and
+# we're not a setuid script, we trust them.  This needs to be called explicitly
+foreach my $optkey (keys %opt) {
+  next if ref $opt{$optkey};
+  Mail::SpamAssassin::Util::untaint_var(\$opt{$optkey});
+}
+
+
+# If the client connection fails it'll spit out it's own error message which
+# is probably more appropriate than anything we can provide to Nagios ourself.
+# We'll still spit out something later, but Nagios will ignore it since it
+# only uses the first line of output.
+my $client;
+if (defined $opt{'port'}) {
+ $client = new Mail::SpamAssassin::Client({port => $opt{'port'},
+					   host => $opt{'hostname'}});
+} else {
+ $client = new Mail::SpamAssassin::Client({socketpath => $opt{'socketpath'}});
+}
+
+# this'd be weird, but totally dependent on the client
+unless (defined $client) {
+  print "SPAMD UNKNOWN: could not create M::SA::Client instance\n";
+  print "failed to create Mail::SpamAssassin::Client instance\n" if $opt{'verbose'};
+  exit EX_UNKNOWN;
+}
+
+# until we try a ping, the ping response status is unknown
+my $response = -1;
+print "connecting to spamd for ping\n" if $opt{'verbose'};
+
+my $timer = Mail::SpamAssassin::Timeout->new({ secs => $opt{'timeout'}});
+my $t0 = (HAS_TIME_HIRES ? Time::HiRes::time() : time());
+
+my $err = $timer->run(sub {
+  if ($client->ping()) {
+    $response = 1;
+  } else {
+    $response = 0;
+  }
+});
+
+my $elapsed = (HAS_TIME_HIRES ? Time::HiRes::time() : time()) - $t0;
+
+
+# a ping response should be most common, we'll handle it first
+if ($response == 1) {
+  # it's possible that we may timeout right after setting the response status to 1
+  # since the timeout value > the critical value, this is a critical state
+  if ((defined $opt{'critical'} && $elapsed > $opt{'critical'}) || $timer->timed_out()) {
+    printf("SPAMD CRITICAL: %.3f second ping response time\n", $elapsed);
+    exit EX_CRITICAL;
+  }
+
+  # warning state will never timeout since that'd be critical (above)
+  if (defined $opt{'warning'} && ($elapsed > $opt{'warning'})) {
+    printf("SPAMD WARNING: %.3f second ping response time\n", $elapsed);
+    exit EX_WARNING;
+  }
+
+  # otherwise we got a timely ping response
+  printf("SPAMD OK: %.3f second ping repsonse time\n", $elapsed);
+  exit EX_OK;
+}
+
+# any way we get a failed ping response is a critical state
+if ($response == 0) {
+  printf("SPAMD CRITICAL: ping failed in %.3f seconds\n", $elapsed);
+  exit EX_CRITICAL;
+}
+
+if ($response == -1) {
+  # this is the common timeout scenario
+  if ($timer->timed_out()) {
+    printf("SPAMD CRITICAL: ping timed out in %.3f seconds\n", $elapsed);
+    exit EX_CRITICAL;
+  }
+
+  # dos: I'll buy lunch for the first person that gets a page about this while
+  # they're sleeping if they come to Midland, ON to get it
+  printf("SPAMD UNKNOWN: assertion! unknown ping response status without timeout after %.3f seconds\n", $elapsed);
+  exit EX_UNKNOWN;
+}
+
+# and some apple pie too
+exit EX_UNKNOWN;
+
+
+#############################################################################
+
+sub print_usage_and_exit {
+  print <<EOF;
+sa-check_spamd version $VERSION
+
+For more details, use "perldoc sa-check_spamd".
+
+Usage:
+   sa-check_spamd [options]
+
+    Options:
+
+     -c secs, --critical=secs          Critical ping response threshold
+     -h, -?, --help                    Print usage message
+     -H hostname, --hostname=hostname  Hostname of spamd service to ping
+     -p port, --port=port              Port of spamd service to ping
+     --socketpath=path                 Connect to given UNIX domain socket
+     -t secs, --timeout=secs           Max time to wait for a ping response
+     -v, --verbose                     Verbose debug output
+     -V, --version                     Output version info
+     -w secs, --warning=secs           Warning ping response threshold
+
+EOF
+
+  exit EX_UNKNOWN;
+}
+
+# Don't use a __DATA__ here, it screws up embedded Perl Nagios (ePN)
+
+=head1 NAME
+
+sa-check_spamd - spamd monitoring script for use with Nagios, etc.
+
+=head1 SYNOPSIS
+
+sa-check_spamd [options]
+
+Options:
+
+ -c secs, --critical=secs          Critical ping response threshold
+ -h, -?, --help                    Print usage message
+ -H hostname, --hostname=hostname  Hostname of spamd service to ping
+ -p port, --port=port              Port of spamd service to ping
+ --socketpath=path                 Connect to given UNIX domain socket
+ -t secs, --timeout=secs           Max time to wait for a ping response
+ -v, --verbose                     Verbose debug output
+ -V, --version                     Output version info
+ -w secs, --warning=secs           Warning ping response threshold
+
+
+=head1 DESCRIPTION
+
+The purpose of this program is to provide a tool to monitor the status of
+C<spamd> server processes.  spamd is the daemonized version of the
+spamassassin executable, both provided in the SpamAssassin distribution.
+
+This program is designed for use, as a plugin, with the Nagios service
+monitoring software available from http://nagios.org.  It might be compatible
+with other service monitoring packages.  It is also useful as a command line
+utility or as a component of a custom shell script.
+
+=head1 OPTIONS
+
+Options of the long form can be shortened as long as the remain
+unambiguous (i.e. B<--host> can be used instead of B<--hostname>).
+
+=over 4
+
+=item B<-c> I<secs>, B<--critical>=I<secs>
+
+Critical ping response threshold in seconds.  If a spamd ping response takes
+longer than the value specified (in seconds) the program will exit with a
+value of 2 to indicate the critical status.
+
+This value must be at least as long as the value specified for B<warning> and
+less than the value specified for B<timeout>.
+
+=item B<-h>, B<-?>, B<--help>
+
+Prints this usage message and exits.
+
+=item B<-H> I<hostname>, B<--hostname>=I<hostname>
+
+The hostname, or IP address, of the spamd service to ping.  By default the
+hostname B<localhost> is used.  If B<--socketpath> is set this value will be
+ignored.
+
+=item B<-p> I<port>, B<--port>=I<port>
+
+The port of the spamd service to ping.  By default port B<783> (the spamd
+default port number) is used.  If B<--socketpath> is set this value will be
+ignored.
+
+=item B<--socketpath>=I<path>
+
+Connect to given UNIX domain socket.  Use instead of a hostname and TCP port.
+When set, any hostname and TCP port specified will be ignored.
+
+=item B<-t> I<secs>, B<--timeout>=I<secs>
+
+The maximum time to wait for a ping response.  Once exceeded the program will
+exit with a value of 2 to indicate the critical status.  The default timeout
+value is 45 seconds.  The timeout must be no less than 1 second.
+
+This value must be greater than the values specified for both the B<critical>
+and B<warning> values.
+
+=item B<-v>, B<--verbose>
+
+Display verbose debug output on STDOUT.
+
+=item B<-V>, B<--version>
+
+Display version info on STDOUT.
+
+=item B<-w> I<secs>, B<--warning>=I<secs>
+
+Warning ping response threshold in seconds.  If a spamd ping response takes
+longer than the value specified (in seconds), and does not exceed the
+B<critical> threshold value, the program will exit with a value of 1 to
+indicate the warning staus.
+
+This value must be no longer than the value specified for B<critical> and
+less than the value specified for B<timeout>.
+
+=back
+
+=head1 EXIT CODES
+
+The program will indicate the status of the spamd process being monitored by
+exiting with one of these values:
+
+=over 4
+
+=item 0
+
+OK: A spamd ping response was received within all threshold times.
+
+=item 1
+
+WARNING: A spamd ping response exceeded the warning threshold but not the
+critical threshold.
+
+=item 2
+
+CRITICAL: A spamd ping response exceeded either the critical threshold or the
+timeout value.
+
+=item 3
+
+UNKNOWN: An error, probably caused by a missing dependency or an invalid
+configuration parameter being supplied, occurred in the sa-check_spamd program.
+
+=back
+
+=head1 SEE ALSO
+
+spamc(1)
+spamd(1)
+spamassassin(1)
+
+=head1 PREREQUISITES
+
+C<Mail::SpamAssassin> version 3.1.1 or higher (3.1.6 or higher recommended)
+
+=head1 AUTHOR
+
+Daryl C. W. O'Shea, DOS Technologies <spamassassin@dostech.ca>
+
+=head1 LICENSE
+
+sa-check_spamd is distributed under the Apache License, Version 2.0, as
+described in the file C<LICENSE> included with the Apache SpamAssassin
+distribution and available at http://www.apache.org/licenses/LICENSE-2.0
+
+=cut

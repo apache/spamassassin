@@ -1,0 +1,32 @@
+#!/bin/bash
+
+. /etc/profile
+
+PATH=/home/jm/sabuildtools/bin:$PATH
+
+set -e
+
+if [ -e ~/state/mkupdates-with-scores-expedite.state ];
+then
+#  echo "Already expedited today"
+  exit
+fi
+
+if [ `find /var/www/updatedist.spamassassin.org/ -mtime -1 -perm 544 -name '*.tar.gz' | wc -l | sed -e 's/^[ \t]*//'` -eq 0 ];
+then
+#  echo "There was not an update yesterday, cannot expedite"
+  exit
+fi
+
+if [ `find /export/home/corpus-rsync/corpus -mtime +0 -mtime -2 -name '*.log' | wc -l | sed -e 's/^[ \t]*//'` -gt 0 ];
+then
+#  echo "Still waiting for the following logs:"
+#  find /export/home/corpus-rsync/corpus -mtime +0 -mtime -2 -name '*.log'
+  exit
+fi
+
+date > ~/state/mkupdates-with-scores-expedite.state
+
+echo "dos - testing - do update now!"
+
+ls -l /export/home/corpus-rsync/corpus

@@ -1,0 +1,71 @@
+# From Adam Katz (khopesh) testing grounds and live channels
+# http://khopesh.com/Anti-spam
+
+### rules from khop-lists
+
+header	 __FROM_DNS		From =~ /(?<![^\w.-])dns(?:admin)?\@/i
+header	 __FROM_INFO		From =~ /(?<![^\w.-])info\@/i
+
+header	 __SENDER_BOT	ALL =~ /(?:not?\W?repl[yi]|bounce|contact|daemon|subscri|report|respon[ds]e?r?s?\b|\b(?:root|news|nobody|agent|(?:post|web)?master|manag|send(?:er|ing)?|out|(?:bot|web|www)\b))[^\@ >]{0,5}s?\@\w/i
+tflags	 __SENDER_BOT	nice
+
+header __VACATION Subject =~ /\b(?:vacatio|away|out.of.offic|auto.?re|confirm)/i
+tflags __VACATION nice
+
+# This rule is meant to be used primarily by auto-reply systems:
+# Construct a filter to skip sending automated messages to items that match 
+# either this or a certain spam score threshold (I suggest 4 or 5).
+#
+# Example using procmail:
+#      :0wc
+#      * ^X-Spam-Status: No
+#      * ! ^X-Spam-Status: .*NOT_A_PERSON
+#      * ! ^FROM_DAEMON
+#      |my_auto_responder_program
+#
+meta	 __NOT_A_PERSON	__VACATION || ANY_BOUNCE_MESSAGE || __CHALLENGE_RESPONSE || __VIA_ML || __DOS_HAS_LIST_UNSUB || __SENDER_BOT || __UNSUB_LINK || __UNSUB_EMAIL || __MSGID_LIST || __SUBSCRIPTION_INFO
+tflags	 __NOT_A_PERSON	nice
+meta	 NOT_A_PERSON	__NOT_A_PERSON
+describe NOT_A_PERSON   List, replier, bot, etc.  Filters: skip auto-reply
+tflags	 NOT_A_PERSON	nice
+score	 NOT_A_PERSON	-0.001	# PIN ME HERE
+# This will score POORLY in the SA ruleqa masscheck.  That is not its purpose.
+# Instead, it is intended to hit as much bulk ham as possible while hitting
+# as little non-bulk ham as possible.  Its spam hits are irrelevant.
+
+
+body	 __UNSUB_EMAIL	/\b(?:(?:un)?subscri(?:ber?|ptions?)|abuses?|opt(?:ing)?.?out)\b[-a-z_0-9.+=]{0,60}\@[a-z0-9][-a-z_0-9.]{4,20}(?:[^a-z_0-9.-]|$)/i
+tflags	 __UNSUB_EMAIL	nice
+rawbody	 __UNSUB_MAILTO	/href=["']?mailto:[^>]{6,60}>[^<]{0,6}\b(?:(?:un)?subscri(?:ber?|ptions?)|abuses?|opt(?:ing)?.?out)\b/
+tflags	 __UNSUB_MAILTO	nice
+uri	 __UNSUB_LINK	/\b(?:(?:un)?subscri(?:ber?|ptions?)|abuses?|opt(?:ing)?.?out)\b/i
+tflags	 __UNSUB_LINK	nice
+uri	 __MAIL_LINK	/\?.{0,200}\w\@[\w-]{1,20}.\w\w\w?\b/i
+tflags	 __MAIL_LINK	nice
+
+header	 __MSGID_LIST	Message-ID =~ /-\w+\#[\w.]+\.\w{2,4}\@/
+tflags	 __MSGID_LIST	nice
+
+body	 __SUBSCRIPTION_INFO	/\b(?:e?newsletters?|(?:un)?(?:subscrib|register)|you(?:r| are) subscri(?:b|ption)|opt(?:.|ing)?out\b|further info|you do ?n[o']t w(?:ish|ant)|remov\w{1,3}.{1,9}\blists?\b|to your white.?list)/i
+tflags	 __SUBSCRIPTION_INFO	nice
+
+#meta	 KHOP_UNSUB_LINK	__UNSUB_LINK && !(SARE_UNI || __NOT_A_PERSON)
+meta	 KHOP_UNSUB_LINK	__UNSUB_LINK && !__NOT_A_PERSON
+describe KHOP_UNSUB_LINK	Personal message has unsusbscribe link
+tflags	 KHOP_UNSUB_LINK	nopublish
+score	 KHOP_UNSUB_LINK	0.001
+
+meta	 KHOP_UNSUB_EMAIL	!__UNSUB_LINK && (__UNSUB_EMAIL||__UNSUB_MAILTO)
+describe KHOP_UNSUB_EMAIL	Unsubscribe by email but not by link
+
+
+# This matches foreign characters by process of elimination.
+# From: must start w/ ~uppercase, ~letters, space/punctuation, then ~uppercase.
+header	 __FROM_FULL_NAME	From:name =~ /^[^a-z[:punct:][:cntrl:]\d\s][^[:punct:][:cntrl:]\d\s]*[[:punct:]\s]+[^a-z[:punct:][:cntrl:]\d\s]/
+tflags	 __FROM_FULL_NAME	nice
+meta	 __KHOP_NO_FULL_NAME	!(__NOT_A_PERSON || __FROM_ENCODED_QP || __FROM_NEEDS_MIME || __FROM_FULL_NAME)
+meta	 KHOP_NO_FULL_NAME	__KHOP_NO_FULL_NAME
+describe KHOP_NO_FULL_NAME	Sender does not have both First and Last names
+#score	 KHOP_NO_FULL_NAME	0.259 # keep low! 20090220, sa-users @20090514
+score	 KHOP_NO_FULL_NAME	0.001
+tflags	 KHOP_NO_FULL_NAME	nopublish

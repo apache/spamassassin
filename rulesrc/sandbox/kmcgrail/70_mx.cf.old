@@ -1,0 +1,35 @@
+# SpamAssassin rules file: kam sandbox
+#
+# Please don't modify this file as your changes will be overwritten with
+# the next update. Use @@LOCAL_RULES_DIR@@/local.cf instead.
+# See 'perldoc Mail::SpamAssassin::Conf' for details.
+#
+# <@LICENSE>
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to you under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at:
+# 
+#     http://www.apache.org/licenses/LICENSE-2.0
+# 
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# </@LICENSE>
+#
+###########################################################################
+
+#COMPANY3 MX
+header          __KAM_MX1               Reply-To =~ /\@mx\d+\./i
+header          __KAM_MX2               Return-Path =~ /\@mx\d+\./i
+header          __KAM_MX3               Received =~ /(\(|\b)(host|mx)\d+\./i
+
+meta            KAM_MX                  (__KAM_MX1 + __KAM_MX2 + __KAM_MX3 >= 1)
+score           KAM_MX                  0.2
+describe        KAM_MX                  Odd prevalence of mx records associated with the COMPANY3 Spammers
+
+#EOF

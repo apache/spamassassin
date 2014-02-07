@@ -10,9 +10,9 @@ exit if $SKIP_SPAMD_TESTS;
 
 %is_spam_patterns = (
 
-q{ INVALID_DATE}, 'date',
-q{ FROM_ENDS_IN_NUMS}, 'endsinnums',
-q{ NO_REAL_NAME}, 'noreal',
+q{ TEST_INVALID_DATE}, 'date',
+q{ TEST_ENDSNUMS}, 'endsinnums',
+q{ TEST_NOREALNAME}, 'noreal',
 
 );
 

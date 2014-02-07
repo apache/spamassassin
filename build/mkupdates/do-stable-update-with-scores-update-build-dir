@@ -1,0 +1,9 @@
+#!/bin/bash
+
+. /etc/profile
+
+PATH=/home/jm/sabuildtools/bin:$PATH
+
+cd /home/updatesd/svn/new-rule-score-gen
+
+ /home/updatesd/svn/mkupdates-with-scores/mkupdate-with-scores / /home/updatesd/key 1

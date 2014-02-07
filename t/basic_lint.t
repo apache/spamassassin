@@ -13,7 +13,7 @@ q{  }, 'anything',
 );
 
 # override locale for this test!
-$ENV{'LC_ALL'} = 'C';
+$ENV{'LANGUAGE'} = $ENV{'LC_ALL'} = 'C';
 
 sarun ("-L --lint", \&patterns_run_cb);
 ok_all_patterns();

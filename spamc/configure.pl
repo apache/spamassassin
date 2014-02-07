@@ -2,14 +2,15 @@
 # autoconf wrapper (for Unix)/alternative (for Windows)
 #
 # <@LICENSE>
-# Copyright 2004 Apache Software Foundation
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to you under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at:
+# 
 #     http://www.apache.org/licenses/LICENSE-2.0
-#
+# 
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -70,7 +71,7 @@ print join(' ', $Config{'perlpath'}, "version.h.pl") . "\n";
   # Got to check for defined because the script returns shell error level!
   unless (defined do $0) {
     $0 = $Z;
-    die $@ ? $@ : "Can't exec `$::args[0]': $!";
+    die $@ ? $@ : "Can't exec `version.h.pl': $!";
   }
 }
 
@@ -97,7 +98,7 @@ else
     WINLIBS        => 'ws2_32.lib',
     SSLLIBS        => 'ssleay32.lib libeay32.lib',
 
-    SPAMC_FILES    => join(' ', 'spamc.c',catfile('replace', 'getopt.c')),
+    SPAMC_FILES    => 'spamc.c getopt.c',
     LIBSPAMC_FILES => 'libspamc.c utils.c',
   );
 
@@ -115,6 +116,8 @@ else
   # Now do the real work...
   print "copy config.h.win config.h\n";
   copy(q{config.h.win}, q{config.h}) || die "Can't copy `config.h.win' to `config.h': $!";
+  print "copy spamc.h.win spamc.h\n";
+  copy(q{spamc.h.win}, q{spamc.h}) || die "Can't copy `spamc.h.win' to `spamc.h': $!";
 
   # We'll use our preprocessor for variable replacement in the Makefile.
   # Note that variables are enclosed by *two* @s while autoconf uses only
@@ -145,4 +148,3 @@ else
     print "cd " . updir() . "\n" for splitdir($srcdir);
   }
 } #* RUNNING_ON_NATIVE_WINDOWS *#
-

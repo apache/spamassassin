@@ -11,11 +11,12 @@
 # search times.
 #
 # <@LICENSE>
-# Copyright 2004 Apache Software Foundation
-# 
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to you under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at:
 # 
 #     http://www.apache.org/licenses/LICENSE-2.0
 # 
@@ -34,87 +35,10 @@ require_version @@VERSION@@
 
 body __ISO_2022_JP_DELIM	/\e\$B/
 
-header __MANY_EXCLS             Subject =~ /![^!]+!/
-header __PLING_PLING            Subject =~ /!!!/
-
-body __UPPERCASE_25_50          eval:check_for_uppercase('25', '50')
-body __UPPERCASE_50_75          eval:check_for_uppercase('50', '75')
-body __UPPERCASE_75_100         eval:check_for_uppercase('75', '100')
-
-meta MANY_EXCLAMATIONS          (!__ISO_2022_JP_DELIM && __MANY_EXCLS)
-describe MANY_EXCLAMATIONS      Subject has many exclamations
-meta UPPERCASE_25_50            (!__ISO_2022_JP_DELIM && __UPPERCASE_25_50)
-describe UPPERCASE_25_50        message body is 25-50% uppercase
 meta UPPERCASE_50_75            (!__ISO_2022_JP_DELIM && __UPPERCASE_50_75)
 describe UPPERCASE_50_75        message body is 50-75% uppercase
 meta UPPERCASE_75_100           (!__ISO_2022_JP_DELIM && __UPPERCASE_75_100)
 describe UPPERCASE_75_100       message body is 75-100% uppercase
-meta PLING_PLING                (!__ISO_2022_JP_DELIM && __PLING_PLING)
-describe PLING_PLING            Subject has lots of exclamation marks
-
-##############################################################################
-
-# tvd - I really wish there was a better way to do this, but ...
-# perhaps make a quick eval that counts how many matches, then we use
-# the cached result in tests?
-
-meta NIGERIAN_BODY1	( __NIGERIAN_BODY_1 + __NIGERIAN_BODY_2 + __NIGERIAN_BODY_3 + __NIGERIAN_BODY_5 + __NIGERIAN_BODY_6 + __NIGERIAN_BODY_7 + __NIGERIAN_BODY_8 + __NIGERIAN_BODY_9 + __NIGERIAN_BODY_10 + __NIGERIAN_BODY_11 + __NIGERIAN_BODY_12 + __NIGERIAN_BODY_13 + __NIGERIAN_BODY_14 + __NIGERIAN_BODY_15 + __NIGERIAN_BODY_16 + __NIGERIAN_BODY_17 + __NIGERIAN_BODY_18 + __NIGERIAN_BODY_19 + __NIGERIAN_BODY_20 + __NIGERIAN_BODY_21 + __NIGERIAN_BODY_22 + __NIGERIAN_BODY_25 + __NIGERIAN_BODY_26 + __NIGERIAN_BODY_27 + __NIGERIAN_BODY_28 + __NIGERIAN_BODY_29 + __NIGERIAN_BODY_30 + __NIGERIAN_BODY_31 + __NIGERIAN_BODY_32 + __NIGERIAN_BODY_33 + __NIGERIAN_BODY_34 + __NIGERIAN_BODY_35 + __NIGERIAN_BODY_36 + __NIGERIAN_BODY_37 + __NIGERIAN_BODY_38 + __NIGERIAN_BODY_39 + __NIGERIAN_BODY_40 + __NIGERIAN_BODY_41 + __NIGERIAN_BODY_42 + __NIGERIAN_BODY_43 + __NIGERIAN_BODY_44 + __NIGERIAN_BODY_45 + __NIGERIAN_BODY_46 ) > 1
-describe NIGERIAN_BODY1	Message body looks like a Nigerian spam message 1+
-
-meta NIGERIAN_BODY2	( __NIGERIAN_BODY_1 + __NIGERIAN_BODY_2 + __NIGERIAN_BODY_3 + __NIGERIAN_BODY_5 + __NIGERIAN_BODY_6 + __NIGERIAN_BODY_7 + __NIGERIAN_BODY_8 + __NIGERIAN_BODY_9 + __NIGERIAN_BODY_10 + __NIGERIAN_BODY_11 + __NIGERIAN_BODY_12 + __NIGERIAN_BODY_13 + __NIGERIAN_BODY_14 + __NIGERIAN_BODY_15 + __NIGERIAN_BODY_16 + __NIGERIAN_BODY_17 + __NIGERIAN_BODY_18 + __NIGERIAN_BODY_19 + __NIGERIAN_BODY_20 + __NIGERIAN_BODY_21 + __NIGERIAN_BODY_22 + __NIGERIAN_BODY_25 + __NIGERIAN_BODY_26 + __NIGERIAN_BODY_27 + __NIGERIAN_BODY_28 + __NIGERIAN_BODY_29 + __NIGERIAN_BODY_30 + __NIGERIAN_BODY_31 + __NIGERIAN_BODY_32 + __NIGERIAN_BODY_33 + __NIGERIAN_BODY_34 + __NIGERIAN_BODY_35 + __NIGERIAN_BODY_36 + __NIGERIAN_BODY_37 + __NIGERIAN_BODY_38 + __NIGERIAN_BODY_39 + __NIGERIAN_BODY_40 + __NIGERIAN_BODY_41 + __NIGERIAN_BODY_42 + __NIGERIAN_BODY_43 + __NIGERIAN_BODY_44 + __NIGERIAN_BODY_45 + __NIGERIAN_BODY_46 ) > 2
-describe NIGERIAN_BODY2	Message body looks like a Nigerian spam message 2+
-
-meta NIGERIAN_BODY3	( __NIGERIAN_BODY_1 + __NIGERIAN_BODY_2 + __NIGERIAN_BODY_3 + __NIGERIAN_BODY_5 + __NIGERIAN_BODY_6 + __NIGERIAN_BODY_7 + __NIGERIAN_BODY_8 + __NIGERIAN_BODY_9 + __NIGERIAN_BODY_10 + __NIGERIAN_BODY_11 + __NIGERIAN_BODY_12 + __NIGERIAN_BODY_13 + __NIGERIAN_BODY_14 + __NIGERIAN_BODY_15 + __NIGERIAN_BODY_16 + __NIGERIAN_BODY_17 + __NIGERIAN_BODY_18 + __NIGERIAN_BODY_19 + __NIGERIAN_BODY_20 + __NIGERIAN_BODY_21 + __NIGERIAN_BODY_22 + __NIGERIAN_BODY_25 + __NIGERIAN_BODY_26 + __NIGERIAN_BODY_27 + __NIGERIAN_BODY_28 + __NIGERIAN_BODY_29 + __NIGERIAN_BODY_30 + __NIGERIAN_BODY_31 + __NIGERIAN_BODY_32 + __NIGERIAN_BODY_33 + __NIGERIAN_BODY_34 + __NIGERIAN_BODY_35 + __NIGERIAN_BODY_36 + __NIGERIAN_BODY_37 + __NIGERIAN_BODY_38 + __NIGERIAN_BODY_39 + __NIGERIAN_BODY_40 + __NIGERIAN_BODY_41 + __NIGERIAN_BODY_42 + __NIGERIAN_BODY_43 + __NIGERIAN_BODY_44 + __NIGERIAN_BODY_45 + __NIGERIAN_BODY_46 ) > 3
-describe NIGERIAN_BODY3	Message body looks like a Nigerian spam message 3+
-
-meta NIGERIAN_BODY4	( __NIGERIAN_BODY_1 + __NIGERIAN_BODY_2 + __NIGERIAN_BODY_3 + __NIGERIAN_BODY_5 + __NIGERIAN_BODY_6 + __NIGERIAN_BODY_7 + __NIGERIAN_BODY_8 + __NIGERIAN_BODY_9 + __NIGERIAN_BODY_10 + __NIGERIAN_BODY_11 + __NIGERIAN_BODY_12 + __NIGERIAN_BODY_13 + __NIGERIAN_BODY_14 + __NIGERIAN_BODY_15 + __NIGERIAN_BODY_16 + __NIGERIAN_BODY_17 + __NIGERIAN_BODY_18 + __NIGERIAN_BODY_19 + __NIGERIAN_BODY_20 + __NIGERIAN_BODY_21 + __NIGERIAN_BODY_22 + __NIGERIAN_BODY_25 + __NIGERIAN_BODY_26 + __NIGERIAN_BODY_27 + __NIGERIAN_BODY_28 + __NIGERIAN_BODY_29 + __NIGERIAN_BODY_30 + __NIGERIAN_BODY_31 + __NIGERIAN_BODY_32 + __NIGERIAN_BODY_33 + __NIGERIAN_BODY_34 + __NIGERIAN_BODY_35 + __NIGERIAN_BODY_36 + __NIGERIAN_BODY_37 + __NIGERIAN_BODY_38 + __NIGERIAN_BODY_39 + __NIGERIAN_BODY_40 + __NIGERIAN_BODY_41 + __NIGERIAN_BODY_42 + __NIGERIAN_BODY_43 + __NIGERIAN_BODY_44 + __NIGERIAN_BODY_45 + __NIGERIAN_BODY_46 ) > 4
-describe NIGERIAN_BODY4	Message body looks like a Nigerian spam message 4+
-
-body __NIGERIAN_BODY_1		/\b(?:financial|confiden(?:tial|ce)|safe|mutual|secret|success|risk-?free|details|business).{1,30}\btransaction\b/i
-body __NIGERIAN_BODY_2		/\btransaction\b.{1,30}\b(?:magnitude|diplomatic|strict|absolute|secret|confiden(?:tial|ce)|guarantee)/i
-body __NIGERIAN_BODY_3		/BASED ON INFORMATION GATHERED ABOUT YOU, WE BELIEVE\s*YOU WOULD BE IN A POSITION TO HELP US IN TRANSFER/i
-body __NIGERIAN_BODY_5		/\bpoisoned (?:to death )?by his business associate/i
-body __NIGERIAN_BODY_6		/\bIt is with trust and confidentiality\b/i
-body __NIGERIAN_BODY_7		/\bU\.?S\.?(?:D\.?)?\s*(?:\$\s*)?(?:\d+,\d+,\d+|\d+\.\d+\.\d+|\d+(?:\.\d+)?\s*milli?on)/i
-body __NIGERIAN_BODY_8		/\b(?:You may be sur?prised to receive this letter from me|this (?:letter|mail) (?:(?:may|will) come to you as|will be) a sur?prise)\b/i
-body __NIGERIAN_BODY_9		/\bthe .{1,10} son of\b/i
-body __NIGERIAN_BODY_10		/\burgent and(?: very)? (?:profitable|confidential) business (?:proposal|proposition)\b/i
-body __NIGERIAN_BODY_11		/\bassistance to relocate\b/i
-body __NIGERIAN_BODY_12		/\bto which will be transferred the sum\b/i
-body __NIGERIAN_BODY_13		/\byour(?: private)? (?:tele)?phone (?:and|&) fax Numbers?\b/i
-body __NIGERIAN_BODY_14		/\bthe importance of Secrecy\b/i
-body __NIGERIAN_BODY_15		/\bmodalities\b/i
-body __NIGERIAN_BODY_16		/\bI am a Private Investigator\b/i
-body __NIGERIAN_BODY_17		/\bWRITING THIS LETTER TO SOLICIT\b/i
-body __NIGERIAN_BODY_18		/\bSEVERAL ATTEMPTS HAVE BEEN MADE WITH OUT SUCCESS\b/i
-body __NIGERIAN_BODY_19		/\bMY PROPOSAL IS ACCEPTABLE\b/i
-body __NIGERIAN_BODY_20		/\d+%.{0,15}\)? (?:of (?:the total|this|the) (?:amount|sum|money)|for you|for my investment|for (?:us|me)|.{0,15}\bfor your expenses)\b/i
-body __NIGERIAN_BODY_21		/\bforeign account\b/i
-body __NIGERIAN_BODY_22		/\btrust (?:and|&) confidentiality\b/i
-body __NIGERIAN_BODY_25		/\bvery beneficial to both of us\b/i
-body __NIGERIAN_BODY_26		/\bmilli?on (?:.{1,25} thousand\s*)?(?:(?:united states|u\.?s\.?) dollars|(?i:U\.?S\.?D?))\b/i
-body __NIGERIAN_BODY_27		/\bcorrespondent branch\b/i
-body __NIGERIAN_BODY_28		/\btransaction is .{1,15} risk free.\b/i
-body __NIGERIAN_BODY_29		/\b(?:percentage|rate) of this money\b/i
-body __NIGERIAN_BODY_30		/\bfavou?rable response\b/i
-body __NIGERIAN_BODY_31		/\btotal acceptance and commitment\b/i
-body __NIGERIAN_BODY_32		/\blocate(?: .{1,20})? extended relative/i
-body __NIGERIAN_BODY_33		/\bhonest cooperation\b/i
-body __NIGERIAN_BODY_34		/\b(?:wife|son|brother|daughter) of the late\b/i
-body __NIGERIAN_BODY_35		/\bintuitive confidence/i
-body __NIGERIAN_BODY_36		/\battached to ticket number\b/i
-body __NIGERIAN_BODY_37		/\ball funds will be returned\b/i
-body __NIGERIAN_BODY_38		/\b(?:International\b.{1,15}\bLottery|lottery\b.{1,15}\binternational)\b/i
-body __NIGERIAN_BODY_39		/\bYOUR FULL NAMES?,?(?:and|&)? FULL CONTACT ADDRESS\b/i
-body __NIGERIAN_BODY_40		/\bsend .{1,30}\byour telefax Numbers?\b/i
-body __NIGERIAN_BODY_41		/(?:government|bank) of nigeria/i
-body __NIGERIAN_BODY_42		/nigerian? (?:national|government)/i
-body __NIGERIAN_BODY_43         /\blate .{0,15}(?:father|wife|husband|general|president|daughter|son|minister).{0,20}(?:wealthy|treasure|deposit|money|left|property|known|\$|US)/i
-body __NIGERIAN_BODY_44         /\b(?:of|the) late president\b/i
-body __NIGERIAN_BODY_45         /\bsum of ?(?:million|US|\$)|\b(?:deposit|left|huge|discovered|abandoned).{0,15} sum of/i
-body __NIGERIAN_BODY_46         /\bgive\s+you .{0,15}(?:fund|money|total|sum|contact|percent)\b/i
-
-##############################################################################
 
 header __SANE_MSGID		MESSAGEID =~ /^<[^<>\\ \t\n\r\x0b\x80-\xff]+\@[^<>\\ \t\n\r\x0b\x80-\xff]+>\s*$/m
 header __HAS_MSGID		MESSAGEID =~ /\S/
@@ -127,7 +51,25 @@ header __MOZILLA_MSGID		MESSAGEID =~ /^<[A-F\d]{8}\.[A-F1-9][A-F\d]{0,7}\@\S+>$/
 meta FORGED_MUA_MOZILLA		(__MOZILLA_MUA && !__UNUSABLE_MSGID && !__MOZILLA_MSGID)
 describe FORGED_MUA_MOZILLA	Forged mail pretending to be from Mozilla
 
-header __PC_RND_HEADER		ALL =~ /%RA?ND(?:OM)?_[A-Z]/i
-body __PC_RND_BODY		/%RA?ND(?:OM)?_[A-Z]/i
-rawbody __PC_RND_RAWBODY	/%RA?ND(?:OM)?_[A-Z]/i
-meta PERCENT_RANDOM	(__PC_RND_HEADER || __PC_RND_BODY || __PC_RND_RAWBODY)
+header __PC_RND_HEADER		ALL =~ /%RA?ND(?:OM)?(?:_|\b|[A-Z]{3})/i
+rawbody __PC_RND_RAWBODY	/%RA?ND(?:OM)?(?:_|\b|[A-Z]{3})/i
+meta PERCENT_RANDOM		(__PC_RND_HEADER || __PC_RND_RAWBODY)
+describe PERCENT_RANDOM		Message has a random macro in it
+
+# __MIME_ATTACHMENT defined in 20_html_tests.cf
+body __NONEMPTY_BODY	/\S/
+meta EMPTY_MESSAGE	!__MIME_ATTACHMENT && !__NONEMPTY_BODY
+describe EMPTY_MESSAGE	Message appears to have no textual parts and no Subject: text
+
+meta NO_HEADERS_MESSAGE (MISSING_DATE && MISSING_HEADERS && NO_RECEIVED && NO_RELAYS && MISSING_MID)
+describe NO_HEADERS_MESSAGE Message appears to be missing most RFC-822 headers
+
+###########################################################################
+
+ifplugin Mail::SpamAssassin::Plugin::MIMEEval
+
+body __UPPERCASE_25_50          eval:check_for_uppercase('25', '50')
+body __UPPERCASE_50_75          eval:check_for_uppercase('50', '75')
+body __UPPERCASE_75_100         eval:check_for_uppercase('75', '100')
+
+endif

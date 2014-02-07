@@ -1,11 +1,10 @@
-# $Id: MIME.pm,v 1.8 2003/10/02 22:59:00 quinlan Exp $
-
 # <@LICENSE>
-# Copyright 2004 Apache Software Foundation
-# 
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to you under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at:
 # 
 #     http://www.apache.org/licenses/LICENSE-2.0
 # 
@@ -48,15 +47,21 @@ It is held in two forms:
 =cut
 
 package Mail::SpamAssassin::Message::Metadata;
+
 use strict;
+use warnings;
 use bytes;
+use re 'taint';
 
 use Mail::SpamAssassin;
 use Mail::SpamAssassin::Constants qw(:sa);
-use Mail::SpamAssassin::TextCat;
+use Mail::SpamAssassin::Util qw(reverse_ip_address);
 use Mail::SpamAssassin::Message::Metadata::Received;
+use Mail::SpamAssassin::Logger;
 
 =item new()
+
+=back
 
 =cut
 
@@ -74,65 +79,36 @@ sub new {
 }
 
 sub extract {
-  my ($self, $msg, $main) = @_;
+  my ($self, $msg, $permsgstatus) = @_;
 
   # pre-chew Received headers
-  $self->parse_received_headers ($main, $msg);
+  $self->parse_received_headers ($permsgstatus, $msg);
 
-  # and identify the language (if we're going to do that), before we
-  # run any Bayes tests, so they can use that as a token
-  $self->check_language($main);
+  foreach my $tuple (
+      [$self->{relays_trusted},   'RELAYSTRUSTEDREVIP'  ],
+      [$self->{relays_untrusted}, 'RELAYSUNTRUSTEDREVIP'],
+      [$self->{relays_internal},  'RELAYSINTERNALREVIP' ],
+      [$self->{relays_external},  'RELAYSEXTERNALREVIP' ])
+  { my($rly, $tag) = @$tuple;
+    my @revips;
+    @revips = map {
+      my($ip,$revip);
+      $ip = $_->{ip}  if ref $_ && !$_->{ip_private};
+      $revip = reverse_ip_address($ip)  if defined $ip && $ip ne '';
+      defined $revip && $revip ne '' ? $revip : ();
+    } @$rly  if $rly;
+    $permsgstatus->set_tag($tag,
+                           @revips == 1 ? $revips[0] : \@revips) if @revips;
+  }
 
-  $main->call_plugins ("extract_metadata", { msg => $msg });
+  $permsgstatus->{main}->call_plugins("extract_metadata",
+                       { msg => $msg, permsgstatus => $permsgstatus,
+                         conf => $permsgstatus->{main}->{conf} });
 }
 
 sub finish {
   my ($self) = @_;
-  delete $self->{msg};
-  delete $self->{strings};
+  %{$self} = ();
 }
-
-# ---------------------------------------------------------------------------
-
-sub check_language {
-  my ($self, $main) = @_;
-
-  my @languages = split (' ', $main->{conf}->{ok_languages});
-  if (grep { $_ eq "all" } @languages) {
-    # user doesn't care what lang it's in, so return.
-    # TODO: might want to have them as bayes tokens all the same, though.
-    # should we add a new config setting to control that?  or make it a
-    # plugin?
-    return;
-  }
-
-  my $body = $self->{msg}->get_rendered_body_text_array();
-  $body = join ("\n", @{$body});
-  $body =~ s/^Subject://i;
-
-  # note body text length, since the check_languages() eval rule also
-  # uses it
-  $self->{languages_body_len} = length($body);
-
-  # need about 256 bytes for reasonably accurate match (experimentally derived)
-  if ($self->{languages_body_len} < 256) {
-    dbg("Message too short for language analysis");
-    $self->{textcat_matches} = [];
-    return;
-  }
-
-  my @matches = Mail::SpamAssassin::TextCat::classify($self, $body, $main->{languages_filename});
-  $self->{textcat_matches} = \@matches;
-  my $matches_str = join(' ', @matches);
-
-  # add to metadata so Bayes gets to take a look
-  $self->{msg}->put_metadata ("X-Languages", $matches_str);
-
-  dbg ("metadata: X-Languages: $matches_str");
-}
-
-# ---------------------------------------------------------------------------
-
-#sub dbg { Mail::SpamAssassin::dbg(@_); }
 
 1;

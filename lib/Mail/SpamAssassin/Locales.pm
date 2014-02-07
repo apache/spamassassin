@@ -1,9 +1,10 @@
 # <@LICENSE>
-# Copyright 2004 Apache Software Foundation
-# 
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to you under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at:
 # 
 #     http://www.apache.org/licenses/LICENSE-2.0
 # 
@@ -17,7 +18,9 @@
 package Mail::SpamAssassin::Locales;
 
 use strict;
+use warnings;
 use bytes;
+use re 'taint';
 
 use vars qw{
   %charsets_for_locale
@@ -77,7 +80,7 @@ sub is_charset_ok_for_locales {
   $cs =~ s/^3D//gs;		# broken by quoted-printable
   $cs =~ s/:.*$//gs;            # trim off multiple charsets, just use 1st
 
-  study $cs;
+  study $cs;  # study is a no-op since perl 5.16.0, eliminating related bugs
   #warn "JMD $cs";
 
   # always OK (the net speaks mostly roman charsets)

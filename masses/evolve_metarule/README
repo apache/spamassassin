@@ -1,0 +1,91 @@
+
+Genetic Algorithm Optimizer for Meta Rules
+
+Henry Stern
+Anti-Spam Engineering
+McAfee International
+Alton House
+Gatehouse Way
+Aylesbury, Bucks
+HP19 8YD
+
+April 9, 2005
+
+1.  WHAT IS IT?
+
+This program is used to optimize phrase-based meta rules such as
+ADVANCE_FEE and NIGERIAN for performance by selecting a subset of the
+candidate body rules.
+
+It selects rule sets based on combined hit rates, false positive rates and
+a desired number of rules.
+
+This program requres the GAUL: Genetic Algorithm Utility Library which can be
+obtained from http://gaul.sourceforge.net/.  It is licensed under the GPL.
+
+2.  OPTIONS
+
+Config parameters:
+  -h hits_file
+	Path to the compressed matrix containing the rule hits.
+	Default: hits.dat
+
+  -r rules_fule
+	Path to the file containing the rule names corresponding to columns		in the compressed matrix.
+	Default: rules.dat
+
+Fitness function parameters:
+  -m maximum_relevant_hits
+	Stop counting hits after seeing this many.  The rule analogue of this
+	is:
+	ADVANCE_FEE_1, ADVANCE_FEE_2, ..., ADVANCE_FEE_m
+	Default: 4
+
+  -t target_num_rules
+	How many sub-rules should be used by the meta rule.
+	Default: 50
+
+  -l target_flex_rules
+	Solutions with target_num_rules +/- target_flex_rules are half as
+	fit as solutions with target_num_rules.
+	Default: 5
+
+  -e hits_exponent
+	Parameter to the fitness function, how the importance of high numbers of
+	hits is.
+	Default: 3.0
+
+  -p penalty_exponent
+	If rules hit ham, this exponential penalty is applied based on the
+	number of hits.
+	Default: 9.0
+
+GA parameters:
+  -s population_size
+	How many individuals should be used in the simulation.
+	Default: 100
+
+  -g max_generations
+	How many geenrations that the simulation should run for.
+	Default: 10000
+
+  -x crossover_prob
+	The probability of an allele-mixing cross-over.
+	Default: 1.0
+
+  -u mutation_prob
+	The probability of a one-allele mutation.
+	Default: 0.1
+
+3.  HOW DOES IT WORK?
+
+For every generation, "Parents" are selected based on their fitness.  Parents
+are "mated" to produce two children.  The alleles on each chromosome are
+randomly selected, which isn't very biologically plausible, but it works.
+
+Fitness of an individual is evaluated based on hit rates, false positive rates
+and how close the individual is to the target number of rules.
+
+--
+hs
+9/5/2005

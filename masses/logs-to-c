@@ -1,11 +1,12 @@
 #!/usr/bin/perl -w
 #
 # <@LICENSE>
-# Copyright 2004 Apache Software Foundation
-# 
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to you under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at:
 # 
 #     http://www.apache.org/licenses/LICENSE-2.0
 # 
@@ -16,150 +17,169 @@
 # limitations under the License.
 # </@LICENSE>
 
-use Getopt::Long;
-use vars qw($opt_cffile $opt_count $opt_lambda $opt_threshold
-		$opt_spam $opt_ham $opt_fplog $opt_fnlog);
+=head1 NAME
 
-GetOptions("cffile=s", "count", "lambda=f", "threshold=f", "spam=s", "ham=s", "scoreset=i", "fplog=s", "fnlog=s");
+logs-to-c - Convert a mass-check log into perceptron format
 
-my $argcffile = $opt_cffile;
+=head1 SYNOPSIS
 
-my $justcount = 0;
-if ($opt_count) { $justcount = 1; }
+logs-to-c [options]
 
-my $threshold = 5;
-if (defined $opt_threshold) { $threshold = $opt_threshold; }
+ Options:
+    -c,--cffile=path	  Use path as the rules directory
+    -s,--scoreset=n	  Use scoreset n
+    --spam=file           Location of spam mass-check log
+    --ham=file            Location of ham mass-check log
 
-$opt_spam ||= 'spam.log';
-$opt_ham ||= 'ham.log';
-$opt_scoreset = 0 if ( !defined $opt_scoreset );
+=head1 DESCRIPTION
 
-# If desired, report false positives and false negatives for analysis
-if (defined $opt_fnlog) { open (FNLOG, ">$opt_fnlog"); }
-if (defined $opt_fplog) { open (FPLOG, ">$opt_fplog"); }
+B<logs-to-c> will read the mass-check logs F<spam.log> and F<ham.log>
+or as specified by the B<--spam> and B<--ham> options, and convert it
+into the format needed by the perceptron. This is a format that is
+simple for the perceptron to parse, but is not very readable to
+humans.
 
-my $nybias = 10;
+=head1 BUGS
 
-# lambda value for TCR equation, representing the cost of of an FP vs. the
-# cost of a FN.  Some example values are: 1 = tagged only, 9 = mailed back
-# to sender asking for token, 999 = blocking or deleting a message.
-#
-# We roughly aim for a value representing "moved to infrequently-read folder".
+Please report bugs to http://bugzilla.spamassassin.org/
 
-my $lambda = 50;
-if ($opt_lambda) { $lambda = $opt_lambda; }
+=head1 SEE ALSO
 
-my %is_spam = ();
-my %tests_hit = ();
+L<mass-check(1)>, L<perceptron(1)>
+
+=cut
+
+use Getopt::Long qw(:config auto_help bundling);
+use strict;
+use vars qw($opt_cffile $opt_spam $opt_ham $opt_scoreset);
+
+$opt_cffile = "../rules";
+$opt_spam = 'spam.log';
+$opt_ham = 'ham.log';
+$opt_scoreset = 0;
+
+GetOptions("cffile=s", "spam=s", "ham=s", "scoreset=i");
+
+my $is_spam = '';		# vec aligned with @tests_hit
+my @tests_hit = ();
 my %mutable_tests = ();
 
-use vars qw(%rules %allrules);
+use vars qw(%rules %allrules %scores);
+
+my (%ignored_rule, %range_lo, %range_hi);
+my %rule_to_index;
 
 readscores();
 
 print "Reading per-message hit stat logs and scores...\n";
 my ($num_tests, $num_spam, $num_ham);
-my ($ga_yy, $ga_ny, $ga_yn, $ga_nn, $yyscore, $ynscore, $nyscore, $nnscore);
 
 read_ranges();
 readlogs();
 
-if ($justcount) {
-  $nybias = $nybias*($num_spam / $num_ham);
-  evaluate();
-} else {
-  print "Writing logs and current scores as C code...\n";
-  writescores_c();
-}
+print "Writing logs and current scores as C code...\n";
+writescores_c();
+
+# show memory usage before we exit
+# print "Running \"ps aux\"...\n";
+# open(PS, "ps aux|");
+# while(<PS>) {
+# print if $. == 1 || /\b$$\b/;
+# }
+# close(PS);
+
 exit 0;
 
+# code to freeze/thaw test lines in as little space as possible
+# this could be faster, but improves memory usage by a phenomenal
+# amount over arrayrefs or strings of comma-separated-values
+my $short_index = 1;
+my %long_to_short;
+my @short_to_long;
+
+sub new_short {
+  $short_index++;
+  $long_to_short{$_[0]} = $short_index;
+  $short_to_long[$short_index] = $_[0];
+  return $short_index;
+}
+
+# uses less than half the memory of join on ',' and even better
+# compared to Storable::freeze
+sub freeze_tests {
+  return pack("w*", map
+	      {
+		$long_to_short{$_} || new_short($_);
+	      } @{$_[0]})
+}
+
+sub thaw_tests {
+  return map { $short_to_long[$_] } unpack("w*", $_[0]);
+}
 
 sub readlogs {
+  my $msgline;
+
   my $count = 0;
   $num_spam = $num_ham = 0;
 
-  if ($justcount) {
-    $ga_yy = $ga_ny = $ga_yn = $ga_nn = 0;
-    $yyscore = $ynscore = $nyscore = $nnscore = 0.0;
-  }
-
   foreach my $file ($opt_spam, $opt_ham) {
-    open (IN, "<$file");
+    open (IN, "<$file") || die "Could not open file '$file': $!";
 
-    while (<IN>) {
-      next unless /^[^#]/;
-      if($_ !~ /^.\s+([-\d]+)\s+(\S+)\s*/) { warn "bad line: $_"; next; }
-      my $msgline = $_;
-      my $hits = $1;
-      #my $id = $2;
-      $_ = $'; s/(?:bayes|time)=\S+//; s/,,+/,/g; s/^\s+//; s/\s+$//;
+    my $isspam = ($file eq $opt_spam);
+    my $caught;			# 1st parameter of log line
+    my $rules;			# 4th parameter of log line
+    my $restofline;             # intermediate parse buffer
 
-      my $score = 0;
-      my @tests = ();
-      foreach my $tst (split (/,/, $_)) {
-	next unless $tst;
-	if (!defined $scores{$tst}) {
-          #warn "unknown test in $file, ignored: $tst\n";
-	  next;
-	}
+    while (defined($msgline = <IN>)) {
+      # faster log-reading code from hit-frequencies.
+      # the additional split() is for this case:
+      # ".  -20 /path  time=1112116980,scantime=0,format=f,reuse=no"
+      # in other words, no hits.  split(' ') cannot deal with this
+      # correctly, seeing (".", "-20", "/path", "time=...etc").  Work
+      # around this by using a literal / / regexp split to discard
+      # the csv stuff we don't want out of the rest of the line.
 
-	# Make sure to skip any subrules!
-	next if ( $allrules{$tst}->{issubrule} );
+      ($caught, undef, $restofline) = split(' ', $msgline, 3);
+      next unless ($caught =~ /^[Y\.]$/ && $restofline);
+      (undef, $rules) = split(/ /, $restofline, 3);
 
-        if ($justcount) {
-          $score += $scores{$tst};
-        } else {
-          push (@tests, $tst);
-        }
+      # get tests, but ignore unknown tests and subrules
+      my @tests = grep { defined $scores{$_} && !$allrules{$_}->{issubrule} }
+	split(/,/, $rules);
+
+      if ($isspam) {
+        $num_spam++;
+        vec($is_spam, $count, 1) = 1;
+      }
+      else {
+        $num_ham++;
+        vec($is_spam, $count, 1) = 0;
       }
 
-      if (!$justcount) { 
-        $tests_hit{$count} = \@tests;
-      }
+      # inlined for speed.
+      # ORIGINAL: $tests_hit[$count] = freeze_tests(\@tests);
+      $tests_hit[$count] = pack("w*", map
+                  {
+                    $long_to_short{$_} || new_short($_);
+                  } @tests);
 
-      if ($file eq $opt_spam) {
-	$num_spam++;
-        if ($justcount) {
-          if ($score >= $threshold) {
-            $ga_yy++; $yyscore += $score;
-          } else {
-            $ga_yn++; $ynscore += $score;
-	    if (defined $opt_fnlog) {
-	    	print FNLOG $msgline;
-	    }
-          }
-        } else {
-          $is_spam{$count} = 1;
-        }
-      } else {
-	$num_ham++;
-        if ($justcount) {
-          if ($score >= $threshold) {
-	    #print STDERR "FP: $id\n";
-            $ga_ny++; $nyscore += $score;
-	    if (defined $opt_fplog) {
-	    	print FPLOG $msgline;
-	    }
-          } else {
-            $ga_nn++; $nnscore += $score;
-          }
-        } else {
-          $is_spam{$count} = 0;
-        }
-      }
-      $count++;
+      # TODO: benchmark using foreach(), map() is often slower
+
+      $count++;                  # increment line
     }
     close IN;
   }
   $num_tests = $count;
 }
 
-
 sub readscores {
-  if (!defined $argcffile) { $argcffile = "../rules"; }
-  print "Reading scores from \"$argcffile\"...\n";
-  system ("./parse-rules-for-masses -d \"$argcffile\" -s $opt_scoreset") and die;
-  require "./tmp/rules.pl";
+  print "Reading scores from \"$opt_cffile\"...\n";
+  my $tmpf = "tmp/rules$$.pl";
+  system "../build/parse-rules-for-masses ".
+        "-d \"$opt_cffile\" -s $opt_scoreset -o $tmpf" and die;
+  require $tmpf;
+  unlink $tmpf;
   %allrules = %rules;           # ensure it stays global
 }
 
@@ -172,13 +192,13 @@ sub writescores_c {
     # jm: now, score-ranges-from-freqs has tflags to work from, so
     # it will always list all mutable tests.
 
-  @index_to_rule = sort {($ignored_rule{$a} <=> $ignored_rule{$b}) ||
+  my @index_to_rule = sort {($ignored_rule{$a} <=> $ignored_rule{$b}) ||
 			  ($mutable_tests{$b} <=> $mutable_tests{$a}) ||
 			   ($a cmp $b)} (keys %scores);
   my $max_hits_per_msg = 0;
-  for ($file = 0; $file < $num_tests; $file++) {
+  for (my $file = 0; $file < $num_tests; $file++) {
     my(@hits) =
-     grep {(! $ignored_rule{$_}) && $mutable_tests{$_}} (@{$tests_hit{$file}});
+     grep {(! $ignored_rule{$_}) && $mutable_tests{$_}} (thaw_tests($tests_hit[$file]));
     if ((scalar(@hits)+1) > $max_hits_per_msg) {
       $max_hits_per_msg = scalar(@hits)+1;
     }
@@ -200,6 +220,12 @@ sub writescores_c {
       }
       #$range_lo{$name} ||= 0.1;
       #$range_hi{$name} ||= 1.5;
+
+      # no default score found? set it to max and let GA adjust downwards.  this
+      # seems to help avoid a load of really good rules getting 1.0 scores
+      if ($allrules{$name}->{no_score_found}) {
+        $scores{$name} = ($range_hi{$name} + $range_lo{$name}) / 2.0;
+      }
     }
 
     $output .= ".".$i."\n".
@@ -255,11 +281,11 @@ sub writetests_c {
 
   for ($file = 0; $file < $num_tests; $file++)
   {
-    my $uniq_key = $is_spam{$file} . " ";
+    my $uniq_key = vec($is_spam, $file, 1) . " ";
 
-    my(@good_tests) =
+    my (@good_tests) =
      grep {length($_) && (! $ignored_rule{$_}) &&
-	    (defined($rule_to_index{$_}))} (@{ $tests_hit{$file} });
+	    (defined($rule_to_index{$_}))} (thaw_tests($tests_hit[$file]));
 
     @good_tests = sort {$a <=> $b} (map {$rule_to_index{$_}} (@good_tests));
 
@@ -305,15 +331,17 @@ int tests_count[$num_nondup];
     print DAT ".".$uniq_files{$file}."\n";
 
     my $out = '';
-    $out .= "s".$is_spam{$file}."\n";
+    $out .= "s".vec($is_spam, $file, 1)."\n";
 
     my $base_score = 0;
     my $num_tests_hit = 0;
-    foreach my $test (@{$tests_hit{$file}}) {
+    foreach my $test (thaw_tests($tests_hit[$file])) {
       if ($test eq '') { next; }
 
       if ($ignored_rule{$test}) {
-        warn "ignored rule $test got a hit in $file!\n";
+        # this is not a log-worthy event anymore, since we have a lot
+        # of T_ test rules that are ignored during perceptron runs
+        # warn "ignored rule $test got a hit in $file!\n";
         next;
       }
 
@@ -323,12 +351,12 @@ int tests_count[$num_nondup];
       }
 
       if ($mutable_tests{$test}) {
-      $num_tests_hit++;
-      $out .= "t".$rule_to_index{$test}."\n";
+        $num_tests_hit++;
+        $out .= "t".$rule_to_index{$test}."\n";
 
-      if ($num_tests_hit >= $max_hits_per_msg) {
-	die "Need to increase \$max_hits_per_msg";
-      }
+        if ($num_tests_hit >= $max_hits_per_msg) {
+          die "Need to increase \$max_hits_per_msg";
+        }
       } else {
 	$base_score += $scores{$test};
       }
@@ -344,7 +372,7 @@ int tests_count[$num_nondup];
 
 sub read_ranges {
   if (!-f 'tmp/ranges.data') {
-    system ("make tmp/ranges.data");
+    die "need to make 'tmp/ranges.data' first";
   }
 
   # read ranges, and mutableness, from ranges.data.
@@ -360,21 +388,27 @@ sub read_ranges {
     my $mut = $3+0;
 
     if ($allrules{$t}->{issubrule}) {
-      # warn "ignoring '$t': is sub-rule\n";    # no need to warn
+      # warn "$t: ignoring, is sub-rule\n";    # no need to warn
       $ignored_rule{$t} = 1;
       $mutable_tests{$t} = 0;
       next;
     }
+    if ($t =~ /^T_/) {
+      # warn "$t: ignoring, is T_ test rule\n";    # no need to warn
+      $ignored_rule{$t} = 1;
+      $mutable_tests{$t} = 0;
+      $range_lo{$t} = 0.01;    # clamp to insignificant range
+      $range_hi{$t} = 0.01;
+      next;
+    }
     if (($range_lo{$t} == $range_hi{$t}) && (! $range_lo{$t})) {
-      warn "ignoring '$t': score and range == 0\n";
+      warn "$t: ignoring, score and range == 0\n";
       $ignored_rule{$t} = 1;
       $mutable_tests{$t} = 0;
       next;
     }
 
     $ignored_rule{$t} = 0;
-    $index_to_rule[$count] = $t;
-    $count++;
 
     if (!$mut) {
       $mutable_tests{$t} = 0;
@@ -386,7 +420,7 @@ sub read_ranges {
       $mutable_tests{$t} = 1;
     }
     unless ($mutable_tests{$t} || $scores{$t}) {
-      warn "ignoring '$t': immutable and score == 0\n";
+      warn "$t: ignoring, immutable and score == 0 in this scoreset\n";
       $ignored_rule{$t} = 1;
     }
   }
@@ -394,11 +428,23 @@ sub read_ranges {
 
   # catch up on the ones missed; seems to be userconf or 0-hitters mostly.
   foreach my $t (sort keys %allrules) {
+    next if ($t eq '_scoreset');
     next if (exists($range_lo{$t}));
+
     if ($allrules{$t}->{issubrule}) {
       if (!$ignored_rule{$t}) {
-        # warn "ignoring '$t': is sub-rule\n";  # no need to warn here
+        # warn "$t: ignoring, is sub-rule\n";  # no need to warn here
         $ignored_rule{$t} = 1;
+      }
+      $mutable_tests{$t} = 0;
+      next;
+    }
+    if ($t =~ /^T_/) {
+      if (!$ignored_rule{$t}) {
+        # warn "$t: ignoring, is T_ test rule\n";  # no need to warn here
+        $ignored_rule{$t} = 1;
+	$range_lo{$t} = 0.01;    # clamp to insignificant range
+	$range_hi{$t} = 0.01;
       }
       $mutable_tests{$t} = 0;
       next;
@@ -410,12 +456,10 @@ sub read_ranges {
     }
     unless ($mutable_tests{$t} || $scores{$t}) {
       if (!$ignored_rule{$t}) {
-        warn "ignoring '$t': immutable and score == 0\n";
+        warn "$t: ignoring, immutable and score == 0 in this scoreset\n";
         $ignored_rule{$t} = 1;
       }
     }
-    $index_to_rule[$count] = $t;
-    $count++;
   }
   foreach my $t (keys %range_lo) {
     next if ($ignored_rule{$t});
@@ -453,39 +497,6 @@ sub read_ranges {
   }
 }
 
-sub evaluate {
-   printf ("\n# SUMMARY for threshold %3.1f:\n", $threshold);
-   printf "# Correctly non-spam: %6d  %4.2f%%\n",
-       $ga_nn, ($ga_nn /  $num_ham) * 100.0;
-   printf "# Correctly spam:     %6d  %4.2f%%\n",
-       $ga_yy, ($ga_yy /  $num_spam) * 100.0;
-   printf "# False positives:    %6d  %4.2f%%\n",
-       $ga_ny, ($ga_ny /  $num_ham) * 100.0;
-   printf "# False negatives:    %6d  %4.2f%%\n",
-       $ga_yn, ($ga_yn /  $num_spam) * 100.0;
-
-  # convert to the TCR metrics used in the published lit
-  my $nspamspam = $ga_yy;
-  my $nspamlegit = $ga_yn;
-  my $nlegitspam = $ga_ny;
-  my $nlegitlegit = $ga_yn;
-  my $nlegit = $num_ham;
-  my $nspam = $num_spam;
-
-  my $werr = ($lambda * $nlegitspam + $nspamlegit)
-                  / ($lambda * $nlegit + $nspam);
-
-  my $werr_base = $nspam
-                  / ($lambda * $nlegit + $nspam);
-
-  $werr ||= 0.000001;     # avoid / by 0
-  my $tcr = $werr_base / $werr;
-
-  my $sr = ($nspamspam / $nspam) * 100.0;
-  my $sp = ($nspamspam / ($nspamspam + $nlegitspam)) * 100.0;
-  printf "# TCR(l=%s): %3.6f  SpamRecall: %3.3f%%  SpamPrec: %3.3f%%\n",
-    $lambda, $tcr, $sr, $sp;
-}
 
 __DATA__
 

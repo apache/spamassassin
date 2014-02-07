@@ -1,9 +1,10 @@
 # <@LICENSE>
-# Copyright 2004 Apache Software Foundation
-# 
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to you under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at:
 # 
 #     http://www.apache.org/licenses/LICENSE-2.0
 # 
@@ -17,8 +18,11 @@
 package Mail::SpamAssassin::Locker;
 
 use strict;
+use warnings;
 use bytes;
+use re 'taint';
 use Fcntl;
+use Time::HiRes ();
 
 use Mail::SpamAssassin;
 
@@ -41,30 +45,32 @@ sub new {
 ###########################################################################
 
 sub safe_lock {
-  my ($self, $path, $max_retries) = @_;
+  my ($self, $path, $max_retries, $mode) = @_;
   # max_retries is optional, should default to about 30
-  die "safe_lock not implemented by Locker subclass";
+  # mode is UNIX-style and optional, should default to 0700,
+  # callers must specify --x bits
+  die "locker: safe_lock not implemented by Locker subclass";
 }
 
 ###########################################################################
 
 sub safe_unlock {
   my ($self, $path) = @_;
-  die "safe_unlock not implemented by Locker subclass";
+  die "locker: safe_unlock not implemented by Locker subclass";
 }
 
 ###########################################################################
 
 sub refresh_lock {
   my ($self, $path) = @_;
-  die "refresh_lock not implemented by Locker subclass";
+  die "locker: refresh_lock not implemented by Locker subclass";
 }
 
 ###########################################################################
 
 sub jittery_one_second_sleep {
   my ($self) = @_;
-  select(undef, undef, undef, (rand(1.0) + 0.5));
+  Time::HiRes::sleep(rand(1.0) + 0.5);
 }
 
 ###########################################################################

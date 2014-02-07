@@ -1,0 +1,59 @@
+#!/bin/sh
+
+# Cron script for "release".  See "backend/nitemc/crontab.txt"
+
+RSYNC_DIR=/home/corpus-rsync/tagged_builds
+REPO_URL=http://svn.apache.org/repos/asf/spamassassin/trunk
+PERL=/local/perl586/bin/perl
+SVN=/opt/subversion-current/bin/svn
+
+type="$1"
+versfile="$2"
+
+if [ -z "$type" ]; then
+  echo "Type not specified" >&2
+  exit 1
+fi
+
+if [ ! -f $versfile ]; then
+  echo "Version file not specified" >&2
+  exit 1
+fi
+
+subdir=${type}_mass_check
+set -ex
+
+echo "Type: $type"
+echo "Version File: $versfile"
+echo "Subdir: $subdir"
+
+REV=`tail -1 $versfile | awk '{print $2}'`
+
+echo "Revision: $REV"
+
+for retry in 1 2 3 4 5 6 7 8 9 10 ; do
+
+    # export the main repo:
+    rm -rf $RSYNC_DIR/$subdir
+    echo Command: $SVN export --non-interactive \
+            -r $REV $REPO_URL $RSYNC_DIR/$subdir
+    $SVN export --non-interactive -r $REV $REPO_URL $RSYNC_DIR/$subdir \
+            || continue
+
+    cd $RSYNC_DIR/$subdir
+    $PERL build/mkrules --out rules > /dev/null || continue
+
+    # create "svn info" file for mass-check
+    # we assume that the current directory was updated via cron to the correct
+    # revision, so just info it. (can't do remote info with the svn version
+    # installed on the zones machine, nor will it accept "--non-interactive")
+    $SVN info $HOME/versions/trunk \
+            > $RSYNC_DIR/$subdir/masses/svninfo.tmp \
+            < /dev/null || continue
+
+    exit               # assume success at this point
+done
+
+echo "FAILED to extract to rsync dir" 1>&2
+exit 2
+

@@ -38,8 +38,8 @@ Examples:
 
 If the user_scores_dsn option does not exist, SpamAssassin will not attempt
 to use an LDAP server for retrieving users' preferences. Note that this will
-NOT look for test rules, only local scores, whitelist_from(s), required_score,
-and auto_report_threshold.
+NOT look for test rules, only local scores, whitelist_from(s), and
+required_score.
 
 Requirements
 ------------
@@ -111,6 +111,6 @@ operation of LDAP support may change at any time with future releases of SA.
 ******
 
 Please send any comments to <kris at koehntopp.de> and file bugs via
-<http://bugzilla.spamassassin.org/>.
+<http://issues.apache.org/SpamAssassin/>.
 
 Kristian Köhntopp

@@ -1,0 +1,56 @@
+#!/bin/sh
+
+# to create a new slave:
+#
+# PASSWORD=[whatever]
+# buildbot slave /export/home/buildbot/slaves/slave-name buildbot.spamassassin.org:9989 slave-name $PASSWORD
+
+. /etc/profile
+
+HOME=/home/bbmass
+PATH=/local/bbmass-buildbot-live/bin:$PATH
+PYTHONPATH=/local/bbmass-buildbot-live/lib/python
+export PATH PYTHONPATH HOME
+
+prog=bbmass
+runall () {
+    su buildbot -c "buildbot $1 /export/home/buildbot/bots/bbmass"
+    ## nice su bbmass -c "buildbot $1 /export/home/bbmass/slaves/mc-fast"
+    ## nice su bbmass -c "buildbot $1 /export/home/bbmass/slaves/mc-slow"
+    ## nice su bbmass -c "buildbot $1 /export/home/bbmass/slaves/mc-slower"
+}
+
+start() {
+    echo "Starting $prog: " 
+    runall start
+    RETVAL=$?
+    echo
+    return $RETVAL
+}
+
+stop() {
+    runall stop
+    RETVAL=$?
+    return $RETVAL
+}
+
+case "$1" in
+	start)
+	    start
+	    ;;
+	
+	stop)
+	    stop
+	    ;;
+	
+	restart)
+	    stop; sleep 2; start
+	    ;;
+	
+	*)
+	    echo $"Usage: $0 {start|stop|restart|condrestart}"
+	    exit 1
+
+esac
+
+exit 0

@@ -1,13 +1,14 @@
 #!/usr/bin/perl
 # <@LICENSE>
-# Copyright 2004 Apache Software Foundation
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to you under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at:
+# 
 #     http://www.apache.org/licenses/LICENSE-2.0
-#
+# 
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -50,9 +51,6 @@
 use strict;
 use warnings;
 
-use Config;
-use File::Spec;
-
 my %modules = ();
 my %defines = ();
 
@@ -86,6 +84,7 @@ foreach (@ARGV) {
 $mode = undef unless $mode;
 
 if (defined ($indir) && defined ($outdir) && scalar @infiles > 0) {
+  require File::Spec;
   my $fname;
   while ($fname = shift @infiles) {
     my $in = File::Spec->catfile ($indir, $fname);
@@ -106,7 +105,7 @@ else {
 
 sub read_defs {
   my ($in) = @_;
-  open (DEFS, "<$in") or die "Connot open $in: $!";
+  open (DEFS, "<$in") or die "Cannot open $in: $!";
   foreach (<DEFS>) {
     $_ =~ s/^\s+|\s+$//g;
     next if /^#/;
@@ -148,12 +147,16 @@ sub do_stdin {
 
 sub do_it {
   # The perlpath can be overwritten via -DPERL_BIN=<perlpath>
-  my $perl   = $Config{'perlpath'};
+  my $perl;
   if($defines{'PERL_BIN'} && ($defines{PERL_BIN} ne 'this')) {
     $perl = $defines{'PERL_BIN'};
     unless(-x $perl) {
       warn("No such PERL_BIN: $perl");
     }
+  }
+  else {
+    # use eval so the module is not loaded unless needed; it's slow
+    eval 'use Config; $perl = $Config{"perlpath"};';
   }
 
   # Warnings are enabled per default
@@ -170,14 +173,27 @@ sub do_it {
     $perl_taint = '';
   }
 
-  # Save the Perl Version
-  my $perl_version = $];
-  if ($defines{PERL_VERSION} && ($defines{PERL_VERSION} ne 'this')) {
-    my @v = split(/[^\d]+/, $defines{PERL_VERSION});
-    $perl_version = sprintf("%i.%03i%03i", $v[0] || 0, $v[1] || 0, $v[2] || 0);
-  }
+  $defines{PERL_MAJOR_VER} = sub {
+    $] =~ /^(\d\.\d\d\d)/ or die "bad perl ver $]";
+    return $1;
+  };
 
-  my $l = 1;
+  $defines{PLUGIN_POD} = sub {
+
+    # Grab active plugin list
+    my @plugin_pod = ();
+    foreach my $pre (<rules/*.pre>) {
+      if (open(INIT, $pre)) {
+        while (<INIT>) {
+          if (/^loadplugin\s+(.*?)\s*$/) { push(@plugin_pod, "    $1\n"); }
+        }
+        close(INIT);
+      }
+    }
+    return join('', sort @plugin_pod);
+  };
+
+  my $towrite = '';
   while (<FOOIN>) {
     $_ = pack("C0A*", $_);	# turn off UTF8-ness
 
@@ -189,22 +205,24 @@ sub do_it {
       }
     }
 
-    # Variable replacement
-    if ($modules{'vars'}) {
-      # Replace all @@VARS@@
-      while (/\@\@([A-Z][A-Z0-9_]*)\@\@/) {
-        my $d = $defines{$1} || '';
-        s/\@\@$1\@\@/$d/g;
-      }
-    }
-
-    # Sharpbang (#!) replacement (see also ExtUtils::MY->fixin)
-    if ($modules{'sharpbang'} && ($l == 1)) {
-      s/^#!.*perl.*$/#!${perl}${perl_taint}${perl_warn}/;
-    }
-
-    print FOOOUT $_;
-    $l++;
+    $towrite .= $_;
   }
-}
 
+  # Sharpbang (#!) replacement (see also ExtUtils::MY->fixin)
+  if ($modules{'sharpbang'}) {
+    $towrite =~ s/^#![^\n]*perl[^\n]*\n/#!${perl}${perl_taint}${perl_warn}\n/;
+  }
+
+  # Variable replacement (do in one invocation)
+  if ($modules{'vars'}) {
+    # Replace all @@VARS@@
+    while ($towrite =~ /\@\@([A-Z][A-Z0-9_]*)\@\@/) {
+      my $what = $1;
+      my $d = $defines{$what} || '';
+      if (ref($d) =~ /^CODE/) { $d = $d->(); }
+      $towrite =~ s/\@\@${what}\@\@/$d/g;
+    }
+  }
+
+  print FOOOUT $towrite;
+}

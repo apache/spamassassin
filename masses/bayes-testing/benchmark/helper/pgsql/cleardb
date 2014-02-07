@@ -1,0 +1,6 @@
+#!/bin/bash
+
+DIRNAME=`dirname $0`
+
+echo "[Removing bayes database]"
+psql -U sapostgres -f $DIRNAME/delete.sql spamassassin

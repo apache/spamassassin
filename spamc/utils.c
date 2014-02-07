@@ -1,9 +1,10 @@
 /* <@LICENSE>
- * Copyright 2004 Apache Software Foundation
- * 
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to you under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at:
  * 
  *     http://www.apache.org/licenses/LICENSE-2.0
  * 
@@ -27,8 +28,9 @@
  4115 named type definition in parentheses
  4127 conditional expression is constant
  4514 unreferenced inline function removed
+ 4996 deprecated "unsafe" functions
  */
-#pragma warning( disable : 4115 4127 4514 )
+#pragma warning( disable : 4115 4127 4514 4996 )
 #endif
 
 #include <io.h>
@@ -66,6 +68,33 @@ static void catch_alrm(int x)
     UNUSED_VARIABLE(x);
 }
 #endif
+
+int timeout_connect (int sockfd, const struct sockaddr *serv_addr, size_t addrlen)
+{
+    int ret;
+
+#ifndef _WIN32
+    sigfunc* sig;
+
+    sig = sig_catch(SIGALRM, catch_alrm);
+    if (libspamc_connect_timeout > 0) {
+      alarm(libspamc_connect_timeout);
+    }
+#endif
+
+    ret = connect(sockfd, serv_addr, addrlen);
+
+#ifndef _WIN32
+    if (libspamc_connect_timeout > 0) {
+      alarm(0);
+    }
+  
+    /* restore old signal handler */
+    sig_catch(SIGALRM, sig);
+#endif
+  
+    return ret;
+}
 
 int fd_timeout_read(int fd, char fdflag, void *buf, size_t nbytes)
 {

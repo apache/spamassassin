@@ -1,0 +1,1270 @@
+#!/usr/bin/perl -w
+# 
+# build/mkrules -- compile the SpamAssassin rules into installable form
+#
+# <@LICENSE>
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to you under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at:
+# 
+#     http://www.apache.org/licenses/LICENSE-2.0
+# 
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# </@LICENSE>
+
+# This is an implementation of
+# http://wiki.apache.org/spamassassin/RulesProjPromotion 
+
+sub usage {
+  die "build/mkrules [--src srcdir] [--exit_on_no_src] [--out outputdir]\n";
+}
+
+my $RULE_DEFINE_KEYWORDS_RE = qr{
+        header|rawbody|body|full|uri
+        |meta|mimeheader|urirhssub|uridnsbl
+    }x;
+
+my $RULE_KEYWORDS_RE = qr{
+        ${RULE_DEFINE_KEYWORDS_RE}|
+        describe|tflags|reuse|score
+    }x;
+
+use strict;
+use File::Find;
+use File::Copy;
+use File::Basename;
+use Getopt::Long;
+
+# use SpamAssassin classes directly, so we can lint rules
+# as we go
+use lib 'lib';
+use Mail::SpamAssassin;
+
+use vars qw(
+    @opt_srcs $opt_out $opt_sandboxout $opt_manifest
+    $opt_manifestskip $opt_listpromotable $opt_active
+    $opt_activeout $default_file_header
+    $opt_rulemetadata $opt_exit_on_no_src
+);
+GetOptions("src=s" => \@opt_srcs,
+    "out=s",
+    "sandboxout=s",
+    "activeout=s",
+    "active=s",
+    "manifest=s",
+    "manifestskip=s",
+    "rulemetadata=s",
+    "exit_on_no_src",
+  );
+
+if (!@opt_srcs) {
+  foreach ( 'rulescode', 'rulesrc' ) {
+    if (-d $_) {
+      # print "using default src $_\n";
+      push(@opt_srcs, $_);
+    }
+  }
+}
+
+if (!$opt_manifest && -f "MANIFEST") {
+  $opt_manifest = "MANIFEST";
+}
+
+if (!$opt_manifestskip && -f "MANIFEST.SKIP") {
+  $opt_manifestskip = "MANIFEST.SKIP";
+}
+
+if (!$opt_active && -f "rules/active.list") {
+  $opt_active = "rules/active.list";
+}
+
+if ($opt_exit_on_no_src) {
+  my $foundone = 0;
+  foreach my $src (@opt_srcs) {
+    if (-d $src) { $foundone++; last; }
+  }
+
+  if (!$foundone) {
+    print "no source directory found: exiting\n";
+    exit 0;
+  }
+}
+# else
+die "no src" unless (@opt_srcs >= 1);
+
+my $promolist;
+
+  die "no out" unless ($opt_out);
+  die "unreadable out" unless (-d $opt_out);
+  die "unreadable active" unless (-f $opt_active);
+
+$opt_sandboxout  ||= "70_sandbox.cf";
+$opt_activeout   ||= "72_active.cf";
+
+# source files that need compilation, and their targets
+my $needs_compile = { };
+my $found_output = { };
+my $current_src;
+my $newest_src_mtime = 0;
+my $newest_out_mtime = 0;
+
+my $default_file_header = join('', <DATA>);
+compile_utf8ify_function();
+
+foreach my $src (@opt_srcs) {
+  if (!-d $src) {
+    warn "WARNING: unreadable src '$src'\n";
+    next;
+  }
+  $current_src = $src;
+  File::Find::find ({
+          wanted => \&src_wanted,
+          no_chdir => 1
+        }, $src);
+}
+
+# get mtimes of output files; we can be sure that all
+# output is under the "opt_out" dir, so recurse there
+File::Find::find ({
+        wanted => \&out_wanted,
+        no_chdir => 1
+      }, $opt_out);
+
+# we must rebuild if a compiled .pm is missing, too
+my $found_all_pm_files = 1;
+foreach my $f (keys %{$needs_compile}) {
+  next unless ($f =~ /\.pm$/i);
+  if (!exists $found_output->{basename $f}) {
+    $found_all_pm_files = 0;
+  }
+}
+
+# check mtime on the active.list file, too
+{
+  my @st = stat $opt_active;
+  if ($st[9] && $st[9] > $newest_src_mtime) {
+    $newest_src_mtime = $st[9];
+  }
+}
+
+# check mtimes, and also require that the two required output files
+# really do exist
+if ($newest_src_mtime && $newest_out_mtime
+    && $newest_src_mtime < $newest_out_mtime
+    && -f $opt_out.'/'.$opt_sandboxout
+    && -f $opt_out.'/'.$opt_activeout
+    && $found_all_pm_files)
+{
+  print "mkrules: no rules updated\n";
+  exit 0;
+}
+
+my $rules = { };
+
+my $file_manifest = { };
+my $file_manifest_skip = [ ];
+if ($opt_manifest) {
+  read_manifest($opt_manifest);
+}
+if ($opt_manifestskip) {
+  read_manifest_skip($opt_manifestskip);
+}
+
+my $active_rules = { };
+read_active($opt_active);
+
+# context for the rules compiler
+my $seen_rules = { };
+my $renamed_rules = { };
+my $output_files = { };
+my $output_file_text = { };
+my $files_to_lint = { };
+my $entries_for_rule_name = { };
+
+# $COMMENTS is a "catch-all" "name", for lines that appear after the last line
+# that refers to a rule by name.  Those lines are not published by themselves;
+# they'll be published to all pubfiles found in the file.
+#
+# It's assumed they are comments, because they generally are, but could be all
+# sorts of unparseable lines.
+my $COMMENTS = '!comments!';
+
+# another "fake name" for lines that should always be published.  They'll
+# be published to the non-sandbox file.
+my $ALWAYS_PUBLISH = '!always_publish!';
+
+read_all_rules($needs_compile);
+read_rules_from_output_dir();
+compile_output_files();
+lint_output_files();
+write_output_files();
+
+exit;
+
+# ---------------------------------------------------------------------------
+
+sub lint_output_files {
+  foreach my $file (keys %{$files_to_lint}) {
+    my $text = join("\n", "file start $file", $output_file_text->{$file}, "file end $file");
+    if (lint_rule_text($text) != 0) {
+      warn "\nERROR: LINT FAILED, suppressing output: $file\n\n";
+
+      # don't suppress entirely, otherwise 'make distcheck'/'disttest'
+      # will fail since the MANIFEST-listed output files will be 
+      # empty.
+
+      # delete $output_file_text->{$file};
+      $output_file_text->{$file} = '';
+    }
+  }
+}
+
+sub lint_rule_text {
+  my ($text) = @_;
+
+  # ensure we turn off slow/optional stuff for linting, but keep the essentials
+  my $pretext = q{
+    loadplugin Mail::SpamAssassin::Plugin::Check
+    loadplugin Mail::SpamAssassin::Plugin::URIDNSBL
+    use_bayes 0
+  };
+
+  my $mailsa = Mail::SpamAssassin->new({
+      rules_filename => "./rules",
+      # debug => 1,
+      local_tests_only => 1,
+      dont_copy_prefs => 1,
+      config_text => $pretext.$text
+  });
+
+  my $errors = 0;
+  $mailsa->{lint_callback} = sub {
+    my %opts = @_;
+
+    return if ($opts{msg} =~ /
+          (?:score\sset\sfor\snon-existent|description\sexists)
+      /x);
+
+    warn "lint: $opts{msg}";
+    if ($opts{iserror}) {
+      $errors++;
+    }
+  };
+
+  $mailsa->lint_rules();
+  $mailsa->finish();
+  return $errors;       # 0 means good
+}
+
+sub src_wanted {
+  my $path = $File::Find::name;
+
+  # record stat times of directories, too, to catch file additions/removals
+  # in the source tree
+  my @st = stat $path;
+  if ($st[9] && $st[9] > $newest_src_mtime) {
+    $newest_src_mtime = $st[9];
+  }
+
+  # only files from now on, though
+  return if (!-f $path);
+  
+  # limit what will be copied from sandboxes
+  return if ($path =~ /\bsandbox\b/ && !/(?:\d.*\.cf|\.pm)$/i);
+
+  # don't use generated scores; they can be out of sync with what is currently
+  # in the sandboxes or the most current active.list file at any given time
+  return if ($path =~ /\bscores\b/);
+
+  # a bit of sanity please - no svn metadata ;)
+  return if ($path =~ /\.svn/);
+
+  my $dir = $path;
+  $dir =~ s/^${current_src}[\/\\\:]//s;
+  $dir =~ s/([^\/\\\:]+)$//;
+  my $filename = $1;
+
+
+  my $f = "$current_src/$dir$filename";
+  my $t;
+  $t = "$opt_out/$filename";
+
+  $needs_compile->{$f} = {
+          f => $f,
+          t => $t,
+          dir => $dir,
+          filename => $filename
+        };
+}
+
+sub out_wanted {
+  my $path = $File::Find::name;
+  return unless (-f $path);
+  return if ($path =~ /\.svn/);
+  return unless ($path =~ /\.(?:cf|pm)$/i);
+
+  my @st = stat $path;
+  if ($st[9] && $st[9] > $newest_out_mtime) {
+    $newest_out_mtime = $st[9];
+  }
+
+  my $dir = $path;
+  $dir =~ s/^${current_src}[\/\\\:]//s;
+  $dir =~ s/([^\/\\\:]+)$//;
+  my $filename = $1;
+
+  if ($path =~ /\.pm$/i) {
+    $found_output->{$filename} = 1;
+  }
+}
+
+# compile all the source files found by the src_wanted() sub, in sorted
+# order so that the order of precedence makes sense.
+sub read_all_rules {
+  my ($sources) = @_;
+
+  # deal with the perl modules first, so that later linting w/ loadplugin will
+  # work appropriately.
+  foreach my $f (sort {
+                  my ($ae) = $a =~ /\.(cf|pm)$/;
+                  my ($be) = $b =~ /\.(cf|pm)$/;
+                  return $be cmp $ae || $a cmp $b;
+                } keys %$sources)
+  {
+    my $entry = $needs_compile->{$f};
+    my $t = $entry->{t};
+
+    # TODO: dependency checking optimization?
+    ## my $needs_rebuild = 0;
+    ## if (!-f $t || -M $t > -M $f) {
+    ## # the source file is newer, or dest is not there
+    ## $needs_rebuild = 1;     
+    ## }
+
+    my $needs_rebuild = 1;
+
+    if ($entry->{filename} =~ /\.pm$/) {
+      plugin_file_compile($entry);
+    }
+    elsif ($entry->{dir} =~ /sandbox/) {
+      rule_file_compile($f, $t, $entry->{filename},
+                { issandbox => 1 });
+    }
+    elsif ($entry->{dir} =~ /scores/) {
+      rule_file_compile($f, $t, $entry->{filename},
+                { issandbox => 1, isscores => 1 });
+    }
+    elsif ($entry->{dir} =~ /extra/) {
+      # 'extra' rulesets; not built by default (TODO)
+      next;
+    }
+    else {
+      # rules in "core" and "lang" are always copied
+      if ($needs_rebuild) {
+        rule_file_compile($f, $t, $entry->{filename}, { });
+      }
+    }
+  }
+}
+
+###########################################################################
+
+# Rules are compiled from source dir to output dir.
+# 
+# Rules in "rules/active.list" are promoted to "72_active.cf"; rules not
+# listed there are relegated to "70_sandbox.cf".  There is code to allow
+# other filenames to be selected from the rulesrc .cf file, but I'm not
+# sure if it works anymore ;)
+# 
+# Rules will be autorenamed, if there's a collision between a new rule name and
+# one that's already been output by the compiler in another source file. The
+# autorenaming is very simple -- portions of the current source path are
+# appended to the rule name, sanitised.
+
+sub rule_file_compile {
+  my ($f, $t, $filename, $flags) = @_;
+  my $issandbox = $flags->{issandbox};
+  my $isscores = $flags->{isscores};
+
+  open (IN, "<$f") or die "cannot read $f";
+
+  # a fast parser for the config file format; don't need the
+  # full deal here, and it must be fast, since it's run on every
+  # "make" invocation
+
+  my $rule_order = [ ];
+
+  my $lastrule = $COMMENTS;
+
+  if (!defined $rules->{$ALWAYS_PUBLISH}) {
+    $rules->{$ALWAYS_PUBLISH} = rule_entry_create();
+  }
+
+  # zero or more "ifplugin" or "if" scopes
+  my @current_conditionals = ();
+  my $current_comments = '';
+
+  while (<IN>) {
+    my $orig = $_;
+
+    s/#.*$//g; s/^\s+//; s/\s+$//;
+
+    # drop comments/blank lines from output
+    next if (/^$/);
+
+    # save "lang" declarations
+    my $lang = '';
+    if (s/^lang\s+(\S+)\s+//) {
+      $lang = $1;
+    }
+
+    if (/^(${RULE_KEYWORDS_RE})\s+(\S+)\s+(.*)$/)
+    {
+      # rule definitions
+      my $type = $1;
+      my $name = $2;
+      my $val = $3;
+
+      my $origname = $name;
+      if ($issandbox) {
+        $name = sandbox_rule_name_avoid_collisions($name, $f);
+      }
+      my $origname_w_T_prefix = $name;
+      # non-sandbox rules always use the same name
+
+      if (scalar @current_conditionals) {
+        # ensure the current conditionals are used in the block name;
+        # this ensures that we scope alternative (#ifdef-style) dupe
+        # rule definitions in their own ifplugin scopes
+        $name .= " ".join("", @current_conditionals);
+        $name =~ s/\s+/ /gs; $name =~ s/ $//;
+      }
+
+      # track this as a rule-entry block for that rule name
+      # (and it's T_ prefixed variant, if relevant)
+      push @{$entries_for_rule_name->{$origname}}, $name;
+      push @{$entries_for_rule_name->{$origname_w_T_prefix}}, $name;
+
+      # comment "score" lines for sandbox rules (bug 5558)
+      # use generated scores, though, if the rule is active
+      if ($type eq 'score' && $issandbox &&
+        !($isscores && $active_rules->{$name}))
+      {
+        $orig =~ s/^/#/g;
+      }
+
+      if (!$rules->{$name}) { $rules->{$name} = rule_entry_create(); }
+
+      $rules->{$name}->{issandbox} = $issandbox;
+      $rules->{$name}->{isscores} = $isscores;
+      $rules->{$name}->{origname} = $origname;
+      $rules->{$name}->{origname_w_T_prefix} = $origname_w_T_prefix;
+      $rules->{$name}->{cond} = [@current_conditionals];
+      $rules->{$name}->{text} .= $current_comments . $orig;
+      $rules->{$name}->{plugin_dependencies} = {};
+
+      # note if the conditional is a plugin reference, as we need to
+      # ensure that "loadplugin" lines stay in the same place
+      foreach my $c (@current_conditionals) {
+        if ($c =~ /^ifplugin\s+(\S+)/) {
+          $rules->{$name}->{plugin_dependencies}->{$1} = 1;
+        } elsif ($c =~ /^if.*plugin/) {
+          while ($c =~ /plugin\s*\(\s*(\S+)\s*\)/g) {
+            $rules->{$name}->{plugin_dependencies}->{$1} = 1;
+          }
+        }
+      }
+
+      # note if we found the rule defn or not.  if we did not,
+      # that means the rule was a code-tied rule, which should always
+      # have its descriptions/scores/etc. published in "active".
+      if ($type =~ /^${RULE_DEFINE_KEYWORDS_RE}$/x) {
+        $rules->{$name}->{found_definition} = 1;
+        $rules->{$name}->{srcfile} = $f;
+        $rules->{$name}->{code} = $orig;
+      }
+      elsif ($type eq 'tflags') {
+        # userconf rules are always published in "active"
+        if ($val =~ /\buserconf\b/) {
+          $rules->{$name}->{forceactive} = 1;
+        }
+
+        # record for rulemetadata code
+        $val =~ s/\s+/ /gs;
+        if ($rules->{$name}->{tflags}) {
+          $rules->{$name}->{tflags} .= ' '.$val;
+        } else {
+          $rules->{$name}->{tflags} = $val;
+        }
+      }
+
+      $current_comments = '';
+
+      $lastrule = $name;
+      push (@$rule_order, $name);
+    }
+    elsif (/^
+        (pubfile|publish)
+        \s+(\S+)\s*(.*?)$
+      /x)
+    {
+      # preprocessor directives
+      my $command = $1;
+      my $name = $2;
+      my $val = $3;
+
+      my $origname = $name;
+
+      # note: if we call sandbox_rule_name_avoid_collisions(), it'll
+      # rename to 'T_RULENAME' -- which is exactly what we're trying
+      # to avoid in 'publish RULENAME' lines!  so don't call it here.
+      # if ($issandbox) {
+      # $name = sandbox_rule_name_avoid_collisions($name, $f);
+      # }
+
+      if (!$rules->{$name}) { $rules->{$name} = rule_entry_create(); }
+      $rules->{$name}->{origname} = $origname;
+      $rules->{$name}->{origname_w_T_prefix} = $origname;
+
+      if ($command eq 'publish') {
+        # the 'publish' command defaults to "1", unless it explicitly
+        # is set to "0".  iow: publish RULE_NAME [(0 | 1)]  [default: 1]
+        if (!defined $val || $val eq '') { $val = '1'; }
+      }
+      elsif ($command eq 'pubfile') {
+        if (!filename_in_manifest($opt_out.'/'.$val)) {
+          warn "$val: WARNING: not listed in manifest file, using default\n";
+          next;     # don't set 'pubfile' below
+        }
+      }
+
+      $rules->{$name}->{$command} = $val;
+
+      # if we see "publish NAMEOFRULE", that means the rule is
+      # considered active
+      if ($rules->{$name}->{publish}) {
+        $rules->{$name}->{forceactive} = 1;
+      }
+    }
+    elsif (/^
+        (if|ifplugin)
+        \s+(.*?)$
+      /x)
+    {
+      push @current_conditionals, $orig;
+    }
+    elsif (/^else\b/x)
+    {
+      if (!scalar @current_conditionals) {
+        warn "WARNING: 'else' without 'if'/'ifplugin' conditional\n";
+      } else {
+        my $cond = invert_conditional(pop @current_conditionals);
+        push @current_conditionals, $cond;
+      }
+    }
+    elsif (/^endif\b/x)
+    {
+      if (!scalar @current_conditionals) {
+        warn "WARNING: 'endif' without 'if'/'ifplugin' conditional\n";
+      } else {
+        pop @current_conditionals;
+      }
+    }
+    elsif (/^require_version\s*(\S+)\b/) {
+      # silently ignored.  TODO?  (meh)
+    }
+    elsif (/^loadplugin\s*(\S+)\b/) {
+      my $name = 'loadplugin_'.$1;
+
+      unless ($rules->{$name}) {
+        $rules->{$name} = rule_entry_create();
+        $rules->{$name}->{origname} = $name;
+        $rules->{$name}->{origname_w_T_prefix} = $name;
+        $rules->{$name}->{issandbox} = $issandbox;
+        $rules->{$name}->{iscommand} = 1;
+      }
+
+      if (/^loadplugin\s*\S+\s+(\S+)/) {
+        my $fname = $1;
+        my $fpath = dirname($f)."/".$fname;
+
+        if (!-f $fpath) {
+          warn "$f: WARNING: plugin code file '$fpath' not found, line ignored: $orig";
+          next;
+        }
+
+        if ($fpath =~ /sandbox/i) {
+          # Since this is a sandbox plugin, force its output to the sandbox area.
+          $rules->{$name}->{sandbox_plugin} = 1;
+        }
+
+        # If a 'loadplugin' line is found, and the plugin .pm is not listed in
+        # the MANIFEST file, this will mean that the .pm will not be copied
+        # during "make dist".  This causes failures during "make disttest",
+        # since the file does not exist.
+        #
+        # However, we do want to preserve these lines in the 'rules' dir, for
+        # use during development -- without requiring that the .pm's be put
+        # into MANIFEST -- ie. before the plugin is considered release-ready,
+        # ie. sandbox plugins.
+        #
+        # fix: make it a "tryplugin" line instead; these are ignored if the
+        # target file is nonexistent.
+
+        if (!filename_in_manifest($opt_out.'/'.$fname)) {
+          warn "$f: WARNING: '$opt_out/$fname' not listed in manifest file, making 'tryplugin': $orig";
+          $orig =~ s/^\s*loadplugin\b/tryplugin/;
+        }
+      }
+
+      $rules->{$name}->{text} .= $orig;
+      unshift (@$rule_order, $name);
+    }
+    else {
+      # an unhandled configuration line; "redirector_pattern",
+      # "report", something like that.  This should be sent to
+      # the active.cf output (or sandbox if it appeared in a sandbox
+      # input file).
+
+      # use the line itself as a key
+      my $name = $_;
+      /^\s*(\S+)/ and $name = $1;
+      $name =~ s/\s+/ /gs;
+
+      my $forceactive = 1;
+      
+      # always send 'test' lines to the sandbox files
+      if (/^test\s*/) {
+        $forceactive = 0;
+
+        $name = $_;   # ensure we don't drag rules with us though!
+        $name =~ s/\s+/ /gs;
+      }
+
+      if (scalar @current_conditionals) {
+        $name = join("", @current_conditionals);
+        $name =~ s/\s+/ /gs; $name =~ s/ $//;
+      }
+
+      if ($issandbox) {
+        $name .= "_sandbox";
+      }
+
+      unless ($rules->{$name}) {
+        $rules->{$name} = rule_entry_create();
+        $rules->{$name}->{origname} = $name;
+        $rules->{$name}->{origname_w_T_prefix} = $name;
+      }
+      $rules->{$name}->{cond} = [@current_conditionals];
+      $rules->{$name}->{issandbox} = $issandbox;
+      $rules->{$name}->{forceactive} = $forceactive;
+      # $rules->{$name}->{forceactive} = 1;
+      $rules->{$name}->{iscommand} = 1;
+
+      # TODO: bug 6241: 'replace_rules' should be handled ok, but isn't
+
+      # warn "unknown line in rules file '$f', saving to default: $orig";
+
+      $rules->{$name}->{text} .= $orig;
+      unshift (@$rule_order, $name);
+    }
+  }
+  close IN;
+
+  if ($current_comments) {
+    $rules->{$COMMENTS}->{text} .= $current_comments;
+  }
+
+  # now append all the found text to the output file buffers
+  copy_to_output_buffers($rule_order, $issandbox, $f, $filename);
+
+  # ok; file complete.  now mark all those rules as "seen"; future
+  # refs to those rule names will trigger an autorename.
+  foreach my $name (@$rule_order) {
+    $seen_rules->{$name} = 1;
+  }
+}
+
+# this is only run if we're generating rulemetadata!
+sub read_rules_from_output_dir {
+  return unless ($opt_rulemetadata);
+
+  foreach my $file (<$opt_out/*.cf>) {
+    next unless ($file =~ /\d\d_\S+\.cf$/);
+    next if (pubfile_is_activeout($file));
+    next if (pubfile_is_sandboxout($file));
+    read_output_file($file);
+  }
+}
+
+sub read_output_file {
+  my ($file) = @_;
+  open (IN, "<$file") or warn "cannot read $file";
+  while (<IN>) {
+    my $orig = $_;
+
+    s/#.*$//g; s/^\s+//; s/\s+$//;
+
+    # drop comments/blank lines from output
+    next if (/^$/);
+
+    # save "lang" declarations
+    my $lang = '';
+    if (s/^lang\s+(\S+)\s+//) {
+      $lang = $1;
+    }
+
+    if (/^(${RULE_KEYWORDS_RE})\s+(\S+)\s+(.*)$/) {
+      # rule definitions
+      my $type = $1;
+      my $name = $2;
+      my $val = $3;
+
+      # note: we only want to do this if --rulemetadata is in use!
+      if (!$rules->{$name}) { $rules->{$name} = rule_entry_create(); }
+
+      if ($type eq 'tflags') {
+        $val =~ s/\s+/ /gs;
+        if ($rules->{$name}->{tflags}) {
+          $rules->{$name}->{tflags} .= ' '.$val;
+        } else {
+          $rules->{$name}->{tflags} = $val;
+        }
+      }
+
+      if ($type =~ /^${RULE_DEFINE_KEYWORDS_RE}$/x) {
+        $rules->{$name}->{srcfile} = $file;
+        $rules->{$name}->{code} = $orig;
+      }
+    }
+  }
+  close IN;
+}
+
+sub copy_to_output_buffers {
+  my ($rule_order, $issandbox, $f, $filename) = @_;
+
+  # always output these two files, even if they're empty!
+  foreach my $pubfile ($opt_out.'/'.$opt_sandboxout,
+                $opt_out.'/'.$opt_activeout)
+  {
+    $output_files->{$pubfile} = {
+      header => $default_file_header
+    };
+  }
+
+  my %already_done = ();
+  my $copied_active = 0;
+  my $copied_other = 0;
+  foreach my $name (@$rule_order)
+  {
+    # only do each rule once, please ;)
+    next if exists $already_done{$name};
+    $already_done{$name} = undef;
+
+    my $text = $rules->{$name}->{text};
+    if (!$text) {
+      next;     # nothing to write!
+    }
+
+    my $srcfile = $rules->{$name}->{srcfile};
+    my $pubfile = pubfile_for_rule($rules, $rules->{$name}->{origname_w_T_prefix});
+    my $is_active = 0;
+    if (pubfile_is_activeout($pubfile)) {
+      $is_active++;
+    }
+
+    my $cond = $rules->{$name}->{cond};
+    if ($cond) {
+      foreach my $pluginclass (keys %{$rules->{$name}->{plugin_dependencies}}) {
+        my $ifplugin_text_name = "loadplugin_".($pluginclass || "");
+
+        if ($rules->{$ifplugin_text_name}) {
+          # if the plugin is a sandbox plugin, ensure it's not
+          # sent to the active file
+          if ($rules->{$ifplugin_text_name}->{sandbox_plugin}) {
+            $pubfile = $opt_out.'/'.$opt_sandboxout;
+            $is_active = 0;
+          }
+
+          # either way, ensure the "loadplugin" line, if there is one,
+          # goes to the same file
+          $rules->{$ifplugin_text_name}->{output_file} = $pubfile;
+        }
+      }
+
+      # ensure we produce enough "endif"s to match however many
+      # nested conditions there are
+      my $endifs = "endif\n" x (scalar @{$cond});
+
+      $rules->{$name}->{output_text} = "\n"
+                .join("", @{$cond})
+                .$text
+                .$endifs;
+
+    } else {
+      $rules->{$name}->{output_text} = $text;
+    }
+
+    # note the target file
+    $rules->{$name}->{output_file} = $pubfile;
+
+    $output_files->{$pubfile} = {
+      header => $default_file_header
+    };
+
+    if ($is_active) {
+      $copied_active++;
+    } else {
+      $copied_other++;
+    }
+  }
+
+  print "$f: $copied_active active rules, ".
+            "$copied_other other\n";
+}
+
+sub pubfile_for_rule {
+  my ($rules, $name) = @_;
+
+  my $pubfile;
+  if ($rules->{$name}->{publish}) {
+    # "publish NAMEOFRULE" => send it to active
+    $pubfile = $opt_out.'/'.$opt_activeout;
+  }
+
+  # default: "70_sandbox.cf" or "72_active.cf"
+  if (!$pubfile) {
+    if ($active_rules->{$name}      # is active
+        || $rules->{$name}->{forceactive}   # or is forced to be
+        || (!$rules->{$name}->{found_definition} && !$rules->{$name}->{iscommand}
+            && !$rules->{$name}->{isscores}))
+                # or is a rule-related setting in reference to an unknown rule
+                # but isn't a generated score
+    {
+      $pubfile = $opt_out.'/'.$opt_activeout;
+    }
+    elsif ($rules->{$name}->{issandbox}) {
+      $pubfile = $opt_out.'/'.$opt_sandboxout;
+    }
+    else {
+      warn "oops? inactive rule, non-sandbox, shouldn't be possible anymore";
+      $pubfile = $opt_out.'/'.$opt_sandboxout;
+    }
+  }
+  return $pubfile;
+}
+
+sub plugin_file_compile {
+  my ($entry) = @_;
+
+  return if $opt_listpromotable;
+  # just copy the raw perl module over to the new area
+  # we can't really rename to avoid conflicts since the loadplugin lines
+  # are going to be all screwed up in that case.
+  # jm: we always want to update the output file in case the input
+  # has been changed!
+  if (0 && -e $entry->{t}) {
+    warn "The perl module ".$entry->{t}." already exists, can't copy from ".$entry->{f}."\n";
+  }
+  else {
+    copy($entry->{f}, $entry->{t}) || warn "Couldn't copy ".$entry->{f}.": $!";
+  }
+}
+
+###########################################################################
+
+sub compile_output_files {
+  my $always = $rules->{$ALWAYS_PUBLISH}->{output_text};
+
+  # create all known output files
+  foreach my $file (keys %$output_files) {
+    $output_file_text->{$file} = $output_files->{$file}->{header};
+
+    if ($always && pubfile_is_activeout($file)) {
+      $output_file_text->{$file} .= $always;
+    }
+  }
+
+  # this is a horrible kluge.
+  # at this point in the game, we've lost the ordered list of rules, so the
+  # loadplugin lines have no guarantee that they'll be loaded before the rules
+  # that require them.  so we kluge the sort to always have loadplugin lines
+  # appear at the very top of the array so we know they'll be listed before
+  # anything else.
+  my @rulenames = sort {
+    if ($a =~ /^loadplugin_/) {
+      return -1;
+    }
+    elsif ($b =~ /^loadplugin_/) {
+      return 1;
+    }
+    return $a cmp $b;
+  } keys %$rules;
+  my %seen = ();
+
+  # go through the rules looking for meta subrules we
+  # may have forgotten; this happens if a non-subrule is
+  # listed in active.list, the subrules will not be!  fix them
+  # to appear in the same output file as the master rule.
+  foreach my $rule (@rulenames) {
+    fix_up_rule_dependencies($rule);
+  }
+
+  # now repeat, just for rules in the active set; their dependencies should
+  # always be likewise promoted into the active set, overriding the prev step.
+  foreach my $rule (@rulenames) {
+    my $pubfile = $rules->{$rule}->{output_file};
+    next unless ($pubfile && pubfile_is_activeout($pubfile));
+    fix_up_rule_dependencies($rule);
+  }
+
+  my $rulemd = '';
+
+  # output the known rules that are not meta subrules.
+  foreach my $rule (@rulenames) {
+    $rulemd .= get_rulemetadata_string($rule);      # all metadata strings
+
+    next if ($rule =~ /^__/);
+    my $pubfile = $rules->{$rule}->{output_file};
+    my $text    = $rules->{$rule}->{output_text};
+    next unless defined ($text);
+
+# DOS - bug 6297 - HACK HACK HACK HACK
+# this will probably screw up meta rules that do something like '&& !$rule'
+
+    # avoid publishing 'tflags nopublish' rules
+    if (pubfile_is_activeout($pubfile) && exists $rules->{$rule}->{tflags} &&
+        $rules->{$rule}->{tflags} =~ /\bnopublish\b/)
+    {
+      print "omitting rule $rule due to tflags nopublish (tflags $rules->{$rule}->{tflags})\n";
+      next;
+    }
+
+# DOS - END HACK
+
+    $output_file_text->{$pubfile} .= "##{ $rule\n".
+                            $text.
+                            "##} ".$rule."\n\n";
+  }
+
+  # now output all subrules (in a slightly more compact form)
+  foreach my $rule (@rulenames) {
+    next unless ($rule =~ /^__/);
+    my $pubfile = $rules->{$rule}->{output_file};
+    my $text    = $rules->{$rule}->{output_text};
+    next unless defined ($text);
+
+# DOS - bug 6297 - HACK HACK HACK HACK
+# this will probably screw up meta rules that do something like '&& !$rule'
+
+    # avoid publishing 'tflags nopublish' rules
+    if (pubfile_is_activeout($pubfile) && exists $rules->{$rule}->{tflags} &&
+        $rules->{$rule}->{tflags} =~ /\bnopublish\b/)
+    {
+      print "omitting rule $rule due to tflags nopublish (tflags $rules->{$rule}->{tflags})\n";
+      next;
+    }
+
+# DOS - END HACK
+
+    $output_file_text->{$pubfile} .= $text;
+  }
+
+  # finally, finish off all output files
+  foreach my $file (keys %$output_files) {
+    # and get them lint-checked!
+    $files_to_lint->{$file} = 1;
+  }
+
+  if ($opt_rulemetadata) {
+    open (RULEMD, ">".$opt_rulemetadata)
+            or die "cannot write rulemd to $opt_rulemetadata";
+    print RULEMD "<?xml version='1.0' encoding='UTF-8'?>\n",
+                    "<rulemds>", $rulemd, "</rulemds>\n";
+    close RULEMD or die "cannot close rulemd to $opt_rulemetadata";
+  }
+}
+
+# conditionally build a method to UTF-8-encode a string.  this is only required
+# for the rulemetadata XML output, so don't make it mandatory!
+sub compile_utf8ify_function {
+  if (!eval '
+      sub utf8ify { use Encode; return Encode::encode("UTF-8", $_[0]); } 1;
+    ')
+  {
+    eval '
+      sub utf8ify { die "unimplemented -- Encode module required!" } 1;
+    '
+  }
+}
+
+sub get_rulemetadata_string {
+  my ($rule) = @_;
+
+  return '' unless ($opt_rulemetadata);
+
+  my $mod = 0;
+  my $srcfile = '';
+  my $code = '';
+  my $name = $rule;
+
+  # if we found a rule definition with a T_ prefix, use that data
+  if (!$rules->{$name}->{srcfile} && $rules->{"T_".$name}->{srcfile}) {
+    $name = "T_".$name;
+  }
+
+  if ($rules->{$name}->{srcfile}) {
+    $srcfile = $rules->{$name}->{srcfile};
+    if ($srcfile) {
+      my @s = stat $srcfile;
+      if (@s) { $mod = $s[9]; }
+    }
+  }
+
+  if ($rules->{$name}->{code}) {
+    $code = $rules->{$name}->{code};
+    $code =~ s/\]\]>/\](defanged by mkrules)\]>/gs;     # ensure it's CDATA-safe
+    $code = utf8ify($code);
+  }
+
+  my $tf = $rules->{$name}->{tflags} || '';
+
+  return "<rulemetadata>".
+            "<name>$rule</name>".
+            "<src>$srcfile</src>".
+            "<srcmtime>$mod</srcmtime>".
+            # don't include <code> blocks; they bloat up the XML badly (to 800KB)
+            # and make it very slow to parse later
+            # "<code><![CDATA[$code]]></code>".
+            "<tf>$tf</tf>".
+          "</rulemetadata>\n";
+}
+
+sub fix_up_rule_dependencies {
+  my $rule = shift;
+
+  my $pubfile = $rules->{$rule}->{output_file};
+  my $text    = $rules->{$rule}->{output_text};
+  return unless $text;
+  
+  while ($text =~ /^\s*meta\s+(.*)$/mg) {
+    my $line = $1;
+    while ($line =~ /\b([_A-Za-z0-9]+)\b/g) {
+      # force that subrule (if it exists) to output in the
+      # same pubfile
+      my $rule2 = $1;
+
+      # deal with rules that changed name from "FOO" to "T_FOO"
+      sed_renamed_rule_names(\$rule2);
+
+      if (!$entries_for_rule_name->{$rule2}) {
+        # we may not always have a rule entry, if the rule was from a non-sandbox
+        # source
+        # warn "cannot find entries_for_rule_name '$rule2'";
+      }
+
+      foreach my $entryname2 (@{$entries_for_rule_name->{$rule2}}) {
+        next unless ($rules->{$entryname2} && $rules->{$entryname2}->{output_file});
+
+        # don't do this if the subrule would be moved *out* of the
+        # active file!
+        my $pubfile2 = $rules->{$entryname2}->{output_file};
+        next if (pubfile_is_activeout($pubfile2));
+
+        $rules->{$entryname2}->{output_file} = $pubfile;
+      }
+    }
+  }
+}
+
+sub pubfile_is_activeout {
+  return 1 if ($_[0] && $_[0] =~ /\b\Q$opt_activeout\E$/);
+  return 0;
+}
+
+sub pubfile_is_sandboxout {
+  return 1 if ($_[0] && $_[0] =~ /\b\Q$opt_sandboxout\E$/);
+  return 0;
+}
+
+sub write_output_files {
+  foreach my $pubfile (sort keys %$output_files) {
+    if (-f $pubfile) {
+      unlink $pubfile or die "cannot remove output file '$pubfile'";
+    }
+
+    if (!filename_in_manifest($pubfile)) {
+      warn "$pubfile: WARNING: not listed in manifest file\n";
+    }
+
+    my $text = $output_file_text->{$pubfile};
+    if ($text) {
+      open (OUT, ">".$pubfile) or die "cannot write to output file '$pubfile'";
+      sed_renamed_rule_names(\$text);
+      print OUT $text;
+      close OUT or die "cannot close output file '$pubfile'";
+      # print "$pubfile: written\n";        # too noisy
+    }
+    else {
+      print "$pubfile: no rules promoted\n";
+
+      # create an empty file anyway to satisfy MANIFEST
+      open (OUT, ">".$pubfile) or die "cannot write to output file '$pubfile'";
+      close OUT or die "cannot close output file '$pubfile'";
+    }
+  }
+}
+
+###########################################################################
+
+sub rule_entry_create {
+  return {
+    text => '',
+    publish => 0
+  };
+}
+
+###########################################################################
+
+sub sandbox_rule_name_avoid_collisions {
+  my ($rule, $path) = @_;
+  my $new;
+  my $newreason;
+  my $dowarn = 0;
+
+  return $rule if $opt_listpromotable;
+  return $rule if $active_rules->{$rule};
+  return $rule if $rules->{$rule}->{forceactive};
+
+  if ($rule !~ /^(?:T_|__)/) {
+    $new = "T_".$rule;
+    $newreason = "missing T_ prefix";
+  }
+  elsif (!exists $seen_rules->{$rule}) {
+    return $rule;
+  }
+  else {
+    $new = $path;
+    $new =~ s/[^A-Za-z0-9]+/_/gs;
+    $new =~ s/_+/_/gs;
+    $new =~ s/^_//;
+    $new =~ s/_$//;
+    $new = $rule.'_'.$new;
+    $newreason = "collision with existing rule";
+    $dowarn = 1;
+  }
+
+  if (!$renamed_rules->{$new}) {
+    $renamed_rules->{$new} = $rule;
+    if ($dowarn) {
+      warn "WARNING: $rule: renamed as $new due to $newreason\n";
+    }
+  }
+
+  return $new;
+}
+
+sub sed_renamed_rule_names {
+  my ($textref) = @_;
+  foreach my $new (keys %{$renamed_rules}) {
+    my $rule = $renamed_rules->{$new};
+    $$textref =~ s/\b${rule}\b/${new}/gs;
+  }
+}
+
+###########################################################################
+
+sub invert_conditional {
+  my $cond = shift;
+  if ($cond =~ /^ \s* ifplugin \s+(.*?)$ /x) {
+    return "if !plugin($1)\n";
+  } elsif ($cond =~ /^ \s* if \s+(.*?)$ /x) {
+    return "if !($1)\n";
+  } else {
+    warn "WARNING: cannot parse '$cond' for 'else'\n";
+    return 'if 0';
+  }
+}
+
+###########################################################################
+
+sub read_manifest {
+  my ($fname) = @_;
+  parse_line_delimited_config_file($fname, sub {
+      /^\s*(.*?)\s*$/ and $file_manifest->{$1} = 1;
+    });
+}
+
+sub read_manifest_skip {
+  my ($fname) = @_;
+  parse_line_delimited_config_file($fname, sub {
+      /^\s*(.*?)\s*$/ and push (@{$file_manifest_skip}, qr/$1/);
+    });
+}
+
+sub read_active {
+  my ($fname) = @_;
+  parse_line_delimited_config_file($fname, sub {
+      /^(\S+)/ and $active_rules->{$1} = 1;
+    });
+}
+
+sub filename_in_manifest {
+  my ($fname) = @_;
+  return 1 if ($file_manifest->{$fname});
+  foreach my $skipre (@{$file_manifest_skip}) {
+    return 1 if ($fname =~ $skipre);
+  }
+  return 0;
+}
+
+sub parse_line_delimited_config_file {
+  my ($fname, $callback) = @_;
+  if (!open (IN, "<$fname")) {
+    warn "cannot read $fname\n";
+  } else {
+    while (<IN>) {
+      next if /^#/;
+      $callback->();
+    }
+    close IN;
+  }
+}
+
+
+__DATA__
+# SpamAssassin rules file
+#
+# Please don't modify this file as your changes will be overwritten with
+# the next update. Use @@LOCAL_RULES_DIR@@/local.cf instead.
+# See 'perldoc Mail::SpamAssassin::Conf' for details.
+#
+# <@LICENSE>
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to you under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at:
+# 
+#     http://www.apache.org/licenses/LICENSE-2.0
+# 
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# </@LICENSE>
+#
+###########################################################################
+
+require_version @@VERSION@@
+

@@ -1,58 +1,133 @@
 #!/bin/sh
 
-#
+# <@LICENSE>
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to you under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at:
+# 
+#     http://www.apache.org/licenses/LICENSE-2.0
+# 
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# </@LICENSE>
+
+# Written by Theo Van Dinter <felicity@apache.org>
+# Please feel free to mail with any questions. :)
+
 # This is a small script used to interact with run-masses to do a full
 # corpus mass-check run, including the rsync to the SA server.
-# Change the appropriate variables below.
 #
-# By default, it'll do a set0 run, but you can change that by adding
-# --net or --bayes to the commandline.
+# NOTE: you MUST set RSYNC_USER and RSYNC_PASSWORD outside of this script so
+# that your results can be sent up for review.
 #
-# --net by itself will automatically try running 4 mass-checks in parallel
+# By default, it'll do a nightly (set0) run.  If you want to do a weekly
+# (set1) run, add "--net" to the commandline.
 #
+# Defaults for mass-check parameters:
+#       no commandline parameters
+#		use DEF_AFTER for --after option
+#		adds "-n"
+#		use nightly-versions.txt for updates
+#	--net
+#		switches to NET_AFTER for --after option
+#		adds "-j 4", "--net", "--reuse"
+#		use weekly-versions.txt for updates
+#
+# ie: "run-corpora" equates to:		"mass-check -n"
+#     "run-corpora --net" equates to:	"mass-check -n -j 4 --net --reuse"
 
-CORPUS=/home/felicity/SA/corpus
-SA_VER=/home/felicity/SA/spamassassin-corpora
-SVN=/usr/local/bin/svn
-SVNVERS=/usr/local/bin/svnversion
+# Set the path appropriately
+PATH=/bin:/usr/bin:/usr/local/bin
+if [ -d /sw/bin ]; then
+  PATH=${PATH}:/sw/bin
+fi
+export PATH
+
+# Where do things live?
+
+# CORPUS is the directory that houses your mail corpus and these scripts.
+CORPUS=$HOME/SA/corpus
+
+# SA_VER is the directory that you want updated and will use for the
+# nightly/weekly run
+SA_VER=$HOME/SA/spamassassin-corpora
+
+# OUTDIR is the directory which will be used for the temporary log files
+# during the run, etc.  If you don't know, leave it blank and it'll use
+# "SA_VER/masses"
+OUTDIR=
+
+# FINALDIR, if set, is where you want the files moved to after processing is
+# completed.
+FINALDIR=
+
+# These are paths to various programs.  If PATH is set appropriately, you can
+# just let the shell find them.
+SVN=svn
+SVNVERS=svnversion
+WGET=wget
+RSYNC=rsync
+
+# DEF_AFTER is used for the set0 run --after parameter
+# NET_AFTER is used for the set1 run --after parameter
+# this needs to be specially handled since there are problems with shell
+# parameter parsing that make these not work without it.
+#
+DEF_AFTER="-120 days"
+NET_AFTER="-60 days"
+
+
+
+if [ -z "$RSYNC_USER" -o -z "$RSYNC_PASSWORD" ]; then
+  echo "You need to specify RSYNC_USER and RSYNC_PASSWORD via the environment!" >&2
+  exit 2
+fi
+
+if [ -z "$OUTDIR" ]; then
+  OUTDIR="$SA_VER/masses"
+fi
+
+cd $OUTDIR
+if [ -f ham.log -o -f spam.log ]; then
+  echo "A previous run still has log files, exiting." >&2
+  exit 2
+fi
 
 NET=0
-BAYES=0
-OPTS="--progress --after=-2592000"
-RSYNC_USER=your_rsync_username
-RSYNC_PASSWORD="your_rsync_password"; export RSYNC_PASSWORD
+OPTS="-n"
 VERS=nightly
 FILENAME=$RSYNC_USER
+umask 002
 
 while [ ! -z "$1" ]; do
   if [ "$1" = "--net" ]; then
     NET=1
-  elif [ "$1" = "--bayes" ]; then
-    BAYES=1
   fi
   shift
 done
 
 if [ $NET -eq 1 ]; then
   FILENAME="net-$FILENAME"
-  OPTS="$OPTS --net"
+  OPTS="$OPTS --net --reuse"
+  AFTER="$NET_AFTER"
   VERS=weekly
 
-  # We want to do this with more parallelization, but not if Bayes is also running ...
-  if [ $BAYES -eq 0 ]; then
-    OPTS="$OPTS -j 4 --restart 1000"
-  fi
-fi
-if [ $BAYES -eq 1 ]; then
-  FILENAME="bayes-$FILENAME"
-  OPTS="$OPTS --bayes"
+  # We want to do this with more parallelization...
+  OPTS="$OPTS -j 4"
+else
+  AFTER="$DEF_AFTER"
 fi
 
-# Update SA version before our run
+# Verify appropriate version to run with
 echo "[Updating $SA_VER]"
-cd $SA_VER
 COUNT=0
-while ! wget -q -nd -m http://rsync.spamassassin.org/$VERS-versions.txt ; do
+while ! $WGET -q -nd -m http://rsync.spamassassin.org/$VERS-versions.txt ; do
   sleep 60
   COUNT=`expr $COUNT + 1`
   if [ $COUNT -gt 5 ]; then
@@ -61,50 +136,65 @@ while ! wget -q -nd -m http://rsync.spamassassin.org/$VERS-versions.txt ; do
   fi
 done
 
-CREV=`$SVNVERS .`
 NREV=`tail -1 $VERS-versions.txt | awk '{print $2}'`
-
-if [ $CREV -ge $NREV ]; then
-  echo "Current rev ($CREV) newer or equal to nightly rev ($NREV)"
-  exit 0
-fi
-
-COUNT=0
-while ! $SVN update -r $NREV; do
-  sleep 60
-  COUNT=`expr $COUNT + 1`
-  if [ $COUNT -gt 5 ]; then
-    echo "Couldn't do a SVN update, aborting!" >&2
+if [ -f "$SA_VER/masses/svninfo.tmp" ]; then
+  CREV=`grep ^Revision: $SA_VER/masses/svninfo.tmp | awk '{print $2}'`
+  if [ $CREV -eq $NREV ]; then
+    echo "Looks like a problem with the $VERS-versions.txt update, same rev ($CREV)" >&2
     exit 2
   fi
-done
-
-# update the corpus with the latest/greatest mail files
-echo "[Updating Corpus]"
-cd $CORPUS
-$CORPUS/update -q
-
-# remove current bayes db set
-echo "[Removing old Bayes DB]"
-rm -f $SA_VER/masses/spamassassin/bayes*
-
-# do the run
-echo "[Running mass-check '$OPTS' in $CORPUS]"
-$CORPUS/run-masses $SA_VER $OPTS > /dev/null
-
-if [ ! -s ham.log -o ! -s spam.log ]; then
-	echo "There seems to be a problem with either ham.log or spam.log, aborting!" >&2
-	exit 1
 fi
 
-mv -f ham.log results/ham-$FILENAME.log
-mv -f spam.log results/spam-$FILENAME.log
-mv -f results.log results/hf/results-$FILENAME.log
+if ! $RSYNC -uaqrC --exclude masses/spamassassin/ --delete rsync.spamassassin.org::tagged_builds/${VERS}_mass_check/ $SA_VER; then
+  echo "Couldn't rsync update the $VERS spamassassin corpora code" >&2
+  exit 2
+fi
 
-cd results
+CREV=`grep ^Revision: $SA_VER/masses/svninfo.tmp | awk '{print $2}'`
+if [ $CREV -ne $NREV ]; then
+  echo "Looks like a problem with the rsync area, found rev $CREV but expected rev $NREV" >&2
+  exit 2
+fi
+
+# do the run, treat $AFTER differently due to commandline parsing and "-"
+echo "[Running mass-check '$OPTS' in $CORPUS]"
+if [ -z "$AFTER" ]; then
+  $CORPUS/run-masses $SA_VER $OPTS > /dev/null
+else
+  echo "[Using '$AFTER' for --after setting]"
+  $CORPUS/run-masses $SA_VER $OPTS --after "$AFTER" > /dev/null
+fi
+
+if [ ! -s ham.log -o ! -s spam.log ]; then
+  echo "There seems to be a problem with either ham.log or spam.log, aborting!" >&2
+  exit 1
+fi
+
 # now we have our ham.log and spam.log files...
 echo "[Uploading daily corpus logs]"
-rsync -qCPcvuzb *-$FILENAME.log $RSYNC_USER@rsync.spamassassin.org::corpus/
+mv ham.log ham-$FILENAME.log
+mv spam.log spam-$FILENAME.log
+mv results.log results-$FILENAME.log
+
+if ! $RSYNC -qPcvzb ham-$FILENAME.log spam-$FILENAME.log $RSYNC_USER@rsync.spamassassin.org::corpus/; then
+  echo "There was an error during rsync!" >&2
+fi
+
+RESULTDIR=.
+if [ "$FINALDIR" ]; then
+  mv -f ham-$FILENAME.log spam-$FILENAME.log $FINALDIR
+
+  if [ -f "ham-$FILENAME.log" -o -f "spam-$FILENAME.log" ]; then
+    echo "There was an error moving files around, aborting!" >&2
+    exit 1
+  fi
+
+  RESULTDIR=$FINALDIR
+  if [ -d "$FINALDIR/hf" ]; then
+    RESULTDIR="$FINALDIR/hf"
+  fi
+  mv -f results-$FILENAME.log $RESULTDIR
+fi
 
 echo "[Our results]"
-cat hf/results-$FILENAME.log
+cat $RESULTDIR/results-$FILENAME.log

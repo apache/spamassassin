@@ -1,0 +1,10 @@
+#header T_BUG6353_1 From:addr !~ /\@.+\.[a-z]+$/i [if-unset: foo@bar.com]
+#header T_BUG6353_2 From:addr !~ /\.[a-z]+$/i [if-unset: foo@bar.com]
+#header T_BUG6353_3 From:addr !~ /\@.+?\.[a-z]/i [if-unset: foo@bar.com]
+#header T_BUG6353_4 From:addr !~ /\@[^@]+\.(?:[a-z]{2,}|xn--[a-z0-9]+(?:-[a-z0-9]*)?)$/i
+#header T_BUG6353_5 From:addr !~ /\@[^@]+\.(?:[a-z]{2,}|xn--[a-z0-9]+(?:-[a-z0-9]*)?)$/i [if-unset: foo@bar.com]
+#header T_BUG6353_6 From:addr !~ /\@[^@]+\.(?:[a-z0-9-]+)$/i
+#header T_BUG6353_7 From:addr !~ /\@[^@]+\.(?:[a-z0-9-]+)$/i [if-unset: foo@bar.com]
+#header T_MISSING_FROM From =~ /^UNSET$/ [if-unset: UNSET]
+#header __HAS_FROM exists:From
+#meta T_MISSING_FROM2 !__HAS_FROM

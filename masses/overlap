@@ -1,13 +1,12 @@
 #!/usr/bin/perl -w
 
-# overlap - print overlap between test pairs
-#
 # <@LICENSE>
-# Copyright 2004 Apache Software Foundation
-# 
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to you under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at:
 # 
 #     http://www.apache.org/licenses/LICENSE-2.0
 # 
@@ -18,23 +17,41 @@
 # limitations under the License.
 # </@LICENSE>
 
-use vars qw($opt_a $opt_h $opt_t);
-use Getopt::Std;
-getopts("aht");
+use strict;
+use warnings;
 
-my $prog = $0;
-$prog =~ s@.*/@@;
+use vars qw($opt_a $opt_t);
+use Getopt::Long qw(:config auto_help bundling);
 
-sub usage {
-    my $status = shift;
+GetOptions("a|all" => \$opt_a,
+	   "t|ignore" => \$opt_t);
 
-    my $out = $status ? STDERR : STDOUT;
-    print $out <<EOF;
-usage: $prog [options] [mass-check results files]
+=head1 NAME
 
- -a    show all entries (normally, reverses of pairs are not shown)
- -h    print this help
- -t    ignore T_ tests
+overlap - Tool to help determine which tests overlap significantly
+
+=head1 SYNOPSIS
+
+overlap [options] <log file>
+
+ Options:
+   -a,--all          Show all entries (including reverses of pairs)
+   -t,--ignore       Ignore T_ tests (rules under testing)
+
+=head1 DESCRIPTION
+
+B<overlap> will read the mass-check results log specified and output
+pairs of tests and how frequently they occur together in absolute
+terms, and relative to their individual hit rates.
+
+The output is of the form:
+
+ COUNT   PAIR/A  PAIR/B  A,B
+
+where C<COUNT> is the number of times the tests hit on the same
+message, C<PAIR/A> is the ratio of times that both test hit to the
+number of times test A hits, C<PAIR/B> is the ratio of pair hits to B
+hits, and the C<A,B> column shows the names of the two tests.
 
 Do not abuse this tool.  Just because a test highly correlates with
 another test does not mean you can simply remove one or merge them
@@ -43,11 +60,11 @@ false positives, false negatives, and actually compare the tests.
 Some overlap is often good, especially if the tests have different
 characteristics.
 
-EOF
-    exit($status);
-}
+=cut
 
-usage(0) if $opt_h;
+
+my $prog = $0;
+$prog =~ s@.*/@@;
 
 if ($#ARGV < 0) {
     push(@ARGV, "-");
@@ -56,13 +73,13 @@ if ($#ARGV < 0) {
 my %solo;
 my %pair;
 
-foreach $file (@ARGV) {
+foreach my $file (@ARGV) {
     read_file($file);
 }
 
 print "COUNT\tPAIR/A\tPAIR/B\tA,B\n";
 
-foreach $k (sort { $pair{$b} <=> $pair{$a} } keys %pair) {
+foreach my $k (sort { $pair{$b} <=> $pair{$a} } keys %pair) {
     my ($a, $b) = split(/ /, $k);
     my $a_pct = $pair{$k} / $solo{$a};
     my $b_pct = $pair{$k} / $solo{$b};

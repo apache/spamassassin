@@ -1,23 +1,64 @@
 #!/bin/sh
 
+# TODO: add FPRATE instead of HAM_PREFERENCE
 # set SCORESET
-. config
+
+# must use a / in the arg to a 'source' command to avoid searching the PATH
+. ./config
+
+LEARN_RATE="${LEARN_RATE:-2.0}"
 
 NAME="set$SCORESET"
-LOGDIR="gen-$NAME-$HAM_PREFERENCE-$THRESHOLD-$EPOCHS"
+# TODO: add $FPRATE instead of HAM_PREFERENCE
+LOGDIR="gen-$NAME-$HAM_PREFERENCE-$THRESHOLD-$EPOCHS-ga"
+
+# ensure sandbox T_ rules aren't used in the GA and don't appear in output
+KILL_SANDBOX_RULES=y
+
+###########################################################################
+
+[ -d gen-cache ] || mkdir gen-cache     # a cache, woo
 
 if [ "$NOTE" != "" ]; then
 	LOGDIR="$LOGDIR-$NOTE"
 fi
+
+if [ "x$1" = "x" ]; then
+
+# -------------------------------------------------------------------------
+# Initial rescoring
 
 if [ ! -f "ORIG/ham-$NAME.log" -o ! -f "ORIG/spam-$NAME.log" ]; then
 	echo "Couldn't find logs for $NAME" >&2
 	exit 1
 fi
 
-if [ "x$1" = "x" ]; then
+(	# log this
+
+set -x	# trace commands to the log
+
+# Create a directory to organize the logs with this group of settings
+mkdir -p $LOGDIR $LOGDIR/NSBASE $LOGDIR/SPBASE
+
+if ! [ -d $LOGDIR ] ; then
+  echo "Failed to mkdir $LOGDIR, dying" 1>&2
+  exit 1
+fi
+
 # This should be in here instead.  Prevents testing.
-svn revert ../rules/50_scores.cf
+# svn revert ../rules/50_scores.cf
+
+rm -rf tmprules
+cp -r ../rules tmprules
+
+cp tmprules/50_scores.cf orig_scores.cf
+
+# fix all scores to non-zero (avoid a possible bug, not quite sure)
+./enable-all-evolved-rules < tmprules/50_scores.cf \
+	> tmprules/50_scores.cf.new || exit 1
+mv tmprules/50_scores.cf.new tmprules/50_scores.cf
+
+[ $KILL_SANDBOX_RULES = y ] && rm tmprules/70_sandbox.cf
 
 echo "[Doing a scoreset $SCORESET score-generation run]"
 
@@ -25,28 +66,22 @@ echo "[Doing a scoreset $SCORESET score-generation run]"
 echo "[Cleaning up]"
 rm -rf spam-test.log ham-test.log spam.log ham.log \
 	NSBASE SPBASE tmp make.output freqs perceptron.scores \
-	$LOGDIR
-make clean >/dev/null
-
-# Create a directory to organize the logs with this group of settings
-mkdir $LOGDIR
+	garescorer.scores
+make clean
 
 # Generate 90/10 split logs
+# keep the *-split*.logs in cwd so it's cacheable
 echo "[Generating 90/10 split ham]"
-mkdir $LOGDIR/NSBASE $LOGDIR/SPBASE
-cd $LOGDIR/NSBASE
-../../tenpass/split-log-into-buckets-random 10 < ../../ORIG/ham-$NAME.log > /dev/null
-cat split-[1-9].log > ham.log
-rm -f split-[1-9].log
-mv split-10.log ham-test.log
+perl tenpass/split-log-into-buckets-cached \
+    9:gen-cache/ham-split9.log 1:gen-cache/ham-split1.log ORIG/ham-$NAME.log
+ln gen-cache/ham-split9.log $LOGDIR/NSBASE/ham.log
+ln gen-cache/ham-split1.log $LOGDIR/NSBASE/ham-test.log
 
 echo "[Generating 90/10 split spam]"
-cd ../SPBASE
-../../tenpass/split-log-into-buckets-random 10 < ../../ORIG/spam-$NAME.log > /dev/null
-cat split-[1-9].log > spam.log
-rm -f split-[1-9].log
-mv split-10.log spam-test.log
-cd ../..
+perl tenpass/split-log-into-buckets-cached \
+    9:gen-cache/spam-split9.log 1:gen-cache/spam-split1.log ORIG/spam-$NAME.log
+ln gen-cache/spam-split9.log $LOGDIR/SPBASE/spam.log
+ln gen-cache/spam-split1.log $LOGDIR/SPBASE/spam-test.log
 
 echo "[Setting up for gen run]"
 # Ok, setup for a run
@@ -56,37 +91,93 @@ ln -s $LOGDIR/SPBASE/spam-test.log .
 ln -s $LOGDIR/NSBASE/ham-test.log .
 
 # try to find number of processors
-numcpus=`cpucount 2>/dev/null || egrep -c '^processor\b' /proc/cpuinfo 2>/dev/null || echo 1`
+ostype=`uname`
+if [ $ostype = "FreeBSD" ]; then
+  numcpus=`/sbin/sysctl -n kern.smp.cpus`
+elif [ $ostype = "SunOS" ]; then
+  numcpus=`/usr/sbin/psrinfo | wc -l`
+else
+  numcpus=`cpucount 2>/dev/null || egrep -c '^processor\b' /proc/cpuinfo 2>/dev/null || echo 1`
+fi
+if [ ${numcpus:=0} -le 0 ]; then numcpus=1; fi
 
-echo "[Generating perceptron]"
-# Generate perceptron with full logs
-make -j $numcpus SCORESET=$SCORESET > $LOGDIR/make.output 2>&1
+echo "[Generating GA]"
+# Generate GA with full logs
+make -j $numcpus SCORESET=$SCORESET garescorer > $LOGDIR/make.output 2>&1
+cp freqs $LOGDIR/freqs
 
-(
 echo "[config]"
 cat config
 echo "[gen run start]"
 pwd
 date
-./perceptron -p $HAM_PREFERENCE -t $THRESHOLD -e $EPOCHS
-mv perceptron.scores $LOGDIR/scores
+
+# TODO: use -f $FPRATE instead of -b $HAM_PREFERENCE
+time ./garescorer -b $HAM_PREFERENCE -e $EPOCHS -t $THRESHOLD || exit $?
+date
+
+# POST-GA COMMANDS:
+
+mv garescorer.scores $LOGDIR/scores
 echo "[gen run end]"
+
+cp orig_scores.cf tmprules/50_scores.cf
+perl ./rewrite-cf-with-new-scores --scoreset $SCORESET \
+        --old-scores tmprules/50_scores.cf \
+	--new-scores $LOGDIR/scores \
+        --cffile tmprules \
+        > tmprules/50_newscores.cf
+
+mv tmprules/50_newscores.cf tmprules/50_scores.cf
+cp tmprules/50_scores.cf $LOGDIR/50_scores.cf
+
+perl ./fp-fn-statistics --ham ham-test.log --spam spam-test.log \
+    --scoreset $SCORESET --cffile=tmprules \
+    --fnlog $LOGDIR/false_negatives --fplog $LOGDIR/false_positives \
+    > $LOGDIR/test
+
+# END OF POST-GA COMMANDS
+
 ) | tee $LOGDIR/log
-svn revert ../rules/50_scores.cf
-./rewrite-cf-with-new-scores $SCORESET ../rules/50_scores.cf $LOGDIR/scores > /tmp/runGA.$$
-mv /tmp/runGA.$$ ../rules/50_scores.cf
-./fp-fn-statistics --ham ham-test.log --spam spam-test.log --scoreset $SCORESET --fnlog $LOGDIR/false_negatives --fplog $LOGDIR/false_positives > $LOGDIR/test
 
 else
 
-# This needs to have 50_scores.cf in place first ...
-echo "[gen test results]"
-./logs-to-c --spam=spam-test.log \
-	--ham=ham-test.log \
-	--count --cffile=../rules --scoreset=$SCORESET | tee $LOGDIR/test
+# -------------------------------------------------------------------------
+# Statistics generation, once everyone likes the scores
 
-echo "[STATISTICS file generation]"
-./mk-baseline-results $SCORESET | tee $LOGDIR/statistics
+
+  # use the logs we saved
+  fulllogh=$LOGDIR/NSBASE/ham.log
+  fulllogs=$LOGDIR/SPBASE/spam.log
+  testlogh=$LOGDIR/NSBASE/ham-test.log
+  testlogs=$LOGDIR/SPBASE/spam-test.log
+
+  if [ ! -f "$testlogh" -o ! -f "$testlogs" ]; then
+    echo "Couldn't find logs for $NAME: $testlogh $testlogs" >&2
+    exit 1
+  fi
+
+  rm -f ham-test.log spam-test.log
+  ln -s $testlogh ham-test.log
+  ln -s $testlogs spam-test.log
+
+  rm -f ham.log spam.log
+  ln -s $fulllogh ham.log
+  ln -s $fulllogs spam.log
+
+  [ $KILL_SANDBOX_RULES = y ] && rm ../rules/70_sandbox.cf
+
+  # This needs to have ../rules/50_scores.cf in place first ...
+  echo "[gen test results for set $SCORESET]"
+  perl ./fp-fn-statistics --ham $testlogh --spam $testlogs \
+      --scoreset $SCORESET --cffile=../rules | tee $LOGDIR/test
+
+  echo "[STATISTICS file generation for set $SCORESET]"
+  bash ./mk-baseline-results $SCORESET | tee $LOGDIR/statistics
+
+  cp $LOGDIR/statistics ../rules/STATISTICS-set${SCORESET}.txt
+  ls -l ../rules/STATISTICS-set${SCORESET}.txt
+
 fi
 
 exit 0

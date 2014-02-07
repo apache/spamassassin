@@ -5,7 +5,8 @@ use lib '.'; use lib 't';
 use SATest; sa_t_init("bayesdbm_flock");
 use Test;
 
-use constant HAS_DB_FILE => eval { require DB_File; };
+use constant TEST_ENABLED => conf_bool('run_long_tests') &&
+                        eval { require DB_File; };
 
 BEGIN { 
   if (-e 't/test_dir') {
@@ -16,10 +17,10 @@ BEGIN {
     unshift(@INC, '../blib/lib');
   }
 
-  plan tests => ((HAS_DB_FILE && !$RUNNING_ON_WINDOWS) ? 44 : 0);
+  plan tests => ((TEST_ENABLED && !$RUNNING_ON_WINDOWS) ? 48 : 0);
 };
 
-exit unless (HAS_DB_FILE && !$RUNNING_ON_WINDOWS);
+exit unless (TEST_ENABLED && !$RUNNING_ON_WINDOWS);
 
 tstlocalrules ("
         bayes_learn_to_journal 0
@@ -34,7 +35,11 @@ $sa->init();
 
 ok($sa);
 
-ok($sa->{bayes_scanner});
+sub getimpl {
+  return $sa->call_plugins("learner_get_implementation");
+}
+
+ok(getimpl && $sa->{bayes_scanner});
 
 ok(!$sa->{bayes_scanner}->is_scan_available());
 
@@ -52,49 +57,51 @@ my $mail = $sa->parse( $raw_message );
 
 ok($mail);
 
-my $body = $sa->{bayes_scanner}->get_body_from_msg($mail);
+my $body = getimpl->get_body_from_msg($mail);
 
 ok($body);
 
-my $toks = $sa->{bayes_scanner}->tokenize($mail, $body);
+my $toks = getimpl->tokenize($mail, $body);
 
 ok(scalar(keys %{$toks}) > 0);
 
-my($msgid,$msgid_hdr) = $sa->{bayes_scanner}->get_msgid($mail);
+my($msgid,$msgid_hdr) = getimpl->get_msgid($mail);
 
 # $msgid is the generated hash messageid
 # $msgid_hdr is the Message-Id header
-ok($msgid eq 'ce33e4a8bc5798c65428d6018380bae346c7c126@sa_generated');
+ok($msgid eq '4cf5cc4d53b22e94d3e55932a606b18641a54041@sa_generated');
 ok($msgid_hdr eq '9PS291LhupY');
 
-ok($sa->{bayes_scanner}->{store}->tie_db_writable());
+ok(getimpl->{store}->tie_db_writable());
 
-ok(!$sa->{bayes_scanner}->{store}->seen_get($msgid));
+ok(!getimpl->{store}->seen_get($msgid));
 
-$sa->{bayes_scanner}->{store}->untie_db();
+getimpl->{store}->untie_db();
+alarm(0);
 
 ok($sa->{bayes_scanner}->learn(1, $mail));
 
 ok(!$sa->{bayes_scanner}->learn(1, $mail));
 
-ok($sa->{bayes_scanner}->{store}->tie_db_writable());
+ok(getimpl->{store}->tie_db_writable());
 
-ok($sa->{bayes_scanner}->{store}->seen_get($msgid) eq 's');
+ok(getimpl->{store}->seen_get($msgid) eq 's');
 
-$sa->{bayes_scanner}->{store}->untie_db();
+getimpl->{store}->untie_db();
+alarm(0);
 
-ok($sa->{bayes_scanner}->{store}->tie_db_writable());
+ok(getimpl->{store}->tie_db_writable());
 
 my $tokerror = 0;
 foreach my $tok (keys %{$toks}) {
-  my ($spam, $ham, $atime) = $sa->{bayes_scanner}->{store}->tok_get($tok);
+  my ($spam, $ham, $atime) = getimpl->{store}->tok_get($tok);
   if ($spam == 0 || $ham > 0) {
     $tokerror = 1;
   }
 }
 ok(!$tokerror);
 
-my $tokens = $sa->{bayes_scanner}->{store}->tok_get_all(keys %{$toks});
+my $tokens = getimpl->{store}->tok_get_all(keys %{$toks});
 
 ok($tokens);
 
@@ -107,36 +114,40 @@ foreach my $tok (@{$tokens}) {
 }
 ok(!$tokerror);
 
-$sa->{bayes_scanner}->{store}->untie_db();
+getimpl->{store}->untie_db();
+alarm(0);
 
 ok($sa->{bayes_scanner}->learn(0, $mail));
 
-ok($sa->{bayes_scanner}->{store}->tie_db_writable());
+ok(getimpl->{store}->tie_db_writable());
 
-ok($sa->{bayes_scanner}->{store}->seen_get($msgid) eq 'h');
+ok(getimpl->{store}->seen_get($msgid) eq 'h');
 
-$sa->{bayes_scanner}->{store}->untie_db();
+getimpl->{store}->untie_db();
+alarm(0);
 
-ok($sa->{bayes_scanner}->{store}->tie_db_writable());
+ok(getimpl->{store}->tie_db_writable());
 
 $tokerror = 0;
 foreach my $tok (keys %{$toks}) {
-  my ($spam, $ham, $atime) = $sa->{bayes_scanner}->{store}->tok_get($tok);
+  my ($spam, $ham, $atime) = getimpl->{store}->tok_get($tok);
   if ($spam  > 0 || $ham == 0) {
     $tokerror = 1;
   }
 }
 ok(!$tokerror);
 
-$sa->{bayes_scanner}->{store}->untie_db();
+getimpl->{store}->untie_db();
+alarm(0);
 
 ok($sa->{bayes_scanner}->forget($mail));
 
-ok($sa->{bayes_scanner}->{store}->tie_db_writable());
+ok(getimpl->{store}->tie_db_writable());
 
-ok(!$sa->{bayes_scanner}->{store}->seen_get($msgid));
+ok(!getimpl->{store}->seen_get($msgid));
 
-$sa->{bayes_scanner}->{store}->untie_db();
+getimpl->{store}->untie_db();
+alarm(0);
 
 undef $sa;
 
@@ -169,6 +180,8 @@ undef $sa;
 
 sa_t_init('bayes'); # this wipes out what is there and begins anew
 
+alarm(0);  # cancel timer - make sure that alarm is off
+
 # make sure we learn to a journal
 tstlocalrules ("
 bayes_learn_to_journal 0
@@ -178,7 +191,7 @@ bayes_min_ham_num 10
 
 # we get to bastardize the existing pattern matching code here.  It lets us provide
 # our own checking callback and keep using the existing ok_all_patterns call
-%patterns = ( 1 => 'Learned from message' );
+%patterns = ( 1 => 'Acted on message' );
 
 ok(salearnrun("--spam data/spam", \&check_examined));
 ok_all_patterns();
@@ -213,19 +226,19 @@ close(MAIL);
 
 $mail = $sa->parse( $raw_message );
 
-$body = $sa->{bayes_scanner}->get_body_from_msg($mail);
+$body = getimpl->get_body_from_msg($mail);
 
 my $msgstatus = Mail::SpamAssassin::PerMsgStatus->new($sa, $mail);
 
 ok($msgstatus);
 
-my $score = $sa->{bayes_scanner}->scan($msgstatus, $mail, $body);
+my $score = getimpl->scan($msgstatus, $mail, $body);
 
 # Pretty much we can't count on the data returned with such little training
 # so just make sure that the score wasn't equal to .5 which is the default
 # return value.
 print "\treturned score: $score\n";
-ok($score != .5);
+ok($score =~ /\d/ && $score <= 1.0 && $score != .5);
 
 open(MAIL,"< ../sample-spam.txt");
 
@@ -238,19 +251,25 @@ close(MAIL);
 
 $mail = $sa->parse( $raw_message );
 
-$body = $sa->{bayes_scanner}->get_body_from_msg($mail);
+$body = getimpl->get_body_from_msg($mail);
 
 $msgstatus = Mail::SpamAssassin::PerMsgStatus->new($sa, $mail);
 
-$score = $sa->{bayes_scanner}->scan($msgstatus, $mail, $body);
+$score = getimpl->scan($msgstatus, $mail, $body);
 
 # Pretty much we can't count on the data returned with such little training
 # so just make sure that the score wasn't equal to .5 which is the default
 # return value.
 print "\treturned score: $score\n";
-ok($score != .5);
+ok($score =~ /\d/ && $score <= 1.0 && $score != .5);
 
 }
+
+ok(getimpl->{store}->clear_database());
+
+ok(!-e 'log/user_state/bayes_journal');
+ok(!-e 'log/user_state/bayes_seen');
+ok(!-e 'log/user_state/bayes_toks');
 
 sub check_examined {
   local ($_);
@@ -262,8 +281,8 @@ sub check_examined {
     $_ = join ('', <IN>);
   }
 
-  if ($_ =~ /Learned from \d+ message\(s\) \(\d+ message\(s\) examined\)/) {
-    $found{'Learned from message'}++;
+  if ($_ =~ /(?:Forgot|Learned) tokens from \d+ message\(s\) \(\d+ message\(s\) examined\)/) {
+    $found{'Acted on message'}++;
   }
 }
 

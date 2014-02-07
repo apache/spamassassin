@@ -22,10 +22,10 @@ Recommended stuff:
    local time, this is US/Pacific, adjust appropriately for your
    timezone)
 
-   The "tagtime" and "corpus-nightly" cron jobs should be run twice a
-   day to handle daylight savings since cron does not.  They exit if
-   it's 0800-0859 or 1000-1059 UTC (which means you can "corpus-nightly"
-   any other time of day if you want).
+   The "tagtime" and "corpus-nightly" cron jobs will automatically handle
+   daylight savings, since cron does not.  They do this by sleeping for 1 hour
+   if they detect that they are run in the 0800-0859 hour. (This means you can
+    "corpus-nightly" any other time of day, if you want).
 
    The "corpus-hourly" script only needs to be run if you are producing
    optional mass-check summary reports.
@@ -34,8 +34,8 @@ Recommended stuff:
 
 ------- start of cut text --------------
 PATH=/home/corpus/scripts:/usr/local/bin:/usr/local/sbin:/bin:/sbin:/usr/bin:/usr/sbin
-0 1,2 * * * corpus-tagtime
-10 1,2 * * * corpus-nightly >/home/corpus/log/nightly 2>&1
+0 1 * * * corpus-tagtime
+10 1 * * * corpus-nightly >/home/corpus/log/nightly 2>&1
 30 * * * * corpus-hourly >/home/corpus/log/hourly 2>&1
 5 1 * * * pyzor discover >/dev/null 2>/dev/null
 ------- end ----------------------------

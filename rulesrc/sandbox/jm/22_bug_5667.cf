@@ -1,0 +1,13 @@
+#testrules
+# bug 5667
+
+#ifplugin Mail::SpamAssassin::Plugin::URIDNSBL
+#
+#urirhsbl        T_URIBL_RHS_AHBL  rhsbl.ahbl.org. A
+#body            T_URIBL_RHS_AHBL  eval:check_uridnsbl('URIBL_RHS_AHBL')
+#describe        T_URIBL_RHS_AHBL  Contains an URI listed in rhsbl.ahbl.org.
+#tflags          T_URIBL_RHS_AHBL  net
+##reuse          URIBL_RHS_AHBL T_URIBL_RHS_AHBL
+#
+#endif
+

@@ -1,0 +1,41 @@
+# "I hereby license them under the WTFPL which is GPL and Apache license
+# compatible." -- Thomas Rutter/neon_overload to SA-users, 2012-02-16 00:43 UTC
+# http://old.nabble.com/Some-rules-I-created-for-suspicious-Javascript-practices-tt33333130.html
+# 
+# WTFPL 2.0 basically says "rename things and they're essentially public domain"
+# Rules have been renamed and slightly tweaked
+
+rawbody  __TR_JS_EXTRA_UNESCAPE /[+=(]\s{0,9}unescape\s{0,9}\(\s{0,9}["']%(?i:6[1-9A-F]|7[0-9A])/
+describe __TR_JS_EXTRA_UNESCAPE JavaScript: Unnecessary URI escaping
+#score LOCAL_U_UNESCAPE 1.8
+
+rawbody  __TR_JS_EXTRA_CONCAT	/[+=(]\s{0,9}["'][a-z0-9.]{1,32}["'] ?\+ ?["'][a-z0-9]{1,32}["']/i
+describe __TR_JS_EXTRA_CONCAT	JavaScript: Unnecessary string concatenation
+#score LOCAL_U_STRCONCAT 0.7
+
+rawbody  TR_JS_FROMCHARCODE	/[+=(]\s{0,9}String\.fromCharCode\b/
+describe TR_JS_FROMCHARCODE	JavaScript: function String.fromCharCode
+#score LOCAL_HIDE_FROMCHARCODE 0.6
+
+#rawbody LOCAL_HIDE_URL /[+=(]\s*(["'])(?!http)h(\1 ?\+ ?\1)?t(\1 ?\+ ?\1)?t(\1 ?\+ ?\1)?p(\1 ?\+ ?\1)?(?!:\/\/):(\1 ?\+ ?\1)?\/(\1 ?\+ ?\1)?\//
+rawbody  __TR_JS_CONCATINATED_HTTP m@\b(?!http:/)h["'+]{0,3}(?:t["'+]{0,3}){2}p['"+]{0,3}:['"+]{0,3}/@
+describe __TR_JS_CONCATINATED_HTTP Contains concatenated URI like "htt"+"p://..."
+#score LOCAL_HIDE_URL 0.9
+
+#rawbody LOCAL_JS_REDIR1 /<[Ss][Cc][Rr][Ii][Pp][Tt]\s*(type="[^"]+"\s*)?>\s*(window|self|(var\s+)?([a-z]+)\s*=\s*window\s*;?\s*\4)?\.?(location|\[['"]location['"]\])(\.href)?\s*[=(]/
+rawbody TR_JS_REDIRECTION_0	/<[Ss][Cc][Rr][Ii][Pp][Tt]\s*(type="[^"]+"\s*)?>\s*(window|self|(var\s+)?([a-z]+)\s*=\s*window\s*;?\s*\4)?\.?(location|\[['"]location['"]\])(\.href)?\s*[=(]/
+rawbody TR_JS_REDIRECTION_1	/<script\s(?-i)[^>]{0,75}>(?:\s{0,9}.{0,1024};)?\s{0,9}\b(?:window|self|([a-z]+)\s{0,9}=\s{0,9}(?:window|self)\s{0,9};?\s{0,9}\1)?\.?(?:location|\[['"]location['"]\])(?:\.href)?\s{0,9}[=(]/msi
+rawbody TR_JS_REDIRECTION_2	/<script\s(?-i).{1,1024}(?:[.\s]|\[["'])location\b(?:["']\])?\s{0,9}(?:\.href)?\s{0,9}[=(]/msi
+describe TR_JS_REDIRECTION_0	Script: Current window location is redirected (unoptimized)
+describe TR_JS_REDIRECTION_1	Script: Current window location is redirected
+describe TR_JS_REDIRECTION_2	Script: Something changes location (a redirection)
+#score LOCAL_JS_REDIR1 0.5
+
+meta	KHOP_JS_OBFUSCATION	__TR_JS_EXTRA_UNESCAPE || __TR_JS_EXTRA_CONCAT || __TR_JS_CONCATINATED_HTTP
+describe KHOP_JS_OBFUSCATION	Script: unnecessarily complex string composition
+
+body TR_FILLER_TEXT		/\b(?:[A-Z][a-z]{0,16}\b(?:\s[a-z]{1,16}\b){4,6}\.?\s{0,2}){18}/
+describe TR_FILLER_TEXT 	18 sentences of capitalized word, 4-6 words, period
+score TR_FILLER_TEXT 0.2	# I (khopesh) am worried about this one getting out of hand
+#score LOCAL_FILLER_TEXT 0.4
+

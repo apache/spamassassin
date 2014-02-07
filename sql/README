@@ -11,8 +11,11 @@ for them to update their $HOME/.spamassassin/user_prefs file.  It is also quite
 common for users listed in /etc/passwd to not have a home directory, therefore,
 the only way to have their own local settings would be through an RDBMS system.
 
-Note that this will NOT look for test rules, only local scores, whitelist_from(s),
-required_score, and auto_report_threshold.
+Note that this will NOT look for test rules, only local scores,
+whitelist_from(s), and required_score.
+
+In addition, any config options marked as Admin Only will NOT be parsed from
+SQL preferences.
 
 SpamAssassin will check the global configuration file (ie. any file matching
 /etc/mail/spamassassin/*.cf) for the following settings:
@@ -69,8 +72,8 @@ required if your database server requires a username and password to
 be sent on connect.
 
 If you have a table layout that differs from the default, please
-review the documentation for user_scores_sql_customer_query for
-information on how deal with a customer layout.
+review the documentation for user_scores_sql_custom_query for
+information on how deal with a custom layout.
 
 Requirements
 ------------
@@ -98,7 +101,7 @@ The database must contain a table, default name "userpref", with at
 least three fields:
 
   username varchar(100)	  # this is the username whose e-mail is being filtered
-  preference varchar(30)  # the preference (whitelist_from, required_score, etc.)
+  preference varchar(50)  # the preference (whitelist_from, required_score, etc.)
   value varchar(100)	  # the value of the named preference
 
 You can add as many other fields you wish as long as the above three fields are
@@ -129,7 +132,7 @@ This will create the following table:
 
 CREATE TABLE userpref (
   username varchar(100) default NOT NULL,
-  preference varchar(30) default NOT NULL,
+  preference varchar(50) default NOT NULL,
   value varchar(100) default NOT NULL,
   prefid int(11) NOT NULL auto_increment,
   PRIMARY KEY (prefid),
@@ -215,11 +218,6 @@ username '@GLOBAL' are used as defaults for all users.
 This code has only been tested using MySQL as the RDMS, but it has been written
 with the utmost simplicity using DBI, and any database driver that conforms to
 the DBI interface should work without problems.
-
-******
-NB:  This should be considered BETA, and the interface, schema, or overall
-operation of SQL support may change at any time with future releases of SA.
-******
 
 Web Interfaces
 --------------

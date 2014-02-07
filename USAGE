@@ -31,7 +31,8 @@ Steps to take for every installation:
     contain a SpamAssassin report anyway.  This is a side-effect of
     the "-t" (test) switch.  However, there should be less than 5
     points accumulated; when the "-t" switch is not in use, the report
-    text would not be added.
+    text would not be added. For more verbose (debugging) output, add
+    the "-D" switch.
 
     If the commands do not work, DO NOT PROCEED TO THE NEXT STEP, as you
     will lose mail!
@@ -84,7 +85,8 @@ If you want to use SpamAssassin site-wide:
 
   - take a look at the notes on the Wiki website, currently at
     <http://wiki.apache.org/spamassassin/UsingSiteWide>.  You will probably
-    want to use 'spamd' (see below).
+    want to use 'spamd' (see below).   You may want to investigate the
+    new Apache mod_perl module, in the 'spamd-apache2' directory, too.
 
   - *PLEASE* let your users know you've installed it, and how to turn it
     off!   This is our #1 tech support query, and the users are usually
@@ -114,10 +116,10 @@ Other Installation Notes
   - Hashcash is a useful system; it requires that senders exercise a
     CPU-intensive task before they can send mail to you, so we give that
     some bonus points.  However, it requires that you list what addresses
-    you expect to receive mail from, by adding 'hashcash_accept' lines to
+    you expect to receive mail for, by adding 'hashcash_accept' lines to
     your ~/.spamassassin/user_prefs or /etc/mail/spamassassin/local.cf
-    files.  See the Mail::SpamAssassin::Conf manual page for details on
-    how to specify these.
+    files.  See the Mail::SpamAssassin::Plugin::Hashcash manual page for
+    details on how to specify these.
 
 
   - SpamAssassin now uses a temporary file in /tmp (or $TMPDIR, if that's
@@ -151,17 +153,15 @@ Other Installation Notes
   - If you have an unusual network configuration, you should probably
     set 'trusted_networks'.  This allows SpamAssassin to determine where
     your internal network ends and the internet begins, and allows DNS
-    checks to be more accurate.
+    checks to be more accurate. If your mail host is NATed, you will
+    almost certainly need to set 'trusted_networks' to get correct
+    results.
 
 
   - A very handy new feature is SPF support, which allows you to check
     that the message sender is permitted by their domain to send from the
     IP address used.  This has the potential to greatly cut down on mail
-    forgery.  (see http://spf.pobox.com/ for more details.)   However,
-    sendmail will not expose the MAIL FROM: sender address by default.  So
-    if you're using sendmail, please add this to /etc/sendmail.cf :
-
-      H?l?X-Envelope-From: $f
+    forgery.  (see http://spf.pobox.com/ for more details.)
 
 
   - MDaemon users should add this line to their "local.cf" file:
@@ -172,11 +172,21 @@ Other Installation Notes
     rewrites a message as spam.
 
 
-  - The distribution includes 'spamd', a daemonized version of the
-    perl script, and 'spamc', a low-overhead C client for this,
-    contributed by Craig R. Hughes.  This greatly reduces the overhead of
-    checking large volumes of mail with SpamAssassin.  Take a look in the
-    'spamd' directory for more details.
+  - The distribution includes 'spamd', a daemonized version of
+    SpamAssassin which runs persistently.  Using its counterpart,
+    'spamc', a lightweight client written in C, an MTA can process
+    large volumes of mail through SpamAssassin without having to
+    fork/exec a perl interpreter for each message. Take a look in the
+    'spamd' and 'spamc' directories for more details.
+
+
+  - The distribution also includes 'spamd-apache2', a mod_perl module
+    allowing the Apache HTTP server to be used as a platform for a
+    daemonized SpamAssassin, in an upwardly-compatible fashion from
+    'spamd'.  If you don't require some of the spamd features it does not
+    implement (such as switching UIDs to read per-user configuration from
+    user home directories), this may be much faster than spamd.  Take a
+    look at the 'spamd-apache2' directory for details.
 
 
   - spamc can now be built as a shared library for use with milters or
@@ -212,8 +222,21 @@ Other Installation Notes
       [1]: http://wiki.apache.org/spamassassin/SpamTrapping
 
 
-  - Scores and other user preferences can now be loaded from an SQL
-    database; see the 'sql' subdirectory for more details.
+  - Scores and other user preferences can now be loaded from, and Bayes
+    and auto-whitelist data can be stored in, an SQL database; see the
+    'sql' subdirectory for more details.
+
+    If you are setting up a large 'spamd' system-wide installation, with
+    Bayes and/or auto-whitelists, we strongly recommend using SQL as
+    storage.  It has proven more reliable than the default DB_File storage
+    backend at several large sites.
+
+
+  - If you are running SpamAssassin under a disk quota, or are setting up
+    'spamd' with users with disk quotas, be warned that the DB_File
+    database module used by SpamAssassin for Bayes and AWL storage seems
+    to be unreliable in the face of quotas (bug 3796). In this situation,
+    we recommend using SQL storage for those databases, instead of DB_File.
 
 
   - Lots more ways to integrate SpamAssassin can be read at

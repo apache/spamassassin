@@ -1,5 +1,129 @@
-Note for Users Upgrading to SpamAssassin 3.0.0
+Note for Users Upgrading to SpamAssassin 3.3.0
 -----------------------------------------------
+
+- Rules are no longer included with SpamAssassin "out of the box".  You will
+  need to immediately run "sa-update", or download the additional rules .tgz
+  package and run "sa-update --install" with it, to get a ruleset.
+
+- The BETA label has been taken off of the SpamAssassin SQL support.  Please
+  be aware that occasional changes may still be made to this area of the
+  code.  You should be sure to read this upgrade document each time you
+  install a new version to determine if any SQL updates need to be made to
+  your local installation.
+
+- The DKIM plugin is now enabled by default for new installs, if the perl
+  module Mail::DKIM is installed.  However, installation of SpamAssassin
+  will not overwrite existing .pre configuration files, so to use DKIM when
+  upgrading from a previous release that did not use DKIM, a directive:
+
+    loadplugin Mail::SpamAssassin::Plugin::DKIM
+
+  will need to be uncommented in file "v312.pre", or added to some
+  other .pre file, such as local.pre.
+
+
+Note for Users Upgrading to SpamAssassin 3.2.0
+-----------------------------------------------
+
+- The "127/8" network, including 127.0.0.1, is now always implicitly part of
+  "trusted_networks" and "internal_networks".  It's impossible to remove these
+  from the trusted/internal sets, since if you cannot trust the host where
+  SpamAssassin is running, you cannot trust SpamAssassin itself.  If you
+  previously had "trusted_networks" and "internal_networks" lines listing those
+  hosts, you should now remove them, otherwise a minor (non-lint-error) warning
+  will be output.
+
+- For ISPs -- version 3.2.0 now includes a new way to specify Mail Submission
+  Agents, relay hosts which accept mail from your own users and authenticates
+  them appropriately.  See the Mail::SpamAssassin::Conf manual page for the
+  "msa_networks" setting.
+
+
+Note for Users Upgrading to SpamAssassin 3.1.0
+-----------------------------------------------
+
+- A significant amount of core functionality has been moved into
+  plugins.  These include, AWL (auto-whitelist), DCC, Pyzor, Razor2,
+  SpamCop reporting and TextCat.  For information on configuring these
+  plugins please refer to their individual documentation:
+  perldoc Mail::SpamAssassin::Plugin::* (ie AWL, DCC, etc)
+
+- There are now multiple files read to enable plugins in the
+  /etc/mail/spamassassin directory; previously only one, "init.pre" was
+  read.  Now both "init.pre", "v310.pre", and any other files ending
+  in ".pre" will be read.  As future releases are made, new plugins
+  will be added to new files named according to the release they're
+  added in.
+
+- Due to license restrictions the DCC and Razor2 plugins are disabled
+  by default.  We encourage you to read the appropriate license
+  yourself and decide if you are able to re-enable the plugins for
+  your site.
+
+- The use_auto_whitelist config option has been moved to a user config
+  option, this allows individual users to turn on or off whitelisting
+  regardless of what is set in the system config.  If you would like to
+  disable AWL (auto-whitelist) on a site-wide basis, then you can comment
+  out the plugin in "v310.pre".
+
+- The bayes_auto_learn_threshold_* config options for bayes have moved
+  to a plugin.  In general the default should work just fine however
+  if you are interested in changing these values you should see:
+  perldoc Mail::SpamAssassin::Plugin::AutoLearnThreshold
+
+- The AWL support for NDBM_File databases has been dropped, due to a
+  bug in that package which renders it useless (bug 4353).  It appears
+  that SDBM_File, the package which will be used instead, is fully
+  compatible with NDBM however, so this should be unnoticeable.
+
+- The prefork algorithm for spamd has been changed.  In this version spamd
+  will attempt to keep a small number of "hot" child processes as busy as
+  possible, and keep any others as idle as possible, using something
+  similar to the Apache httpd server scaling algorithm. This reduces
+  memory usage and swapping. You can use the --round-robin switch for
+  spamd to disable this scaling algorithm, and the behaviour seen in the
+  3.0.x versions will be used instead, where all processes receive an
+  equal load and no scaling takes place.
+
+- As of 3.1.0, in addition to the generic BayesSQL support (via
+  Mail::SpamAssassin::BayesStore::SQL) usable by multiple database
+  drivers there is now specific support for MySQL 4.1+ and
+  PostgreSQL.  This support is based on non-standard features present
+  in both database servers that allow for various performance boosts.
+
+  If you were using the previous BayesSQL support with MySQL, and
+  already have MySQL 4.1+ installed you can begin using the new module
+  immediately by replacing the bayes_store_module line in your
+  configuration with:  Mail::SpamAssassin::BayesStore::MySQL
+
+  We do however recommend that you switch your MySQL tables over to
+  InnoDB for better data integrity and multi user support.  You can
+  most often do this via a simple ALTER TABLE command, refer to the
+  MySQL documentation for more information.
+
+  If you were previously using PostgreSQL for your bayes database then
+  we STRONGLY recommend switching to the PostgreSQL specific backend:
+  Mail::SpamAssassin::BayesStore::PgSQL
+  To switch to this backend you should first run sa-learn --backup to
+  make a backup of your existing data and then drop and recreate the
+  database following the instructions in sql/README.bayes.  Then you
+  can restore the database with sa-learn --restore.  If you have
+  multiple users then you will have to run --backup and --restore for
+  each user to fully restore the database.
+
+- See http://wiki.apache.org/spamassassin/UpgradeTo310 for a
+  supplementary list of upgrade notes.  It will be updated with any
+  upgrade notes not captured in this document.
+
+- Finally, this document is likely not complete.  Other configuration
+  options/arguments may have changed from older versions, etc.  It would
+  be good to double-check any custom configuration options to make sure
+  they're still valid.  This could be as simple as running "spamassassin
+  --lint", or more complex, as required by the environment.
+
+
+Note for Users Upgrading to SpamAssassin 3.0.x
+----------------------------------------------
 
 - The SpamAssassin 2.6x release series was the last set of releases to
   officially support perl versions earlier than perl 5.6.1.  If you are
@@ -9,15 +133,21 @@ Note for Users Upgrading to SpamAssassin 3.0.0
   modules as they may have changed from old versions.  The INSTALL
   document has the modules and version requirements listed.
 
-- SpamAssassin 3.0.0 has a significantly different API (Application
-  Program Interface) from the 2.x series of code.  This means that if you
-  use SpamAssassin through a third-party utility (milter, etc,) you need
-  to make sure you have an updated version which supports 3.0.0.
+- See http://wiki.apache.org/spamassassin/UpgradeTo300 for a
+  supplementary list of upgrade notes.  It will be updated with any
+  upgrade notes not captured in this document.
 
-- The --auto-whitelist and -a options for "spamd" and "spamassassin" to
-  turn on the auto-whitelist have been removed and replaced by the
-  "use_auto_whitelist" configuration option which is also now turned on by
-  default.
+- SpamAssassin 3.0.0 has a significantly different API (Application Program
+  Interface) from the 2.x series of code.  This means that if you use
+  SpamAssassin through a third-party utility (milter, etc,) you need to make
+  sure you have an updated version which supports 3.0.0.  See
+  http://wiki.apache.org/spamassassin/UpgradeTo300 for information about
+  third-party software.
+
+- The --auto-whitelist, --whitelist and -a options for "spamd" and
+  "spamassassin" to turn on the auto-whitelist have been removed and
+  replaced by the "use_auto_whitelist" configuration option which is
+  also now turned on by default.
 
 - The --virtual-config switch for spamd had to be dropped, due to licensing
   issues.  It is replaced by the --virtual-config-dir switch.
@@ -35,7 +165,7 @@ Note for Users Upgrading to SpamAssassin 3.0.0
 
 - The "sa-learn --rebuild" command has been deprecated; please use
   "sa-learn --sync" instead.  The --rebuild option will remain temporarily
-  for backwards compatability.
+  for backward compatability.
 
 - The Bayesian storage modules have been completely re-written and now
   include Berkeley DB (DBM) storage as well as SQL based storage (see
@@ -61,6 +191,13 @@ Note for Users Upgrading to SpamAssassin 3.0.0
     SpamAssassin, and/or at least running "sa-learn --dump" to make sure
     the data looks valid.
   - start running spamassassin/spamd again
+
+  If, instead of uprading your Bayes database, you want to wipe it and
+  start fresh, you can run "sa-learn --clear" to safely remove your
+  Bayes database files.  If the --clear command issues an error then
+  you can simply delete the Bayes database files ("bayes_*") while SA
+  is not running; SpamAssassin will recreate them in the current
+  format when it runs.
 
 - "spamd" now has a default max-children setting of 5; no more than 5
   child scanner processes will be run in parallel.  Previously, there was
@@ -89,10 +226,7 @@ Note for Users Upgrading to SpamAssassin 3.0.0
   user_scores_sql_custom_query config option.
 
 - SpamAssassin runs in "taint mode" by default for improved security.
-  Certain third-party modules, such as Razor v2, may be incompatible with
-  taint mode. For Razor v2, you will need to be using v2.40 of
-  razor-agents or higher which allows taint mode by default.  Earlier
-  versions which are patched to allow taint mode may be used as well.
+  Certain third-party modules may be incompatible with taint mode.
 
 - 2.6x deprecated the use of the "check_bayes_db" script, and it
   has been removed in 3.0.0.  Please see the sa-learn man/pod

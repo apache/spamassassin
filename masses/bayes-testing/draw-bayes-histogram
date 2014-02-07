@@ -48,7 +48,7 @@ foreach my $file ($spam, $nonspam) {
   my $isspam = 0; ($file eq $spam) and $isspam = 1;
 
   while (<IN>) {
-    /^(\.|Y)\s.+bayes=(\S+)$/ or next;
+    /^(\.|Y)\s.+bayes=([^\s,]+)/ or next;
     my $score = $2+0;
 
     my $bucket_id;

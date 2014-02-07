@@ -1,0 +1,155 @@
+/* in SVN at
+
+https://svn.apache.org/repos/asf/spamassassin/trunk/masses/rule-qa/automc/ruleqa.css
+
+*/
+
+body {
+  padding: 1em 1em 1em 1em;
+}
+pre.freqs {
+  font-family: monospace;
+  font-size: 14px;
+  border: 1px dashed #ddb;
+  margin: 0em -0.5em 0em -0.5em;
+  padding: 10px 20px 10px 20px;
+}
+div.updateform {
+  border: 3px solid #aaa;
+  background: #eec;
+  margin: 0em 0em 1em 0em;
+  padding: 0em 1em 0em 2em;
+}
+
+p.showfreqslink {
+  color: #999;
+  font-size: 50%;
+  text-align: right;
+  margin: 0px 0px 0px 0px;
+  border: none;
+}
+p.showfreqslink a { color: #999; }
+
+div.headdiv {
+  border: 1px solid;
+  background: #f0f8c0;
+  margin: 0px 0px 0px 20px;
+}
+p.headclosep {
+  margin: 0px 0px 0px 0px;
+  border: none;
+}
+pre.head {
+  margin-left: 10px;
+}
+
+table.freqs {
+  border: 1px dashed #ddb;
+  background: #fff;
+  padding: 10px 5px 10px 5px;
+}
+
+tr.freqsline_promo1 td {
+  text-align: right;
+  padding: 0.1em 0.2em 0.1em 0.2em;
+}
+tr.freqsline_promo0 td {
+  text-align: right;
+  padding: 0.1em 0.2em 0.1em 0.2em;
+  color: #999;
+}
+tr.freqsline_promo0 td a { color: #999; }
+
+tr.freqsline_promo0:hover { background: #e0e6f6; }
+tr.freqsline_promo1:hover { background: #e0e6f6; }
+
+a.mcloghref {
+  color: #999;
+  font-size: 50%;
+}
+
+h3 {
+  border: 1px solid;
+  padding: 10px 20px 10px 20px;
+  margin: 20px -20px -10px -20px;
+  background: #fe8;
+}
+
+td.daterevtd {
+  font-size: 75%;
+  padding: 1px 3px 1px 5px;
+}
+
+td.daterevcommittd {
+  font-size: 75%;
+  padding: 1px 3px 1px 5px;
+  background: #ffc;
+}
+
+td.mcviewing {
+  background: #7f9;
+}
+
+div.commitmsgdiv {
+  font-size: 75%;
+  overflow: auto;
+}
+
+td.daterevtdempty {
+  background: #eec;
+}
+
+tr.daterevtr {
+  background: #fff;
+}
+
+tr.daterevdesc {
+  background: #fea;
+}
+
+div.ui_label {
+  font-size: 75%;
+  color: #676;
+}
+label.ui_label {
+  font-size: 75%;
+  color: #676;
+}
+
+
+/* Sortable tables, see http://www.kryogenix.org/code/browser/sorttable/ */
+table.sortable a.sortheader {
+    background: #ddd;
+    color:#666;
+    font-weight: bold;
+    text-decoration: none;
+    display: block;
+}
+tr.freqsheader {
+    background: #ddd;
+}
+table.sortable span.sortarrow {
+    color: black;
+    text-decoration: none;
+}
+
+
+/* mouseover data for the freqs spam% and ham% figures using CSS2.
+  * see: http://www.meyerweb.com/eric/css/edge/popups/demo.html
+  */
+table tr td a.ftd {
+  position: relative;
+  /* relative positioning so that the span will be
+    * "absolute" positioned relative to this block */
+}
+table tr td a.ftd span {
+  display: none;
+}
+table tr td a.ftd:hover span {
+  display: block;
+  position: absolute; top: 1em; left: 0.5em;
+  padding: 5px 20px 5px 20px; margin: 10px; z-index: 100;
+  border: 1px dashed;
+  background: #ffc;
+}
+

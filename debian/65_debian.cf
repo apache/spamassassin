@@ -1,0 +1,27 @@
+# Special SpamAssassin rules for Debian
+# Duncan Findlay
+
+header	 D_SENT_BY_DEBCONF	Subject =~ /^Debconf:/
+score	 D_SENT_BY_DEBCONF	-5.0
+describe D_SENT_BY_DEBCONF	Sent by Debconf
+
+body	 D_SENT_BY_AFBACKUP	/^\[Afbackup\]: Overall exit status:/
+score	 D_SENT_BY_AFBACKUP	-5.0
+describe D_SENT_BY_AFBACKUP	Sent by Afbackup
+
+header	 D_SENT_BY_APTLC	Subject =~ /^apt-listchanges: (changelogs|news) for/
+score	 D_SENT_BY_APTLC	-5.0
+describe D_SENT_BY_APTLC	Sent by apt-listchanges
+
+header	 __ANACRON_SUBJ		Subject =~ /^Anacron job '[a-z0-9_.-]+' on/i
+header   __ANACRON_FROM		From =~ /^Anacron/
+meta	 D_SENT_BY_ANACRON	__ANACRON_SUBJ && __ANACRON_FROM
+score	 D_SENT_BY_ANACRON	-5.0
+describe D_SENT_BY_ANACRON	Sent by Anacron Daemon
+
+
+header	 __CRON_FROM		From =~ /^Cron Daemon/
+header 	 __CRON_HEADER		X-Cron-Env =~ /./
+meta	 D_SENT_BY_CRON		__CRON_FROM && __CRON_HEADER
+score 	 D_SENT_BY_CRON		-5.0
+describe D_SENT_BY_CRON		Sent by Cron Daemon

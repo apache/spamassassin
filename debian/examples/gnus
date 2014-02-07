@@ -1,0 +1,7 @@
+;; F10 pipe the message as spam
+(global-set-key [(f10)]
+  '(lambda () (interactive) (shell-command "sa-learn --spam --single ")))
+
+;; F9 pipe the message as ham
+(global-set-key [(f9)]
+  '(lambda () (interactive) (shell-command "sa-learn --ham --single ")))

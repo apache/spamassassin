@@ -1,0 +1,62 @@
+This is a quick benchmark to help test changes to the bayes storage
+system.  It also happens to work as a benchmark for other changes.  It
+requires that you install the code you wish to benchmark, but upgrades
+to make the scripts more in-tree friendly would be accepted.
+
+You will also need Proc::Background.
+
+Quick Start:
+
+Create 8 buckets for your mail (mbox files), 4 each of ham and spam.
+They should be in rough date order (oldest in bucket 1).  Name them
+hambucketX.mbox and spambucketX.mbox where X is the bucket number.
+
+I suggest at least 1000 messages per bucket, for sure it should not be
+less than 200, and maybe even 300 depending on how much autolearning
+happens in phase 2.
+
+Take hambucket1.mbox and copy the first half of the messages to
+hamforget1.mbox.  Do the same for spambucket1.mbox.
+
+Verify that the passwords and paths in the tests directories are
+valid/correct and look over the scripts in the helper directory,
+especially the username/passwords in the sql based helper scripts.
+
+run-bench db_file db_file.1
+
+This will create a results/db_file.1 directory and put all of the test
+data in that directory.
+
+You can tail -f results/db_file.1/output.txt to watch the test
+progress.
+
+More Detailed view:
+
+The benchmark consistes of several phases, normally between each phase
+there will be a sa-learn --dump magic, a database size check (if
+available) and an sa-learn --backup:
+
+Phase 1:
+  This is the learning phase, here we run sa-learn on hambucket1.mbox
+  and spambucket1.mbox, getting the timings for each.
+
+Phase 2: This is the spamd scanning phase.  We startup a spamd and
+  then startup a forking script that throws all messages in
+  hambucket2.mbox, hambucket3.mbox, spambucket2.mbox and
+  spambucket4.mbod at the daemon using spamc.
+
+  After this is done it does an sa-learn --sync and an
+  sa-learn --force-expire.
+
+Phase 3:
+  This is the forget phase.  We use sa-learn to forget all the
+  messages in hamforget1.mbox and then do it again for
+  spamforget1.mbox.
+
+Phase 4:
+  This is the spamassassin scan phase.  Here we scan the
+  hambucket4.mbox and then the spambucket4.mbox using the spamassassin
+  script.
+
+I suggest running each benchmark 3 times to make sure your test is not
+influenced by other system activities too much.

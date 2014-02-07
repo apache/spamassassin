@@ -1,0 +1,30 @@
+=head1 NAME
+
+perceptron - Generate scores for SpamAssassin using the "Stochastic
+Gradient Method"
+
+=head1 SYNOPSIS
+
+perceptron [options]
+
+ Options:
+  -p ham_preference 	Modifies tendency to prefer false negatives over
+			false positives (default 2.0) (higher = less fp)
+  -e num_epochs		Set number of passes to make (default 15)
+  -l learning_rate	Modifies learning rate (default 2.0)
+  -t threshold		Minimum threshold for spam (default 5.0)
+  -w weight_decay 	Scores multiplied by this value after each pass
+			to prevent scores from getting too high
+			(default off (1.0))
+
+=head1 DESCRIPTION
+
+B<perceptron> is used to optimize the SpamAssassin scores.  The output
+of B<logs-to-c> is compiled into the perceptron which is then run to
+generate scores.
+
+=head1 SEE ALSO
+
+L<logs-to-c>
+
+=cut

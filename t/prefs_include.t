@@ -4,7 +4,7 @@ use lib '.'; use lib 't';
 use SATest; sa_t_init("prefs_include");
 use Test; BEGIN { plan tests => 2 };
 
-$ENV{'LC_ALL'} = 'C';             # a cheat, but we need the patterns to work
+$ENV{'LANGUAGE'} = $ENV{'LC_ALL'} = 'C';             # a cheat, but we need the patterns to work
 
 # ---------------------------------------------------------------------------
 
@@ -17,7 +17,7 @@ $ENV{'LC_ALL'} = 'C';             # a cheat, but we need the patterns to work
 
 tstprefs ("
         $default_cf_lines
-        include log/prefs_include.inc
+        include prefs_include.inc
         ");
 
 open (OUT, ">log/prefs_include.inc") or die "open log/prefs_include.inc failed";

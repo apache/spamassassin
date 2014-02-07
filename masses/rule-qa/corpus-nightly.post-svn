@@ -1,0 +1,114 @@
+#!/bin/sh
+#
+# second (post-SVN-update) part of corpus-nightly.  This is a separate
+# script so that, if SVN updates it, changes will take effect in this
+# mass-check
+
+. /etc/profile
+. $HOME/.corpus
+
+RSYNC_PASSWORD=$password ; export RSYNC_PASSWORD
+
+# use $PERL from env if unset
+[ "x${PERL:-}" = x ] && PERL=perl
+export PERL
+
+set -x
+set -e
+
+# day of week
+net=""
+if date | egrep '^Sat' || [ "$1" = "net" ]; then net="net-" ; fi
+
+# enter tree
+cd $tree || exit 5
+
+[ -d $tmp ] || mkdir -p $tmp
+
+# build
+$PERL Makefile.PL < /dev/null
+make > $tmp/build.log
+
+# call ext command, if required
+if [ "x${pre_mass_check_command:-}" != x ] ; then
+  $pre_mass_check_command
+fi
+
+# run test
+cd masses
+rm -f spamassassin/auto*
+rm -f spamassassin/bayes*
+rm -f razor-agent.log
+[ -d spamassassin ] || mkdir spamassassin
+
+if [ -n "$net" ]; then
+	prefs=$prefs_weekly
+	opts="$opts_weekly ${opts:-}"
+else
+	prefs=$prefs_nightly
+	opts="$opts_nightly ${opts:-}"
+fi
+if [ -n "$prefs" -a -f "$prefs" ]; then
+	cp $prefs spamassassin/user_prefs
+else
+	rm -f spamassassin/user_prefs
+fi
+
+date | tee test.start
+
+if [ "${clienthosts:-}" = "" ] ; then
+
+  # local mass-check
+  $PERL mass-check $opts
+
+else
+
+  # client-server mode
+
+  # copy the certs from their storage dir; this is not checked
+  # in, since that would allow third-party hosts to connect to
+  # the master server and "steal" scanned mails
+  cp /local/bbmasstools/mass-check-certs/*.pem spamassassin/
+
+  $PERL mass-check --noisy --progress --cs_ssl --server $serverhost \
+    --run_post_scan="./rule-qa/nightly-slaves-start $clienthosts" \
+    $opts
+
+  # the slaves will be started if the "run" stage is started, and
+  # will exit when the server mass-check does (they "phone home"
+  # to the specified server host/port and exit if that disappears
+  # for a long time)
+
+  # just to be sure, though: run a 'stop' script in case that fails
+  ./rule-qa/nightly-slaves-stop $clienthosts || true
+fi
+
+date | tee test.end
+
+uptime
+ls -l spam.log ham.log
+
+# results name
+mv spam.log spam-$net$username.log
+mv ham.log ham-$net$username.log
+
+# rsync
+set +e
+retry=0
+while true; do
+	if rsync -Pcvuzb --timeout=120 \
+            spam-$net$username.log ham-$net$username.log \
+            $username@rsync.spamassassin.org::corpus/
+        then
+		break;
+	fi
+	if [ $retry -eq 120 ]; then
+		echo "rsync failed" 1>&2
+		exit 1
+	fi
+	retry=$(( $retry + 1 ))
+	sleep 30
+done
+set -e
+
+exit 0

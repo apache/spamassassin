@@ -1,0 +1,46 @@
+# # https://issues.apache.org/SpamAssassin/show_bug.cgi?id=6212
+#
+# header __RCVD_IN_HOSTKARMA eval:check_rbl('HOSTKARMA-lastexternal','hostkarma.junkemailfilter.com.')
+# describe __RCVD_IN_HOSTKARMA Sender listed in JunkEmailFilter HostKarma
+# tflags __RCVD_IN_HOSTKARMA net nopublish
+#
+# header RCVD_IN_HOSTKARMA_WL eval:check_rbl_sub('HOSTKARMA-lastexternal', '127.0.0.1')
+# describe RCVD_IN_HOSTKARMA_WL Sender listed in HOSTKARMA-WHITE, http://hostkarma.junkemailfilter.com
+# tflags RCVD_IN_HOSTKARMA_WL net nice nopublish
+# # score RCVD_IN_HOSTKARMA_WL 0 -0.01 0 -0.01
+#
+# header RCVD_IN_HOSTKARMA_BL eval:check_rbl_sub('HOSTKARMA-lastexternal', '127.0.0.2')
+# describe RCVD_IN_HOSTKARMA_BL Sender listed in HOSTKARMA-BLACK, http://hostkarma.junkemailfilter.com
+# tflags RCVD_IN_HOSTKARMA_BL net nopublish
+# # score RCVD_IN_HOSTKARMA_BL 0 2.0 0 2.0
+#
+# header RCVD_IN_HOSTKARMA_YL eval:check_rbl_sub('HOSTKARMA-lastexternal', '127.0.0.3')
+# describe RCVD_IN_HOSTKARMA_YL Sender listed in HOSTKARMA-YELLOW, http://hostkarma.junkemailfilter.com
+# tflags RCVD_IN_HOSTKARMA_YL net nice nopublish
+# # score RCVD_IN_HOSTKARMA_YL 0 -0.01 0 -0.01
+#
+# header RCVD_IN_HOSTKARMA_BR eval:check_rbl_sub('HOSTKARMA-lastexternal', '127.0.0.4')
+# describe RCVD_IN_HOSTKARMA_BR Sender listed in HOSTKARMA-BROWN, http://hostkarma.junkemailfilter.com
+# tflags RCVD_IN_HOSTKARMA_BR net nopublish
+# # score RCVD_IN_HOSTKARMA_BR 0 1.0 0 1.0
+#
+# ifplugin Mail::SpamAssassin::Plugin::URIDNSBL
+# # HOSTKARMA URIBL's
+# urirhssub URIBL_HOSTKARMA_BL hostkarma.junkemailfilter.com. A 127.0.0.2
+# body      URIBL_HOSTKARMA_BL eval:check_uridnsbl('URIBL_HOSTKARMA_BL')
+# tflags    URIBL_HOSTKARMA_BL net nopublish
+#
+# urirhssub URIBL_HOSTKARMA_BR hostkarma.junkemailfilter.com. A 127.0.0.4
+# body      URIBL_HOSTKARMA_BR eval:check_uridnsbl('URIBL_HOSTKARMA_BR')
+# tflags    URIBL_HOSTKARMA_BR net nopublish
+#
+# urirhssub URIBL_HOSTKARMA_FRESH_2D hostkarma.junkemailfilter.com. A 127.0.2.1
+# body      URIBL_HOSTKARMA_FRESH_2D eval:check_uridnsbl('URIBL_HOSTKARMA_FRESH_2D')
+# tflags    URIBL_HOSTKARMA_FRESH_2D net nopublish
+#
+# urirhssub URIBL_HOSTKARMA_FRESH_10D hostkarma.junkemailfilter.com. A 127.0.2.2
+# body      URIBL_HOSTKARMA_FRESH_10D eval:check_uridnsbl('URIBL_HOSTKARMA_FRESH_10D')
+# tflags    URIBL_HOSTKARMA_FRESH_10D net nopublish
+# endif
+#
+#

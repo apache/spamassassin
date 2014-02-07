@@ -55,8 +55,6 @@ foreach my $bucket (1 .. $num_buckets) {
 my $current_bucket = 0;
 
 my $iter = new Mail::SpamAssassin::ArchiveIterator({
-        'opt_j' => 1,
-        'opt_n' => 1,
         'opt_all' => 1,
   });
 

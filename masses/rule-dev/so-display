@@ -1,0 +1,66 @@
+#!/usr/bin/perl
+#
+# so-display spamfile hamfile
+# combineddatasource | so-display 
+#
+# Compute "S/O ratios" for data. S/O stands for Spam/Overall, and denotes the
+# probability that a hit for that datum is spam (in the Bayesian style).
+#
+# combinedfile should contain lines in the format "X data", where "X" is either
+# "h" or "s" for ham or spam, and "data" is what will be collated and reported.
+#
+# Otherwise "hamfile" and "spamfile" contain data entries, one per line.
+# 
+# Feb 11 2003 jm
+
+my $spamdata = shift @ARGV;
+my $hamdata = shift @ARGV;
+my $combined = 0;
+if (!defined $spamdata) { $combined = 1; }
+
+%spam = (); %ham = (); %found = ();
+
+if ($combined) {
+  while (<>) {
+    chomp; s/^(\S+)\s+//;
+    if ($1 eq 's') { $spam{$_}++; } else { $ham{$_}++; }
+    $found{$_}++;
+  }
+
+} else {
+  open (IN, "< $spamdata");
+  while (<IN>) { chomp; $found{$_}++; $spam{$_}++; }
+  close IN;
+  open (IN, "< $hamdata");
+  while (<IN>) { chomp; $found{$_}++; $ham{$_}++; }
+  close IN;
+}
+
+my $stot = 0;
+my $htot = 0;
+foreach my $id (keys %found) {
+  $ham{$id} ||= 0; $spam{$id} ||= 0;
+  $htot += $ham{$id}; $stot += $spam{$id};
+}
+$htot ||= 0.000001;
+$stot ||= 0.000001;
+
+foreach my $id (keys %found) {
+  my $ham = $ham{$id} / $htot;
+  my $spam = $spam{$id} / $stot;
+  my $t = $ham + $spam || 0.000001;
+  $so{$id} = $spam / $t;
+}
+
+printf ("%6s  %6s  %6s   %s\n", "RATIO", "SPAM%", "HAM%", "DATA");
+foreach my $id (sort {
+		     $so{$a} <=> $so{$b}
+		  || $spam{$a} <=> $spam{$b}
+		  || $ham{$b} <=> $ham{$a}
+		} keys %so)
+{
+  printf ("%6.3f  %6.3f  %6.3f   %s\n",
+	$so{$id}, ($spam{$id}*100) / $stot, ($ham{$id}*100) / $htot, $id);
+}
+
+exit;

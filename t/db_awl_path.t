@@ -28,9 +28,8 @@ tstprefs ("
 my $fh = IO::File->new_tmpfile();
 ok($fh);
 open(STDERR, ">&=".fileno($fh)) || die "Cannot reopen STDERR";
-ok (!sarun (
-"--add-addr-to-whitelist whitelist_test\@whitelist.spamassassin.taint.org",
-                \&patterns_run_cb));
+sarun("--add-addr-to-whitelist whitelist_test\@whitelist.spamassassin.taint.org",
+      \&patterns_run_cb);
 seek($fh, 0, 0);
 my $error = do {
   local $/;
@@ -45,3 +44,4 @@ ok($error, qr/(cannot create tmp lockfile)|(unlink of lock file.*failed)/, "Chec
 sarun ("-L -t < data/spam/004", \&patterns_run_cb);
 ok_all_patterns();
 
+ok(unlink 'log/awl'); # need a little cleanup

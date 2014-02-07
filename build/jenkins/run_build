@@ -1,0 +1,99 @@
+#!/bin/sh -xe
+
+# really clean everything first
+rm -rf t/log t/log.* artifacts testxml Mail-SpamAssassin* || true
+make distclean < /dev/null || true
+mkdir artifacts testxml
+
+#SOLARIS1 SLAVE BUILD FILE
+
+#SOLARIS1 SLAVE w/JM's PERL - WORKS AS OF 5/30/2011
+PATH=/export/home/jm/tools/perl586/bin:/usr/ccs/bin:/sbin:/usr/sbin:/etc:/usr/etc:/usr/local/bin:/usr/bin/mh:/export/home/jm/bin:/sbin:/usr/sbin:/etc:/usr/etc:/usr/local/bin:/usr/bin/mh:/export/home/jm/bin:/sbin:/usr/sbin:/etc:/usr/etc:/usr/local/bin:/usr/bin/mh:/usr/bin:/opt/sfw/bin:/opt/SUNWspro/bin:/usr/ucb/
+PERL5LIB=/export/home/hudson/tools/sa_perl/lib/site_perl/
+export PATH PERL5LIB
+#INSTALL NETADDR USING JM's PERL USING COMPLETE SILLINESS
+#echo "o conf makepl_arg PREFIX=/export/home/hudson/tools/sa_perl\ninstall NetAddr::IP" | cpan
+#cd /tmp/1
+#curl -o netaddr.tar.gz http://www.peregrinehw.com/downloads/SpamAssassin/NetAddr-IP-4.044.tar.gz
+#ls -al /tmp/1
+#gunzip netaddr.tar.gz
+#tar xvf netaddr.tar
+#cd NetAddr-IP-4.044/
+#perl Makefile.PL PREFIX=/export/home/hudson/tools/sa_perl
+#make test && make install 
+#perl -I /export/home/hudson/tools/sa_perl/lib/site_perl/ -e 'if (require NetAddr::IP) { print "NetAddr::IP Version is: $NetAddr::IP::VERSION\n"; exit 0;} else {exit 1;}'
+#exit
+perl Makefile.PL < /dev/null
+
+
+
+# SOLARIS1 SLAVE w/Infra installing modules for us in a separate dir. 
+#PERL5LIB=/export/home/hudson/tools/perl/lib/site_perl/
+#export PERL5LIB
+#perl Makefile.PL < /dev/null
+
+make
+
+# ensure a lint failure generates shouty mails to the dev list
+rm rules/70_sandbox.cf
+make build_rules > make.log 2>&1
+if grep "ERROR:" make.log ; then 
+  exit 2
+else
+  true
+fi
+
+make distcheck
+
+# select the tests we want
+echo "
+run_spamd_prefork_stress_test=y
+run_net_tests=y
+run_long_tests=y
+" > t/config
+
+# generate 't/log.make_test'
+make test TEST_VERBOSE=1 \
+    2>&1 | tee artifacts/make_test.log
+mv t/log artifacts/t.log.make_test
+
+# generate 't/log.make_disttest'
+(
+  # this hack is required to produce verbose disttest output
+  PASTHRU='TEST_VERBOSE=1'; export PASTHRU          
+  make -e disttest TEST_VERBOSE=1 < /dev/null \
+      2>&1 | tee artifacts/make_disttest.log
+)
+mv Mail-SpamAssassin*/t/log artifacts/t.log.make_disttest
+
+# generate XML test reports (multifile)
+perl ./build/jenkins/tap-to-junit-xml \
+    "make test" testxml/make_test < artifacts/make_test.log
+perl ./build/jenkins/tap-to-junit-xml \
+    "make disttest" testxml/make_disttest < artifacts/make_disttest.log
+
+# -------------------------------------------------------------------------- 
+# generate 't/log.make_test_p561'.  OFF: we're deprecating perl 5.6.x
+
+###make distclean < /dev/null || true
+###/home/jm/tools/perl561/bin/perl Makefile.PL < /dev/null
+###make
+###make test TEST_VERBOSE=1 \
+    ###2>&1 | tee artifacts/make_test_p561.log
+###mv t/log artifacts/t.log.make_test_p561
+###perl ./build/jenkins/tap-to-junit-xml \
+    ###"make test with perl561" testxml/make_test_p561 < artifacts/make_test_p561.log
+
+# -------------------------------------------------------------------------- 
+# generate XML test reports (single file, runs into Hudson bug where it
+# cannot read <system-out> correctly)
+
+# perl ./build/jenkins/tap-to-junit-xml \
+    # "make test" < artifacts/make_test.log > testxml/make_test.xml
+# perl ./build/jenkins/tap-to-junit-xml \
+    # "make disttest" < artifacts/make_disttest.log > testxml/make_disttest.xml
+# perl ./build/jenkins/tap-to-junit-xml \
+    # "make test p561" < artifacts/make_test_p561.log > testxml/make_test_p561.xml
+
+# -------------------------------------------------------------------------- 
+

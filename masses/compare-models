@@ -16,6 +16,10 @@ if ( scalar(@ARGV) < 2 ) {
 
 my (@fp1, @fn1, @tcr1);
 
+# allow dir names to be specified, too, for brevity
+if (-f "$ARGV[0]/validate") { $ARGV[0] .= "/validate"; }
+if (-f "$ARGV[1]/validate") { $ARGV[1] .= "/validate"; }
+
 open (FILE, $ARGV[0]) || die $!;
 while (<FILE>) {
 	my @x = split(/\s+/);

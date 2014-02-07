@@ -1,9 +1,10 @@
 # <@LICENSE>
-# Copyright 2004 Apache Software Foundation
-# 
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to you under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at:
 # 
 #     http://www.apache.org/licenses/LICENSE-2.0
 # 
@@ -41,15 +42,16 @@ MySQL, SQLite and PostgreSQL) to store user auto-whitelists.
 
 The default table structure looks like this:
 CREATE TABLE awl (
-  username VARCHAR NOT NULL,
-  email VARCHAR NOT NULL,
-  ip VARCHAR NOT NULL,
-  count INT NOT NULL,
-  totscore FLOAT NOT NULL,
-  PRIMARY KEY (username, email, ip)
-)
+  username varchar(100) NOT NULL default '',
+  email varchar(255) NOT NULL default '',
+  ip varchar(40) NOT NULL default '',
+  count int(11) NOT NULL default '0',
+  totscore float NOT NULL default '0',
+  signedby varchar(255) NOT NULL default '',
+  PRIMARY KEY (username,email,signedby,ip)
+) TYPE=MyISAM;
 
-You're table definition may change depending on which database driver
+Your table definition may change depending on which database driver
 you choose.  There is a config option to override the table name.
 
 This module introduces several new config variables:
@@ -62,6 +64,8 @@ user_awl_sql_password
 
 user_awl_sql_table
 
+user_awl_sql_override_username
+
 see C<Mail::SpamAssassin::Conf> for more information.
 
 
@@ -70,11 +74,15 @@ see C<Mail::SpamAssassin::Conf> for more information.
 package Mail::SpamAssassin::SQLBasedAddrList;
 
 use strict;
+use warnings;
 use bytes;
+use re 'taint';
 
-use DBI;
+# Do this silliness to stop RPM from finding DBI as required
+BEGIN { require DBI;  import DBI; }
 
 use Mail::SpamAssassin::PersistentAddrList;
+use Mail::SpamAssassin::Logger;
 
 use vars qw(@ISA);
 
@@ -117,8 +125,8 @@ sub new_checker {
 
   if (!$main->{conf}->{user_awl_dsn} ||
       !$main->{conf}->{user_awl_sql_table}) {
-    dbg("auto-whitelist (sql-based): invalid config");
-    return undef;
+    dbg("auto-whitelist: sql-based invalid config");
+    return;
   }
 
   my $dsn    = $main->{conf}->{user_awl_dsn};
@@ -128,9 +136,12 @@ sub new_checker {
   my $dbh = DBI->connect($dsn, $dbuser, $dbpass, {'PrintError' => 0});
 
   if(!$dbh) {
-    dbg("auto-whitelist (sql-based): Unable to Connect to DB");
-    return undef;
+    info("auto-whitelist: sql-based unable to connect to database (%s) : %s",
+         $dsn, DBI::errstr);
+    return;
   }
+
+  dbg("auto-whitelist: sql-based connected to $dsn");
 
   $self = { 'main'      => $main,
             'dsn'       => $dsn,
@@ -138,20 +149,39 @@ sub new_checker {
             'tablename' => $main->{conf}->{user_awl_sql_table},
           };
 
-  dbg("SQL Based AWL: Connected to $dsn");
+  my $override_username = $main->{conf}->{user_awl_sql_override_username};
+  if (defined $override_username && $override_username ne '') {
+    $self->{_username} = $override_username;
+  }
+  else {
+    $self->{_username} = $main->{username};
+
+    # Need to make sure that a username is set, so just in case there is
+    # no username set in main, set one here.
+    if (!defined $self->{_username} || $self->{_username} eq '') {
+      $self->{_username} = "GLOBAL";
+    }
+  }
+  $self->{_with_awl_signer} =
+    $main->{conf}->{auto_whitelist_distinguish_signed};
+
+  dbg("auto-whitelist: sql-based using username: ".$self->{_username});
 
   return bless ($self, $class);
 }
 
 =head2 get_addr_entry
 
-public instance (\%) get_addr_entry (String $addr)
+public instance (\%) get_addr_entry (String $addr, String $signedby)
 
 Description:
 This method takes a given C<$addr> and splits it between the email address
 component and the ip component and performs a lookup in the database. If
 nothing is found in the database then a blank entry hash is created and
 returned, otherwise an entry containing the found information is returned.
+If a with_awl_signer configuration option is enabled only addresses signed
+by the given signing identity are taken into account, or, if $signedby is
+undefined (or empty) only unsigned entries are considered.
 
 A key, C<exists_p>, is set to 1 if an entry already exists in the database,
 otherwise it is set to 0.
@@ -159,47 +189,67 @@ otherwise it is set to 0.
 =cut
 
 sub get_addr_entry {
-  my ($self, $addr) = @_;
+  my ($self, $addr, $signedby) = @_;
 
   my $entry = { addr     => $addr,
                 exists_p => 0,
                 count    => 0,
                 totscore => 0,
+                signedby => $signedby,
               };
 
   my ($email, $ip) = $self->_unpack_addr($addr);
 
-  return $entry unless ($email && $ip);
+  return $entry  unless $email ne '' && (defined $ip || defined $signedby);
 
-  my $username = $self->{main}->{username};
-
-  my $sql = "SELECT count, totscore FROM $self->{tablename}
-              WHERE username = ? AND email = ? AND ip = ?";
+  my $sql = "SELECT count, totscore FROM $self->{tablename} " .
+            "WHERE username = ? AND email = ?";
+  my @args = ( $email );
+  if (!$self->{_with_awl_signer}) {
+    $sql .= " AND ip = ?";
+    push(@args, $ip);
+  } else {
+    my @signedby = !defined $signedby ? () : split(' ', lc $signedby);
+    if (!@signedby) {
+      $sql .= " AND signedby = '' AND ip = ?";
+      push(@args, $ip);
+    } elsif (@signedby == 1) {
+      $sql .= " AND signedby = ?";
+    } elsif (@signedby > 1) {
+      $sql .= " AND signedby IN (" . join(',', ('?') x @signedby) . ")";
+    }
+    push(@args, @signedby);
+  }
   my $sth = $self->{dbh}->prepare($sql);
-  my $rc = $sth->execute($username, $email, $ip);
+  my $rc = $sth->execute($self->{_username}, @args);
 
   if (!$rc) { # there was an error, but try to go on
-    my $err = $self->{dbh}->errstr;
-    dbg("auto-whitelist (sql-based) get_addr_entry: SQL Error: $err");
+    info("auto-whitelist: sql-based get_addr_entry %s: SQL error: %s",
+         join('|',@args), $sth->errstr);
     $entry->{count} = 0;
     $entry->{totscore} = 0;
   }
   else {
-    my $aryref = $sth->fetchrow_arrayref();
-
-    if (defined($aryref)) { # we got some data back
-      $entry->{count} = $aryref->[0] || 0;
-      $entry->{totscore} = $aryref->[1] || 0;
+    my $cnt = 0;
+    my $aryref;
+    # how to combine data if there are several entries (like signed by
+    # an author domain and by a remailer)?  for now just take an average
+    while ( defined($aryref = $sth->fetchrow_arrayref()) ) {
+      if (defined $entry->{count} && defined $aryref->[1]) {
+        $entry->{count} += $aryref->[0];
+        $entry->{totscore} += $aryref->[1];
+      }
       $entry->{exists_p} = 1;
-      dbg("auto-whitelist (sql-based) get_addr_entry: Found existing entry for $addr");
+      $cnt++;
     }
-    else {
-      dbg("auto-whitelist (sql-based) get_addr_entry: No entry found for $addr");
-    }
+    dbg("auto-whitelist: sql-based get_addr_entry: %s for %s",
+        $cnt ? "found $cnt entries" : 'no entries found',
+        join('|',@args) );
   }
   $sth->finish();
 
-  dbg ("auto-whitelist (sql-based): $addr scores ".$entry->{count}.'/'.$entry->{totscore});
+  dbg("auto-whitelist: sql-based %s scores %s, count %s",
+      join('|',@args), $entry->{totscore}, $entry->{count});
 
   return $entry;
 }
@@ -228,39 +278,85 @@ sub add_score {
 
   $entry->{count} += 1;
   $entry->{totscore} += $score;
+  my $signedby = $entry->{signedby};
   
-  return $entry unless ($email && $ip);
+  return $entry  unless $email ne '' && (defined $ip || defined $signedby);
 
-  my $username = $self->{main}->{username};
-  
-  if ($entry->{exists_p}) { # entry already exists, so just update
-    my $sql = "UPDATE $self->{tablename} SET count = count + 1,
-                                             totscore = totscore + ?
-                WHERE username = ? AND email = ? AND ip = ?";
-    
+  # try inserting first, and if that fails we'll do the update; this way
+  # we avoid to large extent a race condition between multiple processes
+
+  my $inserted = 0;
+
+  { my @fields = qw(username email ip count totscore);
+    my @signedby;
+    if ($self->{_with_awl_signer}) {
+      push(@fields, 'signedby');
+      @signedby = !defined $signedby ? () : split(' ', lc $signedby);
+      @signedby = ( '' )  if !@signedby;
+    }
+    my @args = ($self->{_username}, $email, $ip, 1, $score);
+    my $sql = sprintf("INSERT INTO %s (%s) VALUES (%s)", $self->{tablename},
+                      join(',', @fields),  join(',', ('?') x @fields));
     my $sth = $self->{dbh}->prepare($sql);
-    my $rc = $sth->execute($score, $username, $email, $ip);
-    
-    if (!$rc) {
-      my $err = $self->{dbh}->errstr;
-      dbg("auto-whitelist (sql-based) add_score: SQL Error: $err");
+
+    if (!$self->{_with_awl_signer}) {
+      my $rc = $sth->execute(@args);
+      if (!$rc) {
+        dbg("auto-whitelist: sql-based add_score/insert %s: SQL error: %s",
+             join('|',@args), $sth->errstr);
+      } else {
+        dbg("auto-whitelist: sql-based add_score/insert ".
+            "score %s: %s", $score, join('|',@args));
+        $inserted = 1; $entry->{exists_p} = 1;
+      }
+    } else {
+      for my $s (@signedby) {
+        my $rc = $sth->execute(@args, $s);
+        if (!$rc) {
+          dbg("auto-whitelist: sql-based add_score/insert %s: SQL error: %s",
+              join('|',@args,$s), $sth->errstr);
+        } else {
+          dbg("auto-whitelist: sql-based add_score/insert ".
+              "score %s: %s", $score, join('|',@args,$s));
+          $inserted = 1; $entry->{exists_p} = 1;
+        }
+      }
     }
-    else {
-      dbg("auto-whitelist (sql-based) add_score: New count: ". $entry->{count} .", new totscore: ".$entry->{totscore}." for ".$entry->{addr});
-    }
-    $sth->finish();
   }
-  else { # no entry yet, so insert a new entry
-    my $sql = "INSERT INTO $self->{tablename} (username,email,ip,count,totscore) VALUES (?,?,?,?,?)";
-    my $sth = $self->{dbh}->prepare($sql);
-    my $rc = $sth->execute($username,$email,$ip,1,$score);
-    if (!$rc) {
-      my $err = $self->{dbh}->errstr;
-      dbg("auto-whitelist (sql-based) add_score: SQL Error: $err");
+
+  if (!$inserted) {
+    # insert failed, assume primary key constraint, so try the update
+
+    my $sql = "UPDATE $self->{tablename} ".
+              "SET count = count + 1, totscore = totscore + ? ".
+              "WHERE username = ? AND email = ?";
+    my(@args) = ($score, $self->{_username}, $email);
+    if ($self->{_with_awl_signer}) {
+      my @signedby = !defined $signedby ? () : split(' ', lc $signedby);
+      if (!@signedby) {
+        $sql .= " AND signedby = ''";
+      } elsif (@signedby == 1) {
+        $sql .= " AND signedby = ?";
+      } elsif (@signedby > 1) {
+        $sql .= " AND signedby IN (" . join(',', ('?') x @signedby) . ")";
+      }
+      push(@args, @signedby);
     }
-    $entry->{exists_p} = 1;
-    dbg("auto-whitelist (sql-based) add_score: Created new entry for ".$entry->{addr}." with totscore: $score");
-    $sth->finish();
+    $sql .= " AND ip = ?";
+    push(@args, $ip);
+
+    my $sth = $self->{dbh}->prepare($sql);
+    my $rc = $sth->execute(@args);
+    
+    if (!$rc) {
+      info("auto-whitelist: sql-based add_score/update %s: SQL error: %s",
+           join('|',@args), $sth->errstr);
+    } else {
+      dbg("auto-whitelist: sql-based add_score/update ".
+          "new count: %s, new totscore: %s for %s",
+          $entry->{count}, $entry->{totscore}, join('|',@args));
+      $entry->{exists_p} = 1;
+    }
   }
   
   return $entry;
@@ -284,31 +380,37 @@ sub remove_entry {
 
   return unless ($email && $ip);
 
-  my $username = $self->{main}->{username};
-
-  my $sql;
-  my @args;
+  my $sql = "DELETE FROM $self->{tablename} WHERE username = ? AND email = ?";
+  my @args = ($self->{_username}, $email);
 
   # when $ip is equal to none then attempt to delete all entries
   # associated with address
   if ($ip eq 'none') {
-    $sql = "DELETE FROM $self->{tablename} WHERE username = ? AND email = ?";
-    @args = ($username, $email);
-    dbg("auto-whitelist (sql-based) remove_entry: Removing all entries matching $email");
+    dbg("auto-whitelist: sql-based remove_entry: removing all entries matching $email");
   }
   else {
-    $sql = "DELETE FROM $self->{tablename}
-             WHERE username = ? AND email = ? AND ip = ?";
-    @args = ($username, $email, $ip);
-    dbg("auto-whitelist (sql-based) remove_entry: Removing single entry matching ".$entry->{addr});
+    $sql .= " AND ip = ?";
+    push(@args, $ip);
+    dbg("auto-whitelist: sql-based remove_entry: removing single entry matching ".$entry->{addr});
+  }
+  # if a key 'signedby' exists in the $entry, be selective on its value too
+  my $signedby = $entry->{signedby};
+  if ($self->{_with_awl_signer} && defined $signedby) {
+    my @signedby = split(' ', lc $signedby);
+    if (@signedby == 1) {
+      $sql .= " AND signedby = ?";
+    } elsif (@signedby > 1) {
+      $sql .= " AND signedby IN (" . join(',', ('?') x @signedby) . ")";
+    }
+    push(@args, @signedby);
   }
 
   my $sth = $self->{dbh}->prepare($sql);
   my $rc = $sth->execute(@args);
 
   if (!$rc) {
-    my $err = $self->{dbh}->errstr;
-    dbg("auto-whitelist (sql-based) remove_entry: SQL Error: $err");
+    info("auto-whitelist: sql-based remove_entry %s: SQL error: %s",
+         join('|',@args), $sth->errstr);
   }
   else {
     # We might normally have a dbg saying we removed the address
@@ -328,7 +430,7 @@ This method provides the necessary cleanup for the address list.
 
 sub finish {
   my ($self) = @_;
-  dbg("auto-whitelist (sql-based) finish: Disconnected from " . $self->{dsn});
+  dbg("auto-whitelist: sql-based finish: disconnected from " . $self->{dsn});
   $self->{dbh}->disconnect();
 }
 
@@ -348,12 +450,10 @@ sub _unpack_addr {
   my ($email, $ip) = split(/\|ip=/, $addr);
 
   unless ($email && $ip) {
-    dbg("auto-whitelist (sql-based): _unpack_addr: Unable to decode $addr");
+    dbg("auto-whitelist: sql-based _unpack_addr: unable to decode $addr");
   }
 
   return ($email, $ip);
 }
-
-sub dbg { Mail::SpamAssassin::dbg (@_); }
 
 1;

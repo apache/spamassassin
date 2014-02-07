@@ -1,9 +1,10 @@
 # <@LICENSE>
-# Copyright 2004 Apache Software Foundation
-# 
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to you under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at:
 # 
 #     http://www.apache.org/licenses/LICENSE-2.0
 # 
@@ -46,7 +47,9 @@ See C<Mail::SpamAssassin::DBBasedAddrList> for an example.
 package Mail::SpamAssassin::PersistentAddrList;
 
 use strict;
+use warnings;
 use bytes;
+use re 'taint';
 
 use vars qw{
   @ISA
@@ -82,7 +85,7 @@ SpamAssassin classes.
 
 sub new_checker {
   my ($factory, $main) = @_;
-  die "unimpled base method";	# override this
+  die "auto-whitelist: unimplemented base method";	# override this
 }
 
 ###########################################################################
@@ -108,9 +111,9 @@ a C<count> key and a C<totscore> key.
 =cut 
 
 sub get_addr_entry {
-  my ($self, $addr) = @_;
+  my ($self, $addr, $signedby) = @_;
   my $entry = { };
-  die "unimpled base method";	# override this
+  die "auto-whitelist: unimplemented base method";	# override this
   return $entry;
 }
 
@@ -125,7 +128,7 @@ given entry, and then return the new entry.
 
 sub add_score {
     my ($self, $entry, $score) = @_;
-    die "unimpled base method"; # override this
+    die "auto-whitelist: unimplemented base method"; # override this
 }
 
 ###########################################################################
@@ -138,7 +141,7 @@ This method should remove the given entry from the whitelist database.
 
 sub remove_entry {
   my ($self, $entry) = @_;
-  die "unimpled base method";	# override this
+  die "auto-whitelist: unimplemented base method";	# override this
 }
 
 ###########################################################################
@@ -157,3 +160,7 @@ sub finish {
 ###########################################################################
 
 1;
+
+=back
+
+=cut

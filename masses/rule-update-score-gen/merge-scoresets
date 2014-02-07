@@ -1,0 +1,65 @@
+#!/usr/bin/perl
+
+# merges the scores found in score-setN into a single scores file
+#
+# if called with a score set parameter N, only rules that appear in
+# that score-setN file will be used (score lines for rules only found
+# in other score-set files will be ignored)
+#
+# <@LICENSE>
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to you under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at:
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# </@LICENSE>
+
+use strict;
+use warnings;
+
+my %rules;
+
+my $active_rule_set;
+$active_rule_set = $ARGV[0] if (defined $ARGV[0] && $ARGV[0] =~ /^[0-3]$/);
+
+if (defined $active_rule_set) {
+  open (SCORES, "scores-set$active_rule_set") or die "Cannot open scores-set$active_rule_set: $!";
+  while(<SCORES>) {
+    next unless /^score (\S+)\s+(-?[\d.]+)$/;
+    @{$rules{$1}} = ('0.000', '0.000' ,'0.000', '0.000');
+    $rules{$1}[$active_rule_set] = $2;
+  }
+  close SCORES;
+}
+
+for (my $i = 0; $i < 4; $i++) {
+  next if (defined $active_rule_set && $i == $active_rule_set);
+  open (SCORES, "scores-set$i") or die "Cannot open scores-set$i: $!";
+  while(<SCORES>) {
+    next unless /^score (\S+)\s+(-?[\d.]+)$/;
+    next if (defined $active_rule_set && !exists $rules{$1});
+    @{$rules{$1}} = ('0.000', '0.000' ,'0.000', '0.000') unless exists $rules{$1};
+    $rules{$1}[$i] = $2;
+  }
+  close SCORES;
+}
+
+open (SCORES, ">scores") or die "Cannot open scores: $!";
+  foreach my $rule (sort(keys %rules)) {
+    my $line = "score $rule ";
+    for (my $i = 0; $i < 30 - length $rule; $i++) {
+      $line .= ' ';
+    }
+    $line .= join(' ', @{$rules{$rule}})."\n";
+    print SCORES $line;
+  }
+close SCORES;

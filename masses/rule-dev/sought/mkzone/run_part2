@@ -1,0 +1,176 @@
+#!/bin/bash
+#
+# Generate an updates tarball from a directory in SVN.
+#
+# usage: sudo -u rulesd /export/home/svn-trunk/masses/rule-dev/sought/mkzone/run_part2
+#
+# required setup, in /etc/sudoers or /opt/sfw/etc/sudoers:
+#   updatesd     ALL = NOPASSWD: /usr/sbin/rndc reload
+
+. /etc/profile
+
+# name of rule-updates package
+#
+updname=sought
+
+# source directory for this update package
+#
+sourcedir=/export/home/svn-trunk/rulesrc/updates/sought
+
+# versions to build
+#
+versions="3.2.x 3.3.0 3.1.x"
+
+# download stage, where update tarballs are deposited for downloaders
+#
+stagedir=/export/home/rulesd/web/updates.spamassassin.org/rules/$updname/stage
+remotestagedir=vm-web:/export/home/rulesd/web/updates.spamassassin.org/rules/$updname/stage
+
+# directory where "0.2.3" and other version-specific files live.
+# it's assumed that the *real* zone $INCLUDEs files from this dir.
+# it must be writable by the user this script runs as.
+#
+dnsdir=/export/home/rulesd/zones/$updname.updates.spamassassin.org.d
+
+# directory where "counter", "soa_line.tmpl", "soa_line" live.
+# it's assumed that the *real* zone $INCLUDEs files from this dir.
+# it must be writable by the user this script runs as.
+#
+soadir=/var/named/spamassassin.org.d
+
+tmpbase=/export/home/rulesd/tmp
+svndir=/export/home/svn-trunk
+perl=/local/perl586/bin/perl
+
+# ---------------------------------------------------------------------------
+
+make_tarball_for_version () {
+version="$1"
+
+case "$version" in
+  3.1.x ) tarballprefix="310" ;;
+  3.2.x ) tarballprefix="320" ;;
+  3.3.0 ) tarballprefix="330" ;;
+  * ) echo "no prefix for $version! FAILING" 1>&2 ; exit 1 ;;
+esac
+
+
+tmpdir=$tmpbase/$updname.$version
+rm -rf $tmpdir; mkdir -p $tmpdir         || exit $?
+cd $svndir
+
+# get SVN revision number.
+# note: use 'Last Changed Rev' instead of 'Revision'.  Because we share
+# an SVN repository with other projects, this means that the same
+# rev of *our* codebase may appear under multiple rev#s, as other projects
+# check their changes in.
+svn info rulesrc < /dev/null > $tmpdir/svn 2>&1 || exit $?
+svnrev=`(grep 'Last Changed Rev: ' $tmpdir/svn || exit 1) | sed -e 's/^.*: //'`
+
+if [ "$svnrev" == "" ] ; then
+  echo "missing SVN revision"
+  cat $tmpdir/svn
+  exit 5
+fi
+
+if [ "$svnrev" -lt 1 ] ; then
+  echo "bad SVN revision: $svnrev"
+  cat $tmpdir/svn
+  exit 5
+fi
+
+if [ -f $tmpdir.last_svn -a $svnrev = `cat $tmpdir.last_svn` ] ; then
+  echo "no change in SVN: $svnrev is last rev"
+  cat $tmpdir/svn
+  exit 0
+fi
+
+# extract the new rules files.
+rulesdir=$tmpdir/share/spamassassin
+[ -d $rulesdir/. ] || mkdir -p $rulesdir
+cp rulesrc/updates/$updname/*.cf $rulesdir
+
+# and lint them
+./spamassassin -C $rulesdir -p rules/v320.pre --lint  	 || exit $?
+
+(
+  cd $rulesdir 
+  tar cvf - *.cf                         || exit $?
+) | gzip -9 > $tmpdir/update.tgz         || exit $?
+
+# ensure non-empty
+[ -s $tmpdir/update.tgz ] || exit 3
+
+# sign and get sums
+gpg --batch --homedir /export/home/rulesd/code/signing_key \
+	-bas $tmpdir/update.tgz  		|| exit $?
+
+$perl build/sha1sum.pl $tmpdir/update.tgz > $tmpdir/update.tgz.sha1  || exit $?
+
+
+
+fullsvnrev="$tarballprefix$svnrev"
+
+# TODO: if we were maintaining multiple versions, these would be
+# copied into a path specific to the version
+
+chmod 644 $tmpdir/update.tgz $tmpdir/update.tgz*
+mkdir -p $stagedir
+mv $tmpdir/update.tgz      $stagedir/$fullsvnrev.tar.gz            || exit $?
+mv $tmpdir/update.tgz.sha1 $stagedir/$fullsvnrev.tar.gz.sha1       || exit $?
+mv $tmpdir/update.tgz.asc  $stagedir/$fullsvnrev.tar.gz.asc        || exit $?
+
+
+
+# next, create the new DNS record....
+
+# turn "3.2.0" into "0.2.3"
+# and "foo.bar.3.2.0" into "0.2.3.bar.foo"
+rvers=`echo "$version" | perl -ne \
+    's/x/*/g;chop; @x = split(/\./); print join ".", reverse @x'`
+
+[ -d $dnsdir/. ] || mkdir -p $dnsdir
+dnsfile="$dnsdir/$version"
+if echo "
+$rvers  TXT	\"$fullsvnrev\"
+" > $dnsfile.new
+then
+  mv $dnsfile.new $dnsfile || exit $?
+else
+  echo "failed to create $dnsfile.new" 1>&2 ; exit 1
+fi
+
+# increment the zone serial.
+bash ./build/mkupdates/tick_zone_serial $soadir || exit $?
+
+# and don't rebuild this rev's update
+echo $svnrev > $tmpdir.last_svn
+
+}
+
+# ---------------------------------------------------------------------------
+
+mv LOG.2 LOG.3
+mv LOG.1 LOG.2
+mv LOG   LOG.1
+
+(
+
+set -xe
+
+for version in $versions ; do
+  make_tarball_for_version $version
+done
+
+ls -l $stagedir
+
+# clean up 4-day-old (and older) update tarballs.  This seems as
+# good a place as any to do this!
+# note: for manual updates, the file permissions should be 0444 so let's clean
+# out only 0644 (automatic) updates.  a bit of a kluge, but ...
+find $stagedir -mtime +4 -perm 0644 -type f -name '*.tar.*' | xargs rm
+
+#rsync -vre ssh --delete $stagedir/. $remotestagedir/.
+
+) > LOG 2>&1
+exit

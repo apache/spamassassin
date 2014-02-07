@@ -1,9 +1,10 @@
 # <@LICENSE>
-# Copyright 2004 Apache Software Foundation
-# 
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to you under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at:
 # 
 #     http://www.apache.org/licenses/LICENSE-2.0
 # 
@@ -17,11 +18,14 @@
 package Mail::SpamAssassin::Locker::UnixNFSSafe;
 
 use strict;
+use warnings;
 use bytes;
+use re 'taint';
 
 use Mail::SpamAssassin;
 use Mail::SpamAssassin::Locker;
 use Mail::SpamAssassin::Util;
+use Mail::SpamAssassin::Logger;
 use File::Spec;
 use Time::Local;
 use Fcntl qw(:DEFAULT :flock);
@@ -53,11 +57,14 @@ sub new {
 use constant LOCK_MAX_AGE => 600;	# seconds 
 
 sub safe_lock {
-  my ($self, $path, $max_retries) = @_;
+  my ($self, $path, $max_retries, $mode) = @_;
   my $is_locked = 0;
   my @stat;
 
   $max_retries ||= 30;
+  $mode ||= "0700";
+  $mode = (oct $mode) & 0666;
+  dbg ("locker: mode is $mode");
 
   my $lock_file = "$path.lock";
   my $hname = Mail::SpamAssassin::Util::fq_hostname();
@@ -67,49 +74,55 @@ sub safe_lock {
   # keep this for unlocking
   $self->{lock_tmp} = $lock_tmp;
 
-  my $umask = umask 077;
+  my $umask = umask(~$mode);
   if (!open(LTMP, ">$lock_tmp")) {
       umask $umask; # just in case
-      die "lock: $$ cannot create tmp lockfile $lock_tmp for $lock_file: $!\n";
+      die "locker: safe_lock: cannot create tmp lockfile $lock_tmp for $lock_file: $!\n";
   }
   umask $umask;
   autoflush LTMP 1;
-  dbg("lock: $$ created $lock_tmp");
+  dbg("locker: safe_lock: created $lock_tmp");
 
   for (my $retries = 0; $retries < $max_retries; $retries++) {
     if ($retries > 0) { $self->jittery_one_second_sleep(); }
-    print LTMP "$hname.$$\n";
-    dbg("lock: $$ trying to get lock on $path with $retries retries");
+    print LTMP "$hname.$$\n"  or warn "Error writing to $lock_tmp: $!";
+    dbg("locker: safe_lock: trying to get lock on $path with $retries retries");
     if (link($lock_tmp, $lock_file)) {
-      dbg("lock: $$ link to $lock_file: link ok");
+      dbg("locker: safe_lock: link to $lock_file: link ok");
       $is_locked = 1;
       last;
     }
     # link _may_ return false even if the link _is_ created
     @stat = lstat($lock_tmp);
-    if ($stat[3] > 1) {
-      dbg("lock: $$ link to $lock_file: stat ok");
+    @stat  or warn "locker: error accessing $lock_tmp: $!";
+    if (defined $stat[3] && $stat[3] > 1) {
+      dbg("locker: safe_lock: link to $lock_file: stat ok");
       $is_locked = 1;
       last;
     }
     # check age of lockfile ctime
     my $now = ($#stat < 11 ? undef : $stat[10]);
     @stat = lstat($lock_file);
+    @stat  or warn "locker: error accessing $lock_file: $!";
     my $lock_age = ($#stat < 11 ? undef : $stat[10]);
-    if (!defined($lock_age) || ($now - $lock_age) > LOCK_MAX_AGE) {
+    if (defined($lock_age) && defined($now) && ($now - $lock_age) > LOCK_MAX_AGE)
+    {
       # we got a stale lock, break it
-      dbg("lock: $$ breaking stale $lock_file: age=" .
+      dbg("locker: safe_lock: breaking stale $lock_file: age=" .
 	  (defined $lock_age ? $lock_age : "undef") . " now=$now");
-      unlink ($lock_file) || warn "lock: $$ unlink of lock file $lock_file failed: $!\n";
+      unlink($lock_file)
+        or warn "locker: safe_lock: unlink of lock file $lock_file failed: $!\n";
     }
   }
 
-  close(LTMP);
-  unlink ($lock_tmp) || warn "lock: $$ unlink of temp lock $lock_tmp failed: $!\n";
+  close LTMP  or die "error closing $lock_tmp: $!";
+  unlink($lock_tmp)
+    or warn "locker: safe_lock: unlink of temp lock $lock_tmp failed: $!\n";
 
   # record this for safe unlocking
   if ($is_locked) {
     @stat = lstat($lock_file);
+    @stat  or warn "locker: error accessing $lock_file: $!";
     my $lock_ctime = ($#stat < 11 ? undef : $stat[10]);
 
     $self->{lock_ctimes} ||= { };
@@ -127,7 +140,7 @@ sub safe_unlock {
   my $lock_file = "$path.lock";
   my $lock_tmp = $self->{lock_tmp};
   if (!$lock_tmp) {
-    dbg("unlock: $$ $path.lock never locked");
+    dbg("locker: safe_unlock: $path.lock never locked");
     return;
   }
 
@@ -136,46 +149,59 @@ sub safe_unlock {
   # directly because the server's clock may be out of sync with the client's.
 
   my @stat_ourtmp;
-  sysopen(LTMP, $lock_tmp, O_CREAT|O_WRONLY|O_EXCL, 0700);
-  autoflush LTMP 1;
-  print LTMP "\n";
-
-  if (!(@stat_ourtmp = stat(LTMP)) || (scalar(@stat_ourtmp) < 11)) {
-    warn "unlock: $$ failed to create lock tmpfile $lock_tmp";
-    close LTMP; unlink $lock_tmp;
+  if (!defined sysopen(LTMP, $lock_tmp, O_CREAT|O_WRONLY|O_EXCL, 0700)) {
+    warn "locker: safe_unlock: failed to create lock tmpfile $lock_tmp: $!";
     return;
+  } else {
+    autoflush LTMP 1;
+    print LTMP "\n"  or warn "Error writing to $lock_tmp: $!";
+
+    if (!(@stat_ourtmp = stat(LTMP)) || (scalar(@stat_ourtmp) < 11)) {
+      @stat_ourtmp  or warn "locker: error accessing $lock_tmp: $!";
+      warn "locker: safe_unlock: failed to create lock tmpfile $lock_tmp";
+      close LTMP  or die "error closing $lock_tmp: $!";
+      unlink($lock_tmp)
+        or warn "locker: safe_lock: unlink of lock file failed: $!\n";
+      return;
+    }
   }
  
   my $ourtmp_ctime = $stat_ourtmp[10]; # paranoia
   if (!defined $ourtmp_ctime) {
-    die "stat failed on $lock_tmp";
+    die "locker: safe_unlock: stat failed on $lock_tmp";
   }
 
-  close LTMP; unlink $lock_tmp;
+  close LTMP  or die "error closing $lock_tmp: $!";
+  unlink($lock_tmp)
+    or warn "locker: safe_lock: unlink of lock file failed: $!\n";
 
   # 2. If the ctime hasn't been modified, unlink the file and return. If the
-  # lock has expired, sleep the usual random interval before returning. If we # didn't sleep, there could be a race if the caller immediately tries to
+  # lock has expired, sleep the usual random interval before returning. If we
+  # didn't sleep, there could be a race if the caller immediately tries to
   # relock the file.
 
   my $lock_ctime = $self->{lock_ctimes}->{$path};
   if (!defined $lock_ctime) {
-    warn "unlock: $$ no ctime recorded for $lock_file";
+    warn "locker: safe_unlock: no ctime recorded for $lock_file";
     return;
   }
 
-  my @stat_lock = lstat ($lock_file);
+  my @stat_lock = lstat($lock_file);
+  @stat_lock  or warn "locker: error accessing $lock_file: $!";
+
   my $now_ctime = $stat_lock[10];
 
   if (defined $now_ctime && $now_ctime == $lock_ctime) 
   {
     # things are good: the ctimes match so it was our lock
-    unlink ($lock_file) || warn "unlock: $$ unlink failed: $lock_file\n";
-    dbg("unlock: $$ unlink $lock_file");
+    unlink($lock_file)
+      or warn "locker: safe_unlock: unlink failed: $lock_file\n";
+    dbg("locker: safe_unlock: unlink $lock_file");
 
     if ($ourtmp_ctime >= $lock_ctime + LOCK_MAX_AGE) {
       # the lock has expired, so sleep a bit; use some randomness
       # to avoid race conditions.
-      dbg("unlock: $$ lock expired on $lock_file expired safely; sleeping");
+      dbg("locker: safe_unlock: lock expired on $lock_file expired safely; sleeping");
       my $i; for ($i = 0; $i < 5; $i++) {
         $self->jittery_one_second_sleep();
       }
@@ -188,9 +214,9 @@ sub safe_unlock {
   # file, warn it was stolen. If not, then our lock is expired and
   # someone else has grabbed the file, so warn it was lost.
   if ($ourtmp_ctime < $lock_ctime + LOCK_MAX_AGE) {
-    warn "unlock: $$ lock on $lock_file was stolen";
+    warn "locker: safe_unlock: lock on $lock_file was stolen";
   } else {
-    warn "unlock: $$ lock on $lock_file was lost due to expiry";
+    warn "locker: safe_unlock: lock on $lock_file was lost due to expiry";
   }
 }
 
@@ -210,14 +236,14 @@ sub refresh_lock {
 
   # update the lock_ctimes entry
   my @stat = lstat($lock_file);
+  @stat  or warn "locker: error accessing $lock_file: $!";
+
   my $lock_ctime = ($#stat < 11 ? undef : $stat[10]);
   $self->{lock_ctimes}->{$path} = $lock_ctime;
 
-  dbg("refresh: $$ refresh $path.lock");
+  dbg("locker: refresh_lock: refresh $path.lock");
 }
 
 ###########################################################################
-
-sub dbg { Mail::SpamAssassin::dbg (@_); }
 
 1;

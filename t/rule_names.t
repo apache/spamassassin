@@ -15,22 +15,40 @@ if (-e 'test_dir') {            # running from test directory, not ..
   $prefix = '..';
 }
 
-use strict;
+use lib '.'; use lib 't';
 use SATest; sa_t_init("rule_names");
-use Test;
+
+use strict;
 use Mail::SpamAssassin;
-use Digest::SHA1;
+
+BEGIN {
+  eval { require Digest::SHA; import Digest::SHA qw(sha1); 1 }
+  or do { require Digest::SHA1; import Digest::SHA1 qw(sha1) }
+}
+
+our $RUN_THIS_TEST;
+
+use Test;
+BEGIN {
+  $RUN_THIS_TEST = conf_bool('run_rule_name_tests');
+
+  plan tests => 0  if !$RUN_THIS_TEST;
+};
+
+if (!$RUN_THIS_TEST) {
+  print "NOTE: this test requires 'run_rule_name_tests' set to 'y'.\n";
+  exit;
+}
+
 use vars qw(%patterns %anti_patterns);
 
 # initialize SpamAssassin
-my $sa = Mail::SpamAssassin->new({
-    rules_filename => "$prefix/t/log/test_rules_copy",
-    site_rules_filename => "$prefix/t/log/test_default.cf",
-    userprefs_filename  => "$prefix/masses/spamassassin/user_prefs",
-    local_tests_only    => 1,
-    debug             => 0,
-    dont_copy_prefs   => 1,
-});
+my $sa = create_saobj({'dont_copy_prefs' => 1});
+
+# allow_user_rules, otherwise $sa->{conf}->{test_types} will be
+# deleted by SA::Conf::Parser::finish_parsing()
+$sa->{conf}->{allow_user_rules} = 1;
+
 $sa->init(0); # parse rules
 
 # get rule names
@@ -48,24 +66,35 @@ for my $test (@tests) {
   # look for test with spaces on either side, should match report
   # lines in spam report, only exempt rules that are really unavoidable
   # and are clearly not hitting due to rules being named poorly
-  next if $test eq "UPPERCASE_75_100";
+  next if $test =~ /^UPPERCASE_\d/;
   next if $test eq "UNIQUE_WORDS";
+  # exempt the auto-generated nightly mass-check rules
+  next if $test =~ /^T_MC_/;
+
   $anti_patterns{"$test,"} = "P_" . $i++;
 }
 
-# settings
-plan tests => (scalar(keys %anti_patterns) + scalar(keys %patterns)),
-onfail => sub {
-    warn "\n\n   Note: rule_name failures may be only cosmetic" .
-    "\n        but must be fixed before release\n\n";
+{ # couldn't call Test::plan in a BEGIN phase, the %patterns and %anti_patterns
+  # must be assembled first in order to get the planned test count
+
+  plan tests => scalar(keys %anti_patterns) + scalar(keys %patterns),
+
+  onfail => sub {
+      warn "\n\n   Note: rule_name failures may be only cosmetic" .
+      "\n        but must be fixed before release\n\n";
+  };
 };
+
+# ---------------------------------------------------------------------------
+
 
 tstprefs ("
 	# set super low threshold, so always marked as spam
 	required_score -10000.0
-	# add a fake lexically final test so every other hit will always be
+	# add two fake lexically high tests so every other hit will always be
 	# followed by a comma in the X-Spam-Status header
 	body ZZZZZZZZ /./
+	body zzzzzzzz /./
 ");
 sarun ("-L < $mail", \&patterns_run_cb);
 ok_all_patterns();
@@ -88,9 +117,15 @@ Content-Type: text/plain; charset=us-ascii; format=flowed
 Content-Transfer-Encoding: 7bit
 
 EOF
-    print MAIL join("\n", @tests) . "\n\n";
+
     # we are looking for random failures, but we do a deterministic
-    # test to prevent too much frustration with "make test"
+    # test to prevent too much frustration with "make test".
+
+    # start off sorted
+    @tests = sort @tests;
+
+    print MAIL join("\n", @tests) . "\n\n";
+
     # 25 iterations gets most hits most of the time, but 10 is large enough
     for (1..10) {
       print MAIL join("\n", sha1_shuffle($_, @tests)) . "\n\n";
@@ -105,7 +140,7 @@ EOF
 # Fisher-Yates shuffle
 sub fy_shuffle {
   for (my $i = $#_; $i > 0; $i--) {
-    @_[$_,$i] = @_[$i,$_] for rand $i+1;
+    @_[$_,$i] = @_[$i,$_] for int rand($i+1);
   }
   return @_;
 }
@@ -115,6 +150,6 @@ sub sha1_shuffle {
   my $i = shift;
   return map { $_->[0] }
          sort { $a->[1] cmp $b->[1] }
-         map { [$_, Digest::SHA1::sha1($_ . $i)] }
+         map { [$_, sha1($_ . $i)] }
          @_;
 }

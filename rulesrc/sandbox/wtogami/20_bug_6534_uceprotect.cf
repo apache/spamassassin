@@ -1,0 +1,18 @@
+# # https://issues.apache.org/SpamAssassin/show_bug.cgi?id=6534
+# # Bug 6534 - Evaluate UCEPROTECT
+#
+# header     RCVD_IN_UCEPROTECT_L1    eval:check_rbl('uceprot-1-lastexternal','dnsbl-1.uceprotect.net.')
+# describe RCVD_IN_UCEPROTECT_L1    Listed in dnsbl-1.uceprotect.net.
+# #score     RCVD_IN_UCEPROTECT_L1    0.0 0.3 0.0 0.3
+# tflags     RCVD_IN_UCEPROTECT_L1    net nopublish
+#
+# #header     RCVD_IN_UCEPROTECT_L2    eval:check_rbl('uceprot-2-lastexternal','dnsbl-2.uceprotect.net.')
+# #describe RCVD_IN_UCEPROTECT_L2    Listed in dnsbl-2.uceprotect.net.
+# #score     RCVD_IN_UCEPROTECT_L2    0.0 0.2 0.0 0.2
+# #tflags     RCVD_IN_UCEPROTECT_L2    net nopublish
+#
+# #header     RCVD_IN_UCEPROTECT_L3    eval:check_rbl('uceprot-3-lastexternal','dnsbl-3.uceprotect.net.')
+# #describe RCVD_IN_UCEPROTECT_L3    Listed in dnsbl-3.uceprotect.net.
+# #score     RCVD_IN_UCEPROTECT_L3    0.0 0.1 0.0 0.1
+# #tflags     RCVD_IN_UCEPROTECT_L3    net nopublish
+#

@@ -13,14 +13,15 @@
 # searches; use /.{0,30}/ instead of /.*/ to avoid huge search times.
 #
 # <@LICENSE>
-# Copyright 2004 Apache Software Foundation
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to you under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at:
+# 
 #     http://www.apache.org/licenses/LICENSE-2.0
-#
+# 
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -42,8 +43,6 @@ describe SUBJECT_DRUG_GAP_C	Subject contains a gappy version of 'cialis'
 header SUBJECT_DRUG_GAP_L	Subject =~ /l.{0,2}e.{0,2}v.{0,2}i.{0,2}t.{0,2}r.{0,2}a/i
 describe SUBJECT_DRUG_GAP_L	Subject contains a gappy version of 'levitra'
 
-header SUBJECT_DRUG_GAP_P	Subject =~ /p.{0,2}h.{0,6}t.{0,2}e.{0,2}r.{0,2}m/i
-describe SUBJECT_DRUG_GAP_P	Subject contains a gappy version of 'phentermine'
 
 header SUBJECT_DRUG_GAP_S	Subject =~ /\bs.{0,1}o.{0,1}m.{0,1}a\b/i
 describe SUBJECT_DRUG_GAP_S	Subject contains a gappy version of 'soma'
@@ -51,11 +50,6 @@ describe SUBJECT_DRUG_GAP_S	Subject contains a gappy version of 'soma'
 header SUBJECT_DRUG_GAP_VA	Subject =~ /v.{0,2}a.{0,2}l.{0,2}i.{0,2}u.{0,2}m/i
 describe SUBJECT_DRUG_GAP_VA	Subject contains a gappy version of 'valium'
 
-header SUBJECT_DRUG_GAP_VIA	Subject =~ /v.{0,2}i.{0,2}a.{0,2}g.{0,2}r.{0,2}a/i
-describe SUBJECT_DRUG_GAP_VIA	Subject contains a gappy version of 'viagra'
-
-header SUBJECT_DRUG_GAP_VIC	Subject =~ /v.{0,2}i.{0,2}c.{0,2}[0o].{0,2}d.{0,2}i.{0,2}n/i
-describe SUBJECT_DRUG_GAP_VIC	Subject contains a gappy version of 'vicodin'
 
 header SUBJECT_DRUG_GAP_X	Subject =~ /x.{0,2}a.{0,2}n.{0,2}a.{0,2}x/i
 describe SUBJECT_DRUG_GAP_X	Subject contains a gappy version of 'xanax'
@@ -67,25 +61,25 @@ body DRUG_DOSAGE		m{[\d\.]+ *\$? *(?:[\\/]|per) *d.?o.?s.?e}i
 describe DRUG_DOSAGE		Talks about price per dose
 
 # jm: keep this case-sensitive, otherwise it FP's
-body DRUG_ED_CAPS		/\bCIALIS|LEVITRA|VIAGRA/
+body DRUG_ED_CAPS		/\b(?:CIALIS|LEVITRA|VIAGRA)/
 describe DRUG_ED_CAPS		Mentions an E.D. drug
 
-body DRUG_ED_COMBO		/\bviagra .{0,15}(?:phentermine|xenical|tenuate|zyban|propecia)\b/i
-describe DRUG_ED_COMBO		Viagra and other drugs
 
 body DRUG_ED_SILD		/\bsildenafil\b/i
 describe DRUG_ED_SILD		Talks about an E.D. drug using its chemical name
 
-body DRUG_ED_GENERIC		/Generic Viagra/
+body DRUG_ED_GENERIC		/\bGeneric Viagra\b/
 describe DRUG_ED_GENERIC	Mentions Generic Viagra
 
 body DRUG_ED_ONLINE		/\bviagra .{0,25}(?:express|online|overnight)/i
 describe DRUG_ED_ONLINE		Fast Viagra Delivery 
-body DEEP_DISC_MEDS		/\bdeep discount med(?:s|ications)\b/i
-describe DEEP_DISC_MEDS		Deep discount medications
 
 body ONLINE_PHARMACY		/\bonline pharmacy|\b(?:drugs|medications) online/i
 describe ONLINE_PHARMACY	Online Pharmacy
+
+# Updated bug 6448
+body NO_PRESCRIPTION		/N[o0].{1,10}P(?:er|re)scr[i1]pt[i1][o0]n.{1,10}(?:n[e3][e3]d[e3]d|requ[1i]re|n[e3]c[e3]ssary)/i
+describe NO_PRESCRIPTION	No prescription needed
 
 # too easy
 body VIA_GAP_GRA                /\bvia.gra\b/i
@@ -200,10 +194,7 @@ body __DRUGS_PAIN12	/\besgic plus\b/i
 #Darvon - a prescription narcotic
 body __DRUGS_PAIN13	/\bD[_\W]?[a4\xE0-\xE6@][_\W]?r[_\W]?v[_\W]?[o0\xF2-\xF6][_\W]?n\b/i
 body __DRUGS_PAIN14  /N[o0\xF2-\xF6]rc[o0\xF2-\xF6]/i
-meta DRUGS_PAIN (__DRUGS_PAIN1 || __DRUGS_PAIN2 || __DRUGS_PAIN3 || __DRUGS_PAIN4 ||__DRUGS_PAIN5 ||__DRUGS_PAIN6 ||__DRUGS_PAIN7 ||__DRUGS_PAIN8 || __DRUGS_PAIN9 || __DRUGS_PAIN10|| __DRUGS_PAIN11 || __DRUGS_PAIN12 || __DRUGS_PAIN13 ||__DRUGS_PAIN14)
-describe DRUGS_PAIN 	Refers to a pain relief drug
-meta DRUGS_PAIN_OBFU (( __DRUGS_PAIN4 &&! __DRUGS_PAIN_VICO) || ( __DRUGS_PAIN10 &&!__DRUGS_PAIN_VIOXX) || ( __DRUGS_PAIN7 &&!__DRUGS_PAIN_FIO))
-describe DRUGS_PAIN_OBFU 	Obfuscated reference to a pain relief drug
+meta __DRUGS_PAIN (__DRUGS_PAIN1 || __DRUGS_PAIN2 || __DRUGS_PAIN3 || __DRUGS_PAIN4 ||__DRUGS_PAIN5 ||__DRUGS_PAIN6 ||__DRUGS_PAIN7 ||__DRUGS_PAIN8 || __DRUGS_PAIN9 || __DRUGS_PAIN10|| __DRUGS_PAIN11 || __DRUGS_PAIN12 || __DRUGS_PAIN13 ||__DRUGS_PAIN14)
 #sleep aids
 #ativan and lorazepam already under anxiety
 #Ambien, brand of zolpidem tartrate
@@ -215,12 +206,11 @@ body __DRUGS_SLEEP3	/\b_{0,3}R[_\W]?[e3\xE8-\xEB][_\W]?s[_\W]?t[_\W]?[o0\xF2-\xF
 #Halcion, brand of triazolam
 body __DRUGS_SLEEP4	/\b_{0,3}H[_\W]?[a4\xE0-\xE6@][_\W]?l[_\W]?c[_\W]?i[_\W]?[o0\xF2-\xF6][_\W]?n_{0,3}\b/i
 
-meta DRUGS_SLEEP (__DRUGS_SLEEP1 || __DRUGS_SLEEP2 || __DRUGS_SLEEP3 ||__DRUGS_SLEEP4)
-describe DRUGS_SLEEP 	Refers to a sleep aid drug
+meta __DRUGS_SLEEP (__DRUGS_SLEEP1 || __DRUGS_SLEEP2 || __DRUGS_SLEEP3 ||__DRUGS_SLEEP4)
 
 #muscle relaxants
 #soma
-body __DRUGS_MUSCLE1	/(?:\b|\s)[_\W]{0,3}s[_\W]{0,3}[o0\xF2-\xF6][_\W]{0,3}m[_\W]{0,3}[a4\xE0-\xE6@][_\W]{0,3}(?:\b|\s)/i
+body __DRUGS_MUSCLE1	/(?:\b|\s)[_\W]{0,3}s[_\W]{0,3}[o0\xF2-\xF6][_\W]{0,3}m[_\W]{0,3}[a4\xE0-\xE3\xE5\xE6@][_\W]{0,3}(?:\b|\s)/i
 #cyclobenzaprine
 body __DRUGS_MUSCLE2	/\b_{0,3}cycl[o0\xF2-\xF6]b[e3\xE8-\xEB]nz[a4\xE0-\xE6@]pr[i1!|l\xEC-\xEF]n[e3\xE8-\xEB]_{0,3}(?:\b|\s)/i
 #flexeril
@@ -266,13 +256,13 @@ describe DRUGS_SMEAR1	Two or more drugs crammed together into one word
 #mentioned in the same email, except an online pharmacy ad.
 meta DRUGS_ANXIETY_EREC (DRUGS_ERECTILE && DRUGS_ANXIETY)
 describe DRUGS_ANXIETY_EREC 	Refers to both an erectile and an anxiety drug
-meta DRUGS_SLEEP_EREC	(DRUGS_ERECTILE && DRUGS_SLEEP)
+meta DRUGS_SLEEP_EREC	(DRUGS_ERECTILE && __DRUGS_SLEEP)
 describe DRUGS_SLEEP_EREC 	Refers to both an erectile and a sleep aid drug
 
 # note: some 3 item combos are "normal" ie: a patient might legitimately
 # be prescribed depression, anxiety and sleep aid drugs all at once.
 # however, I know of no "normal" 4-item combinations.
-meta DRUGS_MANYKINDS	(DRUGS_ERECTILE + DRUGS_DIET + DRUGS_PAIN + DRUGS_SLEEP + DRUGS_MUSCLE + DRUGS_ANXIETY + DRUGS_DEPRESSION >3)
+meta DRUGS_MANYKINDS	(DRUGS_ERECTILE + DRUGS_DIET + __DRUGS_PAIN + __DRUGS_SLEEP + DRUGS_MUSCLE + DRUGS_ANXIETY > 3)
 describe DRUGS_MANYKINDS 	Refers to at least four kinds of drugs
 
 ########################################################################

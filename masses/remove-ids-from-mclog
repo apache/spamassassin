@@ -1,0 +1,63 @@
+#!/usr/bin/perl -w
+
+# remove-ids-from-mclog - remove lines from a mass-check log, by ID
+#
+# usage: remove-ids-from-mclog idlist < log > log.new
+#
+# idlist can either be a file listing ID strings, one per line, or
+# a file containing grepped lines from a mass-check log, in which
+# case the IDs will be read from each line.
+#
+# <@LICENSE>
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to you under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at:
+# 
+#     http://www.apache.org/licenses/LICENSE-2.0
+# 
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# </@LICENSE>
+
+use strict;
+
+my $file = shift @ARGV;
+$file or usage();
+
+sub usage {
+die "
+usage: remove-ids-from-mclog idlist < log > log.new
+";
+}
+
+my %ids = ();
+open (IN, "<$file") or usage();
+while (<IN>) {
+  chop;
+  if (/^[Y\.]\s+-?\d+\s+(\S+)\s+\S+/) {
+    $ids{$1}++;     # mass-check lines
+  } else {
+    $ids{$_}++;     # just the IDs
+  }
+}
+close IN;
+
+my $rmed = 0;
+my $left = 0;
+while (<>) {
+  if (/^[Y\.]\s+-?\d+\s+(\S+)\s+\S+/) {
+    if ($ids{$1}) {
+      $rmed++; next;
+    }
+  }
+  print; $left++;
+}
+
+warn "read ".(scalar keys %ids)." IDs, $rmed lines removed, $left left intact.\n";
+

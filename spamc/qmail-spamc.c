@@ -1,9 +1,10 @@
 /* <@LICENSE>
- * Copyright 2004 Apache Software Foundation
- * 
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to you under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at:
  * 
  *     http://www.apache.org/licenses/LICENSE-2.0
  * 
@@ -46,8 +47,7 @@ int main(int argc, char **argv)
 
 #ifdef HAVE_QMAIL_RELAYCLIENT
     /*
-     * use standard qmail-queue if this is a RELAYCLIENT,
-     * see <http://bugzilla.spamassassin.org/show_bug.cgi?id=2927>
+     * bug 2927: use standard qmail-queue if this is a RELAYCLIENT
      */
     if (getenv("RELAYCLIENT")) {
        TRY(execlp("qmail-queue", "qmail-queue", NULL));

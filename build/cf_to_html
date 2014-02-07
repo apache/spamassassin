@@ -8,7 +8,8 @@ use HTML::Entities;
 my $tmpl = q{<tr __BGCOLOR__><td><strong>__TYPE__</strong></td>
 <td><font size=-1>__LANG__</font></td>
 <td><font size=-1>__DESCRIPTION__</font></td>
-<td><font size=-1>__NAME__</font></td><td>__SCORE__</td></tr>};
+<td><font size=-1>__NAME__</font></td><td>__SCORE__</td>
+<td><a href='__MORE__'>Wiki</a></td></tr>};
 
 my %test = ();
 my %type = ();
@@ -63,12 +64,16 @@ foreach my $t (@testnames) {
   my $bgcolor = '';
   if ($n % 2 == 0) { $bgcolor = ' bgcolor=#ccffcc'; }
 
+  $t =~ s/[^A-Za-z0-9_]/_/gs;   # sanitize odd chars
+  my $more = 'http://wiki.apache.org/spamassassin/Rules/'.$t;
+
   s/__BGCOLOR__/$bgcolor/gs;
   s/__NAME__/$t/gs;
   s/__DESCRIPTION__/$desc/gs;
   s/__TYPE__/$type{$t}/gs;
   s/__LANG__/$lang{$t}/gs;
   s/__SCORE__/$score{$t} or 1/ges;
+  s/__MORE__/$more/gs;
   print;
 }
 

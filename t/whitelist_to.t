@@ -14,8 +14,8 @@ use Test; BEGIN { plan tests => 1 };
 
 tstprefs ("
         $default_cf_lines
-	whitelist-to procmail*
+        whitelist_to announce*
 	");
 
-sarun ("-L -t < data/nice/005", \&patterns_run_cb);
+sarun ("-L -t < data/nice/016", \&patterns_run_cb);
 ok_all_patterns();

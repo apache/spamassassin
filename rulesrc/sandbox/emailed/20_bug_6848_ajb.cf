@@ -1,0 +1,32 @@
+# DISABLED 2014-01-21-Axb
+
+## samples rules submitted by Alex Boyer (NO CLA)
+## 2012-09-03
+#
+#ifplugin  Mail::SpamAssassin::Plugin::URIDetail
+#
+### Canada Post
+#uri_detail      AJB_CANPOST_BADLINK     raw !~ /canadapost\./ text =~ /(?:https?:\/\/|www\.)canadapost\./ type =~ /^a$/
+#describe        AJB_CANPOST_BADLINK     Found a mismatch between href and anchored text pretending to link to www.canadapost.ca
+## score         AJB_UTUBE_BADLINK       1.0
+##tflags          AJB_UTUBE_BADLINK       nopublish
+#
+### youtube
+#uri_detail      AJB_UTUBE_BADLINK       raw !~ /youtube\./ text =~ /(?:https?:\/\/|www\.)youtube\./ type =~ /^a$/
+#describe        AJB_UTUBE_BADLINK       Found a mismatch between href and anchored text pretending to link to www.youtube.com
+##score          AJB_UTUBE_BADLINK       0.5
+##tflags          AJB_UTUBE_BADLINK       nopublish
+#
+#
+#
+## because of link trackers (from massmailer for example), we must meta this with other rulz to be sure we face our fake yutube botnet
+#header          __AJB_EMPTY_SUBJ        Subject =~ /^$/
+#tflags          __AJB_EMPTY_SUBJ        nopublish
+#
+#meta            AJB_FK_UTUBE_BOTNET     AJB_UTUBE_BADLINK && MIME_HTML_ONLY && __AJB_EMPTY_SUBJ
+#describe        AJB_FK_UTUBE_BOTNET     mismatch between href and anchored + empty subject = botnet
+##score          AJB_FK_UTUBE_BOTNET     5.5
+#tflags          AJB_FK_UTUBE_BOTNET     nopublish
+#
+#endif
+#

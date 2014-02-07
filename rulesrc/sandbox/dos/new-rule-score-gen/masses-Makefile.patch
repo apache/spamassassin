@@ -1,0 +1,32 @@
+# <@LICENSE>
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to you under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at:
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# </@LICENSE>
+
+Index: Makefile
+===================================================================
+--- masses/Makefile	(revision 529172)
++++ masses/Makefile	(working copy)
+@@ -36,7 +36,10 @@
+ tmp/scores.h: tmp/tests.h
+ 
+ tmp/ranges.data: tmp/.created freqs score-ranges-from-freqs
++	perl add-hitless-active-to-freqs
+ 	perl score-ranges-from-freqs $(RULES) $(SCORESET) < freqs
++	perl lock-scores 1
++	mv tmp/ranges.data-new tmp/ranges.data
+ 
+ freqs: spam.log ham.log
+ 	perl hit-frequencies -c $(RULES) -x -p -s $(SCORESET) > freqs

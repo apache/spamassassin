@@ -14,11 +14,8 @@ Content-Transfer-Encoding: 7bit
 Message-Id: <200210192141953.SM01220@217.125.101.38>
 
 <HTML>
-<HEAD>
-<TITLE>TC</TITLE>
-</HEAD>
-<BODY>
-<P>
+<!-- bug 6168 -->
+<head><title>example.org</title></head><body><h1>example.net</h1>
 
 <H1>tests</H1>
 <!-- each line should have a different spam pattern -->
@@ -40,6 +37,10 @@ OPPO< /foo>RTUNITY<br>
 OPPO< /foo >RTUNITY<br>
 OPPO< / foo>RTUNITY<br>
 OPPO< / foo >RTUNITY<br>
+
+<!-- bug 5749 -->
+<p>foo</p><h2>bar</h2>
+<h2>foo</h2><h3>baz</h3>
 
 </BODY>
 </HTML>
