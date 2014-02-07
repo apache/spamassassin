@@ -68,7 +68,7 @@ SPAMASSASSIN RELEASE PROCEDURE
 
 - edit lib/Mail/SpamAssassin.pm and comment the $IS_DEVEL_BUILD
   line.   Ensure the correct version number is present in $VERSION
-  and $EXTRA_VERSION.
+  and @EXTRA_VERSION.
 
   Prereleases: formatted like this: "pre4" -- in $EXTRA_VERSION, and
   $IS_DEVEL_BUILD is left as 1 instead of commented. When referred to in
@@ -76,6 +76,8 @@ SPAMASSASSIN RELEASE PROCEDURE
 
   Release candidates: formatted like this: "rc2" -- in $EXTRA_VERSION, and
   $IS_DEVEL_BUILD is commented. When referred to in full, it's "3.1.0-rc2".
+
+  Full releases: comment out @EXTRA_VERSION
 
   [NOTE: when editing files in these instructions, you may have to
   use another checkout somewhere else, check in the changes there,
