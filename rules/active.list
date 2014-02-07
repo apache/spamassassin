@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-8mile axb-coi-bulk axb-generic axb-ham-misc axb-sa-users axb-trash bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bpoliakoff grenier jarif kpg-core mas-cps mas-mas zmi; day 2: axb-8mile axb-coi-bulk axb-generic axb-ham-misc axb-sa-users axb-trash bernie-fsf bernie-it_batt bpoliakoff grenier jarif kpg-core llanga mas-cps mas-mas zmi; day 3: axb-8mile axb-coi-bulk axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bpoliakoff grenier jarif kpg-core llanga mas-cps mas-mas zmi
+# with results from: day 1: axb-8mile axb-coi-bulk axb-generic axb-ham-misc axb-sa-users axb-trash bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bpoliakoff grenier jarif kpg-core mas-cps mas-mas mmiroslaw-ham mmiroslaw-spam zmi; day 2: axb-8mile axb-coi-bulk axb-generic axb-ham-misc axb-sa-users axb-trash bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bpoliakoff grenier jarif kpg-core llanga mas-cps mas-mas zmi; day 3: axb-8mile axb-coi-bulk axb-generic axb-ham-misc axb-sa-users axb-trash bernie-fsf bernie-it_batt bpoliakoff grenier jarif kpg-core llanga mas-cps mas-mas zmi
 
 # tflags publish
 AC_HTML_NONSENSE_TAGS
@@ -517,6 +517,9 @@ NSL_RCVD_HELO_USER
 # good enough
 OBFU_ATTACH_MISSP
 
+# good enough
+OBFU_HTML_ATTACH
+
 # tflags publish
 OBFU_JVSCR_ESC
 
@@ -751,12 +754,6 @@ SHARE_50_50
 # good enough
 SHORT_HELO_AND_INLINE_IMAGE
 
-# good enough
-SINGLE_HEADER_3K
-
-# good enough
-SINGLE_HEADER_4K
-
 # tflags net
 SPF_FAIL
 
@@ -780,9 +777,6 @@ SPF_PASS
 
 # tflags net
 SPF_SOFTFAIL
-
-# good enough
-STYLE_GIBBERISH
 
 # tflags userconf
 SUBJECT_IN_BLACKLIST
@@ -845,13 +839,10 @@ BODY_URI_ONLY
 DEAR_NOBODY
 
 # good enough
-FSL_MY_NAME_IS
-
-# good enough
 HK_LOTTO_NAME
 
 # good enough
-SINGLE_HEADER_2K
+HK_SCAM_N4
 
 # tflags userconf
 UNPARSEABLE_RELAY
