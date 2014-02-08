@@ -77,15 +77,17 @@ ifplugin Mail::SpamAssassin::Plugin::MIMEHeader
   describe   WON_NBDY_ATTACH    You won lots of money! See attachment.
 endif
 
+body     __TO_YOUR_ORG       /\b(?:to|for) your organi[sz]ation\b/i
+
 body     __LOTTO_AGENT_01 /\b(?:(?:(?:the|y?our)(?:\s\w{1,20})?|contact|accredited|listed)\sclaim(?:s|ing)?(?:\sprocessing)?|fiducia\w+|reimbursement|(?:prize|international|intl|foreign|win+ing)(?:[\s,.]+(?:rem+it+ance|settlement|payment|payout|award|transfer))+|payment|payout|immunity|(?<!memory\s)grants?)\s?(?:agent|manager|officer|secretary|director|mgr\b)/i
 body     __LOTTO_AGENT_02 /\blot+ery[^\.]{1,40} ticket agent/i
 meta     __LOTTO_AGENT    __LOTTO_AGENT_01 || __LOTTO_AGENT_02
-meta     LOTTO_AGENT      __LOTTO_AGENT && !__HAS_IN_REPLY_TO && !__THREADED
+meta     LOTTO_AGENT      __LOTTO_AGENT && !__HAS_IN_REPLY_TO && !__THREADED && !__TO_YOUR_ORG && !__DKIM_EXISTS 
 describe LOTTO_AGENT      Claims Agent
 score    LOTTO_AGENT      3.00		# limit
 
 body     __LOTTO_DEPT       /\b(?:claim(?:s|ing)?(?:\sprocessing)?|fiducia\w+|reimbursement|(?:international|foreign|win+ing)(?:\s(?:rem+it+ance|settlement|payment|award))+|payment|award|compensation|lot+ery)(?:\s\w+)?\s?(?:department|dept|unit|group|committee|bureau)/i
-meta     LOTTO_DEPT       __LOTTO_DEPT && !__COMMENT_EXISTS && !__HAS_IN_REPLY_TO && !__THREADED && !__VIA_ML
+meta     LOTTO_DEPT       __LOTTO_DEPT && !__COMMENT_EXISTS && !__HAS_IN_REPLY_TO && !__THREADED && !__VIA_ML && !__TO_YOUR_ORG
 describe LOTTO_DEPT       Claims Department
 score    LOTTO_DEPT       2.00		# limit
 
@@ -97,7 +99,8 @@ header   LOTTO_AGENT_FM   From =~ /(?:claim(?:s|ing)?(?:[\s_.]processing)?|fiduc
 describe LOTTO_AGENT_FM   Claims Agent
 #score    LOTTO_AGENT_FM   0.50
 
-header   LOTTO_AGENT_RPLY Reply-To =~ /(?:claim(?:s|ing)?(?:[\s_.]processing)?|fiducia\w+|dispatch|reimbursement|payout|prize\stransfer|(?:international|foreign|win+ing)[\s_.]rem+it+ance)[\s_.]?(?:agent|manager|officer|secretary|director|department|dept)/i
+header   __LOTTO_AGENT_RPLY Reply-To =~ /(?:claim(?:s|ing)?(?:[\s_.]processing)?|fiducia\w+|dispatch|reimbursement|payout|prize\stransfer|(?:international|foreign|win+ing)[\s_.]rem+it+ance)[\s_.]?(?:agent|manager|officer|secretary|director|department|dept)/i
+meta     LOTTO_AGENT_RPLY __LOTTO_AGENT_RPLY && !__TO_YOUR_ORG
 describe LOTTO_AGENT_RPLY Claims Agent
 #score    LOTTO_AGENT_RPLY 0.50
 
