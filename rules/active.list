@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-8mile axb-coi-bulk axb-generic axb-ham-misc axb-sa-users axb-trash bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bpoliakoff grenier jarif kpg-core mas-cps mas-mas mmiroslaw-ham mmiroslaw-spam zmi; day 2: axb-8mile axb-coi-bulk axb-generic axb-ham-misc axb-sa-users axb-trash bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bpoliakoff grenier jarif kpg-core llanga mas-cps mas-mas zmi; day 3: axb-8mile axb-coi-bulk axb-generic axb-ham-misc axb-sa-users axb-trash bernie-fsf bernie-it_batt bpoliakoff grenier jarif kpg-core llanga mas-cps mas-mas zmi
+# with results from: day 1: axb-8mile axb-coi-bulk axb-generic axb-ham-misc axb-sa-users axb-trash bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bpoliakoff grenier jarif kpg-core mmiroslaw-ham mmiroslaw-spam zmi; day 2: axb-8mile axb-coi-bulk axb-generic axb-ham-misc axb-sa-users axb-trash bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bpoliakoff grenier jarif kpg-core llanga mas-cps mas-mas mmiroslaw-ham mmiroslaw-spam zmi; day 3: axb-8mile axb-coi-bulk axb-generic axb-ham-misc axb-sa-users axb-trash bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bpoliakoff grenier jarif kpg-core llanga mas-cps mas-mas zmi
 
 # tflags publish
 AC_HTML_NONSENSE_TAGS
@@ -119,6 +119,9 @@ BITLY_URI
 BODY_EMPTY
 
 # good enough
+BODY_URI_ONLY
+
+# good enough
 BUG6152_INVALID_DATE_TZ_ABSURD
 
 # tflags userconf
@@ -158,7 +161,7 @@ DATE_IN_FUTURE_Q_PLUS
 DEAR_BENEFICIARY
 
 # good enough
-DEAR_EMAIL_USER
+DEAR_NOBODY
 
 # good enough
 DEAR_WINNER
@@ -210,6 +213,9 @@ DOS_OE_TO_MX
 
 # good enough
 DSN_NO_MIMEVERSION
+
+# good enough
+DYN_RDNS_SHORT_HELO_HTML
 
 # tflags publish
 EMAIL_URI_PHISH
@@ -320,6 +326,9 @@ FSL_CTYPE_WIN1251
 FSL_FAKE_HOTMAIL_RVCD
 
 # good enough
+FSL_HELO_BARE_IP_1
+
+# good enough
 FSL_HELO_BARE_IP_2
 
 # good enough
@@ -384,6 +393,9 @@ HEAD_LONG
 
 # good enough
 HK_LOTTO
+
+# good enough
+HK_LOTTO_NAME
 
 # good enough
 HK_NAME_DRUGS
@@ -516,9 +528,6 @@ NSL_RCVD_HELO_USER
 
 # good enough
 OBFU_ATTACH_MISSP
-
-# good enough
-OBFU_HTML_ATTACH
 
 # tflags publish
 OBFU_JVSCR_ESC
@@ -828,21 +837,6 @@ TVD_PH_BODY_META
 
 # good enough
 TVD_PH_REC
-
-# good enough
-TVD_RCVD_IP
-
-# good enough
-BODY_URI_ONLY
-
-# good enough
-DEAR_NOBODY
-
-# good enough
-HK_LOTTO_NAME
-
-# good enough
-HK_SCAM_N4
 
 # tflags userconf
 UNPARSEABLE_RELAY
