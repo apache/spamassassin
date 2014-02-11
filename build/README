@@ -255,6 +255,11 @@ SPAMASSASSIN RELEASE PROCEDURE
   NOTE: Here's a quick example to concat the MD5 or SHA1 checksums:
         ls *3.4.0*rc6* | grep sha1 | xargs cat --
 
+- If there are any issues to note, make sure to edit the UPGRADE file.
+  Every x.x.0 release at a minimum should include a section.
+
+- Check the README file for any items to change.
+
 - (for any rc, prerelease, or full release) Place the tarballs in a
   discreet location (discreet means not linked from the "downloads" page
   of the website, but included in the vote mail) and request a vote on the
@@ -311,7 +316,7 @@ SPAMASSASSIN RELEASE PROCEDURE
   for their minor version number.  In the example above, 3.4 is the
   branch for the stable 3.4.x releases.
 
-- In the new development codeline, edit lib/Mail/SpamAssassin.pm
+- In the new development codebase, edit lib/Mail/SpamAssassin.pm
   and bump the $VERSION line to the correct version.
 
 - then, commit the new version number to the new branch:
@@ -364,35 +369,40 @@ SPAMASSASSIN RELEASE PROCEDURE
 
 -- END STILL TO BE DONE --
 
-- publish the tarballs.
+- publish the tarballs
 
-  All of this refers to working on people.apache.org.
-
-  (for rc and prerelease builds) copy the tarballs to the website.
   ASF bylaws prohibit the distribution of files claiming to be
   releases from the website, without 3 PMC +1 votes, so you need to
   make it clear that this is an unofficial "test build" by placing it
   in your public_html dir:
 
-        http://people.apache.org/~jm/rc/
+        http://people.apache.org/~kmcgrail/devel/ for example
 
-  this command will do it:
+  For full release builds, you need to publish using SVNPubSub.
+ 
+  Need to commit the new artifacts and signature files to 
+  https://dist.apache.org/repos/dist/spamassassin once a
+  release vote passes. 
 
-        version=X.Y.Z
-        cp -p ~/public_html/devel/Mail-SpamAssassin*-$version.* \
-            ~/public_html/rc/
+        **** NEEDS SPECIFIC COMMANDS FOR HOW TO COMMIT VIA SVNPUBSUB ****
 
-  (for full release builds) copy the tarballs to www.apache.org/dist:
+  [note: Symlinks may not work on all mirrors even though there may be 
+  documentation to the contrary.]
 
-        version=X.Y.Z
-        cp -p ~/public_html/devel/Mail-SpamAssassin*-$version.* /www/www.apache.org/dist/spamassassin/source
+  See https://issues.apache.org/jira/browse/INFRA-7295
 
-        cd /www/www.apache.org/dist/spamassassin
-        cp -p source/Mail-SpamAssassin*-$version.* .
+- Remove tar-balls for now-obsolete versions from dist:
 
-        chmod -R g+w /www/www.apache.org/dist/spamassassin
+  Only the most recent version of each supported release line should be
+  stored.  The archives will auto update.  
+  See http://www.apache.org/dev/release#archived.
 
-  [note: the ASF archives documentation claims that symlinks are supported. This is not the case for some mirrors, so use "cp" instead.]
+        **** NEEDS SPECIFIC COMMANDS FOR HOW TO COMMIT VIA SVNPUBSUB ****
+        
+  (NOTE: it may be better to wait a while before doing this; it appears to
+  take a while for the spamassassin.apache.org website mirror script to
+  run, so the old downloads page will stick around for a while before it's
+  safe to do so.)
 
 - (for full release builds) update the main website "downloads" page:
 
@@ -416,20 +426,23 @@ SPAMASSASSIN RELEASE PROCEDURE
         cd /var/www/buildbot.spamassassin.org/staging/website
         webmake -F
 
-- update the 'doc' tree in the SpamAssassin website (WARNING: if you're
-  moving to a new major release, x.y.0, you need to edit
-  'build/update_website_docs' beforehand and set the "vers" line):
+- update the 'doc' tree in the SpamAssassin website 
+
+  WARNING: if you're moving to a new major release, x.y.0, you need to edit
+  'build/update_website_docs' beforehand and set the "vers" line.  And if 
+  you are running on a server other than buildbot, the PERL and WEBDIR
+  vars may need tweaking:
 
         cd /var/www/buildbot.spamassassin.org/staging/website
         svn up
-        svn delete --force full/3.3.x
+        svn delete --force full/3.4.x
         svn commit -m "removing old doc tree from website" full
 
         cd [checkedoutdir]
         build/update_website_docs
 
         cd /var/www/buildbot.spamassassin.org/staging/website
-        svn add full/3.3.x
+        svn add full/3.4.x
         svn commit -m "updating new doc tree on website" full
 
 - and check the entire website into SVN (see bug 4998 for reasons why).
@@ -442,11 +455,8 @@ SPAMASSASSIN RELEASE PROCEDURE
 - update the tag used to point to "current release":
 
     repo=https://svn.apache.org/repos/asf/spamassassin
-    svn delete -m "updating for new release" \
-	$repo/tags/spamassassin_current_release_3.3.x
-    svn copy -m "updating for new release" \
-	$repo/tags/spamassassin_release_3_3_0 \
-	$repo/tags/spamassassin_current_release_3.3.x
+    svn delete -m "updating for new release"  $repo/tags/spamassassin_current_release_3.4.x
+    svn copy -m "updating for new release" $repo/tags/spamassassin_release_3_4_0 $repo/tags/spamassassin_current_release_3.4.x
 
 - upload release .tar.gz (not .bz2) tarball to CPAN at http://pause.cpan.org/:
 
@@ -472,14 +482,17 @@ SPAMASSASSIN RELEASE PROCEDURE
   otherwise it'll be bounced by the ASF's custom spam filtering
   rules.
 
-- Before doing the next step, run through the release summary mail, and
-  write up a really short summary of the important changes in
-  human-readable format.  This should be less than 600 chars to fit into
-  Freshmeat's format, and to be easily understandable.
+# IGNORING 2014-02-11 - NOT BOTHERING WITH FRESHMEAT - TOO OUT OF DATE AND
+# NOW FREECODE
+#
+#- Before doing the next step, run through the release summary mail, and
+#  write up a really short summary of the important changes in
+#  human-readable format.  This should be less than 600 chars to fit into
+#  Freshmeat's format, and to be easily understandable.
 
-- announce to Freshmeat at http://freshmeat.net/:
-
-        http://freshmeat.net/projects/spamassassin/releases/new
+#- announce to Freshmeat at http://freshmeat.net/:
+#
+#        http://freshmeat.net/projects/spamassassin/releases/new
 
 - Approve the posting to the announce list (the list admins will get a
   mail indicating how to do this.)
@@ -497,20 +510,15 @@ SPAMASSASSIN RELEASE PROCEDURE
 
         https://issues.apache.org/SpamAssassin/editmilestones.cgi?product=Spamassassin
 
-- (for full release builds) remove release tarballs from now-obsolete
-  versions from dist:
+- When releasing 3.4.0, we also did the following tasks which are less
+  documented in this README:
 
-        ssh people.apache.org
-        cd /www/www.apache.org/dist/spamassassin
-        prev=X.Y.notZ
-        rm -f source/Mail-SpamAssassin*-$prev.* Mail-SpamAssassin*-$prev.*
-        rm -f binaries/*/Mail-SpamAssassin*-$prev.*
-
-  (Archive copies are automatically kept on archive.apache.org/dist/ .)
-
-  (TODO: it may be better to wait a while before doing this; it appears to
-  take a while for the spamassassin.apache.org website mirror script to
-  run, so the old downloads page will stick around for a while before it's
-  safe to do so.)
+ - Reviewed the CREDITS to update inactive Committers
+ - Reviewed the website and wiki for less obvious items like:
+	- updating things that refered to 3.3 to 3.4 such as SVN Checkout
+	  instructions.
+	- The how to Upgrade Instructions
+ - Updated http://en.wikipedia.org/wiki/SpamAssassin
+ - Reviewed the Project Branding Report Checklist
 
 // vim:tw=74:
