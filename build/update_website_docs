@@ -1,13 +1,13 @@
 #!/bin/sh
 
 WEBDIR=/var/www/buildbot.spamassassin.org/staging/website
-vers=3.3.x
+vers=3.4.x
 
 if [ -z "$PERL" ]; then
   if [ -x /home/jm/perl584/bin/perl ]; then
     PERL=/home/jm/perl584/bin/perl
   else
-    PERL=perl
+    PERL=/usr/local/bin/perl
   fi
 fi
 
