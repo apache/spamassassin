@@ -330,8 +330,6 @@ SPAMASSASSIN RELEASE PROCEDURE
 
   - lib/Mail/SpamAssassin.pm
 
-
--- 2011-02-04 - STILL TO BE DONE -- 
 - [X.Y.0 RELEASES ONLY]: NOTE: This may change, make sure this info is
   still accurate before changing this (preferrably find out BEFORE doing
   an X.Y.0 release.  Update the mkupdates stuff:
@@ -340,13 +338,19 @@ SPAMASSASSIN RELEASE PROCEDURE
     development version (X.Y+1.0).
 
   - Create an empty file for the new version number in
-    /var/named/updates.dev.spamassassin.org.d/ on the zone
+    /var/named/updates.dev.spamassassin.org.d/ on the zone and chown to
+    updatesd and chgrp to others.
+
+    NOTE: I don't believe this does anything KAM: 2014-02-11
 
   - Add "$INCLUDE /var/named/updates.spamassassin.org.d/X.Y+1.0" to the
     spamassassin.org zone file in spamassassin/dns/
 
-  - commit the changes, update the zone (if not doing above on the zone)
-    and tick the zone file using build/mkupdates/tick_zone_serial
+    NOTE: I don't believe this is right.  Per bug 6644, using a CNAME for
+    3.4.1 to 3.4.0 - KAM: 2014-02-11
+
+  - commit the changes, update the zone (if not doing above on the zone -
+    NOTE: See /var/named/README) and tick the zone file using build/mkupdates/tick_zone_serial
 
 - !WARNING! After the next step, the version number will be considered
   "burned". The number is locked for this particular code.  The same
@@ -362,12 +366,13 @@ SPAMASSASSIN RELEASE PROCEDURE
     svn commit -m "oops, had to redo: THIS IS THE REAL X.Y.Z RELEASE"
 
 - Release a new rules update matching the released code:
+  #2014-02-11 switched to su - instead of sudo because of .ssh and .svn
+  stored config items
 
         ssh spamassassin.zones.apache.org
+        su - updatesd
         cd /home/updatesd/svn/spamassassin/build/mkupdates
-        sudo -u updatesd ./update-rules-3.3 3.3
-
--- END STILL TO BE DONE --
+        ./update-rules-3.3 3.4
 
 - publish the tarballs
 
@@ -520,5 +525,16 @@ SPAMASSASSIN RELEASE PROCEDURE
 	- The how to Upgrade Instructions
  - Updated http://en.wikipedia.org/wiki/SpamAssassin
  - Reviewed the Project Branding Report Checklist
+
+
+- Issues not resolved with the release of 3.4.0 2014-02-11
+
+ - We updated to 3.4.0 and 3.4.1 is the current trunk version.  Need to
+   confirm what needs to change on the updatesd scripts to make this
+   happen.
+
+ - Do we stop 3.3.X update releases?  Or do we just make sure we aren't
+   running masscheck for that version and release the updates with proper
+   ifplugin loops for any new features? 
 
 // vim:tw=74:
