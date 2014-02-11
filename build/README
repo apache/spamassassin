@@ -281,8 +281,6 @@ SPAMASSASSIN RELEASE PROCEDURE
 
   As of 2014-02-05, adding TRIAL to the filename should work
 
-***RE-TESTED BY KAM TO THIS POINT AS OF 2014-02-05***
-
 - (for a full release) 3 +1's votes from PMC members are required to 
   proceed with an official (not pre-release) ASF software release.
 
@@ -301,12 +299,12 @@ SPAMASSASSIN RELEASE PROCEDURE
   branch, off the trunk.
 
     repo=https://svn.apache.org/repos/asf/spamassassin
-    svn copy $repo/tags/spamassassin_release_3_1_0 \
-           $repo/branches/3.1
+    svn copy $repo/tags/spamassassin_release_3_4_0 \
+           $repo/branches/3.4
 
   "trunk" is SVN's concept of head.  Typically, our branches are named
-  for their minor version number.  In the example above, b3_1_0 is the
-  branch for the stable 3.1.x releases.
+  for their minor version number.  In the example above, 3.4 is the
+  branch for the stable 3.4.x releases.
 
 - In the new development codeline, edit lib/Mail/SpamAssassin.pm
   and bump the $VERSION line to the correct version.
