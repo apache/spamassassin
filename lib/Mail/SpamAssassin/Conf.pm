@@ -1135,7 +1135,8 @@ Unicode.  Requires the Encode::Detect module, HTML::Parser version
 	    return $INVALID_VALUE;
 	}
 	require HTML::Parser;
-	unless ($HTML::Parser::VERSION >= 3.46) {
+        #changed to eval to use VERSION so that this version was not incorrectly parsed for CPAN
+	unless ( eval { HTML::Parser->VERSION(3.46) } ) {
 	    $self->{parser}->lint_warn("config: normalize_charset requires HTML::Parser 3.46 or later");
 	    return $INVALID_VALUE;
 	}
