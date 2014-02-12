@@ -90,7 +90,7 @@ sub sa_t_init {
   $perl_cmd .= " -T" if !defined($ENV{'TEST_PERL_TAINT'}) or $ENV{'TEST_PERL_TAINT'} ne 'no';
   $perl_cmd .= " -w" if !defined($ENV{'TEST_PERL_WARN'})  or $ENV{'TEST_PERL_WARN'}  ne 'no';
 
-  $scr = $ENV{'SCRIPT'};
+  $scr = $ENV{'SPAMASSASSIN_SCRIPT'};
   $scr ||= "$perl_cmd ../spamassassin.raw";
 
   $spamd = "$perl_cmd ../spamd/spamd.raw";
