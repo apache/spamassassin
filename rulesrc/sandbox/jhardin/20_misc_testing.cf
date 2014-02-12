@@ -1224,7 +1224,7 @@ rawbody     __FR_SPACING_22    /[a-z0-9]{6}\s{22}[a-z0-9]{5}/i
 
 
 # per users mailing list question from Joe Quinn
-body        __HEXHASHWORD      /\b[0-9a-f]{30,}\s[a-z]{1,10}\b/
+body        __HEXHASHWORD      /\b[0-9a-f]{30,64}\s[a-z]{1,10}\b/
 tflags      __HEXHASHWORD      multiple maxhits=5
 meta        HEXHASH_WORD       (__HEXHASHWORD > 4)
 describe    HEXHASH_WORD       Hexadecimal hash followed by a word
