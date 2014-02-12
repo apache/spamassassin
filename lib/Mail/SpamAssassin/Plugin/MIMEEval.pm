@@ -26,6 +26,7 @@ use Mail::SpamAssassin::Plugin;
 use Mail::SpamAssassin::Locales;
 use Mail::SpamAssassin::Constants qw(:sa CHARSETS_LIKELY_TO_FP_AS_CAPS);
 use Mail::SpamAssassin::Util qw(untaint_var);
+use Mail::SpamAssassin::Logger;
 
 use vars qw(@ISA);
 @ISA = qw(Mail::SpamAssassin::Plugin);
@@ -50,6 +51,7 @@ sub new {
   $self->register_eval_rule("check_for_uppercase");
   $self->register_eval_rule("check_ma_non_text");
   $self->register_eval_rule("check_base64_length");
+  $self->register_eval_rule("check_qp_ratio");
 
   return $self;
 }
@@ -342,6 +344,8 @@ sub _check_attachments {
 
   if ($qp_bytes) {
     $pms->{mime_qp_ratio} = $qp_count / $qp_bytes;
+    $pms->{mime_qp_count} = $qp_count;
+    $pms->{mime_qp_bytes} = $qp_bytes;
   }
 
   if ($pms->{mime_multipart_alternative}) {
@@ -371,6 +375,32 @@ sub _check_attachments {
     }
   }
 }
+
+=item has_check_qp_ratio
+
+Adds capability check for "if can()" for check_qp_ratio
+
+=cut
+sub has_check_qp_ratio { 1 }
+
+=item check_qp_ratio
+
+Takes a min ratio to use in eval to see if there is an spamminess to the ratio of 
+quoted printable to total bytes in an email.
+
+=cut
+sub check_qp_ratio {
+  my ($self, $pms, undef, $min) = @_;
+
+  $self->_check_attachments($pms) unless exists $pms->{mime_checked_attachments};
+
+  my $qp_ratio = $pms->{mime_qp_ratio};
+
+  dbg("eval: qp_ratio - %s - check for min of %s", $qp_ratio, $min);
+
+  return (defined $qp_ratio && $qp_ratio >= $min) ? 1 : 0;
+}
+
 
 sub check_msg_parse_flags {
   my($self, $pms, $type, $type2) = @_;
