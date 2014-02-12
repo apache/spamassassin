@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-8mile axb-coi-bulk axb-generic axb-ham-misc axb-sa-users axb-trash bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bpoliakoff grenier jarif kpg-core mmiroslaw-ham mmiroslaw-spam zmi; day 2: axb-8mile axb-coi-bulk axb-generic axb-ham-misc axb-sa-users axb-trash bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bpoliakoff grenier jarif kpg-core llanga mas-cps mas-mas mmiroslaw-ham mmiroslaw-spam zmi; day 3: axb-8mile axb-coi-bulk axb-generic axb-ham-misc axb-sa-users axb-trash bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bpoliakoff grenier jarif kpg-core llanga mas-cps mas-mas zmi
+# with results from: day 1: axb-8mile axb-coi-bulk axb-generic axb-ham-misc axb-sa-users axb-trash bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bpoliakoff grenier jarif kpg-core mas-cps mas-mas zmi; day 2: axb-8mile axb-coi-bulk axb-generic axb-ham-misc axb-sa-users axb-trash bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bpoliakoff grenier jarif kpg-core llanga mas-cps mas-mas zmi; day 3: axb-8mile axb-coi-bulk axb-generic axb-ham-misc axb-sa-users axb-trash bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bpoliakoff grenier jarif kpg-core llanga mas-cps mas-mas zmi
 
 # tflags publish
 AC_HTML_NONSENSE_TAGS
@@ -121,9 +121,6 @@ BODY_EMPTY
 # good enough
 BODY_URI_ONLY
 
-# good enough
-BUG6152_INVALID_DATE_TZ_ABSURD
-
 # tflags userconf
 CHARSET_FARAWAY
 
@@ -153,9 +150,6 @@ DATE_DOTS
 
 # good enough
 DATE_IN_FUTURE_96_Q
-
-# good enough
-DATE_IN_FUTURE_Q_PLUS
 
 # good enough
 DEAR_BENEFICIARY
@@ -213,9 +207,6 @@ DOS_OE_TO_MX
 
 # good enough
 DSN_NO_MIMEVERSION
-
-# good enough
-DYN_RDNS_SHORT_HELO_HTML
 
 # tflags publish
 EMAIL_URI_PHISH
@@ -335,9 +326,6 @@ FSL_HELO_BARE_IP_2
 FSL_HELO_DEVICE
 
 # good enough
-FSL_HELO_FAKE
-
-# good enough
 FSL_HELO_FIREWALL
 
 # good enough
@@ -392,6 +380,9 @@ HASHCASH_HIGH
 HEAD_LONG
 
 # good enough
+HELO_LOCALHOST
+
+# good enough
 HK_LOTTO
 
 # good enough
@@ -432,9 +423,6 @@ HK_SCAM_N3
 
 # good enough
 HK_SCAM_N8
-
-# good enough
-HK_SCAM_S15
 
 # good enough
 HK_SCAM_S25
@@ -528,9 +516,6 @@ NSL_RCVD_HELO_USER
 
 # good enough
 OBFU_ATTACH_MISSP
-
-# good enough
-OBFU_HTML_ATTACH
 
 # tflags publish
 OBFU_JVSCR_ESC
@@ -790,6 +775,9 @@ SPF_PASS
 # tflags net
 SPF_SOFTFAIL
 
+# good enough
+STOCK_IMG_CTYPE
+
 # tflags userconf
 SUBJECT_IN_BLACKLIST
 
@@ -801,6 +789,9 @@ SUBJ_ATTENTION
 
 # good enough
 TAB_IN_FROM
+
+# good enough
+TBIRD_SUSP_MIME_BDRY
 
 # tflags net
 TO_EQ_FM_DOM_SPF_FAIL
@@ -840,6 +831,27 @@ TVD_PH_BODY_META
 
 # good enough
 TVD_PH_REC
+
+# good enough
+TVD_RCVD_IP
+
+# good enough
+DEAR_EMAIL_USER
+
+# good enough
+FH_HELO_EQ_610HEX
+
+# good enough
+FM_FRM_RN_L_BRACK
+
+# good enough
+FSL_MY_NAME_IS
+
+# good enough
+HK_SCAM_N4
+
+# good enough
+STYLE_GIBBERISH
 
 # tflags userconf
 UNPARSEABLE_RELAY
