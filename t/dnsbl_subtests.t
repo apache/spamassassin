@@ -365,7 +365,22 @@ test_samples(
 
 if ($pid) {
   kill('TERM',$pid) or die "Cannot stop a DNS server [$pid]: $!";
-  waitpid($pid,0);
+
+# Bug 7000: Seems like a DNS server process can't be terminated. [...]
+# Reason is "waitpid($pid,0)". If commented out, it does not hang.
+# There are no extra processes after end of this test.
+#
+# perlfunc: waitpid - waiting for a particular pid with FLAGS of 0 is
+# implemented everywhere
+#
+# perlport: (Win32) waitpid Can only be applied to process handles returned
+# for processes spawned using "system(1, ...)" or pseudo processes created
+# with "fork()".
+#
+# so ... waitpid($pid,0) should work on Windows, but it doesn't - nevermind:
+
+  waitpid($pid,0) unless $RUNNING_ON_WINDOWS;
+
   undef $pid;
 }
 
