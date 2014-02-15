@@ -369,8 +369,9 @@ meta           FROM_IN_TO_AND_SUBJ  (__TO_EQ_FROM && __SUBJ_HAS_FROM_1)
 describe       FROM_IN_TO_AND_SUBJ  From address is in To and Subject
 tflags         FROM_IN_TO_AND_SUBJ  publish
 
-header         __SUBJ_HAS_TO_1      ALL =~ /\nTo:\s+(?:[^\n<]{0,80}<)?([^\n\s>,]+)>?\n(?:[^\n]{1,100}\n)*Subject:\s+[^\n]{0,100}\1[>,\s\n]/ism
-meta           TO_IN_SUBJ           __SUBJ_HAS_TO_1 && !__VIA_ML && !MISSING_MIMEOLE && !__THREAD_INDEX_GOOD
+header         __SUBJ_HAS_TO_1      ALL =~ /\nTo:\s+(?:[^\n<]{0,80}<)?([^\n\s>,]+)>?\n(?:[^\n]{1,200}\n)*Subject:\s+[^\n]{0,100}\1[>,\s\n]/ism
+header         __SUBJ_HAS_TO_2      ALL =~ /\nReceived:[^\n]{0,200} for <?([^\n\s>;]+)>?;(?:[^\n]+\n)*Subject:\s+[^\n]{0,100}\1[>,\s\n]/ism
+meta           TO_IN_SUBJ           (__SUBJ_HAS_TO_1 || __SUBJ_HAS_TO_2) && !__VIA_ML && !MISSING_MIMEOLE && !__THREAD_INDEX_GOOD
 describe       TO_IN_SUBJ           To address is in Subject
 
 meta           __TO_EQ_FM_HTML_ONLY __TO_EQ_FROM && MIME_HTML_ONLY
