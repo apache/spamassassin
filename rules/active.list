@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-8mile axb-coi-bulk axb-generic axb-ham-misc axb-sa-users axb-trash bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bpoliakoff grenier jarif kpg-core mas-cps mas-mas mmiroslaw-ham mmiroslaw-spam zmi; day 2: axb-8mile axb-coi-bulk axb-generic axb-ham-misc axb-sa-users axb-trash bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bpoliakoff grenier jarif kpg-core llanga mas-cps mas-mas zmi; day 3: axb-8mile axb-coi-bulk axb-generic axb-ham-misc axb-sa-users axb-trash bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bpoliakoff grenier jarif kpg-core llanga mas-cps mas-mas zmi
+# with results from: day 1: axb-8mile axb-coi-bulk axb-generic axb-ham-misc axb-sa-users axb-trash bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bpoliakoff grenier jarif kpg-core mas-cps mas-mas zmi; day 2: axb-8mile axb-coi-bulk axb-generic axb-ham-misc axb-sa-users axb-trash bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bpoliakoff grenier jarif kpg-core llanga mas-cps mas-mas mmiroslaw-ham mmiroslaw-spam zmi; day 3: axb-8mile axb-coi-bulk axb-generic axb-ham-misc axb-sa-users axb-trash bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bpoliakoff grenier jarif kpg-core llanga mas-cps mas-mas zmi
 
 # tflags publish
 AC_HTML_NONSENSE_TAGS
@@ -206,6 +206,9 @@ DOS_ANAL_SPAM_MAILER
 DOS_OE_TO_MX
 
 # good enough
+DOS_OE_TO_MX_IMAGE
+
+# good enough
 DSN_NO_MIMEVERSION
 
 # good enough
@@ -396,6 +399,9 @@ HEAD_LONG
 
 # good enough
 HELO_LOCALHOST
+
+# good enough
+HEXHASH_WORD
 
 # good enough
 HK_LOTTO
@@ -796,6 +802,9 @@ SPF_PASS
 # tflags net
 SPF_SOFTFAIL
 
+# good enough
+STOCK_IMG_CTYPE
+
 # tflags userconf
 SUBJECT_IN_BLACKLIST
 
@@ -850,11 +859,62 @@ TVD_PH_REC
 # good enough
 TVD_RCVD_IP
 
-# good enough
-FSL_HELO_FAKE
+# tflags publish
+AC_BR_BONANZA
+
+# tflags publish
+AC_DIV_BONANZA
+
+# tflags publish
+AC_SPAMMY_URI_PATTERNS1
+
+# tflags publish
+AC_SPAMMY_URI_PATTERNS10
+
+# tflags publish
+AC_SPAMMY_URI_PATTERNS11
+
+# tflags publish
+AC_SPAMMY_URI_PATTERNS12
+
+# tflags publish
+AC_SPAMMY_URI_PATTERNS2
+
+# tflags publish
+AC_SPAMMY_URI_PATTERNS3
+
+# tflags publish
+AC_SPAMMY_URI_PATTERNS4
+
+# tflags publish
+AC_SPAMMY_URI_PATTERNS5
+
+# tflags publish
+AC_SPAMMY_URI_PATTERNS6
+
+# tflags publish
+AC_SPAMMY_URI_PATTERNS7
+
+# tflags publish
+AC_SPAMMY_URI_PATTERNS8
+
+# tflags publish
+AC_SPAMMY_URI_PATTERNS9
+
+# tflags publish
+BAYES_999
 
 # good enough
-HEXHASH_WORD
+BODY_URI_ONLY
+
+# good enough
+OBFU_HTML_ATTACH
+
+# good enough
+STYLE_GIBBERISH
+
+# good enough
+TO_NO_BRKTS_HTML_ONLY
 
 # tflags userconf
 UNPARSEABLE_RELAY
