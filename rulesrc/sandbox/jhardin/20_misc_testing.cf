@@ -1228,7 +1228,10 @@ body        __HEXHASHWORD      /\s[a-z]{1,15}\s[0-9a-f]{30}/
 tflags      __HEXHASHWORD      multiple maxhits=6
 meta        HEXHASH_WORD       (__HEXHASHWORD > 5) && !__RP_MATCHES_RCVD && !__VIA_ML && !__HAS_ERRORS_TO && !__DKIM_EXISTS 
 describe    HEXHASH_WORD       Multiple of hexadecimal hash + word
-score       HEXHASH_WORD       1.000	# limit
+score       HEXHASH_WORD       2.500	# limit
 
-
+meta        __HEXHASH_2        __HEXHASHWORD == 2
+meta        __HEXHASH_3        __HEXHASHWORD == 3
+meta        __HEXHASH_4        __HEXHASHWORD == 4
+meta        __HEXHASH_5        __HEXHASHWORD == 5
 
