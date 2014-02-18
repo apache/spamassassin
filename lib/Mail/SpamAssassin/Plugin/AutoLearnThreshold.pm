@@ -241,7 +241,7 @@ sub autolearn_discriminator {
     my $tests = $scan->get_tag('TESTS');
     if (defined $tests && $tests ne 'none') {
       my %t = map { ($_,1) } split(/,/, $tests);
-      if ($isspam && $t{'BAYES_99'} || !$isspam && $t{'BAYES_00'}) {
+      if ($isspam && ($t{'BAYES_99'} || $t{'BAYES_999'}) || !$isspam && $t{'BAYES_00'}) {
         dbg("learn: auto-learn? no: learn-on-error, %s, already classified ".
             "as such",  $isspam ? 'spam' : 'ham');
         return;
