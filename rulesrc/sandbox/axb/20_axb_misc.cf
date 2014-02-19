@@ -40,16 +40,7 @@ tflags		AXB_X_FF_SEZ_S		autolearn_force
 endif
 
 
-# 2013-01-30
-header		AXB_BULK_SENDGRID	exists:X-Sendgrid-EID
-describe	AXB_BULK_SENDGRID	Bulk sent via Sendgrid
-
-# 2012-10-16
-header          AXB_BULK_ECO            exists:X-CSA-Complaints
-describe        AXB_BULK_ECO            Message sent by eco.de member
-
 # 2012-09-27
-# Overlap test
 header          __AXB_XM_OL_2600  X-Mailer =~ /Microsoft\ Outlook\ Express\ 6\.00\.2600\.0000/
 header          __AXB_MO_OL_2600  X-MimeOLE =~ /Produced\ By\ Microsoft\ MimeOLE\ V6\.00\.2600\.0000/
 meta            AXB_XM_FORGED_OL2600    (__AXB_XM_OL_2600  && !__AXB_MO_OL_2600 )
@@ -76,20 +67,6 @@ describe        AXB_XMA_BASP            Mailer fingerprint
 header          AXB_X_AOL_SEZ_S         x-aol-global-disposition =~ /^S$/
 describe        AXB_X_AOL_SEZ_S         AOL said this is S
 
-# 2011-12-08
-header          AXB_XM_BULK_SB          X-Mailer =~ /SendBlaster/
-describe        AXB_XM_BULK_SB          Bulk mail tool
-
-# 2011-09-14 - Suggested by rfg / patternity
-header          AXB_XM_SENTBY   exists:X-Mailer-Sent-By
-describe        AXB_XM_SENTBY   Ratware fingerprint
-
-#header          AXB_XMID_PFIX_CTRIP     Message-ID =~ /\<[A-F0-9]{8}.[0-9]{6}\@ctrip\.com\>/
-#describe        AXB_XMID_PFIX_CTRIP     possibly forged ctrip sender - postfix
-
-# 2011-07-05
-#rawbody         AXB_SSCECCF     /\bSandboxScopeClass ExternalClass\b/
-#describe        AXB_SSCECCF     unidentified fingerprint
 
 #2011-06-05
 #header   AXB_XRCVD_EYOU_SEND    Received =~ /\(eyou send program\)/
