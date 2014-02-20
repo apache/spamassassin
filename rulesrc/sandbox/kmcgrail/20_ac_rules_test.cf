@@ -42,31 +42,6 @@ uri __AC_PHPOFFTOP_URI	/\/php\/off\/[0-9.]+\/top\//
 uri __AC_PHPOFFSUB_URI	/\/php\/off\/[0-9.]+\/sub\//
     # http://www.shoosecalehhd.us/3345/174/380/1411/2938.11tt1747757AAF11.php
 uri __AC_NUMS_URI	/(?:\/[0-9]+){5}\.[0-9a-zA-Z]+\.(:?php|html)\b/
-    # http://charmaine.connectmediajk.biz/PsQ-bx161ZWh1ZEAzcGhhc2UuY29tmbe
-uri __AC_SEQHASH_URI	/\/[A-Za-z0-9]{3}-[A-Za-z0-9]+AzcGhhc2UuY29t[A-Za-z0-9]{3}\b/
-    #  http://www.efordold.me/?r=1&h=13579&s=70266-5&e=ZWh1ZEAzcGhhc2UuY29t
-uri __AC_RHASH_URI	/\/\?r=[0-9]+&h=[0-9]{4,}&s=[0-9]{4,}-[0-9]+&e=[A-Za-z0-9]+AzcGhhc2UuY29t/
-    # http://efordold.me/?h=13579&e=ZWh1ZEAzcGhhc2UuY29t&ar=20713376%2Fvuxtxusnr_ut6umoosrtv%7E53umtfupqnwsyppywn_umlslxpq%2Fypsl_uypvzrr_tztdyumo_toqpqm_tmtceu_tt7uoqq_msm_%2Futdfw3yu_8k_vj_84_je_8_buutyxuo_tlltxveumpmmte3u%2Flt0x0ut0xut7eum_tty1u_ttf1um_tlt2utezdeuteutyutw%2F2utv3utvaut0u_wcvty8uoa2vdz_ox97tdy97utd3aut09ul%2Ftcdautd3ummssrntw3utwv8utweut80utecegutfnutaeut263yutdzeum
-uri __AC_RHASH2_URI	/\/\?h=[0-9]{4,}&e=[A-Za-z0-9]+AzcGhhc2UuY29t&ar=[A-Za-z0-9%_]{50,}/
-    # http://www.chubbydiet.biz/11VP6856DOBTTT53RYM380F1073AHG1687LCS12K1907471II3470154694.php
-uri __AC_LONGSEQ_URI	/\/[A-Z0-9]{50,}\.(?:php|html|cgi)\b/
-    # http://www.losefast.us/1a83066009e4c6a4463ef4bb01/C/
-uri __AC_1SEQC_URI	/\/1[a-z0-9]8[a-z0-9_]{20,}\/C\//
-    # http://www.search-lots-archiv.com/1c8481478cf46e0b6d9dd0e40801/V/F5B03UPMP/8BJ6447LN.jpg
-uri __AC_1SEQV_URI	/\/1[a-z0-9]8[a-z0-9_]{20,}\/V\//
-    # http://www.losefast.us/r/move/254/42182/61283
-uri __AC_RMOVE_URI	/\/r\/move\/[0-9]+\//
-    # http://www.flaxchid.com/mo.n+new1844407650e8crit-ical.32153002was/es?t.816265832
-uri __AC_PUNCTNUMS_URI	/\.com\/[A-Za-z+=\/.?_-]{4,}[0-9]{9,12}[a-z0-9]{1,2}[A-Za-z+=\/.?_-]+[0-9]{7,9}[A-Za-z+=\/.?_-]{6,}[0-9]{7,9}\b/
-    #http://approbativeness57.isfient.me/caller-vulgarize-thriller-formality/forget-diet-pills-and-exercise-get-350-recipes-and-a-paleo-meal-plan/359297028/unjustifiedness.aspx
-uri __AC_NDOMLONGNASPX_URI	/[A-Za-z]+[0-9]{2}\.[A-Za-z0-9-]+\.me\/(?:[A-Za-z0-9-]{10,}\/){2}[0-9]{8,}\/[A-Za-z]+\.aspx/
-    #http://www.honkzoo.org/chd196h4d60c7347h484h886d5b
-uri __AC_CHDSEQ_URI	/\/chd[a-z0-9]{20,}/
-    #http://www.honkzoo.org/mhd196h4d60c7347h484h03c00c
-uri __AC_MHDSEQ_URI	/\/mhd[a-z0-9]{20,}/
-    #http://www.altkangaroo.com/uhd228h4da2fd0c5h49bhff5c2f
-uri __AC_UHDSEQ_URI	/\/uhd[a-z0-9]{20,}/
-
 
 meta 		AC_SPAMMY_URI_PATTERNS1 (__AC_OUTL_URI && __AC_OUTI_URI)
 describe 	AC_SPAMMY_URI_PATTERNS1	link combos match highly spammy template
@@ -87,21 +62,6 @@ meta 		AC_SPAMMY_URI_PATTERNS4 __AC_NUMS_URI
 describe 	AC_SPAMMY_URI_PATTERNS4	link combos match highly spammy template
 score 		AC_SPAMMY_URI_PATTERNS4	4.0
 tflags 		AC_SPAMMY_URI_PATTERNS4	publish
-
-meta 		AC_SPAMMY_URI_PATTERNS5 (__AC_SEQHASH_URI) # || __AC_SEQHASH_URIb || __AC_SEQHASH_URIc) 
-describe 	AC_SPAMMY_URI_PATTERNS5	link combos match highly spammy template
-score 		AC_SPAMMY_URI_PATTERNS5	4.0
-tflags 		AC_SPAMMY_URI_PATTERNS5	publish
-
-meta 		AC_SPAMMY_URI_PATTERNS6 (__AC_RHASH_URI) # || __AC_RHASH_URIb || __AC_RHASH_URIc) 
-describe 	AC_SPAMMY_URI_PATTERNS6	link combos match highly spammy template
-score 		AC_SPAMMY_URI_PATTERNS6	4.0
-tflags 		AC_SPAMMY_URI_PATTERNS6	publish
-
-meta 		AC_SPAMMY_URI_PATTERNS7 (__AC_RHASH2_URI) # || __AC_RHASH2_URIb || __AC_RHASH2_URIc)
-describe 	AC_SPAMMY_URI_PATTERNS7	link combos match highly spammy template
-score 		AC_SPAMMY_URI_PATTERNS7	4.0
-tflags 		AC_SPAMMY_URI_PATTERNS7	publish
 
 meta 		AC_SPAMMY_URI_PATTERNS8 __AC_LONGSEQ_URI
 describe 	AC_SPAMMY_URI_PATTERNS8	link combos match highly spammy template
@@ -155,3 +115,33 @@ rawbody AC_DIV_BONANZA  /(?:<div>(?:\s*<\/div>)?\s*){10}/i
 describe AC_DIV_BONANZA Too many divs in a row... spammy template
 score AC_DIV_BONANZA    0.001
 tflags AC_DIV_BONANZA	publish
+
+
+#Hash Rules currently Disabled.  Need a plugin to identify the hashes per domain
+#
+#    # http://charmaine.connectmediajk.biz/PsQ-bx161ZWh1ZEAzcGhhc2UuY29tmbe
+#uri __AC_SEQHASH_URI    /\/[A-Za-z0-9]{3}-[A-Za-z0-9]+AzcGhhc2UuY29t[A-Za-z0-9]{3}\b/
+#    #  http://www.efordold.me/?r=1&h=13579&s=70266-5&e=ZWh1ZEAzcGhhc2UuY29t
+#uri __AC_RHASH_URI      /\/\?r=[0-9]+&h=[0-9]{4,}&s=[0-9]{4,}-[0-9]+&e=[A-Za-z0-9]+AzcGhhc2UuY29t/
+#    # http://efordold.me/?h=13579&e=ZWh1ZEAzcGhhc2UuY29t&ar=20713376%2Fvuxtxusnr_ut6umoosrtv%7E53umtfupqnwsyppywn_umlslxpq%2Fypsl_uypvzrr_tztdyumo_toqpqm_tmtceu_tt7uoqq_msm_%2Futdfw3yu_8k_vj_84_je_8_buutyxuo_tlltxveumpmmte3u%2Flt0x0ut0xut7eum_tty1u_ttf1um_tlt2utezdeuteutyutw%2F2utv3utvaut0u_wcvty8uoa2vdz_ox97tdy97utd3aut09ul%2Ftcdautd3ummssrntw3utwv8utweut80utecegutfnutaeut263yutdzeum
+#uri __AC_RHASH2_URI     /\/\?h=[0-9]{4,}&e=[A-Za-z0-9]+AzcGhhc2UuY29t&ar=[A-Za-z0-9%_]{50,}/
+#
+#
+#    # http://www.chubbydiet.biz/11VP6856DOBTTT53RYM380F1073AHG1687LCS12K1907471II3470154694.php
+#uri __AC_LONGSEQ_URI    /\/[A-Z0-9]{50,}\.(?:php|html|cgi)\b/
+#    # http://www.losefast.us/1a83066009e4c6a4463ef4bb01/C/
+#uri __AC_1SEQC_URI      /\/1[a-z0-9]8[a-z0-9_]{20,}\/C\//
+#    # http://www.search-lots-archiv.com/1c8481478cf46e0b6d9dd0e40801/V/F5B03UPMP/8BJ6447LN.jpg
+#uri __AC_1SEQV_URI      /\/1[a-z0-9]8[a-z0-9_]{20,}\/V\//
+#    # http://www.losefast.us/r/move/254/42182/61283
+#uri __AC_RMOVE_URI      /\/r\/move\/[0-9]+\//
+#    # http://www.flaxchid.com/mo.n+new1844407650e8crit-ical.32153002was/es?t.816265832
+#uri __AC_PUNCTNUMS_URI  /\.com\/[A-Za-z+=\/.?_-]{4,}[0-9]{9,12}[a-z0-9]{1,2}[A-Za-z+=\/.?_-]+[0-9]{7,9}[A-Za-z+=\/.?_-]{6,}[0-9]{7,9}\b/
+#    #http://approbativeness57.isfient.me/caller-vulgarize-thriller-formality/forget-diet-pills-and-exercise-get-350-recipes-and-a-paleo-meal-plan/359297028/unjustifiedness.aspx
+#uri __AC_NDOMLONGNASPX_URI      /[A-Za-z]+[0-9]{2}\.[A-Za-z0-9-]+\.me\/(?:[A-Za-z0-9-]{10,}\/){2}[0-9]{8,}\/[A-Za-z]+\.aspx/
+#    #http://www.honkzoo.org/chd196h4d60c7347h484h886d5b
+#uri __AC_CHDSEQ_URI     /\/chd[a-z0-9]{20,}/
+#    #http://www.honkzoo.org/mhd196h4d60c7347h484h03c00c
+#uri __AC_MHDSEQ_URI     /\/mhd[a-z0-9]{20,}/
+#    #http://www.altkangaroo.com/uhd228h4da2fd0c5h49bhff5c2f
+#uri __AC_UHDSEQ_URI     /\/uhd[a-z0-9]{20,}/
