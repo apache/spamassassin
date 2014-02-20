@@ -7,7 +7,7 @@ use Test;
 use Config;
 
 my $temp_binpath = $Config{sitebinexp};
-$temp_binpath =~ s/^$Config{prefix}//;
+$temp_binpath =~ s/^\Q$Config{prefix}\E//;
 
 # called from BEGIN
 sub re2c_version_new_enough {
