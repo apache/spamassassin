@@ -1,8 +1,50 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-8mile axb-coi-bulk axb-generic axb-ham-misc axb-sa-users axb-trash bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bpoliakoff grenier jarif kpg-core mas-cps mas-mas zmi; day 2: axb-8mile axb-coi-bulk axb-generic axb-ham-misc axb-sa-users axb-trash bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bpoliakoff grenier jarif kpg-core llanga mas-cps mas-mas mmiroslaw-ham mmiroslaw-spam zmi; day 3: axb-8mile axb-coi-bulk axb-generic axb-ham-misc axb-sa-users axb-trash bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bpoliakoff grenier jarif kpg-core llanga mas-cps mas-mas zmi
+# with results from: day 1: axb-8mile axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bpoliakoff grenier jarif kpg-core mas-cps mas-mas mmiroslaw-ham mmiroslaw-spam zmi; day 2: axb-8mile axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bpoliakoff grenier jarif kpg-core llanga mas-cps mas-mas zmi; day 3: axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bpoliakoff jarif kpg-core llanga mas-cps mas-mas mmiroslaw-ham mmiroslaw-spam zmi
+
+# tflags publish
+AC_BR_BONANZA
+
+# tflags publish
+AC_DIV_BONANZA
 
 # tflags publish
 AC_HTML_NONSENSE_TAGS
+
+# tflags publish
+AC_SPAMMY_URI_PATTERNS1
+
+# tflags publish
+AC_SPAMMY_URI_PATTERNS10
+
+# tflags publish
+AC_SPAMMY_URI_PATTERNS11
+
+# tflags publish
+AC_SPAMMY_URI_PATTERNS12
+
+# tflags publish
+AC_SPAMMY_URI_PATTERNS2
+
+# tflags publish
+AC_SPAMMY_URI_PATTERNS3
+
+# tflags publish
+AC_SPAMMY_URI_PATTERNS4
+
+# tflags publish
+AC_SPAMMY_URI_PATTERNS5
+
+# tflags publish
+AC_SPAMMY_URI_PATTERNS6
+
+# tflags publish
+AC_SPAMMY_URI_PATTERNS7
+
+# tflags publish
+AC_SPAMMY_URI_PATTERNS8
+
+# tflags publish
+AC_SPAMMY_URI_PATTERNS9
 
 # tflags publish
 ADVANCE_FEE_2_NEW_FORM
@@ -59,22 +101,13 @@ AXB_3LITTLE_PIGS
 AXB_BODYMAIL_SBL112884
 
 # good enough
-AXB_ONMS_LEAKS
-
-# good enough
 AXB_XMAILER_MIMEOLE_OL_024C2
 
 # good enough
 AXB_XMAILER_MIMEOLE_OL_1ECD5
 
 # good enough
-AXB_XMA_BASP
-
-# good enough
 AXB_XM_FORGED_OL2600
-
-# good enough
-AXB_X_FF_SEZ_S
 
 # good enough
 BANKING_LAWS
@@ -106,14 +139,14 @@ BAYES_95
 # tflags publish
 BAYES_99
 
+# tflags publish
+BAYES_999
+
 # good enough
 BIGNUM_EMAILS
 
 # good enough
 BILLION_OVERLAP
-
-# good enough
-BITLY_URI
 
 # good enough
 BODY_EMPTY
@@ -205,15 +238,6 @@ DOS_ANAL_SPAM_MAILER
 # good enough
 DOS_OE_TO_MX
 
-# good enough
-DOS_OE_TO_MX_IMAGE
-
-# good enough
-DSN_NO_MIMEVERSION
-
-# good enough
-DYN_RDNS_SHORT_HELO_HTML
-
 # tflags publish
 EMAIL_URI_PHISH
 
@@ -230,19 +254,7 @@ FBI_MONEY
 FBI_SPOOF
 
 # good enough
-FH_FAKE_RCVD_LINE
-
-# good enough
-FH_FROM_START_YOU
-
-# good enough
 FH_HELO_ALMOST_IP
-
-# good enough
-FH_HELO_EQ_610HEX
-
-# good enough
-FH_HOST_EQ_DYNAMICIP
 
 # tflags publish
 FILL_THIS_FORM
@@ -255,9 +267,6 @@ FILL_THIS_FORM_LOAN
 
 # good enough
 FILL_THIS_FORM_LONG
-
-# good enough
-FM_FRM_RN_L_BRACK
 
 # good enough
 FM_LOTTO_MONEY
@@ -317,31 +326,13 @@ FROM_MISSP_TO_UNDISC
 FROM_MISSP_USER
 
 # good enough
-FROM_WSP_LEAD
-
-# good enough
 FR_ALMOST_VIAG2
 
 # good enough
 FSL_CTYPE_WIN1251
 
 # good enough
-FSL_FAKE_HOTMAIL_RVCD
-
-# good enough
-FSL_HELO_BARE_IP_1
-
-# good enough
-FSL_HELO_BARE_IP_2
-
-# good enough
 FSL_HELO_DEVICE
-
-# good enough
-FSL_HELO_FIREWALL
-
-# good enough
-FSL_HELO_NON_FQDN_1
 
 # good enough
 FSL_MID_419
@@ -354,12 +345,6 @@ FSL_MY_NAME_IS
 
 # good enough
 FSL_NEW_HELO_USER
-
-# good enough
-FS_CHEAP_CAP
-
-# good enough
-FU_ENDS_SG
 
 # tflags publish
 GOOGLE_DOCS_PHISH
@@ -396,12 +381,6 @@ HASHCASH_HIGH
 
 # tflags userconf
 HEAD_LONG
-
-# good enough
-HELO_LOCALHOST
-
-# good enough
-HEXHASH_WORD
 
 # good enough
 HK_LOTTO
@@ -465,12 +444,6 @@ KB_DATE_CONTAINS_TAB
 
 # good enough
 KB_FAKED_THE_BAT
-
-# good enough
-KB_RATWARE_MSGID
-
-# good enough
-KHOP_BIG_TO_CC
 
 # tflags publish
 LOTS_OF_MONEY
@@ -770,9 +743,6 @@ REPLYTO_WITHOUT_TO_CC
 RISK_FREE
 
 # good enough
-RP_MATCHES_RCVD
-
-# good enough
 SHARE_50_50
 
 # good enough
@@ -803,7 +773,7 @@ SPF_PASS
 SPF_SOFTFAIL
 
 # good enough
-STOCK_IMG_CTYPE
+STYLE_GIBBERISH
 
 # tflags userconf
 SUBJECT_IN_BLACKLIST
@@ -817,9 +787,6 @@ SUBJ_ATTENTION
 # good enough
 TAB_IN_FROM
 
-# good enough
-TBIRD_SUSP_MIME_BDRY
-
 # tflags net
 TO_EQ_FM_DOM_SPF_FAIL
 
@@ -830,22 +797,10 @@ TO_EQ_FM_HTML_ONLY
 TO_EQ_FM_SPF_FAIL
 
 # good enough
-TO_IN_SUBJ
-
-# good enough
 TO_NO_BRKTS_FROM_MSSP
 
 # good enough
 TO_NO_BRKTS_MSFT
-
-# good enough
-TT_MSGID_TRUNC
-
-# good enough
-TVD_APPROVED
-
-# good enough
-TVD_FINGER_02
 
 # good enough
 TVD_FROM_1
@@ -859,59 +814,35 @@ TVD_PH_REC
 # good enough
 TVD_RCVD_IP
 
-# tflags publish
-AC_BR_BONANZA
-
-# tflags publish
-AC_DIV_BONANZA
-
-# tflags publish
-AC_SPAMMY_URI_PATTERNS1
-
-# tflags publish
-AC_SPAMMY_URI_PATTERNS10
-
-# tflags publish
-AC_SPAMMY_URI_PATTERNS11
-
-# tflags publish
-AC_SPAMMY_URI_PATTERNS12
-
-# tflags publish
-AC_SPAMMY_URI_PATTERNS2
-
-# tflags publish
-AC_SPAMMY_URI_PATTERNS3
-
-# tflags publish
-AC_SPAMMY_URI_PATTERNS4
-
-# tflags publish
-AC_SPAMMY_URI_PATTERNS5
-
-# tflags publish
-AC_SPAMMY_URI_PATTERNS6
-
-# tflags publish
-AC_SPAMMY_URI_PATTERNS7
-
-# tflags publish
-AC_SPAMMY_URI_PATTERNS8
-
-# tflags publish
-AC_SPAMMY_URI_PATTERNS9
-
-# tflags publish
-BAYES_999
+# good enough
+TVD_RCVD_IP4
 
 # good enough
-BODY_URI_ONLY
+DATE_IN_FUTURE_Q_PLUS
 
 # good enough
-STYLE_GIBBERISH
+FREEMAIL_RVW_ATTCH
 
 # good enough
-TO_NO_BRKTS_HTML_ONLY
+FSL_HELO_FAKE
+
+# good enough
+HELO_MISC_IP
+
+# good enough
+HK_RANDOM_REPLYTO
+
+# good enough
+HK_SCAM_S4
+
+# good enough
+OBFU_HTML_ATTACH
+
+# good enough
+POSTCARD_09
+
+# good enough
+SERGIO_SUBJECT_VIAGRA01
 
 # tflags userconf
 UNPARSEABLE_RELAY
@@ -999,9 +930,6 @@ USER_IN_WHITELIST
 
 # tflags userconf
 USER_IN_WHITELIST_TO
-
-# good enough
-YOUR_PERMISSION
 
 # tflags net
 __DKIMDOMAIN_IN_DWL_ANY
