@@ -125,7 +125,7 @@ the spaminess of a message.
 With C<bayes_auto_learn_on_error> off, autolearning will be performed
 even if bayes classifier already agrees with the new classification (i.e.
 yielded BAYES_00 for what we are now trying to teach it as ham, or yielded
-BAYES_99 / BAYES_999 for spam). This is a traditional setting, the default was chosen
+BAYES_99 for spam). This is a traditional setting, the default was chosen
 to retain backward compatibility.
 
 With C<bayes_auto_learn_on_error> turned on, autolearning will be performed
@@ -241,7 +241,7 @@ sub autolearn_discriminator {
     my $tests = $scan->get_tag('TESTS');
     if (defined $tests && $tests ne 'none') {
       my %t = map { ($_,1) } split(/,/, $tests);
-      if ($isspam && ($t{'BAYES_99'} || $t{'BAYES_999'}) || !$isspam && $t{'BAYES_00'}) {
+      if ($isspam && $t{'BAYES_99'} || !$isspam && $t{'BAYES_00'}) {
         dbg("learn: auto-learn? no: learn-on-error, %s, already classified ".
             "as such",  $isspam ? 'spam' : 'ham');
         return;
