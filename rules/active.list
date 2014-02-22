@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bpoliakoff grenier jarif kpg-core mas-cps mas-mas zmi; day 2: axb-8mile axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bpoliakoff grenier jarif kpg-core llanga mas-cps mas-mas mmiroslaw-ham mmiroslaw-spam zmi; day 3: axb-8mile axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bpoliakoff grenier jarif kpg-core llanga mas-cps mas-mas zmi
+# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bpoliakoff grenier jarif kpg-core mas-cps zmi; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bpoliakoff grenier jarif kpg-core llanga mas-cps mas-mas zmi; day 3: axb-8mile axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bpoliakoff grenier jarif kpg-core llanga mas-cps mas-mas mmiroslaw-ham mmiroslaw-spam zmi
 
 # tflags publish
 AC_BR_BONANZA
@@ -30,15 +30,6 @@ AC_SPAMMY_URI_PATTERNS3
 
 # tflags publish
 AC_SPAMMY_URI_PATTERNS4
-
-# tflags publish
-AC_SPAMMY_URI_PATTERNS5
-
-# tflags publish
-AC_SPAMMY_URI_PATTERNS6
-
-# tflags publish
-AC_SPAMMY_URI_PATTERNS7
 
 # tflags publish
 AC_SPAMMY_URI_PATTERNS8
@@ -293,6 +284,9 @@ FSL_CTYPE_WIN1251
 FSL_HELO_DEVICE
 
 # good enough
+FSL_HELO_FAKE
+
+# good enough
 FSL_MISSP_REPLYTO
 
 # tflags publish
@@ -332,19 +326,19 @@ HASHCASH_HIGH
 HEAD_LONG
 
 # good enough
-HK_NAME_DRUGS
+HELO_MISC_IP
 
 # good enough
-HK_NAME_FM_DR
+HK_LOTTO
+
+# good enough
+HK_NAME_DRUGS
 
 # good enough
 HK_NAME_FM_MR_MRS
 
 # good enough
 HK_NAME_MR_MRS
-
-# good enough
-HK_SCAM_N13
 
 # good enough
 HK_SCAM_N15
@@ -707,10 +701,43 @@ TO_NO_BRKTS_MSFT
 TVD_FROM_1
 
 # good enough
-FSL_HELO_FAKE
+AXB_ONMS_LEAKS
 
 # good enough
-HELO_MISC_IP
+AXB_X_FF_SEZ_S
+
+# good enough
+BODY_URI_ONLY
+
+# good enough
+FH_HELO_EQ_610HEX
+
+# good enough
+FH_HOST_EQ_DYNAMICIP
+
+# good enough
+FROM_MISSP_EH_MATCH
+
+# good enough
+FSL_HELO_BARE_IP_2
+
+# good enough
+FSL_HELO_FIREWALL
+
+# good enough
+HEXHASH_WORD
+
+# good enough
+HK_LOTTO_NAME
+
+# good enough
+KHOP_BIG_TO_CC
+
+# good enough
+TO_IN_SUBJ
+
+# good enough
+TO_NO_BRKTS_HTML_ONLY
 
 # tflags userconf
 UNPARSEABLE_RELAY
