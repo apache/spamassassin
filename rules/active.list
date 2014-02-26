@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bpoliakoff grenier jarif kpg-core mas-cps zmi; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bpoliakoff grenier jarif kpg-core llanga mas-cps mas-mas zmi; day 3: axb-8mile axb-sa-users bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bpoliakoff grenier jarif kpg-core llanga mas-cps mas-mas mmiroslaw-ham mmiroslaw-spam zmi
+# with results from: day 1: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bpoliakoff grenier jarif kpg-core mas-cps mas-mas mmiroslaw-ham mmiroslaw-spam zmi; day 2: axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bpoliakoff grenier jarif kpg-core llanga mas-cps mas-mas mmiroslaw-ham mmiroslaw-spam zmi; day 3: axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bpoliakoff grenier jarif kpg-core llanga mas-cps mas-mas zmi
 
 # tflags publish
 AC_BR_BONANZA
@@ -86,10 +86,16 @@ ADVANCE_FEE_5_NEW_MONEY
 ALL_TRUSTED
 
 # good enough
+AXB_ONMS_LEAKS
+
+# good enough
 AXB_XMAILER_MIMEOLE_OL_024C2
 
 # good enough
 AXB_XMAILER_MIMEOLE_OL_1ECD5
+
+# good enough
+AXB_X_FF_SEZ_S
 
 # tflags learn
 BAYES_00
@@ -202,9 +208,6 @@ DYN_RDNS_SHORT_HELO_HTML
 # tflags publish
 EMAIL_URI_PHISH
 
-# good enough
-EMRCP
-
 # tflags userconf
 ENV_AND_HDR_SPF_MATCH
 
@@ -213,6 +216,12 @@ FH_FAKE_RCVD_LINE
 
 # good enough
 FH_HELO_ALMOST_IP
+
+# good enough
+FH_HELO_EQ_610HEX
+
+# good enough
+FH_HOST_EQ_DYNAMICIP
 
 # tflags publish
 FILL_THIS_FORM
@@ -257,6 +266,9 @@ FROM_LOCAL_NOVOWEL
 FROM_MISSPACED
 
 # good enough
+FROM_MISSP_EH_MATCH
+
+# good enough
 FROM_MISSP_FREEMAIL
 
 # good enough
@@ -281,13 +293,22 @@ FR_ALMOST_VIAG2
 FSL_CTYPE_WIN1251
 
 # good enough
+FSL_HELO_BARE_IP_2
+
+# good enough
 FSL_HELO_DEVICE
 
 # good enough
-FSL_HELO_FAKE
+FSL_HELO_FIREWALL
+
+# good enough
+FSL_HELO_NON_FQDN_1
 
 # good enough
 FSL_MISSP_REPLYTO
+
+# good enough
+FS_CHEAP_CAP
 
 # tflags publish
 GOOGLE_DOCS_PHISH
@@ -329,6 +350,9 @@ HEAD_LONG
 HELO_MISC_IP
 
 # good enough
+HEXHASH_WORD
+
+# good enough
 HK_LOTTO
 
 # good enough
@@ -339,9 +363,6 @@ HK_NAME_FM_MR_MRS
 
 # good enough
 HK_NAME_MR_MRS
-
-# good enough
-HK_SCAM_N15
 
 # good enough
 HK_SCAM_N2
@@ -357,6 +378,9 @@ KB_DATE_CONTAINS_TAB
 
 # good enough
 KB_FAKED_THE_BAT
+
+# good enough
+KHOP_BIG_TO_CC
 
 # tflags publish
 LOTS_OF_MONEY
@@ -423,9 +447,6 @@ OBFU_JVSCR_ESC
 
 # tflags publish
 OBFU_TEXT_ATTACH
-
-# good enough
-PHP_NOVER_MUA
 
 # tflags net
 PYZOR_CHECK
@@ -638,9 +659,6 @@ RCVD_IN_SORBS_ZOMBIE
 RCVD_IN_XBL
 
 # good enough
-REPLYTO_WITHOUT_TO_CC
-
-# good enough
 RISK_FREE
 
 # good enough
@@ -673,9 +691,6 @@ SPF_PASS
 # tflags net
 SPF_SOFTFAIL
 
-# good enough
-STYLE_GIBBERISH
-
 # tflags userconf
 SUBJECT_IN_BLACKLIST
 
@@ -692,52 +707,52 @@ TO_EQ_FM_DOM_SPF_FAIL
 TO_EQ_FM_SPF_FAIL
 
 # good enough
+TO_IN_SUBJ
+
+# good enough
 TO_NO_BRKTS_FROM_MSSP
+
+# good enough
+TO_NO_BRKTS_HTML_ONLY
 
 # good enough
 TO_NO_BRKTS_MSFT
 
 # good enough
+TT_MSGID_TRUNC
+
+# good enough
 TVD_FROM_1
 
 # good enough
-AXB_ONMS_LEAKS
+BIGNUM_EMAILS
 
 # good enough
-AXB_X_FF_SEZ_S
+FB_EARN_UP_TO
 
 # good enough
-BODY_URI_ONLY
+FH_HELO_EQ_CHARTER
 
 # good enough
-FH_HELO_EQ_610HEX
+FSL_NEW_HELO_USER
 
 # good enough
-FH_HOST_EQ_DYNAMICIP
+HELO_NO_DOMAIN
 
 # good enough
-FROM_MISSP_EH_MATCH
+HK_SCAM_N1
 
 # good enough
-FSL_HELO_BARE_IP_2
+HK_SCAM_N13
 
 # good enough
-FSL_HELO_FIREWALL
+MONEY_12LTRDOM
 
 # good enough
-HEXHASH_WORD
+SUBJ_BROKEN_WORD
 
 # good enough
-HK_LOTTO_NAME
-
-# good enough
-KHOP_BIG_TO_CC
-
-# good enough
-TO_IN_SUBJ
-
-# good enough
-TO_NO_BRKTS_HTML_ONLY
+TVD_SUBJ_NUM_OBFU_MINFP
 
 # tflags userconf
 UNPARSEABLE_RELAY
