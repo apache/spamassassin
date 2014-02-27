@@ -1,5 +1,11 @@
 ##
 
+# #  2014-02.27
+header		AXB_BULWARE_OEM		X-Mailer =~ /^OEM$/
+
+#  2014-02.27
+header		AXB_BULKWARE_API	exists:X-SMTPAPI
+
 #  2014-02.06
 meta		AXB_NOQUIEROMAS		(FREEMAIL_FROM && __HAS_ORGANIZATION && ! __HAS_UA && ! __HAS_XMAIL) 
 describe	AXB_NOQUIEROMAS		Soy lo que soy
