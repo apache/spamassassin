@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bpoliakoff grenier jarif kpg-core mas-cps mas-mas mmiroslaw-ham mmiroslaw-spam zmi; day 2: axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bpoliakoff grenier jarif kpg-core llanga mas-cps mas-mas mmiroslaw-ham mmiroslaw-spam zmi; day 3: axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bpoliakoff grenier jarif kpg-core llanga mas-cps mas-mas zmi
+# with results from: day 1: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bpoliakoff grenier jarif kpg-core mas-cps mas-mas mmiroslaw-ham mmiroslaw-spam zmi; day 2: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bpoliakoff grenier jarif kpg-core llanga mas-cps mas-mas mmiroslaw-ham mmiroslaw-spam zmi; day 3: axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bpoliakoff grenier jarif kpg-core llanga mas-cps mas-mas mmiroslaw-ham mmiroslaw-spam zmi
 
 # tflags publish
 AC_BR_BONANZA
@@ -128,6 +128,9 @@ BAYES_99
 BAYES_999
 
 # good enough
+BIGNUM_EMAILS
+
+# good enough
 BODY_EMPTY
 
 # tflags userconf
@@ -212,6 +215,9 @@ EMAIL_URI_PHISH
 ENV_AND_HDR_SPF_MATCH
 
 # good enough
+FB_EARN_UP_TO
+
+# good enough
 FH_FAKE_RCVD_LINE
 
 # good enough
@@ -219,6 +225,9 @@ FH_HELO_ALMOST_IP
 
 # good enough
 FH_HELO_EQ_610HEX
+
+# good enough
+FH_HELO_EQ_CHARTER
 
 # good enough
 FH_HOST_EQ_DYNAMICIP
@@ -308,7 +317,7 @@ FSL_HELO_NON_FQDN_1
 FSL_MISSP_REPLYTO
 
 # good enough
-FS_CHEAP_CAP
+FSL_NEW_HELO_USER
 
 # tflags publish
 GOOGLE_DOCS_PHISH
@@ -350,6 +359,9 @@ HEAD_LONG
 HELO_MISC_IP
 
 # good enough
+HELO_NO_DOMAIN
+
+# good enough
 HEXHASH_WORD
 
 # good enough
@@ -363,6 +375,12 @@ HK_NAME_FM_MR_MRS
 
 # good enough
 HK_NAME_MR_MRS
+
+# good enough
+HK_SCAM_N1
+
+# good enough
+HK_SCAM_N13
 
 # good enough
 HK_SCAM_N2
@@ -399,6 +417,9 @@ MIME_CHARSET_FARAWAY
 
 # tflags userconf
 MISSING_HB_SEP
+
+# good enough
+MONEY_12LTRDOM
 
 # good enough
 MONEY_ATM_CARD
@@ -698,6 +719,9 @@ SUBJECT_IN_BLACKLIST
 SUBJECT_IN_WHITELIST
 
 # good enough
+SUBJ_BROKEN_WORD
+
+# good enough
 TAB_IN_FROM
 
 # tflags net
@@ -725,34 +749,16 @@ TT_MSGID_TRUNC
 TVD_FROM_1
 
 # good enough
-BIGNUM_EMAILS
-
-# good enough
-FB_EARN_UP_TO
-
-# good enough
-FH_HELO_EQ_CHARTER
-
-# good enough
-FSL_NEW_HELO_USER
-
-# good enough
-HELO_NO_DOMAIN
-
-# good enough
-HK_SCAM_N1
-
-# good enough
-HK_SCAM_N13
-
-# good enough
-MONEY_12LTRDOM
-
-# good enough
-SUBJ_BROKEN_WORD
-
-# good enough
 TVD_SUBJ_NUM_OBFU_MINFP
+
+# good enough
+FSL_HELO_FAKE
+
+# good enough
+HK_SCAM_N15
+
+# good enough
+PHP_NOVER_MUA
 
 # tflags userconf
 UNPARSEABLE_RELAY
