@@ -383,27 +383,37 @@ SPAMASSASSIN RELEASE PROCEDURE
 
         http://people.apache.org/~kmcgrail/devel/ for example
 
+  NOTE: It's also feasible that you could publish via SVNPubSub as noted 
+  below but using the SVN repository at:
+
+    https://dist.apache.org/repos/dist/dev/SpamAssassin
+ 
+  The choice is up to the Release Manager for these test builds.
+
+
   For full release builds, you need to publish using SVNPubSub.
  
-  Need to commit the new artifacts and signature files to 
-  https://dist.apache.org/repos/dist/spamassassin once a
+  This is a simple matter of committing the new artifacts and signature 
+  files to https://dist.apache.org/repos/dist/spamassassin once a
   release vote passes. 
-
-        **** NEEDS SPECIFIC COMMANDS FOR HOW TO COMMIT VIA SVNPUBSUB ****
 
   [note: Symlinks may not work on all mirrors even though there may be 
   documentation to the contrary.]
 
-  See https://issues.apache.org/jira/browse/INFRA-7295
+  As documented at http://www.apache.org/dev/release.html, SpamAssassin
+  as of 2014-02-26 publishes tarballs by manipulating the repo on svn.
 
-- Remove tar-balls for now-obsolete versions from dist:
+  svn co https://dist.apache.org/repos/dist/release/spamassassin/ release
 
-  Only the most recent version of each supported release line should be
-  stored.  The archives will auto update.  
-  See http://www.apache.org/dev/release#archived.
+  - Manipulate the files to add the new version artifacts to the source dir
+  - Remove tar-balls for now-obsolete versions from dist:
 
-        **** NEEDS SPECIFIC COMMANDS FOR HOW TO COMMIT VIA SVNPUBSUB ****
-        
+    Only the most recent version of each supported release line should be
+    stored.  The archives will auto update.  
+    See http://www.apache.org/dev/release#archived.
+  - Commit 
+  - Wait 24 hours before you announce to allow mirrors to update
+
   (NOTE: it may be better to wait a while before doing this; it appears to
   take a while for the spamassassin.apache.org website mirror script to
   run, so the old downloads page will stick around for a while before it's
