@@ -1236,11 +1236,11 @@ score       HEXHASH_WORD       2.500	# limit
 # meta        __HEXHASH_4        __HEXHASHWORD == 4
 # meta        __HEXHASH_5        __HEXHASHWORD == 5
 
-##  from users list spample provided by Larry Starr
-# body        __UC_GIBB_OBFU     /\b[a-z]{1,20}\so?[A-Z]{16,}r?\s[A-Za-z][a-z]{1,10}/
-# tflags      __UC_GIBB_OBFU     multiple maxhits=8
-# meta        UC_GIBBERISH_OBFU  (__UC_GIBB_OBFU > 7)
-# describe    UC_GIBBERISH_OBFU  Multiple instances of "word LONGGIBBERISH word"
-# score       UC_GIBBERISH_OBFU  1.000	# Limit
+#  from users list spample provided by Larry Starr
+body        __UC_GIBB_OBFU     /\b[a-z]{1,20}[,;]?\s[A-Z]{16,}\s[A-Za-z][a-z]{1,10}\b/
+tflags      __UC_GIBB_OBFU     multiple maxhits=8
+meta        UC_GIBBERISH_OBFU  (__UC_GIBB_OBFU > 7)
+describe    UC_GIBBERISH_OBFU  Multiple instances of "word LONGGIBBERISH word"
+score       UC_GIBBERISH_OBFU  1.000	# Limit
 
 
