@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bpoliakoff grenier jarif kpg-core mas-cps mas-mas zmi; day 2: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bpoliakoff grenier jarif kpg-core llanga mas-cps mas-mas mmiroslaw-ham mmiroslaw-spam zmi; day 3: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bpoliakoff grenier jarif kpg-core llanga mas-cps mas-mas zmi
+# with results from: day 1: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bpoliakoff grenier jarif kpg-core mas-cps mas-mas zmi; day 2: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bpoliakoff grenier jarif kpg-core llanga mas-cps mas-mas zmi; day 3: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bpoliakoff grenier jarif kpg-core llanga mas-cps mas-mas mmiroslaw-ham mmiroslaw-spam zmi
 
 # tflags publish
 AC_BR_BONANZA
@@ -98,6 +98,9 @@ AXB_XMAILER_MIMEOLE_OL_024C2
 AXB_XMAILER_MIMEOLE_OL_1ECD5
 
 # good enough
+AXB_XM_FORGED_OL2600
+
+# good enough
 AXB_X_FF_SEZ_S
 
 # good enough
@@ -177,6 +180,9 @@ DATE_IN_FUTURE_Q_PLUS
 
 # good enough
 DEAR_BENEFICIARY
+
+# good enough
+DEAR_EMAIL_USER
 
 # good enough
 DEAR_WINNER
@@ -260,6 +266,9 @@ FH_FAKE_RCVD_LINE
 FH_FAKE_RCVD_LINE_B
 
 # good enough
+FH_FROM_CASH
+
+# good enough
 FH_HELO_ALMOST_IP
 
 # good enough
@@ -297,6 +306,9 @@ FORM_FRAUD_5
 
 # tflags userconf
 FRAGMENTED_MESSAGE
+
+# tflags publish
+FREEMAIL_FORGED_FROMDOMAIN
 
 # good enough
 FROM_12LTRDOM
@@ -403,6 +415,9 @@ HASHCASH_2SPEND
 # tflags userconf
 HASHCASH_HIGH
 
+# tflags publish
+HEADER_FROM_DIFFERENT_DOMAINS
+
 # tflags userconf
 HEAD_LONG
 
@@ -417,6 +432,9 @@ HEXHASH_WORD
 
 # good enough
 HK_LOTTO
+
+# good enough
+HK_NAME_DRUGS
 
 # good enough
 HK_NAME_FROM
@@ -441,6 +459,9 @@ HK_SCAM_N2
 
 # good enough
 HK_SCAM_N3
+
+# good enough
+HK_SCAM_N4
 
 # tflags userconf
 HTML_CHARSET_FARAWAY
@@ -752,6 +773,12 @@ REPLYTO_WITHOUT_TO_CC
 RISK_FREE
 
 # good enough
+SERGIO_SUBJECT_VIAGRA01
+
+# good enough
+SHARE_50_50
+
+# good enough
 SHORT_HELO_AND_INLINE_IMAGE
 
 # tflags net
@@ -788,9 +815,6 @@ SUBJECT_IN_BLACKLIST
 SUBJECT_IN_WHITELIST
 
 # good enough
-SUBJ_BROKEN_WORD
-
-# good enough
 TAB_IN_FROM
 
 # tflags net
@@ -821,37 +845,31 @@ TVD_FROM_1
 TVD_PH_BODY_META
 
 # good enough
+TVD_QUAL_MEDS
+
+# good enough
 TVD_RCVD_IP
 
 # good enough
 TVD_SUBJ_NUM_OBFU_MINFP
 
 # good enough
-AXB_XM_FORGED_OL2600
+ANY_PILL_PRICE
 
 # good enough
-DEAR_EMAIL_USER
+HK_NAME_FM_MR_MRS
 
 # good enough
-FH_FROM_CASH
-
-# tflags publish
-FREEMAIL_FORGED_FROMDOMAIN
-
-# tflags publish
-HEADER_FROM_DIFFERENT_DOMAINS
+HK_SCAM_N8
 
 # good enough
-HK_SCAM_N4
+HK_SCAM_S7
 
 # good enough
-SERGIO_SUBJECT_VIAGRA01
+LOTTO_AGENT_RPLY
 
 # good enough
-SHARE_50_50
-
-# good enough
-YOUR_PERMISSION
+OBFU_HTML_ATTACH
 
 # tflags userconf
 UNPARSEABLE_RELAY
@@ -939,6 +957,9 @@ USER_IN_WHITELIST
 
 # tflags userconf
 USER_IN_WHITELIST_TO
+
+# good enough
+YOUR_PERMISSION
 
 # tflags net
 __DKIMDOMAIN_IN_DWL_ANY
