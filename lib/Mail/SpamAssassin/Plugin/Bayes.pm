@@ -150,13 +150,15 @@ $MARK_PRESENCE_ONLY_HDRS = qr{(?: X-Face
   |D(?:KIM|omainKey)-Signature
 )}ix;
 
-# tweaks tested as of Nov 18 2002 by jm: see SpamAssassin-devel list archives
+# tweaks tested as of Nov 18 2002 by jm posted to -devel at
+# http://sourceforge.net/p/spamassassin/mailman/message/12977556/
 # for results.  The winners are now the default settings.
 use constant IGNORE_TITLE_CASE => 1;
 use constant TOKENIZE_LONG_8BIT_SEQS_AS_TUPLES => 1;
 use constant TOKENIZE_LONG_TOKENS_AS_SKIPS => 1;
 
-# tweaks of May 12 2003, see SpamAssassin-devel archives again.
+# tweaks by jm on May 12 2003, see -devel email at
+# http://sourceforge.net/p/spamassassin/mailman/message/14844556/
 use constant PRE_CHEW_ADDR_HEADERS => 1;
 use constant CHEW_BODY_URIS => 1;
 use constant CHEW_BODY_MAILADDRS => 1;
@@ -1167,8 +1169,9 @@ sub _tokenize_line {
             || ($region == 2 && URIS_TOKENIZE_LONG_TOKENS_AS_SKIPS))
       {
 	# if (TOKENIZE_LONG_TOKENS_AS_SKIPS)
-	# Spambayes trick via Matt: Just retain 7 chars.  Do not retain
-	# the length, it does not help; see my mail to -devel of Nov 20 2002.
+	# Spambayes trick via Matt: Just retain 7 chars.  Do not retain the
+	# length, it does not help; see jm's mail to -devel on Nov 20 2002 at
+	# http://sourceforge.net/p/spamassassin/mailman/message/12977605/
 	# "sk:" stands for "skip".
 	$token = "sk:".substr($token, 0, 7);
       }
