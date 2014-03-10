@@ -58,7 +58,7 @@ use vars qw (
 foreach (qw/
   ac ad ae aero af ag ai al am an ao aq ar arpa as asia at au aw ax az
   ba bb bd be bf bg bh bi biz bj bm bn bo br bs bt bw by bz ca cat cc
-  cd cf cg ch ci ck cl cm cn co com coop cr cu cv cx cy cz de dj dk dm
+  cd cf cg ch ci ck cl cm cn co com coop cr cu cv cw cx cy cz de dj dk dm
   do dz ec edu ee eg er es et eu fi fj fk fm fo fr ga gd ge gf gg gh
   gi gl gm gn gov gp gq gr gs gt gu gw gy hk hm hn hr ht hu id ie il im
   in info int io iq ir is it je jm jo jobs jp ke kg kh ki km kn kp kr kw
@@ -66,7 +66,7 @@ foreach (qw/
   mn mo mobi mp mq mr ms mt mu museum mv mw mx my mz na name nc ne net
   nf ng ni nl no np nr nu nz om org pa pe pf pg ph pk pl pm pn pr pro ps
   pt pw py qa re ro rs ru rw sa sb sc sd se sg sh si sk sl sm sn so
-  sr st su sv sy sz tc td tel tf tg th tj tk tl tm tn to tp tr travel tt
+  sr st su sv sx sy sz tc td tel tf tg th tj tk tl tm tn to tp tr travel tt
   tv tw tz ua ug uk us uy uz va vc ve vg vi vn vu wf ws xxx ye yt za
   zm zw
   /) {
@@ -80,11 +80,11 @@ foreach (qw/
 $VALID_TLDS_RE = qr/
   (?=[abcdefghijklmnopqrstuvwxyz])
   (?:a(?:e(?:ro)?|r(?:pa)?|s(?:ia)?|[cdfgilmnoqtuwxz])|b(?:iz?|[abdefghjmnorstwyz])
-  |c(?:at?|o(?:m|op)?|[cdfghiklmnruvxyz])|d[ejkmoz]|e(?:[cegrst]|d?u)|f[ijkmor]
+  |c(?:at?|o(?:m|op)?|[cdfghiklmnruvwxyz])|d[ejkmoz]|e(?:[cegrst]|d?u)|f[ijkmor]
   |g(?:[adefghilmnpqrstuwy]|ov)|h[kmnrtu]|i(?:n(?:fo|t)?|[delmoqrst])|j(?:o(?:bs)?|[emp])
   |k[eghimnprwyz]|l[abcikrstuvy]|m(?:o(?:bi)?|u(?:seum)?|[acdeghkmnpqrstvwxyz]|i?l)
   |n(?:a(?:me)?|et?|[cfgilopruz])|o(?:m|rg)|p(?:ro?|[aefghklmnstwy])|r[eosuw]
-  |s[abcdeghiklmnortuvyz]|t(?:r(?:avel)?|[cdfghjkmnoptvwz]|e?l)|u[agksyz]
+  |s[abcdeghiklmnortuvxyz]|t(?:r(?:avel)?|[cdfghjkmnoptvwz]|e?l)|u[agksyz]
   |v[aceginu]|w[fs]|y[et]|z[amw]|qa|xxx
   )/ix;
 
