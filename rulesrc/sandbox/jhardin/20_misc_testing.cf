@@ -298,7 +298,7 @@ endif
 meta           EMPTY_RVM_ATTCH      (__PLS_REVIEW || __DLND_ATTACH) && __EMPTY_BODY
 describe       EMPTY_RVM_ATTCH      Please review attached document, empty message
 
-body           END_FUTURE_EMAILS   /\b(?:end|stop|discontinue) (?:or )?(?:these|our|(?:any )?future) (?:(?:e|ad)-?mail|alert)[- ]?(?:ad)?s?\b/i
+body           END_FUTURE_EMAILS   /\b(?:end|stop|discontinue|removed?) (?:receiving |or |(?:a-z{1,30} ){0,4}from )?(?:these|our|(?:any )?(?:future|further)) (?:(?:e|ad)-?m(?:ail(?:ing)?|essage)|alert)[- ]?(?:ad)?s?\b/i
 describe       END_FUTURE_EMAILS   Unsubscribe
 score          END_FUTURE_EMAILS   2.000	# limit
 
@@ -1248,4 +1248,22 @@ score       UC_GIBBERISH_OBFU  1.000	# Limit
 
 body        __B2B_HELP         /\bhelp(?:ing)? businesses like yours\b/i
 
+
+# will be removed with immediate effect from any further mailing list
+# wish to receive information from us in the future
+# This-link http://www.nowyehue.com/bon/dds/ will end messages.
+# stop receiving these emails
+# Unsubscribe me from this list
+# We are not promoting any kind of SPAM.
+# recieve any kind promotional email form us
+# To stop receiving these emails
+# exclude yourself from further ad-messages
+# removal options
+# Stop PSA alert:
+
+body        __UNSUB_PSA       /\bstop PSA alert\b/i
+
+body        __UNSUB_EXCL      /\bexclude yourself from further ad\b/i
+
+body        __UNSUB_OPT       /\bremoval options?\b/i
 
