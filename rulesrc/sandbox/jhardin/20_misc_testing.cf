@@ -298,8 +298,10 @@ endif
 meta           EMPTY_RVM_ATTCH      (__PLS_REVIEW || __DLND_ATTACH) && __EMPTY_BODY
 describe       EMPTY_RVM_ATTCH      Please review attached document, empty message
 
-body           END_FUTURE_EMAILS   /\bend future (?:email|alert)s?\b/i
-describe       END_FUTURE_EMAILS   Pump-and-dump unsubscribe
+body           END_FUTURE_EMAILS   /\b(?:end|stop|discontinue) (?:or )?(?:these|our|(?:any )?future) (?:(?:e|ad)-?mail|alert)[- ]?(?:ad)?s?\b/i
+describe       END_FUTURE_EMAILS   Unsubscribe
+score          END_FUTURE_EMAILS   2.000	# limit
+
 
 body           AD_COMPLAINTS       /\bcomplaints about this ad+\b/i
 describe       AD_COMPLAINTS       Complain about this spam
@@ -1242,5 +1244,8 @@ tflags      __UC_GIBB_OBFU     multiple maxhits=8
 meta        UC_GIBBERISH_OBFU  (__UC_GIBB_OBFU > 7)
 describe    UC_GIBBERISH_OBFU  Multiple instances of "word LONGGIBBERISH word"
 score       UC_GIBBERISH_OBFU  1.000	# Limit
+
+
+body        __B2B_HELP         /\bhelp(?:ing)? businesses like yours\b/i
 
 
