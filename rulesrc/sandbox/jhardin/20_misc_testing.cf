@@ -298,7 +298,8 @@ endif
 meta           EMPTY_RVM_ATTCH      (__PLS_REVIEW || __DLND_ATTACH) && __EMPTY_BODY
 describe       EMPTY_RVM_ATTCH      Please review attached document, empty message
 
-body           END_FUTURE_EMAILS   /\b(?:end|stop|discontinue|removed?) (?:receiving |or |(?:a-z{1,30} ){0,4}from )?(?:these|our|(?:any )?(?:future|further)) (?:(?:e|ad)-?m(?:ail(?:ing)?|essage)|alert)[- ]?(?:ad)?s?\b/i
+body           __END_FUTURE_EMAILS /\b(?:end|stop|discontinue|removed?|do not w(?:ish|ant) to) (?:receiv(?:ing|e) |or |(?:a-z{1,30} ){0,4}from )?(?:these|our|(?:any )?(?:future|further)) (?:(?:e|ad)-?m(?:ail(?:ing)?|essage)|alert)[- ]?(?:ad)?s?\b/i
+meta           END_FUTURE_EMAILS   __END_FUTURE_EMAILS && !__RCD_RDNS_SMTP_MESSY && !__RPATH_12LTRDOM
 describe       END_FUTURE_EMAILS   Unsubscribe
 score          END_FUTURE_EMAILS   2.000	# limit
 
@@ -1117,7 +1118,12 @@ describe    YOUR_PHOTOS         "Your Photos" phishing or malware
 score       YOUR_PHOTOS         4.00	# limit
 
 body        __UNSUBSCRIBE_ES   /\b(?:Para darte de baja y no recibir ning(?:=FA|[\xfa]|[\xc3][\xba])n|Si no desea que le enviemos publicidad|Si desea eliminar su correo [^\s@]{1,64}@[^\s@]{1,64} de nuestra lista|no recibir estos boletines a: [^\s@]{1,64}@[^\s@]{1,64} simplemente|Si no desea recibir m(?:=E1|[\xe1]|[\xc3][\xa1]|a)s notificaciones)\b/i
+meta        UNSUBSCRIBE_ES     __UNSUBSCRIBE_ES
+score       UNSUBSCRIBE_ES     2.500	# limit
+
 body        __UNSUBSCRIBE_PT   /\bSe n(?:a|=E3|[\xe3]|[\xc3][\xa3])o desejar mais receber nossos e-?mails?\b/i
+meta        UNSUBSCRIBE_PT     __UNSUBSCRIBE_PT
+score       UNSUBSCRIBE_PT     2.500	# limit
 
 body        __URI_DBL_PROTO    m,\b(?:https?:/+){2},i
 
@@ -1246,7 +1252,8 @@ describe    UC_GIBBERISH_OBFU  Multiple instances of "word LONGGIBBERISH word"
 score       UC_GIBBERISH_OBFU  1.000	# Limit
 
 
-body        __B2B_HELP         /\bhelp(?:ing)? businesses like yours\b/i
+body        __B2B_HELP         /\bhelp(?:ing)? (?:businesses like yours|your business)\b/i
+body        __YOUR_BIZ         /\bbusiness(?:es) like yours|(?<!of )your b(?:usiness|rand)\b/i
 
 
 # will be removed with immediate effect from any further mailing list
@@ -1264,6 +1271,10 @@ body        __B2B_HELP         /\bhelp(?:ing)? businesses like yours\b/i
 body        __UNSUB_PSA       /\bstop PSA alert\b/i
 
 body        __UNSUB_EXCL      /\bexclude yourself from further ad\b/i
+meta        UNSUB_EXCL        __UNSUB_EXCL
+score       UNSUB_EXCL        2.000	# limit
 
 body        __UNSUB_OPT       /\bremoval options?\b/i
+meta        UNSUB_OPT         __UNSUB_OPT
+score       UNSUB_OPT         2.000	# limit
 
