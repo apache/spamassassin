@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bpoliakoff grenier jarif kpg-core mas-cps mas-mas zmi; day 2: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bernie-fsf bernie-it_batt bpoliakoff grenier jarif kpg-core llanga mas-cps mas-mas zmi; day 3: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bpoliakoff grenier jarif kpg-core llanga mas-cps mas-mas mmiroslaw-ham mmiroslaw-spam zmi
+# with results from: day 1: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bpoliakoff grenier kpg-core mas-cps mas-mas mmiroslaw-ham mmiroslaw-spam zmi; day 2: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bpoliakoff grenier jarif kpg-core llanga mas-cps mas-mas zmi; day 3: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bernie-fsf bernie-it_batt bpoliakoff grenier jarif kpg-core llanga mas-cps mas-mas zmi
 
 # tflags publish
 AC_BR_BONANZA
@@ -92,6 +92,9 @@ ANY_PILL_PRICE
 AXB_3LITTLE_PIGS
 
 # good enough
+AXB_BODYMAIL_SBL112884
+
+# good enough
 AXB_ONMS_LEAKS
 
 # good enough
@@ -105,6 +108,9 @@ AXB_XM_FORGED_OL2600
 
 # good enough
 AXB_X_FF_SEZ_S
+
+# good enough
+AXB_X_RCV_WLOCAL
 
 # good enough
 BANKING_LAWS
@@ -182,9 +188,6 @@ DATE_IN_FUTURE_Q_PLUS
 DEAR_BENEFICIARY
 
 # good enough
-DEAR_EMAIL_USER
-
-# good enough
 DEAR_WINNER
 
 # tflags net
@@ -241,9 +244,6 @@ DRUGS_STOCK_MIMEOLE
 # good enough
 DSN_NO_MIMEVERSION
 
-# good enough
-DYN_RDNS_SHORT_HELO_HTML
-
 # tflags publish
 EMAIL_URI_PHISH
 
@@ -264,6 +264,9 @@ FH_FAKE_RCVD_LINE
 
 # good enough
 FH_FAKE_RCVD_LINE_B
+
+# good enough
+FH_FROM_GET_NAME
 
 # good enough
 FH_HELO_ALMOST_IP
@@ -354,6 +357,9 @@ FROM_WSP_LEAD
 
 # good enough
 FSL_CTYPE_WIN1251
+
+# good enough
+FSL_HELO_BARE_IP_2
 
 # good enough
 FSL_HELO_DEVICE
@@ -469,6 +475,9 @@ HK_SCAM_S25
 # good enough
 HK_SCAM_S7
 
+# good enough
+HK_SPAMMY_FILENAME
+
 # tflags userconf
 HTML_CHARSET_FARAWAY
 
@@ -477,9 +486,6 @@ KB_DATE_CONTAINS_TAB
 
 # good enough
 KB_FAKED_THE_BAT
-
-# good enough
-KB_RATWARE_MSGID
 
 # good enough
 KB_RATWARE_OUTLOOK_MID
@@ -552,6 +558,9 @@ NSL_RCVD_HELO_USER
 
 # good enough
 OBFU_ATTACH_MISSP
+
+# good enough
+OBFU_HTML_ATTACH
 
 # tflags publish
 OBFU_JVSCR_ESC
@@ -815,9 +824,6 @@ SPF_PASS
 SPF_SOFTFAIL
 
 # good enough
-STOX_REPLY_TYPE
-
-# good enough
 STOX_REPLY_TYPE_WITHOUT_QUOTES
 
 # tflags userconf
@@ -827,10 +833,16 @@ SUBJECT_IN_BLACKLIST
 SUBJECT_IN_WHITELIST
 
 # good enough
+SUBJ_ATTENTION
+
+# good enough
 TAB_IN_FROM
 
 # tflags net
 TO_EQ_FM_DOM_SPF_FAIL
+
+# good enough
+TO_EQ_FM_HTML_ONLY
 
 # tflags net
 TO_EQ_FM_SPF_FAIL
@@ -860,19 +872,10 @@ TVD_PH_REC
 TVD_QUAL_MEDS
 
 # good enough
-AXB_BODYMAIL_SBL112884
-
-# good enough
 AXB_BULKWARE_API
 
 # good enough
-AXB_X_RCV_WLOCAL
-
-# good enough
-BODY_SINGLE_WORD
-
-# good enough
-FH_FROM_GET_NAME
+DEAR_EMAIL_USER
 
 # good enough
 FH_FROM_START_YOU
@@ -881,40 +884,22 @@ FH_FROM_START_YOU
 FROM_ONE_CHAR
 
 # good enough
-FSL_HELO_BARE_IP_2
-
-# good enough
 FSL_HELO_FAKE
 
 # good enough
 FU_ENDS_SG
 
 # good enough
-HK_GOLDDUST
-
-# good enough
-HK_LOTTO_NAME
-
-# good enough
 HK_NAME_FM_MR_MRS
 
 # good enough
-HK_SCAM_S4
+HK_RANDOM_FROM
 
 # good enough
-HK_SPAMMY_FILENAME
+HK_SCAM_S22
 
 # good enough
-LOTTO_URI
-
-# good enough
-STYLE_GIBBERISH
-
-# good enough
-SUBJ_ATTENTION
-
-# good enough
-TO_EQ_FM_HTML_ONLY
+URI_WPADMIN
 
 # tflags userconf
 UNPARSEABLE_RELAY
