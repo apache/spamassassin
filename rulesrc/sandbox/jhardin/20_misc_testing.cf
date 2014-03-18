@@ -842,6 +842,11 @@ header      __CC_TOO_MANY          Cc =~ /(?:,[^,]{1,90}){30}/
 
 header      __TO_WAY_TOO_MANY      ToCc =~ /(?:,[^,]{1,90}){50}/
 
+meta        FREEMAIL_MANY_TO       __TO_WAY_TOO_MANY && FREEMAIL_FROM
+describe    FREEMAIL_MANY_TO       Freemail sender, 50+ exposed recipients
+score       FREEMAIL_MANY_TO       2.000	# limit
+
+
 body        __GAPPY_PHONE_NA       /1 ?- \d \d \d ?- \d \d \d ?- \d \d \d \d/
 meta        GAPPY_PHONE_NA         __GAPPY_PHONE_NA
 describe    GAPPY_PHONE_NA         Phone number with lots of spaces
@@ -1277,4 +1282,6 @@ score       UNSUB_EXCL        2.000	# limit
 body        __UNSUB_OPT       /\bremoval options?\b/i
 meta        UNSUB_OPT         __UNSUB_OPT
 score       UNSUB_OPT         2.000	# limit
+
+header	    __NO_TRUSTED_RELAY	X-Spam-Relays-Trusted !~ /ip=/i
 
