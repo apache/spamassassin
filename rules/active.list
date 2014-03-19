@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bpoliakoff grenier kpg-core mas-cps mas-mas mmiroslaw-ham mmiroslaw-spam zmi; day 2: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bpoliakoff grenier jarif kpg-core llanga mas-cps mas-mas zmi; day 3: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bernie-fsf bernie-it_batt bpoliakoff grenier jarif kpg-core llanga mas-cps mas-mas zmi
+# with results from: day 1: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bpoliakoff grenier jarif kpg-core mas-cps mas-mas zmi; day 2: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bpoliakoff grenier jarif kpg-core llanga mas-cps mas-mas mmiroslaw-ham mmiroslaw-spam zmi; day 3: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bpoliakoff grenier jarif kpg-core llanga zmi
 
 # tflags publish
 AC_BR_BONANZA
@@ -95,6 +95,9 @@ AXB_3LITTLE_PIGS
 AXB_BODYMAIL_SBL112884
 
 # good enough
+AXB_BULKWARE_API
+
+# good enough
 AXB_ONMS_LEAKS
 
 # good enough
@@ -111,9 +114,6 @@ AXB_X_FF_SEZ_S
 
 # good enough
 AXB_X_RCV_WLOCAL
-
-# good enough
-BANKING_LAWS
 
 # tflags learn
 BAYES_00
@@ -188,6 +188,9 @@ DATE_IN_FUTURE_Q_PLUS
 DEAR_BENEFICIARY
 
 # good enough
+DEAR_EMAIL_USER
+
+# good enough
 DEAR_WINNER
 
 # tflags net
@@ -244,6 +247,9 @@ DRUGS_STOCK_MIMEOLE
 # good enough
 DSN_NO_MIMEVERSION
 
+# good enough
+DYN_RDNS_SHORT_HELO_HTML
+
 # tflags publish
 EMAIL_URI_PHISH
 
@@ -267,6 +273,9 @@ FH_FAKE_RCVD_LINE_B
 
 # good enough
 FH_FROM_GET_NAME
+
+# good enough
+FH_FROM_START_YOU
 
 # good enough
 FH_HELO_ALMOST_IP
@@ -359,10 +368,16 @@ FROM_WSP_LEAD
 FSL_CTYPE_WIN1251
 
 # good enough
+FSL_HELO_BARE_IP_1
+
+# good enough
 FSL_HELO_BARE_IP_2
 
 # good enough
 FSL_HELO_DEVICE
+
+# good enough
+FSL_HELO_FAKE
 
 # good enough
 FSL_HELO_FIREWALL
@@ -376,8 +391,11 @@ FSL_MID_419
 # good enough
 FSL_MISSP_REPLYTO
 
-# good enough
+# tflags publish
 FSL_NEW_HELO_USER
+
+# good enough
+FU_ENDS_SG
 
 # tflags publish
 GOOGLE_DOCS_PHISH
@@ -440,6 +458,9 @@ HK_NAME_DRUGS
 HK_NAME_FM_FROM
 
 # good enough
+HK_NAME_FM_MR_MRS
+
+# good enough
 HK_NAME_FROM
 
 # good enough
@@ -470,6 +491,9 @@ HK_SCAM_N4
 HK_SCAM_N8
 
 # good enough
+HK_SCAM_S22
+
+# good enough
 HK_SCAM_S25
 
 # good enough
@@ -486,9 +510,6 @@ KB_DATE_CONTAINS_TAB
 
 # good enough
 KB_FAKED_THE_BAT
-
-# good enough
-KB_RATWARE_OUTLOOK_MID
 
 # tflags publish
 LOTS_OF_MONEY
@@ -558,9 +579,6 @@ NSL_RCVD_HELO_USER
 
 # good enough
 OBFU_ATTACH_MISSP
-
-# good enough
-OBFU_HTML_ATTACH
 
 # tflags publish
 OBFU_JVSCR_ESC
@@ -782,9 +800,6 @@ RCVD_IN_SORBS_ZOMBIE
 RCVD_IN_XBL
 
 # good enough
-REPLYTO_EMPTY
-
-# good enough
 REPLYTO_WITHOUT_TO_CC
 
 # good enough
@@ -822,6 +837,9 @@ SPF_PASS
 
 # tflags net
 SPF_SOFTFAIL
+
+# good enough
+STOX_REPLY_TYPE
 
 # good enough
 STOX_REPLY_TYPE_WITHOUT_QUOTES
@@ -872,34 +890,25 @@ TVD_PH_REC
 TVD_QUAL_MEDS
 
 # good enough
-AXB_BULKWARE_API
+AXB_XMA_BASP
 
 # good enough
-DEAR_EMAIL_USER
+BODY_SINGLE_WORD
 
 # good enough
-FH_FROM_START_YOU
+EMRCP
 
 # good enough
-FROM_ONE_CHAR
+FRT_FREE
 
 # good enough
-FSL_HELO_FAKE
+RP_MATCHES_RCVD
 
 # good enough
-FU_ENDS_SG
+STYLE_GIBBERISH
 
 # good enough
-HK_NAME_FM_MR_MRS
-
-# good enough
-HK_RANDOM_FROM
-
-# good enough
-HK_SCAM_S22
-
-# good enough
-URI_WPADMIN
+URI_OBFU_TLD
 
 # tflags userconf
 UNPARSEABLE_RELAY
@@ -955,6 +964,9 @@ URIBL_WS_SURBL
 # tflags userconf
 URI_NOVOWEL
 
+# good enough
+URI_WPADMIN
+
 # tflags userconf
 USER_IN_ALL_SPAM_TO
 
@@ -987,9 +999,6 @@ USER_IN_WHITELIST
 
 # tflags userconf
 USER_IN_WHITELIST_TO
-
-# good enough
-YOUR_PERMISSION
 
 # tflags net
 __DKIMDOMAIN_IN_DWL_ANY
