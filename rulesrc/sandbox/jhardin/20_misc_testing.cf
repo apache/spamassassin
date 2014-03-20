@@ -298,7 +298,7 @@ endif
 meta           EMPTY_RVM_ATTCH      (__PLS_REVIEW || __DLND_ATTACH) && __EMPTY_BODY
 describe       EMPTY_RVM_ATTCH      Please review attached document, empty message
 
-body           __END_FUTURE_EMAILS /\b(?:end|stop|discontinue|removed?|do not w(?:ish|ant) to) (?:receiv(?:ing|e) |or |(?:a-z{1,30} ){0,4}from )?(?:these|our|(?:any )?(?:future|further)) (?:(?:e|ad)-?m(?:ail(?:ing)?|essage)|alert)[- ]?(?:ad)?s?\b/i
+body           __END_FUTURE_EMAILS /\b(?:end|stop|discontinue|removed?|(?:do|would) not (?:w(?:ish|ant)|like|desire) to) (?:get |receiv(?:ing|e) |or |(?:a-z{1,30} ){0,4}from )?(?:these|our|(?:any )?(?:future|further)) (?:(?:e|ad)-?m(?:ail(?:ing)?|essage)|alert|PSA)[- ]?(?:ad|update)?s?\b/i
 meta           END_FUTURE_EMAILS   __END_FUTURE_EMAILS && !__RCD_RDNS_SMTP_MESSY && !__RPATH_12LTRDOM
 describe       END_FUTURE_EMAILS   Unsubscribe
 score          END_FUTURE_EMAILS   2.000	# limit
@@ -727,15 +727,15 @@ describe    __UCOZ_URI             URI contains ucoz.org
 
 # Intrust Domains is a persistent domain registration spammer
 # recent sign, will likely change
-body        __ARTHUR_SIMMONS       /Arthur Simmons/
-body        __INTRUST_DOMS         /In[Tt]rust Domains/
-meta        ARTHUR_INTRUST         __ARTHUR_SIMMONS && __INTRUST_DOMS
+#body        __ARTHUR_SIMMONS       /Arthur Simmons/
+#body        __INTRUST_DOMS         /In[Tt]rust Domains/
+#meta        ARTHUR_INTRUST         __ARTHUR_SIMMONS && __INTRUST_DOMS
 #score       ARTHUR_INTRUST         4.5
-describe    ARTHUR_INTRUST         Arthur Simmons - registrar spammer extraordinaire
+#describe    ARTHUR_INTRUST         Arthur Simmons - registrar spammer extraordinaire
 
-header      ART_NAMES_ORG          Received =~ /\bart\.names\.org\b/i
+#header      ART_NAMES_ORG          Received =~ /\bart\.names\.org\b/i
 #score       ART_NAMES_ORG          4.0
-describe    ART_NAMES_ORG          Arthur Simmons - registrar spammer extraordinaire
+#describe    ART_NAMES_ORG          Arthur Simmons - registrar spammer extraordinaire
 
 if can(Mail::SpamAssassin::Conf::feature_bug6558_free)
   body        __PILL_PRICE_01        m;(?=[\d .f])(?:free|[\d .]{3}(?:/|per|each)) ?(?=[ptc])(?:pill|tablet|cap(?:sule|let))s?\b;i
