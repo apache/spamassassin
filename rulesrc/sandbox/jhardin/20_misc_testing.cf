@@ -1285,3 +1285,10 @@ score       UNSUB_OPT         2.000	# limit
 
 header	    __NO_TRUSTED_RELAY	X-Spam-Relays-Trusted !~ /ip=/i
 
+body        CANT_SEE_AD       /\bcant (?:view|read|see) our ad at all\b/i
+describe    CANT_SEE_AD       You really want to see our spam.
+score       CANT_SEE_AD       3.000	# limit
+
+
+
+
