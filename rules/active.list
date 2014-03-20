@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bpoliakoff grenier jarif kpg-core mas-cps mas-mas zmi; day 2: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bpoliakoff grenier jarif kpg-core llanga mas-cps mas-mas mmiroslaw-ham mmiroslaw-spam zmi; day 3: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bpoliakoff grenier jarif kpg-core llanga zmi
+# with results from: day 1: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bpoliakoff grenier jarif kpg-core mas-cps mas-mas zmi; day 2: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bpoliakoff grenier jarif kpg-core llanga mas-cps mas-mas zmi; day 3: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bpoliakoff grenier jarif kpg-core llanga mas-cps mas-mas mmiroslaw-ham mmiroslaw-spam zmi
 
 # tflags publish
 AC_BR_BONANZA
@@ -107,6 +107,9 @@ AXB_XMAILER_MIMEOLE_OL_024C2
 AXB_XMAILER_MIMEOLE_OL_1ECD5
 
 # good enough
+AXB_XMA_BASP
+
+# good enough
 AXB_XM_FORGED_OL2600
 
 # good enough
@@ -150,6 +153,9 @@ BIGNUM_EMAILS
 
 # good enough
 BODY_EMPTY
+
+# good enough
+BODY_SINGLE_WORD
 
 # tflags userconf
 CHARSET_FARAWAY
@@ -252,6 +258,9 @@ DYN_RDNS_SHORT_HELO_HTML
 
 # tflags publish
 EMAIL_URI_PHISH
+
+# good enough
+EMRCP
 
 # tflags userconf
 ENV_AND_HDR_SPF_MATCH
@@ -363,6 +372,9 @@ FROM_MISSP_USER
 
 # good enough
 FROM_WSP_LEAD
+
+# good enough
+FRT_FREE
 
 # good enough
 FSL_CTYPE_WIN1251
@@ -806,6 +818,9 @@ REPLYTO_WITHOUT_TO_CC
 RISK_FREE
 
 # good enough
+RP_MATCHES_RCVD
+
+# good enough
 SERGIO_SUBJECT_VIAGRA01
 
 # good enough
@@ -843,6 +858,9 @@ STOX_REPLY_TYPE
 
 # good enough
 STOX_REPLY_TYPE_WITHOUT_QUOTES
+
+# good enough
+STYLE_GIBBERISH
 
 # tflags userconf
 SUBJECT_IN_BLACKLIST
@@ -890,25 +908,10 @@ TVD_PH_REC
 TVD_QUAL_MEDS
 
 # good enough
-AXB_XMA_BASP
+HK_RANDOM_FROM
 
 # good enough
-BODY_SINGLE_WORD
-
-# good enough
-EMRCP
-
-# good enough
-FRT_FREE
-
-# good enough
-RP_MATCHES_RCVD
-
-# good enough
-STYLE_GIBBERISH
-
-# good enough
-URI_OBFU_TLD
+OBFU_HTML_ATTACH
 
 # tflags userconf
 UNPARSEABLE_RELAY
@@ -963,6 +966,9 @@ URIBL_WS_SURBL
 
 # tflags userconf
 URI_NOVOWEL
+
+# good enough
+URI_OBFU_TLD
 
 # good enough
 URI_WPADMIN
