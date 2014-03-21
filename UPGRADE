@@ -1,3 +1,17 @@
+Note for Users Upgrading to SpamAssassin 3.4.1
+----------------------------------------------
+
+- The TxRep plugin is now included and disabled by default for new installs.
+  To replace an existing AWL configuration with TxRep, follow the steps below:
+  - Disable AWL
+  - Enable TxRep
+  - Set txrep_factor equal to your previous AWL factor
+  - Set use_txrep to 1
+
+  For more detailed information and more configuration options, consult the
+  documentation in Mail::SpamAssassin::Plugin::TxRep.
+
+
 Note for Users Upgrading to SpamAssassin 3.4.0
 ----------------------------------------------
 - Please see the Announcement file at:
