@@ -298,10 +298,10 @@ endif
 meta           EMPTY_RVM_ATTCH      (__PLS_REVIEW || __DLND_ATTACH) && __EMPTY_BODY
 describe       EMPTY_RVM_ATTCH      Please review attached document, empty message
 
-body           __END_FUTURE_EMAILS /\b(?:end|stop|discontinue|removed?|(?:do|would) not (?:w(?:ish|ant)|like|desire) to) (?:get |receiv(?:ing|e) |or |(?:a-z{1,30} ){0,4}from )?(?:these|our|(?:any )?(?:future|further)) (?:(?:e|ad)-?m(?:ail(?:ing)?|essage)|alert|PSA)[- ]?(?:ad|update)?s?\b/i
-meta           END_FUTURE_EMAILS   __END_FUTURE_EMAILS && !__RCD_RDNS_SMTP_MESSY && !__RPATH_12LTRDOM
+body           __END_FUTURE_EMAILS /\b(?:end|stop|discontinue|removed?|(?:do|would|you(?:'d)?) (?:not (?:wish|want|like|desire)|(?:prefer|wish|want|like|desire) not) to) (?:get |receiv(?:ing|e) |or |(?:a-z{1,30} ){0,4}from )?(?:these|our|(?:any )?(?:future|further)) (?:(?:e|ad)-?m(?:ail(?:ing)?|essage)|alert|PSA)[- ]?(?:ad|update)?s?\b/i
+meta           END_FUTURE_EMAILS   __END_FUTURE_EMAILS && !__RCD_RDNS_SMTP_MESSY && !__RPATH_12LTRDOM && !__MSGID_OK_HEX && !__REPTO_QUOTE
 describe       END_FUTURE_EMAILS   Unsubscribe
-score          END_FUTURE_EMAILS   2.000	# limit
+score          END_FUTURE_EMAILS   2.500	# limit
 
 
 body           AD_COMPLAINTS       /\bcomplaints about this ad+\b/i
@@ -1238,11 +1238,11 @@ rawbody     __FR_SPACING_22    /[a-z0-9]{6}\s{22}[a-z0-9]{5}/i
 
 
 # per users mailing list question from Joe Quinn
-body        __HEXHASHWORD      /\s[a-z]{1,15}\s[0-9a-f]{30}/
+body        __HEXHASHWORD      /\s[A-Z]?[a-z]{1,15}\s[0-9a-f]{30}/
 tflags      __HEXHASHWORD      multiple maxhits=6
 meta        HEXHASH_WORD       (__HEXHASHWORD > 5) && !__RP_MATCHES_RCVD && !__VIA_ML && !__HAS_ERRORS_TO && !__DKIM_EXISTS && !__HAS_IN_REPLY_TO
 describe    HEXHASH_WORD       Multiple of hexadecimal hash + word
-score       HEXHASH_WORD       2.500	# limit
+score       HEXHASH_WORD       3.000	# limit
 
 # meta        __HEXHASH_2        __HEXHASHWORD == 2
 # meta        __HEXHASH_3        __HEXHASHWORD == 3
