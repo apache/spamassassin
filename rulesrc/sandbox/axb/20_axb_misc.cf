@@ -2,19 +2,21 @@
 
 # #  2014-02.27
 header		AXB_BULWARE_OEM		X-Mailer =~ /^OEM$/
+describe	AXB_BULWARE_OEM		Mailer fingerprint
 
 #  2014-02.27
 header		AXB_BULKWARE_API	exists:X-SMTPAPI
+describe	AXB_BULKWARE_API	Mailer fingerprint
 
 #  2014-02.06
-meta		AXB_NOQUIEROMAS		(FREEMAIL_FROM && __HAS_ORGANIZATION && ! __HAS_UA && ! __HAS_XMAIL) 
+meta		AXB_NOQUIEROMAS		(FREEMAIL_FROM && __HAS_ORGANIZATION && ! __HAS_UA && ! __HAS_XMAIL)
 describe	AXB_NOQUIEROMAS		Soy lo que soy
 
 # 2014-01-09
 header		AXB_XM_MYECLNT		X-Mailer =~ /^My e-mail client\b/
 describe	AXB_XM_MYECLNT		Ratas castellanas
 if (version >= 3.004000)
-tflags		AXB_XM_MYECLNT		autolearn_force	
+tflags		AXB_XM_MYECLNT		autolearn_force
 endif
 
 
@@ -22,7 +24,7 @@ endif
 body		AXB_3LITTLE_PIGS	/\bwas sent by third-party independent marketing agent\./
 describe	AXB_3LITTLE_PIGS	chinny chin chin
 if (version >= 3.004000)
-tflags		AXB_3LITTLE_PIGS	autolearn_force	
+tflags		AXB_3LITTLE_PIGS	autolearn_force
 endif
 
 
@@ -34,7 +36,7 @@ header	__TO_ONMS_RCPTS		To:name =~ /\bRecipients\b/
 meta	 AXB_ONMS_LEAKS		(__FROM_ONMS && __TO_ONMS && __TO_ONMS_RCPTS)
 describe AXB_ONMS_LEAKS		Onmicrosoft Leak Party
 if (version >= 3.004000)
-tflags	AXB_ONMS_LEAKS		autolearn_force	
+tflags	AXB_ONMS_LEAKS		autolearn_force
 endif
 
 
@@ -42,7 +44,7 @@ endif
 header          AXB_X_FF_SEZ_S          X-Forefront-Antispam-Report =~ /^SFV\:SPM/
 describe        AXB_X_FF_SEZ_S          Forefront sez this is spam
 if (version >= 3.004000)
-tflags		AXB_X_FF_SEZ_S		autolearn_force	
+tflags		AXB_X_FF_SEZ_S		autolearn_force
 endif
 
 
