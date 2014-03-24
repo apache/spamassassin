@@ -1250,7 +1250,7 @@ score       HEXHASH_WORD       3.000	# limit
 # meta        __HEXHASH_5        __HEXHASHWORD == 5
 
 #  from users list spample provided by Larry Starr
-body        __UC_GIBB_OBFU     /\b[a-z]{1,20}[,;]?\s[A-Z]{16,}\s[A-Za-z][a-z]{1,10}\b/
+body        __UC_GIBB_OBFU     /\b[A-Za-z][a-z]{0,20}[,;]?\s[A-Z]{16,}[a-z]?\s[A-Za-z][a-z]{1,15}\b/
 tflags      __UC_GIBB_OBFU     multiple maxhits=8
 meta        UC_GIBBERISH_OBFU  (__UC_GIBB_OBFU > 7)
 describe    UC_GIBBERISH_OBFU  Multiple instances of "word LONGGIBBERISH word"
@@ -1285,7 +1285,7 @@ score       UNSUB_OPT         2.000	# limit
 
 header	    __NO_TRUSTED_RELAY	X-Spam-Relays-Trusted !~ /ip=/i
 
-body        CANT_SEE_AD       /\bcant (?:view|read|see) our ad at all\b/i
+body        CANT_SEE_AD       /\bcan(?:no|')?t (?:view|read|see|participate in) our ad (?:at all|due to images)\b/i
 describe    CANT_SEE_AD       You really want to see our spam.
 score       CANT_SEE_AD       3.000	# limit
 
