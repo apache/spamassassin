@@ -1285,11 +1285,19 @@ score       UNSUB_OPT         2.000	# limit
 
 header	    __NO_TRUSTED_RELAY	X-Spam-Relays-Trusted !~ /ip=/i
 
-body        CANT_SEE_AD       /\b(?:can(?:no|')?t|not able to) (?:view|read|see|scan|participate in) (?:our|this) ad(?:vertisement)? (?:at all|due to images)\b/i
+body        CANT_SEE_AD       /\b(?:can(?:no|')?t|not able to) (?:view|read|see|scan|participate in) (?:our|this) (?:commercial |ad(?:vertisement)? ){1,2}(?:at all|(?:due to|because of) images)\b/i
 describe    CANT_SEE_AD       You really want to see our spam.
 score       CANT_SEE_AD       3.000	# limit
 
 uri         __LONG_HEX_URI    m,/[0-9a-f]{512},
+
+rawbody     __HTML_OFF_PAGE   /;(?:top|left):-\d{3,9}px;/i
+meta        HTML_OFF_PAGE     __HTML_OFF_PAGE
+describe    HTML_OFF_PAGE     HTML element rendered well off the displayed page
+score       HTML_OFF_PAGE     2.000	# limit
+
+
+
 
 
 
