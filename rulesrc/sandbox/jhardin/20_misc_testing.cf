@@ -1290,10 +1290,17 @@ body        CANT_SEE_AD       /\b(?:can(?:no|')?t|not able to) (?:view|read|see|
 describe    CANT_SEE_AD       You really want to see our spam.
 score       CANT_SEE_AD       3.000	# limit
 
-uri         __LONG_HEX_URI    m,/[0-9a-f]{512},
+uri         __128_HEX_URI     m,/[0-9a-f]{128},
+uri         __256_HEX_URI     m,/[0-9a-f]{256},
+uri         __384_HEX_URI     m,/[0-9a-f]{384},
+uri         __512_HEX_URI     m,/[0-9a-f]{512},
+meta        LONG_HEX_URI      __512_HEX_URI
+describe    LONG_HEX_URI      Very long purely hexadecimal URI
+score       LONG_HEX_URI      3.000	# limit
+
 
 rawbody     __HTML_OFF_PAGE   /;(?:top|left):-\d{3,9}px;/i
-meta        HTML_OFF_PAGE     __HTML_OFF_PAGE
+meta        HTML_OFF_PAGE     __HTML_OFF_PAGE && !__RP_MATCHES_RCVD 
 describe    HTML_OFF_PAGE     HTML element rendered well off the displayed page
 score       HTML_OFF_PAGE     2.000	# limit
 
