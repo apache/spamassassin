@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bpoliakoff grenier jarif kpg-core mas-cps mas-mas mmiroslaw-ham mmiroslaw-spam zmi; day 2: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bpoliakoff grenier jarif kpg-core llanga mas-cps mas-mas mmiroslaw-ham mmiroslaw-spam zmi; day 3: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bpoliakoff grenier jarif kpg-core llanga mas-cps mas-mas zmi
+# with results from: day 1: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bpoliakoff grenier jarif kpg-core mas-cps mas-mas zmi; day 2: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bpoliakoff grenier jarif kpg-core llanga mas-cps mas-mas mmiroslaw-ham mmiroslaw-spam zmi; day 3: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bpoliakoff grenier jarif kpg-core llanga mas-cps mas-mas mmiroslaw-ham mmiroslaw-spam zmi
 
 # tflags publish
 AC_BR_BONANZA
@@ -148,6 +148,9 @@ BIGNUM_EMAILS
 # good enough
 BODY_EMPTY
 
+# good enough
+BODY_SINGLE_WORD
+
 # tflags userconf
 CHARSET_FARAWAY
 
@@ -225,9 +228,6 @@ DKIM_VALID
 
 # tflags net
 DKIM_VALID_AU
-
-# tflags net
-DNS_FROM_AHBL_RHSBL
 
 # tflags publish
 DOS_ANAL_SPAM_MAILER
@@ -309,6 +309,9 @@ FORM_FRAUD_3
 
 # tflags publish
 FORM_FRAUD_5
+
+# good enough
+FOUND_YOU
 
 # tflags userconf
 FRAGMENTED_MESSAGE
@@ -476,6 +479,9 @@ HK_SCAM_N13
 HK_SCAM_N15
 
 # good enough
+HK_SCAM_N16
+
+# good enough
 HK_SCAM_N2
 
 # good enough
@@ -486,9 +492,6 @@ HK_SCAM_N4
 
 # good enough
 HK_SCAM_N8
-
-# good enough
-HK_SCAM_S22
 
 # good enough
 HK_SCAM_S25
@@ -531,6 +534,9 @@ MIME_CHARSET_FARAWAY
 
 # tflags userconf
 MISSING_HB_SEP
+
+# good enough
+MONEY_12LTRDOM
 
 # good enough
 MONEY_ATM_CARD
@@ -884,22 +890,16 @@ TVD_PH_BODY_META
 TVD_QUAL_MEDS
 
 # good enough
-BODY_SINGLE_WORD
+AXB_BULKWARE_API
 
 # good enough
-FOUND_YOU
+FROM_MISSP_EH_MATCH
 
 # good enough
-FR_ALMOST_VIAG2
+FSL_HELO_FAKE
 
 # good enough
-HK_SCAM_N16
-
-# good enough
-MONEY_12LTRDOM
-
-# good enough
-OBFU_HTML_ATTACH
+STYLE_GIBBERISH
 
 # tflags userconf
 UNPARSEABLE_RELAY
