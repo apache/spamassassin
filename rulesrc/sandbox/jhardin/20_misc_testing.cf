@@ -299,7 +299,7 @@ meta           EMPTY_RVM_ATTCH      (__PLS_REVIEW || __DLND_ATTACH) && __EMPTY_B
 describe       EMPTY_RVM_ATTCH      Please review attached document, empty message
 
 body           __END_FUTURE_EMAILS /\b(?:end|stop(?! receiving these (?:alerts|emails))|cease|discontinue|removed?|(?:do|would|you(?:'d)?) (?:not (?:wish|want|like|desire)|(?:prefer|wish|want|like|desire) not) to) (?:get |receiv(?:ing|e) |or |(?:a-z{1,30} ){0,4}from )?(?:these|our|(?:any )?(?:future|further)) (?:(?:e|ad)?-?m(?:ail(?:ing)?|es+[age]{3})|alert|PSA)[- ]?(?:ad|update)?s?\b/i
-meta           END_FUTURE_EMAILS   __END_FUTURE_EMAILS && !__RCD_RDNS_SMTP_MESSY && !__RPATH_12LTRDOM && !__MSGID_OK_HEX && !__REPTO_QUOTE && !__VIA_ML
+meta           END_FUTURE_EMAILS   __END_FUTURE_EMAILS && !__SUBJECT_ENCODED_B64 && !__HDRS_LCASE 
 describe       END_FUTURE_EMAILS   Unsubscribe
 score          END_FUTURE_EMAILS   2.500	# limit
 
@@ -1251,7 +1251,7 @@ score       HEXHASH_WORD       3.000	# limit
 # meta        __HEXHASH_5        __HEXHASHWORD == 5
 
 #  from users list spample provided by Larry Starr
-body        __UC_GIBB_OBFU     /\b[A-Za-z][a-z]{0,20}[,;]?\s[A-Z]{16,}[a-z]?\s[A-Za-z][a-z]{1,15}\b/
+body        __UC_GIBB_OBFU     /\b[A-Za-z][a-z]{0,20}[,;)]?\s[A-Z]{16,}[a-z]?\s[A-Za-z][a-z]{1,15}\b/
 tflags      __UC_GIBB_OBFU     multiple maxhits=8
 meta        UC_GIBBERISH_OBFU  (__UC_GIBB_OBFU > 7)
 describe    UC_GIBBERISH_OBFU  Multiple instances of "word LONGGIBBERISH word"
@@ -1291,10 +1291,10 @@ describe    CANT_SEE_AD       You really want to see our spam.
 score       CANT_SEE_AD       3.000	# limit
 
 uri         __128_HEX_URI     m,/[0-9a-f]{128},
+uri         __192_HEX_URI     m,/[0-9a-f]{192},
 uri         __256_HEX_URI     m,/[0-9a-f]{256},
 uri         __384_HEX_URI     m,/[0-9a-f]{384},
-uri         __512_HEX_URI     m,/[0-9a-f]{512},
-meta        LONG_HEX_URI      __512_HEX_URI
+meta        LONG_HEX_URI      __256_HEX_URI
 describe    LONG_HEX_URI      Very long purely hexadecimal URI
 score       LONG_HEX_URI      3.000	# limit
 
