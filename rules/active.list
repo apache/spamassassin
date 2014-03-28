@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bpoliakoff grenier jarif kpg-core mas-cps mas-mas zmi; day 2: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bpoliakoff grenier jarif kpg-core llanga mas-cps mas-mas mmiroslaw-ham mmiroslaw-spam zmi; day 3: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bpoliakoff grenier jarif kpg-core llanga mas-cps mas-mas mmiroslaw-ham mmiroslaw-spam zmi
+# with results from: day 1: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bpoliakoff grenier jarif kpg-core mas-cps mas-mas mmiroslaw-ham mmiroslaw-spam zmi; day 2: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bpoliakoff grenier jarif kpg-core llanga mas-cps mas-mas zmi; day 3: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bpoliakoff grenier jarif kpg-core llanga mas-cps mas-mas mmiroslaw-ham mmiroslaw-spam zmi
 
 # tflags publish
 AC_BR_BONANZA
@@ -90,6 +90,9 @@ ANY_PILL_PRICE
 
 # good enough
 AXB_3LITTLE_PIGS
+
+# good enough
+AXB_BULKWARE_API
 
 # good enough
 AXB_ONMS_LEAKS
@@ -338,6 +341,9 @@ FROM_MISSPACED
 FROM_MISSP_DYNIP
 
 # good enough
+FROM_MISSP_EH_MATCH
+
+# good enough
 FROM_MISSP_FREEMAIL
 
 # good enough
@@ -375,6 +381,9 @@ FSL_HELO_BARE_IP_2
 
 # good enough
 FSL_HELO_DEVICE
+
+# good enough
+FSL_HELO_FAKE
 
 # good enough
 FSL_HELO_FIREWALL
@@ -510,6 +519,9 @@ KB_DATE_CONTAINS_TAB
 
 # good enough
 KB_FAKED_THE_BAT
+
+# good enough
+KB_RATWARE_MSGID
 
 # tflags publish
 LOTS_OF_MONEY
@@ -845,9 +857,6 @@ SPF_PASS
 SPF_SOFTFAIL
 
 # good enough
-STOX_REPLY_TYPE
-
-# good enough
 STOX_REPLY_TYPE_WITHOUT_QUOTES
 
 # tflags userconf
@@ -890,16 +899,16 @@ TVD_PH_BODY_META
 TVD_QUAL_MEDS
 
 # good enough
-AXB_BULKWARE_API
+FB_V_SPACE_GRA
 
 # good enough
-FROM_MISSP_EH_MATCH
+FR_ALMOST_VIAG2
 
 # good enough
-FSL_HELO_FAKE
+HK_SCAM_S22
 
 # good enough
-STYLE_GIBBERISH
+OBFU_HTML_ATTACH
 
 # tflags userconf
 UNPARSEABLE_RELAY
