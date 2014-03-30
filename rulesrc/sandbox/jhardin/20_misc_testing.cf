@@ -298,9 +298,13 @@ endif
 meta           EMPTY_RVM_ATTCH      (__PLS_REVIEW || __DLND_ATTACH) && __EMPTY_BODY
 describe       EMPTY_RVM_ATTCH      Please review attached document, empty message
 
-body           __END_FUTURE_EMAILS /\b(?:end|stop(?! receiving these (?:alerts|emails))|cease|discontinue|removed?|(?:do|would|you(?:'d)?) (?:not (?:wish|want|like|desire)|(?:prefer|wish|want|like|desire) not) to) (?:get |receiv(?:ing|e) |or |(?:a-z{1,30} ){0,4}from )?(?:these|our|(?:any )?(?:future|further)) (?:(?:e|ad)?-?m(?:ail(?:ing)?|es+[age]{3})|alert|PSA)[- ]?(?:ad|update)?s?\b/i
-meta           END_FUTURE_EMAILS   __END_FUTURE_EMAILS && !__SUBJECT_ENCODED_B64 && !__HDRS_LCASE 
-describe       END_FUTURE_EMAILS   Unsubscribe
+body           __END_FUTURE_EMAILS /\b(?:end|stop(?! receiving these (?:alerts|emails))|cease|discontinue|removed?|(?:do|would|you(?:'d)?) (?:not (?:wish|want|like|desire)|(?:prefer|wish|want|like|desire) not) to|exclude yourself) (?:get |receiv(?:ing|e) |or |(?:a-z{1,30} ){0,4}from )?(?:these|our|(?:any )?(?:future|further)) (?:(?:e|ad)?-?m(?:ail(?:ing)?|es+[age]{3})|alert|PSA)[- ]?(?:ad|update)?s?\b/i
+ifplugin Mail::SpamAssassin::Plugin::DKIM
+  meta         END_FUTURE_EMAILS   __END_FUTURE_EMAILS && !__SUBJECT_ENCODED_B64 && !__FB_IDENTITY && !__HDRS_LCASE_KNOWN && !__DKIM_DEPENDABLE && !DKIM_SIGNED 
+else
+  meta         END_FUTURE_EMAILS   __END_FUTURE_EMAILS && !__SUBJECT_ENCODED_B64 && !__FB_IDENTITY && !__HDRS_LCASE_KNOWN 
+endif
+describe       END_FUTURE_EMAILS   Spammy unsubscribe
 score          END_FUTURE_EMAILS   2.500	# limit
 
 
@@ -1242,7 +1246,7 @@ rawbody     __FR_SPACING_22    /[a-z0-9]{6}\s{22}[a-z0-9]{5}/i
 body        __HEXHASHWORD      /\s[A-Z]?[a-z]{1,15}\s[0-9a-f]{30}/
 tflags      __HEXHASHWORD      multiple maxhits=6
 meta        HEXHASH_WORD       (__HEXHASHWORD > 5) && !__RP_MATCHES_RCVD && !__VIA_ML && !__HAS_ERRORS_TO && !__DKIM_EXISTS && !__HAS_IN_REPLY_TO
-describe    HEXHASH_WORD       Multiple of hexadecimal hash + word
+describe    HEXHASH_WORD       Multiple instances of word + hexadecimal hash
 score       HEXHASH_WORD       3.000	# limit
 
 # meta        __HEXHASH_2        __HEXHASHWORD == 2
@@ -1254,8 +1258,8 @@ score       HEXHASH_WORD       3.000	# limit
 body        __UC_GIBB_OBFU     /\b[A-Za-z][a-z]{0,20}[,;)]?\s[A-Z]{16,}[a-z]?\s[A-Za-z][a-z]{1,15}\b/
 tflags      __UC_GIBB_OBFU     multiple maxhits=8
 meta        UC_GIBBERISH_OBFU  (__UC_GIBB_OBFU > 7)
-describe    UC_GIBBERISH_OBFU  Multiple instances of "word LONGGIBBERISH word"
-score       UC_GIBBERISH_OBFU  1.000	# Limit
+describe    UC_GIBBERISH_OBFU  Multiple instances of "word VERYLONGGIBBERISH word"
+score       UC_GIBBERISH_OBFU  3.000	# Limit
 
 
 body        __B2B_HELP         /\bhelp(?:ing)? (?:businesses like yours|your business)\b/i
@@ -1272,13 +1276,13 @@ body        __YOUR_BIZ         /\bbusiness(?:es) like yours|(?<!of )your b(?:usi
 # To stop receiving these emails
 # exclude yourself from further ad-messages
 # removal options
-# Stop PSA alert:
+# Stop PSA alert
 
-body        __UNSUB_PSA       /\bstop PSA alert\b/i
+#body        __UNSUB_PSA       /\bstop PSA alert\b/i
 
-body        __UNSUB_EXCL      /\bexclude yourself from further ad\b/i
-meta        UNSUB_EXCL        __UNSUB_EXCL
-score       UNSUB_EXCL        2.000	# limit
+#body        __UNSUB_EXCL      /\bexclude yourself from further ad\b/i
+#meta        UNSUB_EXCL        __UNSUB_EXCL
+#score       UNSUB_EXCL        2.000	# limit
 
 body        __UNSUB_OPT       /\bremoval options?\b/i
 meta        UNSUB_OPT         __UNSUB_OPT
@@ -1291,16 +1295,19 @@ describe    CANT_SEE_AD       You really want to see our spam.
 score       CANT_SEE_AD       3.000	# limit
 
 uri         __128_HEX_URI     m,/[0-9a-f]{128},
-uri         __192_HEX_URI     m,/[0-9a-f]{192},
-uri         __256_HEX_URI     m,/[0-9a-f]{256},
-uri         __384_HEX_URI     m,/[0-9a-f]{384},
-meta        LONG_HEX_URI      __256_HEX_URI
+tflags      __128_HEX_URI     multiple maxhits=2
+#uri         __192_HEX_URI     m,/[0-9a-f]{192},
+#uri         __256_HEX_URI     m,/[0-9a-f]{256},
+#uri         __384_HEX_URI     m,/[0-9a-f]{384},
+meta        __128_HEX_URI_SGL __128_HEX_URI == 1
+meta        __128_HEX_URI_MLT __128_HEX_URI > 1
+meta        LONG_HEX_URI      __128_HEX_URI && !__KAM_BODY_LENGTH_LT_1024 
 describe    LONG_HEX_URI      Very long purely hexadecimal URI
 score       LONG_HEX_URI      3.000	# limit
 
 
 rawbody     __HTML_OFF_PAGE   /;(?:top|left):-\d{3,9}px;/i
-meta        HTML_OFF_PAGE     __HTML_OFF_PAGE && !__RP_MATCHES_RCVD 
+meta        HTML_OFF_PAGE     __HTML_OFF_PAGE && !__RP_MATCHES_RCVD && !__LONGLINE && !__DKIM_EXISTS 
 describe    HTML_OFF_PAGE     HTML element rendered well off the displayed page
 score       HTML_OFF_PAGE     2.000	# limit
 
