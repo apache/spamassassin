@@ -25,8 +25,10 @@ header   FSL_MID_419   MESSAGE-ID =~ /\@User>$/
 describe FSL_MID_419   Spam signature in Message-ID
 # score    FSL_MID_419   2.0
 
-meta     FSL_MISSP_REPLYTO   (__FROM_MISSPACED && __HAS_REPLY_TO)
-describe FSL_MISSP_REPLYTO   Mis-spaced from and Reply-to
+# https://issues.apache.org/SpamAssassin/show_bug.cgi?id=7028
+# simplistic rule overlaps with FROM_MISSP_REPLYTO - FP Potential (axb - 04-31-2014)
+#meta     FSL_MISSP_REPLYTO   (__FROM_MISSPACED && __HAS_REPLY_TO)
+# describe FSL_MISSP_REPLYTO   Mis-spaced from and Reply-to
 # score    FSL_MISSP_REPLYTO   2.0
 
 # http://groups.yahoo.com/group/oftajscns/message
