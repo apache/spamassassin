@@ -300,9 +300,9 @@ describe       EMPTY_RVM_ATTCH      Please review attached document, empty messa
 
 body           __END_FUTURE_EMAILS /\b(?:end|stop(?! receiving these (?:alerts|emails))|cease|discontinue|removed?|(?:do|would|you(?:'d)?) (?:not (?:wish|want|like|desire)|(?:prefer|wish|want|like|desire) not) to|exclude yourself) (?:get |receiv(?:ing|e) |or |(?:a-z{1,30} ){0,4}from )?(?:these|our|(?:any )?(?:future|further)) (?:(?:e|ad)?-?m(?:ail(?:ing)?|es+[age]{3})|alert|PSA)[- ]?(?:ad|update)?s?\b/i
 ifplugin Mail::SpamAssassin::Plugin::DKIM
-  meta         END_FUTURE_EMAILS   __END_FUTURE_EMAILS && !__SUBJECT_ENCODED_B64 && !__FB_IDENTITY && !__HDRS_LCASE_KNOWN && !__DKIM_DEPENDABLE && !DKIM_SIGNED 
+  meta         END_FUTURE_EMAILS   __END_FUTURE_EMAILS && !__SUBJECT_ENCODED_B64 && !__HDRS_LCASE_KNOWN && !__DKIM_DEPENDABLE && !DKIM_SIGNED 
 else
-  meta         END_FUTURE_EMAILS   __END_FUTURE_EMAILS && !__SUBJECT_ENCODED_B64 && !__FB_IDENTITY && !__HDRS_LCASE_KNOWN 
+  meta         END_FUTURE_EMAILS   __END_FUTURE_EMAILS && !__SUBJECT_ENCODED_B64 && !__HDRS_LCASE_KNOWN 
 endif
 describe       END_FUTURE_EMAILS   Spammy unsubscribe
 score          END_FUTURE_EMAILS   2.500	# limit
