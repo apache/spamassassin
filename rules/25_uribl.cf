@@ -142,7 +142,7 @@ reuse           URIBL_BLOCKED
 # Don't bother looking for example domains as per RFC 2606.
 uridnsbl_skip_domain example.com example.net example.org
 
-uridnsbl_skip_domain local.cf 
+uridnsbl_skip_domain local.cf
 
 # MUA CSS class definitions
 uridnsbl_skip_domain div.tk p.tk li.tk no.tk
@@ -208,5 +208,8 @@ uridnsbl_skip_domain twitter.com wordpress.com yahoo.co.jp youtube.com
 
 uridnsbl_skip_domain fedex.com
 uridnsbl_skip_domain openoffice.org
+
+# Microsoft on ns1.msedge.net
+uridnsbl_skip_domain microsofttranslator.com office.com microsoftonline.com bing.com msedge.net
 
 endif   # Mail::SpamAssassin::Plugin::URIDNSBL
