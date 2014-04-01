@@ -168,6 +168,7 @@ sub sa_t_init {
 
   mkdir ("log", 0755);
   chmod (0755, "log"); # set in case log already exists with wrong permissions
+  system("chacl -B log 2>/dev/null || setfacl -b log 2>/dev/null"); # remove acls that confuse test
 
   rmtree ("log/user_state");
   rmtree ("log/outputdir.tmp");
