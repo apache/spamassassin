@@ -1,0 +1,18 @@
+
+
+# testing for darxus@chaosreigns.com
+#RATIO   SPAM%    HAM%   DATA
+# 1.000  11.905   0.000  / message status/
+# 1.000   7.483   0.000  /change your message stat/
+# 1.000   5.102   0.000  /AOG Media Group /
+# 1.000   3.741   0.000  / NIZ Media Group/
+# 1.000   2.041   0.000  / Media Group by writing /
+
+body     __DX_TEST_01       /\bmessage status\b/i
+body     __DX_TEST_02       /\bchange your message stat/i
+body     __DX_TEST_03       /\b(?:AOG|NIZ) Media Group\b/
+body     __DX_TEST_04       /\bMedia Group by writing\b/i
+body     __DX_TEST_05       /o text only message available for this email\./i
+
+
+
