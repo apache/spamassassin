@@ -8,11 +8,15 @@
 # 1.000   3.741   0.000  / NIZ Media Group/
 # 1.000   2.041   0.000  / Media Group by writing /
 
-body     __DX_TEST_01       /\bmessage status\b/i
-body     __DX_TEST_02       /\bchange (?:yo)ur message stat/i
-body     __DX_TEST_03       /\b(?:AOG|NIZ) Media Group\b/
-body     __DX_TEST_04       /\bMedia Group by writing\b/i
-body     __DX_TEST_05       /o text only message available for this email\./i
-
+body       DX_TEXT_01       /\bmessage status\b/i
+describe   DX_TEXT_01       "message status"
+body       DX_TEXT_02       /\bchange (?:yo)ur message stat/i
+describe   DX_TEXT_02       "change your message stat"
+body       DX_TEXT_03       /\b(?:AOG|NIZ) Media Group\b/
+describe   DX_TEXT_03       "XXX Media Group"
+body       DX_TEXT_04       /\bMedia Group by writing\b/i
+describe   DX_TEXT_04       "Media Group by writing"
+body       DX_TEXT_05       /o text only message available for this email\./i
+describe   DX_TEXT_05       HTML snobbery
 
 
