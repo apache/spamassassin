@@ -9,7 +9,7 @@
 # 1.000   2.041   0.000  / Media Group by writing /
 
 body     __DX_TEST_01       /\bmessage status\b/i
-body     __DX_TEST_02       /\bchange your message stat/i
+body     __DX_TEST_02       /\bchange (?:yo)ur message stat/i
 body     __DX_TEST_03       /\b(?:AOG|NIZ) Media Group\b/
 body     __DX_TEST_04       /\bMedia Group by writing\b/i
 body     __DX_TEST_05       /o text only message available for this email\./i
