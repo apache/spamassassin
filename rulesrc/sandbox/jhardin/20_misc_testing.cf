@@ -1245,18 +1245,23 @@ rawbody     __FR_SPACING_22    /[a-z0-9]{6}\s{22}[a-z0-9]{5}/i
 # per users mailing list question from Joe Quinn
 body        __HEXHASHWORD      /\s[A-Z]?[a-z]{1,15}\s[0-9a-f]{30}/
 tflags      __HEXHASHWORD      multiple maxhits=6
-meta        HEXHASH_WORD       (__HEXHASHWORD > 5) && !__RP_MATCHES_RCVD && !__VIA_ML && !__HAS_ERRORS_TO && !__DKIM_EXISTS && !__HAS_IN_REPLY_TO
+meta        __HEXHASH_2        __HEXHASHWORD > 1
+meta        __HEXHASH_3        __HEXHASHWORD > 2
+meta        __HEXHASH_4        __HEXHASHWORD > 3
+meta        __HEXHASH_5        __HEXHASHWORD > 4
+meta        HEXHASH_WORD       (__HEXHASHWORD > 5) && !__RP_MATCHES_RCVD && !__VIA_ML && !__HAS_ERRORS_TO && !__DKIM_EXISTS && !__HAS_IN_REPLY_TO && !__KAM_BODY_LENGTH_LT_512
 describe    HEXHASH_WORD       Multiple instances of word + hexadecimal hash
 score       HEXHASH_WORD       3.000	# limit
-
-# meta        __HEXHASH_2        __HEXHASHWORD == 2
-# meta        __HEXHASH_3        __HEXHASHWORD == 3
-# meta        __HEXHASH_4        __HEXHASHWORD == 4
-# meta        __HEXHASH_5        __HEXHASHWORD == 5
 
 #  from users list spample provided by Larry Starr
 body        __UC_GIBB_OBFU     /\b[A-Za-z][a-z]{0,20}[,;)]?\s[A-Z]{16,}[a-z]?\s[A-Za-z][a-z]{1,15}\b/
 tflags      __UC_GIBB_OBFU     multiple maxhits=8
+meta        __UC_GIBB_2        __UC_GIBB_OBFU > 1
+meta        __UC_GIBB_3        __UC_GIBB_OBFU > 2
+meta        __UC_GIBB_4        __UC_GIBB_OBFU > 3
+meta        __UC_GIBB_5        __UC_GIBB_OBFU > 4
+meta        __UC_GIBB_6        __UC_GIBB_OBFU > 5
+meta        __UC_GIBB_7        __UC_GIBB_OBFU > 6
 meta        UC_GIBBERISH_OBFU  (__UC_GIBB_OBFU > 7)
 describe    UC_GIBBERISH_OBFU  Multiple instances of "word VERYLONGGIBBERISH word"
 score       UC_GIBBERISH_OBFU  3.000	# Limit
