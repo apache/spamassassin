@@ -10,7 +10,7 @@
 
 body       DX_TEXT_01       /\bmessage status\b/i
 describe   DX_TEXT_01       "message status"
-body       DX_TEXT_02       /\b(?:change|modify) (?:yo)ur (?:message|sub) stat/i
+body       DX_TEXT_02       /\b(?:change|modify) (?:yo)?ur (?:message|sub) stat/i
 describe   DX_TEXT_02       "change your message stat"
 body       DX_TEXT_03       /\b(?:AOG|NIZ) Media Group\b/
 describe   DX_TEXT_03       "XXX Media Group"
