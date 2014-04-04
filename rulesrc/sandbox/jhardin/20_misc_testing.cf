@@ -1167,6 +1167,10 @@ body        __ADMITS_CANSPAM  /\bThis is a CANSPAM ACT compliant advertising bro
 meta        ADMITS_CANSPAM    __ADMITS_CANSPAM && !__VIA_ML
 describe    ADMITS_CANSPAM    Admits to being spam
 
+body        __ADMITS_SPAM     /\bth(?:e[- ]+above|is)(?:\?+s|[- ]+is)[- ]+(?:intended[- ]+as[- ]+)?an?[- ]+advert[i1l]sement\b/i
+body        __OBFU_ADVERT     /\badvert[1l]sement\b/i
+
+
 body        __SEO_REGISTER    /\bsearch engine (?:registration|subscription|submission)\b/i
 tflags      __SEO_REGISTER    multiple maxhits=5
 meta        SEO_REGISTER      __SEO_REGISTER > 4
@@ -1295,7 +1299,7 @@ score       UNSUB_OPT         2.000	# limit
 
 header	    __NO_TRUSTED_RELAY	X-Spam-Relays-Trusted !~ /ip=/i
 
-body        CANT_SEE_AD       /\b(?:can(?:no|')?t|not able to) (?:view|read|see|scan|witness|participate in) (?:our|this|the) (?:commercial |ad(?:vertisement)? |images ){1,2}(?:at all|below|(?:due to|because of) images)\b/i
+body        CANT_SEE_AD       /\b(?:can(?:no|')?t|not able to) (?:view|read|see|scan|witness|consider|look at|participate in) (?:our|this|the) (?:commercial |ad(?:vert[i1l]se-?ment)? |images |newsletter |mailing ){1,2}(?:at all|below|(?:due to|because of|as|from) (?:no |missing |unloaded |blocked )?images)\b/i
 describe    CANT_SEE_AD       You really want to see our spam.
 score       CANT_SEE_AD       3.000	# limit
 
