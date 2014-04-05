@@ -10,12 +10,17 @@
 
 body       DX_TEXT_01       /\bmessage status\b/i
 describe   DX_TEXT_01       "message status"
+
 body       DX_TEXT_02       /\b(?:change|modify) (?:yo)?ur (?:message|sub) stat/i
 describe   DX_TEXT_02       "change your message stat"
+tflags     DX_TEXT_02       publish   # hit masscheck over the head with a cluebat
+
 body       DX_TEXT_03       /\b(?:AOG|NIZ) Media Group\b/
 describe   DX_TEXT_03       "XXX Media Group"
+
 body       DX_TEXT_04       /\bMedia Group by writing\b/i
 describe   DX_TEXT_04       "Media Group by writing"
+
 body       DX_TEXT_05       /o text only message available for this email\./i
 describe   DX_TEXT_05       HTML snobbery
 
