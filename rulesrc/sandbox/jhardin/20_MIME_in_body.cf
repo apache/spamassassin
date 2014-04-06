@@ -9,5 +9,8 @@ if (version >= 3.004000)
 	meta        MIME_MALF        __MIME_MALF && !ALL_TRUSTED
 	describe    MIME_MALF        Malformed MIME: headers in body
 	score       MIME_MALF        2.00	# limit
+else
+	meta        __MIME_CTYPE_IN_BODY    0
+	meta        __MIME_MALF      0
 endif
 

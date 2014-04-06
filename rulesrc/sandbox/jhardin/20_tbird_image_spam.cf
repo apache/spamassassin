@@ -45,7 +45,7 @@ describe   TO_NO_BRKTS_DYNIP       To: misformatted and dynamic rDNS
 #tflags     TO_NO_BRKTS_DYNIP       publish
 
 meta       __TO_NO_BRKTS_NORDNS    __TO_NO_ARROWS_R && !__TO_UNDISCLOSED && RDNS_NONE
-meta       TO_NO_BRKTS_NORDNS      __TO_NO_BRKTS_NORDNS && !__MANY_RECIPS && !__FROM_RUNON && !__VIA_ML && !__TO___LOWER && !ALL_TRUSTED && !__COMMENT_EXISTS && !__DOS_HAS_LIST_UNSUB && !__OE_MSGID_1 && !__MSGID_JAVAMAIL && !__CTYPE_MULTIPART_MIXED && !__UNSUB_LINK && !__JM_REACTOR_DATE && !__TAG_EXISTS_CENTER && !__HAS_UA && !__TO_EQ_FROM_DOM && !__TAG_EXISTS_STYLE && !__SUBSCRIPTION_INFO && !__NOT_SPOOFED && !__DKIM_EXISTS && !__LOCAL_PP_NONPPURL && !__SENDER_BOT && !__ENV_AND_HDR_FROM_MATCH 
+meta       TO_NO_BRKTS_NORDNS      __TO_NO_BRKTS_NORDNS && !__MANY_RECIPS && !__FROM_RUNON && !__VIA_ML && !__TO___LOWER && !ALL_TRUSTED && !__COMMENT_EXISTS && !__DOS_HAS_LIST_UNSUB && !__OE_MSGID_1 && !__MSGID_JAVAMAIL && !__CTYPE_MULTIPART_MIXED && !__UNSUB_LINK && !__JM_REACTOR_DATE && !__TAG_EXISTS_CENTER && !__HAS_UA && !__TO_EQ_FROM_DOM && !__TAG_EXISTS_STYLE && !__SUBSCRIPTION_INFO && !__NOT_SPOOFED && !__DKIM_EXISTS && !__LOCAL_PP_NONPPURL && !__SENDER_BOT && !__LCL__ENV_AND_HDR_FROM_MATCH 
 score      TO_NO_BRKTS_NORDNS      0.75	# limit, rDNS can fail
 describe   TO_NO_BRKTS_NORDNS      To: misformatted and no rDNS
 
@@ -60,7 +60,7 @@ describe   TO_NO_BRKTS_MSFT         To: misformatted and supposed Microsoft tool
 score      TO_NO_BRKTS_MSFT         3.50	# limit
 
 meta       __TO_NO_BRKTS_PCNT       __TO_NO_ARROWS_R && __FB_NUM_PERCNT
-meta       TO_NO_BRKTS_PCNT         __TO_NO_BRKTS_PCNT && !__SUBJECT_ENCODED_B64 && !__DOS_HAS_LIST_UNSUB && !__VIA_ML && !__ISO_2022_JP_DELIM && !__IMS_MSGID && !__THREAD_INDEX_GOOD && !__RCD_RDNS_MX_MESSY && !__UNSUB_LINK && !__LONGLINE && !URI_HEX && !__RP_MATCHES_RCVD && !__MAIL_LINK && !__BUGGED_IMG && !__MIME_QP && !__COMMENT_EXISTS && !__TAG_EXISTS_STYLE && !__ENV_AND_HDR_FROM_MATCH && !__HAS_X_MAILER && !__HTML_LINK_IMAGE && !__SENDER_BOT && !__DKIM_EXISTS 
+meta       TO_NO_BRKTS_PCNT         __TO_NO_BRKTS_PCNT && !__SUBJECT_ENCODED_B64 && !__DOS_HAS_LIST_UNSUB && !__VIA_ML && !__ISO_2022_JP_DELIM && !__IMS_MSGID && !__THREAD_INDEX_GOOD && !__RCD_RDNS_MX_MESSY && !__UNSUB_LINK && !__LONGLINE && !URI_HEX && !__RP_MATCHES_RCVD && !__MAIL_LINK && !__BUGGED_IMG && !__MIME_QP && !__COMMENT_EXISTS && !__TAG_EXISTS_STYLE && !__LCL__ENV_AND_HDR_FROM_MATCH && !__HAS_X_MAILER && !__HTML_LINK_IMAGE && !__SENDER_BOT && !__DKIM_EXISTS 
 describe   TO_NO_BRKTS_PCNT         To: misformatted + percentage
 score      TO_NO_BRKTS_PCNT         3.00	# limit
 
@@ -81,6 +81,8 @@ ifplugin Mail::SpamAssassin::Plugin::FreeMail
   describe   TO_NO_BRKTS_FREEMAIL    To: misformatted and free email service
   #score      TO_NO_BRKTS_FREEMAIL    0.20
   tflags     TO_NO_BRKTS_FREEMAIL    nopublish
+else
+  meta       __TO_NO_BRKTS_FREEMAIL  0
 endif
 
 meta       __TO_NO_BRKTS_FROM_RUNON  __TO_NO_ARROWS_R && !__TO_UNDISCLOSED && __FROM_RUNON
@@ -111,6 +113,9 @@ ifplugin Mail::SpamAssassin::Plugin::ImageInfo
 
   describe   FORGED_TBIRD_IMG_SIZE   Likely forged Thunderbird image spam
   #score      FORGED_TBIRD_IMG_SIZE   0.8
+else
+  meta       __ONE_IMG               0
+  meta       __IMG_LE_300K           0
 endif
 
 # Try some combinations not related to tbird forgery
