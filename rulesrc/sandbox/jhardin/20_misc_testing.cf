@@ -7,6 +7,7 @@ ifplugin Mail::SpamAssassin::Plugin::BodyEval
     meta      __LCL__KAM_BODY_LENGTH_LT_512     __KAM_BODY_LENGTH_LT_512
   else
     meta      __LCL__KAM_BODY_LENGTH_LT_512     0
+  endif
 else
   meta      __LCL__KAM_BODY_LENGTH_LT_512     0
 endif
@@ -17,6 +18,7 @@ ifplugin Mail::SpamAssassin::Plugin::BodyEval
     meta      __LCL__KAM_BODY_LENGTH_LT_1024    __KAM_BODY_LENGTH_LT_1024
   else
     meta      __LCL__KAM_BODY_LENGTH_LT_1024    0
+  endif
 else
   meta      __LCL__KAM_BODY_LENGTH_LT_1024    0
 endif
