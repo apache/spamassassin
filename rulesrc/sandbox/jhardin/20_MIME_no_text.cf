@@ -20,5 +20,8 @@ ifplugin Mail::SpamAssassin::Plugin::MIMEHeader
   meta        MIME_PHP_NO_TEXT  (MIME_NO_TEXT && __PHP_MUA)
   #score       MIME_PHP_NO_TEXT  2.00
   describe    MIME_PHP_NO_TEXT  No text body parts, X-Mailer: PHP
+else
+  meta        __ANY_TEXT_ATTACH 0
+  meta        __MIME_NO_TEXT    0
 endif
 

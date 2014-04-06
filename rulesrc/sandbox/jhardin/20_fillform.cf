@@ -103,4 +103,18 @@ ifplugin Mail::SpamAssassin::Plugin::ReplaceTags
   describe FILL_THIS_FORM_FRAUD_PHISH     Answer suspicious question(s)
   #score    FILL_THIS_FORM_FRAUD_PHISH     1.50
 
+else
+  meta     __FILL_THIS_FORM_LONG1         0
+  meta     __FILL_THIS_FORM_LONG2         0
+  meta     __FILL_THIS_FORM_LONG          0
+  meta     __FILL_THIS_FORM_PARTIAL       0
+  meta     __FILL_THIS_FORM_PARTIAL_RAW   0
+  meta     __FILL_THIS_FORM               0
+  meta     __FILL_THIS_FORM_SHORT1        0
+  meta     __FILL_THIS_FORM_SHORT2        0
+  meta     __FILL_THIS_FORM_SHORT         0
+  meta     __FILL_THIS_FORM_LOAN1         0
+  meta     __FILL_THIS_FORM_LOAN          0
+  meta     __FILL_THIS_FORM_FRAUD_PHISH1  0
+  meta     __FILL_THIS_FORM_FRAUD_PHISH   0
 endif   # Mail::SpamAssassin::Plugin::ReplaceTags
