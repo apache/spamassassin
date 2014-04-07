@@ -3148,6 +3148,16 @@ points from the body to be auto-learned as spam. This option keeps
 the threshold at 6 points total but changes it to have no regard to the 
 source of the points.
 
+=item  noawl
+
+This flag is specific when using AWL plugin.
+
+Normally, AWL plugin normalizes scores via auto-whitelist. In some scenarios
+it works against the system administrator when trying to add some rules to
+correct miss-classified email. When AWL plugin searches the email and finds 
+the noawl flag it will exit without normalizing the score nor storing the
+value in db.
+
 =item  multiple
 
 The test will be evaluated multiple times, for use with meta rules.
