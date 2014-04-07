@@ -30,6 +30,12 @@ else
   meta      __LCL__ENV_AND_HDR_FROM_MATCH     0
 endif
 
+# __TVD_SPACE_RATIO
+ifplugin Mail::SpamAssassin::Plugin::BodyEval
+  #
+else
+  meta      __TVD_SPACE_RATIO      0
+endif
 
 
 
@@ -268,10 +274,10 @@ describe       MANY_HDRS_LCASE       Odd capitalization of multiple message head
 score          MANY_HDRS_LCASE       0.10	# limit
 
 # Some metas that appear to perform well in masscheck
-meta           __HDRS_LCASE_1K       __HDRS_LCASE && __SINGLE_HEADER_1K
-meta           HDRS_LCASE_1K         __HDRS_LCASE_1K && !__HDRS_LCASE_KNOWN && !__VIA_ML && !__MIME_QP && !__BUGGED_IMG && !__BOUNCE_RPATH_NULL && !__NOT_SPOOFED && !__DKIM_EXISTS && !__RDNS_NONE
-describe       HDRS_LCASE_1K         Odd capitalization of message headers + long header
-score          HDRS_LCASE_1K         0.50	# limit
+#meta           __HDRS_LCASE_1K       __HDRS_LCASE && __SINGLE_HEADER_1K
+#meta           HDRS_LCASE_1K         __HDRS_LCASE_1K && !__HDRS_LCASE_KNOWN && !__VIA_ML && !__MIME_QP && !__BUGGED_IMG && !__BOUNCE_RPATH_NULL && !__NOT_SPOOFED && !__DKIM_EXISTS && !__RDNS_NONE
+#describe       HDRS_LCASE_1K         Odd capitalization of message headers + long header
+#score          HDRS_LCASE_1K         0.50	# limit
 meta           HDRS_LCASE_IMGONLY    __HDRS_LCASE && __HTML_IMG_ONLY && !__HDRS_LCASE_KNOWN
 describe       HDRS_LCASE_IMGONLY    Odd capitalization of message headers + image-only HTML
 score          HDRS_LCASE_IMGONLY    0.10	# limit
@@ -512,10 +518,10 @@ meta           __RP_SAFE_PSBL             RCVD_IN_RP_SAFE && RCVD_IN_PSBL
 meta           __RP_CERTIFIED_PSBL        RCVD_IN_RP_CERTIFIED && RCVD_IN_PSBL
 tflags         __RP_SAFE_PSBL             net nopublish
 tflags         __RP_CERTIFIED_PSBL        net nopublish
-meta           __RP_SAFE_ANBREP_L3        RCVD_IN_RP_SAFE && RCVD_IN_ANBREP_L3
-meta           __RP_CERTIFIED_ANBREP_L3   RCVD_IN_RP_CERTIFIED && RCVD_IN_ANBREP_L3
-tflags         __RP_SAFE_ANBREP_L3        net nopublish
-tflags         __RP_CERTIFIED_ANBREP_L3   net nopublish
+#meta           __RP_SAFE_ANBREP_L3        RCVD_IN_RP_SAFE && RCVD_IN_ANBREP_L3
+#meta           __RP_CERTIFIED_ANBREP_L3   RCVD_IN_RP_CERTIFIED && RCVD_IN_ANBREP_L3
+#tflags         __RP_SAFE_ANBREP_L3        net nopublish
+#tflags         __RP_CERTIFIED_ANBREP_L3   net nopublish
 
 # a URI in the From comment text, to bypass URIBL checks
 # simplistic URI format for now
@@ -729,11 +735,11 @@ header          RPT_SPAM_HDR            Report-SPAM =~ /./
 
 
 # Suggested by Gerard Z 2010-08-15
-uri         __GZ_PILL_SQUAT1       /\/[a-z]{3,8}\d{2}\.html/i
-uri         __GZ_PILL_SQUAT2       /\/[a-z]{3,8}\d{2}\.jpg/i
-meta        __GZ_PILL_SQUATTERS    __GZ_PILL_SQUAT1 && __GZ_PILL_SQUAT2
-meta        GZ_PILL_SQUATTERS      __GZ_PILL_SQUATTERS && !__DOS_RELAYED_EXT && !__FROM_ISO_2022_JP && !__RCD_RDNS_MX_MESSY
-describe    GZ_PILL_SQUATTERS      Found a link to rogue pill pusher content
+#uri         __GZ_PILL_SQUAT1       /\/[a-z]{3,8}\d{2}\.html/i
+#uri         __GZ_PILL_SQUAT2       /\/[a-z]{3,8}\d{2}\.jpg/i
+#meta        __GZ_PILL_SQUATTERS    __GZ_PILL_SQUAT1 && __GZ_PILL_SQUAT2
+#meta        GZ_PILL_SQUATTERS      __GZ_PILL_SQUATTERS && !__DOS_RELAYED_EXT && !__FROM_ISO_2022_JP && !__RCD_RDNS_MX_MESSY
+#describe    GZ_PILL_SQUATTERS      Found a link to rogue pill pusher content
 
 # observed in multiple spam
 header      TO_JOHNZY              TO =~ /johnzy_the_king\@hotmail\.com/i
@@ -1247,8 +1253,8 @@ meta        SEO_REGISTER      __SEO_REGISTER > 4
 score       SEO_REGISTER      2.50	# limit
 
 
-uri         REMOVE_YEAHNET    /imremove\@yeah\.net/i
-describe    REMOVE_YEAHNET    Opt-out address used by CN spammers
+#uri         REMOVE_YEAHNET    /imremove\@yeah\.net/i
+#describe    REMOVE_YEAHNET    Opt-out address used by CN spammers
 
 
 header      __FROM_LIC         From:name =~ /^Lic\./
