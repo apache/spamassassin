@@ -437,6 +437,7 @@ sub check_from_in_auto_whitelist {
       # or if the test is marked as "noautolearn"
       next if !$scores->{$test};
       next if exists $tflags->{$test} && $tflags->{$test} =~ /\bnoautolearn\b/;
+      return 0 if exists $tflags->{$test} && $tflags->{$test} =~ /\bnoawl\b/;
       $points += $scores->{$test};
     }
 
