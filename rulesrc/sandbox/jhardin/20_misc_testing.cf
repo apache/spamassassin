@@ -853,6 +853,9 @@ tflags      NSL_TO_ENDS_COMMA      nopublish
 body        CN_B2B_SPAMMER         /\bWe are (?:(?:a )?(?:China|Taiwan)[-\s]based|(?:one of (?:the )?best|(?:a )?leading) [^\.]{10,90} (?:in|from) (?:China|Taiwan))\b/i
 describe    CN_B2B_SPAMMER         Chinese company introducing itself
 
+body        CN_OPTOUT_EML          /\bpasamenzi\@sina\.com\b/i
+describe    CN_OPTOUT_EML          Opt-out email address in CN B2B spams
+
 # __ version of khopesh UPPERCASE_URI, for use in metas
 uri         __UPPERCASE_URI        /^[^:A-Z]+[A-Z]/
 
@@ -1400,6 +1403,20 @@ describe    HTML_OFF_PAGE     HTML element rendered well off the displayed page
 score       HTML_OFF_PAGE     2.000	# limit
 
 
+body        __PUMPDUMP_01     /\b(?:times|multiply|triple|quadruple|quintuple) your princip(?:al|le)\b/i
+body        __PUMPDUMP_02     /\bstock (?:triple|quadruple|quintuple)\b/i
+body        __PUMPDUMP_03     /\bbuy (?:[^.!]{1,30} )?(?:(?:(?:mon|tues|wednes|thurs|fri)day|tomorrow) (?:first thing|open|morning)|(?:first thing|opens|before) (?:(?:mon|tues|wednes|thurs|fri)day|tomorrow))/i
+body        __PUMPDUMP_04     /\bmake you (?:big bucks|hundreds|thousands)\b/i
+body        __PUMPDUMP_05     /\b(?:triple|quadruple|quintuple)d in \d days\b/i
+body        __PUMPDUMP_06     /\brecommend(?:ed)? (?:a|this) company\b/i
+body        __PUMPDUMP_07     /\bbuy for (?:around |about |less than )?\d+ cents\b/i
+meta        __PD_CNT_1        (__PUMPDUMP_01+__PUMPDUMP_02+__PUMPDUMP_03+__PUMPDUMP_04+__PUMPDUMP_05+__PUMPDUMP_06+__PUMPDUMP_07) == 1
+meta        __PD_CNT_2        (__PUMPDUMP_01+__PUMPDUMP_02+__PUMPDUMP_03+__PUMPDUMP_04+__PUMPDUMP_05+__PUMPDUMP_06+__PUMPDUMP_07) == 2
+meta        __PD_CNT_3        (__PUMPDUMP_01+__PUMPDUMP_02+__PUMPDUMP_03+__PUMPDUMP_04+__PUMPDUMP_05+__PUMPDUMP_06+__PUMPDUMP_07) == 3
+meta        __PD_CNT_4        (__PUMPDUMP_01+__PUMPDUMP_02+__PUMPDUMP_03+__PUMPDUMP_04+__PUMPDUMP_05+__PUMPDUMP_06+__PUMPDUMP_07) == 4
+meta        __PD_CNT_5        (__PUMPDUMP_01+__PUMPDUMP_02+__PUMPDUMP_03+__PUMPDUMP_04+__PUMPDUMP_05+__PUMPDUMP_06+__PUMPDUMP_07) == 5
+meta        __PD_CNT_6        (__PUMPDUMP_01+__PUMPDUMP_02+__PUMPDUMP_03+__PUMPDUMP_04+__PUMPDUMP_05+__PUMPDUMP_06+__PUMPDUMP_07) == 6
+meta        __PD_CNT_7        (__PUMPDUMP_01+__PUMPDUMP_02+__PUMPDUMP_03+__PUMPDUMP_04+__PUMPDUMP_05+__PUMPDUMP_06+__PUMPDUMP_07) == 7
 
 
 
