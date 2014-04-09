@@ -2,8 +2,8 @@
 
 # 2014-04-08
 ifplugin Mail::SpamAssassin::Plugin::MIMEHeader
-mimeheader	GETTING_RICHER      X-Attachment-Id =~ /ii\_[A-F0-9]{16}$/
-describe        GETTING_RICHER      the future's so bright...
+mimeheader	AXB_GETTING_RICHER      X-Attachment-Id =~ /^ii\_[A-F0-9]{16}$/
+describe        AXB_GETTING_RICHER      the future's so bright...
 endif
 
 # 2014-04-04
