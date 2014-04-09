@@ -1,6 +1,10 @@
 ##
 
 # 2014-04-08
+
+header		AXB_TIMEMID		Message-ID =~ /^\<\!\&\!AAAAAAAAAAAY/
+describe	AXB_TIMEMID		Timed it
+
 ifplugin Mail::SpamAssassin::Plugin::ImageInfo
 body	 	AXB_FAPIK		eval:image_size_exact('gif','486','535')
 describe	AXB_FAPIK		Found a pic I know
