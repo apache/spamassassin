@@ -6,6 +6,11 @@ mimeheader	AXB_GETTING_RICHER      X-Attachment-Id =~ /^ii\_[A-F0-9]{16}$/
 describe        AXB_GETTING_RICHER      the future's so bright...
 endif
 
+ifplugin Mail::SpamAssassin::Plugin::ImageInfo
+body	 	AXB_FAPIK		eval:image_size_exact('gif','533','307')
+describe	AXB_FAPIK		Found a pic I know
+endif
+
 # 2014-04-04
 header		AXB_XM_OEBTTF		X-Mailer =~ /^Microsoft Outlook Express 1[0-9]/
 describe	AXB_XM_OEBTTF		Back to the future
