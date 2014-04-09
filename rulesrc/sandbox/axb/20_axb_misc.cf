@@ -1,6 +1,16 @@
 ##
 
-# #  2014-02.27
+# 2014-04-08
+ifplugin Mail::SpamAssassin::Plugin::MIMEHeader
+mimeheader	GETTING_RICHER      X-Attachment-Id =~ /ii\_[A-F0-9]{16}$/
+describe        GETTING_RICHER      the future's so bright...
+endif
+
+# 2014-04-04
+header		AXB_XM_OEBTTF		X-Mailer =~ /^Microsoft Outlook Express 1[0-9]/
+describe	AXB_XM_OEBTTF		Back to the future
+
+# 2014-02.27
 header		AXB_BULWARE_OEM		X-Mailer =~ /^OEM$/
 describe	AXB_BULWARE_OEM		Mailer fingerprint
 
