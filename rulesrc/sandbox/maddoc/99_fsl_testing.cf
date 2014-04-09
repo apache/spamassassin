@@ -47,18 +47,18 @@ describe FSL_THIS_IS_ADV  This is an advertisement
 # score    FSL_THIS_IS_ADV  3.0
 
 # Bot spew
-rawbody  FSL_BOTSPAM_2   /alt="Click here to show image"/
+#rawbody  FSL_BOTSPAM_2   /alt="Click here to show image"/
 # score    FSL_BOTSPAM_2   0.01
 
-rawbody  FSL_BOTSPAM_3   /<img alt="\*\*\* Click here \*\*\*"/
+#rawbody  FSL_BOTSPAM_3   /<img alt="\*\*\* Click here \*\*\*"/
 # score    FSL_BOTSPAM_3   0.01
 
 # Fake Amazon order e-mails
-rawbody  FSL_BOTSPAM_4   /Sorry for taking your time\.\./
+#rawbody  FSL_BOTSPAM_4   /Sorry for taking your time\.\./
 # score    FSL_BOTSPAM_4   0.01
 
-uri      FSL_RU_URL      /[^\/]+\.ru(?:$|\/|\?)/i
-tflags   FSL_RU_URL      nopublish
+#uri      FSL_RU_URL      /[^\/]+\.ru(?:$|\/|\?)/i
+#tflags   FSL_RU_URL      nopublish
 # score    FSL_RU_URL      0.01
 
 # SpamEatingMonkey lists
