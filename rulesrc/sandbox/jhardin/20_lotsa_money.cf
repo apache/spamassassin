@@ -194,6 +194,8 @@ meta     MONEY_ATM_CARD   __MONEY_ATM_CARD && !__COMMENT_EXISTS && !__TAG_EXISTS
 describe MONEY_ATM_CARD   Lots of money on an ATM card
 
 body     __YOU_INHERIT    /\byour\s[a-z\s]{0,30}inherit+ance\b/i
+meta     YOU_INHERIT      __YOU_INHERIT
+describe YOU_INHERIT      Discussing your inheritance
 body     __I_INHERIT      /\b(?:I|eu)\s[a-z\s]{0,30}(?:inherited|herdei)\b/i
 body     __THEY_INHERIT   /\b(?:inherit\sth(?:e|is)\smoney|herede\sest[ea]\sdinero)\b/i
 body     __NOT_DEAD_YET   /\b(?:will\sinherit|que\sherede)\b/i
