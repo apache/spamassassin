@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus grenier jarif kpg-core mas-cps mas-mas; day 2: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus grenier jarif kpg-core llanga mas-cps mas-mas zmi; day 3: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus grenier jarif kpg-core llanga mas-cps mas-mas zmi
+# with results from: day 1: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus grenier jarif kpg-core mas-cps mas-mas zmi; day 2: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus grenier jarif kpg-core llanga mas-cps mas-mas; day 3: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus grenier jarif kpg-core llanga mas-cps mas-mas zmi
 
 # tflags publish
 AC_BR_BONANZA
@@ -136,6 +136,9 @@ BAYES_999
 # good enough
 BODY_EMPTY
 
+# tflags publish
+CANT_SEE_AD
+
 # tflags userconf
 CHARSET_FARAWAY
 
@@ -219,6 +222,12 @@ DOS_OE_TO_MX_IMAGE
 
 # good enough
 DSN_NO_MIMEVERSION
+
+# tflags publish
+DX_TEXT_02
+
+# good enough
+DX_TEXT_03
 
 # good enough
 DYN_RDNS_AND_INLINE_IMAGE
@@ -405,6 +414,9 @@ KB_DATE_CONTAINS_TAB
 
 # good enough
 KB_FAKED_THE_BAT
+
+# tflags publish
+LONG_HEX_URI
 
 # tflags publish
 LOTS_OF_MONEY
@@ -755,7 +767,13 @@ TO_EQ_FM_SPF_FAIL
 TO_NO_BRKTS_FROM_MSSP
 
 # good enough
+TO_NO_BRKTS_HTML_ONLY
+
+# good enough
 TO_NO_BRKTS_MSFT
+
+# good enough
+TO_NO_BRKTS_NORDNS_HTML
 
 # good enough
 TT_MSGID_TRUNC
@@ -769,29 +787,35 @@ TVD_FROM_1
 # good enough
 TVD_PH_BODY_META
 
-# tflags publish
-CANT_SEE_AD
-
-# tflags publish
-DX_TEXT_02
-
-# good enough
-DX_TEXT_03
-
-# tflags publish
-LONG_HEX_URI
-
-# good enough
-OBFU_HTML_ATTACH
-
-# good enough
-TO_NO_BRKTS_HTML_ONLY
-
-# good enough
-TO_NO_BRKTS_NORDNS_HTML
-
 # good enough
 TVD_SUBJ_NUM_OBFU_MINFP
+
+# good enough
+AXB_XM_FORGED_OL2600
+
+# good enough
+BIGNUM_EMAILS
+
+# good enough
+COMMENT_GIBBERISH
+
+# good enough
+HK_NAME_FM_MR_MRS
+
+# good enough
+HK_RANDOM_FROM
+
+# good enough
+HK_SCAM_N3
+
+# good enough
+HK_SCAM_N4
+
+# good enough
+HK_SCAM_S25
+
+# good enough
+IMG_DIRECT_TO_MX
 
 # tflags userconf
 UNPARSEABLE_RELAY
