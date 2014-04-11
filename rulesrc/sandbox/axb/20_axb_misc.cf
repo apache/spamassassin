@@ -1,5 +1,11 @@
 ##
 
+# 2014-04-11
+ifplugin Mail::SpamAssassin::Plugin::ImageInfo
+body	 	AXB_TIMEPIK		eval:image_size_exact('gif','241','359')
+describe	AXB_TIMEPIK		Found a pic I know
+endif
+
 # 2014-04-08
 ifplugin Mail::SpamAssassin::Plugin::MIMEHeader
 mimeheader	AXB_MH_ACHRLABEL	Content-Disposition =~ /^inline\; filename\=\"RCHA_/
