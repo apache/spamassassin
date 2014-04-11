@@ -1201,10 +1201,10 @@ score       BODY_SINGLE_WORD    1.00	# limit
 #  meta      __DKIM_MALFORMED	DKIM_SIGNED && !DKIM_VALID
 #endif
 
-body        __YOUR_PHOTOS       /\byour photos (?:as p[rw]omised )?(?:here )?(?:- )?https?:/i
-meta        YOUR_PHOTOS         __YOUR_PHOTOS && !__HAS_ANY_EMAIL && !__HAS_REPLY_TO && !__DOS_HAS_LIST_UNSUB 
-describe    YOUR_PHOTOS         "Your Photos" phishing or malware
-score       YOUR_PHOTOS         4.00	# limit
+#body        __YOUR_PHOTOS       /\byour photos (?:as p[rw]omised )?(?:here )?(?:- )?https?:/i
+#meta        YOUR_PHOTOS         __YOUR_PHOTOS && !__HAS_ANY_EMAIL && !__HAS_REPLY_TO && !__DOS_HAS_LIST_UNSUB 
+#describe    YOUR_PHOTOS         "Your Photos" phishing or malware
+#score       YOUR_PHOTOS         4.00	# limit
 
 body        __UNSUBSCRIBE_ES   /\b(?:Para darte de baja y no recibir ning(?:=FA|[\xfa]|[\xc3][\xba])n|Si no desea que le enviemos publicidad|Si desea eliminar su correo [^\s@]{1,64}@[^\s@]{1,64} de nuestra lista|no recibir estos boletines a: [^\s@]{1,64}@[^\s@]{1,64} simplemente|Si no desea recibir m(?:=E1|[\xe1]|[\xc3][\xa1]|a)s notificaciones)\b/i
 meta        UNSUBSCRIBE_ES     __UNSUBSCRIBE_ES
@@ -1229,17 +1229,16 @@ meta        __HTML_FONT_LOW_CONTRAST_MINFP	HTML_FONT_LOW_CONTRAST && !__RCD_RDNS
 
 uri         __URI_DOM_DOTDOT      m,://[^/]+\.\.,
 
-# suggested by ratio for __FOUND_YOU: spam 4.2514% ham 0.0176% - most spam hits at 2-3 points
-meta        FOUND_YOU          __FOUND_YOU && !__MIME_QP && !__CTYPE_HAS_BOUNDARY && !__LOCAL_PP_NONPPURL && !__RCD_RDNS_MAIL_MESSY && !__DKIM_EXISTS && !__SUBJ_RE && !__HAS_X_REF && !__RP_MATCHES_RCVD && !__TO_NO_ARROWS_R
+meta        FOUND_YOU          __FOUND_YOU && !__DKIM_EXISTS && !__SUBJ_RE && !__HAS_X_REF && !__RP_MATCHES_RCVD && !__COMMENT_EXISTS && !__HAS_ERRORS_TO && !__HAS_IN_REPLY_TO 
 score       FOUND_YOU          3.25	# limit
 describe    FOUND_YOU          I found you...
 
 
-rawbody     __HTML_FONT_ONE_WORD_01   />\s{0,5}\S{1,15}\s{0,5}<\/font>/i
-tflags      __HTML_FONT_ONE_WORD_01   multiple maxhits=26
-meta        HTML_FONT_ONE_WORD_MANY   __HTML_FONT_ONE_WORD_01 > 25
-describe    HTML_FONT_ONE_WORD_MANY   Many one-word font changes
-score       HTML_FONT_ONE_WORD_MANY   0.50	# limit (initial)
+#rawbody     __HTML_FONT_ONE_WORD_01   />\s{0,5}\S{1,15}\s{0,5}<\/font>/i
+#tflags      __HTML_FONT_ONE_WORD_01   multiple maxhits=26
+#meta        HTML_FONT_ONE_WORD_MANY   __HTML_FONT_ONE_WORD_01 > 25
+#describe    HTML_FONT_ONE_WORD_MANY   Many one-word font changes
+#score       HTML_FONT_ONE_WORD_MANY   0.50	# limit (initial)
 
 
 #body        __ADMITS_CANSPAM  /\bThis is a CANSPAM ACT compliant advertising broadcast\b/i
@@ -1251,6 +1250,7 @@ describe    ADMITS_CANSPAM    Admits to being spam
 body        __OBFU_ADVERT     /\badvert[1l]sement\b/i
 meta        OBFU_ADVERT       __OBFU_ADVERT
 describe    OBFU_ADVERT       Misspelled "advertisement"
+tflags      OBFU_ADVERT       publish
 
 
 #body        __SEO_REGISTER    /\bsearch engine (?:registration|subscription|submission)\b/i
@@ -1288,6 +1288,7 @@ meta        __TRAVEL_MANY      (__TRAVEL_PROFILE + __TRAVEL_RESERV + __TRAVEL_BU
 uri         __URI_WPADMIN      m,/wp-admin/\w+/,i
 meta        URI_WPADMIN        __URI_WPADMIN
 describe    URI_WPADMIN        WordPress login/admin URI, possible phishing
+tflags      URI_WPADMIN        publish
 
 # subrules migrated from 00_FVGT_File001.cf
 
@@ -1352,6 +1353,7 @@ tflags      __UC_GIBB_OBFU     multiple maxhits=2
 meta        UC_GIBBERISH_OBFU  (__UC_GIBB_OBFU > 1) && !__RP_MATCHES_RCVD && !__VIA_ML && !__DKIM_EXISTS && !ALL_TRUSTED
 describe    UC_GIBBERISH_OBFU  Multiple instances of "word VERYLONGGIBBERISH word"
 score       UC_GIBBERISH_OBFU  3.000	# Limit
+tflags      UC_GIBBERISH_OBFU  publish
 
 
 #body        __B2B_HELP         /\bhelp(?:ing)? (?:businesses like yours|your business)\b/i
@@ -1397,29 +1399,33 @@ uri         __128_HEX_URI     m,/[0-9a-f]{128},
 meta        LONG_HEX_URI      __128_HEX_URI && !__LCL__KAM_BODY_LENGTH_LT_1024 
 describe    LONG_HEX_URI      Very long purely hexadecimal URI
 score       LONG_HEX_URI      3.000	# limit
+tflags      LONG_HEX_URI      publish
 
 
 rawbody     __HTML_OFF_PAGE   /;(?:top|left):-\d{3,9}px;/i
 meta        HTML_OFF_PAGE     __HTML_OFF_PAGE && !__RP_MATCHES_RCVD && !__LONGLINE && !__DKIM_EXISTS 
 describe    HTML_OFF_PAGE     HTML element rendered well off the displayed page
 score       HTML_OFF_PAGE     2.000	# limit
+tflags      HTML_OFF_PAGE     publish
 
 
-body        __PUMPDUMP_01     /\b(?:times|multiply|triple|quadruple|quintuple) your princip(?:al|le)\b/i
+body        __PUMPDUMP_01     /\b(?:times|multiply|triple|quadruple|quintuple) your (?:princip(?:al|le)|investment)\b/i
 body        __PUMPDUMP_02     /\bstock (?:triple|quadruple|quintuple)\b/i
 body        __PUMPDUMP_03     /\bbuy (?:[^.!]{1,30} )?(?:(?:(?:mon|tues|wednes|thurs|fri)day|tomorrow) (?:first thing|open|morning)|(?:first thing|opens|before) (?:(?:mon|tues|wednes|thurs|fri)day|tomorrow))/i
 body        __PUMPDUMP_04     /\bmake you (?:big bucks|hundreds|thousands)\b/i
 body        __PUMPDUMP_05     /\b(?:triple|quadruple|quintuple)d in \d days\b/i
-body        __PUMPDUMP_06     /\brecommend(?:ed)? (?:a|this) company\b/i
+body        __PUMPDUMP_06     /\brecommend(?:ed)? (?:a|this) (?:company|stock)\b/i
 body        __PUMPDUMP_07     /\bbuy for (?:around |about |less than )?\d+ cents\b/i
-meta        __PD_CNT_1        (__PUMPDUMP_01+__PUMPDUMP_02+__PUMPDUMP_03+__PUMPDUMP_04+__PUMPDUMP_05+__PUMPDUMP_06+__PUMPDUMP_07) == 1
-meta        __PD_CNT_2        (__PUMPDUMP_01+__PUMPDUMP_02+__PUMPDUMP_03+__PUMPDUMP_04+__PUMPDUMP_05+__PUMPDUMP_06+__PUMPDUMP_07) == 2
-meta        __PD_CNT_3        (__PUMPDUMP_01+__PUMPDUMP_02+__PUMPDUMP_03+__PUMPDUMP_04+__PUMPDUMP_05+__PUMPDUMP_06+__PUMPDUMP_07) == 3
-meta        __PD_CNT_4        (__PUMPDUMP_01+__PUMPDUMP_02+__PUMPDUMP_03+__PUMPDUMP_04+__PUMPDUMP_05+__PUMPDUMP_06+__PUMPDUMP_07) == 4
-meta        __PD_CNT_5        (__PUMPDUMP_01+__PUMPDUMP_02+__PUMPDUMP_03+__PUMPDUMP_04+__PUMPDUMP_05+__PUMPDUMP_06+__PUMPDUMP_07) == 5
-meta        __PD_CNT_6        (__PUMPDUMP_01+__PUMPDUMP_02+__PUMPDUMP_03+__PUMPDUMP_04+__PUMPDUMP_05+__PUMPDUMP_06+__PUMPDUMP_07) == 6
-meta        __PD_CNT_7        (__PUMPDUMP_01+__PUMPDUMP_02+__PUMPDUMP_03+__PUMPDUMP_04+__PUMPDUMP_05+__PUMPDUMP_06+__PUMPDUMP_07) == 7
-
+meta        __PD_CNT_1        (__PUMPDUMP_01+__PUMPDUMP_02+__PUMPDUMP_03+__PUMPDUMP_04+__PUMPDUMP_05+__PUMPDUMP_06+__PUMPDUMP_07) > 0
+meta        __PD_CNT_2        (__PUMPDUMP_01+__PUMPDUMP_02+__PUMPDUMP_03+__PUMPDUMP_04+__PUMPDUMP_05+__PUMPDUMP_06+__PUMPDUMP_07) > 1
+meta        __PD_CNT_3        (__PUMPDUMP_01+__PUMPDUMP_02+__PUMPDUMP_03+__PUMPDUMP_04+__PUMPDUMP_05+__PUMPDUMP_06+__PUMPDUMP_07) > 2
+meta        __PD_CNT_4        (__PUMPDUMP_01+__PUMPDUMP_02+__PUMPDUMP_03+__PUMPDUMP_04+__PUMPDUMP_05+__PUMPDUMP_06+__PUMPDUMP_07) > 3
+meta        __PD_CNT_5        (__PUMPDUMP_01+__PUMPDUMP_02+__PUMPDUMP_03+__PUMPDUMP_04+__PUMPDUMP_05+__PUMPDUMP_06+__PUMPDUMP_07) > 4
+meta        __PD_CNT_6        (__PUMPDUMP_01+__PUMPDUMP_02+__PUMPDUMP_03+__PUMPDUMP_04+__PUMPDUMP_05+__PUMPDUMP_06+__PUMPDUMP_07) > 5
+meta        __PD_CNT_7        (__PUMPDUMP_01+__PUMPDUMP_02+__PUMPDUMP_03+__PUMPDUMP_04+__PUMPDUMP_05+__PUMPDUMP_06+__PUMPDUMP_07) > 6
+meta        PUMPDUMP          (__PUMPDUMP_01+__PUMPDUMP_02+__PUMPDUMP_03+__PUMPDUMP_04+__PUMPDUMP_05+__PUMPDUMP_06+__PUMPDUMP_07) > 0
+describe    PUMPDUMP          Pump-and-dump stock scam
+score       PUMPDUMP          2.000	# limit
 
 
 
