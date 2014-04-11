@@ -61,8 +61,12 @@ describe HIDE_WIN_STATUS	Javascript to hide URLs in browser
 
 rawbody __OBFUSCATING_COMMENT_A	/\w(?:<![^>]*>)+\w/
 rawbody __OBFUSCATING_COMMENT_B	/[^\s>](?:<![^>]*>)+[^\s<]/
+ifplugin Mail::SpamAssassin::Plugin::HTMLEval
+ifplugin Mail::SpamAssassin::Plugin::MIMEEval
 meta OBFUSCATING_COMMENT	((__OBFUSCATING_COMMENT_A && HTML_MESSAGE) || (__OBFUSCATING_COMMENT_B && MIME_HTML_ONLY)) && !__ISO_2022_JP_DELIM
 describe OBFUSCATING_COMMENT	HTML comments which obfuscate text
+endif
+endif
 
 # spams that are assembled from a Javascript array
 # look for the XOR op
@@ -216,6 +220,11 @@ body __HTML_CHARSET_FARAWAY	eval:html_charset_faraway()
 
 body HTML_IFRAME_SRC	eval:check_iframe_src()
 describe HTML_IFRAME_SRC	Message has HTML IFRAME tag with SRC URI
+
+else
+
+meta __COMMENT_EXISTS		0
+meta __TAG_EXISTS_CENTER	0
 
 endif
 
