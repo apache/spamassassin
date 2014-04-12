@@ -1414,7 +1414,7 @@ body        __PUMPDUMP_02     /\bstock (?:triple|quadruple|quintuple)\b/i
 body        __PUMPDUMP_03     /\bbuy (?:[^.!]{1,30} )?(?:(?:(?:mon|tues|wednes|thurs|fri)day|tomorrow) (?:first thing|open|morning)|(?:first thing|opens|before) (?:(?:mon|tues|wednes|thurs|fri)day|tomorrow))/i
 body        __PUMPDUMP_04     /\bmake you (?:big bucks|hundreds|thousands)\b/i
 body        __PUMPDUMP_05     /\b(?:triple|quadruple|quintuple)d in \d days\b/i
-body        __PUMPDUMP_06     /\brecommend(?:ed)? (?:a|this) (?:company|stock)\b/i
+body        __PUMPDUMP_06     /\brecommend(?:ed|s)? (?:a|this) (?:company|stock)\b/i
 body        __PUMPDUMP_07     /\bbuy for (?:around |about |less than )?\d+ cents\b/i
 meta        __PD_CNT_1        (__PUMPDUMP_01+__PUMPDUMP_02+__PUMPDUMP_03+__PUMPDUMP_04+__PUMPDUMP_05+__PUMPDUMP_06+__PUMPDUMP_07) > 0
 meta        __PD_CNT_2        (__PUMPDUMP_01+__PUMPDUMP_02+__PUMPDUMP_03+__PUMPDUMP_04+__PUMPDUMP_05+__PUMPDUMP_06+__PUMPDUMP_07) > 1
@@ -1423,9 +1423,14 @@ meta        __PD_CNT_4        (__PUMPDUMP_01+__PUMPDUMP_02+__PUMPDUMP_03+__PUMPD
 meta        __PD_CNT_5        (__PUMPDUMP_01+__PUMPDUMP_02+__PUMPDUMP_03+__PUMPDUMP_04+__PUMPDUMP_05+__PUMPDUMP_06+__PUMPDUMP_07) > 4
 meta        __PD_CNT_6        (__PUMPDUMP_01+__PUMPDUMP_02+__PUMPDUMP_03+__PUMPDUMP_04+__PUMPDUMP_05+__PUMPDUMP_06+__PUMPDUMP_07) > 5
 meta        __PD_CNT_7        (__PUMPDUMP_01+__PUMPDUMP_02+__PUMPDUMP_03+__PUMPDUMP_04+__PUMPDUMP_05+__PUMPDUMP_06+__PUMPDUMP_07) > 6
-meta        PUMPDUMP          (__PUMPDUMP_01+__PUMPDUMP_02+__PUMPDUMP_03+__PUMPDUMP_04+__PUMPDUMP_05+__PUMPDUMP_06+__PUMPDUMP_07) > 0
-describe    PUMPDUMP          Pump-and-dump stock scam
+meta        PUMPDUMP          __PUMPDUMP_01 || __PUMPDUMP_02 || __PUMPDUMP_03 || __PUMPDUMP_04 || __PUMPDUMP_05 || __PUMPDUMP_06 || __PUMPDUMP_07
+describe    PUMPDUMP          Pump-and-dump stock scam phrase
 score       PUMPDUMP          2.000	# limit
+tflags      PUMPDUMP          publish
+meta        PUMPDUMP_MULTI    (__PUMPDUMP_01+__PUMPDUMP_02+__PUMPDUMP_03+__PUMPDUMP_04+__PUMPDUMP_05+__PUMPDUMP_06+__PUMPDUMP_07) > 1
+describe    PUMPDUMP_MULTI    Pump-and-dump stock scam phrases
+score       PUMPDUMP_MULTI    2.000	# limit
+tflags      PUMPDUMP_MULTI    publish
 
 
 
