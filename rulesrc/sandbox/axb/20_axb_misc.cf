@@ -1,20 +1,5 @@
 ##
 
-# 2014-04-11
-ifplugin Mail::SpamAssassin::Plugin::ImageInfo
-body	 	AXB_TIMEPIK		eval:image_size_exact('gif','241','359')
-describe	AXB_TIMEPIK		Found a pic I know
-endif
-
-ifplugin Mail::SpamAssassin::Plugin::ImageInfo
-body	 	AXB_FAPIK		eval:image_size_exact('gif','486','535')
-describe	AXB_FAPIK		Found a pic I know
-endif
-
-# 2014-04-04
-header		AXB_XM_OEBTTF		X-Mailer =~ /^Microsoft Outlook Express 1[0-9]/
-describe	AXB_XM_OEBTTF		Back to the future
-
 # 2014-02.27
 header		AXB_BULWARE_OEM		X-Mailer =~ /^OEM$/
 describe	AXB_BULWARE_OEM		Mailer fingerprint
