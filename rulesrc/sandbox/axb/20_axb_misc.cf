@@ -1,5 +1,15 @@
 ##
 
+#2014-04-15
+header		__FROMN_LIIN		From:name /^Linked\s?In/i
+header		__FROM_LII		From =~ /\@bounce.linkedin.com/
+header		__AXB_LI_CLASS		exists:X-LinkedIn-Class
+header		__AXB_LI_FBL		exists:X-LinkedIn-fbl
+meta		AXB_LITTLECLASS		(__FROMN_LIIN && !__FROMN_LII && !__AXB_LI_CLASS && !__AXB_LI_FBL)
+describe	AXB_LITTLECLASS		Hiding Easter eggs
+
+
+
 # 2014-02.27
 header		AXB_BULWARE_OEM		X-Mailer =~ /^OEM$/
 describe	AXB_BULWARE_OEM		Mailer fingerprint
@@ -54,17 +64,10 @@ header          __AXB_MO_OL_2600  X-MimeOLE =~ /Produced\ By\ Microsoft\ MimeOLE
 meta            AXB_XM_FORGED_OL2600    (__AXB_XM_OL_2600  && !__AXB_MO_OL_2600 )
 describe        AXB_XM_FORGED_OL2600     Forged OE v. 6.2600
 
-# 2012-03-17
-header		__AXB_LI_U	List-Unsubscribe =~ /\@em\.linkedin\.com\b/
-header		__AXB_LI_CLASS	exists:X-LinkedIn-Class
-header		__AXB_LI_FBL	exists:X-LinkedIn-fbl
-meta		AXB_OBFU_MULE	(__AXB_LI_U && !__AXB_LI_CLASS && !__AXB_LI_FBL)
-describe	AXB_OBFU_MULE	spacey mules
 
 # 2012-02-16
 body            AXB_BODYMAIL_SBL112884  /\@yeah\.net\b/
 describe        AXB_BODYMAIL_SBL112884  Spammer dropbox SBL112884
-
 
 # 2012-01-07
 header          AXB_XMA_BASP            X-Mail-Agent =~ /^BASP21/
