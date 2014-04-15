@@ -1,8 +1,8 @@
 ##
 
 #2014-04-15
-header		__FROMN_LIIN		From:name /^Linked\s?In/i
-header		__FROM_LII		From =~ /\@bounce.linkedin.com/
+header		__FROMN_LIIN		From:name =~ /^Linked\s?In/i
+header		__FROM_LII		From =~ /\@bounce\.linkedin\.com/
 header		__AXB_LI_CLASS		exists:X-LinkedIn-Class
 header		__AXB_LI_FBL		exists:X-LinkedIn-fbl
 meta		AXB_LITTLECLASS		(__FROMN_LIIN && !__FROMN_LII && !__AXB_LI_CLASS && !__AXB_LI_FBL)
