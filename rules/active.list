@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus grenier jarif kpg-core mas-cps mas-mas zmi; day 2: axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus grenier jarif kpg-core llanga mas-cps mas-mas zmi; day 3: axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-kmcgrail bernie-fsf bernie-it_batt bpoliakoff darxus grenier jarif kpg-core llanga zmi
+# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus grenier jarif kpg-core mas-cps mas-mas zmi; day 2: axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus grenier jarif kpg-core llanga mas-cps mas-mas zmi; day 3: axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus grenier jarif kpg-core llanga mas-cps mas-mas zmi
 
 # tflags publish
 AC_BR_BONANZA
@@ -314,10 +314,10 @@ HEAD_LONG
 HELO_LH_HOME
 
 # good enough
-HELO_LOCALHOST
+HELO_MISC_IP
 
 # good enough
-HELO_MISC_IP
+HK_RANDOM_FROM
 
 # good enough
 HK_RANDOM_REPLYTO
@@ -617,6 +617,9 @@ RCVD_IN_SORBS_ZOMBIE
 RCVD_IN_XBL
 
 # good enough
+RISK_FREE
+
+# good enough
 RP_MATCHES_RCVD
 
 # good enough
@@ -663,9 +666,6 @@ TO_EQ_FM_SPF_FAIL
 
 # good enough
 TO_NO_BRKTS_MSFT
-
-# good enough
-TO_NO_BRKTS_NORDNS_HTML
 
 # good enough
 TT_MSGID_TRUNC
