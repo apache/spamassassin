@@ -969,6 +969,7 @@ meta        TVD_SUBJ_NUM_OBFU_MINFP   __TVD_SUBJ_NUM_OBFU && !__RP_MATCHES_RCVD 
 header      __XM_PHPMAILER_FORGED  X-Mailer =~ /PHPMailer\s.*version\D+$/
 meta        XM_PHPMAILER_FORGED    __XM_PHPMAILER_FORGED
 describe    XM_PHPMAILER_FORGED    Apparently forged header
+tflags      XM_PHPMAILER_FORGED    publish
 
 # from spample on users list 7/24/2011
 header      __XM_EC_MESSENGER      X-Mailer =~ /\beC-Messenger\b/
@@ -1331,6 +1332,10 @@ rawbody     __FR_SPACING_22    /[a-z0-9]{6}\s{22}[a-z0-9]{5}/i
 
 
 # per users mailing list question from Joe Quinn
+body        __HEXHASHWORD_S    /\s[A-Z]?[a-z]{1,15}\s(?![a-z]{18})[0-9a-f]{18}/
+tflags      __HEXHASHWORD_S    multiple maxhits=4
+body        __HEXHASHWORD_S2    /\s[A-Z]?[a-z]{1,15}\s(?![a-z]{10,20}\s)[0-9a-f]{10,64}\s[A-Z]?[a-z]{1,15}\b/
+tflags      __HEXHASHWORD_S2   multiple maxhits=4
 body        __HEXHASHWORD      /\s[A-Z]?[a-z]{1,15}\s[0-9a-f]{30}/
 tflags      __HEXHASHWORD      multiple maxhits=4
 #meta        __HEXHASH_2        __HEXHASHWORD > 1
