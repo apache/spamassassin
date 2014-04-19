@@ -361,9 +361,9 @@ describe       EMPTY_RVM_ATTCH      Please review attached document, empty messa
 
 body           __END_FUTURE_EMAILS /\b(?:end|stop(?! receiving these (?:alerts|emails))|cease|discontinue|removed?|(?:do|would|you(?:'d)?) (?:not (?:wish|want|like|desire)|(?:prefer|wish|want|like|desire) not) to|exclude yourself) (?:get |receiv(?:ing|e) |or |(?:a-z{1,30} ){0,4}from )?(?:these|our|(?:any )?(?:future|further)) (?:(?:e|ad)?-?m(?:ail(?:ing)?|es+[age]{3})|alert|PSA)[- ]?(?:ad|update)?s?\b/i
 ifplugin Mail::SpamAssassin::Plugin::DKIM
-  meta         END_FUTURE_EMAILS   __END_FUTURE_EMAILS && !__SUBJECT_ENCODED_B64 && !__HDRS_LCASE && !__HDRS_LCASE_KNOWN && !__DKIM_DEPENDABLE && !DKIM_SIGNED 
+  meta         END_FUTURE_EMAILS   __END_FUTURE_EMAILS && !__SUBJECT_ENCODED_B64 && !__HDRS_LCASE && !__HDRS_LCASE_KNOWN && !__TO___LOWER && !__DKIM_DEPENDABLE && !DKIM_SIGNED 
 else
-  meta         END_FUTURE_EMAILS   __END_FUTURE_EMAILS && !__SUBJECT_ENCODED_B64 && !__HDRS_LCASE && !__HDRS_LCASE_KNOWN 
+  meta         END_FUTURE_EMAILS   __END_FUTURE_EMAILS && !__SUBJECT_ENCODED_B64 && !__HDRS_LCASE && !__HDRS_LCASE_KNOWN && !__TO___LOWER  
 endif
 describe       END_FUTURE_EMAILS   Spammy unsubscribe
 score          END_FUTURE_EMAILS   2.500	# limit
@@ -1089,10 +1089,12 @@ meta        __FBI_SPOOF          (__FBI_FM_NAME || __FBI_FM_DOM || __FBI_BODY_SH
 meta        FBI_SPOOF            __FBI_SPOOF
 describe    FBI_SPOOF            Claims to be FBI, but not from FBI domain
 score       FBI_SPOOF            2.00	# limit
+tflags      FBI_SPOOF            publish
 
 meta        FBI_MONEY            __FBI_SPOOF && LOTS_OF_MONEY
 describe    FBI_MONEY            The FBI wants to give you lots of money?
 score       FBI_MONEY            2.00	# limit
+tflags      FBI_MONEY            publish
 
 
 header      __FROM_ASB_BANK      From:addr =~ /\basb\.co\.nz$/i
@@ -1233,6 +1235,7 @@ uri         __URI_DOM_DOTDOT      m,://[^/]+\.\.,
 meta        FOUND_YOU          __FOUND_YOU && !__DKIM_EXISTS && !__SUBJ_RE && !__HAS_X_REF && !__RP_MATCHES_RCVD && !__COMMENT_EXISTS && !__HAS_ERRORS_TO && !__HAS_IN_REPLY_TO 
 score       FOUND_YOU          3.25	# limit
 describe    FOUND_YOU          I found you...
+tflags      FOUND_YOU          publish
 
 
 #rawbody     __HTML_FONT_ONE_WORD_01   />\s{0,5}\S{1,15}\s{0,5}<\/font>/i
@@ -1334,7 +1337,9 @@ rawbody     __FR_SPACING_22    /[a-z0-9]{6}\s{22}[a-z0-9]{5}/i
 # per users mailing list question from Joe Quinn
 #body        __HEXHASHWORD_S    /\s[A-Z]?[a-z]{1,15}\s(?![a-z]{18})[0-9a-f]{18}/
 #tflags      __HEXHASHWORD_S    multiple maxhits=4
-body        __HEXHASHWORD_S2    /\s[A-Z]?[a-z]{1,15}\s(?![a-z]{10,20}\s)[0-9a-f]{10,64}\s[A-Z]?[a-z]{1,15}\b/
+body        __HEXHASHWORD_S2E  /\s[A-Z]?[a-z]{1,15}\s(?![a-z]{10,20}\s)[a-z]{0,10}[0-9a-f]{10,64}(?:[g-z][a-z]{0,10})?\s[A-Z]?[a-z]{1,15}\b/
+tflags      __HEXHASHWORD_S2E  multiple maxhits=4
+body        __HEXHASHWORD_S2   /\s[A-Z]?[a-z]{1,15}\s(?![a-z]{10,20}\s)[0-9a-f]{10,64}\s[A-Z]?[a-z]{1,15}\b/
 tflags      __HEXHASHWORD_S2   multiple maxhits=4
 #body        __HEXHASHWORD      /\s[A-Z]?[a-z]{1,15}\s[0-9a-f]{30}/
 #tflags      __HEXHASHWORD      multiple maxhits=4
@@ -1407,6 +1412,24 @@ describe    LONG_HEX_URI      Very long purely hexadecimal URI
 score       LONG_HEX_URI      3.000	# limit
 tflags      LONG_HEX_URI      publish
 
+uri         __128_LC_URI        m;[/?][a-z]{128,}$;
+uri         __128_LC_IMG        m;/[a-z]{128,}/\w+\.(?:png|gif|jpe?g)$;
+uri         __128_ALNUM_URI     m;[/?][0-9a-z]{128,}$;i
+uri         __128_ALNUM_IMG     m;/[0-9a-z]{128,}/\w+\.(?:png|gif|jpe?g)$;i
+uri         __64_ANY_URI        m;[/?]\w{64,}$;i
+uri         __64_ANY_IMG        m;/\w{64,}/\w+\.(?:png|gif|jpe?g)$;i
+uri         __45_ALNUM_URI      m;[/?][0-9a-z]{45,}$;i
+uri         __45_ALNUM_IMG      m;/[0-9a-z]{45,}/\w+\.(?:png|gif|jpe?g)$;i
+meta        __128_LC_URI_IMG    __128_LC_URI && __128_LC_IMG
+meta        __128_ALNUM_URI_O   __128_ALNUM_URI && !__128_LC_URI
+meta        __128_ALNUM_IMG_O   __128_ALNUM_IMG && !__128_LC_IMG
+meta        __128_ALNUM_URI_IMG __128_ALNUM_URI_O && __128_ALNUM_IMG_O
+meta        __64_ANY_URI_O      __64_ANY_URI && !__128_ALNUM_URI && !__128_LC_URI
+meta        __64_ANY_IMG_O      __64_ANY_IMG && !__128_ALNUM_IMG && !__128_LC_IMG
+meta        __64_ALNUM_URI_IMG  __64_ANY_URI_O && __64_ANY_IMG_O
+meta        __45_ALNUM_URI_O    __45_ALNUM_URI && !__64_ANY_URI && !__128_ALNUM_URI && !__128_LC_URI
+meta        __45_ALNUM_IMG_O    __45_ALNUM_IMG && !__64_ANY_IMG && !__128_ALNUM_IMG && !__128_LC_IMG
+meta        __45_ALNUM_URI_IMG  __45_ALNUM_URI_O && __45_ALNUM_IMG_O
 
 rawbody     __HTML_OFF_PAGE   /;(?:top|left):-\d{3,9}px;/i
 meta        HTML_OFF_PAGE     __HTML_OFF_PAGE && !__RP_MATCHES_RCVD && !__LONGLINE && !__DKIM_EXISTS 
