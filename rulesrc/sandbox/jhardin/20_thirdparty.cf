@@ -13,7 +13,7 @@ describe   DX_TEXT_01       "message status"
 
 body       DX_TEXT_02       /\b(?:change|modif(?:y|ications?)) (?:of|to|(?:yo)?ur) (?:message|sub|comm) stat/i
 describe   DX_TEXT_02       "change your message stat"
-tflags     DX_TEXT_02       publish   # hit masscheck over the head with a cluebat
+tflags     DX_TEXT_02       publish
 
 body       DX_TEXT_03       /\b[A-Z]{3} Media (?:Group|Relations)\b/
 describe   DX_TEXT_03       "XXX Media Group"
