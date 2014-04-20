@@ -385,7 +385,7 @@ rawbody __TVD_BODY      /\S{4}/
 
 ## look for specific content-types
 header __TVD_MIME_CT_MM Content-Type =~ /^multipart\/mixed/i
-ifplugin Mail::SpamAssassin::Plugin::MIMEEval
+ifplugin Mail::SpamAssassin::Plugin::MIMEHeader
 mimeheader __TVD_MIME_ATT_TP    Content-Type =~ /^text\/plain/i
 mimeheader __TVD_MIME_ATT_AP    Content-Type =~ /^application\/pdf/i
 mimeheader __TVD_MIME_ATT_AOPDF Content-Type =~ /^application\/octet-stream.*\.pdf/i
