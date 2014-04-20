@@ -1192,11 +1192,14 @@ score       BODY_URI_ONLY        0.25	# limit during testing
 body        __SINGLE_WORD_LINE  /^\s?\S{1,60}\s?$/
 tflags      __SINGLE_WORD_LINE  multiple maxhits=2
 header      __SINGLE_WORD_SUBJ  Subject =~ /^\s*\S{1,60}\s*$/
-meta        __BODY_SINGLE_WORD    __BODY_TEXT_LINE < 3 && !__SMIME_MESSAGE && ((__SINGLE_WORD_LINE && !__SINGLE_WORD_SUBJ) || __SINGLE_WORD_LINE > 1)
-meta        BODY_SINGLE_WORD    __BODY_SINGLE_WORD && !ALL_TRUSTED && !__NOT_SPOOFED && !__MSGID_APPLEMAIL 
+meta        __BODY_SINGLE_WORD    __BODY_TEXT_LINE < 3 && !__EMPTY_BODY && !__SMIME_MESSAGE && ((__SINGLE_WORD_LINE && !__SINGLE_WORD_SUBJ) || __SINGLE_WORD_LINE > 1)
+meta        BODY_SINGLE_WORD    __BODY_SINGLE_WORD && !ALL_TRUSTED && !__HDRS_LCASE_KNOWN && !__FROM_ALL_NUMS && !__RCD_RDNS_SMTP 
 describe    BODY_SINGLE_WORD    Message body is only one word (no spaces)
-score       BODY_SINGLE_WORD    1.00	# limit
+score       BODY_SINGLE_WORD    3.00	# limit
 
+meta        BODY_SINGLE_URI     (__BODY_SINGLE_WORD && __HAS_ANY_URI) && !ALL_TRUSTED && !__HDRS_LCASE_KNOWN && !__FROM_ALL_NUMS && !__RCD_RDNS_SMTP 
+describe    BODY_SINGLE_URI     Message body is only a URI
+score       BODY_SINGLE_URI     3.00	# limit
 
 #ifplugin Mail::SpamAssassin::Plugin::DKIM
 #  # malformed DKIM signatures seen in the wild - see bug#6895
@@ -1225,6 +1228,7 @@ meta        __FORM_LOW_CONTRAST   (__FILL_THIS_FORM_SHORT2 || __FILL_THIS_FORM_S
 meta        FORM_LOW_CONTRAST     __FORM_LOW_CONTRAST && !__BUGGED_IMG && !__HAS_REPLY_TO && !__DKIM_EXISTS && !__DOS_HAS_LIST_UNSUB && !__MSGID_JAVAMAIL
 describe    FORM_LOW_CONTRAST     Fill in a form with hidden text
 score       FORM_LOW_CONTRAST     3.00	# Limit
+tflags      FORM_LOW_CONTRAST     publish
 
 
 # try to FP-reduce HTML_FONT_LOW_CONTRAST
@@ -1246,15 +1250,15 @@ tflags      FOUND_YOU          publish
 
 
 #body        __ADMITS_CANSPAM  /\bThis is a CANSPAM ACT compliant advertising broadcast\b/i
-body        __ADMITS_CANSPAM  /\bThis is a CANSPAM ACT compliant\b/i
-meta        ADMITS_CANSPAM    __ADMITS_CANSPAM && !__VIA_ML
-describe    ADMITS_CANSPAM    Admits to being spam
+#body        __ADMITS_CANSPAM  /\bThis is a CANSPAM ACT compliant\b/i
+#meta        ADMITS_CANSPAM    __ADMITS_CANSPAM && !__VIA_ML
+#describe    ADMITS_CANSPAM    Admits to being spam
 
 #body        __ADMITS_SPAM     /\bth(?:e[- ]+above|is)(?:\?+s|[- ]+is)[- ]+(?:intended[- ]+as[- ]+)?an?[- ]+advert[i1l]sement\b/i
-body        __OBFU_ADVERT     /\badvert[1l]sement\b/i
-meta        OBFU_ADVERT       __OBFU_ADVERT
-describe    OBFU_ADVERT       Misspelled "advertisement"
-tflags      OBFU_ADVERT       publish
+#body        __OBFU_ADVERT     /\badvert[1l]sement\b/i
+#meta        OBFU_ADVERT       __OBFU_ADVERT
+#describe    OBFU_ADVERT       Misspelled "advertisement"
+#tflags      OBFU_ADVERT       publish
 
 
 #body        __SEO_REGISTER    /\bsearch engine (?:registration|subscription|submission)\b/i
@@ -1303,6 +1307,7 @@ header      __DATE_LOWER       ALL =~ /date:\s\S{5}/
 
 header      __FH_HAS_XMSMAIL   exists:X-MSMail-Priority
 header      __FH_HAS_XPRIORITY exists:X-Priority
+meta        __FH_HAS_XPRIORITY_MINFP     __FH_HAS_XPRIORITY && !ALL_TRUSTED && !__PHPMAILER_MUA && !__BUGGED_IMG && !__HAS_ERRORS_TO && !__LCL__ENV_AND_HDR_FROM_MATCH && !__THREADED && !__VIA_ML 
 
 header      __FS_SUBJ_RE       Subject =~ /^Re: /
 header      __NUMBERS_IN_SUBJ  Subject =~ /\d{3}/
@@ -1347,7 +1352,7 @@ tflags      __HEXHASHWORD_S2   multiple maxhits=4
 #meta        __HEXHASH_3        __HEXHASHWORD > 2
 #meta        __HEXHASH_4        __HEXHASHWORD > 3
 #meta        __HEXHASH_5        __HEXHASHWORD > 4
-meta        HEXHASH_WORD       (__HEXHASHWORD_S2 > 3) && !__ML1 && !__ML3 && !__LCL_ENV_AND_HDR_FROM_MATCH && !__HAS_X_REF && !__HAS_IN_REPLY_TO && !__FSL_TO_COMMON_ROLE && !__LYRIS_EZLM_REMAILER 
+meta        HEXHASH_WORD       (__HEXHASHWORD_S2 > 3) && !__ML1 && !__ML3 && !__LCL__ENV_AND_HDR_FROM_MATCH && !__HAS_X_REF && !__HAS_IN_REPLY_TO && !__FSL_TO_COMMON_ROLE && !__LYRIS_EZLM_REMAILER && !__SENDER_BOT && !ALL_TRUSTED
 describe    HEXHASH_WORD       Multiple instances of word + hexadecimal hash
 score       HEXHASH_WORD       3.000	# limit
 tflags      HEXHASH_WORD       publish
@@ -1431,6 +1436,10 @@ meta        __45_ALNUM_URI_O    __45_ALNUM_URI && !__64_ANY_URI && !__128_ALNUM_
 meta        __45_ALNUM_IMG_O    __45_ALNUM_IMG && !__64_ANY_IMG && !__128_ALNUM_IMG && !__128_LC_IMG
 meta        __45_ALNUM_URI_IMG  __45_ALNUM_URI_O && __45_ALNUM_IMG_O
 
+meta        LONG_IMG_URI        __45_ALNUM_IMG && !ALL_TRUSTED
+describe    LONG_IMG_URI        Image URI with very long path component - web bug?
+
+
 rawbody     __HTML_OFF_PAGE   /;(?:top|left):-\d{3,9}px;/i
 meta        HTML_OFF_PAGE     __HTML_OFF_PAGE && !__RP_MATCHES_RCVD && !__LONGLINE && !__DKIM_EXISTS 
 describe    HTML_OFF_PAGE     HTML element rendered well off the displayed page
@@ -1460,6 +1469,7 @@ meta        PUMPDUMP_MULTI    (__PUMPDUMP_01+__PUMPDUMP_02+__PUMPDUMP_03+__PUMPD
 describe    PUMPDUMP_MULTI    Pump-and-dump stock scam phrases
 score       PUMPDUMP_MULTI    3.000	# limit
 tflags      PUMPDUMP_MULTI    publish
+
 
 
 
