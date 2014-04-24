@@ -764,7 +764,7 @@ sub get_names_of_tests_hit_with_scores {
 
   #BASED ON CODE FOR TESTSSCORES TAG - KAM 2014-04-24
   foreach my $test (sort @{$self->{test_names_hit}}) {
-    my $score = $sel->{conf}->{scores}->{$test};
+    my $score = $self->{conf}->{scores}->{$test};
     $score = '0'  if !defined $score;
     $line .= ','  if $line ne '';
     $line .= $test . '=' . $score;
