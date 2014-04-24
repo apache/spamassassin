@@ -717,7 +717,7 @@ sub is_spam {
 
 After a mail message has been checked, this method can be called. It will
 return a comma-separated string, listing all the symbolic test names
-of the tests which were trigged by the mail.
+of the tests which were triggered by the mail.
 
 =cut
 
@@ -727,13 +727,62 @@ sub get_names_of_tests_hit {
   return join(',', sort(@{$self->{test_names_hit}}));
 }
 
+=item $list = $status->get_names_of_tests_hit_with_scores_hash ()
+
+After a mail message has been checked, this method can be called. It will
+return a pointer to a hash for rule & score pairs for all the symbolic
+test names and individual scores of the tests which were triggered by the mail.
+
+=cut
+sub get_names_of_tests_hit_with_scores_hash {
+  my ($self) = @_;
+
+  my ($line, %testsscores);
+
+  #BASED ON CODE FOR TESTSSCORES TAG - KAM 2014-04-24
+  foreach my $test (@{$self->{test_names_hit}}) {
+    my $score = $self->{conf}->{scores}->{$test};
+    $score = '0'  if !defined $score;
+
+    $testsscores{$test} = $score;
+  }
+
+  return \%testsscores;
+}
+
+=item $list = $status->get_names_of_tests_hit_with_scores ()
+
+After a mail message has been checked, this method can be called. It will
+return a comma-separated string of rule=score pairs for all the symbolic
+test names and individual scores of the tests which were triggered by the mail.
+
+=cut
+sub get_names_of_tests_hit_with_scores {
+  my ($self) = @_;
+
+  my ($line, %testsscores);
+
+  #BASED ON CODE FOR TESTSSCORES TAG - KAM 2014-04-24
+  foreach my $test (sort @{$self->{test_names_hit}}) {
+    my $score = $sel->{conf}->{scores}->{$test};
+    $score = '0'  if !defined $score;
+    $line .= ','  if $line ne '';
+    $line .= $test . '=' . $score;
+  }
+
+  $line ||= 'none';
+
+  return $line;
+}
+
+
 ###########################################################################
 
 =item $list = $status->get_names_of_subtests_hit ()
 
 After a mail message has been checked, this method can be called.  It will
 return a comma-separated string, listing all the symbolic test names of the
-meta-rule sub-tests which were trigged by the mail.  Sub-tests are the
+meta-rule sub-tests which were triggered by the mail.  Sub-tests are the
 normally-hidden rules, which score 0 and have names beginning with two
 underscores, used in meta rules.
 
