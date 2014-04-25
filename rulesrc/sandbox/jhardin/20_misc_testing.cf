@@ -359,7 +359,7 @@ endif
 meta           EMPTY_RVM_ATTCH      (__PLS_REVIEW || __DLND_ATTACH) && __EMPTY_BODY
 describe       EMPTY_RVM_ATTCH      Please review attached document, empty message
 
-body           __END_FUTURE_EMAILS /\b(?:end|stop(?! receiving these (?:alerts|emails))|cease|discontinue|removed?|(?:do|would|you(?:'d)?) (?:not (?:wish|want|like|desire)|(?:prefer|wish|want|like|desire) not) to|exclude yourself) (?:get |receiv(?:ing|e) |or |(?:a-z{1,30} ){0,4}from )?(?:these|our|(?:any )?(?:future|further)) (?:(?:e|ad)?-?m(?:ail(?:ing)?|es+[age]{3})|alert|PSA)[- ]?(?:ad|update)?s?\b/i
+body           __END_FUTURE_EMAILS /\b(?:end|stop(?! receiving these (?:alerts|emails))|cease|discontinue|removed?|(?:do(?! not wish to receive [\w\s]{0,20}emails)|would|you(?:'d)?) (?:not (?:wish|want|like|desire)|(?:prefer|wish|want|like|desire) not) to|exclude yourself) (?:get |receiv(?:ing|e) |or |(?:a-z{1,30} ){0,4}from )?(?:these|our|(?:any )?(?:future|further)) (?:(?:e|ad)?-?m(?:ail(?:ing)?|es+[age]{3})|alert|PSA|marketing)[- ]?(?:ad|update)?s?\b/i
 ifplugin Mail::SpamAssassin::Plugin::DKIM
   meta         END_FUTURE_EMAILS   __END_FUTURE_EMAILS && !__SUBJECT_ENCODED_B64 && !__HDRS_LCASE && !__HDRS_LCASE_KNOWN && !__TO___LOWER && !__DKIM_DEPENDABLE && !DKIM_SIGNED
 else
@@ -1400,7 +1400,7 @@ tflags      UC_GIBBERISH_OBFU  publish
 
 header	    __NO_TRUSTED_RELAY	X-Spam-Relays-Trusted !~ /ip=/i
 
-body        CANT_SEE_AD       /\b(?:can(?:no|')?t|not able to) (?:view|read|see|scan|witness|consider|look at|participate in) (?:our|this|the) (?:commercial |ad(?:vert[i1l]se-?ment)? |images |newsletter |mailing ){1,2}(?:at all|below|(?:due to|because of|as|from) (?:no |missing |unloaded |blocked )?images)\b/i
+body        CANT_SEE_AD       /\b(?:can(?:no|')?t|(?:aren'?t|not) able to) (?:view|read|see|scan|witness|consider|look at|participate in|take in) (?:our|this|the) (?:commercial |ad(?:vert[i1l]se-?ment)? |images |newsletter |mailing ){1,2}(?:at all|below|(?:due to|because(?: of)?|as|from) (?:no |missing |unloaded |blocked )?images)\b/i
 describe    CANT_SEE_AD       You really want to see our spam.
 score       CANT_SEE_AD       3.000	# limit
 tflags      CANT_SEE_AD       publish
@@ -1470,6 +1470,8 @@ describe    PUMPDUMP_MULTI    Pump-and-dump stock scam phrases
 score       PUMPDUMP_MULTI    3.000	# limit
 tflags      PUMPDUMP_MULTI    publish
 
+body        DR_OZ_OBFU        /\bD(?:r\.|octor) ?0z\b/i
+describe    DR_OZ_OBFU        Obfuscated "Dr. Oz"
 
 
 
