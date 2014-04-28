@@ -359,7 +359,7 @@ endif
 meta           EMPTY_RVM_ATTCH      (__PLS_REVIEW || __DLND_ATTACH) && __EMPTY_BODY
 describe       EMPTY_RVM_ATTCH      Please review attached document, empty message
 
-body           __END_FUTURE_EMAILS /\b(?:end|stop(?! receiving these (?:alerts|emails))|cease|discontinue|removed?|(?:do(?! not wish to receive [\w\s]{0,20}emails)|would|you(?:'d)?) (?:not (?:wish|want|like|desire)|(?:prefer|wish|want|like|desire) not) to|exclude yourself) (?:get |receiv(?:ing|e) |or |(?:a-z{1,30} ){0,4}from )?(?:these|our|(?:any )?(?:future|further)) (?:(?:e|ad)?-?m(?:ail(?:ing)?|es+[age]{3})|alert|PSA|marketing)[- ]?(?:ad|update)?s?\b/i
+body           __END_FUTURE_EMAILS /\b(?:end|stop(?! receiving these (?:alerts|emails))|cease|discontinue|removed?|(?:do(?! not wish to receive [\w\s]{0,20}emails)|would|you(?:'d)?) (?:not (?:wish|want|like|desire)|(?:prefer|wish|want|like|desire) not) to|exclude yourself|fore?go)[- ](?:get |receiv(?:ing|e) |or |(?:a-z{1,30} ){0,4}from )?(?:these|our|(?:any )?(?:future|further)) (?:(?:e|ad)?-?m(?:ail(?:ing)?|es+[age]{3})|alert|PSA|marketing|notice)[- ]?(?:ad|update)?s?\b/i
 ifplugin Mail::SpamAssassin::Plugin::DKIM
   meta         END_FUTURE_EMAILS   __END_FUTURE_EMAILS && !__SUBJECT_ENCODED_B64 && !__HDRS_LCASE && !__HDRS_LCASE_KNOWN && !__TO___LOWER && !__DKIM_DEPENDABLE && !DKIM_SIGNED
 else
