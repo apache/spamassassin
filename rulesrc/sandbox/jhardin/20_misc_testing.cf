@@ -1342,20 +1342,22 @@ rawbody     __FR_SPACING_22    /[a-z0-9]{6}\s{22}[a-z0-9]{5}/i
 # per users mailing list question from Joe Quinn
 #body        __HEXHASHWORD_S    /\s[A-Z]?[a-z]{1,15}\s(?![a-z]{18})[0-9a-f]{18}/
 #tflags      __HEXHASHWORD_S    multiple maxhits=4
-body        __HEXHASHWORD_S2E  /\s[A-Z]?[a-z]{1,15}\s(?![a-z]{10,20}\s)[a-z]{0,10}[0-9a-f]{10,64}(?:[g-z][a-z]{0,10})?\s[A-Z]?[a-z]{1,15}\b/
-tflags      __HEXHASHWORD_S2E  multiple maxhits=4
-body        __HEXHASHWORD_S2   /\s[A-Z]?[a-z]{1,15}\s(?![a-z]{10,20}\s)[0-9a-f]{10,64}\s[A-Z]?[a-z]{1,15}\b/
-tflags      __HEXHASHWORD_S2   multiple maxhits=4
+body        __HEXHASHWORD_S2EU /\s[A-Z]?[a-z]{1,15}\s(?![a-z]{10,20}\s)[a-z]{0,10}(?:(?!--)[-0-9a-f]){10,64}(?:[g-z][a-z]{0,10})?\s[A-Z]?[a-z]{1,15}\b/
+tflags      __HEXHASHWORD_S2EU multiple maxhits=4
+#body        __HEXHASHWORD_S2E  /\s[A-Z]?[a-z]{1,15}\s(?![a-z]{10,20}\s)[a-z]{0,10}[0-9a-f]{10,64}(?:[g-z][a-z]{0,10})?\s[A-Z]?[a-z]{1,15}\b/
+#tflags      __HEXHASHWORD_S2E  multiple maxhits=4
+#body        __HEXHASHWORD_S2   /\s[A-Z]?[a-z]{1,15}\s(?![a-z]{10,20}\s)[0-9a-f]{10,64}\s[A-Z]?[a-z]{1,15}\b/
+#tflags      __HEXHASHWORD_S2   multiple maxhits=4
 #body        __HEXHASHWORD      /\s[A-Z]?[a-z]{1,15}\s[0-9a-f]{30}/
 #tflags      __HEXHASHWORD      multiple maxhits=4
 #meta        __HEXHASH_2        __HEXHASHWORD > 1
 #meta        __HEXHASH_3        __HEXHASHWORD > 2
 #meta        __HEXHASH_4        __HEXHASHWORD > 3
 #meta        __HEXHASH_5        __HEXHASHWORD > 4
-#meta        HEXHASH_WORD       (__HEXHASHWORD_S2 > 3) && !__ML1 && !__ML3 && !__LCL__ENV_AND_HDR_FROM_MATCH && !__HAS_X_REF && !__HAS_IN_REPLY_TO && !__FSL_TO_COMMON_ROLE && !__LYRIS_EZLM_REMAILER && !__SENDER_BOT && !ALL_TRUSTED
-#describe    HEXHASH_WORD       Multiple instances of word + hexadecimal hash
-#score       HEXHASH_WORD       3.000	# limit
-#tflags      HEXHASH_WORD       publish
+meta        HEXHASH_WORD       (__HEXHASHWORD_S2EU > 3) && !__ML1 && !__ML3 && !__LCL__ENV_AND_HDR_FROM_MATCH && !__HAS_X_REF && !__HAS_IN_REPLY_TO && !__FSL_TO_COMMON_ROLE && !__LYRIS_EZLM_REMAILER && !__SENDER_BOT && !ALL_TRUSTED
+describe    HEXHASH_WORD       Multiple instances of word + hexadecimal hash
+score       HEXHASH_WORD       3.000	# limit
+tflags      HEXHASH_WORD       publish
 
 #  from users list spample provided by Larry Starr
 body        __UC_GIBB_OBFU     /\b[A-Za-z][a-z]{0,20}[,;)]?\s[A-Z]{16,}[a-z]?\s[A-Za-z][a-z]{1,15}\b/
