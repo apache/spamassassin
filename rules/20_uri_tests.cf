@@ -116,6 +116,6 @@ describe URI_NO_WWW_BIZ_CGI	CGI in .biz TLD other than third-level "www"
 
 ###########################################################################
 
-uri NORMAL_HTTP_TO_IP          m{^https?://\d+\.\d+\.\d+\.\d+}i
-describe NORMAL_HTTP_TO_IP     Uses a dotted-decimal IP address in URL
+uri NORMAL_HTTP_TO_IP          m{^https?://(?!1(?:0|27|69\.254|72\.(?:1[6-9]|2\d|3[01])|92\.168)\.)\d+\.\d+\.\d+\.\d+\b(?![.-])}i
+describe NORMAL_HTTP_TO_IP     URI host has a public dotted-decimal IPv4 address
 
