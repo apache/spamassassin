@@ -300,7 +300,7 @@ sub pick_random_available_port {
       if  ($b eq $all_zeroes) { $ind += 256 }
       elsif ($b eq $all_ones) { $ind += 256; $cnt += 256 }
       else {  # count nontrivial cases the slow way
-        foreach (0..255) { if (vec($ports_bitset, $ind++, 1)) { $cnt++ } }
+        vec($ports_bitset, $ind++, 1) && $cnt++  for 0..255;
       }
       $available_portscount += $cnt;
       $bucket_counts[$bucket] = $cnt;
