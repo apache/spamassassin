@@ -327,9 +327,10 @@ sub new {
 
     # if we've got a series of blank lines, get rid of them
     if (defined $start) {
+      my $max_blank_lines = 20;
       my $num = $start-$cnt;
-      if ($num > 10) {
-        splice @message, $cnt+2, $num-1;
+      if ($num > $max_blank_lines) {
+        splice @message, $cnt+2, $num-$max_blank_lines;
       }
       undef $start;
     }
