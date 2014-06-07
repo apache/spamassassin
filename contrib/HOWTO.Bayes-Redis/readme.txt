@@ -4,4 +4,10 @@ http://redis.io/download
 
 Follow steps in "Installation"
 
-NOTE: We're not using authentication assuming the Redis server/port should not be reachable form the "outside"
+Redis docs: http://redis.io/documentation
+
+run "redis-cli info" to get an idea of what's going on.
+
+see Redis cli commands
+http://redis.io/commands
+
