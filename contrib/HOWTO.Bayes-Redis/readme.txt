@@ -33,3 +33,4 @@ see Redis cli commands
 http://redis.io/commands
 
 If you need help, pls use the SA user's mailing list
+If you're a Redis/Bayes user please post some feedback in the SA user's mailing list
