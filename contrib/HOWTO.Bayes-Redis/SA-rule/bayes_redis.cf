@@ -1,0 +1,31 @@
+# Axb 2014-06-07
+# This goes in /etc/mail/spamassassin
+
+# Tell SA to use Bayes/Redis backend
+bayes_store_module  Mail::SpamAssassin::BayesStore::Redis
+
+# You'll need to set IP to your Redis server's IP
+# Redis-server-ip:Redis server listening port
+
+bayes_sql_dsn  server=192.168.1.2:6379
+
+use_bayes 1
+use_bayes_rules 1
+
+# Your choice if you want to use auto_learn
+bayes_auto_learn  1
+
+use_learner 1
+bayes_learn_to_journal 0
+
+
+
+# THIS IS MANDATORY - You don't need to run sa-learn to expire tokens
+# *_ttl below takes care of it.
+bayes_auto_expire  1
+
+# You  will need to changes this according to your need
+# This replaces sa-learn's sql/file based expire routines.
+bayes_token_ttl 30d
+bayes_seen_ttl  14d
+
