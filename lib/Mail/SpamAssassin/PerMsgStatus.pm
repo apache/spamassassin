@@ -167,7 +167,7 @@ BEGIN {
                                    : "0.5";
     },
 
-    DATE => \&Mail::SpamAssassin::Util::time_to_rfc822_date,
+    DATE => sub { Mail::SpamAssassin::Util::time_to_rfc822_date() },
 
     STARS => sub {
       my $pms = shift;
