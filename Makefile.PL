@@ -177,20 +177,21 @@ my %makefile = (
     # be quite explicit about this; afaik CPAN.pm is sensible using this
     # also see CURRENT_PM below
     'PREREQ_PM' => {
-        'Digest::SHA1'  => 0,             # 2.0 is oldest tested version
-        'File::Spec'    => 0.8,           # older versions lack some routines we need
-        'File::Copy'    => 2.02,          # this version is shipped with 5.005_03, the oldest version known to work
-        'Pod::Usage'    => 1.10,          # all versions prior to this do seem to be buggy
-        'HTML::Parser'  => 3.43,          # the HTML code is based on this parser, older versions have utf-8 bugs
-        'Archive::Tar'  => 1.23,          # for sa-update
-        'IO::Zlib'      => 1.04,          # for sa-update
-        'Mail::DKIM'    => 0.31,
-        'Net::DNS'      => (RUNNING_ON_WINDOWS ? 0.46 : 0.34), # bugs in older revs
-        'NetAddr::IP'   => 4.010,
-        'Sys::Hostname' => 0,
-        'Time::HiRes'   => 0,
-        'Time::Local'   => 0,
-        'Errno'         => 0,
+        'Digest::SHA1'         => 0,             # 2.0 is oldest tested version
+        'File::Spec'           => 0.8,           # older versions lack some routines we need
+        'File::Copy'           => 2.02,          # this version is shipped with 5.005_03, the oldest version known to work
+        'Pod::Usage'           => 1.10,          # all versions prior to this do seem to be buggy
+        'HTML::Parser'         => 3.43,          # the HTML code is based on this parser, older versions have utf-8 bugs
+        'Archive::Tar'         => 1.23,          # for sa-update
+        'IO::Zlib'             => 1.04,          # for sa-update
+        'Mail::DKIM'           => 0.31,
+        'Net::DNS'             => (RUNNING_ON_WINDOWS ? 0.46 : 0.34), # bugs in older revs
+	'Net::DNS::Nameserver' => 0,
+        'NetAddr::IP'          => 4.010,
+        'Sys::Hostname'        => 0,
+        'Time::HiRes'          => 0,
+        'Time::Local'          => 0,
+        'Errno'                => 0,
     },
 
     'dist' => {

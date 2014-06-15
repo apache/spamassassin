@@ -72,6 +72,13 @@ $have_sha1 ? {
   - version 0.46 or higher on Windows systems',
 },
 {
+  module => 'Net::DNS::Nameserver',
+  version => 0,
+  desc => 'Net::DNS:Nameserver is typically part of Net::DNS.  However, RHEL/
+  CentOS systems may install it using separate packages.  Because of this, we
+  check for both Net::DNS and Net::DNS::Nameserver.',
+},
+{
   'module' => 'NetAddr::IP',
   'version' => '4.010',
   'desc' => "Used in determining which DNS tests are to be done for each of
