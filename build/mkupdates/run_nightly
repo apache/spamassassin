@@ -66,6 +66,7 @@ cat /home/updatesd/LATEST
 $PERL masses/rule-qa/list-bad-rules \
     > /var/www/ruleqa.spamassassin.org/reports/badrules.txt 2>&1
 
+#On Wednesday's, we send out a bad sandbox rules report to the list
 if [ `date +%w` = 3 ] ; then
   (
     echo "From: nobody@spamassassin.apache.org (Rules Report Cron)"
