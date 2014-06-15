@@ -24,6 +24,7 @@ svn update || exit $?
 
 # Do the restart if we need to ...
 if [ "$FLAG" = "YES" ]; then
+  #THIS IS NOT WORKING CURRENTLY 6-15-2014
   exec $0 "$@"
 
   # It shouldn't get here, but just in case ...
