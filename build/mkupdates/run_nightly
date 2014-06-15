@@ -8,7 +8,9 @@ set -x
 cd /home/updatesd/svn/spamassassin
 
 . /etc/profile
-PERL=/local/perl586/bin/perl
+#Switched to system perl on spamassassin-vm box
+PERL=/usr/bin/perl
+#PERL=/local/perl586/bin/perl
 export PERL 
 
 # Will this script be updated?  If so, re-run it after updating.
