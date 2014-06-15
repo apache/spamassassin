@@ -13,8 +13,9 @@ set -x
 cd /home/updatesd/svn/spamassassin
 
 . /etc/profile
-PERL=/local/perl586/bin/perl
-export PERL 
+#Switched to system perl on spamassassin-vm box
+PERL=/usr/bin/perl
+#PERL=/local/perl586/bin/perl
 
 # download stage, where update tarballs are deposited for downloaders
 #
