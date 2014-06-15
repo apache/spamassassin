@@ -4,8 +4,12 @@
 
 RSYNC_DIR=/home/corpus-rsync/tagged_builds
 REPO_URL=http://svn.apache.org/repos/asf/spamassassin/trunk
-PERL=/local/perl586/bin/perl
-SVN=/opt/subversion-current/bin/svn
+#switched to system perl for spamassassin-vm and system svn
+PERL=/usr/bin/perl
+SVN=/usr/bin/svn
+#PERL=/local/perl586/bin/perl
+#SVN=/opt/subversion-current/bin/svn
+
 
 type="$1"
 versfile="$2"
