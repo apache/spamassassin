@@ -9,6 +9,6 @@ chmod -R a+r /export/home/bbmass/uploadedcorpora/
 chmod -R a+rw /export/home/bbmass/uploadedcorpora/*/ham
 chmod -R a+rw /export/home/bbmass/uploadedcorpora/*/spam
 
-rsync --delete --exclude=ARCHIVE -aze ssh /export/home/corpus-rsync root@spamassassin2:/export/home/
-rsync --delete --exclude=ARCHIVE -aze ssh /export/home/bbmass/uploadedcorpora root@spamassassin2:/export/home/bbmass/
+rsync --delete --exclude=ARCHIVE -aze ssh /export/home/corpus-rsync root@spamassassin2.zones.apache.org:/export/home/
+rsync --delete --exclude=ARCHIVE -aze ssh /export/home/bbmass/uploadedcorpora root@spamassassin2.zones.apache.org:/export/home/bbmass/
 
