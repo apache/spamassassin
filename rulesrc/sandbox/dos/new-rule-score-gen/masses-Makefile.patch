@@ -37,10 +37,10 @@ Index: Makefile
  tmp/scores.h: tmp/tests.h
  
  tmp/ranges.data: tmp/.created freqs score-ranges-from-freqs
-+       perl add-hitless-active-to-freqs
++	perl add-hitless-active-to-freqs
  	perl score-ranges-from-freqs $(RULES) $(SCORESET) < freqs
-+       perl lock-scores 1
-+       mv tmp/ranges.data-new tmp/ranges.data
++	perl lock-scores 1
++	mv tmp/ranges.data-new tmp/ranges.data
  
  freqs: spam.log ham.log
  	perl hit-frequencies -c $(RULES) -x -p -s $(SCORESET) > freqs
