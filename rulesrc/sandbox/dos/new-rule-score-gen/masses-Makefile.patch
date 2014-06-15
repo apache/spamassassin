@@ -15,18 +15,32 @@
 # limitations under the License.
 # </@LICENSE>
 
-Index: Makefile
+Index: masses/Makefile
 ===================================================================
---- masses/Makefile	(revision 529172)
-+++ masses/Makefile	(working copy)
-@@ -36,7 +36,10 @@
+--- masses/Makefile (revision 1602669)
++++ masses/Makefile (working copy)
+@@ -2,9 +2,10 @@
+ CFLAGS=   -g -O2 -Wall 
+ LDFLAGS=  -lm
+ 
+-PGAPACK=  /local/pgapack-1.0.0.1
+-#PGAPACKLIBDIR=  $(PGAPACK)/lib/linux    # linux
+-PGAPACKLIBDIR=  $(PGAPACK)/lib/sun4     # solaris
++#Changed to the location recommended by pgapack's readme and linux libdir for new spamassassin-vm box on 6/15/2014
++PGAPACK=  /usr/local/pga
++PGAPACKLIBDIR=  $(PGAPACK)/lib/linux    # linux
++#PGAPACKLIBDIR=  $(PGAPACK)/lib/sun4     # solaris
+ 
+ # What rule scoreset are we using?
+ include config
+@@ -36,7 +37,10 @@
  tmp/scores.h: tmp/tests.h
  
  tmp/ranges.data: tmp/.created freqs score-ranges-from-freqs
 +	perl add-hitless-active-to-freqs
- 	perl score-ranges-from-freqs $(RULES) $(SCORESET) < freqs
+	perl score-ranges-from-freqs $(RULES) $(SCORESET) < freqs
 +	perl lock-scores 1
 +	mv tmp/ranges.data-new tmp/ranges.data
  
  freqs: spam.log ham.log
- 	perl hit-frequencies -c $(RULES) -x -p -s $(SCORESET) > freqs
+  perl hit-frequencies -c $(RULES) -x -p -s $(SCORESET) > freqs
