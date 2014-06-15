@@ -1105,6 +1105,8 @@ conf__install:
 	$(PERL) -MFile::Copy -e "copy(q{rules/v320.pre}, q{$(B_CONFDIR)/v320.pre}) unless -f q{$(B_CONFDIR)/v320.pre}"
 	$(PERL) -MFile::Copy -e "copy(q{rules/v330.pre}, q{$(B_CONFDIR)/v330.pre}) unless -f q{$(B_CONFDIR)/v330.pre}"
 	$(PERL) -MFile::Copy -e "copy(q{rules/v340.pre}, q{$(B_CONFDIR)/v340.pre}) unless -f q{$(B_CONFDIR)/v340.pre}"
+	$(PERL) -MFile::Copy -e "copy(q{rules/v341.pre}, q{$(B_CONFDIR)/v341.pre}) unless -f q{$(B_CONFDIR)/v341.pre}"
+  
 
 data__install:
 	-$(MKPATH) $(B_DATADIR)
