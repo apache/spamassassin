@@ -24,4 +24,4 @@ RREV=`$SVNVERS .`
 REV=`echo $RREV | awk -F: '{print $1}' | tr -cd '[0-9]'`
 DATE=`date "+%Y-%m-%d"`
 
-echo "$DATE\t$REV"
+echo -e "$DATE\t$REV"
