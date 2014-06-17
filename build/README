@@ -66,6 +66,13 @@ SPAMASSASSIN RELEASE PROCEDURE
   (ie., no "M" or "C" files; any files marked "M" have been locally
   modified, and should be "svn revert"ed before you continue.)
 
+- consider updating the TLD list in
+  Mail/SpamAssassin/Util/RegistrarBoundaries.pm
+
+  Follow the documentation under %VALID_TLDS and $VALID_TLDS_RE for
+  updating the TLD list, make test, and do a commit if there are any
+  changes from the previous TLD list
+
 - edit lib/Mail/SpamAssassin.pm and comment the $IS_DEVEL_BUILD
   line.   Ensure the correct version number is present in $VERSION
   and @EXTRA_VERSION.

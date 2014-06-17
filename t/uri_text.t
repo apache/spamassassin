@@ -126,7 +126,7 @@ foo.Cahl1goo.php	!Cahl1goo
 www5.mi1coozu.php	!mi1coozu
 www.mezeel0P.php	!mezeel0P
 bar.neih6fee.com.php	!neih6fee
-www.zai6Vuwi.com.bar	!zai6Vuwi
+www.zai6Vuwi.com.blah	!zai6Vuwi
 
 =www.deiJ1pha.com	www.deiJ1pha.com
 @www.Te0xohxu.com	www.Te0xohxu.com
@@ -194,13 +194,13 @@ WWW.Kiox3phi.nz		WWW.Kiox3phi.nz
 WWW.jong3Xou.cn		WWW.jong3Xou.cn
 WWW.waeShoe0.tw		WWW.waeShoe0.tw
 
-invalid_ltd.foo		!invalid_tld
-invalid_ltd.bar		!invalid_tld
+invalid_ltd.notword	!invalid_tld
+invalid_ltd.blah	!invalid_tld
 invalid_ltd.xyzzy	!invalid_tld
 invalid_ltd.co.zz	!invalid_tld
 
-www.invalid_ltd.foo	!invalid_tld
-www.invalid_ltd.bar	!invalid_tld
+www.invalid_ltd.notword	!invalid_tld
+www.invalid_ltd.blah	!invalid_tld
 www.invalid_ltd.xyzzy	!invalid_tld
 www.invalid_ltd.co.zz	!invalid_tld
 
@@ -289,7 +289,7 @@ donotignorethiswww.delimtest14.com	donotignorethiswww.delimtest14.com
 # the inactive TLDs have negative checks
 
 # first confirm that it will not match on not a TLD
-example.foo	!^http://example.foo$
+example.blah	!^http://example.blah$
 example.zzf	!^http://example.zzf$
 
 example.ac	^http://example.ac$
@@ -329,7 +329,7 @@ example.bo	^http://example.bo$
 example.br	^http://example.br$
 example.bs	^http://example.bs$
 example.bt	^http://example.bt$
-example.bv	!^http://example.bv$
+example.bv	^http://example.bv$
 example.bw	^http://example.bw$
 example.by	^http://example.by$
 example.bz	^http://example.bz$
@@ -375,7 +375,7 @@ example.fm	^http://example.fm$
 example.fo	^http://example.fo$
 example.fr	^http://example.fr$
 example.ga	^http://example.ga$
-example.gb	!^http://example.gb$
+example.gb	^http://example.gb$
 example.gd	^http://example.gd$
 example.ge	^http://example.ge$
 example.gf	^http://example.gf$
@@ -509,7 +509,7 @@ example.se	^http://example.se$
 example.sg	^http://example.sg$
 example.sh	^http://example.sh$
 example.si	^http://example.si$
-example.sj	!^http://example.sj$
+example.sj	^http://example.sj$
 example.sk	^http://example.sk$
 example.sl	^http://example.sl$
 example.sm	^http://example.sm$
@@ -565,7 +565,7 @@ example.zw	^http://example.zw$
 
 # with www. prefix tests a different table of TLDs
 
-www.example.foo	!^http://www.example.foo$
+www.example.foo	^http://www.example.foo$
 www.example.zzf	!^http://www.example.zzf$
 
 www.example.ac	^http://www.example.ac$
@@ -605,7 +605,7 @@ www.example.bo	^http://www.example.bo$
 www.example.br	^http://www.example.br$
 www.example.bs	^http://www.example.bs$
 www.example.bt	^http://www.example.bt$
-www.example.bv	!^http://www.example.bv$
+www.example.bv	^http://www.example.bv$
 www.example.bw	^http://www.example.bw$
 www.example.by	^http://www.example.by$
 www.example.bz	^http://www.example.bz$
@@ -651,7 +651,7 @@ www.example.fm	^http://www.example.fm$
 www.example.fo	^http://www.example.fo$
 www.example.fr	^http://www.example.fr$
 www.example.ga	^http://www.example.ga$
-www.example.gb	!^http://www.example.gb$
+www.example.gb	^http://www.example.gb$
 www.example.gd	^http://www.example.gd$
 www.example.ge	^http://www.example.ge$
 www.example.gf	^http://www.example.gf$
@@ -785,7 +785,7 @@ www.example.se	^http://www.example.se$
 www.example.sg	^http://www.example.sg$
 www.example.sh	^http://www.example.sh$
 www.example.si	^http://www.example.si$
-www.example.sj	!^http://www.example.sj$
+www.example.sj	^http://www.example.sj$
 www.example.sk	^http://www.example.sk$
 www.example.sl	^http://www.example.sl$
 www.example.sm	^http://www.example.sm$
