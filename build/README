@@ -71,7 +71,10 @@ SPAMASSASSIN RELEASE PROCEDURE
 
   Follow the documentation under %VALID_TLDS and $VALID_TLDS_RE for
   updating the TLD list, make test, and do a commit if there are any
-  changes from the previous TLD list
+  changes from the previous TLD list.
+
+  Currently, the only way to change the TLD list is via a release as 
+  of 6/17/2014.
 
 - edit lib/Mail/SpamAssassin.pm and comment the $IS_DEVEL_BUILD
   line.   Ensure the correct version number is present in $VERSION
