@@ -186,7 +186,6 @@ my %makefile = (
         'IO::Zlib'             => 1.04,          # for sa-update
         'Mail::DKIM'           => 0.31,
         'Net::DNS'             => (RUNNING_ON_WINDOWS ? 0.46 : 0.34), # bugs in older revs
-	'Net::DNS::Nameserver' => 0,
         'NetAddr::IP'          => 4.010,
         'Sys::Hostname'        => 0,
         'Time::HiRes'          => 0,
