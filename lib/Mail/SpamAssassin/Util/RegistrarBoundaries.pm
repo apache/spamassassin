@@ -35,9 +35,14 @@ use vars qw (
   @ISA %TWO_LEVEL_DOMAINS %THREE_LEVEL_DOMAINS %US_STATES %VALID_TLDS $VALID_TLDS_RE
 );
 
+# %VALID_TLDS
 # The list of currently-valid TLDs for the DNS system.
 #
 # When updating domain lists, also modify t/uri_text.t accordingly
+#
+# bash line to generate a formatted list of domains
+# Fetches domains, drops the top comment line, then joins domains with spaces in between
+#   wget http://data.iana.org/TLD/tlds-alpha-by-domain.txt -O - | tail -n+2 | perl -e 'chomp && s/$/ / && print lc while <>' && echo
 #
 # http://data.iana.org/TLD/tlds-alpha-by-domain.txt
 # Version 2008020601, Last Updated Thu Feb  7 09:07:00 2008 UTC
@@ -56,37 +61,77 @@ use vars qw (
 # Remember to also change regexp below when updating!
 
 foreach (qw/
-  ac ad ae aero af ag ai al am an ao aq ar arpa as asia at au aw ax az
-  ba bb bd be bf bg bh bi biz bj bm bn bo br bs bt bw by bz ca cat cc
-  cd cf cg ch ci ck cl club cm cn co com coop cr cu cv cw cx cy cz de dj dk dm
-  do dz ec edu ee eg er es et eu fi fj fk fm fo fr ga gd ge gf gg gh
-  gi gl gm gn gov gp gq gr gs gt gu gw gy hk hm hn hr ht hu id ie il im
-  in info int io iq ir is it je jm jo jobs jp ke kg kh ki km kn kp kr kw
-  ky kz la lb lc li lk lr ls lt lu lv ly ma mc md me mg mh mil mk ml mm
-  mn mo mobi mp mq mr ms mt mu museum mv mw mx my mz na name nc ne net
-  nf ng ni nl no np nr nu nz om org pa pe pf pg ph pk pl pm pn pr pro ps
-  pt pw py qa re ro rs ru rw sa sb sc sd se sg sh si sk sl sm sn so
-  sr st su sv sx sy sz tc td tel tf tg th tj tk tl tm tn to tp tr travel tt
-  tv tw tz ua ug uk us uy uz va vc ve vg vi vn vu wf ws xxx ye yt za
-  zm zw
+ac academy accountants actor ad ae aero af ag agency ai airforce al am an ao aq ar archi army arpa as asia associates
+at attorney au audio autos aw ax axa az ba bar bargains bayern bb bd be beer berlin best bf bg bh bi bid bike bio biz
+bj black blackfriday blue bm bn bo boutique br bs bt build builders buzz bv bw by bz ca cab camera camp capital cards
+care career careers cash cat catering cc cd center ceo cf cg ch cheap christmas church ci citic ck cl claims cleaning
+clinic clothing club cm cn co codes coffee college cologne com community company computer condos construction
+consulting contractors cooking cool coop country cr credit creditcard cruises cu cv cw cx cy cz dance dating de degree
+democrat dental dentist desi diamonds digital directory discount dj dk dm dnp do domains dz ec edu education ee eg
+email engineer engineering enterprises equipment er es estate et eu eus events exchange expert exposed fail farm
+feedback fi finance financial fish fishing fitness fj fk flights florist fm fo foo foundation fr frogans fund furniture
+futbol ga gal gallery gb gd ge gf gg gh gi gift gives gl glass global globo gm gmo gn gop gov gp gq gr graphics gratis
+gripe gs gt gu guide guitars guru gw gy hamburg haus hiphop hiv hk hm hn holdings holiday homes horse host house hr ht
+hu id ie il im immobilien in industries info ink institute insure int international investments io iq ir is it je jetzt
+jm jo jobs jp juegos kaufen ke kg kh ki kim kitchen kiwi km kn koeln kp kr kred kw ky kz la land lawyer lb lc lease li
+life lighting limited limo link lk loans london lr ls lt lu luxe luxury lv ly ma maison management mango market
+marketing mc md me media meet menu mg mh miami mil mk ml mm mn mo mobi moda moe monash mortgage moscow motorcycles mp
+mq mr ms mt mu museum mv mw mx my mz na nagoya name navy nc ne net neustar nf ng nhk ni ninja nl no np nr nu nyc nz
+okinawa om onl org organic pa paris partners parts pe pf pg ph photo photography photos pics pictures pink pk pl
+plumbing pm pn post pr press pro productions properties ps pt pub pw py qa qpon quebec re recipes red rehab reise
+reisen ren rentals repair report republican rest reviews rich rio ro rocks rodeo rs ru ruhr rw ryukyu sa saarland sb
+sc schule scot sd se services sexy sg sh shiksha shoes si singles sj sk sl sm sn so social software sohu solar
+solutions soy space sr st su supplies supply support surgery sv sx sy systems sz tattoo tax tc td technology tel tf
+tg th tienda tips tirol tj tk tl tm tn to today tokyo tools town toys tp tr trade training travel tt tv tw tz ua ug
+uk university uno us uy uz va vacations vc ve vegas ventures versicherung vet vg vi viajes villas vision vn vodka
+vote voting voto voyage vu wang watch webcam website wed wf wien wiki works ws wtc wtf xn--3bst00m xn--3ds443g
+xn--3e0b707e xn--45brj9c xn--4gbrim xn--55qw42g xn--55qx5d xn--6frz82g xn--6qq986b3xl xn--80adxhks xn--80ao21a
+xn--80asehdb xn--80aswg xn--90a3ac xn--c1avg xn--cg4bki xn--clchc0ea0b2g2a9gcd xn--czr694b xn--czru2d xn--d1acj3b
+xn--fiq228c5hs xn--fiq64b xn--fiqs8s xn--fiqz9s xn--fpcrj9c3d xn--fzc2c9e2c xn--gecrj9c xn--h2brj9c xn--i1b6b1a6a2e
+xn--io0a7i xn--j1amh xn--j6w193g xn--kprw13d xn--kpry57d xn--l1acc xn--lgbbat1ad8j xn--mgb9awbf xn--mgba3a4f16a
+xn--mgbaam7a8h xn--mgbab2bd xn--mgbayh7gpa xn--mgbbh1a71e xn--mgbc0a9azcg xn--mgberp4a5d4ar xn--mgbx4cd0ab xn--ngbc5azd
+xn--nqv7f xn--nqv7fs00ema xn--o3cw4h xn--ogbpf8fl xn--p1ai xn--pgbs0dh xn--q9jyb4c xn--rhqv96g xn--s9brj9c xn--ses554g
+xn--unup4y xn--wgbh1c xn--wgbl6a xn--xkc2al3hye2a xn--xkc2dl3a5ee0h xn--yfro4i67o xn--ygbi2ammx xn--zfr164b xxx xyz
+yachts ye yokohama yt za zm zone zw
   /) {
   $VALID_TLDS{$_} = 1;
 }
 
+# $VALID_TLDS_RE
 # %VALID_TLDS as Regexp::List optimized regexp, for use in Plugins etc
-# Paste above list to:
-#  perl -MRegexp::List -e '$/=undef; $_=<>; $r = Regexp::List->new; push @l, $_ for (split); print $r->list2re(@l)'
+# bash line to generate regex from TLD list
+# Fetches domains, drops the top commet line, builds a regex from the list of domains, then formats it to remove (?-xsim:) regex modifier flags
+#   wget http://data.iana.org/TLD/tlds-alpha-by-domain.txt -O - | tail -n+2 | perl -MRegexp::List -e '$/=undef; $_=<>; $r = Regexp::List->new; push @l, $_ for (split); print $r->list2re(@l)' | perl -pe 's/^\(\?[^:]*:(.*)\)$/$1/' && echo
 # Verified up to date 20120401
 $VALID_TLDS_RE = qr/
-  (?=[abcdefghijklmnopqrstuvwxyz])
-  (?:a(?:e(?:ro)?|r(?:pa)?|s(?:ia)?|[cdfgilmnoqtuwxz])|b(?:iz?|[abdefghjmnorstwyz])
-  |c(?:at?|o(?:m|op)?|(?:l(?:ub)?)|[cdfghikmnruvwxyz])|d[ejkmoz]|e(?:[cegrst]|d?u)|f[ijkmor]
-  |g(?:[adefghilmnpqrstuwy]|ov)|h[kmnrtu]|i(?:n(?:fo|t)?|[delmoqrst])|j(?:o(?:bs)?|[emp])
-  |k[eghimnprwyz]|l[abcikrstuvy]|m(?:o(?:bi)?|u(?:seum)?|[acdeghkmnpqrstvwxyz]|i?l)
-  |n(?:a(?:me)?|et?|[cfgilopruz])|o(?:m|rg)|p(?:ro?|[aefghklmnstwy])|r[eosuw]
-  |s[abcdeghiklmnortuvxyz]|t(?:r(?:avel)?|[cdfghjkmnoptvwz]|e?l)|u[agksyz]
-  |v[aceginu]|w[fs]|y[et]|z[amw]|qa|xxx
-  )/ix;
+(?:X(?:N--(?:MGB(?:A(?:(?:3A4F16|YH7GP)A|AM7A8H|B2BD)|ERP4A5D4AR|C0A9AZCG|BH1A71E|X4CD0AB|9AWBF)|F(?:IQ(?:(?:228C5H|
+S8|Z9)S|64B)|PCRJ9C3D|ZC2C9E2C)|C(?:LCHC0EA0B2G2A9GCD|ZR(?:694B|U2D)|G4BKI|1AVG)|(?:(?:GEC|H2B)RJ9|Q9JYB4|90A3A)C|
+80A(?:S(?:EHDB|WG)|DXHKS|O21A)|N(?:QV7F(?:S00EMA)?|GBC5AZD)|3(?:E0B707E|BST00M|DS443G)|XKC2(?:DL3A5EE0H|AL3HYE2A)|
+Y(?:FRO4I67O|GBI2AMMX)|6(?:QQ986B3XL|FRZ82G)|I(?:1B6B1A6A2E|O0A7I)|L(?:GBBAT1AD8J|1ACC)|(?:D1ACJ3|ZFR164)B|O(?:GBPF8FL|
+3CW4H)|S(?:9BRJ9C|ES554G)|4(?:5BRJ9C|GBRIM)|J(?:6W193G|1AMH)|55Q(?:W42G|X5D)|KPR(?:W13|Y57)D|P(?:GBS0DH|1AI)|WGB(?:H1C|
+L6A)|RHQV96G|UNUP4Y)|XX|YZ)|C(?:[CDFGKMNUVWXYZ]|O(?:N(?:S(?:TRUCTION|ULTING)|(?:TRACTOR|DO)S)|M(?:P(?:UTER|ANY)|MUNITY)?|
+(?:L(?:LEG|OGN)|FFE)E|O(?:[LP]|KING)|UNTRY|DES)?|A(?:R(?:E(?:ERS?)?|DS)|T(?:ERING)?|M(?:ERA|P)|PITAL|SH|B)?|L(?:(?:EAN|
+OTH)ING|AIMS|INIC|UB)?|R(?:EDIT(?:CARD)?|UISES)?|H(?:RISTMAS|URCH|EAP)?|E(?:NTER|O)|I(?:TIC)?)|S(?:[BDGJKLMNRTVXZ]|
+O(?:L(?:UTIONS|AR)|FTWARE|CIAL|HU|Y)?|U(?:PP(?:L(?:IES|Y)|ORT)|RGERY)?|E(?:RVICES|XY)?|H(?:IKSHA|OES)?|C(?:HULE|OT)?|
+A(?:ARLAND)?|I(?:NGLES)?|Y(?:STEMS)?|PACE)|M(?:[CDGHKLMNPQRSTVWXYZ]|O(?:(?:RTGAG)?E|TORCYCLES|NASH|SCOW|BI|DA)?|
+A(?:N(?:AGEMENT|GO)|RKET(?:ING)?|ISON)?|E(?:DIA|ET|NU)?|I(?:AMI|L)|U(?:SEUM)?)|P(?:[EFGKMNSWY]|R(?:O(?:(?:DUCTION|
+PERTIE)S)?|ESS)?|A(?:R(?:T(?:NER)?|I)S)?|H(?:OTO(?:GRAPHY|S)?)?|I(?:C(?:TURE)?S|NK)|L(?:UMBING)?|(?:OS)?T|UB)|
+A(?:[DFLMNOQWZ]|C(?:COUNTANTS|ADEMY|TOR)?|S(?:SOCIATES|IA)?|R(?:CHI|MY|PA)?|U(?:DIO|TOS)?|I(?:RFORCE)?|T(?:TORNEY)?|
+G(?:ENCY)?|E(?:RO)?|XA?)|F(?:[JM]|I(?:NANC(?:IAL|E)|SH(?:ING)?|TNESS)?|U(?:RNITURE|TBOL|ND)|L(?:IGHTS|ORIST)|O(?:UNDATION|
+O)?|(?:EEDBAC)?K|R(?:OGANS)?|A(?:IL|RM))|B(?:[BDFGHJMNRSTVWYZ]|A(?:R(?:GAINS)?|YERN)?|L(?:ACK(?:FRIDAY)?|UE)|
+U(?:ILD(?:ERS)?|ZZ)|E(?:RLIN|ER|ST)?|I(?:[DOZ]|KE)?|O(?:UTIQUE)?)|G(?:[BDEFGHNPQSTWY]|R(?:A(?:PHIC|TI)S|IPE)?|U(?:I(?:TARS|
+DE)|RU)?|L(?:OB(?:AL|O)|ASS)?|A(?:L(?:LERY)?)?|I(?:VES|FT)?|O[PV]|MO?)|E(?:[CEGR]|N(?:GINEER(?:ING)?|TERPRISES)|
+X(?:P(?:OSED|ERT)|CHANGE)|(?:QUIPMEN)?T|DU(?:CATION)?|S(?:TATE)?|VENTS|MAIL|US?)|T(?:[CDFGHJKLMNPTVWZ]|O(?:(?:OL|Y)S|
+DAY|KYO|WN)?|R(?:A(?:INING|VEL|DE))?|I(?:ENDA|ROL|PS)|E(?:CHNOLOGY|L)|A(?:TTOO|X))|R(?:[SW]|E(?:P(?:UBLICAN|AIR|ORT)|
+(?:CIPE|VIEW)S|N(?:TALS)?|ISEN?|HAB|ST|D)?|O(?:CKS|DEO)?|I(?:CH|O)|U(?:HR)?|YUKYU)|V(?:[CGNU]|E(?:(?:NTURE|GA)S|
+RSICHERUNG|T)?|O(?:T(?:[EO]|ING)|YAGE|DKA)|I(?:(?:AJE|LLA)S|SION)?|A(?:CATIONS)?)|D(?:[JKMZ]|E(?:NT(?:IST|AL)|MOCRAT|
+GREE|SI)?|I(?:RECTORY|AMONDS|SCOUNT|GITAL)|A(?:TING|NCE)|O(?:MAINS)?|NP)|L(?:[BCKRSTVY]|I(?:M(?:ITED|O)|GHTING|FE|NK)?|
+U(?:X(?:URY|E))?|A(?:WYER|ND)?|O(?:NDON|ANS)|EASE)|I(?:[DELOQRST]|N(?:(?:VESTMENT|DUSTRIE)S|T(?:ERNATIONAL)?|S(?:TITUT|
+UR)E|FO|K)?|M(?:MOBILIEN)?)|H(?:[KMNRTU]|O(?:L(?:DINGS|IDAY)|[RU]SE|MES|ST)|A(?:MBURG|US)|I(?:PHOP|V))|W(?:E(?:B(?:SITE|
+CAM)|D)|A(?:TCH|NG)|I(?:EN|KI)|(?:ORK)?S|T[CF]|F)|N(?:[FGLOPRUZ]|A(?:GOYA|ME|VY)?|E(?:USTAR|T)?|I(?:NJA)?|Y?C|HK)|
+K(?:[EGHMPWYZ]|I(?:TCHEN|WI|M)?|(?:AUFE|OEL)?N|R(?:ED)?)|J(?:[MP]|E(?:TZT)?|O(?:BS)?|UEGOS)|U(?:[AGKSYZ]|N(?:IVERSITY|
+O))|O(?:RG(?:ANIC)?|KINAWA|NL|M)|Y(?:[ET]|OKOHAMA|ACHTS)|Q(?:UEBEC|PON|A)|Z(?:[AMW]|ONE))
+/ix;
 
 # Two-Level TLDs
 #
