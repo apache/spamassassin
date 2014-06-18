@@ -8,16 +8,16 @@ ifplugin Mail::SpamAssassin::Plugin::ReplaceTags
   replace_tag  CURRENCY   [\(\[]?(?:\bU[Ss][D\$]{0,2}|\$(?:US)?|usd|GBP|=[Aa][34]|\xa3|&\#16[34];|(?i:pounds\ssterling)|\xa4|EUR(?:OS)?|(?:d')?[Ee]uro?s?|(?i:eur)\sde|CHF|FCFA|d[\xf3]lares\sde\slos\sE+\.\s?U+\.)[\]\)]?
   replace_tag  GB_UK      \b(?:U\.?K\.?|(?:Great\s)?Brit(?:ain|ish)|G\.?B\.?)\b
 
-  body     __LOTSA_MONEY_00   /<CURRENCY>[\s\.]?\d[\dOo][,\.][\dOo]{3}(?:(?!\d)|\b)/
-  body     __LOTSA_MONEY_01   /(?:(?i:sum\sof\s)[\(\[]?|<CURRENCY>\s?)[\s\.]?\d[\d.,\sOo]{5,20}[\dOo](?<!\.00)/
-  body     __LOTSA_MONEY_02   /\d[\d.,\sOo]{5,20}[\dOo][\)\]\(]?\s?(?:<CURRENCY>|Pounds|(?i:dollars?|bucks))\b/
-  body     __LOTSA_MONEY_03   /(?:(?i:sum\sof\s)[\(\[]?|<CURRENCY>\s?)\d[\d.,\sOo]{0,5}[\)\]]?\s?(?i:M(?i:il)?\b|mil+(?i:io|<O>)n|hund?[re]+a?[dt]|thousand|tausend|milh[\xf5]es)/
-  body     __LOTSA_MONEY_04   /(?:\d[\d\.,]{0,4}(?:M|\smilli?one?s|\s?mln)|million(?!s)|mill<O>n|hund?rea?d(?!s)[^\.]{1,25}thousand(?!s)|cents?[^\.]{1,25}mille|hundert[^\.]{1,30}tausend|ientos?[^\.]{1,20}mil|cent[a-z\s]{1,20}mil\s[a-z]{1,20}centos)[^\.\$]{0,50}?(?:(?:U\.?\s?S\.?\s?(?:A\.?\s?)?|united\s?states\s|E\.\s?U\.\s|canad(?:ian|a)\s|(?:ia\s)?de\s)?d(?:[o\xf3]|[\xc3][\xb3])l+are?s?|bucks|USD|GBP|<GB_UK>\spounds?|(?:<GB_UK>\s)?pounds?\ssterling|pounds(?!\sof)|(?:d'\s?)?euros?|francs?)\b/i
-  body     __LOTSA_MONEY_05   /(?:(?:sum|value|amount)\sof\s)\d[\d.,\sO]{7,20}[\dO\.][\)\]\(\s]{0,3}(?:pounds?|dollars?|euros?|bucks)\b/i
+  body     __LOTSA_MONEY_00   /<CURRENCY>[\s\.]?[1-9][\dOo][,\.][\dOo]{3}(?:(?!\d)|\b)/
+  body     __LOTSA_MONEY_01   /(?:(?i:sum\sof\s)[\(\[]?|<CURRENCY>\s?)[\s\.]?[1-9][\d.,\sOo]{5,20}[\dOo](?<!\.00)/
+  body     __LOTSA_MONEY_02   /(?<!\d)[1-9][\d.,\sOo]{5,20}[\dOo][\)\]\(]?\s?(?:<CURRENCY>|Pounds|(?i:dollars?|bucks))\b/
+  body     __LOTSA_MONEY_03   /(?:(?i:sum\sof\s)[\(\[]?|<CURRENCY>\s?)[1-9][\d.,\sOo]{0,5}[\)\]]?\s?(?i:M(?i:il)?\b|mil+(?i:io|<O>)n|hund?[re]+a?[dt]|thousand|tausend|milh[\xf5]es)/
+  body     __LOTSA_MONEY_04   /(?:(?<!\d)[1-9][\d\.,]{0,4}(?:M|\smilli?one?s|\s?mln)|million(?!s)|mill<O>n|hund?rea?d(?!s)[^\.]{1,25}thousand(?!s)|cents?[^\.]{1,25}mille|hundert[^\.]{1,30}tausend|ientos?[^\.]{1,20}mil|cent[a-z\s]{1,20}mil\s[a-z]{1,20}centos)[^\.\$]{0,50}?(?:(?:U\.?\s?S\.?\s?(?:A\.?\s?)?|united\s?states\s|E\.\s?U\.\s|canad(?:ian|a)\s|(?:ia\s)?de\s)?d(?:[o\xf3]|[\xc3][\xb3])l+are?s?|bucks|USD|GBP|<GB_UK>\spounds?|(?:<GB_UK>\s)?pounds?\ssterling|pounds(?!\sof)|(?:d'\s?)?euros?|francs?)\b/i
+  body     __LOTSA_MONEY_05   /(?:(?:sum|value|amount)\sof\s)[1-9][\d.,\sO]{7,20}[\dO\.][\)\]\(\s]{0,3}(?:pounds?|dollars?|euros?|bucks)\b/i
   replace_rules   __LOTSA_MONEY_00 __LOTSA_MONEY_01 __LOTSA_MONEY_02 __LOTSA_MONEY_03 __LOTSA_MONEY_04
 
   # not a meta so it will show up in the report
-  meta     LOTS_OF_MONEY    (__LOTSA_MONEY_00 || __LOTSA_MONEY_01 || __LOTSA_MONEY_02 || __LOTSA_MONEY_03 || __LOTSA_MONEY_04 || __LOTSA_MONEY_05)
+  meta     LOTS_OF_MONEY    (__LOTSA_MONEY_00 || __LOTSA_MONEY_01 || __LOTSA_MONEY_02 || __LOTSA_MONEY_03 || __LOTSA_MONEY_04 || __LOTSA_MONEY_05) && !__TRAVEL_ITINERARY
   describe LOTS_OF_MONEY    Huge... sums of money
   score    LOTS_OF_MONEY    0.01
   tflags   LOTS_OF_MONEY    publish
@@ -84,16 +84,18 @@ ifplugin Mail::SpamAssassin::Plugin::MIMEHeader
 endif
 
 body     __TO_YOUR_ORG       /\b(?:to|for) your organi[sz]ation\b/i
+body     __TRAVEL_ITINERARY  /(?:travel|ticketed|your|current) itinerary/i
+body     __AUTO_ACCIDENT     /auto(?:mobile)? accident/i
 
 body     __LOTTO_AGENT_01 /\b(?:(?:(?:the|y?our)(?:\s\w{1,20})?|contact|accredited|listed)\sclaim(?:s|ing)?(?:\sprocessing)?|fiducia\w+|reimbursement|(?:prize|international|intl|foreign|win+ing)(?:[\s,.]+(?:rem+it+ance|settlement|payment|payout|award|transfer))+|payment|payout|immunity|(?<!memory\s)grants?)\s?(?:agent|manager|officer|secretary|director|mgr\b)/i
 body     __LOTTO_AGENT_02 /\blot+ery[^\.]{1,40} ticket agent/i
 meta     __LOTTO_AGENT    __LOTTO_AGENT_01 || __LOTTO_AGENT_02
-meta     LOTTO_AGENT      __LOTTO_AGENT && !__HAS_IN_REPLY_TO && !__THREADED && !__TO_YOUR_ORG && !__DKIM_EXISTS 
+meta     LOTTO_AGENT      __LOTTO_AGENT && !__HAS_IN_REPLY_TO && !__THREADED && !__TO_YOUR_ORG && !__DKIM_EXISTS && !__TRAVEL_ITINERARY && !__AUTO_ACCIDENT
 describe LOTTO_AGENT      Claims Agent
-score    LOTTO_AGENT      3.00		# limit
+score    LOTTO_AGENT      2.50		# limit
 
 body     __LOTTO_DEPT       /\b(?:claim(?:s|ing)?(?:\sprocessing)?|fiducia\w+|reimbursement|(?:international|foreign|win+ing)(?:\s(?:rem+it+ance|settlement|payment|award))+|payment|award|compensation|lot+ery)(?:\s\w+)?\s?(?:department|dept|unit|group|committee|bureau)/i
-meta     LOTTO_DEPT       __LOTTO_DEPT && !__COMMENT_EXISTS && !__HAS_IN_REPLY_TO && !__THREADED && !__VIA_ML && !__TO_YOUR_ORG
+meta     LOTTO_DEPT       __LOTTO_DEPT && !__COMMENT_EXISTS && !__HAS_IN_REPLY_TO && !__THREADED && !__VIA_ML && !__TO_YOUR_ORG && !__TRAVEL_ITINERARY && !__AUTO_ACCIDENT
 describe LOTTO_DEPT       Claims Department
 score    LOTTO_DEPT       2.00		# limit
 

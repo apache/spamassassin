@@ -43,9 +43,10 @@ describe  ADVANCE_FEE_5_NEW  Appears to be advance fee fraud (Nigerian 419)
 
 # if large sums of money are involved...
 
-meta      __ADVANCE_FEE_2_NEW_MONEY  LOTS_OF_MONEY && __ADVANCE_FEE_2_NEW
+meta      __ADVANCE_FEE_2_NEW_MONEY  !__FILL_THIS_FORM && LOTS_OF_MONEY && __ADVANCE_FEE_2_NEW
 meta      ADVANCE_FEE_2_NEW_MONEY    __ADVANCE_FEE_2_NEW_MONEY && !__DOS_HAS_LIST_UNSUB && !__TAG_EXISTS_CENTER && !__LYRIS_EZLM_REMAILER && !__COMMENT_EXISTS && !__UNSUB_LINK && !__VIA_ML && !__HTML_LINK_IMAGE && !__HDRS_LCASE && !__NAME_EQ_EMAIL && !__URI_MAILTO_MANY && !__RP_MATCHES_RCVD && !__THREADED && !__HAS_SENDER && !__HAS_X_LOOP
 describe  ADVANCE_FEE_2_NEW_MONEY    Advance Fee fraud and lots of money
+score     ADVANCE_FEE_2_NEW_MONEY    2.000  # limit
 
 meta      __ADVANCE_FEE_3_NEW_MONEY  LOTS_OF_MONEY && __ADVANCE_FEE_3_NEW
 meta      ADVANCE_FEE_3_NEW_MONEY    __ADVANCE_FEE_3_NEW_MONEY && !__HTML_LINK_IMAGE && !__UPPERCASE_URI && !__UNSUB_LINK && !__VIA_ML && !__THREADED && !__HAS_SENDER && !__HAS_X_LOOP
@@ -61,9 +62,10 @@ describe  ADVANCE_FEE_5_NEW_MONEY    Advance Fee fraud and lots of money
 
 # if you fill in a form...
 
-meta      __ADVANCE_FEE_2_NEW_FORM  __FILL_THIS_FORM && __ADVANCE_FEE_2_NEW
+meta      __ADVANCE_FEE_2_NEW_FORM  __FILL_THIS_FORM && !LOTS_OF_MONEY && __ADVANCE_FEE_2_NEW
 meta      ADVANCE_FEE_2_NEW_FORM    __ADVANCE_FEE_2_NEW_FORM && !__COMMENT_EXISTS && !__THREADED && !__HTML_LINK_IMAGE && !__HDRS_LCASE && !__DOS_HAS_LIST_UNSUB && !__HAS_SENDER && !__HAS_X_LOOP
 describe  ADVANCE_FEE_2_NEW_FORM    Advance Fee fraud and a form
+score     ADVANCE_FEE_2_NEW_FORM    2.000  # limit
 
 meta      __ADVANCE_FEE_3_NEW_FORM  __FILL_THIS_FORM && __ADVANCE_FEE_3_NEW
 meta      ADVANCE_FEE_3_NEW_FORM    __ADVANCE_FEE_3_NEW_FORM && !__HTML_LINK_IMAGE && !__THREADED && !__HAS_SENDER && !__HAS_X_LOOP
@@ -82,6 +84,7 @@ describe  ADVANCE_FEE_5_NEW_FORM    Advance Fee fraud and a form
 meta      __ADVANCE_FEE_2_NEW_FRM_MNY  __FILL_THIS_FORM && LOTS_OF_MONEY && __ADVANCE_FEE_2_NEW
 meta      ADVANCE_FEE_2_NEW_FRM_MNY    __ADVANCE_FEE_2_NEW_FRM_MNY && !__HTML_LINK_IMAGE && !__HDRS_LCASE && !__DOS_HAS_LIST_UNSUB && !__THREADED && !__HAS_SENDER && !__HAS_X_LOOP
 describe  ADVANCE_FEE_2_NEW_FRM_MNY    Advance Fee fraud form and lots of money
+score     ADVANCE_FEE_2_NEW_FRM_MNY    2.500
 
 meta      __ADVANCE_FEE_3_NEW_FRM_MNY  __FILL_THIS_FORM && LOTS_OF_MONEY && __ADVANCE_FEE_3_NEW
 meta      ADVANCE_FEE_3_NEW_FRM_MNY    __ADVANCE_FEE_3_NEW_FRM_MNY && !__HTML_LINK_IMAGE && !__THREADED && !__HAS_SENDER && !__HAS_X_LOOP
