@@ -1495,6 +1495,10 @@ tflags      AD_PREFS          publish
 body        OPT_OUT           /\bOpt-Out Here\b/i
 score       OPT_OUT           2.000
 
+uri         URI_OPTOUT_USME   m,^https?://(?:quit|bye|remove|exit|leave)\.[^/]+\.(?:us|me)\b,i
+describe    URI_OPTOUT_USME   Opt-out URI
+
+
 
 ## REFINE THIS
 #body        __INCOMING_FAX    /\bincoming fax\b/i
