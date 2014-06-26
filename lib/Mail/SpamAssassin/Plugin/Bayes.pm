@@ -323,7 +323,7 @@ sub learner_close {
   my ($self, $params) = @_;
   my $quiet = $params->{quiet};
 
-  # do a sanity check here.  Wierd things happen if we remain tied
+  # do a sanity check here.  Weird things happen if we remain tied
   # after compiling; for example, spamd will never see that the
   # number of messages has reached the bayes-scanning threshold.
   if ($self->{store}->db_readable()) {
@@ -1578,6 +1578,7 @@ sub learner_new {
   $module = 'Mail::SpamAssassin::BayesStore::DBM'  if !$module;
 
   dbg("bayes: learner_new self=%s, bayes_store_module=%s", $self,$module);
+  undef $self->{store};  # DESTROYs previous object, if any
   eval '
     require '.$module.';
     $store = '.$module.'->new($self);
