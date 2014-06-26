@@ -1439,8 +1439,10 @@ meta        __45_ALNUM_URI_O    __45_ALNUM_URI && !__64_ANY_URI && !__128_ALNUM_
 meta        __45_ALNUM_IMG_O    __45_ALNUM_IMG && !__64_ANY_IMG && !__128_ALNUM_IMG && !__128_LC_IMG
 meta        __45_ALNUM_URI_IMG  __45_ALNUM_URI_O && __45_ALNUM_IMG_O
 
-meta        LONG_IMG_URI        __45_ALNUM_IMG && !ALL_TRUSTED
+meta        LONG_IMG_URI        __45_ALNUM_IMG && !ALL_TRUSTED && !__HAS_ERRORS_TO 
 describe    LONG_IMG_URI        Image URI with very long path component - web bug?
+score       LONG_IMG_URI        3.000	# limit
+tflags      LONG_IMG_URI        publish
 
 
 rawbody     __HTML_OFF_PAGE   /;(?:top|left):-\d{3,9}px;/i
@@ -1477,14 +1479,16 @@ body        DR_OZ_OBFU        /\bD(?:r\.|oc(?:tor)?) ?0z\b/i
 describe    DR_OZ_OBFU        Obfuscated "Dr. Oz"
 
 
-body        ADMAIL            /(?:\b|_)ad-?(?:mail|message)s?(?:\b|_)/i
+body        __ADMAIL          /(?:\b|_)ad-?(?:mail|message)s?(?:\b|_)/i
+meta        ADMAIL            __ADMAIL && !__DKIM_EXISTS && !__COMMENT_EXISTS 
 describe    ADMAIL            "admail" and variants
 tflags      ADMAIL            publish
 
 body        ORS               /\bOn-?line Rate Saver\b/i
 describe    ORS               "Online Rate Saver"
 
-body        THIS_AD           /(?:\b|_)this[- _]+(?:ad(?:vert[i1l]sement)?|promo(?:tion)?)(?:\b|_)/i
+body        __THIS_AD         /(?:\b|_)this[- _]+(?:ad(?:vert[i1l]sement)?|promo(?:tion)?)(?:\b|_)/i
+meta        THIS_AD           __THIS_AD && !__HTML_LINK_IMAGE && !__DKIM_EXISTS 
 describe    THIS_AD           "This ad" and variants
 tflags      THIS_AD           publish
 
@@ -1497,6 +1501,7 @@ score       OPT_OUT           2.000
 
 uri         URI_OPTOUT_USME   m,^https?://(?:quit|bye|remove|exit|leave)\.[^/]+\.(?:us|me)\b,i
 describe    URI_OPTOUT_USME   Opt-out URI
+tflags      URI_OPTOUT_USME   publish
 
 
 
