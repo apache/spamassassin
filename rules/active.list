@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus dwarren jarif kpg-core mas-cps mas-mas zmi; day 2: llanga; day 3: axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bpoliakoff darxus dwarren grenier jarif kpg-core mas-cps mas-mas
+# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus dwarren jarif kpg-core mas-cps mas-mas zmi; day 2: axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus dwarren jarif kpg-core llanga mas-cps mas-mas zmi; day 3: llanga
 
 # tflags publish
 AC_BR_BONANZA
@@ -36,6 +36,9 @@ AC_SPAMMY_URI_PATTERNS8
 
 # tflags publish
 AC_SPAMMY_URI_PATTERNS9
+
+# tflags publish
+ADMAIL
 
 # tflags publish
 ADVANCE_FEE_2_NEW_FORM
@@ -81,6 +84,9 @@ ADVANCE_FEE_5_NEW_FRM_MNY
 
 # good enough
 ADVANCE_FEE_5_NEW_MONEY
+
+# tflags publish
+AD_PREFS
 
 # tflags userconf
 ALL_TRUSTED
@@ -193,6 +199,9 @@ DOS_OE_TO_MX
 # good enough
 DOS_OE_TO_MX_IMAGE
 
+# good enough
+DOS_OUTLOOK_TO_MX
+
 # tflags publish
 DX_TEXT_02
 
@@ -252,9 +261,6 @@ FROM_IN_TO_AND_SUBJ
 
 # tflags userconf
 FROM_LOCAL_NOVOWEL
-
-# good enough
-FROM_MISSPACED
 
 # good enough
 FROM_MISSP_FREEMAIL
@@ -319,6 +325,9 @@ HEADER_FROM_DIFFERENT_DOMAINS
 # tflags userconf
 HEAD_LONG
 
+# good enough
+HELO_LOCALHOST
+
 # tflags publish
 HEXHASH_WORD
 
@@ -326,7 +335,7 @@ HEXHASH_WORD
 HK_NAME_DRUGS
 
 # good enough
-HK_NAME_MR_MRS
+HK_RANDOM_REPLYTO
 
 # good enough
 HK_SCAM_N2
@@ -646,6 +655,9 @@ SUBJECT_IN_BLACKLIST
 # tflags userconf
 SUBJECT_IN_WHITELIST
 
+# tflags publish
+THIS_AD
+
 # tflags net
 TO_EQ_FM_DOM_SPF_FAIL
 
@@ -655,17 +667,38 @@ TO_EQ_FM_SPF_FAIL
 # good enough
 TO_NO_BRKTS_MSFT
 
-# tflags publish
-ADMAIL
-
-# tflags publish
-AD_PREFS
+# good enough
+FSL_HELO_BARE_IP_2
 
 # good enough
-HK_RANDOM_REPLYTO
+FSL_HELO_FIREWALL
 
-# tflags publish
-THIS_AD
+# good enough
+HK_RANDOM_FROM
+
+# good enough
+HK_SCAM_S23
+
+# good enough
+LONG_IMG_URI
+
+# good enough
+OBFU_HTML_ATTACH
+
+# good enough
+RISK_FREE
+
+# good enough
+TO_NO_BRKTS_HTML_ONLY
+
+# good enough
+TO_NO_BRKTS_NORDNS_HTML
+
+# good enough
+TO_NO_BRKTS_PCNT
+
+# good enough
+TVD_FROM_1
 
 # tflags publish
 UC_GIBBERISH_OBFU
