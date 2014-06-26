@@ -161,7 +161,7 @@ sub new {
   my $bconf = $self->{bayes}->{conf};
 
   foreach (split(';', $bconf->{bayes_sql_dsn})) {
-    my ($a, $b) = split('=');
+    my ($a, $b) = split(/=/, $_, 2);
     if (!defined $b) {
       warn("bayes: invalid bayes_sql_dsn config\n");
       return;
