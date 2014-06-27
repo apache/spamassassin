@@ -126,7 +126,7 @@ foo.Cahl1goo.php	!Cahl1goo
 www5.mi1coozu.php	!mi1coozu
 www.mezeel0P.php	!mezeel0P
 bar.neih6fee.com.php	!neih6fee
-www.zai6Vuwi.com.blah	!zai6Vuwi
+www.zai6Vuwi.com.invalid	!zai6Vuwi
 
 =www.deiJ1pha.com	www.deiJ1pha.com
 @www.Te0xohxu.com	www.Te0xohxu.com
@@ -195,12 +195,12 @@ WWW.jong3Xou.cn		WWW.jong3Xou.cn
 WWW.waeShoe0.tw		WWW.waeShoe0.tw
 
 invalid_ltd.notword	!invalid_tld
-invalid_ltd.blah	!invalid_tld
+invalid_ltd.invalid	!invalid_tld
 invalid_ltd.xyzzy	!invalid_tld
 invalid_ltd.co.zz	!invalid_tld
 
 www.invalid_ltd.notword	!invalid_tld
-www.invalid_ltd.blah	!invalid_tld
+www.invalid_ltd.invalid	!invalid_tld
 www.invalid_ltd.xyzzy	!invalid_tld
 www.invalid_ltd.co.zz	!invalid_tld
 
@@ -289,7 +289,7 @@ donotignorethiswww.delimtest14.com	donotignorethiswww.delimtest14.com
 # the inactive TLDs have negative checks
 
 # first confirm that it will not match on not a TLD
-example.blah	!^http://example.blah$
+example.invalid	!^http://example.invalid$
 example.zzf	!^http://example.zzf$
 
 example.ac	^http://example.ac$
