@@ -290,7 +290,8 @@ header         MDN_BOTCHED           Disposition-notification-to =~ /<>/
 describe       MDN_BOTCHED           Malformed return receipt header
 
 # observed in spam 9/2009
-header         HDRS_MISSP            ALL =~ /\n(?:Subject|From|To):\S/ism
+header         __HDRS_MISSP          ALL =~ /\n(?:Subject|From|To):\S/ism
+meta           HDRS_MISSP            __HDRS_MISSP && !__TAG_EXISTS_HEAD && !__DKIM_EXISTS && !__RP_MATCHES_RCVD && !__NOT_SPOOFED 
 describe       HDRS_MISSP            Misspaced headers
 #score          HDRS_MISSP            2.0
 
@@ -576,9 +577,10 @@ rawbody        __STYLE_GIBBERISH_1      /<style[^>]{0,30}>(?:\s{0,80}(?!<\/style
 rawbody        __STYLE_GIBBERISH_2      /\.style\w{0,20}\s{1,10}\{[^:;]{200}/im
 rawbody        __STYLE_GIBBERISH_3      /<style[^>]{0,30}>\s{0,30}(?:[\w:]{1,30}\s{0,10}\{[^}]{1,50}\}\s{0,80}){1,5}(?:[\w,.']{1,30}\s{1,10}){40}/im
 meta           __STYLE_GIBBERISH        (__STYLE_GIBBERISH_1 || __STYLE_GIBBERISH_2 || __STYLE_GIBBERISH_3)
-meta           STYLE_GIBBERISH          __STYLE_GIBBERISH && (__BODY_XHTML || !__STYLE_TAG_IN_BODY) && !__RCD_RDNS_MX_MESSY && !__HAS_THREAD_INDEX && !__ANY_OUTLOOK_MUA
+meta           STYLE_GIBBERISH          __STYLE_GIBBERISH && (__BODY_XHTML || !__STYLE_TAG_IN_BODY) && !__RCD_RDNS_MX_MESSY && !__HAS_THREAD_INDEX && !__ANY_OUTLOOK_MUA && !__MIME_QP 
 describe       STYLE_GIBBERISH          Nonsense in HTML <STYLE> tag
 score          STYLE_GIBBERISH          4.00	# limit
+tflags         STYLE_GIBBERISH          publish
 
 body           __SCRIPT_TAG_IN_BODY     /<script>/i
 rawbody        __SCRIPT_GIBBERISH       /<script>[^;<]{100}/im
@@ -588,7 +590,8 @@ describe       SCRIPT_GIBBERISH         Nonsense in HTML <SCRIPT> tag
 rawbody        __COMMENT_GIBBERISH      /<!--(?:\s{1,10}[-\w'"]{1,40}){100}/im
 meta           COMMENT_GIBBERISH        __COMMENT_GIBBERISH && !__JM_REACTOR_DATE && !__RCD_RDNS_MTA_MESSY && !__SENDER_BOT
 describe       COMMENT_GIBBERISH        Nonsense in long HTML comment
-score          COMMENT_GIBBERISH        1.00	# limit
+score          COMMENT_GIBBERISH        1.50	# limit
+tflags         COMMENT_GIBBERISH        publish
 
 #rawbody        MANY_DIV_5                   /(?:<div[^>]{0,30}>\s{0,80}){5}/im
 #tflags         MANY_DIV_5                    nopublish
@@ -1350,10 +1353,10 @@ tflags      __HEXHASHWORD_S2EU multiple maxhits=4
 #tflags      __HEXHASHWORD_S2   multiple maxhits=4
 #body        __HEXHASHWORD      /\s[A-Z]?[a-z]{1,15}\s[0-9a-f]{30}/
 #tflags      __HEXHASHWORD      multiple maxhits=4
-#meta        __HEXHASH_2        __HEXHASHWORD > 1
-#meta        __HEXHASH_3        __HEXHASHWORD > 2
-#meta        __HEXHASH_4        __HEXHASHWORD > 3
-#meta        __HEXHASH_5        __HEXHASHWORD > 4
+meta        __HEXHASH_2        __HEXHASHWORD_S2EU > 1
+meta        __HEXHASH_3        __HEXHASHWORD_S2EU > 2
+meta        __HEXHASH_4        __HEXHASHWORD_S2EU > 3
+meta        __HEXHASH_5        __HEXHASHWORD_S2EU > 4
 meta        HEXHASH_WORD       (__HEXHASHWORD_S2EU > 3) && !__ML1 && !__ML3 && !__LCL__ENV_AND_HDR_FROM_MATCH && !__HAS_X_REF && !__HAS_IN_REPLY_TO && !__FSL_TO_COMMON_ROLE && !__LYRIS_EZLM_REMAILER && !__SENDER_BOT && !ALL_TRUSTED
 describe    HEXHASH_WORD       Multiple instances of word + hexadecimal hash
 score       HEXHASH_WORD       3.000	# limit
@@ -1513,5 +1516,18 @@ tflags      URI_OPTOUT_USME   publish
 #meta        DROPBOX_MALW      (__INCOMING_FAX || (__BANK && __ACCT_STMT)) && __URI_DROPBOX && !ALL_TRUSTED 
 #describe    DROPBOX_MALW      Spoofed FAX or bank statement with Dropbox link: PROBABLE MALWARE
 #score       DROPBOX_MALW      10.00
+
+
+ifplugin Mail::SpamAssassin::Plugin::ReplaceTags
+  body          FUZZY_UNSUBSCRIBE   /<inter W2><post P2>(?!unsubscribe)<U><N><S><U><B><S><C><R><I><B><E>/i
+  replace_rules FUZZY_UNSUBSCRIBE
+  describe      FUZZY_UNSUBSCRIBE   Obfuscated "unsubscribe"
+  tflags        FUZZY_UNSUBSCRIBE   publish
+
+  body          FUZZY_ANDROID       /<inter W2><post P2>(?!android)<A><N><D><R><O><I><D>/i
+  replace_rules FUZZY_ANDROID    
+  describe      FUZZY_ANDROID       Obfuscated "android"
+  tflags        FUZZY_ANDROID       publish
+endif
 
 
