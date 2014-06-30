@@ -1356,8 +1356,8 @@ tflags      __HEXHASHWORD_S2EU multiple maxhits=4
 meta        __HEXHASH_2        __HEXHASHWORD_S2EU > 1
 meta        __HEXHASH_3        __HEXHASHWORD_S2EU > 2
 meta        __HEXHASH_4        __HEXHASHWORD_S2EU > 3
-meta        __HEXHASH_5        __HEXHASHWORD_S2EU > 4
-meta        HEXHASH_WORD       (__HEXHASHWORD_S2EU > 3) && !__ML1 && !__ML3 && !__LCL__ENV_AND_HDR_FROM_MATCH && !__HAS_X_REF && !__HAS_IN_REPLY_TO && !__FSL_TO_COMMON_ROLE && !__LYRIS_EZLM_REMAILER && !__SENDER_BOT && !ALL_TRUSTED
+#meta        __HEXHASH_5        __HEXHASHWORD_S2EU > 4
+meta        HEXHASH_WORD       (__HEXHASHWORD_S2EU > 1) && !ALL_TRUSTED && !__DKIM_EXISTS && !__BUGGED_IMG && !__RP_MATCHES_RCVD && !__LCL__ENV_AND_HDR_FROM_MATCH && !__FSL_TO_COMMON_ROLE && !__LYRIS_EZLM_REMAILER
 describe    HEXHASH_WORD       Multiple instances of word + hexadecimal hash
 score       HEXHASH_WORD       3.000	# limit
 tflags      HEXHASH_WORD       publish
@@ -1490,7 +1490,7 @@ tflags      ADMAIL            publish
 body        ORS               /\bOn-?line Rate Saver\b/i
 describe    ORS               "Online Rate Saver"
 
-body        __THIS_AD         /(?:\b|_)this[- _]+(?:ad(?:vert[i1l]sement)?|promo(?:tion)?)(?:\b|_)/i
+body        __THIS_AD         /(?:\b|_)this[- _]+(?:ad(?:vert[i1l]sement)?|promo(?:tion)?)s?(?:\b|_)/i
 meta        THIS_AD           __THIS_AD && !__HTML_LINK_IMAGE && !__DKIM_EXISTS 
 describe    THIS_AD           "This ad" and variants
 tflags      THIS_AD           publish
@@ -1519,15 +1519,35 @@ tflags      URI_OPTOUT_USME   publish
 
 
 ifplugin Mail::SpamAssassin::Plugin::ReplaceTags
-  body          FUZZY_UNSUBSCRIBE   /<inter W2><post P2>(?!unsubscribe)<U><N><S><U><B><S><C><R><I><B><E>/i
+  body          FUZZY_UNSUBSCRIBE   /<U>(?!nsubscribe)<N><S><U><B><S><C><R><I><B><E>/i
   replace_rules FUZZY_UNSUBSCRIBE
   describe      FUZZY_UNSUBSCRIBE   Obfuscated "unsubscribe"
   tflags        FUZZY_UNSUBSCRIBE   publish
 
-  body          FUZZY_ANDROID       /<inter W2><post P2>(?!android)<A><N><D><R><O><I><D>/i
+  body          FUZZY_ANDROID       /<A>(?!ndroid)<N><D><R><O><I><D>/i
   replace_rules FUZZY_ANDROID    
   describe      FUZZY_ANDROID       Obfuscated "android"
   tflags        FUZZY_ANDROID       publish
+
+  body          FUZZY_PROMOTION     /<P>(?!romotion)<R><O><M><O><T><I><O><N>/i
+  replace_rules FUZZY_PROMOTION  
+  describe      FUZZY_PROMOTION     Obfuscated "promotion"
+  tflags        FUZZY_PROMOTION     publish
+
+  body          FUZZY_PRIVACY       /<P>(?!rivacy)<R><I><V><A><C><Y>/i
+  replace_rules FUZZY_PRIVACY    
+  describe      FUZZY_PRIVACY       Obfuscated "privacy"
+  tflags        FUZZY_PRIVACY       publish
+
+  body          FUZZY_BROWSER       /<B>(?!rowser)<R><O><W><S><E><R>/i
+  replace_rules FUZZY_BROWSER    
+  describe      FUZZY_BROWSER       Obfuscated "browser"
+  tflags        FUZZY_BROWSER       publish
+
+  body          FUZZY_SAVINGS       /<S>(?!avings)<A><V><I><N><G><S>/i
+  replace_rules FUZZY_SAVINGS    
+  describe      FUZZY_SAVINGS       Obfuscated "savings"
+  tflags        FUZZY_SAVINGS       publish
 endif
 
 
