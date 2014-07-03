@@ -47,6 +47,7 @@ sub new {
   $self->register_eval_rule("check_for_mime_html_only");
   $self->register_eval_rule("check_mime_multipart_ratio");
   $self->register_eval_rule("check_msg_parse_flags");
+  $self->register_eval_rule("check_for_ascii_text_illegal");
   $self->register_eval_rule("check_for_faraway_charset");
   $self->register_eval_rule("check_for_uppercase");
   $self->register_eval_rule("check_ma_non_text");
@@ -66,6 +67,15 @@ sub are_more_high_bits_set {
   my $numlos = length($str) - $numhis;
 
   ($numlos <= $numhis && $numhis > 3);
+}
+
+sub has_check_for_ascii_text_illegal { 1 }
+
+sub check_for_ascii_text_illegal {
+  my ($self, $pms) = @_;
+
+  $self->_check_attachments($pms) unless exists $pms->{mime_ascii_text_illegal};
+  return ($pms->{mime_ascii_text_illegal} > 0);
 }
 
 sub check_for_faraway_charset {
@@ -246,6 +256,7 @@ sub _check_attachments {
   # $pms->{mime_qp_inline_no_charset} = 0;
   $pms->{mime_qp_long_line} = 0;
   $pms->{mime_qp_ratio} = 0;
+  $pms->{mime_ascii_text_illegal} = 0;
 
   # Get all parts ...
   foreach my $p ($pms->{msg}->find_parts(qr/./)) {
@@ -338,6 +349,21 @@ sub _check_attachments {
 	  }
         }
       }
+
+      # if our charset is ASCII, this should only contain 7-bit characters
+      # except NUL or a free-standing CR. anything else is a violation of
+      # the definition of charset="us-ascii".
+      if ($ctype eq 'text/plain' && (!defined $charset || $charset eq 'us-ascii')) {
+        if (m/[\x00\x0d\x80-\xff]+/) {
+          if (would_log('dbg', 'eval')) {
+            my $str = $_;
+            $str =~ s/[\x00\x0d\x80-\xff]+/'<' . unpack('H*', $&) . '>'/eg;
+            dbg("check: ascii_text_illegal: matches " . $str . "\n");
+          }
+          $pms->{mime_ascii_text_illegal}++;
+        }
+      }
+
       $previous = $_;
     }
   }
