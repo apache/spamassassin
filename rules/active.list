@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bpoliakoff darxus jarif kpg-core mas-cps mas-mas zmi; day 2: axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bpoliakoff darxus dwarren jarif kpg-core llanga mas-cps mas-mas zmi; day 3: axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus dwarren jarif kpg-core llanga mas-cps mas-mas zmi
+# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bpoliakoff darxus dwarren jarif kpg-core zmi; day 2: axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus jarif kpg-core llanga mas-cps mas-mas zmi; day 3: axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bpoliakoff darxus dwarren jarif kpg-core llanga mas-cps mas-mas zmi
 
 # tflags publish
 AC_BR_BONANZA
@@ -137,10 +137,10 @@ CHARSET_FARAWAY_HEADER
 CK_HELO_DYNAMIC_SPLIT_IP
 
 # tflags publish
-CORRUPT_FROM_LINE_IN_HDRS
+COMMENT_GIBBERISH
 
-# good enough
-DEAR_BENEFICIARY
+# tflags publish
+CORRUPT_FROM_LINE_IN_HDRS
 
 # tflags net
 DIGEST_MULTIPLE
@@ -248,9 +248,6 @@ FROM_MISSP_SPF_FAIL
 FROM_MISSP_USER
 
 # good enough
-FSL_CTYPE_WIN1251
-
-# good enough
 FSL_HELO_BARE_IP_2
 
 # good enough
@@ -261,6 +258,24 @@ FSL_HELO_FIREWALL
 
 # tflags publish
 FSL_NEW_HELO_USER
+
+# tflags publish
+FUZZY_ANDROID
+
+# tflags publish
+FUZZY_BROWSER
+
+# tflags publish
+FUZZY_PRIVACY
+
+# tflags publish
+FUZZY_PROMOTION
+
+# tflags publish
+FUZZY_SAVINGS
+
+# tflags publish
+FUZZY_UNSUBSCRIBE
 
 # tflags publish
 GOOGLE_DOCS_PHISH
@@ -295,6 +310,9 @@ HASHCASH_2SPEND
 # tflags userconf
 HASHCASH_HIGH
 
+# good enough
+HDRS_MISSP
+
 # tflags publish
 HEADER_FROM_DIFFERENT_DOMAINS
 
@@ -309,9 +327,6 @@ HK_NAME_DRUGS
 
 # good enough
 HK_RANDOM_FROM
-
-# good enough
-HK_RANDOM_REPLYTO
 
 # tflags userconf
 HTML_CHARSET_FARAWAY
@@ -329,10 +344,16 @@ LONG_IMG_URI
 LOTS_OF_MONEY
 
 # tflags publish
+LUCRATIVE
+
+# tflags publish
 MANY_SPAN_IN_TEXT
 
 # tflags userconf
 MIME_CHARSET_FARAWAY
+
+# tflags publish
+MIME_NO_TEXT
 
 # tflags userconf
 MISSING_HB_SEP
@@ -345,9 +366,6 @@ MONEY_FRAUD_5
 
 # good enough
 MONEY_FROM_41
-
-# good enough
-MONEY_FROM_MISSP
 
 # good enough
 MSOE_MID_WRONG_CASE
@@ -363,9 +381,6 @@ NO_RELAYS
 
 # good enough
 NSL_RCVD_FROM_USER
-
-# good enough
-NSL_RCVD_HELO_USER
 
 # tflags publish
 OBFU_JVSCR_ESC
@@ -589,6 +604,9 @@ RCVD_IN_SORBS_ZOMBIE
 # tflags net
 RCVD_IN_XBL
 
+# good enough
+RP_MATCHES_RCVD
+
 # tflags net
 SPF_FAIL
 
@@ -613,6 +631,9 @@ SPF_PASS
 # tflags net
 SPF_SOFTFAIL
 
+# tflags publish
+STYLE_GIBBERISH
+
 # tflags userconf
 SUBJECT_IN_BLACKLIST
 
@@ -628,13 +649,13 @@ TO_EQ_FM_DOM_SPF_FAIL
 # tflags net
 TO_EQ_FM_SPF_FAIL
 
-# good enough
+# tflags publish
 TO_NO_BRKTS_HTML_ONLY
 
 # good enough
 TO_NO_BRKTS_MSFT
 
-# good enough
+# tflags publish
 TO_NO_BRKTS_NORDNS_HTML
 
 # tflags publish
@@ -644,46 +665,13 @@ TO_NO_BRKTS_PCNT
 TVD_FROM_1
 
 # good enough
-TVD_VISIT_PHARMA
-
-# tflags publish
-COMMENT_GIBBERISH
-
-# tflags publish
-FUZZY_ANDROID
-
-# tflags publish
-FUZZY_BROWSER
-
-# tflags publish
-FUZZY_PRIVACY
-
-# tflags publish
-FUZZY_PROMOTION
-
-# tflags publish
-FUZZY_SAVINGS
-
-# tflags publish
-FUZZY_UNSUBSCRIBE
+FROM_MISSP_REPLYTO
 
 # good enough
-HDRS_MISSP
-
-# good enough
-LUCRATIVE
-
-# good enough
-MIME_NO_TEXT
-
-# good enough
-RP_MATCHES_RCVD
+MONEY_FORM_SHORT
 
 # tflags publish
-STYLE_GIBBERISH
-
-# tflags publish
-URI_OPTOUT_USME
+PP_MIME_FAKE_ASCII_TEXT
 
 # tflags publish
 UC_GIBBERISH_OBFU
@@ -765,6 +753,9 @@ URIBL_WS_SURBL
 
 # tflags userconf
 URI_NOVOWEL
+
+# tflags publish
+URI_OPTOUT_USME
 
 # tflags publish
 URI_WPADMIN
