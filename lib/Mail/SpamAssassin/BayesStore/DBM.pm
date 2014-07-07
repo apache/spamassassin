@@ -139,7 +139,7 @@ sub tie_db_readonly {
   my ($self) = @_;
 
   if (!$self->HAS_DBM_MODULE) {
-    dbg("bayes: " . $self->DBM_MODULE . " module not installed, cannot use bayes");
+    dbg("bayes: %s module not installed, cannot use bayes", $self->DBM_MODULE);
     return 0;
   }
 
@@ -166,7 +166,7 @@ sub tie_db_readonly {
   }
 
   if (!$found) {
-    dbg("bayes: no dbs present, cannot tie DB R/O: ${path}_toks");
+    dbg("bayes: no dbs present, cannot tie DB R/O: %s", $path.'_toks');
     return 0;
   }
 
@@ -201,7 +201,7 @@ sub tie_db_readonly {
   }
 
   $self->{db_version} = ($self->get_storage_variables())[6];
-  dbg("bayes: found bayes db version ".$self->{db_version});
+  dbg("bayes: found bayes db version %s", $self->{db_version});
 
   # If the DB version is one we don't understand, abort!
   if ($self->_check_db_version() != 0) {
@@ -232,7 +232,7 @@ sub tie_db_writable {
   my ($self) = @_;
 
   if (!$self->HAS_DBM_MODULE) {
-    dbg("bayes: " . $self->DBM_MODULE . " module not installed, cannot use bayes");
+    dbg("bayes: %s module not installed, cannot use bayes", $self->DBM_MODULE);
     return 0;
   }
 
@@ -306,7 +306,7 @@ sub tie_db_writable {
   # set our cache to what version DB we're using
   $self->{db_version} = ($self->get_storage_variables())[6];
   # don't bother printing this unless found since it would be bogus anyway
-  dbg("bayes: found bayes db version ".$self->{db_version}) if ($found);
+  dbg("bayes: found bayes db version %s", $self->{db_version}) if $found;
 
   # figure out if we can read the current DB and if we need to do a
   # DB version update and do it if necessary if either has a problem,
@@ -319,7 +319,7 @@ sub tie_db_writable {
   elsif (!$found) { # new DB, make sure we know that ...
     $self->{db_version} = $self->{db_toks}->{$DB_VERSION_MAGIC_TOKEN} = $self->DB_VERSION;
     $self->{db_toks}->{$NTOKENS_MAGIC_TOKEN} = 0; # no tokens in the db ...
-    dbg("bayes: new db, set db version ".$self->{db_version}." and 0 tokens");
+    dbg("bayes: new db, set db version %s and 0 tokens", $self->{db_version});
   }
 
   $self->{already_tied} = 1;
@@ -373,7 +373,7 @@ sub _upgrade_db {
   # Do conversions in order so we can go 1 -> 3, make sure to update
   #   $self->{db_version} along the way
 
-  dbg("bayes: detected bayes db format ".$self->{db_version}.", upgrading");
+  dbg("bayes: detected bayes db format %s, upgrading", $self->{db_version});
 
   # since DB_File will not shrink a database (!!), we need to *create*
   # a new one instead.
@@ -389,7 +389,7 @@ sub _upgrade_db {
   }
 
   if ($self->{db_version} < 2) {
-    dbg("bayes: upgrading database format from v".$self->{db_version}." to v2");
+    dbg("bayes: upgrading database format from v%s to v2", $self->{db_version});
     $self->set_running_expire_tok();
 
     my ($DB_NSPAM_MAGIC_TOKEN, $DB_NHAM_MAGIC_TOKEN, $DB_NTOKENS_MAGIC_TOKEN);
@@ -499,13 +499,14 @@ sub _upgrade_db {
     return 0 unless $res;
     undef $res;
 
-    dbg("bayes: upgraded database format from v".$self->{db_version}." to v2 in ".(time - $started)." seconds");
+    dbg("bayes: upgraded database format from v%s to v2 in %d seconds",
+        $self->{db_version}, time - $started);
     $self->{db_version} = 2; # need this for other functions which check
   }
 
   # Version 3 of the database converts all existing tokens to SHA1 hashes
   if ($self->{db_version} == 2) {
-    dbg("bayes: upgrading database format from v".$self->{db_version}." to v3");
+    dbg("bayes: upgrading database format from v%s to v3", $self->{db_version});
     $self->set_running_expire_tok();
 
     my $DB_NSPAM_MAGIC_TOKEN		  = "\015\001\007\011\003NSPAM";
@@ -587,7 +588,8 @@ sub _upgrade_db {
     return 0 unless $res;
     undef $res;
 
-    dbg("bayes: upgraded database format from v".$self->{db_version}." to v3 in ".(time - $started)." seconds");
+    dbg("bayes: upgraded database format from v%s to v3 in %d seconds",
+        $self->{db_version}, time - $started);
 
     $self->{db_version} = 3; # need this for other functions which check
   }
@@ -812,7 +814,7 @@ sub sync_due {
   return 0 if ($conf->{bayes_journal_max_size} == 0);
 
   my @vars = $self->get_storage_variables();
-  dbg("bayes: DB journal sync: last sync: ".$vars[7],'bayes','-1');
+  dbg("bayes: DB journal sync: last sync: %s", $vars[7]);
 
   ## Ok, should we do a sync?
 
@@ -1571,7 +1573,8 @@ sub clear_database {
     foreach my $ext ($self->DB_EXTENSIONS) {
       my $name = $path.'_'.$dbname.$ext;
       my $ret = unlink $name;
-      dbg("bayes: clear_database: " . ($ret ? 'removed' : 'tried to remove') . " $name");
+      dbg("bayes: clear_database: %s %s",
+          $ret ? 'removed' : 'tried to remove', $name);
     }
   }
 
@@ -1579,7 +1582,8 @@ sub clear_database {
   foreach my $dbname ('journal') {
     my $name = $path.'_'.$dbname;
     my $ret = unlink $name;
-    dbg("bayes: clear_database: " . ($ret ? 'removed' : 'tried to remove') . " $name");
+    dbg("bayes: clear_database: %s %s",
+        $ret ? 'removed' : 'tried to remove', $name);
   }
 
   $self->untie_db();
@@ -1758,7 +1762,8 @@ sub restore_database {
       }
 
       if ($token_warn_p) {
-	dbg("bayes: token ($token) has the following warnings:\n".join("\n",@warnings));
+	dbg("bayes: token (%s) has the following warnings:\n%s",
+            $token, join("\n",@warnings));
       }
 
       # database versions < 3 did not encode their token values
