@@ -1554,3 +1554,6 @@ endif
 body          NUM_FREE         /\d+free/i
 describe      NUM_FREE         Number + free
 
+# seen in spam (malware?) 07/2014
+header        __DATE_SPACEY    ALL =~ /\nDate:\s{8}/ism
+
