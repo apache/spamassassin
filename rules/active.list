@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bpoliakoff darxus dwarren jarif kpg-core zmi; day 2: axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus jarif kpg-core llanga mas-cps mas-mas zmi; day 3: axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bpoliakoff darxus dwarren jarif kpg-core llanga mas-cps mas-mas zmi
+# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus dwarren jarif kpg-core mas-cps mas-mas zmi; day 2: axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus jarif kpg-core llanga mas-cps mas-mas zmi; day 3: axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus dwarren jarif kpg-core llanga mas-cps mas-mas zmi
 
 # tflags publish
 AC_BR_BONANZA
@@ -241,6 +241,9 @@ FROM_MISSP_FREEMAIL
 # good enough
 FROM_MISSP_MSFT
 
+# good enough
+FROM_MISSP_REPLYTO
+
 # tflags net
 FROM_MISSP_SPF_FAIL
 
@@ -249,12 +252,6 @@ FROM_MISSP_USER
 
 # good enough
 FSL_HELO_BARE_IP_2
-
-# good enough
-FSL_HELO_DEVICE
-
-# good enough
-FSL_HELO_FIREWALL
 
 # tflags publish
 FSL_NEW_HELO_USER
@@ -387,6 +384,9 @@ OBFU_JVSCR_ESC
 
 # tflags publish
 OBFU_TEXT_ATTACH
+
+# tflags publish
+PP_MIME_FAKE_ASCII_TEXT
 
 # tflags publish
 PUMPDUMP
@@ -665,13 +665,37 @@ TO_NO_BRKTS_PCNT
 TVD_FROM_1
 
 # good enough
-FROM_MISSP_REPLYTO
+BITLY_URI
 
 # good enough
-MONEY_FORM_SHORT
+CK_HELO_GENERIC
 
-# tflags publish
-PP_MIME_FAKE_ASCII_TEXT
+# good enough
+DEAR_BENEFICIARY
+
+# good enough
+FROM_MISSPACED
+
+# good enough
+FROM_MISSP_TO_UNDISC
+
+# good enough
+FSL_CTYPE_WIN1251
+
+# good enough
+HK_SCAM_N2
+
+# good enough
+MONEY_FORM
+
+# good enough
+MONEY_FROM_MISSP
+
+# good enough
+NSL_RCVD_HELO_USER
+
+# good enough
+RISK_FREE
 
 # tflags publish
 UC_GIBBERISH_OBFU
