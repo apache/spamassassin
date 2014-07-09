@@ -2,33 +2,33 @@
 # ham-net-axb-coi-bulk.log ham-net-axb-generic.log ham-net-axb-ham-misc.log ham-net-bb-guenther_fraud.log ham-net-bb-jhardin_fraud.log ham-net-bb-jhardin.log ham-net-bb-jm.log ham-net-bb-kmcgrail.log ham-net-bb-traps.log ham-net-bb-zmi.log ham-net-bpoliakoff.log ham-net-darxus.log ham-net-dwarren.log ham-net-jarif.log ham-net-kpg-core.log ham-net-mas-cps.log ham-net-mas-mas.log ham-net-zmi.log spam-net-axb-coi-bulk.log spam-net-axb-generic.log spam-net-axb-ham-misc.log spam-net-bb-guenther_fraud.log spam-net-bb-jhardin_fraud.log spam-net-bb-jhardin.log spam-net-bb-jm.log spam-net-bb-kmcgrail.log spam-net-bb-traps.log spam-net-bb-zmi.log spam-net-bpoliakoff.log spam-net-darxus.log spam-net-dwarren.log spam-net-jarif.log spam-net-kpg-core.log spam-net-mas-cps.log spam-net-mas-mas.log spam-net-zmi.log
 
 score AC_DIV_BONANZA                 0.001 # force non-zero
-score AC_SPAMMY_URI_PATTERNS4        2.202
+score AC_SPAMMY_URI_PATTERNS4        0.934
 score ADMAIL                         2.800
 score ADVANCE_FEE_2_NEW_FRM_MNY      2.499
 score ADVANCE_FEE_2_NEW_MONEY        1.999
-score ADVANCE_FEE_3_NEW              3.499
-score ADVANCE_FEE_3_NEW_FORM         1.512
-score ADVANCE_FEE_3_NEW_FRM_MNY      2.016
-score ADVANCE_FEE_3_NEW_MONEY        0.639
-score ADVANCE_FEE_4_NEW              1.926
-score ADVANCE_FEE_4_NEW_FORM         0.001
-score ADVANCE_FEE_4_NEW_FRM_MNY      0.001
-score ADVANCE_FEE_4_NEW_MONEY        0.061
-score ADVANCE_FEE_5_NEW              1.232
-score ADVANCE_FEE_5_NEW_FORM         2.075
-score ADVANCE_FEE_5_NEW_FRM_MNY      2.715
-score ADVANCE_FEE_5_NEW_MONEY        0.628
-score AXB_XMAILER_MIMEOLE_OL_024C2   1.423
-score CK_HELO_DYNAMIC_SPLIT_IP       0.001
-score COMMENT_GIBBERISH              1.499
-score FILL_THIS_FORM                 1.040
-score FORM_FRAUD_3                   1.709
-score FORM_FRAUD_5                   1.155
-score FREEMAIL_FORGED_FROMDOMAIN     0.001
+score ADVANCE_FEE_3_NEW              3.500
+score ADVANCE_FEE_3_NEW_FORM         0.606
+score ADVANCE_FEE_3_NEW_FRM_MNY      2.274
+score ADVANCE_FEE_3_NEW_MONEY        3.056
+score ADVANCE_FEE_4_NEW              1.741
+score ADVANCE_FEE_4_NEW_FORM         0.841
+score ADVANCE_FEE_4_NEW_FRM_MNY      1.073
+score ADVANCE_FEE_4_NEW_MONEY        1.378
+score ADVANCE_FEE_5_NEW              1.864
+score ADVANCE_FEE_5_NEW_FORM         1.355
+score ADVANCE_FEE_5_NEW_FRM_MNY      2.835
+score ADVANCE_FEE_5_NEW_MONEY        0.001
+score AXB_XMAILER_MIMEOLE_OL_024C2   1.496
+score CK_HELO_DYNAMIC_SPLIT_IP       0.001 # force non-zero
+score COMMENT_GIBBERISH              1.500
+score FILL_THIS_FORM                 1.041
+score FORM_FRAUD_3                   3.548
+score FORM_FRAUD_5                   2.478
+score FREEMAIL_FORGED_FROMDOMAIN     0.001 # force non-zero
 score FROM_12LTRDOM                  0.100
-score FROM_MISSP_FREEMAIL            0.001
-score FROM_MISSP_MSFT                0.001
-score FROM_MISSP_USER                0.001 # force non-zero
+score FROM_MISSP_FREEMAIL            0.001 # force non-zero
+score FROM_MISSP_MSFT                0.001 # force non-zero
+score FROM_MISSP_USER                0.001
 score FSL_HELO_BARE_IP_2             0.214
 score FSL_NEW_HELO_USER              0.001
 score HDRS_MISSP                     0.001
@@ -37,27 +37,27 @@ score HEXHASH_WORD                   0.424
 score HK_RANDOM_FROM                 0.999
 score LONG_IMG_URI                   3.000
 score LOTS_OF_MONEY                  0.001 # force non-zero
-score LUCRATIVE                      1.999
+score LUCRATIVE                      2.000
 score MANY_SPAN_IN_TEXT              0.001
 score MIME_NO_TEXT                   2.000
-score MONEY_FRAUD_3                  3.862
-score MONEY_FRAUD_5                  1.045
+score MONEY_FRAUD_3                  3.807
+score MONEY_FRAUD_5                  1.790
 score MONEY_FROM_41                  1.999
-score NSL_RCVD_FROM_USER             0.001
+score NSL_RCVD_FROM_USER             0.001 # force non-zero
 score RCVD_IN_MSPIKE_H2              -0.676
 score RCVD_IN_MSPIKE_L3              2.699
-score RCVD_IN_MSPIKE_L4              2.899
-score RCVD_IN_MSPIKE_L5              3.700
-score RCVD_IN_MSPIKE_ZBI             2.299
+score RCVD_IN_MSPIKE_L4              2.800
+score RCVD_IN_MSPIKE_L5              3.699
+score RCVD_IN_MSPIKE_ZBI             1.425
 score RP_MATCHES_RCVD                -0.652
 score STYLE_GIBBERISH                4.000
-score THIS_AD                        1.071
+score THIS_AD                        1.070
 score TO_NO_BRKTS_HTML_ONLY          2.499
 score TO_NO_BRKTS_MSFT               3.500
 score TO_NO_BRKTS_NORDNS_HTML        2.620
 score TO_NO_BRKTS_PCNT               2.749
-score TVD_FROM_1                     0.999
-score URI_OPTOUT_USME                2.999
+score TVD_FROM_1                     1.000
+score URI_OPTOUT_USME                2.899
 score AC_BR_BONANZA                  0.001
 score AC_HTML_NONSENSE_TAGS          1.000
 score AC_SPAMMY_URI_PATTERNS1        1.000
