@@ -36,7 +36,7 @@ describe   TO_NO_BRKTS_HTML_IMG    To: misformatted and HTML and one image
 
 meta       __TO_NO_BRKTS_HTML_ONLY __TO_NO_ARROWS_R && !__TO_UNDISCLOSED && MIME_HTML_ONLY
 meta       TO_NO_BRKTS_HTML_ONLY   __TO_NO_BRKTS_HTML_ONLY && !RDNS_NONE && !__MIME_QP && !__MSGID_JAVAMAIL && !__CTYPE_CHARSET_QUOTED && !__SUBJECT_ENCODED_B64 && !__VIA_ML && !__MSGID_BEFORE_RECEIVED && !__MIME_BASE64 && !__RCD_RDNS_MAIL_MESSY && !__COMMENT_EXISTS && !LOTS_OF_MONEY && !__TAG_EXISTS_CENTER && !__UPPERCASE_URI && !__UNSUB_LINK && !__RCD_RDNS_MX_MESSY && !__DKIM_EXISTS && !__BUGGED_IMG && !__FM_TO_ALL_NUMS && !__URI_12LTRDOM && !__RDNS_NO_SUBDOM && !__HDRS_LCASE && !__LCL__ENV_AND_HDR_FROM_MATCH 
-score      TO_NO_BRKTS_HTML_ONLY   2.50	# limit
+score      TO_NO_BRKTS_HTML_ONLY   2.00	# limit
 describe   TO_NO_BRKTS_HTML_ONLY   To: misformatted and HTML only
 tflags     TO_NO_BRKTS_HTML_ONLY   publish
 
@@ -52,7 +52,7 @@ describe   TO_NO_BRKTS_DYNIP       To: misformatted and dynamic rDNS
 
 meta       __TO_NO_BRKTS_NORDNS_HTML    __TO_NO_BRKTS_HTML_ONLY && RDNS_NONE
 meta       TO_NO_BRKTS_NORDNS_HTML      __TO_NO_BRKTS_NORDNS_HTML && !ALL_TRUSTED && !__MSGID_JAVAMAIL && !__MSGID_BEFORE_RECEIVED && !__VIA_ML && !__UA_MUTT && !__COMMENT_EXISTS && !__HTML_LENGTH_384 && !__MIME_BASE64 && !__UPPERCASE_URI && !__TO___LOWER && !__TAG_EXISTS_CENTER && !__LONGLINE && !__DKIM_EXISTS 
-score      TO_NO_BRKTS_NORDNS_HTML      2.75	# limit
+score      TO_NO_BRKTS_NORDNS_HTML      2.00	# limit
 describe   TO_NO_BRKTS_NORDNS_HTML      To: misformatted and no rDNS and HTML only
 tflags     TO_NO_BRKTS_NORDNS_HTML      publish
 
@@ -64,7 +64,7 @@ score      TO_NO_BRKTS_MSFT         3.50	# limit
 meta       __TO_NO_BRKTS_PCNT       __TO_NO_ARROWS_R && __FB_NUM_PERCNT
 meta       TO_NO_BRKTS_PCNT         __TO_NO_BRKTS_PCNT && !__SUBJECT_ENCODED_B64 && !__DOS_HAS_LIST_UNSUB && !__VIA_ML && !__ISO_2022_JP_DELIM && !__IMS_MSGID && !__THREAD_INDEX_GOOD && !__RCD_RDNS_MX_MESSY && !__UNSUB_LINK && !__LONGLINE && !URI_HEX && !__RP_MATCHES_RCVD && !__MAIL_LINK && !__BUGGED_IMG && !__MIME_QP && !__COMMENT_EXISTS && !__TAG_EXISTS_STYLE && !__LCL__ENV_AND_HDR_FROM_MATCH && !__HAS_X_MAILER && !__HTML_LINK_IMAGE && !__SENDER_BOT && !__DKIM_EXISTS && !__KHOP_NO_FULL_NAME && !__THREADED 
 describe   TO_NO_BRKTS_PCNT         To: misformatted + percentage
-score      TO_NO_BRKTS_PCNT         2.75	# limit
+score      TO_NO_BRKTS_PCNT         2.50	# limit
 tflags     TO_NO_BRKTS_PCNT         publish
 
 #meta       __TO_NO_BRKTS_DIRECT     __TO_NO_ARROWS_R && __DOS_DIRECT_TO_MX
