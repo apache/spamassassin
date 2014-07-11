@@ -1562,3 +1562,6 @@ describe      NUM_FREE         Number + free
 # seen in spam (malware?) 07/2014
 header        __DATE_SPACEY    ALL =~ /\nDate:\s{8}/ism
 
+uri           __FSL_LINK_AWS_S3_WEB_LOOSE       m,^https?://(?:[^./]+\.)*s3[^./]+\.amazonaws\.com,i
+
+
