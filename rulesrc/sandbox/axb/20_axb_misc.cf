@@ -23,12 +23,12 @@ header		AXB_LUNSUB_ONE		List-Unsubscribe =~ /^1\,/
 describe	AXB_LUNSUB_ONE		One
 
 #2014-04-15
-#header		__FROMN_LIIN		From:name =~ /^Linked\s?In/i
-#header		__FROM_LII		From =~ /\@bounce\.linkedin\.com/
-#header		__AXB_LI_CLASS		exists:X-LinkedIn-Class
-#header		__AXB_LI_FBL		exists:X-LinkedIn-fbl
-#meta		AXB_LITTLECLASS		(__FROMN_LIIN && !__FROMN_LII && !__AXB_LI_CLASS && !__AXB_LI_FBL)
-#describe	AXB_LITTLECLASS		Hiding Easter eggs
+header		__FROM_LIIN		From:name =~ /^Linked\s?In/i
+header		__FROM_LII		From =~ /\@bounce\.linkedin\.com/
+header		__AXB_LI_CLASS		exists:X-LinkedIn-Class
+header		__AXB_LI_FBL		exists:X-LinkedIn-fbl
+meta		AXB_LITTLECLASS		(__FROM_LIIN && !__FROM_LII && !__AXB_LI_CLASS && !__AXB_LI_FBL)
+describe	AXB_LITTLECLASS		Hiding Easter eggs
 
 
 
