@@ -912,13 +912,13 @@ sub ask_dcc {
   $permsgstatus->leave_helper_run_mode();
 
   if ($timer->timed_out()) {
-    dbg("$tag $pgm timed out after $timeout seconds");
+    dbg("$tag %s timed out after %d seconds", $pgm||'', $timeout);
     return (undef, undef);
   }
 
   if ($err) {
     chomp $err;
-    info("$tag $pgm failed: $err\n");
+    info("$tag %s failed: %s", $pgm||'', $err);
     return (undef, undef);
   }
 
