@@ -570,6 +570,11 @@ endif
 # describe       GAPPY_EXPENSES             Possible obfuscated stock disclaimer
 # describe       GAPPY_DOLLARS              Possible obfuscated stock disclaimer
 
+body           GAPPY_GENITALIA          /\bp(?!enis)[^a-z]?e[^a-z]?n[^a-z]?i[^a-z]?s(?:\b|_)/i
+describe       GAPPY_GENITALIA          G.a.p.p.y male body parts
+
+body           GAPPY_PILLS              /\bp(?!ills)[^a-z]?i[^a-z]?l[^a-z]?l[^a-z]?s(?:\b|_)/i
+describe       GAPPY_PILLS              G.a.p.p.y pills
 
 body           __STYLE_TAG_IN_BODY      /<style(?:[^>]{0,30})?>/i
 body           __BODY_XHTML             /<x-html>/i
@@ -1563,5 +1568,9 @@ describe      NUM_FREE         Number + free
 header        __DATE_SPACEY    ALL =~ /\nDate:\s{8}/ism
 
 uri           __FSL_LINK_AWS_S3_WEB_LOOSE       m,^https?://(?:[^./]+\.)*s3[^./]+\.amazonaws\.com,i
+
+
+uri            URI_IP_UNSUB     m;^[a-z]+://(?:\d+\.){3}\d+/.*unsubscribe;i
+describe       URI_IP_UNSUB     IP-address unsubscribe URI
 
 
