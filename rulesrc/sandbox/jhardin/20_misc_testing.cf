@@ -570,7 +570,7 @@ endif
 # describe       GAPPY_EXPENSES             Possible obfuscated stock disclaimer
 # describe       GAPPY_DOLLARS              Possible obfuscated stock disclaimer
 
-body           GAPPY_GENITALIA          /\bp(?!enis)[^a-z]?e[^a-z]?n[^a-z]?i[^a-z]?s(?:\b|_)/i
+body           GAPPY_GENITALIA          /\bp(?!enis)(?!en is)[^a-z]?e[^a-z]?n[^a-z]?i[^a-z]?s(?:\b|_)/i
 describe       GAPPY_GENITALIA          G.a.p.p.y male body parts
 
 body           GAPPY_PILLS              /\bp(?!ills)[^a-z]?i[^a-z]?l[^a-z]?l[^a-z]?s(?:\b|_)/i
