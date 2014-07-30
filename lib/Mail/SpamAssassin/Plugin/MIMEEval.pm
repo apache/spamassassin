@@ -70,7 +70,21 @@ sub are_more_high_bits_set {
   ($numlos <= $numhis && $numhis > 3);
 }
 
+=item has_check_for_ascii_text_illegal
+
+Adds capability check for "if can()" for has_check_for_ascii_text_illegal
+
+=cut
+
 sub has_check_for_ascii_text_illegal { 1 }
+
+=item check_for_ascii_text_illegal
+
+If a MIME part claims to be text/plain or text/plain;charset=us-ascii and the Content-Transfer-Encoding is 7bit (either explicitly or by default), then we should enforce the actual text being only TAB, NL, SPACE through TILDE, i.e. all 7bit characters excluding NO-WS-CTL (per RFC-2822).
+
+All mainstream MTA's get this right.
+
+=cut
 
 sub check_for_ascii_text_illegal {
   my ($self, $pms) = @_;
