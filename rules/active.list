@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bpoliakoff darxus dwarren jarif kpg-core mas-cps mas-mas; day 2: axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt darxus dwarren jarif kpg-core llanga mas-cps mas-mas mmiroslaw-ham mmiroslaw-spam zmi; day 3: axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt darxus dwarren grenier jarif kpg-core llanga mas-cps mas-mas zmi
+# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus dwarren jarif kpg-core mas-cps mas-mas mmiroslaw-ham mmiroslaw-spam; day 2: axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bernie-fsf bernie-it_batt bpoliakoff darxus jarif kpg-core llanga mas-cps mas-mas; day 3: axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus dwarren jarif kpg-core llanga mas-cps mas-mas
 
 # tflags publish
 AC_BR_BONANZA
@@ -196,6 +196,9 @@ DOS_ANAL_SPAM_MAILER
 # good enough
 DOS_OE_TO_MX
 
+# good enough
+DOS_OE_TO_MX_IMAGE
+
 # tflags publish
 DX_TEXT_02
 
@@ -237,6 +240,9 @@ FRAGMENTED_MESSAGE
 
 # tflags publish
 FREEMAIL_FORGED_FROMDOMAIN
+
+# good enough
+FROM_12LTRDOM
 
 # tflags userconf
 FROM_DOMAIN_NOVOWEL
@@ -334,11 +340,17 @@ HASHCASH_2SPEND
 # tflags userconf
 HASHCASH_HIGH
 
+# good enough
+HDRS_MISSP
+
 # tflags publish
 HEADER_FROM_DIFFERENT_DOMAINS
 
 # tflags userconf
 HEAD_LONG
+
+# good enough
+HELO_LH_HOME
 
 # tflags publish
 HEXHASH_WORD
@@ -347,7 +359,7 @@ HEXHASH_WORD
 HK_NAME_DRUGS
 
 # good enough
-HK_NAME_MR_MRS
+HK_RANDOM_FROM
 
 # good enough
 HK_SCAM_N2
@@ -370,26 +382,14 @@ LONG_HEX_URI
 # tflags publish
 LONG_IMG_URI
 
-# good enough
-LONG_TERM_PRICE
-
 # tflags publish
 LOTS_OF_MONEY
-
-# good enough
-LOTTO_AGENT
-
-# good enough
-LOTTO_AGENT_RPLY
 
 # good enough
 LOTTO_DEPT
 
 # tflags publish
 LUCRATIVE
-
-# good enough
-L_SPAM_TOOL_13
 
 # tflags publish
 MANY_SPAN_IN_TEXT
@@ -671,7 +671,10 @@ RCVD_IN_SORBS_ZOMBIE
 RCVD_IN_XBL
 
 # good enough
-SHORT_TERM_PRICE
+REPLYTO_WITHOUT_TO_CC
+
+# good enough
+SERGIO_SUBJECT_PORN014
 
 # tflags net
 SPF_FAIL
@@ -737,31 +740,22 @@ TO_NO_BRKTS_NORDNS_HTML
 TO_NO_BRKTS_PCNT
 
 # good enough
-DSN_NO_MIMEVERSION
+TVD_RCVD_IP
 
 # good enough
-FROM_12LTRDOM
+AXB_HELO_HOME_UN
 
 # good enough
-HDRS_MISSP
+CK_HELO_GENERIC
 
 # good enough
-HK_RANDOM_FROM
+FROM_MISSP_EH_MATCH
 
 # good enough
-LOTTO_URI
+RISK_FREE
 
 # good enough
-RP_MATCHES_RCVD
-
-# good enough
-SERGIO_SUBJECT_PORN006
-
-# good enough
-SERGIO_SUBJECT_PORN014
-
-# good enough
-SERGIO_SUBJECT_PORN015
+TVD_FROM_1
 
 # tflags publish
 UC_GIBBERISH_OBFU
