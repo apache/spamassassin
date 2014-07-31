@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus dwarren jarif kpg-core mas-cps mas-mas mmiroslaw-ham mmiroslaw-spam; day 2: axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bernie-fsf bernie-it_batt bpoliakoff darxus jarif kpg-core llanga mas-cps mas-mas; day 3: axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus dwarren jarif kpg-core llanga mas-cps mas-mas
+# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus dwarren jarif kpg-core mas-cps mas-mas; day 2: axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus dwarren jarif kpg-core llanga mas-cps mas-mas mmiroslaw-ham mmiroslaw-spam; day 3: axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bernie-fsf bernie-it_batt bpoliakoff darxus jarif kpg-core llanga mas-cps mas-mas
 
 # tflags publish
 AC_BR_BONANZA
@@ -205,6 +205,9 @@ DX_TEXT_02
 # tflags publish
 DX_TEXT_03
 
+# good enough
+DYN_RDNS_SHORT_HELO_HTML
+
 # tflags publish
 EMAIL_URI_PHISH
 
@@ -240,9 +243,6 @@ FRAGMENTED_MESSAGE
 
 # tflags publish
 FREEMAIL_FORGED_FROMDOMAIN
-
-# good enough
-FROM_12LTRDOM
 
 # tflags userconf
 FROM_DOMAIN_NOVOWEL
@@ -351,6 +351,9 @@ HEAD_LONG
 
 # good enough
 HELO_LH_HOME
+
+# good enough
+HELO_LOCALHOST
 
 # tflags publish
 HEXHASH_WORD
@@ -676,6 +679,9 @@ REPLYTO_WITHOUT_TO_CC
 # good enough
 SERGIO_SUBJECT_PORN014
 
+# good enough
+SHORT_HELO_AND_INLINE_IMAGE
+
 # tflags net
 SPF_FAIL
 
@@ -749,13 +755,31 @@ AXB_HELO_HOME_UN
 CK_HELO_GENERIC
 
 # good enough
+FILL_THIS_FORM_FRAUD_PHISH
+
+# good enough
+FROM_MISSP_DYNIP
+
+# good enough
 FROM_MISSP_EH_MATCH
+
+# good enough
+HK_LOTTO_NAME
+
+# good enough
+HK_NAME_DR
+
+# good enough
+OBFU_HTML_ATTACH
 
 # good enough
 RISK_FREE
 
 # good enough
 TVD_FROM_1
+
+# tflags publish
+URI_IP_UNSUB
 
 # tflags publish
 UC_GIBBERISH_OBFU
