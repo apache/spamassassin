@@ -1355,7 +1355,7 @@ rawbody     __FR_SPACING_22    /[a-z0-9]{6}\s{22}[a-z0-9]{5}/i
 # per users mailing list question from Joe Quinn
 #body        __HEXHASHWORD_S    /\s[A-Z]?[a-z]{1,15}\s(?![a-z]{18})[0-9a-f]{18}/
 #tflags      __HEXHASHWORD_S    multiple maxhits=4
-body        __HEXHASHWORD_S2EU /\s[A-Z]?[a-z]{1,15}\s(?![a-z]{10,20}\s)[a-z]{0,10}(?!\d{1,3}-)(?:(?!--)[-0-9a-f]){10,64}(?:[g-z][a-z]{0,10})?\s[A-Z]?[a-z]{1,15}\b/
+body        __HEXHASHWORD_S2EU /\s[A-Z]?[a-z]{1,15}\s(?![a-z]{10,20}\s)[a-z]{0,10}(?!\d{1,4}-)(?!\d{10}\s)(?:(?!--)[-0-9a-f]){10,64}(?:[g-z][a-z]{0,10})?\s[A-Z]?[a-z]{1,15}\b/
 tflags      __HEXHASHWORD_S2EU multiple maxhits=4
 #body        __HEXHASHWORD_S2E  /\s[A-Z]?[a-z]{1,15}\s(?![a-z]{10,20}\s)[a-z]{0,10}[0-9a-f]{10,64}(?:[g-z][a-z]{0,10})?\s[A-Z]?[a-z]{1,15}\b/
 #tflags      __HEXHASHWORD_S2E  multiple maxhits=4
@@ -1367,7 +1367,7 @@ meta        __HEXHASH_2        __HEXHASHWORD_S2EU > 1
 meta        __HEXHASH_3        __HEXHASHWORD_S2EU > 2
 meta        __HEXHASH_4        __HEXHASHWORD_S2EU > 3
 #meta        __HEXHASH_5        __HEXHASHWORD_S2EU > 4
-meta        HEXHASH_WORD       (__HEXHASHWORD_S2EU > 1) && !ALL_TRUSTED && !__DKIM_EXISTS && !__BUGGED_IMG && !__RP_MATCHES_RCVD && !__LCL__ENV_AND_HDR_FROM_MATCH && !__FSL_TO_COMMON_ROLE && !__LYRIS_EZLM_REMAILER && !__THREADED && !__HDRS_LCASE && !__MSGID_HEXISH && !__RDNS_SHORT 
+meta        HEXHASH_WORD       (__HEXHASHWORD_S2EU > 1) && !ALL_TRUSTED && !__DKIM_EXISTS && !__BUGGED_IMG && !__RP_MATCHES_RCVD && !__LCL__ENV_AND_HDR_FROM_MATCH && !__LYRIS_EZLM_REMAILER && !__THREADED && !__HDRS_LCASE && !__MSGID_HEXISH && !__RDNS_SHORT 
 describe    HEXHASH_WORD       Multiple instances of word + hexadecimal hash
 score       HEXHASH_WORD       3.000	# limit
 tflags      HEXHASH_WORD       publish
