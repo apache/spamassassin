@@ -1,83 +1,3 @@
-##
-
-#2014-06-29
-header		AXB_XRCVD_QRJATYDI	Received =~ /^from (?:DWNYIPLM|QRJATYDI)\b/
-describe	AXB_XRCVD_QRJATYDI	Love, Alice
-
-
-#2014-04-25
-header		AXB_XM_EFFY	X-mailer =~ /^EfficiencyNetwork\b/
-describe	AXB_XM_EFFY	Electrons on steroids
-
-#2014-04-22
-body		AXB_BDY_YOUCANSPAM	/\bWe have clearly mentioned the source mail\-id of this email\b/
-describe	AXB_BDY_YOUCANSPAM	Ye olde Hindi sweatshop
-
-header		AXB_XRCVD_EXCH_UUCP	Received =~ /\(from uucp\@localhost\)/
-describe	AXB_XRCVD_EXCH_UUCP	Time Tunnel
-
-header		AXB_XM_ONE		X-Mailer =~ /^1$/
-describe	AXB_XM_ONE		One
-
-header		AXB_LUNSUB_ONE		List-Unsubscribe =~ /^1\,/
-describe	AXB_LUNSUB_ONE		One
-
-#2014-04-15
-header		__FROM_LIIN		From:name =~ /^Linked\s?In/i
-header		__FROM_LII		From =~ /\@bounce\.linkedin\.com/
-header		__AXB_LI_CLASS		exists:X-LinkedIn-Class
-header		__AXB_LI_FBL		exists:X-LinkedIn-fbl
-meta		AXB_LITTLECLASS		(__FROM_LIIN && !__FROM_LII && !__AXB_LI_CLASS && !__AXB_LI_FBL)
-describe	AXB_LITTLECLASS		Hiding Easter eggs
-
-
-
-# 2014-02.27
-header		AXB_BULWARE_OEM		X-Mailer =~ /^OEM$/
-describe	AXB_BULWARE_OEM		Mailer fingerprint
-
-#  2014-02.27
-header		AXB_BULKWARE_API	exists:X-SMTPAPI
-describe	AXB_BULKWARE_API	Mailer fingerprint
-
-#  2014-02.06
-meta		AXB_NOQUIEROMAS		(FREEMAIL_FROM && __HAS_ORGANIZATION && ! __HAS_UA && ! __HAS_XMAIL)
-describe	AXB_NOQUIEROMAS		Soy lo que soy
-
-# 2014-01-09
-header		AXB_XM_MYECLNT		X-Mailer =~ /^My e-mail client\b/
-describe	AXB_XM_MYECLNT		Ratas castellanas
-if (version >= 3.004000)
-tflags		AXB_XM_MYECLNT		autolearn_force
-endif
-
-
-# 2013-11-02
-body		AXB_3LITTLE_PIGS	/\bwas sent by third-party independent marketing agent\./
-describe	AXB_3LITTLE_PIGS	chinny chin chin
-if (version >= 3.004000)
-tflags		AXB_3LITTLE_PIGS	autolearn_force
-endif
-
-
-# 2013-11-01
-header	__FROM_ONMS		From =~	 /\.onmicrosoft\.com/
-header	__TO_ONMS		To =~	 /\.onmicrosoft\.com/
-header	__TO_ONMS_RCPTS		To:name =~ /\bRecipients\b/
-
-meta	 AXB_ONMS_LEAKS		(__FROM_ONMS && __TO_ONMS && __TO_ONMS_RCPTS)
-describe AXB_ONMS_LEAKS		Onmicrosoft Leak Party
-if (version >= 3.004000)
-tflags	AXB_ONMS_LEAKS		autolearn_force
-endif
-
-
-# 2013-10-17
-header          AXB_X_FF_SEZ_S          X-Forefront-Antispam-Report =~ /^SFV\:SPM/
-describe        AXB_X_FF_SEZ_S          Forefront sez this is spam
-if (version >= 3.004000)
-tflags		AXB_X_FF_SEZ_S		autolearn_force
-endif
 
 
 # 2012-09-27
@@ -87,23 +7,9 @@ meta            AXB_XM_FORGED_OL2600    (__AXB_XM_OL_2600  && !__AXB_MO_OL_2600 
 describe        AXB_XM_FORGED_OL2600     Forged OE v. 6.2600
 
 
-# 2012-02-16
-body            AXB_BODYMAIL_SBL112884  /\@yeah\.net\b/
-describe        AXB_BODYMAIL_SBL112884  Spammer dropbox SBL112884
-
-# 2012-01-07
-header          AXB_XMA_BASP            X-Mail-Agent =~ /^BASP21/
-describe        AXB_XMA_BASP            Mailer fingerprint
-
-
 # 2012-01-04
 header          AXB_X_AOL_SEZ_S         x-aol-global-disposition =~ /^S$/
 describe        AXB_X_AOL_SEZ_S         AOL said this is S
-
-
-#2011-06-05
-#header   AXB_XRCVD_EYOU_SEND    Received =~ /\(eyou send program\)/
-#describe AXB_XRCVD_EYOU_SEND    fingerprint
 
 
 header          AXB_HELO_HOME_UN        X-Spam-Relays-Untrusted =~ /^[^\]]+ helo=\w+\.(lan|home) /i
