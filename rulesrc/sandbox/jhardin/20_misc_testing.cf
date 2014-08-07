@@ -1355,7 +1355,7 @@ rawbody     __FR_SPACING_22    /[a-z0-9]{6}\s{22}[a-z0-9]{5}/i
 # per users mailing list question from Joe Quinn
 #body        __HEXHASHWORD_S    /\s[A-Z]?[a-z]{1,15}\s(?![a-z]{18})[0-9a-f]{18}/
 #tflags      __HEXHASHWORD_S    multiple maxhits=4
-body        __HEXHASHWORD_S2EU /\s[A-Z]?[a-z]{1,15}\s(?![a-z]{10,20}\s)[a-z]{0,10}(?!\d{1,4}-)(?!\d{10}\s)(?:(?!--)[-0-9a-f]){10,64}(?:[g-z][a-z]{0,10})?\s[A-Z]?[a-z]{1,15}\b/
+body        __HEXHASHWORD_S2EU /\s[A-Z]?[a-z]{1,15}\s(?![a-z]{10,20}\s)[a-z]{0,10}(?!-?\d{1,5}-)(?!\d{10}\s)(?:(?!--)[-0-9a-f]){10,64}(?:[g-z][a-z]{0,10})?\s[A-Z]?[a-z]{1,15}\b/
 tflags      __HEXHASHWORD_S2EU multiple maxhits=4
 #body        __HEXHASHWORD_S2E  /\s[A-Z]?[a-z]{1,15}\s(?![a-z]{10,20}\s)[a-z]{0,10}[0-9a-f]{10,64}(?:[g-z][a-z]{0,10})?\s[A-Z]?[a-z]{1,15}\b/
 #tflags      __HEXHASHWORD_S2E  multiple maxhits=4
@@ -1512,9 +1512,13 @@ tflags      AD_PREFS          publish
 body        OPT_OUT           /\bOpt-Out Here\b/i
 score       OPT_OUT           2.000
 
-uri         URI_OPTOUT_USME   m,^https?://(?:quit|bye|remove|exit|leave)\d*\.[^/]+\.(?:us|me)\b,i
-describe    URI_OPTOUT_USME   Opt-out URI
+uri         URI_OPTOUT_USME   m,^https?://(?:quit|bye|remove|exit|leave|disallow|halt|stop|end)\d*\.[^/]+\.(?:us|me|mobi)\b,i
+describe    URI_OPTOUT_USME   Opt-out URI, unusual TLD
 tflags      URI_OPTOUT_USME   publish
+
+uri         URI_TRY_USME      m,^https?://(?:try|start|get|save|check|act|compare|join|learn|request)[^\.]*\.[^/]+\.(?:us|me|mobi)\b,i
+describe    URI_TRY_USME      "Try it" URI, unusual TLD
+tflags      URI_TRY_USME      publish
 
 
 
