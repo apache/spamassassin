@@ -18,7 +18,16 @@
 ###########################################################################
 
 
-# axb 2014-06-07
+# axb 2014-08-07
+
+What's so cool about Bayes/Redis
+
+- speed, speed, speed
+- zero maintenance
+- cheap to run  - all it needs is cheap memory - the more the better.
+
+
+------------------------------------------
 Get Redis "Stable" from
 
 http://redis.io/download
