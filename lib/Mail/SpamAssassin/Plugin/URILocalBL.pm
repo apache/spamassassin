@@ -76,7 +76,14 @@ And to block all CIDR blocks registered to an ISP, one might use:
 
   uri_block_isp TEST3 "ColoCrossing"
 
-if one didn't trust URL's pointing to that organization's clients.
+if one didn't trust URL's pointing to that organization's clients.  Lastly,
+if there's a country that you want to block but there's an explicit host
+you wish to exempt from that blacklist, you can use:
+
+  uri_block_exclude TEST1 www.baidu.com
+
+if you wish to exempt URL's referring to this host. The same syntax is
+applicable to CIDR and ISP blocks as well.
 
 =head1 DEPENDENCIES
 
@@ -215,8 +222,6 @@ sub set_config {
 	return $Mail::SpamAssassin::Conf::INVALID_VALUE;
       }
 
-      dbg("config: uri_block_isp added %s\n", $name);
-
       $conf->{parser}->add_test($name, 'check_uri_local_bl()', $Mail::SpamAssassin::Conf::TYPE_BODY_EVALS);
     }
   }) if (defined $self->{geoisp});
@@ -262,7 +267,6 @@ sub set_config {
       # optimize the ranges
       $conf->{parser}->{conf}->{uri_local_bl}->{$name}->{cidr}->clean();
 
-      dbg("config: uri_block_cidr added %s\n", $name);
       $conf->{parser}->add_test($name, 'check_uri_local_bl()', $Mail::SpamAssassin::Conf::TYPE_BODY_EVALS);
     }
   });
@@ -304,7 +308,6 @@ sub set_config {
 	return $Mail::SpamAssassin::Conf::INVALID_VALUE;
       }
 
-      dbg("config: uri_block_exclude added %s\n", $name);
       $conf->{parser}->add_test($name, 'check_uri_local_bl()', $Mail::SpamAssassin::Conf::TYPE_BODY_EVALS);
     }
   });
@@ -328,11 +331,11 @@ sub check_uri_local_bl {
     # look for W3 links only
     next unless (defined $info->{types}->{a});
 
-    for my $host (keys $info->{hosts}) {
+    while (my($host, $domain) = each $info->{hosts}) {
 
       # skip if the domain name was matched
-      if (exists $rule->{exclusions} && exists $rule->{exclusions}->{$host}) {
-        dbg("check: uri_local_bl excludes %s\n", $host);
+      if (exists $rule->{exclusions} && exists $rule->{exclusions}->{$domain}) {
+        dbg("check: uri_local_bl excludes %s as *.%s\n", $host, $domain);
         next;
       }
 
@@ -371,6 +374,7 @@ sub check_uri_local_bl {
             dbg("check: uri_block_cc criteria for $test met");
           }
       
+          $permsg->test_log("Host: $host in $cc");
           $permsg->got_hit($test);
 
           # reset hash
@@ -398,6 +402,7 @@ sub check_uri_local_bl {
             dbg("check: uri_block_isp criteria for $test met");
           }
       
+          $permsg->test_log("Host: $host in \"$isp\"");
           $permsg->got_hit($test);
 
           # reset hash
@@ -417,6 +422,7 @@ sub check_uri_local_bl {
             dbg("check: uri_block_cidr criteria for $test met");
           }
 
+          $permsg->test_log("Host: $host as $ip");
           $permsg->got_hit($test);
 
           # reset hash
