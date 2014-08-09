@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus dwarren jarif kpg-core mas-cps mas-mas; day 2: axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus dwarren jarif kpg-core llanga mas-cps mas-mas; day 3: axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus dwarren grenier jarif kpg-core llanga mas-cps mas-mas
+# with results from: day 1: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus dwarren jarif kpg-core mas-cps mas-mas; day 2: axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus dwarren jarif kpg-core llanga mas-cps mas-mas; day 3: axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus dwarren jarif kpg-core llanga mas-cps mas-mas
 
 # tflags publish
 AC_BR_BONANZA
@@ -154,9 +154,6 @@ CK_HELO_DYNAMIC_SPLIT_IP
 # good enough
 CK_HELO_GENERIC
 
-# good enough
-CN_B2B_SPAMMER
-
 # tflags publish
 COMMENT_GIBBERISH
 
@@ -219,6 +216,9 @@ DOS_OE_TO_MX
 
 # good enough
 DOS_OE_TO_MX_IMAGE
+
+# good enough
+DSN_NO_MIMEVERSION
 
 # tflags publish
 DX_TEXT_02
@@ -424,9 +424,6 @@ HK_SCAM_N8
 # good enough
 HK_SCAM_S23
 
-# good enough
-HK_SCAM_S7
-
 # tflags userconf
 HTML_CHARSET_FARAWAY
 
@@ -450,6 +447,9 @@ LOTS_OF_MONEY
 
 # good enough
 LOTTO_AGENT
+
+# good enough
+LOTTO_DEPT
 
 # tflags publish
 LUCRATIVE
@@ -511,14 +511,14 @@ NSL_RCVD_FROM_USER
 # good enough
 NSL_RCVD_HELO_USER
 
-# good enough
-OBFU_HTML_ATTACH
-
 # tflags publish
 OBFU_JVSCR_ESC
 
 # tflags publish
 OBFU_TEXT_ATTACH
+
+# good enough
+PHP_NOVER_MUA
 
 # tflags publish
 PP_MIME_FAKE_ASCII_TEXT
@@ -749,9 +749,6 @@ REPLYTO_WITHOUT_TO_CC
 RISK_FREE
 
 # good enough
-SERGIO_SUBJECT_PORN014
-
-# good enough
 SERGIO_SUBJECT_VIAGRA01
 
 # tflags net
@@ -827,13 +824,13 @@ TO_NO_BRKTS_PCNT
 TT_MSGID_TRUNC
 
 # good enough
+TVD_APPROVED
+
+# good enough
 TVD_FROM_1
 
 # good enough
 TVD_RCVD_IP
-
-# good enough
-TVD_RCVD_IP4
 
 # good enough
 TVD_RCVD_SINGLE
@@ -851,13 +848,13 @@ ANY_PILL_PRICE
 AXB_RBDY_TENANDTEN
 
 # good enough
-DSN_NO_MIMEVERSION
+BITLY_URI
 
 # good enough
-FILL_THIS_FORM_LONG
+IMG_ALT_HSPACE_CID_ALIGN
 
 # good enough
-LOTTO_DEPT
+MAILER_EQ_ORG
 
 # good enough
 NAME_EMAIL_DIFF
