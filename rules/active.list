@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus dwarren jarif kpg-core mas-cps mas-mas; day 2: axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus dwarren jarif kpg-core llanga mas-cps mas-mas; day 3: axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus dwarren jarif kpg-core llanga mas-cps mas-mas
+# with results from: day 1: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus dwarren jarif kpg-core mas-cps mas-mas; day 2: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus dwarren jarif kpg-core llanga mas-cps mas-mas; day 3: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus dwarren jarif kpg-core llanga mas-cps mas-mas
 
 # tflags publish
 AC_BR_BONANZA
@@ -92,7 +92,13 @@ AD_PREFS
 ALL_TRUSTED
 
 # good enough
+ANY_PILL_PRICE
+
+# good enough
 AXB_HELO_HOME_UN
+
+# good enough
+AXB_RBDY_TENANDTEN
 
 # good enough
 AXB_XMAILER_MIMEOLE_OL_024C2
@@ -135,6 +141,9 @@ BAYES_99
 
 # tflags learn
 BAYES_999
+
+# good enough
+BITLY_URI
 
 # good enough
 BODY_EMPTY
@@ -311,7 +320,7 @@ FROM_MISSP_USER
 FSL_CTYPE_WIN1251
 
 # good enough
-FSL_HELO_BARE_IP_2
+FSL_HELO_BARE_IP_1
 
 # good enough
 FSL_HELO_DEVICE
@@ -431,10 +440,16 @@ HTML_CHARSET_FARAWAY
 HTML_OFF_PAGE
 
 # good enough
+IMG_ALT_HSPACE_CID_ALIGN
+
+# good enough
 KB_DATE_CONTAINS_TAB
 
 # good enough
 KB_FAKED_THE_BAT
+
+# good enough
+KB_RATWARE_MSGID
 
 # tflags publish
 LONG_HEX_URI
@@ -455,7 +470,7 @@ LOTTO_DEPT
 LUCRATIVE
 
 # good enough
-MALFORMED_FREEMAIL
+MAILER_EQ_ORG
 
 # tflags publish
 MANY_SPAN_IN_TEXT
@@ -824,9 +839,6 @@ TO_NO_BRKTS_PCNT
 TT_MSGID_TRUNC
 
 # good enough
-TVD_APPROVED
-
-# good enough
 TVD_FROM_1
 
 # good enough
@@ -842,28 +854,22 @@ TVD_SPACE_RATIO_MINFP
 TVD_SUBJ_NUM_OBFU_MINFP
 
 # good enough
-ANY_PILL_PRICE
+FILL_THIS_FORM_FRAUD_PHISH
 
 # good enough
-AXB_RBDY_TENANDTEN
+FILL_THIS_FORM_LONG
 
 # good enough
-BITLY_URI
+HK_NAME_FM_MR_MRS
 
 # good enough
-IMG_ALT_HSPACE_CID_ALIGN
+HK_SCAM_S25
 
 # good enough
-MAILER_EQ_ORG
+SUBJ_BROKEN_WORDS
 
 # good enough
-NAME_EMAIL_DIFF
-
-# good enough
-OBFU_HTML_ATTACH
-
-# tflags publish
-URI_TRY_USME
+TVD_PH_BODY_META
 
 # tflags publish
 UC_GIBBERISH_OBFU
@@ -951,6 +957,9 @@ URI_NOVOWEL
 
 # tflags publish
 URI_OPTOUT_USME
+
+# tflags publish
+URI_TRY_USME
 
 # tflags publish
 URI_WPADMIN
