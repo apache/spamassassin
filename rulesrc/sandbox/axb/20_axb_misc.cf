@@ -1,5 +1,8 @@
-rawbody		AXB_RBDY_TENANDTEN	 /\&\#1088\;\&\#1092\;\?/
-describe	AXB_RBDY_TENANDTEN	Bork fingerprint
+header		AXB_XMIME_JAMIEC	MIME-version =~ /^1.0\;$/
+describe	AXB_XMIME_JAMIEC	JamieC plays the piano
+
+rawbody		AXB_RBDY_TENANDTEN	/\&\#1088\;\&\#1092\;\?/
+describe	AXB_RBDY_TENANDTEN	Ten & Ten
 
 # 2012-09-27
 header          __AXB_XM_OL_2600  X-Mailer =~ /Microsoft\ Outlook\ Express\ 6\.00\.2600\.0000/
@@ -10,7 +13,7 @@ describe        AXB_XM_FORGED_OL2600     Forged OE v. 6.2600
 
 # 2012-01-04
 header          AXB_X_AOL_SEZ_S         x-aol-global-disposition =~ /^S$/
-describe        AXB_X_AOL_SEZ_S         AOL said this is S
+describe        AXB_X_AOL_SEZ_S         AOL said this is S*
 
 
 header          AXB_HELO_HOME_UN        X-Spam-Relays-Untrusted =~ /^[^\]]+ helo=\w+\.(lan|home) /i
