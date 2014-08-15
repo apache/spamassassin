@@ -1,3 +1,10 @@
+
+header          AXB_X_FF_SEZ_S          X-Forefront-Antispam-Report =~ /\bSFV\:SPM\b/
+describe        AXB_X_FF_SEZ_S          Forefront sez this is spam
+if (version >= 3.004000)
+tflags          AXB_X_FF_SEZ_S          autolearn_force
+endif
+
 header		AXB_XMIME_JAMIEC	MIME-version =~ /^1.0\;$/
 describe	AXB_XMIME_JAMIEC	JamieC plays the piano
 
