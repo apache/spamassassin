@@ -1516,7 +1516,7 @@ uri         URI_OPTOUT_USME   m,^https?://(?:quit|bye|remove|exit|leave|disallow
 describe    URI_OPTOUT_USME   Opt-out URI, unusual TLD
 tflags      URI_OPTOUT_USME   publish
 
-uri         URI_TRY_USME      m,^https?://(?:try|start|get|save|check|act|compare|join|learn|request)[^\.]*\.[^/]+\.(?:us|me|mobi)\b,i
+uri         URI_TRY_USME      m,^https?://(?:try|start|get|save|check|act|compare|join|learn|request|visit|my)[^.]*\.[^/]+\.(?:us|me|mobi)\b,i
 describe    URI_TRY_USME      "Try it" URI, unusual TLD
 tflags      URI_TRY_USME      publish
 
