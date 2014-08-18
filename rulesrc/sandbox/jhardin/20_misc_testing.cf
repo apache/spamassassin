@@ -1578,4 +1578,8 @@ uri            URI_IP_UNSUB     m;^[a-z]+://(?:\d+\.){3}\d+/.*unsubscribe;i
 describe       URI_IP_UNSUB     IP-address unsubscribe URI
 tflags         URI_IP_UNSUB     publish
 
+uri            URI_GOOGLE_PROXY m;^https?://[^.]+\.googleusercontent\.com/proxy/;i
+describe       URI_GOOGLE_PROXY Accessing a blacklisted URI via Google proxy?
+
+
 
