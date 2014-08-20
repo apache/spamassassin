@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus dwarren jarif kpg-core mas-cps mas-mas; day 2: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus dwarren jarif kpg-core llanga mas-cps mas-mas; day 3: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus dwarren jarif kpg-core llanga mas-cps mas-mas
+# with results from: day 1: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus jarif kpg-core mas-cps mas-mas; day 2: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus dwarren jarif kpg-core llanga mas-cps mas-mas; day 3: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus dwarren jarif kpg-core llanga mas-cps mas-mas
 
 # tflags publish
 AC_BR_BONANZA
@@ -110,7 +110,7 @@ AXB_XMAILER_MIMEOLE_OL_1ECD5
 AXB_XM_FORGED_OL2600
 
 # good enough
-AXB_X_AOL_SEZ_S
+AXB_X_FF_SEZ_S
 
 # tflags learn
 BAYES_00
@@ -143,9 +143,6 @@ BAYES_99
 BAYES_999
 
 # good enough
-BITLY_URI
-
-# good enough
 BODY_EMPTY
 
 # tflags publish
@@ -171,6 +168,9 @@ COMPENSATION
 
 # tflags publish
 CORRUPT_FROM_LINE_IN_HDRS
+
+# good enough
+DATE_DOTS
 
 # good enough
 DATE_IN_FUTURE_96_Q
@@ -329,6 +329,9 @@ FSL_CTYPE_WIN1251
 FSL_HELO_BARE_IP_1
 
 # good enough
+FSL_HELO_BARE_IP_2
+
+# good enough
 FSL_HELO_DEVICE
 
 # good enough
@@ -432,9 +435,6 @@ HK_SCAM_N3
 
 # good enough
 HK_SCAM_N8
-
-# good enough
-HK_SCAM_S23
 
 # good enough
 HK_SCAM_S25
@@ -764,9 +764,6 @@ RCVD_IN_SORBS_ZOMBIE
 RCVD_IN_XBL
 
 # good enough
-RDNS_LOCALHOST
-
-# good enough
 REPLYTO_WITHOUT_TO_CC
 
 # good enough
@@ -848,13 +845,16 @@ TO_NO_BRKTS_PCNT
 TT_MSGID_TRUNC
 
 # good enough
+TVD_FINGER_02
+
+# good enough
 TVD_FROM_1
 
 # good enough
-TVD_INCREASE_SIZE
+TVD_PH_BODY_META
 
 # good enough
-TVD_PH_BODY_META
+TVD_QUAL_MEDS
 
 # good enough
 TVD_RCVD_IP
@@ -863,19 +863,19 @@ TVD_RCVD_IP
 TVD_RCVD_SINGLE
 
 # good enough
-TVD_SPACE_RATIO_MINFP
-
-# good enough
 TVD_SUBJ_NUM_OBFU_MINFP
 
 # good enough
-AXB_X_FF_SEZ_S
+BODY_URI_ONLY
 
 # good enough
-DATE_DOTS
+HK_NAME_FM_FROM
 
 # good enough
-FSL_HELO_BARE_IP_2
+OBFU_HTML_ATTACH
+
+# good enough
+REPLYTO_EMPTY
 
 # tflags publish
 UC_GIBBERISH_OBFU
