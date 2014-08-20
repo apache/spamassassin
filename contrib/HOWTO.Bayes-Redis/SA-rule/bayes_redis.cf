@@ -1,8 +1,6 @@
 # Axb 2014-06-07
 # This goes in /etc/mail/spamassassin
 
-# Tell SA to use Bayes/Redis backend
-bayes_store_module  Mail::SpamAssassin::BayesStore::Redis
 
 # You'll need to set IP to your Redis server's IP
 # Redis-server-ip:Redis server listening port
@@ -24,6 +22,10 @@ bayes_store_module  Mail::SpamAssassin::BayesStore::Redis
 # </@LICENSE>
 #
 ###########################################################################
+
+# Tell SA to use Bayes/Redis backend
+bayes_store_module  Mail::SpamAssassin::BayesStore::Redis
+
 
 #NOTE: We're not using authentication assuming the Redis server/port should not be reachable form the "outside"
 # You can add authentication once you've seen it work.
