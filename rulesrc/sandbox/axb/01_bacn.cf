@@ -4,6 +4,7 @@
 # statesman, scientist, jurist, orator, essayist, and author.
 # He served both as Attorney General and Lord Chancellor of England.
 
+# URI rules
 uri	BACN_URI_001	/\/link\.php\?m/
 tflags	BACN_URI_001	nopublish
 
@@ -12,4 +13,9 @@ tflags	BACN_URI_002	nopublish
 
 uri	BACN_URI_003	/\/u\.php\?p\=/
 tflags	BACN_URI_003	nopublish
+
+
+# header rules
+header	BACN_X_001	exists:X-Mandrill-User
+tflags	BACN_X_001	nopublish
 
