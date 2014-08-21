@@ -27,8 +27,9 @@
 bayes_store_module  Mail::SpamAssassin::BayesStore::Redis
 
 
-#NOTE: In this example, we're not using authentication assuming the Redis server/port will not be reachable form the "outside".
-# You may want to add authentication once you've seen it work. See Redis docs for syntax
+# NOTE: In this example, we're not using Redis authentication assuming
+# the Redis server/port will not be reachable from the "outside".
+# See Redis docs for authentication syntax
 
 bayes_sql_dsn  server=192.168.1.2:6379
 
