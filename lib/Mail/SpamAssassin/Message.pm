@@ -214,6 +214,9 @@ sub new {
     dbg("message: line ending changed to CRLF");
   }
 
+  # Is a CRLF -> LF line endings conversion necessary?
+  my $squash_crlf = $self->{line_ending} eq "\015\012";
+
   # Go through all the header fields of the message
   my $hdr_errors = 0;
   my $header;
@@ -240,6 +243,8 @@ sub new {
 
         # If it's not a valid header (aka: not in the form "foo:bar"), skip it.
         if (defined $value) {
+	  # CRLF -> LF line-endings conversion if necessary
+	  $value =~ s/\015\012\z/\012/  if $squash_crlf;
 	  $key =~ s/[ \t]+\z//;  # strip WSP before colon, obsolete rfc822 syn
 	  # limit the length of the pairs we store
 	  if (length($key) > MAX_HEADER_KEY_LENGTH) {
@@ -306,13 +311,12 @@ sub new {
     $self->{'pristine_body_length'} = length($self->{'pristine_body'});
   }
 
-  # CRLF -> LF  (but avoid expensive operation unless necessary)
-  # also merge multiple blank lines into a single one
-  my $squash_crlf = $self->{line_ending} eq "\015\012";
-  my $start;
   # iterate over lines in reverse order
+  # merge multiple blank lines into a single one
+  my $start;
   for (my $cnt=$#message; $cnt>=0; $cnt--) {
-    $message[$cnt] =~ s/\015\012/\012/  if $squash_crlf;
+    # CRLF -> LF line-endings conversion if necessary
+    $message[$cnt] =~ s/\015\012\z/\012/  if $squash_crlf;
 
     # line is blank
     if ($message[$cnt] =~ /^\s*$/) {
