@@ -860,6 +860,7 @@ tflags      NSL_TO_ENDS_COMMA      nopublish
 
 body        CN_B2B_SPAMMER         /\bWe are (?:(?:a )?(?:China|Taiwan)[-\s]based|(?:one of (?:the )?best|(?:a )?leading) [^\.]{10,90} (?:in|from) (?:China|Taiwan))\b/i
 describe    CN_B2B_SPAMMER         Chinese company introducing itself
+tflags      CN_B2B_SPAMMER         publish
 
 body        CN_OPTOUT_EML          /\bpasamenzi\@sina\.com\b/i
 describe    CN_OPTOUT_EML          Opt-out email address in CN B2B spams
@@ -1491,6 +1492,9 @@ tflags      PUMPDUMP_MULTI    publish
 body        DR_OZ_OBFU        /\bD(?:r\.|oc(?:tor)?) ?0z\b/i
 describe    DR_OZ_OBFU        Obfuscated "Dr. Oz"
 
+body        DOC_OZ            /\bdoc oz\b/
+describe    DOC_OZ            Doc Oz
+
 
 body        __ADMAIL          /(?:\b|_)ad-?(?:mail|message)s?(?:\b|_)/i
 meta        ADMAIL            __ADMAIL && !__DKIM_EXISTS && !__COMMENT_EXISTS 
@@ -1500,8 +1504,13 @@ tflags      ADMAIL            publish
 body        ORS               /\bOn-?line Rate Saver\b/i
 describe    ORS               "Online Rate Saver"
 
+
+# subrule version of MMartinec CR_IN_SUBJ
+header      __CR_IN_SUBJ      Subject:raw =~ /\015/
+
+
 body        __THIS_AD         /(?:\b|_)this[- _]+(?:ad(?:vert[i1l]sement)?|promo(?:tion)?)s?(?:\b|_)/i
-meta        THIS_AD           __THIS_AD && !__HTML_LINK_IMAGE && !__DKIM_EXISTS 
+meta        THIS_AD           __THIS_AD && !__MOZILLA_MSGID && !__FROM_ENCODED_QP && !__CR_IN_SUBJ
 describe    THIS_AD           "This ad" and variants
 tflags      THIS_AD           publish
 
@@ -1516,7 +1525,8 @@ uri         URI_OPTOUT_USME   m,^https?://(?:quit|bye|remove|exit|leave|disallow
 describe    URI_OPTOUT_USME   Opt-out URI, unusual TLD
 tflags      URI_OPTOUT_USME   publish
 
-uri         URI_TRY_USME      m,^https?://(?:try|start|get|save|check|act|compare|join|learn|request|visit|my)[^.]*\.[^/]+\.(?:us|me|mobi)\b,i
+uri         __URI_TRY_USME    m,^https?://(?:try|start|get|save|check|act|compare|join|learn|request|visit|my)[^.]*\.[^/]+\.(?:us|me|mobi)\b,i
+meta        URI_TRY_USME      __URI_TRY_USME && !__DKIM_EXISTS 
 describe    URI_TRY_USME      "Try it" URI, unusual TLD
 tflags      URI_TRY_USME      publish
 
@@ -1574,12 +1584,13 @@ header        __DATE_SPACEY    ALL =~ /\nDate:\s{8}/ism
 uri           __FSL_LINK_AWS_S3_WEB_LOOSE       m,^https?://(?:[^./]+\.)*s3[^./]+\.amazonaws\.com,i
 
 
-uri            URI_IP_UNSUB     m;^[a-z]+://(?:\d+\.){3}\d+/.*unsubscribe;i
-describe       URI_IP_UNSUB     IP-address unsubscribe URI
-tflags         URI_IP_UNSUB     publish
+uri            URI_DQ_UNSUB     m;^[a-z]+://(?:\d+\.){3}\d+/.*unsubscribe;i
+describe       URI_DQ_UNSUB     IP-address unsubscribe URI
+tflags         URI_DQ_UNSUB     publish
 
-uri            URI_GOOGLE_PROXY m;^https?://[^.]+\.googleusercontent\.com/proxy/;i
-describe       URI_GOOGLE_PROXY Accessing a blacklisted URI via Google proxy?
+uri            __URI_GOOGLE_PROXY     m;^https?://[^.]+\.googleusercontent\.com/proxy/;i
+meta           URI_GOOGLE_PROXY       __URI_GOOGLE_PROXY && !__LONGLINE && !__ML1 && !__FSL_RELAY_GOOGLE && !__RP_MATCHES_RCVD 
+describe       URI_GOOGLE_PROXY       Accessing a blacklisted URI via Google proxy?
 
 
 
