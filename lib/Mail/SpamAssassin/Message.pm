@@ -244,7 +244,7 @@ sub new {
         # If it's not a valid header (aka: not in the form "foo:bar"), skip it.
         if (defined $value) {
 	  # CRLF -> LF line-endings conversion if necessary
-	  $value =~ s/\015\012\z/\012/  if $squash_crlf;
+	  $value =~ s/\015\012/\012/sg  if $squash_crlf;
 	  $key =~ s/[ \t]+\z//;  # strip WSP before colon, obsolete rfc822 syn
 	  # limit the length of the pairs we store
 	  if (length($key) > MAX_HEADER_KEY_LENGTH) {
