@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus dwarren jarif kpg-core mas-cps mas-mas zmi; day 2: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus dwarren jarif kpg-core llanga mas-cps mas-mas; day 3: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus jarif kpg-core llanga mas-cps mas-mas
+# with results from: day 1: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus dwarren jarif kpg-core mas-cps mas-mas zmi; day 2: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus dwarren jarif kpg-core llanga mas-cps mas-mas zmi; day 3: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus dwarren jarif kpg-core llanga mas-cps mas-mas
 
 # tflags publish
 AC_BR_BONANZA
@@ -141,6 +141,9 @@ BAYES_99
 
 # tflags learn
 BAYES_999
+
+# good enough
+BITLY_URI
 
 # good enough
 BODY_EMPTY
@@ -416,6 +419,9 @@ HELO_LOCALHOST
 HEXHASH_WORD
 
 # good enough
+HK_LOTTO
+
+# good enough
 HK_NAME_DRUGS
 
 # good enough
@@ -534,9 +540,6 @@ NSL_RCVD_FROM_USER
 
 # good enough
 NSL_RCVD_HELO_USER
-
-# good enough
-OBFU_HTML_ATTACH
 
 # tflags publish
 OBFU_JVSCR_ESC
@@ -854,6 +857,9 @@ TVD_FINGER_02
 TVD_FROM_1
 
 # good enough
+TVD_INCREASE_SIZE
+
+# good enough
 TVD_PH_BODY_META
 
 # good enough
@@ -871,11 +877,17 @@ TVD_SUBJ_NUM_OBFU_MINFP
 # good enough
 AXB_X_AOL_SEZ_S
 
-# good enough
-BITLY_URI
-
 # tflags publish
 CN_B2B_SPAMMER
+
+# good enough
+DQ_URI_DOM_IN_PATH
+
+# good enough
+FILL_THIS_FORM_SHORT
+
+# good enough
+HK_NAME_FM_MR_MRS
 
 # good enough
 HK_NAME_FROM
@@ -885,6 +897,12 @@ HK_SCAM_N1
 
 # good enough
 MALFORMED_FREEMAIL
+
+# good enough
+RP_MATCHES_RCVD
+
+# tflags publish
+URI_DQ_UNSUB
 
 # tflags publish
 UC_GIBBERISH_OBFU
@@ -963,9 +981,6 @@ URIBL_SC_SURBL
 
 # tflags net
 URIBL_WS_SURBL
-
-# tflags publish
-URI_IP_UNSUB
 
 # tflags userconf
 URI_NOVOWEL
