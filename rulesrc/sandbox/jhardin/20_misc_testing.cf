@@ -1555,6 +1555,11 @@ uri         URI_OPTOUT_USME   m,^https?://(?:quit|bye|remove|exit|leave|disallow
 describe    URI_OPTOUT_USME   Opt-out URI, unusual TLD
 tflags      URI_OPTOUT_USME   publish
 
+uri         URI_OPTOUT_3LD    m,^https?://(?:quit|bye|remove|exit|leave|disallow|halt|stop|end)\d*\.[^/]+\.com\b,i
+describe    URI_OPTOUT_3LD    Opt-out URI, suspicious hostname
+score       URI_OPTOUT_3LD    2.000   # limit
+#tflags      URI_OPTOUT_3LD    publish
+
 uri         __URI_TRY_USME    m,^https?://(?:try|start|get|save|check|act|compare|join|learn|request|visit|my)[^.]*\.[^/]+\.(?:us|me|mobi)\b,i
 meta        URI_TRY_USME      __URI_TRY_USME && !__DKIM_EXISTS 
 describe    URI_TRY_USME      "Try it" URI, unusual TLD
