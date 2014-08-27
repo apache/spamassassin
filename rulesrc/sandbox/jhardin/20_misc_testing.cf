@@ -1632,8 +1632,8 @@ describe       URI_DQ_UNSUB     IP-address unsubscribe URI
 tflags         URI_DQ_UNSUB     publish
 
 uri            __URI_GOOGLE_PROXY     m;^https?://[^.]+\.googleusercontent\.com/proxy/;i
-meta           URI_GOOGLE_PROXY       __URI_GOOGLE_PROXY && !__LONGLINE && !__ML1 && !__FSL_RELAY_GOOGLE && !__RP_MATCHES_RCVD && !__FROM_LOWER && !__RCD_RDNS_MAIL 
-describe       URI_GOOGLE_PROXY       Accessing a blacklisted URI via Google proxy?
+meta           URI_GOOGLE_PROXY       __URI_GOOGLE_PROXY && !__LONGLINE && !__ML1 && !__FSL_RELAY_GOOGLE && !__FROM_LOWER && !__RCD_RDNS_MAIL 
+describe       URI_GOOGLE_PROXY       Accessing a blacklisted URI or obscuring source of phish via Google proxy?
 tflags         URI_GOOGLE_PROXY       publish
 
 
