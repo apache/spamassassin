@@ -1406,7 +1406,7 @@ meta        __HEXHASH_2        __HEXHASHWORD_S2EU > 1
 meta        __HEXHASH_3        __HEXHASHWORD_S2EU > 2
 meta        __HEXHASH_4        __HEXHASHWORD_S2EU > 3
 #meta        __HEXHASH_5        __HEXHASHWORD_S2EU > 4
-meta        HEXHASH_WORD       (__HEXHASHWORD_S2EU > 1) && !ALL_TRUSTED && !__DKIM_EXISTS && !__BUGGED_IMG && !__RP_MATCHES_RCVD && !__LCL__ENV_AND_HDR_FROM_MATCH && !__LYRIS_EZLM_REMAILER && !__THREADED && !__HDRS_LCASE && !__MSGID_HEXISH && !__RDNS_SHORT 
+meta        HEXHASH_WORD       (__HEXHASHWORD_S2EU > 1) && !ALL_TRUSTED && !__DKIM_EXISTS && !__RP_MATCHES_RCVD && !__LCL__ENV_AND_HDR_FROM_MATCH && !__LYRIS_EZLM_REMAILER && !__THREADED && !__HDRS_LCASE && !__MSGID_HEXISH && !__RDNS_SHORT 
 describe    HEXHASH_WORD       Multiple instances of word + hexadecimal hash
 score       HEXHASH_WORD       3.000	# limit
 tflags      HEXHASH_WORD       publish
