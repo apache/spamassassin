@@ -27,12 +27,11 @@ meta       FORGED_TBIRD_IMG_ARROW  __FORGED_TBIRD_IMG && __TO_NO_ARROWS_R && !__
 describe   FORGED_TBIRD_IMG_ARROW  Likely forged Thunderbird image spam
 #score      FORGED_TBIRD_IMG_ARROW  0.8
 
-# Try it against other stuff, too,
-# "To without <>" might be useful outside the context of image spam
 meta       __TO_NO_BRKTS_HTML_IMG  __TO_NO_ARROWS_R && !__TO_UNDISCLOSED && HTML_MESSAGE && __ONE_IMG
-meta       TO_NO_BRKTS_HTML_IMG    __TO_NO_BRKTS_HTML_IMG && !__FM_TO_ALL_NUMS
-score      TO_NO_BRKTS_HTML_IMG    0.20
+meta       TO_NO_BRKTS_HTML_IMG    __TO_NO_BRKTS_HTML_IMG && !__FM_TO_ALL_NUMS && !__FROM_FULL_NAME && !__HAS_THREAD_INDEX && !__DKIM_EXISTS 
 describe   TO_NO_BRKTS_HTML_IMG    To: misformatted and HTML and one image
+score      TO_NO_BRKTS_HTML_IMG    2.000   # limit
+tflags     TO_NO_BRKTS_HTML_IMG    publish
 
 meta       __TO_NO_BRKTS_HTML_ONLY __TO_NO_ARROWS_R && !__TO_UNDISCLOSED && MIME_HTML_ONLY
 meta       TO_NO_BRKTS_HTML_ONLY   __TO_NO_BRKTS_HTML_ONLY && !RDNS_NONE && !__MIME_QP && !__MSGID_JAVAMAIL && !__CTYPE_CHARSET_QUOTED && !__SUBJECT_ENCODED_B64 && !__VIA_ML && !__MSGID_BEFORE_RECEIVED && !__MIME_BASE64 && !__RCD_RDNS_MAIL_MESSY && !__COMMENT_EXISTS && !LOTS_OF_MONEY && !__TAG_EXISTS_CENTER && !__UPPERCASE_URI && !__UNSUB_LINK && !__RCD_RDNS_MX_MESSY && !__DKIM_EXISTS && !__BUGGED_IMG && !__FM_TO_ALL_NUMS && !__URI_12LTRDOM && !__RDNS_NO_SUBDOM && !__HDRS_LCASE && !__LCL__ENV_AND_HDR_FROM_MATCH 
