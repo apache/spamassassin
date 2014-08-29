@@ -952,11 +952,11 @@ meta        GAPPY_HTML             __GAPPY_HTML && !__UNSUB_LINK && !__RP_MATCHE
 describe    GAPPY_HTML             HTML body with much useless whitespace
 
 # Try to improve S/O per bug 6119
-meta        TVD_SPACE_RATIO_MINFP  __TVD_SPACE_RATIO && !__LCL__ENV_AND_HDR_FROM_MATCH && !__VIA_ML && !__SUBSCRIPTION_INFO && !__NOT_SPOOFED 
+meta        TVD_SPACE_RATIO_MINFP  __TVD_SPACE_RATIO && !__LCL__ENV_AND_HDR_FROM_MATCH && !__VIA_ML && !__SUBSCRIPTION_INFO && !__NOT_SPOOFED  && !__RCD_RDNS_MAIL && !__SUBJECT_ENCODED_QP 
 #tflags      TVD_SPACE_RATIO_MINFP  nopublish
 score       TVD_SPACE_RATIO_MINFP  3.500   # limit
 
-meta        TVD_SPACE_ENCODED      __TVD_SPACE_RATIO && __SUBJECT_ENCODED_B64 
+meta        TVD_SPACE_ENCODED      __TVD_SPACE_RATIO && __SUBJECT_ENCODED_B64 && !__LCL__ENV_AND_HDR_FROM_MATCH 
 score       TVD_SPACE_ENCODED      3.000   # limit
 
 # sample from users list:   Subject: Sta ffWork sFastToSen dTab le tsGood s
@@ -1249,7 +1249,7 @@ tflags      FORM_LOW_CONTRAST     publish
 
 
 # try to FP-reduce HTML_FONT_LOW_CONTRAST
-meta        __HTML_FONT_LOW_CONTRAST_MINFP	HTML_FONT_LOW_CONTRAST && !__VIA_ML && !__RP_MATCHES_RCVD && !__RCD_RDNS_MAIL && !__DKIM_EXISTS 
+meta        __HTML_FONT_LOW_CONTRAST_MINFP	HTML_FONT_LOW_CONTRAST && !__VIA_ML && !__RP_MATCHES_RCVD && !__RCD_RDNS_MAIL && !__DKIM_EXISTS && !__LCL__ENV_AND_HDR_FROM_MATCH && !__BUGGED_IMG 
 
 # some no-ham combinations
 meta        GAPPY_LOW_CONTRAST    __HTML_FONT_LOW_CONTRAST_MINFP && __GAPPY_SUBJECT 
@@ -1346,7 +1346,7 @@ header      __FH_HAS_XMSMAIL   exists:X-MSMail-Priority
 
 # duplicates __XPRIO
 #header      __FH_HAS_XPRIORITY exists:X-Priority
-meta        XPRIO              __XPRIO && !ALL_TRUSTED && !__PHPMAILER_MUA && !__BUGGED_IMG && !__HAS_ERRORS_TO && !__LCL__ENV_AND_HDR_FROM_MATCH && !__THREADED && !__VIA_ML && !__SUBSCRIPTION_INFO 
+meta        XPRIO              __XPRIO && !ALL_TRUSTED && !__PHPMAILER_MUA && !__BUGGED_IMG && !__HAS_ERRORS_TO && !__LCL__ENV_AND_HDR_FROM_MATCH && !__THREADED && !__VIA_ML && !__SUBSCRIPTION_INFO && !__RCD_RDNS_MX_MESSY && !__HAS_THREAD_INDEX 
 describe    XPRIO              Has X-Priority header
 score       XPRIO              2.500   # limit
 
@@ -1356,7 +1356,7 @@ meta        FROM_MISSP_XPRIO   __XPRIO && __FROM_MISSPACED
 describe    FROM_MISSP_XPRIO   Misspaced FROM + X-Priority
 score       FROM_MISSP_XPRIO   2.500   # limit
 
-meta        XPRIO_RPATH_NULL   __XPRIO && __BOUNCE_RPATH_NULL 
+meta        XPRIO_RPATH_NULL   __XPRIO && __BOUNCE_RPATH_NULL && !__HAS_ERRORS_TO && !__VIA_ML 
 score       XPRIO_RPATH_NULL   2.500   # limit
 
 
@@ -1548,7 +1548,7 @@ header      __CR_IN_SUBJ      Subject:raw =~ /\015/
 
 
 body        __THIS_AD         /(?:\b|_)this[- _]+(?:ad(?:vert[i1l]sement)?|promo(?:tion)?)s?(?:\b|_)/i
-meta        THIS_AD           __THIS_AD && !__MOZILLA_MSGID && !__FROM_ENCODED_QP && !__CR_IN_SUBJ
+meta        THIS_AD           __THIS_AD && !__MOZILLA_MSGID && !__FROM_ENCODED_QP && !__CR_IN_SUBJ && !__RP_MATCHES_RCVD 
 describe    THIS_AD           "This ad" and variants
 tflags      THIS_AD           publish
 
@@ -1556,8 +1556,8 @@ body        AD_PREFS          /(?:\b|_)(?:ad(?:vert[i1l]s[i1l]ng)?|promo(?:tion)
 describe    AD_PREFS          Advertising preferences
 tflags      AD_PREFS          publish
 
-body        OPT_OUT           /\bOpt-Out Here\b/i
-score       OPT_OUT           2.000
+#body        OPT_OUT           /\bOpt-Out Here\b/i
+#score       OPT_OUT           2.000
 
 uri         URI_OPTOUT_USME   m,^https?://(?:quit|bye|remove|exit|leave|disallow|halt|stop|end)\d*\.[^/]+\.(?:us|me|mobi)\b,i
 describe    URI_OPTOUT_USME   Opt-out URI, unusual TLD
@@ -1618,13 +1618,13 @@ ifplugin Mail::SpamAssassin::Plugin::ReplaceTags
 endif
 
 
-body          NUM_FREE         /\b\d+free/i
-describe      NUM_FREE         Number + free
+#body          NUM_FREE         /\b\d+free/i
+#describe      NUM_FREE         Number + free
 
 # seen in spam (malware?) 07/2014
-header        __DATE_SPACEY    ALL =~ /\nDate:\s{8}/ism
+#header        __DATE_SPACEY    ALL =~ /\nDate:\s{8}/ism
 
-uri           __FSL_LINK_AWS_S3_WEB_LOOSE       m,^https?://(?:[^./]+\.)*s3[^./]+\.amazonaws\.com,i
+#uri           __FSL_LINK_AWS_S3_WEB_LOOSE       m,^https?://(?:[^./]+\.)*s3[^./]+\.amazonaws\.com,i
 
 
 uri            URI_DQ_UNSUB     m;^[a-z]+://(?:\d+\.){3}\d+/.*unsubscribe;i
@@ -1637,7 +1637,7 @@ describe       URI_GOOGLE_PROXY       Accessing a blacklisted URI or obscuring s
 tflags         URI_GOOGLE_PROXY       publish
 
 
-meta           __RPATH_NULL_CTCQ  __BOUNCE_RPATH_NULL && __CTYPE_CHARSET_QUOTED 
+meta           RPATH_NULL_CTCQ        __BOUNCE_RPATH_NULL && __CTYPE_CHARSET_QUOTED && !__VIA_ML && !__SUBJECT_ENCODED_QP 
 
 
 
