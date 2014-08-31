@@ -1348,7 +1348,7 @@ header      __FH_HAS_XMSMAIL   exists:X-MSMail-Priority
 #header      __FH_HAS_XPRIORITY exists:X-Priority
 meta        XPRIO              __XPRIO && !ALL_TRUSTED && !__PHPMAILER_MUA && !__BUGGED_IMG && !__HAS_ERRORS_TO && !__LCL__ENV_AND_HDR_FROM_MATCH && !__THREADED && !__VIA_ML && !__SUBSCRIPTION_INFO && !__RCD_RDNS_MX_MESSY && !__HAS_THREAD_INDEX 
 describe    XPRIO              Has X-Priority header
-score       XPRIO              2.500   # limit
+score       XPRIO              1.500   # limit
 
 # some no-ham combinations
 
