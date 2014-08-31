@@ -1356,7 +1356,7 @@ meta        FROM_MISSP_XPRIO   __XPRIO && __FROM_MISSPACED
 describe    FROM_MISSP_XPRIO   Misspaced FROM + X-Priority
 score       FROM_MISSP_XPRIO   2.500   # limit
 
-meta        XPRIO_RPATH_NULL   __XPRIO && __BOUNCE_RPATH_NULL && !__HAS_ERRORS_TO && !__VIA_ML 
+meta        XPRIO_RPATH_NULL   __XPRIO && __BOUNCE_RPATH_NULL && !__HAS_ERRORS_TO && !__VIA_ML && !ANY_BOUNCE_MESSAGE 
 score       XPRIO_RPATH_NULL   2.500   # limit
 
 
@@ -1637,7 +1637,7 @@ describe       URI_GOOGLE_PROXY       Accessing a blacklisted URI or obscuring s
 tflags         URI_GOOGLE_PROXY       publish
 
 
-meta           RPATH_NULL_CTCQ        __BOUNCE_RPATH_NULL && __CTYPE_CHARSET_QUOTED && !__VIA_ML && !__SUBJECT_ENCODED_QP 
+meta           RPATH_NULL_CTCQ        __BOUNCE_RPATH_NULL && __CTYPE_CHARSET_QUOTED && !__VIA_ML && !__SUBJECT_ENCODED_QP && !ANY_BOUNCE_MESSAGE && !__DOS_HAS_LIST_UNSUB 
 
 
 
