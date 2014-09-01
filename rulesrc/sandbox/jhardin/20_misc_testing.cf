@@ -957,7 +957,7 @@ meta        TVD_SPACE_RATIO_MINFP  __TVD_SPACE_RATIO && !__LCL__ENV_AND_HDR_FROM
 score       TVD_SPACE_RATIO_MINFP  3.500   # limit
 
 meta        TVD_SPACE_ENCODED      __TVD_SPACE_RATIO && __SUBJECT_ENCODED_B64 && !__LCL__ENV_AND_HDR_FROM_MATCH 
-score       TVD_SPACE_ENCODED      3.000   # limit
+score       TVD_SPACE_ENCODED      1.000   # limit
 
 # sample from users list:   Subject: Sta ffWork sFastToSen dTab le tsGood s
 header      __SUBJ_BROKEN_WORD     Subject =~ /\s(?!i[PTM][aoh][bcdou])[a-z]{1,3}[A-Z][a-z]{2}/
@@ -985,17 +985,20 @@ tflags      XM_PHPMAILER_FORGED    publish
 
 # from spample on users list 7/24/2011
 header      __XM_EC_MESSENGER      X-Mailer =~ /\beC-Messenger\b/
-meta        XM_EC_MESSENGER        __XM_EC_MESSENGER
-describe    XM_EC_MESSENGER        eC-Messenger bulk mail service
+#meta        XM_EC_MESSENGER        __XM_EC_MESSENGER
+#describe    XM_EC_MESSENGER        eC-Messenger bulk mail service
 
 header      __SUBJ_OBFU_PUNCT      Subject =~ /(?:(?!<[a-z][a-z])[-~`"!@\#$%^&*()_+={}|\\\/?<>,.:;][a-z][-~`"!@\#$%^&*()_+={}|\\\/?<>,.:;\s]|[a-z][~`"!@\#$%^&*()_+={}|\\?<>,.:;][a-z])/i
 tflags      __SUBJ_OBFU_PUNCT      multiple maxhits=4
-meta        SUBJ_OBFU_PUNCT_FEW    __SUBJ_OBFU_PUNCT > 1 && !__SUBJECT_ENCODED_B64 && !__VIA_ML && !__THREADED && !__RP_MATCHES_RCVD && !__DKIM_EXISTS && !NO_RELAYS && !__X_CRON_ENV && !__MSOE_MID_WRONG_CASE && !__HS_SUBJ_RE_FW && !__HAS_THREAD_INDEX && !__REPLYTO_EXISTS && !__RCD_RDNS_MAIL_MESSY
+meta        SUBJ_OBFU_PUNCT_FEW    __SUBJ_OBFU_PUNCT > 1 && !__THREADED && !__RP_MATCHES_RCVD && !__NOT_SPOOFED && !__LCL__ENV_AND_HDR_FROM_MATCH 
 describe    SUBJ_OBFU_PUNCT_FEW    Possible punctuation-obfuscated Subject: header
 score       SUBJ_OBFU_PUNCT_FEW    0.750
-meta        SUBJ_OBFU_PUNCT_MANY   __SUBJ_OBFU_PUNCT > 2 && !__SUBJECT_ENCODED_B64 && !__VIA_ML && !__THREADED && !__RP_MATCHES_RCVD && !__DKIM_EXISTS && !NO_RELAYS && !__X_CRON_ENV && !__MSOE_MID_WRONG_CASE && !__HS_SUBJ_RE_FW && !__HAS_THREAD_INDEX && !__REPLYTO_EXISTS && !__RCD_RDNS_MAIL_MESSY
+meta        SUBJ_OBFU_PUNCT_MANY   __SUBJ_OBFU_PUNCT > 2 && !__THREADED && !__RP_MATCHES_RCVD && !__NOT_SPOOFED && !__LCL__ENV_AND_HDR_FROM_MATCH 
 describe    SUBJ_OBFU_PUNCT_MANY   Punctuation-obfuscated Subject: header
 score       SUBJ_OBFU_PUNCT_MANY   1.750
+
+meta        SUBJ_MANGLED           __SUBJ_OBFU_PUNCT && __GAPPY_SUBJECT 
+score       SUBJ_MANGLED           2.000    # limit
 
 # A document was scanned and sentto you using a Hewlett-Packard HP Officejet
 # A document was scanned and sent to you using a Hewlett-Packard HP Officejet
@@ -1259,7 +1262,7 @@ score       GAPPY_LOW_CONTRAST    2.500   # limit
 meta        URI_ONLY_LOW_CONTRAST __HTML_FONT_LOW_CONTRAST_MINFP && __BODY_URI_ONLY 
 score       URI_ONLY_LOW_CONTRAST 2.500   # limit
 
-meta        SUBJ_OBFU_LOW_CNTRST  __HTML_FONT_LOW_CONTRAST_MINFP && SUBJ_OBFU_PUNCT_FEW 
+meta        SUBJ_OBFU_LOW_CNTRST  __HTML_FONT_LOW_CONTRAST_MINFP && __SUBJ_OBFU_PUNCT && !ALL_TRUSTED 
 describe    SUBJ_OBFU_LOW_CNTRST  Subject obfuscation + hidden text
 score       SUBJ_OBFU_LOW_CNTRST  2.500   # limit
 
@@ -1637,7 +1640,8 @@ describe       URI_GOOGLE_PROXY       Accessing a blacklisted URI or obscuring s
 tflags         URI_GOOGLE_PROXY       publish
 
 
-meta           RPATH_NULL_CTCQ        __BOUNCE_RPATH_NULL && __CTYPE_CHARSET_QUOTED && !__VIA_ML && !__SUBJECT_ENCODED_QP && !ANY_BOUNCE_MESSAGE && !__DOS_HAS_LIST_UNSUB 
+meta           RPATH_NULL_CTCQ        __BOUNCE_RPATH_NULL && __CTYPE_CHARSET_QUOTED && !__VIA_ML && !__SUBJECT_ENCODED_QP && !ANY_BOUNCE_MESSAGE && !__DOS_HAS_LIST_UNSUB && !__TAG_EXISTS_STYLE 
+score          RPATH_NULL_CTCQ        2.000   # limit
 
 
 
