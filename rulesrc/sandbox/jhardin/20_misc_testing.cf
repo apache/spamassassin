@@ -954,10 +954,10 @@ describe    GAPPY_HTML             HTML body with much useless whitespace
 # Try to improve S/O per bug 6119
 meta        TVD_SPACE_RATIO_MINFP  __TVD_SPACE_RATIO && !__LCL__ENV_AND_HDR_FROM_MATCH && !__VIA_ML && !__SUBSCRIPTION_INFO && !__NOT_SPOOFED  && !__RCD_RDNS_MAIL && !__SUBJECT_ENCODED_QP && !__THREADED 
 #tflags      TVD_SPACE_RATIO_MINFP  nopublish
-score       TVD_SPACE_RATIO_MINFP  3.500   # limit
+score       TVD_SPACE_RATIO_MINFP  3.000   # limit
 
-meta        TVD_SPACE_ENCODED      __TVD_SPACE_RATIO && __SUBJECT_ENCODED_B64 && !__LCL__ENV_AND_HDR_FROM_MATCH 
-score       TVD_SPACE_ENCODED      1.000   # limit
+meta        TVD_SPACE_ENCODED      __TVD_SPACE_RATIO && __SUBJECT_ENCODED_B64 && !__LCL__ENV_AND_HDR_FROM_MATCH && !__SUBSCRIPTION_INFO && !__NOT_SPOOFED 
+score       TVD_SPACE_ENCODED      2.500   # limit
 
 # sample from users list:   Subject: Sta ffWork sFastToSen dTab le tsGood s
 header      __SUBJ_BROKEN_WORD     Subject =~ /\s(?!i[PTM][aoh][bcdou])[a-z]{1,3}[A-Z][a-z]{2}/
