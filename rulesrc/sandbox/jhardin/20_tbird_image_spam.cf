@@ -28,7 +28,7 @@ describe   FORGED_TBIRD_IMG_ARROW  Likely forged Thunderbird image spam
 #score      FORGED_TBIRD_IMG_ARROW  0.8
 
 meta       __TO_NO_BRKTS_HTML_IMG  __TO_NO_ARROWS_R && !__TO_UNDISCLOSED && HTML_MESSAGE && __ONE_IMG
-meta       TO_NO_BRKTS_HTML_IMG    __TO_NO_BRKTS_HTML_IMG && !__FM_TO_ALL_NUMS && !__FROM_FULL_NAME && !__HAS_THREAD_INDEX && !__DKIM_EXISTS 
+meta       TO_NO_BRKTS_HTML_IMG    __TO_NO_BRKTS_HTML_IMG && !__FM_TO_ALL_NUMS && !__FROM_FULL_NAME && !__HAS_THREAD_INDEX && !__DKIM_EXISTS && !__KHOP_NO_FULL_NAME 
 describe   TO_NO_BRKTS_HTML_IMG    To: misformatted and HTML and one image
 score      TO_NO_BRKTS_HTML_IMG    2.000   # limit
 tflags     TO_NO_BRKTS_HTML_IMG    publish
