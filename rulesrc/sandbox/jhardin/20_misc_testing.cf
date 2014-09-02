@@ -1291,8 +1291,8 @@ tflags      FOUND_YOU          publish
 #meta        ADMITS_CANSPAM    __ADMITS_CANSPAM && !__VIA_ML
 #describe    ADMITS_CANSPAM    Admits to being spam
 
-body        __ADMITS_SPAM     /\bth(?:e[- ]+above|is)(?:\?+s|[- ]+is)[- ]+(?:intended[- ]+as[- ]+)?an?[- ]+advert[i1l]sement\b/i
-meta        ADMITS_SPAM       __ADMITS_SPAM && !__TO___LOWER 
+body        __ADMITS_SPAM     /\bth(?:e[- ]+above|is)(?:\?+s|[- ]+is)[- ]+(?:intended[- ]+as[- ]+)?an?[- ]+(?:email[- ]+)?advert[i1l]sement\b/i
+meta        ADMITS_SPAM       __ADMITS_SPAM && !__TO___LOWER && !__MSOE_MID_WRONG_CASE 
 describe    ADMITS_SPAM       Admits this is an ad
 
 #body        __OBFU_ADVERT     /\badvert[1l]sement\b/i
@@ -1359,7 +1359,7 @@ meta        FROM_MISSP_XPRIO   __XPRIO && __FROM_MISSPACED
 describe    FROM_MISSP_XPRIO   Misspaced FROM + X-Priority
 score       FROM_MISSP_XPRIO   2.500   # limit
 
-meta        XPRIO_RPATH_NULL   __XPRIO && __BOUNCE_RPATH_NULL && !__HAS_ERRORS_TO && !__VIA_ML && !ANY_BOUNCE_MESSAGE 
+meta        XPRIO_RPATH_NULL   __XPRIO && __BOUNCE_RPATH_NULL && !__HAS_ERRORS_TO && !__VIA_ML && !ANY_BOUNCE_MESSAGE && !__HAS_ORGANIZATION && !__RCD_RDNS_SMTP_MESSY 
 score       XPRIO_RPATH_NULL   2.500   # limit
 
 
@@ -1458,7 +1458,9 @@ tflags      UC_GIBBERISH_OBFU  publish
 header	    __NO_TRUSTED_RELAY	X-Spam-Relays-Trusted !~ /ip=/i
 
 #body        CANT_SEE_AD       /\b(?:can(?:no|')?t|(?:aren'?t |not |un)able to) (?:view|read|see|scan|witness|consider|look at|participate in|take in|(?:make|check|scope) out|eye|scrutinize|watch|display|observe) (?:our|this|the) (?:commercial[-. ]|ad(?:v[-.]?ert[i1l]se-?ment)? |images |newsletter |mailing ){1,2}(?:at all|(?:(?:down )?(?:below|underneath))|in (?:your|this) mail|(?:due to|because(?: of)?|as|from) (?:no |missing |unloaded |blocked )?images)\b/i
-body        CANT_SEE_AD       /\b(?:can(?:no|')?t|(?:aren'?t[-,!\s]{1,3}|not[-,!\s]{1,3}|un)able[-,!\s]{1,3}to)[-,!\s]{1,3}(?:(?!our|this|the)\w{1,12}[-,\s]{1,3}){1,2}(?:our|this|the)[-.,\s*]{1,3}(?:commercial[-.,\s]{1,3}|ad(?:v[-.]?ert[i1l]se-?ment)?[-.,\s]{1,3}|images |newsletter |mailing ){1,2}(?:at all|(?:(?:down )?(?:below|underneath))|in (?:your|this) mail|(?:due to|because(?: of)?|as|from) (?:no |missing |unloaded |blocked )?(?:images|graphics))\b/i
+body        __CANT_SEE_AD_1   /\b(?:can(?:no|')?t|(?:aren'?t[-,!\s]{1,3}|not[-,!\s]{1,3}|un)able[-,!\s]{1,3}to)[-,!\s]{1,3}(?:(?!our|this|the)\w{1,12}[-,\s]{1,3}){1,2}(?:our|this|the)[-.,\s*]{1,3}(?:commercial[-.,\s]{1,3}|ad(?:v[-.]?ert[i1l]se-?ment)?[-.,\s]{1,3}|images |newsletter |mailing ){1,2}(?:at all|(?:(?:down )?(?:below|underneath))|in (?:your|this) mail|(?:due to|because(?: of)?|as|from) (?:no |missing |unloaded |blocked )?(?:images|graphics))\b/i
+body        __CANT_SEE_AD_2   /\b(?:issue|problem|trouble) (?:getting|viewing|with) (?:(?:our|the) )?(?:message|content|e-?mail|details)(?: below)?[.?] (?:please|go ahead and) (?:click|browse)\b/i
+meta        CANT_SEE_AD       __CANT_SEE_AD_1 || __CANT_SEE_AD_2
 describe    CANT_SEE_AD       You really want to see our spam.
 score       CANT_SEE_AD       3.000	# limit
 tflags      CANT_SEE_AD       publish
@@ -1508,10 +1510,10 @@ tflags      HTML_OFF_PAGE     publish
 
 
 body        __PUMPDUMP_01     /\b(?:times|multiply|tripl(?:e|ing)|quadrupl(?:e|ing)|quintupl(?:e|ing)) (?:your|an) (?:princip(?:al|le)|investment)\b/i
-body        __PUMPDUMP_02     /\bstock (?:triple|quadruple|quintuple)\b/i
+body        __PUMPDUMP_02     /\bsto[ck]{2} (?:triple|quadruple|quintuple|is about to soar)\b/i
 body        __PUMPDUMP_03     /\bbuy (?:[^.!]{1,30} )?(?:(?:(?:mon|tues|wednes|thurs|fri)day|tomorrow) (?:first thing|open|morning)|(?:first thing|opens|before) (?:(?:mon|tues|wednes|thurs|fri)day|tomorrow))/i
 body        __PUMPDUMP_04     /\bmake you (?:big bucks|hundreds|thousands)\b/i
-body        __PUMPDUMP_05     /\b(?:triple|quadruple|quintuple)d in \d days\b/i
+body        __PUMPDUMP_05     /\b(?:tripled|quadrupled|quintupled|(?:shares|value) (?:go up|increase) by [a-z\s]{0,20}\d+ times) in (?:\d|a span of|a few) days\b/i
 body        __PUMPDUMP_06     /\brecommend(?:ed|s)? (?:a|this) (?:company|stock)\b/i
 body        __PUMPDUMP_07     /\bbuy for (?:around |about |less than )?\d+ cents\b/i
 meta        __PD_CNT_1        (__PUMPDUMP_01+__PUMPDUMP_02+__PUMPDUMP_03+__PUMPDUMP_04+__PUMPDUMP_05+__PUMPDUMP_06+__PUMPDUMP_07) > 0
@@ -1640,8 +1642,22 @@ describe       URI_GOOGLE_PROXY       Accessing a blacklisted URI or obscuring s
 tflags         URI_GOOGLE_PROXY       publish
 
 
-meta           RPATH_NULL_CTCQ        __BOUNCE_RPATH_NULL && __CTYPE_CHARSET_QUOTED && !__VIA_ML && !__SUBJECT_ENCODED_QP && !ANY_BOUNCE_MESSAGE && !__DOS_HAS_LIST_UNSUB && !__TAG_EXISTS_STYLE 
+meta           RPATH_NULL_CTCQ        __BOUNCE_RPATH_NULL && __CTYPE_CHARSET_QUOTED && !__VIA_ML && !__SUBJECT_ENCODED_QP && !ANY_BOUNCE_MESSAGE && !__DOS_HAS_LIST_UNSUB && !__TAG_EXISTS_STYLE && !__TAG_EXISTS_STYLE 
 score          RPATH_NULL_CTCQ        2.000   # limit
+
+rawbody        __TENWORD_GIBBERISH    /^\s*(?:[a-z]+\s+){10}\.$/m
+tflags         __TENWORD_GIBBERISH    multiple maxhits=21
+meta           TW_GIBBERISH_MANY      __TENWORD_GIBBERISH > 20
+describe       TW_GIBBERISH_MANY      Lots of gibberish text to spoof pattern matching filters
+score          TW_GIBBERISH_MANY      2.000   # limit
+
+body           __OPTOUT_BRKT          /\[(?:unsub(?:scribe)|remove(?: me)|leave)\]/i
+tflags         __OPTOUT_BRKT          multiple maxhits=2
+meta           OPTOUT_BRKT_MANY       __OPTOUT_BRKT > 1
+describe       OPTOUT_BRKT_MANY       Repetitive opt-outs
+score          OPTOUT_BRKT_MANY       2.000   # limit
+
+
 
 
 
