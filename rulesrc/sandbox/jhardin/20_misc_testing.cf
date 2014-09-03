@@ -1338,6 +1338,9 @@ meta        URI_WPADMIN        __URI_WPADMIN
 describe    URI_WPADMIN        WordPress login/admin URI, possible phishing
 tflags      URI_WPADMIN        publish
 
+uri         __URI_WPCONTENT    m,/wp-content/.*\.php,i
+uri         __URI_WPINCLUDES   m,/wp-includes/.*\.php,i
+
 # subrules migrated from 00_FVGT_File001.cf
 
 header      __SUBJ_LOWER       ALL =~ /subject:\s\S{5}/
