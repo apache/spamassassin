@@ -1359,7 +1359,7 @@ meta        FROM_MISSP_XPRIO   __XPRIO && __FROM_MISSPACED
 describe    FROM_MISSP_XPRIO   Misspaced FROM + X-Priority
 score       FROM_MISSP_XPRIO   2.500   # limit
 
-meta        XPRIO_RPATH_NULL   __XPRIO && __BOUNCE_RPATH_NULL && !__HAS_ERRORS_TO && !__VIA_ML && !ANY_BOUNCE_MESSAGE && !__HAS_ORGANIZATION && !__RCD_RDNS_SMTP_MESSY 
+meta        XPRIO_RPATH_NULL   __XPRIO && __BOUNCE_RPATH_NULL && !__HAS_ERRORS_TO && !__VIA_ML && !ANY_BOUNCE_MESSAGE && !__HAS_ORGANIZATION && !__RCD_RDNS_SMTP_MESSY && !__NOT_SPOOFED 
 score       XPRIO_RPATH_NULL   2.500   # limit
 
 
@@ -1642,7 +1642,7 @@ describe       URI_GOOGLE_PROXY       Accessing a blacklisted URI or obscuring s
 tflags         URI_GOOGLE_PROXY       publish
 
 
-meta           RPATH_NULL_CTCQ        __BOUNCE_RPATH_NULL && __CTYPE_CHARSET_QUOTED && !__VIA_ML && !__SUBJECT_ENCODED_QP && !ANY_BOUNCE_MESSAGE && !__DOS_HAS_LIST_UNSUB && !__TAG_EXISTS_STYLE && !__TAG_EXISTS_STYLE 
+meta           RPATH_NULL_CTCQ        __BOUNCE_RPATH_NULL && __CTYPE_CHARSET_QUOTED && !__VIA_ML && !__SUBJECT_ENCODED_QP && !ANY_BOUNCE_MESSAGE && !__DOS_HAS_LIST_UNSUB && !__TAG_EXISTS_STYLE && !__TAG_EXISTS_STYLE && !__HAS_THREAD_INDEX 
 score          RPATH_NULL_CTCQ        2.000   # limit
 
 rawbody        __TENWORD_GIBBERISH    /^\s*(?:[a-z]+\s+){10}\.$/m
@@ -1658,6 +1658,9 @@ describe       OPTOUT_BRKT_MANY       Repetitive opt-outs
 score          OPTOUT_BRKT_MANY       2.000   # limit
 
 
-
+# Oh, the humanity! Is there no better way?
+#full           __RECIP_IN_URL_DOM     m;^Received:[^:]{1,400}?\sfor\s<(\w+)\@.+?https?://\1\d*\.;ism
+#describe       __RECIP_IN_URL_DOM     Recipient in body URL
+#tflags         __RECIP_IN_URL_DOM     nopublish
 
 
