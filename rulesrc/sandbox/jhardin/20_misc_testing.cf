@@ -997,7 +997,7 @@ meta        SUBJ_OBFU_PUNCT_MANY   __SUBJ_OBFU_PUNCT > 2 && !__THREADED && !__RP
 describe    SUBJ_OBFU_PUNCT_MANY   Punctuation-obfuscated Subject: header
 score       SUBJ_OBFU_PUNCT_MANY   1.750
 
-meta        SUBJ_MANGLED           __SUBJ_OBFU_PUNCT && __GAPPY_SUBJECT 
+meta        SUBJ_MANGLED           __SUBJ_OBFU_PUNCT && __GAPPY_SUBJECT && !__RP_MATCHES_RCVD && !__HAS_X_MAILER && !__DOS_HAS_LIST_UNSUB 
 score       SUBJ_MANGLED           2.000    # limit
 
 # A document was scanned and sentto you using a Hewlett-Packard HP Officejet
@@ -1360,8 +1360,12 @@ meta        URI_WPADMIN        __URI_WPADMIN
 describe    URI_WPADMIN        WordPress login/admin URI, possible phishing
 tflags      URI_WPADMIN        publish
 
-uri         __URI_WPCONTENT    m,/wp-content/.*\.php,i
-uri         __URI_WPINCLUDES   m,/wp-includes/.*\.php,i
+uri         __URI_WPCONTENT    m,/wp-content/.*\.php\b,i
+uri         __URI_WPINCLUDES   m,/wp-includes/.*\.php\b,i
+meta        URI_WP_HACKED      __URI_WPCONTENT || __URI_WPINCLUDES
+describe    URI_WP_HACKED      URI for compromised WordPress site, possible malware
+score       URI_WP_HACKED      3.000   # limit
+tflags      URI_WP_HACKED      publish
 
 # subrules migrated from 00_FVGT_File001.cf
 
@@ -1687,5 +1691,10 @@ score          OPTOUT_BRKT_MANY       2.000   # limit
 #full           __RECIP_IN_URL_DOM     m;^Received:[^:]{1,400}?\sfor\s<(\w+)\@.+?https?://\1\d*\.;ism
 #describe       __RECIP_IN_URL_DOM     Recipient in body URL
 #tflags         __RECIP_IN_URL_DOM     nopublish
+
+# tuning tests
+body      __TVD_GET_STOCK_1            /\b(?i:OTC).{2,8}(?:[A-Z]\s*){3,5}\b/
+body      __TVD_GET_STOCK_2            /(?i:OTC)[^-\/\\'.]{2,8}(?:[A-Z]\s*){3,5}\b/
+
 
 
