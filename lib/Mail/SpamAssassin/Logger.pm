@@ -236,7 +236,7 @@ sub _log {
   }
 
   my ($level, $message, @args) = @_;
-  $message =~ s/^([a-z0-9_-]*):\s*//i;
+  $message =~ s/^(?:[a-z0-9_-]*):\s*//i;
 
   $message = sprintf($message,@args)  if @args;
   $message =~ s/\n+$//s;
