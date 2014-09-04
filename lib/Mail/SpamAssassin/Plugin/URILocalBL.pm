@@ -130,12 +130,22 @@ sub new {
   # a uri_block_cc rule?
 
   # this code burps an ugly message if it fails, but that's redirected elsewhere
-  open(OLDERR, ">&STDERR");
-  open(STDERR, ">", "/dev/null");
-  $self->{geoip} = Geo::IP->new(GEOIP_MEMORY_CACHE | GEOIP_CHECK_CACHE);
-  $self->{geoisp} = Geo::IP->open_type(GEOIP_ISP_EDITION, GEOIP_MEMORY_CACHE | GEOIP_CHECK_CACHE);
+  my $flags = 0;
+  eval '$flags = Geo::IP::GEOIP_SILENCE if (defined &Geo::IP::GEOIP_SILENCE)';
   open(STDERR, ">&OLDERR");
   close(OLDERR);
+
+  if ($flags) {
+    $self->{geoip} = Geo::IP->new(GEOIP_MEMORY_CACHE | GEOIP_CHECK_CACHE | $flags);
+    $self->{geoisp} = Geo::IP->open_type(GEOIP_ISP_EDITION, GEOIP_MEMORY_CACHE | GEOIP_CHECK_CACHE | $flags);
+  } else {
+    open(OLDERR, ">&STDERR");
+    open(STDERR, ">", "/dev/null");
+    $self->{geoip} = Geo::IP->new(GEOIP_MEMORY_CACHE | GEOIP_CHECK_CACHE);
+    $self->{geoisp} = Geo::IP->open_type(GEOIP_ISP_EDITION, GEOIP_MEMORY_CACHE | GEOIP_CHECK_CACHE);
+    open(STDERR, ">&OLDERR");
+    close(OLDERR);
+  }
 
   $self->register_eval_rule("check_uri_local_bl");
 
