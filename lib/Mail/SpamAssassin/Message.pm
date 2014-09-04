@@ -1036,7 +1036,9 @@ sub _parse_normal {
       # we cannot just delete immediately in the POSIX idiom, as this is
       # unportable (to win32 at least)
       push @{$self->{tmpfiles}}, $filepath;
+      dbg("message: storing a message part to file %s", $filepath);
       $fh->print(@{$body})  or die "error writing to $filepath: $!";
+      $fh->flush  or die "error writing (flush) to $filepath: $!";
       $msg->{'raw'} = $fh;
     }
   }
