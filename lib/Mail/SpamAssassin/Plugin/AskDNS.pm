@@ -589,7 +589,8 @@ sub process_response_packet {
           $match = 1  if $subtest->{$rcode};
         } elsif ($rcode != 0) {
           # skip remaining tests on DNS error
-        } elsif (!grep($_ eq 'ANY' || $_ eq $rr_type, @$answer_types_ref) ) {
+        } elsif (!defined($rr_type) ||
+                 !grep($_ eq 'ANY' || $_ eq $rr_type, @$answer_types_ref) ) {
           # skip remaining tests on wrong RR type
         } elsif (!defined $subtest) {
           $match = 1;  # any valid response of the requested RR type matches
