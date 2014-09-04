@@ -18,13 +18,14 @@
 ###########################################################################
 
 
-# axb 2014-08-07
+# Updated: 2014-09-04 (axb@apache.org)
 
 What's so cool about Bayes/Redis
 
 - speed, speed, speed
 - zero maintenance
 - cheap to run  - all it needs is cheap memory - the more the better.
+- Hint: feed spam from trap box with longer expiration times than production traffic
 
 
 ------------------------------------------
