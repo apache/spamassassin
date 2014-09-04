@@ -1128,6 +1128,7 @@ sub secure_tmpfile {
     return;
   }
 
+  dbg("util: secure_tmpfile created a temporary file %s", $reportfile);
   return ($reportfile, $tmpfh);
 }
 

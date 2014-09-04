@@ -2935,7 +2935,17 @@ sub create_fulltext_tmpfile {
 
   my ($tmpf, $tmpfh) = Mail::SpamAssassin::Util::secure_tmpfile();
   $tmpfh  or die "failed to create a temporary file";
-  print $tmpfh $$fulltext  or die "error writing to $tmpf: $!";
+
+  # PerlIO's buffered print writes in 8 kB chunks - which can be slow.
+  #   print $tmpfh $$fulltext  or die "error writing to $tmpf: $!";
+  #
+  # reducing the number of writes and bypassing extra buffering in PerlIO
+  # speeds up writing of larger text by a factor of 2
+  my $nwrites;
+  for (my $ofs = 0; $ofs < length($$fulltext); $ofs += $nwrites) {
+    $nwrites = $tmpfh->syswrite($$fulltext, length($$fulltext)-$ofs, $ofs);
+    defined $nwrites  or die "error writing to $tmpf: $!";
+  }
   close $tmpfh  or die "error closing $tmpf: $!";
 
   $self->{fulltext_tmpfile} = $tmpf;
