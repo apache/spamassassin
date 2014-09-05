@@ -1368,7 +1368,7 @@ describe    URI_WP_HACKED      URI for compromised WordPress site, possible malw
 score       URI_WP_HACKED      3.000   # limit
 tflags      URI_WP_HACKED      publish
 
-uri         __PS_TEST_LOC_WP   m;/(?:wp-content/plugins|wp-content/themes|wp-includes|modules/mod_wdbanners|includes/|google_recommends|mt-static|data/module)/.{0,64}(?!\.gif|\.jpg|\.png|\.bmp).{3}$;i
+uri         __PS_TEST_LOC_WP   m;/(?:wp-content/plugins|wp-content/themes|wp-includes|modules/mod_wdbanners|includes/|google_recommends|mt-static|data/module)/.{0,64}(?!\.gif|\.jpg|\.png|\.bmp).{4}$;i
 
 
 
