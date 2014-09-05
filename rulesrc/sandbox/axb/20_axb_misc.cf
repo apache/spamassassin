@@ -10,10 +10,8 @@ describe	AXB_XM_OE7		Not really
 uri		AXB_URI_POLQS		/\/policy\/\?qs\=[a-f0-9]{10}/
 describe	AXB_URI_POLQS		Over the counter
 
-
 header          AXB_X_FF_SEZ_S          X-Forefront-Antispam-Report =~ /\bSFV\:SPM\b/
 describe        AXB_X_FF_SEZ_S          Forefront sez this is spam
-
 
 rawbody		AXB_RBDY_TENANDTEN	/\&\#1088\;\&\#1092\;/
 describe	AXB_RBDY_TENANDTEN	Ten & Ten
