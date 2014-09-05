@@ -1702,4 +1702,7 @@ body      __TVD_GET_STOCK_1            /\b(?i:OTC).{2,8}(?:[A-Z]\s*){3,5}\b/
 body      __TVD_GET_STOCK_2            /(?i:OTC)[^-\/\\'.]{2,8}(?:[A-Z]\s*){3,5}\b/
 
 
+# reported on users list 09/2014 jdebert <jdebert@garlic.com>
+header    __RCVD_DBL_DQ                Received =~ /(?:\[\d+\.\d+\.\d+\.\d+\]){2}/
+
 
