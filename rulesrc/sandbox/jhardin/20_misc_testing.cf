@@ -1706,7 +1706,7 @@ body      __TVD_GET_STOCK_2            /(?i:OTC)[^-\/\\'.]{2,8}(?:[A-Z]\s*){3,5}
 header    __RCVD_DBL_DQ                Received =~ /(?:\[\d+\.\d+\.\d+\.\d+\]){2}/
 
 # reported on users list 09/2014 George Johnson <georgejohnson@talaya.net>
-header    __RAND_HEADER                ALL =~ /^(?!Accept-Language|Authentication-Results|Content-|DomainKey-Signature|Received-SPF|Return-Path|Thread-)[a-z]{5,}-[a-z]{3,}:\s+(?:\d{3,}[-\.][0-9a-f]{6,}|\d{6,}(?:[-\.]\d{2,5})?|[0-9a-f]{30,})$/ism
+header    __RAND_HEADER                ALL =~ /^(?!Accept-Language|Authentication-Results|Content-|DomainKey-Signature|DKIM-|MIME-|Received-SPF|Return-Path|Thread-|User-Agent)(?:[a-z]{4,}-[a-z]{3,}|[a-z]{3,}-[a-z]{5,}):\s+(?:\d{3,}[-\.][0-9a-f]{6,}|\d{6,}(?:[-\.]\d{2,5})?|[0-9a-f]{30,})$/ism
 tflags    __RAND_HEADER                multiple, maxhits=5
 meta      RAND_HEADER_MANY             __RAND_HEADER > 4
 describe  RAND_HEADER_MANY             Many random gibberish message headers
