@@ -956,6 +956,7 @@ meta        TVD_SPACE_RATIO_MINFP  __TVD_SPACE_RATIO && !__LCL__ENV_AND_HDR_FROM
 #tflags      TVD_SPACE_RATIO_MINFP  nopublish
 score       TVD_SPACE_RATIO_MINFP  3.000   # limit
 
+# exclude __SUBSCRIPTION_INFO hits to avoid FP on legit chinese mailing lists (09/2014)
 meta        TVD_SPACE_ENCODED      __TVD_SPACE_RATIO && __SUBJECT_ENCODED_B64 && !__LCL__ENV_AND_HDR_FROM_MATCH && !__SUBSCRIPTION_INFO && !__NOT_SPOOFED 
 score       TVD_SPACE_ENCODED      2.500   # limit
 
@@ -997,8 +998,8 @@ meta        SUBJ_OBFU_PUNCT_MANY   __SUBJ_OBFU_PUNCT > 2 && !__THREADED && !__RP
 describe    SUBJ_OBFU_PUNCT_MANY   Punctuation-obfuscated Subject: header
 score       SUBJ_OBFU_PUNCT_MANY   1.750
 
-meta        SUBJ_MANGLED           __SUBJ_OBFU_PUNCT && __GAPPY_SUBJECT && !__RP_MATCHES_RCVD && !__HAS_X_MAILER && !__DOS_HAS_LIST_UNSUB 
-score       SUBJ_MANGLED           2.000    # limit
+#meta        SUBJ_MANGLED           __SUBJ_OBFU_PUNCT && __GAPPY_SUBJECT && !__RP_MATCHES_RCVD && !__HAS_X_MAILER && !__DOS_HAS_LIST_UNSUB 
+#score       SUBJ_MANGLED           2.000    # limit
 
 # A document was scanned and sentto you using a Hewlett-Packard HP Officejet
 # A document was scanned and sent to you using a Hewlett-Packard HP Officejet
@@ -1539,10 +1540,10 @@ tflags      HTML_OFF_PAGE     publish
 
 
 body        __PUMPDUMP_01     /\b(?:times|multiply|tripl(?:e|ing)|quadrupl(?:e|ing)|quintupl(?:e|ing)) (?:your|an) (?:princip(?:al|le)|investment)\b/i
-body        __PUMPDUMP_02     /\bsto[ck]{2} (?:triple|quadruple|quintuple|is about to soar)\b/i
+body        __PUMPDUMP_02     /\bsto[ck]{2} (?:will |may |is (?:about|poised|positioned|ready) to )?(?:triple|quadruple|quintuple|soar)\b/i
 body        __PUMPDUMP_03     /\bbuy (?:[^.!]{1,30} )?(?:(?:(?:mon|tues|wednes|thurs|fri)day|tomorrow) (?:first thing|open|morning)|(?:first thing|opens|before) (?:(?:mon|tues|wednes|thurs|fri)day|tomorrow))/i
 body        __PUMPDUMP_04     /\bmake you (?:big bucks|hundreds|thousands)\b/i
-body        __PUMPDUMP_05     /\b(?:tripled|quadrupled|quintupled|(?:shares|value) (?:go up|increase) by [a-z\s]{0,20}\d+ times) in (?:\d|a span of|a few) days\b/i
+body        __PUMPDUMP_05     /\b(?:tripled|quadrupled|quintupled|(?:shares|value) (?:go up|increase) by [a-z\s]{0,20}\d+ times) in (?:\d|a (?:span of|few)) days\b/i
 body        __PUMPDUMP_06     /\brecommend(?:ed|s)? (?:a|this) (?:company|stock)\b/i
 body        __PUMPDUMP_07     /\bbuy for (?:around |about |less than )?\d+ cents\b/i
 meta        __PD_CNT_1        (__PUMPDUMP_01+__PUMPDUMP_02+__PUMPDUMP_03+__PUMPDUMP_04+__PUMPDUMP_05+__PUMPDUMP_06+__PUMPDUMP_07) > 0
@@ -1552,9 +1553,9 @@ meta        __PD_CNT_4        (__PUMPDUMP_01+__PUMPDUMP_02+__PUMPDUMP_03+__PUMPD
 meta        __PD_CNT_5        (__PUMPDUMP_01+__PUMPDUMP_02+__PUMPDUMP_03+__PUMPDUMP_04+__PUMPDUMP_05+__PUMPDUMP_06+__PUMPDUMP_07) > 4
 meta        __PD_CNT_6        (__PUMPDUMP_01+__PUMPDUMP_02+__PUMPDUMP_03+__PUMPDUMP_04+__PUMPDUMP_05+__PUMPDUMP_06+__PUMPDUMP_07) > 5
 meta        __PD_CNT_7        (__PUMPDUMP_01+__PUMPDUMP_02+__PUMPDUMP_03+__PUMPDUMP_04+__PUMPDUMP_05+__PUMPDUMP_06+__PUMPDUMP_07) > 6
-meta        PUMPDUMP          __PUMPDUMP_01 || __PUMPDUMP_02 || __PUMPDUMP_03 || __PUMPDUMP_04 || __PUMPDUMP_05 || __PUMPDUMP_06 || __PUMPDUMP_07
+meta        PUMPDUMP          (__PUMPDUMP_01 || __PUMPDUMP_02 || __PUMPDUMP_03 || __PUMPDUMP_04 || __PUMPDUMP_05 || __PUMPDUMP_06 || __PUMPDUMP_07) && !PUMPDUMP_MULTI
 describe    PUMPDUMP          Pump-and-dump stock scam phrase
-score       PUMPDUMP          3.000	# limit
+score       PUMPDUMP          1.500	# limit
 tflags      PUMPDUMP          publish
 meta        PUMPDUMP_MULTI    (__PUMPDUMP_01+__PUMPDUMP_02+__PUMPDUMP_03+__PUMPDUMP_04+__PUMPDUMP_05+__PUMPDUMP_06+__PUMPDUMP_07) > 1
 describe    PUMPDUMP_MULTI    Pump-and-dump stock scam phrases
