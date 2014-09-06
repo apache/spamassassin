@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus jarif kpg-core mas-cps mas-mas mmiroslaw-ham mmiroslaw-spam zmi; day 2: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus dwarren jarif kpg-core llanga mas-cps mas-mas zmi; day 3: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus dwarren jarif kpg-core llanga mas-cps mas-mas mmiroslaw-ham mmiroslaw-spam zmi
+# with results from: day 1: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus dwarren jarif kpg-core zmi; day 2: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus jarif kpg-core llanga mas-cps mas-mas mmiroslaw-ham mmiroslaw-spam zmi; day 3: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus dwarren jarif kpg-core llanga mas-cps mas-mas zmi
 
 # tflags publish
 AC_BR_BONANZA
@@ -105,6 +105,9 @@ AXB_URI_POLQS
 
 # good enough
 AXB_XMAILER_MIMEOLE_OL_024C2
+
+# good enough
+AXB_X_AOL_SEZ_S
 
 # tflags learn
 BAYES_00
@@ -303,6 +306,9 @@ FSL_CTYPE_WIN1251
 
 # good enough
 FSL_HELO_DEVICE
+
+# good enough
+FSL_HELO_FAKE
 
 # good enough
 FSL_HELO_FIREWALL
@@ -754,12 +760,6 @@ SUBJECT_IN_BLACKLIST
 # tflags userconf
 SUBJECT_IN_WHITELIST
 
-# good enough
-SUBJ_MANGLED
-
-# good enough
-SUBJ_OBFU_PUNCT_MANY
-
 # tflags publish
 SYSADMIN
 
@@ -809,22 +809,16 @@ TVD_SPACE_ENCODED
 TVD_SPACE_RATIO_MINFP
 
 # good enough
-FROM_12LTRDOM
-
-# good enough
-HELO_MISC_IP
+MALFORMED_FREEMAIL
 
 # good enough
 SUBJ_OBFU_LOW_CNTRST
 
-# good enough
-TVD_PH_BODY_META
-
-# good enough
-TVD_SUBJ_NUM_OBFU_MINFP
-
 # tflags publish
 URI_PHISH
+
+# tflags publish
+URI_WP_HACKED
 
 # tflags publish
 UC_GIBBERISH_OBFU
