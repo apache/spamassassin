@@ -802,7 +802,9 @@ tflags      OBFU_JVSCR_ESC         publish
 
 # Starting to observe in spam
 meta        __LIST_PARTIAL         __DOS_HAS_LIST_UNSUB && !__DOS_HAS_LIST_ID
-describe    __LIST_PARTIAL         Has incomplete List-* header set
+meta        LIST_PARTIAL           __LIST_PARTIAL && !__BUGGED_IMG && !__DKIM_EXISTS && !__RP_MATCHES_RCVD && !__HAS_SENDER 
+describe    LIST_PARTIAL           Has incomplete List-* header set
+score       LIST_PARTIAL           2.000   # limit
 
 # in lots of phishing
 uri         __UCOZ_URI             /\.ucoz\.org\//i
@@ -956,8 +958,8 @@ meta        TVD_SPACE_RATIO_MINFP  __TVD_SPACE_RATIO && !__LCL__ENV_AND_HDR_FROM
 #tflags      TVD_SPACE_RATIO_MINFP  nopublish
 score       TVD_SPACE_RATIO_MINFP  3.000   # limit
 
-# exclude __SUBSCRIPTION_INFO hits to avoid FP on legit chinese mailing lists (09/2014)
-meta        TVD_SPACE_ENCODED      __TVD_SPACE_RATIO && __SUBJECT_ENCODED_B64 && !__LCL__ENV_AND_HDR_FROM_MATCH && !__SUBSCRIPTION_INFO && !__NOT_SPOOFED 
+# Be sensitive to FP on legit chinese-language mailing lists (09/2014)
+meta        TVD_SPACE_ENCODED      __TVD_SPACE_RATIO && __SUBJECT_ENCODED_B64 && !__LCL__ENV_AND_HDR_FROM_MATCH && !__NOT_SPOOFED && !__VIA_ML
 score       TVD_SPACE_ENCODED      2.500   # limit
 
 # sample from users list:   Subject: Sta ffWork sFastToSen dTab le tsGood s
@@ -1213,7 +1215,7 @@ uri         __URI_TLD_MC         /\.(?!(?-i:com|net|org|biz|info|COM|NET|ORG))(?
 uri         __URI_GOOG_MC        /(?!(?-i:[Gg]oogle))google/i
 
 rawbody     __HTML_FONT_TINY_01  /font-size:\s{0,5}[0-4]px;/i
-meta        HTML_FONT_TINY       __HTML_FONT_TINY_01 && __TAG_EXISTS_BODY
+meta        HTML_FONT_TINY       __HTML_FONT_TINY_01 && __TAG_EXISTS_BODY && !__DKIM_EXISTS && !__BUGGED_IMG && !__VIA_ML && !__RP_MATCHES_RCVD && !__THREADED && !__LCL__ENV_AND_HDR_FROM_MATCH 
 describe    HTML_FONT_TINY       Font too small to read
 score       HTML_FONT_TINY       1.00	# limit
 
@@ -1275,7 +1277,7 @@ tflags      FORM_LOW_CONTRAST     publish
 
 
 # try to FP-reduce HTML_FONT_LOW_CONTRAST
-meta        __HTML_FONT_LOW_CONTRAST_MINFP	HTML_FONT_LOW_CONTRAST && !__VIA_ML && !__RP_MATCHES_RCVD && !__RCD_RDNS_MAIL && !__DKIM_EXISTS && !__LCL__ENV_AND_HDR_FROM_MATCH && !__BUGGED_IMG && !__THREADED && !__SENDER_BOT 
+meta        __HTML_FONT_LOW_CONTRAST_MINFP	HTML_FONT_LOW_CONTRAST && !__VIA_ML && !__RP_MATCHES_RCVD && !__RCD_RDNS_MAIL && !__DKIM_EXISTS && !__LCL__ENV_AND_HDR_FROM_MATCH && !__BUGGED_IMG && !__THREADED && !__SENDER_BOT && !__HAS_THREAD_INDEX && !ALL_TRUSTED && !__NOT_SPOOFED 
 
 # some no-ham combinations
 meta        GAPPY_LOW_CONTRAST    __HTML_FONT_LOW_CONTRAST_MINFP && __GAPPY_SUBJECT 
@@ -1285,7 +1287,7 @@ score       GAPPY_LOW_CONTRAST    2.500   # limit
 meta        URI_ONLY_LOW_CONTRAST __HTML_FONT_LOW_CONTRAST_MINFP && __BODY_URI_ONLY 
 score       URI_ONLY_LOW_CONTRAST 2.500   # limit
 
-meta        SUBJ_OBFU_LOW_CNTRST  __HTML_FONT_LOW_CONTRAST_MINFP && __SUBJ_OBFU_PUNCT && !ALL_TRUSTED 
+meta        SUBJ_OBFU_LOW_CNTRST  __HTML_FONT_LOW_CONTRAST_MINFP && __SUBJ_OBFU_PUNCT && !ALL_TRUSTED && !__NOT_A_PERSON 
 describe    SUBJ_OBFU_LOW_CNTRST  Subject obfuscation + hidden text
 score       SUBJ_OBFU_LOW_CNTRST  2.500   # limit
 
@@ -1363,7 +1365,7 @@ tflags      URI_WPADMIN        publish
 
 uri         __URI_WPCONTENT    m,/wp-content/.*\.php\b,i
 uri         __URI_WPINCLUDES   m,/wp-includes/.*\.php\b,i
-meta        URI_WP_HACKED      __URI_WPCONTENT || __URI_WPINCLUDES
+meta        URI_WP_HACKED      (__URI_WPCONTENT || __URI_WPINCLUDES)
 describe    URI_WP_HACKED      URI for compromised WordPress site, possible malware
 score       URI_WP_HACKED      3.000   # limit
 tflags      URI_WP_HACKED      publish
@@ -1383,7 +1385,7 @@ header      __FH_HAS_XMSMAIL   exists:X-MSMail-Priority
 
 # duplicates __XPRIO
 #header      __FH_HAS_XPRIORITY exists:X-Priority
-meta        XPRIO              __XPRIO && !ALL_TRUSTED && !__PHPMAILER_MUA && !__BUGGED_IMG && !__HAS_ERRORS_TO && !__LCL__ENV_AND_HDR_FROM_MATCH && !__THREADED && !__VIA_ML && !__SUBSCRIPTION_INFO && !__RCD_RDNS_MX_MESSY && !__HAS_THREAD_INDEX 
+meta        XPRIO              __XPRIO && !ALL_TRUSTED && !__PHPMAILER_MUA && !__BUGGED_IMG && !__HAS_ERRORS_TO && !__THREADED && !__VIA_ML && !__RCD_RDNS_MX_MESSY && !__HAS_THREAD_INDEX && !__RP_MATCHES_RCVD && !__HAS_X_REF 
 describe    XPRIO              Has X-Priority header
 score       XPRIO              1.500   # limit
 
@@ -1697,9 +1699,6 @@ score          OPTOUT_BRKT_MANY       2.000   # limit
 #describe       __RECIP_IN_URL_DOM     Recipient in body URL
 #tflags         __RECIP_IN_URL_DOM     nopublish
 
-# tuning tests
-body      __TVD_GET_STOCK_1            /\b(?i:OTC).{2,8}(?:[A-Z]\s*){3,5}\b/
-body      __TVD_GET_STOCK_2            /(?i:OTC)[^-\/\\'.]{2,8}(?:[A-Z]\s*){3,5}\b/
 
 
 # reported on users list 09/2014 jdebert <jdebert@garlic.com>
