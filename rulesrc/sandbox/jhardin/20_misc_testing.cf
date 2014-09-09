@@ -1549,24 +1549,25 @@ tflags      HTML_OFF_PAGE     publish
 
 
 body        __PUMPDUMP_01     /\b(?:times|multiply|tripl(?:e|ing)|quadrupl(?:e|ing)|quintupl(?:e|ing)) (?:your|an) (?:princip(?:al|le)|investment)\b/i
-body        __PUMPDUMP_02     /\bsto[ck]{2} (?:will |may |is (?:about|poised|positioned|ready) to )?(?:triple|quadruple|quintuple|soar)\b/i
+body        __PUMPDUMP_02     /\b(?:sto[ck]{2}|share price) (?:will |may |is (?:about|poised|positioned|ready) to )?(?:triple|quadruple|quintuple|soar|go(?:es?) (?:nuts|crazy|sky high|way up))\b/i
 body        __PUMPDUMP_03     /\bbuy (?:[^.!]{1,30} )?(?:(?:(?:mon|tues|wednes|thurs|fri)day|tomorrow) (?:first thing|open|morning)|(?:first thing|opens|before) (?:(?:mon|tues|wednes|thurs|fri)day|tomorrow))/i
 body        __PUMPDUMP_04     /\bmake you (?:big bucks|hundreds|thousands)\b/i
-body        __PUMPDUMP_05     /\b(?:tripled|quadrupled|quintupled|(?:shares|value) (?:go up|increase) by [a-z\s]{0,20}\d+ times) in (?:\d|a (?:span of|few)) days\b/i
+body        __PUMPDUMP_05     /\b(?:tripled|quadrupled|quintupled|(?:shares|value|company) (?:go up|increase|has (?:increased|gained)) (?:by|more than) [a-z\s]{0,20}\d+(?: times| percent| ?%)) (?:and that )?in (?:(?:\d|a (?:span of|few)) days|a very short period)\b/i
 body        __PUMPDUMP_06     /\brecommend(?:ed|s)? (?:a|this) (?:company|stock)\b/i
 body        __PUMPDUMP_07     /\bbuy for (?:around |about |less than )?\d+ cents\b/i
-meta        __PD_CNT_1        (__PUMPDUMP_01+__PUMPDUMP_02+__PUMPDUMP_03+__PUMPDUMP_04+__PUMPDUMP_05+__PUMPDUMP_06+__PUMPDUMP_07) > 0
-meta        __PD_CNT_2        (__PUMPDUMP_01+__PUMPDUMP_02+__PUMPDUMP_03+__PUMPDUMP_04+__PUMPDUMP_05+__PUMPDUMP_06+__PUMPDUMP_07) > 1
-meta        __PD_CNT_3        (__PUMPDUMP_01+__PUMPDUMP_02+__PUMPDUMP_03+__PUMPDUMP_04+__PUMPDUMP_05+__PUMPDUMP_06+__PUMPDUMP_07) > 2
-meta        __PD_CNT_4        (__PUMPDUMP_01+__PUMPDUMP_02+__PUMPDUMP_03+__PUMPDUMP_04+__PUMPDUMP_05+__PUMPDUMP_06+__PUMPDUMP_07) > 3
-meta        __PD_CNT_5        (__PUMPDUMP_01+__PUMPDUMP_02+__PUMPDUMP_03+__PUMPDUMP_04+__PUMPDUMP_05+__PUMPDUMP_06+__PUMPDUMP_07) > 4
-meta        __PD_CNT_6        (__PUMPDUMP_01+__PUMPDUMP_02+__PUMPDUMP_03+__PUMPDUMP_04+__PUMPDUMP_05+__PUMPDUMP_06+__PUMPDUMP_07) > 5
-meta        __PD_CNT_7        (__PUMPDUMP_01+__PUMPDUMP_02+__PUMPDUMP_03+__PUMPDUMP_04+__PUMPDUMP_05+__PUMPDUMP_06+__PUMPDUMP_07) > 6
-meta        PUMPDUMP          (__PUMPDUMP_01 || __PUMPDUMP_02 || __PUMPDUMP_03 || __PUMPDUMP_04 || __PUMPDUMP_05 || __PUMPDUMP_06 || __PUMPDUMP_07) && !PUMPDUMP_MULTI
+body        __PUMPDUMP_08     /\b?(:sto[ck]{2}|sotk) of the year/i
+meta        __PD_CNT_1        (__PUMPDUMP_01+__PUMPDUMP_02+__PUMPDUMP_03+__PUMPDUMP_04+__PUMPDUMP_05+__PUMPDUMP_06+__PUMPDUMP_07+__PUMPDUMP_08) > 0
+meta        __PD_CNT_2        (__PUMPDUMP_01+__PUMPDUMP_02+__PUMPDUMP_03+__PUMPDUMP_04+__PUMPDUMP_05+__PUMPDUMP_06+__PUMPDUMP_07+__PUMPDUMP_08) > 1
+meta        __PD_CNT_3        (__PUMPDUMP_01+__PUMPDUMP_02+__PUMPDUMP_03+__PUMPDUMP_04+__PUMPDUMP_05+__PUMPDUMP_06+__PUMPDUMP_07+__PUMPDUMP_08) > 2
+meta        __PD_CNT_4        (__PUMPDUMP_01+__PUMPDUMP_02+__PUMPDUMP_03+__PUMPDUMP_04+__PUMPDUMP_05+__PUMPDUMP_06+__PUMPDUMP_07+__PUMPDUMP_08) > 3
+meta        __PD_CNT_5        (__PUMPDUMP_01+__PUMPDUMP_02+__PUMPDUMP_03+__PUMPDUMP_04+__PUMPDUMP_05+__PUMPDUMP_06+__PUMPDUMP_07+__PUMPDUMP_08) > 4
+meta        __PD_CNT_6        (__PUMPDUMP_01+__PUMPDUMP_02+__PUMPDUMP_03+__PUMPDUMP_04+__PUMPDUMP_05+__PUMPDUMP_06+__PUMPDUMP_07+__PUMPDUMP_08) > 5
+meta        __PD_CNT_7        (__PUMPDUMP_01+__PUMPDUMP_02+__PUMPDUMP_03+__PUMPDUMP_04+__PUMPDUMP_05+__PUMPDUMP_06+__PUMPDUMP_07+__PUMPDUMP_08) > 6
+meta        PUMPDUMP          (__PUMPDUMP_01 || __PUMPDUMP_02 || __PUMPDUMP_03 || __PUMPDUMP_04 || __PUMPDUMP_05 || __PUMPDUMP_06 || __PUMPDUMP_07 || __PUMPDUMP_08) && !PUMPDUMP_MULTI
 describe    PUMPDUMP          Pump-and-dump stock scam phrase
 score       PUMPDUMP          1.500	# limit
 tflags      PUMPDUMP          publish
-meta        PUMPDUMP_MULTI    (__PUMPDUMP_01+__PUMPDUMP_02+__PUMPDUMP_03+__PUMPDUMP_04+__PUMPDUMP_05+__PUMPDUMP_06+__PUMPDUMP_07) > 1
+meta        PUMPDUMP_MULTI    (__PUMPDUMP_01+__PUMPDUMP_02+__PUMPDUMP_03+__PUMPDUMP_04+__PUMPDUMP_05+__PUMPDUMP_06+__PUMPDUMP_07+__PUMPDUMP_08) > 1
 describe    PUMPDUMP_MULTI    Pump-and-dump stock scam phrases
 score       PUMPDUMP_MULTI    3.000	# limit
 tflags      PUMPDUMP_MULTI    publish
@@ -1603,19 +1604,24 @@ tflags      AD_PREFS          publish
 #body        OPT_OUT           /\bOpt-Out Here\b/i
 #score       OPT_OUT           2.000
 
-uri         URI_OPTOUT_USME   m,^https?://(?:quit|bye|remove|exit|leave|disallow|halt|stop|end)\d*\.[^/]+\.(?:us|me|mobi)\b,i
+uri         URI_OPTOUT_USME   m,^https?://(?:quit|bye|remove|exit|leave|disallow|halt|stop|end|herego|out|discontinue)\d*\.[^/]+\.(?:us|me|mobi|club)\b,i
 describe    URI_OPTOUT_USME   Opt-out URI, unusual TLD
 tflags      URI_OPTOUT_USME   publish
 
-uri         URI_OPTOUT_3LD    m,^https?://(?:quit|bye|remove|exit|leave|disallow|halt|stop|end)\d*\.[^/]+\.com\b,i
+uri         URI_OPTOUT_3LD    m,^https?://(?:quit|bye|remove|exit|leave|disallow|halt|stop|end|herego|out|discontinue)\d*\.[^/]+\.(?:com|net)\b,i
 describe    URI_OPTOUT_3LD    Opt-out URI, suspicious hostname
 score       URI_OPTOUT_3LD    2.000   # limit
-#tflags      URI_OPTOUT_3LD    publish
+tflags      URI_OPTOUT_3LD    publish
 
-uri         __URI_TRY_USME    m,^https?://(?:try|start|get|save|check|act|compare|join|learn|request|visit|my)[^.]*\.[^/]+\.(?:us|me|mobi)\b,i
+uri         __URI_TRY_USME    m,^https?://(?:try|start|get|save|check|act|compare|join|learn|request|visit|my)[^.]*\.[^/]+\.(?:us|me|mobi|club)\b,i
 meta        URI_TRY_USME      __URI_TRY_USME && !__DKIM_EXISTS 
 describe    URI_TRY_USME      "Try it" URI, unusual TLD
 tflags      URI_TRY_USME      publish
+
+uri         URI_TRY_3LD       m,^https?://(?:try|start|get|save|check|act|compare|join|learn|request|visit|my)[^.]*\.[^/]+\.(?:com|net)\b,i
+describe    URI_TRY_3LD       "Try it" URI, suspicious hostname
+score       URI_TRY_3LD       2.000   # limit
+tflags      URI_TRY_3LD       publish
 
 
 
