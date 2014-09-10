@@ -140,7 +140,7 @@ describe TVD_DEAR_HOMEOWNER     Spam with generic salutation of "dear homeowner"
 
 body TVD_ENHANCE                /(?:enhanc(?:e(?:ment)?|ing)|improv(?:e|ing)) .{0,20}sexual (?:stamina|performance)/i
 body __TVD_GET_STOCK            /(?i:OTC)[^-\/\\'.]{2,8}(?:[A-Z]\s*){3,5}\b/
-meta TVD_GET_STOCK              __TVD_GET_STOCK && !__VIA_ML && !__DKIM_EXISTS && !__LCL__ENV_AND_HDR_FROM_MATCH && !__RP_MATCHES_RCVD 
+meta TVD_GET_STOCK              __TVD_GET_STOCK && !__VIA_ML && !__DKIM_EXISTS && !__LCL__ENV_AND_HDR_FROM_MATCH && !__RP_MATCHES_RCVD && !__BUGGED_IMG && !__MSOE_MID_WRONG_CASE 
 
 body TVD_INCREASE_SIZE          /\bsize of .{1,20}(?:penis|dick|manhood)/i
 describe TVD_INCREASE_SIZE      Advertising for penis enlargement
