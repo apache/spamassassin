@@ -954,12 +954,17 @@ meta        GAPPY_HTML             __GAPPY_HTML && !__UNSUB_LINK && !__RP_MATCHE
 describe    GAPPY_HTML             HTML body with much useless whitespace
 
 # Try to improve S/O per bug 6119
-meta        TVD_SPACE_RATIO_MINFP  __TVD_SPACE_RATIO && !__LCL__ENV_AND_HDR_FROM_MATCH && !__VIA_ML && !__SUBSCRIPTION_INFO && !__NOT_SPOOFED  && !__RCD_RDNS_MAIL && !__SUBJECT_ENCODED_QP && !__THREADED 
+meta        TVD_SPACE_RATIO_MINFP  __TVD_SPACE_RATIO && !__LCL__ENV_AND_HDR_FROM_MATCH && !__VIA_ML && !__SUBSCRIPTION_INFO && !__NOT_SPOOFED  && !__RCD_RDNS_MAIL && !__SUBJECT_ENCODED_QP && !__THREADED && !__TO_EQ_FROM_DOM 
 #tflags      TVD_SPACE_RATIO_MINFP  nopublish
 score       TVD_SPACE_RATIO_MINFP  3.000   # limit
 
+meta        SUBJECT_UNNEEDED_ENCODING    (__SUBJECT_ENCODED_B64 && !__SUBJECT_UTF8_B_ENCODED)
+describe    SUBJECT_UNNEEDED_ENCODING    Subject encoded but not non-ASCII?
+score       SUBJECT_UNNEEDED_ENCODING    1.000    # limit
+
 # Be sensitive to FP on legit chinese-language mailing lists (09/2014)
-meta        TVD_SPACE_ENCODED      __TVD_SPACE_RATIO && __SUBJECT_ENCODED_B64 && !__LCL__ENV_AND_HDR_FROM_MATCH && !__NOT_SPOOFED && !__VIA_ML
+meta        __TVD_SPACE_ENCODED    (__TVD_SPACE_RATIO && __SUBJECT_ENCODED_B64 && !__SUBJECT_UTF8_B_ENCODED)
+meta        TVD_SPACE_ENCODED      __TVD_SPACE_ENCODED && !__LCL__ENV_AND_HDR_FROM_MATCH && !__NOT_SPOOFED && !__VIA_ML && !__HS_SUBJ_RE_FW && !__SUBSCRIPTION_INFO 
 score       TVD_SPACE_ENCODED      2.500   # limit
 
 # sample from users list:   Subject: Sta ffWork sFastToSen dTab le tsGood s
@@ -1215,9 +1220,9 @@ uri         __URI_TLD_MC         /\.(?!(?-i:com|net|org|biz|info|COM|NET|ORG))(?
 uri         __URI_GOOG_MC        /(?!(?-i:[Gg]oogle))google/i
 
 rawbody     __HTML_FONT_TINY_01  /font-size:\s{0,5}[0-4]px;/i
-meta        HTML_FONT_TINY       __HTML_FONT_TINY_01 && __TAG_EXISTS_BODY && !__DKIM_EXISTS && !__BUGGED_IMG && !__VIA_ML && !__RP_MATCHES_RCVD && !__THREADED && !__LCL__ENV_AND_HDR_FROM_MATCH && !__MSGID_JAVAMAIL && !__FROM_LOWER 
+meta        HTML_FONT_TINY       __HTML_FONT_TINY_01 && __TAG_EXISTS_BODY && !__DKIM_EXISTS && !__BUGGED_IMG && !__VIA_ML && !__RP_MATCHES_RCVD && !__THREADED && !__LCL__ENV_AND_HDR_FROM_MATCH && !__MSGID_JAVAMAIL && !__FROM_LOWER && !__HAS_THREAD_INDEX && !__FROM_LOWER 
 describe    HTML_FONT_TINY       Font too small to read
-score       HTML_FONT_TINY       1.00	# limit
+score       HTML_FONT_TINY       1.500	# limit
 
 body        __BODY_TEXT_LINE     /^\s*\S/
 tflags      __BODY_TEXT_LINE     multiple maxhits=3
@@ -1396,11 +1401,12 @@ meta        FROM_MISSP_XPRIO   __XPRIO && __FROM_MISSPACED
 describe    FROM_MISSP_XPRIO   Misspaced FROM + X-Priority
 score       FROM_MISSP_XPRIO   2.500   # limit
 
-meta        XPRIO_RPATH_NULL   __XPRIO && __BOUNCE_RPATH_NULL && !__HAS_ERRORS_TO && !__VIA_ML && !ANY_BOUNCE_MESSAGE && !__HAS_ORGANIZATION && !__RCD_RDNS_SMTP_MESSY && !__NOT_SPOOFED 
+meta        XPRIO_RPATH_NULL   (__XPRIO && __BOUNCE_RPATH_NULL) && !__HAS_ERRORS_TO && !__VIA_ML && !ANY_BOUNCE_MESSAGE && !__HAS_ORGANIZATION && !__RCD_RDNS_SMTP_MESSY && !__NOT_SPOOFED 
 score       XPRIO_RPATH_NULL   2.500   # limit
 
-meta        TO_EQ_FM_RPATH_NULL   (__TO_EQ_FROM_USR_NN && __BOUNCE_RPATH_NULL)
-score       TO_EQ_FM_RPATH_NULL   2.000   # limit
+meta        TO_EQ_FM_NN_RPATH_NULL   (__TO_EQ_FROM_USR_NN && __BOUNCE_RPATH_NULL) && !__TO_EQ_FROM_USR 
+score       TO_EQ_FM_NN_RPATH_NULL   2.000   # limit
+tflags      TO_EQ_FM_NN_RPATH_NULL   publish
 
 
 header      __FS_SUBJ_RE       Subject =~ /^Re: /
@@ -1565,11 +1571,11 @@ meta        __PD_CNT_6        (__PUMPDUMP_01+__PUMPDUMP_02+__PUMPDUMP_03+__PUMPD
 meta        __PD_CNT_7        (__PUMPDUMP_01+__PUMPDUMP_02+__PUMPDUMP_03+__PUMPDUMP_04+__PUMPDUMP_05+__PUMPDUMP_06+__PUMPDUMP_07+__PUMPDUMP_08) > 6
 meta        PUMPDUMP          (__PUMPDUMP_01 || __PUMPDUMP_02 || __PUMPDUMP_03 || __PUMPDUMP_04 || __PUMPDUMP_05 || __PUMPDUMP_06 || __PUMPDUMP_07 || __PUMPDUMP_08) && !PUMPDUMP_MULTI
 describe    PUMPDUMP          Pump-and-dump stock scam phrase
-score       PUMPDUMP          1.500	# limit
+score       PUMPDUMP          1.000	# limit
 tflags      PUMPDUMP          publish
 meta        PUMPDUMP_MULTI    (__PUMPDUMP_01+__PUMPDUMP_02+__PUMPDUMP_03+__PUMPDUMP_04+__PUMPDUMP_05+__PUMPDUMP_06+__PUMPDUMP_07+__PUMPDUMP_08) > 1
 describe    PUMPDUMP_MULTI    Pump-and-dump stock scam phrases
-score       PUMPDUMP_MULTI    3.000	# limit
+score       PUMPDUMP_MULTI    3.500	# limit
 tflags      PUMPDUMP_MULTI    publish
 
 body        DR_OZ_OBFU        /\bD(?:r\.|oc(?:tor)?) ?0z\b/i
@@ -1721,7 +1727,6 @@ tflags    __RAND_HEADER                multiple, maxhits=5
 meta      RAND_HEADER_MANY             __RAND_HEADER > 4
 describe  RAND_HEADER_MANY             Many random gibberish message headers
 score     RAND_HEADER_MANY             3.500   # limit
-tflags    RAND_HEADER_MANY             publish
 
 
 
