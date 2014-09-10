@@ -1,14 +1,19 @@
 
+# 2014-09-10
+header		AXB_XM_EOL	X-Mailer =~ /\bWindows 2000\b/
+describe	AXB_XM_EOL	Not really
+
+
 # 2014-09-03
-header		AXB_XM_OE7		X-Mailer =~ /^Outlook-Express\/7\.0/
-describe	AXB_XM_OE7		Not really
+header		AXB_XM_OE7	X-Mailer =~ /^Outlook-Express\/7\.0/
+describe	AXB_XM_OE7	Not really
 
 # 2014-09-01
-uri		AXB_URI_POLQS		/\/policy\/\?qs\=[a-f0-9]{10}/
-describe	AXB_URI_POLQS		Over the counter
+uri		AXB_URI_POLQS	/\/policy\/\?qs\=[a-f0-9]{10}/
+describe	AXB_URI_POLQS	Over the counter
 
-header          AXB_X_FF_SEZ_S          X-Forefront-Antispam-Report =~ /\bSFV\:SPM\b/
-describe        AXB_X_FF_SEZ_S          Forefront sez this is spam
+header          AXB_X_FF_SEZ_S	X-Forefront-Antispam-Report =~ /\bSFV\:SPM\b/
+describe        AXB_X_FF_SEZ_S	Forefront sez this is spam
 
 rawbody		AXB_RBDY_TENANDTEN	/\&\#1088\;\&\#1092\;/
 describe	AXB_RBDY_TENANDTEN	Ten & Ten
