@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus dwarren jarif kpg-core zmi; day 2: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus jarif kpg-core llanga mas-cps mas-mas mmiroslaw-ham mmiroslaw-spam zmi; day 3: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus dwarren jarif kpg-core llanga mas-cps mas-mas zmi
+# with results from: day 1: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus dwarren jarif kpg-core mmiroslaw-ham mmiroslaw-spam zmi; day 2: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus dwarren jarif kpg-core llanga mmiroslaw-ham mmiroslaw-spam zmi; day 3: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus dwarren jarif kpg-core llanga mmiroslaw-ham mmiroslaw-spam zmi
 
 # tflags publish
 AC_BR_BONANZA
@@ -92,9 +92,6 @@ AD_PREFS
 ALL_TRUSTED
 
 # good enough
-AXB_AUTOGEN_GENERIC
-
-# good enough
 AXB_HELO_HOME_UN
 
 # good enough
@@ -105,9 +102,6 @@ AXB_URI_POLQS
 
 # good enough
 AXB_XMAILER_MIMEOLE_OL_024C2
-
-# good enough
-AXB_X_AOL_SEZ_S
 
 # tflags learn
 BAYES_00
@@ -308,9 +302,6 @@ FSL_CTYPE_WIN1251
 FSL_HELO_DEVICE
 
 # good enough
-FSL_HELO_FAKE
-
-# good enough
 FSL_HELO_FIREWALL
 
 # tflags publish
@@ -402,9 +393,6 @@ HK_RANDOM_FROM
 
 # good enough
 HK_RANDOM_REPLYTO
-
-# good enough
-HK_SCAM_N2
 
 # good enough
 HK_SCAM_N8
@@ -760,6 +748,9 @@ SUBJECT_IN_BLACKLIST
 # tflags userconf
 SUBJECT_IN_WHITELIST
 
+# good enough
+SUBJ_OBFU_LOW_CNTRST
+
 # tflags publish
 SYSADMIN
 
@@ -794,6 +785,9 @@ TO_NO_BRKTS_NORDNS_HTML
 TO_NO_BRKTS_PCNT
 
 # good enough
+TT_MSGID_TRUNC
+
+# good enough
 TVD_FROM_1
 
 # good enough
@@ -809,16 +803,34 @@ TVD_SPACE_ENCODED
 TVD_SPACE_RATIO_MINFP
 
 # good enough
-MALFORMED_FREEMAIL
+ADMITS_SPAM
 
 # good enough
-SUBJ_OBFU_LOW_CNTRST
+AXB_XMAILER_MIMEOLE_OL_1ECD5
+
+# good enough
+HTML_FONT_TINY
+
+# good enough
+LIST_PARTIAL
+
+# good enough
+LOTTO_DEPT
+
+# good enough
+MONEY_ATM_CARD
 
 # tflags publish
-URI_PHISH
+RCVD_DBL_DQ
 
 # tflags publish
-URI_WP_HACKED
+URI_OPTOUT_3LD
+
+# tflags publish
+URI_TRY_3LD
+
+# good enough
+YOU_INHERIT
 
 # tflags publish
 UC_GIBBERISH_OBFU
@@ -917,10 +929,16 @@ URI_ONLY_LOW_CONTRAST
 URI_OPTOUT_USME
 
 # tflags publish
+URI_PHISH
+
+# tflags publish
 URI_TRY_USME
 
 # tflags publish
 URI_WPADMIN
+
+# tflags publish
+URI_WP_HACKED
 
 # tflags userconf
 USER_IN_ALL_SPAM_TO
