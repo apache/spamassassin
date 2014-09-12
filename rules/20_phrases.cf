@@ -163,8 +163,10 @@ describe ACT_NOW_CAPS		Talks about 'acting now' with capitals
 body MORE_SEX               /increased?.{0,9}(?:sex|stamina)/i
 describe MORE_SEX 		Talks about a bigger drive for sex
 
+# explicitly capped at 1.0 score because of FP potential
 body BANG_GUAR	         	/\bguaranteed?\!/i
 describe BANG_GUAR		Something is emphatically guaranteed
+score BANG_GUAR                 1.0
 
 
 body __RUDE_HTML_1	/Get a capable html e-mailer/i
