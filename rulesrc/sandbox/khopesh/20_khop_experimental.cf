@@ -287,7 +287,7 @@ describe __TO_EQ_FROM_USR_NN	To: username same as From: username sans trailing n
 #   this suggests the primary spam indicator is having *different* suffixes
 # Many of the rest are fairly reliable ham indicators
 # suggested scored FP avoidance rule:
-meta	 __TO_EQ_FROM_USR_NN_MINFP	__TO_EQ_FROM_USR_NN && !__TO_EQ_FROM_USR && !__TO_EQ_FROM && !__LCL__ENV_AND_HDR_FROM_MATCH && !__DKIM_EXISTS && !__NOT_SPOOFED && !__RCD_RDNS_SMTP && !__RCD_RDNS_MX_MESSY && !__THREADED
+meta	 __TO_EQ_FROM_USR_NN_MINFP	__TO_EQ_FROM_USR_NN && !__TO_EQ_FROM_USR_1 && !__TO_EQ_FROM && !__TO_EQ_FROM_DOM && !__LCL__ENV_AND_HDR_FROM_MATCH && !__DKIM_EXISTS && !__NOT_SPOOFED && !__RCD_RDNS_SMTP && !__RCD_RDNS_MX_MESSY && !__THREADED
 
 
 header	 __SUBJ_NOT_SHORT	Subject =~ /^.{16}/
