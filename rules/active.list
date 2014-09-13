@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus dwarren jarif kpg-core mmiroslaw-ham mmiroslaw-spam zmi; day 2: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus dwarren jarif kpg-core llanga mmiroslaw-ham mmiroslaw-spam zmi; day 3: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus dwarren jarif kpg-core llanga mmiroslaw-ham mmiroslaw-spam zmi
+# with results from: day 1: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus dwarren jarif kpg-core zmi; day 2: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus dwarren jarif kpg-core llanga mmiroslaw-ham mmiroslaw-spam zmi; day 3: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus dwarren jarif kpg-core llanga zmi
 
 # tflags publish
 AC_BR_BONANZA
@@ -39,6 +39,9 @@ AC_SPAMMY_URI_PATTERNS9
 
 # tflags publish
 ADMAIL
+
+# good enough
+ADMITS_SPAM
 
 # tflags publish
 ADVANCE_FEE_2_NEW_FORM
@@ -102,6 +105,9 @@ AXB_URI_POLQS
 
 # good enough
 AXB_XMAILER_MIMEOLE_OL_024C2
+
+# good enough
+AXB_XMAILER_MIMEOLE_OL_1ECD5
 
 # tflags learn
 BAYES_00
@@ -383,6 +389,9 @@ HELO_LOCALHOST
 HEXHASH_WORD
 
 # good enough
+HK_LOTTO
+
+# good enough
 HK_NAME_DRUGS
 
 # good enough
@@ -400,6 +409,9 @@ HK_SCAM_N8
 # tflags userconf
 HTML_CHARSET_FARAWAY
 
+# good enough
+HTML_FONT_TINY
+
 # tflags publish
 HTML_OFF_PAGE
 
@@ -408,6 +420,9 @@ KB_DATE_CONTAINS_TAB
 
 # good enough
 KB_FAKED_THE_BAT
+
+# good enough
+LIST_PARTIAL
 
 # tflags publish
 LONG_HEX_URI
@@ -420,6 +435,9 @@ LOTS_OF_MONEY
 
 # good enough
 LOTTO_AGENT
+
+# good enough
+LOTTO_DEPT
 
 # tflags publish
 LUCRATIVE
@@ -435,6 +453,9 @@ MIME_NO_TEXT
 
 # tflags userconf
 MISSING_HB_SEP
+
+# good enough
+MONEY_ATM_CARD
 
 # good enough
 MONEY_FORM
@@ -504,6 +525,9 @@ RAZOR2_CF_RANGE_E8_51_100
 
 # tflags net
 RAZOR2_CHECK
+
+# tflags publish
+RCVD_DBL_DQ
 
 # tflags net
 RCVD_IN_BL_SPAMCOP_NET
@@ -803,34 +827,43 @@ TVD_SPACE_ENCODED
 TVD_SPACE_RATIO_MINFP
 
 # good enough
-ADMITS_SPAM
+ANY_PILL_PRICE
 
 # good enough
-AXB_XMAILER_MIMEOLE_OL_1ECD5
-
-# good enough
-HTML_FONT_TINY
-
-# good enough
-LIST_PARTIAL
-
-# good enough
-LOTTO_DEPT
-
-# good enough
-MONEY_ATM_CARD
+AXB_X_AOL_SEZ_S
 
 # tflags publish
-RCVD_DBL_DQ
-
-# tflags publish
-URI_OPTOUT_3LD
-
-# tflags publish
-URI_TRY_3LD
+BODY_URI_ONLY
 
 # good enough
-YOU_INHERIT
+DSN_NO_MIMEVERSION
+
+# good enough
+FILL_THIS_FORM_FRAUD_PHISH
+
+# good enough
+FILL_THIS_FORM_LONG
+
+# good enough
+HK_SCAM_N2
+
+# good enough
+MALFORMED_FREEMAIL
+
+# tflags publish
+RAND_HEADER_MANY
+
+# tflags publish
+SUBJECT_UNNEEDED_ENCODING
+
+# good enough
+SUBJ_OBFU_PUNCT_MANY
+
+# tflags publish
+TO_EQ_FM_NN_RPATH_NULL
+
+# tflags publish
+TW_GIBBERISH_MANY
 
 # tflags publish
 UC_GIBBERISH_OBFU
@@ -926,10 +959,16 @@ URI_NOVOWEL
 URI_ONLY_LOW_CONTRAST
 
 # tflags publish
+URI_OPTOUT_3LD
+
+# tflags publish
 URI_OPTOUT_USME
 
 # tflags publish
 URI_PHISH
+
+# tflags publish
+URI_TRY_3LD
 
 # tflags publish
 URI_TRY_USME
@@ -977,7 +1016,7 @@ USER_IN_WHITELIST_TO
 XM_PHPMAILER_FORGED
 
 # good enough
-XPRIO_RPATH_NULL
+YOU_INHERIT
 
 # tflags net
 __DKIMDOMAIN_IN_DWL_ANY
