@@ -954,13 +954,14 @@ meta        GAPPY_HTML             __GAPPY_HTML && !__UNSUB_LINK && !__RP_MATCHE
 describe    GAPPY_HTML             HTML body with much useless whitespace
 
 # Try to improve S/O per bug 6119
-meta        TVD_SPACE_RATIO_MINFP  __TVD_SPACE_RATIO && !__LCL__ENV_AND_HDR_FROM_MATCH && !__VIA_ML && !__SUBSCRIPTION_INFO && !__NOT_SPOOFED  && !__RCD_RDNS_MAIL && !__SUBJECT_ENCODED_QP && !__THREADED && !__TO_EQ_FROM_DOM 
+meta        TVD_SPACE_RATIO_MINFP  __TVD_SPACE_RATIO && !__LCL__ENV_AND_HDR_FROM_MATCH && !__VIA_ML && !__SUBSCRIPTION_INFO && !__NOT_SPOOFED  && !__RCD_RDNS_MAIL && !__SUBJECT_ENCODED_QP && !__THREADED && !__TO_EQ_FROM_DOM && !__BOTH_INR_AND_REF 
 #tflags      TVD_SPACE_RATIO_MINFP  nopublish
 score       TVD_SPACE_RATIO_MINFP  3.000   # limit
 
-meta        SUBJECT_UNNEEDED_ENCODING    (__SUBJECT_ENCODED_B64 && !__SUBJECT_UTF8_B_ENCODED)
+meta        SUBJECT_UNNEEDED_ENCODING    (__SUBJECT_ENCODED_B64 && !__SUBJECT_UTF8_B_ENCODED) && !__RCD_RDNS_MAIL && !__LCL__ENV_AND_HDR_FROM_MATCH && !__SUBSCRIPTION_INFO 
 describe    SUBJECT_UNNEEDED_ENCODING    Subject encoded but not non-ASCII?
-score       SUBJECT_UNNEEDED_ENCODING    1.000    # limit
+score       SUBJECT_UNNEEDED_ENCODING    2.000    # limit
+tflags      SUBJECT_UNNEEDED_ENCODING    publish
 
 # Be sensitive to FP on legit chinese-language mailing lists (09/2014)
 meta        __TVD_SPACE_ENCODED    (__TVD_SPACE_RATIO && __SUBJECT_ENCODED_B64 && !__SUBJECT_UTF8_B_ENCODED)
@@ -1234,9 +1235,10 @@ score       BODY_EMPTY           3.00	# limit
 
 
 meta        __BODY_URI_ONLY      __BODY_TEXT_LINE < 3 && __HAS_ANY_URI && !__SMIME_MESSAGE
-meta        BODY_URI_ONLY        __BODY_URI_ONLY && !__THREAD_INDEX_GOOD && !__FSL_HELO_BARE_IP_2 && !__XM_MS_IN_GENERAL
+meta        BODY_URI_ONLY        __BODY_URI_ONLY && !__NOT_SPOOFED && !__LCL__ENV_AND_HDR_FROM_MATCH && !__TO_EQ_FROM_DOM && !__X_CRON_ENV 
 describe    BODY_URI_ONLY        Message body is only a URI in one line of text or for an image
-score       BODY_URI_ONLY        0.25	# limit during testing
+score       BODY_URI_ONLY        1.000   # limit
+tflags      BODY_URI_ONLY        publish
 
 
 body        __SINGLE_WORD_LINE  /^\s?\S{1,60}\s?$/
@@ -1702,12 +1704,13 @@ tflags         __TENWORD_GIBBERISH    multiple maxhits=21
 meta           TW_GIBBERISH_MANY      __TENWORD_GIBBERISH > 20
 describe       TW_GIBBERISH_MANY      Lots of gibberish text to spoof pattern matching filters
 score          TW_GIBBERISH_MANY      2.000   # limit
+tflags         TW_GIBBERISH_MANY      publish
 
-body           __OPTOUT_BRKT          /\[(?:unsub(?:scribe)|remove(?: me)|leave)\]/i
-tflags         __OPTOUT_BRKT          multiple maxhits=2
-meta           OPTOUT_BRKT_MANY       __OPTOUT_BRKT > 1
-describe       OPTOUT_BRKT_MANY       Repetitive opt-outs
-score          OPTOUT_BRKT_MANY       2.000   # limit
+#body           __OPTOUT_BRKT          /\[(?:unsub(?:scribe)|remove(?: me)|leave)\]/i
+#tflags         __OPTOUT_BRKT          multiple maxhits=2
+#meta           OPTOUT_BRKT_MANY       __OPTOUT_BRKT > 1
+#describe       OPTOUT_BRKT_MANY       Repetitive opt-outs
+#score          OPTOUT_BRKT_MANY       2.000   # limit
 
 
 # Oh, the humanity! Is there no better way?
@@ -1728,7 +1731,12 @@ tflags    __RAND_HEADER                multiple, maxhits=5
 meta      RAND_HEADER_MANY             __RAND_HEADER > 4
 describe  RAND_HEADER_MANY             Many random gibberish message headers
 score     RAND_HEADER_MANY             3.500   # limit
+tflags    RAND_HEADER_MANY             publish
 
+
+body      FR_SPAM_LAW                  /article 34 de la loi 78-17\b/i
+describe  FR_SPAM_LAW                  References French privacy law
+score     FR_SPAM_LAW                  1.000   # limit
 
 
 
