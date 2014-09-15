@@ -206,7 +206,7 @@ body     __AM_DYING       /\b(?:am\s(?:\S+\s)?dying|terminally\sill|cancer|en\sp
 body     __I_WILL_YOU     /\bwill(?:ed)?\s(?:[a-z\s]{0,20}(?:fortune|money|\$[\d,]+[a-z]{0,9})\s)?to\syou\b/i
 body     __NEXT_OF_KIN    /\bnext[-\s]of[-\s]kin\b/i
 body     __EX_CUSTOMER    /\b(?:(?:dead|deceased|late|verstorbenen|death\sof\sthe)\s(?:[ck]lient|customer|ac+ount|invest[eo]r|beneficiary|depositor|mr\.|kunde|engr?\.?)|titulaire\sdu\scompte\sest\sd(?:e|=E9|[\xe9]|[\xc3][\xa9])c(?:e|=E9|[\xe9]|[\xc3][\xa9])d(?:e|=E9|[\xe9]|[\xc3][\xa9])|invest[eo]r\sdied|(?:e|=E9|[\xe9]|[\xc3][\xa9])tranger\sd(?:e|=E9|[\xe9]|[\xc3][\xa9])c(?:e|=E9|[\xe9]|[\xc3][\xa9])d(?:e|=E9|[\xe9]|[\xc3][\xa9])|(?:[ck]lient|customer|ac+ount|invest[eo]r|beneficiary|mr\.|kunde|engr?\.?)\s(?:[a-z]{1,10}\s)?(?:dead|deceased|verstorbenen))/i
-body     __DECEASED       /\b(?:the|my|der|du|le|meu?)\s(?:deceased|late|verstorbenen|d(?:i|e|=E9|[\xe9]|[\xc3][\xa9])funto?|d(?:e|=E9|[\xe9]|[\xc3][\xa9])nt|falecido)\b/i
+body     __DECEASED       /\b(?:the|my|your|der|du|le|meu?)\s(?:deceased|late|verstorbenen|d(?:i|e|=E9|[\xe9]|[\xc3][\xa9])funto?|d(?:e|=E9|[\xe9]|[\xc3][\xa9])nt|falecido)\b/i
 body     __SURVIVORS      /\b(?:widow|son|daughter|husband|wife|brother|sister|attorney|vi(?:=FA|[\xfa]|[\xc3][\xba])va|esposa|veuve)\s(?:of|to|do|de)\s(?:the\s)?(?:late|falecido|finales|feu|d(?:e|=E9|[\xe9]|[\xc3][\xa9])funt|mr\.?)\s\w+\b/i
 body     __DEAD_PARENT    /\b(?:my|meu)\s(?:(?:deceased|dead)\s(?:father|mother|husband)|(?:father|dad|mother|mom|husband|marido)(?:'?s)?\s(?:death|died|passed\saway|murder|was\s(?:killed|murdered|poisoned)|faleceu))/i
 body     __DORMANT_ACCT   /\b(?:(?:dormant|abandoned|left\s?over)\s(?:account|fund|transaction|sum|deposit)|fonds\sdorment)/i
@@ -237,6 +237,9 @@ body     __INTL_BANK      /\b(?:international\s(?:\w+\s)?bank|banque\sinternatio
 body     __YOUR_BANK      /\byour?\s(?:full\s)?bank(?:ing)?\sinformations?\b/i
 
 body     __BARRISTER      /\b(?:barrister|solicitor at law|barr\.)/i
+meta     MONEY_BARRISTER  __BARRISTER && LOTS_OF_MONEY
+describe MONEY_BARRISTER  Lots of money from a UK lawyer
+score    MONEY_BARRISTER  1.000   # limit
 
 body     __SCAM           /\bscam(?:m?e[dr])?s?\b/i
 body     __UN             /\bunited\snations?\b/i
