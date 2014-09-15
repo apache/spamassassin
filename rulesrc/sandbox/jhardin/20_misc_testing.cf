@@ -1627,7 +1627,7 @@ meta        URI_TRY_USME      __URI_TRY_USME && !__DKIM_EXISTS
 describe    URI_TRY_USME      "Try it" URI, unusual TLD
 tflags      URI_TRY_USME      publish
 
-uri         URI_TRY_3LD       m,^https?://(?:try|start|get|save|check|act|compare|join|learn|request|visit|my)[^.]*\.[^/]+\.(?:com|net)\b,i
+uri         URI_TRY_3LD       m,^https?://(?:try|start|get|save|check(?!out)|act|compare|join|learn|request|visit(?!or)|my(?!sub)\w)[^.]*\.[^/]+\.(?:com|net)\b,i
 describe    URI_TRY_3LD       "Try it" URI, suspicious hostname
 score       URI_TRY_3LD       2.000   # limit
 tflags      URI_TRY_3LD       publish
@@ -1738,6 +1738,4 @@ tflags    RAND_HEADER_MANY             publish
 #body      FR_SPAM_LAW                  /article 34 de la loi 78-17\b/i
 #describe  FR_SPAM_LAW                  References French privacy law
 #score     FR_SPAM_LAW                  1.000   # limit
-
-
 
