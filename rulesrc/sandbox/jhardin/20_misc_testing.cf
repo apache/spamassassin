@@ -954,9 +954,9 @@ meta        GAPPY_HTML             __GAPPY_HTML && !__UNSUB_LINK && !__RP_MATCHE
 describe    GAPPY_HTML             HTML body with much useless whitespace
 
 # Try to improve S/O per bug 6119
-meta        TVD_SPACE_RATIO_MINFP  __TVD_SPACE_RATIO && !__LCL__ENV_AND_HDR_FROM_MATCH && !__VIA_ML && !__SUBSCRIPTION_INFO && !__NOT_SPOOFED  && !__RCD_RDNS_MAIL && !__SUBJECT_ENCODED_QP && !__THREADED && !__TO_EQ_FROM_DOM && !__BOTH_INR_AND_REF 
+meta        TVD_SPACE_RATIO_MINFP  __TVD_SPACE_RATIO && !__LCL__ENV_AND_HDR_FROM_MATCH && !__VIA_ML && !__SUBSCRIPTION_INFO && !__NOT_SPOOFED  && !__RCD_RDNS_MAIL && !__SUBJECT_ENCODED_QP && !__THREADED && !__TO_EQ_FROM_DOM && !__BOTH_INR_AND_REF && !__X_CRON_ENV 
 #tflags      TVD_SPACE_RATIO_MINFP  nopublish
-score       TVD_SPACE_RATIO_MINFP  3.000   # limit
+score       TVD_SPACE_RATIO_MINFP  2.750   # limit
 
 meta        SUBJECT_UNNEEDED_ENCODING    (__SUBJECT_ENCODED_B64 && !__SUBJECT_UTF8_B_ENCODED) && !__RCD_RDNS_MAIL && !__LCL__ENV_AND_HDR_FROM_MATCH && !__SUBSCRIPTION_INFO 
 describe    SUBJECT_UNNEEDED_ENCODING    Subject encoded but not non-ASCII?
@@ -1735,9 +1735,9 @@ score     RAND_HEADER_MANY             3.500   # limit
 tflags    RAND_HEADER_MANY             publish
 
 
-body      FR_SPAM_LAW                  /article 34 de la loi 78-17\b/i
-describe  FR_SPAM_LAW                  References French privacy law
-score     FR_SPAM_LAW                  1.000   # limit
+#body      FR_SPAM_LAW                  /article 34 de la loi 78-17\b/i
+#describe  FR_SPAM_LAW                  References French privacy law
+#score     FR_SPAM_LAW                  1.000   # limit
 
 
 
