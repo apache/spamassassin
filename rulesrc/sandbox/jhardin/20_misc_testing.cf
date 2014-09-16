@@ -804,7 +804,11 @@ tflags      OBFU_JVSCR_ESC         publish
 meta        __LIST_PARTIAL         __DOS_HAS_LIST_UNSUB && !__DOS_HAS_LIST_ID
 meta        LIST_PARTIAL           __LIST_PARTIAL && !__BUGGED_IMG && !__DKIM_EXISTS && !__RP_MATCHES_RCVD && !__HAS_SENDER 
 describe    LIST_PARTIAL           Has incomplete List-* header set
-score       LIST_PARTIAL           2.000   # limit
+score       LIST_PARTIAL           1.000   # limit
+
+meta        LIST_PRTL_SAME_USER    __LIST_PARTIAL && __TO_EQ_FROM_USR 
+describe    LIST_PRTL_SAME_USER    Incomplete List-* headers and from+to user the same
+score       LIST_PRTL_SAME_USER    2.000   # limit
 
 # in lots of phishing
 uri         __UCOZ_URI             /\.ucoz\.org\//i
