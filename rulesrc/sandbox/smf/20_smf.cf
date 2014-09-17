@@ -60,6 +60,7 @@ score    FSL_YAHOO_AUTH_SIG     5.0
 header   __smf_freemail_hdr_replyto  eval:check_freemail_header('Reply-To:addr')
 meta     SMF_FM_FORGED_REPLYTO  __freemail_hdr_replyto && !FREEMAIL_FROM && !__freemail_safe
 describe SMF_FM_FORGED_REPLYTO  Freemail in Reply-To, but not From
-score    SMF_FM_FORGED_REPLYTO  0.1
+tflags	 SMF_FM_FORGED_REPLYTO  nopublish
+#score    SMF_FM_FORGED_REPLYTO  0.1
 endif
 
