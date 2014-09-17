@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus dwarren jarif kpg-core zmi; day 2: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus dwarren jarif kpg-core llanga mmiroslaw-ham mmiroslaw-spam zmi; day 3: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus dwarren jarif kpg-core llanga zmi
+# with results from: day 1: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus dwarren jarif kpg-core zmi; day 2: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus jarif kpg-core llanga zmi; day 3: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus dwarren jarif kpg-core llanga zmi
 
 # tflags publish
 AC_BR_BONANZA
@@ -95,19 +95,22 @@ AD_PREFS
 ALL_TRUSTED
 
 # good enough
+ANY_PILL_PRICE
+
+# good enough
 AXB_HELO_HOME_UN
 
 # good enough
 AXB_RBDY_TENANDTEN
 
 # good enough
-AXB_URI_POLQS
-
-# good enough
 AXB_XMAILER_MIMEOLE_OL_024C2
 
 # good enough
 AXB_XMAILER_MIMEOLE_OL_1ECD5
+
+# good enough
+AXB_X_AOL_SEZ_S
 
 # tflags learn
 BAYES_00
@@ -138,6 +141,9 @@ BAYES_99
 
 # tflags learn
 BAYES_999
+
+# tflags publish
+BODY_URI_ONLY
 
 # tflags publish
 CANT_SEE_AD
@@ -214,14 +220,17 @@ DOS_ANAL_SPAM_MAILER
 # good enough
 DOS_OE_TO_MX
 
+# good enough
+DOS_OE_TO_MX_IMAGE
+
+# good enough
+DSN_NO_MIMEVERSION
+
 # tflags publish
 DX_TEXT_02
 
 # tflags publish
 DX_TEXT_03
-
-# good enough
-DX_TEXT_05
 
 # good enough
 DYN_RDNS_AND_INLINE_IMAGE
@@ -245,7 +254,13 @@ FBI_SPOOF
 FILL_THIS_FORM
 
 # good enough
+FILL_THIS_FORM_FRAUD_PHISH
+
+# good enough
 FILL_THIS_FORM_LOAN
+
+# good enough
+FILL_THIS_FORM_LONG
 
 # tflags publish
 FORM_FRAUD_3
@@ -404,13 +419,13 @@ HK_RANDOM_FROM
 HK_RANDOM_REPLYTO
 
 # good enough
+HK_SCAM_N2
+
+# good enough
 HK_SCAM_N8
 
 # tflags userconf
 HTML_CHARSET_FARAWAY
-
-# good enough
-HTML_FONT_TINY
 
 # tflags publish
 HTML_OFF_PAGE
@@ -441,6 +456,9 @@ LOTTO_DEPT
 
 # tflags publish
 LUCRATIVE
+
+# good enough
+MALFORMED_FREEMAIL
 
 # tflags publish
 MANY_SPAN_IN_TEXT
@@ -513,6 +531,9 @@ PUMPDUMP_MULTI
 
 # tflags net
 PYZOR_CHECK
+
+# tflags publish
+RAND_HEADER_MANY
 
 # tflags net
 RAZOR2_CF_RANGE_51_100
@@ -769,8 +790,14 @@ SUBJECT_IN_BLACKLIST
 # tflags userconf
 SUBJECT_IN_WHITELIST
 
+# tflags publish
+SUBJECT_UNNEEDED_ENCODING
+
 # good enough
 SUBJ_OBFU_LOW_CNTRST
+
+# good enough
+SUBJ_OBFU_PUNCT_MANY
 
 # tflags publish
 SYSADMIN
@@ -809,10 +836,10 @@ TO_NO_BRKTS_PCNT
 TT_MSGID_TRUNC
 
 # good enough
-TVD_FROM_1
+TVD_FINGER_02
 
 # good enough
-TVD_GET_STOCK
+TVD_FROM_1
 
 # good enough
 TVD_QUAL_MEDS
@@ -823,44 +850,44 @@ TVD_SPACE_ENCODED
 # good enough
 TVD_SPACE_RATIO_MINFP
 
-# good enough
-ANY_PILL_PRICE
-
-# good enough
-AXB_X_AOL_SEZ_S
-
-# tflags publish
-BODY_URI_ONLY
-
-# good enough
-DSN_NO_MIMEVERSION
-
-# good enough
-FILL_THIS_FORM_FRAUD_PHISH
-
-# good enough
-FILL_THIS_FORM_LONG
-
-# good enough
-HK_SCAM_N2
-
-# good enough
-MALFORMED_FREEMAIL
-
-# tflags publish
-RAND_HEADER_MANY
-
-# tflags publish
-SUBJECT_UNNEEDED_ENCODING
-
-# good enough
-SUBJ_OBFU_PUNCT_MANY
-
-# tflags publish
-TO_EQ_FM_NN_RPATH_NULL
-
 # tflags publish
 TW_GIBBERISH_MANY
+
+# good enough
+AXB_XM_FORGED_OL2600
+
+# good enough
+BODY_EMPTY
+
+# good enough
+FSL_HELO_BARE_IP_2
+
+# good enough
+FSL_MID_419
+
+# good enough
+HK_LOTTO_NAME
+
+# good enough
+HK_SCAM_N1
+
+# good enough
+HK_SCAM_N13
+
+# good enough
+HK_SCAM_N3
+
+# good enough
+IRS_SPOOF
+
+# good enough
+OBFU_HTML_ATTACH
+
+# good enough
+SHORTENED_URL_SRC
+
+# good enough
+XPRIO
 
 # tflags publish
 UC_GIBBERISH_OBFU
