@@ -55,10 +55,10 @@ meta     FSL_YAHOO_AUTH_SIG     (__FSL_RELAY_YAHOO && (__FSL_YAHOO_AUTH1 || __FS
 describe FSL_YAHOO_AUTH_SIG     Yahoo SMTP AUTH observed patterns
 score    FSL_YAHOO_AUTH_SIG     5.0
 
-#ifplugin Mail::SpamAssassin::Plugin::FreeMail
+ifplugin Mail::SpamAssassin::Plugin::FreeMail
 # Test potential error in base rules
 header   __smf_freemail_hdr_replyto  eval:check_freemail_header('Reply-To:addr')
-meta     SMF_FM_FORGED_REPLYTO  __freemail_hdr_replyto && !FREEMAIL_FROM && !__freemail_safe
+meta     SMF_FM_FORGED_REPLYTO  __smf_freemail_hdr_replyto && !FREEMAIL_FROM && !__freemail_safe
 describe SMF_FM_FORGED_REPLYTO  Freemail in Reply-To, but not From
 tflags	 SMF_FM_FORGED_REPLYTO  nopublish
 #score    SMF_FM_FORGED_REPLYTO  0.1
