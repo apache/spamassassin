@@ -1,21 +1,26 @@
-# These rules are being contributed by Sir Francis Bacon
-# Born: January 22, 1561, Strand, London, United Kingdom
-# 1st Viscount St. Alban, QC, was an English philosopher,
-# statesman, scientist, jurist, orator, essayist, and author.
-# He served both as Attorney General and Lord Chancellor of England.
+# This is not spam - this is Bacn
+# http://en.wikipedia.org/wiki/Bacn
 
-# URI rules
-uri	BACN_URI_001	/\/link\.php\?m/
-tflags	BACN_URI_001	nopublish
+# Bacn URI rules
+uri		BACN_URI_001	/\/link\.php\?/
+describe	BACN_URI_001	Bulk fingerprint
+tflags		BACN_URI_001	nopublish
 
-uri	BACN_URI_002	/\/tr\/index\.aspx\?id/
-tflags	BACN_URI_002	nopublish
+uri		BACN_URI_002	/\/tr\/index\.aspx\?id/
+describe	BACN_URI_002	Bulk fingerprint
+tflags		BACN_URI_002	nopublish
 
-uri	BACN_URI_003	/\/u\.php\?p\=/
-tflags	BACN_URI_003	nopublish
+uri		BACN_URI_003	/\/u\.php\?p\=/
+describe	BACN_URI_003	Bulk fingerprint
+tflags		BACN_URI_003	nopublish
 
 
-# header rules
-header	BACN_X_001	exists:X-Mandrill-User
-tflags	BACN_X_001	nopublish
+# Bacn header rules
+header		BACN_X_001	exists:X-Mandrill-User
+describe	BACN_X_001	Bulk fingerprint
+tflags		BACN_X_001	nopublish
+
+header		BACN_X_002	exists:X-Spread-CampaignId
+describe	BACN_X_002	Bulk fingerprint
+tflags		BACN_X_002	nopublish
 
