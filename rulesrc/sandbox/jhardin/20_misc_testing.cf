@@ -806,9 +806,11 @@ meta        LIST_PARTIAL           __LIST_PARTIAL && !__BUGGED_IMG && !__DKIM_EX
 describe    LIST_PARTIAL           Has incomplete List-* header set
 score       LIST_PARTIAL           1.000   # limit
 
-meta        LIST_PRTL_SAME_USER    __LIST_PARTIAL && __TO_EQ_FROM_USR 
+meta        __LIST_PRTL_SAME_USER  __LIST_PARTIAL && __TO_EQ_FROM_USR
+meta        LIST_PRTL_SAME_USER    __LIST_PRTL_SAME_USER && !__BUGGED_IMG && !__DKIM_EXISTS && !__RP_MATCHES_RCVD 
 describe    LIST_PRTL_SAME_USER    Incomplete List-* headers and from+to user the same
 score       LIST_PRTL_SAME_USER    2.000   # limit
+tflags      LIST_PRTL_SAME_USER    publish
 
 # in lots of phishing
 uri         __UCOZ_URI             /\.ucoz\.org\//i
