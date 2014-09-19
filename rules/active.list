@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus dwarren jarif kpg-core zmi; day 2: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus dwarren jarif kpg-core llanga zmi; day 3: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus jarif kpg-core llanga zmi
+# with results from: day 1: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus dwarren jarif kpg-core zmi; day 2: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus dwarren jarif kpg-core llanga zmi; day 3: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus dwarren jarif kpg-core llanga zmi
 
 # tflags publish
 AC_BR_BONANZA
@@ -110,6 +110,9 @@ AXB_XMAILER_MIMEOLE_OL_024C2
 AXB_XMAILER_MIMEOLE_OL_1ECD5
 
 # good enough
+AXB_XM_FORGED_OL2600
+
+# good enough
 AXB_X_AOL_SEZ_S
 
 # tflags learn
@@ -141,6 +144,9 @@ BAYES_99
 
 # tflags learn
 BAYES_999
+
+# good enough
+BODY_EMPTY
 
 # tflags publish
 BODY_URI_ONLY
@@ -314,6 +320,9 @@ FROM_MISSP_XPRIO
 FSL_CTYPE_WIN1251
 
 # good enough
+FSL_HELO_BARE_IP_2
+
+# good enough
 FSL_HELO_DEVICE
 
 # good enough
@@ -401,6 +410,9 @@ HEXHASH_WORD
 HK_LOTTO
 
 # good enough
+HK_LOTTO_NAME
+
+# good enough
 HK_NAME_DRUGS
 
 # good enough
@@ -413,7 +425,13 @@ HK_RANDOM_FROM
 HK_RANDOM_REPLYTO
 
 # good enough
+HK_SCAM_N13
+
+# good enough
 HK_SCAM_N2
+
+# good enough
+HK_SCAM_N3
 
 # good enough
 HK_SCAM_N8
@@ -507,6 +525,9 @@ NSL_RCVD_FROM_USER
 
 # good enough
 NSL_RCVD_HELO_USER
+
+# good enough
+OBFU_HTML_ATTACH
 
 # tflags publish
 OBFU_JVSCR_ESC
@@ -748,6 +769,9 @@ RISK_FREE
 # good enough
 RP_MATCHES_RCVD
 
+# good enough
+SHORTENED_URL_SRC
+
 # tflags net
 SPF_FAIL
 
@@ -845,37 +869,19 @@ TVD_SPACE_RATIO_MINFP
 TW_GIBBERISH_MANY
 
 # good enough
-AXB_XM_FORGED_OL2600
+DX_TEXT_05
 
 # good enough
-BODY_EMPTY
+FREEMAIL_MANY_TO
 
 # good enough
-FSL_HELO_BARE_IP_2
+HTML_FONT_TINY
 
-# good enough
-FSL_MID_419
-
-# good enough
-HK_LOTTO_NAME
-
-# good enough
-HK_SCAM_N13
-
-# good enough
-HK_SCAM_N3
-
-# good enough
+# tflags publish
 LIST_PRTL_SAME_USER
 
 # good enough
 PHP_NOVER_MUA
-
-# good enough
-SHORTENED_URL_SRC
-
-# good enough
-XPRIO
 
 # tflags publish
 UC_GIBBERISH_OBFU
@@ -1026,6 +1032,9 @@ USER_IN_WHITELIST_TO
 
 # tflags publish
 XM_PHPMAILER_FORGED
+
+# good enough
+XPRIO
 
 # good enough
 YOU_INHERIT
