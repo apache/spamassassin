@@ -1657,29 +1657,39 @@ ifplugin Mail::SpamAssassin::Plugin::ReplaceTags
   tflags        FUZZY_UNSUBSCRIBE   publish
 
   body          FUZZY_ANDROID       /<A>(?!ndroid)<N><D><R><O><I><D>/i
-  replace_rules FUZZY_ANDROID    
+  replace_rules FUZZY_ANDROID
   describe      FUZZY_ANDROID       Obfuscated "android"
   tflags        FUZZY_ANDROID       publish
 
   body          FUZZY_PROMOTION     /<P>(?!romotion)<R><O><M><O><T><I><O><N>/i
-  replace_rules FUZZY_PROMOTION  
+  replace_rules FUZZY_PROMOTION
   describe      FUZZY_PROMOTION     Obfuscated "promotion"
   tflags        FUZZY_PROMOTION     publish
 
   body          FUZZY_PRIVACY       /<P>(?!rivacy)<R><I><V><A><C><Y>/i
-  replace_rules FUZZY_PRIVACY    
+  replace_rules FUZZY_PRIVACY
   describe      FUZZY_PRIVACY       Obfuscated "privacy"
   tflags        FUZZY_PRIVACY       publish
 
   body          FUZZY_BROWSER       /<B>(?!rowser)<R><O><W><S><E><R>/i
-  replace_rules FUZZY_BROWSER    
+  replace_rules FUZZY_BROWSER
   describe      FUZZY_BROWSER       Obfuscated "browser"
   tflags        FUZZY_BROWSER       publish
 
   body          FUZZY_SAVINGS       /<S>(?!avings)<A><V><I><N><G><S>/i
-  replace_rules FUZZY_SAVINGS    
+  replace_rules FUZZY_SAVINGS
   describe      FUZZY_SAVINGS       Obfuscated "savings"
   tflags        FUZZY_SAVINGS       publish
+
+  body          FUZZY_IMPORTANT     /<I>(?!mportant)<M><P><O><R><T><A><N><T>/i
+  replace_rules FUZZY_IMPORTANT
+  describe      FUZZY_IMPORTANT     Obfuscated "important"
+  tflags        FUZZY_IMPORTANT     publish
+
+  body          FUZZY_SECURITY      /<S>(?!ecurity)(?!eguridad)<E>(?:<C>|<G>)<U><R><I>(?:<T><Y>|<D><A><D>)/i
+  replace_rules FUZZY_SECURITY
+  describe      FUZZY_SECURITY      Obfuscated "security"
+  tflags        FUZZY_SECURITY      publish
 endif
 
 
