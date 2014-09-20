@@ -1290,21 +1290,21 @@ tflags      FORM_LOW_CONTRAST     publish
 
 
 # try to FP-reduce HTML_FONT_LOW_CONTRAST
-meta        __HTML_FONT_LOW_CONTRAST_MINFP	HTML_FONT_LOW_CONTRAST && !__VIA_ML && !__RP_MATCHES_RCVD && !__RCD_RDNS_MAIL && !__DKIM_EXISTS && !__LCL__ENV_AND_HDR_FROM_MATCH && !__BUGGED_IMG && !__THREADED && !__SENDER_BOT && !__HAS_THREAD_INDEX && !ALL_TRUSTED && !__NOT_SPOOFED && !__RCD_RDNS_SMTP_MESSY && !__RCD_RDNS_SMTP 
+meta        __HTML_FONT_LOW_CONTRAST_MINFP	HTML_FONT_LOW_CONTRAST && !__HAS_SENDER && !__VIA_ML && !__RP_MATCHES_RCVD && !__THREADED && !__HAS_THREAD_INDEX && !ALL_TRUSTED && !__NOT_SPOOFED && !__HDRS_LCASE_KNOWN && !__DKIM_EXISTS
 
 # some no-ham combinations
-meta        GAPPY_LOW_CONTRAST    __HTML_FONT_LOW_CONTRAST_MINFP && __GAPPY_SUBJECT 
+meta        GAPPY_LOW_CONTRAST    HTML_FONT_LOW_CONTRAST && __GAPPY_SUBJECT 
 describe    GAPPY_LOW_CONTRAST    Gappy subject + hidden text
 score       GAPPY_LOW_CONTRAST    2.500   # limit
 
-meta        URI_ONLY_LOW_CONTRAST __HTML_FONT_LOW_CONTRAST_MINFP && __BODY_URI_ONLY 
+meta        URI_ONLY_LOW_CONTRAST HTML_FONT_LOW_CONTRAST && __BODY_URI_ONLY 
 score       URI_ONLY_LOW_CONTRAST 2.500   # limit
 
-meta        SUBJ_OBFU_LOW_CNTRST  __HTML_FONT_LOW_CONTRAST_MINFP && __SUBJ_OBFU_PUNCT && !ALL_TRUSTED && !__NOT_A_PERSON 
+meta        SUBJ_OBFU_LOW_CNTRST  HTML_FONT_LOW_CONTRAST && __SUBJ_OBFU_PUNCT && !ALL_TRUSTED && !__NOT_A_PERSON 
 describe    SUBJ_OBFU_LOW_CNTRST  Subject obfuscation + hidden text
 score       SUBJ_OBFU_LOW_CNTRST  2.500   # limit
 
-meta        URI_DOTDOT_LOW_CNTRST __HTML_FONT_LOW_CONTRAST_MINFP && __URI_DOM_DOTDOT
+meta        URI_DOTDOT_LOW_CNTRST HTML_FONT_LOW_CONTRAST && __URI_DOM_DOTDOT
 describe    URI_DOTDOT_LOW_CNTRST Suspicious URI + hidden text
 score       URI_DOTDOT_LOW_CNTRST 2.500   # limit
 
@@ -1401,7 +1401,7 @@ header      __FH_HAS_XMSMAIL   exists:X-MSMail-Priority
 #header      __FH_HAS_XPRIORITY exists:X-Priority
 meta        XPRIO              __XPRIO && !ALL_TRUSTED && !__PHPMAILER_MUA && !__BUGGED_IMG && !__HAS_ERRORS_TO && !__THREADED && !__VIA_ML && !__RCD_RDNS_MX_MESSY && !__HAS_THREAD_INDEX && !__RP_MATCHES_RCVD && !__HAS_X_REF && !__LCL__ENV_AND_HDR_FROM_MATCH 
 describe    XPRIO              Has X-Priority header
-score       XPRIO              1.500   # limit
+score       XPRIO              1.000   # limit
 
 # some no-ham combinations
 
