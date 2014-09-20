@@ -222,7 +222,7 @@ sub DESTROY {
 # The on_connect() callback must not use batched calls!
 sub on_connect {
   my($r, $db_id, $pwd) = @_;
-  $db_id || 0;
+  $db_id ||= 0;
   dbg("bayes: Redis on-connect, db_id %d", $db_id);
   eval {
     $r->call('SELECT', $db_id) eq 'OK' ? 1 : 0;
