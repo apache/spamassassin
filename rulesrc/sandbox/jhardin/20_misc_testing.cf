@@ -802,15 +802,22 @@ tflags      OBFU_JVSCR_ESC         publish
 
 # Starting to observe in spam
 meta        __LIST_PARTIAL         __DOS_HAS_LIST_UNSUB && !__DOS_HAS_LIST_ID
-meta        LIST_PARTIAL           __LIST_PARTIAL && !__BUGGED_IMG && !__DKIM_EXISTS && !__RP_MATCHES_RCVD && !__HAS_SENDER 
+meta        LIST_PARTIAL           __LIST_PARTIAL && !__BUGGED_IMG && !__DKIM_EXISTS && !__RP_MATCHES_RCVD && !__HAS_SENDER && !__HAS_ERRORS_TO 
 describe    LIST_PARTIAL           Has incomplete List-* header set
 score       LIST_PARTIAL           1.000   # limit
 
 meta        __LIST_PRTL_SAME_USER  __LIST_PARTIAL && __TO_EQ_FROM_USR
-meta        LIST_PRTL_SAME_USER    __LIST_PRTL_SAME_USER && !__BUGGED_IMG && !__DKIM_EXISTS && !__RP_MATCHES_RCVD 
+meta        LIST_PRTL_SAME_USER    __LIST_PRTL_SAME_USER && !__BUGGED_IMG && !__DKIM_EXISTS && !__RP_MATCHES_RCVD && !__HAS_ERRORS_TO 
 describe    LIST_PRTL_SAME_USER    Incomplete List-* headers and from+to user the same
-score       LIST_PRTL_SAME_USER    2.000   # limit
+score       LIST_PRTL_SAME_USER    3.000   # limit
 tflags      LIST_PRTL_SAME_USER    publish
+
+meta        __LIST_PRTL_PUMPDUMP   __LIST_PARTIAL && __PD_CNT_1
+meta        LIST_PRTL_PUMPDUMP     __LIST_PRTL_PUMPDUMP && !__DKIM_EXISTS 
+describe    LIST_PRTL_PUMPDUMP     Incomplete List-* headers and stock pump-and-dump
+score       LIST_PRTL_PUMPDUMP     2.000   # limit
+
+
 
 # in lots of phishing
 uri         __UCOZ_URI             /\.ucoz\.org\//i
@@ -964,7 +971,7 @@ meta        TVD_SPACE_RATIO_MINFP  __TVD_SPACE_RATIO && !__LCL__ENV_AND_HDR_FROM
 #tflags      TVD_SPACE_RATIO_MINFP  nopublish
 score       TVD_SPACE_RATIO_MINFP  2.750   # limit
 
-meta        SUBJECT_UNNEEDED_ENCODING    (__SUBJECT_ENCODED_B64 && !__SUBJECT_UTF8_B_ENCODED) && !__RCD_RDNS_MAIL && !__LCL__ENV_AND_HDR_FROM_MATCH && !__SUBSCRIPTION_INFO 
+meta        SUBJECT_UNNEEDED_ENCODING    (__SUBJECT_ENCODED_B64 && !__SUBJECT_UTF8_B_ENCODED) && !__RCD_RDNS_MAIL && !__LCL__ENV_AND_HDR_FROM_MATCH && !__SUBSCRIPTION_INFO && !__THREADED && !__NONBOUNCE_READ_RECEIPT 
 describe    SUBJECT_UNNEEDED_ENCODING    Subject encoded but not non-ASCII?
 score       SUBJECT_UNNEEDED_ENCODING    2.000    # limit
 tflags      SUBJECT_UNNEEDED_ENCODING    publish
