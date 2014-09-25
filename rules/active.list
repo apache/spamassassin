@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus dwarren jarif kpg-core mmiroslaw-ham mmiroslaw-spam zmi; day 2: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus dwarren jarif kpg-core llanga mmiroslaw-ham mmiroslaw-spam zmi; day 3: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus dwarren jarif kpg-core llanga zmi
+# with results from: day 1: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus dwarren jarif kpg-core zmi; day 2: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus dwarren jarif kpg-core llanga mmiroslaw-ham mmiroslaw-spam zmi; day 3: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus dwarren jarif kpg-core llanga mmiroslaw-ham mmiroslaw-spam zmi
 
 # tflags publish
 AC_BR_BONANZA
@@ -544,6 +544,9 @@ NSL_RCVD_FROM_USER
 # good enough
 NSL_RCVD_HELO_USER
 
+# good enough
+OBFU_HTML_ATTACH
+
 # tflags publish
 OBFU_JVSCR_ESC
 
@@ -902,9 +905,6 @@ FILL_THIS_FORM_FRAUD_PHISH
 FILL_THIS_FORM_LONG
 
 # good enough
-FROM_12LTRDOM
-
-# good enough
 FROM_MISSP_EH_MATCH
 
 # good enough
@@ -914,6 +914,9 @@ FROM_UNBAL2
 FSL_HELO_BARE_IP_2
 
 # good enough
+FSL_HELO_FAKE
+
+# good enough
 FSL_MIME_NO_TEXT
 
 # good enough
@@ -921,6 +924,9 @@ HDRS_LCASE
 
 # good enough
 HK_LOTTO_NAME
+
+# good enough
+HK_NAME_FM_DR
 
 # good enough
 HK_SCAM_N1
@@ -933,9 +939,6 @@ LIST_PRTL_PUMPDUMP
 
 # good enough
 LOTTO_URI
-
-# good enough
-MONEY_BARRISTER
 
 # good enough
 TVD_GET_STOCK
