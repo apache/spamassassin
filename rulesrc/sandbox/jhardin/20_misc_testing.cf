@@ -873,11 +873,11 @@ describe    NSL_TO_ENDS_COMMA      To: ends with a comma
 tflags      NSL_TO_ENDS_COMMA      nopublish
 
 
-body        CN_B2B_SPAMMER         /\bWe are (?:(?:a )?(?:China|Taiwan)[-\s]based|(?:one of (?:the )?best|(?:a )?leading) [^\.]{10,90} (?:in|from) (?:China|Taiwan))\b/i
+body        CN_B2B_SPAMMER         /\bWe are (?:(?:a )?(?:China|Taiwan)[-\s]based|(?:one of (?:the )?best|(?:a )?leading) (?:international|[^\.]{10,90} (?:in|from) (?:China|Taiwan)))\b/i
 describe    CN_B2B_SPAMMER         Chinese company introducing itself
 tflags      CN_B2B_SPAMMER         publish
 
-body        CN_OPTOUT_EML          /\bpasamenzi\@sina\.com\b/i
+body        CN_OPTOUT_EML          /\b(?:pasamenzi|arinayuma)\@sina\.com\b/i
 describe    CN_OPTOUT_EML          Opt-out email address in CN B2B spams
 
 # __ version of khopesh UPPERCASE_URI, for use in metas
