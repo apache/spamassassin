@@ -267,26 +267,27 @@ sub check_illegal_chars {
 
   $header .= ":raw" unless ($header eq "ALL" || $header =~ /:raw$/);
   my $str = $pms->get($header);
-  return 0 unless $str ne '';
+  return 0 if !defined $str || $str eq '';
 
   # avoid overlap between tests
   if ($header eq "ALL") {
     # fix continuation lines, then remove Subject and From
     $str =~ s/\n[ \t]+/  /gs;
-    $str =~ s/^(?:Subject|From):.*$//gm;
+    $str =~ s/^(?:Subject|From):.*$//gmi;
   }
 
   # count illegal substrings (RFC 2045)
-  my $illegal = () = ($str =~ /[\x00-\x08\x0b\x0c\x0e-\x1f\x7f-\xff]/g);
+  # (non-ASCII + C0 controls except TAB, NL, CR)
+  my $illegal = $str =~ tr/\x00-\x08\x0b\x0c\x0e-\x1f\x7f-\xff//;
 
   # minor exemptions for Subject
-  if ($header eq "Subject:raw") {
+  if ($illegal > 0 && lc $header eq "subject:raw") {
     # only exempt a single cent sign, pound sign, or registered sign
-    my $exempt = () = ($str =~ /[\xa2\xa3\xae]/g);
+    my $exempt = $str =~ tr/\xa2\xa3\xae//;
     $illegal-- if $exempt == 1;
   }
 
-  return 0 if (length($str) == 0);
+  return 0 if $str eq '';
   return (($illegal / length($str)) >= $ratio && $illegal >= $count);
 }
 
