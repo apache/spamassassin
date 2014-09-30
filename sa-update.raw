@@ -1527,7 +1527,8 @@ sub http_get {
   # parent
   waitpid($pid,0);
   my $child_stat = $?;
-  dbg("http: process [%s], exit status: %s", $pid, $child_stat);
+  dbg("http: process [%s], exit status: %s",
+      $pid, exit_status_str($child_stat,0));
 
   if (!$opt{'verbose'}) {
     # silent
@@ -1535,7 +1536,7 @@ sub http_get {
     printf("http: (%s) GET %s, success\n", $ext_prog, $url);
   } else {
     printf("http: (%s) GET %s, FAILED, status: %s\n",
-           $ext_prog, $url, $child_stat);
+           $ext_prog, $url, exit_status_str($child_stat,0));
   }
 
   if ($child_stat == 0) {
