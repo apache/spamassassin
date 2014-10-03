@@ -873,7 +873,7 @@ describe    NSL_TO_ENDS_COMMA      To: ends with a comma
 tflags      NSL_TO_ENDS_COMMA      nopublish
 
 
-body        CN_B2B_SPAMMER         /\bWe are (?:(?:a )?(?:China|Taiwan)[-\s]based|(?:one of (?:the )?best|(?:a )?leading) (?:international|[^\.]{10,90} (?:in|from) (?:China|Taiwan)))\b/i
+body        CN_B2B_SPAMMER         /\bWe are (?:(?:a )?(?:China|Taiwan)[-\s]based|(?:one of (?:the )?best|(?:a )?leading) (?:international|[^\.]{10,90} (?:in|from) (?:\w+, )?(?:China|Taiwan)))\b/i
 describe    CN_B2B_SPAMMER         Chinese company introducing itself
 tflags      CN_B2B_SPAMMER         publish
 
@@ -1594,11 +1594,11 @@ describe    PUMPDUMP_MULTI    Pump-and-dump stock scam phrases
 score       PUMPDUMP_MULTI    3.500	# limit
 tflags      PUMPDUMP_MULTI    publish
 
-body        DR_OZ_OBFU        /\bD(?:r\.|oc(?:tor)?) ?0z\b/i
-describe    DR_OZ_OBFU        Obfuscated "Dr. Oz"
-
-body        DOC_OZ            /\bdoc oz\b/
-describe    DOC_OZ            Doc Oz
+#body        DR_OZ_OBFU        /\bD(?:r\.|oc(?:tor)?) ?0z\b/i
+#describe    DR_OZ_OBFU        Obfuscated Doctor Oz
+#
+#body        DOC_OZ            /\b(?:doc oz|Dr\.?Oz)\b/
+#describe    DOC_OZ            Doctor Oz
 
 
 body        __ADMAIL          /(?:\b|_)ad-?(?:mail|message)s?(?:\b|_)/i
@@ -1697,6 +1697,11 @@ ifplugin Mail::SpamAssassin::Plugin::ReplaceTags
   replace_rules FUZZY_SECURITY
   describe      FUZZY_SECURITY      Obfuscated "security"
   tflags        FUZZY_SECURITY      publish
+
+  body          FUZZY_DR_OZ         /\bD(?!(?-i:(?:r.|octor) Oz))(?:<R>|<O><C>(?:<T><O><R>)?)\.? ?<O><Z>(?:$|\W)/i
+  replace_rules FUZZY_DR_OZ
+  describe      FUZZY_DR_OZ         Obfuscated Doctor Oz
+  tflags        FUZZY_DR_OZ         publish
 endif
 
 
