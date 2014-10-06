@@ -237,6 +237,12 @@ meta           MAILER_EQ_ORG         __MUA_EQ_ORG_1 || __MUA_EQ_ORG_2
 describe       MAILER_EQ_ORG         X-Mailer: same as Organization:
 #tflags         MAILER_EQ_ORG         publish
 
+header         __FROM_EQ_ORG_1       ALL =~ /\nFrom: "?([^\n]+)"? <[^>]+>\n.*Organization: \1\n/ism
+header         __FROM_EQ_ORG_2       ALL =~ /\nOrganization: ([^\n]+)\n.*From: "?\1"?/ism
+#meta           FROM_EQ_ORG           __FROM_EQ_ORG_1 || __FROM_EQ_ORG_2
+#describe       FROM_EQ_ORG           From: same as Organization:
+#tflags         FROM_EQ_ORG           publish
+
 
 # observed in UCE 9/2009
 #header         __HDRS_LCASE          ALL =~ /\n(?:Reply-to|Message-id|Content-type|X-MSMail-priority|from|subject|to|Disposition-notification-to):/sm
@@ -971,10 +977,11 @@ meta        TVD_SPACE_RATIO_MINFP  __TVD_SPACE_RATIO && !__LCL__ENV_AND_HDR_FROM
 #tflags      TVD_SPACE_RATIO_MINFP  nopublish
 score       TVD_SPACE_RATIO_MINFP  2.750   # limit
 
-meta        SUBJECT_UNNEEDED_ENCODING    (__SUBJECT_ENCODED_B64 && !__SUBJECT_UTF8_B_ENCODED) && !__RCD_RDNS_MAIL && !__LCL__ENV_AND_HDR_FROM_MATCH && !__SUBSCRIPTION_INFO && !__THREADED && !__NONBOUNCE_READ_RECEIPT 
-describe    SUBJECT_UNNEEDED_ENCODING    Subject encoded but not non-ASCII?
-score       SUBJECT_UNNEEDED_ENCODING    2.000    # limit
-tflags      SUBJECT_UNNEEDED_ENCODING    publish
+# Only useful for English-language email
+#meta        SUBJECT_UNNEEDED_ENCODING    (__SUBJECT_ENCODED_B64 && !__SUBJECT_UTF8_B_ENCODED) && !__RCD_RDNS_MAIL && !__LCL__ENV_AND_HDR_FROM_MATCH && !__SUBSCRIPTION_INFO && !__THREADED && !__NONBOUNCE_READ_RECEIPT 
+#describe    SUBJECT_UNNEEDED_ENCODING    Subject encoded but not non-ANSI?
+#score       SUBJECT_UNNEEDED_ENCODING    1.000    # limit
+#tflags      SUBJECT_UNNEEDED_ENCODING    publish
 
 # Be sensitive to FP on legit chinese-language mailing lists (09/2014)
 meta        __TVD_SPACE_ENCODED    (__TVD_SPACE_RATIO && __SUBJECT_ENCODED_B64 && !__SUBJECT_UTF8_B_ENCODED)
