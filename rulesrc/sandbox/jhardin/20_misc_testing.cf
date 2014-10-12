@@ -1775,6 +1775,9 @@ tflags    RAND_HEADER_MANY             publish
 #describe  FR_SPAM_LAW                  References French privacy law
 #score     FR_SPAM_LAW                  1.000   # limit
 
-body      __EDGER_HOOVER                 /\bedger hoover\b/i
-header    __FM_EDGER_HOOVER              From =~ /\bedger hoover\b/i
+body      __EDGER_HOOVER                /\bedger hoover\b/i
+header    __FM_EDGER_HOOVER             From =~ /\bedger hoover\b/i
+
+body      __MYSTERY_SHOPPER             /\bmystery shoppers?\b/i
+
 
