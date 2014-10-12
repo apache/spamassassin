@@ -973,7 +973,7 @@ meta        GAPPY_HTML             __GAPPY_HTML && !__UNSUB_LINK && !__RP_MATCHE
 describe    GAPPY_HTML             HTML body with much useless whitespace
 
 # Try to improve S/O per bug 6119
-meta        TVD_SPACE_RATIO_MINFP  __TVD_SPACE_RATIO && !__LCL__ENV_AND_HDR_FROM_MATCH && !__VIA_ML && !__SUBSCRIPTION_INFO && !__NOT_SPOOFED  && !__RCD_RDNS_MAIL && !__SUBJECT_ENCODED_QP && !__THREADED && !__TO_EQ_FROM_DOM && !__BOTH_INR_AND_REF && !__X_CRON_ENV 
+meta        TVD_SPACE_RATIO_MINFP  __TVD_SPACE_RATIO && !__LCL__ENV_AND_HDR_FROM_MATCH && !__VIA_ML && !__SUBSCRIPTION_INFO && !__NOT_SPOOFED  && !__RCD_RDNS_MAIL && !__SUBJECT_ENCODED_QP && !__THREADED && !__TO_EQ_FROM_DOM && !__BOTH_INR_AND_REF && !__X_CRON_ENV && !__HAS_THREAD_INDEX 
 #tflags      TVD_SPACE_RATIO_MINFP  nopublish
 score       TVD_SPACE_RATIO_MINFP  2.750   # limit
 
@@ -1314,7 +1314,7 @@ score       GAPPY_LOW_CONTRAST    2.500   # limit
 meta        URI_ONLY_LOW_CONTRAST HTML_FONT_LOW_CONTRAST && __BODY_URI_ONLY 
 score       URI_ONLY_LOW_CONTRAST 2.500   # limit
 
-meta        SUBJ_OBFU_LOW_CNTRST  HTML_FONT_LOW_CONTRAST && __SUBJ_OBFU_PUNCT && !ALL_TRUSTED && !__NOT_A_PERSON 
+meta        SUBJ_OBFU_LOW_CNTRST  (HTML_FONT_LOW_CONTRAST && __SUBJ_OBFU_PUNCT) && !ALL_TRUSTED && !__NOT_A_PERSON && !__THREADED 
 describe    SUBJ_OBFU_LOW_CNTRST  Subject obfuscation + hidden text
 score       SUBJ_OBFU_LOW_CNTRST  2.500   # limit
 
