@@ -1780,4 +1780,15 @@ header    __FM_EDGER_HOOVER             From =~ /\bedger hoover\b/i
 
 body      __MYSTERY_SHOPPER             /\bmystery shoppers?\b/i
 
+header    __HAS_NO_RELAY                X-No-Relay =~ /./
+
+# seen 10/2014: "https://www.google.com/url?q=https://copy.com/ApbFn2848pQm/ShippingInvoice_6974.PDF.scr?download=1&sa=D&sntz=1&usg=AFQjCNGhvWhljnujQlP85tA6YUsddfuJow"
+uri       __GOOG_MALWARE_DNLD           m;^https?://[^/]*\.google\.com/[^?]*url\?.*[\?&]download=1;i
+meta      GOOG_MALWARE_DNLD             __GOOG_MALWARE_DNLD
+describe  GOOG_MALWARE_DNLD             File download via Google - Malware?
+score     GOOG_MALWARE_DNLD             5.000   # limit
+tflags    GOOG_MALWARE_DNLD             publish
+
+
+
 
