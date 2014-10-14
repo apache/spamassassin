@@ -1,4 +1,4 @@
-# Last update: 2014-10-13-axb
+# Last update: 2014-10-14-axb
 # Set headers which may provide inappropriate cues to the Bayesian classifier
 bayes_ignore_header Auto-Submitted
 bayes_ignore_header CTCH-SenderID-TotalSpam
@@ -127,6 +127,9 @@ bayes_ignore_header X-MXScan-Msgid
 bayes_ignore_header X-MXScan-ProcessingTime
 bayes_ignore_header X-MXScan-Scan
 bayes_ignore_header X-NAI-Spam-Flag
+bayes_ignore_header X-NAI-Spam-Rules
+bayes_ignore_header X-NAI-Spam-Score
+bayes_ignore_header X-NAI-Spam-Threshold
 bayes_ignore_header X-NetStation-Status
 bayes_ignore_header X-No-Relay
 bayes_ignore_header X-OVH-SPAMSTATE
