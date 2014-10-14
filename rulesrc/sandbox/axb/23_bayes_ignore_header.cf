@@ -1,15 +1,5 @@
 # Last update: 2014-10-14-axb
-# Set headers which may provide inappropriate cues to the Bayesian classifier
-bayes_ignore_header Auto-Submitted
-bayes_ignore_header List-Archive
-bayes_ignore_header List-Help
-bayes_ignore_header List-Id
-bayes_ignore_header List-Post
-bayes_ignore_header List-Subscribe
-bayes_ignore_header List-Unsubscribe
-bayes_ignore_header Mailing-List
-bayes_ignore_header Precedence
-bayes_ignore_header Received-SPF
+# Set headers which may provide inappropriate AV/filter cues to the Bayesian classifier
 bayes_ignore_header X-ACL-Warn
 bayes_ignore_header X-Alimail-AntiSpam
 bayes_ignore_header X-Amavis-Modified
@@ -55,7 +45,6 @@ bayes_ignore_header X-Barracuda-URL
 bayes_ignore_header X-Barracuda-Virus-Alert
 bayes_ignore_header X-Bayesian-Result
 bayes_ignore_header X-Bayes-Prob
-bayes_ignore_header X-BeenThere
 bayes_ignore_header X-BitDefender-Spam
 bayes_ignore_header X-Bogosity
 bayes_ignore_header X-Boxtrapper
@@ -71,7 +60,6 @@ bayes_ignore_header X-CMAE-Analysis
 bayes_ignore_header X-CMAE-Match
 bayes_ignore_header X-CMAE-Score
 bayes_ignore_header X-CMAE-Verdict
-bayes_ignore_header X-Complaints-To
 bayes_ignore_header X-Coremail-Antispam
 bayes_ignore_header X-CTCH-SenderID
 bayes_ignore_header X-CTCH-SenderID-TotalBulk
