@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus dwarren jarif kpg-core mas-cps mas-mas mmiroslaw-ham mmiroslaw-spam zmi; day 2: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus dwarren jarif kpg-core llanga mas-cps mas-mas mmiroslaw-ham mmiroslaw-spam zmi; day 3: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus dwarren jarif kpg-core llanga mas-cps mas-mas zmi
+# with results from: day 1: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus jarif kpg-core mas-cps mas-mas mmiroslaw-ham mmiroslaw-spam zmi; day 2: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus dwarren kpg-core llanga mas-cps mas-mas mmiroslaw-ham mmiroslaw-spam zmi; day 3: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus kpg-core llanga mas-cps mas-mas zmi
 
 # tflags publish
 AC_BR_BONANZA
@@ -95,19 +95,19 @@ AD_PREFS
 ALL_TRUSTED
 
 # good enough
-ANY_PILL_PRICE
+AXB_HELO_HOME_UN
 
 # good enough
 AXB_RBDY_TENANDTEN
+
+# good enough
+AXB_RCVD_NS1GOO
 
 # good enough
 AXB_XMAILER_MIMEOLE_OL_024C2
 
 # good enough
 AXB_XMAILER_MIMEOLE_OL_1ECD5
-
-# good enough
-AXB_X_AOL_SEZ_S
 
 # tflags learn
 BAYES_00
@@ -139,14 +139,8 @@ BAYES_99
 # tflags learn
 BAYES_999
 
-# good enough
-BIGNUM_EMAILS
-
 # tflags publish
 BODY_URI_ONLY
-
-# good enough
-BUG6152_INVALID_DATE_TZ_ABSURD
 
 # tflags publish
 CANT_SEE_AD
@@ -177,9 +171,6 @@ CORRUPT_FROM_LINE_IN_HDRS
 
 # good enough
 DATE_IN_FUTURE_96_Q
-
-# good enough
-DATE_IN_FUTURE_Q_PLUS
 
 # good enough
 DEAR_BENEFICIARY
@@ -225,9 +216,6 @@ DOS_ANAL_SPAM_MAILER
 
 # good enough
 DOS_OE_TO_MX
-
-# good enough
-DSN_NO_MIMEVERSION
 
 # tflags publish
 DX_TEXT_02
@@ -290,9 +278,6 @@ FROM_LOCAL_NOVOWEL
 FROM_MISSPACED
 
 # good enough
-FROM_MISSP_DYNIP
-
-# good enough
 FROM_MISSP_EH_MATCH
 
 # good enough
@@ -324,9 +309,6 @@ FSL_CTYPE_WIN1251
 
 # good enough
 FSL_HELO_DEVICE
-
-# good enough
-FSL_HELO_FAKE
 
 # tflags publish
 FSL_NEW_HELO_USER
@@ -422,6 +404,9 @@ HK_NAME_DRUGS
 HK_NAME_MR_MRS
 
 # good enough
+HK_RANDOM_FROM
+
+# good enough
 HK_SCAM_N15
 
 # good enough
@@ -442,9 +427,6 @@ KB_DATE_CONTAINS_TAB
 # good enough
 KB_FAKED_THE_BAT
 
-# good enough
-LIST_PRTL_PUMPDUMP
-
 # tflags publish
 LIST_PRTL_SAME_USER
 
@@ -459,9 +441,6 @@ LOTS_OF_MONEY
 
 # good enough
 LOTTO_AGENT
-
-# good enough
-LOTTO_DEPT
 
 # tflags publish
 LUCRATIVE
@@ -525,9 +504,6 @@ OBFU_JVSCR_ESC
 
 # tflags publish
 OBFU_TEXT_ATTACH
-
-# good enough
-PHP_NOVER_MUA
 
 # tflags publish
 PP_MIME_FAKE_ASCII_TEXT
@@ -845,9 +821,6 @@ TO_NO_BRKTS_NORDNS_HTML
 TO_NO_BRKTS_PCNT
 
 # good enough
-TT_MSGID_TRUNC
-
-# good enough
 TVD_FINGER_02
 
 # good enough
@@ -855,9 +828,6 @@ TVD_FROM_1
 
 # good enough
 TVD_PH_BODY_META
-
-# good enough
-TVD_QUAL_MEDS
 
 # good enough
 TVD_SPACE_ENCODED
@@ -869,19 +839,25 @@ TVD_SPACE_RATIO_MINFP
 TW_GIBBERISH_MANY
 
 # good enough
-AXB_HELO_HOME_UN
+FROM_12LTRDOM
 
 # good enough
-AXB_RCVD_NS1GOO
+FSL_HELO_FIREWALL
 
 # good enough
-HK_NAME_FM_MR_MRS
+FSL_MID_419
+
+# tflags publish
+GOOG_MALWARE_DNLD
 
 # good enough
-HK_RANDOM_FROM
+RP_MATCHES_RCVD
 
 # good enough
-MALFORMED_FREEMAIL
+TVD_SUBJ_NUM_OBFU_MINFP
+
+# good enough
+XPRIO
 
 # tflags publish
 UC_GIBBERISH_OBFU
