@@ -1181,6 +1181,9 @@ body        __VALIDATE_MBOX_SE   /(?:\b=E5|[\xe5]|[\xc3][\xa5])terst(?:=E4|\xe4|
 meta        __EMAIL_PHISH        (__WEBMAIL_ACCT + __MAILBOX_FULL + __MAILBOX_FULL_SE + __CLEAN_MAILBOX + __VALIDATE_MAILBOX + __VALIDATE_MBOX_SE + __UPGR_MAILBOX + __LOCK_MAILBOX + __SYSADMIN + __ATTN_MAIL_USER + __MAIL_ACCT_ACCESS1 + __MAIL_ACCT_ACCESS2 + __ACCESS_REVOKE + (__TVD_PH_SUBJ_META || __TVD_PH_BODY_META || __TVD_PH_BODY_ACCOUNTS_PRE || __TVD_PH_BODY_ACCOUNTS_POST) > 1)
 meta        __EMAIL_PHISH_MANY   (__WEBMAIL_ACCT + __MAILBOX_FULL + __MAILBOX_FULL_SE + __CLEAN_MAILBOX + __VALIDATE_MAILBOX + __VALIDATE_MBOX_SE + __UPGR_MAILBOX + __LOCK_MAILBOX + __SYSADMIN + __ATTN_MAIL_USER + __MAIL_ACCT_ACCESS1 + __MAIL_ACCT_ACCESS2 + __ACCESS_REVOKE + (__TVD_PH_SUBJ_META || __TVD_PH_BODY_META || __TVD_PH_BODY_ACCOUNTS_PRE || __TVD_PH_BODY_ACCOUNTS_POST) > 3)
 
+meta        UPGRADE_MAILBOX      __UPGR_MAILBOX && __HTML_FONT_LOW_CONTRAST_MINFP 
+describe    UPGRADE_MAILBOX      Upgrade your mailbox! (phishing?)
+
 body        __ACCESS_SUSPENDED   /\b?(:(?:access|account) has been (?:temporar(?:il)?y )(?:suspended|blocked|locked)|suspend (?:you from|your) access(?:ing)?)\b/i
 body        __ACCESS_RESTORE     /\bto (?:(?:restore|regain) access|(?:remove|uplift) (?:the|this) suspens|continue using your (?:account|online))/i
 body        __ACCESS_REVOKE      /(?:temporary|permanent) (?:de-?activation|removal) of your (?:\w{1,30} )?(?:access|account)/i
