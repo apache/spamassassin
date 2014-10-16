@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus jarif kpg-core mas-cps mas-mas mmiroslaw-ham mmiroslaw-spam zmi; day 2: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus dwarren kpg-core llanga mas-cps mas-mas mmiroslaw-ham mmiroslaw-spam zmi; day 3: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus kpg-core llanga mas-cps mas-mas zmi
+# with results from: day 1: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus dwarren jarif kpg-core mas-cps mas-mas mmiroslaw-ham mmiroslaw-spam zmi; day 2: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus jarif kpg-core llanga mas-cps mas-mas mmiroslaw-ham mmiroslaw-spam zmi; day 3: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus dwarren kpg-core llanga mas-cps mas-mas mmiroslaw-ham mmiroslaw-spam zmi
 
 # tflags publish
 AC_BR_BONANZA
@@ -142,6 +142,9 @@ BAYES_999
 # tflags publish
 BODY_URI_ONLY
 
+# good enough
+BUG6152_INVALID_DATE_TZ_ABSURD
+
 # tflags publish
 CANT_SEE_AD
 
@@ -217,6 +220,12 @@ DOS_ANAL_SPAM_MAILER
 # good enough
 DOS_OE_TO_MX
 
+# good enough
+DOS_OE_TO_MX_IMAGE
+
+# good enough
+DSN_NO_MIMEVERSION
+
 # tflags publish
 DX_TEXT_02
 
@@ -276,6 +285,9 @@ FROM_LOCAL_NOVOWEL
 
 # good enough
 FROM_MISSPACED
+
+# good enough
+FROM_MISSP_DYNIP
 
 # good enough
 FROM_MISSP_EH_MATCH
@@ -441,6 +453,9 @@ LOTS_OF_MONEY
 
 # good enough
 LOTTO_AGENT
+
+# good enough
+LOTTO_DEPT
 
 # tflags publish
 LUCRATIVE
@@ -821,13 +836,13 @@ TO_NO_BRKTS_NORDNS_HTML
 TO_NO_BRKTS_PCNT
 
 # good enough
+TT_MSGID_TRUNC
+
+# good enough
 TVD_FINGER_02
 
 # good enough
 TVD_FROM_1
-
-# good enough
-TVD_PH_BODY_META
 
 # good enough
 TVD_SPACE_ENCODED
@@ -837,9 +852,6 @@ TVD_SPACE_RATIO_MINFP
 
 # tflags publish
 TW_GIBBERISH_MANY
-
-# good enough
-FROM_12LTRDOM
 
 # good enough
 FSL_HELO_FIREWALL
@@ -854,10 +866,7 @@ GOOG_MALWARE_DNLD
 RP_MATCHES_RCVD
 
 # good enough
-TVD_SUBJ_NUM_OBFU_MINFP
-
-# good enough
-XPRIO
+TR_FILLER_TEXT
 
 # tflags publish
 UC_GIBBERISH_OBFU
