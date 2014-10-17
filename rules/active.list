@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus dwarren jarif kpg-core mas-cps mas-mas mmiroslaw-ham mmiroslaw-spam zmi; day 2: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus jarif kpg-core llanga mas-cps mas-mas mmiroslaw-ham mmiroslaw-spam zmi; day 3: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus dwarren kpg-core llanga mas-cps mas-mas mmiroslaw-ham mmiroslaw-spam zmi
+# with results from: day 1: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus dwarren kpg-core mas-cps mas-mas mmiroslaw-ham mmiroslaw-spam; day 2: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus dwarren jarif kpg-core llanga mas-cps mas-mas mmiroslaw-ham mmiroslaw-spam zmi; day 3: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus jarif kpg-core llanga mas-cps mas-mas mmiroslaw-ham mmiroslaw-spam zmi
 
 # tflags publish
 AC_BR_BONANZA
@@ -322,6 +322,12 @@ FSL_CTYPE_WIN1251
 # good enough
 FSL_HELO_DEVICE
 
+# good enough
+FSL_HELO_FIREWALL
+
+# good enough
+FSL_MID_419
+
 # tflags publish
 FSL_NEW_HELO_USER
 
@@ -366,6 +372,9 @@ GOOGLE_DOCS_PHISH
 
 # tflags publish
 GOOGLE_DOCS_PHISH_MANY
+
+# tflags publish
+GOOG_MALWARE_DNLD
 
 # tflags userconf
 GTUBE
@@ -453,9 +462,6 @@ LOTS_OF_MONEY
 
 # good enough
 LOTTO_AGENT
-
-# good enough
-LOTTO_DEPT
 
 # tflags publish
 LUCRATIVE
@@ -758,6 +764,9 @@ REPLYTO_WITHOUT_TO_CC
 RISK_FREE
 
 # good enough
+RP_MATCHES_RCVD
+
+# good enough
 SHORTENED_URL_SRC
 
 # tflags net
@@ -799,9 +808,6 @@ SUBJECT_IN_WHITELIST
 # good enough
 SUBJ_OBFU_LOW_CNTRST
 
-# good enough
-SUBJ_OBFU_PUNCT_MANY
-
 # tflags publish
 SYSADMIN
 
@@ -836,6 +842,9 @@ TO_NO_BRKTS_NORDNS_HTML
 TO_NO_BRKTS_PCNT
 
 # good enough
+TR_FILLER_TEXT
+
+# good enough
 TT_MSGID_TRUNC
 
 # good enough
@@ -854,19 +863,28 @@ TVD_SPACE_RATIO_MINFP
 TW_GIBBERISH_MANY
 
 # good enough
-FSL_HELO_FIREWALL
+AXB_X_AOL_SEZ_S
 
 # good enough
-FSL_MID_419
-
-# tflags publish
-GOOG_MALWARE_DNLD
+BIGNUM_EMAILS
 
 # good enough
-RP_MATCHES_RCVD
+FSL_HELO_FAKE
 
 # good enough
-TR_FILLER_TEXT
+HK_NAME_FM_MR_MRS
+
+# good enough
+HK_SCAM_N4
+
+# good enough
+MALFORMED_FREEMAIL
+
+# good enough
+PHP_NOVER_MUA
+
+# good enough
+UPGRADE_MAILBOX
 
 # tflags publish
 UC_GIBBERISH_OBFU
