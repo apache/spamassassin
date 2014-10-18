@@ -1307,7 +1307,7 @@ tflags      FORM_LOW_CONTRAST     publish
 
 
 # try to FP-reduce HTML_FONT_LOW_CONTRAST
-meta        __HTML_FONT_LOW_CONTRAST_MINFP	HTML_FONT_LOW_CONTRAST && !__HAS_SENDER && !__VIA_ML && !__RP_MATCHES_RCVD && !__THREADED && !__HAS_THREAD_INDEX && !ALL_TRUSTED && !__NOT_SPOOFED && !__HDRS_LCASE_KNOWN && !__DKIM_EXISTS
+meta        __HTML_FONT_LOW_CONTRAST_MINFP	HTML_FONT_LOW_CONTRAST && !__HAS_SENDER && !__VIA_ML && !__RP_MATCHES_RCVD && !__THREADED && !__HAS_THREAD_INDEX && !ALL_TRUSTED && !__NOT_SPOOFED && !__HDRS_LCASE_KNOWN && !__DKIM_EXISTS && !__SENDER_BOT 
 
 # some no-ham combinations
 meta        GAPPY_LOW_CONTRAST    HTML_FONT_LOW_CONTRAST && __GAPPY_SUBJECT 
@@ -1325,6 +1325,9 @@ meta        URI_DOTDOT_LOW_CNTRST HTML_FONT_LOW_CONTRAST && __URI_DOM_DOTDOT
 describe    URI_DOTDOT_LOW_CNTRST Suspicious URI + hidden text
 score       URI_DOTDOT_LOW_CNTRST 2.500   # limit
 
+meta        STOCK_LOW_CONTRAST    __HTML_FONT_LOW_CONTRAST_MINFP && __FB_S_STOCK
+describe    STOCK_LOW_CONTRAST    Stocks + hidden text
+score       STOCK_LOW_CONTRAST    2.500   # limit
 
 uri         __URI_DOM_DOTDOT      m,://[^/]+\.\.,
 
