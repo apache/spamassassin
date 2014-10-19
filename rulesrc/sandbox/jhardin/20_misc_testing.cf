@@ -1820,4 +1820,7 @@ body      __WANT_BIZ                    /\b(?:I|we) want your business\b/i
 meta      TEQF_USR_MSGID_MALF           __TO_EQ_FROM_USR_NN_MINFP && __MSGID_NOFQDN2 
 describe  TEQF_USR_MSGID_MALF           To and from user nearly same + malformed message ID
 
+meta      GOOG_REDIR_SHORT              __GOOG_REDIR && __KAM_BODY_LENGTH_LT_512 
+describe  GOOG_REDIR_SHORT              Google redirect to obscure spamvertised website + short message
+
 
