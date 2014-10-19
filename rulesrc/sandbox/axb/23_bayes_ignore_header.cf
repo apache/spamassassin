@@ -1,4 +1,4 @@
-# Last update: 2014-10-14-axb
+# Last update: 2014-10-19-axb
 # Set headers which may provide inappropriate AV/filter cues to the Bayesian classifier
 bayes_ignore_header X-ACL-Warn
 bayes_ignore_header X-Alimail-AntiSpam
@@ -73,11 +73,13 @@ bayes_ignore_header X-CTCH-VOD
 bayes_ignore_header X-CT-Spam
 bayes_ignore_header X-Drweb-SpamState
 bayes_ignore_header X-Enigmail-Version
+bayes_ignore_header X-Exchange-Antispam-Report
 bayes_ignore_header X-EYOU-SPAMVALUE
 bayes_ignore_header X-FB-OUTBOUND-SPAM
 bayes_ignore_header X-FEAS-SBL
 bayes_ignore_header X-FILTER-SCORE
 bayes_ignore_header X-Forefront-Antispam-Report
+bayes_ignore_header X-Forefront-PRVS
 bayes_ignore_header X-Fuglu-Spamstatus
 bayes_ignore_header X-Fuglu-Suspect
 bayes_ignore_header X-getmail-filter-classifier
@@ -106,6 +108,7 @@ bayes_ignore_header X-MailFoundry
 bayes_ignore_header X-MDMailLookup-Result
 bayes_ignore_header X-ME-Bayesian
 bayes_ignore_header X-ME-Content
+bayes_ignore_header X-Microsoft-Antispam
 bayes_ignore_header X-Mlf-Version
 bayes_ignore_header X-MXScan-AntiSpam
 bayes_ignore_header X-MXScan-AntiVirus
