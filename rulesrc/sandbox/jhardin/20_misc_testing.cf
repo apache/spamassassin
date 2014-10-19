@@ -1711,11 +1711,17 @@ ifplugin Mail::SpamAssassin::Plugin::ReplaceTags
   describe      FUZZY_SECURITY      Obfuscated "security"
   tflags        FUZZY_SECURITY      publish
 
-  body          __FUZZY_DR_OZ       /\bD(?!(?-i:(?:r.|octor) Oz))(?:<R>|<O><C>(?:<T><O><R>)?)\.? ?<O><Z>(?:$|\W)/i
+  body          __FUZZY_DR_OZ       /\bD(?!(?-i:(?:r.|octor) Oz))(?:<R>|<O><C>(?:<T><O><R>)?)\.?<WS>*<O><Z>(?:$|\W)/i
   replace_rules __FUZZY_DR_OZ
   meta          FUZZY_DR_OZ         __FUZZY_DR_OZ && !__VIA_ML && !__DKIM_EXISTS && !__RP_MATCHES_RCVD 
   describe      FUZZY_DR_OZ         Obfuscated Doctor Oz
   tflags        FUZZY_DR_OZ         publish
+
+  body          FUZZY_CLICK_HERE    /<C>(?!lick here)<WS>*<L><WS>*<I><WS>*<C><WS>*<K><WS>+<H><WS>*<E><WS>*<R><WS>*<E>/i
+  replace_rules FUZZY_CLICK_HERE
+  describe      FUZZY_CLICK_HERE    Obfuscated "click here"
+  tflags        FUZZY_CLICK_HERE    publish
+
 endif
 
 
@@ -1797,6 +1803,18 @@ tflags    GOOG_MALWARE_DNLD             publish
 
 uri       __GOOG_REDIR                  m;^https?://[^/]*\.google\.com/url\?;i
 
+body      ONLINE_MKTG_CNSLT             /\bonline marketing consultant\b/i
 
+body      SOLICIT_BIZ                   /\bbusiness solicitation messag/i
+
+body      __SPELLED_OUT_NUM             /\b(?:(?:one|two|three|four|five|six|seven|eight|nine|zero)[\s_-]?){4,}/i
+
+header    __SUBJ_BOTCHED_HTML           Subject =~ /%[0-9a-f][0-9a-f]/i
+tflags    __SUBJ_BOTCHED_HTML           multiple, maxhits=3
+meta      __SUBJ_BOTCHED_HTML_MANY      __SUBJ_BOTCHED_HTML > 2
+
+body      __HELP_YOU_SUCCEED            /\bhelp you succeed\b/i
+
+body      __WANT_BIZ                    /\b(?:I|we) want your business\b/i
 
 
