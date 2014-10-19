@@ -35,10 +35,12 @@ describe FROM_WSP_LEAD	Leading whitespace after '<' in From header field
 header   MSGID_WSP_TRAIL Message-ID:raw =~ /< [^>]* \s > [^<>]* \z/xm
 describe MSGID_WSP_TRAIL Trailing whitespace before '>' in Message-ID header
 
-header   MSGID_NOFQDN1  Message-ID =~ /<[^\@]*>/m
-describe MSGID_NOFQDN1  Message-ID with no domain name
-header   MSGID_NOFQDN2  Message-ID =~ /<.*\@[A-Za-z0-9]+>/m
-describe MSGID_NOFQDN2  Message-ID without a fully-qualified domain name
+header   __MSGID_NOFQDN1  Message-ID =~ /<[^\@]*>/m
+meta     MSGID_NOFQDN1    __MSGID_NOFQDN1
+describe MSGID_NOFQDN1    Message-ID with no domain name
+header   __MSGID_NOFQDN2  Message-ID =~ /<.*\@[A-Za-z0-9]+>/m
+meta     MSGID_NOFQDN2    __MSGID_NOFQDN2
+describe MSGID_NOFQDN2    Message-ID without a fully-qualified domain name
 
 #score   LONGLINE	0.5
 #score   RP_8BIT	2.8
