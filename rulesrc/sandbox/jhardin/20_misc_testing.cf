@@ -1817,4 +1817,7 @@ body      __HELP_YOU_SUCCEED            /\bhelp you succeed\b/i
 
 body      __WANT_BIZ                    /\b(?:I|we) want your business\b/i
 
+meta      TEQF_USR_MSGID_MALF           __TO_EQ_FROM_USR_NN_MINFP && __MSGID_NOFQDN2 
+describe  TEQF_USR_MSGID_MALF           To and from user nearly same + malformed message ID
+
 
