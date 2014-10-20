@@ -1204,6 +1204,9 @@ meta        ACCT_PHISHING_MANY   __ACCT_PHISH_MANY
 describe    ACCT_PHISHING_MANY   Phishing for account information
 score       ACCT_PHISHING_MANY   3.000  # limit
 
+meta        PHISHING_FREEMAIL    (__EMAIL_PHISH || __EMAIL_PHISH_MANY || __ACCT_PHISH || __ACCT_PHISH_MANY) && FREEMAIL_FORGED_REPLYTO
+describe    PHISHING_FREEMAIL    Send your login credentials to some random freemail account
+
 
 # Google Docs observed on LOTS of phishes 2012
 meta        __GOOGLE_DOCS_PHISH_1  __URI_GOOGLE_DOC && (__TVD_PH_SUBJ_META || __TVD_PH_BODY_META || __TVD_PH_BODY_ACCOUNTS_PRE || __TVD_PH_BODY_ACCOUNTS_POST)
