@@ -376,6 +376,17 @@ sub extract_metadata {
   for my $depends_on_tags (keys %{$conf->{askdns}}) {
     my @tags;
     @tags = split(/,/, $depends_on_tags)  if $depends_on_tags ne '';
+
+    if (would_log("dbg","askdns")) {
+      while ( my($query_template_key, $struct) =
+                each %{$conf->{askdns}{$depends_on_tags}} ) {
+        my($query_template, $query_type, $answer_types_ref, $rules) =
+          @$struct{qw(query q_type a_types rules)};
+        dbg("askdns: depend on tags %s, rules: %s ",
+            $depends_on_tags, join(', ', keys %$rules));
+      }
+    }
+
     if (!@tags) {
       # no dependencies on tags, just call directly
       $self->launch_queries($pms,$depends_on_tags);
