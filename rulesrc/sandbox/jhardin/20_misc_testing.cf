@@ -822,6 +822,7 @@ meta        __LIST_PRTL_PUMPDUMP   __LIST_PARTIAL && __PD_CNT_1
 meta        LIST_PRTL_PUMPDUMP     __LIST_PRTL_PUMPDUMP && !__DKIM_EXISTS 
 describe    LIST_PRTL_PUMPDUMP     Incomplete List-* headers and stock pump-and-dump
 score       LIST_PRTL_PUMPDUMP     2.000   # limit
+tflags      LIST_PRTL_PUMPDUMP     publish
 
 
 
@@ -1328,9 +1329,10 @@ meta        URI_DOTDOT_LOW_CNTRST HTML_FONT_LOW_CONTRAST && __URI_DOM_DOTDOT
 describe    URI_DOTDOT_LOW_CNTRST Suspicious URI + hidden text
 score       URI_DOTDOT_LOW_CNTRST 2.500   # limit
 
-meta        STOCK_LOW_CONTRAST    __HTML_FONT_LOW_CONTRAST_MINFP && __FB_S_STOCK
+meta        STOCK_LOW_CONTRAST    (__HTML_FONT_LOW_CONTRAST_MINFP && __FB_S_STOCK) && !__BUGGED_IMG 
 describe    STOCK_LOW_CONTRAST    Stocks + hidden text
 score       STOCK_LOW_CONTRAST    2.500   # limit
+tflags      STOCK_LOW_CONTRAST    publish
 
 uri         __URI_DOM_DOTDOT      m,://[^/]+\.\.,
 
@@ -1592,24 +1594,31 @@ body        __PUMPDUMP_03     /\bbuy (?:[^.!]{1,30} )?(?:(?:(?:mon|tues|wednes|t
 body        __PUMPDUMP_04     /\bmake you (?:big bucks|hundreds|thousands)\b/i
 body        __PUMPDUMP_05     /\b(?:tripled|quadrupled|quintupled|(?:shares|value|company) (?:go up|increase|has (?:increased|gained)) (?:by|more than) [a-z\s]{0,20}\d+(?: times| percent| ?%)) (?:and that )?in (?:(?:\d|a (?:span of|few)) days|a very short period)\b/i
 body        __PUMPDUMP_06     /\brecommend(?:ed|s)? (?:a|this) (?:company|stock)\b/i
-body        __PUMPDUMP_07     /\bbuy for (?:around |about |less than )?\d+ cents\b/i
+body        __PUMPDUMP_07     /\b(?:buy|grab it) for (?:around |about |less than )?\d+ cents\b/i
 body        __PUMPDUMP_08     /\b?(:sto[ck]{2}|sotk) of the year/i
-body        __PUMPDUMP_09     /\b(?:buy|get|snap up) as many shares (?:of it )?as you can\b/i
-meta        __PD_CNT_1        (__PUMPDUMP_01+__PUMPDUMP_02+__PUMPDUMP_03+__PUMPDUMP_04+__PUMPDUMP_05+__PUMPDUMP_06+__PUMPDUMP_07+__PUMPDUMP_08+__PUMPDUMP_09) > 0
-meta        __PD_CNT_2        (__PUMPDUMP_01+__PUMPDUMP_02+__PUMPDUMP_03+__PUMPDUMP_04+__PUMPDUMP_05+__PUMPDUMP_06+__PUMPDUMP_07+__PUMPDUMP_08+__PUMPDUMP_09) > 1
-meta        __PD_CNT_3        (__PUMPDUMP_01+__PUMPDUMP_02+__PUMPDUMP_03+__PUMPDUMP_04+__PUMPDUMP_05+__PUMPDUMP_06+__PUMPDUMP_07+__PUMPDUMP_08+__PUMPDUMP_09) > 2
-meta        __PD_CNT_4        (__PUMPDUMP_01+__PUMPDUMP_02+__PUMPDUMP_03+__PUMPDUMP_04+__PUMPDUMP_05+__PUMPDUMP_06+__PUMPDUMP_07+__PUMPDUMP_08+__PUMPDUMP_09) > 3
-meta        __PD_CNT_5        (__PUMPDUMP_01+__PUMPDUMP_02+__PUMPDUMP_03+__PUMPDUMP_04+__PUMPDUMP_05+__PUMPDUMP_06+__PUMPDUMP_07+__PUMPDUMP_08+__PUMPDUMP_09) > 4
-meta        __PD_CNT_6        (__PUMPDUMP_01+__PUMPDUMP_02+__PUMPDUMP_03+__PUMPDUMP_04+__PUMPDUMP_05+__PUMPDUMP_06+__PUMPDUMP_07+__PUMPDUMP_08+__PUMPDUMP_09) > 5
-meta        __PD_CNT_7        (__PUMPDUMP_01+__PUMPDUMP_02+__PUMPDUMP_03+__PUMPDUMP_04+__PUMPDUMP_05+__PUMPDUMP_06+__PUMPDUMP_07+__PUMPDUMP_08+__PUMPDUMP_09) > 6
-meta        PUMPDUMP          (__PUMPDUMP_01 || __PUMPDUMP_02 || __PUMPDUMP_03 || __PUMPDUMP_04 || __PUMPDUMP_05 || __PUMPDUMP_06 || __PUMPDUMP_07 || __PUMPDUMP_08 || __PUMPDUMP_09) && !PUMPDUMP_MULTI
+body        __PUMPDUMP_09     /\b(?:buy|get|snap up|grab) as many shares (?:of it )?as (?:you|I) can\b/i
+body        __PUMPDUMP_10     /\btrading at (?:such )?a (?:bargain|cheap|low)\b/i
+meta        __PD_CNT_1        (__PUMPDUMP_01+__PUMPDUMP_02+__PUMPDUMP_03+__PUMPDUMP_04+__PUMPDUMP_05+__PUMPDUMP_06+__PUMPDUMP_07+__PUMPDUMP_08+__PUMPDUMP_09+__PUMPDUMP_10) > 0
+meta        __PD_CNT_2        (__PUMPDUMP_01+__PUMPDUMP_02+__PUMPDUMP_03+__PUMPDUMP_04+__PUMPDUMP_05+__PUMPDUMP_06+__PUMPDUMP_07+__PUMPDUMP_08+__PUMPDUMP_09+__PUMPDUMP_10) > 1
+meta        __PD_CNT_3        (__PUMPDUMP_01+__PUMPDUMP_02+__PUMPDUMP_03+__PUMPDUMP_04+__PUMPDUMP_05+__PUMPDUMP_06+__PUMPDUMP_07+__PUMPDUMP_08+__PUMPDUMP_09+__PUMPDUMP_10) > 2
+meta        __PD_CNT_4        (__PUMPDUMP_01+__PUMPDUMP_02+__PUMPDUMP_03+__PUMPDUMP_04+__PUMPDUMP_05+__PUMPDUMP_06+__PUMPDUMP_07+__PUMPDUMP_08+__PUMPDUMP_09+__PUMPDUMP_10) > 3
+meta        __PD_CNT_5        (__PUMPDUMP_01+__PUMPDUMP_02+__PUMPDUMP_03+__PUMPDUMP_04+__PUMPDUMP_05+__PUMPDUMP_06+__PUMPDUMP_07+__PUMPDUMP_08+__PUMPDUMP_09+__PUMPDUMP_10) > 4
+meta        __PD_CNT_6        (__PUMPDUMP_01+__PUMPDUMP_02+__PUMPDUMP_03+__PUMPDUMP_04+__PUMPDUMP_05+__PUMPDUMP_06+__PUMPDUMP_07+__PUMPDUMP_08+__PUMPDUMP_09+__PUMPDUMP_10) > 5
+meta        __PD_CNT_7        (__PUMPDUMP_01+__PUMPDUMP_02+__PUMPDUMP_03+__PUMPDUMP_04+__PUMPDUMP_05+__PUMPDUMP_06+__PUMPDUMP_07+__PUMPDUMP_08+__PUMPDUMP_09+__PUMPDUMP_10) > 6
+meta        PUMPDUMP          (__PUMPDUMP_01 || __PUMPDUMP_02 || __PUMPDUMP_03 || __PUMPDUMP_04 || __PUMPDUMP_05 || __PUMPDUMP_06 || __PUMPDUMP_07 || __PUMPDUMP_08 || __PUMPDUMP_09 || __PUMPDUMP_10) && !PUMPDUMP_MULTI
 describe    PUMPDUMP          Pump-and-dump stock scam phrase
 score       PUMPDUMP          1.000	# limit
 tflags      PUMPDUMP          publish
-meta        PUMPDUMP_MULTI    (__PUMPDUMP_01+__PUMPDUMP_02+__PUMPDUMP_03+__PUMPDUMP_04+__PUMPDUMP_05+__PUMPDUMP_06+__PUMPDUMP_07+__PUMPDUMP_08+__PUMPDUMP_09) > 1
+meta        PUMPDUMP_MULTI    (__PUMPDUMP_01+__PUMPDUMP_02+__PUMPDUMP_03+__PUMPDUMP_04+__PUMPDUMP_05+__PUMPDUMP_06+__PUMPDUMP_07+__PUMPDUMP_08+__PUMPDUMP_09+__PUMPDUMP_10) > 1
 describe    PUMPDUMP_MULTI    Pump-and-dump stock scam phrases
 score       PUMPDUMP_MULTI    3.500	# limit
 tflags      PUMPDUMP_MULTI    publish
+
+body        __STOCK_TIP       /\bsto[ck]{2}\s?tip\b/i
+
+meta        PUMPDUMP_TIP      __PD_CNT_1 && __STOCK_TIP
+describe    PUMPDUMP_TIP      Pump-and-dump stock tip
+
 
 #body        DR_OZ_OBFU        /\bD(?:r\.|oc(?:tor)?) ?0z\b/i
 #describe    DR_OZ_OBFU        Obfuscated Doctor Oz
@@ -1817,9 +1826,11 @@ describe  SPELLED_OUT_NUMBER            Spelled out a number (one two three)
 score     SPELLED_OUT_NUMBER            3.250   # limit
 
 
-header    __SUBJ_BOTCHED_HTML           Subject =~ /%[0-9a-f][0-9a-f]/i
-tflags    __SUBJ_BOTCHED_HTML           multiple, maxhits=3
-meta      __SUBJ_BOTCHED_HTML_MANY      __SUBJ_BOTCHED_HTML > 2
+header    __SUBJ_UNNEEDED_HTML          Subject =~ /%[0-9a-f][0-9a-f]/i
+tflags    __SUBJ_UNNEEDED_HTML          multiple, maxhits=3
+meta      __SUBJ_UNNEEDED_HTML_MANY     __SUBJ_UNNEEDED_HTML > 1
+meta      SUBJ_UNNEEDED_HTML            __SUBJ_UNNEEDED_HTML && !__NOT_SPOOFED && !__RP_MATCHES_RCVD && !__VIA_ML 
+describe  SUBJ_UNNEEDED_HTML            Unneeded HTML formatting in Subject:
 
 body      __HELP_YOU_SUCCEED            /\bhelp you succeed\b/i
 
@@ -1827,16 +1838,19 @@ body      __WANT_BIZ                    /\b(?:I|we) want your business\b/i
 
 meta      TEQF_USR_MSGID_MALF           __TO_EQ_FROM_USR_NN_MINFP && __MSGID_NOFQDN2 
 describe  TEQF_USR_MSGID_MALF           To and from user nearly same + malformed message ID
+tflags    TEQF_USR_MSGID_MALF           publish
 
 meta      GOOG_REDIR_SHORT              __GOOG_REDIR && __KAM_BODY_LENGTH_LT_512 
 describe  GOOG_REDIR_SHORT              Google redirect to obscure spamvertised website + short message
+tflags    GOOG_REDIR_SHORT              publish
 
 
+# low S/O, apparently lots of invisible ham...
 rawbody   __STY_INVIS                   /\bstyle\s*=(?:3d)?\s*"\s*(?:visibility\s*:\s*hidden\s*;|display\s*:\s*none\s*;|background\s*:)/i
 tflags    __STY_INVIS                   multiple, maxhits=6
 meta      __STY_INVIS_MANY              __STY_INVIS > 5
-meta      HTML_TEXT_INVISIBLE           __STY_INVIS_MANY
-describe  HTML_TEXT_INVISIBLE           Hidden text
-score     HTML_TEXT_INVISIBLE           2.000   # limit
+#meta      HTML_TEXT_INVISIBLE           __STY_INVIS_MANY
+#describe  HTML_TEXT_INVISIBLE           Hidden text
+#score     HTML_TEXT_INVISIBLE           2.000   # limit
 
 
