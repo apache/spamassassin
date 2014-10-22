@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus dwarren kpg-core mas-cps mas-mas zmi; day 2: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus dwarren kpg-core llanga mas-cps mas-mas mmiroslaw-ham mmiroslaw-spam zmi; day 3: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus dwarren jarif kpg-core llanga mas-cps mas-mas mmiroslaw-ham mmiroslaw-spam zmi
+# with results from: day 1: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus dwarren jarif kpg-core mas-cps mas-mas mmiroslaw-ham mmiroslaw-spam zmi; day 2: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus dwarren jarif kpg-core llanga mas-cps mas-mas zmi; day 3: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus jarif kpg-core llanga mas-cps mas-mas zmi
 
 # tflags publish
 AC_BR_BONANZA
@@ -46,9 +46,6 @@ ADMITS_SPAM
 # tflags publish
 ADVANCE_FEE_2_NEW_FORM
 
-# good enough
-ADVANCE_FEE_2_NEW_FRM_MNY
-
 # tflags publish
 ADVANCE_FEE_2_NEW_MONEY
 
@@ -68,19 +65,10 @@ ADVANCE_FEE_3_NEW_MONEY
 ADVANCE_FEE_4_NEW
 
 # good enough
-ADVANCE_FEE_4_NEW_FORM
-
-# good enough
-ADVANCE_FEE_4_NEW_FRM_MNY
-
-# good enough
 ADVANCE_FEE_4_NEW_MONEY
 
 # good enough
 ADVANCE_FEE_5_NEW
-
-# good enough
-ADVANCE_FEE_5_NEW_FORM
 
 # good enough
 ADVANCE_FEE_5_NEW_FRM_MNY
@@ -108,6 +96,9 @@ AXB_XMAILER_MIMEOLE_OL_024C2
 
 # good enough
 AXB_XMAILER_MIMEOLE_OL_1ECD5
+
+# good enough
+AXB_X_AOL_SEZ_S
 
 # tflags learn
 BAYES_00
@@ -221,9 +212,6 @@ DOS_ANAL_SPAM_MAILER
 DOS_OE_TO_MX
 
 # good enough
-DOS_OE_TO_MX_IMAGE
-
-# good enough
 DSN_NO_MIMEVERSION
 
 # tflags publish
@@ -299,9 +287,6 @@ FROM_MISSP_FREEMAIL
 FROM_MISSP_MSFT
 
 # good enough
-FROM_MISSP_PHISH
-
-# good enough
 FROM_MISSP_REPLYTO
 
 # tflags net
@@ -357,15 +342,6 @@ FUZZY_SECURITY
 
 # tflags publish
 FUZZY_UNSUBSCRIBE
-
-# good enough
-GAPPY_GENITALIA
-
-# good enough
-GAPPY_LOW_CONTRAST
-
-# good enough
-GAPPY_PILLS
 
 # tflags publish
 GOOGLE_DOCS_PHISH
@@ -428,9 +404,6 @@ HK_NAME_MR_MRS
 HK_RANDOM_FROM
 
 # good enough
-HK_SCAM_N15
-
-# good enough
 HK_SCAM_N2
 
 # good enough
@@ -456,6 +429,9 @@ LONG_HEX_URI
 
 # tflags publish
 LONG_IMG_URI
+
+# good enough
+LONG_TERM_PRICE
 
 # tflags publish
 LOTS_OF_MONEY
@@ -769,6 +745,9 @@ RP_MATCHES_RCVD
 # good enough
 SHORTENED_URL_SRC
 
+# good enough
+SHORT_TERM_PRICE
+
 # tflags net
 SPF_FAIL
 
@@ -804,9 +783,6 @@ SUBJECT_IN_BLACKLIST
 
 # tflags userconf
 SUBJECT_IN_WHITELIST
-
-# good enough
-SUBJ_OBFU_LOW_CNTRST
 
 # tflags publish
 SYSADMIN
@@ -845,9 +821,6 @@ TO_NO_BRKTS_PCNT
 TR_FILLER_TEXT
 
 # good enough
-TT_MSGID_TRUNC
-
-# good enough
 TVD_FINGER_02
 
 # good enough
@@ -862,20 +835,38 @@ TVD_SPACE_RATIO_MINFP
 # tflags publish
 TW_GIBBERISH_MANY
 
-# good enough
-AXB_X_AOL_SEZ_S
+# tflags publish
+FORM_FRAUD
 
 # good enough
-HK_SCAM_N4
+FROM_12LTRDOM
+
+# tflags publish
+FUZZY_CLICK_HERE
 
 # good enough
-UPGRADE_MAILBOX
+GOOG_REDIR_SHORT
+
+# good enough
+LIST_PRTL_PUMPDUMP
+
+# good enough
+SPELLED_OUT_NUMBER
+
+# good enough
+STOCK_LOW_CONTRAST
+
+# good enough
+TEQF_USR_MSGID_MALF
 
 # tflags publish
 UC_GIBBERISH_OBFU
 
 # tflags userconf
 UNPARSEABLE_RELAY
+
+# good enough
+UPGRADE_MAILBOX
 
 # tflags net
 URIBL_AB_SURBL
@@ -960,9 +951,6 @@ URI_GOOGLE_PROXY
 
 # tflags userconf
 URI_NOVOWEL
-
-# good enough
-URI_ONLY_LOW_CONTRAST
 
 # tflags publish
 URI_OPTOUT_3LD
