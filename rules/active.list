@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus dwarren jarif kpg-core mas-cps mas-mas mmiroslaw-ham mmiroslaw-spam zmi; day 2: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus dwarren jarif kpg-core llanga mas-cps mas-mas zmi; day 3: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus jarif kpg-core llanga mas-cps mas-mas zmi
+# with results from: day 1: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus dwarren jarif kpg-core mas-cps mas-mas zmi; day 2: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus dwarren jarif kpg-core llanga mas-cps mas-mas mmiroslaw-ham mmiroslaw-spam zmi; day 3: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus dwarren jarif kpg-core llanga mas-cps mas-mas zmi
 
 # tflags publish
 AC_BR_BONANZA
@@ -212,6 +212,9 @@ DOS_ANAL_SPAM_MAILER
 DOS_OE_TO_MX
 
 # good enough
+DOS_OE_TO_MX_IMAGE
+
+# good enough
 DSN_NO_MIMEVERSION
 
 # tflags publish
@@ -287,6 +290,9 @@ FROM_MISSP_FREEMAIL
 FROM_MISSP_MSFT
 
 # good enough
+FROM_MISSP_PHISH
+
+# good enough
 FROM_MISSP_REPLYTO
 
 # tflags net
@@ -309,9 +315,6 @@ FSL_HELO_DEVICE
 
 # good enough
 FSL_HELO_FIREWALL
-
-# good enough
-FSL_MID_419
 
 # tflags publish
 FSL_NEW_HELO_USER
@@ -342,6 +345,9 @@ FUZZY_SECURITY
 
 # tflags publish
 FUZZY_UNSUBSCRIBE
+
+# good enough
+GAPPY_LOW_CONTRAST
 
 # tflags publish
 GOOGLE_DOCS_PHISH
@@ -773,6 +779,9 @@ SPF_PASS
 SPF_SOFTFAIL
 
 # good enough
+STOX_REPLY_TYPE
+
+# good enough
 STOX_REPLY_TYPE_WITHOUT_QUOTES
 
 # tflags publish
@@ -844,20 +853,26 @@ FROM_12LTRDOM
 # tflags publish
 FUZZY_CLICK_HERE
 
-# good enough
+# tflags publish
 GOOG_REDIR_SHORT
 
-# good enough
+# tflags publish
 LIST_PRTL_PUMPDUMP
+
+# good enough
+MONEY_BARRISTER
 
 # good enough
 SPELLED_OUT_NUMBER
 
-# good enough
+# tflags publish
 STOCK_LOW_CONTRAST
 
-# good enough
+# tflags publish
 TEQF_USR_MSGID_MALF
+
+# good enough
+XFER_LOTSA_MONEY
 
 # tflags publish
 UC_GIBBERISH_OBFU
