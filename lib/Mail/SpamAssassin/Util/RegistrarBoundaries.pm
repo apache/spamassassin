@@ -37,8 +37,7 @@ use vars qw (
 
 # %VALID_TLDS
 # The list of currently-valid TLDs for the DNS system.
-#
-# When updating domain lists, also modify t/uri_text.t accordingly
+# Note for SA devs only: If required, when updating domain lists, also modify t/uri_text.t accordingly
 #
 # bash line to generate a formatted list of domains
 # Fetches domains, drops the top comment line, then joins domains with spaces in between
