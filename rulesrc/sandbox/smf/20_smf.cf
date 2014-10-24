@@ -64,3 +64,16 @@ tflags	 SMF_FM_FORGED_REPLYTO  nopublish
 #score    SMF_FM_FORGED_REPLYTO  0.1
 endif
 
+# Theory: most glue adds their own Received headers be SpamAssassin
+# sees the message, so NO_RECEIVED will never fire when run in that
+# way.  So lets see if a single Untrusted/External is an indicator.
+header   __FSL_COUNT_UNTRUST	X-Spam-Relays-Untrusted =~ /\[[^\]]+\]/
+tflags   __FSL_COUNT_UNTRUST	multiple
+header   __FSL_COUNT_EXTERN	X-Spam-Relays-External =~ /\[[^\]]+\]/
+tflags   __FSL_COUNT_EXTERN	multiple
+meta     FSL_SINGLE_UNTRUST	(__FSL_COUNT_UNTRUST == 1)
+describe FSL_SINGLE_UNTRUST	Only a single untrusted received header
+score    FSL_SINGLE_UNTRUST	0.01
+meta     FSL_SINGLE_EXTERN	(__FSL_COUNT_EXTERN == 1)
+describe FSL_SINGLE_EXTERN	Only a single external received header
+score    FSL_SINGLE_EXTERN	0.01
