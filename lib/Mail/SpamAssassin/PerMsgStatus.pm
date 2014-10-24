@@ -174,7 +174,8 @@ BEGIN {
       my $arg = (shift || "*");
       my $length = int($pms->{score});
       $length = 50 if $length > 50;
-      $arg x $length;
+      # avoid a perl 5.21 warning: "Negative repeat count does nothing"
+      $length > 0 ? $arg x $length : '';
     },
 
     AUTOLEARN => sub {
