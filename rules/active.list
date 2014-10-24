@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus dwarren jarif kpg-core mas-cps mas-mas zmi; day 2: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus dwarren jarif kpg-core llanga mas-cps mas-mas mmiroslaw-ham mmiroslaw-spam zmi; day 3: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus dwarren jarif kpg-core llanga mas-cps mas-mas zmi
+# with results from: day 1: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus jarif kpg-core mas-cps mas-mas zmi; day 2: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus dwarren jarif kpg-core llanga mas-cps mas-mas mmiroslaw-ham mmiroslaw-spam zmi; day 3: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus dwarren jarif kpg-core llanga mas-cps mas-mas mmiroslaw-ham mmiroslaw-spam zmi
 
 # tflags publish
 AC_BR_BONANZA
@@ -226,9 +226,6 @@ DX_TEXT_03
 # good enough
 DX_TEXT_05
 
-# good enough
-DYN_RDNS_SHORT_HELO_HTML
-
 # tflags userconf
 ENV_AND_HDR_SPF_MATCH
 
@@ -248,6 +245,9 @@ FILL_THIS_FORM_LOAN
 FILL_THIS_FORM_LONG
 
 # tflags publish
+FORM_FRAUD
+
+# tflags publish
 FORM_FRAUD_3
 
 # tflags publish
@@ -264,6 +264,9 @@ FRAGMENTED_MESSAGE
 
 # tflags publish
 FREEMAIL_FORGED_FROMDOMAIN
+
+# good enough
+FROM_12LTRDOM
 
 # tflags userconf
 FROM_DOMAIN_NOVOWEL
@@ -288,9 +291,6 @@ FROM_MISSP_FREEMAIL
 
 # good enough
 FROM_MISSP_MSFT
-
-# good enough
-FROM_MISSP_PHISH
 
 # good enough
 FROM_MISSP_REPLYTO
@@ -326,6 +326,9 @@ FUZZY_ANDROID
 FUZZY_BROWSER
 
 # tflags publish
+FUZZY_CLICK_HERE
+
+# tflags publish
 FUZZY_DR_OZ
 
 # tflags publish
@@ -346,9 +349,6 @@ FUZZY_SECURITY
 # tflags publish
 FUZZY_UNSUBSCRIBE
 
-# good enough
-GAPPY_LOW_CONTRAST
-
 # tflags publish
 GOOGLE_DOCS_PHISH
 
@@ -357,6 +357,9 @@ GOOGLE_DOCS_PHISH_MANY
 
 # tflags publish
 GOOG_MALWARE_DNLD
+
+# tflags publish
+GOOG_REDIR_SHORT
 
 # tflags userconf
 GTUBE
@@ -426,6 +429,9 @@ KB_DATE_CONTAINS_TAB
 
 # good enough
 KB_FAKED_THE_BAT
+
+# tflags publish
+LIST_PRTL_PUMPDUMP
 
 # tflags publish
 LIST_PRTL_SAME_USER
@@ -754,6 +760,9 @@ SHORTENED_URL_SRC
 # good enough
 SHORT_TERM_PRICE
 
+# good enough
+SPELLED_OUT_NUMBER
+
 # tflags net
 SPF_FAIL
 
@@ -778,6 +787,9 @@ SPF_PASS
 # tflags net
 SPF_SOFTFAIL
 
+# tflags publish
+STOCK_LOW_CONTRAST
+
 # good enough
 STOX_REPLY_TYPE
 
@@ -798,6 +810,9 @@ SYSADMIN
 
 # good enough
 TAB_IN_FROM
+
+# tflags publish
+TEQF_USR_MSGID_MALF
 
 # tflags publish
 THIS_AD
@@ -844,35 +859,38 @@ TVD_SPACE_RATIO_MINFP
 # tflags publish
 TW_GIBBERISH_MANY
 
-# tflags publish
-FORM_FRAUD
+# good enough
+ADVANCE_FEE_2_NEW_FRM_MNY
 
 # good enough
-FROM_12LTRDOM
-
-# tflags publish
-FUZZY_CLICK_HERE
-
-# tflags publish
-GOOG_REDIR_SHORT
-
-# tflags publish
-LIST_PRTL_PUMPDUMP
+ADVANCE_FEE_4_NEW_FRM_MNY
 
 # good enough
-MONEY_BARRISTER
+AXB_URI_CDGB
 
 # good enough
-SPELLED_OUT_NUMBER
+FROM_MISSP_PHISH
 
-# tflags publish
-STOCK_LOW_CONTRAST
+# good enough
+FSL_HELO_BARE_IP_2
 
-# tflags publish
-TEQF_USR_MSGID_MALF
+# good enough
+HK_SCAM_N3
+
+# good enough
+PUMPDUMP_TIP
+
+# good enough
+SUBJ_UNNEEDED_HTML
+
+# good enough
+TVD_SUBJ_NUM_OBFU_MINFP
 
 # good enough
 XFER_LOTSA_MONEY
+
+# good enough
+XPRIO
 
 # tflags publish
 UC_GIBBERISH_OBFU
