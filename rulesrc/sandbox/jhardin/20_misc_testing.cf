@@ -1618,6 +1618,7 @@ body        __STOCK_TIP       /\bsto[ck]{2}\s?tip\b/i
 
 meta        PUMPDUMP_TIP      __PD_CNT_1 && __STOCK_TIP
 describe    PUMPDUMP_TIP      Pump-and-dump stock tip
+tflags      PUMPDUMP_TIP      publish
 
 
 #body        DR_OZ_OBFU        /\bD(?:r\.|oc(?:tor)?) ?0z\b/i
@@ -1839,6 +1840,9 @@ body      __WANT_BIZ                    /\b(?:I|we) want your business\b/i
 meta      TEQF_USR_MSGID_MALF           __TO_EQ_FROM_USR_NN_MINFP && __MSGID_NOFQDN2 
 describe  TEQF_USR_MSGID_MALF           To and from user nearly same + malformed message ID
 tflags    TEQF_USR_MSGID_MALF           publish
+
+meta      URI_ONLY_MSGID_MALF           __BODY_URI_ONLY && __MSGID_NOFQDN2 
+describe  URI_ONLY_MSGID_MALF           URI only + malformed message ID
 
 meta      GOOG_REDIR_SHORT              __GOOG_REDIR && __KAM_BODY_LENGTH_LT_512 
 describe  GOOG_REDIR_SHORT              Google redirect to obscure spamvertised website + short message
