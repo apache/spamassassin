@@ -1841,7 +1841,8 @@ meta      TEQF_USR_MSGID_MALF           __TO_EQ_FROM_USR_NN_MINFP && __MSGID_NOF
 describe  TEQF_USR_MSGID_MALF           To and from user nearly same + malformed message ID
 tflags    TEQF_USR_MSGID_MALF           publish
 
-meta      URI_ONLY_MSGID_MALF           __BODY_URI_ONLY && __MSGID_NOFQDN2 
+meta      __URI_ONLY_MSGID_MALF         __BODY_URI_ONLY && __MSGID_NOFQDN2
+meta      URI_ONLY_MSGID_MALF           __URI_ONLY_MSGID_MALF && !__RP_MATCHES_RCVD && !__URI_MAILTO 
 describe  URI_ONLY_MSGID_MALF           URI only + malformed message ID
 
 meta      GOOG_REDIR_SHORT              __GOOG_REDIR && __KAM_BODY_LENGTH_LT_512 
