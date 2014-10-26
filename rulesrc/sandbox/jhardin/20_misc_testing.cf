@@ -1826,6 +1826,8 @@ meta      SPELLED_OUT_NUMBER            __SPELLED_OUT_NUM && !__DKIM_EXISTS
 describe  SPELLED_OUT_NUMBER            Spelled out a number (one two three)
 score     SPELLED_OUT_NUMBER            3.250   # limit
 
+body      __NUM_SPCD_LTRS               /\d{4}\s(?:[a-z]\s){5}/i
+
 
 header    __SUBJ_UNNEEDED_HTML          Subject =~ /%[0-9a-f][0-9a-f]/i
 tflags    __SUBJ_UNNEEDED_HTML          multiple, maxhits=3
@@ -1842,8 +1844,9 @@ describe  TEQF_USR_MSGID_MALF           To and from user nearly same + malformed
 tflags    TEQF_USR_MSGID_MALF           publish
 
 meta      __URI_ONLY_MSGID_MALF         __BODY_URI_ONLY && __MSGID_NOFQDN2
-meta      URI_ONLY_MSGID_MALF           __URI_ONLY_MSGID_MALF && !__RP_MATCHES_RCVD && !__URI_MAILTO 
+meta      URI_ONLY_MSGID_MALF           __URI_ONLY_MSGID_MALF && !__RP_MATCHES_RCVD && !__URI_MAILTO && !__NOT_SPOOFED && !__DKIM_EXISTS && !__MSGID_JAVAMAIL 
 describe  URI_ONLY_MSGID_MALF           URI only + malformed message ID
+tflags    URI_ONLY_MSGID_MALF           publish
 
 meta      GOOG_REDIR_SHORT              __GOOG_REDIR && __KAM_BODY_LENGTH_LT_512 
 describe  GOOG_REDIR_SHORT              Google redirect to obscure spamvertised website + short message
