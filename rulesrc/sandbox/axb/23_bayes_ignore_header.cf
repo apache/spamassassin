@@ -1,3 +1,4 @@
+
 # Last update: 2014-10-23-axb
 # Set headers which may provide inappropriate AV/filter cues to the Bayesian classifier
 bayes_ignore_header X-ACL-Warn
@@ -79,6 +80,9 @@ bayes_ignore_header X-DSPAM-Probability
 bayes_ignore_header X-DSPAM-Processed
 bayes_ignore_header X-DSPAM-Result
 bayes_ignore_header X-DSPAM-Signature
+bayes_ignore_header x-eavas: version
+bayes_ignore_header x-eavas-action
+bayes_ignore_header x-eavas-eavasid
 bayes_ignore_header X-Enigmail-Version
 bayes_ignore_header X-Exchange-Antispam-Report
 bayes_ignore_header X-EYOU-SPAMVALUE
@@ -140,6 +144,10 @@ bayes_ignore_header X-PreRBLs
 bayes_ignore_header X-Probable-Spam
 bayes_ignore_header X-PROLinux-SpamCheck
 bayes_ignore_header X-Proofpoint-Virus-Version
+bayes_ignore_header x-purgate-eavas: clean
+bayes_ignore_header x-purgate-id
+bayes_ignore_header x-purgate-size
+bayes_ignore_header x-purgate-type
 bayes_ignore_header X-Qmail-Scanner-Diagnostics
 bayes_ignore_header X-Qmail-Scanner-MOVED-X-Spam-Status
 bayes_ignore_header X-RSpam-Report
