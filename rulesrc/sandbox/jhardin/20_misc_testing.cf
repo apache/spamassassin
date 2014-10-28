@@ -1844,7 +1844,7 @@ describe  TEQF_USR_MSGID_MALF           To and from user nearly same + malformed
 tflags    TEQF_USR_MSGID_MALF           publish
 
 meta      __URI_ONLY_MSGID_MALF         __BODY_URI_ONLY && __MSGID_NOFQDN2
-meta      URI_ONLY_MSGID_MALF           __URI_ONLY_MSGID_MALF && !__RP_MATCHES_RCVD && !__URI_MAILTO && !__NOT_SPOOFED && !__DKIM_EXISTS && !__MSGID_JAVAMAIL 
+meta      URI_ONLY_MSGID_MALF           __URI_ONLY_MSGID_MALF && !__RP_MATCHES_RCVD && !__URI_MAILTO && !__NOT_SPOOFED && !__DKIM_EXISTS && !__MSGID_JAVAMAIL && !__HAS_REPLY_TO 
 describe  URI_ONLY_MSGID_MALF           URI only + malformed message ID
 tflags    URI_ONLY_MSGID_MALF           publish
 
@@ -1865,9 +1865,10 @@ meta      __STY_INVIS_MANY              __STY_INVIS > 5
 rawbody   __HTML_SINGLET                />\s*(?:[a-z"]|&\#(?:\d+|x[0-9a-f]+);)\s*</i
 tflags    __HTML_SINGLET                multiple, maxhits=21
 meta      __HTML_SINGLET_MANY           __HTML_SINGLET > 20
-meta      HTML_SINGLET_MANY             __HTML_SINGLET_MANY
-describe  HTML_SINGLET_MANY             Many single-letter HTML format blocks
-score     HTML_SINGLET_MANY             1.000   # limit
+#meta      HTML_SINGLET_MANY             __HTML_SINGLET_MANY
+#describe  HTML_SINGLET_MANY             Many single-letter HTML format blocks
+#score     HTML_SINGLET_MANY             1.000   # limit
 
-
+meta      SINGLETS_LOW_CONTRAST         __HTML_SINGLET_MANY && __HTML_FONT_LOW_CONTRAST_MINFP
+describe  SINGLETS_LOW_CONTRAST         Single-letter formatted HTML + hidden text
 
