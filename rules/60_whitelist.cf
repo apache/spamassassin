@@ -60,11 +60,11 @@ describe USER_IN_ALL_SPAM_TO    User is listed in 'all_spam_to'
 tflags USER_IN_ALL_SPAM_TO      userconf nice noautolearn
 
 body      URI_HOST_IN_BLACKLIST eval:check_uri_host_in_blacklist()
-describe  URI_HOST_IN_BLACKLIST domain is in the URL's black-list
+describe  URI_HOST_IN_BLACKLIST host or domain listed in the URI black-list
 tflags    URI_HOST_IN_BLACKLIST userconf noautolearn
 
 body      URI_HOST_IN_WHITELIST eval:check_uri_host_in_whitelist()
-describe  URI_HOST_IN_WHITELIST domain is in the URL's white-list
+describe  URI_HOST_IN_WHITELIST host or domain listed in the URI white-list
 tflags    URI_HOST_IN_WHITELIST userconf noautolearn
 
 header 	  HEADER_HOST_IN_BLACKLIST eval:check_uri_host_listed('BLACK')
