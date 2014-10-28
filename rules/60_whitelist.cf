@@ -65,7 +65,7 @@ tflags    URI_HOST_IN_BLACKLIST userconf noautolearn
 
 body      URI_HOST_IN_WHITELIST eval:check_uri_host_in_whitelist()
 describe  URI_HOST_IN_WHITELIST host or domain listed in the URI white-list
-tflags    URI_HOST_IN_WHITELIST userconf noautolearn
+tflags    URI_HOST_IN_WHITELIST userconf nice noautolearn
 
 header 	  HEADER_HOST_IN_BLACKLIST eval:check_uri_host_listed('BLACK')
 describe  HEADER_HOST_IN_BLACKLIST Blacklisted header host or domain
@@ -73,7 +73,7 @@ tflags    HEADER_HOST_IN_BLACKLIST userconf noautolearn
 
 header 	  HEADER_HOST_IN_WHITELIST eval:check_uri_host_listed('WHITE')
 describe  HEADER_HOST_IN_WHITELIST Whitelisted header host or domain
-tflags    HEADER_HOST_IN_WHITELIST userconf noautolearn
+tflags    HEADER_HOST_IN_WHITELIST userconf nice noautolearn
 
 ###########################################################################
 # Default whitelists.  These should be addresses which send mail that is often
