@@ -44,3 +44,24 @@ http://redis.io/commands
 
 If you need help, pls use the SA user's mailing list
 If you're a Redis/Bayes user please post some feedback in the SA user's mailing list
+
+
+Resources usage to give you an idea how much memory you may need on a biggish system
+with a token TTL of 10 days.
+
+sa-learn --dump magic
+0.000          0          3          0  non-token data: bayes db version
+0.000          0   30125835          0  non-token data: nspam
+0.000          0   13887519          0  non-token data: nham
+
+30 MILLION! use:
+
+# Memory
+used_memory:5787709376
+used_memory_human:5.39G
+used_memory_rss:5909553152
+used_memory_peak:5808814272
+used_memory_peak_human:5.41G
+used_memory_lua:104448
+mem_fragmentation_ratio:1.02
+mem_allocator:jemalloc-3.2.0
