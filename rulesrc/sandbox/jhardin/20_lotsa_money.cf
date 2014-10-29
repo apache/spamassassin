@@ -138,7 +138,7 @@ body     __LOTTO_VERIFY     /\bpromo\sverification/i
 body     __GET_TICKET       /\b(?:buy|order) your (?:lott(?:o|ery) )?tickets?\b/i
 body     __IF_WIN           /\bif (?:i|we) win\b/i
 body     __FOR_CHARITY      /\brecipient charit(?:y|ies)\b/i
-
+meta     __LEGIT_LOTTERY    (__GET_TICKET + __IF_WIN + __FOR_CHARITY) > 1
 
 meta     __MONEY_LOTTERY  LOTS_OF_MONEY && (__LOTTO_WINNINGS + __LOTTO_WIN_01 + __YOU_WON + __LOTTO_AGENT_01 + __LOTTO_AGENT_02 + __LOTTO_DEPT + LOTTO_AGENT_FM + LOTTO_AGENT_RPLY + __LOTTO_ADMITS + __LOTTO_RELATED + DEAR_WINNER + __LOTTO_VERIFY + __GET_TICKET > 1)
 meta     MONEY_LOTTERY    __MONEY_LOTTERY && !__CAN_HELP && !__HTML_LINK_IMAGE && !__DOS_HAS_LIST_UNSUB && !__MSGID_APPLEMAIL && __THREADED
