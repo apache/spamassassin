@@ -5,7 +5,7 @@ describe	AXB_XM_DMAILER		Fingerprint
 header		AXB_XRCVD_8B8		Received =~ /\bby [0-9a-f]{8}\./
 describe	AXB_XRCVD_8B8		8x8 is better than 4x4
 
-header		AXB_XSA_PXYEX		X-Source-Args =~ /\/usr\/sbin\/proxyexec/
+header		AXB_XSA_PXYEX		X-Source-Args =~ /\/usr\/sbin\/proxyexec$/
 describe	AXB_XSA_PXYEX		Fingerprint
 
 uri		AXB_URI_CDGB		/\/\?cid\=gib/
