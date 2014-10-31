@@ -2,7 +2,9 @@
 header		AXB_XM_DMAILER		X-Mailer =~ /^DietMailer\b/
 describe	AXB_XM_DMAILER		Fingerprint
 
-header		AXB_XRCVD_8B8		Received =~ /\bby [0-9a-f]{8}\./
+header		__HAS_AMAVISD_PORT	Received =~ /\(amavisd-new\, port\b/
+header		__BY_8B8		Received =~ /\bby [a-f0-9]{8}\./
+meta		AXB_XRCVD_8B8		(__HAS_AMAVISD_PORT && __BY_8B8)
 describe	AXB_XRCVD_8B8		8x8 is better than 4x4
 
 header		AXB_XSA_PXYEX		X-Source-Args =~ /\/usr\/sbin\/proxyexec$/
