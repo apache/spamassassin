@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus dwarren grenier jarif kpg-core mas-cps mas-mas zmi; day 2: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus dwarren grenier kpg-core llanga mas-cps mas-mas mmiroslaw-ham mmiroslaw-spam zmi; day 3: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus jarif kpg-core llanga mas-cps mas-mas mmiroslaw-ham mmiroslaw-spam zmi
+# with results from: day 1: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus dwarren grenier jarif kpg-core mas-cps mas-mas zmi; day 2: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus dwarren grenier jarif kpg-core llanga mas-cps mas-mas zmi; day 3: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus dwarren grenier kpg-core llanga mas-cps mas-mas mmiroslaw-ham mmiroslaw-spam zmi
 
 # tflags publish
 AC_BR_BONANZA
@@ -317,13 +317,22 @@ FROM_MISSP_USER
 FROM_MISSP_XPRIO
 
 # good enough
+FROM_ONE_CHAR
+
+# good enough
 FSL_CTYPE_WIN1251
+
+# good enough
+FSL_HELO_BARE_IP_2
 
 # good enough
 FSL_HELO_DEVICE
 
 # good enough
 FSL_HELO_FIREWALL
+
+# good enough
+FSL_MID_419
 
 # tflags publish
 FSL_NEW_HELO_USER
@@ -357,9 +366,6 @@ FUZZY_SECURITY
 
 # tflags publish
 FUZZY_UNSUBSCRIBE
-
-# good enough
-GAPPY_LOW_CONTRAST
 
 # tflags publish
 GOOGLE_DOCS_PHISH
@@ -475,6 +481,9 @@ LOTS_OF_MONEY
 # good enough
 LOTTO_AGENT
 
+# good enough
+LOTTO_DEPT
+
 # tflags publish
 LUCRATIVE
 
@@ -532,14 +541,14 @@ NSL_RCVD_FROM_USER
 # good enough
 NSL_RCVD_HELO_USER
 
+# good enough
+OBFU_HTML_ATTACH
+
 # tflags publish
 OBFU_JVSCR_ESC
 
 # tflags publish
 OBFU_TEXT_ATTACH
-
-# good enough
-PHP_NOVER_MUA
 
 # tflags publish
 PP_MIME_FAKE_ASCII_TEXT
@@ -893,19 +902,19 @@ TVD_SPACE_RATIO_MINFP
 TW_GIBBERISH_MANY
 
 # good enough
-FSL_HELO_BARE_IP_2
+BIGNUM_EMAILS
 
 # good enough
-FSL_MID_419
+FSL_BOTSPAM_1
 
 # good enough
-LOTTO_DEPT
+GAPPY_LOW_CONTRAST
+
+# good enough
+HK_SCAM_N13
 
 # good enough
 SINGLETS_LOW_CONTRAST
-
-# tflags publish
-URI_ONLY_MSGID_MALF
 
 # tflags publish
 UC_GIBBERISH_OBFU
@@ -1002,6 +1011,9 @@ URI_HOST_IN_WHITELIST
 
 # tflags userconf
 URI_NOVOWEL
+
+# tflags publish
+URI_ONLY_MSGID_MALF
 
 # tflags publish
 URI_OPTOUT_3LD
