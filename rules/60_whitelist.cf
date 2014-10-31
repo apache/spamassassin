@@ -59,6 +59,7 @@ header USER_IN_ALL_SPAM_TO      eval:check_to_in_all_spam()
 describe USER_IN_ALL_SPAM_TO    User is listed in 'all_spam_to'
 tflags USER_IN_ALL_SPAM_TO      userconf nice noautolearn
 
+if (version >= 3.004000)
 body      URI_HOST_IN_BLACKLIST eval:check_uri_host_in_blacklist()
 describe  URI_HOST_IN_BLACKLIST host or domain listed in the URI black-list
 tflags    URI_HOST_IN_BLACKLIST userconf noautolearn
@@ -74,6 +75,8 @@ tflags    HEADER_HOST_IN_BLACKLIST userconf noautolearn
 header 	  HEADER_HOST_IN_WHITELIST eval:check_uri_host_listed('WHITE')
 describe  HEADER_HOST_IN_WHITELIST Whitelisted header host or domain
 tflags    HEADER_HOST_IN_WHITELIST userconf nice noautolearn
+
+endif
 
 ###########################################################################
 # Default whitelists.  These should be addresses which send mail that is often
