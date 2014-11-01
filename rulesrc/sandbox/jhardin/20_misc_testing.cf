@@ -974,7 +974,7 @@ meta        GAPPY_HTML             __GAPPY_HTML && !__UNSUB_LINK && !__RP_MATCHE
 describe    GAPPY_HTML             HTML body with much useless whitespace
 
 # Try to improve S/O per bug 6119
-meta        TVD_SPACE_RATIO_MINFP  __TVD_SPACE_RATIO && !__LCL__ENV_AND_HDR_FROM_MATCH && !__VIA_ML && !__SUBSCRIPTION_INFO && !__NOT_SPOOFED  && !__RCD_RDNS_MAIL && !__SUBJECT_ENCODED_QP && !__THREADED && !__TO_EQ_FROM_DOM && !__BOTH_INR_AND_REF && !__X_CRON_ENV && !__HAS_THREAD_INDEX && !__HS_SUBJ_RE_FW 
+meta        TVD_SPACE_RATIO_MINFP  __TVD_SPACE_RATIO && !__LCL__ENV_AND_HDR_FROM_MATCH && !__SUBSCRIPTION_INFO && !__RCD_RDNS_MAIL && !__SUBJECT_ENCODED_QP && !__THREADED && !__TO_EQ_FROM_DOM && !__BOTH_INR_AND_REF && !__X_CRON_ENV && !__HAS_THREAD_INDEX && !__HDRS_LCASE_KNOWN 
 #tflags      TVD_SPACE_RATIO_MINFP  nopublish
 score       TVD_SPACE_RATIO_MINFP  2.750   # limit
 
@@ -1843,6 +1843,12 @@ meta      TEQF_USR_MSGID_MALF           __TO_EQ_FROM_USR_NN_MINFP && __MSGID_NOF
 describe  TEQF_USR_MSGID_MALF           To and from user nearly same + malformed message ID
 tflags    TEQF_USR_MSGID_MALF           publish
 
+meta      TEQF_USR_MSGID_HEX            __TO_EQ_FROM_USR_NN_MINFP && __MSGID_OK_HEX && !__MSGID_NOFQDN2
+describe  TEQF_USR_MSGID_HEX            To and from user nearly same + unusual message ID
+tflags    TEQF_USR_MSGID_HEX            publish
+
+meta      __MSGID_HEX_MALF              __MSGID_NOFQDN2 && __MSGID_OK_HEX
+
 meta      __URI_ONLY_MSGID_MALF         __BODY_URI_ONLY && __MSGID_NOFQDN2
 meta      URI_ONLY_MSGID_MALF           __URI_ONLY_MSGID_MALF && !__RP_MATCHES_RCVD && !__URI_MAILTO && !__NOT_SPOOFED && !__DKIM_EXISTS && !__MSGID_JAVAMAIL && !__HAS_REPLY_TO 
 describe  URI_ONLY_MSGID_MALF           URI only + malformed message ID
@@ -1871,4 +1877,5 @@ meta      __HTML_SINGLET_MANY           __HTML_SINGLET > 20
 
 meta      SINGLETS_LOW_CONTRAST         __HTML_SINGLET_MANY && __HTML_FONT_LOW_CONTRAST_MINFP
 describe  SINGLETS_LOW_CONTRAST         Single-letter formatted HTML + hidden text
+tflags    SINGLETS_LOW_CONTRAST         publish
 
