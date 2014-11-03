@@ -356,15 +356,19 @@ else
 endif
 
 ifplugin Mail::SpamAssassin::Plugin::FreeMail
-  meta         FREEMAIL_DOC_PDF     (__DOC_ATTACH || __PDF_ATTACH) && (FREEMAIL_FROM || FREEMAIL_REPLYTO)
-  describe     FREEMAIL_DOC_PDF     MS document or PDF attachment, from freemail
+  meta         __FREEMAIL_DOC_PDF     (__DOC_ATTACH || __PDF_ATTACH) && (FREEMAIL_FROM || FREEMAIL_REPLYTO)
+  meta         FREEMAIL_DOC_PDF       __FREEMAIL_DOC_PDF
+  describe     FREEMAIL_DOC_PDF       MS document or PDF attachment, from freemail
 
-  meta         FREEMAIL_RVW_ATTCH   (__PLS_REVIEW || __DLND_ATTACH) && FREEMAIL_DOC_PDF
-  describe     FREEMAIL_RVW_ATTCH   Please review attached document, from freemail
+  meta         FREEMAIL_DOC_PDF_BCC   __FREEMAIL_DOC_PDF && __TO_UNDISCLOSED
+  describe     FREEMAIL_DOC_PDF_BCC   MS document or PDF attachment, from freemail, all recipients hidden
+
+  meta         FREEMAIL_RVW_ATTCH     (__PLS_REVIEW || __DLND_ATTACH) && __FREEMAIL_DOC_PDF
+  describe     FREEMAIL_RVW_ATTCH     Please review attached document, from freemail
 endif
 
-meta           EMPTY_RVM_ATTCH      (__PLS_REVIEW || __DLND_ATTACH) && __EMPTY_BODY
-describe       EMPTY_RVM_ATTCH      Please review attached document, empty message
+meta           EMPTY_RVW_ATTCH      (__PLS_REVIEW || __DLND_ATTACH) && __EMPTY_BODY
+describe       EMPTY_RVW_ATTCH      Please review attached document, empty message
 
 body           __END_FUTURE_EMAILS /\b(?:end|stop(?! receiving these (?:alerts|emails))|cease|discontinue|removed?|(?:do(?! not wish to receive [\w\s]{0,20}emails)|would|you(?:'d)?) (?:not (?:wish|want|like|desire)|(?:prefer|wish|want|like|desire) not) to|exclude yourself|fore?go)[- ](?:get |receiv(?:ing|e) |or |(?:a-z{1,30} ){0,4}from )?(?:these|our|(?:any )?(?:future|further)) (?:(?:e|ad)?-?m(?:ail(?:ing)?|es+[age]{3})|alert|PSA|marketing|notice)[- ]?(?:ad|update)?s?\b/i
 ifplugin Mail::SpamAssassin::Plugin::DKIM
