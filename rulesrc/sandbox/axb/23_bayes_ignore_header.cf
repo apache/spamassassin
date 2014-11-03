@@ -1,5 +1,5 @@
 
-# Last update: 2014-10-28-axb
+# Last update: 2014-11-03-axb
 # Set headers which may provide inappropriate AV/filter cues to the Bayesian classifier
 bayes_ignore_header X-ACL-Warn
 bayes_ignore_header X-Alimail-AntiSpam
@@ -143,6 +143,7 @@ bayes_ignore_header X-policyd-weight
 bayes_ignore_header X-PreRBLs
 bayes_ignore_header X-Probable-Spam
 bayes_ignore_header X-PROLinux-SpamCheck
+bayes_ignore_header X-Proofpoint-Spam-Reason
 bayes_ignore_header X-Proofpoint-Virus-Version
 bayes_ignore_header x-purgate-eavas: clean
 bayes_ignore_header x-purgate-id
