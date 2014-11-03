@@ -1880,9 +1880,10 @@ describe  SINGLETS_LOW_CONTRAST         Single-letter formatted HTML + hidden te
 tflags    SINGLETS_LOW_CONTRAST         publish
 
 # per users list, 10-11 2014
-uri       MALWARE_HACKED_URI            m;/(?:dropbox|googlebox|banking)/(?:doc(?:ument)?|invoice)\.php;i
+uri       MALWARE_HACKED_URI            m;/(?:dropbox|googlebox|banking)/(?:doc(?:ument)?|invoice)\.php$;
 describe  MALWARE_HACKED_URI            Malware or phishing hosted-file URI at hacked webserver
 
+uri       __HACKED_PHP_URI              m;/\w+/(?:doc(?:ument)?|invoice)\.php$;
 
 
 
