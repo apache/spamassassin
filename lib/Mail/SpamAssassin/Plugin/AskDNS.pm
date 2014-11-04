@@ -557,7 +557,8 @@ sub process_response_packet {
   # the code handling such reply from DNS MUST assemble all of these
   # marshaled text blocks into a single one before any syntactical
   # verification takes place.
-  # The same goes for RFC 4408 (SPF), RFC 4871 (DKIM), RFC 5617 (ADSP) ...
+  # The same goes for RFC 4408 (SPF), RFC 4871 (DKIM), RFC 5617 (ADSP),
+  # draft-kucherawy-dmarc-base (DMARC), ...
 
   for my $rr (@answer) {
     my($rr_rdatastr, $rdatanum, $rr_type);

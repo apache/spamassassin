@@ -1714,6 +1714,26 @@ sub extract_message_metadata {
     $self->{$item} = $self->{msg}->{metadata}->{$item};
   }
 
+  # TODO: International domain names (UTF-8) must be converted to
+  # ASCII-compatible encoding (ACE) for the purpose of setting the
+  # SENDERDOMAIN and AUTHORDOMAIN tags (and probably for other uses too).
+  # (explicitly required for DMARC, draft-kucherawy-dmarc-base sect. 5.6.1)
+  #
+  { local $1;
+    my $addr = $self->get('EnvelopeFrom:addr', undef);
+    # collect a FQDN, ignoring potential trailing WSP
+    if (defined $addr && $addr =~ /\@([^@. \t]+\.[^@ \t]+?)[ \t]*\z/s) {
+      $self->set_tag('SENDERDOMAIN', lc $1);
+    }
+    # TODO: the get ':addr' only returns the first address; this should be
+    # augmented to be able to return all addresses in a header field, multiple
+    # addresses in a From header field are allowed according to RFC 5322
+    $addr = $self->get('From:addr', undef);
+    if (defined $addr && $addr =~ /\@([^@. \t]+\.[^@ \t]+?)[ \t]*\z/s) {
+      $self->set_tag('AUTHORDOMAIN', lc $1);
+    }
+  }
+
   $self->set_tag('RELAYSTRUSTED',   $self->{relays_trusted_str});
   $self->set_tag('RELAYSUNTRUSTED', $self->{relays_untrusted_str});
   $self->set_tag('RELAYSINTERNAL',  $self->{relays_internal_str});
@@ -1967,7 +1987,7 @@ sub _get {
       $result = $self->{msg}->get_metadata($request);
     }
   }
-      
+
   # special queries
   if (defined $result && ($getaddr || $getname)) {
     local $1;
@@ -1991,7 +2011,7 @@ sub _get {
       $result =~ s/\s*\(.*?\)//g;
       # strip out the "quoted text", unless it's the only thing in the string
       if ($result !~ /^".*"$/) {
-        $result =~ s/(?<!<)"[^"]*"(?!@)//g;   #" emacs
+        $result =~ s/(?<!<)"[^"]*"(?!\@)//g;   #" emacs
       }
       # Foo Blah <jm@xxx> or <jm@xxx>
       local $1;
@@ -2767,7 +2787,7 @@ sub get_envelope_from {
     # make sure we get the most recent copy - there can be only one EnvelopeSender.
     $envf = $self->get($self->{conf}->{envelope_sender_header}.":addr",undef);
     # ok if it contains an "@" sign, or is "" (ie. "<>" without the < and >)
-    goto ok if defined $envf && ($envf =~ /\@/ || $envf =~ /^$/);
+    goto ok if defined $envf && ($envf =~ /\@/ || $envf eq '');
     # Warn them if it's configured, but not there or not usable.
     if (defined $envf) {
       chomp $envf;
@@ -2862,8 +2882,9 @@ sub get_envelope_from {
   return;
 
 ok:
-  $envf =~ s/^<*//gs;                # remove <
-  $envf =~ s/>*\s*$//gs;        # remove >, whitespace, newlines
+  $envf =~ s/^<*//s;            # remove <
+  $envf =~ s/>*\s*\z//s;        # remove >, whitespace, newlines
+
   return $envf;
 }
 

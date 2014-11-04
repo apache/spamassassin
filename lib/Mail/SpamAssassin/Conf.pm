@@ -4003,6 +4003,11 @@ optional, and the default is shown below.
  _DATE_            rfc-2822 date of scan
  _STARS(*)_        one "*" (use any character) for each full score point
                    (note: limited to 50 'stars')
+ _SENDERDOMAIN_    a domain name of the envelope sender address, lowercased
+ _AUTHORDOMAIN_    a domain name of the author address (the From header
+                   field), lowercased;  note that RFC 5322 allows a mail
+                   message to have multiple authors - currently only the
+                   domain name of the first email address is returned
  _RELAYSTRUSTED_   relays used and deemed to be trusted (see the 
                    'X-Spam-Relays-Trusted' pseudo-header)
  _RELAYSUNTRUSTED_ relays used that can not be trusted (see the 
