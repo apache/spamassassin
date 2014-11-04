@@ -1851,6 +1851,10 @@ meta      TEQF_USR_MSGID_HEX            __TO_EQ_FROM_USR_NN_MINFP && __MSGID_OK_
 describe  TEQF_USR_MSGID_HEX            To and from user nearly same + unusual message ID
 tflags    TEQF_USR_MSGID_HEX            publish
 
+meta      TEQF_USR_IMAGE                __TO_EQ_FROM_USR_NN_MINFP && __ANY_IMAGE_ATTACH 
+describe  TEQF_USR_IMAGE                To and from user nearly same + image
+#tflags    TEQF_USR_IMAGE                publish
+
 meta      __MSGID_HEX_MALF              __MSGID_NOFQDN2 && __MSGID_OK_HEX
 
 meta      __URI_ONLY_MSGID_MALF         __BODY_URI_ONLY && __MSGID_NOFQDN2
