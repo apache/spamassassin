@@ -87,7 +87,7 @@ BEGIN {
       my $pms = shift;
       $pms->_get_tag_value_for_yesno(@_);
     },
-  
+
     YESNOCAPS => sub {
       my $pms = shift;
       uc $pms->_get_tag_value_for_yesno(@_);
@@ -404,7 +404,7 @@ sub check_timed {
   # We assume required_score to be properly rounded already.
   # add 0 to force it back to numeric representation instead of string.
   $self->{score} = (sprintf "%0.3f", $self->{score}) + 0;
-  
+
   dbg("check: is spam? score=".$self->{score}.
                         " required=".$self->{conf}->{required_score});
   dbg("check: tests=".$self->get_names_of_tests_hit());
@@ -581,22 +581,22 @@ sub get_body_only_points {
 
 =item $score = $status->get_autolearn_force_status()
 
-Return whether a message's score included any rules that are flagged as 
+Return whether a message's score included any rules that are flagged as
 autolearn_force.
-  
+
 =cut
 
 sub get_autolearn_force_status {
   my ($self) = @_;
   $self->_get_autolearn_points();
   return $self->{autolearn_force};
-} 
+}
 
 =item $rule_names = $status->get_autolearn_force_names()
 
-Return a list of comma separated list of rule names if a message's 
+Return a list of comma separated list of rule names if a message's
 score included any rules that are flagged as autolearn_force.
-  
+
 =cut
 
 sub get_autolearn_force_names {
@@ -605,8 +605,8 @@ sub get_autolearn_force_names {
 
   $self->_get_autolearn_points();
   $names = $self->{autolearn_force_names};
- 
-  if (defined $names) { 
+
+  if (defined $names) {
     #remove trailing comma
     $names =~ s/,$//;
   } else {
@@ -662,8 +662,8 @@ sub _get_autolearn_points {
         $self->{learned_points} += $self->{conf}->{scoreset}->[$orig_scoreset]->{$test};
 	next;
       }
-    
-      #IF ANY RULES ARE AUTOLEARN FORCE, SET THAT FLAG  
+
+      #IF ANY RULES ARE AUTOLEARN FORCE, SET THAT FLAG
       if ($tflags->{$test} =~ /\bautolearn_force\b/) {
         $self->{autolearn_force}++;
         #ADD RULE NAME TO LIST
@@ -674,7 +674,7 @@ sub _get_autolearn_points {
     # ignore tests with 0 score (or undefined) in this scoreset
     next if !$scores->{$test};
 
-    # Go ahead and add points to the proper locations 
+    # Go ahead and add points to the proper locations
     # Changed logic because in testing, I was getting both head and body. Bug 5503
     if ($self->{conf}->maybe_header_only ($test)) {
       $self->{head_only_points} += $scores->{$test};
@@ -1130,7 +1130,7 @@ sub rewrite_report_safe {
   # tvd: do this after report_safe_copy_headers so Received will be done correctly
   $newmsg = "Received: from localhost by " .
               Mail::SpamAssassin::Util::fq_hostname() . "\n" .
-            "\twith SpamAssassin (version " . 
+            "\twith SpamAssassin (version " .
               Mail::SpamAssassin::Version() . ");\n" .
             "\t" . Mail::SpamAssassin::Util::time_to_rfc822_date() . "\n" .
             $newmsg;
@@ -1204,7 +1204,7 @@ sub rewrite_no_report_safe {
 
   # put the pristine headers into an array
   # skip the X-Spam- headers, but allow the X-Spam-Prev headers to remain.
-  # since there may be a missing header/body 
+  # since there may be a missing header/body
   #
   my @pristine_headers = split(/^/m, $self->{msg}->get_pristine_header());
   for (my $line = 0; $line <= $#pristine_headers; $line++) {
@@ -1698,7 +1698,7 @@ sub get_current_eval_rule_name {
 
 sub extract_message_metadata {
   my ($self) = @_;
-  
+
   my $timer = $self->{main}->time_method("extract_message_metadata");
   $self->{msg}->extract_message_metadata($self);
 
@@ -2291,7 +2291,7 @@ sub get_uri_detail_list {
     my $info = $detail->{$uri};
 
     my @uris;
-    
+
     if (!exists $info->{cleaned}) {
       if ($type eq 'parsed') {
         @uris = Mail::SpamAssassin::Util::uri_list_canonify($redirector_patterns, $uri);
@@ -2353,7 +2353,7 @@ sub _get_parsed_uri_list {
 
     for my $entry (@$textary) {
 
-      # a workaround for [perl #69973] bug: 
+      # a workaround for [perl #69973] bug:
       # Invalid and tainted utf-8 char crashes perl 5.10.1 in regexp evaluation
       # Bug 6225, regexp and string should both be utf8, or none of them;
       # untainting string also seems to avoid the crash
@@ -2771,7 +2771,7 @@ sub _test_log_line {
 # and this does not!
 sub get_envelope_from {
   my ($self) = @_;
-  
+
   # bug 2142:
   # Get the SMTP MAIL FROM:, aka. the "envelope sender", if our
   # calling app has helpfully marked up the source message
@@ -3046,19 +3046,19 @@ sub all_from_addrs {
 
 =item all_from_addrs_domains
 
-This function returns all the various from addresses in a message using all_from_addrs() 
-and then returns only the domain names.  
+This function returns all the various from addresses in a message using all_from_addrs()
+and then returns only the domain names.
 
 =cut
 
 sub all_from_addrs_domains {
   my ($self) = @_;
 
-  if (exists $self->{all_from_addrs_domains}) { 
+  if (exists $self->{all_from_addrs_domains}) {
     return @{$self->{all_from_addrs_domains}};
   }
 
-  #TEST POINT - my @addrs = ("test.voipquotes2.net","test.voipquotes2.co.uk"); 
+  #TEST POINT - my @addrs = ("test.voipquotes2.net","test.voipquotes2.co.uk");
   #Start with all the normal from addrs
   my @addrs = &all_from_addrs($self);
 
@@ -3110,7 +3110,7 @@ sub all_to_addrs {
     @addrs = $self->{main}->find_all_addrs_in_line (
        join('',
 	 join(" ", @rcvdaddrs)."\n",
-         $self->get('To'),			# std 
+         $self->get('To'),			# std
   	 $self->get('Apparently-To'),		# sendmail, from envelope
   	 $self->get('Delivered-To'),		# Postfix, poss qmail
   	 $self->get('Envelope-Recipients'),	# qmail: new-inject(1)
