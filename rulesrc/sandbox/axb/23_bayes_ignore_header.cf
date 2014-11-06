@@ -1,5 +1,5 @@
 
-# Last update: 2014-11-03-axb
+# Last update: 2014-11-06-axb
 # Set headers which may provide inappropriate AV/filter cues to the Bayesian classifier
 bayes_ignore_header X-ACL-Warn
 bayes_ignore_header X-Alimail-AntiSpam
@@ -47,6 +47,7 @@ bayes_ignore_header X-Barracuda-Virus-Alert
 bayes_ignore_header X-Bayesian-Result
 bayes_ignore_header X-Bayes-Prob
 bayes_ignore_header X-BitDefender-Spam
+bayes_ignore_header X-BitDefender-SpamStamp
 bayes_ignore_header X-Bogosity
 bayes_ignore_header X-Boxtrapper
 bayes_ignore_header X-Brightmail-Tracker
@@ -191,6 +192,7 @@ bayes_ignore_header X-SpamTest-SPF
 bayes_ignore_header X-SpamTest-Status
 bayes_ignore_header X-SpamTest-Status-Extended
 bayes_ignore_header X-Spam-Threshold
+bayes_ignore_header X-SPF-Scan-By
 bayes_ignore_header X-STA-Metric
 bayes_ignore_header X-STA-NotSpam
 bayes_ignore_header X-StarScan-Version
