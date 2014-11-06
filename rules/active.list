@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus dwarren grenier jarif kpg-core mas-cps mas-mas; day 2: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus dwarren grenier jarif kpg-core llanga mas-cps mas-mas zmi; day 3: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus grenier jarif kpg-core llanga mas-cps mas-mas zmi
+# with results from: day 1: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus dwarren grenier kpg-core mas-cps mas-mas zmi; day 2: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus dwarren grenier jarif kpg-core llanga mas-cps mas-mas zmi; day 3: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus dwarren grenier jarif kpg-core llanga mas-cps mas-mas zmi
 
 # tflags publish
 AC_BR_BONANZA
@@ -338,6 +338,9 @@ FROM_MISSP_USER
 FROM_MISSP_XPRIO
 
 # good enough
+FSL_BOTSPAM_1
+
+# good enough
 FSL_CTYPE_WIN1251
 
 # good enough
@@ -576,6 +579,9 @@ NSL_RCVD_FROM_USER
 
 # good enough
 NSL_RCVD_HELO_USER
+
+# good enough
+OBFU_HTML_ATTACH
 
 # tflags publish
 OBFU_JVSCR_ESC
@@ -947,28 +953,37 @@ TVD_SPACE_RATIO_MINFP
 TW_GIBBERISH_MANY
 
 # good enough
+AXB_XM_FORGED_OL2600
+
+# good enough
+DATE_DOTS
+
+# good enough
+DOS_OUTLOOK_TO_MX_IMAGE
+
+# good enough
 FILL_THIS_FORM_FRAUD_PHISH
 
 # good enough
+HDRS_LCASE
+
+# good enough
 MONEY_BARRISTER
+
+# good enough
+TEQF_USR_IMAGE
 
 # tflags publish
 TEQF_USR_MSGID_HEX
 
 # good enough
-TVD_PH_BODY_META
-
-# good enough
-TVD_SUBJ_NUM_OBFU_MINFP
-
-# good enough
 TVD_UNDER_VALUED
 
 # good enough
-URI_OBFU_TLD
+UPGRADE_MAILBOX
 
 # good enough
-XPRIO
+URI_OBFU_TLD
 
 # tflags publish
 UC_GIBBERISH_OBFU
