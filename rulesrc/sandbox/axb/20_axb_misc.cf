@@ -1,4 +1,10 @@
 
+ifplugin Mail::SpamAssassin::Plugin::MIMEHeader
+mimeheader	AXB_MH_APPHTML	Content-Type =~ /^application\/html/
+describe	AXB_MH_APPHTML	Mime header fingerprint
+tflags		AXB_MH_APPHTML	publish
+endif
+
 header		__AXB_HAS_AMAVISD_PORT	Received =~ /\(amavisd-new\, port\b/
 header		__AXB_BY_8B8		Received =~ /\bby [a-f0-9]{8}\./
 meta		AXB_XRCVD_8B8	(__AXB_HAS_AMAVISD_PORT && __AXB_BY_8B8)
