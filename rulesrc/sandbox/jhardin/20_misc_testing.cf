@@ -1895,5 +1895,6 @@ uri       __HACKED_PHP_URI              m;/\w+/(?:doc(?:ument)?|invoice)\.php$;
 
 body      __PUNCT_ODD_SPACING           /[a-z]{3}\s+[.,][a-z]/
 tflags    __PUNCT_ODD_SPACING           multiple, maxhits=3
+meta      __PUNCT_ODD_SPACING_MANY      __PUNCT_ODD_SPACING > 2
 
 
