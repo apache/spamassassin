@@ -6,7 +6,7 @@ tflags		AXB_MH_APPHTML	publish
 endif
 
 header		__AXB_HAS_AMAVISD_PORT	Received =~ /\(amavisd-new\, port\b/
-header		__AXB_BY_8B8		Received =~ /\bby [a-f0-9]{8}\./
+header		__AXB_BY_8B8		Received =~ /^by [a-f0-9]{8}\./
 meta		AXB_XRCVD_8B8	(__AXB_HAS_AMAVISD_PORT && __AXB_BY_8B8)
 describe	AXB_XRCVD_8B8	8x8 is better than 4x4
 tflags		AXB_XRCVD_8B8	publish
