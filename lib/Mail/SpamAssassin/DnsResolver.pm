@@ -165,7 +165,9 @@ sub load_resolver {
     dbg("dns: eval failed: $eval_stat");
   };
 
-  dbg("dns: using socket module: %s%s", $io_socket_module_name,
+  dbg("dns: using socket module: %s version %s%s",
+      $io_socket_module_name,
+      $io_socket_module_name->VERSION,
       $self->{force_ipv4} ? ', forced IPv4' :
       $self->{force_ipv6} ? ', forced IPv6' : '');
   dbg("dns: is Net::DNS::Resolver available? %s",
@@ -387,8 +389,6 @@ sub connect_sock {
   } else {  # unrecognized
     # unspecified address, unspecified protocol family
   }
-  dbg("dns: LocalAddr: %s, name server(s): %s",
-      $srcaddr||'', join(', ',@ns_addr_port));
 
   # find a free local random port from a set of declared-to-be-available ports
   my $lport;
@@ -405,6 +405,8 @@ sub connect_sock {
       $errno = 0;
       last;
     }
+    dbg("dns: LocalAddr: [%s]:%d, name server: [%s]:%d, module %s",
+        $srcaddr||'x', $lport,  $ns_addr, $ns_port,  $io_socket_module_name);
     my %args = (
         PeerAddr => $ns_addr,
         PeerPort => $ns_port,
