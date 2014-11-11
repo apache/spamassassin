@@ -1892,8 +1892,12 @@ uri       MALWARE_HACKED_URI            m;/(?:dropbox|googlebox|banking)/(?:doc(
 describe  MALWARE_HACKED_URI            Malware or phishing hosted-file URI at hacked webserver
 
 uri       __HACKED_PHP_URI              m;/\w+/(?:doc(?:ument)?|invoice)\.php$;
+meta      HACKED_PHP_URI                __HACKED_PHP_URI
+describe  HACKED_PHP_URI                Possible phishing/malware URI
+score     HACKED_PHP_URI                2.000     # limit
 
-body      __PUNCT_ODD_SPACING           /[a-z]{3}\s+[.,][a-z]/
+# very poor S/O - this appears a lot more in ham than in spam??
+body      __PUNCT_ODD_SPACING           /[a-z]{3}\s+[.,][a-z]{3}/
 tflags    __PUNCT_ODD_SPACING           multiple, maxhits=3
 meta      __PUNCT_ODD_SPACING_MANY      __PUNCT_ODD_SPACING > 2
 
