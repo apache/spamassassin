@@ -196,7 +196,7 @@ header __RDNS_DYNAMIC_TTNET   X-Spam-Relays-External =~ /^[^\]]+ rdns=\S+[\-\.]d
 header __RDNS_DYNAMIC_ASAHI   X-Spam-Relays-External =~ /^[^\]]+ rdns=[a-z][0-9]+\.ppp\.asahi-net\.or\.jp/i
 
 # exceptions (bug 5397):
-header  __RDNS_STATIC         X-Spam-Relays-External =~ /^[^\]]+ rdns=\S*(?:fix|static|fixip)/i
+header  __RDNS_STATIC         X-Spam-Relays-External =~ /^[^\]]+ rdns=\S*(?:fix|static|fixip|dedicated)/i
 
 # bug 5586:
 header __CGATE_RCVD       Received =~ /by \S+ \(CommuniGate Pro/
