@@ -1,5 +1,5 @@
 
-# Last update: 2014-11-07-axb
+# Last update: 2014-11-12-axb
 # Set headers which may provide inappropriate AV/filter cues to the Bayesian classifier
 bayes_ignore_header X-ACL-Warn
 bayes_ignore_header X-Alimail-AntiSpam
@@ -212,6 +212,9 @@ bayes_ignore_header X-Virus-Scanned
 bayes_ignore_header X-Virus-Scanner-Result
 bayes_ignore_header X-Virus-Scanner-Version
 bayes_ignore_header X-Virus-Status
+bayes_ignore_header X-VR-SCORE
+bayes_ignore_header X-VR-SPAMCAUSE
+bayes_ignore_header X-VR-STATUS
 bayes_ignore_header X-WatchGuard-Mail-Client-IP
 bayes_ignore_header X-WatchGuard-Mail-From
 bayes_ignore_header X-WatchGuard-Mail-Recipients
