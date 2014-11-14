@@ -60,7 +60,7 @@ BEGIN {
   @EXPORT_OK = qw(&local_tz &base64_decode &untaint_var &untaint_file_path
                   &exit_status_str &proc_status_ok &am_running_on_windows
                   &reverse_ip_address &decode_dns_question_entry
-                  &secure_tmpfile &secure_tmpdir);
+                  &secure_tmpfile &secure_tmpdir &uri_list_canonicalize);
 }
 
 use Mail::SpamAssassin;
@@ -1229,7 +1229,8 @@ sub uri_to_domain {
   return !wantarray ? lc $uri : (lc $uri, lc $host);
 }
 
-sub uri_list_canonify {
+*uri_list_canonify = \&uri_list_canonicalize;  # compatibility alias
+sub uri_list_canonicalize {
   my($redirector_patterns, @uris) = @_;
 
   # make sure we catch bad encoding tricks
