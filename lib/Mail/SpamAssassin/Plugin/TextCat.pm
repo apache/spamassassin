@@ -356,7 +356,7 @@ sub load_models {
   my @lm;
   my $ngram = {};
   my $rang = 1;
-  dbg("textcat: loading languages file...");
+  dbg("textcat: loading languages file %s", $languages_filename);
 
   local *LM;
   if (!open(LM, $languages_filename)) {
