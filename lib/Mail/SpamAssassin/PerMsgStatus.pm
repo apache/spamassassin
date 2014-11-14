@@ -59,7 +59,7 @@ use Time::HiRes qw(time);
 use Mail::SpamAssassin::Constants qw(:sa);
 use Mail::SpamAssassin::AsyncLoop;
 use Mail::SpamAssassin::Conf;
-use Mail::SpamAssassin::Util qw(untaint_var);
+use Mail::SpamAssassin::Util qw(untaint_var uri_list_canonicalize);
 use Mail::SpamAssassin::Util::RegistrarBoundaries;
 use Mail::SpamAssassin::Timeout;
 use Mail::SpamAssassin::Logger;
@@ -2188,7 +2188,7 @@ The hash format looks something like this:
 
   raw_uri => {
     types => { a => 1, img => 1, parsed => 1 },
-    cleaned => [ canonified_uri ],
+    cleaned => [ canonicalized_uri ],
     anchor_text => [ "click here", "no click here" ],
     domains => { domain1 => 1, domain2 => 1 },
   }
@@ -2200,15 +2200,15 @@ C<types> is a hash of the HTML tags (lowercase) which referenced
 the raw_uri.  I<parsed> is a faked type which specifies that the
 raw_uri was seen in the rendered text.
 
-C<cleaned> is an array of the raw and canonified version of the raw_uri
+C<cleaned> is an array of the raw and canonicalized version of the raw_uri
 (http://spamassassin.apache%2Eorg/, http://spamassassin.apache.org/).
 
 C<anchor_text> is an array of the anchor text (text between <a> and
 </a>), if any, which linked to the URI.
 
-C<domains> is a hash of the domains found in the canonified URIs.
+C<domains> is a hash of the domains found in the canonicalized URIs.
 
-C<hosts> is a hash of unstripped hostnames found in the canonified URIs
+C<hosts> is a hash of unstripped hostnames found in the canonicalized URIs
 as hash keys, with their domain part stored as a value of each hash entry.
 
 =cut
@@ -2255,9 +2255,9 @@ sub get_uri_detail_list {
   # don't keep dereferencing ...
   my $redirector_patterns = $self->{conf}->{redirector_patterns};
 
-  # canonify the HTML parsed URIs
+  # canonicalize the HTML parsed URIs
   while(my($uri, $info) = each %{ $detail }) {
-    my @tmp = Mail::SpamAssassin::Util::uri_list_canonify($redirector_patterns, $uri);
+    my @tmp = uri_list_canonicalize($redirector_patterns, $uri);
     $info->{cleaned} = \@tmp;
 
     foreach (@tmp) {
@@ -2285,7 +2285,7 @@ sub get_uri_detail_list {
     }
   }
 
-  # canonify the text parsed URIs
+  # canonicalize the text parsed URIs
   while (my($uri, $type) = each %parsed) {
     $detail->{$uri}->{types}->{$type} = 1;
     my $info = $detail->{$uri};
@@ -2294,7 +2294,7 @@ sub get_uri_detail_list {
 
     if (!exists $info->{cleaned}) {
       if ($type eq 'parsed') {
-        @uris = Mail::SpamAssassin::Util::uri_list_canonify($redirector_patterns, $uri);
+        @uris = uri_list_canonicalize($redirector_patterns, $uri);
       }
       else {
         @uris = ( $uri );
@@ -2404,7 +2404,7 @@ sub _get_parsed_uri_list {
 
         next unless ($uri =~/^(?:https?|ftp):/i);  # at this point only valid if one or the other of these
 
-        my @tmp = Mail::SpamAssassin::Util::uri_list_canonify($redirector_patterns, $uri);
+        my @tmp = uri_list_canonicalize($redirector_patterns, $uri);
         my $goodurifound = 0;
         foreach my $cleanuri (@tmp) {
           my $domain = Mail::SpamAssassin::Util::uri_to_domain($cleanuri);
