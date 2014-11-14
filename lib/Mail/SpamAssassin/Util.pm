@@ -282,40 +282,43 @@ sub untaint_hostname {
 #
 sub untaint_var {
 # my $arg = $_[0];  # avoid copying unnecessarily
-  my $r = ref $_[0];
-  if (!$r) {
+  if (!ref $_[0]) { # optimized by-far-the-most-common case
     no re 'taint';  # override a  "use re 'taint'"  from outer scope
     return undef if !defined $_[0];
     local($1); # avoid Perl taint bug: tainted global $1 propagates taintedness
     $_[0] =~ /^(.*)\z/s;
     return $1;
-  }
-  elsif ($r eq 'ARRAY') {
-    my $arg = $_[0];
-    $_ = untaint_var($_)  for @{$arg};
-    return @{$arg} if wantarray;
-  }
-  elsif ($r eq 'HASH') {
-    my $arg = $_[0];
-    if ($arg == \%ENV) {  # purge undefs from %ENV, untaint the rest
-      while (my($k, $v) = each %{$arg}) {
-        # It is safe to delete the item most recently returned by each()
-        if (!defined $v) { delete ${$arg}{$k}; next }
-        ${$arg}{untaint_var($k)} = untaint_var($v);
-      }
-    } else {
-      while (my($k, $v) = each %{$arg}) {
-        ${$arg}{untaint_var($k)} = untaint_var($v);
-      }
+  } else {
+    my $r = ref $_[0];
+    if ($r eq 'ARRAY') {
+      my $arg = $_[0];
+      $_ = untaint_var($_)  for @{$arg};
+      return @{$arg} if wantarray;
     }
-    return %{$arg} if wantarray;
-  }
-  elsif ($r eq 'SCALAR' || $r eq 'REF') {
-    my $arg = $_[0];
-    ${$arg} = untaint_var(${$arg});
-  }
-  else {
-    warn "util: can't untaint a $r !\n";
+    elsif ($r eq 'HASH') {
+      my $arg = $_[0];
+      if ($arg == \%ENV) {  # purge undefs from %ENV, untaint the rest
+        while (my($k, $v) = each %{$arg}) {
+          # It is safe to delete the item most recently returned by each()
+          if (!defined $v) { delete ${$arg}{$k}; next }
+          ${$arg}{untaint_var($k)} = untaint_var($v);
+        }
+      } else {
+        # hash keys are never tainted,
+        # although old version of perl had some quirks there
+        while (my($k, $v) = each %{$arg}) {
+          ${$arg}{untaint_var($k)} = untaint_var($v);
+        }
+      }
+      return %{$arg} if wantarray;
+    }
+    elsif ($r eq 'SCALAR' || $r eq 'REF') {
+      my $arg = $_[0];
+      ${$arg} = untaint_var(${$arg});
+    }
+    else {
+      warn "util: can't untaint a $r !\n";
+    }
   }
   return $_[0];
 }
