@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus dwarren grenier kpg-core mas-cps mas-mas; day 2: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus dwarren grenier jarif kpg-core llanga mas-cps mas-mas zmi; day 3: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus dwarren grenier jarif kpg-core llanga mas-cps mas-mas zmi
+# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus dwarren grenier jarif kpg-core mas-cps mas-mas; day 2: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus dwarren grenier jarif kpg-core llanga mas-cps mas-mas; day 3: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus dwarren grenier jarif kpg-core llanga mas-cps mas-mas zmi
 
 # tflags publish
 AC_BR_BONANZA
@@ -88,6 +88,9 @@ AD_PREFS
 # tflags userconf
 ALL_TRUSTED
 
+# tflags publish
+AXB_MH_APPHTML
+
 # good enough
 AXB_RBDY_TENANDTEN
 
@@ -160,9 +163,6 @@ CHARSET_FARAWAY_HEADER
 # good enough
 CK_HELO_DYNAMIC_SPLIT_IP
 
-# good enough
-CK_HELO_GENERIC
-
 # tflags publish
 CN_B2B_SPAMMER
 
@@ -231,6 +231,9 @@ DOS_OE_TO_MX
 
 # good enough
 DOS_OE_TO_MX_IMAGE
+
+# good enough
+DOS_OUTLOOK_TO_MX_IMAGE
 
 # good enough
 DSN_NO_MIMEVERSION
@@ -329,6 +332,9 @@ FROM_MISSP_USER
 FROM_MISSP_XPRIO
 
 # good enough
+FSL_BOTSPAM_1
+
+# good enough
 FSL_CTYPE_WIN1251
 
 # good enough
@@ -370,6 +376,9 @@ FUZZY_SECURITY
 # tflags publish
 FUZZY_UNSUBSCRIBE
 
+# good enough
+GAPPY_LOW_CONTRAST
+
 # tflags publish
 GOOGLE_DOCS_PHISH
 
@@ -384,6 +393,9 @@ GOOG_REDIR_SHORT
 
 # tflags userconf
 GTUBE
+
+# good enough
+HACKED_PHP_URI
 
 # tflags userconf
 HASHCASH_20
@@ -424,9 +436,6 @@ HEADER_HOST_IN_WHITELIST
 # tflags userconf
 HEAD_LONG
 
-# good enough
-HELO_LOCALHOST
-
 # tflags publish
 HEXHASH_WORD
 
@@ -440,10 +449,19 @@ HK_NAME_DRUGS
 HK_NAME_MR_MRS
 
 # good enough
+HK_SCAM_N1
+
+# good enough
 HK_SCAM_N13
 
 # good enough
+HK_SCAM_N15
+
+# good enough
 HK_SCAM_N2
+
+# good enough
+HK_SCAM_N3
 
 # good enough
 HK_SCAM_N8
@@ -506,6 +524,9 @@ MISSING_HB_SEP
 MONEY_ATM_CARD
 
 # good enough
+MONEY_BARRISTER
+
+# good enough
 MONEY_FORM
 
 # good enough
@@ -546,6 +567,9 @@ NSL_RCVD_FROM_USER
 
 # good enough
 NSL_RCVD_HELO_USER
+
+# good enough
+OBFU_HTML_ATTACH
 
 # tflags publish
 OBFU_JVSCR_ESC
@@ -847,9 +871,6 @@ SUBJECT_IN_BLACKLIST
 # tflags userconf
 SUBJECT_IN_WHITELIST
 
-# good enough
-SUBJ_UNNEEDED_HTML
-
 # tflags publish
 SYSADMIN
 
@@ -922,9 +943,6 @@ TW_GIBBERISH_MANY
 # good enough
 ADVANCE_FEE_5_NEW_FORM
 
-# tflags publish
-AXB_MH_APPHTML
-
 # good enough
 AXB_X_FF_SEZ_S
 
@@ -932,28 +950,16 @@ AXB_X_FF_SEZ_S
 BIGNUM_EMAILS
 
 # good enough
-DOS_OUTLOOK_TO_MX_IMAGE
-
-# good enough
-FROM_UNBAL2
-
-# good enough
-FSL_BOTSPAM_1
+CK_HELO_GENERIC
 
 # good enough
 FSL_HELO_FAKE
 
 # good enough
-GAPPY_LOW_CONTRAST
+FSL_MID_419
 
 # good enough
-HACKED_PHP_URI
-
-# good enough
-HK_SCAM_N15
-
-# good enough
-HK_SCAM_N3
+HK_RANDOM_FROM
 
 # good enough
 MALFORMED_FREEMAIL
@@ -962,19 +968,16 @@ MALFORMED_FREEMAIL
 MALWARE_HACKED_URI
 
 # good enough
-MONEY_BARRISTER
-
-# good enough
 NAME_EMAIL_DIFF
 
 # good enough
 OBFU_ATTACH_MISSP
 
 # good enough
-SHARE_50_50
+SERGIO_SUBJECT_VIAGRA01
 
 # good enough
-UPGRADE_MAILBOX
+SHARE_50_50
 
 # good enough
 URI_ONLY_LOW_CONTRAST
@@ -984,6 +987,9 @@ UC_GIBBERISH_OBFU
 
 # tflags userconf
 UNPARSEABLE_RELAY
+
+# good enough
+UPGRADE_MAILBOX
 
 # tflags net
 URIBL_AB_SURBL
