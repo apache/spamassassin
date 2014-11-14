@@ -480,6 +480,19 @@ else
   meta           __TO_EQ_FM_SPF_FAIL  0
 endif
 
+# Paul Stead on SA list 11/2014
+header         __PDS_TO_EQ_FROM_NAME_1       ALL =~ /\nTo:\s+(?:[^\n<]{0,80}<)?([^\n\s>]+)>?\n(?:[^\n]{1,100}\n)*From:\W+(\1)([^\n\w<]++<)?((?!\1)[^\n">]++)>?\n/ism
+header         __PDS_TO_EQ_FROM_NAME_2       ALL =~ /\nFrom:\W+"([\w+.-]+\@[\w.-]+\.\w\w+)(?:[^\n\w<]{0,80}<)?((?!\1)[^\n">]++)>?\n(?:[^\n]{1,100}\n)*To:\s+(?:[^\n<]{0,80}<)?(\1)>?/ism
+
+meta           PDS_TO_EQ_FROM_NAME           (__PDS_TO_EQ_FROM_NAME_1 || __PDS_TO_EQ_FROM_NAME_2)
+describe       PDS_TO_EQ_FROM_NAME           From: name same as To: address
+
+header  __PDS_FROM_2_EMAILS     From =~ /^\W+([\w+.-]+\@[\w.-]+\.\w\w++)(?:[^\n\w<]{0,80})?<(?!\1)[^\n\s]*\@/i
+meta    PDS_FROM_2_EMAILS       __PDS_FROM_2_EMAILS && !__VIA_ML && !__VIA_RESIGNER
+
+uri     __PDS_LOC_WP_POMO       m;/wp-includes/pomo/(?!(?:entry|po|mo|streams|translations)\.php).*;i
+
+
 header         __FROM_ALL_NUMS      From:addr =~ /^\d+@/
 header         __TO_ALL_NUMS        To:addr =~ /^\d+@/
 meta           __FM_TO_ALL_NUMS     __FROM_ALL_NUMS && __TO_ALL_NUMS
@@ -1407,13 +1420,24 @@ tflags      URI_WPADMIN        publish
 
 uri         __URI_WPCONTENT    m,/wp-content/.*\.php\b,i
 uri         __URI_WPINCLUDES   m,/wp-includes/.*\.php\b,i
-uri         __URI_WPDIRINDEX   m,/wp-(?:content|includes)/.*/$,i
+uri         __URI_WPCONTENT_L  m,/wp-content/.*\.(?!gif|jpg|png|bmp|ico|eot|pdf)[a-z]{3}\b,i
+uri         __URI_WPINCLUDES_L m,/wp-includes/.*\.(?!gif|jpg|png|bmp|ico|eot|pdf)[a-z]{3}\b,i
 meta        URI_WP_HACKED      (__URI_WPCONTENT || __URI_WPINCLUDES) && !__VIA_ML && !__HAS_ERRORS_TO && !__RCD_RDNS_SMTP && !__THREADED && !ALL_TRUSTED && !__NOT_SPOOFED 
 describe    URI_WP_HACKED      URI for compromised WordPress site, possible malware
 score       URI_WP_HACKED      3.000   # limit
 tflags      URI_WP_HACKED      publish
 
+uri         __URI_WPDIRINDEX   m,/wp-(?:content|includes)/.*/$,i
+meta        URI_WP_DIRINDEX    __URI_WPDIRINDEX
+describe    URI_WP_DIRINDEX    URI for compromised WordPress site, possible malware
+score       URI_WP_DIRINDEX    3.000   # limit
+tflags      URI_WP_DIRINDEX    publish
+
 uri         __PS_TEST_LOC_WP   m;/(?:wp-content/plugins|wp-content/themes|wp-includes|modules/mod_wdbanners|includes/|google_recommends|mt-static|data/module)/.{0,64}(?!\.gif|\.jpg|\.png|\.bmp).{4}$;i
+meta        URI_WP_HACKED_2    __PS_TEST_LOC_WP && !__TO_EQ_FROM && !__THREADED 
+describe    URI_WP_HACKED_2    URI for compromised WordPress site, possible malware
+score       URI_WP_HACKED_2    2.000   # limit
+tflags      URI_WP_HACKED_2    publish
 
 
 
