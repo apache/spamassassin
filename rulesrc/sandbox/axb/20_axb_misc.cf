@@ -1,8 +1,4 @@
 
-header 		RW_BOGUS_RCVD_AMAVIS  Received =~ /\(amavisd-new,\s+port\s+\d+\).+;\s*for\b/
-describe	RW_BOGUS_RCVD_AMAVIS  Contains bogus amavisd-new rcvd header
-
-
 ifplugin Mail::SpamAssassin::Plugin::MIMEHeader
 mimeheader	AXB_MH_APPHTML	Content-Type =~ /^application\/html/
 describe	AXB_MH_APPHTML	Mime header fingerprint
