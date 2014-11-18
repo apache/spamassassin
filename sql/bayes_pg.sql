@@ -32,6 +32,8 @@ CREATE TABLE bayes_token (
 
 CREATE INDEX bayes_token_idx1 ON bayes_token (token);
 
+ALTER TABLE bayes_token SET (fillfactor=95);
+
 CREATE TABLE bayes_vars (
   id serial NOT NULL,
   username varchar(200) NOT NULL default '',
