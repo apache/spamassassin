@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus grenier jarif kpg-core mas-cps mas-mas mmiroslaw-ham mmiroslaw-spam; day 2: axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus dwarren grenier jarif kpg-core llanga mas-cps mas-mas zmi; day 3: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus dwarren grenier jarif kpg-core llanga mas-cps mas-mas
+# with results from: day 1: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bpoliakoff darxus grenier kpg-core mas-cps mas-mas; day 2: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt darxus grenier jarif kpg-core mas-cps mas-mas zmi; day 3: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt darxus dwarren grenier jarif kpg-core llanga mas-cps mas-mas zmi
 
 # tflags publish
 AC_BR_BONANZA
@@ -77,6 +77,9 @@ ADVANCE_FEE_4_NEW_MONEY
 ADVANCE_FEE_5_NEW
 
 # good enough
+ADVANCE_FEE_5_NEW_FORM
+
+# good enough
 ADVANCE_FEE_5_NEW_FRM_MNY
 
 # good enough
@@ -145,9 +148,6 @@ BAYES_99
 # tflags learn
 BAYES_999
 
-# good enough
-BILLION_OVERLAP
-
 # tflags publish
 BODY_URI_ONLY
 
@@ -177,9 +177,6 @@ CORRUPT_FROM_LINE_IN_HDRS
 
 # good enough
 CURR_PRICE
-
-# good enough
-DATE_DOTS
 
 # good enough
 DEAR_BENEFICIARY
@@ -286,6 +283,9 @@ FRAGMENTED_MESSAGE
 # tflags publish
 FREEMAIL_FORGED_FROMDOMAIN
 
+# good enough
+FROM_12LTRDOM
+
 # tflags userconf
 FROM_DOMAIN_NOVOWEL
 
@@ -332,10 +332,16 @@ FROM_MISSP_XPRIO
 FSL_CTYPE_WIN1251
 
 # good enough
+FSL_HELO_BARE_IP_1
+
+# good enough
 FSL_HELO_BARE_IP_2
 
 # good enough
 FSL_HELO_DEVICE
+
+# good enough
+FSL_HELO_NON_FQDN_1
 
 # tflags publish
 FSL_NEW_HELO_USER
@@ -443,9 +449,6 @@ HK_NAME_DRUGS
 HK_NAME_MR_MRS
 
 # good enough
-HK_SCAM_N13
-
-# good enough
 HK_SCAM_N15
 
 # good enough
@@ -456,6 +459,9 @@ HK_SCAM_N3
 
 # good enough
 HK_SCAM_N8
+
+# good enough
+HK_SCAM_S25
 
 # tflags userconf
 HTML_CHARSET_FARAWAY
@@ -495,6 +501,9 @@ LOTTO_DEPT
 
 # tflags publish
 LUCRATIVE
+
+# good enough
+MALFORMED_FREEMAIL
 
 # tflags publish
 MANY_SPAN_IN_TEXT
@@ -555,9 +564,6 @@ NSL_RCVD_FROM_USER
 
 # good enough
 NSL_RCVD_HELO_USER
-
-# good enough
-OBFU_HTML_ATTACH
 
 # tflags publish
 OBFU_JVSCR_ESC
@@ -806,6 +812,9 @@ REPLYTO_WITHOUT_TO_CC
 RISK_FREE
 
 # good enough
+SHARE_50_50
+
+# good enough
 SHORTENED_URL_SRC
 
 # good enough
@@ -844,9 +853,6 @@ SPF_SOFTFAIL
 # tflags publish
 STOCK_LOW_CONTRAST
 
-# good enough
-STOX_REPLY_TYPE_WITHOUT_QUOTES
-
 # tflags publish
 STYLE_GIBBERISH
 
@@ -855,6 +861,12 @@ SUBJECT_IN_BLACKLIST
 
 # tflags userconf
 SUBJECT_IN_WHITELIST
+
+# good enough
+SUBJ_OBFU_LOW_CNTRST
+
+# good enough
+SUBJ_OBFU_PUNCT_MANY
 
 # tflags publish
 SYSADMIN
@@ -911,7 +923,7 @@ TVD_FROM_1
 TVD_PH_BODY_META
 
 # good enough
-TVD_RCVD_IP
+TVD_QUAL_MEDS
 
 # good enough
 TVD_SPACE_ENCODED
@@ -920,46 +932,67 @@ TVD_SPACE_ENCODED
 TVD_SPACE_RATIO_MINFP
 
 # good enough
-TVD_UNDER_VALUED
+TVD_SUBJ_NUM_OBFU_MINFP
 
 # tflags publish
 TW_GIBBERISH_MANY
 
 # good enough
-ADVANCE_FEE_5_NEW_FORM
+ANY_PILL_PRICE
 
 # good enough
-AXB_HELO_HOME_UN
+BODY_EMPTY
 
 # good enough
-BIGNUM_EMAILS
+DATE_IN_FUTURE_Q_PLUS
 
 # good enough
-CK_HELO_GENERIC
+DOS_BODY_HIGH_NO_MID
 
 # good enough
-FROM_12LTRDOM
+FROM_UNBAL2
 
 # good enough
-HK_SCAM_S23
+FSL_HELO_FAKE
 
 # good enough
-HK_SCAM_S25
+HACKED_PHP_URI
 
 # good enough
-MALFORMED_FREEMAIL
+HELO_NO_DOMAIN
 
 # good enough
-SHARE_50_50
+HK_LOTTO_NAME
 
 # good enough
-SUBJ_OBFU_LOW_CNTRST
+HK_RANDOM_FROM
 
 # good enough
-SUBJ_OBFU_PUNCT_MANY
+HK_SCAM_N1
 
 # good enough
-TVD_SUBJ_NUM_OBFU_MINFP
+HK_SCAM_S4
+
+# good enough
+MAILER_EQ_ORG
+
+# good enough
+MALWARE_HACKED_URI
+
+# good enough
+PHP_NOVER_MUA
+
+# good enough
+SERGIO_SUBJECT_PORN014
+
+# good enough
+SUBJ_UNNEEDED_HTML
+
+# tflags publish
+URI_WP_DIRINDEX
+
+# tflags publish
+URI_WP_HACKED_2
 
 # tflags publish
 UC_GIBBERISH_OBFU
