@@ -24,7 +24,7 @@ use Mail::SpamAssassin;
 use vars qw(%patterns %anti_patterns);
 
 # settings
-plan tests => 682;
+plan tests => 683;
 
 # initialize SpamAssassin
 my $sa = create_saobj({'dont_copy_prefs' => 1});
@@ -284,6 +284,9 @@ donotignorethiswww.delimtest14.com	donotignorethiswww.delimtest14.com
 -----www.delimtest17.com----------	^http://www.delimtest17.com$
 .....http://www.delimtest18.com..........	^http://www.delimtest18.com$
 -----http://www.delimtest19.com----------	^http://www.delimtest19.com$
+
+# emails with a comma at the end
+test@delimtest20.com,stuff stuff		delimtest20.com
 
 # check all the TLDs (might as well be thorough)
 # the inactive TLDs have negative checks
