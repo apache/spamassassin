@@ -2113,7 +2113,10 @@ my $iso2022shift = "\x1b" . '\(.';  # bug 4522
 my $tbirdenddelim = '><"`}\]{[|\s' . "\x1b";  # The \x1b as per bug 4522
 my $oeignoreatend = '-~!@#^&*()_+=:;\'?,.';
 my $nonASCII    = '\x80-\xff';
-my $tbirdenddelimemail = $tbirdenddelim . '(\'' . $nonASCII;  # tbird ignores non-ASCII mail addresses for now, until RFC changes
+
+# bug 7100: we allow a comma to delimit the end of an email address because it will never appear in a domain name, and
+# it's a common thing to find in text
+my $tbirdenddelimemail = $tbirdenddelim . ',(\'' . $nonASCII;  # tbird ignores non-ASCII mail addresses for now, until RFC changes
 my $tbirdenddelimplusat = $tbirdenddelimemail . '@';
 
 # valid TLDs
