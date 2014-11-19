@@ -69,9 +69,12 @@ sub connect {
   if ($server =~ m{^/}) {
     $sock = IO::Socket::UNIX->new(
               Peer => $server, Type => SOCK_STREAM);
-  } else {
+  } elsif ($server =~ /^(?: \[ ([^\]]+) \] | ([^:]+) ) : ([^:]+) \z/xs) {
+    $server = defined $1 ? $1 : $2;  my $port = $3;
     $sock = $io_socket_module_name->new(
-              PeerAddr => $server, Proto => 'tcp');
+              PeerAddr => $server, PeerPort => $port, Proto => 'tcp');
+  } else {
+    die "Invalid 'server:port' specification: $server";
   }
   if ($sock) {
     $self->{sock} = $sock;
