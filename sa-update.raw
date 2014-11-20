@@ -1472,7 +1472,7 @@ sub http_get {
   } elsif (defined $ext_prog && $ext_prog eq 'wget') {
     push(@args, qw(-q -N --max-redirect=2 --tries=3
                    --dns-timeout=20 --connect-timeout=30 --read-timeout=300
-                   -o), $out_fname_short);
+                   -O), $out_fname_short);
     #*** ???  if $out_fname_exists && !$force_reload;
   } elsif (defined $ext_prog && $ext_prog eq 'fetch') {
     push(@args, qw(-q -n -a -w 20 -m -o), $out_fname_short);
