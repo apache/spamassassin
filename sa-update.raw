@@ -1470,10 +1470,10 @@ sub http_get {
                    --fail -o), $out_fname_short);
     push(@args, '-z', $out_fname_short)  if $out_fname_exists && !$force_reload;
   } elsif (defined $ext_prog && $ext_prog eq 'wget') {
-    push(@args, qw(-q -N --max-redirect=2 --tries=3
-                   --dns-timeout=20 --connect-timeout=30 --read-timeout=300
-                   -O), $out_fname_short);
-    #*** ???  if $out_fname_exists && !$force_reload;
+    push(@args, qw(-q --max-redirect=2 --tries=3
+                   --dns-timeout=20 --connect-timeout=30 --read-timeout=300));
+    push(@args, defined $suggested_out_fname ? ('-O', $out_fname_short)
+                : $force_reload ? () : ('-N') );
   } elsif (defined $ext_prog && $ext_prog eq 'fetch') {
     push(@args, qw(-q -n -a -w 20 -m -o), $out_fname_short);
     push(@args, '-m')  if $out_fname_exists && !$force_reload;
