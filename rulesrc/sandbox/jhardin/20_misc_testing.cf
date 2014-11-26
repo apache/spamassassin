@@ -489,8 +489,9 @@ header         __PDS_TO_EQ_FROM_NAME_2       ALL =~ /\nFrom:\W+"([\w+.-]+\@[\w.-
 meta           PDS_TO_EQ_FROM_NAME           (__PDS_TO_EQ_FROM_NAME_1 || __PDS_TO_EQ_FROM_NAME_2)
 describe       PDS_TO_EQ_FROM_NAME           From: name same as To: address
 
-header  __PDS_FROM_2_EMAILS     From =~ /^\W+([\w+.-]+\@[\w.-]+\.\w\w++)(?:[^\n\w<]{0,80})?<(?!\1)[^\n\s]*\@/i
-meta    PDS_FROM_2_EMAILS       __PDS_FROM_2_EMAILS && !__VIA_ML && !__VIA_RESIGNER
+# ++ not liked by perl 5.8.x
+# header  __PDS_FROM_2_EMAILS     From =~ /^\W+([\w+.-]+\@[\w.-]+\.\w\w++)(?:[^\n\w<]{0,80})?<(?!\1)[^\n\s]*\@/i
+#  meta    PDS_FROM_2_EMAILS       __PDS_FROM_2_EMAILS && !__VIA_ML && !__VIA_RESIGNER
 
 uri     __PDS_LOC_WP_POMO       m;/wp-includes/pomo/(?!(?:entry|po|mo|streams|translations)\.php).*;i
 
