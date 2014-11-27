@@ -533,6 +533,9 @@ sub handle_conditional {
     elsif ($token eq 'version') {
       $eval .= $Mail::SpamAssassin::VERSION." ";
     }
+    elsif ($token eq 'perl_version') {
+      $eval .= $]." ";
+    }
     elsif ($token =~ /^\w[\w\:]+$/) { # class name
       my $u = untaint_var($token);
       $eval .= '"' . $u . '" ';
