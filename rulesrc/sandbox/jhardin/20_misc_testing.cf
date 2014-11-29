@@ -490,10 +490,11 @@ meta           PDS_TO_EQ_FROM_NAME           (__PDS_TO_EQ_FROM_NAME_1 || __PDS_T
 describe       PDS_TO_EQ_FROM_NAME           From: name same as To: address
 
 # ++ not liked by perl 5.8.x
-if perl_version >= 5.010000
-  header  __PDS_FROM_2_EMAILS     From =~ /^\W+([\w+.-]+\@[\w.-]+\.\w\w++)(?:[^\n\w<]{0,80})?<(?!\1)[^\n\s]*\@/i
-  meta    PDS_FROM_2_EMAILS       __PDS_FROM_2_EMAILS && !__VIA_ML && !__VIA_RESIGNER
-endif
+# disable until perl_version officially released
+#if perl_version >= 5.010000
+#  header  __PDS_FROM_2_EMAILS     From =~ /^\W+([\w+.-]+\@[\w.-]+\.\w\w++)(?:[^\n\w<]{0,80})?<(?!\1)[^\n\s]*\@/i
+#  meta    PDS_FROM_2_EMAILS       __PDS_FROM_2_EMAILS && !__VIA_ML && !__VIA_RESIGNER && !__CLICK_HERE && !__BUGGED_IMG && !__RP_MATCHES_RCVD 
+#endif
 
 uri     __PDS_LOC_WP_POMO       m;/wp-includes/pomo/(?!(?:entry|po|mo|streams|translations)\.php).*;i
 
@@ -1008,11 +1009,15 @@ score       TVD_SPACE_RATIO_MINFP  2.750   # limit
 
 # Be sensitive to FP on legit chinese-language mailing lists (09/2014)
 meta        __TVD_SPACE_ENCODED    (__TVD_SPACE_RATIO && __SUBJECT_ENCODED_B64 && !__SUBJECT_UTF8_B_ENCODED)
-meta        TVD_SPACE_ENCODED      __TVD_SPACE_ENCODED && !__LCL__ENV_AND_HDR_FROM_MATCH && !__NOT_SPOOFED && !__VIA_ML && !__HS_SUBJ_RE_FW && !__SUBSCRIPTION_INFO 
+meta        TVD_SPACE_ENCODED      __TVD_SPACE_ENCODED && !__NOT_SPOOFED && !__VIA_ML && !__HS_SUBJ_RE_FW && !__SUBSCRIPTION_INFO && !__TO_EQ_FROM_DOM && !__RCD_RDNS_MAIL 
 score       TVD_SPACE_ENCODED      2.500   # limit
 
+meta        TVD_SPACE_ENC_FM_MIME  __TVD_SPACE_ENCODED && __FROM_NEEDS_MIME 
+score       TVD_SPACE_ENC_FM_MIME  2.000   # limit
+
+
 # sample from users list:   Subject: Sta ffWork sFastToSen dTab le tsGood s
-header      __SUBJ_BROKEN_WORD     Subject =~ /\s(?!i[PTM][aoh][bcdou])[a-z]{1,3}[A-Z][a-z]{2}/
+header      __SUBJ_BROKEN_WORD     Subject =~ /\s(?!i[PTM][aoh][bcdou]|e[MP]a[is])[a-z]{1,3}[A-Z][a-z]{2}/
 tflags      __SUBJ_BROKEN_WORD     multiple maxhits=2
 meta        SUBJ_BROKEN_WORD       __SUBJ_BROKEN_WORD && !ALL_TRUSTED && !__RP_MATCHES_RCVD && !__COMMENT_EXISTS && !__MIME_QP && !__DOS_HAS_LIST_UNSUB && !__HAS_IN_REPLY_TO && !__THREADED && !__MSGID_JAVAMAIL && !__DKIM_EXISTS && !__RCD_RDNS_MAIL_MESSY && !__MSGID_OK_DIGITS && !__NOT_A_PERSON && !__LCL__ENV_AND_HDR_FROM_MATCH
 describe    SUBJ_BROKEN_WORD       Subject contains odd word break
