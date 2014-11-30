@@ -997,7 +997,7 @@ meta        GAPPY_HTML             __GAPPY_HTML && !__UNSUB_LINK && !__RP_MATCHE
 describe    GAPPY_HTML             HTML body with much useless whitespace
 
 # Try to improve S/O per bug 6119
-meta        TVD_SPACE_RATIO_MINFP  __TVD_SPACE_RATIO && !__LCL__ENV_AND_HDR_FROM_MATCH && !__SUBSCRIPTION_INFO && !__RCD_RDNS_MAIL && !__SUBJECT_ENCODED_QP && !__THREADED && !__TO_EQ_FROM_DOM && !__BOTH_INR_AND_REF && !__X_CRON_ENV && !__HAS_THREAD_INDEX && !__HDRS_LCASE_KNOWN 
+meta        TVD_SPACE_RATIO_MINFP  __TVD_SPACE_RATIO && !__LCL__ENV_AND_HDR_FROM_MATCH && !__SUBSCRIPTION_INFO && !__RCD_RDNS_MAIL && !__SUBJECT_ENCODED_QP && !__THREADED && !__TO_EQ_FROM_DOM && !__BOTH_INR_AND_REF && !__X_CRON_ENV && !__HAS_THREAD_INDEX && !__HDRS_LCASE_KNOWN && !__ISO_2022_JP_DELIM
 #tflags      TVD_SPACE_RATIO_MINFP  nopublish
 score       TVD_SPACE_RATIO_MINFP  2.750   # limit
 
@@ -1007,12 +1007,12 @@ score       TVD_SPACE_RATIO_MINFP  2.750   # limit
 #score       SUBJECT_UNNEEDED_ENCODING    1.000    # limit
 #tflags      SUBJECT_UNNEEDED_ENCODING    publish
 
-# Be sensitive to FP on legit chinese-language mailing lists (09/2014)
+# Be sensitive to FP on legit japanese- and chinese-language mailing lists (09/2014)
 meta        __TVD_SPACE_ENCODED    (__TVD_SPACE_RATIO && __SUBJECT_ENCODED_B64 && !__SUBJECT_UTF8_B_ENCODED)
-meta        TVD_SPACE_ENCODED      __TVD_SPACE_ENCODED && !__NOT_SPOOFED && !__VIA_ML && !__HS_SUBJ_RE_FW && !__SUBSCRIPTION_INFO && !__TO_EQ_FROM_DOM && !__RCD_RDNS_MAIL 
+meta        TVD_SPACE_ENCODED      __TVD_SPACE_ENCODED && !__NOT_SPOOFED && !__VIA_ML && !__HS_SUBJ_RE_FW && !__SUBSCRIPTION_INFO && !__TO_EQ_FROM_DOM && !__RCD_RDNS_MAIL && !__ISO_2022_JP_DELIM
 score       TVD_SPACE_ENCODED      2.500   # limit
 
-meta        TVD_SPACE_ENC_FM_MIME  __TVD_SPACE_ENCODED && __FROM_NEEDS_MIME 
+meta        TVD_SPACE_ENC_FM_MIME  __TVD_SPACE_ENCODED && __FROM_NEEDS_MIME && !__ISO_2022_JP_DELIM
 score       TVD_SPACE_ENC_FM_MIME  2.000   # limit
 
 
