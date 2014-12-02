@@ -1,14 +1,19 @@
-#ifplugin Mail::SpamAssassin::Plugin::PDFInfo
+ifplugin Mail::SpamAssassin::Plugin::PDFInfo
+
+## cat msg.eml | spamassassin --debug pdfinfo  2>&1 | grep fuzzy 2>&1
+
+body		AXB_PDFINFO_AUTH_TEST	eval:pdf_match_details('author','/^Test$/')
+describe	AXB_PDFINFO_AUTH_TEST	PDF trait seen in spam
+
+body            AXB_PDF_FUZZY_LOTTOUK	eval:pdf_match_fuzzy_md5('A2E91B898193A34CA233632210FA87C9')
+describe        AXB_PDF_FUZZY_LOTTOUK	Fuzzy tags Match
+
+body            AXB_PDF_FUZZY2_WINNING	eval:pdf_match_fuzzy_md5('4440EC39D1441386FF8AE1E9A12F9F4B')
+describe	AXB_PDF_FUZZY2_WINNING	Fuzzy tags match
+
+body            AXB_PDF_FUZZY1_EBR	eval:pdf_match_fuzzy_md5('68E3B831CD249E5E0E1F48F2346CB1A9')
+describe	AXB_PDF_FUZZY1_EBR	Fuzzy tags match
 
 
-# 2010-04-28
-# body            AXB_PDF_FUZZY1_BLO       eval:pdf_match_fuzzy_md5 ('1CFAF9421C768D6B6EB7848B2035217B')
-# describe        AXB_PDF_FUZZY1_BLO     Fuzzy tags Match 1CFAF9421C768D6B6EB7848B2035217B
-# score           AXB_PDF_FUZZY1_BLO     3.00
 
-# 2010-04-28
-# body            AXB_PDF_FUZZY2_BLO       eval:pdf_match_fuzzy_md5 ('800618943025315F869E4E1F09471012')
-# describe        AXB_PDF_FUZZY2_BLO     Fuzzy tags Match 800618943025315F869E4E1F09471012
-# score           AXB_PDF_FUZZY2_BLO     3.00
-
-# endif
+endif
