@@ -1,6 +1,7 @@
 ifplugin Mail::SpamAssassin::Plugin::PDFInfo
 
-## cat msg.eml | spamassassin --debug pdfinfo  2>&1 | grep fuzzy 2>&1
+# Hint
+## cat spam.eml | spamassassin --debug pdfinfo
 
 #2014-12-2
 body		AXB_PDFINFO_AUTH_TEST	eval:pdf_match_details('author','/^Test$/')
