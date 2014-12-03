@@ -1,4 +1,4 @@
-# Last update: 2014-11-25-axb
+# Last update: 2014-12-03-axb
 # Set headers which may provide inappropriate AV/filter cues to the Bayesian classifier
 bayes_ignore_header X-ACL-Warn
 bayes_ignore_header X-Alimail-AntiSpam
@@ -23,6 +23,7 @@ bayes_ignore_header X-Authority-Analysis
 bayes_ignore_header X-Authvirus
 bayes_ignore_header X-Auto-Response-Suppress
 bayes_ignore_header x-avast-antispam
+bayes_ignore_header X-AV-Do-Run
 bayes_ignore_header X-AV-Status
 bayes_ignore_header X-Backend
 bayes_ignore_header X-Barracuda-Apparent-Source-IP
@@ -165,6 +166,7 @@ bayes_ignore_header X-Qmail-Scanner-Diagnostics
 bayes_ignore_header X-Qmail-Scanner-MOVED-X-Spam-Status
 bayes_ignore_header X-Quarantine-ID
 bayes_ignore_header X-RSpam-Report
+bayes_ignore_header X-SA-Do-Not-Run
 bayes_ignore_header X-SA-Exim-Version
 bayes_ignore_header X-Scanned-By
 bayes_ignore_header X-SmarterMail-CustomSpamHeader
