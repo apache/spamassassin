@@ -25,6 +25,9 @@ describe	AXB_XM_SMSMTP		Fingerprint
 header		AXB_RCVD_NS1GOO		Received =~ /from ns1\.google\.com\b/
 describe	AXB_RCVD_NS1GOO		Fingerprint
 
+header		AXB_RCVD_NS1HUS		Received =~ /from ns1\.hushmail\.com\b/
+describe	AXB_RCVD_NS1HUS		Fingerprint
+
 header          AXB_X_FF_SEZ_S		X-Forefront-Antispam-Report =~ /\bSFV\:SPM\b/
 describe        AXB_X_FF_SEZ_S		Forefront sez this is spam
 
