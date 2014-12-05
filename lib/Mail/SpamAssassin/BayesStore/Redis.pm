@@ -227,13 +227,13 @@ sub on_connect {
   eval {
     $r->call('SELECT', $db_id) eq 'OK' ? 1 : 0;
   } or do {
-    if ($@ =~ /\bNOAUTH\b/) {
+    if ($@ =~ /^NOAUTH\b/ || $@ =~ /^ERR operation not permitted/) {
       defined $pwd
         or die "Redis server requires authentication, no password provided";
       $r->call('AUTH', $pwd);
       $r->call('SELECT', $db_id);
     } else {
-      chomp $@; die "Redis error: $@";
+      chomp $@; die "Command 'SELECT $db_id' failed: $@";
     }
   };
   eval {
