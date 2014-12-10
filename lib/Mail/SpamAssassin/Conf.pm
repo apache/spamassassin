@@ -3888,17 +3888,29 @@ C<3.004080>.
 
 =item perl_version
 
-This will be replaced with the version number of the currently-running
+(Introduced in 3.4.2)  This will be replaced with the version number of the currently-running
 perl engine.  Note: The version used is in the $] version format which is
 C<x.yyyzzz>, where x is major version, y is minor version, and z is maintenance
 version.  So 5.8.8 is C<5.008008>, and 5.10.0 is C<5.010000>. Use to protect rules
 that incorporate RE syntax elements introduced in later versions of perl, such
-as the C<++> non-backtracking match. For example:
+as the C<++> non-backtracking match introduced in perl 5.10. For example:
 
   # Avoid lint error on older perl installs
-  if perl_version >= 5.010000
-    body  INVALID_RE_SYNTAX_IN_PERL_5_8_8  /\w++/
+  # Check SA version first to avoid warnings on checking perl_version on older SA
+  if version > 3.004001 && perl_version >= 5.018000
+    body  INVALID_RE_SYNTAX_IN_PERL_BEFORE_5_18  /(?[ \p{Thai} & \p{Digit} ])/
   endif
+
+Note that the above will still generate a warning on perl older than 5.10.0;
+to avoid that warning do this instead:
+
+  # Avoid lint error on older perl installs
+  if can(Mail::SpamAssassin::Conf::perl_min_version_5010000)
+    body  INVALID_RE_SYNTAX_IN_PERL_5_8  /\w++/
+  endif
+
+Warning: a can() test is only defined for perl 5.10.0!
+
 
 =item plugin(Name::Of::Plugin)
 
@@ -4772,6 +4784,7 @@ sub feature_yesno_takes_args { 1 }
 sub feature_bug6558_free { 1 }
 sub feature_edns { 1 }  # supports 'dns_options edns' config option
 sub feature_dns_query_restriction { 1 }  # supported config option
+sub perl_min_version_5010000 { return $] >= 5.010000 }  # perl version check ("perl_version" not neatly backwards-compatible)
 
 ###########################################################################
 
