@@ -24,7 +24,7 @@
 ifplugin Mail::SpamAssassin::Plugin::AWL
 
 header AWL			eval:check_from_in_auto_whitelist()
-describe AWL			From: address is in the auto white-list
+describe AWL			Adjusted score from AWL reputation of From: address
 tflags AWL			userconf noautolearn
 priority AWL                    1000
 
