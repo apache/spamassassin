@@ -1,0 +1,124 @@
+To: users, dev, announce
+Subject: ANNOUNCE: Apache SpamAssassin 3.4.1-rc1 available
+
+Release Notes -- Apache SpamAssassin -- Version 3.4.1-rc1
+
+Introduction
+------------
+
+To be completed.
+
+Notable bug fixes
+-----------------
+
+
+Notable features:
+=================
+
+New configuration options
+-------------------------
+
+New plugins
+-----------
+
+
+Optimizations
+-------------
+
+Downloading and availability
+----------------------------
+
+Downloads are available from:
+
+http://spamassassin.apache.org/downloads.cgi
+
+md5sum of archive files:
+
+06ce92812b84bd51f20bc90fa931933c  Mail-SpamAssassin-3.4.1-rc1.tar.bz2
+5cc08804e32adeb104f0ef9b68de8d8d  Mail-SpamAssassin-3.4.1-rc1.tar.gz
+c3cc867edbf875d157e8a871b73838a6  Mail-SpamAssassin-3.4.1-rc1.zip
+cafc1a8b3a870e1c5634d39df99f37f7  Mail-SpamAssassin-rules-3.4.1-rc1.r1645877.tgz
+
+sha1sum of archive files:
+
+9a26266720114d907596a078671e10e14025ec1d  Mail-SpamAssassin-3.4.1-rc1.tar.bz2
+1029b7da3e279455ff2e8ea9619b0eb9222a484a  Mail-SpamAssassin-3.4.1-rc1.tar.gz
+0fee42eb54bec29fd817082d31cc4749a81e0b77  Mail-SpamAssassin-3.4.1-rc1.zip
+d63d73515445b15980a3155ff8004fc069527d93  Mail-SpamAssassin-rules-3.4.1-rc1.r1645877.tgz
+
+Note that the *-rules-*.tar.gz files are only necessary if you cannot,
+or do not wish to, run "sa-update" after install to download the latest
+fresh rules.
+
+See the INSTALL and UPGRADE files in the distribution for important
+installation notes.
+
+
+GPG Verification Procedure
+--------------------------
+The release files also have a .asc accompanying them.  The file serves
+as an external GPG signature for the given release file.  The signing
+key is available via the wwwkeys.pgp.net key server, as well as
+http://www.apache.org/dist/spamassassin/KEYS
+
+The key information is:
+
+pub   4096R/F7D39814 2009-12-02
+       Key fingerprint = D809 9BC7 9E17 D7E4 9BC2  1E31 FDE5 2F40 F7D3 9814
+uid                  SpamAssassin Project Management Committee <private@spamassassin.apache.org>
+uid                  SpamAssassin Signing Key (Code Signing Key, replacement for 1024D/265FA05B) <dev@spamassassin.apache.org>
+sub   4096R/7B3265A5 2009-12-02
+
+To verify a release file, download the file with the accompanying .asc file and run the following commands:
+
+  gpg -v --keyserver wwwkeys.pgp.net --recv-key F7D39814
+  gpg --verify Mail-SpamAssassin-3.4.0.tar.bz2.asc
+  gpg --fingerprint F7D39814
+
+Then verify that the key matches the signature.
+
+Note that older versions of gnupg may not be able to complete the steps
+above. Specifically, GnuPG v1.0.6, 1.0.7 & 1.2.6 failed while v1.4.11
+worked flawlessly.
+
+See http://www.apache.org/info/verification.html for more information
+on verifying Apache releases.
+
+
+About Apache SpamAssassin
+-------------------------
+
+Apache SpamAssassin is a mature, widely-deployed open source project
+that serves as a mail filter to identify spam. SpamAssassin uses a
+variety of mechanisms including mail header and text analysis, Bayesian
+filtering, DNS blocklists, and collaborative filtering databases. In
+addition, Apache SpamAssassin has a modular architecture that allows
+other technologies to be quickly incorporated as an addition or as a
+replacement for existing methods.
+
+Apache SpamAssassin typically runs on a server, classifies and labels
+spam before it reaches your mailbox, while allowing other components of
+a mail system to act on its results.
+
+Most of the Apache SpamAssassin is written in Perl, with heavily
+traversed code paths carefully optimized. Benefits are portability,
+robustness and facilitated maintenance. It can run on a wide variety of
+POSIX platforms.
+
+The server and the Perl library feels at home on Unix and Linux
+platforms, and reportedly also works on MS Windows systems under ActivePerl.
+
+For more information, visit http://spamassassin.apache.org/
+
+
+About The Apache Software Foundation
+------------------------------------
+
+Established in 1999, The Apache Software Foundation provides
+organizational, legal, and financial support for more than 100
+freely-available, collaboratively-developed Open Source projects. The
+pragmatic Apache License enables individual and commercial users to
+easily deploy Apache software; the Foundation's intellectual property
+framework limits the legal exposure of its 2,500+ contributors.
+
+For more information, visit http://www.apache.org/
