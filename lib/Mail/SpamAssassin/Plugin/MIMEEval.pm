@@ -402,7 +402,7 @@ sub _check_attachments {
         if (m/[\x00\x0d\x80-\xff]+/) {
           if (would_log('dbg', 'eval')) {
             my $str = $_;
-            $str =~ s/[\x00\x0d\x80-\xff]+/'<' . unpack('H*', $&) . '>'/eg;
+            $str =~ s/([\x00\x0d\x80-\xff]+)/'<' . unpack('H*', $1) . '>'/eg;
             dbg("check: ascii_text_illegal: matches " . $str . "\n");
           }
           $pms->{mime_ascii_text_illegal}++;
