@@ -94,12 +94,12 @@ use vars qw{
 };
 
 $VERSION = "3.004001";      # update after release (same format as perl $])
-$IS_DEVEL_BUILD = 1;        # change for release versions
+$IS_DEVEL_BUILD = 0;        # change for release versions
 
 # Used during the prerelease/release-candidate part of the official release
 # process. If you hacked up your SA, you should add a version_tag to your .cf
 # files; this variable should not be modified.
-#@EXTRA_VERSION = qw(rc6);
+@EXTRA_VERSION = qw(rc1);
 
 @ISA = qw();
 
