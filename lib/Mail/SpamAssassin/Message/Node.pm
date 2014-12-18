@@ -272,8 +272,9 @@ sub raw {
     my $fd = $self->{'raw'};
     seek($fd, 0, 0)  or die "message: cannot rewind file: $!";
 
-    my($inbuf,$nread,$raw_str); $raw_str = '';
-    while ( $nread=sysread($fd,$inbuf,16384) ) { $raw_str .= $inbuf }
+    # dbg("message: (raw) reading mime part from a temporary file");
+    my($nread,$raw_str); $raw_str = '';
+    while ( $nread=sysread($fd, $raw_str, 16384, length $raw_str) ) { }
     defined $nread  or die "error reading: $!";
     my @array = split(/^/m, $raw_str, -1);
 
@@ -308,8 +309,9 @@ sub decode {
       my $fd = $self->{'raw'};
       seek($fd, 0, 0)  or die "message: cannot rewind file: $!";
 
-      my($inbuf,$nread,$raw_str); $raw = '';
-      while ( $nread=sysread($fd,$inbuf,16384) ) { $raw .= $inbuf }
+      # dbg("message: (decode) reading mime part from a temporary file");
+      my($nread,$raw_str); $raw = '';
+      while ( $nread=sysread($fd, $raw, 16384, length $raw) ) { }
       defined $nread  or die "error reading: $!";
 
       dbg("message: empty message read from a temp file")  if $raw eq '';
