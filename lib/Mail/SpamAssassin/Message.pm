@@ -139,8 +139,8 @@ sub new {
       # and is faster than (<$message>) by 10..25 %
       # (a drawback is a short-term double storage of a text in $raw_str)
       #
-      my($inbuf,$nread,$raw_str); $raw_str = '';
-      while ( $nread=sysread($message,$inbuf,16384) ) { $raw_str .= $inbuf }
+      my($nread,$raw_str); $raw_str = '';
+      while ( $nread=sysread($message, $raw_str, 16384, length $raw_str) ) { }
       defined $nread  or die "error reading: $!";
       @message = split(/^/m, $raw_str, -1);
 
