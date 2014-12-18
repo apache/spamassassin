@@ -727,8 +727,16 @@ sub base64_decode {
 sub qp_decode {
   local $_ = shift;
 
-  s/\=\r?\n//gs;
-  s/\=([0-9a-fA-F]{2})/chr(hex($1))/ge;
+  # RFC 2045: when decoding a Quoted-Printable body, any trailing
+  # white space on a line must be deleted
+  s/[ \t]+(?=\r?\n)//gs;
+
+  # RFC 2045 explicitly prohibits lowercase characters a-f in QP encoding
+  # do we really want to allow them???
+  s/=([0-9a-fA-F]{2})/chr(hex($1))/ge;
+
+  s/=\r?\n//gs;  # soft line breaks
+
   return $_;
 }
 
