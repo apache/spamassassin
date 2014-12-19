@@ -1040,6 +1040,7 @@ sub _get_msgdata_from_permsgstatus {
   my $msgdata = { };
   $msgdata->{bayes_token_body} = $msg->{msg}->get_visible_rendered_body_text_array();
   $msgdata->{bayes_token_inviz} = $msg->{msg}->get_invisible_rendered_body_text_array();
+  $msgdata->{bayes_mimepart_digests} = $msg->{msg}->get_mimepart_digests();
   @{$msgdata->{bayes_token_uris}} = $msg->get_uri_list();
   return $msgdata;
 }
@@ -1066,6 +1067,23 @@ sub tokenize {
   if (ADD_INVIZ_TOKENS_NO_PREFIX) {
     push (@tokens, map { $self->_tokenize_line ($_, "", 1) }
                                     @{$msgdata->{bayes_token_inviz}});
+  }
+
+  # add digests and Content-Type of all MIME parts
+  if (ref $msgdata->{bayes_mimepart_digests}) {
+    my %shorthand = (  # some frequent MIME part contents for human readability
+     'da39a3ee5e6b4b0d3255bfef95601890afd80709:text/plain'=> 'Empty-Plaintext',
+     'da39a3ee5e6b4b0d3255bfef95601890afd80709:text/html' => 'Empty-HTML',
+     'da39a3ee5e6b4b0d3255bfef95601890afd80709:text/xml'  => 'Empty-XML',
+     'adc83b19e793491b1c6ea0fd8b46cd9f32e592fc:text/plain'=> 'OneNL-Plaintext',
+     'adc83b19e793491b1c6ea0fd8b46cd9f32e592fc:text/html' => 'OneNL-HTML',
+     '71853c6197a6a7f222db0f1978c7cb232b87c5ee:text/plain'=> 'TwoNL-Plaintext',
+     '71853c6197a6a7f222db0f1978c7cb232b87c5ee:text/html' => 'TwoNL-HTML',
+    );
+    my(@t) = map('MIME:' . ($shorthand{$_} || $_),
+                 @{ $msgdata->{bayes_mimepart_digests} });
+    dbg("bayes: mime-part token %s", $_) for @t;
+    push (@tokens, @t);
   }
 
   # Tokenize the headers

@@ -46,6 +46,11 @@ use strict;
 use warnings;
 use re 'taint';
 
+BEGIN {
+  eval { require Digest::SHA; import Digest::SHA qw(sha1 sha1_hex); 1 }
+  or do { require Digest::SHA1; import Digest::SHA1 qw(sha1 sha1_hex) }
+}
+
 use Mail::SpamAssassin;
 use Mail::SpamAssassin::Message::Node;
 use Mail::SpamAssassin::Message::Metadata;
@@ -116,6 +121,25 @@ sub new {
   $self->{line_ending} =	"\012";
   $self->{master_deadline} = $opts->{'master_deadline'};
   $self->{suppl_attrib} = $opts->{'suppl_attrib'};
+
+  if ($self->{suppl_attrib}) {  # caller-provided additional information
+    # pristine_body_length is currently used by an eval test check_body_length
+    # Possible To-Do: Base the length on the @message array later down?
+    if (defined $self->{suppl_attrib}{body_size}) {
+      # Optional info provided by a caller; should reflect the original
+      # message body size if provided, and as such it may differ from the
+      # $self->{pristine_body} size, e.g. when the caller passed a truncated
+      # message to SpamAssassin, or when counting line-endings differently.
+      $self->{pristine_body_length} = $self->{suppl_attrib}{body_size};
+    }
+    if (ref $self->{suppl_attrib}{mimepart_digests}) {
+      # Optional info provided by a caller: an array of digest codes (e.g. SHA1)
+      # of each MIME part. Should reflect the original message if provided.
+      # As such it may differ from digests calculated by get_mimepart_digests(),
+      # e.g. when the caller passed a truncated message to SpamAssassin.
+      $self->{mimepart_digests} = $self->{suppl_attrib}{mimepart_digests};
+    }
+  }
 
   bless($self,$class);
 
@@ -298,17 +322,8 @@ sub new {
   # will get modified below
   $self->{'pristine_body'} = join('', @message);
 
-  # pristine_body_length is currently used by an eval test check_body_length.  
-  # Possible To-Do: Base the length on the @message array later down?
-  # Or a different copy of the message post decoding?
-  if ($self->{suppl_attrib} && defined $self->{suppl_attrib}{body_size}) {
-    # optional info provided by a caller; should reflect the original
-    # message body size if provided, and as such it may differ from the
-    # $self->{pristine_body} size, e.g. when the caller passed a truncated
-    # message to SpamAssassin, or when counting line-endings differently
-    $self->{'pristine_body_length'} = $self->{suppl_attrib}{body_size};
-  } else {
-    $self->{'pristine_body_length'} = length($self->{'pristine_body'});
+  if (!defined $self->{pristine_body_length}) {
+    $self->{'pristine_body_length'} = length $self->{'pristine_body'};
   }
 
   # iterate over lines in reverse order
@@ -1048,6 +1063,20 @@ sub _parse_normal {
     dbg("message: storing a body to memory");
     $msg->{'raw'} = $body;
   }
+}
+
+# ---------------------------------------------------------------------------
+
+sub get_mimepart_digests {
+  my ($self) = @_;
+
+  if (!exists $self->{mimepart_digests}) {
+    # traverse all parts which are leaves, recursively
+    $self->{mimepart_digests} =
+      [ map(sha1_hex($_->decode) . ':' . lc($_->{type}||''),
+            $self->find_parts(qr/^/,1,1)) ];
+  }
+  return $self->{mimepart_digests};
 }
 
 # ---------------------------------------------------------------------------
