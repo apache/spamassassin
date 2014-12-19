@@ -731,11 +731,11 @@ sub qp_decode {
   # white space on a line must be deleted
   s/[ \t]+(?=\r?\n)//gs;
 
+  s/=\r?\n//gs;  # soft line breaks
+
   # RFC 2045 explicitly prohibits lowercase characters a-f in QP encoding
   # do we really want to allow them???
   s/=([0-9a-fA-F]{2})/chr(hex($1))/ge;
-
-  s/=\r?\n//gs;  # soft line breaks
 
   return $_;
 }
