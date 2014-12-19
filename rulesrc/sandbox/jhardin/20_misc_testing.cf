@@ -1935,4 +1935,6 @@ body      __PUNCT_ODD_SPACING           /[a-z]{3}\s+[.,][a-z]{3}/
 tflags    __PUNCT_ODD_SPACING           multiple, maxhits=3
 meta      __PUNCT_ODD_SPACING_MANY      __PUNCT_ODD_SPACING > 2
 
+header    XMAILER_MANY                  ALL =~ /\nX-Mailer:(?:[^\n]+\n)+X-Mailer:/ism
+describe  XMAILER_MANY                  Has multiple X-Mailer: headers
 
