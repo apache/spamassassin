@@ -1009,7 +1009,7 @@ sub parse_content_type {
   }
 
   # strip inappropriate chars (bug 5399: after the text/plain fixup)
-  $ct =~ tr/\000-\040\177-\377\042\050\051\054\056\072-\077\100\133-\135//d;
+  $ct =~ tr/\000-\040\177-\377\042\050\051\054\072-\077\100\133-\135//d;
 
   # Now that the header has been parsed, return the requested information.
   # In scalar context, just the MIME type, in array context the
