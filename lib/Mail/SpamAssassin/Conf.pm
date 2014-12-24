@@ -1929,6 +1929,76 @@ for details on how Bayes auto-learning is implemented by default.
     type => $CONF_TYPE_BOOL,
   });
 
+=item bayes_token_sources  (default: header visible invisible uri)
+
+Controls which sources in a mail message can contribute tokens (e.g. words,
+phrases, etc.) to a Bayes classifier. The argument is a space-separated list
+of keywords: I<header>, I<visible>, I<invisible>, I<uri>, I<mimepart>), each
+of which may be prefixed by a I<no> to indicate its exclusion. Additionally
+two reserved keywords are allowed: I<all> and I<none> (or: I<noall>). The list
+of keywords is processed sequentially: a keyword I<all> adds all available
+keywords to a set being built, a I<none> or I<noall> clears the set, other
+non-negated keywords are added to the set, and negated keywords are removed
+from the set. Keywords are case-insensitive.
+
+The default set is: I<header> I<visible> I<invisible> I<uri>, which is
+equivalent for example to: I<All> I<NoMIMEpart>. The reason why I<mimepart>
+is not currently in a default set is that it is a newer source (introduced
+with SpamAssassin version 3.4.1) and not much experience has yet been gathered
+regarding its usefulness.
+
+See also option C<bayes_ignore_header> for a fine-grained control on individual
+header fields under the umbrella of a more general keyword I<header> here.
+
+Keywords imply the following data sources:
+
+=over 4
+
+=item I<header> - tokens collected from a message header section
+
+=item I<visible> - words from visible text (plain or HTML) in a message body
+
+=item I<invisible> - hidden/invisible text in HTML parts of a message body
+
+=item I<uri> - URIs collected from a message body
+
+=item I<mimepart> - digests (hashes) of all MIME parts (textual or non-textual) of a message, computed after Base64 and quoted-printable decoding, suffixed by their Content-Type
+
+=item I<all> - adds all the above keywords to the set being assembled
+
+=item I<none> or I<noall> - removes all keywords from the set
+
+=back
+
+The C<bayes_token_sources> directive may appear multiple times, its keywords
+are interpreted sequentially, adding or removing items from the final set
+as they appear in their order in C<bayes_token_sources> directive(s).
+
+=cut
+
+  push (@cmds, {
+    setting => 'bayes_token_sources',
+    default => { map(($_,1), qw(header visible invisible uri)) },  # mimepart
+    type => $CONF_TYPE_HASH_KEY_VALUE,
+    code => sub {
+      my ($self, $key, $value, $line) = @_;
+      return $MISSING_REQUIRED_VALUE  if $value eq '';
+      my $h = ($self->{bayes_token_sources} ||= {});
+      my %all_kw = map(($_,1), qw(header visible invisible uri mimepart));
+      foreach (split(' ', lc $value)) {
+        if (/^(none|noall)\z/) {
+          %$h = ();
+        } elsif ($_ eq 'all') {
+          %$h = %all_kw;
+        } elsif (/^(no)?(.+)\z/s && exists $all_kw{$2}) {
+          $h->{$2} = defined $1 ? 0 : 1;
+        } else {
+          return $INVALID_VALUE;
+        }
+      }
+    }
+  });
+
 =item bayes_ignore_header header_name
 
 If you receive mail filtered by upstream mail systems, like
