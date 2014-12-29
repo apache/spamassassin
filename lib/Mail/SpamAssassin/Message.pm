@@ -1081,30 +1081,36 @@ sub get_mimepart_digests {
 
 # ---------------------------------------------------------------------------
 
-sub get_rendered_body_text_array {
-  my ($self) = @_;
+# common code for get_rendered_body_text_array,
+# get_visible_rendered_body_text_array, get_invisible_rendered_body_text_array
+#
+sub get_body_text_array_common {
+  my ($self, $method_name) = @_;
 
-  if (exists $self->{text_rendered}) { return $self->{text_rendered}; }
+  my $key = 'text_' . $method_name;
+  if (exists $self->{$key}) { return $self->{$key} }
 
-  $self->{text_rendered} = [];
+  $self->{$key} = [];
 
   # Find all parts which are leaves
   my @parts = $self->find_parts(qr/./,1);
-  return $self->{text_rendered} unless @parts;
+  return $self->{$key} unless @parts;
 
   # the html metadata may have already been set, so let's not bother if it's
   # already been done.
   my $html_needs_setting = !exists $self->{metadata}->{html};
 
+  my $text = $method_name eq 'invisible_rendered' ? ''
+               : ($self->get_header('subject') || "\n");
+
   # Go through each part
-  my $text = $self->get_header ('subject') || "\n";
-  for(my $pt = 0 ; $pt <= $#parts ; $pt++ ) {
+  for (my $pt = 0 ; $pt <= $#parts ; $pt++ ) {
     my $p = $parts[$pt];
 
     # put a blank line between parts ...
-    $text .= "\n";
+    $text .= "\n"  if $text ne '';
 
-    my($type, $rnd) = $p->rendered(); # decode this part
+    my($type, $rnd) = $p->$method_name();  # decode this part
     if ( defined $rnd ) {
       # Only text/* types are rendered ...
       $text .= $rnd;
@@ -1121,121 +1127,30 @@ sub get_rendered_body_text_array {
 
   # whitespace handling (warning: small changes have large effects!)
   $text =~ s/\n+\s*\n+/\f/gs;		# double newlines => form feed
-  $text =~ tr/ \t\n\r\x0b\xa0/ /s;	# whitespace => space
+  $text =~ tr/ \t\n\r\x0b\xa0/ /s;	# whitespace (incl. VT, NBSP) => space
   $text =~ tr/\f/\n/;			# form feeds => newline
-  
-  # warn "message: $text";
 
-  my @textary = split_into_array_of_short_lines ($text);
-  $self->{text_rendered} = \@textary;
+  my @textary = split_into_array_of_short_lines($text);
+  $self->{$key} = \@textary;
 
-  return $self->{text_rendered};
+  return $self->{$key};
 }
 
 # ---------------------------------------------------------------------------
 
-# TODO: possibly this should just replace get_rendered_body_text_array().
-# (although watch out, this one doesn't copy {html} to metadata)
+sub get_rendered_body_text_array {
+  my ($self) = @_;
+  return $self->get_body_text_array_common('rendered');
+}
+
 sub get_visible_rendered_body_text_array {
   my ($self) = @_;
-
-  if (exists $self->{text_visible_rendered}) {
-    return $self->{text_visible_rendered};
-  }
-
-  $self->{text_visible_rendered} = [];
-
-  # Find all parts which are leaves
-  my @parts = $self->find_parts(qr/./,1);
-  return $self->{text_visible_rendered} unless @parts;
-
-  # the html metadata may have already been set, so let's not bother if it's
-  # already been done.
-  my $html_needs_setting = !exists $self->{metadata}->{html};
-
-  # Go through each part
-  my $text = $self->get_header ('subject') || "\n";
-  for(my $pt = 0 ; $pt <= $#parts ; $pt++ ) {
-    my $p = $parts[$pt];
-
-    # put a blank line between parts ...
-    $text .= "\n";
-
-    my($type, $rnd) = $p->visible_rendered(); # decode this part
-    if ( defined $rnd ) {
-      # Only text/* types are rendered ...
-      $text .= $rnd;
-
-      # TVD - if there are multiple parts, what should we do?
-      # right now, just use the last one.  we may need to give some priority
-      # at some point, ie: use text/html rendered if it exists, or
-      # text/plain rendered as html otherwise.
-      if ($html_needs_setting && $type eq 'text/html') {
-        $self->{metadata}->{html} = $p->{html_results};
-      }
-    }
-  }
-
-  # whitespace handling (warning: small changes have large effects!)
-  $text =~ s/\n+\s*\n+/\f/gs;		# double newlines => form feed
-  $text =~ tr/ \t\n\r\x0b\xa0/ /s;	# whitespace => space
-  $text =~ tr/\f/\n/;			# form feeds => newline
-
-  my @textary = split_into_array_of_short_lines ($text);
-  $self->{text_visible_rendered} = \@textary;
-
-  return $self->{text_visible_rendered};
+  return $self->get_body_text_array_common('visible_rendered');
 }
 
 sub get_invisible_rendered_body_text_array {
   my ($self) = @_;
-
-  if (exists $self->{text_invisible_rendered}) {
-    return $self->{text_invisible_rendered};
-  }
-
-  $self->{text_invisible_rendered} = [];
-
-  # Find all parts which are leaves
-  my @parts = $self->find_parts(qr/./,1);
-  return $self->{text_invisible_rendered} unless @parts;
-
-  # the html metadata may have already been set, so let's not bother if it's
-  # already been done.
-  my $html_needs_setting = !exists $self->{metadata}->{html};
-
-  # Go through each part
-  my $text = '';
-  for(my $pt = 0 ; $pt <= $#parts ; $pt++ ) {
-    my $p = $parts[$pt];
-
-    # put a blank line between parts ...
-    $text .= "\n" if ( $text );
-
-    my($type, $rnd) = $p->invisible_rendered(); # decode this part
-    if ( defined $rnd ) {
-      # Only text/* types are rendered ...
-      $text .= $rnd;
-
-      # TVD - if there are multiple parts, what should we do?
-      # right now, just use the last one.  we may need to give some priority
-      # at some point, ie: use text/html rendered if it exists, or
-      # text/plain rendered as html otherwise.
-      if ($html_needs_setting && $type eq 'text/html') {
-        $self->{metadata}->{html} = $p->{html_results};
-      }
-    }
-  }
-
-  # whitespace handling (warning: small changes have large effects!)
-  $text =~ s/\n+\s*\n+/\f/gs;		# double newlines => form feed
-  $text =~ tr/ \t\n\r\x0b\xa0/ /s;	# whitespace => space
-  $text =~ tr/\f/\n/;			# form feeds => newline
-
-  my @textary = split_into_array_of_short_lines ($text);
-  $self->{text_invisible_rendered} = \@textary;
-
-  return $self->{text_invisible_rendered};
+  return $self->get_body_text_array_common('invisible_rendered');
 }
 
 # ---------------------------------------------------------------------------
