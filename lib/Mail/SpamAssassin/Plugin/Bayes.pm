@@ -1061,32 +1061,33 @@ sub tokenize {
 
   # visible tokens from the body
   if ($msgdata->{bayes_token_body}) {
-    dbg("bayes: tokenizing body");
-    push(@tokens, map($self->_tokenize_line ($_, '', 1),
-                      @{$msgdata->{bayes_token_body}} ));
+    my(@t) = map($self->_tokenize_line ($_, '', 1),
+                 @{$msgdata->{bayes_token_body}} );
+    dbg("bayes: tokenized body: %d tokens", scalar @t);
+    push(@tokens, @t);
   }
   # the URI list
   if ($msgdata->{bayes_token_uris}) {
-    dbg("bayes: tokenizing uri");
-    push(@tokens, map($self->_tokenize_line ($_, '', 2),
-                      @{$msgdata->{bayes_token_uris}} ));
+    my(@t) = map($self->_tokenize_line ($_, '', 2),
+                 @{$msgdata->{bayes_token_uris}} );
+    dbg("bayes: tokenized uri: %d tokens", scalar @t);
+    push(@tokens, @t);
   }
   # add invisible tokens
   if ($msgdata->{bayes_token_inviz}) {
-    dbg("bayes: tokenizing invisible");
-    if (ADD_INVIZ_TOKENS_I_PREFIX) {
-      push(@tokens, map($self->_tokenize_line ($_, "I*:", 1),
-                        @{$msgdata->{bayes_token_inviz}} ));
-    }
-    if (ADD_INVIZ_TOKENS_NO_PREFIX) {
-      push(@tokens, map($self->_tokenize_line ($_, "", 1),
-                        @{$msgdata->{bayes_token_inviz}} ));
+    my $tokprefix;
+    if (ADD_INVIZ_TOKENS_I_PREFIX)  { $tokprefix = 'I*:' }
+    if (ADD_INVIZ_TOKENS_NO_PREFIX) { $tokprefix = '' }
+    if (defined $tokprefix) {
+      my(@t) = map($self->_tokenize_line ($_, $tokprefix, 1),
+                   @{$msgdata->{bayes_token_inviz}} );
+      dbg("bayes: tokenized invisible: %d tokens", scalar @t);
+      push(@tokens, @t);
     }
   }
 
   # add digests and Content-Type of all MIME parts
   if ($msgdata->{bayes_mimepart_digests}) {
-    dbg("bayes: tokenizing mime parts");
     my %shorthand = (  # some frequent MIME part contents for human readability
      'da39a3ee5e6b4b0d3255bfef95601890afd80709:text/plain'=> 'Empty-Plaintext',
      'da39a3ee5e6b4b0d3255bfef95601890afd80709:text/html' => 'Empty-HTML',
@@ -1098,25 +1099,28 @@ sub tokenize {
     );
     my(@t) = map('MIME:' . ($shorthand{$_} || $_),
                  @{ $msgdata->{bayes_mimepart_digests} });
+    dbg("bayes: tokenized mime parts: %d tokens", scalar @t);
     dbg("bayes: mime-part token %s", $_) for @t;
-    push (@tokens, @t);
+    push(@tokens, @t);
   }
 
   # Tokenize the headers
   if ($t_src->{header}) {
-    dbg("bayes: tokenizing header");
+    my(@t);
     my %hdrs = $self->_tokenize_headers ($msg);
     while( my($prefix, $value) = each %hdrs ) {
-      push(@tokens, $self->_tokenize_line ($value, "H$prefix:", 0));
+      push(@t, $self->_tokenize_line ($value, "H$prefix:", 0));
     }
+    dbg("bayes: tokenized header: %d tokens", scalar @t);
+    push(@tokens, @t);
   }
 
   # Go ahead and uniq the array, skip null tokens (can happen sometimes)
   # generate an SHA1 hash and take the lower 40 bits as our token
   my %tokens;
   foreach my $token (@tokens) {
-    next unless length($token); # skip 0 length tokens
-    $tokens{substr(sha1($token), -5)} = $token;
+    # skip empty tokens
+    $tokens{substr(sha1($token), -5)} = $token  if $token ne '';
   }
 
   # return the keys == tokens ...
