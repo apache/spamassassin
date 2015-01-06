@@ -1,5 +1,6 @@
-# Last update: 2014-12-08-axb
+# Last update: 2015-01-06-axb
 # Set headers which may provide inappropriate AV/filter cues to the Bayesian classifier
+bayes_ignore_header X_CMAE_Category
 bayes_ignore_header X-ACL-Warn
 bayes_ignore_header X-Alimail-AntiSpam
 bayes_ignore_header X-Amavis-Modified
@@ -64,6 +65,8 @@ bayes_ignore_header X-CMAE-Analysis
 bayes_ignore_header X-CMAE-Match
 bayes_ignore_header X-CMAE-Score
 bayes_ignore_header X-CMAE-Verdict
+bayes_ignore_header X-CM-Score
+bayes_ignore_header X-CNFS-Analysis
 bayes_ignore_header X-Coremail-Antispam
 bayes_ignore_header X-CRM114-CacheID
 bayes_ignore_header X-CRM114-Status
@@ -171,7 +174,7 @@ bayes_ignore_header X-Quarantine-ID
 bayes_ignore_header X-RSpam-Report
 bayes_ignore_header X-SA-Do-Not-Run
 bayes_ignore_header X-SA-Exim-Version
-bayes_ignore_header X-Scanned-By
+bayes_ignore_header X-Scanned-by
 bayes_ignore_header X-SmarterMail-CustomSpamHeader
 bayes_ignore_header X-Spam
 bayes_ignore_header X-Spam_bar
