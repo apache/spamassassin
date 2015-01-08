@@ -1428,7 +1428,7 @@ sub get_sender {
 ###########################################################################
   my ($self, $addr, $origip, $signedby) = @_;
 
-  return undef unless (defined $self->{checker});
+  return unless (defined $self->{checker});
 
   my $fulladdr   = $self->pack_addr($addr, $origip);
   my $entry      = $self->{checker}->get_addr_entry($fulladdr, $signedby);
@@ -1448,11 +1448,11 @@ sub add_score {
 ###########################################################################
   my ($self,$score) = @_;
 
-  return undef unless (defined $self->{checker});       # no factory defined; we can't check
+  return unless (defined $self->{checker});       # no factory defined; we can't check
 
   if ($score != $score) {
     warn "TxRep: attempt to add a $score to TxRep entry ignored\n";
-    return undef;                                       # don't try to add a NaN
+    return;                                       # don't try to add a NaN
   }
   $self->{entry}->{count} ||= 0;
 
@@ -1476,11 +1476,11 @@ sub remove_score {
 ###########################################################################
   my ($self,$score) = @_;
 
-  return undef unless (defined $self->{checker});       # no factory defined; we can't check
+  return unless (defined $self->{checker});       # no factory defined; we can't check
 
   if ($score != $score) {                               # don't try to add a NaN
     warn "TxRep: attempt to add a $score to TxRep entry ignored\n";
-    return undef;
+    return;
   }
   # no reversal dilution aging correction (not easily possible),
   # just removing the original message score
@@ -1498,7 +1498,7 @@ sub modify_reputation {
 ###########################################################################
   my ($self, $addr, $score, $signedby) = @_;
 
-  return undef unless (defined $self->{checker});       # no factory defined; we can't check
+  return unless (defined $self->{checker});       # no factory defined; we can't check
   my $fulladdr = $self->pack_addr($addr, undef);
   my $entry    = $self->{checker}->get_addr_entry($fulladdr, $signedby);
 
@@ -1605,7 +1605,7 @@ sub finish {
 ###########################################################################
   my $self = shift;
 
-  return undef unless (defined $self->{checker});       # no factory defined; we can't check
+  return unless (defined $self->{checker});       # no factory defined; we can't check
 
   if ($self->{conf}->{txrep_user2global_ratio} && defined $self->{user_storage} && ($self->{user_storage} != $self->{global_storage})) {
     $self->{user_storage}->finish();
