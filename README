@@ -319,35 +319,19 @@ init.pre, you need to uncomment the loadplugin line and make sure the
 prerequisites for proper operation of the plugin are present.
 
 
-Automatic Whitelist System
+Automatic Reputation System
 --------------------------
 
-SpamAssassin includes automatic whitelisting; The current iteration is
-considerably more complex than the original version.  The way it works is
-by tracking for each sender address the average score of messages so far
-seen from there.  Then, it combines this long-term average score for the
-sender with the score for the particular message being evaluated, after
-all other rules have been applied.
+SpamAssassin includes an automatic reputation system. The way it works is
+by tracking for each sender address a rolling average score of messages
+so far seen from there.  Then, it combines this long-term average score
+for the sender with the score for the particular message being evaluated,
+after all other rules have been applied.
 
-This functionality is on by default, and is enabled or disabled with the
-"use_auto_whitelist" option.
+This functionality can be enabled or disabled with the
+"use_txrep" option.
 
-A system-wide auto-whitelist can be used, by setting the
-auto_whitelist_path and auto_whitelist_file_mode configuration commands
-appropriately, e.g.
-
-    auto_whitelist_path        /var/spool/spamassassin/auto-whitelist
-    auto_whitelist_file_mode   0666
-
-The spamassassin -W and -R command line flags provide an API to add and
-remove entries 'manually', if you so desire.  They operate based on an
-input mail message, to allow them to be set up as aliases which users can
-simply forward their mails to.  See the spamassassin manual page for more
-details.
-
-The default address-list implementation,
-Mail::SpamAssassin::DBBasedAddrList, uses Berkeley DB files to store
-the addresses.
+For more information, read sql/README.txrep
 
 (end of README)
 
