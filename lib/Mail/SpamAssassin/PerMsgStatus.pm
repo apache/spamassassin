@@ -389,7 +389,8 @@ sub check_timed {
     # did anything happen?  if not, this is fatal
     if (!$self->{main}->have_plugin("check_main")) {
       die "check: no loaded plugin implements 'check_main': cannot scan!\n".
-            "Check the necessary '.pre' files are in the config directory.\n";
+            "Check that the necessary '.pre' files are in the config directory.\n".
+              "At a minimum, v320.pre loads the Check plugin which is required.\n";
     }
   }
 
