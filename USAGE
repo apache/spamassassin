@@ -223,20 +223,21 @@ Other Installation Notes
 
 
   - Scores and other user preferences can now be loaded from, and Bayes
-    and auto-whitelist data can be stored in, an SQL database; see the
-    'sql' subdirectory for more details.
+    and automatic reputation data can be stored in, an SQL database; see
+    the 'sql' subdirectory for more details.
 
     If you are setting up a large 'spamd' system-wide installation, with
-    Bayes and/or auto-whitelists, we strongly recommend using SQL as
+    Bayes and/or automatic reputation, we strongly recommend using SQL as
     storage.  It has proven more reliable than the default DB_File storage
     backend at several large sites.
 
 
   - If you are running SpamAssassin under a disk quota, or are setting up
     'spamd' with users with disk quotas, be warned that the DB_File
-    database module used by SpamAssassin for Bayes and AWL storage seems
-    to be unreliable in the face of quotas (bug 3796). In this situation,
-    we recommend using SQL storage for those databases, instead of DB_File.
+    database module used by SpamAssassin for Bayes, TxRep, and AWL storage
+    seems to be unreliable in the face of quotas (bug 3796). In this
+    situation, we recommend using SQL storage for those databases, instead
+    of DB_File.
 
 
   - Lots more ways to integrate SpamAssassin can be read at

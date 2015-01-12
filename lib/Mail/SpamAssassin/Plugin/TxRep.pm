@@ -15,6 +15,7 @@
 # limitations under the License.
 # </@LICENSE>
 
+
 =head1 NAME
 
 Mail::SpamAssassin::Plugin::TxRep - Normalize scores with sender reputation records
@@ -109,13 +110,16 @@ progressively reducing the impact of past records. More details can be found in 
 description of the factor below.
 
 6. B<Blacklisting and Whitelisting> - when a whitelisting or blacklisting was requested
-through SpamAssassin's API, AWL adjusts the historical total score by a fixed value,
-regardless of the number of messages recorded at given sender. It results in practical
-impossibility of blacklisting or whitelisting any sender with higher number of recorded
-scores. Even at senders with few messages, the impact of the whitelisting or blacklisting
-is minimal, and new messages can be still tagged incorrectly. TxRep handles black/whitelisting
-differently, so that it has the desired effect. It is explained in details in the section
-L</BLACKLISTING / WHITELISTING>.
+through SpamAssassin's API, AWL adjusts the historical total score of the plain email
+address without IP (and deleted records bound to an IP), but since during the reception 
+new records with IP will be added, the blacklisted entry would cease acting during 
+scanning. TxRep always uses the record of th plain email address without IP together 
+with the one bound to an IP address, DKIM signature, or SPF pass (unless the weight 
+factor for the EMAIL reputation is set to zero). AWL uses the score of 100 (resp. -100) 
+for the blacklisting (resp. whitelisting) purposes. TxRep increases the value 
+proportionally to the weight factor of the EMAIL reputation. It is explained in details 
+in the section L</BLACKLISTING / WHITELISTING>. TxRep can blacklist or whitelist also
+IP addresses, domain names, and dotless HELO names.
 
 7. B<Sender Identification> - AWL identifies a sender on the basis of the email address
 used, and the originating IP address (better told its part defined by the mask setting).
@@ -225,6 +229,7 @@ sub new {                       # constructor: register the eval rule
 
   # only the default conf loaded here, do nothing here requiring
   # the runtime settings
+  dbg("TxRep: new object created");
   return $self;
 }
 
@@ -649,8 +654,6 @@ need this option at all - for compatibility with pre-3.3.0 database schema).
 A plugin DKIM should also be enabled, as otherwise there is no benefit from
 turning on this option.
 
-=back
-
 =cut  # ...................................................................
   push (@cmds, {
     setting     => 'auto_whitelist_distinguish_signed',
@@ -671,6 +674,8 @@ Note: at domains that define the useless SPF +all (pass all), no IP would be
 ever associated with the email address, and all addresses (incl. the froged
 ones) would be treated as coming from the authorized source. However, such
 domains are hopefuly rare, and ask for this kind of treatment anyway.
+
+=back
 
 =cut  # ...................................................................
   push (@cmds, {
@@ -1083,10 +1088,36 @@ sub _fn_envelope {
   unless ($self->{main}->{conf}->{use_txrep}){                                  return 0;}
   unless ($args->{address}) {$self->_message($args->{cli_p},"failed ".$msg);    return 0;}
 
-  my $status;
+  my $factor =	$self->{conf}->{txrep_weight_email} +
+		$self->{conf}->{txrep_weight_email_ip} +
+		$self->{conf}->{txrep_weight_domain} +
+		$self->{conf}->{txrep_weight_ip} +
+		$self->{conf}->{txrep_weight_helo};
+  my $sign = $args->{signedby};
+  my $id     = $args->{address};
+  if ($args->{address} =~ /,/) {
+    $sign = $args->{address};
+    $sign =~ s/^.*,//g;
+    $id   =~ s/,.*$//g;
+  }
+
+  # simplified regex used for IP detection (possible FP at a domain is not critical)
+  if ($id !~ /\./ && $self->{conf}->{txrep_weight_helo}) 
+	{$factor /= $self->{conf}->{txrep_weight_helo}; $sign = 'helo';}
+  elsif ($id =~ /^[a-f\d\.:]+$/ && $self->{conf}->{txrep_weight_ip})
+	{$factor /= $self->{conf}->{txrep_weight_ip};}
+  elsif ($id =~ /@/ && $self->{conf}->{txrep_weight_email})
+	{$factor /= $self->{conf}->{txrep_weight_email};}
+  elsif ($id !~ /@/ && $self->{conf}->{txrep_weight_domain})
+	{$factor /= $self->{conf}->{txrep_weight_domain};}
+  else	{$factor  = 1;}
+
+  $self->open_storages();
+  my $score  = (!defined $value)? undef : $factor * $value;
+  my $status = $self->modify_reputation($id, $score, $sign);
+  dbg("TxRep: $msg %s (score %s) %s", $id, $score || 'undef', $sign || '');
   eval {
-    $status = $self->modify_reputation($args->{address}, $value*$self->count(), $args->{signedby});
-    $self->_message($args->{cli_p}, ($status?"":"error ") . $msg . ": " . $args->{address});
+    $self->_message($args->{cli_p}, ($status?"":"error ") . $msg . ": " . $id);
     if (!defined $self->{txKeepStoreTied}) {$self->finish();}
     1;
   } or return $self->_fail_exit( $@ );
@@ -1100,24 +1131,34 @@ sub _fn_envelope {
 
 When asked by SpamAssassin to blacklist or whitelist a user, the TxRep
 plugin adds a score of 100 (for blacklisting) or -100 (for whitelisting)
-to the given sender for every email recorded in the reputation database. It
-means, if there are 1000 emails from a given sender, his total reputation
-score will increase/decrease by 100,000 points, and the average reputation
-score is pushed close to 100 (blacklisted) or -100 (whitelisted) points (+/-
-the original average). C<reputation> is the average recorded score, which
-is equal to the C<total> / C<count>.
+to the given sender's email address. At a plain address without any IP
+address, the value is multiplied by the ratio of total reputation
+weight to the EMAIL reputation weight to account for the reduced impact
+of the standalone EMAIL reputation when calculating the overall reputation.
 
-   reputation = total / count
-   total = reputation * count
+   total_weight = weight_email + weight_email_ip + weight_domain + weight_ip + weight_helo
+   blacklisted_reputation = 100 * total_weight / weight_email
 
-The following two formulas are equivalent:
+When a standalone email address is blacklisted/whitelisted, all records
+of the email address bound to an IP address, DKIM signature, or a SPF pass
+will be removed from the database, and only the standalone record is kept.
 
-   blacklisted_total = old_total + 100 * count
-   blacklisted_reputation = old_reputation + 100
+Besides blacklisting/whitelisting of standalone email addresses, the same
+method may be used also for blacklisting/whitelisting of IP addresses,
+domain names, and HELO names (only dotless Netbios HELO names can be used).
 
-Blacklisting and whitelisting have the influence only on the reputation of
-the standalone email address. It does not affect the reputation scores of
-the domain name, HELO name, DKIM signature or the originating IP address.
+When whitelisting/blacklisting an email address or domain name, you can
+bind them to a specified DKIM signature or SPF record by appending the 
+DKIM signing domain or the tag 'spf' after the ID in the following way:
+
+ spamassassin --add-addr-to-blacklist=spamming.biz,spf
+ spamassassin --add-addr-to-whitelist=friend@good.org,good.org
+
+When a message contains both a DKIM signature and an SPF pass, the DKIM
+signature takes the priority, so the record bound to the 'spf' tag won't 
+be checked. Only email addresses and domains can be bound to DKIM or SPF.
+Records of IP adresses and HELO names are always without DKIM/SPF.
+
 In case of dual storage, the black/whitelisting is performed only in the
 default storage.
 
@@ -1279,7 +1320,7 @@ sub check_senders_reputation {
     $domain   = $signedby;
   } elsif ($pms->{spf_pass} && $self->{conf}->{txrep_spf}) {
     $ip       = undef;
-    $signedby = 'SPF';
+    $signedby = 'spf';
   }
 
   my $totalweight      = 0;
@@ -1369,6 +1410,7 @@ sub check_reputation {
         $self->{totalweight} += $weight;
         if ($key eq 'MSG_ID' && $self->count() > 0) {
             $delta = $self->total() / $self->count();
+	    $pms->set_tag('TXREP'.$tag_id,              sprintf("%2.1f",$delta));
         } elsif (defined $self->total()) {
             $delta = ($self->total() + $msgscore) / (1 + $self->count()) - $msgscore;
 
@@ -1726,9 +1768,9 @@ sub learn_message {
 ###########################################################################
   my ($self, $params) = @_;
   return 0 unless (defined $params->{isspam});
+
   dbg("TxRep: learning a message");
   my $pms = ($self->{last_pms})? $self->{last_pms} : Mail::SpamAssassin::PerMsgStatus->new($self->{main}, $params->{msg});
-
   if (!defined $pms->{relays_internal} && !defined $pms->{relays_external}) {
     $pms->extract_message_metadata();
   }
@@ -1836,30 +1878,19 @@ initializing the SQL storage, the same instructions apply also to TxRep.
 Although the old AWL table can be reused for TxRep, by default TxRep expects
 the SQL table to be named "txrep".
 
-To install a new SQL table for TxRep, save the 'CREATE' SQL command shown
-below into a file named txrep_mysql.sql, and use the following command. You
-can also simply run the SQL command from within the respective database
-area in PhpMyAdmin:
+To install a new SQL table for TxRep, run the appropriate SQL file for your
+system under the /sql directory.
 
- mysql -h <hostname> -u <adminusername> -p <databasename> < txrep_mysql.sql
- Enter password: <adminpassword>
-
- CREATE TABLE txrep (
-   username varchar(100) NOT NULL default '',
-   email varchar(255) NOT NULL default '',
-   ip varchar(40) NOT NULL default '',
-   count int(11) NOT NULL default '0',
-   totscore float NOT NULL default '0',
-   signedby varchar(255) NOT NULL default '',
-   PRIMARY KEY (username,email,signedby,ip)
- ) ENGINE=MyISAM;
-
-(If you get a syntax error at an older version of MySQL, use TYPE=MyISAM
-instead of ENGINE=MyISAM at the end of the command)
-
-For PostgreSQL, use the following:
-
- psql -U <username> -f txrep_pg.sql <databasename>
+If you get a syntax error at an older version of MySQL, use TYPE=MyISAM
+instead of ENGINE=MyISAM at the end of the command. You can also use other
+types of ENGINE (depending on what is available on your system). For example
+MEMORY engine stores the entire table in the server memory, achieving
+performance similar to Redis. You would need to care about the replication
+of the RAM table to disk through a cronjob, to avoid loss of data at reboot.
+The InnoDB engine is used by default, offering high scalability (database
+size and concurence of accesses). In conjunction with a high value of
+innodb_buffer_pool or with the memcached plugin (MySQL v5.6+) it can also
+offer performance comparable to Redis.
 
 =cut
 
