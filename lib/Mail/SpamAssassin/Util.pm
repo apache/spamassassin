@@ -1204,7 +1204,7 @@ sub uri_to_domain {
   my ($uri) = @_;
 
   # Javascript is not going to help us, so return.
-  return if ($uri =~ /^javascript:/i);
+  return undef if ($uri =~ /^javascript:/i);
 
   $uri =~ s{\#.*$}{}gs;			# drop fragment
   $uri =~ s{^[a-z]+:/{0,2}}{}gsi;	# drop the protocol
@@ -1219,7 +1219,7 @@ sub uri_to_domain {
 
   # skip undecoded URIs if the encoded bits shouldn't be.
   # we'll see the decoded version as well.  see url_encode()
-  return if $uri =~ /\%(?:2[1-9a-fA-F]|[3-6][0-9a-fA-F]|7[0-9a-eA-E])/;
+  return undef if $uri =~ /\%(?:2[1-9a-fA-F]|[3-6][0-9a-fA-F]|7[0-9a-eA-E])/;
 
   my $host = $uri;  # unstripped/full domain name
 
@@ -1229,7 +1229,7 @@ sub uri_to_domain {
     $uri = Mail::SpamAssassin::Util::RegistrarBoundaries::trim_domain($uri);
 
     # ignore invalid domains
-    return unless
+    return undef unless
         (Mail::SpamAssassin::Util::RegistrarBoundaries::is_domain_valid($uri));
   }
   
