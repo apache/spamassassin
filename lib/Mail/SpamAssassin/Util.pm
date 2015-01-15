@@ -284,7 +284,7 @@ sub untaint_var {
 # my $arg = $_[0];  # avoid copying unnecessarily
   if (!ref $_[0]) { # optimized by-far-the-most-common case
     no re 'taint';  # override a  "use re 'taint'"  from outer scope
-    return if !defined $_[0];
+    return undef if !defined $_[0];
     local($1); # avoid Perl taint bug: tainted global $1 propagates taintedness
     $_[0] =~ /^(.*)\z/s;
     return $1;
@@ -1204,7 +1204,7 @@ sub uri_to_domain {
   my ($uri) = @_;
 
   # Javascript is not going to help us, so return.
-  return undef if ($uri =~ /^javascript:/i);
+  return if ($uri =~ /^javascript:/i);
 
   $uri =~ s{\#.*$}{}gs;			# drop fragment
   $uri =~ s{^[a-z]+:/{0,2}}{}gsi;	# drop the protocol
@@ -1219,7 +1219,7 @@ sub uri_to_domain {
 
   # skip undecoded URIs if the encoded bits shouldn't be.
   # we'll see the decoded version as well.  see url_encode()
-  return undef if $uri =~ /\%(?:2[1-9a-fA-F]|[3-6][0-9a-fA-F]|7[0-9a-eA-E])/;
+  return if $uri =~ /\%(?:2[1-9a-fA-F]|[3-6][0-9a-fA-F]|7[0-9a-eA-E])/;
 
   my $host = $uri;  # unstripped/full domain name
 
@@ -1229,7 +1229,7 @@ sub uri_to_domain {
     $uri = Mail::SpamAssassin::Util::RegistrarBoundaries::trim_domain($uri);
 
     # ignore invalid domains
-    return undef unless
+    return unless
         (Mail::SpamAssassin::Util::RegistrarBoundaries::is_domain_valid($uri));
   }
   
