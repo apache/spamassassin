@@ -1595,8 +1595,8 @@ sub choose_mirror {
 ##############################################################################
 
 sub print_version {
-  print "sa-update version $VERSION\n"
-      . "  running on Perl version " . join(".", map { $_||=0; $_*1 } ($] =~ /(\d)\.(\d{3})(\d{3})?/ )) . "\n";
+  printf("sa-update version %s\n  running on Perl version %s\n", $VERSION, 
+         join(".", map( 0+($_||0), ( $] =~ /(\d)\.(\d{3})(\d{3})?/ ))));
 }
 
 ##############################################################################

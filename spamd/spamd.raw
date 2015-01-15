@@ -293,8 +293,9 @@ my %resphash = (
 );
 
 sub print_version {
-  printf("%s version %s\n", "SpamAssassin Server", Mail::SpamAssassin::Version());
-  printf("  running on Perl %s\n", join(".", map { $_||=0; $_*1 } ($] =~ /(\d)\.(\d{3})(\d{3})?/)));
+  printf("SpamAssassin Server version %s\n", Mail::SpamAssassin::Version());
+  printf("  running on Perl %s\n",
+         join(".", map( 0+($_||0), ($] =~ /(\d)\.(\d{3})(\d{3})?/) )));
   eval { require IO::Socket::SSL; };
   printf("  with SSL support (%s %s)\n", "IO::Socket::SSL", $IO::Socket::SSL::VERSION) unless ($@);
   eval { require Compress::Zlib; };
