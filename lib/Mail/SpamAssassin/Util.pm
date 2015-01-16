@@ -284,7 +284,7 @@ sub untaint_var {
 # my $arg = $_[0];  # avoid copying unnecessarily
   if (!ref $_[0]) { # optimized by-far-the-most-common case
     no re 'taint';  # override a  "use re 'taint'"  from outer scope
-    return undef if !defined $_[0];
+    return undef if !defined $_[0]; ## no critic (ProhibitExplicitReturnUndef)  - See Bug 7120
     local($1); # avoid Perl taint bug: tainted global $1 propagates taintedness
     $_[0] =~ /^(.*)\z/s;
     return $1;
