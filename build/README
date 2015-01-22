@@ -118,7 +118,7 @@ SPAMASSASSIN RELEASE PROCEDURE
 
   - For releases on the trunk (e.g. a .0 release):
 
-      TZ=UTC svn log -r HEAD:1149751 --non-interactive > Changes
+      TZ=UTC svn log -r HEAD:1567124 --non-interactive > Changes
 
     r497472 was the release of 3.2.0-pre1; r233108 was the start of 3.2.0,
     just after the 3.1.0 branch was created; r46030 was the start of the
@@ -186,7 +186,7 @@ SPAMASSASSIN RELEASE PROCEDURE
     repo=https://svn.apache.org/repos/asf/spamassassin
     svn delete -m "replaced old tag" $repo/tags/spamassassin_release_$vers
     svn copy -m "creating tag for release $vers" \
-	$repo/branches/3.3 $repo/tags/spamassassin_release_$vers
+	$repo/branches/3.4 $repo/tags/spamassassin_release_$vers
 
   - For a trunk release (x.y.0):
 
