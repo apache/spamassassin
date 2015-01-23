@@ -731,6 +731,7 @@ sub html_text {
     # ideas discarded since they would be easy to evade:
     # 1. using \w or [A-Za-z] instead of \S or non-punctuation
     # 2. exempting certain tags
+    # no re "strict";  # since perl 5.21.8: Ranges of ASCII printables...
     if ($text =~ /^[^\s\x21-\x2f\x3a-\x40\x5b-\x60\x7b-\x7e]/s &&
 	$self->{text}->[-1] =~ /[^\s\x21-\x2f\x3a-\x40\x5b-\x60\x7b-\x7e]\z/s)
     {

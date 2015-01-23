@@ -238,7 +238,7 @@ sub untaint_file_path {
   local ($1);
   # Barry Jaspan: allow ~ and spaces, good for Windows.  Also return ''
   # if input is '', as it is a safe path.
-  my $chars = '-_A-Za-z\xA0-\xFF0-9\.\%\@\=\+\,\/\\\:';
+  my $chars = '-_A-Za-z0-9\xA0-\xFF\.\%\@\=\+\,\/\\\:';
   my $re = qr/^\s*([$chars][${chars}~ ]*)$/o;
 
   if ($path =~ $re) {
@@ -1040,6 +1040,7 @@ sub url_encode {
     }
     # other stuff
     else {
+      # no re "strict";  # since perl 5.21.8
       # 0x00-0x20, 0x7f-0xff, ", %, <, >
       s/([\000-\040\177-\377\042\045\074\076])
 	  /push(@encoded, $1) && sprintf "%%%02x", unpack("C",$1)/egx;

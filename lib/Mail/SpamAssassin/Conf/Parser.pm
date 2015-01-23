@@ -1212,6 +1212,7 @@ sub add_test {
   if ($type == $Mail::SpamAssassin::Conf::TYPE_HEAD_TESTS)
   {
     # RFC 5322 section 3.6.8, ftext printable US-ASCII chars not including ":"
+    # no re "strict";  # since perl 5.21.8: Ranges of ASCII printables...
     if ($text =~ /^!?defined\([!-9;-\176]+\)$/) {
       # fine, implements 'exists:'
     } else {
@@ -1383,8 +1384,8 @@ sub is_regexp_valid {
   # interpolation of the $re variable into a code regexp, in order to test the
   # security of the regexp.  simply using ("" =~ $re) will NOT do that, and
   # will therefore open a hole!
-  if (eval { ("" =~ m{$re}); 1; }) {
-    return 1;
+  { # no re "strict";  # since perl 5.21.8: Ranges of ASCII printables...
+    if (eval { ("" =~ m{$re}); 1; }) { return 1 }
   }
   my $err = $@ ne '' ? $@ : "errno=$!";  chomp $err;
   $err =~ s/ at .*? line \d.*$//;

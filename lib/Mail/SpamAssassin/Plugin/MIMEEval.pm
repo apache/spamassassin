@@ -399,6 +399,7 @@ sub _check_attachments {
       # except NUL or a free-standing CR. anything else is a violation of
       # the definition of charset="us-ascii".
       if ($ctype eq 'text/plain' && (!defined $charset || $charset eq 'us-ascii')) {
+        # no re "strict";  # since perl 5.21.8: Ranges of ASCII printables...
         if (m/[\x00\x0d\x80-\xff]+/) {
           if (would_log('dbg', 'eval')) {
             my $str = $_;

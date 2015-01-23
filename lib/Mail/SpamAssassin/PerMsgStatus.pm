@@ -2398,7 +2398,7 @@ sub _get_parsed_uri_list {
 
         if ($uri =~ /^mailto:/i) {
           # skip a mail link that does not have a valid TLD or other than one @ after decoding any URLEncoded characters
-          $uri = Mail::SpamAssassin::Util::url_encode($uri) if ($uri =~ /\%(?:2[1-9a-fA-F]|[3-6][0-9a-fA-f]|7[0-9a-eA-E])/);
+          $uri = Mail::SpamAssassin::Util::url_encode($uri) if ($uri =~ /\%(?:2[1-9a-fA-F]|[3-6][0-9a-fA-F]|7[0-9a-eA-E])/);
           next if ($uri !~ /^[^@]+@[^@]+$/);
           my $domuri = Mail::SpamAssassin::Util::uri_to_domain($uri);
           next unless $domuri;
