@@ -1,5 +1,6 @@
 package Mail::SpamAssassin::Plugin::FreeMail;
 use strict;
+use warnings;
 my $VERSION = 2.002;
 
 ### About:
@@ -146,7 +147,9 @@ my $email_whitelist = qr/
 
 # skip replyto check when envelope sender is
 # allow <> for now
-my $skip_replyto_envfrom = qr/
+my $skip_replyto_envfrom;
+{ # no re "strict";  # since perl 5.21.8: Ranges of ASCII printables...
+  $skip_replyto_envfrom = qr/
   (?:
       ^(?:post|host|domain)master
     | ^double-bounce
@@ -156,6 +159,7 @@ my $skip_replyto_envfrom = qr/
     | .+=.+
   )\@
 /xi;
+}
 
 
 sub dbg { Mail::SpamAssassin::Plugin::dbg ("FreeMail: @_"); }

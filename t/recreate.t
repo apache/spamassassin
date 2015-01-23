@@ -32,7 +32,9 @@ $SIG{'__WARN__'} = sub {
   print STDERR @_;
 
   # certain warnings can be ignored for this test
-  if ($_[0] =~ m{plugin: failed to parse plugin.*: Can.t locate })
+  if ($_[0] =~ m{plugin: failed to parse plugin.*: Can.t locate } ||
+      $_[0] =~ m{is more clearly written simply as .* in regex} ||
+      $_[0] =~ m{Ranges of ASCII printables should be some subset of .* in regex})
   {
     print STDERR "[ignored warning, not recreate-related]\n";
   } else {

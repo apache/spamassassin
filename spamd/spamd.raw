@@ -1810,6 +1810,7 @@ sub parse_msgids {
   my $rmsgid = $mail->get_pristine_header("Resent-Message-Id");
   foreach my $id ((\$msgid, \$rmsgid)) {
     if ( $$id ) {
+      # no re "strict";  # since perl 5.21.8: Ranges of ASCII printables...
       while ( $$id =~ s/\([^\(\)]*\)// )
          { }                           # remove comments and
       $$id =~ s/^\s+|\s+$//g;          # leading and trailing spaces
@@ -1987,9 +1988,11 @@ sub check {
             "rport=".$remote_port);
 
   {
+    # no re "strict";  # since perl 5.21.8: Ranges of ASCII printables...
     my $safe = $msgid; $safe =~ s/[\x00-\x20\s,]/_/gs; push(@extra, "mid=$safe");
   }
   if ($rmsgid) {
+    # no re "strict";  # since perl 5.21.8: Ranges of ASCII printables...
     my $safe = $rmsgid; $safe =~ s/[\x00-\x20\s,]/_/gs; push(@extra, "rmid=$safe");
   }
   if (defined $status->{bayes_score}) {
@@ -2273,12 +2276,15 @@ sub parse_headers {
 sub got_user_header {
   my ( $client, $header, $value ) = @_;
 
-  if ( $value !~ /^([\x20-\xFF]*)$/ ) {
-    protocol_error("(User header contains control chars)");
-    return 0;
+  { # no re "strict";  # since perl 5.21.8: Ranges of ASCII printables...
+    local $1;
+    if ( $value !~ /^([\x20-\xFF]*)$/ ) {
+      protocol_error("(User header contains control chars)");
+      return 0;
+    }
+    $current_user = $1;
   }
 
-  $current_user = $1;
   if ($opt{'auth-ident'} && !auth_ident($current_user)) {
     return 0;
   }

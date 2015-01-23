@@ -297,18 +297,21 @@ sub new {
  	last;
       }
       # should we assume entering a body on encountering invalid header field?
-      elsif ($current !~ /^[\041-\071\073-\176]+[ \t]*:/) {
-	# A field name MUST be composed of printable US-ASCII characters
-	# (i.e., characters that have values between 33 (041) and 126 (176),
-	# inclusive), except colon (072). Obsolete header field syntax
-	# allowed WSP before a colon.
-	if (++$hdr_errors <= 3) {
-	  # just consume but ignore a few invalid header fields
-	} else {  # enough is enough...
-	  $self->{'missing_head_body_separator'} = 1;
-	  unshift(@message, $current);
- 	  last;
- 	}
+      else {
+        # no re "strict";  # since perl 5.21.8: Ranges of ASCII printables...
+        if ($current !~ /^[\041-\071\073-\176]+[ \t]*:/) {
+	  # A field name MUST be composed of printable US-ASCII characters
+	  # (i.e., characters that have values between 33 (041) and 126 (176),
+	  # inclusive), except colon (072). Obsolete header field syntax
+	  # allowed WSP before a colon.
+	  if (++$hdr_errors <= 3) {
+	    # just consume but ignore a few invalid header fields
+	  } else {  # enough is enough...
+	    $self->{'missing_head_body_separator'} = 1;
+	    unshift(@message, $current);
+ 	    last;
+	  }
+	}
       }
 
       # start collecting a new header field
@@ -840,6 +843,7 @@ sub _parse_multipart {
 
 	# if the line after the opening boundary isn't a header, flag it.
 	# we need to make sure that there's actually another line though.
+	# no re "strict";  # since perl 5.21.8: Ranges of ASCII printables...
 	if ($line+1 < $tmp_line && $body->[$line+1] !~ /^[\041-\071\073-\176]+:/) {
 	  $self->{'missing_mime_headers'} = 1;
 	}
@@ -920,6 +924,7 @@ sub _parse_multipart {
       # but this causes problems with horizontal lines when the boundary is
       # made up of dashes as well, etc.
       if (defined $boundary) {
+        # no re "strict";  # since perl 5.21.8: Ranges of ASCII printables...
         if ($line =~ /^--\Q${boundary}\E--\s*$/) {
 	  # Make a note that we've seen the end boundary
 	  $self->{mime_boundary_state}->{$boundary}--;
@@ -944,6 +949,7 @@ sub _parse_multipart {
 
     if (!$in_body) {
       # s/\s+$//;   # bug 5127: don't clean this up (yet)
+      # no re "strict";  # since perl 5.21.8: Ranges of ASCII printables...
       if (/^[\041-\071\073-\176]+[ \t]*:/) {
         if ($header) {
           my ( $key, $value ) = split ( /:\s*/, $header, 2 );

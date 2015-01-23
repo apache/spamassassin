@@ -1177,7 +1177,7 @@ sub parse_received_line {
     # logging a little more.
     if (/^\S+ by \S+ \(.{0,100}\) with qmail-scanner/) {
       $envfrom =~ s/^\s*<*//gs; $envfrom =~ s/>*\s*$//gs;
-      $envfrom =~ s/[\s\0\#\[\]\(\)\<\>\|]/!/gs;
+      $envfrom =~ s/[\s\000\#\[\]\(\)\<\>\|]/!/gs;
       $self->{qmail_scanner_env_from} = $envfrom; # hack!
       return 0;
     }
@@ -1307,12 +1307,12 @@ enough:
   # presence, though.  NOTE: this means "[1.2.3.4]" IP addr HELO
   # strings, which are legit by RFC-2821, look like "!1.2.3.4!".
   # still useful though.
-  $ip =~ s/[\s\0\#\[\]\(\)\<\>\|]/!/gs;
-  $rdns =~ s/[\s\0\#\[\]\(\)\<\>\|]/!/gs;
-  $helo =~ s/[\s\0\#\[\]\(\)\<\>\|]/!/gs;
-  $by =~ s/[\s\0\#\[\]\(\)\<\>\|]/!/gs;
-  $ident =~ s/[\s\0\#\[\]\(\)\<\>\|]/!/gs;
-  $envfrom =~ s/[\s\0\#\[\]\(\)\<\>\|]/!/gs;
+  $ip =~ s/[\s\000\#\[\]\(\)\<\>\|]/!/gs;
+  $rdns =~ s/[\s\000\#\[\]\(\)\<\>\|]/!/gs;
+  $helo =~ s/[\s\000\#\[\]\(\)\<\>\|]/!/gs;
+  $by =~ s/[\s\000\#\[\]\(\)\<\>\|]/!/gs;
+  $ident =~ s/[\s\000\#\[\]\(\)\<\>\|]/!/gs;
+  $envfrom =~ s/[\s\000\#\[\]\(\)\<\>\|]/!/gs;
 
   my $relay = {
     ip => $ip,
