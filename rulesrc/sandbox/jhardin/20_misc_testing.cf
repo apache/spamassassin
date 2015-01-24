@@ -606,13 +606,13 @@ describe       GAPPY_PILLS              G.a.p.p.y pills
 
 body           __STYLE_TAG_IN_BODY      /<style(?:[^>]{0,30})?>/i
 body           __BODY_XHTML             /<x-html>/i
-rawbody        __STYLE_GIBBERISH_1      /<style[^>]{0,30}>(?:\s{0,80}(?!<\/style>)[^\s:;]){150}/im
+rawbody        __STYLE_GIBBERISH_1      /<style[^>]{0,30}>(?:\s{0,80}(?!<\/style>)(?:\/\*(?:\s|[^*<]|(?!\*\/)\*|(?!<\/style>)<){0,200}\*\/)){0,4}(?:\s{0,80}(?!<\/style>|\/\*)[^\s:;,]){150}/im
 rawbody        __STYLE_GIBBERISH_2      /\.style\w{0,20}\s{1,10}\{[^:;]{200}/im
 rawbody        __STYLE_GIBBERISH_3      /<style[^>]{0,30}>\s{0,30}(?:[\w:]{1,30}\s{0,10}\{[^}]{1,50}\}\s{0,80}){1,5}(?:[\w,.']{1,30}\s{1,10}){40}/im
 meta           __STYLE_GIBBERISH        (__STYLE_GIBBERISH_1 || __STYLE_GIBBERISH_2 || __STYLE_GIBBERISH_3)
 meta           STYLE_GIBBERISH          __STYLE_GIBBERISH && (__BODY_XHTML || !__STYLE_TAG_IN_BODY) && !__RCD_RDNS_MX_MESSY && !__HAS_THREAD_INDEX && !__ANY_OUTLOOK_MUA && !__MIME_QP && !__THREADED 
 describe       STYLE_GIBBERISH          Nonsense in HTML <STYLE> tag
-score          STYLE_GIBBERISH          4.00	# limit
+score          STYLE_GIBBERISH          3.50	# limit
 tflags         STYLE_GIBBERISH          publish
 
 body           __SCRIPT_TAG_IN_BODY     /<script>/i
@@ -1845,6 +1845,11 @@ header    __FM_EDGER_HOOVER             From =~ /\bedger hoover\b/i
 body      __MYSTERY_SHOPPER             /\bmystery shoppers?\b/i
 
 header    __HAS_NO_RELAY                X-No-Relay =~ /./
+
+header    __DUP_SUSP_HDR                ALL =~ /\n(X-No-Relay)\s*:[ 	][^\n]{1,100}\n\1\s*:[ 	]/ism
+meta      DUP_SUSP_HDR                  __DUP_SUSP_HDR
+describe  DUP_SUSP_HDR                  Duplicate suspicious message headers
+score     DUP_SUSP_HDR                  0.500	# limit
 
 # seen 10/2014: "https://www.google.com/url?q=https://copy.com/ApbFn2848pQm/ShippingInvoice_6974.PDF.scr?download=1&sa=D&sntz=1&usg=AFQjCNGhvWhljnujQlP85tA6YUsddfuJow"
 uri       __GOOG_MALWARE_DNLD           m;^https?://[^/]*\.google\.com/[^?]*url\?.*[\?&]download=1;i
