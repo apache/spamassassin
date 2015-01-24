@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus dwarren grenier jarif kpg-core mas-cps mas-mas zmi; day 2: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus dwarren grenier jarif kpg-core llanga mas-cps mas-mas zmi; day 3: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus dwarren grenier jarif kpg-core llanga mas-cps mas-mas zmi
+# with results from: day 1: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus dwarren grenier jarif kpg-core zmi; day 2: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus dwarren grenier jarif kpg-core llanga mas-cps mas-mas zmi; day 3: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus dwarren grenier jarif kpg-core llanga mas-cps mas-mas zmi
 
 # tflags publish
 AC_BR_BONANZA
@@ -91,9 +91,6 @@ AD_PREFS
 # tflags userconf
 ALL_TRUSTED
 
-# good enough
-AXB_HELO_HOME_UN
-
 # tflags publish
 AXB_MH_APPHTML
 
@@ -150,9 +147,6 @@ BAYES_99
 
 # tflags learn
 BAYES_999
-
-# good enough
-BIGNUM_EMAILS
 
 # tflags publish
 BODY_URI_ONLY
@@ -443,9 +437,6 @@ HEADER_HOST_IN_WHITELIST
 HEAD_LONG
 
 # good enough
-HELO_LH_HOME
-
-# good enough
 HELO_LOCALHOST
 
 # tflags publish
@@ -530,9 +521,6 @@ LOTTO_DEPT
 LUCRATIVE
 
 # good enough
-MAILER_EQ_ORG
-
-# good enough
 MALFORMED_FREEMAIL
 
 # tflags publish
@@ -596,7 +584,10 @@ NSL_RCVD_FROM_USER
 NSL_RCVD_HELO_USER
 
 # good enough
-OBFU_JPG_ATTACH
+NULL_IN_BODY
+
+# good enough
+OBFU_HTML_ATTACH
 
 # tflags publish
 OBFU_JVSCR_ESC
@@ -857,9 +848,6 @@ SERGIO_SUBJECT_PORN006
 SERGIO_SUBJECT_PORN011
 
 # good enough
-SERGIO_SUBJECT_PORN014
-
-# good enough
 SERGIO_SUBJECT_PORN015
 
 # good enough
@@ -962,6 +950,9 @@ TVD_FROM_1
 TVD_PH_BODY_META
 
 # good enough
+TVD_QUAL_MEDS
+
+# good enough
 TVD_RCVD_IP
 
 # good enough
@@ -983,10 +974,13 @@ TVD_VISIT_PHARMA
 TW_GIBBERISH_MANY
 
 # good enough
+HK_NAME_FM_DR
+
+# good enough
 HK_RANDOM_FROM
 
 # good enough
-XPRIO
+PHP_NOVER_MUA
 
 # tflags publish
 UC_GIBBERISH_OBFU
