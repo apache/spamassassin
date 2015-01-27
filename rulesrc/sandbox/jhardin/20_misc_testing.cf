@@ -613,7 +613,7 @@ meta           __STYLE_GIBBERISH        (__STYLE_GIBBERISH_1 || __STYLE_GIBBERIS
 meta           STYLE_GIBBERISH          __STYLE_GIBBERISH && (__BODY_XHTML || !__STYLE_TAG_IN_BODY) && !__RCD_RDNS_MX_MESSY && !__HAS_THREAD_INDEX && !__ANY_OUTLOOK_MUA && !__MIME_QP && !__THREADED 
 describe       STYLE_GIBBERISH          Nonsense in HTML <STYLE> tag
 score          STYLE_GIBBERISH          3.50	# limit
-tflags         STYLE_GIBBERISH          publish
+tflags         STYLE_GIBBERISH          nopublish
 
 body           __SCRIPT_TAG_IN_BODY     /<script>/i
 rawbody        __SCRIPT_GIBBERISH       /<script>[^;<]{100}/im
