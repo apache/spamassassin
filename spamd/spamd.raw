@@ -805,7 +805,8 @@ for (@listen_socket_specs) {
            m{^ (?: (ssl) : )?
                (?: \[ ( [^\]]* ) \]
                  | ( [a-z0-9._-]* )
-                 | ( [a-f0-9]* : [a-f0-9]* : [a-f0-9:]* \z )
+                 | ( [a-f0-9]* : [a-f0-9]* : [a-f0-9:]*
+                     (?: % [a-z0-9._~-]* )? \z )
                  | ( \* )
                )?
                (?: : ( [a-z0-9-]* ) )? \z }xsi) {
@@ -1057,6 +1058,7 @@ sub server_sock_setup_inet {
 
   dbg("spamd: attempting to listen on IP addresses: %s, port %d",
       join(', ',@addresses), $port);
+  my(@diag_succ, @diag_fail);
   for my $adr (@addresses) {
     my %sockopt = (
       LocalAddr => $adr,
@@ -1086,15 +1088,35 @@ sub server_sock_setup_inet {
     }
     my $server_inet = $ssl ? IO::Socket::SSL->new(%sockopt)
                            : $io_socket_module_name->new(%sockopt);
-    $server_inet
-      or die sprintf("spamd: could not create %s socket on [%s]:%s: %s\n",
-                     $ssl ? 'IO::Socket::SSL' : $io_socket_module_name,
-                     $adr, $port, $!);
-    push(@listen_sockets, { specs => $socket_specs,
-                            ip_addr => $adr, port => $port,
-                            socket => $server_inet,
-                            fd => $server_inet->fileno }) if $server_inet;
+    my $diag;
+    if (!$server_inet) {
+      $diag = sprintf("could not create %s socket on [%s]:%s: %s",
+                      $ssl ? 'IO::Socket::SSL' : $io_socket_module_name,
+                      $adr, $port, $!);
+      push(@diag_fail, $diag);
+    } else {
+      $diag = sprintf("created %s socket on [%s]:%s",
+                      $ssl ? 'IO::Socket::SSL' : $io_socket_module_name,
+                      $adr, $port);
+      push(@diag_succ, $diag);
+      push(@listen_sockets, { specs => $socket_specs,
+                              ip_addr => $adr, port => $port,
+                              socket => $server_inet,
+                              fd => $server_inet->fileno });
+    }
+    dbg("spamd: %s", $diag);
   }
+  if (!@diag_fail) {
+    # no failures, nothing to report
+  } elsif (@diag_succ) {  # some failures and some success
+    # just warn of all attempts, successful and failed
+    warn "spamd: $_\n"  for @diag_succ;
+    warn "spamd: $_\n"  for @diag_fail;
+  } else {  # all failed, no success
+    warn "spamd: $_\n"  for @diag_fail[0 .. $#diag_fail-1];
+    die  "spamd: $_\n"  for $diag_fail[-1];
+  }
+
   1;
 }
 
