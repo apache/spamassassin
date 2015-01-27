@@ -89,6 +89,7 @@ sub test_samples($$) {
 
 # ensure rules will fire, and disable some expensive ones
 tstlocalrules("
+  dkim_minimum_key_bits 512
   score DKIM_SIGNED          -0.1
   score DKIM_VALID           -0.1
   score DKIM_VALID_AU        -0.1
