@@ -1039,15 +1039,15 @@ sub server_sock_setup_inet {
   }
   my($error, @addresses);
   if (!defined $addr || lc $addr eq 'localhost') {  # loopback interface
-    push(@addresses, '127.0.0.1')
-      if $ai_family == &AF_UNSPEC || $ai_family == &AF_INET;
     push(@addresses, '::1')
       if $ai_family == &AF_UNSPEC || $ai_family == &AF_INET6;
-  } elsif ($addr eq '*' || $addr eq '') {  # any address
-    push(@addresses, '0.0.0.0')
+    push(@addresses, '127.0.0.1')
       if $ai_family == &AF_UNSPEC || $ai_family == &AF_INET;
+  } elsif ($addr eq '*' || $addr eq '') {  # any address
     push(@addresses, '::')
       if $ai_family == &AF_UNSPEC || $ai_family == &AF_INET6;
+    push(@addresses, '0.0.0.0')
+      if $ai_family == &AF_UNSPEC || $ai_family == &AF_INET;
   } else {
     ($error, @addresses) = ip_or_name_to_ip_addresses($addr, $ai_family);
   }
