@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus dwarren grenier jarif kpg-core mas-cps mas-mas zmi; day 2: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus dwarren grenier jarif kpg-core llanga mas-cps mas-mas zmi; day 3: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus dwarren grenier jarif kpg-core llanga zmi
+# with results from: day 1: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus dwarren grenier jarif kpg-core; day 2: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus dwarren grenier jarif kpg-core llanga mas-cps mas-mas zmi; day 3: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus dwarren grenier jarif kpg-core llanga mas-cps mas-mas zmi
 
 # tflags publish
 AC_BR_BONANZA
@@ -277,9 +277,6 @@ FOUND_YOU
 # tflags userconf
 FRAGMENTED_MESSAGE
 
-# good enough
-FREEMAIL_DOC_PDF_BCC
-
 # tflags publish
 FREEMAIL_FORGED_FROMDOMAIN
 
@@ -431,9 +428,6 @@ HEADER_HOST_IN_WHITELIST
 HEAD_LONG
 
 # good enough
-HELO_LH_HOME
-
-# good enough
 HELO_LOCALHOST
 
 # tflags publish
@@ -579,6 +573,9 @@ NSL_RCVD_FROM_USER
 
 # good enough
 NSL_RCVD_HELO_USER
+
+# good enough
+NULL_IN_BODY
 
 # tflags publish
 OBFU_JVSCR_ESC
@@ -836,9 +833,6 @@ RISK_FREE
 SERGIO_SUBJECT_PORN006
 
 # good enough
-SERGIO_SUBJECT_PORN011
-
-# good enough
 SERGIO_SUBJECT_PORN015
 
 # good enough
@@ -873,9 +867,6 @@ SPF_SOFTFAIL
 
 # tflags publish
 STOCK_LOW_CONTRAST
-
-# tflags publish
-STYLE_GIBBERISH
 
 # tflags userconf
 SUBJECT_IN_BLACKLIST
@@ -965,13 +956,16 @@ TVD_VISIT_PHARMA
 TW_GIBBERISH_MANY
 
 # good enough
-AXB_HELO_HOME_UN
-
-# good enough
 AXB_X_AOL_SEZ_S
 
 # good enough
 BIGNUM_EMAILS
+
+# good enough
+DOS_BODY_HIGH_NO_MID
+
+# good enough
+DUP_SUSP_HDR
 
 # good enough
 FILL_THIS_FORM_FRAUD_PHISH
@@ -980,19 +974,19 @@ FILL_THIS_FORM_FRAUD_PHISH
 HK_SCAM_S1
 
 # good enough
-HK_SPAMMY_FILENAME
+HTML_FONT_TINY
 
 # good enough
 MONEY_LOTTERY
 
 # good enough
-OBFU_HTML_ATTACH
+OBFU_ATTACH_MISSP
 
 # good enough
 SERGIO_SUBJECT_PORN014
 
 # good enough
-SERGIO_SUBJECT_VIAGRA01
+SUBJ_OBFU_PUNCT_MANY
 
 # good enough
 TR_FILLER_TEXT
