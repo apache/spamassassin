@@ -1,4 +1,4 @@
-# Last update: 2015-01-06-axb
+# Last update: 2015-01-29-axb
 # Set headers which may provide inappropriate AV/filter cues to the Bayesian classifier
 bayes_ignore_header X_CMAE_Category
 bayes_ignore_header X-ACL-Warn
@@ -122,13 +122,23 @@ bayes_ignore_header X-IronPort-AV
 bayes_ignore_header X-IronPort-Outgoing-Antispam
 bayes_ignore_header X-Junkmail
 bayes_ignore_header X-Junk-Score
-bayes_ignore_header X-Klms-Anti
+bayes_ignore_header X-KLMS-AntiPhishing
 bayes_ignore_header X-Klms-Antispam
+bayes_ignore_header X-KLMS-AntiSpam-Info
+bayes_ignore_header X-KLMS-AntiSpam-Interceptor-Info
+bayes_ignore_header X-KLMS-AntiSpam-Lua-Profiles
+bayes_ignore_header X-KLMS-AntiSpam-Method
+bayes_ignore_header X-KLMS-AntiSpam-Moebius-Timestamps
+bayes_ignore_header X-KLMS-AntiSpam-Rate
+bayes_ignore_header X-KLMS-AntiSpam-Status
+bayes_ignore_header X-KLMS-AntiSpam-Version
+bayes_ignore_header X-KLMS-AntiVirus
+bayes_ignore_header X-KLMS-AntiVirus-Status
+bayes_ignore_header X-KLMS-Message-Action
+bayes_ignore_header X-KLMS-Rule-ID
 bayes_ignore_header X-KMail-EncryptionState
 bayes_ignore_header X-KMail-MDN-Sent
 bayes_ignore_header X-KMail-SignatureState
-bayes_ignore_header X-Kse-Anti
-bayes_ignore_header X-Length
 bayes_ignore_header X-MailCleaner-SpamChec
 bayes_ignore_header X-MailCleaner-SpamCheck
 bayes_ignore_header X-MailFoundry
