@@ -241,11 +241,13 @@ $have_sha ? {
   If-Modified-Since GET requests.',
 },
 {
-  module => 'Encode::Detect',
+  module => 'Encode::Detect::Detector',
   version => 0,
-  desc => 'If you plan to use the normalize_charset config setting to detect
-  charsets and convert them into Unicode, you will need to install
-  this module.',
+  desc => 'If you plan to use the normalize_charset config setting to
+  decode message parts from their declared character set into Unicode, and
+  such decoding fails, the Encode::Detect::Detector module (when available)
+  may be consulted to provide an alternative guess on a character set of a
+  problematic message part.',
 },
 {
   module => 'Net::Patricia',

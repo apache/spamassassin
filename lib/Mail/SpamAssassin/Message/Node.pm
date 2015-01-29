@@ -43,6 +43,12 @@ use Mail::SpamAssassin::Constants qw(:sa);
 use Mail::SpamAssassin::HTML;
 use Mail::SpamAssassin::Logger;
 
+our($enc_utf8, $have_encode_detector);
+BEGIN {
+  eval { require Encode && ($enc_utf8 = Encode::find_encoding('UTF-8')) };
+  eval { require Encode::Detect::Detector && ($have_encode_detector = 1) };
+};
+
 =item new()
 
 Generates an empty Node object and returns it.  Typically only called
@@ -386,28 +392,110 @@ sub _html_render {
 }
 
 sub _normalize {
-  my ($self, $data, $charset) = @_;
-  return $data unless $self->{normalize};
+  my $self = $_[0];
+# my $data = $_[1];  # avoid copying large strings
+  my $charset_declared = $_[2];
 
-  my $detected = Encode::Detect::Detector::detect($data);
+  return $_[1]  unless $self->{normalize} && $enc_utf8;
 
-  my $converter;
-
-  if ($charset && $charset !~ /^us-ascii$/i &&
-      ($detected || 'none') !~ /^(?:UTF|EUC|ISO-2022|Shift_JIS|Big5|GB)/i) {
-      dbg("message: Using labeled charset $charset");
-      $converter = Encode::find_encoding($charset);
+  if (!defined $charset_declared || $charset_declared eq '') {
+    $charset_declared = 'us-ascii';
   }
 
-  $converter = Encode::find_encoding($detected) unless $converter || !defined($detected);
+  if ($charset_declared =~ /^(?:US-)?ASCII\z/i && $_[1] !~ tr/\x00-\x7F//c ) {
+    # declared as US-ASCII and it really is
+    dbg("message: kept, charset really is US-ASCII as declared");
+    return $_[1];  # is all-ASCII, no need for decoding
+  }
 
-  return $data unless $converter;
+  if ($charset_declared =~
+        /^(?: ISO-?8859-\d{1,2} | Windows-\d{4} | KOI8-[A-Z]{1,2} )\z/xsi &&
+      $_[1] !~ tr/\x00-\x7F//c )  # is all-ASCII
+  { # declared as extended ASCII, but it is actually a plain 7-bit US-ASCII
+    dbg("message: kept, is all-ASCII, declared charset %s", $charset_declared);
+    return $_[1];  # is all-ASCII, no need for decoding
+  }
 
-  dbg("message: Converting...");
+  # try first to strictly decode based on a declared character set
 
-  my $rv = $converter->decode($data, 0);
-  utf8::downgrade($rv, 1);
-  return $rv
+  my $rv;
+  if ($charset_declared =~ /^(?:US-)?ASCII\z/i) {
+    # declared as US-ASCII but contains 8-bit characters, makes no sense
+    # to attempt decoding first as strict US-ASCII as we know it would fail
+
+  } elsif ($charset_declared =~ /^UTF-?8\z/i) {
+    # attempt decoding as strict UTF-8, but as our intention is to return
+    # the string encoded as UTF-8 anyway, the re-encoding step can be avoided
+    # by returning original string as long as the decoding proves successful
+    if (eval { defined $enc_utf8->decode($_[1], 1|8) }) { # FB_CROAK | LEAVE_SRC
+      dbg("message: kept, valid charset UTF-8");
+      return $_[1];
+    } else {
+      dbg("message: failed decoding as declared charset UTF-8");
+    };
+
+  } else {
+    # try decoding as a declared character set
+
+    # ->  http://en.wikipedia.org/wiki/Windows-1252
+    # Windows-1252 character encoding is a superset of ISO 8859-1, but differs
+    # from the IANA's ISO-8859-1 by using displayable characters rather than
+    # control characters in the 80 to 9F (hex) range. [...]
+    # It is very common to mislabel Windows-1252 text with the charset label
+    # ISO-8859-1. A common result was that all the quotes and apostrophes
+    # (produced by "smart quotes" in word-processing software) were replaced
+    # with question marks or boxes on non-Windows operating systems, making
+    # text difficult to read. Most modern web browsers and e-mail clients
+    # treat the MIME charset ISO-8859-1 as Windows-1252 to accommodate
+    # such mislabeling. This is now standard behavior in the draft HTML 5
+    # specification, which requires that documents advertised as ISO-8859-1
+    # actually be parsed with the Windows-1252 encoding.
+    #
+    my $chset = $charset_declared;
+    $chset = 'Windows-1252'  if $charset_declared =~ /^ISO-?8859-1\z/i;
+
+    my $decoder = Encode::find_encoding($chset);
+    if ($decoder) {
+      eval { $rv = $decoder->decode($_[1], 1|8) };  # FB_CROAK | LEAVE_SRC
+      if ($chset eq $charset_declared) {
+        dbg("message: %s as declared charset %s",
+            defined $rv ? 'decoded' : 'failed decoding', $charset_declared);
+      } else {
+        dbg("message: %s as charset %s, declared %s",
+            defined $rv ? 'decoded' : 'failed decoding',
+            $chset, $charset_declared);
+      }
+    }
+  }
+
+  # if we were unsuccessful so far, try some guesswork
+  # based on Encode::Detect::Detector
+
+  if (defined $rv) {
+    # done, no need for guesswork
+  } elsif (!$have_encode_detector) {
+    dbg("message: Encode::Detect::Detector not available, declared %s failed",
+        $charset_declared);
+  } else {
+    my $charset_detected = Encode::Detect::Detector::detect($_[1]);
+    if ($charset_detected && lc $charset_detected ne lc $charset_declared) {
+      my $decoder = Encode::find_encoding($charset_detected);
+      if ($decoder) {
+        eval { $rv = $decoder->decode($_[1], 1|8) };  # FB_CROAK | LEAVE_SRC
+        dbg("message: %s as detected charset %s, declared %s",
+            defined $rv ? 'decoded' : 'failed decoding',
+            $charset_detected, $charset_declared);
+      }
+    }
+  }
+
+  if (!defined $rv) {
+    # decoding attempts failed, return unchanged octets
+    return $_[1];  # garbage-in / garbage-out
+  }
+
+  # decoding octets to characters was successful, now encode it as UTF-8 octets
+  return $enc_utf8->encode($rv);
 }
 
 =item rendered()
