@@ -740,25 +740,34 @@ sub parse_body {
     # one doesn't, assume it's malformed and send it to be parsed as a
     # non-multipart section
     #
-    if ( $toparse->[0]->{'type'} =~ /^multipart\//i && defined $toparse->[1] && ($toparse->[3] > 0)) {
+    my ($msg, $boundary, $body, $subparse) = @$toparse;
+
+    if ($msg->{'type'} =~ m{^multipart/}i && defined $boundary && $subparse > 0) {
       $self->_parse_multipart($toparse);
     }
     else {
       # If it's not multipart, go ahead and just deal with it.
       $self->_parse_normal($toparse);
 
-      # bug 5041: exclude message/partial messages, however
-      if ($toparse->[0]->{'type'} =~ /^message\b/i &&
-          $toparse->[0]->{'type'} !~ /^message\/partial$/i &&
-            ($toparse->[3] > 0))
+      # bug 5041: process message/*, but exclude message/partial content types
+      if ($msg->{'type'} =~ m{^message/(?!partial\z)}i && $subparse > 0)
       {
-        # Just decode the part, but we don't care about the result here.
-        $toparse->[0]->decode(0);
+        # Just decode the part, but we don't need the resulting string here.
+        $msg->decode(0);
 
-        # bug 5051, bug 3748: sometimes message/* parts have no content,
-        # and we get stuck waiting for STDIN, which is bad. :(
-        if (defined $toparse->[0]->{'decoded'} &&
-            $toparse->[0]->{'decoded'} ne '')
+        # bug 7125: decode and parse only message/rfc822 or message/global,
+        # but do not treat other message/* content types (like the ones listed
+        # here) as a message consisting of a header and a body, as they are not:
+        #    message/delivery-status, message/global-delivery-status,
+        #    message/feedback-report, message/global-headers,
+        #    message/global-disposition-notification,
+        #    message/disposition-notification, (and message/partial)
+
+        # bug 5051, bug 3748: check $msg->{decoded}: sometimes message/* parts
+        # have no content, and we get stuck waiting for STDIN, which is bad. :(
+
+        if ($msg->{'type'} =~ m{^message/(?:rfc822|global)\z}i &&
+            defined $msg->{'decoded'} && $msg->{'decoded'} ne '')
         {
 	  # Ok, so this part is still semi-recursive, since M::SA::Message
 	  # calls M::SA::Message, but we don't subparse the new message,
@@ -767,14 +776,14 @@ sub parse_body {
 	  # since it's faster.
 	  # 
           my $msg_obj = Mail::SpamAssassin::Message->new({
-    	    message	=>	$toparse->[0]->{'decoded'},
+    	    message	=>	$msg->{'decoded'},
 	    parsenow	=>	0,
 	    normalize	=>	$self->{normalize},
-	    subparse	=>	$toparse->[3]-1,
+	    subparse	=>	$subparse - 1,
 	    });
 
 	  # Add the new message to the current node
-          $toparse->[0]->add_body_part($msg_obj);
+          $msg->add_body_part($msg_obj);
 
 	  # now this is the sneaky bit ... steal the sub-message's parse_queue
 	  # and add it to ours.  then we'll handle the sub-message in our
@@ -785,15 +794,15 @@ sub parse_body {
 	  # Ok, we've subparsed, so go ahead and remove the raw and decoded
 	  # data because we won't need them anymore (the tree under this part
 	  # will have that data)
-	  if (ref $toparse->[0]->{'raw'} eq 'GLOB') {
+	  if (ref $msg->{'raw'} eq 'GLOB') {
 	    # Make sure we close it if it's a temp file -- Bug 5166
-	    close($toparse->[0]->{'raw'})
+	    close($msg->{'raw'})
 	      or die "error closing input file: $!";
 	  }
 
-	  delete $toparse->[0]->{'raw'};
+	  delete $msg->{'raw'};
 	  
-	  delete $toparse->[0]->{'decoded'};
+	  delete $msg->{'decoded'};
         }
       }
     }
