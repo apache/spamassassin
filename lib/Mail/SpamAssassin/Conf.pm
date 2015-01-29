@@ -1112,9 +1112,21 @@ Select the locales to allow from the list below:
 
 =item normalize_charset ( 0 | 1)        (default: 0)
 
-Whether to detect character sets and normalize message content to
-Unicode.  Requires the Encode::Detect module, HTML::Parser version
-3.46 or later, and Perl 5.8.5 or later.
+Whether to decode non- UTF-8 and non-ASCII textual parts and recode them
+to UTF-8 before the text is given over to rules processing. The character
+set used for attempted decoding is primarily based on a declared character
+set in a Content-Type header, but if the decoding attempt fails a module
+Encode::Detect::Detector is consulted (if available) to provide a guess
+based on the actual text, and decoding is re-attempted. Even if the option
+is enabled no unnecessary decoding and re-encoding work is done when
+possible (like with an all-ASCII text with a US-ASCII or extended ASCII
+character set declaration, e.g. UTF-8 or ISO-8859-nn or Windows-nnnn).
+
+Unicode support in old versions of perl or in a core module Encode is likely
+to be buggy in places, so if the normalize_charset function is enabled
+it is advised to stick to more recent versions of perl (preferably 5.12
+or later). The module Encode::Detect::Detector is optional, when necessary
+it will be used if it is available.
 
 =cut
 
@@ -1140,10 +1152,10 @@ Unicode.  Requires the Encode::Detect module, HTML::Parser version
 	    $self->{parser}->lint_warn("config: normalize_charset requires HTML::Parser 3.46 or later");
 	    return $INVALID_VALUE;
 	}
-	unless (eval 'require Encode::Detect::Detector') {
-	    $self->{parser}->lint_warn("config: normalize_charset requires Encode::Detect");
-	    return $INVALID_VALUE;
-	}
+#	unless (eval 'require Encode::Detect::Detector') {
+#	    $self->{parser}->lint_warn("config: normalize_charset requires Encode::Detect::Detector");
+#	    return $INVALID_VALUE;
+#	}
 	unless (eval 'require Encode') {
 	    $self->{parser}->lint_warn("config: normalize_charset requires Encode");
 	    return $INVALID_VALUE;
