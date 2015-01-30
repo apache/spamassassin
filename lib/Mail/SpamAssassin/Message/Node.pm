@@ -43,10 +43,13 @@ use Mail::SpamAssassin::Constants qw(:sa);
 use Mail::SpamAssassin::HTML;
 use Mail::SpamAssassin::Logger;
 
-our($enc_utf8, $have_encode_detector);
+our($enc_utf8, $enc_w1252, $have_encode_detector);
 BEGIN {
-  eval { require Encode && ($enc_utf8 = Encode::find_encoding('UTF-8')) };
-  eval { require Encode::Detect::Detector && ($have_encode_detector = 1) };
+  eval { require Encode }
+    and do { $enc_utf8  = Encode::find_encoding('UTF-8');
+             $enc_w1252 = Encode::find_encoding('Windows-1252') };
+  eval { require Encode::Detect::Detector }
+    and do { $have_encode_detector = 1 };
 };
 
 =item new()
@@ -391,6 +394,8 @@ sub _html_render {
   return 0;
 }
 
+# Convert character set of a given text into UTF-8 octets.
+#
 sub _normalize {
   my $self = $_[0];
 # my $data = $_[1];  # avoid copying large strings
@@ -416,7 +421,7 @@ sub _normalize {
     return $_[1];  # is all-ASCII, no need for decoding
   }
 
-  # try first to strictly decode based on a declared character set
+  # Try first to strictly decode based on a declared character set.
 
   my $rv;
   if ($charset_declared =~ /^(?:US-)?ASCII\z/i) {
@@ -451,13 +456,18 @@ sub _normalize {
     # specification, which requires that documents advertised as ISO-8859-1
     # actually be parsed with the Windows-1252 encoding.
     #
-    my $chset = $charset_declared;
-    $chset = 'Windows-1252'  if $charset_declared =~ /^ISO-?8859-1\z/i;
-
-    my $decoder = Encode::find_encoding($chset);
-    if ($decoder) {
+    my($chset, $decoder);
+    if ($charset_declared =~ /^(?: ISO-?8859-1 | Windows-1252 | CP1252 )\z/xi) {
+      $chset = 'Windows-1252'; $decoder = $enc_w1252;
+    } else {
+      $chset = $charset_declared; $decoder = Encode::find_encoding($chset);
+    }
+    if (!$decoder) {
+      dbg("message: failed decoding, no decoder for a declared charset %s",
+          $chset);
+    } else {
       eval { $rv = $decoder->decode($_[1], 1|8) };  # FB_CROAK | LEAVE_SRC
-      if ($chset eq $charset_declared) {
+      if (lc $chset eq lc $charset_declared) {
         dbg("message: %s as declared charset %s",
             defined $rv ? 'decoded' : 'failed decoding', $charset_declared);
       } else {
@@ -468,8 +478,28 @@ sub _normalize {
     }
   }
 
-  # if we were unsuccessful so far, try some guesswork
-  # based on Encode::Detect::Detector
+  # If the above failed, check if it is US-ASCII, possibly with a few
+  # NBSP or SHY characters from ISO-8859-* or Windows-1252, or containing
+  # some popular punctuation or special characters from Windows-1252 in
+  # the \x80-\x9F range (which is unassigned in ISO-8859-*).
+  # Note that Windows-1252 is a proper superset of ISO-8859-1.
+  #
+  if (!defined $rv && $enc_w1252 &&
+      #             ASCII  NBSP (c) SHY ...  '
+      $_[1] !~ tr/\x00-\x7F\xA0\xA9\xAD\x85\x92//c)
+  { # ASCII + NBSP + SHY + some special characters
+    # NBSP (A0) and SHY (AD) are at the same position in ISO-8859-* chsets too
+    eval { $rv = $enc_w1252->decode($_[1], 1|8) };  # FB_CROAK | LEAVE_SRC
+    # the above can't fail, but keep code general just in case
+    dbg("message: %s as guessed charset %s, declared %s",
+        defined $rv ? 'decoded' : 'failed decoding',
+        'Windows-1252', $charset_declared);
+    # consider also: A9 (c), AE (r), 99 TM, 80 Euro
+    # quotes: 82, 84, 8B, 91, 92, 93, 94, 9B, bullet: 95, dash: 96, 97
+  }
+
+  # If we were unsuccessful so far, try some guesswork
+  # based on Encode::Detect::Detector .
 
   if (defined $rv) {
     # done, no need for guesswork
@@ -480,7 +510,10 @@ sub _normalize {
     my $charset_detected = Encode::Detect::Detector::detect($_[1]);
     if ($charset_detected && lc $charset_detected ne lc $charset_declared) {
       my $decoder = Encode::find_encoding($charset_detected);
-      if ($decoder) {
+      if (!$decoder) {
+        dbg("message: failed decoding, no decoder for a detected charset %s",
+            $charset_detected);
+      } else {
         eval { $rv = $decoder->decode($_[1], 1|8) };  # FB_CROAK | LEAVE_SRC
         dbg("message: %s as detected charset %s, declared %s",
             defined $rv ? 'decoded' : 'failed decoding',
