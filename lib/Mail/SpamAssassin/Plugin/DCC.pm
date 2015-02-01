@@ -91,6 +91,17 @@ use IO::Socket;
 use vars qw(@ISA);
 @ISA = qw(Mail::SpamAssassin::Plugin);
 
+our $io_socket_module_name;
+BEGIN {
+  if (eval { require IO::Socket::IP }) {
+    $io_socket_module_name = 'IO::Socket::IP';
+  } elsif (eval { require IO::Socket::INET6 }) {
+    $io_socket_module_name = 'IO::Socket::INET6';
+  } elsif (eval { require IO::Socket::INET }) {
+    $io_socket_module_name = 'IO::Socket::INET';
+  }
+}
+
 sub new {
   my $class = shift;
   my $mailsaobject = shift;
@@ -277,10 +288,6 @@ The default is C<undef>.
 
 	$self->{dcc_dccifd_host} = $host;
 	$self->{dcc_dccifd_port} = $port;
-	if ($host !~ /^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\z/) {
-	  # remember to try IPv6 if we can with a host name or non-IPv4 address
-	  $self->{dcc_dccifd_IPv6} = eval { require IO::Socket::INET6 };
-	}
 	dbg("config: dcc_dccifd_path set to [%s]:%s", $host, $port);
 
       } else {
@@ -535,9 +542,9 @@ sub is_dccifd_available {
   # dccifd remains available until it breaks
   return $self->{dccifd_available} if $self->{dccifd_available};
 
-  # deal with configured INET socket
+  # deal with configured INET or INET6 socket
   if (defined $conf->{dcc_dccifd_host}) {
-    dbg("dcc: dccifd is available via INET socket [%s]:%s",
+    dbg("dcc: dccifd is available via socket [%s]:%s",
 	$conf->{dcc_dccifd_host}, $conf->{dcc_dccifd_port});
     return ($self->{dccifd_available} = 1);
   }
@@ -589,34 +596,22 @@ sub dccifd_connect {
   my $sock;
 
   if (defined $sockpath) {
+    dbg("$tag connecting to local socket $sockpath");
     $sock = IO::Socket::UNIX->new(Type => SOCK_STREAM, Peer => $sockpath);
-    if ($sock) {
-      dbg("$tag connected to local socket $sockpath");
-      return $sock;
-    }
-    $self->{dccifd_available} = 0;
-    info("$tag failed to connect to local socket $sockpath");
-    return $sock
+    info("$tag failed to connect to local socket $sockpath") if !$sock;
+
+  } else {  # must be TCP/IP
+    my $host = $conf->{dcc_dccifd_host};
+    my $port = $conf->{dcc_dccifd_port};
+    dbg("$tag connecting to [%s]:%s using %s",
+        $host, $port, $io_socket_module_name);
+    $sock = $io_socket_module_name->new(
+              Proto => 'tcp', PeerAddr => $host, PeerPort => $port);
+    info("$tag failed to connect to [%s]:%s using %s: %s",
+         $host, $port, $io_socket_module_name, $!) if !$sock;
   }
 
-  # must be TCP/IP
-  my $host = $conf->{dcc_dccifd_host};
-  my $port = $conf->{dcc_dccifd_port};
-
-  if ($conf->{dcc_dccifd_IPv6}) {
-    # try IPv6 if we can with a host name or non-IPv4 address
-    dbg("$tag connecting to inet6 socket [$host]:$port");
-    $sock = IO::Socket::INET6->new(
-		  Proto => 'tcp', PeerAddr => $host, PeerPort => $port);
-    # fall back to IPv4 if that failed
-  }
-  if (!$sock) {
-    dbg("$tag connecting to inet4 socket [$host]:$port");
-    $sock = IO::Socket::INET->new(
-		Proto => 'tcp', PeerAddr => $host, PeerPort => $port);
-  }
-
-  info("failed to connect to [$host]:$port : $!") if !$sock;
+  $self->{dccifd_available} = 0  if !$sock;
   return $sock;
 }
 
