@@ -407,8 +407,10 @@ sub _normalize {
     $charset_declared = 'us-ascii';
   }
 
-  if ($charset_declared =~ /^(?:US-)?ASCII\z/i && $_[1] !~ tr/\x00-\x7F//c ) {
-    # declared as US-ASCII and it really is
+  if ($charset_declared =~
+        /^(?: (?:US-)?ASCII | ANSI[_ ]?X3\.4-(?:1986|1968) | ISO646-US )\z/xsi
+      &&  $_[1] !~ tr/\x00-\x7F//c ) {
+    # declared as US-ASCII (a.k.a. ANSI X3.4-1986) and it really is
     dbg("message: kept, charset really is US-ASCII as declared");
     return $_[1];  # is all-ASCII, no need for decoding
   }
@@ -485,17 +487,16 @@ sub _normalize {
   # Note that Windows-1252 is a proper superset of ISO-8859-1.
   #
   if (!defined $rv && $enc_w1252 &&
-      #             ASCII  NBSP (c) SHY ...  '
-      $_[1] !~ tr/\x00-\x7F\xA0\xA9\xAD\x85\x92//c)
-  { # ASCII + NBSP + SHY + some special characters
-    # NBSP (A0) and SHY (AD) are at the same position in ISO-8859-* chsets too
+      #             ASCII  NBSP (c) SHY  '   "  ...   '".-   TM
+      $_[1] !~ tr/\x00-\x7F\xA0\xA9\xAD\x82\x84\x85\x91-\x97\x99//c)
+  { # ASCII + NBSP + SHY + some punctuation characters
+    # NBSP (A0) and SHY (AD) are at the same position in ISO-8859-* too
+    # consider also: AE (r), 80 Euro
     eval { $rv = $enc_w1252->decode($_[1], 1|8) };  # FB_CROAK | LEAVE_SRC
     # the above can't fail, but keep code general just in case
     dbg("message: %s as guessed charset %s, declared %s",
         defined $rv ? 'decoded' : 'failed decoding',
         'Windows-1252', $charset_declared);
-    # consider also: A9 (c), AE (r), 99 TM, 80 Euro
-    # quotes: 82, 84, 8B, 91, 92, 93, 94, 9B, bullet: 95, dash: 96, 97
   }
 
   # If we were unsuccessful so far, try some guesswork
