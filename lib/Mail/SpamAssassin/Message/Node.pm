@@ -730,11 +730,6 @@ sub _decode_header {
   # separated by whitespace.
   1 while ($header_field_body =~ s/(=\?[\w_-]+\?[bqBQ]\?[^?]+\?=)\s+(=\?[\w_-]+\?[bqBQ]\?[^?]+\?=)/$1$2/g);
 
-# unless ($header_field_body =~
-#	  s/=\?([\w_-]+)\?([bqBQ])\?([^?]+)\?=/$self->__decode_header($1, uc($2), $3)/ge) {
-#   $header_field_body = $self->_normalize($header_field_body);
-# }
-
   # Bug 6945: header fields have no inherent character set;
   # only decode and normalize properly encoded RFC 2047 substrings,
   # leave the rest as plain octets
