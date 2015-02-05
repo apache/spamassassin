@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus grenier jarif kpg-core mas-cps mas-mas zmi; day 2: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus grenier jarif kpg-core llanga mas-cps mas-mas mmiroslaw-ham mmiroslaw-spam zmi; day 3: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus grenier jarif kpg-core llanga zmi
+# with results from: day 1: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus dwarren grenier jarif kpg-core mas-cps mas-mas zmi; day 2: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus grenier jarif kpg-core llanga mas-cps mas-mas zmi; day 3: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus grenier jarif kpg-core llanga mas-cps mas-mas mmiroslaw-ham mmiroslaw-spam zmi
 
 # tflags publish
 AC_BR_BONANZA
@@ -353,9 +353,6 @@ FSL_HELO_DEVICE
 FSL_HELO_FAKE
 
 # good enough
-FSL_HELO_NON_FQDN_1
-
-# good enough
 FSL_MID_419
 
 # tflags publish
@@ -603,6 +600,9 @@ NSL_RCVD_FROM_USER
 
 # good enough
 NSL_RCVD_HELO_USER
+
+# good enough
+OBFU_HTML_ATTACH
 
 # tflags publish
 OBFU_JVSCR_ESC
@@ -859,9 +859,6 @@ RISK_FREE
 # good enough
 SHORTENED_URL_SRC
 
-# good enough
-SHORT_HELO_AND_INLINE_IMAGE
-
 # tflags publish
 SINGLETS_LOW_CONTRAST
 
@@ -897,9 +894,6 @@ SUBJECT_IN_BLACKLIST
 
 # tflags userconf
 SUBJECT_IN_WHITELIST
-
-# good enough
-SUBJ_OBFU_PUNCT_MANY
 
 # good enough
 SUBJ_UNNEEDED_HTML
@@ -1001,9 +995,6 @@ AXB_RCVD_NS1GOO
 BODY_EMPTY
 
 # good enough
-BODY_SINGLE_URI
-
-# good enough
 CN_OPTOUT_EML
 
 # good enough
@@ -1016,16 +1007,7 @@ DATE_IN_FUTURE_Q_PLUS
 DEAR_EMAIL_USER
 
 # good enough
-HDRS_LCASE
-
-# good enough
-HELO_MISC_IP
-
-# good enough
-HK_GOLDDUST
-
-# good enough
-HK_NAME_DR
+HK_NAME_FM_FROM
 
 # good enough
 HK_SCAM_N13
@@ -1040,9 +1022,6 @@ HK_SPAMMY_FILENAME
 LOTTO_URI
 
 # good enough
-OBFU_JPG_ATTACH
-
-# good enough
 PHP_NOVER_MUA
 
 # good enough
@@ -1055,16 +1034,7 @@ SHARE_50_50
 STYLE_GIBBERISH
 
 # good enough
-TO_EQ_FM_DIRECT_MX
-
-# good enough
-TO_EQ_FM_HTML_ONLY
-
-# good enough
-URI_GOOGLE_DOCS
-
-# good enough
-URI_OBFU_TLD
+SUBJ_OBFU_LOW_CNTRST
 
 # tflags publish
 UC_GIBBERISH_OBFU
@@ -1158,6 +1128,9 @@ URI_HOST_IN_WHITELIST
 
 # tflags userconf
 URI_NOVOWEL
+
+# good enough
+URI_ONLY_LOW_CONTRAST
 
 # tflags publish
 URI_ONLY_MSGID_MALF
