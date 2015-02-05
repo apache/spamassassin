@@ -180,7 +180,7 @@ how frequently this may happen, mind you.
 
 =item opt_from_regex
 
-This setting allows for flexibility in specifying the mbox format From seperator.
+This setting allows for flexibility in specifying the mbox format From separator.
 
 It defaults to the regular expression:
 

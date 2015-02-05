@@ -253,7 +253,7 @@ This option tells SpamAssassin where to find the dccifd socket instead
 of a local Unix socket named C<dccifd> in the C<dcc_home> directory.
 If a socket is specified or found, use it instead of C<dccproc>.
 
-If specifed, C<dcc_dccifd_path> is the absolute path of local Unix socket
+If specified, C<dcc_dccifd_path> is the absolute path of local Unix socket
 or an INET socket specified as C<[Host]:Port> or C<Host:Port>.
 Host can be an IPv4 or IPv6 address or a host name
 Port is a TCP port number. The brackets are required for an IPv6 address.
