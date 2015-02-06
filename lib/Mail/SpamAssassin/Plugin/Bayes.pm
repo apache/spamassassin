@@ -155,6 +155,7 @@ $MARK_PRESENCE_ONLY_HDRS = qr{(?: X-Face
 # for results.  The winners are now the default settings.
 use constant IGNORE_TITLE_CASE => 1;
 use constant TOKENIZE_LONG_8BIT_SEQS_AS_TUPLES => 1;
+use constant TOKENIZE_LONG_8BIT_SEQS_AS_UTF8_CHARS => 1;
 use constant TOKENIZE_LONG_TOKENS_AS_SKIPS => 1;
 
 # tweaks by jm on May 12 2003, see -devel email at
@@ -1156,6 +1157,10 @@ sub _tokenize_line {
 
   my $magic_re = $self->{store}->get_magic_re();
 
+  # Note that split() in scope of 'use bytes' results in words with utf8 flag
+  # cleared, even if the source string has perl characters semantics !!!
+  # Is this really still desirable?
+
   foreach my $token (split) {
     $token =~ s/^[-'"\.,]+//;        # trim non-alphanum chars at start or end
     $token =~ s/[-'"\.,]+$//;        # so we don't get loads of '"foo' tokens
@@ -1195,6 +1200,17 @@ sub _tokenize_line {
     # the domain ".net" appeared in the To header.
     #
     if ($len > MAX_TOKEN_LENGTH && $token !~ /\*/) {
+
+      if (TOKENIZE_LONG_8BIT_SEQS_AS_UTF8_CHARS && $token =~ /[\x80-\xBF]{2}/) {
+	# only collect 3- and 4-byte UTF-8 sequences, ignore 2-byte sequences
+	my(@t) = $token =~ /( (?: [\xE0-\xEF] | [\xF0-\xF4][\x80-\xBF] )
+                              [\x80-\xBF]{2} )/xsg;
+	if (@t) {
+          push (@rettokens, map('u8:'.$_, @t));
+	  next;
+	}
+      }
+
       if (TOKENIZE_LONG_8BIT_SEQS_AS_TUPLES && $token =~ /[\xa0-\xff]{2}/) {
 	# Matt sez: "Could be asian? Autrijus suggested doing character ngrams,
 	# but I'm doing tuples to keep the dbs small(er)."  Sounds like a plan
