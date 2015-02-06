@@ -1202,7 +1202,8 @@ sub _tokenize_line {
     if ($len > MAX_TOKEN_LENGTH && $token !~ /\*/) {
 
       if (TOKENIZE_LONG_8BIT_SEQS_AS_UTF8_CHARS && $token =~ /[\x80-\xBF]{2}/) {
-	# only collect 3- and 4-byte UTF-8 sequences, ignore 2-byte sequences
+	# Bug 7135
+	# collect 3- and 4-byte UTF-8 sequences, ignore 2-byte sequences
 	my(@t) = $token =~ /( (?: [\xE0-\xEF] | [\xF0-\xF4][\x80-\xBF] )
                               [\x80-\xBF]{2} )/xsg;
 	if (@t) {
