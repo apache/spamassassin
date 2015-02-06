@@ -1,5 +1,8 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus dwarren grenier jarif kpg-core mas-cps mas-mas zmi; day 2: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus grenier jarif kpg-core llanga mas-cps mas-mas zmi; day 3: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus grenier jarif kpg-core llanga mas-cps mas-mas mmiroslaw-ham mmiroslaw-spam zmi
+# with results from: day 1: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus dwarren grenier jarif kpg-core mas-cps mas-mas zmi; day 2: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus dwarren grenier jarif kpg-core llanga mas-cps mas-mas zmi; day 3: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus grenier jarif kpg-core llanga mas-cps mas-mas zmi
+
+# good enough
+ACCT_PHISHING
 
 # tflags publish
 AC_BR_BONANZA
@@ -91,11 +94,17 @@ AD_PREFS
 # tflags userconf
 ALL_TRUSTED
 
+# good enough
+AXB_HELO_HOME_UN
+
 # tflags publish
 AXB_MH_APPHTML
 
 # good enough
 AXB_RBDY_TENANDTEN
+
+# good enough
+AXB_RCVD_NS1GOO
 
 # good enough
 AXB_URI_CDGB
@@ -151,6 +160,9 @@ BAYES_999
 # good enough
 BIGNUM_EMAILS
 
+# good enough
+BODY_EMPTY
+
 # tflags publish
 BODY_URI_ONLY
 
@@ -172,6 +184,9 @@ CK_HELO_GENERIC
 # tflags publish
 CN_B2B_SPAMMER
 
+# good enough
+CN_OPTOUT_EML
+
 # tflags publish
 COMMENT_GIBBERISH
 
@@ -182,7 +197,16 @@ COMPENSATION
 CORRUPT_FROM_LINE_IN_HDRS
 
 # good enough
+DATE_DOTS
+
+# good enough
+DATE_IN_FUTURE_Q_PLUS
+
+# good enough
 DEAR_BENEFICIARY
+
+# good enough
+DEAR_EMAIL_USER
 
 # good enough
 DEAR_WINNER
@@ -482,6 +506,9 @@ HK_RANDOM_REPLYTO
 HK_SCAM_N1
 
 # good enough
+HK_SCAM_N13
+
+# good enough
 HK_SCAM_N15
 
 # good enough
@@ -495,6 +522,12 @@ HK_SCAM_N8
 
 # good enough
 HK_SCAM_S1
+
+# good enough
+HK_SCAM_S25
+
+# good enough
+HK_SPAMMY_FILENAME
 
 # tflags userconf
 HTML_CHARSET_FARAWAY
@@ -531,6 +564,9 @@ LOTTO_AGENT
 
 # good enough
 LOTTO_DEPT
+
+# good enough
+LOTTO_URI
 
 # tflags publish
 LUCRATIVE
@@ -601,9 +637,6 @@ NSL_RCVD_FROM_USER
 # good enough
 NSL_RCVD_HELO_USER
 
-# good enough
-OBFU_HTML_ATTACH
-
 # tflags publish
 OBFU_JVSCR_ESC
 
@@ -612,6 +645,9 @@ OBFU_TEXT_ATTACH
 
 # good enough
 PDS_FROM_2_EMAILS
+
+# good enough
+PHP_NOVER_MUA
 
 # tflags publish
 PP_MIME_FAKE_ASCII_TEXT
@@ -857,6 +893,12 @@ REPLYTO_WITHOUT_TO_CC
 RISK_FREE
 
 # good enough
+SERGIO_SUBJECT_VIAGRA01
+
+# good enough
+SHARE_50_50
+
+# good enough
 SHORTENED_URL_SRC
 
 # tflags publish
@@ -888,6 +930,9 @@ SPF_SOFTFAIL
 
 # tflags publish
 STOCK_LOW_CONTRAST
+
+# tflags publish
+STYLE_GIBBERISH
 
 # tflags userconf
 SUBJECT_IN_BLACKLIST
@@ -983,58 +1028,40 @@ TVD_VISIT_PHARMA
 TW_GIBBERISH_MANY
 
 # good enough
-ACCT_PHISHING
+AXB_XRCVD_8B8
 
 # good enough
-AXB_HELO_HOME_UN
+DOS_OUTLOOK_TO_MX_IMAGE
 
 # good enough
-AXB_RCVD_NS1GOO
-
-# good enough
-BODY_EMPTY
-
-# good enough
-CN_OPTOUT_EML
-
-# good enough
-DATE_DOTS
-
-# good enough
-DATE_IN_FUTURE_Q_PLUS
-
-# good enough
-DEAR_EMAIL_USER
+DX_TEXT_05
 
 # good enough
 HK_NAME_FM_FROM
 
 # good enough
-HK_SCAM_N13
+HTML_FONT_TINY
 
 # good enough
-HK_SCAM_S25
+NAME_EMAIL_DIFF
 
 # good enough
-HK_SPAMMY_FILENAME
+OBFU_ATTACH_MISSP
 
 # good enough
-LOTTO_URI
+SERGIO_SUBJECT_PORN006
 
 # good enough
-PHP_NOVER_MUA
+SERGIO_SUBJECT_PORN014
 
 # good enough
-SERGIO_SUBJECT_VIAGRA01
+SERGIO_SUBJECT_PORN015
 
 # good enough
-SHARE_50_50
-
-# tflags publish
-STYLE_GIBBERISH
+TR_FILLER_TEXT
 
 # good enough
-SUBJ_OBFU_LOW_CNTRST
+URI_ONLY_LOW_CONTRAST
 
 # tflags publish
 UC_GIBBERISH_OBFU
@@ -1111,9 +1138,6 @@ URIBL_SC_SURBL
 # tflags net
 URIBL_WS_SURBL
 
-# good enough
-URI_DOTDOT_LOW_CNTRST
-
 # tflags publish
 URI_DQ_UNSUB
 
@@ -1128,9 +1152,6 @@ URI_HOST_IN_WHITELIST
 
 # tflags userconf
 URI_NOVOWEL
-
-# good enough
-URI_ONLY_LOW_CONTRAST
 
 # tflags publish
 URI_ONLY_MSGID_MALF
