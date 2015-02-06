@@ -407,39 +407,48 @@ sub _normalize {
     $charset_declared = 'us-ascii';
   }
 
-  if ($charset_declared =~
-        /^(?: (?:US-)?ASCII | ANSI[_ ]?X3\.4-(?:1986|1968) | ISO646-US )\z/xsi
-      &&  $_[1] !~ tr/\x00-\x7F//c ) {
-    # declared as US-ASCII (a.k.a. ANSI X3.4-1986) and it really is
-    dbg("message: kept, charset really is US-ASCII as declared");
+  # number of characters with code above 127
+  my $cnt_8bits = $_[1] =~ tr/\x00-\x7F//c;
+
+  if (!$cnt_8bits &&
+      $charset_declared =~
+        /^(?: (?:US-)?ASCII | ANSI [_ ]? X3\.4- (?: 1986|1968 ) |
+              ISO646-US )\z/xsi)
+  { # declared as US-ASCII (a.k.a. ANSI X3.4-1986) and it really is
+    dbg("message: kept, charset is US-ASCII as declared");
     return $_[1];  # is all-ASCII, no need for decoding
   }
 
-  if ($charset_declared =~
-        /^(?: ISO-?8859-\d{1,2} | Windows-\d{4} | KOI8-[A-Z]{1,2} )\z/xsi &&
-      $_[1] !~ tr/\x00-\x7F//c )  # is all-ASCII
+  if (!$cnt_8bits &&
+      $charset_declared =~
+        /^(?: ISO [ -]? 8859 (?: - \d{1,2} )? | Windows-\d{4} |
+              KOI8-[A-Z]{1,2} )\z/xsi)
   { # declared as extended ASCII, but it is actually a plain 7-bit US-ASCII
-    dbg("message: kept, is all-ASCII, declared charset %s", $charset_declared);
+    dbg("message: kept, charset is US-ASCII, declared %s", $charset_declared);
     return $_[1];  # is all-ASCII, no need for decoding
   }
 
   # Try first to strictly decode based on a declared character set.
 
   my $rv;
-  if ($charset_declared =~ /^(?:US-)?ASCII\z/i) {
-    # declared as US-ASCII but contains 8-bit characters, makes no sense
-    # to attempt decoding first as strict US-ASCII as we know it would fail
-
-  } elsif ($charset_declared =~ /^UTF-?8\z/i) {
+  if ($charset_declared =~ /^UTF-?8\z/i) {
     # attempt decoding as strict UTF-8, but as our intention is to return
     # the string encoded as UTF-8 anyway, the re-encoding step can be avoided
     # by returning original string as long as the decoding proves successful
     if (eval { defined $enc_utf8->decode($_[1], 1|8) }) { # FB_CROAK | LEAVE_SRC
-      dbg("message: kept, valid charset UTF-8");
+      dbg("message: kept, valid charset UTF-8 as declared");
       return $_[1];
     } else {
       dbg("message: failed decoding as declared charset UTF-8");
     };
+
+  } elsif ($cnt_8bits && eval { defined $enc_utf8->decode($_[1], 1|8) }) {
+    dbg("message: kept, valid charset UTF-8, declared %s", $charset_declared);
+    return $_[1];
+
+  } elsif ($charset_declared =~ /^(?:US-)?ASCII\z/i) {
+    # declared as US-ASCII but contains 8-bit characters, makes no sense
+    # to attempt decoding first as strict US-ASCII as we know it would fail
 
   } else {
     # try decoding as a declared character set
@@ -480,13 +489,18 @@ sub _normalize {
     }
   }
 
-  # If the above failed, check if it is US-ASCII, possibly with a few
+  # If the above failed, check if it is US-ASCII, possibly extended by few
   # NBSP or SHY characters from ISO-8859-* or Windows-1252, or containing
   # some popular punctuation or special characters from Windows-1252 in
   # the \x80-\x9F range (which is unassigned in ISO-8859-*).
   # Note that Windows-1252 is a proper superset of ISO-8859-1.
   #
-  if (!defined $rv && $enc_w1252 &&
+  if (!defined $rv && !$cnt_8bits) {
+    dbg("message: kept, guessed charset is US-ASCII, declared %s",
+        $charset_declared);
+    return $_[1];  # is all-ASCII, no need for decoding
+
+  } elsif (!defined $rv && $enc_w1252 &&
       #             ASCII  NBSP (c) SHY  '   "  ...   '".-   TM
       $_[1] !~ tr/\x00-\x7F\xA0\xA9\xAD\x82\x84\x85\x91-\x97\x99//c)
   { # ASCII + NBSP + SHY + some punctuation characters
