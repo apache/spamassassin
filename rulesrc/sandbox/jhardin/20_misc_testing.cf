@@ -616,7 +616,7 @@ endif
 rawbody        __STYLE_GIBBERISH_2      /\.style\w{0,20}\s{1,10}\{[^:;]{200}/im
 rawbody        __STYLE_GIBBERISH_3      /<style(?:\s[^>]{0,40})?>\s{0,80}(?:[\w:]{1,30}\s{0,10}\{[^}]{1,50}\}\s{0,80}){1,5}(?:[\w,.']{1,30}\s{1,10}){40}/im
 meta           __STYLE_GIBBERISH        (__STYLE_GIBBERISH_1 || __STYLE_GIBBERISH_2 || __STYLE_GIBBERISH_3)
-meta           STYLE_GIBBERISH          __STYLE_GIBBERISH && (__BODY_XHTML || !__STYLE_TAG_IN_BODY) && !__RCD_RDNS_MX_MESSY && !__HAS_THREAD_INDEX && !__ANY_OUTLOOK_MUA && !__MIME_QP && !__THREADED 
+meta           STYLE_GIBBERISH          __STYLE_GIBBERISH && (__BODY_XHTML || !__STYLE_TAG_IN_BODY) && !__RCD_RDNS_MX_MESSY && !__HAS_THREAD_INDEX && !__ANY_OUTLOOK_MUA && !__MIME_QP && !ALL_TRUSTED
 describe       STYLE_GIBBERISH          Nonsense in HTML <STYLE> tag
 score          STYLE_GIBBERISH          3.50	# limit
 tflags         STYLE_GIBBERISH          publish
