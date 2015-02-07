@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus dwarren grenier jarif kpg-core mas-cps mas-mas zmi; day 2: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus dwarren grenier jarif kpg-core llanga mas-cps mas-mas zmi; day 3: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus grenier jarif kpg-core llanga mas-cps mas-mas zmi
+# with results from: day 1: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus dwarren grenier jarif kpg-core mas-cps mas-mas zmi; day 2: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus dwarren grenier jarif kpg-core llanga mas-cps mas-mas zmi; day 3: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus dwarren grenier jarif kpg-core llanga mas-cps mas-mas zmi
 
 # good enough
 ACCT_PHISHING
@@ -488,6 +488,9 @@ HK_NAME_DRUGS
 HK_NAME_FM_DR
 
 # good enough
+HK_NAME_FM_FROM
+
+# good enough
 HK_NAME_FM_MR_MRS
 
 # good enough
@@ -636,6 +639,9 @@ NSL_RCVD_FROM_USER
 
 # good enough
 NSL_RCVD_HELO_USER
+
+# good enough
+OBFU_HTML_ATTACH
 
 # tflags publish
 OBFU_JVSCR_ESC
@@ -1028,7 +1034,10 @@ TVD_VISIT_PHARMA
 TW_GIBBERISH_MANY
 
 # good enough
-AXB_XRCVD_8B8
+BILLION_OVERLAP
+
+# good enough
+DOS_BODY_HIGH_NO_MID
 
 # good enough
 DOS_OUTLOOK_TO_MX_IMAGE
@@ -1037,10 +1046,10 @@ DOS_OUTLOOK_TO_MX_IMAGE
 DX_TEXT_05
 
 # good enough
-HK_NAME_FM_FROM
+HDRS_LCASE
 
 # good enough
-HTML_FONT_TINY
+KB_FORGED_MOZ4
 
 # good enough
 NAME_EMAIL_DIFF
@@ -1059,9 +1068,6 @@ SERGIO_SUBJECT_PORN015
 
 # good enough
 TR_FILLER_TEXT
-
-# good enough
-URI_ONLY_LOW_CONTRAST
 
 # tflags publish
 UC_GIBBERISH_OBFU
@@ -1152,6 +1158,9 @@ URI_HOST_IN_WHITELIST
 
 # tflags userconf
 URI_NOVOWEL
+
+# good enough
+URI_ONLY_LOW_CONTRAST
 
 # tflags publish
 URI_ONLY_MSGID_MALF
