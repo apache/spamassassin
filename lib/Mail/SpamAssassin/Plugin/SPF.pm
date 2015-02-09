@@ -228,6 +228,15 @@ working downwards until results are successfully parsed.
   $conf->{parser}->register_commands(\@cmds);
 }
 
+
+=item has_check_for_spf_errors
+
+Adds capability check for "if can()" for check_for_spf_permerror, check_for_spf_temperror, check_for_spf_helo_permerror and check_for_spf_helo_permerror
+  
+=cut 
+
+sub has_check_for_spf_errors { 1 }
+
 # SPF support
 sub check_for_spf_pass {
   my ($self, $scanner) = @_;

@@ -72,7 +72,7 @@ sub are_more_high_bits_set {
 
 =item has_check_for_ascii_text_illegal
 
-Adds capability check for "if can()" for has_check_for_ascii_text_illegal
+Adds capability check for "if can()" for check_for_ascii_text_illegal
 
 =cut
 
