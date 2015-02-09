@@ -733,6 +733,7 @@ sub _check_spf {
     elsif ($result eq 'none') { $scanner->{spf_none} = 1; }
     elsif ($result eq 'fail') { $scanner->{spf_fail} = 1; }
     elsif ($result eq 'softfail') { $scanner->{spf_softfail} = 1; }
+    elsif ($result eq 'permerror') { $scanner->{spf_permerror} = 1; }
     elsif ($result eq 'temperror') { $scanner->{spf_temperror} = 1; }
     elsif ($result eq 'error') { $scanner->{spf_temperror} = 1; }
 
