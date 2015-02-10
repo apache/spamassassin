@@ -421,7 +421,7 @@ sub _normalize {
 
   if (!$cnt_8bits &&
       $charset_declared =~
-        /^(?: ISO [ -]? 8859 (?: - \d{1,2} )? | Windows-\d{4} |
+        /^(?: UTF-?8 | ISO [ -]? 8859 (?: - \d{1,2} )? | Windows-\d{4} |
               KOI8-[A-Z]{1,2} )\z/xsi)
   { # declared as extended ASCII, but it is actually a plain 7-bit US-ASCII
     dbg("message: kept, charset is US-ASCII, declared %s", $charset_declared);
