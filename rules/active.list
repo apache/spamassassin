@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus dwarren grenier jarif kpg-core mas-cps mas-mas zmi; day 2: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus dwarren grenier jarif kpg-core llanga mas-cps mas-mas zmi; day 3: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus dwarren grenier jarif kpg-core llanga mas-cps mas-mas zmi
+# with results from: day 1: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus dwarren grenier jarif kpg-core mas-cps mas-mas mmiroslaw-ham mmiroslaw-spam zmi; day 2: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus dwarren grenier jarif kpg-core llanga zmi; day 3: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus dwarren grenier jarif kpg-core llanga mas-cps mas-mas zmi
 
 # good enough
 ACCT_PHISHING
@@ -104,9 +104,6 @@ AXB_MH_APPHTML
 AXB_RBDY_TENANDTEN
 
 # good enough
-AXB_RCVD_NS1GOO
-
-# good enough
 AXB_URI_CDGB
 
 # good enough
@@ -123,9 +120,6 @@ AXB_X_AOL_SEZ_S
 
 # good enough
 AXB_X_FF_SEZ_S
-
-# good enough
-BANKING_LAWS
 
 # tflags learn
 BAYES_00
@@ -161,7 +155,7 @@ BAYES_999
 BIGNUM_EMAILS
 
 # good enough
-BODY_EMPTY
+BILLION_OVERLAP
 
 # tflags publish
 BODY_URI_ONLY
@@ -204,9 +198,6 @@ DATE_IN_FUTURE_Q_PLUS
 
 # good enough
 DEAR_BENEFICIARY
-
-# good enough
-DEAR_EMAIL_USER
 
 # good enough
 DEAR_WINNER
@@ -254,10 +245,10 @@ DOS_ANAL_SPAM_MAILER
 DOS_OE_TO_MX
 
 # good enough
-DOS_OE_TO_MX_IMAGE
+DOS_OUTLOOK_TO_MX
 
 # good enough
-DOS_OUTLOOK_TO_MX
+DOS_OUTLOOK_TO_MX_IMAGE
 
 # good enough
 DSN_NO_MIMEVERSION
@@ -270,6 +261,9 @@ DX_TEXT_02
 
 # tflags publish
 DX_TEXT_03
+
+# good enough
+DX_TEXT_05
 
 # good enough
 DYN_RDNS_SHORT_HELO_HTML
@@ -365,9 +359,6 @@ FROM_MISSP_XPRIO
 FSL_CTYPE_WIN1251
 
 # good enough
-FSL_HELO_BARE_IP_1
-
-# good enough
 FSL_HELO_BARE_IP_2
 
 # good enough
@@ -454,6 +445,9 @@ HASHCASH_2SPEND
 # tflags userconf
 HASHCASH_HIGH
 
+# good enough
+HDRS_LCASE
+
 # tflags publish
 HEADER_FROM_DIFFERENT_DOMAINS
 
@@ -525,9 +519,6 @@ HK_SCAM_N8
 
 # good enough
 HK_SCAM_S1
-
-# good enough
-HK_SCAM_S25
 
 # good enough
 HK_SPAMMY_FILENAME
@@ -625,6 +616,9 @@ MONEY_LOTTERY
 # good enough
 MSOE_MID_WRONG_CASE
 
+# good enough
+NAME_EMAIL_DIFF
+
 # tflags net
 NO_DNS_FOR_FROM
 
@@ -639,6 +633,9 @@ NSL_RCVD_FROM_USER
 
 # good enough
 NSL_RCVD_HELO_USER
+
+# good enough
+OBFU_ATTACH_MISSP
 
 # tflags publish
 OBFU_JVSCR_ESC
@@ -896,6 +893,15 @@ REPLYTO_WITHOUT_TO_CC
 RISK_FREE
 
 # good enough
+SERGIO_SUBJECT_PORN006
+
+# good enough
+SERGIO_SUBJECT_PORN014
+
+# good enough
+SERGIO_SUBJECT_PORN015
+
+# good enough
 SERGIO_SUBJECT_VIAGRA01
 
 # good enough
@@ -1031,40 +1037,13 @@ TVD_VISIT_PHARMA
 TW_GIBBERISH_MANY
 
 # good enough
-BILLION_OVERLAP
+LIST_PARTIAL
 
 # good enough
-DOS_BODY_HIGH_NO_MID
+OBFU_HTML_ATTACH
 
 # good enough
-DOS_OUTLOOK_TO_MX_IMAGE
-
-# good enough
-DX_TEXT_05
-
-# good enough
-HDRS_LCASE
-
-# good enough
-KB_FORGED_MOZ4
-
-# good enough
-NAME_EMAIL_DIFF
-
-# good enough
-OBFU_ATTACH_MISSP
-
-# good enough
-SERGIO_SUBJECT_PORN006
-
-# good enough
-SERGIO_SUBJECT_PORN014
-
-# good enough
-SERGIO_SUBJECT_PORN015
-
-# good enough
-TR_FILLER_TEXT
+URI_DOTDOT_LOW_CNTRST
 
 # tflags publish
 UC_GIBBERISH_OBFU
