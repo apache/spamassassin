@@ -746,25 +746,32 @@ sub _decode_header {
   $header_field_body =~ s/\n[ \t]+/\n /g;
   $header_field_body =~ s/\015?\012//gs;
 
-  # Bug 6945: some header fields must not be processed for MIME encoding
   if ($header_field_name =~
        /^ (?: (?: Received | (?:Resent-)? (?: Message-ID | Date ) |
                   MIME-Version | References | In-Reply-To ) \z
             | (?: List- | Content- ) ) /xsi ) {
-    return $header_field_body;
+    # Bug 6945: some header fields must not be processed for MIME encoding
+
+  } else {
+    local($1,$2,$3,$4);
+
+    # Multiple encoded sections must ignore the interim whitespace.
+    # To avoid possible FPs with (\s+(?==\?))?, look for the whole RE
+    # separated by whitespace.
+    1 while $header_field_body =~
+              s{ ( = \? [A-Za-z0-9_-]+ \? [bqBQ] \? [^?]* \? = ) \s+
+                 ( = \? [A-Za-z0-9_-]+ \? [bqBQ] \? [^?]* \? = ) }
+               {$1$2}xsg;
+
+    # transcode properly encoded RFC 2047 substrings into UTF-8 octets,
+    # leave everything else unchanged as it is supposed to be UTF-8 (RFC 6532)
+    # or plain US-ASCII
+    $header_field_body =~
+      s{ (?: = \? ([A-Za-z0-9_-]+) \? ([bqBQ]) \? ([^?]*) \? = ) }
+       { $self->__decode_header($1, uc($2), $3) }xsge;
   }
 
-  # multiple encoded sections must ignore the interim whitespace.
-  # to avoid possible FPs with (\s+(?==\?))?, look for the whole RE
-  # separated by whitespace.
-  1 while ($header_field_body =~ s/(=\?[\w_-]+\?[bqBQ]\?[^?]+\?=)\s+(=\?[\w_-]+\?[bqBQ]\?[^?]+\?=)/$1$2/g);
-
-  # Bug 6945: header fields have no inherent character set;
-  # only decode and normalize properly encoded RFC 2047 substrings,
-  # leave the rest as plain octets
-  $header_field_body =~ s{ = \? ([A-Za-z0-9_-]+) \? ([bqBQ]) \? ([^?]+) \? = }
-                         { $self->__decode_header($1, uc($2), $3) }xge;
-
+# dbg("message: _decode_header %s: %s", $header_field_name, $header_field_body);
   return $header_field_body;
 }
 
