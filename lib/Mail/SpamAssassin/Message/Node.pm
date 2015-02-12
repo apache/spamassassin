@@ -394,14 +394,19 @@ sub _html_render {
   return 0;
 }
 
-# Convert character set of a given text into UTF-8 octets.
+# Decode character set of a given text to perl characters (Unicode),
+# then encode into UTF-8 octets if requested.
 #
 sub _normalize {
   my $self = $_[0];
 # my $data = $_[1];  # avoid copying large strings
   my $charset_declared = $_[2];
+  my $return_decoded = $_[3];  # true: characters semantic, false: UTF-8 octets
 
   return $_[1]  unless $self->{normalize} && $enc_utf8;
+
+# warn "message: _normalize() was given characters, expected bytes: $_[1]\n"
+#   if Encode::is_utf8($_[1]);
 
   if (!defined $charset_declared || $charset_declared eq '') {
     $charset_declared = 'us-ascii';
@@ -412,7 +417,7 @@ sub _normalize {
 
   if (!$cnt_8bits &&
       $charset_declared =~
-        /^(?: (?:US-)?ASCII | ANSI [_ ]? X3\.4- (?: 1986|1968 ) |
+        /^(?: (?:US-)?ASCII | ANSI[_ ]? X3\.4- (?:1986|1968) |
               ISO646-US )\z/xsi)
   { # declared as US-ASCII (a.k.a. ANSI X3.4-1986) and it really is
     dbg("message: kept, charset is US-ASCII as declared");
@@ -421,8 +426,9 @@ sub _normalize {
 
   if (!$cnt_8bits &&
       $charset_declared =~
-        /^(?: UTF-?8 | ISO [ -]? 8859 (?: - \d{1,2} )? | Windows-\d{4} |
-              KOI8-[A-Z]{1,2} )\z/xsi)
+        /^(?: ISO[ -]?8859 (?: - \d{1,2} )? | Windows-\d{4} |
+              UTF-?8 | (KOI8|EUC)-[A-Z]{1,2} |
+              Big5 | GBK | GB[ -]?18030 (?:-20\d\d)? )\z/xsi)
   { # declared as extended ASCII, but it is actually a plain 7-bit US-ASCII
     dbg("message: kept, charset is US-ASCII, declared %s", $charset_declared);
     return $_[1];  # is all-ASCII, no need for decoding
@@ -432,19 +438,18 @@ sub _normalize {
 
   my $rv;
   if ($charset_declared =~ /^UTF-?8\z/i) {
-    # attempt decoding as strict UTF-8, but as our intention is to return
-    # the string encoded as UTF-8 anyway, the re-encoding step can be avoided
-    # by returning original string as long as the decoding proves successful
-    if (eval { defined $enc_utf8->decode($_[1], 1|8) }) { # FB_CROAK | LEAVE_SRC
-      dbg("message: kept, valid charset UTF-8 as declared");
-      return $_[1];
+    # attempt decoding as strict UTF-8  (flags: FB_CROAK | LEAVE_SRC)
+    if (eval { $rv = $enc_utf8->decode("$_[1]", 1|8); defined $rv }) {
+      dbg("message: decoded as declared charset UTF-8");
+      return $return_decoded ? $rv : $_[1];
     } else {
       dbg("message: failed decoding as declared charset UTF-8");
     };
 
-  } elsif ($cnt_8bits && eval { defined $enc_utf8->decode($_[1], 1|8) }) {
-    dbg("message: kept, valid charset UTF-8, declared %s", $charset_declared);
-    return $_[1];
+  } elsif ($cnt_8bits &&
+           eval { $rv = $enc_utf8->decode("$_[1]", 1|8); defined $rv }) {
+    dbg("message: decoded as charset UTF-8, declared %s", $charset_declared);
+    return $return_decoded ? $rv : $_[1];
 
   } elsif ($charset_declared =~ /^(?:US-)?ASCII\z/i) {
     # declared as US-ASCII but contains 8-bit characters, makes no sense
@@ -477,7 +482,7 @@ sub _normalize {
       dbg("message: failed decoding, no decoder for a declared charset %s",
           $chset);
     } else {
-      eval { $rv = $decoder->decode($_[1], 1|8) };  # FB_CROAK | LEAVE_SRC
+      eval { $rv = $decoder->decode("$_[1]", 1|8) };  # FB_CROAK | LEAVE_SRC
       if (lc $chset eq lc $charset_declared) {
         dbg("message: %s as declared charset %s",
             defined $rv ? 'decoded' : 'failed decoding', $charset_declared);
@@ -506,7 +511,7 @@ sub _normalize {
   { # ASCII + NBSP + SHY + some punctuation characters
     # NBSP (A0) and SHY (AD) are at the same position in ISO-8859-* too
     # consider also: AE (r), 80 Euro
-    eval { $rv = $enc_w1252->decode($_[1], 1|8) };  # FB_CROAK | LEAVE_SRC
+    eval { $rv = $enc_w1252->decode("$_[1]", 1|8) };  # FB_CROAK | LEAVE_SRC
     # the above can't fail, but keep code general just in case
     dbg("message: %s as guessed charset %s, declared %s",
         defined $rv ? 'decoded' : 'failed decoding',
@@ -522,14 +527,14 @@ sub _normalize {
     dbg("message: Encode::Detect::Detector not available, declared %s failed",
         $charset_declared);
   } else {
-    my $charset_detected = Encode::Detect::Detector::detect($_[1]);
+    my $charset_detected = Encode::Detect::Detector::detect("$_[1]");
     if ($charset_detected && lc $charset_detected ne lc $charset_declared) {
       my $decoder = Encode::find_encoding($charset_detected);
       if (!$decoder) {
         dbg("message: failed decoding, no decoder for a detected charset %s",
             $charset_detected);
       } else {
-        eval { $rv = $decoder->decode($_[1], 1|8) };  # FB_CROAK | LEAVE_SRC
+        eval { $rv = $decoder->decode("$_[1]", 1|8) };  # FB_CROAK | LEAVE_SRC
         dbg("message: %s as detected charset %s, declared %s",
             defined $rv ? 'decoded' : 'failed decoding',
             $charset_detected, $charset_declared);
@@ -537,13 +542,23 @@ sub _normalize {
     }
   }
 
-  if (!defined $rv) {
-    # decoding attempts failed, return unchanged octets
-    return $_[1];  # garbage-in / garbage-out
+  if (!defined $rv) {  # all decoding attempts failed so far, probably garbage
+    # go for Windows-1252 which can't fail
+    eval { $rv = $enc_w1252->decode("$_[1]") };
+    dbg("message: %s as last-resort charset %s, declared %s",
+        defined $rv ? 'decoded' : 'failed decoding',
+        'Windows-1252', $charset_declared);
   }
 
-  # decoding octets to characters was successful, now encode it as UTF-8 octets
-  return $enc_utf8->encode($rv);
+  if (!defined $rv) {  # just in case - all decoding attempts failed so far
+    return $_[1];  # garbage-in / garbage-out, return unchanged octets
+  } elsif ($return_decoded) {
+    # decoding octets to characters was successful
+    return $rv;  # return decoded as perl characters (Unicode)
+  } else {
+    # decoding octets to characters was successful
+    return $enc_utf8->encode($rv);  # return encoded as UTF-8 octets
+  }
 }
 
 =item rendered()
