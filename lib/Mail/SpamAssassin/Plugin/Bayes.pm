@@ -154,7 +154,7 @@ $MARK_PRESENCE_ONLY_HDRS = qr{(?: X-Face
 # http://sourceforge.net/p/spamassassin/mailman/message/12977556/
 # for results.  The winners are now the default settings.
 use constant IGNORE_TITLE_CASE => 1;
-use constant TOKENIZE_LONG_8BIT_SEQS_AS_TUPLES => 1;
+use constant TOKENIZE_LONG_8BIT_SEQS_AS_TUPLES => 0;
 use constant TOKENIZE_LONG_8BIT_SEQS_AS_UTF8_CHARS => 1;
 use constant TOKENIZE_LONG_TOKENS_AS_SKIPS => 1;
 
