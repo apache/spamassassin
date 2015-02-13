@@ -401,7 +401,7 @@ sub _normalize {
   my $self = $_[0];
 # my $data = $_[1];  # avoid copying large strings
   my $charset_declared = $_[2];
-  my $return_decoded = $_[3];  # true: characters semantic, false: UTF-8 octets
+  my $return_decoded = $_[3];  # true: Unicode characters, false: UTF-8 octets
 
   return $_[1]  unless $self->{normalize} && $enc_utf8;
 
@@ -581,19 +581,39 @@ sub rendered {
     # text/x-aol is ignored here, but looks like text/html ...
     return(undef,undef) unless ( $self->{'type'} =~ /^text\/(?:plain|html)$/i );
 
-    my $text = $self->_normalize($self->decode(), $self->{charset});
-    my $raw = length($text);
+    my $text = $self->decode;  # QP and Base64 decoding
 
     # render text/html always, or any other text|text/plain part as text/html
     # based on a heuristic which simulates a certain common mail client
-    if ($raw > 0 && ($self->{'type'} =~ m@^text/html$@i ||
-		     ($self->{'type'} =~ m@^text/plain$@i &&
-		      _html_render(substr($text, 0, 23)))))
+    if ($text ne '' && ($self->{'type'} =~ m{^text/html$}i ||
+		        ($self->{'type'} =~ m{^text/plain$}i &&
+		         _html_render(substr($text, 0, 23)))))
     {
       $self->{rendered_type} = 'text/html';
 
-      my $html = Mail::SpamAssassin::HTML->new();	# object
-      $html->parse($text);				# parse+render text
+      # will input text to HTML::Parser be provided as Unicode characters?
+      my $character_semantics = 0;
+      if ($self->{normalize} && $enc_utf8) {  # charset decoding requested
+        # Provide input to HTML::Parser as Unicode characters
+        # which avoids a HTML::Parser bug in utf8_mode
+        #   https://rt.cpan.org/Public/Bug/Display.html?id=99755
+        # Avoid unnecessary step of encoding->decoding by telling
+        # subroutine _normalize() to return Unicode text.  See Bug 7133
+        #
+        $character_semantics = 1;
+        $text = $self->_normalize($text, $self->{charset}, 1);
+      } elsif (!defined $self->{charset} ||
+               $self->{charset} =~ /^(?:US-ASCII|UTF-8)\z/i) {
+        # With some luck input can be interpreted as UTF-8, do not warn.
+        # It is still possible to hit the HTML::Parses utf8_mode bug however.
+      } else {
+        dbg("message: 'normalize_charset' is off, encoding will likely ".
+            "be misinterpreted; declared charset: %s", $self->{charset});
+      }
+      # the 0 requires decoded HTML results to be in bytes (not characters)
+      my $html = Mail::SpamAssassin::HTML->new($character_semantics,0); # object
+
+      $html->parse($text);  # parse+render text
       $self->{rendered} = $html->get_rendered_text();
       $self->{visible_rendered} = $html->get_rendered_text(invisible => 0);
       $self->{invisible_rendered} = $html->get_rendered_text(invisible => 1);
@@ -607,10 +627,16 @@ sub rendered {
       my $space = ($rt =~ tr/ \t\n\r\x0b\xa0/ \t\n\r\x0b\xa0/);
       $r->{html_length} = length($rt);
 
+      my $text_len = length($text);
       $r->{non_space_len} = $r->{html_length} - $space;
-      $r->{ratio} = ($raw - $r->{html_length}) / $raw;
+      $r->{ratio} = ($text_len - $r->{html_length}) / $text_len;
     }
-    else {
+
+    else {  # plain text
+      if ($self->{normalize} && $enc_utf8) {
+        # request transcoded result as UTF-8 octets!
+        $text = $self->_normalize($text, $self->{charset}, 0);
+      }
       $self->{rendered_type} = $self->{type};
       $self->{rendered} = $self->{'visible_rendered'} = $text;
       $self->{'invisible_rendered'} = '';
@@ -732,7 +758,7 @@ sub __decode_header {
     # not possible since the input has already been limited to 'B' and 'Q'
     die "message: unknown encoding type '$cte' in RFC2047 header";
   }
-  return $self->_normalize($data, $encoding);
+  return $self->_normalize($data, $encoding, 0);  # transcode to UTF-8 octets
 }
 
 # Decode base64 and quoted-printable in headers according to RFC2047.
@@ -753,7 +779,7 @@ sub _decode_header {
     # Bug 6945: some header fields must not be processed for MIME encoding
 
   } else {
-    local($1,$2,$3,$4);
+    local($1,$2,$3);
 
     # Multiple encoded sections must ignore the interim whitespace.
     # To avoid possible FPs with (\s+(?==\?))?, look for the whole RE

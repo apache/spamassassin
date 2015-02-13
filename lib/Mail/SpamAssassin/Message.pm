@@ -1142,7 +1142,8 @@ sub get_body_text_array_common {
 
   # whitespace handling (warning: small changes have large effects!)
   $text =~ s/\n+\s*\n+/\f/gs;		# double newlines => form feed
-  $text =~ tr/ \t\n\r\x0b\xa0/ /s;	# whitespace (incl. VT, NBSP) => space
+# $text =~ tr/ \t\n\r\x0b\xa0/ /s;	# whitespace (incl. VT, NBSP) => space
+  $text =~ tr/ \t\n\r\x0b/ /s;		# whitespace (incl. VT) => space
   $text =~ tr/\f/\n/;			# form feeds => newline
 
   my @textary = split_into_array_of_short_lines($text);
