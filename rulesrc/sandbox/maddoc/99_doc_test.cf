@@ -98,7 +98,8 @@ meta    FSL_STACKED_TEXT (__TWO_WORD_LINES > 10)
 ####
 
 # SMF: FP avoidance
-header  __FSL_HELO_BARE_IP_1      X-Spam-Relays-External =~ /^[^\]]+ helo=\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3} /i
+# JHardin: don't hit 127.x.x.x (loopback) addresses
+header  __FSL_HELO_BARE_IP_1      X-Spam-Relays-External =~ /^[^\]]+ helo=(?!127)\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3} /i
 meta    FSL_HELO_BARE_IP_1        __FSL_HELO_BARE_IP_1 && !FSL_HELO_BARE_IP_2
 
 # score   FSL_HELO_BARE_IP_1      0.001
@@ -106,7 +107,8 @@ meta    FSL_HELO_BARE_IP_1        __FSL_HELO_BARE_IP_1 && !FSL_HELO_BARE_IP_2
 # JHardin: FP avoidance per reports on users list 10/12/2013
 # SMF: Further FP avoidance; we don't want to match 4.3.2.1.host.domain.com
 # score limit due to partial overlap with RCVD_NUMERIC_HELO
-header  __FSL_HELO_BARE_IP_2    X-Spam-Relays-External =~ /helo=\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3} /i
+# JHardin: don't hit 127.x.x.x (loopback) addresses
+header  __FSL_HELO_BARE_IP_2    X-Spam-Relays-External =~ /helo=(?!127)\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3} /i
 meta    FSL_HELO_BARE_IP_2      __FSL_HELO_BARE_IP_2 && !__VIA_ML && !__HAS_ERRORS_TO
 score   FSL_HELO_BARE_IP_2      2.000
 
