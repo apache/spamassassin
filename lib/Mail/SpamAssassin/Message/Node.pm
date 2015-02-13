@@ -439,7 +439,7 @@ sub _normalize {
   my $rv;
   if ($charset_declared =~ /^UTF-?8\z/i) {
     # attempt decoding as strict UTF-8  (flags: FB_CROAK | LEAVE_SRC)
-    if (eval { $rv = $enc_utf8->decode("$_[1]", 1|8); defined $rv }) {
+    if (eval { $rv = $enc_utf8->decode($_[1], 1|8); defined $rv }) {
       dbg("message: decoded as declared charset UTF-8");
       return $return_decoded ? $rv : $_[1];
     } else {
@@ -447,7 +447,7 @@ sub _normalize {
     };
 
   } elsif ($cnt_8bits &&
-           eval { $rv = $enc_utf8->decode("$_[1]", 1|8); defined $rv }) {
+           eval { $rv = $enc_utf8->decode($_[1], 1|8); defined $rv }) {
     dbg("message: decoded as charset UTF-8, declared %s", $charset_declared);
     return $return_decoded ? $rv : $_[1];
 
@@ -482,7 +482,7 @@ sub _normalize {
       dbg("message: failed decoding, no decoder for a declared charset %s",
           $chset);
     } else {
-      eval { $rv = $decoder->decode("$_[1]", 1|8) };  # FB_CROAK | LEAVE_SRC
+      eval { $rv = $decoder->decode($_[1], 1|8) };  # FB_CROAK | LEAVE_SRC
       if (lc $chset eq lc $charset_declared) {
         dbg("message: %s as declared charset %s",
             defined $rv ? 'decoded' : 'failed decoding', $charset_declared);
@@ -511,7 +511,7 @@ sub _normalize {
   { # ASCII + NBSP + SHY + some punctuation characters
     # NBSP (A0) and SHY (AD) are at the same position in ISO-8859-* too
     # consider also: AE (r), 80 Euro
-    eval { $rv = $enc_w1252->decode("$_[1]", 1|8) };  # FB_CROAK | LEAVE_SRC
+    eval { $rv = $enc_w1252->decode($_[1], 1|8) };  # FB_CROAK | LEAVE_SRC
     # the above can't fail, but keep code general just in case
     dbg("message: %s as guessed charset %s, declared %s",
         defined $rv ? 'decoded' : 'failed decoding',
@@ -527,14 +527,14 @@ sub _normalize {
     dbg("message: Encode::Detect::Detector not available, declared %s failed",
         $charset_declared);
   } else {
-    my $charset_detected = Encode::Detect::Detector::detect("$_[1]");
+    my $charset_detected = Encode::Detect::Detector::detect($_[1]);
     if ($charset_detected && lc $charset_detected ne lc $charset_declared) {
       my $decoder = Encode::find_encoding($charset_detected);
       if (!$decoder) {
         dbg("message: failed decoding, no decoder for a detected charset %s",
             $charset_detected);
       } else {
-        eval { $rv = $decoder->decode("$_[1]", 1|8) };  # FB_CROAK | LEAVE_SRC
+        eval { $rv = $decoder->decode($_[1], 1|8) };  # FB_CROAK | LEAVE_SRC
         dbg("message: %s as detected charset %s, declared %s",
             defined $rv ? 'decoded' : 'failed decoding',
             $charset_detected, $charset_declared);
@@ -544,7 +544,7 @@ sub _normalize {
 
   if (!defined $rv) {  # all decoding attempts failed so far, probably garbage
     # go for Windows-1252 which can't fail
-    eval { $rv = $enc_w1252->decode("$_[1]") };
+    eval { $rv = $enc_w1252->decode($_[1]) };
     dbg("message: %s as last-resort charset %s, declared %s",
         defined $rv ? 'decoded' : 'failed decoding',
         'Windows-1252', $charset_declared);
@@ -581,7 +581,8 @@ sub rendered {
     # text/x-aol is ignored here, but looks like text/html ...
     return(undef,undef) unless ( $self->{'type'} =~ /^text\/(?:plain|html)$/i );
 
-    my $text = $self->decode;  # QP and Base64 decoding
+    my $text = $self->decode;  # QP and Base64 decoding, bytes
+    my $text_len = length($text);  # num of bytes in original charset encoding
 
     # render text/html always, or any other text|text/plain part as text/html
     # based on a heuristic which simulates a certain common mail client
@@ -592,16 +593,16 @@ sub rendered {
       $self->{rendered_type} = 'text/html';
 
       # will input text to HTML::Parser be provided as Unicode characters?
-      my $character_semantics = 0;
+      my $character_semantics = 0;  # $text is in bytes
       if ($self->{normalize} && $enc_utf8) {  # charset decoding requested
         # Provide input to HTML::Parser as Unicode characters
         # which avoids a HTML::Parser bug in utf8_mode
         #   https://rt.cpan.org/Public/Bug/Display.html?id=99755
-        # Avoid unnecessary step of encoding->decoding by telling
+        # Avoid unnecessary step of encoding-then-decoding by telling
         # subroutine _normalize() to return Unicode text.  See Bug 7133
         #
-        $character_semantics = 1;
-        $text = $self->_normalize($text, $self->{charset}, 1);
+        $character_semantics = 1;  # $text will be in character
+        $text = $self->_normalize($text, $self->{charset}, 1); # bytes to chars
       } elsif (!defined $self->{charset} ||
                $self->{charset} =~ /^(?:US-ASCII|UTF-8)\z/i) {
         # With some luck input can be interpreted as UTF-8, do not warn.
@@ -614,6 +615,8 @@ sub rendered {
       my $html = Mail::SpamAssassin::HTML->new($character_semantics,0); # object
 
       $html->parse($text);  # parse+render text
+
+      # resulting HTML-decoded text is in bytes, likely encoded as UTF-8
       $self->{rendered} = $html->get_rendered_text();
       $self->{visible_rendered} = $html->get_rendered_text(invisible => 0);
       $self->{invisible_rendered} = $html->get_rendered_text(invisible => 1);
@@ -622,14 +625,13 @@ sub rendered {
       # end-of-document result values that require looking at the text
       my $r = $self->{html_results};	# temporary reference for brevity
 
-      # count the number of spaces in the rendered text
-      my $rt = pack "C0A*", $self->{rendered};
-      my $space = ($rt =~ tr/ \t\n\r\x0b\xa0/ \t\n\r\x0b\xa0/);
-      $r->{html_length} = length($rt);
+      # count the number of spaces in the rendered text (likely UTF-8 octets)
+      my $space = $self->{rendered} =~ tr/ \t\n\r\x0b//;
+      # we may want to add the count of other Unicode whitespace characters
 
-      my $text_len = length($text);
+      $r->{html_length} = length $self->{rendered};  # bytes (likely UTF-8)
       $r->{non_space_len} = $r->{html_length} - $space;
-      $r->{ratio} = ($text_len - $r->{html_length}) / $text_len;
+      $r->{ratio} = ($text_len - $r->{html_length}) / $text_len  if $text_len;
     }
 
     else {  # plain text
