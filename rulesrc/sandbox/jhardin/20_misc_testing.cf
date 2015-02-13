@@ -1855,7 +1855,7 @@ header    __HAS_NO_RELAY                X-No-Relay =~ /./
 header    __DUP_SUSP_HDR                ALL =~ /\n(X-No-Relay)\s*:[ 	][^\n]{1,100}\n\1\s*:[ 	]/ism
 meta      DUP_SUSP_HDR                  __DUP_SUSP_HDR
 describe  DUP_SUSP_HDR                  Duplicate suspicious message headers
-score     DUP_SUSP_HDR                  0.500	# limit
+score     DUP_SUSP_HDR                  2.500	# limit
 
 # seen 10/2014: "https://www.google.com/url?q=https://copy.com/ApbFn2848pQm/ShippingInvoice_6974.PDF.scr?download=1&sa=D&sntz=1&usg=AFQjCNGhvWhljnujQlP85tA6YUsddfuJow"
 uri       __GOOG_MALWARE_DNLD           m;^https?://[^/]*\.google\.com/[^?]*url\?.*[\?&]download=1;i
