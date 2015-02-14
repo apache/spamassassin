@@ -1139,7 +1139,16 @@ sub _tokenize_line {
   # include quotes, .'s and -'s for URIs, and [$,]'s for Nigerian-scam strings,
   # and ISO-8859-15 alphas.  Do not split on @'s; better results keeping it.
   # Some useful tokens: "$31,000,000" "www.clock-speed.net" "f*ck" "Hits!"
-  tr/-A-Za-z0-9,\@\*\!_'"\$.\241-\377 / /cs;
+
+  ### (previous:)  tr/-A-Za-z0-9,\@\*\!_'"\$.\241-\377 / /cs;
+
+  ### (now): see Bug 7130 for rationale (slower, but makes UTF-8 chars atomic)
+  s{ ( [A-Za-z0-9,@*!_'"\$. -]+  |
+       [\xC0-\xDF][\x80-\xBF]    |
+       [\xE0-\xEF][\x80-\xBF]{2} |
+       [\xF0-\xF4][\x80-\xBF]{3} |
+       [\xA1-\xFF] ) | . }
+   { defined $1 ? $1 : ' ' }xsge;
 
   # DO split on "..." or "--" or "---"; common formatting error resulting in
   # hapaxes.  Keep the separator itself as a token, though, as long ones can
