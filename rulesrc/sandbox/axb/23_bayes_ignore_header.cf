@@ -1,4 +1,4 @@
-# Last update: 2015-01-29-axb
+# Last update: 2015-02-16-axb
 # Set headers which may provide inappropriate AV/filter cues to the Bayesian classifier
 bayes_ignore_header X_CMAE_Category
 bayes_ignore_header X-ACL-Warn
@@ -94,6 +94,8 @@ bayes_ignore_header x-eavas
 bayes_ignore_header x-eavas-action
 bayes_ignore_header x-eavas-eavasid
 bayes_ignore_header X-Enigmail-Version
+bayes_ignore_header X-EsetId
+bayes_ignore_header X-EsetResult
 bayes_ignore_header X-Exchange-Antispam-Report
 bayes_ignore_header X-EYOU-SPAMVALUE
 bayes_ignore_header X-FB-OUTBOUND-SPAM
