@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus dwarren grenier jarif kam-ninja kpg-core zmi; day 2: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus dwarren grenier jarif kam-ninja kpg-core llanga zmi; day 3: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus dwarren grenier jarif kam-ninja kpg-core llanga zmi
+# with results from: day 1: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus dwarren grenier jarif kam-ninja kpg-core mmiroslaw-ham mmiroslaw-spam zmi; day 2: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus dwarren grenier jarif kam-ninja kpg-core llanga zmi; day 3: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus dwarren grenier jarif kam-ninja kpg-core llanga zmi
 
 # good enough
 ACCT_PHISHING
@@ -93,9 +93,6 @@ AD_PREFS
 
 # tflags userconf
 ALL_TRUSTED
-
-# good enough
-AXB_HELO_HOME_UN
 
 # tflags publish
 AXB_MH_APPHTML
@@ -260,9 +257,6 @@ DX_TEXT_03
 DX_TEXT_05
 
 # good enough
-DYN_RDNS_AND_INLINE_IMAGE
-
-# good enough
 DYN_RDNS_SHORT_HELO_HTML
 
 # tflags userconf
@@ -276,9 +270,6 @@ FBI_SPOOF
 
 # tflags publish
 FILL_THIS_FORM
-
-# good enough
-FILL_THIS_FORM_FRAUD_PHISH
 
 # good enough
 FILL_THIS_FORM_LOAN
@@ -441,9 +432,6 @@ HASHCASH_2SPEND
 
 # tflags userconf
 HASHCASH_HIGH
-
-# good enough
-HDRS_LCASE
 
 # tflags publish
 HEADER_FROM_DIFFERENT_DOMAINS
@@ -623,10 +611,10 @@ NSL_RCVD_FROM_USER
 NSL_RCVD_HELO_USER
 
 # good enough
-NULL_IN_BODY
+OBFU_ATTACH_MISSP
 
 # good enough
-OBFU_ATTACH_MISSP
+OBFU_HTML_ATTACH
 
 # tflags publish
 OBFU_JVSCR_ESC
@@ -1028,16 +1016,22 @@ BODY_EMPTY
 FREEMAIL_DOC_PDF_BCC
 
 # good enough
+FROM_UNBAL2
+
+# good enough
+HK_LOTTO_SUBJECT
+
+# good enough
 HK_SPAMMY_FILENAME
 
 # good enough
 HTML_FONT_TINY
 
 # good enough
-RP_MATCHES_RCVD
+THREAD_INDEX_HEX
 
 # good enough
-THREAD_INDEX_HEX
+TVD_PH_SUBJ_META1
 
 # tflags publish
 UC_GIBBERISH_OBFU
