@@ -242,7 +242,8 @@ sub untaint_file_path {
   my $re = qr/^\s*([$chars][${chars}~ ]*)$/o;
 
   if ($path =~ $re) {
-    return untaint_var($1);
+    $path = $1;
+    return untaint_var($path);
   } else {
     warn "util: refusing to untaint suspicious path: \"$path\"\n";
     return $path;
