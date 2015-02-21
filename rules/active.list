@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus dwarren grenier jarif kam-ninja kpg-core mmiroslaw-ham mmiroslaw-spam zmi; day 2: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus dwarren grenier jarif kam-ninja kpg-core llanga mmiroslaw-ham mmiroslaw-spam zmi; day 3: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus dwarren grenier jarif kam-ninja kpg-core llanga zmi
+# with results from: day 1: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus dwarren grenier jarif kam-ninja kpg-core mas-cps mas-mas mmiroslaw-ham mmiroslaw-spam zmi; day 2: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus dwarren grenier jarif kam-ninja kpg-core llanga mmiroslaw-ham mmiroslaw-spam zmi; day 3: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus dwarren grenier jarif kam-ninja kpg-core llanga mmiroslaw-ham mmiroslaw-spam zmi
 
 # good enough
 ACCT_PHISHING
@@ -153,9 +153,6 @@ BIGNUM_EMAILS
 
 # good enough
 BILLION_OVERLAP
-
-# good enough
-BODY_EMPTY
 
 # tflags publish
 BODY_URI_ONLY
@@ -350,6 +347,9 @@ FROM_MISSP_USER
 FROM_MISSP_XPRIO
 
 # good enough
+FROM_UNBAL2
+
+# good enough
 FSL_CTYPE_WIN1251
 
 # good enough
@@ -468,6 +468,9 @@ HK_LOTTO
 
 # good enough
 HK_LOTTO_NAME
+
+# good enough
+HK_LOTTO_SUBJECT
 
 # good enough
 HK_NAME_DRUGS
@@ -624,6 +627,9 @@ NSL_RCVD_HELO_USER
 
 # good enough
 OBFU_ATTACH_MISSP
+
+# good enough
+OBFU_HTML_ATTACH
 
 # tflags publish
 OBFU_JVSCR_ESC
@@ -1001,6 +1007,9 @@ TVD_PH_BODY_META
 TVD_PH_REC
 
 # good enough
+TVD_PH_SUBJ_META1
+
+# good enough
 TVD_QUAL_MEDS
 
 # good enough
@@ -1025,16 +1034,13 @@ TVD_VISIT_PHARMA
 TW_GIBBERISH_MANY
 
 # good enough
-FROM_UNBAL2
+BODY_SINGLE_URI
+
+# good enough
+FILL_THIS_FORM_FRAUD_PHISH
 
 # good enough
 HK_GOLDDUST
-
-# good enough
-HK_LOTTO_SUBJECT
-
-# good enough
-TVD_PH_SUBJ_META1
 
 # tflags publish
 UC_GIBBERISH_OBFU
@@ -1110,9 +1116,6 @@ URIBL_SC_SURBL
 
 # tflags net
 URIBL_WS_SURBL
-
-# good enough
-URI_DOTDOT_LOW_CNTRST
 
 # tflags publish
 URI_DQ_UNSUB
