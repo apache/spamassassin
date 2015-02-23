@@ -1149,6 +1149,7 @@ sub _tokenize_line {
        [\xF0-\xF4][\x80-\xBF]{3} |
        [\xA1-\xFF] ) | . }
    { defined $1 ? $1 : ' ' }xsge;
+  # should we also turn NBSP ( \xC2\xA0 ) into space?
 
   # DO split on "..." or "--" or "---"; common formatting error resulting in
   # hapaxes.  Keep the separator itself as a token, though, as long ones can
@@ -1240,7 +1241,14 @@ sub _tokenize_line {
 	# length, it does not help; see jm's mail to -devel on Nov 20 2002 at
 	# http://sourceforge.net/p/spamassassin/mailman/message/12977605/
 	# "sk:" stands for "skip".
-	$token = "sk:".substr($token, 0, 7);
+	# Bug 7141: retain seven UTF-8 chars (or other bytes),
+	# if followed by at least two bytes
+	$token =~ s{ ^ ( (?> (?: [\x00-\x7F\xF5-\xFF]      |
+	                         [\xC0-\xDF][\x80-\xBF]    |
+	                         [\xE0-\xEF][\x80-\xBF]{2} |
+	                         [\xF0-\xF4][\x80-\xBF]{3} | . ){7} ))
+	             .{2,} \z }{sk:$1}xs;
+	## (was:)  $token = "sk:".substr($token, 0, 7);  # seven bytes
       }
     }
 
