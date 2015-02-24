@@ -601,7 +601,7 @@ sub rendered {
         # Avoid unnecessary step of encoding-then-decoding by telling
         # subroutine _normalize() to return Unicode text.  See Bug 7133
         #
-        $character_semantics = 1;  # $text will be in character
+        $character_semantics = 1;  # $text will be in characters
         $text = $self->_normalize($text, $self->{charset}, 1); # bytes to chars
       } elsif (!defined $self->{charset} ||
                $self->{charset} =~ /^(?:US-ASCII|UTF-8)\z/i) {
