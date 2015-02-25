@@ -38,6 +38,8 @@ use strict;
 use warnings;
 use re 'taint';
 
+require 5.008001;  # needs utf8::is_utf8()
+
 use Mail::SpamAssassin;
 use Mail::SpamAssassin::Constants qw(:sa);
 use Mail::SpamAssassin::HTML;
@@ -405,8 +407,11 @@ sub _normalize {
 
   return $_[1]  unless $self->{normalize} && $enc_utf8;
 
-# warn "message: _normalize() was given characters, expected bytes: $_[1]\n"
-#   if Encode::is_utf8($_[1]);
+  warn "message: _normalize() was given characters, expected bytes: $_[1]\n"
+    if utf8::is_utf8($_[1]);
+
+  # workaround for Encode::decode taint laundering bug [rt.cpan.org #84879]
+  my $data_taint = substr($_[1], 0, 0);  # empty string, tainted like $data
 
   if (!defined $charset_declared || $charset_declared eq '') {
     $charset_declared = 'us-ascii';
@@ -441,7 +446,9 @@ sub _normalize {
     # attempt decoding as strict UTF-8  (flags: FB_CROAK | LEAVE_SRC)
     if (eval { $rv = $enc_utf8->decode($_[1], 1|8); defined $rv }) {
       dbg("message: decoded as declared charset UTF-8");
-      return $return_decoded ? $rv : $_[1];
+      return $_[1]  if !$return_decoded;
+      $rv .= $data_taint;  # carry taintedness over, avoid Encode bug
+      return $rv;  # decoded
     } else {
       dbg("message: failed decoding as declared charset UTF-8");
     };
@@ -449,7 +456,9 @@ sub _normalize {
   } elsif ($cnt_8bits &&
            eval { $rv = $enc_utf8->decode($_[1], 1|8); defined $rv }) {
     dbg("message: decoded as charset UTF-8, declared %s", $charset_declared);
-    return $return_decoded ? $rv : $_[1];
+    return $_[1]  if !$return_decoded;
+    $rv .= $data_taint;  # carry taintedness over, avoid Encode bug
+    return $rv;  # decoded
 
   } elsif ($charset_declared =~ /^(?:US-)?ASCII\z/i) {
     # declared as US-ASCII but contains 8-bit characters, makes no sense
@@ -552,13 +561,14 @@ sub _normalize {
 
   if (!defined $rv) {  # just in case - all decoding attempts failed so far
     return $_[1];  # garbage-in / garbage-out, return unchanged octets
-  } elsif ($return_decoded) {
-    # decoding octets to characters was successful
-    return $rv;  # return decoded as perl characters (Unicode)
-  } else {
-    # decoding octets to characters was successful
-    return $enc_utf8->encode($rv);  # return encoded as UTF-8 octets
   }
+  # decoding octets to characters was successful
+  if (!$return_decoded) {
+    # utf8::encode() is much faster than $enc_utf8->encode on utf8-flagged arg
+    utf8::encode($rv);  # encode Unicode characters to UTF-8 octets
+  }
+  $rv .= $data_taint;  # carry taintedness over, avoid Encode bug
+  return $rv;
 }
 
 =item rendered()
