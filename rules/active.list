@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus dwarren grenier jarif kam-ninja kpg-core mas-cps mas-mas mmiroslaw-ham mmiroslaw-spam zmi; day 2: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus dwarren grenier jarif kam-ninja kpg-core llanga mas-cps mas-mas mmiroslaw-ham mmiroslaw-spam zmi; day 3: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus dwarren grenier jarif kam-ninja kpg-core llanga mas-cps mas-mas zmi
+# with results from: day 1: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus dwarren grenier jarif kam-ninja kpg-core mas-cps mas-mas mmiroslaw-ham mmiroslaw-spam zmi; day 2: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus dwarren grenier jarif kam-ninja kpg-core llanga mas-cps mas-mas mmiroslaw-ham mmiroslaw-spam zmi; day 3: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus dwarren grenier jarif kam-ninja kpg-core llanga mas-cps mas-mas mmiroslaw-ham mmiroslaw-spam zmi
 
 # good enough
 ACCT_PHISHING
@@ -260,6 +260,9 @@ FBI_SPOOF
 FILL_THIS_FORM
 
 # good enough
+FILL_THIS_FORM_FRAUD_PHISH
+
+# good enough
 FILL_THIS_FORM_LOAN
 
 # good enough
@@ -336,9 +339,6 @@ FROM_UNBAL2
 
 # good enough
 FSL_CTYPE_WIN1251
-
-# good enough
-FSL_HELO_BARE_IP_2
 
 # good enough
 FSL_HELO_DEVICE
@@ -465,9 +465,6 @@ HK_NAME_FROM
 
 # good enough
 HK_NAME_MR_MRS
-
-# good enough
-HK_RANDOM_FROM
 
 # good enough
 HK_RANDOM_REPLYTO
@@ -965,9 +962,6 @@ TO_NO_BRKTS_PCNT
 TT_MSGID_TRUNC
 
 # good enough
-TVD_APPROVED
-
-# good enough
 TVD_FROM_1
 
 # good enough
@@ -999,9 +993,6 @@ TW_GIBBERISH_MANY
 
 # good enough
 HK_NAME_FM_FROM
-
-# good enough
-OBFU_HTML_ATTACH
 
 # tflags publish
 UC_GIBBERISH_OBFU
@@ -1092,9 +1083,6 @@ URI_HOST_IN_WHITELIST
 
 # tflags userconf
 URI_NOVOWEL
-
-# good enough
-URI_ONLY_LOW_CONTRAST
 
 # tflags publish
 URI_ONLY_MSGID_MALF
