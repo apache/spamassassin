@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus dwarren grenier jarif kam-ninja kpg-core mas-cps mas-mas mmiroslaw-ham mmiroslaw-spam zmi; day 2: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus dwarren grenier jarif kam-ninja kpg-core llanga mas-cps mas-mas mmiroslaw-ham mmiroslaw-spam zmi; day 3: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus dwarren grenier jarif kam-ninja kpg-core llanga mas-cps mas-mas mmiroslaw-ham mmiroslaw-spam zmi
+# with results from: day 1: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus dwarren grenier jarif kam-ninja kpg-core zmi; day 2: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus dwarren grenier jarif kam-ninja kpg-core llanga mas-cps mas-mas mmiroslaw-ham mmiroslaw-spam zmi; day 3: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus dwarren grenier jarif kam-ninja kpg-core llanga mas-cps mas-mas mmiroslaw-ham mmiroslaw-spam zmi
 
 # good enough
 ACCT_PHISHING
@@ -260,9 +260,6 @@ FBI_SPOOF
 FILL_THIS_FORM
 
 # good enough
-FILL_THIS_FORM_FRAUD_PHISH
-
-# good enough
 FILL_THIS_FORM_LOAN
 
 # good enough
@@ -335,10 +332,10 @@ FROM_MISSP_USER
 FROM_MISSP_XPRIO
 
 # good enough
-FROM_UNBAL2
+FSL_CTYPE_WIN1251
 
 # good enough
-FSL_CTYPE_WIN1251
+FSL_HELO_BARE_IP_2
 
 # good enough
 FSL_HELO_DEVICE
@@ -456,6 +453,9 @@ HK_NAME_DRUGS
 
 # good enough
 HK_NAME_FM_DR
+
+# good enough
+HK_NAME_FM_FROM
 
 # good enough
 HK_NAME_FM_MR_MRS
@@ -597,6 +597,9 @@ NSL_RCVD_FROM_USER
 
 # good enough
 NSL_RCVD_HELO_USER
+
+# good enough
+OBFU_HTML_ATTACH
 
 # tflags publish
 OBFU_JVSCR_ESC
@@ -857,9 +860,6 @@ RISK_FREE
 SERGIO_SUBJECT_PORN006
 
 # good enough
-SERGIO_SUBJECT_PORN014
-
-# good enough
 SERGIO_SUBJECT_PORN015
 
 # good enough
@@ -992,7 +992,13 @@ TVD_VISIT_PHARMA
 TW_GIBBERISH_MANY
 
 # good enough
-HK_NAME_FM_FROM
+FILL_THIS_FORM_FRAUD_PHISH
+
+# good enough
+FSL_HELO_FIREWALL
+
+# good enough
+HTML_FONT_TINY
 
 # tflags publish
 UC_GIBBERISH_OBFU
