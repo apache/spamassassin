@@ -811,8 +811,12 @@ sub poll_responses {
           $cb->($packet, $id, $now);
           $cnt++;
         } else {  # no match, report the problem
-          info("dns: no callback for id %s, ignored; packet: %s",
-               $id,  $packet ? $packet->string : "undef" );
+          if ($rcode eq 'REFUSED' || $id =~ m{^\d+/NO_QUESTION_IN_PACKET\z}) {
+            # the failure was already reported above
+          } else {
+            info("dns: no callback for id %s, ignored; packet: %s",
+                 $id,  $packet ? $packet->string : "undef" );
+          }
           # report a likely matching query for diagnostic purposes
           local $1;
           if ($id =~ m{^(\d+)/}) {
