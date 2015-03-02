@@ -1528,13 +1528,16 @@ argument can either be an IPv4 or IPv6 address, optionally enclosed in
 brackets, and optionally followed by a colon and a port number. In absence
 of a port number a standard port number 53 is assumed. When an IPv6 address
 is specified along with a port number, the address B<must> be enclosed in
-brackets to avoid parsing ambiguity regarding a colon separator,
+brackets to avoid parsing ambiguity regarding a colon separator. A scoped
+link-local IP address is allowed (assuming underlying modules allow it).
 
 Examples :
  dns_server 127.0.0.1
  dns_server 127.0.0.1:53
  dns_server [127.0.0.1]:53
  dns_server [::1]:53
+ dns_server fe80::1%lo0
+ dns_server [fe80::1%lo0]:53
 
 In absence of I<dns_server> directives, the list of name servers is provided
 by Net::DNS module, which typically obtains the list from /etc/resolv.conf,
@@ -1551,16 +1554,19 @@ documentation for details.
       my($address,$port); local($1,$2,$3);
       if ($value =~ /^(?: \[ ([^\]]*) \] | ([^:]*) ) : (\d+) \z/sx) {
         $address = defined $1 ? $1 : $2;  $port = $3;
-      } elsif ($value =~ /^(?: \[ ([^\]]*) \] | ([0-9a-fA-F.:]+) ) \z/sx) {
+      } elsif ($value =~ /^(?: \[ ([^\]]*) \] |
+                               ([0-9A-F.:]+ (?: %[A-Z0-9._~-]* )? ) ) \z/six) {
         $address = defined $1 ? $1 : $2;  $port = '53';
       } else {
         return $INVALID_VALUE;
       }
-      my $IP_ADDRESS = IP_ADDRESS;
+      my $scope = '';  # scoped IP address?
+      $scope = $1  if $address =~ s/ ( % [A-Z0-9._~-]* ) \z//xsi;
+      my $IP_ADDRESS = IP_ADDRESS;  # IP_ADDRESS regexp does not handle scope
       if ($address =~ /$IP_ADDRESS/ && $port >= 1 && $port <= 65535) {
         $self->{dns_servers} = []  if !$self->{dns_servers};
         # checked, untainted, stored in a normalized form
-        push(@{$self->{dns_servers}}, untaint_var("[$address]:$port"));
+        push(@{$self->{dns_servers}}, untaint_var("[$address$scope]:$port"));
       } else {
         return $INVALID_VALUE;
       }
