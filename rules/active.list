@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus dwarren grenier jarif kam-ninja kpg-core mmiroslaw-ham mmiroslaw-spam zmi; day 2: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus dwarren grenier jarif kam-ninja kpg-core llanga zmi; day 3: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus dwarren grenier jarif kam-ninja kpg-core llanga mas-cps mas-mas mmiroslaw-ham mmiroslaw-spam zmi
+# with results from: day 1: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus dwarren grenier kam-ninja kpg-core mas-cps mas-mas mmiroslaw-ham mmiroslaw-spam zmi; day 2: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus dwarren grenier jarif kam-ninja kpg-core llanga mas-cps mas-mas mmiroslaw-ham mmiroslaw-spam zmi; day 3: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus dwarren grenier jarif kam-ninja kpg-core llanga mas-cps mas-mas zmi
 
 # good enough
 ACCT_PHISHING
@@ -176,9 +176,6 @@ COMPENSATION
 CORRUPT_FROM_LINE_IN_HDRS
 
 # good enough
-DATE_DOTS
-
-# good enough
 DEAR_BENEFICIARY
 
 # good enough
@@ -231,9 +228,6 @@ DOS_OUTLOOK_TO_MX_IMAGE
 
 # good enough
 DSN_NO_MIMEVERSION
-
-# good enough
-DUP_SUSP_HDR
 
 # tflags publish
 DX_TEXT_02
@@ -344,6 +338,9 @@ FSL_HELO_DEVICE
 FSL_HELO_FAKE
 
 # good enough
+FSL_HELO_FIREWALL
+
+# good enough
 FSL_MID_419
 
 # tflags publish
@@ -378,9 +375,6 @@ FUZZY_SECURITY
 
 # tflags publish
 FUZZY_UNSUBSCRIBE
-
-# good enough
-GAPPY_LOW_CONTRAST
 
 # tflags publish
 GOOGLE_DOCS_PHISH
@@ -452,9 +446,6 @@ HK_LOTTO_NAME
 HK_NAME_DRUGS
 
 # good enough
-HK_NAME_FM_DR
-
-# good enough
 HK_NAME_FM_FROM
 
 # good enough
@@ -465,9 +456,6 @@ HK_NAME_FROM
 
 # good enough
 HK_NAME_MR_MRS
-
-# good enough
-HK_RANDOM_REPLYTO
 
 # good enough
 HK_SCAM_N1
@@ -483,9 +471,6 @@ HK_SCAM_N3
 
 # good enough
 HK_SCAM_N8
-
-# good enough
-HK_SPAMMY_FILENAME
 
 # tflags userconf
 HTML_CHARSET_FARAWAY
@@ -956,9 +941,6 @@ TO_NO_BRKTS_NORDNS_HTML
 TO_NO_BRKTS_PCNT
 
 # good enough
-TT_MSGID_TRUNC
-
-# good enough
 TVD_FROM_1
 
 # good enough
@@ -989,16 +971,10 @@ TVD_VISIT_PHARMA
 TW_GIBBERISH_MANY
 
 # good enough
-FSL_HELO_FIREWALL
+FROM_UNBAL2
 
 # good enough
-HK_RANDOM_FROM
-
-# good enough
-HTML_FONT_TINY
-
-# good enough
-OBFU_HTML_ATTACH
+HDRS_LCASE
 
 # tflags publish
 UC_GIBBERISH_OBFU
