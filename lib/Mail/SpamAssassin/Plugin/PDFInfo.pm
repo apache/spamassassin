@@ -21,7 +21,7 @@ Mail::SpamAssassin::Plugin::PDFInfo - PDFInfo Plugin for SpamAssassin
 
 =head1 SYNOPSIS
 
-loadplugin     Mail::SpamAssassin::Plugin::PDFInfo
+  loadplugin     Mail::SpamAssassin::Plugin::PDFInfo
 
 =head1 DESCRIPTION
 
@@ -29,109 +29,110 @@ This plugin helps detected spam using attached PDF files
 
 =item See "Usage:" below - more documentation see 20_pdfinfo.cf
 
-# Original info kept for history.
-# -------------------------------------------------------
-# PDFInfo Plugin for SpamAssassin
-# Version: 0.8
-# Info: $Id: PDFInfo.pm 904 2007-08-12 01:36:23Z root $
-# Created: 2007-08-10
-# Modified: 2007-08-10
-# By: Dallas Engelken
-#
-#
-# Changes:
-#   0.8 - added .fdf detection (thanks John Lundin) [axb]
-#   0.7 - fixed empty body/pdf count buglet(thanks Jeremy) [axb]
-#   0.6 - added support for tags - PDFCOUNT, PDFVERSION, PDFPRODUCER, etc.
-#       - fixed issue on perl 5.6.1 where pdf_match_details() failed to call
-#         _find_pdf_mime_parts(), resulting in no detection of pdf mime parts.
-#       - quoted-printable support - requires MIME::QuotedPrint (which should be in everyones
-#         install as a part of the MIME-Base64 package which is a SA req)
-#       - added simple pdf_is_empty_body() function with counts the body bytes minus the
-#         subject line.  can add optional <bytes> param if you need to allow for a few bytes.
-#   0.5 - fix warns for undef $pdf_tags
-#       - remove { } and \ before running eval in pdf_match_details to avoid eval error
-#   0.4 - added pdf_is_encrypted() function
-#       - added option to look for image HxW on same line
-#   0.3 - added 2nd fuzzy md5 which uses pdf tag layout as data
-#       - renamed pdf_image_named() to pdf_named()
-#          - PDF images are encapsulated and have no names.  We are matching the PDF file name.
-#       - renamed pdf_image_name_regex() to pdf_name_regex()
-#          - PDF images are encapsulated and have no names.  We are matching the PDF file name.
-#       - changed pdf_image_count() a bit and added pdf_count().
-#          - pdf_count() checks how many pdf attachments there are on the mail
-#          - pdf_image_count() checks how many images are found within all pdfs in the mail.
-#       - removed the restriction of the pdf containing an image in order to md5 it.
-#       - added pdf_match_details() function to check the following 'details'
-#          - author: Author of PDF if specified
-#          - producer: Software used to produce PDF
-#          - creator: Software used to produce PDF, usually similar to producer
-#          - title: Title of PDF
-#          - created: Creation Date
-#          - modified: Last Modified
-#   0.2 - support PDF octet-stream
-#   0.1 - just ported over the imageinfo code, and renamed to pdfinfo.
-#         - removed all support for png, gif, and jpg from the code.
-#         - prepended pdf_ to all function names to avoid conflicts with ImageInfo in SA 3.2.
-#
-#
-# Usage:
-#
-#  pdf_count()
-#
-#     body RULENAME  eval:pdf_count(<min>,[max])
-#        min: required, message contains at least x pdf mime parts
-#        max: optional, if specified, must not contain more than x pdf mime parts
-#
-#  pdf_image_count()
-#
-#     body RULENAME  eval:pdf_image_count(<min>,[max])
-#        min: required, message contains at least x images in pdf attachments.
-#        max: optional, if specified, must not contain more than x pdf images
-#
-#  pdf_pixel_coverage()
-#
-#     body RULENAME  eval:pdf_pixel_coverage(<min>,[max])
-#        min: required, message contains at least this much pixel area
-#        max: optional, if specified, message must not contain more than this much pixel area
-#
-#  pdf_named()
-#
-#     body RULENAME  eval:pdf_named(<string>)
-#        string: exact file name match, if you need partial match, see pdf_name_regex()
-#
-#  pdf_name_regex()
-#
-#     body RULENAME  eval:pdf_name_regex(<regex>)
-#        regex: regular expression, see examples in ruleset
-#
-#  pdf_match_md5()
-#
-#     body RULENAME  eval:pdf_match_md5(<string>)
-#        string: 32-byte md5 hex
-#
-#  pdf_match_fuzzy_md5()
-#
-#     body RULENAME  eval:pdf_match_md5(<string>)
-#        string: 32-byte md5 hex - see ruleset for obtaining the fuzzy md5
-#
-#  pdf_match_details()
-#
-#     body RULENAME  eval:pdf_match_details(<detail>,<regex>);
-#        detail: author, creator, created, modified, producer, title
-#        regex: regular expression, see examples in ruleset
-#
-#  pdf_is_encrypted()
-#
-#     body RULENAME eval:pdf_is_encrypted()
-#
-#  pdf_is_empty_body()
-#
-#     body RULENAME eval:pdf_is_empty_body(<bytes>)
-#        bytes: maximum byte count to allow and still consider it empty
-#
-#  NOTE: See the ruleset for more examples that are not documented here.
-#
+ Original info kept for history.
+ -------------------------------------------------------
+ PDFInfo Plugin for SpamAssassin
+ Version: 0.8
+ Info: $Id: PDFInfo.pm 904 2007-08-12 01:36:23Z root $
+ Created: 2007-08-10
+ Modified: 2007-08-10
+ By: Dallas Engelken
+
+
+ Changes:
+   0.8 - added .fdf detection (thanks John Lundin) [axb]
+   0.7 - fixed empty body/pdf count buglet(thanks Jeremy) [axb]
+   0.6 - added support for tags - PDFCOUNT, PDFVERSION, PDFPRODUCER, etc.
+       - fixed issue on perl 5.6.1 where pdf_match_details() failed to call
+         _find_pdf_mime_parts(), resulting in no detection of pdf mime parts.
+       - quoted-printable support - requires MIME::QuotedPrint (which should be in everyones
+         install as a part of the MIME-Base64 package which is a SA req)
+       - added simple pdf_is_empty_body() function with counts the body bytes minus the
+         subject line.  can add optional <bytes> param if you need to allow for a few bytes.
+   0.5 - fix warns for undef $pdf_tags
+       - remove { } and \ before running eval in pdf_match_details to avoid eval error
+   0.4 - added pdf_is_encrypted() function
+       - added option to look for image HxW on same line
+   0.3 - added 2nd fuzzy md5 which uses pdf tag layout as data
+       - renamed pdf_image_named() to pdf_named()
+          - PDF images are encapsulated and have no names.  We are matching the PDF file name.
+       - renamed pdf_image_name_regex() to pdf_name_regex()
+          - PDF images are encapsulated and have no names.  We are matching the PDF file name.
+       - changed pdf_image_count() a bit and added pdf_count().
+          - pdf_count() checks how many pdf attachments there are on the mail
+          - pdf_image_count() checks how many images are found within all pdfs in the mail.
+       - removed the restriction of the pdf containing an image in order to md5 it.
+       - added pdf_match_details() function to check the following 'details'
+          - author: Author of PDF if specified
+          - producer: Software used to produce PDF
+          - creator: Software used to produce PDF, usually similar to producer
+          - title: Title of PDF
+          - created: Creation Date
+          - modified: Last Modified
+   0.2 - support PDF octet-stream
+   0.1 - just ported over the imageinfo code, and renamed to pdfinfo.
+         - removed all support for png, gif, and jpg from the code.
+         - prepended pdf_ to all function names to avoid conflicts with ImageInfo in SA 3.2.
+
+
+ Usage:
+
+  pdf_count()
+
+     body RULENAME  eval:pdf_count(<min>,[max])
+        min: required, message contains at least x pdf mime parts
+        max: optional, if specified, must not contain more than x pdf mime parts
+
+  pdf_image_count()
+
+     body RULENAME  eval:pdf_image_count(<min>,[max])
+        min: required, message contains at least x images in pdf attachments.
+        max: optional, if specified, must not contain more than x pdf images
+
+  pdf_pixel_coverage()
+
+     body RULENAME  eval:pdf_pixel_coverage(<min>,[max])
+        min: required, message contains at least this much pixel area
+        max: optional, if specified, message must not contain more than this much pixel area
+
+  pdf_named()
+
+     body RULENAME  eval:pdf_named(<string>)
+        string: exact file name match, if you need partial match, see pdf_name_regex()
+
+  pdf_name_regex()
+
+     body RULENAME  eval:pdf_name_regex(<regex>)
+        regex: regular expression, see examples in ruleset
+
+  pdf_match_md5()
+
+     body RULENAME  eval:pdf_match_md5(<string>)
+        string: 32-byte md5 hex
+
+  pdf_match_fuzzy_md5()
+
+     body RULENAME  eval:pdf_match_md5(<string>)
+        string: 32-byte md5 hex - see ruleset for obtaining the fuzzy md5
+
+  pdf_match_details()
+
+     body RULENAME  eval:pdf_match_details(<detail>,<regex>);
+        detail: author, creator, created, modified, producer, title
+        regex: regular expression, see examples in ruleset
+
+  pdf_is_encrypted()
+
+     body RULENAME eval:pdf_is_encrypted()
+
+  pdf_is_empty_body()
+
+     body RULENAME eval:pdf_is_empty_body(<bytes>)
+        bytes: maximum byte count to allow and still consider it empty
+
+  NOTE: See the ruleset for more examples that are not documented here.
+=cut
+
 # -------------------------------------------------------
 
 package Mail::SpamAssassin::Plugin::PDFInfo;
