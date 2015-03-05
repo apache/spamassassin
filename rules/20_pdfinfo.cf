@@ -166,23 +166,23 @@ ifplugin Mail::SpamAssassin::Plugin::PDFInfo
 # pdf image dimensions
 
 # thin horizontal, common stox.
-#body            GMD_PDF_HORIZ           eval:pdf_image_size_range(100, 450, 240, 800)
-#describe        GMD_PDF_HORIZ           Contains pdf 100-240 (high) x 450-800 (wide)
-#score           GMD_PDF_HORIZ           0.25
+body            GMD_PDF_HORIZ           eval:pdf_image_size_range(100, 450, 240, 800)
+describe        GMD_PDF_HORIZ           Contains pdf 100-240 (high) x 450-800 (wide)
+score           GMD_PDF_HORIZ           0.25
 # counts        GMD_PDF_HORIZ           135s/0h of 6132 corpus (4555s/1577h AxB-MANUAL) 07/11/07
 # counts        GMD_PDF_HORIZ           278s/0h of 34051 corpus (33259s/792h AxB2-TRAPS) 07/13/07
 
 # near square, and small.  common stox.
-#body            GMD_PDF_SQUARE          eval:pdf_image_size_range(180, 180, 360, 360)
-#describe        GMD_PDF_SQUARE          Contains pdf 180-360 (high) x 180-360 (wide)
-#score           GMD_PDF_SQUARE          0.50
+body            GMD_PDF_SQUARE          eval:pdf_image_size_range(180, 180, 360, 360)
+describe        GMD_PDF_SQUARE          Contains pdf 180-360 (high) x 180-360 (wide)
+score           GMD_PDF_SQUARE          0.50
 # counts        GMD_PDF_SQUARE          36s/0h of 6132 corpus (4555s/1577h AxB-MANUAL) 07/11/07
 # counts        GMD_PDF_SQUARE          46s/0h of 34051 corpus (33259s/792h AxB2-TRAPS) 07/13/07
 
 # thin vertical, very tall.  common stox.
-#body            GMD_PDF_VERT            eval:pdf_image_size_range(450, 100, 800, 240)
-#describe        GMD_PDF_VERT            Contains pdf 450-800 (high) x 100-240 (wide)
-#score           GMD_PDF_VERT            0.90
+body            GMD_PDF_VERT            eval:pdf_image_size_range(450, 100, 800, 240)
+describe        GMD_PDF_VERT            Contains pdf 450-800 (high) x 100-240 (wide)
+score           GMD_PDF_VERT            0.90
 # counts        GMD_PDF_VERT            24s/0h of 6132 corpus (4555s/1577h AxB-MANUAL) 07/11/07
 # counts        GMD_PDF_VERT            10s/0h of 11773 corpus (10988s/785h AxB2-TRAPS) 07/11/07
 
@@ -240,46 +240,46 @@ ifplugin Mail::SpamAssassin::Plugin::PDFInfo
 # counts        GMD_AUTHOR_HPADMIN      27s/0h of 11773 corpus (10988s/785h AxB2-TRAPS) 07/11/07
 
 # generic rule for software used to produce the pdf.
-#body            GMD_PRODUCER_GPL        eval:pdf_match_details('producer','/^(?:gnu|gpl) ghostscript/i')
-#describe        GMD_PRODUCER_GPL        PDF producer was GPL Ghostscript
-#score           GMD_PRODUCER_GPL        0.25
+body            GMD_PRODUCER_GPL        eval:pdf_match_details('producer','/^(?:gnu|gpl) ghostscript/i')
+describe        GMD_PRODUCER_GPL        PDF producer was GPL Ghostscript
+score           GMD_PRODUCER_GPL        0.25
 # counts        GMD_PRODUCER_GPL        227s/0h of 6132 corpus (555s/1577h AxB-MANUAL) 07/11/07
 # counts        GMD_PRODUCER_GPL        85s/0h of 10767 corpus (9986s/781h AxB2-TRAPS) 07/11/07
 
 # generic rule for software used to produce the pdf.
-#body            GMD_PRODUCER_POWERPDF   eval:pdf_match_details('producer','/^PowerPdf 0\./')
-#describe        GMD_PRODUCER_POWERPDF   PDF producer was PowerPDF
-#score           GMD_PRODUCER_POWERPDF   0.25
+body            GMD_PRODUCER_POWERPDF   eval:pdf_match_details('producer','/^PowerPdf 0\./')
+describe        GMD_PRODUCER_POWERPDF   PDF producer was PowerPDF
+score           GMD_PRODUCER_POWERPDF   0.25
 # counts        GMD_PRODUCER_POWERPDF   0s/0h of 10767 corpus (9986s/781h AxB2-TRAPS) 07/11/07
 # counts        GMD_PRODUCER_POWERPDF   0s/0h of 5641 corpus (4064s/1577h AxB-MANUAL) 07/11/07
 
 # producer is bcl
-#body            GMD_PRODUCER_EASYPDF    eval:pdf_match_details('producer','/^BCL easyPDF/')
-#describe        GMD_PRODUCER_EASYPDF    PDF producer was BCL easyPDF
-#score           GMD_PRODUCER_EASYPDF    0.25
+body            GMD_PRODUCER_EASYPDF    eval:pdf_match_details('producer','/^BCL easyPDF/')
+describe        GMD_PRODUCER_EASYPDF    PDF producer was BCL easyPDF
+score           GMD_PRODUCER_EASYPDF    0.25
 
 # simple check for encryption used inside pdf.
 # recommend meta with something else...
-#body            GMD_PDF_ENCRYPTED       eval:pdf_is_encrypted()
-#describe        GMD_PDF_ENCRYPTED       Attached PDF is encrypted
-#score           GMD_PDF_ENCRYPTED       0.60
+body            GMD_PDF_ENCRYPTED       eval:pdf_is_encrypted()
+describe        GMD_PDF_ENCRYPTED       Attached PDF is encrypted
+score           GMD_PDF_ENCRYPTED       0.60
 # counts        GMD_PDF_ENCRYPTED       13s/0h of 34051 corpus (33259s/792h AxB2-TRAPS) 07/13/07
 
 # simple check for empty msg body when there is one or more pdf attachments present.
-#body            GMD_PDF_EMPTY_BODY      eval:pdf_is_empty_body()
-#describe        GMD_PDF_EMPTY_BODY      Attached PDF with empty message body
-#score           GMD_PDF_EMPTY_BODY      0.25
+body            GMD_PDF_EMPTY_BODY      eval:pdf_is_empty_body()
+describe        GMD_PDF_EMPTY_BODY      Attached PDF with empty message body
+score           GMD_PDF_EMPTY_BODY      0.25
 # counts        GMD_PDF_EMPTY_BODY      1638s/20h of 27034 corpus (24636s/2398h AxB-MANUAL) 07/19/07
 
 ######################################################################################################
 # metas
 #meta            __GMD_PDF_CHECKSUM      ( GMD_PDF_FUZZY1_T1 || GMD_PDF_FUZZY2_T1 || GMD_PDF_FUZZY2_T2 || GMD_PDF_FUZZY2_T3 || GMD_PDF_FUZZY2_T4 || GMD_PDF_FUZZY2_T5 || GMD_PDF_FUZZY2_T6 || GMD_PDF_FUZZY2_T7 ||GMD_PDF_FUZZY2_T9 || GMD_PDF_FUZZY2_T10 || GMD_PDF_FUZZY2_T11 || GMD_PDF_FUZZY2_T12 )
 #meta            __GMD_PDF_DETAIL        ( GMD_AUTHOR_COLET || GMD_AUTHOR_MOBILE || GMD_AUTHOR_OOO || GMD_AUTHOR_HPADMIN || GMD_PRODUCER_GPL || GMD_PRODUCER_POWERPDF || GMD_PRODUCER_EASYPDF )
-#meta            __GMD_PDF_DIMS          ( GMD_PDF_VERT || GMD_PDF_HORIZ || GMD_PDF_SQUARE )
-#meta            __GMD_PDF_PRODUCERS     ( GMD_PRODUCER_GPL || GMD_PRODUCER_POWERPDF || GMD_PRODUCER_EASYPDF )
+meta            __GMD_PDF_DIMS          ( GMD_PDF_VERT || GMD_PDF_HORIZ || GMD_PDF_SQUARE )
+meta            __GMD_PDF_PRODUCERS     ( GMD_PRODUCER_GPL || GMD_PRODUCER_POWERPDF || GMD_PRODUCER_EASYPDF )
 
 # rule hits ham by itself, so use just to meta.
-#body            __GMD_PDF_NO_TXT        eval:pdf_image_to_text_ratio(0.000, 0.005)
+body            __GMD_PDF_NO_TXT        eval:pdf_image_to_text_ratio(0.000, 0.005)
 
 # meta checksum hit with image dimensions
 #meta            GMD_PDF_STOX_M1         ( __GMD_PDF_CHECKSUM && __GMD_PDF_DIMS)
