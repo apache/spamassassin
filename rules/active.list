@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus dwarren grenier kam-ninja kpg-core mas-cps mas-mas mmiroslaw-ham mmiroslaw-spam zmi; day 2: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus dwarren grenier jarif kam-ninja kpg-core llanga mas-cps mas-mas mmiroslaw-ham mmiroslaw-spam zmi; day 3: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus dwarren grenier jarif kam-ninja kpg-core llanga mas-cps mas-mas zmi
+# with results from: day 1: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus dwarren grenier jarif kam-ninja kpg-core mas-cps mas-mas mmiroslaw-ham mmiroslaw-spam zmi; day 2: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus dwarren grenier kam-ninja kpg-core llanga mas-cps mas-mas mmiroslaw-ham mmiroslaw-spam zmi; day 3: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus dwarren grenier jarif kam-ninja kpg-core llanga mas-cps mas-mas mmiroslaw-ham mmiroslaw-spam zmi
 
 # good enough
 ACCT_PHISHING
@@ -80,9 +80,6 @@ ADVANCE_FEE_4_NEW_MONEY
 ADVANCE_FEE_5_NEW
 
 # good enough
-ADVANCE_FEE_5_NEW_FORM
-
-# good enough
 ADVANCE_FEE_5_NEW_FRM_MNY
 
 # good enough
@@ -93,12 +90,6 @@ AD_PREFS
 
 # tflags userconf
 ALL_TRUSTED
-
-# good enough
-AXB_RBDY_TENANDTEN
-
-# good enough
-AXB_URI_CDGB
 
 # good enough
 AXB_XMAILER_MIMEOLE_OL_024C2
@@ -222,6 +213,9 @@ DOS_ANAL_SPAM_MAILER
 
 # good enough
 DOS_OE_TO_MX
+
+# good enough
+DOS_OUTLOOK_TO_MX
 
 # good enough
 DOS_OUTLOOK_TO_MX_IMAGE
@@ -446,9 +440,6 @@ HK_LOTTO_NAME
 HK_NAME_DRUGS
 
 # good enough
-HK_NAME_FM_FROM
-
-# good enough
 HK_NAME_FM_MR_MRS
 
 # good enough
@@ -456,6 +447,9 @@ HK_NAME_FROM
 
 # good enough
 HK_NAME_MR_MRS
+
+# good enough
+HK_RANDOM_REPLYTO
 
 # good enough
 HK_SCAM_N1
@@ -471,6 +465,9 @@ HK_SCAM_N3
 
 # good enough
 HK_SCAM_N8
+
+# good enough
+HK_SPAMMY_FILENAME
 
 # tflags userconf
 HTML_CHARSET_FARAWAY
@@ -582,6 +579,9 @@ NSL_RCVD_FROM_USER
 
 # good enough
 NSL_RCVD_HELO_USER
+
+# good enough
+OBFU_HTML_ATTACH
 
 # tflags publish
 OBFU_JVSCR_ESC
@@ -971,10 +971,13 @@ TVD_VISIT_PHARMA
 TW_GIBBERISH_MANY
 
 # good enough
+AXB_X_AOL_SEZ_S
+
+# good enough
 FROM_UNBAL2
 
 # good enough
-HDRS_LCASE
+FSL_HELO_BARE_IP_2
 
 # tflags publish
 UC_GIBBERISH_OBFU
