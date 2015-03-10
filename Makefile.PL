@@ -7,13 +7,8 @@ use Config;
 
 use ExtUtils::MakeMaker;
 
-# Store the version for later use
-my $mm_version = $ExtUtils::MakeMaker::VERSION;
-
 # avoid stupid 'Argument "6.30_01" isn't numeric in numeric ge (>=)' warnings;
-# strip off the beta subversion noise that causes the trouble.
-$mm_version =~ s/_\S+$//;      # "6.30_01" => "6.30"
-$mm_version += 0;
+my $mm_version = eval $ExtUtils::MakeMaker::VERSION;
 
 if ($mm_version < 6.17) {
   die "SpamAssassin Makefile.PL requires at least ExtUtils::MakeMaker v6.17";
