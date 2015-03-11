@@ -505,7 +505,8 @@ sub _check_spf {
       # Mail::SPF::Server can be re-used, and we get to use our own resolver object!
       $self->{spf_server} = Mail::SPF::Server->new(
 				hostname     => $scanner->get_tag('HOSTNAME'),
-				dns_resolver => $self->{main}->{resolver} );
+				dns_resolver => $self->{main}->{resolver},
+				max_dns_interactive_terms => 15);
       1;
     } or do {
       $eval_stat = $@ ne '' ? $@ : "errno=$!";  chomp $eval_stat;
