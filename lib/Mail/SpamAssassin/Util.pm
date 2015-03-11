@@ -1321,8 +1321,9 @@ sub uri_list_canonicalize {
       #   [...] Only the IDEOGRAPHIC FULL STOP character (U+3002) is added in
       #   this mapping because the authors have not fully investigated [...]
       # Adding also 'SMALL FULL STOP' (U+FE52) as seen in the wild.
+      # Parhaps also the 'ONE DOT LEADER' (U+2024).
       if ($host =~ s{(?: \xE3\x80\x82 | \xEF\xBC\x8E | \xEF\xBD\xA1 |
-                         \xEF\xB9\x92 )}{.}xgs) {
+                         \xEF\xB9\x92 | \xE2\x80\xA4 )}{.}xgs) {
         push(@nuris, join ('', $proto, $host, $rest));
       }
 
