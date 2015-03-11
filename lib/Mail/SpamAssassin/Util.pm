@@ -1268,15 +1268,15 @@ sub uri_list_canonicalize {
     # bug 4390: certain MUAs treat back slashes as front slashes.
     # since backslashes are supposed to be encoded in a URI, swap non-encoded
     # ones with front slashes.
-    $nuri =~ tr@\\@/@;
+    $nuri =~ tr{\\}{/};
 
     # http:www.foo.biz -> http://www.foo.biz
-    $nuri =~ s#^(https?:)/{0,2}#$1//#i;
+    $nuri =~ s{^(https?:)/{0,2}}{$1//}i;
 
     # *always* make a dup with all %-encoding decoded, since
     # important parts of the URL may be encoded (such as the
     # scheme). (bug 4213)
-    if ($nuri =~ /\%[0-9a-fA-F]{2}/) {
+    if ($nuri =~ /%[0-9a-fA-F]{2}/) {
       $nuri = Mail::SpamAssassin::Util::url_encode($nuri);
     }
 
@@ -1284,15 +1284,15 @@ sub uri_list_canonicalize {
     # unschemed URIs: assume default of "http://" as most MUAs do
     if ($nuri !~ /^[-_a-z0-9]+:/i) {
       if ($nuri =~ /^ftp\./) {
-	$nuri =~ s@^@ftp://@g;
+	$nuri =~ s{^}{ftp://}g;
       }
       else {
-	$nuri =~ s@^@http://@g;
+	$nuri =~ s{^}{http://}g;
       }
     }
 
     # http://www.foo.biz?id=3 -> http://www.foo.biz/?id=3
-    $nuri =~ s@^(https?://[^/?]+)\?@$1/?@i;
+    $nuri =~ s{^(https?://[^/?]+)\?}{$1/?}i;
 
     # deal with encoding of chars, this is just the set of printable
     # chars minus ' ' (that is, dec 33-126, hex 21-7e)
@@ -1310,6 +1310,21 @@ sub uri_list_canonicalize {
 
       # not required
       $rest ||= '';
+
+      # Bug 6751:
+      # RFC 3490 (IDNA): Whenever dots are used as label separators, the
+      #   following characters MUST be recognized as dots: U+002E (full stop),
+      #   U+3002 (ideographic full stop), U+FF0E (fullwidth full stop),
+      #   U+FF61 (halfwidth ideographic full stop).
+      # RFC 5895: [...] the IDEOGRAPHIC FULL STOP character (U+3002)
+      #   can be mapped to the FULL STOP before label separation occurs.
+      #   [...] Only the IDEOGRAPHIC FULL STOP character (U+3002) is added in
+      #   this mapping because the authors have not fully investigated [...]
+      # Adding also 'SMALL FULL STOP' (U+FE52) as seen in the wild.
+      if ($host =~ s{(?: \xE3\x80\x82 | \xEF\xBC\x8E | \xEF\xBD\xA1 |
+                         \xEF\xB9\x92 )}{.}xgs) {
+        push(@nuris, join ('', $proto, $host, $rest));
+      }
 
       # bug 4146: deal with non-US ASCII 7-bit chars in the host portion
       # of the URI according to RFC 1738 that's invalid, and the tested
