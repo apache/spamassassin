@@ -113,9 +113,9 @@ use re 'taint';
 use version;
 
 # need GeoIP C library 1.6.3 and GeoIP perl API 1.4.4 or later to avoid messages leaking - Bug 7153
-my $gic_wanted = version->parse('v1.4.4');
+my $gic_wanted = version->parse('v1.6.3');
 my $gic_have = version->parse(Geo::IP->lib_version());
-my $gip_wanted = version->parse('v1.6.3');
+my $gip_wanted = version->parse('v1.4.4');
 my $gip_have = version->parse($Geo::IP::VERSION);
 
 use vars qw(@ISA);
@@ -138,9 +138,9 @@ sub new {
 
   # this code burps an ugly message if it fails, but that's redirected elsewhere
   my $flags = 0;
-  eval '$flags = Geo::IP::GEOIP_SILENCE if (defined &Geo::IP::GEOIP_SILENCE)';
+  eval '$flags = Geo::IP::GEOIP_SILENCE' if ($gip_wanted >= $gip_have);
 
-  if ($flags && $gip_wanted >= $gip_have && $gic_wanted >= $gic_have) {
+  if ($flags && $gic_wanted >= $gic_have) {
     $self->{geoip} = Geo::IP->new(GEOIP_MEMORY_CACHE | GEOIP_CHECK_CACHE | $flags);
     $self->{geoisp} = Geo::IP->open_type(GEOIP_ISP_EDITION, GEOIP_MEMORY_CACHE | GEOIP_CHECK_CACHE | $flags);
   } else {
