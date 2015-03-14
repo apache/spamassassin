@@ -507,6 +507,8 @@ sub _check_spf {
 				hostname     => $scanner->get_tag('HOSTNAME'),
 				dns_resolver => $self->{main}->{resolver},
 				max_dns_interactive_terms => 15);
+      # Bug 7112: max_dns_interactive_terms defaults to 10, but even 14 is
+      # not enough for ebay.com, setting it to 15
       1;
     } or do {
       $eval_stat = $@ ne '' ? $@ : "errno=$!";  chomp $eval_stat;
