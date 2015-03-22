@@ -536,7 +536,6 @@ example.tl	^http://example.tl$
 example.tm	^http://example.tm$
 example.tn	^http://example.tn$
 example.to	^http://example.to$
-example.tp	^http://example.tp$
 example.tr	^http://example.tr$
 example.travel	^http://example.travel$
 example.tt	^http://example.tt$
