@@ -1,14 +1,521 @@
 ------------------------------------------------------------------------
+r1668416 | axb | 2015-03-22 17:27:38 +0000 (Sun, 22 Mar 2015) | 1 line
+ 
+ Updated TLD list - Version 2015032200, Last Updated Sun Mar 22 07:07:01 
+2015 UTC
+------------------------------------------------------------------------
+r1668414 | axb | 2015-03-22 17:13:50 +0000 (Sun, 22 Mar 2015) | 3 lines
+ 
+ diasbled  *.tp tests
+ TLD  deleted in February 2015
+ See http://en.wikipedia.org/wiki/.tp
+------------------------------------------------------------------------
+r1668413 | axb | 2015-03-22 17:13:47 +0000 (Sun, 22 Mar 2015) | 3 lines
+ 
+ diasbled  *.tp tests
+ TLD  deleted in February 2015
+ See http://en.wikipedia.org/wiki/.tp
+------------------------------------------------------------------------
+r1668371 | axb | 2015-03-22 13:59:55 +0000 (Sun, 22 Mar 2015) | 7 lines
+ 
+ removed example.tp	^http://example.tp$
+ 
+ .tp was the listed Internet country code top-level domain (ccTLD) for 
+East Timor. The letters used refer to Timor Português, or Portuguese 
+Timor, a legacy from the nation's previous status as a Portuguese colony. 
+The domain .tp was officially launched in December 1997 by connect.ie, an 
+internet service provider based in Dublin, Ireland, in cooperation with 
+the East Timorese authorities in absentia, while East Timor was under 
+Indonesian military control.
+ 
+ 
+ .tp was the listed Internet country code top-level domain (ccTLD) for 
+East Timor. The letters used refer to Timor Português, or Portuguese 
+Timor, a legacy from the nation's previous status as a Portuguese colony. 
+The domain .tp was officially launched in December 1997 by connect.ie, an 
+internet service provider based in Dublin, Ireland, in cooperation with 
+the East Timorese authorities in absentia, while East Timor was under 
+Indonesian military control.
+ .tp remained active for the period of transition, although it now no 
+longer complies with the ISO 3166-1 standard for the two-letter codes for 
+the name of countries as the code for East Timor changed from TP to TL 
+after independence. Regardless, it retained a number of domains until it 
+was finally deleted in February 2015
+------------------------------------------------------------------------
+r1668321 | jhardin | 2015-03-21 21:14:31 +0000 (Sat, 21 Mar 2015) | 1 line
+ 
+ tweak LOTSA_MONEY - add CAD currency
+------------------------------------------------------------------------
+r1666626 | mmartinec | 2015-03-14 00:50:59 +0000 (Sat, 14 Mar 2015) | 1 
+line
+ 
+ SPF: Bug 7112: added a comment
+------------------------------------------------------------------------
+r1665864 | kmcgrail | 2015-03-11 12:30:50 +0000 (Wed, 11 Mar 2015) | 1 
+line
+ 
+ more cleanup for bug 7153
+------------------------------------------------------------------------
+r1665863 | jquinn | 2015-03-11 12:26:44 +0000 (Wed, 11 Mar 2015) | 1 line
+ 
+ raied SPF max dns terms to 15, because ebay could not even follow one 
+simple standard
+------------------------------------------------------------------------
+r1665746 | mmartinec | 2015-03-11 00:37:45 +0000 (Wed, 11 Mar 2015) | 1 
+line
+ 
+ Bug 6751: Certain Character Sets can use alternate characters - add ONE 
+DOT LEADER (U+2024) for good measure
+------------------------------------------------------------------------
+r1665744 | mmartinec | 2015-03-11 00:03:24 +0000 (Wed, 11 Mar 2015) | 1 
+line
+ 
+ Bug 6751: Certain Character Sets can use alternate characters for period 
+that then bypass DNSBL Checks
+------------------------------------------------------------------------
+r1665706 | kmcgrail | 2015-03-10 21:25:36 +0000 (Tue, 10 Mar 2015) | 1 
+line
+ 
+ Bug 7153 for leak of URILocalBL.pm to stderr
+------------------------------------------------------------------------
+r1665679 | kmcgrail | 2015-03-10 20:28:44 +0000 (Tue, 10 Mar 2015) | 1 
+line
+ 
+ use eval instead of regex to fix MakeMaker version - bug 7143
+------------------------------------------------------------------------
+r1664525 | kmcgrail | 2015-03-05 23:26:00 +0000 (Thu, 05 Mar 2015) | 1 
+line
+ 
+ Turning back on some of the PDFinfo rules for those who use the plugin
+------------------------------------------------------------------------
+r1664498 | kmcgrail | 2015-03-05 22:07:08 +0000 (Thu, 05 Mar 2015) | 1 
+line
+ 
+ documentation and exec bit change on PDFInfo.pm
+------------------------------------------------------------------------
+r1663406 | mmartinec | 2015-03-02 19:34:11 +0000 (Mon, 02 Mar 2015) | 1 
+line
+ 
+ Bug 7150: Allow scoped IP address in the dns_server config option
+------------------------------------------------------------------------
+r1663393 | mmartinec | 2015-03-02 18:40:08 +0000 (Mon, 02 Mar 2015) | 1 
+line
+ 
+ avoid unnecessary error logging on certain DNS failure responses
+------------------------------------------------------------------------
+r1662813 | kmcgrail | 2015-02-27 20:54:52 +0000 (Fri, 27 Feb 2015) | 1 
+line
+ 
+ small getopt.c change for bug 7148
+------------------------------------------------------------------------
+r1662745 | axb | 2015-02-27 16:39:47 +0000 (Fri, 27 Feb 2015) | 1 line
+ 
+ removed score FSL_FAKE_GMAIL_RCVD  for disabled sandbox rule
+------------------------------------------------------------------------
+r1662744 | axb | 2015-02-27 16:38:35 +0000 (Fri, 27 Feb 2015) | 1 line
+ 
+ removed VANITY score - not being published
+------------------------------------------------------------------------
+r1662158 | mmartinec | 2015-02-25 01:26:46 +0000 (Wed, 25 Feb 2015) | 1 
+line
+ 
+ Node::_normalize : workaround for Encode::decode taint laundering bug 
+[rt.cpan.org #84879]; use faster utf8::encode instead of 
+Encode::encode_utf8
+------------------------------------------------------------------------
+r1662088 | mmartinec | 2015-02-24 19:18:43 +0000 (Tue, 24 Feb 2015) | 1 
+line
+ 
+ added a missing 'require 5.008001', previously it would just fail on a 
+missing utf8::is_utf8()
+------------------------------------------------------------------------
+r1662087 | mmartinec | 2015-02-24 19:16:54 +0000 (Tue, 24 Feb 2015) | 1 
+line
+ 
+ typo in a comment
+------------------------------------------------------------------------
+r1661633 | mmartinec | 2015-02-23 10:27:54 +0000 (Mon, 23 Feb 2015) | 1 
+line
+ 
+ Bug 7141: Bayes truncates ('skip') long tokens on bytes, should it count 
+characters instead?
+------------------------------------------------------------------------
+r1661308 | axb | 2015-02-21 09:32:07 +0000 (Sat, 21 Feb 2015) | 1 line
+ 
+ # Version 2015022100, Last Updated Sat Feb 21 07:07:01 2015 UTC
+------------------------------------------------------------------------
+r1660962 | mmartinec | 2015-02-19 18:05:57 +0000 (Thu, 19 Feb 2015) | 1 
+line
+ 
+ just in case: don't pass  directly as argument to untaint_var()
+------------------------------------------------------------------------
+r1660859 | mmartinec | 2015-02-19 11:40:11 +0000 (Thu, 19 Feb 2015) | 1 
+line
+ 
+ Bug 7140: DKIM/SPF Insecure dependency in require
+------------------------------------------------------------------------
+r1660756 | axb | 2015-02-18 22:45:39 +0000 (Wed, 18 Feb 2015) | 2 lines
+ 
+ removed forced "publish HELO_LH_HOME"
+ overlaps with autopromoted AXB_HELO_HOME_UN
+------------------------------------------------------------------------
+r1660345 | axb | 2015-02-17 10:33:04 +0000 (Tue, 17 Feb 2015) | 1 line
+ 
+ added util_rb_2tld esy.es
+------------------------------------------------------------------------
+r1659740 | mmartinec | 2015-02-14 01:38:24 +0000 (Sat, 14 Feb 2015) | 1 
+line
+ 
+ Bug 7130: Bayes tokenization mangles/chops many UTF-8 words with 
+accented, Cyrillic etc. letters - inappropriately assuming ISO-8859 
+encoding
+------------------------------------------------------------------------
+r1659706 | mmartinec | 2015-02-13 22:56:30 +0000 (Fri, 13 Feb 2015) | 1 
+line
+ 
+ Bug 7130 - disable TOKENIZE_LONG_8BIT_SEQS_AS_TUPLES, seems reduntant 
+and useless with TOKENIZE_LONG_8BIT_SEQS_AS_UTF8_CHARS, e.g. turns each 
+Cyrillic letter of longer words into an individual token
+------------------------------------------------------------------------
+r1659705 | mmartinec | 2015-02-13 22:50:30 +0000 (Fri, 13 Feb 2015) | 1 
+line
+ 
+ Bug 7133 - forgot to remove test couches "$_[1]" -> $_[1], add comments
+------------------------------------------------------------------------
+r1659704 | mmartinec | 2015-02-13 22:45:39 +0000 (Fri, 13 Feb 2015) | 1 
+line
+ 
+ Bug 7133 - forgot to checkin t/html_utf8.t
+------------------------------------------------------------------------
+r1659677 | jhardin | 2015-02-13 20:48:02 +0000 (Fri, 13 Feb 2015) | 2 
+lines
+ 
+ bug 7139: FSL_HELO_BARE_IP_* should not hit on loopback
+ 
+------------------------------------------------------------------------
+r1659641 | mmartinec | 2015-02-13 18:29:30 +0000 (Fri, 13 Feb 2015) | 1 
+line
+ 
+ Bug 7133: Revisiting Bug 4046 - HTML::Parser: Parsing of undecoded UTF-8 
+will give garbage when decoding entities
+------------------------------------------------------------------------
+r1659456 | jhardin | 2015-02-13 05:18:39 +0000 (Fri, 13 Feb 2015) | 1 line
+ 
+ Increase score limit on test rule
+------------------------------------------------------------------------
+r1659260 | mmartinec | 2015-02-12 14:01:10 +0000 (Thu, 12 Feb 2015) | 1 
+line
+ 
+ Node.pm: replace misleading comment at RFC 2047 decoding, unify both 
+similar regexps, spacier formatting
+------------------------------------------------------------------------
+r1659255 | mmartinec | 2015-02-12 13:46:03 +0000 (Thu, 12 Feb 2015) | 1 
+line
+ 
+ Bug 7126: Incorrect character set detections by normalize_charset - sub 
+_normalize() V2
+------------------------------------------------------------------------
+r1658751 | mmartinec | 2015-02-10 16:18:27 +0000 (Tue, 10 Feb 2015) | 1 
+line
+ 
+ _normalize() tweak (avoid decoding if we already know it is ascii)
+------------------------------------------------------------------------
+r1658431 | jquinn | 2015-02-09 15:15:56 +0000 (Mon, 09 Feb 2015) | 1 line
+ 
+ fixed missing case for permerror in From SPF
+------------------------------------------------------------------------
+r1658380 | kmcgrail | 2015-02-09 12:17:46 +0000 (Mon, 09 Feb 2015) | 1 
+line
+ 
+ added has_check_for_spf_errors and if can() encapsulation, modified 
+25_spf.t for bug 7136 and reverted reversion in SpamAssassin.pm from 
+previous rc1 work
+------------------------------------------------------------------------
+r1657912 | mmartinec | 2015-02-06 18:23:50 +0000 (Fri, 06 Feb 2015) | 1 
+line
+ 
+ added a comment
+------------------------------------------------------------------------
+r1657911 | mmartinec | 2015-02-06 18:18:32 +0000 (Fri, 06 Feb 2015) | 1 
+line
+ 
+ Bug 7135: Bayes tokenizer 'arbitrarily' breaks multibyte CJK utf-8 
+characters into digrams instead of breaking on UTF-8 character boundaries
+------------------------------------------------------------------------
+r1657862 | mmartinec | 2015-02-06 15:19:05 +0000 (Fri, 06 Feb 2015) | 1 
+line
+ 
+ Bug 7126 - some more tweaks at sub _normalize
+------------------------------------------------------------------------
+r1657740 | jhardin | 2015-02-06 03:02:28 +0000 (Fri, 06 Feb 2015) | 2 
+lines
+ 
+ STYLE_GIBBERISH tuning
+ 
+------------------------------------------------------------------------
+r1657652 | axb | 2015-02-05 18:10:36 +0000 (Thu, 05 Feb 2015) | 2 lines
+ 
+ EMERGENCY FIX: lowered score on RCVD_ILLEGAL_IP 
+ Yahoo! is using 238/8 in Received headers.
+------------------------------------------------------------------------
+r1657563 | jquinn | 2015-02-05 13:35:18 +0000 (Thu, 05 Feb 2015) | 1 line
+ 
+ spelling fixes in documentation
+------------------------------------------------------------------------
+r1656974 | jhardin | 2015-02-04 02:03:36 +0000 (Wed, 04 Feb 2015) | 1 line
+ 
+ STYLE_GIBBERISH tuning
+------------------------------------------------------------------------
+r1656495 | jhardin | 2015-02-02 15:41:48 +0000 (Mon, 02 Feb 2015) | 1 line
+ 
+ Fix runaway backtracking in STYLE_GIBBERISH_1, don't treat comments as 
+gibberish - requires perl 5.10+
+------------------------------------------------------------------------
+r1656448 | mmartinec | 2015-02-02 12:21:10 +0000 (Mon, 02 Feb 2015) | 1 
+line
+ 
+ strip out commented-out incorrect old code in 
+MS::Message::Node::_decode_header()
+------------------------------------------------------------------------
+r1656447 | mmartinec | 2015-02-02 12:02:31 +0000 (Mon, 02 Feb 2015) | 1 
+line
+ 
+ Bug 7126: Incorrect character set detections by normalize_charset - 
+refinements: ANSI X3.4-1986, Windows-1252 quotes
+------------------------------------------------------------------------
+r1656261 | mmartinec | 2015-02-01 01:35:56 +0000 (Sun, 01 Feb 2015) | 1 
+line
+ 
+ Bug 7128: DCC plugin uses IO::Socket::INET6 instead of IO::Socket::IP
+------------------------------------------------------------------------
+r1656048 | mmartinec | 2015-01-30 16:24:36 +0000 (Fri, 30 Jan 2015) | 1 
+line
+ 
+ Bug 7126: Incorrect character set detections by normalize_charset - some 
+small refinements
+------------------------------------------------------------------------
+r1656028 | jquinn | 2015-01-30 14:34:01 +0000 (Fri, 30 Jan 2015) | 1 line
+ 
+ Added test rules to detect SPF queries that produce error results
+------------------------------------------------------------------------
+r1655758 | mmartinec | 2015-01-29 17:24:47 +0000 (Thu, 29 Jan 2015) | 1 
+line
+ 
+ Bug 7126: Incorrect character set detections by normalize_charset
+------------------------------------------------------------------------
+r1655673 | mmartinec | 2015-01-29 14:18:45 +0000 (Thu, 29 Jan 2015) | 1 
+line
+ 
+ Bug 7125: MIME parsing of nested messages must not treat parts like 
+delivery-status, disposition-notification as message/rfc822
+------------------------------------------------------------------------
+r1655345 | mmartinec | 2015-01-28 14:18:04 +0000 (Wed, 28 Jan 2015) | 1 
+line
+ 
+ Bug 6953: spamd: could not create IO::Socket::INET6 socket on [::]:783: 
+Address already in use
+------------------------------------------------------------------------
+r1655145 | mmartinec | 2015-01-27 20:20:53 +0000 (Tue, 27 Jan 2015) | 1 
+line
+ 
+ Bug 7106: Failed IPv6 port create blocks good IPv4 port create
+------------------------------------------------------------------------
+r1655106 | mmartinec | 2015-01-27 19:05:45 +0000 (Tue, 27 Jan 2015) | 1 
+line
+ 
+ Bug 7124 - DKIM: RFC 6376 - Signers MUST use RSA keys of at least 1024 
+bits
+------------------------------------------------------------------------
+r1655102 | mmartinec | 2015-01-27 18:43:06 +0000 (Tue, 27 Jan 2015) | 1 
+line
+ 
+ updated a comment in Logger::would_log to match code
+------------------------------------------------------------------------
+r1655081 | jhardin | 2015-01-27 16:26:11 +0000 (Tue, 27 Jan 2015) | 2 
+lines
+ 
+ Hard disable STYLE_GIBBERISH for troubleshooting
+ 
+------------------------------------------------------------------------
+r1655077 | jhardin | 2015-01-27 16:21:32 +0000 (Tue, 27 Jan 2015) | 2 
+lines
+ 
+ Temporarily disable STYLE_GIBBERISH to troubleshoot infinite loop report
+ 
+------------------------------------------------------------------------
+r1654576 | jhardin | 2015-01-24 21:04:09 +0000 (Sat, 24 Jan 2015) | 1 line
+ 
+ STYLE_GIBBERISH skip comments, add duplicated-header rule
+------------------------------------------------------------------------
+r1654102 | mmartinec | 2015-01-23 00:43:08 +0000 (Fri, 23 Jan 2015) | 1 
+line
+ 
+ Bug 7123: Address some warnings issued by 'use re qw(strict)' in perl 
+5.21.8
+------------------------------------------------------------------------
+r1654006 | jquinn | 2015-01-22 19:03:22 +0000 (Thu, 22 Jan 2015) | 1 line
+ 
+ added new install docs to MANIFEST
+------------------------------------------------------------------------
+r1653868 | axb | 2015-01-22 14:13:25 +0000 (Thu, 22 Jan 2015) | 2 lines
+ 
+ removed unnecessary 
+ reuse           URIBL_BLOCKED
+------------------------------------------------------------------------
+r1653842 | kmcgrail | 2015-01-22 13:11:38 +0000 (Thu, 22 Jan 2015) | 1 
+line
+ 
+ minor rule change for __HAS_OFFICE1214_IN_MAILER for Office 15 bug 7122
+------------------------------------------------------------------------
+r1652734 | axb | 2015-01-18 11:16:29 +0000 (Sun, 18 Jan 2015) | 1 line
+ 
+ removed URIBL_DBL_REDIR . Replaced by URIBL_DBL_ABUSE_REDIR
+------------------------------------------------------------------------
+r1652429 | kmcgrail | 2015-01-16 15:15:02 +0000 (Fri, 16 Jan 2015) | 1 
+line
+ 
+ Perl Critic exemption per bug 7120
+------------------------------------------------------------------------
+r1652181 | mmartinec | 2015-01-15 17:30:37 +0000 (Thu, 15 Jan 2015) | 1 
+line
+ 
+ Bug 7119: Perl::Critic: ControlStructures::ProhibitMutatingListFunctions
+------------------------------------------------------------------------
+r1652170 | kmcgrail | 2015-01-15 16:47:19 +0000 (Thu, 15 Jan 2015) | 1 
+line
+ 
+ Reverting some recent undef changes in Util.pm
+------------------------------------------------------------------------
+r1651793 | jquinn | 2015-01-14 19:55:43 +0000 (Wed, 14 Jan 2015) | 1 line
+ 
+ reverted critic recommendations to fix undef warning
+------------------------------------------------------------------------
+r1651208 | axb | 2015-01-12 21:35:44 +0000 (Mon, 12 Jan 2015) | 2 lines
+ 
+ # loadplugin Mail::SpamAssassin::Plugin::TxRep
+ TxRep should be optional - avoid suprises.
+------------------------------------------------------------------------
+r1651169 | kmcgrail | 2015-01-12 19:08:29 +0000 (Mon, 12 Jan 2015) | 1 
+line
+ 
+ small change to error message for plugins to let people know about Check 
+plugin being mandatory
+------------------------------------------------------------------------
+r1651130 | jquinn | 2015-01-12 16:25:10 +0000 (Mon, 12 Jan 2015) | 1 line
+ 
+ fixed a minor test failure
+------------------------------------------------------------------------
+r1651114 | jquinn | 2015-01-12 15:17:46 +0000 (Mon, 12 Jan 2015) | 1 line
+ 
+ Another pass at bookkeeping for TxRep to succeed AWL
+------------------------------------------------------------------------
+r1651037 | axb | 2015-01-12 07:57:51 +0000 (Mon, 12 Jan 2015) | 1 line
+ 
+ # Version 2015011200, Last Updated Mon Jan 12 07:07:01 2015 UTC
+------------------------------------------------------------------------
+r1650450 | axb | 2015-01-09 07:01:56 +0000 (Fri, 09 Jan 2015) | 1 line
+ 
+ removed already disabled DNS_FROM_AHBL_RHSBL
+------------------------------------------------------------------------
+r1650327 | kmcgrail | 2015-01-08 16:49:20 +0000 (Thu, 08 Jan 2015) | 1 
+line
+ 
+ Removed undef returns for perlcritic test
+------------------------------------------------------------------------
+r1650258 | axb | 2015-01-08 11:49:29 +0000 (Thu, 08 Jan 2015) | 1 line
+ 
+ removed all ref to defunct AHBL
+------------------------------------------------------------------------
+r1650033 | axb | 2015-01-07 10:56:37 +0000 (Wed, 07 Jan 2015) | 1 line
+ 
+ removed obsoleted FSL rules from 50_scores.cf
+------------------------------------------------------------------------
+r1648381 | mmartinec | 2014-12-29 15:59:27 +0000 (Mon, 29 Dec 2014) | 1 
+line
+ 
+ Bug 7115, factoring out common code in Message.pm
+------------------------------------------------------------------------
+r1648372 | mmartinec | 2014-12-29 15:44:13 +0000 (Mon, 29 Dec 2014) | 1 
+line
+ 
+ Bug 7115, more informative bayes debugging: report number of tokens for 
+each source
+------------------------------------------------------------------------
+r1647707 | mmartinec | 2014-12-24 00:27:01 +0000 (Wed, 24 Dec 2014) | 1 
+line
+ 
+ Bug 7115: Adding SHA digests of MIME parts as Bayes tokens allows bayes 
+to see non-textual content - added configirability
+------------------------------------------------------------------------
+r1646914 | jhardin | 2014-12-20 02:19:40 +0000 (Sat, 20 Dec 2014) | 2 
+lines
+ 
+ Add test rule
+ 
+------------------------------------------------------------------------
+r1646848 | mmartinec | 2014-12-19 19:39:51 +0000 (Fri, 19 Dec 2014) | 1 
+line
+ 
+ Bug 7115: Adding SHA digests of MIME parts as Bayes tokens allows bayes 
+to 'see' non-textual content
+------------------------------------------------------------------------
+r1646770 | mmartinec | 2014-12-19 15:27:02 +0000 (Fri, 19 Dec 2014) | 1 
+line
+ 
+ fix MS::Util::parse_content_type, dots are allowed in Content-Type (a 
+fix to Bug 5399 was too strict)
+------------------------------------------------------------------------
+r1646769 | mmartinec | 2014-12-19 15:21:58 +0000 (Fri, 19 Dec 2014) | 1 
+line
+ 
+ oops, one more stab at MS::Util::qp_decode
+------------------------------------------------------------------------
+r1646603 | jhardin | 2014-12-19 01:13:23 +0000 (Fri, 19 Dec 2014) | 2 
+lines
+ 
+ Add test rule: multiple X-Mailer headers
+ 
+------------------------------------------------------------------------
+r1646535 | mmartinec | 2014-12-18 21:07:50 +0000 (Thu, 18 Dec 2014) | 1 
+line
+ 
+ more avoidance of unnecessary string copying while reading a message
+------------------------------------------------------------------------
+r1646455 | mmartinec | 2014-12-18 13:24:51 +0000 (Thu, 18 Dec 2014) | 1 
+line
+ 
+ fix SA::Util::qp_decode for compliance with RFC 2045 (trailing 
+whitespace must be deleted before decoding), add comments
+------------------------------------------------------------------------
+r1646453 | mmartinec | 2014-12-18 13:20:29 +0000 (Thu, 18 Dec 2014) | 1 
+line
+ 
+ small optimization: avoid unnecessary copying when reading from a temp 
+file in SA::Message::Node
+------------------------------------------------------------------------
+r1646452 | mmartinec | 2014-12-18 13:17:12 +0000 (Thu, 18 Dec 2014) | 1 
+line
+ 
+ update inaccurate comment in MIMEEval
+------------------------------------------------------------------------
+r1646396 | axb | 2014-12-18 08:08:43 +0000 (Thu, 18 Dec 2014) | 1 line
+ 
+ # Version 2014121701, Last Updated Thu Dec 18 07:07:01 2014 UTC
+------------------------------------------------------------------------
+r1646149 | kmcgrail | 2014-12-17 04:05:38 +0000 (Wed, 17 Dec 2014) | 1 
+line
+ 
+ draft framework for 3.4.1 announcement
+------------------------------------------------------------------------
+r1646147 | kmcgrail | 2014-12-17 03:53:02 +0000 (Wed, 17 Dec 2014) | 1 
+line
+ 
+ preparing to release 3.4.1-rc1
+------------------------------------------------------------------------
 r1646143 | kmcgrail | 2014-12-17 03:06:14 +0000 (Wed, 17 Dec 2014) | 1 
 line
  
  removing sawampersand thanks to Philip Prindeville - bug 7063
-------------------------------------------------------------------------
-r1646141 | spamassassin_role | 2014-12-17 02:46:44 +0000 (Wed, 17 Dec 
-2014) | 1 line
- 
- updated scores for revision 1645877 active rules added since last 
-mass-check
 ------------------------------------------------------------------------
 r1646036 | jhardin | 2014-12-16 18:15:42 +0000 (Tue, 16 Dec 2014) | 2 
 lines
@@ -16,70 +523,22 @@ lines
  Protect some test rules with can(perl_min_version_5010000)
  
 ------------------------------------------------------------------------
-r1645827 | spamassassin_role | 2014-12-16 02:45:31 +0000 (Tue, 16 Dec 
-2014) | 1 line
- 
- updated scores for revision 1645598 active rules added since last 
-mass-check
-------------------------------------------------------------------------
 r1645801 | kmcgrail | 2014-12-16 00:38:59 +0000 (Tue, 16 Dec 2014) | 1 
 line
  
  Adding PDFInfo to the MANIFEST
 ------------------------------------------------------------------------
-r1645552 | spamassassin_role | 2014-12-15 02:44:22 +0000 (Mon, 15 Dec 
-2014) | 1 line
- 
- updated scores for revision 1645426 active rules added since last 
-mass-check
-------------------------------------------------------------------------
-r1645378 | spamassassin_role | 2014-12-14 02:47:09 +0000 (Sun, 14 Dec 
-2014) | 1 line
- 
- updated scores for revision 1645209 active rules added since last 
-mass-check
-------------------------------------------------------------------------
 r1645238 | axb | 2014-12-13 13:10:11 +0000 (Sat, 13 Dec 2014) | 1 line
  
  applies S/O to different scores
-------------------------------------------------------------------------
-r1645102 | spamassassin_role | 2014-12-13 02:47:33 +0000 (Sat, 13 Dec 
-2014) | 1 line
- 
- updated scores for revision 1644845 active rules added since last 
-mass-check
 ------------------------------------------------------------------------
 r1645050 | jquinn | 2014-12-12 19:49:16 +0000 (Fri, 12 Dec 2014) | 1 line
  
  Slight clarification of AWL rule and that it is not a true whitelist
 ------------------------------------------------------------------------
-r1644819 | spamassassin_role | 2014-12-12 02:44:29 +0000 (Fri, 12 Dec 
-2014) | 1 line
- 
- updated scores for revision 1644578 active rules added since last 
-mass-check
-------------------------------------------------------------------------
-r1644543 | spamassassin_role | 2014-12-11 02:46:32 +0000 (Thu, 11 Dec 
-2014) | 1 line
- 
- updated scores for revision 1644350 active rules added since last 
-mass-check
-------------------------------------------------------------------------
 r1644448 | jhardin | 2014-12-10 15:05:51 +0000 (Wed, 10 Dec 2014) | 1 line
  
  bug 7107: add "perl_min_version_5010000" for preprocessor conditionals
-------------------------------------------------------------------------
-r1644320 | spamassassin_role | 2014-12-10 02:44:25 +0000 (Wed, 10 Dec 
-2014) | 1 line
- 
- updated scores for revision 1643999 active rules added since last 
-mass-check
-------------------------------------------------------------------------
-r1643978 | spamassassin_role | 2014-12-09 02:45:12 +0000 (Tue, 09 Dec 
-2014) | 1 line
- 
- updated scores for revision 1643762 active rules added since last 
-mass-check
 ------------------------------------------------------------------------
 r1643877 | mmartinec | 2014-12-08 18:18:35 +0000 (Mon, 08 Dec 2014) | 1 
 line
@@ -87,35 +546,11 @@ line
  Bug 7111: sa-update: wrong exit code with --checkonly (does not find new 
 versions)
 ------------------------------------------------------------------------
-r1643730 | spamassassin_role | 2014-12-08 02:45:41 +0000 (Mon, 08 Dec 
-2014) | 1 line
- 
- updated scores for revision 1643656 active rules added since last 
-mass-check
-------------------------------------------------------------------------
-r1643636 | spamassassin_role | 2014-12-07 02:41:11 +0000 (Sun, 07 Dec 
-2014) | 1 line
- 
- updated scores for revision 1643501 active rules added since last 
-mass-check
-------------------------------------------------------------------------
-r1643487 | spamassassin_role | 2014-12-06 02:44:27 +0000 (Sat, 06 Dec 
-2014) | 1 line
- 
- updated scores for revision 1643197 active rules added since last 
-mass-check
-------------------------------------------------------------------------
 r1643325 | mmartinec | 2014-12-05 15:23:15 +0000 (Fri, 05 Dec 2014) | 1 
 line
  
  Bug 7030: BayesStore/Redis.pm: authentication doesn't work with Redis 
 2.6 and earlier
-------------------------------------------------------------------------
-r1643046 | spamassassin_role | 2014-12-03 02:46:31 +0000 (Wed, 03 Dec 
-2014) | 1 line
- 
- updated scores for revision 1642820 active rules added since last 
-mass-check
 ------------------------------------------------------------------------
 r1643016 | axb | 2014-12-02 21:54:56 +0000 (Tue, 02 Dec 2014) | 1 line
  
@@ -134,43 +569,13 @@ r1643000 | axb | 2014-12-02 20:15:03 +0000 (Tue, 02 Dec 2014) | 1 line
  
  saving PDFinfo rules from 2007!
 ------------------------------------------------------------------------
-r1642798 | spamassassin_role | 2014-12-02 02:46:54 +0000 (Tue, 02 Dec 
-2014) | 1 line
- 
- updated scores for revision 1642648 active rules added since last 
-mass-check
-------------------------------------------------------------------------
-r1642622 | spamassassin_role | 2014-12-01 02:46:09 +0000 (Mon, 01 Dec 
-2014) | 1 line
- 
- updated scores for revision 1642528 active rules added since last 
-mass-check
-------------------------------------------------------------------------
 r1642602 | jhardin | 2014-11-30 20:23:35 +0000 (Sun, 30 Nov 2014) | 1 line
  
  Avoid japanese-language FPs
 ------------------------------------------------------------------------
-r1642502 | spamassassin_role | 2014-11-30 02:40:51 +0000 (Sun, 30 Nov 
-2014) | 1 line
- 
- updated scores for revision 1642401 active rules added since last 
-mass-check
-------------------------------------------------------------------------
 r1642459 | jhardin | 2014-11-29 18:22:57 +0000 (Sat, 29 Nov 2014) | 1 line
  
  Disable perl_version rule for now; FP tuning and new test rule
-------------------------------------------------------------------------
-r1642393 | spamassassin_role | 2014-11-29 02:44:00 +0000 (Sat, 29 Nov 
-2014) | 1 line
- 
- updated scores for revision 1642273 active rules added since last 
-mass-check
-------------------------------------------------------------------------
-r1642258 | spamassassin_role | 2014-11-28 02:39:49 +0000 (Fri, 28 Nov 
-2014) | 1 line
- 
- updated scores for revision 1642043 active rules added since last 
-mass-check
 ------------------------------------------------------------------------
 r1642208 | jhardin | 2014-11-27 18:58:07 +0000 (Thu, 27 Nov 2014) | 1 line
  
@@ -180,21 +585,9 @@ r1642207 | jhardin | 2014-11-27 18:54:32 +0000 (Thu, 27 Nov 2014) | 1 line
  
  bug 7107: add "perl_version" to preprocessor conditionals
 ------------------------------------------------------------------------
-r1642012 | spamassassin_role | 2014-11-27 02:42:11 +0000 (Thu, 27 Nov 
-2014) | 1 line
- 
- updated scores for revision 1641777 active rules added since last 
-mass-check
-------------------------------------------------------------------------
 r1641856 | jhardin | 2014-11-26 17:00:06 +0000 (Wed, 26 Nov 2014) | 1 line
  
  disable perl-5.8-hostile rule
-------------------------------------------------------------------------
-r1641752 | spamassassin_role | 2014-11-26 02:41:14 +0000 (Wed, 26 Nov 
-2014) | 1 line
- 
- updated scores for revision 1641542 active rules added since last 
-mass-check
 ------------------------------------------------------------------------
 r1641408 | jquinn | 2014-11-24 15:19:16 +0000 (Mon, 24 Nov 2014) | 1 line
  
@@ -206,24 +599,6 @@ line
  Bug 7103: Bad wget option causes first fetch of third-party rules 
 channel to fail
 ------------------------------------------------------------------------
-r1641306 | spamassassin_role | 2014-11-24 02:40:53 +0000 (Mon, 24 Nov 
-2014) | 1 line
- 
- updated scores for revision 1641165 active rules added since last 
-mass-check
-------------------------------------------------------------------------
-r1640849 | spamassassin_role | 2014-11-21 02:40:06 +0000 (Fri, 21 Nov 
-2014) | 1 line
- 
- updated scores for revision 1640695 active rules added since last 
-mass-check
-------------------------------------------------------------------------
-r1640653 | spamassassin_role | 2014-11-20 02:39:59 +0000 (Thu, 20 Nov 
-2014) | 1 line
- 
- updated scores for revision 1640501 active rules added since last 
-mass-check
-------------------------------------------------------------------------
 r1640650 | mmartinec | 2014-11-20 00:34:07 +0000 (Thu, 20 Nov 2014) | 1 
 line
  
@@ -233,12 +608,6 @@ channel to fail
 r1640567 | jquinn | 2014-11-19 14:53:59 +0000 (Wed, 19 Nov 2014) | 1 line
  
  fixed uribl matching on email addresses with commas after them
-------------------------------------------------------------------------
-r1640468 | spamassassin_role | 2014-11-19 02:38:23 +0000 (Wed, 19 Nov 
-2014) | 1 line
- 
- updated scores for revision 1640281 active rules added since last 
-mass-check
 ------------------------------------------------------------------------
 r1640462 | mmartinec | 2014-11-19 01:44:02 +0000 (Wed, 19 Nov 2014) | 1 
 line
@@ -250,12 +619,6 @@ r1640413 | jquinn | 2014-11-18 19:32:28 +0000 (Tue, 18 Nov 2014) | 1 line
  
  changed fillfactor for postgres bayes/awl tables to optimize for updates
 ------------------------------------------------------------------------
-r1640273 | spamassassin_role | 2014-11-18 02:39:15 +0000 (Tue, 18 Nov 
-2014) | 1 line
- 
- updated scores for revision 1640099 active rules added since last 
-mass-check
-------------------------------------------------------------------------
 r1640221 | jquinn | 2014-11-17 20:11:31 +0000 (Mon, 17 Nov 2014) | 1 line
  
  Disabled synchronous commit for Postgres Bayes store
@@ -264,27 +627,9 @@ r1640216 | jhardin | 2014-11-17 19:55:34 +0000 (Mon, 17 Nov 2014) | 1 line
  
  hacked WordPress rule tweaks
 ------------------------------------------------------------------------
-r1640058 | spamassassin_role | 2014-11-17 02:41:03 +0000 (Mon, 17 Nov 
-2014) | 1 line
- 
- updated scores for revision 1639976 active rules added since last 
-mass-check
-------------------------------------------------------------------------
-r1639942 | spamassassin_role | 2014-11-16 02:37:21 +0000 (Sun, 16 Nov 
-2014) | 1 line
- 
- updated scores for revision 1639843 active rules added since last 
-mass-check
-------------------------------------------------------------------------
 r1639941 | jhardin | 2014-11-16 02:29:31 +0000 (Sun, 16 Nov 2014) | 1 line
  
  more hacked WordPress rule tweaks
-------------------------------------------------------------------------
-r1639828 | spamassassin_role | 2014-11-15 02:45:18 +0000 (Sat, 15 Nov 
-2014) | 1 line
- 
- updated scores for revision 1639585 active rules added since last 
-mass-check
 ------------------------------------------------------------------------
 r1639751 | mmartinec | 2014-11-14 19:23:09 +0000 (Fri, 14 Nov 2014) | 1 
 line
@@ -305,12 +650,6 @@ r1639576 | jhardin | 2014-11-14 06:07:55 +0000 (Fri, 14 Nov 2014) | 1 line
  
  hacked wordpress rule tweaking, test rules from users list
 ------------------------------------------------------------------------
-r1639565 | spamassassin_role | 2014-11-14 02:45:40 +0000 (Fri, 14 Nov 
-2014) | 1 line
- 
- updated scores for revision 1639267 active rules added since last 
-mass-check
-------------------------------------------------------------------------
 r1639396 | jhardin | 2014-11-13 17:17:48 +0000 (Thu, 13 Nov 2014) | 1 line
  
  tweak PHP malware/phishing rules
@@ -319,22 +658,10 @@ r1639253 | axb | 2014-11-13 06:35:25 +0000 (Thu, 13 Nov 2014) | 1 line
  
  added some chinese domains
 ------------------------------------------------------------------------
-r1639239 | spamassassin_role | 2014-11-13 02:46:22 +0000 (Thu, 13 Nov 
-2014) | 1 line
- 
- updated scores for revision 1638721 active rules added since last 
-mass-check
-------------------------------------------------------------------------
 r1639062 | jquinn | 2014-11-12 21:24:30 +0000 (Wed, 12 Nov 2014) | 1 line
  
  Added dedicated to list of static IP indicators for RDNS_DYNAMIC - bug 
 6919
-------------------------------------------------------------------------
-r1638696 | spamassassin_role | 2014-11-12 02:47:37 +0000 (Wed, 12 Nov 
-2014) | 1 line
- 
- updated scores for revision 1638049 active rules added since last 
-mass-check
 ------------------------------------------------------------------------
 r1638327 | mmartinec | 2014-11-11 19:48:16 +0000 (Tue, 11 Nov 2014) | 1 
 line
@@ -344,18 +671,6 @@ line
 r1638020 | jhardin | 2014-11-11 02:52:15 +0000 (Tue, 11 Nov 2014) | 1 line
  
  test rule tweaks
-------------------------------------------------------------------------
-r1638019 | spamassassin_role | 2014-11-11 02:48:54 +0000 (Tue, 11 Nov 
-2014) | 1 line
- 
- updated scores for revision 1637807 active rules added since last 
-mass-check
-------------------------------------------------------------------------
-r1637780 | spamassassin_role | 2014-11-10 02:50:19 +0000 (Mon, 10 Nov 
-2014) | 1 line
- 
- updated scores for revision 1637637 active rules added since last 
-mass-check
 ------------------------------------------------------------------------
 r1637441 | jhardin | 2014-11-07 20:05:33 +0000 (Fri, 07 Nov 2014) | 2 
 lines
@@ -410,33 +725,9 @@ r1635987 | jhardin | 2014-11-01 16:32:12 +0000 (Sat, 01 Nov 2014) | 1 line
  
  FP avoidance tuning, new test rule, unblock a rule
 ------------------------------------------------------------------------
-r1635888 | spamassassin_role | 2014-11-01 02:50:27 +0000 (Sat, 01 Nov 
-2014) | 1 line
- 
- updated scores for revision 1635724 active rules added since last 
-mass-check
-------------------------------------------------------------------------
-r1635657 | spamassassin_role | 2014-10-31 02:42:52 +0000 (Fri, 31 Oct 
-2014) | 1 line
- 
- updated scores for revision 1635432 active rules added since last 
-mass-check
-------------------------------------------------------------------------
-r1635371 | spamassassin_role | 2014-10-30 02:47:10 +0000 (Thu, 30 Oct 
-2014) | 1 line
- 
- updated scores for revision 1635070 active rules added since last 
-mass-check
-------------------------------------------------------------------------
 r1635096 | axb | 2014-10-29 10:54:03 +0000 (Wed, 29 Oct 2014) | 1 line
  
  added util_rb_2tld com.us
-------------------------------------------------------------------------
-r1635028 | spamassassin_role | 2014-10-29 02:43:16 +0000 (Wed, 29 Oct 
-2014) | 1 line
- 
- updated scores for revision 1634816 active rules added since last 
-mass-check
 ------------------------------------------------------------------------
 r1635024 | jhardin | 2014-10-29 01:58:33 +0000 (Wed, 29 Oct 2014) | 2 
 lines
@@ -458,22 +749,10 @@ r1634886 | jhardin | 2014-10-28 14:37:26 +0000 (Tue, 28 Oct 2014) | 1 line
  
  FP avoidance tuning, new test rule
 ------------------------------------------------------------------------
-r1634764 | spamassassin_role | 2014-10-28 02:45:42 +0000 (Tue, 28 Oct 
-2014) | 1 line
- 
- updated scores for revision 1634476 active rules added since last 
-mass-check
-------------------------------------------------------------------------
 r1634561 | kmcgrail | 2014-10-27 15:03:45 +0000 (Mon, 27 Oct 2014) | 1 
 line
  
  added askdns to known debug facilities
-------------------------------------------------------------------------
-r1634439 | spamassassin_role | 2014-10-27 02:39:55 +0000 (Mon, 27 Oct 
-2014) | 1 line
- 
- updated scores for revision 1634279 active rules added since last 
-mass-check
 ------------------------------------------------------------------------
 r1634399 | jhardin | 2014-10-26 21:20:50 +0000 (Sun, 26 Oct 2014) | 1 line
  
@@ -491,12 +770,6 @@ r1634309 | smf | 2014-10-26 12:02:00 +0000 (Sun, 26 Oct 2014) | 1 line
  
  Sandbox updates
 ------------------------------------------------------------------------
-r1634269 | spamassassin_role | 2014-10-26 02:43:25 +0000 (Sun, 26 Oct 
-2014) | 1 line
- 
- updated scores for revision 1634195 active rules added since last 
-mass-check
-------------------------------------------------------------------------
 r1634267 | jhardin | 2014-10-26 02:15:19 +0000 (Sun, 26 Oct 2014) | 1 line
  
  FP avoidance tuning
@@ -510,12 +783,6 @@ r1634179 | jhardin | 2014-10-25 05:36:03 +0000 (Sat, 25 Oct 2014) | 1 line
  
  add test rule
 ------------------------------------------------------------------------
-r1634175 | spamassassin_role | 2014-10-25 02:42:50 +0000 (Sat, 25 Oct 
-2014) | 1 line
- 
- updated scores for revision 1634030 active rules added since last 
-mass-check
-------------------------------------------------------------------------
 r1634092 | smf | 2014-10-24 16:51:39 +0000 (Fri, 24 Oct 2014) | 1 line
  
  Update sandbox rules
@@ -524,18 +791,6 @@ r1634087 | mmartinec | 2014-10-24 16:24:43 +0000 (Fri, 24 Oct 2014) | 1
 line
  
  avoid a perl 5.21 warning: Negative repeat count does nothing
-------------------------------------------------------------------------
-r1633989 | spamassassin_role | 2014-10-24 02:43:08 +0000 (Fri, 24 Oct 
-2014) | 1 line
- 
- updated scores for revision 1633771 active rules added since last 
-mass-check
-------------------------------------------------------------------------
-r1633738 | spamassassin_role | 2014-10-23 02:45:09 +0000 (Thu, 23 Oct 
-2014) | 1 line
- 
- updated scores for revision 1633562 active rules added since last 
-mass-check
 ------------------------------------------------------------------------
 r1633645 | mmartinec | 2014-10-22 16:07:50 +0000 (Wed, 22 Oct 2014) | 1 
 line
@@ -546,31 +801,13 @@ r1633632 | jhardin | 2014-10-22 14:25:25 +0000 (Wed, 22 Oct 2014) | 1 line
  
  FP avoidance tuning, PUMPDUMP tuning, push some rules
 ------------------------------------------------------------------------
-r1633509 | spamassassin_role | 2014-10-22 02:47:49 +0000 (Wed, 22 Oct 
-2014) | 1 line
- 
- updated scores for revision 1633316 active rules added since last 
-mass-check
-------------------------------------------------------------------------
 r1633267 | jhardin | 2014-10-21 02:44:53 +0000 (Tue, 21 Oct 2014) | 1 line
  
  Tune PUMPDUMP, add some new rules
 ------------------------------------------------------------------------
-r1633266 | spamassassin_role | 2014-10-21 02:42:09 +0000 (Tue, 21 Oct 
-2014) | 1 line
- 
- updated scores for revision 1633078 active rules added since last 
-mass-check
-------------------------------------------------------------------------
 r1633214 | jhardin | 2014-10-20 19:49:40 +0000 (Mon, 20 Oct 2014) | 1 line
  
  Add rule for testing
-------------------------------------------------------------------------
-r1633025 | spamassassin_role | 2014-10-20 02:40:53 +0000 (Mon, 20 Oct 
-2014) | 1 line
- 
- updated scores for revision 1632884 active rules added since last 
-mass-check
 ------------------------------------------------------------------------
 r1633018 | jhardin | 2014-10-19 22:16:42 +0000 (Sun, 19 Oct 2014) | 1 line
  
@@ -608,12 +845,6 @@ r1632967 | jhardin | 2014-10-19 18:38:04 +0000 (Sun, 19 Oct 2014) | 1 line
  
  FP avoidance tuning
 ------------------------------------------------------------------------
-r1632872 | spamassassin_role | 2014-10-19 02:46:11 +0000 (Sun, 19 Oct 
-2014) | 1 line
- 
- updated scores for revision 1632740 active rules added since last 
-mass-check
-------------------------------------------------------------------------
 r1632864 | jhardin | 2014-10-18 23:32:10 +0000 (Sat, 18 Oct 2014) | 1 line
  
  Prevent most overlapping hits of fraud rules
@@ -622,47 +853,17 @@ r1632860 | jhardin | 2014-10-18 23:22:50 +0000 (Sat, 18 Oct 2014) | 1 line
  
  more FP avoidance, new rule
 ------------------------------------------------------------------------
-r1632717 | spamassassin_role | 2014-10-18 02:43:05 +0000 (Sat, 18 Oct 
-2014) | 1 line
- 
- updated scores for revision 1632514 active rules added since last 
-mass-check
-------------------------------------------------------------------------
-r1632462 | spamassassin_role | 2014-10-17 02:43:40 +0000 (Fri, 17 Oct 
-2014) | 1 line
- 
- updated scores for revision 1632248 active rules added since last 
-mass-check
-------------------------------------------------------------------------
 r1632204 | jhardin | 2014-10-16 02:56:01 +0000 (Thu, 16 Oct 2014) | 1 line
  
  add rule
-------------------------------------------------------------------------
-r1632203 | spamassassin_role | 2014-10-16 02:43:58 +0000 (Thu, 16 Oct 
-2014) | 1 line
- 
- updated scores for revision 1631972 active rules added since last 
-mass-check
 ------------------------------------------------------------------------
 r1631961 | axb | 2014-10-15 07:32:49 +0000 (Wed, 15 Oct 2014) | 1 line
  
  # Version 2014101500, Last Updated Wed Oct 15 07:07:01 2014 UTC
 ------------------------------------------------------------------------
-r1631937 | spamassassin_role | 2014-10-15 02:46:05 +0000 (Wed, 15 Oct 
-2014) | 1 line
- 
- updated scores for revision 1631683 active rules added since last 
-mass-check
-------------------------------------------------------------------------
 r1631767 | axb | 2014-10-14 14:06:02 +0000 (Tue, 14 Oct 2014) | 1 line
  
  removed non AV/filter headers
-------------------------------------------------------------------------
-r1631606 | spamassassin_role | 2014-10-14 02:44:47 +0000 (Tue, 14 Oct 
-2014) | 1 line
- 
- updated scores for revision 1631318 active rules added since last 
-mass-check
 ------------------------------------------------------------------------
 r1631537 | jhardin | 2014-10-13 20:36:02 +0000 (Mon, 13 Oct 2014) | 1 line
  
@@ -696,54 +897,18 @@ r1631207 | jhardin | 2014-10-12 16:44:22 +0000 (Sun, 12 Oct 2014) | 1 line
  
  tune __RAND_HEADER
 ------------------------------------------------------------------------
-r1631141 | spamassassin_role | 2014-10-12 02:45:13 +0000 (Sun, 12 Oct 
-2014) | 1 line
- 
- updated scores for revision 1631027 active rules added since last 
-mass-check
-------------------------------------------------------------------------
 r1631133 | jhardin | 2014-10-11 22:30:07 +0000 (Sat, 11 Oct 2014) | 1 line
  
  Add testing rule
-------------------------------------------------------------------------
-r1631013 | spamassassin_role | 2014-10-11 02:42:12 +0000 (Sat, 11 Oct 
-2014) | 1 line
- 
- updated scores for revision 1630733 active rules added since last 
-mass-check
 ------------------------------------------------------------------------
 r1630918 | jhardin | 2014-10-10 14:50:51 +0000 (Fri, 10 Oct 2014) | 1 line
  
  add testing rule
 ------------------------------------------------------------------------
-r1630640 | spamassassin_role | 2014-10-10 02:39:24 +0000 (Fri, 10 Oct 
-2014) | 1 line
- 
- updated scores for revision 1630324 active rules added since last 
-mass-check
-------------------------------------------------------------------------
-r1630270 | spamassassin_role | 2014-10-09 02:39:43 +0000 (Thu, 09 Oct 
-2014) | 1 line
- 
- updated scores for revision 1630031 active rules added since last 
-mass-check
-------------------------------------------------------------------------
 r1630128 | kmcgrail | 2014-10-08 14:46:38 +0000 (Wed, 08 Oct 2014) | 1 
 line
  
  Another question for the template
-------------------------------------------------------------------------
-r1630002 | spamassassin_role | 2014-10-08 02:38:31 +0000 (Wed, 08 Oct 
-2014) | 1 line
- 
- updated scores for revision 1629824 active rules added since last 
-mass-check
-------------------------------------------------------------------------
-r1629797 | spamassassin_role | 2014-10-07 02:40:19 +0000 (Tue, 07 Oct 
-2014) | 1 line
- 
- updated scores for revision 1629593 active rules added since last 
-mass-check
 ------------------------------------------------------------------------
 r1629640 | kmcgrail | 2014-10-06 13:11:05 +0000 (Mon, 06 Oct 2014) | 1 
 line
@@ -760,18 +925,6 @@ r1629561 | jhardin | 2014-10-06 03:40:13 +0000 (Mon, 06 Oct 2014) | 1 line
  disable SUBJECT_UNNEEDED_ENCODING, punishes pretty much all non-English 
 email; add new rule for testing
 ------------------------------------------------------------------------
-r1629559 | spamassassin_role | 2014-10-06 02:38:23 +0000 (Mon, 06 Oct 
-2014) | 1 line
- 
- updated scores for revision 1629477 active rules added since last 
-mass-check
-------------------------------------------------------------------------
-r1629466 | spamassassin_role | 2014-10-05 02:40:11 +0000 (Sun, 05 Oct 
-2014) | 1 line
- 
- updated scores for revision 1629360 active rules added since last 
-mass-check
-------------------------------------------------------------------------
 r1629423 | jhardin | 2014-10-04 17:01:02 +0000 (Sat, 04 Oct 2014) | 1 line
  
  more FP avoidance
@@ -782,33 +935,9 @@ r1629383 | axb | 2014-10-04 12:57:20 +0000 (Sat, 04 Oct 2014) | 2 lines
  # Set headers which may provide inappropriate cues to the Bayesian 
 classifier
 ------------------------------------------------------------------------
-r1629351 | spamassassin_role | 2014-10-04 02:38:30 +0000 (Sat, 04 Oct 
-2014) | 1 line
- 
- updated scores for revision 1629145 active rules added since last 
-mass-check
-------------------------------------------------------------------------
-r1629104 | spamassassin_role | 2014-10-03 02:38:08 +0000 (Fri, 03 Oct 
-2014) | 1 line
- 
- updated scores for revision 1628908 active rules added since last 
-mass-check
-------------------------------------------------------------------------
 r1629103 | jhardin | 2014-10-03 01:16:37 +0000 (Fri, 03 Oct 2014) | 1 line
  
  Tweak CN_B2B and Doctor Oz rules
-------------------------------------------------------------------------
-r1628878 | spamassassin_role | 2014-10-02 02:38:01 +0000 (Thu, 02 Oct 
-2014) | 1 line
- 
- updated scores for revision 1628646 active rules added since last 
-mass-check
-------------------------------------------------------------------------
-r1628588 | spamassassin_role | 2014-10-01 02:41:19 +0000 (Wed, 01 Oct 
-2014) | 1 line
- 
- updated scores for revision 1628373 active rules added since last 
-mass-check
 ------------------------------------------------------------------------
 r1628419 | mmartinec | 2014-09-30 12:30:58 +0000 (Tue, 30 Sep 2014) | 1 
 line
@@ -821,50 +950,14 @@ line
  
  Bug 7074, sa-update: improved error reporting of a failed spawned process
 ------------------------------------------------------------------------
-r1628355 | spamassassin_role | 2014-09-30 02:42:12 +0000 (Tue, 30 Sep 
-2014) | 1 line
- 
- updated scores for revision 1628137 active rules added since last 
-mass-check
-------------------------------------------------------------------------
-r1628113 | spamassassin_role | 2014-09-29 02:40:26 +0000 (Mon, 29 Sep 
-2014) | 1 line
- 
- updated scores for revision 1628053 active rules added since last 
-mass-check
-------------------------------------------------------------------------
 r1628075 | axb | 2014-09-28 15:44:15 +0000 (Sun, 28 Sep 2014) | 2 lines
  
  RegistrarBoundaries
  Version 2014092800, Last Updated Sun Sep 28 07:07:01 2014 UTC
 ------------------------------------------------------------------------
-r1628041 | spamassassin_role | 2014-09-28 02:37:12 +0000 (Sun, 28 Sep 
-2014) | 1 line
- 
- updated scores for revision 1627935 active rules added since last 
-mass-check
-------------------------------------------------------------------------
 r1627983 | jhardin | 2014-09-27 17:27:32 +0000 (Sat, 27 Sep 2014) | 1 line
  
  tweak CN_B2B_SPAMMER
-------------------------------------------------------------------------
-r1627920 | spamassassin_role | 2014-09-27 02:41:37 +0000 (Sat, 27 Sep 
-2014) | 1 line
- 
- updated scores for revision 1627725 active rules added since last 
-mass-check
-------------------------------------------------------------------------
-r1627704 | spamassassin_role | 2014-09-26 02:42:04 +0000 (Fri, 26 Sep 
-2014) | 1 line
- 
- updated scores for revision 1627486 active rules added since last 
-mass-check
-------------------------------------------------------------------------
-r1627447 | spamassassin_role | 2014-09-25 02:41:45 +0000 (Thu, 25 Sep 
-2014) | 1 line
- 
- updated scores for revision 1627258 active rules added since last 
-mass-check
 ------------------------------------------------------------------------
 r1627443 | jhardin | 2014-09-25 01:04:15 +0000 (Thu, 25 Sep 2014) | 2 
 lines
@@ -872,35 +965,11 @@ lines
  moving money (very short 419 fraud spams)
  
 ------------------------------------------------------------------------
-r1627195 | spamassassin_role | 2014-09-24 02:40:37 +0000 (Wed, 24 Sep 
-2014) | 1 line
- 
- updated scores for revision 1626964 active rules added since last 
-mass-check
-------------------------------------------------------------------------
-r1626929 | spamassassin_role | 2014-09-23 02:40:30 +0000 (Tue, 23 Sep 
-2014) | 1 line
- 
- updated scores for revision 1626698 active rules added since last 
-mass-check
-------------------------------------------------------------------------
-r1626659 | spamassassin_role | 2014-09-22 02:43:55 +0000 (Mon, 22 Sep 
-2014) | 1 line
- 
- updated scores for revision 1626540 active rules added since last 
-mass-check
-------------------------------------------------------------------------
 r1626615 | jhardin | 2014-09-21 18:10:59 +0000 (Sun, 21 Sep 2014) | 2 
 lines
  
  FP tuning, new test rules
  
-------------------------------------------------------------------------
-r1626514 | spamassassin_role | 2014-09-21 02:41:27 +0000 (Sun, 21 Sep 
-2014) | 1 line
- 
- updated scores for revision 1626399 active rules added since last 
-mass-check
 ------------------------------------------------------------------------
 r1626485 | jhardin | 2014-09-20 18:39:29 +0000 (Sat, 20 Sep 2014) | 1 line
  
@@ -910,18 +979,6 @@ r1626426 | hege | 2014-09-20 12:27:58 +0000 (Sat, 20 Sep 2014) | 2 lines
  
  db_id not initialized, || -> ||=
  
-------------------------------------------------------------------------
-r1626378 | spamassassin_role | 2014-09-20 02:42:50 +0000 (Sat, 20 Sep 
-2014) | 1 line
- 
- updated scores for revision 1626145 active rules added since last 
-mass-check
-------------------------------------------------------------------------
-r1626113 | spamassassin_role | 2014-09-19 02:38:12 +0000 (Fri, 19 Sep 
-2014) | 1 line
- 
- updated scores for revision 1625916 active rules added since last 
-mass-check
 ------------------------------------------------------------------------
 r1626112 | jhardin | 2014-09-19 01:32:29 +0000 (Fri, 19 Sep 2014) | 2 
 lines
@@ -938,12 +995,6 @@ lines
 r1626000 | jhardin | 2014-09-18 14:45:17 +0000 (Thu, 18 Sep 2014) | 1 line
  
  tuning
-------------------------------------------------------------------------
-r1625880 | spamassassin_role | 2014-09-18 02:42:01 +0000 (Thu, 18 Sep 
-2014) | 1 line
- 
- updated scores for revision 1625487 active rules added since last 
-mass-check
 ------------------------------------------------------------------------
 r1625872 | jhardin | 2014-09-18 01:52:31 +0000 (Thu, 18 Sep 2014) | 2 
 lines
@@ -988,21 +1039,9 @@ r1625473 | axb | 2014-09-17 06:51:23 +0000 (Wed, 17 Sep 2014) | 2 lines
  added 20_freemail_mailcom_domains.cf
  removed dupe domains in 20_freemail_domains.cf
 ------------------------------------------------------------------------
-r1625454 | spamassassin_role | 2014-09-17 02:39:15 +0000 (Wed, 17 Sep 
-2014) | 1 line
- 
- updated scores for revision 1625221 active rules added since last 
-mass-check
-------------------------------------------------------------------------
 r1625302 | jhardin | 2014-09-16 14:17:07 +0000 (Tue, 16 Sep 2014) | 1 line
  
  score tuning and add new test rule
-------------------------------------------------------------------------
-r1625206 | spamassassin_role | 2014-09-16 02:41:44 +0000 (Tue, 16 Sep 
-2014) | 1 line
- 
- updated scores for revision 1624971 active rules added since last 
-mass-check
 ------------------------------------------------------------------------
 r1625146 | jhardin | 2014-09-15 20:02:52 +0000 (Mon, 15 Sep 2014) | 1 line
  
@@ -1012,27 +1051,9 @@ r1625047 | jhardin | 2014-09-15 14:55:46 +0000 (Mon, 15 Sep 2014) | 1 line
  
  various tuning
 ------------------------------------------------------------------------
-r1624929 | spamassassin_role | 2014-09-15 02:42:56 +0000 (Mon, 15 Sep 
-2014) | 1 line
- 
- updated scores for revision 1624812 active rules added since last 
-mass-check
-------------------------------------------------------------------------
-r1624801 | spamassassin_role | 2014-09-14 02:41:37 +0000 (Sun, 14 Sep 
-2014) | 1 line
- 
- updated scores for revision 1624715 active rules added since last 
-mass-check
-------------------------------------------------------------------------
 r1624768 | jhardin | 2014-09-13 17:30:14 +0000 (Sat, 13 Sep 2014) | 1 line
  
  Cannot trust __BOUNCE_RPATH_NULL due to large corpora's collection method
-------------------------------------------------------------------------
-r1624694 | spamassassin_role | 2014-09-13 02:52:16 +0000 (Sat, 13 Sep 
-2014) | 1 line
- 
- updated scores for revision 1624477 active rules added since last 
-mass-check
 ------------------------------------------------------------------------
 r1624693 | jhardin | 2014-09-13 02:37:38 +0000 (Sat, 13 Sep 2014) | 1 line
  
@@ -1045,18 +1066,6 @@ r1624531 | jquinn | 2014-09-12 12:55:36 +0000 (Fri, 12 Sep 2014) | 1 line
 r1624445 | jhardin | 2014-09-12 02:56:53 +0000 (Fri, 12 Sep 2014) | 1 line
  
  more FP avoidance tuning
-------------------------------------------------------------------------
-r1624443 | spamassassin_role | 2014-09-12 02:50:54 +0000 (Fri, 12 Sep 
-2014) | 1 line
- 
- updated scores for revision 1624227 active rules added since last 
-mass-check
-------------------------------------------------------------------------
-r1624184 | spamassassin_role | 2014-09-11 02:54:02 +0000 (Thu, 11 Sep 
-2014) | 1 line
- 
- updated scores for revision 1623939 active rules added since last 
-mass-check
 ------------------------------------------------------------------------
 r1624118 | axb | 2014-09-10 20:38:30 +0000 (Wed, 10 Sep 2014) | 1 line
  
@@ -1078,18 +1087,6 @@ r1623904 | jhardin | 2014-09-10 05:27:12 +0000 (Wed, 10 Sep 2014) | 1 line
  
  more FP avoidance tuning
 ------------------------------------------------------------------------
-r1623896 | spamassassin_role | 2014-09-10 02:59:17 +0000 (Wed, 10 Sep 
-2014) | 1 line
- 
- updated scores for revision 1623698 active rules added since last 
-mass-check
-------------------------------------------------------------------------
-r1623616 | spamassassin_role | 2014-09-09 02:52:20 +0000 (Tue, 09 Sep 
-2014) | 1 line
- 
- updated scores for revision 1623339 active rules added since last 
-mass-check
-------------------------------------------------------------------------
 r1623598 | jhardin | 2014-09-09 00:21:50 +0000 (Tue, 09 Sep 2014) | 1 line
  
  tweak pumpdump and optout rules
@@ -1097,12 +1094,6 @@ r1623598 | jhardin | 2014-09-09 00:21:50 +0000 (Tue, 09 Sep 2014) | 1 line
 r1623415 | jhardin | 2014-09-08 14:46:50 +0000 (Mon, 08 Sep 2014) | 1 line
  
  Rule and FP avoidance tweaking
-------------------------------------------------------------------------
-r1623260 | spamassassin_role | 2014-09-08 02:54:57 +0000 (Mon, 08 Sep 
-2014) | 1 line
- 
- updated scores for revision 1622985 active rules added since last 
-mass-check
 ------------------------------------------------------------------------
 r1623256 | jhardin | 2014-09-08 02:47:12 +0000 (Mon, 08 Sep 2014) | 1 line
  
@@ -1123,12 +1114,6 @@ r1622917 | jhardin | 2014-09-06 19:37:56 +0000 (Sat, 06 Sep 2014) | 1 line
 r1622901 | jhardin | 2014-09-06 18:26:15 +0000 (Sat, 06 Sep 2014) | 1 line
  
  FP avoidance for TVD_GET_STOCK
-------------------------------------------------------------------------
-r1622824 | spamassassin_role | 2014-09-06 02:50:11 +0000 (Sat, 06 Sep 
-2014) | 1 line
- 
- updated scores for revision 1622642 active rules added since last 
-mass-check
 ------------------------------------------------------------------------
 r1622787 | jhardin | 2014-09-05 20:28:10 +0000 (Fri, 05 Sep 2014) | 1 line
  
@@ -1157,12 +1142,6 @@ r1622741 | jhardin | 2014-09-05 17:05:45 +0000 (Fri, 05 Sep 2014) | 1 line
 r1622739 | jhardin | 2014-09-05 16:44:45 +0000 (Fri, 05 Sep 2014) | 1 line
  
  misc rules tuning
-------------------------------------------------------------------------
-r1622599 | spamassassin_role | 2014-09-05 02:47:24 +0000 (Fri, 05 Sep 
-2014) | 1 line
- 
- updated scores for revision 1622419 active rules added since last 
-mass-check
 ------------------------------------------------------------------------
 r1622551 | kmcgrail | 2014-09-04 20:06:05 +0000 (Thu, 04 Sep 2014) | 1 
 line
@@ -1199,12 +1178,6 @@ line
 temporary files by using a larger buffer and avoiding PerlIO; added some 
 debugging
 ------------------------------------------------------------------------
-r1622395 | spamassassin_role | 2014-09-04 02:47:48 +0000 (Thu, 04 Sep 
-2014) | 1 line
- 
- updated scores for revision 1622183 active rules added since last 
-mass-check
-------------------------------------------------------------------------
 r1622391 | jhardin | 2014-09-04 01:49:42 +0000 (Thu, 04 Sep 2014) | 1 line
  
  Freshen and extend phishing rules
@@ -1217,21 +1190,9 @@ r1622275 | jhardin | 2014-09-03 14:58:43 +0000 (Wed, 03 Sep 2014) | 1 line
  
  more FP avoidance
 ------------------------------------------------------------------------
-r1622160 | spamassassin_role | 2014-09-03 02:48:26 +0000 (Wed, 03 Sep 
-2014) | 1 line
- 
- updated scores for revision 1621946 active rules added since last 
-mass-check
-------------------------------------------------------------------------
 r1621911 | jhardin | 2014-09-02 04:18:52 +0000 (Tue, 02 Sep 2014) | 1 line
  
  FP avoidance tuning, new rules
-------------------------------------------------------------------------
-r1621909 | spamassassin_role | 2014-09-02 02:50:13 +0000 (Tue, 02 Sep 
-2014) | 1 line
- 
- updated scores for revision 1621703 active rules added since last 
-mass-check
 ------------------------------------------------------------------------
 r1621867 | kmcgrail | 2014-09-01 18:51:01 +0000 (Mon, 01 Sep 2014) | 1 
 line
@@ -1250,12 +1211,6 @@ r1621839 | jhardin | 2014-09-01 16:38:23 +0000 (Mon, 01 Sep 2014) | 1 line
  
  FP avoidance and score tuning
 ------------------------------------------------------------------------
-r1621663 | spamassassin_role | 2014-09-01 02:45:44 +0000 (Mon, 01 Sep 
-2014) | 1 line
- 
- updated scores for revision 1621567 active rules added since last 
-mass-check
-------------------------------------------------------------------------
 r1621611 | jhardin | 2014-08-31 17:31:56 +0000 (Sun, 31 Aug 2014) | 1 line
  
  adjust score limit
@@ -1267,18 +1222,6 @@ r1621605 | axb | 2014-08-31 16:42:36 +0000 (Sun, 31 Aug 2014) | 1 line
 r1621559 | jhardin | 2014-08-31 04:23:53 +0000 (Sun, 31 Aug 2014) | 1 line
  
  FP avoidance tuning
-------------------------------------------------------------------------
-r1621557 | spamassassin_role | 2014-08-31 02:41:02 +0000 (Sun, 31 Aug 
-2014) | 1 line
- 
- updated scores for revision 1621430 active rules added since last 
-mass-check
-------------------------------------------------------------------------
-r1621412 | spamassassin_role | 2014-08-30 02:40:33 +0000 (Sat, 30 Aug 
-2014) | 1 line
- 
- updated scores for revision 1621260 active rules added since last 
-mass-check
 ------------------------------------------------------------------------
 r1621396 | axb | 2014-08-29 22:29:02 +0000 (Fri, 29 Aug 2014) | 3 lines
  
@@ -1294,18 +1237,6 @@ r1621243 | jhardin | 2014-08-29 04:47:54 +0000 (Fri, 29 Aug 2014) | 1 line
  
  more FP avoidance
 ------------------------------------------------------------------------
-r1621240 | spamassassin_role | 2014-08-29 02:37:29 +0000 (Fri, 29 Aug 
-2014) | 1 line
- 
- updated scores for revision 1621092 active rules added since last 
-mass-check
-------------------------------------------------------------------------
-r1621021 | spamassassin_role | 2014-08-28 02:40:45 +0000 (Thu, 28 Aug 
-2014) | 1 line
- 
- updated scores for revision 1620815 active rules added since last 
-mass-check
-------------------------------------------------------------------------
 r1620963 | jhardin | 2014-08-27 19:27:21 +0000 (Wed, 27 Aug 2014) | 1 line
  
  tuning FP avoidance
@@ -1318,41 +1249,17 @@ r1620824 | axb | 2014-08-27 09:08:25 +0000 (Wed, 27 Aug 2014) | 1 line
  
  Version 2014082700, Last Updated Wed Aug 27 07:07:01 2014 UTC
 ------------------------------------------------------------------------
-r1620776 | spamassassin_role | 2014-08-27 02:38:23 +0000 (Wed, 27 Aug 
-2014) | 1 line
- 
- updated scores for revision 1620532 active rules added since last 
-mass-check
-------------------------------------------------------------------------
 r1620508 | jhardin | 2014-08-26 05:13:41 +0000 (Tue, 26 Aug 2014) | 1 line
  
  FP avoidance, no-ham metas, other tweaks
-------------------------------------------------------------------------
-r1620494 | spamassassin_role | 2014-08-26 02:35:05 +0000 (Tue, 26 Aug 
-2014) | 1 line
- 
- updated scores for revision 1620274 active rules added since last 
-mass-check
 ------------------------------------------------------------------------
 r1620376 | jhardin | 2014-08-25 17:04:51 +0000 (Mon, 25 Aug 2014) | 1 line
  
  add URI_OPTOUT_3LD
 ------------------------------------------------------------------------
-r1620254 | spamassassin_role | 2014-08-25 02:37:13 +0000 (Mon, 25 Aug 
-2014) | 1 line
- 
- updated scores for revision 1620112 active rules added since last 
-mass-check
-------------------------------------------------------------------------
 r1620253 | jhardin | 2014-08-25 02:16:06 +0000 (Mon, 25 Aug 2014) | 1 line
  
  More FP avoidance, add some metas
-------------------------------------------------------------------------
-r1620099 | spamassassin_role | 2014-08-24 02:36:50 +0000 (Sun, 24 Aug 
-2014) | 1 line
- 
- updated scores for revision 1619988 active rules added since last 
-mass-check
 ------------------------------------------------------------------------
 r1619952 | mmartinec | 2014-08-23 00:00:52 +0000 (Sat, 23 Aug 2014) | 1 
 line
@@ -1422,18 +1329,6 @@ r1614677 | axb | 2014-07-30 15:00:35 +0000 (Wed, 30 Jul 2014) | 1 line
  
  show me if TO_NO_BRKTS_MSFT is worth the resources
 ------------------------------------------------------------------------
-r1613870 | spamassassin_role | 2014-07-28 02:35:10 +0000 (Mon, 28 Jul 
-2014) | 1 line
- 
- updated scores for revision 1613764 active rules added since last 
-mass-check
-------------------------------------------------------------------------
-r1613747 | spamassassin_role | 2014-07-27 02:35:48 +0000 (Sun, 27 Jul 
-2014) | 1 line
- 
- updated scores for revision 1613581 active rules added since last 
-mass-check
-------------------------------------------------------------------------
 r1613554 | kmcgrail | 2014-07-26 02:24:44 +0000 (Sat, 26 Jul 2014) | 1 
 line
  
@@ -1464,18 +1359,6 @@ line
  Added rbl_timeout_min so that t_min for rbl_timeout applies even without 
 a zone - See bug 7070
 ------------------------------------------------------------------------
-r1610108 | spamassassin_role | 2014-07-13 02:42:02 +0000 (Sun, 13 Jul 
-2014) | 1 line
- 
- updated scores for revision 1609892 active rules added since last 
-mass-check
-------------------------------------------------------------------------
-r1609880 | spamassassin_role | 2014-07-12 02:43:44 +0000 (Sat, 12 Jul 
-2014) | 1 line
- 
- updated scores for revision 1609650 active rules added since last 
-mass-check
-------------------------------------------------------------------------
 r1609767 | jhardin | 2014-07-11 18:42:00 +0000 (Fri, 11 Jul 2014) | 1 line
  
  add __FSL_LINK_AWS_S3_WEB_LOOSE for testing
@@ -1488,27 +1371,9 @@ r1609616 | jhardin | 2014-07-11 02:52:06 +0000 (Fri, 11 Jul 2014) | 1 line
  
  various rule tweaks
 ------------------------------------------------------------------------
-r1609614 | spamassassin_role | 2014-07-11 02:43:52 +0000 (Fri, 11 Jul 
-2014) | 1 line
- 
- updated scores for revision 1609422 active rules added since last 
-mass-check
-------------------------------------------------------------------------
 r1609383 | jhardin | 2014-07-10 03:59:26 +0000 (Thu, 10 Jul 2014) | 1 line
  
  FP avoidance, add scored version of SYSADMIN
-------------------------------------------------------------------------
-r1609376 | spamassassin_role | 2014-07-10 02:45:11 +0000 (Thu, 10 Jul 
-2014) | 1 line
- 
- updated scores for revision 1609057 active rules added since last 
-mass-check
-------------------------------------------------------------------------
-r1608996 | spamassassin_role | 2014-07-09 02:45:25 +0000 (Wed, 09 Jul 
-2014) | 1 line
- 
- updated scores for revision 1608691 active rules added since last 
-mass-check
 ------------------------------------------------------------------------
 r1608976 | jhardin | 2014-07-09 01:18:31 +0000 (Wed, 09 Jul 2014) | 1 line
  
@@ -1517,12 +1382,6 @@ r1608976 | jhardin | 2014-07-09 01:18:31 +0000 (Wed, 09 Jul 2014) | 1 line
 r1608898 | jhardin | 2014-07-08 18:56:53 +0000 (Tue, 08 Jul 2014) | 1 line
  
  tweak URI_OPTOUT_USME
-------------------------------------------------------------------------
-r1608643 | spamassassin_role | 2014-07-08 02:45:10 +0000 (Tue, 08 Jul 
-2014) | 1 line
- 
- updated scores for revision 1608367 active rules added since last 
-mass-check
 ------------------------------------------------------------------------
 r1608632 | jhardin | 2014-07-08 00:40:41 +0000 (Tue, 08 Jul 2014) | 1 line
  
@@ -1537,24 +1396,6 @@ r1608329 | jhardin | 2014-07-07 03:12:54 +0000 (Mon, 07 Jul 2014) | 1 line
  
  add NUM_FREE
 ------------------------------------------------------------------------
-r1608328 | spamassassin_role | 2014-07-07 02:45:44 +0000 (Mon, 07 Jul 
-2014) | 1 line
- 
- updated scores for revision 1608173 active rules added since last 
-mass-check
-------------------------------------------------------------------------
-r1608152 | spamassassin_role | 2014-07-06 02:45:42 +0000 (Sun, 06 Jul 
-2014) | 1 line
- 
- updated scores for revision 1607982 active rules added since last 
-mass-check
-------------------------------------------------------------------------
-r1607968 | spamassassin_role | 2014-07-05 02:45:13 +0000 (Sat, 05 Jul 
-2014) | 1 line
- 
- updated scores for revision 1607798 active rules added since last 
-mass-check
-------------------------------------------------------------------------
 r1607966 | jhardin | 2014-07-05 02:24:38 +0000 (Sat, 05 Jul 2014) | 1 line
  
  More FP avoidance
@@ -1562,12 +1403,6 @@ r1607966 | jhardin | 2014-07-05 02:24:38 +0000 (Sat, 05 Jul 2014) | 1 line
 r1607893 | jhardin | 2014-07-04 17:01:34 +0000 (Fri, 04 Jul 2014) | 1 line
  
  More FP avoidance and other tweaks
-------------------------------------------------------------------------
-r1607775 | spamassassin_role | 2014-07-04 02:45:59 +0000 (Fri, 04 Jul 
-2014) | 1 line
- 
- updated scores for revision 1607563 active rules added since last 
-mass-check
 ------------------------------------------------------------------------
 r1607729 | kmcgrail | 2014-07-03 19:37:59 +0000 (Thu, 03 Jul 2014) | 1 
 line
@@ -1580,24 +1415,6 @@ line
  
  Disabling the DOS_FAKE_SQUIRREL rules due to their age (over 9 years)
 ------------------------------------------------------------------------
-r1607519 | spamassassin_role | 2014-07-03 02:44:12 +0000 (Thu, 03 Jul 
-2014) | 1 line
- 
- updated scores for revision 1607299 active rules added since last 
-mass-check
-------------------------------------------------------------------------
-r1607238 | spamassassin_role | 2014-07-02 02:42:50 +0000 (Wed, 02 Jul 
-2014) | 1 line
- 
- updated scores for revision 1607021 active rules added since last 
-mass-check
-------------------------------------------------------------------------
-r1606969 | spamassassin_role | 2014-07-01 02:45:17 +0000 (Tue, 01 Jul 
-2014) | 1 line
- 
- updated scores for revision 1606646 active rules added since last 
-mass-check
-------------------------------------------------------------------------
 r1606755 | jhardin | 2014-06-30 14:29:29 +0000 (Mon, 30 Jun 2014) | 1 line
  
  Rule tuning, more obfuscation rules
@@ -1605,18 +1422,6 @@ r1606755 | jhardin | 2014-06-30 14:29:29 +0000 (Mon, 30 Jun 2014) | 1 line
 r1606754 | jhardin | 2014-06-30 14:27:41 +0000 (Mon, 30 Jun 2014) | 1 line
  
  Avoid TVD_FUZZY_SECURITIES FP on spanish "security es"
-------------------------------------------------------------------------
-r1606618 | spamassassin_role | 2014-06-30 02:41:55 +0000 (Mon, 30 Jun 
-2014) | 1 line
- 
- updated scores for revision 1606442 active rules added since last 
-mass-check
-------------------------------------------------------------------------
-r1606420 | spamassassin_role | 2014-06-29 02:42:12 +0000 (Sun, 29 Jun 
-2014) | 1 line
- 
- updated scores for revision 1606305 active rules added since last 
-mass-check
 ------------------------------------------------------------------------
 r1606396 | jhardin | 2014-06-28 21:36:16 +0000 (Sat, 28 Jun 2014) | 1 line
  
@@ -1627,21 +1432,9 @@ r1606394 | jhardin | 2014-06-28 21:31:00 +0000 (Sat, 28 Jun 2014) | 1 line
  Add Cyrillic and Armenian glyphs in UTF-8 encoding to single-letter 
 replace tags
 ------------------------------------------------------------------------
-r1606282 | spamassassin_role | 2014-06-28 02:37:31 +0000 (Sat, 28 Jun 
-2014) | 1 line
- 
- updated scores for revision 1605990 active rules added since last 
-mass-check
-------------------------------------------------------------------------
 r1606096 | jquinn | 2014-06-27 13:45:29 +0000 (Fri, 27 Jun 2014) | 1 line
  
  Changed invalid TLD used in testing to .invalid per RFC 2606
-------------------------------------------------------------------------
-r1605942 | spamassassin_role | 2014-06-27 02:36:32 +0000 (Fri, 27 Jun 
-2014) | 1 line
- 
- updated scores for revision 1605704 active rules added since last 
-mass-check
 ------------------------------------------------------------------------
 r1605889 | mmartinec | 2014-06-26 19:32:15 +0000 (Thu, 26 Jun 2014) | 1 
 line
@@ -1658,28 +1451,10 @@ line
  
  allow an "=" char in a redis password
 ------------------------------------------------------------------------
-r1605650 | spamassassin_role | 2014-06-26 02:34:31 +0000 (Thu, 26 Jun 
-2014) | 1 line
- 
- updated scores for revision 1605294 active rules added since last 
-mass-check
-------------------------------------------------------------------------
 r1605266 | kmcgrail | 2014-06-25 04:52:10 +0000 (Wed, 25 Jun 2014) | 1 
 line
  
  Added verbose to sync to sa2 zones server
-------------------------------------------------------------------------
-r1605242 | spamassassin_role | 2014-06-25 02:34:54 +0000 (Wed, 25 Jun 
-2014) | 1 line
- 
- updated scores for revision 1605031 active rules added since last 
-mass-check
-------------------------------------------------------------------------
-r1604997 | spamassassin_role | 2014-06-24 02:33:42 +0000 (Tue, 24 Jun 
-2014) | 1 line
- 
- updated scores for revision 1604715 active rules added since last 
-mass-check
 ------------------------------------------------------------------------
 r1604881 | kmcgrail | 2014-06-23 16:57:58 +0000 (Mon, 23 Jun 2014) | 1 
 line
@@ -1688,33 +1463,9 @@ line
 v341.pre file as well as optional dependencies with Net::CIDR::Lite and 
 Geo::IP
 ------------------------------------------------------------------------
-r1604684 | spamassassin_role | 2014-06-23 02:33:59 +0000 (Mon, 23 Jun 
-2014) | 1 line
- 
- updated scores for revision 1604549 active rules added since last 
-mass-check
-------------------------------------------------------------------------
-r1604500 | spamassassin_role | 2014-06-22 02:35:21 +0000 (Sun, 22 Jun 
-2014) | 1 line
- 
- updated scores for revision 1604324 active rules added since last 
-mass-check
-------------------------------------------------------------------------
-r1604310 | spamassassin_role | 2014-06-21 02:35:55 +0000 (Sat, 21 Jun 
-2014) | 1 line
- 
- updated scores for revision 1604106 active rules added since last 
-mass-check
-------------------------------------------------------------------------
 r1604290 | jhardin | 2014-06-20 22:12:07 +0000 (Fri, 20 Jun 2014) | 1 line
  
  add URI_OPTOUT_USME
-------------------------------------------------------------------------
-r1604075 | spamassassin_role | 2014-06-20 02:38:09 +0000 (Fri, 20 Jun 
-2014) | 1 line
- 
- updated scores for revision 1603761 active rules added since last 
-mass-check
 ------------------------------------------------------------------------
 r1603876 | axb | 2014-06-19 13:25:34 +0000 (Thu, 19 Jun 2014) | 1 line
  
@@ -1731,23 +1482,11 @@ r1603806 | axb | 2014-06-19 10:06:33 +0000 (Thu, 19 Jun 2014) | 1 line
  
  removed publish for obsoleted rules in 00_FVGT_File001.cf
 ------------------------------------------------------------------------
-r1603703 | spamassassin_role | 2014-06-19 02:39:45 +0000 (Thu, 19 Jun 
-2014) | 1 line
- 
- updated scores for revision 1603373 active rules added since last 
-mass-check
-------------------------------------------------------------------------
 r1603518 | kmcgrail | 2014-06-18 16:48:04 +0000 (Wed, 18 Jun 2014) | 1 
 line
  
  Committing Marks Patch for the DNS Resolving to fix the issues with 
 Net::DNS 0.76
-------------------------------------------------------------------------
-r1603350 | spamassassin_role | 2014-06-18 02:37:42 +0000 (Wed, 18 Jun 
-2014) | 1 line
- 
- updated scores for revision 1603094 active rules added since last 
-mass-check
 ------------------------------------------------------------------------
 r1603347 | jhardin | 2014-06-18 02:05:34 +0000 (Wed, 18 Jun 2014) | 1 line
  
@@ -1789,12 +1528,6 @@ line
  
  Fixing issues with extract_to_rsync_dir
 ------------------------------------------------------------------------
-r1602790 | spamassassin_role | 2014-06-16 02:41:25 +0000 (Mon, 16 Jun 
-2014) | 1 line
- 
- updated scores for revision 1588859 active rules added since last 
-mass-check
-------------------------------------------------------------------------
 r1602789 | kmcgrail | 2014-06-16 02:17:51 +0000 (Mon, 16 Jun 2014) | 1 
 line
  
@@ -1831,18 +1564,6 @@ line
  Having issues with this sandbox rule failing make test 
 TEST_FILES="t/basic_lint.t t/basic_lint_without_sandbox.t t/basic_meta.t"
 ------------------------------------------------------------------------
-r1602734 | spamassassin_role | 2014-06-15 17:03:42 +0000 (Sun, 15 Jun 
-2014) | 1 line
- 
- updated scores for revision 1588622 active rules added since last 
-mass-check
-------------------------------------------------------------------------
-r1602731 | spamassassin_role | 2014-06-15 16:47:57 +0000 (Sun, 15 Jun 
-2014) | 1 line
- 
- updated scores for revision 1588622 active rules added since last 
-mass-check
-------------------------------------------------------------------------
 r1602728 | kmcgrail | 2014-06-15 16:34:50 +0000 (Sun, 15 Jun 2014) | 1 
 line
  
@@ -1876,18 +1597,6 @@ line
  
  fixed the interpreter to reference /bin/bash instead of /usr/bin/bash
 ------------------------------------------------------------------------
-r1602676 | spamassassin_role | 2014-06-15 09:08:47 +0000 (Sun, 15 Jun 
-2014) | 1 line
- 
- updated scores for revision 1588622 active rules added since last 
-mass-check
-------------------------------------------------------------------------
-r1602675 | spamassassin_role | 2014-06-15 08:49:18 +0000 (Sun, 15 Jun 
-2014) | 1 line
- 
- updated scores for revision 1588622 active rules added since last 
-mass-check
-------------------------------------------------------------------------
 r1602674 | kmcgrail | 2014-06-15 08:34:28 +0000 (Sun, 15 Jun 2014) | 1 
 line
  
@@ -1906,34 +1615,10 @@ line
  Fixing the masses Makefile for pgapack for linux on new spamassassin-vm 
 centos box
 ------------------------------------------------------------------------
-r1602670 | spamassassin_role | 2014-06-15 07:32:00 +0000 (Sun, 15 Jun 
-2014) | 1 line
- 
- updated scores for revision 1588622 active rules added since last 
-mass-check
-------------------------------------------------------------------------
-r1602668 | spamassassin_role | 2014-06-15 06:57:17 +0000 (Sun, 15 Jun 
-2014) | 1 line
- 
- updated scores for revision 1588622 active rules added since last 
-mass-check
-------------------------------------------------------------------------
-r1602667 | spamassassin_role | 2014-06-15 06:41:02 +0000 (Sun, 15 Jun 
-2014) | 1 line
- 
- updated scores for revision 1588622 active rules added since last 
-mass-check
-------------------------------------------------------------------------
 r1602660 | kmcgrail | 2014-06-15 06:03:57 +0000 (Sun, 15 Jun 2014) | 1 
 line
  
  Fix for Net::DNS::Nameserver dependency on CentOS systems - bug 7052
-------------------------------------------------------------------------
-r1602657 | spamassassin_role | 2014-06-15 05:48:58 +0000 (Sun, 15 Jun 
-2014) | 1 line
- 
- updated scores for revision 1588622 active rules added since last 
-mass-check
 ------------------------------------------------------------------------
 r1602655 | kmcgrail | 2014-06-15 05:31:07 +0000 (Sun, 15 Jun 2014) | 1 
 line
@@ -2039,43 +1724,13 @@ r1588603 | jhardin | 2014-04-19 03:12:10 +0000 (Sat, 19 Apr 2014) | 1 line
  
  tweak HEXHASH_WORD, minor cleanup
 ------------------------------------------------------------------------
-r1588602 | spamassassin_role | 2014-04-19 02:50:51 +0000 (Sat, 19 Apr 
-2014) | 1 line
- 
- updated scores for revision 1588424 active rules added since last 
-mass-check
-------------------------------------------------------------------------
-r1588405 | spamassassin_role | 2014-04-18 02:56:32 +0000 (Fri, 18 Apr 
-2014) | 1 line
- 
- updated scores for revision 1588168 active rules added since last 
-mass-check
-------------------------------------------------------------------------
 r1588397 | jhardin | 2014-04-18 01:49:11 +0000 (Fri, 18 Apr 2014) | 1 line
  
  exploratory HEXHASH changes, tweak DX_TEXT
 ------------------------------------------------------------------------
-r1587786 | spamassassin_role | 2014-04-16 02:57:11 +0000 (Wed, 16 Apr 
-2014) | 1 line
- 
- updated scores for revision 1587475 active rules added since last 
-mass-check
-------------------------------------------------------------------------
-r1587391 | spamassassin_role | 2014-04-15 03:02:43 +0000 (Tue, 15 Apr 
-2014) | 1 line
- 
- updated scores for revision 1587163 active rules added since last 
-mass-check
-------------------------------------------------------------------------
 r1587118 | jhardin | 2014-04-13 22:59:09 +0000 (Sun, 13 Apr 2014) | 1 line
  
  tweak PUMPDUMP
-------------------------------------------------------------------------
-r1586917 | spamassassin_role | 2014-04-13 03:05:13 +0000 (Sun, 13 Apr 
-2014) | 1 line
- 
- updated scores for revision 1586838 active rules added since last 
-mass-check
 ------------------------------------------------------------------------
 r1586884 | jhardin | 2014-04-12 18:57:55 +0000 (Sat, 12 Apr 2014) | 1 line
  
@@ -2097,18 +1752,6 @@ r1586577 | axb | 2014-04-11 05:56:02 +0000 (Fri, 11 Apr 2014) | 1 line
  
  removed reference/s to demoted MSGID_MULTIPLE_AT
 ------------------------------------------------------------------------
-r1586546 | spamassassin_role | 2014-04-11 03:23:13 +0000 (Fri, 11 Apr 
-2014) | 1 line
- 
- updated scores for revision 1586244 active rules added since last 
-mass-check
-------------------------------------------------------------------------
-r1586201 | spamassassin_role | 2014-04-10 03:28:35 +0000 (Thu, 10 Apr 
-2014) | 1 line
- 
- updated scores for revision 1585908 active rules added since last 
-mass-check
-------------------------------------------------------------------------
 r1586195 | jhardin | 2014-04-10 01:38:53 +0000 (Thu, 10 Apr 2014) | 1 line
  
  FP avoidance tuning, disable some poor rules
@@ -2121,28 +1764,10 @@ r1585916 | axb | 2014-04-09 09:21:33 +0000 (Wed, 09 Apr 2014) | 1 line
  
  disabled "no hits at all" & ancient bad performers
 ------------------------------------------------------------------------
-r1585884 | spamassassin_role | 2014-04-09 03:27:32 +0000 (Wed, 09 Apr 
-2014) | 1 line
- 
- updated scores for revision 1585665 active rules added since last 
-mass-check
-------------------------------------------------------------------------
-r1585642 | spamassassin_role | 2014-04-08 03:15:14 +0000 (Tue, 08 Apr 
-2014) | 1 line
- 
- updated scores for revision 1585428 active rules added since last 
-mass-check
-------------------------------------------------------------------------
 r1585485 | kmcgrail | 2014-04-07 13:57:58 +0000 (Mon, 07 Apr 2014) | 1 
 line
  
  Adding tflag for noawl thanks to Nuno Fernandes - Bug 7032
-------------------------------------------------------------------------
-r1585375 | spamassassin_role | 2014-04-07 03:01:26 +0000 (Mon, 07 Apr 
-2014) | 1 line
- 
- updated scores for revision 1585261 active rules added since last 
-mass-check
 ------------------------------------------------------------------------
 r1585366 | jhardin | 2014-04-07 00:26:12 +0000 (Mon, 07 Apr 2014) | 1 line
  
@@ -2159,37 +1784,13 @@ avoid breaking dependent rules. Fix some rules depending on subrules in
 if blocks in other sandboxes so they don't break if the conditional check 
 suppresses that subrule.
 ------------------------------------------------------------------------
-r1585237 | spamassassin_role | 2014-04-06 03:07:06 +0000 (Sun, 06 Apr 
-2014) | 1 line
- 
- updated scores for revision 1585021 active rules added since last 
-mass-check
-------------------------------------------------------------------------
 r1585162 | jhardin | 2014-04-05 18:52:39 +0000 (Sat, 05 Apr 2014) | 1 line
  
  Force publication of a few rules
 ------------------------------------------------------------------------
-r1584957 | spamassassin_role | 2014-04-05 03:18:52 +0000 (Sat, 05 Apr 
-2014) | 1 line
- 
- updated scores for revision 1584563 active rules added since last 
-mass-check
-------------------------------------------------------------------------
-r1584510 | spamassassin_role | 2014-04-04 03:02:12 +0000 (Fri, 04 Apr 
-2014) | 1 line
- 
- updated scores for revision 1584283 active rules added since last 
-mass-check
-------------------------------------------------------------------------
 r1584498 | jhardin | 2014-04-04 01:26:25 +0000 (Fri, 04 Apr 2014) | 1 line
  
  tweak CANT_SEE_AD, add ADMITS_SPAM for testing
-------------------------------------------------------------------------
-r1584251 | spamassassin_role | 2014-04-03 03:03:53 +0000 (Thu, 03 Apr 
-2014) | 1 line
- 
- updated scores for revision 1583931 active rules added since last 
-mass-check
 ------------------------------------------------------------------------
 r1584248 | jhardin | 2014-04-03 01:42:21 +0000 (Thu, 03 Apr 2014) | 1 line
  
@@ -2202,12 +1803,6 @@ r1584246 | jhardin | 2014-04-03 01:23:09 +0000 (Thu, 03 Apr 2014) | 1 line
 r1584245 | jhardin | 2014-04-03 01:21:22 +0000 (Thu, 03 Apr 2014) | 1 line
  
  tweak DX_TEXT_02
-------------------------------------------------------------------------
-r1583862 | spamassassin_role | 2014-04-02 03:10:42 +0000 (Wed, 02 Apr 
-2014) | 1 line
- 
- updated scores for revision 1583576 active rules added since last 
-mass-check
 ------------------------------------------------------------------------
 r1583818 | jhardin | 2014-04-01 22:51:10 +0000 (Tue, 01 Apr 2014) | 1 line
  
@@ -2260,37 +1855,13 @@ r1583263 | axb | 2014-03-31 08:26:35 +0000 (Mon, 31 Mar 2014) | 2 lines
  disabled FSL_MISSP_REPLYTO (bug 7028)
  simplistic rule overlaps with FROM_MISSP_REPLYTO - FP Potential
 ------------------------------------------------------------------------
-r1583235 | spamassassin_role | 2014-03-31 02:58:52 +0000 (Mon, 31 Mar 
-2014) | 1 line
- 
- updated scores for revision 1583111 active rules added since last 
-mass-check
-------------------------------------------------------------------------
-r1583102 | spamassassin_role | 2014-03-30 03:21:21 +0000 (Sun, 30 Mar 
-2014) | 1 line
- 
- updated scores for revision 1582966 active rules added since last 
-mass-check
-------------------------------------------------------------------------
 r1583101 | jhardin | 2014-03-30 02:38:24 +0000 (Sun, 30 Mar 2014) | 1 line
  
  various rule and FP avoidance tweaks
 ------------------------------------------------------------------------
-r1582938 | spamassassin_role | 2014-03-29 03:07:40 +0000 (Sat, 29 Mar 
-2014) | 1 line
- 
- updated scores for revision 1582635 active rules added since last 
-mass-check
-------------------------------------------------------------------------
 r1582904 | jhardin | 2014-03-28 23:19:38 +0000 (Fri, 28 Mar 2014) | 1 line
  
  tweak various rules
-------------------------------------------------------------------------
-r1582586 | spamassassin_role | 2014-03-28 03:15:23 +0000 (Fri, 28 Mar 
-2014) | 1 line
- 
- updated scores for revision 1582222 active rules added since last 
-mass-check
 ------------------------------------------------------------------------
 r1582541 | jhardin | 2014-03-27 23:16:30 +0000 (Thu, 27 Mar 2014) | 1 line
  
@@ -2299,12 +1870,6 @@ r1582541 | jhardin | 2014-03-27 23:16:30 +0000 (Thu, 27 Mar 2014) | 1 line
 r1582520 | jhardin | 2014-03-27 22:33:22 +0000 (Thu, 27 Mar 2014) | 1 line
  
  tweak STYLE_GIBBERISH and CANT_SEE_AD
-------------------------------------------------------------------------
-r1582169 | spamassassin_role | 2014-03-27 03:08:34 +0000 (Thu, 27 Mar 
-2014) | 1 line
- 
- updated scores for revision 1581749 active rules added since last 
-mass-check
 ------------------------------------------------------------------------
 r1581971 | jhardin | 2014-03-26 18:04:36 +0000 (Wed, 26 Mar 2014) | 1 line
  
@@ -2322,12 +1887,6 @@ r1581902 | jhardin | 2014-03-26 16:10:19 +0000 (Wed, 26 Mar 2014) | 1 line
  
  tweak CANT_SEE_ADD, add HTML_OFF_PAGE
 ------------------------------------------------------------------------
-r1581660 | spamassassin_role | 2014-03-26 03:00:07 +0000 (Wed, 26 Mar 
-2014) | 1 line
- 
- updated scores for revision 1581278 active rules added since last 
-mass-check
-------------------------------------------------------------------------
 r1581538 | jhardin | 2014-03-25 21:38:30 +0000 (Tue, 25 Mar 2014) | 1 line
  
  add __LONG_HEX_URI
@@ -2336,12 +1895,6 @@ r1581453 | jhardin | 2014-03-25 18:28:16 +0000 (Tue, 25 Mar 2014) | 1 line
  
  tweak CANT_SEE_AD
 ------------------------------------------------------------------------
-r1581201 | spamassassin_role | 2014-03-25 03:16:58 +0000 (Tue, 25 Mar 
-2014) | 1 line
- 
- updated scores for revision 1580786 active rules added since last 
-mass-check
-------------------------------------------------------------------------
 r1581018 | jhardin | 2014-03-24 19:41:45 +0000 (Mon, 24 Mar 2014) | 1 line
  
  tweak UC_GIBBERISH_OBFU, CANT_SEE_AD
@@ -2349,18 +1902,6 @@ r1581018 | jhardin | 2014-03-24 19:41:45 +0000 (Mon, 24 Mar 2014) | 1 line
 r1580729 | jhardin | 2014-03-24 03:49:39 +0000 (Mon, 24 Mar 2014) | 1 line
  
  tune END_FUTURE_EMAILS
-------------------------------------------------------------------------
-r1580716 | spamassassin_role | 2014-03-24 03:06:39 +0000 (Mon, 24 Mar 
-2014) | 1 line
- 
- updated scores for revision 1580469 active rules added since last 
-mass-check
-------------------------------------------------------------------------
-r1580434 | spamassassin_role | 2014-03-23 03:07:59 +0000 (Sun, 23 Mar 
-2014) | 1 line
- 
- updated scores for revision 1580183 active rules added since last 
-mass-check
 ------------------------------------------------------------------------
 r1580010 | jhardin | 2014-03-21 18:46:36 +0000 (Fri, 21 Mar 2014) | 1 line
  
@@ -2403,12 +1944,6 @@ line
  
  FSL_NEW_HELO_USER rule improvements bug 6693
 ------------------------------------------------------------------------
-r1577024 | spamassassin_role | 2014-03-13 02:59:35 +0000 (Thu, 13 Mar 
-2014) | 1 line
- 
- updated scores for revision 1576640 active rules added since last 
-mass-check
-------------------------------------------------------------------------
 r1576762 | jhardin | 2014-03-12 14:47:01 +0000 (Wed, 12 Mar 2014) | 1 line
  
  tweak and score various unsubscribe rules
@@ -2416,12 +1951,6 @@ r1576762 | jhardin | 2014-03-12 14:47:01 +0000 (Wed, 12 Mar 2014) | 1 line
 r1576183 | jhardin | 2014-03-11 03:38:39 +0000 (Tue, 11 Mar 2014) | 1 line
  
  tune END_FUTURE_EMAILS, add some test rules for unsubscribe texts
-------------------------------------------------------------------------
-r1576181 | spamassassin_role | 2014-03-11 03:09:58 +0000 (Tue, 11 Mar 
-2014) | 1 line
- 
- updated scores for revision 1575870 active rules added since last 
-mass-check
 ------------------------------------------------------------------------
 r1576177 | jhardin | 2014-03-11 02:29:55 +0000 (Tue, 11 Mar 2014) | 1 line
  
@@ -2432,76 +1961,16 @@ line
  
  Added cw and sx TLDs to registrar boundaries
 ------------------------------------------------------------------------
-r1575802 | spamassassin_role | 2014-03-10 03:05:40 +0000 (Mon, 10 Mar 
-2014) | 1 line
- 
- updated scores for revision 1575679 active rules added since last 
-mass-check
-------------------------------------------------------------------------
-r1575654 | spamassassin_role | 2014-03-09 03:15:22 +0000 (Sun, 09 Mar 
-2014) | 1 line
- 
- updated scores for revision 1575504 active rules added since last 
-mass-check
-------------------------------------------------------------------------
-r1575474 | spamassassin_role | 2014-03-08 03:06:32 +0000 (Sat, 08 Mar 
-2014) | 1 line
- 
- updated scores for revision 1575209 active rules added since last 
-mass-check
-------------------------------------------------------------------------
-r1575129 | spamassassin_role | 2014-03-07 03:12:12 +0000 (Fri, 07 Mar 
-2014) | 1 line
- 
- updated scores for revision 1574804 active rules added since last 
-mass-check
-------------------------------------------------------------------------
 r1575099 | khopesh | 2014-03-06 23:39:33 +0000 (Thu, 06 Mar 2014) | 1 line
  
  link references to ancient archived tweaks to Bayes since they're so 
 hard to find
-------------------------------------------------------------------------
-r1574755 | spamassassin_role | 2014-03-06 03:13:36 +0000 (Thu, 06 Mar 
-2014) | 1 line
- 
- updated scores for revision 1574395 active rules added since last 
-mass-check
-------------------------------------------------------------------------
-r1574360 | spamassassin_role | 2014-03-05 03:15:52 +0000 (Wed, 05 Mar 
-2014) | 1 line
- 
- updated scores for revision 1573942 active rules added since last 
-mass-check
 ------------------------------------------------------------------------
 r1574117 | kmcgrail | 2014-03-04 14:46:18 +0000 (Tue, 04 Mar 2014) | 1 
 line
  
  Adding HeaderEval condition to FREEMAIL_FORGED_FROMDOMAIN & 
 HEADER_FROM_DIFFERENT_DOMAINS
-------------------------------------------------------------------------
-r1573846 | spamassassin_role | 2014-03-04 03:10:01 +0000 (Tue, 04 Mar 
-2014) | 1 line
- 
- updated scores for revision 1573480 active rules added since last 
-mass-check
-------------------------------------------------------------------------
-r1573432 | spamassassin_role | 2014-03-03 03:12:20 +0000 (Mon, 03 Mar 
-2014) | 1 line
- 
- updated scores for revision 1573272 active rules added since last 
-mass-check
-------------------------------------------------------------------------
-r1573256 | spamassassin_role | 2014-03-02 03:15:47 +0000 (Sun, 02 Mar 
-2014) | 1 line
- 
- updated scores for revision 1573137 active rules added since last 
-mass-check
-------------------------------------------------------------------------
-r1573122 | spamassassin_role | 2014-03-01 02:58:08 +0000 (Sat, 01 Mar 
-2014) | 1 line
- 
- updated scores for revision 1572879 active rules added since last 
-mass-check
 ------------------------------------------------------------------------
 r1573021 | jhardin | 2014-02-28 17:50:36 +0000 (Fri, 28 Feb 2014) | 1 line
  
@@ -2511,18 +1980,6 @@ r1572814 | kmcgrail | 2014-02-28 03:54:00 +0000 (Fri, 28 Feb 2014) | 1
 line
  
  Adding Joe Quinn to committer list
-------------------------------------------------------------------------
-r1572809 | spamassassin_role | 2014-02-28 02:58:06 +0000 (Fri, 28 Feb 
-2014) | 1 line
- 
- updated scores for revision 1572469 active rules added since last 
-mass-check
-------------------------------------------------------------------------
-r1572414 | spamassassin_role | 2014-02-27 02:56:55 +0000 (Thu, 27 Feb 
-2014) | 1 line
- 
- updated scores for revision 1571963 active rules added since last 
-mass-check
 ------------------------------------------------------------------------
 r1572369 | kmcgrail | 2014-02-27 00:50:42 +0000 (Thu, 27 Feb 2014) | 1 
 line
@@ -2535,39 +1992,9 @@ line
  
  Updating build docs to reflect svnpubsub for publishing tarballs
 ------------------------------------------------------------------------
-r1571901 | spamassassin_role | 2014-02-26 02:59:36 +0000 (Wed, 26 Feb 
-2014) | 1 line
- 
- updated scores for revision 1571615 active rules added since last 
-mass-check
-------------------------------------------------------------------------
-r1571553 | spamassassin_role | 2014-02-25 02:50:46 +0000 (Tue, 25 Feb 
-2014) | 1 line
- 
- updated scores for revision 1571183 active rules added since last 
-mass-check
-------------------------------------------------------------------------
-r1571130 | spamassassin_role | 2014-02-24 02:49:12 +0000 (Mon, 24 Feb 
-2014) | 1 line
- 
- updated scores for revision 1570986 active rules added since last 
-mass-check
-------------------------------------------------------------------------
-r1570782 | spamassassin_role | 2014-02-22 02:56:53 +0000 (Sat, 22 Feb 
-2014) | 1 line
- 
- updated scores for revision 1570491 active rules added since last 
-mass-check
-------------------------------------------------------------------------
 r1570457 | jhardin | 2014-02-21 05:47:48 +0000 (Fri, 21 Feb 2014) | 1 line
  
  tune HEXHASH_WORD FP avoidance, disable some nonperforming rules
-------------------------------------------------------------------------
-r1570435 | spamassassin_role | 2014-02-21 03:11:29 +0000 (Fri, 21 Feb 
-2014) | 1 line
- 
- updated scores for revision 1570110 active rules added since last 
-mass-check
 ------------------------------------------------------------------------
 r1570365 | kmcgrail | 2014-02-20 22:25:29 +0000 (Thu, 20 Feb 2014) | 1 
 line
@@ -2600,12 +2027,6 @@ line
 r1570169 | axb | 2014-02-20 12:32:26 +0000 (Thu, 20 Feb 2014) | 1 line
  
  disabled 2014-02-20 - zero hits (axb)
-------------------------------------------------------------------------
-r1570064 | spamassassin_role | 2014-02-20 03:16:14 +0000 (Thu, 20 Feb 
-2014) | 1 line
- 
- updated scores for revision 1569660 active rules added since last 
-mass-check
 ------------------------------------------------------------------------
 r1569844 | jhardin | 2014-02-19 17:36:04 +0000 (Wed, 19 Feb 2014) | 1 line
  
@@ -2643,12 +2064,6 @@ line
  
  Adding scoring gradient for BAYES_999 to cover 99.9% to 100%
 ------------------------------------------------------------------------
-r1568711 | spamassassin_role | 2014-02-16 03:35:29 +0000 (Sun, 16 Feb 
-2014) | 1 line
- 
- updated scores for revision 1568594 active rules added since last 
-mass-check
-------------------------------------------------------------------------
 r1568704 | kmcgrail | 2014-02-15 23:31:17 +0000 (Sat, 15 Feb 2014) | 1 
 line
  
@@ -2667,12 +2082,6 @@ r1568677 | jhardin | 2014-02-15 21:16:40 +0000 (Sat, 15 Feb 2014) | 1 line
  
  tweak HEXHASH_WORD
 ------------------------------------------------------------------------
-r1568587 | spamassassin_role | 2014-02-15 03:03:04 +0000 (Sat, 15 Feb 
-2014) | 1 line
- 
- updated scores for revision 1568221 active rules added since last 
-mass-check
-------------------------------------------------------------------------
 r1568520 | jhardin | 2014-02-14 21:11:06 +0000 (Fri, 14 Feb 2014) | 1 line
  
  tweak HEXHASH_WORD
@@ -2686,22 +2095,10 @@ line
  
  Bug 7000: dnsbl_subtests.t hangs on Windows
 ------------------------------------------------------------------------
-r1568195 | spamassassin_role | 2014-02-14 03:26:56 +0000 (Fri, 14 Feb 
-2014) | 1 line
- 
- updated scores for revision 1567864 active rules added since last 
-mass-check
-------------------------------------------------------------------------
 r1568036 | kmcgrail | 2014-02-13 21:04:55 +0000 (Thu, 13 Feb 2014) | 1 
 line
  
  Adding rule file for Amir Caspi rules
-------------------------------------------------------------------------
-r1567839 | spamassassin_role | 2014-02-13 03:24:16 +0000 (Thu, 13 Feb 
-2014) | 1 line
- 
- updated scores for revision 1567565 active rules added since last 
-mass-check
 ------------------------------------------------------------------------
 r1567786 | kmcgrail | 2014-02-12 23:00:03 +0000 (Wed, 12 Feb 2014) | 1 
 line
@@ -2733,12 +2130,6 @@ line
 r1567617 | axb | 2014-02-12 13:29:50 +0000 (Wed, 12 Feb 2014) | 1 line
  
  disabled  nopublish  (since 2010) KHOP_SPAMDB_SUBJ rule
-------------------------------------------------------------------------
-r1567509 | spamassassin_role | 2014-02-12 03:19:40 +0000 (Wed, 12 Feb 
-2014) | 1 line
- 
- updated scores for revision 1567012 active rules added since last 
-mass-check
 ------------------------------------------------------------------------
 r1567424 | kmcgrail | 2014-02-11 22:26:47 +0000 (Tue, 11 Feb 2014) | 1 
 line
