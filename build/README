@@ -105,7 +105,11 @@ SPAMASSASSIN RELEASE PROCEDURE
         relbuild checkout.
 
 - create the Changes file.  Do this step on your own checkout, as
-  the release checkout is read-only.   There are two options here:
+  the release checkout is read-only.   
+
+  MAKE CERTAIN THIS IS RUN IN THE ROOT OF YOUR CHECKOUT!
+
+  There are two options here:
 
   - For releases on a maintainance branch (e.g. 3.0.1, .2, etc.):
 
@@ -127,11 +131,11 @@ SPAMASSASSIN RELEASE PROCEDURE
     produce the first 3.4.0-pre release, for example.  r1567124 is the
     3.4.0 release tag revision.
 
-- Exclude some automated changes from the logs
+- Exclude some automated changes from the logs:
 
     cat Changes | perl -ne ' BEGIN{$/=("-"x72)."\n"}
     chomp; @ln=split/^/;
-    next if @ln==3 && $ln[2]=~/^\s*(promotions validated|auto-generated rules|)\s*$/;
+    next if @ln==3 && $ln[2]=~/^\s*(updated scores for revision.*|promotions validated|auto-generated rules|)\s*$/;
     print "@ln$/"' > Changes.tmp
 
 - Word wrap the Changes file with something like 
