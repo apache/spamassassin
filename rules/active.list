@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus dwarren grenier jarif kam-ninja kpg-core mas-cps mas-mas mmiroslaw-ham mmiroslaw-spam zmi; day 2: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus dwarren grenier jarif kam-ninja kpg-core llanga mas-cps mas-mas zmi; day 3: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus dwarren grenier jarif kam-ninja kpg-core llanga mas-cps mas-mas mmiroslaw-ham mmiroslaw-spam zmi
+# with results from: day 1: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus dwarren grenier jarif kam-ninja kpg-core mas-cps mas-mas mmiroslaw-ham mmiroslaw-spam zmi; day 2: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus dwarren grenier jarif kam-ninja kpg-core llanga mas-cps mas-mas zmi; day 3: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus dwarren grenier jarif kam-ninja kpg-core llanga mas-cps mas-mas zmi
 
 # tflags publish
 AC_BR_BONANZA
@@ -101,9 +101,6 @@ AXB_XMAILER_MIMEOLE_OL_1ECD5
 AXB_XM_FORGED_OL2600
 
 # good enough
-AXB_X_AOL_SEZ_S
-
-# good enough
 AXB_X_FF_SEZ_S
 
 # tflags learn
@@ -170,7 +167,13 @@ COMPENSATION
 CORRUPT_FROM_LINE_IN_HDRS
 
 # good enough
+DATE_DOTS
+
+# good enough
 DEAR_BENEFICIARY
+
+# good enough
+DEAR_NOBODY
 
 # good enough
 DEAR_WINNER
@@ -221,7 +224,13 @@ DOS_OE_TO_MX
 DOS_OUTLOOK_TO_MX
 
 # good enough
+DOS_OUTLOOK_TO_MX_IMAGE
+
+# good enough
 DSN_NO_MIMEVERSION
+
+# good enough
+DUP_SUSP_HDR
 
 # tflags publish
 DX_TEXT_02
@@ -231,9 +240,6 @@ DX_TEXT_03
 
 # good enough
 DX_TEXT_05
-
-# good enough
-DYN_RDNS_SHORT_HELO_HTML
 
 # tflags userconf
 ENV_AND_HDR_SPF_MATCH
@@ -326,10 +332,10 @@ FSL_CTYPE_WIN1251
 FSL_HELO_BARE_IP_2
 
 # good enough
-FSL_HELO_DEVICE
+FSL_HELO_FAKE
 
 # good enough
-FSL_HELO_FAKE
+FSL_MID_419
 
 # tflags publish
 FSL_NEW_HELO_USER
@@ -416,16 +422,10 @@ HEADER_HOST_IN_WHITELIST
 HEAD_LONG
 
 # good enough
-HELO_LH_HOME
-
-# good enough
 HELO_LOCALHOST
 
 # tflags publish
 HEXHASH_WORD
-
-# good enough
-HK_LOTTO
 
 # good enough
 HK_NAME_FM_MR_MRS
@@ -438,9 +438,6 @@ HK_NAME_MR_MRS
 
 # good enough
 HK_RANDOM_FROM
-
-# good enough
-HK_RANDOM_REPLYTO
 
 # good enough
 HK_SCAM_N1
@@ -505,9 +502,6 @@ LUCRATIVE
 # good enough
 MAILER_EQ_ORG
 
-# good enough
-MALFORMED_FREEMAIL
-
 # tflags publish
 MANY_SPAN_IN_TEXT
 
@@ -546,6 +540,12 @@ MONEY_FROM_41
 
 # good enough
 MONEY_FROM_MISSP
+
+# good enough
+MONEY_LOTTERY
+
+# good enough
+MSGID_NOFQDN1
 
 # good enough
 MSOE_MID_WRONG_CASE
@@ -827,13 +827,13 @@ REPLYTO_WITHOUT_TO_CC
 RISK_FREE
 
 # good enough
-SERGIO_SUBJECT_PORN006
-
-# good enough
 SERGIO_SUBJECT_PORN014
 
 # good enough
 SERGIO_SUBJECT_VIAGRA01
+
+# good enough
+SHARE_50_50
 
 # good enough
 SHORTENED_URL_SRC
@@ -877,6 +877,9 @@ SUBJECT_IN_BLACKLIST
 # tflags userconf
 SUBJECT_IN_WHITELIST
 
+# good enough
+SUBJ_UNNEEDED_HTML
+
 # tflags publish
 SYSADMIN
 
@@ -894,9 +897,6 @@ TEQF_USR_MSGID_MALF
 
 # tflags publish
 THIS_AD
-
-# good enough
-TO_EQ_FM_DIRECT_MX
 
 # tflags net
 TO_EQ_FM_DOM_SPF_FAIL
@@ -926,16 +926,13 @@ TO_NO_BRKTS_NORDNS_HTML
 TO_NO_BRKTS_PCNT
 
 # good enough
+TT_MSGID_TRUNC
+
+# good enough
 TVD_FROM_1
 
 # good enough
 TVD_PH_BODY_META
-
-# good enough
-TVD_PH_SUBJ_META
-
-# good enough
-TVD_QUAL_MEDS
 
 # good enough
 TVD_RCVD_IP
@@ -952,77 +949,17 @@ TVD_SPACE_ENC_FM_MIME
 # good enough
 TVD_SPACE_RATIO_MINFP
 
-# good enough
-TVD_VISIT_PHARMA
-
 # tflags publish
 TW_GIBBERISH_MANY
 
 # good enough
-BODY_SINGLE_URI
+FSL_MY_NAME_IS
 
 # good enough
-BODY_SINGLE_WORD
+FSL_PHP_EXPLOIT_41
 
 # good enough
-DATE_DOTS
-
-# good enough
-DATE_IN_FUTURE_Q_PLUS
-
-# good enough
-DEAR_EMAIL_USER
-
-# good enough
-DEAR_NOBODY
-
-# good enough
-DOS_OUTLOOK_TO_MX_IMAGE
-
-# good enough
-DUP_SUSP_HDR
-
-# good enough
-FILL_THIS_FORM_FRAUD_PHISH
-
-# good enough
-FSL_BULK_SIG
-
-# good enough
-FSL_MID_419
-
-# good enough
-HDRS_LCASE
-
-# good enough
-HK_GOLDDUST
-
-# good enough
-HK_LOTTO_NAME
-
-# good enough
-HK_NAME_FM_DR
-
-# good enough
-MONEY_LOTTERY
-
-# good enough
-MSGID_NOFQDN1
-
-# good enough
-OBFU_ATTACH_MISSP
-
-# good enough
-OBFU_HTML_ATTACH
-
-# good enough
-PHP_NOVER_MUA
-
-# good enough
-SHARE_50_50
-
-# good enough
-SUBJ_UNNEEDED_HTML
+TVD_UNDER_VALUED
 
 # tflags publish
 UC_GIBBERISH_OBFU
