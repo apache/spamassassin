@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus dwarren grenier jarif kam-ninja kpg-core mas-cps mas-mas mmiroslaw-ham mmiroslaw-spam zmi; day 2: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus dwarren grenier jarif kam-ninja kpg-core llanga mas-cps mas-mas zmi; day 3: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus dwarren grenier jarif kam-ninja kpg-core llanga mas-cps mas-mas zmi
+# with results from: day 1: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus dwarren grenier jarif kam-ninja kpg-core mas-cps mas-mas mmiroslaw-ham mmiroslaw-spam zmi; day 2: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus dwarren grenier jarif kam-ninja kpg-core llanga mas-cps mas-mas mmiroslaw-ham mmiroslaw-spam zmi; day 3: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus dwarren grenier jarif kam-ninja kpg-core llanga mas-cps mas-mas zmi
 
 # tflags publish
 AC_BR_BONANZA
@@ -332,6 +332,9 @@ FSL_CTYPE_WIN1251
 FSL_HELO_BARE_IP_2
 
 # good enough
+FSL_HELO_DEVICE
+
+# good enough
 FSL_HELO_FAKE
 
 # good enough
@@ -435,9 +438,6 @@ HK_NAME_FROM
 
 # good enough
 HK_NAME_MR_MRS
-
-# good enough
-HK_RANDOM_FROM
 
 # good enough
 HK_SCAM_N1
@@ -570,6 +570,9 @@ NSL_RCVD_HELO_USER
 
 # good enough
 NULL_IN_BODY
+
+# good enough
+OBFU_HTML_ATTACH
 
 # tflags publish
 OBFU_JVSCR_ESC
