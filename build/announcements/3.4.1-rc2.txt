@@ -1,7 +1,7 @@
 To: users, dev, announce
-Subject: ANNOUNCE: Apache SpamAssassin 3.4.1-rc1 available
+Subject: ANNOUNCE: Apache SpamAssassin 3.4.1-rc2 available
 
-Release Notes -- Apache SpamAssassin -- Version 3.4.1-rc1
+Release Notes -- Apache SpamAssassin -- Version 3.4.1-rc2
 
 Introduction
 ------------
@@ -15,22 +15,363 @@ block more international spam & stop spammers from using alternate character
 sets to bypass tests; Continued refinement to the native IPv6 support; and
 Improved Bayesian classification with better debugging and attachment hashing.
 
-Notable bug fixes
------------------
-
-
 Notable features:
 =================
+
+Bug 7115: Adding SHA digests of MIME parts as Bayes tokens allows bayes
+to see non-textual content - added configurability
+
+rewritten Node::_normalize
+
 
 New configuration options
 -------------------------
 
+Mail::SpamAssassin::Conf:
+  bayes_token_sources  (default: header visible invisible uri)
+
+
 New plugins
 -----------
+
+New plugin (optional):
+# loadplugin Mail::SpamAssassin::Plugin::TxRep
+# loadplugin Mail::SpamAssassin::Plugin::PDFInfo  ???
+
+
+Rule updates
+------------
+
+Many rules were added or modified, or their score adjusted.
+Some of these are (in no particular order):
+
+  ADMITS_SPAM, AXB_HELO_HOME_UN, AXB_XRCVD_EXCH_UUCP, BANG_GUAR,
+  BAYES_999, CANT_SEE_AD, CN_B2B, CN_B2B_SPAMMER, DX_TEXT, DX_TEXT_02,
+  Doctor Oz, END_FUTURE_EMAILS, FILLFORM, FREEMAIL_FORGED_FROMDOMAIN,
+  FREEMAIL_MANY_TO, FROM_MISSP_REPLYTO, FSL_FAKE_GMAIL_RCVD, GAPPY_,
+  FSL_HELO_BARE_IP_*, FSL_NEW_HELO_USER, HEADER_FROM_DIFFERENT_DOMAINS,
+  HELO_LH_HOME, HEXHASH, HEXHASH_WORD, HTML_OFF_PAGE, LONG_HEX_URI,
+  FUZZY_CLICK_HERE, LOTSA_MONEY, MSGID_NOFQDN[12], NORMAL_HTTP_TO_IP,
+  NUM_FREE, PDS_FROM_2_EMAILS, PHP malware/phish, PUMPDUMP, RAND_HEADER,
+  RCVD_ILLEGAL_IP, STYLE_GIBBERISH, SYSADMIN, TVD_FUZZY_SECURITIES FP,
+  TVD_GET_STOCK, TO_IN_SUBJ, TO_NO_BRTKS_MSFT, UC_GIBBERISH_OBFU,
+  URIBL_DBL_ABUSE_REDIR, URIBL_DBL_SPAM, URI_GOOGLE_PROXY, URI_IP_UNSUB,
+  URI_OPTOUT_3LD, URI_OPTOUT_USME, URI_TRY_USME, VANITY, __DATE_SPACEY,
+  __BOUNCE_RPATH_NULL, __FORGED_URL_DOM_*, __FSL_LINK_AWS_S3_WEB_LOOSE,
+  __HAS_OFFICE1214_IN_MAILER, __HEXHASHWORD_S2EU, __LONG_HEX_URI,
+  __RAND_HEADER, __SUBJECT_UTF8_B_ENCODED, unsubscribe URI to IP addr.,
+  advance_fee, lotsa_money, exploratory tagged-URI, pumpdump, optout,
+  moving money rules (very short 419 fraud spams), new phrase rules,
+  PDFinfo, protect some test rules with can(perl_min_version_5010000),
+  test rules to detect SPF queries that produce error results,
+  various unsubscribe rules, freshen and extend phishing rules,
+  added missing eval:check_uri_host_in_* rules, check for references
+  to compromised WordPress sites, other wordpress rules, some Cyrillic
+  and Hebrew obfuscations that were overlooked, avoid Japanese-language
+  false-positives, added 20_freemail_mailcom_domains.cf
+
+Some rules were removed or disabled, either because of ineffectiveness,
+or duplication with other rules, or due to false positives. Some of these
+are (in no particular order):
+
+  DNS_FROM_AHBL_RHSBL, DOS_FAKE_SQUIRREL, FSL_MISSP_REPLYTO,
+  KHOP_SPAMDB_SUBJ, MSGID_MULTIPLE_AT, SMF_FM_FORGED_REPLYTO,
+  SUBJECT_UNNEEDED_ENCODING, URIBL_DBL_REDIR, XPRIO_RPATH_NULL,
+  defunct AHBL rules, obsoleted FSL rules from 50_scores.cf,
+  obsoleted rules in 00_FVGT_File001.cf, perl-5.8-hostile rule,
+  removed duplicate domains in 20_freemail_domains.cf
+
+
+Other updates
+-------------
+
+Documentation was updated or enhanced. Project's testing and evaluation
+hosts and tools running in the ASF infrastructure were updated.
+
+A list of top-level domains in registrar boundaries was updated
+several times (cw, sx, club, com.us, util_rb_2tld, ...). TLD updating
+process was improved, tests to account for new TLDs and changes were
+updated, TLD update in build/README was clarified for SA releases,
+RFC 2606: Changed invalid TLD used in testing to .invalid
+
+
+Improvements
+------------
+
+Bug 7150: Allow scoped IP address in the dns_server config option
+
+Util::TinyRedis: allow a scoped / link-local IP address specification
+(avoid current limitation in IO::Socket::IP [rt.cpan.org #89608])
+
+SPF max DNS terms was raised to 15 to accomodate eBay nested records.
+
+Bug 7136: added has_check_for_spf_errors and if can() encapsulation
+
+Bug 7128: DCC plugin uses IO::Socket::INET6 instead of IO::Socket::IP
+
+Plugin::TextCat minor debugging improvement
+
+Bug 7099: Adding tags SENDERDOMAIN and AUTHORDOMAIN
+
+Plugin/AskDNS: additional debug logging
+
+Bug 7068: rule and code to counts unicode entities
+
+Bug 7052: moved Net::DNS::Nameserver to optional since it is just
+used in make test
+
+clean up on httpd.conf
+
+more informative dns debugging output
+
+added new install docs to MANIFEST
 
 
 Optimizations
 -------------
+
+MS::PerMsgStatus::create_fulltext_tmpfile(): speed up writing large
+temporary files by using a larger buffer and avoiding PerlIO
+
+small optimization: avoid unnecessary copying when reading from a
+temporary file in SA::Message::Node
+
+changed fillfactor for postgres bayes/awl tables to optimize for updates
+
+optimize a small hotspot in DnsResolver.pm
+
+use faster utf8::encode instead of Encode::encode_utf8
+
+
+Notable bug fixes
+-----------------
+
+Adjusted for Yahoo! using subnet 238.0.0./8 in Received headers.
+
+Bug 6751: Certain Character Sets can use alternate characters for period
+that then bypass DNSBL Checks
+
+Bug 7153: leak of URILocalBL.pm to stderr
+
+Bug 7143: use eval instead of regex to fix MakeMaker version
+
+Bug 7148: small getopt.c change
+
+Node::_normalize : workaround for Encode::decode taint laundering bug
+[rt.cpan.org #84879]
+
+Bug 7141: Bayes truncates ('skip') long tokens on bytes, should it count
+characters instead?
+
+Bug 7140: DKIM/SPF Insecure dependency in require
+
+Bug 7130: Bayes tokenization mangles/chops many UTF-8 words with accented,
+Cyrillic etc. letters - inappropriately assuming ISO-8859 encoding
+
+Bug 7130 - disable TOKENIZE_LONG_8BIT_SEQS_AS_TUPLES, seems redundant
+and useless with TOKENIZE_LONG_8BIT_SEQS_AS_UTF8_CHARS, e.g. turns
+each Cyrillic letter of longer words into an individual token
+
+Bug 7133: Revisiting Bug 4046 - HTML::Parser: Parsing of undecoded UTF-8
+will give garbage when decoding entities
+
+fixed missing case for permerror in From SPF
+
+Bug 7136: modified 25_spf.t and reverted reversion in SpamAssassin.pm
+from previous rc1 work
+
+Bug 7135: Bayes tokenizer 'arbitrarily' breaks multibyte CJK UTF-8
+characters into digrams instead of breaking on UTF-8 character boundaries
+
+Bug 7126: Incorrect character set detections by normalize_charset
+
+Bug 7125: MIME parsing of nested messages must not treat parts like
+delivery-status, disposition-notification as message/rfc822
+
+Bug 6953: spamd: could not create IO::Socket::INET6 socket on [::]:783:
+Address already in use
+
+Bug 7106: Failed IPv6 port create blocks good IPv4 port create
+
+Bug 7124: DKIM: RFC 6376 - Signers MUST use RSA keys of at least 1024 bits
+
+Bug 7120: Perl Critic exemption
+Bug 7119: Perl::Critic: ControlStructures::ProhibitMutatingListFunctions
+reverted critic recommendations to fix undef warning, Removed undef
+returns for perlcritic test
+
+Bug 5399: fix MS::Util::parse_content_type, dots are allowed in
+Content-Type (a fix to Bug 5399 was too strict)
+
+fix SA::Util::qp_decode for compliance with RFC 2045 (trailing whitespace
+must be deleted before decoding)
+
+Bug 7063: removing sawampersand thanks to Philip Prindeville
+
+Bug 7107: add "perl_min_version_5010000" for preprocessor conditionals
+
+Bug 7111: sa-update: wrong exit code with --checkonly (does not find
+new versions)
+
+Bug 7030: BayesStore/Redis.pm: authentication doesn't work with
+Redis 2.6 and earlier
+
+Bug 7103: Bad wget option causes first fetch of third-party rules
+channel to fail
+
+fixed uribl matching on email addresses with commas after them
+
+Disabled synchronous commit for Postgres Bayes store
+
+Bug 6919: Added 'dedicated' to list of static IP indicators for RDNS_DYNAMIC
+
+Fixed POD error caused by trailing whitespace
+
+hacked PHP URI tuning
+
+added askdns to known debug facilities
+
+expansion of replace tags for more characters
+
+avoid a perl 5.21 warning: Negative repeat count does nothing
+
+More UTF-8 Unicode obfuscation variants
+
+removed non AV/filter headers
+
+Bug 7087: added parse_dkim_uris option
+
+Set headers which may provide inappropriate cues to the Bayesian classifier
+
+Plugin/HeaderEval: header field names are case-insensitive
+
+Bug 7074, sa-update: improved error reporting of a failed spawned process
+
+db_id not initialized, || -> ||=
+
+renamed __freemail_hdr_replyto to __smf_freemail_hdr_replyto avoiding
+name collision
+
+changed bayes_auto_learn_threshold_nonspam -1.0
+
+MS::Plugin::AskDNS - avoid warning on undef in eq when a DNS response
+has no answer section
+
+Bug 7079: hide the Geo::IP warning
+
+Bug 7078: Mail::Spamassassin::Message::Node::header() error - normalize
+line endings in header, not just in body
+
+Bug 7060: allow excluding domains instead of individual hosts
+
+Cleaned up documentation and removed rule name parameter that was not
+needed on the rule
+
+avoid warning: Use of uninitialized value $pgm in concatenation
+Plugin/DCC.pm, line 915
+
+Bug 7070: added rbl_timeout_min so that t_min for rbl_timeout applies
+even without a zone
+
+Bug 7065: Debug Mode breaks Bayes but only if DBM storage is used
+
+Added code for check_for_ascii_text_illegal in MIMEEval and added
+test rule to sandbox
+
+Add Cyrillic and Armenian glyphs in UTF-8 encoding to single-letter
+replace tags
+
+Bug 7034: Redis.pm leaks file descriptors when preforking - avoid
+creating a circular data structure through a closure
+
+allow an "=" char in a redis password
+
+Added verbose to sync to sa2 zones server
+
+Added URILocalBL.pm plugin to trunk for testing, updating MANIFEST
+and v341.pre file as well as optional dependencies with Net::CIDR::Lite
+and Geo::IP
+
+fix DNS resolving with Net::DNS 0.76
+
+Changes in Spamhaus DBL DNSBL return codes as per
+  http://www.spamhaus.org/news/article/713/
+
+Fixing issues with extract_to_rsync_dir
+
+Having issues with this sandbox rule failing make test
+TEST_FILES="t/basic_lint.t t/basic_lint_without_sandbox.t t/basic_meta.t"
+
+fixed escaping where perl called from bash using bash variables for
+tick_zone_serial
+
+fixed the interpreter to reference /bin/bash instead of /usr/bin/bash
+
+Fixing the masses Makefile for pgapack for linux on new spamassassin-vm
+centos box
+
+Bug 7052: Fix for Net::DNS::Nameserver dependency on CentOS systems
+
+fix to install v341.pre file
+
+Bug 7050: fix _DATE_ Template Tag.  Use anonymous sub, calling
+Util::time_to_rfc822_date() explicitly without any argument
+
+Fix for newline collapse harming excessive whitespace rules
+
+Added max_connections=100 as a safety feature
+
+fixed $self
+
+added get_names_of_tests_hit_with_scores_hash,
+get_names_of_tests_hit_with_scores functions to PMS along
+with trivial fixing of triggered being misspelled.
+
+uridnsbl_skip_domain vk.com (the russian facebook)
+
+Fix wrong plugin in IF
+
+improvements for disabled plugins
+
+Bug 7032: Adding tflag for noawl thanks to Nuno Fernandes
+
+If a subrule is in an if block, ensure it appears in an else block to
+avoid breaking dependent rules. Fix some rules depending on subrules
+in if blocks in other sandboxes so they don't break if the conditional
+check suppresses that subrule.
+
+Bug 6994: small change for systems with ACLs in testing
+
+fixed SQLBasedAddrList re-learning
+
+frequently seen domains on ns1.msedge.net
+
+Added windows-1251 to likely FP list
+
+Bug 7024: check_rbl_from_host/check_rbl_from_domain/check_rbl_envfrom
+did not support the subtest functionality.  Fixed and removed
+has_check_rbl_from_domain as pointless now.
+
+Bug 7018: Misspelling on Razor Configuration item
+
+Bug 7005: sa_compile.t test failures with MacPorts' perl - safe quoting
+
+use Config to get path when non-standard sitebin is set
+
+Bug 7015: fixed untaint var bug
+
+Bug 7013: small fix for  bayes_auto_learn_on  not working with BAYES_999
+
+Bug 7000: dnsbl_subtests.t hangs on Windows
+
+Bug 7008: fixed CPAN Parsing
+
+Added eval for testing a quoted printable ratio for spaminess
+
+Fix SA version check
+
+Bug 7004: Test suite fails when using FreeBSD's 'script' utility
+
 
 Downloading and availability
 ----------------------------
