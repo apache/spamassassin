@@ -30,6 +30,9 @@ New configuration options
 Mail::SpamAssassin::Conf:
   bayes_token_sources  (default: header visible invisible uri)
 
+Bug 7087: added parse_dkim_uris option
+  parse_dkim_uris ( 0 | 1 ) (default: 0)
+
 
 New plugins
 -----------
@@ -38,6 +41,7 @@ New plugin (optional):
 # loadplugin Mail::SpamAssassin::Plugin::TxRep
 # loadplugin Mail::SpamAssassin::Plugin::PDFInfo  ???
 
+URILocalBL.pm ???
 
 Rule updates
 ------------
@@ -92,7 +96,7 @@ A list of top-level domains in registrar boundaries was updated
 several times (cw, sx, club, com.us, util_rb_2tld, ...). TLD updating
 process was improved, tests to account for new TLDs and changes were
 updated, TLD update in build/README was clarified for SA releases,
-RFC 2606: Changed invalid TLD used in testing to .invalid
+RFC 2606: invalid TLD used in testing was changed to '.invalid' .
 
 
 Improvements
@@ -103,44 +107,53 @@ Bug 7150: Allow scoped IP address in the dns_server config option
 Util::TinyRedis: allow a scoped / link-local IP address specification
 (avoid current limitation in IO::Socket::IP [rt.cpan.org #89608])
 
-SPF max DNS terms was raised to 15 to accomodate eBay nested records.
+SPF max DNS terms was raised to 15 to accomodate for eBay SPF records
 
 Bug 7136: added has_check_for_spf_errors and if can() encapsulation
 
-Bug 7128: DCC plugin uses IO::Socket::INET6 instead of IO::Socket::IP
-
-Plugin::TextCat minor debugging improvement
+Bug 7128: DCC plugin now uses IO::Socket::INET6 instead of IO::Socket::IP
 
 Bug 7099: Adding tags SENDERDOMAIN and AUTHORDOMAIN
 
-Plugin/AskDNS: additional debug logging
+Bug 7068: added rule and code to counts Unicode entities
 
-Bug 7068: rule and code to counts unicode entities
-
-Bug 7052: moved Net::DNS::Nameserver to optional since it is just
-used in make test
+Bug 7052: moved module Net::DNS::Nameserver to optional since it is
+just used in make test
 
 clean up on httpd.conf
+
+minor debugging improvement in Plugin::TextCat 
+
+Plugin/AskDNS: additional debug logging
+
+Bug 7107: added "perl_min_version_5010000" for preprocessor conditionals
+
+Cleaned up documentation and removed rule name parameter that was not
+needed on the rule
 
 more informative dns debugging output
 
 added new install docs to MANIFEST
 
+improvements for disabled plugins
+
 
 Optimizations
 -------------
 
-MS::PerMsgStatus::create_fulltext_tmpfile(): speed up writing large
-temporary files by using a larger buffer and avoiding PerlIO
+writing speed of large temporary files was improved by using a larger
+buffer and avoiding PerlIO - MS::PerMsgStatus::create_fulltext_tmpfile()
 
-small optimization: avoid unnecessary copying when reading from a
-temporary file in SA::Message::Node
+unnecessary copying was avoided when reading from a temporary file
+in SA::Message::Node (small optimization)
 
 changed fillfactor for postgres bayes/awl tables to optimize for updates
 
-optimize a small hotspot in DnsResolver.pm
+a small hotspot in DnsResolver.pm was optimized
 
 use faster utf8::encode instead of Encode::encode_utf8
+
+disabled synchronous commit for Postgres Bayes store
 
 
 Notable bug fixes
@@ -148,27 +161,27 @@ Notable bug fixes
 
 Adjusted for Yahoo! using subnet 238.0.0./8 in Received headers.
 
-Bug 6751: Certain Character Sets can use alternate characters for period
-that then bypass DNSBL Checks
+Bug 6751: certain character sets can use alternate characters for
+a period and bypass DNSBL checks
 
-Bug 7153: leak of URILocalBL.pm to stderr
+Bug 7153: prevent leaking of messages to stderr in URILocalBL.pm
 
 Bug 7143: use eval instead of regex to fix MakeMaker version
 
 Bug 7148: small getopt.c change
 
-Node::_normalize : workaround for Encode::decode taint laundering bug
-[rt.cpan.org #84879]
+added a workaround to Node::_normalize for an Encode::decode taint
+laundering bug [rt.cpan.org #84879]
 
-Bug 7141: Bayes truncates ('skip') long tokens on bytes, should it count
-characters instead?
+Bug 7141: Bayes truncates ('skip') long tokens on bytes, should it
+count characters instead?
 
-Bug 7140: DKIM/SPF Insecure dependency in require
+Bug 7140: fixed DKIM/SPF Insecure dependency in require
 
 Bug 7130: Bayes tokenization mangles/chops many UTF-8 words with accented,
 Cyrillic etc. letters - inappropriately assuming ISO-8859 encoding
 
-Bug 7130 - disable TOKENIZE_LONG_8BIT_SEQS_AS_TUPLES, seems redundant
+Bug 7130: disable TOKENIZE_LONG_8BIT_SEQS_AS_TUPLES, seems redundant
 and useless with TOKENIZE_LONG_8BIT_SEQS_AS_UTF8_CHARS, e.g. turns
 each Cyrillic letter of longer words into an individual token
 
@@ -186,12 +199,12 @@ characters into digrams instead of breaking on UTF-8 character boundaries
 Bug 7126: Incorrect character set detections by normalize_charset
 
 Bug 7125: MIME parsing of nested messages must not treat parts like
-delivery-status, disposition-notification as message/rfc822
+delivery-status or disposition-notification as message/rfc822
 
-Bug 6953: spamd: could not create IO::Socket::INET6 socket on [::]:783:
-Address already in use
+Bug 6953: spamd: could not create IO::Socket::INET6 socket
+on [::]:783: Address already in use
 
-Bug 7106: Failed IPv6 port create blocks good IPv4 port create
+Bug 7106: failed IPv6 socket creation blocks creating a good IPv4 socket
 
 Bug 7124: DKIM: RFC 6376 - Signers MUST use RSA keys of at least 1024 bits
 
@@ -203,12 +216,10 @@ returns for perlcritic test
 Bug 5399: fix MS::Util::parse_content_type, dots are allowed in
 Content-Type (a fix to Bug 5399 was too strict)
 
-fix SA::Util::qp_decode for compliance with RFC 2045 (trailing whitespace
-must be deleted before decoding)
+fixed SA::Util::qp_decode for compliance with RFC 2045 (trailing
+whitespace must be deleted before decoding)
 
-Bug 7063: removing sawampersand thanks to Philip Prindeville
-
-Bug 7107: add "perl_min_version_5010000" for preprocessor conditionals
+Bug 7063: removing sawampersand
 
 Bug 7111: sa-update: wrong exit code with --checkonly (does not find
 new versions)
@@ -216,12 +227,10 @@ new versions)
 Bug 7030: BayesStore/Redis.pm: authentication doesn't work with
 Redis 2.6 and earlier
 
-Bug 7103: Bad wget option causes first fetch of third-party rules
+Bug 7103: bad wget option causes first fetch of third-party rules
 channel to fail
 
 fixed uribl matching on email addresses with commas after them
-
-Disabled synchronous commit for Postgres Bayes store
 
 Bug 6919: Added 'dedicated' to list of static IP indicators for RDNS_DYNAMIC
 
@@ -235,11 +244,9 @@ expansion of replace tags for more characters
 
 avoid a perl 5.21 warning: Negative repeat count does nothing
 
-More UTF-8 Unicode obfuscation variants
+added more UTF-8 Unicode obfuscation variants
 
 removed non AV/filter headers
-
-Bug 7087: added parse_dkim_uris option
 
 Set headers which may provide inappropriate cues to the Bayesian classifier
 
@@ -264,21 +271,18 @@ line endings in header, not just in body
 
 Bug 7060: allow excluding domains instead of individual hosts
 
-Cleaned up documentation and removed rule name parameter that was not
-needed on the rule
-
-avoid warning: Use of uninitialized value $pgm in concatenation
+avoid a warning: Use of uninitialized value $pgm in concatenation
 Plugin/DCC.pm, line 915
 
 Bug 7070: added rbl_timeout_min so that t_min for rbl_timeout applies
 even without a zone
 
-Bug 7065: Debug Mode breaks Bayes but only if DBM storage is used
+Bug 7065: debug mode breaks Bayes but only if DBM storage is used
 
-Added code for check_for_ascii_text_illegal in MIMEEval and added
+added code for check_for_ascii_text_illegal in MIMEEval and added
 test rule to sandbox
 
-Add Cyrillic and Armenian glyphs in UTF-8 encoding to single-letter
+added Cyrillic and Armenian glyphs in UTF-8 encoding to single-letter
 replace tags
 
 Bug 7034: Redis.pm leaks file descriptors when preforking - avoid
@@ -286,9 +290,9 @@ creating a circular data structure through a closure
 
 allow an "=" char in a redis password
 
-Added verbose to sync to sa2 zones server
+added verbose to sync to sa2 zones server
 
-Added URILocalBL.pm plugin to trunk for testing, updating MANIFEST
+added URILocalBL.pm plugin to trunk for testing, updating MANIFEST
 and v341.pre file as well as optional dependencies with Net::CIDR::Lite
 and Geo::IP
 
@@ -314,12 +318,12 @@ Bug 7052: Fix for Net::DNS::Nameserver dependency on CentOS systems
 
 fix to install v341.pre file
 
-Bug 7050: fix _DATE_ Template Tag.  Use anonymous sub, calling
-Util::time_to_rfc822_date() explicitly without any argument
+Bug 7050: fixed _DATE_ template tag by use of an anonymous sub,
+calling Util::time_to_rfc822_date() explicitly without any argument
 
-Fix for newline collapse harming excessive whitespace rules
+fixed newline collapse harming excessive whitespace rules
 
-Added max_connections=100 as a safety feature
+added max_connections=100 as a safety feature
 
 fixed $self
 
@@ -329,11 +333,9 @@ with trivial fixing of triggered being misspelled.
 
 uridnsbl_skip_domain vk.com (the russian facebook)
 
-Fix wrong plugin in IF
+fixed wrong plugin in IF
 
-improvements for disabled plugins
-
-Bug 7032: Adding tflag for noawl thanks to Nuno Fernandes
+Bug 7032: added tflag for noawl
 
 If a subrule is in an if block, ensure it appears in an else block to
 avoid breaking dependent rules. Fix some rules depending on subrules
@@ -346,13 +348,13 @@ fixed SQLBasedAddrList re-learning
 
 frequently seen domains on ns1.msedge.net
 
-Added windows-1251 to likely FP list
+added windows-1251 to likely FP list
 
 Bug 7024: check_rbl_from_host/check_rbl_from_domain/check_rbl_envfrom
 did not support the subtest functionality.  Fixed and removed
 has_check_rbl_from_domain as pointless now.
 
-Bug 7018: Misspelling on Razor Configuration item
+Bug 7018: fixed misspelling on Razor configuration item
 
 Bug 7005: sa_compile.t test failures with MacPorts' perl - safe quoting
 
@@ -360,15 +362,16 @@ use Config to get path when non-standard sitebin is set
 
 Bug 7015: fixed untaint var bug
 
-Bug 7013: small fix for  bayes_auto_learn_on  not working with BAYES_999
+Bug 7013: added a small fix for bayes_auto_learn_on not working
+with BAYES_999
 
 Bug 7000: dnsbl_subtests.t hangs on Windows
 
 Bug 7008: fixed CPAN Parsing
 
-Added eval for testing a quoted printable ratio for spaminess
+added eval for testing a quoted printable ratio for spaminess
 
-Fix SA version check
+fixed SA version check
 
 Bug 7004: Test suite fails when using FreeBSD's 'script' utility
 
