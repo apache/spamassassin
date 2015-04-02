@@ -27,6 +27,8 @@ Mail::SpamAssassin::Plugin::PDFInfo - PDFInfo Plugin for SpamAssassin
 
 This plugin helps detected spam using attached PDF files
 
+=over 4
+
 =item See "Usage:" below - more documentation see 20_pdfinfo.cf
 
  Original info kept for history.
@@ -131,6 +133,9 @@ This plugin helps detected spam using attached PDF files
         bytes: maximum byte count to allow and still consider it empty
 
   NOTE: See the ruleset for more examples that are not documented here.
+
+=back
+
 =cut
 
 # -------------------------------------------------------

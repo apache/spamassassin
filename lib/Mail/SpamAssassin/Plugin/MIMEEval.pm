@@ -69,6 +69,7 @@ sub are_more_high_bits_set {
 
   ($numlos <= $numhis && $numhis > 3);
 }
+=over 4
 
 =item has_check_for_ascii_text_illegal
 
@@ -479,6 +480,8 @@ sub has_check_qp_ratio { 1 }
 
 Takes a min ratio to use in eval to see if there is an spamminess to the ratio of 
 quoted printable to total bytes in an email.
+
+=back
 
 =cut
 sub check_qp_ratio {

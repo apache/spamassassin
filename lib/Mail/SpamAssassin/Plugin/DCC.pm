@@ -395,6 +395,8 @@ The default is C<undef>.
 Report messages with total scores this much larger than the
 SpamAssassin spam threshold to DCC as spam.
 
+=back
+
 =cut
 
   push (@cmds, {
