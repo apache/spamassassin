@@ -80,6 +80,7 @@ $SIG{PIPE} = 'IGNORE';
   'force-expire' => 0,
   'use-ignores'  => 0,
   'nosync'       => 0,
+  'quiet'        => 0,
   'cf'           => []
 );
 
@@ -95,6 +96,7 @@ GetOptions(
   'sync'        => \$synconly,
   'rebuild'     => sub { $synconly = 1; warn "The --rebuild option has been deprecated.  Please use --sync instead.\n" },
 
+  'q|quiet'     => \$opt{'quiet'},
   'username|u=s'    => \$opt{'username'},
   'configpath|config-file|config-dir|c|C=s' => \$opt{'configpath'},
   'prefspath|prefs-file|p=s'                => \$opt{'prefspath'},
@@ -356,7 +358,7 @@ $spamtest->{bayes_scanner}{use_ignores} = $opt{'use-ignores'};
 if ($synconly) {
   $spamtest->rebuild_learner_caches(
     {
-      verbose  => 1,
+      verbose  => !$opt{'quiet'},
       showdots => $opt{'showdots'}
     }
   );
@@ -480,7 +482,8 @@ eval {
   $progress->final() if ($opt{progress} && $progress);
 
   my $phrase = defined $forget ? "Forgot" : "Learned";
-  print "$phrase tokens from $learnedcount message(s) ($messagecount message(s) examined)\n";
+  print "$phrase tokens from $learnedcount message(s) ($messagecount message(s) examined)\n"
+    if !$opt{'quiet'};
 
   # If we needed to make a tempfile, go delete it.
   if (defined $tempfile) {
