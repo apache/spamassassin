@@ -325,6 +325,8 @@ sub check_rbl_from_host {
 
 This checks all the from addrs domain names as an alternate to check_rbl_from_host.  As of v3.4.1, it has been improved to include a subtest for a specific octet.
 
+=back
+
 =cut
 sub check_rbl_from_domain {
   my ($self, $pms, $rule, $set, $rbl_server, $subtest) = @_;
