@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus dwarren grenier jarif kam-ninja kpg-core mmiroslaw-ham mmiroslaw-spam zmi; day 2: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus dwarren grenier jarif kam-ninja kpg-core llanga mmiroslaw-ham mmiroslaw-spam zmi; day 3: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus dwarren grenier jarif kam-ninja kpg-core llanga zmi
+# with results from: day 1: axb-8mile bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus dwarren grenier jarif kam-ninja kpg-core mmiroslaw-ham mmiroslaw-spam zmi; day 2: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus dwarren grenier jarif kam-ninja kpg-core llanga mmiroslaw-ham mmiroslaw-spam zmi; day 3: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus dwarren grenier jarif kam-ninja kpg-core llanga mmiroslaw-ham mmiroslaw-spam zmi
 
 # tflags publish
 AC_BR_BONANZA
@@ -162,9 +162,6 @@ COMPENSATION
 
 # tflags publish
 CORRUPT_FROM_LINE_IN_HDRS
-
-# good enough
-CURR_PRICE
 
 # good enough
 DEAR_BENEFICIARY
@@ -416,13 +413,7 @@ HEADER_HOST_IN_WHITELIST
 HEAD_LONG
 
 # good enough
-HELO_LH_HOME
-
-# good enough
 HELO_LOCALHOST
-
-# good enough
-HELO_MISC_IP
 
 # tflags publish
 HEXHASH_WORD
@@ -457,6 +448,9 @@ HK_SCAM_N3
 # good enough
 HK_SCAM_N8
 
+# good enough
+HK_SPAMMY_FILENAME
+
 # tflags userconf
 HTML_CHARSET_FARAWAY
 
@@ -481,9 +475,6 @@ LONG_HEX_URI
 # tflags publish
 LONG_IMG_URI
 
-# good enough
-LONG_TERM_PRICE
-
 # tflags publish
 LOTS_OF_MONEY
 
@@ -498,9 +489,6 @@ LOTTO_DEPT
 
 # tflags publish
 LUCRATIVE
-
-# good enough
-MAILER_EQ_ORG
 
 # tflags publish
 MANY_SPAN_IN_TEXT
@@ -540,9 +528,6 @@ MONEY_FROM_41
 
 # good enough
 MONEY_FROM_MISSP
-
-# good enough
-MONEY_LOTTERY
 
 # good enough
 MSGID_NOFQDN1
@@ -832,9 +817,6 @@ SERGIO_SUBJECT_VIAGRA01
 # good enough
 SHARE_50_50
 
-# good enough
-SHORT_TERM_PRICE
-
 # tflags publish
 SINGLETS_LOW_CONTRAST
 
@@ -947,34 +929,34 @@ TVD_VISIT_PHARMA
 TW_GIBBERISH_MANY
 
 # good enough
-ACH_CANCELLED
-
-# good enough
 BIGNUM_EMAILS
 
 # good enough
 BODY_SINGLE_WORD
 
 # good enough
-FSL_HELO_FIREWALL
+DATE_IN_FUTURE_Q_PLUS
+
+# good enough
+FILL_THIS_FORM_FRAUD_PHISH
+
+# good enough
+HK_GOLDDUST
 
 # good enough
 HK_NAME_FM_DR
 
 # good enough
-LIST_PARTIAL
-
-# good enough
-OBFU_HTML_ATTACH
-
-# good enough
-RP_MATCHES_RCVD
+HK_SCAM_N13
 
 # good enough
 TVD_PH_BODY_META
 
 # good enough
 XFER_LOTSA_MONEY
+
+# good enough
+XPRIO
 
 # tflags publish
 UC_GIBBERISH_OBFU
