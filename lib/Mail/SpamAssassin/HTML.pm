@@ -608,7 +608,7 @@ sub html_tests {
   my ($self, $tag, $attr, $num) = @_;
 
   if ($tag eq "font" && exists $attr->{face}) {
-    if ($attr->{face} !~ /^[a-z][a-z -]*[a-z](?:,\s*[a-z][a-z -]*[a-z])*$/i) {
+    if ($attr->{face} !~ /^[a-z ][a-z -]*[a-z](?:,\s*[a-z][a-z -]*[a-z])*$/i) {
       $self->put_results(font_face_bad => 1);
     }
   }
