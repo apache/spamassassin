@@ -448,9 +448,10 @@ meta           FROM_IN_TO_AND_SUBJ  (__TO_EQ_FROM && __SUBJ_HAS_FROM_1)
 describe       FROM_IN_TO_AND_SUBJ  From address is in To and Subject
 tflags         FROM_IN_TO_AND_SUBJ  publish
 
-header         __SUBJ_HAS_TO_1      ALL =~ /\nTo:\s+(?:[^\n<]{0,80}<)?([^\n\s>,]+)>?\n(?:[^\n]{1,200}\n)*Subject:\s+[^\n]{0,100}\1[>,\s\n]/ism
-header         __SUBJ_HAS_TO_2      ALL =~ /\nReceived:[^\n]{0,200} for <?([^\n\s>;]+)>?;(?:[^\n]+\n)*Subject:\s+[^\n]{0,100}\1[>,\s\n]/ism
-meta           __TO_IN_SUBJ         (__SUBJ_HAS_TO_1 || __SUBJ_HAS_TO_2)
+header         __SUBJ_HAS_TO_1      ALL =~ /\nTo:\s+(?:[^\n<]{0,80}<)?([^\n\s>,]+)>?\n(?:[^\n]{1,200}\n)*Subject:\s+[^\n]{0,100}\1[^a-z0-9]/ism
+header         __SUBJ_HAS_TO_2      ALL =~ /\nReceived:[^\n]{0,200} for <?([^\n\s>;]+)>?;(?:[^\n]+\n)*Subject:\s+[^\n]{0,100}\1[^a-z0-9]/ism
+header         __SUBJ_HAS_TO_3      ALL =~ /\nSubject:(?=[^\n]{0,200}@)[^\n]{0,200}([a-z][a-z0-9_.]{3,80}@(?:[a-z0-9_]{1,80}\.){1,4}[a-z]{2,30})(?:[^\n]+\n)*To:\s+[^\n]{0,100}\1[^a-z0-9.]/ism
+meta           __TO_IN_SUBJ         (__SUBJ_HAS_TO_1 || __SUBJ_HAS_TO_2 || __SUBJ_HAS_TO_3)
 meta           TO_IN_SUBJ           __TO_IN_SUBJ && !__VIA_ML && !MISSING_MIMEOLE && !__THREAD_INDEX_GOOD && !__FSL_RELAY_GOOGLE && !__LCL__ENV_AND_HDR_FROM_MATCH && !__HS_SUBJ_RE_FW
 describe       TO_IN_SUBJ           To address is in Subject
 tflags         TO_IN_SUBJ           publish
