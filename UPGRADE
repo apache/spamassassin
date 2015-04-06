@@ -11,6 +11,14 @@ Note for Users Upgrading to SpamAssassin 3.4.1
   For more detailed information and more configuration options, consult the
   documentation in Mail::SpamAssassin::Plugin::TxRep.
 
+- The $VALID_TLDS_RE global in registrar boundaries is deprecated but kept for 
+  third-party plugin compatibility.  It will become increasingly out of date
+  and may be removed in a future release. 
+
+  See lib/Mail/SpamAssassin/Plugin/FreeMail.pm for an example of the new way
+  to obtain a valid list of TLDs, i.e. 
+
+    $self->{main}->{registryboundaries}->{valid_tlds_re} 
 
 Note for Users Upgrading to SpamAssassin 3.4.0
 ----------------------------------------------
