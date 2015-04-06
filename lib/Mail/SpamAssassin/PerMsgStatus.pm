@@ -60,7 +60,6 @@ use Mail::SpamAssassin::Constants qw(:sa);
 use Mail::SpamAssassin::AsyncLoop;
 use Mail::SpamAssassin::Conf;
 use Mail::SpamAssassin::Util qw(untaint_var uri_list_canonicalize);
-use Mail::SpamAssassin::Util::RegistrarBoundaries;
 use Mail::SpamAssassin::Timeout;
 use Mail::SpamAssassin::Logger;
 
@@ -2108,30 +2107,39 @@ sub get {
 #
 # bug 4522: ISO2022 format mail, most commonly Japanese SHIFT-JIS, inserts a three character escape sequence  ESC ( .
 
-# a hybrid of tbird and oe's  version of uri parsing
-my $tbirdstartdelim = '><"\'`,{[(|\s'  . "\x1b";  # The \x1b as per bug 4522
-my $iso2022shift = "\x1b" . '\(.';  # bug 4522
-my $tbirdenddelim = '><"`}\]{[|\s' . "\x1b";  # The \x1b as per bug 4522
-my $oeignoreatend = '-~!@#^&*()_+=:;\'?,.';
-my $nonASCII    = '\x80-\xff';
+sub _tbirdurire {
+  my ($self) = @_;
 
-# bug 7100: we allow a comma to delimit the end of an email address because it will never appear in a domain name, and
-# it's a common thing to find in text
-my $tbirdenddelimemail = $tbirdenddelim . ',(\'' . $nonASCII;  # tbird ignores non-ASCII mail addresses for now, until RFC changes
-my $tbirdenddelimplusat = $tbirdenddelimemail . '@';
+  # Cached?
+  return $self->{tbirdurire} if $self->{tbirdurire};
 
-# valid TLDs
-my $tldsRE = $Mail::SpamAssassin::Util::RegistrarBoundaries::VALID_TLDS_RE;
+  # a hybrid of tbird and oe's  version of uri parsing
+  my $tbirdstartdelim = '><"\'`,{[(|\s'  . "\x1b";  # The \x1b as per bug 4522
+  my $iso2022shift = "\x1b" . '\(.';  # bug 4522
+  my $tbirdenddelim = '><"`}\]{[|\s' . "\x1b";  # The \x1b as per bug 4522
+  my $nonASCII    = '\x80-\xff';
 
-# knownscheme regexp looks for either a https?: or ftp: scheme, or www\d*\. or ftp\. prefix, i.e., likely to start a URL
-# schemeless regexp looks for a valid TLD at the end of what may be a FQDN, followed by optional ., optional :portnum, optional /rest_of_uri
-my $urischemeless = qr/[a-z\d][a-z\d._-]{0,251}\.${tldsRE}\.?(?::\d{1,5})?(?:\/[^$tbirdenddelim]{1,251})?/io;
-my $uriknownscheme = qr/(?:(?:(?:(?:https?)|(?:ftp)):(?:\/\/)?)|(?:(?:www\d{0,2}|ftp)\.))[^$tbirdenddelim]{1,251}/io;
-my $urimailscheme = qr/(?:mailto:)?[^$tbirdenddelimplusat]{1,251}@[^$tbirdenddelimemail]{1,251}/io;
-my $tbirdurire = qr/(?:\b|(?<=$iso2022shift)|(?<=[$tbirdstartdelim]))
-                    (?:(?:($uriknownscheme)(?=(?:[$tbirdenddelim]|\z))) |
-                       (?:($urimailscheme)(?=(?:[$tbirdenddelimemail]|\z))) |
-                       (?:\b($urischemeless)(?=(?:[$tbirdenddelim]|\z))))/xo;
+  # bug 7100: we allow a comma to delimit the end of an email address because it will never appear in a domain name, and
+  # it's a common thing to find in text
+  my $tbirdenddelimemail = $tbirdenddelim . ',(\'' . $nonASCII;  # tbird ignores non-ASCII mail addresses for now, until RFC changes
+  my $tbirdenddelimplusat = $tbirdenddelimemail . '@';
+
+  # valid TLDs
+  my $tldsRE = $self->{main}->{registryboundaries}->{valid_tlds_re};
+
+  # knownscheme regexp looks for either a https?: or ftp: scheme, or www\d*\. or ftp\. prefix, i.e., likely to start a URL
+  # schemeless regexp looks for a valid TLD at the end of what may be a FQDN, followed by optional ., optional :portnum, optional /rest_of_uri
+  my $urischemeless = qr/[a-z\d][a-z\d._-]{0,251}\.${tldsRE}\.?(?::\d{1,5})?(?:\/[^$tbirdenddelim]{1,251})?/io;
+  my $uriknownscheme = qr/(?:(?:(?:(?:https?)|(?:ftp)):(?:\/\/)?)|(?:(?:www\d{0,2}|ftp)\.))[^$tbirdenddelim]{1,251}/io;
+  my $urimailscheme = qr/(?:mailto:)?[^$tbirdenddelimplusat]{1,251}@[^$tbirdenddelimemail]{1,251}/io;
+
+  $self->{tbirdurire} = qr/(?:\b|(?<=$iso2022shift)|(?<=[$tbirdstartdelim]))
+                        (?:(?:($uriknownscheme)(?=(?:[$tbirdenddelim]|\z))) |
+                        (?:($urimailscheme)(?=(?:[$tbirdenddelimemail]|\z))) |
+                        (?:\b($urischemeless)(?=(?:[$tbirdenddelim]|\z))))/xo;
+
+  return $self->{tbirdurire};
+}
 
 =item $status->get_uri_list ()
 
@@ -2265,7 +2273,7 @@ sub get_uri_detail_list {
     $info->{cleaned} = \@tmp;
 
     foreach (@tmp) {
-      my($domain,$host) = Mail::SpamAssassin::Util::uri_to_domain($_);
+      my($domain,$host) = $self->{main}->{registryboundaries}->uri_to_domain($_);
       if (defined $host && $host ne '' && !$info->{hosts}->{$host}) {
         # unstripped full host name as a key, and its domain part as a value
         $info->{hosts}->{$host} = $domain;
@@ -2306,7 +2314,7 @@ sub get_uri_detail_list {
       $info->{cleaned} = \@uris;
 
       foreach (@uris) {
-        my($domain,$host) = Mail::SpamAssassin::Util::uri_to_domain($_);
+        my($domain,$host) = $self->{main}->{registryboundaries}->uri_to_domain($_);
         if (defined $host && $host ne '' && !$info->{hosts}->{$host}) {
           # unstripped full host name as a key, and its domain part as a value
           $info->{hosts}->{$host} = $domain;
@@ -2354,6 +2362,7 @@ sub _get_parsed_uri_list {
 
     my ($rulename, $pat, @uris);
     my $text;
+    my $tbirdurire = $self->_tbirdurire;
 
     for my $entry (@$textary) {
 
@@ -2369,7 +2378,7 @@ sub _get_parsed_uri_list {
       while (/$tbirdurire/igo) {
         my $rawuri = $1||$2||$3;
         $rawuri =~ s/(^[^(]*)\).*$/$1/;  # as per ThunderBird, ) is an end delimiter if there is no ( preceeding it
-        $rawuri =~ s/[$oeignoreatend]*$//; # remove trailing string of punctuations that TBird ignores
+        $rawuri =~ s/[-~!@#^&*()_+=:;\'?,.]*$//; # remove trailing string of punctuations that TBird ignores
         # skip if there is '..' in the hostname portion of the URI, something we can't catch in the general URI regexp
         next if $rawuri =~ /^(?:(?:https?|ftp|mailto):(?:\/\/)?)?[a-z\d.-]*\.\./i;
 
@@ -2400,7 +2409,7 @@ sub _get_parsed_uri_list {
           # skip a mail link that does not have a valid TLD or other than one @ after decoding any URLEncoded characters
           $uri = Mail::SpamAssassin::Util::url_encode($uri) if ($uri =~ /\%(?:2[1-9a-fA-F]|[3-6][0-9a-fA-F]|7[0-9a-eA-E])/);
           next if ($uri !~ /^[^@]+@[^@]+$/);
-          my $domuri = Mail::SpamAssassin::Util::uri_to_domain($uri);
+          my $domuri = $self->{main}->{registryboundaries}->uri_to_domain($uri);
           next unless $domuri;
           push (@uris, $rawuri);
           push (@uris, $uri) unless ($rawuri eq $uri);
@@ -2411,7 +2420,7 @@ sub _get_parsed_uri_list {
         my @tmp = uri_list_canonicalize($redirector_patterns, $uri);
         my $goodurifound = 0;
         foreach my $cleanuri (@tmp) {
-          my $domain = Mail::SpamAssassin::Util::uri_to_domain($cleanuri);
+          my $domain = $self->{main}->{registryboundaries}->uri_to_domain($cleanuri);
           if ($domain) {
             # bug 5780: Stop after domain to avoid FP, but do that after all deobfuscation of urlencoding and redirection
             if ($rblonly) {
@@ -3070,7 +3079,7 @@ sub all_from_addrs_domains {
 
   #loop through and limit to just the domain with a dummy address
   for (my $i = 0; $i < scalar(@addrs); $i++) {
-    $addrs[$i] = 'dummy@'.&Mail::SpamAssassin::Util::uri_to_domain($addrs[$i]);
+    $addrs[$i] = 'dummy@'.&$self->{main}->{registryboundaries}->uri_to_domain($addrs[$i]);
   }
 
   #Remove duplicate domains

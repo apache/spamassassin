@@ -22,6 +22,10 @@
 
 Mail::SpamAssassin::Util::RegistrarBoundaries - domain delegation rules
 
+DEPRECATED AND REPLACED WITH Mail::SpamAssassin::RegistryBoundaries !!
+
+DO NOT USE. This is left as fallback for third party plugins.
+
 =cut
 
 package Mail::SpamAssassin::Util::RegistrarBoundaries;
@@ -37,25 +41,18 @@ use vars qw (
 
 # %VALID_TLDS
 # The list of currently-valid TLDs for the DNS system.
-# Note for SA devs only: If required, when updating domain lists, also modify t/uri_text.t accordingly
-#
-# bash line to generate a formatted list of domains
-# Fetches domains, drops the top comment line, then joins domains with spaces in between
-#   wget http://data.iana.org/TLD/tlds-alpha-by-domain.txt -O - | tail -n+2 | perl -e 'chomp && s/$/ / && print lc while <>' && echo
-#
-# Remember to also change regexp below when updating!
-#
-# Last update: 2015-04-02-axb-Easter-Update
+# This list is deprecated and unmaintained. It will become increasingly
+# out of date and will be removed in a future release.
+# As of 3.4.2, updates will be done in rules/20_aux_tlds.cf
 foreach (qw/abbott abogado ac academy accountant accountants active actor ad ads adult ae aero af afl ag agency ai airforce al allfinanz alsace am amsterdam an android ao apartments aq aquarelle ar archi army arpa as asia associates at attorney au auction audio autos aw ax axa az ba band bank bar barclaycard barclays bargains bayern bb bbc bd be beer berlin best bf bg bh bi bid bike bingo bio biz bj black blackfriday bloomberg blue bm bmw bn bnpparibas bo boats bond boo boutique br brussels bs bt budapest build builders business buzz bv bw by bz bzh ca cab cal camera camp cancerresearch canon capetown capital caravan cards care career careers cartier casa cash casino cat catering cbn cc cd center ceo cern cf cfd cg ch channel chat cheap chloe christmas chrome church ci citic city ck cl claims cleaning click clinic clothing club cm cn co coach codes coffee college cologne com community company computer condos construction consulting contractors cooking cool coop country courses cr credit creditcard cricket crs cruises cu cuisinella cv cw cx cy cymru cz dabur dad dance date dating datsun day dclk de deals degree delivery democrat dental dentist desi design dev diamonds diet digital direct directory discount dj dk dm dnp do docs doha domains doosan download durban dvag dz eat ec edu education ee eg email emerck energy engineer engineering enterprises epson equipment er erni es esq estate et eu eurovision eus events everbank exchange expert exposed fail faith fan fans farm fashion feedback fi film finance financial firmdale fish fishing fit fitness fj fk flights florist flowers flsmidth fly fm fo foo football forex forsale foundation fr frl frogans fund furniture futbol ga gal gallery garden gb gbiz gd gdn ge gent gf gg ggee gh gi gift gifts gives gl glass gle global globo gm gmail gmo gmx gn gold goldpoint golf goo goog google gop gov gp gq gr graphics gratis green gripe gs gt gu guge guide guitars guru gw gy hamburg hangout haus healthcare help here hermes hiphop hiv hk hm hn holdings holiday homes horse host hosting house how hr ht hu ibm id ie ifm il im immo immobilien in industries infiniti info ing ink institute insure int international investments io iq ir irish is it iwc java jcb je jetzt jm jo jobs joburg jp juegos kaufen kddi ke kg kh ki kim kitchen kiwi km kn koeln komatsu kp kr krd kred kw ky kyoto kz la lacaixa land lat latrobe lawyer lb lc lds lease leclerc legal lgbt li lidl life lighting limited limo link lk loan loans london lotte lotto lr ls lt ltda lu luxe luxury lv ly ma madrid maif maison management mango market marketing markets marriott mc md me media meet melbourne meme memorial menu mg mh miami mil mini mk ml mm mma mn mo mobi moda moe monash money mormon mortgage moscow motorcycles mov movie mp mq mr ms mt mtn mtpc mu museum mv mw mx my mz na nagoya name navy nc ne net network neustar new news nexus nf ng ngo nhk ni nico ninja nissan nl no np nr nra nrw ntt nu nyc nz okinawa om one ong onl online ooo oracle org organic osaka otsuka ovh pa page panerai paris partners parts party pe pf pg ph pharmacy photo photography photos physio piaget pics pictet pictures pink pizza pk pl place plumbing plus pm pn pohl poker porn post pr praxi press pro prod productions prof properties property ps pt pub pw py qa qpon quebec re realtor recipes red redstone rehab reise reisen reit ren rentals repair report republican rest restaurant review reviews rich rio rip ro rocks rodeo rs rsvp ru ruhr rw ryukyu sa saarland sale samsung sap sarl saxo sb sc sca scb schmidt school schule schwarz science scot sd se services sew sexy sg sh shiksha shoes shriram si singles site sj sk sky sl sm sn so social software sohu solar solutions soy space spiegel spreadbetting sr st study style su sucks supplies supply support surf surgery suzuki sv sx sy sydney systems sz taipei tatar tattoo tax tc td tech technology tel temasek tennis tf tg th tickets tienda tips tires tirol tj tk tl tm tn to today tokyo tools top toshiba tours town toys tr trade trading training travel trust tt tui tv tw tz ua ug uk university uno uol us uy uz va vacations vc ve vegas ventures versicherung vet vg vi viajes video villas vision vlaanderen vn vodka vote voting voto voyage vu wales wang watch webcam website wed wedding wf whoswho wien wiki williamhill win wme work works world ws wtc wtf xin xn--1qqw23a xn--30rr7y xn--3bst00m xn--3ds443g xn--3e0b707e xn--45brj9c xn--45q11c xn--4gbrim xn--55qw42g xn--55qx5d xn--6frz82g xn--6qq986b3xl xn--80adxhks xn--80ao21a xn--80asehdb xn--80aswg xn--90a3ac xn--90ais xn--9et52u xn--b4w605ferd xn--c1avg xn--cg4bki xn--clchc0ea0b2g2a9gcd xn--czr694b xn--czrs0t xn--czru2d xn--d1acj3b xn--d1alf xn--fiq228c5hs xn--fiq64b xn--fiqs8s xn--fiqz9s xn--flw351e xn--fpcrj9c3d xn--fzc2c9e2c xn--gecrj9c xn--h2brj9c xn--hxt814e xn--i1b6b1a6a2e xn--io0a7i xn--j1amh xn--j6w193g xn--kprw13d xn--kpry57d xn--kput3i xn--l1acc xn--lgbbat1ad8j xn--mgb9awbf xn--mgba3a4f16a xn--mgbaam7a8h xn--mgbab2bd xn--mgbayh7gpa xn--mgbbh1a71e xn--mgbc0a9azcg xn--mgberp4a5d4ar xn--mgbx4cd0ab xn--mxtq1m xn--ngbc5azd xn--node xn--nqv7f xn--nqv7fs00ema xn--o3cw4h xn--ogbpf8fl xn--p1acf xn--p1ai xn--pgbs0dh xn--q9jyb4c xn--qcka1pmc xn--rhqv96g xn--s9brj9c xn--ses554g xn--unup4y xn--vermgensberater-ctb xn--vermgensberatung-pwb xn--vhquv xn--vuq861b xn--wgbh1c xn--wgbl6a xn--xhq521b xn--xkc2al3hye2a xn--xkc2dl3a5ee0h xn--yfro4i67o xn--ygbi2ammx xn--zfr164b xxx xyz yachts yandex ye yodobashi yoga yokohama youtube yt za zip zm zone zuerich zw/) {
   $VALID_TLDS{$_} = 1;
 }
 
 # $VALID_TLDS_RE
 # %VALID_TLDS as Regexp::List optimized regexp, for use in Plugins etc
-# bash line to generate regex from TLD list
-# Fetches domains, drops the top commet line, builds a regex from the list of domains, then formats it to remove (?-xsim:) regex modifier flags
-#   wget http://data.iana.org/TLD/tlds-alpha-by-domain.txt -O - | tail -n+2 | perl -MRegexp::List -e '$/=undef; $_=<>; $r = Regexp::List->new; push @l, $_ for (split); print $r->list2re(@l)' | perl -pe 's/^\(\?[^:]*:(.*)\)$/$1/' && echo
-#
+# This regex is deprecated and unmaintained. It will become increasingly
+# out of date and will be removed in a future release.
+# As of 3.4.2, this regex is generated automatically in Conf.pm
 $VALID_TLDS_RE = qr/(?:X(?:N--(?:M(?:GB(?:A(?:(?:3A4F16|YH7GP)A|AM7A8H|B2BD)|ERP4A5D4AR|C0A9AZCG|BH1A71E|X4CD0AB|9AWBF)|XTQ1M)|F(?:IQ(?:(?:228C5H|S8|Z9)S|64B)|PCRJ9C3D|ZC2C9E2C|LW351E)|C(?:ZR(?:694B|S0T|U2D)|LCHC0EA0B2G2A9GCD|G4BKI|1AVG)|V(?:(?:ERMGENSBERAT(?:UNG-PW|ER-CT)|UQ861)B|HQUV)|X(?:KC2(?:DL3A5EE0H|AL3HYE2A)|HQ521B)|3(?:E0B707E|BST00M|DS443G|0RR7Y)|N(?:QV7F(?:S00EMA)?|GBC5AZD|ODE)|80A(?:S(?:EHDB|WG)|DXHKS|O21A)|(?:Q(?:CKA1PM|9JYB4)|GECRJ9)C|4(?:5(?:BRJ9|Q11)C|GBRIM)|KP(?:R(?:W13|Y57)D|UT3I)|9(?:0A(?:3AC|IS)|ET52U)|P(?:1A(?:CF|I)|GBS0DH)|Y(?:FRO4I67O|GBI2AMMX)|6(?:QQ986B3XL|FRZ82G)|I(?:1B6B1A6A2E|O0A7I)|L(?:GBBAT1AD8J|1ACC)|H(?:2BRJ9C|XT814E)|O(?:GBPF8FL|3CW4H)|S(?:9BRJ9C|ES554G)|J(?:6W193G|1AMH)|55Q(?:W42G|X5D)|D1A(?:CJ3B|LF)|WGB(?:H1C|L6A)|B4W605FERD|1QQW23A|RHQV96G|ZFR164B|UNUP4Y)|IN|XX|YZ)|C(?:[CDGKMVWXZ]|O(?:N(?:S(?:TRUCTION|ULTING)|(?:TRACTOR|DO)S)|M(?:P(?:UTER|ANY)|MUNITY)?|(?:L(?:LEG|OGN)|FFE)E|O(?:[LP]|KING)|U(?:NTRY|RSES)|ACH|DES)?|A(?:[BL]|R(?:E(?:ERS?)?|AVAN|TIER|DS)|N(?:CERRESEARCH|ON)|P(?:ETOWN|ITAL)|S(?:[AH]|INO)|T(?:ERING)?|M(?:ERA|P))?|H(?:R(?:ISTMAS|OME)|A(?:NNEL|T)|URCH|EAP|LOE)?|L(?:(?:EAN|OTH)ING|I(?:NIC|CK)|AIMS|UB)?|R(?:EDIT(?:CARD)?|(?:UISE)?S|ICKET)?|I(?:T(?:IC|Y))?|E(?:NTER|RN|O)|U(?:ISINELLA)?|Y(?:MRU)?|B?N|FD?)|S(?:[BDGJLMNRVXZ]|U(?:PP(?:L(?:IES|Y)|ORT)|R(?:GERY|F)|ZUKI|CKS)?|C(?:[AB]|H(?:MIDT|WARZ|OOL|ULE)|IENCE|OT)?|O(?:L(?:UTIONS|AR)|FTWARE|CIAL|HU|Y)?|A(?:ARLAND|MSUNG|LE|RL|XO|P)?|P(?:READBETTING|IEGEL|ACE)|H(?:IKSHA|RIRAM|OES)?|E(?:RVICES|XY|W)?|Y(?:STEMS|DNEY)?|I(?:NGLES|TE)?|T(?:UDY|YLE)?|KY?)|A(?:[OWZ]|C(?:T(?:IVE|OR)|COUNTANTS?|ADEMY)?|U(?:CTION|DIO|TOS)?|L(?:LFINANZ|SACE)?|S(?:SOCIATES|IA)?|B(?:OGADO|BOTT)|R(?:CHI|MY|PA)?|(?:MSTERDA)?M|Q(?:UARELLE)?|I(?:RFORCE)?|T(?:TORNEY)?|D(?:ULT|S)?|N(?:DROID)?|G(?:ENCY)?|PARTMENTS|E(?:RO)?|FL?|XA?)|M(?:[CDGHKLNPQRSVWXYZ]|O(?:R(?:TGAGE|MON)|N(?:ASH|EY)|TORCYCLES|V(?:IE)?|SCOW|BI|DA|E)?|A(?:R(?:KET(?:ING|S)?|RIOTT)|N(?:AGEMENT|GO)|I(?:SON|F)|DRID)?|E(?:M(?:ORIAL|E)|LBOURNE|DIA|ET|NU)?|I(?:(?:AM|N)I|L)|T(?:PC|N)?|U(?:SEUM)?|MA?)|B(?:[DFGHJSTVWY]|A(?:R(?:CLAY(?:CARD|S)|GAINS)?|N[DK]|YERN)?|U(?:ILD(?:ERS)?|DAPEST|SINESS|ZZ)|L(?:ACK(?:FRIDAY)?|OOMBERG|UE)|I(?:[DZ]|(?:NG)?O|KE)?|O(?:UTIQUE|ATS|ND|O)?|E(?:RLIN|ER|ST)?|N(?:PPARIBAS)?|R(?:USSELS)?|BC?|MW?|ZH?)|P(?:[EFGKMNSTWY]|R(?:O(?:D(?:UCTIONS)?|PERT(?:IES|Y)|F)?|AXI|ESS)?|A(?:R(?:T(?:(?:NER)?S|Y)|IS)|NERAI|GE)?|I(?:C(?:T(?:URES|ET)|S)|AGET|ZZA|NK)|H(?:OTO(?:GRAPHY|S)?|ARMACY|YSIO)?|L(?:U(?:MBING|S)|ACE)?|O(?:KER|HL|RN|ST)|UB)|G(?:[FHNPQSTWY]|O(?:[PV]|L(?:D(?:POINT)?|F)|O(?:G(?:LE)?)?)|R(?:A(?:PHIC|TI)S|EEN|IPE)?|U(?:I(?:TARS|DE)|GE|RU)?|L(?:OB(?:AL|O)|ASS|E)?|A(?:L(?:LERY)?|RDEN)?|I(?:FTS?|VES)?|M(?:[OX]|AIL)?|B(?:IZ)?|E(?:NT)?|G(?:EE)?|DN?)|F(?:[JM]|I(?:NANC(?:IAL|E)|SH(?:ING)?|T(?:NESS)?|RMDALE|LM)?|O(?:R(?:SALE|EX)|O(?:TBALL)?|UNDATION)?|L(?:O(?:RIST|WERS)|SMIDTH|IGHTS|Y)|A(?:I(?:TH|L)|SHION|NS?|RM)|U(?:RNITURE|TBOL|ND)|R(?:OGANS|L)?|(?:EEDBAC)?K)|D(?:[JMZ]|E(?:NT(?:IST|AL)|SI(?:GN)?|LIVERY|MOCRAT|GREE|ALS|V)?|I(?:(?:SCOUN|E)T|RECT(?:ORY)?|AMONDS|GITAL)|A(?:[DY]|T(?:ING|SUN|E)|BUR|NCE)|O(?:(?:MAIN|C)S|WNLOAD|OSAN|HA)?|(?:CL)?K|URBAN|VAG|NP)|T(?:[CDFGHJKLMNTVWZ]|O(?:(?:OL|UR|Y)S|SHIBA|DAY|KYO|WN|P)?|R(?:A(?:D(?:ING|E)|INING|VEL)|UST)?|I(?:(?:CKET|P)S|R(?:ES|OL)|ENDA)|E(?:CH(?:NOLOGY)?|MASEK|NNIS|L)|A(?:T(?:TOO|AR)|IPEI|X)|UI)|E(?:[CEG]|N(?:GINEER(?:ING)?|TERPRISES|ERGY)|X(?:P(?:OSED|ERT)|CHANGE)|U(?:ROVISION|S)?|(?:QUIPMEN|A)?T|VE(?:RBANK|NTS)|DU(?:CATION)?|M(?:ERCK|AIL)|S(?:TATE|Q)?|R(?:NI)?|PSON)|R(?:E(?:P(?:UBLICAN|AIR|ORT)|S(?:TAURAN)?T|D(?:STONE)?|I(?:SEN?|T)|N(?:TALS)?|VIEWS?|ALTOR|CIPES|HAB)?|O(?:CKS|DEO)?|I(?:[OP]|CH)|S(?:VP)?|U(?:HR)?|YUKYU|W)|L(?:[BCKRVY]|I(?:M(?:ITED|O)|GHTING|DL|FE|NK)?|A(?:T(?:ROBE)?|CAIXA|WYER|ND)?|O(?:TT[EO]|ANS?|NDON)|E(?:CLERC|ASE|GAL)|U(?:X(?:URY|E))?|T(?:DA)?|D?S|GBT)|I(?:[DELOQST]|N(?:[GK]|(?:VESTMENT|DUSTRIE)S|T(?:ERNATIONAL)?|S(?:TITUT|UR)E|F(?:INITI|O))?|M(?:MO(?:BILIEN)?)?|R(?:ISH)?|[BF]M|WC)|V(?:[CGU]|E(?:(?:NTURE|GA)S|RSICHERUNG|T)?|I(?:(?:AJE|LLA)S|SION|DEO)?|O(?:T(?:[EO]|ING)|YAGE|DKA)|(?:LAANDERE)?N|A(?:CATIONS)?)|H(?:[KMNRTU]|O(?:L(?:DINGS|IDAY)|ST(?:ING)?|[RU]SE|MES|W)|E(?:R(?:MES|E)|ALTHCARE|LP)|A(?:MBURG|NGOUT|US)|I(?:PHOP|V))|W(?:[FS]|E(?:B(?:SITE|CAM)|D(?:DING)?)|I(?:LLIAMHILL|E?N|KI)|A(?:LES|TCH|NG)|OR(?:KS?|LD)|HOSWHO|T[CF]|ME)|N(?:[FLOPUZ]|E(?:T(?:WORK)?|USTAR|WS?|XUS)?|I(?:SSAN|NJA|CO)?|A(?:GOYA|ME|VY)?|R[AW]?|GO?|Y?C|HK|TT)|K(?:[EGHMPWZ]|I(?:TCHEN|WI|M)?|O(?:MATSU|ELN)|(?:AUFE)?N|R(?:E?D)?|Y(?:OTO)?|DDI)|O(?:(?:(?:TSU|SA)K|KINAW)A|R(?:G(?:ANIC)?|ACLE)|N(?:[EG]|L(?:INE)?)|OO|VH|M)|Y(?:[ET]|O(?:(?:KOHAM|G)A|DOBASHI|UTUBE)|A(?:CHTS|NDEX))|J(?:[MP]|O(?:B(?:URG|S))?|E(?:TZT)?|UEGOS|AVA|CB)|U(?:[AGKSYZ]|N(?:IVERSITY|O)|OL)|Z(?:[AMW]|UERICH|ONE|IP)|Q(?:UEBEC|PON|A))/ix;
 
 # Two-Level TLDs
@@ -72,6 +69,10 @@ $VALID_TLDS_RE = qr/(?:X(?:N--(?:M(?:GB(?:A(?:(?:3A4F16|YH7GP)A|AM7A8H|B2BD)|ERP
 # Unsorted sources:
 # .ua : http://hostmaster.ua
 # .hu : http://www.domain.hu/domain/English/szabalyzat/sld.html
+#
+# This list is deprecated and unmaintained. It will become increasingly
+# out of date and will be removed in a future release.
+# As of 3.4.2, updates will be done in rules/20_aux_tlds.cf
 #
 foreach(qw/
 
@@ -271,6 +272,10 @@ foreach (qw/
   $US_STATES{$_} = 1;
 }
 
+##
+## DO NOT UPDATE THIS DEPRECATED LIST
+## Everything is now maintained in sa-update 20_aux_tlds.cf
+##
 foreach (qw/
   demon.co.uk esc.edu.ar lkd.co.im plc.co.im
  /) {
@@ -292,6 +297,8 @@ Examples:
 
     "www.foo.com" => ( "www", "foo.com" )
     "www.foo.co.uk" => ( "www", "foo.co.uk" )
+
+DEPRECATED FUNCTION !!! See Mail::SpamAssassin::RegistryBoundaries !!!
 
 =cut
 
@@ -369,6 +376,8 @@ Examples:
     "www.foo.com" => "foo.com"
     "www.foo.co.uk" => "foo.co.uk"
 
+DEPRECATED FUNCTION !!! See Mail::SpamAssassin::RegistryBoundaries !!!
+
 =cut
 
 sub trim_domain {
@@ -384,6 +393,8 @@ sub trim_domain {
 Return C<1> if the domain is valid, C<undef> otherwise.  A valid domain
 (a) does not contain whitespace, (b) contains at least one dot, and (c)
 uses a valid TLD or ccTLD.
+
+DEPRECATED FUNCTION !!! See Mail::SpamAssassin::RegistryBoundaries !!!
 
 =back
 

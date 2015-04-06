@@ -75,6 +75,7 @@ use Mail::SpamAssassin::PerMsgStatus;
 use Mail::SpamAssassin::Message;
 use Mail::SpamAssassin::PluginHandler;
 use Mail::SpamAssassin::DnsResolver;
+use Mail::SpamAssassin::RegistryBoundaries;
 use Mail::SpamAssassin::Util qw(untaint_var am_running_on_windows);
 use Mail::SpamAssassin::Util::ScopedTimer;
 
@@ -430,6 +431,7 @@ sub new {
   }
 
   $self->{conf} ||= new Mail::SpamAssassin::Conf ($self);
+  $self->{registryboundaries} = Mail::SpamAssassin::RegistryBoundaries->new ($self);
   $self->{plugins} = Mail::SpamAssassin::PluginHandler->new ($self);
 
   $self->{save_pattern_hits} ||= 0;
