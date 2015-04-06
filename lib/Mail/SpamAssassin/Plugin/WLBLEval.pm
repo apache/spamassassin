@@ -262,14 +262,14 @@ sub _check_addr_matches_rcvd {
   return 0  if !@relays;
 
   my($adrh,$adrd) =
-    Mail::SpamAssassin::Util::RegistrarBoundaries::split_domain($addr_domain);
+    $self->{main}->{registryboundaries}->split_domain($addr_domain);
   my $match = 0;
   my $any_tried = 0;
   foreach my $rly (@relays) {
     my $relay_rdns = $rly->{lc_rdns};
     next  if !defined $relay_rdns || $relay_rdns eq '';
     my($rlyh,$rlyd) =
-      Mail::SpamAssassin::Util::RegistrarBoundaries::split_domain($relay_rdns);
+      $self->{main}->{registryboundaries}->split_domain($relay_rdns);
     $any_tried = 1;
     if ($adrd eq $rlyd) {
       dbg("rules: $addr MATCHES relay $relay_rdns ($adrd)");

@@ -1037,9 +1037,9 @@ sub check_ratware_envelope_from {
 
   if ($to =~ /^([^@]+)@(.+)$/) {
     my($user,$dom) = ($1,$2);
-    $dom = Mail::SpamAssassin::Util::RegistrarBoundaries::trim_domain($dom);
+    $dom = $self->{main}->{registryboundaries}->trim_domain($dom);
     return unless
-        (Mail::SpamAssassin::Util::RegistrarBoundaries::is_domain_valid($dom));
+        ($self->{main}->{registryboundaries}->is_domain_valid($dom));
 
     return 1 if ($from =~ /\b\Q$dom\E.\Q$user\E@/i);
   }

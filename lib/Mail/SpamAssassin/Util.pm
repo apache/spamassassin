@@ -66,7 +66,6 @@ BEGIN {
 }
 
 use Mail::SpamAssassin;
-use Mail::SpamAssassin::Util::RegistrarBoundaries;
 
 use Config;
 use IO::Handle;
@@ -1204,6 +1203,10 @@ sub secure_tmpdir {
 
 ###########################################################################
 
+##
+## DEPRECATED FUNCTION, only left for third party plugins as fallback.
+## Replaced with Mail::SpamAssassin::RegistryBoundaries::uri_to_domain.
+##
 sub uri_to_domain {
   my ($uri) = @_;
 

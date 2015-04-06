@@ -140,7 +140,7 @@ ok tryone Mail::SpamAssassin::Constants::IP_PRIVATE, "0:0:0::0:0:1";
 sub tsttrim ($$) {
   my $dom = shift;
   my $want = shift;
-  my $got = Mail::SpamAssassin::Util::RegistrarBoundaries::trim_domain ($dom);
+  my $got = $sa->{registryboundaries}->trim_domain ($dom);
   if ($got eq $want) {
     return 1;
   } else {

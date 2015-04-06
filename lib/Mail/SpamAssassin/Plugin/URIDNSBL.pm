@@ -295,7 +295,6 @@ package Mail::SpamAssassin::Plugin::URIDNSBL;
 use Mail::SpamAssassin::Plugin;
 use Mail::SpamAssassin::Constants qw(:ip);
 use Mail::SpamAssassin::Util;
-use Mail::SpamAssassin::Util::RegistrarBoundaries;
 use Mail::SpamAssassin::Logger;
 use strict;
 use warnings;
@@ -961,7 +960,7 @@ sub complete_ns_lookup {
           $seen_lookups->{'A:'.$nsmatch} = 1;
           $self->lookup_a_record($pms, $ent->{obj}, $nsmatch);
         }
-        $nsrhblstr = Mail::SpamAssassin::Util::RegistrarBoundaries::trim_domain($nsmatch);
+        $nsrhblstr = $self->{main}->{registryboundaries}->trim_domain($nsmatch);
       }
 
       foreach my $rulename (keys %{$nsrhsblrules}) {
