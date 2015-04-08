@@ -3800,6 +3800,7 @@ standard lists supplied by sa-update.
       $self->{valid_tlds} = ();
       $self->{two_level_domains} = ();
       $self->{three_level_domains} = ();
+      dbg("config: cleared tld lists");
     }
   });
 
