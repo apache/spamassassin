@@ -195,7 +195,10 @@ sub seen_put {
   return 0 unless (defined($self->{_dbh}));
 
   my $sql = "INSERT INTO bayes_seen (id, msgid, flag)
-             VALUES (?,?,?)";
+             VALUES (?,?,?)
+	     ON DUPLICATE KEY UPDATE flag=VALUES(flag)"; 
+
+  #added ON DUPLICATE KEY UPDATE flag=VALUES(flag) per bug 5998 on 4/8/2015
   
   my $rows = $self->{_dbh}->do($sql,
 			       undef,
