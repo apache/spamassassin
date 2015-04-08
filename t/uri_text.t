@@ -24,7 +24,7 @@ use Mail::SpamAssassin;
 use vars qw(%patterns %anti_patterns);
 
 # settings
-plan tests => 683;
+plan tests => 681;
 
 # initialize SpamAssassin
 my $sa = create_saobj({'dont_copy_prefs' => 1});
@@ -536,7 +536,6 @@ example.tl	^http://example.tl$
 example.tm	^http://example.tm$
 example.tn	^http://example.tn$
 example.to	^http://example.to$
-example.tp	!^http://example.tp$
 example.tr	^http://example.tr$
 example.travel	^http://example.travel$
 example.tt	^http://example.tt$
@@ -812,7 +811,6 @@ www.example.tl	^http://www.example.tl$
 www.example.tm	^http://www.example.tm$
 www.example.tn	^http://www.example.tn$
 www.example.to	^http://www.example.to$
-www.example.tp	!^http://www.example.tp$
 www.example.tr	^http://www.example.tr$
 www.example.travel	^http://www.example.travel$
 www.example.tt	^http://www.example.tt$
