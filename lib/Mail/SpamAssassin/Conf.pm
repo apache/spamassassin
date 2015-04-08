@@ -3553,6 +3553,7 @@ TLDs include things like com, net, org, etc.
       foreach (split(/\s+/, $value)) {
         $self->{valid_tlds}{lc $_} = 1;
       }
+      dbg("config: added tld list - $value");
     }
   });
 
