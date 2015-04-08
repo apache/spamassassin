@@ -332,7 +332,8 @@ my %get_details = (
 
     $md5 = uc(md5_hex($data)) if $data;
     $fuzzy_md5 = uc(md5_hex($fuzzy_data)) if $fuzzy_data;
-    my $tags_md5 = uc(md5_hex($pdf_tags)) if $pdf_tags;
+    my $tags_md5;
+    $tags_md5 = uc(md5_hex($pdf_tags)) if $pdf_tags;
 
     dbg("pdfinfo: MD5 results for ".($name ? $name : '')." - md5=".($md5 ? $md5 : '')." fuzzy1=".($fuzzy_md5 ? $fuzzy_md5 : '')." fuzzy2=".($tags_md5 ? $tags_md5 : ''));
 
