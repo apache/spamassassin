@@ -145,7 +145,7 @@ describe HELO_NO_DOMAIN	Relay reports its domain incorrectly
 # because they have such similar definitions, numbers, and merits
 
 header __NAME_IS_EMAIL	From:raw =~ /\w\@[\w.-]+\.\w\w+["'`]*\s*<\w+\@\w/
-header __NAME_EQ_EMAIL	From:raw =~ /([\w+.-]+\@[\w.-]+\.\w\w+)["'`\s]*<\s*\1>/
+header __NAME_EQ_EMAIL	From:raw =~ /([\w+.-]+\@[\w.-]+\.\w\w+)["'`\s]*<\s*\1>/i
 meta	 NAME_EMAIL_DIFF	__NAME_IS_EMAIL && ! __NAME_EQ_EMAIL
 describe NAME_EMAIL_DIFF	Sender NAME is an unrelated email address
 #score	 NAME_EMAIL_DIFF	0.375 # tot=0.5, low for noreply@dom  20090811
