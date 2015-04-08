@@ -3079,7 +3079,7 @@ sub all_from_addrs_domains {
 
   #loop through and limit to just the domain with a dummy address
   for (my $i = 0; $i < scalar(@addrs); $i++) {
-    $addrs[$i] = 'dummy@'.&$self->{main}->{registryboundaries}->uri_to_domain($addrs[$i]);
+    $addrs[$i] = 'dummy@'.$self->{main}->{registryboundaries}->uri_to_domain($addrs[$i]);
   }
 
   #Remove duplicate domains
