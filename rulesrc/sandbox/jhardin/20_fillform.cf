@@ -93,7 +93,7 @@ ifplugin Mail::SpamAssassin::Plugin::ReplaceTags
   meta     __FILL_THIS_FORM_LOAN          __FILL_THIS_FORM && __FILL_THIS_FORM_LOAN1
   meta     FILL_THIS_FORM_LOAN            __FILL_THIS_FORM_LOAN && !__COMMENT_EXISTS && !__HTML_LINK_IMAGE
   describe FILL_THIS_FORM_LOAN            Answer loan question(s)
-  #score    FILL_THIS_FORM_LOAN            0.50
+  score    FILL_THIS_FORM_LOAN            2.0
 
   # Add to score if fraud/phishing question is present
   body     __FILL_THIS_FORM_FRAUD_PHISH1   /<FF_YOUR>(?:<FF_F1>|<FF_F2>|<FF_F3>|<FF_F4>|<FF_F5>)<FF_SUFFIX>(?:<FF_BLANK1>|<FF_BLANK2>$)/i
