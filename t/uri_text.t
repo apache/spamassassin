@@ -26,8 +26,21 @@ use vars qw(%patterns %anti_patterns);
 # settings
 plan tests => 683;
 
+for my $fn (<../rules/*.cf>) {
+  my($dev,$ino,$mode,$nlink,$uid,$gid,$rdev,$size,$atime,$mtime,$ctime) =
+    lstat($fn);
+  printf STDERR ("rules: %03o %d %d size=%s at=%d mt=%d ct=%d %s\n",
+                 $mode, $uid, $gid, $size, $atime, $mtime, $ctime, $fn);
+}
+for my $fn (<log/test_rules_copy/*>) {
+  my($dev,$ino,$mode,$nlink,$uid,$gid,$rdev,$size,$atime,$mtime,$ctime) =
+    lstat($fn);
+  printf STDERR ("copy: %03o %d %d size=%s at=%d mt=%d ct=%d %s\n",
+                 $mode, $uid, $gid, $size, $atime, $mtime, $ctime, $fn);
+}
+
 # initialize SpamAssassin
-my $sa = create_saobj({dont_copy_prefs => 1, debug => 'all'});
+my $sa = create_saobj({dont_copy_prefs => 1});
 
 $sa->init(0); # parse rules
 
