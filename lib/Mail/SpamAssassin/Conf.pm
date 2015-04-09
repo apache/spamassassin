@@ -3520,7 +3520,7 @@ TLDs include things like com, net, org, etc.
     sm sn so social software sohu solar solutions soy space spiegel sr st su
     supplies supply support surf surgery suzuki sv sx sy systems sz tatar tattoo tax
     tc td technology tel tf tg th tienda tips tirol tj tk tl tm tn to today tokyo
-    tools top town toys tp tr trade training travel tt tv tw tz ua ug uk university
+    tools top town toys tr trade training travel tt tv tw tz ua ug uk university
     uno uol us uy uz va vacations vc ve vegas ventures versicherung vet vg vi viajes
     villas vision vlaanderen vn vodka vote voting voto voyage vu wales wang watch
     webcam website wed wf whoswho wien wiki williamhill works ws wtc wtf xn--1qqw23a
@@ -3701,7 +3701,7 @@ code.  2TLDs include things like co.uk, fed.us, etc.
     or.th ac.tj biz.tj co.tj com.tj edu.tj go.tj gov.tj int.tj mil.tj name.tj
     net.tj org.tj web.tj com.tn edunet.tn ens.tn fin.tn gov.tn ind.tn info.tn
     intl.tn nat.tn net.tn org.tn rnrt.tn rns.tn rnu.tn tourism.tn gov.to
-    gov.tp av.tr bbs.tr bel.tr biz.tr com.tr dr.tr edu.tr gen.tr gov.tr
+    av.tr bbs.tr bel.tr biz.tr com.tr dr.tr edu.tr gen.tr gov.tr
     info.tr k12.tr mil.tr name.tr net.tr org.tr pol.tr tel.tr web.tr aero.tt
     at.tt au.tt be.tt biz.tt ca.tt co.tt com.tt coop.tt de.tt dk.tt edu.tt
     es.tt eu.tt fr.tt gov.tt info.tt int.tt it.tt jobs.tt mobi.tt museum.tt
