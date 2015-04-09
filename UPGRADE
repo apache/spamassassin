@@ -20,6 +20,46 @@ Note for Users Upgrading to SpamAssassin 3.4.1
 
     $self->{main}->{registryboundaries}->{valid_tlds_re} 
 
+- Mail::SpamAssassin::Util::RegistrarBoundaries is being replaced by 
+  Mail::SpamAssassin::RegistryBoundaries so that new TLDs can be updated via 
+  20_aux_tlds.cf delivered via sa-update.
+
+  ***3rd Party Plugin Authors, Please Note***
+  
+  The following functions will be removed in the next release after 3.4.1 
+  excepting any emergency break/fix releases immediately after 3.4.1:
+  
+  Mail::SpamAssassin::Util::RegistrarBoundaries::is_domain_valid 
+  Mail::SpamAssassin::Util::RegistrarBoundaries::trim_domain
+  Mail::SpamAssassin::Util::RegistrarBoundaries::split_domain 
+  Mail::SpamAssassin::Util::uri_to_domain 
+  
+  And the following variables will also be removed:
+  
+  Mail::SpamAssassin::Util::RegistrarBoundaries::US_STATES
+  Mail::SpamAssassin::Util::RegistrarBoundaries::THREE_LEVEL_DOMAINS
+  Mail::SpamAssassin::Util::RegistrarBoundaries::TWO_LEVEL_DOMAINS
+  Mail::SpamAssassin::Util::RegistrarBoundaries::VALID_TLDS_RE
+  Mail::SpamAssassin::Util::RegistrarBoundaries::VALID_TLDS
+  
+  
+  This change should only affect 3rd party plugin authors who will need to 
+  update their code to utilize Mail::SpamAssassin::RegistryBoundaries 
+  instead of the functions and variables in 
+  Mail::SpamAssassin::Util::RegistrarBoundaries and the function 
+  Mail::SpamAssassin::Util::uri_to_domain which are deprecated and will be 
+  removed.
+
+  For example, the $VALID_TLDS_RE global in registrar boundaries is 
+  deprecated but kept for third-party plugin compatibility.  It will become 
+  increasingly out of date and may be removed in a future release.
+
+  See lib/Mail/SpamAssassin/Plugin/FreeMail.pm for an example of the new way
+  to obtain a valid list of TLDs, i.e.
+
+    $self->{main}->{registryboundaries}->{valid_tlds_re}
+
+
 Note for Users Upgrading to SpamAssassin 3.4.0
 ----------------------------------------------
 - Please see the Announcement file at:

@@ -1233,11 +1233,11 @@ sub uri_to_domain {
   # keep IPs intact
   if ($uri !~ /^\d+\.\d+\.\d+\.\d+$/) { 
     # get rid of hostname part of domain, understanding delegation
-    $uri = Mail::SpamAssassin::RegistryBoundaries::trim_domain($uri);
+    $uri = Mail::SpamAssassin::Util::RegistrarBoundaries::trim_domain($uri);
 
     # ignore invalid domains
     return unless
-        (Mail::SpamAssassin::RegistryBoundaries::is_domain_valid($uri));
+        (Mail::SpamAssassin::Util::RegistrarBoundaries::is_domain_valid($uri));
   }
   
   # $uri is now the domain only, optionally return unstripped host name
