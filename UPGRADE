@@ -62,7 +62,37 @@ Note for Users Upgrading to SpamAssassin 3.4.1
 
 Note for Users Upgrading to SpamAssassin 3.4.0
 ----------------------------------------------
-- Please see the Announcement file at:
+
+- When Bayes classification is in use and messages are 'learned' as spam
+  or ham and stored in a database, the Bayes plugin generates internal
+  message IDs of learned messages and stores them in a 'seen' database to
+  avoid re-learning duplicates and accidental un-learning messages that
+  were not previously learned. With changes in bug 5185, the calculation
+  of message IDs in a bayes 'seen' database has changed, so new code can
+  no longer associate new messages with those learned before the change.
+
+- Note that this change does not affect recognition of old tokens and the
+  classification algorithm, only duplicate detection and unlearning of old
+  messages is affected.
+
+- Because of this change, if you use Bayes and you are upgrading from a
+  version prior to 3.4.0, you may consider wiping your Bayes database
+  and starting fresh.
+
+- There is a new optional dependency on Net::Patricia to speed up lookups
+  on internal_networks, trusted_networks or msa_networks when these lists
+  contain a larger number of entries. Consider installing this module to
+  speed up classification.
+
+- The minimal required version of NetAddr::IP was bumped to 4.010
+
+- In addition to existing backends, the 3.4.0 introduces support for keeping
+  a Bayes database on a Redis server, either running locally, or accessed
+  over network. Similar to SQL backends, the database may be concurrently
+  used by several hosts running SpamAssassin.
+
+- For more detail on these and other changes, please see the Announcement
+  file at:
    http://svn.apache.org/repos/asf/spamassassin/branches/3.4/build/announcements/3.4.0.txt
 
 Note for Users Upgrading to SpamAssassin 3.3.0
