@@ -59,6 +59,12 @@ Note for Users Upgrading to SpamAssassin 3.4.1
 
     $self->{main}->{registryboundaries}->{valid_tlds_re}
 
+- It is now recommended that users uncomment "normalize_charset 1" in
+  local.cf. It will break rules that depend on messages being in non-UTF8
+  encodings, but going forward this will enable more robust unicode rules and
+  will eventually become the default.
+
+
 
 Note for Users Upgrading to SpamAssassin 3.4.0
 ----------------------------------------------
