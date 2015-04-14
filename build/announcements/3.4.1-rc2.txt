@@ -18,27 +18,32 @@ Improved Bayesian classification with better debugging and attachment hashing.
 Notable features:
 =================
 
-Bug 7115: Adding SHA digests of MIME parts as Bayes tokens allows bayes
-to see non-textual content - added configurability
+New plugins
+-----------
 
-rewritten Node::_normalize
+Mail::SpamAssassin::Plugin::TxRep
+Mail::SpamAssassin::Plugin::PDFInfo
+Mail::SpamAssassin::Plugin::URILocalBL.pm
 
-improved tokenization of UTF-8 -encoded or normalized text in
-the Bayes plugin
+
+Notable changes
+---------------
+
+Adding SHA digests of MIME parts as Bayes tokens allows bayes
+to see non-textual content. The set of sources of bayes tokens
+is configurable with a new configuration option 'bayes_token_sources'
+as documented in the Mail::SpamAssassin::Conf man page. (Bug 7115)
+
+Subroutine Node::_normalize has been rewritten. The new behavior
+is documented with the 'normalize_charset' option in the
+Mail::SpamAssassin::Conf man page. (Bug 7144, Bug 7126, Bug 7133)
+
+Tokenization of UTF-8 -encoded or normalized text has been improved
+in the Bayes plugin. (Bug 7130, Bug 7135, Bug 7141)
 
 
 New configuration options
 -------------------------
-
-Added flag 'noawl' to the 'tflags' configuration option.
-
-
-parse_dkim_uris ( 0 | 1 ) (default: 0)
-
-  If this option is set to 1 and the message contains DKIM headers,
-  the headers will be parsed for URIs to process alongside URIs found
-  in the body with some rules and moduels (ex. URIDNSBL)
-
 
 perl_version
   (Introduced in 3.4.2)  This will be replaced with the version
@@ -67,7 +72,7 @@ normalize_charset ( 0 | 1)        (default: 0)
   used if it is available.
 
   
-option dns_server can now specify a link-local IPv6 address, e.g.:
+option dns_server can now specify a scoped link-local IPv6 address, e.g.:
   dns_server [fe80::1%lo0]:53
 
 
@@ -101,8 +106,8 @@ bayes_token_sources  (default: header visible invisible uri)
     invisible - hidden/invisible text in HTML parts of a message body
     uri - URIs collected from a message body
     mimepart - digests (hashes) of all MIME parts (textual or non-
-    textual) of a message, computed after Base64 and quoted-printable
-    decoding, suffixed by their Content-Type
+      textual) of a message, computed after Base64 and quoted-printable
+      decoding, suffixed by their Content-Type
     all - adds all the above keywords to the set being assembled
     none or noall - removes all keywords from the set
 
@@ -141,6 +146,17 @@ check_rbl_from_domain
   a subtest for a specific octet.
 
 
+
+parse_dkim_uris ( 0 | 1 ) (default: 0)
+
+  If this option is set to 1 and the message contains DKIM headers,
+  the headers will be parsed for URIs to process alongside URIs found
+  in the body with some rules and modules (ex. URIDNSBL)
+
+
+Added flag 'noawl' to the 'tflags' configuration option.
+
+
 new template tags:
 _SENDERDOMAIN_  a domain name of the envelope sender address, lowercased
 _AUTHORDOMAIN_  a domain name of the author address (the From header
@@ -166,16 +182,6 @@ $pms->get_names_of_tests_hit_with_scores
   were triggered by the mail.
 
 
-
-
-New plugins
------------
-
-New plugin (optional):
-# loadplugin Mail::SpamAssassin::Plugin::TxRep
-# loadplugin Mail::SpamAssassin::Plugin::PDFInfo  ???
-
-URILocalBL.pm ???
 
 
 Rule updates
@@ -246,7 +252,7 @@ SPF max DNS terms was raised to 15 to accomodate for eBay SPF records
 
 Bug 7136: added has_check_for_spf_errors and if can() encapsulation
 
-Bug 7128: DCC plugin now uses IO::Socket::INET6 instead of IO::Socket::IP
+Bug 7128: DCC plugin now uses IO::Socket::IP instead of IO::Socket::INET6 
 
 Bug 7099: Adding tags SENDERDOMAIN and AUTHORDOMAIN
 
@@ -282,11 +288,11 @@ buffer and avoiding PerlIO - MS::PerMsgStatus::create_fulltext_tmpfile()
 unnecessary copying was avoided when reading from a temporary file
 in SA::Message::Node (small optimization)
 
-changed fillfactor for postgres bayes/awl tables to optimize for updates
-
 a small hotspot in DnsResolver.pm was optimized
 
 use faster utf8::encode instead of Encode::encode_utf8
+
+changed fillfactor for postgres bayes/awl tables to optimize for updates
 
 disabled synchronous commit for Postgres Bayes store
 
