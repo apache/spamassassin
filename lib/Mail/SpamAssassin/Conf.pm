@@ -1139,29 +1139,29 @@ it will be used if it is available.
 	unless (defined $value && $value !~ /^$/) {
 	    return $MISSING_REQUIRED_VALUE;
 	}
-        if    (lc $value eq 'yes' || $value eq '1') { $value = 1 }
-        elsif (lc $value eq 'no'  || $value eq '0') { $value = 0 }
-        else { return $INVALID_VALUE }
-
-	$self->{normalize_charset} = $value;
+	return  if $value == 0;
+	return $INVALID_VALUE unless $value == 1;
 
 	unless ($] > 5.008004) {
 	    $self->{parser}->lint_warn("config: normalize_charset requires Perl 5.8.5 or later");
-	    $self->{normalize_charset} = 0;
 	    return $INVALID_VALUE;
 	}
 	require HTML::Parser;
         #changed to eval to use VERSION so that this version was not incorrectly parsed for CPAN
 	unless ( eval { HTML::Parser->VERSION(3.46) } ) {
 	    $self->{parser}->lint_warn("config: normalize_charset requires HTML::Parser 3.46 or later");
-	    $self->{normalize_charset} = 0;
 	    return $INVALID_VALUE;
 	}
+#	unless (eval 'require Encode::Detect::Detector') {
+#	    $self->{parser}->lint_warn("config: normalize_charset requires Encode::Detect::Detector");
+#	    return $INVALID_VALUE;
+#	}
 	unless (eval 'require Encode') {
 	    $self->{parser}->lint_warn("config: normalize_charset requires Encode");
-	    $self->{normalize_charset} = 0;
 	    return $INVALID_VALUE;
 	}
+
+	$self->{normalize_charset} = 1;
     }
   });
 
