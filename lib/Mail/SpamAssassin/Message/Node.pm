@@ -486,6 +486,11 @@ sub _normalize {
       $chset = 'Windows-1252'; $decoder = $enc_w1252;
     } else {
       $chset = $charset_declared; $decoder = Encode::find_encoding($chset);
+      if (!$decoder && $chset =~ /^GB[ -]?18030(?:-20\d\d)?\z/i) {
+        $decoder = Encode::find_encoding('GBK');  # a subset of GB18030
+        dbg("message: no decoder for a declared charset %s, using GBK",
+            $chset)  if $decoder;
+      }
     }
     if (!$decoder) {
       dbg("message: failed decoding, no decoder for a declared charset %s",
@@ -539,6 +544,11 @@ sub _normalize {
     my $charset_detected = Encode::Detect::Detector::detect($_[1]);
     if ($charset_detected && lc $charset_detected ne lc $charset_declared) {
       my $decoder = Encode::find_encoding($charset_detected);
+      if (!$decoder && $charset_detected =~ /^GB[ -]?18030(?:-20\d\d)?\z/i) {
+        $decoder = Encode::find_encoding('GBK');  # a subset of GB18030
+        dbg("message: no decoder for a detected charset %s, using GBK",
+            $charset_detected)  if $decoder;
+      }
       if (!$decoder) {
         dbg("message: failed decoding, no decoder for a detected charset %s",
             $charset_detected);
