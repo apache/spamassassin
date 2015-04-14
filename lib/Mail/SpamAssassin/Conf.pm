@@ -3520,7 +3520,7 @@ TLDs include things like com, net, org, etc.
     sm sn so social software sohu solar solutions soy space spiegel sr st su
     supplies supply support surf surgery suzuki sv sx sy systems sz tatar tattoo tax
     tc td technology tel tf tg th tienda tips tirol tj tk tl tm tn to today tokyo
-    tools top town toys tp tr trade training travel tt tv tw tz ua ug uk university
+    tools top town toys tr trade training travel tt tv tw tz ua ug uk university
     uno uol us uy uz va vacations vc ve vegas ventures versicherung vet vg vi viajes
     villas vision vlaanderen vn vodka vote voting voto voyage vu wales wang watch
     webcam website wed wf whoswho wien wiki williamhill works ws wtc wtf xn--1qqw23a
