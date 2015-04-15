@@ -4224,17 +4224,18 @@ Namely these characters and ranges:
 This will be replaced with the version number of the currently-running
 SpamAssassin engine.  Note: The version used is in the internal SpamAssassin
 version format which is C<x.yyyzzz>, where x is major version, y is minor
-version, and z is maintenance version.  So 3.0.0 is C<3.000000>, and 3.4.80 is
-C<3.004080>.
+version, and z is maintenance version.  So 3.0.0 is C<3.000000>, and 3.4.80
+is C<3.004080>.
 
 =item perl_version
 
-(Introduced in 3.4.2)  This will be replaced with the version number of the currently-running
-perl engine.  Note: The version used is in the $] version format which is
-C<x.yyyzzz>, where x is major version, y is minor version, and z is maintenance
-version.  So 5.8.8 is C<5.008008>, and 5.10.0 is C<5.010000>. Use to protect rules
-that incorporate RE syntax elements introduced in later versions of perl, such
-as the C<++> non-backtracking match introduced in perl 5.10. For example:
+(Introduced in 3.4.1)  This will be replaced with the version number of the
+currently-running perl engine.  Note: The version used is in the $] version
+format which is C<x.yyyzzz>, where x is major version, y is minor version,
+and z is maintenance version.  So 5.8.8 is C<5.008008>, and 5.10.0 is
+C<5.010000>. Use to protect rules that incorporate RE syntax elements
+introduced in later versions of perl, such as the C<++> non-backtracking
+match introduced in perl 5.10. For example:
 
   # Avoid lint error on older perl installs
   # Check SA version first to avoid warnings on checking perl_version on older SA
