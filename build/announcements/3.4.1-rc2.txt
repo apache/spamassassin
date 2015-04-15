@@ -113,13 +113,16 @@ The configuration option 'check_rbl_from_domain' checks all domain names
 in a From mail address as an alternate to check_rbl_from_host. As of
 v3.4.1, it has been improved to include a subtest for a specific octet.
 
+The 'if (boolean perl expression)' now accepts 'perl_version' in the
+expression. The 'perl_version' will be replaced with the version number
+of the currently-running perl engine. Another way of testing perl
+version in a conditional of a configuration file is:
+  if can(Mail::SpamAssassin::Conf::perl_min_version_5010000)
+Please see documentation in the Mail::SpamAssassin::Conf man page.
 
 
 
 
-??? perl_version
-???   (Introduced in 3.4.2)  This will be replaced with the version
-???-->>  THIS NEEDS TO BE FIXED in Conf.pm, WE ARE AT 3.4.1
 
 Added flag 'noawl' to the 'tflags' configuration option.
 
