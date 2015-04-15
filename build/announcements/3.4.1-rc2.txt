@@ -1,19 +1,20 @@
 To: users, dev, announce
-Subject: ANNOUNCE: Apache SpamAssassin 3.4.1-rc2 available
+Subject: ANNOUNCE: Apache SpamAssassin 3.4.1 available
 
-Release Notes -- Apache SpamAssassin -- Version 3.4.1-rc2
+Release Notes -- Apache SpamAssassin -- Version 3.4.1
 
 Introduction
 ------------
 
-Apache SpamAssassin 3.4.1 represents more than a year of development and
-nearly 500 tweaks, changes, upgrades and bug fixes over the previous release.
-Highlights include: Improved automation to help combat spammers that are
-abusing new top level domains; Tweaks to the SPF support to block more spoofed
-emails; Increased character set normalization to make rules easier to develop,
-block more international spam & stop spammers from using alternate character
-sets to bypass tests; Continued refinement to the native IPv6 support; and
-Improved Bayesian classification with better debugging and attachment hashing.
+Apache SpamAssassin 3.4.1 represents more than a year of development
+and nearly 500 tweaks, changes, upgrades and bug fixes over the previous
+release. Highlights include: Improved automation to help combat spammers
+that are abusing new top level domains; Tweaks to the SPF support to
+block more spoofed emails; Increased character set normalization to
+make rules easier to develop, block more international spam and stop
+spammers from using alternate character sets to bypass tests;
+Continued refinement to the native IPv6 support; and Improved Bayesian
+classification with better debugging and attachment hashing.
 
 Notable features:
 =================
@@ -33,7 +34,7 @@ by looking up and taking in consideration the reputation of the sender.
 It cannot coexist with the old AWL plugin, which must be disabled when
 the TxRep is loaded.
 
-The PDFInfo plugin helps detected spam using attached PDF files.
+The PDFInfo plugin helps detecting spam with attached PDF files.
 
 The URILocalBL plugin creates some new rule test types, such as
 "uri_block_cc", "uri_block_cidr", and "uri_block_isp".  These rules
@@ -41,7 +42,7 @@ apply to the URIs found in the HTML portion of a message, i.e.
 <a href=...> markup.
 
 All these three plugins are disabled by default. To enable, uncomment
-the loadplugin configuration options in file v341.pre or add them to
+the loadplugin configuration options in file v341.pre, or add them to
 some local .pre file such as local.pre .
 
 Plugins are documented in their respective man pages.
@@ -50,11 +51,10 @@ Plugins are documented in their respective man pages.
 Notable changes
 ---------------
 
-Adding SHA digests of MIME parts as Bayes tokens allows bayes
-to see non-textual content. The set of sources of bayes tokens is
-configurable with a new configuration option 'bayes_token_sources'
-as documented in the Mail::SpamAssassin::Conf man page, disabled
-by default for backward compatibility. (Bug 7115)
+A new subsystem RegistryBoundaries for recognizing and updating
+top-level domains and registry boundaries has been introduced,
+which allows dynamically updating both lists through rule updates,
+instead of having them hard-wired in the code.
 
 Subroutine Node::_normalize has been rewritten. The new behavior
 is documented with the 'normalize_charset' option in the
@@ -63,20 +63,27 @@ Mail::SpamAssassin::Conf man page. (Bug 7144, Bug 7126, Bug 7133)
 Tokenization of UTF-8 -encoded or normalized text has been improved
 in the Bayes plugin. (Bug 7130, Bug 7135, Bug 7141)
 
+SHA1 digests of all MIME parts (including non-textual) can now be
+contributed to Bayes tokens, which allows the bayes classifier to assess
+also the non-textual content. The set of sources of bayes tokens is
+configurable with a new configuration option 'bayes_token_sources' as
+documented in the Mail::SpamAssassin::Conf man page, disabled by default
+for backward compatibility. (Bug 7115)
+
 
 New configuration options
 -------------------------
 
 The 'normalize_charset' configuration option already existed in previous
 versions, but its functionality has been re-implemented to put more
-emphasis on the declared character set of a MIME part instead of relying
-on guesswork by Encode::Detect::Detector. When enabled, it converts
-non- UTF-8 textual parts of a mail message into UTF-8 encoding, before
-passing them to HTML decoding and to rules processing. This makes it
-possible to write regular expressions and strings in rules in UTF-8
-encoding, and allows plugins (such as tokenization in a Bayes plugin)
-to recognize multibyte characters and words in non-English languages
-as such, instead of 'randomly' considering some non-ASCII octets in
+emphasis on the declared character set of each MIME part, instead of
+relying on guesswork by Encode::Detect::Detector. When enabled, non-UTF8
+textual parts of a mail message are decoded into Unicode and re-encoded
+into UTF-8 before passing them to HTML decoding and to rules processing.
+This makes it possible to write regular expressions and strings of rules
+in UTF-8 encoding, and allows plugins (such as tokenization in a Bayes
+plugin) to recognize multibyte characters and words in non-English
+languages, instead of 'randomly' considering some non-ASCII octets in
 multibyte characters as delimiters. Please see documentation for this
 configuration option in the Mail::SpamAssassin::Conf man page.
 
