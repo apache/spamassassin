@@ -51,12 +51,12 @@ Plugins are documented in their respective man pages.
 Notable changes
 ---------------
 
-A new subsystem RegistryBoundaries for recognizing and updating
-top-level domains and registry boundaries has been introduced,
-which allows dynamically updating both lists through rule updates,
-instead of having them hard-wired in the code.
+A new subsystem RegistryBoundaries for recognizing and updating a list
+of top-level domains and registry boundaries has been introduced, which
+allows dynamically updating both lists through rule updates instead of
+having them hard-wired in the code.
 
-Subroutine Node::_normalize has been rewritten. The new behavior
+A subroutine Node::_normalize has been rewritten. The new behavior
 is documented with the 'normalize_charset' option in the
 Mail::SpamAssassin::Conf man page. (Bug 7144, Bug 7126, Bug 7133)
 
@@ -66,36 +66,33 @@ in the Bayes plugin. (Bug 7130, Bug 7135, Bug 7141)
 SHA1 digests of all MIME parts (including non-textual) can now be
 contributed to Bayes tokens, which allows the bayes classifier to assess
 also the non-textual content. The set of sources of bayes tokens is
-configurable with a new configuration option 'bayes_token_sources' as
-documented in the Mail::SpamAssassin::Conf man page, disabled by default
-for backward compatibility. (Bug 7115)
+configurable with a new configuration option 'bayes_token_sources'
+as documented in the Mail::SpamAssassin::Conf man page. (Bug 7115)
+It is disabled by default for backward compatibility. 
 
 
 New configuration options
 -------------------------
 
 The 'normalize_charset' configuration option already existed in previous
-versions, but its functionality has been re-implemented to put more
-emphasis on the declared character set of each MIME part, instead of
+versions, but functionality has been re-implemented with more emphasis
+on the declared character set of each textual MIME part, instead of
 relying on guesswork by Encode::Detect::Detector. When enabled, non-UTF8
 textual parts of a mail message are decoded into Unicode and re-encoded
 into UTF-8 before passing them to HTML decoding and to rules processing.
-This makes it possible to write regular expressions and strings of rules
-in UTF-8 encoding, and allows plugins (such as tokenization in a Bayes
-plugin) to recognize multibyte characters and words in non-English
+This makes it easier to write regular expressions and strings in rules
+using UTF-8 encoding, and allows plugins (such as tokenization in a
+Bayes plugin) to recognize multibyte characters and words in non-English
 languages, instead of 'randomly' considering some non-ASCII octets in
 multibyte characters as delimiters. Please see documentation for this
 configuration option in the Mail::SpamAssassin::Conf man page.
 
-The configuration option 'dns_server' can now specify a scoped
-link-local IPv6 address, e.g.:  dns_server [fe80::1%lo0]:53
-
 A new configuration option 'bayes_token_sources' allows more control
-on the sources of tokens for the Bayes plugin. For compatibility
-the default set of sources is unchanged, but consider: 
+on the sources of tokens for the Bayes plugin. For compatibility the
+default set of sources is unchanged, but consider: 
     bayes_token_sources all
 or: bayes_token_sources mimepart
-to include SHA1 digests of all MIME parts of a message as Bayes tokens.
+to include SHA1 digests of all MIME parts in a message as Bayes tokens.
 Please see documentation for this option in the Mail::SpamAssassin::Conf
 man page.
 
@@ -106,13 +103,15 @@ documentation for this option in the Mail::SpamAssassin::Plugin::DKIM
 man page.
 
 A new configuration option 'parse_dkim_uris' allows DKIM header fields
-to be parsed for URIs to process alongside URIs found in the body with
-some rules and modules (e.g. URIDNSBL).
+to be parsed for URIs and to be processed alongside other URIs found in
+the body.
 
-The configuration option 'check_rbl_from_domain' checks all the domain
-names in a From mail address as an alternate to check_rbl_from_host.
-As of v3.4.1, it has been improved to include a subtest for a specific
-octet.
+A configuration option 'dns_server' can now specify a scoped link-local
+IPv6 address, e.g.:  dns_server [fe80::1%lo0]:53 .
+
+The configuration option 'check_rbl_from_domain' checks all domain names
+in a From mail address as an alternate to check_rbl_from_host. As of
+v3.4.1, it has been improved to include a subtest for a specific octet.
 
 
 
