@@ -196,7 +196,7 @@ SPAMASSASSIN RELEASE PROCEDURE
 
   - For a trunk release candidate (x.y.0-rc1), pre-release (x.y.0-preZ) or alpha (x.y.0-alphaZ):
 
-    vers=3_3_0_alpha_2
+    vers=3_4_0_rc_2
 
     Then run:
 
@@ -219,7 +219,8 @@ SPAMASSASSIN RELEASE PROCEDURE
 
   Check out the code from the tag you just made:
 
-    #These should be set from the previous command
+    #These should be set from the previous command unless you are on a
+    #  different server
     #vers=3_3_0_alpha_2 
     #repo=https://svn.apache.org/repos/asf/spamassassin
     rm -rf ~/relbuild
@@ -260,7 +261,8 @@ SPAMASSASSIN RELEASE PROCEDURE
     vi !$
 
   NOTE: Here's a quick example to concat the MD5 or SHA1 checksums:
-        ls *3.4.0*rc6* | grep sha1 | xargs cat --
+        ls *3.4.1*rc2* | grep md5 | xargs cat --
+        ls *3.4.1*rc2* | grep sha1 | xargs cat --
 
 - If there are any issues to note, make sure to edit the UPGRADE file.
   Every x.x.0 release at a minimum should include a section.
@@ -297,7 +299,9 @@ SPAMASSASSIN RELEASE PROCEDURE
 
   http://www.cpan.org/modules/04pause.html#developerreleases
 
-  As of 2014-02-05, adding TRIAL to the filename should work.
+  As of 2014-02-05, adding -TRIAL to the filename should work. For example:
+
+        Mail-SpamAssassin-3.4.1-rc2-TRIAL.tar.gz
 
 - (for a full release) 3 +1's votes from PMC members are required to 
   proceed with an official (not pre-release) ASF software release.
