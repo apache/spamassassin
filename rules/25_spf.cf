@@ -32,12 +32,17 @@ ifplugin Mail::SpamAssassin::Plugin::SPF
 #   "neutral" is somewhat bad
 #   "fail" is bad
 #   "softfail" is bad, but not as bad as "fail"
+#   "permerror" is very bad, and means the domain doesn't have a valid spf record
 # These are more trustworthy results than the SPF_HELO rules.
 
 header SPF_PASS			eval:check_for_spf_pass()
 header SPF_NEUTRAL		eval:check_for_spf_neutral()
 header SPF_FAIL			eval:check_for_spf_fail()
 header SPF_SOFTFAIL		eval:check_for_spf_softfail()
+if can(Mail::SpamAssassin::Plugin::SPF::has_check_for_spf_errors)
+  header T_SPF_PERMERROR		eval:check_for_spf_permerror()
+  header T_SPF_TEMPERROR		eval:check_for_spf_temperror()
+endif
 
 # NOTE: SPF_HELO_PASS is not incredibly hard to fake, so shouldn't
 # provide much in the way of points compared to SPF_PASS et al.
@@ -47,6 +52,10 @@ header SPF_HELO_PASS		eval:check_for_spf_helo_pass()
 header SPF_HELO_NEUTRAL		eval:check_for_spf_helo_neutral()
 header SPF_HELO_FAIL		eval:check_for_spf_helo_fail()
 header SPF_HELO_SOFTFAIL	eval:check_for_spf_helo_softfail()
+if can(Mail::SpamAssassin::Plugin::SPF::has_check_for_spf_errors)
+  header T_SPF_HELO_PERMERROR	eval:check_for_spf_helo_permerror()
+  header T_SPF_HELO_TEMPERROR	eval:check_for_spf_helo_temperror()
+endif
 
 describe SPF_PASS		SPF: sender matches SPF record
 describe SPF_NEUTRAL		SPF: sender does not match SPF record (neutral)
@@ -56,6 +65,12 @@ describe SPF_HELO_PASS		SPF: HELO matches SPF record
 describe SPF_HELO_NEUTRAL	SPF: HELO does not match SPF record (neutral)
 describe SPF_HELO_FAIL		SPF: HELO does not match SPF record (fail)
 describe SPF_HELO_SOFTFAIL	SPF: HELO does not match SPF record (softfail)
+if can(Mail::SpamAssassin::Plugin::SPF::has_check_for_spf_errors)
+  describe T_SPF_PERMERROR        SPF: test of record failed (permerror)
+  describe T_SPF_TEMPERROR        SPF: test of record failed (temperror)
+  describe T_SPF_HELO_PERMERROR	SPF: test of HELO record failed (permerror)
+  describe T_SPF_HELO_TEMPERROR	SPF: test of HELO record failed (temperror)
+endif
 
 # these are "userconf" so that scores are set by hand
 tflags SPF_PASS			nice userconf net
@@ -66,6 +81,12 @@ tflags SPF_SOFTFAIL		net
 tflags SPF_HELO_NEUTRAL	        net
 tflags SPF_HELO_FAIL		net
 tflags SPF_HELO_SOFTFAIL	net
+if can(Mail::SpamAssassin::Plugin::SPF::has_check_for_spf_errors)
+  tflags T_SPF_HELO_PERMERROR	net
+  tflags T_SPF_HELO_TEMPERROR	net
+  tflags T_SPF_PERMERROR          net
+  tflags T_SPF_TEMPERROR          net
+endif
 
 # rules from earlier than current release that can be reused
 reuse  SPF_PASS
@@ -76,6 +97,12 @@ reuse  SPF_HELO_FAIL
 reuse  SPF_HELO_SOFTFAIL
 reuse  SPF_NEUTRAL
 reuse  SPF_HELO_NEUTRAL
+if can(Mail::SpamAssassin::Plugin::SPF::has_check_for_spf_errors)
+  reuse  T_SPF_PERMERROR
+  reuse  T_SPF_TEMPERROR
+  reuse  T_SPF_HELO_PERMERROR
+  reuse  T_SPF_HELO_TEMPERROR
+endif
 
 # Implementing the Sender Check for No SPF REcord defaulting to disabled so Admins can override
 header		SPF_NONE    eval:check_for_spf_none()

@@ -1,4 +1,4 @@
-#!/usr/bin/bash
+#!/bin/bash
 #
 # Continue the updates-building process, post the user approval step.
 # Currently this is interactive as it requires a GPG passphrase entry.
@@ -13,8 +13,9 @@ set -x
 cd /home/updatesd/svn/spamassassin
 
 . /etc/profile
-PERL=/local/perl586/bin/perl
-export PERL 
+#Switched to system perl on spamassassin-vm box
+PERL=/usr/bin/perl
+#PERL=/local/perl586/bin/perl
 
 # download stage, where update tarballs are deposited for downloaders
 #
@@ -37,7 +38,7 @@ dnsdir=/var/named/updates.spamassassin.org.d
 #
 soadir=/var/named/spamassassin.org.d
 
-versions="3.4.0"
+versions="3.4.1"
 
 # ---------------------------------------------------------------------------
 # TODO: if/when this becomes fully automatic, this commit will be superfluous

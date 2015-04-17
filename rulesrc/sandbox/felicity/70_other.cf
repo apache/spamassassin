@@ -31,6 +31,8 @@
 #  4.470   5.2627   0.0000    1.000   1.00    0.00  T_TVD_SILLY_URI_OBFU
 # allow the obfuscation around the tld as well
 body TVD_SILLY_URI_OBFU         m!https?://[a-z0-9-]+\.[a-z0-9-]*\.?[^a-z0-9.:/\s"'\@?\)>-]+[a-z0-9.-]*[a-z]{3}(?:\s|$)!i
+describe TVD_SILLY_URI_OBFU     URI obfuscation that can fool a URIBL or a uri rule
+
 # much more generic -- since the current spammer(s) are using com domains,
 # let's specifically just look for when they do something like "example*com"
 # or "example-com", etc.
@@ -45,37 +47,44 @@ replace_rules FUZZY_SPRM
 # 0.115   0.1326   0.0000    1.000   0.80    0.01  T_FUZZY_MERIDIA
 body FUZZY_MERIDIA      /<inter W3><post P2>\b(?!meridia)<M><E><R><I><D><I><A>\b/i
 replace_rules FUZZY_MERIDIA
+describe FUZZY_MERIDIA  Obfuscation of the word "meridia"
 
 # bug 4773
 body TVD_FUZZY_PHARMACEUTICAL   /<inter W2><post P2>(?!pharmaceutical)<P><H><A><R><M><A><C><E><U><T><I><C><A><L>/i
 replace_rules TVD_FUZZY_PHARMACEUTICAL
+describe TVD_FUZZY_PHARMACEUTICAL  Obfuscation of the word "pharmaceutical"
 
 body TVD_FUZZY_SYMBOL   /<inter W2><post P2>(?!symbol)<S><Y><M><B><O><L>/i
 replace_rules TVD_FUZZY_SYMBOL
+describe TVD_FUZZY_SYMBOL  Obfuscation of the word "symbol"
 
 # I think the FPs are small enough to accept the extra spam hit rate, but the
 # other one is still here if we want to get S/O of 1.0.
 # 1.740   2.1249   0.0000    1.000   0.89    1.00  TVD_FUZZY_SECURITIES2
 # 1.912   2.3312   0.0135    0.994   0.88    1.00  TVD_FUZZY_SECURITIES
-body TVD_FUZZY_SECURITIES       /<inter W2><post P2>(?!securities)<S><E><C><U><R><I><T><I><E><S>/i
+body TVD_FUZZY_SECURITIES       /<inter W2><post P2>(?!securities)(?!security es)<S><E><C><U><R><I><T><I><E><S>/i
 replace_rules TVD_FUZZY_SECURITIES
 #body TVD_FUZZY_SECURITIES2     /(?!securities)<S><E><C><U><R><I><T><I><E><S>/i
 #replace_rules TVD_FUZZY_SECURITIES2
 
 body TVD_FUZZY_FINANCE  /(?!finance)<F><I><N><A><N><C><E>/i
 replace_rules TVD_FUZZY_FINANCE
+describe TVD_FUZZY_FINANCE  Obfuscation of the word "finance"
 
 body TVD_FUZZY_FIXED_RATE       /<inter W2><post P2>(?!fixed rate)<F><I><X><E><D>\s+<R><A><T><E>/i
 replace_rules TVD_FUZZY_FIXED_RATE
+describe TVD_FUZZY_FIXED_RATE   Obfuscation of the phrase "fixed rate"
 
 body TVD_FUZZY_MICROCAP /<inter W2><post P2>(?!microcap)(?!micro-cap)<M><I><C><R><O>-?<C><A><P>/i
 replace_rules TVD_FUZZY_MICROCAP
+describe TVD_FUZZY_MICROCAP  Obfuscation of the word "micro-cap"
 
 body TVD_FUZZY_SECTOR   /(?!sector)<S><E><C><T><O><R>/i
 replace_rules TVD_FUZZY_SECTOR
 
 # 0.318   0.3838   0.0000    1.000   1.00    0.01  TVD_FUZZY_DEGREE
 body TVD_FUZZY_DEGREE   /<inter W1><post P1>\b(?!degree)<D><E><G><R><E><E>\b/i
+describe TVD_FUZZY_DEGREE  Obfuscation of the word "degree"
 replace_rules TVD_FUZZY_DEGREE
 
 endif
@@ -84,23 +93,30 @@ endif
 
 # 0.181   0.2347   0.0000    1.000   0.68    0.01  T_DEAR_WINNER
 body DEAR_WINNER /\bdear.{1,20}winner/i
+describe DEAR_WINNER   Spam with generic salutation of "dear winner"
 
 # 18.685  24.1565   0.0671    0.997   0.87    0.01  T_SUBJECT_NEEDS_ENCODING
 meta SUBJECT_NEEDS_ENCODING    (!__SUBJECT_ENCODED_B64 && !__SUBJECT_ENCODED_QP) && __SUBJECT_NEEDS_MIME
+describe SUBJECT_NEEDS_ENCODING  Subject is encoded but does not specify the encoding
 
 # 0.310   0.4008   0.0000    1.000   0.74    0.01  T_DRUGS_HDIA
 header DRUGS_HDIA       Subject =~ /\bhoodia\b/i
+describe DRUGS_HDIA     Subject mentions "hoodia"
 
 # 0.197   0.2525   0.0066    0.974   0.67    0.01  T_TVD_FROM_1
 header TVD_FROM_1       From:addr =~ /[^\@0-9]{2}\d{3}\.(?:com|net|org|info|biz)$/i
 #KAM: 2013-05-17 added 1.0 to put a ceiling on this score because it's currently hitting 3.5 which is far too high
 score  TVD_FROM_1	1.0
+describe TVD_FROM_1  From address appears to be a throwaway domain
 
 # doesn't hit a lot, but seems to hit mostly on phishing mails
 # 0.062   0.0800   0.0000    1.000   0.58    0.01  T_TVD_RATWARE_CB
 header TVD_RATWARE_CB           Content-Type =~ /\bboundary\b.{1,40}qzsoft_directmail_seperator/i
+describe TVD_RATWARE_CB         Content-Type header that is commonly indicative of ratware
 
 header TVD_SUBJ_WIPE_DEBT       Subject =~ /(?:wipe out|remove|get (?:rid|out) of|eradicate) .{0,20}(?:owe|debt|obligation)/i
+describe TVD_SUBJ_WIPE_DEBT     Spam advertising a way to eliminate debt
+
 header TVD_SUBJ_APPR_LOAN       Subject =~ /approved? .{0,20}loan/i
 
 header __HEAD_X_KERNEL          exists:X-Kernel
@@ -111,20 +127,36 @@ header TVD_HEAD_EDITION exists:X-Edition
 header TVD_HEAD_USR             exists:X-Usr
 
 body TVD_ACT_193                /\bact of (?:193|nineteen thirty)/i
+describe TVD_ACT_193            Message refers to an act passed in the 1930s
+
 body TVD_APPROVED               /you.{1,2}re .{0,20}approved/i
+describe TVD_APPROVED           Body states that the recipient has been approved
+
 body TVD_APP_LOAN               /approved .{0,20}loan/i
 body TVD_COMPANY_PICK           /company .{2,20}hot pick/i
+
 body TVD_DEAR_HOMEOWNER         /^dear homeowner/i
+describe TVD_DEAR_HOMEOWNER     Spam with generic salutation of "dear homeowner"
+
 body TVD_ENHANCE                /(?:enhanc(?:e(?:ment)?|ing)|improv(?:e|ing)) .{0,20}sexual (?:stamina|performance)/i
-body TVD_GET_STOCK              /(?i:OTC).{2,8}(?:[A-Z]\s*){3,5}\b/
+body __TVD_GET_STOCK            /(?i:OTC)[^-\/\\'.]{2,8}(?:[A-Z]\s*){3,5}\b/
+meta TVD_GET_STOCK              __TVD_GET_STOCK && !__VIA_ML && !__DKIM_EXISTS && !__LCL__ENV_AND_HDR_FROM_MATCH && !__RP_MATCHES_RCVD && !__BUGGED_IMG && !__MSOE_MID_WRONG_CASE 
+
 body TVD_INCREASE_SIZE          /\bsize of .{1,20}(?:penis|dick|manhood)/i
+describe TVD_INCREASE_SIZE      Advertising for penis enlargement
+
 body TVD_LONG_WORD5             /^(?:(?:\w+,?\s+)\.)+\s*$/
 body TVD_NOT_SATISFIED          /not satisfied .{1,32}(?:lover|size)/i
+
 body TVD_SECTION                /\bSection (?:27A|21B)/i
+describe TVD_SECTION            References to specific legal codes
+
 body TVD_UNDER_VALUED           /(?:company|stock) .{1,20}under-?valued/i
 body TVD_VISIT_PHARMA           /Online Ph.rmacy/i
+describe TVD_VISIT_PHARMA       Body mentions online pharmacy
 
 header TVD_SUBJ_OWE Subject =~ /^\s*(?:\w+\s+)+you\s+(?:\w+\s+)*(?:owe|indebted)\s+(?:\w+\s+)+an\s*other/i
+describe TVD_SUBJ_OWE  Subject line states that the recipieint is in debt
 
 #  0.153   0.1870   0.0000    1.000   0.64    0.01  TVD_DOLLARS_US
 body TVD_DOLLARS_US /\s\d[\d.,]+US/
@@ -158,7 +190,10 @@ mimeheader TVD_FW_GRAPHIC_ID2   Content-Id =~ /<(?:[0-9A-F]{8}\.){3}[0-9A-F]{8}/
 mimeheader __TVD_OUTLOOK_IMG    Content-Id =~ /<image\d+\.(?:gif|jpe?g|png)\@/
 
 mimeheader TVD_FW_GRAPHIC_NAME_LONG     Content-Type =~ /\bname="[a-z]{8,}\.gif/
+describe   TVD_FW_GRAPHIC_NAME_LONG     Long image attachment name
+
 mimeheader TVD_FW_GRAPHIC_NAME_MID      Content-Type =~ /\bname="[a-z]{6,7}\.gif/
+describe   TVD_FW_GRAPHIC_NAME_MID      Medium sized image attachment name
 
 endif
 
@@ -190,6 +225,8 @@ rawbody TVD_SINGLE_SPAN_DIV />\s+[a-zA-Z]\s+<\/(?:span|div)\b/i
 # 1.100   1.3379   0.0000    1.000   0.87    0.01  T_TVD_FLOAT_GENERAL5
 # was TVD_FLOAT_GENERAL4 ...
 rawbody TVD_FLOAT_GENERAL       /\bstyle\s*=\s*"[^"]*\bfloat\s*:\s*[a-z]+\s*">\s*[a-zA-Z]+\s*</i
+describe TVD_FLOAT_GENERAL      Message uses CSS float style
+
 #rawbody T_TVD_FLOAT_GENERAL5   /\bstyle="[^"]*\bfloat\s*:\s*[a-z]+\s*">\s*[a-zA-Z]\s*</i
 #rawbody T_TVD_FLOAT_GENERAL6   /\bstyle="[^"]*\bfloat\s*:\s*[a-z]+\s*">\s*(?-i:[a-z])+\s*</i
 
@@ -201,6 +238,7 @@ body TVD_DEAD_JOB /\bTired of working a dead end job\s*\?/i
 
 # 0.425   0.5130   0.0000    1.000   1.00    0.01  TVD_SUBJ_FINGER_03
 header TVD_SUBJ_FINGER_03       Subject =~ /^\s*\*\s+(?:\w+\W+)+\*\s*$/
+describe TVD_SUBJ_FINGER_03     Entire subject is enclosed in asterisks "* like so *"
 
 # Re: VI w AGRA
 # Re: XANAboX
@@ -210,6 +248,8 @@ header TVD_SUBJ_FINGER_03       Subject =~ /^\s*\*\s+(?:\w+\W+)+\*\s*$/
 #header TVD_SPACED_SUBJECT_WORD2        Subject =~ /^Re: [A-Z]+ [a-z] [A-Z]+$/
 #header TVD_SPACED_SUBJECT_WORD4        Subject =~ /^Re: [A-Z]+[a-z]+[A-Z]+$/
 header TVD_SPACED_SUBJECT_WORD3 Subject =~ /^(?:(?:Re|Fw)[^:]{0,5}: )?[A-Z]+[a-z]+[A-Z]+$/
+describe TVD_SPACED_SUBJECT_WORD3  Entire subject is "UPPERlowerUPPER" with no whitespace
+
 header TVD_SPACED_SUBJECT_WORD5 Subject =~ /^(?:(?:Re|Fw)[^:]{0,5}: )?[A-Z]+\s*[a-z]+\s*[A-Z]+$/
 
 # V I A G R i A
@@ -220,6 +260,7 @@ body TVD_SPACED_WORDS   /^(?:[A-Z]\s)+[a-z]\s(?:[A-Z]\s)+$/
 # this came up on the users list, good results for me:
 # 0.821   0.9903   0.0000    1.000   1.00    1.00  TVD_VIS_HIDDEN
 rawbody TVD_VIS_HIDDEN /<TEXTAREA[^>]+style\s*=\s*"visibility:\s*hidden\b/i
+describe TVD_VIS_HIDDEN Invisible textarea HTML tags
 
 # 0.255   0.3074   0.0000    1.000   1.00    0.01  TVD_RATWARE_MSGID_01
 header TVD_RATWARE_MSGID_01     Message-ID =~ /<[a-z0-9]{2}-/
@@ -234,13 +275,20 @@ header TVD_SUBJ_FINGER_04       Subject =~ /^(?:(?:Re|Fw)[^:]{0,5}: )?[A-Z]+[\/a
 # 0.044   0.0527   0.0000    1.000   0.33    0.01  T_TVD_BODY_END_STAR
 header TVD_SUBJ_END_STAR        Subject =~ /(?:[A-Z0-9]+\*[,\s]+){2}/
 body TVD_BODY_END_STAR          /(?:[A-Z0-9]+\*[,\s]+){2}/
+
 body TVD_QUAL_MEDS              /\bquality med(?:ication)?s\b/i
+describe TVD_QUAL_MEDS          The body matches phrases such as "quality meds" or "quality medication"
+
 body TVD_LINK_SAVE              /\blink to save\b/i
+describe TVD_LINK_SAVE          Spam with the text "link to save"
+
 header TVD_RATWARE_CB_2         Content-Type =~ /\bboundary\s*=\s*"?-+\d+=+\.MRA/
+describe TVD_RATWARE_CB_2       Content-Type header that is commonly indicative of ratware
 
 # 0.650   0.7944   0.0000    1.000   1.00    0.01  TVD_MSGID_LOWERCASE
 # this came up on the irc channel
 header TVD_RATWARE_MSGID_02     Message-ID =~ /^[^<]*<[a-z]+\@/
+describe TVD_RATWARE_MSGID_02   Ratware with a Message-ID header that is entirely lower-case
 
 ########################################################################
 #loadplugin Mail::SpamAssassin::Plugin::Sandbox::felicity sandbox-felicity.pm
@@ -256,7 +304,10 @@ ifplugin Mail::SpamAssassin::Plugin::MIMEEval
 #  0.798   0.9651   0.0000    1.000   0.86    0.00  BASE64_LENGTH_79_INF
 #  0.170   0.2047   0.0020    0.990   0.69    0.00  BASE64_LENGTH_78_79
 body BASE64_LENGTH_78_79        eval:check_base64_length('78','79')
+describe BASE64_LENGTH_79_INF   base64 encoded email part uses line length of 78 or 79 characters
+
 body BASE64_LENGTH_79_INF       eval:check_base64_length('79')
+describe BASE64_LENGTH_79_INF   base64 encoded email part uses line length greater than 79 characters
 
 # 0.177   0.2037   0.0000    1.000   0.00    0.00  TVD_MIME_EPI
 # with one exception, my FPs are all mails through mailing lists that tack on
@@ -298,10 +349,14 @@ header TVD_RCVD_SPACE_BRACKET Received =~ /\(\[(?!UNIX:)[^\[\]]*\s/
 #  12.405  14.5584   0.0000    1.000   1.00    1.00  TVD_RCVD_IP
 #   6.088   7.1444   0.0000    1.000   0.50    1.00  TVD_RCVD_IP4
 header TVD_RCVD_IP4 Received =~ /^from\s+(?:\d+\.){3}\d+\s/
+describe TVD_RCVD_IP4  Message was received from an IPv4 address
+
 header TVD_RCVD_IP  Received =~ /^from\s+(?:\d+[^0-9a-zA-Z\s]){3}\d+[.\s]/
+describe TVD_RCVD_IP  Message was received from an IP address
 
 #   1.265   1.4843   0.0000    1.000   1.00    1.00  TVD_RCVD_046
 header TVD_RCVD_SINGLE Received =~ /^from\s+(?!localhost)[^\s.a-z0-9-]+\s/
+describe TVD_RCVD_SINGLE  Message was received from localhost
 
 
 ifplugin Mail::SpamAssassin::Plugin::HeaderEval
@@ -315,12 +370,15 @@ endif
 # 13.245  14.9333   0.0000    1.000   1.00    1.00  RCVD_BAD_ID
 # bug 6073, removed colon
 header RCVD_BAD_ID      Received =~ /\bid\s+[a-zA-Z0-9_+\/\\,-]+(?:[!"\#\$\%&'()*<=>?\@\[\]^\`{|}~]|;\S)/
+describe RCVD_BAD_ID    Received header contains id field with bad characters
 
 # 8.791  10.1359   0.0000    1.000   1.00    1.00  TVD_ENVFROM_APOST
 header TVD_ENVFROM_APOST        EnvelopeFrom =~ /\'/
+describe TVD_ENVFROM_APOST      Envelope From contains single-quote
 
 ifplugin Mail::SpamAssassin::Plugin::BodyEval
 body TVD_STOCK1    eval:check_stock_info('2')
+describe TVD_STOCK1  Spam related to stock trading
 endif
 
 # don't use body
@@ -328,7 +386,7 @@ rawbody __TVD_BODY      /\S{4}/
 
 ## look for specific content-types
 header __TVD_MIME_CT_MM Content-Type =~ /^multipart\/mixed/i
-ifplugin Mail::SpamAssassin::Plugin::MIMEEval
+ifplugin Mail::SpamAssassin::Plugin::MIMEHeader
 mimeheader __TVD_MIME_ATT_TP    Content-Type =~ /^text\/plain/i
 mimeheader __TVD_MIME_ATT_AP    Content-Type =~ /^application\/pdf/i
 mimeheader __TVD_MIME_ATT_AOPDF Content-Type =~ /^application\/octet-stream.*\.pdf/i

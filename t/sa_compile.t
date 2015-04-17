@@ -4,6 +4,10 @@ use lib '.'; use lib 't';
 $ENV{'TEST_PERL_TAINT'} = 'no';     # inhibit for this test
 use SATest; sa_t_init("sa_compile");
 use Test;
+use Config;
+
+my $temp_binpath = $Config{sitebinexp};
+$temp_binpath =~ s/^\Q$Config{prefix}\E//;
 
 # called from BEGIN
 sub re2c_version_new_enough {
@@ -51,7 +55,7 @@ if ($INST_FROM_SCRATCH) {
   system_or_die "cd .. && make tardist";
   system("rm -rf $builddir");
   system("mkdir -p $builddir");
-  system_or_die "cd $builddir && gunzip -cd $cwd/../Mail-SpamAssassin-*.tar.gz | tar xf -";
+  system_or_die "cd $builddir && gunzip -c $cwd/../Mail-SpamAssassin-*.tar.gz | tar xf -";
   system_or_die "cd $builddir && mv Mail-SpamAssassin-* x";
 }
 
@@ -113,7 +117,7 @@ $INST_FROM_SCRATCH and run_makefile_pl "PREFIX=$instdir/foo";
 
 # we now have an "installed" version we can run sa-compile with.  Ensure
 # sarun() will use it appropriately
-$scr = "$instdir/foo/bin/spamassassin";
+$scr = "$instdir/foo/$temp_binpath/spamassassin";
 $scr_localrules_args = $scr_cf_args = "";      # use the default rules dir, from our "install"
 
 set_rules q{
@@ -135,14 +139,14 @@ clear_pattern_counters();
 
 # -------------------------------------------------------------------
 
-system_or_die "$instdir/foo/bin/sa-compile --keep-tmps";  # --debug
+system_or_die "$instdir/foo/$temp_binpath/sa-compile --keep-tmps";  # --debug
 %patterns = (
 
   q{ able to use 1/1 'body_0' compiled rules }, 'able-to-use',
   q{ check: tests=FOO }, 'FOO'
 
 );
-$scr = "$instdir/foo/bin/spamassassin";
+$scr = "$instdir/foo/$temp_binpath/spamassassin";
 $scr_localrules_args = $scr_cf_args = "";      # use the default rules dir, from our "install"
 ok sarun ("-D -Lt < $cwd/data/spam/001 2>&1", \&patterns_run_cb);
 ok_all_patterns();

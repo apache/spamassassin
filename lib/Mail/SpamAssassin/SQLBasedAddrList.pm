@@ -328,9 +328,9 @@ sub add_score {
     # insert failed, assume primary key constraint, so try the update
 
     my $sql = "UPDATE $self->{tablename} ".
-              "SET count = count + 1, totscore = totscore + ? ".
+              "SET count = ?, totscore = totscore + ? ".
               "WHERE username = ? AND email = ?";
-    my(@args) = ($score, $self->{_username}, $email);
+    my(@args) = ($entry->{count}, $score, $self->{_username}, $email);
     if ($self->{_with_awl_signer}) {
       my @signedby = !defined $signedby ? () : split(' ', lc $signedby);
       if (!@signedby) {

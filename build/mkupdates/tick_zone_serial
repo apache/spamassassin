@@ -1,4 +1,4 @@
-#!/usr/bin/bash
+#!/bin/bash
 #
 # Increment the spamassassin.org DNS zone's serial number, and trigger
 # a zone update against the DNS server.
@@ -48,8 +48,8 @@ newserial=`perl -e '
   my @t = localtime time;
   printf "%04d%02d%02d%02d", $t[5]+1900, $t[4]+1, $t[3], $count;
 
-  open (INCR, ">'"$soadir"'/counter") or die "open failed $soadir";
-  print INCR $count,"\n"; close INCR or die "close failed $soadir";
+  open (INCR, ">'"$soadir"'/counter") or die "open failed '"$soadir"'";
+  print INCR $count,"\n"; close INCR or die "close failed '"$soadir"'";
 
 ' -- $oldcount`
 

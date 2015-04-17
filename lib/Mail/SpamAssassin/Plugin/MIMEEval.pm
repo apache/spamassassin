@@ -26,6 +26,7 @@ use Mail::SpamAssassin::Plugin;
 use Mail::SpamAssassin::Locales;
 use Mail::SpamAssassin::Constants qw(:sa CHARSETS_LIKELY_TO_FP_AS_CAPS);
 use Mail::SpamAssassin::Util qw(untaint_var);
+use Mail::SpamAssassin::Logger;
 
 use vars qw(@ISA);
 @ISA = qw(Mail::SpamAssassin::Plugin);
@@ -46,10 +47,13 @@ sub new {
   $self->register_eval_rule("check_for_mime_html_only");
   $self->register_eval_rule("check_mime_multipart_ratio");
   $self->register_eval_rule("check_msg_parse_flags");
+  $self->register_eval_rule("check_for_ascii_text_illegal");
+  $self->register_eval_rule("check_abundant_unicode_ratio");
   $self->register_eval_rule("check_for_faraway_charset");
   $self->register_eval_rule("check_for_uppercase");
   $self->register_eval_rule("check_ma_non_text");
   $self->register_eval_rule("check_base64_length");
+  $self->register_eval_rule("check_qp_ratio");
 
   return $self;
 }
@@ -64,6 +68,56 @@ sub are_more_high_bits_set {
   my $numlos = length($str) - $numhis;
 
   ($numlos <= $numhis && $numhis > 3);
+}
+=over 4
+
+=item has_check_for_ascii_text_illegal
+
+Adds capability check for "if can()" for check_for_ascii_text_illegal
+
+=cut
+
+sub has_check_for_ascii_text_illegal { 1 }
+
+=item check_for_ascii_text_illegal
+
+If a MIME part claims to be text/plain or text/plain;charset=us-ascii and the Content-Transfer-Encoding is 7bit (either explicitly or by default), then we should enforce the actual text being only TAB, NL, SPACE through TILDE, i.e. all 7bit characters excluding NO-WS-CTL (per RFC-2822).
+
+All mainstream MTA's get this right.
+
+=cut
+
+sub check_for_ascii_text_illegal {
+  my ($self, $pms) = @_;
+
+  $self->_check_attachments($pms) unless exists $pms->{mime_ascii_text_illegal};
+  return ($pms->{mime_ascii_text_illegal} > 0);
+}
+
+=item has_check_abundant_unicode_ratio
+
+Adds capability check for "if can()" for check_abundant_unicode_ratio
+
+=cut
+
+sub has_check_abundant_unicode_ratio { 1 }
+
+=item check_abundant_unicode_ratio
+
+A MIME part claiming to be text/plain and containing Unicode characters must be encoded as quoted-printable or base64, or use UTF data coding (typically with 8bit encoding).  Any message in 7bit or 8bit encoding containing (HTML) Unicode entities will not render them as Unicode, but literally.
+
+Thus a few such sequences might occur on a mailing list of developers discussing such characters, but a message with a high density of such characters is likely spam.
+
+=cut
+
+sub check_abundant_unicode_ratio {
+  my ($self, $pms, undef, $ratio) = @_;
+
+  # validate ratio?
+  return 0 unless ($ratio =~ /^\d{0,3}\.\d{1,3}$/);
+
+  $self->_check_attachments($pms) unless exists $pms->{mime_text_unicode_ratio};
+  return ($pms->{mime_text_unicode_ratio} >= $ratio);
 }
 
 sub check_for_faraway_charset {
@@ -220,6 +274,9 @@ sub _check_attachments {
   my @part_bytes;		# MIME part total bytes
   my @part_type;		# MIME part types
 
+  my $normal_chars = 0;		# MIME text bytes that aren't encoded
+  my $unicode_chars = 0;	# MIME text bytes that are unicode entities
+
   # MIME header information
   my $part = -1;		# MIME part index
 
@@ -244,6 +301,8 @@ sub _check_attachments {
   # $pms->{mime_qp_inline_no_charset} = 0;
   $pms->{mime_qp_long_line} = 0;
   $pms->{mime_qp_ratio} = 0;
+  $pms->{mime_ascii_text_illegal} = 0;
+  $pms->{mime_text_unicode_ratio} = 0;
 
   # Get all parts ...
   foreach my $p ($pms->{msg}->find_parts(qr/./)) {
@@ -336,12 +395,50 @@ sub _check_attachments {
 	  }
         }
       }
+
+      # if our charset is ASCII, this should only contain 7-bit characters
+      # except NUL or a free-standing CR. anything else is a violation of
+      # the definition of charset="us-ascii".
+      if ($ctype eq 'text/plain' && (!defined $charset || $charset eq 'us-ascii')) {
+        # no re "strict";  # since perl 5.21.8: Ranges of ASCII printables...
+        if (m/[\x00\x0d\x80-\xff]+/) {
+          if (would_log('dbg', 'eval')) {
+            my $str = $_;
+            $str =~ s/([\x00\x0d\x80-\xff]+)/'<' . unpack('H*', $1) . '>'/eg;
+            dbg("check: ascii_text_illegal: matches " . $str . "\n");
+          }
+          $pms->{mime_ascii_text_illegal}++;
+        }
+      }
+
+      # if we're text/plain, we should never see unicode escapes in this
+      # format, especially not for 7bit or 8bit.
+      if ($ctype eq 'text/plain' && ($cte eq '' || $cte eq '7bit' || $cte eq '8bit')) {
+        my ($text, $subs) = $_;
+
+        $subs = $text =~ s/&#x[0-9A-F]{4};//g;
+        $normal_chars += length($text);
+        $unicode_chars += $subs;
+
+        if ($subs && would_log('dbg', 'eval')) {
+          my $str = $_;
+          $str = substr($str, 0, 512) . '...' if (length($str) > 512);
+          dbg("check: abundant_unicode: " . $str . " (" . $subs . ")\n");
+        }
+      }
+
       $previous = $_;
     }
   }
 
   if ($qp_bytes) {
     $pms->{mime_qp_ratio} = $qp_count / $qp_bytes;
+    $pms->{mime_qp_count} = $qp_count;
+    $pms->{mime_qp_bytes} = $qp_bytes;
+  }
+
+  if ($normal_chars) {
+    $pms->{mime_text_unicode_ratio} = $unicode_chars / $normal_chars;
   }
 
   if ($pms->{mime_multipart_alternative}) {
@@ -371,6 +468,34 @@ sub _check_attachments {
     }
   }
 }
+
+=item has_check_qp_ratio
+
+Adds capability check for "if can()" for check_qp_ratio
+
+=cut
+sub has_check_qp_ratio { 1 }
+
+=item check_qp_ratio
+
+Takes a min ratio to use in eval to see if there is an spamminess to the ratio of 
+quoted printable to total bytes in an email.
+
+=back
+
+=cut
+sub check_qp_ratio {
+  my ($self, $pms, undef, $min) = @_;
+
+  $self->_check_attachments($pms) unless exists $pms->{mime_checked_attachments};
+
+  my $qp_ratio = $pms->{mime_qp_ratio};
+
+  dbg("eval: qp_ratio - %s - check for min of %s", $qp_ratio, $min);
+
+  return (defined $qp_ratio && $qp_ratio >= $min) ? 1 : 0;
+}
+
 
 sub check_msg_parse_flags {
   my($self, $pms, $type, $type2) = @_;

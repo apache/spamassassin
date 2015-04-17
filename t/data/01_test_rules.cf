@@ -231,7 +231,7 @@ redirector_pattern      m'^https?:/*(?:[^/]+\.)?emf\d\.com/r\.cfm.*?&r=(.*)'i
 
 ifplugin Mail::SpamAssassin::Plugin::DCC
 full DCC_CHECK          eval:check_dcc()
-describe DCC_CHECK      Listed in DCC (http://rhyolite.com/anti-spam/dcc/)
+describe DCC_CHECK      Detected as bulk mail by DCC (dcc-servers.net)
 tflags DCC_CHECK        net
 reuse DCC_CHECK
 endif

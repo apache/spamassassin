@@ -1,5 +1,6 @@
 package Mail::SpamAssassin::Plugin::FreeMail;
 use strict;
+use warnings;
 my $VERSION = 2.002;
 
 ### About:
@@ -109,30 +110,12 @@ my $VERSION = 2.002;
 
 use Mail::SpamAssassin::Plugin;
 use Mail::SpamAssassin::PerMsgStatus;
-use Mail::SpamAssassin::Util::RegistrarBoundaries;
-use vars qw(@ISA);
+
+use vars qw(@ISA $email_whitelist $skip_replyto_envfrom);
 @ISA = qw(Mail::SpamAssassin::Plugin);
 
-# List of TLDs from RegistrarBoundaries.pm
-my $tlds = $Mail::SpamAssassin::Util::RegistrarBoundaries::VALID_TLDS_RE;
-
-### Some regexp tips courtesy of http://www.regular-expressions.info/email.html
-### v 0.02
-# full email regex
-my $email_regex = qr/
-  (?=.{0,64}\@)				# limit userpart to 64 chars (and speed up searching?)
-  (?<![a-z0-9!#$%&'*+\/=?^_`{|}~-])	# start boundary
-  (					# capture email
-  [a-z0-9!#$%&'*+\/=?^_`{|}~-]+		# no dot in beginning
-  (?:\.[a-z0-9!#$%&'*+\/=?^_`{|}~-]+)*	# no consecutive dots, no ending dot
-  \@
-  (?:[a-z0-9](?:[a-z0-9-]{0,59}[a-z0-9])?\.){1,4} # max 4x61 char parts (should be enough?)
-  ${tlds}				# ends with valid tld
-  )
-  (?!(?:[a-z0-9-]|\.[a-z0-9]))		# make sure domain ends here
-/xi;
 # default email whitelist
-my $email_whitelist = qr/
+$email_whitelist = qr/
   ^(?:
       abuse|support|sales|info|helpdesk|contact|kontakt
     | (?:post|host|domain)master
@@ -146,7 +129,8 @@ my $email_whitelist = qr/
 
 # skip replyto check when envelope sender is
 # allow <> for now
-my $skip_replyto_envfrom = qr/
+{ # no re "strict";  # since perl 5.21.8: Ranges of ASCII printables...
+  $skip_replyto_envfrom = qr/
   (?:
       ^(?:post|host|domain)master
     | ^double-bounce
@@ -156,7 +140,7 @@ my $skip_replyto_envfrom = qr/
     | .+=.+
   )\@
 /xi;
-
+}
 
 sub dbg { Mail::SpamAssassin::Plugin::dbg ("FreeMail: @_"); }
 
@@ -173,6 +157,22 @@ sub new {
     $self->register_eval_rule("check_freemail_from");
     $self->register_eval_rule("check_freemail_header");
     $self->register_eval_rule("check_freemail_body");
+
+    # Need to init the regex here, utilizing registryboundaries->valid_tlds_re
+    # Some regexp tips courtesy of http://www.regular-expressions.info/email.html
+    # full email regex v0.02
+    $self->{email_regex} = qr/
+      (?=.{0,64}\@)				# limit userpart to 64 chars (and speed up searching?)
+      (?<![a-z0-9!#\$%&'*+\/=?^_`{|}~-])	# start boundary
+      (						# capture email
+      [a-z0-9!#\$%&'*+\/=?^_`{|}~-]+		# no dot in beginning
+      (?:\.[a-z0-9!#\$%&'*+\/=?^_`{|}~-]+)*	# no consecutive dots, no ending dot
+      \@
+      (?:[a-z0-9](?:[a-z0-9-]{0,59}[a-z0-9])?\.){1,4} # max 4x61 char parts (should be enough?)
+      $self->{main}->{registryboundaries}->{valid_tlds_re}	# ends with valid tld
+      )
+      (?!(?:[a-z0-9-]|\.[a-z0-9]))		# make sure domain ends here
+    /xi;
 
     return $self;
 }
@@ -329,7 +329,7 @@ sub _parse_body {
         my $parsed = $pms->get_uri_detail_list();
         while (my($uri, $info) = each %{$parsed}) {
             if (defined $info->{types}->{a} and not defined $info->{types}->{parsed}) {
-                if ($uri =~ /^(?:(?i)mailto):${email_regex}/) {
+                if ($uri =~ /^(?:(?i)mailto):$self->{email_regex}/) {
                     my $email = lc($1);
                     push(@body_emails, $email) unless defined $seen{$email};
                     $seen{$email} = 1;
@@ -345,8 +345,8 @@ sub _parse_body {
             s#<?https?://\S{0,255}(?:\@|%40)\S{0,255}# #gi;
             # strip emails contained in <>, not mailto:
             # also strip ones followed by quote-like "wrote:" (but not fax: and tel: etc)
-            s#<?(?<!mailto:)${email_regex}(?:>|\s{1,10}(?!(?:fa(?:x|csi)|tel|phone|e?-?mail))[a-z]{2,11}:)# #gi;
-            while (/$email_regex/g) {
+            s#<?(?<!mailto:)$self->{email_regex}(?:>|\s{1,10}(?!(?:fa(?:x|csi)|tel|phone|e?-?mail))[a-z]{2,11}:)# #gi;
+            while (/$self->{email_regex}/g) {
                 my $email = lc($1);
                 push(@body_emails, $email) unless defined $seen{$email};
                 $seen{$email} = 1;

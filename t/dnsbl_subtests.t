@@ -49,7 +49,7 @@ printf("Using %s [%s]:%s for a spawned test DNS server\n",
        $use_inet4 ? 'inet' : 'inet6',
        $dns_server_localaddr, $dns_server_localport);
 
-# test zones
+# test zone names (lowercase!)
 my $z  = 'sa1-dbl-test.spamassassin.org';
 my $z2 = 'sa2-dbl-test.spamassassin.org';
 
@@ -207,7 +207,10 @@ sub reply_handler {
     }
   }
   # special DBL test case - numerical IP query handling
-  if ($qclass_uc eq 'IN' && $qname =~ /^[0-9.]+\.(?:\Q$z\E|\Q$z2\E)\z/is) {
+    # Bug 6983: Uninitialized value in lc in t/dnsbl_subtests for X_URIBL_Y_255A
+    # Unicode case folding bug present in at least perl-5.8.[678], fixed 5.8.9
+    # avoid case-insensitive regexp match, $z and $z2 are already in lowercase
+  if ($qclass_uc eq 'IN' && lc $qname =~ /^[0-9.]+\.(?:\Q$z\E|\Q$z2\E)\z/s) {
     $rcode = 'NOERROR';
     if ($qtype_uc eq 'A' || $qtype_uc eq 'ANY') {
       push(@ans, Net::DNS::RR->new(join(' ',
@@ -362,7 +365,22 @@ test_samples(
 
 if ($pid) {
   kill('TERM',$pid) or die "Cannot stop a DNS server [$pid]: $!";
-  waitpid($pid,0);
+
+# Bug 7000: Seems like a DNS server process can't be terminated. [...]
+# Reason is "waitpid($pid,0)". If commented out, it does not hang.
+# There are no extra processes after end of this test.
+#
+# perlfunc: waitpid - waiting for a particular pid with FLAGS of 0 is
+# implemented everywhere
+#
+# perlport: (Win32) waitpid Can only be applied to process handles returned
+# for processes spawned using "system(1, ...)" or pseudo processes created
+# with "fork()".
+#
+# so ... waitpid($pid,0) should work on Windows, but it doesn't - nevermind:
+
+  waitpid($pid,0) unless $RUNNING_ON_WINDOWS;
+
   undef $pid;
 }
 

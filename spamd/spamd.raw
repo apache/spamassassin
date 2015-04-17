@@ -39,7 +39,8 @@ BEGIN {
 }
 
 use vars qw($have_getaddrinfo_in_core $have_getaddrinfo_legacy
-            $io_socket_module_name $have_inet4 $have_inet6);
+            $io_socket_module_name $have_inet4 $have_inet6
+            $ai_addrconfig_flag);
 # don't force requirement on IO::Socket::IP or IO::Socket::INET6
 BEGIN {
   use Socket qw(:DEFAULT IPPROTO_TCP);
@@ -73,15 +74,25 @@ BEGIN {
 
   &AF_UNSPEC; &AF_INET; &AF_INET6;  # enable inlining
 
+  $ai_addrconfig_flag = 0;
+
   if ($have_getaddrinfo_in_core) {
     # using a modern Socket module
+
+    eval {  # does the operating system recognize an AI_ADDRCONFIG flag?
+      if (&AI_ADDRCONFIG && &EAI_BADFLAGS) {
+        my($err, @res) = Socket::getaddrinfo("localhost", 0,
+                           { family => &AF_UNSPEC, flags => &AI_ADDRCONFIG });
+        $ai_addrconfig_flag = &AI_ADDRCONFIG if !$err || $err != &EAI_BADFLAGS;
+      }
+    };
 
     *ip_or_name_to_ip_addresses = sub {
       my($addr, $ai_family) = @_;
       # Socket::getaddrinfo returns a list of hashrefs
       my($error, @res) =
         Socket::getaddrinfo($addr, 0,
-          { family => $ai_family, flags => &AI_ADDRCONFIG | &AI_PASSIVE, 
+          { family => $ai_family, flags => $ai_addrconfig_flag | &AI_PASSIVE, 
             socktype => &SOCK_STREAM, protocol => &IPPROTO_TCP });
       my(@ip_addrs);
       if (!$error) {
@@ -98,9 +109,17 @@ BEGIN {
 
     *peer_info_from_socket = sub {
       my $sock = shift;
-      my $peer_addr = $sock->peerhost;
+      my $peer_addr = $sock->peerhost;  # textual representation of an IP addr
       $peer_addr or return;
-      return ($sock->peerport, $peer_addr, $sock->peerhostname||$peer_addr,
+      my $peer_hostname;
+      if ($sock->UNIVERSAL::can('peerhostname')) {
+        $peer_hostname = $sock->peerhostname;  # provided by IO::Socket::IP
+      } else {
+        my($err, $host) = Socket::getnameinfo($sock->peername,
+                                              &NI_NAMEREQD, &NIx_NOSERV);
+        $peer_hostname = $host  if !$err;
+      }
+      return ($sock->peerport, $peer_addr, $peer_hostname||$peer_addr,
               $sock->sockport);
     };
 
@@ -108,12 +127,21 @@ BEGIN {
     # using a legacy Socket6 module; somewhat different API on getaddrinfo()
     # and getnameinfo() compared to these functions in a module Socket
 
+    eval {  # does the operating system recognize an AI_ADDRCONFIG flag?
+      if (&AI_ADDRCONFIG && &EAI_BADFLAGS) {
+        my @res = Socket6::getaddrinfo("localhost", "", 0, &SOCK_STREAM,
+                                       &IPPROTO_TCP, &AI_ADDRCONFIG);
+        my $err = @res >= 5 ? 0 : $res[0];
+        $ai_addrconfig_flag = &AI_ADDRCONFIG if !$err || $err != &EAI_BADFLAGS;
+      }
+    };
+
     *ip_or_name_to_ip_addresses = sub {
       my($addr, $ai_family) = @_;
       # Socket6::getaddrinfo returns a list of quintuples
       my @res = Socket6::getaddrinfo($addr, '',
                                      $ai_family, &SOCK_STREAM, &IPPROTO_TCP,
-                                     &AI_ADDRCONFIG | &AI_PASSIVE);
+                                     $ai_addrconfig_flag | &AI_PASSIVE);
       my($error, @ip_addrs);
       if (@res < 5) {
         $error = $res[0];
@@ -210,20 +238,22 @@ BEGIN {
 
 use IO::Handle;
 use IO::Pipe;
+use IO::File ();
 
 use Mail::SpamAssassin;
 use Mail::SpamAssassin::NetSet;
 use Mail::SpamAssassin::SubProcBackChannel;
 use Mail::SpamAssassin::SpamdForkScaling qw(:pfstates);
 use Mail::SpamAssassin::Logger qw(:DEFAULT log_message);
-use Mail::SpamAssassin::Util qw(untaint_var exit_status_str
-                                am_running_on_windows);
+use Mail::SpamAssassin::Util qw(untaint_var untaint_file_path
+                                exit_status_str am_running_on_windows);
 use Mail::SpamAssassin::Timeout;
 
 use Getopt::Long;
 use POSIX qw(:sys_wait_h);
 use POSIX qw(locale_h setsid sigprocmask _exit);
 use Errno;
+use Fcntl qw(:flock);
 
 use Cwd ();
 use File::Spec 0.8;
@@ -263,8 +293,9 @@ my %resphash = (
 );
 
 sub print_version {
-  printf("%s version %s\n", "SpamAssassin Server", Mail::SpamAssassin::Version());
-  printf("  running on Perl %s\n", join(".", map { $_||=0; $_*1 } ($] =~ /(\d)\.(\d{3})(\d{3})?/)));
+  printf("SpamAssassin Server version %s\n", Mail::SpamAssassin::Version());
+  printf("  running on Perl %s\n",
+         join(".", map( 0+($_||0), ($] =~ /(\d)\.(\d{3})(\d{3})?/) )));
   eval { require IO::Socket::SSL; };
   printf("  with SSL support (%s %s)\n", "IO::Socket::SSL", $IO::Socket::SSL::VERSION) unless ($@);
   eval { require Compress::Zlib; };
@@ -452,9 +483,9 @@ foreach my $opt (
   )
   )
 {
-  $opt{$opt} = Mail::SpamAssassin::Util::untaint_file_path(
-    File::Spec->rel2abs( $opt{$opt} )    # rel2abs taints the new value!
-  ) if ( $opt{$opt} );
+  # rel2abs taints the new value!
+  $opt{$opt} =
+    untaint_file_path(File::Spec->rel2abs( $opt{$opt} )) if $opt{$opt};
 }
 
 # These can be changed on command line with -A flag
@@ -724,7 +755,7 @@ $opt{'server-cert'} ||= "$LOCAL_RULES_DIR/certs/server-cert.pem";
 # Server (listening) socket setup for the various supported types
 
 dbg("spamd: socket module of choice: %s %s, Socket %s".
-    ", %s PF_INET, %s PF_INET6, %s",
+    ", %s PF_INET, %s PF_INET6, %s, AI_ADDRCONFIG %s",
     $io_socket_module_name,
     $io_socket_module_name->VERSION,
     Socket->VERSION,
@@ -733,6 +764,7 @@ dbg("spamd: socket module of choice: %s %s, Socket %s".
     $have_getaddrinfo_in_core ? 'using Socket::getaddrinfo'
     : $have_getaddrinfo_legacy ? 'using legacy Socket6::getaddrinfo'
     : 'no getaddrinfo, using gethostbyname, IPv4-only',
+    $ai_addrconfig_flag ? "is supported" : "not supported",
 );
 
 my $have_ssl_module;
@@ -773,7 +805,8 @@ for (@listen_socket_specs) {
            m{^ (?: (ssl) : )?
                (?: \[ ( [^\]]* ) \]
                  | ( [a-z0-9._-]* )
-                 | ( [a-f0-9]* : [a-f0-9]* : [a-f0-9:]* \z )
+                 | ( [a-f0-9]* : [a-f0-9]* : [a-f0-9:]*
+                     (?: % [a-z0-9._~-]* )? \z )
                  | ( \* )
                )?
                (?: : ( [a-z0-9-]* ) )? \z }xsi) {
@@ -814,8 +847,12 @@ if ( $have_ssl_module ) {
 
 # ---------------------------------------------------------------------------
 
+my $sockets_access_lock_tempfile;  # a File::Temp object, if locking is needed
+my $sockets_access_lock_fh;  # per-child file handle on a lock file
+
 my $backchannel = Mail::SpamAssassin::SubProcBackChannel->new();
 my $scaling;
+
 if (!$opt{'round-robin'})
 {
   my $max_children = $childlimit;
@@ -825,6 +862,9 @@ if (!$opt{'round-robin'})
   # as it was with the old algorithm.
   if ($childlimit > $opt{'max-spare'}) {
     $childlimit = $opt{'max-spare'};
+  }
+  if ($childlimit < $opt{'min-children'}) {
+    $childlimit = $opt{'min-children'};
   }
 
   $scaling = Mail::SpamAssassin::SpamdForkScaling->new({
@@ -999,15 +1039,15 @@ sub server_sock_setup_inet {
   }
   my($error, @addresses);
   if (!defined $addr || lc $addr eq 'localhost') {  # loopback interface
-    push(@addresses, '127.0.0.1')
-      if $ai_family == &AF_UNSPEC || $ai_family == &AF_INET;
     push(@addresses, '::1')
       if $ai_family == &AF_UNSPEC || $ai_family == &AF_INET6;
-  } elsif ($addr eq '*' || $addr eq '') {  # any address
-    push(@addresses, '0.0.0.0')
+    push(@addresses, '127.0.0.1')
       if $ai_family == &AF_UNSPEC || $ai_family == &AF_INET;
+  } elsif ($addr eq '*' || $addr eq '') {  # any address
     push(@addresses, '::')
       if $ai_family == &AF_UNSPEC || $ai_family == &AF_INET6;
+    push(@addresses, '0.0.0.0')
+      if $ai_family == &AF_UNSPEC || $ai_family == &AF_INET;
   } else {
     ($error, @addresses) = ip_or_name_to_ip_addresses($addr, $ai_family);
   }
@@ -1018,6 +1058,7 @@ sub server_sock_setup_inet {
 
   dbg("spamd: attempting to listen on IP addresses: %s, port %d",
       join(', ',@addresses), $port);
+  my(@diag_succ, @diag_fail);
   for my $adr (@addresses) {
     my %sockopt = (
       LocalAddr => $adr,
@@ -1047,15 +1088,35 @@ sub server_sock_setup_inet {
     }
     my $server_inet = $ssl ? IO::Socket::SSL->new(%sockopt)
                            : $io_socket_module_name->new(%sockopt);
-    $server_inet
-      or die sprintf("spamd: could not create %s socket on [%s]:%s: %s\n",
-                     $ssl ? 'IO::Socket::SSL' : $io_socket_module_name,
-                     $adr, $port, $!);
-    push(@listen_sockets, { specs => $socket_specs,
-                            ip_addr => $adr, port => $port,
-                            socket => $server_inet,
-                            fd => $server_inet->fileno }) if $server_inet;
+    my $diag;
+    if (!$server_inet) {
+      $diag = sprintf("could not create %s socket on [%s]:%s: %s",
+                      $ssl ? 'IO::Socket::SSL' : $io_socket_module_name,
+                      $adr, $port, $!);
+      push(@diag_fail, $diag);
+    } else {
+      $diag = sprintf("created %s socket on [%s]:%s",
+                      $ssl ? 'IO::Socket::SSL' : $io_socket_module_name,
+                      $adr, $port);
+      push(@diag_succ, $diag);
+      push(@listen_sockets, { specs => $socket_specs,
+                              ip_addr => $adr, port => $port,
+                              socket => $server_inet,
+                              fd => $server_inet->fileno });
+    }
+    dbg("spamd: %s", $diag);
   }
+  if (!@diag_fail) {
+    # no failures, nothing to report
+  } elsif (@diag_succ) {  # some failures and some success
+    # just warn of all attempts, successful and failed
+    warn "spamd: $_\n"  for @diag_succ;
+    warn "spamd: $_\n"  for @diag_fail;
+  } else {  # all failed, no success
+    warn "spamd: $_\n"  for @diag_fail[0 .. $#diag_fail-1];
+    die  "spamd: $_\n"  for $diag_fail[-1];
+  }
+
   1;
 }
 
@@ -1064,9 +1125,25 @@ sub server_sock_setup_inet {
 # for select() purposes: make a map of the server socket FDs
 map_server_sockets();
 
+if (!$scaling && @listen_sockets > 1) {
+  require File::Temp;
+
+  # Have multiple sockets and autonomous child processes (--round-robin),
+  # prepare an anonymous lock file to protect access to select+accept.
+
+  # using the same choice of a tmp dir as in Util::secure_tmpfile()
+  my $tmpdir = untaint_file_path($ENV{'TMPDIR'} || File::Spec->tmpdir);
+
+  # the file will be automatically removed by DESTROY on program exit
+  $sockets_access_lock_tempfile =
+    File::Temp->new(DIR => $tmpdir, SUFFIX => '.lck', EXLOCK => 0);
+
+  dbg("spamd: created a lock file %s to protect select+accept",
+      $sockets_access_lock_tempfile->filename);
+}
+
 if ( defined $opt{'pidfile'} ) {
-  $opt{'pidfile'} =
-    Mail::SpamAssassin::Util::untaint_file_path( $opt{'pidfile'} );
+  $opt{'pidfile'} = untaint_file_path( $opt{'pidfile'} );
 }
 
 
@@ -1269,6 +1346,15 @@ sub spawn {
     srand;  # reseed pseudorandom number generator soon for each child process
     $spamtest->call_plugins("spamd_child_init");
 
+    if ($sockets_access_lock_tempfile) {
+      # A lock will be required across select+accept in a child processes,
+      # Bug 6996. Need to have a per-child filehandle on the same lock file
+      # for flock to work, let's dup(2) the parent's file handle.
+      my $fname = $sockets_access_lock_tempfile->filename;
+      $sockets_access_lock_fh = IO::File->new($fname, "+>");
+      $sockets_access_lock_fh or die "Can't open a lock file $fname: $!";
+    }
+
     # support non-root use
     if ( $opt{'username'} ) {
       my ( $uuid, $ugid ) = ( getpwnam( $opt{'username'} ) )[ 2, 3 ];
@@ -1316,9 +1402,9 @@ sub spawn {
 
       # use a large eval scope to catch die()s and ensure they
       # don't kill the server.
-      my $evalret = eval { accept_a_conn(); };
+      my $evalret = eval { accept_a_conn($scaling ? 0.5 : undef); };
 
-      if (!defined ($evalret)) {
+      if (!defined $evalret) {
         warn("spamd: error: $@ $!, continuing");
         if ($client) { $client->close(); }  # avoid fd leaks
       }
@@ -1379,54 +1465,98 @@ sub spawn {
 }
 
 sub accept_from_any_server_socket {
-  my($client, $selected_socket_info);
+  my($timeout) = @_;
+  my($client, $selected_socket_info, $socket, $locked);
 
-  if (!@listen_sockets) {
-    # nothing?
-    die "accept_a_conn: no sockets?";
+  eval {
+    if (!@listen_sockets) {
+      # nothing?
+      die "no sockets?";
 
-  } elsif (@listen_sockets == 1) {
-    $selected_socket_info = $listen_sockets[0];
+    } elsif (@listen_sockets == 1) {
+      $selected_socket_info = $listen_sockets[0];
 
-  } else {
-    # determine which of our server FDs is ready using select().
-    # We only need to do this if we have more than one server
-    # socket supported, since otherwise there can only be one socket
-    # with a client waiting.
-    # (TODO: we could extend the prefork protocol to pass this data)
+    } else {
+      # determine which of our server FDs is ready using select().
+      # We only need to do this if we have more than one server
+      # socket supported, since otherwise there can only be one socket
+      # with a client waiting.
+      # (TODO: we could extend the prefork protocol to pass this data)
 
-    my $fdvec = $server_select_mask;
-    my $nfound = select($fdvec, undef, undef, 0.1);
-    die "oops? accept_a_conn: no fds ready"  if !$nfound;
-
-    for my $socket_info (@listen_sockets) {
-      my $fd = $socket_info->{fd};
-      if (defined($fd) && vec($fdvec,$fd,1)) {
-        $selected_socket_info = $socket_info;
-        last;
+      if ($sockets_access_lock_fh) {
+        dbg("spamd: acquiring a lock over select+accept");
+        # with multipe sockets a lock across select+accept is needed, Bug 6996
+        flock($sockets_access_lock_fh, LOCK_EX)
+          or die "Can't acquire lock access to sockets: $!";
+        $locked = 1;
       }
-    }
-    $selected_socket_info
-      or die "accept_a_conn: no fds ready by vec: $fdvec";
-  }
 
-  if ($selected_socket_info) {
-    my $socket = $selected_socket_info->{socket};
-    $socket or die "accept_a_conn: no socket???, impossible";
-    $client = $socket->accept;
-    $client or die sprintf("accept_a_conn: %s accept failed: %s",
-                           ref $socket,
-                           !$socket->isa('IO::Socket::SSL') ? $!
-                             : $socket->errstr.", $!");
+      my $sel_mask_str = unpack('b*', $server_select_mask);
+      dbg("spamd: select() on fd bit field %s, %s, %s",
+          $sel_mask_str, defined $timeout ? "timeout $timeout" : "no timeout",
+          $locked ? "locked" : "not locked");
+
+      my $fdvec = $server_select_mask;
+      my $nfound = select($fdvec, undef, undef, $timeout);
+
+      if (!defined $nfound || $nfound < 0) {
+        die "select failed on fd bit field $sel_mask_str: $!";
+      } elsif (!$nfound) {
+        die "no fd ready, fd bit field $sel_mask_str";
+      }
+
+      my(@ready_fd) =  # list of file desciptors ready for read
+        grep(defined $_->{fd} && vec($fdvec, $_->{fd}, 1), @listen_sockets);
+      if (!@ready_fd) {
+        die "no file descriptors matching a bit field " . unpack('b*',$fdvec);
+      } elsif (@ready_fd == 1) {  # easy, just one is ready
+        $selected_socket_info = $ready_fd[0];
+      } else {  # give equal opportunity to each ready socket
+        my $j = int rand(@ready_fd);
+        $selected_socket_info = $ready_fd[$j];
+        dbg("spamd: requests ready on multiple sockets, picking #%d out of %d",
+            $j+1, scalar @ready_fd);
+      }
+
+    } # end multiple sockets case
+
+    if ($selected_socket_info) {
+      my $socket = $selected_socket_info->{socket};
+      $socket or die "no socket???, impossible";
+      dbg("spamd: accept() on fd %d", $selected_socket_info->{fd});
+      $client = $socket->accept;
+    }
+    1;  # end eval with success
+
+  } or do {
+    my $err = $@ ne '' ? $@ : "errno=$!";  chomp $err;
+    if ($locked) {
+      dbg("spamd: releasing a lock over select+accept");
+      flock($sockets_access_lock_fh, LOCK_UN)
+        or die "Can't release sockets-access lock: $!";
+      $locked = 0;
+    }
+    die "accept_a_conn: $err";
+  };
+
+  if ($locked) {
+    dbg("spamd: releasing a lock over select+accept");
+    flock($sockets_access_lock_fh, LOCK_UN)
+      or die "Can't release sockets-access lock: $!";
   }
+  $client or die sprintf("accept_a_conn: %s accept failed: %s",
+                         ref $socket,
+                         !$socket->isa('IO::Socket::SSL') ? $!
+                           : $socket->errstr.", $!");
   return ($client, $selected_socket_info);
 }
 
 sub accept_a_conn {
+  my ($timeout) = @_;
 
   my $socket_info;
   # $client is a global variable
-  ($client, $socket_info) = accept_from_any_server_socket();
+  ($client, $socket_info) = accept_from_any_server_socket($timeout);
 
   if ($scaling) {
     $scaling->update_child_status_busy();
@@ -1465,9 +1595,9 @@ sub accept_a_conn {
       peer_info_from_socket($client);
     $remote_hostaddr or die 'failed to obtain port and ip from socket';
 
-    my $msg = sprintf("connection from %s [%s]:%s to port %d",
+    my $msg = sprintf("connection from %s [%s]:%s to port %d, fd %d",
                       $remote_hostname, $remote_hostaddr, $remote_port,
-                      $local_port);
+                      $local_port, $socket_info->{fd});
     if (ip_is_allowed($remote_hostaddr)) {
       info("spamd: $msg");
     }
@@ -1702,6 +1832,7 @@ sub parse_msgids {
   my $rmsgid = $mail->get_pristine_header("Resent-Message-Id");
   foreach my $id ((\$msgid, \$rmsgid)) {
     if ( $$id ) {
+      # no re "strict";  # since perl 5.21.8: Ranges of ASCII printables...
       while ( $$id =~ s/\([^\(\)]*\)// )
          { }                           # remove comments and
       $$id =~ s/^\s+|\s+$//g;          # leading and trailing spaces
@@ -1879,9 +2010,11 @@ sub check {
             "rport=".$remote_port);
 
   {
+    # no re "strict";  # since perl 5.21.8: Ranges of ASCII printables...
     my $safe = $msgid; $safe =~ s/[\x00-\x20\s,]/_/gs; push(@extra, "mid=$safe");
   }
   if ($rmsgid) {
+    # no re "strict";  # since perl 5.21.8: Ranges of ASCII printables...
     my $safe = $rmsgid; $safe =~ s/[\x00-\x20\s,]/_/gs; push(@extra, "rmid=$safe");
   }
   if (defined $status->{bayes_score}) {
@@ -2165,12 +2298,15 @@ sub parse_headers {
 sub got_user_header {
   my ( $client, $header, $value ) = @_;
 
-  if ( $value !~ /^([\x20-\xFF]*)$/ ) {
-    protocol_error("(User header contains control chars)");
-    return 0;
+  { # no re "strict";  # since perl 5.21.8: Ranges of ASCII printables...
+    local $1;
+    if ( $value !~ /^([\x20-\xFF]*)$/ ) {
+      protocol_error("(User header contains control chars)");
+      return 0;
+    }
+    $current_user = $1;
   }
 
-  $current_user = $1;
   if ($opt{'auth-ident'} && !auth_ident($current_user)) {
     return 0;
   }
@@ -2897,7 +3033,7 @@ sub preload_modules_with_tmp_homedir {
   delete $ENV{'TMPDIR'} if ( !defined $ENV{'TMPDIR'} );
 
   my $tmphome = File::Spec->catdir( $tmpdir, "spamd-$$-init" );
-  $tmphome = Mail::SpamAssassin::Util::untaint_file_path($tmphome);
+  $tmphome = untaint_file_path($tmphome);
 
   my $tmpsadir = File::Spec->catdir( $tmphome, ".spamassassin" );
 
@@ -2928,9 +3064,7 @@ sub preload_modules_with_tmp_homedir {
     opendir( TMPDIR, $d ) or $err ||= "open $d: $!";
     unless ($err) {
       foreach my $f ( File::Spec->no_upwards( readdir(TMPDIR) ) ) {
-        $f =
-          Mail::SpamAssassin::Util::untaint_file_path(
-          File::Spec->catfile( $d, $f ) );
+        $f = untaint_file_path( File::Spec->catfile( $d, $f ) );
         unlink($f) or $err ||= "remove $f: $!";
       }
       closedir(TMPDIR) or $err ||= "close $d: $!";
@@ -2988,6 +3122,8 @@ sub map_server_sockets {
     my $fd = $socket_info->{fd};
     vec($server_select_mask, $fd, 1) = 1  if defined $fd;
   }
+  dbg("spamd: server listen sockets fd bit field: %s",
+      unpack('b*', $server_select_mask));
 
   my $back_selector = $server_select_mask;
   $backchannel->set_selector(\$back_selector);

@@ -64,7 +64,7 @@ ok (!$urimap{'CUMSLUTS..VIRGIN'});
 
 sub try_domains {
   my($try, $expect) = @_;
-  my $result = Mail::SpamAssassin::Util::uri_to_domain($try);
+  my $result = $sa->{registryboundaries}->uri_to_domain($try);
 
   # undef is valid in some situations, so deal with it...
   if (!defined $expect) {

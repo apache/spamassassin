@@ -115,7 +115,7 @@ the results
     setting => 'razor_timeout',
     is_admin => 1,
     default => 5,
-    type => $Mail::SpamAssassin::Conf::CONF_TYPE_DURATIION,
+    type => $Mail::SpamAssassin::Conf::CONF_TYPE_DURATION,
   });
 
 =item razor_config filename

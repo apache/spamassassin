@@ -274,7 +274,7 @@ sub main_server_poll {
     # right before select() syscall, but after alarm(), eval scope, etc.
     $self->{child_just_exited} = 0;     
     ($nfound, $timeleft) = select($rout=$rin, undef, $eout=$rin, $tout);
-    $selerr = $!;
+    $selerr = $!  if !defined $nfound || $nfound < 0;
 
   });
 
@@ -664,7 +664,9 @@ retry_read:
         $sock->fileno, $tout);
     my $rin = '';
     vec($rin, $sock->fileno, 1) = 1;
-    select($rin, undef, undef, $tout);
+    my $nfound = select($rin, undef, undef, $tout);
+    defined $nfound && $nfound >= 0
+      or info("prefork: sysread_with_timeout select error: %s", $!);
     goto retry_read;
 
   }
@@ -711,7 +713,9 @@ retry_write:
       # give it 1 second to recover
       my $rout = '';
       vec($rout, $sock->fileno, 1) = 1;
-      select(undef, $rout, undef, 1);
+      my $nfound = select(undef, $rout, undef, 1);
+      defined $nfound && $nfound >= 0
+        or info("prefork: syswrite_with_retry select error: %s", $!);
     }
   }
 

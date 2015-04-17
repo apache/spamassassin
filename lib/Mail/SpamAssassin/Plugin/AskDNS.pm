@@ -189,7 +189,7 @@ use warnings;
 use re 'taint';
 
 use Mail::SpamAssassin::Plugin;
-use Mail::SpamAssassin::Util qw(fmt_dns_question_entry);
+use Mail::SpamAssassin::Util qw(decode_dns_question_entry);
 use Mail::SpamAssassin::Logger;
 
 use vars qw(@ISA %rcode_value $txtdata_can_provide_a_list);
@@ -376,6 +376,17 @@ sub extract_metadata {
   for my $depends_on_tags (keys %{$conf->{askdns}}) {
     my @tags;
     @tags = split(/,/, $depends_on_tags)  if $depends_on_tags ne '';
+
+    if (would_log("dbg","askdns")) {
+      while ( my($query_template_key, $struct) =
+                each %{$conf->{askdns}{$depends_on_tags}} ) {
+        my($query_template, $query_type, $answer_types_ref, $rules) =
+          @$struct{qw(query q_type a_types rules)};
+        dbg("askdns: depend on tags %s, rules: %s ",
+            $depends_on_tags, join(', ', keys %$rules));
+      }
+    }
+
     if (!@tags) {
       # no dependencies on tags, just call directly
       $self->launch_queries($pms,$depends_on_tags);
@@ -513,7 +524,7 @@ sub process_response_packet {
     # NOTE: qname is encoded in RFC 1035 zone format, decode it
     dbg("askdns: answer received, rcode %s, query %s, answer has %d records",
         $rcode,
-        join(', ', map(join('/', fmt_dns_question_entry($_)), @question)),
+        join(', ', map(join('/', decode_dns_question_entry($_)), @question)),
         scalar @answer);
 
     if (defined $rcode && exists $rcode_value{$rcode}) {
@@ -546,7 +557,8 @@ sub process_response_packet {
   # the code handling such reply from DNS MUST assemble all of these
   # marshaled text blocks into a single one before any syntactical
   # verification takes place.
-  # The same goes for RFC 4408 (SPF), RFC 4871 (DKIM), RFC 5617 (ADSP) ...
+  # The same goes for RFC 4408 (SPF), RFC 4871 (DKIM), RFC 5617 (ADSP),
+  # draft-kucherawy-dmarc-base (DMARC), ...
 
   for my $rr (@answer) {
     my($rr_rdatastr, $rdatanum, $rr_type);
@@ -589,7 +601,8 @@ sub process_response_packet {
           $match = 1  if $subtest->{$rcode};
         } elsif ($rcode != 0) {
           # skip remaining tests on DNS error
-        } elsif (!grep($_ eq 'ANY' || $_ eq $rr_type, @$answer_types_ref) ) {
+        } elsif (!defined($rr_type) ||
+                 !grep($_ eq 'ANY' || $_ eq $rr_type, @$answer_types_ref) ) {
           # skip remaining tests on wrong RR type
         } elsif (!defined $subtest) {
           $match = 1;  # any valid response of the requested RR type matches

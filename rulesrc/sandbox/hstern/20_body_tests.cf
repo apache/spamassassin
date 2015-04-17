@@ -30,34 +30,3 @@
 #
 ###########################################################################
 
-# body HS_NO_FLOWERS m'no flowers\W{0,5}no gifts'i
-# describe HS_NO_FLOWERS Talks about needing no flowers nor gifts
-##score HS_NO_FLOWERS 1
-
-# body HS_MEETUP_FOR_SEX m'(?:meet ?up|see eachother|get together) for (?:some )?(?:action|sex)'i
-# describe HS_MEETUP_FOR_SEX Talks about meeting up for sex.
-##score HS_MEETUP_FOR_SEX 1
-
-# body HS_SEXOHOLICS_DATESITE m'date site (?:\w+\s)*for sex[ao]holics'i
-# describe HS_SEXOHOLICS_DATESITE Talks about a date site for sexoholics.
-##score HS_SEXOHOLICS_DATESITE 1
-
-# body HS_DRUG_DOLLAR_1 m'^[a-z]+[glrt][a-z]?[eir][a-z]?[asx](?: -|:)? \$[\d.]+$'i
-# describe HS_DRUG_DOLLAR_1 Contains a drug and price-like pattern.
-##score HS_DRUG_DOLLAR_1 1
-
-# body HS_DRUG_DOLLAR_2 m'^[a-z]+[lmor][a-z]?[aex][a-z]?[mx](?: -|:)? \$[\d.]+$'i
-# describe HS_DRUG_DOLLAR_2 Contains a drug and price-like pattern.
-##score HS_DRUG_DOLLAR_2 1
-
-# body HS_DRUG_DOLLAR_3 m'^[a-z]+[dino][a-z]?[aimu][a-z]?[amx](?: -|:)? \$[\d.]+$'i
-# describe HS_DRUG_DOLLAR_3 Contains a drug and price-like pattern.
-##score HS_DRUG_DOLLAR_3 1
-
-# body HS_BODY_UPLOADED_SOFTWARE /^\w+ has uploaded some new software/
-# describe HS_BODY_UPLOADED_SOFTWARE Somebody has uploaded some new software for you
-##score HS_BODY_UPLOADED_SOFTWARE 1
-
-# body HS_VPXL /\bVPXL\b/i
-# describe HS_VPXL Contains VPXL, yet the recommended dose is only 2 tablets.
-##score HS_VPXL 1

@@ -92,7 +92,7 @@ use Mail::SpamAssassin::Util qw(untaint_var);
 use File::Spec;
 
 use vars qw{
-  @ISA $VERSION
+  @ISA 
   $CONF_TYPE_STRING $CONF_TYPE_BOOL
   $CONF_TYPE_NUMERIC $CONF_TYPE_HASH_KEY_VALUE
   $CONF_TYPE_ADDRLIST $CONF_TYPE_TEMPLATE
@@ -131,7 +131,8 @@ my @rule_types = ("body_tests", "uri_tests", "uri_evals",
                   "full_evals", "rawbody_tests", "rawbody_evals",
 		  "rbl_evals", "meta_tests");
 
-$VERSION = 'bogus';     # avoid CPAN.pm picking up version strings later
+#Removed $VERSION per BUG 6422
+#$VERSION = 'bogus';     # avoid CPAN.pm picking up version strings later
 
 # these are variables instead of constants so that other classes can
 # access them; if they're constants, they'd have to go in Constants.pm
@@ -1111,9 +1112,21 @@ Select the locales to allow from the list below:
 
 =item normalize_charset ( 0 | 1)        (default: 0)
 
-Whether to detect character sets and normalize message content to
-Unicode.  Requires the Encode::Detect module, HTML::Parser version
-3.46 or later, and Perl 5.8.5 or later.
+Whether to decode non- UTF-8 and non-ASCII textual parts and recode them
+to UTF-8 before the text is given over to rules processing. The character
+set used for attempted decoding is primarily based on a declared character
+set in a Content-Type header, but if the decoding attempt fails a module
+Encode::Detect::Detector is consulted (if available) to provide a guess
+based on the actual text, and decoding is re-attempted. Even if the option
+is enabled no unnecessary decoding and re-encoding work is done when
+possible (like with an all-ASCII text with a US-ASCII or extended ASCII
+character set declaration, e.g. UTF-8 or ISO-8859-nn or Windows-nnnn).
+
+Unicode support in old versions of perl or in a core module Encode is likely
+to be buggy in places, so if the normalize_charset function is enabled
+it is advised to stick to more recent versions of perl (preferably 5.12
+or later). The module Encode::Detect::Detector is optional, when necessary
+it will be used if it is available.
 
 =cut
 
@@ -1126,28 +1139,29 @@ Unicode.  Requires the Encode::Detect module, HTML::Parser version
 	unless (defined $value && $value !~ /^$/) {
 	    return $MISSING_REQUIRED_VALUE;
 	}
-	return  if $value == 0;
-	return $INVALID_VALUE unless $value == 1;
+        if    (lc $value eq 'yes' || $value eq '1') { $value = 1 }
+        elsif (lc $value eq 'no'  || $value eq '0') { $value = 0 }
+        else { return $INVALID_VALUE }
+
+	$self->{normalize_charset} = $value;
 
 	unless ($] > 5.008004) {
 	    $self->{parser}->lint_warn("config: normalize_charset requires Perl 5.8.5 or later");
+	    $self->{normalize_charset} = 0;
 	    return $INVALID_VALUE;
 	}
 	require HTML::Parser;
-	unless ($HTML::Parser::VERSION >= 3.46) {
+        #changed to eval to use VERSION so that this version was not incorrectly parsed for CPAN
+	unless ( eval { HTML::Parser->VERSION(3.46) } ) {
 	    $self->{parser}->lint_warn("config: normalize_charset requires HTML::Parser 3.46 or later");
-	    return $INVALID_VALUE;
-	}
-	unless (eval 'require Encode::Detect::Detector') {
-	    $self->{parser}->lint_warn("config: normalize_charset requires Encode::Detect");
+	    $self->{normalize_charset} = 0;
 	    return $INVALID_VALUE;
 	}
 	unless (eval 'require Encode') {
 	    $self->{parser}->lint_warn("config: normalize_charset requires Encode");
+	    $self->{normalize_charset} = 0;
 	    return $INVALID_VALUE;
 	}
-
-	$self->{normalize_charset} = 1;
     }
   });
 
@@ -1514,13 +1528,16 @@ argument can either be an IPv4 or IPv6 address, optionally enclosed in
 brackets, and optionally followed by a colon and a port number. In absence
 of a port number a standard port number 53 is assumed. When an IPv6 address
 is specified along with a port number, the address B<must> be enclosed in
-brackets to avoid parsing ambiguity regarding a colon separator,
+brackets to avoid parsing ambiguity regarding a colon separator. A scoped
+link-local IP address is allowed (assuming underlying modules allow it).
 
 Examples :
  dns_server 127.0.0.1
  dns_server 127.0.0.1:53
  dns_server [127.0.0.1]:53
  dns_server [::1]:53
+ dns_server fe80::1%lo0
+ dns_server [fe80::1%lo0]:53
 
 In absence of I<dns_server> directives, the list of name servers is provided
 by Net::DNS module, which typically obtains the list from /etc/resolv.conf,
@@ -1537,16 +1554,19 @@ documentation for details.
       my($address,$port); local($1,$2,$3);
       if ($value =~ /^(?: \[ ([^\]]*) \] | ([^:]*) ) : (\d+) \z/sx) {
         $address = defined $1 ? $1 : $2;  $port = $3;
-      } elsif ($value =~ /^(?: \[ ([^\]]*) \] | ([0-9a-fA-F.:]+) ) \z/sx) {
+      } elsif ($value =~ /^(?: \[ ([^\]]*) \] |
+                               ([0-9A-F.:]+ (?: %[A-Z0-9._~-]* )? ) ) \z/six) {
         $address = defined $1 ? $1 : $2;  $port = '53';
       } else {
         return $INVALID_VALUE;
       }
-      my $IP_ADDRESS = IP_ADDRESS;
+      my $scope = '';  # scoped IP address?
+      $scope = $1  if $address =~ s/ ( % [A-Z0-9._~-]* ) \z//xsi;
+      my $IP_ADDRESS = IP_ADDRESS;  # IP_ADDRESS regexp does not handle scope
       if ($address =~ /$IP_ADDRESS/ && $port >= 1 && $port <= 65535) {
         $self->{dns_servers} = []  if !$self->{dns_servers};
         # checked, untainted, stored in a normalized form
-        push(@{$self->{dns_servers}}, untaint_var("[$address]:$port"));
+        push(@{$self->{dns_servers}}, untaint_var("[$address$scope]:$port"));
       } else {
         return $INVALID_VALUE;
       }
@@ -1722,22 +1742,24 @@ Option names are not case-sensitive. The I<dns_options> directive may
 appear in configuration files multiple times, the last setting prevails.
 
 Option I<edns> (or I<edsn0>) may take a value which specifies a requestor's
-acceptable UDP payload size according to EDNS0 specifications (RFC 2671bis
-draft), e.g. I<edns=4096>. When EDNS0 is off (I<noedns> or I<edns=512>)
-a traditional implied UDP payload size is 512 bytes. When the option is
-specified but a value is not provided, a conservative default of 1240 bytes
-is implied. It is recommended to keep I<edns> enabled when using a local
-recursive DNS server which supports EDNS0 (like most modern DNS servers do),
-a suitable setting in this case is I<edns=4096>, which is also a default.
-Allowing packets larger than 512 bytes can avoid truncation of answer
-resource records in large DNS responses (like in TXT records of some SPF
-and DKIM responses, or when an unreasonable number of A records is published
-by some domain). The option should be disabled when a recursive DNS server
-is only reachable through some old-fashioned firewall which bans DNS UDP
-packets larger than 512 bytes. A suitable value when a non-local recursive
-DNS server is used and a firewall does allow EDNS0 but blocks fragmented
-IP packets is perhaps 1240 bytes, allowing a DNS UDP packet to fit within
-a single IP packet in most cases.
+acceptable UDP payload size according to EDNS0 specifications (RFC 6891,
+ex RFC 2671) e.g. I<edns=4096>. When EDNS0 is off (I<noedns> or I<edns=512>)
+a traditional implied UDP payload size is 512 bytes, which is also a minimum
+allowed value for this option. When the option is specified but a value
+is not provided, a conservative default of 1220 bytes is implied. It is
+recommended to keep I<edns> enabled when using a local recursive DNS server
+which supports EDNS0 (like most modern DNS servers do), a suitable setting
+in this case is I<edns=4096>, which is also a default. Allowing UDP payload
+size larger than 512 bytes can avoid truncation of resource records in large
+DNS responses (like in TXT records of some SPF and DKIM responses, or when
+an unreasonable number of A records is published by some domain). The option
+should be disabled when a recursive DNS server is only reachable through
+non- RFC 6891 compliant middleboxes (such as some old-fashioned firewall)
+which bans DNS UDP payload sizes larger than 512 bytes. A suitable value
+when a non-local recursive DNS server is used and a middlebox B<does> allow
+EDNS0 but blocks fragmented IP packets is perhaps 1220 bytes, allowing a
+DNS UDP packet to fit within a single IP packet in most cases (a slightly
+less conservative range would be 1280-1410 bytes).
 
 Option I<rotate> causes SpamAssassin to choose a DNS server at random
 from all servers listed in C</etc/resolv.conf> every I<dns_test_interval>
@@ -1771,11 +1793,16 @@ do not work for no apparent reason.
         } elsif ($option =~ /^(rotate|dns0x20)\z/) {
           $self->{dns_options}->{$1} = 1;
         } elsif ($option =~ /^(edns)0? (?: = (\d+) )? \z/x) {
-          # RFC 2671 bis - EDNS0, value is a requestor's UDP payload size
-          # defaults to some UDP packet size likely to fit into a single packet
-          # which is more likely to pass firewalls which choke on IP fragments.
-          # RFC 2460 min MTU is 1280 for IPv6, minus 40 bytes for basic header
-          $self->{dns_options}->{$1} = $2 || 1240;
+          # RFC 6891 (ex RFC 2671) - EDNS0, value is a requestor's UDP payload
+          # size, defaults to some UDP packet size likely to fit into a single
+          # IP packet which is more likely to pass firewalls which choke on IP
+          # fragments.  RFC 2460: min MTU is 1280 for IPv6, minus 40 bytes for
+          # basic header, yielding 1240.  RFC 3226 prescribes a min of 1220 for
+          # RFC 2535 compliant servers.  RFC 6891: choosing between 1280 and
+          # 1410 bytes for IP (v4 or v6) over Ethernet would be reasonable.
+          # 
+          $self->{dns_options}->{$1} = $2 || 1220;
+          return $INVALID_VALUE  if $self->{dns_options}->{$1} < 512;
         } else {
           return $INVALID_VALUE;
         }
@@ -1918,6 +1945,76 @@ for details on how Bayes auto-learning is implemented by default.
     setting => 'bayes_auto_learn',
     default => 1,
     type => $CONF_TYPE_BOOL,
+  });
+
+=item bayes_token_sources  (default: header visible invisible uri)
+
+Controls which sources in a mail message can contribute tokens (e.g. words,
+phrases, etc.) to a Bayes classifier. The argument is a space-separated list
+of keywords: I<header>, I<visible>, I<invisible>, I<uri>, I<mimepart>), each
+of which may be prefixed by a I<no> to indicate its exclusion. Additionally
+two reserved keywords are allowed: I<all> and I<none> (or: I<noall>). The list
+of keywords is processed sequentially: a keyword I<all> adds all available
+keywords to a set being built, a I<none> or I<noall> clears the set, other
+non-negated keywords are added to the set, and negated keywords are removed
+from the set. Keywords are case-insensitive.
+
+The default set is: I<header> I<visible> I<invisible> I<uri>, which is
+equivalent for example to: I<All> I<NoMIMEpart>. The reason why I<mimepart>
+is not currently in a default set is that it is a newer source (introduced
+with SpamAssassin version 3.4.1) and not much experience has yet been gathered
+regarding its usefulness.
+
+See also option C<bayes_ignore_header> for a fine-grained control on individual
+header fields under the umbrella of a more general keyword I<header> here.
+
+Keywords imply the following data sources:
+
+=over 4
+
+=item I<header> - tokens collected from a message header section
+
+=item I<visible> - words from visible text (plain or HTML) in a message body
+
+=item I<invisible> - hidden/invisible text in HTML parts of a message body
+
+=item I<uri> - URIs collected from a message body
+
+=item I<mimepart> - digests (hashes) of all MIME parts (textual or non-textual) of a message, computed after Base64 and quoted-printable decoding, suffixed by their Content-Type
+
+=item I<all> - adds all the above keywords to the set being assembled
+
+=item I<none> or I<noall> - removes all keywords from the set
+
+=back
+
+The C<bayes_token_sources> directive may appear multiple times, its keywords
+are interpreted sequentially, adding or removing items from the final set
+as they appear in their order in C<bayes_token_sources> directive(s).
+
+=cut
+
+  push (@cmds, {
+    setting => 'bayes_token_sources',
+    default => { map(($_,1), qw(header visible invisible uri)) },  # mimepart
+    type => $CONF_TYPE_HASH_KEY_VALUE,
+    code => sub {
+      my ($self, $key, $value, $line) = @_;
+      return $MISSING_REQUIRED_VALUE  if $value eq '';
+      my $h = ($self->{bayes_token_sources} ||= {});
+      my %all_kw = map(($_,1), qw(header visible invisible uri mimepart));
+      foreach (split(' ', lc $value)) {
+        if (/^(none|noall)\z/) {
+          %$h = ();
+        } elsif ($_ eq 'all') {
+          %$h = %all_kw;
+        } elsif (/^(no)?(.+)\z/s && exists $all_kw{$2}) {
+          $h->{$2} = defined $1 ? 0 : 1;
+        } else {
+          return $INVALID_VALUE;
+        }
+      }
+    }
   });
 
 =item bayes_ignore_header header_name
@@ -2503,6 +2600,19 @@ mbox_format_from_regex /^From \S+  ?[[:upper:]][[:lower:]]{2}(?:, \d\d [[:upper:
     type => $CONF_TYPE_STRING
   });
 
+
+=item parse_dkim_uris ( 0 | 1 ) (default: 0)
+
+If this option is set to 1 and the message contains DKIM headers, the headers will be parsed for URIs to process alongside URIs found in the body with some rules and moduels (ex. URIDNSBL)
+
+=cut
+
+  push (@cmds, {
+    setting => 'parse_dkim_uris',
+    default => 0,
+    type => $CONF_TYPE_BOOL,
+  });
+
 =back
 
 =head1 RULE DEFINITIONS AND PRIVILEGED SETTINGS
@@ -2619,10 +2729,10 @@ field name, although currently most combinations achieve no additional effect,
 for example C<From:addr:raw> or C<From:raw:addr> is currently the same as
 C<From:addr> .
 
-=over 4
-
 For example, appending C<:addr> to a header name will result in example@foo
 in all of the following cases:
+
+=over 4
 
 =item example@foo
 
@@ -3096,9 +3206,10 @@ B<Mail::SpamAssassin::Plugin::Reuse>.
     }
   });
 
-=item tflags SYMBOLIC_TEST_NAME [ {net|nice|learn|userconf|noautolearn|autolearn_force|multiple|maxhits=N|ips_only|domains_only|a|ns} ]
+=item tflags SYMBOLIC_TEST_NAME flags
 
-Used to set flags on a test. Parameter is a space-separated list of flag names.
+Used to set flags on a test. Parameter is a space-separated list of flag
+names or flag name = value pairs.
 These flags are used in the score-determination back end system for details
 of the test's behaviour.  Please see C<bayes_auto_learn> for more information
 about tflag interaction with those systems. The following flags can be set:
@@ -3133,6 +3244,21 @@ learning systems.
 
 The test will be subject to less stringent autolearn thresholds.
 
+Normally, SpamAssassin will require 3 points from the header and 3
+points from the body to be auto-learned as spam. This option keeps
+the threshold at 6 points total but changes it to have no regard to the 
+source of the points.
+
+=item  noawl
+
+This flag is specific when using AWL plugin.
+
+Normally, AWL plugin normalizes scores via auto-whitelist. In some scenarios
+it works against the system administrator when trying to add some rules to
+correct miss-classified email. When AWL plugin searches the email and finds 
+the noawl flag it will exit without normalizing the score nor storing the
+value in db.
+
 =item  multiple
 
 The test will be evaluated multiple times, for use with meta rules.
@@ -3143,6 +3269,21 @@ Only affects header, body, rawbody, uri, and full tests.
 If B<multiple> is specified, limit the number of hits found to N.
 If the rule is used in a meta that counts the hits (e.g. __RULENAME > 5),
 this is a way to avoid wasted extra work (use "tflags multiple maxhits=6").
+
+For example:
+
+  uri      __KAM_COUNT_URIS /^./
+  tflags   __KAM_COUNT_URIS multiple maxhits=16
+  describe __KAM_COUNT_URIS A multiple match used to count URIs in a message
+
+  meta __KAM_HAS_0_URIS (__KAM_COUNT_URIS == 0)
+  meta __KAM_HAS_1_URIS (__KAM_COUNT_URIS >= 1)
+  meta __KAM_HAS_2_URIS (__KAM_COUNT_URIS >= 2)
+  meta __KAM_HAS_3_URIS (__KAM_COUNT_URIS >= 3)
+  meta __KAM_HAS_4_URIS (__KAM_COUNT_URIS >= 4)
+  meta __KAM_HAS_5_URIS (__KAM_COUNT_URIS >= 5)
+  meta __KAM_HAS_10_URIS (__KAM_COUNT_URIS >= 10)
+  meta __KAM_HAS_15_URIS (__KAM_COUNT_URIS >= 15)
 
 =item  ips_only
 
@@ -3332,12 +3473,71 @@ subdomain of the specified zone.
 
 =item util_rb_tld tld1 tld2 ...
 
-This option allows the addition of new TLDs to the RegistrarBoundaries code.
-Updates to the list usually happen when new versions of SpamAssassin are
-released, but sometimes it's necessary to add in new TLDs faster than a
-release can occur.  TLDs include things like com, net, org, etc.
+This option maintains list of valid TLDs in the RegistryBoundaries code. 
+TLDs include things like com, net, org, etc.
 
 =cut
+
+  # DO NOT UPDATE THIS HARDCODED LIST!! It is only as fallback for
+  # transitional period and to be removed later.  TLDs are now maintained in
+  # sa-update 20_aux_tlds.cf.
+  foreach (qw/
+    ac academy accountants active actor ad ae aero af ag agency ai airforce al am an
+    ao aq ar archi army arpa as asia associates at attorney au auction audio autos
+    aw ax axa az ba bar bargains bayern bb bd be beer berlin best bf bg bh bi bid
+    bike bio biz bj black blackfriday blue bm bmw bn bnpparibas bo boo boutique br
+    brussels bs bt build builders business buzz bv bw by bz bzh ca cab camera camp
+    cancerresearch capetown capital caravan cards care career careers cash cat
+    catering cc cd center ceo cern cf cg ch cheap christmas church ci citic city ck
+    cl claims cleaning click clinic clothing club cm cn co codes coffee college
+    cologne com community company computer condos construction consulting
+    contractors cooking cool coop country cr credit creditcard cruises cu cuisinella
+    cv cw cx cy cymru cz dad dance dating day de deals degree democrat dental
+    dentist desi diamonds diet digital direct directory discount dj dk dm dnp do
+    domains durban dz eat ec edu education ee eg email engineer engineering
+    enterprises equipment er es esq estate et eu eus events exchange expert exposed
+    fail farm feedback fi finance financial fish fishing fitness fj fk flights
+    florist fm fo foo foundation fr frl frogans fund furniture futbol ga gal gallery
+    gb gbiz gd ge gent gf gg gh gi gift gifts gives gl glass global globo gm gmail
+    gmo gn gop gov gp gq gr graphics gratis green gripe gs gt gu guide guitars guru
+    gw gy hamburg haus healthcare help here hiphop hiv hk hm hn holdings holiday
+    homes horse host hosting house how hr ht hu id ie il im immo immobilien in
+    industries info ing ink institute insure int international investments io iq ir
+    is it je jetzt jm jo jobs joburg jp juegos kaufen ke kg kh ki kim kitchen kiwi
+    km kn koeln kp kr krd kred kw ky kz la lacaixa land lawyer lb lc lease lgbt li
+    life lighting limited limo link lk loans london lotto lr ls lt ltda lu luxe
+    luxury lv ly ma maison management mango market marketing mc md me media meet
+    melbourne meme menu mg mh miami mil mini mk ml mm mn mo mobi moda moe monash
+    mortgage moscow motorcycles mov mp mq mr ms mt mu museum mv mw mx my mz na
+    nagoya name navy nc ne net network neustar new nf ng ngo nhk ni ninja nl no np
+    nr nra nrw nu nyc nz okinawa om ong onl ooo org organic otsuka ovh pa paris
+    partners parts pe pf pg ph photo photography photos physio pics pictures pink
+    pizza pk pl place plumbing pm pn post pr praxi press pro prod productions
+    properties property ps pt pub pw py qa qpon quebec re realtor recipes red rehab
+    reise reisen ren rentals repair report republican rest restaurant reviews rich
+    rio ro rocks rodeo rs rsvp ru ruhr rw ryukyu sa saarland sarl sb sc sca scb
+    schmidt schule scot sd se services sexy sg sh shiksha shoes si singles sj sk sl
+    sm sn so social software sohu solar solutions soy space spiegel sr st su
+    supplies supply support surf surgery suzuki sv sx sy systems sz tatar tattoo tax
+    tc td technology tel tf tg th tienda tips tirol tj tk tl tm tn to today tokyo
+    tools top town toys tr trade training travel tt tv tw tz ua ug uk university
+    uno uol us uy uz va vacations vc ve vegas ventures versicherung vet vg vi viajes
+    villas vision vlaanderen vn vodka vote voting voto voyage vu wales wang watch
+    webcam website wed wf whoswho wien wiki williamhill works ws wtc wtf xn--1qqw23a
+    xn--3bst00m xn--3ds443g xn--3e0b707e xn--45brj9c xn--4gbrim xn--55qw42g
+    xn--55qx5d xn--6frz82g xn--6qq986b3xl xn--80adxhks xn--80ao21a xn--80asehdb
+    xn--80aswg xn--90a3ac xn--c1avg xn--cg4bki xn--clchc0ea0b2g2a9gcd xn--czr694b
+    xn--czru2d xn--d1acj3b xn--fiq228c5hs xn--fiq64b xn--fiqs8s xn--fiqz9s
+    xn--fpcrj9c3d xn--fzc2c9e2c xn--gecrj9c xn--h2brj9c xn--i1b6b1a6a2e xn--io0a7i
+    xn--j1amh xn--j6w193g xn--kprw13d xn--kpry57d xn--kput3i xn--l1acc
+    xn--lgbbat1ad8j xn--mgb9awbf xn--mgba3a4f16a xn--mgbaam7a8h xn--mgbab2bd
+    xn--mgbayh7gpa xn--mgbbh1a71e xn--mgbc0a9azcg xn--mgberp4a5d4ar xn--mgbx4cd0ab
+    xn--ngbc5azd xn--nqv7f xn--nqv7fs00ema xn--o3cw4h xn--ogbpf8fl xn--p1ai
+    xn--pgbs0dh xn--q9jyb4c xn--rhqv96g xn--s9brj9c xn--ses554g xn--unup4y xn--vhquv
+    xn--wgbh1c xn--wgbl6a xn--xhq521b xn--xkc2al3hye2a xn--xkc2dl3a5ee0h
+    xn--yfro4i67o xn--ygbi2ammx xn--zfr164b xxx xyz yachts yandex ye yokohama
+    youtube yt za zm zone zw
+    /) { $self->{valid_tlds}{lc $_} = 1; }
 
   push (@cmds, {
     setting => 'util_rb_tld',
@@ -3347,24 +3547,191 @@ release can occur.  TLDs include things like com, net, org, etc.
       unless (defined $value && $value !~ /^$/) {
 	return $MISSING_REQUIRED_VALUE;
       }
-      unless ($value =~ /^[a-zA-Z]+(?:\s+[a-zA-Z]+)*$/) {
+      unless ($value =~ /^[^\s.]+(?:\s+[^\s.]+)*$/) {
 	return $INVALID_VALUE;
       }
       foreach (split(/\s+/, $value)) {
-        $Mail::SpamAssassin::Util::RegistrarBoundaries::VALID_TLDS{lc $_} = 1;
+        $self->{valid_tlds}{lc $_} = 1;
       }
+      dbg("config: added tld list - $value");
     }
   });
 
 =item util_rb_2tld 2tld-1.tld 2tld-2.tld ...
 
-This option allows the addition of new 2nd-level TLDs (2TLD) to the
-RegistrarBoundaries code.  Updates to the list usually happen when new
-versions of SpamAssassin are released, but sometimes it's necessary to add in
-new 2TLDs faster than a release can occur.  2TLDs include things like co.uk,
-fed.us, etc.
+This option maintains list of valid 2nd-level TLDs in the RegistryBoundaries
+code.  2TLDs include things like co.uk, fed.us, etc.
 
 =cut
+
+  # DO NOT UPDATE THIS HARDCODED LIST!! It is only as fallback for
+  # transitional period and to be removed later.  TLDs are now maintained in
+  # sa-update 20_aux_tlds.cf.
+  foreach (qw/
+    com.ac edu.ac gov.ac mil.ac net.ac org.ac nom.ad ac.ae co.ae com.ae gov.ae
+    mil.ae name.ae net.ae org.ae pro.ae sch.ae com.af edu.af gov.af net.af
+    co.ag com.ag net.ag nom.ag org.ag com.ai edu.ai gov.ai net.ai off.ai
+    org.ai com.al edu.al gov.al net.al org.al com.an edu.an net.an org.an
+    co.ao ed.ao gv.ao it.ao og.ao pb.ao com.ar edu.ar gov.ar int.ar mil.ar
+    net.ar org.ar e164.arpa in-addr.arpa ip6.arpa iris.arpa uri.arpa urn.arpa
+    ac.at co.at gv.at or.at priv.at act.au asn.au com.au conf.au csiro.au
+    edu.au gov.au id.au info.au net.au nsw.au nt.au org.au otc.au oz.au qld.au
+    sa.au tas.au telememo.au vic.au wa.au com.aw biz.az com.az edu.az gov.az
+    info.az int.az mil.az name.az net.az org.az pp.az co.ba com.ba edu.ba
+    gov.ba mil.ba net.ba org.ba rs.ba unbi.ba unsa.ba com.bb edu.bb gov.bb
+    net.bb org.bb ac.bd com.bd edu.bd gov.bd mil.bd net.bd org.bd ac.be
+    belgie.be dns.be fgov.be gov.bf biz.bh cc.bh com.bh edu.bh gov.bh info.bh
+    net.bh org.bh com.bm edu.bm gov.bm net.bm org.bm com.bn edu.bn net.bn
+    org.bn com.bo edu.bo gob.bo gov.bo int.bo mil.bo net.bo org.bo tv.bo
+    adm.br adv.br agr.br am.br arq.br art.br ato.br bio.br bmd.br cim.br
+    cng.br cnt.br com.br coop.br dpn.br eco.br ecn.br edu.br eng.br esp.br
+    etc.br eti.br far.br fm.br fnd.br fot.br fst.br g12.br ggf.br gov.br
+    imb.br ind.br inf.br jor.br lel.br mat.br med.br mil.br mus.br net.br
+    nom.br not.br ntr.br odo.br org.br ppg.br pro.br psc.br psi.br qsl.br
+    rec.br slg.br srv.br tmp.br trd.br tur.br tv.br vet.br zlg.br com.bs
+    net.bs org.bs com.bt edu.bt gov.bt net.bt org.bt co.bw org.bw gov.by
+    mil.by com.bz net.bz org.bz ab.ca bc.ca gc.ca mb.ca nb.ca nf.ca nl.ca
+    ns.ca nt.ca nu.ca on.ca pe.ca qc.ca sk.ca yk.ca co.ck edu.ck gov.ck net.ck
+    org.ck ac.cn ah.cn bj.cn com.cn cq.cn edu.cn fj.cn gd.cn gov.cn gs.cn
+    gx.cn gz.cn ha.cn hb.cn he.cn hi.cn hk.cn hl.cn hn.cn jl.cn js.cn jx.cn
+    ln.cn mo.cn net.cn nm.cn nx.cn org.cn qh.cn sc.cn sd.cn sh.cn sn.cn sx.cn
+    tj.cn tw.cn xj.cn xz.cn yn.cn zj.cn arts.co com.co edu.co firm.co gov.co
+    info.co int.co mil.co net.co nom.co org.co rec.co web.co lkd.co.im
+    ltd.co.im plc.co.im co.cm com.cm net.cm au.com br.com cn.com de.com eu.com
+    gb.com hu.com no.com qc.com ru.com sa.com se.com uk.com us.com uy.com
+    za.com ac.cr co.cr ed.cr fi.cr go.cr or.cr sa.cr com.cu edu.cu gov.cu
+    inf.cu net.cu org.cu gov.cx ac.cy biz.cy com.cy ekloges.cy gov.cy ltd.cy
+    name.cy net.cy org.cy parliament.cy press.cy pro.cy tm.cy co.dk com.dm
+    edu.dm gov.dm net.dm org.dm art.do com.do edu.do gob.do gov.do mil.do
+    net.do org.do sld.do web.do art.dz asso.dz com.dz edu.dz gov.dz net.dz
+    org.dz pol.dz com.ec edu.ec fin.ec gov.ec info.ec k12.ec med.ec mil.ec
+    net.ec org.ec pro.ec gob.ec co.ee com.ee edu.ee fie.ee med.ee org.ee
+    pri.ee com.eg edu.eg eun.eg gov.eg mil.eg net.eg org.eg sci.eg com.er
+    edu.er gov.er ind.er mil.er net.er org.er com.es edu.es gob.es nom.es
+    org.es biz.et com.et edu.et gov.et info.et name.et net.et org.et aland.fi
+    ac.fj biz.fj com.fj gov.fj id.fj info.fj mil.fj name.fj net.fj org.fj
+    pro.fj school.fj ac.fk co.fk com.fk gov.fk net.fk nom.fk org.fk tm.fr
+    asso.fr nom.fr prd.fr presse.fr com.fr gouv.fr com.ge edu.ge gov.ge mil.ge
+    net.ge org.ge pvt.ge ac.gg alderney.gg co.gg gov.gg guernsey.gg ind.gg
+    ltd.gg net.gg org.gg sark.gg sch.gg com.gh edu.gh gov.gh mil.gh org.gh
+    com.gi edu.gi gov.gi ltd.gi mod.gi org.gi ac.gn com.gn gov.gn net.gn
+    org.gn asso.gp com.gp edu.gp net.gp org.gp com.gr edu.gr gov.gr net.gr
+    org.gr com.gt edu.gt gob.gt ind.gt mil.gt net.gt org.gt com.gu edu.gu
+    gov.gu mil.gu net.gu org.gu com.hk edu.hk gov.hk idv.hk net.hk org.hk
+    com.hn edu.hn gob.hn mil.hn net.hn org.hn com.hr from.hr iz.hr name.hr
+    adult.ht art.ht asso.ht com.ht coop.ht edu.ht firm.ht gouv.ht info.ht
+    med.ht net.ht org.ht perso.ht pol.ht pro.ht rel.ht shop.ht 2000.hu
+    agrar.hu bolt.hu casino.hu city.hu co.hu erotica.hu erotika.hu film.hu
+    forum.hu games.hu hotel.hu info.hu ingatlan.hu jogasz.hu konyvelo.hu
+    lakas.hu media.hu news.hu org.hu priv.hu reklam.hu sex.hu shop.hu sport.hu
+    suli.hu szex.hu tm.hu tozsde.hu utazas.hu video.hu ac.id co.id go.id
+    mil.id net.id or.id sch.id web.id gov.ie ac.il co.il gov.il idf.il k12.il
+    muni.il net.il org.il ac.im co.im gov.im net.im nic.im org.im ac.in co.in
+    edu.in ernet.in firm.in gen.in gov.in ind.in mil.in net.in nic.in org.in
+    res.in com.io gov.io mil.io net.io org.io ac.ir co.ir gov.ir id.ir net.ir
+    org.ir sch.ir edu.it gov.it ac.je co.je gov.je ind.je jersey.je ltd.je
+    net.je org.je sch.je com.jm edu.jm gov.jm net.jm org.jm com.jo edu.jo
+    gov.jo mil.jo net.jo org.jo ac.jp ad.jp aichi.jp akita.jp aomori.jp
+    chiba.jp co.jp ed.jp ehime.jp fukui.jp fukuoka.jp fukushima.jp gifu.jp
+    go.jp gov.jp gr.jp gunma.jp hiroshima.jp hokkaido.jp hyogo.jp ibaraki.jp
+    ishikawa.jp iwate.jp kagawa.jp kagoshima.jp kanagawa.jp kanazawa.jp
+    kawasaki.jp kitakyushu.jp kobe.jp kochi.jp kumamoto.jp kyoto.jp lg.jp
+    matsuyama.jp mie.jp miyagi.jp miyazaki.jp nagano.jp nagasaki.jp nagoya.jp
+    nara.jp ne.jp net.jp niigata.jp oita.jp okayama.jp okinawa.jp or.jp org.jp
+    osaka.jp saga.jp saitama.jp sapporo.jp sendai.jp shiga.jp shimane.jp
+    shizuoka.jp takamatsu.jp tochigi.jp tokushima.jp tokyo.jp tottori.jp
+    toyama.jp utsunomiya.jp wakayama.jp yamagata.jp yamaguchi.jp yamanashi.jp
+    yokohama.jp ac.ke co.ke go.ke ne.ke new.ke or.ke sc.ke com.kg edu.kg
+    gov.kg mil.kg net.kg org.kg com.kh edu.kh gov.kh mil.kh net.kh org.kh
+    per.kh ac.kr busan.kr chungbuk.kr chungnam.kr co.kr daegu.kr daejeon.kr
+    es.kr gangwon.kr go.kr gwangju.kr gyeongbuk.kr gyeonggi.kr gyeongnam.kr
+    hs.kr incheon.kr jeju.kr jeonbuk.kr jeonnam.kr kg.kr kyonggi.kr mil.kr
+    ms.kr ne.kr or.kr pe.kr re.kr sc.kr seoul.kr ulsan.kr com.kw edu.kw gov.kw
+    mil.kw net.kw org.kw com.ky edu.ky gov.ky net.ky org.ky com.kz edu.kz
+    gov.kz mil.kz net.kz org.kz com.la net.la org.la com.lb edu.lb gov.lb
+    mil.lb net.lb org.lb com.lc edu.lc gov.lc net.lc org.lc assn.lk com.lk
+    edu.lk gov.lk grp.lk hotel.lk int.lk ltd.lk net.lk ngo.lk org.lk sch.lk
+    soc.lk web.lk com.lr edu.lr gov.lr net.lr org.lr co.ls org.ls gov.lt
+    mil.lt asn.lv com.lv conf.lv edu.lv gov.lv id.lv mil.lv net.lv org.lv
+    biz.ly com.ly edu.ly gov.ly id.ly med.ly net.ly org.ly plc.ly sch.ly ac.ma
+    co.ma gov.ma net.ma org.ma press.ma asso.mc tm.mc ac.me co.me edu.me
+    gov.me its.me net.me org.me priv.me com.mg edu.mg gov.mg mil.mg nom.mg
+    org.mg prd.mg tm.mg army.mil navy.mil com.mk org.mk com.mm edu.mm gov.mm
+    net.mm org.mm edu.mn gov.mn org.mn com.mo edu.mo gov.mo net.mo org.mo
+    music.mobi weather.mobi co.mp edu.mp gov.mp net.mp org.mp com.mt edu.mt
+    gov.mt net.mt org.mt tm.mt uu.mt co.mu com.mu aero.mv biz.mv com.mv
+    coop.mv edu.mv gov.mv info.mv int.mv mil.mv museum.mv name.mv net.mv
+    org.mv pro.mv ac.mw co.mw com.mw coop.mw edu.mw gov.mw int.mw museum.mw
+    net.mw org.mw com.mx edu.mx gob.mx net.mx org.mx com.my edu.my gov.my
+    mil.my name.my net.my org.my alt.na com.na cul.na edu.na net.na org.na
+    telecom.na unam.na com.nc net.nc org.nc de.net gb.net uk.net ac.ng com.ng
+    edu.ng gov.ng net.ng org.ng sch.ng ac.ni biz.ni com.ni edu.ni gob.ni in.ni
+    info.ni int.ni mil.ni net.ni nom.ni org.ni web.ni fhs.no folkebibl.no
+    fylkesbibl.no herad.no idrett.no kommune.no mil.no museum.no priv.no
+    stat.no tel.no vgs.no com.np edu.np gov.np mil.np net.np org.np biz.nr
+    co.nr com.nr edu.nr fax.nr gov.nr info.nr mob.nr mobil.nr mobile.nr net.nr
+    org.nr tel.nr tlf.nr ac.nz co.nz cri.nz geek.nz gen.nz govt.nz iwi.nz
+    maori.nz mil.nz net.nz org.nz school.nz ac.om biz.om co.om com.om edu.om
+    gov.om med.om mil.om mod.om museum.om net.om org.om pro.om sch.om dk.org
+    eu.org abo.pa ac.pa com.pa edu.pa gob.pa ing.pa med.pa net.pa nom.pa
+    org.pa sld.pa com.pe edu.pe gob.pe mil.pe net.pe nom.pe org.pe com.pf
+    edu.pf org.pf ac.pg com.pg net.pg com.ph edu.ph gov.ph mil.ph net.ph
+    ngo.ph org.ph biz.pk com.pk edu.pk fam.pk gob.pk gok.pk gon.pk gop.pk
+    gos.pk gov.pk net.pk org.pk web.pk art.pl biz.pl com.pl edu.pl gov.pl
+    info.pl mil.pl net.pl ngo.pl org.pl biz.pr com.pr edu.pr gov.pr info.pr
+    isla.pr name.pr net.pr org.pr pro.pr cpa.pro law.pro med.pro com.ps edu.ps
+    gov.ps net.ps org.ps plo.ps sec.ps com.pt edu.pt gov.pt int.pt net.pt
+    nome.pt org.pt publ.pt com.py edu.py gov.py net.py org.py com.qa edu.qa
+    gov.qa net.qa org.qa asso.re com.re nom.re arts.ro com.ro firm.ro info.ro
+    nom.ro nt.ro org.ro rec.ro store.ro tm.ro www.ro ac.rs co.rs edu.rs gov.rs
+    in.rs org.rs ac.ru com.ru edu.ru gov.ru int.ru mil.ru net.ru org.ru pp.ru
+    ac.rw co.rw com.rw edu.rw gouv.rw gov.rw int.rw mil.rw net.rw com.sa
+    edu.sa gov.sa med.sa net.sa org.sa pub.sa sch.sa com.sb edu.sb gov.sb
+    net.sb org.sb com.sc edu.sc gov.sc net.sc org.sc com.sd edu.sd gov.sd
+    info.sd med.sd net.sd org.sd sch.sd tv.sd ab.se ac.se bd.se brand.se c.se
+    d.se e.se f.se fh.se fhsk.se fhv.se g.se h.se i.se k.se komforb.se
+    kommunalforbund.se komvux.se lanarb.se lanbib.se m.se mil.se n.se
+    naturbruksgymn.se o.se org.se parti.se pp.se press.se s.se sshn.se t.se
+    tm.se u.se w.se x.se y.se z.se com.sg edu.sg gov.sg idn.sg net.sg org.sg
+    per.sg com.sh edu.sh gov.sh mil.sh net.sh org.sh edu.sk gov.sk mil.sk
+    co.st com.st consulado.st edu.st embaixada.st gov.st mil.st net.st org.st
+    principe.st saotome.st store.st com.sv edu.sv gob.sv org.sv red.sv com.sy
+    gov.sy net.sy org.sy at.tf bg.tf ca.tf ch.tf cz.tf de.tf edu.tf eu.tf
+    int.tf net.tf pl.tf ru.tf sg.tf us.tf ac.th co.th go.th in.th mi.th net.th
+    or.th ac.tj biz.tj co.tj com.tj edu.tj go.tj gov.tj int.tj mil.tj name.tj
+    net.tj org.tj web.tj com.tn edunet.tn ens.tn fin.tn gov.tn ind.tn info.tn
+    intl.tn nat.tn net.tn org.tn rnrt.tn rns.tn rnu.tn tourism.tn gov.to
+    av.tr bbs.tr bel.tr biz.tr com.tr dr.tr edu.tr gen.tr gov.tr
+    info.tr k12.tr mil.tr name.tr net.tr org.tr pol.tr tel.tr web.tr aero.tt
+    at.tt au.tt be.tt biz.tt ca.tt co.tt com.tt coop.tt de.tt dk.tt edu.tt
+    es.tt eu.tt fr.tt gov.tt info.tt int.tt it.tt jobs.tt mobi.tt museum.tt
+    name.tt net.tt nic.tt org.tt pro.tt se.tt travel.tt uk.tt us.tt co.tv
+    gov.tv club.tw com.tw ebiz.tw edu.tw game.tw gov.tw idv.tw mil.tw net.tw
+    org.tw ac.tz co.tz go.tz ne.tz or.tz cherkassy.ua chernigov.ua
+    chernovtsy.ua ck.ua cn.ua co.ua com.ua crimea.ua cv.ua dn.ua
+    dnepropetrovsk.ua donetsk.ua dp.ua edu.ua gov.ua if.ua in.ua
+    ivano-frankivsk.ua kh.ua kharkov.ua kherson.ua khmelnitskiy.ua kiev.ua
+    kirovograd.ua km.ua kr.ua ks.ua kv.ua lg.ua lugansk.ua lutsk.ua lviv.ua
+    mk.ua net.ua nikolaev.ua od.ua odessa.ua org.ua pl.ua poltava.ua rovno.ua
+    rv.ua sebastopol.ua sumy.ua te.ua ternopil.ua uzhgorod.ua vinnica.ua vn.ua
+    zaporizhzhe.ua zhitomir.ua zp.ua zt.ua ac.ug co.ug go.ug ne.ug or.ug sc.ug
+    ac.uk bl.uk british-library.uk co.uk edu.uk gov.uk icnet.uk jet.uk ltd.uk
+    me.uk mod.uk national-library-scotland.uk net.uk nhs.uk nic.uk nls.uk
+    org.uk parliament.uk plc.uk police.uk sch.uk ak.us al.us ar.us az.us ca.us
+    co.us ct.us dc.us de.us dni.us fed.us fl.us ga.us hi.us ia.us id.us il.us
+    in.us isa.us kids.us ks.us ky.us la.us ma.us md.us me.us mi.us mn.us mo.us
+    ms.us mt.us nc.us nd.us ne.us nh.us nj.us nm.us nsn.us nv.us ny.us oh.us
+    ok.us or.us pa.us ri.us sc.us sd.us tn.us tx.us ut.us va.us vt.us wa.us
+    wi.us wv.us wy.us com.uy edu.uy gub.uy mil.uy net.uy org.uy vatican.va
+    arts.ve bib.ve co.ve com.ve edu.ve firm.ve gov.ve info.ve int.ve mil.ve
+    net.ve nom.ve org.ve rec.ve store.ve tec.ve web.ve co.vi com.vi edu.vi
+    gov.vi net.vi org.vi ac.vn biz.vn com.vn edu.vn gov.vn health.vn info.vn
+    int.vn name.vn net.vn org.vn pro.vn ch.vu com.vu de.vu edu.vu fr.vu net.vu
+    org.vu com.ws edu.ws gov.ws net.ws org.ws com.ye edu.ye gov.ye mil.ye
+    net.ye org.ye ac.za alt.za bourse.za city.za co.za edu.za gov.za law.za
+    mil.za net.za ngo.za nom.za org.za school.za tm.za web.za ac.zm co.zm
+    com.zm edu.zm gov.zm org.zm sch.zm ac.zw co.zw gov.zw org.zw
+    /) { $self->{two_level_domains}{lc $_} = 1; }
 
   push (@cmds, {
     setting => 'util_rb_2tld',
@@ -3378,20 +3745,24 @@ fed.us, etc.
 	return $INVALID_VALUE;
       }
       foreach (split(/\s+/, $value)) {
-        $Mail::SpamAssassin::Util::RegistrarBoundaries::TWO_LEVEL_DOMAINS{lc $_} = 1;
+        $self->{two_level_domains}{lc $_} = 1;
       }
     }
   });
 
 =item util_rb_3tld 3tld1.some.tld 3tld2.other.tld ...
 
-This option allows the addition of new 3rd-level TLDs (3TLD) to the
-RegistrarBoundaries code.  Updates to the list usually happen when new
-versions of SpamAssassin are released, but sometimes it's necessary to add in
-new 3TLDs faster than a release can occur.  3TLDs include things like
-demon.co.uk, plc.co.im, etc.
+This option maintains list of valid 3rd-level TLDs in the RegistryBoundaries
+code.  3TLDs include things like demon.co.uk, plc.co.im, etc.
 
 =cut
+
+  # DO NOT UPDATE THIS HARDCODED LIST!! It is only as fallback for
+  # transitional period and to be removed later.  TLDs are now maintained in
+  # sa-update 20_aux_tlds.cf.
+  foreach (qw/
+    demon.co.uk esc.edu.ar lkd.co.im plc.co.im
+    /) { $self->{three_level_domains}{lc $_} = 1; }
 
   push (@cmds, {
     setting => 'util_rb_3tld',
@@ -3401,12 +3772,35 @@ demon.co.uk, plc.co.im, etc.
       unless (defined $value && $value !~ /^$/) {
 	return $MISSING_REQUIRED_VALUE;
       }
-      unless ($value =~ /^[^\s.]+\.[^\s.]+\.[^\s.]+(?:\s+[^\s.]+\.[^\s.]+)*$/) {
+      unless ($value =~ /^[^\s.]+\.[^\s.]+\.[^\s.]+(?:\s+[^\s.]+\.[^\s.]+\.[^\s.]+)*$/) {
 	return $INVALID_VALUE;
       }
       foreach (split(/\s+/, $value)) {
-        $Mail::SpamAssassin::Util::RegistrarBoundaries::THREE_LEVEL_DOMAINS{lc $_} = 1;
+        $self->{three_level_domains}{lc $_} = 1;
       }
+    }
+  });
+
+=item clear_util_rb
+
+Empty internal list of valid TLDs (including 2nd and 3rd level) which
+RegistryBoundaries code uses.  Only useful if you want to override the
+standard lists supplied by sa-update.
+
+=cut
+
+  push (@cmds, {
+    setting => 'clear_util_rb',
+    type => $CONF_TYPE_NOARGS,
+    code => sub {
+      my ($self, $key, $value, $line) = @_;
+      unless (!defined $value || $value eq '') {
+        return $INVALID_VALUE;
+      }
+      $self->{valid_tlds} = ();
+      $self->{two_level_domains} = ();
+      $self->{three_level_domains} = ();
+      dbg("config: cleared tld lists");
     }
   });
 
@@ -3830,8 +4224,35 @@ Namely these characters and ranges:
 This will be replaced with the version number of the currently-running
 SpamAssassin engine.  Note: The version used is in the internal SpamAssassin
 version format which is C<x.yyyzzz>, where x is major version, y is minor
-version, and z is maintenance version.  So 3.0.0 is C<3.000000>, and 3.4.80 is
-C<3.004080>.
+version, and z is maintenance version.  So 3.0.0 is C<3.000000>, and 3.4.80
+is C<3.004080>.
+
+=item perl_version
+
+(Introduced in 3.4.1)  This will be replaced with the version number of the
+currently-running perl engine.  Note: The version used is in the $] version
+format which is C<x.yyyzzz>, where x is major version, y is minor version,
+and z is maintenance version.  So 5.8.8 is C<5.008008>, and 5.10.0 is
+C<5.010000>. Use to protect rules that incorporate RE syntax elements
+introduced in later versions of perl, such as the C<++> non-backtracking
+match introduced in perl 5.10. For example:
+
+  # Avoid lint error on older perl installs
+  # Check SA version first to avoid warnings on checking perl_version on older SA
+  if version > 3.004001 && perl_version >= 5.018000
+    body  INVALID_RE_SYNTAX_IN_PERL_BEFORE_5_18  /(?[ \p{Thai} & \p{Digit} ])/
+  endif
+
+Note that the above will still generate a warning on perl older than 5.10.0;
+to avoid that warning do this instead:
+
+  # Avoid lint error on older perl installs
+  if can(Mail::SpamAssassin::Conf::perl_min_version_5010000)
+    body  INVALID_RE_SYNTAX_IN_PERL_5_8  /\w++/
+  endif
+
+Warning: a can() test is only defined for perl 5.10.0!
+
 
 =item plugin(Name::Of::Plugin)
 
@@ -3950,6 +4371,11 @@ optional, and the default is shown below.
  _DATE_            rfc-2822 date of scan
  _STARS(*)_        one "*" (use any character) for each full score point
                    (note: limited to 50 'stars')
+ _SENDERDOMAIN_    a domain name of the envelope sender address, lowercased
+ _AUTHORDOMAIN_    a domain name of the author address (the From header
+                   field), lowercased;  note that RFC 5322 allows a mail
+                   message to have multiple authors - currently only the
+                   domain name of the first email address is returned
  _RELAYSTRUSTED_   relays used and deemed to be trusted (see the 
                    'X-Spam-Relays-Trusted' pseudo-header)
  _RELAYSUNTRUSTED_ relays used that can not be trusted (see the 
@@ -4161,6 +4587,8 @@ sub new {
     push(@{$self->{headers_ham}},  $r);
   }
 
+  # RFC 6891: A good compromise may be the use of an EDNS maximum payload size
+  # of 4096 octets as a starting point.
   $self->{dns_options}->{edns} = 4096;
 
   # these should potentially be settable by end-users
@@ -4698,6 +5126,8 @@ sub feature_yesno_takes_args { 1 }
 sub feature_bug6558_free { 1 }
 sub feature_edns { 1 }  # supports 'dns_options edns' config option
 sub feature_dns_query_restriction { 1 }  # supported config option
+sub feature_registryboundaries { 1 } # replaces deprecated registrarboundaries
+sub perl_min_version_5010000 { return $] >= 5.010000 }  # perl version check ("perl_version" not neatly backwards-compatible)
 
 ###########################################################################
 

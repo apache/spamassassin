@@ -75,6 +75,7 @@ use Mail::SpamAssassin::PerMsgStatus;
 use Mail::SpamAssassin::Message;
 use Mail::SpamAssassin::PluginHandler;
 use Mail::SpamAssassin::DnsResolver;
+use Mail::SpamAssassin::RegistryBoundaries;
 use Mail::SpamAssassin::Util qw(untaint_var am_running_on_windows);
 use Mail::SpamAssassin::Util::ScopedTimer;
 
@@ -93,7 +94,7 @@ use vars qw{
   @site_rules_path
 };
 
-$VERSION = "3.004000";      # update after release (same format as perl $])
+$VERSION = "3.004001";      # update after release (same format as perl $])
 #$IS_DEVEL_BUILD = 1;        # change for release versions
 
 # Used during the prerelease/release-candidate part of the official release
@@ -430,6 +431,7 @@ sub new {
   }
 
   $self->{conf} ||= new Mail::SpamAssassin::Conf ($self);
+  $self->{registryboundaries} = Mail::SpamAssassin::RegistryBoundaries->new ($self);
   $self->{plugins} = Mail::SpamAssassin::PluginHandler->new ($self);
 
   $self->{save_pattern_hits} ||= 0;
@@ -1633,7 +1635,7 @@ sub timer_report {
   foreach my $name (@{$self->{timers_order}}) {
     my $elapsed = $self->{timers}->{$name}->{elapsed} || 0;
     my $pc = $total <= 0 || $elapsed >= $total ? 100 : ($elapsed/$total)*100;
-    my $fmt = $elapsed >= 0.002 ? "%.0f" : "%.2f";
+    my $fmt = $elapsed >= 0.005 ? "%.0f" : $elapsed >= 0.002 ? "%.1f" : "%.2f";
     push @str, sprintf("%s: $fmt (%.1f%%)", $name, $elapsed*1000, $pc);
   }
 

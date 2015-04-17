@@ -91,6 +91,17 @@ use IO::Socket;
 use vars qw(@ISA);
 @ISA = qw(Mail::SpamAssassin::Plugin);
 
+our $io_socket_module_name;
+BEGIN {
+  if (eval { require IO::Socket::IP }) {
+    $io_socket_module_name = 'IO::Socket::IP';
+  } elsif (eval { require IO::Socket::INET6 }) {
+    $io_socket_module_name = 'IO::Socket::INET6';
+  } elsif (eval { require IO::Socket::INET }) {
+    $io_socket_module_name = 'IO::Socket::INET';
+  }
+}
+
 sub new {
   my $class = shift;
   my $mailsaobject = shift;
@@ -242,7 +253,7 @@ This option tells SpamAssassin where to find the dccifd socket instead
 of a local Unix socket named C<dccifd> in the C<dcc_home> directory.
 If a socket is specified or found, use it instead of C<dccproc>.
 
-If specifed, C<dcc_dccifd_path> is the absolute path of local Unix socket
+If specified, C<dcc_dccifd_path> is the absolute path of local Unix socket
 or an INET socket specified as C<[Host]:Port> or C<Host:Port>.
 Host can be an IPv4 or IPv6 address or a host name
 Port is a TCP port number. The brackets are required for an IPv6 address.
@@ -277,10 +288,6 @@ The default is C<undef>.
 
 	$self->{dcc_dccifd_host} = $host;
 	$self->{dcc_dccifd_port} = $port;
-	if ($host !~ /^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\z/) {
-	  # remember to try IPv6 if we can with a host name or non-IPv4 address
-	  $self->{dcc_dccifd_IPv6} = eval { require IO::Socket::INET6 };
-	}
 	dbg("config: dcc_dccifd_path set to [%s]:%s", $host, $port);
 
       } else {
@@ -387,6 +394,8 @@ The default is C<undef>.
 
 Report messages with total scores this much larger than the
 SpamAssassin spam threshold to DCC as spam.
+
+=back
 
 =cut
 
@@ -535,9 +544,9 @@ sub is_dccifd_available {
   # dccifd remains available until it breaks
   return $self->{dccifd_available} if $self->{dccifd_available};
 
-  # deal with configured INET socket
+  # deal with configured INET or INET6 socket
   if (defined $conf->{dcc_dccifd_host}) {
-    dbg("dcc: dccifd is available via INET socket [%s]:%s",
+    dbg("dcc: dccifd is available via socket [%s]:%s",
 	$conf->{dcc_dccifd_host}, $conf->{dcc_dccifd_port});
     return ($self->{dccifd_available} = 1);
   }
@@ -589,34 +598,22 @@ sub dccifd_connect {
   my $sock;
 
   if (defined $sockpath) {
+    dbg("$tag connecting to local socket $sockpath");
     $sock = IO::Socket::UNIX->new(Type => SOCK_STREAM, Peer => $sockpath);
-    if ($sock) {
-      dbg("$tag connected to local socket $sockpath");
-      return $sock;
-    }
-    $self->{dccifd_available} = 0;
-    info("$tag failed to connect to local socket $sockpath");
-    return $sock
+    info("$tag failed to connect to local socket $sockpath") if !$sock;
+
+  } else {  # must be TCP/IP
+    my $host = $conf->{dcc_dccifd_host};
+    my $port = $conf->{dcc_dccifd_port};
+    dbg("$tag connecting to [%s]:%s using %s",
+        $host, $port, $io_socket_module_name);
+    $sock = $io_socket_module_name->new(
+              Proto => 'tcp', PeerAddr => $host, PeerPort => $port);
+    info("$tag failed to connect to [%s]:%s using %s: %s",
+         $host, $port, $io_socket_module_name, $!) if !$sock;
   }
 
-  # must be TCP/IP
-  my $host = $conf->{dcc_dccifd_host};
-  my $port = $conf->{dcc_dccifd_port};
-
-  if ($conf->{dcc_dccifd_IPv6}) {
-    # try IPv6 if we can with a host name or non-IPv4 address
-    dbg("$tag connecting to inet6 socket [$host]:$port");
-    $sock = IO::Socket::INET6->new(
-		  Proto => 'tcp', PeerAddr => $host, PeerPort => $port);
-    # fall back to IPv4 if that failed
-  }
-  if (!$sock) {
-    dbg("$tag connecting to inet4 socket [$host]:$port");
-    $sock = IO::Socket::INET->new(
-		Proto => 'tcp', PeerAddr => $host, PeerPort => $port);
-  }
-
-  info("failed to connect to [$host]:$port : $!") if !$sock;
+  $self->{dccifd_available} = 0  if !$sock;
   return $sock;
 }
 
@@ -825,9 +822,12 @@ sub ask_dcc {
 	$opts = $self->{dccifd_report_options}
       } else {
 	$opts = $self->{dccifd_lookup_options};
-	# only query if there is an X-DCC header
-	$opts =~ s/grey-off/& query/ if defined $permsgstatus->{dcc_raw_x_dcc};
+	if (defined $permsgstatus->{dcc_raw_x_dcc}) {
+	  # only query if there is an X-DCC header
+	  $opts =~ s/grey-off/grey-off query/;
+	}
       }
+
       $sock->print($opts)	   or die "failed write options\n";
       $sock->print($client . "\n") or die "failed write SMTP client\n";
       $sock->print($helo . "\n")   or die "failed write HELO value\n";
@@ -909,13 +909,13 @@ sub ask_dcc {
   $permsgstatus->leave_helper_run_mode();
 
   if ($timer->timed_out()) {
-    dbg("$tag $pgm timed out after $timeout seconds");
+    dbg("$tag %s timed out after %d seconds", $pgm||'', $timeout);
     return (undef, undef);
   }
 
   if ($err) {
     chomp $err;
-    info("$tag $pgm failed: $err\n");
+    info("$tag %s failed: %s", $pgm||'', $err);
     return (undef, undef);
   }
 

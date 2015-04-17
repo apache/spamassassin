@@ -473,7 +473,7 @@ sub expiry_due {
     return 0 if ($last_expire < 300);
   }
 
-  dbg("bayes: DB expiry: tokens in DB: $ntoks, Expiry max size: ".$self->{expiry_max_db_size}.", Oldest atime: ".$vars[5].", Newest atime: ".$vars[10].", Last expire: ".$vars[4].", Current time: ".time(),'bayes','-1');
+  dbg("bayes: DB expiry: tokens in DB: $ntoks, Expiry max size: ".$self->{expiry_max_db_size}.", Oldest atime: ".$vars[5].", Newest atime: ".$vars[10].", Last expire: ".$vars[4].", Current time: ".time());
 
   my $conf = $self->{bayes}->{main}->{conf};
   if ($ntoks <= 100000 ||			# keep at least 100k tokens

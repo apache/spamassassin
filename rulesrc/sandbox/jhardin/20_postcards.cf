@@ -49,7 +49,7 @@ describe   POSTCARD_DQ   Postcard + DQ URI
 
 # EXECUTABLE_URI is a generally-useful rule.
 # It appears here so a meta with the postcard rules can be made
-uri        __EXECUTABLE_URI         /\.(?:exe|scr|dll|pif|vbs|wsh|cmd|bat)$/i
+uri        __EXECUTABLE_URI         /\.(?:exe|scr|dll|pif|vbs|wsh|cmd|bat|cpl)$/i
 meta       EXECUTABLE_URI   __EXECUTABLE_URI
 describe   EXECUTABLE_URI   Link to an executable file
 #score      EXECUTABLE_URI   2.00

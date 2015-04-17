@@ -165,6 +165,7 @@ sub autolearn_discriminator {
 
   # find out if any of the tests added an autolearn_force status
   my $force_autolearn = $scan->get_autolearn_force_status();
+  my $force_autolearn_names = $scan->get_autolearn_force_names();
 
   dbg("learn: auto-learn? ham=$min, spam=$max, ".
                 "body-points=".$body_only_points.", ".
@@ -193,6 +194,7 @@ sub autolearn_discriminator {
       $required_body_points = -99;
       $required_head_points = -99;
       dbg("learn: auto-learn: autolearn_force flagged for a rule.  Removing seperate body and head point threshold.  Body Only Points: $body_only_points ($required_body_points req'd) / Head Only Points: $head_only_points ($required_head_points req'd)");
+      dbg("learn: auto-learn: autolearn_force flagged because of rule(s): $force_autolearn_names");
     } else {
       dbg("learn: auto-learn: autolearn_force not flagged for a rule. Body Only Points: $body_only_points ($required_body_points req'd) / Head Only Points: $head_only_points ($required_head_points req'd)");
     }
@@ -247,8 +249,10 @@ sub autolearn_discriminator {
     }
   }
 
-  dbg("learn: auto-learn? yes, ".($isspam?"spam ($score > $max)":"ham ($score < $min)"));
-  return $isspam;
+  dbg("learn: auto-learn? yes, ".($isspam?"spam ($score > $max)":"ham ($score < $min)")." autolearn_force=".($force_autolearn?"yes":"no"));
+ 
+  #Return an array reference because call_plugins only carry's one return value 
+  return [$isspam, $force_autolearn, $force_autolearn_names];
 }
 
 1;

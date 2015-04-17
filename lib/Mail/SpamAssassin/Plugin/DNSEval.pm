@@ -15,6 +15,13 @@
 # limitations under the License.
 # </@LICENSE>
 
+=head1 NAME
+
+DNSEVAL - look up URLs against DNS blocklists
+
+=cut
+
+
 package Mail::SpamAssassin::Plugin::DNSEval;
 
 use Mail::SpamAssassin::Plugin;
@@ -49,6 +56,7 @@ sub new {
     'check_rbl_sub',
     'check_rbl_results_for',
     'check_rbl_from_host',
+    'check_rbl_from_domain',
     'check_rbl_envfrom',
     'check_dns_sender',
   ];
@@ -307,17 +315,33 @@ sub check_rbl_results_for {
 # this only checks the address host name and not the domain name because
 # using the domain name had much worse results for dsn.rfc-ignorant.org
 sub check_rbl_from_host {
-  _check_rbl_addresses(@_, $_[1]->all_from_addrs());
+  my ($self, $pms, $rule, $set, $rbl_server, $subtest) = @_; 
+  _check_rbl_addresses($self, $pms, $rule, $set, $rbl_server, $subtest, $_[1]->all_from_addrs_domains());
+}
+
+=over 4
+
+=item check_rbl_from_domain
+
+This checks all the from addrs domain names as an alternate to check_rbl_from_host.  As of v3.4.1, it has been improved to include a subtest for a specific octet.
+
+=back
+
+=cut
+sub check_rbl_from_domain {
+  my ($self, $pms, $rule, $set, $rbl_server, $subtest) = @_;
+  _check_rbl_addresses($self, $pms, $rule, $set, $rbl_server, $subtest, $_[1]->all_from_addrs_domains());
 }
 
 # this only checks the address host name and not the domain name because
 # using the domain name had much worse results for dsn.rfc-ignorant.org
 sub check_rbl_envfrom {
-  _check_rbl_addresses(@_, $_[1]->get('EnvelopeFrom:addr',undef));
+  my ($self, $pms, $rule, $set, $rbl_server, $subtest) = @_; 
+  _check_rbl_addresses($self, $pms, $rule, $set, $rbl_server, $subtest, $_[1]->get('EnvelopeFrom:addr',undef));
 }
 
 sub _check_rbl_addresses {
-  my ($self, $pms, $rule, $set, $rbl_server, @addresses) = @_;
+  my ($self, $pms, $rule, $set, $rbl_server, $subtest, @addresses) = @_;
   
   return 0 if $self->{main}->{conf}->{skip_rbl_checks};
   return 0 unless $pms->is_dns_available();
@@ -344,7 +368,8 @@ sub _check_rbl_addresses {
   dbg("dns: _check_rbl_addresses RBL $rbl_server, set $set");
 
   for my $host (keys %hosts) {
-    $pms->do_rbl_lookup($rule, $set, 'A', "$host.$rbl_server");
+    dbg("dns: checking [$host] / $rule / $set / $rbl_server");
+    $pms->do_rbl_lookup($rule, $set, 'A', "$host.$rbl_server", $subtest);
   }
 }
 

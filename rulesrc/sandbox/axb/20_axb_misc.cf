@@ -1,125 +1,30 @@
-##
+ifplugin Mail::SpamAssassin::Plugin::URIDetail
+  uri_detail      AXB_URIDETAIL_BROWSETHIS	text =~ /You may browse this\./
+  describe        AXB_URIDETAIL_BROWSETHIS	LLT fingerprint
+  tflags	  AXB_URIDETAIL_BROWSETHIS	nopublish
+endif
 
-# 2013-06-17
-header		AXB_XM_OL_122		X-Mailer =~ /^Outlook 12\.2$/
-describe	AXB_XM_OL_122		Possibly forged OL version
 
-# 2013-01-30
-header		AXB_BULK_SENDGRID	exists:X-Sendgrid-EID
-describe	AXB_BULK_SENDGRID	Bulk sent via Sendgrid
+uri		AXB_URI_CDGB		/\/\?cid\=gib/
+describe	AXB_URI_CDGB		Do not mistake with CBGB
 
-# 2012-12-01
-header		AXB_X_WUM_TAG		X-WUM-CCI =~ /[\|\~\|]{10}/
-describe	AXB_X_WUM_TAG		Possible Orange spam tag
 
-# 2012-10-29
-header		AXB_X_FORGED_OE61	X-Mailer =~/^Microsoft Outlook Express 6\.1/
-describe	AXB_X_FORGED_OE61	Forge OE version
+header          AXB_X_FF_SEZ_S		X-Forefront-Antispam-Report =~ /\bSFV\:SPM\b/
+describe        AXB_X_FF_SEZ_S		Forefront sez this is spam
 
-# 2012-10-16
-header          AXB_BULK_ECO            exists:X-CSA-Complaints
-describe        AXB_BULK_ECO            Message sent by eco.de member
+rawbody		AXB_RBDY_TENANDTEN	/\&\#1088\;\&\#1092\;/
+describe	AXB_RBDY_TENANDTEN	Ten & Ten
 
 # 2012-09-27
-# Overlap test
 header          __AXB_XM_OL_2600  X-Mailer =~ /Microsoft\ Outlook\ Express\ 6\.00\.2600\.0000/
 header          __AXB_MO_OL_2600  X-MimeOLE =~ /Produced\ By\ Microsoft\ MimeOLE\ V6\.00\.2600\.0000/
 meta            AXB_XM_FORGED_OL2600    (__AXB_XM_OL_2600  && !__AXB_MO_OL_2600 )
 describe        AXB_XM_FORGED_OL2600     Forged OE v. 6.2600
 
-# TrendMicro antispam outbound tagged? - could cause Fps due to dubious filter quality
-# header          AXB_X_TREND_AS          X-TM-AS-Result =~ /^Yes/
-# describe        AXB_X_TREND_AS          Trendmicro said this is S
-
-# 2012-08-29
-header          AXB_XM_TURBOM           X-Mailer =~ /TurboMailer/
-describe        AXB_XM_TURBOM           Mailer fingerprint
-
-# 2012-08-15
-header          AXB_X_XM_MMAGIC         X-Mailer =~ /\bMailMagic/
-describe        AXB_X_XM_MMAGIC         Mailer fingerprint
-
-# 2012-07-24
-header          AXB_X_MSEX_ANONYMOUS     X-MS-Exchange-Organization-AuthAs =~ /^Anonymous$/
-describe        AXB_X_MSEX_ANONYMOUS     Seen in exploited MTA msgs
-
-# 2012-03-19
-header		AXB_XM_GETRSP	X-Mailer =~ /^GetResponse\b/
-describe	AXB_XM_GETRSP	ESP Bulkware
-
-# 2012-03-17
-header		__AXB_LI_U	List-Unsubscribe =~ /\@em\.linkedin\.com\b/
-header		__AXB_LI_CLASS	exists:X-LinkedIn-Class
-header		__AXB_LI_FBL	exists:X-LinkedIn-fbl
-meta		AXB_OBFU_MULE	(__AXB_LI_U && !__AXB_LI_CLASS && !__AXB_LI_FBL)
-describe	AXB_OBFU_MULE	spacey mules
-
-# 2012-02-16
-body            AXB_BODYMAIL_SBL112884  /\@yeah\.net\b/
-describe        AXB_BODYMAIL_SBL112884  Spammer dropbox SBL112884
-
-
-# 2012-01-07
-header          AXB_XMA_BASP            X-Mail-Agent =~ /^BASP21/
-describe        AXB_XMA_BASP            Mailer fingerprint
-
 
 # 2012-01-04
 header          AXB_X_AOL_SEZ_S         x-aol-global-disposition =~ /^S$/
-describe        AXB_X_AOL_SEZ_S         AOL said this is S
-
-# 2012-01-01
-# uri             AXB_URI_BIG5    /\¡[CDO]/
-# describe        AXB_URI_BIG5    Uri contains big5 encoding
-
-# 2011-12-08
-header          AXB_XM_BULK_SB          X-Mailer =~ /SendBlaster/
-describe        AXB_XM_BULK_SB          Bulk mail tool
-
-
-# 2011-09-14 - Suggested by rfg / patternity
-header          AXB_XM_SENTBY   exists:X-Mailer-Sent-By
-describe        AXB_XM_SENTBY   Ratware fingerprint
-
-# 2011-07-27
-# header          AXB_XRCVD_XYZCRP         Received =~ /\(envelope\-sender \<\#\@\[\]\>\)/
-# describe        AXB_XRCVD_XYZCRP         sender fingerprint
-
-
-# 2011-07-08
-#header          AXB_XRCVD_APACHE_CTRIP  Received =~ /\bfrom apache by ctrip\.com\b/i
-#describe        AXB_XRCVD_APACHE_CTRIP  possibly forged ctrip sender - apache
-
-header          AXB_XMID_PFIX_CTRIP     Message-ID =~ /\<[A-F0-9]{8}.[0-9]{6}\@ctrip\.com\>/
-describe        AXB_XMID_PFIX_CTRIP     possibly forged ctrip sender - postfix
-
-#header          AXB_XMID_EXIM_CTRIP     Message-ID =~ /\<[A-F0-9]{32}\@ctrip\.com\>/
-#describe        AXB_XMID_EXIM_CTRIP     possibly forged ctrip sender - exim
-
-header          AXB_X_PHPS_CTRIP        X-PHP-Script =~ /\bctrip\.com\/sendmail\.php\b/
-describe        AXB_X_PHPS_CTRIP        possibly forged ctrip sender - php
-
-#header          AXB_XRCVD_FRMCTRIP      Received =~ /from ctrip\.com\b/
-#describe        AXB_XRCVD_FRMCTRIP      possibly forged ctrip sender - rcvd
-
-#
-
-# 2011-07-05
-rawbody         AXB_SSCECCF     /\bSandboxScopeClass ExternalClass\b/
-describe        AXB_SSCECCF     unidentified fingerprint
-
-
-
-#2011-06-05
-header   AXB_XRCVD_EYOU_SEND    Received =~ /\(eyou send program\)/
-describe AXB_XRCVD_EYOU_SEND    fingerprint
-#score   AXB_XRCVD_EYOU_SEND    1.0
-
-
-
-header          AXB_HELO_HOME_UN        X-Spam-Relays-Untrusted =~ /^[^\]]+ helo=\w+\.(lan|home) /i
-describe        AXB_HELO_HOME_UN        HELO from home  - untrusted
-#score          AXB_HELO_HOME_UN        1.0
+describe        AXB_X_AOL_SEZ_S         AOL said this is S*
 
 
 

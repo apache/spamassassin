@@ -36,7 +36,7 @@ use IO::Socket;
 use POSIX ":sys_wait_h";
 
 use vars qw{
-  $KNOWN_BAD_DIALUP_RANGES @EXISTING_DOMAINS $IS_DNS_AVAILABLE $LAST_DNS_CHECK $VERSION
+  $KNOWN_BAD_DIALUP_RANGES @EXISTING_DOMAINS $IS_DNS_AVAILABLE $LAST_DNS_CHECK 
 };
 
 # use very well-connected domains (fast DNS response, many DNS servers,
@@ -66,7 +66,8 @@ use vars qw{
 
 $IS_DNS_AVAILABLE = undef;
 
-$VERSION = 'bogus';     # avoid CPAN.pm picking up razor ver
+#Removed $VERSION per BUG 6422
+#$VERSION = 'bogus';     # avoid CPAN.pm picking up razor ver
 
 ###########################################################################
 
@@ -247,7 +248,8 @@ sub process_dnsbl_result {
 
   # NO_DNS_FOR_FROM
   if ($self->{sender_host} &&
-      $question->qname eq $self->{sender_host} &&
+        # fishy, qname should have been "RFC 1035 zone format" -decoded first
+      lc($question->qname) eq lc($self->{sender_host}) &&
       $question->qtype =~ /^(?:A|MX)$/ &&
       $pkt->header->rcode =~ /^(?:NXDOMAIN|SERVFAIL)$/ &&
       ++$self->{sender_host_fail} == 2)

@@ -77,6 +77,7 @@ ok(getimpl->{store}->tie_db_writable());
 ok(!getimpl->{store}->seen_get($msgid));
 
 getimpl->{store}->untie_db();
+alarm(0);
 
 ok($sa->{bayes_scanner}->learn(1, $mail));
 
@@ -87,6 +88,7 @@ ok(getimpl->{store}->tie_db_writable());
 ok(getimpl->{store}->seen_get($msgid) eq 's');
 
 getimpl->{store}->untie_db();
+alarm(0);
 
 ok(getimpl->{store}->tie_db_writable());
 
@@ -113,6 +115,7 @@ foreach my $tok (@{$tokens}) {
 ok(!$tokerror);
 
 getimpl->{store}->untie_db();
+alarm(0);
 
 ok($sa->{bayes_scanner}->learn(0, $mail));
 
@@ -121,6 +124,7 @@ ok(getimpl->{store}->tie_db_writable());
 ok(getimpl->{store}->seen_get($msgid) eq 'h');
 
 getimpl->{store}->untie_db();
+alarm(0);
 
 ok(getimpl->{store}->tie_db_writable());
 
@@ -134,6 +138,7 @@ foreach my $tok (keys %{$toks}) {
 ok(!$tokerror);
 
 getimpl->{store}->untie_db();
+alarm(0);
 
 ok($sa->{bayes_scanner}->forget($mail));
 
@@ -142,6 +147,7 @@ ok(getimpl->{store}->tie_db_writable());
 ok(!getimpl->{store}->seen_get($msgid));
 
 getimpl->{store}->untie_db();
+alarm(0);
 
 undef $sa;
 
@@ -173,6 +179,8 @@ ok(-e 'log/user_state/bayes_toks');
 undef $sa;
 
 sa_t_init('bayes'); # this wipes out what is there and begins anew
+
+alarm(0);  # cancel timer - make sure that alarm is off
 
 # make sure we learn to a journal
 tstlocalrules ("

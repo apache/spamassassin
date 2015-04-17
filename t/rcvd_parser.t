@@ -18,7 +18,7 @@ if (-e 'test_dir') {            # running from test directory, not ..
 
 use lib '.'; use lib 't';
 use SATest; sa_t_init("rcvd_parser");
-use Test; BEGIN { plan tests => 145 };
+use Test; BEGIN { plan tests => 146 };
 use strict;
 
 # format is:
@@ -474,6 +474,10 @@ my %data = (
   #ADDED PER Bug 6900
   'from unknown (HELO ?151.80.38.67?) (myuser@mydomain.it@151.80.38.67) by mail.it-connect.it with SMTP; 28 Jan 2013 21:50:51 +0100' => 
   '[ ip=151.80.38.67 rdns= helo=?151.80.38.67? by=mail.it-connect.it ident=myuser@mydomain.it envfrom= id= auth= msa=0 ]',
+
+  #Bug 7101
+  'from [94.79.161.130] by 3capp-webde-bs01.dlan.cinetic.de (via HTTP); Tue, 11 Nov 2014 20:32:34 +0100' => 
+  '[ ip=94.79.161.130 rdns= helo= by=3capp-webde-bs01.dlan.cinetic.de ident= envfrom= id= auth=HTTP msa=0 ]',
 
 );
 

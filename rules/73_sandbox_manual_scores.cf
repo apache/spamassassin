@@ -51,6 +51,12 @@ score FILL_THIS_FORM           0.001
 #score MONEY_FRAUD_8            0.50
 
 # jhardin
+# GA scores this unreasonably high, and
+# the fact that this is defined in an #ifplugin
+# appears to be preventing score limiting from working
+score FILL_THIS_FORM_LONG      2.00
+
+# jhardin
 # misc rules
 # Commented out if GA is scoring reasonably
 #score FROM_MISSP_MSFT          0.50

@@ -339,10 +339,10 @@ header DUH_DIKSBJ   Subject =~ /^\$DIKSBJ/
 describe DUH_DIKSBJ Idiot spammer screwed up his templates (DIK variant)
 
 # a test rule for Jeff
-ifplugin Mail::SpamAssassin::Plugin::URIDNSBL
-meta        URIBL_META_SURBL_ANY   (URIBL_AB_SURBL || URIBL_JP_SURBL || URIBL_PH_SURBL || URIBL_SC_SURBL || URIBL_WS_SURBL)
-tflags      URIBL_META_SURBL_ANY       net nopublish
-endif
+#ifplugin Mail::SpamAssassin::Plugin::URIDNSBL
+#meta        URIBL_META_SURBL_ANY   (URIBL_AB_SURBL || URIBL_JP_SURBL || URIBL_PH_SURBL || URIBL_SC_SURBL || URIBL_WS_SURBL)
+#tflags      URIBL_META_SURBL_ANY       net nopublish
+#endif
 
 uri T_CN_URL      /[^\/]+\.cn(?:$|\/|\?)/i
 describe T_CN_URL Contains a URL in the .cn domain

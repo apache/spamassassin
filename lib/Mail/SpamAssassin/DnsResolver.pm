@@ -40,10 +40,12 @@ use warnings;
 use bytes;
 use re 'taint';
 
+require 5.008001;  # needs utf8::is_utf8()
+
 use Mail::SpamAssassin;
 use Mail::SpamAssassin::Logger;
 use Mail::SpamAssassin::Constants qw(:ip);
-use Mail::SpamAssassin::Util qw(untaint_var fmt_dns_question_entry);
+use Mail::SpamAssassin::Util qw(untaint_var decode_dns_question_entry);
 
 use Socket;
 use Errno qw(EADDRINUSE EACCES);
@@ -143,7 +145,7 @@ sub load_resolver {
       $res->persistent_tcp(0);  # bug 3997
       $res->persistent_udp(0);  # bug 3997
 
-      # RFC 2671 bis - EDNS0, value is a requestor's UDP payload size
+      # RFC 6891 (ex RFC 2671): EDNS0, value is a requestor's UDP payload size
       my $edns = $self->{conf}->{dns_options}->{edns};
       if ($edns && $edns > 512) {
         $res->udppacketsize($edns);
@@ -165,7 +167,9 @@ sub load_resolver {
     dbg("dns: eval failed: $eval_stat");
   };
 
-  dbg("dns: using socket module: %s%s", $io_socket_module_name,
+  dbg("dns: using socket module: %s version %s%s",
+      $io_socket_module_name,
+      $io_socket_module_name->VERSION,
       $self->{force_ipv4} ? ', forced IPv4' :
       $self->{force_ipv6} ? ', forced IPv6' : '');
   dbg("dns: is Net::DNS::Resolver available? %s",
@@ -204,8 +208,10 @@ sub configured_nameservers {
     @ns_addr_port = @{$self->{conf}->{dns_servers}};
     dbg("dns: servers set by config to: %s", join(', ',@ns_addr_port));
   } elsif ($res) {  # default as provided by Net::DNS, e.g. /etc/resolv.conf
-    @ns_addr_port = map(untaint_var("[$_]:" . $res->{port}),
-                        @{$res->{nameservers}});
+    my @ns = $res->UNIVERSAL::can('nameservers') ? $res->nameservers
+                                                 : @{$res->{nameservers}};
+    my $port = $res->UNIVERSAL::can('port') ? $res->port : $res->{port};
+    @ns_addr_port = map(untaint_var("[$_]:" . $port), @ns);
     dbg("dns: servers obtained from Net::DNS : %s", join(', ',@ns_addr_port));
   }
   return @ns_addr_port;
@@ -300,7 +306,7 @@ sub pick_random_available_port {
       if  ($b eq $all_zeroes) { $ind += 256 }
       elsif ($b eq $all_ones) { $ind += 256; $cnt += 256 }
       else {  # count nontrivial cases the slow way
-        foreach (0..255) { if (vec($ports_bitset, $ind++, 1)) { $cnt++ } }
+        vec($ports_bitset, $ind++, 1) && $cnt++  for 0..255;
       }
       $available_portscount += $cnt;
       $bucket_counts[$bucket] = $cnt;
@@ -385,8 +391,6 @@ sub connect_sock {
   } else {  # unrecognized
     # unspecified address, unspecified protocol family
   }
-  dbg("dns: LocalAddr: %s, name server(s): %s",
-      $srcaddr||'', join(', ',@ns_addr_port));
 
   # find a free local random port from a set of declared-to-be-available ports
   my $lport;
@@ -403,6 +407,8 @@ sub connect_sock {
       $errno = 0;
       last;
     }
+    dbg("dns: LocalAddr: [%s]:%d, name server: [%s]:%d, module %s",
+        $srcaddr||'x', $lport,  $ns_addr, $ns_port,  $io_socket_module_name);
     my %args = (
         PeerAddr => $ns_addr,
         PeerPort => $ns_port,
@@ -539,6 +545,11 @@ sub new_dns_packet {
 
   my $packet;
   eval {
+
+    if (utf8::is_utf8($domain)) {  # since Perl 5.8.1
+      info("dns: new_dns_packet: domain is utf8 flagged: %s", $domain);
+    }
+
     $domain =~ s/\.*\z/./s;
     if (length($domain) > 255) {
       die "domain name longer than 255 bytes\n";
@@ -623,7 +634,7 @@ sub _packet_id {
     # sure the query section of an answer packet matches the query section
     # in our packet as formed by new_dns_packet():
     #
-    my($class,$type,$qname) = fmt_dns_question_entry($questions[0]);
+    my($class,$type,$qname) = decode_dns_question_entry($questions[0]);
     $qname =~ tr/A-Z/a-z/  if !$self->{conf}->{dns_options}->{dns0x20};
     return join('/', $id, $class, $type, $qname);
 
@@ -787,7 +798,6 @@ sub poll_responses {
         } else {
           # some failure, e.g. NXDOMAIN, SERVFAIL, FORMERR, REFUSED, ...
           # btw, one reason for SERVFAIL is an RR signature failure in DNSSEC
-          # NOTE: qname is encoded in RFC 1035 zone format, decode it
           dbg("dns: dns reply to %s: %s", $id, $rcode);
         }
 
@@ -801,8 +811,12 @@ sub poll_responses {
           $cb->($packet, $id, $now);
           $cnt++;
         } else {  # no match, report the problem
-          info("dns: no callback for id %s, ignored; packet: %s",
-               $id,  $packet ? $packet->string : "undef" );
+          if ($rcode eq 'REFUSED' || $id =~ m{^\d+/NO_QUESTION_IN_PACKET\z}) {
+            # the failure was already reported above
+          } else {
+            info("dns: no callback for id %s, ignored; packet: %s",
+                 $id,  $packet ? $packet->string : "undef" );
+          }
           # report a likely matching query for diagnostic purposes
           local $1;
           if ($id =~ m{^(\d+)/}) {
@@ -854,6 +868,14 @@ be avoided for mainstream usage.
 sub send {
   my ($self, $name, $type, $class) = @_;
   return if $self->{no_resolver};
+
+  # Avoid passing utf8 character strings to DNS, as it has no notion of
+  # character set encodings - encode characters somehow to plain bytes
+  # using some arbitrary encoding (they are normally just 7-bit ascii
+  # characters anyway, just need to get rid of the utf8 flag).  Bug 6959
+  # Most if not all af these come from a SPF plugin.
+  #
+  utf8::encode($name);
 
   my $retrans = $self->{retrans};
   my $retries = $self->{retry};

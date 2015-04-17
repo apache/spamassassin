@@ -368,8 +368,8 @@ sub check_examined {
   }
 }
 
-# WARNING! Do not use this as an example, this breaks abstraction and here strictly
-# to help the regression tests.
+# WARNING! Do not use this as an example, this breaks abstraction
+# and is here strictly to help the regression tests.
 sub database_clear_p {
   my ($username, $userid) = @_;
 

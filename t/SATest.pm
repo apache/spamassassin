@@ -14,29 +14,30 @@ use File::Path;
 use File::Spec;
 use POSIX qw(WIFEXITED WIFSIGNALED WIFSTOPPED WEXITSTATUS WTERMSIG WSTOPSIG);
 
+use vars qw($RUNNING_ON_WINDOWS $SSL_AVAILABLE
+            $SKIP_SPAMD_TESTS $SKIP_SPAMC_TESTS $NO_SPAMC_EXE
+            $SKIP_SETUID_NOBODY_TESTS $SKIP_DNSBL_TESTS
+            $have_inet4 $have_inet6 $spamdhost $spamdport);
+
 BEGIN {
   require Exporter;
   use vars qw(@ISA @EXPORT @EXPORT_OK);
   @ISA = qw(Exporter);
 
-  use vars qw($have_inet4 $have_inet6 $spamdhost $spamdport);
   @EXPORT = qw($have_inet4 $have_inet6 $spamdhost $spamdport);
 
   # No spamd test in Windows unless env override says user figured out a way
   # If you want to know why these are vars and no constants, read this thread:
   #   <http://www.mail-archive.com/dev%40perl.apache.org/msg05466.html>
   #  -- mss, 2004-01-13
-  our $RUNNING_ON_WINDOWS = ($^O =~ /^(mswin|dos|os2)/oi);
-  our $SKIP_SPAMD_TESTS =
+  $RUNNING_ON_WINDOWS = ($^O =~ /^(mswin|dos|os2)/oi);
+  $SKIP_SPAMD_TESTS =
         $RUNNING_ON_WINDOWS ||
         ( $ENV{'SPAMD_HOST'} && !($ENV{'SPAMD_HOST'} eq '127.0.0.1' ||
                                   $ENV{'SPAMD_HOST'} eq '::1' ||
                                   $ENV{'SPAMD_HOST'} eq 'localhost') );
-  our $NO_SPAMC_EXE;
-  our $SKIP_SPAMC_TESTS;
-  our $SSL_AVAILABLE;
-  our $SKIP_SETUID_NOBODY_TESTS = 0;
-  our $SKIP_DNSBL_TESTS = 0;
+  $SKIP_SETUID_NOBODY_TESTS = 0;
+  $SKIP_DNSBL_TESTS = 0;
 
   $have_inet4 = eval {
     require IO::Socket::INET;
@@ -90,7 +91,7 @@ sub sa_t_init {
   $perl_cmd .= " -T" if !defined($ENV{'TEST_PERL_TAINT'}) or $ENV{'TEST_PERL_TAINT'} ne 'no';
   $perl_cmd .= " -w" if !defined($ENV{'TEST_PERL_WARN'})  or $ENV{'TEST_PERL_WARN'}  ne 'no';
 
-  $scr = $ENV{'SCRIPT'};
+  $scr = $ENV{'SPAMASSASSIN_SCRIPT'};
   $scr ||= "$perl_cmd ../spamassassin.raw";
 
   $spamd = "$perl_cmd ../spamd/spamd.raw";
@@ -167,6 +168,7 @@ sub sa_t_init {
 
   mkdir ("log", 0755);
   chmod (0755, "log"); # set in case log already exists with wrong permissions
+  system("chacl -B log 2>/dev/null || setfacl -b log 2>/dev/null"); # remove acls that confuse test
 
   rmtree ("log/user_state");
   rmtree ("log/outputdir.tmp");
