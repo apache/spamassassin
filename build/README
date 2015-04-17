@@ -327,10 +327,10 @@ SPAMASSASSIN RELEASE PROCEDURE
   for their minor version number.  In the example above, 3.4 is the
   branch for the stable 3.4.x releases.
 
-- In the new development codebase, edit lib/Mail/SpamAssassin.pm
-  and bump the $VERSION line to the correct version.
+  - In the new development codebase, edit lib/Mail/SpamAssassin.pm
+    and bump the $VERSION line to the correct version.
 
-- then, commit the new version number to the new branch:
+  - then, commit the new version number to the new branch:
 
         svn commit -m "X.Y.N devel cycle started"
 
