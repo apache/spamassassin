@@ -496,17 +496,17 @@ http://spamassassin.apache.org/downloads.cgi
 
 md5sum of archive files:
 
-06ce92812b84bd51f20bc90fa931933c  Mail-SpamAssassin-3.4.1-rc1.tar.bz2
-5cc08804e32adeb104f0ef9b68de8d8d  Mail-SpamAssassin-3.4.1-rc1.tar.gz
-c3cc867edbf875d157e8a871b73838a6  Mail-SpamAssassin-3.4.1-rc1.zip
-cafc1a8b3a870e1c5634d39df99f37f7  Mail-SpamAssassin-rules-3.4.1-rc1.r1645877.tgz
+55f934b54e7b56fb89b491b289b10e8d  Mail-SpamAssassin-3.4.1-rc2.tar.bz2
+3c9a10d08731877a29499769e75e35b3  Mail-SpamAssassin-3.4.1-rc2.tar.gz
+8d01b76eb532499f590a8314f5a5f938  Mail-SpamAssassin-3.4.1-rc2.zip
+a5e4a3f174cc5ed8b18077f9a6ca0c47  Mail-SpamAssassin-rules-3.4.1-rc2.r1670273.tgz
 
 sha1sum of archive files:
 
-9a26266720114d907596a078671e10e14025ec1d  Mail-SpamAssassin-3.4.1-rc1.tar.bz2
-1029b7da3e279455ff2e8ea9619b0eb9222a484a  Mail-SpamAssassin-3.4.1-rc1.tar.gz
-0fee42eb54bec29fd817082d31cc4749a81e0b77  Mail-SpamAssassin-3.4.1-rc1.zip
-d63d73515445b15980a3155ff8004fc069527d93  Mail-SpamAssassin-rules-3.4.1-rc1.r1645877.tgz
+0efbde52cdc882461d2e3a5d9ed977499268cadd  Mail-SpamAssassin-3.4.1-rc2.tar.bz2
+bb2eb6a3c7a79ea1cc2a53abf668b4684f39b653  Mail-SpamAssassin-3.4.1-rc2.tar.gz
+318ac84a1f17e19229d9813078a12e7f4825dee3  Mail-SpamAssassin-3.4.1-rc2.zip
+680c231efd0cfca69e665445a9472d0b7bb3a8fe  Mail-SpamAssassin-rules-3.4.1-rc2.r1670273.tgz
 
 Note that the *-rules-*.tar.gz files are only necessary if you cannot,
 or do not wish to, run "sa-update" after install to download the latest
@@ -534,7 +534,7 @@ sub   4096R/7B3265A5 2009-12-02
 To verify a release file, download the file with the accompanying .asc file and run the following commands:
 
   gpg -v --keyserver wwwkeys.pgp.net --recv-key F7D39814
-  gpg --verify Mail-SpamAssassin-3.4.0.tar.bz2.asc
+  gpg --verify Mail-SpamAssassin-3.4.1.tar.bz2.asc
   gpg --fingerprint F7D39814
 
 Then verify that the key matches the signature.
