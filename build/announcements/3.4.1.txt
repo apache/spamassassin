@@ -115,7 +115,7 @@ A configuration option 'dns_server' can now specify a scoped link-local
 IPv6 address, e.g.:  dns_server [fe80::1%lo0]:53 .
 
 The configuration option 'check_rbl_from_domain' checks all domain names
-in a From mail address as an alternate to check_rbl_from_host. As of
+in a From mail address as an alternative to check_rbl_from_host. As of
 v3.4.1, it has been improved to include a subtest for a specific octet.
 
 The 'if (boolean perl expression)' now accepts 'perl_version' in the
@@ -125,38 +125,58 @@ version in a conditional of a configuration file is:
   if can(Mail::SpamAssassin::Conf::perl_min_version_5010000)
 Please see documentation in the Mail::SpamAssassin::Conf man page.
 
+A flag 'noawl' was added to the 'tflags' configuration option.
+
+Two new template tags were added:
+_SENDERDOMAIN_ expands to a domain name of the envelope sender address
+_AUTHORDOMAIN_ expands to a domain name of the author address (the From
+   header field), lowercased;  note that RFC 5322 allows a mail message
+   to have multiple authors - currently only the domain name of the
+   first email address is returned
 
 
+Notable Internal changes
+------------------------
+
+Mail::SpamAssassin::Util::RegistrarBoundaries is being replaced by 
+Mail::SpamAssassin::RegistryBoundaries so that new TLDs can be updated
+via 20_aux_tlds.cf delivered via sa-update.
+
+The $VALID_TLDS_RE global in registrar boundaries is deprecated but kept
+for third-party plugin compatibility.  It may be removed in a future
+release. See Mail::SpamAssassin::Plugin::FreeMail for an example of the
+new way of abtaining a valid list of TLDs.
+
+The following functions and variables will be removed in the next
+release after 3.4.1 excepting any emergency break/fix releases
+immediately after 3.4.1:
+  Mail::SpamAssassin::Util::RegistrarBoundaries::is_domain_valid 
+  Mail::SpamAssassin::Util::RegistrarBoundaries::trim_domain
+  Mail::SpamAssassin::Util::RegistrarBoundaries::split_domain 
+  Mail::SpamAssassin::Util::uri_to_domain 
+  Mail::SpamAssassin::Util::RegistrarBoundaries::US_STATES
+  Mail::SpamAssassin::Util::RegistrarBoundaries::THREE_LEVEL_DOMAINS
+  Mail::SpamAssassin::Util::RegistrarBoundaries::TWO_LEVEL_DOMAINS
+  Mail::SpamAssassin::Util::RegistrarBoundaries::VALID_TLDS_RE
+  Mail::SpamAssassin::Util::RegistrarBoundaries::VALID_TLDS
+
+This change should only affect 3rd party plugin authors who will need
+to update their code to utilize Mail::SpamAssassin::RegistryBoundaries.
 
 
-Added flag 'noawl' to the 'tflags' configuration option.
-
-
-new template tags:
-_SENDERDOMAIN_  a domain name of the envelope sender address, lowercased
-_AUTHORDOMAIN_  a domain name of the author address (the From header
-                field), lowercased;  note that RFC 5322 allows a mail
-                message to have multiple authors - currently only the
-                domain name of the first email address is returned
-
-INTERNAL:
-new methods in Mail::SpamAssassin::PerMsgStatus :
+In module Mail::SpamAssassin::PerMsgStatus two new methods were added:
 
 $pms->get_names_of_tests_hit_with_scores_hash
-
   After a mail message has been checked, this method can be called.
   It will return a pointer to a hash for rule & score pairs for all
   the symbolic test names and individual scores of the tests which
   were triggered by the mail.
 
 $pms->get_names_of_tests_hit_with_scores
-
   After a mail message has been checked, this method can be called.
   It will return a comma-separated string of rule=score pairs for all
   the symbolic test names and individual scores of the tests which
   were triggered by the mail.
-
-
 
 
 Rule updates
@@ -191,8 +211,8 @@ Some of these are (in no particular order):
   false-positives, added 20_freemail_mailcom_domains.cf
 
 Some rules were removed or disabled, either because of ineffectiveness,
-or duplication with other rules, or due to false positives. Some of these
-are (in no particular order):
+or duplication with other rules, or due to false positives. Some of
+these are (in no particular order):
 
   DNS_FROM_AHBL_RHSBL, DOS_FAKE_SQUIRREL, FSL_MISSP_REPLYTO,
   KHOP_SPAMDB_SUBJ, MSGID_MULTIPLE_AT, SMF_FM_FORGED_REPLYTO,
@@ -206,7 +226,7 @@ Other updates
 -------------
 
 Documentation was updated or enhanced. Project's testing and evaluation
-hosts and tools running in the ASF infrastructure were updated.
+hosts and tools running on the ASF infrastructure were updated.
 
 A list of top-level domains in registrar boundaries was updated
 several times (cw, sx, club, com.us, util_rb_2tld, ...). TLD updating
@@ -231,12 +251,12 @@ Bug 7128: DCC plugin now uses IO::Socket::IP instead of IO::Socket::INET6
 
 Bug 7099: Adding tags SENDERDOMAIN and AUTHORDOMAIN
 
-Bug 7068: added rule and code to counts Unicode entities
+Bug 7068: added rule and code to count Unicode entities
 
 Bug 7052: moved module Net::DNS::Nameserver to optional since it is
 just used in make test
 
-clean up on httpd.conf
+cleaned up on httpd.conf
 
 minor debugging improvement in Plugin::TextCat 
 
@@ -247,7 +267,7 @@ Bug 7107: added "perl_min_version_5010000" for preprocessor conditionals
 Cleaned up documentation and removed rule name parameter that was not
 needed on the rule
 
-more informative dns debugging output
+more informative DNS debugging output
 
 added new install docs to MANIFEST
 
@@ -275,7 +295,7 @@ disabled synchronous commit for Postgres Bayes store
 Notable bug fixes
 -----------------
 
-Adjusted for Yahoo! using subnet 238.0.0./8 in Received headers.
+Adjusted for Yahoo! using subnet 238.0.0./8 in Received headers
 
 Bug 6751: certain character sets can use alternate characters for
 a period and bypass DNSBL checks
@@ -294,11 +314,12 @@ count characters instead?
 
 Bug 7140: fixed DKIM/SPF Insecure dependency in require
 
-Bug 7130: Bayes tokenization mangles/chops many UTF-8 words with accented,
-Cyrillic etc. letters - inappropriately assuming ISO-8859 encoding
+Bug 7130: Bayes tokenization mangles/chops many UTF-8 words with
+accented, Cyrillic etc. letters - inappropriately assuming ISO-8859
+encoding
 
 Bug 7130: disable TOKENIZE_LONG_8BIT_SEQS_AS_TUPLES, seems redundant
-and useless with TOKENIZE_LONG_8BIT_SEQS_AS_UTF8_CHARS, e.g. turns
+and useless with TOKENIZE_LONG_8BIT_SEQS_AS_UTF8_CHARS, e.g. turned
 each Cyrillic letter of longer words into an individual token
 
 Bug 7133: Revisiting Bug 4046 - HTML::Parser: Parsing of undecoded UTF-8
@@ -310,7 +331,8 @@ Bug 7136: modified 25_spf.t and reverted reversion in SpamAssassin.pm
 from previous rc1 work
 
 Bug 7135: Bayes tokenizer 'arbitrarily' breaks multibyte CJK UTF-8
-characters into digrams instead of breaking on UTF-8 character boundaries
+characters into digrams instead of breaking on UTF-8 character
+boundaries
 
 Bug 7126: Incorrect character set detections by normalize_charset
 
@@ -320,16 +342,17 @@ delivery-status or disposition-notification as message/rfc822
 Bug 6953: spamd: could not create IO::Socket::INET6 socket
 on [::]:783: Address already in use
 
-Bug 7106: failed IPv6 socket creation blocks creating a good IPv4 socket
+Bug 7106: a failed IPv6 socket creation blocks creating an IPv4 socket
 
-Bug 7124: DKIM: RFC 6376 - Signers MUST use RSA keys of at least 1024 bits
+Bug 7124: DKIM: RFC 6376 - Signers MUST use RSA keys of
+at least 1024 bits
 
 Bug 7120: Perl Critic exemption
 Bug 7119: Perl::Critic: ControlStructures::ProhibitMutatingListFunctions
 reverted critic recommendations to fix undef warning, Removed undef
 returns for perlcritic test
 
-Bug 5399: fix MS::Util::parse_content_type, dots are allowed in
+Bug 5399: fixed MS::Util::parse_content_type, dots are allowed in
 Content-Type (a fix to Bug 5399 was too strict)
 
 fixed SA::Util::qp_decode for compliance with RFC 2045 (trailing
@@ -343,14 +366,15 @@ new versions)
 Bug 7030: BayesStore/Redis.pm: authentication doesn't work with
 Redis 2.6 and earlier
 
-Bug 7103: bad wget option causes first fetch of third-party rules
+Bug 7103: bad wget option causes the first fetch of third-party rules
 channel to fail
 
 fixed uribl matching on email addresses with commas after them
 
-Bug 6919: Added 'dedicated' to list of static IP indicators for RDNS_DYNAMIC
+Bug 6919: added 'dedicated' to list of static IP indicators
+for RDNS_DYNAMIC
 
-Fixed POD error caused by trailing whitespace
+fixed POD error caused by trailing whitespace
 
 hacked PHP URI tuning
 
@@ -364,11 +388,13 @@ added more UTF-8 Unicode obfuscation variants
 
 removed non AV/filter headers
 
-Set headers which may provide inappropriate cues to the Bayesian classifier
+set headers which may provide inappropriate cues to the Bayesian
+classifier
 
 Plugin/HeaderEval: header field names are case-insensitive
 
-Bug 7074, sa-update: improved error reporting of a failed spawned process
+Bug 7074, sa-update: improved error reporting of a failed spawned
+process
 
 db_id not initialized, || -> ||=
 
@@ -412,25 +438,25 @@ added URILocalBL.pm plugin to trunk for testing, updating MANIFEST
 and v341.pre file as well as optional dependencies with Net::CIDR::Lite
 and Geo::IP
 
-fix DNS resolving with Net::DNS 0.76
+fixed DNS resolving with Net::DNS 0.76
 
-Changes in Spamhaus DBL DNSBL return codes as per
+changes in Spamhaus DBL DNSBL return codes as per
   http://www.spamhaus.org/news/article/713/
 
-Fixing issues with extract_to_rsync_dir
+fixing issues with extract_to_rsync_dir
 
-Having issues with this sandbox rule failing make test
+having issues with this sandbox rule failing make test
 TEST_FILES="t/basic_lint.t t/basic_lint_without_sandbox.t t/basic_meta.t"
 
-fixed escaping where perl called from bash using bash variables for
+fixed escaping where perl was called from bash using bash variables for
 tick_zone_serial
 
 fixed the interpreter to reference /bin/bash instead of /usr/bin/bash
 
-Fixing the masses Makefile for pgapack for linux on new spamassassin-vm
+fixing the masses Makefile for pgapack for linux on new spamassassin-vm
 centos box
 
-Bug 7052: Fix for Net::DNS::Nameserver dependency on CentOS systems
+Bug 7052: a fix for Net::DNS::Nameserver dependency on CentOS systems
 
 fix to install v341.pre file
 
@@ -454,7 +480,7 @@ fixed wrong plugin in IF
 Bug 7032: added tflag for noawl
 
 If a subrule is in an if block, ensure it appears in an else block to
-avoid breaking dependent rules. Fix some rules depending on subrules
+avoid breaking dependent rules. Fixed some rules depending on subrules
 in if blocks in other sandboxes so they don't break if the conditional
 check suppresses that subrule.
 
@@ -536,7 +562,8 @@ uid                  SpamAssassin Project Management Committee <private@spamassa
 uid                  SpamAssassin Signing Key (Code Signing Key, replacement for 1024D/265FA05B) <dev@spamassassin.apache.org>
 sub   4096R/7B3265A5 2009-12-02
 
-To verify a release file, download the file with the accompanying .asc file and run the following commands:
+To verify a release file, download the file with the accompanying .asc
+file and run the following commands:
 
   gpg -v --keyserver wwwkeys.pgp.net --recv-key F7D39814
   gpg --verify Mail-SpamAssassin-3.4.1.tar.bz2.asc
@@ -572,8 +599,8 @@ traversed code paths carefully optimized. Benefits are portability,
 robustness and facilitated maintenance. It can run on a wide variety of
 POSIX platforms.
 
-The server and the Perl library feels at home on Unix and Linux
-platforms, and reportedly also works on MS Windows systems under ActivePerl.
+The server and the Perl library feels at home on Unix and Linux platforms
+and reportedly also works on MS Windows systems under ActivePerl.
 
 For more information, visit http://spamassassin.apache.org/
 
