@@ -565,7 +565,7 @@ sub   4096R/7B3265A5 2009-12-02
 To verify a release file, download the file with the accompanying .asc
 file and run the following commands:
 
-  gpg -v --keyserver wwwkeys.pgp.net --recv-key F7D39814
+  gpg --verbose --keyserver wwwkeys.pgp.net --recv-key F7D39814
   gpg --verify Mail-SpamAssassin-3.4.1.tar.bz2.asc
   gpg --fingerprint F7D39814
 
