@@ -632,8 +632,7 @@ ifplugin Mail::SpamAssassin::Plugin::RelayEval
 score NO_RDNS_DOTCOM_HELO 3.100 0.433 3.099 0.823
 score RCVD_HELO_IP_MISMATCH 1.680 1.186 2.362 2.368
 # score RCVD_ILLEGAL_IP 3.399
-# lowered from 1.3 to 0.1 till MS comes to its senses
-score RCVD_ILLEGAL_IP 0.5
+score RCVD_ILLEGAL_IP 1.3
 score RCVD_NUMERIC_HELO 0.001 0.865 0.001 1.164
 # </gen:mutable>
 
