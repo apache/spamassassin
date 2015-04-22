@@ -66,6 +66,16 @@ SPAMASSASSIN RELEASE PROCEDURE
   (ie., no "M" or "C" files; any files marked "M" have been locally
   modified, and should be "svn revert"ed before you continue.)
 
+#- consider updating the TLD list in
+#  Mail/SpamAssassin/Util/RegistrarBoundaries.pm
+#
+#  Follow the documentation under %VALID_TLDS and $VALID_TLDS_RE for
+#  updating the TLD list, make test, and do a commit if there are any
+#  changes from the previous TLD list.
+#
+#  Currently, the only way to change the TLD list is via a release as 
+#  of 6/17/2014.
+
 - Consider updating the TLD list in 20_aux_tlds.cf.  As of 4/6/2015,
   this is not automated but bug 7165 is open for this purpose.
 
@@ -196,7 +206,7 @@ SPAMASSASSIN RELEASE PROCEDURE
 
   - For a trunk release candidate (x.y.0-rc1), pre-release (x.y.0-preZ) or alpha (x.y.0-alphaZ):
 
-    vers=3_4_0_rc_2
+    vers=3_3_0_alpha_2
 
     Then run:
 
@@ -219,8 +229,7 @@ SPAMASSASSIN RELEASE PROCEDURE
 
   Check out the code from the tag you just made:
 
-    #These should be set from the previous command unless you are on a
-    #  different server
+    #These should be set from the previous command
     #vers=3_3_0_alpha_2 
     #repo=https://svn.apache.org/repos/asf/spamassassin
     rm -rf ~/relbuild
@@ -261,8 +270,7 @@ SPAMASSASSIN RELEASE PROCEDURE
     vi !$
 
   NOTE: Here's a quick example to concat the MD5 or SHA1 checksums:
-        ls *3.4.1*rc2* | grep md5 | xargs cat --
-        ls *3.4.1*rc2* | grep sha1 | xargs cat --
+        ls *3.4.0*rc6* | grep sha1 | xargs cat --
 
 - If there are any issues to note, make sure to edit the UPGRADE file.
   Every x.x.0 release at a minimum should include a section.
@@ -299,9 +307,7 @@ SPAMASSASSIN RELEASE PROCEDURE
 
   http://www.cpan.org/modules/04pause.html#developerreleases
 
-  As of 2014-02-05, adding -TRIAL to the filename should work. For example:
-
-        Mail-SpamAssassin-3.4.1-rc2-TRIAL.tar.gz
+  As of 2014-02-05, adding TRIAL to the filename should work.
 
 - (for a full release) 3 +1's votes from PMC members are required to 
   proceed with an official (not pre-release) ASF software release.
@@ -327,10 +333,10 @@ SPAMASSASSIN RELEASE PROCEDURE
   for their minor version number.  In the example above, 3.4 is the
   branch for the stable 3.4.x releases.
 
-  - In the new development codebase, edit lib/Mail/SpamAssassin.pm
-    and bump the $VERSION line to the correct version.
+- In the new development codebase, edit lib/Mail/SpamAssassin.pm
+  and bump the $VERSION line to the correct version.
 
-  - then, commit the new version number to the new branch:
+- then, commit the new version number to the new branch:
 
         svn commit -m "X.Y.N devel cycle started"
 

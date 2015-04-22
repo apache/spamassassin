@@ -5,7 +5,5 @@ CREATE TABLE txrep (
   count int(11) NOT NULL default '0',
   totscore float NOT NULL default '0',
   signedby varchar(255) NOT NULL default '',
-  last_hit timestamp NOT NULL default CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  PRIMARY KEY (username,email,signedby,ip),
-  KEY last_hit (last_hit)
+  PRIMARY KEY (username,email,signedby,ip)
 ) ENGINE=InnoDB;
