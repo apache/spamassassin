@@ -55,9 +55,6 @@ describe EXCUSE_4		Claims you can be removed from the list
 # strange pattern because otherwise it matches the std. majordomo line
 # pls note the comment above. DO NOT just put "to" in the first group!
 
-body EXCUSE_24			/you(?:'ve|'re| have| are)? receiv(?:e|ed|ing) this (?:advertisement|offer|special|recurring|paid).{0,16}\b(?:by either|because)/i
-describe EXCUSE_24		Claims you wanted this ad
-
 body EXCUSE_REMOVE		/to be removed from.{0,20}(?:mailings|offers)/i
 describe EXCUSE_REMOVE		Talks about how to be removed from mailings
 
