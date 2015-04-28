@@ -7,6 +7,10 @@ SPAMASSASSIN DEVELOPMENT SNAPSHOT PROCEDURE
     ssh spamassassin.zones.apache.org
     cd [checkedoutdir]
 
+  NOTE: SpamAssassin.Zones is a crashed box replaced by SpamAssassin-vm.
+  A copy of the sabuildtools is in
+  /root/zonestorage-restore/spamassassin/export/home/kmcgrail/sabuildtools
+
 - ensure the required code and data is available for the build scripts:
 
     $HOME/sabuildtools
@@ -27,6 +31,12 @@ SPAMASSASSIN DEVELOPMENT SNAPSHOT PROCEDURE
 - by default, they're written to ~/public_html/devel/ . 
   Copy them to wherever you want, yourself.
 
+- KAM has included all of these on one of his devel systems with perl
+  5.8.6 (the earliest supported version of Perl as of 4/28/2015).  One
+  note is that you need webmake 2.4 from
+    http://webmake.taint.org/devel/HTML-WebMake-2.4.tar.gz
+  
+  Also, a copy is mirrored at www.pccc.com/downloads/SpamAssassin
 
 
 SPAMASSASSIN RELEASE PROCEDURE
@@ -124,7 +134,14 @@ SPAMASSASSIN RELEASE PROCEDURE
     3.1.0 work (created 3.0 branch); replace with the correct rev number
     for the point you want to start at if different. I used r1149751 to
     produce the first 3.4.0-pre release, for example.  r1567124 is the
-    3.4.0 release tag revision.
+    3.4.0 release tag revision.  r1676613 is the 3.4.1 release tag
+    revision.
+
+    To find the release tag revision, use the tags website, i.e.: 
+      https://svn.apache.org/repos/asf/spamassassin/tags/
+
+    NOTE: 3.4.1 is currently on trunk and will be branched to 3.4 because 
+    3.4 branch was not used.
 
 - Exclude some automated changes from the logs:
 
@@ -178,7 +195,7 @@ SPAMASSASSIN RELEASE PROCEDURE
 
   - For a maintainance release (x.y.1, x.y.2):
 
-    vers=3_1_7
+    vers=3_4_2
 
     Then run:
 
@@ -189,7 +206,7 @@ SPAMASSASSIN RELEASE PROCEDURE
 
   - For a trunk release (x.y.0):
 
-    vers=3_4_0
+    vers=3_4_1
 
     repo=https://svn.apache.org/repos/asf/spamassassin
     svn delete -m "replaced old tag" $repo/tags/spamassassin_release_$vers
@@ -223,7 +240,7 @@ SPAMASSASSIN RELEASE PROCEDURE
 
     #These should be set from the previous command unless you are on a
     #  different server
-    #vers=3_3_0_alpha_2 
+    #vers=3_4_1
     #repo=https://svn.apache.org/repos/asf/spamassassin
     rm -rf ~/relbuild
     svn co $repo/tags/spamassassin_release_$vers ~/relbuild
@@ -246,7 +263,8 @@ SPAMASSASSIN RELEASE PROCEDURE
   module, you didn't update your $PATH.
 
 - run "./build/repackage_latest_update_rules" to repackage the
-  latest file on updates.spamassassin.org.
+  latest rules file for the purpose of publishing a starter rule file 
+  for people who can't run sa-update:
 
     PATH=$HOME/sabuildtools/bin:$PATH
     ./build/repackage_latest_update_rules
@@ -258,13 +276,13 @@ SPAMASSASSIN RELEASE PROCEDURE
   links, fixing the MD5 and SHA1 checksums in this mail, and summarising
   the important changes from the Changes file.
 
-    cp build/announcements/3.3.2.txt build/announcements/3.4.0.txt
+    cp build/announcements/3.4.0.txt build/announcements/3.4.1.txt
     svn add !$
     vi !$
 
   NOTE: Here's a quick example to concat the MD5 or SHA1 checksums:
-        ls *3.4.1*rc2* | grep md5 | xargs cat --
-        ls *3.4.1*rc2* | grep sha1 | xargs cat --
+        ls *3.4.1.* | grep md5 | xargs cat --
+        ls *3.4.1.* | grep sha1 | xargs cat --
 
 - If there are any issues to note, make sure to edit the UPGRADE file.
   Every x.x.0 release at a minimum should include a section.
@@ -272,12 +290,12 @@ SPAMASSASSIN RELEASE PROCEDURE
 - Check the README file for any items to change.
 
 - (for any rc, prerelease, or full release) Place the tarballs in a
-  discrete location (discrete means not linked from the "downloads" page
+  discreet location (discreet means not linked from the "downloads" page
   of the website, but included in the vote mail) and request a vote on the
   development mailing list to make the release.  Post the URL,
   md5sums/sha1sums, and proposed release announcement mail to the dev
   list.  The default location -- ~/public_html/devel/ , or
-  http://people.apache.org/~jm/devel/ , qualifies as "discrete".
+  http://people.apache.org/~jm/devel/ , qualifies as "discreet".
 
   If you build on the zone, you will need to scp them over:
 
