@@ -111,8 +111,9 @@ my %resphash = (
 
 
 sub print_version {
-  print "SpamAssassin version " . Mail::SpamAssassin::Version() . "\n"
-      . "  running on Perl version " . join(".", map { $_||=0; $_*1 } ($] =~ /(\d)\.(\d{3})(\d{3})?/ )) . "\n"
+  printf("SpamAssassin version %s\n  running on Perl version %s\n",
+         Mail::SpamAssassin::Version(),
+         join(".", map( 0+($_||0), ($] =~ /(\d)\.(\d{3})(\d{3})?/ ))))
     or die "error writing: $!";
 }
 
@@ -344,9 +345,14 @@ for(my $elem = 0; $elem <= $#targets; $elem++) {
       binmode $handle  or die "cannot set binmode on file $tempfile: $!";
 
       # avoid slurping the whole file into memory, copy chunk by chunk
-      my($inbuf,$nread);
-      while ( $nread=sysread(STDIN,$inbuf,16384) )
-        { print {$handle} $inbuf  or die "error writing to $tempfile: $!" }
+      my($inbuf,$nread,$nwrites);
+      while ( $nread = sysread(STDIN, $inbuf, 32*1024) ) {
+        for (my $ofs = 0; $ofs < length($inbuf); $ofs += $nwrites) {
+          $nwrites = $handle->syswrite($inbuf, length($inbuf)-$ofs, $ofs);
+          defined $nwrites  or die "error writing to $tempfile: $!";
+        }
+      }
+      undef $inbuf;  # release storage
       defined $nread  or die "error reading from STDIN: $!";
       close $handle   or die "cannot close $tempfile: $!";
 

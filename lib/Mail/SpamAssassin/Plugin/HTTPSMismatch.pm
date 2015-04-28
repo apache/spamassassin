@@ -73,8 +73,8 @@ sub check_https_http_mismatch {
 
 	  # want to compare whole hostnames instead of domains?
 	  # comment this next section to the blank line.
-	  $uri = Mail::SpamAssassin::Util::RegistrarBoundaries::trim_domain($uri);
-          undef $uri unless (Mail::SpamAssassin::Util::RegistrarBoundaries::is_domain_valid($uri));
+	  $uri = $self->{main}->{registryboundaries}->trim_domain($uri);
+          undef $uri unless ($self->{main}->{registryboundaries}->is_domain_valid($uri));
 
 	  last if $uri;
         }
@@ -90,8 +90,8 @@ sub check_https_http_mismatch {
 	  # want to compare whole hostnames instead of domains?
 	  # comment this next section to the blank line.
           if ($https !~ /^\d+\.\d+\.\d+\.\d+$/) {
-	    $https = Mail::SpamAssassin::Util::RegistrarBoundaries::trim_domain($https);
-            undef $https unless (Mail::SpamAssassin::Util::RegistrarBoundaries::is_domain_valid($https));
+	    $https = $self->{main}->{registryboundaries}->trim_domain($https);
+            undef $https unless ($self->{main}->{registryboundaries}->is_domain_valid($https));
           }
 	  next unless $https;
 

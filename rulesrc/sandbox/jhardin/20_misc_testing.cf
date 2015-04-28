@@ -1,3 +1,44 @@
+
+# Ensure plugin-based rules used for FP avoidance exist
+# even if the plugin is not loaded, or an older version is loaded
+# __KAM_BODY_LENGTH_LT_512
+ifplugin Mail::SpamAssassin::Plugin::BodyEval
+  if can(Mail::SpamAssassin::Plugin::BodyEval::has_check_body_length)
+    meta      __LCL__KAM_BODY_LENGTH_LT_512     __KAM_BODY_LENGTH_LT_512
+  else
+    meta      __LCL__KAM_BODY_LENGTH_LT_512     0
+  endif
+else
+  meta      __LCL__KAM_BODY_LENGTH_LT_512     0
+endif
+
+# __KAM_BODY_LENGTH_LT_1024
+ifplugin Mail::SpamAssassin::Plugin::BodyEval
+  if can(Mail::SpamAssassin::Plugin::BodyEval::has_check_body_length)
+    meta      __LCL__KAM_BODY_LENGTH_LT_1024    __KAM_BODY_LENGTH_LT_1024
+  else
+    meta      __LCL__KAM_BODY_LENGTH_LT_1024    0
+  endif
+else
+  meta      __LCL__KAM_BODY_LENGTH_LT_1024    0
+endif
+
+# __ENV_AND_HDR_FROM_MATCH
+ifplugin Mail::SpamAssassin::Plugin::HeaderEval
+  meta      __LCL__ENV_AND_HDR_FROM_MATCH     __ENV_AND_HDR_FROM_MATCH
+else
+  meta      __LCL__ENV_AND_HDR_FROM_MATCH     0
+endif
+
+# __TVD_SPACE_RATIO
+ifplugin Mail::SpamAssassin::Plugin::BodyEval
+  #
+else
+  meta      __TVD_SPACE_RATIO      0
+endif
+
+
+
 #
 #header         REPLYTO_MANY_AT Reply-To =~ /\@.+\@/
 #describe       REPLYTO_MANY_AT More than one @ in Reply-To:
@@ -65,6 +106,13 @@ ifplugin Mail::SpamAssassin::Plugin::MIMEHeader
   meta         DOC_ATTACH_NO_EXT   __ATTACH_NAME_NO_EXT && (__PDF_ATTACH || __DOC_ATTACH_MT)
   describe     DOC_ATTACH_NO_EXT   Document attachment with suspicious name
 
+else
+  meta         __HTML_ATTACH_01    0
+  meta         __HTML_ATTACH_02    0
+  meta         __CTYPE_NULL        0
+  meta         __ZIP_ATTACH_NOFN   0
+  meta         __PDF_ATTACH        0
+  meta         __ATTACH_NAME_NO_EXT 0
 endif
 
 # general case of spample observation
@@ -86,9 +134,9 @@ header  __PHPMAILER_MUA       X-Mailer =~ /^PHPMailer\b/
 
 # __PHP_NOVER_MUA most spam hits are on messages scoring < 5 points
 ifplugin Mail::SpamAssassin::Plugin::DKIM
-  meta    PHP_NOVER_MUA       __PHP_NOVER_MUA && !__DKIM_DEPENDABLE && !__TO_NO_BRKTS_HTML_ONLY && !__MSGID_OK_DIGITS && !__UPPERCASE_25_50 && !__RP_MATCHES_RCVD && !__GIF_ATTACH 
+  meta    PHP_NOVER_MUA       __PHP_NOVER_MUA && !__DKIM_DEPENDABLE && !__TO_NO_BRKTS_HTML_ONLY && !__MSGID_OK_DIGITS && !__UPPERCASE_25_50 && !__RP_MATCHES_RCVD && !__GIF_ATTACH
 else
-  meta    PHP_NOVER_MUA       __PHP_NOVER_MUA && !__TO_NO_BRKTS_HTML_ONLY && !__MSGID_OK_DIGITS && !__UPPERCASE_25_50 && !__RP_MATCHES_RCVD && !__GIF_ATTACH 
+  meta    PHP_NOVER_MUA       __PHP_NOVER_MUA && !__TO_NO_BRKTS_HTML_ONLY && !__MSGID_OK_DIGITS && !__UPPERCASE_25_50 && !__RP_MATCHES_RCVD && !__GIF_ATTACH
 endif
 score     PHP_NOVER_MUA       3.50	# limit
 describe  PHP_NOVER_MUA       Mail from PHP with no version number
@@ -125,14 +173,14 @@ ifplugin Mail::SpamAssassin::Plugin::SPF
   score          FROM_MISSP_SPF_FAIL  2.00	# limit
 endif
 
-meta           __FROM_MISSP_EH_MATCH __FROM_RUNON_UNCODED && __ENV_AND_HDR_FROM_MATCH
+meta           __FROM_MISSP_EH_MATCH __FROM_RUNON_UNCODED && __LCL__ENV_AND_HDR_FROM_MATCH
 meta           FROM_MISSP_EH_MATCH   __FROM_MISSP_EH_MATCH && !__RCD_RDNS_MTA_MESSY && !__UNSUB_LINK && !__COMMENT_EXISTS && !__TO___LOWER && !__MIME_QP && !__TO_EQ_FROM_DOM && !__BUGGED_IMG && !__DKIM_EXISTS && !__RCVD_ZIXMAIL && !__MTLANDROID_MUA && !__XEROXWORKCTR_MUA && !__PHP_MUA && !__AMADEUSMS_MUA && !__FLASHMAIL_MUA
 describe       FROM_MISSP_EH_MATCH   From misspaced, matches envelope
 score          FROM_MISSP_EH_MATCH   2.00	# max
 
 # most hits > 10 points already
 #meta           __FROM_MISSP_URI      __FROM_RUNON_UNCODED && __HAS_ANY_URI
-#meta           FROM_MISSP_URI        __FROM_MISSP_URI && !__NOT_SPOOFED && !__RCD_RDNS_MTA_MESSY && !MISSING_MIMEOLE && !__REPTO_QUOTE && !__UNSUB_LINK && !__MSGID_OK_HEX && !__MAIL_LINK && !__MIME_QP && !__BUGGED_IMG && !MIME_BASE64_TEXT && !__CTYPE_MULTIPART_ALT && !__MTLANDROID_MUA && !__XEROXWORKCTR_MUA && !__PHP_MUA && !__AMADEUSMS_MUA && !__FLASHMAIL_MUA && !__DKIM_EXISTS && !__HAS_SENDER && !__RP_MATCHES_RCVD && !__THREADED && !__TAG_EXISTS_META 
+#meta           FROM_MISSP_URI        __FROM_MISSP_URI && !__NOT_SPOOFED && !__RCD_RDNS_MTA_MESSY && !MISSING_MIMEOLE && !__REPTO_QUOTE && !__UNSUB_LINK && !__MSGID_OK_HEX && !__MAIL_LINK && !__MIME_QP && !__BUGGED_IMG && !MIME_BASE64_TEXT && !__CTYPE_MULTIPART_ALT && !__MTLANDROID_MUA && !__XEROXWORKCTR_MUA && !__PHP_MUA && !__AMADEUSMS_MUA && !__FLASHMAIL_MUA && !__DKIM_EXISTS && !__HAS_SENDER && !__RP_MATCHES_RCVD && !__THREADED && !__TAG_EXISTS_META
 #describe       FROM_MISSP_URI        From misspaced, has URI
 #score          FROM_MISSP_URI        2.00	# max
 
@@ -151,6 +199,8 @@ ifplugin Mail::SpamAssassin::Plugin::DKIM
   tflags       __FROM_MISSP_DKIM     net
   meta         FROM_MISSP_DKIM       __FROM_MISSP_DKIM && !__CTYPE_MULTIPART_ALT && !__MIME_QP && !__BUGGED_IMG && !__DOS_HAS_LIST_UNSUB && !__MIME_BASE64 && !__MTLANDROID_MUA && !__XEROXWORKCTR_MUA && !__PHP_MUA && !__AMADEUSMS_MUA && !__FLASHMAIL_MUA
   describe     FROM_MISSP_DKIM       From misspaced, DKIM dependable
+else
+  meta         __FROM_MISSP_DKIM     0
 endif
 
 meta           __FROM_MISSP_REPLYTO  __FROM_RUNON && __REPLYTO_EXISTS
@@ -167,6 +217,8 @@ ifplugin Mail::SpamAssassin::Plugin::FreeMail
   meta         FROM_MISSP_FREEMAIL   __FROM_MISSP_FREEMAIL && !__TO_EQ_FROM_DOM && !__MTLANDROID_MUA
   describe     FROM_MISSP_FREEMAIL   From misspaced + freemail provider
   #score        FROM_MISSP_FREEMAIL   2.0
+else
+  meta         __FROM_MISSP_FREEMAIL 0
 endif
 
 meta           FROM_MISSP_MSFT       __FROM_RUNON && (__ANY_OUTLOOK_MUA || __MIMEOLE_MS)
@@ -184,6 +236,12 @@ header         __MUA_EQ_ORG_2        ALL =~ /\nOrganization: ([^\n]+)\n.*X-Maile
 meta           MAILER_EQ_ORG         __MUA_EQ_ORG_1 || __MUA_EQ_ORG_2
 describe       MAILER_EQ_ORG         X-Mailer: same as Organization:
 #tflags         MAILER_EQ_ORG         publish
+
+header         __FROM_EQ_ORG_1       ALL =~ /\nFrom: "?([^\n]+)"? <[^>]+>\n.*Organization: \1\n/ism
+header         __FROM_EQ_ORG_2       ALL =~ /\nOrganization: ([^\n]+)\n.*From: "?\1"?/ism
+#meta           FROM_EQ_ORG           __FROM_EQ_ORG_1 || __FROM_EQ_ORG_2
+#describe       FROM_EQ_ORG           From: same as Organization:
+#tflags         FROM_EQ_ORG           publish
 
 
 # observed in UCE 9/2009
@@ -222,10 +280,10 @@ describe       MANY_HDRS_LCASE       Odd capitalization of multiple message head
 score          MANY_HDRS_LCASE       0.10	# limit
 
 # Some metas that appear to perform well in masscheck
-meta           __HDRS_LCASE_1K       __HDRS_LCASE && __SINGLE_HEADER_1K
-meta           HDRS_LCASE_1K         __HDRS_LCASE_1K && !__HDRS_LCASE_KNOWN && !__VIA_ML && !__MIME_QP && !__BUGGED_IMG && !__BOUNCE_RPATH_NULL && !__NOT_SPOOFED && !__DKIM_EXISTS && !__RDNS_NONE
-describe       HDRS_LCASE_1K         Odd capitalization of message headers + long header
-score          HDRS_LCASE_1K         0.50	# limit
+#meta           __HDRS_LCASE_1K       __HDRS_LCASE && __SINGLE_HEADER_1K
+#meta           HDRS_LCASE_1K         __HDRS_LCASE_1K && !__HDRS_LCASE_KNOWN && !__VIA_ML && !__MIME_QP && !__BUGGED_IMG && !__BOUNCE_RPATH_NULL && !__NOT_SPOOFED && !__DKIM_EXISTS && !__RDNS_NONE
+#describe       HDRS_LCASE_1K         Odd capitalization of message headers + long header
+#score          HDRS_LCASE_1K         0.50	# limit
 meta           HDRS_LCASE_IMGONLY    __HDRS_LCASE && __HTML_IMG_ONLY && !__HDRS_LCASE_KNOWN
 describe       HDRS_LCASE_IMGONLY    Odd capitalization of message headers + image-only HTML
 score          HDRS_LCASE_IMGONLY    0.10	# limit
@@ -238,9 +296,10 @@ header         MDN_BOTCHED           Disposition-notification-to =~ /<>/
 describe       MDN_BOTCHED           Malformed return receipt header
 
 # observed in spam 9/2009
-header         HDRS_MISSP            ALL =~ /\n(?:Subject|From|To):\S/ism
+header         __HDRS_MISSP          ALL =~ /\n(?:Subject|From|To):\S/ism
+meta           HDRS_MISSP            __HDRS_MISSP && !__TAG_EXISTS_HEAD && !__DKIM_EXISTS && !__RP_MATCHES_RCVD && !__NOT_SPOOFED && !__LCL__ENV_AND_HDR_FROM_MATCH 
 describe       HDRS_MISSP            Misspaced headers
-#score          HDRS_MISSP            2.0
+score          HDRS_MISSP            2.000	# limit
 
 header         SPAMMY_MIME_BDRY_01  Content-Type =~ /boundary="\@\@BOUNDARY"/
 describe       SPAMMY_MIME_BDRY_01  Spammy MIME boundary string
@@ -252,7 +311,7 @@ meta           TBIRD_SUSP_MIME_BDRY  __MUA_TBIRD && __TB_MIME_BDRY_NO_Z
 describe       TBIRD_SUSP_MIME_BDRY  Unlikely Thunderbird MIME boundary
 
 # too dangerous even if it has a good S/O and hits >20% of spam in masschecks
-#meta           TBIRD_SPOOF           __MUA_TBIRD && !__HAS_IN_REPLY_TO && !__HAS_X_REF  && !__THREADED  && !__VIA_ML && !__NOT_SPOOFED && !__HAS_SENDER && !__HAS_ERRORS_TO && !__HAS_X_BEEN_THERE && !__RP_MATCHES_RCVD && !ALL_TRUSTED && !__TO_EQ_FROM_DOM && !__RCD_RDNS_MAIL_MESSY && !__MIME_BASE64 && !__S25R_1 
+#meta           TBIRD_SPOOF           __MUA_TBIRD && !__HAS_IN_REPLY_TO && !__HAS_X_REF  && !__THREADED  && !__VIA_ML && !__NOT_SPOOFED && !__HAS_SENDER && !__HAS_ERRORS_TO && !__HAS_X_BEEN_THERE && !__RP_MATCHES_RCVD && !ALL_TRUSTED && !__TO_EQ_FROM_DOM && !__RCD_RDNS_MAIL_MESSY && !__MIME_BASE64 && !__S25R_1
 #describe       TBIRD_SPOOF           Claims Thunderbird mail client but looks suspicious
 #score          TBIRD_SPOOF           2.00	# limit
 
@@ -285,21 +344,41 @@ ifplugin Mail::SpamAssassin::Plugin::MIMEHeader
   mimeheader   CDISP_SZ_MANY      Content-Disposition =~ /\bsize\s?=\s?\d.*\bsize\s?=\s?\d/
   describe     CDISP_SZ_MANY      Suspicious MIME header
   score        CDISP_SZ_MANY      2.0  # limit
+else
+  meta         __DOC_ATTACH_MT    0
+  meta         __DOC_ATTACH_FN1   0
+  meta         __DOC_ATTACH_FN2   0
+  meta         __DOC_ATTACH       0
+  meta         __PDF_ATTACH_MT    0
+  meta         __PDF_ATTACH_FN1   0
+  meta         __PDF_ATTACH_FN2   0
+  meta         __PDF_ATTACH       0
 endif
 
 ifplugin Mail::SpamAssassin::Plugin::FreeMail
-  meta         FREEMAIL_DOC_PDF     (__DOC_ATTACH || __PDF_ATTACH) && (FREEMAIL_FROM || FREEMAIL_REPLYTO)
-  describe     FREEMAIL_DOC_PDF     MS document or PDF attachment, from freemail
+  meta         __FREEMAIL_DOC_PDF     (__DOC_ATTACH || __PDF_ATTACH) && (FREEMAIL_FROM || FREEMAIL_REPLYTO)
+  meta         FREEMAIL_DOC_PDF       __FREEMAIL_DOC_PDF
+  describe     FREEMAIL_DOC_PDF       MS document or PDF attachment, from freemail
 
-  meta         FREEMAIL_RVW_ATTCH   (__PLS_REVIEW || __DLND_ATTACH) && FREEMAIL_DOC_PDF
-  describe     FREEMAIL_RVW_ATTCH   Please review attached document, from freemail
+  meta         FREEMAIL_DOC_PDF_BCC   __FREEMAIL_DOC_PDF && __TO_UNDISCLOSED
+  describe     FREEMAIL_DOC_PDF_BCC   MS document or PDF attachment, from freemail, all recipients hidden
+
+  meta         FREEMAIL_RVW_ATTCH     (__PLS_REVIEW || __DLND_ATTACH) && __FREEMAIL_DOC_PDF
+  describe     FREEMAIL_RVW_ATTCH     Please review attached document, from freemail
 endif
 
-meta           EMPTY_RVM_ATTCH      (__PLS_REVIEW || __DLND_ATTACH) && __EMPTY_BODY
-describe       EMPTY_RVM_ATTCH      Please review attached document, empty message
+meta           EMPTY_RVW_ATTCH      (__PLS_REVIEW || __DLND_ATTACH) && __EMPTY_BODY
+describe       EMPTY_RVW_ATTCH      Please review attached document, empty message
 
-body           END_FUTURE_EMAILS   /\bend future (?:email|alert)s?\b/i
-describe       END_FUTURE_EMAILS   Pump-and-dump unsubscribe
+body           __END_FUTURE_EMAILS /\b(?:end|stop(?! receiving these (?:alerts|emails))|cease|discontinue|removed?|(?:do(?! not wish to receive [\w\s]{0,20}emails)|would|you(?:'d)?) (?:not (?:wish|want|like|desire)|(?:prefer|wish|want|like|desire) not) to|exclude yourself|fore?go)[- ](?:get |receiv(?:ing|e) |or |(?:a-z{1,30} ){0,4}from )?(?:these|our|(?:any )?(?:future|further)) (?:(?:e|ad)?-?m(?:ail(?:ing)?|es+[age]{3})|alert|PSA|marketing|notice)[- ]?(?:ad|update)?s?\b/i
+ifplugin Mail::SpamAssassin::Plugin::DKIM
+  meta         END_FUTURE_EMAILS   __END_FUTURE_EMAILS && !__SUBJECT_ENCODED_B64 && !__HDRS_LCASE && !__HDRS_LCASE_KNOWN && !__TO___LOWER && !__DKIM_DEPENDABLE && !DKIM_SIGNED
+else
+  meta         END_FUTURE_EMAILS   __END_FUTURE_EMAILS && !__SUBJECT_ENCODED_B64 && !__HDRS_LCASE && !__HDRS_LCASE_KNOWN && !__TO___LOWER
+endif
+describe       END_FUTURE_EMAILS   Spammy unsubscribe
+score          END_FUTURE_EMAILS   2.500	# limit
+
 
 body           AD_COMPLAINTS       /\bcomplaints about this ad+\b/i
 describe       AD_COMPLAINTS       Complain about this spam
@@ -369,9 +448,14 @@ meta           FROM_IN_TO_AND_SUBJ  (__TO_EQ_FROM && __SUBJ_HAS_FROM_1)
 describe       FROM_IN_TO_AND_SUBJ  From address is in To and Subject
 tflags         FROM_IN_TO_AND_SUBJ  publish
 
-header         __SUBJ_HAS_TO_1      ALL =~ /\nTo:\s+(?:[^\n<]{0,80}<)?([^\n\s>,]+)>?\n(?:[^\n]{1,100}\n)*Subject:\s+[^\n]{0,100}\1[>,\s\n]/ism
-meta           TO_IN_SUBJ           __SUBJ_HAS_TO_1 && !__VIA_ML && !MISSING_MIMEOLE && !__THREAD_INDEX_GOOD
+header         __SUBJ_HAS_TO_1      ALL =~ /\nTo:\s+(?:[^\n<]{0,80}<)?([^\n\s>,]+)>?\n(?:[^\n]{1,200}\n)*Subject:\s+[^\n]{0,100}\1[^a-z0-9]/ism
+header         __SUBJ_HAS_TO_2      ALL =~ /\nReceived:[^\n]{0,200} for <?([^\n\s>;]+)>?;(?:[^\n]+\n)*Subject:\s+[^\n]{0,100}\1[^a-z0-9]/ism
+header         __SUBJ_HAS_TO_3      ALL =~ /\nSubject:(?=[^\n]{0,200}@)[^\n]{0,200}([a-z][a-z0-9_.]{3,80}@(?:[a-z0-9_]{1,80}\.){1,4}[a-z]{2,30})(?:[^\n]+\n)*To:\s+[^\n]{0,100}\1[^a-z0-9.]/ism
+meta           __TO_IN_SUBJ         (__SUBJ_HAS_TO_1 || __SUBJ_HAS_TO_2 || __SUBJ_HAS_TO_3)
+meta           TO_IN_SUBJ           __TO_IN_SUBJ && !__VIA_ML && !MISSING_MIMEOLE && !__THREAD_INDEX_GOOD && !__FSL_RELAY_GOOGLE && !__LCL__ENV_AND_HDR_FROM_MATCH && !__HS_SUBJ_RE_FW
 describe       TO_IN_SUBJ           To address is in Subject
+tflags         TO_IN_SUBJ           publish
+score          TO_IN_SUBJ           0.1
 
 meta           __TO_EQ_FM_HTML_ONLY __TO_EQ_FROM && MIME_HTML_ONLY
 meta           TO_EQ_FM_HTML_ONLY   __TO_EQ_FM_HTML_ONLY && !ALL_TRUSTED && !__RCD_RDNS_MAIL_MESSY && !__RCD_RDNS_SMTP_MESSY && !__NOT_SPOOFED && !__DKIM_EXISTS && !__ANY_IMAGE_ATTACH && !__FROM_LOWER && !__TAG_EXISTS_CENTER
@@ -395,11 +479,29 @@ ifplugin Mail::SpamAssassin::Plugin::SPF
   meta           TO_EQ_FM_SPF_FAIL    __TO_EQ_FM_SPF_FAIL && !__THREADED && !ALL_TRUSTED
   describe       TO_EQ_FM_SPF_FAIL    To == From and external SPF failed
   tflags         TO_EQ_FM_SPF_FAIL    net
+else
+  meta           __TO_EQ_FM_SPF_FAIL  0
 endif
+
+# Paul Stead on SA list 11/2014
+# ++ not liked by perl 5.8.x
+if can(Mail::SpamAssassin::Conf::perl_min_version_5010000)
+  header     __PDS_TO_EQ_FROM_NAME_1  ALL =~ /\nTo:\s+(?:[^\n<]{0,80}<)?([^\n\s>]+)>?\n(?:[^\n]{1,100}\n)*From:\W+(\1)([^\n\w<]++<)?((?!\1)[^\n">]++)>?\n/ism
+  header     __PDS_TO_EQ_FROM_NAME_2  ALL =~ /\nFrom:\W+"([\w+.-]+\@[\w.-]+\.\w\w+)(?:[^\n\w<]{0,80}<)?((?!\1)[^\n">]++)>?\n(?:[^\n]{1,100}\n)*To:\s+(?:[^\n<]{0,80}<)?(\1)>?/ism
+
+  meta       PDS_TO_EQ_FROM_NAME      (__PDS_TO_EQ_FROM_NAME_1 || __PDS_TO_EQ_FROM_NAME_2)
+  describe   PDS_TO_EQ_FROM_NAME      From: name same as To: address
+
+  header     __PDS_FROM_2_EMAILS      From =~ /^\W+([\w+.-]+\@[\w.-]+\.\w\w++)(?:[^\n\w<]{0,80})?<(?!\1)[^\n\s]*\@/i
+  meta       PDS_FROM_2_EMAILS        __PDS_FROM_2_EMAILS && !__VIA_ML && !__VIA_RESIGNER && !__CLICK_HERE && !__BUGGED_IMG && !__RP_MATCHES_RCVD 
+endif
+
+uri     __PDS_LOC_WP_POMO       m;/wp-includes/pomo/(?!(?:entry|po|mo|streams|translations)\.php).*;i
+
 
 header         __FROM_ALL_NUMS      From:addr =~ /^\d+@/
 header         __TO_ALL_NUMS        To:addr =~ /^\d+@/
-meta           __FM_TO_ALL_NUMS     __FROM_ALL_NUMS && __TO_ALL_NUMS  
+meta           __FM_TO_ALL_NUMS     __FROM_ALL_NUMS && __TO_ALL_NUMS
 
 header         __TO_EQ_FROM_DOM_1   ALL =~ /\nFrom:\s+[^\n@]{0,80}@([^\n\s>]+)>?\n(?:[^\n]{1,100}\n)*To:\s+[^\n]+@\1[>,\s\n]/ism
 header         __TO_EQ_FROM_DOM_2   ALL =~ /\nTo:\s+[^\n@]{0,80}@([^\n\s>]+)>?\n(?:[^\n]{1,100}\n)*From:\s+[^\n]+@\1[>,\s\n]/ism
@@ -407,11 +509,11 @@ meta           __TO_EQ_FROM_DOM     (__TO_EQ_FROM_DOM_1 || __TO_EQ_FROM_DOM_2)
 describe       __TO_EQ_FROM_DOM     To: domain same as From: domain
 
 meta           __TO_EQ_FM_DOM_HTML_ONLY __TO_EQ_FROM_DOM && MIME_HTML_ONLY
-meta           TO_EQ_FM_DOM_HTML_ONLY   __TO_EQ_FM_DOM_HTML_ONLY && !__NOT_SPOOFED && !__CTYPE_MULTIPART_ALT && !HTML_MIME_NO_HTML_TAG && !__IS_EXCH && !__MSGID_BEFORE_RECEIVED && !__FM_TO_ALL_NUMS && !__FROM_LOWER && !__HAS_IN_REPLY_TO && !__BUGGED_IMG && !__FROM_ENCODED_QP && !__MSGID_OK_HEX 
+meta           TO_EQ_FM_DOM_HTML_ONLY   __TO_EQ_FM_DOM_HTML_ONLY && !__NOT_SPOOFED && !__CTYPE_MULTIPART_ALT && !HTML_MIME_NO_HTML_TAG && !__IS_EXCH && !__MSGID_BEFORE_RECEIVED && !__FM_TO_ALL_NUMS && !__FROM_LOWER && !__HAS_IN_REPLY_TO && !__BUGGED_IMG && !__FROM_ENCODED_QP && !__MSGID_OK_HEX
 describe       TO_EQ_FM_DOM_HTML_ONLY   To domain == From domain and HTML only
 
 meta           __TO_EQ_FM_DOM_HTML_IMG  __TO_EQ_FROM_DOM && __HTML_LINK_IMAGE
-meta           TO_EQ_FM_DOM_HTML_IMG    __TO_EQ_FM_DOM_HTML_IMG && !__NOT_SPOOFED && !__CTYPE_MULTIPART_ALT && !__IS_EXCH && !__UNSUB_LINK && !__COMMENT_EXISTS && !__FM_TO_ALL_NUMS && !__DKIM_EXISTS && !__HAS_THREAD_INDEX && !__MSGID_JAVAMAIL && !__RP_MATCHES_RCVD 
+meta           TO_EQ_FM_DOM_HTML_IMG    __TO_EQ_FM_DOM_HTML_IMG && !__NOT_SPOOFED && !__CTYPE_MULTIPART_ALT && !__IS_EXCH && !__UNSUB_LINK && !__COMMENT_EXISTS && !__FM_TO_ALL_NUMS && !__DKIM_EXISTS && !__HAS_THREAD_INDEX && !__MSGID_JAVAMAIL && !__RP_MATCHES_RCVD
 describe       TO_EQ_FM_DOM_HTML_IMG    To domain == From domain and HTML image link
 
 ifplugin Mail::SpamAssassin::Plugin::SPF
@@ -420,6 +522,8 @@ ifplugin Mail::SpamAssassin::Plugin::SPF
   meta           TO_EQ_FM_DOM_SPF_FAIL    __TO_EQ_FM_DOM_SPF_FAIL && !__THREADED && !ALL_TRUSTED
   describe       TO_EQ_FM_DOM_SPF_FAIL    To domain == From domain and external SPF failed
   tflags         TO_EQ_FM_DOM_SPF_FAIL    net
+else
+  meta           __TO_EQ_FM_DOM_SPF_FAIL  0
 endif
 
 
@@ -444,10 +548,10 @@ meta           __RP_SAFE_PSBL             RCVD_IN_RP_SAFE && RCVD_IN_PSBL
 meta           __RP_CERTIFIED_PSBL        RCVD_IN_RP_CERTIFIED && RCVD_IN_PSBL
 tflags         __RP_SAFE_PSBL             net nopublish
 tflags         __RP_CERTIFIED_PSBL        net nopublish
-meta           __RP_SAFE_ANBREP_L3        RCVD_IN_RP_SAFE && RCVD_IN_ANBREP_L3
-meta           __RP_CERTIFIED_ANBREP_L3   RCVD_IN_RP_CERTIFIED && RCVD_IN_ANBREP_L3
-tflags         __RP_SAFE_ANBREP_L3        net nopublish
-tflags         __RP_CERTIFIED_ANBREP_L3   net nopublish
+#meta           __RP_SAFE_ANBREP_L3        RCVD_IN_RP_SAFE && RCVD_IN_ANBREP_L3
+#meta           __RP_CERTIFIED_ANBREP_L3   RCVD_IN_RP_CERTIFIED && RCVD_IN_ANBREP_L3
+#tflags         __RP_SAFE_ANBREP_L3        net nopublish
+#tflags         __RP_CERTIFIED_ANBREP_L3   net nopublish
 
 # a URI in the From comment text, to bypass URIBL checks
 # simplistic URI format for now
@@ -485,7 +589,7 @@ endif
 # body           GAPPY_THOUSAND             /\b(?!thousand)t[^a-z\s]?h[^a-z\s]?o[^a-z\s]?u[^a-z\s]?s[^a-z\s]?a[^a-z\s]?n[^a-z\s]?d/i
 # body           GAPPY_EXPENSES             /\b(?!expenses)e[^a-z\s]?x[^a-z\s]?p[^a-z\s]?e[^a-z\s]?n[^a-z\s]?s[^a-z\s]?e[^a-z\s]?s/i
 # body           GAPPY_DOLLARS              /\b(?!dollars)d[^a-z\s]?o[^a-z\s]?l[^a-z\s]?l[^a-z\s]?a[^a-z\s]?r[^a-z\s]?s/i
-# 
+#
 # describe       GAPPY_TRADING              Possible obfuscated stock disclaimer
 # describe       GAPPY_SECURITIES           Possible obfuscated stock disclaimer
 # describe       GAPPY_RISK                 Possible obfuscated stock disclaimer
@@ -495,16 +599,28 @@ endif
 # describe       GAPPY_EXPENSES             Possible obfuscated stock disclaimer
 # describe       GAPPY_DOLLARS              Possible obfuscated stock disclaimer
 
+body           GAPPY_GENITALIA          /\bp(?!enis)(?!en is)[^a-z]?e[^a-z]?n[^a-z]?i[^a-z]?s(?:\b|_)/i
+describe       GAPPY_GENITALIA          G.a.p.p.y male body parts
+
+body           GAPPY_PILLS              /\bp(?!ills)[^a-z]?i[^a-z]?l[^a-z]?l[^a-z]?s(?:\b|_)/i
+describe       GAPPY_PILLS              G.a.p.p.y pills
 
 body           __STYLE_TAG_IN_BODY      /<style(?:[^>]{0,30})?>/i
 body           __BODY_XHTML             /<x-html>/i
-rawbody        __STYLE_GIBBERISH_1      /<style[^>]{0,30}>(?:\s{0,80}[^\s:;<]){150}/im
+if can(Mail::SpamAssassin::Conf::perl_min_version_5010000)
+  # possessive {0,4}+ requires perl 5.10 or better
+  rawbody        __STYLE_GIBBERISH_1      /<style(?:\s[^>]{0,40})?>(?:\s{0,100}(?!<\/style>)(?:(?:\/\*(?:\s|[^*<]|\*(?!\/)|<(?!\/style>)){0,200}\*\/)|\#[^{<]{1,50}\{[^}<]{4,100}\})){0,4}+(?:\s{0,100}(?!<\/style>|\/\*)[^\s:;,]){150}/im
+else
+  # older perl, can't deal with style comments properly
+  rawbody        __STYLE_GIBBERISH_1      /<style(?:\s[^>]{0,40})?>(?:\s{0,100}(?!<\/style>|\/\*)[^\s:;,]){150}/im
+endif
 rawbody        __STYLE_GIBBERISH_2      /\.style\w{0,20}\s{1,10}\{[^:;]{200}/im
-rawbody        __STYLE_GIBBERISH_3      /<style[^>]{0,30}>\s{0,30}(?:[\w:]{1,30}\s{0,10}\{[^}]{1,50}\}\s{0,80}){1,5}(?:[\w,.']{1,30}\s{1,10}){40}/im
+rawbody        __STYLE_GIBBERISH_3      /<style(?:\s[^>]{0,40})?>\s{0,80}(?:[\w:]{1,30}\s{0,10}\{[^}]{1,50}\}\s{0,80}){1,5}(?:[\w,.']{1,30}\s{1,10}){40}/im
 meta           __STYLE_GIBBERISH        (__STYLE_GIBBERISH_1 || __STYLE_GIBBERISH_2 || __STYLE_GIBBERISH_3)
-meta           STYLE_GIBBERISH          __STYLE_GIBBERISH && (__BODY_XHTML || !__STYLE_TAG_IN_BODY) && !__THREADED && !__RCD_RDNS_MAIL_MESSY && !__RCD_RDNS_DIAL_MESSY && !__HAS_REPLY_TO && !MIME_HTML_MOSTLY
+meta           STYLE_GIBBERISH          __STYLE_GIBBERISH && (__BODY_XHTML || !__STYLE_TAG_IN_BODY) && !__RCD_RDNS_MX_MESSY && !__HAS_THREAD_INDEX && !__ANY_OUTLOOK_MUA && !__MIME_QP && !ALL_TRUSTED
 describe       STYLE_GIBBERISH          Nonsense in HTML <STYLE> tag
-score          STYLE_GIBBERISH          4.00	# limit
+score          STYLE_GIBBERISH          3.50	# limit
+tflags         STYLE_GIBBERISH          publish
 
 body           __SCRIPT_TAG_IN_BODY     /<script>/i
 rawbody        __SCRIPT_GIBBERISH       /<script>[^;<]{100}/im
@@ -512,9 +628,10 @@ meta           SCRIPT_GIBBERISH         __SCRIPT_GIBBERISH && (__BODY_XHTML || !
 describe       SCRIPT_GIBBERISH         Nonsense in HTML <SCRIPT> tag
 
 rawbody        __COMMENT_GIBBERISH      /<!--(?:\s{1,10}[-\w'"]{1,40}){100}/im
-meta           COMMENT_GIBBERISH        __COMMENT_GIBBERISH && !__JM_REACTOR_DATE && !__RCD_RDNS_MTA_MESSY && !__SENDER_BOT 
+meta           COMMENT_GIBBERISH        __COMMENT_GIBBERISH && !__JM_REACTOR_DATE && !__RCD_RDNS_MTA_MESSY && !__SENDER_BOT
 describe       COMMENT_GIBBERISH        Nonsense in long HTML comment
-score          COMMENT_GIBBERISH        1.00	# limit
+score          COMMENT_GIBBERISH        1.50	# limit
+tflags         COMMENT_GIBBERISH        publish
 
 #rawbody        MANY_DIV_5                   /(?:<div[^>]{0,30}>\s{0,80}){5}/im
 #tflags         MANY_DIV_5                    nopublish
@@ -585,6 +702,8 @@ ifplugin Mail::SpamAssassin::Plugin::FreeMail
 
 #  meta         __FROM_AFR_FREEMAIL       __RCVD_VIA_AFRINIC_E && (FREEMAIL_FROM || FREEMAIL_REPLYTO) && !__THREADED
 #  describe     __FROM_AFR_FREEMAIL       Sent from Africa + freemail provider
+else
+  meta         __FROM_41_FREEMAIL         0
 endif
 
 # More from Ned
@@ -608,7 +727,7 @@ describe        IMAGESHACK_URI          URI contains imageshack.us
 #describe        DYNDNS_URIS             Has multiple dyndns.org URIs
 
 uri             __BITLY_URI             /\/\/bit\.ly\//i
-meta            BITLY_URI               __BITLY_URI && !__SUBSCRIPTION_INFO && !__HAS_ANY_EMAIL && !__HAS_REPLY_TO && !__UNSUB_LINK && !__RCD_RDNS_MAIL_MESSY && !__RP_MATCHES_RCVD && !__COMMENT_EXISTS && !__TO_NO_BRKTS_HTML_ONLY && !__NOT_SPOOFED 
+meta            BITLY_URI               __BITLY_URI && !__SUBSCRIPTION_INFO && !__HAS_ANY_EMAIL && !__HAS_REPLY_TO && !__UNSUB_LINK && !__RCD_RDNS_MAIL_MESSY && !__RP_MATCHES_RCVD && !__COMMENT_EXISTS && !__TO_NO_BRKTS_HTML_ONLY && !__NOT_SPOOFED
 describe        BITLY_URI               URI contains bit.ly
 score           BITLY_URI               2.25	# limit
 
@@ -631,6 +750,9 @@ ifplugin Mail::SpamAssassin::Plugin::SPF
   tflags          __SPF_FULL_PASS         net
   meta            __SPF_RANDOM_SENDER     (SPF_HELO_PASS && !SPF_PASS)
   tflags          __SPF_RANDOM_SENDER     net
+else
+  meta            __SPF_FULL_PASS         0
+  meta            __SPF_RANDOM_SENDER     0
 endif
 
 # Spam from ZA
@@ -656,15 +778,15 @@ header          RPT_SPAM_HDR            Report-SPAM =~ /./
 
 
 # Suggested by Gerard Z 2010-08-15
-uri         __GZ_PILL_SQUAT1       /\/[a-z]{3,8}\d{2}\.html/i
-uri         __GZ_PILL_SQUAT2       /\/[a-z]{3,8}\d{2}\.jpg/i
-meta        __GZ_PILL_SQUATTERS    __GZ_PILL_SQUAT1 && __GZ_PILL_SQUAT2
-meta        GZ_PILL_SQUATTERS      __GZ_PILL_SQUATTERS && !__DOS_RELAYED_EXT && !__FROM_ISO_2022_JP && !__RCD_RDNS_MX_MESSY
-describe    GZ_PILL_SQUATTERS      Found a link to rogue pill pusher content
+#uri         __GZ_PILL_SQUAT1       /\/[a-z]{3,8}\d{2}\.html/i
+#uri         __GZ_PILL_SQUAT2       /\/[a-z]{3,8}\d{2}\.jpg/i
+#meta        __GZ_PILL_SQUATTERS    __GZ_PILL_SQUAT1 && __GZ_PILL_SQUAT2
+#meta        GZ_PILL_SQUATTERS      __GZ_PILL_SQUATTERS && !__DOS_RELAYED_EXT && !__FROM_ISO_2022_JP && !__RCD_RDNS_MX_MESSY
+#describe    GZ_PILL_SQUATTERS      Found a link to rogue pill pusher content
 
 # observed in multiple spam
 header      TO_JOHNZY              TO =~ /johnzy_the_king\@hotmail\.com/i
-describe    TO_JOHNZY              To a spammy recipent	
+describe    TO_JOHNZY              To a spammy recipent
 #score       TO_JOHNZY              3.00
 
 # Discussed on list and observed in spam 10/15/2010
@@ -715,7 +837,23 @@ tflags      OBFU_JVSCR_ESC         publish
 
 # Starting to observe in spam
 meta        __LIST_PARTIAL         __DOS_HAS_LIST_UNSUB && !__DOS_HAS_LIST_ID
-describe    __LIST_PARTIAL         Has incomplete List-* header set
+meta        LIST_PARTIAL           __LIST_PARTIAL && !__BUGGED_IMG && !__DKIM_EXISTS && !__RP_MATCHES_RCVD && !__HAS_SENDER && !__HAS_ERRORS_TO 
+describe    LIST_PARTIAL           Has incomplete List-* header set
+score       LIST_PARTIAL           1.000   # limit
+
+meta        __LIST_PRTL_SAME_USER  __LIST_PARTIAL && __TO_EQ_FROM_USR
+meta        LIST_PRTL_SAME_USER    __LIST_PRTL_SAME_USER && !__BUGGED_IMG && !__DKIM_EXISTS && !__RP_MATCHES_RCVD && !__HAS_ERRORS_TO 
+describe    LIST_PRTL_SAME_USER    Incomplete List-* headers and from+to user the same
+score       LIST_PRTL_SAME_USER    3.000   # limit
+tflags      LIST_PRTL_SAME_USER    publish
+
+meta        __LIST_PRTL_PUMPDUMP   __LIST_PARTIAL && __PD_CNT_1
+meta        LIST_PRTL_PUMPDUMP     __LIST_PRTL_PUMPDUMP && !__DKIM_EXISTS 
+describe    LIST_PRTL_PUMPDUMP     Incomplete List-* headers and stock pump-and-dump
+score       LIST_PRTL_PUMPDUMP     2.000   # limit
+tflags      LIST_PRTL_PUMPDUMP     publish
+
+
 
 # in lots of phishing
 uri         __UCOZ_URI             /\.ucoz\.org\//i
@@ -723,15 +861,15 @@ describe    __UCOZ_URI             URI contains ucoz.org
 
 # Intrust Domains is a persistent domain registration spammer
 # recent sign, will likely change
-body        __ARTHUR_SIMMONS       /Arthur Simmons/
-body        __INTRUST_DOMS         /In[Tt]rust Domains/
-meta        ARTHUR_INTRUST         __ARTHUR_SIMMONS && __INTRUST_DOMS
+#body        __ARTHUR_SIMMONS       /Arthur Simmons/
+#body        __INTRUST_DOMS         /In[Tt]rust Domains/
+#meta        ARTHUR_INTRUST         __ARTHUR_SIMMONS && __INTRUST_DOMS
 #score       ARTHUR_INTRUST         4.5
-describe    ARTHUR_INTRUST         Arthur Simmons - registrar spammer extraordinaire
+#describe    ARTHUR_INTRUST         Arthur Simmons - registrar spammer extraordinaire
 
-header      ART_NAMES_ORG          Received =~ /\bart\.names\.org\b/i
+#header      ART_NAMES_ORG          Received =~ /\bart\.names\.org\b/i
 #score       ART_NAMES_ORG          4.0
-describe    ART_NAMES_ORG          Arthur Simmons - registrar spammer extraordinaire
+#describe    ART_NAMES_ORG          Arthur Simmons - registrar spammer extraordinaire
 
 if can(Mail::SpamAssassin::Conf::feature_bug6558_free)
   body        __PILL_PRICE_01        m;(?=[\d .f])(?:free|[\d .]{3}(?:/|per|each)) ?(?=[ptc])(?:pill|tablet|cap(?:sule|let))s?\b;i
@@ -742,6 +880,9 @@ if can(Mail::SpamAssassin::Conf::feature_bug6558_free)
   describe    ANY_PILL_PRICE         Prices for pills
   meta        MANY_PILL_PRICE        (__PILL_PRICE_01 + __PILL_PRICE_02) > 2
   describe    MANY_PILL_PRICE        Prices for many pills
+else
+  meta        __PILL_PRICE_01        0
+  meta        __PILL_PRICE_02        0
 endif
 
 # More from Ned Slider
@@ -750,12 +891,12 @@ ifplugin Mail::SpamAssassin::Plugin::FreeMail
   describe    NSL_FREEMAIL_SUBJ      From freemail with missing subject
 #  score       NSL_FREEMAIL_SUBJ      1.0
   tflags      NSL_FREEMAIL_SUBJ      nopublish
-  
+
   meta        NSL_FREEMAIL_M1        (NSL_FREEMAIL_SUBJ && (__HAS_ANY_URI || __MANY_RECIPS))
   describe    NSL_FREEMAIL_M1        From freemail, missing subject and uri or many recips
 #  score       NSL_FREEMAIL_M1        1.0
   tflags      NSL_FREEMAIL_M1        nopublish
-  
+
   meta        NSL_FREEMAIL_M2        (FREEMAIL_FROM && __HAS_ANY_URI && __MANY_RECIPS)
   describe    NSL_FREEMAIL_M2        From freemail with uri and many recips
 #  score       NSL_FREEMAIL_M2        1.0
@@ -768,17 +909,20 @@ describe    NSL_TO_ENDS_COMMA      To: ends with a comma
 tflags      NSL_TO_ENDS_COMMA      nopublish
 
 
-body        CN_B2B_SPAMMER         /\bWe are (?:(?:a )?(?:China|Taiwan)[-\s]based|(?:one of (?:the )?best|(?:a )?leading) [^\.]{10,90} (?:in|from) (?:China|Taiwan))\b/i
+body        CN_B2B_SPAMMER         /\bWe are (?:(?:a )?(?:China|Taiwan)[-\s]based|(?:one of (?:the )?best|(?:a )?leading) (?:international|[^\.]{10,90} (?:in|from) (?:\w+, )?(?:China|Taiwan)))\b/i
 describe    CN_B2B_SPAMMER         Chinese company introducing itself
+tflags      CN_B2B_SPAMMER         publish
+
+body        CN_OPTOUT_EML          /\b(?:pasamenzi|arinayuma)\@sina\.com\b/i
+describe    CN_OPTOUT_EML          Opt-out email address in CN B2B spams
 
 # __ version of khopesh UPPERCASE_URI, for use in metas
 uri         __UPPERCASE_URI        /^[^:A-Z]+[A-Z]/
 
 # __ version of khopesh SINGLE_HEADER_1K, for use in metas
-#header      __SINGLE_HEADER_1K     ALL:raw =~ /(?-xim:(?=(?!X-Spam|X-MailScan)(?:^|\n)[^\s\n]+:(?:.(?!\n\S)){1024,2047}.(?:\n\S|$)))/s 
+#header      __SINGLE_HEADER_1K     ALL:raw =~ /(?-xim:(?=(?!X-Spam|X-MailScan)(?:^|\n)[^\s\n]+:(?:.(?!\n\S)){1024,2047}.(?:\n\S|$)))/s
 
 # __ version of mmartinec RP_MATCHES_RCVD, for use in metas
-
 if version >= 3.003000
 ifplugin Mail::SpamAssassin::Plugin::WLBLEval
   header      __RP_MATCHES_RCVD      eval:check_mailfrom_matches_rcvd()
@@ -838,6 +982,11 @@ header      __CC_TOO_MANY          Cc =~ /(?:,[^,]{1,90}){30}/
 
 header      __TO_WAY_TOO_MANY      ToCc =~ /(?:,[^,]{1,90}){50}/
 
+meta        FREEMAIL_MANY_TO       __TO_WAY_TOO_MANY && FREEMAIL_FROM
+describe    FREEMAIL_MANY_TO       Freemail sender, 50+ exposed recipients
+score       FREEMAIL_MANY_TO       2.000	# limit
+
+
 body        __GAPPY_PHONE_NA       /1 ?- \d \d \d ?- \d \d \d ?- \d \d \d \d/
 meta        GAPPY_PHONE_NA         __GAPPY_PHONE_NA
 describe    GAPPY_PHONE_NA         Phone number with lots of spaces
@@ -854,16 +1003,31 @@ meta        GAPPY_HTML             __GAPPY_HTML && !__UNSUB_LINK && !__RP_MATCHE
 describe    GAPPY_HTML             HTML body with much useless whitespace
 
 # Try to improve S/O per bug 6119
-meta        TVD_SPACE_RATIO_MINFP  __TVD_SPACE_RATIO && !__OBFUSCATING_COMMENT_B && !WEIRD_QUOTING && !__NOT_SPOOFED && !__BUGGED_IMG && !__ML1 && !__DOS_HAS_LIST_UNSUB && !__RP_MATCHES_RCVD && !__MUA_TBIRD && !__HS_SUBJ_RE_FW && !__RCD_RDNS_MAIL_MESSY && !__ISO_2022_JP_DELIM && !__MIME_QP && !__NOT_A_PERSON && __HAS_THREAD_INDEX && !__MIME_ATTACHMENT && !__CTYPE_MULTIPART_MIXED && !__THREADED && !__NAKED_TO
+meta        TVD_SPACE_RATIO_MINFP  __TVD_SPACE_RATIO && !__LCL__ENV_AND_HDR_FROM_MATCH && !__SUBSCRIPTION_INFO && !__RCD_RDNS_MAIL && !__SUBJECT_ENCODED_QP && !__THREADED && !__TO_EQ_FROM_DOM && !__BOTH_INR_AND_REF && !__X_CRON_ENV && !__HAS_THREAD_INDEX && !__HDRS_LCASE_KNOWN && !__ISO_2022_JP_DELIM
 #tflags      TVD_SPACE_RATIO_MINFP  nopublish
-score       TVD_SPACE_RATIO_MINFP  3.5		# limit
+score       TVD_SPACE_RATIO_MINFP  2.750   # limit
+
+# Only useful for English-language email
+#meta        SUBJECT_UNNEEDED_ENCODING    (__SUBJECT_ENCODED_B64 && !__SUBJECT_UTF8_B_ENCODED) && !__RCD_RDNS_MAIL && !__LCL__ENV_AND_HDR_FROM_MATCH && !__SUBSCRIPTION_INFO && !__THREADED && !__NONBOUNCE_READ_RECEIPT 
+#describe    SUBJECT_UNNEEDED_ENCODING    Subject encoded but not non-ANSI?
+#score       SUBJECT_UNNEEDED_ENCODING    1.000    # limit
+#tflags      SUBJECT_UNNEEDED_ENCODING    publish
+
+# Be sensitive to FP on legit japanese- and chinese-language mailing lists (09/2014)
+meta        __TVD_SPACE_ENCODED    (__TVD_SPACE_RATIO && __SUBJECT_ENCODED_B64 && !__SUBJECT_UTF8_B_ENCODED)
+meta        TVD_SPACE_ENCODED      __TVD_SPACE_ENCODED && !__NOT_SPOOFED && !__VIA_ML && !__HS_SUBJ_RE_FW && !__SUBSCRIPTION_INFO && !__TO_EQ_FROM_DOM && !__RCD_RDNS_MAIL && !__ISO_2022_JP_DELIM
+score       TVD_SPACE_ENCODED      2.500   # limit
+
+meta        TVD_SPACE_ENC_FM_MIME  __TVD_SPACE_ENCODED && __FROM_NEEDS_MIME && !__ISO_2022_JP_DELIM
+score       TVD_SPACE_ENC_FM_MIME  2.000   # limit
+
 
 # sample from users list:   Subject: Sta ffWork sFastToSen dTab le tsGood s
-header      __SUBJ_BROKEN_WORD     Subject =~ /\s(?!i[PTM][aoh][bcdou])[a-z]{1,3}[A-Z][a-z]{2}/
+header      __SUBJ_BROKEN_WORD     Subject =~ /\s(?!i[PTM][aoh][bcdou]|e[MP]a[is])[a-z]{1,3}[A-Z][a-z]{2}/
 tflags      __SUBJ_BROKEN_WORD     multiple maxhits=2
-meta        SUBJ_BROKEN_WORD       __SUBJ_BROKEN_WORD && !ALL_TRUSTED && !__RP_MATCHES_RCVD && !__COMMENT_EXISTS && !__MIME_QP && !__DOS_HAS_LIST_UNSUB && !__HAS_IN_REPLY_TO && !__THREADED && !__MSGID_JAVAMAIL && !__DKIM_EXISTS && !__RCD_RDNS_MAIL_MESSY && !__MSGID_OK_DIGITS && !__NOT_A_PERSON && !__ENV_AND_HDR_FROM_MATCH 
+meta        SUBJ_BROKEN_WORD       __SUBJ_BROKEN_WORD && !ALL_TRUSTED && !__RP_MATCHES_RCVD && !__COMMENT_EXISTS && !__MIME_QP && !__DOS_HAS_LIST_UNSUB && !__HAS_IN_REPLY_TO && !__THREADED && !__MSGID_JAVAMAIL && !__DKIM_EXISTS && !__RCD_RDNS_MAIL_MESSY && !__MSGID_OK_DIGITS && !__NOT_A_PERSON && !__LCL__ENV_AND_HDR_FROM_MATCH
 describe    SUBJ_BROKEN_WORD       Subject contains odd word break
-meta        SUBJ_BROKEN_WORDS      __SUBJ_BROKEN_WORD > 1 && !__RP_MATCHES_RCVD && !__COMMENT_EXISTS && !__MIME_QP && !__DOS_HAS_LIST_UNSUB && !__HAS_IN_REPLY_TO && !__THREADED && !__MSGID_JAVAMAIL && !__DKIM_EXISTS && !__RCD_RDNS_MAIL_MESSY && !__MSGID_OK_DIGITS 
+meta        SUBJ_BROKEN_WORDS      __SUBJ_BROKEN_WORD > 1 && !__RP_MATCHES_RCVD && !__COMMENT_EXISTS && !__MIME_QP && !__DOS_HAS_LIST_UNSUB && !__HAS_IN_REPLY_TO && !__THREADED && !__MSGID_JAVAMAIL && !__DKIM_EXISTS && !__RCD_RDNS_MAIL_MESSY && !__MSGID_OK_DIGITS
 describe    SUBJ_BROKEN_WORDS      Subject contains multiple odd word breaks
 
 # felicity TVD_SUBJ_NUM_OBFU as subrule
@@ -880,23 +1044,27 @@ meta        TVD_SUBJ_NUM_OBFU_MINFP   __TVD_SUBJ_NUM_OBFU && !__RP_MATCHES_RCVD 
 header      __XM_PHPMAILER_FORGED  X-Mailer =~ /PHPMailer\s.*version\D+$/
 meta        XM_PHPMAILER_FORGED    __XM_PHPMAILER_FORGED
 describe    XM_PHPMAILER_FORGED    Apparently forged header
+tflags      XM_PHPMAILER_FORGED    publish
 
 # from spample on users list 7/24/2011
 header      __XM_EC_MESSENGER      X-Mailer =~ /\beC-Messenger\b/
-meta        XM_EC_MESSENGER        __XM_EC_MESSENGER
-describe    XM_EC_MESSENGER        eC-Messenger bulk mail service
+#meta        XM_EC_MESSENGER        __XM_EC_MESSENGER
+#describe    XM_EC_MESSENGER        eC-Messenger bulk mail service
 
 header      __SUBJ_OBFU_PUNCT      Subject =~ /(?:(?!<[a-z][a-z])[-~`"!@\#$%^&*()_+={}|\\\/?<>,.:;][a-z][-~`"!@\#$%^&*()_+={}|\\\/?<>,.:;\s]|[a-z][~`"!@\#$%^&*()_+={}|\\?<>,.:;][a-z])/i
 tflags      __SUBJ_OBFU_PUNCT      multiple maxhits=4
-meta        SUBJ_OBFU_PUNCT_FEW    __SUBJ_OBFU_PUNCT > 1 && !__SUBJECT_ENCODED_B64 && !__VIA_ML && !__THREADED && !__RP_MATCHES_RCVD && !__DKIM_EXISTS && !NO_RELAYS && !__X_CRON_ENV && !__MSOE_MID_WRONG_CASE && !__HS_SUBJ_RE_FW && !__HAS_THREAD_INDEX && !__REPLYTO_EXISTS && !__RCD_RDNS_MAIL_MESSY
+meta        SUBJ_OBFU_PUNCT_FEW    __SUBJ_OBFU_PUNCT > 1 && !__THREADED && !__RP_MATCHES_RCVD && !__NOT_SPOOFED && !__LCL__ENV_AND_HDR_FROM_MATCH 
 describe    SUBJ_OBFU_PUNCT_FEW    Possible punctuation-obfuscated Subject: header
 score       SUBJ_OBFU_PUNCT_FEW    0.750
-meta        SUBJ_OBFU_PUNCT_MANY   __SUBJ_OBFU_PUNCT > 2 && !__SUBJECT_ENCODED_B64 && !__VIA_ML && !__THREADED && !__RP_MATCHES_RCVD && !__DKIM_EXISTS && !NO_RELAYS && !__X_CRON_ENV && !__MSOE_MID_WRONG_CASE && !__HS_SUBJ_RE_FW && !__HAS_THREAD_INDEX && !__REPLYTO_EXISTS && !__RCD_RDNS_MAIL_MESSY
+meta        SUBJ_OBFU_PUNCT_MANY   __SUBJ_OBFU_PUNCT > 2 && !__THREADED && !__RP_MATCHES_RCVD && !__NOT_SPOOFED && !__LCL__ENV_AND_HDR_FROM_MATCH 
 describe    SUBJ_OBFU_PUNCT_MANY   Punctuation-obfuscated Subject: header
 score       SUBJ_OBFU_PUNCT_MANY   1.750
 
-# A document was scanned and sentto you using a Hewlett-Packard HP Officejet 
-# A document was scanned and sent to you using a Hewlett-Packard HP Officejet 
+#meta        SUBJ_MANGLED           __SUBJ_OBFU_PUNCT && __GAPPY_SUBJECT && !__RP_MATCHES_RCVD && !__HAS_X_MAILER && !__DOS_HAS_LIST_UNSUB 
+#score       SUBJ_MANGLED           2.000    # limit
+
+# A document was scanned and sentto you using a Hewlett-Packard HP Officejet
+# A document was scanned and sent to you using a Hewlett-Packard HP Officejet
 # Scan from Hewlet-Packard Officejet
 # Scan from a HP Officejet
 # Hewlett-Packard Officejet Location: machine location not set
@@ -914,6 +1082,8 @@ if can(Mail::SpamAssassin::Conf::feature_bug6558_free)
    tflags      __LARGE_PERCENT_AFTER  multiple maxhits=4
    meta        LARGE_PCT_AFTER_MANY   __LARGE_PERCENT_AFTER > 3
    describe    LARGE_PCT_AFTER_MANY   Many large percentages after...
+else
+   meta        __LARGE_PERCENT_AFTER  0
 endif
 
 # phish/malware 11/2011
@@ -927,6 +1097,8 @@ ifplugin Mail::SpamAssassin::Plugin::MIMEHeader
 	meta         __ACH_CANCELLED_EXE (__ACH_CANCELLED_01 || __ACH_CANCELLED_02 || __ACH_CANCELLED_03 || __ACH_CANCELLED_04) && __EXE_ATTACH
 	meta         ACH_CANCELLED_EXE   __ACH_CANCELLED_EXE
 	describe     ACH_CANCELLED_EXE   "ACH cancelled" probable malware
+else
+	meta         __EXE_ATTACH        0
 endif
 
 meta        __ACH_CANCELLED        (__ACH_CANCELLED_01 || __ACH_CANCELLED_02 || __ACH_CANCELLED_03 || __ACH_CANCELLED_04) && (__HAS_ANY_URI || LOTS_OF_MONEY)
@@ -936,7 +1108,7 @@ describe    ACH_CANCELLED          "ACH cancelled" fraud / phish
 # spams from users list query 03/2012
 # Not useful as scored rules, may be useful meta'd with something else
 uri         __URI_DBL_SUBDOM   m,^https?://(?!www\.amazon\.com)([^/]+)/.*https?://(?:[^.]+\.)?\1/,i
-#meta        URI_DBL_SUBDOM     __URI_DBL_SUBDOM && !__RP_MATCHES_RCVD && !__FROM_LOWER && !__HAS_ERRORS_TO && !__TO_EQ_FROM_DOM 
+#meta        URI_DBL_SUBDOM     __URI_DBL_SUBDOM && !__RP_MATCHES_RCVD && !__FROM_LOWER && !__HAS_ERRORS_TO && !__TO_EQ_FROM_DOM
 #score       URI_DBL_SUBDOM     1.00	# limit
 
 uri         __URI_DBL_DOM      m,^https?://[^.]+\.(?!amazon\.com)([^/]+)/.*https?://[^.]+\.\1/,i
@@ -956,8 +1128,8 @@ describe    SUBJ_ODD_CASE      Oddly mixed-case Subject: header
 # Somebody's resurrecting the dead 07/1012
 body        BILL_1618          /\bUnder Bills?.1618(?: Title III)? passed by the 105th U\.S\. Congress\b/i
 describe    BILL_1618          Mentions proposed US law supposedly permitting spamming
-body        NOT_SPAM           /\b(?:this mail cannot be considered Spam|ESTE CORREO NO PUEDE SER CONSIDERADO (?:INTRUSIVO|spam))\b/i
-describe    NOT_SPAM           I'm not spam! Really!
+body        NOT_SPAM           /\b(?:this mail cannot be considered Spam|ESTE CORREO NO PUEDE SER CONSIDERADO (?:INTRUSIVO|spam)|Diese Nachricht ist KEIN SPAM)\b/i
+describe    NOT_SPAM           I'm not spam! Really! I'm not, I'm not, I'm not!
 
 
 # suggested by http://isc.sans.edu/diary.html?storyid=13921
@@ -995,16 +1167,19 @@ meta        __FBI_SPOOF          (__FBI_FM_NAME || __FBI_FM_DOM || __FBI_BODY_SH
 meta        FBI_SPOOF            __FBI_SPOOF
 describe    FBI_SPOOF            Claims to be FBI, but not from FBI domain
 score       FBI_SPOOF            2.00	# limit
+tflags      FBI_SPOOF            publish
 
 meta        FBI_MONEY            __FBI_SPOOF && LOTS_OF_MONEY
 describe    FBI_MONEY            The FBI wants to give you lots of money?
 score       FBI_MONEY            2.00	# limit
+tflags      FBI_MONEY            publish
 
 
 header      __FROM_ASB_BANK      From:addr =~ /\basb\.co\.nz$/i
 header      __FROM_AMEX          From =~ /american\s?express/i
 header      __FROM_BANK_LOOSE    From =~ /ban(?:k|co)/i
 header      __FROM_CHASE         From:addr =~ /chase(?:2?-?paymentech)\.com$/i
+header      __FROM_CMNWLTH_BANK  From:addr =~ /\bcommonwealth\.com\.au$/i
 header      __FROM_EBAY_LOOSE    From =~ /\be-?bay\b/i
 header      __FROM_HSBC          From:addr =~ /\bhsbc\.co\.uk$/i
 header      __FROM_LLOYDSTSB     From:addr =~ /\blloyds(?:tsb)\.(?:co\.uk|com)$/i
@@ -1012,7 +1187,7 @@ header      __FROM_PAYPAL_LOOSE  From =~ /paypal/i
 header      __FROM_WELLSFARGO    From:addr =~ /wellsfargo\.com$/i
 header      __FROM_WESTERNUNION  From:addr =~ /westernunion\.com$/i
 
-meta        __FROM_MISSP_PHISH   __FROM_MISSPACED && (__FROM_ASB_BANK || __FROM_AMEX || __FROM_BANK_LOOSE || __FROM_CHASE || __FROM_EBAY_LOOSE || __FROM_HSBC || __FROM_LLOYDSTSB || __FROM_PAYPAL_LOOSE || __FROM_WELLSFARGO || __FROM_WESTERNUNION)
+meta        __FROM_MISSP_PHISH   __FROM_MISSPACED && (__FROM_ASB_BANK || __FROM_AMEX || __FROM_BANK_LOOSE || __FROM_CHASE || __FROM_CMNWLTH_BANK || __FROM_EBAY_LOOSE || __FROM_HSBC || __FROM_LLOYDSTSB || __FROM_PAYPAL_LOOSE || __FROM_WELLSFARGO || __FROM_WESTERNUNION)
 meta        FROM_MISSP_PHISH     __FROM_MISSP_PHISH
 describe    FROM_MISSP_PHISH     Malformed, claims to be from financial organization - possible phish
 score       FROM_MISSP_PHISH     4.75	# limit
@@ -1024,11 +1199,11 @@ uri         __URI_YOUSENDIT      m,^https?://www\.yousendit\.com/directdownload,
 uri         __URI_GOOGLE_DOC     m,^https?://docs\.google\.com/(?:[^/]+/)*view(?:form)?\?(?:id|formkey)=,i
 
 body        __WEBMAIL_ACCT       /\byour web ?mail account/i
-body        __MAILBOX_FULL       /\b(?:you(?:r (?:mail\s?box|(?:e-?|web ?)mail))? (?:is (?:almost )?full|(?:quota )?ha(?:s|ve) (?:reached|exceeded|passed) (?:the|your|it'?s?) (?:size|storage|set|(?:e-?|web ?)mail|quota|folder|mail ?box)[\/\s](?:limit|quota))|over your mail\s?box (?:size )?(?:limit|quota)|maximum mail\s?box (?:size )?(?:limit|quota) exceeded|sua (?:conta|caixa) de (?:(?:e-?|web ?)mail|correio) (?:excedeu (?:sua|o) limite|est(?:=E1|[\xe1]|[\xc3][\xa1]) quase cheio))\b/i
+body        __MAILBOX_FULL       /\b(?:you(?:r (?:mail\s?box|(?:e-?|web ?)mail))? (?:is (?:almost )?full|(?:quota )?ha(?:s|ve) (?:reached|exceeded|passed) (?:the|your|it'?s?) (?:university )?(?:size|storage|set|(?:e-?|web ?)mail|quota|folder|mail ?box)[\/\s](?:limit |quota |account )+)|over your mail\s?box (?:size )?(?:limit|quota)|maximum mail\s?box (?:size )?(?:limit|quota) exceeded|sua (?:conta|caixa) de (?:(?:e-?|web ?)mail|correio) (?:excedeu (?:sua|o) limite|est(?:=E1|[\xe1]|[\xc3][\xa1]) quase cheio))\b/i
 body        __CLEAN_MAILBOX      /\b(?:(?:e-?mail|mail\s?box|violation:|(?-i:CLICK)) (?:quota size|clean(?:-?up))|clean ?up click ?here)\b/i
 body        __VALIDATE_MAILBOX   /\b(?:(?:re-?)?(?:valida(?:te|r)|confirm|set)(?:\S?(?:increase|raise))? (?:your|(?:a )?sua) (?:mail\s?box|(?:e-?)?mail quota|caixa)|confirmar (?:que )?a sua conta (?:de e-?mail|ainda est(?:=E1|[\xe1]|[\xc3][\xa1]) ativa)|wprowadz dane konta ponizej|utrzymania aktywnego konta e-?mail|weryfikacji konta)\b/i
-body        __UPGR_MAILBOX       /\b(?:up(?:g[ra]+d(?:e|ing)|date) (?:[hw]as\s(?:[a-z]+\s){1,5})?(?:o[nf] )?(?:your )?(?:mail\s?box|(?:web ?|e-?)mail)|(?:web ?|e-?)mail Upgrade cuenta|atualiz(?:e|ar) (?:a|sua) caixa de correio|click\S{0,10} (?:here(?:[:\.\s]{0,5}\S{0,10}http\S{10,80})?|below)(?: link)? to (?:(?:complete|finish|increase) )?(?:(?:the|this|your)\s)?(?:up(?:date|grade)|(?:web ?|e-?)?mail(?:\s?box)? (?:size|quota|limit))|utrzymania aktywnego konta)\b/i
-body        __LOCK_MAILBOX       /\b(?:(?:deactivate|lock|lose ac+ess to|los[se] (?:of )?(?:important )?(?:information|mail|messages) in) (?:your )?(?:mail\s?box|(?:web ?|e-?)mail)|your (?:mail\s?box|(?:(?:web ?|e-?)mail)(?: account)?) (?:(?:will|may) be(?:come)? )?(?:in-?a(?:ctive|cess[ia]ble)|locked|disabled|deleted|removed)\b|ditt konto vara "?deaktiverad"?|begr(?:=E4|\xe4|[\xc3][\xa4])nsad tillg(?:=E5|[\xe5]|[\xc3][\xa5])ng till din brevl(?:=E5|[\xe5]|[\xc3][\xa5])da|contas? de (?:web ?|e-?)mail (?:ser(?:=E1|[\xe1]|[\xc3][\xa1]) (?:desativado|exclu(?:=ED|[\xed]|[\xc3][\xad])do)|(?:=E9|[\xe9]|[\xc3][\xa9]) exclu(?:=ED|[\xed]|[\xc3][\xad])do)|destruir a sua caixa de (?:correio|entrada)|tw(?:=F3|[\xf3])j konto zostalo ograniczone|straci swoje e-?mail na sta[\xc5][\x82]e|konto zostanie automatycznie wy[\xc5][\x82][\xc4][\x85]czona)/i
+body        __UPGR_MAILBOX       /\b(?:up(?:g[ra]+d(?:e|ing)|date) (?:[hw]as\s(?:[a-z]+\s){1,5})?(?:o[nf] )?(?:your )?(?:mail\s?box|(?:web ?|e-?)mail)|(?:web ?|e-?)mail Upgrade cuenta|atualiz(?:e|ar) (?:a|sua) caixa de correio|click\S{0,10} (?:here(?:[:\.\s]{0,5}\S{0,10}http\S{10,80})?|below)(?: link)? to (?:(?:complete|finish|increase) )?(?:(?:the|this|your)\s)?(?:up(?:date|grade)|(?:web ?|e-?)?mail(?:\s?box)? (?:size|quota|limit))|utrzymania aktywnego konta|request (?:for )additional storage)\b/i
+body        __LOCK_MAILBOX       /\b(?:(?:deactivate|lock|lose ac+ess to|los[se] (?:of )?(?:important )?(?:information|mail|messages) in) (?:your )?(?:mail\s?box|(?:web ?|e-?)mail)|your (?:mail\s?box|(?:(?:web ?|e-?)mail)(?: account)?) (?:(?:will|may) be(?:come)? )?(?:in-?a(?:ctive|cess[ia]ble)|locked|disabled|deleted|removed)\b|ditt konto vara "?deaktiverad"?|begr(?:=E4|\xe4|[\xc3][\xa4])nsad tillg(?:=E5|[\xe5]|[\xc3][\xa5])ng till din brevl(?:=E5|[\xe5]|[\xc3][\xa5])da|contas? de (?:web ?|e-?)mail (?:ser(?:=E1|[\xe1]|[\xc3][\xa1]) (?:desativado|exclu(?:=ED|[\xed]|[\xc3][\xad])do)|(?:=E9|[\xe9]|[\xc3][\xa9]) exclu(?:=ED|[\xed]|[\xc3][\xad])do)|destruir a sua caixa de (?:correio|entrada)|tw(?:=F3|[\xf3])j konto zostalo ograniczone|straci swoje e-?mail na sta[\xc5][\x82]e|konto zostanie automatycznie wy[\xc5][\x82][\xc4][\x85]czona|e-?mail account[^.]{0,30}deactivated (?:in|from) our (?:database|system|server))/i
 body        __SYSADMIN           /\b(?:help?[- ]?desk|(?:(?:web ?)?mail ?|sys(?:tem )?)admin(?:istrator)|local[- ]host|(?:support|upgrade|management) (?:team|center)|message from administrator|university mail server copyright|suporte t(?:=E9|[\xe9]|[\xc3][\xa9])cnico|administrador do sistema)\b/i
 body        __ATTN_MAIL_USER     /\b(?:att(?:entio)?n|dear|caro) (?:web ?(?:mail)?\s\S\s)?(?:web ?|e-?)?mail (?:user|DO USU(?:=E1|[\xe1]|[\xc3][\xa1])RIO)[:;,]/i
 body        __MAIL_ACCT_ACCESS1  /\b(?:your (?:web ?|e-?)?mail (?:account|log-?in) (?:has )?been accessed|r(?:=F3|[\xf3])zne komputery zalogowaniu sie)\b/i
@@ -1037,35 +1212,67 @@ body        __MAIL_ACCT_ACCESS2  /\blo+se ac+es+ to your (?:web|e-?)?mail (?:acc
 body        __MAILBOX_FULL_SE    /(?:\b=F6|[\xf6]|[\xc3][\xb6])verskridit gr(?:=E4|[\xe4]|[\xc3][\xa4])nsen f(?:=F6|[\xf6]|[\xc3][\xb6])r din postl(?:=E5|[\xe5]|[\xc3][\xa5])da\b/i
 body        __VALIDATE_MBOX_SE   /(?:\b=E5|[\xe5]|[\xc3][\xa5])terst(?:=E4|\xe4|[\xc3][\xa4])lla ditt konto\b/i
 
-meta        __EMAIL_PHISH        (__WEBMAIL_ACCT + __MAILBOX_FULL + __MAILBOX_FULL_SE + __CLEAN_MAILBOX + __VALIDATE_MAILBOX + __VALIDATE_MBOX_SE + __UPGR_MAILBOX + __LOCK_MAILBOX + __SYSADMIN + __ATTN_MAIL_USER + __MAIL_ACCT_ACCESS1 + __MAIL_ACCT_ACCESS2 + (__TVD_PH_SUBJ_META || __TVD_PH_BODY_META || __TVD_PH_BODY_ACCOUNTS_PRE || __TVD_PH_BODY_ACCOUNTS_POST) > 1)
-meta        __EMAIL_PHISH_MANY   (__WEBMAIL_ACCT + __MAILBOX_FULL + __MAILBOX_FULL_SE + __CLEAN_MAILBOX + __VALIDATE_MAILBOX + __VALIDATE_MBOX_SE + __UPGR_MAILBOX + __LOCK_MAILBOX + __SYSADMIN + __ATTN_MAIL_USER + __MAIL_ACCT_ACCESS1 + __MAIL_ACCT_ACCESS2 + (__TVD_PH_SUBJ_META || __TVD_PH_BODY_META || __TVD_PH_BODY_ACCOUNTS_PRE || __TVD_PH_BODY_ACCOUNTS_POST) > 3)
+meta        __EMAIL_PHISH        (__WEBMAIL_ACCT + __MAILBOX_FULL + __MAILBOX_FULL_SE + __CLEAN_MAILBOX + __VALIDATE_MAILBOX + __VALIDATE_MBOX_SE + __UPGR_MAILBOX + __LOCK_MAILBOX + __SYSADMIN + __ATTN_MAIL_USER + __MAIL_ACCT_ACCESS1 + __MAIL_ACCT_ACCESS2 + __ACCESS_REVOKE + (__TVD_PH_SUBJ_META || __TVD_PH_BODY_META || __TVD_PH_BODY_ACCOUNTS_PRE || __TVD_PH_BODY_ACCOUNTS_POST) > 1)
+meta        __EMAIL_PHISH_MANY   (__WEBMAIL_ACCT + __MAILBOX_FULL + __MAILBOX_FULL_SE + __CLEAN_MAILBOX + __VALIDATE_MAILBOX + __VALIDATE_MBOX_SE + __UPGR_MAILBOX + __LOCK_MAILBOX + __SYSADMIN + __ATTN_MAIL_USER + __MAIL_ACCT_ACCESS1 + __MAIL_ACCT_ACCESS2 + __ACCESS_REVOKE + (__TVD_PH_SUBJ_META || __TVD_PH_BODY_META || __TVD_PH_BODY_ACCOUNTS_PRE || __TVD_PH_BODY_ACCOUNTS_POST) > 3)
+
+meta        UPGRADE_MAILBOX      __UPGR_MAILBOX && __HTML_FONT_LOW_CONTRAST_MINFP 
+describe    UPGRADE_MAILBOX      Upgrade your mailbox! (phishing?)
+
+body        __ACCESS_SUSPENDED   /\b?(:(?:access|account) has been (?:temporar(?:il)?y )(?:suspended|blocked|locked)|suspend (?:you from|your) access(?:ing)?)\b/i
+body        __ACCESS_RESTORE     /\bto (?:(?:restore|regain) access|(?:remove|uplift) (?:the|this) suspens|continue using your (?:account|online))/i
+body        __ACCESS_REVOKE      /(?:temporary|permanent) (?:de-?activation|removal) of your (?:\w{1,30} )?(?:access|account)/i
+body        __VERIFY_ACCOUNT     /(?:confirm|updated?|verify) (?:your|the) (?:account|current|billing|personal|online)? ?(?:records?|information|account|identity|access|data|login)/i
+body        __FAILED_LOGINS      /unsuc+es+ful log-?[io]n at+empts/i
+body        __ACCOUNT_REACTIV    /(?:(?:account|access) (?:has been )?(?:successfully )?(?:reviewed and )?re-?(?:activat(?:ion|ed)|new(?:al|ed))|(?:unlock|re-?activate|restore|recover) (?:your|the|this) (?:account|access))/i
+body        __SECURITY_DEPT      /\bsecurity dep(?:artmen)?t\b/i
+body        __ACCOUNT_ERROR      /your account (?:is|appears to be) (?:incorrect|missing|in error|invalid)/i
+body        __ACCOUNT_DISRUPT    /ensure (?:that )?your (?:account|access) is not (?:disrupted|suspended|interrupted)/i
+body        __ACCOUNT_UPGRADE    /(?:upgrade (?:of )your (?:account|access)|your (?:access|account) is[\w\s]{0,40}being upgraded)/i
+
+meta        __ACCT_PHISH         (__ACCESS_SUSPENDED + __ACCESS_RESTORE + __ACCESS_REVOKE + __VERIFY_ACCOUNT + __FAILED_LOGINS + __ACCOUNT_REACTIV + __SECURITY_DEPT + __ACCOUNT_ERROR + __ACCOUNT_DISRUPT + __ACCOUNT_UPGRADE) > 1 && !__ACCT_PHISH_MANY
+meta        __ACCT_PHISH_MANY    (__ACCESS_SUSPENDED + __ACCESS_RESTORE + __ACCESS_REVOKE + __VERIFY_ACCOUNT + __FAILED_LOGINS + __ACCOUNT_REACTIV + __SECURITY_DEPT + __ACCOUNT_ERROR + __ACCOUNT_DISRUPT + __ACCOUNT_UPGRADE) > 3
+meta        ACCT_PHISHING        __ACCT_PHISH
+describe    ACCT_PHISHING        Possible phishing for account information
+score       ACCT_PHISHING        1.500  # limit
+meta        ACCT_PHISHING_MANY   __ACCT_PHISH_MANY
+describe    ACCT_PHISHING_MANY   Phishing for account information
+score       ACCT_PHISHING_MANY   3.000  # limit
+
+meta        PHISHING_FREEMAIL    (__EMAIL_PHISH || __EMAIL_PHISH_MANY || __ACCT_PHISH || __ACCT_PHISH_MANY) && FREEMAIL_FORGED_REPLYTO
+describe    PHISHING_FREEMAIL    Send your login credentials to some random freemail account
+
 
 # Google Docs observed on LOTS of phishes 2012
 meta        __GOOGLE_DOCS_PHISH_1  __URI_GOOGLE_DOC && (__TVD_PH_SUBJ_META || __TVD_PH_BODY_META || __TVD_PH_BODY_ACCOUNTS_PRE || __TVD_PH_BODY_ACCOUNTS_POST)
-meta        __GOOGLE_DOCS_PHISH_2  __URI_GOOGLE_DOC && __EMAIL_PHISH
+meta        __GOOGLE_DOCS_PHISH_2  __URI_GOOGLE_DOC && (__EMAIL_PHISH || __ACCT_PHISH)
 meta        GOOGLE_DOCS_PHISH    (__GOOGLE_DOCS_PHISH_1 || __GOOGLE_DOCS_PHISH_2)
-describe    GOOGLE_DOCS_PHISH    E-mail account phishing via a Google Docs form
-score       GOOGLE_DOCS_PHISH    4.00	# limit
-tflags      GOOGLE_DOCS_PHISH    publish	# Force publication - great S/O, hits only <= 6 points
+describe    GOOGLE_DOCS_PHISH    Possible phishing via a Google Docs form
+score       GOOGLE_DOCS_PHISH    3.00	# limit
+tflags      GOOGLE_DOCS_PHISH    publish
 
-meta        GOOGLE_DOCS_PHISH_MANY  __URI_GOOGLE_DOC && __EMAIL_PHISH_MANY
-describe    GOOGLE_DOCS_PHISH_MANY  E-mail account phishing via a Google Docs form
-score       GOOGLE_DOCS_PHISH_MANY  5.50	# limit
-tflags      GOOGLE_DOCS_PHISH_MANY  publish	# Force publication - great S/O, hits only <= 6 points
+meta        GOOGLE_DOCS_PHISH_MANY  __URI_GOOGLE_DOC && (__EMAIL_PHISH_MANY || __ACCT_PHISH_MANY)
+describe    GOOGLE_DOCS_PHISH_MANY  Phishing via a Google Docs form
+score       GOOGLE_DOCS_PHISH_MANY  4.00	# limit
+tflags      GOOGLE_DOCS_PHISH_MANY  publish
 
 meta        URI_GOOGLE_DOCS      __URI_GOOGLE_DOC && !__DKIM_EXISTS && !__TO_EQ_FROM_DOM && !__DOS_REF_TODAY && !__DOS_BODY_FRI && !__DOS_BODY_WED && !__freemail_safe_fwd && !__TO_EQ_FROM_DOM && !__HAS_ERRORS_TO
 describe    URI_GOOGLE_DOCS      URI for Google Docs, common in phishing
 score       URI_GOOGLE_DOCS      1.00	# limit
 
-meta        __EMAIL_URI_PHISH    __HAS_ANY_URI && !__URI_GOOGLE_DOC && __EMAIL_PHISH
+meta        __URI_PHISH    __HAS_ANY_URI && !__URI_GOOGLE_DOC && (__EMAIL_PHISH || __ACCT_PHISH)
 ifplugin Mail::SpamAssassin::Plugin::MIMEHeader
-  meta      EMAIL_URI_PHISH      __EMAIL_URI_PHISH && !ALL_TRUSTED && !__UNSUB_LINK && !__TAG_EXISTS_CENTER && !__HAS_SENDER && !__CAN_HELP && !__VIA_ML && !__UPPERCASE_URI && !__HAS_CC && !__NUMBERS_IN_SUBJ && !__PCT_FOR_YOU && !__MOZILLA_MSGID && !__FB_COST && !__hk_bigmoney && !__REMOTE_IMAGE
+  meta      URI_PHISH      __URI_PHISH && !ALL_TRUSTED && !__UNSUB_LINK && !__TAG_EXISTS_CENTER && !__HAS_SENDER && !__CAN_HELP && !__VIA_ML && !__UPPERCASE_URI && !__HAS_CC && !__NUMBERS_IN_SUBJ && !__PCT_FOR_YOU && !__MOZILLA_MSGID && !__FB_COST && !__hk_bigmoney && !__REMOTE_IMAGE
 else
-  meta      EMAIL_URI_PHISH      __EMAIL_URI_PHISH && !ALL_TRUSTED && !__UNSUB_LINK && !__TAG_EXISTS_CENTER && !__HAS_SENDER && !__CAN_HELP && !__VIA_ML && !__UPPERCASE_URI && !__HAS_CC && !__NUMBERS_IN_SUBJ && !__PCT_FOR_YOU && !__MOZILLA_MSGID && !__FB_COST && !__hk_bigmoney
+  meta      URI_PHISH      __URI_PHISH && !ALL_TRUSTED && !__UNSUB_LINK && !__TAG_EXISTS_CENTER && !__HAS_SENDER && !__CAN_HELP && !__VIA_ML && !__UPPERCASE_URI && !__HAS_CC && !__NUMBERS_IN_SUBJ && !__PCT_FOR_YOU && !__MOZILLA_MSGID && !__FB_COST && !__hk_bigmoney
 endif
-score       EMAIL_URI_PHISH      4.00	# limit
-describe    EMAIL_URI_PHISH      Email account phishing using web form
-tflags      EMAIL_URI_PHISH      publish	# Force publication - very good S/O, hits mainly <= 3 points
+describe    URI_PHISH            Phishing using web form
+score       URI_PHISH            4.00   # limit
+tflags      URI_PHISH            publish
+
+meta        SYSADMIN             __SYSADMIN && !ALL_TRUSTED && !__ANY_TEXT_ATTACH && !__DKIM_EXISTS && !__LCL__ENV_AND_HDR_FROM_MATCH && !__MSGID_OK_DIGITS 
+describe    SYSADMIN             Supposedly from your IT department
+score       SYSADMIN             3.500	# limit
+tflags      SYSADMIN             publish
 
 # suggested by MPerkel on the users list 11/10/2012
 uri         __URI_PROTO_MC       /^(?!(?-i:(?:[Hh]ttps?|HTTPS?):))https?:/i
@@ -1074,33 +1281,37 @@ uri         __URI_TLD_MC         /\.(?!(?-i:com|net|org|biz|info|COM|NET|ORG))(?
 uri         __URI_GOOG_MC        /(?!(?-i:[Gg]oogle))google/i
 
 rawbody     __HTML_FONT_TINY_01  /font-size:\s{0,5}[0-4]px;/i
-meta        HTML_FONT_TINY       __HTML_FONT_TINY_01 && __TAG_EXISTS_BODY
+meta        HTML_FONT_TINY       __HTML_FONT_TINY_01 && __TAG_EXISTS_BODY && !__DKIM_EXISTS && !__BUGGED_IMG && !__VIA_ML && !__RP_MATCHES_RCVD && !__THREADED && !__LCL__ENV_AND_HDR_FROM_MATCH && !__MSGID_JAVAMAIL && !__FROM_LOWER && !__HAS_THREAD_INDEX && !__FROM_LOWER 
 describe    HTML_FONT_TINY       Font too small to read
-score       HTML_FONT_TINY       1.00	# limit
+score       HTML_FONT_TINY       1.500	# limit
 
 body        __BODY_TEXT_LINE     /^\s*\S/
 tflags      __BODY_TEXT_LINE     multiple maxhits=3
 meta        __EMPTY_BODY         __BODY_TEXT_LINE < 2 && !__SMIME_MESSAGE
 # this hits 13% of masscheck corpus spam, 50% of that only scores 2 points
-meta        BODY_EMPTY           __EMPTY_BODY && !__NUMBERS_IN_SUBJ && !__CTE && !__RP_MATCHES_RCVD && !__VIA_ML && !__MIME_ATTACHMENT && !__HAS_THREAD_INDEX && !__TO_EQ_FROM_DOM && !__ENV_AND_HDR_FROM_MATCH && !__FROM_LOWER && !__NOT_SPOOFED && !__MSGID_APPLEMAIL && !__RCD_RDNS_MAIL_MESSY && !NO_RELAYS && !__NOT_A_PERSON 
+meta        BODY_EMPTY           __EMPTY_BODY && !__NUMBERS_IN_SUBJ && !__CTE && !__RP_MATCHES_RCVD && !__VIA_ML && !__MIME_ATTACHMENT && !__HAS_THREAD_INDEX && !__TO_EQ_FROM_DOM && !__LCL__ENV_AND_HDR_FROM_MATCH && !__FROM_LOWER && !__NOT_SPOOFED && !__MSGID_APPLEMAIL && !__RCD_RDNS_MAIL_MESSY && !NO_RELAYS && !__NOT_A_PERSON
 describe    BODY_EMPTY           No body text in message
 score       BODY_EMPTY           3.00	# limit
 
 
 meta        __BODY_URI_ONLY      __BODY_TEXT_LINE < 3 && __HAS_ANY_URI && !__SMIME_MESSAGE
-meta        BODY_URI_ONLY        __BODY_URI_ONLY && !__THREAD_INDEX_GOOD && !__FSL_HELO_BARE_IP_2 && !__XM_MS_IN_GENERAL 
+meta        BODY_URI_ONLY        __BODY_URI_ONLY && !__NOT_SPOOFED && !__LCL__ENV_AND_HDR_FROM_MATCH && !__TO_EQ_FROM_DOM && !__X_CRON_ENV 
 describe    BODY_URI_ONLY        Message body is only a URI in one line of text or for an image
-score       BODY_URI_ONLY        0.25	# limit during testing
+score       BODY_URI_ONLY        1.000   # limit
+tflags      BODY_URI_ONLY        publish
 
 
 body        __SINGLE_WORD_LINE  /^\s?\S{1,60}\s?$/
 tflags      __SINGLE_WORD_LINE  multiple maxhits=2
 header      __SINGLE_WORD_SUBJ  Subject =~ /^\s*\S{1,60}\s*$/
-meta        __BODY_SINGLE_WORD    __BODY_TEXT_LINE < 3 && !__SMIME_MESSAGE && ((__SINGLE_WORD_LINE && !__SINGLE_WORD_SUBJ) || __SINGLE_WORD_LINE > 1)
-meta        BODY_SINGLE_WORD    __BODY_SINGLE_WORD && !ALL_TRUSTED && !__NOT_SPOOFED && !__MSGID_APPLEMAIL 
+meta        __BODY_SINGLE_WORD    __BODY_TEXT_LINE < 3 && !__EMPTY_BODY && !__SMIME_MESSAGE && ((__SINGLE_WORD_LINE && !__SINGLE_WORD_SUBJ) || __SINGLE_WORD_LINE > 1)
+meta        BODY_SINGLE_WORD    __BODY_SINGLE_WORD && !ALL_TRUSTED && !__HDRS_LCASE_KNOWN && !__FROM_ALL_NUMS && !__RCD_RDNS_SMTP
 describe    BODY_SINGLE_WORD    Message body is only one word (no spaces)
-score       BODY_SINGLE_WORD    1.00	# limit
+score       BODY_SINGLE_WORD    3.00	# limit
 
+meta        BODY_SINGLE_URI     (__BODY_SINGLE_WORD && __HAS_ANY_URI) && !ALL_TRUSTED && !__HDRS_LCASE_KNOWN && !__FROM_ALL_NUMS && !__RCD_RDNS_SMTP
+describe    BODY_SINGLE_URI     Message body is only a URI
+score       BODY_SINGLE_URI     3.00	# limit
 
 #ifplugin Mail::SpamAssassin::Plugin::DKIM
 #  # malformed DKIM signatures seen in the wild - see bug#6895
@@ -1108,54 +1319,92 @@ score       BODY_SINGLE_WORD    1.00	# limit
 #  meta      __DKIM_MALFORMED	DKIM_SIGNED && !DKIM_VALID
 #endif
 
-body        __YOUR_PHOTOS       /\byour photos (?:as p[rw]omised )?(?:here )?(?:- )?https?:/i
-meta        YOUR_PHOTOS         __YOUR_PHOTOS && !__HAS_ANY_EMAIL && !__HAS_REPLY_TO && !__DOS_HAS_LIST_UNSUB 
-describe    YOUR_PHOTOS         "Your Photos" phishing or malware
-score       YOUR_PHOTOS         4.00	# limit
+#body        __YOUR_PHOTOS       /\byour photos (?:as p[rw]omised )?(?:here )?(?:- )?https?:/i
+#meta        YOUR_PHOTOS         __YOUR_PHOTOS && !__HAS_ANY_EMAIL && !__HAS_REPLY_TO && !__DOS_HAS_LIST_UNSUB
+#describe    YOUR_PHOTOS         "Your Photos" phishing or malware
+#score       YOUR_PHOTOS         4.00	# limit
 
 body        __UNSUBSCRIBE_ES   /\b(?:Para darte de baja y no recibir ning(?:=FA|[\xfa]|[\xc3][\xba])n|Si no desea que le enviemos publicidad|Si desea eliminar su correo [^\s@]{1,64}@[^\s@]{1,64} de nuestra lista|no recibir estos boletines a: [^\s@]{1,64}@[^\s@]{1,64} simplemente|Si no desea recibir m(?:=E1|[\xe1]|[\xc3][\xa1]|a)s notificaciones)\b/i
+meta        UNSUBSCRIBE_ES     __UNSUBSCRIBE_ES
+score       UNSUBSCRIBE_ES     2.500	# limit
+
 body        __UNSUBSCRIBE_PT   /\bSe n(?:a|=E3|[\xe3]|[\xc3][\xa3])o desejar mais receber nossos e-?mails?\b/i
+meta        UNSUBSCRIBE_PT     __UNSUBSCRIBE_PT
+score       UNSUBSCRIBE_PT     2.500	# limit
 
 body        __URI_DBL_PROTO    m,\b(?:https?:/+){2},i
 
 uri         __URI_DOS_FILE     /^[A-Z]:\\/i
 
-meta        __FORM_LOW_CONTRAST   (__FILL_THIS_FORM_SHORT2 || __FILL_THIS_FORM_SHORT2) && HTML_FONT_LOW_CONTRAST 
+meta        __FORM_LOW_CONTRAST   (__FILL_THIS_FORM_SHORT2 || __FILL_THIS_FORM_SHORT2) && __HTML_FONT_LOW_CONTRAST_MINFP
 meta        FORM_LOW_CONTRAST     __FORM_LOW_CONTRAST && !__BUGGED_IMG && !__HAS_REPLY_TO && !__DKIM_EXISTS && !__DOS_HAS_LIST_UNSUB && !__MSGID_JAVAMAIL
 describe    FORM_LOW_CONTRAST     Fill in a form with hidden text
 score       FORM_LOW_CONTRAST     3.00	# Limit
+tflags      FORM_LOW_CONTRAST     publish
 
 
 # try to FP-reduce HTML_FONT_LOW_CONTRAST
-meta        __HTML_FONT_LOW_CONTRAST_MINFP	HTML_FONT_LOW_CONTRAST && !__RCD_RDNS_MAIL && !__DOS_HAS_LIST_UNSUB && !__MAIL_LINK 
+meta        __HTML_FONT_LOW_CONTRAST_MINFP	HTML_FONT_LOW_CONTRAST && !__HAS_SENDER && !__VIA_ML && !__RP_MATCHES_RCVD && !__THREADED && !__HAS_THREAD_INDEX && !ALL_TRUSTED && !__NOT_SPOOFED && !__HDRS_LCASE_KNOWN && !__DKIM_EXISTS && !__SENDER_BOT 
+
+# some no-ham combinations
+meta        GAPPY_LOW_CONTRAST    HTML_FONT_LOW_CONTRAST && __GAPPY_SUBJECT 
+describe    GAPPY_LOW_CONTRAST    Gappy subject + hidden text
+score       GAPPY_LOW_CONTRAST    2.500   # limit
+
+meta        URI_ONLY_LOW_CONTRAST HTML_FONT_LOW_CONTRAST && __BODY_URI_ONLY 
+score       URI_ONLY_LOW_CONTRAST 2.500   # limit
+
+meta        SUBJ_OBFU_LOW_CNTRST  (HTML_FONT_LOW_CONTRAST && __SUBJ_OBFU_PUNCT) && !ALL_TRUSTED && !__NOT_A_PERSON && !__THREADED 
+describe    SUBJ_OBFU_LOW_CNTRST  Subject obfuscation + hidden text
+score       SUBJ_OBFU_LOW_CNTRST  2.500   # limit
+
+meta        URI_DOTDOT_LOW_CNTRST HTML_FONT_LOW_CONTRAST && __URI_DOM_DOTDOT
+describe    URI_DOTDOT_LOW_CNTRST Suspicious URI + hidden text
+score       URI_DOTDOT_LOW_CNTRST 2.500   # limit
+
+meta        STOCK_LOW_CONTRAST    (__HTML_FONT_LOW_CONTRAST_MINFP && __FB_S_STOCK) && !__BUGGED_IMG 
+describe    STOCK_LOW_CONTRAST    Stocks + hidden text
+score       STOCK_LOW_CONTRAST    2.500   # limit
+tflags      STOCK_LOW_CONTRAST    publish
 
 uri         __URI_DOM_DOTDOT      m,://[^/]+\.\.,
 
-# suggested by ratio for __FOUND_YOU: spam 4.2514% ham 0.0176% - most spam hits at 2-3 points
-meta        FOUND_YOU          __FOUND_YOU && !__MIME_QP && !__CTYPE_HAS_BOUNDARY && !__LOCAL_PP_NONPPURL && !__RCD_RDNS_MAIL_MESSY && !__DKIM_EXISTS && !__SUBJ_RE && !__HAS_X_REF && !__RP_MATCHES_RCVD && !__TO_NO_ARROWS_R
+meta        FOUND_YOU          __FOUND_YOU && !__DKIM_EXISTS && !__SUBJ_RE && !__HAS_X_REF && !__RP_MATCHES_RCVD && !__COMMENT_EXISTS && !__HAS_ERRORS_TO && !__HAS_IN_REPLY_TO
 score       FOUND_YOU          3.25	# limit
 describe    FOUND_YOU          I found you...
+tflags      FOUND_YOU          publish
 
 
-rawbody     __HTML_FONT_ONE_WORD_01   />\s{0,5}\S{1,15}\s{0,5}<\/font>/i
-tflags      __HTML_FONT_ONE_WORD_01   multiple maxhits=26
-meta        HTML_FONT_ONE_WORD_MANY   __HTML_FONT_ONE_WORD_01 > 25
-describe    HTML_FONT_ONE_WORD_MANY   Many one-word font changes
-score       HTML_FONT_ONE_WORD_MANY   0.50	# limit (initial)
+#rawbody     __HTML_FONT_ONE_WORD_01   />\s{0,5}\S{1,15}\s{0,5}<\/font>/i
+#tflags      __HTML_FONT_ONE_WORD_01   multiple maxhits=26
+#meta        HTML_FONT_ONE_WORD_MANY   __HTML_FONT_ONE_WORD_01 > 25
+#describe    HTML_FONT_ONE_WORD_MANY   Many one-word font changes
+#score       HTML_FONT_ONE_WORD_MANY   0.50	# limit (initial)
 
 
-body        __ADMITS_CANSPAM  /\bThis is a CANSPAM ACT compliant advertising broadcast\b/i
-meta        ADMITS_CANSPAM    __ADMITS_CANSPAM && !__VIA_ML
-describe    ADMITS_CANSPAM    Admits to being spam
+#body        __ADMITS_CANSPAM  /\bThis is a CANSPAM ACT compliant advertising broadcast\b/i
+#body        __ADMITS_CANSPAM  /\bThis is a CANSPAM ACT compliant\b/i
+#meta        ADMITS_CANSPAM    __ADMITS_CANSPAM && !__VIA_ML
+#describe    ADMITS_CANSPAM    Admits to being spam
 
-body        __SEO_REGISTER    /\bsearch engine (?:registration|subscription|submission)\b/i
-tflags      __SEO_REGISTER    multiple maxhits=5
-meta        SEO_REGISTER      __SEO_REGISTER > 4
-score       SEO_REGISTER      2.50	# limit
+body        __ADMITS_SPAM     /\bth(?:e[- ]+above|is)(?:\?+s|[- ]+is)[- ]+(?:intended[- ]+as[- ]+)?an?[- ]+(?:email[- ]+)?advert[i1l]sement\b/i
+meta        ADMITS_SPAM       __ADMITS_SPAM && !__TO___LOWER && !__MSOE_MID_WRONG_CASE && !__RP_MATCHES_RCVD 
+describe    ADMITS_SPAM       Admits this is an ad
+
+#body        __OBFU_ADVERT     /\badvert[1l]sement\b/i
+#meta        OBFU_ADVERT       __OBFU_ADVERT
+#describe    OBFU_ADVERT       Misspelled "advertisement"
+#tflags      OBFU_ADVERT       publish
 
 
-uri         REMOVE_YEAHNET    /imremove\@yeah\.net/i
-describe    REMOVE_YEAHNET    Opt-out address used by CN spammers
+#body        __SEO_REGISTER    /\bsearch engine (?:registration|subscription|submission)\b/i
+#tflags      __SEO_REGISTER    multiple maxhits=5
+#meta        SEO_REGISTER      __SEO_REGISTER > 4
+#score       SEO_REGISTER      2.50	# limit
+
+
+#uri         REMOVE_YEAHNET    /imremove\@yeah\.net/i
+#describe    REMOVE_YEAHNET    Opt-out address used by CN spammers
 
 
 header      __FROM_LIC         From:name =~ /^Lic\./
@@ -1183,16 +1432,61 @@ meta        __TRAVEL_MANY      (__TRAVEL_PROFILE + __TRAVEL_RESERV + __TRAVEL_BU
 uri         __URI_WPADMIN      m,/wp-admin/\w+/,i
 meta        URI_WPADMIN        __URI_WPADMIN
 describe    URI_WPADMIN        WordPress login/admin URI, possible phishing
+tflags      URI_WPADMIN        publish
+
+uri         __URI_WPCONTENT    m,/wp-content/.*\.(?:php|html?)\b,i
+uri         __URI_WPCONTENT_L  m,/wp-content/.*\.(?:(?!gif|jpg|png|bmp|ico|eot|pdf)[a-z]{3}|(?!jpeg)[a-z]{4})\b,i
+uri         __URI_WPINCLUDES   m,/wp-includes/.*\.(?:php|html?)\b,i
+uri         __URI_WPINCLUDES_L m,/wp-includes/.*\.(?:(?!gif|jpg|png|bmp|ico|eot|pdf)[a-z]{3}|(?!jpeg)[a-z]{4})\b,i
+meta        URI_WP_HACKED      (__URI_WPCONTENT || __URI_WPINCLUDES) && !__VIA_ML && !__HAS_ERRORS_TO && !__RCD_RDNS_SMTP && !__THREADED && !ALL_TRUSTED && !__NOT_SPOOFED 
+describe    URI_WP_HACKED      URI for compromised WordPress site, possible malware
+score       URI_WP_HACKED      3.000   # limit
+tflags      URI_WP_HACKED      publish
+
+uri         __URI_WPDIRINDEX   m,/wp-(?:content|includes)/.*/$,i
+meta        URI_WP_DIRINDEX    __URI_WPDIRINDEX
+describe    URI_WP_DIRINDEX    URI for compromised WordPress site, possible malware
+score       URI_WP_DIRINDEX    3.000   # limit
+tflags      URI_WP_DIRINDEX    publish
+
+# this has some overlap with URI_WP_HACKED
+uri         __PS_TEST_LOC_WP   m;/(?:wp-content/plugins|wp-content/themes|wp-includes|modules/mod_wdbanners|includes/|google_recommends|mt-static|data/module)/.{1,64}(?!\.gif|\.jpg|\.png|\.bmp|\.ico|\.pdf).{4}$;i
+meta        URI_WP_HACKED_2    (__PS_TEST_LOC_WP && !URI_WP_HACKED) && !__TO_EQ_FROM && !__THREADED 
+describe    URI_WP_HACKED_2    URI for compromised WordPress site, possible malware
+score       URI_WP_HACKED_2    2.000   # limit
+tflags      URI_WP_HACKED_2    publish
+
+
 
 # subrules migrated from 00_FVGT_File001.cf
 
-header      __SUBJ_LOWER       ALL =~ /subject:\s\S{5}/ 
-header      __FROM_LOWER       ALL =~ /from:\s\S{5}/ 
-header      __TO___LOWER       ALL =~ /to:\s\S{5}/ 
-header      __DATE_LOWER       ALL =~ /date:\s\S{5}/ 
+header      __SUBJ_LOWER       ALL =~ /subject:\s\S{5}/
+header      __FROM_LOWER       ALL =~ /from:\s\S{5}/
+header      __TO___LOWER       ALL =~ /to:\s\S{5}/
+header      __DATE_LOWER       ALL =~ /date:\s\S{5}/
 
 header      __FH_HAS_XMSMAIL   exists:X-MSMail-Priority
-header      __FH_HAS_XPRIORITY exists:X-Priority
+
+# duplicates __XPRIO
+#header      __FH_HAS_XPRIORITY exists:X-Priority
+meta        XPRIO              __XPRIO && !ALL_TRUSTED && !__PHPMAILER_MUA && !__BUGGED_IMG && !__HAS_ERRORS_TO && !__THREADED && !__VIA_ML && !__RCD_RDNS_MX_MESSY && !__HAS_THREAD_INDEX && !__RP_MATCHES_RCVD && !__HAS_X_REF && !__LCL__ENV_AND_HDR_FROM_MATCH 
+describe    XPRIO              Has X-Priority header
+score       XPRIO              1.000   # limit
+
+# some no-ham combinations
+
+meta        FROM_MISSP_XPRIO   __XPRIO && __FROM_MISSPACED 
+describe    FROM_MISSP_XPRIO   Misspaced FROM + X-Priority
+score       FROM_MISSP_XPRIO   2.500   # limit
+
+# Apparent good performance is an artifact of certain corpora's collection mechanism
+#meta        XPRIO_RPATH_NULL   (__XPRIO && __BOUNCE_RPATH_NULL) && !__HAS_ERRORS_TO && !__VIA_ML && !ANY_BOUNCE_MESSAGE && !__HAS_ORGANIZATION && !__RCD_RDNS_SMTP_MESSY && !__NOT_SPOOFED 
+#score       XPRIO_RPATH_NULL   2.500   # limit
+#
+#meta        TO_EQ_FM_NN_RPATH_NULL   (__TO_EQ_FROM_USR_NN && __BOUNCE_RPATH_NULL) && !__TO_EQ_FROM_USR 
+#score       TO_EQ_FM_NN_RPATH_NULL   2.000   # limit
+#tflags      TO_EQ_FM_NN_RPATH_NULL   publish
+
 
 header      __FS_SUBJ_RE       Subject =~ /^Re: /
 header      __NUMBERS_IN_SUBJ  Subject =~ /\d{3}/
@@ -1213,6 +1507,7 @@ ifplugin Mail::SpamAssassin::Plugin::ReplaceTags
 
 	meta        __FM_MY_PRICE      (__FB_S_PRICE || __FRT_PRICE)
 else
+	meta        __FRT_PRICE        0
 	meta        __FM_MY_PRICE      __FB_S_PRICE
 endif
 
@@ -1221,6 +1516,444 @@ rawbody     __FR_SPACING_9     /[a-z0-9]{6}\s{9}[a-z0-9]{5}/i
 rawbody     __FR_SPACING_15    /[a-z0-9]{6}\s{15}[a-z0-9]{5}/i
 rawbody     __FR_SPACING_17    /[a-z0-9]{6}\s{17}[a-z0-9]{5}/i
 rawbody     __FR_SPACING_22    /[a-z0-9]{6}\s{22}[a-z0-9]{5}/i
+
+
+# per users mailing list question from Joe Quinn
+#body        __HEXHASHWORD_S    /\s[A-Z]?[a-z]{1,15}\s(?![a-z]{18})[0-9a-f]{18}/
+#tflags      __HEXHASHWORD_S    multiple maxhits=4
+body        __HEXHASHWORD_S2EU /\s[A-Z]?[a-z]{1,15}\s(?![a-z]{10,20}\s)[a-z]{0,10}(?!-?\d{1,5}-)(?!\d{10}\s)(?:(?!--)[-0-9a-f]){10,64}(?:[g-z][a-z]{0,10})?\s[A-Z]?[a-z]{1,15}\b/
+tflags      __HEXHASHWORD_S2EU multiple maxhits=4
+#body        __HEXHASHWORD_S2E  /\s[A-Z]?[a-z]{1,15}\s(?![a-z]{10,20}\s)[a-z]{0,10}[0-9a-f]{10,64}(?:[g-z][a-z]{0,10})?\s[A-Z]?[a-z]{1,15}\b/
+#tflags      __HEXHASHWORD_S2E  multiple maxhits=4
+#body        __HEXHASHWORD_S2   /\s[A-Z]?[a-z]{1,15}\s(?![a-z]{10,20}\s)[0-9a-f]{10,64}\s[A-Z]?[a-z]{1,15}\b/
+#tflags      __HEXHASHWORD_S2   multiple maxhits=4
+#body        __HEXHASHWORD      /\s[A-Z]?[a-z]{1,15}\s[0-9a-f]{30}/
+#tflags      __HEXHASHWORD      multiple maxhits=4
+meta        __HEXHASH_2        __HEXHASHWORD_S2EU > 1
+meta        __HEXHASH_3        __HEXHASHWORD_S2EU > 2
+meta        __HEXHASH_4        __HEXHASHWORD_S2EU > 3
+#meta        __HEXHASH_5        __HEXHASHWORD_S2EU > 4
+meta        HEXHASH_WORD       (__HEXHASHWORD_S2EU > 1) && !ALL_TRUSTED && !__DKIM_EXISTS && !__RP_MATCHES_RCVD && !__LCL__ENV_AND_HDR_FROM_MATCH && !__LYRIS_EZLM_REMAILER && !__THREADED && !__HDRS_LCASE && !__MSGID_HEXISH && !__RDNS_SHORT 
+describe    HEXHASH_WORD       Multiple instances of word + hexadecimal hash
+score       HEXHASH_WORD       3.000	# limit
+tflags      HEXHASH_WORD       publish
+
+#  from users list spample provided by Larry Starr
+body        __UC_GIBB_OBFU     /\b[A-Za-z][a-z]{0,20}[,;)]?\s[A-Z]{16,}[a-z]?\s[A-Za-z][a-z]{1,15}\b/
+tflags      __UC_GIBB_OBFU     multiple maxhits=2
+#meta        __UC_GIBB_2        __UC_GIBB_OBFU > 1
+#meta        __UC_GIBB_3        __UC_GIBB_OBFU > 2
+#meta        __UC_GIBB_4        __UC_GIBB_OBFU > 3
+#meta        __UC_GIBB_5        __UC_GIBB_OBFU > 4
+#meta        __UC_GIBB_6        __UC_GIBB_OBFU > 5
+#meta        __UC_GIBB_7        __UC_GIBB_OBFU > 6
+meta        UC_GIBBERISH_OBFU  (__UC_GIBB_OBFU > 1) && !__RP_MATCHES_RCVD && !__VIA_ML && !__DKIM_EXISTS && !ALL_TRUSTED
+describe    UC_GIBBERISH_OBFU  Multiple instances of "word VERYLONGGIBBERISH word"
+score       UC_GIBBERISH_OBFU  3.000	# Limit
+tflags      UC_GIBBERISH_OBFU  publish
+
+
+#body        __B2B_HELP         /\bhelp(?:ing)? (?:businesses like yours|your business)\b/i
+#body        __YOUR_BIZ         /\bbusiness(?:es) like yours|(?<!of )your b(?:usiness|rand)\b/i
+
+
+# will be removed with immediate effect from any further mailing list
+# wish to receive information from us in the future
+# This-link http://www.nowyehue.com/bon/dds/ will end messages.
+# stop receiving these emails
+# Unsubscribe me from this list
+# We are not promoting any kind of SPAM.
+# recieve any kind promotional email form us
+# To stop receiving these emails
+# exclude yourself from further ad-messages
+# removal options
+# Stop PSA alert
+
+#body        __UNSUB_PSA       /\bstop PSA alert\b/i
+
+#body        __UNSUB_EXCL      /\bexclude yourself from further ad\b/i
+#meta        UNSUB_EXCL        __UNSUB_EXCL
+#score       UNSUB_EXCL        2.000	# limit
+
+#body        __UNSUB_OPT       /\bremoval options?\b/i
+#meta        UNSUB_OPT         __UNSUB_OPT
+#score       UNSUB_OPT         2.000	# limit
+
+header	    __NO_TRUSTED_RELAY	X-Spam-Relays-Trusted !~ /ip=/i
+
+#body        CANT_SEE_AD       /\b(?:can(?:no|')?t|(?:aren'?t |not |un)able to) (?:view|read|see|scan|witness|consider|look at|participate in|take in|(?:make|check|scope) out|eye|scrutinize|watch|display|observe) (?:our|this|the) (?:commercial[-. ]|ad(?:v[-.]?ert[i1l]se-?ment)? |images |newsletter |mailing ){1,2}(?:at all|(?:(?:down )?(?:below|underneath))|in (?:your|this) mail|(?:due to|because(?: of)?|as|from) (?:no |missing |unloaded |blocked )?images)\b/i
+body        __CANT_SEE_AD_1   /\b(?:can(?:no|')?t|(?:aren'?t[-,!\s]{1,3}|not[-,!\s]{1,3}|un)able[-,!\s]{1,3}to)[-,!\s]{1,3}(?:(?!our|this|the)\w{1,12}[-,\s]{1,3}){1,2}(?:our|this|the)[-.,\s*]{1,3}(?:commercial[-.,\s]{1,3}|ad(?:v[-.]?ert[i1l]se-?ment)?[-.,\s]{1,3}|images |newsletter |mailing ){1,2}(?:at all|(?:(?:down )?(?:below|underneath))|in (?:your|this) mail|(?:due to|because(?: of)?|as|from) (?:no |missing |unloaded |blocked )?(?:images|graphics))\b/i
+body        __CANT_SEE_AD_2   /\b(?:issue|problem|trouble) (?:getting|viewing|with) (?:(?:our|the) )?(?:message|content|e-?mail|details)(?: below)?[.?] (?:please|go ahead and) (?:click|browse)\b/i
+meta        CANT_SEE_AD       __CANT_SEE_AD_1 || __CANT_SEE_AD_2
+describe    CANT_SEE_AD       You really want to see our spam.
+score       CANT_SEE_AD       3.000	# limit
+tflags      CANT_SEE_AD       publish
+
+uri         __128_HEX_URI     m,/[0-9a-f]{128},
+#tflags      __128_HEX_URI     multiple maxhits=2
+#uri         __192_HEX_URI     m,/[0-9a-f]{192},
+#uri         __256_HEX_URI     m,/[0-9a-f]{256},
+#uri         __384_HEX_URI     m,/[0-9a-f]{384},
+#meta        __128_HEX_URI_SGL __128_HEX_URI == 1
+#meta        __128_HEX_URI_MLT __128_HEX_URI > 1
+meta        LONG_HEX_URI      __128_HEX_URI && !__LCL__KAM_BODY_LENGTH_LT_1024
+describe    LONG_HEX_URI      Very long purely hexadecimal URI
+score       LONG_HEX_URI      3.000	# limit
+tflags      LONG_HEX_URI      publish
+
+uri         __128_LC_URI        m;[/?][a-z]{128,}$;
+uri         __128_LC_IMG        m;/[a-z]{128,}/\w+\.(?:png|gif|jpe?g)$;
+uri         __128_ALNUM_URI     m;[/?][0-9a-z]{128,}$;i
+uri         __128_ALNUM_IMG     m;/[0-9a-z]{128,}/\w+\.(?:png|gif|jpe?g)$;i
+uri         __64_ANY_URI        m;[/?]\w{64,}$;i
+uri         __64_ANY_IMG        m;/\w{64,}/\w+\.(?:png|gif|jpe?g)$;i
+uri         __45_ALNUM_URI      m;[/?][0-9a-z]{45,}$;i
+uri         __45_ALNUM_IMG      m;/[0-9a-z]{45,}/\w+\.(?:png|gif|jpe?g)$;i
+meta        __128_LC_URI_IMG    __128_LC_URI && __128_LC_IMG
+meta        __128_ALNUM_URI_O   __128_ALNUM_URI && !__128_LC_URI
+meta        __128_ALNUM_IMG_O   __128_ALNUM_IMG && !__128_LC_IMG
+meta        __128_ALNUM_URI_IMG __128_ALNUM_URI_O && __128_ALNUM_IMG_O
+meta        __64_ANY_URI_O      __64_ANY_URI && !__128_ALNUM_URI && !__128_LC_URI
+meta        __64_ANY_IMG_O      __64_ANY_IMG && !__128_ALNUM_IMG && !__128_LC_IMG
+meta        __64_ALNUM_URI_IMG  __64_ANY_URI_O && __64_ANY_IMG_O
+meta        __45_ALNUM_URI_O    __45_ALNUM_URI && !__64_ANY_URI && !__128_ALNUM_URI && !__128_LC_URI
+meta        __45_ALNUM_IMG_O    __45_ALNUM_IMG && !__64_ANY_IMG && !__128_ALNUM_IMG && !__128_LC_IMG
+meta        __45_ALNUM_URI_IMG  __45_ALNUM_URI_O && __45_ALNUM_IMG_O
+
+meta        LONG_IMG_URI        __45_ALNUM_IMG && !ALL_TRUSTED && !__HAS_ERRORS_TO 
+describe    LONG_IMG_URI        Image URI with very long path component - web bug?
+score       LONG_IMG_URI        3.000	# limit
+tflags      LONG_IMG_URI        publish
+
+
+rawbody     __HTML_OFF_PAGE   /;(?:top|left):-\d{3,9}px;/i
+meta        HTML_OFF_PAGE     __HTML_OFF_PAGE && !__RP_MATCHES_RCVD && !__LONGLINE && !__DKIM_EXISTS
+describe    HTML_OFF_PAGE     HTML element rendered well off the displayed page
+score       HTML_OFF_PAGE     2.000	# limit
+tflags      HTML_OFF_PAGE     publish
+
+
+body        __PUMPDUMP_01     /\b(?:times|multiply|tripl(?:e|ing)|quadrupl(?:e|ing)|quintupl(?:e|ing)) (?:your|an) (?:princip(?:al|le)|investment)\b/i
+body        __PUMPDUMP_02     /\b(?:sto[ck]{2}|share price) (?:will |may |is (?:(?:about|poised|positioned|ready) to |gonna ))?(?:triple|quadruple|quintuple|soar|go(?:es?) (?:nuts|crazy|sky high|way up))\b/i
+body        __PUMPDUMP_03     /\bbuy (?:[^.!]{1,30} )?(?:(?:(?:mon|tues|wednes|thurs|fri)day|tomorrow) (?:first thing|open|morning)|(?:first thing|opens|before) (?:(?:mon|tues|wednes|thurs|fri)day|tomorrow))/i
+body        __PUMPDUMP_04     /\bmake you (?:big bucks|hundreds|thousands)\b/i
+body        __PUMPDUMP_05     /\b(?:tripled|quadrupled|quintupled|(?:shares|value|company) (?:go up|increase|has (?:increased|gained)) (?:by|more than) [a-z\s]{0,20}\d+(?: times| percent| ?%)) (?:and that )?in (?:(?:\d|a (?:span of|few)) days|a very short period)\b/i
+body        __PUMPDUMP_06     /\brecommend(?:ed|s)? (?:a|this) (?:company|stock)\b/i
+body        __PUMPDUMP_07     /\b(?:buy|grab it) for (?:around |about |less than )?\d+ cents\b/i
+body        __PUMPDUMP_08     /\b?(:sto[ck]{2}|sotk) of the year/i
+body        __PUMPDUMP_09     /\b(?:buy|get|snap up|grab) as many shares (?:of it )?as (?:you|I) can\b/i
+body        __PUMPDUMP_10     /\btrading at (?:such )?a (?:bargain|cheap|low)\b/i
+meta        __PD_CNT_1        (__PUMPDUMP_01+__PUMPDUMP_02+__PUMPDUMP_03+__PUMPDUMP_04+__PUMPDUMP_05+__PUMPDUMP_06+__PUMPDUMP_07+__PUMPDUMP_08+__PUMPDUMP_09+__PUMPDUMP_10) > 0
+meta        __PD_CNT_2        (__PUMPDUMP_01+__PUMPDUMP_02+__PUMPDUMP_03+__PUMPDUMP_04+__PUMPDUMP_05+__PUMPDUMP_06+__PUMPDUMP_07+__PUMPDUMP_08+__PUMPDUMP_09+__PUMPDUMP_10) > 1
+meta        __PD_CNT_3        (__PUMPDUMP_01+__PUMPDUMP_02+__PUMPDUMP_03+__PUMPDUMP_04+__PUMPDUMP_05+__PUMPDUMP_06+__PUMPDUMP_07+__PUMPDUMP_08+__PUMPDUMP_09+__PUMPDUMP_10) > 2
+meta        __PD_CNT_4        (__PUMPDUMP_01+__PUMPDUMP_02+__PUMPDUMP_03+__PUMPDUMP_04+__PUMPDUMP_05+__PUMPDUMP_06+__PUMPDUMP_07+__PUMPDUMP_08+__PUMPDUMP_09+__PUMPDUMP_10) > 3
+meta        __PD_CNT_5        (__PUMPDUMP_01+__PUMPDUMP_02+__PUMPDUMP_03+__PUMPDUMP_04+__PUMPDUMP_05+__PUMPDUMP_06+__PUMPDUMP_07+__PUMPDUMP_08+__PUMPDUMP_09+__PUMPDUMP_10) > 4
+meta        __PD_CNT_6        (__PUMPDUMP_01+__PUMPDUMP_02+__PUMPDUMP_03+__PUMPDUMP_04+__PUMPDUMP_05+__PUMPDUMP_06+__PUMPDUMP_07+__PUMPDUMP_08+__PUMPDUMP_09+__PUMPDUMP_10) > 5
+meta        __PD_CNT_7        (__PUMPDUMP_01+__PUMPDUMP_02+__PUMPDUMP_03+__PUMPDUMP_04+__PUMPDUMP_05+__PUMPDUMP_06+__PUMPDUMP_07+__PUMPDUMP_08+__PUMPDUMP_09+__PUMPDUMP_10) > 6
+meta        PUMPDUMP          (__PUMPDUMP_01 || __PUMPDUMP_02 || __PUMPDUMP_03 || __PUMPDUMP_04 || __PUMPDUMP_05 || __PUMPDUMP_06 || __PUMPDUMP_07 || __PUMPDUMP_08 || __PUMPDUMP_09 || __PUMPDUMP_10) && !PUMPDUMP_MULTI
+describe    PUMPDUMP          Pump-and-dump stock scam phrase
+score       PUMPDUMP          1.000	# limit
+tflags      PUMPDUMP          publish
+meta        PUMPDUMP_MULTI    (__PUMPDUMP_01+__PUMPDUMP_02+__PUMPDUMP_03+__PUMPDUMP_04+__PUMPDUMP_05+__PUMPDUMP_06+__PUMPDUMP_07+__PUMPDUMP_08+__PUMPDUMP_09+__PUMPDUMP_10) > 1
+describe    PUMPDUMP_MULTI    Pump-and-dump stock scam phrases
+score       PUMPDUMP_MULTI    3.500	# limit
+tflags      PUMPDUMP_MULTI    publish
+
+body        __STOCK_TIP       /\bsto[ck]{2}\s?tip\b/i
+
+meta        PUMPDUMP_TIP      __PD_CNT_1 && __STOCK_TIP
+describe    PUMPDUMP_TIP      Pump-and-dump stock tip
+tflags      PUMPDUMP_TIP      publish
+
+
+#body        DR_OZ_OBFU        /\bD(?:r\.|oc(?:tor)?) ?0z\b/i
+#describe    DR_OZ_OBFU        Obfuscated Doctor Oz
+#
+#body        DOC_OZ            /\b(?:doc oz|Dr\.?Oz)\b/
+#describe    DOC_OZ            Doctor Oz
+
+
+body        __ADMAIL          /(?:\b|_)ad-?(?:mail|message)s?(?:\b|_)/i
+meta        ADMAIL            __ADMAIL && !__DKIM_EXISTS && !__COMMENT_EXISTS 
+describe    ADMAIL            "admail" and variants
+tflags      ADMAIL            publish
+
+body        ORS               /\bOn-?line Rate Saver\b/i
+describe    ORS               "Online Rate Saver"
+
+
+# subrule version of MMartinec CR_IN_SUBJ
+header      __CR_IN_SUBJ      Subject:raw =~ /\015/
+
+
+body        __THIS_AD         /(?:\b|_)this[- _]+(?:ad(?:vert[i1l]sement)?|promo(?:tion)?)s?(?:\b|_)/i
+meta        THIS_AD           __THIS_AD && !__MOZILLA_MSGID && !__FROM_ENCODED_QP && !__CR_IN_SUBJ && !__RP_MATCHES_RCVD 
+describe    THIS_AD           "This ad" and variants
+tflags      THIS_AD           publish
+
+body        AD_PREFS          /(?:\b|_)(?:ad(?:vert[i1l]s[i1l]ng)?|promo(?:tion)?|marketing)[- _](?:pref(?:s|erences)|settings)(?:\b|_)/i
+describe    AD_PREFS          Advertising preferences
+tflags      AD_PREFS          publish
+
+#body        OPT_OUT           /\bOpt-Out Here\b/i
+#score       OPT_OUT           2.000
+
+uri         URI_OPTOUT_USME   m,^https?://(?:quit|bye|remove|exit|leave|disallow|halt|stop|end|herego|out|discontinue)\d*\.[^/]+\.(?:us|me|mobi|club)\b,i
+describe    URI_OPTOUT_USME   Opt-out URI, unusual TLD
+tflags      URI_OPTOUT_USME   publish
+
+uri         URI_OPTOUT_3LD    m,^https?://(?:quit|bye|remove|exit|leave|disallow|halt|stop|end|herego|out|discontinue)\d*\.[^/]+\.(?:com|net)\b,i
+describe    URI_OPTOUT_3LD    Opt-out URI, suspicious hostname
+score       URI_OPTOUT_3LD    2.000   # limit
+tflags      URI_OPTOUT_3LD    publish
+
+uri         __URI_TRY_USME    m,^https?://(?:try|start|get|save|check|act|compare|join|learn|request|visit|my)[^.]*\.[^/]+\.(?:us|me|mobi|club)\b,i
+meta        URI_TRY_USME      __URI_TRY_USME && !__DKIM_EXISTS 
+describe    URI_TRY_USME      "Try it" URI, unusual TLD
+tflags      URI_TRY_USME      publish
+
+uri         URI_TRY_3LD       m,^https?://(?:try|start|get|save|check(?!out)|act|compare|join|learn|request|visit(?!or)|my(?!sub)\w)[^.]*\.[^/]+\.(?:com|net)\b,i
+describe    URI_TRY_3LD       "Try it" URI, suspicious hostname
+score       URI_TRY_3LD       2.000   # limit
+tflags      URI_TRY_3LD       publish
+
+
+
+## REFINE THIS
+#body        __INCOMING_FAX    /\bincoming fax\b/i
+#body        __BANK            /\bbank\b/i
+#body        __ACCT_STMT       /\bac(?:count|tivity) statement\b/i
+#uri         __URI_DROPBOX     m,[/.]dropbox\.com\/,i
+#meta        DROPBOX_MALW      (__INCOMING_FAX || (__BANK && __ACCT_STMT)) && __URI_DROPBOX && !ALL_TRUSTED 
+#describe    DROPBOX_MALW      Spoofed FAX or bank statement with Dropbox link: PROBABLE MALWARE
+#score       DROPBOX_MALW      10.00
+
+
+ifplugin Mail::SpamAssassin::Plugin::ReplaceTags
+  body          FUZZY_UNSUBSCRIBE   /<U>(?!nsubscribe)<N><S><U><B><S><C><R><I><B><E>/i
+  replace_rules FUZZY_UNSUBSCRIBE
+  describe      FUZZY_UNSUBSCRIBE   Obfuscated "unsubscribe"
+  tflags        FUZZY_UNSUBSCRIBE   publish
+
+  body          FUZZY_ANDROID       /<A>(?!ndroid)<N><D><R><O><I><D>/i
+  replace_rules FUZZY_ANDROID
+  describe      FUZZY_ANDROID       Obfuscated "android"
+  tflags        FUZZY_ANDROID       publish
+
+  body          FUZZY_PROMOTION     /<P>(?!romotion)<R><O><M><O><T><I><O><N>/i
+  replace_rules FUZZY_PROMOTION
+  describe      FUZZY_PROMOTION     Obfuscated "promotion"
+  tflags        FUZZY_PROMOTION     publish
+
+  body          FUZZY_PRIVACY       /<P>(?!rivacy)<R><I><V><A><C><Y>/i
+  replace_rules FUZZY_PRIVACY
+  describe      FUZZY_PRIVACY       Obfuscated "privacy"
+  tflags        FUZZY_PRIVACY       publish
+
+  body          FUZZY_BROWSER       /<B>(?!rowser)<R><O><W><S><E><R>/i
+  replace_rules FUZZY_BROWSER
+  describe      FUZZY_BROWSER       Obfuscated "browser"
+  tflags        FUZZY_BROWSER       publish
+
+  body          FUZZY_SAVINGS       /<S>(?!avings)<A><V><I><N><G><S>/i
+  replace_rules FUZZY_SAVINGS
+  describe      FUZZY_SAVINGS       Obfuscated "savings"
+  tflags        FUZZY_SAVINGS       publish
+
+  body          FUZZY_IMPORTANT     /<I>(?!mportant)<M><P><O><R><T><A><N><T>/i
+  replace_rules FUZZY_IMPORTANT
+  describe      FUZZY_IMPORTANT     Obfuscated "important"
+  tflags        FUZZY_IMPORTANT     publish
+
+  body          FUZZY_SECURITY      /<S>(?!ecurity)(?!eguridad)<E>(?:<C>|<G>)<U><R><I>(?:<T><Y>|<D><A><D>)/i
+  replace_rules FUZZY_SECURITY
+  describe      FUZZY_SECURITY      Obfuscated "security"
+  tflags        FUZZY_SECURITY      publish
+
+  body          __FUZZY_DR_OZ       /\bD(?!(?-i:(?:r.|octor)(?:\s|&nbsp;)Oz))(?:<R>|<O><C>(?:<T><O><R>)?)\.?<WS>*<O><Z>(?:$|\W)/i
+  replace_rules __FUZZY_DR_OZ
+  meta          FUZZY_DR_OZ         __FUZZY_DR_OZ && !__VIA_ML && !__DKIM_EXISTS && !__RP_MATCHES_RCVD 
+  describe      FUZZY_DR_OZ         Obfuscated Doctor Oz
+  tflags        FUZZY_DR_OZ         publish
+
+  body          FUZZY_CLICK_HERE    /<C>(?!lick(?:\s|&nbsp;)here)<WS>*<L><WS>*<I><WS>*<C><WS>*<K><WS>+<H><WS>*<E><WS>*<R><WS>*<E>/i
+  replace_rules FUZZY_CLICK_HERE
+  describe      FUZZY_CLICK_HERE    Obfuscated "click here"
+  tflags        FUZZY_CLICK_HERE    publish
+
+endif
+
+
+#body          NUM_FREE         /\b\d+free/i
+#describe      NUM_FREE         Number + free
+
+# seen in spam (malware?) 07/2014
+#header        __DATE_SPACEY    ALL =~ /\nDate:\s{8}/ism
+
+#uri           __FSL_LINK_AWS_S3_WEB_LOOSE       m,^https?://(?:[^./]+\.)*s3[^./]+\.amazonaws\.com,i
+
+
+uri            URI_DQ_UNSUB     m;^[a-z]+://(?:\d+\.){3}\d+/.*unsubscribe;i
+describe       URI_DQ_UNSUB     IP-address unsubscribe URI
+tflags         URI_DQ_UNSUB     publish
+
+uri            __URI_GOOGLE_PROXY     m;^https?://[^.]+\.googleusercontent\.com/proxy/;i
+meta           URI_GOOGLE_PROXY       __URI_GOOGLE_PROXY && !__LONGLINE && !__ML1 && !__FSL_RELAY_GOOGLE && !__FROM_LOWER && !__RCD_RDNS_MAIL 
+describe       URI_GOOGLE_PROXY       Accessing a blacklisted URI or obscuring source of phish via Google proxy?
+tflags         URI_GOOGLE_PROXY       publish
+
+
+# Apparent good performance is an artifact of certain corpora's collection mechanism
+#meta           RPATH_NULL_CTCQ        __BOUNCE_RPATH_NULL && __CTYPE_CHARSET_QUOTED && !__VIA_ML && !__SUBJECT_ENCODED_QP && !ANY_BOUNCE_MESSAGE && !__DOS_HAS_LIST_UNSUB && !__TAG_EXISTS_STYLE && !__TAG_EXISTS_STYLE && !__HAS_THREAD_INDEX 
+#score          RPATH_NULL_CTCQ        2.000   # limit
+
+rawbody        __TENWORD_GIBBERISH    /^\s*(?:[a-z]+\s+){10}\.$/m
+tflags         __TENWORD_GIBBERISH    multiple maxhits=21
+meta           TW_GIBBERISH_MANY      __TENWORD_GIBBERISH > 20
+describe       TW_GIBBERISH_MANY      Lots of gibberish text to spoof pattern matching filters
+score          TW_GIBBERISH_MANY      2.000   # limit
+tflags         TW_GIBBERISH_MANY      publish
+
+#body           __OPTOUT_BRKT          /\[(?:unsub(?:scribe)|remove(?: me)|leave)\]/i
+#tflags         __OPTOUT_BRKT          multiple maxhits=2
+#meta           OPTOUT_BRKT_MANY       __OPTOUT_BRKT > 1
+#describe       OPTOUT_BRKT_MANY       Repetitive opt-outs
+#score          OPTOUT_BRKT_MANY       2.000   # limit
+
+
+# Oh, the humanity! Is there no better way?
+#full           __RECIP_IN_URL_DOM     m;^Received:[^:]{1,400}?\sfor\s<(\w+)\@.+?https?://\1\d*\.;ism
+#describe       __RECIP_IN_URL_DOM     Recipient in body URL
+#tflags         __RECIP_IN_URL_DOM     nopublish
+
+
+
+# reported on users list 09/2014 jdebert <jdebert@garlic.com>
+header      RCVD_DBL_DQ                Received =~ /(?:\[\d+\.\d+\.\d+\.\d+\]){2}/
+describe    RCVD_DBL_DQ                Malformatted message header
+tflags      RCVD_DBL_DQ                publish
+
+# reported on users list 09/2014 George Johnson <georgejohnson@talaya.net>
+header    __RAND_HEADER                ALL =~ /^(?!Accept-Language|Authentication-Results|Content-|DomainKey-Signature|DKIM-|List-|MIME-|Received-SPF|Return-Path|Thread-|User-Agent)(?:[a-z]{4,}-[a-z]{3,}|[a-z]{3,}-[a-z]{4,}):\s+\d(?=\S{6,}\s*$)[\da-f]*(?:[-.]\w+)*\s*$/ism
+tflags    __RAND_HEADER                multiple, maxhits=4
+meta      RAND_HEADER_MANY             __RAND_HEADER > 3
+describe  RAND_HEADER_MANY             Many random gibberish message headers
+score     RAND_HEADER_MANY             3.500   # limit
+tflags    RAND_HEADER_MANY             publish
+
+
+#body      FR_SPAM_LAW                  /article 34 de la loi 78-17\b/i
+#describe  FR_SPAM_LAW                  References French privacy law
+#score     FR_SPAM_LAW                  1.000   # limit
+
+body      __EDGER_HOOVER                /\bedger hoover\b/i
+header    __FM_EDGER_HOOVER             From =~ /\bedger hoover\b/i
+
+body      __MYSTERY_SHOPPER             /\bmystery shoppers?\b/i
+
+header    __HAS_NO_RELAY                X-No-Relay =~ /./
+
+header    __DUP_SUSP_HDR                ALL =~ /\n(X-No-Relay)\s*:[ 	][^\n]{1,100}\n\1\s*:[ 	]/ism
+meta      DUP_SUSP_HDR                  __DUP_SUSP_HDR
+describe  DUP_SUSP_HDR                  Duplicate suspicious message headers
+score     DUP_SUSP_HDR                  2.500	# limit
+
+# seen 10/2014: "https://www.google.com/url?q=https://copy.com/ApbFn2848pQm/ShippingInvoice_6974.PDF.scr?download=1&sa=D&sntz=1&usg=AFQjCNGhvWhljnujQlP85tA6YUsddfuJow"
+uri       __GOOG_MALWARE_DNLD           m;^https?://[^/]*\.google\.com/[^?]*url\?.*[\?&]download=1;i
+meta      GOOG_MALWARE_DNLD             __GOOG_MALWARE_DNLD
+describe  GOOG_MALWARE_DNLD             File download via Google - Malware?
+score     GOOG_MALWARE_DNLD             5.000   # limit
+tflags    GOOG_MALWARE_DNLD             publish
+
+uri       __GOOG_REDIR                  m;^https?://[^/]*\.google\.com/url\?;i
+
+body      ONLINE_MKTG_CNSLT             /\bonline marketing consultant\b/i
+
+body      SOLICIT_BIZ                   /\bbusiness solicitation messag/i
+
+body      __SPELLED_OUT_NUM             /\b(?:(?:one|two|three|four|five|six|seven|eight|nine|zero)[\s_-]?){4,}/i
+meta      SPELLED_OUT_NUMBER            __SPELLED_OUT_NUM && !__DKIM_EXISTS 
+describe  SPELLED_OUT_NUMBER            Spelled out a number (one two three)
+score     SPELLED_OUT_NUMBER            3.250   # limit
+
+body      __NUM_SPCD_LTRS               /\d{4}\s(?:[a-z]\s){5}/i
+
+
+header    __SUBJ_UNNEEDED_HTML          Subject =~ /%[0-9a-f][0-9a-f]/i
+tflags    __SUBJ_UNNEEDED_HTML          multiple, maxhits=3
+meta      __SUBJ_UNNEEDED_HTML_MANY     __SUBJ_UNNEEDED_HTML > 1
+meta      SUBJ_UNNEEDED_HTML            __SUBJ_UNNEEDED_HTML && !__NOT_SPOOFED && !__RP_MATCHES_RCVD && !__VIA_ML 
+describe  SUBJ_UNNEEDED_HTML            Unneeded HTML formatting in Subject:
+
+body      __HELP_YOU_SUCCEED            /\bhelp you succeed\b/i
+
+body      __WANT_BIZ                    /\b(?:I|we) want your business\b/i
+
+meta      TEQF_USR_MSGID_MALF           __TO_EQ_FROM_USR_NN_MINFP && __MSGID_NOFQDN2 
+describe  TEQF_USR_MSGID_MALF           To and from user nearly same + malformed message ID
+tflags    TEQF_USR_MSGID_MALF           publish
+
+meta      TEQF_USR_MSGID_HEX            __TO_EQ_FROM_USR_NN_MINFP && __MSGID_OK_HEX && !__MSGID_NOFQDN2
+describe  TEQF_USR_MSGID_HEX            To and from user nearly same + unusual message ID
+tflags    TEQF_USR_MSGID_HEX            publish
+
+meta      TEQF_USR_IMAGE                __TO_EQ_FROM_USR_NN_MINFP && __ANY_IMAGE_ATTACH 
+describe  TEQF_USR_IMAGE                To and from user nearly same + image
+tflags    TEQF_USR_IMAGE                publish
+
+meta      __MSGID_HEX_MALF              __MSGID_NOFQDN2 && __MSGID_OK_HEX
+
+meta      __URI_ONLY_MSGID_MALF         __BODY_URI_ONLY && __MSGID_NOFQDN2
+meta      URI_ONLY_MSGID_MALF           __URI_ONLY_MSGID_MALF && !__RP_MATCHES_RCVD && !__URI_MAILTO && !__NOT_SPOOFED && !__DKIM_EXISTS && !__MSGID_JAVAMAIL && !__HAS_REPLY_TO 
+describe  URI_ONLY_MSGID_MALF           URI only + malformed message ID
+tflags    URI_ONLY_MSGID_MALF           publish
+
+meta      GOOG_REDIR_SHORT              __GOOG_REDIR && __KAM_BODY_LENGTH_LT_512 
+describe  GOOG_REDIR_SHORT              Google redirect to obscure spamvertised website + short message
+tflags    GOOG_REDIR_SHORT              publish
+
+
+# low S/O, apparently lots of invisible ham...
+rawbody   __STY_INVIS                   /\bstyle\s*=(?:3d)?\s*"\s*(?:visibility\s*:\s*hidden\s*;|display\s*:\s*none\s*;|background\s*:)/i
+tflags    __STY_INVIS                   multiple, maxhits=6
+meta      __STY_INVIS_MANY              __STY_INVIS > 5
+#meta      HTML_TEXT_INVISIBLE           __STY_INVIS_MANY
+#describe  HTML_TEXT_INVISIBLE           Hidden text
+#score     HTML_TEXT_INVISIBLE           2.000   # limit
+
+# Adapted from SARE rules __SARE_HTML_SINGLET*
+rawbody   __HTML_SINGLET                />\s*(?:[a-z"]|&\#(?:\d+|x[0-9a-f]+);)\s*</i
+tflags    __HTML_SINGLET                multiple, maxhits=21
+meta      __HTML_SINGLET_MANY           __HTML_SINGLET > 20
+#meta      HTML_SINGLET_MANY             __HTML_SINGLET_MANY
+#describe  HTML_SINGLET_MANY             Many single-letter HTML format blocks
+#score     HTML_SINGLET_MANY             1.000   # limit
+
+meta      SINGLETS_LOW_CONTRAST         __HTML_SINGLET_MANY && __HTML_FONT_LOW_CONTRAST_MINFP
+describe  SINGLETS_LOW_CONTRAST         Single-letter formatted HTML + hidden text
+tflags    SINGLETS_LOW_CONTRAST         publish
+
+# per users list, 10-11 2014
+uri       MALWARE_HACKED_URI            m;/(?:dropbox|googlebox|bank\w+|newgdoc)/(?:doc(?:ument)?|invoice|message|index)\.php$;
+describe  MALWARE_HACKED_URI            Malware or phishing hosted-file URI at hacked webserver
+
+uri       __HACKED_PHP_URI              m;/\w+/(?:doc(?:ument)?|invoice|message)\.php$;
+meta      HACKED_PHP_URI                __HACKED_PHP_URI
+describe  HACKED_PHP_URI                Possible phishing/malware URI
+score     HACKED_PHP_URI                2.000     # limit
+
+# very poor S/O - this appears a lot more in ham than in spam??
+body      __PUNCT_ODD_SPACING           /[a-z]{3}\s+[.,][a-z]{3}/
+tflags    __PUNCT_ODD_SPACING           multiple, maxhits=3
+meta      __PUNCT_ODD_SPACING_MANY      __PUNCT_ODD_SPACING > 2
+
+header    XMAILER_MANY                  ALL =~ /\nX-Mailer:(?:[^\n]+\n)+X-Mailer:/ism
+describe  XMAILER_MANY                  Has multiple X-Mailer: headers
+
+body      __RAW_TOKEN                   /\#(?:(?:First|Last)Name|Email)\#/i
+tflags    __RAW_TOKEN                   multiple maxhits=3
+meta      RAW_TOKENS                    __RAW_TOKEN > 2
+describe  RAW_TOKENS                    Raw mail merge tokens in body
 
 
 

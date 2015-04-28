@@ -1,6 +1,104 @@
+Note for Users Upgrading to SpamAssassin 3.4.1
+----------------------------------------------
+
+- The TxRep plugin is now included and disabled by default for new installs.
+  To replace an existing AWL configuration with TxRep, follow the steps below:
+  - Disable AWL
+  - Enable TxRep
+  - Set txrep_factor equal to your previous AWL factor
+  - Set use_txrep to 1
+
+  For more detailed information and more configuration options, consult the
+  documentation in Mail::SpamAssassin::Plugin::TxRep.
+
+- The $VALID_TLDS_RE global in registrar boundaries is deprecated but kept for 
+  third-party plugin compatibility.  It will become increasingly out of date
+  and may be removed in a future release. 
+
+  See lib/Mail/SpamAssassin/Plugin/FreeMail.pm for an example of the new way
+  to obtain a valid list of TLDs, i.e. 
+
+    $self->{main}->{registryboundaries}->{valid_tlds_re} 
+
+- Mail::SpamAssassin::Util::RegistrarBoundaries is being replaced by 
+  Mail::SpamAssassin::RegistryBoundaries so that new TLDs can be updated via 
+  20_aux_tlds.cf delivered via sa-update.
+
+  ***3rd Party Plugin Authors, Please Note***
+  
+  The following functions will be removed in the next release after 3.4.1 
+  excepting any emergency break/fix releases immediately after 3.4.1:
+  
+  Mail::SpamAssassin::Util::RegistrarBoundaries::is_domain_valid 
+  Mail::SpamAssassin::Util::RegistrarBoundaries::trim_domain
+  Mail::SpamAssassin::Util::RegistrarBoundaries::split_domain 
+  Mail::SpamAssassin::Util::uri_to_domain 
+  
+  And the following variables will also be removed:
+  
+  Mail::SpamAssassin::Util::RegistrarBoundaries::US_STATES
+  Mail::SpamAssassin::Util::RegistrarBoundaries::THREE_LEVEL_DOMAINS
+  Mail::SpamAssassin::Util::RegistrarBoundaries::TWO_LEVEL_DOMAINS
+  Mail::SpamAssassin::Util::RegistrarBoundaries::VALID_TLDS_RE
+  Mail::SpamAssassin::Util::RegistrarBoundaries::VALID_TLDS
+  
+  
+  This change should only affect 3rd party plugin authors who will need to 
+  update their code to utilize Mail::SpamAssassin::RegistryBoundaries 
+  instead of the functions and variables in 
+  Mail::SpamAssassin::Util::RegistrarBoundaries and the function 
+  Mail::SpamAssassin::Util::uri_to_domain which are deprecated and will be 
+  removed.
+
+  For example, the $VALID_TLDS_RE global in registrar boundaries is 
+  deprecated but kept for third-party plugin compatibility.  It will become 
+  increasingly out of date and may be removed in a future release.
+
+  See lib/Mail/SpamAssassin/Plugin/FreeMail.pm for an example of the new way
+  to obtain a valid list of TLDs, i.e.
+
+    $self->{main}->{registryboundaries}->{valid_tlds_re}
+
+- It is now recommended that users uncomment "normalize_charset 1" in
+  local.cf. It will break rules that depend on messages being in non-UTF8
+  encodings, but going forward this will enable more robust unicode rules and
+  will eventually become the default.
+
+
+
 Note for Users Upgrading to SpamAssassin 3.4.0
 ----------------------------------------------
-- Please see the Announcement file at:
+
+- When Bayes classification is in use and messages are 'learned' as spam
+  or ham and stored in a database, the Bayes plugin generates internal
+  message IDs of learned messages and stores them in a 'seen' database to
+  avoid re-learning duplicates and accidental un-learning messages that
+  were not previously learned. With changes in bug 5185, the calculation
+  of message IDs in a bayes 'seen' database has changed, so new code can
+  no longer associate new messages with those learned before the change.
+
+- Note that this change does not affect recognition of old tokens and the
+  classification algorithm, only duplicate detection and unlearning of old
+  messages is affected.
+
+- Because of this change, if you use Bayes and you are upgrading from a
+  version prior to 3.4.0, you may consider wiping your Bayes database
+  and starting fresh.
+
+- There is a new optional dependency on Net::Patricia to speed up lookups
+  on internal_networks, trusted_networks or msa_networks when these lists
+  contain a larger number of entries. Consider installing this module to
+  speed up classification.
+
+- The minimal required version of NetAddr::IP was bumped to 4.010
+
+- In addition to existing backends, the 3.4.0 introduces support for keeping
+  a Bayes database on a Redis server, either running locally, or accessed
+  over network. Similar to SQL backends, the database may be concurrently
+  used by several hosts running SpamAssassin.
+
+- For more detail on these and other changes, please see the Announcement
+  file at:
    http://svn.apache.org/repos/asf/spamassassin/branches/3.4/build/announcements/3.4.0.txt
 
 Note for Users Upgrading to SpamAssassin 3.3.0

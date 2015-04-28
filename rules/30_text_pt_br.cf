@@ -110,7 +110,6 @@ lang pt_BR describe __RCVD_IN_ZEN Recebida por um relay listado em Spamhaus Zen
 lang pt_BR describe RCVD_IN_SBL Recebida por um relay listado em Spamhaus SBL
 lang pt_BR describe RCVD_IN_XBL Recebida por um relay listado em Spamhaus XBL
 lang pt_BR describe RCVD_IN_PBL Recebida por um relay listado em Spamhaus PBL
-lang pt_BR describe DNS_FROM_AHBL_RHSBL Envelope sender consta em dnsbl.ahbl.org
 lang pt_BR describe RCVD_IN_BL_SPAMCOP_NET Recebida por um relay listado em bl.spamcop.net
 lang pt_BR describe RCVD_IN_MAPS_RBL Relay consta em RBL, http://www.mail-abuse.com/enduserinfo_rbl.html
 lang pt_BR describe RCVD_IN_MAPS_DUL Relay consta em DUL, http://www.mail-abuse.com/enduserinfo_dul.html
@@ -209,7 +208,6 @@ lang pt_BR describe FORGED_MSGID_MSN Message-ID é forjado (msn.com)
 lang pt_BR describe FORGED_MSGID_YAHOO Message-ID é forjado (yahoo.com)
 lang pt_BR describe MSGID_FROM_MTA_HEADER Message-Id foi adicionado por um relay
 lang pt_BR describe MSGID_SHORT Message-ID é curto demais
-#lang pt_BR describe MSGID_MULTIPLE_AT Message-ID contém múltiplos "@"
 lang pt_BR describe DATE_SPAMWARE_Y2K Data no cabeçalho usa formatação estranha
 lang pt_BR describe INVALID_DATE Cabeçalho Date: é inválido (não segue a RFC 2822)
 lang pt_BR describe INVALID_DATE_TZ_ABSURD Cabeçalho Date: é inválido (timezone não existe)
@@ -486,6 +484,7 @@ lang pt_BR describe BAYES_60 Probabilidade de ser spam entre 60 to 80%
 lang pt_BR describe BAYES_80 Probabilidade de ser spam entre 80 to 95%
 lang pt_BR describe BAYES_95 Probabilidade de ser spam entre 95 to 99%
 lang pt_BR describe BAYES_99 Probabilidade de ser spam entre 99 to 100%
+lang pt_BR describe BAYES_999 Probabilidade de ser spam entre 99.9 to 100%
 endif
 #
 # 25_accessdb.cf

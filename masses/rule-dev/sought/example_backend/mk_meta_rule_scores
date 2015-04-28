@@ -1,0 +1,71 @@
+#!/usr/bin/perl
+#
+# Convert seek-phrases-in-log output to something suitable for use as a production ruleset
+
+use POSIX qw(strftime);  my $now = strftime("%Y-%m-%d %H:%M:%S", localtime());
+
+print "# Creation: $now\n\n";
+
+print "# Note: rule names are based on a hash of the content pattern.\n\n";
+
+
+#score: left side is hitrate threshold, right side is score
+my %scoremap = (
+  '2.0' => '3.0',
+  '1.0' => '2.5',
+  '0.5' => '2.0',
+);
+my $defaultscore='2.5'; #if no threshold info available or not configured above
+
+my $nameprefix = (shift @ARGV);
+my $num = 0;
+my @rule = ();
+my $currentthreshold=0;
+
+while (<>) {
+  # fix control chars, high-bit chars
+  s/([\x00-\x09\x0b-\x1f\x7f-\xff])/
+        sprintf "\\x{%02x}", ord $1;
+  /gex;
+
+  print;
+  if (/^body\s+(\S+)\s/) {
+    push @rule, $1;
+  }
+  if (/^# passed hit-rate threshold: (\S+)/) {
+    $currentthreshold=$1;
+    end_subrule_block();
+    start_subrule_block();
+  }
+}
+end_subrule_block();
+exit;
+
+sub start_subrule_block {
+  @rule = ();
+}
+
+sub end_subrule_block {
+  $num++;
+  my $outscore=$defaultscore;
+  $outscore = $scoremap{$currentthreshold} if defined $scoremap{$currentthreshold};
+  #print "#current th: $currentthreshold outscore=$outscore";
+  #reset threshhold
+  $currentthreshold=undef;
+
+
+  if (@rule) {
+    print "
+meta $nameprefix$num   (".join(" || ",@rule).")
+score $nameprefix$num  $outscore
+describe $nameprefix$num  Body contains frequently-spammed text patterns \n
+";
+  }
+  else {
+    print "
+meta $nameprefix$num   (0)
+score $nameprefix$num  0
+describe $nameprefix$num  Body contains frequently-spammed text patterns \n
+";
+  }
+}

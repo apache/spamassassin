@@ -56,13 +56,15 @@ describe	DOS_STOCK_O_PRICE	Stocks with 'oh', rather than 'zero' values
 # Message-ID: <1252.10.145.1.219.1157357908.squirrel@cyan.dostech.net>
 # X-Mailer: SquirrelMail (version 1.2.11)
 # User-Agent: SquirrelMail/1.4.4
-header __DOS_UA_SM	User-Agent =~ /SquirrelMail/
-header __DOS_MAILER_SM	X-Mailer =~ /SquirrelMail/
-header __DOS_RELAY_SM	Received =~ /SquirrelMail authenticated/
-header __DOS_SM_MID	Message-ID =~ /^<\d{4,8}(?:\.\d{1,3}){4}(?:\.\d{10})?\.squirrel\@[A-Za-z0-9._-]+>$/
-
-meta DOS_FAKE_SQUIRREL		(__DOS_MAILER_SM || __DOS_UA_SM) && (!__DOS_RELAY_SM || !__DOS_SM_MID)
-describe DOS_FAKE_SQUIRREL	Message contains faked SquirrelMail headers
+#
+# Disabled 2014-07-03 - Bug 7061
+#header __DOS_UA_SM	User-Agent =~ /SquirrelMail/
+#header __DOS_MAILER_SM	X-Mailer =~ /SquirrelMail/
+#header __DOS_RELAY_SM	Received =~ /SquirrelMail authenticated/
+#header __DOS_SM_MID	Message-ID =~ /^<\d{4,8}(?:\.\d{1,3}){4}(?:\.\d{10})?\.squirrel\@[A-Za-z0-9._-]+>$/
+#
+#meta DOS_FAKE_SQUIRREL		(__DOS_MAILER_SM || __DOS_UA_SM) && (!__DOS_RELAY_SM || !__DOS_SM_MID)
+#describe DOS_FAKE_SQUIRREL	Message contains faked SquirrelMail headers
 
 
 # your job must suck if you count how long you've had it by months after 10 or 20+ years

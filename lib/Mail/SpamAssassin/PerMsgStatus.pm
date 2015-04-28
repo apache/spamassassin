@@ -59,8 +59,7 @@ use Time::HiRes qw(time);
 use Mail::SpamAssassin::Constants qw(:sa);
 use Mail::SpamAssassin::AsyncLoop;
 use Mail::SpamAssassin::Conf;
-use Mail::SpamAssassin::Util qw(untaint_var);
-use Mail::SpamAssassin::Util::RegistrarBoundaries;
+use Mail::SpamAssassin::Util qw(untaint_var uri_list_canonicalize);
 use Mail::SpamAssassin::Timeout;
 use Mail::SpamAssassin::Logger;
 
@@ -87,7 +86,7 @@ BEGIN {
       my $pms = shift;
       $pms->_get_tag_value_for_yesno(@_);
     },
-  
+
     YESNOCAPS => sub {
       my $pms = shift;
       uc $pms->_get_tag_value_for_yesno(@_);
@@ -174,7 +173,8 @@ BEGIN {
       my $arg = (shift || "*");
       my $length = int($pms->{score});
       $length = 50 if $length > 50;
-      $arg x $length;
+      # avoid a perl 5.21 warning: "Negative repeat count does nothing"
+      $length > 0 ? $arg x $length : '';
     },
 
     AUTOLEARN => sub {
@@ -388,7 +388,8 @@ sub check_timed {
     # did anything happen?  if not, this is fatal
     if (!$self->{main}->have_plugin("check_main")) {
       die "check: no loaded plugin implements 'check_main': cannot scan!\n".
-            "Check the necessary '.pre' files are in the config directory.\n";
+            "Check that the necessary '.pre' files are in the config directory.\n".
+              "At a minimum, v320.pre loads the Check plugin which is required.\n";
     }
   }
 
@@ -403,7 +404,7 @@ sub check_timed {
   # We assume required_score to be properly rounded already.
   # add 0 to force it back to numeric representation instead of string.
   $self->{score} = (sprintf "%0.3f", $self->{score}) + 0;
-  
+
   dbg("check: is spam? score=".$self->{score}.
                         " required=".$self->{conf}->{required_score});
   dbg("check: tests=".$self->get_names_of_tests_hit());
@@ -580,22 +581,22 @@ sub get_body_only_points {
 
 =item $score = $status->get_autolearn_force_status()
 
-Return whether a message's score included any rules that are flagged as 
+Return whether a message's score included any rules that are flagged as
 autolearn_force.
-  
+
 =cut
 
 sub get_autolearn_force_status {
   my ($self) = @_;
   $self->_get_autolearn_points();
   return $self->{autolearn_force};
-} 
+}
 
 =item $rule_names = $status->get_autolearn_force_names()
 
-Return a list of comma separated list of rule names if a message's 
+Return a list of comma separated list of rule names if a message's
 score included any rules that are flagged as autolearn_force.
-  
+
 =cut
 
 sub get_autolearn_force_names {
@@ -604,8 +605,8 @@ sub get_autolearn_force_names {
 
   $self->_get_autolearn_points();
   $names = $self->{autolearn_force_names};
- 
-  if (defined $names) { 
+
+  if (defined $names) {
     #remove trailing comma
     $names =~ s/,$//;
   } else {
@@ -661,8 +662,8 @@ sub _get_autolearn_points {
         $self->{learned_points} += $self->{conf}->{scoreset}->[$orig_scoreset]->{$test};
 	next;
       }
-    
-      #IF ANY RULES ARE AUTOLEARN FORCE, SET THAT FLAG  
+
+      #IF ANY RULES ARE AUTOLEARN FORCE, SET THAT FLAG
       if ($tflags->{$test} =~ /\bautolearn_force\b/) {
         $self->{autolearn_force}++;
         #ADD RULE NAME TO LIST
@@ -673,7 +674,7 @@ sub _get_autolearn_points {
     # ignore tests with 0 score (or undefined) in this scoreset
     next if !$scores->{$test};
 
-    # Go ahead and add points to the proper locations 
+    # Go ahead and add points to the proper locations
     # Changed logic because in testing, I was getting both head and body. Bug 5503
     if ($self->{conf}->maybe_header_only ($test)) {
       $self->{head_only_points} += $scores->{$test};
@@ -717,7 +718,7 @@ sub is_spam {
 
 After a mail message has been checked, this method can be called. It will
 return a comma-separated string, listing all the symbolic test names
-of the tests which were trigged by the mail.
+of the tests which were triggered by the mail.
 
 =cut
 
@@ -727,13 +728,62 @@ sub get_names_of_tests_hit {
   return join(',', sort(@{$self->{test_names_hit}}));
 }
 
+=item $list = $status->get_names_of_tests_hit_with_scores_hash ()
+
+After a mail message has been checked, this method can be called. It will
+return a pointer to a hash for rule & score pairs for all the symbolic
+test names and individual scores of the tests which were triggered by the mail.
+
+=cut
+sub get_names_of_tests_hit_with_scores_hash {
+  my ($self) = @_;
+
+  my ($line, %testsscores);
+
+  #BASED ON CODE FOR TESTSSCORES TAG - KAM 2014-04-24
+  foreach my $test (@{$self->{test_names_hit}}) {
+    my $score = $self->{conf}->{scores}->{$test};
+    $score = '0'  if !defined $score;
+
+    $testsscores{$test} = $score;
+  }
+
+  return \%testsscores;
+}
+
+=item $list = $status->get_names_of_tests_hit_with_scores ()
+
+After a mail message has been checked, this method can be called. It will
+return a comma-separated string of rule=score pairs for all the symbolic
+test names and individual scores of the tests which were triggered by the mail.
+
+=cut
+sub get_names_of_tests_hit_with_scores {
+  my ($self) = @_;
+
+  my ($line, %testsscores);
+
+  #BASED ON CODE FOR TESTSSCORES TAG - KAM 2014-04-24
+  foreach my $test (sort @{$self->{test_names_hit}}) {
+    my $score = $self->{conf}->{scores}->{$test};
+    $score = '0'  if !defined $score;
+    $line .= ','  if $line ne '';
+    $line .= $test . '=' . $score;
+  }
+
+  $line ||= 'none';
+
+  return $line;
+}
+
+
 ###########################################################################
 
 =item $list = $status->get_names_of_subtests_hit ()
 
 After a mail message has been checked, this method can be called.  It will
 return a comma-separated string, listing all the symbolic test names of the
-meta-rule sub-tests which were trigged by the mail.  Sub-tests are the
+meta-rule sub-tests which were triggered by the mail.  Sub-tests are the
 normally-hidden rules, which score 0 and have names beginning with two
 underscores, used in meta rules.
 
@@ -1080,7 +1130,7 @@ sub rewrite_report_safe {
   # tvd: do this after report_safe_copy_headers so Received will be done correctly
   $newmsg = "Received: from localhost by " .
               Mail::SpamAssassin::Util::fq_hostname() . "\n" .
-            "\twith SpamAssassin (version " . 
+            "\twith SpamAssassin (version " .
               Mail::SpamAssassin::Version() . ");\n" .
             "\t" . Mail::SpamAssassin::Util::time_to_rfc822_date() . "\n" .
             $newmsg;
@@ -1154,7 +1204,7 @@ sub rewrite_no_report_safe {
 
   # put the pristine headers into an array
   # skip the X-Spam- headers, but allow the X-Spam-Prev headers to remain.
-  # since there may be a missing header/body 
+  # since there may be a missing header/body
   #
   my @pristine_headers = split(/^/m, $self->{msg}->get_pristine_header());
   for (my $line = 0; $line <= $#pristine_headers; $line++) {
@@ -1648,7 +1698,7 @@ sub get_current_eval_rule_name {
 
 sub extract_message_metadata {
   my ($self) = @_;
-  
+
   my $timer = $self->{main}->time_method("extract_message_metadata");
   $self->{msg}->extract_message_metadata($self);
 
@@ -1662,6 +1712,26 @@ sub extract_message_metadata {
 	))
   {
     $self->{$item} = $self->{msg}->{metadata}->{$item};
+  }
+
+  # TODO: International domain names (UTF-8) must be converted to
+  # ASCII-compatible encoding (ACE) for the purpose of setting the
+  # SENDERDOMAIN and AUTHORDOMAIN tags (and probably for other uses too).
+  # (explicitly required for DMARC, draft-kucherawy-dmarc-base sect. 5.6.1)
+  #
+  { local $1;
+    my $addr = $self->get('EnvelopeFrom:addr', undef);
+    # collect a FQDN, ignoring potential trailing WSP
+    if (defined $addr && $addr =~ /\@([^@. \t]+\.[^@ \t]+?)[ \t]*\z/s) {
+      $self->set_tag('SENDERDOMAIN', lc $1);
+    }
+    # TODO: the get ':addr' only returns the first address; this should be
+    # augmented to be able to return all addresses in a header field, multiple
+    # addresses in a From header field are allowed according to RFC 5322
+    $addr = $self->get('From:addr', undef);
+    if (defined $addr && $addr =~ /\@([^@. \t]+\.[^@ \t]+?)[ \t]*\z/s) {
+      $self->set_tag('AUTHORDOMAIN', lc $1);
+    }
   }
 
   $self->set_tag('RELAYSTRUSTED',   $self->{relays_trusted_str});
@@ -1917,7 +1987,7 @@ sub _get {
       $result = $self->{msg}->get_metadata($request);
     }
   }
-      
+
   # special queries
   if (defined $result && ($getaddr || $getname)) {
     local $1;
@@ -1941,7 +2011,7 @@ sub _get {
       $result =~ s/\s*\(.*?\)//g;
       # strip out the "quoted text", unless it's the only thing in the string
       if ($result !~ /^".*"$/) {
-        $result =~ s/(?<!<)"[^"]*"(?!@)//g;   #" emacs
+        $result =~ s/(?<!<)"[^"]*"(?!\@)//g;   #" emacs
       }
       # Foo Blah <jm@xxx> or <jm@xxx>
       local $1;
@@ -2037,27 +2107,39 @@ sub get {
 #
 # bug 4522: ISO2022 format mail, most commonly Japanese SHIFT-JIS, inserts a three character escape sequence  ESC ( .
 
-# a hybrid of tbird and oe's  version of uri parsing
-my $tbirdstartdelim = '><"\'`,{[(|\s'  . "\x1b";  # The \x1b as per bug 4522
-my $iso2022shift = "\x1b" . '\(.';  # bug 4522
-my $tbirdenddelim = '><"`}\]{[|\s' . "\x1b";  # The \x1b as per bug 4522
-my $oeignoreatend = '-~!@#^&*()_+=:;\'?,.';
-my $nonASCII    = '\x80-\xff';
-my $tbirdenddelimemail = $tbirdenddelim . '(\'' . $nonASCII;  # tbird ignores non-ASCII mail addresses for now, until RFC changes
-my $tbirdenddelimplusat = $tbirdenddelimemail . '@';
+sub _tbirdurire {
+  my ($self) = @_;
 
-# valid TLDs
-my $tldsRE = $Mail::SpamAssassin::Util::RegistrarBoundaries::VALID_TLDS_RE;
+  # Cached?
+  return $self->{tbirdurire} if $self->{tbirdurire};
 
-# knownscheme regexp looks for either a https?: or ftp: scheme, or www\d*\. or ftp\. prefix, i.e., likely to start a URL
-# schemeless regexp looks for a valid TLD at the end of what may be a FQDN, followed by optional ., optional :portnum, optional /rest_of_uri
-my $urischemeless = qr/[a-z\d][a-z\d._-]{0,251}\.${tldsRE}\.?(?::\d{1,5})?(?:\/[^$tbirdenddelim]{1,251})?/io;
-my $uriknownscheme = qr/(?:(?:(?:(?:https?)|(?:ftp)):(?:\/\/)?)|(?:(?:www\d{0,2}|ftp)\.))[^$tbirdenddelim]{1,251}/io;
-my $urimailscheme = qr/(?:mailto:)?[^$tbirdenddelimplusat]{1,251}@[^$tbirdenddelimemail]{1,251}/io;
-my $tbirdurire = qr/(?:\b|(?<=$iso2022shift)|(?<=[$tbirdstartdelim]))
-                    (?:(?:($uriknownscheme)(?=(?:[$tbirdenddelim]|\z))) |
-                       (?:($urimailscheme)(?=(?:[$tbirdenddelimemail]|\z))) |
-                       (?:\b($urischemeless)(?=(?:[$tbirdenddelim]|\z))))/xo;
+  # a hybrid of tbird and oe's  version of uri parsing
+  my $tbirdstartdelim = '><"\'`,{[(|\s'  . "\x1b";  # The \x1b as per bug 4522
+  my $iso2022shift = "\x1b" . '\(.';  # bug 4522
+  my $tbirdenddelim = '><"`}\]{[|\s' . "\x1b";  # The \x1b as per bug 4522
+  my $nonASCII    = '\x80-\xff';
+
+  # bug 7100: we allow a comma to delimit the end of an email address because it will never appear in a domain name, and
+  # it's a common thing to find in text
+  my $tbirdenddelimemail = $tbirdenddelim . ',(\'' . $nonASCII;  # tbird ignores non-ASCII mail addresses for now, until RFC changes
+  my $tbirdenddelimplusat = $tbirdenddelimemail . '@';
+
+  # valid TLDs
+  my $tldsRE = $self->{main}->{registryboundaries}->{valid_tlds_re};
+
+  # knownscheme regexp looks for either a https?: or ftp: scheme, or www\d*\. or ftp\. prefix, i.e., likely to start a URL
+  # schemeless regexp looks for a valid TLD at the end of what may be a FQDN, followed by optional ., optional :portnum, optional /rest_of_uri
+  my $urischemeless = qr/[a-z\d][a-z\d._-]{0,251}\.${tldsRE}\.?(?::\d{1,5})?(?:\/[^$tbirdenddelim]{1,251})?/io;
+  my $uriknownscheme = qr/(?:(?:(?:(?:https?)|(?:ftp)):(?:\/\/)?)|(?:(?:www\d{0,2}|ftp)\.))[^$tbirdenddelim]{1,251}/io;
+  my $urimailscheme = qr/(?:mailto:)?[^$tbirdenddelimplusat]{1,251}@[^$tbirdenddelimemail]{1,251}/io;
+
+  $self->{tbirdurire} = qr/(?:\b|(?<=$iso2022shift)|(?<=[$tbirdstartdelim]))
+                        (?:(?:($uriknownscheme)(?=(?:[$tbirdenddelim]|\z))) |
+                        (?:($urimailscheme)(?=(?:[$tbirdenddelimemail]|\z))) |
+                        (?:\b($urischemeless)(?=(?:[$tbirdenddelim]|\z))))/xo;
+
+  return $self->{tbirdurire};
+}
 
 =item $status->get_uri_list ()
 
@@ -2118,7 +2200,7 @@ The hash format looks something like this:
 
   raw_uri => {
     types => { a => 1, img => 1, parsed => 1 },
-    cleaned => [ canonified_uri ],
+    cleaned => [ canonicalized_uri ],
     anchor_text => [ "click here", "no click here" ],
     domains => { domain1 => 1, domain2 => 1 },
   }
@@ -2130,15 +2212,15 @@ C<types> is a hash of the HTML tags (lowercase) which referenced
 the raw_uri.  I<parsed> is a faked type which specifies that the
 raw_uri was seen in the rendered text.
 
-C<cleaned> is an array of the raw and canonified version of the raw_uri
+C<cleaned> is an array of the raw and canonicalized version of the raw_uri
 (http://spamassassin.apache%2Eorg/, http://spamassassin.apache.org/).
 
 C<anchor_text> is an array of the anchor text (text between <a> and
 </a>), if any, which linked to the URI.
 
-C<domains> is a hash of the domains found in the canonified URIs.
+C<domains> is a hash of the domains found in the canonicalized URIs.
 
-C<hosts> is a hash of unstripped hostnames found in the canonified URIs
+C<hosts> is a hash of unstripped hostnames found in the canonicalized URIs
 as hash keys, with their domain part stored as a value of each hash entry.
 
 =cut
@@ -2162,15 +2244,20 @@ sub get_uri_detail_list {
   # This parses of DKIM for URIs disagrees with documentation and bug 6700 votes to disable
   # this functionality
   # 2013-01-07
+  # This functionality is re-enabled as a configuration option disabled by
+  # default (bug 7087)
+  # 2014-10-06
 
   # Look for the domain in DK/DKIM headers
-  #my $dk = join(" ", grep {defined} ( $self->get('DomainKey-Signature',undef),
-  #                                    $self->get('DKIM-Signature',undef) ));
-  #while ($dk =~ /\bd\s*=\s*([^;]+)/g) {
-  #  my $dom = $1;
-  #  $dom =~ s/\s+//g;
-  #  $parsed{$dom} = 'domainkeys';
-  #}
+  if ( $self->{conf}->{parse_dkim_uris} ) {
+    my $dk = join(" ", grep {defined} ( $self->get('DomainKey-Signature',undef),
+                                        $self->get('DKIM-Signature',undef) ));
+    while ($dk =~ /\bd\s*=\s*([^;]+)/g) {
+      my $dom = $1;
+      $dom =~ s/\s+//g;
+      $parsed{$dom} = 'domainkeys';
+    }
+  }
 
   # get URIs from HTML parsing
   # use the metadata version since $self->{html} may not be setup
@@ -2180,13 +2267,13 @@ sub get_uri_detail_list {
   # don't keep dereferencing ...
   my $redirector_patterns = $self->{conf}->{redirector_patterns};
 
-  # canonify the HTML parsed URIs
+  # canonicalize the HTML parsed URIs
   while(my($uri, $info) = each %{ $detail }) {
-    my @tmp = Mail::SpamAssassin::Util::uri_list_canonify($redirector_patterns, $uri);
+    my @tmp = uri_list_canonicalize($redirector_patterns, $uri);
     $info->{cleaned} = \@tmp;
 
     foreach (@tmp) {
-      my($domain,$host) = Mail::SpamAssassin::Util::uri_to_domain($_);
+      my($domain,$host) = $self->{main}->{registryboundaries}->uri_to_domain($_);
       if (defined $host && $host ne '' && !$info->{hosts}->{$host}) {
         # unstripped full host name as a key, and its domain part as a value
         $info->{hosts}->{$host} = $domain;
@@ -2210,16 +2297,16 @@ sub get_uri_detail_list {
     }
   }
 
-  # canonify the text parsed URIs
+  # canonicalize the text parsed URIs
   while (my($uri, $type) = each %parsed) {
     $detail->{$uri}->{types}->{$type} = 1;
     my $info = $detail->{$uri};
 
     my @uris;
-    
+
     if (!exists $info->{cleaned}) {
       if ($type eq 'parsed') {
-        @uris = Mail::SpamAssassin::Util::uri_list_canonify($redirector_patterns, $uri);
+        @uris = uri_list_canonicalize($redirector_patterns, $uri);
       }
       else {
         @uris = ( $uri );
@@ -2227,7 +2314,7 @@ sub get_uri_detail_list {
       $info->{cleaned} = \@uris;
 
       foreach (@uris) {
-        my($domain,$host) = Mail::SpamAssassin::Util::uri_to_domain($_);
+        my($domain,$host) = $self->{main}->{registryboundaries}->uri_to_domain($_);
         if (defined $host && $host ne '' && !$info->{hosts}->{$host}) {
           # unstripped full host name as a key, and its domain part as a value
           $info->{hosts}->{$host} = $domain;
@@ -2275,10 +2362,11 @@ sub _get_parsed_uri_list {
 
     my ($rulename, $pat, @uris);
     my $text;
+    my $tbirdurire = $self->_tbirdurire;
 
     for my $entry (@$textary) {
 
-      # a workaround for [perl #69973] bug: 
+      # a workaround for [perl #69973] bug:
       # Invalid and tainted utf-8 char crashes perl 5.10.1 in regexp evaluation
       # Bug 6225, regexp and string should both be utf8, or none of them;
       # untainting string also seems to avoid the crash
@@ -2290,7 +2378,7 @@ sub _get_parsed_uri_list {
       while (/$tbirdurire/igo) {
         my $rawuri = $1||$2||$3;
         $rawuri =~ s/(^[^(]*)\).*$/$1/;  # as per ThunderBird, ) is an end delimiter if there is no ( preceeding it
-        $rawuri =~ s/[$oeignoreatend]*$//; # remove trailing string of punctuations that TBird ignores
+        $rawuri =~ s/[-~!@#^&*()_+=:;\'?,.]*$//; # remove trailing string of punctuations that TBird ignores
         # skip if there is '..' in the hostname portion of the URI, something we can't catch in the general URI regexp
         next if $rawuri =~ /^(?:(?:https?|ftp|mailto):(?:\/\/)?)?[a-z\d.-]*\.\./i;
 
@@ -2319,9 +2407,9 @@ sub _get_parsed_uri_list {
 
         if ($uri =~ /^mailto:/i) {
           # skip a mail link that does not have a valid TLD or other than one @ after decoding any URLEncoded characters
-          $uri = Mail::SpamAssassin::Util::url_encode($uri) if ($uri =~ /\%(?:2[1-9a-fA-F]|[3-6][0-9a-fA-f]|7[0-9a-eA-E])/);
+          $uri = Mail::SpamAssassin::Util::url_encode($uri) if ($uri =~ /\%(?:2[1-9a-fA-F]|[3-6][0-9a-fA-F]|7[0-9a-eA-E])/);
           next if ($uri !~ /^[^@]+@[^@]+$/);
-          my $domuri = Mail::SpamAssassin::Util::uri_to_domain($uri);
+          my $domuri = $self->{main}->{registryboundaries}->uri_to_domain($uri);
           next unless $domuri;
           push (@uris, $rawuri);
           push (@uris, $uri) unless ($rawuri eq $uri);
@@ -2329,10 +2417,10 @@ sub _get_parsed_uri_list {
 
         next unless ($uri =~/^(?:https?|ftp):/i);  # at this point only valid if one or the other of these
 
-        my @tmp = Mail::SpamAssassin::Util::uri_list_canonify($redirector_patterns, $uri);
+        my @tmp = uri_list_canonicalize($redirector_patterns, $uri);
         my $goodurifound = 0;
         foreach my $cleanuri (@tmp) {
-          my $domain = Mail::SpamAssassin::Util::uri_to_domain($cleanuri);
+          my $domain = $self->{main}->{registryboundaries}->uri_to_domain($cleanuri);
           if ($domain) {
             # bug 5780: Stop after domain to avoid FP, but do that after all deobfuscation of urlencoding and redirection
             if ($rblonly) {
@@ -2696,7 +2784,7 @@ sub _test_log_line {
 # and this does not!
 sub get_envelope_from {
   my ($self) = @_;
-  
+
   # bug 2142:
   # Get the SMTP MAIL FROM:, aka. the "envelope sender", if our
   # calling app has helpfully marked up the source message
@@ -2712,7 +2800,7 @@ sub get_envelope_from {
     # make sure we get the most recent copy - there can be only one EnvelopeSender.
     $envf = $self->get($self->{conf}->{envelope_sender_header}.":addr",undef);
     # ok if it contains an "@" sign, or is "" (ie. "<>" without the < and >)
-    goto ok if defined $envf && ($envf =~ /\@/ || $envf =~ /^$/);
+    goto ok if defined $envf && ($envf =~ /\@/ || $envf eq '');
     # Warn them if it's configured, but not there or not usable.
     if (defined $envf) {
       chomp $envf;
@@ -2807,8 +2895,9 @@ sub get_envelope_from {
   return;
 
 ok:
-  $envf =~ s/^<*//gs;                # remove <
-  $envf =~ s/>*\s*$//gs;        # remove >, whitespace, newlines
+  $envf =~ s/^<*//s;            # remove <
+  $envf =~ s/>*\s*\z//s;        # remove >, whitespace, newlines
+
   return $envf;
 }
 
@@ -2886,7 +2975,17 @@ sub create_fulltext_tmpfile {
 
   my ($tmpf, $tmpfh) = Mail::SpamAssassin::Util::secure_tmpfile();
   $tmpfh  or die "failed to create a temporary file";
-  print $tmpfh $$fulltext  or die "error writing to $tmpf: $!";
+
+  # PerlIO's buffered print writes in 8 kB chunks - which can be slow.
+  #   print $tmpfh $$fulltext  or die "error writing to $tmpf: $!";
+  #
+  # reducing the number of writes and bypassing extra buffering in PerlIO
+  # speeds up writing of larger text by a factor of 2
+  my $nwrites;
+  for (my $ofs = 0; $ofs < length($$fulltext); $ofs += $nwrites) {
+    $nwrites = $tmpfh->syswrite($$fulltext, length($$fulltext)-$ofs, $ofs);
+    defined $nwrites  or die "error writing to $tmpf: $!";
+  }
   close $tmpfh  or die "error closing $tmpf: $!";
 
   $self->{fulltext_tmpfile} = $tmpf;
@@ -2960,19 +3059,19 @@ sub all_from_addrs {
 
 =item all_from_addrs_domains
 
-This function returns all the various from addresses in a message using all_from_addrs() 
-and then returns only the domain names.  
+This function returns all the various from addresses in a message using all_from_addrs()
+and then returns only the domain names.
 
 =cut
 
 sub all_from_addrs_domains {
   my ($self) = @_;
 
-  if (exists $self->{all_from_addrs_domains}) { 
+  if (exists $self->{all_from_addrs_domains}) {
     return @{$self->{all_from_addrs_domains}};
   }
 
-  #TEST POINT - my @addrs = ("test.voipquotes2.net","test.voipquotes2.co.uk"); 
+  #TEST POINT - my @addrs = ("test.voipquotes2.net","test.voipquotes2.co.uk");
   #Start with all the normal from addrs
   my @addrs = &all_from_addrs($self);
 
@@ -2980,7 +3079,7 @@ sub all_from_addrs_domains {
 
   #loop through and limit to just the domain with a dummy address
   for (my $i = 0; $i < scalar(@addrs); $i++) {
-    $addrs[$i] = 'dummy@'.&Mail::SpamAssassin::Util::uri_to_domain($addrs[$i]);
+    $addrs[$i] = 'dummy@'.$self->{main}->{registryboundaries}->uri_to_domain($addrs[$i]);
   }
 
   #Remove duplicate domains
@@ -3024,7 +3123,7 @@ sub all_to_addrs {
     @addrs = $self->{main}->find_all_addrs_in_line (
        join('',
 	 join(" ", @rcvdaddrs)."\n",
-         $self->get('To'),			# std 
+         $self->get('To'),			# std
   	 $self->get('Apparently-To'),		# sendmail, from envelope
   	 $self->get('Delivered-To'),		# Postfix, poss qmail
   	 $self->get('Envelope-Recipients'),	# qmail: new-inject(1)

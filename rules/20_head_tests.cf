@@ -176,7 +176,10 @@ describe INVALID_TZ_EST		Invalid date in header (wrong EST timezone)
 ###########################################################################
 # MIME encoding with spam characteristics
 
-header __SUBJECT_NEEDS_MIME	Subject =~ /[\x00-\x08\x0b\x0c\x0e-\x1f\x7f-\xff]/
+ifplugin Mail::SpamAssassin::Plugin::HeaderEval
+meta __SUBJECT_NEEDS_MIME	__SUBJ_ILLEGAL_CHARS
+endif
+
 header __SUBJECT_ENCODED_QP	Subject:raw =~ /=\?\S+\?Q\?/i
 header __SUBJECT_ENCODED_B64	Subject:raw =~ /=\?\S+\?B\?/i
 
@@ -306,7 +309,8 @@ header   __HAS_MIMEOLE          exists:X-MimeOLE
 header   __HAS_MSMAIL_PRI       exists:X-MSMail-Priority
 header   __HAS_SQUIRRELMAIL_IN_MAILER	X-Mailer =~ /SquirrelMail\b/
 # Bug 6346
-header   __HAS_OFFICE1214_IN_MAILER	X-Mailer =~ /^Microsoft (?:Office )?Outlook 1[24]\.0/
+# 2015-01-22 expanded to Office 15 as well per bug 7122
+header   __HAS_OFFICE1214_IN_MAILER	X-Mailer =~ /^Microsoft (?:Office )?Outlook 1[245]\.0/
 meta     MISSING_MIMEOLE	(__HAS_MSMAIL_PRI && !__HAS_MIMEOLE && !__HAS_SQUIRRELMAIL_IN_MAILER && !__HAS_OFFICE1214_IN_MAILER)
 describe MISSING_MIMEOLE	Message has X-MSMail-Priority, but no X-MimeOLE
 

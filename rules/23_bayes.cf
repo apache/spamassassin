@@ -43,6 +43,9 @@ body BAYES_80		eval:check_bayes('0.80', '0.95')
 body BAYES_95		eval:check_bayes('0.95', '0.99')
 body BAYES_99		eval:check_bayes('0.99', '1.00')
 
+#Additional rule to add more of a score to BAYES_99 FOR 99.9% to 100%
+body BAYES_999		eval:check_bayes('0.999', '1.00')
+
 tflags BAYES_00		nice learn
 tflags BAYES_05		nice learn
 tflags BAYES_20		nice learn
@@ -52,6 +55,7 @@ tflags BAYES_60		learn
 tflags BAYES_80		learn
 tflags BAYES_95		learn
 tflags BAYES_99		learn
+tflags BAYES_999	learn
 
 describe BAYES_00	Bayes spam probability is 0 to 1%
 describe BAYES_05	Bayes spam probability is 1 to 5%
@@ -62,5 +66,6 @@ describe BAYES_60	Bayes spam probability is 60 to 80%
 describe BAYES_80	Bayes spam probability is 80 to 95%
 describe BAYES_95	Bayes spam probability is 95 to 99%
 describe BAYES_99	Bayes spam probability is 99 to 100%
+describe BAYES_999      Bayes spam probability is 99.9 to 100%
 
 endif

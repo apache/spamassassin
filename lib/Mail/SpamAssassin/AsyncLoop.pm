@@ -212,6 +212,7 @@ sub start_lookup {
 
   my $t_end = $ent->{timeout_min};       # application-specified has precedence
   $t_end = $settings->{rbl_timeout_min}  if $settings && !defined $t_end;
+  $t_end = $self->{main}->{conf}->{rbl_timeout_min}  if !defined $t_end; # added for bug 7070
   $t_end = 0.2 * $t_init  if !defined $t_end;
   $t_end = 0  if $t_end < 0;  # just in case
   $t_init = $t_end  if $t_init < $t_end;

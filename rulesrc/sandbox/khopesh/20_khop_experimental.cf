@@ -145,7 +145,7 @@ describe HELO_NO_DOMAIN	Relay reports its domain incorrectly
 # because they have such similar definitions, numbers, and merits
 
 header __NAME_IS_EMAIL	From:raw =~ /\w\@[\w.-]+\.\w\w+["'`]*\s*<\w+\@\w/
-header __NAME_EQ_EMAIL	From:raw =~ /([\w+.-]+\@[\w.-]+\.\w\w+)["'`\s]*<\s*\1>/
+header __NAME_EQ_EMAIL	From:raw =~ /([\w+.-]+\@[\w.-]+\.\w\w+)["'`\s]*<\s*\1>/i
 meta	 NAME_EMAIL_DIFF	__NAME_IS_EMAIL && ! __NAME_EQ_EMAIL
 describe NAME_EMAIL_DIFF	Sender NAME is an unrelated email address
 #score	 NAME_EMAIL_DIFF	0.375 # tot=0.5, low for noreply@dom  20090811
@@ -278,6 +278,17 @@ header	 __TO_EQ_FROM_USR_NN_1	ALL =~ /\nFrom:\s+(?:[^\n<]{0,80}<)?([^\n\s\@>]{4,
 header	 __TO_EQ_FROM_USR_NN_2	ALL =~ /\nTo:\s+(?:[^\n<]{0,80}<)?([^\n\s\@>]{4,80}?)\d*\@[^\n\s]+>?\n(?:[^\n]{1,100}\n)*From:\s+(?:[^\n]{0,80}<)?\1\d*[\@>,\s\n]/ism
 meta	 __TO_EQ_FROM_USR_NN	(__TO_EQ_FROM_USR_NN_1 || __TO_EQ_FROM_USR_NN_2) && !(__FROM_DNS || __FROM_INFO || __SENDER_BOT)
 describe __TO_EQ_FROM_USR_NN	To: username same as From: username sans trailing nums
+
+# JHardin:
+# __TO_EQ_FROM_USR_NN recent S/O is 0.992 on a large corpus
+# with most hits at <= 5 points
+# let's see if we can get those low-scored spams some more points
+# FP observation: __TO_EQ_FROM_USR overlaps ~99% of _USER_NN ham hits and no spam;
+#   this suggests the primary spam indicator is having *different* suffixes
+# Many of the rest are fairly reliable ham indicators
+# suggested scored FP avoidance rule:
+meta	 __TO_EQ_FROM_USR_NN_MINFP	__TO_EQ_FROM_USR_NN && !__TO_EQ_FROM_USR_1 && !__TO_EQ_FROM && !__TO_EQ_FROM_DOM && !__LCL__ENV_AND_HDR_FROM_MATCH && !__DKIM_EXISTS && !__NOT_SPOOFED && !__RCD_RDNS_SMTP && !__RCD_RDNS_MX_MESSY && !__THREADED
+
 
 header	 __SUBJ_NOT_SHORT	Subject =~ /^.{16}/
 header	 __SUBJ_HAS_WORDS	Subject =~ /(?:^|\s)[^\W0-9_]{3,15}(?:\s|$)/

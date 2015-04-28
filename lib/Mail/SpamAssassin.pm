@@ -75,6 +75,7 @@ use Mail::SpamAssassin::PerMsgStatus;
 use Mail::SpamAssassin::Message;
 use Mail::SpamAssassin::PluginHandler;
 use Mail::SpamAssassin::DnsResolver;
+use Mail::SpamAssassin::RegistryBoundaries;
 use Mail::SpamAssassin::Util qw(untaint_var am_running_on_windows);
 use Mail::SpamAssassin::Util::ScopedTimer;
 
@@ -94,12 +95,12 @@ use vars qw{
 };
 
 $VERSION = "3.004001";      # update after release (same format as perl $])
-$IS_DEVEL_BUILD = 1;        # change for release versions
+#$IS_DEVEL_BUILD = 1;        # change for release versions
 
 # Used during the prerelease/release-candidate part of the official release
 # process. If you hacked up your SA, you should add a version_tag to your .cf
 # files; this variable should not be modified.
-#@EXTRA_VERSION = qw(rc6);
+#@EXTRA_VERSION = qw();
 
 @ISA = qw();
 
@@ -430,6 +431,7 @@ sub new {
   }
 
   $self->{conf} ||= new Mail::SpamAssassin::Conf ($self);
+  $self->{registryboundaries} = Mail::SpamAssassin::RegistryBoundaries->new ($self);
   $self->{plugins} = Mail::SpamAssassin::PluginHandler->new ($self);
 
   $self->{save_pattern_hits} ||= 0;

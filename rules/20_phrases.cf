@@ -15,9 +15,9 @@
 # The ASF licenses this file to you under the Apache License, Version 2.0
 # (the "License"); you may not use this file except in compliance with
 # the License.  You may obtain a copy of the License at:
-# 
+#
 #     http://www.apache.org/licenses/LICENSE-2.0
-# 
+#
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -54,9 +54,6 @@ describe EXCUSE_4		Claims you can be removed from the list
 
 # strange pattern because otherwise it matches the std. majordomo line
 # pls note the comment above. DO NOT just put "to" in the first group!
-
-body EXCUSE_24			/you(?:'ve|'re| have| are)? receiv(?:e|ed|ing) this (?:advertisement|offer|special|recurring|paid).{0,16}\b(?:by either|because)/i
-describe EXCUSE_24		Claims you wanted this ad
 
 body EXCUSE_REMOVE		/to be removed from.{0,20}(?:mailings|offers)/i
 describe EXCUSE_REMOVE		Talks about how to be removed from mailings
@@ -163,8 +160,10 @@ describe ACT_NOW_CAPS		Talks about 'acting now' with capitals
 body MORE_SEX               /increased?.{0,9}(?:sex|stamina)/i
 describe MORE_SEX 		Talks about a bigger drive for sex
 
+# explicitly capped at 1.0 score because of FP potential
 body BANG_GUAR	         	/\bguaranteed?\!/i
 describe BANG_GUAR		Something is emphatically guaranteed
+
 
 
 body __RUDE_HTML_1	/Get a capable html e-mailer/i

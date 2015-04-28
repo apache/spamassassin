@@ -1,67 +1,70 @@
-Welcome to SpamAssassin!
-------------------------
+Welcome to Apache SpamAssassin!
+-------------------------------
 
-What SpamAssassin Is
---------------------
+What Apache SpamAssassin Is
+---------------------------
 
-SpamAssassin is a mail filter which attempts to identify spam using
-a variety of mechanisms including text analysis, Bayesian filtering,
-DNS blocklists, and collaborative filtering databases.
+Apache SpamAssassin is the #1 Open Source anti-spam platform giving
+system administrators a filter to classify email and block "spam"
+(unsolicited bulk email).  It uses a robust scoring framework and plug-ins
+to integrate a wide range of advanced heuristic and statistical analysis
+tests on email headers and body text including text analysis, Bayesian 
+filtering, DNS blocklists, and collaborative filtering databases.
 
-SpamAssassin is a project of the Apache Software Foundation (ASF).
+Apache SpamAssassin is a project of the Apache Software Foundation (ASF).
 
 
-What SpamAssassin Is Not
-------------------------
+What Apache SpamAssassin Is Not
+-------------------------------
 
-SpamAssassin is not a program to delete spam, route spam and ham to
+Apache SpamAssassin is not a program to delete spam, route spam and ham to
 separate mailboxes or folders, or send bounces when you receive spam.
-Those are mail routing functions, and SpamAssassin is not a mail
-router.  SpamAssassin is a mail filter or classifier.  It will examine
+Those are mail routing functions, and Apache SpamAssassin is not a mail
+router.  Apache SpamAssassin is a mail filter or classifier.  It will examine
 each message presented to it, and assign a score indicating the
 likelihood that the mail is spam.  An external program must then
 examine this score and do any routing the user wants done.  There are
 many programs that will easily perform these functions after examining
-the score assigned by SpamAssassin.
+the score assigned by Apache SpamAssassin.
 
 
-How SpamAssassin Works
-----------------------
+How Apache SpamAssassin Works
+-----------------------------
 
-SpamAssassin uses a wide range of heuristic tests on mail headers and
+Apache SpamAssassin uses a wide range of heuristic tests on mail headers and
 body text to identify "spam", also known as unsolicited commercial
 email.
 
 Once identified, the mail can then be optionally tagged as spam for
 later filtering using the user's own mail user-agent application.
 
-SpamAssassin typically differentiates successfully between spam and
+Apache SpamAssassin typically differentiates successfully between spam and
 non-spam in between 95% and 100% of cases, depending on what kind of mail
 you get and your training of its Bayesian filter.  Specifically,
-SpamAssassin has been shown to produce around 1.5% false negatives (spam
+Apache SpamAssassin has been shown to produce around 1.5% false negatives (spam
 that was missed) and around 0.06% false positives (ham incorrectly marked
 as spam).  See the rules/STATISTICS*.txt files for more information.
 
-SpamAssassin also includes plugins to support reporting spam messages
+Apache SpamAssassin also includes plugins to support reporting spam messages
 automatically or manually to collaborative filtering databases such as
 Pyzor, DCC, and Vipul's Razor.
 
 The distribution provides "spamassassin", a command line tool to
 perform filtering, along with the "Mail::SpamAssassin" module set
-which allows SpamAssassin to be used in spam-protection proxy SMTP or
+which allows Apache SpamAssassin to be used in spam-protection proxy SMTP or
 POP/IMAP server, or a variety of different spam-blocking scenarios.
 
-In addition, "spamd", a daemonized version of SpamAssassin which
+In addition, "spamd", a daemonized version of Apache SpamAssassin which
 runs persistently, is available.  Using its counterpart, "spamc",
 a lightweight client written in C, an MTA can process large volumes of
-mail through SpamAssassin without having to fork/exec a perl interpreter
+mail through Apache SpamAssassin without having to fork/exec a perl interpreter
 for each message.
 
 
 Questions? Need Help?
 ---------------------
 
-If you have questions about SpamAssassin, please check the Wiki[1] to
+If you have questions about Apache SpamAssassin, please check the Wiki[1] to
 see if someone has already posted an answer to your question. (The
 Wiki doubles as a FAQ.) Failing that, post a message to the
 spamassassin-users mailing list[2]. If you've found a bug (and you're
@@ -75,29 +78,29 @@ Bugzilla[3].
 Please also be sure to read the man pages.
 
 
-Upgrading SpamAssassin
-----------------------
+Upgrading Apache SpamAssassin
+-----------------------------
 
 IMPORTANT: If you are upgrading from a previous major version of
-SpamAssassin, please be sure to read the notes in UPGRADE to find out
+Apache SpamAssassin, please be sure to read the notes in UPGRADE to find out
 what has changed in a non- backward compatible way.
 
 
-Installing SpamAssassin
------------------------
+Installing Apache SpamAssassin
+------------------------------
 
 See the INSTALL file.
 
 
-Customising SpamAssassin
-------------------------
+Customizing Apache SpamAssassin
+-------------------------------
 
-These are the configuration files installed by SpamAssassin.  The commands
+These are the configuration files installed by Apache SpamAssassin.  The commands
 that can be used therein are listed in the POD documentation for the
 Mail::SpamAssassin::Conf class (run the following command to read it:
 "perldoc Mail::SpamAssassin::Conf").  Note: The following directories are
 the standard defaults that people use.  There is an explanation of all the
-default locations that SpamAssassin will look at the end.
+default locations that Apache SpamAssassin will look at the end.
 
   - /usr/share/spamassassin/*.cf:
 
@@ -166,7 +169,7 @@ default locations that SpamAssassin will look at the end.
   - $USER_HOME/.spamassassin/bayes*
 
 	Statistics databases used for Bayesian filtering.  If they do
-	not exist, they will be created by SpamAssassin.
+	not exist, they will be created by Apache SpamAssassin.
 
 	Spamd users may wish to create a shared set of bayes databases;
 	the "bayes_path" and "bayes_file_mode" configuration settings
@@ -177,7 +180,7 @@ default locations that SpamAssassin will look at the end.
 
 File Locations:
 
-SpamAssassin will look in a number of areas to find the default
+Apache SpamAssassin will look in a number of areas to find the default
 configuration files that are used.  The "__*__" text are variables
 whose value you can see by looking at the first several lines of the
 "spamassassin" or "spamd" scripts.
@@ -236,7 +239,7 @@ ruleset:
 
 This is normally written to by the "sa-update" script.  "__version__" is
 replaced by a representation of the version number, so that multiple
-versions of SpamAssassin will not interfere with each other's rulesets.
+versions of Apache SpamAssassin will not interfere with each other's rulesets.
 
 
 After installation, try "perldoc Mail::SpamAssassin::Conf" to see what
@@ -244,8 +247,8 @@ can be set. Common first-time tweaks include:
 
   - required_score
 
-	Set this higher to make SpamAssassin less sensitive.
-        If you are installing SpamAssassin system-wide, this is
+	Set this higher to make Apache SpamAssassin less sensitive.
+        If you are installing Apache SpamAssassin system-wide, this is
         **strongly** recommended!
 
         Statistics on how many false positives to expect at various
@@ -266,8 +269,8 @@ can be set. Common first-time tweaks include:
 Learning
 --------
 
-SpamAssassin includes a Bayesian learning filter, so it is worthwhile
-training SpamAssassin with your collection of non-spam and spam,
+Apache SpamAssassin includes a Bayesian learning filter, so it is worthwhile
+training Apache SpamAssassin with your collection of non-spam and spam,
 if possible.  This will make it more accurate for your incoming mail.
 Do this using the "sa-learn" tools, like so:
 
@@ -279,12 +282,12 @@ Do this using the "sa-learn" tools, like so:
 If these are mail folders in mbox format, use the --mbox switch, for
 Maildirs use a trailing slash, like Maildir/cur/.
 
-Use as many mailboxes as you like.  Note that SpamAssassin will remember
+Use as many mailboxes as you like.  Note that Apache SpamAssassin will remember
 what mails it has learnt from, so you can re-run this as often as you like.
 
 
-Locali[sz]ation
----------------
+Localization
+------------
 
 All text displayed to users is taken from the configuration files.  This
 means that you can translate messages, test descriptions, and templates
@@ -301,7 +304,7 @@ translations. You will, of course, be credited for this work!
 Disabled code
 -------------
 
-There are some tests and code in SpamAssassin that are turned off by
+There are some tests and code in Apache SpamAssassin that are turned off by
 default: experimental code, slow code, or code that depends on
 non-open-source software or services that are not always free.  These
 disabled tests include:
@@ -319,35 +322,19 @@ init.pre, you need to uncomment the loadplugin line and make sure the
 prerequisites for proper operation of the plugin are present.
 
 
-Automatic Whitelist System
+Automatic Reputation System
 --------------------------
 
-SpamAssassin includes automatic whitelisting; The current iteration is
-considerably more complex than the original version.  The way it works is
-by tracking for each sender address the average score of messages so far
-seen from there.  Then, it combines this long-term average score for the
-sender with the score for the particular message being evaluated, after
-all other rules have been applied.
+Apache SpamAssassin includes an automatic reputation system. The way it works is
+by tracking for each sender address a rolling average score of messages
+so far seen from there.  Then, it combines this long-term average score
+for the sender with the score for the particular message being evaluated,
+after all other rules have been applied.
 
-This functionality is on by default, and is enabled or disabled with the
-"use_auto_whitelist" option.
+This functionality can be enabled or disabled with the
+"use_txrep" option.
 
-A system-wide auto-whitelist can be used, by setting the
-auto_whitelist_path and auto_whitelist_file_mode configuration commands
-appropriately, e.g.
-
-    auto_whitelist_path        /var/spool/spamassassin/auto-whitelist
-    auto_whitelist_file_mode   0666
-
-The spamassassin -W and -R command line flags provide an API to add and
-remove entries 'manually', if you so desire.  They operate based on an
-input mail message, to allow them to be set up as aliases which users can
-simply forward their mails to.  See the spamassassin manual page for more
-details.
-
-The default address-list implementation,
-Mail::SpamAssassin::DBBasedAddrList, uses Berkeley DB files to store
-the addresses.
+For more information, read sql/README.txrep
 
 (end of README)
 

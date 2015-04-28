@@ -404,6 +404,7 @@ sub parse_received_line {
   # with ASMTP (Authenticated SMTP) is used by Earthlink, Exim 4.34, and others
   # with HTTP should only be authenticated webmail sessions
   # with HTTPU is used by Communigate Pro with Pronto! webmail interface
+  # IANA registry: http://www.iana.org/assignments/mail-parameters/mail-parameters.xhtml
   if (/ by / && / with ((?:ES|L|UTF8S|UTF8L)MTPS?A|ASMTP|HTTPU?)(?: |;|$)/i) {
     $auth = $1;
   }
@@ -439,6 +440,10 @@ sub parse_received_line {
   # Microsoft Exchange (complete with syntax error)
   elsif (/ with Microsoft Exchange Server HTTP-DAV\b/) {
     $auth = 'HTTP-DAV';
+  }
+  # froufrou mailers like United Internet use a '(via HTTP)' comment, Bug 7101
+  elsif (/ by / && / \(via (HTTP.?)\)(?: |;|$)/i) {
+    $auth = $1;
   }
 
 # ---------------------------------------------------------------------------
@@ -1176,7 +1181,7 @@ sub parse_received_line {
     # logging a little more.
     if (/^\S+ by \S+ \(.{0,100}\) with qmail-scanner/) {
       $envfrom =~ s/^\s*<*//gs; $envfrom =~ s/>*\s*$//gs;
-      $envfrom =~ s/[\s\0\#\[\]\(\)\<\>\|]/!/gs;
+      $envfrom =~ s/[\s\000\#\[\]\(\)\<\>\|]/!/gs;
       $self->{qmail_scanner_env_from} = $envfrom; # hack!
       return 0;
     }
@@ -1306,12 +1311,12 @@ enough:
   # presence, though.  NOTE: this means "[1.2.3.4]" IP addr HELO
   # strings, which are legit by RFC-2821, look like "!1.2.3.4!".
   # still useful though.
-  $ip =~ s/[\s\0\#\[\]\(\)\<\>\|]/!/gs;
-  $rdns =~ s/[\s\0\#\[\]\(\)\<\>\|]/!/gs;
-  $helo =~ s/[\s\0\#\[\]\(\)\<\>\|]/!/gs;
-  $by =~ s/[\s\0\#\[\]\(\)\<\>\|]/!/gs;
-  $ident =~ s/[\s\0\#\[\]\(\)\<\>\|]/!/gs;
-  $envfrom =~ s/[\s\0\#\[\]\(\)\<\>\|]/!/gs;
+  $ip =~ s/[\s\000\#\[\]\(\)\<\>\|]/!/gs;
+  $rdns =~ s/[\s\000\#\[\]\(\)\<\>\|]/!/gs;
+  $helo =~ s/[\s\000\#\[\]\(\)\<\>\|]/!/gs;
+  $by =~ s/[\s\000\#\[\]\(\)\<\>\|]/!/gs;
+  $ident =~ s/[\s\000\#\[\]\(\)\<\>\|]/!/gs;
+  $envfrom =~ s/[\s\000\#\[\]\(\)\<\>\|]/!/gs;
 
   my $relay = {
     ip => $ip,

@@ -59,11 +59,15 @@ sub new {
   $self->register_eval_rule ("check_for_spf_none");
   $self->register_eval_rule ("check_for_spf_fail");
   $self->register_eval_rule ("check_for_spf_softfail");
+  $self->register_eval_rule ("check_for_spf_permerror");
+  $self->register_eval_rule ("check_for_spf_temperror");
   $self->register_eval_rule ("check_for_spf_helo_pass");
   $self->register_eval_rule ("check_for_spf_helo_neutral");
   $self->register_eval_rule ("check_for_spf_helo_none");
   $self->register_eval_rule ("check_for_spf_helo_fail");
   $self->register_eval_rule ("check_for_spf_helo_softfail");
+  $self->register_eval_rule ("check_for_spf_helo_permerror");
+  $self->register_eval_rule ("check_for_spf_helo_temperror");
   $self->register_eval_rule ("check_for_spf_whitelist_from");
   $self->register_eval_rule ("check_for_def_spf_whitelist_from");
 
@@ -224,6 +228,15 @@ working downwards until results are successfully parsed.
   $conf->{parser}->register_commands(\@cmds);
 }
 
+
+=item has_check_for_spf_errors
+
+Adds capability check for "if can()" for check_for_spf_permerror, check_for_spf_temperror, check_for_spf_helo_permerror and check_for_spf_helo_permerror
+  
+=cut 
+
+sub has_check_for_spf_errors { 1 }
+
 # SPF support
 sub check_for_spf_pass {
   my ($self, $scanner) = @_;
@@ -258,6 +271,18 @@ sub check_for_spf_softfail {
   $scanner->{spf_softfail};
 }
 
+sub check_for_spf_permerror {
+  my ($self, $scanner) = @_;
+  $self->_check_spf ($scanner, 0) unless $scanner->{spf_checked};
+  $scanner->{spf_permerror};
+}
+
+sub check_for_spf_temperror {
+  my ($self, $scanner) = @_;
+  $self->_check_spf ($scanner, 0) unless $scanner->{spf_checked};
+  $scanner->{spf_temperror};
+}
+
 sub check_for_spf_helo_pass {
   my ($self, $scanner) = @_;
   $self->_check_spf ($scanner, 1) unless $scanner->{spf_helo_checked};
@@ -289,6 +314,18 @@ sub check_for_spf_helo_softfail {
   my ($self, $scanner) = @_;
   $self->_check_spf ($scanner, 1) unless $scanner->{spf_helo_checked};
   $scanner->{spf_helo_softfail};
+}
+
+sub check_for_spf_helo_permerror {
+  my ($self, $scanner) = @_;
+  $self->_check_spf ($scanner, 1) unless $scanner->{spf_helo_checked};
+  $scanner->{spf_helo_permerror};
+}
+
+sub check_for_spf_helo_temperror {
+  my ($self, $scanner) = @_;
+  $self->_check_spf ($scanner, 1) unless $scanner->{spf_helo_checked};
+  $scanner->{spf_helo_temperror};
 }
 
 sub check_for_spf_whitelist_from {
@@ -468,7 +505,10 @@ sub _check_spf {
       # Mail::SPF::Server can be re-used, and we get to use our own resolver object!
       $self->{spf_server} = Mail::SPF::Server->new(
 				hostname     => $scanner->get_tag('HOSTNAME'),
-				dns_resolver => $self->{main}->{resolver} );
+				dns_resolver => $self->{main}->{resolver},
+				max_dns_interactive_terms => 15);
+      # Bug 7112: max_dns_interactive_terms defaults to 10, but even 14 is
+      # not enough for ebay.com, setting it to 15
       1;
     } or do {
       $eval_stat = $@ ne '' ? $@ : "errno=$!";  chomp $eval_stat;
@@ -524,6 +564,8 @@ sub _check_spf {
     $scanner->{spf_helo_none} = 0;
     $scanner->{spf_helo_fail} = 0;
     $scanner->{spf_helo_softfail} = 0;
+    $scanner->{spf_helo_permerror} = 0;
+    $scanner->{spf_helo_temperror} = 0;
     $scanner->{spf_helo_failure_comment} = undef;
   } else {
     # SPF on envelope sender (where possible)
@@ -533,6 +575,8 @@ sub _check_spf {
     $scanner->{spf_none} = 0;
     $scanner->{spf_fail} = 0;
     $scanner->{spf_softfail} = 0;
+    $scanner->{spf_permerror} = 0;
+    $scanner->{spf_temperror} = 0;
     $scanner->{spf_failure_comment} = undef;
   }
 
@@ -679,6 +723,9 @@ sub _check_spf {
     elsif ($result eq 'none') { $scanner->{spf_helo_none} = 1; }
     elsif ($result eq 'fail') { $scanner->{spf_helo_fail} = 1; }
     elsif ($result eq 'softfail') { $scanner->{spf_helo_softfail} = 1; }
+    elsif ($result eq 'permerror') { $scanner->{spf_helo_permerror} = 1; }
+    elsif ($result eq 'temperror') { $scanner->{spf_helo_temperror} = 1; }
+    elsif ($result eq 'error') { $scanner->{spf_helo_temperror} = 1; }
 
     if ($result eq 'fail') {	# RFC 4408 6.2
       $scanner->{spf_helo_failure_comment} = "SPF failed: $comment";
@@ -689,6 +736,9 @@ sub _check_spf {
     elsif ($result eq 'none') { $scanner->{spf_none} = 1; }
     elsif ($result eq 'fail') { $scanner->{spf_fail} = 1; }
     elsif ($result eq 'softfail') { $scanner->{spf_softfail} = 1; }
+    elsif ($result eq 'permerror') { $scanner->{spf_permerror} = 1; }
+    elsif ($result eq 'temperror') { $scanner->{spf_temperror} = 1; }
+    elsif ($result eq 'error') { $scanner->{spf_temperror} = 1; }
 
     if ($result eq 'fail') {	# RCF 4408 6.2
       $scanner->{spf_failure_comment} = "SPF failed: $comment";

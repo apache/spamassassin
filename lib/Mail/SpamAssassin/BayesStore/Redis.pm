@@ -161,7 +161,7 @@ sub new {
   my $bconf = $self->{bayes}->{conf};
 
   foreach (split(';', $bconf->{bayes_sql_dsn})) {
-    my ($a, $b) = split('=');
+    my ($a, $b) = split(/=/, $_, 2);
     if (!defined $b) {
       warn("bayes: invalid bayes_sql_dsn config\n");
       return;
@@ -202,35 +202,38 @@ sub new {
 
 sub disconnect {
   my($self) = @_;
+  local($@, $!);
   if ($self->{connected}) {
-    local($@, $!);
     dbg("bayes: Redis disconnect");
-    $self->{connected} = 0; undef $self->{redis};
+    $self->{connected} = 0;
+    $self->{redis}->disconnect;
   }
+  undef $self->{redis};
 }
 
 sub DESTROY {
   my($self) = @_;
   local($@, $!, $_);
+  dbg("bayes: Redis destroy");
   $self->{connected} = 0; undef $self->{redis};
 }
 
 # Called from a Redis module on Redis->new and on automatic re-connect.
 # The on_connect() callback must not use batched calls!
 sub on_connect {
-  my($self, $r) = @_;
-  my $db_id = $self->{db_id} || 0;
+  my($r, $db_id, $pwd) = @_;
+  $db_id ||= 0;
   dbg("bayes: Redis on-connect, db_id %d", $db_id);
   eval {
     $r->call('SELECT', $db_id) eq 'OK' ? 1 : 0;
   } or do {
-    if ($@ =~ /\bNOAUTH\b/) {
-      defined $self->{password}
+    if ($@ =~ /^NOAUTH\b/ || $@ =~ /^ERR operation not permitted/) {
+      defined $pwd
         or die "Redis server requires authentication, no password provided";
-      $r->call('AUTH', $self->{password});
+      $r->call('AUTH', $pwd);
       $r->call('SELECT', $db_id);
     } else {
-      chomp $@; die "Redis error: $@";
+      chomp $@; die "Command 'SELECT $db_id' failed: $@";
     }
   };
   eval {
@@ -250,11 +253,14 @@ sub connect {
 
   my $err = $self->{timer}->run_and_catch(sub {
     $self->{opened_from_pid} = $$;
+    # Bug 7034: avoid a closure passing $self to $self->{redis}->{on_connect},
+    # otherwise a circular reference prevents object destruction!
+    my $db_id = $self->{db_id};
+    my $pwd = $self->{password};
     # will keep a persistent session open to a redis server
     $self->{redis} = Mail::SpamAssassin::Util::TinyRedis->new(
                        @{$self->{redis_conf}},
-                       on_connect => sub { $self->on_connect(@_) },
-                     );
+                       on_connect => sub { on_connect($_[0], $db_id, $pwd) });
     $self->{redis} or die "Error: $!";
   });
   if ($self->{timer}->timed_out()) {

@@ -30,6 +30,11 @@ which makes SQL calls involving the token column.  Since PostgreSQL uses BYTEA
 for the token column type you must make sure that the DBD driver does the proper
 quoting.  You can accomplish this by binding the token column to a specific type.
 
+In versions 8.3 and up, synchronous_commit is disabled for faster performance.
+Data is not guaranteed to be stored until (3 * wal_writer_delay) (default: 0.6s)
+after it is written. This tradeoff works for Bayes because we care about aggregate
+data and a small period of time can be lost without sacrificing accuracy.
+
 =cut
 
 package Mail::SpamAssassin::BayesStore::PgSQL;
@@ -930,6 +935,10 @@ sub _connect_db {
   }
   else {
     dbg("bayes: database connection established");
+  }
+
+  if ( $dbh->{pg_server_version} >= 80300 ) {
+    $dbh->do('SET synchronous_commit=off')
   }
 
   if ( $dbh->{pg_server_version} >= 80100 ) {

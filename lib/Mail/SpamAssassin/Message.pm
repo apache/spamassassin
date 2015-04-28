@@ -46,6 +46,11 @@ use strict;
 use warnings;
 use re 'taint';
 
+BEGIN {
+  eval { require Digest::SHA; import Digest::SHA qw(sha1 sha1_hex); 1 }
+  or do { require Digest::SHA1; import Digest::SHA1 qw(sha1 sha1_hex) }
+}
+
 use Mail::SpamAssassin;
 use Mail::SpamAssassin::Message::Node;
 use Mail::SpamAssassin::Message::Metadata;
@@ -117,6 +122,25 @@ sub new {
   $self->{master_deadline} = $opts->{'master_deadline'};
   $self->{suppl_attrib} = $opts->{'suppl_attrib'};
 
+  if ($self->{suppl_attrib}) {  # caller-provided additional information
+    # pristine_body_length is currently used by an eval test check_body_length
+    # Possible To-Do: Base the length on the @message array later down?
+    if (defined $self->{suppl_attrib}{body_size}) {
+      # Optional info provided by a caller; should reflect the original
+      # message body size if provided, and as such it may differ from the
+      # $self->{pristine_body} size, e.g. when the caller passed a truncated
+      # message to SpamAssassin, or when counting line-endings differently.
+      $self->{pristine_body_length} = $self->{suppl_attrib}{body_size};
+    }
+    if (ref $self->{suppl_attrib}{mimepart_digests}) {
+      # Optional info provided by a caller: an array of digest codes (e.g. SHA1)
+      # of each MIME part. Should reflect the original message if provided.
+      # As such it may differ from digests calculated by get_mimepart_digests(),
+      # e.g. when the caller passed a truncated message to SpamAssassin.
+      $self->{mimepart_digests} = $self->{suppl_attrib}{mimepart_digests};
+    }
+  }
+
   bless($self,$class);
 
   # create the metadata holder class
@@ -139,8 +163,8 @@ sub new {
       # and is faster than (<$message>) by 10..25 %
       # (a drawback is a short-term double storage of a text in $raw_str)
       #
-      my($inbuf,$nread,$raw_str); $raw_str = '';
-      while ( $nread=sysread($message,$inbuf,16384) ) { $raw_str .= $inbuf }
+      my($nread,$raw_str); $raw_str = '';
+      while ( $nread=sysread($message, $raw_str, 16384, length $raw_str) ) { }
       defined $nread  or die "error reading: $!";
       @message = split(/^/m, $raw_str, -1);
 
@@ -214,6 +238,9 @@ sub new {
     dbg("message: line ending changed to CRLF");
   }
 
+  # Is a CRLF -> LF line endings conversion necessary?
+  my $squash_crlf = $self->{line_ending} eq "\015\012";
+
   # Go through all the header fields of the message
   my $hdr_errors = 0;
   my $header;
@@ -240,6 +267,8 @@ sub new {
 
         # If it's not a valid header (aka: not in the form "foo:bar"), skip it.
         if (defined $value) {
+	  # CRLF -> LF line-endings conversion if necessary
+	  $value =~ s/\015\012/\012/sg  if $squash_crlf;
 	  $key =~ s/[ \t]+\z//;  # strip WSP before colon, obsolete rfc822 syn
 	  # limit the length of the pairs we store
 	  if (length($key) > MAX_HEADER_KEY_LENGTH) {
@@ -268,18 +297,21 @@ sub new {
  	last;
       }
       # should we assume entering a body on encountering invalid header field?
-      elsif ($current !~ /^[\041-\071\073-\176]+[ \t]*:/) {
-	# A field name MUST be composed of printable US-ASCII characters
-	# (i.e., characters that have values between 33 (041) and 126 (176),
-	# inclusive), except colon (072). Obsolete header field syntax
-	# allowed WSP before a colon.
-	if (++$hdr_errors <= 3) {
-	  # just consume but ignore a few invalid header fields
-	} else {  # enough is enough...
-	  $self->{'missing_head_body_separator'} = 1;
-	  unshift(@message, $current);
- 	  last;
- 	}
+      else {
+        # no re "strict";  # since perl 5.21.8: Ranges of ASCII printables...
+        if ($current !~ /^[\041-\071\073-\176]+[ \t]*:/) {
+	  # A field name MUST be composed of printable US-ASCII characters
+	  # (i.e., characters that have values between 33 (041) and 126 (176),
+	  # inclusive), except colon (072). Obsolete header field syntax
+	  # allowed WSP before a colon.
+	  if (++$hdr_errors <= 3) {
+	    # just consume but ignore a few invalid header fields
+	  } else {  # enough is enough...
+	    $self->{'missing_head_body_separator'} = 1;
+	    unshift(@message, $current);
+ 	    last;
+	  }
+	}
       }
 
       # start collecting a new header field
@@ -293,26 +325,16 @@ sub new {
   # will get modified below
   $self->{'pristine_body'} = join('', @message);
 
-  # pristine_body_length is currently used by an eval test check_body_length.  
-  # Possible To-Do: Base the length on the @message array later down?
-  # Or a different copy of the message post decoding?
-  if ($self->{suppl_attrib} && defined $self->{suppl_attrib}{body_size}) {
-    # optional info provided by a caller; should reflect the original
-    # message body size if provided, and as such it may differ from the
-    # $self->{pristine_body} size, e.g. when the caller passed a truncated
-    # message to SpamAssassin, or when counting line-endings differently
-    $self->{'pristine_body_length'} = $self->{suppl_attrib}{body_size};
-  } else {
-    $self->{'pristine_body_length'} = length($self->{'pristine_body'});
+  if (!defined $self->{pristine_body_length}) {
+    $self->{'pristine_body_length'} = length $self->{'pristine_body'};
   }
 
-  # CRLF -> LF  (but avoid expensive operation unless necessary)
-  # also merge multiple blank lines into a single one
-  my $squash_crlf = $self->{line_ending} eq "\015\012";
-  my $start;
   # iterate over lines in reverse order
+  # merge multiple blank lines into a single one
+  my $start;
   for (my $cnt=$#message; $cnt>=0; $cnt--) {
-    $message[$cnt] =~ s/\015\012/\012/  if $squash_crlf;
+    # CRLF -> LF line-endings conversion if necessary
+    $message[$cnt] =~ s/\015\012\z/\012/  if $squash_crlf;
 
     # line is blank
     if ($message[$cnt] =~ /^\s*$/) {
@@ -327,9 +349,10 @@ sub new {
 
     # if we've got a series of blank lines, get rid of them
     if (defined $start) {
+      my $max_blank_lines = 20;
       my $num = $start-$cnt;
-      if ($num > 10) {
-        splice @message, $cnt+2, $num-1;
+      if ($num > $max_blank_lines) {
+        splice @message, $cnt+2, $num-$max_blank_lines;
       }
       undef $start;
     }
@@ -717,25 +740,34 @@ sub parse_body {
     # one doesn't, assume it's malformed and send it to be parsed as a
     # non-multipart section
     #
-    if ( $toparse->[0]->{'type'} =~ /^multipart\//i && defined $toparse->[1] && ($toparse->[3] > 0)) {
+    my ($msg, $boundary, $body, $subparse) = @$toparse;
+
+    if ($msg->{'type'} =~ m{^multipart/}i && defined $boundary && $subparse > 0) {
       $self->_parse_multipart($toparse);
     }
     else {
       # If it's not multipart, go ahead and just deal with it.
       $self->_parse_normal($toparse);
 
-      # bug 5041: exclude message/partial messages, however
-      if ($toparse->[0]->{'type'} =~ /^message\b/i &&
-          $toparse->[0]->{'type'} !~ /^message\/partial$/i &&
-            ($toparse->[3] > 0))
+      # bug 5041: process message/*, but exclude message/partial content types
+      if ($msg->{'type'} =~ m{^message/(?!partial\z)}i && $subparse > 0)
       {
-        # Just decode the part, but we don't care about the result here.
-        $toparse->[0]->decode(0);
+        # Just decode the part, but we don't need the resulting string here.
+        $msg->decode(0);
 
-        # bug 5051, bug 3748: sometimes message/* parts have no content,
-        # and we get stuck waiting for STDIN, which is bad. :(
-        if (defined $toparse->[0]->{'decoded'} &&
-            $toparse->[0]->{'decoded'} ne '')
+        # bug 7125: decode and parse only message/rfc822 or message/global,
+        # but do not treat other message/* content types (like the ones listed
+        # here) as a message consisting of a header and a body, as they are not:
+        #    message/delivery-status, message/global-delivery-status,
+        #    message/feedback-report, message/global-headers,
+        #    message/global-disposition-notification,
+        #    message/disposition-notification, (and message/partial)
+
+        # bug 5051, bug 3748: check $msg->{decoded}: sometimes message/* parts
+        # have no content, and we get stuck waiting for STDIN, which is bad. :(
+
+        if ($msg->{'type'} =~ m{^message/(?:rfc822|global)\z}i &&
+            defined $msg->{'decoded'} && $msg->{'decoded'} ne '')
         {
 	  # Ok, so this part is still semi-recursive, since M::SA::Message
 	  # calls M::SA::Message, but we don't subparse the new message,
@@ -744,14 +776,14 @@ sub parse_body {
 	  # since it's faster.
 	  # 
           my $msg_obj = Mail::SpamAssassin::Message->new({
-    	    message	=>	$toparse->[0]->{'decoded'},
+    	    message	=>	$msg->{'decoded'},
 	    parsenow	=>	0,
 	    normalize	=>	$self->{normalize},
-	    subparse	=>	$toparse->[3]-1,
+	    subparse	=>	$subparse - 1,
 	    });
 
 	  # Add the new message to the current node
-          $toparse->[0]->add_body_part($msg_obj);
+          $msg->add_body_part($msg_obj);
 
 	  # now this is the sneaky bit ... steal the sub-message's parse_queue
 	  # and add it to ours.  then we'll handle the sub-message in our
@@ -762,15 +794,15 @@ sub parse_body {
 	  # Ok, we've subparsed, so go ahead and remove the raw and decoded
 	  # data because we won't need them anymore (the tree under this part
 	  # will have that data)
-	  if (ref $toparse->[0]->{'raw'} eq 'GLOB') {
+	  if (ref $msg->{'raw'} eq 'GLOB') {
 	    # Make sure we close it if it's a temp file -- Bug 5166
-	    close($toparse->[0]->{'raw'})
+	    close($msg->{'raw'})
 	      or die "error closing input file: $!";
 	  }
 
-	  delete $toparse->[0]->{'raw'};
+	  delete $msg->{'raw'};
 	  
-	  delete $toparse->[0]->{'decoded'};
+	  delete $msg->{'decoded'};
         }
       }
     }
@@ -820,6 +852,7 @@ sub _parse_multipart {
 
 	# if the line after the opening boundary isn't a header, flag it.
 	# we need to make sure that there's actually another line though.
+	# no re "strict";  # since perl 5.21.8: Ranges of ASCII printables...
 	if ($line+1 < $tmp_line && $body->[$line+1] !~ /^[\041-\071\073-\176]+:/) {
 	  $self->{'missing_mime_headers'} = 1;
 	}
@@ -900,6 +933,7 @@ sub _parse_multipart {
       # but this causes problems with horizontal lines when the boundary is
       # made up of dashes as well, etc.
       if (defined $boundary) {
+        # no re "strict";  # since perl 5.21.8: Ranges of ASCII printables...
         if ($line =~ /^--\Q${boundary}\E--\s*$/) {
 	  # Make a note that we've seen the end boundary
 	  $self->{mime_boundary_state}->{$boundary}--;
@@ -924,6 +958,7 @@ sub _parse_multipart {
 
     if (!$in_body) {
       # s/\s+$//;   # bug 5127: don't clean this up (yet)
+      # no re "strict";  # since perl 5.21.8: Ranges of ASCII printables...
       if (/^[\041-\071\073-\176]+[ \t]*:/) {
         if ($header) {
           my ( $key, $value ) = split ( /:\s*/, $header, 2 );
@@ -1031,7 +1066,9 @@ sub _parse_normal {
       # we cannot just delete immediately in the POSIX idiom, as this is
       # unportable (to win32 at least)
       push @{$self->{tmpfiles}}, $filepath;
+      dbg("message: storing a message part to file %s", $filepath);
       $fh->print(@{$body})  or die "error writing to $filepath: $!";
+      $fh->flush  or die "error writing (flush) to $filepath: $!";
       $msg->{'raw'} = $fh;
     }
   }
@@ -1045,87 +1082,50 @@ sub _parse_normal {
 
 # ---------------------------------------------------------------------------
 
-sub get_rendered_body_text_array {
+sub get_mimepart_digests {
   my ($self) = @_;
 
-  if (exists $self->{text_rendered}) { return $self->{text_rendered}; }
-
-  $self->{text_rendered} = [];
-
-  # Find all parts which are leaves
-  my @parts = $self->find_parts(qr/./,1);
-  return $self->{text_rendered} unless @parts;
-
-  # the html metadata may have already been set, so let's not bother if it's
-  # already been done.
-  my $html_needs_setting = !exists $self->{metadata}->{html};
-
-  # Go through each part
-  my $text = $self->get_header ('subject') || "\n";
-  for(my $pt = 0 ; $pt <= $#parts ; $pt++ ) {
-    my $p = $parts[$pt];
-
-    # put a blank line between parts ...
-    $text .= "\n";
-
-    my($type, $rnd) = $p->rendered(); # decode this part
-    if ( defined $rnd ) {
-      # Only text/* types are rendered ...
-      $text .= $rnd;
-
-      # TVD - if there are multiple parts, what should we do?
-      # right now, just use the last one.  we may need to give some priority
-      # at some point, ie: use text/html rendered if it exists, or
-      # text/plain rendered as html otherwise.
-      if ($html_needs_setting && $type eq 'text/html') {
-        $self->{metadata}->{html} = $p->{html_results};
-      }
-    }
+  if (!exists $self->{mimepart_digests}) {
+    # traverse all parts which are leaves, recursively
+    $self->{mimepart_digests} =
+      [ map(sha1_hex($_->decode) . ':' . lc($_->{type}||''),
+            $self->find_parts(qr/^/,1,1)) ];
   }
-
-  # whitespace handling (warning: small changes have large effects!)
-  $text =~ s/\n+\s*\n+/\f/gs;		# double newlines => form feed
-  $text =~ tr/ \t\n\r\x0b\xa0/ /s;	# whitespace => space
-  $text =~ tr/\f/\n/;			# form feeds => newline
-  
-  # warn "message: $text";
-
-  my @textary = split_into_array_of_short_lines ($text);
-  $self->{text_rendered} = \@textary;
-
-  return $self->{text_rendered};
+  return $self->{mimepart_digests};
 }
 
 # ---------------------------------------------------------------------------
 
-# TODO: possibly this should just replace get_rendered_body_text_array().
-# (although watch out, this one doesn't copy {html} to metadata)
-sub get_visible_rendered_body_text_array {
-  my ($self) = @_;
+# common code for get_rendered_body_text_array,
+# get_visible_rendered_body_text_array, get_invisible_rendered_body_text_array
+#
+sub get_body_text_array_common {
+  my ($self, $method_name) = @_;
 
-  if (exists $self->{text_visible_rendered}) {
-    return $self->{text_visible_rendered};
-  }
+  my $key = 'text_' . $method_name;
+  if (exists $self->{$key}) { return $self->{$key} }
 
-  $self->{text_visible_rendered} = [];
+  $self->{$key} = [];
 
   # Find all parts which are leaves
   my @parts = $self->find_parts(qr/./,1);
-  return $self->{text_visible_rendered} unless @parts;
+  return $self->{$key} unless @parts;
 
   # the html metadata may have already been set, so let's not bother if it's
   # already been done.
   my $html_needs_setting = !exists $self->{metadata}->{html};
 
+  my $text = $method_name eq 'invisible_rendered' ? ''
+               : ($self->get_header('subject') || "\n");
+
   # Go through each part
-  my $text = $self->get_header ('subject') || "\n";
-  for(my $pt = 0 ; $pt <= $#parts ; $pt++ ) {
+  for (my $pt = 0 ; $pt <= $#parts ; $pt++ ) {
     my $p = $parts[$pt];
 
     # put a blank line between parts ...
-    $text .= "\n";
+    $text .= "\n"  if $text ne '';
 
-    my($type, $rnd) = $p->visible_rendered(); # decode this part
+    my($type, $rnd) = $p->$method_name();  # decode this part
     if ( defined $rnd ) {
       # Only text/* types are rendered ...
       $text .= $rnd;
@@ -1142,64 +1142,31 @@ sub get_visible_rendered_body_text_array {
 
   # whitespace handling (warning: small changes have large effects!)
   $text =~ s/\n+\s*\n+/\f/gs;		# double newlines => form feed
-  $text =~ tr/ \t\n\r\x0b\xa0/ /s;	# whitespace => space
+# $text =~ tr/ \t\n\r\x0b\xa0/ /s;	# whitespace (incl. VT, NBSP) => space
+  $text =~ tr/ \t\n\r\x0b/ /s;		# whitespace (incl. VT) => space
   $text =~ tr/\f/\n/;			# form feeds => newline
 
-  my @textary = split_into_array_of_short_lines ($text);
-  $self->{text_visible_rendered} = \@textary;
+  my @textary = split_into_array_of_short_lines($text);
+  $self->{$key} = \@textary;
 
-  return $self->{text_visible_rendered};
+  return $self->{$key};
+}
+
+# ---------------------------------------------------------------------------
+
+sub get_rendered_body_text_array {
+  my ($self) = @_;
+  return $self->get_body_text_array_common('rendered');
+}
+
+sub get_visible_rendered_body_text_array {
+  my ($self) = @_;
+  return $self->get_body_text_array_common('visible_rendered');
 }
 
 sub get_invisible_rendered_body_text_array {
   my ($self) = @_;
-
-  if (exists $self->{text_invisible_rendered}) {
-    return $self->{text_invisible_rendered};
-  }
-
-  $self->{text_invisible_rendered} = [];
-
-  # Find all parts which are leaves
-  my @parts = $self->find_parts(qr/./,1);
-  return $self->{text_invisible_rendered} unless @parts;
-
-  # the html metadata may have already been set, so let's not bother if it's
-  # already been done.
-  my $html_needs_setting = !exists $self->{metadata}->{html};
-
-  # Go through each part
-  my $text = '';
-  for(my $pt = 0 ; $pt <= $#parts ; $pt++ ) {
-    my $p = $parts[$pt];
-
-    # put a blank line between parts ...
-    $text .= "\n" if ( $text );
-
-    my($type, $rnd) = $p->invisible_rendered(); # decode this part
-    if ( defined $rnd ) {
-      # Only text/* types are rendered ...
-      $text .= $rnd;
-
-      # TVD - if there are multiple parts, what should we do?
-      # right now, just use the last one.  we may need to give some priority
-      # at some point, ie: use text/html rendered if it exists, or
-      # text/plain rendered as html otherwise.
-      if ($html_needs_setting && $type eq 'text/html') {
-        $self->{metadata}->{html} = $p->{html_results};
-      }
-    }
-  }
-
-  # whitespace handling (warning: small changes have large effects!)
-  $text =~ s/\n+\s*\n+/\f/gs;		# double newlines => form feed
-  $text =~ tr/ \t\n\r\x0b\xa0/ /s;	# whitespace => space
-  $text =~ tr/\f/\n/;			# form feeds => newline
-
-  my @textary = split_into_array_of_short_lines ($text);
-  $self->{text_invisible_rendered} = \@textary;
-
-  return $self->{text_invisible_rendered};
+  return $self->get_body_text_array_common('invisible_rendered');
 }
 
 # ---------------------------------------------------------------------------

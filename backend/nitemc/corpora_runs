@@ -4,8 +4,9 @@
 
 TZ=UTC; export TZ
 DIR=$HOME/versions/trunk
-SVN=/opt/subversion-current/bin/svn
-SVNVERS=/opt/subversion-current/bin/svnversion
+#Changed for spamassassin-vm
+SVN=/usr/bin/svn
+SVNVERS=/usr/bin//svnversion
 
 if [ ! -d $DIR ]; then
   echo "Whaaaa?!?  No directory?" >&2
@@ -23,4 +24,4 @@ RREV=`$SVNVERS .`
 REV=`echo $RREV | awk -F: '{print $1}' | tr -cd '[0-9]'`
 DATE=`date "+%Y-%m-%d"`
 
-echo "$DATE\t$REV"
+echo -e "$DATE\t$REV"
