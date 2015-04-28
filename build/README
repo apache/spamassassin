@@ -28,6 +28,7 @@ SPAMASSASSIN DEVELOPMENT SNAPSHOT PROCEDURE
   Copy them to wherever you want, yourself.
 
 
+
 SPAMASSASSIN RELEASE PROCEDURE
 ==============================
 
@@ -94,6 +95,7 @@ SPAMASSASSIN RELEASE PROCEDURE
 
   Verify that the X-Spam-* headers use the correct version string,
   without an SVN revision number (those are only for dev and pre builds).
+
   NOTE: If the date is old, don't worry, it will change later with the
         relbuild checkout.
 
@@ -133,7 +135,7 @@ SPAMASSASSIN RELEASE PROCEDURE
 
 - Word wrap the Changes file with something like 
 
-    fold -sw 74 Changes.tmp > Changes && rm Changes.tmp
+    fold -sw 74 Changes.tmp > Changes && rm -f Changes.tmp
 
 - run "make distcheck" to ensure all files are included in the
   distribution that should be, and to ensure all files that are listed
@@ -196,7 +198,7 @@ SPAMASSASSIN RELEASE PROCEDURE
 
   - For a trunk release candidate (x.y.0-rc1), pre-release (x.y.0-preZ) or alpha (x.y.0-alphaZ):
 
-    vers=3_4_0_rc_2
+    vers=3_4_1_rc_2
 
     Then run:
 
@@ -270,12 +272,12 @@ SPAMASSASSIN RELEASE PROCEDURE
 - Check the README file for any items to change.
 
 - (for any rc, prerelease, or full release) Place the tarballs in a
-  discreet location (discreet means not linked from the "downloads" page
+  discrete location (discrete means not linked from the "downloads" page
   of the website, but included in the vote mail) and request a vote on the
   development mailing list to make the release.  Post the URL,
   md5sums/sha1sums, and proposed release announcement mail to the dev
   list.  The default location -- ~/public_html/devel/ , or
-  http://people.apache.org/~jm/devel/ , qualifies as "discreet".
+  http://people.apache.org/~jm/devel/ , qualifies as "discrete".
 
   If you build on the zone, you will need to scp them over:
 
@@ -384,6 +386,9 @@ SPAMASSASSIN RELEASE PROCEDURE
         su - updatesd
         cd /home/updatesd/svn/spamassassin/build/mkupdates
         ./update-rules-3.3 3.4
+
+  NOTE: Is this needed with our rule update process?  not convinced it
+  is...
 
 - publish the tarballs
 
