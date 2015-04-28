@@ -166,7 +166,9 @@ sub sa_t_init {
   # do not remove prior test results!
   # rmtree ("log");
 
-  mkdir ("log", 0755);
+  unless (-d "log") {
+    mkdir ("log", 0755) or die ("Error creating log dir: $!");
+  }
   chmod (0755, "log"); # set in case log already exists with wrong permissions
   system("chacl -B log 2>/dev/null || setfacl -b log 2>/dev/null"); # remove acls that confuse test
 

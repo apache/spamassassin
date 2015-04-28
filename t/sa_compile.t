@@ -5,6 +5,8 @@ $ENV{'TEST_PERL_TAINT'} = 'no';     # inhibit for this test
 use SATest; sa_t_init("sa_compile");
 use Test;
 use Config;
+use File::Basename;
+use File::Path qw/mkpath/;
 
 my $temp_binpath = $Config{sitebinexp};
 $temp_binpath =~ s/^\Q$Config{prefix}\E//;
@@ -75,8 +77,14 @@ sub run_makefile_pl {
 
 sub set_rules {
   my $rules = shift;
-  open RULES, ">$instdir/foo/share/spamassassin/20_testrules.cf"
-          or die "cannot write $instdir/foo/share/spamassassin/20_testrules.cf";
+
+  #Create the dir for the cf file
+  my $file = "$instdir/foo/share/spamassassin/20_testrules.cf";
+  my $dir = dirname($file);
+  mkpath($dir);
+
+  open RULES, ">$file"
+          or die "cannot write $file - $!";
   print RULES qq{
 
     use_bayes 0
@@ -86,8 +94,13 @@ sub set_rules {
   };
   close RULES or die;
 
-  open RULES, ">$instdir/foo/etc/mail/spamassassin/v330.pre"
-          or die "cannot write $instdir/foo/etc/mail/spamassassin/v330.pre";
+  #Create the dir for the pre file
+  $file = "$instdir/foo/etc/mail/spamassassin/v330.pre";
+  $dir = dirname($file);
+  mkpath($dir);
+
+  open RULES, ">$file"
+          or die "cannot write $file - $!";
   print RULES qq{
 
     loadplugin Mail::SpamAssassin::Plugin::MIMEHeader
