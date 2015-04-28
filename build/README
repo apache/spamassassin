@@ -341,7 +341,8 @@ SPAMASSASSIN RELEASE PROCEDURE
   branch, off the trunk.
 
     repo=https://svn.apache.org/repos/asf/spamassassin
-    svn copy $repo/tags/spamassassin_release_3_4_0 $repo/branches/3.4 -m 'Creating 3.4 branch'
+    svn copy $repo/tags/spamassassin_release_3_4_1 $repo/branches/3.4 \
+    -m 'Creating 3.4 branch based on 3.4.1 so that trunk can go to 4.0'
 
   "trunk" is SVN's concept of head.  Typically, our branches are named
   for their minor version number.  In the example above, 3.4 is the
@@ -361,24 +362,26 @@ SPAMASSASSIN RELEASE PROCEDURE
 
   - lib/Mail/SpamAssassin.pm
 
+
+- In build/mkupdates/run_part2 change versions="X.Y.Z" to the new
+  development version (A.B.C).
+
+
 - [X.Y.0 RELEASES ONLY]: NOTE: This may change, make sure this info is
   still accurate before changing this (preferrably find out BEFORE doing
   an X.Y.0 release.  Update the mkupdates stuff:
 
-  - In build/mkupdates/run_part2 change versions="X.Y.0" to the new
-    development version (X.Y+1.0).
-
-  - Create an empty file for the new version number in
-    /var/named/updates.dev.spamassassin.org.d/ on the zone and chown to
-    updatesd and chgrp to others.
-
-    NOTE: I don't believe this does anything KAM: 2014-02-11
+#  - Create an empty file for the new version number in
+#    /var/named/updates.dev.spamassassin.org.d/ on the zone and chown to
+#    updatesd and chgrp to others.
+#
+#    NOTE: I don't believe this does anything KAM: 2014-02-11 and the
+#    directory doesn't exist.
 
   - Add "$INCLUDE /var/named/updates.spamassassin.org.d/X.Y+1.0" to the
-    spamassassin.org zone file in spamassassin/dns/
+    /var/named/spamassassin.org zone file OR use a CNAME (see below)
 
-    NOTE: I don't believe this is right.  Per bug 6644, using a CNAME for
-    3.4.1 to 3.4.0 - KAM: 2014-02-11
+    NOTE: Per bug 6644, using a CNAME for 3.4.1, 3.4.2, 4.0.0 to 3.3.2
 
   - commit the changes, update the zone (if not doing above on the zone -
     NOTE: See /var/named/README) and tick the zone file using build/mkupdates/tick_zone_serial
@@ -406,7 +409,7 @@ SPAMASSASSIN RELEASE PROCEDURE
         ./update-rules-3.3 3.4
 
   NOTE: Is this needed with our rule update process?  not convinced it
-  is...
+  is... 2015-04-28
 
 - publish the tarballs
 
