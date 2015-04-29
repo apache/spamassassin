@@ -24,6 +24,9 @@ use strict;
 use warnings;
 use re 'taint';
 
+require 5.008;     # need basic Unicode support for HTML::Parser::utf8_mode
+# require 5.008008;  # Bug 3787; [perl #37950]: Malformed UTF-8 character ...
+
 use HTML::Parser 3.43 ();
 use Mail::SpamAssassin::Logger;
 use Mail::SpamAssassin::Constants qw(:sa);
@@ -86,7 +89,7 @@ $ok_attributes{p}{$_} = 1 for qw( style );
 $ok_attributes{div}{$_} = 1 for qw( style );
 
 sub new {
-  my ($class) = @_;
+  my ($class, $character_semantics_input, $character_semantics_output) = @_;
   my $self = $class->SUPER::new(
 		api_version => 3,
 		handlers => [
@@ -99,7 +102,9 @@ sub new {
 			declaration => ["html_declaration", "self,text"],
 		],
 		marked_sections => 1);
-
+  $self->{SA_character_semantics_input} = $character_semantics_input;
+  $self->{SA_encode_results} =
+    $character_semantics_input && !$character_semantics_output;
   $self;
 }
 
@@ -125,7 +130,7 @@ sub html_end {
 
   my @uri;
 
-  # add the canonified version of each uri to the detail list
+  # add the canonicalized version of each uri to the detail list
   if (defined $self->{uri}) {
     @uri = keys %{$self->{uri}};
   }
@@ -232,24 +237,27 @@ sub parse {
   # NOTE: HTML::Parser can cope with: <?xml pis>, <? with space>, so we
   # don't need to fix them here.
 
-  # HTML::Parser converts &nbsp; into a question mark ("?") for some
-  # reason, so convert them to spaces.  Confirmed in 3.31, at least.
+  # # (outdated claim) HTML::Parser converts &nbsp; into a question mark ("?")
+  # # for some reason, so convert them to spaces.  Confirmed in 3.31, at least.
+  # ... Actually it doesn't, it is correctly coverted into Unicode NBSP,
+  # nevertheless it does not hurt to treat it as a space.
   $text =~ s/&nbsp;/ /g;
 
   # bug 4695: we want "<br/>" to be treated the same as "<br>", and
   # the HTML::Parser API won't do it for us
   $text =~ s/<(\w+)\s*\/>/<$1>/gi;
 
-  # Ignore stupid warning that can't be suppressed: 'Parsing of
-  # undecoded UTF-8 will give garbage when decoding entities at ..' (bug 4046)
-  {
-    local $SIG{__WARN__} = sub {
-      warn @_ unless (defined $_[0] && $_[0] =~ /^Parsing of undecoded UTF-/);
-    };
-
-    $self->SUPER::parse($text);
+  if (!$self->UNIVERSAL::can('utf8_mode')) {
+    # utf8_mode is cleared by default, only warn if it would need to be set
+    warn "message: cannot set utf8_mode, module HTML::Parser is too old\n"
+      if !$self->{SA_character_semantics_input};
+  } else {
+    $self->SUPER::utf8_mode($self->{SA_character_semantics_input} ? 0 : 1);
+    dbg("message: HTML::Parser utf8_mode %s",
+        $self->SUPER::utf8_mode ? "on (assumed UTF-8 octets)"
+                                : "off (default, assumed Unicode characters)");
   }
-
+  $self->SUPER::parse($text);
   $self->SUPER::eof;
 
   return $self->{text};
@@ -257,6 +265,7 @@ sub parse {
 
 sub html_tag {
   my ($self, $tag, $attr, $num) = @_;
+  utf8::encode($tag) if $self->{SA_encode_results};
 
   my $maybe_namespace = ($tag =~ m@^(?:o|st\d):[\w-]+/?$@);
 
@@ -276,15 +285,15 @@ sub html_tag {
 
   # ignore non-elements
   if (exists $elements{$tag} || exists $tricks{$tag}) {
-    text_style(@_) if exists $elements_text_style{$tag};
+    $self->text_style($tag, $attr, $num) if exists $elements_text_style{$tag};
 
     # bug 5009: things like <p> and </p> both need dealing with
-    html_whitespace(@_) if exists $elements_whitespace{$tag};
+    $self->html_whitespace($tag) if exists $elements_whitespace{$tag};
 
     # start tags
     if ($num == 1) {
-      html_uri(@_) if exists $elements_uri{$tag};
-      html_tests(@_);
+      $self->html_uri($tag, $attr) if exists $elements_uri{$tag};
+      $self->html_tests($tag, $attr, $num);
     }
     # end tags
     else {
@@ -315,13 +324,12 @@ sub push_uri {
   my ($self, $type, $uri) = @_;
 
   $uri = $self->canon_uri($uri);
+  utf8::encode($uri) if $self->{SA_encode_results};
 
   my $target = target_uri($self->{base_href} || "", $uri);
 
   # skip things like <iframe src="" ...>
-  if (length $uri) {
-    $self->{uri}->{$uri}->{types}->{$type} = 1;
-  }
+  $self->{uri}->{$uri}->{types}->{$type} = 1  if $uri ne '';
 }
 
 sub canon_uri {
@@ -382,6 +390,7 @@ sub html_uri {
 
 	# Make sure it ends in a slash
 	$uri .= "/" unless $uri =~ m@/$@;
+        utf8::encode($uri) if $self->{SA_encode_results};
 	$self->{base_href} = $uri;
       }
     }
@@ -599,12 +608,14 @@ sub html_tests {
   my ($self, $tag, $attr, $num) = @_;
 
   if ($tag eq "font" && exists $attr->{face}) {
-    if ($attr->{face} !~ /^[a-z][a-z -]*[a-z](?:,\s*[a-z][a-z -]*[a-z])*$/i) {
+    if ($attr->{face} !~ /^[a-z ][a-z -]*[a-z](?:,\s*[a-z][a-z -]*[a-z])*$/i) {
       $self->put_results(font_face_bad => 1);
     }
   }
   if ($tag eq "img" && exists $self->{inside}{a} && $self->{inside}{a} > 0) {
-    $self->{uri}->{$self->{anchor_last}}->{anchor_text}->[-1] .= "<img>\n";
+    my $uri = $self->{anchor_last};
+    utf8::encode($uri) if $self->{SA_encode_results};
+    $self->{uri}->{$uri}->{anchor_text}->[-1] .= "<img>\n";
     $self->{anchor}->[-1] .= "<img>\n";
   }
 
@@ -639,8 +650,10 @@ sub html_tests {
 
   # special text delimiters - <a> and <title>
   if ($tag eq "a") {
-    $self->{anchor_last} = (exists $attr->{href} ? $self->canon_uri($attr->{href}) : "");
-    push(@{$self->{uri}->{$self->{anchor_last}}->{anchor_text}}, '');
+    my $uri = $self->{anchor_last} =
+      (exists $attr->{href} ? $self->canon_uri($attr->{href}) : "");
+    utf8::encode($uri) if $self->{SA_encode_results};
+    push(@{$self->{uri}->{$uri}->{anchor_text}}, '');
     push(@{$self->{anchor}}, '');
   }
   if ($tag eq "title") {
@@ -681,7 +694,8 @@ sub display_text {
     }
   }
   else {
-    $text =~ s/[ \t\n\r\f\x0b\xa0]+/ /g;
+    # NBSP:  UTF-8: C2 A0, ISO-8859-*: A0
+    $text =~ s/[ \t\n\r\f\x0b]+|\xc2\xa0/ /gs;
     # trim leading whitespace if previous element was whitespace 
     # and current element is not invisible
     if (@{ $self->{text} } && !$display{invisible} &&
@@ -701,6 +715,7 @@ sub display_text {
 
 sub html_text {
   my ($self, $text) = @_;
+  utf8::encode($text) if $self->{SA_encode_results};
 
   # text that is not part of body
   if (exists $self->{inside}{script} && $self->{inside}{script} > 0)
@@ -715,7 +730,9 @@ sub html_text {
   # text that is part of body and also stored separately
   if (exists $self->{inside}{a} && $self->{inside}{a} > 0) {
     # this doesn't worry about nested anchors
-    $self->{uri}->{$self->{anchor_last}}->{anchor_text}->[-1] .= $text;
+    my $uri = $self->{anchor_last};
+    utf8::encode($uri) if $self->{SA_encode_results};
+    $self->{uri}->{$uri}->{anchor_text}->[-1] .= $text;
     $self->{anchor}->[-1] .= $text;
   }
   if (exists $self->{inside}{title} && $self->{inside}{title} > 0) {
@@ -723,7 +740,9 @@ sub html_text {
   }
 
   my $invisible_for_bayes = 0;
-  if ($text =~ /[^ \t\n\r\f\x0b\xa0]/) {
+
+  # NBSP:  UTF-8: C2 A0, ISO-8859-*: A0
+  if ($text !~ /^(?:[ \t\n\r\f\x0b]|\xc2\xa0)*\z/s) {
     $invisible_for_bayes = $self->html_font_invisible($text);
   }
 
@@ -731,6 +750,7 @@ sub html_text {
     # ideas discarded since they would be easy to evade:
     # 1. using \w or [A-Za-z] instead of \S or non-punctuation
     # 2. exempting certain tags
+    # no re "strict";  # since perl 5.21.8: Ranges of ASCII printables...
     if ($text =~ /^[^\s\x21-\x2f\x3a-\x40\x5b-\x60\x7b-\x7e]/s &&
 	$self->{text}->[-1] =~ /[^\s\x21-\x2f\x3a-\x40\x5b-\x60\x7b-\x7e]\z/s)
     {
@@ -757,12 +777,14 @@ sub html_text {
 # note: $text includes <!-- and -->
 sub html_comment {
   my ($self, $text) = @_;
+  utf8::encode($text) if $self->{SA_encode_results};
 
   push @{ $self->{comment} }, $text;
 }
 
 sub html_declaration {
   my ($self, $text) = @_;
+  utf8::encode($text) if $self->{SA_encode_results};
 
   if ($text =~ /^<!doctype/i) {
     my $tag = "!doctype";

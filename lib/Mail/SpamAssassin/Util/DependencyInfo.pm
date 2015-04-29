@@ -141,7 +141,13 @@ $have_sha ? {
   module => 'Geo::IP',
   version => 0,
   desc => 'Used by the RelayCountry plugin (not enabled by default) to determine
-  the domain country codes of each relay in the path of an email.',
+  the domain country codes of each relay in the path of an email.  Also used by 
+  the URILocalBL plugin to provide ISP and Country code based filtering.',
+},
+{
+  module => 'Net::CIDR::Lite',
+  version => 0,
+  desc => 'Used by the URILocalBL plugin to process IP address ranges.',
 },
 {
   module => 'Razor2::Client::Agent',
@@ -235,11 +241,13 @@ $have_sha ? {
   If-Modified-Since GET requests.',
 },
 {
-  module => 'Encode::Detect',
+  module => 'Encode::Detect::Detector',
   version => 0,
-  desc => 'If you plan to use the normalize_charset config setting to detect
-  charsets and convert them into Unicode, you will need to install
-  this module.',
+  desc => 'If you plan to use the normalize_charset config setting to
+  decode message parts from their declared character set into Unicode, and
+  such decoding fails, the Encode::Detect::Detector module (when available)
+  may be consulted to provide an alternative guess on a character set of a
+  problematic message part.',
 },
 {
   module => 'Net::Patricia',
@@ -253,6 +261,14 @@ $have_sha ? {
   a first-matching entry. So when overlapping network ranges are given,
   specifying more specific subnets (longest netmask) first, followed by
   wider subnets ensures predictable results.',
+},
+{
+  module => 'Net::DNS::Nameserver',
+  version => 0,
+  desc => 'Net::DNS:Nameserver is typically part of Net::DNS.  However, RHEL/
+  CentOS systems may install it using separate packages.  Because of this, we
+  check for both Net::DNS and Net::DNS::Nameserver.  However, 
+  Net::DNS::Nameserver is only used in make test as of June 2014.',
 },
 );
 

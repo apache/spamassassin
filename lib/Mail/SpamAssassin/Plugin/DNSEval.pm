@@ -315,35 +315,33 @@ sub check_rbl_results_for {
 # this only checks the address host name and not the domain name because
 # using the domain name had much worse results for dsn.rfc-ignorant.org
 sub check_rbl_from_host {
-  _check_rbl_addresses(@_, $_[1]->all_from_addrs());
+  my ($self, $pms, $rule, $set, $rbl_server, $subtest) = @_; 
+  _check_rbl_addresses($self, $pms, $rule, $set, $rbl_server, $subtest, $_[1]->all_from_addrs_domains());
 }
 
 =over 4
 
 =item check_rbl_from_domain
 
-This checks all the from addrs domain names as an alternate to check_rbl_from_host
+This checks all the from addrs domain names as an alternate to check_rbl_from_host.  As of v3.4.1, it has been improved to include a subtest for a specific octet.
+
+=back
 
 =cut
 sub check_rbl_from_domain {
-  _check_rbl_addresses(@_, $_[1]->all_from_addrs_domains());
+  my ($self, $pms, $rule, $set, $rbl_server, $subtest) = @_;
+  _check_rbl_addresses($self, $pms, $rule, $set, $rbl_server, $subtest, $_[1]->all_from_addrs_domains());
 }
-
-=item has_check_rbl_from_domain
-
-Adds capability check for "if can()" for check_rbl_from_domain
-
-=cut
-sub has_check_rbl_from_domain { 1 }
 
 # this only checks the address host name and not the domain name because
 # using the domain name had much worse results for dsn.rfc-ignorant.org
 sub check_rbl_envfrom {
-  _check_rbl_addresses(@_, $_[1]->get('EnvelopeFrom:addr',undef));
+  my ($self, $pms, $rule, $set, $rbl_server, $subtest) = @_; 
+  _check_rbl_addresses($self, $pms, $rule, $set, $rbl_server, $subtest, $_[1]->get('EnvelopeFrom:addr',undef));
 }
 
 sub _check_rbl_addresses {
-  my ($self, $pms, $rule, $set, $rbl_server, @addresses) = @_;
+  my ($self, $pms, $rule, $set, $rbl_server, $subtest, @addresses) = @_;
   
   return 0 if $self->{main}->{conf}->{skip_rbl_checks};
   return 0 unless $pms->is_dns_available();
@@ -371,7 +369,7 @@ sub _check_rbl_addresses {
 
   for my $host (keys %hosts) {
     dbg("dns: checking [$host] / $rule / $set / $rbl_server");
-    $pms->do_rbl_lookup($rule, $set, 'A', "$host.$rbl_server");
+    $pms->do_rbl_lookup($rule, $set, 'A', "$host.$rbl_server", $subtest);
   }
 }
 

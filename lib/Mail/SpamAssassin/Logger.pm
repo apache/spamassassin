@@ -236,7 +236,7 @@ sub _log {
   }
 
   my ($level, $message, @args) = @_;
-  $message =~ s/^([a-z0-9_-]*):\s*//i;
+  $message =~ s/^(?:[a-z0-9_-]*):\s*//i;
 
   $message = sprintf($message,@args)  if @args;
   $message =~ s/\n+$//s;
@@ -322,8 +322,8 @@ sub remove {
 
 =item would_log($level, $facility)
 
-Returns 0 if a message at the given level and with the given facility
-would be logged.  Returns 1 if a message at a given level and facility
+Returns false if a message at the given level and with the given facility
+would not be logged.  Returns 1 if a message at a given level and facility
 would be logged normally.  Returns 2 if the facility was specifically
 enabled.
 

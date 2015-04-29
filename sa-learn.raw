@@ -17,6 +17,7 @@
 # </@LICENSE>
 
 use strict;
+use warnings;
 use bytes;
 
 use Errno qw(EBADF);
@@ -79,6 +80,7 @@ $SIG{PIPE} = 'IGNORE';
   'force-expire' => 0,
   'use-ignores'  => 0,
   'nosync'       => 0,
+  'quiet'        => 0,
   'cf'           => []
 );
 
@@ -94,6 +96,7 @@ GetOptions(
   'sync'        => \$synconly,
   'rebuild'     => sub { $synconly = 1; warn "The --rebuild option has been deprecated.  Please use --sync instead.\n" },
 
+  'q|quiet'     => \$opt{'quiet'},
   'username|u=s'    => \$opt{'username'},
   'configpath|config-file|config-dir|c|C=s' => \$opt{'configpath'},
   'prefspath|prefs-file|p=s'                => \$opt{'prefspath'},
@@ -355,7 +358,7 @@ $spamtest->{bayes_scanner}{use_ignores} = $opt{'use-ignores'};
 if ($synconly) {
   $spamtest->rebuild_learner_caches(
     {
-      verbose  => 1,
+      verbose  => !$opt{'quiet'},
       showdots => $opt{'showdots'}
     }
   );
@@ -457,7 +460,7 @@ eval {
   my $iter = new Mail::SpamAssassin::ArchiveIterator(
     {
         # skip messages larger than max-size bytes,
-        # 0 for no limit, undef defaults to 256 KiB
+        # 0 for no limit, undef defaults to 256 KB
       'opt_max_size' => $opt{'max-size'},
       'opt_want_date' => 0,
       'opt_from_regex' => $spamtest->{conf}->{mbox_format_from_regex},
@@ -479,7 +482,8 @@ eval {
   $progress->final() if ($opt{progress} && $progress);
 
   my $phrase = defined $forget ? "Forgot" : "Learned";
-  print "$phrase tokens from $learnedcount message(s) ($messagecount message(s) examined)\n";
+  print "$phrase tokens from $learnedcount message(s) ($messagecount message(s) examined)\n"
+    if !$opt{'quiet'};
 
   # If we needed to make a tempfile, go delete it.
   if (defined $tempfile) {
@@ -630,7 +634,7 @@ Options:
  --mbox                Input sources are in mbox format
  --mbx                 Input sources are in mbx format
  --max-size <b>        Skip messages larger than b bytes;
-                       defaults to 256 KiB, 0 implies no limit
+                       defaults to 256 KB, 0 implies no limit
  --showdots            Show progress using dots
  --progress            Show progress using progress bar
  --no-sync             Skip synchronizing the database and journal

@@ -55,7 +55,7 @@ sub check_for_http_redirector {
     while (s{^https?://([^/:\?]+).+?(https?:/{0,2}?([^/:\?]+).*)$}{$2}i) {
       my ($redir, $dest) = ($1, $3);
       foreach ($redir, $dest) {
-	$_ = Mail::SpamAssassin::Util::uri_to_domain(lc($_)) || $_;
+	$_ = $self->{main}->{registryboundaries}->uri_to_domain($_) || $_;
       }
       next if ($redir eq $dest);
       dbg("eval: redirect: found $redir to $dest, flagging");

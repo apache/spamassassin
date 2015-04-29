@@ -180,7 +180,7 @@ how frequently this may happen, mind you.
 
 =item opt_from_regex
 
-This setting allows for flexibility in specifying the mbox format From seperator.
+This setting allows for flexibility in specifying the mbox format From separator.
 
 It defaults to the regular expression:
 
@@ -417,7 +417,10 @@ sub _run_file {
 sub _run_mailbox {
   my ($self, $class, $format, $where, $date) = @_;
 
-  my ($file, $offset) = ($where =~ m/(.*)\.(\d+)$/);
+  my ($file, $offset);
+  { local($1,$2);  # Bug 7140 (avoids perl bug [perl #123880])
+    ($file, $offset) = ($where =~ m/(.*)\.(\d+)$/);
+  }
   my @msg;
   my $header;
   if (!_mail_open($file)) {

@@ -45,6 +45,8 @@ use warnings;
 use bytes;
 use re 'taint';
 
+require 5.008001;  # needs utf8::is_utf8()
+
 use Mail::SpamAssassin::Logger;
 
 BEGIN {
@@ -60,11 +62,10 @@ BEGIN {
   @EXPORT_OK = qw(&local_tz &base64_decode &untaint_var &untaint_file_path
                   &exit_status_str &proc_status_ok &am_running_on_windows
                   &reverse_ip_address &decode_dns_question_entry
-                  &secure_tmpfile &secure_tmpdir);
+                  &secure_tmpfile &secure_tmpdir &uri_list_canonicalize);
 }
 
 use Mail::SpamAssassin;
-use Mail::SpamAssassin::Util::RegistrarBoundaries;
 
 use Config;
 use IO::Handle;
@@ -238,11 +239,12 @@ sub untaint_file_path {
   local ($1);
   # Barry Jaspan: allow ~ and spaces, good for Windows.  Also return ''
   # if input is '', as it is a safe path.
-  my $chars = '-_A-Za-z\xA0-\xFF0-9\.\%\@\=\+\,\/\\\:';
+  my $chars = '-_A-Za-z0-9\xA0-\xFF\.\%\@\=\+\,\/\\\:';
   my $re = qr/^\s*([$chars][${chars}~ ]*)$/o;
 
   if ($path =~ $re) {
-    return untaint_var($1);
+    $path = $1;
+    return untaint_var($path);
   } else {
     warn "util: refusing to untaint suspicious path: \"$path\"\n";
     return $path;
@@ -282,40 +284,43 @@ sub untaint_hostname {
 #
 sub untaint_var {
 # my $arg = $_[0];  # avoid copying unnecessarily
-  my $r = ref $_[0];
-  if (!$r) {
+  if (!ref $_[0]) { # optimized by-far-the-most-common case
     no re 'taint';  # override a  "use re 'taint'"  from outer scope
-    return if !defined $_[0];
+    return undef if !defined $_[0]; ## no critic (ProhibitExplicitReturnUndef)  - See Bug 7120
     local($1); # avoid Perl taint bug: tainted global $1 propagates taintedness
     $_[0] =~ /^(.*)\z/s;
     return $1;
-  }
-  elsif ($r eq 'ARRAY') {
-    my $arg = $_[0];
-    $_ = untaint_var($_)  for @{$arg};
-    return @{$arg} if wantarray;
-  }
-  elsif ($r eq 'HASH') {
-    my $arg = $_[0];
-    if ($arg == \%ENV) {  # purge undefs from %ENV, untaint the rest
-      while (my($k, $v) = each %{$arg}) {
-        # It is safe to delete the item most recently returned by each()
-        if (!defined $v) { delete ${$arg}{$k}; next }
-        ${$arg}{untaint_var($k)} = untaint_var($v);
-      }
-    } else {
-      while (my($k, $v) = each %{$arg}) {
-        ${$arg}{untaint_var($k)} = untaint_var($v);
-      }
+  } else {
+    my $r = ref $_[0];
+    if ($r eq 'ARRAY') {
+      my $arg = $_[0];
+      $_ = untaint_var($_)  for @{$arg};
+      return @{$arg} if wantarray;
     }
-    return %{$arg} if wantarray;
-  }
-  elsif ($r eq 'SCALAR' || $r eq 'REF') {
-    my $arg = $_[0];
-    ${$arg} = untaint_var(${$arg});
-  }
-  else {
-    warn "util: can't untaint a $r !\n";
+    elsif ($r eq 'HASH') {
+      my $arg = $_[0];
+      if ($arg == \%ENV) {  # purge undefs from %ENV, untaint the rest
+        while (my($k, $v) = each %{$arg}) {
+          # It is safe to delete the item most recently returned by each()
+          if (!defined $v) { delete ${$arg}{$k}; next }
+          ${$arg}{untaint_var($k)} = untaint_var($v);
+        }
+      } else {
+        # hash keys are never tainted,
+        # although old version of perl had some quirks there
+        while (my($k, $v) = each %{$arg}) {
+          ${$arg}{untaint_var($k)} = untaint_var($v);
+        }
+      }
+      return %{$arg} if wantarray;
+    }
+    elsif ($r eq 'SCALAR' || $r eq 'REF') {
+      my $arg = $_[0];
+      ${$arg} = untaint_var(${$arg});
+    }
+    else {
+      warn "util: can't untaint a $r !\n";
+    }
   }
   return $_[0];
 }
@@ -724,8 +729,16 @@ sub base64_decode {
 sub qp_decode {
   local $_ = shift;
 
-  s/\=\r?\n//gs;
-  s/\=([0-9a-fA-F]{2})/chr(hex($1))/ge;
+  # RFC 2045: when decoding a Quoted-Printable body, any trailing
+  # white space on a line must be deleted
+  s/[ \t]+(?=\r?\n)//gs;
+
+  s/=\r?\n//gs;  # soft line breaks
+
+  # RFC 2045 explicitly prohibits lowercase characters a-f in QP encoding
+  # do we really want to allow them???
+  s/=([0-9a-fA-F]{2})/chr(hex($1))/ge;
+
   return $_;
 }
 
@@ -998,7 +1011,7 @@ sub parse_content_type {
   }
 
   # strip inappropriate chars (bug 5399: after the text/plain fixup)
-  $ct =~ tr/\000-\040\177-\377\042\050\051\054\056\072-\077\100\133-\135//d;
+  $ct =~ tr/\000-\040\177-\377\042\050\051\054\072-\077\100\133-\135//d;
 
   # Now that the header has been parsed, return the requested information.
   # In scalar context, just the MIME type, in array context the
@@ -1029,6 +1042,7 @@ sub url_encode {
     }
     # other stuff
     else {
+      # no re "strict";  # since perl 5.21.8
       # 0x00-0x20, 0x7f-0xff, ", %, <, >
       s/([\000-\040\177-\377\042\045\074\076])
 	  /push(@encoded, $1) && sprintf "%%%02x", unpack("C",$1)/egx;
@@ -1128,6 +1142,7 @@ sub secure_tmpfile {
     return;
   }
 
+  dbg("util: secure_tmpfile created a temporary file %s", $reportfile);
   return ($reportfile, $tmpfh);
 }
 
@@ -1188,6 +1203,10 @@ sub secure_tmpdir {
 
 ###########################################################################
 
+##
+## DEPRECATED FUNCTION, only left for third party plugins as fallback.
+## Replaced with Mail::SpamAssassin::RegistryBoundaries::uri_to_domain.
+##
 sub uri_to_domain {
   my ($uri) = @_;
 
@@ -1225,7 +1244,8 @@ sub uri_to_domain {
   return !wantarray ? lc $uri : (lc $uri, lc $host);
 }
 
-sub uri_list_canonify {
+*uri_list_canonify = \&uri_list_canonicalize;  # compatibility alias
+sub uri_list_canonicalize {
   my($redirector_patterns, @uris) = @_;
 
   # make sure we catch bad encoding tricks
@@ -1251,15 +1271,15 @@ sub uri_list_canonify {
     # bug 4390: certain MUAs treat back slashes as front slashes.
     # since backslashes are supposed to be encoded in a URI, swap non-encoded
     # ones with front slashes.
-    $nuri =~ tr@\\@/@;
+    $nuri =~ tr{\\}{/};
 
     # http:www.foo.biz -> http://www.foo.biz
-    $nuri =~ s#^(https?:)/{0,2}#$1//#i;
+    $nuri =~ s{^(https?:)/{0,2}}{$1//}i;
 
     # *always* make a dup with all %-encoding decoded, since
     # important parts of the URL may be encoded (such as the
     # scheme). (bug 4213)
-    if ($nuri =~ /\%[0-9a-fA-F]{2}/) {
+    if ($nuri =~ /%[0-9a-fA-F]{2}/) {
       $nuri = Mail::SpamAssassin::Util::url_encode($nuri);
     }
 
@@ -1267,15 +1287,15 @@ sub uri_list_canonify {
     # unschemed URIs: assume default of "http://" as most MUAs do
     if ($nuri !~ /^[-_a-z0-9]+:/i) {
       if ($nuri =~ /^ftp\./) {
-	$nuri =~ s@^@ftp://@g;
+	$nuri =~ s{^}{ftp://}g;
       }
       else {
-	$nuri =~ s@^@http://@g;
+	$nuri =~ s{^}{http://}g;
       }
     }
 
     # http://www.foo.biz?id=3 -> http://www.foo.biz/?id=3
-    $nuri =~ s@^(https?://[^/?]+)\?@$1/?@i;
+    $nuri =~ s{^(https?://[^/?]+)\?}{$1/?}i;
 
     # deal with encoding of chars, this is just the set of printable
     # chars minus ' ' (that is, dec 33-126, hex 21-7e)
@@ -1293,6 +1313,22 @@ sub uri_list_canonify {
 
       # not required
       $rest ||= '';
+
+      # Bug 6751:
+      # RFC 3490 (IDNA): Whenever dots are used as label separators, the
+      #   following characters MUST be recognized as dots: U+002E (full stop),
+      #   U+3002 (ideographic full stop), U+FF0E (fullwidth full stop),
+      #   U+FF61 (halfwidth ideographic full stop).
+      # RFC 5895: [...] the IDEOGRAPHIC FULL STOP character (U+3002)
+      #   can be mapped to the FULL STOP before label separation occurs.
+      #   [...] Only the IDEOGRAPHIC FULL STOP character (U+3002) is added in
+      #   this mapping because the authors have not fully investigated [...]
+      # Adding also 'SMALL FULL STOP' (U+FE52) as seen in the wild.
+      # Parhaps also the 'ONE DOT LEADER' (U+2024).
+      if ($host =~ s{(?: \xE3\x80\x82 | \xEF\xBC\x8E | \xEF\xBD\xA1 |
+                         \xEF\xB9\x92 | \xE2\x80\xA4 )}{.}xgs) {
+        push(@nuris, join ('', $proto, $host, $rest));
+      }
 
       # bug 4146: deal with non-US ASCII 7-bit chars in the host portion
       # of the URI according to RFC 1738 that's invalid, and the tested

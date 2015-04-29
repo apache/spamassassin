@@ -1,0 +1,96 @@
+
+Using SpamAssassin Automatic Reputation With An SQL Database
+-------------------------------------------------------
+
+The TxRep plugin improves on the earlier Auto-Whitelist plugin.
+The most common use for a system like this would be for tracking
+the expected spam score (or reputation) of frequent senders. A
+domain that sends frequent spam will lose reputation (or gain
+spam score) over time.
+
+In order to activate the SQL based reputation system you have to
+configure spamassassin and spamd to use the appropriate storage
+backend. This is done with the txrep_factory config variable,
+like so:
+
+txrep_factory Mail::SpamAssassin::SQLBasedAddrList
+
+SpamAssassin will check the global configuration file (ie. any file
+matching /etc/mail/spamassassin/*.cf) for the following settings:
+
+user_awl_dsn                 DBI:driver:database:hostname[:port]
+user_awl_sql_username        dbusername
+user_awl_sql_password        dbpassword
+
+These settings are identical to those for the AWL plugin, so you
+do not need to change these if you are upgrading.
+
+The first option, user_awl_dsn, describes the data source name that
+will be used to create the connection to your SQL server.  It MUST be
+in the format as listed above.  <driver> should be the DBD driver that
+you have installed to access your database (the most common being
+MySQL (driver is 'mysql'), PostgreSQL ('Pg') and SQLite ('SQLite')).
+<database> must be the name of the database that you created to store
+the txrep table. <hostname> is the name of the host that contains
+the SQL database server.  <port> is the optional port number where your
+database server is listening.
+
+user_awl_dsn                DBI:mysql:spamassassin:localhost
+
+Would tell SpamAssassin to connect to the database named spamassassin using
+MySQL on the local server, and since <port> is omitted, the driver will use
+the default port number.  The other two required options tells SpamAssassin
+to use the defined username and password to establish the connection.
+
+If the user_awl_dsn option does not exist, SpamAssassin will not attempt
+to use SQL for tracking reputations.
+
+One additional configuration option exists that allows you to set the
+table name for the txrep table.
+
+user_awl_sql_table           txrep
+
+For an example of connecting to a PostgreSQL database, see the README file.
+
+Requirements
+------------
+
+In order for SpamAssassin to work with your SQL database, you must have
+the perl DBI module installed, AS WELL AS the DBD driver/module for your
+specific database.  For example, if using MySQL as your RDBMS, you must have
+the Msql-Mysql (DBD::mysql) module installed.  Check CPAN for the latest
+versions of DBI and your database driver/module.
+
+Database Schema
+---------------
+
+The database must contain a table named by 'user_awl_sql_table' (default
+setting: "txrep") with at least the fields specified in the accompanying
+SQL files.
+
+You can add as many other fields you wish as long as the required fields
+are contained in the table.
+
+To install the table, use the following command:
+
+mysql -h <hostname> -u <adminusername> -p <databasename> < txrep_mysql.sql
+Enter password: <adminpassword>
+
+For PostgreSQL, use the following:
+
+psql -U <username> -f txrep_pg.sql <databasename>
+
+Once you have created the database and added the table, just add the
+required lines to your global configuration file (local.cf).  Note that
+you must specify the proper storage backend in the config file in order
+for this to work and the current username must be passed to spamd.
+
+Maintenance
+---------------
+
+It is recommended to keep user_awl_sql_table clear of stale data, for
+performance reasons. A sample query that can be run on a regular
+schedule is below:
+
+DELETE FROM txrep WHERE last_hit <= (now() - INTERVAL 120 day);
+

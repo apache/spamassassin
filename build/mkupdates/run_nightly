@@ -8,7 +8,9 @@ set -x
 cd /home/updatesd/svn/spamassassin
 
 . /etc/profile
-PERL=/local/perl586/bin/perl
+#Switched to system perl on spamassassin-vm box
+PERL=/usr/bin/perl
+#PERL=/local/perl586/bin/perl
 export PERL 
 
 # Will this script be updated?  If so, re-run it after updating.
@@ -22,6 +24,7 @@ svn update || exit $?
 
 # Do the restart if we need to ...
 if [ "$FLAG" = "YES" ]; then
+  #THIS IS NOT WORKING CURRENTLY 6-15-2014
   exec $0 "$@"
 
   # It shouldn't get here, but just in case ...
@@ -64,6 +67,7 @@ cat /home/updatesd/LATEST
 $PERL masses/rule-qa/list-bad-rules \
     > /var/www/ruleqa.spamassassin.org/reports/badrules.txt 2>&1
 
+#On Wednesday's, we send out a bad sandbox rules report to the list
 if [ `date +%w` = 3 ] ; then
   (
     echo "From: nobody@spamassassin.apache.org (Rules Report Cron)"

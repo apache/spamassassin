@@ -401,7 +401,7 @@ use constant AI_TIME_UNKNOWN => 0;
 
 # Charsets which use capital letters heavily in their encoded representation.
 use constant CHARSETS_LIKELY_TO_FP_AS_CAPS => qr{[-_a-z0-9]*(?:
-	  koi|jp|jis|euc|gb|big5|isoir|cp1251|georgianps|pt154|tis
+	  koi|jp|jis|euc|gb|big5|isoir|cp1251|windows-1251|georgianps|pt154|tis
 	)[-_a-z0-9]*}ix;
 
 1;

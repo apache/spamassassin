@@ -1,103 +1,30 @@
-##
-
-#  2014-02.06
-meta		AXB_NOQUIEROMAS		(FREEMAIL_FROM && __HAS_ORGANIZATION && ! __HAS_UA && ! __HAS_XMAIL) 
-describe	AXB_NOQUIEROMAS		Soy lo que soy
-
-# 2014-01-09
-header		AXB_XM_MYECLNT		X-Mailer =~ /^My e-mail client\b/
-describe	AXB_XM_MYECLNT		Ratas castellanas
-if (version >= 3.004000)
-tflags		AXB_XM_MYECLNT		autolearn_force	
+ifplugin Mail::SpamAssassin::Plugin::URIDetail
+  uri_detail      AXB_URIDETAIL_BROWSETHIS	text =~ /You may browse this\./
+  describe        AXB_URIDETAIL_BROWSETHIS	LLT fingerprint
+  tflags	  AXB_URIDETAIL_BROWSETHIS	nopublish
 endif
 
 
-# 2013-11-02
-body		AXB_3LITTLE_PIGS	/\bwas sent by third-party independent marketing agent\./
-describe	AXB_3LITTLE_PIGS	chinny chin chin
-if (version >= 3.004000)
-tflags		AXB_3LITTLE_PIGS	autolearn_force	
-endif
+uri		AXB_URI_CDGB		/\/\?cid\=gib/
+describe	AXB_URI_CDGB		Do not mistake with CBGB
 
 
-# 2013-11-01
-header	__FROM_ONMS		From =~	 /\.onmicrosoft\.com/
-header	__TO_ONMS		To =~	 /\.onmicrosoft\.com/
-header	__TO_ONMS_RCPTS		To:name =~ /\bRecipients\b/
+header          AXB_X_FF_SEZ_S		X-Forefront-Antispam-Report =~ /\bSFV\:SPM\b/
+describe        AXB_X_FF_SEZ_S		Forefront sez this is spam
 
-meta	 AXB_ONMS_LEAKS		(__FROM_ONMS && __TO_ONMS && __TO_ONMS_RCPTS)
-describe AXB_ONMS_LEAKS		Onmicrosoft Leak Party
-if (version >= 3.004000)
-tflags	AXB_ONMS_LEAKS		autolearn_force	
-endif
-
-
-# 2013-10-17
-header          AXB_X_FF_SEZ_S          X-Forefront-Antispam-Report =~ /^SFV\:SPM/
-describe        AXB_X_FF_SEZ_S          Forefront sez this is spam
-if (version >= 3.004000)
-tflags		AXB_X_FF_SEZ_S		autolearn_force	
-endif
-
-
-# 2013-01-30
-header		AXB_BULK_SENDGRID	exists:X-Sendgrid-EID
-describe	AXB_BULK_SENDGRID	Bulk sent via Sendgrid
-
-# 2012-10-16
-header          AXB_BULK_ECO            exists:X-CSA-Complaints
-describe        AXB_BULK_ECO            Message sent by eco.de member
+rawbody		AXB_RBDY_TENANDTEN	/\&\#1088\;\&\#1092\;/
+describe	AXB_RBDY_TENANDTEN	Ten & Ten
 
 # 2012-09-27
-# Overlap test
 header          __AXB_XM_OL_2600  X-Mailer =~ /Microsoft\ Outlook\ Express\ 6\.00\.2600\.0000/
 header          __AXB_MO_OL_2600  X-MimeOLE =~ /Produced\ By\ Microsoft\ MimeOLE\ V6\.00\.2600\.0000/
 meta            AXB_XM_FORGED_OL2600    (__AXB_XM_OL_2600  && !__AXB_MO_OL_2600 )
 describe        AXB_XM_FORGED_OL2600     Forged OE v. 6.2600
 
-# 2012-03-17
-header		__AXB_LI_U	List-Unsubscribe =~ /\@em\.linkedin\.com\b/
-header		__AXB_LI_CLASS	exists:X-LinkedIn-Class
-header		__AXB_LI_FBL	exists:X-LinkedIn-fbl
-meta		AXB_OBFU_MULE	(__AXB_LI_U && !__AXB_LI_CLASS && !__AXB_LI_FBL)
-describe	AXB_OBFU_MULE	spacey mules
-
-# 2012-02-16
-body            AXB_BODYMAIL_SBL112884  /\@yeah\.net\b/
-describe        AXB_BODYMAIL_SBL112884  Spammer dropbox SBL112884
-
-
-# 2012-01-07
-header          AXB_XMA_BASP            X-Mail-Agent =~ /^BASP21/
-describe        AXB_XMA_BASP            Mailer fingerprint
-
 
 # 2012-01-04
 header          AXB_X_AOL_SEZ_S         x-aol-global-disposition =~ /^S$/
-describe        AXB_X_AOL_SEZ_S         AOL said this is S
-
-# 2011-12-08
-header          AXB_XM_BULK_SB          X-Mailer =~ /SendBlaster/
-describe        AXB_XM_BULK_SB          Bulk mail tool
-
-# 2011-09-14 - Suggested by rfg / patternity
-header          AXB_XM_SENTBY   exists:X-Mailer-Sent-By
-describe        AXB_XM_SENTBY   Ratware fingerprint
-
-#header          AXB_XMID_PFIX_CTRIP     Message-ID =~ /\<[A-F0-9]{8}.[0-9]{6}\@ctrip\.com\>/
-#describe        AXB_XMID_PFIX_CTRIP     possibly forged ctrip sender - postfix
-
-# 2011-07-05
-#rawbody         AXB_SSCECCF     /\bSandboxScopeClass ExternalClass\b/
-#describe        AXB_SSCECCF     unidentified fingerprint
-
-#2011-06-05
-#header   AXB_XRCVD_EYOU_SEND    Received =~ /\(eyou send program\)/
-#describe AXB_XRCVD_EYOU_SEND    fingerprint
-
-
-header          AXB_HELO_HOME_UN        X-Spam-Relays-Untrusted =~ /^[^\]]+ helo=\w+\.(lan|home) /i
-describe        AXB_HELO_HOME_UN        HELO from home  - untrusted
+describe        AXB_X_AOL_SEZ_S         AOL said this is S*
 
 
 

@@ -150,13 +150,16 @@ $MARK_PRESENCE_ONLY_HDRS = qr{(?: X-Face
   |D(?:KIM|omainKey)-Signature
 )}ix;
 
-# tweaks tested as of Nov 18 2002 by jm: see SpamAssassin-devel list archives
+# tweaks tested as of Nov 18 2002 by jm posted to -devel at
+# http://sourceforge.net/p/spamassassin/mailman/message/12977556/
 # for results.  The winners are now the default settings.
 use constant IGNORE_TITLE_CASE => 1;
-use constant TOKENIZE_LONG_8BIT_SEQS_AS_TUPLES => 1;
+use constant TOKENIZE_LONG_8BIT_SEQS_AS_TUPLES => 0;
+use constant TOKENIZE_LONG_8BIT_SEQS_AS_UTF8_CHARS => 1;
 use constant TOKENIZE_LONG_TOKENS_AS_SKIPS => 1;
 
-# tweaks of May 12 2003, see SpamAssassin-devel archives again.
+# tweaks by jm on May 12 2003, see -devel email at
+# http://sourceforge.net/p/spamassassin/mailman/message/14844556/
 use constant PRE_CHEW_ADDR_HEADERS => 1;
 use constant CHEW_BODY_URIS => 1;
 use constant CHEW_BODY_MAILADDRS => 1;
@@ -288,8 +291,8 @@ sub spamd_child_init {
 sub check_bayes {
   my ($self, $pms, $fulltext, $min, $max) = @_;
 
-  return 0 if (!$pms->{conf}->{use_learner});
-  return 0 if (!$pms->{conf}->{use_bayes} || !$pms->{conf}->{use_bayes_rules});
+  return 0 if (!$self->{conf}->{use_learner});
+  return 0 if (!$self->{conf}->{use_bayes} || !$self->{conf}->{use_bayes_rules});
 
   if (!exists ($pms->{bayes_score})) {
     my $timer = $self->{main}->time_method("check_bayes");
@@ -300,7 +303,7 @@ sub check_bayes {
       ($min == 0 || $pms->{bayes_score} > $min) &&
       ($max eq "undef" || $pms->{bayes_score} <= $max))
   {
-      if ($pms->{conf}->{detailed_bayes_score}) {
+      if ($self->{conf}->{detailed_bayes_score}) {
         $pms->test_log(sprintf ("score: %3.4f, hits: %s",
                                  $pms->{bayes_score},
                                  $pms->{bayes_hits}));
@@ -321,7 +324,7 @@ sub learner_close {
   my ($self, $params) = @_;
   my $quiet = $params->{quiet};
 
-  # do a sanity check here.  Wierd things happen if we remain tied
+  # do a sanity check here.  Weird things happen if we remain tied
   # after compiling; for example, spamd will never see that the
   # number of messages has reached the bayes-scanning threshold.
   if ($self->{store}->db_readable()) {
@@ -1033,12 +1036,18 @@ sub get_body_from_msg {
 }
 
 sub _get_msgdata_from_permsgstatus {
-  my ($self, $msg) = @_;
+  my ($self, $pms) = @_;
 
+  my $t_src = $self->{conf}->{bayes_token_sources};
   my $msgdata = { };
-  $msgdata->{bayes_token_body} = $msg->{msg}->get_visible_rendered_body_text_array();
-  $msgdata->{bayes_token_inviz} = $msg->{msg}->get_invisible_rendered_body_text_array();
-  @{$msgdata->{bayes_token_uris}} = $msg->get_uri_list();
+  $msgdata->{bayes_token_body} =
+    $pms->{msg}->get_visible_rendered_body_text_array() if $t_src->{visible};
+  $msgdata->{bayes_token_inviz} =
+    $pms->{msg}->get_invisible_rendered_body_text_array() if $t_src->{invisible};
+  $msgdata->{bayes_mimepart_digests} =
+    $pms->{msg}->get_mimepart_digests() if $t_src->{mimepart};
+  @{$msgdata->{bayes_token_uris}} =
+    $pms->get_uri_list() if $t_src->{uri};
   return $msgdata;
 }
 
@@ -1048,36 +1057,71 @@ sub _get_msgdata_from_permsgstatus {
 sub tokenize {
   my ($self, $msg, $msgdata) = @_;
 
-  # the body
-  my @tokens = map { $self->_tokenize_line ($_, '', 1) }
-                                    @{$msgdata->{bayes_token_body}};
+  my $t_src = $self->{conf}->{bayes_token_sources};
+  my @tokens;
 
-  # the URI list
-  push (@tokens, map { $self->_tokenize_line ($_, '', 2) }
-                                    @{$msgdata->{bayes_token_uris}});
-
-  # add invisible tokens
-  if (ADD_INVIZ_TOKENS_I_PREFIX) {
-    push (@tokens, map { $self->_tokenize_line ($_, "I*:", 1) }
-                                    @{$msgdata->{bayes_token_inviz}});
+  # visible tokens from the body
+  if ($msgdata->{bayes_token_body}) {
+    my(@t) = map($self->_tokenize_line ($_, '', 1),
+                 @{$msgdata->{bayes_token_body}} );
+    dbg("bayes: tokenized body: %d tokens", scalar @t);
+    push(@tokens, @t);
   }
-  if (ADD_INVIZ_TOKENS_NO_PREFIX) {
-    push (@tokens, map { $self->_tokenize_line ($_, "", 1) }
-                                    @{$msgdata->{bayes_token_inviz}});
+  # the URI list
+  if ($msgdata->{bayes_token_uris}) {
+    my(@t) = map($self->_tokenize_line ($_, '', 2),
+                 @{$msgdata->{bayes_token_uris}} );
+    dbg("bayes: tokenized uri: %d tokens", scalar @t);
+    push(@tokens, @t);
+  }
+  # add invisible tokens
+  if ($msgdata->{bayes_token_inviz}) {
+    my $tokprefix;
+    if (ADD_INVIZ_TOKENS_I_PREFIX)  { $tokprefix = 'I*:' }
+    if (ADD_INVIZ_TOKENS_NO_PREFIX) { $tokprefix = '' }
+    if (defined $tokprefix) {
+      my(@t) = map($self->_tokenize_line ($_, $tokprefix, 1),
+                   @{$msgdata->{bayes_token_inviz}} );
+      dbg("bayes: tokenized invisible: %d tokens", scalar @t);
+      push(@tokens, @t);
+    }
+  }
+
+  # add digests and Content-Type of all MIME parts
+  if ($msgdata->{bayes_mimepart_digests}) {
+    my %shorthand = (  # some frequent MIME part contents for human readability
+     'da39a3ee5e6b4b0d3255bfef95601890afd80709:text/plain'=> 'Empty-Plaintext',
+     'da39a3ee5e6b4b0d3255bfef95601890afd80709:text/html' => 'Empty-HTML',
+     'da39a3ee5e6b4b0d3255bfef95601890afd80709:text/xml'  => 'Empty-XML',
+     'adc83b19e793491b1c6ea0fd8b46cd9f32e592fc:text/plain'=> 'OneNL-Plaintext',
+     'adc83b19e793491b1c6ea0fd8b46cd9f32e592fc:text/html' => 'OneNL-HTML',
+     '71853c6197a6a7f222db0f1978c7cb232b87c5ee:text/plain'=> 'TwoNL-Plaintext',
+     '71853c6197a6a7f222db0f1978c7cb232b87c5ee:text/html' => 'TwoNL-HTML',
+    );
+    my(@t) = map('MIME:' . ($shorthand{$_} || $_),
+                 @{ $msgdata->{bayes_mimepart_digests} });
+    dbg("bayes: tokenized mime parts: %d tokens", scalar @t);
+    dbg("bayes: mime-part token %s", $_) for @t;
+    push(@tokens, @t);
   }
 
   # Tokenize the headers
-  my %hdrs = $self->_tokenize_headers ($msg);
-  while( my($prefix, $value) = each %hdrs ) {
-    push(@tokens, $self->_tokenize_line ($value, "H$prefix:", 0));
+  if ($t_src->{header}) {
+    my(@t);
+    my %hdrs = $self->_tokenize_headers ($msg);
+    while( my($prefix, $value) = each %hdrs ) {
+      push(@t, $self->_tokenize_line ($value, "H$prefix:", 0));
+    }
+    dbg("bayes: tokenized header: %d tokens", scalar @t);
+    push(@tokens, @t);
   }
 
   # Go ahead and uniq the array, skip null tokens (can happen sometimes)
   # generate an SHA1 hash and take the lower 40 bits as our token
   my %tokens;
   foreach my $token (@tokens) {
-    next unless length($token); # skip 0 length tokens
-    $tokens{substr(sha1($token), -5)} = $token;
+    # skip empty tokens
+    $tokens{substr(sha1($token), -5)} = $token  if $token ne '';
   }
 
   # return the keys == tokens ...
@@ -1095,7 +1139,17 @@ sub _tokenize_line {
   # include quotes, .'s and -'s for URIs, and [$,]'s for Nigerian-scam strings,
   # and ISO-8859-15 alphas.  Do not split on @'s; better results keeping it.
   # Some useful tokens: "$31,000,000" "www.clock-speed.net" "f*ck" "Hits!"
-  tr/-A-Za-z0-9,\@\*\!_'"\$.\241-\377 / /cs;
+
+  ### (previous:)  tr/-A-Za-z0-9,\@\*\!_'"\$.\241-\377 / /cs;
+
+  ### (now): see Bug 7130 for rationale (slower, but makes UTF-8 chars atomic)
+  s{ ( [A-Za-z0-9,@*!_'"\$. -]+  |
+       [\xC0-\xDF][\x80-\xBF]    |
+       [\xE0-\xEF][\x80-\xBF]{2} |
+       [\xF0-\xF4][\x80-\xBF]{3} |
+       [\xA1-\xFF] ) | . }
+   { defined $1 ? $1 : ' ' }xsge;
+  # should we also turn NBSP ( \xC2\xA0 ) into space?
 
   # DO split on "..." or "--" or "---"; common formatting error resulting in
   # hapaxes.  Keep the separator itself as a token, though, as long ones can
@@ -1112,6 +1166,10 @@ sub _tokenize_line {
   }
 
   my $magic_re = $self->{store}->get_magic_re();
+
+  # Note that split() in scope of 'use bytes' results in words with utf8 flag
+  # cleared, even if the source string has perl characters semantics !!!
+  # Is this really still desirable?
 
   foreach my $token (split) {
     $token =~ s/^[-'"\.,]+//;        # trim non-alphanum chars at start or end
@@ -1152,6 +1210,18 @@ sub _tokenize_line {
     # the domain ".net" appeared in the To header.
     #
     if ($len > MAX_TOKEN_LENGTH && $token !~ /\*/) {
+
+      if (TOKENIZE_LONG_8BIT_SEQS_AS_UTF8_CHARS && $token =~ /[\x80-\xBF]{2}/) {
+	# Bug 7135
+	# collect 3- and 4-byte UTF-8 sequences, ignore 2-byte sequences
+	my(@t) = $token =~ /( (?: [\xE0-\xEF] | [\xF0-\xF4][\x80-\xBF] )
+                              [\x80-\xBF]{2} )/xsg;
+	if (@t) {
+          push (@rettokens, map('u8:'.$_, @t));
+	  next;
+	}
+      }
+
       if (TOKENIZE_LONG_8BIT_SEQS_AS_TUPLES && $token =~ /[\xa0-\xff]{2}/) {
 	# Matt sez: "Could be asian? Autrijus suggested doing character ngrams,
 	# but I'm doing tuples to keep the dbs small(er)."  Sounds like a plan
@@ -1167,10 +1237,18 @@ sub _tokenize_line {
             || ($region == 2 && URIS_TOKENIZE_LONG_TOKENS_AS_SKIPS))
       {
 	# if (TOKENIZE_LONG_TOKENS_AS_SKIPS)
-	# Spambayes trick via Matt: Just retain 7 chars.  Do not retain
-	# the length, it does not help; see my mail to -devel of Nov 20 2002.
+	# Spambayes trick via Matt: Just retain 7 chars.  Do not retain the
+	# length, it does not help; see jm's mail to -devel on Nov 20 2002 at
+	# http://sourceforge.net/p/spamassassin/mailman/message/12977605/
 	# "sk:" stands for "skip".
-	$token = "sk:".substr($token, 0, 7);
+	# Bug 7141: retain seven UTF-8 chars (or other bytes),
+	# if followed by at least two bytes
+	$token =~ s{ ^ ( (?> (?: [\x00-\x7F\xF5-\xFF]      |
+	                         [\xC0-\xDF][\x80-\xBF]    |
+	                         [\xE0-\xEF][\x80-\xBF]{2} |
+	                         [\xF0-\xF4][\x80-\xBF]{3} | . ){7} ))
+	             .{2,} \z }{sk:$1}xs;
+	## (was:)  $token = "sk:".substr($token, 0, 7);  # seven bytes
       }
     }
 
@@ -1575,6 +1653,7 @@ sub learner_new {
   $module = 'Mail::SpamAssassin::BayesStore::DBM'  if !$module;
 
   dbg("bayes: learner_new self=%s, bayes_store_module=%s", $self,$module);
+  undef $self->{store};  # DESTROYs previous object, if any
   eval '
     require '.$module.';
     $store = '.$module.'->new($self);

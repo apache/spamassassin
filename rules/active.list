@@ -1,8 +1,50 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-8mile axb-coi-bulk axb-generic axb-ham-misc axb-sa-users axb-trash bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bpoliakoff grenier jarif kpg-core mmiroslaw-ham mmiroslaw-spam zmi; day 2: axb-8mile axb-coi-bulk axb-generic axb-ham-misc axb-sa-users axb-trash bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bpoliakoff grenier jarif kpg-core llanga mas-cps mas-mas mmiroslaw-ham mmiroslaw-spam zmi; day 3: axb-8mile axb-coi-bulk axb-generic axb-ham-misc axb-sa-users axb-trash bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bernie-fsf bernie-it_batt bpoliakoff grenier jarif kpg-core llanga mas-cps mas-mas zmi
+# with results from: day 1: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bernie-mix bpoliakoff darxus dwarren grenier jarif kam-ninja kpg-core mas-cps mas-mas zmi; day 2: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bernie-mix bpoliakoff darxus dwarren grenier jarif kam-ninja kpg-core llanga mas-cps mas-mas mmiroslaw-ham mmiroslaw-spam zmi; day 3: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bernie-mix bpoliakoff darxus dwarren grenier kam-ninja llanga mas-cps mas-mas mmiroslaw-ham mmiroslaw-spam zmi
+
+# good enough
+ACCT_PHISHING
+
+# tflags publish
+AC_BR_BONANZA
+
+# tflags publish
+AC_DIV_BONANZA
 
 # tflags publish
 AC_HTML_NONSENSE_TAGS
+
+# tflags publish
+AC_SPAMMY_URI_PATTERNS1
+
+# tflags publish
+AC_SPAMMY_URI_PATTERNS10
+
+# tflags publish
+AC_SPAMMY_URI_PATTERNS11
+
+# tflags publish
+AC_SPAMMY_URI_PATTERNS12
+
+# tflags publish
+AC_SPAMMY_URI_PATTERNS2
+
+# tflags publish
+AC_SPAMMY_URI_PATTERNS3
+
+# tflags publish
+AC_SPAMMY_URI_PATTERNS4
+
+# tflags publish
+AC_SPAMMY_URI_PATTERNS8
+
+# tflags publish
+AC_SPAMMY_URI_PATTERNS9
+
+# tflags publish
+ADMAIL
+
+# good enough
+ADMITS_SPAM
 
 # tflags publish
 ADVANCE_FEE_2_NEW_FORM
@@ -29,9 +71,6 @@ ADVANCE_FEE_3_NEW_MONEY
 ADVANCE_FEE_4_NEW
 
 # good enough
-ADVANCE_FEE_4_NEW_FORM
-
-# good enough
 ADVANCE_FEE_4_NEW_FRM_MNY
 
 # good enough
@@ -49,17 +88,11 @@ ADVANCE_FEE_5_NEW_FRM_MNY
 # good enough
 ADVANCE_FEE_5_NEW_MONEY
 
+# tflags publish
+AD_PREFS
+
 # tflags userconf
 ALL_TRUSTED
-
-# good enough
-AXB_3LITTLE_PIGS
-
-# good enough
-AXB_BODYMAIL_SBL112884
-
-# good enough
-AXB_ONMS_LEAKS
 
 # good enough
 AXB_XMAILER_MIMEOLE_OL_024C2
@@ -68,16 +101,10 @@ AXB_XMAILER_MIMEOLE_OL_024C2
 AXB_XMAILER_MIMEOLE_OL_1ECD5
 
 # good enough
-AXB_XMA_BASP
-
-# good enough
 AXB_XM_FORGED_OL2600
 
 # good enough
 AXB_X_FF_SEZ_S
-
-# good enough
-BANKING_LAWS
 
 # tflags learn
 BAYES_00
@@ -106,23 +133,17 @@ BAYES_95
 # tflags learn
 BAYES_99
 
+# tflags learn
+BAYES_999
+
 # good enough
 BIGNUM_EMAILS
 
-# good enough
-BILLION_OVERLAP
-
-# good enough
-BITLY_URI
-
-# good enough
-BODY_EMPTY
-
-# good enough
+# tflags publish
 BODY_URI_ONLY
 
-# good enough
-BUG6152_INVALID_DATE_TZ_ABSURD
+# tflags publish
+CANT_SEE_AD
 
 # tflags userconf
 CHARSET_FARAWAY
@@ -136,10 +157,10 @@ CK_HELO_DYNAMIC_SPLIT_IP
 # good enough
 CK_HELO_GENERIC
 
-# good enough
+# tflags publish
 CN_B2B_SPAMMER
 
-# good enough
+# tflags publish
 COMMENT_GIBBERISH
 
 # good enough
@@ -149,19 +170,10 @@ COMPENSATION
 CORRUPT_FROM_LINE_IN_HDRS
 
 # good enough
-DATE_DOTS
-
-# good enough
-DATE_IN_FUTURE_96_Q
-
-# good enough
-DATE_IN_FUTURE_Q_PLUS
-
-# good enough
 DEAR_BENEFICIARY
 
 # good enough
-DEAR_NOBODY
+DEAR_EMAIL_USER
 
 # good enough
 DEAR_WINNER
@@ -202,9 +214,6 @@ DKIM_VALID
 # tflags net
 DKIM_VALID_AU
 
-# tflags net
-DNS_FROM_AHBL_RHSBL
-
 # tflags publish
 DOS_ANAL_SPAM_MAILER
 
@@ -212,37 +221,31 @@ DOS_ANAL_SPAM_MAILER
 DOS_OE_TO_MX
 
 # good enough
+DOS_OUTLOOK_TO_MX
+
+# good enough
 DSN_NO_MIMEVERSION
+
+# tflags publish
+DX_TEXT_02
+
+# tflags publish
+DX_TEXT_03
+
+# good enough
+DX_TEXT_05
 
 # good enough
 DYN_RDNS_SHORT_HELO_HTML
 
-# tflags publish
-EMAIL_URI_PHISH
-
-# good enough
-EMRCP
-
 # tflags userconf
 ENV_AND_HDR_SPF_MATCH
 
-# good enough
+# tflags publish
 FBI_MONEY
 
-# good enough
+# tflags publish
 FBI_SPOOF
-
-# good enough
-FH_FAKE_RCVD_LINE
-
-# good enough
-FH_FROM_START_YOU
-
-# good enough
-FH_HELO_ALMOST_IP
-
-# good enough
-FH_HOST_EQ_DYNAMICIP
 
 # tflags publish
 FILL_THIS_FORM
@@ -256,11 +259,8 @@ FILL_THIS_FORM_LOAN
 # good enough
 FILL_THIS_FORM_LONG
 
-# good enough
-FM_LOTTO_MONEY
-
-# good enough
-FM_LOTTO_YOU_WON
+# tflags publish
+FORM_FRAUD
 
 # tflags publish
 FORM_FRAUD_3
@@ -268,11 +268,20 @@ FORM_FRAUD_3
 # tflags publish
 FORM_FRAUD_5
 
+# tflags publish
+FORM_LOW_CONTRAST
+
+# tflags publish
+FOUND_YOU
+
 # tflags userconf
 FRAGMENTED_MESSAGE
 
 # good enough
-FROM_12LTRDOM
+FREEMAIL_DOC_PDF_BCC
+
+# tflags publish
+FREEMAIL_FORGED_FROMDOMAIN
 
 # tflags userconf
 FROM_DOMAIN_NOVOWEL
@@ -314,19 +323,13 @@ FROM_MISSP_TO_UNDISC
 FROM_MISSP_USER
 
 # good enough
-FROM_WSP_LEAD
+FROM_MISSP_XPRIO
 
 # good enough
-FR_ALMOST_VIAG2
+FSL_BOTSPAM_1
 
 # good enough
 FSL_CTYPE_WIN1251
-
-# good enough
-FSL_FAKE_HOTMAIL_RVCD
-
-# good enough
-FSL_HELO_BARE_IP_1
 
 # good enough
 FSL_HELO_BARE_IP_2
@@ -338,28 +341,52 @@ FSL_HELO_DEVICE
 FSL_HELO_FAKE
 
 # good enough
-FSL_HELO_FIREWALL
-
-# good enough
 FSL_MID_419
 
-# good enough
-FSL_MISSP_REPLYTO
-
-# good enough
+# tflags publish
 FSL_NEW_HELO_USER
 
-# good enough
-FS_CHEAP_CAP
+# tflags publish
+FUZZY_ANDROID
 
-# good enough
-FU_ENDS_SG
+# tflags publish
+FUZZY_BROWSER
+
+# tflags publish
+FUZZY_CLICK_HERE
+
+# tflags publish
+FUZZY_DR_OZ
+
+# tflags publish
+FUZZY_IMPORTANT
+
+# tflags publish
+FUZZY_PRIVACY
+
+# tflags publish
+FUZZY_PROMOTION
+
+# tflags publish
+FUZZY_SAVINGS
+
+# tflags publish
+FUZZY_SECURITY
+
+# tflags publish
+FUZZY_UNSUBSCRIBE
 
 # tflags publish
 GOOGLE_DOCS_PHISH
 
 # tflags publish
 GOOGLE_DOCS_PHISH_MANY
+
+# tflags publish
+GOOG_MALWARE_DNLD
+
+# tflags publish
+GOOG_REDIR_SHORT
 
 # tflags userconf
 GTUBE
@@ -388,8 +415,26 @@ HASHCASH_2SPEND
 # tflags userconf
 HASHCASH_HIGH
 
+# tflags publish
+HEADER_FROM_DIFFERENT_DOMAINS
+
+# tflags userconf
+HEADER_HOST_IN_BLACKLIST
+
+# tflags userconf
+HEADER_HOST_IN_WHITELIST
+
 # tflags userconf
 HEAD_LONG
+
+# good enough
+HELO_LH_HOME
+
+# good enough
+HELO_LOCALHOST
+
+# tflags publish
+HEXHASH_WORD
 
 # good enough
 HK_LOTTO
@@ -401,12 +446,6 @@ HK_LOTTO_NAME
 HK_NAME_DRUGS
 
 # good enough
-HK_NAME_FM_DR
-
-# good enough
-HK_NAME_FM_FROM
-
-# good enough
 HK_NAME_FM_MR_MRS
 
 # good enough
@@ -414,6 +453,12 @@ HK_NAME_FROM
 
 # good enough
 HK_NAME_MR_MRS
+
+# good enough
+HK_RANDOM_FROM
+
+# good enough
+HK_RANDOM_REPLYTO
 
 # good enough
 HK_SCAM_N1
@@ -437,16 +482,13 @@ HK_SCAM_N8
 HK_SCAM_S15
 
 # good enough
-HK_SCAM_S25
-
-# good enough
-HK_SCAM_S7
-
-# good enough
 HK_SPAMMY_FILENAME
 
 # tflags userconf
 HTML_CHARSET_FARAWAY
+
+# tflags publish
+HTML_OFF_PAGE
 
 # good enough
 KB_DATE_CONTAINS_TAB
@@ -454,11 +496,17 @@ KB_DATE_CONTAINS_TAB
 # good enough
 KB_FAKED_THE_BAT
 
-# good enough
-KB_RATWARE_MSGID
+# tflags publish
+LIST_PRTL_PUMPDUMP
 
-# good enough
-KHOP_BIG_TO_CC
+# tflags publish
+LIST_PRTL_SAME_USER
+
+# tflags publish
+LONG_HEX_URI
+
+# tflags publish
+LONG_IMG_URI
 
 # tflags publish
 LOTS_OF_MONEY
@@ -476,16 +524,31 @@ LOTTO_AGENT_RPLY
 LOTTO_DEPT
 
 # tflags publish
+LUCRATIVE
+
+# good enough
+MAILER_EQ_ORG
+
+# good enough
+MALFORMED_FREEMAIL
+
+# tflags publish
 MANY_SPAN_IN_TEXT
 
 # tflags userconf
 MIME_CHARSET_FARAWAY
+
+# tflags publish
+MIME_NO_TEXT
 
 # tflags userconf
 MISSING_HB_SEP
 
 # good enough
 MONEY_ATM_CARD
+
+# good enough
+MONEY_BARRISTER
 
 # good enough
 MONEY_FORM
@@ -499,6 +562,9 @@ MONEY_FRAUD_3
 # tflags publish
 MONEY_FRAUD_5
 
+# tflags publish
+MONEY_FRAUD_8
+
 # good enough
 MONEY_FROM_41
 
@@ -506,10 +572,13 @@ MONEY_FROM_41
 MONEY_FROM_MISSP
 
 # good enough
-MSGID_NOFQDN1
+MONEY_LOTTERY
 
 # good enough
 MSOE_MID_WRONG_CASE
+
+# good enough
+NAME_EMAIL_DIFF
 
 # tflags net
 NO_DNS_FOR_FROM
@@ -527,10 +596,10 @@ NSL_RCVD_FROM_USER
 NSL_RCVD_HELO_USER
 
 # good enough
-OBFU_ATTACH_MISSP
+NULL_IN_BODY
 
 # good enough
-OBFU_HTML_ATTACH
+OBFU_ATTACH_MISSP
 
 # tflags publish
 OBFU_JVSCR_ESC
@@ -539,10 +608,31 @@ OBFU_JVSCR_ESC
 OBFU_TEXT_ATTACH
 
 # good enough
-PHP_NOVER_MUA
+PDS_FROM_2_EMAILS
+
+# tflags publish
+PP_MIME_FAKE_ASCII_TEXT
+
+# tflags publish
+PP_TOO_MUCH_UNICODE02
+
+# tflags publish
+PP_TOO_MUCH_UNICODE05
+
+# tflags publish
+PUMPDUMP
+
+# tflags publish
+PUMPDUMP_MULTI
+
+# tflags publish
+PUMPDUMP_TIP
 
 # tflags net
 PYZOR_CHECK
+
+# tflags publish
+RAND_HEADER_MANY
 
 # tflags net
 RAZOR2_CF_RANGE_51_100
@@ -555,6 +645,9 @@ RAZOR2_CF_RANGE_E8_51_100
 
 # tflags net
 RAZOR2_CHECK
+
+# tflags publish
+RCVD_DBL_DQ
 
 # tflags net
 RCVD_IN_BL_SPAMCOP_NET
@@ -725,6 +818,9 @@ RCVD_IN_RP_SAFE
 RCVD_IN_SBL
 
 # tflags net
+RCVD_IN_SBL_CSS
+
+# tflags net
 RCVD_IN_SORBS_BLOCK
 
 # tflags net
@@ -752,19 +848,25 @@ RCVD_IN_SORBS_ZOMBIE
 RCVD_IN_XBL
 
 # good enough
+RDNS_LOCALHOST
+
+# good enough
 REPLYTO_WITHOUT_TO_CC
 
 # good enough
 RISK_FREE
 
 # good enough
-RP_MATCHES_RCVD
+SERGIO_SUBJECT_PORN014
+
+# good enough
+SERGIO_SUBJECT_VIAGRA01
 
 # good enough
 SHARE_50_50
 
-# good enough
-SHORT_HELO_AND_INLINE_IMAGE
+# tflags publish
+SINGLETS_LOW_CONTRAST
 
 # tflags net
 SPF_FAIL
@@ -790,56 +892,116 @@ SPF_PASS
 # tflags net
 SPF_SOFTFAIL
 
+# tflags publish
+STOCK_LOW_CONTRAST
+
+# good enough
+STOX_REPLY_TYPE
+
+# good enough
+STOX_REPLY_TYPE_WITHOUT_QUOTES
+
+# tflags publish
+STYLE_GIBBERISH
+
 # tflags userconf
 SUBJECT_IN_BLACKLIST
 
 # tflags userconf
 SUBJECT_IN_WHITELIST
 
-# good enough
-SUBJ_ATTENTION
+# tflags publish
+SYSADMIN
 
 # good enough
 TAB_IN_FROM
 
-# tflags net
-TO_EQ_FM_DOM_SPF_FAIL
+# tflags publish
+TEQF_USR_IMAGE
+
+# tflags publish
+TEQF_USR_MSGID_HEX
+
+# tflags publish
+TEQF_USR_MSGID_MALF
+
+# tflags publish
+THIS_AD
 
 # good enough
-TO_EQ_FM_HTML_ONLY
+TO_EQ_FM_DIRECT_MX
+
+# tflags net
+TO_EQ_FM_DOM_SPF_FAIL
 
 # tflags net
 TO_EQ_FM_SPF_FAIL
 
-# good enough
+# tflags publish
 TO_IN_SUBJ
 
 # good enough
 TO_NO_BRKTS_FROM_MSSP
 
+# tflags publish
+TO_NO_BRKTS_HTML_IMG
+
+# tflags publish
+TO_NO_BRKTS_HTML_ONLY
+
 # good enough
 TO_NO_BRKTS_MSFT
 
-# good enough
+# tflags publish
+TO_NO_BRKTS_NORDNS_HTML
+
+# tflags publish
 TO_NO_BRKTS_PCNT
 
 # good enough
 TT_MSGID_TRUNC
 
 # good enough
-TVD_APPROVED
-
-# good enough
-TVD_FINGER_02
-
-# good enough
-TVD_FROM_1
-
-# good enough
 TVD_PH_BODY_META
 
 # good enough
-TVD_PH_REC
+TVD_QUAL_MEDS
+
+# good enough
+TVD_RCVD_IP
+
+# good enough
+TVD_RCVD_IP4
+
+# good enough
+TVD_SPACE_ENCODED
+
+# good enough
+TVD_SPACE_ENC_FM_MIME
+
+# good enough
+TVD_SPACE_RATIO_MINFP
+
+# good enough
+TVD_VISIT_PHARMA
+
+# tflags publish
+TW_GIBBERISH_MANY
+
+# good enough
+DOS_OUTLOOK_TO_MX_IMAGE
+
+# good enough
+PHP_NOVER_MUA
+
+# good enough
+SHORTENED_URL_SRC
+
+# good enough
+SUBJ_UNNEEDED_HTML
+
+# tflags publish
+UC_GIBBERISH_OBFU
 
 # tflags userconf
 UNPARSEABLE_RELAY
@@ -854,10 +1016,31 @@ URIBL_BLACK
 URIBL_BLOCKED
 
 # tflags net
+URIBL_DBL_ABUSE_BOTCC
+
+# tflags net
+URIBL_DBL_ABUSE_MALW
+
+# tflags net
+URIBL_DBL_ABUSE_PHISH
+
+# tflags net
+URIBL_DBL_ABUSE_REDIR
+
+# tflags net
+URIBL_DBL_ABUSE_SPAM
+
+# tflags net
+URIBL_DBL_BOTNETCC
+
+# tflags net
 URIBL_DBL_ERROR
 
 # tflags net
-URIBL_DBL_REDIR
+URIBL_DBL_MALWARE
+
+# tflags net
+URIBL_DBL_PHISH
 
 # tflags net
 URIBL_DBL_SPAM
@@ -892,8 +1075,50 @@ URIBL_SC_SURBL
 # tflags net
 URIBL_WS_SURBL
 
+# tflags publish
+URI_DQ_UNSUB
+
+# tflags publish
+URI_GOOGLE_PROXY
+
+# tflags userconf
+URI_HOST_IN_BLACKLIST
+
+# tflags userconf
+URI_HOST_IN_WHITELIST
+
 # tflags userconf
 URI_NOVOWEL
+
+# tflags publish
+URI_ONLY_MSGID_MALF
+
+# tflags publish
+URI_OPTOUT_3LD
+
+# tflags publish
+URI_OPTOUT_USME
+
+# tflags publish
+URI_PHISH
+
+# tflags publish
+URI_TRY_3LD
+
+# tflags publish
+URI_TRY_USME
+
+# tflags publish
+URI_WPADMIN
+
+# tflags publish
+URI_WP_DIRINDEX
+
+# tflags publish
+URI_WP_HACKED
+
+# tflags publish
+URI_WP_HACKED_2
 
 # tflags userconf
 USER_IN_ALL_SPAM_TO
@@ -928,11 +1153,14 @@ USER_IN_WHITELIST
 # tflags userconf
 USER_IN_WHITELIST_TO
 
-# good enough
+# tflags publish
 XM_PHPMAILER_FORGED
 
 # good enough
-YOUR_PERMISSION
+XPRIO
+
+# good enough
+YOU_INHERIT
 
 # tflags net
 __DKIMDOMAIN_IN_DWL_ANY

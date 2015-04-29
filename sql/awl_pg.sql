@@ -7,3 +7,6 @@ CREATE TABLE awl (
   signedby varchar(255) NOT NULL default '',
   PRIMARY KEY (username,email,signedby,ip)
 );
+
+ALTER TABLE awl SET (fillfactor=95);
+

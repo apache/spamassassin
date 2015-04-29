@@ -248,7 +248,7 @@ will be replaced by http_url.
 
 =head1 DOWNLOAD
 
-The source of this plugin is avaliable at: 
+The source of this plugin is available at: 
 http://umut.topkara.org/PhishTag/PhishTag.pm
 a sample configuration file is also available:
 http://umut.topkara.org/PhishTag/PhishTag.cf

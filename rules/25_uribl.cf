@@ -50,16 +50,55 @@ if (version >= 3.004000)
 endif
 
 # DBL, http://www.spamhaus.org/dbl/
+# changes axb 05-17-2014: as per http://www.spamhaus.org/news/article/713/
+# SH changes effective 06-01-2014
 if can(Mail::SpamAssassin::Plugin::URIDNSBL::has_tflags_domains_only)
-urirhssub       URIBL_DBL_SPAM   dbl.spamhaus.org.       A   127.0.1.2
-body            URIBL_DBL_SPAM   eval:check_uridnsbl('URIBL_DBL_SPAM')
-describe        URIBL_DBL_SPAM   Contains an URL listed in the DBL blocklist
-tflags          URIBL_DBL_SPAM   net domains_only
 
-urirhssub       URIBL_DBL_REDIR  dbl.spamhaus.org.       A   127.0.1.3
-body            URIBL_DBL_REDIR  eval:check_uridnsbl('URIBL_DBL_REDIRECTOR')
-describe        URIBL_DBL_REDIR  Contains a URL listed in the DBL as a spammed redirector domain
-tflags          URIBL_DBL_REDIR  net domains_only
+urirhssub       URIBL_DBL_SPAM   	dbl.spamhaus.org.       A   127.0.1.2
+body            URIBL_DBL_SPAM   	eval:check_uridnsbl('URIBL_DBL_SPAM')
+describe        URIBL_DBL_SPAM   	Contains a spam URL listed in the DBL blocklist
+tflags          URIBL_DBL_SPAM   	net domains_only
+
+urirhssub       URIBL_DBL_PHISH  	dbl.spamhaus.org.       A   127.0.1.4
+body            URIBL_DBL_PHISH	 	eval:check_uridnsbl('URIBL_DBL_PHISH')
+describe        URIBL_DBL_PHISH	 	Contains a Phishing URL listed in the DBL blocklist
+tflags          URIBL_DBL_PHISH  	net domains_only
+
+urirhssub       URIBL_DBL_MALWARE  	dbl.spamhaus.org.       A   127.0.1.5
+body            URIBL_DBL_MALWARE  	eval:check_uridnsbl('URIBL_DBL_MALWARE')
+describe        URIBL_DBL_MALWARE  	Contains a malware URL listed in the DBL blocklist
+tflags          URIBL_DBL_MALWARE  	net domains_only
+
+urirhssub       URIBL_DBL_BOTNETCC  	dbl.spamhaus.org.       A   127.0.1.6
+body            URIBL_DBL_BOTNETCC	eval:check_uridnsbl('URIBL_DBL_BOTNETCC')
+describe        URIBL_DBL_BOTNETCC	Contains a botned C&C URL listed in the DBL blocklist
+tflags          URIBL_DBL_BOTNETCC	net domains_only
+
+urirhssub       URIBL_DBL_ABUSE_SPAM  	dbl.spamhaus.org.       A   127.0.1.102
+body            URIBL_DBL_ABUSE_SPAM	eval:check_uridnsbl('URIBL_DBL_ABUSE_SPAM')
+describe        URIBL_DBL_ABUSE_SPAM	Contains an abused spamvertized URL listed in the DBL blocklist
+tflags          URIBL_DBL_ABUSE_SPAM	net domains_only
+
+urirhssub       URIBL_DBL_ABUSE_REDIR  	dbl.spamhaus.org.       A   127.0.1.103
+body            URIBL_DBL_ABUSE_REDIR  	eval:check_uridnsbl('URIBL_DBL_ABUSE_REDIR')
+describe        URIBL_DBL_ABUSE_REDIR  	Contains an abused redirector URL listed in the DBL blocklist
+tflags          URIBL_DBL_ABUSE_REDIR  	net domains_only
+
+urirhssub       URIBL_DBL_ABUSE_PHISH  	dbl.spamhaus.org.       A   127.0.1.104
+body            URIBL_DBL_ABUSE_PHISH	eval:check_uridnsbl('URIBL_DBL_ABUSE_PHISH')
+describe        URIBL_DBL_ABUSE_PHISH	Contains an abused phishing URL listed in the DBL blocklist
+tflags          URIBL_DBL_ABUSE_PHISH	net domains_only
+
+urirhssub       URIBL_DBL_ABUSE_MALW  	dbl.spamhaus.org.       A   127.0.1.105
+body            URIBL_DBL_ABUSE_MALW	eval:check_uridnsbl('URIBL_DBL_ABUSE_MALW')
+describe        URIBL_DBL_ABUSE_MALW	Contains an abused malware URL listed in the DBL blocklist
+tflags          URIBL_DBL_ABUSE_MALW	net domains_only
+
+urirhssub       URIBL_DBL_ABUSE_BOTCC  	dbl.spamhaus.org.       A   127.0.1.106
+body            URIBL_DBL_ABUSE_BOTCC  	eval:check_uridnsbl('URIBL_DBL_ABUSE_BOTCC')
+describe        URIBL_DBL_ABUSE_BOTCC  	Contains an abused botnet C&C URL listed in the DBL blocklist
+tflags          URIBL_DBL_ABUSE_BOTCC  	net domains_only
+
 
 # this indicates that IP-address queries were sent to DBL, and should
 # never appear; if it does, something is wrong with SpamAssassin
@@ -134,7 +173,7 @@ urirhssub       URIBL_BLOCKED   multi.uribl.com.        A   1
 body            URIBL_BLOCKED   eval:check_uridnsbl('URIBL_BLOCKED')
 describe        URIBL_BLOCKED   ADMINISTRATOR NOTICE: The query to URIBL was blocked.  See http://wiki.apache.org/spamassassin/DnsBlocklists\#dnsbl-block for more information.
 tflags          URIBL_BLOCKED   net noautolearn
-reuse           URIBL_BLOCKED
+
 
 ###########################################################################
 ## DOMAINS TO SKIP (KNOWN GOOD)
@@ -142,7 +181,7 @@ reuse           URIBL_BLOCKED
 # Don't bother looking for example domains as per RFC 2606.
 uridnsbl_skip_domain example.com example.net example.org
 
-uridnsbl_skip_domain local.cf 
+uridnsbl_skip_domain local.cf
 
 # MUA CSS class definitions
 uridnsbl_skip_domain div.tk p.tk li.tk no.tk
@@ -208,5 +247,9 @@ uridnsbl_skip_domain twitter.com wordpress.com yahoo.co.jp youtube.com
 
 uridnsbl_skip_domain fedex.com
 uridnsbl_skip_domain openoffice.org
+uridnsbl_skip_domain vk.com
+
+# Microsoft on ns1.msedge.net
+uridnsbl_skip_domain microsofttranslator.com office.com microsoftonline.com bing.com msedge.net
 
 endif   # Mail::SpamAssassin::Plugin::URIDNSBL

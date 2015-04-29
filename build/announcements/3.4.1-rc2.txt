@@ -1,0 +1,586 @@
+To: users, dev, announce
+Subject: ANNOUNCE: Apache SpamAssassin 3.4.1 available
+
+Release Notes -- Apache SpamAssassin -- Version 3.4.1
+
+Introduction
+------------
+
+Apache SpamAssassin 3.4.1 represents more than a year of development
+and nearly 500 tweaks, changes, upgrades and bug fixes over the previous
+release. Highlights include: Improved automation to help combat spammers
+that are abusing new top level domains; Tweaks to the SPF support to
+block more spoofed emails; Increased character set normalization to
+make rules easier to develop, block more international spam and stop
+spammers from using alternate character sets to bypass tests;
+Continued refinement to the native IPv6 support; and Improved Bayesian
+classification with better debugging and attachment hashing.
+
+Notable features:
+=================
+
+New plugins
+-----------
+
+There are three new plugins added with this release:
+
+  Mail::SpamAssassin::Plugin::TxRep
+  Mail::SpamAssassin::Plugin::PDFInfo
+  Mail::SpamAssassin::Plugin::URILocalBL
+
+The TxRep (Reputation) plugin is designed as a substantially improved
+replacement of the AWL plugin. It adjusts the final message spam score
+by looking up and taking in consideration the reputation of the sender.
+It cannot coexist with the old AWL plugin, which must be disabled when
+the TxRep is loaded.
+
+The PDFInfo plugin helps detecting spam with attached PDF files.
+
+The URILocalBL plugin creates some new rule test types, such as
+"uri_block_cc", "uri_block_cidr", and "uri_block_isp".  These rules
+apply to the URIs found in the HTML portion of a message, i.e.
+<a href=...> markup.
+
+All these three plugins are disabled by default. To enable, uncomment
+the loadplugin configuration options in file v341.pre, or add them to
+some local .pre file such as local.pre .
+
+Plugins are documented in their respective man pages.
+
+
+Notable changes
+---------------
+
+A new subsystem RegistryBoundaries for recognizing and updating a list
+of top-level domains and registry boundaries has been introduced, which
+allows dynamically updating both lists through rule updates instead of
+having them hard-wired in the code.
+
+A subroutine Node::_normalize has been rewritten. The new behavior
+is documented with the 'normalize_charset' option in the
+Mail::SpamAssassin::Conf man page. (Bug 7144, Bug 7126, Bug 7133)
+
+Tokenization of UTF-8 -encoded or normalized text has been improved
+in the Bayes plugin. (Bug 7130, Bug 7135, Bug 7141)
+
+SHA1 digests of all MIME parts (including non-textual) can now be
+contributed to Bayes tokens, which allows the bayes classifier to assess
+also the non-textual content. The set of sources of bayes tokens is
+configurable with a new configuration option 'bayes_token_sources'
+as documented in the Mail::SpamAssassin::Conf man page. (Bug 7115)
+It is disabled by default for backward compatibility. 
+
+
+New configuration options
+-------------------------
+
+The 'normalize_charset' configuration option already existed in previous
+versions, but functionality has been re-implemented with more emphasis
+on the declared character set of each textual MIME part, instead of
+relying on guesswork by Encode::Detect::Detector. When enabled, non-UTF8
+textual parts of a mail message are decoded into Unicode and re-encoded
+into UTF-8 before passing them to HTML decoding and to rules processing.
+This makes it easier to write regular expressions and strings in rules
+using UTF-8 encoding, and allows plugins (such as tokenization in a
+Bayes plugin) to recognize multibyte characters and words in non-English
+languages, instead of 'randomly' considering some non-ASCII octets in
+multibyte characters as delimiters. Please see documentation for this
+configuration option in the Mail::SpamAssassin::Conf man page.
+
+A new configuration option 'bayes_token_sources' allows more control
+on the sources of tokens for the Bayes plugin. For compatibility the
+default set of sources is unchanged, but consider: 
+    bayes_token_sources all
+or: bayes_token_sources mimepart
+to include SHA1 digests of all MIME parts in a message as Bayes tokens.
+Please see documentation for this option in the Mail::SpamAssassin::Conf
+man page.
+
+A new configuration option 'dkim_minimum_key_bits' with a default value
+of 1024 bits now controls the smallest size of a signing key (in bits)
+for a valid signature to be considered for whitelisting. Please see
+documentation for this option in the Mail::SpamAssassin::Plugin::DKIM
+man page.
+
+A new configuration option 'parse_dkim_uris' allows DKIM header fields
+to be parsed for URIs and to be processed alongside other URIs found in
+the body.
+
+A configuration option 'dns_server' can now specify a scoped link-local
+IPv6 address, e.g.:  dns_server [fe80::1%lo0]:53 .
+
+The configuration option 'check_rbl_from_domain' checks all domain names
+in a From mail address as an alternate to check_rbl_from_host. As of
+v3.4.1, it has been improved to include a subtest for a specific octet.
+
+The 'if (boolean perl expression)' now accepts 'perl_version' in the
+expression. The 'perl_version' will be replaced with the version number
+of the currently-running perl engine. Another way of testing perl
+version in a conditional of a configuration file is:
+  if can(Mail::SpamAssassin::Conf::perl_min_version_5010000)
+Please see documentation in the Mail::SpamAssassin::Conf man page.
+
+
+
+
+
+Added flag 'noawl' to the 'tflags' configuration option.
+
+
+new template tags:
+_SENDERDOMAIN_  a domain name of the envelope sender address, lowercased
+_AUTHORDOMAIN_  a domain name of the author address (the From header
+                field), lowercased;  note that RFC 5322 allows a mail
+                message to have multiple authors - currently only the
+                domain name of the first email address is returned
+
+INTERNAL:
+new methods in Mail::SpamAssassin::PerMsgStatus :
+
+$pms->get_names_of_tests_hit_with_scores_hash
+
+  After a mail message has been checked, this method can be called.
+  It will return a pointer to a hash for rule & score pairs for all
+  the symbolic test names and individual scores of the tests which
+  were triggered by the mail.
+
+$pms->get_names_of_tests_hit_with_scores
+
+  After a mail message has been checked, this method can be called.
+  It will return a comma-separated string of rule=score pairs for all
+  the symbolic test names and individual scores of the tests which
+  were triggered by the mail.
+
+
+
+
+Rule updates
+------------
+
+Many rules were added or modified, or their score adjusted.
+Some of these are (in no particular order):
+
+  ADMITS_SPAM, AXB_HELO_HOME_UN, AXB_XRCVD_EXCH_UUCP, BANG_GUAR,
+  BAYES_999, CANT_SEE_AD, CN_B2B, CN_B2B_SPAMMER, DX_TEXT, DX_TEXT_02,
+  Doctor Oz, END_FUTURE_EMAILS, FILLFORM, FREEMAIL_FORGED_FROMDOMAIN,
+  FREEMAIL_MANY_TO, FROM_MISSP_REPLYTO, FSL_FAKE_GMAIL_RCVD, GAPPY_,
+  FSL_HELO_BARE_IP_*, FSL_NEW_HELO_USER, HEADER_FROM_DIFFERENT_DOMAINS,
+  HELO_LH_HOME, HEXHASH, HEXHASH_WORD, HTML_OFF_PAGE, LONG_HEX_URI,
+  FUZZY_CLICK_HERE, LOTSA_MONEY, MSGID_NOFQDN[12], NORMAL_HTTP_TO_IP,
+  NUM_FREE, PDS_FROM_2_EMAILS, PHP malware/phish, PUMPDUMP, RAND_HEADER,
+  RCVD_ILLEGAL_IP, STYLE_GIBBERISH, SYSADMIN, TVD_FUZZY_SECURITIES FP,
+  TVD_GET_STOCK, TO_IN_SUBJ, TO_NO_BRTKS_MSFT, UC_GIBBERISH_OBFU,
+  URIBL_DBL_ABUSE_REDIR, URIBL_DBL_SPAM, URI_GOOGLE_PROXY, URI_IP_UNSUB,
+  URI_OPTOUT_3LD, URI_OPTOUT_USME, URI_TRY_USME, VANITY, __DATE_SPACEY,
+  __BOUNCE_RPATH_NULL, __FORGED_URL_DOM_*, __FSL_LINK_AWS_S3_WEB_LOOSE,
+  __HAS_OFFICE1214_IN_MAILER, __HEXHASHWORD_S2EU, __LONG_HEX_URI,
+  __RAND_HEADER, __SUBJECT_UTF8_B_ENCODED, unsubscribe URI to IP addr.,
+  advance_fee, lotsa_money, exploratory tagged-URI, pumpdump, optout,
+  moving money rules (very short 419 fraud spams), new phrase rules,
+  PDFinfo, protect some test rules with can(perl_min_version_5010000),
+  test rules to detect SPF queries that produce error results,
+  various unsubscribe rules, freshen and extend phishing rules,
+  added missing eval:check_uri_host_in_* rules, check for references
+  to compromised WordPress sites, other wordpress rules, some Cyrillic
+  and Hebrew obfuscations that were overlooked, avoid Japanese-language
+  false-positives, added 20_freemail_mailcom_domains.cf
+
+Some rules were removed or disabled, either because of ineffectiveness,
+or duplication with other rules, or due to false positives. Some of these
+are (in no particular order):
+
+  DNS_FROM_AHBL_RHSBL, DOS_FAKE_SQUIRREL, FSL_MISSP_REPLYTO,
+  KHOP_SPAMDB_SUBJ, MSGID_MULTIPLE_AT, SMF_FM_FORGED_REPLYTO,
+  SUBJECT_UNNEEDED_ENCODING, URIBL_DBL_REDIR, XPRIO_RPATH_NULL,
+  defunct AHBL rules, obsoleted FSL rules from 50_scores.cf,
+  obsoleted rules in 00_FVGT_File001.cf, perl-5.8-hostile rule,
+  removed duplicate domains in 20_freemail_domains.cf
+
+
+Other updates
+-------------
+
+Documentation was updated or enhanced. Project's testing and evaluation
+hosts and tools running in the ASF infrastructure were updated.
+
+A list of top-level domains in registrar boundaries was updated
+several times (cw, sx, club, com.us, util_rb_2tld, ...). TLD updating
+process was improved, tests to account for new TLDs and changes were
+updated, TLD update in build/README was clarified for SA releases,
+RFC 2606: invalid TLD used in testing was changed to '.invalid' .
+
+
+Improvements
+------------
+
+Bug 7150: Allow scoped IP address in the dns_server config option
+
+Util::TinyRedis: allow a scoped / link-local IP address specification
+(avoid current limitation in IO::Socket::IP [rt.cpan.org #89608])
+
+SPF max DNS terms was raised to 15 to accomodate for eBay SPF records
+
+Bug 7136: added has_check_for_spf_errors and if can() encapsulation
+
+Bug 7128: DCC plugin now uses IO::Socket::IP instead of IO::Socket::INET6 
+
+Bug 7099: Adding tags SENDERDOMAIN and AUTHORDOMAIN
+
+Bug 7068: added rule and code to counts Unicode entities
+
+Bug 7052: moved module Net::DNS::Nameserver to optional since it is
+just used in make test
+
+clean up on httpd.conf
+
+minor debugging improvement in Plugin::TextCat 
+
+Plugin/AskDNS: additional debug logging
+
+Bug 7107: added "perl_min_version_5010000" for preprocessor conditionals
+
+Cleaned up documentation and removed rule name parameter that was not
+needed on the rule
+
+more informative dns debugging output
+
+added new install docs to MANIFEST
+
+improvements for disabled plugins
+
+
+Optimizations
+-------------
+
+writing speed of large temporary files was improved by using a larger
+buffer and avoiding PerlIO - MS::PerMsgStatus::create_fulltext_tmpfile()
+
+unnecessary copying was avoided when reading from a temporary file
+in SA::Message::Node (small optimization)
+
+a small hotspot in DnsResolver.pm was optimized
+
+use faster utf8::encode instead of Encode::encode_utf8
+
+changed fillfactor for postgres bayes/awl tables to optimize for updates
+
+disabled synchronous commit for Postgres Bayes store
+
+
+Notable bug fixes
+-----------------
+
+Adjusted for Yahoo! using subnet 238.0.0./8 in Received headers.
+
+Bug 6751: certain character sets can use alternate characters for
+a period and bypass DNSBL checks
+
+Bug 7153: prevent leaking of messages to stderr in URILocalBL.pm
+
+Bug 7143: use eval instead of regex to fix MakeMaker version
+
+Bug 7148: small getopt.c change
+
+added a workaround to Node::_normalize for an Encode::decode taint
+laundering bug [rt.cpan.org #84879]
+
+Bug 7141: Bayes truncates ('skip') long tokens on bytes, should it
+count characters instead?
+
+Bug 7140: fixed DKIM/SPF Insecure dependency in require
+
+Bug 7130: Bayes tokenization mangles/chops many UTF-8 words with accented,
+Cyrillic etc. letters - inappropriately assuming ISO-8859 encoding
+
+Bug 7130: disable TOKENIZE_LONG_8BIT_SEQS_AS_TUPLES, seems redundant
+and useless with TOKENIZE_LONG_8BIT_SEQS_AS_UTF8_CHARS, e.g. turns
+each Cyrillic letter of longer words into an individual token
+
+Bug 7133: Revisiting Bug 4046 - HTML::Parser: Parsing of undecoded UTF-8
+will give garbage when decoding entities
+
+fixed missing case for permerror in From SPF
+
+Bug 7136: modified 25_spf.t and reverted reversion in SpamAssassin.pm
+from previous rc1 work
+
+Bug 7135: Bayes tokenizer 'arbitrarily' breaks multibyte CJK UTF-8
+characters into digrams instead of breaking on UTF-8 character boundaries
+
+Bug 7126: Incorrect character set detections by normalize_charset
+
+Bug 7125: MIME parsing of nested messages must not treat parts like
+delivery-status or disposition-notification as message/rfc822
+
+Bug 6953: spamd: could not create IO::Socket::INET6 socket
+on [::]:783: Address already in use
+
+Bug 7106: failed IPv6 socket creation blocks creating a good IPv4 socket
+
+Bug 7124: DKIM: RFC 6376 - Signers MUST use RSA keys of at least 1024 bits
+
+Bug 7120: Perl Critic exemption
+Bug 7119: Perl::Critic: ControlStructures::ProhibitMutatingListFunctions
+reverted critic recommendations to fix undef warning, Removed undef
+returns for perlcritic test
+
+Bug 5399: fix MS::Util::parse_content_type, dots are allowed in
+Content-Type (a fix to Bug 5399 was too strict)
+
+fixed SA::Util::qp_decode for compliance with RFC 2045 (trailing
+whitespace must be deleted before decoding)
+
+Bug 7063: removing sawampersand
+
+Bug 7111: sa-update: wrong exit code with --checkonly (does not find
+new versions)
+
+Bug 7030: BayesStore/Redis.pm: authentication doesn't work with
+Redis 2.6 and earlier
+
+Bug 7103: bad wget option causes first fetch of third-party rules
+channel to fail
+
+fixed uribl matching on email addresses with commas after them
+
+Bug 6919: Added 'dedicated' to list of static IP indicators for RDNS_DYNAMIC
+
+Fixed POD error caused by trailing whitespace
+
+hacked PHP URI tuning
+
+added askdns to known debug facilities
+
+expansion of replace tags for more characters
+
+avoid a perl 5.21 warning: Negative repeat count does nothing
+
+added more UTF-8 Unicode obfuscation variants
+
+removed non AV/filter headers
+
+Set headers which may provide inappropriate cues to the Bayesian classifier
+
+Plugin/HeaderEval: header field names are case-insensitive
+
+Bug 7074, sa-update: improved error reporting of a failed spawned process
+
+db_id not initialized, || -> ||=
+
+renamed __freemail_hdr_replyto to __smf_freemail_hdr_replyto avoiding
+name collision
+
+changed bayes_auto_learn_threshold_nonspam -1.0
+
+MS::Plugin::AskDNS - avoid warning on undef in eq when a DNS response
+has no answer section
+
+Bug 7079: hide the Geo::IP warning
+
+Bug 7078: Mail::Spamassassin::Message::Node::header() error - normalize
+line endings in header, not just in body
+
+Bug 7060: allow excluding domains instead of individual hosts
+
+avoid a warning: Use of uninitialized value $pgm in concatenation
+Plugin/DCC.pm, line 915
+
+Bug 7070: added rbl_timeout_min so that t_min for rbl_timeout applies
+even without a zone
+
+Bug 7065: debug mode breaks Bayes but only if DBM storage is used
+
+added code for check_for_ascii_text_illegal in MIMEEval and added
+test rule to sandbox
+
+added Cyrillic and Armenian glyphs in UTF-8 encoding to single-letter
+replace tags
+
+Bug 7034: Redis.pm leaks file descriptors when preforking - avoid
+creating a circular data structure through a closure
+
+allow an "=" char in a redis password
+
+added verbose to sync to sa2 zones server
+
+added URILocalBL.pm plugin to trunk for testing, updating MANIFEST
+and v341.pre file as well as optional dependencies with Net::CIDR::Lite
+and Geo::IP
+
+fix DNS resolving with Net::DNS 0.76
+
+Changes in Spamhaus DBL DNSBL return codes as per
+  http://www.spamhaus.org/news/article/713/
+
+Fixing issues with extract_to_rsync_dir
+
+Having issues with this sandbox rule failing make test
+TEST_FILES="t/basic_lint.t t/basic_lint_without_sandbox.t t/basic_meta.t"
+
+fixed escaping where perl called from bash using bash variables for
+tick_zone_serial
+
+fixed the interpreter to reference /bin/bash instead of /usr/bin/bash
+
+Fixing the masses Makefile for pgapack for linux on new spamassassin-vm
+centos box
+
+Bug 7052: Fix for Net::DNS::Nameserver dependency on CentOS systems
+
+fix to install v341.pre file
+
+Bug 7050: fixed _DATE_ template tag by use of an anonymous sub,
+calling Util::time_to_rfc822_date() explicitly without any argument
+
+fixed newline collapse harming excessive whitespace rules
+
+added max_connections=100 as a safety feature
+
+fixed $self
+
+added get_names_of_tests_hit_with_scores_hash,
+get_names_of_tests_hit_with_scores functions to PMS along
+with trivial fixing of triggered being misspelled.
+
+uridnsbl_skip_domain vk.com (the russian facebook)
+
+fixed wrong plugin in IF
+
+Bug 7032: added tflag for noawl
+
+If a subrule is in an if block, ensure it appears in an else block to
+avoid breaking dependent rules. Fix some rules depending on subrules
+in if blocks in other sandboxes so they don't break if the conditional
+check suppresses that subrule.
+
+Bug 6994: small change for systems with ACLs in testing
+
+fixed SQLBasedAddrList re-learning
+
+frequently seen domains on ns1.msedge.net
+
+added windows-1251 to likely FP list
+
+Bug 7024: check_rbl_from_host/check_rbl_from_domain/check_rbl_envfrom
+did not support the subtest functionality.  Fixed and removed
+has_check_rbl_from_domain as pointless now.
+
+Bug 7018: fixed misspelling on Razor configuration item
+
+Bug 7005: sa_compile.t test failures with MacPorts' perl - safe quoting
+
+use Config to get path when non-standard sitebin is set
+
+Bug 7015: fixed untaint var bug
+
+Bug 7013: added a small fix for bayes_auto_learn_on not working
+with BAYES_999
+
+Bug 7000: dnsbl_subtests.t hangs on Windows
+
+Bug 7008: fixed CPAN Parsing
+
+added eval for testing a quoted printable ratio for spaminess
+
+fixed SA version check
+
+Bug 7004: Test suite fails when using FreeBSD's 'script' utility
+
+
+Downloading and availability
+----------------------------
+
+Downloads are available from:
+
+http://spamassassin.apache.org/downloads.cgi
+
+md5sum of archive files:
+
+55f934b54e7b56fb89b491b289b10e8d  Mail-SpamAssassin-3.4.1-rc2.tar.bz2
+3c9a10d08731877a29499769e75e35b3  Mail-SpamAssassin-3.4.1-rc2.tar.gz
+8d01b76eb532499f590a8314f5a5f938  Mail-SpamAssassin-3.4.1-rc2.zip
+a5e4a3f174cc5ed8b18077f9a6ca0c47  Mail-SpamAssassin-rules-3.4.1-rc2.r1670273.tgz
+
+sha1sum of archive files:
+
+0efbde52cdc882461d2e3a5d9ed977499268cadd  Mail-SpamAssassin-3.4.1-rc2.tar.bz2
+bb2eb6a3c7a79ea1cc2a53abf668b4684f39b653  Mail-SpamAssassin-3.4.1-rc2.tar.gz
+318ac84a1f17e19229d9813078a12e7f4825dee3  Mail-SpamAssassin-3.4.1-rc2.zip
+680c231efd0cfca69e665445a9472d0b7bb3a8fe  Mail-SpamAssassin-rules-3.4.1-rc2.r1670273.tgz
+
+Note that the *-rules-*.tar.gz files are only necessary if you cannot,
+or do not wish to, run "sa-update" after install to download the latest
+fresh rules.
+
+See the INSTALL and UPGRADE files in the distribution for important
+installation notes.
+
+
+GPG Verification Procedure
+--------------------------
+The release files also have a .asc accompanying them.  The file serves
+as an external GPG signature for the given release file.  The signing
+key is available via the wwwkeys.pgp.net key server, as well as
+http://www.apache.org/dist/spamassassin/KEYS
+
+The key information is:
+
+pub   4096R/F7D39814 2009-12-02
+       Key fingerprint = D809 9BC7 9E17 D7E4 9BC2  1E31 FDE5 2F40 F7D3 9814
+uid                  SpamAssassin Project Management Committee <private@spamassassin.apache.org>
+uid                  SpamAssassin Signing Key (Code Signing Key, replacement for 1024D/265FA05B) <dev@spamassassin.apache.org>
+sub   4096R/7B3265A5 2009-12-02
+
+To verify a release file, download the file with the accompanying .asc file and run the following commands:
+
+  gpg -v --keyserver wwwkeys.pgp.net --recv-key F7D39814
+  gpg --verify Mail-SpamAssassin-3.4.1.tar.bz2.asc
+  gpg --fingerprint F7D39814
+
+Then verify that the key matches the signature.
+
+Note that older versions of gnupg may not be able to complete the steps
+above. Specifically, GnuPG v1.0.6, 1.0.7 & 1.2.6 failed while v1.4.11
+worked flawlessly.
+
+See http://www.apache.org/info/verification.html for more information
+on verifying Apache releases.
+
+
+About Apache SpamAssassin
+-------------------------
+
+Apache SpamAssassin is a mature, widely-deployed open source project
+that serves as a mail filter to identify spam. SpamAssassin uses a
+variety of mechanisms including mail header and text analysis, Bayesian
+filtering, DNS blocklists, and collaborative filtering databases. In
+addition, Apache SpamAssassin has a modular architecture that allows
+other technologies to be quickly incorporated as an addition or as a
+replacement for existing methods.
+
+Apache SpamAssassin typically runs on a server, classifies and labels
+spam before it reaches your mailbox, while allowing other components of
+a mail system to act on its results.
+
+Most of the Apache SpamAssassin is written in Perl, with heavily
+traversed code paths carefully optimized. Benefits are portability,
+robustness and facilitated maintenance. It can run on a wide variety of
+POSIX platforms.
+
+The server and the Perl library feels at home on Unix and Linux
+platforms, and reportedly also works on MS Windows systems under ActivePerl.
+
+For more information, visit http://spamassassin.apache.org/
+
+
+About The Apache Software Foundation
+------------------------------------
+
+Established in 1999, The Apache Software Foundation provides
+organizational, legal, and financial support for more than 100
+freely-available, collaboratively-developed Open Source projects. The
+pragmatic Apache License enables individual and commercial users to
+easily deploy Apache software; the Foundation's intellectual property
+framework limits the legal exposure of its 2,500+ contributors.
+
+For more information, visit http://www.apache.org/

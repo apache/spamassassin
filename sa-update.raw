@@ -518,6 +518,7 @@ foreach my $channel (@channels) {
 
     if ( defined $opt{'checkonly'} ) {            
       dbg("channel: $channel: --install and --checkonly, claiming update available");
+      $channel_successes++;
       next;
     }
 
@@ -558,6 +559,7 @@ foreach my $channel (@channels) {
     if ( defined $opt{'checkonly'} ) {            
       dbg("channel: $channel: update available, not downloading ".
           "in checkonly mode");
+      $channel_successes++;
       next;
     }
 
@@ -1470,10 +1472,10 @@ sub http_get {
                    --fail -o), $out_fname_short);
     push(@args, '-z', $out_fname_short)  if $out_fname_exists && !$force_reload;
   } elsif (defined $ext_prog && $ext_prog eq 'wget') {
-    push(@args, qw(-q -N --max-redirect=2 --tries=3
-                   --dns-timeout=20 --connect-timeout=30 --read-timeout=300
-                   -o), $out_fname_short);
-    #*** ???  if $out_fname_exists && !$force_reload;
+    push(@args, qw(-q --max-redirect=2 --tries=3
+                   --dns-timeout=20 --connect-timeout=30 --read-timeout=300));
+    push(@args, defined $suggested_out_fname ? ('-O', $out_fname_short)
+                : $force_reload ? () : ('-N') );
   } elsif (defined $ext_prog && $ext_prog eq 'fetch') {
     push(@args, qw(-q -n -a -w 20 -m -o), $out_fname_short);
     push(@args, '-m')  if $out_fname_exists && !$force_reload;
@@ -1527,7 +1529,8 @@ sub http_get {
   # parent
   waitpid($pid,0);
   my $child_stat = $?;
-  dbg("http: process [%s], exit status: %s", $pid, $child_stat);
+  dbg("http: process [%s], exit status: %s",
+      $pid, exit_status_str($child_stat,0));
 
   if (!$opt{'verbose'}) {
     # silent
@@ -1535,7 +1538,7 @@ sub http_get {
     printf("http: (%s) GET %s, success\n", $ext_prog, $url);
   } else {
     printf("http: (%s) GET %s, FAILED, status: %s\n",
-           $ext_prog, $url, $child_stat);
+           $ext_prog, $url, exit_status_str($child_stat,0));
   }
 
   if ($child_stat == 0) {
@@ -1592,8 +1595,8 @@ sub choose_mirror {
 ##############################################################################
 
 sub print_version {
-  print "sa-update version $VERSION\n"
-      . "  running on Perl version " . join(".", map { $_||=0; $_*1 } ($] =~ /(\d)\.(\d{3})(\d{3})?/ )) . "\n";
+  printf("sa-update version %s\n  running on Perl version %s\n", $VERSION, 
+         join(".", map( 0+($_||0), ( $] =~ /(\d)\.(\d{3})(\d{3})?/ ))));
 }
 
 ##############################################################################
@@ -1994,8 +1997,10 @@ Print sa-update version and exit.
 
 =head1 EXIT CODES
 
-An exit code of C<0> means an update was available, and was downloaded and
-installed successfully if --checkonly was not specified.
+In absence of a --checkonly option, an exit code of C<0> means:
+an update was available, and was downloaded and installed successfully.
+If --checkonly was specified, an exit code of C<0> means: an update was
+available.
 
 An exit code of C<1> means no fresh updates were available.
 

@@ -11,9 +11,9 @@
 # The ASF licenses this file to you under the Apache License, Version 2.0
 # (the "License"); you may not use this file except in compliance with
 # the License.  You may obtain a copy of the License at:
-# 
+#
 #     http://www.apache.org/licenses/LICENSE-2.0
-# 
+#
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -58,6 +58,24 @@ tflags USER_IN_MORE_SPAM_TO     userconf nice noautolearn
 header USER_IN_ALL_SPAM_TO      eval:check_to_in_all_spam()
 describe USER_IN_ALL_SPAM_TO    User is listed in 'all_spam_to'
 tflags USER_IN_ALL_SPAM_TO      userconf nice noautolearn
+
+if (version >= 3.004000)
+body      URI_HOST_IN_BLACKLIST eval:check_uri_host_in_blacklist()
+describe  URI_HOST_IN_BLACKLIST host or domain listed in the URI black-list
+tflags    URI_HOST_IN_BLACKLIST userconf noautolearn
+
+body      URI_HOST_IN_WHITELIST eval:check_uri_host_in_whitelist()
+describe  URI_HOST_IN_WHITELIST host or domain listed in the URI white-list
+tflags    URI_HOST_IN_WHITELIST userconf nice noautolearn
+
+header 	  HEADER_HOST_IN_BLACKLIST eval:check_uri_host_listed('BLACK')
+describe  HEADER_HOST_IN_BLACKLIST Blacklisted header host or domain
+tflags    HEADER_HOST_IN_BLACKLIST userconf noautolearn
+
+header 	  HEADER_HOST_IN_WHITELIST eval:check_uri_host_listed('WHITE')
+describe  HEADER_HOST_IN_WHITELIST Whitelisted header host or domain
+tflags    HEADER_HOST_IN_WHITELIST userconf nice noautolearn
+endif
 
 ###########################################################################
 # Default whitelists.  These should be addresses which send mail that is often

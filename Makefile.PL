@@ -7,13 +7,8 @@ use Config;
 
 use ExtUtils::MakeMaker;
 
-# Store the version for later use
-my $mm_version = $ExtUtils::MakeMaker::VERSION;
-
 # avoid stupid 'Argument "6.30_01" isn't numeric in numeric ge (>=)' warnings;
-# strip off the beta subversion noise that causes the trouble.
-$mm_version =~ s/_\S+$//;      # "6.30_01" => "6.30"
-$mm_version += 0;
+my $mm_version = eval $ExtUtils::MakeMaker::VERSION;
 
 if ($mm_version < 6.17) {
   die "SpamAssassin Makefile.PL requires at least ExtUtils::MakeMaker v6.17";
@@ -177,20 +172,20 @@ my %makefile = (
     # be quite explicit about this; afaik CPAN.pm is sensible using this
     # also see CURRENT_PM below
     'PREREQ_PM' => {
-        'Digest::SHA1'  => 0,             # 2.0 is oldest tested version
-        'File::Spec'    => 0.8,           # older versions lack some routines we need
-        'File::Copy'    => 2.02,          # this version is shipped with 5.005_03, the oldest version known to work
-        'Pod::Usage'    => 1.10,          # all versions prior to this do seem to be buggy
-        'HTML::Parser'  => 3.43,          # the HTML code is based on this parser, older versions have utf-8 bugs
-        'Archive::Tar'  => 1.23,          # for sa-update
-        'IO::Zlib'      => 1.04,          # for sa-update
-        'Mail::DKIM'    => 0.31,
-        'Net::DNS'      => (RUNNING_ON_WINDOWS ? 0.46 : 0.34), # bugs in older revs
-        'NetAddr::IP'   => 4.010,
-        'Sys::Hostname' => 0,
-        'Time::HiRes'   => 0,
-        'Time::Local'   => 0,
-        'Errno'         => 0,
+        'Digest::SHA1'         => 0,             # 2.0 is oldest tested version
+        'File::Spec'           => 0.8,           # older versions lack some routines we need
+        'File::Copy'           => 2.02,          # this version is shipped with 5.005_03, the oldest version known to work
+        'Pod::Usage'           => 1.10,          # all versions prior to this do seem to be buggy
+        'HTML::Parser'         => 3.43,          # the HTML code is based on this parser, older versions have utf-8 bugs
+        'Archive::Tar'         => 1.23,          # for sa-update
+        'IO::Zlib'             => 1.04,          # for sa-update
+        'Mail::DKIM'           => 0.31,
+        'Net::DNS'             => (RUNNING_ON_WINDOWS ? 0.46 : 0.34), # bugs in older revs
+        'NetAddr::IP'          => 4.010,
+        'Sys::Hostname'        => 0,
+        'Time::HiRes'          => 0,
+        'Time::Local'          => 0,
+        'Errno'                => 0,
     },
 
     'dist' => {
@@ -1105,6 +1100,8 @@ conf__install:
 	$(PERL) -MFile::Copy -e "copy(q{rules/v320.pre}, q{$(B_CONFDIR)/v320.pre}) unless -f q{$(B_CONFDIR)/v320.pre}"
 	$(PERL) -MFile::Copy -e "copy(q{rules/v330.pre}, q{$(B_CONFDIR)/v330.pre}) unless -f q{$(B_CONFDIR)/v330.pre}"
 	$(PERL) -MFile::Copy -e "copy(q{rules/v340.pre}, q{$(B_CONFDIR)/v340.pre}) unless -f q{$(B_CONFDIR)/v340.pre}"
+	$(PERL) -MFile::Copy -e "copy(q{rules/v341.pre}, q{$(B_CONFDIR)/v341.pre}) unless -f q{$(B_CONFDIR)/v341.pre}"
+  
 
 data__install:
 	-$(MKPATH) $(B_DATADIR)

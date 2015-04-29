@@ -30,35 +30,6 @@ header   FSL_UNDISCLOSED_RCPTS  To =~ /\bundisclosed[- ]recipients\b/i
 score    FSL_UNDISCLOSED_RCPTS  0.01
 describe FSL_UNDISCLOSED_RCPTS  To undisclosed recipients
 
-# JHardin: replaced with __FROM_DOM_INFO subrule
-#header   FSL_FROM_INFO_DOM      From:addr =~ /\.info$/
-#score    FSL_FROM_INFO_DOM      1.0
-#describe FSL_FROM_INFO_DOM      From address is in .info
-
-body     FSL_ADV                /\bThis(?:\s*is an)? advert(?:isement)?\b/i
-score    FSL_ADV                1.0
-describe FSL_ADV                This is an advertisement
-
-body     FSL_OPEN_ATTACH        /\b(?:OPEN|VIEW|READ|SEE|YOUR|ARE)\s*(?:THE\s*)?ATTACH(?:ED|MENT)\b?/
-score    FSL_OPEN_ATTACH        2.0
-describe FSL_OPEN_ATTACH        DEMANDS that you open the attachment!
-
-ifplugin Mail::SpamAssassin::Plugin::MIMEHeader
-mimeheader FSL_OPEN_ATTACH_MH   Content-Disposition =~ /\b(?:OPEN|VIEW|READ|SEE|YOUR|ARE)\s*(?:THE\s*)?ATTACH(?:ED|MENT)\b?/
-score      FSL_OPEN_ATTACH_MH   2.0
-describe   FSL_OPEN_ATTACH_MH   Filename demands that you open the attachment!
-endif
-
-body     __FSL_PHISH_UN         /\buser\s*name\s*:/i
-body     __FSL_PHISH_PW         /\bpass\s*word\s*:/i
-body     __FSL_PHISH_DE         /\bdeactivat(?:ed?|ion)\b/i
-body     __FSL_PHISH_MB         /\b(?:this|your|you're) (?:e|e-)?mailbox (?:has|is)\b/i
-body     __FSL_PHISH_RV         /\bre-?validat(?:ed?|ion)\b/i
-header   __FSL_PHISH_ADMIN      From:name =~ /admin(?:istrator)?\b/i
-meta     FSL_PHISH_EMAIL        (__FSL_PHISH_UN + __FSL_PHISH_PW + __FSL_PHISH_DE + __FSL_PHISH_MB + __FSL_PHISH_RV + __FSL_PHISH_ADMIN) >= 3
-score    FSL_PHISH_EMAIL        1.0
-describe FSL_PHISH_EMAIL        Likely phishing for e-mail account details
-
 header   FSL_ABUSED_WEB_1       exists:X-AntiAbuse
 score    FSL_ABUSED_WEB_1       0.01
 describe FSL_ABUSED_WEB_1       Has X-AntiAbuse header
@@ -71,38 +42,9 @@ header   FSL_ABUSED_WEB_3       exists:X-PHP-Originating-Script
 score    FSL_ABUSED_WEB_3       0.01
 describe FSL_ABUSED_WEB_3       Has X-PHP-Originating-Script header
 
-body     FSL_SUPPLY            /\b(?:i|we|company)\s*(?:can|is|am|are)?\s*(?:sell(?:ing)?|offer(?:ing)?|provid(?:es?|ing|supply(?:ing)))\b/i
-describe FSL_SUPPLY            Something can be supplied
-score    FSL_SUPPLY            1.0
-
-meta     FSL_SUPPLY_FM         (FREEMAIL_FROM && FSL_SUPPLY)
-describe FSL_SUPPLY_FM         Something can be supplied and from Freemail account
-score    FSL_SUPPLY_FM         1.0
-
-header   __FSL_SUBJ_SEO_1      Subject =~ /\bSEO\b/i
-header   __FSL_SUBJ_SEO_2      Subject =~ /\bsearch engine optimi[sz]ation\b/i
-meta     FSL_SUBJ_SEO          (__FSL_SUBJ_SEO_1 || __FSL_SUBJ_SEO_2)
-describe FSL_SUBJ_SEO          Search engine optimisation
-score    FSL_SUBJ_SEO          1.0
-
-body     __FSL_BODY_SEO_1      /\bSEO\b/
-body     __FSL_BODY_SEO_2      /\bsearch engine optimi[sz]ation\b/i
-meta     FSL_BODY_SEO          (__FSL_BODY_SEO_1 || __FSL_BODY_SEO_2)
-describe FSL_BODY_SEO          Search engine optimisation
-score    FSL_BODY_SEO          1.0
-
-meta     FSL_FREEMAIL_SEO      (FREEMAIL_FROM && (FSL_SUBJ_SEO || FSL_BODY_SEO))
-describe FSL_FREEMAIL_SEO      Freemail account offering SEO
-score    FSL_FREEMAIL_SEO      5.0
-
 meta     FSL_UNDISCLOSED_BULK  (FSL_UNDISCLOSED_RCPTS && (DCC_CHECK || RAZOR2_CHECK || PYZOR_CHECK))
 describe FSL_UNDISCLOSED_BULK  Undisclosed recipients and bulk signature
 score    FSL_UNDISCLOSED_BULK  3.0
-
-header   __FSL_TO_COMMON_ROLE  To:addr =~ /^((?:post|web|domain)master|info|sales|(?:tech)?support|(?:sys)?admin(?:istrator)?|abuse|noc|root|security|compliance|registrar)@/i
-meta     FSL_TO_ROLE_BULK      (__FSL_TO_COMMON_ROLE && (DCC_CHECK || RAZOR2_CHECK || PYZOR_CHECK))
-describe FSL_TO_ROLE_BULK      Bulk signature and to a role account
-score    FSL_TO_ROLE_BULK      1.0
 
 # Received: from hwyhsxwaxz (amandacallow@113.162.65.176 with login) by
 header   __FSL_YAHOO_AUTH1      Received =~ /from [a-z]{10} \([^\@ ]+\@\d+\.\d+\.\d+\.\d+ with (?:plain|login)\) /
@@ -113,27 +55,89 @@ meta     FSL_YAHOO_AUTH_SIG     (__FSL_RELAY_YAHOO && (__FSL_YAHOO_AUTH1 || __FS
 describe FSL_YAHOO_AUTH_SIG     Yahoo SMTP AUTH observed patterns
 score    FSL_YAHOO_AUTH_SIG     5.0
 
-uri      FSL_UNSUB_RATWARE     /unsubscribe\.php\?M=[0-9]+&C=[^& ]+&L=[0-9]+&N=[0-9]+/
-describe FSL_UNSUB_RATWARE     Unsubscribe ratware signature
-score    FSL_UNSUB_RATWARE     3.0
+ifplugin Mail::SpamAssassin::Plugin::FreeMail
+# Test potential error in base rules
+header   __smf_freemail_hdr_replyto  eval:check_freemail_header('Reply-To:addr')
+meta     SMF_FM_FORGED_REPLYTO  __smf_freemail_hdr_replyto && !FREEMAIL_FROM && !__freemail_safe
+describe SMF_FM_FORGED_REPLYTO  Freemail in Reply-To, but not From
+tflags	 SMF_FM_FORGED_REPLYTO  nopublish
+#score    SMF_FM_FORGED_REPLYTO  0.1
+endif
 
-body     FSL_I_AM              /^I(?:'m| am)(?! a | by | pretty | very | excited | seeking )\s*[a-zA-Z.-]+(?:\s*\S+){1,3}(?:\s*from\s*\S+[,.]|[,.])/
-describe FSL_I_AM              I am ...
-score    FSL_I_AM              0.1
+# Theory: most glue adds their own Received headers be SpamAssassin
+# sees the message, so NO_RECEIVED will never fire when run in that
+# way.  So lets see if a single Untrusted/External is an indicator.
+header   __FSL_COUNT_TRUST      X-Spam-Relays-Trusted =~ /\[[^\]]+\]/
+tflags   __FSL_COUNT_TRUST	multiple
+meta     FSL_RCVD_TR_1          (__FSL_COUNT_TRUST == 1)
+score    FSL_RCVD_TR_1		0.01
+meta     FSL_RCVD_TR_2          (__FSL_COUNT_TRUST == 2)
+score    FSL_RCVD_TR_2		0.01
+meta     FSL_RCVD_TR_3          (__FSL_COUNT_TRUST == 3)
+score    FSL_RCVD_TR_3		0.01
+meta     FSL_RCVD_TR_4          (__FSL_COUNT_TRUST == 4)
+score    FSL_RCVD_TR_4		0.01
+meta     FSL_RCVD_TR_5          (__FSL_COUNT_TRUST == 5)
+score    FSL_RCVD_TR_5		0.01
+meta     FSL_RCVD_TR_GT_5       (__FSL_COUNT_TRUST > 5)
 
-# Based on John Hardin's MONEY_FROM_41
-header   __FSL_IPV4_41         ALL =~ /(?:\(|\s+)?\[?41\.(?:[0-9]{1,3}\.){2}[0-9]{1,3}\]?/
-body     __FSL_URGENT_ASSIST   /your urgent assist/i
-body     __FSL_MAIL_HAS        /your mail has/i
-header   __FSL_SUBJECT_EMAIL   Subject =~ /\b[^\@ ]+\@[^\@ ]+\b/
-body     __FSL_ATM_CARD        /\bATM [Cc][Aa][Rr][Dd]\b/
-meta     FSL_FRAUD_FROM_41     (__FSL_IPV4_41 && (LOTS_OF_MONEY || FSL_MY_NAME_IS || FSL_I_AM || __FSL_URGENT_ASSIST || __FSL_MAIL_HAS || __FSL_SUBJECT_EMAIL || __FSL_ATM_CARD))
-score    FSL_FRAUD_FROM_41     1.0
+header   __FSL_COUNT_UNTRUST	X-Spam-Relays-Untrusted =~ /\[[^\]]+\]/
+tflags   __FSL_COUNT_UNTRUST	multiple
+meta     FSL_RCVD_UT_1          (__FSL_COUNT_UNTRUST == 1)
+score    FSL_RCVD_UT_1		0.01
+meta     FSL_RCVD_UT_2          (__FSL_COUNT_UNTRUST == 2)
+score    FSL_RCVD_UT_2		0.01
+meta     FSL_RCVD_UT_3          (__FSL_COUNT_UNTRUST == 3)
+score    FSL_RCVD_UT_3		0.01
+meta     FSL_RCVD_UT_4          (__FSL_COUNT_UNTRUST == 4)
+score    FSL_RCVD_UT_4		0.01
+meta     FSL_RCVD_UT_5          (__FSL_COUNT_UNTRUST == 5)
+score    FSL_RCVD_UT_5		0.01
+meta     FSL_RCVD_UT_GT_5       (__FSL_COUNT_UNTRUST > 5)
+score    FSL_RCVD_UT_GT_5	0.01
 
-rawbody  FSL_CSS_NO_DISPLAY      /display:[^:]+\bnone\b/i
-rawbody  FSL_HTML_COMMENT        /<!--/
+header   __FSL_COUNT_EXTERN	X-Spam-Relays-External =~ /\[[^\]]+\]/
+tflags   __FSL_COUNT_EXTERN	multiple
+meta     FSL_RCVD_EX_1          (__FSL_COUNT_EXTERN == 1)
+score    FSL_RCVD_EX_1		0.01
+meta     FSL_RCVD_EX_2          (__FSL_COUNT_EXTERN == 2)
+score    FSL_RCVD_EX_2		0.01
+meta     FSL_RCVD_EX_3          (__FSL_COUNT_EXTERN == 3)
+score    FSL_RCVD_EX_3		0.01
+meta     FSL_RCVD_EX_4          (__FSL_COUNT_EXTERN == 4)
+score    FSL_RCVD_EX_4		0.01
+meta     FSL_RCVD_EX_5          (__FSL_COUNT_EXTERN == 5)
+score    FSL_RCVD_EX_5		0.01
+meta     FSL_RCVD_EX_GT_5       (__FSL_COUNT_EXTERN > 5)
 
-header   __FSL_FROM_EQ_REPTO     ALL =~ /(?:Reply-To|From):\s*([^<]+)\s*<[^\@ ]+@[^> ]+>.*(?:From|Reply-To):\s*\1/msi
-body     __FSL_FRIEND_SPAM       /^\s*h(?:i|ello)\s+\S+\s+http:\/\//mi
-meta     FSL_FRIEND_SPAM         (__FSL_FROM_EQ_REPTO && __FSL_FRIEND_SPAM && FREEMAIL_REPLYTO)
-score    FSL_FRIEND_SPAM         10.0
+rawbody  __FSL_HTML_BLOCKS      /<((?:div|span))[^>]+>.{1,10}?<\/\1[^>]*>.{0,20}?<\1/si
+tflags   __FSL_HTML_BLOCKS      multiple
+
+meta     FSL_HTML_BLOCK_LOTS_1  (__FSL_HTML_BLOCKS > __FSL_BODY_TEXT_LINE)
+describe FSL_HTML_BLOCK_LOTS_1  More <div> or <span> blocks than lines
+score    FSL_HTML_BLOCK_LOTS_1  0.01
+
+meta     FSL_HTML_BLOCK_LOTS_2  (__FSL_HTML_BLOCKS > (__FSL_BODY_TEXT_LINE * 2))
+describe FSL_HTML_BLOCK_LOTS_2  More <div> or <span> blocks than twice the amount of lines
+score    FSL_HTML_BLOCK_LOTS_2  0.01
+
+meta     FSL_HTML_BLOCK_LOTS_3  (__FSL_HTML_BLOCKS > (__FSL_BODY_TEXT_LINE * 4))
+describe FSL_HTML_BLOCK_LOTS_3  More <div> or <span> blocks than 4x the amount of lines
+score    FSL_HTML_BLOCK_LOTS_3  0.01
+
+rawbody  __FSL_HTML_ENTITIES    /\&(?!(?:nbsp|cent|pound|yen|copy|reg|\#1[678][0-9];|\#x[AB][0-9A-F];))(?:\#(?:x[a-f0-9]+|\d{3,4})|[a-zA-Z]+)\;/si
+tflags   __FSL_HTML_ENTITIES    multiple
+
+meta     FSL_HTML_ENT_LOTS_1    (__FSL_HTML_ENTITIES > (__FSL_BODY_TEXT_LINE * 2))
+describe FSL_HTML_ENT_LOTS_1    Lots of HTML entities x2
+score    FSL_HTML_ENT_LOTS_1    0.01
+
+meta     FSL_HTML_ENT_LOTS_2    (__FSL_HTML_ENTITIES > (__FSL_BODY_TEXT_LINE * 8))
+describe FSL_HTML_ENT_LOTS_2    Lots of HTML entities x8
+score    FSL_HTML_ENT_LOTS_2    0.01
+
+meta     FSL_HTML_ENT_LOTS_3    (__FSL_HTML_ENTITIES > (__FSL_BODY_TEXT_LINE * 24))
+describe FSL_HTML_ENT_LOTS_3    Lots of HTML entities x24
+score    FSL_HTML_ENT_LOTS_3    0.01
+
+
