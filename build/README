@@ -482,7 +482,8 @@ SPAMASSASSIN RELEASE PROCEDURE
 
   WARNING: if you're moving to a new major release, x.y.0, you need to edit
   'build/update_website_docs' beforehand and set the "vers" line.  And if 
-  you are running on a server other than buildbot, the PERL and WEBDIR
+  you are running on a server other than buildbot (NOTE: this works on the 
+  spamassassin-vm.apache.org box), the PERL and WEBDIR
   vars may need tweaking:
 
         cd /var/www/buildbot.spamassassin.org/staging/website
@@ -490,7 +491,10 @@ SPAMASSASSIN RELEASE PROCEDURE
         svn delete --force full/3.4.x
         svn commit -m "removing old doc tree from website" full
 
-        cd [checkedoutdir]
+        #Checkout the current release
+        cd /tmp
+        svn checkout http://svn.apache.org/repos/asf/spamassassin/tags/spamassassin_release_3_4_1/ release
+        cd /tmp/release
         build/update_website_docs
 
         cd /var/www/buildbot.spamassassin.org/staging/website
@@ -508,7 +512,7 @@ SPAMASSASSIN RELEASE PROCEDURE
 
     repo=https://svn.apache.org/repos/asf/spamassassin
     svn delete -m "updating for new release"  $repo/tags/spamassassin_current_release_3.4.x
-    svn copy -m "updating for new release" $repo/tags/spamassassin_release_3_4_0 $repo/tags/spamassassin_current_release_3.4.x
+    svn copy -m "updating for new release" $repo/tags/spamassassin_release_3_4_1 $repo/tags/spamassassin_current_release_3.4.x
 
 - upload release .tar.gz (not .bz2) tarball to CPAN at http://pause.cpan.org/:
 
@@ -574,7 +578,8 @@ SPAMASSASSIN RELEASE PROCEDURE
  - Reviewed the Project Branding Report Checklist
 
 
-- Issues not resolved with the release of 3.4.0 2014-02-11
+- Issues not resolved with the release of 3.4.0 2014-02-11 and still not
+  resolved with the release of 3.4.1 2015-04-28
 
  - We updated to 3.4.0 and 3.4.1 is the current trunk version.  Need to
    confirm what needs to change on the updatesd scripts to make this
