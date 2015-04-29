@@ -506,9 +506,9 @@ sub _check_spf {
       $self->{spf_server} = Mail::SPF::Server->new(
 				hostname     => $scanner->get_tag('HOSTNAME'),
 				dns_resolver => $self->{main}->{resolver},
-				max_dns_interactive_terms => 15);
+				max_dns_interactive_terms => 20);
       # Bug 7112: max_dns_interactive_terms defaults to 10, but even 14 is
-      # not enough for ebay.com, setting it to 15
+      # not enough for ebay.com, setting it to 15 NOTE: raising to 20 per bug 7182
       1;
     } or do {
       $eval_stat = $@ ne '' ? $@ : "errno=$!";  chomp $eval_stat;
