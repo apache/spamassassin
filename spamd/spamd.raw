@@ -2417,6 +2417,7 @@ sub got_compress_header {
       return 0;
     }
     $hdrs->{compress_zlib} = 1;
+    dbg("spamd: compress header received\n");
   }
   else {
     protocol_error("(compression type not supported)");
