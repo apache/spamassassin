@@ -94,13 +94,13 @@ use vars qw{
   @site_rules_path
 };
 
-$VERSION = "4.000000";      # update after release (same format as perl $])
+$VERSION = "3.004001";      # update after release (same format as perl $])
 $IS_DEVEL_BUILD = 1;        # change for release versions
 
 # Used during the prerelease/release-candidate part of the official release
 # process. If you hacked up your SA, you should add a version_tag to your .cf
 # files; this variable should not be modified.
-#@EXTRA_VERSION = qw();
+#@EXTRA_VERSION = qw(rc1);
 
 @ISA = qw();
 
