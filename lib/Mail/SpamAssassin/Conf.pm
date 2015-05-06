@@ -1139,29 +1139,29 @@ it will be used if it is available.
 	unless (defined $value && $value !~ /^$/) {
 	    return $MISSING_REQUIRED_VALUE;
 	}
-        if    (lc $value eq 'yes' || $value eq '1') { $value = 1 }
-        elsif (lc $value eq 'no'  || $value eq '0') { $value = 0 }
-        else { return $INVALID_VALUE }
-
-	$self->{normalize_charset} = $value;
+	return  if $value == 0;
+	return $INVALID_VALUE unless $value == 1;
 
 	unless ($] > 5.008004) {
 	    $self->{parser}->lint_warn("config: normalize_charset requires Perl 5.8.5 or later");
-	    $self->{normalize_charset} = 0;
 	    return $INVALID_VALUE;
 	}
 	require HTML::Parser;
         #changed to eval to use VERSION so that this version was not incorrectly parsed for CPAN
 	unless ( eval { HTML::Parser->VERSION(3.46) } ) {
 	    $self->{parser}->lint_warn("config: normalize_charset requires HTML::Parser 3.46 or later");
-	    $self->{normalize_charset} = 0;
 	    return $INVALID_VALUE;
 	}
+#	unless (eval 'require Encode::Detect::Detector') {
+#	    $self->{parser}->lint_warn("config: normalize_charset requires Encode::Detect::Detector");
+#	    return $INVALID_VALUE;
+#	}
 	unless (eval 'require Encode') {
 	    $self->{parser}->lint_warn("config: normalize_charset requires Encode");
-	    $self->{normalize_charset} = 0;
 	    return $INVALID_VALUE;
 	}
+
+	$self->{normalize_charset} = 1;
     }
   });
 
@@ -4224,18 +4224,17 @@ Namely these characters and ranges:
 This will be replaced with the version number of the currently-running
 SpamAssassin engine.  Note: The version used is in the internal SpamAssassin
 version format which is C<x.yyyzzz>, where x is major version, y is minor
-version, and z is maintenance version.  So 3.0.0 is C<3.000000>, and 3.4.80
-is C<3.004080>.
+version, and z is maintenance version.  So 3.0.0 is C<3.000000>, and 3.4.80 is
+C<3.004080>.
 
 =item perl_version
 
-(Introduced in 3.4.1)  This will be replaced with the version number of the
-currently-running perl engine.  Note: The version used is in the $] version
-format which is C<x.yyyzzz>, where x is major version, y is minor version,
-and z is maintenance version.  So 5.8.8 is C<5.008008>, and 5.10.0 is
-C<5.010000>. Use to protect rules that incorporate RE syntax elements
-introduced in later versions of perl, such as the C<++> non-backtracking
-match introduced in perl 5.10. For example:
+(Introduced in 3.4.2)  This will be replaced with the version number of the currently-running
+perl engine.  Note: The version used is in the $] version format which is
+C<x.yyyzzz>, where x is major version, y is minor version, and z is maintenance
+version.  So 5.8.8 is C<5.008008>, and 5.10.0 is C<5.010000>. Use to protect rules
+that incorporate RE syntax elements introduced in later versions of perl, such
+as the C<++> non-backtracking match introduced in perl 5.10. For example:
 
   # Avoid lint error on older perl installs
   # Check SA version first to avoid warnings on checking perl_version on older SA
