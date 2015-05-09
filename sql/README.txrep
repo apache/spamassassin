@@ -38,9 +38,9 @@ database server is listening.
 user_awl_dsn                DBI:mysql:spamassassin:localhost
 
 Would tell SpamAssassin to connect to the database named spamassassin using
-MySQL on the local server, and since <port> is omitted, the driver will use
-the default port number.  The other two required options tells SpamAssassin
-to use the defined username and password to establish the connection.
+MySQL on the local server, and since <port> is omitted, the driver will use the
+default port number.  The other two required options tells SpamAssassin to use
+the defined username and password to establish the connection.
 
 If the user_awl_dsn option does not exist, SpamAssassin will not attempt
 to use SQL for tracking reputations.
@@ -84,13 +84,4 @@ Once you have created the database and added the table, just add the
 required lines to your global configuration file (local.cf).  Note that
 you must specify the proper storage backend in the config file in order
 for this to work and the current username must be passed to spamd.
-
-Maintenance
----------------
-
-It is recommended to keep user_awl_sql_table clear of stale data, for
-performance reasons. A sample query that can be run on a regular
-schedule is below:
-
-DELETE FROM txrep WHERE last_hit <= (now() - INTERVAL 120 day);
 
