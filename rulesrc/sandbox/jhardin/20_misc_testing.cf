@@ -1955,6 +1955,17 @@ tflags    __RAW_TOKEN                   multiple maxhits=3
 meta      RAW_TOKENS                    __RAW_TOKEN > 2
 describe  RAW_TOKENS                    Raw mail merge tokens in body
 
+header    __REPTO_CHN_FREEM             Reply-To =~ /\@(?:sina|aliyun)\.com/i
+
+meta      __SPOOFED_FREEM_REPTO         __SPOOFED_FREEMAIL && FREEMAIL_REPLYTO
+
+meta      SPOOFED_FREEM_REPTO_CHN       __SPOOFED_FREEM_REPTO && __REPTO_CHN_FREEM
+describe  SPOOFED_FREEM_REPTO_CHN       Forged freemail sender with Chinese freemail reply-to
+score     SPOOFED_FREEM_REPTO_CHN       2.000
+
+meta      SPOOFED_FREEM_REPTO           __SPOOFED_FREEM_REPTO && !__REPTO_CHN_FREEM
+describe  SPOOFED_FREEM_REPTO           Forged freemail sender with freemail reply-to
+score     SPOOFED_FREEM_REPTO           2.000
 
 
 
