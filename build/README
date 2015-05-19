@@ -7,10 +7,6 @@ SPAMASSASSIN DEVELOPMENT SNAPSHOT PROCEDURE
     ssh spamassassin.zones.apache.org
     cd [checkedoutdir]
 
-  NOTE: SpamAssassin.Zones is a crashed box replaced by SpamAssassin-vm.
-  A copy of the sabuildtools is in
-  /root/zonestorage-restore/spamassassin/export/home/kmcgrail/sabuildtools
-
 - ensure the required code and data is available for the build scripts:
 
     $HOME/sabuildtools
@@ -30,13 +26,6 @@ SPAMASSASSIN DEVELOPMENT SNAPSHOT PROCEDURE
 
 - by default, they're written to ~/public_html/devel/ . 
   Copy them to wherever you want, yourself.
-
-- KAM has included all of these on one of his devel systems with perl
-  5.8.6 (the earliest supported version of Perl as of 4/28/2015).  One
-  note is that you need webmake 2.4 from
-    http://webmake.taint.org/devel/HTML-WebMake-2.4.tar.gz
-  
-  Also, a copy is mirrored at www.pccc.com/downloads/SpamAssassin
 
 
 SPAMASSASSIN RELEASE PROCEDURE
@@ -77,6 +66,16 @@ SPAMASSASSIN RELEASE PROCEDURE
   (ie., no "M" or "C" files; any files marked "M" have been locally
   modified, and should be "svn revert"ed before you continue.)
 
+#- consider updating the TLD list in
+#  Mail/SpamAssassin/Util/RegistrarBoundaries.pm
+#
+#  Follow the documentation under %VALID_TLDS and $VALID_TLDS_RE for
+#  updating the TLD list, make test, and do a commit if there are any
+#  changes from the previous TLD list.
+#
+#  Currently, the only way to change the TLD list is via a release as 
+#  of 6/17/2014.
+
 - Consider updating the TLD list in 20_aux_tlds.cf.  As of 4/6/2015,
   this is not automated but bug 7165 is open for this purpose.
 
@@ -105,7 +104,6 @@ SPAMASSASSIN RELEASE PROCEDURE
 
   Verify that the X-Spam-* headers use the correct version string,
   without an SVN revision number (those are only for dev and pre builds).
-
   NOTE: If the date is old, don't worry, it will change later with the
         relbuild checkout.
 
@@ -134,14 +132,7 @@ SPAMASSASSIN RELEASE PROCEDURE
     3.1.0 work (created 3.0 branch); replace with the correct rev number
     for the point you want to start at if different. I used r1149751 to
     produce the first 3.4.0-pre release, for example.  r1567124 is the
-    3.4.0 release tag revision.  r1676613 is the 3.4.1 release tag
-    revision.
-
-    To find the release tag revision, use the tags website, i.e.: 
-      https://svn.apache.org/repos/asf/spamassassin/tags/
-
-    NOTE: 3.4.1 is currently on trunk and will be branched to 3.4 because 
-    3.4 branch was not used.
+    3.4.0 release tag revision.
 
 - Exclude some automated changes from the logs:
 
@@ -152,7 +143,7 @@ SPAMASSASSIN RELEASE PROCEDURE
 
 - Word wrap the Changes file with something like 
 
-    fold -sw 74 Changes.tmp > Changes && rm -f Changes.tmp
+    fold -sw 74 Changes.tmp > Changes && rm Changes.tmp
 
 - run "make distcheck" to ensure all files are included in the
   distribution that should be, and to ensure all files that are listed
@@ -195,7 +186,7 @@ SPAMASSASSIN RELEASE PROCEDURE
 
   - For a maintainance release (x.y.1, x.y.2):
 
-    vers=3_4_2
+    vers=3_1_7
 
     Then run:
 
@@ -206,7 +197,7 @@ SPAMASSASSIN RELEASE PROCEDURE
 
   - For a trunk release (x.y.0):
 
-    vers=3_4_1
+    vers=3_4_0
 
     repo=https://svn.apache.org/repos/asf/spamassassin
     svn delete -m "replaced old tag" $repo/tags/spamassassin_release_$vers
@@ -215,7 +206,7 @@ SPAMASSASSIN RELEASE PROCEDURE
 
   - For a trunk release candidate (x.y.0-rc1), pre-release (x.y.0-preZ) or alpha (x.y.0-alphaZ):
 
-    vers=3_4_1_rc_2
+    vers=3_3_0_alpha_2
 
     Then run:
 
@@ -238,9 +229,8 @@ SPAMASSASSIN RELEASE PROCEDURE
 
   Check out the code from the tag you just made:
 
-    #These should be set from the previous command unless you are on a
-    #  different server
-    #vers=3_4_1
+    #These should be set from the previous command
+    #vers=3_3_0_alpha_2 
     #repo=https://svn.apache.org/repos/asf/spamassassin
     rm -rf ~/relbuild
     svn co $repo/tags/spamassassin_release_$vers ~/relbuild
@@ -263,8 +253,7 @@ SPAMASSASSIN RELEASE PROCEDURE
   module, you didn't update your $PATH.
 
 - run "./build/repackage_latest_update_rules" to repackage the
-  latest rules file for the purpose of publishing a starter rule file 
-  for people who can't run sa-update:
+  latest file on updates.spamassassin.org.
 
     PATH=$HOME/sabuildtools/bin:$PATH
     ./build/repackage_latest_update_rules
@@ -276,13 +265,12 @@ SPAMASSASSIN RELEASE PROCEDURE
   links, fixing the MD5 and SHA1 checksums in this mail, and summarising
   the important changes from the Changes file.
 
-    cp build/announcements/3.4.0.txt build/announcements/3.4.1.txt
+    cp build/announcements/3.3.2.txt build/announcements/3.4.0.txt
     svn add !$
     vi !$
 
   NOTE: Here's a quick example to concat the MD5 or SHA1 checksums:
-        ls *3.4.1.* | grep md5 | xargs cat --
-        ls *3.4.1.* | grep sha1 | xargs cat --
+        ls *3.4.0*rc6* | grep sha1 | xargs cat --
 
 - If there are any issues to note, make sure to edit the UPGRADE file.
   Every x.x.0 release at a minimum should include a section.
@@ -319,9 +307,7 @@ SPAMASSASSIN RELEASE PROCEDURE
 
   http://www.cpan.org/modules/04pause.html#developerreleases
 
-  As of 2014-02-05, adding -TRIAL to the filename should work. For example:
-
-        Mail-SpamAssassin-3.4.1-rc2-TRIAL.tar.gz
+  As of 2014-02-05, adding TRIAL to the filename should work.
 
 - (for a full release) 3 +1's votes from PMC members are required to 
   proceed with an official (not pre-release) ASF software release.
@@ -341,17 +327,16 @@ SPAMASSASSIN RELEASE PROCEDURE
   branch, off the trunk.
 
     repo=https://svn.apache.org/repos/asf/spamassassin
-    svn copy $repo/tags/spamassassin_release_3_4_1 $repo/branches/3.4 \
-    -m 'Creating 3.4 branch based on 3.4.1 so that trunk can go to 4.0'
+    svn copy $repo/tags/spamassassin_release_3_4_0 $repo/branches/3.4 -m 'Creating 3.4 branch'
 
   "trunk" is SVN's concept of head.  Typically, our branches are named
   for their minor version number.  In the example above, 3.4 is the
   branch for the stable 3.4.x releases.
 
-  - In the new development codebase, edit lib/Mail/SpamAssassin.pm
-    and bump the $VERSION line to the correct version.
+- In the new development codebase, edit lib/Mail/SpamAssassin.pm
+  and bump the $VERSION line to the correct version.
 
-  - then, commit the new version number to the new branch:
+- then, commit the new version number to the new branch:
 
         svn commit -m "X.Y.N devel cycle started"
 
@@ -362,26 +347,24 @@ SPAMASSASSIN RELEASE PROCEDURE
 
   - lib/Mail/SpamAssassin.pm
 
-
-- In build/mkupdates/run_part2 change versions="X.Y.Z" to the new
-  development version (A.B.C).
-
-
 - [X.Y.0 RELEASES ONLY]: NOTE: This may change, make sure this info is
   still accurate before changing this (preferrably find out BEFORE doing
   an X.Y.0 release.  Update the mkupdates stuff:
 
-#  - Create an empty file for the new version number in
-#    /var/named/updates.dev.spamassassin.org.d/ on the zone and chown to
-#    updatesd and chgrp to others.
-#
-#    NOTE: I don't believe this does anything KAM: 2014-02-11 and the
-#    directory doesn't exist.
+  - In build/mkupdates/run_part2 change versions="X.Y.0" to the new
+    development version (X.Y+1.0).
+
+  - Create an empty file for the new version number in
+    /var/named/updates.dev.spamassassin.org.d/ on the zone and chown to
+    updatesd and chgrp to others.
+
+    NOTE: I don't believe this does anything KAM: 2014-02-11
 
   - Add "$INCLUDE /var/named/updates.spamassassin.org.d/X.Y+1.0" to the
-    /var/named/spamassassin.org zone file OR use a CNAME (see below)
+    spamassassin.org zone file in spamassassin/dns/
 
-    NOTE: Per bug 6644, using a CNAME for 3.4.1, 3.4.2, 4.0.0 to 3.3.2
+    NOTE: I don't believe this is right.  Per bug 6644, using a CNAME for
+    3.4.1 to 3.4.0 - KAM: 2014-02-11
 
   - commit the changes, update the zone (if not doing above on the zone -
     NOTE: See /var/named/README) and tick the zone file using build/mkupdates/tick_zone_serial
@@ -407,9 +390,6 @@ SPAMASSASSIN RELEASE PROCEDURE
         su - updatesd
         cd /home/updatesd/svn/spamassassin/build/mkupdates
         ./update-rules-3.3 3.4
-
-  NOTE: Is this needed with our rule update process?  not convinced it
-  is... 2015-04-28
 
 - publish the tarballs
 
@@ -482,8 +462,7 @@ SPAMASSASSIN RELEASE PROCEDURE
 
   WARNING: if you're moving to a new major release, x.y.0, you need to edit
   'build/update_website_docs' beforehand and set the "vers" line.  And if 
-  you are running on a server other than buildbot (NOTE: this works on the 
-  spamassassin-vm.apache.org box), the PERL and WEBDIR
+  you are running on a server other than buildbot, the PERL and WEBDIR
   vars may need tweaking:
 
         cd /var/www/buildbot.spamassassin.org/staging/website
@@ -491,10 +470,7 @@ SPAMASSASSIN RELEASE PROCEDURE
         svn delete --force full/3.4.x
         svn commit -m "removing old doc tree from website" full
 
-        #Checkout the current release
-        cd /tmp
-        svn checkout http://svn.apache.org/repos/asf/spamassassin/tags/spamassassin_release_3_4_1/ release
-        cd /tmp/release
+        cd [checkedoutdir]
         build/update_website_docs
 
         cd /var/www/buildbot.spamassassin.org/staging/website
@@ -512,7 +488,7 @@ SPAMASSASSIN RELEASE PROCEDURE
 
     repo=https://svn.apache.org/repos/asf/spamassassin
     svn delete -m "updating for new release"  $repo/tags/spamassassin_current_release_3.4.x
-    svn copy -m "updating for new release" $repo/tags/spamassassin_release_3_4_1 $repo/tags/spamassassin_current_release_3.4.x
+    svn copy -m "updating for new release" $repo/tags/spamassassin_release_3_4_0 $repo/tags/spamassassin_current_release_3.4.x
 
 - upload release .tar.gz (not .bz2) tarball to CPAN at http://pause.cpan.org/:
 
@@ -578,8 +554,7 @@ SPAMASSASSIN RELEASE PROCEDURE
  - Reviewed the Project Branding Report Checklist
 
 
-- Issues not resolved with the release of 3.4.0 2014-02-11 and still not
-  resolved with the release of 3.4.1 2015-04-28
+- Issues not resolved with the release of 3.4.0 2014-02-11
 
  - We updated to 3.4.0 and 3.4.1 is the current trunk version.  Need to
    confirm what needs to change on the updatesd scripts to make this
