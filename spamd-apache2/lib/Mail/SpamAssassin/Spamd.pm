@@ -47,6 +47,15 @@ Interface is likely to change.
 
 See the source code of L<spamd(1)> and L<Mail::SpamAssassin::Spamd::Apache2(3)>.
 
+=head1 AUTHORS
+
+The SpamAssassin(tm) Project E<lt>http://spamassassin.apache.org/E<gt>
+
+=head1 COPYRIGHT
+
+SpamAssassin is distributed under the Apache License, Version 2.0, as
+described in the file C<LICENSE> included with the distribution.
+
 =head2 METHODS
 
 =over
