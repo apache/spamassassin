@@ -7,6 +7,9 @@ use Apache2::RequestUtil ();    # RequestRec->new
 use Apache2::RequestRec  ();
 use Apache2::Access      ();    # $r->get_remote_logname
 
+use Apache::Test;
+use constant APACHE24   => have_min_apache_version('2.4.0');
+
 use APR::SockAddr ();           # $c->remote_addr->...
 use APR::Table    ();           # $c->notes
 
@@ -69,8 +72,8 @@ sub handler {
 
   unless (defined $remote_user && length $remote_user) {
     warn 'rfc1413 check: failed to obtain info for '
-      . $c->remote_addr->ip_get() . ':'
-      . $c->remote_addr->port() . "\n";
+      . APACHE24 ? $c->client_addr->ip_get() : $c->remote_addr->ip_get() . ':'
+      . APACHE24 ? $c->client_addr->port() : $c->remote_addr->port() . "\n";
     return Apache2::Const::FORBIDDEN;
   }
 
@@ -93,14 +96,14 @@ sub check_ident {
   my ($c, $user) = @_;
   my $remote_user = $c->notes->{remote_user};
   die "rfc1413 check: no query result for user=$user ip="
-    . $c->remote_addr->ip_get()
+    . APACHE24 ? $c->client_addr->ip_get() : $c->remote_addr->ip_get()
     . ' port='
-    . $c->remote_addr->port()
+    . APACHE24 ? $c->client_addr->port() : $c->remote_addr->port()
     unless defined $remote_user && length $remote_user;
   return $remote_user if $user eq $remote_user;
   warn "ident mismatch for [$user] from "
-    . $c->remote_addr->ip_get() . ':'
-    . $c->remote_addr->port()
+    . APACHE24 ? $c->client_addr->ip_get() : $c->remote_addr->ip_get() . ':'
+    . APACHE24 ? $c->client_addr->port() : $c->remote_addr->port()
     . "; remote identd returned [$remote_user]\n";
   0;
 }

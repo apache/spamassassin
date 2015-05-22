@@ -6,6 +6,9 @@ use Apache2::Const -compile => qw(OK FORBIDDEN SERVER_ERROR);
 use Apache2::Module    ();
 use Apache2::ServerRec ();
 
+use Apache::Test;
+use constant APACHE24   => have_min_apache_version('2.4.0');
+
 use Mail::SpamAssassin::Logger;
 
 =head1 NAME
@@ -61,14 +64,17 @@ sub handler {
   # my $ip = NetAddr::IP::Lite->new($c->remote_ip)
   #   or return Apache2::Const::SERVER_ERROR;   # log it, shouldn't happen
 
-  my $remote = $c->remote_addr;
+  #use Apache::Test have_min_apache_version to support MP under Apache 2.2 and 2.4
+  my $remote = APACHE24 ? $c->client_addr : $c->remote_addr;
+
   for my $allowed (@{ $srv_cfg->{allowed_networks} }) {
     # depends on allowed_ips format; TODO; if NetAddr::IP::Lite:
     # return Apache2::Const::OK if $allowed->contains($ip);
     return Apache2::Const::OK if $allowed->test($remote);
   }
 
-  info(sprintf "access denied for '%s'", $c->remote_ip);
+  info(sprintf "access denied for '%s'", APACHE24 ? $c->client_ip : $c->remote_ip);
+
   return Apache2::Const::FORBIDDEN;
 }
 
