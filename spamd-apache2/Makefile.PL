@@ -20,7 +20,7 @@ WriteMakefile(
 	VERSION   => '0.03',
 	NAME      => 'Mail::SpamAssassin::Spamd::Apache2',
 	ABSTRACT  => 'mod_perl2 module implementing spamd in Apache2',
-	AUTHOR    => 'Radoslaw Zielinski <radek@pld-linux.org>',
+	AUTHOR    => 'The Apache SpamAssassin Project <dev at spamassassin.apache.org>',
 	EXE_FILES => [qw(bin/apache-spamd.pl)],
 	PREREQ_PM => {
 		'mod_perl2'          => 2,
