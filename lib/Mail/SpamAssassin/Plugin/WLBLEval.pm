@@ -17,13 +17,15 @@
 
 package Mail::SpamAssassin::Plugin::WLBLEval;
 
-use Mail::SpamAssassin::Plugin;
-use Mail::SpamAssassin::Logger;
-
 use strict;
 use warnings;
 use bytes;
 use re 'taint';
+
+use NetAddr::IP 4.000;
+
+use Mail::SpamAssassin::Plugin;
+use Mail::SpamAssassin::Logger;
 
 use vars qw(@ISA);
 @ISA = qw(Mail::SpamAssassin::Plugin);
@@ -310,23 +312,51 @@ sub _check_whitelist_rcvd {
   foreach my $white_addr (keys %{$list}) {
     my $regexp = qr/$list->{$white_addr}{re}/i;
     foreach my $domain (@{$list->{$white_addr}{domain}}) {
+      # $domain is a second param in whitelist_from_rcvd: a domain name or an IP address
       
       if ($addr =~ $regexp) {
+        # From or sender address matching the first param in whitelist_from_rcvd
         my $match;
         foreach my $lastunt (@relays) {
-          local $1;
-          if ($domain =~ m{^ \[ (.*) \] \z}sx) {  # matching by IP address
+          local($1,$2);
+          if ($domain =~ m{^ \[ (.*) \] ( / \d{1,3} )? \z}sx) {
+            # matching by IP address
             my($wl_ip, $rly_ip) = ($1, $lastunt->{ip});
+            $wl_ip .= $2  if defined $2;  # allow prefix len even after bracket
+
             if (!defined $rly_ip || $rly_ip eq '') {
               # relay's IP address not provided or unparseable
-            } elsif ($wl_ip =~ /^\d+\.\d+\.\d+\.\d+\z/) {
+
+            } elsif ($wl_ip  =~ /^\d+\.\d+\.\d+\.\d+\z/s) {
+              # an IPv4 whitelist entry can only be matched by an IPv4 relay
               if ($wl_ip eq $rly_ip) { $match = 1; last }  # exact match
-            } elsif ($wl_ip =~ /^[\d\.]+\z/) {  # assume IPv4 classful subnet
+
+            } elsif ($wl_ip =~ /^[\d\.]+\z/s) {  # an IPv4 classful subnet?
               $wl_ip =~ s/\.*\z/./;  # enforce trailing dot
-              if ($rly_ip =~ /^\Q$wl_ip\E/i) { $match = 1; last }  # subnet
+              if ($rly_ip =~ /^\Q$wl_ip\E/) { $match = 1; last }  # subnet
+
+            } else {  # either an wl entry is an IPv6 addr, or has a prefix len
+              my $rly_ip_obj = NetAddr::IP->new($rly_ip);  # TCP-info field
+              if (!defined $rly_ip_obj) {
+                dbg("rules: bad IP address in relay: %s, sender: %s",
+                    $rly_ip, $addr);
+              } else {
+                my $wl_ip_obj = NetAddr::IP->new($wl_ip); # whitelist 2nd param
+                if (!defined $wl_ip_obj) {
+                  info("rules: bad IP address in whitelist: %s", $wl_ip);
+                } elsif ($wl_ip_obj->contains($rly_ip_obj)) {
+                  # note: an IPv4-compatible IPv6 address can match an IPv4 addr
+                  dbg("rules: relay addr %s matches whitelist %s, sender: %s",
+                      $rly_ip, $wl_ip_obj, $addr);
+                  $match = 1; last;
+                } else {
+                  dbg("rules: relay addr %s does not match wl %s, sender %s",
+                      $rly_ip, $wl_ip_obj, $addr);
+                }
+              }
             }
-            # todo: handle IPv6 and CIDR notation
-          } else {  # match by a rdns name
+
+          } else {  # match by an rdns name
             my $rdns = $lastunt->{lc_rdns};
             if ($rdns =~ /(?:^|\.)\Q${domain}\E$/i) { $match=1; last }
           }
