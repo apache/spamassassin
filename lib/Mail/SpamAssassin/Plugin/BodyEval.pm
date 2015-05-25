@@ -218,7 +218,6 @@ sub tvd_vertical_words {
     }
   }
 
-  dbg("eval: tvd_vertical_words value: $pms->{tvd_vertical_words} / min: $min / max: $max - value must be >= min and < max");
   return 1 if ($pms->{tvd_vertical_words} >= $min && $pms->{tvd_vertical_words} < $max);
 }
 
