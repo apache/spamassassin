@@ -59,12 +59,6 @@ describe KHOP_BOTNET_UNCLEAN	Relay looks like a dynamic address
 tflags	 KHOP_BOTNET_UNCLEAN	nopublish
 
 
-
-# Sanity check:  how much freemail lacks spf or dkim?
-# JHardin: convert to subrule and scored meta
-meta	 __SPOOFED_FREEMAIL	!__NOT_SPOOFED && FREEMAIL_FROM
-meta	 SPOOFED_FREEMAIL	__SPOOFED_FREEMAIL
-
-
 # see if we can further reduce the FPs w/out impacting the spam hits too hard
 header __RDNS_HEX9 X-Spam-Relays-External =~ /^[^\]]+ rdns=[^ .]*\d(?![0-9a-f]*[a-f]{3})[0-9a-f]{8}/
+
