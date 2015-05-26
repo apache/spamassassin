@@ -360,24 +360,24 @@ for the whitelisting rule to fire. The first parameter is a sender's e-mail
 address to whitelist, and the second is a string to match the relay's rDNS,
 or its IP address. Matching is case-insensitive.
 
-This second parameter is matched against a TCP-info information field as
-provided in a FROM clause of a trace information (i.e. in a Received header
+This second parameter is matched against the TCP-info information field as
+provided in a FROM clause of a trace information (i.e. the Received header
 field, see RFC 5321). Only the Received header fields inserted by trusted
-hosts are considered. This parameter can either be a full hostname, or a
-domain component of that hostname, or an IP address (optionally followed
-by a slash and a prefix length) in square brackets. The address prefix
-(mask) length with a slash may stand within brackets along with an address,
-or may follow the bracketed address. Reverse DNS lookup is done by an MTA,
-not by SpamAssassin.
+hosts are considered. This parameter can either be a full hostname, or the
+domain component of that hostname, or an IP address in square brackets.
+The reverse DNS lookup is done by a MTA, not by SpamAssassin.
 
-For backward compatibility as an alternative to a CIDR notation, an IPv4
-address in brackets may be truncated on classful boundaries to cover whole
-subnets, e.g. C<[10.1.2.3]>, C<[10.1.2]>, C<[10.1]>, C<[10]>.
+In case of an IPv4 address in brackets, it may be truncated on classful
+boundaries to cover whole subnets, e.g. C<[10.1.2.3]>, C<[10.1.2]>,
+C<[10.1]>, C<[10]>.  CIDR notation is currently not supported, nor is
+IPv6. The matching on IP address is mainly provided to cover rare cases
+where whitelisting of a sending MTA is desired which does not have a
+correct reverse DNS configured.
 
 In other words, if the host that connected to your MX had an IP address
 192.0.2.123 that mapped to 'sendinghost.example.org', you should specify
-C<sendinghost.example.org>, or C<example.org>, or C<[192.0.2.123]>, or
-C<[192.0.2.0/24]>, or C<[192.0.2]> here.
+C<sendinghost.example.org>, or C<example.org>, or C<[192.0.2.123]> or
+C<[192.0.2]> here.
 
 Note that this requires that C<internal_networks> be correct.  For simple
 cases, it will be, but for a complex network you may get better results
@@ -390,12 +390,8 @@ result in the generated Received header field according to RFC 5321.
 e.g.
 
   whitelist_from_rcvd joe@example.com  example.com
-  whitelist_from_rcvd *@*              mail.example.org
+  whitelist_from_rcvd *@axkit.org      sergeant.org
   whitelist_from_rcvd *@axkit.org      [192.0.2.123]
-  whitelist_from_rcvd *@axkit.org      [192.0.2.0/24]
-  whitelist_from_rcvd *@axkit.org      [192.0.2.0]/24
-  whitelist_from_rcvd *@axkit.org      [2001:db8:1234::/48]
-  whitelist_from_rcvd *@axkit.org      [2001:db8:1234::]/48
 
 =item def_whitelist_from_rcvd addr@lists.sourceforge.net sourceforge.net
 
@@ -1143,29 +1139,29 @@ it will be used if it is available.
 	unless (defined $value && $value !~ /^$/) {
 	    return $MISSING_REQUIRED_VALUE;
 	}
-        if    (lc $value eq 'yes' || $value eq '1') { $value = 1 }
-        elsif (lc $value eq 'no'  || $value eq '0') { $value = 0 }
-        else { return $INVALID_VALUE }
-
-	$self->{normalize_charset} = $value;
+	return  if $value == 0;
+	return $INVALID_VALUE unless $value == 1;
 
 	unless ($] > 5.008004) {
 	    $self->{parser}->lint_warn("config: normalize_charset requires Perl 5.8.5 or later");
-	    $self->{normalize_charset} = 0;
 	    return $INVALID_VALUE;
 	}
 	require HTML::Parser;
         #changed to eval to use VERSION so that this version was not incorrectly parsed for CPAN
 	unless ( eval { HTML::Parser->VERSION(3.46) } ) {
 	    $self->{parser}->lint_warn("config: normalize_charset requires HTML::Parser 3.46 or later");
-	    $self->{normalize_charset} = 0;
 	    return $INVALID_VALUE;
 	}
+#	unless (eval 'require Encode::Detect::Detector') {
+#	    $self->{parser}->lint_warn("config: normalize_charset requires Encode::Detect::Detector");
+#	    return $INVALID_VALUE;
+#	}
 	unless (eval 'require Encode') {
 	    $self->{parser}->lint_warn("config: normalize_charset requires Encode");
-	    $self->{normalize_charset} = 0;
 	    return $INVALID_VALUE;
 	}
+
+	$self->{normalize_charset} = 1;
     }
   });
 
@@ -4228,18 +4224,17 @@ Namely these characters and ranges:
 This will be replaced with the version number of the currently-running
 SpamAssassin engine.  Note: The version used is in the internal SpamAssassin
 version format which is C<x.yyyzzz>, where x is major version, y is minor
-version, and z is maintenance version.  So 3.0.0 is C<3.000000>, and 3.4.80
-is C<3.004080>.
+version, and z is maintenance version.  So 3.0.0 is C<3.000000>, and 3.4.80 is
+C<3.004080>.
 
 =item perl_version
 
-(Introduced in 3.4.1)  This will be replaced with the version number of the
-currently-running perl engine.  Note: The version used is in the $] version
-format which is C<x.yyyzzz>, where x is major version, y is minor version,
-and z is maintenance version.  So 5.8.8 is C<5.008008>, and 5.10.0 is
-C<5.010000>. Use to protect rules that incorporate RE syntax elements
-introduced in later versions of perl, such as the C<++> non-backtracking
-match introduced in perl 5.10. For example:
+(Introduced in 3.4.2)  This will be replaced with the version number of the currently-running
+perl engine.  Note: The version used is in the $] version format which is
+C<x.yyyzzz>, where x is major version, y is minor version, and z is maintenance
+version.  So 5.8.8 is C<5.008008>, and 5.10.0 is C<5.010000>. Use to protect rules
+that incorporate RE syntax elements introduced in later versions of perl, such
+as the C<++> non-backtracking match introduced in perl 5.10. For example:
 
   # Avoid lint error on older perl installs
   # Check SA version first to avoid warnings on checking perl_version on older SA
