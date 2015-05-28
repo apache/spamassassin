@@ -3073,25 +3073,24 @@ sub all_from_addrs_domains {
 
   #TEST POINT - my @addrs = ("test.voipquotes2.net","test.voipquotes2.co.uk");
   #Start with all the normal from addrs
-  my @addrs = all_from_addrs($self);
+  my @addrs = &all_from_addrs($self);
 
   dbg("eval: all '*From' addrs domains (before): " . join(" ", @addrs));
 
-  #Take just the domain with a dummy localpart
-  #removing invalid and duplicate domains
-  my(%addrs_seen, @addrs_filtered);
-  foreach my $a (@addrs) {
-    my $domain = $self->{main}->{registryboundaries}->uri_to_domain($a);
-    next if !defined $domain || $addrs_seen{lc $domain}++;
-    push(@addrs_filtered, 'dummy@'.$domain);
+  #loop through and limit to just the domain with a dummy address
+  for (my $i = 0; $i < scalar(@addrs); $i++) {
+    $addrs[$i] = 'dummy@'.$self->{main}->{registryboundaries}->uri_to_domain($addrs[$i]);
   }
 
-  dbg("eval: all '*From' addrs domains (after uri to domain): " .
-      join(" ", @addrs_filtered));
+  #Remove duplicate domains
+  my %addrs = map { $_ => 1 } @addrs;
+  @addrs = keys %addrs;
 
-  $self->{all_from_addrs_domains} = \@addrs_filtered;
+  dbg("eval: all '*From' addrs domains (after uri to domain): " . join(" ", @addrs));
 
-  return @addrs_filtered;
+  $self->{all_from_addrs_domains} = \@addrs;
+
+  return @addrs;
 }
 
 sub all_to_addrs {

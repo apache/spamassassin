@@ -1,130 +1,144 @@
 To: users, dev, announce
-Subject: ANNOUNCE: Apache SpamAssassin 3.4.1 available
+Subject: ANNOUNCE: Apache SpamAssassin 3.4.1-rc2 available
 
-Release Notes -- Apache SpamAssassin -- Version 3.4.1
+Release Notes -- Apache SpamAssassin -- Version 3.4.1-rc2
 
 Introduction
 ------------
 
-Apache SpamAssassin 3.4.1 represents more than a year of development
-and nearly 500 tweaks, changes, upgrades and bug fixes over the previous
-release. Highlights include: Improved automation to help combat spammers
-that are abusing new top level domains; Tweaks to the SPF support to
-block more spoofed emails; Increased character set normalization to
-make rules easier to develop, block more international spam and stop
-spammers from using alternate character sets to bypass tests;
-Continued refinement to the native IPv6 support; and Improved Bayesian
-classification with better debugging and attachment hashing.
+Apache SpamAssassin 3.4.1 represents more than a year of development and
+nearly 500 tweaks, changes, upgrades and bug fixes over the previous release.
+Highlights include: Improved automation to help combat spammers that are
+abusing new top level domains; Tweaks to the SPF support to block more spoofed
+emails; Increased character set normalization to make rules easier to develop,
+block more international spam & stop spammers from using alternate character
+sets to bypass tests; Continued refinement to the native IPv6 support; and
+Improved Bayesian classification with better debugging and attachment hashing.
 
 Notable features:
 =================
 
-New plugins
------------
+Bug 7115: Adding SHA digests of MIME parts as Bayes tokens allows bayes
+to see non-textual content - added configurability
 
-There are three new plugins added with this release:
+rewritten Node::_normalize
 
-  Mail::SpamAssassin::Plugin::TxRep
-  Mail::SpamAssassin::Plugin::PDFInfo
-  Mail::SpamAssassin::Plugin::URILocalBL
-
-The TxRep (Reputation) plugin is designed as a substantially improved
-replacement of the AWL plugin. It adjusts the final message spam score
-by looking up and taking in consideration the reputation of the sender.
-It cannot coexist with the old AWL plugin, which must be disabled when
-the TxRep is loaded.
-
-The PDFInfo plugin helps detecting spam with attached PDF files.
-
-The URILocalBL plugin creates some new rule test types, such as
-"uri_block_cc", "uri_block_cidr", and "uri_block_isp".  These rules
-apply to the URIs found in the HTML portion of a message, i.e.
-<a href=...> markup.
-
-All these three plugins are disabled by default. To enable, uncomment
-the loadplugin configuration options in file v341.pre, or add them to
-some local .pre file such as local.pre .
-
-Plugins are documented in their respective man pages.
-
-
-Notable changes
----------------
-
-A new subsystem RegistryBoundaries for recognizing and updating a list
-of top-level domains and registry boundaries has been introduced, which
-allows dynamically updating both lists through rule updates instead of
-having them hard-wired in the code.
-
-A subroutine Node::_normalize has been rewritten. The new behavior
-is documented with the 'normalize_charset' option in the
-Mail::SpamAssassin::Conf man page. (Bug 7144, Bug 7126, Bug 7133)
-
-Tokenization of UTF-8 -encoded or normalized text has been improved
-in the Bayes plugin. (Bug 7130, Bug 7135, Bug 7141)
-
-SHA1 digests of all MIME parts (including non-textual) can now be
-contributed to Bayes tokens, which allows the bayes classifier to assess
-also the non-textual content. The set of sources of bayes tokens is
-configurable with a new configuration option 'bayes_token_sources'
-as documented in the Mail::SpamAssassin::Conf man page. (Bug 7115)
-It is disabled by default for backward compatibility. 
+improved tokenization of UTF-8 -encoded or normalized text in
+the Bayes plugin
 
 
 New configuration options
 -------------------------
 
-The 'normalize_charset' configuration option already existed in previous
-versions, but functionality has been re-implemented with more emphasis
-on the declared character set of each textual MIME part, instead of
-relying on guesswork by Encode::Detect::Detector. When enabled, non-UTF8
-textual parts of a mail message are decoded into Unicode and re-encoded
-into UTF-8 before passing them to HTML decoding and to rules processing.
-This makes it easier to write regular expressions and strings in rules
-using UTF-8 encoding, and allows plugins (such as tokenization in a
-Bayes plugin) to recognize multibyte characters and words in non-English
-languages, instead of 'randomly' considering some non-ASCII octets in
-multibyte characters as delimiters. Please see documentation for this
-configuration option in the Mail::SpamAssassin::Conf man page.
-
-A new configuration option 'bayes_token_sources' allows more control
-on the sources of tokens for the Bayes plugin. For compatibility the
-default set of sources is unchanged, but consider: 
-    bayes_token_sources all
-or: bayes_token_sources mimepart
-to include SHA1 digests of all MIME parts in a message as Bayes tokens.
-Please see documentation for this option in the Mail::SpamAssassin::Conf
-man page.
-
-A new configuration option 'dkim_minimum_key_bits' with a default value
-of 1024 bits now controls the smallest size of a signing key (in bits)
-for a valid signature to be considered for whitelisting. Please see
-documentation for this option in the Mail::SpamAssassin::Plugin::DKIM
-man page.
-
-A new configuration option 'parse_dkim_uris' allows DKIM header fields
-to be parsed for URIs and to be processed alongside other URIs found in
-the body.
-
-A configuration option 'dns_server' can now specify a scoped link-local
-IPv6 address, e.g.:  dns_server [fe80::1%lo0]:53 .
-
-The configuration option 'check_rbl_from_domain' checks all domain names
-in a From mail address as an alternate to check_rbl_from_host. As of
-v3.4.1, it has been improved to include a subtest for a specific octet.
-
-The 'if (boolean perl expression)' now accepts 'perl_version' in the
-expression. The 'perl_version' will be replaced with the version number
-of the currently-running perl engine. Another way of testing perl
-version in a conditional of a configuration file is:
-  if can(Mail::SpamAssassin::Conf::perl_min_version_5010000)
-Please see documentation in the Mail::SpamAssassin::Conf man page.
-
-
-
-
-
 Added flag 'noawl' to the 'tflags' configuration option.
+
+
+parse_dkim_uris ( 0 | 1 ) (default: 0)
+
+  If this option is set to 1 and the message contains DKIM headers,
+  the headers will be parsed for URIs to process alongside URIs found
+  in the body with some rules and moduels (ex. URIDNSBL)
+
+
+perl_version
+  (Introduced in 3.4.2)  This will be replaced with the version
+-->>  THIS NEEDS TO BE FIXED in Conf.pm, WE ARE AT 3.4.1
+
+
+changed implementation, may produce different result in some cases:
+
+normalize_charset ( 0 | 1)        (default: 0)
+  Whether to decode non- UTF-8 and non-ASCII textual parts and recode
+  them to UTF-8 before the text is given over to rules processing.
+  The character set used for attempted decoding is primarily based on
+  a declared character set in a Content-Type header, but if the
+  decoding attempt fails a module Encode::Detect::Detector is
+  consulted (if available) to provide a guess based on the actual
+  text, and decoding is re-attempted. Even if the option is enabled
+  no unnecessary decoding and re-encoding work is done when possible
+  (like with an all-ASCII text with a US-ASCII or extended ASCII
+  character set declaration, e.g. UTF-8 or ISO-8859-nn or Windows-nnnn).
+
+  Unicode support in old versions of perl or in a core module Encode
+  is likely to be buggy in places, so if the normalize_charset
+  function is enabled it is advised to stick to more recent versions
+  of perl (preferably 5.12 or later). The module
+  Encode::Detect::Detector is optional, when necessary it will be
+  used if it is available.
+
+  
+option dns_server can now specify a link-local IPv6 address, e.g.:
+  dns_server [fe80::1%lo0]:53
+
+
+new option:
+
+bayes_token_sources  (default: header visible invisible uri)
+  Controls which sources in a mail message can contribute tokens
+  (e.g. words, phrases, etc.) to a Bayes classifier. The argument is
+  a space-separated list of keywords: header, visible, invisible,
+  uri, mimepart), each of which may be prefixed by a no to indicate
+  its exclusion. Additionally two reserved keywords are allowed: all
+  and none (or: noall). The list of keywords is processed
+  sequentially: a keyword all adds all available keywords to a set
+  being built, a none or noall clears the set, other non-negated
+  keywords are added to the set, and negated keywords are removed
+  from the set. Keywords are case-insensitive.
+
+  The default set is: header visible invisible uri, which is
+  equivalent for example to: All NoMIMEpart. The reason why mimepart
+  is not currently in a default set is that it is a newer source
+  (introduced with SpamAssassin version 3.4.1) and not much
+  experience has yet been gathered regarding its usefulness.
+
+  See also option "bayes_ignore_header" for a fine-grained control on
+  individual header fields under the umbrella of a more general
+  keyword header here.
+
+  Keywords imply the following data sources:
+    header - tokens collected from a message header section
+    visible - words from visible text (plain or HTML) in a message body
+    invisible - hidden/invisible text in HTML parts of a message body
+    uri - URIs collected from a message body
+    mimepart - digests (hashes) of all MIME parts (textual or non-
+    textual) of a message, computed after Base64 and quoted-printable
+    decoding, suffixed by their Content-Type
+    all - adds all the above keywords to the set being assembled
+    none or noall - removes all keywords from the set
+
+  The "bayes_token_sources" directive may appear multiple times, its
+  keywords are interpreted sequentially, adding or removing items
+  from the final set as they appear in their order in
+  "bayes_token_sources" directive(s).
+
+
+new option:
+
+dkim_minimum_key_bits n             (default: 1024)
+  The smallest size of a signing key (in bits) for a valid signature
+  to be considered for whitelisting. Additionally, the eval function
+  check_dkim_valid() will return false on short keys when called with
+  explicitly listed domains, and the eval function
+  check_dkim_valid_author_sig() will return false on short keys
+  (regardless of its arguments). Setting the option to 0 disables a
+  key size check.
+
+  Note that the option has no effect when the eval function
+  check_dkim_valid() is called with no arguments (like in a rule
+  DKIM_VALID). A mere presence of some valid signature on a message
+  has no reputational value (without being associated with a
+  particular domain), regardless of its key size - anyone can prepend
+  its own signature on a copy of some third party mail and re-send
+  it, which makes it no more trustworthy than without such signature.
+  This is also a reason for a rule DKIM_VALID to have a near-zero score.
+
+
+change:
+
+check_rbl_from_domain
+  This checks all the from addrs domain names as an alternate to
+  check_rbl_from_host.  As of v3.4.1, it has been improved to include
+  a subtest for a specific octet.
 
 
 new template tags:
@@ -152,6 +166,16 @@ $pms->get_names_of_tests_hit_with_scores
   were triggered by the mail.
 
 
+
+
+New plugins
+-----------
+
+New plugin (optional):
+# loadplugin Mail::SpamAssassin::Plugin::TxRep
+# loadplugin Mail::SpamAssassin::Plugin::PDFInfo  ???
+
+URILocalBL.pm ???
 
 
 Rule updates
@@ -222,7 +246,7 @@ SPF max DNS terms was raised to 15 to accomodate for eBay SPF records
 
 Bug 7136: added has_check_for_spf_errors and if can() encapsulation
 
-Bug 7128: DCC plugin now uses IO::Socket::IP instead of IO::Socket::INET6 
+Bug 7128: DCC plugin now uses IO::Socket::INET6 instead of IO::Socket::IP
 
 Bug 7099: Adding tags SENDERDOMAIN and AUTHORDOMAIN
 
@@ -258,11 +282,11 @@ buffer and avoiding PerlIO - MS::PerMsgStatus::create_fulltext_tmpfile()
 unnecessary copying was avoided when reading from a temporary file
 in SA::Message::Node (small optimization)
 
+changed fillfactor for postgres bayes/awl tables to optimize for updates
+
 a small hotspot in DnsResolver.pm was optimized
 
 use faster utf8::encode instead of Encode::encode_utf8
-
-changed fillfactor for postgres bayes/awl tables to optimize for updates
 
 disabled synchronous commit for Postgres Bayes store
 
@@ -496,17 +520,17 @@ http://spamassassin.apache.org/downloads.cgi
 
 md5sum of archive files:
 
-55f934b54e7b56fb89b491b289b10e8d  Mail-SpamAssassin-3.4.1-rc2.tar.bz2
-3c9a10d08731877a29499769e75e35b3  Mail-SpamAssassin-3.4.1-rc2.tar.gz
-8d01b76eb532499f590a8314f5a5f938  Mail-SpamAssassin-3.4.1-rc2.zip
-a5e4a3f174cc5ed8b18077f9a6ca0c47  Mail-SpamAssassin-rules-3.4.1-rc2.r1670273.tgz
+06ce92812b84bd51f20bc90fa931933c  Mail-SpamAssassin-3.4.1-rc1.tar.bz2
+5cc08804e32adeb104f0ef9b68de8d8d  Mail-SpamAssassin-3.4.1-rc1.tar.gz
+c3cc867edbf875d157e8a871b73838a6  Mail-SpamAssassin-3.4.1-rc1.zip
+cafc1a8b3a870e1c5634d39df99f37f7  Mail-SpamAssassin-rules-3.4.1-rc1.r1645877.tgz
 
 sha1sum of archive files:
 
-0efbde52cdc882461d2e3a5d9ed977499268cadd  Mail-SpamAssassin-3.4.1-rc2.tar.bz2
-bb2eb6a3c7a79ea1cc2a53abf668b4684f39b653  Mail-SpamAssassin-3.4.1-rc2.tar.gz
-318ac84a1f17e19229d9813078a12e7f4825dee3  Mail-SpamAssassin-3.4.1-rc2.zip
-680c231efd0cfca69e665445a9472d0b7bb3a8fe  Mail-SpamAssassin-rules-3.4.1-rc2.r1670273.tgz
+9a26266720114d907596a078671e10e14025ec1d  Mail-SpamAssassin-3.4.1-rc1.tar.bz2
+1029b7da3e279455ff2e8ea9619b0eb9222a484a  Mail-SpamAssassin-3.4.1-rc1.tar.gz
+0fee42eb54bec29fd817082d31cc4749a81e0b77  Mail-SpamAssassin-3.4.1-rc1.zip
+d63d73515445b15980a3155ff8004fc069527d93  Mail-SpamAssassin-rules-3.4.1-rc1.r1645877.tgz
 
 Note that the *-rules-*.tar.gz files are only necessary if you cannot,
 or do not wish to, run "sa-update" after install to download the latest
@@ -534,7 +558,7 @@ sub   4096R/7B3265A5 2009-12-02
 To verify a release file, download the file with the accompanying .asc file and run the following commands:
 
   gpg -v --keyserver wwwkeys.pgp.net --recv-key F7D39814
-  gpg --verify Mail-SpamAssassin-3.4.1.tar.bz2.asc
+  gpg --verify Mail-SpamAssassin-3.4.0.tar.bz2.asc
   gpg --fingerprint F7D39814
 
 Then verify that the key matches the signature.
