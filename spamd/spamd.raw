@@ -415,7 +415,6 @@ GetOptions(
   'log-timestamp-fmt:s'      => \$opt{'log-timestamp-fmt'},
   'timeout-tcp|T=i'          => \$opt{'timeout-tcp'},
   'timeout-child|t=i'        => \$opt{'timeout-child'},
-  'timing'                   => \$opt{'timing'},
   'user-config'              => \$opt{'user-config'},
   'username|u=s'             => \$opt{'username'},
   'version|V'                => \$opt{'version'},
@@ -1172,11 +1171,6 @@ my $spamtest = Mail::SpamAssassin->new(
   }
 );
 
-#Enable Timing?
-if ($opt{'timing'}) {
-  $spamtest->timer_enable();
-}
-
 # if $clients_per_child == 1, there's no point in copying configs around
 unless ($clients_per_child > 1) {
   # unset $copy_config_p so we don't bother trying to copy things back
@@ -1462,12 +1456,7 @@ sub spawn {
       }
       undef $current_user;
 
-      #LOG TIMING
-      if ($opt{'timing'}) {
-        info("timing: " . $spamtest->timer_report());
-      } else {
-        dbg("timing: " . $spamtest->timer_report()) if would_log('dbg', 'timing');
-      }
+      dbg("timing: " . $spamtest->timer_report()) if would_log('dbg', 'timing');
     }
 
     # If the child lives to get here, it will die ...  Muhaha.
@@ -2428,7 +2417,6 @@ sub got_compress_header {
       return 0;
     }
     $hdrs->{compress_zlib} = 1;
-    dbg("spamd: compress header received\n");
   }
   else {
     protocol_error("(compression type not supported)");
@@ -3251,7 +3239,6 @@ Options:
  --socketowner=name                Set UNIX domain socket file's owner
  --socketgroup=name                Set UNIX domain socket file's group
  --socketmode=mode                 Set UNIX domain socket file's mode
- --timing                          Enable timing and logging
  -V, --version                     Print version and exit
 
 The --listen option (or -i) may be specified multiple times, its syntax
@@ -3786,12 +3773,6 @@ C<--socketowner> for notes on ownership and permissions.
 Set UNIX domain socket to use the octal mode I<mode>.  Note that if C<-u> is
 used, that user should have write permissions to unlink the file later, for
 when the C<spamd> server is killed.
-
-
-=item B<--timing>
-
-  Enable timing measurements and output the information for logging.  This
-  is the same information as provided by the TIMING tag.
 
 =back
 
