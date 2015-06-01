@@ -1326,37 +1326,28 @@ sub check_senders_reputation {
   my $totalweight      = 0;
   $self->{totalweight} = $totalweight;
 
-  $delta += $self->check_reputations($pms, 'EMAIL_IP', $from, $ip, $signedby, $msgscore);
-
-  if ($domain) {
-    $delta += $self->check_reputations($pms, 'DOMAIN', $domain, $ip, $signedby, $msgscore);
-  }
-  if ($helo) {
-    $delta += $self->check_reputations($pms, 'HELO', $helo, undef, 'HELO', $msgscore);
-  }
+                     $delta += $self->check_reputations($pms, 'EMAIL_IP', $from,   $ip,   $signedby, $msgscore);
+  if ($domain)      {$delta += $self->check_reputations($pms, 'DOMAIN',   $domain, $ip,   $signedby, $msgscore);}
+  if ($helo)        {$delta += $self->check_reputations($pms, 'HELO',     $helo,   undef, 'HELO',    $msgscore);}
   if ($origip) {
-    if (!$signedby) {
-      $delta += $self->check_reputations($pms, 'EMAIL', $from, undef, undef, $msgscore);
-    }
-    $delta += $self->check_reputations($pms, 'IP', $origip, undef, undef, $msgscore);
+    if (!$signedby) {$delta += $self->check_reputations($pms, 'EMAIL',    $from,   undef, undef,     $msgscore);}
+                     $delta += $self->check_reputations($pms, 'IP',       $origip, undef, undef,     $msgscore);
   }
 
   if (!defined $self->{learning}) {
     $delta = ($self->{totalweight})? $self->{conf}->{txrep_factor} * $delta / $self->{totalweight}  :  0;
     if ($delta) {
-      $pms->got_hit("TXREP", "TXREP: ", ruletype => 'eval', score => sprintf("%0.3f", $delta));
+        $pms->got_hit("TXREP", "TXREP: ", ruletype => 'eval', score => sprintf("%0.3f", $delta));
     }
     $msgscore += $delta;
     if (defined $pms->{score}) {
-      dbg("TxRep: post-TxRep score: %.3f", $pms->{score});
+        dbg("TxRep: post-TxRep score: %.3f", $pms->{score});
     }
   }
   if ($self->{conf}->{txrep_track_messages} && $msg_id) {
     $self->check_reputations($pms, 'MSG_ID', $msg_id, undef, $date, $msgscore);
   }
-  if (!defined $self->{txKeepStoreTied}) {
-    $self->finish();
-  }
+  if (!defined $self->{txKeepStoreTied}) {$self->finish();}
 
   return 0;
 }
@@ -1370,16 +1361,14 @@ sub check_reputations {
 
   if ($self->open_storages()) {
     if ($self->{conf}->{txrep_user2global_ratio} && $self->{user_storage} != $self->{global_storage}) {
-      my $user   = $self->check_reputation('user_storage',  @_);
-      my $global = $self->check_reputation('global_storage',@_);
+        my $user   = $self->check_reputation('user_storage',  @_);
+        my $global = $self->check_reputation('global_storage',@_);
 
-      if (defined $user and $user == $user) {
-        $delta = ( $self->{conf}->{txrep_user2global_ratio} * $user + $global ) / ( 1 + $self->{conf}->{txrep_user2global_ratio} );
-      } else {
-        $delta = $global;
-      }
+        $delta = (defined $user && $user==$user) ?
+            ( $self->{conf}->{txrep_user2global_ratio} * $user + $global ) / ( 1 + $self->{conf}->{txrep_user2global_ratio} ) :
+            $global;
     } else {
-      $delta = $self->check_reputation(undef,@_);
+        $delta = $self->check_reputation(undef,@_);
     }
   }
   return $delta;
@@ -1393,29 +1382,6 @@ sub check_reputation {
 
   my $delta  = 0;
   my $weight = ($key eq 'MSG_ID')? 1 : eval('$pms->{main}->{conf}->{txrep_weight_'.lc($key).'}');
-
-#  {
-#    #Bug 7164, trying to find out reason for these: _WARN: Use of uninitialized value $msgscore in addition (+) at /usr/share/perl5/vendor_perl/Mail/SpamAssassin/Plugin/TxRep.pm line 1415.
-#    no warnings;
-#
-#    unless (defined $msgscore) {
-#      #Output some params and the calling function so we can identify more about this bug
-#      dbg("TxRep: MsgScore Undefined (bug 7164) - check_reputation Parameters: self: $self storage: $storage pms: $pms, key: $key, id: $id, ip: $ip, signedby: $signedby, msgscore: $msgscore");
-#      dbg("TxRep: MsgScore Undefined (bug 7164) - weight: $weight");
-#
-#      my ($package, $filename, $line) = caller();
-#
-#      chomp($package);
-#      chomp($filename);
-#      chomp($line);
-#
-#      dbg("TxRep: MsgScore Undefined (bug 7164) - Caller Info: Package: $package - Filename: $filename - Line: $line");
-#
-#      #Define $msgscore as a triage to hide warnings while we find the root cause
-#      #$msgscore = 0;
-#    }
-#  }
-
 
   if (defined $weight && $weight) {
     my $meanrep;
@@ -1444,16 +1410,11 @@ sub check_reputation {
         $self->{totalweight} += $weight;
         if ($key eq 'MSG_ID' && $self->count() > 0) {
             $delta = $self->total() / $self->count();
-	    $pms->set_tag('TXREP'.$tag_id,              sprintf("%2.1f", $delta));
+	    $pms->set_tag('TXREP'.$tag_id,              sprintf("%2.1f",$delta));
         } elsif (defined $self->total()) {
-            #Bug 7164 - $msgscore undefined
-            if (defined $msgscore) {
-              $delta = ($self->total() + $msgscore) / (1 + $self->count()) - $msgscore;
-            } else {
-              $delta = ($self->total()) / (1 + $self->count());
-            }
+            $delta = ($self->total() + $msgscore) / (1 + $self->count()) - $msgscore;
 
-            $pms->set_tag('TXREP_'.$tag_id,             sprintf("%2.1f", $delta));
+            $pms->set_tag('TXREP_'.$tag_id,             sprintf("%2.1f",$delta));
             if (defined $meanrep) {
                 $pms->set_tag('TXREP_'.$tag_id.'_MEAN', sprintf("%2.1f", $meanrep));
             }
@@ -1487,9 +1448,7 @@ sub check_reputation {
         $self->{checker}->remove_entry($self->{entry}); #forgetting the message ID
     }
   }
-  if (defined $storage) {
-    $self->{checker} = $self->{default_storage};
-  }
+  if (defined $storage) {$self->{checker} = $self->{default_storage};}
 
   return ($weight || 0) * ($delta || 0);
 }
