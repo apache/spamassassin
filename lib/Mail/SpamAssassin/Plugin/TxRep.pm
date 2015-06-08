@@ -1650,7 +1650,7 @@ sub open_storages {
 	# TODO: add an a method to the handler class instead
 	my ($storage_type, $is_global);
 	
-	if (ref($factory) =~ /SQLasedAddrList/) {
+	if (ref($factory) =~ /SQLBasedAddrList/) {
 	    $is_global    = defined $self->{conf}->{user_awl_sql_override_username};
 	    $storage_type = 'SQL';
 	    if ($is_global && $self->{conf}->{user_awl_sql_override_username} eq $self->{main}->{username}) {
