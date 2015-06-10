@@ -1387,7 +1387,7 @@ tflags      FOUND_YOU          publish
 #meta        ADMITS_CANSPAM    __ADMITS_CANSPAM && !__VIA_ML
 #describe    ADMITS_CANSPAM    Admits to being spam
 
-body        __ADMITS_SPAM     /\bth(?:e[- ]+above|is)(?:\?+s|[- ]+is)[- ]+(?:intended[- ]+as[- ]+)?an?[- ]+(?:email[- ]+)?advert[i1l]sement\b/i
+body        __ADMITS_SPAM     /\bth(?:e[- ]+above|is)(?:\?+s|[- ]+is)[- ]+(?:intended[- ]+as[- ]+)?an?[- ]+(?:email[- ]+)?[a@]dvert[i1l]sement\b/i
 meta        ADMITS_SPAM       __ADMITS_SPAM && !__TO___LOWER && !__MSOE_MID_WRONG_CASE && !__RP_MATCHES_RCVD 
 describe    ADMITS_SPAM       Admits this is an ad
 
@@ -1911,6 +1911,9 @@ tflags    URI_ONLY_MSGID_MALF           publish
 meta      GOOG_REDIR_SHORT              __GOOG_REDIR && __KAM_BODY_LENGTH_LT_512 
 describe  GOOG_REDIR_SHORT              Google redirect to obscure spamvertised website + short message
 tflags    GOOG_REDIR_SHORT              publish
+
+meta      GOOG_REDIR_NORDNS             __GOOG_REDIR && RDNS_NONE
+describe  GOOG_REDIR_NORDNS             Google redirect to obscure spamvertised website + no rDNS
 
 
 # low S/O, apparently lots of invisible ham...
