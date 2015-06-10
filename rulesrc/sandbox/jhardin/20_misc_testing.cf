@@ -1966,7 +1966,7 @@ meta      SPOOFED_FREEM_REPTO_CHN       __SPOOFED_FREEM_REPTO && __REPTO_CHN_FRE
 describe  SPOOFED_FREEM_REPTO_CHN       Forged freemail sender with Chinese freemail reply-to
 score     SPOOFED_FREEM_REPTO_CHN       2.000
 
-meta      SPOOFED_FREEM_REPTO           __SPOOFED_FREEM_REPTO && !__REPTO_CHN_FREEM
+meta      SPOOFED_FREEM_REPTO           __SPOOFED_FREEM_REPTO && !__REPTO_CHN_FREEM && !__THREADED
 describe  SPOOFED_FREEM_REPTO           Forged freemail sender with freemail reply-to
 score     SPOOFED_FREEM_REPTO           2.000
 
