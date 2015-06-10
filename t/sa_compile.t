@@ -4,12 +4,13 @@ use lib '.'; use lib 't';
 $ENV{'TEST_PERL_TAINT'} = 'no';     # inhibit for this test
 use SATest; sa_t_init("sa_compile");
 use Test;
-use Config;
 use File::Basename;
 use File::Path qw/mkpath/;
 
-my $temp_binpath = $Config{sitebinexp};
-$temp_binpath =~ s/^\Q$Config{prefix}\E//;
+#Reverting changes from Bug 7005 - KAM 5/6/2015
+#use Config;
+#my $temp_binpath = $Config{sitebinexp};
+#$temp_binpath =~ s/^\Q$Config{prefix}\E//;
 
 # called from BEGIN
 sub re2c_version_new_enough {
@@ -26,7 +27,7 @@ sub re2c_version_new_enough {
   return $newenough;
 }
 
-use constant TEST_ENABLED => conf_bool('run_long_tests')
+use constant TEST_ENABLED => 1 #conf_bool('run_long_tests')
                                 && re2c_version_new_enough();
 
 BEGIN { 
@@ -81,7 +82,9 @@ sub set_rules {
   #Create the dir for the cf file
   my $file = "$instdir/foo/share/spamassassin/20_testrules.cf";
   my $dir = dirname($file);
-  mkpath($dir);
+  unless (-d $dir) {
+    mkpath($dir) or die "cannot mkpath $dir - $!";
+  }
 
   open RULES, ">$file"
           or die "cannot write $file - $!";
@@ -97,7 +100,9 @@ sub set_rules {
   #Create the dir for the pre file
   $file = "$instdir/foo/etc/mail/spamassassin/v330.pre";
   $dir = dirname($file);
-  mkpath($dir);
+  unless (-d $dir) {
+    mkpath($dir) or die "cannot mkpath $dir - $!";
+  }
 
   open RULES, ">$file"
           or die "cannot write $file - $!";
@@ -130,7 +135,10 @@ $INST_FROM_SCRATCH and run_makefile_pl "PREFIX=$instdir/foo";
 
 # we now have an "installed" version we can run sa-compile with.  Ensure
 # sarun() will use it appropriately
-$scr = "$instdir/foo/$temp_binpath/spamassassin";
+
+# Bug 7005 reverted
+#$scr = "$instdir/foo/$temp_binpath/spamassassin";
+$scr = "$instdir/foo/bin/spamassassin";
 $scr_localrules_args = $scr_cf_args = "";      # use the default rules dir, from our "install"
 
 set_rules q{
@@ -152,14 +160,17 @@ clear_pattern_counters();
 
 # -------------------------------------------------------------------
 
-system_or_die "$instdir/foo/$temp_binpath/sa-compile --keep-tmps";  # --debug
+system_or_die "$instdir/foo/bin/sa-compile --keep-tmps";  # --debug
 %patterns = (
 
   q{ able to use 1/1 'body_0' compiled rules }, 'able-to-use',
   q{ check: tests=FOO }, 'FOO'
 
 );
-$scr = "$instdir/foo/$temp_binpath/spamassassin";
+
+# Bug 7005 reverted
+#$scr = "$instdir/foo/$temp_binpath/spamassassin";
+$scr = "$instdir/foo/bin/spamassassin";
 $scr_localrules_args = $scr_cf_args = "";      # use the default rules dir, from our "install"
 ok sarun ("-D -Lt < $cwd/data/spam/001 2>&1", \&patterns_run_cb);
 ok_all_patterns();
