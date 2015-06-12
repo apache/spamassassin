@@ -27,7 +27,7 @@ ifplugin Mail::SpamAssassin::Plugin::FreeMail
 
 body     __freemail_safe_fwd  /---\s?(?:(?:Forwarded|Original) message|Alkuper.inen viesti)/i
 header   __freemail_safe_rls  X-Spam-Relays-External =~ /^[^\]]+ rdns=\S+\.(?:tfbnw\.net|ebay\.com|tieto\.com) /
-meta     __freemail_safe      __freemail_safe_fwd || __ML2 || __ML4 || __HAS_X_MAILING_LIST || __freemail_safe_rls
+meta     __freemail_safe      __freemail_safe_fwd || __ML2 || __ML4 || __HAS_X_MAILING_LIST || __HAS_X_MAILMAN_VERSION || __freemail_safe_rls
 
 header   __freemail_replyto  eval:check_freemail_replyto('replyto')
 meta     FREEMAIL_REPLYTO  __freemail_replyto && !__freemail_safe
