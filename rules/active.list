@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bernie-mix bpoliakoff darxus dwarren grenier jarif kam-ninja kpg-core mas-cps mas-cpsr mas-mas mas-masr mmiroslaw-ham mmiroslaw-spam zmi; day 2: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bernie-mix bpoliakoff darxus dwarren grenier jarif kam-ninja kpg-core llanga mas-cps mas-cpsr mas-mas mas-masr mmiroslaw-ham mmiroslaw-spam zmi; day 3: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bernie-mix bpoliakoff darxus dwarren grenier jarif kam-ninja kpg-core llanga mas-cps mas-cpsr mas-mas mas-masr zmi
+# with results from: day 1: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bernie-mix bpoliakoff darxus dwarren kam-ninja kpg-core mas-cf mas-cs mas-mf mas-ms zmi; day 2: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bernie-mix bpoliakoff darxus dwarren grenier jarif kam-ninja kpg-core llanga mas-cps mas-cpsr mas-mas mas-masr mmiroslaw-ham mmiroslaw-spam zmi; day 3: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bernie-mix bpoliakoff darxus dwarren grenier jarif kam-ninja kpg-core llanga mas-cps mas-cpsr mas-mas mas-masr mmiroslaw-ham mmiroslaw-spam zmi
 
 # tflags publish
 AC_BR_BONANZA
@@ -136,6 +136,9 @@ CORRUPT_FROM_LINE_IN_HDRS
 # good enough
 DEAR_BENEFICIARY
 
+# good enough
+DEAR_WINNER
+
 # tflags net
 DIGEST_MULTIPLE
 
@@ -178,9 +181,6 @@ DOS_ANAL_SPAM_MAILER
 # good enough
 DOS_OE_TO_MX
 
-# good enough
-DOS_RCVD_IP_TWICE_C
-
 # tflags publish
 DX_TEXT_02
 
@@ -205,9 +205,6 @@ FILL_THIS_FORM
 # good enough
 FILL_THIS_FORM_LOAN
 
-# good enough
-FILL_THIS_FORM_LONG
-
 # tflags publish
 FORM_FRAUD
 
@@ -228,9 +225,6 @@ FRAGMENTED_MESSAGE
 
 # tflags publish
 FREEMAIL_FORGED_FROMDOMAIN
-
-# good enough
-FROM_12LTRDOM
 
 # tflags userconf
 FROM_DOMAIN_NOVOWEL
@@ -763,9 +757,6 @@ SUBJECT_IN_WHITELIST
 # tflags publish
 SYSADMIN
 
-# good enough
-TAB_IN_FROM
-
 # tflags publish
 TEQF_USR_IMAGE
 
@@ -806,9 +797,6 @@ TO_NO_BRKTS_NORDNS_HTML
 TO_NO_BRKTS_PCNT
 
 # good enough
-TVD_FROM_1
-
-# good enough
 TVD_QUAL_MEDS
 
 # good enough
@@ -836,13 +824,7 @@ ACCT_PHISHING_MANY
 ADMITS_SPAM
 
 # good enough
-ADVANCE_FEE_2_NEW_FRM_MNY
-
-# good enough
 ADVANCE_FEE_3_NEW_FRM_MNY
-
-# good enough
-ADVANCE_FEE_4_NEW_FRM_MNY
 
 # good enough
 ADVANCE_FEE_4_NEW_MONEY
@@ -861,9 +843,6 @@ DX_TEXT_05
 
 # good enough
 FORGED_RELAY_MUA_TO_MX
-
-# good enough
-FROM_WEBSITE
 
 # good enough
 FSL_HELO_FIREWALL
@@ -900,9 +879,6 @@ MONEY_ATM_CARD
 
 # good enough
 MSGID_NOFQDN1
-
-# good enough
-OBFU_HTML_ATTACH
 
 # good enough
 PHISHING_FREEMAIL
