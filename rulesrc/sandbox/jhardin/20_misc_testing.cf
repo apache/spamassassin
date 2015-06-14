@@ -1438,6 +1438,7 @@ uri         __URI_WPCONTENT    m,/wp-content/.*\.(?:php|html?)\b,i
 uri         __URI_WPCONTENT_L  m,/wp-content/.*\.(?:(?!gif|jpg|png|bmp|ico|eot|pdf)[a-z]{3}|(?!jpeg)[a-z]{4})\b,i
 uri         __URI_WPINCLUDES   m,/wp-includes/.*\.(?:php|html?)\b,i
 uri         __URI_WPINCLUDES_L m,/wp-includes/.*\.(?:(?!gif|jpg|png|bmp|ico|eot|pdf)[a-z]{3}|(?!jpeg)[a-z]{4})\b,i
+#uri         __URI_WP_WHITELIST m,/wp-content/plugins/civicrm/,i
 meta        URI_WP_HACKED      (__URI_WPCONTENT || __URI_WPINCLUDES) && !__VIA_ML && !__HAS_ERRORS_TO && !__RCD_RDNS_SMTP && !__THREADED && !ALL_TRUSTED && !__NOT_SPOOFED 
 describe    URI_WP_HACKED      URI for compromised WordPress site, possible malware
 score       URI_WP_HACKED      3.000   # limit
@@ -1965,10 +1966,12 @@ meta      __SPOOFED_FREEM_REPTO         __SPOOFED_FREEMAIL && FREEMAIL_REPLYTO
 meta      SPOOFED_FREEM_REPTO_CHN       __SPOOFED_FREEM_REPTO && __REPTO_CHN_FREEM
 describe  SPOOFED_FREEM_REPTO_CHN       Forged freemail sender with Chinese freemail reply-to
 score     SPOOFED_FREEM_REPTO_CHN       2.000
+tflags    SPOOFED_FREEM_REPTO_CHN       publish
 
-meta      SPOOFED_FREEM_REPTO           __SPOOFED_FREEM_REPTO && !__REPTO_CHN_FREEM && !__THREADED
+meta      SPOOFED_FREEM_REPTO           __SPOOFED_FREEM_REPTO && !__THREADED
 describe  SPOOFED_FREEM_REPTO           Forged freemail sender with freemail reply-to
 score     SPOOFED_FREEM_REPTO           2.000
+tflags    SPOOFED_FREEM_REPTO           publish
 
 
 
