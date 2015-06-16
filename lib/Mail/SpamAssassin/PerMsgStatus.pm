@@ -738,7 +738,7 @@ test names and individual scores of the tests which were triggered by the mail.
 sub get_names_of_tests_hit_with_scores_hash {
   my ($self) = @_;
 
-  my ($line, %testsscores);
+  my (%testsscores);
 
   #BASED ON CODE FOR TESTSSCORES TAG - KAM 2014-04-24
   foreach my $test (@{$self->{test_names_hit}}) {
@@ -762,6 +762,8 @@ sub get_names_of_tests_hit_with_scores {
   my ($self) = @_;
 
   my ($line, %testsscores);
+
+  $line = '';
 
   #BASED ON CODE FOR TESTSSCORES TAG - KAM 2014-04-24
   foreach my $test (sort @{$self->{test_names_hit}}) {
