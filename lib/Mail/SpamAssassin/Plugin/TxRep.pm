@@ -113,7 +113,7 @@ description of the factor below.
 through SpamAssassin's API, AWL adjusts the historical total score of the plain email
 address without IP (and deleted records bound to an IP), but since during the reception 
 new records with IP will be added, the blacklisted entry would cease acting during 
-scanning. TxRep always uses the record of th plain email address without IP together 
+scanning. TxRep always uses the record of the plain email address without IP together 
 with the one bound to an IP address, DKIM signature, or SPF pass (unless the weight 
 factor for the EMAIL reputation is set to zero). AWL uses the score of 100 (resp. -100) 
 for the blacklisting (resp. whitelisting) purposes. TxRep increases the value 
@@ -1259,7 +1259,10 @@ sub check_senders_reputation {
     foreach my $rly ( @{$pms->{relays_trusted}}, @{$pms->{relays_untrusted}} ) {
 	# Get the last found HELO, regardless of private/public or trusted/untrusted
 	# Avoiding a redundant duplicate entry if HELO is equal/similar to another identificator
-	if (defined $rly->{helo} && $rly->{helo} !~ /^\[?$rly->{ip}\]?$/ && $rly->{helo} !~ /$domain/i && $rly->{helo} !~ /$from/i ) {
+	if (defined $rly->{helo} &&
+            $rly->{helo} !~ /^\[?\Q$rly->{ip}\E\]?$/ &&
+            $rly->{helo} !~ /\Q$domain\E/i &&
+            $rly->{helo} !~ /\Q$from\E/i ) {
 	    $helo   = $rly->{helo};
 	}
 	# use only trusted ID, but use the first untrusted IP (if available) (AWL bug 6908)
