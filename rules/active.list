@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bernie-mix bpoliakoff darxus dwarren grenier jarif kam-ninja kpg-core mas-cf mas-cs mas-mf mas-ms zmi; day 2: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bernie-mix bpoliakoff darxus dwarren grenier jarif kam-ninja kpg-core llanga mas-cf mas-cs mas-mf mas-ms mmiroslaw-ham mmiroslaw-spam zmi; day 3: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bernie-mix bpoliakoff darxus dwarren grenier jarif kam-ninja kpg-core llanga mas-cf mas-cs mas-mf mas-ms mmiroslaw-ham mmiroslaw-spam zmi
+# with results from: day 1: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bernie-mix bpoliakoff darxus dwarren grenier jarif kam-ninja kpg-core mas-cs mas-ms mmiroslaw-ham mmiroslaw-spam zmi; day 2: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bernie-mix bpoliakoff darxus dwarren grenier jarif kam-ninja kpg-core llanga mas-cf mas-cs mas-mf mas-ms zmi; day 3: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bernie-mix bpoliakoff darxus dwarren grenier jarif kam-ninja kpg-core llanga mas-cf mas-cs mas-mf mas-ms mmiroslaw-ham mmiroslaw-spam zmi
 
 # good enough
 ACCT_PHISHING_MANY
@@ -285,6 +285,9 @@ FSL_BOTSPAM_1
 
 # good enough
 FSL_CTYPE_WIN1251
+
+# good enough
+FSL_HELO_BARE_IP_1
 
 # good enough
 FSL_HELO_BARE_IP_2
@@ -863,6 +866,9 @@ TO_NO_BRKTS_NORDNS_HTML
 TO_NO_BRKTS_PCNT
 
 # good enough
+TT_MSGID_TRUNC
+
+# good enough
 TVD_RCVD_IP
 
 # good enough
@@ -887,16 +893,37 @@ TW_GIBBERISH_MANY
 ADVANCE_FEE_2_NEW_FRM_MNY
 
 # good enough
+ADVANCE_FEE_4_NEW_FRM_MNY
+
+# good enough
+AXB_XM_FORGED_OL2600
+
+# good enough
 DSN_NO_MIMEVERSION
+
+# good enough
+DUP_SUSP_HDR
 
 # good enough
 FILL_THIS_FORM_LONG
 
 # good enough
+FREEMAIL_DOC_PDF_BCC
+
+# good enough
 FROM_12LTRDOM
 
 # good enough
+FROM_MISSP_DYNIP
+
+# good enough
+FROM_WEBSITE
+
+# good enough
 HK_NAME_FM_MR_MRS
+
+# good enough
+HK_SCAM_N8
 
 # good enough
 MONEY_BARRISTER
@@ -908,7 +935,10 @@ MONEY_FORM_SHORT
 NA_DOLLARS
 
 # good enough
-OBFU_HTML_ATTACH
+SERGIO_SUBJECT_PORN011
+
+# good enough
+SHARE_50_50
 
 # tflags publish
 SPOOFED_FREEM_REPTO_CHN
@@ -920,7 +950,19 @@ SUBJ_OBFU_PUNCT_MANY
 SUBJ_UNNEEDED_HTML
 
 # good enough
+TAB_IN_FROM
+
+# good enough
 TVD_FROM_1
+
+# good enough
+TVD_PH_BODY_META
+
+# good enough
+US_DOLLARS_3
+
+# good enough
+XPRIO
 
 # tflags publish
 UC_GIBBERISH_OBFU
