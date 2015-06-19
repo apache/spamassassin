@@ -18,7 +18,7 @@ if (-e 'test_dir') {            # running from test directory, not ..
 
 use lib '.'; use lib 't';
 use SATest; sa_t_init("rcvd_parser");
-use Test; BEGIN { plan tests => 146 };
+use Test; BEGIN { plan tests => 147 };
 use strict;
 
 # format is:
@@ -478,6 +478,10 @@ my %data = (
   #Bug 7101
   'from [94.79.161.130] by 3capp-webde-bs01.dlan.cinetic.de (via HTTP); Tue, 11 Nov 2014 20:32:34 +0100' => 
   '[ ip=94.79.161.130 rdns= helo= by=3capp-webde-bs01.dlan.cinetic.de ident= envfrom= id= auth=HTTP msa=0 ]',
+
+  #Bug 7213
+  'from mail1-backend.DDDD.com (LHLO mail2-backend.DDDD.com) (10.2.2.20) by mail3-backend.DDDD.com with LMTP; Thu, 18 Jun 2015 16:50:56 -0700 (PDT)' =>
+  '[ ip=10.2.2.20 rdns=mail1-backend.DDDD.com helo=mail2-backend.DDDD.com by=mail3-backend.DDDD.com ident= envfrom= id= auth= msa=0 ]',
 
 );
 

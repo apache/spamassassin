@@ -717,6 +717,11 @@ sub parse_received_line {
       $rdns = $1; $helo = $2; $ip = $3; $by = $4; goto enough;
     }
 
+    # Received: from mail-backend.DDDD.com (LHLO mail-backend.DDDD.com) (10.2.2.20) by mail-backend.DDDD.com with LMTP; Thu, 18 Jun 2015 16:50:56 -0700 (PDT)
+    if (/^(\S+) \(LHLO (\S*)\) \((${IP_ADDRESS})\) by (\S+) with LMTP/) {
+      $rdns = $1; $helo = $2; $ip = $3; $by = $4; goto enough;
+    }
+
     # from dslb-082-083-045-064.pools.arcor-ip.net (EHLO homepc) [82.83.45.64] by mail.gmx.net (mp010) with SMTP; 03 Feb 2007 13:13:47 +0100
     if (/^(\S+) \((?:HELO|EHLO) (\S*)\) \[(${IP_ADDRESS})\] by (\S+) \([^\)]+\) with (?:ESMTP|SMTP)/) {
       $rdns = $1; $helo = $2; $ip = $3; $by = $4; goto enough;
