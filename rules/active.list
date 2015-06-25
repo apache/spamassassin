@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bernie-mix bpoliakoff darxus dwarren grenier jarif kam-ninja kpg-core mas-cf mas-cs mas-mf mas-ms mmiroslaw-ham mmiroslaw-spam zmi; day 2: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bernie-mix bpoliakoff darxus dwarren grenier jarif kam-ninja kpg-core llanga mas-cf mas-cs mas-mf mas-ms mmiroslaw-ham mmiroslaw-spam; day 3: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bernie-mix bpoliakoff darxus grenier jarif kam-ninja kpg-core llanga mas-cf mas-cs mas-mf mas-ms zmi
+# with results from: day 1: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bernie-mix bpoliakoff darxus dwarren grenier jarif kam-ninja kpg-core zmi; day 2: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bernie-mix bpoliakoff darxus dwarren grenier jarif kam-ninja kpg-core llanga mas-cf mas-cs mas-mf mas-ms mmiroslaw-ham mmiroslaw-spam zmi; day 3: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bernie-mix bpoliakoff darxus dwarren grenier jarif kam-ninja kpg-core llanga mas-cf mas-cs mas-mf mas-ms mmiroslaw-ham mmiroslaw-spam
 
 # good enough
 ACCT_PHISHING_MANY
@@ -87,9 +87,6 @@ AXB_XMAILER_MIMEOLE_OL_024C2
 
 # good enough
 AXB_XMAILER_MIMEOLE_OL_1ECD5
-
-# good enough
-BANKING_LAWS
 
 # tflags learn
 BAYES_00
@@ -196,11 +193,20 @@ DOS_ANAL_SPAM_MAILER
 # good enough
 DOS_OE_TO_MX
 
+# good enough
+DUP_SUSP_HDR
+
 # tflags publish
 DX_TEXT_02
 
 # tflags publish
 DX_TEXT_03
+
+# good enough
+DX_TEXT_05
+
+# good enough
+DYN_RDNS_AND_INLINE_IMAGE
 
 # good enough
 DYN_RDNS_SHORT_HELO_HTML
@@ -284,10 +290,10 @@ FROM_MISSP_XPRIO
 FROM_WEBSITE
 
 # good enough
-FSL_CTYPE_WIN1251
+FSL_BOTSPAM_1
 
 # good enough
-FSL_HELO_BARE_IP_1
+FSL_CTYPE_WIN1251
 
 # good enough
 FSL_HELO_BARE_IP_2
@@ -407,9 +413,6 @@ HK_RANDOM_FROM
 HK_RANDOM_REPLYTO
 
 # good enough
-HK_SCAM_N15
-
-# good enough
 HK_SCAM_N2
 
 # tflags userconf
@@ -444,9 +447,6 @@ LOTTO_DEPT
 
 # tflags publish
 LUCRATIVE
-
-# good enough
-MAILER_EQ_ORG
 
 # tflags publish
 MANY_SPAN_IN_TEXT
@@ -490,6 +490,9 @@ MSGID_NOFQDN1
 # good enough
 MSOE_MID_WRONG_CASE
 
+# good enough
+NAME_EMAIL_DIFF
+
 # tflags net
 NO_DNS_FOR_FROM
 
@@ -513,6 +516,9 @@ OBFU_JVSCR_ESC
 
 # tflags publish
 OBFU_TEXT_ATTACH
+
+# good enough
+PDS_FROM_2_EMAILS
 
 # good enough
 PHISHING_FREEMAIL
@@ -759,6 +765,9 @@ RISK_FREE
 
 # good enough
 RP_MATCHES_RCVD
+
+# good enough
+SERGIO_SUBJECT_VIAGRA01
 
 # tflags publish
 SINGLETS_LOW_CONTRAST
