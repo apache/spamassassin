@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bernie-mix bpoliakoff darxus dwarren grenier jarif kam-ninja kpg-core zmi; day 2: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bernie-mix bpoliakoff darxus dwarren grenier jarif kam-ninja kpg-core llanga mas-cf mas-cs mas-mf mas-ms mmiroslaw-ham mmiroslaw-spam zmi; day 3: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bernie-mix bpoliakoff darxus dwarren grenier jarif kam-ninja kpg-core llanga mas-cf mas-cs mas-mf mas-ms mmiroslaw-ham mmiroslaw-spam
+# with results from: day 1: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bernie-mix bpoliakoff darxus dwarren grenier jarif kam-ninja kpg-core mmiroslaw-ham mmiroslaw-spam zmi; day 2: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bernie-mix bpoliakoff darxus dwarren grenier jarif kam-ninja kpg-core llanga zmi; day 3: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bernie-mix bpoliakoff darxus dwarren grenier jarif kam-ninja kpg-core llanga mas-cf mas-cs mas-mf mas-ms mmiroslaw-ham mmiroslaw-spam zmi
 
 # good enough
 ACCT_PHISHING_MANY
@@ -151,6 +151,9 @@ CORRUPT_FROM_LINE_IN_HDRS
 # good enough
 DEAR_BENEFICIARY
 
+# good enough
+DEAR_WINNER
+
 # tflags net
 DIGEST_MULTIPLE
 
@@ -193,17 +196,11 @@ DOS_ANAL_SPAM_MAILER
 # good enough
 DOS_OE_TO_MX
 
-# good enough
-DUP_SUSP_HDR
-
 # tflags publish
 DX_TEXT_02
 
 # tflags publish
 DX_TEXT_03
-
-# good enough
-DX_TEXT_05
 
 # good enough
 DYN_RDNS_AND_INLINE_IMAGE
@@ -288,9 +285,6 @@ FROM_MISSP_XPRIO
 
 # good enough
 FROM_WEBSITE
-
-# good enough
-FSL_BOTSPAM_1
 
 # good enough
 FSL_CTYPE_WIN1251
@@ -422,6 +416,12 @@ HTML_CHARSET_FARAWAY
 HTML_OFF_PAGE
 
 # good enough
+KB_DATE_CONTAINS_TAB
+
+# good enough
+KB_FAKED_THE_BAT
+
+# good enough
 LIST_PARTIAL
 
 # tflags publish
@@ -441,6 +441,9 @@ LOTS_OF_MONEY
 
 # good enough
 LOTTO_AGENT
+
+# good enough
+LOTTO_AGENT_FM
 
 # good enough
 LOTTO_DEPT
@@ -490,9 +493,6 @@ MSGID_NOFQDN1
 # good enough
 MSOE_MID_WRONG_CASE
 
-# good enough
-NAME_EMAIL_DIFF
-
 # tflags net
 NO_DNS_FOR_FROM
 
@@ -516,9 +516,6 @@ OBFU_JVSCR_ESC
 
 # tflags publish
 OBFU_TEXT_ATTACH
-
-# good enough
-PDS_FROM_2_EMAILS
 
 # good enough
 PHISHING_FREEMAIL
@@ -767,7 +764,7 @@ RISK_FREE
 RP_MATCHES_RCVD
 
 # good enough
-SERGIO_SUBJECT_VIAGRA01
+SHORT_HELO_AND_INLINE_IMAGE
 
 # tflags publish
 SINGLETS_LOW_CONTRAST
@@ -863,6 +860,9 @@ TO_NO_BRKTS_PCNT
 TVD_FROM_1
 
 # good enough
+TVD_QUAL_MEDS
+
+# good enough
 TVD_RCVD_IP
 
 # good enough
@@ -884,7 +884,73 @@ TVD_VISIT_PHARMA
 TW_GIBBERISH_MANY
 
 # good enough
-LOTTO_AGENT_FM
+ADVANCE_FEE_2_NEW_FRM_MNY
+
+# good enough
+ADVANCE_FEE_4_NEW_FRM_MNY
+
+# good enough
+ADVANCE_FEE_5_NEW
+
+# good enough
+DSN_NO_MIMEVERSION
+
+# good enough
+DUP_SUSP_HDR
+
+# good enough
+DX_TEXT_05
+
+# good enough
+FREEMAIL_DOC_PDF_BCC
+
+# good enough
+FROM_MISSP_PHISH
+
+# good enough
+FSL_BOTSPAM_1
+
+# good enough
+HK_NAME_FM_MR_MRS
+
+# good enough
+HK_NAME_MR_MRS
+
+# good enough
+HK_SCAM_N3
+
+# good enough
+HK_SCAM_N8
+
+# good enough
+MONEY_BARRISTER
+
+# good enough
+MONEY_FORM_SHORT
+
+# good enough
+NAME_EMAIL_DIFF
+
+# good enough
+NA_DOLLARS
+
+# good enough
+OBFU_HTML_ATTACH
+
+# good enough
+PDS_FROM_2_EMAILS
+
+# good enough
+SERGIO_SUBJECT_PORN011
+
+# good enough
+SERGIO_SUBJECT_VIAGRA01
+
+# good enough
+SUBJ_OBFU_PUNCT_MANY
+
+# good enough
+TAB_IN_FROM
 
 # tflags publish
 UC_GIBBERISH_OBFU
