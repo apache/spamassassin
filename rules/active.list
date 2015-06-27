@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bernie-mix bpoliakoff darxus dwarren grenier jarif kam-ninja kpg-core mmiroslaw-ham mmiroslaw-spam zmi; day 2: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bernie-mix bpoliakoff darxus dwarren grenier jarif kam-ninja kpg-core llanga zmi; day 3: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bernie-mix bpoliakoff darxus dwarren grenier jarif kam-ninja kpg-core llanga mas-cf mas-cs mas-mf mas-ms mmiroslaw-ham mmiroslaw-spam zmi
+# with results from: day 1: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bernie-mix bpoliakoff darxus dwarren grenier jarif kam-ninja kpg-core zmi; day 2: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bernie-mix bpoliakoff darxus dwarren grenier jarif kam-ninja kpg-core llanga mmiroslaw-ham mmiroslaw-spam zmi; day 3: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bernie-mix bpoliakoff darxus dwarren grenier jarif kam-ninja kpg-core llanga zmi
 
 # good enough
 ACCT_PHISHING_MANY
@@ -133,9 +133,6 @@ CHARSET_FARAWAY_HEADER
 # good enough
 CK_HELO_DYNAMIC_SPLIT_IP
 
-# good enough
-CK_HELO_GENERIC
-
 # tflags publish
 CN_B2B_SPAMMER
 
@@ -196,6 +193,9 @@ DOS_ANAL_SPAM_MAILER
 # good enough
 DOS_OE_TO_MX
 
+# good enough
+DUP_SUSP_HDR
+
 # tflags publish
 DX_TEXT_02
 
@@ -203,10 +203,10 @@ DX_TEXT_02
 DX_TEXT_03
 
 # good enough
-DYN_RDNS_AND_INLINE_IMAGE
+DX_TEXT_05
 
 # good enough
-DYN_RDNS_SHORT_HELO_HTML
+DYN_RDNS_AND_INLINE_IMAGE
 
 # good enough
 DYN_RDNS_SHORT_HELO_IMAGE
@@ -287,6 +287,9 @@ FROM_MISSP_XPRIO
 FROM_WEBSITE
 
 # good enough
+FSL_BOTSPAM_1
+
+# good enough
 FSL_CTYPE_WIN1251
 
 # good enough
@@ -294,9 +297,6 @@ FSL_HELO_BARE_IP_2
 
 # good enough
 FSL_HELO_DEVICE
-
-# good enough
-FSL_HELO_FIREWALL
 
 # good enough
 FSL_MY_NAME_IS
@@ -401,9 +401,6 @@ HEXHASH_WORD
 HK_NAME_FROM
 
 # good enough
-HK_RANDOM_FROM
-
-# good enough
 HK_RANDOM_REPLYTO
 
 # good enough
@@ -420,9 +417,6 @@ KB_DATE_CONTAINS_TAB
 
 # good enough
 KB_FAKED_THE_BAT
-
-# good enough
-LIST_PARTIAL
 
 # tflags publish
 LIST_PRTL_PUMPDUMP
@@ -493,6 +487,9 @@ MSGID_NOFQDN1
 # good enough
 MSOE_MID_WRONG_CASE
 
+# good enough
+NAME_EMAIL_DIFF
+
 # tflags net
 NO_DNS_FOR_FROM
 
@@ -516,6 +513,9 @@ OBFU_JVSCR_ESC
 
 # tflags publish
 OBFU_TEXT_ATTACH
+
+# good enough
+PDS_FROM_2_EMAILS
 
 # good enough
 PHISHING_FREEMAIL
@@ -764,6 +764,9 @@ RISK_FREE
 RP_MATCHES_RCVD
 
 # good enough
+SERGIO_SUBJECT_VIAGRA01
+
+# good enough
 SHORT_HELO_AND_INLINE_IMAGE
 
 # tflags publish
@@ -896,19 +899,13 @@ ADVANCE_FEE_5_NEW
 DSN_NO_MIMEVERSION
 
 # good enough
-DUP_SUSP_HDR
-
-# good enough
-DX_TEXT_05
-
-# good enough
 FREEMAIL_DOC_PDF_BCC
 
 # good enough
-FROM_MISSP_PHISH
+FROM_MISSP_EH_MATCH
 
 # good enough
-FSL_BOTSPAM_1
+FROM_MISSP_PHISH
 
 # good enough
 HK_NAME_FM_MR_MRS
@@ -917,10 +914,19 @@ HK_NAME_FM_MR_MRS
 HK_NAME_MR_MRS
 
 # good enough
+HK_SCAM_N15
+
+# good enough
 HK_SCAM_N3
 
 # good enough
 HK_SCAM_N8
+
+# good enough
+HTML_FONT_TINY
+
+# good enough
+MAILER_EQ_ORG
 
 # good enough
 MONEY_BARRISTER
@@ -929,22 +935,16 @@ MONEY_BARRISTER
 MONEY_FORM_SHORT
 
 # good enough
-NAME_EMAIL_DIFF
-
-# good enough
 NA_DOLLARS
 
 # good enough
-OBFU_HTML_ATTACH
+OBFU_DOC_ATTACH
 
 # good enough
-PDS_FROM_2_EMAILS
+OBFU_JPG_ATTACH
 
 # good enough
 SERGIO_SUBJECT_PORN011
-
-# good enough
-SERGIO_SUBJECT_VIAGRA01
 
 # good enough
 SUBJ_OBFU_PUNCT_MANY
