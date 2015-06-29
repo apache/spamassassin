@@ -1261,8 +1261,8 @@ sub check_senders_reputation {
 	# Avoiding a redundant duplicate entry if HELO is equal/similar to another identificator
 	if (defined $rly->{helo} &&
             $rly->{helo} !~ /^\[?\Q$rly->{ip}\E\]?$/ &&
-            $rly->{helo} !~ /\Q$domain\E/i &&
-            $rly->{helo} !~ /\Q$from\E/i ) {
+            $rly->{helo} !~ /^\Q$domain\E$/i &&
+            $rly->{helo} !~ /^\Q$from\E$/i ) {
 	    $helo   = $rly->{helo};
 	}
 	# use only trusted ID, but use the first untrusted IP (if available) (AWL bug 6908)
