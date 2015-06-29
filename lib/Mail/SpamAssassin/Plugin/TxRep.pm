@@ -1252,9 +1252,14 @@ sub check_senders_reputation {
     foreach my $rly ( @{$pms->{relays_trusted}}, @{$pms->{relays_untrusted}} ) {
 	# Get the last found HELO, regardless of private/public or trusted/untrusted
 	# Avoiding a redundant duplicate entry if HELO is equal/similar to another identificator
-	if (defined $rly->{helo} && $rly->{helo} !~ /^\[?$rly->{ip}\]?$/ && $rly->{helo} !~ /$domain/i && $rly->{helo} !~ /$from/i ) {
-	    $helo   = $rly->{helo};
-	}
+        # Get the last found HELO, regardless of private/public or trusted/untrusted
+        # Avoiding a redundant duplicate entry if HELO is equal/similar to another identificator
+        if (defined $rly->{helo} &&
+            $rly->{helo} !~ /^\[?\Q$rly->{ip}\E\]?$/ &&
+            $rly->{helo} !~ /^\Q$domain\E$/i &&
+            $rly->{helo} !~ /^\Q$from\E$/i ) {
+            $helo   = $rly->{helo};
+        }
 	# use only trusted ID, but use the first untrusted IP (if available) (AWL bug 6908)
 	# at low spam scores (<2) ignore trusted/untrusted
 	# set IP to 127.0.0.1 for any internal IP, so that it can be distinguished from none (AWL bug 6357)
