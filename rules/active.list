@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bpoliakoff darxus dwarren grenier kam-ninja kpg-core; day 2: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus dwarren grenier jarif kam-ninja kpg-core llanga zmi; day 3: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus dwarren grenier jarif kam-ninja kpg-core llanga zmi
+# with results from: day 1: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus dwarren grenier jarif kam-ninja kpg-core zmi; day 2: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus dwarren grenier kam-ninja kpg-core llanga; day 3: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus dwarren grenier jarif kam-ninja kpg-core llanga zmi
 
 # good enough
 ACCT_PHISHING_MANY
@@ -97,6 +97,15 @@ AXB_XMAILER_MIMEOLE_OL_024C2
 # good enough
 AXB_XMAILER_MIMEOLE_OL_1ECD5
 
+# good enough
+AXB_XM_FORGED_OL2600
+
+# good enough
+AXB_X_AOL_SEZ_S
+
+# good enough
+AXB_X_FF_SEZ_S
+
 # tflags learn
 BAYES_00
 
@@ -127,6 +136,12 @@ BAYES_99
 # tflags learn
 BAYES_999
 
+# good enough
+BIGNUM_EMAILS
+
+# good enough
+BODY_SINGLE_WORD
+
 # tflags publish
 BODY_URI_ONLY
 
@@ -142,6 +157,9 @@ CHARSET_FARAWAY_HEADER
 # good enough
 CK_HELO_DYNAMIC_SPLIT_IP
 
+# good enough
+CK_HELO_GENERIC
+
 # tflags publish
 CN_B2B_SPAMMER
 
@@ -153,6 +171,9 @@ COMPENSATION
 
 # tflags publish
 CORRUPT_FROM_LINE_IN_HDRS
+
+# good enough
+DATE_IN_FUTURE_96_Q
 
 # good enough
 DEAR_BENEFICIARY
@@ -269,6 +290,9 @@ FROM_LOCAL_NOVOWEL
 FROM_MISSPACED
 
 # good enough
+FROM_MISSP_DYNIP
+
+# good enough
 FROM_MISSP_EH_MATCH
 
 # good enough
@@ -303,6 +327,15 @@ FSL_CTYPE_WIN1251
 
 # good enough
 FSL_HELO_BARE_IP_2
+
+# good enough
+FSL_HELO_DEVICE
+
+# good enough
+FSL_HELO_FAKE
+
+# good enough
+FSL_MID_419
 
 # tflags publish
 FSL_NEW_HELO_USER
@@ -401,10 +434,22 @@ HELO_LOCALHOST
 HEXHASH_WORD
 
 # good enough
+HK_NAME_DR
+
+# good enough
+HK_NAME_FM_DR
+
+# good enough
 HK_NAME_FM_MR_MRS
 
 # good enough
 HK_NAME_MR_MRS
+
+# good enough
+HK_RANDOM_REPLYTO
+
+# good enough
+HK_SCAM_N1
 
 # good enough
 HK_SCAM_N15
@@ -463,6 +508,9 @@ LUCRATIVE
 # good enough
 MAILER_EQ_ORG
 
+# good enough
+MALFORMED_FREEMAIL
+
 # tflags publish
 MANY_SPAN_IN_TEXT
 
@@ -506,6 +554,9 @@ MONEY_FROM_41
 MONEY_FROM_MISSP
 
 # good enough
+MONEY_LOTTERY
+
+# good enough
 MSGID_NOFQDN1
 
 # good enough
@@ -536,10 +587,7 @@ NSL_RCVD_HELO_USER
 NULL_IN_BODY
 
 # good enough
-OBFU_DOC_ATTACH
-
-# good enough
-OBFU_JPG_ATTACH
+OBFU_HTML_ATTACH
 
 # tflags publish
 OBFU_JVSCR_ESC
@@ -800,7 +848,13 @@ RISK_FREE
 RP_MATCHES_RCVD
 
 # good enough
+SERGIO_SUBJECT_PORN015
+
+# good enough
 SERGIO_SUBJECT_VIAGRA01
+
+# good enough
+SHARE_50_50
 
 # tflags publish
 SINGLETS_LOW_CONTRAST
@@ -902,6 +956,9 @@ TVD_FINGER_02
 TVD_FROM_1
 
 # good enough
+TVD_PH_BODY_META
+
+# good enough
 TVD_RCVD_IP
 
 # good enough
@@ -929,55 +986,13 @@ TW_GIBBERISH_MANY
 ADVANCE_FEE_5_NEW_FORM
 
 # good enough
-AXB_XM_FORGED_OL2600
-
-# good enough
-AXB_X_AOL_SEZ_S
-
-# good enough
-AXB_X_FF_SEZ_S
-
-# good enough
-BIGNUM_EMAILS
-
-# good enough
-BODY_SINGLE_WORD
-
-# good enough
-DATE_IN_FUTURE_96_Q
-
-# good enough
-DOS_BODY_HIGH_NO_MID
-
-# good enough
-FROM_MISSP_DYNIP
-
-# good enough
-FSL_HELO_FAKE
-
-# good enough
-FSL_MID_419
-
-# good enough
 HDRS_LCASE
-
-# good enough
-HK_NAME_FM_DR
-
-# good enough
-HK_SCAM_N1
 
 # good enough
 KB_FORGED_MOZ4
 
 # good enough
-MALFORMED_FREEMAIL
-
-# good enough
-MONEY_LOTTERY
-
-# good enough
-SHARE_50_50
+PHP_NOVER_MUA
 
 # tflags publish
 UC_GIBBERISH_OBFU
@@ -1134,6 +1149,9 @@ USER_IN_WHITELIST_TO
 
 # tflags publish
 XM_PHPMAILER_FORGED
+
+# good enough
+XPRIO
 
 # good enough
 YOU_INHERIT
