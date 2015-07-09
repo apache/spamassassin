@@ -26,3 +26,7 @@
 body EXCUSE_24                  /you(?:'ve|'re| have| are)? receiv(?:e|ed|ing) this (?:advertisement|offer|special|recurring|paid).{0,16}\b(?:by either|because)/i
 describe EXCUSE_24              Claims you wanted this ad
 
+header __USING_VERP1 Return-Path =~ /[+-].*=/
+
+meta USING_VERP (__USING_VERP1)
+describe USING_VERP Message uses VERP
