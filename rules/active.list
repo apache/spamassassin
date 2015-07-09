@@ -400,9 +400,6 @@ HASHCASH_2SPEND
 # tflags userconf
 HASHCASH_HIGH
 
-# good enough
-HDRS_LCASE
-
 # tflags publish
 HEADER_FROM_DIFFERENT_DOMAINS
 
@@ -543,6 +540,9 @@ NSL_RCVD_HELO_USER
 
 # good enough
 NULL_IN_BODY
+
+# good enough
+OBFU_HTML_ATTACH
 
 # tflags publish
 OBFU_JVSCR_ESC
@@ -939,12 +939,6 @@ HK_RANDOM_FROM
 
 # good enough
 LIST_PARTIAL
-
-# good enough
-OBFU_DOC_ATTACH
-
-# good enough
-OBFU_JPG_ATTACH
 
 # tflags publish
 UC_GIBBERISH_OBFU
