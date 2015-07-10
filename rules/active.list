@@ -2,6 +2,9 @@
 # with results from: day 1: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus dwarren grenier jarif kam-ninja kpg-core zmi; day 2: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus dwarren grenier jarif kam-ninja kpg-core llanga zmi; day 3: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus dwarren grenier jarif kam-ninja kpg-core llanga zmi
 
 # good enough
+ACCT_PHISHING
+
+# good enough
 ACCT_PHISHING_MANY
 
 # tflags publish
@@ -224,9 +227,6 @@ DX_TEXT_02
 DX_TEXT_03
 
 # good enough
-DX_TEXT_05
-
-# good enough
 DYN_RDNS_SHORT_HELO_HTML
 
 # tflags userconf
@@ -325,6 +325,12 @@ FSL_HELO_BARE_IP_2
 # good enough
 FSL_HELO_DEVICE
 
+# good enough
+FSL_HELO_FIREWALL
+
+# good enough
+FSL_MY_NAME_IS
+
 # tflags publish
 FSL_NEW_HELO_USER
 
@@ -422,13 +428,16 @@ HELO_LOCALHOST
 HEXHASH_WORD
 
 # good enough
+HK_LOTTO
+
+# good enough
 HK_NAME_MR_MRS
 
 # good enough
-HK_RANDOM_REPLYTO
+HK_RANDOM_FROM
 
 # good enough
-HK_SCAM_N1
+HK_RANDOM_REPLYTO
 
 # good enough
 HK_SCAM_N15
@@ -438,9 +447,6 @@ HK_SCAM_N2
 
 # good enough
 HK_SCAM_N3
-
-# good enough
-HK_SCAM_N8
 
 # tflags userconf
 HTML_CHARSET_FARAWAY
@@ -453,6 +459,9 @@ KB_DATE_CONTAINS_TAB
 
 # good enough
 KB_FAKED_THE_BAT
+
+# good enough
+LIST_PARTIAL
 
 # tflags publish
 LIST_PRTL_PUMPDUMP
@@ -542,7 +551,10 @@ NSL_RCVD_HELO_USER
 NULL_IN_BODY
 
 # good enough
-OBFU_HTML_ATTACH
+OBFU_DOC_ATTACH
+
+# good enough
+OBFU_JPG_ATTACH
 
 # tflags publish
 OBFU_JVSCR_ESC
@@ -926,19 +938,28 @@ TVD_VISIT_PHARMA
 TW_GIBBERISH_MANY
 
 # good enough
-ACCT_PHISHING
+BIGNUM_EMAILS
 
 # good enough
-FSL_HELO_FIREWALL
+FSL_HELO_FAKE
 
 # good enough
-FSL_MY_NAME_IS
+HK_LOTTO_NAME
 
 # good enough
-HK_RANDOM_FROM
+HK_LOTTO_SUBJECT
 
 # good enough
-LIST_PARTIAL
+LOTTO_AGENT_RPLY
+
+# good enough
+LOTTO_URI
+
+# good enough
+MALFORMED_FREEMAIL
+
+# good enough
+NA_DOLLARS
 
 # tflags publish
 UC_GIBBERISH_OBFU
