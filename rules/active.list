@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus dwarren grenier jarif kam-ninja kpg-core zmi; day 2: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus dwarren grenier jarif kam-ninja kpg-core llanga zmi; day 3: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus dwarren grenier jarif kam-ninja kpg-core llanga zmi
+# with results from: day 1: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus dwarren grenier jarif kam-ninja kpg-core; day 2: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus dwarren grenier jarif kam-ninja kpg-core llanga zmi; day 3: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus dwarren grenier jarif kam-ninja kpg-core llanga zmi
 
 # good enough
 ACCT_PHISHING
@@ -265,9 +265,6 @@ FOUND_YOU
 # tflags userconf
 FRAGMENTED_MESSAGE
 
-# good enough
-FREEMAIL_DOC_PDF_BCC
-
 # tflags publish
 FREEMAIL_FORGED_FROMDOMAIN
 
@@ -440,13 +437,7 @@ HK_RANDOM_FROM
 HK_RANDOM_REPLYTO
 
 # good enough
-HK_SCAM_N15
-
-# good enough
 HK_SCAM_N2
-
-# good enough
-HK_SCAM_N3
 
 # tflags userconf
 HTML_CHARSET_FARAWAY
@@ -549,12 +540,6 @@ NSL_RCVD_HELO_USER
 
 # good enough
 NULL_IN_BODY
-
-# good enough
-OBFU_DOC_ATTACH
-
-# good enough
-OBFU_JPG_ATTACH
 
 # tflags publish
 OBFU_JVSCR_ESC
@@ -938,10 +923,7 @@ TVD_VISIT_PHARMA
 TW_GIBBERISH_MANY
 
 # good enough
-BIGNUM_EMAILS
-
-# good enough
-FSL_HELO_FAKE
+HDRS_LCASE
 
 # good enough
 HK_LOTTO_NAME
@@ -954,12 +936,6 @@ LOTTO_AGENT_RPLY
 
 # good enough
 LOTTO_URI
-
-# good enough
-MALFORMED_FREEMAIL
-
-# good enough
-NA_DOLLARS
 
 # tflags publish
 UC_GIBBERISH_OBFU
