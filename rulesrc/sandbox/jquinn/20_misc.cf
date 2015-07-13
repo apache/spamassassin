@@ -28,5 +28,5 @@ describe EXCUSE_24              Claims you wanted this ad
 
 header __USING_VERP1 Return-Path =~ /[+-].*=/
 
-meta USING_VERP (__USING_VERP1)
+meta USING_VERP (__USING_VERP1 && !__HAS_LIST_ID)
 describe USING_VERP Message uses VERP
