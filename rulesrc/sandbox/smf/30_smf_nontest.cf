@@ -1,8 +1,9 @@
 # Rules that have tested OK in mass-checks
 # and can be considered for promotion.
 
-body     FSL_MY_NAME_IS        /\bmy name is\b/i
-describe FSL_MY_NAME_IS        My name is ...
+# DISABLED - VERY, VERY PRONE TO FPs
+#body     FSL_MY_NAME_IS        /\bmy name is\b/i
+#describe FSL_MY_NAME_IS        My name is ...
 
 header   __FSL_HAS_LIST_UNSUB  exists:List-Unsubscribe
 meta     FSL_BULK_SIG          ((DCC_CHECK || RAZOR2_CHECK || PYZOR_CHECK) && !__FSL_HAS_LIST_UNSUB)
