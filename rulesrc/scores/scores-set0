@@ -1,125 +1,123 @@
-# Using score set 0 logs for revision 1690428 from:
+# Using score set 0 logs for revision 1690587 from:
 # ham-axb-8mile.log ham-axb-coi-bulk.log ham-axb-generic.log ham-axb-ham-misc.log ham-bb-guenther_fraud.log ham-bb-jhardin_fraud.log ham-bb-jhardin.log ham-bb-jm.log ham-bb-kmcgrail.log ham-bb-traps.log ham-bb-zmi.log ham-bernie-fsf.log ham-bernie-it_batt.log ham-bpoliakoff.log ham-darxus.log ham-dwarren.log ham-grenier.log ham-jarif.log ham-kam-ninja.log ham-kpg-core.log ham-zmi.log spam-axb-8mile.log spam-axb-coi-bulk.log spam-axb-generic.log spam-axb-ham-misc.log spam-bb-guenther_fraud.log spam-bb-jhardin_fraud.log spam-bb-jhardin.log spam-bb-jm.log spam-bb-kmcgrail.log spam-bb-traps.log spam-bb-zmi.log spam-bernie-fsf.log spam-bernie-it_batt.log spam-bpoliakoff.log spam-darxus.log spam-dwarren.log spam-grenier.log spam-jarif.log spam-kam-ninja.log spam-kpg-core.log spam-zmi.log
 
-score ACCT_PHISHING                  1.498
-score ACCT_PHISHING_MANY             2.999
+score ACCT_PHISHING                  0.400
+score ACCT_PHISHING_MANY             1.845
 score AC_BR_BONANZA                  0.001
 score AC_DIV_BONANZA                 0.001 # force non-zero
 score AC_SPAMMY_URI_PATTERNS10       3.995
-score ADMITS_SPAM                    2.896
-score ADVANCE_FEE_2_NEW_FRM_MNY      0.500
-score ADVANCE_FEE_2_NEW_MONEY        1.998
+score ADMITS_SPAM                    2.796
+score ADVANCE_FEE_2_NEW_FRM_MNY      1.798
+score ADVANCE_FEE_2_NEW_MONEY        1.997
 score ADVANCE_FEE_3_NEW              3.496
-score ADVANCE_FEE_3_NEW_FORM         0.001 # force non-zero
-score ADVANCE_FEE_3_NEW_FRM_MNY      0.001 # force non-zero
-score ADVANCE_FEE_3_NEW_MONEY        3.696
-score ADVANCE_FEE_4_NEW              2.596
-score ADVANCE_FEE_4_NEW_FRM_MNY      0.694
-score ADVANCE_FEE_4_NEW_MONEY        3.096
-score ADVANCE_FEE_5_NEW              2.796
-score ADVANCE_FEE_5_NEW_FRM_MNY      4.399
-score ADVANCE_FEE_5_NEW_MONEY        3.536
-score AD_PREFS                       0.001
+score ADVANCE_FEE_3_NEW_FRM_MNY      0.001
+score ADVANCE_FEE_3_NEW_MONEY        3.799
+score ADVANCE_FEE_4_NEW              2.498
+score ADVANCE_FEE_4_NEW_FRM_MNY      0.573
+score ADVANCE_FEE_4_NEW_MONEY        3.097
+score ADVANCE_FEE_5_NEW              2.696
+score ADVANCE_FEE_5_NEW_FRM_MNY      0.856
+score ADVANCE_FEE_5_NEW_MONEY        3.595
+score AD_PREFS                       0.001 # force non-zero
 score AXB_XMAILER_MIMEOLE_OL_024C2   4.495
-score AXB_XMAILER_MIMEOLE_OL_1ECD5   2.060
-score AXB_XM_FORGED_OL2600           2.275
-score AXB_X_FF_SEZ_S                 2.498
+score AXB_XMAILER_MIMEOLE_OL_1ECD5   1.671
+score AXB_XM_FORGED_OL2600           1.586
+score AXB_X_FF_SEZ_S                 2.497
 score BODY_URI_ONLY                  0.999
 score CK_HELO_DYNAMIC_SPLIT_IP       1.498
 score CK_HELO_GENERIC                0.249
 score COMMENT_GIBBERISH              1.498
 score COMPENSATION                   1.499
-score DATE_IN_FUTURE_96_Q            2.297
-score DEAR_BENEFICIARY               3.396
-score DSN_NO_MIMEVERSION             1.997
-score FBI_MONEY                      1.058
+score DEAR_BENEFICIARY               3.762
+score DSN_NO_MIMEVERSION             1.998
+score FBI_MONEY                      1.999
 score FBI_SPOOF                      1.997
 score FILL_THIS_FORM                 3.496
-score FORM_FRAUD                     0.999
-score FORM_FRAUD_3                   2.696
-score FORM_FRAUD_5                   1.583
+score FORM_FRAUD                     0.998
+score FORM_FRAUD_3                   2.136
+score FORM_FRAUD_5                   0.314
 score FOUND_YOU                      2.098
 score FREEMAIL_FORGED_FROMDOMAIN     0.002
-score FROM_MISSPACED                 0.001 # force non-zero
-score FROM_MISSP_EH_MATCH            0.001
-score FROM_MISSP_FREEMAIL            2.602
-score FROM_MISSP_MSFT                0.001 # force non-zero
-score FROM_MISSP_PHISH               4.428
-score FROM_MISSP_REPLYTO             2.797
+score FROM_MISSPACED                 0.001
+score FROM_MISSP_EH_MATCH            1.997
+score FROM_MISSP_FREEMAIL            1.843
+score FROM_MISSP_MSFT                0.001
+score FROM_MISSP_PHISH               2.394
+score FROM_MISSP_REPLYTO             2.598
 score FROM_MISSP_TO_UNDISC           0.001
 score FROM_MISSP_USER                0.001
 score FROM_MISSP_XPRIO               0.001
-score FROM_WEBSITE                   3.096
-score FSL_BOTSPAM_1                  1.476
-score FSL_CTYPE_WIN1251              0.001 # force non-zero
-score FSL_HELO_BARE_IP_2             1.998
+score FROM_WEBSITE                   2.996
+score FSL_BOTSPAM_1                  1.998
+score FSL_CTYPE_WIN1251              0.001
+score FSL_HELO_BARE_IP_2             1.997
 score FSL_MY_NAME_IS                 2.896
-score FSL_NEW_HELO_USER              1.600
-score FUZZY_DR_OZ                    2.298
-score GOOG_REDIR_NORDNS              2.699
-score GOOG_REDIR_SHORT               1.798
-score HDRS_LCASE                     0.099
+score FSL_NEW_HELO_USER              1.997
+score GOOG_REDIR_NORDNS              2.598
+score GOOG_REDIR_SHORT               0.398
+score HDRS_LCASE                     0.098
 score HEADER_FROM_DIFFERENT_DOMAINS  0.001 # force non-zero
-score HEXHASH_WORD                   2.795
-score HK_LOTTO                       0.336
+score HEXHASH_WORD                   2.796
+score HK_LOTTO                       0.200
 score HK_LOTTO_NAME                  0.998
 score HK_LOTTO_SUBJECT               0.998
-score HK_NAME_MR_MRS                 0.998
+score HK_NAME_MR_MRS                 0.999
 score HK_RANDOM_FROM                 0.998
 score HK_RANDOM_REPLYTO              0.998
-score HK_SCAM_N2                     2.151
-score HTML_OFF_PAGE                  1.998
-score LIST_PARTIAL                   0.998
+score HK_SCAM_N2                     2.583
+score HTML_OFF_PAGE                  1.997
+score LIST_PARTIAL                   0.999
 score LONG_HEX_URI                   2.996
 score LOTS_OF_MONEY                  0.010
 score LOTTO_AGENT                    2.497
-score LOTTO_AGENT_RPLY               2.035
+score LOTTO_AGENT_RPLY               1.448
 score LOTTO_DEPT                     0.001
 score LOTTO_URI                      0.001
 score MANY_SPAN_IN_TEXT              2.197
 score MILLION_USD                    1.997
-score MIME_NO_TEXT                   1.998
-score MONEY_ATM_CARD                 2.772
-score MONEY_FORM                     0.001 # force non-zero
-score MONEY_FRAUD_3                  3.096
-score MONEY_FRAUD_5                  1.865
-score MONEY_FRAUD_8                  1.593
+score MIME_NO_TEXT                   1.997
+score MONEY_ATM_CARD                 2.999
+score MONEY_FORM                     0.001
+score MONEY_FRAUD_3                  2.996
+score MONEY_FRAUD_5                  3.248
+score MONEY_FRAUD_8                  1.448
 score MONEY_FROM_41                  1.997
-score MONEY_FROM_MISSP               1.997
+score MONEY_FROM_MISSP               0.001
 score MSGID_NOFQDN1                  3.696
-score NAME_EMAIL_DIFF                3.795
-score NSL_RCVD_FROM_USER             1.944
-score NSL_RCVD_HELO_USER             0.998
-score OBFU_TEXT_ATTACH               2.196
-score PDS_FROM_2_EMAILS              3.996
+score NAME_EMAIL_DIFF                3.696
+score NSL_RCVD_FROM_USER             0.775
+score NSL_RCVD_HELO_USER             0.593
+score OBFU_DOC_ATTACH                2.896
+score OBFU_JPG_ATTACH                2.798
+score OBFU_TEXT_ATTACH               2.197
+score PDS_FROM_2_EMAILS              3.895
 score PHISHING_FREEMAIL              3.096
 score PP_MIME_FAKE_ASCII_TEXT        0.999
 score RISK_FREE                      2.897
-score RP_MATCHES_RCVD                -1.050
-score SERGIO_SUBJECT_VIAGRA01        2.045
+score RP_MATCHES_RCVD                -1.051
+score SERGIO_SUBJECT_VIAGRA01        2.772
 score SPOOFED_FREEM_REPTO            1.997
-score SPOOFED_FREEM_REPTO_CHN        1.998
-score STYLE_GIBBERISH                3.235
+score SPOOFED_FREEM_REPTO_CHN        1.997
+score STYLE_GIBBERISH                2.907
 score TAB_IN_FROM                    0.498
-score THIS_AD                        2.086
+score THIS_AD                        2.082
 score TO_IN_SUBJ                     0.099
-score TO_NO_BRKTS_FROM_MSSP          2.390
-score TO_NO_BRKTS_HTML_IMG           1.288
+score TO_NO_BRKTS_FROM_MSSP          0.001 # force non-zero
+score TO_NO_BRKTS_HTML_IMG           1.050
 score TO_NO_BRKTS_HTML_ONLY          1.997
 score TO_NO_BRKTS_MSFT               2.497
-score TO_NO_BRKTS_NORDNS_HTML        0.001 # force non-zero
+score TO_NO_BRKTS_NORDNS_HTML        0.001
 score TO_NO_BRKTS_PCNT               2.497
-score TVD_FROM_1                     0.998
-score TVD_SPACE_ENCODED              2.498
+score TVD_FROM_1                     0.999
+score TVD_SPACE_ENCODED              2.497
 score TVD_SPACE_ENC_FM_MIME          1.997
-score TVD_SPACE_RATIO_MINFP          2.746
+score TVD_SPACE_RATIO_MINFP          2.747
 score URI_DQ_UNSUB                   2.297
 score URI_GOOGLE_PROXY               2.497
 score URI_ONLY_MSGID_MALF            0.001
-score URI_OPTOUT_3LD                 1.997
-score URI_PHISH                      2.595
-score URI_TRY_3LD                    0.001 # force non-zero
-score URI_TRY_USME                   3.097
+score URI_PHISH                      2.091
+score URI_TRY_3LD                    0.001
+score URI_TRY_USME                   3.096
 score URI_WP_DIRINDEX                2.996
 score URI_WP_HACKED                  2.996
 score URI_WP_HACKED_2                1.997
@@ -153,6 +151,7 @@ score STOCK_LOW_CONTRAST             1.000
 score SYSADMIN                       1.000
 score TW_GIBBERISH_MANY              1.000
 score UC_GIBBERISH_OBFU              1.000
+score URI_OPTOUT_3LD                 1.000
 # in active.list but have no hits in recent corpus
 score FROM_MISSP_SPF_FAIL            0.001 # force non-zero
 score RCVD_IN_MSPIKE_BL              0.001 # force non-zero
