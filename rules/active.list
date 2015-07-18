@@ -2,9 +2,6 @@
 # with results from: day 1: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus dwarren grenier jarif kam-ninja kpg-core zmi; day 2: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus dwarren grenier jarif kam-ninja kpg-core llanga zmi; day 3: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus dwarren grenier jarif kam-ninja kpg-core llanga zmi
 
 # good enough
-ACCT_PHISHING
-
-# good enough
 ACCT_PHISHING_MANY
 
 # tflags publish
@@ -139,6 +136,9 @@ BAYES_99
 # tflags learn
 BAYES_999
 
+# good enough
+BIGNUM_EMAILS
+
 # tflags publish
 BODY_URI_ONLY
 
@@ -165,6 +165,9 @@ COMPENSATION
 
 # tflags publish
 CORRUPT_FROM_LINE_IN_HDRS
+
+# good enough
+CURR_PRICE
 
 # good enough
 DATE_IN_FUTURE_96_Q
@@ -239,6 +242,9 @@ FBI_SPOOF
 FILL_THIS_FORM
 
 # good enough
+FILL_THIS_FORM_FRAUD_PHISH
+
+# good enough
 FILL_THIS_FORM_LOAN
 
 # good enough
@@ -262,6 +268,9 @@ FOUND_YOU
 # tflags userconf
 FRAGMENTED_MESSAGE
 
+# good enough
+FREEMAIL_DOC_PDF_BCC
+
 # tflags publish
 FREEMAIL_FORGED_FROMDOMAIN
 
@@ -276,6 +285,9 @@ FROM_LOCAL_NOVOWEL
 
 # good enough
 FROM_MISSPACED
+
+# good enough
+FROM_MISSP_DYNIP
 
 # good enough
 FROM_MISSP_EH_MATCH
@@ -318,6 +330,9 @@ FSL_HELO_BARE_IP_1
 
 # good enough
 FSL_HELO_BARE_IP_2
+
+# good enough
+FSL_HELO_FAKE
 
 # tflags publish
 FSL_NEW_HELO_USER
@@ -407,9 +422,6 @@ HEADER_HOST_IN_WHITELIST
 HEAD_LONG
 
 # good enough
-HELO_LH_HOME
-
-# good enough
 HELO_LOCALHOST
 
 # tflags publish
@@ -425,6 +437,9 @@ HK_LOTTO_NAME
 HK_LOTTO_SUBJECT
 
 # good enough
+HK_NAME_FM_MR_MRS
+
+# good enough
 HK_NAME_MR_MRS
 
 # good enough
@@ -434,10 +449,25 @@ HK_RANDOM_FROM
 HK_RANDOM_REPLYTO
 
 # good enough
+HK_RANDOM_REPLYTO_NAME
+
+# good enough
+HK_SCAM_N15
+
+# good enough
 HK_SCAM_N2
+
+# good enough
+HK_SCAM_N3
+
+# good enough
+HK_SCAM_N8
 
 # tflags userconf
 HTML_CHARSET_FARAWAY
+
+# good enough
+HTML_FONT_TINY
 
 # tflags publish
 HTML_OFF_PAGE
@@ -460,6 +490,9 @@ LONG_HEX_URI
 # tflags publish
 LONG_IMG_URI
 
+# good enough
+LONG_TERM_PRICE
+
 # tflags publish
 LOTS_OF_MONEY
 
@@ -481,6 +514,9 @@ LOTTO_URI
 # tflags publish
 LUCRATIVE
 
+# good enough
+MAILER_EQ_ORG
+
 # tflags publish
 MANY_SPAN_IN_TEXT
 
@@ -498,6 +534,9 @@ MISSING_HB_SEP
 
 # good enough
 MONEY_ATM_CARD
+
+# good enough
+MONEY_BARRISTER
 
 # good enough
 MONEY_FORM
@@ -526,6 +565,9 @@ MSOE_MID_WRONG_CASE
 # good enough
 NAME_EMAIL_DIFF
 
+# good enough
+NA_DOLLARS
+
 # tflags net
 NO_DNS_FOR_FROM
 
@@ -543,12 +585,6 @@ NSL_RCVD_HELO_USER
 
 # good enough
 NULL_IN_BODY
-
-# good enough
-OBFU_DOC_ATTACH
-
-# good enough
-OBFU_JPG_ATTACH
 
 # tflags publish
 OBFU_JVSCR_ESC
@@ -814,6 +850,9 @@ RP_MATCHES_RCVD
 # good enough
 SERGIO_SUBJECT_VIAGRA01
 
+# good enough
+SHORT_TERM_PRICE
+
 # tflags publish
 SINGLETS_LOW_CONTRAST
 
@@ -905,9 +944,6 @@ TO_NO_BRKTS_NORDNS_HTML
 TO_NO_BRKTS_PCNT
 
 # good enough
-TT_MSGID_TRUNC
-
-# good enough
 TVD_FROM_1
 
 # good enough
@@ -932,70 +968,28 @@ TVD_SPACE_ENC_FM_MIME
 TVD_SPACE_RATIO_MINFP
 
 # good enough
-TVD_VISIT_PHARMA
-
-# tflags publish
-TW_GIBBERISH_MANY
-
-# good enough
-BIGNUM_EMAILS
-
-# good enough
-DATE_IN_FUTURE_Q_PLUS
-
-# good enough
-FILL_THIS_FORM_FRAUD_PHISH
-
-# good enough
-FREEMAIL_DOC_PDF_BCC
-
-# good enough
-FROM_MISSP_DYNIP
-
-# good enough
-FSL_HELO_FAKE
-
-# good enough
-HK_NAME_FM_MR_MRS
-
-# good enough
-HK_RANDOM_REPLYTO_NAME
-
-# good enough
-HK_SCAM_N15
-
-# good enough
-HK_SCAM_N3
-
-# good enough
-HK_SCAM_N8
-
-# good enough
-HTML_FONT_TINY
-
-# good enough
-IMG_ALT_HSPACE_CID_ALIGN
-
-# good enough
-MAILER_EQ_ORG
-
-# good enough
-MONEY_BARRISTER
-
-# good enough
-MONEY_LOTTERY
-
-# good enough
-NA_DOLLARS
-
-# good enough
 TVD_SUBJ_NUM_OBFU_MINFP
 
 # good enough
 TVD_UNDER_VALUED
 
 # good enough
-XPRIO
+TVD_VISIT_PHARMA
+
+# tflags publish
+TW_GIBBERISH_MANY
+
+# good enough
+HK_SCAM_N1
+
+# good enough
+HK_SCAM_S23
+
+# good enough
+MONEY_FORM_SHORT
+
+# good enough
+OBFU_HTML_ATTACH
 
 # tflags publish
 UC_GIBBERISH_OBFU
@@ -1152,6 +1146,9 @@ USER_IN_WHITELIST_TO
 
 # tflags publish
 XM_PHPMAILER_FORGED
+
+# good enough
+XPRIO
 
 # good enough
 YOU_INHERIT
