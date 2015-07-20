@@ -581,7 +581,7 @@ sub new_dns_packet {
     #    time, $domain, $type, $packet->id);
     1;
   } or do {
-    # this can if a domain name in a query is invalid, or if a timeout signal
+    # get here if a domain name in a query is invalid, or if a timeout signal
     # happened to be trapped by this eval, or if Net::DNS signalled an error
     my $eval_stat = $@ ne '' ? $@ : "errno=$!";  chomp $eval_stat;
     # resignal if alarm went off
@@ -592,6 +592,9 @@ sub new_dns_packet {
   };
 
   if ($packet) {
+    # RD flag needs to be set explicitly since Net::DNS 1.01, Bug 7223	
+    $packet->header->rd(1);
+
   # my $udp_payload_size = $self->{res}->udppacketsize;
     my $udp_payload_size = $self->{conf}->{dns_options}->{edns};
     if ($udp_payload_size && $udp_payload_size > 512) {
@@ -861,7 +864,8 @@ Emulates C<Net::DNS::Resolver::send()>.
 This subroutine is a simple synchronous leftover from SpamAssassin version
 3.3 and does not participate in packet query caching and callback grouping
 as implemented by AsyncLoop::bgsend_and_start_lookup().  As such it should
-be avoided for mainstream usage.
+be avoided for mainstream usage.  Currently used through Mail::SPF::Server
+by the SPF plugin.
 
 =cut
 
