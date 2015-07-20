@@ -592,6 +592,9 @@ sub new_dns_packet {
   };
 
   if ($packet) {
+    # RD flag needs to be set explicitly since Net::DNS 1.01, Bug 7223	
+    $packet->header->rd(1);
+
   # my $udp_payload_size = $self->{res}->udppacketsize;
     my $udp_payload_size = $self->{conf}->{dns_options}->{edns};
     if ($udp_payload_size && $udp_payload_size > 512) {
