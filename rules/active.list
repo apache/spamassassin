@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus dwarren grenier jarif kam-ninja kpg-core zmi; day 2: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus dwarren grenier jarif kam-ninja kpg-core llanga zmi; day 3: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus dwarren grenier jarif kam-ninja kpg-core llanga zmi
+# with results from: day 1: axb-8mile bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus dwarren grenier jarif kam-ninja kpg-core mmiroslaw-ham mmiroslaw-spam zmi; day 2: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus dwarren grenier jarif kam-ninja kpg-core llanga mmiroslaw-ham mmiroslaw-spam zmi; day 3: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bernie-fsf bernie-it_batt bpoliakoff darxus grenier jarif kam-ninja kpg-core llanga zmi
 
 # good enough
 ACCT_PHISHING_MANY
@@ -49,9 +49,6 @@ ADMITS_SPAM
 # tflags publish
 ADVANCE_FEE_2_NEW_FORM
 
-# good enough
-ADVANCE_FEE_2_NEW_FRM_MNY
-
 # tflags publish
 ADVANCE_FEE_2_NEW_MONEY
 
@@ -69,9 +66,6 @@ ADVANCE_FEE_3_NEW_MONEY
 
 # tflags publish
 ADVANCE_FEE_4_NEW
-
-# good enough
-ADVANCE_FEE_4_NEW_FRM_MNY
 
 # good enough
 ADVANCE_FEE_4_NEW_MONEY
@@ -103,9 +97,6 @@ AXB_XM_FORGED_OL2600
 # good enough
 AXB_X_FF_SEZ_S
 
-# good enough
-BANKING_LAWS
-
 # tflags learn
 BAYES_00
 
@@ -135,9 +126,6 @@ BAYES_99
 
 # tflags learn
 BAYES_999
-
-# good enough
-BIGNUM_EMAILS
 
 # tflags publish
 BODY_URI_ONLY
@@ -229,6 +217,9 @@ DX_TEXT_02
 # tflags publish
 DX_TEXT_03
 
+# good enough
+DYN_RDNS_SHORT_HELO_HTML
+
 # tflags userconf
 ENV_AND_HDR_SPF_MATCH
 
@@ -240,9 +231,6 @@ FBI_SPOOF
 
 # tflags publish
 FILL_THIS_FORM
-
-# good enough
-FILL_THIS_FORM_FRAUD_PHISH
 
 # good enough
 FILL_THIS_FORM_LOAN
@@ -287,9 +275,6 @@ FROM_LOCAL_NOVOWEL
 FROM_MISSPACED
 
 # good enough
-FROM_MISSP_DYNIP
-
-# good enough
 FROM_MISSP_EH_MATCH
 
 # good enough
@@ -297,9 +282,6 @@ FROM_MISSP_FREEMAIL
 
 # good enough
 FROM_MISSP_MSFT
-
-# good enough
-FROM_MISSP_PHISH
 
 # good enough
 FROM_MISSP_REPLYTO
@@ -320,19 +302,13 @@ FROM_MISSP_XPRIO
 FROM_WEBSITE
 
 # good enough
-FSL_BOTSPAM_1
-
-# good enough
 FSL_CTYPE_WIN1251
-
-# good enough
-FSL_HELO_BARE_IP_1
 
 # good enough
 FSL_HELO_BARE_IP_2
 
 # good enough
-FSL_HELO_FAKE
+FSL_HELO_DEVICE
 
 # tflags publish
 FSL_NEW_HELO_USER
@@ -376,9 +352,6 @@ GOOGLE_DOCS_PHISH_MANY
 # tflags publish
 GOOG_MALWARE_DNLD
 
-# good enough
-GOOG_REDIR_NORDNS
-
 # tflags publish
 GOOG_REDIR_SHORT
 
@@ -421,9 +394,6 @@ HEADER_HOST_IN_WHITELIST
 # tflags userconf
 HEAD_LONG
 
-# good enough
-HELO_LOCALHOST
-
 # tflags publish
 HEXHASH_WORD
 
@@ -437,12 +407,6 @@ HK_LOTTO_NAME
 HK_LOTTO_SUBJECT
 
 # good enough
-HK_NAME_FM_MR_MRS
-
-# good enough
-HK_NAME_MR_MRS
-
-# good enough
 HK_RANDOM_FROM
 
 # good enough
@@ -452,16 +416,10 @@ HK_RANDOM_REPLYTO
 HK_RANDOM_REPLYTO_NAME
 
 # good enough
-HK_SCAM_N15
-
-# good enough
 HK_SCAM_N2
 
 # good enough
 HK_SCAM_N3
-
-# good enough
-HK_SCAM_N8
 
 # tflags userconf
 HTML_CHARSET_FARAWAY
@@ -497,9 +455,6 @@ LONG_TERM_PRICE
 LOTS_OF_MONEY
 
 # good enough
-LOTTERY_PH_004470
-
-# good enough
 LOTTO_AGENT
 
 # good enough
@@ -513,9 +468,6 @@ LOTTO_URI
 
 # tflags publish
 LUCRATIVE
-
-# good enough
-MAILER_EQ_ORG
 
 # tflags publish
 MANY_SPAN_IN_TEXT
@@ -539,7 +491,7 @@ MONEY_ATM_CARD
 MONEY_BARRISTER
 
 # good enough
-MONEY_FORM
+MONEY_FORM_SHORT
 
 # tflags publish
 MONEY_FRAUD_3
@@ -562,12 +514,6 @@ MSGID_NOFQDN1
 # good enough
 MSOE_MID_WRONG_CASE
 
-# good enough
-NAME_EMAIL_DIFF
-
-# good enough
-NA_DOLLARS
-
 # tflags net
 NO_DNS_FOR_FROM
 
@@ -585,12 +531,6 @@ NSL_RCVD_HELO_USER
 
 # good enough
 NULL_IN_BODY
-
-# good enough
-OBFU_DOC_ATTACH
-
-# good enough
-OBFU_JPG_ATTACH
 
 # tflags publish
 OBFU_JVSCR_ESC
@@ -962,9 +902,6 @@ TVD_RCVD_IP
 TVD_RCVD_IP4
 
 # good enough
-TVD_RCVD_SINGLE
-
-# good enough
 TVD_SPACE_ENCODED
 
 # good enough
@@ -972,9 +909,6 @@ TVD_SPACE_ENC_FM_MIME
 
 # good enough
 TVD_SPACE_RATIO_MINFP
-
-# good enough
-TVD_SUBJ_NUM_OBFU_MINFP
 
 # good enough
 TVD_UNDER_VALUED
@@ -986,13 +920,22 @@ TVD_VISIT_PHARMA
 TW_GIBBERISH_MANY
 
 # good enough
-HK_SCAM_N1
+CK_HELO_GENERIC
 
 # good enough
-HK_SCAM_S23
+FROM_12LTRDOM
 
 # good enough
-MONEY_FORM_SHORT
+FSL_HELO_FIREWALL
+
+# good enough
+HELO_LH_HOME
+
+# good enough
+HELO_MISC_IP
+
+# good enough
+OBFU_HTML_ATTACH
 
 # tflags publish
 UC_GIBBERISH_OBFU
