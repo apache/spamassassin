@@ -71,9 +71,6 @@ ADVANCE_FEE_4_NEW
 ADVANCE_FEE_4_NEW_MONEY
 
 # good enough
-ADVANCE_FEE_5_NEW
-
-# good enough
 ADVANCE_FEE_5_NEW_FRM_MNY
 
 # good enough
@@ -142,6 +139,9 @@ CHARSET_FARAWAY_HEADER
 # good enough
 CK_HELO_DYNAMIC_SPLIT_IP
 
+# good enough
+CK_HELO_GENERIC
+
 # tflags publish
 CN_B2B_SPAMMER
 
@@ -153,9 +153,6 @@ COMPENSATION
 
 # tflags publish
 CORRUPT_FROM_LINE_IN_HDRS
-
-# good enough
-DATE_IN_FUTURE_96_Q
 
 # good enough
 DEAR_BENEFICIARY
@@ -296,9 +293,6 @@ FROM_MISSP_XPRIO
 FROM_WEBSITE
 
 # good enough
-FSL_BOTSPAM_1
-
-# good enough
 FSL_CTYPE_WIN1251
 
 # good enough
@@ -391,6 +385,12 @@ HEADER_HOST_IN_WHITELIST
 # tflags userconf
 HEAD_LONG
 
+# good enough
+HELO_LH_HOME
+
+# good enough
+HELO_MISC_IP
+
 # tflags publish
 HEXHASH_WORD
 
@@ -402,9 +402,6 @@ HK_LOTTO_NAME
 
 # good enough
 HK_LOTTO_SUBJECT
-
-# good enough
-HK_NAME_FM_MR_MRS
 
 # good enough
 HK_RANDOM_FROM
@@ -481,9 +478,6 @@ MONEY_ATM_CARD
 # good enough
 MONEY_BARRISTER
 
-# good enough
-MONEY_FORM
-
 # tflags publish
 MONEY_FRAUD_3
 
@@ -505,9 +499,6 @@ MSGID_NOFQDN1
 # good enough
 MSOE_MID_WRONG_CASE
 
-# good enough
-NAME_EMAIL_DIFF
-
 # tflags net
 NO_DNS_FOR_FROM
 
@@ -527,7 +518,7 @@ NSL_RCVD_HELO_USER
 NULL_IN_BODY
 
 # good enough
-OBFU_DOC_ATTACH
+OBFU_HTML_ATTACH
 
 # tflags publish
 OBFU_JVSCR_ESC
@@ -899,22 +890,58 @@ TVD_SPACE_ENC_FM_MIME
 TVD_SPACE_RATIO_MINFP
 
 # good enough
-TVD_SUBJ_NUM_OBFU_MINFP
-
-# good enough
 TVD_VISIT_PHARMA
 
 # tflags publish
 TW_GIBBERISH_MANY
 
 # good enough
-CK_HELO_GENERIC
+ADVANCE_FEE_2_NEW_FRM_MNY
 
 # good enough
-HELO_LH_HOME
+ADVANCE_FEE_4_NEW_FRM_MNY
 
 # good enough
-HELO_MISC_IP
+BIGNUM_EMAILS
+
+# good enough
+FROM_MISSP_PHISH
+
+# good enough
+FSL_BOTSPAM_1
+
+# good enough
+FSL_HELO_FAKE
+
+# good enough
+GOOG_REDIR_NORDNS
+
+# good enough
+HK_NAME_FM_MR_MRS
+
+# good enough
+HK_NAME_MR_MRS
+
+# good enough
+HK_SCAM_N1
+
+# good enough
+HK_SCAM_N15
+
+# good enough
+HK_SCAM_N8
+
+# good enough
+MONEY_FORM
+
+# good enough
+NAME_EMAIL_DIFF
+
+# good enough
+NA_DOLLARS
+
+# good enough
+TVD_SUBJ_NUM_OBFU_MINFP
 
 # tflags publish
 UC_GIBBERISH_OBFU
