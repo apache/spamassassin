@@ -178,13 +178,18 @@ sub set_config {
 
 Works similarly to whitelist_from, except that in addition to matching
 an author address (From) to the pattern in the first parameter, the message
-must also carry a Domain Keys Identified Mail (DKIM) signature made by a
-signing domain (SDID, i.e. the d= tag) that is acceptable to us.
+must also carry a valid Domain Keys Identified Mail (DKIM) signature made by
+a signing domain (SDID, i.e. the d= tag) that is acceptable to us.
 
 Only one whitelist entry is allowed per line, as in C<whitelist_from_rcvd>.
 Multiple C<whitelist_from_dkim> lines are allowed. File-glob style characters
 are allowed for the From address (the first parameter), just like with
-C<whitelist_from_rcvd>. The second parameter does not accept wildcards.
+C<whitelist_from_rcvd>.
+
+The second parameter (the signing-domain) does not accept full file-glob style
+wildcards, although a simple '*.' (or just a '.') prefix to a domain name
+is recognized and implies any subdomain of the specified domain (but not
+the domain itself).
 
 If no signing-domain parameter is specified, the only acceptable signature
 will be an Author Domain Signature (sometimes called first-party signature)
@@ -205,7 +210,8 @@ Examples of whitelisting based on third-party signatures:
   whitelist_from_dkim jane@example.net      example.org
   whitelist_from_dkim rick@info.example.net example.net
   whitelist_from_dkim *@info.example.net    example.net
-  whitelist_from_dkim *@*                   remailer.example.com
+  whitelist_from_dkim *@*                   mail7.remailer.example.com
+  whitelist_from_dkim *@*                   *.remailer.example.com
 
 =item def_whitelist_from_dkim author@example.com [signing-domain]
 
@@ -376,7 +382,8 @@ some valid signature on a message has no reputational value (without being
 associated with a particular domain), regardless of its key size - anyone can
 prepend its own signature on a copy of some third party mail and re-send it,
 which makes it no more trustworthy than without such signature. This is also
-a reason for a rule DKIM_VALID to have a near-zero score.
+a reason for a rule DKIM_VALID to have a near-zero score, i.e. a rule hit
+is only informational.
 
 =cut
 
@@ -1257,8 +1264,12 @@ sub _wlcheck_list {
         # identity (AUID). Nevertheless, be prepared to accept the full e-mail
         # address there for compatibility, and just ignore its local-part.
 
-        $acceptable_sdid = $1  if $acceptable_sdid =~ /\@([^\@]*)\z/;
-        $matches = 1  if $sdid eq lc $acceptable_sdid;
+        $acceptable_sdid = $1  if $acceptable_sdid =~ /\@([^\@]*)\z/s;
+        if ($acceptable_sdid =~ s/^\*?\.//s) {
+          $matches = 1  if $sdid =~ /\.\Q$acceptable_sdid\E\z/si;
+        } else {
+          $matches = 1  if $sdid eq lc $acceptable_sdid;
+        }
       }
       if ($matches) {
         if (would_log("dbg","dkim")) {
