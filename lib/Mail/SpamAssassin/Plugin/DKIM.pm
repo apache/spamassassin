@@ -899,13 +899,13 @@ sub _check_dkim_signature {
         }
       }
       if (would_log("dbg","dkim")) {
-        dbg("dkim: %s %s, i=%s, d=%s, s=%s, a=%s, c=%s, %s, %s",
+        dbg("dkim: %s %s, i=%s, d=%s, s=%s, a=%s, c=%s, %s, %s, %s",
           $info,
           $signature->isa('Mail::DKIM::DkSignature') ? 'DK' : 'DKIM',
           map(!defined $_ ? '(undef)' : $_,
             $signature->identity, $d, $signature->selector,
             $signature->algorithm, scalar($signature->canonicalization),
-            $key_size ? "key_bits=$key_size" : (),
+            $key_size ? "key_bits=$key_size" : "unknown key size",
             ($sig_result_supported ? $signature : $verifier)->result ),
           defined $d && $pms->{dkim_author_domains}->{$d}
             ? 'matches author domain'
