@@ -942,9 +942,8 @@ sub complete_ns_lookup {
     next unless (defined($str) && defined($dom));
     dbg("uridnsbl: got($j) NS for $dom: $str");
 
-    if ($str =~ /IN\s+NS\s+(\S+)/) {
-      my $nsmatch = lc $1;
-      $nsmatch =~ s/\.$//;
+    if ($rr->type eq 'NS') {
+      my $nsmatch = lc $rr->nsdname;  # available since at least Net::DNS 0.14
       my $nsrhblstr = $nsmatch;
       my $fullnsrhblstr = $nsmatch;
 
@@ -1025,9 +1024,11 @@ sub complete_a_lookup {
     }
     dbg("uridnsbl: complete_a_lookup got(%d) A for %s: %s", $j,$hname,$str);
 
-    local $1;
-    if ($str =~ /IN\s+A\s+(\S+)/) {
-      $self->lookup_dnsbl_for_ip($pms, $ent->{obj}, $1);
+    if ($rr->type eq 'A') {
+      # Net::DNS::RR::A::address() is available since Net::DNS 0.69
+      my $ip_address = $rr->UNIVERSAL::can('address') ? $rr->address
+                                                      : $rr->rdatastr;
+      $self->lookup_dnsbl_for_ip($pms, $ent->{obj}, $ip_address);
     }
   }
 }
@@ -1038,7 +1039,8 @@ sub lookup_dnsbl_for_ip {
   my ($self, $pms, $obj, $ip) = @_;
 
   local($1,$2,$3,$4);
-  $ip =~ /^(\d+)\.(\d+)\.(\d+)\.(\d+)$/;
+  $ip =~ /^(\d+)\.(\d+)\.(\d+)\.(\d+)$/
+    or warn "lookup_dnsbl_for_ip: not an IPv4 address: $ip\n";
   my $revip = "$4.$3.$2.$1";
 
   my $conf = $pms->{conf};
@@ -1100,12 +1102,14 @@ sub complete_dnsbl_lookup {
     my $rr_type = $rr->type;
 
     if ($rr_type eq 'A') {
-      $rdatastr = $rr->rdatastr;
+      # Net::DNS::RR::A::address() is available since Net::DNS 0.69
+      $rdatastr = $rr->UNIVERSAL::can('address') ? $rr->address
+                                                 : $rr->rdatastr;
       if ($rdatastr =~ m/^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/) {
         $rdatanum = Mail::SpamAssassin::Util::my_inet_aton($rdatastr);
       }
     } elsif ($rr_type eq 'TXT') {
-      # txtdata returns a non- zone-file-format encoded result, unlike rdatastr;
+      # txtdata returns a non- zone-file-format encoded result, unlike rdstring;
       # avoid space-separated RDATA <character-string> fields if possible;
       # txtdata provides a list of strings in list context since Net::DNS 0.69
       $rdatastr = join('',$rr->txtdata);
