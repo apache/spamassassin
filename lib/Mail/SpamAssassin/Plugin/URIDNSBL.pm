@@ -1009,27 +1009,19 @@ sub complete_a_lookup {
     dbg("uridnsbl: complete_a_lookup aborted %s", $ent->{key});
     return;
   }
-
   dbg("uridnsbl: complete_a_lookup %s", $ent->{key});
-  my @answer = $pkt->answer;
+  $hname = ''  if !defined $hname;
   my $j = 0;
+  my @answer = $pkt->answer;
   foreach my $rr (@answer) {
     $j++;
-    my $str = $rr->string;
-    if (!defined $hname) {
-      warn "complete_a_lookup-1: $j, (hname is undef), $str";
-    } elsif (!defined $str) {
-      warn "complete_a_lookup-2: $j, $hname, (str is undef)";
-      next;
-    }
-    dbg("uridnsbl: complete_a_lookup got(%d) A for %s: %s", $j,$hname,$str);
-
-    if ($rr->type eq 'A') {
-      # Net::DNS::RR::A::address() is available since Net::DNS 0.69
-      my $ip_address = $rr->UNIVERSAL::can('address') ? $rr->address
-                                                      : $rr->rdatastr;
-      $self->lookup_dnsbl_for_ip($pms, $ent->{obj}, $ip_address);
-    }
+    next if $rr->type ne 'A';
+    # Net::DNS::RR::A::address() is available since Net::DNS 0.69
+    my $ip_address = $rr->UNIVERSAL::can('address') ? $rr->address
+                                                    : $rr->rdatastr;
+    dbg("uridnsbl: complete_a_lookup got(%d) A for %s: %s",
+        $j, $hname, $ip_address);
+    $self->lookup_dnsbl_for_ip($pms, $ent->{obj}, $ip_address);
   }
 }
 
