@@ -539,7 +539,7 @@ sub process_response_packet {
     @answer = ( undef );
   }
 
-  # NOTE:  $rr->rdatastr returns the result encoded in a DNS zone file
+  # NOTE:  $rr->rdstring returns the result encoded in a DNS zone file
   # format, i.e. enclosed in double quotes if a result contains whitespace
   # (or other funny characters), and may use \DDD encoding or \X quoting as
   # per RFC 1035.  Using $rr->txtdata instead avoids this unnecessary encoding
@@ -566,19 +566,24 @@ sub process_response_packet {
       # special case, no answer records, only rcode can be tested
     } else {
       $rr_type = uc $rr->type;
-      if ($rr->UNIVERSAL::can('txtdata')) {  # TXT, SPF
-        # join with no intervening spaces, as per RFC 5518
+      if ($rr_type eq 'A') {
+        # Net::DNS::RR::A::address() is available since Net::DNS 0.69
+        $rr_rdatastr = $rr->UNIVERSAL::can('address') ? $rr->address
+                                                      : $rr->rdatastr;
+        if ($rr_rdatastr =~ m/^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\z/) {
+          $rdatanum = Mail::SpamAssassin::Util::my_inet_aton($rr_rdatastr);
+        }
+      } elsif ($rr->UNIVERSAL::can('txtdata')) {
+        # TXT, SPF: join with no intervening spaces, as per RFC 5518
         if ($txtdata_can_provide_a_list || $rr_type ne 'TXT') {
           $rr_rdatastr = join('', $rr->txtdata);  # txtdata() in list context!
         } else {  # char_str_list() is only available for TXT records
           $rr_rdatastr = join('', $rr->char_str_list);  # historical
         }
       } else {
-        $rr_rdatastr = $rr->rdatastr;
-        if ($rr_type eq 'A' &&
-            $rr_rdatastr =~ m/^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\z/) {
-          $rdatanum = Mail::SpamAssassin::Util::my_inet_aton($rr_rdatastr);
-        }
+        # rdatastr() is historical, use rdstring() since Net::DNS 0.69
+        $rr_rdatastr = $rr->UNIVERSAL::can('rdstring') ? $rr->rdstring
+                                                       : $rr->rdatastr;
       }
     # dbg("askdns: received rr type %s, data: %s", $rr_type, $rr_rdatastr);
     }

@@ -171,7 +171,7 @@ sub dnsbl_hit {
   if (substr($rule, 0, 2) eq "__") {
     # don't bother with meta rules
   } elsif ($answer->type eq 'TXT') {
-    # txtdata returns a non- zone-file-format encoded result, unlike rdatastr;
+    # txtdata returns a non- zone-file-format encoded result, unlike rdstring;
     # avoid space-separated RDATA <character-string> fields if possible,
     # txtdata provides a list of strings in a list context since Net::DNS 0.69
     $log = join('',$answer->txtdata);
@@ -215,12 +215,14 @@ sub dnsbl_uri {
 
   my $qname = $question->qname;
 
-  # txtdata returns a non- zone-file-format encoded result, unlike rdatastr;
+  # txtdata returns a non- zone-file-format encoded result, unlike rdstring;
   # avoid space-separated RDATA <character-string> fields if possible,
   # txtdata provides a list of strings in a list context since Net::DNS 0.69
   #
-  my $rdatastr = $answer->UNIVERSAL::can('txtdata') ? join('',$answer->txtdata)
-                                                    : $answer->rdatastr;
+  # rdatastr() is historical/undocumented, use rdstring() since Net::DNS 0.69
+  my $rdatastr = $answer->UNIVERSAL::can('txtdata')  ? join('',$answer->txtdata)
+               : $answer->UNIVERSAL::can('rdstring') ? $answer->rdstring
+                                                     : $answer->rdatastr;
   if (defined $qname && defined $rdatastr) {
     my $qclass = $question->qclass;
     my $qtype = $question->qtype;
@@ -267,8 +269,13 @@ sub process_dnsbl_result {
     my $answ_type = $answer->type;
     # TODO: there are some CNAME returns that might be useful
     next if ($answ_type ne 'A' && $answ_type ne 'TXT');
-    # skip any A record that isn't on 127/8
-    next if ($answ_type eq 'A' && $answer->rdatastr !~ /^127\./);
+    if ($answ_type eq 'A') {
+      # Net::DNS::RR::A::address() is available since Net::DNS 0.69
+      my $ip_address = $answer->UNIVERSAL::can('address') ? $answer->address
+                                                          : $answer->rdatastr;
+      # skip any A record that isn't on 127.0.0.0/8
+      next if $ip_address !~ /^127\./;
+    }
     for my $rule (@{$rules}) {
       $self->dnsbl_hit($rule, $question, $answer);
     }
@@ -284,12 +291,14 @@ sub process_dnsbl_result {
 sub process_dnsbl_set {
   my ($self, $set, $question, $answer) = @_;
 
-  # txtdata returns a non- zone-file-format encoded result, unlike rdatastr;
+  # txtdata returns a non- zone-file-format encoded result, unlike rdstring;
   # avoid space-separated RDATA <character-string> fields if possible,
   # txtdata provides a list of strings in a list context since Net::DNS 0.69
   #
-  my $rdatastr = $answer->UNIVERSAL::can('txtdata') ? join('',$answer->txtdata)
-                                                    : $answer->rdatastr;
+  # rdatastr() is historical/undocumented, use rdstring() since Net::DNS 0.69
+  my $rdatastr = $answer->UNIVERSAL::can('txtdata')  ? join('',$answer->txtdata)
+               : $answer->UNIVERSAL::can('rdstring') ? $answer->rdstring
+                                                     : $answer->rdatastr;
 
   while (my ($subtest, $rule) = each %{ $self->{dnspost}->{$set} }) {
     next if $self->{tests_already_hit}->{$rule};
