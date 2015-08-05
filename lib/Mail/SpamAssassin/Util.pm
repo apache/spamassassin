@@ -62,7 +62,9 @@ BEGIN {
   @EXPORT_OK = qw(&local_tz &base64_decode &untaint_var &untaint_file_path
                   &exit_status_str &proc_status_ok &am_running_on_windows
                   &reverse_ip_address &decode_dns_question_entry
-                  &secure_tmpfile &secure_tmpdir &uri_list_canonicalize);
+                  &secure_tmpfile &secure_tmpdir &uri_list_canonicalize
+                  &get_my_locales &parse_rfc822_date &idn_to_ascii
+                  &is_valid_utf_8);
 }
 
 use Mail::SpamAssassin;
@@ -74,6 +76,7 @@ use File::Basename;
 use Time::Local;
 use Sys::Hostname (); # don't import hostname() into this namespace!
 use NetAddr::IP 4.000;
+use Scalar::Util qw(tainted);
 use Fcntl;
 use Errno qw(ENOENT EACCES EEXIST);
 use POSIX qw(:sys_wait_h WIFEXITED WIFSIGNALED WIFSTOPPED WEXITSTATUS
@@ -93,6 +96,43 @@ BEGIN {
     *WTERMSIG    = sub { $_[0] & 127 };
   }
 }
+
+###########################################################################
+
+our $ALT_FULLSTOP_UTF8_RE;
+BEGIN {
+  # Bug 6751:
+  # RFC 3490 (IDNA): Whenever dots are used as label separators, the
+  #   following characters MUST be recognized as dots: U+002E (full stop),
+  #   U+3002 (ideographic full stop), U+FF0E (fullwidth full stop),
+  #   U+FF61 (halfwidth ideographic full stop).
+  # RFC 5895: [...] the IDEOGRAPHIC FULL STOP character (U+3002)
+  #   can be mapped to the FULL STOP before label separation occurs.
+  #   [...] Only the IDEOGRAPHIC FULL STOP character (U+3002) is added in
+  #   this mapping because the authors have not fully investigated [...]
+  # Adding also 'SMALL FULL STOP' (U+FE52) as seen in the wild,
+  # and a 'ONE DOT LEADER' (U+2024).
+  #
+  my $dot_chars = "\x{2024}\x{3002}\x{FF0E}\x{FF61}\x{FE52}";  # \x{002E}
+  my $dot_bytes = join('|', split(//,$dot_chars));  utf8::encode($dot_bytes);
+  $ALT_FULLSTOP_UTF8_RE = qr/$dot_bytes/so;
+}
+
+###########################################################################
+
+our $enc_utf8;
+BEGIN {
+  eval { require Encode }
+    and do { $enc_utf8 = Encode::find_encoding('UTF-8') }
+};
+
+our $have_libidn;
+BEGIN {
+  eval { require Net::LibIDN } and do { $have_libidn = 1 };
+}
+
+$have_libidn or warn "INFO: module Net::LibIDN not available,\n".
+  "  internationalized domain names with U-labels will not be recognized!\n";
 
 ###########################################################################
 
@@ -334,6 +374,93 @@ sub taint_var {
   # $^X is apparently "always tainted".
   # Concatenating an empty tainted string taints the result.
   return $v . substr($^X, 0, 0);
+}
+
+###########################################################################
+
+# returns true if the provided string of octets represents a syntactically
+# valid UTF-8 string, otherwise a false is returned
+#
+sub is_valid_utf_8($) {
+# my $octets = $_[0];
+  return undef if !defined $_[0];
+  #
+  # RFC 6532: UTF8-non-ascii = UTF8-2 / UTF8-3 / UTF8-4
+  # RFC 3629 section 4: Syntax of UTF-8 Byte Sequences
+  #   UTF8-char   = UTF8-1 / UTF8-2 / UTF8-3 / UTF8-4
+  #   UTF8-1      = %x00-7F
+  #   UTF8-2      = %xC2-DF UTF8-tail
+  #   UTF8-3      = %xE0 %xA0-BF UTF8-tail /
+  #                 %xE1-EC 2( UTF8-tail ) /
+  #                 %xED %x80-9F UTF8-tail /
+  #                   # U+D800..U+DFFF are utf16 surrogates, not legal utf8
+  #                 %xEE-EF 2( UTF8-tail )
+  #   UTF8-4      = %xF0 %x90-BF 2( UTF8-tail ) /
+  #                 %xF1-F3 3( UTF8-tail ) /
+  #                 %xF4 %x80-8F 2( UTF8-tail )
+  #   UTF8-tail   = %x80-BF
+  #
+  # loose variant:
+  #   [\x00-\x7F] | [\xC0-\xDF][\x80-\xBF] |
+  #   [\xE0-\xEF][\x80-\xBF]{2} | [\xF0-\xF4][\x80-\xBF]{3}
+  #
+  $_[0] =~ /^ (?: [\x00-\x7F] |
+                  [\xC2-\xDF] [\x80-\xBF] |
+                  \xE0 [\xA0-\xBF] [\x80-\xBF] |
+                  [\xE1-\xEC] [\x80-\xBF]{2} |
+                  \xED [\x80-\x9F] [\x80-\xBF] |
+                  [\xEE-\xEF] [\x80-\xBF]{2} |
+                  \xF0 [\x90-\xBF] [\x80-\xBF]{2} |
+                  [\xF1-\xF3] [\x80-\xBF]{3} |
+                  \xF4 [\x80-\x8F] [\x80-\xBF]{2} )* \z/xs ? 1 : 0;
+}
+
+# Given an international domain name with U-labels (UTF-8 or Unicode chars)
+# converts it to ASCII-compatible encoding (ACE).  If the argument is in
+# ASCII (or is an invalid IDN), returns it lowercased but otherwise unchanged.
+# The result is always in octets (utf8 flag off) even if the argument was in
+# Unicode characters.
+#
+sub idn_to_ascii($) {
+  no bytes;  # make sure there is no 'use bytes' in effect
+  return undef  if !defined $_[0];
+  my $s = "$_[0]";  # stringify
+  # propagate taintedness of the argument, but not its utf8 flag
+  my $t = tainted($s);  # taintedness of the argument
+  if ($t) {  # untaint $s, avoids taint-related bugs in LibIDN or in old perl
+    no re 'taint';  local $1;  $s =~ /^(.*)\z/s;
+  }
+  # encode chars to UTF-8, leave octets unchanged (not necessarily valid UTF-8)
+  utf8::encode($s)  if utf8::is_utf8($s);
+  if ($s !~ tr/\x00-\x7F//c) {  # is all-ASCII (including IP address literal)
+    $s = lc $s;
+  } elsif (!is_valid_utf_8($s)) {
+    my($package, $filename, $line) = caller;
+    info("util: idn_to_ascii: not valid UTF-8: /%s/, called from %s line %d",
+         $s, $package, $line);
+    $s = lc $s;  # garbage-in / garbage-out
+  } else {
+    my $chars;
+    # RFC 3490 (IDNA): Whenever dots are used as label separators, the
+    # following characters MUST be recognized as dots: U+002E (full stop),
+    # U+3002 (ideographic full stop), U+FF0E (fullwidth full stop),
+    # U+FF61 (halfwidth ideographic full stop).
+    if ($s =~ s/$ALT_FULLSTOP_UTF8_RE/./gso) {
+      info("util: idn_to_ascii: alternative dots normalized: /%s/ -> /%s/",
+           $_[0], $s);
+    }
+    if ($have_libidn) {
+      # to ASCII-compatible encoding (ACE), lowercased
+      my $sa = Net::LibIDN::idn_to_ascii($s, 'UTF-8');
+      if (!defined $sa) {
+        info("util: idn_to_ascii: conversion to ACE failed: /%s/", $s);
+      } else {
+        info("util: idn_to_ascii: converted to ACE: /%s/ -> /%s/", $s, $sa);
+        $s = $sa;
+      }
+    }
+  }
+  $t ? taint_var($s) : $s;  # propagate taintedness of the argument
 }
 
 ###########################################################################
@@ -1314,20 +1441,10 @@ sub uri_list_canonicalize {
       # not required
       $rest ||= '';
 
-      # Bug 6751:
-      # RFC 3490 (IDNA): Whenever dots are used as label separators, the
-      #   following characters MUST be recognized as dots: U+002E (full stop),
-      #   U+3002 (ideographic full stop), U+FF0E (fullwidth full stop),
-      #   U+FF61 (halfwidth ideographic full stop).
-      # RFC 5895: [...] the IDEOGRAPHIC FULL STOP character (U+3002)
-      #   can be mapped to the FULL STOP before label separation occurs.
-      #   [...] Only the IDEOGRAPHIC FULL STOP character (U+3002) is added in
-      #   this mapping because the authors have not fully investigated [...]
-      # Adding also 'SMALL FULL STOP' (U+FE52) as seen in the wild.
-      # Parhaps also the 'ONE DOT LEADER' (U+2024).
-      if ($host =~ s{(?: \xE3\x80\x82 | \xEF\xBC\x8E | \xEF\xBD\xA1 |
-                         \xEF\xB9\x92 | \xE2\x80\xA4 )}{.}xgs) {
-        push(@nuris, join ('', $proto, $host, $rest));
+      my $nhost = idn_to_ascii($host);
+      if (defined $nhost && $nhost ne lc $host) {
+        push(@nuris, join('', $proto, $nhost, $rest));
+        $host = $nhost;
       }
 
       # bug 4146: deal with non-US ASCII 7-bit chars in the host portion

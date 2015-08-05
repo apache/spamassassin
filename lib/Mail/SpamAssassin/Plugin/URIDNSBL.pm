@@ -294,7 +294,7 @@ package Mail::SpamAssassin::Plugin::URIDNSBL;
 
 use Mail::SpamAssassin::Plugin;
 use Mail::SpamAssassin::Constants qw(:ip);
-use Mail::SpamAssassin::Util;
+use Mail::SpamAssassin::Util qw(idn_to_ascii);
 use Mail::SpamAssassin::Logger;
 use strict;
 use warnings;
@@ -901,6 +901,7 @@ sub query_hosts_or_domains {
 sub lookup_domain_ns {
   my ($self, $pms, $obj, $dom, $rulename) = @_;
 
+  $dom = idn_to_ascii($dom);
   my $key = "NS:" . $dom;
   my $ent = {
     key => $key, zone => $dom, obj => $obj, type => "URI-NS",
@@ -986,6 +987,7 @@ sub complete_ns_lookup {
 sub lookup_a_record {
   my ($self, $pms, $obj, $hname, $rulename) = @_;
 
+  $hname = idn_to_ascii($hname);
   my $key = "A:" . $hname;
   my $ent = {
     key => $key, zone => $hname, obj => $obj, type => "URI-A",
@@ -1054,6 +1056,7 @@ sub lookup_dnsbl_for_ip {
 sub lookup_single_dnsbl {
   my ($self, $pms, $obj, $rulename, $lookupstr, $dnsbl, $qtype) = @_;
 
+  $dnsbl = idn_to_ascii($dnsbl);
   my $key = "DNSBL:" . $lookupstr . ':' . $dnsbl;
   my $ent = {
     key => $key, zone => $dnsbl, obj => $obj, type => 'URI-DNSBL',

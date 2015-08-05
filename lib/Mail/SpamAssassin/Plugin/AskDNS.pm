@@ -189,7 +189,7 @@ use warnings;
 use re 'taint';
 
 use Mail::SpamAssassin::Plugin;
-use Mail::SpamAssassin::Util qw(decode_dns_question_entry);
+use Mail::SpamAssassin::Util qw(decode_dns_question_entry idn_to_ascii);
 use Mail::SpamAssassin::Logger;
 
 use vars qw(@ISA %rcode_value $txtdata_can_provide_a_list);
@@ -465,6 +465,7 @@ OUTER:
       $query_domain =~ s{_([A-Z][A-Z0-9]*)_}
                         { defined $current_tag_val{$1} ? $current_tag_val{$1}
                                                        : '' }ge;
+      $query_domain = idn_to_ascii($query_domain);
 
       # the $dnskey identifies this query in AsyncLoop's pending_lookups
       my $dnskey = join(':', 'askdns', $query_type, $query_domain);
