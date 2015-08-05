@@ -113,6 +113,7 @@ BEGIN {
   # Adding also 'SMALL FULL STOP' (U+FE52) as seen in the wild,
   # and a 'ONE DOT LEADER' (U+2024).
   #
+  no bytes;  # make sure there is no 'use bytes' in effect
   my $dot_chars = "\x{2024}\x{3002}\x{FF0E}\x{FF61}\x{FE52}";  # \x{002E}
   my $dot_bytes = join('|', split(//,$dot_chars));  utf8::encode($dot_bytes);
   $ALT_FULLSTOP_UTF8_RE = qr/$dot_bytes/so;
