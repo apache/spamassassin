@@ -29,7 +29,7 @@ use Mail::SpamAssassin::Conf;
 use Mail::SpamAssassin::PerMsgStatus;
 use Mail::SpamAssassin::AsyncLoop;
 use Mail::SpamAssassin::Constants qw(:ip);
-use Mail::SpamAssassin::Util qw(untaint_var am_running_on_windows);
+use Mail::SpamAssassin::Util qw(untaint_var am_running_on_windows idn_to_ascii);
 
 use File::Spec;
 use IO::Socket;
@@ -101,6 +101,7 @@ BEGIN {
 sub do_rbl_lookup {
   my ($self, $rule, $set, $type, $host, $subtest) = @_;
 
+  $host = idn_to_ascii($host);
   $host =~ s/\.\z//s;  # strip a redundant trailing dot
   my $key = "dns:$type:$host";
   my $existing_ent = $self->{async}->get_lookup($key);
@@ -145,6 +146,7 @@ sub register_rbl_subtest {
 sub do_dns_lookup {
   my ($self, $rule, $type, $host) = @_;
 
+  $host = idn_to_ascii($host);
   $host =~ s/\.\z//s;  # strip a redundant trailing dot
   my $key = "dns:$type:$host";
 
