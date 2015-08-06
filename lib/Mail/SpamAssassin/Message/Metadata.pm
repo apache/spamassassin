@@ -50,7 +50,7 @@ package Mail::SpamAssassin::Message::Metadata;
 
 use strict;
 use warnings;
-use bytes;
+# use bytes;
 use re 'taint';
 
 use Mail::SpamAssassin;

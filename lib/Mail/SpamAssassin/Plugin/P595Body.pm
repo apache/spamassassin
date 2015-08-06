@@ -23,7 +23,7 @@ use Mail::SpamAssassin::Plugin::OneLineBodyRuleType;
 
 use strict;
 use warnings;
-use bytes;
+# use bytes;
 use re 'taint';
 
 use vars qw(@ISA);

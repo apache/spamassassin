@@ -46,7 +46,7 @@ package Mail::SpamAssassin::Plugin::WhiteListSubject;
 use Mail::SpamAssassin::Plugin;
 use strict;
 use warnings;
-use bytes;
+# use bytes;
 use re 'taint';
 
 use vars qw(@ISA);

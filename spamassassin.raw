@@ -528,7 +528,7 @@ sub wanted {
   print $status->rewrite_mail()  or die "error writing: $!";
 
   if ( $opt{'test-mode'} ) {
-    use bytes;
+    # use bytes;
     print $status->get_report()  or die "error writing: $!";
   }
 

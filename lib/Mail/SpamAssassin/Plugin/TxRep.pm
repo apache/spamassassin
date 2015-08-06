@@ -197,7 +197,7 @@ package Mail::SpamAssassin::Plugin::TxRep;
 
 use strict;
 use warnings;
-use bytes;
+# use bytes;
 use re 'taint';
 
 use NetAddr::IP 4.000;                          # qw(:upper);
