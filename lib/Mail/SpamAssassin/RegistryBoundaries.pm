@@ -27,7 +27,7 @@ package Mail::SpamAssassin::RegistryBoundaries;
 
 use strict;
 use warnings;
-use bytes;
+# use bytes;
 use re 'taint';
 
 our @ISA = qw();

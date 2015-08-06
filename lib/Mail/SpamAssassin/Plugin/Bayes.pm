@@ -45,7 +45,7 @@ package Mail::SpamAssassin::Plugin::Bayes;
 
 use strict;
 use warnings;
-use bytes;
+# use bytes;
 use re 'taint';
 
 BEGIN {

@@ -19,7 +19,7 @@ package Mail::SpamAssassin::Plugin::MIMEEval;
 
 use strict;
 use warnings;
-use bytes;
+# use bytes;
 use re 'taint';
 
 use Mail::SpamAssassin::Plugin;

@@ -38,7 +38,7 @@ package Mail::SpamAssassin::BayesStore::MySQL;
 
 use strict;
 use warnings;
-use bytes;
+# use bytes;
 use re 'taint';
 
 use Mail::SpamAssassin::BayesStore::SQL;

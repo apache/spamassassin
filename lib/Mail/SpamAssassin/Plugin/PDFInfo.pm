@@ -146,7 +146,7 @@ use Mail::SpamAssassin::Plugin;
 use Mail::SpamAssassin::Logger;
 use strict;
 use warnings;
-use bytes;
+# use bytes;
 use Digest::MD5 qw(md5_hex);
 use MIME::QuotedPrint;
 

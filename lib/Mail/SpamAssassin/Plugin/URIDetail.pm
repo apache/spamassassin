@@ -72,7 +72,7 @@ use Mail::SpamAssassin::Util qw(untaint_var);
 
 use strict;
 use warnings;
-use bytes;
+# use bytes;
 use re 'taint';
 
 use vars qw(@ISA);

@@ -21,7 +21,7 @@ package Mail::SpamAssassin::SpamdForkScaling;
 
 use strict;
 use warnings;
-use bytes;
+# use bytes;
 use re 'taint';
 use Errno qw();
 
