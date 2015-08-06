@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bpoliakoff darxus dwarren grenier jarif kam-ninja kpg-core zmi; day 2: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bpoliakoff darxus dwarren grenier jarif kam-ninja kpg-core llanga zmi; day 3: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bpoliakoff darxus dwarren grenier jarif kam-ninja kpg-core llanga zmi
+# with results from: day 1: axb-8mile bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bpoliakoff darxus dwarren grenier jarif kam-ninja kpg-core zmi; day 2: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bpoliakoff darxus dwarren grenier jarif kam-ninja kpg-core llanga zmi; day 3: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bpoliakoff darxus dwarren grenier jarif kam-ninja kpg-core llanga zmi
 
 # good enough
 ACCT_PHISHING_MANY
@@ -167,9 +167,6 @@ COMPENSATION
 CORRUPT_FROM_LINE_IN_HDRS
 
 # good enough
-DATE_IN_FUTURE_Q_PLUS
-
-# good enough
 DEAR_BENEFICIARY
 
 # good enough
@@ -216,9 +213,6 @@ DOS_ANAL_SPAM_MAILER
 
 # good enough
 DOS_OE_TO_MX
-
-# good enough
-DOS_RCVD_IP_TWICE_C
 
 # good enough
 DSN_NO_MIMEVERSION
@@ -291,9 +285,6 @@ FROM_MISSP_FREEMAIL
 
 # good enough
 FROM_MISSP_MSFT
-
-# good enough
-FROM_MISSP_PHISH
 
 # good enough
 FROM_MISSP_REPLYTO
@@ -397,9 +388,6 @@ HASHCASH_2SPEND
 # tflags userconf
 HASHCASH_HIGH
 
-# good enough
-HDRS_LCASE
-
 # tflags publish
 HEADER_FROM_DIFFERENT_DOMAINS
 
@@ -429,6 +417,9 @@ HK_LOTTO_NAME
 
 # good enough
 HK_LOTTO_SUBJECT
+
+# good enough
+HK_NAME_FM_DR
 
 # good enough
 HK_NAME_FM_MR_MRS
@@ -465,15 +456,6 @@ HTML_FONT_TINY
 
 # tflags publish
 HTML_OFF_PAGE
-
-# good enough
-KB_DATE_CONTAINS_TAB
-
-# good enough
-KB_FAKED_THE_BAT
-
-# good enough
-KHOP_JS_OBFUSCATION
 
 # tflags publish
 LIST_PRTL_PUMPDUMP
@@ -532,9 +514,6 @@ MONEY_BARRISTER
 # good enough
 MONEY_FORM
 
-# good enough
-MONEY_FORM_SHORT
-
 # tflags publish
 MONEY_FRAUD_3
 
@@ -577,11 +556,17 @@ NSL_RCVD_HELO_USER
 # good enough
 NULL_IN_BODY
 
+# good enough
+OBFU_HTML_ATTACH
+
 # tflags publish
 OBFU_JVSCR_ESC
 
 # tflags publish
 OBFU_TEXT_ATTACH
+
+# good enough
+PDS_FROM_2_EMAILS
 
 # good enough
 PHISHING_FREEMAIL
@@ -883,9 +868,6 @@ SUBJECT_IN_WHITELIST
 # tflags publish
 SYSADMIN
 
-# good enough
-TAB_IN_FROM
-
 # tflags publish
 TEQF_USR_IMAGE
 
@@ -926,9 +908,6 @@ TO_NO_BRKTS_NORDNS_HTML
 TO_NO_BRKTS_PCNT
 
 # good enough
-TT_MSGID_TRUNC
-
-# good enough
 TVD_FROM_1
 
 # good enough
@@ -953,10 +932,7 @@ TVD_SUBJ_NUM_OBFU_MINFP
 TW_GIBBERISH_MANY
 
 # good enough
-FILL_THIS_FORM_FRAUD_PHISH
-
-# good enough
-FROM_MISSP_DYNIP
+FROM_URI
 
 # good enough
 FROM_WEBSITE
@@ -968,19 +944,10 @@ FSL_BULK_SIG
 HK_SCAM_N15
 
 # good enough
-MALFORMED_FREEMAIL
-
-# good enough
-OBFU_DOC_ATTACH
-
-# good enough
-OBFU_JPG_ATTACH
-
-# good enough
 SERGIO_SUBJECT_VIAGRA01
 
 # good enough
-SHARE_50_50
+TVD_PH_BODY_META
 
 # tflags publish
 UC_GIBBERISH_OBFU
