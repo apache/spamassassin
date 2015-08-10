@@ -1108,6 +1108,7 @@ sub complete_dnsbl_lookup {
       # avoid space-separated RDATA <character-string> fields if possible;
       # txtdata provides a list of strings in list context since Net::DNS 0.69
       $rdatastr = join('',$rr->txtdata);
+      utf8::encode($rdatastr)  if utf8::is_utf8($rdatastr);
     } else {
       next;
     }

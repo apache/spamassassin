@@ -574,6 +574,7 @@ sub process_response_packet {
         if ($rr_rdatastr =~ m/^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\z/) {
           $rdatanum = Mail::SpamAssassin::Util::my_inet_aton($rr_rdatastr);
         }
+
       } elsif ($rr->UNIVERSAL::can('txtdata')) {
         # TXT, SPF: join with no intervening spaces, as per RFC 5518
         if ($txtdata_can_provide_a_list || $rr_type ne 'TXT') {
@@ -581,10 +582,22 @@ sub process_response_packet {
         } else {  # char_str_list() is only available for TXT records
           $rr_rdatastr = join('', $rr->char_str_list);  # historical
         }
+        # Net::DNS attempts to decode text strings in a TXT record as UTF-8,
+        # which is bad: octets failing the UTF-8 decoding are converted to
+        # three octets \x{EF}\x{BF}\x{BD} (i.e. to a Unicode "replacement
+        # character" U+FFFD encoded as UTF-8), and ASCII text is unnecessarily
+        # flagged as perl native characters (utf8 flag on), which can be
+        # disruptive on later processing, e.g. implicitly upgrading strings
+        # on concatenation. Unfortunately there is no way of legally bypassing
+        # the UTF-8 decoding by Net::DNS::RR::TXT in Net::DNS::RR::Text.
+        # Try to minimize damage by encoding back to UTF-8 octets:
+        utf8::encode($rr_rdatastr)  if utf8::is_utf8($rr_rdatastr);
+
       } else {
         # rdatastr() is historical, use rdstring() since Net::DNS 0.69
         $rr_rdatastr = $rr->UNIVERSAL::can('rdstring') ? $rr->rdstring
                                                        : $rr->rdatastr;
+        utf8::encode($rr_rdatastr)  if utf8::is_utf8($rr_rdatastr);
       }
     # dbg("askdns: received rr type %s, data: %s", $rr_type, $rr_rdatastr);
     }

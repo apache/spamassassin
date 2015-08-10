@@ -355,8 +355,10 @@ sub process_dns_result {
   foreach my $rr (@answer) {
     dbg("asn: %s: lookup result packet: %s", $zone, $rr->string);
     next if $rr->type ne 'TXT';
-    my @strings = $rr->char_str_list;
+    my @strings = Net::DNS->VERSION >= 0.69 ? $rr->txtdata
+                                            : $rr->char_str_list;
     next if !@strings;
+    for (@strings) { utf8::encode($_) if utf8::is_utf8($_) }
 
     my @items;
     if (@strings > 1 && join('',@strings) !~ m{\|}) {
