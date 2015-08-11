@@ -320,8 +320,9 @@ sub set_config {
         my @answer_types = split(/,/, $query_type);
         # http://www.iana.org/assignments/dns-parameters/dns-parameters.xml
         if (grep(!/^(?:ANY|A|AAAA|MX|TXT|PTR|NAPTR|NS|SOA|CERT|CNAME|DNAME|
-                       DHCID|HINFO|MINFO|RP|HIP|IPSECKEY|KX|LOC|SRV|
-                       SSHFP|SPF)\z/x, @answer_types)) {
+                       DHCID|HINFO|MINFO|RP|HIP|IPSECKEY|KX|LOC|GPOS|SRV|
+                       OPENPGPKEY|SSHFP|SPF|TLSA|URI|CAA|CSYNC)\z/x,
+                 @answer_types)) {
           return $Mail::SpamAssassin::Conf::INVALID_VALUE;
         }
         $query_type = 'ANY' if @answer_types > 1 || $answer_types[0] eq 'ANY';

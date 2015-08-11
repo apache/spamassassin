@@ -1069,8 +1069,8 @@ sub decode_dns_question_entry {
 
   local $1;
   # Net::DNS provides a query in encoded RFC 1035 zone file format, decode it!
-  $qname =~ s{ \\ ( [0-9]{3} | [^0-9] ) }
-             { length($1)==1 ? $1 : $1 <= 255 ? chr($1) : "\\$1" }xgse;
+  $qname =~ s{ \\ ( [0-9]{3} | (?![0-9]{3}) . ) }
+             { length($1)==3 && $1 <= 255 ? chr($1) : $1 }xgse;
   return ($q->qclass, $q->qtype, $qname);
 }
 
