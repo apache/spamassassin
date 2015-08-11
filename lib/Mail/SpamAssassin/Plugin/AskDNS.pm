@@ -140,7 +140,7 @@ IPv4 address. In case of a TXT or SPF resource record which can return
 multiple character-strings (as defined in Section 3.3 of [RFC1035]), these
 strings are concatenated with no delimiters before comparing the result
 to the filtering string. This follows requirements of several documents,
-such as RFC 5518, RFC 4408, RFC 4871, RFC 5617.  Examples of a plain text
+such as RFC 5518, RFC 7208, RFC 4871, RFC 5617.  Examples of a plain text
 filtering parameter: "127.0.0.1", "transaction", 'list' .
 
 A regular expression follows a familiar perl syntax like /.../ or m{...}
@@ -558,7 +558,7 @@ sub process_response_packet {
   # the code handling such reply from DNS MUST assemble all of these
   # marshaled text blocks into a single one before any syntactical
   # verification takes place.
-  # The same goes for RFC 4408 (SPF), RFC 4871 (DKIM), RFC 5617 (ADSP),
+  # The same goes for RFC 7208 (SPF), RFC 4871 (DKIM), RFC 5617 (ADSP),
   # draft-kucherawy-dmarc-base (DMARC), ...
 
   for my $rr (@answer) {
