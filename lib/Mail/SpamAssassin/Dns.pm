@@ -177,6 +177,7 @@ sub dnsbl_hit {
     # avoid space-separated RDATA <character-string> fields if possible,
     # txtdata provides a list of strings in a list context since Net::DNS 0.69
     $log = join('',$answer->txtdata);
+    utf8::encode($log)  if utf8::is_utf8($log);
     local $1;
     $log =~ s{ (?<! [<(\[] ) (https? : // \S+)}{<$1>}xgi;
   } else {  # assuming $answer->type eq 'A'
@@ -215,16 +216,27 @@ sub dnsbl_hit {
 sub dnsbl_uri {
   my ($self, $question, $answer) = @_;
 
-  my $qname = $question->qname;
+  my $rdatastr;
+  if ($answer->UNIVERSAL::can('txtdata')) {
+    # txtdata returns a non- zone-file-format encoded result, unlike rdstring;
+    # avoid space-separated RDATA <character-string> fields if possible,
+    # txtdata provides a list of strings in a list context since Net::DNS 0.69
+    $rdatastr = join('',$answer->txtdata);
+  } else {
+    # rdatastr() is historical/undocumented, use rdstring() since Net::DNS 0.69
+    $rdatastr = $answer->UNIVERSAL::can('rdstring') ? $answer->rdstring
+                                                    : $answer->rdatastr;
+    # encoded in a RFC 1035 zone file format (escaped), decode it
+    $rdatastr =~ s{ \\ ( [0-9]{3} | (?![0-9]{3}) . ) }
+                  { length($1)==3 && $1 <= 255 ? chr($1) : $1 }xgse;
+  }
+  # Bug 7236: Net::DNS attempts to decode text strings in a TXT record as
+  # UTF-8 since version 0.69, which is undesired: octets failing the UTF-8
+  # decoding are converted to a Unicode "replacement character" U+FFFD, and
+  # ASCII text is unnecessarily flagged as perl native characters.
+  utf8::encode($rdatastr)  if utf8::is_utf8($rdatastr);
 
-  # txtdata returns a non- zone-file-format encoded result, unlike rdstring;
-  # avoid space-separated RDATA <character-string> fields if possible,
-  # txtdata provides a list of strings in a list context since Net::DNS 0.69
-  #
-  # rdatastr() is historical/undocumented, use rdstring() since Net::DNS 0.69
-  my $rdatastr = $answer->UNIVERSAL::can('txtdata')  ? join('',$answer->txtdata)
-               : $answer->UNIVERSAL::can('rdstring') ? $answer->rdstring
-                                                     : $answer->rdatastr;
+  my $qname = $question->qname;
   if (defined $qname && defined $rdatastr) {
     my $qclass = $question->qclass;
     my $qtype = $question->qtype;
@@ -293,14 +305,25 @@ sub process_dnsbl_result {
 sub process_dnsbl_set {
   my ($self, $set, $question, $answer) = @_;
 
-  # txtdata returns a non- zone-file-format encoded result, unlike rdstring;
-  # avoid space-separated RDATA <character-string> fields if possible,
-  # txtdata provides a list of strings in a list context since Net::DNS 0.69
-  #
-  # rdatastr() is historical/undocumented, use rdstring() since Net::DNS 0.69
-  my $rdatastr = $answer->UNIVERSAL::can('txtdata')  ? join('',$answer->txtdata)
-               : $answer->UNIVERSAL::can('rdstring') ? $answer->rdstring
-                                                     : $answer->rdatastr;
+  my $rdatastr;
+  if ($answer->UNIVERSAL::can('txtdata')) {
+    # txtdata returns a non- zone-file-format encoded result, unlike rdstring;
+    # avoid space-separated RDATA <character-string> fields if possible,
+    # txtdata provides a list of strings in a list context since Net::DNS 0.69
+    $rdatastr = join('',$answer->txtdata);
+  } else {
+    # rdatastr() is historical/undocumented, use rdstring() since Net::DNS 0.69
+    $rdatastr = $answer->UNIVERSAL::can('rdstring') ? $answer->rdstring
+                                                    : $answer->rdatastr;
+    # encoded in a RFC 1035 zone file format (escaped), decode it
+    $rdatastr =~ s{ \\ ( [0-9]{3} | (?![0-9]{3}) . ) }
+                  { length($1)==3 && $1 <= 255 ? chr($1) : $1 }xgse;
+  }
+  # Bug 7236: Net::DNS attempts to decode text strings in a TXT record as
+  # UTF-8 since version 0.69, which is undesired: octets failing the UTF-8
+  # decoding are converted to a Unicode "replacement character" U+FFFD, and
+  # ASCII text is unnecessarily flagged as perl native characters.
+  utf8::encode($rdatastr)  if utf8::is_utf8($rdatastr);
 
   while (my ($subtest, $rule) = each %{ $self->{dnspost}->{$set} }) {
     next if $self->{tests_already_hit}->{$rule};
