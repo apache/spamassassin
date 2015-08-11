@@ -584,9 +584,9 @@ sub process_response_packet {
           $rr_rdatastr = join('', $rr->char_str_list);  # historical
         }
         # Net::DNS attempts to decode text strings in a TXT record as UTF-8,
-        # which is bad: octets failing the UTF-8 decoding are converted to
-        # three octets \x{EF}\x{BF}\x{BD} (i.e. to a Unicode "replacement
-        # character" U+FFFD encoded as UTF-8), and ASCII text is unnecessarily
+        # which is undesired: octets failing the UTF-8 decoding are converted
+        # to a Unicode "replacement character" U+FFFD (encoded as octets
+        # \x{EF}\x{BF}\x{BD} in UTF-8), and ASCII text is unnecessarily
         # flagged as perl native characters (utf8 flag on), which can be
         # disruptive on later processing, e.g. implicitly upgrading strings
         # on concatenation. Unfortunately there is no way of legally bypassing
