@@ -1056,7 +1056,9 @@ sub lookup_dnsbl_for_ip {
 sub lookup_single_dnsbl {
   my ($self, $pms, $obj, $rulename, $lookupstr, $dnsbl, $qtype) = @_;
 
+  $lookupstr = idn_to_ascii($lookupstr);
   $dnsbl = idn_to_ascii($dnsbl);
+
   my $key = "DNSBL:" . $lookupstr . ':' . $dnsbl;
   my $ent = {
     key => $key, zone => $dnsbl, obj => $obj, type => 'URI-DNSBL',

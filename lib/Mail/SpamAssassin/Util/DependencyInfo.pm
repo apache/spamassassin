@@ -132,6 +132,14 @@ $have_sha ? {
   desc => 'Used when manually reporting spam to SpamCop with "spamassassin -r".',
 },
 {
+  'module' => 'Net::LibIDN',
+  'version' => 0,
+  'desc' => "Provides mapping between Internationalized Domain Names (IDN) in
+  Unicode and ASCII-compatible encoding (ACE) for use in DNS and comparisions.
+  The module is optional, but without it Unicode IDN names found in mail will
+  not be suitable for DNS queries and white/blacklisting.",
+},
+{
   module => 'Mail::SPF',
   version => 0,
   desc => 'Used to check DNS Sender Policy Framework (SPF) records to fight email
