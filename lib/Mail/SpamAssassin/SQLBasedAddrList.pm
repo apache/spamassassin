@@ -220,6 +220,7 @@ sub get_addr_entry {
     }
     push(@args, @signedby);
   }
+  $sql .= " ORDER BY last_hit";
   my $sth = $self->{dbh}->prepare($sql);
   my $rc = $sth->execute($self->{_username}, @args);
 
@@ -236,8 +237,8 @@ sub get_addr_entry {
     # an author domain and by a remailer)?  for now just take an average
     while ( defined($aryref = $sth->fetchrow_arrayref()) ) {
       if (defined $entry->{count} && defined $aryref->[1]) {
-        $entry->{count} += $aryref->[0];
-        $entry->{totscore} += $aryref->[1];
+        $entry->{count} = $aryref->[0];
+        $entry->{totscore} = $aryref->[1];
       }
       $entry->{exists_p} = 1;
       $cnt++;
