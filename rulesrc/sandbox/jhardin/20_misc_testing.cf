@@ -1902,6 +1902,10 @@ meta      TEQF_USR_IMAGE                __TO_EQ_FROM_USR_NN_MINFP && __ANY_IMAGE
 describe  TEQF_USR_IMAGE                To and from user nearly same + image
 tflags    TEQF_USR_IMAGE                publish
 
+meta      TEQF_USR_POLITE               __TO_EQ_FROM_USR_NN && __FRAUD_IRT 
+describe  TEQF_USR_POLITE               To and from user nearly same + polite greeting
+score     TEQF_USR_POLITE               2.000	# limit
+
 meta      __MSGID_HEX_MALF              __MSGID_NOFQDN2 && __MSGID_OK_HEX
 
 meta      __URI_ONLY_MSGID_MALF         __BODY_URI_ONLY && __MSGID_NOFQDN2
@@ -1963,9 +1967,9 @@ header    __REPTO_CHN_FREEM             Reply-To =~ /\@(?:sina|aliyun)\.com/i
 
 meta      __SPOOFED_FREEM_REPTO         __SPOOFED_FREEMAIL && FREEMAIL_REPLYTO
 
-meta      SPOOFED_FREEM_REPTO_CHN       __SPOOFED_FREEM_REPTO && __REPTO_CHN_FREEM
+meta      SPOOFED_FREEM_REPTO_CHN       (__SPOOFED_FREEM_REPTO || FORGED_YAHOO_RCVD) && __REPTO_CHN_FREEM
 describe  SPOOFED_FREEM_REPTO_CHN       Forged freemail sender with Chinese freemail reply-to
-score     SPOOFED_FREEM_REPTO_CHN       2.000
+score     SPOOFED_FREEM_REPTO_CHN       3.000
 tflags    SPOOFED_FREEM_REPTO_CHN       publish
 
 meta      SPOOFED_FREEM_REPTO           __SPOOFED_FREEM_REPTO && !__THREADED
