@@ -304,7 +304,7 @@ example.ag	^http://example\.ag$
 example.ai	^http://example\.ai$
 example.al	^http://example\.al$
 example.am	^http://example\.am$
-example.an	^http://example\.an$
+example.an	!^http://example\.an$
 example.ao	^http://example\.ao$
 example.aq	^http://example\.aq$
 example.ar	^http://example\.ar$
@@ -580,7 +580,7 @@ www.example.ag	^http://www\.example\.ag$
 www.example.ai	^http://www\.example\.ai$
 www.example.al	^http://www\.example\.al$
 www.example.am	^http://www\.example\.am$
-www.example.an	^http://www\.example\.an$
+www.example.an	!^http://www\.example\.an$
 www.example.ao	^http://www\.example\.ao$
 www.example.aq	^http://www\.example\.aq$
 www.example.ar	^http://www\.example\.ar$
