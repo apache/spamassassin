@@ -1,8 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bpoliakoff darxus dwarren grenier jarif kam-ninja kpg-core zmi; day 2: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bpoliakoff darxus dwarren grenier jarif kam-ninja kpg-core llanga mmiroslaw-ham mmiroslaw-spam zmi; day 3: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bpoliakoff darxus dwarren grenier jarif kam-ninja kpg-core llanga zmi
-
-# good enough
-ACH_CANCELLED
+# with results from: day 1: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bpoliakoff darxus dwarren grenier jarif kam-ninja kpg-core mmiroslaw-ham mmiroslaw-spam zmi; day 2: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bpoliakoff darxus dwarren grenier jarif kam-ninja kpg-core llanga zmi; day 3: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bpoliakoff darxus dwarren grenier jarif kam-ninja kpg-core llanga mmiroslaw-ham mmiroslaw-spam zmi
 
 # tflags publish
 AC_BR_BONANZA
@@ -423,9 +420,6 @@ HEAD_LONG
 
 # good enough
 HELO_LH_HOME
-
-# good enough
-HELO_LOCALHOST
 
 # tflags publish
 HEXHASH_WORD
@@ -935,6 +929,9 @@ TO_NO_BRKTS_NORDNS_HTML
 TO_NO_BRKTS_PCNT
 
 # good enough
+TT_MSGID_TRUNC
+
+# good enough
 TVD_FINGER_02
 
 # good enough
@@ -980,10 +977,10 @@ ADVANCE_FEE_4_NEW_MONEY
 ADVANCE_FEE_5_NEW_FORM
 
 # good enough
-DATE_IN_FUTURE_Q_PLUS
+BODY_EMPTY
 
 # good enough
-DUP_SUSP_HDR
+DATE_IN_FUTURE_Q_PLUS
 
 # good enough
 EMRCP
@@ -995,10 +992,10 @@ FSL_MID_419
 HDRS_LCASE
 
 # good enough
-HK_NAME_DR
+HK_NAME_FM_DR
 
 # good enough
-HK_NAME_FM_DR
+HK_NAME_FROM
 
 # good enough
 HK_RANDOM_FROM
@@ -1013,13 +1010,10 @@ LOTTO_AGENT_RPLY
 MALFORMED_FREEMAIL
 
 # good enough
-OBFU_DOC_ATTACH
-
-# good enough
-OBFU_JPG_ATTACH
-
-# good enough
 SHARE_50_50
+
+# good enough
+SUBJ_ATTENTION
 
 # tflags publish
 UC_GIBBERISH_OBFU
