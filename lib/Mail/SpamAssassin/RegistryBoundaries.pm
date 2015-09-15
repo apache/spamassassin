@@ -33,6 +33,9 @@ use re 'taint';
 our @ISA = qw();
 use vars qw(%US_STATES);
 
+use Mail::SpamAssassin::Logger;
+use Mail::SpamAssassin::Util qw(idn_to_ascii);
+
 # called from SpamAssassin->init() to create $self->{util_rb}
 sub new {
   my $class = shift;
@@ -46,7 +49,8 @@ sub new {
   bless ($self, $class);
 
   # Initialize valid_tlds_re for schemeless uri parsing, FreeMail etc
-  if ($self->{conf}->{valid_tlds}) {
+  if ($self->{conf}->{valid_tlds} && %{$self->{conf}->{valid_tlds}}) {
+    # International domain names are already in ASCII-compatible encoding (ACE)
     my $tlds = join('|', keys %{$self->{conf}->{valid_tlds}});
     # Perl 5.10+ trie optimizes lists, no need for fancy regex optimizing
     $self->{valid_tlds_re} = qr/(?:$tlds)/i;
@@ -87,9 +91,9 @@ Examples:
 =cut
 
 sub split_domain {
-  my $self = shift;
-  my $domain = lc shift;
+  my ($self, $domain) = @_;
 
+  $domain = idn_to_ascii($domain);
   my $hostname = '';
 
   if (defined $domain && $domain ne '') {
@@ -126,12 +130,14 @@ sub split_domain {
         }
         else {
           my $temp = join(".", @domparts);
+          # International domain names in ASCII-compatible encoding (ACE)
           last if ($self->{conf}->{three_level_domains}{$temp});
         }
       }
       elsif (@domparts == 2) {
         # co.uk, etc.
         my $temp = join(".", @domparts);
+        # International domain names in ASCII-compatible encoding (ACE)
         last if ($self->{conf}->{two_level_domains}{$temp});
       }
       push(@hostname, shift @domparts);
@@ -185,11 +191,12 @@ uses a valid TLD or ccTLD.
 =cut
 
 sub is_domain_valid {
-  my $self = shift;
-  my $dom = lc shift;
+  my ($self, $dom) = @_;
 
   # domains don't have whitespace
   return 0 if ($dom =~ /\s/);
+
+  $dom = idn_to_ascii($dom);
 
   # ensure it ends in a known-valid TLD, and has at least 1 dot
   return 0 unless ($dom =~ /\.([^.]+)$/);

@@ -52,6 +52,8 @@ endif
 #
 # For an up to date list of IDN TLDs that can be pasted into this block, run this command:
 #  wget http://data.iana.org/TLD/tlds-alpha-by-domain.txt -q -O - | grep -i '^xn--' | tr '\n' ' ' | fold -w 80 -s | perl -pe 'chomp; s/.*/util_rb_tld \L$_\n/'
+# Since version 4.0 the util_rb_tld also accepts Unicode IDN labels (encoded as UTF-8), e.g.:
+#  wget http://data.iana.org/TLD/tlds-alpha-by-domain.txt -q -O - | grep -i '^xn--' | idn -u | tr '\n' ' ' | fold -w 80 -s | perl -pe 'chomp; s/.*/util_rb_tld \L$_\n/'
 
 if (can(Mail::SpamAssassin::Conf::feature_registryboundaries))
 util_rb_tld xn--1qqw23a xn--30rr7y xn--3bst00m xn--3ds443g xn--3e0b707e xn--45brj9c

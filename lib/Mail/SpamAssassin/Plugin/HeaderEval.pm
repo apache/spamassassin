@@ -1048,9 +1048,8 @@ sub check_ratware_envelope_from {
   return 0 if $from eq '' || $to eq '';
   return 0 if $from =~ /^SRS\d=/;
 
-  if ($to =~ /^([^@]+)@(.+)$/) {
+  if ($to =~ /^([^@]+)\@(.+)$/) {
     my($user,$dom) = ($1,$2);
-    $dom = idn_to_ascii($dom);
     $dom = $self->{main}->{registryboundaries}->trim_domain($dom);
     return unless
         ($self->{main}->{registryboundaries}->is_domain_valid($dom));
