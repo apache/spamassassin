@@ -3801,9 +3801,9 @@ standard lists supplied by sa-update.
       unless (!defined $value || $value eq '') {
         return $INVALID_VALUE;
       }
-      $self->{valid_tlds} = ();
-      $self->{two_level_domains} = ();
-      $self->{three_level_domains} = ();
+      undef $self->{valid_tlds};
+      undef $self->{two_level_domains};
+      undef $self->{three_level_domains};
       dbg("config: cleared tld lists");
     }
   });
