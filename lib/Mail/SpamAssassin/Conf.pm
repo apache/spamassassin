@@ -82,13 +82,12 @@ use warnings;
 # use bytes;
 use re 'taint';
 
-use Mail::SpamAssassin::Util;
 use Mail::SpamAssassin::NetSet;
 use Mail::SpamAssassin::Constants qw(:sa :ip);
 use Mail::SpamAssassin::Conf::Parser;
 use Mail::SpamAssassin::Logger;
 use Mail::SpamAssassin::Util::TieOneStringHash;
-use Mail::SpamAssassin::Util qw(untaint_var);
+use Mail::SpamAssassin::Util qw(untaint_var idn_to_ascii);
 use File::Spec;
 
 use vars qw{
@@ -3477,8 +3476,11 @@ subdomain of the specified zone.
 
 =item util_rb_tld tld1 tld2 ...
 
-This option maintains list of valid TLDs in the RegistryBoundaries code. 
-TLDs include things like com, net, org, etc.
+This option maintains a list of valid TLDs in the RegistryBoundaries code. 
+Top level domains (TLD) include things like com, net, org, xn--p1ai, рф, ...
+International domain names may be specified in ASCII-compatible encoding (ACE),
+e.g. xn--p1ai, xn--qxam, or with Unicode labels encoded as UTF-8 octets,
+e.g. рф, ελ.
 
 =cut
 
@@ -3541,7 +3543,7 @@ TLDs include things like com, net, org, etc.
     xn--wgbh1c xn--wgbl6a xn--xhq521b xn--xkc2al3hye2a xn--xkc2dl3a5ee0h
     xn--yfro4i67o xn--ygbi2ammx xn--zfr164b xxx xyz yachts yandex ye yokohama
     youtube yt za zm zone zw
-    /) { $self->{valid_tlds}{lc $_} = 1; }
+    /) { $self->{valid_tlds}{idn_to_ascii($_)} = 1 }
 
   push (@cmds, {
     setting => 'util_rb_tld',
@@ -3555,7 +3557,7 @@ TLDs include things like com, net, org, etc.
 	return $INVALID_VALUE;
       }
       foreach (split(/\s+/, $value)) {
-        $self->{valid_tlds}{lc $_} = 1;
+        $self->{valid_tlds}{idn_to_ascii($_)} = 1;
       }
       dbg("config: added tld list - $value");
     }
@@ -3564,7 +3566,9 @@ TLDs include things like com, net, org, etc.
 =item util_rb_2tld 2tld-1.tld 2tld-2.tld ...
 
 This option maintains list of valid 2nd-level TLDs in the RegistryBoundaries
-code.  2TLDs include things like co.uk, fed.us, etc.
+code.  2TLDs include things like co.uk, fed.us, etc.  International domain
+names may be specified in ASCII-compatible encoding (ACE), or with Unicode
+labels encoded as UTF-8 octets.
 
 =cut
 
@@ -3735,7 +3739,7 @@ code.  2TLDs include things like co.uk, fed.us, etc.
     net.ye org.ye ac.za alt.za bourse.za city.za co.za edu.za gov.za law.za
     mil.za net.za ngo.za nom.za org.za school.za tm.za web.za ac.zm co.zm
     com.zm edu.zm gov.zm org.zm sch.zm ac.zw co.zw gov.zw org.zw
-    /) { $self->{two_level_domains}{lc $_} = 1; }
+    /) { $self->{two_level_domains}{idn_to_ascii($_)} = 1 }
 
   push (@cmds, {
     setting => 'util_rb_2tld',
@@ -3749,7 +3753,7 @@ code.  2TLDs include things like co.uk, fed.us, etc.
 	return $INVALID_VALUE;
       }
       foreach (split(/\s+/, $value)) {
-        $self->{two_level_domains}{lc $_} = 1;
+        $self->{two_level_domains}{idn_to_ascii($_)} = 1;
       }
     }
   });
@@ -3757,7 +3761,9 @@ code.  2TLDs include things like co.uk, fed.us, etc.
 =item util_rb_3tld 3tld1.some.tld 3tld2.other.tld ...
 
 This option maintains list of valid 3rd-level TLDs in the RegistryBoundaries
-code.  3TLDs include things like demon.co.uk, plc.co.im, etc.
+code.  3TLDs include things like demon.co.uk, plc.co.im, etc.  International
+domain names may be specified in ASCII-compatible encoding (ACE), or with
+Unicode labels encoded as UTF-8 octets.
 
 =cut
 
@@ -3766,7 +3772,7 @@ code.  3TLDs include things like demon.co.uk, plc.co.im, etc.
   # sa-update 20_aux_tlds.cf.
   foreach (qw/
     demon.co.uk esc.edu.ar lkd.co.im plc.co.im
-    /) { $self->{three_level_domains}{lc $_} = 1; }
+    /) { $self->{three_level_domains}{idn_to_ascii($_)} = 1 }
 
   push (@cmds, {
     setting => 'util_rb_3tld',
@@ -3780,7 +3786,7 @@ code.  3TLDs include things like demon.co.uk, plc.co.im, etc.
 	return $INVALID_VALUE;
       }
       foreach (split(/\s+/, $value)) {
-        $self->{three_level_domains}{lc $_} = 1;
+        $self->{three_level_domains}{idn_to_ascii($_)} = 1;
       }
     }
   });

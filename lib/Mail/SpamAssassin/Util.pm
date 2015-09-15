@@ -440,7 +440,7 @@ sub idn_to_ascii($) {
     info("util: idn_to_ascii: not valid UTF-8: /%s/, called from %s line %d",
          $s, $package, $line);
     $s = lc $s;  # garbage-in / garbage-out
-  } else {
+  } else {  # is valid UTF-8 but not all-ASCII
     my $chars;
     # RFC 3490 (IDNA): Whenever dots are used as label separators, the
     # following characters MUST be recognized as dots: U+002E (full stop),
@@ -450,7 +450,9 @@ sub idn_to_ascii($) {
       info("util: idn_to_ascii: alternative dots normalized: /%s/ -> /%s/",
            $_[0], $s);
     }
-    if ($have_libidn) {
+    if (!$have_libidn) {
+      $s = lc $s;
+    } else {
       # to ASCII-compatible encoding (ACE), lowercased
       my $sa = Net::LibIDN::idn_to_ascii($s, 'UTF-8');
       if (!defined $sa) {
