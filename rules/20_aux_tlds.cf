@@ -43,7 +43,7 @@ endif
 #
 
 # Basic list can be obtained with the following command:
-#  wget http://data.iana.org/TLD/tlds-alpha-by-domain.txt -O - | tail -n+2 | perl -ne 'print lc'
+#  wget http://data.iana.org/TLD/tlds-alpha-by-domain.txt -q -O - | tail -n+2 | perl -ne 'print lc'
 # Current list may include more or less.. TODO easier maintenance?
 
 # util_rb_tld only accepts alpha (a-z) input before RegistryBoundaries was
@@ -51,7 +51,7 @@ endif
 # this block
 #
 # For an up to date list of IDN TLDs that can be pasted into this block, run this command:
-# wget http://data.iana.org/TLD/tlds-alpha-by-domain.txt -O - | tail -n+2 | grep -i 'xn--' | tr '\n' ' ' | fold -w 80 -s | perl -e 's/^/util_rb_tld / && print lc while <>' && echo
+#  wget http://data.iana.org/TLD/tlds-alpha-by-domain.txt -q -O - | grep -i '^xn--' | tr '\n' ' ' | fold -w 80 -s | perl -pe 'chomp; s/.*/util_rb_tld \L$_\n/'
 
 if (can(Mail::SpamAssassin::Conf::feature_registryboundaries))
 util_rb_tld xn--1qqw23a xn--30rr7y xn--3bst00m xn--3ds443g xn--3e0b707e xn--45brj9c
@@ -74,7 +74,7 @@ endif
 
 # Standard List
 # For an up to date list of TLDs that can be pasted into this block, run this command:
-# wget http://data.iana.org/TLD/tlds-alpha-by-domain.txt -O - | tail -n+2 | grep -vi 'xn--' | tr '\n' ' ' | fold -w 80 -s | perl -e 's/^/util_rb_tld / && print lc while <>' && echo
+#  wget http://data.iana.org/TLD/tlds-alpha-by-domain.txt -q -O - | tail -n+2 | grep -vi '^xn--' | tr '\n' ' ' | fold -w 80 -s | perl -pe 'chomp; s/.*/util_rb_tld \L$_\n/'
 
 util_rb_tld aaa abb abbott abogado ac academy accenture accountant accountants aco active 
 util_rb_tld actor ad ads adult ae aeg aero af afl ag agency ai aig airforce airtel al 
