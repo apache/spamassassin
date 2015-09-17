@@ -29,58 +29,58 @@ describe   FORGED_TBIRD_IMG_ARROW  Likely forged Thunderbird image spam
 
 meta       __TO_NO_BRKTS_HTML_IMG  __TO_NO_ARROWS_R && !__TO_UNDISCLOSED && HTML_MESSAGE && __ONE_IMG
 meta       TO_NO_BRKTS_HTML_IMG    __TO_NO_BRKTS_HTML_IMG && !__FM_TO_ALL_NUMS && !__FROM_FULL_NAME && !__HAS_THREAD_INDEX && !__DKIM_EXISTS && !__HAS_SENDER && !__THREADED && !__LONGLINE 
-describe   TO_NO_BRKTS_HTML_IMG    To: misformatted and HTML and one image
+describe   TO_NO_BRKTS_HTML_IMG    To: lacks brackets and HTML and one image
 score      TO_NO_BRKTS_HTML_IMG    2.000   # limit
 tflags     TO_NO_BRKTS_HTML_IMG    publish
 
 meta       __TO_NO_BRKTS_HTML_ONLY __TO_NO_ARROWS_R && !__TO_UNDISCLOSED && MIME_HTML_ONLY
 meta       TO_NO_BRKTS_HTML_ONLY   __TO_NO_BRKTS_HTML_ONLY && !RDNS_NONE && !__MIME_QP && !__MSGID_JAVAMAIL && !__CTYPE_CHARSET_QUOTED && !__SUBJECT_ENCODED_B64 && !__VIA_ML && !__MSGID_BEFORE_RECEIVED && !__MIME_BASE64 && !__RCD_RDNS_MAIL_MESSY && !__COMMENT_EXISTS && !LOTS_OF_MONEY && !__TAG_EXISTS_CENTER && !__UPPERCASE_URI && !__UNSUB_LINK && !__RCD_RDNS_MX_MESSY && !__DKIM_EXISTS && !__BUGGED_IMG && !__FM_TO_ALL_NUMS && !__URI_12LTRDOM && !__RDNS_NO_SUBDOM && !__HDRS_LCASE && !__LCL__ENV_AND_HDR_FROM_MATCH 
 score      TO_NO_BRKTS_HTML_ONLY   2.00	# limit
-describe   TO_NO_BRKTS_HTML_ONLY   To: misformatted and HTML only
+describe   TO_NO_BRKTS_HTML_ONLY   To: lacks brackets and HTML only
 tflags     TO_NO_BRKTS_HTML_ONLY   publish
 
 meta       __TO_NO_BRKTS_DYNIP     __TO_NO_ARROWS_R && !__TO_UNDISCLOSED && RDNS_DYNAMIC
 meta       TO_NO_BRKTS_DYNIP       __TO_NO_BRKTS_DYNIP && !__NAME_IS_EMAIL && !__MSGID_OK_HEX && !__UNSUB_LINK && !__THREADED && !__RCD_RDNS_MX_MESSY && !__COMMENT_EXISTS && !__MUA_TBIRD && !__CD && !__ML1 && !__RP_MATCHES_RCVD && !__SUBSCRIPTION_INFO && !__HAS_THREAD_INDEX && !__IS_EXCH 
-describe   TO_NO_BRKTS_DYNIP       To: misformatted and dynamic rDNS
+describe   TO_NO_BRKTS_DYNIP       To: lacks brackets and dynamic rDNS
 #tflags     TO_NO_BRKTS_DYNIP       publish
 
 #meta       __TO_NO_BRKTS_NORDNS    __TO_NO_ARROWS_R && !__TO_UNDISCLOSED && RDNS_NONE
 #meta       TO_NO_BRKTS_NORDNS      __TO_NO_BRKTS_NORDNS && !ALL_TRUSTED && !__NOT_SPOOFED
 #score      TO_NO_BRKTS_NORDNS      0.75	# limit, rDNS can fail
-#describe   TO_NO_BRKTS_NORDNS      To: misformatted and no rDNS
+#describe   TO_NO_BRKTS_NORDNS      To: lacks brackets and no rDNS
 
 meta       __TO_NO_BRKTS_NORDNS_HTML    __TO_NO_BRKTS_HTML_ONLY && RDNS_NONE
 meta       TO_NO_BRKTS_NORDNS_HTML      __TO_NO_BRKTS_NORDNS_HTML && !ALL_TRUSTED && !__MSGID_JAVAMAIL && !__MSGID_BEFORE_RECEIVED && !__VIA_ML && !__UA_MUTT && !__COMMENT_EXISTS && !__HTML_LENGTH_384 && !__MIME_BASE64 && !__UPPERCASE_URI && !__TO___LOWER && !__TAG_EXISTS_CENTER && !__LONGLINE && !__DKIM_EXISTS 
 score      TO_NO_BRKTS_NORDNS_HTML      2.00	# limit
-describe   TO_NO_BRKTS_NORDNS_HTML      To: misformatted and no rDNS and HTML only
+describe   TO_NO_BRKTS_NORDNS_HTML      To: lacks brackets and no rDNS and HTML only
 tflags     TO_NO_BRKTS_NORDNS_HTML      publish
 
 meta       __TO_NO_BRKTS_MSFT       __TO_NO_ARROWS_R && !__TO_UNDISCLOSED && (__ANY_OUTLOOK_MUA || __MIMEOLE_MS)
 meta       TO_NO_BRKTS_MSFT         __TO_NO_BRKTS_MSFT && !__VIA_ML && !__LYRIS_EZLM_REMAILER && !__THREAD_INDEX_GOOD && !__IS_EXCH && !__UNSUB_LINK && !__NOT_SPOOFED && !__DOS_HAS_LIST_UNSUB && !__NAME_EQ_EMAIL && !__SUBJECT_ENCODED_QP && !__THREADED && !__HAS_THREAD_INDEX && !__HAS_X_REF && !__HAS_IN_REPLY_TO && !__FROM_ENCODED_QP && !__RP_MATCHES_RCVD
-describe   TO_NO_BRKTS_MSFT         To: misformatted and supposed Microsoft tool
+describe   TO_NO_BRKTS_MSFT         To: lacks brackets and supposed Microsoft tool
 score      TO_NO_BRKTS_MSFT         2.50	# limit
 
 meta       __TO_NO_BRKTS_PCNT       __TO_NO_ARROWS_R && __FB_NUM_PERCNT
 meta       TO_NO_BRKTS_PCNT         __TO_NO_BRKTS_PCNT && !__SUBJECT_ENCODED_B64 && !__DOS_HAS_LIST_UNSUB && !__VIA_ML && !__ISO_2022_JP_DELIM && !__IMS_MSGID && !__THREAD_INDEX_GOOD && !__RCD_RDNS_MX_MESSY && !__UNSUB_LINK && !__LONGLINE && !URI_HEX && !__RP_MATCHES_RCVD && !__MAIL_LINK && !__BUGGED_IMG && !__MIME_QP && !__COMMENT_EXISTS && !__TAG_EXISTS_STYLE && !__LCL__ENV_AND_HDR_FROM_MATCH && !__HAS_X_MAILER && !__HTML_LINK_IMAGE && !__SENDER_BOT && !__DKIM_EXISTS && !__KHOP_NO_FULL_NAME && !__THREADED 
-describe   TO_NO_BRKTS_PCNT         To: misformatted + percentage
+describe   TO_NO_BRKTS_PCNT         To: lacks brackets + percentage
 score      TO_NO_BRKTS_PCNT         2.50	# limit
 tflags     TO_NO_BRKTS_PCNT         publish
 
 #meta       __TO_NO_BRKTS_DIRECT     __TO_NO_ARROWS_R && __DOS_DIRECT_TO_MX
 #meta       TO_NO_BRKTS_DIRECT       __TO_NO_BRKTS_DIRECT && !__IS_EXCH && !__THREAD_INDEX_GOOD && !__COMMENT_EXISTS && !__RCD_RDNS_MTA_MESSY && !__TVD_SPACE_RATIO && !__THREADED && !__FB_DO_NOT_REPLY && !__VBOUNCE_MAILSWEEP3 && !__DEAL && !__RCD_RDNS_MAIL_MESSY && !__UNSUB_LINK && !__RP_MATCHES_RCVD && !__DKIM_EXISTS && !__TAG_EXISTS_CENTER
-#describe   TO_NO_BRKTS_DIRECT       To: misformatted and direct-to-MX
+#describe   TO_NO_BRKTS_DIRECT       To: lacks brackets and direct-to-MX
 #tflags     TO_NO_BRKTS_DIRECT       publish
 
 #meta       __TO_NO_BRKTS_NOTLIST    __TO_NO_ARROWS_R && !__VIA_ML
 #meta       TO_NO_BRKTS_NOTLIST      __TO_NO_BRKTS_NOTLIST && !__UNUSABLE_MSGID && !__THREADED && !__SUBJ_RE && !__RCD_RDNS_MAIL_MESSY && !__HAS_MIMEOLE && !__THREAD_INDEX_GOOD && !__IMS_MSGID && !__RCD_RDNS_MTA_MESSY && !__BOUNCE_RPATH_NULL && !__BOUNCE_STAT_FAIL && !__BOUNCE_CTYPE && !ALL_TRUSTED && !__FB_DO_NOT_REPLY && !__RPATH_12LTRDOM && !__MIME_BASE64 && !__UPPERCASE_URI && !__TO___LOWER && !__BUGGED_IMG && !__JM_REACTOR_DATE && !__RP_MATCHES_RCVD && !__X_CRON_ENV && !NO_RELAYS
-#describe   TO_NO_BRKTS_NOTLIST      To: misformatted and not a mailing list
+#describe   TO_NO_BRKTS_NOTLIST      To: lacks brackets and not a mailing list
 
 
 ifplugin Mail::SpamAssassin::Plugin::FreeMail
 #  meta       TO_NO_BRKTS_FREEMAIL    __TO_NO_ARROWS_R && !__TO_UNDISCLOSED && (FREEMAIL_FROM || FREEMAIL_REPLYTO)
   meta       __TO_NO_BRKTS_FREEMAIL  __TO_NO_ARROWS_R && (FREEMAIL_FROM || FREEMAIL_REPLYTO)
   meta       TO_NO_BRKTS_FREEMAIL    __TO_NO_BRKTS_FREEMAIL && !__TO_EQ_FROM_DOM
-  describe   TO_NO_BRKTS_FREEMAIL    To: misformatted and free email service
+  describe   TO_NO_BRKTS_FREEMAIL    To: lacks brackets and free email service
   #score      TO_NO_BRKTS_FREEMAIL    0.20
   tflags     TO_NO_BRKTS_FREEMAIL    nopublish
 else
@@ -91,7 +91,7 @@ meta       __TO_NO_BRKTS_FROM_RUNON  __TO_NO_ARROWS_R && !__TO_UNDISCLOSED && __
 meta       __TO_NO_BRKTS_FROM_MSSP   __TO_NO_ARROWS_R && !__TO_UNDISCLOSED && __FROM_MISSPACED
 meta       TO_NO_BRKTS_FROM_MSSP     __TO_NO_BRKTS_FROM_RUNON && !__RCD_RDNS_MTA_MESSY && !__CTYPE_MULTIPART_ALT && !__REPTO_QUOTE && !__MIME_QP && !__TO___LOWER && !__BUGGED_IMG && !__SUBJECT_ENCODED_QP && !__VIA_ML && !__FR_SPACING_8 && !__TAG_EXISTS_CENTER && !__RCVD_ZIXMAIL && !__RP_MATCHES_RCVD && !__HAS_SENDER 
 score      TO_NO_BRKTS_FROM_MSSP     2.50	# max
-describe   TO_NO_BRKTS_FROM_MSSP     Multiple formatting errors
+describe   TO_NO_BRKTS_FROM_MSSP     Multiple header formatting problems
 
 
 # The boundary *does* FP on legit mail.  However, all of KB's recent samples
