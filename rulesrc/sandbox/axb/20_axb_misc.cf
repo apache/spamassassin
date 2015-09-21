@@ -1,19 +1,25 @@
+
+# 9/21/2015
+header          AXB_X_OUTLOOKPROT_ENVSDR        Authentication-Results =~ /smtp\.mailfrom\=\<\>\;/
+describe        AXB_X_OUTLOOKPROT_ENVSDR        Outlook Protection trash trait
+
+
 ifplugin Mail::SpamAssassin::Plugin::URIDetail
-  uri_detail      AXB_URIDETAIL_BROWSETHIS	text =~ /You may browse this\./
-  describe        AXB_URIDETAIL_BROWSETHIS	LLT fingerprint
-  tflags	  AXB_URIDETAIL_BROWSETHIS	nopublish
+  uri_detail      AXB_URIDETAIL_BROWSETHIS      text =~ /You may browse this\./
+  describe        AXB_URIDETAIL_BROWSETHIS      LLT fingerprint
+  tflags          AXB_URIDETAIL_BROWSETHIS      nopublish
 endif
 
 
-uri		AXB_URI_CDGB		/\/\?cid\=gib/
-describe	AXB_URI_CDGB		Do not mistake with CBGB
+uri             AXB_URI_CDGB            /\/\?cid\=gib/
+describe        AXB_URI_CDGB            Do not mistake with CBGB
 
 
-header          AXB_X_FF_SEZ_S		X-Forefront-Antispam-Report =~ /\bSFV\:SPM\b/
-describe        AXB_X_FF_SEZ_S		Forefront sez this is spam
+header          AXB_X_FF_SEZ_S          X-Forefront-Antispam-Report =~ /\bSFV\:SPM\b/
+describe        AXB_X_FF_SEZ_S          Forefront sez this is spam
 
-rawbody		AXB_RBDY_TENANDTEN	/\&\#1088\;\&\#1092\;/
-describe	AXB_RBDY_TENANDTEN	Ten & Ten
+rawbody         AXB_RBDY_TENANDTEN      /\&\#1088\;\&\#1092\;/
+describe        AXB_RBDY_TENANDTEN      Ten & Ten
 
 # 2012-09-27
 header          __AXB_XM_OL_2600  X-Mailer =~ /Microsoft\ Outlook\ Express\ 6\.00\.2600\.0000/
