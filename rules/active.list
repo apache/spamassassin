@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bpoliakoff darxus dwarren grenier jarif kam-ninja kpg-core zmi; day 2: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bpoliakoff darxus dwarren grenier jarif kam-ninja kpg-core llanga zmi; day 3: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bpoliakoff darxus dwarren grenier jarif kam-ninja kpg-core llanga zmi
+# with results from: day 1: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bpoliakoff darxus dwarren grenier jarif kam-ninja kpg-core; day 2: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bpoliakoff darxus dwarren grenier jarif kam-ninja kpg-core llanga zmi; day 3: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bpoliakoff darxus dwarren grenier jarif kam-ninja kpg-core llanga zmi
 
 # tflags publish
 AC_BR_BONANZA
@@ -97,6 +97,9 @@ AXB_XM_FORGED_OL2600
 # good enough
 AXB_X_FF_SEZ_S
 
+# good enough
+AXB_X_OUTLOOKPROT_ENVSDR
+
 # tflags learn
 BAYES_00
 
@@ -159,6 +162,9 @@ COMPENSATION
 
 # tflags publish
 CORRUPT_FROM_LINE_IN_HDRS
+
+# good enough
+DATE_IN_FUTURE_96_Q
 
 # good enough
 DEAR_BENEFICIARY
@@ -311,10 +317,10 @@ FROM_MISSP_XPRIO
 FROM_WEBSITE
 
 # good enough
-FSL_BULK_SIG
+FSL_CTYPE_WIN1251
 
 # good enough
-FSL_CTYPE_WIN1251
+FSL_FAKE_HOTMAIL_RVCD
 
 # good enough
 FSL_HELO_BARE_IP_2
@@ -412,9 +418,6 @@ HEADER_HOST_IN_WHITELIST
 # tflags userconf
 HEAD_LONG
 
-# good enough
-HELO_LH_HOME
-
 # tflags publish
 HEXHASH_WORD
 
@@ -429,6 +432,9 @@ HK_NAME_FM_MR_MRS
 
 # good enough
 HK_NAME_MR_MRS
+
+# good enough
+HK_RANDOM_FROM
 
 # good enough
 HK_SCAM_N1
@@ -477,9 +483,6 @@ LONG_IMG_URI
 
 # tflags publish
 LOTS_OF_MONEY
-
-# good enough
-LOTTERY_PH_004470
 
 # good enough
 LOTTO_AGENT
@@ -561,6 +564,9 @@ NSL_RCVD_HELO_USER
 
 # good enough
 NULL_IN_BODY
+
+# good enough
+OBFU_DOC_ATTACH
 
 # tflags publish
 OBFU_JVSCR_ESC
@@ -821,12 +827,6 @@ REPLYTO_WITHOUT_TO_CC
 RISK_FREE
 
 # good enough
-RP_MATCHES_RCVD
-
-# good enough
-SERGIO_SUBJECT_PORN011
-
-# good enough
 SERGIO_SUBJECT_PORN014
 
 # good enough
@@ -898,6 +898,9 @@ TEQF_USR_MSGID_HEX
 # tflags publish
 TEQF_USR_MSGID_MALF
 
+# good enough
+TEQF_USR_POLITE
+
 # tflags publish
 THIS_AD
 
@@ -956,28 +959,34 @@ TVD_VISIT_PHARMA
 TW_GIBBERISH_MANY
 
 # good enough
-AXB_X_OUTLOOKPROT_ENVSDR
-
-# good enough
-DATE_IN_FUTURE_96_Q
-
-# good enough
 EMRCP
 
 # good enough
-GAPPY_HTML
+FSL_BULK_SIG
 
 # good enough
-HK_RANDOM_FROM
+HDRS_LCASE
 
 # good enough
 HK_SCAM_N13
 
 # good enough
+MAILER_EQ_ORG
+
+# good enough
+PHP_NOVER_MUA
+
+# good enough
+SERGIO_SUBJECT_PORN011
+
+# good enough
 SUBJ_ATTENTION
 
 # good enough
-TEQF_USR_POLITE
+TVD_IP_HEX
+
+# good enough
+TVD_IP_OCT
 
 # tflags publish
 UC_GIBBERISH_OBFU
