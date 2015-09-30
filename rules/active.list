@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bpoliakoff darxus dwarren grenier jarif kam-ninja kpg-core zmi; day 2: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bpoliakoff darxus dwarren grenier jarif kam-ninja kpg-core llanga zmi; day 3: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bpoliakoff darxus dwarren grenier jarif kam-ninja kpg-core zmi
+# with results from: day 1: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bpoliakoff darxus dwarren grenier jarif kam-ninja kpg-core zmi; day 2: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bpoliakoff darxus dwarren grenier jarif kam-ninja kpg-core llanga zmi; day 3: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bpoliakoff darxus dwarren grenier jarif kam-ninja kpg-core llanga zmi
 
 # tflags publish
 AC_BR_BONANZA
@@ -229,6 +229,9 @@ DX_TEXT_03
 # good enough
 DX_TEXT_05
 
+# good enough
+DYN_RDNS_AND_INLINE_IMAGE
+
 # tflags userconf
 ENV_AND_HDR_SPF_MATCH
 
@@ -421,6 +424,9 @@ HEADER_HOST_IN_WHITELIST
 # tflags userconf
 HEAD_LONG
 
+# good enough
+HELO_LH_HOME
+
 # tflags publish
 HEXHASH_WORD
 
@@ -584,7 +590,7 @@ NSL_RCVD_HELO_USER
 NULL_IN_BODY
 
 # good enough
-OBFU_DOC_ATTACH
+OBFU_ATTACH_MISSP
 
 # tflags publish
 OBFU_JVSCR_ESC
@@ -845,6 +851,9 @@ REPLYTO_WITHOUT_TO_CC
 RISK_FREE
 
 # good enough
+SERGIO_SUBJECT_PORN006
+
+# good enough
 SERGIO_SUBJECT_PORN011
 
 # good enough
@@ -965,6 +974,9 @@ TVD_IP_OCT
 TVD_PH_BODY_META
 
 # good enough
+TVD_QUAL_MEDS
+
+# good enough
 TVD_RCVD_IP
 
 # good enough
@@ -992,19 +1004,25 @@ TW_GIBBERISH_MANY
 ADVANCE_FEE_5_NEW_FORM
 
 # good enough
+BODY_EMPTY
+
+# good enough
 FROM_UNBAL2
 
 # good enough
 FSL_MID_419
 
 # good enough
-HELO_LH_HOME
+LOTTO_AGENT_RPLY
 
 # good enough
-OBFU_ATTACH_MISSP
+PDS_TO_EQ_FROM_NAME
 
 # good enough
-SERGIO_SUBJECT_PORN006
+PHP_NOVER_MUA
+
+# good enough
+TO_EQ_FM_HTML_ONLY
 
 # tflags publish
 UC_GIBBERISH_OBFU
