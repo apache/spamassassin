@@ -1046,6 +1046,9 @@ sub _parse_normal {
   elsif ($ct[3]) {
     $msg->{'name'} = $ct[3];
   }
+  if ($msg->{'name'}) {
+    $msg->{'name'} = Encode::decode("MIME-Header", $msg->{'name'});
+  }
 
   $msg->{'boundary'} = $boundary;
 
