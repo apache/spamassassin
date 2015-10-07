@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bpoliakoff darxus grenier jarif kam-ninja kpg-core zmi; day 2: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bpoliakoff darxus dwarren grenier jarif kam-ninja kpg-core llanga zmi; day 3: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bpoliakoff darxus dwarren grenier jarif kam-ninja kpg-core llanga zmi
+# with results from: day 1: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bpoliakoff darxus dwarren grenier jarif kam-ninja kpg-core zmi; day 2: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bpoliakoff darxus dwarren grenier jarif kam-ninja kpg-core llanga mmiroslaw-ham mmiroslaw-spam zmi; day 3: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bpoliakoff darxus dwarren grenier jarif kam-ninja kpg-core llanga zmi
 
 # tflags publish
 AC_BR_BONANZA
@@ -138,9 +138,6 @@ BAYES_999
 
 # good enough
 BIGNUM_EMAILS
-
-# good enough
-BODY_EMPTY
 
 # tflags publish
 BODY_URI_ONLY
@@ -436,9 +433,6 @@ HEAD_LONG
 # good enough
 HELO_LH_HOME
 
-# good enough
-HELO_LOCALHOST
-
 # tflags publish
 HEXHASH_WORD
 
@@ -456,9 +450,6 @@ HK_NAME_FM_MR_MRS
 
 # good enough
 HK_NAME_MR_MRS
-
-# good enough
-HK_RANDOM_FROM
 
 # good enough
 HK_SCAM_N1
@@ -492,9 +483,6 @@ KB_DATE_CONTAINS_TAB
 
 # good enough
 KB_FAKED_THE_BAT
-
-# good enough
-KHOP_UNSUB_EMAIL
 
 # tflags publish
 LIST_PRTL_PUMPDUMP
@@ -537,6 +525,9 @@ MAILER_EQ_ORG
 
 # good enough
 MALFORMED_FREEMAIL
+
+# good enough
+MANY_HDRS_LCASE
 
 # tflags publish
 MANY_SPAN_IN_TEXT
@@ -949,6 +940,9 @@ TEQF_USR_POLITE
 # tflags publish
 THIS_AD
 
+# good enough
+TO_EQ_FM_DOM_HTML_ONLY
+
 # tflags net
 TO_EQ_FM_DOM_SPF_FAIL
 
@@ -989,13 +983,13 @@ TVD_FROM_1
 TVD_PH_BODY_META
 
 # good enough
-TVD_QUAL_MEDS
-
-# good enough
 TVD_RCVD_IP
 
 # good enough
 TVD_RCVD_IP4
+
+# good enough
+TVD_RCVD_SINGLE
 
 # good enough
 TVD_SPACE_ENCODED
@@ -1013,22 +1007,49 @@ TVD_VISIT_PHARMA
 TW_GIBBERISH_MANY
 
 # good enough
-BITLY_URI
+DATE_IN_FUTURE_96_Q
 
 # good enough
-FROM_12LTRDOM
+DX_TEXT_05
 
 # good enough
-HELO_MISC_IP
+FROM_MISSP_DYNIP
 
 # good enough
-MANY_HDRS_LCASE
+HDRS_MISSP
 
 # good enough
-TO_EQ_FM_DOM_HTML_ONLY
+HK_LOTTO_NAME
 
 # good enough
-TVD_UNDER_VALUED
+KB_FORGED_MOZ4
+
+# good enough
+MONEY_LOTTERY
+
+# good enough
+NAME_EMAIL_DIFF
+
+# good enough
+OBFU_ATTACH_MISSP
+
+# good enough
+OBFU_JPG_ATTACH
+
+# good enough
+PDS_TO_EQ_FROM_NAME
+
+# good enough
+SHORTENED_URL_SRC
+
+# good enough
+SUBJ_ATTENTION
+
+# good enough
+TVD_IP_HEX
+
+# good enough
+TVD_IP_OCT
 
 # tflags publish
 UC_GIBBERISH_OBFU
