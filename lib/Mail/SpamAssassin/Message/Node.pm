@@ -186,7 +186,7 @@ sub header {
     $dec_value =~ s/\n[ \t]+/ /gs;
     $dec_value =~ s/\s+$//s;
     $dec_value =~ s/^\s+//s;
-    push @{ $self->{'headers'}->{$key} }, $self->_decode_header($dec_value,$key);
+    push @{ $self->{'headers'}->{$key} }, _decode_header($dec_value,$key);
 
     push @{ $self->{'raw_headers'}->{$key} }, $raw_value;
 
@@ -400,25 +400,22 @@ sub _html_render {
 # then encode into UTF-8 octets if requested.
 #
 sub _normalize {
-  my $self = $_[0];
-# my $data = $_[1];  # avoid copying large strings
-  my $charset_declared = $_[2];
-  my $return_decoded = $_[3];  # true: Unicode characters, false: UTF-8 octets
+# my $data = $_[0];  # avoid copying large strings
+  my $charset_declared = $_[1];
+  my $return_decoded = $_[2];  # true: Unicode characters, false: UTF-8 octets
 
-  return $_[1]  unless $self->{normalize} && $enc_utf8;
-
-  warn "message: _normalize() was given characters, expected bytes: $_[1]\n"
-    if utf8::is_utf8($_[1]);
+  warn "message: _normalize() was given characters, expected bytes: $_[0]\n"
+    if utf8::is_utf8($_[0]);
 
   # workaround for Encode::decode taint laundering bug [rt.cpan.org #84879]
-  my $data_taint = substr($_[1], 0, 0);  # empty string, tainted like $data
+  my $data_taint = substr($_[0], 0, 0);  # empty string, tainted like $data
 
   if (!defined $charset_declared || $charset_declared eq '') {
     $charset_declared = 'us-ascii';
   }
 
   # number of characters with code above 127
-  my $cnt_8bits = $_[1] =~ tr/\x00-\x7F//c;
+  my $cnt_8bits = $_[0] =~ tr/\x00-\x7F//c;
 
   if (!$cnt_8bits &&
       $charset_declared =~
@@ -426,7 +423,7 @@ sub _normalize {
               ISO646-US )\z/xsi)
   { # declared as US-ASCII (a.k.a. ANSI X3.4-1986) and it really is
     dbg("message: kept, charset is US-ASCII as declared");
-    return $_[1];  # is all-ASCII, no need for decoding
+    return $_[0];  # is all-ASCII, no need for decoding
   }
 
   if (!$cnt_8bits &&
@@ -436,7 +433,7 @@ sub _normalize {
               Big5 | GBK | GB[ -]?18030 (?:-20\d\d)? )\z/xsi)
   { # declared as extended ASCII, but it is actually a plain 7-bit US-ASCII
     dbg("message: kept, charset is US-ASCII, declared %s", $charset_declared);
-    return $_[1];  # is all-ASCII, no need for decoding
+    return $_[0];  # is all-ASCII, no need for decoding
   }
 
   # Try first to strictly decode based on a declared character set.
@@ -444,9 +441,9 @@ sub _normalize {
   my $rv;
   if ($charset_declared =~ /^UTF-?8\z/i) {
     # attempt decoding as strict UTF-8  (flags: FB_CROAK | LEAVE_SRC)
-    if (eval { $rv = $enc_utf8->decode($_[1], 1|8); defined $rv }) {
+    if (eval { $rv = $enc_utf8->decode($_[0], 1|8); defined $rv }) {
       dbg("message: decoded as declared charset UTF-8");
-      return $_[1]  if !$return_decoded;
+      return $_[0]  if !$return_decoded;
       $rv .= $data_taint;  # carry taintedness over, avoid Encode bug
       return $rv;  # decoded
     } else {
@@ -454,9 +451,9 @@ sub _normalize {
     };
 
   } elsif ($cnt_8bits &&
-           eval { $rv = $enc_utf8->decode($_[1], 1|8); defined $rv }) {
+           eval { $rv = $enc_utf8->decode($_[0], 1|8); defined $rv }) {
     dbg("message: decoded as charset UTF-8, declared %s", $charset_declared);
-    return $_[1]  if !$return_decoded;
+    return $_[0]  if !$return_decoded;
     $rv .= $data_taint;  # carry taintedness over, avoid Encode bug
     return $rv;  # decoded
 
@@ -496,7 +493,7 @@ sub _normalize {
       dbg("message: failed decoding, no decoder for a declared charset %s",
           $chset);
     } else {
-      eval { $rv = $decoder->decode($_[1], 1|8) };  # FB_CROAK | LEAVE_SRC
+      eval { $rv = $decoder->decode($_[0], 1|8) };  # FB_CROAK | LEAVE_SRC
       if (lc $chset eq lc $charset_declared) {
         dbg("message: %s as declared charset %s",
             defined $rv ? 'decoded' : 'failed decoding', $charset_declared);
@@ -517,15 +514,15 @@ sub _normalize {
   if (!defined $rv && !$cnt_8bits) {
     dbg("message: kept, guessed charset is US-ASCII, declared %s",
         $charset_declared);
-    return $_[1];  # is all-ASCII, no need for decoding
+    return $_[0];  # is all-ASCII, no need for decoding
 
   } elsif (!defined $rv && $enc_w1252 &&
       #             ASCII  NBSP (c) SHY  '   "  ...   '".-   TM
-      $_[1] !~ tr/\x00-\x7F\xA0\xA9\xAD\x82\x84\x85\x91-\x97\x99//c)
+      $_[0] !~ tr/\x00-\x7F\xA0\xA9\xAD\x82\x84\x85\x91-\x97\x99//c)
   { # ASCII + NBSP + SHY + some punctuation characters
     # NBSP (A0) and SHY (AD) are at the same position in ISO-8859-* too
     # consider also: AE (r), 80 Euro
-    eval { $rv = $enc_w1252->decode($_[1], 1|8) };  # FB_CROAK | LEAVE_SRC
+    eval { $rv = $enc_w1252->decode($_[0], 1|8) };  # FB_CROAK | LEAVE_SRC
     # the above can't fail, but keep code general just in case
     dbg("message: %s as guessed charset %s, declared %s",
         defined $rv ? 'decoded' : 'failed decoding',
@@ -541,7 +538,7 @@ sub _normalize {
     dbg("message: Encode::Detect::Detector not available, declared %s failed",
         $charset_declared);
   } else {
-    my $charset_detected = Encode::Detect::Detector::detect($_[1]);
+    my $charset_detected = Encode::Detect::Detector::detect($_[0]);
     if ($charset_detected && lc $charset_detected ne lc $charset_declared) {
       my $decoder = Encode::find_encoding($charset_detected);
       if (!$decoder && $charset_detected =~ /^GB[ -]?18030(?:-20\d\d)?\z/i) {
@@ -553,7 +550,7 @@ sub _normalize {
         dbg("message: failed decoding, no decoder for a detected charset %s",
             $charset_detected);
       } else {
-        eval { $rv = $decoder->decode($_[1], 1|8) };  # FB_CROAK | LEAVE_SRC
+        eval { $rv = $decoder->decode($_[0], 1|8) };  # FB_CROAK | LEAVE_SRC
         dbg("message: %s as detected charset %s, declared %s",
             defined $rv ? 'decoded' : 'failed decoding',
             $charset_detected, $charset_declared);
@@ -563,14 +560,14 @@ sub _normalize {
 
   if (!defined $rv) {  # all decoding attempts failed so far, probably garbage
     # go for Windows-1252 which can't fail
-    eval { $rv = $enc_w1252->decode($_[1]) };
+    eval { $rv = $enc_w1252->decode($_[0]) };
     dbg("message: %s as last-resort charset %s, declared %s",
         defined $rv ? 'decoded' : 'failed decoding',
         'Windows-1252', $charset_declared);
   }
 
   if (!defined $rv) {  # just in case - all decoding attempts failed so far
-    return $_[1];  # garbage-in / garbage-out, return unchanged octets
+    return $_[0];  # garbage-in / garbage-out, return unchanged octets
   }
   # decoding octets to characters was successful
   if (!$return_decoded) {
@@ -622,7 +619,7 @@ sub rendered {
         # subroutine _normalize() to return Unicode text.  See Bug 7133
         #
         $character_semantics = 1;  # $text will be in characters
-        $text = $self->_normalize($text, $self->{charset}, 1); # bytes to chars
+        $text = _normalize($text, $self->{charset}, 1); # bytes to chars
       } elsif (!defined $self->{charset} ||
                $self->{charset} =~ /^(?:US-ASCII|UTF-8)\z/i) {
         # With some luck input can be interpreted as UTF-8, do not warn.
@@ -657,7 +654,7 @@ sub rendered {
     else {  # plain text
       if ($self->{normalize} && $enc_utf8) {
         # request transcoded result as UTF-8 octets!
-        $text = $self->_normalize($text, $self->{charset}, 0);
+        $text = _normalize($text, $self->{charset}, 0);
       }
       $self->{rendered_type} = $self->{type};
       $self->{rendered} = $self->{'visible_rendered'} = $text;
@@ -762,7 +759,7 @@ sub delete_header {
 
 # decode a header appropriately.  don't bother adding it to the pod documents.
 sub __decode_header {
-  my ( $self, $encoding, $cte, $data ) = @_;
+  my ( $encoding, $cte, $data ) = @_;
 
   if ( $cte eq 'B' ) {
     # base 64 encoded
@@ -780,13 +777,13 @@ sub __decode_header {
     # not possible since the input has already been limited to 'B' and 'Q'
     die "message: unknown encoding type '$cte' in RFC2047 header";
   }
-  return $self->_normalize($data, $encoding, 0);  # transcode to UTF-8 octets
+  return _normalize($data, $encoding, 0);  # transcode to UTF-8 octets
 }
 
 # Decode base64 and quoted-printable in headers according to RFC2047.
 #
 sub _decode_header {
-  my($self, $header_field_body, $header_field_name) = @_;
+  my($header_field_body, $header_field_name) = @_;
 
   return '' unless defined $header_field_body && $header_field_body ne '';
 
@@ -816,7 +813,7 @@ sub _decode_header {
     # or plain US-ASCII
     $header_field_body =~
       s{ (?: = \? ([A-Za-z0-9_-]+) \? ([bqBQ]) \? ([^?]*) \? = ) }
-       { $self->__decode_header($1, uc($2), $3) }xsge;
+       { __decode_header($1, uc($2), $3) }xsge;
   }
 
 # dbg("message: _decode_header %s: %s", $header_field_name, $header_field_body);
