@@ -2478,7 +2478,7 @@ length to no more than 50 characters.
     type => $CONF_TYPE_HASH_KEY_VALUE,
   });
 
-=item report_charset CHARSET		(default: unset)
+=item report_charset CHARSET		(default: UTF-8)
 
 Set the MIME Content-Type charset used for the text/plain report which
 is attached to spam mail messages.
@@ -2487,7 +2487,7 @@ is attached to spam mail messages.
 
   push (@cmds, {
     setting => 'report_charset',
-    default => '',
+    default => 'UTF-8',
     type => $CONF_TYPE_STRING,
   });
 
