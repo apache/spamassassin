@@ -348,14 +348,15 @@ sub _parse_body {
             s{<?(?<!mailto:)$self->{email_regex}(?:>|\s{1,10}(?!(?:fa(?:x|csi)|tel|phone|e?-?mail))[a-z]{2,11}:)}{ }gi;
             while (/$self->{email_regex}/g) {
                 my $email = lc($1);
-                push(@body_emails, $email) unless defined $seen{$email};
+                utf8::encode($email) if utf8::is_utf8($email); # chars to UTF-8
+                push(@body_emails, $email) unless $seen{$email};
                 $seen{$email} = 1;
                 last BODY if @body_emails >= 40; # sanity
             }
         }
         my $count_all = 0;
         my $count_fm = 0;
-        foreach my $email (@body_emails) {
+        foreach my $email (@body_emails) {  # as UTF-8 octets
             if (++$count_all == $pms->{main}->{conf}->{freemail_max_body_emails}) {
                 if ($pms->{main}->{conf}->{freemail_skip_when_over_max}) {
                     $pms->{freemail_skip_body} = 1;

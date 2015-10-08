@@ -473,14 +473,22 @@ sub create_lm {
   my %ngram;
   my @sorted;
 
+  # Note that $$inputptr may or may not be in perl characters (utf8 flag set)
+  my $is_unicode = utf8::is_utf8($$inputptr);
+
   # my $non_word_characters = qr/[0-9\s]/;
-  for my $word (split(/[0-9\s]+/, ${$_[0]}))
+  for my $word (split(/[0-9\s]+/, $$inputptr))
   {
-    # Bug 6229: Current TextCat database only works well with
-    # lowercase input, lets work around it until it's properly
-    # generated and/or locale issues are resolved..
-    $word =~ tr/A-Z\xc0-\xd6\xd8-\xde/a-z\xe0-\xf6\xf8-\xfe/
-        if $word =~ /[A-Z]/ && $word =~ /[a-zA-Z\xc0-\xd6\xd8-\xde\xe0-\xf6\xf8-\xfe]{4}/;
+    # Bug 6229: Current TextCat database only works well with lowercase input
+    if ($is_unicode) {
+      # Unicode rules are used for the case change
+      $word = lc $word  if $word =~ /\w{4}/;
+      utf8::encode($word);  # encode Unicode characters to UTF-8 octets
+    } elsif ($word =~ /[A-Z]/ &&
+             $word =~ /[a-zA-Z\xc0-\xd6\xd8-\xde\xe0-\xf6\xf8-\xfe]{4}/) {
+      # assume ISO 8859-1 / Windows-1252
+      $word =~ tr/A-Z\xc0-\xd6\xd8-\xde/a-z\xe0-\xf6\xf8-\xfe/;
+    }
     $word = "\000" . $word . "\000";
     my $len = length($word);
     my $flen = $len;
