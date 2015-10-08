@@ -122,6 +122,7 @@ package Mail::SpamAssassin::Plugin::DKIM;
 use Mail::SpamAssassin::Plugin;
 use Mail::SpamAssassin::Logger;
 use Mail::SpamAssassin::Timeout;
+use Mail::SpamAssassin::Util qw(idn_to_ascii);
 
 use strict;
 use warnings;
@@ -1047,12 +1048,13 @@ sub _check_dkim_adsp {
           my $err = $timer->run_and_catch(sub {
             eval {
               if (Mail::DKIM::AuthorDomainPolicy->UNIVERSAL::can("fetch")) {
+                my $author_domain_ace = idn_to_ascii($author_domain);
                 dbg("dkim: adsp: performing lookup on _adsp._domainkey.%s",
-                    $author_domain);
+                    $author_domain_ace);
                 # get our Net::DNS::Resolver object
                 my $res = $self->{main}->{resolver}->get_resolver;
                 $practices = Mail::DKIM::AuthorDomainPolicy->fetch(
-                               Protocol => "dns", Domain => $author_domain,
+                               Protocol => "dns", Domain => $author_domain_ace,
                                DnsResolver => $res);
               }
               1;
