@@ -1046,9 +1046,6 @@ sub _parse_normal {
   elsif ($ct[3]) {
     $msg->{'name'} = $ct[3];
   }
-  if ($msg->{'name'}) {
-    $msg->{'name'} = Encode::decode("MIME-Header", $msg->{'name'});
-  }
 
   $msg->{'boundary'} = $boundary;
 
@@ -1144,11 +1141,13 @@ sub get_body_text_array_common {
   }
 
   # whitespace handling (warning: small changes have large effects!)
-  $text =~ s/\n+\s*\n+/\f/gs;		# double newlines => form feed
+  $text =~ s/\n+\s*\n+/\x00/gs;		# double newlines => null
 # $text =~ tr/ \t\n\r\x0b\xa0/ /s;	# whitespace (incl. VT, NBSP) => space
-  $text =~ tr/ \t\n\r\x0b/ /s;		# whitespace (incl. VT) => space
-  $text =~ tr/\f/\n/;			# form feeds => newline
+# $text =~ tr/ \t\n\r\x0b/ /s;		# whitespace (incl. VT) => single space
+  $text =~ s/\s+/ /gs;		        # Unicode whitespace => single space
+  $text =~ tr/\x00/\n/;			# null => newline
 
+  utf8::encode($text) if utf8::is_utf8($text);
   my @textary = split_into_array_of_short_lines($text);
   $self->{$key} = \@textary;
 
