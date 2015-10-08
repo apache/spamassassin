@@ -121,12 +121,6 @@ BEGIN {
 
 ###########################################################################
 
-our $enc_utf8;
-BEGIN {
-  eval { require Encode }
-    and do { $enc_utf8 = Encode::find_encoding('UTF-8') }
-};
-
 our $have_libidn;
 BEGIN {
   eval { require Net::LibIDN } and do { $have_libidn = 1 };
