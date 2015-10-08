@@ -1269,8 +1269,8 @@ sub rewrite_no_report_safe {
 sub qp_encode_header {
   my ($self, $text) = @_;
 
-  # do nothing unless there's an 8-bit char
-  return $text unless ($text =~ /[\x80-\xff]/);
+  # return unchanged if there are no 8-bit characters
+  return $text  if $text !~ tr/\x00-\x7F//c;
 
   my $cs = 'ISO-8859-1';
   if ($self->{report_charset}) {
@@ -1965,7 +1965,8 @@ sub _get {
   else {
     my @results = $getraw ? $self->{msg}->raw_header($request)
                           : $self->{msg}->get_header($request);
-  # dbg("message: get(%s) = %s", $request, join(", ",@results));
+  # dbg("message: get(%s)%s = %s",
+  #     $request, $getraw?'raw':'', join(", ",@results));
     if (@results) {
       $result = join('', @results);
     } else {  # metadata
