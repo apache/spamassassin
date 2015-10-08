@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bpoliakoff darxus dwarren grenier jarif kam-ninja kpg-core zmi; day 2: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bpoliakoff darxus dwarren grenier jarif kam-ninja kpg-core llanga mmiroslaw-ham mmiroslaw-spam zmi; day 3: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bpoliakoff darxus dwarren grenier jarif kam-ninja kpg-core llanga zmi
+# with results from: day 1: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bpoliakoff darxus dwarren grenier jarif kam-ninja kpg-core zmi; day 2: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bpoliakoff darxus dwarren grenier jarif kam-ninja kpg-core llanga zmi; day 3: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bpoliakoff darxus dwarren grenier jarif kam-ninja kpg-core llanga mmiroslaw-ham mmiroslaw-spam zmi
 
 # tflags publish
 AC_BR_BONANZA
@@ -168,9 +168,6 @@ COMPENSATION
 
 # tflags publish
 CORRUPT_FROM_LINE_IN_HDRS
-
-# good enough
-CURR_PRICE
 
 # good enough
 DEAR_BENEFICIARY
@@ -496,9 +493,6 @@ LONG_HEX_URI
 # tflags publish
 LONG_IMG_URI
 
-# good enough
-LONG_TERM_PRICE
-
 # tflags publish
 LOTS_OF_MONEY
 
@@ -525,9 +519,6 @@ MAILER_EQ_ORG
 
 # good enough
 MALFORMED_FREEMAIL
-
-# good enough
-MANY_HDRS_LCASE
 
 # tflags publish
 MANY_SPAN_IN_TEXT
@@ -871,9 +862,6 @@ SERGIO_SUBJECT_VIAGRA01
 # good enough
 SHARE_50_50
 
-# good enough
-SHORT_TERM_PRICE
-
 # tflags publish
 SINGLETS_LOW_CONTRAST
 
@@ -1007,7 +995,7 @@ TVD_VISIT_PHARMA
 TW_GIBBERISH_MANY
 
 # good enough
-DATE_IN_FUTURE_96_Q
+BODY_SINGLE_URI
 
 # good enough
 DX_TEXT_05
@@ -1016,13 +1004,25 @@ DX_TEXT_05
 FROM_MISSP_DYNIP
 
 # good enough
+FROM_URI
+
+# good enough
+HDRS_LCASE
+
+# good enough
 HDRS_MISSP
 
 # good enough
 HK_LOTTO_NAME
 
 # good enough
+HK_SCAM_S23
+
+# good enough
 KB_FORGED_MOZ4
+
+# good enough
+MONEY_FORM_SHORT
 
 # good enough
 MONEY_LOTTERY
@@ -1032,9 +1032,6 @@ NAME_EMAIL_DIFF
 
 # good enough
 OBFU_ATTACH_MISSP
-
-# good enough
-OBFU_JPG_ATTACH
 
 # good enough
 PDS_TO_EQ_FROM_NAME
