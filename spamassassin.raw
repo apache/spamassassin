@@ -476,7 +476,10 @@ sub wanted {
 
     # If we're not going to retest, just remove the markup and print it out
     if ( !$opt{'test-mode'} ) {
-      print $spamtest->remove_spamassassin_markup ($mail);
+      my $report = $spamtest->remove_spamassassin_markup ($mail);
+      # encode Unicode characters to UTF-8 octets
+      utf8::encode($report) if utf8::is_utf8($report);
+      print $report;
       $mail->finish();
       $mail = undef;
       return 1;
@@ -525,11 +528,17 @@ sub wanted {
 
   # OK, do checks and put out the message.
   my $status = $spamtest->check($mail);
-  print $status->rewrite_mail()  or die "error writing: $!";
+  { my $report = $status->rewrite_mail();
+    # encode Unicode characters to UTF-8 octets
+    utf8::encode($report) if utf8::is_utf8($report);
+    print $report  or die "error writing: $!";
+  }
 
   if ( $opt{'test-mode'} ) {
-    # use bytes;
-    print $status->get_report()  or die "error writing: $!";
+    my $report = $status->get_report();
+    # encode Unicode characters to UTF-8 octets
+    utf8::encode($report) if utf8::is_utf8($report);
+    print $report  or die "error writing: $!";
   }
 
   # if this message was spam, set the exit value appropriately.
