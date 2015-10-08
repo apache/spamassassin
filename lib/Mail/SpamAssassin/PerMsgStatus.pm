@@ -55,6 +55,7 @@ use re 'taint';
 
 use Errno qw(ENOENT);
 use Time::HiRes qw(time);
+use Encode;
 
 use Mail::SpamAssassin::Constants qw(:sa);
 use Mail::SpamAssassin::AsyncLoop;
@@ -1024,21 +1025,23 @@ sub rewrite_report_safe {
   # This is the new message.
   my $newmsg = '';
 
-  # the report charset
-  my $report_charset = "; charset=iso-8859-1";
-  if ($self->{conf}->{report_charset}) {
-    $report_charset = "; charset=" . $self->{conf}->{report_charset};
-  }
+  # the character set of a report
+  my $report_charset = $self->{conf}->{report_charset} || "UTF-8";
 
   # the SpamAssassin report
   my $report = $self->get_report();
 
-  # If there are any wide characters, need to MIME-encode in UTF-8
-  # TODO: If $report_charset is something other than iso-8859-1/us-ascii, then
-  # we could try converting to that charset if possible
-  unless ($] < 5.008 || utf8::downgrade($report, 1)) {
-      $report_charset = "; charset=utf-8";
-      utf8::encode($report);
+  if (!utf8::is_utf8($report)) {
+    # already in octets
+  } else {
+    # encode to octets
+    if (uc $report_charset eq 'UTF-8') {
+      dbg("check: encoding report to $report_charset");
+      utf8::encode($report);  # very fast
+    } else {
+      dbg("check: encoding report to $report_charset. Slow, to be avoided!");
+      $report = Encode::encode($report_charset, $report);  # slow
+    }
   }
 
   # get original headers, "pristine" if we can do it
@@ -1151,7 +1154,7 @@ Content-Type: multipart/mixed; boundary="$boundary"
 This is a multi-part message in MIME format.
 
 --$boundary
-Content-Type: text/plain$report_charset
+Content-Type: text/plain; charset=$report_charset
 Content-Disposition: inline
 Content-Transfer-Encoding: 8bit
 
@@ -1272,10 +1275,8 @@ sub qp_encode_header {
   # return unchanged if there are no 8-bit characters
   return $text  if $text !~ tr/\x00-\x7F//c;
 
-  my $cs = 'ISO-8859-1';
-  if ($self->{report_charset}) {
-    $cs = $self->{report_charset};
-  }
+# my $cs = $self->{conf}->{report_charset} || "UTF-8";
+  my $cs = "UTF-8";
 
   my @hexchars = split('', '0123456789abcdef');
   my $ord;
@@ -1294,7 +1295,7 @@ sub qp_encode_header {
 sub _process_header {
   my ($self, $hdr_name, $hdr_data) = @_;
 
-  $hdr_data = $self->_replace_tags($hdr_data);
+  $hdr_data = $self->_replace_tags($hdr_data);  # as octets
   $hdr_data =~ s/(?:\r?\n)+$//; # make sure there are no trailing newlines ...
 
   if ($self->{conf}->{fold_headers}) {
@@ -1332,7 +1333,13 @@ sub _replace_tags {
           # _get_tag on an attempt to use such tag in add_header template
         } else {
           $result = $self->get_tag_raw($tag,$3);
-          $result = join(' ',@$result)  if ref $result eq 'ARRAY';
+          if (!ref $result) {
+            utf8::encode($result) if utf8::is_utf8($result);
+          } elsif (ref $result eq 'ARRAY') {
+            my @values = @$result;  # avoid modifying referenced array
+            for (@values) { utf8::encode($_) if utf8::is_utf8($_) }
+            $result = join(' ', @values);
+          }
         }
         defined $result ? $result : $full;
       }ge;
