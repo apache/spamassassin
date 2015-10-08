@@ -4625,12 +4625,12 @@ sub mtime {
 
 sub parse_scores_only {
   my ($self) = @_;
-  $_[0]->{parser}->parse ($_[1], 1);
+  $self->{parser}->parse ($_[1], 1);
 }
 
 sub parse_rules {
   my ($self) = @_;
-  $_[0]->{parser}->parse ($_[1], 0);
+  $self->{parser}->parse ($_[1], 0);
 }
 
 ###########################################################################

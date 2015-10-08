@@ -1040,7 +1040,7 @@ sub _parse_normal {
 
   # attempt to figure out a name for this attachment if there is one ...
   my $disp = $msg->header('content-disposition') || '';
-  if ($disp =~ /name="?([^\";]+)"?/i) {
+  if ($disp =~ /name=\s*"?([^";]+)"?/i) {
     $msg->{'name'} = $1;
   }
   elsif ($ct[3]) {
