@@ -403,6 +403,7 @@ sub _normalize {
 # my $data = $_[0];  # avoid copying large strings
   my $charset_declared = $_[1];
   my $return_decoded = $_[2];  # true: Unicode characters, false: UTF-8 octets
+  my $insist_on_declared_charset = $_[3];  # no FB_CROAK in Encode::decode
 
   warn "message: _normalize() was given characters, expected bytes: $_[0]\n"
     if utf8::is_utf8($_[0]);
@@ -439,25 +440,15 @@ sub _normalize {
   # Try first to strictly decode based on a declared character set.
 
   my $rv;
-  if ($charset_declared =~ /^UTF-?8\z/i) {
-    # attempt decoding as strict UTF-8  (flags: FB_CROAK | LEAVE_SRC)
-    if (eval { $rv = $enc_utf8->decode($_[0], 1|8); defined $rv }) {
-      dbg("message: decoded as declared charset UTF-8");
-      return $_[0]  if !$return_decoded;
-      $rv .= $data_taint;  # carry taintedness over, avoid Encode bug
-      return $rv;  # decoded
-    } else {
-      dbg("message: failed decoding as declared charset UTF-8");
-    };
-
-  } elsif ($cnt_8bits &&
-           eval { $rv = $enc_utf8->decode($_[0], 1|8); defined $rv }) {
+  if ($cnt_8bits && !$insist_on_declared_charset &&
+      eval { $rv = $enc_utf8->decode($_[0], 1|8); defined $rv }) {
     dbg("message: decoded as charset UTF-8, declared %s", $charset_declared);
     return $_[0]  if !$return_decoded;
     $rv .= $data_taint;  # carry taintedness over, avoid Encode bug
     return $rv;  # decoded
 
-  } elsif ($charset_declared =~ /^(?:US-)?ASCII\z/i) {
+  } elsif ($charset_declared =~ /^(?:US-)?ASCII\z/i
+           && !$insist_on_declared_charset) {
     # declared as US-ASCII but contains 8-bit characters, makes no sense
     # to attempt decoding first as strict US-ASCII as we know it would fail
 
@@ -481,8 +472,11 @@ sub _normalize {
     my($chset, $decoder);
     if ($charset_declared =~ /^(?: ISO-?8859-1 | Windows-1252 | CP1252 )\z/xi) {
       $chset = 'Windows-1252'; $decoder = $enc_w1252;
+    } elsif ($charset_declared =~ /^UTF-?8\z/i) {
+      $chset = 'UTF-8'; $decoder = $enc_utf8;
     } else {
-      $chset = $charset_declared; $decoder = Encode::find_encoding($chset);
+      $chset = $charset_declared;
+      $decoder = Encode::find_encoding($chset);
       if (!$decoder && $chset =~ /^GB[ -]?18030(?:-20\d\d)?\z/i) {
         $decoder = Encode::find_encoding('GBK');  # a subset of GB18030
         dbg("message: no decoder for a declared charset %s, using GBK",
@@ -493,7 +487,9 @@ sub _normalize {
       dbg("message: failed decoding, no decoder for a declared charset %s",
           $chset);
     } else {
-      eval { $rv = $decoder->decode($_[0], 1|8) };  # FB_CROAK | LEAVE_SRC
+      my $check_flags = Encode::LEAVE_SRC;  # 0x0008
+      $check_flags |= Encode::FB_CROAK  unless $insist_on_declared_charset;
+      eval { $rv = $decoder->decode($_[0], $check_flags) };
       if (lc $chset eq lc $charset_declared) {
         dbg("message: %s as declared charset %s",
             defined $rv ? 'decoded' : 'failed decoding', $charset_declared);
@@ -757,8 +753,8 @@ sub delete_header {
   $self->{'header_order'} = \@neworder;
 }
 
-# decode a header appropriately.  don't bother adding it to the pod documents.
-sub __decode_header {
+# decode 'encoded-word' (RFC 2047, RFC 2231)
+sub _decode_mime_encoded_word {
   my ( $encoding, $cte, $data ) = @_;
 
   if ( $cte eq 'B' ) {
@@ -775,12 +771,21 @@ sub __decode_header {
   }
   else {
     # not possible since the input has already been limited to 'B' and 'Q'
-    die "message: unknown encoding type '$cte' in RFC2047 header";
+    die "message: unknown encoding type '$cte' in RFC 2047 header";
   }
-  return _normalize($data, $encoding, 0);  # transcode to UTF-8 octets
+
+  # RFC 2231 section 5: Language specification in Encoded Words
+  #   =?US-ASCII*EN?Q?Keith_Moore?=
+  # strip optional language information following an asterisk
+  $encoding =~ s{ \* .* \z }{}xs;
+
+  $data = _normalize($data, $encoding, 0, 1);  # transcode to UTF-8 octets
+
+# dbg("message: _decode_mime_encoded_word (%s, %s): %s", $cte, $encoding, $data);
+  return $data;  # as UTF-8 octets
 }
 
-# Decode base64 and quoted-printable in headers according to RFC2047.
+# Decode base64 and quoted-printable in headers according to RFC 2047.
 #
 sub _decode_header {
   my($header_field_body, $header_field_name) = @_;
@@ -788,32 +793,52 @@ sub _decode_header {
   return '' unless defined $header_field_body && $header_field_body ne '';
 
   # deal with folding and cream the newlines and such
-  $header_field_body =~ s/\n[ \t]+/\n /g;
+  $header_field_body =~ s/\n[ \t]/\n /g;  # turning tab into space on folds
   $header_field_body =~ s/\015?\012//gs;
 
-  if ($header_field_name =~
-       /^ (?: (?: Received | (?:Resent-)? (?: Message-ID | Date ) |
-                  MIME-Version | References | In-Reply-To ) \z
-            | (?: List- | Content- ) ) /xsi ) {
-    # Bug 6945: some header fields must not be processed for MIME encoding
+  if ($header_field_body =~ tr/\x00-\x7F//c) {
+    # Non-ASCII characters in header are not allowed by RFC 5322, but
+    # RFC 6532 relaxed the rule and allows UTF-8 encoding in header
+    # field bodies; no other encoding is allowed there (apart from
+    # RFC 2047 MIME encoded words, which must be all-ASCII anyway).
+    # The following call keeps UTF-8 octets if valid, otherwise tries
+    # some decoding guesswork so that the result is valid UTF-8 (octets).
+    $header_field_body = _normalize($header_field_body, 'UTF-8', 0);
+  }
 
-  } else {
+  if ($header_field_name =~
+       /^ (?: Received | (?:Resent-)? (?: Message-ID | Date ) |
+              MIME-Version | References | In-Reply-To | List-.* ) \z /xsi ) {
+    # Bug 6945: some header fields must not be processed for MIME encoding
+    # Bug 7249: leave out the Content-*
+
+  } elsif ($header_field_body =~ /=\?/) {  # triage for possible encoded-words
     local($1,$2,$3);
+
+    # RFC 2231 section 5: Language specification in Encoded Words
+    #   =?US-ASCII*EN?Q?Keith_Moore?=
 
     # Multiple encoded sections must ignore the interim whitespace.
     # To avoid possible FPs with (\s+(?==\?))?, look for the whole RE
     # separated by whitespace.
+    $header_field_body =~
+      s{ (   = \? [A-Za-z0-9*_-]+ \? [bqBQ] \? [^?]* \? = ) \s+
+         (?= = \? [A-Za-z0-9*_-]+ \? [bqBQ] \? [^?]* \? = ) }{$1}xsg;
+
+    # Bug 7249: work around violations of the RFC 2047 section 5 requirement:
+    #   Each 'encoded-word' MUST represent an integral number of characters.
+    #   A multi-octet character may not be split across adjacent 'encoded-word's
     1 while $header_field_body =~
-              s{ ( = \? [A-Za-z0-9_-]+ \? [bqBQ] \? [^?]* \? = ) \s+
-                 ( = \? [A-Za-z0-9_-]+ \? [bqBQ] \? [^?]* \? = ) }
-               {$1$2}xsg;
+        s{ ( = \? [a-z0-9_-]+ (?: \* [a-z0-9_-]* )? \? [BQ] \? )
+               (   [^?]* ) \? =
+           \1  (?= [^?]*   \? = ) }{$1$2}xsi;
 
     # transcode properly encoded RFC 2047 substrings into UTF-8 octets,
     # leave everything else unchanged as it is supposed to be UTF-8 (RFC 6532)
-    # or plain US-ASCII
+    # or its plain US-ASCII subset (RFC 5322);
     $header_field_body =~
-      s{ (?: = \? ([A-Za-z0-9_-]+) \? ([bqBQ]) \? ([^?]*) \? = ) }
-       { __decode_header($1, uc($2), $3) }xsge;
+      s{ (?: = \? ([A-Za-z0-9*_-]+) \? ([bqBQ]) \? ([^?]*) \? = ) }
+       { _decode_mime_encoded_word($1, uc($2), $3) }xsge;
   }
 
 # dbg("message: _decode_header %s: %s", $header_field_name, $header_field_body);
