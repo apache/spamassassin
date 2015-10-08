@@ -10,7 +10,7 @@ $ENV{'LANGUAGE'} = $ENV{'LC_ALL'} = 'C';             # a cheat, but we need the 
 
 %patterns = (
 
-    q{X-Spam-Report: =?ISO-8859-1?Q? }, 'qp-encoded-hdr',
+    q{X-Spam-Report: =?UTF-8?Q? }, 'qp-encoded-hdr',
     q{ Invalid Date: header =ae =af =b0 foo }, 'qp-encoded-desc',
 
 );
