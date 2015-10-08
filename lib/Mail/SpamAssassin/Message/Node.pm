@@ -618,18 +618,26 @@ sub rendered {
         $text = _normalize($text, $self->{charset}, 1); # bytes to chars
       } elsif (!defined $self->{charset} ||
                $self->{charset} =~ /^(?:US-ASCII|UTF-8)\z/i) {
-        # With some luck input can be interpreted as UTF-8, do not warn.
-        # It is still possible to hit the HTML::Parses utf8_mode bug however.
+        if ($text !~ tr/\x00-\x7F//c) {
+          # all-ASCII, keep as octets (utf8 flag off)
+        } else { # non-ASCII, try UTF-8
+          my $rv;
+          # with some luck input can be interpreted as UTF-8
+          if (eval { $rv = $enc_utf8->decode($text, 1|8); defined $rv }) {
+            $text = $rv;  # decoded to perl characters
+            $character_semantics = 1;  # $text will be in characters
+          };
+        }
       } else {
         dbg("message: 'normalize_charset' is off, encoding will likely ".
             "be misinterpreted; declared charset: %s", $self->{charset});
       }
-      # the 0 requires decoded HTML results to be in bytes (not characters)
-      my $html = Mail::SpamAssassin::HTML->new($character_semantics,0); # object
+      # the 1 requires decoded HTML results to be in characters (utf8 flag on)
+      my $html = Mail::SpamAssassin::HTML->new($character_semantics,1); # object
 
       $html->parse($text);  # parse+render text
 
-      # resulting HTML-decoded text is in bytes, likely encoded as UTF-8
+      # resulting HTML-decoded text is in perl characters (utf8 flag on)
       $self->{rendered} = $html->get_rendered_text();
       $self->{visible_rendered} = $html->get_rendered_text(invisible => 0);
       $self->{invisible_rendered} = $html->get_rendered_text(invisible => 1);
@@ -638,11 +646,25 @@ sub rendered {
       # end-of-document result values that require looking at the text
       my $r = $self->{html_results};	# temporary reference for brevity
 
-      # count the number of spaces in the rendered text (likely UTF-8 octets)
-      my $space = $self->{rendered} =~ tr/ \t\n\r\x0b//;
+      # count the number of spaces in the rendered text
+      my $space;
+      if (utf8::is_utf8($self->{rendered})) {
+        my $str = $self->{rendered};
+        $str =~ s/\S+//g;  # delete non-whitespace Unicode characters
+        $space = length $str;  # count remaining Unicode space characters
+        undef $str;  # deallocate storage
+        dbg("message: spaces (Unicode) in HTML: %d out of %d%s",
+            $space, length $self->{rendered},
+            $character_semantics ? '' : ', octets!?');
+      } else {
+        $space = $self->{rendered} =~ tr/ \t\n\r\x0b//;
+        dbg("message: spaces (octets) in HTML: %d out of %d%s",
+            $space, length $self->{rendered},
+            $character_semantics ? ', chars!?' : '');
+      }
       # we may want to add the count of other Unicode whitespace characters
 
-      $r->{html_length} = length $self->{rendered};  # bytes (likely UTF-8)
+      $r->{html_length} = length $self->{rendered};  # perl characters count
       $r->{non_space_len} = $r->{html_length} - $space;
       $r->{ratio} = ($text_len - $r->{html_length}) / $text_len  if $text_len;
     }
@@ -650,7 +672,16 @@ sub rendered {
     else {  # plain text
       if ($self->{normalize} && $enc_utf8) {
         # request transcoded result as UTF-8 octets!
-        $text = _normalize($text, $self->{charset}, 0);
+        $text = _normalize($text, $self->{charset}, 1); # bytes to chars
+      } elsif (!defined $self->{charset} ||
+               $self->{charset} =~ /^(?:US-ASCII|UTF-8)\z/i) {
+        if ($text =~ tr/\x00-\x7F//c) {  # non-ASCII, try UTF-8
+          my $rv;
+          # with some luck input can be interpreted as UTF-8
+          if (eval { $rv = $enc_utf8->decode($text, 1|8); defined $rv }) {
+            $text = $rv;  # decoded to perl characters
+          };
+        }
       }
       $self->{rendered_type} = $self->{type};
       $self->{rendered} = $self->{'visible_rendered'} = $text;
@@ -841,7 +872,7 @@ sub _decode_header {
        { _decode_mime_encoded_word($1, uc($2), $3) }xsge;
   }
 
-# dbg("message: _decode_header %s: %s", $header_field_name, $header_field_body);
+  dbg("message: _decode_header %s: %s", $header_field_name, $header_field_body);
   return $header_field_body;
 }
 
