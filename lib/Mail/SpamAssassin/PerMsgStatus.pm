@@ -59,7 +59,7 @@ use Time::HiRes qw(time);
 use Mail::SpamAssassin::Constants qw(:sa);
 use Mail::SpamAssassin::AsyncLoop;
 use Mail::SpamAssassin::Conf;
-use Mail::SpamAssassin::Util qw(untaint_var uri_list_canonicalize);
+use Mail::SpamAssassin::Util qw(untaint_var uri_list_canonicalize idn_to_ascii);
 use Mail::SpamAssassin::Timeout;
 use Mail::SpamAssassin::Logger;
 
@@ -1694,23 +1694,28 @@ sub extract_message_metadata {
     $self->{$item} = $self->{msg}->{metadata}->{$item};
   }
 
-  # TODO: International domain names (UTF-8) must be converted to
-  # ASCII-compatible encoding (ACE) for the purpose of setting the
-  # SENDERDOMAIN and AUTHORDOMAIN tags (and probably for other uses too).
-  # (explicitly required for DMARC, draft-kucherawy-dmarc-base sect. 5.6.1)
+  # International domain names (UTF-8) must be converted to ASCII-compatible
+  # encoding (ACE) for the purpose of setting the SENDERDOMAIN and AUTHORDOMAIN
+  # tags (explicitly required for DMARC, RFC 7489)
   #
   { local $1;
     my $addr = $self->get('EnvelopeFrom:addr', undef);
     # collect a FQDN, ignoring potential trailing WSP
     if (defined $addr && $addr =~ /\@([^@. \t]+\.[^@ \t]+?)[ \t]*\z/s) {
-      $self->set_tag('SENDERDOMAIN', lc $1);
+      my $d = idn_to_ascii($1);
+      $self->set_tag('SENDERDOMAIN', $d);
+      $self->{msg}->put_metadata("X-SenderDomain", $d);
+      dbg("metadata: X-SenderDomain: %s", $d);
     }
     # TODO: the get ':addr' only returns the first address; this should be
     # augmented to be able to return all addresses in a header field, multiple
     # addresses in a From header field are allowed according to RFC 5322
     $addr = $self->get('From:addr', undef);
     if (defined $addr && $addr =~ /\@([^@. \t]+\.[^@ \t]+?)[ \t]*\z/s) {
-      $self->set_tag('AUTHORDOMAIN', lc $1);
+      my $d = idn_to_ascii($1);
+      $self->set_tag('AUTHORDOMAIN', $d);
+      $self->{msg}->put_metadata("X-AuthorDomain", $d);
+      dbg("metadata: X-AuthorDomain: %s", $d);
     }
   }
 
