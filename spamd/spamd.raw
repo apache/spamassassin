@@ -245,7 +245,7 @@ use Mail::SpamAssassin::NetSet;
 use Mail::SpamAssassin::SubProcBackChannel;
 use Mail::SpamAssassin::SpamdForkScaling qw(:pfstates);
 use Mail::SpamAssassin::Logger qw(:DEFAULT log_message);
-use Mail::SpamAssassin::Util qw(untaint_var untaint_file_path
+use Mail::SpamAssassin::Util qw(untaint_var untaint_file_path secure_tmpdir
                                 exit_status_str am_running_on_windows);
 use Mail::SpamAssassin::Timeout;
 
@@ -3033,33 +3033,27 @@ sub ip_is_allowed {
 
 sub preload_modules_with_tmp_homedir {
 
-  # set $ENV{HOME} in /tmp while we compile and preload everything.
-  # File::Spec->tmpdir uses TMPDIR, TMP, TEMP, C:/temp, /tmp etc.
-  my $tmpdir = File::Spec->tmpdir();
-  if ( !$tmpdir ) {
-    die "spamd: cannot find writable tmp dir, set TMP or TMPDIR in environment";
-  }
+  # set $ENV{HOME} in a temp directory while we compile and preload everything.
+  my $tmphome = secure_tmpdir();
 
-  # If TMPDIR isn't set, File::Spec->tmpdir() will set it to undefined.
+  # If TMPDIR isn't set, File::Spec->tmpdir() called by secure_tmpdir() may set it to undefined.
   # that then breaks other things ...
+  # If this is really necessary shouldn't secure_tmpdir() be doing it?
   delete $ENV{'TMPDIR'} if ( !defined $ENV{'TMPDIR'} );
-
-  my $tmphome = File::Spec->catdir( $tmpdir, "spamd-$$-init" );
-  $tmphome = untaint_file_path($tmphome);
 
   my $tmpsadir = File::Spec->catdir( $tmphome, ".spamassassin" );
 
   dbg("spamd: Preloading modules with HOME=$tmphome");
 
-  # bug 5379: spamd won't start if the temp preloading dir exists;
-  # be sure to remove it just in case 
+  if (!-d $tmphome) {
+    die "spamd: cannot create temp directory $tmphome: $!";
+  }
+
+  # bug 5379: spamd won't start if the temp preloading dir exists; check if exists and remove it
+  # This check should be unnecessary now that $tmphome created using File::Temp, but leave it just in case
   if (-d $tmpsadir) {
     rmdir( $tmpsadir ) or die "spamd: $tmpsadir not empty: $!";
   }
-  if (-d $tmphome) {
-    rmdir( $tmphome ) or die "spamd: $tmphome not empty: $!";
-  }
-  mkdir( $tmphome,  0700 ) or die "spamd: cannot create $tmphome: $!";
   mkdir( $tmpsadir, 0700 ) or die "spamd: cannot create $tmpsadir: $!";
   $ENV{HOME} = $tmphome;
 
