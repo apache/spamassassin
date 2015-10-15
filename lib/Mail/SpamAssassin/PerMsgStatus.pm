@@ -60,7 +60,8 @@ use Encode;
 use Mail::SpamAssassin::Constants qw(:sa);
 use Mail::SpamAssassin::AsyncLoop;
 use Mail::SpamAssassin::Conf;
-use Mail::SpamAssassin::Util qw(untaint_var uri_list_canonicalize idn_to_ascii);
+use Mail::SpamAssassin::Util qw(untaint_var base64_encode idn_to_ascii
+                                uri_list_canonicalize);
 use Mail::SpamAssassin::Timeout;
 use Mail::SpamAssassin::Logger;
 
@@ -1005,7 +1006,7 @@ sub _get_added_headers {
   foreach my $hf_ref (@{$self->{conf}->{$which}}) {
     my($hfname, $hfbody) = @$hf_ref;
     my $line = $self->_process_header($hfname,$hfbody);
-    $line = $self->qp_encode_header($line);
+    $line = $self->mime_encode_header($line);
     $str .= "X-Spam-$hfname: $line\n";
   }
   return $str;
@@ -1269,27 +1270,53 @@ sub rewrite_no_report_safe {
   return $newmsg.$self->{msg}->get_pristine_body();
 }
 
-sub qp_encode_header {
+# encode a header field body into ASCII as per RFC 2047
+#
+sub mime_encode_header {
   my ($self, $text) = @_;
 
-  # return unchanged if there are no 8-bit characters
-  return $text  if $text !~ tr/\x00-\x7F//c;
+  utf8::encode($text)  if utf8::is_utf8($text);
 
-# my $cs = $self->{conf}->{report_charset} || "UTF-8";
-  my $cs = "UTF-8";
+  my $result = '';
+  for my $line (split(/^/, $text)) {
 
-  my @hexchars = split('', '0123456789abcdef');
-  my $ord;
-  local $1;
-  $text =~ s{([\x80-\xff])}{
-		$ord = ord $1;
-		'='.$hexchars[($ord & 0xf0) >> 4].$hexchars[$ord & 0x0f]
-	}ges;
+    if ($line =~ /^[\x09\x20-\x7E]*\r?\n\z/s) {
+      $result .= $line;  # no need for encoding
 
-  $text = '=?'.$cs.'?Q?'.$text.'?=';
+    } else {
+      my $prefix = '';
+      my $suffix = '';
 
-  dbg("markup: encoding header in $cs: $text");
-  return $text;
+      local $1;
+      if ($line =~ s/( (?: ^ | [ \t] ) [\x09\x20-\x7E]* (?: \r?\n )? ) \z//xs) {
+        $suffix = $1;
+      } elsif ($line =~ s/(\r?\n)\z//s) {
+        $suffix = $1;
+      }
+
+      if ($line =~ s/^ ( [\x09\x20-\x7E]* (?: [ \t] | \z ) )//xs) {
+        $prefix = $1;
+      }
+
+      if ($line eq '') {
+        $result .= $prefix . $suffix;
+      } else {
+        my $qp_enc_count = $line =~ tr/=?_\x00-\x1F\x7F-\xFF//;
+        if (length($line) + $qp_enc_count*2 <= 4 * int(length($line)+2)/3) {
+          # RFC 2047: Upper case should be used for hex digits A through F
+          $line =~ s{ ( [=?_\x00-\x20\x7F-\xFF] ) }
+                    { $1 eq ' ' ? '_' : sprintf("=%02X", ord $1) }xges;
+          $result .= $prefix . '=?UTF-8?Q?' . $line;
+        } else {
+          $result .= $prefix . '=?UTF-8?B?' . base64_encode($line);
+        }
+        $result .= '?=' . $suffix;
+      }
+    }
+  }
+
+  dbg("markup: mime_encode_header: %s", $result);
+  return $result;
 }
 
 sub _process_header {

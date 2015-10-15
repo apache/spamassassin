@@ -5,13 +5,13 @@ use SATest; sa_t_init("header_utf8.t");
 
 use constant TEST_ENABLED => ($] > 5.010001);
 
-use Test; BEGIN { plan tests => (TEST_ENABLED ? 44 : 0) };
+use Test; BEGIN { plan tests => (TEST_ENABLED ? 154 : 0) };
 
 exit unless (TEST_ENABLED);
 
 # ---------------------------------------------------------------------------
 
-%patterns = (
+%mypatterns = (
   q{/ LT_RPATH /}     => 'LT_RPATH',
   q{/ LT_ENVFROM /}   => 'LT_ENVFROM',
   q{/ LT_FROM /}      => 'LT_FROM',
@@ -31,8 +31,19 @@ exit unless (TEST_ENABLED);
   q{/ LT_NOTE /}      => 'LT_NOTE',
   q{/ LT_UTF8SMTP_ANY /}    => 'LT_UTF8SMTP_ANY',
   q{/ LT_SPLIT_UTF8_SUBJ /} => 'LT_SPLIT_UTF8_SUBJ',
-  q{/ USER_IN_WHITELIST /}  => 'USER_IN_WHITELIST',
-  q{/(?m) LT_ANY_CHARS \s*En-tête contient caractères$/} => 'LT_ANY_CHARS',
+  q{/ USER_IN_BLACKLIST /}  => 'USER_IN_BLACKLIST',
+);
+
+%mypatterns_utf8 = (  # as it appears in a report body
+  q{/(?m)^ 0\.0 LT_ANY_CHARS \s*En-tête contient caractères$/} => 'LT_ANY_CHARS utf8',
+);
+
+%mypatterns_mime_qp = (  # as it appears in a mail header section
+  q{/(?m)^\t\*  0\.0 LT_ANY_CHARS =\?UTF-8\?Q\?En-t=C3=AAte_contient_caract=C3=A8res\?=$/} => 'LT_ANY_CHARS mime encoded',
+);
+
+%mypatterns_mime_b64 = (  # as it appears in a mail header section
+  q{/(?m)^\t\*  0\.0 LT_ANY_CHARS =\?UTF-8\?B\?5a2X56ym6KKr5YyF5ZCr5Zyo5raI5oGv5oql5aS06YOo5YiG\?=$/} => 'LT_ANY_CHARS mime encoded',
 );
 
 %anti_patterns = (
@@ -40,9 +51,9 @@ exit unless (TEST_ENABLED);
 # q{/ INVALID_MSGID /}  => 'INVALID_MSGID',
 );
 
-my $localrules = <<'END';
+my $myrules = <<'END';
   add_header all  AuthorDomain _AUTHORDOMAIN_
-  whitelist_from  Marilù.Gioffré@esempio-università.it
+  blacklist_from  Marilù.Gioffré@esempio-università.it
   header LT_UTF8SMTP_ANY  Received =~ /\bwith\s*UTF8SMTPS?A?\b/mi
   score  LT_UTF8SMTP_ANY  -0.1
   header LT_RPATH   Return-Path:addr =~ /^Marilù\.Gioffré\@esempio-università\.it\z/
@@ -82,18 +93,77 @@ my $localrules = <<'END';
   header LT_NOTE      X-Note =~ /^The above.*char =C5 =BE is invalid, .*wild$/m
   score  LT_NOTE      0.01
   header LT_ANY_CHARS From =~ /./
-  score  LT_ANY_CHARS 0.01
-  describe LT_ANY_CHARS  En-tête contient caractères
+  score  LT_ANY_CHARS 0.001
+  describe         LT_ANY_CHARS  Header contains characters
+  lang fr describe LT_ANY_CHARS  En-tête contient caractères
+  # sorry, Google translate:
+  lang zh describe LT_ANY_CHARS  字符被包含在消息报头部分
 END
 
-tstlocalrules ($localrules . '
-  normalize_charset 0
-');
-sarun ("-L -t < data/nice/unicode1", \&patterns_run_cb);
-ok_all_patterns();
+$ENV{LANG}   = 'fr_CH.UTF-8';
+$ENV{LC_ALL} = 'fr_CH.UTF-8';
 
-tstlocalrules ($localrules . '
+#--- normalize_charset 1
+
+tstlocalrules ($myrules . '
+  report_safe 0
   normalize_charset 1
 ');
-sarun ("-L -t < data/nice/unicode1", \&patterns_run_cb);
+%patterns = (%mypatterns, %mypatterns_mime_qp);
+sarun ("-L < data/nice/unicode1", \&patterns_run_cb);
+ok_all_patterns();
+
+tstlocalrules ($myrules . '
+  report_safe 1
+  normalize_charset 1
+');
+%patterns = (%mypatterns, %mypatterns_utf8);
+sarun ("-L < data/nice/unicode1", \&patterns_run_cb);
+ok_all_patterns();
+
+tstlocalrules ($myrules . '
+  report_safe 2
+  normalize_charset 1
+');
+%patterns = (%mypatterns, %mypatterns_utf8);
+sarun ("-L < data/nice/unicode1", \&patterns_run_cb);
+ok_all_patterns();
+
+#--- normalize_charset 0
+
+tstlocalrules ($myrules . '
+  report_safe 0
+  normalize_charset 0
+');
+%patterns = (%mypatterns, %mypatterns_mime_qp);
+sarun ("-L < data/nice/unicode1", \&patterns_run_cb);
+ok_all_patterns();
+
+tstlocalrules ($myrules . '
+  report_safe 1
+  normalize_charset 0
+');
+%patterns = (%mypatterns, %mypatterns_utf8);
+sarun ("-L < data/nice/unicode1", \&patterns_run_cb);
+ok_all_patterns();
+
+tstlocalrules ($myrules . '
+  report_safe 2
+  normalize_charset 0
+');
+%patterns = (%mypatterns, %mypatterns_utf8);
+sarun ("-L < data/nice/unicode1", \&patterns_run_cb);
+ok_all_patterns();
+
+#--- base64 encoded-words
+
+$ENV{LANG}   = 'zh_CN.UTF-8';
+$ENV{LC_ALL} = 'zh_CN.UTF-8';
+
+tstlocalrules ($myrules . '
+  report_safe 0
+  normalize_charset 1
+');
+%patterns = (%mypatterns, %mypatterns_mime_b64);
+sarun ("-L < data/nice/unicode1", \&patterns_run_cb);
 ok_all_patterns();
