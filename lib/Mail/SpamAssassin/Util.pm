@@ -59,7 +59,8 @@ BEGIN {
 
   @ISA = qw(Exporter);
   @EXPORT = ();
-  @EXPORT_OK = qw(&local_tz &base64_decode &untaint_var &untaint_file_path
+  @EXPORT_OK = qw(&local_tz &base64_decode &base64_encode
+                  &untaint_var &untaint_file_path
                   &exit_status_str &proc_status_ok &am_running_on_windows
                   &reverse_ip_address &decode_dns_question_entry
                   &secure_tmpfile &secure_tmpdir &uri_list_canonicalize
@@ -873,7 +874,7 @@ sub base64_encode {
   local $_ = shift;
 
   if (HAS_MIME_BASE64) {
-    return MIME::Base64::encode_base64($_);
+    return MIME::Base64::encode_base64($_,'');
   }
 
   $_ = pack("u57", $_);

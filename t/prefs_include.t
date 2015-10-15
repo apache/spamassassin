@@ -2,7 +2,7 @@
 
 use lib '.'; use lib 't';
 use SATest; sa_t_init("prefs_include");
-use Test; BEGIN { plan tests => 2 };
+use Test; BEGIN { plan tests => 3 };
 
 $ENV{'LANGUAGE'} = $ENV{'LC_ALL'} = 'C';             # a cheat, but we need the patterns to work
 
@@ -10,9 +10,9 @@ $ENV{'LANGUAGE'} = $ENV{'LC_ALL'} = 'C';             # a cheat, but we need the 
 
 %patterns = (
 
-    q{X-Spam-Report: =?UTF-8?Q? }, 'qp-encoded-hdr',
-    q{ Invalid Date: header =ae =af =b0 foo }, 'qp-encoded-desc',
-
+  q{/(?m)^X-Spam-Report:\s*$/}, 'qp-encoded-hdr',
+  q{/(?m)^\t\*\s+[0-9.-]+ INVALID_DATE\s+Invalid Date: header =\?UTF-8\?B\?wq4gwq8gwrA=\?=$/}, 'qp-encoded-desc',
+  q{/(?m)^ [0-9.-]+ INVALID_DATE\s+Invalid Date: header ® ¯ °$/}, 'report-desc',
 );
 
 tstprefs ("
@@ -23,7 +23,7 @@ tstprefs ("
 open (OUT, ">log/prefs_include.inc") or die "open log/prefs_include.inc failed";
 print OUT "
         report_safe 0
-	describe INVALID_DATE	Invalid Date: header \xae \xaf \xb0 foo
+	describe INVALID_DATE	Invalid Date: header ® ¯ °
 	";
 close OUT;
 
