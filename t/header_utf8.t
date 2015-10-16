@@ -3,7 +3,7 @@
 use lib '.'; use lib 't';
 use SATest; sa_t_init("header_utf8.t");
 
-use constant TEST_ENABLED => ($] > 5.010001);
+use constant TEST_ENABLED => ($] >= 5.010);
 
 use Test; BEGIN { plan tests => (TEST_ENABLED ? 154 : 0) };
 
