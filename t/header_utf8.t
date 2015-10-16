@@ -100,8 +100,10 @@ my $myrules = <<'END';
   lang zh describe LT_ANY_CHARS  字符被包含在消息报头部分
 END
 
-$ENV{LANG}   = 'fr_CH.UTF-8';
-$ENV{LC_ALL} = 'fr_CH.UTF-8';
+$ENV{PERL_BADLANG} = 0;  # suppresses Perl warning about failed locale setting
+# see Mail::SpamAssassin::Conf::Parser::parse()
+$ENV{LANGUAGE} = $ENV{LANG} = 'fr_CH.UTF-8';
+undef $ENV{LC_ALL}; undef $ENV{LC_MESSAGES};
 
 #--- normalize_charset 1
 
@@ -157,8 +159,10 @@ ok_all_patterns();
 
 #--- base64 encoded-words
 
-$ENV{LANG}   = 'zh_CN.UTF-8';
-$ENV{LC_ALL} = 'zh_CN.UTF-8';
+$ENV{PERL_BADLANG} = 0;  # suppresses Perl warning about failed locale setting
+# see Mail::SpamAssassin::Conf::Parser::parse()
+$ENV{LANGUAGE} = $ENV{LANG} = 'zh_CN.UTF-8';
+undef $ENV{LC_ALL}; undef $ENV{LC_MESSAGES};
 
 tstlocalrules ($myrules . '
   report_safe 0
