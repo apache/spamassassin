@@ -101,9 +101,8 @@ my $myrules = <<'END';
 END
 
 $ENV{PERL_BADLANG} = 0;  # suppresses Perl warning about failed locale setting
-# see Mail::SpamAssassin::Conf::Parser::parse()
+# see Mail::SpamAssassin::Conf::Parser::parse(), also Bug 6992
 $ENV{LANGUAGE} = $ENV{LANG} = 'fr_CH.UTF-8';
-undef $ENV{LC_ALL}; undef $ENV{LC_MESSAGES};
 
 #--- normalize_charset 1
 
@@ -160,9 +159,8 @@ ok_all_patterns();
 #--- base64 encoded-words
 
 $ENV{PERL_BADLANG} = 0;  # suppresses Perl warning about failed locale setting
-# see Mail::SpamAssassin::Conf::Parser::parse()
+# see Mail::SpamAssassin::Conf::Parser::parse(), also Bug 6992
 $ENV{LANGUAGE} = $ENV{LANG} = 'zh_CN.UTF-8';
-undef $ENV{LC_ALL}; undef $ENV{LC_MESSAGES};
 
 tstlocalrules ($myrules . '
   report_safe 0
