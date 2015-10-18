@@ -1661,6 +1661,8 @@ score       PUMPDUMP_MULTI    3.500	# limit
 tflags      PUMPDUMP_MULTI    publish
 
 body        __STOCK_TIP       /\bsto[ck]{2}\s?tip\b/i
+meta        STOCK_TIP         __STOCK_TIP && !__DKIM_EXISTS 
+describe    STOCK_TIP         Stock tips
 
 meta        PUMPDUMP_TIP      __PD_CNT_1 && __STOCK_TIP
 describe    PUMPDUMP_TIP      Pump-and-dump stock tip
