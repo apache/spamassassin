@@ -1663,6 +1663,8 @@ tflags      PUMPDUMP_MULTI    publish
 body        __STOCK_TIP       /\bsto[ck]{2}\s?tip\b/i
 meta        STOCK_TIP         __STOCK_TIP && !__DKIM_EXISTS 
 describe    STOCK_TIP         Stock tips
+score       STOCK_TIP         3.000	# limit
+tflags      STOCK_TIP         publish
 
 meta        PUMPDUMP_TIP      __PD_CNT_1 && __STOCK_TIP
 describe    PUMPDUMP_TIP      Pump-and-dump stock tip
