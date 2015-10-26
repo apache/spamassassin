@@ -40,6 +40,17 @@ use Time::HiRes ();
 use vars qw(@ISA);
 @ISA = ();
 
+# ADDING OS-DEPENDENT LINE TERMINATOR - BUG 6456
+
+# Using Mail::SpamAssassin::Util::am_running_on_windows() leads to circular
+# dependencies. So, we are duplicating the code instead.
+use constant RUNNING_ON_WINDOWS => ($^O =~ /^(?:mswin|dos|os2)/oi);
+
+my $eol = "\n";
+if (RUNNING_ON_WINDOWS) {
+  $eol = "\r\n";
+}
+
 sub new {
   my $class = shift;
 
@@ -72,8 +83,8 @@ sub log_message {
   }
   $timestamp .= ' '  if $timestamp ne '';
 
-  my($nwrite) = syswrite(STDERR, sprintf("%s[%d] %s: %s\n",
-                                         $timestamp, $$, $level, $msg));
+  my($nwrite) = syswrite(STDERR, sprintf("%s[%d] %s: %s%s",
+                                         $timestamp, $$, $level, $msg, $eol));
   defined $nwrite  or warn "error writing to log file: $!";
 }
 
