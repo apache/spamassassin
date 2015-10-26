@@ -1057,7 +1057,7 @@ spamc_has_moved:
 	$(NOECHO) echo "*** spamc now has its own directory: $(TARGET) is $(SOURCE)"
 	$(NOECHO) echo "***"
 	$(PERL) -MFile::Spec -MFile::Copy \
-	  -e "copy(q{$(SOURCE)}, q{$(TARGET)});"
+	  -e "copy(q[$(SOURCE)], q{$(TARGET)});"
 
 spamc/libspamc.so: $(SPAMC_MAKEFILE) $(LIBSPAMC_SRC)
 	$(MAKE_SPAMC) $@
@@ -1093,14 +1093,14 @@ qmail/qmail-spamc$(EXE_EXT): spamc/qmail-spamc$(EXE_EXT)
 
 conf__install:
 	-$(MKPATH) $(B_CONFDIR)
-	$(PERL) -MFile::Copy -e "copy(q{rules/local.cf}, q{$(B_CONFDIR)/local.cf}) unless -f q{$(B_CONFDIR)/local.cf}"
-	$(PERL) -MFile::Copy -e "copy(q{rules/init.pre}, q{$(B_CONFDIR)/init.pre}) unless -f q{$(B_CONFDIR)/init.pre}"
-	$(PERL) -MFile::Copy -e "copy(q{rules/v310.pre}, q{$(B_CONFDIR)/v310.pre}) unless -f q{$(B_CONFDIR)/v310.pre}"
-	$(PERL) -MFile::Copy -e "copy(q{rules/v312.pre}, q{$(B_CONFDIR)/v312.pre}) unless -f q{$(B_CONFDIR)/v312.pre}"
-	$(PERL) -MFile::Copy -e "copy(q{rules/v320.pre}, q{$(B_CONFDIR)/v320.pre}) unless -f q{$(B_CONFDIR)/v320.pre}"
-	$(PERL) -MFile::Copy -e "copy(q{rules/v330.pre}, q{$(B_CONFDIR)/v330.pre}) unless -f q{$(B_CONFDIR)/v330.pre}"
-	$(PERL) -MFile::Copy -e "copy(q{rules/v340.pre}, q{$(B_CONFDIR)/v340.pre}) unless -f q{$(B_CONFDIR)/v340.pre}"
-	$(PERL) -MFile::Copy -e "copy(q{rules/v341.pre}, q{$(B_CONFDIR)/v341.pre}) unless -f q{$(B_CONFDIR)/v341.pre}"
+	$(PERL) -MFile::Copy -e "copy(q[rules/local.cf], q{$(B_CONFDIR)/local.cf}) unless -f q{$(B_CONFDIR)/local.cf}"
+	$(PERL) -MFile::Copy -e "copy(q[rules/init.pre], q{$(B_CONFDIR)/init.pre}) unless -f q{$(B_CONFDIR)/init.pre}"
+	$(PERL) -MFile::Copy -e "copy(q[rules/v310.pre], q{$(B_CONFDIR)/v310.pre}) unless -f q{$(B_CONFDIR)/v310.pre}"
+	$(PERL) -MFile::Copy -e "copy(q[rules/v312.pre], q{$(B_CONFDIR)/v312.pre}) unless -f q{$(B_CONFDIR)/v312.pre}"
+	$(PERL) -MFile::Copy -e "copy(q[rules/v320.pre], q{$(B_CONFDIR)/v320.pre}) unless -f q{$(B_CONFDIR)/v320.pre}"
+	$(PERL) -MFile::Copy -e "copy(q[rules/v330.pre], q{$(B_CONFDIR)/v330.pre}) unless -f q{$(B_CONFDIR)/v330.pre}"
+	$(PERL) -MFile::Copy -e "copy(q[rules/v340.pre], q{$(B_CONFDIR)/v340.pre}) unless -f q{$(B_CONFDIR)/v340.pre}"
+	$(PERL) -MFile::Copy -e "copy(q[rules/v341.pre], q{$(B_CONFDIR)/v341.pre}) unless -f q{$(B_CONFDIR)/v341.pre}"
   
 
 data__install:
