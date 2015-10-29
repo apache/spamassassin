@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bpoliakoff darxus dwarren grenier jarif kam-ninja kpg-core zmi; day 2: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bpoliakoff darxus dwarren grenier jarif kam-ninja kpg-core llanga zmi; day 3: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bpoliakoff darxus dwarren grenier jarif kam-ninja kpg-core llanga zmi
+# with results from: day 1: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bpoliakoff darxus dwarren grenier jarif kam-ninja kpg-core zmi; day 2: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bpoliakoff darxus dwarren grenier jarif kam-ninja kpg-core llanga zmi; day 3: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bpoliakoff darxus dwarren grenier jarif kam-ninja kpg-core llanga zmi
 
 # tflags publish
 AC_BR_BONANZA
@@ -268,9 +268,6 @@ FREEMAIL_DOC_PDF_BCC
 # tflags publish
 FREEMAIL_FORGED_FROMDOMAIN
 
-# good enough
-FROM_12LTRDOM
-
 # tflags userconf
 FROM_DOMAIN_NOVOWEL
 
@@ -320,13 +317,13 @@ FSL_BULK_SIG
 FSL_CTYPE_WIN1251
 
 # good enough
+FSL_HELO_BARE_IP_1
+
+# good enough
 FSL_HELO_BARE_IP_2
 
 # good enough
 FSL_HELO_DEVICE
-
-# good enough
-FSL_HELO_FIREWALL
 
 # tflags publish
 FSL_NEW_HELO_USER
@@ -434,6 +431,9 @@ HK_NAME_MR_MRS
 HK_SCAM_N1
 
 # good enough
+HK_SCAM_N13
+
+# good enough
 HK_SCAM_N8
 
 # good enough
@@ -468,9 +468,6 @@ LONG_HEX_URI
 
 # tflags publish
 LONG_IMG_URI
-
-# good enough
-LONG_TERM_PRICE
 
 # tflags publish
 LOTS_OF_MONEY
@@ -824,9 +821,6 @@ REPLYTO_WITHOUT_TO_CC
 RISK_FREE
 
 # good enough
-RP_MATCHES_RCVD
-
-# good enough
 SERGIO_SUBJECT_PORN006
 
 # good enough
@@ -837,9 +831,6 @@ SERGIO_SUBJECT_VIAGRA01
 
 # good enough
 SHORTENED_URL_SRC
-
-# good enough
-SHORT_TERM_PRICE
 
 # tflags publish
 SINGLETS_LOW_CONTRAST
@@ -956,6 +947,9 @@ TVD_RCVD_IP
 TVD_RCVD_IP4
 
 # good enough
+TVD_RCVD_SINGLE
+
+# good enough
 TVD_SPACE_ENCODED
 
 # good enough
@@ -971,13 +965,34 @@ TVD_VISIT_PHARMA
 TW_GIBBERISH_MANY
 
 # good enough
+ANY_PILL_PRICE
+
+# good enough
 FILL_THIS_FORM_FRAUD_PHISH
+
+# good enough
+HK_NAME_FM_DR
 
 # good enough
 HK_NAME_FM_MR_MRS
 
 # good enough
 HK_SCAM_N3
+
+# good enough
+MONEY_FORM_SHORT
+
+# good enough
+PDS_TO_EQ_FROM_NAME
+
+# good enough
+SHARE_50_50
+
+# good enough
+TEQF_USR_POLITE
+
+# good enough
+TVD_PH_BODY_META
 
 # tflags publish
 UC_GIBBERISH_OBFU
