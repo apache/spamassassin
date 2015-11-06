@@ -1982,4 +1982,18 @@ score     SPOOFED_FREEM_REPTO           2.000
 tflags    SPOOFED_FREEM_REPTO           publish
 
 
+header    __VERY_LONG_REPTO             Reply-To =~ /[^\s\@]{20,}\@/
+ifplugin Mail::SpamAssassin::Plugin::FreeMail
+  meta    __VERY_LONG_FREEM_REPTO       __VERY_LONG_REPTO && FREEMAIL_REPLYTO
+endif
+
+#	for <steve.stewart@fastnet.co.uk>; Mon, 2 Nov 2015 14:27:08 GMT
+#        (envelope-from fastnet.co.uk.12056010.steve.stewart@vmta27.topreasonstovisit.com)
+header    __RECIP_IN_ENV_FM_01          Received =~ /for\s+<([^\@]+)\@([^>]+)>.*envelope-from\s+\2\.\d+\.\1\@/i
+meta      RECIP_IN_ENV_FROM		__RECIP_IN_ENV_FM_01
+describe  RECIP_IN_ENV_FROM		Recipient address (partial or complete) in envelope From address
+score     RECIP_IN_ENV_FROM		1.000	# limit
+
+
+
 
