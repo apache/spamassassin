@@ -2006,5 +2006,8 @@ header    __RECIP_IN_ENV_FM_02          Received =~ /for\s+<([^\@]+)\@([^>]+)>.*
 #score     RECIP_IN_ENV_FROM		1.000	# limit
 
 
+uri        URI_MALWARE_CWALL            /\/abuse_report\.php\?/i
+describe   URI_MALWARE_CWALL            Potential CryptoWall malware URL
+
 
 
