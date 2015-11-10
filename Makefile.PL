@@ -72,6 +72,7 @@ my @ATT_KEYS = (
 
 
   'BUILD_SPAMC'  ,    # Set to 'no' to skip build of spamc.
+  'BUILD_SPAMD',      # Set to 'no' to skip build of spamd.
   'ENABLE_SSL',       # Set to 'yes' to build spamc with SSL support.
   'CONTACT_ADDRESS',  # To not ask for the contact address, use this.
 );
@@ -105,6 +106,7 @@ sub yesno {
 
 my %opt = (
   'build_spamc'     => undef,
+  'build_spamd'     => undef,
   'enable_ssl'      => undef,
   'contact_address' => undef,
   'destdir'         => undef,
@@ -267,9 +269,19 @@ unless($Config{installman1dir}
 
 # Windows platforms need some adjustments
 if (RUNNING_ON_WINDOWS) {
-  # Don't build spamd
-  delete $makefile{EXE_FILES}{'spamd/spamd.raw'};
-  delete $makefile{MAN1PODS}{'spamd/spamd'};
+  # Building spamd is optional on Windows because it still is somewhat
+  # experimental.
+  if (!defined $opt{'build_spamd'}) {
+    $opt{'build_spamd'} = bool(prompt(
+      "Build spamd.exe (experimental on windows platforms)? (y/n)",
+      'n'));
+  } else {
+    $opt{'build_spamd'} = bool($opt{'build_spamd'});
+  }
+  if (!$opt{'build_spamd'}) {
+    delete $makefile{EXE_FILES}{'spamd/spamd.raw'};
+    delete $makefile{MAN1PODS}{'spamd/spamd'};
+  }
   # building spamc is optional under Win32 because not everyone has compiler
   if (!defined $opt{'build_spamc'}) {
     $opt{'build_spamc'} = bool(prompt(
