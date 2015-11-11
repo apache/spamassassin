@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bpoliakoff darxus grenier jarif kam-ninja kpg-core mmiroslaw-ham mmiroslaw-spam zmi; day 2: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bpoliakoff darxus dwarren grenier jarif kam-ninja kpg-core llanga zmi; day 3: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bpoliakoff darxus dwarren grenier jarif kam-ninja kpg-core llanga zmi
+# with results from: day 1: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bpoliakoff darxus dwarren grenier jarif kam-ninja kpg-core zmi; day 2: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bpoliakoff darxus dwarren grenier jarif kam-ninja kpg-core llanga zmi; day 3: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bpoliakoff darxus dwarren grenier jarif kam-ninja kpg-core llanga zmi
 
 # tflags publish
 AC_BR_BONANZA
@@ -71,9 +71,6 @@ ADVANCE_FEE_4_NEW
 ADVANCE_FEE_4_NEW_FRM_MNY
 
 # good enough
-ADVANCE_FEE_4_NEW_MONEY
-
-# good enough
 ADVANCE_FEE_5_NEW
 
 # good enough
@@ -96,12 +93,6 @@ AXB_XMAILER_MIMEOLE_OL_1ECD5
 
 # good enough
 AXB_XM_FORGED_OL2600
-
-# good enough
-AXB_XRCVD_ROBOT02
-
-# good enough
-AXB_X_AOL_SEZ_S
 
 # good enough
 AXB_X_FF_SEZ_S
@@ -247,11 +238,11 @@ DX_TEXT_03
 # good enough
 DYN_RDNS_AND_INLINE_IMAGE
 
+# good enough
+DYN_RDNS_SHORT_HELO_HTML
+
 # tflags userconf
 ENV_AND_HDR_SPF_MATCH
-
-# good enough
-FAKE_REPLY_C
 
 # tflags publish
 FBI_MONEY
@@ -261,9 +252,6 @@ FBI_SPOOF
 
 # tflags publish
 FILL_THIS_FORM
-
-# good enough
-FILL_THIS_FORM_FRAUD_PHISH
 
 # good enough
 FILL_THIS_FORM_LOAN
@@ -338,9 +326,6 @@ FROM_MISSP_USER
 FROM_MISSP_XPRIO
 
 # good enough
-FROM_ONE_CHAR
-
-# good enough
 FROM_WEBSITE
 
 # good enough
@@ -348,9 +333,6 @@ FSL_BULK_SIG
 
 # good enough
 FSL_CTYPE_WIN1251
-
-# good enough
-FSL_HELO_BARE_IP_1
 
 # good enough
 FSL_HELO_BARE_IP_2
@@ -436,6 +418,9 @@ HASHCASH_2SPEND
 # tflags userconf
 HASHCASH_HIGH
 
+# good enough
+HDRS_LCASE
+
 # tflags publish
 HEADER_FROM_DIFFERENT_DOMAINS
 
@@ -451,14 +436,14 @@ HEAD_LONG
 # good enough
 HELO_LH_HOME
 
+# good enough
+HELO_LOCALHOST
+
 # tflags publish
 HEXHASH_WORD
 
 # good enough
 HK_LOTTO
-
-# good enough
-HK_NAME_DR
 
 # good enough
 HK_NAME_FM_DR
@@ -471,9 +456,6 @@ HK_NAME_MR_MRS
 
 # good enough
 HK_SCAM_N1
-
-# good enough
-HK_SCAM_N13
 
 # good enough
 HK_SCAM_N15
@@ -505,6 +487,9 @@ KB_DATE_CONTAINS_TAB
 # good enough
 KB_FAKED_THE_BAT
 
+# good enough
+KHOP_DYNAMIC
+
 # tflags publish
 LIST_PRTL_PUMPDUMP
 
@@ -516,6 +501,9 @@ LONG_HEX_URI
 
 # tflags publish
 LONG_IMG_URI
+
+# good enough
+LONG_TERM_PRICE
 
 # tflags publish
 LOTS_OF_MONEY
@@ -612,9 +600,6 @@ OBFU_JVSCR_ESC
 
 # tflags publish
 OBFU_TEXT_ATTACH
-
-# good enough
-PART_CID_STOCK
 
 # good enough
 PDS_FROM_2_EMAILS
@@ -877,6 +862,9 @@ SERGIO_SUBJECT_VIAGRA01
 # good enough
 SHARE_50_50
 
+# good enough
+SHORT_TERM_PRICE
+
 # tflags publish
 SINGLETS_LOW_CONTRAST
 
@@ -1016,28 +1004,40 @@ TVD_VISIT_PHARMA
 TW_GIBBERISH_MANY
 
 # good enough
-BODY_EMPTY
+ANY_PILL_PRICE
 
 # good enough
-CDISP_SZ_MANY
+DATE_IN_FUTURE_96_Q
 
 # good enough
-FROM_12LTRDOM
+FSL_HELO_FIREWALL
 
 # good enough
-HDRS_LCASE
+HDRS_MISSP
 
 # good enough
-KHOP_DYNAMIC
+HK_RANDOM_FROM
 
 # good enough
-MANY_SUBDOM
+KB_FORGED_MOZ4
 
 # good enough
-MAY_BE_FORGED
+LIST_PARTIAL
 
 # good enough
-PHP_NOVER_MUA
+NAME_EMAIL_DIFF
+
+# good enough
+SHORTENED_URL_SRC
+
+# good enough
+TO_NO_BRKTS_DYNIP
+
+# tflags publish
+VERY_LONG_FREEM_REPTO
+
+# tflags publish
+VERY_LONG_REPTO_SHORT_MSG
 
 # tflags publish
 UC_GIBBERISH_OBFU
