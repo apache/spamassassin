@@ -238,10 +238,11 @@ sub untaint_file_path {
   return '' if ($path eq '');
 
   local ($1);
-  # Barry Jaspan: allow ~ and spaces, good for Windows.  Also return ''
-  # if input is '', as it is a safe path.
-  my $chars = '-_A-Za-z0-9\xA0-\xFF\.\%\@\=\+\,\/\\\:';
-  my $re = qr/^\s*([$chars][${chars}~ ]*)$/o;
+  # Barry Jaspan: allow ~ and spaces, good for Windows.
+  # Also return '' if input is '', as it is a safe path.
+  # Bug 7264: allow also parenthesis, e.g. "C:\Program Files (x86)"
+  my $chars = '-_A-Za-z0-9.%=+,/:()\\@\\xA0-\\xFF\\\\';
+  my $re = qr{^\s*([$chars][${chars}~ ]*)\z}o;
 
   if ($path =~ $re) {
     $path = $1;
