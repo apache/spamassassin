@@ -86,6 +86,9 @@ AD_PREFS
 ALL_TRUSTED
 
 # good enough
+ANY_PILL_PRICE
+
+# good enough
 AXB_XMAILER_MIMEOLE_OL_024C2
 
 # good enough
@@ -165,6 +168,12 @@ COMPENSATION
 
 # tflags publish
 CORRUPT_FROM_LINE_IN_HDRS
+
+# good enough
+CURR_PRICE
+
+# good enough
+DATE_IN_FUTURE_96_Q
 
 # good enough
 DEAR_BENEFICIARY
@@ -335,6 +344,9 @@ FSL_HELO_BARE_IP_2
 FSL_HELO_DEVICE
 
 # good enough
+FSL_HELO_FIREWALL
+
+# good enough
 FSL_MID_419
 
 # tflags publish
@@ -413,7 +425,7 @@ HASHCASH_2SPEND
 HASHCASH_HIGH
 
 # good enough
-HDRS_LCASE
+HDRS_MISSP
 
 # tflags publish
 HEADER_FROM_DIFFERENT_DOMAINS
@@ -438,9 +450,6 @@ HEXHASH_WORD
 
 # good enough
 HK_LOTTO
-
-# good enough
-HK_NAME_FM_DR
 
 # good enough
 HK_NAME_FM_MR_MRS
@@ -482,7 +491,13 @@ KB_DATE_CONTAINS_TAB
 KB_FAKED_THE_BAT
 
 # good enough
+KB_FORGED_MOZ4
+
+# good enough
 KHOP_DYNAMIC
+
+# good enough
+LIST_PARTIAL
 
 # tflags publish
 LIST_PRTL_PUMPDUMP
@@ -569,6 +584,9 @@ MSGID_NOFQDN1
 MSOE_MID_WRONG_CASE
 
 # good enough
+NAME_EMAIL_DIFF
+
+# good enough
 NA_DOLLARS
 
 # tflags net
@@ -596,10 +614,10 @@ OBFU_JVSCR_ESC
 OBFU_TEXT_ATTACH
 
 # good enough
-PDS_FROM_2_EMAILS
+PART_CID_STOCK
 
 # good enough
-PHP_NOVER_MUA
+PDS_FROM_2_EMAILS
 
 # tflags publish
 PP_MIME_FAKE_ASCII_TEXT
@@ -857,6 +875,9 @@ SERGIO_SUBJECT_PORN014
 SERGIO_SUBJECT_VIAGRA01
 
 # good enough
+SHORTENED_URL_SRC
+
+# good enough
 SHORT_TERM_PRICE
 
 # tflags publish
@@ -944,6 +965,9 @@ TO_EQ_FM_SPF_FAIL
 TO_IN_SUBJ
 
 # good enough
+TO_NO_BRKTS_DYNIP
+
+# good enough
 TO_NO_BRKTS_FROM_MSSP
 
 # tflags publish
@@ -995,40 +1019,16 @@ TVD_VISIT_PHARMA
 TW_GIBBERISH_MANY
 
 # good enough
-DATE_IN_FUTURE_96_Q
+ADVANCE_FEE_4_NEW_MONEY
 
 # good enough
-FSL_HELO_FIREWALL
-
-# good enough
-HDRS_MISSP
+FROM_ONE_CHAR
 
 # good enough
 HELO_MISC_IP
 
 # good enough
-HK_RANDOM_FROM
-
-# good enough
-KB_FORGED_MOZ4
-
-# good enough
-LIST_PARTIAL
-
-# good enough
-NAME_EMAIL_DIFF
-
-# good enough
-SHORTENED_URL_SRC
-
-# good enough
-TO_NO_BRKTS_DYNIP
-
-# tflags publish
-VERY_LONG_FREEM_REPTO
-
-# tflags publish
-VERY_LONG_REPTO_SHORT_MSG
+PHP_NOVER_MUA
 
 # tflags publish
 UC_GIBBERISH_OBFU
@@ -1184,10 +1184,13 @@ USER_IN_WHITELIST
 USER_IN_WHITELIST_TO
 
 # tflags publish
-XM_PHPMAILER_FORGED
+VERY_LONG_FREEM_REPTO
 
-# good enough
-XPRIO
+# tflags publish
+VERY_LONG_REPTO_SHORT_MSG
+
+# tflags publish
+XM_PHPMAILER_FORGED
 
 # good enough
 YOU_INHERIT
