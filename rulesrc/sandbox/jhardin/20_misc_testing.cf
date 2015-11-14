@@ -1984,9 +1984,9 @@ tflags    SPOOFED_FREEM_REPTO           publish
 
 header    __VERY_LONG_REPTO             Reply-To =~ /[^\s\@]{20,}\@/
 
-meta      VERY_LONG_REPTO_SHORT_MSG     (__VERY_LONG_REPTO && __HTML_LENGTH_0000_1024) && !__VIA_ML 
+meta      VERY_LONG_REPTO_SHORT_MSG     (__VERY_LONG_REPTO && __HTML_LENGTH_0000_1024) && !__VIA_ML && !__TO_EQ_FROM_DOM && !__THREAD_INDEX_GOOD 
 describe  VERY_LONG_REPTO_SHORT_MSG     Very long Reply-to username + short message
-score     VERY_LONG_REPTO_SHORT_MSG     3.000	# limit
+score     VERY_LONG_REPTO_SHORT_MSG     4.000	# limit
 tflags    VERY_LONG_REPTO_SHORT_MSG     publish
 
 
