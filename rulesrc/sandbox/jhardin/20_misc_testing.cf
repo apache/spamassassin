@@ -1962,10 +1962,10 @@ meta      __PUNCT_ODD_SPACING_MANY      __PUNCT_ODD_SPACING > 2
 header    XMAILER_MANY                  ALL =~ /\nX-Mailer:(?:[^\n]+\n)+X-Mailer:/ism
 describe  XMAILER_MANY                  Has multiple X-Mailer: headers
 
-body      __RAW_TOKEN                   /\#(?:(?:First|Last)Name|Email)\#/i
-tflags    __RAW_TOKEN                   multiple maxhits=3
-meta      RAW_TOKENS                    __RAW_TOKEN > 2
-describe  RAW_TOKENS                    Raw mail merge tokens in body
+#body      __RAW_TOKEN                   /\#(?:(?:First|Last)Name|Email)\#/i
+#tflags    __RAW_TOKEN                   multiple maxhits=3
+#meta      RAW_TOKENS                    __RAW_TOKEN > 2
+#describe  RAW_TOKENS                    Raw mail merge tokens in body
 
 header    __REPTO_CHN_FREEM             Reply-To =~ /\@(?:sina|aliyun)\.com/i
 
@@ -1984,7 +1984,8 @@ tflags    SPOOFED_FREEM_REPTO           publish
 
 header    __VERY_LONG_REPTO             Reply-To =~ /[^\s\@]{20,}\@/
 
-meta      VERY_LONG_REPTO_SHORT_MSG     (__VERY_LONG_REPTO && __HTML_LENGTH_0000_1024) && !__VIA_ML && !__TO_EQ_FROM_DOM && !__THREAD_INDEX_GOOD 
+meta      __VERY_LONG_REPTO_SHORT_MSG   __VERY_LONG_REPTO && __HTML_LENGTH_0000_1024
+meta      VERY_LONG_REPTO_SHORT_MSG     __VERY_LONG_REPTO_SHORT_MSG && !__VIA_ML && !__TO_EQ_FROM_DOM && !__THREAD_INDEX_GOOD 
 describe  VERY_LONG_REPTO_SHORT_MSG     Very long Reply-to username + short message
 score     VERY_LONG_REPTO_SHORT_MSG     4.000	# limit
 tflags    VERY_LONG_REPTO_SHORT_MSG     publish
@@ -2000,11 +2001,9 @@ endif
 
 #	for <steve.stewart@fastnet.co.uk>; Mon, 2 Nov 2015 14:27:08 GMT
 #        (envelope-from fastnet.co.uk.12056010.steve.stewart@vmta27.topreasonstovisit.com)
+# S/O low, seems to be common in legit mailing lists
 #header    __RECIP_IN_ENV_FM_01          Received =~ /for\s+<([^\@]+)\@([^>]+)>.*envelope-from\s+\2\.\d+\.\1\@/i
-header    __RECIP_IN_ENV_FM_02          Received =~ /for\s+<([^\@]+)\@([^>]+)>.*envelope-from\s+[^@]*\2[^@]*\@/i
-#meta      RECIP_IN_ENV_FROM		__RECIP_IN_ENV_FM_01
-#describe  RECIP_IN_ENV_FROM		Recipient address (partial or complete) in envelope From address
-#score     RECIP_IN_ENV_FROM		1.000	# limit
+#header    __RECIP_IN_ENV_FM_02          Received =~ /for\s+<([^\@]+)\@([^>]+)>.*envelope-from\s+[^@]*\2[^@]*\@/i
 
 
 uri        URI_MALWARE_CWALL            /\/abuse_report\.php\?/i
@@ -2015,7 +2014,7 @@ meta       LIST_PARTIAL_SHORT_MSG       __HTML_LENGTH_0000_1024 && __LIST_PARTIA
 describe   LIST_PARTIAL_SHORT_MSG       Incomplete mailing list headers + short message
 score      LIST_PARTIAL_SHORT_MSG       2.000	# limit
 
-meta       __BOGUS_MSM_PRI              __HAS_MSMAIL_PRI && __HDR_ORDER_FTSDMCXXXX 
+meta       __BOGUS_MSM_PRIO             __HAS_MSMAIL_PRI && __HDR_ORDER_FTSDMCXXXX 
 
 
 
