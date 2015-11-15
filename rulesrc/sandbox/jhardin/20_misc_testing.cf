@@ -1986,7 +1986,7 @@ header    __VERY_LONG_REPTO             Reply-To =~ /[^\s\@]{20,}\@/
 
 meta      __VERY_LONG_REPTO_SHORT_MSG   __VERY_LONG_REPTO && __HTML_LENGTH_0000_1024
 meta      VERY_LONG_REPTO_SHORT_MSG     __VERY_LONG_REPTO_SHORT_MSG && !__VIA_ML && !__TO_EQ_FROM_DOM && !__THREAD_INDEX_GOOD 
-describe  VERY_LONG_REPTO_SHORT_MSG     Very long Reply-to username + short message
+describe  VERY_LONG_REPTO_SHORT_MSG     Very long Reply-To username + short message
 score     VERY_LONG_REPTO_SHORT_MSG     4.000	# limit
 tflags    VERY_LONG_REPTO_SHORT_MSG     publish
 
@@ -1994,7 +1994,7 @@ tflags    VERY_LONG_REPTO_SHORT_MSG     publish
 ifplugin Mail::SpamAssassin::Plugin::FreeMail
   meta      __VERY_LONG_FREEM_REPTO       __VERY_LONG_REPTO && FREEMAIL_REPLYTO
   meta      VERY_LONG_FREEM_REPTO         __VERY_LONG_FREEM_REPTO
-  describe  VERY_LONG_FREEM_REPTO         Very long freemail Reply-to username
+  describe  VERY_LONG_FREEM_REPTO         Very long freemail Reply-To username
   score     VERY_LONG_FREEM_REPTO         2.000	# limit
   tflags    VERY_LONG_FREEM_REPTO         publish
 endif
@@ -2014,7 +2014,13 @@ meta       LIST_PARTIAL_SHORT_MSG       __HTML_LENGTH_0000_1024 && __LIST_PARTIA
 describe   LIST_PARTIAL_SHORT_MSG       Incomplete mailing list headers + short message
 score      LIST_PARTIAL_SHORT_MSG       2.000	# limit
 
-meta       __BOGUS_MSM_PRIO             __HAS_MSMAIL_PRI && __HDR_ORDER_FTSDMCXXXX 
+meta       __BOGUS_MSM_HDRS             __HAS_MSMAIL_PRI && __MSOE_MID_WRONG_CASE && __HDR_ORDER_FTSDMCXXXX
+meta       BOGUS_MSM_HDRS               __BOGUS_MSM_HDRS
+describe   BOGUS_MSM_HDRS               Apparently bogus Microsoft email headers
+score      BOGUS_MSM_HDRS               3.250	# limit
+
+meta       __BOGUS_MSM_PRIO             __HAS_MSMAIL_PRI && __HDR_ORDER_FTSDMCXXXX
+meta       __BOGUS_MSM_PRIO_MINFP       __BOGUS_MSM_PRIO && !__MSGID_NOFQDN2 && !__ANY_OUTLOOK_MUA 
 
 
 
