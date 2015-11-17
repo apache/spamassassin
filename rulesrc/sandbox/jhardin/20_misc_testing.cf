@@ -1466,15 +1466,19 @@ header      __FROM_LOWER       ALL =~ /from:\s\S{5}/
 header      __TO___LOWER       ALL =~ /to:\s\S{5}/
 header      __DATE_LOWER       ALL =~ /date:\s\S{5}/
 
-header      __FH_HAS_XMSMAIL   exists:X-MSMail-Priority
 
 # duplicates __XPRIO
 #header      __FH_HAS_XPRIORITY exists:X-Priority
-meta        XPRIO              __XPRIO && !ALL_TRUSTED && !__PHPMAILER_MUA && !__BUGGED_IMG && !__HAS_ERRORS_TO && !__THREADED && !__VIA_ML && !__RCD_RDNS_MX_MESSY && !__HAS_THREAD_INDEX && !__RP_MATCHES_RCVD && !__HAS_X_REF && !__LCL__ENV_AND_HDR_FROM_MATCH 
+#meta        XPRIO              __XPRIO && !ALL_TRUSTED && !__PHPMAILER_MUA && !__BUGGED_IMG && !__HAS_ERRORS_TO && !__THREADED && !__VIA_ML && !__RCD_RDNS_MX_MESSY && !__HAS_THREAD_INDEX && !__RP_MATCHES_RCVD && !__HAS_X_REF && !__LCL__ENV_AND_HDR_FROM_MATCH 
+meta        XPRIO              __XPRIO && !ALL_TRUSTED && !__PHPMAILER_MUA && !__BUGGED_IMG && !__HAS_ERRORS_TO && !__SUBSCRIPTION_INFO && !__DKIM_EXISTS && !__RCD_RDNS_MAIL_MESSY 
 describe    XPRIO              Has X-Priority header
-score       XPRIO              1.000   # limit
+score       XPRIO              2.000	# limit
 
 # some no-ham combinations
+
+meta        XPRIO_SHORT_SUBJ   __XPRIO && __SUBJ_SHORT 
+describe    XPRIO_SHORT_SUBJ   Has X-Priority header + short subject
+score       XPRIO_SHORT_SUBJ   2.500	# limit
 
 meta        FROM_MISSP_XPRIO   __XPRIO && __FROM_MISSPACED 
 describe    FROM_MISSP_XPRIO   Misspaced FROM + X-Priority
@@ -2014,6 +2018,9 @@ meta       LIST_PARTIAL_SHORT_MSG       __HTML_LENGTH_0000_1024 && __LIST_PARTIA
 describe   LIST_PARTIAL_SHORT_MSG       Incomplete mailing list headers + short message
 score      LIST_PARTIAL_SHORT_MSG       2.000	# limit
 
+# duplicates __HAS_MSMAIL_PRI
+#header      __FH_HAS_XMSMAIL   exists:X-MSMail-Priority
+
 meta       __BOGUS_MSM_HDRS             __HAS_MSMAIL_PRI && __MSOE_MID_WRONG_CASE && __HDR_ORDER_FTSDMCXXXX
 meta       BOGUS_MSM_HDRS               __BOGUS_MSM_HDRS
 describe   BOGUS_MSM_HDRS               Apparently bogus Microsoft email headers
@@ -2022,6 +2029,8 @@ tflags     BOGUS_MSM_HDRS               publish
 
 meta       __BOGUS_MSM_PRIO             __HAS_MSMAIL_PRI && __HDR_ORDER_FTSDMCXXXX
 meta       __BOGUS_MSM_PRIO_MINFP       __BOGUS_MSM_PRIO && !__BOGUS_MSM_HDRS && !__MSGID_NOFQDN2 && !__ANY_OUTLOOK_MUA && !__RCD_RDNS_MAIL_MESSY
+
+meta       __MSM_PRIO_REPTO             __HAS_MSMAIL_PRI && __REPLYTO_EXISTS 
 
 
 
