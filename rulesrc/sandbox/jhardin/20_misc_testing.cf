@@ -2018,9 +2018,10 @@ meta       __BOGUS_MSM_HDRS             __HAS_MSMAIL_PRI && __MSOE_MID_WRONG_CAS
 meta       BOGUS_MSM_HDRS               __BOGUS_MSM_HDRS
 describe   BOGUS_MSM_HDRS               Apparently bogus Microsoft email headers
 score      BOGUS_MSM_HDRS               3.250	# limit
+tflags     BOGUS_MSM_HDRS               publish
 
 meta       __BOGUS_MSM_PRIO             __HAS_MSMAIL_PRI && __HDR_ORDER_FTSDMCXXXX
-meta       __BOGUS_MSM_PRIO_MINFP       __BOGUS_MSM_PRIO && !__MSGID_NOFQDN2 && !__ANY_OUTLOOK_MUA 
+meta       __BOGUS_MSM_PRIO_MINFP       __BOGUS_MSM_PRIO && !__BOGUS_MSM_HDRS && !__MSGID_NOFQDN2 && !__ANY_OUTLOOK_MUA && !__RCD_RDNS_MAIL_MESSY
 
 
 
