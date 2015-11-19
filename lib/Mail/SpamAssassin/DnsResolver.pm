@@ -674,7 +674,7 @@ be used, like so:
 
   my $id = $self->{resolver}->bgsend($domain, $type, undef, sub {
         my ($reply, $reply_id, $timestamp) = @_;
-        $self->got_a_reply ($reply, $reply_id);
+        $self->got_a_reply($reply, $reply_id);
       });
 
 The callback can ignore the reply as an invalid packet sent to the listening
