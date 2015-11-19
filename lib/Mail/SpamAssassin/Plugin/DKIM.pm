@@ -793,7 +793,8 @@ sub _check_dkim_signature {
         # Only do so if EDNS0 provides a reasonably-sized UDP payload size,
         # as our interface does not provide a DNS fallback to TCP, unlike
         # the Net::DNS::Resolver::send which does provide it.
-        my $res = $self->{main}->{resolver}->get_resolver;
+        my $res = $self->{main}->{resolver};
+        dbg("dkim: providing our own resolver: %s", ref $res);
         Mail::DKIM::DNS::resolver($res);
       }
     }
