@@ -2034,6 +2034,10 @@ meta       __BOGUS_MSM_PRIO             __HAS_MSMAIL_PRI && __HDR_ORDER_FTSDMCXX
 meta       __BOGUS_MSM_PRIO_MINFP       __BOGUS_MSM_PRIO && !__BOGUS_MSM_HDRS && !__MSGID_NOFQDN2 && !__ANY_OUTLOOK_MUA && !__RCD_RDNS_MAIL_MESSY
 
 meta       __MSM_PRIO_REPTO             __HAS_MSMAIL_PRI && __REPLYTO_EXISTS && __SUBJ_SHORT 
+meta       MSM_PRIO_REPTO              __MSM_PRIO_REPTO && __ENV_AND_HDR_FROM_MATCH 
+describe   MSM_PRIO_REPTO              MSMail priority header + Reply-to + short subject
+score      MSM_PRIO_REPTO              2.500	# limit
+tflags     MSM_PRIO_REPTO              publish
 
 header     __XM_YAMAIL                  X-Mailer =~ /^Yamail/
 
