@@ -740,6 +740,16 @@ foreach my $channel (@channels) {
       my $mirror_info = $mirrors{$mirror};
       delete $mirrors{$mirror};
 
+      if (!check_mirror_af($mirror)) {
+	  my @my_af;
+	  push(@my_af, "IPv4") if ($have_inet4);
+	  push(@my_af, "IPv6") if ($have_inet6);
+	  push(@my_af, "no IP service") if ($#my_af < 0) 
+	  dbg("reject mirror " . $mirror . ": no common address family"
+	      . " (" . join(" ", @af) . ")");
+	  next;
+      }
+
       dbg("channel: selected mirror $mirror");
 
       # Actual archive file
@@ -1590,6 +1600,17 @@ sub choose_mirror {
   }
 
   return $mirrors[0];
+}
+
+##############################################################################
+
+sub check_mirror_af {
+    my ($mirror) = @_;
+    my($a_rr, $aaaa_rr);
+    $mirror =~ s/[a-z][a-z09]+:\/\///;  # strip http:// or https:// or other
+    return 1 if ($have_inet4 && do_dns_query($mirror, "A"));
+    return 1 if ($have_inet6 && do_dns_query($mirror, "AAAA"));
+    return 0;
 }
 
 ##############################################################################
