@@ -746,7 +746,7 @@ foreach my $channel (@channels) {
         push(@my_af, "IPv6") if $have_inet6;
         push(@my_af, "no IP service") if !@my_af;
         dbg("reject mirror %s: no common address family (%s)",
-            $mirror, join(" ", @af));
+            $mirror, join(" ", @my_af));
         next;
       }
 
