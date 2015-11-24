@@ -1478,7 +1478,7 @@ tflags      XPRIO              publish
 # some no-ham combinations
 
 meta        __XPRIO_SHORT_SUBJ __XPRIO && __SUBJ_SHORT 
-meta        XPRIO_SHORT_SUBJ   __XPRIO_SHORT_SUBJ && !__HAS_ANY_URI && !__TO_NO_ARROWS_R 
+meta        XPRIO_SHORT_SUBJ   __XPRIO_SHORT_SUBJ && !__HAS_ANY_URI && !__TO_NO_ARROWS_R && !__ENV_AND_HDR_FROM_MATCH 
 describe    XPRIO_SHORT_SUBJ   Has X-Priority header + short subject
 score       XPRIO_SHORT_SUBJ   2.500	# limit
 tflags      XPRIO_SHORT_SUBJ   publish
