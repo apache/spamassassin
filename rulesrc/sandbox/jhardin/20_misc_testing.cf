@@ -1469,8 +1469,7 @@ header      __DATE_LOWER       ALL =~ /date:\s\S{5}/
 
 # duplicates __XPRIO
 #header      __FH_HAS_XPRIORITY exists:X-Priority
-#meta        XPRIO              __XPRIO && !ALL_TRUSTED && !__PHPMAILER_MUA && !__BUGGED_IMG && !__HAS_ERRORS_TO && !__THREADED && !__VIA_ML && !__RCD_RDNS_MX_MESSY && !__HAS_THREAD_INDEX && !__RP_MATCHES_RCVD && !__HAS_X_REF && !__LCL__ENV_AND_HDR_FROM_MATCH 
-meta        XPRIO              __XPRIO && !ALL_TRUSTED && !__PHPMAILER_MUA && !__BUGGED_IMG && !__HAS_ERRORS_TO && !__SUBSCRIPTION_INFO && !__DKIM_EXISTS && !__RCD_RDNS_MAIL_MESSY && !__HTML_LINK_IMAGE && !__THREADED && !__RP_MATCHES_RCVD
+meta        XPRIO              __XPRIO && !ALL_TRUSTED && !__HAS_ERRORS_TO && !__THREADED && !__RP_MATCHES_RCVD && !__LONGLINE && !__MAIL_LINK && !__COMMENT_EXISTS 
 describe    XPRIO              Has X-Priority header
 score       XPRIO              2.000	# limit
 tflags      XPRIO              publish
@@ -1486,6 +1485,10 @@ tflags      XPRIO_SHORT_SUBJ   publish
 meta        FROM_MISSP_XPRIO   __XPRIO && __FROM_MISSPACED 
 describe    FROM_MISSP_XPRIO   Misspaced FROM + X-Priority
 score       FROM_MISSP_XPRIO   2.500   # limit
+
+meta        __STATIC_XPRIO_OLE   __XPRIO && __RDNS_STATIC && __HAS_MIMEOLE
+#describe    STATIC_XPRIO_OLE     Static RDNS + X-Priority + MIMEOLE
+#score       STATIC_XPRIO_OLE     3.500   # limit
 
 # Apparent good performance is an artifact of certain corpora's collection mechanism
 #meta        XPRIO_RPATH_NULL   (__XPRIO && __BOUNCE_RPATH_NULL) && !__HAS_ERRORS_TO && !__VIA_ML && !ANY_BOUNCE_MESSAGE && !__HAS_ORGANIZATION && !__RCD_RDNS_SMTP_MESSY && !__NOT_SPOOFED 
