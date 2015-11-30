@@ -1487,8 +1487,10 @@ describe    FROM_MISSP_XPRIO   Misspaced FROM + X-Priority
 score       FROM_MISSP_XPRIO   2.500   # limit
 
 meta        __STATIC_XPRIO_OLE   __XPRIO && __RDNS_STATIC && __HAS_MIMEOLE
-#describe    STATIC_XPRIO_OLE     Static RDNS + X-Priority + MIMEOLE
-#score       STATIC_XPRIO_OLE     3.500   # limit
+meta        STATIC_XPRIO_OLE     __STATIC_XPRIO_OLE
+describe    STATIC_XPRIO_OLE     Static RDNS + X-Priority + MIMEOLE
+score       STATIC_XPRIO_OLE     3.500   # limit
+tflags      STATIC_XPRIO_OLE     publish
 
 # Apparent good performance is an artifact of certain corpora's collection mechanism
 #meta        XPRIO_RPATH_NULL   (__XPRIO && __BOUNCE_RPATH_NULL) && !__HAS_ERRORS_TO && !__VIA_ML && !ANY_BOUNCE_MESSAGE && !__HAS_ORGANIZATION && !__RCD_RDNS_SMTP_MESSY && !__NOT_SPOOFED 
