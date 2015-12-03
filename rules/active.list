@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bpoliakoff darxus dwarren grenier jarif kam-ninja kpg-core zmi; day 2: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bpoliakoff darxus dwarren grenier jarif kam-ninja kpg-core llanga zmi; day 3: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bpoliakoff darxus dwarren grenier kam-ninja kpg-core llanga zmi
+# with results from: day 1: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bpoliakoff darxus dwarren grenier jarif kam-ninja kpg-core mmiroslaw-ham mmiroslaw-spam zmi; day 2: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bpoliakoff darxus dwarren grenier jarif kam-ninja kpg-core llanga zmi; day 3: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bpoliakoff darxus dwarren grenier jarif kam-ninja kpg-core llanga zmi
 
 # tflags publish
 AC_BR_BONANZA
@@ -137,9 +137,6 @@ BAYES_999
 BIGNUM_EMAILS
 
 # good enough
-BODY_EMPTY
-
-# good enough
 BODY_SINGLE_URI
 
 # good enough
@@ -239,6 +236,9 @@ DOS_OE_TO_MX
 DOS_OE_TO_MX_IMAGE
 
 # good enough
+DOS_RCVD_IP_TWICE_C
+
+# good enough
 DSN_NO_MIMEVERSION
 
 # tflags publish
@@ -249,6 +249,9 @@ DX_TEXT_03
 
 # good enough
 DX_TEXT_05
+
+# good enough
+DYN_RDNS_AND_INLINE_IMAGE
 
 # tflags userconf
 ENV_AND_HDR_SPF_MATCH
@@ -338,6 +341,12 @@ FROM_MISSP_USER
 FROM_MISSP_XPRIO
 
 # good enough
+FROM_WEBSITE
+
+# good enough
+FSL_BULK_SIG
+
+# good enough
 FSL_CTYPE_WIN1251
 
 # good enough
@@ -347,13 +356,7 @@ FSL_FAKE_HOTMAIL_RVCD
 FSL_HELO_BARE_IP_1
 
 # good enough
-FSL_HELO_BARE_IP_2
-
-# good enough
 FSL_HELO_DEVICE
-
-# good enough
-FSL_MID_419
 
 # tflags publish
 FSL_NEW_HELO_USER
@@ -447,9 +450,6 @@ HEAD_LONG
 
 # good enough
 HELO_LH_HOME
-
-# good enough
-HELO_LOCALHOST
 
 # tflags publish
 HEXHASH_WORD
@@ -624,6 +624,9 @@ OBFU_JVSCR_ESC
 
 # tflags publish
 OBFU_TEXT_ATTACH
+
+# good enough
+PART_CID_STOCK
 
 # good enough
 PDS_FROM_2_EMAILS
@@ -866,6 +869,9 @@ RCVD_IN_SORBS_ZOMBIE
 RCVD_IN_XBL
 
 # good enough
+RDNS_LOCALHOST
+
+# good enough
 REPLYTO_WITHOUT_TO_CC
 
 # good enough
@@ -1037,6 +1043,9 @@ TW_GIBBERISH_MANY
 DUP_SUSP_HDR
 
 # good enough
+FROM_URI
+
+# good enough
 HK_NAME_DR
 
 # good enough
@@ -1046,10 +1055,10 @@ HK_NAME_FROM
 HK_SCAM_S25
 
 # good enough
-OBFU_DOC_ATTACH
+MAILER_EQ_ORG
 
 # good enough
-OBFU_JPG_ATTACH
+OBFU_ATTACH_MISSP
 
 # good enough
 PDS_TO_EQ_FROM_NAME
