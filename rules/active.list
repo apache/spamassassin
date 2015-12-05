@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bpoliakoff darxus dwarren grenier jarif kam-ninja kpg-core zmi; day 2: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bpoliakoff darxus dwarren grenier jarif kam-ninja kpg-core llanga mmiroslaw-ham mmiroslaw-spam zmi; day 3: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bpoliakoff darxus dwarren grenier jarif kam-ninja kpg-core llanga zmi
+# with results from: day 1: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bpoliakoff darxus dwarren grenier jarif kam-ninja zmi; day 2: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bpoliakoff darxus dwarren grenier jarif kam-ninja kpg-core llanga zmi; day 3: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bpoliakoff darxus dwarren grenier jarif kam-ninja kpg-core llanga mmiroslaw-ham mmiroslaw-spam zmi
 
 # tflags publish
 AC_BR_BONANZA
@@ -238,9 +238,6 @@ DOS_RCVD_IP_TWICE_C
 # good enough
 DSN_NO_MIMEVERSION
 
-# good enough
-DUP_SUSP_HDR
-
 # tflags publish
 DX_TEXT_02
 
@@ -344,6 +341,15 @@ FROM_MISSP_USER
 FROM_MISSP_XPRIO
 
 # good enough
+FROM_URI
+
+# good enough
+FROM_WEBSITE
+
+# good enough
+FSL_BULK_SIG
+
+# good enough
 FSL_CTYPE_WIN1251
 
 # good enough
@@ -351,9 +357,6 @@ FSL_FAKE_HOTMAIL_RVCD
 
 # good enough
 FSL_HELO_BARE_IP_1
-
-# good enough
-FSL_HELO_BARE_IP_2
 
 # good enough
 FSL_HELO_DEVICE
@@ -551,6 +554,9 @@ LOTTO_URI
 LUCRATIVE
 
 # good enough
+MAILER_EQ_ORG
+
+# good enough
 MALFORMED_FREEMAIL
 
 # tflags publish
@@ -576,6 +582,9 @@ MONEY_BARRISTER
 
 # good enough
 MONEY_FORM
+
+# good enough
+MONEY_FORM_SHORT
 
 # tflags publish
 MONEY_FRAUD_3
@@ -626,7 +635,7 @@ NSL_RCVD_HELO_USER
 NULL_IN_BODY
 
 # good enough
-OBFU_DOC_ATTACH
+OBFU_ATTACH_MISSP
 
 # tflags publish
 OBFU_JVSCR_ESC
@@ -639,9 +648,6 @@ PART_CID_STOCK
 
 # good enough
 PDS_FROM_2_EMAILS
-
-# good enough
-PDS_TO_EQ_FROM_NAME
 
 # tflags publish
 PP_MIME_FAKE_ASCII_TEXT
@@ -1019,9 +1025,6 @@ TT_MSGID_TRUNC
 TVD_FROM_1
 
 # good enough
-TVD_IP_HEX
-
-# good enough
 TVD_IP_OCT
 
 # good enough
@@ -1055,25 +1058,31 @@ TVD_VISIT_PHARMA
 TW_GIBBERISH_MANY
 
 # good enough
-FROM_URI
+ACCT_PHISHING
 
 # good enough
-FROM_WEBSITE
+END_FUTURE_EMAILS
 
 # good enough
-FSL_BULK_SIG
+FSL_HELO_BARE_IP_2
 
 # good enough
-MAILER_EQ_ORG
+FSL_MID_419
+
+# good enough
+HK_RANDOM_FROM
+
+# good enough
+IMG_ALT_HSPACE_CID_ALIGN
 
 # good enough
 MONEY_LOTTERY
 
 # good enough
-OBFU_ATTACH_MISSP
+PHP_NOVER_MUA
 
 # good enough
-PHP_NOVER_MUA
+TVD_APP_LOAN
 
 # tflags publish
 UC_GIBBERISH_OBFU
