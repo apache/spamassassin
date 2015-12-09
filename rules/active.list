@@ -1,5 +1,8 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bpoliakoff darxus dwarren grenier jarif kam-ninja zmi; day 2: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bpoliakoff darxus dwarren grenier jarif kam-ninja kpg-core llanga zmi; day 3: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bpoliakoff darxus dwarren grenier jarif kam-ninja kpg-core llanga mmiroslaw-ham mmiroslaw-spam zmi
+# with results from: day 1: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bpoliakoff darxus dwarren grenier jarif kam-ninja zmi; day 2: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bpoliakoff darxus dwarren grenier jarif kam-ninja kpg-core llanga zmi; day 3: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bpoliakoff darxus dwarren grenier jarif kam-ninja kpg-core llanga zmi
+
+# good enough
+ACCT_PHISHING
 
 # tflags publish
 AC_BR_BONANZA
@@ -250,6 +253,9 @@ DX_TEXT_05
 # good enough
 DYN_RDNS_AND_INLINE_IMAGE
 
+# good enough
+END_FUTURE_EMAILS
+
 # tflags userconf
 ENV_AND_HDR_SPF_MATCH
 
@@ -264,9 +270,6 @@ FBI_SPOOF
 
 # tflags publish
 FILL_THIS_FORM
-
-# good enough
-FILL_THIS_FORM_FRAUD_PHISH
 
 # good enough
 FILL_THIS_FORM_LOAN
@@ -341,25 +344,22 @@ FROM_MISSP_USER
 FROM_MISSP_XPRIO
 
 # good enough
-FROM_URI
-
-# good enough
-FROM_WEBSITE
-
-# good enough
 FSL_BULK_SIG
 
 # good enough
 FSL_CTYPE_WIN1251
 
 # good enough
-FSL_FAKE_HOTMAIL_RVCD
-
-# good enough
 FSL_HELO_BARE_IP_1
 
 # good enough
+FSL_HELO_BARE_IP_2
+
+# good enough
 FSL_HELO_DEVICE
+
+# good enough
+FSL_MID_419
 
 # tflags publish
 FSL_NEW_HELO_USER
@@ -476,6 +476,9 @@ HK_NAME_FM_MR_MRS
 HK_NAME_MR_MRS
 
 # good enough
+HK_RANDOM_FROM
+
+# good enough
 HK_SCAM_N1
 
 # good enough
@@ -506,6 +509,9 @@ HTML_FONT_TINY
 HTML_OFF_PAGE
 
 # good enough
+IMG_ALT_HSPACE_CID_ALIGN
+
+# good enough
 KB_DATE_CONTAINS_TAB
 
 # good enough
@@ -513,9 +519,6 @@ KB_FAKED_THE_BAT
 
 # good enough
 KB_FORGED_MOZ4
-
-# good enough
-KB_RATWARE_OUTLOOK_MID
 
 # good enough
 LIST_PARTIAL_SHORT_MSG
@@ -531,9 +534,6 @@ LONG_HEX_URI
 
 # tflags publish
 LONG_IMG_URI
-
-# good enough
-LONG_TERM_PRICE
 
 # tflags publish
 LOTS_OF_MONEY
@@ -552,9 +552,6 @@ LOTTO_URI
 
 # tflags publish
 LUCRATIVE
-
-# good enough
-MAILER_EQ_ORG
 
 # good enough
 MALFORMED_FREEMAIL
@@ -602,6 +599,9 @@ MONEY_FROM_41
 MONEY_FROM_MISSP
 
 # good enough
+MONEY_LOTTERY
+
+# good enough
 MSGID_NOFQDN1
 
 # tflags publish
@@ -642,9 +642,6 @@ OBFU_JVSCR_ESC
 
 # tflags publish
 OBFU_TEXT_ATTACH
-
-# good enough
-PART_CID_STOCK
 
 # good enough
 PDS_FROM_2_EMAILS
@@ -910,9 +907,6 @@ SHARE_50_50
 # good enough
 SHORTENED_URL_SRC
 
-# good enough
-SHORT_TERM_PRICE
-
 # tflags publish
 SINGLETS_LOW_CONTRAST
 
@@ -958,6 +952,12 @@ STOCK_LOW_CONTRAST
 # tflags publish
 STOCK_TIP
 
+# good enough
+STOX_REPLY_TYPE
+
+# good enough
+STOX_REPLY_TYPE_WITHOUT_QUOTES
+
 # tflags publish
 STYLE_GIBBERISH
 
@@ -988,9 +988,6 @@ TEQF_USR_POLITE
 # tflags publish
 THIS_AD
 
-# good enough
-THREAD_INDEX_HEX
-
 # tflags net
 TO_EQ_FM_DOM_SPF_FAIL
 
@@ -1020,6 +1017,9 @@ TO_NO_BRKTS_PCNT
 
 # good enough
 TT_MSGID_TRUNC
+
+# good enough
+TVD_APP_LOAN
 
 # good enough
 TVD_FROM_1
@@ -1058,31 +1058,28 @@ TVD_VISIT_PHARMA
 TW_GIBBERISH_MANY
 
 # good enough
-ACCT_PHISHING
+AXB_X_AOL_SEZ_S
 
 # good enough
-END_FUTURE_EMAILS
+CDISP_SZ_MANY
 
 # good enough
-FSL_HELO_BARE_IP_2
+DATE_IN_FUTURE_96_Q
 
 # good enough
-FSL_MID_419
+DUP_SUSP_HDR
 
 # good enough
-HK_RANDOM_FROM
+HK_LOTTO_NAME
 
 # good enough
-IMG_ALT_HSPACE_CID_ALIGN
+OBFU_DOC_ATTACH
 
 # good enough
-MONEY_LOTTERY
+PDS_TO_EQ_FROM_NAME
 
 # good enough
-PHP_NOVER_MUA
-
-# good enough
-TVD_APP_LOAN
+TVD_IP_HEX
 
 # tflags publish
 UC_GIBBERISH_OBFU
