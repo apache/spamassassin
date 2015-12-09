@@ -1003,7 +1003,7 @@ meta        GAPPY_HTML             __GAPPY_HTML && !__UNSUB_LINK && !__RP_MATCHE
 describe    GAPPY_HTML             HTML body with much useless whitespace
 
 # Try to improve S/O per bug 6119
-meta        TVD_SPACE_RATIO_MINFP  __TVD_SPACE_RATIO && !__LCL__ENV_AND_HDR_FROM_MATCH && !__SUBSCRIPTION_INFO && !__RCD_RDNS_MAIL && !__SUBJECT_ENCODED_QP && !__THREADED && !__TO_EQ_FROM_DOM && !__BOTH_INR_AND_REF && !__X_CRON_ENV && !__HAS_THREAD_INDEX && !__HDRS_LCASE_KNOWN && !__ISO_2022_JP_DELIM
+meta        TVD_SPACE_RATIO_MINFP  __TVD_SPACE_RATIO && !__CT_ENCRYPTED && !__LCL__ENV_AND_HDR_FROM_MATCH && !__SUBSCRIPTION_INFO && !__RCD_RDNS_MAIL && !__SUBJECT_ENCODED_QP && !__THREADED && !__TO_EQ_FROM_DOM && !__BOTH_INR_AND_REF && !__X_CRON_ENV && !__HAS_THREAD_INDEX && !__HDRS_LCASE_KNOWN && !__ISO_2022_JP_DELIM
 #tflags      TVD_SPACE_RATIO_MINFP  nopublish
 score       TVD_SPACE_RATIO_MINFP  2.750   # limit
 
@@ -1469,7 +1469,7 @@ header      __DATE_LOWER       ALL =~ /date:\s\S{5}/
 
 # duplicates __XPRIO
 #header      __FH_HAS_XPRIORITY exists:X-Priority
-meta        XPRIO              __XPRIO && !ALL_TRUSTED && !__HAS_ERRORS_TO && !__THREADED && !__RP_MATCHES_RCVD && !__LONGLINE && !__MAIL_LINK && !__COMMENT_EXISTS && !__RCD_RDNS_SMTP 
+meta        XPRIO              __XPRIO && !__CT_ENCRYPTED && !ALL_TRUSTED && !__HAS_ERRORS_TO && !__THREADED && !__RP_MATCHES_RCVD && !__LONGLINE && !__MAIL_LINK && !__COMMENT_EXISTS && !__RCD_RDNS_SMTP
 describe    XPRIO              Has X-Priority header
 score       XPRIO              2.000	# limit
 tflags      XPRIO              publish
@@ -2052,6 +2052,9 @@ meta       __RCVD_RMV_BODY_SHORT       __GATED_THROUGH_RCVD_REMOVER && __KAM_BOD
 meta       __RCVD_RMV_FROM_TWO         __GATED_THROUGH_RCVD_REMOVER && __PDS_FROM_2_EMAILS 
 meta       __RCVD_RMV_XPRIO            __GATED_THROUGH_RCVD_REMOVER && __XPRIO 
 
+
+#header  KHOP_ENCRYPTED_CONTENT Content-Type =~ /^multipart\/(?:x-)?(?:pgp-)?encrypted|application\/(?:x-)?pkcs7-mime/
+header     __CT_ENCRYPTED              Content-Type =~ /^multipart\/(?:x-)?(?:pgp-)?encrypted|application\/(?:x-)?pkcs7-mime/
 
 
 
