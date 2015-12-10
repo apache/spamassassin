@@ -1,8 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bpoliakoff darxus dwarren grenier jarif kam-ninja zmi; day 2: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bpoliakoff darxus dwarren grenier jarif kam-ninja kpg-core llanga zmi; day 3: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bpoliakoff darxus dwarren grenier jarif kam-ninja kpg-core llanga zmi
-
-# good enough
-ACCT_PHISHING
+# with results from: day 1: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bpoliakoff darxus dwarren grenier kam-ninja kpg-core zmi; day 2: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bpoliakoff darxus dwarren grenier jarif kam-ninja llanga zmi; day 3: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bpoliakoff darxus dwarren grenier jarif kam-ninja kpg-core llanga zmi
 
 # tflags publish
 AC_BR_BONANZA
@@ -185,9 +182,6 @@ CTYPE_NULL
 DEAR_BENEFICIARY
 
 # good enough
-DEAR_EMAIL_USER
-
-# good enough
 DEAR_WINNER
 
 # tflags net
@@ -236,7 +230,7 @@ DOS_OE_TO_MX
 DOS_OE_TO_MX_IMAGE
 
 # good enough
-DOS_RCVD_IP_TWICE_C
+DOS_OUTLOOK_TO_MX
 
 # good enough
 DSN_NO_MIMEVERSION
@@ -249,12 +243,6 @@ DX_TEXT_03
 
 # good enough
 DX_TEXT_05
-
-# good enough
-DYN_RDNS_AND_INLINE_IMAGE
-
-# good enough
-END_FUTURE_EMAILS
 
 # tflags userconf
 ENV_AND_HDR_SPF_MATCH
@@ -342,9 +330,6 @@ FROM_MISSP_USER
 
 # good enough
 FROM_MISSP_XPRIO
-
-# good enough
-FSL_BULK_SIG
 
 # good enough
 FSL_CTYPE_WIN1251
@@ -461,9 +446,6 @@ HELO_LOCALHOST
 HEXHASH_WORD
 
 # good enough
-HK_LOTTO
-
-# good enough
 HK_NAME_DR
 
 # good enough
@@ -474,9 +456,6 @@ HK_NAME_FM_MR_MRS
 
 # good enough
 HK_NAME_MR_MRS
-
-# good enough
-HK_RANDOM_FROM
 
 # good enough
 HK_SCAM_N1
@@ -507,9 +486,6 @@ HTML_FONT_TINY
 
 # tflags publish
 HTML_OFF_PAGE
-
-# good enough
-IMG_ALT_HSPACE_CID_ALIGN
 
 # good enough
 KB_DATE_CONTAINS_TAB
@@ -547,9 +523,6 @@ LOTTO_AGENT
 # good enough
 LOTTO_DEPT
 
-# good enough
-LOTTO_URI
-
 # tflags publish
 LUCRATIVE
 
@@ -579,9 +552,6 @@ MONEY_BARRISTER
 
 # good enough
 MONEY_FORM
-
-# good enough
-MONEY_FORM_SHORT
 
 # tflags publish
 MONEY_FRAUD_3
@@ -633,9 +603,6 @@ NSL_RCVD_HELO_USER
 
 # good enough
 NULL_IN_BODY
-
-# good enough
-OBFU_ATTACH_MISSP
 
 # tflags publish
 OBFU_JVSCR_ESC
@@ -884,9 +851,6 @@ RCVD_IN_SORBS_ZOMBIE
 RCVD_IN_XBL
 
 # good enough
-RDNS_LOCALHOST
-
-# good enough
 REPLYTO_WITHOUT_TO_CC
 
 # good enough
@@ -953,9 +917,6 @@ STOCK_LOW_CONTRAST
 STOCK_TIP
 
 # good enough
-STOX_REPLY_TYPE
-
-# good enough
 STOX_REPLY_TYPE_WITHOUT_QUOTES
 
 # tflags publish
@@ -1016,9 +977,6 @@ TO_NO_BRKTS_NORDNS_HTML
 TO_NO_BRKTS_PCNT
 
 # good enough
-TT_MSGID_TRUNC
-
-# good enough
 TVD_APP_LOAN
 
 # good enough
@@ -1061,22 +1019,22 @@ TW_GIBBERISH_MANY
 AXB_X_AOL_SEZ_S
 
 # good enough
-CDISP_SZ_MANY
-
-# good enough
 DATE_IN_FUTURE_96_Q
 
 # good enough
-DUP_SUSP_HDR
+DOS_BODY_HIGH_NO_MID
+
+# good enough
+FAKE_REPLY_A1
 
 # good enough
 HK_LOTTO_NAME
 
 # good enough
-OBFU_DOC_ATTACH
+PDS_TO_EQ_FROM_NAME
 
 # good enough
-PDS_TO_EQ_FROM_NAME
+TO_EQ_FM_DIRECT_MX
 
 # good enough
 TVD_IP_HEX
