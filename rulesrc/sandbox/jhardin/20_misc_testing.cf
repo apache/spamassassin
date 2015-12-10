@@ -2046,8 +2046,13 @@ tflags     MSM_PRIO_REPTO              publish
 
 header     __XM_YAMAIL                 X-Mailer =~ /^Yamail/
 
-# test some combos
 meta       __RCVD_RMV_URI_ONLY         __GATED_THROUGH_RCVD_REMOVER && __BODY_URI_ONLY 
+meta       RCVD_RMV_URI_ONLY           __RCVD_RMV_URI_ONLY
+describe   RCVD_RMV_URI_ONLY           Headers removed + URI only
+score      RCVD_RMV_URI_ONLY           3.000	# limit
+tflags     RCVD_RMV_URI_ONLY           publish
+
+# test some combos
 meta       __RCVD_RMV_BODY_SHORT       __GATED_THROUGH_RCVD_REMOVER && __KAM_BODY_LENGTH_LT_128
 meta       __RCVD_RMV_FROM_TWO         __GATED_THROUGH_RCVD_REMOVER && __PDS_FROM_2_EMAILS 
 meta       __RCVD_RMV_XPRIO            __GATED_THROUGH_RCVD_REMOVER && __XPRIO 
