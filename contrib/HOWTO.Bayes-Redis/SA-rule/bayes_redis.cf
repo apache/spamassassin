@@ -31,7 +31,7 @@ bayes_store_module  Mail::SpamAssassin::BayesStore::Redis
 # the Redis server/port will not be reachable from the "outside".
 # See Redis docs for authentication syntax
 
-bayes_sql_dsn  server=192.168.1.2:6379
+bayes_sql_dsn  server=192.168.1.2:6379,database=0
 
 use_bayes 1
 use_bayes_rules 1
