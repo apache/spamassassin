@@ -1470,6 +1470,7 @@ header      __DATE_LOWER       ALL =~ /date:\s\S{5}/
 # duplicates __XPRIO
 #header      __FH_HAS_XPRIORITY exists:X-Priority
 meta        XPRIO              __XPRIO && !__CT_ENCRYPTED && !ALL_TRUSTED && !__HAS_ERRORS_TO && !__THREADED && !__RP_MATCHES_RCVD && !__LONGLINE && !__MAIL_LINK && !__COMMENT_EXISTS && !__RCD_RDNS_SMTP
+# fp-avoid with __REPTO_QUOTE __USING_VERP1  too?
 describe    XPRIO              Has X-Priority header
 score       XPRIO              2.000	# limit
 tflags      XPRIO              publish
@@ -2060,6 +2061,11 @@ meta       __RCVD_RMV_XPRIO            __GATED_THROUGH_RCVD_REMOVER && __XPRIO
 
 #header  KHOP_ENCRYPTED_CONTENT Content-Type =~ /^multipart\/(?:x-)?(?:pgp-)?encrypted|application\/(?:x-)?pkcs7-mime/
 header     __CT_ENCRYPTED              Content-Type =~ /^multipart\/(?:x-)?(?:pgp-)?encrypted|application\/(?:x-)?pkcs7-mime/
+meta       ENCRYPTED_MESSAGE           __CT_ENCRYPTED
+describe   ENCRYPTED_MESSAGE           Message is encrypted, not likely to be spam
+score      ENCRYPTED_MESSAGE           -1.000
+tflags     ENCRYPTED_MESSAGE           nice,publish
+
 
 
 
