@@ -1625,7 +1625,8 @@ sub open_storages {
 ###########################################################################
   my $self = shift;
 
-  return 1 unless (!defined $self->{default_storage});
+  # disabled per bug 7191
+  #return 1 unless (!defined $self->{default_storage});
 
   my $factory;
   if ($self->{main}->{pers_addr_list_factory}) {
