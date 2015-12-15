@@ -1,6 +1,17 @@
 
 # Ensure plugin-based rules used for FP avoidance exist
 # even if the plugin is not loaded, or an older version is loaded
+# __KAM_BODY_LENGTH_LT_128
+ifplugin Mail::SpamAssassin::Plugin::BodyEval
+  if can(Mail::SpamAssassin::Plugin::BodyEval::has_check_body_length)
+    meta      __LCL__KAM_BODY_LENGTH_LT_128     __KAM_BODY_LENGTH_LT_128
+  else
+    meta      __LCL__KAM_BODY_LENGTH_LT_128     0
+  endif
+else
+  meta      __LCL__KAM_BODY_LENGTH_LT_128     0
+endif
+
 # __KAM_BODY_LENGTH_LT_512
 ifplugin Mail::SpamAssassin::Plugin::BodyEval
   if can(Mail::SpamAssassin::Plugin::BodyEval::has_check_body_length)
@@ -1469,8 +1480,7 @@ header      __DATE_LOWER       ALL =~ /date:\s\S{5}/
 
 # duplicates __XPRIO
 #header      __FH_HAS_XPRIORITY exists:X-Priority
-meta        XPRIO              __XPRIO && !__CT_ENCRYPTED && !ALL_TRUSTED && !__HAS_ERRORS_TO && !__THREADED && !__RP_MATCHES_RCVD && !__LONGLINE && !__MAIL_LINK && !__COMMENT_EXISTS && !__RCD_RDNS_SMTP
-# fp-avoid with __REPTO_QUOTE __USING_VERP1  too?
+meta        XPRIO              __XPRIO && !__CT_ENCRYPTED && !ALL_TRUSTED && !__HAS_ERRORS_TO && !__THREADED && !__RP_MATCHES_RCVD && !__LONGLINE && !__MAIL_LINK && !__COMMENT_EXISTS && !__RCD_RDNS_SMTP && !__SUBSCRIPTION_INFO && !__DKIM_EXISTS 
 describe    XPRIO              Has X-Priority header
 score       XPRIO              2.000	# limit
 tflags      XPRIO              publish
@@ -1478,7 +1488,7 @@ tflags      XPRIO              publish
 # some no-ham combinations
 
 meta        __XPRIO_SHORT_SUBJ __XPRIO && __SUBJ_SHORT 
-meta        XPRIO_SHORT_SUBJ   __XPRIO_SHORT_SUBJ && !__HAS_ANY_URI && !__TO_NO_ARROWS_R && !__ENV_AND_HDR_FROM_MATCH 
+meta        XPRIO_SHORT_SUBJ   __XPRIO_SHORT_SUBJ && !__HAS_ANY_URI && !__TO_NO_ARROWS_R && !__ENV_AND_HDR_FROM_MATCH && !__VISTA_MSGID 
 describe    XPRIO_SHORT_SUBJ   Has X-Priority header + short subject
 score       XPRIO_SHORT_SUBJ   2.500	# limit
 tflags      XPRIO_SHORT_SUBJ   publish
@@ -2053,10 +2063,15 @@ describe   RCVD_RMV_URI_ONLY           Headers removed + URI only
 score      RCVD_RMV_URI_ONLY           3.000	# limit
 tflags     RCVD_RMV_URI_ONLY           publish
 
-# test some combos
-meta       __RCVD_RMV_BODY_SHORT       __GATED_THROUGH_RCVD_REMOVER && __KAM_BODY_LENGTH_LT_128
-meta       __RCVD_RMV_FROM_TWO         __GATED_THROUGH_RCVD_REMOVER && __PDS_FROM_2_EMAILS 
 meta       __RCVD_RMV_XPRIO            __GATED_THROUGH_RCVD_REMOVER && __XPRIO 
+meta       RCVD_RMV_XPRIO              __RCVD_RMV_XPRIO
+describe   RCVD_RMV_XPRIO              Headers removed + X-Priority
+score      RCVD_RMV_XPRIO              2.000	# limit
+
+# test some combos
+meta       __RCVD_RMV_BODY_SHORT       __GATED_THROUGH_RCVD_REMOVER && __LCL__KAM_BODY_LENGTH_LT_128
+meta       __RCVD_RMV_FROM_TWO         __GATED_THROUGH_RCVD_REMOVER && __PDS_FROM_2_EMAILS 
+meta       __RCVD_RMV_XMAIL            __GATED_THROUGH_RCVD_REMOVER && __HAS_X_MAILER 
 
 
 #header  KHOP_ENCRYPTED_CONTENT Content-Type =~ /^multipart\/(?:x-)?(?:pgp-)?encrypted|application\/(?:x-)?pkcs7-mime/
@@ -2069,5 +2084,7 @@ tflags     ENCRYPTED_MESSAGE           nice,publish
 
 body       __PHONE_GIBBERISH_01        /(?:\b\d\d\d-\d\d\d-\d\d\d\d\s+[a-z][^\d\s:.]+\s+){15}/
 
+# Find spams not hitting already good-performing combos
+meta       __RCVD_RMV_TEST_01          __GATED_THROUGH_RCVD_REMOVER && !__BODY_URI_ONLY && !PDS_FROM_2_EMAILS && !__XPRIO
 
 
