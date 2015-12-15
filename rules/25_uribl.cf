@@ -147,6 +147,12 @@ describe        URIBL_JP_SURBL  Contains an URL listed in the JP SURBL blocklist
 tflags          URIBL_JP_SURBL  net
 reuse           URIBL_JP_SURBL
 
+#SURBL BLOCK RULES - Bit 1 means your DNS has been blocked and this rule should be triggered to notify you.
+urirhssub       SURBL_BLOCKED   multi.surbl.org.        A   1
+body            SURBL_BLOCKED   eval:check_uridnsbl('SURBL_BLOCKED')
+describe        SURBL_BLOCKED   ADMINISTRATOR NOTICE: The query to SURBL was blocked.  See http://wiki.apache.org/spamassassin/DnsBlocklists\#dnsbl-block for more information.
+tflags          SURBL_BLOCKED   net noautolearn
+
 ###########################################################################
 ## URIBL
 
