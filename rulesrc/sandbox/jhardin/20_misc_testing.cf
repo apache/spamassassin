@@ -2085,6 +2085,7 @@ tflags     ENCRYPTED_MESSAGE           nice,publish
 body       __PHONE_GIBBERISH_01        /(?:\b\d\d\d-\d\d\d-\d\d\d\d\s+[a-z][^\d\s:.]+\s+){15}/
 
 # Find spams not hitting already good-performing combos
-meta       __RCVD_RMV_TEST_01          __GATED_THROUGH_RCVD_REMOVER && !__BODY_URI_ONLY && !PDS_FROM_2_EMAILS && !__XPRIO
+meta       __RCVD_RMV_TEST_01          __GATED_THROUGH_RCVD_REMOVER && !__BODY_URI_ONLY && !__XPRIO && !__DOS_HAS_LIST_ID  && !__PDS_FROM_2_EMAILS
+meta       __RCVD_RMV_TEST_02          __GATED_THROUGH_RCVD_REMOVER && !__BODY_URI_ONLY && !__XPRIO && !__DOS_HAS_LIST_ID 
 
 
