@@ -2067,11 +2067,17 @@ meta       __RCVD_RMV_XPRIO            __GATED_THROUGH_RCVD_REMOVER && __XPRIO
 meta       RCVD_RMV_XPRIO              __RCVD_RMV_XPRIO
 describe   RCVD_RMV_XPRIO              Headers removed + X-Priority
 score      RCVD_RMV_XPRIO              2.000	# limit
+tflags     RCVD_RMV_XPRIO              publish
 
-# test some combos
-meta       __RCVD_RMV_BODY_SHORT       __GATED_THROUGH_RCVD_REMOVER && __LCL__KAM_BODY_LENGTH_LT_128
-meta       __RCVD_RMV_FROM_TWO         __GATED_THROUGH_RCVD_REMOVER && __PDS_FROM_2_EMAILS 
-meta       __RCVD_RMV_XMAIL            __GATED_THROUGH_RCVD_REMOVER && __HAS_X_MAILER 
+meta       RCVD_REMOVED                __GATED_THROUGH_RCVD_REMOVER && !__BODY_URI_ONLY && !__XPRIO && !__DOS_HAS_LIST_ID && !__BOTH_INR_AND_REF 
+describe   RCVD_REMOVED                Headers removed
+score      RCVD_REMOVED                3.750	# limit
+tflags     RCVD_REMOVED                publish
+
+## test some combos
+#meta       __RCVD_RMV_BODY_SHORT       __GATED_THROUGH_RCVD_REMOVER && __LCL__KAM_BODY_LENGTH_LT_128
+#meta       __RCVD_RMV_FROM_TWO         __GATED_THROUGH_RCVD_REMOVER && __PDS_FROM_2_EMAILS 
+#meta       __RCVD_RMV_XMAIL            __GATED_THROUGH_RCVD_REMOVER && __HAS_X_MAILER 
 
 
 #header  KHOP_ENCRYPTED_CONTENT Content-Type =~ /^multipart\/(?:x-)?(?:pgp-)?encrypted|application\/(?:x-)?pkcs7-mime/
@@ -2084,8 +2090,8 @@ tflags     ENCRYPTED_MESSAGE           nice,publish
 
 body       __PHONE_GIBBERISH_01        /(?:\b\d\d\d-\d\d\d-\d\d\d\d\s+[a-z][^\d\s:.]+\s+){15}/
 
-# Find spams not hitting already good-performing combos
-meta       __RCVD_RMV_TEST_01          __GATED_THROUGH_RCVD_REMOVER && !__BODY_URI_ONLY && !__XPRIO && !__DOS_HAS_LIST_ID  && !__PDS_FROM_2_EMAILS
-meta       __RCVD_RMV_TEST_02          __GATED_THROUGH_RCVD_REMOVER && !__BODY_URI_ONLY && !__XPRIO && !__DOS_HAS_LIST_ID 
+## Find spams not hitting already good-performing combos
+#meta       __RCVD_RMV_TEST_01          __GATED_THROUGH_RCVD_REMOVER && !__BODY_URI_ONLY && !__XPRIO && !__DOS_HAS_LIST_ID  && !__PDS_FROM_2_EMAILS
+#meta       __RCVD_RMV_TEST_02          __GATED_THROUGH_RCVD_REMOVER && !__BODY_URI_ONLY && !__XPRIO && !__DOS_HAS_LIST_ID 
 
 
