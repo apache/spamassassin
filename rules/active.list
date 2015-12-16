@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi darxus dwarren grenier jarif kam-ninja kpg-core zmi; day 2: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bpoliakoff darxus dwarren grenier kam-ninja kpg-core llanga zmi; day 3: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bpoliakoff darxus dwarren grenier kam-ninja kpg-core llanga zmi
+# with results from: day 1: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bpoliakoff darxus dwarren grenier jarif kam-ninja kpg-core zmi; day 2: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bpoliakoff darxus dwarren grenier jarif kam-ninja kpg-core llanga zmi; day 3: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bpoliakoff darxus dwarren grenier jarif kam-ninja kpg-core llanga zmi
 
 # tflags publish
 AC_BR_BONANZA
@@ -95,9 +95,6 @@ AXB_XMAILER_MIMEOLE_OL_024C2
 AXB_XMAILER_MIMEOLE_OL_1ECD5
 
 # good enough
-AXB_XM_FORGED_OL2600
-
-# good enough
 AXB_X_FF_SEZ_S
 
 # good enough
@@ -176,10 +173,7 @@ COMPENSATION
 CORRUPT_FROM_LINE_IN_HDRS
 
 # good enough
-CTYPE_NULL
-
-# good enough
-DATE_IN_FUTURE_96_Q
+CURR_PRICE
 
 # good enough
 DEAR_BENEFICIARY
@@ -233,7 +227,7 @@ DOS_OE_TO_MX
 DOS_OE_TO_MX_IMAGE
 
 # good enough
-DOS_OUTLOOK_TO_MX
+DOS_RCVD_IP_TWICE_C
 
 # good enough
 DSN_NO_MIMEVERSION
@@ -247,11 +241,11 @@ DX_TEXT_03
 # good enough
 DX_TEXT_05
 
+# good enough
+DYN_RDNS_SHORT_HELO_HTML
+
 # tflags userconf
 ENV_AND_HDR_SPF_MATCH
-
-# good enough
-FAKE_REPLY_A1
 
 # good enough
 FAKE_REPLY_C
@@ -348,9 +342,6 @@ FSL_HELO_BARE_IP_2
 
 # good enough
 FSL_HELO_DEVICE
-
-# good enough
-FSL_MID_419
 
 # tflags publish
 FSL_NEW_HELO_USER
@@ -452,28 +443,7 @@ HELO_LOCALHOST
 HEXHASH_WORD
 
 # good enough
-HK_LOTTO_NAME
-
-# good enough
-HK_NAME_DR
-
-# good enough
-HK_NAME_FM_DR
-
-# good enough
-HK_NAME_FM_MR_MRS
-
-# good enough
 HK_NAME_MR_MRS
-
-# good enough
-HK_SCAM_N1
-
-# good enough
-HK_SCAM_N13
-
-# good enough
-HK_SCAM_N15
 
 # good enough
 HK_SCAM_N2
@@ -483,9 +453,6 @@ HK_SCAM_N3
 
 # good enough
 HK_SCAM_N8
-
-# good enough
-HK_SCAM_S25
 
 # tflags userconf
 HTML_CHARSET_FARAWAY
@@ -519,6 +486,9 @@ LONG_HEX_URI
 
 # tflags publish
 LONG_IMG_URI
+
+# good enough
+LONG_TERM_PRICE
 
 # tflags publish
 LOTS_OF_MONEY
@@ -575,9 +545,6 @@ MONEY_FROM_41
 MONEY_FROM_MISSP
 
 # good enough
-MONEY_LOTTERY
-
-# good enough
 MSGID_NOFQDN1
 
 # tflags publish
@@ -607,9 +574,6 @@ NSL_RCVD_FROM_USER
 # good enough
 NSL_RCVD_HELO_USER
 
-# good enough
-NULL_IN_BODY
-
 # tflags publish
 OBFU_JVSCR_ESC
 
@@ -617,10 +581,10 @@ OBFU_JVSCR_ESC
 OBFU_TEXT_ATTACH
 
 # good enough
-PDS_FROM_2_EMAILS
+PART_CID_STOCK
 
 # good enough
-PDS_TO_EQ_FROM_NAME
+PDS_FROM_2_EMAILS
 
 # tflags publish
 PP_MIME_FAKE_ASCII_TEXT
@@ -859,6 +823,12 @@ RCVD_IN_SORBS_ZOMBIE
 # tflags net
 RCVD_IN_XBL
 
+# tflags publish
+RCVD_RMV_URI_ONLY
+
+# good enough
+RDNS_LOCALHOST
+
 # good enough
 REPLYTO_WITHOUT_TO_CC
 
@@ -866,19 +836,10 @@ REPLYTO_WITHOUT_TO_CC
 RISK_FREE
 
 # good enough
-SERGIO_SUBJECT_PORN006
-
-# good enough
-SERGIO_SUBJECT_PORN014
-
-# good enough
-SERGIO_SUBJECT_VIAGRA01
-
-# good enough
-SHARE_50_50
-
-# good enough
 SHORTENED_URL_SRC
+
+# good enough
+SHORT_TERM_PRICE
 
 # tflags publish
 SINGLETS_LOW_CONTRAST
@@ -923,9 +884,6 @@ STOCK_LOW_CONTRAST
 STOCK_TIP
 
 # good enough
-STOX_REPLY_TYPE
-
-# good enough
 STOX_REPLY_TYPE_WITHOUT_QUOTES
 
 # tflags publish
@@ -952,14 +910,8 @@ TEQF_USR_MSGID_HEX
 # tflags publish
 TEQF_USR_MSGID_MALF
 
-# good enough
-TEQF_USR_POLITE
-
 # tflags publish
 THIS_AD
-
-# good enough
-TO_EQ_FM_DIRECT_MX
 
 # tflags net
 TO_EQ_FM_DOM_SPF_FAIL
@@ -992,15 +944,6 @@ TO_NO_BRKTS_PCNT
 TVD_FROM_1
 
 # good enough
-TVD_IP_HEX
-
-# good enough
-TVD_IP_OCT
-
-# good enough
-TVD_PH_BODY_META
-
-# good enough
 TVD_QUAL_MEDS
 
 # good enough
@@ -1008,9 +951,6 @@ TVD_RCVD_IP
 
 # good enough
 TVD_RCVD_IP4
-
-# good enough
-TVD_RCVD_SINGLE
 
 # good enough
 TVD_SPACE_ENCODED
@@ -1028,37 +968,19 @@ TVD_VISIT_PHARMA
 TW_GIBBERISH_MANY
 
 # good enough
-ADVANCE_FEE_5_NEW_FORM
-
-# good enough
-BODY_EMPTY
-
-# good enough
-FILL_THIS_FORM_FRAUD_PHISH
-
-# good enough
-FSL_BULK_SIG
-
-# good enough
-HK_RANDOM_FROM
-
-# good enough
-HK_SCAM_S15
-
-# good enough
-LOTTO_URI
-
-# good enough
-OBFU_ATTACH_MISSP
-
-# good enough
-OBFU_DOC_ATTACH
-
-# good enough
-PHP_NOVER_MUA
+AXB_JT_FOLNO0
 
 # tflags publish
-RCVD_RMV_URI_ONLY
+ENCRYPTED_MESSAGE
+
+# good enough
+FROM_12LTRDOM
+
+# good enough
+KHOP_DYNAMIC
+
+# good enough
+RCVD_RMV_XPRIO
 
 # tflags publish
 UC_GIBBERISH_OBFU
