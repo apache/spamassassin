@@ -434,7 +434,8 @@ sub parse_received_line {
     $auth = 'Postfix';
   }
   # Communigate Pro - Bug 6495 adds HTTP as possible transmission method
-  elsif (/CommuniGate Pro (HTTP|SMTP)/ && / \(account /) {
+  # 	Bug 7277: XIMSS used by Pronto and other custom apps, IMAP supports XMIT extension
+  elsif (/CommuniGate Pro (HTTP|SMTP|XIMSS|IMAP)/ && / \(account /) {
     $auth = 'Communigate';
   }
   # Microsoft Exchange (complete with syntax error)
