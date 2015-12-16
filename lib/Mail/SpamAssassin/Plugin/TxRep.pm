@@ -24,16 +24,20 @@ Mail::SpamAssassin::Plugin::TxRep - Normalize scores with sender reputation reco
 =head1 SYNOPSIS
 
 The TxRep (Reputation) plugin is designed as an improved replacement of the AWL
-(Auto-Whitelist) plugin. It adjusts the final message spam score by looking up and
-taking in consideration the reputation of the sender.
+(Auto-Whitelist) plugin. It adjusts the final message spam score by looking up 
+and taking in consideration the reputation of the sender.
 
-To try TxRep out, you B<have to> disable the AWL plugin (if present), back up its
-database and add a line loading this module in init.pre (AWL may be enabled in v310.pre):
+To try TxRep out, you B<have to> first disable the AWL plugin (if enabled), and
+back up its database. AWL is loaded in v310.pre and can be disabled by
+commenting out the loadplugin line:
 
  # loadplugin   Mail::SpamAssassin::Plugin::AWL
-   loadplugin   Mail::SpamAssassin::Plugin::TxRep
 
 When AWL is not disabled, TxRep will refuse to run.
+
+TxRep should be enabled by uncommenting the following line in v341.pre:
+
+  loadplugin   Mail::SpamAssassin::Plugin::TxRep
 
 Use the supplied 60_txreputation.cf file or add these lines to a .cf file:
 
