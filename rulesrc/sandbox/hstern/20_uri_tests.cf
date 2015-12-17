@@ -1,4 +1,4 @@
-###########################################################################
+  ###########################################################################
 #
 # <@LICENSE>
 # Licensed to the Apache Software Foundation (ASF) under one or more
@@ -7,9 +7,9 @@
 # The ASF licenses this file to you under the Apache License, Version 2.0
 # (the "License"); you may not use this file except in compliance with
 # the License.  You may obtain a copy of the License at:
-# 
+#
 #     http://www.apache.org/licenses/LICENSE-2.0
-# 
+#
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -29,14 +29,14 @@ redirector_pattern m'/(?:index.php)?\?.*(?<=[?&])URL=(.*?)(?:$|[&\#])'i
 
 # Google redirector.
 # Common form:
-# http://www.google.com/url?sa=U&start=4&q=http://urlofspammer 
+# http://www.google.com/url?sa=U&start=4&q=http://urlofspammer
 #	-> http://urlofspammer
 # Unhandled form:
 # http://www.google.com/url?q=http://urlofspammer/space&q=here
 #	-> http://urlofspammer/space%20here
 #	Redirector gets http://urlofspammer/space
 # http://www.google.com/url?q=http://urlof&q=spammer does not work
-redirector_pattern m'^http:/*(?:\w+\.)?google(?:\.\w{2,3}){1,2}/url\?.*?(?<=[?&])q=(.*?)(?:$|[&\#])'i
+redirector_pattern m'^https?:/*(?:\w+\.)?google(?:\.\w{2,3}){1,2}/url\?.*?(?<=[?&])q=(.*?)(?:$|[&\#])'i
 
 # Google site search
 # http://www.google.com/search?q=site:bluevallet.com
@@ -44,29 +44,29 @@ redirector_pattern m'^http:/*(?:\w+\.)?google(?:\.\w{2,3}){1,2}/url\?.*?(?<=[?&]
 # Google inurl search
 # http://google.com//search?hl=en&q=inurl:rnyself.com%2Bvpxl%2Bmade%2Beasy&btnI=RC27
 #       -> searches for 'VXPL made easy' on rnyself.com
-redirector_pattern m'^http:/*(?:\w+\.)?google(?:\.\w{2,3}){1,2}/search\?.*?(?<=[?&])q=[^&]*?(?<=%20|..[=+\s])(?:site|inurl):(.*?)(?:$|%20|[\s+&\#])'i
+redirector_pattern m'^https?:/*(?:\w+\.)?google(?:\.\w{2,3}){1,2}/search\?.*?(?<=[?&])q=[^&]*?(?<=%20|..[=+\s])(?:site|inurl):(.*?)(?:$|%20|[\s+&\#])'i
 
 # Google search for pages that contain the site name
 # http://www.google.com/search?q="bluevallet.com"
 # http://www.google.com/search?q=%22bluevallet.com%22
 #	-> links to search page that probably has http://bluevallet.com
 #	   at the top
-redirector_pattern m'^http:/*(?:\w+\.)?google(?:\.\w{2,3}){1,2}/search\?.*?(?<=[?&])q=[^&]*?(?<=%20|..[=+\s])(?:"|%22)(.*?)(?:$|%22|["\s+&\#])'i
+redirector_pattern m'^https?:/*(?:\w+\.)?google(?:\.\w{2,3}){1,2}/search\?.*?(?<=[?&])q=[^&]*?(?<=%20|..[=+\s])(?:"|%22)(.*?)(?:$|%22|["\s+&\#])'i
 
 # Google translate
 # http://translate.google.com/translate?u=www.domain.tld&langpair=en%7Cen&hl=en
 #	-> http://www.domain.tld inside a frame
-redirector_pattern m'^http:/*(?:\w+\.)?google(?:\.\w{2,3}){1,2}/translate\?.*?(?<=[?&])u=(.*?)(?:$|[&\#])'i
+redirector_pattern m'^https?:/*(?:\w+\.)?google(?:\.\w{2,3}){1,2}/translate\?.*?(?<=[?&])u=(.*?)(?:$|[&\#])'i
 
 # Google Ads
 # http://google.com/pagead/iclk?sa=l&ai=nightmare&num=399412020&adurl=http://quilarpe.com?375
 #       -> http://quilarpe.com?375
-redirector_pattern m'^http:/*(?:\w+\.)?google(?:\.\w{2,3}){1,2}/pagead/iclk\?.*?(?<=[?&])adurl=(.*?)(?:$|[&\#])'i
+redirector_pattern m'^https?:/*(?:\w+\.)?google(?:\.\w{2,3}){1,2}/pagead/iclk\?.*?(?<=[?&])adurl=(.*?)(?:$|[&\#])'i
 
 # AOL redirector
 # http://aol.com/redir.adp?_url=http://www.ixp.jp/univac/
 #	-> http://www.ixp.jp/univac/
-redirector_pattern m'^http:/*(?:\w+\.)?aol\.com/redir\.adp\?.*(?<=[?&])_url=(.*?)(?:$|[&\#])'i
+redirector_pattern m'^https?:/*(?:\w+\.)?aol\.com/redir\.adp\?.*(?<=[?&])_url=(.*?)(?:$|[&\#])'i
 
 # Facebook redirector
 # http://www.facebook.com/l/;www.example.com
