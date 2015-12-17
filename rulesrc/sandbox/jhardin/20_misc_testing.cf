@@ -1887,7 +1887,7 @@ describe  DUP_SUSP_HDR                  Duplicate suspicious message headers
 score     DUP_SUSP_HDR                  2.500	# limit
 
 # seen 10/2014: "https://www.google.com/url?q=https://copy.com/ApbFn2848pQm/ShippingInvoice_6974.PDF.scr?download=1&sa=D&sntz=1&usg=AFQjCNGhvWhljnujQlP85tA6YUsddfuJow"
-uri       __GOOG_MALWARE_DNLD           m;^https?://[^/]*\.google\.com/[^?]*url\?.*[\?&]download=1;i
+uri       __GOOG_MALWARE_DNLD           m;^https?://[^/]*\.google\.com/[^?]*url\?.*[\?&/]download;i
 meta      GOOG_MALWARE_DNLD             __GOOG_MALWARE_DNLD
 describe  GOOG_MALWARE_DNLD             File download via Google - Malware?
 score     GOOG_MALWARE_DNLD             5.000   # limit
