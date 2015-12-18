@@ -1940,12 +1940,19 @@ meta      URI_ONLY_MSGID_MALF           __URI_ONLY_MSGID_MALF && !__RP_MATCHES_R
 describe  URI_ONLY_MSGID_MALF           URI only + malformed message ID
 tflags    URI_ONLY_MSGID_MALF           publish
 
-meta      GOOG_REDIR_SHORT              __GOOG_REDIR && __KAM_BODY_LENGTH_LT_512 
+# These may be a bit risky, the masscheck ham corpus may not
+# reflect how often these are legit in Real Life...
+meta      GOOG_REDIR_SHORT              __GOOG_REDIR && __LCL__KAM_BODY_LENGTH_LT_512 
 describe  GOOG_REDIR_SHORT              Google redirect to obscure spamvertised website + short message
 tflags    GOOG_REDIR_SHORT              publish
 
 meta      GOOG_REDIR_NORDNS             __GOOG_REDIR && RDNS_NONE
 describe  GOOG_REDIR_NORDNS             Google redirect to obscure spamvertised website + no rDNS
+
+meta      GOOG_REDIR_HTML_ONLY          (__GOOG_REDIR && MIME_HTML_ONLY) && !RDNS_NONE && !__LCL__KAM_BODY_LENGTH_LT_512
+describe  GOOG_REDIR_HTML_ONLY          Google redirect to obscure spamvertised website + HTML only
+score     GOOG_REDIR_HTML_ONLY          2.000	# limit
+
 
 
 # low S/O, apparently lots of invisible ham...
