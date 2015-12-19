@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bpoliakoff darxus dwarren grenier jarif kam-ninja kpg-core zmi; day 2: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bpoliakoff dwarren grenier jarif kam-ninja llanga zmi; day 3: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bpoliakoff darxus dwarren grenier jarif kam-ninja kpg-core llanga zmi
+# with results from: day 1: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bpoliakoff darxus dwarren grenier jarif kam-ninja kpg-core zmi; day 2: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bpoliakoff darxus dwarren grenier jarif kam-ninja kpg-core llanga zmi; day 3: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bpoliakoff dwarren grenier jarif kam-ninja llanga zmi
 
 # tflags publish
 AC_BR_BONANZA
@@ -308,9 +308,6 @@ FROM_LOCAL_NOVOWEL
 FROM_MISSPACED
 
 # good enough
-FROM_MISSP_DYNIP
-
-# good enough
 FROM_MISSP_EH_MATCH
 
 # good enough
@@ -348,6 +345,9 @@ FSL_HELO_BARE_IP_2
 
 # good enough
 FSL_HELO_DEVICE
+
+# good enough
+FSL_HELO_FIREWALL
 
 # tflags publish
 FSL_NEW_HELO_USER
@@ -423,9 +423,6 @@ HASHCASH_2SPEND
 
 # tflags userconf
 HASHCASH_HIGH
-
-# good enough
-HDRS_MISSP
 
 # tflags publish
 HEADER_FROM_DIFFERENT_DOMAINS
@@ -561,9 +558,6 @@ MSOE_MID_WRONG_CASE
 
 # good enough
 NAME_EMAIL_DIFF
-
-# good enough
-NA_DOLLARS
 
 # tflags net
 NO_DNS_FOR_FROM
@@ -845,6 +839,9 @@ REPLYTO_WITHOUT_TO_CC
 RISK_FREE
 
 # good enough
+RP_MATCHES_RCVD
+
+# good enough
 SHORTENED_URL_SRC
 
 # good enough
@@ -980,25 +977,19 @@ TVD_VISIT_PHARMA
 TW_GIBBERISH_MANY
 
 # good enough
-FAKE_REPLY_A1
-
-# good enough
 FILL_THIS_FORM_FRAUD_PHISH
 
 # good enough
-FSL_HELO_FIREWALL
+HDRS_MISSP
 
 # good enough
-HK_NAME_FM_DR
+NA_DOLLARS
 
 # good enough
 PHP_NOVER_MUA
 
 # tflags publish
 RCVD_REMOVED
-
-# good enough
-RP_MATCHES_RCVD
 
 # tflags publish
 UC_GIBBERISH_OBFU
