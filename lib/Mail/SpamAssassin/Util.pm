@@ -1343,8 +1343,8 @@ sub uri_list_canonicalize {
       # and add back to the array.  the foreach loop will go over those
       # and deal appropriately.
 
-      # try redirector pattern matching first
-      # (but see also bug 4176)
+      # Bug 7278: try redirector pattern matching first
+      # (but see also Bug 4176)
       my $found_redirector_match;
       foreach my $re (@{$redirector_patterns}) {
         if ("$proto$host$rest" =~ $re) {
