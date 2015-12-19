@@ -1464,23 +1464,27 @@ sub uri_list_canonicalize {
       # deal with http redirectors.  strip off one level of redirector
       # and add back to the array.  the foreach loop will go over those
       # and deal appropriately.
-      # bug 3308: redirectors like yahoo only need one '/' ... <grrr>
-      if ($rest =~ m{(https?:/{0,2}.+)$}i) {
-        push(@uris, $1);
-      }
 
-      # resort to redirector pattern matching if the generic https? check
-      # doesn't result in a match -- bug 4176
-      else {
-	foreach (@{$redirector_patterns}) {
-	  if ("$proto$host$rest" =~ $_) {
-	    next unless defined $1;
-	    dbg("uri: parsed uri pattern: $_");
-	    dbg("uri: parsed uri found: $1 in redirector: $proto$host$rest");
-	    push (@uris, $1);
-	    last;
-	  }
-	}
+      # try redirector pattern matching first
+      # (but see also bug 4176)
+      my $found_redirector_match;
+      foreach my $re (@{$redirector_patterns}) {
+        if ("$proto$host$rest" =~ $re) {
+          next unless defined $1;
+          dbg("uri: parsed uri pattern: $re");
+          dbg("uri: parsed uri found: $1 in redirector: $proto$host$rest");
+          push (@uris, $1);
+          $found_redirector_match = 1;
+          last;
+        }
+      }
+      if (!$found_redirector_match) {
+        # try generic https? check if redirector pattern matching failed
+        # bug 3308: redirectors like yahoo only need one '/' ... <grrr>
+        if ($rest =~ m{(https?:/{0,2}.+)$}i) {
+          push(@uris, $1);
+          dbg("uri: parsed uri found: $1 in hard-coded redirector");
+        }
       }
 
       ########################
