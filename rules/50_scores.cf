@@ -786,13 +786,14 @@ endif # Mail::SpamAssassin::Plugin::SPF
 # URIDNSBL
 ifplugin Mail::SpamAssassin::Plugin::URIDNSBL
 # <gen:mutable>
-score URIBL_AB_SURBL 0 4.499 0 4.499 # n=0 n=2
-score URIBL_JP_SURBL 0 1.948 0 1.250 # n=0 n=2
+#score URIBL_AB_SURBL 0 4.499 0 4.499 # n=0 n=2 - removed bug 7279
+#Changed below from JP to Abuse - bug 7279
+score URIBL_ABUSE_SURBL 0 1.948 0 1.250 # n=0 n=2
 score URIBL_PH_SURBL 0 0.001 0 0.610 # n=0 n=2
 score URIBL_RHS_DOB 0 0.276 0 1.514 # n=0 n=2
 score URIBL_SBL 0 0.644 0 1.623 # n=0 n=2
 score URIBL_SBL_A 0 0.1 0 0.1
-score URIBL_SC_SURBL 0 0.001 0 0.568 # n=0 n=2
+#score URIBL_SC_SURBL 0 0.001 0 0.568 # n=0 n=2 - removed bug 7279
 score URIBL_WS_SURBL 0 1.659 0 1.608 # n=0 n=2
 score URIBL_MW_SURBL 0 1.263 0 1.263
 score URIBL_BLACK 0 1.7 0 1.7 # n=0 n=2
