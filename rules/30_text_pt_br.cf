@@ -598,12 +598,13 @@ endif
 lang pt_BR describe URIBL_SBL Contém uma URL listada na blacklist SBL
 lang pt_BR describe URIBL_DBL_SPAM Contém uma URL listada na blacklist DBL blocklist
 lang pt_BR describe URIBL_DBL_ERROR Erro: Consultou a DBL por um IP
-lang pt_BR describe URIBL_SC_SURBL Contém uma URL listada na blacklist SC SURBL
+#lang pt_BR describe URIBL_SC_SURBL Contém uma URL listada na blacklist SC SURBL - removed bug 7279
 lang pt_BR describe URIBL_WS_SURBL Contém uma URL listada na blacklist WS SURBL
 lang pt_BR describe URIBL_PH_SURBL Contém uma URL listada na blacklist PH SURBL
 #lang pt_BR describe URIBL_OB_SURBL Contém uma URL listada na blacklist OB SURBL - REMOVED BUG 6853
-lang pt_BR describe URIBL_AB_SURBL Contém uma URL listada na blacklist AB SURBL
-lang pt_BR describe URIBL_JP_SURBL Contém uma URL listada na blacklist JP SURBL
+#lang pt_BR describe URIBL_AB_SURBL Contém uma URL listada na blacklist AB SURBL - removed bug 7279
+#Changed from JP to ABUSE per bug 7279
+lang pt_BR describe URIBL_ABUSE_SURBL Contém uma URL listada na blacklist ABUSE SURBL
 lang pt_BR describe URIBL_BLACK Contém uma URL listada na blacklist URIBL
 lang pt_BR describe URIBL_GREY Contém uma URL listada na greylist URIBL
 lang pt_BR describe URIBL_RED Contém uma URL listada na redlist URIBL

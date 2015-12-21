@@ -111,11 +111,12 @@ endif
 ###########################################################################
 ## SURBL
 
-urirhssub       URIBL_SC_SURBL  multi.surbl.org.        A   2
-body            URIBL_SC_SURBL  eval:check_uridnsbl('URIBL_SC_SURBL')
-describe        URIBL_SC_SURBL  Contains an URL listed in the SC SURBL blocklist
-tflags          URIBL_SC_SURBL  net
-reuse           URIBL_SC_SURBL
+#MERGED INTO BIT 64 per bug 7279
+#urirhssub       URIBL_SC_SURBL  multi.surbl.org.        A   2
+#body            URIBL_SC_SURBL  eval:check_uridnsbl('URIBL_SC_SURBL')
+#describe        URIBL_SC_SURBL  Contains an URL listed in the SC SURBL blocklist
+#tflags          URIBL_SC_SURBL  net
+#reuse           URIBL_SC_SURBL
 
 urirhssub       URIBL_WS_SURBL  multi.surbl.org.        A   4
 body            URIBL_WS_SURBL  eval:check_uridnsbl('URIBL_WS_SURBL')
@@ -135,17 +136,19 @@ describe        URIBL_MW_SURBL  Contains a Malware Domain or IP listed in the MW
 tflags          URIBL_MW_SURBL  net
 reuse           URIBL_MW_SURBL
 
-urirhssub       URIBL_AB_SURBL  multi.surbl.org.        A   32
-body            URIBL_AB_SURBL  eval:check_uridnsbl('URIBL_AB_SURBL')
-describe        URIBL_AB_SURBL  Contains an URL listed in the AB SURBL blocklist
-tflags          URIBL_AB_SURBL  net
-reuse           URIBL_AB_SURBL
+#MERGED INTO BIT 64 per bug 7279
+#urirhssub       URIBL_AB_SURBL  multi.surbl.org.        A   32
+#body            URIBL_AB_SURBL  eval:check_uridnsbl('URIBL_AB_SURBL')
+#describe        URIBL_AB_SURBL  Contains an URL listed in the AB SURBL blocklist
+#tflags          URIBL_AB_SURBL  net
+#reuse           URIBL_AB_SURBL
 
-urirhssub       URIBL_JP_SURBL  multi.surbl.org.        A   64
-body            URIBL_JP_SURBL  eval:check_uridnsbl('URIBL_JP_SURBL')
-describe        URIBL_JP_SURBL  Contains an URL listed in the JP SURBL blocklist
-tflags          URIBL_JP_SURBL  net
-reuse           URIBL_JP_SURBL
+#JP MOVED INTO ABUSE AS WELL AND BIT REUSED  per bug 7279
+urirhssub       URIBL_ABUSE_SURBL  multi.surbl.org.        A   64
+body            URIBL_ABUSE_SURBL  eval:check_uridnsbl('URIBL_ABUSE_SURBL')
+describe        URIBL_ABUSE_SURBL  Contains an URL listed in the ABUSE SURBL blocklist
+tflags          URIBL_ABUSE_SURBL  net
+reuse           URIBL_ABUSE_SURBL
 
 ###########################################################################
 ## URIBL
