@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bpoliakoff darxus dwarren grenier jarif kam-ninja kpg-core zmi; day 2: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bpoliakoff darxus dwarren grenier jarif kam-ninja kpg-core llanga zmi; day 3: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bpoliakoff dwarren grenier jarif kam-ninja llanga zmi
+# with results from: day 1: bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bpoliakoff darxus grenier jarif kpg-core zmi; day 2: axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bpoliakoff darxus dwarren grenier jarif kam-ninja kpg-core llanga zmi; day 3: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bpoliakoff darxus dwarren grenier jarif kam-ninja kpg-core llanga zmi
 
 # tflags publish
 AC_BR_BONANZA
@@ -176,9 +176,6 @@ COMPENSATION
 CORRUPT_FROM_LINE_IN_HDRS
 
 # good enough
-CURR_PRICE
-
-# good enough
 DEAR_BENEFICIARY
 
 # good enough
@@ -227,7 +224,7 @@ DOS_ANAL_SPAM_MAILER
 DOS_OE_TO_MX
 
 # good enough
-DOS_OE_TO_MX_IMAGE
+DOS_OUTLOOK_TO_MX
 
 # good enough
 DOS_RCVD_IP_TWICE_C
@@ -242,16 +239,16 @@ DX_TEXT_02
 DX_TEXT_03
 
 # good enough
-DX_TEXT_05
-
-# good enough
-DYN_RDNS_SHORT_HELO_HTML
+DYN_RDNS_AND_INLINE_IMAGE
 
 # tflags publish
 ENCRYPTED_MESSAGE
 
 # tflags userconf
 ENV_AND_HDR_SPF_MATCH
+
+# good enough
+FAKE_REPLY_C
 
 # tflags publish
 FBI_MONEY
@@ -261,6 +258,9 @@ FBI_SPOOF
 
 # tflags publish
 FILL_THIS_FORM
+
+# good enough
+FILL_THIS_FORM_FRAUD_PHISH
 
 # good enough
 FILL_THIS_FORM_LOAN
@@ -338,16 +338,10 @@ FROM_MISSP_XPRIO
 FSL_CTYPE_WIN1251
 
 # good enough
-FSL_HELO_BARE_IP_1
-
-# good enough
 FSL_HELO_BARE_IP_2
 
 # good enough
 FSL_HELO_DEVICE
-
-# good enough
-FSL_HELO_FIREWALL
 
 # tflags publish
 FSL_NEW_HELO_USER
@@ -457,20 +451,8 @@ HK_SCAM_N8
 # tflags userconf
 HTML_CHARSET_FARAWAY
 
-# good enough
-HTML_FONT_TINY
-
 # tflags publish
 HTML_OFF_PAGE
-
-# good enough
-KB_DATE_CONTAINS_TAB
-
-# good enough
-KB_FAKED_THE_BAT
-
-# good enough
-KB_FORGED_MOZ4
 
 # good enough
 KHOP_DYNAMIC
@@ -489,9 +471,6 @@ LONG_HEX_URI
 
 # tflags publish
 LONG_IMG_URI
-
-# good enough
-LONG_TERM_PRICE
 
 # tflags publish
 LOTS_OF_MONEY
@@ -547,9 +526,6 @@ MONEY_FROM_41
 # good enough
 MONEY_FROM_MISSP
 
-# good enough
-MSGID_NOFQDN1
-
 # tflags publish
 MSM_PRIO_REPTO
 
@@ -558,6 +534,9 @@ MSOE_MID_WRONG_CASE
 
 # good enough
 NAME_EMAIL_DIFF
+
+# good enough
+NA_DOLLARS
 
 # tflags net
 NO_DNS_FOR_FROM
@@ -579,9 +558,6 @@ OBFU_JVSCR_ESC
 
 # tflags publish
 OBFU_TEXT_ATTACH
-
-# good enough
-PART_CID_STOCK
 
 # good enough
 PDS_FROM_2_EMAILS
@@ -824,6 +800,9 @@ RCVD_IN_SORBS_ZOMBIE
 RCVD_IN_XBL
 
 # tflags publish
+RCVD_REMOVED
+
+# tflags publish
 RCVD_RMV_URI_ONLY
 
 # tflags publish
@@ -839,13 +818,7 @@ REPLYTO_WITHOUT_TO_CC
 RISK_FREE
 
 # good enough
-RP_MATCHES_RCVD
-
-# good enough
 SHORTENED_URL_SRC
-
-# good enough
-SHORT_TERM_PRICE
 
 # tflags publish
 SINGLETS_LOW_CONTRAST
@@ -890,6 +863,9 @@ STOCK_LOW_CONTRAST
 STOCK_TIP
 
 # good enough
+STOX_REPLY_TYPE
+
+# good enough
 STOX_REPLY_TYPE_WITHOUT_QUOTES
 
 # tflags publish
@@ -906,9 +882,6 @@ SURBL_BLOCKED
 
 # tflags publish
 SYSADMIN
-
-# good enough
-TAB_IN_FROM
 
 # tflags publish
 TEQF_USR_IMAGE
@@ -953,9 +926,6 @@ TO_NO_BRKTS_PCNT
 TVD_FROM_1
 
 # good enough
-TVD_QUAL_MEDS
-
-# good enough
 TVD_RCVD_IP
 
 # good enough
@@ -968,28 +938,25 @@ TVD_SPACE_ENCODED
 TVD_SPACE_ENC_FM_MIME
 
 # good enough
-TVD_SPACE_RATIO_MINFP
-
-# good enough
 TVD_VISIT_PHARMA
 
 # tflags publish
 TW_GIBBERISH_MANY
 
 # good enough
-FILL_THIS_FORM_FRAUD_PHISH
+FSL_BULK_SIG
 
 # good enough
-HDRS_MISSP
+GOOG_REDIR_HTML_ONLY
 
 # good enough
-NA_DOLLARS
+HK_NAME_FM_MR_MRS
 
 # good enough
-PHP_NOVER_MUA
+HK_SCAM_N3
 
-# tflags publish
-RCVD_REMOVED
+# good enough
+SERGIO_SUBJECT_VIAGRA01
 
 # tflags publish
 UC_GIBBERISH_OBFU
@@ -998,7 +965,7 @@ UC_GIBBERISH_OBFU
 UNPARSEABLE_RELAY
 
 # tflags net
-URIBL_AB_SURBL
+URIBL_ABUSE_SURBL
 
 # tflags net
 URIBL_BLACK
@@ -1040,9 +1007,6 @@ URIBL_DBL_SPAM
 URIBL_GREY
 
 # tflags net
-URIBL_JP_SURBL
-
-# tflags net
 URIBL_MW_SURBL
 
 # tflags net
@@ -1059,9 +1023,6 @@ URIBL_SBL
 
 # tflags net
 URIBL_SBL_A
-
-# tflags net
-URIBL_SC_SURBL
 
 # tflags net
 URIBL_WS_SURBL
