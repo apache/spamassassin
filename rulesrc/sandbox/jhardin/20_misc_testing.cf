@@ -395,9 +395,9 @@ body           AD_COMPLAINTS       /\bcomplaints about this ad+\b/i
 describe       AD_COMPLAINTS       Complain about this spam
 
 # observed in bank phishing 09/2009
-rawbody        MISQ_HTML           /<\w{2,20}[^>=]{1,30}=[^"][^">]{1,30}[^=]"[\s>]/
-describe       MISQ_HTML           Unbalanced quotes in HTML tag
-tflags         MISQ_HTML           nopublish
+#rawbody        MISQ_HTML           /<\w{2,20}[^>=]{1,30}=[^"][^">]{1,30}[^=]"[\s>]/
+#describe       MISQ_HTML           Unbalanced quotes in HTML tag
+#tflags         MISQ_HTML           nopublish
 
 # observed in bank phishing 09/2009
 uri            WIKI_IMG            m,^https?://[^/]+wiki[mp]edia\.org/.+\.(?:png|gif|jpe?g),i
@@ -2102,9 +2102,9 @@ body       __PHONE_GIBBERISH_01        /(?:\b\d\d\d-\d\d\d-\d\d\d\d\s+[a-z][^\d\
 #meta       __RCVD_RMV_TEST_01          __GATED_THROUGH_RCVD_REMOVER && !__BODY_URI_ONLY && !__XPRIO && !__DOS_HAS_LIST_ID  && !__PDS_FROM_2_EMAILS
 #meta       __RCVD_RMV_TEST_02          __GATED_THROUGH_RCVD_REMOVER && !__BODY_URI_ONLY && !__XPRIO && !__DOS_HAS_LIST_ID 
 
-#header     HDR_GMX_BULK                X-Gmx-Bulk =~ /./
-#describe   HDR_GMX_BULK                Bulk-mailer header
-#score      HDR_GMX_BULK                1.000	# limit
+header     HDR_GMX_BULK                X-Gmx-Bulk =~ /./
+describe   HDR_GMX_BULK                Bulk-mailer header
+score      HDR_GMX_BULK                1.000	# limit
 
 
 ifplugin Mail::SpamAssassin::Plugin::HTMLEval
