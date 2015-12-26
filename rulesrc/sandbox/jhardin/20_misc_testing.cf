@@ -2111,4 +2111,8 @@ ifplugin Mail::SpamAssassin::Plugin::HTMLEval
   body       __HTML_TAG_BALANCE_CENTER     eval:html_tag_balance('center', '!= 0')
 endif
 
+# rule possibility: HTML image sourced via URL shortening service:
+# <IMG border=0 hspace=0 alt="" src="http://bit.ly/1OiuN0y" width=26 height=25>
+rawbody    __IMG_VIA_BITLY             m;<img\s[^>]+\ssrc\s*=\s*"?https?://(?:www\.)?bit\.ly/;i
+
 
