@@ -2096,19 +2096,22 @@ score      ENCRYPTED_MESSAGE           -1.000
 tflags     ENCRYPTED_MESSAGE           nice,publish
 
 
-body       __PHONE_GIBBERISH_01        /(?:\b\d\d\d-\d\d\d-\d\d\d\d\s+[a-z][^\d\s:.]+\s+){15}/
+#body       __PHONE_GIBBERISH_01        /(?:\b\d\d\d-\d\d\d-\d\d\d\d\s+[a-z][^\d\s:.]+\s+){15}/
 
 ## Find spams not hitting already good-performing combos
 #meta       __RCVD_RMV_TEST_01          __GATED_THROUGH_RCVD_REMOVER && !__BODY_URI_ONLY && !__XPRIO && !__DOS_HAS_LIST_ID  && !__PDS_FROM_2_EMAILS
 #meta       __RCVD_RMV_TEST_02          __GATED_THROUGH_RCVD_REMOVER && !__BODY_URI_ONLY && !__XPRIO && !__DOS_HAS_LIST_ID 
 
-header     HDR_GMX_BULK                X-Gmx-Bulk =~ /./
-describe   HDR_GMX_BULK                Bulk-mailer header
-score      HDR_GMX_BULK                1.000	# limit
+# already high-scoring
+#header     HDR_GMX_BULK                X-Gmx-Bulk =~ /./
+#describe   HDR_GMX_BULK                Bulk-mailer header
+#score      HDR_GMX_BULK                1.000	# limit
 
 
 ifplugin Mail::SpamAssassin::Plugin::HTMLEval
   body       __HTML_TAG_BALANCE_CENTER     eval:html_tag_balance('center', '!= 0')
+  meta       HTML_TAG_BALANCE_CENTER       __HTML_TAG_BALANCE_CENTER && !__RCD_RDNS_MAIL_MESSY 
+  describe   HTML_TAG_BALANCE_CENTER       Malformatted HTML
 endif
 
 # rule possibility: HTML image sourced via URL shortening service:
