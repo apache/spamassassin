@@ -2110,7 +2110,7 @@ tflags     ENCRYPTED_MESSAGE           nice,publish
 
 ifplugin Mail::SpamAssassin::Plugin::HTMLEval
   body       __HTML_TAG_BALANCE_CENTER     eval:html_tag_balance('center', '!= 0')
-  meta       HTML_TAG_BALANCE_CENTER       __HTML_TAG_BALANCE_CENTER && !__RCD_RDNS_MAIL_MESSY 
+  meta       HTML_TAG_BALANCE_CENTER       __HTML_TAG_BALANCE_CENTER && !__RCD_RDNS_MAIL_MESSY && !__RCD_RDNS_SMTP_MESSY 
   describe   HTML_TAG_BALANCE_CENTER       Malformatted HTML
 endif
 
