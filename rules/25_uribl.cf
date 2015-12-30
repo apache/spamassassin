@@ -136,6 +136,12 @@ describe        URIBL_MW_SURBL  Contains a Malware Domain or IP listed in the MW
 tflags          URIBL_MW_SURBL  net
 reuse           URIBL_MW_SURBL
 
+urirhssub       URIBL_CR_SURBL  multi.surbl.org.        A   128
+body            URIBL_CR_SURBL  eval:check_uridnsbl('URIBL_CR_SURBL')
+describe        URIBL_CR_SURBL  Contains a Malware Domain or IP listed in the CR SURBL blocklist
+tflags          URIBL_CR_SURBL  net
+reuse           URIBL_CR_SURBL
+
 #MERGED INTO BIT 64 per bug 7279
 #urirhssub       URIBL_AB_SURBL  multi.surbl.org.        A   32
 #body            URIBL_AB_SURBL  eval:check_uridnsbl('URIBL_AB_SURBL')
