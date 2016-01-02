@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bpoliakoff darxus grenier jarif kam-ninja kpg-core zmi; day 2: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bpoliakoff darxus grenier jarif kpg-core llanga zmi; day 3: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bpoliakoff darxus dwarren grenier jarif kam-ninja kpg-core llanga zmi
+# with results from: day 1: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bpoliakoff darxus grenier jarif kam-ninja kpg-core zmi; day 2: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bpoliakoff darxus grenier jarif kam-ninja kpg-core llanga zmi; day 3: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bpoliakoff darxus grenier jarif kpg-core llanga zmi
 
 # tflags publish
 AC_BR_BONANZA
@@ -146,6 +146,12 @@ BAYES_999
 BIGNUM_EMAILS
 
 # good enough
+BITLY_URI
+
+# good enough
+BODY_EMPTY
+
+# good enough
 BODY_SINGLE_URI
 
 # good enough
@@ -183,6 +189,9 @@ COMPENSATION
 
 # tflags publish
 CORRUPT_FROM_LINE_IN_HDRS
+
+# good enough
+CTYPE_NULL
 
 # good enough
 CURR_PRICE
@@ -309,6 +318,9 @@ FREEMAIL_DOC_PDF_BCC
 
 # tflags publish
 FREEMAIL_FORGED_FROMDOMAIN
+
+# good enough
+FROM_12LTRDOM
 
 # tflags userconf
 FROM_DOMAIN_NOVOWEL
@@ -515,6 +527,9 @@ HTML_OFF_PAGE
 HTML_TAG_BALANCE_CENTER
 
 # good enough
+IMG_ALT_HSPACE_CID_ALIGN
+
+# good enough
 KB_DATE_CONTAINS_TAB
 
 # good enough
@@ -525,6 +540,9 @@ KB_FORGED_MOZ4
 
 # good enough
 KB_RATWARE_MSGID
+
+# good enough
+KHOP_DYNAMIC
 
 # good enough
 LIST_PARTIAL_SHORT_MSG
@@ -548,9 +566,6 @@ LONG_TERM_PRICE
 LOTS_OF_MONEY
 
 # good enough
-LOTTERY_1
-
-# good enough
 LOTTERY_PH_004470
 
 # good enough
@@ -562,11 +577,11 @@ LOTTO_DEPT
 # tflags publish
 LUCRATIVE
 
-# good enough
-MALFORMED_FREEMAIL
-
 # tflags publish
 MANY_SPAN_IN_TEXT
+
+# good enough
+MAY_BE_FORGED
 
 # good enough
 MILLION_USD
@@ -588,6 +603,9 @@ MONEY_BARRISTER
 
 # good enough
 MONEY_FORM
+
+# good enough
+MONEY_FORM_SHORT
 
 # tflags publish
 MONEY_FRAUD_3
@@ -631,12 +649,6 @@ NSL_RCVD_FROM_USER
 # good enough
 NSL_RCVD_HELO_USER
 
-# good enough
-OBFU_DOC_ATTACH
-
-# good enough
-OBFU_JPG_ATTACH
-
 # tflags publish
 OBFU_JVSCR_ESC
 
@@ -644,10 +656,10 @@ OBFU_JVSCR_ESC
 OBFU_TEXT_ATTACH
 
 # good enough
-PART_CID_STOCK
+PDS_FROM_2_EMAILS
 
 # good enough
-PDS_FROM_2_EMAILS
+PHP_NOVER_MUA
 
 # tflags publish
 PP_MIME_FAKE_ASCII_TEXT
@@ -1040,6 +1052,9 @@ TT_MSGID_TRUNC
 TVD_FROM_1
 
 # good enough
+TVD_IP_OCT
+
+# good enough
 TVD_PH_BODY_META
 
 # good enough
@@ -1070,52 +1085,58 @@ TVD_VISIT_PHARMA
 TW_GIBBERISH_MANY
 
 # good enough
+AXB_X_AOL_SEZ_S
+
+# good enough
 BILLION_OVERLAP
 
 # good enough
-BITLY_URI
+DEAR_NOBODY
 
 # good enough
-BODY_EMPTY
+DUP_SUSP_HDR
 
 # good enough
-CTYPE_NULL
+FREEMAIL_RVW_ATTCH
 
 # good enough
-FROM_12LTRDOM
+FROM_WSP_LEAD
+
+# good enough
+HDRS_MISSP
+
+# good enough
+HELO_MISC_IP
+
+# good enough
+HK_GOLDDUST
 
 # good enough
 HK_RANDOM_FROM
 
 # good enough
-IMG_ALT_HSPACE_CID_ALIGN
+LOTTO_AGENT_RPLY
 
 # good enough
-KHOP_DYNAMIC
+MAILER_EQ_ORG
 
 # good enough
-MAY_BE_FORGED
-
-# good enough
-MONEY_FORM_SHORT
+MONEY_LOTTERY
 
 # good enough
 OBFU_ATTACH_MISSP
 
 # good enough
-PHP_NOVER_MUA
-
-# good enough
-TVD_GET_STOCK
+TO_EQ_FM_HTML_ONLY
 
 # good enough
 TVD_IP_HEX
 
 # good enough
-TVD_IP_OCT
+URI_GOOGLE_DOCS
 
 # good enough
-US_DOLLARS_3
+URI_OBFU_TLD
 
 # tflags publish
 UC_GIBBERISH_OBFU
@@ -1266,6 +1287,9 @@ USER_IN_WHITELIST
 
 # tflags userconf
 USER_IN_WHITELIST_TO
+
+# good enough
+US_DOLLARS_3
 
 # tflags publish
 VERY_LONG_FREEM_REPTO
