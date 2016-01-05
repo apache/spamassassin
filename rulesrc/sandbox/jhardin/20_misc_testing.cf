@@ -2036,7 +2036,7 @@ endif
 #header    __RECIP_IN_ENV_FM_02          Received =~ /for\s+<([^\@]+)\@([^>]+)>.*envelope-from\s+[^@]*\2[^@]*\@/i
 
 
-uri        URI_MALWARE_CWALL            /\/abuse_report\.php\?/i
+uri        URI_MALWARE_CWALL            /\/abuse_report\.php\?(?!username=)[^&\s.]{1,100}\./i
 describe   URI_MALWARE_CWALL            Potential CryptoWall malware URL
 
 
