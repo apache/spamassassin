@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bpoliakoff darxus grenier jarif kam-ninja kpg-core zmi; day 2: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bpoliakoff darxus grenier jarif kam-ninja kpg-core llanga zmi; day 3: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bpoliakoff darxus grenier jarif kpg-core llanga zmi
+# with results from: day 1: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-jhardin bb-traps bpoliakoff darxus dwarren grenier jarif kam-ninja kpg-core zmi; day 2: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bpoliakoff darxus dwarren grenier jarif kam-ninja kpg-core llanga zmi; day 3: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bpoliakoff darxus dwarren grenier jarif kam-ninja kpg-core llanga zmi
 
 # tflags publish
 AC_BR_BONANZA
@@ -77,9 +77,6 @@ ADVANCE_FEE_4_NEW_MONEY
 ADVANCE_FEE_5_NEW
 
 # good enough
-ADVANCE_FEE_5_NEW_FORM
-
-# good enough
 ADVANCE_FEE_5_NEW_FRM_MNY
 
 # good enough
@@ -108,9 +105,6 @@ AXB_X_FF_SEZ_S
 
 # good enough
 AXB_X_OUTLOOKPROT_ENVSDR
-
-# good enough
-BASE64_LENGTH_79_INF
 
 # tflags learn
 BAYES_00
@@ -146,10 +140,7 @@ BAYES_999
 BIGNUM_EMAILS
 
 # good enough
-BITLY_URI
-
-# good enough
-BODY_EMPTY
+BILLION_OVERLAP
 
 # good enough
 BODY_SINGLE_URI
@@ -251,7 +242,7 @@ DOS_ANAL_SPAM_MAILER
 DOS_OE_TO_MX
 
 # good enough
-DOS_OUTLOOK_TO_MX
+DOS_OE_TO_MX_IMAGE
 
 # good enough
 DOS_OUTLOOK_TO_MX_IMAGE
@@ -276,6 +267,9 @@ ENCRYPTED_MESSAGE
 
 # tflags userconf
 ENV_AND_HDR_SPF_MATCH
+
+# good enough
+FAKE_REPLY_C
 
 # tflags publish
 FBI_MONEY
@@ -319,9 +313,6 @@ FREEMAIL_DOC_PDF_BCC
 # tflags publish
 FREEMAIL_FORGED_FROMDOMAIN
 
-# good enough
-FROM_12LTRDOM
-
 # tflags userconf
 FROM_DOMAIN_NOVOWEL
 
@@ -363,6 +354,9 @@ FROM_MISSP_USER
 
 # good enough
 FROM_MISSP_XPRIO
+
+# good enough
+FROM_WSP_LEAD
 
 # good enough
 FSL_BULK_SIG
@@ -457,6 +451,9 @@ HASHCASH_2SPEND
 # tflags userconf
 HASHCASH_HIGH
 
+# good enough
+HDRS_MISSP
+
 # tflags publish
 HEADER_FROM_DIFFERENT_DOMAINS
 
@@ -506,9 +503,6 @@ HK_SCAM_N2
 HK_SCAM_N3
 
 # good enough
-HK_SCAM_N4
-
-# good enough
 HK_SCAM_N8
 
 # good enough
@@ -527,9 +521,6 @@ HTML_OFF_PAGE
 HTML_TAG_BALANCE_CENTER
 
 # good enough
-IMG_ALT_HSPACE_CID_ALIGN
-
-# good enough
 KB_DATE_CONTAINS_TAB
 
 # good enough
@@ -537,12 +528,6 @@ KB_FAKED_THE_BAT
 
 # good enough
 KB_FORGED_MOZ4
-
-# good enough
-KB_RATWARE_MSGID
-
-# good enough
-KHOP_DYNAMIC
 
 # good enough
 LIST_PARTIAL_SHORT_MSG
@@ -572,6 +557,9 @@ LOTTERY_PH_004470
 LOTTO_AGENT
 
 # good enough
+LOTTO_AGENT_RPLY
+
+# good enough
 LOTTO_DEPT
 
 # tflags publish
@@ -579,9 +567,6 @@ LUCRATIVE
 
 # tflags publish
 MANY_SPAN_IN_TEXT
-
-# good enough
-MAY_BE_FORGED
 
 # good enough
 MILLION_USD
@@ -657,9 +642,6 @@ OBFU_TEXT_ATTACH
 
 # good enough
 PDS_FROM_2_EMAILS
-
-# good enough
-PHP_NOVER_MUA
 
 # tflags publish
 PP_MIME_FAKE_ASCII_TEXT
@@ -917,9 +899,6 @@ REPLYTO_WITHOUT_TO_CC
 RISK_FREE
 
 # good enough
-SB_GIF_AND_NO_URIS
-
-# good enough
 SERGIO_SUBJECT_PORN015
 
 # good enough
@@ -1015,9 +994,6 @@ TEQF_USR_POLITE
 # tflags publish
 THIS_AD
 
-# good enough
-TO_EQ_FM_DOM_HTML_ONLY
-
 # tflags net
 TO_EQ_FM_DOM_SPF_FAIL
 
@@ -1070,6 +1046,9 @@ TVD_RCVD_IP
 TVD_RCVD_IP4
 
 # good enough
+TVD_RCVD_SINGLE
+
+# good enough
 TVD_SPACE_ENCODED
 
 # good enough
@@ -1085,64 +1064,34 @@ TVD_VISIT_PHARMA
 TW_GIBBERISH_MANY
 
 # good enough
-AXB_X_AOL_SEZ_S
+DOS_BODY_HIGH_NO_MID
 
 # good enough
-BILLION_OVERLAP
+DX_TEXT_05
 
 # good enough
-DEAR_NOBODY
+FAKE_REPLY_A1
 
 # good enough
-DUP_SUSP_HDR
+FAKE_REPLY_B
 
 # good enough
-FREEMAIL_RVW_ATTCH
+GAPPY_PILLS
 
 # good enough
-FROM_WSP_LEAD
+GOOG_REDIR_HTML_ONLY
 
 # good enough
-HDRS_MISSP
+HK_SCAM_S15
 
 # good enough
-HELO_MISC_IP
+NAME_EMAIL_DIFF
 
 # good enough
-HK_GOLDDUST
+PDS_TO_EQ_FROM_NAME
 
 # good enough
-HK_RANDOM_FROM
-
-# good enough
-LOTTO_AGENT_RPLY
-
-# good enough
-MAILER_EQ_ORG
-
-# good enough
-MONEY_LOTTERY
-
-# good enough
-OBFU_ATTACH_MISSP
-
-# good enough
-OBFU_DOC_ATTACH
-
-# good enough
-OBFU_JPG_ATTACH
-
-# good enough
-TO_EQ_FM_HTML_ONLY
-
-# good enough
-TVD_IP_HEX
-
-# good enough
-URI_GOOGLE_DOCS
-
-# good enough
-URI_OBFU_TLD
+SERGIO_SUBJECT_PORN006
 
 # tflags publish
 UC_GIBBERISH_OBFU
@@ -1293,9 +1242,6 @@ USER_IN_WHITELIST
 
 # tflags userconf
 USER_IN_WHITELIST_TO
-
-# good enough
-US_DOLLARS_3
 
 # tflags publish
 VERY_LONG_FREEM_REPTO
