@@ -2119,3 +2119,13 @@ endif
 rawbody    __IMG_VIA_BITLY             m;<img\s[^>]+\ssrc\s*=\s*"?https?://(?:www\.)?bit\.ly/;i
 
 
+# more random garbage message headers 01/2016
+header     __HDR_CASE_REVERSED         ALL =~ /^[^-:\s]*[a-z][A-Z]/m
+tflags     __HDR_CASE_REVERSED         multiple maxhits=4
+meta       __HDR_CASE_REV_MANY         (__HDR_CASE_REVERSED > 3)
+meta       HDR_CASE_REV_MANY           __HDR_CASE_REV_MANY
+describe   HDR_CASE_REV_MANY           Multiple malformed (possibly random gibberish) message headers
+score      HDR_CASE_REV_MANY           2.000	# limit
+
+
+
