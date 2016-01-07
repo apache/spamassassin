@@ -1480,7 +1480,7 @@ header      __DATE_LOWER       ALL =~ /date:\s\S{5}/
 
 # duplicates __XPRIO
 #header      __FH_HAS_XPRIORITY exists:X-Priority
-meta        XPRIO              __XPRIO && !__CT_ENCRYPTED && !ALL_TRUSTED && !__HAS_ERRORS_TO && !__THREADED && !__RP_MATCHES_RCVD && !__LONGLINE && !__MAIL_LINK && !__COMMENT_EXISTS && !__RCD_RDNS_SMTP && !__SUBSCRIPTION_INFO && !__DKIM_EXISTS 
+meta        XPRIO              __XPRIO && !__CT_ENCRYPTED && !ALL_TRUSTED && !__GATED_THROUGH_RCVD_REMOVER && !__HAS_ERRORS_TO && !__THREADED && !__RP_MATCHES_RCVD && !__LONGLINE && !__MAIL_LINK && !__COMMENT_EXISTS && !__RCD_RDNS_SMTP && !__SUBSCRIPTION_INFO && !__DKIM_EXISTS 
 describe    XPRIO              Has X-Priority header
 score       XPRIO              2.000	# limit
 tflags      XPRIO              publish
