@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bpoliakoff darxus dwarren grenier jarif kam-ninja kpg-core zmi; day 2: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-jhardin bb-traps bpoliakoff darxus dwarren grenier jarif kam-ninja kpg-core llanga zmi; day 3: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-jhardin bb-traps bpoliakoff darxus dwarren grenier jarif kam-ninja kpg-core llanga zmi
+# with results from: day 1: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bpoliakoff dwarren grenier jarif kam-ninja kpg-core zmi; day 2: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bpoliakoff darxus dwarren grenier jarif kam-ninja kpg-core llanga zmi; day 3: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-jhardin bb-traps bpoliakoff darxus dwarren grenier jarif kam-ninja kpg-core llanga zmi
 
 # tflags publish
 AC_BR_BONANZA
@@ -101,6 +101,9 @@ AXB_XMAILER_MIMEOLE_OL_1ECD5
 AXB_XM_FORGED_OL2600
 
 # good enough
+AXB_X_AOL_SEZ_S
+
+# good enough
 AXB_X_FF_SEZ_S
 
 # good enough
@@ -177,9 +180,6 @@ COMPENSATION
 
 # tflags publish
 CORRUPT_FROM_LINE_IN_HDRS
-
-# good enough
-CTYPE_NULL
 
 # good enough
 CURR_PRICE
@@ -272,9 +272,6 @@ ENV_AND_HDR_SPF_MATCH
 FAKE_REPLY_A1
 
 # good enough
-FAKE_REPLY_B
-
-# good enough
 FAKE_REPLY_C
 
 # tflags publish
@@ -319,6 +316,9 @@ FREEMAIL_DOC_PDF_BCC
 # tflags publish
 FREEMAIL_FORGED_FROMDOMAIN
 
+# good enough
+FROM_12LTRDOM
+
 # tflags userconf
 FROM_DOMAIN_NOVOWEL
 
@@ -362,9 +362,6 @@ FROM_MISSP_USER
 FROM_MISSP_XPRIO
 
 # good enough
-FROM_WSP_LEAD
-
-# good enough
 FSL_BULK_SIG
 
 # good enough
@@ -375,9 +372,6 @@ FSL_HELO_BARE_IP_1
 
 # good enough
 FSL_HELO_BARE_IP_2
-
-# good enough
-FSL_HELO_DEVICE
 
 # good enough
 FSL_MID_419
@@ -478,9 +472,6 @@ HEAD_LONG
 # good enough
 HELO_LH_HOME
 
-# good enough
-HELO_LOCALHOST
-
 # tflags publish
 HEXHASH_WORD
 
@@ -495,6 +486,9 @@ HK_NAME_FM_MR_MRS
 
 # good enough
 HK_NAME_MR_MRS
+
+# good enough
+HK_RANDOM_FROM
 
 # good enough
 HK_SCAM_N1
@@ -640,11 +634,17 @@ NSL_RCVD_HELO_USER
 # good enough
 NULL_IN_BODY
 
+# good enough
+OBFU_DOC_ATTACH
+
 # tflags publish
 OBFU_JVSCR_ESC
 
 # tflags publish
 OBFU_TEXT_ATTACH
+
+# good enough
+PART_CID_STOCK
 
 # good enough
 PDS_FROM_2_EMAILS
@@ -1055,9 +1055,6 @@ TVD_RCVD_IP
 TVD_RCVD_IP4
 
 # good enough
-TVD_RCVD_SINGLE
-
-# good enough
 TVD_SPACE_ENCODED
 
 # good enough
@@ -1073,19 +1070,10 @@ TVD_VISIT_PHARMA
 TW_GIBBERISH_MANY
 
 # good enough
-AXB_X_AOL_SEZ_S
-
-# good enough
 BITLY_URI
 
 # good enough
-DUP_SUSP_HDR
-
-# good enough
-FROM_12LTRDOM
-
-# good enough
-HK_RANDOM_FROM
+HK_SCAM_S25
 
 # good enough
 MAILER_EQ_ORG
