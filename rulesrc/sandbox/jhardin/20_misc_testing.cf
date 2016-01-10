@@ -1478,9 +1478,16 @@ header      __TO___LOWER       ALL =~ /to:\s\S{5}/
 header      __DATE_LOWER       ALL =~ /date:\s\S{5}/
 
 
+# __GATED_THROUGH_RCVD_REMOVER includes messages with no Received headers *at all*.
+# Don't consider those, only consider the ones where *some* Received headers may have been removed
+meta       __RCVD_RMV_PARTIAL          __GATED_THROUGH_RCVD_REMOVER && __HAS_RCVD
+
+# Compare __GATED_THROUGH_RCVD_REMOVER and "via ezmlm"
+header      __ML_EZMLM         Mailing-List =~ /\bezmlm\b/
+
 # duplicates __XPRIO
 #header      __FH_HAS_XPRIORITY exists:X-Priority
-meta        XPRIO              __XPRIO && !__CT_ENCRYPTED && !ALL_TRUSTED && !__GATED_THROUGH_RCVD_REMOVER && !__HAS_ERRORS_TO && !__THREADED && !__RP_MATCHES_RCVD && !__LONGLINE && !__MAIL_LINK && !__COMMENT_EXISTS && !__RCD_RDNS_SMTP && !__SUBSCRIPTION_INFO && !__DKIM_EXISTS 
+meta        XPRIO              __XPRIO && !__CT_ENCRYPTED && !ALL_TRUSTED && !__RCVD_RMV_PARTIAL && !__HAS_ERRORS_TO && !__THREADED && !__RP_MATCHES_RCVD && !__LONGLINE && !__MAIL_LINK && !__COMMENT_EXISTS && !__RCD_RDNS_SMTP && !__SUBSCRIPTION_INFO && !__DKIM_EXISTS 
 describe    XPRIO              Has X-Priority header
 score       XPRIO              2.000	# limit
 tflags      XPRIO              publish
@@ -2003,12 +2010,12 @@ meta      __SPOOFED_FREEM_REPTO         __SPOOFED_FREEMAIL && FREEMAIL_REPLYTO
 
 meta      SPOOFED_FREEM_REPTO_CHN       (__SPOOFED_FREEM_REPTO || FORGED_YAHOO_RCVD) && __REPTO_CHN_FREEM
 describe  SPOOFED_FREEM_REPTO_CHN       Forged freemail sender with Chinese freemail reply-to
-score     SPOOFED_FREEM_REPTO_CHN       3.000
+score     SPOOFED_FREEM_REPTO_CHN       3.500
 tflags    SPOOFED_FREEM_REPTO_CHN       publish
 
 meta      SPOOFED_FREEM_REPTO           __SPOOFED_FREEM_REPTO && !__THREADED
 describe  SPOOFED_FREEM_REPTO           Forged freemail sender with freemail reply-to
-score     SPOOFED_FREEM_REPTO           2.000
+score     SPOOFED_FREEM_REPTO           2.500
 tflags    SPOOFED_FREEM_REPTO           publish
 
 
@@ -2032,6 +2039,7 @@ endif
 #	for <steve.stewart@fastnet.co.uk>; Mon, 2 Nov 2015 14:27:08 GMT
 #        (envelope-from fastnet.co.uk.12056010.steve.stewart@vmta27.topreasonstovisit.com)
 # S/O low, seems to be common in legit mailing lists
+# Maybe in meta with "not a mailing list" rules?
 #header    __RECIP_IN_ENV_FM_01          Received =~ /for\s+<([^\@]+)\@([^>]+)>.*envelope-from\s+\2\.\d+\.\1\@/i
 #header    __RECIP_IN_ENV_FM_02          Received =~ /for\s+<([^\@]+)\@([^>]+)>.*envelope-from\s+[^@]*\2[^@]*\@/i
 
@@ -2064,27 +2072,27 @@ tflags     MSM_PRIO_REPTO              publish
 
 header     __XM_YAMAIL                 X-Mailer =~ /^Yamail/
 
-meta       __RCVD_RMV_URI_ONLY         __GATED_THROUGH_RCVD_REMOVER && __BODY_URI_ONLY 
+meta       __RCVD_RMV_URI_ONLY         __RCVD_RMV_PARTIAL && __BODY_URI_ONLY 
 meta       RCVD_RMV_URI_ONLY           __RCVD_RMV_URI_ONLY
 describe   RCVD_RMV_URI_ONLY           Headers removed + URI only
 score      RCVD_RMV_URI_ONLY           3.000	# limit
 tflags     RCVD_RMV_URI_ONLY           publish
 
-meta       __RCVD_RMV_XPRIO            __GATED_THROUGH_RCVD_REMOVER && __XPRIO 
+meta       __RCVD_RMV_XPRIO            __RCVD_RMV_PARTIAL && __XPRIO 
 meta       RCVD_RMV_XPRIO              __RCVD_RMV_XPRIO
 describe   RCVD_RMV_XPRIO              Headers removed + X-Priority
 score      RCVD_RMV_XPRIO              2.000	# limit
 tflags     RCVD_RMV_XPRIO              publish
 
-meta       RCVD_REMOVED                __GATED_THROUGH_RCVD_REMOVER && !__BODY_URI_ONLY && !__XPRIO && !__DOS_HAS_LIST_ID && !__BOTH_INR_AND_REF 
+meta       RCVD_REMOVED                __RCVD_RMV_PARTIAL && !__BODY_URI_ONLY && !__XPRIO && !__DOS_HAS_LIST_ID && !__BOTH_INR_AND_REF 
 describe   RCVD_REMOVED                Headers removed
 score      RCVD_REMOVED                3.750	# limit
 tflags     RCVD_REMOVED                publish
 
 ## test some combos
-#meta       __RCVD_RMV_BODY_SHORT       __GATED_THROUGH_RCVD_REMOVER && __LCL__KAM_BODY_LENGTH_LT_128
-#meta       __RCVD_RMV_FROM_TWO         __GATED_THROUGH_RCVD_REMOVER && __PDS_FROM_2_EMAILS 
-#meta       __RCVD_RMV_XMAIL            __GATED_THROUGH_RCVD_REMOVER && __HAS_X_MAILER 
+#meta       __RCVD_RMV_BODY_SHORT       __RCVD_RMV_PARTIAL && __LCL__KAM_BODY_LENGTH_LT_128
+#meta       __RCVD_RMV_FROM_TWO         __RCVD_RMV_PARTIAL && __PDS_FROM_2_EMAILS 
+#meta       __RCVD_RMV_XMAIL            __RCVD_RMV_PARTIAL && __HAS_X_MAILER 
 
 
 # easy for spammers to forge a signed message and still have it displayed to the recipient?
@@ -2099,8 +2107,8 @@ tflags     ENCRYPTED_MESSAGE           nice,publish
 #body       __PHONE_GIBBERISH_01        /(?:\b\d\d\d-\d\d\d-\d\d\d\d\s+[a-z][^\d\s:.]+\s+){15}/
 
 ## Find spams not hitting already good-performing combos
-#meta       __RCVD_RMV_TEST_01          __GATED_THROUGH_RCVD_REMOVER && !__BODY_URI_ONLY && !__XPRIO && !__DOS_HAS_LIST_ID  && !__PDS_FROM_2_EMAILS
-#meta       __RCVD_RMV_TEST_02          __GATED_THROUGH_RCVD_REMOVER && !__BODY_URI_ONLY && !__XPRIO && !__DOS_HAS_LIST_ID 
+#meta       __RCVD_RMV_TEST_01          __RCVD_RMV_PARTIAL && !__BODY_URI_ONLY && !__XPRIO && !__DOS_HAS_LIST_ID  && !__PDS_FROM_2_EMAILS
+#meta       __RCVD_RMV_TEST_02          __RCVD_RMV_PARTIAL && !__BODY_URI_ONLY && !__XPRIO && !__DOS_HAS_LIST_ID 
 
 # already high-scoring
 #header     HDR_GMX_BULK                X-Gmx-Bulk =~ /./
