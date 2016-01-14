@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bpoliakoff darxus grenier jarif kam-ninja kpg-core zmi; day 2: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bpoliakoff darxus dwarren grenier jarif kam-ninja kpg-core llanga zmi; day 3: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bpoliakoff darxus dwarren grenier jarif kam-ninja kpg-core llanga zmi
+# with results from: day 1: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bpoliakoff darxus dwarren grenier jarif kam-ninja kpg-core zmi; day 2: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bpoliakoff darxus grenier jarif kam-ninja kpg-core llanga zmi; day 3: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bpoliakoff darxus dwarren grenier jarif kam-ninja kpg-core llanga zmi
 
 # tflags publish
 AC_BR_BONANZA
@@ -240,9 +240,6 @@ DOS_OE_TO_MX
 
 # good enough
 DOS_OE_TO_MX_IMAGE
-
-# good enough
-DOS_OUTLOOK_TO_MX
 
 # good enough
 DOS_OUTLOOK_TO_MX_IMAGE
@@ -518,6 +515,12 @@ HTML_OFF_PAGE
 HTML_TAG_BALANCE_CENTER
 
 # good enough
+KB_DATE_CONTAINS_TAB
+
+# good enough
+KB_FAKED_THE_BAT
+
+# good enough
 KB_FORGED_MOZ4
 
 # good enough
@@ -632,7 +635,13 @@ OBFU_JVSCR_ESC
 OBFU_TEXT_ATTACH
 
 # good enough
+PART_CID_STOCK
+
+# good enough
 PDS_FROM_2_EMAILS
+
+# good enough
+PHP_NOVER_MUA
 
 # tflags publish
 PP_MIME_FAKE_ASCII_TEXT
@@ -890,9 +899,6 @@ REPLYTO_WITHOUT_TO_CC
 RISK_FREE
 
 # good enough
-SERGIO_SUBJECT_PORN015
-
-# good enough
 SERGIO_SUBJECT_VIAGRA01
 
 # good enough
@@ -966,6 +972,9 @@ SURBL_BLOCKED
 
 # tflags publish
 SYSADMIN
+
+# good enough
+TAB_IN_FROM
 
 # tflags publish
 TEQF_USR_IMAGE
@@ -1049,10 +1058,7 @@ TVD_VISIT_PHARMA
 TW_GIBBERISH_MANY
 
 # good enough
-HELO_MISC_IP
-
-# good enough
-HK_RANDOM_REPLYTO
+MALFORMED_FREEMAIL
 
 # tflags publish
 UC_GIBBERISH_OBFU
