@@ -1478,16 +1478,9 @@ header      __TO___LOWER       ALL =~ /to:\s\S{5}/
 header      __DATE_LOWER       ALL =~ /date:\s\S{5}/
 
 
-# __GATED_THROUGH_RCVD_REMOVER includes messages with no Received headers *at all*.
-# Don't consider those, only consider the ones where *some* Received headers may have been removed
-meta       __RCVD_RMV_PARTIAL          __GATED_THROUGH_RCVD_REMOVER && __HAS_RCVD
-
-# Compare __GATED_THROUGH_RCVD_REMOVER and "via ezmlm"
-header      __ML_EZMLM         Mailing-List =~ /\bezmlm\b/
-
 # duplicates __XPRIO
 #header      __FH_HAS_XPRIORITY exists:X-Priority
-meta        XPRIO              __XPRIO && !__CT_ENCRYPTED && !ALL_TRUSTED && !__RCVD_RMV_PARTIAL && !__HAS_ERRORS_TO && !__THREADED && !__RP_MATCHES_RCVD && !__LONGLINE && !__MAIL_LINK && !__COMMENT_EXISTS && !__RCD_RDNS_SMTP && !__SUBSCRIPTION_INFO && !__DKIM_EXISTS 
+meta        XPRIO              __XPRIO && !__CT_ENCRYPTED && !ALL_TRUSTED && !__HAS_ERRORS_TO && !__THREADED && !__RP_MATCHES_RCVD && !__LONGLINE && !__MAIL_LINK && !__COMMENT_EXISTS && !__RCD_RDNS_SMTP && !__SUBSCRIPTION_INFO && !__DKIM_EXISTS 
 describe    XPRIO              Has X-Priority header
 score       XPRIO              2.000	# limit
 tflags      XPRIO              publish
@@ -2032,7 +2025,7 @@ ifplugin Mail::SpamAssassin::Plugin::FreeMail
   meta      __VERY_LONG_FREEM_REPTO       __VERY_LONG_REPTO && FREEMAIL_REPLYTO
   meta      VERY_LONG_FREEM_REPTO         __VERY_LONG_FREEM_REPTO
   describe  VERY_LONG_FREEM_REPTO         Very long freemail Reply-To username
-  score     VERY_LONG_FREEM_REPTO         2.000	# limit
+  score     VERY_LONG_FREEM_REPTO         2.500	# limit
   tflags    VERY_LONG_FREEM_REPTO         publish
 endif
 
@@ -2072,27 +2065,40 @@ tflags     MSM_PRIO_REPTO              publish
 
 header     __XM_YAMAIL                 X-Mailer =~ /^Yamail/
 
-meta       __RCVD_RMV_URI_ONLY         __RCVD_RMV_PARTIAL && __BODY_URI_ONLY 
-meta       RCVD_RMV_URI_ONLY           __RCVD_RMV_URI_ONLY
-describe   RCVD_RMV_URI_ONLY           Headers removed + URI only
-score      RCVD_RMV_URI_ONLY           3.000	# limit
-tflags     RCVD_RMV_URI_ONLY           publish
 
-meta       __RCVD_RMV_XPRIO            __RCVD_RMV_PARTIAL && __XPRIO 
-meta       RCVD_RMV_XPRIO              __RCVD_RMV_XPRIO
-describe   RCVD_RMV_XPRIO              Headers removed + X-Priority
-score      RCVD_RMV_XPRIO              2.000	# limit
-tflags     RCVD_RMV_XPRIO              publish
+# __GATED_THROUGH_RCVD_REMOVER includes messages with no Received headers *at all*.
+# Don't consider those, only consider the ones where *some* Received headers may have been removed
+meta        __RCVD_RMV_PARTIAL __GATED_THROUGH_RCVD_REMOVER && __HAS_RCVD
 
-meta       RCVD_REMOVED                __RCVD_RMV_PARTIAL && !__BODY_URI_ONLY && !__XPRIO && !__DOS_HAS_LIST_ID && !__BOTH_INR_AND_REF 
-describe   RCVD_REMOVED                Headers removed
-score      RCVD_REMOVED                3.750	# limit
-tflags     RCVD_REMOVED                publish
+# Compare __GATED_THROUGH_RCVD_REMOVER and "via ezmlm"
+header      __ML_EZMLM         Mailing-List =~ /\bezmlm\b/
 
+## Apparent performance is an artifact of one damaged masscheck corpora 01/2016
+#meta       __RCVD_RMV_URI_ONLY         __RCVD_RMV_PARTIAL && __BODY_URI_ONLY 
+#meta       RCVD_RMV_URI_ONLY           __RCVD_RMV_URI_ONLY
+#describe   RCVD_RMV_URI_ONLY           Headers removed + URI only
+#score      RCVD_RMV_URI_ONLY           3.000	# limit
+#tflags     RCVD_RMV_URI_ONLY           publish
+#
+#meta       __RCVD_RMV_XPRIO            __RCVD_RMV_PARTIAL && __XPRIO 
+#meta       RCVD_RMV_XPRIO              __RCVD_RMV_XPRIO
+#describe   RCVD_RMV_XPRIO              Headers removed + X-Priority
+#score      RCVD_RMV_XPRIO              2.000	# limit
+#tflags     RCVD_RMV_XPRIO              publish
+#
+#meta       RCVD_REMOVED                __RCVD_RMV_PARTIAL && !__BODY_URI_ONLY && !__XPRIO && !__DOS_HAS_LIST_ID && !__BOTH_INR_AND_REF 
+#describe   RCVD_REMOVED                Headers removed
+#score      RCVD_REMOVED                3.750	# limit
+#tflags     RCVD_REMOVED                publish
+#
 ## test some combos
 #meta       __RCVD_RMV_BODY_SHORT       __RCVD_RMV_PARTIAL && __LCL__KAM_BODY_LENGTH_LT_128
 #meta       __RCVD_RMV_FROM_TWO         __RCVD_RMV_PARTIAL && __PDS_FROM_2_EMAILS 
 #meta       __RCVD_RMV_XMAIL            __RCVD_RMV_PARTIAL && __HAS_X_MAILER 
+## Find spams not hitting already good-performing combos
+#meta       __RCVD_RMV_TEST_01          __RCVD_RMV_PARTIAL && !__BODY_URI_ONLY && !__XPRIO && !__DOS_HAS_LIST_ID  && !__PDS_FROM_2_EMAILS
+#meta       __RCVD_RMV_TEST_02          __RCVD_RMV_PARTIAL && !__BODY_URI_ONLY && !__XPRIO && !__DOS_HAS_LIST_ID 
+
 
 
 # easy for spammers to forge a signed message and still have it displayed to the recipient?
@@ -2105,10 +2111,6 @@ tflags     ENCRYPTED_MESSAGE           nice,publish
 
 
 #body       __PHONE_GIBBERISH_01        /(?:\b\d\d\d-\d\d\d-\d\d\d\d\s+[a-z][^\d\s:.]+\s+){15}/
-
-## Find spams not hitting already good-performing combos
-#meta       __RCVD_RMV_TEST_01          __RCVD_RMV_PARTIAL && !__BODY_URI_ONLY && !__XPRIO && !__DOS_HAS_LIST_ID  && !__PDS_FROM_2_EMAILS
-#meta       __RCVD_RMV_TEST_02          __RCVD_RMV_PARTIAL && !__BODY_URI_ONLY && !__XPRIO && !__DOS_HAS_LIST_ID 
 
 # already high-scoring
 #header     HDR_GMX_BULK                X-Gmx-Bulk =~ /./
@@ -2125,6 +2127,9 @@ endif
 # rule possibility: HTML image sourced via URL shortening service:
 # <IMG border=0 hspace=0 alt="" src="http://bit.ly/1OiuN0y" width=26 height=25>
 rawbody    __IMG_VIA_BITLY             m;<img\s[^>]+\ssrc\s*=\s*"?https?://(?:www\.)?bit\.ly/;i
+meta       IMG_VIA_BITLY               __IMG_VIA_BITLY
+describe   IMG_VIA_BITLY               HTML image via URL shortener - URIBL avoidance?
+score      IMG_VIA_BITLY               2.500	# limit
 
 
 # more random garbage message headers 01/2016
