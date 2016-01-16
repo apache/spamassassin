@@ -2112,11 +2112,7 @@ tflags     ENCRYPTED_MESSAGE           nice,publish
 
 #body       __PHONE_GIBBERISH_01        /(?:\b\d\d\d-\d\d\d-\d\d\d\d\s+[a-z][^\d\s:.]+\s+){15}/
 
-# already high-scoring
-#header     HDR_GMX_BULK                X-Gmx-Bulk =~ /./
-#describe   HDR_GMX_BULK                Bulk-mailer header
-#score      HDR_GMX_BULK                1.000	# limit
-
+header      __HAS_GMX_BULK             exists:X-Gmx-Bulk
 
 ifplugin Mail::SpamAssassin::Plugin::HTMLEval
   body       __HTML_TAG_BALANCE_CENTER     eval:html_tag_balance('center', '!= 0')
@@ -2140,5 +2136,12 @@ meta       HDR_CASE_REV_MANY           __HDR_CASE_REV_MANY
 describe   HDR_CASE_REV_MANY           Multiple malformed (possibly random gibberish) message headers
 score      HDR_CASE_REV_MANY           2.000	# limit
 
+
+header     __HAS_CAMPAIGN              exists:X-Campaign 
+header     __HAS_CAMPAIGNID            exists:X-Campaignid
+header     __HAS_XM_LID                exists:X-Mailer-LID
+header     __HAS_XM_RECPTID            exists:X-Mailer-RecptId
+header     __HAS_XM_SID                exists:X-Mailer-SID
+header     __HAS_XM_SENTBY             exists:X-Mailer-Sent-By
 
 
