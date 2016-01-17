@@ -195,7 +195,7 @@ endif
 #describe MONEY_DEAL       Lots of money in a suspicious deal
 #score    MONEY_DEAL       1.5
 
-body     __ATM_CARD       /\b(?:your|the|this|through|via|by\smeans\sof\|that\sa)[\s\(](?:\w{1,20}\s)?(?:atm|debit|(?:money[\s-]?gram\s)?fast\scash)(?:\smaster|swift|value?|cash)?[\s\)]card/i
+body     __ATM_CARD       /\b(?:your|the|this|through|via|by\smeans\sof\|that\sa|issue\s(?:(?:to|for)\s)?you\sa)[\s\(](?:\w{1,20}\s)?(?:atm|debit|(?:money[\s-]?gram\s)?fast\scash)(?:\smaster|swift|value?|cash)?[\s\)]card/i
 meta     __MONEY_ATM_CARD LOTS_OF_MONEY && __ATM_CARD
 meta     MONEY_ATM_CARD   __MONEY_ATM_CARD && !__COMMENT_EXISTS && !__TAG_EXISTS_STYLE
 describe MONEY_ATM_CARD   Lots of money on an ATM card
