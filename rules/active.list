@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bpoliakoff darxus dwarren grenier jarif kam-ninja kpg-core zmi; day 2: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi darxus dwarren grenier jarif kam-ninja kpg-core llanga zmi; day 3: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bpoliakoff darxus dwarren grenier jarif kam-ninja kpg-core llanga zmi
+# with results from: day 1: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bpoliakoff darxus dwarren jarif kam-ninja kpg-core zmi; day 2: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bpoliakoff darxus dwarren jarif kam-ninja kpg-core llanga zmi; day 3: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bpoliakoff darxus dwarren jarif kam-ninja kpg-core llanga zmi
 
 # tflags publish
 AC_BR_BONANZA
@@ -143,6 +143,9 @@ BIGNUM_EMAILS
 BITLY_URI
 
 # good enough
+BODY_EMPTY
+
+# good enough
 BODY_SINGLE_URI
 
 # good enough
@@ -261,6 +264,9 @@ ENCRYPTED_MESSAGE
 
 # tflags userconf
 ENV_AND_HDR_SPF_MATCH
+
+# good enough
+FAKE_REPLY_C
 
 # tflags publish
 FBI_MONEY
@@ -457,6 +463,9 @@ HEAD_LONG
 # good enough
 HELO_LH_HOME
 
+# good enough
+HELO_LOCALHOST
+
 # tflags publish
 HEXHASH_WORD
 
@@ -485,9 +494,6 @@ HK_RANDOM_FROM
 HK_SCAM_N1
 
 # good enough
-HK_SCAM_N13
-
-# good enough
 HK_SCAM_N15
 
 # good enough
@@ -498,9 +504,6 @@ HK_SCAM_N3
 
 # good enough
 HK_SCAM_N8
-
-# good enough
-HK_SCAM_S25
 
 # tflags userconf
 HTML_CHARSET_FARAWAY
@@ -513,6 +516,9 @@ HTML_OFF_PAGE
 
 # good enough
 HTML_TAG_BALANCE_CENTER
+
+# good enough
+IMG_VIA_BITLY
 
 # good enough
 KB_DATE_CONTAINS_TAB
@@ -588,6 +594,9 @@ MONEY_BARRISTER
 
 # good enough
 MONEY_FORM
+
+# good enough
+MONEY_FORM_SHORT
 
 # tflags publish
 MONEY_FRAUD_3
@@ -1040,6 +1049,9 @@ TVD_RCVD_IP
 TVD_RCVD_IP4
 
 # good enough
+TVD_RCVD_SPACE_BRACKET
+
+# good enough
 TVD_SPACE_ENCODED
 
 # good enough
@@ -1049,25 +1061,31 @@ TVD_SPACE_ENC_FM_MIME
 TVD_SPACE_RATIO_MINFP
 
 # good enough
+TVD_UNDER_VALUED
+
+# good enough
 TVD_VISIT_PHARMA
 
 # tflags publish
 TW_GIBBERISH_MANY
 
 # good enough
-BODY_EMPTY
+FROM_MISSP_DYNIP
 
 # good enough
-IMG_VIA_BITLY
+FROM_ONE_CHAR
 
 # good enough
-MONEY_FORM_SHORT
+FROM_WEBSITE
 
 # good enough
-OBFU_DOC_ATTACH
+MONEY_LOTTERY
 
 # good enough
-TVD_UNDER_VALUED
+OBFU_JPG_ATTACH
+
+# good enough
+THREAD_INDEX_HEX
 
 # tflags publish
 UC_GIBBERISH_OBFU
