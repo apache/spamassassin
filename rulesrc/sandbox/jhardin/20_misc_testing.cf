@@ -2145,9 +2145,12 @@ score      HDR_CASE_REV_MANY           2.000	# limit
 
 header     __HAS_CAMPAIGN              exists:X-Campaign 
 header     __HAS_CAMPAIGNID            exists:X-Campaignid
+header     __HAS_CID                   exists:X-CID
 header     __HAS_XM_LID                exists:X-Mailer-LID
 header     __HAS_XM_RECPTID            exists:X-Mailer-RecptId
 header     __HAS_XM_SID                exists:X-Mailer-SID
 header     __HAS_XM_SENTBY             exists:X-Mailer-Sent-By
+
+header     __FROM_WORDY                From:addr =~ /(?:(?:[A-Z][A-Za-z]+|or|&)\.)+[A-Z][A-Za-z]+\@/
 
 
