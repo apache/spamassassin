@@ -611,6 +611,7 @@ sub rendered {
         # Provide input to HTML::Parser as Unicode characters
         # which avoids a HTML::Parser bug in utf8_mode
         #   https://rt.cpan.org/Public/Bug/Display.html?id=99755
+        #   Note: the above bug was fixed in HTML-Parser 3.72, January 2016.
         # Avoid unnecessary step of encoding-then-decoding by telling
         # subroutine _normalize() to return Unicode text.  See Bug 7133
         #
