@@ -738,9 +738,16 @@ describe        IMAGESHACK_URI          URI contains imageshack.us
 #describe        DYNDNS_URIS             Has multiple dyndns.org URIs
 
 uri             __BITLY_URI             /\/\/bit\.ly\//i
-meta            BITLY_URI               __BITLY_URI && !__SUBSCRIPTION_INFO && !__HAS_ANY_EMAIL && !__HAS_REPLY_TO && !__UNSUB_LINK && !__RCD_RDNS_MAIL_MESSY && !__RP_MATCHES_RCVD && !__COMMENT_EXISTS && !__TO_NO_BRKTS_HTML_ONLY && !__NOT_SPOOFED
+meta            BITLY_URI               __BITLY_URI && !__HDR_CASE_REVERSED && !__HAS_SENDER && !__HAS_CAMPAIGNID && !__DOS_HAS_LIST_UNSUB && !__IMG_VIA_BITLY 
 describe        BITLY_URI               URI contains bit.ly
-score           BITLY_URI               2.25	# limit
+score           BITLY_URI               3.000	# limit
+
+# HTML image sourced via URL shortening service:
+# <IMG border=0 hspace=0 alt="" src="http://bit.ly/1OiuN0y" width=26 height=25>
+rawbody         __IMG_VIA_BITLY         m;<img\s[^>]+\ssrc\s*=\s*"?https?://(?:www\.)?bit\.ly/;i
+meta            IMG_VIA_BITLY           __IMG_VIA_BITLY
+describe        IMG_VIA_BITLY           HTML image via URL shortener - URIBL avoidance?
+score           IMG_VIA_BITLY           2.500	# limit
 
 uri             __URI_OBFU_DOM          /:\/\/(?:\w+\.)+(?:com|gov|net|org)(?:\.\w+){3,}\//i
 meta            URI_OBFU_DOM            __URI_OBFU_DOM && !__VIA_ML
@@ -2126,13 +2133,6 @@ ifplugin Mail::SpamAssassin::Plugin::HTMLEval
   describe   HTML_TAG_BALANCE_CENTER       Malformatted HTML
 endif
 
-# rule possibility: HTML image sourced via URL shortening service:
-# <IMG border=0 hspace=0 alt="" src="http://bit.ly/1OiuN0y" width=26 height=25>
-rawbody    __IMG_VIA_BITLY             m;<img\s[^>]+\ssrc\s*=\s*"?https?://(?:www\.)?bit\.ly/;i
-meta       IMG_VIA_BITLY               __IMG_VIA_BITLY
-describe   IMG_VIA_BITLY               HTML image via URL shortener - URIBL avoidance?
-score      IMG_VIA_BITLY               2.500	# limit
-
 
 # more random garbage message headers 01/2016
 header     __HDR_CASE_REVERSED         ALL =~ /^[^-:\s]*[a-z][A-Z]/m
@@ -2152,5 +2152,8 @@ header     __HAS_XM_SID                exists:X-Mailer-SID
 header     __HAS_XM_SENTBY             exists:X-Mailer-Sent-By
 
 header     __FROM_WORDY                From:addr =~ /(?:(?:[A-Z][A-Za-z]+|or|&)\.)+[A-Z][A-Za-z]+\@/
+meta       FROM_WORDY                  __FROM_WORDY && !__FSL_HTML_ENTITIES && !__HAS_THREAD_INDEX && !__HAS_TNEF && !__HAS_IN_REPLY_TO 
+describe   FROM_WORDY                  From address looks like a sentence
+
 
 
