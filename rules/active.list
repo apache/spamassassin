@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bpoliakoff darxus dwarren kam-ninja kpg-core zmi; day 2: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bpoliakoff darxus dwarren kam-ninja kpg-core llanga zmi; day 3: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bpoliakoff darxus dwarren jarif kam-ninja kpg-core llanga zmi
+# with results from: day 1: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bpoliakoff darxus dwarren jarif kam-ninja kpg-core zmi; day 2: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bpoliakoff darxus dwarren kam-ninja kpg-core llanga zmi; day 3: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bpoliakoff darxus dwarren kam-ninja kpg-core llanga zmi
 
 # tflags publish
 AC_BR_BONANZA
@@ -135,9 +135,6 @@ BAYES_999
 
 # good enough
 BIGNUM_EMAILS
-
-# good enough
-BITLY_URI
 
 # good enough
 BODY_EMPTY
@@ -365,6 +362,12 @@ FSL_HELO_BARE_IP_1
 FSL_HELO_BARE_IP_2
 
 # good enough
+FSL_HELO_DEVICE
+
+# good enough
+FSL_HELO_FAKE
+
+# good enough
 FSL_MID_419
 
 # tflags publish
@@ -524,6 +527,9 @@ KB_FAKED_THE_BAT
 KB_FORGED_MOZ4
 
 # good enough
+KB_RATWARE_MSGID
+
+# good enough
 LIST_PARTIAL_SHORT_MSG
 
 # tflags publish
@@ -636,9 +642,6 @@ NSL_RCVD_HELO_USER
 
 # good enough
 NULL_IN_BODY
-
-# good enough
-OBFU_JPG_ATTACH
 
 # tflags publish
 OBFU_JVSCR_ESC
@@ -899,12 +902,6 @@ REPLYTO_WITHOUT_TO_CC
 RISK_FREE
 
 # good enough
-SB_GIF_AND_NO_URIS
-
-# good enough
-SERGIO_SUBJECT_VIAGRA01
-
-# good enough
 SHARE_50_50
 
 # good enough
@@ -969,9 +966,6 @@ SUBJECT_IN_BLACKLIST
 
 # tflags userconf
 SUBJECT_IN_WHITELIST
-
-# good enough
-SUBJECT_NEEDS_ENCODING
 
 # tflags net
 SURBL_BLOCKED
@@ -1046,6 +1040,9 @@ TVD_QUAL_MEDS
 TVD_RCVD_IP
 
 # good enough
+TVD_RCVD_IP4
+
+# good enough
 TVD_RCVD_SPACE_BRACKET
 
 # good enough
@@ -1067,7 +1064,10 @@ TVD_VISIT_PHARMA
 TW_GIBBERISH_MANY
 
 # good enough
-FSL_HELO_FAKE
+FROM_WORDY
+
+# good enough
+MONEY_FORM_SHORT
 
 # good enough
 RP_MATCHES_RCVD
