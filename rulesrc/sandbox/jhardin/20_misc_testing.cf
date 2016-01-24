@@ -2135,7 +2135,7 @@ endif
 
 
 # more random garbage message headers 01/2016
-header     __HDR_CASE_REVERSED         ALL =~ /^[^-:\s]*[a-z][A-Z]/m
+header     __HDR_CASE_REVERSED         ALL =~ /^(?!DomainKey)[^-:\s]*[a-z][A-Z]/m
 tflags     __HDR_CASE_REVERSED         multiple maxhits=4
 meta       __HDR_CASE_REV_MANY         (__HDR_CASE_REVERSED > 3)
 meta       HDR_CASE_REV_MANY           __HDR_CASE_REV_MANY
@@ -2154,6 +2154,7 @@ header     __HAS_XM_SENTBY             exists:X-Mailer-Sent-By
 header     __FROM_WORDY                From:addr =~ /(?:(?:[A-Z][A-Za-z]+|or|&)\.)+[A-Z][A-Za-z]+\@/
 meta       FROM_WORDY                  __FROM_WORDY && !__FSL_HTML_ENTITIES && !__HAS_THREAD_INDEX && !__HAS_TNEF && !__HAS_IN_REPLY_TO && !__RCD_RDNS_MAIL_MESSY && !__DKIM_EXISTS && !__RP_MATCHES_RCVD 
 describe   FROM_WORDY                  From address looks like a sentence
+tflags     FROM_WORDY                  publish
 
 
 
