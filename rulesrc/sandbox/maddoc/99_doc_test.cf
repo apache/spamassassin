@@ -100,7 +100,7 @@ meta    FSL_STACKED_TEXT (__TWO_WORD_LINES > 10)
 # SMF: FP avoidance
 # JHardin: don't hit 127.x.x.x (loopback) addresses
 header  __FSL_HELO_BARE_IP_1      X-Spam-Relays-External =~ /^[^\]]+ helo=(?!127)\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3} /i
-meta    FSL_HELO_BARE_IP_1        __FSL_HELO_BARE_IP_1 && !FSL_HELO_BARE_IP_2
+meta    FSL_HELO_BARE_IP_1        __FSL_HELO_BARE_IP_1
 
 # score   FSL_HELO_BARE_IP_1      0.001
 
@@ -109,8 +109,8 @@ meta    FSL_HELO_BARE_IP_1        __FSL_HELO_BARE_IP_1 && !FSL_HELO_BARE_IP_2
 # score limit due to partial overlap with RCVD_NUMERIC_HELO
 # JHardin: don't hit 127.x.x.x (loopback) addresses
 header  __FSL_HELO_BARE_IP_2    X-Spam-Relays-External =~ /helo=(?!127)\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3} /i
-meta    FSL_HELO_BARE_IP_2      __FSL_HELO_BARE_IP_2 && !__VIA_ML && !__HAS_ERRORS_TO
-score   FSL_HELO_BARE_IP_2      2.000
+meta    FSL_HELO_BARE_IP_2      __FSL_HELO_BARE_IP_2 && !ALL_TRUSTED && !FSL_HELO_BARE_IP_1 && !__VIA_ML && !__HAS_ERRORS_TO
+score   FSL_HELO_BARE_IP_2      1.500
 
 header  FSL_HELO_NON_FQDN_1     X-Spam-Relays-External =~ /^[^\]]+ helo=[a-zA-Z0-9-_]+ /i
 # score   FSL_HELO_NON_FQDN_1     0.001
