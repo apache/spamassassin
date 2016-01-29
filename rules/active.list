@@ -101,6 +101,9 @@ AXB_XMAILER_MIMEOLE_OL_1ECD5
 AXB_XM_FORGED_OL2600
 
 # good enough
+AXB_X_AOL_SEZ_S
+
+# good enough
 AXB_X_FF_SEZ_S
 
 # tflags learn
@@ -135,6 +138,9 @@ BAYES_999
 
 # good enough
 BIGNUM_EMAILS
+
+# tflags publish
+BITLY_URI
 
 # good enough
 BODY_EMPTY
@@ -347,9 +353,6 @@ FROM_MISSP_XPRIO
 FROM_ONE_CHAR
 
 # good enough
-FROM_WEBSITE
-
-# good enough
 FSL_CTYPE_WIN1251
 
 # good enough
@@ -366,6 +369,9 @@ FSL_HELO_FAKE
 
 # good enough
 FSL_MID_419
+
+# good enough
+FSL_MIME_NO_TEXT
 
 # tflags publish
 FSL_NEW_HELO_USER
@@ -470,10 +476,10 @@ HEXHASH_WORD
 HK_LOTTO
 
 # good enough
-HK_NAME_DRUGS
+HK_NAME_DR
 
 # good enough
-HK_NAME_FM_DR
+HK_NAME_DRUGS
 
 # good enough
 HK_NAME_FM_MR_MRS
@@ -524,9 +530,6 @@ KB_DATE_CONTAINS_TAB
 KB_FAKED_THE_BAT
 
 # good enough
-KB_FORGED_MOZ4
-
-# good enough
 KB_RATWARE_MSGID
 
 # good enough
@@ -564,9 +567,6 @@ LOTTO_DEPT
 
 # tflags publish
 LUCRATIVE
-
-# good enough
-MAILER_EQ_ORG
 
 # good enough
 MALFORMED_FREEMAIL
@@ -642,9 +642,6 @@ NSL_RCVD_HELO_USER
 
 # good enough
 NULL_IN_BODY
-
-# good enough
-OBFU_JPG_ATTACH
 
 # tflags publish
 OBFU_JVSCR_ESC
@@ -1000,9 +997,6 @@ TEQF_USR_POLITE
 # tflags publish
 THIS_AD
 
-# good enough
-THREAD_INDEX_HEX
-
 # tflags net
 TO_EQ_FM_DOM_SPF_FAIL
 
@@ -1049,9 +1043,6 @@ TVD_QUAL_MEDS
 TVD_RCVD_IP
 
 # good enough
-TVD_RCVD_IP4
-
-# good enough
 TVD_SPACE_ENCODED
 
 # good enough
@@ -1067,25 +1058,22 @@ TVD_VISIT_PHARMA
 TW_GIBBERISH_MANY
 
 # good enough
-AXB_X_AOL_SEZ_S
-
-# tflags publish
-BITLY_URI
-
-# good enough
-FSL_MIME_NO_TEXT
-
-# good enough
-HK_NAME_DR
+DUP_SUSP_HDR
 
 # good enough
 HK_RANDOM_REPLYTO
 
 # good enough
-TVD_PH_BODY_META
+KHOP_UNSUB_EMAIL
 
 # good enough
-URI_OBFU_TLD
+MONEY_FORM_SHORT
+
+# good enough
+REPLYTO_EMPTY
+
+# good enough
+TVD_PH_BODY_META
 
 # tflags publish
 UC_GIBBERISH_OBFU
@@ -1173,6 +1161,9 @@ URI_HOST_IN_WHITELIST
 
 # tflags userconf
 URI_NOVOWEL
+
+# good enough
+URI_OBFU_TLD
 
 # tflags publish
 URI_ONLY_MSGID_MALF
