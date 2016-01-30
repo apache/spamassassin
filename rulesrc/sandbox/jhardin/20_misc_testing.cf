@@ -1488,12 +1488,18 @@ header      __DATE_LOWER       ALL =~ /date:\s\S{5}/
 
 # duplicates __XPRIO
 #header      __FH_HAS_XPRIORITY exists:X-Priority
+meta        __XPRIO_MINFP      __XPRIO && !__CT_ENCRYPTED && !ALL_TRUSTED && !__HAS_ERRORS_TO && !__THREADED && !__RP_MATCHES_RCVD && !__LONGLINE && !__MAIL_LINK && !__RCD_RDNS_SMTP && !__PDF_ATTACH && !__USING_VERP1 && !__HAS_DOMAINKEY_SIG && !__LIST_PARTIAL 
+
 ifplugin Mail::SpamAssassin::Plugin::DKIM
-  meta      XPRIO              __XPRIO && !__CT_ENCRYPTED && !ALL_TRUSTED && !__HAS_ERRORS_TO && !__THREADED && !__RP_MATCHES_RCVD && !__LONGLINE && !__MAIL_LINK && !__RCD_RDNS_SMTP && !__PDF_ATTACH && !DKIM_VALID && !DKIM_VALID_AU && !RCVD_IN_DNSWL_NONE 
+  ifplugin Mail::SpamAssassin::Plugin::SPF
+    meta    XPRIO              __XPRIO_MINFP && !DKIM_SIGNED && !__DKIM_DEPENDABLE && !DKIM_VALID && !DKIM_VALID_AU && !RCVD_IN_DNSWL_NONE && !SPF_PASS 
+  else
+    meta    XPRIO              __XPRIO_MINFP && !DKIM_SIGNED && !__DKIM_DEPENDABLE && !DKIM_VALID && !DKIM_VALID_AU && !RCVD_IN_DNSWL_NONE 
+  endif
   tflags    XPRIO              net
   score     XPRIO              3.500	# limit
 else
-  meta      XPRIO              __XPRIO && !__CT_ENCRYPTED && !ALL_TRUSTED && !__HAS_ERRORS_TO && !__THREADED && !__RP_MATCHES_RCVD && !__LONGLINE && !__MAIL_LINK && !__RCD_RDNS_SMTP && !__PDF_ATTACH && !HTML_FONT_LOW_CONTRAST && !__LIST_PARTIAL 
+  meta      XPRIO              __XPRIO_MINFP
   score     XPRIO              2.000	# limit
 endif
 describe    XPRIO              Has X-Priority header
@@ -2153,6 +2159,7 @@ header     __HAS_XM_SID                exists:X-Mailer-SID
 header     __HAS_XM_SENTBY             exists:X-Mailer-Sent-By
 header     __HAS_DOMAINKEY_SIG         exists:DomainKey-Signature
 
+header     __FROM_WORDY_3              From:addr =~ /(?:(?:[A-Z][A-Za-z]+|or|&)\.){2,}[A-Z][A-Za-z]+\@/
 header     __FROM_WORDY                From:addr =~ /(?:(?:[A-Z][A-Za-z]+|or|&)\.)+[A-Z][A-Za-z]+\@/
 meta       FROM_WORDY                  __FROM_WORDY && !__THREADED && !__HAS_CC && !__USING_VERP1 
 describe   FROM_WORDY                  From address looks like a sentence
@@ -2161,6 +2168,7 @@ tflags     FROM_WORDY                  nopublish	# hoping this can be made to wo
 meta       FROM_WORDY_HTML             __FROM_WORDY && __CTYPE_HTML 
 describe   FROM_WORDY_HTML             From address looks like a sentence + HTML only
 score      FROM_WORDY_HTML             3.000	# limit
+tflags     FROM_WORDY_HTML             publish
 
 
 
