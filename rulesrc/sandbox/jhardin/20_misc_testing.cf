@@ -2160,17 +2160,17 @@ header     __HAS_XM_SENTBY             exists:X-Mailer-Sent-By
 header     __HAS_DOMAINKEY_SIG         exists:DomainKey-Signature
 
 header     __FROM_WORDY                From:addr =~ /(?:(?:[A-Z][A-Za-z]+|or|&)\.)+[A-Z][A-Za-z]+\@/
-header     __FROM_WORDY_3              From:addr =~ /(?:(?:[A-Z][A-Za-z]+|or|&)\.){2,}[A-Z][A-Za-z]+\@/
+#header     __FROM_WORDY_3              From:addr =~ /(?:(?:[A-Z][A-Za-z]+|or|&)\.){2,}[A-Z][A-Za-z]+\@/
 #meta       FROM_WORDY                  __FROM_WORDY_3 && !__HAS_THREAD_INDEX && !__SUBJ_RE 
 #describe   FROM_WORDY                  From address looks like a sentence
 #tflags     FROM_WORDY                  nopublish	# hoping this can be made to work...
 
-meta       __FROM_WORDY_HTML             __FROM_WORDY && __CTYPE_HTML && !__LCL__ENV_AND_HDR_FROM_MATCH 
+#meta       __FROM_WORDY_HTML             __FROM_WORDY && __CTYPE_HTML && !__LCL__ENV_AND_HDR_FROM_MATCH 
 #describe   FROM_WORDY_HTML             From address looks like a sentence + HTML only
 #score      FROM_WORDY_HTML             3.000	# limit
 #tflags     FROM_WORDY_HTML             publish
 
-meta       __FROM_WORDY_NO_NAME        __FROM_WORDY && __KHOP_NO_FULL_NAME 
-meta       __FROM_WORDY_SONLY          __FROM_WORDY && (__KHOP_NO_FULL_NAME || __CTYPE_HTML || __TO_EQ_FROM_DOM_2 || __HTML_LENGTH_0000_1024 || __HTML_IMG_ONLY )
+#meta       __FROM_WORDY_NO_NAME        __FROM_WORDY && __KHOP_NO_FULL_NAME 
+meta       __FROM_WORDY_SONLY          __FROM_WORDY && (__KHOP_NO_FULL_NAME || __CTYPE_HTML || __TO_EQ_FROM_DOM_2 || __HTML_IMG_ONLY || FREEMAIL_FORGED_REPLYTO )
 
 
