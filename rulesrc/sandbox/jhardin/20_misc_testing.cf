@@ -738,7 +738,7 @@ describe        IMAGESHACK_URI          URI contains imageshack.us
 #describe        DYNDNS_URIS             Has multiple dyndns.org URIs
 
 uri             __BITLY_URI             /\/\/bit\.ly\//i
-meta            BITLY_URI               __BITLY_URI && !__HDR_CASE_REVERSED && !__HAS_SENDER && !__HAS_CAMPAIGNID && !__DOS_HAS_LIST_UNSUB && !__HAS_ERRORS_TO && !__MAIL_LINK && !__MSGID_JAVAMAIL && !__ENV_AND_HDR_FROM_MATCH && !__THREADED && !__IMG_VIA_BITLY 
+meta            BITLY_URI               __BITLY_URI && !__HDR_CASE_REVERSED && !__HAS_SENDER && !__HAS_CAMPAIGNID && !__DOS_HAS_LIST_UNSUB && !__HAS_ERRORS_TO && !__MAIL_LINK && !__MSGID_JAVAMAIL && !__ENV_AND_HDR_FROM_MATCH && !__THREADED && !__USING_VERP1 && !__IMG_VIA_BITLY 
 describe        BITLY_URI               URI contains bit.ly
 score           BITLY_URI               3.000	# limit
 tflags          BITLY_URI               publish
@@ -2163,7 +2163,7 @@ header     __FROM_WORDY                From:addr =~ /(?:(?:[A-Z][A-Za-z]+|or|&)\
 #header     __FROM_WORDY_3              From:addr =~ /(?:(?:[A-Z][A-Za-z]+|or|&)\.){2,}[A-Z][A-Za-z]+\@/
 
 meta       __FROM_WORDY_SONLY          __FROM_WORDY && (__KHOP_NO_FULL_NAME || __CTYPE_HTML || __TO_EQ_FROM_DOM_2 || __HTML_IMG_ONLY || FREEMAIL_FORGED_REPLYTO )
-meta       FROM_WORDY                  __FROM_WORDY_SONLY && !__LCL__ENV_AND_HDR_FROM_MATCH 
+meta       FROM_WORDY                  __FROM_WORDY_SONLY && !__LCL__ENV_AND_HDR_FROM_MATCH && !__HAS_TNEF && !__USING_VERP1 
 describe   FROM_WORDY                  From address looks like a sentence
 tflags     FROM_WORDY                  publish
 

@@ -161,8 +161,8 @@ body     __FIFTY_FIFTY    /\b(?:50|fifty)(?:%?[\/:]50%?|%|\spercent)/i
 meta     SHARE_50_50     (__SHARE_IT || __AGREED_RATIO) && __FIFTY_FIFTY
 describe SHARE_50_50     Share the money 50/50
 
-body     EMRCP            /\bExcess Maximum Return Capital Profit\b/i
-describe EMRCP            "Excess Maximum Return Capital Profit" Fidelity scam
+body     EMRCP            /\bExcess (?:Maximum )?Return Capital (?:Profits?|Funds?)\b/i
+describe EMRCP            "Excess Maximum Return Capital Profit" scam
 
 meta     LUCRATIVE        __LUCRATIVE && !ALL_TRUSTED && !__ANY_TEXT_ATTACH && !__REPLYTO_EXISTS && !__LCL__ENV_AND_HDR_FROM_MATCH 
 describe LUCRATIVE        Make lots of money!
