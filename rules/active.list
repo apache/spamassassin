@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bpoliakoff darxus dwarren jarif kam-ninja kpg-core; day 2: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bpoliakoff darxus dwarren jarif kam-ninja kpg-core llanga zmi; day 3: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bpoliakoff darxus dwarren kam-ninja kpg-core llanga zmi
+# with results from: day 1: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bpoliakoff darxus dwarren jarif kpg-core zmi; day 2: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bpoliakoff darxus dwarren jarif kam-ninja kpg-core llanga zmi; day 3: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bpoliakoff darxus dwarren jarif kam-ninja kpg-core llanga zmi
 
 # tflags publish
 AC_BR_BONANZA
@@ -96,6 +96,9 @@ AXB_XMAILER_MIMEOLE_OL_024C2
 
 # good enough
 AXB_XMAILER_MIMEOLE_OL_1ECD5
+
+# good enough
+AXB_XM_FORGED_OL2600
 
 # good enough
 AXB_X_AOL_SEZ_S
@@ -239,6 +242,9 @@ DOS_OE_TO_MX
 DOS_OE_TO_MX_IMAGE
 
 # good enough
+DOS_RCVD_IP_TWICE_C
+
+# good enough
 DSN_NO_MIMEVERSION
 
 # good enough
@@ -292,11 +298,11 @@ FOUND_YOU
 # tflags userconf
 FRAGMENTED_MESSAGE
 
+# good enough
+FREEMAIL_DOC_PDF_BCC
+
 # tflags publish
 FREEMAIL_FORGED_FROMDOMAIN
-
-# good enough
-FROM_12LTRDOM
 
 # tflags userconf
 FROM_DOMAIN_NOVOWEL
@@ -355,6 +361,9 @@ FSL_HELO_DEVICE
 # good enough
 FSL_HELO_FAKE
 
+# good enough
+FSL_MID_419
+
 # tflags publish
 FSL_NEW_HELO_USER
 
@@ -397,6 +406,9 @@ GOOGLE_DOCS_PHISH_MANY
 # tflags publish
 GOOG_MALWARE_DNLD
 
+# good enough
+GOOG_REDIR_HTML_ONLY
+
 # tflags publish
 GOOG_REDIR_SHORT
 
@@ -427,6 +439,9 @@ HASHCASH_2SPEND
 # tflags userconf
 HASHCASH_HIGH
 
+# good enough
+HDRS_MISSP
+
 # tflags publish
 HEADER_FROM_DIFFERENT_DOMAINS
 
@@ -452,6 +467,9 @@ HEXHASH_WORD
 HK_NAME_DR
 
 # good enough
+HK_NAME_DRUGS
+
+# good enough
 HK_NAME_FM_MR_MRS
 
 # good enough
@@ -459,6 +477,12 @@ HK_NAME_MR_MRS
 
 # good enough
 HK_RANDOM_FROM
+
+# good enough
+HK_SCAM_N1
+
+# good enough
+HK_SCAM_N15
 
 # good enough
 HK_SCAM_N2
@@ -483,6 +507,9 @@ HTML_TAG_BALANCE_CENTER
 
 # good enough
 HTTPS_HTTP_MISMATCH
+
+# good enough
+IMG_VIA_BITLY
 
 # good enough
 KB_DATE_CONTAINS_TAB
@@ -603,9 +630,6 @@ NSL_RCVD_HELO_USER
 
 # good enough
 NULL_IN_BODY
-
-# good enough
-OBFU_JPG_ATTACH
 
 # tflags publish
 OBFU_JVSCR_ESC
@@ -860,6 +884,9 @@ RCVD_IN_SORBS_ZOMBIE
 RCVD_IN_XBL
 
 # good enough
+RDNS_LOCALHOST
+
+# good enough
 REPLYTO_EMPTY
 
 # good enough
@@ -870,6 +897,9 @@ RISK_FREE
 
 # good enough
 RP_MATCHES_RCVD
+
+# good enough
+SHARE_50_50
 
 # good enough
 SHORTENED_URL_SRC
@@ -1024,17 +1054,14 @@ TVD_VISIT_PHARMA
 # tflags publish
 TW_GIBBERISH_MANY
 
-# good enough
-GOOG_REDIR_HTML_ONLY
+# tflags publish
+FROM_WORDY
 
 # good enough
-HDRS_MISSP
+FSL_MIME_NO_TEXT
 
 # good enough
-HELO_MISC_IP
-
-# good enough
-IMG_VIA_BITLY
+GOOG_REDIR_NORDNS
 
 # good enough
 NAME_EMAIL_DIFF
