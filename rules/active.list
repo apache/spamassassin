@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bpoliakoff darxus dwarren jarif kpg-core zmi; day 2: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bpoliakoff darxus dwarren jarif kam-ninja kpg-core llanga zmi; day 3: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bpoliakoff darxus dwarren jarif kam-ninja kpg-core llanga zmi
+# with results from: day 1: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bpoliakoff darxus dwarren grenier jarif kam-ninja kpg-core zmi; day 2: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bpoliakoff darxus dwarren jarif kpg-core llanga zmi; day 3: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bpoliakoff darxus dwarren jarif kam-ninja kpg-core llanga zmi
 
 # tflags publish
 AC_BR_BONANZA
@@ -262,6 +262,9 @@ ENCRYPTED_MESSAGE
 # tflags userconf
 ENV_AND_HDR_SPF_MATCH
 
+# good enough
+FAKE_REPLY_C
+
 # tflags publish
 FBI_MONEY
 
@@ -346,6 +349,9 @@ FROM_MISSP_USER
 # good enough
 FROM_MISSP_XPRIO
 
+# tflags publish
+FROM_WORDY
+
 # good enough
 FSL_CTYPE_WIN1251
 
@@ -363,6 +369,9 @@ FSL_HELO_FAKE
 
 # good enough
 FSL_MID_419
+
+# good enough
+FSL_MIME_NO_TEXT
 
 # tflags publish
 FSL_NEW_HELO_USER
@@ -408,6 +417,9 @@ GOOG_MALWARE_DNLD
 
 # good enough
 GOOG_REDIR_HTML_ONLY
+
+# good enough
+GOOG_REDIR_NORDNS
 
 # tflags publish
 GOOG_REDIR_SHORT
@@ -521,9 +533,6 @@ KB_FAKED_THE_BAT
 KB_RATWARE_MSGID
 
 # good enough
-KHOP_UNSUB_EMAIL
-
-# good enough
 LIST_PARTIAL_SHORT_MSG
 
 # tflags publish
@@ -609,6 +618,9 @@ MSM_PRIO_REPTO
 
 # good enough
 MSOE_MID_WRONG_CASE
+
+# good enough
+NAME_EMAIL_DIFF
 
 # good enough
 NA_DOLLARS
@@ -1054,17 +1066,8 @@ TVD_VISIT_PHARMA
 # tflags publish
 TW_GIBBERISH_MANY
 
-# tflags publish
-FROM_WORDY
-
 # good enough
-FSL_MIME_NO_TEXT
-
-# good enough
-GOOG_REDIR_NORDNS
-
-# good enough
-NAME_EMAIL_DIFF
+OBFU_JPG_ATTACH
 
 # tflags publish
 UC_GIBBERISH_OBFU
