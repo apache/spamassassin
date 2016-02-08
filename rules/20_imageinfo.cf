@@ -11,9 +11,9 @@
 # The ASF licenses this file to you under the Apache License, Version 2.0
 # (the "License"); you may not use this file except in compliance with
 # the License.  You may obtain a copy of the License at:
-# 
+#
 #     http://www.apache.org/licenses/LICENSE-2.0
-# 
+#
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -29,11 +29,11 @@ ifplugin Mail::SpamAssassin::Plugin::ImageInfo
 ## body		DC_IMAGE001_GIF		eval:image_named('image001.gif')
 ## describe	DC_IMAGE001_GIF		Contains image named image001.gif
 
-## # you can do exact image size matches 
+## # you can do exact image size matches
 ## body	 	DC_GIF_264_127  	eval:image_size_exact('gif','264','127')
 ## describe 	DC_GIF_264_127  	Found 264x127 pixel gif, possible pillz
 
-# you can do image to text, or image to html ratios 
+# you can do image to text, or image to html ratios
 rawbody		__DC_IMG_HTML_RATIO	eval:image_to_text_ratio('all', '0.000', '0.015')
 describe	__DC_IMG_HTML_RATIO	Low rawbody to pixel area ratio
 
@@ -88,7 +88,7 @@ meta		__DC_GIF_MULTI_LARGO 	( __GIF_ATTACH_2P && __GIF_AREA_180K )
 describe	__DC_GIF_MULTI_LARGO  	Message has 2+ inline gif covering lots of area
 
 meta	 	DC_PNG_UNO_LARGO	( __PNG_ATTACH_1 && __PNG_AREA_180K )
-describe 	DC_PNG_UNO_LARGO	Message contains a single large inline gif
+describe 	DC_PNG_UNO_LARGO	Message contains a single large png image
 
 meta	 	__DC_PNG_MULTI_LARGO 	( __PNG_ATTACH_2P && __PNG_AREA_180K )
 describe	__DC_PNG_MULTI_LARGO  	Message has 2+ inline png covering lots of area
@@ -102,7 +102,7 @@ describe	__DC_PNG_MULTI_LARGO  	Message has 2+ inline png covering lots of area
 meta		DC_IMAGE_SPAM_TEXT		( __DC_IMG_TEXT_RATIO && ( DC_GIF_UNO_LARGO || DC_PNG_UNO_LARGO || __DC_GIF_MULTI_LARGO || __DC_PNG_MULTI_LARGO ))
 describe	DC_IMAGE_SPAM_TEXT		Possible Image-only spam with little text
 
-# meta the stock rules together for HTML_IMAGE_ONLY_* 
+# meta the stock rules together for HTML_IMAGE_ONLY_*
 meta		__HTML_IMG_ONLY			( HTML_IMAGE_ONLY_04 || HTML_IMAGE_ONLY_08 || HTML_IMAGE_ONLY_12 || HTML_IMAGE_ONLY_16 || HTML_IMAGE_ONLY_20 || HTML_IMAGE_ONLY_24 || HTML_IMAGE_ONLY_28 )
 
 meta		DC_IMAGE_SPAM_HTML		( ( __HTML_IMG_ONLY  || __DC_IMG_HTML_RATIO ) && ( DC_GIF_UNO_LARGO || DC_PNG_UNO_LARGO || __DC_GIF_MULTI_LARGO || __DC_PNG_MULTI_LARGO ))
