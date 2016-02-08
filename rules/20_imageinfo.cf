@@ -52,7 +52,7 @@ describe	__DC_IMG_TEXT_RATIO	Low body to pixel area ratio
 # body	 	__SCREEN_1024x768 	eval:image_size_exact('all',1024,768)
 # body	 	__SCREEN_1280x1024  	eval:image_size_exact('all',1280,1024)
 # meta		DC_SCREENSHOT_JPG	( __SCREEN_640x480 || __SCREEN_800x600 || __SCREEN_1024x768 || __SCREEN_1280x1024 )
-# describe	DC_SCREENSHOT_JPG	Contains inline image matching common screen resolution
+# describe	DC_SCREENSHOT_JPG	Contains image matching common screen resolution
 # score		DC_SCREENSHOT_JPG	-0.01
 
 # you can do minimum demension matches
@@ -82,7 +82,7 @@ body		__PNG_AREA_180K		eval:pixel_coverage('png','180000','475000')
 
 # meta together something useful
 meta	 	DC_GIF_UNO_LARGO	( __GIF_ATTACH_1 && __GIF_AREA_180K )
-describe 	DC_GIF_UNO_LARGO  	Message contains a single large inline gif
+describe 	DC_GIF_UNO_LARGO  	Message contains a single large gif image
 
 meta		__DC_GIF_MULTI_LARGO 	( __GIF_ATTACH_2P && __GIF_AREA_180K )
 describe	__DC_GIF_MULTI_LARGO  	Message has 2+ inline gif covering lots of area
@@ -91,13 +91,13 @@ meta	 	DC_PNG_UNO_LARGO	( __PNG_ATTACH_1 && __PNG_AREA_180K )
 describe 	DC_PNG_UNO_LARGO	Message contains a single large png image
 
 meta	 	__DC_PNG_MULTI_LARGO 	( __PNG_ATTACH_2P && __PNG_AREA_180K )
-describe	__DC_PNG_MULTI_LARGO  	Message has 2+ inline png covering lots of area
+describe	__DC_PNG_MULTI_LARGO  	Message has 2+ png images covering lots of area
 
 # meta	 	DC_JPEG_UNO_LARGO 	( __JPEG_ATTACH_1 && __JPEG_AREA_180K )
-# describe	DC_JPEG_UNO_LARGO  	Message hash single large inline jpeg
+# describe	DC_JPEG_UNO_LARGO  	Message hash single large jpeg image
 
 # meta	 	DC_JPEG_MULTI_LARGO 	( __JPEG_ATTACH_2P && __JPEG_AREA_180K )
-# describe	DC_JPEG_MULTI_LARGO  	Message has 2+ inline jpeg covering lots of area
+# describe	DC_JPEG_MULTI_LARGO  	Message has 2+ jpeg images covering lots of area
 
 meta		DC_IMAGE_SPAM_TEXT		( __DC_IMG_TEXT_RATIO && ( DC_GIF_UNO_LARGO || DC_PNG_UNO_LARGO || __DC_GIF_MULTI_LARGO || __DC_PNG_MULTI_LARGO ))
 describe	DC_IMAGE_SPAM_TEXT		Possible Image-only spam with little text
