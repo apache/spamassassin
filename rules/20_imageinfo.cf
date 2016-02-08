@@ -99,13 +99,13 @@ describe	__DC_PNG_MULTI_LARGO  	Message has 2+ png images covering lots of area
 # meta	 	DC_JPEG_MULTI_LARGO 	( __JPEG_ATTACH_2P && __JPEG_AREA_180K )
 # describe	DC_JPEG_MULTI_LARGO  	Message has 2+ jpeg images covering lots of area
 
-meta		DC_IMAGE_SPAM_TEXT		( __DC_IMG_TEXT_RATIO && ( DC_GIF_UNO_LARGO || DC_PNG_UNO_LARGO || __DC_GIF_MULTI_LARGO || __DC_PNG_MULTI_LARGO ))
+meta		DC_IMAGE_SPAM_TEXT		( !__HAS_URI && __DC_IMG_TEXT_RATIO && ( DC_GIF_UNO_LARGO || DC_PNG_UNO_LARGO || __DC_GIF_MULTI_LARGO || __DC_PNG_MULTI_LARGO ))
 describe	DC_IMAGE_SPAM_TEXT		Possible Image-only spam with little text
 
 # meta the stock rules together for HTML_IMAGE_ONLY_*
 meta		__HTML_IMG_ONLY			( HTML_IMAGE_ONLY_04 || HTML_IMAGE_ONLY_08 || HTML_IMAGE_ONLY_12 || HTML_IMAGE_ONLY_16 || HTML_IMAGE_ONLY_20 || HTML_IMAGE_ONLY_24 || HTML_IMAGE_ONLY_28 )
 
-meta		DC_IMAGE_SPAM_HTML		( ( __HTML_IMG_ONLY  || __DC_IMG_HTML_RATIO ) && ( DC_GIF_UNO_LARGO || DC_PNG_UNO_LARGO || __DC_GIF_MULTI_LARGO || __DC_PNG_MULTI_LARGO ))
+meta		DC_IMAGE_SPAM_HTML		(!__HAS_URI && ( __HTML_IMG_ONLY  || __DC_IMG_HTML_RATIO ) && ( DC_GIF_UNO_LARGO || DC_PNG_UNO_LARGO || __DC_GIF_MULTI_LARGO || __DC_PNG_MULTI_LARGO ))
 describe	DC_IMAGE_SPAM_HTML		Possible Image-only spam
 
 endif
