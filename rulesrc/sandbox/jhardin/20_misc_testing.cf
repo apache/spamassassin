@@ -737,18 +737,21 @@ describe        IMAGESHACK_URI          URI contains imageshack.us
 #meta            DYNDNS_URIS             __DYNDNS_URI > 1
 #describe        DYNDNS_URIS             Has multiple dyndns.org URIs
 
-uri             __BITLY_URI             /\/\/bit\.ly\//i
-meta            BITLY_URI               __BITLY_URI && !__HDR_CASE_REVERSED && !__HAS_SENDER && !__HAS_CAMPAIGNID && !__DOS_HAS_LIST_UNSUB && !__HAS_ERRORS_TO && !__MAIL_LINK && !__MSGID_JAVAMAIL && !__ENV_AND_HDR_FROM_MATCH && !__THREADED && !__USING_VERP1 && !__IMG_VIA_BITLY && !__URL_SHORTENER 
-describe        BITLY_URI               URI contains bit.ly
-score           BITLY_URI               3.000	# limit
-tflags          BITLY_URI               publish
 
-# HTML image sourced via URL shortening service:
-# <IMG border=0 hspace=0 alt="" src="http://bit.ly/1OiuN0y" width=26 height=25>
-rawbody         __IMG_VIA_BITLY         m;<img\s[^>]+\ssrc\s*=\s*"?https?://(?:www\.)?bit\.ly/;i
-meta            IMG_VIA_BITLY           __IMG_VIA_BITLY && !SHORTENED_URL_SRC 
-describe        IMG_VIA_BITLY           HTML image via URL shortener - URIBL avoidance?
-score           IMG_VIA_BITLY           2.500	# limit
+## Does not perform better than URL_SHORTENER family
+## the ones that misses are already scoring 7+ points
+#uri             __BITLY_URI             /\/\/bit\.ly\//i
+#meta            BITLY_URI               __BITLY_URI && !__HDR_CASE_REVERSED && !__HAS_SENDER && !__HAS_CAMPAIGNID && !__DOS_HAS_LIST_UNSUB && !__HAS_ERRORS_TO && !__MAIL_LINK && !__MSGID_JAVAMAIL && !__ENV_AND_HDR_FROM_MATCH && !__THREADED && !__USING_VERP1 && !__IMG_VIA_BITLY && !__URL_SHORTENER 
+#describe        BITLY_URI               URI contains bit.ly
+#score           BITLY_URI               3.000	# limit
+#tflags          BITLY_URI               publish
+#
+## HTML image sourced via URL shortening service:
+## <IMG border=0 hspace=0 alt="" src="http://bit.ly/1OiuN0y" width=26 height=25>
+#rawbody         __IMG_VIA_BITLY         m;<img\s[^>]+\ssrc\s*=\s*"?https?://(?:www\.)?bit\.ly/;i
+#meta            IMG_VIA_BITLY           __IMG_VIA_BITLY && !SHORTENED_URL_SRC 
+#describe        IMG_VIA_BITLY           HTML image via URL shortener - URIBL avoidance?
+#score           IMG_VIA_BITLY           2.500	# limit
 
 uri             __URI_OBFU_DOM          /:\/\/(?:\w+\.)+(?:com|gov|net|org)(?:\.\w+){3,}\//i
 meta            URI_OBFU_DOM            __URI_OBFU_DOM && !__VIA_ML
@@ -1025,6 +1028,7 @@ describe    GAPPY_HTML             HTML body with much useless whitespace
 meta        TVD_SPACE_RATIO_MINFP  __TVD_SPACE_RATIO && !__CT_ENCRYPTED && !__LCL__ENV_AND_HDR_FROM_MATCH && !__SUBSCRIPTION_INFO && !__RCD_RDNS_MAIL && !__SUBJECT_ENCODED_QP && !__THREADED && !__TO_EQ_FROM_DOM && !__BOTH_INR_AND_REF && !__X_CRON_ENV && !__HAS_THREAD_INDEX && !__HDRS_LCASE_KNOWN && !__ISO_2022_JP_DELIM
 #tflags      TVD_SPACE_RATIO_MINFP  nopublish
 score       TVD_SPACE_RATIO_MINFP  2.750   # limit
+describe    TVD_SPACE_RATIO_MINFP  Space ratio
 
 # Only useful for English-language email
 #meta        SUBJECT_UNNEEDED_ENCODING    (__SUBJECT_ENCODED_B64 && !__SUBJECT_UTF8_B_ENCODED) && !__RCD_RDNS_MAIL && !__LCL__ENV_AND_HDR_FROM_MATCH && !__SUBSCRIPTION_INFO && !__THREADED && !__NONBOUNCE_READ_RECEIPT 
@@ -1036,9 +1040,11 @@ score       TVD_SPACE_RATIO_MINFP  2.750   # limit
 meta        __TVD_SPACE_ENCODED    (__TVD_SPACE_RATIO && __SUBJECT_ENCODED_B64 && !__SUBJECT_UTF8_B_ENCODED)
 meta        TVD_SPACE_ENCODED      __TVD_SPACE_ENCODED && !__NOT_SPOOFED && !__VIA_ML && !__HS_SUBJ_RE_FW && !__SUBSCRIPTION_INFO && !__TO_EQ_FROM_DOM && !__RCD_RDNS_MAIL && !__ISO_2022_JP_DELIM
 score       TVD_SPACE_ENCODED      2.500   # limit
+describe    TVD_SPACE_ENCODED      Space ratio & encoded subject
 
 meta        TVD_SPACE_ENC_FM_MIME  __TVD_SPACE_ENCODED && __FROM_NEEDS_MIME && !__ISO_2022_JP_DELIM
 score       TVD_SPACE_ENC_FM_MIME  2.000   # limit
+describe    TVD_SPACE_ENC_FM_MIME  Space ratio & encoded subject & MIME needed
 
 
 # sample from users list:   Subject: Sta ffWork sFastToSen dTab le tsGood s
@@ -2169,7 +2175,7 @@ header     __FROM_WORDY                From:addr =~ /(?:(?:[A-Z][A-Za-z]+|or|&)\
 #header     __FROM_WORDY_3              From:addr =~ /(?:(?:[A-Z][A-Za-z]+|or|&)\.){2,}[A-Z][A-Za-z]+\@/
 
 meta       __FROM_WORDY_SONLY          __FROM_WORDY && (__KHOP_NO_FULL_NAME || __CTYPE_HTML || __TO_EQ_FROM_DOM_2 || __HTML_IMG_ONLY || FREEMAIL_FORGED_REPLYTO )
-meta       FROM_WORDY                  (__FROM_WORDY_SONLY && !__HTML_LENGTH_0000_1024) && !__LCL__ENV_AND_HDR_FROM_MATCH && !__HAS_TNEF && !__USING_VERP1 
+meta       FROM_WORDY                  (__FROM_WORDY_SONLY && !__HTML_LENGTH_0000_1024) && !__LCL__ENV_AND_HDR_FROM_MATCH && !__HAS_TNEF && !__USING_VERP1 && !__HDRS_LCASE_KNOWN 
 describe   FROM_WORDY                  From address looks like a sentence
 tflags     FROM_WORDY                  publish
 
