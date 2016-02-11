@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bpoliakoff darxus dwarren grenier jarif kam-ninja kpg-core zmi; day 2: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bpoliakoff darxus dwarren grenier jarif kam-ninja kpg-core llanga zmi; day 3: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bpoliakoff darxus dwarren jarif kam-ninja kpg-core llanga zmi
+# with results from: day 1: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bpoliakoff darxus dwarren grenier kam-ninja kpg-core zmi; day 2: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bpoliakoff darxus dwarren grenier jarif kam-ninja kpg-core llanga zmi; day 3: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bpoliakoff darxus dwarren grenier jarif kam-ninja kpg-core llanga zmi
 
 # tflags publish
 AC_BR_BONANZA
@@ -253,9 +253,6 @@ ENCRYPTED_MESSAGE
 # tflags userconf
 ENV_AND_HDR_SPF_MATCH
 
-# good enough
-FAKE_REPLY_C
-
 # tflags publish
 FBI_MONEY
 
@@ -357,9 +354,6 @@ FSL_HELO_DEVICE
 
 # good enough
 FSL_HELO_FAKE
-
-# good enough
-FSL_MID_419
 
 # good enough
 FSL_MIME_NO_TEXT
@@ -470,9 +464,6 @@ HEXHASH_WORD
 HK_NAME_DR
 
 # good enough
-HK_NAME_DRUGS
-
-# good enough
 HK_NAME_FM_MR_MRS
 
 # good enough
@@ -509,6 +500,9 @@ HTML_OFF_PAGE
 HTML_TAG_BALANCE_CENTER
 
 # good enough
+HTTPS_HTTP_MISMATCH
+
+# good enough
 KB_DATE_CONTAINS_TAB
 
 # good enough
@@ -537,9 +531,6 @@ LONG_TERM_PRICE
 
 # tflags publish
 LOTS_OF_MONEY
-
-# good enough
-LOTTERY_1
 
 # good enough
 LOTTERY_PH_004470
@@ -940,9 +931,6 @@ STOCK_LOW_CONTRAST
 # tflags publish
 STOCK_TIP
 
-# good enough
-STOX_REPLY_TYPE_WITHOUT_QUOTES
-
 # tflags publish
 STYLE_GIBBERISH
 
@@ -1025,9 +1013,6 @@ TVD_QUAL_MEDS
 TVD_RCVD_IP
 
 # good enough
-TVD_RCVD_IP4
-
-# good enough
 TVD_SPACE_ENCODED
 
 # good enough
@@ -1055,13 +1040,10 @@ FROM_WORDY_SHORT
 HDR_CASE_REV_ENC
 
 # good enough
-HELO_MISC_IP
-
-# good enough
 HK_SCAM_N13
 
 # good enough
-OBFU_JPG_ATTACH
+SERGIO_SUBJECT_VIAGRA01
 
 # tflags publish
 UC_GIBBERISH_OBFU
