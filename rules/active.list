@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bpoliakoff darxus dwarren grenier kam-ninja kpg-core zmi; day 2: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bpoliakoff darxus dwarren grenier jarif kam-ninja kpg-core llanga zmi; day 3: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bpoliakoff darxus dwarren grenier jarif kam-ninja kpg-core llanga zmi
+# with results from: day 1: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bpoliakoff darxus dwarren grenier jarif kam-ninja kpg-core zmi; day 2: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bpoliakoff darxus dwarren grenier kam-ninja kpg-core llanga zmi; day 3: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bpoliakoff darxus dwarren grenier jarif kam-ninja kpg-core llanga zmi
 
 # tflags publish
 AC_BR_BONANZA
@@ -236,6 +236,9 @@ DOS_OE_TO_MX
 DOS_OE_TO_MX_IMAGE
 
 # good enough
+DOS_OUTLOOK_TO_MX_IMAGE
+
+# good enough
 DSN_NO_MIMEVERSION
 
 # good enough
@@ -295,6 +298,9 @@ FREEMAIL_DOC_PDF_BCC
 # tflags publish
 FREEMAIL_FORGED_FROMDOMAIN
 
+# good enough
+FROM_12LTRDOM
+
 # tflags userconf
 FROM_DOMAIN_NOVOWEL
 
@@ -340,6 +346,9 @@ FROM_MISSP_XPRIO
 # tflags publish
 FROM_WORDY
 
+# tflags publish
+FROM_WORDY_SHORT
+
 # good enough
 FSL_CTYPE_WIN1251
 
@@ -351,12 +360,6 @@ FSL_HELO_BARE_IP_2
 
 # good enough
 FSL_HELO_DEVICE
-
-# good enough
-FSL_HELO_FAKE
-
-# good enough
-FSL_MIME_NO_TEXT
 
 # tflags publish
 FSL_NEW_HELO_USER
@@ -439,6 +442,9 @@ HASHCASH_HIGH
 # good enough
 HDRS_MISSP
 
+# good enough
+HDR_CASE_REV_ENC
+
 # tflags publish
 HEADER_FROM_DIFFERENT_DOMAINS
 
@@ -464,6 +470,9 @@ HEXHASH_WORD
 HK_NAME_DR
 
 # good enough
+HK_NAME_DRUGS
+
+# good enough
 HK_NAME_FM_MR_MRS
 
 # good enough
@@ -474,6 +483,9 @@ HK_RANDOM_FROM
 
 # good enough
 HK_SCAM_N1
+
+# good enough
+HK_SCAM_N13
 
 # good enough
 HK_SCAM_N15
@@ -615,6 +627,9 @@ NSL_RCVD_FROM_USER
 
 # good enough
 NSL_RCVD_HELO_USER
+
+# good enough
+OBFU_JPG_ATTACH
 
 # tflags publish
 OBFU_JVSCR_ESC
@@ -1013,6 +1028,9 @@ TVD_QUAL_MEDS
 TVD_RCVD_IP
 
 # good enough
+TVD_RCVD_IP4
+
+# good enough
 TVD_SPACE_ENCODED
 
 # good enough
@@ -1028,22 +1046,13 @@ TVD_VISIT_PHARMA
 TW_GIBBERISH_MANY
 
 # good enough
-DOS_OUTLOOK_TO_MX_IMAGE
+AXB_X_AOL_SEZ_S
 
 # good enough
-FROM_12LTRDOM
-
-# tflags publish
-FROM_WORDY_SHORT
+MALFORMED_FREEMAIL
 
 # good enough
-HDR_CASE_REV_ENC
-
-# good enough
-HK_SCAM_N13
-
-# good enough
-SERGIO_SUBJECT_VIAGRA01
+THREAD_INDEX_HEX
 
 # tflags publish
 UC_GIBBERISH_OBFU
