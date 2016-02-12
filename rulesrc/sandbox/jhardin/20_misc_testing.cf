@@ -117,6 +117,7 @@ ifplugin Mail::SpamAssassin::Plugin::MIMEHeader
   meta         DOC_ATTACH_NO_EXT   __ATTACH_NAME_NO_EXT && (__PDF_ATTACH || __DOC_ATTACH_MT)
   describe     DOC_ATTACH_NO_EXT   Document attachment with suspicious name
 
+  mimeheader   __ZIP_ATTACH_MT     Content-Type =~ m,\bapplication/zip\b,i
 else
   meta         __HTML_ATTACH_01    0
   meta         __HTML_ATTACH_02    0
@@ -124,6 +125,7 @@ else
   meta         __ZIP_ATTACH_NOFN   0
   meta         __PDF_ATTACH        0
   meta         __ATTACH_NAME_NO_EXT 0
+  meta         __ZIP_ATTACH_MT     0
 endif
 
 # general case of spample observation
@@ -1483,7 +1485,6 @@ score       URI_WP_HACKED_2    2.000   # limit
 tflags      URI_WP_HACKED_2    publish
 
 
-
 # subrules migrated from 00_FVGT_File001.cf
 
 header      __SUBJ_LOWER       ALL =~ /subject:\s\S{5}/
@@ -2170,6 +2171,7 @@ header     __HAS_XM_RECPTID            exists:X-Mailer-RecptId
 header     __HAS_XM_SID                exists:X-Mailer-SID
 header     __HAS_XM_SENTBY             exists:X-Mailer-Sent-By
 header     __HAS_DOMAINKEY_SIG         exists:DomainKey-Signature
+header     __HAS_PHP_SCRIPT            exists:X-PHP-Script
 
 header     __FROM_WORDY                From:addr =~ /(?:(?:[A-Z][A-Za-z]+|or|&)\.)+[A-Z][A-Za-z]+\@/
 #header     __FROM_WORDY_3              From:addr =~ /(?:(?:[A-Z][A-Za-z]+|or|&)\.){2,}[A-Z][A-Za-z]+\@/
@@ -2183,4 +2185,11 @@ meta       FROM_WORDY_SHORT            (__FROM_WORDY_SONLY && __HTML_LENGTH_0000
 describe   FROM_WORDY_SHORT            From address looks like a sentence + short message
 tflags     FROM_WORDY_SHORT            publish
 
+# test some spam-only combos
+meta       __PHP_SCRIPT_SENDER         __HAS_PHP_SCRIPT && __PHP_NOVER_MUA 
+meta       __PHP_SCRIPT_MIMENEEDED     __HAS_PHP_SCRIPT && __FROM_NEEDS_MIME 
+
+header     __FROM_AUTHORITY_COMPANY    From:name =~ /\b(?:court|fed-?ex|dhl|e-?zpass)\b/
+
+meta       __PHP_MALWARE_ATTACH        __HAS_PHP_SCRIPT && __FROM_AUTHORITY_COMPANY && __ZIP_ATTACH_MT
 
