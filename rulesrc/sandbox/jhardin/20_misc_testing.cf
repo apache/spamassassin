@@ -107,7 +107,7 @@ ifplugin Mail::SpamAssassin::Plugin::MIMEHeader
   meta         CTYPE_NULL          __CTYPE_NULL
   describe     CTYPE_NULL          Malformed Content-Type header
 
-  mimeheader   __ZIP_ATTACH_NOFN   Content-Type =~ m,\bapplication/zip[;\s]*$,i
+  mimeheader   __ZIP_ATTACH_NOFN   Content-Type =~ m,\bapplication/(?:zip|x-(?:zip-)?compress(?:ed)?)[;\s]*$,i
   meta         OBFU_HTML_ATT_MALW  __ZIP_ATTACH_NOFN && __HTML_ATTACH_02
   describe     OBFU_HTML_ATT_MALW  HTML attachment with incorrect MIME type - possible malware
 
@@ -117,7 +117,7 @@ ifplugin Mail::SpamAssassin::Plugin::MIMEHeader
   meta         DOC_ATTACH_NO_EXT   __ATTACH_NAME_NO_EXT && (__PDF_ATTACH || __DOC_ATTACH_MT)
   describe     DOC_ATTACH_NO_EXT   Document attachment with suspicious name
 
-  mimeheader   __ZIP_ATTACH_MT     Content-Type =~ m,\bapplication/zip\b,i
+  mimeheader   __ZIP_ATTACH_MT     Content-Type =~ m,\bapplication/(?:zip|x-(?:zip-)?compress(?:ed)?)\b,i
 else
   meta         __HTML_ATTACH_01    0
   meta         __HTML_ATTACH_02    0
@@ -2189,7 +2189,7 @@ tflags     FROM_WORDY_SHORT            publish
 meta       __PHP_SCRIPT_SENDER         __HAS_PHP_SCRIPT && __PHP_NOVER_MUA 
 meta       __PHP_SCRIPT_MIMENEEDED     __HAS_PHP_SCRIPT && __FROM_NEEDS_MIME 
 
-header     __FROM_AUTHORITY_COMPANY    From:name =~ /\b(?:court|fed-?ex|dhl|e-?zpass)\b/
+header     __FROM_AUTHORITY_COMPANY    From:name =~ /\b(?:court|fed-?ex|dhl|e-?zpass|invoice)\b/
 
 meta       __PHP_MALWARE_ATTACH        __HAS_PHP_SCRIPT && __FROM_AUTHORITY_COMPANY && __ZIP_ATTACH_MT
 
