@@ -2185,11 +2185,14 @@ meta       FROM_WORDY_SHORT            (__FROM_WORDY_SONLY && __HTML_LENGTH_0000
 describe   FROM_WORDY_SHORT            From address looks like a sentence + short message
 tflags     FROM_WORDY_SHORT            publish
 
-# test some spam-only combos
-meta       __PHP_SCRIPT_SENDER         __HAS_PHP_SCRIPT && __PHP_NOVER_MUA 
+meta       PHP_SCRIPT_MUA              __HAS_PHP_SCRIPT && __PHP_NOVER_MUA 
+describe   PHP_SCRIPT_MUA              Sent by PHP script, no version number
+score      PHP_SCRIPT_MUA              2.000	# limit
+
 meta       __PHP_SCRIPT_MIMENEEDED     __HAS_PHP_SCRIPT && __FROM_NEEDS_MIME 
 
-header     __FROM_AUTHORITY_COMPANY    From:name =~ /\b(?:court|fed-?ex|dhl|e-?zpass|invoice)\b/
+#header     __FROM_AUTHORITY_COMPANY    From:name =~ /\b(?:court|fed-?ex|dhl|e-?zpass|invoice)\b/
+#meta       __PHP_MALWARE_ATTACH        __HAS_PHP_SCRIPT && __FROM_AUTHORITY_COMPANY && __ZIP_ATTACH_MT
 
-meta       __PHP_MALWARE_ATTACH        __HAS_PHP_SCRIPT && __FROM_AUTHORITY_COMPANY && __ZIP_ATTACH_MT
+meta       __XMSID                     __HAS_XM_SID && !__CTYPE_MULTIPART_MIXED 
 
