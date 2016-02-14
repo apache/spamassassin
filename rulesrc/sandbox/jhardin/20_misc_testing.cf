@@ -145,14 +145,14 @@ describe       URI_NUMERIC_CCTLD     CCTLD URI with multiple numeric subdomains
 header  __PHP_NOVER_MUA       X-Mailer =~ /^PHP$/
 header  __PHPMAILER_MUA       X-Mailer =~ /^PHPMailer\b/
 
-# __PHP_NOVER_MUA most spam hits are on messages scoring < 5 points
 ifplugin Mail::SpamAssassin::Plugin::DKIM
   meta    PHP_NOVER_MUA       __PHP_NOVER_MUA && !__DKIM_DEPENDABLE && !__TO_NO_BRKTS_HTML_ONLY && !__MSGID_OK_DIGITS && !__UPPERCASE_25_50 && !__RP_MATCHES_RCVD && !__GIF_ATTACH
 else
   meta    PHP_NOVER_MUA       __PHP_NOVER_MUA && !__TO_NO_BRKTS_HTML_ONLY && !__MSGID_OK_DIGITS && !__UPPERCASE_25_50 && !__RP_MATCHES_RCVD && !__GIF_ATTACH
 endif
-score     PHP_NOVER_MUA       3.50	# limit
 describe  PHP_NOVER_MUA       Mail from PHP with no version number
+score     PHP_NOVER_MUA       3.50	# limit
+tflags    PHP_NOVER_MUA       publish
 
 
 # From should have whitespace between the comment and the address
@@ -2188,6 +2188,7 @@ tflags     FROM_WORDY_SHORT            publish
 meta       PHP_SCRIPT_MUA              __HAS_PHP_SCRIPT && __PHP_NOVER_MUA 
 describe   PHP_SCRIPT_MUA              Sent by PHP script, no version number
 score      PHP_SCRIPT_MUA              2.000	# limit
+tflags     PHP_SCRIPT_MUA              publish
 
 meta       __PHP_SCRIPT_MIMENEEDED     __HAS_PHP_SCRIPT && __FROM_NEEDS_MIME 
 
