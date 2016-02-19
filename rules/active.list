@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bpoliakoff darxus dwarren grenier jarif kam-ninja kpg-core zmi; day 2: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bpoliakoff darxus dwarren grenier jarif kam-ninja kpg-core llanga zmi; day 3: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bpoliakoff darxus dwarren grenier kam-ninja kpg-core llanga zmi
+# with results from: day 1: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bpoliakoff darxus dwarren grenier jarif kam-ninja kpg-core zmi; day 2: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bpoliakoff darxus dwarren grenier jarif kam-ninja kpg-core llanga zmi; day 3: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bpoliakoff darxus dwarren grenier jarif kam-ninja kpg-core llanga zmi
 
 # tflags publish
 AC_BR_BONANZA
@@ -228,6 +228,9 @@ DOS_ANAL_SPAM_MAILER
 
 # good enough
 DOS_OE_TO_MX
+
+# good enough
+DOS_OE_TO_MX_IMAGE
 
 # good enough
 DOS_OUTLOOK_TO_MX_IMAGE
@@ -512,6 +515,9 @@ KB_DATE_CONTAINS_TAB
 KB_FAKED_THE_BAT
 
 # good enough
+KB_FORGED_MOZ4
+
+# good enough
 KB_RATWARE_MSGID
 
 # good enough
@@ -596,9 +602,6 @@ MSM_PRIO_REPTO
 MSOE_MID_WRONG_CASE
 
 # good enough
-NAME_EMAIL_DIFF
-
-# good enough
 NA_DOLLARS
 
 # tflags net
@@ -616,9 +619,6 @@ NSL_RCVD_FROM_USER
 # good enough
 NSL_RCVD_HELO_USER
 
-# good enough
-OBFU_JPG_ATTACH
-
 # tflags publish
 OBFU_JVSCR_ESC
 
@@ -633,6 +633,9 @@ PDS_FROM_2_EMAILS
 
 # tflags publish
 PHP_NOVER_MUA
+
+# tflags publish
+PHP_SCRIPT_MUA
 
 # tflags publish
 PP_MIME_FAKE_ASCII_TEXT
@@ -872,9 +875,6 @@ RCVD_IN_SORBS_ZOMBIE
 RCVD_IN_XBL
 
 # good enough
-REPLYTO_EMPTY
-
-# good enough
 REPLYTO_WITHOUT_TO_CC
 
 # good enough
@@ -885,9 +885,6 @@ RP_MATCHES_RCVD
 
 # good enough
 SHARE_50_50
-
-# good enough
-SHORTENED_URL_SRC
 
 # tflags publish
 SINGLETS_LOW_CONTRAST
@@ -964,9 +961,6 @@ TEQF_USR_POLITE
 # tflags publish
 THIS_AD
 
-# good enough
-THREAD_INDEX_HEX
-
 # tflags net
 TO_EQ_FM_DOM_SPF_FAIL
 
@@ -1031,22 +1025,31 @@ TVD_VISIT_PHARMA
 TW_GIBBERISH_MANY
 
 # good enough
+DUP_SUSP_HDR
+
+# good enough
+HK_LOTTO_NAME
+
+# good enough
 HK_NAME_FM_DR
 
 # good enough
-KB_FORGED_MOZ4
-
-# tflags publish
-PHP_SCRIPT_MUA
+NAME_EMAIL_DIFF
 
 # good enough
-UPGRADE_MAILBOX
+SHORTENED_URL_SRC
+
+# good enough
+TVD_IP_HEX
 
 # tflags publish
 UC_GIBBERISH_OBFU
 
 # tflags userconf
 UNPARSEABLE_RELAY
+
+# good enough
+UPGRADE_MAILBOX
 
 # tflags net
 URIBL_ABUSE_SURBL
