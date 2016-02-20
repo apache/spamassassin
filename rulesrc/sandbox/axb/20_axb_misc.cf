@@ -1,7 +1,4 @@
 
-header         AXB_JT_FOLNO0    Message-ID =~ /^\<[0-9a-f]{12}\$[0-9a-f]{7}[1-9a-f]\$[0-9a-f]{7}[1-9a-f]\$@/
-describe       AXB_JT_FOLNO0    JT's fingerprint
-
 # 9/21/2015
 header          AXB_X_OUTLOOKPROT_ENVSDR        Authentication-Results =~ /smtp\.mailfrom\=\<\>\;/
 describe        AXB_X_OUTLOOKPROT_ENVSDR        Outlook Protection trash trait
