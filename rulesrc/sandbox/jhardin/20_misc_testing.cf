@@ -2172,7 +2172,7 @@ header     __HAS_XM_SID                exists:X-Mailer-SID
 header     __HAS_XM_SENTBY             exists:X-Mailer-Sent-By
 header     __HAS_DOMAINKEY_SIG         exists:DomainKey-Signature
 header     __HAS_PHP_SCRIPT            exists:X-PHP-Script
-header     __HAS_PHP__ORIG_SCRIPT      exists:X-PHP-Originating-Script
+header     __HAS_PHP_ORIG_SCRIPT       exists:X-PHP-Originating-Script
 
 header     __FROM_WORDY                From:addr =~ /(?:(?:[A-Z][A-Za-z]+|or|&)\.)+[A-Z][A-Za-z]+\@/
 #header     __FROM_WORDY_3              From:addr =~ /(?:(?:[A-Z][A-Za-z]+|or|&)\.){2,}[A-Z][A-Za-z]+\@/
@@ -2193,8 +2193,11 @@ tflags     PHP_SCRIPT_MUA              publish
 
 meta       __PHP_SCRIPT_MIMENEEDED     __HAS_PHP_SCRIPT && __FROM_NEEDS_MIME 
 
+meta       __PHP_ORIG_SCRIPT_SONLY     __HAS_PHP_ORIG_SCRIPT && (__TVD_SPACE_RATIO || __SINGLE_WORD_SUBJ || __OBFUSCATING_COMMENT_B)
+
 #header     __FROM_AUTHORITY_COMPANY    From:name =~ /\b(?:court|fed-?ex|dhl|e-?zpass|invoice)\b/
 #meta       __PHP_MALWARE_ATTACH        __HAS_PHP_SCRIPT && __FROM_AUTHORITY_COMPANY && __ZIP_ATTACH_MT
 
 meta       __XMSID                     __HAS_XM_SID && !__CTYPE_MULTIPART_MIXED 
+meta       __XMSID_SONLY               __HAS_XM_SID && (INVALID_MSGID || __XPRIO || __HAS_X_MAILER)
 
