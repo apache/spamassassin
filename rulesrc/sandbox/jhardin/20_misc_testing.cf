@@ -2040,7 +2040,7 @@ score     SPOOFED_FREEM_REPTO           2.500
 tflags    SPOOFED_FREEM_REPTO           publish
 
 
-header    __VERY_LONG_REPTO             Reply-To =~ /[^\s\@]{25,}\@/
+header    __VERY_LONG_REPTO             Reply-To =~ /[^<\s\@]{25,}\@/
 
 meta      __VERY_LONG_REPTO_SHORT_MSG   __VERY_LONG_REPTO && __HTML_LENGTH_0000_1024
 meta      VERY_LONG_REPTO_SHORT_MSG     __VERY_LONG_REPTO_SHORT_MSG && !__VIA_ML && !__TO_EQ_FROM_DOM && !__THREAD_INDEX_GOOD 
