@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bpoliakoff darxus dwarren grenier jarif kam-ninja kpg-core zmi; day 2: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bpoliakoff darxus dwarren grenier jarif kam-ninja kpg-core llanga zmi; day 3: axb-8mile axb-coi-bulk axb-generic axb-ham-misc bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bpoliakoff darxus dwarren grenier jarif kam-ninja kpg-core llanga zmi
+# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bpoliakoff darxus dwarren grenier jarif kpg-core zmi; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bpoliakoff darxus dwarren grenier jarif kpg-core llanga zmi; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bpoliakoff darxus dwarren grenier jarif kpg-core llanga zmi
 
 # tflags publish
 AC_BR_BONANZA
@@ -100,6 +100,9 @@ AXB_XM_FORGED_OL2600
 # good enough
 AXB_X_FF_SEZ_S
 
+# good enough
+BASE64_LENGTH_79_INF
+
 # tflags learn
 BAYES_00
 
@@ -136,12 +139,6 @@ BIGNUM_EMAILS
 # good enough
 BODY_EMPTY
 
-# good enough
-BODY_SINGLE_URI
-
-# good enough
-BODY_SINGLE_WORD
-
 # tflags publish
 BODY_URI_ONLY
 
@@ -174,9 +171,6 @@ COMPENSATION
 
 # tflags publish
 CORRUPT_FROM_LINE_IN_HDRS
-
-# good enough
-DATE_IN_FUTURE_96_Q
 
 # good enough
 DEAR_BENEFICIARY
@@ -227,10 +221,13 @@ DOS_ANAL_SPAM_MAILER
 DOS_OE_TO_MX
 
 # good enough
-DOS_OE_TO_MX_IMAGE
+DOS_OUTLOOK_TO_MX
 
 # good enough
 DSN_NO_MIMEVERSION
+
+# good enough
+DUP_SUSP_HDR
 
 # tflags publish
 DX_TEXT_02
@@ -346,9 +343,6 @@ FSL_HELO_BARE_IP_1
 # good enough
 FSL_HELO_BARE_IP_2
 
-# good enough
-FSL_HELO_DEVICE
-
 # tflags publish
 FSL_NEW_HELO_USER
 
@@ -421,9 +415,6 @@ HASHCASH_2SPEND
 # tflags userconf
 HASHCASH_HIGH
 
-# good enough
-HDR_CASE_REV_ENC
-
 # tflags publish
 HEADER_FROM_DIFFERENT_DOMAINS
 
@@ -438,9 +429,6 @@ HEAD_LONG
 
 # good enough
 HELO_LH_HOME
-
-# good enough
-HELO_LOCALHOST
 
 # good enough
 HELO_MISC_IP
@@ -462,6 +450,9 @@ HK_NAME_MR_MRS
 
 # good enough
 HK_RANDOM_FROM
+
+# good enough
+HK_RANDOM_REPLYTO
 
 # good enough
 HK_SCAM_N1
@@ -494,19 +485,7 @@ HTML_OFF_PAGE
 HTML_TAG_BALANCE_CENTER
 
 # good enough
-HTTPS_HTTP_MISMATCH
-
-# good enough
-KB_DATE_CONTAINS_TAB
-
-# good enough
-KB_FAKED_THE_BAT
-
-# good enough
 KB_FORGED_MOZ4
-
-# good enough
-KB_RATWARE_MSGID
 
 # good enough
 LIST_PARTIAL_SHORT_MSG
@@ -580,17 +559,11 @@ MONEY_FROM_MISSP
 # good enough
 MONEY_LOTTERY
 
-# good enough
-MSGID_NOFQDN1
-
 # tflags publish
 MSM_PRIO_REPTO
 
 # good enough
 MSOE_MID_WRONG_CASE
-
-# good enough
-NAME_EMAIL_DIFF
 
 # good enough
 NA_DOLLARS
@@ -617,13 +590,13 @@ OBFU_JVSCR_ESC
 OBFU_TEXT_ATTACH
 
 # good enough
-PART_CID_STOCK
-
-# good enough
 PDS_FROM_2_EMAILS
 
 # tflags publish
 PHP_NOVER_MUA
+
+# tflags publish
+PHP_ORIG_SCRIPT
 
 # tflags publish
 PHP_SCRIPT_MUA
@@ -866,9 +839,6 @@ RCVD_IN_SORBS_ZOMBIE
 RCVD_IN_XBL
 
 # good enough
-REPLYTO_EMPTY
-
-# good enough
 REPLYTO_WITHOUT_TO_CC
 
 # good enough
@@ -879,9 +849,6 @@ RP_MATCHES_RCVD
 
 # good enough
 SHARE_50_50
-
-# good enough
-SHORTENED_URL_SRC
 
 # tflags publish
 SINGLETS_LOW_CONTRAST
@@ -940,9 +907,6 @@ SURBL_BLOCKED
 # tflags publish
 SYSADMIN
 
-# good enough
-TAB_IN_FROM
-
 # tflags publish
 TEQF_USR_IMAGE
 
@@ -992,9 +956,6 @@ TT_MSGID_TRUNC
 TVD_FROM_1
 
 # good enough
-TVD_IP_OCT
-
-# good enough
 TVD_PH_BODY_META
 
 # good enough
@@ -1022,16 +983,37 @@ TVD_VISIT_PHARMA
 TW_GIBBERISH_MANY
 
 # good enough
-DUP_SUSP_HDR
+AXB_X_AOL_SEZ_S
 
 # good enough
-HK_RANDOM_REPLYTO
+FSL_MID_419
 
 # good enough
-OBFU_JPG_ATTACH
+GOOG_REDIR_NORDNS
 
-# tflags publish
-PHP_ORIG_SCRIPT
+# good enough
+HK_LOTTO_NAME
+
+# good enough
+HK_LOTTO_SUBJECT
+
+# good enough
+HK_NAME_FM_DR
+
+# good enough
+HK_RANDOM_REPLYTO_NAME
+
+# good enough
+MALFORMED_FREEMAIL
+
+# good enough
+SUBJ_OBFU_LOW_CNTRST
+
+# good enough
+TO_EQ_FM_DIRECT_MX
+
+# good enough
+TO_EQ_FM_DOM_HTML_ONLY
 
 # tflags publish
 UC_GIBBERISH_OBFU
@@ -1119,9 +1101,6 @@ URI_HOST_IN_WHITELIST
 
 # tflags userconf
 URI_NOVOWEL
-
-# good enough
-URI_OBFU_TLD
 
 # tflags publish
 URI_ONLY_MSGID_MALF
