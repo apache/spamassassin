@@ -2206,3 +2206,6 @@ tflags     PHP_ORIG_SCRIPT             publish
 meta       __XMSID                     __HAS_XM_SID && !__CTYPE_MULTIPART_MIXED 
 meta       __XMSID_SONLY               __HAS_XM_SID && (INVALID_MSGID || __XPRIO || __HAS_X_MAILER)
 
+header     __UNSUB_MAILTO_BOGUS        List-Unsubscribe =~ /mailto:[^@\s">]*[\s?">]/
+
+
