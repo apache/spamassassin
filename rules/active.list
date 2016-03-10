@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bpoliakoff darxus grenier jarif kpg-core zmi; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bpoliakoff darxus grenier jarif kpg-core llanga zmi; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bpoliakoff darxus grenier jarif kpg-core llanga zmi
+# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bpoliakoff darxus grenier jarif kpg-core zmi; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bpoliakoff darxus grenier jarif kpg-core llanga zmi; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bpoliakoff darxus grenier jarif kpg-core llanga zmi
 
 # tflags publish
 AC_BR_BONANZA
@@ -100,9 +100,6 @@ AXB_XM_FORGED_OL2600
 # good enough
 AXB_X_FF_SEZ_S
 
-# good enough
-BASE64_LENGTH_79_INF
-
 # tflags learn
 BAYES_00
 
@@ -135,9 +132,6 @@ BAYES_999
 
 # good enough
 BIGNUM_EMAILS
-
-# good enough
-BODY_EMPTY
 
 # tflags publish
 BODY_URI_ONLY
@@ -246,6 +240,9 @@ FBI_SPOOF
 
 # tflags publish
 FILL_THIS_FORM
+
+# good enough
+FILL_THIS_FORM_FRAUD_PHISH
 
 # good enough
 FILL_THIS_FORM_LOAN
@@ -382,6 +379,9 @@ GOOGLE_DOCS_PHISH_MANY
 # tflags publish
 GOOG_MALWARE_DNLD
 
+# good enough
+GOOG_REDIR_NORDNS
+
 # tflags publish
 GOOG_REDIR_SHORT
 
@@ -446,9 +446,6 @@ HK_NAME_MR_MRS
 HK_RANDOM_FROM
 
 # good enough
-HK_RANDOM_REPLYTO
-
-# good enough
 HK_RANDOM_REPLYTO_NAME
 
 # good enough
@@ -474,9 +471,6 @@ HTML_OFF_PAGE
 
 # good enough
 HTML_TAG_BALANCE_CENTER
-
-# good enough
-KB_FORGED_MOZ4
 
 # good enough
 LIST_PARTIAL_SHORT_MSG
@@ -986,10 +980,16 @@ FROM_WSP_LEAD
 MSGID_NOFQDN1
 
 # good enough
+SERGIO_SUBJECT_PORN006
+
+# good enough
 SHORTENED_URL_SRC
 
 # good enough
 SUBJ_BROKEN_WORD
+
+# good enough
+TVD_ENHANCE
 
 # good enough
 UPGRADE_MAILBOX
