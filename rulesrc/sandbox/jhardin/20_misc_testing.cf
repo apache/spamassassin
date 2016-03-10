@@ -1990,6 +1990,8 @@ meta      __STY_INVIS_MANY              __STY_INVIS > 5
 #meta      HTML_TEXT_INVISIBLE           __STY_INVIS_MANY
 #describe  HTML_TEXT_INVISIBLE           Hidden text
 #score     HTML_TEXT_INVISIBLE           2.000   # limit
+# try it on span tags only...
+rawbody   __SPAN_INVIS                  /<span\s[^>]{0,80}style\s*=(?:3d)?\s*"\s*(?:visibility\s*:\s*hidden\s*;|display\s*:\s*none\s*;|background\s*:)/i
 
 # Adapted from SARE rules __SARE_HTML_SINGLET*
 rawbody   __HTML_SINGLET                />\s*(?:[a-z"]|&\#(?:\d+|x[0-9a-f]+);)\s*</i
