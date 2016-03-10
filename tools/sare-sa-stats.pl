@@ -10,35 +10,35 @@
 # version: 1.03
 # author:  Dallas Engelken <dallase@uribl.com>
 # desc:    Generates Top Spam/Ham Rules fired for SA 3.1.x installations.
-#          
+#
 #          IMPORTANT NOTES
 #
-#          SA 3.0.x log files do not have user=<user> in 
+#          SA 3.0.x log files do not have user=<user> in
 #          the report: log entries, so this does not work with 3.0.
 #          See http://www.rulesemporium.com/programs/sa-stats.txt for
 #          a SA 3.0.x version ( no per-domain / per-user support )
 #
 #          If your top 5 does not contain URIBL_BLACK, see
-#          http://www.uribl.com/usage.shtml 
+#          http://www.uribl.com/usage.shtml
 # -------------------------------------------------------------
 
 # Per User and Per Domain Statistics...
 # -------------------------------------------------------------
 #
-# ./sa-stats -r postmaster  
-#    - this would give all stats for postmaster users, 
+# ./sa-stats -r postmaster
+#    - this would give all stats for postmaster users,
 #      regardless of which domain it was for.  handy if you
 #      have alot of domain aliases
 #
 # ./sa-stats -r @domain
 #    - this would give all stats for the domain specified.
-#      make sure you include the '@' sign before the 
+#      make sure you include the '@' sign before the
 #      domain or the script will assume you wanted a user
 #      name instead.
 #
 # ./sa-stats -r user@domain.com
 #    - this would give all stats for a specific email address.
-#      this assumes you pass 'spamc -u <fullemail>' vs. 
+#      this assumes you pass 'spamc -u <fullemail>' vs.
 #      'spamc -u <userpart>'.  If you do the latter, you simply
 #      want to call -r <userpart> instead.
 #
@@ -82,7 +82,7 @@ my $TOTAL_SPAM_RULES=0; my $TOTAL_HAM_RULES=0;
 my $ALSPAM=0; my $ALHAM=0; my $ALNO=0;
 my $HAM_SEC=0; my $SPAM_SEC=0; my $EMAIL_SEC=0;
 
-my $footer  = '</div><div id="footer"><p>CGI by <a href="mailto:dallase@nmgi.com">Dallas Engelken</a></p></div>';
+my $footer  = '</div><div id="footer"><p>CGI by Dallas Engelken </p></div>';
 
 opendir (DIR,"$LOG_DIR");
 my @logs = grep /$FILE/i, readdir DIR;
@@ -144,11 +144,11 @@ sub calcstats {
 
   my $email = $user.$domain;
 
- 
+
   next if ($RECIP && $RECIP !~ m/\@/ && $RECIP ne $user);
   next if ($RECIP =~ m/^[\%\@](.+)/ && $RECIP ne $domain);
   next if ($RECIP =~ m/(.+)\@(.+)/ && $RECIP ne $email);
- 
+
   if ($result eq "Y") {
     $SPAM_SEC+=$time;
   }
@@ -156,7 +156,7 @@ sub calcstats {
     $HAM_SEC+=$time;
   }
   $EMAIL_SEC+=$time;
- 
+
   $spam=1 if ($result =~ m/Y/);
   if ($learn =~ /ham/) {
    $ALHAM++;
@@ -213,31 +213,31 @@ sub summarize {
   print "Content-type: text/html\n\n" if ($PRINT_TO_WEB);
   print "<pre>" if ($PRINT_TO_WEB);
 
-  if ($NUM_SPAM > 0) { 
-     $avgspamhits= sprintf("%.2f",$SPAM_HITS/$NUM_SPAM); 
-     $avgspamtime= sprintf("%.2f",$SPAM_SEC/$NUM_SPAM); 
+  if ($NUM_SPAM > 0) {
+     $avgspamhits= sprintf("%.2f",$SPAM_HITS/$NUM_SPAM);
+     $avgspamtime= sprintf("%.2f",$SPAM_SEC/$NUM_SPAM);
   }
-  else { 
-     $avgspamhits=0; 
-     $avgspamtime=0; 
-  }
-  
-  if ($NUM_HAM > 0) {  
-     $avghamhits= sprintf("%.2f",$HAM_HITS/$NUM_HAM);
-     $avghamtime= sprintf("%.2f",$HAM_SEC/$NUM_HAM); 
-  }
-  else { 
-     $avghamhits=0; 
-     $avghamtime=0; 
+  else {
+     $avgspamhits=0;
+     $avgspamtime=0;
   }
 
-  if ($NUM_EMAIL > 0) {  
-     $avgemailhits= sprintf("%.2f",$EMAIL_HITS/$NUM_EMAIL); 
-     $avgemailtime= sprintf("%.2f",$EMAIL_SEC/$NUM_EMAIL); 
+  if ($NUM_HAM > 0) {
+     $avghamhits= sprintf("%.2f",$HAM_HITS/$NUM_HAM);
+     $avghamtime= sprintf("%.2f",$HAM_SEC/$NUM_HAM);
   }
-  else { 
-     $avgemailhits=0; 
-     $avgemailtime=0; 
+  else {
+     $avghamhits=0;
+     $avghamtime=0;
+  }
+
+  if ($NUM_EMAIL > 0) {
+     $avgemailhits= sprintf("%.2f",$EMAIL_HITS/$NUM_EMAIL);
+     $avgemailtime= sprintf("%.2f",$EMAIL_SEC/$NUM_EMAIL);
+  }
+  else {
+     $avgemailhits=0;
+     $avgemailtime=0;
   }
 
 
@@ -320,7 +320,7 @@ sub hr {
 sub br {
  if ($PRINT_TO_WEB) {
    print "<br>";
- } 
+ }
  else {
    print "\n";
  }
