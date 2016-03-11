@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bpoliakoff darxus grenier jarif kpg-core zmi; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bpoliakoff darxus grenier jarif kpg-core llanga zmi; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bpoliakoff darxus grenier jarif kpg-core llanga zmi
+# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bpoliakoff darxus grenier jarif kpg-core zmi; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bpoliakoff darxus grenier jarif kpg-core llanga zmi; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bpoliakoff darxus grenier jarif kpg-core llanga zmi
 
 # tflags publish
 AC_BR_BONANZA
@@ -167,6 +167,9 @@ COMPENSATION
 CORRUPT_FROM_LINE_IN_HDRS
 
 # good enough
+DATE_IN_FUTURE_96_Q
+
+# good enough
 DEAR_BENEFICIARY
 
 # tflags net
@@ -240,9 +243,6 @@ FBI_SPOOF
 
 # tflags publish
 FILL_THIS_FORM
-
-# good enough
-FILL_THIS_FORM_FRAUD_PHISH
 
 # good enough
 FILL_THIS_FORM_LOAN
@@ -326,6 +326,9 @@ FROM_WORDY
 FROM_WORDY_SHORT
 
 # good enough
+FROM_WSP_LEAD
+
+# good enough
 FSL_CTYPE_WIN1251
 
 # good enough
@@ -378,9 +381,6 @@ GOOGLE_DOCS_PHISH_MANY
 
 # tflags publish
 GOOG_MALWARE_DNLD
-
-# good enough
-GOOG_REDIR_NORDNS
 
 # tflags publish
 GOOG_REDIR_SHORT
@@ -450,9 +450,6 @@ HK_RANDOM_REPLYTO_NAME
 
 # good enough
 HK_SCAM_N1
-
-# good enough
-HK_SCAM_N15
 
 # good enough
 HK_SCAM_N2
@@ -546,6 +543,9 @@ MONEY_FROM_MISSP
 
 # good enough
 MONEY_LOTTERY
+
+# good enough
+MSGID_NOFQDN1
 
 # tflags publish
 MSM_PRIO_REPTO
@@ -833,6 +833,9 @@ RISK_FREE
 RP_MATCHES_RCVD
 
 # good enough
+SHORTENED_URL_SRC
+
+# good enough
 SHORT_TERM_PRICE
 
 # tflags publish
@@ -885,6 +888,9 @@ SUBJECT_IN_BLACKLIST
 
 # tflags userconf
 SUBJECT_IN_WHITELIST
+
+# good enough
+SUBJ_BROKEN_WORD
 
 # good enough
 SUBJ_OBFU_LOW_CNTRST
@@ -959,46 +965,40 @@ TVD_RCVD_IP4
 TVD_SPACE_ENCODED
 
 # good enough
-TVD_SPACE_ENC_FM_MIME
-
-# good enough
-TVD_SPACE_RATIO_MINFP
-
-# good enough
 TVD_VISIT_PHARMA
 
 # tflags publish
 TW_GIBBERISH_MANY
 
 # good enough
-DATE_IN_FUTURE_96_Q
+AXB_X_AOL_SEZ_S
 
 # good enough
-FROM_WSP_LEAD
+DUP_SUSP_HDR
 
 # good enough
-MSGID_NOFQDN1
+FILL_THIS_FORM_FRAUD_PHISH
+
+# good enough
+HK_NAME_FM_DR
+
+# good enough
+MALFORMED_FREEMAIL
 
 # good enough
 SERGIO_SUBJECT_PORN006
 
 # good enough
-SHORTENED_URL_SRC
-
-# good enough
-SUBJ_BROKEN_WORD
-
-# good enough
 TVD_ENHANCE
-
-# good enough
-UPGRADE_MAILBOX
 
 # tflags publish
 UC_GIBBERISH_OBFU
 
 # tflags userconf
 UNPARSEABLE_RELAY
+
+# good enough
+UPGRADE_MAILBOX
 
 # tflags net
 URIBL_ABUSE_SURBL
