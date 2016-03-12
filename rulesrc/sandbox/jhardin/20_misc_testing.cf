@@ -151,7 +151,7 @@ else
   meta    PHP_NOVER_MUA       __PHP_NOVER_MUA && !__TO_NO_BRKTS_HTML_ONLY && !__MSGID_OK_DIGITS && !__UPPERCASE_25_50 && !__RP_MATCHES_RCVD && !__GIF_ATTACH
 endif
 describe  PHP_NOVER_MUA       Mail from PHP with no version number
-score     PHP_NOVER_MUA       3.50	# limit
+score     PHP_NOVER_MUA       3.000	# limit
 tflags    PHP_NOVER_MUA       publish
 
 
@@ -888,11 +888,9 @@ describe    __UCOZ_URI             URI contains ucoz.org
 #body        __ARTHUR_SIMMONS       /Arthur Simmons/
 #body        __INTRUST_DOMS         /In[Tt]rust Domains/
 #meta        ARTHUR_INTRUST         __ARTHUR_SIMMONS && __INTRUST_DOMS
-#score       ARTHUR_INTRUST         4.5
 #describe    ARTHUR_INTRUST         Arthur Simmons - registrar spammer extraordinaire
 
 #header      ART_NAMES_ORG          Received =~ /\bart\.names\.org\b/i
-#score       ART_NAMES_ORG          4.0
 #describe    ART_NAMES_ORG          Arthur Simmons - registrar spammer extraordinaire
 
 if can(Mail::SpamAssassin::Conf::feature_bug6558_free)
@@ -1217,7 +1215,7 @@ header      __FROM_WESTERNUNION  From:addr =~ /westernunion\.com$/i
 meta        __FROM_MISSP_PHISH   __FROM_MISSPACED && (__FROM_ASB_BANK || __FROM_AMEX || __FROM_BANK_LOOSE || __FROM_CHASE || __FROM_CMNWLTH_BANK || __FROM_EBAY_LOOSE || __FROM_HSBC || __FROM_LLOYDSTSB || __FROM_PAYPAL_LOOSE || __FROM_WELLSFARGO || __FROM_WESTERNUNION)
 meta        FROM_MISSP_PHISH     __FROM_MISSP_PHISH
 describe    FROM_MISSP_PHISH     Malformed, claims to be from financial organization - possible phish
-score       FROM_MISSP_PHISH     4.75	# limit
+score       FROM_MISSP_PHISH     3.500	# limit
 
 # another upload-a-document-for-public-access site
 uri         __URI_YOUSENDIT      m,^https?://www\.yousendit\.com/directdownload,i
@@ -1335,11 +1333,11 @@ header      __SINGLE_WORD_SUBJ  Subject =~ /^\s*\S{1,60}\s*$/
 meta        __BODY_SINGLE_WORD    __BODY_TEXT_LINE < 3 && !__EMPTY_BODY && !__SMIME_MESSAGE && ((__SINGLE_WORD_LINE && !__SINGLE_WORD_SUBJ) || __SINGLE_WORD_LINE > 1)
 meta        BODY_SINGLE_WORD    __BODY_SINGLE_WORD && !ALL_TRUSTED && !__HDRS_LCASE_KNOWN && !__FROM_ALL_NUMS && !__RCD_RDNS_SMTP
 describe    BODY_SINGLE_WORD    Message body is only one word (no spaces)
-score       BODY_SINGLE_WORD    3.00	# limit
+score       BODY_SINGLE_WORD    2.500	# limit
 
 meta        BODY_SINGLE_URI     (__BODY_SINGLE_WORD && __HAS_ANY_URI) && !ALL_TRUSTED && !__HDRS_LCASE_KNOWN && !__FROM_ALL_NUMS && !__RCD_RDNS_SMTP
 describe    BODY_SINGLE_URI     Message body is only a URI
-score       BODY_SINGLE_URI     3.00	# limit
+score       BODY_SINGLE_URI     2.500	# limit
 
 #ifplugin Mail::SpamAssassin::Plugin::DKIM
 #  # malformed DKIM signatures seen in the wild - see bug#6895
@@ -1367,7 +1365,7 @@ uri         __URI_DOS_FILE     /^[A-Z]:\\/i
 meta        __FORM_LOW_CONTRAST   (__FILL_THIS_FORM_SHORT2 || __FILL_THIS_FORM_SHORT2) && __HTML_FONT_LOW_CONTRAST_MINFP
 meta        FORM_LOW_CONTRAST     __FORM_LOW_CONTRAST && !__BUGGED_IMG && !__HAS_REPLY_TO && !__DKIM_EXISTS && !__DOS_HAS_LIST_UNSUB && !__MSGID_JAVAMAIL
 describe    FORM_LOW_CONTRAST     Fill in a form with hidden text
-score       FORM_LOW_CONTRAST     3.00	# Limit
+score       FORM_LOW_CONTRAST     2.500	# Limit
 tflags      FORM_LOW_CONTRAST     publish
 
 
@@ -1505,7 +1503,7 @@ ifplugin Mail::SpamAssassin::Plugin::DKIM
     meta    XPRIO              __XPRIO_MINFP && !DKIM_SIGNED && !__DKIM_DEPENDABLE && !DKIM_VALID && !DKIM_VALID_AU && !RCVD_IN_DNSWL_NONE 
   endif
   tflags    XPRIO              net
-  score     XPRIO              3.500	# limit
+  score     XPRIO              2.000	# limit
 else
   meta      XPRIO              __XPRIO_MINFP
   score     XPRIO              2.000	# limit
@@ -1528,7 +1526,7 @@ score       FROM_MISSP_XPRIO   2.500   # limit
 meta        __STATIC_XPRIO_OLE   __XPRIO && __RDNS_STATIC && __HAS_MIMEOLE
 meta        STATIC_XPRIO_OLE     __STATIC_XPRIO_OLE
 describe    STATIC_XPRIO_OLE     Static RDNS + X-Priority + MIMEOLE
-score       STATIC_XPRIO_OLE     4.500   # limit
+score       STATIC_XPRIO_OLE     2.000   # limit
 tflags      STATIC_XPRIO_OLE     publish
 
 # Apparent good performance is an artifact of certain corpora's collection mechanism
@@ -1894,7 +1892,7 @@ header    __RAND_HEADER                ALL =~ /^(?!Accept-Language|Authenticatio
 tflags    __RAND_HEADER                multiple, maxhits=4
 meta      RAND_HEADER_MANY             __RAND_HEADER > 3
 describe  RAND_HEADER_MANY             Many random gibberish message headers
-score     RAND_HEADER_MANY             3.500   # limit
+score     RAND_HEADER_MANY             3.000   # limit
 tflags    RAND_HEADER_MANY             publish
 
 
@@ -1930,7 +1928,7 @@ body      SOLICIT_BIZ                   /\bbusiness solicitation messag/i
 body      __SPELLED_OUT_NUM             /\b(?:(?:one|two|three|four|five|six|seven|eight|nine|zero)[\s_-]?){4,}/i
 meta      SPELLED_OUT_NUMBER            __SPELLED_OUT_NUM && !__DKIM_EXISTS 
 describe  SPELLED_OUT_NUMBER            Spelled out a number (one two three)
-score     SPELLED_OUT_NUMBER            3.250   # limit
+score     SPELLED_OUT_NUMBER            3.000   # limit
 
 body      __NUM_SPCD_LTRS               /\d{4}\s(?:[a-z]\s){5}/i
 
@@ -2047,7 +2045,7 @@ header    __VERY_LONG_REPTO             Reply-To =~ /[^<\s\@]{25,}\@/
 meta      __VERY_LONG_REPTO_SHORT_MSG   __VERY_LONG_REPTO && __HTML_LENGTH_0000_1024
 #meta      VERY_LONG_REPTO_SHORT_MSG     __VERY_LONG_REPTO_SHORT_MSG && !__VIA_ML && !__TO_EQ_FROM_DOM && !__THREAD_INDEX_GOOD 
 #describe  VERY_LONG_REPTO_SHORT_MSG     Very long Reply-To username + short message
-#score     VERY_LONG_REPTO_SHORT_MSG     3.500	# limit
+#score     VERY_LONG_REPTO_SHORT_MSG     2.500	# limit
 #tflags    VERY_LONG_REPTO_SHORT_MSG     publish
 
 
@@ -2081,7 +2079,7 @@ score      LIST_PARTIAL_SHORT_MSG       2.000	# limit
 meta       __BOGUS_MSM_HDRS             __HAS_MSMAIL_PRI && __MSOE_MID_WRONG_CASE && __HDR_ORDER_FTSDMCXXXX
 meta       BOGUS_MSM_HDRS               __BOGUS_MSM_HDRS
 describe   BOGUS_MSM_HDRS               Apparently bogus Microsoft email headers
-score      BOGUS_MSM_HDRS               3.250	# limit
+score      BOGUS_MSM_HDRS               3.000	# limit
 tflags     BOGUS_MSM_HDRS               publish
 
 #meta       __BOGUS_MSM_PRIO             __HAS_MSMAIL_PRI && __HDR_ORDER_FTSDMCXXXX
@@ -2102,33 +2100,6 @@ meta        __RCVD_RMV_PARTIAL __GATED_THROUGH_RCVD_REMOVER && __HAS_RCVD
 
 # Compare __GATED_THROUGH_RCVD_REMOVER and "via ezmlm"
 header      __ML_EZMLM         Mailing-List =~ /\bezmlm\b/
-
-## Apparent performance is an artifact of one damaged masscheck corpora 01/2016
-#meta       __RCVD_RMV_URI_ONLY         __RCVD_RMV_PARTIAL && __BODY_URI_ONLY 
-#meta       RCVD_RMV_URI_ONLY           __RCVD_RMV_URI_ONLY
-#describe   RCVD_RMV_URI_ONLY           Headers removed + URI only
-#score      RCVD_RMV_URI_ONLY           3.000	# limit
-#tflags     RCVD_RMV_URI_ONLY           publish
-#
-#meta       __RCVD_RMV_XPRIO            __RCVD_RMV_PARTIAL && __XPRIO 
-#meta       RCVD_RMV_XPRIO              __RCVD_RMV_XPRIO
-#describe   RCVD_RMV_XPRIO              Headers removed + X-Priority
-#score      RCVD_RMV_XPRIO              2.000	# limit
-#tflags     RCVD_RMV_XPRIO              publish
-#
-#meta       RCVD_REMOVED                __RCVD_RMV_PARTIAL && !__BODY_URI_ONLY && !__XPRIO && !__DOS_HAS_LIST_ID && !__BOTH_INR_AND_REF 
-#describe   RCVD_REMOVED                Headers removed
-#score      RCVD_REMOVED                3.750	# limit
-#tflags     RCVD_REMOVED                publish
-#
-## test some combos
-#meta       __RCVD_RMV_BODY_SHORT       __RCVD_RMV_PARTIAL && __LCL__KAM_BODY_LENGTH_LT_128
-#meta       __RCVD_RMV_FROM_TWO         __RCVD_RMV_PARTIAL && __PDS_FROM_2_EMAILS 
-#meta       __RCVD_RMV_XMAIL            __RCVD_RMV_PARTIAL && __HAS_X_MAILER 
-## Find spams not hitting already good-performing combos
-#meta       __RCVD_RMV_TEST_01          __RCVD_RMV_PARTIAL && !__BODY_URI_ONLY && !__XPRIO && !__DOS_HAS_LIST_ID  && !__PDS_FROM_2_EMAILS
-#meta       __RCVD_RMV_TEST_02          __RCVD_RMV_PARTIAL && !__BODY_URI_ONLY && !__XPRIO && !__DOS_HAS_LIST_ID 
-
 
 
 # easy for spammers to forge a signed message and still have it displayed to the recipient?
@@ -2199,7 +2170,7 @@ meta       __PHP_SCRIPT_MIMENEEDED     __HAS_PHP_SCRIPT && __FROM_NEEDS_MIME
 meta       __PHP_ORIG_SCRIPT_SONLY     __HAS_PHP_ORIG_SCRIPT && (__TVD_SPACE_RATIO || __SINGLE_WORD_SUBJ || __OBFUSCATING_COMMENT_B)
 meta       PHP_ORIG_SCRIPT             __PHP_ORIG_SCRIPT_SONLY && !ALL_TRUSTED && !__SUBSCRIPTION_INFO 
 describe   PHP_ORIG_SCRIPT             Sent by bot & other signs
-score      PHP_ORIG_SCRIPT             4.000	# limit
+score      PHP_ORIG_SCRIPT             2.500	# limit
 tflags     PHP_ORIG_SCRIPT             publish
 
 #header     __FROM_AUTHORITY_COMPANY    From:name =~ /\b(?:court|fed-?ex|dhl|e-?zpass|invoice)\b/
