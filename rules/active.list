@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bpoliakoff darxus grenier jarif kpg-core zmi; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bpoliakoff darxus grenier jarif kpg-core llanga zmi; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bpoliakoff darxus grenier jarif kpg-core llanga zmi
+# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-traps bb-zmi bpoliakoff darxus grenier jarif kpg-core zmi; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bpoliakoff darxus grenier jarif kpg-core zmi; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bpoliakoff darxus grenier jarif kpg-core llanga zmi
 
 # tflags publish
 AC_BR_BONANZA
@@ -87,6 +87,9 @@ AD_PREFS
 
 # tflags userconf
 ALL_TRUSTED
+
+# good enough
+APOSTROPHE_FROM
 
 # good enough
 AXB_XMAILER_MIMEOLE_OL_024C2
@@ -220,6 +223,9 @@ DOS_OUTLOOK_TO_MX
 # good enough
 DSN_NO_MIMEVERSION
 
+# good enough
+DUP_SUSP_HDR
+
 # tflags publish
 DX_TEXT_02
 
@@ -243,9 +249,6 @@ FBI_SPOOF
 
 # tflags publish
 FILL_THIS_FORM
-
-# good enough
-FILL_THIS_FORM_FRAUD_PHISH
 
 # good enough
 FILL_THIS_FORM_LOAN
@@ -294,9 +297,6 @@ FROM_MISSPACED
 
 # good enough
 FROM_MISSP_DYNIP
-
-# good enough
-FROM_MISSP_EH_MATCH
 
 # good enough
 FROM_MISSP_FREEMAIL
@@ -447,12 +447,6 @@ HK_NAME_MR_MRS
 
 # good enough
 HK_RANDOM_FROM
-
-# good enough
-HK_RANDOM_REPLYTO_NAME
-
-# good enough
-HK_SCAM_N1
 
 # good enough
 HK_SCAM_N2
@@ -974,16 +968,13 @@ TVD_VISIT_PHARMA
 TW_GIBBERISH_MANY
 
 # good enough
-DUP_SUSP_HDR
+HK_SCAM_N15
 
 # tflags publish
 UC_GIBBERISH_OBFU
 
 # tflags userconf
 UNPARSEABLE_RELAY
-
-# good enough
-UPGRADE_MAILBOX
 
 # tflags net
 URIBL_ABUSE_SURBL
