@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-traps bb-zmi bpoliakoff darxus grenier jarif kpg-core zmi; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bpoliakoff darxus grenier jarif kpg-core zmi; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bpoliakoff darxus grenier jarif kpg-core llanga zmi
+# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bpoliakoff darxus grenier jarif kpg-core zmi; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-traps bb-zmi bpoliakoff darxus grenier jarif kpg-core llanga zmi; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bpoliakoff darxus grenier jarif kpg-core zmi
 
 # tflags publish
 AC_BR_BONANZA
@@ -223,17 +223,11 @@ DOS_OUTLOOK_TO_MX
 # good enough
 DSN_NO_MIMEVERSION
 
-# good enough
-DUP_SUSP_HDR
-
 # tflags publish
 DX_TEXT_02
 
 # tflags publish
 DX_TEXT_03
-
-# good enough
-DYN_RDNS_SHORT_HELO_HTML
 
 # tflags publish
 ENCRYPTED_MESSAGE
@@ -440,9 +434,6 @@ HK_LOTTO
 HK_NAME_DR
 
 # good enough
-HK_NAME_FM_MR_MRS
-
-# good enough
 HK_NAME_MR_MRS
 
 # good enough
@@ -486,6 +477,9 @@ LONG_TERM_PRICE
 
 # tflags publish
 LOTS_OF_MONEY
+
+# good enough
+LOTTERY_1
 
 # good enough
 LOTTERY_PH_004470
