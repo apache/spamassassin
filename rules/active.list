@@ -1,5 +1,8 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-traps bb-zmi bpoliakoff darxus grenier jarif kpg-core zmi; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bpoliakoff darxus grenier kpg-core llanga zmi; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bpoliakoff darxus grenier jarif kpg-core llanga zmi
+# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bpoliakoff darxus grenier jarif kpg-core zmi; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-traps bb-zmi bpoliakoff darxus grenier jarif kpg-core llanga zmi; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bpoliakoff darxus grenier kpg-core llanga zmi
+
+# good enough
+ACH_CANCELLED
 
 # tflags publish
 AC_BR_BONANZA
@@ -51,6 +54,9 @@ ADVANCE_FEE_3_NEW
 
 # tflags publish
 ADVANCE_FEE_3_NEW_FORM
+
+# good enough
+ADVANCE_FEE_3_NEW_FRM_MNY
 
 # tflags publish
 ADVANCE_FEE_3_NEW_MONEY
@@ -122,6 +128,9 @@ BAYES_99
 BAYES_999
 
 # good enough
+BIGNUM_EMAILS
+
+# good enough
 BODY_SINGLE_WORD
 
 # tflags publish
@@ -139,11 +148,20 @@ CHARSET_FARAWAY
 # tflags userconf
 CHARSET_FARAWAY_HEADER
 
+# good enough
+CK_HELO_DYNAMIC_SPLIT_IP
+
+# good enough
+CK_HELO_GENERIC
+
 # tflags publish
 CN_B2B_SPAMMER
 
 # tflags publish
 COMMENT_GIBBERISH
+
+# good enough
+COMPENSATION
 
 # tflags publish
 CORRUPT_FROM_LINE_IN_HDRS
@@ -196,6 +214,9 @@ DOS_OE_TO_MX
 # good enough
 DOS_OUTLOOK_TO_MX
 
+# good enough
+DSN_NO_MIMEVERSION
+
 # tflags publish
 DX_TEXT_02
 
@@ -220,6 +241,9 @@ FILL_THIS_FORM
 # good enough
 FILL_THIS_FORM_LOAN
 
+# good enough
+FILL_THIS_FORM_LONG
+
 # tflags publish
 FORM_FRAUD
 
@@ -240,6 +264,9 @@ FRAGMENTED_MESSAGE
 
 # tflags publish
 FREEMAIL_FORGED_FROMDOMAIN
+
+# good enough
+FROM_12LTRDOM
 
 # tflags userconf
 FROM_DOMAIN_NOVOWEL
@@ -279,6 +306,9 @@ FROM_WORDY
 
 # tflags publish
 FROM_WORDY_SHORT
+
+# good enough
+FROM_WSP_LEAD
 
 # good enough
 FSL_CTYPE_WIN1251
@@ -376,6 +406,12 @@ HEADER_HOST_IN_WHITELIST
 # tflags userconf
 HEAD_LONG
 
+# good enough
+HELO_LH_HOME
+
+# good enough
+HELO_MISC_IP
+
 # tflags publish
 HEXHASH_WORD
 
@@ -383,16 +419,22 @@ HEXHASH_WORD
 HK_NAME_MR_MRS
 
 # good enough
-HK_RANDOM_FROM
+HK_SCAM_N2
 
 # good enough
-HK_SCAM_N2
+HK_SCAM_N8
 
 # tflags userconf
 HTML_CHARSET_FARAWAY
 
+# good enough
+HTML_FONT_TINY
+
 # tflags publish
 HTML_OFF_PAGE
+
+# good enough
+HTML_TAG_BALANCE_CENTER
 
 # good enough
 LIST_PARTIAL_SHORT_MSG
@@ -439,9 +481,6 @@ MISSING_HB_SEP
 # good enough
 MONEY_ATM_CARD
 
-# good enough
-MONEY_FORM
-
 # tflags publish
 MONEY_FRAUD_3
 
@@ -456,6 +495,12 @@ MONEY_FROM_41
 
 # good enough
 MONEY_FROM_MISSP
+
+# good enough
+MONEY_LOTTERY
+
+# good enough
+MSGID_NOFQDN1
 
 # tflags publish
 MSM_PRIO_REPTO
@@ -733,6 +778,15 @@ RCVD_IN_XBL
 # good enough
 REPLYTO_WITHOUT_TO_CC
 
+# good enough
+RISK_FREE
+
+# good enough
+RP_MATCHES_RCVD
+
+# good enough
+SERGIO_SUBJECT_PORN006
+
 # tflags publish
 SINGLETS_LOW_CONTRAST
 
@@ -799,9 +853,6 @@ TEQF_USR_MSGID_HEX
 # tflags publish
 TEQF_USR_MSGID_MALF
 
-# good enough
-TEQF_USR_POLITE
-
 # tflags publish
 THIS_AD
 
@@ -833,7 +884,10 @@ TO_NO_BRKTS_NORDNS_HTML
 TO_NO_BRKTS_PCNT
 
 # good enough
-TT_MSGID_TRUNC
+TVD_ENHANCE
+
+# good enough
+TVD_FROM_1
 
 # good enough
 TVD_PH_BODY_META
@@ -854,70 +908,25 @@ TVD_SUBJ_ACC_NUM
 TW_GIBBERISH_MANY
 
 # good enough
-ACH_CANCELLED
+DUP_SUSP_HDR
 
 # good enough
-ADVANCE_FEE_3_NEW_FRM_MNY
+FROM_ONE_CHAR
 
 # good enough
-CK_HELO_DYNAMIC_SPLIT_IP
+FROM_WSP_TRAIL
 
 # good enough
-CK_HELO_GENERIC
+HK_NAME_FM_MR_MRS
 
 # good enough
-COMPENSATION
+HK_RANDOM_FROM
 
 # good enough
-DSN_NO_MIMEVERSION
-
-# good enough
-FILL_THIS_FORM_LONG
-
-# good enough
-FROM_12LTRDOM
-
-# good enough
-FROM_WSP_LEAD
-
-# good enough
-HELO_LH_HOME
-
-# good enough
-HELO_MISC_IP
-
-# good enough
-HK_RANDOM_REPLYTO
-
-# good enough
-HTML_FONT_TINY
-
-# good enough
-MONEY_LOTTERY
-
-# good enough
-MSGID_NOFQDN1
+MONEY_FORM
 
 # good enough
 PDS_FROM_2_EMAILS
-
-# good enough
-RISK_FREE
-
-# good enough
-RP_MATCHES_RCVD
-
-# good enough
-SERGIO_SUBJECT_PORN006
-
-# good enough
-SERGIO_SUBJECT_PORN014
-
-# good enough
-TVD_ENHANCE
-
-# good enough
-TVD_FROM_1
 
 # tflags publish
 UC_GIBBERISH_OBFU
