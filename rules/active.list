@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bpoliakoff darxus grenier jarif kpg-core zmi; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-traps bb-zmi bpoliakoff darxus grenier jarif kpg-core llanga zmi; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bpoliakoff darxus grenier kpg-core llanga zmi
+# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-traps bb-zmi bpoliakoff darxus grenier jarif zmi; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bpoliakoff darxus grenier jarif kpg-core llanga zmi; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-traps bb-zmi bpoliakoff darxus grenier jarif kpg-core llanga zmi
 
 # good enough
 ACH_CANCELLED
@@ -126,12 +126,6 @@ BAYES_99
 
 # tflags learn
 BAYES_999
-
-# good enough
-BIGNUM_EMAILS
-
-# good enough
-BODY_SINGLE_WORD
 
 # tflags publish
 BODY_URI_ONLY
@@ -419,10 +413,13 @@ HEXHASH_WORD
 HK_NAME_MR_MRS
 
 # good enough
-HK_SCAM_N2
+HK_RANDOM_FROM
 
 # good enough
-HK_SCAM_N8
+HK_RANDOM_REPLYTO
+
+# good enough
+HK_SCAM_N2
 
 # tflags userconf
 HTML_CHARSET_FARAWAY
@@ -432,9 +429,6 @@ HTML_FONT_TINY
 
 # tflags publish
 HTML_OFF_PAGE
-
-# good enough
-HTML_TAG_BALANCE_CENTER
 
 # good enough
 LIST_PARTIAL_SHORT_MSG
@@ -450,6 +444,9 @@ LONG_HEX_URI
 
 # tflags publish
 LONG_IMG_URI
+
+# good enough
+LONG_TERM_PRICE
 
 # tflags publish
 LOTS_OF_MONEY
@@ -528,6 +525,9 @@ OBFU_JVSCR_ESC
 
 # tflags publish
 OBFU_TEXT_ATTACH
+
+# good enough
+PDS_FROM_2_EMAILS
 
 # tflags publish
 PHP_NOVER_MUA
@@ -787,6 +787,9 @@ RP_MATCHES_RCVD
 # good enough
 SERGIO_SUBJECT_PORN006
 
+# good enough
+SHORT_TERM_PRICE
+
 # tflags publish
 SINGLETS_LOW_CONTRAST
 
@@ -853,6 +856,9 @@ TEQF_USR_MSGID_HEX
 # tflags publish
 TEQF_USR_MSGID_MALF
 
+# good enough
+TEQF_USR_POLITE
+
 # tflags publish
 THIS_AD
 
@@ -902,13 +908,13 @@ TVD_RCVD_IP
 TVD_RCVD_IP4
 
 # good enough
-TVD_SUBJ_ACC_NUM
+TVD_VISIT_PHARMA
 
 # tflags publish
 TW_GIBBERISH_MANY
 
 # good enough
-DUP_SUSP_HDR
+BIGNUM_EMAILS
 
 # good enough
 FROM_ONE_CHAR
@@ -917,16 +923,16 @@ FROM_ONE_CHAR
 FROM_WSP_TRAIL
 
 # good enough
-HK_NAME_FM_MR_MRS
+FSL_MIME_NO_TEXT
 
 # good enough
-HK_RANDOM_FROM
+HK_NAME_DR
 
 # good enough
-MONEY_FORM
+HTML_TAG_BALANCE_CENTER
 
 # good enough
-PDS_FROM_2_EMAILS
+UPGRADE_MAILBOX
 
 # tflags publish
 UC_GIBBERISH_OBFU
