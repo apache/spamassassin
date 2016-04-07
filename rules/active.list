@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bpoliakoff darxus grenier zmi; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bpoliakoff darxus grenier jarif llanga zmi; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bpoliakoff darxus jarif llanga zmi
+# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bpoliakoff darxus grenier zmi; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bpoliakoff darxus grenier jarif llanga zmi; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bpoliakoff darxus grenier jarif llanga zmi
 
 # tflags publish
 AC_BR_BONANZA
@@ -887,6 +887,9 @@ ACCT_PHISHING
 ADVANCE_FEE_3_NEW_FRM_MNY
 
 # good enough
+AXB_XM_FORGED_OL2600
+
+# good enough
 AXB_X_FF_SEZ_S
 
 # good enough
@@ -911,7 +914,7 @@ FROM_12LTRDOM
 FROM_MISSP_DYNIP
 
 # good enough
-HK_RANDOM_REPLYTO_NAME
+GAPPY_LOW_CONTRAST
 
 # good enough
 HK_SCAM_N8
@@ -939,6 +942,9 @@ TVD_ENHANCE
 
 # good enough
 TVD_SPACE_ENCODED
+
+# good enough
+TVD_SPACE_ENC_FM_MIME
 
 # good enough
 UPGRADE_MAILBOX
