@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bpoliakoff darxus grenier jarif zmi; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bpoliakoff darxus grenier jarif llanga zmi; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bpoliakoff darxus grenier jarif llanga zmi
+# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-zmi bpoliakoff darxus grenier jarif zmi; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bpoliakoff darxus grenier jarif llanga zmi; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bpoliakoff darxus grenier jarif llanga zmi
 
 # good enough
 ACCT_PHISHING
@@ -96,6 +96,9 @@ AXB_XMAILER_MIMEOLE_OL_024C2
 
 # good enough
 AXB_XMAILER_MIMEOLE_OL_1ECD5
+
+# good enough
+AXB_XM_FORGED_OL2600
 
 # tflags learn
 BAYES_00
@@ -364,6 +367,9 @@ FUZZY_SECURITY
 # tflags publish
 FUZZY_UNSUBSCRIBE
 
+# good enough
+GAPPY_LOW_CONTRAST
+
 # tflags publish
 GOOGLE_DOCS_PHISH
 
@@ -444,9 +450,6 @@ HTML_FONT_TINY
 
 # tflags publish
 HTML_OFF_PAGE
-
-# good enough
-HTML_TAG_BALANCE_CENTER
 
 # good enough
 LIST_PARTIAL_SHORT_MSG
@@ -806,6 +809,9 @@ SERGIO_SUBJECT_PORN006
 SERGIO_SUBJECT_PORN014
 
 # good enough
+SHORT_HELO_AND_INLINE_IMAGE
+
+# good enough
 SHORT_TERM_PRICE
 
 # tflags publish
@@ -929,6 +935,9 @@ TVD_RCVD_IP4
 TVD_SPACE_ENCODED
 
 # good enough
+TVD_SPACE_ENC_FM_MIME
+
+# good enough
 TVD_SUBJ_ACC_NUM
 
 # good enough
@@ -938,16 +947,16 @@ TVD_VISIT_PHARMA
 TW_GIBBERISH_MANY
 
 # good enough
-AXB_XM_FORGED_OL2600
+ANY_PILL_PRICE
 
 # good enough
 CK_HELO_GENERIC
 
 # good enough
-GAPPY_LOW_CONTRAST
+HK_SPAMMY_FILENAME
 
 # good enough
-HK_SPAMMY_FILENAME
+IMG_DIRECT_TO_MX
 
 # good enough
 MONEY_FORM
@@ -956,10 +965,10 @@ MONEY_FORM
 MONEY_FORM_SHORT
 
 # good enough
-TO_EQ_FM_HTML_ONLY
+SERGIO_SUBJECT_PORN009
 
 # good enough
-TVD_SPACE_ENC_FM_MIME
+TO_EQ_FM_HTML_ONLY
 
 # tflags publish
 UC_GIBBERISH_OBFU
