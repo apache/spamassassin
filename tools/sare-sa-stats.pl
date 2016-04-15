@@ -8,7 +8,7 @@
 # created: 2005-01-31
 # updated: 2007-01-30
 # version: 1.03
-# author:  Dallas Engelken <dallase@uribl.com>
+# author:  Dallas <dallase@uribl.com>
 # desc:    Generates Top Spam/Ham Rules fired for SA 3.1.x installations.
 #
 #          IMPORTANT NOTES
