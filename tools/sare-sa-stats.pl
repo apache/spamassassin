@@ -82,7 +82,7 @@ my $TOTAL_SPAM_RULES=0; my $TOTAL_HAM_RULES=0;
 my $ALSPAM=0; my $ALHAM=0; my $ALNO=0;
 my $HAM_SEC=0; my $SPAM_SEC=0; my $EMAIL_SEC=0;
 
-my $footer  = '</div><div id="footer"><p>CGI by Dallas Engelken </p></div>';
+my $footer  = '</div><div id="footer"><p> CGI by Dallas Engelken </p></div>';
 
 opendir (DIR,"$LOG_DIR");
 my @logs = grep /$FILE/i, readdir DIR;
