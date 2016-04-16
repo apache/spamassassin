@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bpoliakoff darxus grenier jarif zmi; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bpoliakoff darxus grenier jarif llanga zmi; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-traps bb-zmi bpoliakoff darxus grenier jarif llanga zmi
+# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bpoliakoff darxus grenier jarif zmi; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bpoliakoff darxus grenier jarif llanga zmi; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bpoliakoff darxus grenier jarif llanga zmi
 
 # good enough
 ACCT_PHISHING
@@ -257,9 +257,6 @@ FBI_SPOOF
 FILL_THIS_FORM
 
 # good enough
-FILL_THIS_FORM_FRAUD_PHISH
-
-# good enough
 FILL_THIS_FORM_LOAN
 
 # good enough
@@ -330,9 +327,6 @@ FROM_WORDY
 
 # tflags publish
 FROM_WORDY_SHORT
-
-# good enough
-FSL_BULK_SIG
 
 # good enough
 FSL_CTYPE_WIN1251
@@ -441,6 +435,9 @@ HK_NAME_DR
 
 # good enough
 HK_NAME_DRUGS
+
+# good enough
+HK_NAME_FM_DR
 
 # good enough
 HK_NAME_MR_MRS
@@ -916,9 +913,6 @@ TO_EQ_FM_DOM_HTML_ONLY
 # tflags net
 TO_EQ_FM_DOM_SPF_FAIL
 
-# good enough
-TO_EQ_FM_HTML_ONLY
-
 # tflags net
 TO_EQ_FM_SPF_FAIL
 
@@ -974,7 +968,10 @@ TVD_VISIT_PHARMA
 TW_GIBBERISH_MANY
 
 # good enough
-HK_NAME_FM_DR
+ADMITS_SPAM
+
+# good enough
+FSL_BULK_SIG
 
 # good enough
 MALFORMED_FREEMAIL
