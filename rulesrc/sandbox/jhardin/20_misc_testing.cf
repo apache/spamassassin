@@ -2013,14 +2013,16 @@ describe  HACKED_PHP_URI                Possible phishing/malware URI
 score     HACKED_PHP_URI                2.000     # limit
 
 # very poor S/O - this appears a lot more in ham than in spam??
-body      __PUNCT_ODD_SPACING           /[a-z]{3}\s+[.,][a-z]{3}/
-tflags    __PUNCT_ODD_SPACING           multiple, maxhits=3
-meta      __PUNCT_ODD_SPACING_MANY      __PUNCT_ODD_SPACING > 2
+#body      __PUNCT_ODD_SPACING           /[a-z]{3}\s+[.,][a-z]{3}/
+#tflags    __PUNCT_ODD_SPACING           multiple, maxhits=3
+#meta      __PUNCT_ODD_SPACING_MANY      __PUNCT_ODD_SPACING > 2
 
-header    XMAILER_MANY                  ALL =~ /\nX-Mailer:(?:[^\n]+\n)+X-Mailer:/ism
-describe  XMAILER_MANY                  Has multiple X-Mailer: headers
+# poor S/O - how is this in ham?
+#header    XMAILER_MANY                  ALL =~ /\nX-Mailer:(?:[^\n]+\n)+X-Mailer:/ism
+#describe  XMAILER_MANY                  Has multiple X-Mailer: headers
 
-#body      __RAW_TOKEN                   /\#(?:(?:First|Last)Name|Email)\#/i
+body      __RAW_TOKEN_BODY              /\#(?:(?:First|Last)Name|Email)\#/i
+#header    __RAW_TOKEN_HDR               ALL =~ /\$(?:rand[^$]{0,10})\$/i
 #tflags    __RAW_TOKEN                   multiple maxhits=3
 #meta      RAW_TOKENS                    __RAW_TOKEN > 2
 #describe  RAW_TOKENS                    Raw mail merge tokens in body
@@ -2040,22 +2042,20 @@ score     SPOOFED_FREEM_REPTO           2.500
 tflags    SPOOFED_FREEM_REPTO           publish
 
 
-header    __VERY_LONG_REPTO             Reply-To =~ /[^<\s\@]{25,}\@/
-
-meta      __VERY_LONG_REPTO_SHORT_MSG   __VERY_LONG_REPTO && __HTML_LENGTH_0000_1024
+#header    __VERY_LONG_REPTO             Reply-To =~ /[^<\s\@]{25,}\@/
+#meta      __VERY_LONG_REPTO_SHORT_MSG   __VERY_LONG_REPTO && __HTML_LENGTH_0000_1024
 #meta      VERY_LONG_REPTO_SHORT_MSG     __VERY_LONG_REPTO_SHORT_MSG && !__VIA_ML && !__TO_EQ_FROM_DOM && !__THREAD_INDEX_GOOD 
 #describe  VERY_LONG_REPTO_SHORT_MSG     Very long Reply-To username + short message
 #score     VERY_LONG_REPTO_SHORT_MSG     2.500	# limit
 #tflags    VERY_LONG_REPTO_SHORT_MSG     publish
-
-
-ifplugin Mail::SpamAssassin::Plugin::FreeMail
-  meta      __VERY_LONG_FREEM_REPTO       __VERY_LONG_REPTO && FREEMAIL_REPLYTO
-  meta      VERY_LONG_FREEM_REPTO         __VERY_LONG_FREEM_REPTO
-  describe  VERY_LONG_FREEM_REPTO         Very long freemail Reply-To username
-  score     VERY_LONG_FREEM_REPTO         2.500	# limit
-  tflags    VERY_LONG_FREEM_REPTO         publish
-endif
+#
+#ifplugin Mail::SpamAssassin::Plugin::FreeMail
+#  meta      __VERY_LONG_FREEM_REPTO       __VERY_LONG_REPTO && FREEMAIL_REPLYTO
+#  meta      VERY_LONG_FREEM_REPTO         __VERY_LONG_FREEM_REPTO
+#  describe  VERY_LONG_FREEM_REPTO         Very long freemail Reply-To username
+#  score     VERY_LONG_FREEM_REPTO         2.500	# limit
+#  tflags    VERY_LONG_FREEM_REPTO         publish
+#endif
 
 #	for <steve.stewart@fastnet.co.uk>; Mon, 2 Nov 2015 14:27:08 GMT
 #        (envelope-from fastnet.co.uk.12056010.steve.stewart@vmta27.topreasonstovisit.com)
@@ -2180,5 +2180,4 @@ meta       __XMSID                     __HAS_XM_SID && !__CTYPE_MULTIPART_MIXED
 meta       __XMSID_SONLY               __HAS_XM_SID && (INVALID_MSGID || __XPRIO || __HAS_X_MAILER)
 
 header     __UNSUB_MAILTO_BOGUS        List-Unsubscribe =~ /mailto:[^@\s">]*[\s?">]/
-
 
