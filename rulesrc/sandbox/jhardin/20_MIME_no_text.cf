@@ -13,7 +13,7 @@ ifplugin Mail::SpamAssassin::Plugin::MIMEHeader
   mimeheader  __ANY_TEXT_ATTACH Content-Type =~ /text\/\w+/i
 
   meta        __MIME_NO_TEXT    (__CTYPE_MULTIPART_ANY && !__ANY_TEXT_ATTACH)
-  meta        MIME_NO_TEXT      __MIME_NO_TEXT && !__CT_ENCRYPTED && !ALL_TRUSTED && !__MSGID_APPLEMAIL && !__USER_AGENT_APPLEMAIL && !__HAS_IN_REPLY_TO && !__HAS_X_REF && !__HS_SUBJ_RE_FW && !__LCL__ENV_AND_HDR_FROM_MATCH
+  meta        MIME_NO_TEXT      __MIME_NO_TEXT && !__BOUNCE_CTYPE && !__CT_ENCRYPTED && !ALL_TRUSTED && !__MSGID_APPLEMAIL && !__USER_AGENT_APPLEMAIL && !__HAS_IN_REPLY_TO && !__HAS_X_REF && !__HS_SUBJ_RE_FW && !__LCL__ENV_AND_HDR_FROM_MATCH
   score       MIME_NO_TEXT      2.00	# limit
   describe    MIME_NO_TEXT      No (properly identified) text body parts
   tflags      MIME_NO_TEXT      publish
