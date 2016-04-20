@@ -1,8 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bpoliakoff darxus grenier jarif zmi; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bpoliakoff darxus grenier jarif llanga zmi; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bpoliakoff darxus grenier jarif llanga zmi
-
-# good enough
-ACCT_PHISHING
+# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi darxus grenier jarif kgolding zmi; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi darxus grenier jarif llanga zmi; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-traps bb-zmi darxus grenier jarif llanga zmi
 
 # tflags publish
 AC_BR_BONANZA
@@ -100,9 +97,6 @@ AXB_XMAILER_MIMEOLE_OL_1ECD5
 # good enough
 AXB_XM_FORGED_OL2600
 
-# good enough
-AXB_X_FF_SEZ_S
-
 # tflags learn
 BAYES_00
 
@@ -173,9 +167,6 @@ COMPENSATION
 CORRUPT_FROM_LINE_IN_HDRS
 
 # good enough
-CURR_PRICE
-
-# good enough
 DEAR_BENEFICIARY
 
 # tflags net
@@ -231,9 +222,6 @@ DX_TEXT_02
 
 # tflags publish
 DX_TEXT_03
-
-# good enough
-DYN_RDNS_AND_INLINE_IMAGE
 
 # good enough
 DYN_RDNS_SHORT_HELO_HTML
@@ -305,9 +293,6 @@ FROM_MISSP_FREEMAIL
 FROM_MISSP_MSFT
 
 # good enough
-FROM_MISSP_PHISH
-
-# good enough
 FROM_MISSP_REPLYTO
 
 # tflags net
@@ -329,6 +314,9 @@ FROM_WORDY
 FROM_WORDY_SHORT
 
 # good enough
+FSL_BULK_SIG
+
+# good enough
 FSL_CTYPE_WIN1251
 
 # good enough
@@ -336,6 +324,9 @@ FSL_HELO_BARE_IP_1
 
 # good enough
 FSL_HELO_BARE_IP_2
+
+# good enough
+FSL_HELO_DEVICE
 
 # tflags publish
 FSL_NEW_HELO_USER
@@ -437,9 +428,6 @@ HK_NAME_DR
 HK_NAME_DRUGS
 
 # good enough
-HK_NAME_FM_DR
-
-# good enough
 HK_NAME_MR_MRS
 
 # good enough
@@ -456,9 +444,6 @@ HTML_FONT_TINY
 
 # tflags publish
 HTML_OFF_PAGE
-
-# good enough
-IMG_DIRECT_TO_MX
 
 # good enough
 LIST_PARTIAL_SHORT_MSG
@@ -489,6 +474,9 @@ LOTTO_DEPT
 
 # tflags publish
 LUCRATIVE
+
+# good enough
+MALFORMED_FREEMAIL
 
 # tflags publish
 MANY_SPAN_IN_TEXT
@@ -883,9 +871,6 @@ SUBJECT_IN_BLACKLIST
 # tflags userconf
 SUBJECT_IN_WHITELIST
 
-# good enough
-SUBJ_ATTENTION
-
 # tflags net
 SURBL_BLOCKED
 
@@ -900,9 +885,6 @@ TEQF_USR_MSGID_HEX
 
 # tflags publish
 TEQF_USR_MSGID_MALF
-
-# good enough
-TEQF_USR_POLITE
 
 # tflags publish
 THIS_AD
@@ -956,9 +938,6 @@ TVD_RCVD_IP
 TVD_RCVD_IP4
 
 # good enough
-TVD_SPACE_ENCODED
-
-# good enough
 TVD_SPACE_ENC_FM_MIME
 
 # good enough
@@ -968,22 +947,25 @@ TVD_VISIT_PHARMA
 TW_GIBBERISH_MANY
 
 # good enough
-ADMITS_SPAM
+BODY_EMPTY
 
 # good enough
-FSL_BULK_SIG
+DATE_IN_FUTURE_96_Q
 
 # good enough
-MALFORMED_FREEMAIL
+HELO_LH_HOME
 
 # good enough
-UPGRADE_MAILBOX
+MONEY_FORM
 
 # tflags publish
 UC_GIBBERISH_OBFU
 
 # tflags userconf
 UNPARSEABLE_RELAY
+
+# good enough
+UPGRADE_MAILBOX
 
 # tflags net
 URIBL_ABUSE_SURBL
@@ -1128,9 +1110,6 @@ USER_IN_WHITELIST
 
 # tflags userconf
 USER_IN_WHITELIST_TO
-
-# tflags publish
-VERY_LONG_FREEM_REPTO
 
 # tflags publish
 XM_PHPMAILER_FORGED
