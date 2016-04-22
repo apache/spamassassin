@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi darxus grenier jarif kgolding zmi; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi darxus grenier jarif kgolding zmi; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi darxus grenier jarif llanga zmi
+# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi darxus grenier jarif kgolding zmi; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi darxus grenier jarif kgolding llanga zmi; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi darxus grenier jarif kgolding zmi
 
 # tflags publish
 AC_BR_BONANZA
@@ -128,10 +128,7 @@ BAYES_99
 BAYES_999
 
 # good enough
-BIGNUM_EMAILS
-
-# good enough
-BILLION_OVERLAP
+BODY_EMPTY
 
 # tflags publish
 BODY_URI_ONLY
@@ -165,6 +162,9 @@ COMPENSATION
 
 # tflags publish
 CORRUPT_FROM_LINE_IN_HDRS
+
+# good enough
+DATE_IN_FUTURE_96_Q
 
 # good enough
 DEAR_BENEFICIARY
@@ -416,6 +416,9 @@ HEADER_HOST_IN_WHITELIST
 HEAD_LONG
 
 # good enough
+HELO_LH_HOME
+
+# good enough
 HELO_MISC_IP
 
 # tflags publish
@@ -497,7 +500,7 @@ MISSING_HB_SEP
 MONEY_ATM_CARD
 
 # good enough
-MONEY_BARRISTER
+MONEY_FORM
 
 # good enough
 MONEY_FORM_SHORT
@@ -947,16 +950,7 @@ TVD_VISIT_PHARMA
 TW_GIBBERISH_MANY
 
 # good enough
-BODY_EMPTY
-
-# good enough
-DATE_IN_FUTURE_96_Q
-
-# good enough
-HELO_LH_HOME
-
-# good enough
-MONEY_FORM
+HK_NAME_FM_DR
 
 # tflags publish
 UC_GIBBERISH_OBFU
