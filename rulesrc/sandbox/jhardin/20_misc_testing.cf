@@ -2069,9 +2069,10 @@ uri        URI_MALWARE_CWALL            /\/abuse_report\.php\?(?!username=)[^&\s
 describe   URI_MALWARE_CWALL            Potential CryptoWall malware URL
 
 
-meta       LIST_PARTIAL_SHORT_MSG       __HTML_LENGTH_0000_1024 && __LIST_PARTIAL 
+meta       __LIST_PARTIAL_SHORT_MSG     __HTML_LENGTH_0000_1024 && __LIST_PARTIAL 
+meta       LIST_PARTIAL_SHORT_MSG       __LIST_PARTIAL_SHORT_MSG && !__DKIM_EXISTS
 describe   LIST_PARTIAL_SHORT_MSG       Incomplete mailing list headers + short message
-score      LIST_PARTIAL_SHORT_MSG       2.000	# limit
+score      LIST_PARTIAL_SHORT_MSG       2.500	# limit
 
 # duplicates __HAS_MSMAIL_PRI
 #header      __FH_HAS_XMSMAIL   exists:X-MSMail-Priority
@@ -2134,6 +2135,10 @@ score      HDR_CASE_REV_MANY           2.000	# limit
 meta       HDR_CASE_REV_ENC            __HDR_CASE_REVERSED && (__FROM_ENCODED_B64 || __TVD_SPACE_ENCODED )
 describe   HDR_CASE_REV_ENC            Malformed (possibly random gibberish) message header + suspicious encoding
 score      HDR_CASE_REV_ENC            2.000	# limit
+
+meta       HDR_CASE_REV_HELO_IP        __HDR_CASE_REVERSED && __HELO_MISC_IP
+describe   HDR_CASE_REV_HELO_IP        Malformed (possibly random gibberish) message header + IP in HELO
+score      HDR_CASE_REV_HELO_IP        2.000	# limit
 
 
 
