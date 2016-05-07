@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi darxus dwarren grenier kgolding zmi; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi darxus dwarren grenier jarif kgolding llanga; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi darxus dwarren grenier jarif kgolding llanga zmi
+# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi darxus dwarren grenier jarif kgolding zmi; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi darxus dwarren grenier kgolding llanga zmi; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi darxus dwarren grenier jarif kgolding llanga
 
 # good enough
 ACCT_PHISHING
@@ -127,9 +127,6 @@ BAYES_99
 # tflags learn
 BAYES_999
 
-# good enough
-BODY_SINGLE_WORD
-
 # tflags publish
 BODY_URI_ONLY
 
@@ -156,9 +153,6 @@ CN_B2B_SPAMMER
 
 # tflags publish
 COMMENT_GIBBERISH
-
-# good enough
-COMPENSATION
 
 # tflags publish
 CORRUPT_FROM_LINE_IN_HDRS
@@ -207,6 +201,9 @@ DOS_ANAL_SPAM_MAILER
 
 # good enough
 DOS_OE_TO_MX
+
+# good enough
+DOS_OUTLOOK_TO_MX
 
 # good enough
 DSN_NO_MIMEVERSION
@@ -322,9 +319,6 @@ FSL_MIME_NO_TEXT
 # tflags publish
 FSL_NEW_HELO_USER
 
-# good enough
-FSL_THIS_IS_ADV
-
 # tflags publish
 FUZZY_ANDROID
 
@@ -396,9 +390,6 @@ HASHCASH_2SPEND
 
 # tflags userconf
 HASHCASH_HIGH
-
-# good enough
-HDR_CASE_REV_HELO_IP
 
 # tflags publish
 HEADER_FROM_DIFFERENT_DOMAINS
@@ -932,7 +923,13 @@ TVD_VISIT_PHARMA
 TW_GIBBERISH_MANY
 
 # good enough
-ADVANCE_FEE_4_NEW_FRM_MNY
+COMPENSATION
+
+# good enough
+HK_NAME_MR_MRS
+
+# good enough
+LOTTO_AGENT
 
 # tflags publish
 UC_GIBBERISH_OBFU
