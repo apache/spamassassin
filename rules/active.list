@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi darxus dwarren grenier jarif kgolding zmi; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi darxus dwarren grenier kgolding llanga zmi; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi darxus dwarren grenier jarif kgolding llanga
+# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi darxus dwarren grenier jarif kgolding zmi; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi darxus dwarren grenier jarif kgolding llanga zmi; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi darxus dwarren grenier jarif kgolding llanga zmi
 
 # good enough
 ACCT_PHISHING
@@ -43,14 +43,8 @@ AC_SPAMMY_URI_PATTERNS9
 # tflags publish
 ADMAIL
 
-# good enough
-ADMITS_SPAM
-
 # tflags publish
 ADVANCE_FEE_2_NEW_FORM
-
-# good enough
-ADVANCE_FEE_2_NEW_FRM_MNY
 
 # tflags publish
 ADVANCE_FEE_2_NEW_MONEY
@@ -154,6 +148,9 @@ CN_B2B_SPAMMER
 # tflags publish
 COMMENT_GIBBERISH
 
+# good enough
+COMPENSATION
+
 # tflags publish
 CORRUPT_FROM_LINE_IN_HDRS
 
@@ -255,9 +252,6 @@ FRAGMENTED_MESSAGE
 
 # tflags publish
 FREEMAIL_FORGED_FROMDOMAIN
-
-# good enough
-FROM_12LTRDOM
 
 # tflags userconf
 FROM_DOMAIN_NOVOWEL
@@ -416,6 +410,9 @@ HK_NAME_DRUGS
 HK_NAME_FM_MR_MRS
 
 # good enough
+HK_RANDOM_ENVFROM
+
+# good enough
 HK_SCAM_N2
 
 # good enough
@@ -429,9 +426,6 @@ HTML_FONT_TINY
 
 # tflags publish
 HTML_OFF_PAGE
-
-# good enough
-HTML_TAG_BALANCE_CENTER
 
 # good enough
 KB_FORGED_MOZ4
@@ -451,20 +445,17 @@ LONG_HEX_URI
 # tflags publish
 LONG_IMG_URI
 
-# good enough
-LONG_TERM_PRICE
-
 # tflags publish
 LOTS_OF_MONEY
+
+# good enough
+LOTTO_AGENT
 
 # good enough
 LOTTO_DEPT
 
 # tflags publish
 LUCRATIVE
-
-# good enough
-MALFORMED_FREEMAIL
 
 # tflags publish
 MANY_SPAN_IN_TEXT
@@ -483,9 +474,6 @@ MISSING_HB_SEP
 
 # good enough
 MONEY_ATM_CARD
-
-# good enough
-MONEY_BARRISTER
 
 # good enough
 MONEY_FORM
@@ -793,12 +781,6 @@ RP_MATCHES_RCVD
 # good enough
 SERGIO_SUBJECT_PORN006
 
-# good enough
-SHARE_50_50
-
-# good enough
-SHORT_TERM_PRICE
-
 # tflags publish
 SINGLETS_LOW_CONTRAST
 
@@ -914,6 +896,12 @@ TVD_PH_BODY_META
 TVD_QUAL_MEDS
 
 # good enough
+TVD_RCVD_IP
+
+# good enough
+TVD_RCVD_IP4
+
+# good enough
 TVD_SPACE_ENC_FM_MIME
 
 # good enough
@@ -923,13 +911,37 @@ TVD_VISIT_PHARMA
 TW_GIBBERISH_MANY
 
 # good enough
-COMPENSATION
+BIGNUM_EMAILS
 
 # good enough
-HK_NAME_MR_MRS
+BODY_EMPTY
 
 # good enough
-LOTTO_AGENT
+DATE_IN_FUTURE_96_Q
+
+# good enough
+FSL_BULK_SIG
+
+# good enough
+HDRS_LCASE
+
+# good enough
+HELO_MISC_IP
+
+# good enough
+HK_PNIS
+
+# good enough
+HK_RANDOM_FROM
+
+# good enough
+SERGIO_SUBJECT_PORN011
+
+# good enough
+TO_EQ_FM_DIRECT_MX
+
+# good enough
+TVD_SPACE_RATIO_MINFP
 
 # tflags publish
 UC_GIBBERISH_OBFU
