@@ -1,9 +1,6 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
 # with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi darxus dwarren grenier jarif kgolding zmi; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi darxus dwarren grenier jarif kgolding llanga zmi; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi darxus dwarren grenier jarif kgolding llanga zmi
 
-# good enough
-ACCT_PHISHING
-
 # tflags publish
 AC_BR_BONANZA
 
@@ -118,6 +115,12 @@ BAYES_99
 # tflags learn
 BAYES_999
 
+# good enough
+BIGNUM_EMAILS
+
+# good enough
+BODY_EMPTY
+
 # tflags publish
 BODY_URI_ONLY
 
@@ -150,6 +153,9 @@ COMPENSATION
 
 # tflags publish
 CORRUPT_FROM_LINE_IN_HDRS
+
+# good enough
+DATE_IN_FUTURE_96_Q
 
 # good enough
 DEAR_BENEFICIARY
@@ -293,6 +299,9 @@ FROM_WORDY
 FROM_WORDY_SHORT
 
 # good enough
+FSL_BULK_SIG
+
+# good enough
 FSL_CTYPE_WIN1251
 
 # good enough
@@ -303,9 +312,6 @@ FSL_HELO_BARE_IP_2
 
 # good enough
 FSL_HELO_DEVICE
-
-# good enough
-FSL_HELO_HOME
 
 # tflags publish
 FSL_NEW_HELO_USER
@@ -382,6 +388,9 @@ HASHCASH_2SPEND
 # tflags userconf
 HASHCASH_HIGH
 
+# good enough
+HDRS_LCASE
+
 # tflags publish
 HEADER_FROM_DIFFERENT_DOMAINS
 
@@ -397,6 +406,9 @@ HEAD_LONG
 # good enough
 HELO_LH_HOME
 
+# good enough
+HELO_MISC_IP
+
 # tflags publish
 HEXHASH_WORD
 
@@ -407,7 +419,13 @@ HK_NAME_DRUGS
 HK_NAME_FM_MR_MRS
 
 # good enough
+HK_PNIS
+
+# good enough
 HK_RANDOM_ENVFROM
+
+# good enough
+HK_RANDOM_FROM
 
 # good enough
 HK_SCAM_N2
@@ -775,6 +793,9 @@ RP_MATCHES_RCVD
 # good enough
 SERGIO_SUBJECT_PORN006
 
+# good enough
+SERGIO_SUBJECT_PORN011
+
 # tflags publish
 SINGLETS_LOW_CONTRAST
 
@@ -845,6 +866,9 @@ TEQF_USR_MSGID_MALF
 THIS_AD
 
 # good enough
+TO_EQ_FM_DIRECT_MX
+
+# good enough
 TO_EQ_FM_DOM_HTML_ONLY
 
 # tflags net
@@ -902,37 +926,7 @@ TVD_VISIT_PHARMA
 TW_GIBBERISH_MANY
 
 # good enough
-BIGNUM_EMAILS
-
-# good enough
-BODY_EMPTY
-
-# good enough
-DATE_IN_FUTURE_96_Q
-
-# good enough
-FSL_BULK_SIG
-
-# good enough
-HDRS_LCASE
-
-# good enough
-HELO_MISC_IP
-
-# good enough
-HK_PNIS
-
-# good enough
-HK_RANDOM_FROM
-
-# good enough
-SERGIO_SUBJECT_PORN011
-
-# good enough
-SUBJ_ATTENTION
-
-# good enough
-TO_EQ_FM_DIRECT_MX
+MALFORMED_FREEMAIL
 
 # tflags publish
 UC_GIBBERISH_OBFU
