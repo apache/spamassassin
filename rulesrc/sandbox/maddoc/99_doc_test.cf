@@ -140,7 +140,7 @@ header  FSL_FAKE_HOTMAIL_RVCD   X-Spam-Relays-External =~ /mx[1234]\.hotmail\.co
 # header  FSL_HELO_UNKNOWN        X-Spam-Relays-External =~ /\bhelo=unkown\b/i
 # score   FSL_HELO_UNKNOWN        0.001
 
-header  FSL_HELO_HOME           X-Spam-Relays-External =~ /\bhelo=\S+\.home\b/i
+# header  FSL_HELO_HOME           X-Spam-Relays-External =~ /\bhelo=\S+\.home\b/i
 # score   FSL_HELO_HOME           0.001
 
 header  FSL_HELO_SETUP          X-Spam-Relays-External =~ /\bhelo=\S+\.setup\b/i
