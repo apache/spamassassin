@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi darxus dwarren grenier jarif kgolding zmi; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi darxus dwarren grenier jarif kgolding llanga zmi; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi darxus dwarren grenier kgolding llanga zmi
+# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi darxus dwarren grenier jarif kgolding zmi; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi darxus dwarren grenier jarif kgolding llanga zmi; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi darxus dwarren grenier jarif kgolding llanga zmi
 
 # tflags publish
 AC_BR_BONANZA
@@ -57,6 +57,9 @@ ADVANCE_FEE_3_NEW_MONEY
 
 # tflags publish
 ADVANCE_FEE_4_NEW
+
+# good enough
+ADVANCE_FEE_4_NEW_FRM_MNY
 
 # good enough
 ADVANCE_FEE_4_NEW_MONEY
@@ -404,10 +407,16 @@ HK_NAME_DRUGS
 HK_NAME_FM_MR_MRS
 
 # good enough
+HK_RANDOM_ENVFROM
+
+# good enough
 HK_RANDOM_FROM
 
 # good enough
 HK_SCAM_N2
+
+# good enough
+HK_SCAM_N8
 
 # good enough
 HK_SCAM_S7
@@ -420,6 +429,9 @@ HTML_FONT_TINY
 
 # tflags publish
 HTML_OFF_PAGE
+
+# good enough
+HTML_TAG_BALANCE_CENTER
 
 # good enough
 KB_FORGED_MOZ4
@@ -435,6 +447,9 @@ LONG_HEX_URI
 
 # tflags publish
 LONG_IMG_URI
+
+# good enough
+LONG_TERM_PRICE
 
 # tflags publish
 LOTS_OF_MONEY
@@ -772,6 +787,9 @@ RP_MATCHES_RCVD
 # good enough
 SERGIO_SUBJECT_PORN006
 
+# good enough
+SHORT_TERM_PRICE
+
 # tflags publish
 SINGLETS_LOW_CONTRAST
 
@@ -890,6 +908,12 @@ TVD_PH_BODY_META
 TVD_QUAL_MEDS
 
 # good enough
+TVD_RCVD_IP
+
+# good enough
+TVD_RCVD_IP4
+
+# good enough
 TVD_SPACE_ENCODED
 
 # good enough
@@ -899,16 +923,37 @@ TVD_SPACE_ENC_FM_MIME
 TW_GIBBERISH_MANY
 
 # good enough
-ADVANCE_FEE_4_NEW_FRM_MNY
+ADVANCE_FEE_3_NEW_FRM_MNY
 
 # good enough
-CDISP_SZ_MANY
+ANY_PILL_PRICE
 
 # good enough
-HK_SCAM_N8
+FROM_12LTRDOM
 
 # good enough
-HTML_TAG_BALANCE_CENTER
+FROM_MISSP_DYNIP
+
+# good enough
+FSL_BULK_SIG
+
+# good enough
+GOOG_REDIR_NORDNS
+
+# good enough
+HK_NAME_MR_MRS
+
+# good enough
+MONEY_FORM_SHORT
+
+# good enough
+SUBJ_OBFU_LOW_CNTRST
+
+# good enough
+TO_ONE_CHAR
+
+# good enough
+US_DOLLARS_3
 
 # tflags publish
 UC_GIBBERISH_OBFU
