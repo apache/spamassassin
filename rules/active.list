@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi darxus dwarren grenier jarif kgolding zmi; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi darxus dwarren grenier jarif kgolding llanga zmi; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi darxus dwarren grenier jarif kgolding llanga zmi
+# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi darxus dwarren grenier kgolding zmi; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi darxus dwarren grenier jarif kgolding llanga zmi; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi darxus dwarren grenier jarif kgolding llanga zmi
 
 # tflags publish
 AC_BR_BONANZA
@@ -77,9 +77,6 @@ AD_PREFS
 ALL_TRUSTED
 
 # good enough
-ANY_PILL_PRICE
-
-# good enough
 AXB_XMAILER_MIMEOLE_OL_024C2
 
 # good enough
@@ -124,6 +121,9 @@ BOGUS_MSM_HDRS
 # tflags publish
 CANT_SEE_AD
 
+# good enough
+CDISP_SZ_MANY
+
 # tflags userconf
 CHARSET_FARAWAY
 
@@ -132,9 +132,6 @@ CHARSET_FARAWAY_HEADER
 
 # good enough
 CK_HELO_DYNAMIC_SPLIT_IP
-
-# good enough
-CK_HELO_GENERIC
 
 # tflags publish
 CN_B2B_SPAMMER
@@ -149,7 +146,7 @@ COMPENSATION
 CORRUPT_FROM_LINE_IN_HDRS
 
 # good enough
-DATE_IN_FUTURE_96_Q
+CURR_PRICE
 
 # good enough
 DEAR_BENEFICIARY
@@ -293,9 +290,6 @@ FROM_WORDY
 FROM_WORDY_SHORT
 
 # good enough
-FSL_BULK_SIG
-
-# good enough
 FSL_CTYPE_WIN1251
 
 # good enough
@@ -405,12 +399,6 @@ HK_NAME_DRUGS
 
 # good enough
 HK_NAME_FM_MR_MRS
-
-# good enough
-HK_NAME_MR_MRS
-
-# good enough
-HK_RANDOM_ENVFROM
 
 # good enough
 HK_SCAM_N2
@@ -899,12 +887,6 @@ TVD_PH_BODY_META
 TVD_QUAL_MEDS
 
 # good enough
-TVD_RCVD_IP
-
-# good enough
-TVD_RCVD_IP4
-
-# good enough
 TVD_SPACE_ENCODED
 
 # good enough
@@ -917,7 +899,7 @@ TVD_SUBJ_ACC_NUM
 TW_GIBBERISH_MANY
 
 # good enough
-SUBJ_ATTENTION
+MALFORMED_FREEMAIL
 
 # tflags publish
 UC_GIBBERISH_OBFU
