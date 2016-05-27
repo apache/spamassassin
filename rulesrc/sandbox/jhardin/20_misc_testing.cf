@@ -2178,6 +2178,10 @@ describe   PHP_ORIG_SCRIPT             Sent by bot & other signs
 score      PHP_ORIG_SCRIPT             2.500	# limit
 tflags     PHP_ORIG_SCRIPT             publish
 
+# noted 5/26/2016 on list by RW
+header     __PHP_ORIG_SCRIPT_EVAL      X-PHP-Originating-Script =~ /\beval\b.*\bcode\b/i
+
+
 #header     __FROM_AUTHORITY_COMPANY    From:name =~ /\b(?:court|fed-?ex|dhl|e-?zpass|invoice)\b/
 #meta       __PHP_MALWARE_ATTACH        __HAS_PHP_SCRIPT && __FROM_AUTHORITY_COMPANY && __ZIP_ATTACH_MT
 
