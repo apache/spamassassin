@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi darxus dwarren grenier jarif kgolding zmi; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi darxus dwarren grenier kgolding llanga zmi; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi darxus dwarren grenier jarif kgolding llanga zmi
+# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi darxus dwarren grenier jarif kgolding zmi; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi darxus dwarren grenier jarif kgolding llanga zmi; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi darxus dwarren grenier kgolding llanga zmi
 
 # tflags publish
 AC_BR_BONANZA
@@ -77,9 +77,6 @@ AD_PREFS
 ALL_TRUSTED
 
 # good enough
-ANY_PILL_PRICE
-
-# good enough
 AXB_XMAILER_MIMEOLE_OL_024C2
 
 # good enough
@@ -132,9 +129,6 @@ CHARSET_FARAWAY_HEADER
 
 # good enough
 CK_HELO_DYNAMIC_SPLIT_IP
-
-# good enough
-CK_HELO_GENERIC
 
 # tflags publish
 CN_B2B_SPAMMER
@@ -404,9 +398,6 @@ HK_NAME_DRUGS
 HK_NAME_FM_MR_MRS
 
 # good enough
-HK_NAME_MR_MRS
-
-# good enough
 HK_SCAM_N2
 
 # good enough
@@ -453,6 +444,9 @@ LOTTO_DEPT
 
 # tflags publish
 LUCRATIVE
+
+# good enough
+MALFORMED_FREEMAIL
 
 # tflags publish
 MANY_SPAN_IN_TEXT
@@ -832,9 +826,6 @@ SUBJECT_IN_BLACKLIST
 # tflags userconf
 SUBJECT_IN_WHITELIST
 
-# good enough
-SUBJ_ATTENTION
-
 # tflags net
 SURBL_BLOCKED
 
@@ -909,6 +900,24 @@ TVD_SUBJ_ACC_NUM
 
 # tflags publish
 TW_GIBBERISH_MANY
+
+# good enough
+CK_HELO_GENERIC
+
+# good enough
+DATE_IN_FUTURE_96_Q
+
+# good enough
+FSL_BULK_SIG
+
+# good enough
+HK_NAME_MR_MRS
+
+# good enough
+SUBJ_ATTENTION
+
+# good enough
+TVD_SUBJ_NUM_OBFU_MINFP
 
 # tflags publish
 UC_GIBBERISH_OBFU
