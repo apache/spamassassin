@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi darxus grenier jarif kgolding zmi; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi darxus grenier jarif kgolding llanga; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi darxus grenier jarif kgolding llanga zmi
+# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi darxus grenier jarif kgolding zmi; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi darxus grenier jarif kgolding llanga zmi; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi darxus grenier jarif kgolding llanga
 
 # tflags publish
 AC_BR_BONANZA
@@ -109,6 +109,9 @@ BAYES_99
 # tflags learn
 BAYES_999
 
+# good enough
+BIGNUM_EMAILS
+
 # tflags publish
 BODY_URI_ONLY
 
@@ -144,6 +147,9 @@ CORRUPT_FROM_LINE_IN_HDRS
 
 # good enough
 CURR_PRICE
+
+# good enough
+DATE_IN_FUTURE_96_Q
 
 # good enough
 DEAR_BENEFICIARY
@@ -304,6 +310,9 @@ FSL_HELO_BARE_IP_2
 # good enough
 FSL_HELO_DEVICE
 
+# good enough
+FSL_MIME_NO_TEXT
+
 # tflags publish
 FSL_NEW_HELO_USER
 
@@ -345,9 +354,6 @@ GOOGLE_DOCS_PHISH_MANY
 
 # tflags publish
 GOOG_MALWARE_DNLD
-
-# good enough
-GOOG_REDIR_NORDNS
 
 # tflags publish
 GOOG_REDIR_SHORT
@@ -907,20 +913,29 @@ TVD_SUBJ_ACC_NUM
 # good enough
 TVD_SUBJ_NUM_OBFU_MINFP
 
+# good enough
+TVD_UNDER_VALUED
+
 # tflags publish
 TW_GIBBERISH_MANY
 
 # good enough
-BIGNUM_EMAILS
+ADVANCE_FEE_4_NEW_FORM
+
+# good enough
+ADVANCE_FEE_4_NEW_MONEY
 
 # good enough
 BODY_EMPTY
 
 # good enough
-FSL_MIME_NO_TEXT
+MALFORMED_FREEMAIL
 
 # good enough
-TVD_UNDER_VALUED
+MONEY_ATM_CARD
+
+# good enough
+TO_ONE_CHAR
 
 # tflags publish
 UC_GIBBERISH_OBFU
