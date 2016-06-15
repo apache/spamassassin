@@ -74,6 +74,18 @@ all addresses of one host before it tries the next one in the list.
 Note that this fail-over behaviour is incompatible with B<-x>; if that
 switch is used, fail-over will not occur.
 
+=item B<-4>
+
+Use IPv4 only for connecting to server. Restricts domain name resolution of
+spamd server host(s) to address family AF_INET through the C<hints.ai_family>
+flag in the call to getaddrinfo(3).
+
+=item B<-6>
+
+Use IPv6 only for connecting to server. Restricts domain name resolution of
+spamd server host(s) to address family AF_INET6 through the C<hints.ai_family>
+flag in the call to getaddrinfo(3).
+
 =item B<-e> I<command> I<[args]>, B<--pipe-to> I<command> I<[args]>
 
 Instead of writing to stdout, pipe the output to I<command>'s standard input.
