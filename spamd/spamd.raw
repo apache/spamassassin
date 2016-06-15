@@ -409,7 +409,6 @@ GetOptions(
   'sql-config!'              => \$opt{'sql-config'},
   'ssl'                      => \$opt{'ssl'},
   'ssl-port=s'               => \$opt{'ssl-port'},
-  'ssl-version=s'            => \$opt{'ssl-version'},
   'syslog-socket=s'          => \$opt{'syslog-socket'},
   'syslog|s=s'               => \$opt{'syslog'},
   'log-timestamp-fmt:s'      => \$opt{'log-timestamp-fmt'},
@@ -744,11 +743,6 @@ if ( defined $ENV{'HOME'} ) {
 
 # Do whitelist later in tmp dir. Side effect: this will be done as -u user.
 
-my $sslversion = $opt{'ssl-version'} || 'sslv3';
-if ($sslversion !~ /^(?:sslv3|tlsv1)$/) {
-  die "spamd: invalid ssl-version: $opt{'ssl-version'}\n";
-}
-
 $opt{'server-key'}  ||= "$LOCAL_RULES_DIR/certs/server-key.pem";
 $opt{'server-cert'} ||= "$LOCAL_RULES_DIR/certs/server-cert.pem";
 
@@ -899,9 +893,8 @@ sub compose_listen_info_string {
                       $socket_info->{ip_addr}, $socket_info->{port}));
 
     } elsif ($socket->isa('IO::Socket::SSL')) {
-      push(@listeninfo, sprintf("SSL [%s]:%s, ssl version %s",
-                      $socket_info->{ip_addr}, $socket_info->{port},
-                      $opt{'ssl-version'}||'sslv3'));
+      push(@listeninfo, sprintf("SSL [%r]:%s", $socket_info->{ip_addr},
+                      $socket_info->{port}));
     }
   }
 
@@ -1072,7 +1065,6 @@ sub server_sock_setup_inet {
     $sockopt{V6Only} = 1  if $io_socket_module_name eq 'IO::Socket::IP'
                              && IO::Socket::IP->VERSION >= 0.09;
     %sockopt = (%sockopt, (
-      SSL_version     => $sslversion,
       SSL_verify_mode => 0x00,
       SSL_key_file    => $opt{'server-key'},
       SSL_cert_file   => $opt{'server-cert'},
@@ -1093,7 +1085,8 @@ sub server_sock_setup_inet {
     if (!$server_inet) {
       $diag = sprintf("could not create %s socket on [%s]:%s: %s",
                       $ssl ? 'IO::Socket::SSL' : $io_socket_module_name,
-                      $adr, $port, $!);
+                      $adr, $port, $ssl && $IO::Socket::SSL::SSL_ERROR ?
+                      "$!,$IO::Socket::SSL::SSL_ERROR" : $!);
       push(@diag_fail, $diag);
     } else {
       $diag = sprintf("created %s socket on [%s]:%s",
@@ -3238,7 +3231,6 @@ Options:
  -H [dir], --helper-home-dir[=dir] Specify a different HOME directory
  --ssl                             Enable SSL on TCP connections
  --ssl-port port                   Override --port setting for SSL connections
- --ssl-version sslversion          Specify SSL protocol version to use
  --server-key keyfile              Specify an SSL keyfile
  --server-cert certfile            Specify an SSL certificate
  --socketpath=path                 Listen on a given UNIX domain socket
@@ -3726,14 +3718,6 @@ encrypted connections are accepted at B<--ssl-port>.
 Optionally specifies the port number for the server to listen on for
 SSL connections (default: whatever --port uses).  See B<--ssl> for
 more details.
-
-=item B<--ssl-version>=I<sslversion>
-
-Specify the SSL protocol version to use, one of B<sslv3> or B<tlsv1>.
-The default, B<sslv3>, is the most flexible, accepting a SSLv3 or
-higher hello handshake, then negotiating use of SSLv3 or TLSv1
-protocol if the client can accept it.  Specifying B<--ssl-version>
-implies B<--ssl>.
 
 =item B<--server-key> I<keyfile>
 

@@ -1187,7 +1187,7 @@ int message_filter(struct transport *tp, const char *username,
     unsigned int throwaway;
     SSL_CTX *ctx = NULL;
     SSL *ssl = NULL;
-    SSL_METHOD *meth;
+    const SSL_METHOD *meth;
     char zlib_on = 0;
     unsigned char *zlib_buf = NULL;
     int zlib_bufsiz = 0;
@@ -1213,11 +1213,7 @@ int message_filter(struct transport *tp, const char *username,
     if (flags & SPAMC_USE_SSL) {
 #ifdef SPAMC_SSL
 	SSLeay_add_ssl_algorithms();
-	if (flags & SPAMC_TLSV1) {
-	    meth = TLSv1_client_method();
-	} else {
-	    meth = SSLv3_client_method(); /* default */
-	}
+	meth = SSLv23_client_method();
 	SSL_load_error_strings();
 	ctx = SSL_CTX_new(meth);
 #else
@@ -1596,7 +1592,7 @@ int message_tell(struct transport *tp, const char *username, int flags,
     int failureval;
     SSL_CTX *ctx = NULL;
     SSL *ssl = NULL;
-    SSL_METHOD *meth;
+    const SSL_METHOD *meth;
 
     assert(tp != NULL);
     assert(m != NULL);
@@ -1604,7 +1600,7 @@ int message_tell(struct transport *tp, const char *username, int flags,
     if (flags & SPAMC_USE_SSL) {
 #ifdef SPAMC_SSL
 	SSLeay_add_ssl_algorithms();
-	meth = SSLv3_client_method();
+	meth = SSLv23_client_method();
 	SSL_load_error_strings();
 	ctx = SSL_CTX_new(meth);
 #else
