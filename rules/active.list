@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bpoliakoff darxus grenier jarif kgolding zmi; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi darxus grenier jarif kgolding llanga zmi; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi darxus grenier jarif kgolding llanga zmi
+# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bpoliakoff darxus grenier jarif kgolding zmi; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bpoliakoff darxus grenier jarif kgolding llanga zmi; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi darxus grenier jarif kgolding llanga zmi
 
 # tflags publish
 AC_BR_BONANZA
@@ -45,6 +45,9 @@ ADMITS_SPAM
 
 # tflags publish
 ADVANCE_FEE_2_NEW_FORM
+
+# good enough
+ADVANCE_FEE_2_NEW_FRM_MNY
 
 # tflags publish
 ADVANCE_FEE_2_NEW_MONEY
@@ -361,6 +364,9 @@ HASHCASH_2SPEND
 # tflags userconf
 HASHCASH_HIGH
 
+# good enough
+HDRS_LCASE
+
 # tflags publish
 HEADER_FROM_DIFFERENT_DOMAINS
 
@@ -390,6 +396,9 @@ HK_NAME_FM_MR_MRS
 
 # good enough
 HK_NAME_MR_MRS
+
+# good enough
+HK_RANDOM_FROM
 
 # good enough
 HK_SCAM_N8
@@ -454,6 +463,9 @@ MISSING_HB_SEP
 # good enough
 MONEY_FORM
 
+# good enough
+MONEY_FORM_SHORT
+
 # tflags publish
 MONEY_FRAUD_3
 
@@ -468,9 +480,6 @@ MONEY_FROM_41
 
 # good enough
 MONEY_FROM_MISSP
-
-# good enough
-MONEY_LOTTERY
 
 # tflags publish
 MSM_PRIO_REPTO
@@ -865,20 +874,14 @@ TVD_RCVD_IP4
 # good enough
 TVD_SPACE_ENCODED
 
-# good enough
-TVD_SPACE_ENC_FM_MIME
-
 # tflags publish
 TW_GIBBERISH_MANY
 
 # good enough
-ADVANCE_FEE_2_NEW_FRM_MNY
+BIGNUM_EMAILS
 
 # good enough
-HDRS_LCASE
-
-# good enough
-HK_RANDOM_FROM
+FILL_THIS_FORM_FRAUD_PHISH
 
 # tflags publish
 UC_GIBBERISH_OBFU
