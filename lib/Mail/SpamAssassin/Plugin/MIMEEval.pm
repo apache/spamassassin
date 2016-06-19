@@ -15,6 +15,33 @@
 # limitations under the License.
 # </@LICENSE>
 
+=head1 NAME
+
+MIMEEval - perform various tests against MIME structure and body
+
+=head1 SYNOPSIS
+
+  loadplugin    Mail::SpamAssassin::Plugin::MIMEEval
+
+  body NAME_OF_RULE  eval:check_for_mime
+  body NAME_OF_RULE  eval:check_for_mime_html
+  body NAME_OF_RULE  eval:check_for_mime_html_only
+  body NAME_OF_RULE  eval:check_mime_multipart_ratio
+  body NAME_OF_RULE  eval:check_msg_parse_flags
+  body NAME_OF_RULE  eval:check_for_ascii_text_illegal
+  body NAME_OF_RULE  eval:check_abundant_unicode_ratio
+  body NAME_OF_RULE  eval:check_for_faraway_charset
+  body NAME_OF_RULE  eval:check_for_uppercase
+  body NAME_OF_RULE  eval:check_ma_non_text
+  body NAME_OF_RULE  eval:check_base64_length
+  body NAME_OF_RULE  eval:check_qp_ratio
+
+=head1 DESCRIPTION
+
+Perform various tests against MIME structure and body.
+
+=cut
+
 package Mail::SpamAssassin::Plugin::MIMEEval;
 
 use strict;
