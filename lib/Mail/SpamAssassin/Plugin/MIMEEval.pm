@@ -69,6 +69,7 @@ sub are_more_high_bits_set {
 
   ($numlos <= $numhis && $numhis > 3);
 }
+
 =over 4
 
 =item has_check_for_ascii_text_illegal
@@ -474,6 +475,7 @@ sub _check_attachments {
 Adds capability check for "if can()" for check_qp_ratio
 
 =cut
+
 sub has_check_qp_ratio { 1 }
 
 =item check_qp_ratio
@@ -484,6 +486,7 @@ quoted printable to total bytes in an email.
 =back
 
 =cut
+
 sub check_qp_ratio {
   my ($self, $pms, undef, $min) = @_;
 
