@@ -857,13 +857,17 @@ sub _decode_header {
       s{ (   = \? [A-Za-z0-9*_-]+ \? [bqBQ] \? [^?]* \? = ) \s+
          (?= = \? [A-Za-z0-9*_-]+ \? [bqBQ] \? [^?]* \? = ) }{$1}xsg;
 
-    # Bug 7249: work around violations of the RFC 2047 section 5 requirement:
-    #   Each 'encoded-word' MUST represent an integral number of characters.
-    #   A multi-octet character may not be split across adjacent 'encoded-word's
-    1 while $header_field_body =~
-        s{ ( = \? [a-z0-9_-]+ (?: \* [a-z0-9_-]* )? \? [BQ] \? )
-               (   [^?]* ) \? =
-           \1  (?= [^?]*   \? = ) }{$1$2}xsi;
+#   # Bug 7249: work around violations of the RFC 2047 section 5 requirement:
+#   #   Each 'encoded-word' MUST represent an integral number of characters.
+#   #   A multi-octet character may not be split across adjacent 'encoded-word's
+#   1 while $header_field_body =~
+#       s{ ( = \? [a-z0-9_-]+ (?: \* [a-z0-9_-]* )? \? [BQ] \? )
+#              (   [^?]* ) \? =
+#          \1  (?= [^?]*   \? = ) }{$1$2}xsi;
+# Bug 7307: the above code is commented-out as it mistreats adjecent
+# encoded chunks which end on ==?= (are not a multiple of 4 characters).
+# A better solution is needed: base64-decoding of all chunks first, then
+# multi-byte character set decoding over adjecent same-charset chunks.
 
     # transcode properly encoded RFC 2047 substrings into UTF-8 octets,
     # leave everything else unchanged as it is supposed to be UTF-8 (RFC 6532)
