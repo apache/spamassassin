@@ -10,7 +10,8 @@ BEGIN {
   eval { require Net::LibIDN } and do { $have_libidn = 1 };
 }
 
-use Test; BEGIN { plan tests => (TEST_ENABLED ? 154 : 0) };
+use Test; BEGIN { plan tests => (TEST_ENABLED ? 142 : 0) };
+#use Test; BEGIN { plan tests => (TEST_ENABLED ? 156 : 0) };
 
 exit unless (TEST_ENABLED);
 
@@ -26,11 +27,11 @@ exit unless (TEST_ENABLED);
   q{/ LT_TO_ADDR /}   => 'LT_TO_ADDR',
   q{/ LT_TO_NAME /}   => 'LT_TO_NAME',
   q{/ LT_CC_ADDR /}   => 'LT_CC_ADDR',
-  q{/ LT_SUBJ /}      => 'LT_SUBJ',
+# q{/ LT_SUBJ /}      => 'LT_SUBJ',
   q{/ LT_SUBJ_RAW /}  => 'LT_SUBJ_RAW',
   q{/ LT_MESSAGEID /} => 'LT_MESSAGEID',
   q{/ LT_MSGID /}     => 'LT_MSGID',
-  q{/ LT_CT /}        => 'LT_CT',
+# q{/ LT_CT /}        => 'LT_CT',
   q{/ LT_CT_RAW /}    => 'LT_CT_RAW',
   q{/ LT_AUTH_DOM /}  => 'LT_AUTH_DOM',
   q{/ LT_NOTE /}      => 'LT_NOTE',
@@ -49,6 +50,11 @@ exit unless (TEST_ENABLED);
 
 %mypatterns_mime_b64 = (  # as it appears in a mail header section
   q{/(?m)^\t\*  0\.0 LT_ANY_CHARS =\?UTF-8\?B\?5a2X56ym6KKr5YyF5ZCr5Zyo5raI5oGv5oql5aS06YOo5YiG\?=$/} => 'LT_ANY_CHARS mime encoded',
+);
+
+%mypatterns_mime_b64_bug7307 = (
+  q{/ LT_SUBJ2 /}      => 'LT_SUBJ2',
+  q{/ LT_SUBJ2_RAW /}  => 'LT_SUBJ2_RAW',
 );
 
 %anti_patterns = (
@@ -85,6 +91,10 @@ my $myrules = <<'END';
   score  LT_SUBJ      0.01
   header LT_SUBJ_RAW  Subject:raw  =~ /^\s*=\?iso-8859-2\*sl\?Q\?Doma=e8e\?=\s+=\?utf-8\*sl\?Q\?_omre=C5\?=/m
   score  LT_SUBJ_RAW  0.01
+  header LT_SUBJ2     Subject =~ /^【重要訊息】台電105年3月電費，委託金融機構扣繳成功電子繳費憑證\(電號07487616730\)$/m
+  score  LT_SUBJ2     0.01
+  header LT_SUBJ2_RAW Subject:raw  =~ /^\s*=\?UTF-8\?B\?44CQ6YeN6KaB6KiK5oGv44CR5Y\+w6Zu7MTA15bm0\?=\s*=\?UTF-8\?B\?M\+aciOmbu\+iyu\+\+8jOWnlOiol\+mHkeiejeapn\+ani\+aJow==\?=\s*=\?UTF-8\?B\?57mz5oiQ5Yqf6Zu75a2Q57mz6LK75oaR6K2JKOmbu\+iZnw==\?=\s*=\?UTF-8\?B\?MDc0ODc2MTY3MzAp\?=$/m
+  score  LT_SUBJ2_RAW 0.01
   header LT_MSGID     Message-ID =~ /^<b497e6c2\@example\.срб>$/m
   score  LT_MSGID     0.01
   header LT_MESSAGEID MESSAGEID  =~ /^<b497e6c2\@example\.срб>$/m
@@ -181,4 +191,17 @@ tstlocalrules ($myrules . '
 ');
 %patterns = (%mypatterns, %mypatterns_mime_b64);
 sarun ("-L < data/nice/unicode1", \&patterns_run_cb);
+ok_all_patterns();
+
+#--- base64 encoded-words - Bug 7307
+
+$ENV{LANGUAGE} = $ENV{LANG} = 'en_US.UTF-8';
+
+tstlocalrules ($myrules . '
+  report_safe 0
+  normalize_charset 1
+');
+%patterns = (%mypatterns_mime_b64_bug7307);
+%anti_patterns = ();
+sarun ("-L < data/nice/unicode2", \&patterns_run_cb);
 ok_all_patterns();
