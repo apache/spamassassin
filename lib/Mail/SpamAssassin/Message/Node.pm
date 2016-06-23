@@ -789,11 +789,11 @@ sub delete_header {
 sub _decode_mime_encoded_word {
   my ( $encoding, $cte, $data ) = @_;
 
-  if ( $cte eq 'B' ) {
+  if ( uc $cte eq 'B' ) {
     # base 64 encoded
     $data = Mail::SpamAssassin::Util::base64_decode($data);
   }
-  elsif ( $cte eq 'Q' ) {
+  elsif ( uc $cte eq 'Q' ) {
     # quoted printable
 
     # the RFC states that in the encoded text, "_" is equal to "=20"
@@ -806,14 +806,17 @@ sub _decode_mime_encoded_word {
     die "message: unknown encoding type '$cte' in RFC 2047 header";
   }
 
-  # RFC 2231 section 5: Language specification in Encoded Words
-  #   =?US-ASCII*EN?Q?Keith_Moore?=
-  # strip optional language information following an asterisk
-  $encoding =~ s{ \* .* \z }{}xs;
+  if (defined $encoding) {
+    # RFC 2231 section 5: Language specification in Encoded Words
+    #   =?US-ASCII*EN?Q?Keith_Moore?=
+    # strip optional language information following an asterisk
+    $encoding =~ s{ \* .* \z }{}xs;
 
-  $data = _normalize($data, $encoding, 0, 1);  # transcode to UTF-8 octets
+    $data = _normalize($data, $encoding, 0, 1);  # transcode to UTF-8 octets
+  }
+  # dbg("message: _decode_mime_encoded_word (%s, %s): %s",
+  #     $cte, $encoding || '-', $data);
 
-# dbg("message: _decode_mime_encoded_word (%s, %s): %s", $cte, $encoding, $data);
   return $data;  # as UTF-8 octets
 }
 
@@ -845,10 +848,7 @@ sub _decode_header {
     # Bug 7249: leave out the Content-*
 
   } elsif ($header_field_body =~ /=\?/) {  # triage for possible encoded-words
-    local($1,$2,$3);
-
-    # RFC 2231 section 5: Language specification in Encoded Words
-    #   =?US-ASCII*EN?Q?Keith_Moore?=
+    local($1,$2,$3,$4);
 
     # Multiple encoded sections must ignore the interim whitespace.
     # To avoid possible FPs with (\s+(?==\?))?, look for the whole RE
@@ -857,24 +857,54 @@ sub _decode_header {
       s{ (   = \? [A-Za-z0-9*_-]+ \? [bqBQ] \? [^?]* \? = ) \s+
          (?= = \? [A-Za-z0-9*_-]+ \? [bqBQ] \? [^?]* \? = ) }{$1}xsg;
 
-#   # Bug 7249: work around violations of the RFC 2047 section 5 requirement:
-#   #   Each 'encoded-word' MUST represent an integral number of characters.
-#   #   A multi-octet character may not be split across adjacent 'encoded-word's
-#   1 while $header_field_body =~
-#       s{ ( = \? [a-z0-9_-]+ (?: \* [a-z0-9_-]* )? \? [BQ] \? )
-#              (   [^?]* ) \? =
-#          \1  (?= [^?]*   \? = ) }{$1$2}xsi;
-# Bug 7307: the above code is commented-out as it mistreats adjecent
-# encoded chunks which end on ==?= (are not a multiple of 4 characters).
-# A better solution is needed: base64-decoding of all chunks first, then
-# multi-byte character set decoding over adjecent same-charset chunks.
+    # Bug 7249: work around violations of the RFC 2047 section 5 requirement:
+    #   Each 'encoded-word' MUST represent an integral number of characters.
+    #   A multi-octet character may not be split across adjacent 'encoded-word's
+    # Unfortunately such violations are not uncommon.
+    #
+    # Bug 7307: to deal with the above, base64/QP decoding must be decoupled
+    # from decoding a specified multi-byte character set into UTF-8.
+    # A previous simpler code could not handle base64 fill bits correctly
+    # (merging of adjecent encoded sections before base64/QP decoding them).
 
-    # transcode properly encoded RFC 2047 substrings into UTF-8 octets,
-    # leave everything else unchanged as it is supposed to be UTF-8 (RFC 6532)
-    # or its plain US-ASCII subset (RFC 5322);
-    $header_field_body =~
-      s{ (?: = \? ([A-Za-z0-9*_-]+) \? ([bqBQ]) \? ([^?]*) \? = ) }
-       { _decode_mime_encoded_word($1, uc($2), $3) }xsge;
+    my @sections;  # array of pairs: [string, encoding]
+    my $last_encoding = '';
+    while ( $header_field_body =~
+              m{ \G = \? ([A-Za-z0-9*_-]+) \? ([bqBQ]) \? ([^?]*) \? =
+                  | ( [^=]+ | . ) }xsg ) {
+      my($encoding, $str);
+      if (defined $1) {  # we have an encoded section
+        $encoding = lc $1;
+        # decode base64 / QP decoding, remember encoding charset
+        $str = _decode_mime_encoded_word(undef, $2, $3);
+      } else {  # non-encoded text
+        $encoding = '';
+        $str = $4;
+      }
+      if ($encoding eq $last_encoding && @sections) {
+        # merge sections with same encoding - in violation of RFC 2047 sect.5
+        $sections[$#sections]->[0] .= $str;
+      } else {
+        push(@sections, [$str, $encoding]);
+      }
+      $last_encoding = $encoding;
+    }
+
+    # transcode encoded RFC 2047 substrings (already base64/QP-decoded)
+    # into UTF-8 octets, leave everything else unchanged as it is supposed
+    # to be UTF-8 (RFC 6532) or its plain US-ASCII subset (RFC 5322);
+    #
+    my $decoded_result = '';
+    for my $sect (@sections) {
+      my $encoding = $sect->[1];
+      # RFC 2231 section 5: Language specification in Encoded Words
+      #   =?US-ASCII*EN?Q?Keith_Moore?=
+      # strip optional language information following an asterisk
+      $encoding =~ s{ \* .* \z }{}xs;
+      $decoded_result .=
+        $encoding eq '' ? $sect->[0] : _normalize($sect->[0], $encoding, 0, 1);
+    }
+    $header_field_body = $decoded_result;
   }
 
   dbg("message: _decode_header %s: %s", $header_field_name, $header_field_body);
