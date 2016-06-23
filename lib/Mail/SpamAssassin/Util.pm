@@ -48,6 +48,7 @@ use re 'taint';
 require 5.008001;  # needs utf8::is_utf8()
 
 use Mail::SpamAssassin::Logger;
+use Mail::SpamAssassin::Util::RegistrarBoundaries;  # deprecated
 
 BEGIN {
   use Exporter ();
@@ -1343,6 +1344,8 @@ sub secure_tmpdir {
 ##
 sub uri_to_domain {
   my ($uri) = @_;
+
+  warn "DEPRECATED: MS::Util::uri_to_domain, Bug 7170";
 
   # Javascript is not going to help us, so return.
   return if ($uri =~ /^javascript:/i);
