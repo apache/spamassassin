@@ -10,8 +10,7 @@ BEGIN {
   eval { require Net::LibIDN } and do { $have_libidn = 1 };
 }
 
-use Test; BEGIN { plan tests => (TEST_ENABLED ? 142 : 0) };
-#use Test; BEGIN { plan tests => (TEST_ENABLED ? 156 : 0) };
+use Test; BEGIN { plan tests => (TEST_ENABLED ? 156 : 0) };
 
 exit unless (TEST_ENABLED);
 
@@ -27,11 +26,11 @@ exit unless (TEST_ENABLED);
   q{/ LT_TO_ADDR /}   => 'LT_TO_ADDR',
   q{/ LT_TO_NAME /}   => 'LT_TO_NAME',
   q{/ LT_CC_ADDR /}   => 'LT_CC_ADDR',
-# q{/ LT_SUBJ /}      => 'LT_SUBJ',
+  q{/ LT_SUBJ /}      => 'LT_SUBJ',
   q{/ LT_SUBJ_RAW /}  => 'LT_SUBJ_RAW',
   q{/ LT_MESSAGEID /} => 'LT_MESSAGEID',
   q{/ LT_MSGID /}     => 'LT_MSGID',
-# q{/ LT_CT /}        => 'LT_CT',
+  q{/ LT_CT /}        => 'LT_CT',
   q{/ LT_CT_RAW /}    => 'LT_CT_RAW',
   q{/ LT_AUTH_DOM /}  => 'LT_AUTH_DOM',
   q{/ LT_NOTE /}      => 'LT_NOTE',
