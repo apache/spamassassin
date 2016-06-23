@@ -322,6 +322,8 @@ sub split_domain {
   my $domain = lc shift;
   my $hostname = '';
 
+  warn "DEPRECATED: MS::Util::RegistrarBoundaries::split_domain, Bug 7170";
+
   if (defined $domain && $domain ne '') {
     # www..spamassassin.org -> www.spamassassin.org
     $domain =~ tr/././s;
@@ -402,6 +404,7 @@ It will be removed in the future.
 
 sub trim_domain {
   my ($domain) = @_;
+  warn "DEPRECATED: MS::Util::RegistrarBoundaries::trim_domain, Bug 7170";
   my ($host, $dom) = split_domain($domain);
   return $dom;
 }
@@ -426,6 +429,7 @@ It will be removed in the future.
 
 sub is_domain_valid {
   my ($dom) = @_;
+  warn "DEPRECATED: MS::Util::RegistrarBoundaries::is_domain_valid, Bug 7170";
 
   # domains don't have whitespace
   return 0 if ($dom =~ /\s/);
