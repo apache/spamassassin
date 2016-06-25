@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud bpoliakoff darxus grenier jarif kgolding zmi; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bpoliakoff darxus grenier jarif kgolding llanga zmi; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bpoliakoff darxus grenier jarif kgolding llanga zmi
+# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud bpoliakoff darxus dwarren grenier jarif kgolding zmi; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud bpoliakoff darxus grenier jarif kgolding llanga zmi; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud bb-jhardin bb-jhardin_fraud bb-jm bb-kmcgrail bb-traps bb-zmi bpoliakoff darxus grenier jarif kgolding llanga zmi
 
 # tflags publish
 AC_BR_BONANZA
@@ -105,9 +105,6 @@ BAYES_99
 
 # tflags learn
 BAYES_999
-
-# good enough
-BODY_EMPTY
 
 # tflags publish
 BODY_URI_ONLY
@@ -392,19 +389,16 @@ HEXHASH_WORD
 HK_NAME_DRUGS
 
 # good enough
-HK_NAME_FM_MR_MRS
-
-# good enough
 HK_NAME_MR_MRS
 
 # good enough
 HK_RANDOM_FROM
 
 # good enough
-HK_SCAM_N8
+HK_SCAM_N2
 
 # good enough
-HK_SCAM_S7
+HK_SCAM_N8
 
 # tflags userconf
 HTML_CHARSET_FARAWAY
@@ -429,6 +423,9 @@ LONG_IMG_URI
 
 # tflags publish
 LOTS_OF_MONEY
+
+# good enough
+LOTTO_AGENT
 
 # good enough
 LOTTO_DEPT
@@ -471,6 +468,9 @@ MONEY_FROM_41
 
 # good enough
 MONEY_FROM_MISSP
+
+# good enough
+MONEY_LOTTERY
 
 # tflags publish
 MSM_PRIO_REPTO
@@ -805,6 +805,9 @@ SUBJECT_IN_BLACKLIST
 # tflags userconf
 SUBJECT_IN_WHITELIST
 
+# good enough
+SUBJ_OBFU_LOW_CNTRST
+
 # tflags net
 SURBL_BLOCKED
 
@@ -857,6 +860,9 @@ TO_NO_BRKTS_NORDNS_HTML
 TO_NO_BRKTS_PCNT
 
 # good enough
+TR_FILLER_TEXT
+
+# good enough
 TT_MSGID_TRUNC
 
 # good enough
@@ -872,22 +878,10 @@ TVD_SPACE_ENCODED
 TW_GIBBERISH_MANY
 
 # good enough
-FSL_HELO_BARE_IP_2
+ADVANCE_FEE_4_NEW_MONEY
 
 # good enough
-HK_SCAM_N2
-
-# good enough
-LOTTO_AGENT
-
-# good enough
-MONEY_LOTTERY
-
-# good enough
-SUBJ_OBFU_LOW_CNTRST
-
-# good enough
-TR_FILLER_TEXT
+FROM_MISSP_PHISH
 
 # tflags publish
 UC_GIBBERISH_OBFU
