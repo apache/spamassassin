@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud bpoliakoff darxus dwarren grenier jarif kgolding zmi; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bpoliakoff darxus dwarren grenier jarif kgolding llanga zmi; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud bpoliakoff darxus dwarren grenier jarif kgolding llanga zmi
+# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud bpoliakoff darxus dwarren grenier jarif kgolding zmi; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud bpoliakoff darxus dwarren grenier jarif kgolding llanga zmi; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bpoliakoff darxus dwarren grenier jarif kgolding llanga zmi
 
 # tflags publish
 AC_BR_BONANZA
@@ -51,6 +51,9 @@ ADVANCE_FEE_3_NEW
 
 # tflags publish
 ADVANCE_FEE_3_NEW_FORM
+
+# good enough
+ADVANCE_FEE_3_NEW_FRM_MNY
 
 # tflags publish
 ADVANCE_FEE_3_NEW_MONEY
@@ -108,6 +111,12 @@ BAYES_99
 
 # tflags learn
 BAYES_999
+
+# good enough
+BIGNUM_EMAILS
+
+# good enough
+BODY_EMPTY
 
 # tflags publish
 BODY_URI_ONLY
@@ -254,6 +263,9 @@ FROM_LOCAL_NOVOWEL
 FROM_MISSPACED
 
 # good enough
+FROM_MISSP_DYNIP
+
+# good enough
 FROM_MISSP_FREEMAIL
 
 # good enough
@@ -290,7 +302,13 @@ FSL_CTYPE_WIN1251
 FSL_HELO_BARE_IP_1
 
 # good enough
+FSL_HELO_BARE_IP_2
+
+# good enough
 FSL_HELO_DEVICE
+
+# good enough
+FSL_MIME_NO_TEXT
 
 # tflags publish
 FSL_NEW_HELO_USER
@@ -398,6 +416,9 @@ HK_NAME_MR_MRS
 HK_RANDOM_FROM
 
 # good enough
+HK_SCAM_N1
+
+# good enough
 HK_SCAM_N2
 
 # good enough
@@ -453,6 +474,9 @@ MIME_NO_TEXT
 
 # tflags userconf
 MISSING_HB_SEP
+
+# good enough
+MONEY_ATM_CARD
 
 # good enough
 MONEY_FORM
@@ -877,38 +901,14 @@ TVD_RCVD_IP4
 # good enough
 TVD_SPACE_ENCODED
 
+# good enough
+TVD_SUBJ_NUM_OBFU_MINFP
+
 # tflags publish
 TW_GIBBERISH_MANY
 
 # good enough
-ADVANCE_FEE_3_NEW_FRM_MNY
-
-# good enough
-BODY_EMPTY
-
-# good enough
-FROM_MISSP_DYNIP
-
-# good enough
-FSL_HELO_BARE_IP_2
-
-# good enough
-FSL_MIME_NO_TEXT
-
-# good enough
-HK_SCAM_N1
-
-# good enough
-MONEY_ATM_CARD
-
-# good enough
-TVD_SPACE_ENC_FM_MIME
-
-# good enough
-TVD_SUBJ_NUM_OBFU_MINFP
-
-# good enough
-YOU_INHERIT
+MALFORMED_FREEMAIL
 
 # tflags publish
 UC_GIBBERISH_OBFU
@@ -1071,6 +1071,9 @@ XPRIO
 
 # tflags publish
 XPRIO_SHORT_SUBJ
+
+# good enough
+YOU_INHERIT
 
 # tflags net
 __DKIMDOMAIN_IN_DWL_ANY
