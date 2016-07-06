@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud bpoliakoff darxus dwarren grenier jarif kgolding zmi; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud bpoliakoff darxus dwarren grenier jarif kgolding llanga zmi; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud bpoliakoff darxus dwarren grenier jarif kgolding llanga zmi
+# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bpoliakoff darxus grenier jarif kgolding zmi; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-kmcgrail bb-traps bb-zmi bpoliakoff darxus grenier jarif kgolding llanga zmi; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-kmcgrail bb-traps bb-zmi bpoliakoff darxus grenier jarif kgolding llanga zmi
 
 # tflags publish
 AC_BR_BONANZA
@@ -43,6 +43,9 @@ ADMAIL
 # tflags publish
 ADVANCE_FEE_2_NEW_FORM
 
+# good enough
+ADVANCE_FEE_2_NEW_FRM_MNY
+
 # tflags publish
 ADVANCE_FEE_2_NEW_MONEY
 
@@ -63,6 +66,9 @@ ADVANCE_FEE_4_NEW
 
 # good enough
 ADVANCE_FEE_4_NEW_MONEY
+
+# good enough
+ADVANCE_FEE_5_NEW
 
 # good enough
 ADVANCE_FEE_5_NEW_FRM_MNY
@@ -269,9 +275,6 @@ FROM_MISSP_FREEMAIL
 FROM_MISSP_MSFT
 
 # good enough
-FROM_MISSP_PHISH
-
-# good enough
 FROM_MISSP_REPLYTO
 
 # tflags net
@@ -407,9 +410,6 @@ HK_NAME_DRUGS
 HK_NAME_MR_MRS
 
 # good enough
-HK_RANDOM_FROM
-
-# good enough
 HK_SCAM_N1
 
 # good enough
@@ -453,6 +453,9 @@ LOTTO_DEPT
 
 # tflags publish
 LUCRATIVE
+
+# good enough
+MALFORMED_FREEMAIL
 
 # tflags publish
 MANY_SPAN_IN_TEXT
@@ -817,6 +820,9 @@ STOCK_LOW_CONTRAST
 # tflags publish
 STOCK_TIP
 
+# good enough
+STOX_REPLY_TYPE_WITHOUT_QUOTES
+
 # tflags publish
 STYLE_GIBBERISH
 
@@ -893,13 +899,25 @@ TVD_SPACE_ENCODED
 TW_GIBBERISH_MANY
 
 # good enough
-ADVANCE_FEE_2_NEW_FRM_MNY
+BIGNUM_EMAILS
 
 # good enough
-ADVANCE_FEE_5_NEW
+FSL_MID_419
 
 # good enough
-MALFORMED_FREEMAIL
+HELO_MISC_IP
+
+# good enough
+MONEY_LOTTERY
+
+# good enough
+TR_FILLER_TEXT
+
+# good enough
+TVD_SPACE_ENC_FM_MIME
+
+# good enough
+TVD_SUBJ_NUM_OBFU_MINFP
 
 # tflags publish
 UC_GIBBERISH_OBFU
