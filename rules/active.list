@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bpoliakoff darxus grenier jarif kgolding zmi; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-kmcgrail bb-traps bb-zmi bpoliakoff darxus grenier jarif kgolding llanga zmi; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bpoliakoff darxus grenier jarif kgolding llanga zmi
+# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-traps bpoliakoff darxus grenier jarif kgolding zmi; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bpoliakoff darxus grenier jarif kgolding llanga zmi; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-kmcgrail bb-traps bb-zmi bpoliakoff darxus grenier jarif kgolding llanga zmi
 
 # tflags publish
 AC_BR_BONANZA
@@ -117,9 +117,6 @@ BAYES_99
 
 # tflags learn
 BAYES_999
-
-# good enough
-BIGNUM_EMAILS
 
 # good enough
 BODY_EMPTY
@@ -420,9 +417,6 @@ HK_NAME_MR_MRS
 
 # good enough
 HK_SCAM_N1
-
-# good enough
-HK_SCAM_N2
 
 # tflags userconf
 HTML_CHARSET_FARAWAY
@@ -903,9 +897,6 @@ TVD_RCVD_IP4
 
 # good enough
 TVD_SPACE_ENCODED
-
-# good enough
-TVD_SUBJ_NUM_OBFU_MINFP
 
 # tflags publish
 TW_GIBBERISH_MANY
