@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud bpoliakoff darxus grenier jarif kgolding zmi; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bpoliakoff darxus grenier jarif kgolding llanga zmi; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bpoliakoff darxus grenier jarif kgolding llanga zmi
+# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bpoliakoff darxus grenier jarif kgolding zmi; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud bpoliakoff darxus grenier jarif kgolding llanga zmi; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bpoliakoff darxus grenier jarif kgolding llanga zmi
 
 # tflags publish
 AC_BR_BONANZA
@@ -392,6 +392,9 @@ HELO_MISC_IP
 HEXHASH_WORD
 
 # good enough
+HK_LOTTO_SUBJECT
+
+# good enough
 HK_NAME_DRUGS
 
 # good enough
@@ -477,6 +480,9 @@ MONEY_FROM_MISSP
 
 # good enough
 MONEY_LOTTERY
+
+# good enough
+MSGID_NOFQDN1
 
 # tflags publish
 MSM_PRIO_REPTO
@@ -802,9 +808,6 @@ STOCK_LOW_CONTRAST
 # tflags publish
 STOCK_TIP
 
-# good enough
-STOX_REPLY_TYPE_WITHOUT_QUOTES
-
 # tflags publish
 STYLE_GIBBERISH
 
@@ -874,20 +877,20 @@ TVD_RCVD_IP4
 # good enough
 TVD_SPACE_ENCODED
 
+# good enough
+TVD_SUBJ_NUM_OBFU_MINFP
+
 # tflags publish
 TW_GIBBERISH_MANY
 
 # good enough
-HK_LOTTO_SUBJECT
+FROM_MISSP_DYNIP
 
 # good enough
-HK_SCAM_N8
+HK_SCAM_N2
 
 # good enough
-TVD_SPACE_ENC_FM_MIME
-
-# good enough
-TVD_SUBJ_NUM_OBFU_MINFP
+SUBJ_ATTENTION
 
 # tflags publish
 UC_GIBBERISH_OBFU
