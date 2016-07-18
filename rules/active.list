@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bpoliakoff darxus grenier jarif kgolding zmi; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bpoliakoff darxus grenier jarif kgolding llanga zmi; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud bpoliakoff darxus grenier jarif kgolding llanga zmi
+# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud bpoliakoff darxus grenier jarif kgolding zmi; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bpoliakoff darxus grenier jarif kgolding zmi; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bpoliakoff darxus grenier jarif kgolding llanga zmi
 
 # tflags publish
 AC_BR_BONANZA
@@ -260,6 +260,9 @@ FROM_LOCAL_NOVOWEL
 FROM_MISSPACED
 
 # good enough
+FROM_MISSP_DYNIP
+
+# good enough
 FROM_MISSP_FREEMAIL
 
 # good enough
@@ -403,6 +406,9 @@ HK_RANDOM_FROM
 # good enough
 HK_SCAM_N1
 
+# good enough
+HK_SCAM_N2
+
 # tflags userconf
 HTML_CHARSET_FARAWAY
 
@@ -477,6 +483,9 @@ MONEY_FROM_MISSP
 
 # good enough
 MONEY_LOTTERY
+
+# good enough
+MSGID_NOFQDN1
 
 # tflags publish
 MSM_PRIO_REPTO
@@ -811,6 +820,9 @@ SUBJECT_IN_BLACKLIST
 # tflags userconf
 SUBJECT_IN_WHITELIST
 
+# good enough
+SUBJ_ATTENTION
+
 # tflags net
 SURBL_BLOCKED
 
@@ -863,12 +875,6 @@ TO_NO_BRKTS_PCNT
 TT_MSGID_TRUNC
 
 # good enough
-TVD_RCVD_IP
-
-# good enough
-TVD_RCVD_IP4
-
-# good enough
 TVD_SPACE_ENCODED
 
 # good enough
@@ -878,19 +884,16 @@ TVD_SUBJ_NUM_OBFU_MINFP
 TW_GIBBERISH_MANY
 
 # good enough
-FROM_MISSP_DYNIP
+HK_SCAM_N8
 
 # good enough
-HK_SCAM_N2
+MONEY_BARRISTER
 
 # good enough
-MSGID_NOFQDN1
+TVD_FROM_1
 
 # good enough
-SUBJ_ATTENTION
-
-# good enough
-TR_FILLER_TEXT
+TVD_SPACE_ENC_FM_MIME
 
 # tflags publish
 UC_GIBBERISH_OBFU
