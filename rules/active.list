@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-traps bpoliakoff darxus grenier jarif zmi; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bpoliakoff darxus grenier jarif llanga zmi; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud bpoliakoff darxus grenier jarif kgolding llanga zmi
+# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bpoliakoff darxus grenier jarif kgolding zmi; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-traps bpoliakoff darxus grenier jarif llanga zmi; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bpoliakoff darxus grenier jarif llanga zmi
 
 # tflags publish
 AC_BR_BONANZA
@@ -296,6 +296,9 @@ FSL_CTYPE_WIN1251
 FSL_HELO_BARE_IP_1
 
 # good enough
+FSL_HELO_BARE_IP_2
+
+# good enough
 FSL_HELO_DEVICE
 
 # tflags publish
@@ -372,6 +375,9 @@ HASHCASH_HIGH
 
 # good enough
 HDRS_LCASE
+
+# good enough
+HDRS_MISSP
 
 # tflags publish
 HEADER_FROM_DIFFERENT_DOMAINS
@@ -902,22 +908,19 @@ TVD_SUBJ_NUM_OBFU_MINFP
 TW_GIBBERISH_MANY
 
 # good enough
-FSL_HELO_BARE_IP_2
-
-# good enough
-HDRS_MISSP
+FSL_MIME_NO_TEXT
 
 # good enough
 LIST_PARTIAL_SHORT_MSG
-
-# good enough
-UPGRADE_MAILBOX
 
 # tflags publish
 UC_GIBBERISH_OBFU
 
 # tflags userconf
 UNPARSEABLE_RELAY
+
+# good enough
+UPGRADE_MAILBOX
 
 # tflags net
 URIBL_ABUSE_SURBL
