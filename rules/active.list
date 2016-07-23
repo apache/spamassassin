@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bpoliakoff darxus grenier jarif kgolding zmi; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-traps bpoliakoff darxus grenier jarif llanga zmi; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bpoliakoff darxus grenier jarif llanga zmi
+# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-traps bpoliakoff darxus grenier jarif kgolding zmi; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bpoliakoff darxus grenier jarif kgolding llanga zmi; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-traps bpoliakoff darxus grenier jarif llanga zmi
 
 # tflags publish
 AC_BR_BONANZA
@@ -429,6 +429,9 @@ HTML_FONT_TINY
 
 # tflags publish
 HTML_OFF_PAGE
+
+# good enough
+LIST_PARTIAL_SHORT_MSG
 
 # tflags publish
 LIST_PRTL_PUMPDUMP
@@ -908,10 +911,19 @@ TVD_SUBJ_NUM_OBFU_MINFP
 TW_GIBBERISH_MANY
 
 # good enough
+ADVANCE_FEE_4_NEW_FORM
+
+# good enough
+BODY_SINGLE_URI
+
+# good enough
+BODY_SINGLE_WORD
+
+# good enough
 FSL_MIME_NO_TEXT
 
 # good enough
-LIST_PARTIAL_SHORT_MSG
+IMG_DIRECT_TO_MX
 
 # tflags publish
 UC_GIBBERISH_OBFU
