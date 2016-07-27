@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-traps bpoliakoff darxus grenier jarif kgolding zmi; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bpoliakoff darxus grenier jarif kgolding llanga zmi; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-traps bpoliakoff darxus grenier jarif llanga zmi
+# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud bpoliakoff darxus grenier jarif kgolding zmi; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bpoliakoff darxus grenier jarif kgolding zmi; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-traps bpoliakoff darxus grenier jarif kgolding llanga zmi
 
 # tflags publish
 AC_BR_BONANZA
@@ -59,6 +59,9 @@ ADVANCE_FEE_3_NEW_MONEY
 ADVANCE_FEE_4_NEW
 
 # good enough
+ADVANCE_FEE_4_NEW_FORM
+
+# good enough
 ADVANCE_FEE_4_NEW_MONEY
 
 # good enough
@@ -111,6 +114,12 @@ BAYES_99
 
 # tflags learn
 BAYES_999
+
+# good enough
+BODY_SINGLE_URI
+
+# good enough
+BODY_SINGLE_WORD
 
 # tflags publish
 BODY_URI_ONLY
@@ -260,9 +269,6 @@ FROM_LOCAL_NOVOWEL
 FROM_MISSPACED
 
 # good enough
-FROM_MISSP_DYNIP
-
-# good enough
 FROM_MISSP_FREEMAIL
 
 # good enough
@@ -300,6 +306,9 @@ FSL_HELO_BARE_IP_2
 
 # good enough
 FSL_HELO_DEVICE
+
+# good enough
+FSL_MIME_NO_TEXT
 
 # tflags publish
 FSL_NEW_HELO_USER
@@ -401,9 +410,6 @@ HELO_MISC_IP
 HEXHASH_WORD
 
 # good enough
-HK_LOTTO_SUBJECT
-
-# good enough
 HK_NAME_DR
 
 # good enough
@@ -431,7 +437,7 @@ HTML_FONT_TINY
 HTML_OFF_PAGE
 
 # good enough
-LIST_PARTIAL_SHORT_MSG
+IMG_DIRECT_TO_MX
 
 # tflags publish
 LIST_PRTL_PUMPDUMP
@@ -479,9 +485,6 @@ MISSING_HB_SEP
 MONEY_ATM_CARD
 
 # good enough
-MONEY_BARRISTER
-
-# good enough
 MONEY_FORM
 
 # tflags publish
@@ -501,9 +504,6 @@ MONEY_FROM_MISSP
 
 # good enough
 MONEY_LOTTERY
-
-# good enough
-MSGID_NOFQDN1
 
 # tflags publish
 MSM_PRIO_REPTO
@@ -787,6 +787,9 @@ RISK_FREE
 # good enough
 RP_MATCHES_RCVD
 
+# good enough
+SHORT_HELO_AND_INLINE_IMAGE
+
 # tflags publish
 SINGLETS_LOW_CONTRAST
 
@@ -837,9 +840,6 @@ SUBJECT_IN_BLACKLIST
 
 # tflags userconf
 SUBJECT_IN_WHITELIST
-
-# good enough
-SUBJ_ATTENTION
 
 # tflags net
 SURBL_BLOCKED
@@ -896,9 +896,6 @@ TR_FILLER_TEXT
 TT_MSGID_TRUNC
 
 # good enough
-TVD_FROM_1
-
-# good enough
 TVD_SPACE_ENCODED
 
 # good enough
@@ -911,19 +908,19 @@ TVD_SUBJ_NUM_OBFU_MINFP
 TW_GIBBERISH_MANY
 
 # good enough
-ADVANCE_FEE_4_NEW_FORM
+ADVANCE_FEE_2_NEW_FRM_MNY
 
 # good enough
-BODY_SINGLE_URI
+BODY_EMPTY
 
 # good enough
-BODY_SINGLE_WORD
+HK_NAME_FM_MR_MRS
 
 # good enough
-FSL_MIME_NO_TEXT
+HK_SCAM_N13
 
 # good enough
-IMG_DIRECT_TO_MX
+TEQF_USR_POLITE
 
 # tflags publish
 UC_GIBBERISH_OBFU
