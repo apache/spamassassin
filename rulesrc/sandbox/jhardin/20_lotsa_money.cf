@@ -87,10 +87,10 @@ body     __TO_YOUR_ORG       /\b(?:to|for) your organi[sz]ation\b/i
 body     __TRAVEL_ITINERARY  /(?:travel|ticketed|your|current) itinerary/i
 body     __AUTO_ACCIDENT     /auto(?:mobile)? accident/i
 
-body     __LOTTO_AGENT_01 /\b(?:(?:(?:the|y?our)(?:\s\w{1,20})?|contact|accredited|listed)\sclaim(?:s|ing)?(?:\sprocessing)?|fiducia\w+|reimbursement|(?:prize|international|intl|foreign|win+ing)(?:[\s,.]+(?:rem+it+ance|settlement|payment|payout|award|transfer))+|payment|payout|immunity|(?<!memory\s)grants?)\s?(?:agent|manager|officer|secretary|director|mgr\b)/i
+body     __LOTTO_AGENT_01 /\b(?:(?:(?:the|y?our)(?:\s\w{1,20})?|contact|accredited|listed)\sclaim(?:s|ing)?(?:\sprocessing)?|fiducia\w+|reimbursement|(?:prize|international|intl|foreign|win+ing)(?:[\s,.]+(?:rem+it+ance|settlement|payment|payout|award|transfer))+|payment|payout|immunity|(?<!memory\s)grants?(?!\smanager))\s?(?:agent|manager|officer|secretary|director|mgr\b)/i
 body     __LOTTO_AGENT_02 /\blot+ery[^\.]{1,40} ticket agent/i
 meta     __LOTTO_AGENT    __LOTTO_AGENT_01 || __LOTTO_AGENT_02
-meta     LOTTO_AGENT      __LOTTO_AGENT && !__HAS_IN_REPLY_TO && !__THREADED && !__TO_YOUR_ORG && !__DKIM_EXISTS && !__TRAVEL_ITINERARY && !__AUTO_ACCIDENT && !__HAS_ERRORS_TO 
+meta     LOTTO_AGENT      __LOTTO_AGENT && !__HAS_IN_REPLY_TO && !__THREADED && !__TO_YOUR_ORG && !__DKIM_EXISTS && !__TRAVEL_ITINERARY && !__AUTO_ACCIDENT && !__HAS_ERRORS_TO && !__RP_MATCHES_RCVD 
 describe LOTTO_AGENT      Claims Agent
 score    LOTTO_AGENT      1.50		# limit
 
