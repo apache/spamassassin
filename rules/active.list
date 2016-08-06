@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bpoliakoff darxus grenier jarif kgolding zmi; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud bpoliakoff darxus grenier jarif kgolding llanga zmi; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-traps bpoliakoff darxus grenier jarif kgolding llanga zmi
+# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud bpoliakoff darxus grenier jarif kgolding zmi; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bpoliakoff darxus grenier jarif kgolding llanga zmi; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud bpoliakoff darxus grenier jarif kgolding llanga zmi
 
 # tflags publish
 AC_BR_BONANZA
@@ -82,6 +82,9 @@ AXB_XMAILER_MIMEOLE_OL_024C2
 # good enough
 AXB_XMAILER_MIMEOLE_OL_1ECD5
 
+# good enough
+AXB_XM_FORGED_OL2600
+
 # tflags learn
 BAYES_00
 
@@ -111,9 +114,6 @@ BAYES_99
 
 # tflags learn
 BAYES_999
-
-# good enough
-BILLION_OVERLAP
 
 # good enough
 BODY_EMPTY
@@ -279,6 +279,9 @@ FROM_MISSP_FREEMAIL
 
 # good enough
 FROM_MISSP_MSFT
+
+# good enough
+FROM_MISSP_PHISH
 
 # good enough
 FROM_MISSP_REPLYTO
@@ -480,9 +483,6 @@ MISSING_HB_SEP
 
 # good enough
 MONEY_ATM_CARD
-
-# good enough
-MONEY_BARRISTER
 
 # good enough
 MONEY_FORM
@@ -905,13 +905,13 @@ TW_GIBBERISH_MANY
 ADVANCE_FEE_4_NEW_FRM_MNY
 
 # good enough
-AXB_XM_FORGED_OL2600
-
-# good enough
-FROM_MISSP_PHISH
+HDRS_LCASE
 
 # good enough
 HK_NAME_DR
+
+# good enough
+HK_NAME_FM_DR
 
 # good enough
 HK_RANDOM_REPLYTO
@@ -922,14 +922,14 @@ HK_SCAM_N3
 # good enough
 TEQF_USR_POLITE
 
+# good enough
+TVD_SPACE_RATIO_MINFP
+
 # tflags publish
 UC_GIBBERISH_OBFU
 
 # tflags userconf
 UNPARSEABLE_RELAY
-
-# good enough
-UPGRADE_MAILBOX
 
 # tflags net
 URIBL_ABUSE_SURBL
