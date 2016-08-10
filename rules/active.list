@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud bpoliakoff darxus grenier jarif kgolding zmi; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bpoliakoff darxus grenier jarif kgolding llanga zmi; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud bpoliakoff darxus grenier jarif kgolding llanga zmi
+# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-traps bpoliakoff darxus grenier jarif kgolding zmi; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bpoliakoff darxus grenier jarif kgolding llanga zmi; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud bpoliakoff darxus grenier jarif kgolding llanga zmi
 
 # tflags publish
 AC_BR_BONANZA
@@ -57,6 +57,9 @@ ADVANCE_FEE_3_NEW_MONEY
 
 # tflags publish
 ADVANCE_FEE_4_NEW
+
+# good enough
+ADVANCE_FEE_4_NEW_FRM_MNY
 
 # good enough
 ADVANCE_FEE_4_NEW_MONEY
@@ -389,6 +392,9 @@ HASHCASH_2SPEND
 HASHCASH_HIGH
 
 # good enough
+HDRS_LCASE
+
+# good enough
 HDRS_MISSP
 
 # tflags publish
@@ -413,7 +419,13 @@ HELO_MISC_IP
 HEXHASH_WORD
 
 # good enough
+HK_NAME_DR
+
+# good enough
 HK_NAME_DRUGS
+
+# good enough
+HK_NAME_FM_DR
 
 # good enough
 HK_NAME_MR_MRS
@@ -422,10 +434,13 @@ HK_NAME_MR_MRS
 HK_RANDOM_FROM
 
 # good enough
-HK_SCAM_N1
+HK_RANDOM_REPLYTO
 
 # good enough
 HK_SCAM_N2
+
+# good enough
+HK_SCAM_N3
 
 # good enough
 HK_SCAM_N8
@@ -455,6 +470,9 @@ LONG_IMG_URI
 LOTS_OF_MONEY
 
 # good enough
+LOTTERY_PH_004470
+
+# good enough
 LOTTO_AGENT
 
 # good enough
@@ -462,9 +480,6 @@ LOTTO_DEPT
 
 # tflags publish
 LUCRATIVE
-
-# good enough
-MALFORMED_FREEMAIL
 
 # tflags publish
 MANY_SPAN_IN_TEXT
@@ -859,6 +874,9 @@ TEQF_USR_MSGID_HEX
 # tflags publish
 TEQF_USR_MSGID_MALF
 
+# good enough
+TEQF_USR_POLITE
+
 # tflags publish
 THIS_AD
 
@@ -893,37 +911,61 @@ TO_NO_BRKTS_NORDNS_HTML
 TO_NO_BRKTS_PCNT
 
 # good enough
-TR_FILLER_TEXT
+TVD_SPACE_ENCODED
 
 # good enough
-TVD_SPACE_ENCODED
+TVD_SPACE_RATIO_MINFP
 
 # tflags publish
 TW_GIBBERISH_MANY
 
 # good enough
-ADVANCE_FEE_4_NEW_FRM_MNY
+ADVANCE_FEE_2_NEW_FRM_MNY
 
 # good enough
-HDRS_LCASE
+ADVANCE_FEE_3_NEW_FRM_MNY
 
 # good enough
-HK_NAME_DR
+AXB_X_FF_SEZ_S
 
 # good enough
-HK_NAME_FM_DR
+DATE_IN_FUTURE_Q_PLUS
 
 # good enough
-HK_RANDOM_REPLYTO
+FILL_THIS_FORM_FRAUD_PHISH
 
 # good enough
-HK_SCAM_N3
+FREEMAIL_DOC_PDF_BCC
 
 # good enough
-TEQF_USR_POLITE
+FROM_WSP_LEAD
 
 # good enough
-TVD_SPACE_RATIO_MINFP
+FROM_WSP_TRAIL
+
+# good enough
+FSL_HELO_FAKE
+
+# good enough
+HTML_TAG_BALANCE_CENTER
+
+# good enough
+MONEY_BARRISTER
+
+# good enough
+MONEY_FORM_SHORT
+
+# good enough
+NA_DOLLARS
+
+# good enough
+TVD_SPACE_ENC_FM_MIME
+
+# good enough
+TVD_SUBJ_NUM_OBFU_MINFP
+
+# good enough
+YOU_INHERIT
 
 # tflags publish
 UC_GIBBERISH_OBFU
