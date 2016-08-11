@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-traps bpoliakoff darxus grenier jarif kgolding zmi; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bpoliakoff darxus grenier jarif kgolding llanga zmi; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud bpoliakoff darxus grenier jarif kgolding llanga zmi
+# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-traps bpoliakoff darxus grenier jarif kgolding zmi; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-traps bpoliakoff darxus grenier jarif kgolding llanga zmi; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bpoliakoff darxus grenier jarif kgolding llanga zmi
 
 # tflags publish
 AC_BR_BONANZA
@@ -120,9 +120,6 @@ BAYES_999
 
 # good enough
 BODY_EMPTY
-
-# good enough
-BODY_SINGLE_URI
 
 # good enough
 BODY_SINGLE_WORD
@@ -929,9 +926,6 @@ ADVANCE_FEE_3_NEW_FRM_MNY
 AXB_X_FF_SEZ_S
 
 # good enough
-DATE_IN_FUTURE_Q_PLUS
-
-# good enough
 FILL_THIS_FORM_FRAUD_PHISH
 
 # good enough
@@ -948,6 +942,9 @@ FSL_HELO_FAKE
 
 # good enough
 HTML_TAG_BALANCE_CENTER
+
+# good enough
+LIST_PARTIAL_SHORT_MSG
 
 # good enough
 MONEY_BARRISTER
