@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-traps bpoliakoff darxus grenier jarif kgolding zmi; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-traps bpoliakoff darxus grenier jarif kgolding llanga zmi; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bpoliakoff darxus grenier jarif kgolding llanga zmi
+# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-traps bpoliakoff darxus grenier jarif kgolding zmi; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-traps bpoliakoff darxus grenier jarif kgolding llanga zmi; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-traps bpoliakoff darxus grenier jarif kgolding llanga zmi
 
 # tflags publish
 AC_BR_BONANZA
@@ -43,6 +43,9 @@ ADMAIL
 # tflags publish
 ADVANCE_FEE_2_NEW_FORM
 
+# good enough
+ADVANCE_FEE_2_NEW_FRM_MNY
+
 # tflags publish
 ADVANCE_FEE_2_NEW_MONEY
 
@@ -51,6 +54,9 @@ ADVANCE_FEE_3_NEW
 
 # tflags publish
 ADVANCE_FEE_3_NEW_FORM
+
+# good enough
+ADVANCE_FEE_3_NEW_FRM_MNY
 
 # tflags publish
 ADVANCE_FEE_3_NEW_MONEY
@@ -87,6 +93,9 @@ AXB_XMAILER_MIMEOLE_OL_1ECD5
 
 # good enough
 AXB_XM_FORGED_OL2600
+
+# good enough
+AXB_X_FF_SEZ_S
 
 # tflags learn
 BAYES_00
@@ -233,6 +242,9 @@ FBI_SPOOF
 FILL_THIS_FORM
 
 # good enough
+FILL_THIS_FORM_FRAUD_PHISH
+
+# good enough
 FILL_THIS_FORM_LOAN
 
 # good enough
@@ -255,6 +267,9 @@ FOUND_YOU
 
 # tflags userconf
 FRAGMENTED_MESSAGE
+
+# good enough
+FREEMAIL_DOC_PDF_BCC
 
 # tflags publish
 FREEMAIL_FORGED_FROMDOMAIN
@@ -305,6 +320,12 @@ FROM_WORDY
 FROM_WORDY_SHORT
 
 # good enough
+FROM_WSP_LEAD
+
+# good enough
+FROM_WSP_TRAIL
+
+# good enough
 FSL_CTYPE_WIN1251
 
 # good enough
@@ -315,6 +336,9 @@ FSL_HELO_BARE_IP_2
 
 # good enough
 FSL_HELO_DEVICE
+
+# good enough
+FSL_HELO_FAKE
 
 # tflags publish
 FSL_NEW_HELO_USER
@@ -451,6 +475,9 @@ HTML_FONT_TINY
 # tflags publish
 HTML_OFF_PAGE
 
+# good enough
+HTML_TAG_BALANCE_CENTER
+
 # tflags publish
 LIST_PRTL_PUMPDUMP
 
@@ -497,7 +524,13 @@ MISSING_HB_SEP
 MONEY_ATM_CARD
 
 # good enough
+MONEY_BARRISTER
+
+# good enough
 MONEY_FORM
+
+# good enough
+MONEY_FORM_SHORT
 
 # tflags publish
 MONEY_FRAUD_3
@@ -525,6 +558,9 @@ MSM_PRIO_REPTO
 
 # good enough
 MSOE_MID_WRONG_CASE
+
+# good enough
+NA_DOLLARS
 
 # tflags net
 NO_DNS_FOR_FROM
@@ -911,58 +947,22 @@ TO_NO_BRKTS_PCNT
 TVD_SPACE_ENCODED
 
 # good enough
+TVD_SPACE_ENC_FM_MIME
+
+# good enough
 TVD_SPACE_RATIO_MINFP
+
+# good enough
+TVD_SUBJ_NUM_OBFU_MINFP
 
 # tflags publish
 TW_GIBBERISH_MANY
 
 # good enough
-ADVANCE_FEE_2_NEW_FRM_MNY
-
-# good enough
-ADVANCE_FEE_3_NEW_FRM_MNY
-
-# good enough
-AXB_X_FF_SEZ_S
-
-# good enough
-FILL_THIS_FORM_FRAUD_PHISH
-
-# good enough
-FREEMAIL_DOC_PDF_BCC
-
-# good enough
-FROM_WSP_LEAD
-
-# good enough
-FROM_WSP_TRAIL
-
-# good enough
-FSL_HELO_FAKE
-
-# good enough
-HTML_TAG_BALANCE_CENTER
-
-# good enough
 LIST_PARTIAL_SHORT_MSG
 
 # good enough
-MONEY_BARRISTER
-
-# good enough
-MONEY_FORM_SHORT
-
-# good enough
-NA_DOLLARS
-
-# good enough
-TVD_SPACE_ENC_FM_MIME
-
-# good enough
-TVD_SUBJ_NUM_OBFU_MINFP
-
-# good enough
-YOU_INHERIT
+URI_DATA
 
 # tflags publish
 UC_GIBBERISH_OBFU
@@ -1125,6 +1125,9 @@ XPRIO
 
 # tflags publish
 XPRIO_SHORT_SUBJ
+
+# good enough
+YOU_INHERIT
 
 # tflags net
 __DKIMDOMAIN_IN_DWL_ANY
