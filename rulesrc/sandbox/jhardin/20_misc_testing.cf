@@ -1496,7 +1496,7 @@ header      __DATE_LOWER       ALL =~ /date:\s\S{5}/
 
 # duplicates __XPRIO
 #header      __FH_HAS_XPRIORITY exists:X-Priority
-meta        __XPRIO_MINFP      __XPRIO && !__CT_ENCRYPTED && !ALL_TRUSTED && !__HAS_ERRORS_TO && !__THREADED && !__RP_MATCHES_RCVD && !__LONGLINE && !__MAIL_LINK && !__RCD_RDNS_SMTP && !__PDF_ATTACH && !__USING_VERP1 && !__HAS_DOMAINKEY_SIG && !__LIST_PARTIAL 
+meta        __XPRIO_MINFP      __XPRIO && !__CT_ENCRYPTED && !ALL_TRUSTED && !__HAS_ERRORS_TO && !__THREADED && !__RP_MATCHES_RCVD && !__LONGLINE && !__MAIL_LINK && !__RCD_RDNS_SMTP && !__PDF_ATTACH && !__USING_VERP1 && !__HAS_DOMAINKEY_SIG && !__LIST_PARTIAL && !__RCD_RDNS_MX_MESSY 
 
 ifplugin Mail::SpamAssassin::Plugin::DKIM
   ifplugin Mail::SpamAssassin::Plugin::SPF
@@ -1505,12 +1505,11 @@ ifplugin Mail::SpamAssassin::Plugin::DKIM
     meta    XPRIO              __XPRIO_MINFP && !DKIM_SIGNED && !__DKIM_DEPENDABLE && !DKIM_VALID && !DKIM_VALID_AU && !RCVD_IN_DNSWL_NONE 
   endif
   tflags    XPRIO              net
-  score     XPRIO              2.000	# limit
 else
   meta      XPRIO              __XPRIO_MINFP
-  score     XPRIO              2.000	# limit
 endif
 describe    XPRIO              Has X-Priority header
+score       XPRIO              2.500	# limit
 tflags      XPRIO              publish
 
 # some no-ham combinations
