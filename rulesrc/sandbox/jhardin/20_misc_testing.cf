@@ -2191,3 +2191,6 @@ meta       __XMSID_SONLY               __HAS_XM_SID && (INVALID_MSGID || __XPRIO
 
 header     __UNSUB_MAILTO_BOGUS        List-Unsubscribe =~ /mailto:[^@\s">]*[\s?">]/
 
+meta       __MIMEOLE_DIRECT_TO_MX      __HAS_MIMEOLE && __DOS_DIRECT_TO_MX 
+
+
