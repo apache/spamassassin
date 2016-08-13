@@ -476,8 +476,9 @@ describe       TO_EQ_FM_HTML_ONLY   To == From and HTML only
 #tflags         TO_EQ_FM_HTML_ONLY   publish
 
 meta           __TO_EQ_FM_DIRECT_MX __TO_EQ_FROM && __DOS_DIRECT_TO_MX
-meta           TO_EQ_FM_DIRECT_MX   __TO_EQ_FM_DIRECT_MX && !__THREAD_INDEX_GOOD && !__IS_EXCH
+meta           TO_EQ_FM_DIRECT_MX   __TO_EQ_FM_DIRECT_MX && !__THREAD_INDEX_GOOD && !__IS_EXCH && !__CTYPE_MULTIPART_MIXED 
 describe       TO_EQ_FM_DIRECT_MX   To == From and direct-to-MX
+score          TO_EQ_FM_DIRECT_MX   2.500	# limit
 #tflags         TO_EQ_FM_DIRECT_MX   publish
 
 # Why __HUSH_HUSH hits ham on this in masscheck I don't know. Legit bank emails maybe?
@@ -1028,7 +1029,7 @@ describe    GAPPY_HTML             HTML body with much useless whitespace
 # Try to improve S/O per bug 6119
 meta        TVD_SPACE_RATIO_MINFP  __TVD_SPACE_RATIO && !__CT_ENCRYPTED && !__LCL__ENV_AND_HDR_FROM_MATCH && !__SUBSCRIPTION_INFO && !__RCD_RDNS_MAIL && !__SUBJECT_ENCODED_QP && !__THREADED && !__TO_EQ_FROM_DOM && !__BOTH_INR_AND_REF && !__X_CRON_ENV && !__HAS_THREAD_INDEX && !__HDRS_LCASE_KNOWN && !__ISO_2022_JP_DELIM
 #tflags      TVD_SPACE_RATIO_MINFP  nopublish
-score       TVD_SPACE_RATIO_MINFP  2.750   # limit
+score       TVD_SPACE_RATIO_MINFP  2.500   # limit
 describe    TVD_SPACE_RATIO_MINFP  Space ratio
 
 # Only useful for English-language email
