@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-traps bpoliakoff darxus grenier jarif kgolding zmi; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-traps bpoliakoff darxus grenier jarif kgolding llanga zmi; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-traps bpoliakoff darxus grenier jarif kgolding llanga zmi
+# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud bpoliakoff darxus grenier jarif kgolding zmi; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-traps bpoliakoff darxus grenier jarif kgolding llanga zmi; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-traps bpoliakoff darxus grenier jarif kgolding llanga zmi
 
 # tflags publish
 AC_BR_BONANZA
@@ -335,9 +335,6 @@ FSL_HELO_BARE_IP_1
 FSL_HELO_BARE_IP_2
 
 # good enough
-FSL_HELO_DEVICE
-
-# good enough
 FSL_HELO_FAKE
 
 # tflags publish
@@ -477,6 +474,9 @@ HTML_OFF_PAGE
 
 # good enough
 HTML_TAG_BALANCE_CENTER
+
+# good enough
+LIST_PARTIAL_SHORT_MSG
 
 # tflags publish
 LIST_PRTL_PUMPDUMP
@@ -959,7 +959,13 @@ TVD_SUBJ_NUM_OBFU_MINFP
 TW_GIBBERISH_MANY
 
 # good enough
-LIST_PARTIAL_SHORT_MSG
+ADMITS_SPAM
+
+# good enough
+BODY_SINGLE_URI
+
+# good enough
+HK_LOTTO_NAME
 
 # good enough
 URI_DATA
