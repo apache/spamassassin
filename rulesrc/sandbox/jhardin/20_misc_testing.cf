@@ -1496,7 +1496,7 @@ header      __DATE_LOWER       ALL =~ /date:\s\S{5}/
 
 # duplicates __XPRIO
 #header      __FH_HAS_XPRIORITY exists:X-Priority
-meta        __XPRIO_MINFP      __XPRIO && !__CT_ENCRYPTED && !ALL_TRUSTED && !__HAS_ERRORS_TO && !__THREADED && !__RP_MATCHES_RCVD && !__LONGLINE && !__MAIL_LINK && !__RCD_RDNS_SMTP && !__PDF_ATTACH && !__USING_VERP1 && !__HAS_DOMAINKEY_SIG && !__LIST_PARTIAL && !__RCD_RDNS_MX_MESSY 
+meta        __XPRIO_MINFP      __XPRIO && !__CT_ENCRYPTED && !ALL_TRUSTED && !__HAS_ERRORS_TO && !__THREADED && !__RP_MATCHES_RCVD && !__LONGLINE && !__MAIL_LINK && !__RCD_RDNS_SMTP && !__PDF_ATTACH && !__USING_VERP1 && !__HAS_DOMAINKEY_SIG && !__LIST_PARTIAL && !__RCD_RDNS_MX_MESSY && !__XM_VBULLETIN 
 
 ifplugin Mail::SpamAssassin::Plugin::DKIM
   ifplugin Mail::SpamAssassin::Plugin::SPF
@@ -2192,5 +2192,12 @@ meta       __XMSID_SONLY               __HAS_XM_SID && (INVALID_MSGID || __XPRIO
 header     __UNSUB_MAILTO_BOGUS        List-Unsubscribe =~ /mailto:[^@\s">]*[\s?">]/
 
 meta       __MIMEOLE_DIRECT_TO_MX      __HAS_MIMEOLE && __DOS_DIRECT_TO_MX 
+meta       MIMEOLE_DIRECT_TO_MX        __MIMEOLE_DIRECT_TO_MX && !__ANY_IMAGE_ATTACH 
+describe   MIMEOLE_DIRECT_TO_MX        MIMEOLE + direct-to-MX
+score      MIMEOLE_DIRECT_TO_MX        2.000	# limit
+tflags     MIMEOLE_DIRECT_TO_MX        nopublish	# testing
+
+
+
 
 
