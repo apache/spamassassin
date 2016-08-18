@@ -31,7 +31,7 @@
 #                 for (@F) { s/\./\\./g; s/\?/./g; s/\*/[^.]*/g; print }
 #               }' rules/*.cf |grep -wvf- FILE
 
-# Updated 2014-09-17-axb
+# Updated 2016-08-18-axb
 
 ifplugin Mail::SpamAssassin::Plugin::FreeMail
 
