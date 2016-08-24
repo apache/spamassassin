@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud bpoliakoff darxus grenier jarif kgolding zmi; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bpoliakoff darxus grenier jarif kgolding llanga zmi; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-traps bpoliakoff darxus grenier jarif kgolding llanga zmi
+# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bpoliakoff darxus grenier jarif kgolding zmi; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud bpoliakoff darxus grenier jarif kgolding llanga zmi; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud bb-traps bb-zmi bpoliakoff darxus grenier jarif kgolding llanga zmi
 
 # tflags publish
 AC_BR_BONANZA
@@ -93,9 +93,6 @@ AXB_XMAILER_MIMEOLE_OL_1ECD5
 
 # good enough
 AXB_XM_FORGED_OL2600
-
-# good enough
-AXB_X_FF_SEZ_S
 
 # tflags learn
 BAYES_00
@@ -323,7 +320,7 @@ FSL_HELO_BARE_IP_1
 FSL_HELO_BARE_IP_2
 
 # good enough
-FSL_HELO_FAKE
+FSL_HELO_DEVICE
 
 # tflags publish
 FSL_NEW_HELO_USER
@@ -366,9 +363,6 @@ GOOGLE_DOCS_PHISH_MANY
 
 # tflags publish
 GOOG_MALWARE_DNLD
-
-# good enough
-GOOG_REDIR_HTML_ONLY
 
 # tflags publish
 GOOG_REDIR_SHORT
@@ -414,9 +408,6 @@ HEADER_HOST_IN_WHITELIST
 
 # tflags userconf
 HEAD_LONG
-
-# good enough
-HELO_LOCALHOST
 
 # good enough
 HELO_MISC_IP
@@ -467,9 +458,6 @@ HTML_FONT_TINY
 HTML_OFF_PAGE
 
 # good enough
-HTML_TAG_BALANCE_CENTER
-
-# good enough
 IMG_DIRECT_TO_MX
 
 # good enough
@@ -501,9 +489,6 @@ LOTTO_DEPT
 
 # tflags publish
 LUCRATIVE
-
-# good enough
-L_SPAM_TOOL_13
 
 # tflags publish
 MANY_SPAN_IN_TEXT
@@ -841,9 +826,6 @@ RISK_FREE
 # good enough
 RP_MATCHES_RCVD
 
-# good enough
-SERGIO_SUBJECT_VIAGRA01
-
 # tflags publish
 SINGLETS_LOW_CONTRAST
 
@@ -963,6 +945,21 @@ TVD_SPACE_RATIO_MINFP
 
 # tflags publish
 TW_GIBBERISH_MANY
+
+# good enough
+BODY_EMPTY
+
+# good enough
+FROM_WSP_TRAIL
+
+# good enough
+HK_RANDOM_REPLYTO
+
+# good enough
+HK_SCAM_N1
+
+# good enough
+UPGRADE_MAILBOX
 
 # tflags publish
 UC_GIBBERISH_OBFU
