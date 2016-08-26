@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud bb-traps bb-zmi bpoliakoff darxus grenier jarif kgolding zmi; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bpoliakoff darxus grenier jarif kgolding llanga zmi; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud bpoliakoff darxus grenier jarif kgolding llanga zmi
+# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud bpoliakoff darxus grenier jarif kgolding zmi; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud bb-traps bb-zmi bpoliakoff darxus grenier jarif kgolding llanga zmi; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bpoliakoff darxus grenier jarif kgolding llanga zmi
 
 # tflags publish
 AC_BR_BONANZA
@@ -128,6 +128,9 @@ BAYES_999
 BIGNUM_EMAILS
 
 # good enough
+BODY_EMPTY
+
+# good enough
 BODY_SINGLE_WORD
 
 # tflags publish
@@ -236,9 +239,6 @@ FBI_SPOOF
 FILL_THIS_FORM
 
 # good enough
-FILL_THIS_FORM_FRAUD_PHISH
-
-# good enough
 FILL_THIS_FORM_LOAN
 
 # good enough
@@ -309,6 +309,9 @@ FROM_WORDY
 
 # tflags publish
 FROM_WORDY_SHORT
+
+# good enough
+FROM_WSP_TRAIL
 
 # good enough
 FSL_CTYPE_WIN1251
@@ -431,6 +434,12 @@ HK_NAME_MR_MRS
 HK_RANDOM_FROM
 
 # good enough
+HK_RANDOM_REPLYTO
+
+# good enough
+HK_SCAM_N1
+
+# good enough
 HK_SCAM_N2
 
 # good enough
@@ -505,9 +514,6 @@ MONEY_BARRISTER
 # good enough
 MONEY_FORM
 
-# good enough
-MONEY_FORM_SHORT
-
 # tflags publish
 MONEY_FRAUD_3
 
@@ -534,9 +540,6 @@ MSM_PRIO_REPTO
 
 # good enough
 MSOE_MID_WRONG_CASE
-
-# good enough
-NA_DOLLARS
 
 # tflags net
 NO_DNS_FOR_FROM
@@ -938,19 +941,10 @@ TVD_SPACE_RATIO_MINFP
 TW_GIBBERISH_MANY
 
 # good enough
-BODY_EMPTY
+FSL_HELO_FAKE
 
 # good enough
-FROM_WSP_TRAIL
-
-# good enough
-HK_RANDOM_REPLYTO
-
-# good enough
-HK_SCAM_N1
-
-# good enough
-UPGRADE_MAILBOX
+URI_OBFU_TLD
 
 # good enough
 YOUR_PERMISSION
