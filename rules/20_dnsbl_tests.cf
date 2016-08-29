@@ -72,11 +72,10 @@ describe RCVD_IN_SORBS_SMTP     SORBS: sender is open SMTP relay
 tflags RCVD_IN_SORBS_SMTP       net
 reuse  RCVD_IN_SORBS_SMTP
 
-# delist: $50 fee
-#header RCVD_IN_SORBS_SPAM      eval:check_rbl_sub('sorbs', '127.0.0.6')
-#describe RCVD_IN_SORBS_SPAM    SORBS: sender is a spam source
-#tflags RCVD_IN_SORBS_SPAM      net
-#reuse  RCVD_IN_SORBS_SPAM      RCVD_IN_SORBS_SPAM
+header RCVD_IN_SORBS_SPAM      eval:check_rbl_sub('sorbs', '127.0.0.6')
+describe RCVD_IN_SORBS_SPAM    SORBS: sender is a spam source
+tflags RCVD_IN_SORBS_SPAM      net
+reuse  RCVD_IN_SORBS_SPAM      RCVD_IN_SORBS_SPAM
 
 header RCVD_IN_SORBS_WEB        eval:check_rbl_sub('sorbs', '127.0.0.7')
 describe RCVD_IN_SORBS_WEB      SORBS: sender is an abusable web server
