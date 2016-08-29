@@ -44,7 +44,8 @@ ifplugin Mail::SpamAssassin::Plugin::DNSEval
 # transfers: both axfr and ixfr available
 # URL: http://www.dnsbl.sorbs.net/
 # pay-to-use: no
-# delist: $50 fee for RCVD_IN_SORBS_SPAM, others have free retest on request
+# There is no charge for removal from the proxy, vulnerability, relay, zombie, spam or DUHL databases.
+# (as per http://www.sorbs.net/overview.shtml 08-2016)
 
 header __RCVD_IN_SORBS          eval:check_rbl('sorbs', 'dnsbl.sorbs.net.')
 describe __RCVD_IN_SORBS        SORBS: sender is listed in SORBS
