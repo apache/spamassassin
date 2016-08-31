@@ -1,3 +1,4 @@
+ifplugin Mail::SpamAssassin::Plugin::URIDNSBL
 #
 # Last update: 2016-08-29-axb
 # Phished financial domains
@@ -619,3 +620,6 @@ uridnsbl_skip_domain zagbank.ca
 uridnsbl_skip_domain zenithbank.com
 uridnsbl_skip_domain zkb.ch
 uridnsbl_skip_domain zugerkb.ch
+
+#
+endif   # Mail::SpamAssassin::Plugin::URIDNSBL
