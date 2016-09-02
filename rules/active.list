@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bpoliakoff darxus grenier jarif kgolding zmi; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-traps bpoliakoff darxus grenier jarif kgolding llanga zmi; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-traps bpoliakoff darxus grenier jarif kgolding llanga zmi
+# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bpoliakoff darxus grenier jarif kgolding zmi; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bpoliakoff darxus grenier jarif kgolding llanga zmi; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-traps bpoliakoff darxus grenier jarif kgolding llanga zmi
 
 # tflags publish
 AC_BR_BONANZA
@@ -278,6 +278,9 @@ FROM_LOCAL_NOVOWEL
 FROM_MISSPACED
 
 # good enough
+FROM_MISSP_DYNIP
+
+# good enough
 FROM_MISSP_FREEMAIL
 
 # good enough
@@ -428,6 +431,9 @@ HK_RANDOM_FROM
 HK_SCAM_N1
 
 # good enough
+HK_SCAM_N13
+
+# good enough
 HK_SCAM_N2
 
 # good enough
@@ -490,6 +496,9 @@ MONEY_BARRISTER
 # good enough
 MONEY_FORM
 
+# good enough
+MONEY_FORM_SHORT
+
 # tflags publish
 MONEY_FRAUD_3
 
@@ -516,6 +525,9 @@ MSM_PRIO_REPTO
 
 # good enough
 MSOE_MID_WRONG_CASE
+
+# good enough
+NA_DOLLARS
 
 # tflags net
 NO_DNS_FOR_FROM
@@ -850,9 +862,6 @@ SUBJECT_IN_BLACKLIST
 # tflags userconf
 SUBJECT_IN_WHITELIST
 
-# good enough
-SUBJ_ATTENTION
-
 # tflags net
 SURBL_BLOCKED
 
@@ -873,9 +882,6 @@ TEQF_USR_POLITE
 
 # tflags publish
 THIS_AD
-
-# good enough
-TO_EQ_FM_DIRECT_MX
 
 # tflags net
 TO_EQ_FM_DOM_SPF_FAIL
@@ -905,34 +911,19 @@ TO_NO_BRKTS_NORDNS_HTML
 TO_NO_BRKTS_PCNT
 
 # good enough
-TR_FILLER_TEXT
-
-# good enough
 TVD_SPACE_ENCODED
-
-# good enough
-TVD_SPACE_ENC_FM_MIME
-
-# good enough
-TVD_SPACE_RATIO_MINFP
 
 # tflags publish
 TW_GIBBERISH_MANY
 
 # good enough
-FROM_MISSP_DYNIP
+TO_EQ_FM_DIRECT_MX
 
 # good enough
-HK_SCAM_N13
+TR_FILLER_TEXT
 
 # good enough
-MONEY_FORM_SHORT
-
-# good enough
-NA_DOLLARS
-
-# good enough
-SERGIO_SUBJECT_VIAGRA01
+TVD_SPACE_RATIO_MINFP
 
 # tflags publish
 UC_GIBBERISH_OBFU
