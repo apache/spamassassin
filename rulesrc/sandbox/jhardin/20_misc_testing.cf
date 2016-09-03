@@ -207,18 +207,20 @@ describe       FROM_MISSP_USER       From misspaced, from "User"
 meta           FROM_MISSP_TO_UNDISC  (__FROM_RUNON && __TO_UNDISCLOSED)
 describe       FROM_MISSP_TO_UNDISC  From misspaced, To undisclosed
 
-ifplugin Mail::SpamAssassin::Plugin::DKIM
-  meta         __FROM_MISSP_DKIM     (__FROM_RUNON_UNCODED && __DKIM_DEPENDABLE)
-  tflags       __FROM_MISSP_DKIM     net
-  meta         FROM_MISSP_DKIM       __FROM_MISSP_DKIM && !__CTYPE_MULTIPART_ALT && !__MIME_QP && !__BUGGED_IMG && !__DOS_HAS_LIST_UNSUB && !__MIME_BASE64 && !__MTLANDROID_MUA && !__XEROXWORKCTR_MUA && !__PHP_MUA && !__AMADEUSMS_MUA && !__FLASHMAIL_MUA
-  describe     FROM_MISSP_DKIM       From misspaced, DKIM dependable
-else
-  meta         __FROM_MISSP_DKIM     0
-endif
+# 0 hits 8/2016
+#ifplugin Mail::SpamAssassin::Plugin::DKIM
+#  meta         __FROM_MISSP_DKIM     (__FROM_RUNON_UNCODED && __DKIM_DEPENDABLE)
+#  tflags       __FROM_MISSP_DKIM     net
+#  meta         FROM_MISSP_DKIM       __FROM_MISSP_DKIM && !__CTYPE_MULTIPART_ALT && !__MIME_QP && !__BUGGED_IMG && !__DOS_HAS_LIST_UNSUB && !__MIME_BASE64 && !__MTLANDROID_MUA && !__XEROXWORKCTR_MUA && !__PHP_MUA && !__AMADEUSMS_MUA && !__FLASHMAIL_MUA
+#  describe     FROM_MISSP_DKIM       From misspaced, DKIM dependable
+#else
+#  meta         __FROM_MISSP_DKIM     0
+#endif
 
 meta           __FROM_MISSP_REPLYTO  __FROM_RUNON && __REPLYTO_EXISTS
 meta           FROM_MISSP_REPLYTO    __FROM_MISSP_REPLYTO && !__NOT_SPOOFED && !__RCD_RDNS_MTA_MESSY && !__TO___LOWER && !__COMMENT_EXISTS && !__UNSUB_LINK && !__MIME_QP && !__CTYPE_MULTIPART_ALT && !__JM_REACTOR_DATE && !__PLING_QUERY
 describe       FROM_MISSP_REPLYTO    From misspaced, has Reply-To
+score          FROM_MISSP_REPLYTO    2.500	# limit
 
 ## To the same
 #header         TO_MISSPACED          To =~ /^\s*"[^"]*"</
@@ -1496,7 +1498,7 @@ header      __DATE_LOWER       ALL =~ /date:\s\S{5}/
 
 # duplicates __XPRIO
 #header      __FH_HAS_XPRIORITY exists:X-Priority
-meta        __XPRIO_MINFP      __XPRIO && !__CT_ENCRYPTED && !ALL_TRUSTED && !__HAS_ERRORS_TO && !__THREADED && !__RP_MATCHES_RCVD && !__LONGLINE && !__MAIL_LINK && !__RCD_RDNS_SMTP && !__PDF_ATTACH && !__USING_VERP1 && !__HAS_DOMAINKEY_SIG && !__LIST_PARTIAL && !__RCD_RDNS_MX_MESSY && !__XM_VBULLETIN 
+meta        __XPRIO_MINFP      __XPRIO && !__CT_ENCRYPTED && !ALL_TRUSTED && !__HAS_ERRORS_TO && !__THREADED && !__RP_MATCHES_RCVD && !__LONGLINE && !__MAIL_LINK && !__RCD_RDNS_SMTP && !__PDF_ATTACH && !__USING_VERP1 && !__HAS_DOMAINKEY_SIG && !__LIST_PARTIAL && !__RCD_RDNS_MX_MESSY && !__XM_VBULLETIN && !__DKIM_EXISTS 
 
 ifplugin Mail::SpamAssassin::Plugin::DKIM
   ifplugin Mail::SpamAssassin::Plugin::SPF
@@ -2195,9 +2197,12 @@ meta       __MIMEOLE_DIRECT_TO_MX      __HAS_MIMEOLE && __DOS_DIRECT_TO_MX
 meta       MIMEOLE_DIRECT_TO_MX        __MIMEOLE_DIRECT_TO_MX && !__ANY_IMAGE_ATTACH 
 describe   MIMEOLE_DIRECT_TO_MX        MIMEOLE + direct-to-MX
 score      MIMEOLE_DIRECT_TO_MX        2.000	# limit
-tflags     MIMEOLE_DIRECT_TO_MX        nopublish	# testing
 
 
+# suggested 9/2016 by ChipM in personal email
+# would be a LOT nicer if rules could use other rules' captures
+full       __FROM_FULLN_URL            m;^From:\s+"?([a-z]+)\s([a-z]+)\b.*?https?://[^/]+/\1[_.]\2\b;ism
+tflags     __FROM_FULLN_URL            nopublish
 
 
 
