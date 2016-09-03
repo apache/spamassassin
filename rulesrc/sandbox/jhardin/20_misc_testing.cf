@@ -1168,9 +1168,10 @@ score       URI_MALWARE_BH     1.0	# limit
 
 # suggested by https://isc.sans.edu/diary.html?storyid=13996
 uri         __URI_DATA         /^data:[a-z]/i
-meta        URI_DATA           __URI_DATA && !ALL_TRUSTED
-describe    URI_DATA           "data:" URI - possible malware or phish
-score       URI_DATA           1.0	# limit
+meta        URI_DATA           __URI_DATA && !ALL_TRUSTED && !__RCD_RDNS_MAIL_MESSY && !__HAS_ERRORS_TO && !__VIA_ML 
+describe    URI_DATA           "data:" URI : possible malware or phish
+score       URI_DATA           2.500	# limit
+tflags      URI_DATA           publish
 
 
 header      __SUBJ_ATTENTION     Subject =~ /ATTENTION/
