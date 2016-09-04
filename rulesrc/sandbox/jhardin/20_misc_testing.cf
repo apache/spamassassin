@@ -1168,7 +1168,7 @@ score       URI_MALWARE_BH     1.0	# limit
 
 # suggested by https://isc.sans.edu/diary.html?storyid=13996
 uri         __URI_DATA         /^data:[a-z]/i
-meta        URI_DATA           __URI_DATA && !ALL_TRUSTED && !__RCD_RDNS_MAIL_MESSY && !__HAS_ERRORS_TO && !__VIA_ML 
+meta        URI_DATA           __URI_DATA && !ALL_TRUSTED && !__RCD_RDNS_MAIL_MESSY && !__HAS_ERRORS_TO && !__VIA_ML && !__ENV_AND_HDR_FROM_MATCH 
 describe    URI_DATA           "data:" URI : possible malware or phish
 score       URI_DATA           2.500	# limit
 tflags      URI_DATA           publish
@@ -2203,7 +2203,10 @@ score      MIMEOLE_DIRECT_TO_MX        2.000	# limit
 # suggested 9/2016 by ChipM in personal email
 # would be a LOT nicer if rules could use other rules' captures
 full       __FROM_FULLN_URL            m;^From:\s+"?([a-z]+)\s([a-z]+)\b.*?https?://[^/]+/\1[_.]\2\b;ism
-tflags     __FROM_FULLN_URL            nopublish
+meta       FROM_FULLN_URL              __FROM_FULLN_URL && !__THREADED 
+describe   FROM_FULLN_URL              From address full name is in body URL - possible phishing
+score      FROM_FULLN_URL              2.000	# limit
+
 
 
 
