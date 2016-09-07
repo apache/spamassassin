@@ -625,7 +625,7 @@ body           __STYLE_TAG_IN_BODY      /<style(?:[^>]{0,30})?>/i
 body           __BODY_XHTML             /<x-html>/i
 if can(Mail::SpamAssassin::Conf::perl_min_version_5010000)
   # possessive {0,4}+ requires perl 5.10 or better
-  rawbody        __STYLE_GIBBERISH_1      /<style(?:\s[^>]{0,40})?>(?:\s{0,100}(?!<\/style>)(?:(?:\/\*(?:\s|[^*<]|\*(?!\/)|<(?!\/style>)){0,200}\*\/)|\#[^{<]{1,50}\{[^}<]{4,100}\})){0,4}+(?:\s{0,100}(?!<\/style>|\/\*)[^\s:;,]){150}/im
+  rawbody        __STYLE_GIBBERISH_1      /<style(?:\s[^>]{0,40})?>(?:\s{0,100}(?!<\/style>)(?:(?:\/\*(?:\s|[^*<]|\*(?!\/)|<(?!\/style>)){0,200}\*\/)|\#[^{<]{1,50}\{[^}<]{4,100}\})){0,4}+(?:\s{0,100}(?!<\/style>|\/\*)(?:\/{3,}\*|,{2,}|;{2,}|:{2,}|[^\s:;,])){150}/im
 else
   # older perl, can't deal with style comments properly
   rawbody        __STYLE_GIBBERISH_1      /<style(?:\s[^>]{0,40})?>(?:\s{0,100}(?!<\/style>|\/\*)[^\s:;,]){150}/im
