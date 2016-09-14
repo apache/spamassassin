@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-traps bb-zmi bpoliakoff darxus dwarren grenier jarif kgolding zmi; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bpoliakoff darxus dwarren grenier jarif kgolding llanga zmi; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud bpoliakoff darxus dwarren grenier jarif kgolding llanga zmi
+# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bpoliakoff darxus dwarren grenier jarif kgolding zmi; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-kmcgrail bb-traps bb-zmi bpoliakoff darxus dwarren grenier jarif kgolding llanga zmi; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-traps bpoliakoff darxus dwarren grenier jarif kgolding llanga zmi
 
 # tflags publish
 AC_BR_BONANZA
@@ -42,9 +42,6 @@ ADMAIL
 
 # tflags publish
 ADVANCE_FEE_2_NEW_FORM
-
-# good enough
-ADVANCE_FEE_2_NEW_FRM_MNY
 
 # tflags publish
 ADVANCE_FEE_2_NEW_MONEY
@@ -212,10 +209,10 @@ DOS_ANAL_SPAM_MAILER
 DOS_OE_TO_MX
 
 # good enough
-DOS_OUTLOOK_TO_MX
+DOS_OE_TO_MX_IMAGE
 
 # good enough
-DSN_NO_MIMEVERSION
+DOS_OUTLOOK_TO_MX
 
 # tflags publish
 DX_TEXT_02
@@ -228,6 +225,9 @@ ENCRYPTED_MESSAGE
 
 # tflags userconf
 ENV_AND_HDR_SPF_MATCH
+
+# good enough
+FAKE_REPLY_C
 
 # tflags publish
 FBI_MONEY
@@ -281,9 +281,6 @@ FROM_LOCAL_NOVOWEL
 FROM_MISSPACED
 
 # good enough
-FROM_MISSP_DYNIP
-
-# good enough
 FROM_MISSP_FREEMAIL
 
 # good enough
@@ -314,7 +311,7 @@ FROM_WORDY_SHORT
 FSL_CTYPE_WIN1251
 
 # good enough
-FSL_FAKE_HOTMAIL_RVCD
+FSL_HELO_BARE_IP_1
 
 # good enough
 FSL_HELO_BARE_IP_2
@@ -420,9 +417,6 @@ HK_NAME_DRUGS
 
 # good enough
 HK_NAME_MR_MRS
-
-# good enough
-HK_SCAM_N13
 
 # good enough
 HK_SCAM_N2
@@ -793,6 +787,12 @@ RISK_FREE
 # good enough
 RP_MATCHES_RCVD
 
+# good enough
+SERGIO_SUBJECT_VIAGRA01
+
+# good enough
+SHORTENED_URL_SRC
+
 # tflags publish
 SINGLETS_LOW_CONTRAST
 
@@ -893,10 +893,10 @@ TO_NO_BRKTS_NORDNS_HTML
 TO_NO_BRKTS_PCNT
 
 # good enough
-TR_FILLER_TEXT
+TVD_SPACE_ENCODED
 
 # good enough
-TVD_SPACE_ENCODED
+TVD_SPACE_ENC_FM_MIME
 
 # good enough
 TVD_SPACE_RATIO_MINFP
@@ -905,13 +905,10 @@ TVD_SPACE_RATIO_MINFP
 TW_GIBBERISH_MANY
 
 # good enough
-SERGIO_SUBJECT_VIAGRA01
+HELO_MISC_IP
 
 # good enough
-SHORTENED_URL_SRC
-
-# good enough
-TVD_SPACE_ENC_FM_MIME
+MONEY_BARRISTER
 
 # tflags publish
 UC_GIBBERISH_OBFU
