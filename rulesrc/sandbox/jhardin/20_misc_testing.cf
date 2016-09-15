@@ -1167,7 +1167,7 @@ describe    URI_MALWARE_BH     Possible BlackHole malware links / phishing
 score       URI_MALWARE_BH     1.0	# limit
 
 # suggested by https://isc.sans.edu/diary.html?storyid=13996
-uri         __URI_DATA         /^data:[a-z]/i
+uri         __URI_DATA         /^data:(?!image\/)[a-z]/i
 meta        URI_DATA           __URI_DATA && !ALL_TRUSTED && !__RCD_RDNS_MAIL_MESSY && !__HAS_ERRORS_TO && !__VIA_ML && !__ENV_AND_HDR_FROM_MATCH && !__DOS_HAS_LIST_UNSUB 
 describe    URI_DATA           "data:" URI - possible malware or phish
 score       URI_DATA           3.250	# limit
