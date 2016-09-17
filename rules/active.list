@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud bpoliakoff darxus dwarren grenier jarif kgolding zmi; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud bpoliakoff darxus dwarren grenier jarif kgolding llanga zmi; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bpoliakoff darxus dwarren grenier jarif kgolding llanga zmi
+# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bpoliakoff darxus dwarren grenier jarif kgolding zmi; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud bpoliakoff darxus dwarren grenier jarif kgolding llanga zmi; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud bpoliakoff darxus dwarren grenier jarif kgolding llanga zmi
 
 # tflags publish
 AC_BR_BONANZA
@@ -120,6 +120,9 @@ BAYES_999
 
 # good enough
 BODY_EMPTY
+
+# good enough
+BODY_SINGLE_URI
 
 # good enough
 BODY_SINGLE_WORD
@@ -278,6 +281,9 @@ FROM_LOCAL_NOVOWEL
 FROM_MISSPACED
 
 # good enough
+FROM_MISSP_DYNIP
+
+# good enough
 FROM_MISSP_FREEMAIL
 
 # good enough
@@ -427,6 +433,9 @@ HTML_CHARSET_FARAWAY
 # tflags publish
 HTML_OFF_PAGE
 
+# good enough
+HTML_TAG_BALANCE_CENTER
+
 # tflags publish
 LIST_PRTL_PUMPDUMP
 
@@ -522,6 +531,9 @@ NSL_RCVD_HELO_USER
 
 # good enough
 OBFU_ATTACH_MISSP
+
+# good enough
+OBFU_DOC_ATTACH
 
 # tflags publish
 OBFU_JVSCR_ESC
@@ -901,9 +913,6 @@ TVD_SPACE_ENC_FM_MIME
 # good enough
 TVD_SPACE_RATIO_MINFP
 
-# good enough
-TVD_VISIT_PHARMA
-
 # tflags publish
 TW_GIBBERISH_MANY
 
@@ -911,22 +920,10 @@ TW_GIBBERISH_MANY
 ADVANCE_FEE_2_NEW_FRM_MNY
 
 # good enough
-BODY_SINGLE_URI
-
-# good enough
-FROM_MISSP_DYNIP
-
-# good enough
 HDRS_LCASE
 
 # good enough
 HK_LOTTO_NAME
-
-# good enough
-HTML_TAG_BALANCE_CENTER
-
-# good enough
-LIST_PARTIAL_SHORT_MSG
 
 # good enough
 TR_FILLER_TEXT
