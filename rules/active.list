@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-traps bb-zmi bpoliakoff darxus dwarren grenier jarif kgolding; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bpoliakoff darxus dwarren grenier jarif kgolding llanga zmi; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-kmcgrail bb-traps bb-zmi bpoliakoff darxus dwarren grenier jarif kgolding llanga zmi
+# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bpoliakoff darxus dwarren grenier jarif kgolding zmi; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-traps bb-zmi bpoliakoff darxus dwarren grenier jarif kgolding llanga; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bpoliakoff darxus dwarren grenier jarif kgolding llanga zmi
 
 # tflags publish
 AC_BR_BONANZA
@@ -65,6 +65,9 @@ ADVANCE_FEE_4_NEW
 ADVANCE_FEE_4_NEW_MONEY
 
 # good enough
+ADVANCE_FEE_5_NEW_FRM_MNY
+
+# good enough
 ADVANCE_FEE_5_NEW_MONEY
 
 # tflags publish
@@ -110,9 +113,6 @@ BAYES_99
 BAYES_999
 
 # good enough
-BODY_EMPTY
-
-# good enough
 BODY_SINGLE_URI
 
 # good enough
@@ -153,6 +153,9 @@ CORRUPT_FROM_LINE_IN_HDRS
 
 # good enough
 DATE_IN_FUTURE_96_Q
+
+# good enough
+DEAR_BENEFICIARY
 
 # tflags net
 DIGEST_MULTIPLE
@@ -210,9 +213,6 @@ ENCRYPTED_MESSAGE
 
 # tflags userconf
 ENV_AND_HDR_SPF_MATCH
-
-# good enough
-FAKE_REPLY_A1
 
 # good enough
 FAKE_REPLY_C
@@ -488,6 +488,9 @@ MONEY_FRAUD_5
 MONEY_FRAUD_8
 
 # good enough
+MONEY_FROM_41
+
+# good enough
 MONEY_FROM_MISSP
 
 # good enough
@@ -516,9 +519,6 @@ NSL_RCVD_HELO_USER
 
 # good enough
 OBFU_ATTACH_MISSP
-
-# good enough
-OBFU_DOC_ATTACH
 
 # tflags publish
 OBFU_JVSCR_ESC
@@ -906,6 +906,9 @@ TW_GIBBERISH_MANY
 
 # good enough
 BILLION_OVERLAP
+
+# good enough
+SPELLED_OUT_NUMBER
 
 # tflags publish
 UC_GIBBERISH_OBFU
