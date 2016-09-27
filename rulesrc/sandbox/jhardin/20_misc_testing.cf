@@ -2161,7 +2161,7 @@ header     __FROM_WORDY                From:addr =~ /^(?:(?:[A-Z][A-Za-z]+|or|&)
 #header     __FROM_WORDY                From:addr =~ /^(?:(?:[A-Z][A-Za-z]+|or|&)\.)+[A-Z][A-Za-z]+(?<!Customer\.S(?:ervice|upport))\@/
 header     __FROM_WORDY_3              From:addr =~ /(?:(?:[A-Z][A-Za-z]+|or|&)\.){2,}[A-Z][A-Za-z]+\@/
 
-meta       __FROM_WORDY_SONLY          __FROM_WORDY && (__KHOP_NO_FULL_NAME || __TO_EQ_FROM_DOM_2 || __HTML_IMG_ONLY || FREEMAIL_FORGED_REPLYTO || FREEMAIL_REPLYTO )
+meta       __FROM_WORDY_SONLY          __FROM_WORDY && (__XPRIO_MINFP || __TO_NO_BRKTS_MSFT || __FILL_THIS_FORM_SHORT || __HAS_MSMAIL_PRI || DEAR_FRIEND ||  __TO_NO_BRKTS_FROM_MSSP || FREEMAIL_REPLYTO )
 meta       FROM_WORDY                  ((__FROM_WORDY_SONLY || __FROM_WORDY_3) && !__HTML_LENGTH_0000_1024) && !__HAS_TNEF && !__USING_VERP1 && !__HDRS_LCASE_KNOWN 
 describe   FROM_WORDY                  From address looks like a sentence
 score      FROM_WORDY                  2.500	# limit
