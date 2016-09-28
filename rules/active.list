@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bpoliakoff darxus dwarren grenier jarif kgolding zmi; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-traps bb-zmi bpoliakoff darxus dwarren grenier jarif kgolding llanga; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bpoliakoff darxus dwarren grenier jarif kgolding llanga zmi
+# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-traps bpoliakoff darxus dwarren grenier jarif kgolding zmi; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-traps bpoliakoff darxus dwarren grenier jarif kgolding llanga zmi; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud bpoliakoff darxus dwarren grenier jarif kgolding llanga zmi
 
 # tflags publish
 AC_BR_BONANZA
@@ -113,10 +113,7 @@ BAYES_99
 BAYES_999
 
 # good enough
-BODY_SINGLE_URI
-
-# good enough
-BODY_SINGLE_WORD
+BILLION_OVERLAP
 
 # tflags publish
 BODY_URI_ONLY
@@ -213,9 +210,6 @@ ENCRYPTED_MESSAGE
 
 # tflags userconf
 ENV_AND_HDR_SPF_MATCH
-
-# good enough
-FAKE_REPLY_C
 
 # tflags publish
 FBI_MONEY
@@ -492,9 +486,6 @@ MONEY_FROM_41
 
 # good enough
 MONEY_FROM_MISSP
-
-# good enough
-MONEY_LOTTERY
 
 # tflags publish
 MSM_PRIO_REPTO
@@ -793,6 +784,9 @@ SHARE_50_50
 # tflags publish
 SINGLETS_LOW_CONTRAST
 
+# good enough
+SPELLED_OUT_NUMBER
+
 # tflags net
 SPF_FAIL
 
@@ -890,7 +884,7 @@ TO_NO_BRKTS_NORDNS_HTML
 TO_NO_BRKTS_PCNT
 
 # good enough
-TR_FILLER_TEXT
+TVD_QUAL_MEDS
 
 # good enough
 TVD_SPACE_ENCODED
@@ -901,17 +895,29 @@ TVD_SPACE_ENC_FM_MIME
 # good enough
 TVD_SPACE_RATIO_MINFP
 
+# good enough
+TVD_VISIT_PHARMA
+
 # tflags publish
 TW_GIBBERISH_MANY
 
 # good enough
-BILLION_OVERLAP
+ADVANCE_FEE_2_NEW_FRM_MNY
 
 # good enough
-OBFU_DOC_ATTACH
+ADVANCE_FEE_4_NEW_FRM_MNY
 
 # good enough
-SPELLED_OUT_NUMBER
+ADVANCE_FEE_5_NEW
+
+# good enough
+AXB_X_FF_SEZ_S
+
+# good enough
+BODY_EMPTY
+
+# good enough
+HK_SCAM_N2
 
 # tflags publish
 UC_GIBBERISH_OBFU
