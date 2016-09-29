@@ -98,6 +98,8 @@ score    FSL_RCVD_UT_GT_5	0.01
 
 header   __FSL_COUNT_EXTERN	X-Spam-Relays-External =~ /\[[^\]]+\]/
 tflags   __FSL_COUNT_EXTERN	multiple
+meta     FSL_RCVD_EX_0		(__FSL_COUNT_EXTERN == 0)
+score    FSL_RCVD_EX_0		0.01
 meta     FSL_RCVD_EX_1          (__FSL_COUNT_EXTERN == 1)
 score    FSL_RCVD_EX_1		0.01
 meta     FSL_RCVD_EX_2          (__FSL_COUNT_EXTERN == 2)
@@ -109,6 +111,9 @@ score    FSL_RCVD_EX_4		0.01
 meta     FSL_RCVD_EX_5          (__FSL_COUNT_EXTERN == 5)
 score    FSL_RCVD_EX_5		0.01
 meta     FSL_RCVD_EX_GT_5       (__FSL_COUNT_EXTERN > 5)
+
+meta     FSL_NO_RCVD_1          (__FSL_COUNT_TRUST > 0 && __FSL_COUNT_UNTRUST == 0)
+score    FSL_NO_RCVD_1		0.01
 
 rawbody  __FSL_HTML_BLOCKS      /<((?:div|span))[^>]+>.{1,10}?<\/\1[^>]*>.{0,20}?<\1/si
 tflags   __FSL_HTML_BLOCKS      multiple
