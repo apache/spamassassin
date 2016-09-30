@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud bpoliakoff darxus dwarren grenier jarif kgolding zmi; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-traps bpoliakoff darxus dwarren grenier jarif kgolding llanga zmi; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-traps bpoliakoff darxus dwarren grenier jarif kgolding llanga zmi
+# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-kmcgrail bb-traps bb-zmi bpoliakoff darxus dwarren grenier jarif kgolding zmi; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud bpoliakoff darxus dwarren grenier jarif kgolding llanga zmi; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-traps bpoliakoff darxus dwarren grenier jarif kgolding llanga zmi
 
 # tflags publish
 AC_BR_BONANZA
@@ -43,6 +43,9 @@ ADMAIL
 # tflags publish
 ADVANCE_FEE_2_NEW_FORM
 
+# good enough
+ADVANCE_FEE_2_NEW_FRM_MNY
+
 # tflags publish
 ADVANCE_FEE_2_NEW_MONEY
 
@@ -62,7 +65,13 @@ ADVANCE_FEE_3_NEW_MONEY
 ADVANCE_FEE_4_NEW
 
 # good enough
+ADVANCE_FEE_4_NEW_FRM_MNY
+
+# good enough
 ADVANCE_FEE_4_NEW_MONEY
+
+# good enough
+ADVANCE_FEE_5_NEW
 
 # good enough
 ADVANCE_FEE_5_NEW_FRM_MNY
@@ -81,6 +90,9 @@ AXB_XMAILER_MIMEOLE_OL_024C2
 
 # good enough
 AXB_XMAILER_MIMEOLE_OL_1ECD5
+
+# good enough
+AXB_X_FF_SEZ_S
 
 # tflags learn
 BAYES_00
@@ -114,6 +126,9 @@ BAYES_999
 
 # good enough
 BILLION_OVERLAP
+
+# good enough
+BODY_EMPTY
 
 # tflags publish
 BODY_URI_ONLY
@@ -404,6 +419,9 @@ HK_NAME_MR_MRS
 HK_RANDOM_FROM
 
 # good enough
+HK_SCAM_N2
+
+# good enough
 HK_SCAM_S7
 
 # tflags userconf
@@ -510,9 +528,6 @@ NSL_RCVD_HELO_USER
 
 # good enough
 OBFU_ATTACH_MISSP
-
-# good enough
-OBFU_DOC_ATTACH
 
 # tflags publish
 OBFU_JVSCR_ESC
@@ -905,22 +920,13 @@ TVD_VISIT_PHARMA
 TW_GIBBERISH_MANY
 
 # good enough
-ADVANCE_FEE_2_NEW_FRM_MNY
+HK_SCAM_N3
 
 # good enough
-ADVANCE_FEE_4_NEW_FRM_MNY
+SHORTENED_URL_SRC
 
 # good enough
-ADVANCE_FEE_5_NEW
-
-# good enough
-AXB_X_FF_SEZ_S
-
-# good enough
-BODY_EMPTY
-
-# good enough
-HK_SCAM_N2
+TEQF_USR_POLITE
 
 # tflags publish
 UC_GIBBERISH_OBFU
@@ -1074,6 +1080,9 @@ USER_IN_WHITELIST
 
 # tflags userconf
 USER_IN_WHITELIST_TO
+
+# good enough
+US_DOLLARS_3
 
 # tflags publish
 XM_PHPMAILER_FORGED
