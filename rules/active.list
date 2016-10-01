@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-kmcgrail bb-traps bb-zmi bpoliakoff darxus dwarren grenier jarif kgolding zmi; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud bpoliakoff darxus dwarren grenier jarif kgolding llanga zmi; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-traps bpoliakoff darxus dwarren grenier jarif kgolding llanga zmi
+# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bpoliakoff darxus dwarren grenier jarif kgolding zmi; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-kmcgrail bb-traps bb-zmi bpoliakoff darxus dwarren grenier jarif kgolding llanga zmi; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud bpoliakoff darxus dwarren grenier jarif kgolding llanga zmi
 
 # tflags publish
 AC_BR_BONANZA
@@ -123,9 +123,6 @@ BAYES_99
 
 # tflags learn
 BAYES_999
-
-# good enough
-BILLION_OVERLAP
 
 # good enough
 BODY_EMPTY
@@ -466,9 +463,6 @@ MANY_SPAN_IN_TEXT
 # good enough
 MILLION_USD
 
-# good enough
-MIMEOLE_DIRECT_TO_MX
-
 # tflags userconf
 MIME_CHARSET_FARAWAY
 
@@ -480,9 +474,6 @@ MISSING_HB_SEP
 
 # good enough
 MONEY_ATM_CARD
-
-# good enough
-MONEY_BARRISTER
 
 # good enough
 MONEY_FORM
@@ -528,6 +519,9 @@ NSL_RCVD_HELO_USER
 
 # good enough
 OBFU_ATTACH_MISSP
+
+# good enough
+OBFU_DOC_ATTACH
 
 # tflags publish
 OBFU_JVSCR_ESC
@@ -920,7 +914,13 @@ TVD_VISIT_PHARMA
 TW_GIBBERISH_MANY
 
 # good enough
+DUP_SUSP_HDR
+
+# good enough
 HK_SCAM_N3
+
+# good enough
+KHOP_UNSUB_EMAIL
 
 # good enough
 SHORTENED_URL_SRC
@@ -1080,9 +1080,6 @@ USER_IN_WHITELIST
 
 # tflags userconf
 USER_IN_WHITELIST_TO
-
-# good enough
-US_DOLLARS_3
 
 # tflags publish
 XM_PHPMAILER_FORGED
