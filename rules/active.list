@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bpoliakoff darxus dwarren grenier jarif kgolding zmi; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-kmcgrail bb-traps bb-zmi bpoliakoff darxus dwarren grenier jarif kgolding llanga zmi; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud bpoliakoff darxus dwarren grenier jarif kgolding llanga zmi
+# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bpoliakoff darxus dwarren grenier jarif kgolding; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud bpoliakoff darxus dwarren grenier jarif kgolding llanga; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud bpoliakoff darxus dwarren grenier jarif kgolding llanga zmi
 
 # tflags publish
 AC_BR_BONANZA
@@ -43,9 +43,6 @@ ADMAIL
 # tflags publish
 ADVANCE_FEE_2_NEW_FORM
 
-# good enough
-ADVANCE_FEE_2_NEW_FRM_MNY
-
 # tflags publish
 ADVANCE_FEE_2_NEW_MONEY
 
@@ -84,6 +81,9 @@ AD_PREFS
 
 # tflags userconf
 ALL_TRUSTED
+
+# good enough
+APOSTROPHE_FROM
 
 # good enough
 AXB_XMAILER_MIMEOLE_OL_024C2
@@ -210,6 +210,9 @@ DOS_OE_TO_MX
 
 # good enough
 DOS_OUTLOOK_TO_MX
+
+# good enough
+DUP_SUSP_HDR
 
 # tflags publish
 DX_TEXT_02
@@ -383,9 +386,6 @@ HASHCASH_2SPEND
 HASHCASH_HIGH
 
 # good enough
-HDRS_LCASE
-
-# good enough
 HDRS_MISSP
 
 # tflags publish
@@ -413,12 +413,6 @@ HK_NAME_DRUGS
 HK_NAME_MR_MRS
 
 # good enough
-HK_RANDOM_FROM
-
-# good enough
-HK_SCAM_N2
-
-# good enough
 HK_SCAM_S7
 
 # tflags userconf
@@ -431,7 +425,7 @@ HTML_OFF_PAGE
 HTML_TAG_BALANCE_CENTER
 
 # good enough
-LIST_PARTIAL_SHORT_MSG
+KHOP_UNSUB_EMAIL
 
 # tflags publish
 LIST_PRTL_PUMPDUMP
@@ -477,9 +471,6 @@ MONEY_ATM_CARD
 
 # good enough
 MONEY_FORM
-
-# good enough
-MONEY_FORM_SHORT
 
 # tflags publish
 MONEY_FRAUD_3
@@ -790,6 +781,9 @@ SERGIO_SUBJECT_VIAGRA01
 # good enough
 SHARE_50_50
 
+# good enough
+SHORTENED_URL_SRC
+
 # tflags publish
 SINGLETS_LOW_CONTRAST
 
@@ -859,6 +853,9 @@ TEQF_USR_MSGID_HEX
 # tflags publish
 TEQF_USR_MSGID_MALF
 
+# good enough
+TEQF_USR_POLITE
+
 # tflags publish
 THIS_AD
 
@@ -911,19 +908,28 @@ TVD_VISIT_PHARMA
 TW_GIBBERISH_MANY
 
 # good enough
-DUP_SUSP_HDR
+HK_SCAM_N15
 
 # good enough
-HK_SCAM_N3
+MANY_SUBDOM
 
 # good enough
-KHOP_UNSUB_EMAIL
+MONEY_LOTTERY
 
 # good enough
-SHORTENED_URL_SRC
+MSGID_NOFQDN1
 
 # good enough
-TEQF_USR_POLITE
+ONLINE_MKTG_CNSLT
+
+# good enough
+TVD_FROM_1
+
+# good enough
+URI_OBFU_DOM
+
+# good enough
+US_DOLLARS_3
 
 # tflags publish
 UC_GIBBERISH_OBFU
