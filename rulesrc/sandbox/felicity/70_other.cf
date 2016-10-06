@@ -54,7 +54,8 @@ body TVD_FUZZY_PHARMACEUTICAL   /<inter W2><post P2>(?!pharmaceutical)<P><H><A><
 replace_rules TVD_FUZZY_PHARMACEUTICAL
 describe TVD_FUZZY_PHARMACEUTICAL  Obfuscation of the word "pharmaceutical"
 
-body TVD_FUZZY_SYMBOL   /<inter W2><post P2>(?!symbol)<S><Y><M><B><O><L>/i
+# bug 7356
+body TVD_FUZZY_SYMBOL   /<inter W2><post P2>(?!symboo?l)<S><Y><M><B><O><L>/i
 replace_rules TVD_FUZZY_SYMBOL
 describe TVD_FUZZY_SYMBOL  Obfuscation of the word "symbol"
 
