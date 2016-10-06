@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bpoliakoff darxus dwarren grenier jarif kgolding; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud bpoliakoff darxus dwarren grenier jarif kgolding llanga; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud bpoliakoff darxus dwarren grenier jarif kgolding llanga zmi
+# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bpoliakoff darxus dwarren grenier jarif kgolding zmi; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bpoliakoff darxus dwarren grenier jarif kgolding llanga; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud bpoliakoff darxus dwarren grenier jarif kgolding llanga
 
 # tflags publish
 AC_BR_BONANZA
@@ -90,9 +90,6 @@ AXB_XMAILER_MIMEOLE_OL_024C2
 
 # good enough
 AXB_XMAILER_MIMEOLE_OL_1ECD5
-
-# good enough
-AXB_X_FF_SEZ_S
 
 # tflags learn
 BAYES_00
@@ -471,6 +468,9 @@ MONEY_ATM_CARD
 
 # good enough
 MONEY_FORM
+
+# good enough
+MONEY_FORM_SHORT
 
 # tflags publish
 MONEY_FRAUD_3
@@ -908,10 +908,13 @@ TVD_VISIT_PHARMA
 TW_GIBBERISH_MANY
 
 # good enough
+FROM_MISSP_DYNIP
+
+# good enough
 HK_SCAM_N15
 
 # good enough
-MANY_SUBDOM
+HTML_FONT_TINY
 
 # good enough
 MONEY_LOTTERY
@@ -920,13 +923,7 @@ MONEY_LOTTERY
 MSGID_NOFQDN1
 
 # good enough
-ONLINE_MKTG_CNSLT
-
-# good enough
 TVD_FROM_1
-
-# good enough
-URI_OBFU_DOM
 
 # good enough
 US_DOLLARS_3
