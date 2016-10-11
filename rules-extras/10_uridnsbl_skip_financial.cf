@@ -1,7 +1,9 @@
-ifplugin Mail::SpamAssassin::Plugin::URIDNSBL
+
 #
 # Last update: 2016-08-29-axb
 # Phished financial domains
+ifplugin Mail::SpamAssassin::Plugin::URIDNSBL
+
 uridnsbl_skip_domain 1stnationalbank.com
 uridnsbl_skip_domain 365online.com
 uridnsbl_skip_domain 53.com
@@ -84,6 +86,7 @@ uridnsbl_skip_domain bankofireland.com
 uridnsbl_skip_domain bankofirelanduk.com
 uridnsbl_skip_domain bankofoklahoma.com
 uridnsbl_skip_domain bankofscotland.co.uk
+uridnsbl_skip_domain bankofsingapore.com
 uridnsbl_skip_domain banksinarmas.com
 uridnsbl_skip_domain bankvonroll.ch
 uridnsbl_skip_domain bankwest.com.au
@@ -619,6 +622,4 @@ uridnsbl_skip_domain zagbank.ca
 uridnsbl_skip_domain zenithbank.com
 uridnsbl_skip_domain zkb.ch
 uridnsbl_skip_domain zugerkb.ch
-
-#
 endif   # Mail::SpamAssassin::Plugin::URIDNSBL
