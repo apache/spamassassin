@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-traps bpoliakoff darxus dwarren grenier jarif kgolding zmi; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bpoliakoff darxus dwarren grenier jarif kgolding llanga zmi; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud bpoliakoff darxus dwarren grenier jarif kgolding llanga zmi
+# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-traps bb-zmi bpoliakoff darxus dwarren grenier jarif kgolding zmi; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bpoliakoff darxus dwarren grenier jarif kgolding llanga zmi; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-traps bb-zmi bpoliakoff darxus dwarren grenier jarif kgolding llanga zmi
 
 # tflags publish
 AC_BR_BONANZA
@@ -90,6 +90,9 @@ AXB_XMAILER_MIMEOLE_OL_024C2
 
 # good enough
 AXB_XMAILER_MIMEOLE_OL_1ECD5
+
+# good enough
+AXB_X_FF_SEZ_S
 
 # tflags learn
 BAYES_00
@@ -908,6 +911,9 @@ TO_NO_BRKTS_PCNT
 TR_FILLER_TEXT
 
 # good enough
+TT_MSGID_TRUNC
+
+# good enough
 TVD_FROM_1
 
 # good enough
@@ -929,7 +935,10 @@ TVD_VISIT_PHARMA
 TW_GIBBERISH_MANY
 
 # good enough
-AXB_X_FF_SEZ_S
+ADMITS_SPAM
+
+# good enough
+HDRS_LCASE
 
 # tflags publish
 UC_GIBBERISH_OBFU
