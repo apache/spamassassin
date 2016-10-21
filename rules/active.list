@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-traps bpoliakoff darxus dwarren grenier jarif kgolding zmi; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-traps bb-zmi bpoliakoff darxus dwarren grenier jarif kgolding llanga zmi; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bpoliakoff darxus dwarren grenier jarif kgolding llanga zmi
+# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bpoliakoff darxus dwarren grenier jarif kgolding zmi; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-traps bpoliakoff darxus dwarren grenier jarif kgolding llanga zmi; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-traps bb-zmi bpoliakoff darxus dwarren grenier jarif kgolding llanga zmi
 
 # tflags publish
 AC_BR_BONANZA
@@ -389,6 +389,9 @@ HASHCASH_2SPEND
 HASHCASH_HIGH
 
 # good enough
+HDRS_LCASE
+
+# good enough
 HDRS_MISSP
 
 # tflags publish
@@ -480,9 +483,6 @@ MISSING_HB_SEP
 
 # good enough
 MONEY_ATM_CARD
-
-# good enough
-MONEY_BARRISTER
 
 # good enough
 MONEY_FORM
@@ -868,9 +868,6 @@ TEQF_USR_MSGID_HEX
 # tflags publish
 TEQF_USR_MSGID_MALF
 
-# good enough
-TEQF_USR_POLITE
-
 # tflags publish
 THIS_AD
 
@@ -927,9 +924,6 @@ TW_GIBBERISH_MANY
 
 # good enough
 FROM_MISSP_PHISH
-
-# good enough
-HDRS_LCASE
 
 # good enough
 LIST_PARTIAL_SHORT_MSG
