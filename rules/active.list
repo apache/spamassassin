@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-traps bpoliakoff darxus dwarren grenier jarif kgolding; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bpoliakoff darxus dwarren grenier jarif kgolding llanga zmi; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-traps bpoliakoff darxus dwarren grenier jarif kgolding llanga zmi
+# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-traps bpoliakoff darxus dwarren grenier jarif kgolding zmi; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bpoliakoff darxus dwarren grenier jarif kgolding llanga zmi; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud bpoliakoff darxus grenier jarif kgolding llanga zmi
 
 # tflags publish
 AC_BR_BONANZA
@@ -121,9 +121,6 @@ BAYES_99
 # tflags learn
 BAYES_999
 
-# good enough
-BODY_EMPTY
-
 # tflags publish
 BODY_URI_ONLY
 
@@ -156,9 +153,6 @@ COMPENSATION
 
 # tflags publish
 CORRUPT_FROM_LINE_IN_HDRS
-
-# good enough
-DATE_IN_FUTURE_96_Q
 
 # good enough
 DEAR_BENEFICIARY
@@ -213,9 +207,6 @@ DX_TEXT_02
 
 # tflags publish
 DX_TEXT_03
-
-# good enough
-DYN_RDNS_SHORT_HELO_HTML
 
 # tflags publish
 ENCRYPTED_MESSAGE
@@ -787,9 +778,6 @@ SERGIO_SUBJECT_VIAGRA01
 # tflags publish
 SINGLETS_LOW_CONTRAST
 
-# good enough
-SPELLED_OUT_NUMBER
-
 # tflags net
 SPF_FAIL
 
@@ -887,7 +875,7 @@ TO_NO_BRKTS_NORDNS_HTML
 TO_NO_BRKTS_PCNT
 
 # good enough
-TT_MSGID_TRUNC
+TR_FILLER_TEXT
 
 # good enough
 TVD_FROM_1
@@ -911,10 +899,31 @@ TVD_VISIT_PHARMA
 TW_GIBBERISH_MANY
 
 # good enough
-ADMITS_SPAM
+ADVANCE_FEE_5_NEW
 
 # good enough
-TR_FILLER_TEXT
+BIGNUM_EMAILS
+
+# good enough
+BODY_SINGLE_URI
+
+# good enough
+FREEMAIL_DOC_PDF_BCC
+
+# good enough
+HK_SCAM_N2
+
+# good enough
+HK_SCAM_N3
+
+# good enough
+LIST_PARTIAL_SHORT_MSG
+
+# good enough
+MONEY_LOTTERY
+
+# good enough
+RISK_FREE
 
 # tflags publish
 UC_GIBBERISH_OBFU
