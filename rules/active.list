@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bpoliakoff darxus dwarren grenier jarif kgolding zmi; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-traps bpoliakoff darxus dwarren grenier jarif kgolding llanga zmi; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bpoliakoff darxus dwarren grenier jarif kgolding llanga zmi
+# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud bpoliakoff darxus grenier jarif kgolding zmi; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bpoliakoff darxus dwarren grenier jarif kgolding llanga zmi; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-traps bpoliakoff darxus dwarren grenier jarif kgolding llanga zmi
 
 # tflags publish
 AC_BR_BONANZA
@@ -71,6 +71,9 @@ ADVANCE_FEE_4_NEW_FRM_MNY
 ADVANCE_FEE_4_NEW_MONEY
 
 # good enough
+ADVANCE_FEE_5_NEW
+
+# good enough
 ADVANCE_FEE_5_NEW_FRM_MNY
 
 # good enough
@@ -120,6 +123,12 @@ BAYES_99
 
 # tflags learn
 BAYES_999
+
+# good enough
+BIGNUM_EMAILS
+
+# good enough
+BODY_SINGLE_URI
 
 # tflags publish
 BODY_URI_ONLY
@@ -261,9 +270,6 @@ FROM_LOCAL_NOVOWEL
 
 # good enough
 FROM_MISSPACED
-
-# good enough
-FROM_MISSP_DYNIP
 
 # good enough
 FROM_MISSP_FREEMAIL
@@ -409,6 +415,12 @@ HK_NAME_MR_MRS
 # good enough
 HK_SCAM_N15
 
+# good enough
+HK_SCAM_N2
+
+# good enough
+HK_SCAM_N3
+
 # tflags userconf
 HTML_CHARSET_FARAWAY
 
@@ -423,6 +435,9 @@ HTML_TAG_BALANCE_CENTER
 
 # good enough
 KB_FORGED_MOZ4
+
+# good enough
+LIST_PARTIAL_SHORT_MSG
 
 # tflags publish
 LIST_PRTL_PUMPDUMP
@@ -486,6 +501,9 @@ MONEY_FROM_41
 
 # good enough
 MONEY_FROM_MISSP
+
+# good enough
+MONEY_LOTTERY
 
 # good enough
 MSGID_NOFQDN1
@@ -770,6 +788,9 @@ RCVD_IN_XBL
 REPLYTO_WITHOUT_TO_CC
 
 # good enough
+RISK_FREE
+
+# good enough
 RP_MATCHES_RCVD
 
 # good enough
@@ -899,31 +920,13 @@ TVD_VISIT_PHARMA
 TW_GIBBERISH_MANY
 
 # good enough
-ADVANCE_FEE_5_NEW
+BODY_EMPTY
 
 # good enough
-BIGNUM_EMAILS
+HDRS_LCASE_IMGONLY
 
 # good enough
-BODY_SINGLE_URI
-
-# good enough
-FREEMAIL_DOC_PDF_BCC
-
-# good enough
-HK_SCAM_N2
-
-# good enough
-HK_SCAM_N3
-
-# good enough
-LIST_PARTIAL_SHORT_MSG
-
-# good enough
-MONEY_LOTTERY
-
-# good enough
-RISK_FREE
+SPELLED_OUT_NUMBER
 
 # tflags publish
 UC_GIBBERISH_OBFU
