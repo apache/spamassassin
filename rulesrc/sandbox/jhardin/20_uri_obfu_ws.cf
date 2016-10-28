@@ -10,11 +10,12 @@
 
 ifplugin Mail::SpamAssassin::Plugin::ReplaceTags
 
-# Disabled 10/2016 - abysmal S/O, it's ignoring the score limit, and reported FPs that I can't repro
-#body          URI_OBFU_WWW  /(?<!http:\/\/)\b_*w{2,3}(?!(?:\.+|\/)[-\w]+\.+(?:com|net|org|biz|info))[^[:alnum:]]{1,3}(?:<D><O><T>+[^[:alnum:]]{1,3})?[[:alnum:]][-\w]{1,20}[[:alnum:]][^[:alnum:]]{1,3}(?:<D><O><T>+[^[:alnum:]]{1,3})?(?:c\s?o\s?m|n\s?e\s?t|o\s?r\s?g|b\s?i\s?z|i\s?n\s?f\s?o)_*\b/i
-#describe      URI_OBFU_WWW  Obfuscated URI
-#replace_rules URI_OBFU_WWW
-#score         URI_OBFU_WWW  2.000	# limit
+# Disabled 10/2016 - abysmal S/O, it's ignoring the score limit, and reported FPs in bug#7365 that I can't repro
+# trying minor tuning change before we give up, will disable again if that doesn't help
+body          URI_OBFU_WWW  /(?<!:\/\/)\b_*w{2,3}(?!(?:\.+|\/)[-\w]+\.+(?:com|net|org|biz|info))[^[:alnum:]]{1,3}(?:<D><O><T>+[^[:alnum:]]{1,3})?[[:alnum:]][-\w]{1,20}[[:alnum:]][^[:alnum:]]{1,3}(?:<D><O><T>+[^[:alnum:]]{1,3})?(?:c\s?o\s?m|n\s?e\s?t|o\s?r\s?g|b\s?i\s?z|i\s?n\s?f\s?o)_*\b/i
+describe      URI_OBFU_WWW  Obfuscated URI
+replace_rules URI_OBFU_WWW
+score         URI_OBFU_WWW  2.000	# limit
 
 endif
 
