@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud bpoliakoff darxus grenier jarif kgolding zmi; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bpoliakoff darxus dwarren grenier jarif kgolding llanga zmi; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-traps bpoliakoff darxus dwarren grenier jarif kgolding llanga zmi
+# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-traps bb-zmi bpoliakoff darxus grenier jarif kgolding zmi; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud bpoliakoff darxus grenier jarif kgolding llanga zmi; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bpoliakoff darxus dwarren grenier jarif kgolding llanga zmi
 
 # tflags publish
 AC_BR_BONANZA
@@ -310,6 +310,9 @@ FSL_HELO_BARE_IP_1
 # good enough
 FSL_HELO_BARE_IP_2
 
+# good enough
+FSL_HELO_DEVICE
+
 # tflags publish
 FSL_NEW_HELO_USER
 
@@ -435,9 +438,6 @@ HTML_TAG_BALANCE_CENTER
 
 # good enough
 KB_FORGED_MOZ4
-
-# good enough
-LIST_PARTIAL_SHORT_MSG
 
 # tflags publish
 LIST_PRTL_PUMPDUMP
@@ -924,6 +924,9 @@ BODY_EMPTY
 
 # good enough
 HDRS_LCASE_IMGONLY
+
+# good enough
+OBFU_DOC_ATTACH
 
 # good enough
 SPELLED_OUT_NUMBER
