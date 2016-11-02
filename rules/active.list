@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-traps bb-zmi bpoliakoff darxus grenier jarif kgolding zmi; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud bpoliakoff darxus grenier jarif kgolding llanga zmi; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bpoliakoff darxus dwarren grenier jarif kgolding llanga zmi
+# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bpoliakoff darxus dwarren grenier jarif kgolding zmi; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud bpoliakoff darxus grenier jarif kgolding llanga zmi; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud bpoliakoff darxus dwarren grenier jarif kgolding llanga zmi
 
 # tflags publish
 AC_BR_BONANZA
@@ -126,6 +126,9 @@ BAYES_999
 
 # good enough
 BIGNUM_EMAILS
+
+# good enough
+BODY_EMPTY
 
 # good enough
 BODY_SINGLE_URI
@@ -278,9 +281,6 @@ FROM_MISSP_FREEMAIL
 FROM_MISSP_MSFT
 
 # good enough
-FROM_MISSP_PHISH
-
-# good enough
 FROM_MISSP_REPLYTO
 
 # tflags net
@@ -386,7 +386,7 @@ HASHCASH_2SPEND
 HASHCASH_HIGH
 
 # good enough
-HDRS_LCASE
+HDRS_LCASE_IMGONLY
 
 # good enough
 HDRS_MISSP
@@ -480,9 +480,6 @@ MISSING_HB_SEP
 
 # good enough
 MONEY_ATM_CARD
-
-# good enough
-MONEY_FORM
 
 # good enough
 MONEY_FORM_SHORT
@@ -799,6 +796,9 @@ SERGIO_SUBJECT_VIAGRA01
 # tflags publish
 SINGLETS_LOW_CONTRAST
 
+# good enough
+SPELLED_OUT_NUMBER
+
 # tflags net
 SPF_FAIL
 
@@ -838,9 +838,6 @@ STOCK_LOW_CONTRAST
 # tflags publish
 STOCK_TIP
 
-# good enough
-STOX_REPLY_TYPE_WITHOUT_QUOTES
-
 # tflags publish
 STYLE_GIBBERISH
 
@@ -877,9 +874,6 @@ TO_EQ_FM_SPF_FAIL
 # tflags publish
 TO_IN_SUBJ
 
-# good enough
-TO_NO_BRKTS_FROM_MSSP
-
 # tflags publish
 TO_NO_BRKTS_HTML_IMG
 
@@ -894,9 +888,6 @@ TO_NO_BRKTS_NORDNS_HTML
 
 # tflags publish
 TO_NO_BRKTS_PCNT
-
-# good enough
-TR_FILLER_TEXT
 
 # good enough
 TVD_FROM_1
@@ -920,16 +911,10 @@ TVD_VISIT_PHARMA
 TW_GIBBERISH_MANY
 
 # good enough
-BODY_EMPTY
+DUP_SUSP_HDR
 
 # good enough
-HDRS_LCASE_IMGONLY
-
-# good enough
-OBFU_DOC_ATTACH
-
-# good enough
-SPELLED_OUT_NUMBER
+FREEMAIL_DOC_PDF_BCC
 
 # tflags publish
 UC_GIBBERISH_OBFU
