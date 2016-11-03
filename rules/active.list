@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bpoliakoff darxus dwarren grenier jarif kgolding zmi; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud bpoliakoff darxus grenier jarif kgolding llanga zmi; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud bpoliakoff darxus dwarren grenier jarif kgolding llanga zmi
+# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-traps bpoliakoff darxus dwarren grenier jarif kgolding zmi; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bpoliakoff darxus dwarren grenier jarif kgolding llanga zmi; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud bpoliakoff darxus grenier jarif kgolding llanga zmi
 
 # tflags publish
 AC_BR_BONANZA
@@ -91,9 +91,6 @@ AXB_XMAILER_MIMEOLE_OL_024C2
 # good enough
 AXB_XMAILER_MIMEOLE_OL_1ECD5
 
-# good enough
-AXB_X_FF_SEZ_S
-
 # tflags learn
 BAYES_00
 
@@ -129,9 +126,6 @@ BIGNUM_EMAILS
 
 # good enough
 BODY_EMPTY
-
-# good enough
-BODY_SINGLE_URI
 
 # tflags publish
 BODY_URI_ONLY
@@ -481,9 +475,6 @@ MISSING_HB_SEP
 # good enough
 MONEY_ATM_CARD
 
-# good enough
-MONEY_FORM_SHORT
-
 # tflags publish
 MONEY_FRAUD_3
 
@@ -525,6 +516,9 @@ NSL_RCVD_FROM_USER
 
 # good enough
 NSL_RCVD_HELO_USER
+
+# good enough
+OBFU_DOC_ATTACH
 
 # tflags publish
 OBFU_JVSCR_ESC
@@ -874,6 +868,9 @@ TO_EQ_FM_SPF_FAIL
 # tflags publish
 TO_IN_SUBJ
 
+# good enough
+TO_NO_BRKTS_FROM_MSSP
+
 # tflags publish
 TO_NO_BRKTS_HTML_IMG
 
@@ -912,9 +909,6 @@ TW_GIBBERISH_MANY
 
 # good enough
 DUP_SUSP_HDR
-
-# good enough
-FREEMAIL_DOC_PDF_BCC
 
 # tflags publish
 UC_GIBBERISH_OBFU
