@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-traps bpoliakoff darxus dwarren grenier jarif kgolding zmi; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-traps bpoliakoff darxus dwarren grenier jarif kgolding llanga zmi; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bpoliakoff darxus dwarren grenier jarif kgolding llanga zmi
+# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud bpoliakoff darxus dwarren grenier jarif kgolding zmi; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-traps bpoliakoff darxus dwarren grenier jarif kgolding llanga zmi; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-traps bpoliakoff darxus dwarren grenier jarif kgolding llanga zmi
 
 # tflags publish
 AC_BR_BONANZA
@@ -43,9 +43,6 @@ ADMAIL
 # tflags publish
 ADVANCE_FEE_2_NEW_FORM
 
-# good enough
-ADVANCE_FEE_2_NEW_FRM_MNY
-
 # tflags publish
 ADVANCE_FEE_2_NEW_MONEY
 
@@ -63,21 +60,6 @@ ADVANCE_FEE_3_NEW_MONEY
 
 # tflags publish
 ADVANCE_FEE_4_NEW
-
-# good enough
-ADVANCE_FEE_4_NEW_FRM_MNY
-
-# good enough
-ADVANCE_FEE_4_NEW_MONEY
-
-# good enough
-ADVANCE_FEE_5_NEW
-
-# good enough
-ADVANCE_FEE_5_NEW_FRM_MNY
-
-# good enough
-ADVANCE_FEE_5_NEW_MONEY
 
 # tflags publish
 AD_PREFS
@@ -127,9 +109,6 @@ BAYES_999
 # good enough
 BIGNUM_EMAILS
 
-# good enough
-BODY_EMPTY
-
 # tflags publish
 BODY_URI_ONLY
 
@@ -154,14 +133,8 @@ CN_B2B_SPAMMER
 # tflags publish
 COMMENT_GIBBERISH
 
-# good enough
-COMPENSATION
-
 # tflags publish
 CORRUPT_FROM_LINE_IN_HDRS
-
-# good enough
-DEAR_BENEFICIARY
 
 # tflags net
 DIGEST_MULTIPLE
@@ -232,12 +205,6 @@ FBI_SPOOF
 # tflags publish
 FILL_THIS_FORM
 
-# good enough
-FILL_THIS_FORM_LOAN
-
-# good enough
-FILL_THIS_FORM_LONG
-
 # tflags publish
 FORM_FRAUD
 
@@ -297,12 +264,6 @@ FROM_WORDY
 
 # tflags publish
 FROM_WORDY_SHORT
-
-# good enough
-FSL_CTYPE_WIN1251
-
-# good enough
-FSL_HELO_BARE_IP_1
 
 # good enough
 FSL_HELO_BARE_IP_2
@@ -382,12 +343,6 @@ HASHCASH_2SPEND
 # tflags userconf
 HASHCASH_HIGH
 
-# good enough
-HDRS_LCASE_IMGONLY
-
-# good enough
-HDRS_MISSP
-
 # tflags publish
 HEADER_FROM_DIFFERENT_DOMAINS
 
@@ -400,9 +355,6 @@ HEADER_HOST_IN_WHITELIST
 # tflags userconf
 HEAD_LONG
 
-# good enough
-HELO_LOCALHOST
-
 # tflags publish
 HEXHASH_WORD
 
@@ -410,28 +362,13 @@ HEXHASH_WORD
 HK_NAME_DRUGS
 
 # good enough
-HK_NAME_MR_MRS
-
-# good enough
 HK_SCAM_N15
-
-# good enough
-HK_SCAM_N2
-
-# good enough
-HK_SCAM_N3
 
 # tflags userconf
 HTML_CHARSET_FARAWAY
 
-# good enough
-HTML_FONT_TINY
-
 # tflags publish
 HTML_OFF_PAGE
-
-# good enough
-HTML_TAG_BALANCE_CENTER
 
 # good enough
 KB_FORGED_MOZ4
@@ -463,9 +400,6 @@ LUCRATIVE
 # tflags publish
 MANY_SPAN_IN_TEXT
 
-# good enough
-MILLION_USD
-
 # tflags userconf
 MIME_CHARSET_FARAWAY
 
@@ -475,12 +409,6 @@ MIME_NO_TEXT
 # tflags userconf
 MISSING_HB_SEP
 
-# good enough
-MONEY_ATM_CARD
-
-# good enough
-MONEY_FORM_SHORT
-
 # tflags publish
 MONEY_FRAUD_3
 
@@ -489,9 +417,6 @@ MONEY_FRAUD_5
 
 # tflags publish
 MONEY_FRAUD_8
-
-# good enough
-MONEY_FROM_41
 
 # good enough
 MONEY_FROM_MISSP
@@ -522,6 +447,9 @@ NSL_RCVD_FROM_USER
 
 # good enough
 NSL_RCVD_HELO_USER
+
+# good enough
+OBFU_DOC_ATTACH
 
 # tflags publish
 OBFU_JVSCR_ESC
@@ -779,12 +707,6 @@ RCVD_IN_SORBS_ZOMBIE
 RCVD_IN_XBL
 
 # good enough
-REPLYTO_WITHOUT_TO_CC
-
-# good enough
-RISK_FREE
-
-# good enough
 RP_MATCHES_RCVD
 
 # good enough
@@ -871,6 +793,9 @@ TO_EQ_FM_SPF_FAIL
 # tflags publish
 TO_IN_SUBJ
 
+# good enough
+TO_NO_BRKTS_FROM_MSSP
+
 # tflags publish
 TO_NO_BRKTS_HTML_IMG
 
@@ -887,16 +812,10 @@ TO_NO_BRKTS_NORDNS_HTML
 TO_NO_BRKTS_PCNT
 
 # good enough
-TVD_FROM_1
-
-# good enough
 TVD_QUAL_MEDS
 
 # good enough
 TVD_SPACE_ENCODED
-
-# good enough
-TVD_SPACE_ENC_FM_MIME
 
 # good enough
 TVD_SPACE_RATIO_MINFP
@@ -908,10 +827,13 @@ TVD_VISIT_PHARMA
 TW_GIBBERISH_MANY
 
 # good enough
-SHORTENED_URL_SRC
+BODY_SINGLE_WORD
 
 # good enough
-TO_NO_BRKTS_FROM_MSSP
+HK_SCAM_S7
+
+# good enough
+OBFU_ATTACH_MISSP
 
 # good enough
 TR_FILLER_TEXT
