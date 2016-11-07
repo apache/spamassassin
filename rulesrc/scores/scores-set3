@@ -3,92 +3,92 @@
 
 score AC_BR_BONANZA                  0.001 # force non-zero
 score AC_DIV_BONANZA                 0.001
-score AC_HTML_NONSENSE_TAGS          0.001
 score ADVANCE_FEE_2_NEW_MONEY        0.001
 score ADVANCE_FEE_3_NEW              0.001
 score ADVANCE_FEE_3_NEW_FRM_MNY      0.001
-score ADVANCE_FEE_3_NEW_MONEY        0.001 # force non-zero
+score ADVANCE_FEE_3_NEW_MONEY        0.001
 score AXB_XMAILER_MIMEOLE_OL_024C2   0.001
 score AXB_XMAILER_MIMEOLE_OL_1ECD5   0.001
-score BIGNUM_EMAILS                  0.001
+score BIGNUM_EMAILS                  2.999
 score BODY_URI_ONLY                  0.657
-score CANT_SEE_AD                    0.796
+score CANT_SEE_AD                    0.798
 score CK_HELO_DYNAMIC_SPLIT_IP       0.001
-score CN_B2B_SPAMMER                 0.001 # force non-zero
-score COMMENT_GIBBERISH              1.498
-score DUP_SUSP_HDR                   2.497
+score CN_B2B_SPAMMER                 0.001
+score COMMENT_GIBBERISH              1.500
+score DUP_SUSP_HDR                   2.500
 score FILL_THIS_FORM                 0.001
-score FORM_FRAUD                     0.001
-score FORM_FRAUD_3                   0.001 # force non-zero
+score FORM_FRAUD                     0.001 # force non-zero
+score FORM_FRAUD_3                   0.001
 score FORM_FRAUD_5                   0.001
-score FOUND_YOU                      0.001 # force non-zero
-score FREEMAIL_FORGED_FROMDOMAIN     0.001 # force non-zero
-score FROM_IN_TO_AND_SUBJ            0.836
+score FOUND_YOU                      0.001
+score FREEMAIL_FORGED_FROMDOMAIN     0.001
+score FROM_IN_TO_AND_SUBJ            0.507
 score FROM_MISSPACED                 0.001 # force non-zero
 score FROM_MISSP_FREEMAIL            0.001
 score FROM_MISSP_MSFT                0.001
-score FROM_MISSP_REPLYTO             0.001 # force non-zero
+score FROM_MISSP_REPLYTO             0.001
 score FROM_MISSP_TO_UNDISC           0.001
 score FROM_MISSP_USER                0.001
 score FROM_MISSP_XPRIO               0.001
 score FROM_WORDY                     0.001
-score FSL_HELO_BARE_IP_2             1.498
+score FSL_HELO_BARE_IP_2             1.119
 score FSL_NEW_HELO_USER              0.001
 score FUZZY_CLICK_HERE               0.001
 score HEADER_FROM_DIFFERENT_DOMAINS  0.001
 score HEXHASH_WORD                   0.001
-score HK_SCAM_N15                    2.596
-score KB_FORGED_MOZ4                 2.433
-score LONG_IMG_URI                   0.098
+score HK_SCAM_N15                    0.001 # force non-zero
+score KB_FORGED_MOZ4                 2.669
+score LONG_IMG_URI                   0.099
 score LOTS_OF_MONEY                  0.001 # force non-zero
 score LOTTO_AGENT                    0.001
 score LOTTO_DEPT                     0.001
-score MANY_SPAN_IN_TEXT              2.696
-score MIME_NO_TEXT                   1.997
-score MONEY_FRAUD_3                  0.001 # force non-zero
+score MANY_SPAN_IN_TEXT              2.699
+score MIME_NO_TEXT                   0.001
+score MONEY_FRAUD_3                  0.001
 score MONEY_FRAUD_5                  0.001
-score MONEY_FRAUD_8                  0.001
+score MONEY_FRAUD_8                  0.001 # force non-zero
 score MONEY_FROM_MISSP               0.001
-score MONEY_LOTTERY                  1.165
-score MSGID_NOFQDN1                  3.196
+score MONEY_LOTTERY                  1.170
+score MSGID_NOFQDN1                  3.299
 score MSM_PRIO_REPTO                 0.001
 score NSL_RCVD_FROM_USER             0.001
 score NSL_RCVD_HELO_USER             0.001
 score OBFU_TEXT_ATTACH               0.001
 score PHP_ORIG_SCRIPT                0.001
 score PP_MIME_FAKE_ASCII_TEXT        0.001 # force non-zero
-score RCVD_IN_MSPIKE_H2              -2.896
+score RCVD_IN_MSPIKE_H2              -2.638
 score RCVD_IN_MSPIKE_L3              0.001
 score RCVD_IN_MSPIKE_L4              0.001
 score RCVD_IN_MSPIKE_L5              0.001
-score RCVD_IN_SORBS_WEB              2.781
-score RP_MATCHES_RCVD                -2.796
-score SERGIO_SUBJECT_VIAGRA01        0.277
-score SINGLETS_LOW_CONTRAST          4.096
-score SPELLED_OUT_NUMBER             2.558
-score SPOOFED_FREEM_REPTO            0.001
+score RCVD_IN_SORBS_WEB              2.685
+score RP_MATCHES_RCVD                -2.899
+score SERGIO_SUBJECT_VIAGRA01        0.194
+score SINGLETS_LOW_CONTRAST          4.099
+score SPELLED_OUT_NUMBER             0.334
+score SPOOFED_FREEM_REPTO            0.481
 score STATIC_XPRIO_OLE               1.541
-score STOCK_LOW_CONTRAST             2.498
-score STYLE_GIBBERISH                2.994
-score THIS_AD                        1.691
+score STOCK_LOW_CONTRAST             2.499
+score STYLE_GIBBERISH                2.997
+score THIS_AD                        1.994
 score TO_IN_SUBJ                     0.001 # force non-zero
-score TO_NO_BRKTS_FROM_MSSP          0.001
-score TO_NO_BRKTS_HTML_IMG           1.480
-score TO_NO_BRKTS_HTML_ONLY          1.091
+score TO_NO_BRKTS_FROM_MSSP          0.001 # force non-zero
+score TO_NO_BRKTS_HTML_IMG           1.908
+score TO_NO_BRKTS_HTML_ONLY          0.756
 score TO_NO_BRKTS_MSFT               0.001
 score TO_NO_BRKTS_NORDNS_HTML        0.001
-score TO_NO_BRKTS_PCNT               0.001 # force non-zero
-score TR_FILLER_TEXT                 0.071
+score TO_NO_BRKTS_PCNT               0.001
+score TR_FILLER_TEXT                 0.118
 score TVD_SPACE_ENCODED              0.001
-score TVD_SPACE_RATIO_MINFP          2.497
+score TVD_SPACE_RATIO_MINFP          2.499
 score URI_GOOGLE_PROXY               0.001
-score URI_ONLY_MSGID_MALF            2.696
-score URI_PHISH                      3.995
+score URI_ONLY_MSGID_MALF            2.699
+score URI_PHISH                      3.999
 score URI_TRY_3LD                    0.001
-score URI_WP_DIRINDEX                2.996
-score URI_WP_HACKED                  0.001
-score URI_WP_HACKED_2                1.997
-score XPRIO                          2.247
+score URI_WP_DIRINDEX                2.999
+score URI_WP_HACKED                  1.475
+score URI_WP_HACKED_2                1.999
+score XPRIO                          2.250
+score AC_HTML_NONSENSE_TAGS          1.000
 score AC_SPAMMY_URI_PATTERNS1        1.000
 score AC_SPAMMY_URI_PATTERNS10       1.000
 score AC_SPAMMY_URI_PATTERNS11       1.000
