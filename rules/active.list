@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud bpoliakoff darxus grenier jarif kgolding zmi; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud bpoliakoff darxus grenier jarif kgolding llanga zmi; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-kmcgrail bb-traps bb-zmi bpoliakoff darxus grenier jarif kgolding llanga zmi
+# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-traps bb-zmi bpoliakoff darxus grenier jarif kgolding zmi; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud bpoliakoff darxus grenier jarif kgolding llanga zmi; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud bpoliakoff darxus grenier jarif kgolding llanga zmi
 
 # tflags publish
 AC_BR_BONANZA
@@ -406,9 +406,6 @@ HK_SCAM_S7
 # tflags userconf
 HTML_CHARSET_FARAWAY
 
-# good enough
-HTML_FONT_TINY
-
 # tflags publish
 HTML_OFF_PAGE
 
@@ -442,9 +439,6 @@ LUCRATIVE
 # tflags publish
 MANY_SPAN_IN_TEXT
 
-# good enough
-MIMEOLE_DIRECT_TO_MX
-
 # tflags userconf
 MIME_CHARSET_FARAWAY
 
@@ -468,9 +462,6 @@ MONEY_FROM_41
 
 # good enough
 MONEY_FROM_MISSP
-
-# good enough
-MONEY_LOTTERY
 
 # good enough
 MSGID_NOFQDN1
@@ -498,9 +489,6 @@ NSL_RCVD_HELO_USER
 
 # good enough
 OBFU_ATTACH_MISSP
-
-# good enough
-OBFU_DOC_ATTACH
 
 # tflags publish
 OBFU_JVSCR_ESC
@@ -888,6 +876,12 @@ TVD_VISIT_PHARMA
 
 # tflags publish
 TW_GIBBERISH_MANY
+
+# good enough
+FILL_THIS_FORM_LONG
+
+# good enough
+MILLION_USD
 
 # good enough
 TEQF_USR_POLITE
