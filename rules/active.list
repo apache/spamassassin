@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-traps bb-zmi bpoliakoff darxus grenier jarif kgolding zmi; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud bpoliakoff darxus grenier jarif kgolding llanga zmi; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud bpoliakoff darxus grenier jarif kgolding llanga zmi
+# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud bpoliakoff darxus grenier jarif zmi; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bpoliakoff darxus grenier jarif kgolding llanga zmi; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud bpoliakoff darxus grenier jarif kgolding llanga zmi
 
 # tflags publish
 AC_BR_BONANZA
@@ -66,9 +66,6 @@ ADVANCE_FEE_4_NEW_MONEY
 
 # good enough
 ADVANCE_FEE_5_NEW_FRM_MNY
-
-# good enough
-ADVANCE_FEE_5_NEW_MONEY
 
 # tflags publish
 AD_PREFS
@@ -145,9 +142,6 @@ CN_B2B_SPAMMER
 # tflags publish
 COMMENT_GIBBERISH
 
-# good enough
-COMPENSATION
-
 # tflags publish
 CORRUPT_FROM_LINE_IN_HDRS
 
@@ -223,6 +217,9 @@ FILL_THIS_FORM
 # good enough
 FILL_THIS_FORM_LOAN
 
+# good enough
+FILL_THIS_FORM_LONG
+
 # tflags publish
 FORM_FRAUD
 
@@ -255,9 +252,6 @@ FROM_LOCAL_NOVOWEL
 
 # good enough
 FROM_MISSPACED
-
-# good enough
-FROM_MISSP_DYNIP
 
 # good enough
 FROM_MISSP_FREEMAIL
@@ -392,9 +386,6 @@ HEXHASH_WORD
 HK_NAME_DRUGS
 
 # good enough
-HK_NAME_MR_MRS
-
-# good enough
 HK_RANDOM_FROM
 
 # good enough
@@ -438,6 +429,9 @@ LUCRATIVE
 
 # tflags publish
 MANY_SPAN_IN_TEXT
+
+# good enough
+MILLION_USD
 
 # tflags userconf
 MIME_CHARSET_FARAWAY
@@ -799,6 +793,9 @@ STOCK_LOW_CONTRAST
 # tflags publish
 STOCK_TIP
 
+# good enough
+STOX_REPLY_TYPE_WITHOUT_QUOTES
+
 # tflags publish
 STYLE_GIBBERISH
 
@@ -854,9 +851,6 @@ TO_NO_BRKTS_NORDNS_HTML
 TO_NO_BRKTS_PCNT
 
 # good enough
-TR_FILLER_TEXT
-
-# good enough
 TT_MSGID_TRUNC
 
 # good enough
@@ -878,16 +872,22 @@ TVD_VISIT_PHARMA
 TW_GIBBERISH_MANY
 
 # good enough
-FILL_THIS_FORM_LONG
+FROM_WSP_LEAD
 
 # good enough
-MILLION_USD
+HK_SCAM_N15
 
 # good enough
-OBFU_DOC_ATTACH
+MIMEOLE_DIRECT_TO_MX
 
 # good enough
-TEQF_USR_POLITE
+MONEY_FORM
+
+# good enough
+MONEY_LOTTERY
+
+# good enough
+TO_EQ_FM_DIRECT_MX
 
 # tflags publish
 UC_GIBBERISH_OBFU
