@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud bpoliakoff darxus grenier jarif zmi; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bpoliakoff darxus grenier jarif kgolding llanga zmi; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud bpoliakoff darxus grenier jarif kgolding llanga zmi
+# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bpoliakoff darxus grenier jarif kgolding zmi; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud bpoliakoff darxus grenier jarif llanga zmi; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bpoliakoff darxus grenier jarif kgolding llanga zmi
 
 # tflags publish
 AC_BR_BONANZA
@@ -381,9 +381,6 @@ HELO_MISC_IP
 
 # tflags publish
 HEXHASH_WORD
-
-# good enough
-HK_NAME_DRUGS
 
 # good enough
 HK_RANDOM_FROM
@@ -851,9 +848,6 @@ TO_NO_BRKTS_NORDNS_HTML
 TO_NO_BRKTS_PCNT
 
 # good enough
-TT_MSGID_TRUNC
-
-# good enough
 TVD_QUAL_MEDS
 
 # good enough
@@ -878,7 +872,16 @@ FROM_WSP_LEAD
 HK_SCAM_N15
 
 # good enough
+HK_SCAM_N8
+
+# good enough
+LOTTO_AGENT_FM
+
+# good enough
 MIMEOLE_DIRECT_TO_MX
+
+# good enough
+MONEY_ATM_CARD
 
 # good enough
 MONEY_FORM
