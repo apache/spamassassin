@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bpoliakoff darxus grenier jarif kgolding zmi; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud bpoliakoff darxus grenier jarif llanga zmi; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bpoliakoff darxus grenier jarif kgolding llanga zmi
+# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud bpoliakoff darxus grenier jarif kgolding zmi; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bpoliakoff darxus grenier jarif kgolding llanga zmi; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud bpoliakoff darxus grenier jarif llanga zmi
 
 # tflags publish
 AC_BR_BONANZA
@@ -281,6 +281,9 @@ FROM_WORDY
 FROM_WORDY_SHORT
 
 # good enough
+FROM_WSP_LEAD
+
+# good enough
 FSL_CTYPE_WIN1251
 
 # good enough
@@ -389,6 +392,9 @@ HK_RANDOM_FROM
 HK_RANDOM_REPLYTO
 
 # good enough
+HK_SCAM_N15
+
+# good enough
 HK_SCAM_S7
 
 # tflags userconf
@@ -430,6 +436,9 @@ MANY_SPAN_IN_TEXT
 # good enough
 MILLION_USD
 
+# good enough
+MIMEOLE_DIRECT_TO_MX
+
 # tflags userconf
 MIME_CHARSET_FARAWAY
 
@@ -438,6 +447,9 @@ MIME_NO_TEXT
 
 # tflags userconf
 MISSING_HB_SEP
+
+# good enough
+MONEY_FORM
 
 # tflags publish
 MONEY_FRAUD_3
@@ -453,6 +465,9 @@ MONEY_FROM_41
 
 # good enough
 MONEY_FROM_MISSP
+
+# good enough
+MONEY_LOTTERY
 
 # good enough
 MSGID_NOFQDN1
@@ -820,6 +835,9 @@ TEQF_USR_MSGID_MALF
 # tflags publish
 THIS_AD
 
+# good enough
+TO_EQ_FM_DIRECT_MX
+
 # tflags net
 TO_EQ_FM_DOM_SPF_FAIL
 
@@ -866,10 +884,10 @@ TVD_VISIT_PHARMA
 TW_GIBBERISH_MANY
 
 # good enough
-FROM_WSP_LEAD
+ADVANCE_FEE_5_NEW_MONEY
 
 # good enough
-HK_SCAM_N15
+FROM_MISSP_PHISH
 
 # good enough
 HK_SCAM_N8
@@ -878,19 +896,7 @@ HK_SCAM_N8
 LOTTO_AGENT_FM
 
 # good enough
-MIMEOLE_DIRECT_TO_MX
-
-# good enough
 MONEY_ATM_CARD
-
-# good enough
-MONEY_FORM
-
-# good enough
-MONEY_LOTTERY
-
-# good enough
-TO_EQ_FM_DIRECT_MX
 
 # tflags publish
 UC_GIBBERISH_OBFU
