@@ -1322,7 +1322,7 @@ meta        __EMPTY_BODY         __BODY_TEXT_LINE < 2 && !__SMIME_MESSAGE
 # this hits 13% of masscheck corpus spam, 50% of that only scores 2 points
 meta        BODY_EMPTY           __EMPTY_BODY && !__NUMBERS_IN_SUBJ && !__CTE && !__RP_MATCHES_RCVD && !__VIA_ML && !__MIME_ATTACHMENT && !__HAS_THREAD_INDEX && !__TO_EQ_FROM_DOM && !__LCL__ENV_AND_HDR_FROM_MATCH && !__FROM_LOWER && !__NOT_SPOOFED && !__MSGID_APPLEMAIL && !__RCD_RDNS_MAIL_MESSY && !NO_RELAYS && !__NOT_A_PERSON
 describe    BODY_EMPTY           No body text in message
-score       BODY_EMPTY           3.00	# limit
+score       BODY_EMPTY           2.00	# limit
 
 
 meta        __BODY_URI_ONLY      __BODY_TEXT_LINE < 3 && __HAS_ANY_URI && !__SMIME_MESSAGE
