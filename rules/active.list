@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud bpoliakoff darxus grenier jarif kgolding zmi; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bpoliakoff darxus grenier jarif kgolding llanga zmi; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud bpoliakoff darxus grenier jarif llanga zmi
+# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud bpoliakoff darxus grenier jarif kgolding zmi; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud bpoliakoff darxus grenier jarif kgolding llanga zmi; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bpoliakoff darxus grenier jarif kgolding llanga zmi
 
 # tflags publish
 AC_BR_BONANZA
@@ -395,6 +395,9 @@ HK_RANDOM_REPLYTO
 HK_SCAM_N15
 
 # good enough
+HK_SCAM_N8
+
+# good enough
 HK_SCAM_S7
 
 # tflags userconf
@@ -425,6 +428,9 @@ LOTS_OF_MONEY
 LOTTO_AGENT
 
 # good enough
+LOTTO_AGENT_FM
+
+# good enough
 LOTTO_DEPT
 
 # tflags publish
@@ -447,6 +453,9 @@ MIME_NO_TEXT
 
 # tflags userconf
 MISSING_HB_SEP
+
+# good enough
+MONEY_ATM_CARD
 
 # good enough
 MONEY_FORM
@@ -884,19 +893,13 @@ TVD_VISIT_PHARMA
 TW_GIBBERISH_MANY
 
 # good enough
+ADVANCE_FEE_4_NEW_FRM_MNY
+
+# good enough
 ADVANCE_FEE_5_NEW_MONEY
 
 # good enough
 FROM_MISSP_PHISH
-
-# good enough
-HK_SCAM_N8
-
-# good enough
-LOTTO_AGENT_FM
-
-# good enough
-MONEY_ATM_CARD
 
 # tflags publish
 UC_GIBBERISH_OBFU
