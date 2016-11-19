@@ -2217,6 +2217,10 @@ score      MIMEOLE_DIRECT_TO_MX        2.000	# limit
 #describe   FROM_FULLN_URL              From address full name is in body URL - possible phishing
 #score      FROM_FULLN_URL              2.000	# limit
 
+# warning: __SUBJECT_EMPTY true if header entirely missing...
+header     __SUBJECT_EMPTY              Subject:raw =~ /^$/
+meta       __SUBJECT_PRESENT_EMPTY      __HAS_SUBJECT && __SUBJECT_EMPTY
+
 
 
 
