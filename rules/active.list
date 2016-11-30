@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud bpoliakoff darxus grenier jarif kgolding zmi; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-kmcgrail bb-traps bb-zmi bpoliakoff darxus grenier jarif kgolding llanga zmi; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud bpoliakoff darxus grenier jarif kgolding llanga zmi
+# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud bpoliakoff darxus grenier jarif kgolding zmi; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-traps bpoliakoff darxus grenier jarif kgolding llanga zmi; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-traps bpoliakoff darxus jarif kgolding llanga zmi
 
 # tflags publish
 AC_BR_BONANZA
@@ -288,6 +288,9 @@ FSL_HELO_BARE_IP_1
 
 # good enough
 FSL_HELO_BARE_IP_2
+
+# good enough
+FSL_MIME_NO_TEXT
 
 # tflags publish
 FSL_NEW_HELO_USER
@@ -832,9 +835,6 @@ TEQF_USR_MSGID_MALF
 # tflags publish
 THIS_AD
 
-# good enough
-TO_EQ_FM_DIRECT_MX
-
 # tflags net
 TO_EQ_FM_DOM_SPF_FAIL
 
@@ -881,22 +881,7 @@ TVD_VISIT_PHARMA
 TW_GIBBERISH_MANY
 
 # good enough
-ADVANCE_FEE_4_NEW_MONEY
-
-# good enough
-ADVANCE_FEE_5_NEW_MONEY
-
-# good enough
-DEAR_BENEFICIARY
-
-# good enough
-FSL_MIME_NO_TEXT
-
-# good enough
-HK_NAME_MR_MRS
-
-# good enough
-OBFU_DOC_ATTACH
+HK_SCAM_N15
 
 # tflags publish
 UC_GIBBERISH_OBFU
