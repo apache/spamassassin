@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud darxus grenier jarif kgolding zmi; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bpoliakoff darxus grenier jarif kgolding llanga zmi; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-kmcgrail bb-traps bb-zmi bpoliakoff darxus grenier jarif kgolding llanga zmi
+# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud darxus grenier jarif kgolding zmi; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud darxus grenier jarif kgolding llanga zmi; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-kmcgrail bb-traps bb-zmi darxus grenier jarif kgolding llanga zmi
 
 # tflags publish
 AC_BR_BONANZA
@@ -140,10 +140,10 @@ COMMENT_GIBBERISH
 CORRUPT_FROM_LINE_IN_HDRS
 
 # good enough
-DEAR_EMAIL
+DEAR_BENEFICIARY
 
 # good enough
-DEAR_WINNER
+DEAR_EMAIL
 
 # tflags net
 DIGEST_MULTIPLE
@@ -202,6 +202,9 @@ ENCRYPTED_MESSAGE
 # tflags userconf
 ENV_AND_HDR_SPF_MATCH
 
+# good enough
+FAKE_REPLY_C
+
 # tflags publish
 FBI_MONEY
 
@@ -210,6 +213,9 @@ FBI_SPOOF
 
 # tflags publish
 FILL_THIS_FORM
+
+# good enough
+FILL_THIS_FORM_LOAN
 
 # good enough
 FILL_THIS_FORM_LONG
@@ -386,16 +392,13 @@ HELO_MISC_IP
 HEXHASH_WORD
 
 # good enough
-HK_NAME_DRUGS
-
-# good enough
 HK_RANDOM_FROM
 
 # good enough
 HK_RANDOM_REPLYTO
 
 # good enough
-HK_SCAM_N15
+HK_SCAM_S23
 
 # good enough
 HK_SCAM_S7
@@ -823,6 +826,9 @@ TEQF_USR_MSGID_MALF
 # tflags publish
 THIS_AD
 
+# good enough
+TO_EQ_FM_DIRECT_MX
+
 # tflags net
 TO_EQ_FM_DOM_SPF_FAIL
 
@@ -866,16 +872,40 @@ TVD_VISIT_PHARMA
 TW_GIBBERISH_MANY
 
 # good enough
-DEAR_BENEFICIARY
+ADVANCE_FEE_5_NEW_FRM_MNY
 
 # good enough
-FILL_THIS_FORM_LOAN
+ADVANCE_FEE_5_NEW_MONEY
 
 # good enough
-HK_SCAM_S23
+BIGNUM_EMAILS
 
 # good enough
-TO_EQ_FM_DIRECT_MX
+BODY_SINGLE_URI
+
+# good enough
+COMPENSATION
+
+# good enough
+DATE_IN_FUTURE_96_Q
+
+# good enough
+DX_TEXT_01
+
+# good enough
+HDRS_LCASE
+
+# good enough
+MANY_HDRS_LCASE
+
+# good enough
+OBFU_DOC_ATTACH
+
+# good enough
+SERGIO_SUBJECT_VIAGRA01
+
+# good enough
+TEQF_USR_POLITE
 
 # tflags publish
 UC_GIBBERISH_OBFU
