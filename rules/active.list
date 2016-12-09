@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus jarif kgolding zmi; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud darxus grenier jarif kgolding llanga zmi; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud darxus grenier jarif kgolding llanga zmi
+# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud darxus grenier jarif kgolding zmi; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus jarif kgolding llanga zmi; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud darxus grenier jarif kgolding llanga zmi
 
 # tflags publish
 AC_BR_BONANZA
@@ -64,6 +64,12 @@ ADVANCE_FEE_4_NEW
 # good enough
 ADVANCE_FEE_4_NEW_MONEY
 
+# good enough
+ADVANCE_FEE_5_NEW_FRM_MNY
+
+# good enough
+ADVANCE_FEE_5_NEW_MONEY
+
 # tflags publish
 AD_PREFS
 
@@ -107,6 +113,12 @@ BAYES_99
 BAYES_999
 
 # good enough
+BIGNUM_EMAILS
+
+# good enough
+BODY_SINGLE_URI
+
+# good enough
 BODY_SINGLE_WORD
 
 # tflags publish
@@ -136,14 +148,23 @@ CN_B2B_SPAMMER
 # tflags publish
 COMMENT_GIBBERISH
 
+# good enough
+COMPENSATION
+
 # tflags publish
 CORRUPT_FROM_LINE_IN_HDRS
+
+# good enough
+DATE_IN_FUTURE_96_Q
 
 # good enough
 DEAR_BENEFICIARY
 
 # good enough
 DEAR_EMAIL
+
+# good enough
+DEAR_WINNER
 
 # tflags net
 DIGEST_MULTIPLE
@@ -189,6 +210,9 @@ DOS_OE_TO_MX
 
 # good enough
 DOS_OUTLOOK_TO_MX
+
+# good enough
+DX_TEXT_01
 
 # tflags publish
 DX_TEXT_02
@@ -368,6 +392,9 @@ HASHCASH_2SPEND
 HASHCASH_HIGH
 
 # good enough
+HDRS_LCASE
+
+# good enough
 HDRS_MISSP
 
 # tflags publish
@@ -433,6 +460,9 @@ LOTTO_DEPT
 # tflags publish
 LUCRATIVE
 
+# good enough
+MANY_HDRS_LCASE
+
 # tflags publish
 MANY_SPAN_IN_TEXT
 
@@ -495,6 +525,9 @@ NSL_RCVD_HELO_USER
 
 # good enough
 OBFU_ATTACH_MISSP
+
+# good enough
+OBFU_DOC_ATTACH
 
 # tflags publish
 OBFU_JVSCR_ESC
@@ -757,6 +790,9 @@ REPLYTO_WITHOUT_TO_CC
 # good enough
 RP_MATCHES_RCVD
 
+# good enough
+SERGIO_SUBJECT_VIAGRA01
+
 # tflags publish
 SINGLETS_LOW_CONTRAST
 
@@ -823,6 +859,9 @@ TEQF_USR_MSGID_HEX
 # tflags publish
 TEQF_USR_MSGID_MALF
 
+# good enough
+TEQF_USR_POLITE
+
 # tflags publish
 THIS_AD
 
@@ -857,16 +896,10 @@ TO_NO_BRKTS_NORDNS_HTML
 TO_NO_BRKTS_PCNT
 
 # good enough
-TVD_QUAL_MEDS
-
-# good enough
 TVD_SPACE_ENCODED
 
 # good enough
 TVD_SPACE_RATIO_MINFP
-
-# good enough
-TVD_VISIT_PHARMA
 
 # tflags publish
 TW_GIBBERISH_MANY
@@ -875,43 +908,13 @@ TW_GIBBERISH_MANY
 ADVANCE_FEE_2_NEW_FRM_MNY
 
 # good enough
-ADVANCE_FEE_5_NEW_FRM_MNY
-
-# good enough
-ADVANCE_FEE_5_NEW_MONEY
-
-# good enough
-BIGNUM_EMAILS
-
-# good enough
-BODY_SINGLE_URI
-
-# good enough
-COMPENSATION
-
-# good enough
-DATE_IN_FUTURE_96_Q
-
-# good enough
-DX_TEXT_01
-
-# good enough
-HDRS_LCASE
-
-# good enough
 HK_NAME_MR_MRS
 
 # good enough
-MANY_HDRS_LCASE
+MONEY_ATM_CARD
 
 # good enough
 RISK_FREE
-
-# good enough
-SERGIO_SUBJECT_VIAGRA01
-
-# good enough
-TEQF_USR_POLITE
 
 # tflags publish
 UC_GIBBERISH_OBFU
