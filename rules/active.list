@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud darxus grenier jarif kgolding zmi; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus jarif kgolding llanga zmi; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud darxus grenier jarif kgolding llanga zmi
+# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus grenier jarif kgolding zmi; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud darxus grenier jarif kgolding llanga zmi; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus jarif kgolding llanga zmi
 
 # tflags publish
 AC_BR_BONANZA
@@ -42,6 +42,9 @@ ADMAIL
 
 # tflags publish
 ADVANCE_FEE_2_NEW_FORM
+
+# good enough
+ADVANCE_FEE_2_NEW_FRM_MNY
 
 # tflags publish
 ADVANCE_FEE_2_NEW_MONEY
@@ -419,13 +422,13 @@ HELO_MISC_IP
 HEXHASH_WORD
 
 # good enough
+HK_NAME_MR_MRS
+
+# good enough
 HK_RANDOM_FROM
 
 # good enough
 HK_RANDOM_REPLYTO
-
-# good enough
-HK_SCAM_S23
 
 # good enough
 HK_SCAM_S7
@@ -525,9 +528,6 @@ NSL_RCVD_HELO_USER
 
 # good enough
 OBFU_ATTACH_MISSP
-
-# good enough
-OBFU_DOC_ATTACH
 
 # tflags publish
 OBFU_JVSCR_ESC
@@ -788,6 +788,9 @@ RCVD_IN_XBL
 REPLYTO_WITHOUT_TO_CC
 
 # good enough
+RISK_FREE
+
+# good enough
 RP_MATCHES_RCVD
 
 # good enough
@@ -905,16 +908,19 @@ TVD_SPACE_RATIO_MINFP
 TW_GIBBERISH_MANY
 
 # good enough
-ADVANCE_FEE_2_NEW_FRM_MNY
+FILL_THIS_FORM_FRAUD_PHISH
 
 # good enough
-HK_NAME_MR_MRS
+HK_NAME_FROM
+
+# good enough
+LIST_PARTIAL_SHORT_MSG
 
 # good enough
 MONEY_ATM_CARD
 
 # good enough
-RISK_FREE
+MONEY_BARRISTER
 
 # tflags publish
 UC_GIBBERISH_OBFU
