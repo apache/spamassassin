@@ -668,10 +668,10 @@ tflags         COMMENT_GIBBERISH        publish
 #body           LOTSA_EMAILS               /\b(?:thousand|million)\se-?mail(?:\saddresse)?s?\b/i
 #tflags         LOTSA_EMAILS               nopublish
 
-body           __BIGNUM_EMAILS            /\b(?:thousand|million|\d[,\d]{4,})\s(?:(?!and|or|your)\w+\s)?(?:e-?mail\saddresses|leads|names)\b/i
+body           __BIGNUM_EMAILS            /\b(?:thousand|million|\d[,\d]{4,})\s(?:(?!and|or|your|place|baby)\w+\s)?(?:e-?mail\saddresses|leads|names)\b/i
 meta           BIGNUM_EMAILS              __BIGNUM_EMAILS && !__SPOOFED_URL && !__BUGGED_IMG
 describe       BIGNUM_EMAILS              Lots of email addresses/leads
-score          BIGNUM_EMAILS              3.00		# limti
+score          BIGNUM_EMAILS              3.00		# limit
 #tflags         BIGNUM_EMAILS              nopublish
 
 #rawbody        __HTML_ELEM_OBFU           /[a-z\s]&\#[91]\d\d?[a-z]/
