@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus grenier jarif kgolding zmi; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud darxus grenier jarif kgolding llanga zmi; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus jarif kgolding llanga zmi
+# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus grenier jarif kgolding; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud darxus grenier jarif kgolding llanga zmi; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-traps darxus grenier jarif kgolding llanga zmi
 
 # tflags publish
 AC_BR_BONANZA
@@ -63,12 +63,6 @@ ADVANCE_FEE_3_NEW_MONEY
 
 # tflags publish
 ADVANCE_FEE_4_NEW
-
-# good enough
-ADVANCE_FEE_4_NEW_MONEY
-
-# good enough
-ADVANCE_FEE_5_NEW_FRM_MNY
 
 # good enough
 ADVANCE_FEE_5_NEW_MONEY
@@ -240,6 +234,9 @@ FBI_SPOOF
 
 # tflags publish
 FILL_THIS_FORM
+
+# good enough
+FILL_THIS_FORM_FRAUD_PHISH
 
 # good enough
 FILL_THIS_FORM_LOAN
@@ -422,13 +419,16 @@ HELO_MISC_IP
 HEXHASH_WORD
 
 # good enough
+HK_LOTTO
+
+# good enough
+HK_NAME_DRUGS
+
+# good enough
+HK_NAME_FROM
+
+# good enough
 HK_NAME_MR_MRS
-
-# good enough
-HK_RANDOM_FROM
-
-# good enough
-HK_RANDOM_REPLYTO
 
 # good enough
 HK_SCAM_S7
@@ -438,6 +438,9 @@ HTML_CHARSET_FARAWAY
 
 # tflags publish
 HTML_OFF_PAGE
+
+# good enough
+LIST_PARTIAL_SHORT_MSG
 
 # tflags publish
 LIST_PRTL_PUMPDUMP
@@ -463,9 +466,6 @@ LOTTO_DEPT
 # tflags publish
 LUCRATIVE
 
-# good enough
-MANY_HDRS_LCASE
-
 # tflags publish
 MANY_SPAN_IN_TEXT
 
@@ -483,6 +483,9 @@ MIME_NO_TEXT
 
 # tflags userconf
 MISSING_HB_SEP
+
+# good enough
+MONEY_BARRISTER
 
 # good enough
 MONEY_FORM
@@ -788,9 +791,6 @@ RCVD_IN_XBL
 REPLYTO_WITHOUT_TO_CC
 
 # good enough
-RISK_FREE
-
-# good enough
 RP_MATCHES_RCVD
 
 # good enough
@@ -838,6 +838,12 @@ STOCK_LOW_CONTRAST
 # tflags publish
 STOCK_TIP
 
+# good enough
+STOX_REPLY_TYPE
+
+# good enough
+STOX_REPLY_TYPE_WITHOUT_QUOTES
+
 # tflags publish
 STYLE_GIBBERISH
 
@@ -861,9 +867,6 @@ TEQF_USR_MSGID_HEX
 
 # tflags publish
 TEQF_USR_MSGID_MALF
-
-# good enough
-TEQF_USR_POLITE
 
 # tflags publish
 THIS_AD
@@ -908,22 +911,13 @@ TVD_SPACE_RATIO_MINFP
 TW_GIBBERISH_MANY
 
 # good enough
-FILL_THIS_FORM_FRAUD_PHISH
+HK_NAME_DR
 
 # good enough
-HK_NAME_FROM
+TVD_SUBJ_NUM_OBFU_MINFP
 
 # good enough
-LIST_PARTIAL_SHORT_MSG
-
-# good enough
-MONEY_ATM_CARD
-
-# good enough
-MONEY_BARRISTER
-
-# good enough
-OBFU_DOC_ATTACH
+US_DOLLARS_3
 
 # tflags publish
 UC_GIBBERISH_OBFU
