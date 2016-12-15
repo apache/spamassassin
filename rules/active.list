@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus grenier jarif kgolding; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud darxus grenier jarif kgolding llanga zmi; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-traps darxus grenier jarif kgolding llanga zmi
+# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud darxus grenier jarif kgolding zmi; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus grenier jarif kgolding llanga; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud darxus grenier jarif kgolding llanga zmi
 
 # tflags publish
 AC_BR_BONANZA
@@ -65,6 +65,9 @@ ADVANCE_FEE_3_NEW_MONEY
 ADVANCE_FEE_4_NEW
 
 # good enough
+ADVANCE_FEE_5_NEW_FRM_MNY
+
+# good enough
 ADVANCE_FEE_5_NEW_MONEY
 
 # tflags publish
@@ -111,9 +114,6 @@ BAYES_999
 
 # good enough
 BIGNUM_EMAILS
-
-# good enough
-BODY_SINGLE_URI
 
 # good enough
 BODY_SINGLE_WORD
@@ -868,6 +868,9 @@ TEQF_USR_MSGID_HEX
 # tflags publish
 TEQF_USR_MSGID_MALF
 
+# good enough
+TEQF_USR_POLITE
+
 # tflags publish
 THIS_AD
 
@@ -909,6 +912,12 @@ TVD_SPACE_RATIO_MINFP
 
 # tflags publish
 TW_GIBBERISH_MANY
+
+# good enough
+BODY_EMPTY
+
+# good enough
+CTYPE_NULL
 
 # good enough
 HK_NAME_DR
