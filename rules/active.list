@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud darxus grenier jarif kgolding zmi; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud darxus grenier jarif kgolding llanga zmi; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus grenier jarif kgolding llanga
+# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud darxus grenier jarif kgolding; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud darxus grenier jarif kgolding llanga zmi; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud darxus grenier jarif kgolding llanga zmi
 
 # tflags publish
 AC_BR_BONANZA
@@ -113,7 +113,7 @@ BAYES_999
 BIGNUM_EMAILS
 
 # good enough
-BODY_SINGLE_URI
+BODY_EMPTY
 
 # good enough
 BODY_SINGLE_WORD
@@ -145,11 +145,11 @@ CN_B2B_SPAMMER
 # tflags publish
 COMMENT_GIBBERISH
 
-# good enough
-COMPENSATION
-
 # tflags publish
 CORRUPT_FROM_LINE_IN_HDRS
+
+# good enough
+CTYPE_NULL
 
 # good enough
 DATE_IN_FUTURE_96_Q
@@ -222,9 +222,6 @@ ENCRYPTED_MESSAGE
 
 # tflags userconf
 ENV_AND_HDR_SPF_MATCH
-
-# good enough
-FAKE_REPLY_C
 
 # tflags publish
 FBI_MONEY
@@ -914,25 +911,10 @@ ADVANCE_FEE_4_NEW_MONEY
 ADVANCE_FEE_5_NEW
 
 # good enough
-ADVANCE_FEE_5_NEW_FRM_MNY
-
-# good enough
-BODY_EMPTY
-
-# good enough
-CTYPE_NULL
+BODY_SINGLE_URI
 
 # good enough
 HK_SCAM_N15
-
-# good enough
-MONEY_ATM_CARD
-
-# good enough
-OBFU_DOC_ATTACH
-
-# good enough
-RISK_FREE
 
 # good enough
 SUBJ_BROKEN_WORD
