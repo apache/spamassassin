@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud darxus grenier jarif kgolding; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud darxus grenier jarif kgolding llanga zmi; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud darxus grenier jarif kgolding llanga zmi
+# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud darxus grenier jarif kgolding zmi; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus grenier jarif kgolding llanga zmi; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud darxus grenier jarif kgolding llanga zmi
 
 # tflags publish
 AC_BR_BONANZA
@@ -43,9 +43,6 @@ ADMAIL
 # tflags publish
 ADVANCE_FEE_2_NEW_FORM
 
-# good enough
-ADVANCE_FEE_2_NEW_FRM_MNY
-
 # tflags publish
 ADVANCE_FEE_2_NEW_MONEY
 
@@ -65,6 +62,12 @@ ADVANCE_FEE_3_NEW_MONEY
 ADVANCE_FEE_4_NEW
 
 # good enough
+ADVANCE_FEE_4_NEW_MONEY
+
+# good enough
+ADVANCE_FEE_5_NEW
+
+# good enough
 ADVANCE_FEE_5_NEW_MONEY
 
 # tflags publish
@@ -72,6 +75,9 @@ AD_PREFS
 
 # tflags userconf
 ALL_TRUSTED
+
+# good enough
+APOSTROPHE_FROM
 
 # good enough
 AXB_XMAILER_MIMEOLE_OL_024C2
@@ -116,6 +122,9 @@ BIGNUM_EMAILS
 BODY_EMPTY
 
 # good enough
+BODY_SINGLE_URI
+
+# good enough
 BODY_SINGLE_WORD
 
 # tflags publish
@@ -147,9 +156,6 @@ COMMENT_GIBBERISH
 
 # tflags publish
 CORRUPT_FROM_LINE_IN_HDRS
-
-# good enough
-CTYPE_NULL
 
 # good enough
 DATE_IN_FUTURE_96_Q
@@ -208,9 +214,6 @@ DOS_OE_TO_MX
 # good enough
 DOS_OUTLOOK_TO_MX
 
-# good enough
-DX_TEXT_01
-
 # tflags publish
 DX_TEXT_02
 
@@ -222,6 +225,9 @@ ENCRYPTED_MESSAGE
 
 # tflags userconf
 ENV_AND_HDR_SPF_MATCH
+
+# good enough
+FAKE_REPLY_C
 
 # tflags publish
 FBI_MONEY
@@ -388,9 +394,6 @@ HASHCASH_HIGH
 # good enough
 HDRS_LCASE
 
-# good enough
-HDRS_MISSP
-
 # tflags publish
 HEADER_FROM_DIFFERENT_DOMAINS
 
@@ -416,16 +419,13 @@ HEXHASH_WORD
 HK_LOTTO
 
 # good enough
-HK_NAME_DR
-
-# good enough
 HK_NAME_DRUGS
 
 # good enough
-HK_NAME_FROM
+HK_NAME_MR_MRS
 
 # good enough
-HK_NAME_MR_MRS
+HK_SCAM_N15
 
 # good enough
 HK_SCAM_S7
@@ -435,9 +435,6 @@ HTML_CHARSET_FARAWAY
 
 # tflags publish
 HTML_OFF_PAGE
-
-# good enough
-LIST_PARTIAL_SHORT_MSG
 
 # tflags publish
 LIST_PRTL_PUMPDUMP
@@ -847,6 +844,9 @@ SUBJECT_IN_BLACKLIST
 # tflags userconf
 SUBJECT_IN_WHITELIST
 
+# good enough
+SUBJ_BROKEN_WORD
+
 # tflags net
 SURBL_BLOCKED
 
@@ -905,22 +905,37 @@ TVD_SUBJ_NUM_OBFU_MINFP
 TW_GIBBERISH_MANY
 
 # good enough
-ADVANCE_FEE_4_NEW_MONEY
+ADVANCE_FEE_4_NEW_FRM_MNY
 
 # good enough
-ADVANCE_FEE_5_NEW
+ADVANCE_FEE_5_NEW_FRM_MNY
 
 # good enough
-BODY_SINGLE_URI
+AXB_XM_FORGED_OL2600
 
 # good enough
-HK_SCAM_N15
+COMPENSATION
 
 # good enough
-OBFU_DOC_ATTACH
+FREEMAIL_DOC_PDF_BCC
 
 # good enough
-SUBJ_BROKEN_WORD
+FSL_THIS_IS_ADV
+
+# good enough
+HK_SCAM_N3
+
+# good enough
+MONEY_ATM_CARD
+
+# good enough
+RISK_FREE
+
+# good enough
+SERGIO_SUBJECT_VIAGRA01
+
+# good enough
+TO_EQ_FM_DIRECT_MX
 
 # tflags publish
 UC_GIBBERISH_OBFU
