@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud darxus grenier jarif kgolding zmi; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus grenier jarif kgolding llanga zmi; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud darxus grenier jarif kgolding llanga zmi
+# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus grenier jarif kgolding zmi; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud darxus grenier jarif kgolding llanga zmi; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus grenier jarif kgolding llanga zmi
 
 # tflags publish
 AC_BR_BONANZA
@@ -64,12 +64,6 @@ ADVANCE_FEE_4_NEW
 # good enough
 ADVANCE_FEE_4_NEW_MONEY
 
-# good enough
-ADVANCE_FEE_5_NEW
-
-# good enough
-ADVANCE_FEE_5_NEW_MONEY
-
 # tflags publish
 AD_PREFS
 
@@ -117,12 +111,6 @@ BAYES_999
 
 # good enough
 BIGNUM_EMAILS
-
-# good enough
-BODY_EMPTY
-
-# good enough
-BODY_SINGLE_URI
 
 # good enough
 BODY_SINGLE_WORD
@@ -311,9 +299,6 @@ FSL_CTYPE_WIN1251
 FSL_HELO_BARE_IP_1
 
 # good enough
-FSL_HELO_BARE_IP_2
-
-# good enough
 FSL_HELO_DEVICE
 
 # good enough
@@ -416,16 +401,7 @@ HELO_MISC_IP
 HEXHASH_WORD
 
 # good enough
-HK_LOTTO
-
-# good enough
 HK_NAME_DRUGS
-
-# good enough
-HK_NAME_MR_MRS
-
-# good enough
-HK_SCAM_N15
 
 # good enough
 HK_SCAM_S7
@@ -479,9 +455,6 @@ MIME_NO_TEXT
 MISSING_HB_SEP
 
 # good enough
-MONEY_BARRISTER
-
-# good enough
 MONEY_FORM
 
 # tflags publish
@@ -492,9 +465,6 @@ MONEY_FRAUD_5
 
 # tflags publish
 MONEY_FRAUD_8
-
-# good enough
-MONEY_FROM_41
 
 # good enough
 MONEY_FROM_MISSP
@@ -525,6 +495,9 @@ NSL_RCVD_HELO_USER
 
 # good enough
 OBFU_ATTACH_MISSP
+
+# good enough
+OBFU_DOC_ATTACH
 
 # tflags publish
 OBFU_JVSCR_ESC
@@ -829,12 +802,6 @@ STOCK_LOW_CONTRAST
 # tflags publish
 STOCK_TIP
 
-# good enough
-STOX_REPLY_TYPE
-
-# good enough
-STOX_REPLY_TYPE_WITHOUT_QUOTES
-
 # tflags publish
 STYLE_GIBBERISH
 
@@ -893,46 +860,16 @@ TO_NO_BRKTS_NORDNS_HTML
 TO_NO_BRKTS_PCNT
 
 # good enough
-TVD_SPACE_ENCODED
-
-# good enough
-TVD_SPACE_RATIO_MINFP
-
-# good enough
 TVD_SUBJ_NUM_OBFU_MINFP
 
 # tflags publish
 TW_GIBBERISH_MANY
 
 # good enough
-ADVANCE_FEE_4_NEW_FRM_MNY
-
-# good enough
 ADVANCE_FEE_5_NEW_FRM_MNY
 
 # good enough
-AXB_XM_FORGED_OL2600
-
-# good enough
-COMPENSATION
-
-# good enough
-FREEMAIL_DOC_PDF_BCC
-
-# good enough
-FSL_THIS_IS_ADV
-
-# good enough
-HK_SCAM_N3
-
-# good enough
-MONEY_ATM_CARD
-
-# good enough
 RISK_FREE
-
-# good enough
-SERGIO_SUBJECT_VIAGRA01
 
 # good enough
 TO_EQ_FM_DIRECT_MX
@@ -1089,9 +1026,6 @@ USER_IN_WHITELIST
 
 # tflags userconf
 USER_IN_WHITELIST_TO
-
-# good enough
-US_DOLLARS_3
 
 # tflags publish
 XM_PHPMAILER_FORGED
