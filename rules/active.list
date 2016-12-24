@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud darxus grenier jarif kgolding zmi; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus grenier jarif kgolding llanga zmi; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud darxus grenier jarif kgolding llanga zmi
+# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud darxus grenier jarif kgolding zmi; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud darxus grenier jarif kgolding llanga zmi; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus grenier jarif kgolding llanga zmi
 
 # tflags publish
 AC_BR_BONANZA
@@ -219,9 +219,6 @@ FBI_SPOOF
 
 # tflags publish
 FILL_THIS_FORM
-
-# good enough
-FILL_THIS_FORM_LOAN
 
 # good enough
 FILL_THIS_FORM_LONG
@@ -489,6 +486,9 @@ NSL_RCVD_HELO_USER
 
 # good enough
 OBFU_ATTACH_MISSP
+
+# good enough
+OBFU_DOC_ATTACH
 
 # tflags publish
 OBFU_JVSCR_ESC
@@ -805,14 +805,14 @@ SUBJECT_IN_BLACKLIST
 # tflags userconf
 SUBJECT_IN_WHITELIST
 
-# good enough
-SUBJ_BROKEN_WORD
-
 # tflags net
 SURBL_BLOCKED
 
 # tflags publish
 SYSADMIN
+
+# good enough
+TBIRD_SUSP_MIME_BDRY
 
 # tflags publish
 TEQF_USR_IMAGE
@@ -863,10 +863,22 @@ TVD_SUBJ_NUM_OBFU_MINFP
 TW_GIBBERISH_MANY
 
 # good enough
+ACH_CANCELLED
+
+# good enough
+ADVANCE_FEE_5_NEW_MONEY
+
+# good enough
+BODY_EMPTY
+
+# good enough
 DEAR_EMAIL_USER
 
 # good enough
 LIST_PARTIAL_SHORT_MSG
+
+# good enough
+TVD_SPACE_RATIO_MINFP
 
 # tflags publish
 UC_GIBBERISH_OBFU
