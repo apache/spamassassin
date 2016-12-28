@@ -1,5 +1,8 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud darxus grenier jarif kgolding zmi; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud darxus grenier jarif kgolding llanga zmi; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus grenier jarif kgolding llanga zmi
+# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-traps bb-zmi darxus grenier jarif kgolding zmi; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-traps darxus grenier jarif kgolding llanga zmi; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus grenier jarif kgolding llanga zmi
+
+# good enough
+ACH_CANCELLED
 
 # tflags publish
 AC_BR_BONANZA
@@ -62,7 +65,7 @@ ADVANCE_FEE_3_NEW_MONEY
 ADVANCE_FEE_4_NEW
 
 # good enough
-ADVANCE_FEE_4_NEW_MONEY
+ADVANCE_FEE_5_NEW_MONEY
 
 # tflags publish
 AD_PREFS
@@ -110,7 +113,7 @@ BAYES_99
 BAYES_999
 
 # good enough
-BIGNUM_EMAILS
+BODY_EMPTY
 
 # tflags publish
 BODY_URI_ONLY
@@ -150,6 +153,9 @@ DEAR_BENEFICIARY
 
 # good enough
 DEAR_EMAIL
+
+# good enough
+DEAR_EMAIL_USER
 
 # good enough
 DEAR_WINNER
@@ -269,9 +275,6 @@ FROM_MISSP_REPLYTO
 FROM_MISSP_SPF_FAIL
 
 # good enough
-FROM_MISSP_TO_UNDISC
-
-# good enough
 FROM_MISSP_USER
 
 # good enough
@@ -291,9 +294,6 @@ FSL_HELO_BARE_IP_1
 
 # good enough
 FSL_HELO_DEVICE
-
-# good enough
-FSL_MIME_NO_TEXT
 
 # tflags publish
 FSL_NEW_HELO_USER
@@ -394,14 +394,14 @@ HEXHASH_WORD
 # good enough
 HK_NAME_DRUGS
 
-# good enough
-HK_SCAM_S7
-
 # tflags userconf
 HTML_CHARSET_FARAWAY
 
 # tflags publish
 HTML_OFF_PAGE
+
+# good enough
+LIST_PARTIAL_SHORT_MSG
 
 # tflags publish
 LIST_PRTL_PUMPDUMP
@@ -793,6 +793,9 @@ STOCK_LOW_CONTRAST
 # tflags publish
 STOCK_TIP
 
+# good enough
+STOX_REPLY_TYPE_WITHOUT_QUOTES
+
 # tflags publish
 STYLE_GIBBERISH
 
@@ -854,28 +857,37 @@ TO_NO_BRKTS_NORDNS_HTML
 TO_NO_BRKTS_PCNT
 
 # good enough
-TVD_SUBJ_NUM_OBFU_MINFP
+TVD_QUAL_MEDS
+
+# good enough
+TVD_SPACE_RATIO_MINFP
+
+# good enough
+TVD_VISIT_PHARMA
 
 # tflags publish
 TW_GIBBERISH_MANY
 
 # good enough
-ACH_CANCELLED
+ADVANCE_FEE_5_NEW_FRM_MNY
 
 # good enough
-ADVANCE_FEE_5_NEW_MONEY
+FILL_THIS_FORM_LOAN
 
 # good enough
-BODY_EMPTY
+FROM_MISSP_DYNIP
 
 # good enough
-DEAR_EMAIL_USER
+FSL_HELO_BARE_IP_2
 
 # good enough
-LIST_PARTIAL_SHORT_MSG
+OBFU_DOC_ATTACH
 
 # good enough
-TVD_SPACE_RATIO_MINFP
+SERGIO_SUBJECT_VIAGRA01
+
+# good enough
+URI_ONLY_LOW_CONTRAST
 
 # tflags publish
 UC_GIBBERISH_OBFU
