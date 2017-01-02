@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud darxus grenier jarif kgolding zmi; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus grenier jarif kgolding llanga zmi; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus grenier jarif kgolding llanga zmi
+# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud darxus grenier jarif kgolding zmi; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud darxus grenier jarif kgolding zmi; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus grenier jarif kgolding llanga zmi
 
 # good enough
 ACH_CANCELLED
@@ -286,9 +286,6 @@ FSL_HELO_BARE_IP_1
 # good enough
 FSL_HELO_BARE_IP_2
 
-# good enough
-FSL_HELO_DEVICE
-
 # tflags publish
 FSL_NEW_HELO_USER
 
@@ -385,11 +382,20 @@ HELO_MISC_IP
 # tflags publish
 HEXHASH_WORD
 
+# good enough
+HK_NAME_FROM
+
 # tflags userconf
 HTML_CHARSET_FARAWAY
 
+# good enough
+HTML_FONT_TINY
+
 # tflags publish
 HTML_OFF_PAGE
+
+# good enough
+IMG_ALT_HSPACE_CID_ALIGN
 
 # good enough
 LIST_PARTIAL_SHORT_MSG
@@ -866,16 +872,7 @@ TVD_VISIT_PHARMA
 TW_GIBBERISH_MANY
 
 # good enough
-HK_NAME_FROM
-
-# good enough
-HTML_FONT_TINY
-
-# good enough
-IMG_ALT_HSPACE_CID_ALIGN
-
-# good enough
-OBFU_DOC_ATTACH
+ADVANCE_FEE_5_NEW_FRM_MNY
 
 # tflags publish
 UC_GIBBERISH_OBFU
