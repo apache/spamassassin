@@ -1,8 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud darxus grenier jarif kgolding zmi; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud darxus grenier jarif kgolding llanga zmi; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud darxus grenier jarif kgolding zmi
-
-# good enough
-ACH_CANCELLED
+# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud darxus grenier jarif kgolding zmi; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud darxus grenier jarif kgolding llanga zmi; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud darxus grenier jarif kgolding llanga zmi
 
 # tflags publish
 AC_BR_BONANZA
@@ -63,6 +60,9 @@ ADVANCE_FEE_3_NEW_MONEY
 
 # tflags publish
 ADVANCE_FEE_4_NEW
+
+# good enough
+ADVANCE_FEE_5_NEW_FRM_MNY
 
 # good enough
 ADVANCE_FEE_5_NEW_MONEY
@@ -150,6 +150,9 @@ DEAR_BENEFICIARY
 
 # good enough
 DEAR_EMAIL
+
+# good enough
+DEAR_WINNER
 
 # tflags net
 DIGEST_MULTIPLE
@@ -484,12 +487,6 @@ NSL_RCVD_FROM_USER
 # good enough
 NSL_RCVD_HELO_USER
 
-# good enough
-OBFU_ATTACH_MISSP
-
-# good enough
-OBFU_DOC_ATTACH
-
 # tflags publish
 OBFU_JVSCR_ESC
 
@@ -814,6 +811,9 @@ SUBJECT_IN_BLACKLIST
 # tflags userconf
 SUBJECT_IN_WHITELIST
 
+# good enough
+SUBJECT_NEEDS_ENCODING
+
 # tflags net
 SURBL_BLOCKED
 
@@ -875,7 +875,100 @@ TVD_VISIT_PHARMA
 TW_GIBBERISH_MANY
 
 # good enough
-ADVANCE_FEE_5_NEW_FRM_MNY
+ADMITS_SPAM
+
+# good enough
+ADVANCE_FEE_2_NEW_FRM_MNY
+
+# good enough
+ADVANCE_FEE_4_NEW_FRM_MNY
+
+# good enough
+ADVANCE_FEE_4_NEW_MONEY
+
+# good enough
+AXB_XM_FORGED_OL2600
+
+# good enough
+BIGNUM_EMAILS
+
+# good enough
+COMPENSATION
+
+# good enough
+DOS_OUTLOOK_TO_MX_IMAGE
+
+# good enough
+FILL_THIS_FORM_LOAN
+
+# good enough
+FREEMAIL_DOC_PDF_BCC
+
+# good enough
+FROM_MISSP_FREEMAIL
+
+# good enough
+FROM_MISSP_PHISH
+
+# good enough
+FROM_MISSP_TO_UNDISC
+
+# good enough
+FSL_MID_419
+
+# good enough
+HK_NAME_MR_MRS
+
+# good enough
+HK_RANDOM_FROM
+
+# good enough
+HK_RANDOM_REPLYTO
+
+# good enough
+HK_SCAM_N15
+
+# good enough
+HK_SCAM_N2
+
+# good enough
+HK_SCAM_N3
+
+# good enough
+KHOP_DYNAMIC
+
+# good enough
+MANY_HDRS_LCASE
+
+# good enough
+MONEY_ATM_CARD
+
+# good enough
+MONEY_BARRISTER
+
+# good enough
+MONEY_FROM_41
+
+# good enough
+OBFU_HTML_ATTACH
+
+# good enough
+S25R_4
+
+# good enough
+SHARE_50_50
+
+# good enough
+SPOOFED_URL_HOST
+
+# good enough
+TEQF_USR_POLITE
+
+# good enough
+TVD_PH_BODY_META
+
+# good enough
+TVD_SPACE_ENCODED
 
 # tflags publish
 UC_GIBBERISH_OBFU
@@ -966,9 +1059,6 @@ URI_HOST_IN_WHITELIST
 
 # tflags userconf
 URI_NOVOWEL
-
-# good enough
-URI_ONLY_LOW_CONTRAST
 
 # tflags publish
 URI_ONLY_MSGID_MALF
