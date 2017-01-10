@@ -2221,7 +2221,7 @@ score      MIMEOLE_DIRECT_TO_MX        2.000	# limit
 header     __SUBJECT_EMPTY              Subject:raw =~ /^$/
 meta       __SUBJECT_PRESENT_EMPTY      __HAS_SUBJECT && __SUBJECT_EMPTY
 
-body       __BAYES_POISON_NUMS_01       /\s([0-9]{6,})\s(?:.*\s\1){9}/
+body       __BAYES_POISON_NUMS_01       /\s([0-9]{6,})\s(?:.{15,}?\s\1\s){10}/
 
 
 
