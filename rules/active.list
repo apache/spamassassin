@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud darxus grenier jarif kgolding zmi; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud darxus grenier jarif kgolding llanga zmi; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud darxus grenier jarif kgolding llanga zmi
+# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-traps bb-zmi darxus grenier jarif kgolding zmi; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud darxus grenier jarif kgolding llanga zmi; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus grenier jarif kgolding zmi
 
 # tflags publish
 AC_BR_BONANZA
@@ -226,6 +226,9 @@ DX_TEXT_02
 # tflags publish
 DX_TEXT_03
 
+# good enough
+DYN_RDNS_SHORT_HELO_HTML
+
 # tflags publish
 ENCRYPTED_MESSAGE
 
@@ -287,9 +290,6 @@ FROM_LOCAL_NOVOWEL
 FROM_MISSPACED
 
 # good enough
-FROM_MISSP_DYNIP
-
-# good enough
 FROM_MISSP_FREEMAIL
 
 # good enough
@@ -303,9 +303,6 @@ FROM_MISSP_SPF_FAIL
 
 # good enough
 FROM_MISSP_TO_UNDISC
-
-# good enough
-FROM_MISSP_USER
 
 # good enough
 FROM_MISSP_XPRIO
@@ -428,9 +425,6 @@ HEXHASH_WORD
 HK_NAME_DRUGS
 
 # good enough
-HK_NAME_FROM
-
-# good enough
 HK_NAME_MR_MRS
 
 # good enough
@@ -456,12 +450,6 @@ HTML_FONT_TINY
 
 # tflags publish
 HTML_OFF_PAGE
-
-# good enough
-IMG_ALT_HSPACE_CID_ALIGN
-
-# good enough
-KHOP_DYNAMIC
 
 # good enough
 LIST_PARTIAL_SHORT_MSG
@@ -531,9 +519,6 @@ MONEY_FRAUD_8
 
 # good enough
 MONEY_FROM_41
-
-# good enough
-MONEY_FROM_MISSP
 
 # good enough
 MSGID_NOFQDN1
@@ -824,9 +809,6 @@ RISK_FREE
 RP_MATCHES_RCVD
 
 # good enough
-S25R_4
-
-# good enough
 SERGIO_SUBJECT_VIAGRA01
 
 # good enough
@@ -898,6 +880,9 @@ SURBL_BLOCKED
 # tflags publish
 SYSADMIN
 
+# good enough
+TBIRD_SUSP_MIME_BDRY
+
 # tflags publish
 TEQF_USR_IMAGE
 
@@ -906,9 +891,6 @@ TEQF_USR_MSGID_HEX
 
 # tflags publish
 TEQF_USR_MSGID_MALF
-
-# good enough
-TEQF_USR_POLITE
 
 # tflags publish
 THIS_AD
@@ -944,16 +926,61 @@ TO_NO_BRKTS_NORDNS_HTML
 TO_NO_BRKTS_PCNT
 
 # good enough
+TVD_QUAL_MEDS
+
+# good enough
 TVD_SPACE_ENCODED
 
 # good enough
 TVD_SPACE_RATIO_MINFP
 
+# good enough
+TVD_VISIT_PHARMA
+
 # tflags publish
 TW_GIBBERISH_MANY
 
 # good enough
-OBFU_HTML_ATTACH
+CDISP_SZ_MANY
+
+# good enough
+DEAR_EMAIL_USER
+
+# good enough
+FROM_MISSP_PHISH
+
+# good enough
+FROM_WSP_TRAIL
+
+# good enough
+HDRS_MISSP
+
+# good enough
+MONEY_FORM_SHORT
+
+# good enough
+OBFU_DOC_ATTACH
+
+# good enough
+ONLINE_MKTG_CNSLT
+
+# good enough
+SERGIO_SUBJECT_PORN014
+
+# good enough
+SERGIO_SUBJECT_PORN015
+
+# good enough
+SUBJ_OBFU_LOW_CNTRST
+
+# good enough
+TVD_ENHANCE
+
+# good enough
+TVD_SPACE_ENC_FM_MIME
+
+# good enough
+URI_ONLY_LOW_CONTRAST
 
 # tflags publish
 UC_GIBBERISH_OBFU
