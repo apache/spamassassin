@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-traps bb-zmi darxus grenier jarif kgolding zmi; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud darxus grenier jarif kgolding llanga zmi; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus grenier jarif kgolding zmi
+# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud darxus grenier jarif kgolding zmi; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-traps bb-zmi darxus grenier jarif kgolding llanga zmi; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud darxus grenier jarif kgolding llanga zmi
 
 # tflags publish
 AC_BR_BONANZA
@@ -39,9 +39,6 @@ AC_SPAMMY_URI_PATTERNS9
 
 # tflags publish
 ADMAIL
-
-# good enough
-ADMITS_SPAM
 
 # tflags publish
 ADVANCE_FEE_2_NEW_FORM
@@ -437,9 +434,6 @@ HK_RANDOM_REPLYTO
 HK_SCAM_N15
 
 # good enough
-HK_SCAM_N2
-
-# good enough
 HK_SCAM_N3
 
 # tflags userconf
@@ -543,6 +537,9 @@ NSL_RCVD_FROM_USER
 
 # good enough
 NSL_RCVD_HELO_USER
+
+# good enough
+OBFU_HTML_ATTACH
 
 # tflags publish
 OBFU_JVSCR_ESC
@@ -800,9 +797,6 @@ RCVD_IN_SORBS_ZOMBIE
 RCVD_IN_XBL
 
 # good enough
-REPLYTO_WITHOUT_TO_CC
-
-# good enough
 RISK_FREE
 
 # good enough
@@ -871,9 +865,6 @@ SUBJECT_IN_BLACKLIST
 # tflags userconf
 SUBJECT_IN_WHITELIST
 
-# good enough
-SUBJECT_NEEDS_ENCODING
-
 # tflags net
 SURBL_BLOCKED
 
@@ -941,34 +932,10 @@ TVD_VISIT_PHARMA
 TW_GIBBERISH_MANY
 
 # good enough
-CDISP_SZ_MANY
-
-# good enough
-DEAR_EMAIL_USER
-
-# good enough
-FROM_MISSP_PHISH
-
-# good enough
-FROM_WSP_TRAIL
-
-# good enough
 HDRS_MISSP
 
 # good enough
-MONEY_FORM_SHORT
-
-# good enough
-OBFU_DOC_ATTACH
-
-# good enough
 ONLINE_MKTG_CNSLT
-
-# good enough
-SERGIO_SUBJECT_PORN014
-
-# good enough
-SERGIO_SUBJECT_PORN015
 
 # good enough
 SUBJ_OBFU_LOW_CNTRST
@@ -978,9 +945,6 @@ TVD_ENHANCE
 
 # good enough
 TVD_SPACE_ENC_FM_MIME
-
-# good enough
-URI_ONLY_LOW_CONTRAST
 
 # tflags publish
 UC_GIBBERISH_OBFU
