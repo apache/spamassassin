@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud darxus grenier jarif kgolding zmi; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-traps bb-zmi darxus grenier jarif kgolding llanga zmi; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud darxus grenier jarif kgolding llanga zmi
+# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus grenier jarif kgolding zmi; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud darxus grenier jarif kgolding llanga zmi; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-traps bb-zmi darxus grenier jarif kgolding llanga zmi
 
 # tflags publish
 AC_BR_BONANZA
@@ -397,6 +397,9 @@ HASHCASH_HIGH
 # good enough
 HDRS_LCASE
 
+# good enough
+HDRS_MISSP
+
 # tflags publish
 HEADER_FROM_DIFFERENT_DOMAINS
 
@@ -472,9 +475,6 @@ LOTTO_DEPT
 # tflags publish
 LUCRATIVE
 
-# good enough
-MANY_HDRS_LCASE
-
 # tflags publish
 MANY_SPAN_IN_TEXT
 
@@ -498,9 +498,6 @@ MONEY_ATM_CARD
 
 # good enough
 MONEY_BARRISTER
-
-# good enough
-MONEY_FORM
 
 # tflags publish
 MONEY_FRAUD_3
@@ -538,14 +535,14 @@ NSL_RCVD_FROM_USER
 # good enough
 NSL_RCVD_HELO_USER
 
-# good enough
-OBFU_HTML_ATTACH
-
 # tflags publish
 OBFU_JVSCR_ESC
 
 # tflags publish
 OBFU_TEXT_ATTACH
+
+# good enough
+ONLINE_MKTG_CNSLT
 
 # tflags publish
 PHP_NOVER_MUA
@@ -865,6 +862,9 @@ SUBJECT_IN_BLACKLIST
 # tflags userconf
 SUBJECT_IN_WHITELIST
 
+# good enough
+SUBJ_OBFU_LOW_CNTRST
+
 # tflags net
 SURBL_BLOCKED
 
@@ -917,10 +917,16 @@ TO_NO_BRKTS_NORDNS_HTML
 TO_NO_BRKTS_PCNT
 
 # good enough
+TVD_ENHANCE
+
+# good enough
 TVD_QUAL_MEDS
 
 # good enough
 TVD_SPACE_ENCODED
+
+# good enough
+TVD_SPACE_ENC_FM_MIME
 
 # good enough
 TVD_SPACE_RATIO_MINFP
@@ -932,19 +938,7 @@ TVD_VISIT_PHARMA
 TW_GIBBERISH_MANY
 
 # good enough
-HDRS_MISSP
-
-# good enough
-ONLINE_MKTG_CNSLT
-
-# good enough
-SUBJ_OBFU_LOW_CNTRST
-
-# good enough
-TVD_ENHANCE
-
-# good enough
-TVD_SPACE_ENC_FM_MIME
+ANY_PILL_PRICE
 
 # tflags publish
 UC_GIBBERISH_OBFU
@@ -1035,6 +1029,9 @@ URI_HOST_IN_WHITELIST
 
 # tflags userconf
 URI_NOVOWEL
+
+# good enough
+URI_ONLY_LOW_CONTRAST
 
 # tflags publish
 URI_ONLY_MSGID_MALF
