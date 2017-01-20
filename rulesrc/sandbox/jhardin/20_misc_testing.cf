@@ -2201,7 +2201,7 @@ header     __PHP_ORIG_SCRIPT_EVAL      X-PHP-Originating-Script =~ /\beval\b.*\b
 meta       __XMSID                     __HAS_XM_SID && !__CTYPE_MULTIPART_MIXED 
 meta       __XMSID_SONLY               __HAS_XM_SID && (INVALID_MSGID || __XPRIO || __HAS_X_MAILER)
 
-header     __UNSUB_MAILTO_BOGUS        List-Unsubscribe =~ /mailto:[^@\s">]*[\s?">]/
+header     __UNSUB_MAILTO_BOGUS        List-Unsubscribe =~ /mailto:[^@">]*[?">]/i
 
 meta       __MIMEOLE_DIRECT_TO_MX      __HAS_MIMEOLE && __DOS_DIRECT_TO_MX 
 meta       MIMEOLE_DIRECT_TO_MX        __MIMEOLE_DIRECT_TO_MX && !__ANY_IMAGE_ATTACH 
@@ -2222,6 +2222,7 @@ header     __SUBJECT_EMPTY              Subject:raw =~ /^$/
 meta       __SUBJECT_PRESENT_EMPTY      __HAS_SUBJECT && __SUBJECT_EMPTY
 
 body       __BAYES_POISON_NUMS_01       /\s([0-9]{6,})\s(?:.{15,}?\s\1\s){10}/
+
 
 
 
