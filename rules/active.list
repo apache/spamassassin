@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus dwarren grenier jarif kgolding zmi; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud darxus dwarren grenier jarif kgolding llanga zmi; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud darxus dwarren grenier jarif kgolding llanga zmi
+# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud darxus dwarren grenier jarif kgolding; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus dwarren grenier jarif kgolding llanga zmi; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud darxus dwarren grenier jarif kgolding llanga zmi
 
 # tflags publish
 AC_BR_BONANZA
@@ -61,9 +61,6 @@ ADVANCE_FEE_3_NEW_MONEY
 # tflags publish
 ADVANCE_FEE_4_NEW
 
-# good enough
-ADVANCE_FEE_5_NEW_FRM_MNY
-
 # tflags publish
 AD_PREFS
 
@@ -71,13 +68,7 @@ AD_PREFS
 ALL_TRUSTED
 
 # good enough
-ANY_PILL_PRICE
-
-# good enough
 AXB_XMAILER_MIMEOLE_OL_024C2
-
-# good enough
-AXB_XMAILER_MIMEOLE_OL_1ECD5
 
 # tflags learn
 BAYES_00
@@ -141,9 +132,6 @@ CORRUPT_FROM_LINE_IN_HDRS
 
 # good enough
 DATE_IN_FUTURE_96_Q
-
-# good enough
-DEAR_WINNER
 
 # tflags net
 DIGEST_MULTIPLE
@@ -228,9 +216,6 @@ FOUND_YOU
 
 # tflags userconf
 FRAGMENTED_MESSAGE
-
-# good enough
-FREEMAIL_DOC_PDF_BCC
 
 # tflags publish
 FREEMAIL_FORGED_FROMDOMAIN
@@ -383,13 +368,7 @@ HELO_MISC_IP
 HEXHASH_WORD
 
 # good enough
-HK_NAME_DRUGS
-
-# good enough
 HK_RANDOM_FROM
-
-# good enough
-HK_RANDOM_REPLYTO
 
 # good enough
 HK_SCAM_N15
@@ -414,12 +393,6 @@ LONG_IMG_URI
 
 # tflags publish
 LOTS_OF_MONEY
-
-# good enough
-LOTTERY_PH_004470
-
-# good enough
-LOTTO_AGENT
 
 # good enough
 LOTTO_DEPT
@@ -731,13 +704,10 @@ RCVD_IN_SORBS_ZOMBIE
 RCVD_IN_XBL
 
 # good enough
-RISK_FREE
+REPLYTO_WITHOUT_TO_CC
 
 # good enough
 RP_MATCHES_RCVD
-
-# good enough
-SERGIO_SUBJECT_VIAGRA01
 
 # tflags publish
 SINGLETS_LOW_CONTRAST
@@ -851,13 +821,7 @@ TO_NO_BRKTS_PCNT
 TVD_ENHANCE
 
 # good enough
-TVD_QUAL_MEDS
-
-# good enough
 TVD_SPACE_ENCODED
-
-# good enough
-TVD_SPACE_RATIO_MINFP
 
 # good enough
 TVD_VISIT_PHARMA
@@ -866,7 +830,7 @@ TVD_VISIT_PHARMA
 TW_GIBBERISH_MANY
 
 # good enough
-FILL_THIS_FORM_LOAN
+CTYPE_NULL
 
 # good enough
 ONLINE_MKTG_CNSLT
