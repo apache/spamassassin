@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud darxus dwarren grenier jarif kgolding; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus dwarren grenier jarif kgolding llanga zmi; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud darxus dwarren grenier jarif kgolding llanga zmi
+# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud darxus dwarren ena grenier jarif kgolding zmi; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-traps darxus dwarren ena grenier jarif jmcnally kgolding llanga zmi; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud darxus dwarren grenier jarif kgolding llanga zmi
 
 # tflags publish
 AC_BR_BONANZA
@@ -106,6 +106,9 @@ BODY_URI_ONLY
 # tflags publish
 BOGUS_MSM_HDRS
 
+# good enough
+BUG6152_INVALID_DATE_TZ_ABSURD
+
 # tflags publish
 CANT_SEE_AD
 
@@ -132,6 +135,9 @@ CORRUPT_FROM_LINE_IN_HDRS
 
 # good enough
 DATE_IN_FUTURE_96_Q
+
+# good enough
+DEAR_WINNER
 
 # tflags net
 DIGEST_MULTIPLE
@@ -190,6 +196,9 @@ ENCRYPTED_MESSAGE
 # tflags userconf
 ENV_AND_HDR_SPF_MATCH
 
+# good enough
+FAKE_REPLY_C
+
 # tflags publish
 FBI_MONEY
 
@@ -220,9 +229,6 @@ FRAGMENTED_MESSAGE
 # tflags publish
 FREEMAIL_FORGED_FROMDOMAIN
 
-# good enough
-FREEMAIL_MANY_TO
-
 # tflags userconf
 FROM_DOMAIN_NOVOWEL
 
@@ -249,9 +255,6 @@ FROM_MISSP_REPLYTO
 
 # tflags net
 FROM_MISSP_SPF_FAIL
-
-# good enough
-FROM_MISSP_USER
 
 # good enough
 FROM_MISSP_XPRIO
@@ -370,9 +373,6 @@ HEXHASH_WORD
 # good enough
 HK_RANDOM_FROM
 
-# good enough
-HK_SCAM_N15
-
 # tflags userconf
 HTML_CHARSET_FARAWAY
 
@@ -453,6 +453,9 @@ OBFU_JVSCR_ESC
 
 # tflags publish
 OBFU_TEXT_ATTACH
+
+# good enough
+ONLINE_MKTG_CNSLT
 
 # tflags publish
 PHP_NOVER_MUA
@@ -704,9 +707,6 @@ RCVD_IN_SORBS_ZOMBIE
 RCVD_IN_XBL
 
 # good enough
-REPLYTO_WITHOUT_TO_CC
-
-# good enough
 RP_MATCHES_RCVD
 
 # tflags publish
@@ -772,9 +772,6 @@ SURBL_BLOCKED
 # tflags publish
 SYSADMIN
 
-# good enough
-TBIRD_SUSP_MIME_BDRY
-
 # tflags publish
 TEQF_USR_IMAGE
 
@@ -799,9 +796,6 @@ TO_EQ_FM_SPF_FAIL
 # tflags publish
 TO_IN_SUBJ
 
-# good enough
-TO_NO_BRKTS_FROM_MSSP
-
 # tflags publish
 TO_NO_BRKTS_HTML_IMG
 
@@ -818,25 +812,58 @@ TO_NO_BRKTS_NORDNS_HTML
 TO_NO_BRKTS_PCNT
 
 # good enough
-TVD_ENHANCE
+TVD_FINGER_02
 
 # good enough
 TVD_SPACE_ENCODED
-
-# good enough
-TVD_VISIT_PHARMA
 
 # tflags publish
 TW_GIBBERISH_MANY
 
 # good enough
-CTYPE_NULL
+ACH_CANCELLED
 
 # good enough
-ONLINE_MKTG_CNSLT
+ADVANCE_FEE_5_NEW_FRM_MNY
 
 # good enough
-SUBJ_BROKEN_WORD
+ADVANCE_FEE_5_NEW_MONEY
+
+# good enough
+AXB_XMAILER_MIMEOLE_OL_1ECD5
+
+# good enough
+AXB_XM_FORGED_OL2600
+
+# good enough
+BODY_EMPTY
+
+# good enough
+FILL_THIS_FORM_FRAUD_PHISH
+
+# good enough
+FILL_THIS_FORM_LOAN
+
+# good enough
+FREEMAIL_DOC_PDF_BCC
+
+# good enough
+LOTTO_AGENT
+
+# good enough
+PDS_TO_EQ_FROM_NAME
+
+# good enough
+RISK_FREE
+
+# good enough
+SERGIO_SUBJECT_VIAGRA01
+
+# good enough
+SHARE_50_50
+
+# good enough
+TVD_SPACE_ENC_FM_MIME
 
 # tflags publish
 UC_GIBBERISH_OBFU
