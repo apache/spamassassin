@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud darxus dwarren ena grenier jarif kgolding zmi; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-traps darxus dwarren ena grenier jarif jmcnally kgolding llanga zmi; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud darxus dwarren grenier jarif kgolding llanga zmi
+# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud darxus ena grenier jarif kgolding zmi; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud darxus dwarren ena grenier jarif kgolding llanga zmi; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-traps darxus dwarren ena grenier jarif jmcnally kgolding llanga zmi
 
 # tflags publish
 AC_BR_BONANZA
@@ -255,6 +255,9 @@ FROM_MISSP_REPLYTO
 
 # tflags net
 FROM_MISSP_SPF_FAIL
+
+# good enough
+FROM_MISSP_USER
 
 # good enough
 FROM_MISSP_XPRIO
@@ -796,6 +799,9 @@ TO_EQ_FM_SPF_FAIL
 # tflags publish
 TO_IN_SUBJ
 
+# good enough
+TO_NO_BRKTS_FROM_MSSP
+
 # tflags publish
 TO_NO_BRKTS_HTML_IMG
 
@@ -824,6 +830,15 @@ TW_GIBBERISH_MANY
 ACH_CANCELLED
 
 # good enough
+ADMITS_SPAM
+
+# good enough
+ADVANCE_FEE_2_NEW_FRM_MNY
+
+# good enough
+ADVANCE_FEE_5_NEW
+
+# good enough
 ADVANCE_FEE_5_NEW_FRM_MNY
 
 # good enough
@@ -839,16 +854,58 @@ AXB_XM_FORGED_OL2600
 BODY_EMPTY
 
 # good enough
+COMPENSATION
+
+# good enough
+DEAR_BENEFICIARY
+
+# good enough
 FILL_THIS_FORM_FRAUD_PHISH
 
 # good enough
 FILL_THIS_FORM_LOAN
 
 # good enough
+FILL_THIS_FORM_LONG
+
+# good enough
 FREEMAIL_DOC_PDF_BCC
 
 # good enough
+FROM_MISSP_PHISH
+
+# good enough
+FROM_MISSP_TO_UNDISC
+
+# good enough
+HK_NAME_MR_MRS
+
+# good enough
+HK_SCAM_N2
+
+# good enough
+HK_SCAM_N3
+
+# good enough
 LOTTO_AGENT
+
+# good enough
+MILLION_USD
+
+# good enough
+MONEY_ATM_CARD
+
+# good enough
+MONEY_BARRISTER
+
+# good enough
+MONEY_FORM
+
+# good enough
+MONEY_FROM_41
+
+# good enough
+MONEY_FROM_MISSP
 
 # good enough
 PDS_TO_EQ_FROM_NAME
@@ -864,6 +921,9 @@ SHARE_50_50
 
 # good enough
 TVD_SPACE_ENC_FM_MIME
+
+# good enough
+TVD_SPACE_RATIO_MINFP
 
 # tflags publish
 UC_GIBBERISH_OBFU
