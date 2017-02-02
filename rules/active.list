@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-traps darxus dwarren ena grenier jarif kgolding zmi; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud darxus dwarren ena grenier jarif kgolding llanga zmi; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud darxus dwarren ena grenier jarif jbrooks kgolding llanga zmi
+# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-traps bb-zmi darxus dwarren ena grenier jarif kgolding zmi; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-traps darxus dwarren ena grenier jarif kgolding llanga zmi; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud darxus dwarren ena grenier jarif kgolding llanga zmi
 
 # good enough
 ACH_CANCELLED
@@ -432,6 +432,9 @@ LOTTERY_PH_004470
 
 # good enough
 LOTTO_AGENT
+
+# good enough
+LOTTO_DEPT
 
 # tflags publish
 LUCRATIVE
@@ -905,13 +908,10 @@ FROM_MISSP_PHISH
 FSL_MID_419
 
 # good enough
-MONEY_FORM
-
-# good enough
-OBFU_DOC_ATTACH
-
-# good enough
 POSTCARD_09
+
+# good enough
+SUBJ_BROKEN_WORD
 
 # good enough
 TO_NO_BRKTS_FROM_MSSP
