@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud darxus dwarren ena grenier jarif kgolding zmi; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-traps darxus dwarren ena grenier jarif kgolding llanga zmi; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus dwarren ena grenier jarif kgolding llanga zmi
+# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-kmcgrail bb-traps bb-zmi darxus dwarren ena grenier jarif kgolding thendrikx zmi; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud darxus dwarren ena grenier jarif kgolding llanga zmi; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-traps darxus dwarren ena grenier jarif kgolding llanga zmi
 
 # tflags publish
 AC_BR_BONANZA
@@ -207,9 +207,6 @@ DOS_OE_TO_MX
 
 # good enough
 DOS_OUTLOOK_TO_MX
-
-# good enough
-DUP_SUSP_HDR
 
 # tflags publish
 DX_TEXT_02
@@ -923,22 +920,16 @@ ADVANCE_FEE_5_NEW
 FREEMAIL_MANY_TO
 
 # good enough
-FROM_MISSP_PHISH
-
-# good enough
 HK_NAME_DR
 
 # good enough
 HK_SCAM_N2
 
 # good enough
-HK_SCAM_N3
+KHOP_DYNAMIC
 
 # good enough
 MONEY_FROM_41
-
-# good enough
-OBFU_HTML_ATTACH
 
 # good enough
 PDS_TO_EQ_FROM_NAME
