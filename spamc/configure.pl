@@ -66,7 +66,7 @@ print join(' ', $Config{'perlpath'}, "version.h.pl") . "\n";
   # Do the same thing as for the preprocessor below.
   package version_h;
   my $Z = $0;
-  local $0    = "version.h.pl";
+  local $0    = "./version.h.pl";
   local @ARGV = ();
   # Got to check for defined because the script returns shell error level!
   unless (defined do $0) {
