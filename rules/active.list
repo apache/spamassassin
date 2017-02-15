@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus dwarren ena grenier jarif kgolding thendrikx zmi; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud darxus dwarren ena grenier jarif kgolding llanga thendrikx zmi; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-kmcgrail bb-traps bb-zmi darxus dwarren ena grenier jarif kgolding llanga thendrikx zmi
+# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus dwarren ena grenier jarif kgolding thendrikx zmi; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud darxus dwarren ena grenier jarif kgolding llanga thendrikx zmi; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud darxus dwarren ena grenier jarif kgolding llanga thendrikx zmi
 
 # tflags publish
 AC_BR_BONANZA
@@ -232,9 +232,6 @@ FILL_THIS_FORM
 # good enough
 FILL_THIS_FORM_LOAN
 
-# good enough
-FILL_THIS_FORM_LONG
-
 # tflags publish
 FORM_FRAUD
 
@@ -306,6 +303,9 @@ FSL_HELO_BARE_IP_1
 
 # good enough
 FSL_HELO_BARE_IP_2
+
+# good enough
+FSL_HELO_NON_FQDN_1
 
 # tflags publish
 FSL_NEW_HELO_USER
@@ -404,10 +404,10 @@ HELO_MISC_IP
 HEXHASH_WORD
 
 # good enough
-HK_NAME_DR
+HK_NAME_DRUGS
 
 # good enough
-HK_NAME_DRUGS
+HK_NAME_MR_MRS
 
 # good enough
 HK_RANDOM_FROM
@@ -438,9 +438,6 @@ LONG_IMG_URI
 
 # tflags publish
 LOTS_OF_MONEY
-
-# good enough
-LOTTERY_PH_004470
 
 # good enough
 LOTTO_AGENT
@@ -480,9 +477,6 @@ MONEY_FRAUD_5
 
 # tflags publish
 MONEY_FRAUD_8
-
-# good enough
-MONEY_FROM_41
 
 # good enough
 MONEY_FROM_MISSP
@@ -838,12 +832,6 @@ SUBJECT_IN_BLACKLIST
 # tflags userconf
 SUBJECT_IN_WHITELIST
 
-# good enough
-SUBJECT_NEEDS_ENCODING
-
-# good enough
-SUBJ_BROKEN_WORD
-
 # tflags net
 SURBL_BLOCKED
 
@@ -910,14 +898,32 @@ TVD_SPACE_ENC_FM_MIME
 # good enough
 TVD_SPACE_RATIO_MINFP
 
-# good enough
-TVD_VISIT_PHARMA
-
 # tflags publish
 TW_GIBBERISH_MANY
 
 # good enough
-HK_NAME_MR_MRS
+FROM_MISSP_EH_MATCH
+
+# good enough
+HELO_NO_DOMAIN
+
+# good enough
+MAILER_EQ_ORG
+
+# good enough
+MANY_SUBDOM
+
+# good enough
+MONEY_FORM_SHORT
+
+# good enough
+TINY_FLOAT
+
+# good enough
+US_DOLLARS_3
+
+# good enough
+XFER_LOTSA_MONEY
 
 # tflags publish
 UC_GIBBERISH_OBFU
