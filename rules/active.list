@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-traps bb-zmi darxus dwarren ena grenier jarif kgolding thendrikx zmi; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus dwarren ena grenier jarif kgolding llanga thendrikx zmi; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud darxus dwarren ena grenier jarif kgolding llanga thendrikx zmi
+# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud darxus dwarren ena grenier jarif kgolding thendrikx zmi; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-traps bb-zmi darxus dwarren ena grenier jarif kgolding llanga thendrikx zmi; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus dwarren ena grenier jarif kgolding llanga thendrikx zmi
 
 # tflags publish
 AC_BR_BONANZA
@@ -266,6 +266,9 @@ FROM_LOCAL_NOVOWEL
 FROM_MISSPACED
 
 # good enough
+FROM_MISSP_EH_MATCH
+
+# good enough
 FROM_MISSP_FREEMAIL
 
 # good enough
@@ -397,6 +400,9 @@ HELO_LOCALHOST
 # good enough
 HELO_MISC_IP
 
+# good enough
+HELO_NO_DOMAIN
+
 # tflags publish
 HEXHASH_WORD
 
@@ -446,10 +452,16 @@ LOTTO_DEPT
 LUCRATIVE
 
 # good enough
+MAILER_EQ_ORG
+
+# good enough
 MANY_HDRS_LCASE
 
 # tflags publish
 MANY_SPAN_IN_TEXT
+
+# good enough
+MANY_SUBDOM
 
 # good enough
 MIMEOLE_DIRECT_TO_MX
@@ -465,6 +477,9 @@ MISSING_HB_SEP
 
 # good enough
 MONEY_BARRISTER
+
+# good enough
+MONEY_FORM_SHORT
 
 # tflags publish
 MONEY_FRAUD_3
@@ -851,6 +866,9 @@ TEQF_USR_MSGID_MALF
 THIS_AD
 
 # good enough
+TINY_FLOAT
+
+# good enough
 TO_EQ_FM_DIRECT_MX
 
 # tflags net
@@ -899,34 +917,7 @@ DEAR_BENEFICIARY
 FROM_MISSP_DYNIP
 
 # good enough
-FROM_MISSP_EH_MATCH
-
-# good enough
-HELO_NO_DOMAIN
-
-# good enough
 HK_NAME_FM_DR
-
-# good enough
-MAILER_EQ_ORG
-
-# good enough
-MANY_SUBDOM
-
-# good enough
-MONEY_FORM_SHORT
-
-# good enough
-OBFU_DOC_ATTACH
-
-# good enough
-TINY_FLOAT
-
-# good enough
-US_DOLLARS_3
-
-# good enough
-XFER_LOTSA_MONEY
 
 # tflags publish
 UC_GIBBERISH_OBFU
@@ -1080,6 +1071,12 @@ USER_IN_WHITELIST
 
 # tflags userconf
 USER_IN_WHITELIST_TO
+
+# good enough
+US_DOLLARS_3
+
+# good enough
+XFER_LOTSA_MONEY
 
 # tflags publish
 XM_PHPMAILER_FORGED
