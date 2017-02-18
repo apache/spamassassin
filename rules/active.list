@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud darxus dwarren ena grenier jarif kgolding thendrikx zmi; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-traps bb-zmi darxus dwarren ena grenier jarif kgolding llanga thendrikx zmi; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus dwarren ena grenier jarif kgolding llanga thendrikx zmi
+# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud darxus dwarren ena grenier jarif kgolding thendrikx zmi; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud darxus dwarren ena grenier jarif kgolding llanga thendrikx zmi; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-traps bb-zmi darxus dwarren ena grenier jarif kgolding llanga thendrikx zmi
 
 # tflags publish
 AC_BR_BONANZA
@@ -121,9 +121,6 @@ BODY_URI_ONLY
 # tflags publish
 BOGUS_MSM_HDRS
 
-# good enough
-BUG6152_INVALID_DATE_TZ_ABSURD
-
 # tflags publish
 CANT_SEE_AD
 
@@ -153,6 +150,9 @@ CORRUPT_FROM_LINE_IN_HDRS
 
 # good enough
 DATE_IN_FUTURE_96_Q
+
+# good enough
+DEAR_BENEFICIARY
 
 # good enough
 DEAR_WINNER
@@ -264,6 +264,9 @@ FROM_LOCAL_NOVOWEL
 
 # good enough
 FROM_MISSPACED
+
+# good enough
+FROM_MISSP_DYNIP
 
 # good enough
 FROM_MISSP_EH_MATCH
@@ -410,6 +413,9 @@ HEXHASH_WORD
 HK_NAME_DRUGS
 
 # good enough
+HK_NAME_FM_DR
+
+# good enough
 HK_NAME_MR_MRS
 
 # good enough
@@ -516,6 +522,9 @@ NSL_RCVD_FROM_USER
 
 # good enough
 NSL_RCVD_HELO_USER
+
+# good enough
+OBFU_DOC_ATTACH
 
 # tflags publish
 OBFU_JVSCR_ESC
@@ -784,9 +793,6 @@ RISK_FREE
 # good enough
 RP_MATCHES_RCVD
 
-# good enough
-SERGIO_SUBJECT_VIAGRA01
-
 # tflags publish
 SINGLETS_LOW_CONTRAST
 
@@ -899,9 +905,6 @@ TO_NO_BRKTS_NORDNS_HTML
 TO_NO_BRKTS_PCNT
 
 # good enough
-TVD_FINGER_02
-
-# good enough
 TVD_SPACE_ENCODED
 
 # good enough
@@ -909,15 +912,6 @@ TVD_SPACE_RATIO_MINFP
 
 # tflags publish
 TW_GIBBERISH_MANY
-
-# good enough
-DEAR_BENEFICIARY
-
-# good enough
-FROM_MISSP_DYNIP
-
-# good enough
-HK_NAME_FM_DR
 
 # tflags publish
 UC_GIBBERISH_OBFU
