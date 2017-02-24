@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud darxus dwarren ena grenier jarif kgolding thendrikx zmi; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud darxus dwarren ena grenier jarif kgolding llanga thendrikx zmi; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-traps bb-zmi darxus dwarren ena grenier jarif kgolding llanga thendrikx zmi
+# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-traps darxus dwarren ena grenier jarif kgolding thendrikx zmi; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud darxus dwarren ena grenier jarif kgolding llanga thendrikx zmi; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud darxus dwarren ena grenier jarif kgolding llanga thendrikx zmi
 
 # tflags publish
 AC_BR_BONANZA
@@ -40,8 +40,14 @@ AC_SPAMMY_URI_PATTERNS9
 # tflags publish
 ADMAIL
 
+# good enough
+ADMITS_SPAM
+
 # tflags publish
 ADVANCE_FEE_2_NEW_FORM
+
+# good enough
+ADVANCE_FEE_2_NEW_FRM_MNY
 
 # tflags publish
 ADVANCE_FEE_2_NEW_MONEY
@@ -153,6 +159,9 @@ DATE_IN_FUTURE_96_Q
 
 # good enough
 DEAR_BENEFICIARY
+
+# good enough
+DEAR_NOBODY
 
 # good enough
 DEAR_WINNER
@@ -273,6 +282,9 @@ FROM_MISSP_FREEMAIL
 
 # good enough
 FROM_MISSP_MSFT
+
+# good enough
+FROM_MISSP_PHISH
 
 # good enough
 FROM_MISSP_REPLYTO
@@ -404,9 +416,6 @@ HEXHASH_WORD
 HK_NAME_DRUGS
 
 # good enough
-HK_NAME_FM_DR
-
-# good enough
 HK_RANDOM_FROM
 
 # good enough
@@ -446,16 +455,10 @@ LOTTO_DEPT
 LUCRATIVE
 
 # good enough
-MAILER_EQ_ORG
-
-# good enough
 MANY_HDRS_LCASE
 
 # tflags publish
 MANY_SPAN_IN_TEXT
-
-# good enough
-MANY_SUBDOM
 
 # good enough
 MIMEOLE_DIRECT_TO_MX
@@ -480,6 +483,9 @@ MONEY_FRAUD_5
 
 # tflags publish
 MONEY_FRAUD_8
+
+# good enough
+MONEY_FROM_41
 
 # good enough
 MONEY_FROM_MISSP
@@ -507,6 +513,9 @@ NSL_RCVD_FROM_USER
 
 # good enough
 NSL_RCVD_HELO_USER
+
+# good enough
+OBFU_DOC_ATTACH
 
 # tflags publish
 OBFU_JVSCR_ESC
@@ -772,6 +781,9 @@ RISK_FREE
 # good enough
 RP_MATCHES_RCVD
 
+# good enough
+SERGIO_SUBJECT_VIAGRA01
+
 # tflags publish
 SINGLETS_LOW_CONTRAST
 
@@ -884,40 +896,25 @@ TO_NO_BRKTS_PCNT
 TVD_SPACE_ENCODED
 
 # good enough
+TVD_SPACE_ENC_FM_MIME
+
+# good enough
 TVD_SPACE_RATIO_MINFP
 
 # tflags publish
 TW_GIBBERISH_MANY
 
 # good enough
-ADMITS_SPAM
-
-# good enough
-ADVANCE_FEE_2_NEW_FRM_MNY
-
-# good enough
 ADVANCE_FEE_5_NEW
-
-# good enough
-DEAR_NOBODY
 
 # good enough
 FILL_THIS_FORM_LONG
 
 # good enough
-FROM_MISSP_PHISH
+KHOP_DYNAMIC
 
 # good enough
-HK_SCAM_N3
-
-# good enough
-MONEY_FROM_41
-
-# good enough
-SERGIO_SUBJECT_VIAGRA01
-
-# good enough
-TVD_SPACE_ENC_FM_MIME
+MONEY_LOTTERY
 
 # tflags publish
 UC_GIBBERISH_OBFU
