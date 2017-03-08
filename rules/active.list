@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-traps darxus dwarren ena grenier jarif kgolding thendrikx zmi; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus dwarren ena grenier jarif kgolding thendrikx zmi; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud darxus dwarren ena grenier jarif kgolding llanga thendrikx zmi
+# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus ena grenier jarif kgolding thendrikx zmi; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus dwarren ena grenier jarif kgolding llanga thendrikx zmi; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-traps darxus dwarren ena grenier jarif kgolding llanga thendrikx zmi
 
 # tflags publish
 AC_BR_BONANZA
@@ -46,9 +46,6 @@ ADMITS_SPAM
 # tflags publish
 ADVANCE_FEE_2_NEW_FORM
 
-# good enough
-ADVANCE_FEE_2_NEW_FRM_MNY
-
 # tflags publish
 ADVANCE_FEE_2_NEW_MONEY
 
@@ -90,6 +87,9 @@ AXB_XMAILER_MIMEOLE_OL_024C2
 
 # good enough
 AXB_XMAILER_MIMEOLE_OL_1ECD5
+
+# good enough
+AXB_XM_FORGED_OL2600
 
 # tflags learn
 BAYES_00
@@ -220,14 +220,14 @@ DX_TEXT_02
 # tflags publish
 DX_TEXT_03
 
-# good enough
-DYN_RDNS_AND_INLINE_IMAGE
-
 # tflags publish
 ENCRYPTED_MESSAGE
 
 # tflags userconf
 ENV_AND_HDR_SPF_MATCH
+
+# good enough
+FAKE_REPLY_A1
 
 # good enough
 FAKE_REPLY_C
@@ -264,6 +264,9 @@ FOUND_YOU
 
 # tflags userconf
 FRAGMENTED_MESSAGE
+
+# good enough
+FREEMAIL_DOC_PDF_BCC
 
 # tflags publish
 FREEMAIL_FORGED_FROMDOMAIN
@@ -427,11 +430,17 @@ HK_SCAM_N15
 # good enough
 HK_SCAM_N2
 
+# good enough
+HK_SCAM_N3
+
 # tflags userconf
 HTML_CHARSET_FARAWAY
 
 # tflags publish
 HTML_OFF_PAGE
+
+# good enough
+IMG_ALT_HSPACE_CID_ALIGN
 
 # good enough
 IMG_DIRECT_TO_MX
@@ -463,9 +472,6 @@ LOTTO_DEPT
 # tflags publish
 LUCRATIVE
 
-# good enough
-MANY_HDRS_LCASE
-
 # tflags publish
 MANY_SPAN_IN_TEXT
 
@@ -480,6 +486,9 @@ MIME_NO_TEXT
 
 # tflags userconf
 MISSING_HB_SEP
+
+# good enough
+MONEY_ATM_CARD
 
 # good enough
 MONEY_BARRISTER
@@ -853,14 +862,14 @@ SUBJECT_IN_BLACKLIST
 # tflags userconf
 SUBJECT_IN_WHITELIST
 
+# good enough
+SUBJ_ATTENTION
+
 # tflags net
 SURBL_BLOCKED
 
 # tflags publish
 SYSADMIN
-
-# good enough
-TBIRD_SUSP_MIME_BDRY
 
 # tflags publish
 TEQF_USR_IMAGE
@@ -920,34 +929,16 @@ TVD_SPACE_RATIO_MINFP
 TW_GIBBERISH_MANY
 
 # good enough
-AXB_XM_FORGED_OL2600
+DEAR_NOBODY
 
 # good enough
-FAKE_REPLY_A1
+MANY_SUBDOM
 
 # good enough
-FREEMAIL_DOC_PDF_BCC
+MILLION_USD
 
 # good enough
-HK_SCAM_N3
-
-# good enough
-IMG_ALT_HSPACE_CID_ALIGN
-
-# good enough
-MONEY_ATM_CARD
-
-# good enough
-OBFU_DOC_ATTACH
-
-# good enough
-ONLINE_MKTG_CNSLT
-
-# good enough
-SUBJ_ATTENTION
-
-# good enough
-YOUR_PERMISSION
+OBFU_HTML_ATTACH
 
 # tflags publish
 UC_GIBBERISH_OBFU
@@ -1110,6 +1101,9 @@ XPRIO
 
 # tflags publish
 XPRIO_SHORT_SUBJ
+
+# good enough
+YOUR_PERMISSION
 
 # tflags net
 __DKIMDOMAIN_IN_DWL_ANY
