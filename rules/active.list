@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus ena grenier jarif kgolding thendrikx zmi; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus dwarren ena grenier jarif kgolding llanga thendrikx zmi; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-traps darxus dwarren ena grenier jarif kgolding llanga thendrikx zmi
+# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja bb-guenther_fraud darxus dwarren ena grenier jarif kgolding thendrikx zmi; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus dwarren ena grenier jarif kgolding llanga thendrikx zmi; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus dwarren ena grenier jarif kgolding llanga thendrikx zmi
 
 # tflags publish
 AC_BR_BONANZA
@@ -212,6 +212,9 @@ DOS_ANAL_SPAM_MAILER
 DOS_OE_TO_MX
 
 # good enough
+DOS_OE_TO_MX_IMAGE
+
+# good enough
 DOS_OUTLOOK_TO_MX
 
 # tflags publish
@@ -282,9 +285,6 @@ FROM_LOCAL_NOVOWEL
 
 # good enough
 FROM_MISSPACED
-
-# good enough
-FROM_MISSP_DYNIP
 
 # good enough
 FROM_MISSP_FREEMAIL
@@ -430,17 +430,11 @@ HK_SCAM_N15
 # good enough
 HK_SCAM_N2
 
-# good enough
-HK_SCAM_N3
-
 # tflags userconf
 HTML_CHARSET_FARAWAY
 
 # tflags publish
 HTML_OFF_PAGE
-
-# good enough
-IMG_ALT_HSPACE_CID_ALIGN
 
 # good enough
 IMG_DIRECT_TO_MX
@@ -459,9 +453,6 @@ LONG_IMG_URI
 
 # tflags publish
 LOTS_OF_MONEY
-
-# good enough
-LOTTERY_PH_004470
 
 # good enough
 LOTTO_AGENT
@@ -486,9 +477,6 @@ MIME_NO_TEXT
 
 # tflags userconf
 MISSING_HB_SEP
-
-# good enough
-MONEY_ATM_CARD
 
 # good enough
 MONEY_BARRISTER
@@ -794,13 +782,13 @@ RCVD_IN_SORBS_ZOMBIE
 RCVD_IN_XBL
 
 # good enough
-REPLYTO_WITHOUT_TO_CC
-
-# good enough
 RISK_FREE
 
 # good enough
 RP_MATCHES_RCVD
+
+# good enough
+SB_GIF_AND_NO_URIS
 
 # good enough
 SERGIO_SUBJECT_VIAGRA01
@@ -880,9 +868,6 @@ TEQF_USR_MSGID_HEX
 # tflags publish
 TEQF_USR_MSGID_MALF
 
-# good enough
-TEQF_USR_POLITE
-
 # tflags publish
 THIS_AD
 
@@ -927,18 +912,6 @@ TVD_SPACE_RATIO_MINFP
 
 # tflags publish
 TW_GIBBERISH_MANY
-
-# good enough
-DEAR_NOBODY
-
-# good enough
-MANY_SUBDOM
-
-# good enough
-MILLION_USD
-
-# good enough
-OBFU_HTML_ATTACH
 
 # tflags publish
 UC_GIBBERISH_OBFU
@@ -1101,9 +1074,6 @@ XPRIO
 
 # tflags publish
 XPRIO_SHORT_SUBJ
-
-# good enough
-YOUR_PERMISSION
 
 # tflags net
 __DKIMDOMAIN_IN_DWL_ANY
