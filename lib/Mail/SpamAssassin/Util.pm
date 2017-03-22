@@ -719,6 +719,7 @@ sub parse_rfc822_date {
 }
 
 sub time_to_rfc822_date {
+  my $trash = shift;
   my($time) = @_;
 
   my @days = qw/Sun Mon Tue Wed Thu Fri Sat/;
