@@ -315,6 +315,13 @@ my @OPTIONAL_BINARIES = (
   version => '0',
   
   desc => $lwp_note,
+},
+{
+  binary => 're2c',
+  version => '0',
+
+  desc => 'The "re2c" program used by sa-compile to compile rules 
+  for regular expressions to speed up scanning.',
 }
 );
 
