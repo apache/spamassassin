@@ -536,7 +536,7 @@ SPAMASSASSIN RELEASE PROCEDURE
 
   NOTE: you must send this mail with a "From:" address @apache.org,
   otherwise it'll be bounced by the ASF's custom spam filtering
-  rules.
+  rules.  See [1] below for more requirements for the announce email.
 
 # IGNORING 2014-02-11 - NOT BOTHERING WITH FRESHMEAT - TOO OUT OF DATE AND
 # NOW FREECODE
@@ -593,4 +593,42 @@ SPAMASSASSIN RELEASE PROCEDURE
    running masscheck for that version and release the updates with proper
    ifplugin loops for any new features? 
 
+
+-------------
+[1]
+
+Hello PMCs --a quick reminder that messages sent to announce@apache.org
+feature prominently in the weekly Apache News Round-ups [1].
+
+In order for your announcement be happily moderated through, don't forget
+to:
+
+0) write "[ANNOUNCE]", "[ANN]", or "[SECURITY]" in the subject line as
+appropriate
+
+1) send the email in PLAINTEXT --all else will be rejected
+
+2) include the appropriate URL for downloading the release or more
+information regarding the announcement
+
+3) include the DOAP! Whilst you may know what your project is, there's a
+chance that others don't, particularly those with funky names/acronyms.
+Hone your message and polish that one-liner!
+
+3a) speaking of DOAP, relationships are nice --does your project
+involve/play with other technologies? If so, state the relationship.
+
+4) include a way for folks to learn more. Link to the project home page or
+a mailing list or some other relevant resource.
+
+5) personalize your closing --whether your choose to sign off using your
+name or (on behalf of) the collective PMC, doing something friendly
+reinforces the "community" aspect of the ASF.
+
+ 
+Thanks so much,
+Sally
+
+
+[1] https://blogs.apache.org/foundation/date/20150612
 // vim:tw=74:
