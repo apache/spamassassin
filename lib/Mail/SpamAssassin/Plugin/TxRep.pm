@@ -117,7 +117,7 @@ description of the factor below.
 through SpamAssassin's API, AWL adjusts the historical total score of the plain email
 address without IP (and deleted records bound to an IP), but since during the reception 
 new records with IP will be added, the blacklisted entry would cease acting during 
-scanning. TxRep always uses the record of th plain email address without IP together 
+scanning. TxRep always uses the record of the plain email address without IP together 
 with the one bound to an IP address, DKIM signature, or SPF pass (unless the weight 
 factor for the EMAIL reputation is set to zero). AWL uses the score of 100 (resp. -100) 
 for the blacklisting (resp. whitelisting) purposes. TxRep increases the value 
@@ -652,11 +652,16 @@ Used by the SQLBasedAddrList storage implementation.
 
 If this option is set the SQLBasedAddrList module will keep separate
 database entries for DKIM-validated e-mail addresses and for non-validated
-ones. A pre-requisite when setting this option is that a field awl.signedby
-exists in a SQL table, otherwise SQL operations will fail (which is why we
-need this option at all - for compatibility with pre-3.3.0 database schema).
-A plugin DKIM should also be enabled, as otherwise there is no benefit from
-turning on this option.
+ones. Without this option, or for domains that do not use a DKIM signature,
+the reputation of legitimate email can get mixed with the reputation of
+forgeries. A pre-requisite when setting this option is that a field
+txrep.signedby exists in a SQL table, otherwise SQL operations will fail.
+A DKIM plugin must also be enabled in order for this option to take effect.
+This option is highly recommended. Unless you are using a pre-3.3.0 database
+schema and cannot upgrade, there is no reason to disable this option. If
+you are upgrading from AWL and using a pre-3.3.0 schema, the txrep.signedby
+column will not exist. It is recommended that you add this column, but if
+that is not possible you must set this option to 0 to avoid SQL errors.
 
 =cut  # ...................................................................
   push (@cmds, {
@@ -1222,6 +1227,7 @@ sub check_senders_reputation {
   my $autolearn = defined $self->{autolearn};
   $self->{last_pms} = $self->{autolearn} = undef;
 
+  # Cases where we would not be able to use TxRep
   return 0 unless ($self->{conf}->{use_txrep});
   if ($self->{conf}->{use_auto_whitelist}) {
     warn("TxRep: cannot run when Auto-Whitelist is enabled. Please disable it!\n");
@@ -1250,20 +1256,19 @@ sub check_senders_reputation {
   my $domain = $from;
   $domain =~ s/^.+@//;
 
+  # Find the last untrusted relay and populate helo and original IP
   my ($origip, $helo);
   if (defined $pms->{relays_trusted} || defined $pms->{relays_untrusted}) {
     my $trusteds = @{$pms->{relays_trusted}};
     foreach my $rly ( @{$pms->{relays_trusted}}, @{$pms->{relays_untrusted}} ) {
 	# Get the last found HELO, regardless of private/public or trusted/untrusted
 	# Avoiding a redundant duplicate entry if HELO is equal/similar to another identificator
-        # Get the last found HELO, regardless of private/public or trusted/untrusted
-        # Avoiding a redundant duplicate entry if HELO is equal/similar to another identificator
-        if (defined $rly->{helo} &&
+	if (defined $rly->{helo} &&
             $rly->{helo} !~ /^\[?\Q$rly->{ip}\E\]?$/ &&
             $rly->{helo} !~ /^\Q$domain\E$/i &&
             $rly->{helo} !~ /^\Q$from\E$/i ) {
-            $helo   = $rly->{helo};
-        }
+	    $helo   = $rly->{helo};
+	}
 	# use only trusted ID, but use the first untrusted IP (if available) (AWL bug 6908)
 	# at low spam scores (<2) ignore trusted/untrusted
 	# set IP to 127.0.0.1 for any internal IP, so that it can be distinguished from none (AWL bug 6357)
@@ -1273,6 +1278,7 @@ sub check_senders_reputation {
     }
   }
 
+  # Look for previous scores of the same message, for instance when doing re-learning
   if ($self->{conf}->{txrep_track_messages}) {
     if ($msg_id) {
         my $msg_rep = $self->check_reputations($pms, 'MSG_ID', $msg_id, undef, $date, undef);
@@ -1313,7 +1319,10 @@ sub check_senders_reputation {
     }
   }
 
+  # Get the signing domain
   my $signedby = ($self->{conf}->{auto_whitelist_distinguish_signed})? $pms->get_tag('DKIMDOMAIN') : undef;
+
+  # Summary of all information we've gathered so far
   dbg("TxRep: active, %s pre-score: %s, autolearn score: %s, IP: %s, address: %s %s",
     $msg_id       || '',
     $pms->{score} || '?',
@@ -1335,6 +1344,7 @@ sub check_senders_reputation {
   my $totalweight      = 0;
   $self->{totalweight} = $totalweight;
 
+  # Get current reputation info
   $delta += $self->check_reputations($pms, 'EMAIL_IP', $from, $ip, $signedby, $msgscore);
 
   if ($domain) {
@@ -1350,6 +1360,7 @@ sub check_senders_reputation {
     $delta += $self->check_reputations($pms, 'IP', $origip, undef, undef, $msgscore);
   }
 
+  # Learn against this message and store reputation
   if (!defined $self->{learning}) {
     $delta = ($self->{totalweight})? $self->{conf}->{txrep_factor} * $delta / $self->{totalweight}  :  0;
     if ($delta) {
@@ -1360,9 +1371,11 @@ sub check_senders_reputation {
       dbg("TxRep: post-TxRep score: %.3f", $pms->{score});
     }
   }
+  # Track message ID
   if ($self->{conf}->{txrep_track_messages} && $msg_id) {
     $self->check_reputations($pms, 'MSG_ID', $msg_id, undef, $date, $msgscore);
   }
+  # Close any open resources
   if (!defined $self->{txKeepStoreTied}) {
     $self->finish();
   }
