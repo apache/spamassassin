@@ -79,7 +79,7 @@ sub set_rules {
   my $rules = shift;
 
   #Create the dir for the cf file
-  my $file = "$instdir/foo/share/spamassassin/20_testrules.cf";
+  my $file = "$instdir/share/spamassassin/20_testrules.cf";
   my $dir = dirname($file);
   mkpath($dir);
 
@@ -95,7 +95,7 @@ sub set_rules {
   close RULES or die;
 
   #Create the dir for the pre file
-  $file = "$instdir/foo/etc/mail/spamassassin/v330.pre";
+  $file = "$instdir/etc/mail/spamassassin/v330.pre";
   $dir = dirname($file);
   mkpath($dir);
 
@@ -126,11 +126,11 @@ sub set_rules {
 # -------------------------------------------------------------------
 
 new_instdir("basic");
-$INST_FROM_SCRATCH and run_makefile_pl "PREFIX=$instdir/foo";
+$INST_FROM_SCRATCH and run_makefile_pl "PREFIX=$instdir SYSCONFDIR=$instdir/etc DATADIR=$instdir/share/spamassassin LOCALSTATEDIR=$instdir/var/spamassassin CONFDIR=$instdir/etc/mail/spamassassin";
 
 # we now have an "installed" version we can run sa-compile with.  Ensure
 # sarun() will use it appropriately
-$scr = "$instdir/foo/$temp_binpath/spamassassin";
+$scr = "$instdir/$temp_binpath/spamassassin";
 $scr_localrules_args = $scr_cf_args = "";      # use the default rules dir, from our "install"
 
 set_rules q{
@@ -140,7 +140,7 @@ set_rules q{
 };
 
 # ensure we don't use compiled rules
-system("rm -rf $instdir/foo/var/spamassassin/compiled");
+system("rm -rf $instdir/var/spamassassin/compiled");
 %patterns = (
 
   q{ check: tests=FOO }, 'FOO'
@@ -152,14 +152,14 @@ clear_pattern_counters();
 
 # -------------------------------------------------------------------
 
-system_or_die "$instdir/foo/$temp_binpath/sa-compile --keep-tmps";  # --debug
+system_or_die "$instdir/$temp_binpath/sa-compile --keep-tmps";  # --debug
 %patterns = (
 
   q{ able to use 1/1 'body_0' compiled rules }, 'able-to-use',
   q{ check: tests=FOO }, 'FOO'
 
 );
-$scr = "$instdir/foo/$temp_binpath/spamassassin";
+$scr = "$instdir/$temp_binpath/spamassassin";
 $scr_localrules_args = $scr_cf_args = "";      # use the default rules dir, from our "install"
 ok sarun ("-D -Lt < $cwd/data/spam/001 2>&1", \&patterns_run_cb);
 ok_all_patterns();
