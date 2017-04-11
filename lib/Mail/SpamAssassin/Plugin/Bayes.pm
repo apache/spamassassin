@@ -200,7 +200,9 @@ use constant ADD_INVIZ_TOKENS_NO_PREFIX => 0;
   'X-Authentication-Warning' => '*a',
   'Organization'	=> '*o',
   'Organisation'        => '*o',
-  'Content-Type'	=> '*c',
+  'Content-Type'	=> '*ct',
+  'Content-Disposition'	=> '*cd',
+  'Content-Transfer-Encoding' => '*ce',
   'x-spam-relays-trusted' => '*RT',
   'x-spam-relays-untrusted' => '*RU',
 );
@@ -1120,7 +1122,7 @@ sub tokenize {
   # generate an SHA1 hash and take the lower 40 bits as our token
   my %tokens;
   foreach my $token (@tokens) {
-    # skip empty tokens
+  # dbg("bayes: token: %s", $token);
     $tokens{substr(sha1($token), -5)} = $token  if $token ne '';
   }
 
@@ -1217,7 +1219,7 @@ sub _tokenize_line {
 	my(@t) = $token =~ /( (?: [\xE0-\xEF] | [\xF0-\xF4][\x80-\xBF] )
                               [\x80-\xBF]{2} )/xsg;
 	if (@t) {
-          push (@rettokens, map('u8:'.$_, @t));
+          push (@rettokens, map($tokprefix.'u8:'.$_, @t));
 	  next;
 	}
       }
@@ -1227,7 +1229,7 @@ sub _tokenize_line {
 	# but I'm doing tuples to keep the dbs small(er)."  Sounds like a plan
 	# to me! (jm)
 	while ($token =~ s/^(..?)//) {
-	  push (@rettokens, "8:$1");
+	  push (@rettokens, $tokprefix.'8:'.$1);
 	}
 	next;
       }

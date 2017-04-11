@@ -692,6 +692,7 @@ sub base64_decode {
       m|^(?:[A-Za-z0-9+/=]{2,}={0,2})$|s)
   {
     # only use MIME::Base64 when the XS and Perl are both correct and quiet
+    local $1;
     s/(=+)(?!=*$)/'A' x length($1)/ge;
 
     # If only a certain number of bytes are requested, truncate the encoded
@@ -707,7 +708,7 @@ sub base64_decode {
   }
   tr{A-Za-z0-9+/=}{}cd;			# remove non-base64 characters
   s/=+$//;				# remove terminating padding
-  tr{A-Za-z0-9+/=}{ -_`};		# translate to uuencode
+  tr{A-Za-z0-9+/=}{ -_};		# translate to uuencode
   s/.$// if (length($_) % 4 == 1);	# unpack cannot cope with extra byte
 
   my $length;
@@ -728,19 +729,20 @@ sub base64_decode {
 }
 
 sub qp_decode {
-  local $_ = shift;
+  my $str = $_[0];
 
   # RFC 2045: when decoding a Quoted-Printable body, any trailing
   # white space on a line must be deleted
-  s/[ \t]+(?=\r?\n)//gs;
+  $str =~ s/[ \t]+(?=\r?\n)//gs;
 
-  s/=\r?\n//gs;  # soft line breaks
+  $str =~ s/=\r?\n//gs;  # soft line breaks
 
   # RFC 2045 explicitly prohibits lowercase characters a-f in QP encoding
   # do we really want to allow them???
-  s/=([0-9a-fA-F]{2})/chr(hex($1))/ge;
+  local $1;
+  $str =~ s/=([0-9a-fA-F]{2})/chr(hex($1))/ge;
 
-  return $_;
+  return $str;
 }
 
 sub base64_encode {

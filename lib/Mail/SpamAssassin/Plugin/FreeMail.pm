@@ -342,15 +342,15 @@ sub _parse_body {
         my $body = $pms->get_decoded_stripped_body_text_array();
         BODY: foreach (@$body) {
             # strip urls with possible emails inside
-            s#<?https?://\S{0,255}(?:\@|%40)\S{0,255}# #gi;
+            s{<?https?://\S{0,255}(?:\@|%40)\S{0,255}}{ }gi;
             # strip emails contained in <>, not mailto:
             # also strip ones followed by quote-like "wrote:" (but not fax: and tel: etc)
-            s#<?(?<!mailto:)$self->{email_regex}(?:>|\s{1,10}(?!(?:fa(?:x|csi)|tel|phone|e?-?mail))[a-z]{2,11}:)# #gi;
+            s{<?(?<!mailto:)$self->{email_regex}(?:>|\s{1,10}(?!(?:fa(?:x|csi)|tel|phone|e?-?mail))[a-z]{2,11}:)}{ }gi;
             while (/$self->{email_regex}/g) {
                 my $email = lc($1);
                 push(@body_emails, $email) unless defined $seen{$email};
                 $seen{$email} = 1;
-                last BODY if scalar @body_emails >= 40; # sanity
+                last BODY if @body_emails >= 40; # sanity
             }
         }
         my $count_all = 0;
