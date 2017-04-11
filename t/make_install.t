@@ -1,10 +1,13 @@
 #!/usr/bin/perl
 
-use lib '.'; use lib 't';
+use lib '.'; 
+use lib 't';
 $ENV{'TEST_PERL_TAINT'} = 'no';     # inhibit for this test
-use SATest; sa_t_init("make_install");
+use SATest; 
+sa_t_init("make_install");
 
-use Test; plan tests => 25;
+use Test; 
+plan tests => 25;
 
 BEGIN { 
   if (-e 't/test_dir') {
