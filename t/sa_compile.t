@@ -9,7 +9,7 @@ use File::Basename;
 use File::Path qw/mkpath/;
 
 my $temp_binpath = $Config{sitebinexp};
-$temp_binpath =~ s/^\Q$Config{prefix}\E//;
+$temp_binpath =~ s|^\Q$Config{siteprefixexp}\E/||;
 
 # called from BEGIN
 sub re2c_version_new_enough {
