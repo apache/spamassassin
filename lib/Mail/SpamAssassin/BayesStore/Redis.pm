@@ -118,7 +118,7 @@ package Mail::SpamAssassin::BayesStore::Redis;
 
 use strict;
 use warnings;
-use bytes;
+# use bytes;
 use re 'taint';
 use Errno qw(EBADF);
 use Mail::SpamAssassin::Util qw(untaint_var);

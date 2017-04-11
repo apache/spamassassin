@@ -48,7 +48,7 @@ package Mail::SpamAssassin::PersistentAddrList;
 
 use strict;
 use warnings;
-use bytes;
+# use bytes;
 use re 'taint';
 
 use vars qw{

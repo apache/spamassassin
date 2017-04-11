@@ -22,7 +22,7 @@ mass-check output.
 
 package Mail::SpamAssassin::Plugin::Reuse;
 
-use bytes;
+# use bytes;
 use strict;
 use warnings;
 

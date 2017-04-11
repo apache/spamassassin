@@ -20,7 +20,7 @@ package Mail::SpamAssassin::NetSet;
 
 use strict;
 use warnings;
-use bytes;
+# use bytes;
 use re 'taint';
 use Time::HiRes qw(time);
 use NetAddr::IP 4.000;

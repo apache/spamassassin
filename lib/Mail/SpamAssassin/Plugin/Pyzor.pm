@@ -41,7 +41,7 @@ use Mail::SpamAssassin::Util qw(untaint_var untaint_file_path
                                 proc_status_ok exit_status_str);
 use strict;
 use warnings;
-use bytes;
+# use bytes;
 use re 'taint';
 
 use vars qw(@ISA);

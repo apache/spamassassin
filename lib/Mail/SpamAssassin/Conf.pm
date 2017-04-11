@@ -79,7 +79,7 @@ package Mail::SpamAssassin::Conf;
 
 use strict;
 use warnings;
-use bytes;
+# use bytes;
 use re 'taint';
 
 use Mail::SpamAssassin::Util;

@@ -85,7 +85,7 @@ package Mail::SpamAssassin::Plugin::Hashcash;
 
 use strict;
 use warnings;
-use bytes;
+# use bytes;
 use re 'taint';
 
 use Mail::SpamAssassin::Plugin;

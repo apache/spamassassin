@@ -31,7 +31,7 @@ package Mail::SpamAssassin::Logger::Syslog;
 
 use strict;
 use warnings;
-use bytes;
+# use bytes;
 use re 'taint';
 
 use POSIX qw(:sys_wait_h setsid sigprocmask);

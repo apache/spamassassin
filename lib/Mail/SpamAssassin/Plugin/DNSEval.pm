@@ -31,7 +31,7 @@ use Mail::SpamAssassin::Util qw(reverse_ip_address);
 
 use strict;
 use warnings;
-use bytes;
+# use bytes;
 use re 'taint';
 
 use vars qw(@ISA);

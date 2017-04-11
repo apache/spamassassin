@@ -37,7 +37,7 @@ package Mail::SpamAssassin::DnsResolver;
 
 use strict;
 use warnings;
-use bytes;
+# use bytes;
 use re 'taint';
 
 require 5.008001;  # needs utf8::is_utf8()

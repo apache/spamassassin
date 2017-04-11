@@ -55,7 +55,7 @@ package Mail::SpamAssassin::Timeout;
 
 use strict;
 use warnings;
-use bytes;
+# use bytes;
 use re 'taint';
 
 use Time::HiRes qw(time);

@@ -31,7 +31,7 @@ package Mail::SpamAssassin::BayesStore::BDB;
 
 use strict;
 use warnings;
-use bytes;
+# use bytes;
 use re 'taint';
 use Errno qw(EBADF);
 #use Data::Dumper;

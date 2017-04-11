@@ -31,7 +31,7 @@ package Mail::SpamAssassin::Logger::File;
 
 use strict;
 use warnings;
-use bytes;
+# use bytes;
 use re 'taint';
 
 use POSIX ();

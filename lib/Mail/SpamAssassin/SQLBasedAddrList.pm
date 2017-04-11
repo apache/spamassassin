@@ -75,7 +75,7 @@ package Mail::SpamAssassin::SQLBasedAddrList;
 
 use strict;
 use warnings;
-use bytes;
+# use bytes;
 use re 'taint';
 
 # Do this silliness to stop RPM from finding DBI as required

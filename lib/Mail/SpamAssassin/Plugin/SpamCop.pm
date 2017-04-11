@@ -46,7 +46,7 @@ use Mail::SpamAssassin::Logger;
 use IO::Socket;
 use strict;
 use warnings;
-use bytes;
+# use bytes;
 use re 'taint';
 
 use constant HAS_NET_DNS => eval { require Net::DNS; };

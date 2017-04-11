@@ -61,7 +61,7 @@ or the C<spamd>/C<spamc> tools provided.
 package Mail::SpamAssassin;
 use strict;
 use warnings;
-use bytes;
+# use bytes;
 use re 'taint';
 
 require 5.006_001;

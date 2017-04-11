@@ -60,7 +60,7 @@ package Mail::SpamAssassin::Plugin::AWL;
 
 use strict;
 use warnings;
-use bytes;
+# use bytes;
 use re 'taint';
 use Mail::SpamAssassin::Plugin;
 use Mail::SpamAssassin::AutoWhitelist;

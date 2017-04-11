@@ -21,7 +21,7 @@ package Mail::SpamAssassin::ArchiveIterator;
 
 use strict;
 use warnings;
-use bytes;
+# use bytes;
 use re 'taint';
 
 use Errno qw(ENOENT EACCES EBADF);
