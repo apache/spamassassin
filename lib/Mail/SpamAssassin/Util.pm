@@ -48,7 +48,6 @@ use re 'taint';
 require 5.008001;  # needs utf8::is_utf8()
 
 use Mail::SpamAssassin::Logger;
-use Mail::SpamAssassin::Util::RegistrarBoundaries;  # deprecated
 
 BEGIN {
   use Exporter ();
@@ -1206,45 +1205,9 @@ sub secure_tmpdir {
 ###########################################################################
 
 ##
-## DEPRECATED FUNCTION, only left for third party plugins as fallback.
+## DEPRECATED FUNCTION, sub uri_to_domain removed.
 ## Replaced with Mail::SpamAssassin::RegistryBoundaries::uri_to_domain.
 ##
-sub uri_to_domain {
-  my ($uri) = @_;
-
-  # Javascript is not going to help us, so return.
-  return if ($uri =~ /^javascript:/i);
-
-  $uri =~ s{\#.*$}{}gs;			# drop fragment
-  $uri =~ s{^[a-z]+:/{0,2}}{}gsi;	# drop the protocol
-  $uri =~ s{^[^/]*\@}{}gs;		# username/passwd
-
-  # strip path and CGI params.  note: bug 4213 shows that "&" should
-  # *not* be likewise stripped here -- it's permitted in hostnames by
-  # some common MUAs!
-  $uri =~ s{[/?].*$}{}gs;              
-
-  $uri =~ s{:\d*$}{}gs;		# port, bug 4191: sometimes the # is missing
-
-  # skip undecoded URIs if the encoded bits shouldn't be.
-  # we'll see the decoded version as well.  see url_encode()
-  return if $uri =~ /\%(?:2[1-9a-fA-F]|[3-6][0-9a-fA-F]|7[0-9a-eA-E])/;
-
-  my $host = $uri;  # unstripped/full domain name
-
-  # keep IPs intact
-  if ($uri !~ /^\d+\.\d+\.\d+\.\d+$/) { 
-    # get rid of hostname part of domain, understanding delegation
-    $uri = Mail::SpamAssassin::Util::RegistrarBoundaries::trim_domain($uri);
-
-    # ignore invalid domains
-    return unless
-        (Mail::SpamAssassin::Util::RegistrarBoundaries::is_domain_valid($uri));
-  }
-  
-  # $uri is now the domain only, optionally return unstripped host name
-  return !wantarray ? lc $uri : (lc $uri, lc $host);
-}
 
 *uri_list_canonify = \&uri_list_canonicalize;  # compatibility alias
 sub uri_list_canonicalize {

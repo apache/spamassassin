@@ -124,7 +124,6 @@ lib/Mail/SpamAssassin/Timeout.pm
 lib/Mail/SpamAssassin/Util.pm
 lib/Mail/SpamAssassin/Util/DependencyInfo.pm
 lib/Mail/SpamAssassin/Util/Progress.pm
-lib/Mail/SpamAssassin/Util/RegistrarBoundaries.pm
 lib/Mail/SpamAssassin/Util/ScopedTimer.pm
 lib/Mail/SpamAssassin/Util/TieOneStringHash.pm
 lib/spamassassin-run.pod
@@ -143,6 +142,8 @@ rules/v330.pre
 rules/v340.pre
 rules/v341.pre
 rules/20_aux_tlds.cf
+rules-extras/README.txt
+rules-extras/10_uridnsbl_skip_financial.cf
 sa-awl.raw
 sa-check_spamd.raw
 sa-compile.raw
