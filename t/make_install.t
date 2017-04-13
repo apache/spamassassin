@@ -6,6 +6,7 @@ $ENV{'TEST_PERL_TAINT'} = 'no';     # inhibit for this test
 use SATest; 
 sa_t_init("make_install");
 
+use Config;
 use Test; 
 plan tests => 25;
 
@@ -33,6 +34,10 @@ sub system_or_die;
 system_or_die "cd .. && make tardist";
 system_or_die "cd $builddir && gunzip -cd $cwd/../Mail-SpamAssassin-*.tar.gz | tar xf -";
 system_or_die "cd $builddir && mv Mail-SpamAssassin-* x";
+
+# Figure out where 'bin' really is
+my $binpath = $Config{sitebinexp};
+$binpath =~ s|^\Q$Config{siteprefixexp}\E/||;
 
 #Fix for RH/Fedora using lib64 instead of lib - bug 6609
 $x64_bit_lib_test = 0;
@@ -88,66 +93,72 @@ sub run_makefile_pl {
 
 # -------------------------------------------------------------------
 new_instdir(__LINE__);
-run_makefile_pl "PREFIX=$instdir/foo";
+my $prefix="$instdir/foo";
+run_makefile_pl "PREFIX=$prefix";
 
-ok -d "$instdir/foo/bin";
+ok -d "$prefix/$binpath";
 if ($x64_bit_lib_test) {
-  #print "testing for $instdir/foo/lib64";
-  ok -d "$instdir/foo/lib64";
+  #print "testing for $prefix/lib64";
+  ok -d "$prefix/lib64";
 } else {
-  ok -d "$instdir/foo/lib";
+  ok -d "$prefix/lib";
 }
 
-ok -e "$instdir/foo/share/spamassassin";
-ok -e "$instdir/foo/etc/mail/spamassassin";
+ok -e "$prefix/share/spamassassin";
+ok -e "$prefix/etc/mail/spamassassin";
 
 # -------------------------------------------------------------------
 new_instdir(__LINE__);
-run_makefile_pl "PREFIX=$instdir/foo LIB=$instdir/bar";
+$prefix="$instdir/foo";
+run_makefile_pl "PREFIX=$prefix LIB=$instdir/bar";
 
-ok -e "$instdir/foo/bin";
+ok -d "$prefix/$binpath";
 ok -e "$instdir/bar/Mail/SpamAssassin";
-ok -e "$instdir/foo/share/spamassassin";
-ok -e "$instdir/foo/etc/mail/spamassassin";
+ok -e "$prefix/share/spamassassin";
+ok -e "$prefix/etc/mail/spamassassin";
 
 # -------------------------------------------------------------------
 new_instdir(__LINE__);
-run_makefile_pl "PREFIX=$instdir/foo LIB=$instdir/bar DATADIR=$instdir/data";
+$prefix="$instdir/foo";
+run_makefile_pl "PREFIX=$prefix LIB=$instdir/bar DATADIR=$instdir/data";
 
-ok -e "$instdir/foo/bin";
+ok -d "$prefix/$binpath";
 ok -e "$instdir/bar/Mail/SpamAssassin";
 ok -e "$instdir/data/sa-update-pubkey.txt";
-ok !-e "$instdir/foo/share/spamassassin";
-ok -e "$instdir/foo/etc/mail/spamassassin";
+ok !-e "$prefix/share/spamassassin";
+ok -e "$prefix/etc/mail/spamassassin";
 
 # -------------------------------------------------------------------
 new_instdir(__LINE__);
-run_makefile_pl "PREFIX=$instdir/foo SYSCONFDIR=$instdir/sysconf";
+$prefix="$instdir/foo";
+run_makefile_pl "PREFIX=$prefix SYSCONFDIR=$instdir/sysconf";
 
-ok -e "$instdir/foo/bin";
+ok -d "$prefix/$binpath";
 ok -e "$instdir/sysconf/mail/spamassassin/local.cf";
-ok -e "$instdir/foo/share/spamassassin/sa-update-pubkey.txt";
-ok !-e "$instdir/foo/etc/mail/spamassassin";
+ok -e "$prefix/share/spamassassin/sa-update-pubkey.txt";
+ok !-e "$prefix/etc/mail/spamassassin";
 
 # -------------------------------------------------------------------
 new_instdir(__LINE__);
-run_makefile_pl "PREFIX=$instdir/foo CONFDIR=$instdir/conf";
+$prefix="$instdir/foo";
+run_makefile_pl "PREFIX=$prefix CONFDIR=$instdir/conf";
 
-ok -e "$instdir/foo/bin";
+ok -d "$prefix/$binpath";
 ok -e "$instdir/conf/local.cf";
-ok -e "$instdir/foo/share/spamassassin/sa-update-pubkey.txt";
-ok !-e "$instdir/foo/etc/mail/spamassassin";
+ok -e "$prefix/share/spamassassin/sa-update-pubkey.txt";
+ok !-e "$prefix/etc/mail/spamassassin";
 
 # -------------------------------------------------------------------
 new_instdir(__LINE__);
+$prefix="$instdir/dest/foo";
 run_makefile_pl "DESTDIR=$instdir/dest PREFIX=/foo";
 
-ok -d "$instdir/dest/foo/bin";
-ok -d "$instdir/dest/foo/etc/mail/spamassassin";
+ok -d "$prefix/$binpath";
+ok -d "$prefix/etc/mail/spamassassin";
 if ($x64_bit_lib_test) {
-  ok -d "$instdir/dest/foo/lib64";
+  ok -d "$prefix/lib64";
 } else {
-  ok -d "$instdir/dest/foo/lib";
+  ok -d "$prefix/lib";
 }
-ok -e "$instdir/dest/foo/share/spamassassin/sa-update-pubkey.txt";
+ok -e "$prefix/share/spamassassin/sa-update-pubkey.txt";
 
