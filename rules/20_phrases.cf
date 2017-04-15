@@ -82,15 +82,15 @@ describe IMPOTENCE              Impotence cure
 
 
 
-
-body NA_DOLLARS			/\b(?:\d{1,3})?Million\b.{0,40}\b(?:Canadian Dollar?s?|US\$|U\.? ?S\.? Dollar)/i
-describe NA_DOLLARS		Talks about a million North American dollars
-
-body US_DOLLARS_3               /(?:\$|usd).?\d{1,3}[,.]\d{3}[,.]\d{3}(?:[,.]\d\d)?/i
-describe US_DOLLARS_3           Mentions millions of $ ($NN,NNN,NNN.NN)
-
-body MILLION_USD              	/Million\b.{0,40}\b(?:United States? Dollars?|USD)/i
-describe MILLION_USD 		Talks about millions of dollars
+#MOVED TO 20_rules_to_sandbox.cf - kmcgrail 2015-05-14
+#body NA_DOLLARS			/\b(?:\d{1,3})?Million\b.{0,40}\b(?:Canadian Dollar?s?|US\$|U\.? ?S\.? Dollar)/i
+#describe NA_DOLLARS		Talks about a million North American dollars
+#
+#body US_DOLLARS_3               /(?:\$|usd).?\d{1,3}[,.]\d{3}[,.]\d{3}(?:[,.]\d\d)?/i
+#describe US_DOLLARS_3           Mentions millions of $ ($NN,NNN,NNN.NN)
+#
+#body MILLION_USD              	/Million\b.{0,40}\b(?:United States? Dollars?|USD)/i
+#describe MILLION_USD 		Talks about millions of dollars
 
 
 
