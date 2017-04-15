@@ -253,10 +253,10 @@ use constant LOCALHOST => qr/
 # an IP address, in IPv4 format only.
 #
 use constant IPV4_ADDRESS => qr/\b
-		    (?:1\d\d|2[0-4]\d|25[0-5]|\d\d|\d)\.
-                    (?:1\d\d|2[0-4]\d|25[0-5]|\d\d|\d)\.
-                    (?:1\d\d|2[0-4]\d|25[0-5]|\d\d|\d)\.
-                    (?:1\d\d|2[0-4]\d|25[0-5]|\d\d|\d)
+		    (?:1\d\d|2[0-4]\d|25[0-5]|[1-9]\d|\d)\.
+                    (?:1\d\d|2[0-4]\d|25[0-5]|[1-9]\d|\d)\.
+                    (?:1\d\d|2[0-4]\d|25[0-5]|[1-9]\d|\d)\.
+                    (?:1\d\d|2[0-4]\d|25[0-5]|[1-9]\d|\d)
                   \b/ox;
 
 # ---------------------------------------------------------------------------
@@ -267,10 +267,10 @@ use constant IP_ADDRESS => qr/
 		    (?:
 		      \b(?<!:)	# ensure no "::" IPv4 marker before this one
 		      # plain IPv4, as above
-		      (?:1\d\d|2[0-4]\d|25[0-5]|\d\d|\d)\.
-		      (?:1\d\d|2[0-4]\d|25[0-5]|\d\d|\d)\.
-		      (?:1\d\d|2[0-4]\d|25[0-5]|\d\d|\d)\.
-		      (?:1\d\d|2[0-4]\d|25[0-5]|\d\d|\d)\b
+		      (?:1\d\d|2[0-4]\d|25[0-5]|[1-9]\d|\d)\.
+		      (?:1\d\d|2[0-4]\d|25[0-5]|[1-9]\d|\d)\.
+		      (?:1\d\d|2[0-4]\d|25[0-5]|[1-9]\d|\d)\.
+		      (?:1\d\d|2[0-4]\d|25[0-5]|[1-9]\d|\d)\b
 		    |
 		      # IPv6 addresses
 		      # don't use \b here, it hits on :'s
@@ -303,10 +303,10 @@ use constant IP_ADDRESS => qr/
 			  (?:[a-f0-9]{1,4}:){4}:[a-f0-9]{1,4}:
 			)
 			# and the IPv4 address appended to all of the 12 bytes above
-			(?:1\d\d|2[0-4]\d|25[0-5]|\d\d|\d)\.
-			(?:1\d\d|2[0-4]\d|25[0-5]|\d\d|\d)\.
-			(?:1\d\d|2[0-4]\d|25[0-5]|\d\d|\d)\.
-			(?:1\d\d|2[0-4]\d|25[0-5]|\d\d|\d)   # no \b, we check later
+			(?:1\d\d|2[0-4]\d|25[0-5]|[1-9]\d|\d)\.
+			(?:1\d\d|2[0-4]\d|25[0-5]|[1-9]\d|\d)\.
+			(?:1\d\d|2[0-4]\d|25[0-5]|[1-9]\d|\d)\.
+			(?:1\d\d|2[0-4]\d|25[0-5]|[1-9]\d|\d)   # no \b, we check later
 
 			| # or (separately) a pure IPv6 address
 
