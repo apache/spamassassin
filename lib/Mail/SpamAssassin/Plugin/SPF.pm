@@ -740,7 +740,7 @@ sub _check_spf {
     elsif ($result eq 'temperror') { $scanner->{spf_temperror} = 1; }
     elsif ($result eq 'error') { $scanner->{spf_temperror} = 1; }
 
-    if ($result eq 'fail') {	# RCF 7208 6.2
+    if ($result eq 'fail') {	# RFC 7208 6.2
       $scanner->{spf_failure_comment} = "SPF failed: $comment";
     }
   }
