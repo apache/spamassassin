@@ -99,6 +99,9 @@ header fields, other plugins, etc.:
   _DKIMDOMAIN_
     Signing Domain Identifier (SDID) (the 'd' tag) from valid signatures;
 
+  _DKIMSELECTOR_
+    DKIM selector (the 's' tag) from valid signatures;
+
 Identities and domains from signatures which failed verification are not
 included in these tags. Duplicates are eliminated (e.g. when there are two or
 more valid signatures from the same signer, only one copy makes it into a tag).
@@ -923,15 +926,19 @@ sub _check_dkim_signature {
       dbg("dkim: signature verification result: %s", uc($sig_res));
 
       # supply values for both tags
-      my(%seen1, %seen2, @identity_list, @domain_list);
+      my(%seen1, %seen2, %seen3, @identity_list, @domain_list, @selector_list);
       @identity_list = grep(defined $_ && $_ ne '' && !$seen1{$_}++,
                             map($_->identity, @valid_signatures));
       @domain_list =   grep(defined $_ && $_ ne '' && !$seen2{$_}++,
                             map($_->domain, @valid_signatures));
+      @selector_list = grep(defined $_ && $_ ne '' && !$seen3{$_}++,
+                            map($_->selector, @valid_signatures));
       $pms->set_tag('DKIMIDENTITY',
                     @identity_list == 1 ? $identity_list[0] : \@identity_list);
       $pms->set_tag('DKIMDOMAIN',
                     @domain_list == 1   ? $domain_list[0]   : \@domain_list);
+      $pms->set_tag('DKIMSELECTOR',
+                    @selector_list == 1   ? $selector_list[0]   : \@selector_list);
     } elsif (@signatures) {
       $pms->{dkim_signed} = 1;
       my $sig = $signatures[0];
