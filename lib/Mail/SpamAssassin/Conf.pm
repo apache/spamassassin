@@ -360,24 +360,24 @@ for the whitelisting rule to fire. The first parameter is a sender's e-mail
 address to whitelist, and the second is a string to match the relay's rDNS,
 or its IP address. Matching is case-insensitive.
 
-This second parameter is matched against the TCP-info information field as
-provided in a FROM clause of a trace information (i.e. the Received header
+This second parameter is matched against a TCP-info information field as
+provided in a FROM clause of a trace information (i.e. in a Received header
 field, see RFC 5321). Only the Received header fields inserted by trusted
-hosts are considered. This parameter can either be a full hostname, or the
-domain component of that hostname, or an IP address in square brackets.
-The reverse DNS lookup is done by a MTA, not by SpamAssassin.
+hosts are considered. This parameter can either be a full hostname, or a
+domain component of that hostname, or an IP address (optionally followed
+by a slash and a prefix length) in square brackets. The address prefix
+(mask) length with a slash may stand within brackets along with an address,
+or may follow the bracketed address. Reverse DNS lookup is done by an MTA,
+not by SpamAssassin.
 
-In case of an IPv4 address in brackets, it may be truncated on classful
-boundaries to cover whole subnets, e.g. C<[10.1.2.3]>, C<[10.1.2]>,
-C<[10.1]>, C<[10]>.  CIDR notation is currently not supported, nor is
-IPv6. The matching on IP address is mainly provided to cover rare cases
-where whitelisting of a sending MTA is desired which does not have a
-correct reverse DNS configured.
+For backward compatibility as an alternative to a CIDR notation, an IPv4
+address in brackets may be truncated on classful boundaries to cover whole
+subnets, e.g. C<[10.1.2.3]>, C<[10.1.2]>, C<[10.1]>, C<[10]>.
 
 In other words, if the host that connected to your MX had an IP address
 192.0.2.123 that mapped to 'sendinghost.example.org', you should specify
-C<sendinghost.example.org>, or C<example.org>, or C<[192.0.2.123]> or
-C<[192.0.2]> here.
+C<sendinghost.example.org>, or C<example.org>, or C<[192.0.2.123]>, or
+C<[192.0.2.0/24]>, or C<[192.0.2]> here.
 
 Note that this requires that C<internal_networks> be correct.  For simple
 cases, it will be, but for a complex network you may get better results
@@ -390,8 +390,12 @@ result in the generated Received header field according to RFC 5321.
 e.g.
 
   whitelist_from_rcvd joe@example.com  example.com
-  whitelist_from_rcvd *@axkit.org      sergeant.org
+  whitelist_from_rcvd *@*              mail.example.org
   whitelist_from_rcvd *@axkit.org      [192.0.2.123]
+  whitelist_from_rcvd *@axkit.org      [192.0.2.0/24]
+  whitelist_from_rcvd *@axkit.org      [192.0.2.0]/24
+  whitelist_from_rcvd *@axkit.org      [2001:db8:1234::/48]
+  whitelist_from_rcvd *@axkit.org      [2001:db8:1234::]/48
 
 =item def_whitelist_from_rcvd addr@lists.sourceforge.net sourceforge.net
 
