@@ -25,6 +25,7 @@ use Errno qw(EBADF);
 
 use Mail::SpamAssassin::Plugin;
 use Mail::SpamAssassin::Locales;
+use Mail::SpamAssassin::Util qw(get_my_locales parse_rfc822_date);
 use Mail::SpamAssassin::Logger;
 use Mail::SpamAssassin::Constants qw(:sa :ip);
 
@@ -116,7 +117,7 @@ sub check_for_faraway_charset_in_headers {
   my ($self, $pms) = @_;
   my $hdr;
 
-  my @locales = Mail::SpamAssassin::Util::get_my_locales($self->{main}->{conf}->{ok_locales});
+  my @locales = get_my_locales($self->{main}->{conf}->{ok_locales});
 
   return 0 if grep { $_ eq "all" } @locales;
 
@@ -722,7 +723,7 @@ sub _get_date_header_time {
     for my $date (@dates) {
       if (defined($date) && length($date)) {
         chomp($date);
-        $time = Mail::SpamAssassin::Util::parse_rfc822_date($date);
+        $time = parse_rfc822_date($date);
       }
       last DATE if defined($time);
     }
@@ -773,7 +774,7 @@ sub _get_received_header_times {
       if ($rcvd =~ m/(\s.?\d+ \S\S\S \d+ \d+:\d+:\d+ \S+)/) {
 	my $date = $1;
         dbg2("eval: trying Received fetchmail header date for real time: $date");
-	my $time = Mail::SpamAssassin::Util::parse_rfc822_date($date);
+	my $time = parse_rfc822_date($date);
 	if (defined($time) && (time() >= $time)) {
           dbg2("eval: time_t from date=$time, rcvd=$date");
 	  push @fetchmail_times, $time;
@@ -793,7 +794,7 @@ sub _get_received_header_times {
     if ($rcvd =~ m/(\s.?\d+ \S\S\S \d+ \d+:\d+:\d+ \S+)/) {
       my $date = $1;
       dbg2("eval: trying Received header date for real time: $date");
-      my $time = Mail::SpamAssassin::Util::parse_rfc822_date($date);
+      my $time = parse_rfc822_date($date);
       if (defined($time)) {
         dbg2("eval: time_t from date=$time, rcvd=$date");
 	push @header_times, $time;
@@ -953,14 +954,14 @@ sub check_outlook_message_id {
   my $fudge = 250;
 
   $_ = $pms->get('Date');
-  $_ = Mail::SpamAssassin::Util::parse_rfc822_date($_) || 0;
+  $_ = parse_rfc822_date($_) || 0;
   my $expected = int (($_ * $x) + $y);
   my $diff = $timetoken - $expected;
   return 0 if (abs($diff) < $fudge);
 
   $_ = $pms->get('Received');
   /(\s.?\d+ \S\S\S \d+ \d+:\d+:\d+ \S+).*?$/;
-  $_ = Mail::SpamAssassin::Util::parse_rfc822_date($_) || 0;
+  $_ = parse_rfc822_date($_) || 0;
   $expected = int(($_ * $x) + $y);
   $diff = $timetoken - $expected;
 
