@@ -140,7 +140,7 @@ IPv4 address. In case of a TXT or SPF resource record which can return
 multiple character-strings (as defined in Section 3.3 of [RFC1035]), these
 strings are concatenated with no delimiters before comparing the result
 to the filtering string. This follows requirements of several documents,
-such as RFC 5518, RFC 4408, RFC 4871, RFC 5617.  Examples of a plain text
+such as RFC 5518, RFC 7208, RFC 4871, RFC 5617.  Examples of a plain text
 filtering parameter: "127.0.0.1", "transaction", 'list' .
 
 A regular expression follows a familiar perl syntax like /.../ or m{...}
@@ -539,7 +539,7 @@ sub process_response_packet {
     @answer = ( undef );
   }
 
-  # NOTE:  $rr->rdatastr returns the result encoded in a DNS zone file
+  # NOTE:  $rr->rdstring returns the result encoded in a DNS zone file
   # format, i.e. enclosed in double quotes if a result contains whitespace
   # (or other funny characters), and may use \DDD encoding or \X quoting as
   # per RFC 1035.  Using $rr->txtdata instead avoids this unnecessary encoding
@@ -566,19 +566,26 @@ sub process_response_packet {
       # special case, no answer records, only rcode can be tested
     } else {
       $rr_type = uc $rr->type;
-      if ($rr->UNIVERSAL::can('txtdata')) {  # TXT, SPF
-        # join with no intervening spaces, as per RFC 5518
+      if ($rr_type eq 'A') {
+        # Net::DNS::RR::A::address() is available since Net::DNS 0.69
+        $rr_rdatastr = $rr->UNIVERSAL::can('address') ? $rr->address
+                                                      : $rr->rdatastr;
+        if ($rr_rdatastr =~ m/^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\z/) {
+          $rdatanum = Mail::SpamAssassin::Util::my_inet_aton($rr_rdatastr);
+        }
+
+      } elsif ($rr->UNIVERSAL::can('txtdata')) {
+        # TXT, SPF: join with no intervening spaces, as per RFC 5518
         if ($txtdata_can_provide_a_list || $rr_type ne 'TXT') {
           $rr_rdatastr = join('', $rr->txtdata);  # txtdata() in list context!
         } else {  # char_str_list() is only available for TXT records
           $rr_rdatastr = join('', $rr->char_str_list);  # historical
         }
       } else {
-        $rr_rdatastr = $rr->rdatastr;
-        if ($rr_type eq 'A' &&
-            $rr_rdatastr =~ m/^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\z/) {
-          $rdatanum = Mail::SpamAssassin::Util::my_inet_aton($rr_rdatastr);
-        }
+        # rdatastr() is historical, use rdstring() since Net::DNS 0.69
+        $rr_rdatastr = $rr->UNIVERSAL::can('rdstring') ? $rr->rdstring
+                                                       : $rr->rdatastr;
+        utf8::encode($rr_rdatastr)  if utf8::is_utf8($rr_rdatastr);
       }
     # dbg("askdns: received rr type %s, data: %s", $rr_type, $rr_rdatastr);
     }
