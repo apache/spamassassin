@@ -747,8 +747,7 @@ sub bgread() {
   my($answerpkt, $decoded_length) = Net::DNS::Packet->new(\$data);
   $answerpkt or die "bgread: decoding DNS packet failed: $@";
   $answerpkt->answerfrom($peerhost);
-  $decoded_length ||= 0;
-  if ($decoded_length != length($data)) {
+  if (defined $decoded_length && $decoded_length ne "" && $decoded_length != length($data)) {
     warn sprintf("bgread: received a %d bytes packet from %s, decoded %d bytes\n",
                  length($data), $peerhost, $decoded_length);
   }
