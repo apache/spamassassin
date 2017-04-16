@@ -190,26 +190,21 @@ BEGIN {
     TESTS => sub {
       my $pms = shift;
       my $arg = (shift || ',');
-      join($arg, sort(@{$pms->{test_names_hit}})) || "none";
+      join($arg, sort @{$pms->{test_names_hit}}) || "none";
     },
 
     SUBTESTS => sub {
       my $pms = shift;
       my $arg = (shift || ',');
-      join($arg, sort(@{$pms->{subtest_names_hit}})) || "none";
+      join($arg, sort @{$pms->{subtest_names_hit}}) || "none";
     },
 
     TESTSSCORES => sub {
       my $pms = shift;
       my $arg = (shift || ",");
-      my $line = '';
-      foreach my $test (sort @{$pms->{test_names_hit}}) {
-        my $score = $pms->{conf}->{scores}->{$test};
-        $score = '0'  if !defined $score;
-        $line .= $arg  if $line ne '';
-        $line .= $test . "=" . $score;
-      }
-      $line ne '' ? $line : 'none';
+      my $scores = $pms->{conf}->{scores};
+      join($arg, map($_ . "=" . ($scores->{$_} || '0'),
+                     sort @{$pms->{test_names_hit}})) || "none";
     },
 
     PREVIEW => sub {
@@ -725,7 +720,7 @@ of the tests which were triggered by the mail.
 sub get_names_of_tests_hit {
   my ($self) = @_;
 
-  return join(',', sort(@{$self->{test_names_hit}}));
+  return join(',', sort @{$self->{test_names_hit}});
 }
 
 =item $list = $status->get_names_of_tests_hit_with_scores_hash ()
@@ -738,16 +733,10 @@ test names and individual scores of the tests which were triggered by the mail.
 sub get_names_of_tests_hit_with_scores_hash {
   my ($self) = @_;
 
-  my (%testsscores);
-
-  #BASED ON CODE FOR TESTSSCORES TAG - KAM 2014-04-24
-  foreach my $test (@{$self->{test_names_hit}}) {
-    my $score = $self->{conf}->{scores}->{$test};
-    $score = '0'  if !defined $score;
-
-    $testsscores{$test} = $score;
-  }
-
+  #BASED ON CODE FOR TESTSSCORES TAG
+  my $scores = $self->{conf}->{scores};
+  my %testsscores;
+  $testsscores{$_} = $scores->{$_} || '0'  for @{$self->{test_names_hit}};
   return \%testsscores;
 }
 
@@ -761,21 +750,10 @@ test names and individual scores of the tests which were triggered by the mail.
 sub get_names_of_tests_hit_with_scores {
   my ($self) = @_;
 
-  my ($line, %testsscores);
-
-  $line = '';
-
-  #BASED ON CODE FOR TESTSSCORES TAG - KAM 2014-04-24
-  foreach my $test (sort @{$self->{test_names_hit}}) {
-    my $score = $self->{conf}->{scores}->{$test};
-    $score = '0'  if !defined $score;
-    $line .= ','  if $line ne '';
-    $line .= $test . '=' . $score;
-  }
-
-  $line ||= 'none';
-
-  return $line;
+  #BASED ON CODE FOR TESTSSCORES TAG
+  my $scores = $self->{conf}->{scores};
+  return join(',', map($_ . '=' . ($scores->{$_} || '0'),
+                       sort @{$self->{test_names_hit}})) || "none";
 }
 
 
@@ -794,7 +772,7 @@ underscores, used in meta rules.
 sub get_names_of_subtests_hit {
   my ($self) = @_;
 
-  return join(',', sort(@{$self->{subtest_names_hit}}));
+  return join(',', sort @{$self->{subtest_names_hit}});
 }
 
 ###########################################################################
