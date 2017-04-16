@@ -62,6 +62,7 @@ BEGIN {
   @EXPORT_OK = qw(&local_tz &base64_decode &untaint_var &untaint_file_path
                   &exit_status_str &proc_status_ok &am_running_on_windows
                   &reverse_ip_address &decode_dns_question_entry
+                  &get_my_locales &parse_rfc822_date
                   &secure_tmpfile &secure_tmpdir &uri_list_canonicalize);
 }
 
@@ -223,7 +224,7 @@ sub am_running_on_windows {
 ###########################################################################
 
 # untaint a path to a file, e.g. "/home/jm/.spamassassin/foo",
-# "C:\Program Files\SpamAssassin\tmp\foo", "/home/õüt/etc".
+# "C:\Program Files\SpamAssassin\tmp\foo", "/home/ï¿½ï¿½t/etc".
 #
 # TODO: this does *not* handle locales well.  We cannot use "use locale"
 # and \w, since that will not detaint the data.  So instead just allow the
