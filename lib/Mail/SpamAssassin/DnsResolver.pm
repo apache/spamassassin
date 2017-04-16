@@ -581,7 +581,7 @@ sub new_dns_packet {
     #    time, $domain, $type, $packet->id);
     1;
   } or do {
-    # this can if a domain name in a query is invalid, or if a timeout signal
+    # get here if a domain name in a query is invalid, or if a timeout signal
     # happened to be trapped by this eval, or if Net::DNS signalled an error
     my $eval_stat = $@ ne '' ? $@ : "errno=$!";  chomp $eval_stat;
     # resignal if alarm went off
@@ -747,7 +747,7 @@ sub bgread() {
   my($answerpkt, $decoded_length) = Net::DNS::Packet->new(\$data);
   $answerpkt or die "bgread: decoding DNS packet failed: $@";
   $answerpkt->answerfrom($peerhost);
-  if ($decoded_length ne length($data)) {
+  if (defined $decoded_length && $decoded_length ne "" && $decoded_length != length($data)) {
     warn sprintf("bgread: received a %d bytes packet from %s, decoded %d bytes\n",
                  length($data), $peerhost, $decoded_length);
   }
@@ -804,8 +804,10 @@ sub poll_responses {
     last  if $nfound == 0;
 
     my $packet;
+    # Bug 7265, use our own bgread() below
+    # $packet = $self->{res}->bgread($self->{sock});
     eval {
-      $packet = $self->bgread();
+      $packet = $self->bgread();  # Bug 7265, use our own bgread()
     } or do {
       undef $packet;
       my $eval_stat = $@ ne '' ? $@ : "errno=$!";  chomp $eval_stat;
@@ -813,9 +815,6 @@ sub poll_responses {
       die $eval_stat  if $eval_stat =~ /__alarm__ignore__\(.*\)/s;
       info("dns: bad dns reply: %s", $eval_stat);
     };
-
-#   Bug 7265, use our own bgread()
-#   my $packet = $self->{res}->bgread($self->{sock});
 
     if (!$packet) {
       # error already reported above
@@ -907,7 +906,8 @@ Emulates C<Net::DNS::Resolver::send()>.
 This subroutine is a simple synchronous leftover from SpamAssassin version
 3.3 and does not participate in packet query caching and callback grouping
 as implemented by AsyncLoop::bgsend_and_start_lookup().  As such it should
-be avoided for mainstream usage.
+be avoided for mainstream usage.  Currently used through Mail::SPF::Server
+by the SPF plugin.
 
 =cut
 
