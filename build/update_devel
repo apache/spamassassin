@@ -53,8 +53,10 @@ for ext in tar.bz2 tar.gz zip ; do
   perl build/sha1sum.pl $DISTVNAME.$ext > $RELDIR/$DISTVNAME.$ext.sha1 || exit $?
 
   rm -f $DISTVNAME.$ext.asc*
+  #Adding information to run gpg-agent so a non-privileged user can sign
+  gpg-agent --homedir $HOME/sabuildtools/sasigningkey --daemon --write-env-file "${HOME}/sabuildtools/sasigningkey/.gpg-agent-info"
   if [ -d $HOME/sabuildtools/sasigningkey ]; then
-    $HOME/sabuildtools/bin/gpg --homedir $HOME/sabuildtools/sasigningkey -bsa $DISTVNAME.$ext || exit $?
+    gpg --homedir $HOME/sabuildtools/sasigningkey --detach-sign --sign --armor $DISTVNAME.$ext || exit $?
     mv $DISTVNAME.$ext.asc $RELDIR/$DISTVNAME.$ext.asc || exit $?
   fi
 
