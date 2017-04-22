@@ -506,7 +506,8 @@ score RCVD_IN_SORBS_HTTP 0 2.499 0 0.001 # n=0 n=2
 score RCVD_IN_SORBS_MISC 0 # n=0 n=1 n=2 n=3
 score RCVD_IN_SORBS_SMTP 0 # n=0 n=1 n=2 n=3
 score RCVD_IN_SORBS_SOCKS 0 2.443 0 1.927 # n=0 n=2
-score RCVD_IN_SORBS_WEB 0 0.614 0 0.770 # n=0 n=2
+score RCVD_IN_SORBS_SPAM 0 0.5 0 0.5
+score RCVD_IN_SORBS_WEB  0 1.5 0 1.5
 score RCVD_IN_SORBS_ZOMBIE 0 # n=0 n=1 n=2 n=3
 score RCVD_IN_XBL 0 0.724 0 0.375 # n=0 n=2
 score RCVD_IN_PBL 0 3.558 0 3.335 # n=0 n=2
@@ -796,6 +797,7 @@ score URIBL_SBL_A 0 0.1 0 0.1
 #score URIBL_SC_SURBL 0 0.001 0 0.568 # n=0 n=2 - removed bug 7279
 score URIBL_WS_SURBL 0 1.659 0 1.608 # n=0 n=2
 score URIBL_MW_SURBL 0 1.263 0 1.263
+score URIBL_CR_SURBL 0 1.263 0 1.263
 score URIBL_BLACK 0 1.7 0 1.7 # n=0 n=2
 score URIBL_GREY 0 1.084 0 0.424 # n=0 n=2
 score URIBL_DBL_SPAM 	0 2.5 0 2.5

@@ -110,6 +110,7 @@ header __EUDORA_MUA             X-Mailer =~ /^QUALCOMM Windows Eudora (?:Pro |Li
 header __EUDORA_MSGID		MESSAGEID =~ /^<(?:\d\d?\.){3,5}\d{14}\.[a-f0-9]{8}\@\S+(?:\sport\s\d+)?>$/m
 header __HAS_X_LOOP		exists:X-Loop
 header __HAS_X_MAILING_LIST	exists:X-Mailing-List
+header __HAS_X_MAILMAN_VERSION	exists:X-Mailman-Version
 meta FORGED_MUA_EUDORA          (__EUDORA_MUA && !__EUDORA_MSGID && !__UNUSABLE_MSGID && !__HAS_X_LOOP && !__HAS_X_MAILING_LIST)
 describe FORGED_MUA_EUDORA	Forged mail pretending to be from Eudora
   
