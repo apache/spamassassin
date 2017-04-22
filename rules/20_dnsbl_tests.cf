@@ -44,8 +44,7 @@ ifplugin Mail::SpamAssassin::Plugin::DNSEval
 # transfers: both axfr and ixfr available
 # URL: http://www.dnsbl.sorbs.net/
 # pay-to-use: no
-# There is no charge for removal from the proxy, vulnerability, relay, zombie, spam or DUHL databases.
-# (as per http://www.sorbs.net/overview.shtml 08-2016)
+# delist: $50 fee for RCVD_IN_SORBS_SPAM, others have free retest on request
 
 header __RCVD_IN_SORBS          eval:check_rbl('sorbs', 'dnsbl.sorbs.net.')
 describe __RCVD_IN_SORBS        SORBS: sender is listed in SORBS
@@ -72,10 +71,11 @@ describe RCVD_IN_SORBS_SMTP     SORBS: sender is open SMTP relay
 tflags RCVD_IN_SORBS_SMTP       net
 reuse  RCVD_IN_SORBS_SMTP
 
-header RCVD_IN_SORBS_SPAM      eval:check_rbl_sub('sorbs', '127.0.0.6')
-describe RCVD_IN_SORBS_SPAM    SORBS: sender is a spam source
-tflags RCVD_IN_SORBS_SPAM      net
-reuse  RCVD_IN_SORBS_SPAM      RCVD_IN_SORBS_SPAM
+# delist: $50 fee
+#header RCVD_IN_SORBS_SPAM      eval:check_rbl_sub('sorbs', '127.0.0.6')
+#describe RCVD_IN_SORBS_SPAM    SORBS: sender is a spam source
+#tflags RCVD_IN_SORBS_SPAM      net
+#reuse  RCVD_IN_SORBS_SPAM      RCVD_IN_SORBS_SPAM
 
 header RCVD_IN_SORBS_WEB        eval:check_rbl_sub('sorbs', '127.0.0.7')
 describe RCVD_IN_SORBS_WEB      SORBS: sender is an abusable web server
