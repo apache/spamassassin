@@ -67,5 +67,6 @@ done
 test -f Makefile && make distclean
 rm -f $DISTVNAME.*
 
-chgrp -R spamassassin $RELDIR
+#Removed this, it was designed more for when releases were creaed on ASF infrastructure
+#chgrp -R spamassassin $RELDIR
 ls -l $RELDIR
