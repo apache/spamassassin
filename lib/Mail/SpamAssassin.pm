@@ -100,7 +100,7 @@ $IS_DEVEL_BUILD = 1;        # change for release versions
 # Used during the prerelease/release-candidate part of the official release
 # process. If you hacked up your SA, you should add a version_tag to your .cf
 # files; this variable should not be modified.
-@EXTRA_VERSION = qw(pre1);
+@EXTRA_VERSION = qw(pre3);
 
 @ISA = qw();
 
