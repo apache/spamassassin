@@ -44,19 +44,7 @@ SPAMASSASSIN RELEASE PROCEDURE
 
 - First off, checkout the branch or trunk you wish to build.
 
-# log in to spamassassin.zones.apache.org for some preliminary tool
-#  checks.
-#
-#    ssh spamassassin.zones.apache.org
-#
-#- ensure the required code and data is available for the build scripts:
-#  see above.
-#
-#- ensure your PATH is correct:
-#
-#    PATH=$HOME/sabuildtools/bin:$PATH
-
-- ensure ExtUtils::MakeMaker is version 6.46 or later, to create
+- Ensure ExtUtils::MakeMaker is version 6.46 or later, to create
   a detailed-enough META.yml (TODO: this should not be required.)
 
     perl -MExtUtils::MakeMaker -e 'print $ExtUtils::MakeMaker::VERSION'
@@ -91,11 +79,6 @@ SPAMASSASSIN RELEASE PROCEDURE
   $IS_DEVEL_BUILD is commented. When referred to in full, it's "3.1.0-rc2".
 
   Full releases: comment out @EXTRA_VERSION
-
-#  [NOTE: when editing files in these instructions, you may have to
-#  use another checkout somewhere else, check in the changes there,
-#  then 'svn update' in the release account -- since I think it
-#  builds from a read-only checkout.]
 
 - Ensure the new version number takes hold:
 
@@ -207,7 +190,7 @@ SPAMASSASSIN RELEASE PROCEDURE
 
   - For a maintainance release candidate(x.y.1-rc1), pre-release (x.y.1-preZ) or alpha (x.y.1-alphaZ):
 
-    vers=3_4_2_pre_1
+    vers=3_4_2_pre_3
 
     Then run:
 
@@ -263,6 +246,7 @@ SPAMASSASSIN RELEASE PROCEDURE
 
 - run "./build/update_stable" to build the tar.gz, tar.bz2 and zip files.
 
+    killall gpg-agent
     ./build/update_stable
 
   WARNING: this will use the most recently-created "sa-update" tarball for
@@ -278,10 +262,9 @@ SPAMASSASSIN RELEASE PROCEDURE
   latest rules file for the purpose of publishing a starter rule file 
   for people who can't run sa-update:
 
-    PATH=$HOME/sabuildtools/bin:$PATH
     ./build/repackage_latest_update_rules
 
-- test the tar.gz and zip files!  redo until they work!! ;)
+- test the files!  redo until they work!! ;)
 
 - Write the release announcement mail!  This is a simple matter of copying
   the previous release's announcement, updating the version numbers and
