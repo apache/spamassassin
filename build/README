@@ -271,13 +271,13 @@ SPAMASSASSIN RELEASE PROCEDURE
   links, fixing the MD5 and SHA1 checksums in this mail, and summarising
   the important changes from the Changes file.
 
-    cp build/announcements/3.4.0.txt build/announcements/3.4.1.txt
+    cp build/announcements/3.4.1.txt build/announcements/3.4.2.txt
     svn add !$
     vi !$
 
   NOTE: Here's a quick example to concat the MD5 or SHA1 checksums:
-        ls *3.4.1.* | grep md5 | xargs cat --
-        ls *3.4.1.* | grep sha1 | xargs cat --
+        ls *3.4.2* | grep md5 | xargs cat --
+        ls *3.4.2* | grep sha1 | xargs cat --
 
 - If there are any issues to note, make sure to edit the UPGRADE file.
   Every x.x.0 release at a minimum should include a section.
