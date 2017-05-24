@@ -1,11 +1,13 @@
-#!/bin/sh
+#!/bin/bash
 #
 # driver for cron.
-# 30 8 * * * bash /home/updatesd/svn/spamassassin/build/mkupdates/run_nightly > /var/www/buildbot.spamassassin.org/updatesd/mkupdates.txt 2>&1
+# 30 8 * * * automc bash /usr/local/spamassassin/svn/trunk/build/mkupdates/run_nightly > /var/www/bbmass.spamassassin.org/mkupdates/mkupdates.txt 2>&1
 
 set -x
 
-cd /home/updatesd/svn/spamassassin
+LOGDIR="/var/www/bbmass.spamassassin.org/mkupdates"
+
+cd /usr/local/spamassassin/svn/trunk/
 
 . /etc/profile
 #Switched to system perl on spamassassin-vm box
@@ -39,29 +41,27 @@ echo "
 
 To commit this and proceed with update tarball creation:
 
-    ssh spamassassin.zones.apache.org
-    sudo -u updatesd /home/updatesd/svn/spamassassin/build/mkupdates/run_part2
+    ssh sa-vm1.apache.org
+    sudo -u automc /usr/local/spamassassin/svn/trunk/build/mkupdates/run_part2
 
 "
 
 svn diff
-) > /home/updatesd/LATEST
+) > $HOME/LATEST
 
-cat /home/updatesd/LATEST
+cat $HOME/LATEST
 # mailx -s "[admin] planned commit for active.list" \
 #              dev@Spamassassin.apache.org < /home/updatesd/LATEST
 
 # cycle the logfiles; keep 6 (3 days worth I think)
-(
-  cd /var/www/buildbot.spamassassin.org/updatesd
-  rm mkupdates_6.txt
-  mv mkupdates_5.txt  mkupdates_6.txt
-  mv mkupdates_4.txt  mkupdates_5.txt
-  mv mkupdates_3.txt  mkupdates_4.txt
-  mv mkupdates_2.txt  mkupdates_3.txt
-  mv mkupdates_1.txt  mkupdates_2.txt
-  mv mkupdates.txt    mkupdates_1.txt
-)
+X=6
+[[ -e "$LOGDIR/mkupdates_${X}.txt" ]] && rm -f $LOGDIR/mkupdates_${X}.txt
+while [[ $X -gt 0 ]]; do
+  ((X--))
+  Y=$((X+1))
+  [[ -e "$LOGDIR/mkupdates_${X}.txt" ]] && mv -f $LOGDIR/mkupdates_${X}.txt $LOGDIR/mkupdates_${Y}.txt
+done
+mv -f $LOGDIR/mkupdates.txt $LOGDIR/mkupdates_${Y}.txt
 
 # create a list of "bad" rules in the current sandboxes, updated daily
 $PERL masses/rule-qa/list-bad-rules \
@@ -70,10 +70,9 @@ $PERL masses/rule-qa/list-bad-rules \
 #On Wednesday's, we send out a bad sandbox rules report to the list
 if [ `date +%w` = 3 ] ; then
   (
-    echo "From: nobody@spamassassin.apache.org (Rules Report Cron)"
+    echo "From: noreply@sa-vm1.apache.org (Rules Report Cron)"
     echo "Subject: [auto] bad sandbox rules report"
     echo
     cat /var/www/ruleqa.spamassassin.org/reports/badrules.txt
   ) | /usr/sbin/sendmail -oi dev@spamassassin.apache.org
 fi
-
