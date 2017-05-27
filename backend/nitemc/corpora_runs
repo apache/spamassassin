@@ -1,12 +1,10 @@
-#!/bin/sh
+#!/bin/bash
 
 # Cron script for "release".  see "backend/nitemc/crontab.txt"
 
 TZ=UTC; export TZ
+
 DIR=$HOME/versions/trunk
-#Changed for spamassassin-vm
-SVN=/usr/bin/svn
-SVNVERS=/usr/bin//svnversion
 
 if [ ! -d $DIR ]; then
   echo "Whaaaa?!?  No directory?" >&2
@@ -14,7 +12,7 @@ if [ ! -d $DIR ]; then
 fi
 
 cd $DIR
-$SVN update > /dev/null
+svn update > /dev/null
 if [ $? -ne 0 ]; then
   echo "Problem doing svn update" >&2
   exit 1
