@@ -5,21 +5,10 @@
 #
 # usage: sudo -u automc /usr/local/spamassassin/svn/trunk/build/mkupdates/run_part2
 #
-# The PowerDNS $APIKEY is loaded from /usr/local/spamassassin/automc/.powerdns.
-
-HOME="/usr/local/spamassassin/automc"
-
-# load the APIKEY
-. $HOME/.powerdns
-if [[ -z "$APIKEY" ]]; then
-  echo "PowerDNS \$APIKEY not found."
-  echo "It should have been loaded from:"
-  echo " $HOME/.powerdns."
-  exit 53
-fi
 
 set -x
 
+HOME="/usr/local/spamassassin/automc"
 LOGDIR="/var/www/bbmass.spamassassin.org/mkupdates"
 
 cd /usr/local/spamassassin/svn/trunk/
@@ -35,9 +24,6 @@ stagedir=/var/www/bbmass.spamassassin.org/updates
 
 versions="3.4.2"
 
-# ---------------------------------------------------------------------------
-# TODO: if/when this becomes fully automatic, this commit will be superfluous
-
 echo "Committing promotions in rules/active.list..."
 svn commit -m 'promotions validated' rules/active.list
 
@@ -48,7 +34,7 @@ make_tarball_for_version () {
   # to be honest, right now this is unused.
   version="$1"
 
-  tmpdir=/usr/local/spamassassin/automc/tmp/stage/$version
+  tmpdir=$HOME/tmp/stage/$version
   rm -rf $tmpdir; mkdir -p $tmpdir         || exit $?
 
   # extract the new rules files.
@@ -170,15 +156,12 @@ make_tarball_for_version () {
   chmod 644 $stagedir/$svnrev.*
 
 
-  # next, create the new DNS record....
+  # next, create/update the new DNS record....
 
   # turn "3.2.0" into "0.2.3"
   rvers=`echo "$version" | rev`
 
-  curl -X PATCH --data "{\"rrsets\": [ {\"name\": \"${rvers}.updates.spamassassin.org.\", \"type\": \"TXT\", \"ttl\": 3600, \"changetype\": \"REPLACE\", \"records\": [ {\"content\": \"${svnrev}\", \"disabled\": false } ] } ] }" -H "X-API-Key: ${APIKEY}" http://127.0.0.1:8081/api/v1/servers/localhost/zones/spamassassin.org. | jq .
-
-  curl -X PUT -H "X-API-Key: ${APIKEY}" http://127.0.0.1:8081/api/v1/servers/localhost/zones/spamassassin.org./notify | jq .
-
+  /usr/local/bin/updateDNS.sh ${rvers}.updates TXT ${svnrev}
 
   # clean up 4-day-old (and older) update tarballs.  This seems as
   # good a place as any to do this!
