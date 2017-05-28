@@ -1,0 +1,43 @@
+.TH PGARandom01 5 "05/01/95" " " "PGAPack"
+.SH NAME
+PGARandom01 \- generates a uniform random number on the interval [0,1)
+.SH DESCRIPTION
+If the second argument is 0 it returns the next random number in the
+sequence.  Otherwise, the second argument is used as a new seed for the
+population
+.SH INPUT PARAMETERS
+.PD 0
+.TP
+ctx
+- context variable
+.PD 0
+.TP
+newseed
+- either 0 to get the next random number, or nonzero
+to reseed
+Outputs:
+A random number on the interval [0,1)
+.PD 1
+.SH OUTPUT PARAMETERS
+.PD 0
+.TP
+none
+
+.PD 1
+.SH SYNOPSIS
+.nf
+#include "pgapack.h"
+double  PGARandom01(ctx, newseed)
+PGAContext *ctx
+int newseed
+.fi
+.SH LOCATION
+random.c
+.SH EXAMPLE
+.nf
+PGAContext *ctx;
+double r;
+:
+r = PGARandom01(ctx,0);
+
+.fi

@@ -1,0 +1,70 @@
+.TH PGACrossover 3 "05/01/95" " " "PGAPack"
+.SH NAME
+PGACrossover \- performs crossover on two parent strings to create two
+child strings (via side-effect).  
+.SH DESCRIPTION
+The type of crossover performed is
+either the default or that specified by PGASetCrossoverType
+.SH INPUT PARAMETERS
+.PD 0
+.TP
+ctx
+- context variable
+.PD 0
+.TP
+p1
+- the first parent string
+.PD 0
+.TP
+p2
+- the second parent string
+.PD 0
+.TP
+pop1
+- symbolic constant of the population containing string p1 and p2
+.PD 0
+.TP
+c1
+- the first child string
+.PD 0
+.TP
+c2
+- the second child string
+.PD 0
+.TP
+pop2
+- symbolic constant of the population to contain string c1 and c2
+.PD 1
+.SH OUTPUT PARAMETERS
+.PD 0
+.TP
+none
+
+.PD 1
+.SH SYNOPSIS
+.nf
+#include "pgapack.h"
+void  PGACrossover(ctx, p1, p2, pop1, c1, c2, pop2)
+PGAContext *ctx
+int p1
+int p2
+int pop1
+int c1
+int c2
+int pop2
+.fi
+.SH LOCATION
+cross.c
+.SH EXAMPLE
+.nf
+Example:
+Perform crossover on the two parent strings mom and dad in population
+PGA_OLDPOP, and insert the child strings, child1 and child1, in
+population PGA_NEWPOP.
+
+PGAContext *ctx;
+int mom, dad, child1, child2;
+:
+PGACrossover(ctx, mom, dad, PGA_OLDPOP, child1, child2, PGA_NEWPOP);
+
+.fi

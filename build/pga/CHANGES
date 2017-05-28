@@ -1,0 +1,234 @@
+Changes in Version 1.1
+======================
+
+        1)  New COPYRIGHT -- the Mathematics and Computer Science Division
+            at Argonne National Laboratory has agreed to relicense PGAPACK
+	    under the MPICH2 license.  The COPYRIGHT file as well as all
+	    source files in source/*.c have been updated accordingly.
+
+        2)  man/manl/*.l: Set Section to 3
+
+        3)  source/integer.c: The off-by-one error reported by Robin Farin
+	    in http://bugs.debian.org/333381 has been corrected.
+
+        4)  source/report.c: Made two print statements conditional on 
+            ctx->rep.PrintFreq > 0  to allow for complete suppression
+
+	5)  source/mpi_stub.c: A different set of #define statements for
+            Fortran name mangling was introduced.
+
+        6)  source/system.c: If PGAPACK was compiled with 'FAKE_MPI' defined
+            for a 'serial' debug version, print 'Sequential' instead of 
+	    'Parallel' in the version number statement.
+
+        7)  README: updated, removed two sections referring to now-defunct
+            websites and mailing lists.
+
+Changes in Version 1.0
+======================
+
+        1)  Added support for parallel execution of the global model (single 
+            population) using MPI (Message Passing Interface).
+
+        2)  Added support for a restart operator.  The best string is used
+            to reinitialize the population.
+
+	3)  Added support for new native data type Character.
+
+        4)  Added support to specify the multiplier of the worst evaluation 
+            value when remapping a minimization problem.
+
+        5)  Separated specification of mutation type from rate.
+
+        6)  Added new integer mutation operators.
+
+        7)  Added an option to maintain integer and real allele values within
+            the range specified on initialization after mutation.
+
+	8)  The configure script argument -optimize has been removed and
+            replaced with the -debug switch for compiling a debug version.
+            An optimized version of PGAPack is now built by default.
+
+	9)  The configure script argument -arch AIX has been replaced with
+            -arch rs6000.
+
+        10)  The configure script now accepts the -cflags and -flags switchs to
+            supply supply options to the C and FORTRAN compiler, respectively.
+
+	11)  Changed PGATRUE and PGAFALSE to PGA_TRUE and PGA_FALSE.
+
+	12) Renamed debug macros to begin with PGA_DEBUG instead of PGADEBUG.
+
+	13) Renamed report macros to begin with PGA_REPORT (instead of, for
+            example PGA_ONLINE).
+
+	14) Removed macro PGAERROR from pgapack.h.
+
+	15) Rewrote PGARandomInterval(ctx, L, U) so that it would not
+	    return L-1.  It now returns [L, U].
+
+	16) PGADone, PGAUpdateGenertaion and PGAEvaluate all take an MPI
+	    communicator as the last argument.  See PGARunGM in parallel.c
+	    for details on how to rewrite a user run routine.
+
+	17) Removed "Time" from the output.
+
+	18) Shortened the names of the source files as follows:
+
+		character.c                  char.c
+		crossover.c                  cross.c
+		duplicate.c                  duplcate.c
+		f2c_interface.c              f2c.c
+
+	19) Shortened the name of the examples files as follows:
+
+		maxbit_custom.c              maxbitc.c
+		maxbit_menu.c                maxbitm.c
+		maxint_custom.c              maxbitc.c
+		rastrigin.c                  rstrgnb.c
+		real_rastrigin.c             rstrgnr.c
+		udt_struct.c                 udtstr.c
+		udt_struct_array.c           udtastr.c
+
+	20) Replaced the function names on the left with the function	
+	    names on the right.  The Perl script ./util/upgrade_script.pl
+            may be of use in automating part of the renaming process on
+            exisiting files.
+
+	PGABinaryBuildIndividualDatatype()
+					-> PGABinaryBuildDatatype()
+	PGABinaryRandomize()		-> PGABinaryInitString()
+	PGABinaryWrite()		-> PGABinaryPrint()
+	PGABinaryWriteString()		-> PGABinaryPrintString()
+	PGABuildIndividualDatatype()	-> PGABuildDatatype()
+	PGACharacterBuildIndividualDatatype()
+					-> PGACharacterBuildDatatype()
+	PGACharacterRandomize()		-> PGACharacterInitString()
+	PGACharacterWriteString()	-> PGACharacterPrintString()
+	PGAFitnessLinNor()		-> PGAFitnessLinearNormal()
+	PGAFitnessLinRank()		-> PGAFitnessLinearRank()
+	PGAFitnessMinRecprl()		-> PGAFitnessMinReciprocal()
+	PGAGetEvalUpToDate()		-> PGAGetEvaluationUpToDateFlag()
+	PGAGetEvaluate()		-> PGAGetEvaluation()
+	PGAGetFitnessRankMax()		-> PGAGetMaxFitnessRank()
+	PGAGetBest()			-> PGAGetBestIndex()
+	PGAGetWorst()			-> PGAGetWorstIndex()
+	PGAGetInitIntegerMax()		-> PGAGetMaxIntegerInitValue()
+	PGAGetInitIntegerMin()		-> PGAGetMinIntegerInitValue()
+	PGAGetInitRealMax()		-> PGAGetMaxRealInitValue()
+	PGAGetInitRealMin()		-> PGAGetMinRealInitValue()
+	PGAGetIntegerType()		-> PGAGetIntegerInitType()
+	PGAGetIter()			-> PGAGetGAIterValue()
+	PGAGetMaxDouble()		-> PGAGetMaxMachineDoubleValue()
+	PGAGetMaxInt()			-> PGAGetMaxMachineIntValue()
+	PGAGetMaxIter()			-> PGAGetMaxGAIterValue()
+	PGAGetMinDouble()		-> PGAGetMinMachineDoubleValue()
+	PGAGetMinInt()			-> PGAGetMinMachineIntValue()
+	PGAGetMutateIntegerVal()	-> PGAGetMutationIntegerValue()
+	PGAGetMutateOnlyNoCross()	-> PGAGetMutationAndCrossoverFlag()
+                                        -> PGAGetMutationOrCrossoverFlag()
+	PGAGetMutateRealVal()		-> PGAGetMutationRealValue()	
+	PGAGetNoDuplicates()		-> PGAGetNoDuplicatesFlag()
+	PGAGetNprocs()			-> PGAGetNumProcs()
+	PGAGetNumReplace()		-> PGAGetNumReplaceValue()
+	PGAGetOptDir()			-> PGAGetOptDirFlag()
+	PGAGetPID()			-> PGAGetRank()
+	PGAGetPopReplace()		-> PGAGetPopReplaceType()
+	PGAGetPrintFreq()		-> PGAGetPrintFrequency()
+	PGAGetRandomInit()		-> PGAGetRandomInitFlag()
+	PGAGetRestart()			-> PGAGetRestartFlag()
+	PGAGetRestartFrequency()	-> PGAGetRestartFrequencyValue()
+	PGAGetSortPop()			-> PGAGetSortedPopIndex()
+	PGAGetStoppingRule()		-> PGAGetStoppingRuleType()
+	PGAGetStringLen()		-> PGAGetStringLength()
+	PGAGetUniformCrossProb()	-> PGAGetUniformCrossoverProb()
+	PGAIntegerBuildIndividualDatatype()
+					-> PGAIntegerBuildDatatype()	
+	PGAIntegerRandomize()		-> PGAIntegerInitString()
+	PGAIntegerWriteString()		-> PGAIntegerPrintString()
+	PGAParallelDone()		-> PGADoneMS()
+	PGAParallelEvaluateMS()		-> PGAEvaluateMS()
+	PGAPrintContext()		-> PGAPrintContextVariable()
+	PGAPrintVersion()		-> PGAPrintVersionNumber()
+	PGARealBuildIndividualDatatype()-> PGARealBuildDatatype()
+	PGARealRandomize()		-> PGARealInitString()
+	PGARealWriteString()		-> PGARealPrintString()
+	PGARunMutateAndCross()		-> PGARunMutationAndCrossover()
+	PGARunMutateOrCross()		-> PGARunMutationOrCrossover()
+	PGASelectNext()			-> PGASelectNextIndex()
+	PGASetCharacterInit()		-> PGASetCharacterInitType()	
+	PGASetEvaluate()		-> PGASetEvaluation()
+	PGASetEvalUpToDate()		-> PGASetEvaluationUpToDateFlag()
+	PGASetFitnessRankMax()		-> PGASetMaxFitnessRank()
+	PGASetIntegerInitLU()           -> PGASetIntegerInitRange()
+	PGASetMaxIter()			-> PGASetMaxGAIterValue()
+	PGASetMaxNoChange()		-> PGASetMaxNoChangeValue()
+	PGASetMaxSimilarity()		-> PGASetMaxSimilarityValue()
+	PGASetMutateOnlyNoCross()	-> PGASetMutationOrCrossoverFlag()
+                                        -> PGASetMutationAndCrossoverFlag()
+	PGASetMutationIntegerVal()	-> PGASetMutationIntegerValue()
+	PGASetMutationRealVal()		-> PGASetMutationRealValue()
+	PGASetNoDuplicates()		-> PGASetNoDuplicatesFlag()
+	PGASetNumReplace()		-> PGASetNumReplaceValue()
+	PGASetPopReplacement()		-> PGASetPopReplacementType()
+	PGASetPrintFreq()		-> PGASetPrintFrequencyValue()
+	PGASetRandomInit()		-> PGASetRandomInitFlag()
+	PGASetRealInitLU()              -> PGASetRealInitRange()
+	PGASetRestart()			-> PGASetRestartFlag()
+	PGASetRestartFrequency()	-> PGASetRestartFrequencyValue()
+	PGASetStoppingRule()		-> PGASetStoppingRuleType()
+	PGASetSupportingDebugFlags()	-> PGASetDebugFlag()
+	PGASetUniformCrossProb()	-> PGASetUniformCrossoverProb()
+	PGAWriteString()		-> PGAPrintString()	
+
+
+Changes in Version 0.2b
+=======================
+
+        1) In PGABinaryTwoPointCrossover, add<ed a test before left-shifting.
+           The right operand of a shift must be strictly less than the number
+           of bits in the left operand, otherwise the result is undefined.
+
+        2) In udt_char.c, changed the data type to signed char since whether
+           char is signed is implementation dependent.
+
+        3) In real_rastrigin, made upper and lower to be dynamic arrays rather
+           than static arrays to allow variable string length.
+
+
+Changes in Version 0.2a
+=======================
+
+        1) Created pgapack-0.2.a.tar.Z to replace pgapack-0.2.tar.Z
+           when we found the IRIX's do not have a ranlib (unless it
+           is in /usr/local.
+
+        2) Deleted a space from ./examples/c/Makefile.in
+
+        3) Added the -w flag to FFLAGS for the freebsd version to
+           suppress warnings.
+
+
+Changes in Version 0.2
+======================
+
+	1) In PGASetUp, we changed the default value for the number of
+           individuals to replace each generation from 10 to 10% of the
+           population size.
+
+        2) Took all the parallel stuff out.
+
+        3) Defined PGAPrintReport and put various PGAPrint functions in 
+           the new file system.c
+
+        5) Changed EvalUpToDate to all lower case.
+
+        6) Changed PGARunMutateOnlyNoCross to take PGA_OLDPOP and PGA_NEWPOP
+           as arguments
+
+        7) Changed the low-level ops functions to take p,pop as arguments
+           instead of a void pointer
+
+        8) Changed PGAMutate to a 3-argument function.  It just mutates,
+           but does not copy the string to its final location.  Use
+            PGACopyIndividual for that.

@@ -1,0 +1,37 @@
+.TH PGASetRestartFlag 3 "05/01/95" " " "PGAPack"
+.SH NAME
+PGASetRestartFlag \- specifies whether the algorithm should employ
+the restart operator
+.SH INPUT PARAMETERS
+.PD 0
+.TP
+ctx
+- context variable
+.PD 0
+.TP
+val
+- boolean variable
+.PD 1
+.SH OUTPUT PARAMETERS
+.PD 0
+.TP
+none
+
+.PD 1
+.SH SYNOPSIS
+.nf
+#include "pgapack.h"
+void  PGASetRestartFlag(ctx, val)
+PGAContext *ctx
+int val
+.fi
+.SH LOCATION
+restart.c
+.SH EXAMPLE
+.nf
+Example:
+PGAContext *ctx;
+:
+PGASetRestartFlag(ctx, PGA_TRUE);
+
+.fi

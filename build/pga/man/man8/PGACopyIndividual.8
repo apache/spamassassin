@@ -1,0 +1,53 @@
+.TH PGACopyIndividual 8 "05/01/95" " " "PGAPack"
+.SH NAME
+PGACopyIndividual \- copies string p1 in population pop1 to position p2 in
+population pop2
+.SH INPUT PARAMETERS
+.PD 0
+.TP
+ctx
+- context variable
+.PD 0
+.TP
+p1
+- string to copy
+.PD 0
+.TP
+pop1
+- symbolic constant of population containing string p1
+.PD 0
+.TP
+p2
+- string to copy p1 to
+.PD 0
+.TP
+pop2
+- symbolic constant of population containing string p2
+.PD 1
+.SH OUTPUT PARAMETERS
+.PD 0
+.TP
+none
+
+.PD 1
+.SH SYNOPSIS
+.nf
+#include "pgapack.h"
+void  PGACopyIndividual(ctx, p1, pop1, p2, pop2)
+PGAContext *ctx
+int p1
+int pop1
+int p2
+int pop2
+.fi
+.SH LOCATION
+utility.c
+.SH EXAMPLE
+.nf
+Example:
+PGAContext *ctx;
+int i,j;
+:
+PGACopyIndividual(ctx, i, PGA_OLDPOP, j, PGA_NEWPOP);
+
+.fi

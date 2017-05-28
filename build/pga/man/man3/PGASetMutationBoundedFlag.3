@@ -1,0 +1,42 @@
+.TH PGASetMutationBoundedFlag 3 "05/01/95" " " "PGAPack"
+.SH NAME
+PGASetMutationBoundedFlag \- If this flag is set to PGA_TRUE, then for
+Integer and Real strings whenever a gene is mutated, if it underflows
+(overflows) the lower (upper)bound it is reset to the lower (upper) bound.
+.SH DESCRIPTION
+In this way all allele values remain within the range the integer strings
+were initialized on.  If this flag is PGA_FALSE (the default), the alleles
+may take any values.
+.SH INPUT PARAMETERS
+.PD 0
+.TP
+ctx
+- context variable
+.PD 0
+.TP
+flag
+- either PGA_TRUE or PGA_FALSE
+.PD 1
+.SH OUTPUT PARAMETERS
+.PD 0
+.TP
+none
+
+.PD 1
+.SH SYNOPSIS
+.nf
+#include "pgapack.h"
+void  PGASetMutationBoundedFlag(ctx, val)
+PGAContext *ctx
+int val
+.fi
+.SH LOCATION
+mutation.c
+.SH EXAMPLE
+.nf
+Example:
+PGAContext *ctx;
+:
+PGASetMutationBoundedFlag(ctx, PGA_TRUE);
+
+.fi

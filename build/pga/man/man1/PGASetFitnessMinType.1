@@ -1,0 +1,42 @@
+.TH PGASetFitnessMinType 1 "05/01/95" " " "PGAPack"
+.SH NAME
+PGASetFitnessMinType \- sets the type of algorithm used if a minimization
+problem is specified to determine how values are remapped for maximization.
+.SH DESCRIPTION
+Valid choices are PGA_FITNESSMIN_RECIPROCAL and PGA_FITNESSMIN_CMAX to do
+the mapping using the reciprocal of the evaluation function, or by
+subtracting the worst evaluation function value from each evaluation
+function value, respectively.  The default is PGA_FITNESSMIN_CMAX
+.SH INPUT PARAMETERS
+.PD 0
+.TP
+ctx
+- context variable
+.PD 0
+.TP
+fitness_type
+- symbolic constant to specify fitness minimization type
+.PD 1
+.SH OUTPUT PARAMETERS
+.PD 0
+.TP
+none
+
+.PD 1
+.SH SYNOPSIS
+.nf
+#include "pgapack.h"
+void  PGASetFitnessMinType(ctx, fitness_type)
+PGAContext *ctx
+int fitness_type
+.fi
+.SH LOCATION
+fitness.c
+.SH EXAMPLE
+.nf
+Example:
+PGAContext *ctx;
+:
+PGASetFitnessMinType(ctx, PGA_FITNESSMIN_CMAX);
+
+.fi

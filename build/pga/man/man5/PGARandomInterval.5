@@ -1,0 +1,44 @@
+.TH PGARandomInterval 5 "05/01/95" " " "PGAPack"
+.SH NAME
+PGARandomInterval \- returns a uniform random number on the specified
+interval
+.SH INPUT PARAMETERS
+.PD 0
+.TP
+ctx
+- context variable
+.PD 0
+.TP
+start
+- starting (integer) value of the interval
+.PD 0
+.TP
+end
+- ending   (integer) value of the interval
+.PD 1
+.SH OUTPUT PARAMETERS
+.PD 0
+.TP
+none
+
+.PD 1
+.SH SYNOPSIS
+.nf
+#include "pgapack.h"
+int  PGARandomInterval(ctx, start, end)
+PGAContext *ctx
+int start
+int end
+.fi
+.SH LOCATION
+random.c
+.SH EXAMPLE
+.nf
+Example:
+Generate a value uniformly random from the interval [0,99]
+
+PGAContext *ctx;
+:
+PGARandomInterval(ctx, 0, 99);
+
+.fi

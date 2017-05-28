@@ -1,0 +1,33 @@
+.TH PGAGetMutationRealValue 3 "05/01/95" " " "PGAPack"
+.SH NAME
+PGAGetMutationRealValue \- Returns the value of the multiplier used to
+mutate PGA_DATATYPE_REAL strings with.
+.SH INPUT PARAMETERS
+.PD 0
+.TP
+ctx
+- context variable
+.PD 1
+.SH OUTPUT PARAMETERS
+.PD 0
+.TP
+none
+
+.PD 1
+.SH SYNOPSIS
+.nf
+#include "pgapack.h"
+double  PGAGetMutationRealValue(ctx)
+PGAContext *ctx
+.fi
+.SH LOCATION
+mutation.c
+.SH EXAMPLE
+.nf
+Example:
+PGAContext *ctx;
+double val;
+:
+val = PGAGetMutationRealValue(ctx);
+
+.fi

@@ -1,0 +1,41 @@
+.TH PGAGetOptDirFlag 8 "05/01/95" " " "PGAPack"
+.SH NAME
+PGAGetOptDirFlag \- Returns a symbolic constant that represents the
+direction of optimization
+.SH INPUT PARAMETERS
+.PD 0
+.TP
+ctx
+- context variable
+.PD 1
+.SH OUTPUT PARAMETERS
+.PD 0
+.TP
+none
+
+.PD 1
+.SH SYNOPSIS
+.nf
+#include "pgapack.h"
+int  PGAGetOptDirFlag(ctx)
+PGAContext *ctx
+.fi
+.SH LOCATION
+pga.c
+.SH EXAMPLE
+.nf
+Example:
+PGAContext *ctx;
+int optdir;
+:
+optdir = PGAGetOptDirFlag(ctx);
+switch (optdir) {
+case PGA_MAXIMIZE:
+printf("Optimization direction = PGA_MAXIMIZE\n");
+break;
+case PGA_MINIMIZE:
+printf("Optimization direction = PGA_MINIMIZE\n");
+break;
+}
+
+.fi

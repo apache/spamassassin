@@ -1,0 +1,44 @@
+.TH PGASelect 3 "05/01/95" " " "PGAPack"
+.SH NAME
+PGASelect \- performs genetic algorithm selection using either the default
+selection scheme or that specified with PGASetSelectType().  
+.SH DESCRIPTION
+Valid selection methods are proportional, stochastic universal, tournament, or probabilistic
+tournament selection, PGA_SELECT_PROPORTIONAL, PGA_SELECT_SUS, 
+PGA_SELECT_TOURNAMENT, and PGA_SELECT_PTOURNAMENT, respectively.  This 
+function updates an internal array with the indices of members of popix 
+selected for recombination.  These indices may be accessed with 
+PGASelectNextIndex()
+.SH INPUT PARAMETERS
+.PD 0
+.TP
+ctx
+- context variable
+.PD 0
+.TP
+popix
+- symbolic constant of population to select from
+.PD 1
+.SH OUTPUT PARAMETERS
+.PD 0
+.TP
+none
+
+.PD 1
+.SH SYNOPSIS
+.nf
+#include "pgapack.h"
+void  PGASelect(ctx, popix)
+PGAContext *ctx
+int popix
+.fi
+.SH LOCATION
+select.c
+.SH EXAMPLE
+.nf
+Example:
+PGAContext *ctx,
+:
+PGASelect(ctx, PGA_OLDPOP);
+
+.fi

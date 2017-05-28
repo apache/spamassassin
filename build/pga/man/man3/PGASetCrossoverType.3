@@ -1,0 +1,42 @@
+.TH PGASetCrossoverType 3 "05/01/95" " " "PGAPack"
+.SH NAME
+PGASetCrossoverType \- specify the type of crossover to use. 
+.SH DESCRIPTION
+Valid choices are PGA_CROSSOVER_ONEPT, PGA_CROSSOVER_TWOPT, or PGA_CROSSOVER_UNIFORM for
+one-point, two-point, and uniform crossover, respectively.  The default is
+PGA_CROSSOVER_TWOPT.
+.SH INPUT PARAMETERS
+.PD 0
+.TP
+ctx
+- context variable
+.PD 0
+.TP
+crossover_type
+- symbolic constant to specify crossover type
+.PD 1
+.SH OUTPUT PARAMETERS
+.PD 0
+.TP
+none
+
+.PD 1
+.SH SYNOPSIS
+.nf
+#include "pgapack.h"
+void  PGASetCrossoverType(ctx, crossover_type)
+PGAContext *ctx
+int crossover_type
+.fi
+.SH LOCATION
+cross.c
+.SH EXAMPLE
+.nf
+Example:
+Use uniform crossover when crossingover strings.
+
+PGAContext *ctx;
+:
+PGASetCrossoverType(ctx, PGA_CROSSOVER_UNIFORM);
+
+.fi

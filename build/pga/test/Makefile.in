@@ -1,0 +1,27 @@
+CC          = @CC@
+FC          = @FC@
+PRECFLAGS   = @CFLAGS@
+PREFFLAGS   = @FFLAGS@
+CPPFLAGS    = @CPPFLAGS@
+RM          = @RM@
+LDFLAGS     = @LDFLAGS@
+SHELL       = @SHELL@
+
+#    "$@" expands to the target; "$?" expands to the dependency list
+CFLAGS      = -o $@ $? $(PRECFLAGS)
+FFLAGS      = -o $@ $? $(PREFFLAGS)
+
+LINK.c      = @echo "  Compiling $@" ; $(CC) $(CFLAGS) $(CPPFLAGS) $(LDFLAGS)
+LINK.f      = @if test -n "$(FC)"; \
+                  then echo "  Compiling $@" ; $(FC) $(FFLAGS) $(LDFLAGS); \
+              else \
+                  echo "$@: Fortran compiler unavailable"; fi
+
+default:
+	@make instverf 
+
+instverf: instverf.c
+	$(LINK.c)
+
+clean: 
+	@$(RM) instverf instverf.o

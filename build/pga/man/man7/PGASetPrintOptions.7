@@ -1,0 +1,45 @@
+.TH PGASetPrintOptions 7 "05/01/95" " " "PGAPack"
+.SH NAME
+PGASetPrintOptions \- set flags to indicate what GA statistics should be
+printed whenever output is printed.  
+.SH DESCRIPTION
+May be called more than once to
+specify different report options.  Valid choices are PGA_REPORT_AVERAGE,
+PGA_REPORT_OFFLINE, PGA_REPORT_ONLINE, PGA_REPORT_WORST, PGA_REPORT_HAMMING,
+and PGA_REPORT_STRING to specify offline analysis, online analysis, the
+worst string in the population, the Hamming distance of the population, and
+the actual allele values of the best string.  The best string is always
+printed. 
+.SH INPUT PARAMETERS
+.PD 0
+.TP
+ctx
+- context variable
+.PD 0
+.TP
+option
+- symbolic constant to specify a print option
+.PD 1
+.SH OUTPUT PARAMETERS
+.PD 0
+.TP
+none
+
+.PD 1
+.SH SYNOPSIS
+.nf
+#include "pgapack.h"
+void  PGASetPrintOptions(ctx, option)
+PGAContext *ctx
+int option
+.fi
+.SH LOCATION
+report.c
+.SH EXAMPLE
+.nf
+Example:
+PGAContext *ctx;
+:
+PGASetPrintOptions(ctx, PGA_REPORT_WORST);
+
+.fi

@@ -1,0 +1,64 @@
+.TH PGASetUserFunction 8 "05/01/95" " " "PGAPack"
+.SH NAME
+PGASetUserFunction \- specifies the name of a user-written function
+call to provide a specific GA capability (e.g., crossover,
+mutation, etc.).  
+
+.SH DESCRIPTION
+This function MUST be used when using a non-native
+datatype and must be called once for each of:
+  PGA_USERFUNCTION_CREATESTRING     -- String creation
+  PGA_USERFUNCTION_MUTATION         -- Mutation
+  PGA_USERFUNCTION_CROSSOVER        -- Crossover
+  PGA_USERFUNCTION_PRINTSTRING      -- String Output
+  PGA_USERFUNCTION_COPYSTRING       -- Duplication
+  PGA_USERFUNCTION_DUPLICATE        -- Duplicate Checking
+  PGA_USERFUNCTION_INITSTRING       -- Initialization
+  PGA_USERFUNCTION_BUILDDATATYPE    -- MPI Datatype creation
+  PGA_USERFUNCTION_STOPCOND         -- Stopping conditions
+  PGA_USERFUNCTION_ENDOFGEN         -- Auxiliary functions at the end of each generation
+
+It MAY be called when using a native datatype to replace the built-in
+functions PGAPack has for that datatype (For example, if the Integer data
+type is used for a traveling salesperson problem, the user may want to
+provide their own custom crossover operator).  See the user guide and the
+examples in the examples directory for more details.
+.SH INPUT PARAMETERS
+.PD 0
+.TP
+ctx
+- context variable
+.PD 0
+.TP
+constant
+- symbolic constant of the user function to set
+.PD 0
+.TP
+f
+- name of the function to use
+.PD 1
+.SH OUTPUT PARAMETERS
+.PD 0
+.TP
+none
+
+.PD 1
+.SH SYNOPSIS
+.nf
+#include "pgapack.h"
+void  PGASetUserFunction(ctx, constant, f)
+PGAContext *ctx
+int constant
+void *f
+.fi
+.SH LOCATION
+user.c
+.SH EXAMPLE
+.nf
+Example:
+void MyStringInit(PGAContext *, void *);
+PGAContext *ctx;
+:
+PGASetUserFunction(ctx, PGA_USERFUNCTION_INITSTRING, MyStringInit);
+
+.fi

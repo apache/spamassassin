@@ -1,0 +1,42 @@
+.TH PGASetSelectType 3 "05/01/95" " " "PGAPack"
+.SH NAME
+PGASetSelectType \- specify the type of selection to use. 
+.SH DESCRIPTION
+Valid choices
+are PGA_SELECT_PROPORTIONAL, PGA_SELECT_SUS, PGA_SELECT_TOURNAMENT, and
+PGA_SELECT_PTOURNAMENT for proportional, stochastic universal selection,
+tournament, and probabilistic tournament selection, respectively.  The
+default is PGA_SELECT_TOURNAMENT.
+.SH INPUT PARAMETERS
+.PD 0
+.TP
+ctx
+- context variable
+.PD 0
+.TP
+select_type
+- symbolic constant to specify selection type
+.PD 1
+.SH OUTPUT PARAMETERS
+.PD 0
+.TP
+none
+
+.PD 1
+.SH SYNOPSIS
+.nf
+#include "pgapack.h"
+void  PGASetSelectType(ctx, select_type)
+PGAContext *ctx
+int select_type
+.fi
+.SH LOCATION
+select.c
+.SH EXAMPLE
+.nf
+Example:
+PGAContext *ctx;
+:
+PGASetSelectType(ctx, PGA_SELECT_SUS);
+
+.fi

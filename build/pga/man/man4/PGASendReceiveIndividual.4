@@ -1,0 +1,91 @@
+.TH PGASendReceiveIndividual 4 "05/01/95" " " "PGAPack"
+.SH NAME
+PGASendReceiveIndividual \- Send an individual to a process, while receiving
+a different individual from a different process.
+.SH INPUT PARAMETERS
+.PD 0
+.TP
+ctx
+- context variable
+.PD 0
+.TP
+send_p
+- index of string to send
+.PD 0
+.TP
+send_pop
+- symbolic constant of population to send from
+.PD 0
+.TP
+dest
+- destination process
+.PD 0
+.TP
+send_tag
+- tag to send with
+.PD 0
+.TP
+recv_p
+- index of string to receive
+.PD 0
+.TP
+recv_pop
+- symbolic constant of population to receive from
+.PD 0
+.TP
+source
+- process to receive from
+.PD 0
+.TP
+recv_tag
+- tag to receive with
+.PD 0
+.TP
+comm
+- an MPI communicator
+.PD 0
+.TP
+status
+- pointer to the MPI status structure
+.PD 1
+.SH OUTPUT PARAMETERS
+.PD 0
+.TP
+none
+
+.PD 1
+.SH SYNOPSIS
+.nf
+#include "pgapack.h"
+void  PGASendReceiveIndividual(ctx, send_p, send_pop, dest, send_tag, recv_p, recv_pop, source, recv_tag, comm, status)
+PGAContext *ctx
+int send_p
+int send_pop
+int dest
+int send_tag
+int recv_p
+int recv_pop
+int source
+int recv_tag
+MPI_Comm comm
+MPI_Status *status
+.fi
+.SH LOCATION
+parallel.c
+.SH EXAMPLE
+.nf
+Example:
+A dedicated process is being used to perform an optimization algorithm
+on the strings.  Send a new string, s, to the process, while receiving an
+optimized string, r, from it.
+
+PGAContext *ctx;
+MPI_Comm    comm;
+MPI_Status  status;
+int  s, r;
+:
+PGASendReceiveIndividual(ctx, s, PGA_NEWPOP, 1, PGA_SR_STRINGTOMODIFY,
+r, PGA_NEWPOP, 1, PGA_SR_MODIFIEDSTRING,
+comm, &status);
+
+.fi

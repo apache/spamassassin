@@ -1,0 +1,41 @@
+.TH PGAGetRandomInitFlag 2 "05/01/95" " " "PGAPack"
+.SH NAME
+PGAGetRandomInitFlag \- returns true/false to indicate whether or not
+alleles are randomly initialized.
+.SH INPUT PARAMETERS
+.PD 0
+.TP
+ctx
+- context variable
+.PD 1
+.SH OUTPUT PARAMETERS
+.PD 0
+.TP
+none
+
+.PD 1
+.SH SYNOPSIS
+.nf
+#include "pgapack.h"
+int  PGAGetRandomInitFlag(ctx)
+PGAContext *ctx
+.fi
+.SH LOCATION
+create.c
+.SH EXAMPLE
+.nf
+Example:
+PGAContext *ctx;
+int raninit;
+:
+raninit = PGAGetRandomInitFlag(ctx);
+switch (raninit) {
+case PGA_TRUE:
+printf("Population is randomly initialized\n");
+break;
+case PGA_FALSE:
+printf("Population initialized to zero\n");
+break;
+}
+
+.fi

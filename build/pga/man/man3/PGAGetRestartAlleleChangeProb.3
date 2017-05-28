@@ -1,0 +1,32 @@
+.TH PGAGetRestartAlleleChangeProb 3 "05/01/95" " " "PGAPack"
+.SH NAME
+PGAGetRestartAlleleChangeProb \- returns the probability with which
+an allele will be mutated during a restart
+.SH INPUT PARAMETERS
+.PD 0
+.TP
+ctx
+- context variable
+.PD 1
+.SH OUTPUT PARAMETERS
+.PD 0
+.TP
+none
+
+.PD 1
+.SH SYNOPSIS
+.nf
+#include "pgapack.h"
+double  PGAGetRestartAlleleChangeProb(ctx)
+PGAContext *ctx
+.fi
+.SH LOCATION
+restart.c
+.SH EXAMPLE
+.nf
+Example:
+PGAContext *ctx;
+:
+prob = PGASetRestartAlleleChangeProb(ctx);
+
+.fi

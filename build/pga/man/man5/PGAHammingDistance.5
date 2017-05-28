@@ -1,0 +1,41 @@
+.TH PGAHammingDistance 5 "05/01/95" " " "PGAPack"
+.SH NAME
+PGAHammingDistance \- Calculates the mean Hamming distance for a population
+of binary strings.  
+.SH DESCRIPTION
+For all other data types returns a value of 0.0 and
+prints a warning message.
+.SH INPUT PARAMETERS
+.PD 0
+.TP
+ctx
+- context variable
+.PD 0
+.TP
+popindex
+- symbolic constant of the population for which the
+Hamming distance is to be calculated
+Output:
+The mean Hamming distance in the population
+.PD 1
+.SH OUTPUT PARAMETERS
+.PD 0
+.TP
+none
+
+.PD 1
+.SH SYNOPSIS
+.nf
+#include "pgapack.h"
+double  PGAHammingDistance(ctx, popindex)
+PGAContext *ctx
+int popindex
+.fi
+.SH LOCATION
+hamming.c
+.SH EXAMPLE
+.nf
+:
+hd = PGAHammingDistance(ctx, PGA_NEWPOP);
+
+.fi
