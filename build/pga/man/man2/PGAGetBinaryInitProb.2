@@ -1,0 +1,33 @@
+.TH PGAGetBinaryInitProb 2 "05/01/95" " " "PGAPack"
+.SH NAME
+PGAGetBinaryInitProb \- Returns the probability that an allele will be
+randomly initialized to "1" in a PGA_DATATYPE_BINARY string.
+.SH INPUT PARAMETERS
+.PD 0
+.TP
+ctx
+- context variable
+.PD 1
+.SH OUTPUT PARAMETERS
+.PD 0
+.TP
+none
+
+.PD 1
+.SH SYNOPSIS
+.nf
+#include "pgapack.h"
+double  PGAGetBinaryInitProb(ctx)
+PGAContext *ctx
+.fi
+.SH LOCATION
+binary.c
+.SH EXAMPLE
+.nf
+Example:
+PGAContext *ctx;
+double prob;
+:
+prob = PGAGetBinaryInitProb(ctx);
+
+.fi

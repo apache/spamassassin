@@ -1,0 +1,49 @@
+.TH PGAGetMutationType 3 "05/01/95" " " "PGAPack"
+.SH NAME
+PGAGetMutationType \- Returns the type of mutation used
+.SH INPUT PARAMETERS
+.PD 0
+.TP
+ctx
+- context variable
+.PD 1
+.SH OUTPUT PARAMETERS
+.PD 0
+.TP
+none
+
+.PD 1
+.SH SYNOPSIS
+.nf
+#include "pgapack.h"
+int  PGAGetMutationType(ctx)
+PGAContext *ctx
+.fi
+.SH LOCATION
+mutation.c
+.SH EXAMPLE
+.nf
+Example:
+PGAContext *ctx;
+int mutatetype;
+:
+mutatetype = PGAGetMutationType(ctx);
+switch (mutatetype) {
+case PGA_MUTATION_CONSTANT:
+printf("Mutation Type = PGA_MUTATION_CONSTANT\n");
+break;
+case PGA_MUTATION_RANGE:
+printf("Mutation Type = PGA_MUTATION_RANGE\n");
+break;
+case PGA_MUTATION_UNIFORM:
+printf("Mutation Type = PGA_MUTATION_UNIFORM\n");
+break;
+case PGA_MUTATION_GAUSSIAN:
+printf("Mutation Type = PGA_MUTATION_GAUSSIAN\n");
+break;
+case PGA_MUTATION_PERMUTE:
+printf("Mutation Type = PGA_MUTATION_PERMUTE\n");
+break;
+}
+
+.fi

@@ -1,0 +1,32 @@
+.TH PGAGetCrossoverProb 3 "05/01/95" " " "PGAPack"
+.SH NAME
+PGAGetCrossoverProb \- Returns the crossover probability
+.SH INPUT PARAMETERS
+.PD 0
+.TP
+ctx
+- context variable
+.PD 1
+.SH OUTPUT PARAMETERS
+.PD 0
+.TP
+none
+
+.PD 1
+.SH SYNOPSIS
+.nf
+#include "pgapack.h"
+double  PGAGetCrossoverProb(ctx)
+PGAContext *ctx
+.fi
+.SH LOCATION
+cross.c
+.SH EXAMPLE
+.nf
+Example:
+PGAContext *ctx;
+double pc;
+:
+pc = PGAGetCrossoverProb(ctx);
+
+.fi

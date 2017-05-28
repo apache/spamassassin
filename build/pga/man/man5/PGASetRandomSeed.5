@@ -1,0 +1,40 @@
+.TH PGASetRandomSeed 5 "05/01/95" " " "PGAPack"
+.SH NAME
+PGASetRandomSeed \- set a seed for the random number generator.  
+.SH DESCRIPTION
+The
+default is to use a random seed.  Specifying a seed exlicitly allows
+for reproducibility of runs.
+.SH INPUT PARAMETERS
+.PD 0
+.TP
+ctx
+- context variable
+.PD 0
+.TP
+seed
+- seed  for the random number generator
+.PD 1
+.SH OUTPUT PARAMETERS
+.PD 0
+.TP
+none
+
+.PD 1
+.SH SYNOPSIS
+.nf
+#include "pgapack.h"
+void  PGASetRandomSeed(ctx, seed)
+PGAContext *ctx
+int seed
+.fi
+.SH LOCATION
+random.c
+.SH EXAMPLE
+.nf
+Example:
+PGAContext *ctx;
+:
+PGASetRandomSeed(ctx,1);
+
+.fi

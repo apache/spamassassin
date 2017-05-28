@@ -1,0 +1,41 @@
+.TH PGASetFitnessType 1 "05/01/95" " " "PGAPack"
+.SH NAME
+PGASetFitnessType \- Set the type of fitness algorithm to use. 
+.SH DESCRIPTION
+Valid choices
+are PGA_FITNESS_RAW, PGA_FITNESS_NORMAL, or PGA_FITNESS_RANKING for
+raw fitness (the evaluation function value), linear normalization, or
+linear ranking, respectively.  The default is PGA_FITNESS_RAW.
+.SH INPUT PARAMETERS
+.PD 0
+.TP
+ctx
+- context variable
+.PD 0
+.TP
+fitness_type
+- symbolic constant to specify fitness type
+.PD 1
+.SH OUTPUT PARAMETERS
+.PD 0
+.TP
+none
+
+.PD 1
+.SH SYNOPSIS
+.nf
+#include "pgapack.h"
+void  PGASetFitnessType(ctx, fitness_type)
+PGAContext *ctx
+int fitness_type
+.fi
+.SH LOCATION
+fitness.c
+.SH EXAMPLE
+.nf
+Example:
+PGAContext *ctx;
+:
+PGASetFitnessType(ctx, PGA_FITNESS_RANKING);
+
+.fi

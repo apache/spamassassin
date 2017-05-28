@@ -1,0 +1,54 @@
+.TH PGAChange 8 "05/01/95" " " "PGAPack"
+.SH NAME
+PGAChange \- Repeatedly apply mutation to a string (with an increasing
+mutation rate) until one or more mutations have occurred.  
+.SH DESCRIPTION
+This routine is
+usually used with PGADuplicate to modify a duplicate string.  It is not
+intended to replace PGAMutation
+.SH INPUT PARAMETERS
+.PD 0
+.TP
+ctx
+- context variable
+.PD 0
+.TP
+p
+- string index
+.PD 0
+.TP
+pop
+- symbolic constant of the population containing string p
+.PD 1
+.SH OUTPUT PARAMETERS
+.PD 0
+.TP
+none
+
+.PD 1
+.SH SYNOPSIS
+.nf
+#include "pgapack.h"
+void  PGAChange(ctx, p, pop)
+PGAContext *ctx
+int p
+int pop
+.fi
+.SH LOCATION
+duplcate.c
+.SH EXAMPLE
+.nf
+Example:
+Change any string in PGA_NEWPOP that is an exact copy of a string
+in PGA_OLDPOP.  To be complete, we should check the population again
+if any changes are made; for simplicity, we don't.
+
+PGAContext *ctx;
+int b, n;
+:
+n  = PGAGetPopsize(ctx);
+for (b=0; b<n; b++)
+if (PGADuplicate(ctx, b, PGA_NEWPOP, PGA_OLDPOP, n))
+PGAChange(ctx, b, PGA_NEWPOP);
+
+.fi

@@ -1,0 +1,63 @@
+.TH PGAReceiveIndividual 4 "05/01/95" " " "PGAPack"
+.SH NAME
+PGAReceiveIndividual \- receive an individual from another process
+.SH INPUT PARAMETERS
+.PD 0
+.TP
+ctx
+- contex variable
+.PD 0
+.TP
+p
+- index of an individual
+.PD 0
+.TP
+pop
+- symbolic constant of the population
+.PD 0
+.TP
+source
+- ID of the process from which to receive
+.PD 0
+.TP
+tag
+- MPI tag to look for
+.PD 0
+.TP
+status
+- pointer to an MPI status structure
+.PD 1
+.SH OUTPUT PARAMETERS
+.PD 0
+.TP
+side
+-effect.
+.PD 1
+.SH SYNOPSIS
+.nf
+#include "pgapack.h"
+void  PGAReceiveIndividual(ctx, p, pop, source, tag, comm, status)
+PGAContext *ctx
+int p
+int pop
+int source
+int tag
+MPI_Comm comm
+MPI_Status *status
+.fi
+.SH LOCATION
+parallel.c
+.SH EXAMPLE
+.nf
+Receive a string from the master process (rank == 0) with tag
+PGA_SR_STRINGTOEVAL, and place it into the first temporary location
+in PGA_NEWPOP.
+
+PGAContext *ctx;
+MPI_Comm    comm;
+MPI_Status  status;
+:
+PGAReceiveIndividual(ctx, PGA_TEMP1, PGA_NEWPOP, 0, PGA_SR_STRINGTOEVAL,
+comm, &status);
+
+.fi

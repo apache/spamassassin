@@ -1,0 +1,42 @@
+.TH PGASetRandomInitFlag 2 "05/01/95" " " "PGAPack"
+.SH NAME
+PGASetRandomInitFlag \- A boolean flag to indicate whether to randomly
+initialize alleles.  
+.SH DESCRIPTION
+Legal values are PGA_TRUE and PGA_FALSE.  Default
+is PGA_TRUE -- randomly initialize alleles.
+.SH INPUT PARAMETERS
+.PD 0
+.TP
+ctx
+- context variable
+.PD 0
+.TP
+flag
+- either PGA_TRUE or PGA_FALSE
+.PD 1
+.SH OUTPUT PARAMETERS
+.PD 0
+.TP
+none
+
+.PD 1
+.SH SYNOPSIS
+.nf
+#include "pgapack.h"
+void  PGASetRandomInitFlag(ctx, RandomBoolean)
+PGAContext *ctx
+int RandomBoolean
+.fi
+.SH LOCATION
+create.c
+.SH EXAMPLE
+.nf
+Example:
+Set the initialization routine to initialize all alleles to zero
+
+PGAContext *ctx;
+:
+PGASetRandomInitFlag(ctx,PGA_FALSE);
+
+.fi

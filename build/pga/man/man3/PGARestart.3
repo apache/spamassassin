@@ -1,0 +1,51 @@
+.TH PGARestart 3 "05/01/95" " " "PGAPack"
+.SH NAME
+PGARestart \- reseeds a population from the best string
+.SH INPUT PARAMETERS
+.PD 0
+.TP
+val
+- the probability of changing an allele when copying the
+best string to the new population
+.PD 0
+.TP
+source_pop
+- the source population
+.PD 0
+.TP
+dest_pop
+- symbolic constant of the destination population
+.PD 1
+.SH OUTPUT PARAMETERS
+.PD 0
+.TP
+side
+-effect.
+.PD 1
+.SH SYNOPSIS
+.nf
+#include "pgapack.h"
+void  PGARestart(ctx, source_pop, dest_pop)
+PGAContext *ctx
+int source_pop
+int dest_pop
+.fi
+.SH LOCATION
+restart.c
+.SH EXAMPLE
+.nf
+Perform an unspecified test to determine if the current evolution is
+not evolving fast enough, and if so, restart the evolution.
+
+PGAContext *ctx;	    PGAEvaluateMS(ctx, PGA_OLDPOP, f, comm);
+PGAFitness   (ctx, PGA_OLDPOP);
+}
+
+:
+if (StagnantEvolution()) {
+PGARestart(ctx, PGA_OLDPOP, PGA_NEWPOP);
+PGAEvaluate(ctx, PGA_NEWPOP, EvalFunc);
+PGAUpdateGeneration(ctx);
+}
+
+.fi

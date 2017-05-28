@@ -1,0 +1,55 @@
+FC        = @FC@
+PREFFLAGS = @FFLAGS@
+RM        = @RM@
+LDFLAGS   = @LDFLAGS@
+
+SHELL     = @SHELL@
+RANLIB    = @RANLIB@
+MGHDIR    = .
+
+FFLAGS    = -o $@ $(PREFFLAGS)
+
+COMPILE.f = @$(FC) $(FFLAGS) -c
+
+OBJS = grdfcn77.o hesfcn77.o objfcn77.o ssqfcn77.o ssqjac77.o vecfcn77.o \
+       vecjac77.o
+
+default:
+	@echo "Compiling mgh library"
+	@make tprobs.a
+	@echo "Compiling mgh testprog"
+	@make testprog
+
+tprobs.a: $(OBJS)
+	@ar ruv tprobs.a $(OBJS)
+	@$(RANLIB) tprobs.a
+
+gradfcn77.o: gradfcn77.f
+	$(COMPILE.f) gradfcn77.f
+
+hesfcn77.o: hesfcn77.f
+	$(COMPILE.f) hesfcn77.f
+
+objfcn77.o: objfcn77.f
+	$(COMPILE.f) objfcn77.f
+
+ssqfcn77.o: ssqfcn77.f
+	$(COMPILE.f) ssqfcn77.f
+
+ssqjac77.o: ssqjac77.f
+	$(COMPILE.f) ssqjac77.f
+
+vecfcn77.o: vecfcn77.f
+	$(COMPILE.f) vecfcn77.f
+
+vecjac77.o: vecjac77.f
+	$(COMPILE.f) vecjac77.f
+
+testprog: testprog.f
+	@if test ! -f "$(MGHDIR)/tprobs.a"; then\
+		cd $(MGHDIR); make tprobs;\
+	fi
+	@$(FC) $(FFLAGS) testprog.f $(MGHDIR)/tprobs.a $(LDFLAGS)
+
+clean:
+	@$(RM) $(OBJS) tprobs.a testprog

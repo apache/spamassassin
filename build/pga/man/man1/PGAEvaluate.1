@@ -1,0 +1,63 @@
+.TH PGAEvaluate 1 "05/01/95" " " "PGAPack"
+.SH NAME
+PGAEvaluate \- Calls a user-specified function to return an evaluation of
+each string in the population. 
+.SH DESCRIPTION
+The user-specified function is only called
+if the string has been changed (e.g., by crossover or mutation) or the user
+has explicitly signaled the string's evaluation is out-of-date by a call
+to PGASetEvaluationUpToDateFlag().
+.SH INPUT PARAMETERS
+.PD 0
+.TP
+ctx
+- context variable
+.PD 0
+.TP
+pop
+- symbolic constant of the population to be evaluated
+.PD 0
+.TP
+f
+- a pointer to a function to evaluate a string.  This function will
+be called once for each string in population pop that requires
+evaluation.  This function must return a double (the evaluation
+function value) and must fit the prototype
+double f(PGAContext *c, int p, int pop);
+.PD 0
+.TP
+comm
+- an MPI communicator
+.PD 1
+.SH OUTPUT PARAMETERS
+.PD 0
+.TP
+none
+
+.PD 1
+.SH SYNOPSIS
+.nf
+#include "pgapack.h"
+void  PGAEvaluate(ctx, pop, , comm)
+PGAContext *ctx
+int pop
+double (*f)(PGAContext *, int, int)
+MPI_Comm comm
+.fi
+.SH LOCATION
+parallel.c
+.SH EXAMPLE
+.nf
+Example:
+Evaluate all strings in population PGA_NEWPOP using the user-defined
+evaluation function Energy.
+
+double Energy(PGAContext *ctx, int p, int pop) {
+:
+};
+
+PGAContext *ctx;
+:
+PGAEvaluate(ctx, PGA_NEWPOP, Energy, MPI_COMM_WORLD);
+
+.fi

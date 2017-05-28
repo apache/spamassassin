@@ -1,0 +1,37 @@
+.TH PGASetRestartFrequencyValue 3 "05/01/95" " " "PGAPack"
+.SH NAME
+PGASetRestartFrequencyValue \- specifies the number of iterations of no
+change in the best string after which the algorithm should restart
+.SH INPUT PARAMETERS
+.PD 0
+.TP
+ctx
+- context variable
+.PD 0
+.TP
+numiter
+- number of changeless iterations
+.PD 1
+.SH OUTPUT PARAMETERS
+.PD 0
+.TP
+none
+
+.PD 1
+.SH SYNOPSIS
+.nf
+#include "pgapack.h"
+void  PGASetRestartFrequencyValue(ctx, numiter)
+PGAContext *ctx
+int numiter
+.fi
+.SH LOCATION
+restart.c
+.SH EXAMPLE
+.nf
+Example:
+PGAContext *ctx;
+:
+PGASetRestartFrequencyValue(ctx, 100);
+
+.fi

@@ -1,0 +1,45 @@
+This is the test directory README.
+
+instverf:
+--------
+
+A simple program to test the accuracy of an installation.  It runs five
+distinct genetic algorithms, and stores the results from each.  After all
+five are run, it will compare the computed results to those known to be
+correct, stored on disk as "instverf.data".  If any errors are found, the
+problem number is reported.
+
+The problems tested are
+	0:	Binary datatype
+	1:	Integer datatype
+	2:	Character datatype
+	3:	Real datatype
+	4:	Binary datatype using PGAGetRealFrom*
+
+
+SanityChecks:
+------------
+
+Contains several programs designed to test the sanity of PGAPack.  Under
+normal circumstances, they should not be needed.  ST_* will call most
+every PGAPack function.  PT_* will test the parallel code -- it must
+be run with at least three processors!
+This directory contains several programs that exist only to test the
+sanity of PGAPack.  They are very useful for testing the fortran to C
+interface, and that sending and receiving strings work.
+
+ST_c.c and ST_f.f simply call (most) every function in PGAPack.  They
+also run several GA's which do nothing other than use every type of
+crossover and mutation for each native datatype.
+
+PT_c.c and PT_f.f test high-level stuff.  It tests (not in this order) if
+sending/receiving of strings works, PGARun, PGARunGM, PGARunIM and PGARunNM
+(the last two aren't implemented yet, though), and a user defined
+run routine.  A real version of MPI _MUST_ be used for PT_c and PT_f.
+
+instverf.c will run several GA's, one for each native datatype, and check
+the output computed versus that stored on disk.  If any differences are
+found, it will give a warning.
+
+These programs are the development testing suite.
+

@@ -1,0 +1,34 @@
+.TH PGAGetMutationBoundedFlag 3 "05/01/95" " " "PGAPack"
+.SH NAME
+PGAGetMutationBoundedFlag \- returns PGA_TRUE or PGA_FALSE to indicate
+whether mutated integer strings remain in the range specified when
+initialized with PGASetIntegerInitRange.
+.SH INPUT PARAMETERS
+.PD 0
+.TP
+ctx
+- context variable
+.PD 1
+.SH OUTPUT PARAMETERS
+.PD 0
+.TP
+none
+
+.PD 1
+.SH SYNOPSIS
+.nf
+#include "pgapack.h"
+int  PGAGetMutationBoundedFlag(ctx)
+PGAContext *ctx
+.fi
+.SH LOCATION
+mutation.c
+.SH EXAMPLE
+.nf
+Example:
+PGAContext *ctx;
+int val;
+:
+val = PGAGetMutationBoundedFlag(ctx);
+
+.fi

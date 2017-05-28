@@ -1,0 +1,48 @@
+.TH PGAStddev 5 "05/01/95" " " "PGAPack"
+.SH NAME
+PGAStddev \- calculates the standard deviation of an array of elements
+.SH INPUT PARAMETERS
+.PD 0
+.TP
+ctx
+- context variable
+.PD 0
+.TP
+a
+- array to take the standard deviation of
+.PD 0
+.TP
+n
+- number of elements in array a
+.PD 0
+.TP
+mean
+- the mean of the elements in array a
+.PD 1
+.SH OUTPUT PARAMETERS
+.PD 0
+.TP
+none
+
+.PD 1
+.SH SYNOPSIS
+.nf
+#include "pgapack.h"
+double  PGAStddev(ctx, a, n, mean)
+PGAContext *ctx
+double *a
+int n
+double mean
+.fi
+.SH LOCATION
+utility.c
+.SH EXAMPLE
+.nf
+Example:
+PGAContext *ctx;
+double a[100], mean, sigma;
+:
+mean  = PGAMean(ctx, a, 100);
+sigma = PGAStddev(ctx, a, 100, mean);
+
+.fi

@@ -1,0 +1,41 @@
+.TH PGASetMutationProb 3 "05/01/95" " " "PGAPack"
+.SH NAME
+PGASetMutationProb \- Specifies the probability that a given allele will
+be mutated.  
+.SH DESCRIPTION
+If this is called without calling PGASetMutationType(), the
+default mutation type is PGA_MUTATION_FIXED.  The default probability is
+the reciprocal of the string length.
+.SH INPUT PARAMETERS
+.PD 0
+.TP
+ctx
+- context variable
+.PD 0
+.TP
+p
+- the mutation probability
+.PD 1
+.SH OUTPUT PARAMETERS
+.PD 0
+.TP
+none
+
+.PD 1
+.SH SYNOPSIS
+.nf
+#include "pgapack.h"
+void  PGASetMutationProb(ctx, mutation_prob)
+PGAContext *ctx
+double mutation_prob
+.fi
+.SH LOCATION
+mutation.c
+.SH EXAMPLE
+.nf
+Example:
+PGAContext *ctx;
+:
+PGASetMutationProb(ctx,0.001);
+
+.fi

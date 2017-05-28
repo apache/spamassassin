@@ -1,0 +1,26 @@
+FC    = @FC@
+RM    = @RM@
+SHELL = @SHELL@
+
+default:
+	@echo "Making C examples"
+	@make C
+	@echo "Making fortran examples"
+	@make Fortran
+
+C:
+	@cd c; make
+
+Fortran:
+	@if test -n "$(FC)" ; then\
+		cd fortran; make; cd ..;\
+		cd mgh; make;\
+	else\
+		echo "Fortran compiler unavailable";\
+	fi
+
+clean:
+	@cd c; make clean
+	@cd fortran; make clean
+	@cd mgh; make clean
+

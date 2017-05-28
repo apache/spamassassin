@@ -1,0 +1,32 @@
+.TH PGAGetMutationProb 3 "05/01/95" " " "PGAPack"
+.SH NAME
+PGAGetMutationProb \- Returns the probability of mutation.
+.SH INPUT PARAMETERS
+.PD 0
+.TP
+ctx
+- context variable
+.PD 1
+.SH OUTPUT PARAMETERS
+.PD 0
+.TP
+none
+
+.PD 1
+.SH SYNOPSIS
+.nf
+#include "pgapack.h"
+double  PGAGetMutationProb(ctx)
+PGAContext *ctx
+.fi
+.SH LOCATION
+mutation.c
+.SH EXAMPLE
+.nf
+Example:
+PGAContext *ctx;
+double pm;
+:
+pm = PGAGetMutateProb(ctx);
+
+.fi
