@@ -35,6 +35,12 @@ if [ ! $SCORESET ]; then
   exit
 fi
 
+TMPDIR="/tmp/generate-new-scores"
+mkdir -p $TMPDIR
+cd $TMPDIR
+
+pwd
+
 # prep current nightly mass-check logs
 if [ ! -e corpus ]; then
   echo "[ creating corpus directory ]"
@@ -96,6 +102,8 @@ if [ "$REVISION" == "" ]; then
   exit 1
 fi
 
+echo "Latest revision found from masscheck corpus: $REVISION"
+
 for FILE in `find corpus/usable-corpus-set$SCORESET -type f`;
 do
   echo "Checking $FILE for SVN $REVISION..."
@@ -120,8 +128,9 @@ svn co https://svn.apache.org/repos/asf/spamassassin/trunk/rules trunk-new-rules
 svn up -r $REVISION trunk-new-rules-set${SCORESET}/rulesrc/ || exit $?
 
 cd trunk-new-rules-set${SCORESET}/masses
-patch < ../../masses-Makefile.patch || exit $?
-cd ../..
+pwd
+patch < rule-update-score-gen/masses-Makefile.patch || exit $?
+cd -
 
 # copy the support scripts to masses/ of the scoreset's checkout; this lets us
 # contain all the new score generation scripts in their own directory and keeps
@@ -167,6 +176,8 @@ ln -s spam-full.log spam.log
 make freqs SCORESET=$SCORESET || exit $?
 
 cp freqs freqs.full	# probably not needed for anything - someday I'll look to see
+
+pwd
 make > make.out 2>&1 || exit $?
 
 rm -rf ORIG NSBASE SPBASE ham-validate.log spam-validate.log ham.log spam.log
@@ -179,6 +190,7 @@ for CLASS in ham spam ; do
 done
 
 date
+pwd
 echo "[ starting runGA ]"
 
 # generate the new scores
@@ -227,3 +239,4 @@ cat trunk-new-rules-set$SCORESET/masses/$LOGDIR/stats-set$SCORESET-original-test
 date
 echo "[ completed ]"
 
+rm -rf $TMPDIR
