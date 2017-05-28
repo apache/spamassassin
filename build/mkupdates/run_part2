@@ -174,15 +174,17 @@ make_tarball_for_version () {
 # ---------------------------------------------------------------------------
 
 cycle_logfiles () {
-# cycle the logfiles; keep 6 (3 days worth I think)
-  X=6
-  [[ -e "$LOGDIR/mkupdatespt2_${X}.txt" ]] && rm -f $LOGDIR/mkupdatespt2_${X}.txt
-  while [[ $X -gt 0 ]]; do
-    ((X--))
-    Y=$((X+1))
-    [[ -e "$LOGDIR/mkupdatespt2_${X}.txt" ]] && mv -f $LOGDIR/mkupdatespt2_${X}.txt $LOGDIR/mkupdatespt2_${Y}.txt
-  done
-  mv -f $LOGDIR/mkupdatespt2.txt $LOGDIR/mkupdatespt2_${Y}.txt
+  if [[ -e "$LOGDIR/mkupdatespt2.txt" ]]; then
+    # cycle the logfiles; keep 6 (3 days worth I think)
+    X=6
+    [[ -e "$LOGDIR/mkupdatespt2_${X}.txt" ]] && rm -f $LOGDIR/mkupdatespt2_${X}.txt
+    while [[ $X -gt 0 ]]; do
+      ((X--))
+      Y=$((X+1))
+      [[ -e "$LOGDIR/mkupdatespt2_${X}.txt" ]] && mv -f $LOGDIR/mkupdatespt2_${X}.txt $LOGDIR/mkupdatespt2_${Y}.txt
+    done
+    mv -f $LOGDIR/mkupdatespt2.txt $LOGDIR/mkupdatespt2_${Y}.txt
+  fi
 }
 
 # ---------------------------------------------------------------------------
@@ -194,7 +196,9 @@ for version in $versions ; do
   make_tarball_for_version $version
 done
 
-ls -l $stagedir
+ls -l $stagedir/GPG.KEY
+ls -l $stagedir/MIRRORED.BY
+ls -ltr $stagedir/*.tar.* | tail -20
 cycle_logfiles
 exit
 
