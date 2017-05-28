@@ -2,38 +2,36 @@
 
 . /etc/profile
 
-PATH=/home/jm/sabuildtools/bin:$PATH
-
-cd /home/updatesd/svn/new-rule-score-gen
-echo "Changing dirs to /home/updatesd/svn/new-rule-score-gen"
+set -x 
+#PATH=/home/jm/sabuildtools/bin:$PATH
 
 #ADDING MORE EXIT STATUS CHECKS FOR BUG 6702
 echo 'Running do-nightly-rescore-example...'
 echo ''
-/home/updatesd/svn/new-rule-score-gen/do-nightly-rescore-example 
+/usr/local/spamassassin/automc/svn/masses/rule-update-score-gen/do-nightly-rescore-example 
 
 RV=$?
 if [ $RV -ne 0 ] ; then 
 	echo "Exit Status $RV is not zero for do-nightly-rescore-example" 
-       (
-       echo "From: nobody@spamassassin.apache.org (UpdatesD Cron)"
-       echo "Subject: [auto] do-nightly-rescore-example $RV"
-       echo
-       echo "Exit Status $RV is not zero for do-nightly-rescore-example."
-       ) | /usr/sbin/sendmail -oi ruleqa@spamassassin.apache.org
+#       (
+#       echo "From: nobody@spamassassin.apache.org (UpdatesD Cron)"
+#       echo "Subject: [auto] do-nightly-rescore-example $RV"
+#       echo
+#       echo "Exit Status $RV is not zero for do-nightly-rescore-example."
+#       ) | /usr/sbin/sendmail -oi ruleqa@spamassassin.apache.org
 else
 	echo 'Running mkupdate-with-scores...'
 	echo ''
-	/home/updatesd/svn/mkupdates-with-scores/mkupdate-with-scores
+	/usr/local/spamassassin/svn/trunk/build/mkupdates/mkupdate-with-scores
 	RV=$?
 	if [ $RV -ne 0 ] ; then 
 		echo "Exit Status $RV is not zero for mkupdate-with-scores" 
-               (
-               echo "From: nobody@spamassassin.apache.org (UpdatesD Cron)"
-               echo "Subject: [auto] mkupdate-with-scores $RV"
-               echo
-               echo "Exit Status $RV is not zero for mkupdate-with-scores"
-               ) | /usr/sbin/sendmail -oi ruleqa@spamassassin.apache.org
+#               (
+#               echo "From: nobody@spamassassin.apache.org (UpdatesD Cron)"
+#               echo "Subject: [auto] mkupdate-with-scores $RV"
+#               echo
+#               echo "Exit Status $RV is not zero for mkupdate-with-scores"
+#               ) | /usr/sbin/sendmail -oi ruleqa@spamassassin.apache.org
 	fi
 fi
 
