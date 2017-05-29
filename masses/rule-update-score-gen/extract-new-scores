@@ -38,7 +38,7 @@ while (<CONFIG>) {
   $scoreset = $1 if /^\s*SCORESET=(\d)\s*$/;
   $ham_pref = $1 if /^\s*HAM_PREFERENCE=([\d.-]+)/;
   $threshold = $1 if /^\s*THRESHOLD=([\d.-]+)/;
-  $epochs = $1 if /^\s*EPOCHS=(\d)\s*$/;
+  $epochs = $1 if /^\s*EPOCHS=(\d+)\s*$/;
   $note = "-$1" if /^\s*NOTE=(.+)$/;
 
 
