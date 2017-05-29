@@ -22,7 +22,7 @@ if [ $RV -ne 0 ] ; then
 else
   echo "Running mkupdate-with-scores..."
   echo ""
-  /usr/local/spamassassin/automc/svn/build/mkupdates/mkupdate-with-scores
+  /usr/local/spamassassin/automc/svn/trunk/build/mkupdates/mkupdate-with-scores
   RV=$?
   if [ $RV -ne 0 ] ; then 
     echo "Exit Status $RV is not zero for mkupdate-with-scores" 
