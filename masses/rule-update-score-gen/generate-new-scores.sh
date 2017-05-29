@@ -22,35 +22,56 @@
 # limitations under the License.
 # </@LICENSE>
 
-SCORESET=$1
+PROGDIR=`dirname $0`
+[[ "$PROGDIR" = "." ]] && PROGDIR=`pwd`
+PROGNAME=`basename $0 .sh`
+HOST=`hostname -f`
 
-# load rsync credentials from RSYNC-CREDS file
-# RSYNC_USERNAME="username"
-# RSYNC_PASSWORD="password"
-. RSYNC-CREDS
-export RSYNC_PASSWORD
+DOW=`date +%w`
+
+TMP="/tmp/$PROGNAME/$DOW"
+
+SCORESET=$1
+CORPUS_SRC_DIR="/usr/local/spamassassin/rsync/corpus"
+
+MINHAMCONTRIBS=2
+MINSPAMCONTRIBS=2
+
+MINHAMCOUNT=150000
+MINSPAMCOUNT=150000
+MINHAMCOUNT=1500
+MINSPAMCOUNT=1000
+
+HAMHISTORY=84
+SPAMHISTORY=20
 
 if [ ! $SCORESET ]; then
   echo "Missing scoreset number parameter"
   exit
 fi
 
-TMPDIR="/tmp/generate-new-scores"
-mkdir -p $TMPDIR
-cd $TMPDIR
+mkdir -p $TMP/corpus
+cd $TMP
 
 pwd
-
-# prep current nightly mass-check logs
-if [ ! -e corpus ]; then
-  echo "[ creating corpus directory ]"
-  mkdir corpus || exit $?
-fi
 
 date
 echo "[ rsyncing logs ]"
 
-rsync -artvz $RSYNC_USERNAME@rsync.spamassassin.org::corpus/*.log corpus/. || exit $?
+# if running on sa-vm1.apache.org rsync locally, otherwise rsync remotely
+if [[ -e "$CORPUS_SRC_DIR" ]]; then
+  echo "[ rsyncing logs locally ]"
+  rsync -artv --delete --exclude="*am-rescore-*" $CORPUS_SRC_DIR/*.log corpus/. || exit $?
+else
+  echo "[ rsyncing logs remotely ]"
+  # load rsync credentials from RSYNC-CREDS file
+  # RSYNC_USERNAME="username"
+  # RSYNC_PASSWORD="password"
+  . $PROGDIR/RSYNC-CREDS
+  export RSYNC_PASSWORD
+  rsync -artvz --delete --exclude="*am-rescore-*" $RSYNC_USERNAME@rsync.spamassassin.org::corpus/*.log corpus/. || exit $?
+fi
+
 
 date
 echo "[ selecting log files to use for scoreset $SCORESET ]"
@@ -61,29 +82,25 @@ rm -rf corpus/usable-corpus-set$SCORESET
 mkdir corpus/usable-corpus-set$SCORESET || exit $?
 
 if [ $SCORESET -eq 3 ]; then
-  for FILE in `find corpus -type f -name "*am-bayes-net-*"`;
-  do
+  for FILE in `find corpus -type f -name "*am-bayes-net-*"`; do
     FILE=`echo $FILE | cut -d"/" -f2-`
     ln corpus/$FILE corpus/usable-corpus-set${SCORESET}/$FILE || exit $?
     echo "Linked $FILE to corpus/usable-corpus-set${SCORESET}/$FILE"
   done
 elif [ $SCORESET -eq 2 ]; then
-  for FILE in `find corpus -type f -name "*am-bayes-*" | grep -v net-`;
-  do
+  for FILE in `find corpus -type f -name "*am-bayes-*" | grep -v net-`; do
     FILE=`echo $FILE | cut -d"/" -f2-`
     ln corpus/$FILE corpus/usable-corpus-set${SCORESET}/$FILE || exit $?
     echo "Linked $FILE to corpus/usable-corpus-set${SCORESET}/$FILE"
   done
 elif [ $SCORESET -eq 1 ]; then
-  for FILE in `find corpus -type f -name "*am-net-*"`;
-  do
+  for FILE in `find corpus -type f -name "*am-net-*"`; do
     FILE=`echo $FILE | cut -d"/" -f2-`
     ln corpus/$FILE corpus/usable-corpus-set${SCORESET}/$FILE || exit $?
     echo "Linked $FILE to corpus/usable-corpus-set${SCORESET}/$FILE"
   done
 elif [ $SCORESET -eq 0 ]; then
-  for FILE in `find corpus -type f -name "*am-*" | grep -v net- | grep -v bayes-`;
-  do
+  for FILE in `find corpus -type f -name "*am-*" | grep -v net- | grep -v bayes-`; do
     FILE=`echo $FILE | cut -d"/" -f2-`
     ln corpus/$FILE corpus/usable-corpus-set${SCORESET}/$FILE || exit $?
     echo "Linked $FILE to corpus/usable-corpus-set${SCORESET}/$FILE"
@@ -102,13 +119,31 @@ if [ "$REVISION" == "" ]; then
   exit 1
 fi
 
-echo "Latest revision found from masscheck corpus: $REVISION"
+# DEBUG
+#echo "test"
+#exit 1
 
-for FILE in `find corpus/usable-corpus-set$SCORESET -type f`;
-do
+for FILE in `find corpus/usable-corpus-set$SCORESET -type f`; do
   echo "Checking $FILE for SVN $REVISION..."
   head $FILE | grep "SVN revision: $REVISION" || (rm $FILE; echo "$FILE does not meet the requirements")
 done
+
+# check to make sure that we have enough corpus submitters
+HAMCONTRIBS=`ls -l corpus/usable-corpus-set$SCORESET/ham-*.log | wc -l | sed -e 's/^[ \t]*//' | cut -d" " -f1`
+SPAMCONTRIBS=`ls -l corpus/usable-corpus-set$SCORESET/spam-*.log | wc -l | sed -e 's/^[ \t]*//' | cut -d" " -f1`
+
+echo " HAM CONTRIBUTORS FOUND: $HAMCONTRIBS (required $MINHAMCONTRIBS)"
+echo "SPAM CONTRIBUTORS FOUND: $SPAMCONTRIBS (required $MINSPAMCONTRIBS)"
+
+if [ $HAMCONTRIBS -lt $MINHAMCONTRIBS ]; then
+  echo "Insufficient ham corpus contributors; aborting."
+  exit 6
+fi
+
+if [ $SPAMCONTRIBS -lt $MINSPAMCONTRIBS ]; then
+  echo "Insufficient spam corpus contributors; aborting."
+  exit 7
+fi
 
 date
 echo "[ checking out code from svn repository ]"
@@ -121,30 +156,40 @@ echo >> scores-set$SCORESET
 # prep the ruleset checkout
 rm -rf trunk-new-rules-set$SCORESET
 
-svn co -r $REVISION https://svn.apache.org/repos/asf/spamassassin/trunk trunk-new-rules-set$SCORESET || exit $?
-svn co https://svn.apache.org/repos/asf/spamassassin/tags/spamassassin_release_3_2_0_rc_2/rules trunk-new-rules-set$SCORESET/rules-base || exit $?
-svn co https://svn.apache.org/repos/asf/spamassassin/trunk/rules trunk-new-rules-set$SCORESET/rules-current || exit $?
+set -x
+svn co -r $REVISION http://svn.apache.org/repos/asf/spamassassin/trunk trunk-new-rules-set$SCORESET || exit $?
+svn co http://svn.apache.org/repos/asf/spamassassin/tags/spamassassin_release_3_3_0/rules trunk-new-rules-set$SCORESET/rules-base || exit $?
+svn co http://svn.apache.org/repos/asf/spamassassin/trunk/rules trunk-new-rules-set$SCORESET/rules-current || exit $?
 
 svn up -r $REVISION trunk-new-rules-set${SCORESET}/rulesrc/ || exit $?
 
+# use the newest masses/ directory so that we can fix bugs in the masses/ stuff
+# and not have the net-enabled scores broken all week
+svn up trunk-new-rules-set$SCORESET/masses/
+svn up trunk-new-rules-set$SCORESET/build/
+
+set +x
+
+# we need to patch the Makefile to get it to mangle some data for us
 cd trunk-new-rules-set${SCORESET}/masses
-pwd
 patch < rule-update-score-gen/masses-Makefile.patch || exit $?
-cd -
 
 # copy the support scripts to masses/ of the scoreset's checkout; this lets us
 # contain all the new score generation scripts in their own directory and keeps
 # us from having to pass the checkout path as an argument to each of the scripts
-cp lock-scores trunk-new-rules-set$SCORESET/masses/lock-scores
-cp extract-new-scores trunk-new-rules-set$SCORESET/masses/extract-new-scores
-cp add-hitless-active-to-freqs trunk-new-rules-set$SCORESET/masses/add-hitless-active-to-freqs
+# NOTE: lock-scores now uses existing scores (even commented out) in 72_active.cf
+# as absolute maximum values to be inserted in tmp/ranges.data
+cp rule-update-score-gen/lock-scores .
+cp rule-update-score-gen/extract-new-scores .
+cp rule-update-score-gen/add-hitless-active-to-freqs .
+
+cd ..
 
 date
 echo "[ generating active ruleset via make ]"
 
-cd trunk-new-rules-set$SCORESET
 perl Makefile.PL < /dev/null || exit $?
-make || exit $?
+make > make.out 2>&1 || exit $?
 
 # strip scores from new rules so that the garescorer can set them
 grep -v ^score rules/72_active.cf > rules/72_active.cf-scoreless
@@ -153,9 +198,27 @@ mv -f rules/72_active.cf-scoreless rules/72_active.cf
 date
 echo "[ running log-grep-recent ]"
 
-# only use recent spam to generate scores; use a lot of ham history to avoid FPs
-masses/log-grep-recent -m 38 ../corpus/usable-corpus-set$SCORESET/ham-*.log > masses/ham-full.log
-masses/log-grep-recent -m 2 ../corpus/usable-corpus-set$SCORESET/spam-*.log > masses/spam-full.log
+# only use recent spam to generate scores; use a lot of ham history to avoid FPs - Increases Ham to 84 months on 8/8/2012 to try and get a masscheck out the door.
+masses/log-grep-recent -m $HAMHISTORY ../corpus/usable-corpus-set$SCORESET/ham-*.log > masses/ham-full.log
+masses/log-grep-recent -m $SPAMHISTORY ../corpus/usable-corpus-set$SCORESET/spam-*.log > masses/spam-full.log
+
+# make sure that we have enough mass-check results to actually generate reasonable scores
+# NOTE: currently we only check for a minimum number of messages
+HAMCOUNT=`wc -l masses/ham-full.log | sed -e 's/^[ \t]*//' | cut -d" " -f1`
+SPAMCOUNT=`wc -l masses/spam-full.log | sed -e 's/^[ \t]*//' | cut -d" " -f1`
+
+echo " HAM: $HAMCOUNT ($MINHAMCOUNT required)"
+echo "SPAM: $SPAMCOUNT ($MINSPAMCOUNT required)"
+
+if [[ "$HAMCOUNT" -lt "$MINHAMCOUNT" ]]; then
+  echo "Insufficient ham corpus to generate scores; aborting."
+  exit 8
+fi
+
+if [[ "$SPAMCOUNT" -lt "$MINSPAMCOUNT" ]]; then
+  echo "Insufficient spam corpus to generate scores; aborting."
+  exit 9
+fi
 
 # set config to chosen scoreset
 cp masses/config.set$SCORESET masses/config
@@ -168,17 +231,19 @@ echo "[ running make freqs ]"
 
 # generate new ruleset
 cd masses
+pwd
 
+set -x 
 make clean || exit $?
+set +x 
 rm -rf ORIG NSBASE SPBASE ham-validate.log spam-validate.log ham.log spam.log
 ln -s ham-full.log ham.log
 ln -s spam-full.log spam.log
+
+set -x 
 make freqs SCORESET=$SCORESET || exit $?
-
-cp freqs freqs.full	# probably not needed for anything - someday I'll look to see
-
-pwd
 make > make.out 2>&1 || exit $?
+set +x 
 
 rm -rf ORIG NSBASE SPBASE ham-validate.log spam-validate.log ham.log spam.log
 mkdir ORIG
@@ -190,7 +255,6 @@ for CLASS in ham spam ; do
 done
 
 date
-pwd
 echo "[ starting runGA ]"
 
 # generate the new scores
@@ -223,9 +287,7 @@ if [ -s scores-active-zeroed ]; then
 fi
 
 cd ../..
-./merge-scoresets $SCORESET
-echo
-cat scores
+cat scores-set$SCORESET
 
 # collect some stats
 echo "##### WITH NEW RULES AND SCORES #####" > stats-set$SCORESET
@@ -238,5 +300,3 @@ cat trunk-new-rules-set$SCORESET/masses/$LOGDIR/stats-set$SCORESET-original-test
 
 date
 echo "[ completed ]"
-
-rm -rf $TMPDIR
