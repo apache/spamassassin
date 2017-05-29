@@ -12,26 +12,26 @@ echo ''
 
 RV=$?
 if [ $RV -ne 0 ] ; then 
-	echo "Exit Status $RV is not zero for do-nightly-rescore-example" 
-#       (
-#       echo "From: nobody@spamassassin.apache.org (UpdatesD Cron)"
-#       echo "Subject: [auto] do-nightly-rescore-example $RV"
-#       echo
-#       echo "Exit Status $RV is not zero for do-nightly-rescore-example."
-#       ) | /usr/sbin/sendmail -oi ruleqa@spamassassin.apache.org
+  echo "Exit Status $RV is not zero for do-nightly-rescore-example" 
+  (
+    echo "From: nobody@spamassassin.apache.org (UpdatesD Cron)"
+    echo "Subject: [auto] do-nightly-rescore-example $RV"
+    echo ""
+    echo "Exit Status $RV is not zero for do-nightly-rescore-example."
+  ) | /usr/sbin/sendmail -oi ruleqa@spamassassin.apache.org
 else
-	echo 'Running mkupdate-with-scores...'
-	echo ''
-	/usr/local/spamassassin/automc/svn/build/mkupdates/mkupdate-with-scores
-	RV=$?
-	if [ $RV -ne 0 ] ; then 
-		echo "Exit Status $RV is not zero for mkupdate-with-scores" 
-#               (
-#               echo "From: nobody@spamassassin.apache.org (UpdatesD Cron)"
-#               echo "Subject: [auto] mkupdate-with-scores $RV"
-#               echo
-#               echo "Exit Status $RV is not zero for mkupdate-with-scores"
-#               ) | /usr/sbin/sendmail -oi ruleqa@spamassassin.apache.org
-	fi
+  echo "Running mkupdate-with-scores..."
+  echo ""
+  /usr/local/spamassassin/automc/svn/build/mkupdates/mkupdate-with-scores
+  RV=$?
+  if [ $RV -ne 0 ] ; then 
+    echo "Exit Status $RV is not zero for mkupdate-with-scores" 
+    (
+      echo "From: nobody@spamassassin.apache.org (UpdatesD Cron)"
+      echo "Subject: [auto] mkupdate-with-scores $RV"
+      echo ""
+      echo "Exit Status $RV is not zero for mkupdate-with-scores"
+    ) | /usr/sbin/sendmail -oi ruleqa@spamassassin.apache.org
+  fi
 fi
 
