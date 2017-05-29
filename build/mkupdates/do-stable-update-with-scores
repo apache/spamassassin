@@ -6,9 +6,9 @@ set -x
 #PATH=/home/jm/sabuildtools/bin:$PATH
 
 #ADDING MORE EXIT STATUS CHECKS FOR BUG 6702
-echo 'Running do-nightly-rescore-example...'
-echo ''
-/usr/local/spamassassin/automc/svn/masses/rule-update-score-gen/do-nightly-rescore-example 
+echo "'Running do-nightly-rescore-example.sh ..."
+echo ""
+/usr/local/spamassassin/automc/svn/masses/rule-update-score-gen/do-nightly-rescore-example.sh
 
 RV=$?
 if [ $RV -ne 0 ] ; then 
