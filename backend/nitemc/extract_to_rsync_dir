@@ -36,19 +36,15 @@ set -ex
 for retry in 1 2 3 4 5 6 7 8 9 10 ; do
 
     # export the main repo:
-    rm -rf $RSYNC_DIR/$subdir
-    $SVN export --non-interactive -r $REV $REPO_URL $RSYNC_DIR/$subdir \
+    rm -rf $RSYNC_DIR/$subdir/*
+    $SVN export --non-interactive --force -r $REV $REPO_URL $RSYNC_DIR/$subdir/ \
             || continue
 
     cd $RSYNC_DIR/$subdir
     $PERL build/mkrules --out rules > /dev/null || continue
 
     # create "svn info" file for mass-check
-    # we assume that the current directory was updated via cron to the correct
-    # revision, so just info it. (can't do remote info with the svn version
-    # installed on the zones machine, nor will it accept "--non-interactive")
-    $SVN info $HOME/versions/trunk \
-            > $RSYNC_DIR/$subdir/masses/svninfo.tmp \
+    $SVN info $REPO_URL > masses/svninfo.tmp \
             < /dev/null || continue
 
     exit               # assume success at this point
