@@ -6,8 +6,6 @@
 # usage: sudo -u automc /usr/local/spamassassin/svn/trunk/build/mkupdates/run_part2
 #
 
-set -x
-
 HOME="/usr/local/spamassassin/automc"
 LOGDIR="/var/www/bbmass.spamassassin.org/mkupdates"
 
@@ -17,6 +15,8 @@ cd /usr/local/spamassassin/svn/trunk/
 #Switched to system perl on spamassassin-vm box
 PERL=/usr/bin/perl
 #PERL=/local/perl586/bin/perl
+
+set -x
 
 # download stage, where update tarballs are deposited for downloaders
 #
@@ -195,6 +195,8 @@ cycle_logfiles () {
 for version in $versions ; do
   make_tarball_for_version $version
 done
+
+set +x
 
 ls -l $stagedir/GPG.KEY
 ls -l $stagedir/MIRRORED.BY
