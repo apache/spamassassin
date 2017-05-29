@@ -32,6 +32,7 @@ DOW=`date +%w`
 TMP="/tmp/$PROGNAME/$DOW"
 
 SCORESET=$1
+OPTION=$2
 CORPUS_SRC_DIR="/usr/local/spamassassin/rsync/corpus"
 
 MINHAMCONTRIBS=10
@@ -41,7 +42,7 @@ MINSPAMCOUNT=150000
 HAMHISTORY=84
 SPAMHISTORY=2
 
-if [[ "$1" = "force" ]]; then
+if [[ "$OPTION" = "force" ]]; then
   MINHAMCONTRIBS=1
   MINSPAMCONTRIBS=1
   MINHAMCOUNT=1500
