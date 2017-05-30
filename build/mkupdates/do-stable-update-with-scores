@@ -8,7 +8,7 @@ set -x
 #ADDING MORE EXIT STATUS CHECKS FOR BUG 6702
 echo "'Running do-nightly-rescore-example.sh ..."
 echo ""
-/usr/local/spamassassin/automc/svn/masses/rule-update-score-gen/do-nightly-rescore-example.sh
+/usr/local/spamassassin/automc/svn/masses/rule-update-score-gen/do-nightly-rescore-example.sh $1
 
 RV=$?
 if [ $RV -ne 0 ] ; then 
@@ -22,7 +22,7 @@ if [ $RV -ne 0 ] ; then
 else
   echo "Running mkupdate-with-scores..."
   echo ""
-  /usr/local/spamassassin/automc/svn/trunk/build/mkupdates/mkupdate-with-scores
+  /usr/local/spamassassin/automc/svn/trunk/build/mkupdates/mkupdate-with-scores $1
   RV=$?
   if [ $RV -ne 0 ] ; then 
     echo "Exit Status $RV is not zero for mkupdate-with-scores" 
