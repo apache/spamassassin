@@ -97,26 +97,6 @@ test_version() {
   return $STATUS
 }
 
-update_dns_record() {
-  SA_VERSION=$1
-  UPDATE_REVISION=$2
-
-  if [ $AUTOUPDATESDISABLED -eq 1 -a $REVERT_REVISION -eq 0 ]; then
-    echo "DNS updating disabled (auto update publishing disabled), skipping DNS record update"
-    return 0
-  fi
-
-  # turn "3.2.0" into "0.2.3"
-  RVERS=`echo $SA_VERSION | rev`
-
-  DNS_RECORD="$RVERS  TXT  \"$UPDATE_REVISION\""
-  echo "DNS Record: $DNS_RECORD"
-
-  /usr/local/bin/updateDNS.sh ${RVERS}.updates TXT $UPDATE_REVISION
-
-  return 0
-}
-
 copy_update_paranoid() {
   SRC=$1
   DST=$2
@@ -283,9 +263,9 @@ MINOR_VERS=0
 #for (( MINOR_VERS=3; 1; MINOR_VERS++ )); do
 #  for (( UPDATE_VERS=0; 1; UPDATE_VERS++ )); do
 
-# Temporarily only check against 3.3.3 since the DNS TXT records all CNAME to 3.3.3.updates.spamassassin.org
+# Temporarily only check against 3.3.2 -davej 5/29/17
 MINOR_VERS=3
-UPDATE_VERS=3
+UPDATE_VERS=2
     set +e
     svn info https://svn.apache.org/repos/asf/spamassassin/tags/spamassassin_release_3_${MINOR_VERS}_${UPDATE_VERS} | grep Revision
     VERSION_EXISTS=$?
@@ -312,8 +292,9 @@ if [ $UPDATED_VERSIONS -gt 0 ]; then
   if [ $AUTOUPDATESDISABLED -eq 1 -a $REVERT_REVISION -eq 0 ]; then
     echo "DNS updating disabled (auto update publishing disabled), skipping DNS reload"
   else
-    # Currently all supported sa-updated DNS records are CNAMEd to 3.3.3.updates.spamassassin.org
-    update_dns_record 3.3.3 $REVISION
+    # Temporary: See above. -davej 5/29/17
+    /usr/local/bin/updateDNS.sh 3.3.3.updates TXT $REVISION
+    /usr/local/bin/updateDNS.sh 2.3.3.updates TXT $REVISION
   fi
 fi
 
