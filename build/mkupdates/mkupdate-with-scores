@@ -258,25 +258,18 @@ fi
 
 # test to make sure it works with sa-update --install
 UPDATED_VERSIONS=0
-MINOR_VERS=0
 
-#for (( MINOR_VERS=3; 1; MINOR_VERS++ )); do
-#  for (( UPDATE_VERS=0; 1; UPDATE_VERS++ )); do
-
-# Temporarily only check against 3.3.2 -davej 5/29/17
-MINOR_VERS=3
-UPDATE_VERS=2
+MAJOR_VERS=3
+for (( MINOR_VERS=4; 1; MINOR_VERS++ )); do
+  for (( UPDATE_VERS=1; 1; UPDATE_VERS++ )); do
     set +e
-    svn info https://svn.apache.org/repos/asf/spamassassin/tags/spamassassin_release_3_${MINOR_VERS}_${UPDATE_VERS} | grep Revision
-    VERSION_EXISTS=$?
+    svn info https://svn.apache.org/repos/asf/spamassassin/tags/spamassassin_release_${MAJOR_VERS}_${MINOR_VERS}_${UPDATE_VERS} || break
     set -e
-    [[ $VERSION_EXISTS -ne 0 ]] && break
-    test_version 3.${MINOR_VERS}.${UPDATE_VERS} tags/spamassassin_release_3_${MINOR_VERS}_${UPDATE_VERS} && ((UPDATED_VERSIONS++))
-#  done
-
+    test_version ${MAJOR_VERS}.${MINOR_VERS}.${UPDATE_VERS} tags/spamassassin_release_${MAJOR_VERS}_${MINOR_VERS}_${UPDATE_VERS} && ((UPDATED_VERSIONS++))
+  done
   # we just assume that the next stable version is the branch's current version
-  test_version 3.${MINOR_VERS}.${UPDATE_VERS} branches/3.${MINOR_VERS}.${UPDATE_VERS} && ((UPDATED_VERSIONS++))
-#done
+  test_version ${MAJOR_VERS}.${MINOR_VERS}.${UPDATE_VERS} branches/${MAJOR_VERS}.${MINOR_VERS}.${UPDATE_VERS} && ((UPDATED_VERSIONS++))
+done
 
 echo "VERSIONS UPDATE PASSED ON: $UPDATED_VERSIONS"
 
@@ -292,9 +285,12 @@ if [ $UPDATED_VERSIONS -gt 0 ]; then
   if [ $AUTOUPDATESDISABLED -eq 1 -a $REVERT_REVISION -eq 0 ]; then
     echo "DNS updating disabled (auto update publishing disabled), skipping DNS reload"
   else
-    # Temporary: See above. -davej 5/29/17
+    # Current supported versions of SpamAssassin are CNAMEd to 3.3.3
     /usr/local/bin/updateDNS.sh 3.3.3.updates TXT $REVISION
+    # sa-update for these older versions doesn't support CNAMEing
     /usr/local/bin/updateDNS.sh 2.3.3.updates TXT $REVISION
+    /usr/local/bin/updateDNS.sh 1.3.3.updates TXT $REVISION
+    /usr/local/bin/updateDNS.sh 0.3.3.updates TXT $REVISION
   fi
 fi
 
