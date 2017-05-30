@@ -6,7 +6,7 @@ LOGDIR="/var/www/bbmass.spamassassin.org/mkupdates"
 REPDIR="/var/www/ruleqa.spamassassin.org/reports"
 UPDDIR="/var/www/bbmass.spamassassin.org/updates"
 
-VERSIONS="3.3.3"
+VERSIONS="3.3.2"
 
 cd /usr/local/spamassassin/automc/svn/trunk
 
@@ -169,10 +169,11 @@ make_tarball_for_version() {
 
   # next, create/update the new DNS record....
 
-  # turn "3.2.0" into "0.2.3"
-  rvers=`echo "$version" | rev`
+  # Newer versions of SA are CNAMEd to this DNS record:
+  /usr/local/bin/updateDNS.sh 3.3.3.updates TXT ${svnrev}
 
-  /usr/local/bin/updateDNS.sh ${rvers}.updates TXT ${svnrev}
+  # Set older version TXT records for older sa-update
+  /usr/local/bin/updateDNS.sh 2.3.3.updates TXT ${svnrev}
 
   # clean up 4-day-old (and older) update tarballs.  This seems as
   # good a place as any to do this!
