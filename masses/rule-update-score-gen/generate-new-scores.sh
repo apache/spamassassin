@@ -33,7 +33,7 @@ TMP="/tmp/$PROGNAME/$DOW"
 
 SCORESET=$1
 OPTION=$2
-CORPUS_SRC_DIR="/usr/local/spamassassin/rsync/corpus"
+CORPUS_SRC_DIR="/usr/local/spamassassin/automc/rsync/corpus"
 
 MINHAMCONTRIBS=10
 MINSPAMCONTRIBS=10

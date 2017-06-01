@@ -153,8 +153,7 @@ make_rule_update_from_trunk() {
   # remove files we don't want to ship in updates
   # remember that 3KB == 1GB of traffic on the mirrors as of Jan 1, 2010
   set +e
-  rm 70_sandbox.cf 70_inactive.cf
-  rm STATISTICS-set?.txt
+  rm -f 70_sandbox.cf 70_inactive.cf STATISTICS-set?.txt
   set -e
 
   mkdir -p $TMPDIR/trunk/etc/mail/spamassassin
@@ -168,6 +167,8 @@ make_rule_update_from_trunk() {
 
   shasum $TMPDIR/${REVISION}.tar.gz > $TMPDIR/${REVISION}.tar.gz.sha1
   gpg --batch --homedir $KEYDIR -bas $TMPDIR/${REVISION}.tar.gz || exit $?
+
+  tar -ztvf $TMPDIR/${REVISION}.tar.gz
 }
 
 copy_existing_update_for_reversion_testing() {
