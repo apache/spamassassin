@@ -104,21 +104,6 @@ test_version() {
   return $STATUS
 }
 
-copy_update_paranoid() {
-  SRC=$1
-  DST=$2
-
-  set +e
-  cp $SRC $DST
-  diff -u $SRC $DST
-  if [ $? -ne 0 ]; then
-    set -e
-    return 1
-  fi
-  set -e
-  return 0
-}
-
 make_rule_update_from_trunk() {
   # to heck with dealing with svn update failures
   rm -rf trunk trunk-rulesrc-scores
@@ -286,10 +271,10 @@ echo "VERSIONS UPDATE PASSED ON: $TESTED_VERSIONS"
 # publish update
 if [[ ! -z "$TESTED_VERSIONS" ]]; then
   (
-    copy_update_paranoid "$TMPDIR/$REVISION.tar.gz"      "$UPDATEDIR/$REVISION.tar.gz" &&
-    copy_update_paranoid "$TMPDIR/$REVISION.tar.gz.asc"  "$UPDATEDIR/$REVISION.tar.gz.asc" &&
-    copy_update_paranoid "$TMPDIR/$REVISION.tar.gz.sha1" "$UPDATEDIR/$REVISION.tar.gz.sha1" &&
-    chmod 544 $UPDATEDIR/$REVISION.tar.gz*
+    chmod 544 $TMPDIR/$REVISION.tar.gz* &&
+    cp -a "$TMPDIR/$REVISION.tar.gz"      "$UPDATEDIR/$REVISION.tar.gz" &&
+    cp -a "$TMPDIR/$REVISION.tar.gz.asc"  "$UPDATEDIR/$REVISION.tar.gz.asc" &&
+    cp -a "$TMPDIR/$REVISION.tar.gz.sha1" "$UPDATEDIR/$REVISION.tar.gz.sha1"
   ) || exit 5
 
   if [ $AUTOUPDATESDISABLED -eq 1 -a $REVERT_REVISION -eq 0 ]; then
