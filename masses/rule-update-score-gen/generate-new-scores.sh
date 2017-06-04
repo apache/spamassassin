@@ -29,7 +29,7 @@ HOST=`hostname -f`
 
 DOW=`date +%w`
 
-TMP="/tmp/$PROGNAME/$DOW"
+TMP="/usr/local/spamassassin/automc/tmp/$PROGNAME"
 
 SCORESET=$1
 OPTION=$2
@@ -43,9 +43,11 @@ HAMHISTORY=84
 SPAMHISTORY=2
 
 if [[ "$OPTION" = "force" ]]; then
-  MINHAMCONTRIBS=8
-  MINSPAMCONTRIBS=8
-  HAMHISTORY=96
+  MINHAMCONTRIBS=1
+  MINSPAMCONTRIBS=1
+  MINHAMCOUNT=1500
+  MINSPAMCOUNT=1500
+  HAMHISTORY=84
   SPAMHISTORY=24
 fi
 
@@ -117,7 +119,8 @@ fi
 # cthielen's ham logs seem to have a shitload of spam in them
 rm -f corpus/usable-corpus-set${SCORESET}/*cthielen.log
 
-REVISION=`head corpus/usable-corpus-set${SCORESET}/* | grep "SVN revision" | cut -d" " -f4 | sort -rn | head -1`
+# Get the newest SVN revision from the usuable corpus.
+REVISION=`head corpus/usable-corpus-set${SCORESET}/*.log | awk '/SVN revision:/ {print $4}' | sort -run | head -1`
 if [ "$REVISION" == "" ]; then
   echo "No logs for scoreset"
   exit 1
@@ -133,8 +136,8 @@ for FILE in `find corpus/usable-corpus-set$SCORESET -type f`; do
 done
 
 # check to make sure that we have enough corpus submitters
-HAMCONTRIBS=`ls -l corpus/usable-corpus-set$SCORESET/ham-*.log | wc -l | sed -e 's/^[ \t]*//' | cut -d" " -f1`
-SPAMCONTRIBS=`ls -l corpus/usable-corpus-set$SCORESET/spam-*.log | wc -l | sed -e 's/^[ \t]*//' | cut -d" " -f1`
+HAMCONTRIBS=`ls -l corpus/usable-corpus-set$SCORESET/ham-*.log | wc -l`
+SPAMCONTRIBS=`ls -l corpus/usable-corpus-set$SCORESET/spam-*.log | wc -l`
 
 echo " HAM CONTRIBUTORS FOUND: $HAMCONTRIBS (required $MINHAMCONTRIBS)"
 echo "SPAM CONTRIBUTORS FOUND: $SPAMCONTRIBS (required $MINSPAMCONTRIBS)"
