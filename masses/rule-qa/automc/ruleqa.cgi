@@ -1,5 +1,5 @@
 #!/usr/bin/perl
-my $automcdir = "/usr/local/spamassassin/automc/svn/rule-qa/automc";
+my $automcdir = "/usr/local/spamassassin/automc/svn/masses/rule-qa/automc";
 
 ###!/usr/bin/perl
 ##my $automcdir = "/home/jm/ftp/spamassassin/masses/rule-qa/automc";
