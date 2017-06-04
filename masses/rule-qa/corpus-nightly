@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 # settings are located in $HOME/.corpus
 
@@ -33,12 +33,12 @@ net=""
 if date | egrep '^Sat' || [ "$1" = "net" ]; then net="net-" ; fi
 
 # enter tree
-if [ -d $tree ] ; then 
-  cd $tree
-else
-  echo "$tree does not exist yet. you need to check it out first" 1>&2
-  exit 2
-fi
+#if [ -d $tree ] ; then 
+#  cd $tree
+#else
+#  echo "$tree does not exist yet. you need to check it out first" 1>&2
+#  exit 2
+#fi
 
 # find current revision
 rm -f weekly-versions.txt nightly-versions.txt
@@ -56,42 +56,51 @@ else
 	revision=$(tail -1 nightly-versions.txt|awk '{print $2}')
 fi
 
+mkdir -p $tree
+rm -rf $tree/*
+
+cd $tree
+
+pwd
+
+svn co -r $revision https://svn.apache.org/repos/asf/spamassassin/trunk . < /dev/null
+
 # update
 # TODO: replace all this with rsync, it's much safer ;)
-set +e
-retry=0
-while true; do
-        rm -rf rules    # causing trouble for some reason
-        rm -rf rulesrc/sandbox
-
-	if svn update -r $revision < /dev/null && \
-            svn update -r $revision rulesrc < /dev/null
-        then
-		break;
-	fi
+#set +e
+#retry=0
+#while true; do
+#        rm -rf rules    # causing trouble for some reason
+#        rm -rf rulesrc/sandbox
+#
+#	if svn update -r $revision < /dev/null && \
+#            svn update -r $revision rulesrc < /dev/null
+#        then
+#		break;
+#	fi
 
         # if that failed, get aggressive about getting a full
         # checkout, regardless of what may have been here already;
         # delete most of the checkout to do so, and just use "svn co"
         # instead of "svn up".
-
-        svnpath=`svn info .| grep -i ^URL: | cut -d ' ' -f 2`
-
-        rm -rf rules lib build rulesrc spamd spamc
-        svn cleanup < /dev/null
-        svn co --non-interactive $svnpath .
-
-        # just 10 times; our SVN repo shouldn't be *that* unreliable!
-	if [ $retry -eq 20 ]; then
-		echo "svn update/co failed" 1>&2
-		exit 1
-	fi
-
-	retry=$(( $retry + 1 ))
-
-        # longer and longer between retries
-	sleep `expr 20 '*' $retry`
-done
+#
+#        svnpath=`svn info .| grep -i ^URL: | cut -d ' ' -f 2`
+#
+#        rm -rf rules lib build rulesrc spamd spamc
+#        svn cleanup < /dev/null
+#        svn co --non-interactive $svnpath .
+#
+#        # just 10 times; our SVN repo shouldn't be *that* unreliable!
+#	if [ $retry -eq 20 ]; then
+#		echo "svn update/co failed" 1>&2
+#		exit 1
+#	fi
+#
+#	retry=$(( $retry + 1 ))
+#
+#        # longer and longer between retries
+#	sleep `expr 20 '*' $retry`
+#done
 set -e
 
 # once we have everything checked out, run "part 2"
