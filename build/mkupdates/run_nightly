@@ -74,6 +74,11 @@ make_tarball_for_version() {
   # remove the rules files for rules we won't be shipping
   rm rules/70_sandbox.cf rules/70_inactive.cf
 
+  # need to put the latest 72_active.cf in the update.tgz
+  svn co http://svn.apache.org/repos/asf/spamassassin/trunk/rulesrc
+  cp -a rulesrc/scores/72_active.cf rules/
+  rm -rf rulesrc
+
   # double check we still lint without those 2 files
   ./spamassassin --lint                   || exit $?
 
