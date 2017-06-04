@@ -24,12 +24,12 @@ HOST=`hostname -f`
 
 DOW=`date +%w`
 
-GENSCORES="generate-new-scores"
+# Shares the temp dir with $PROGDIR/generate-new-scores.sh
+# that it calls below.
+TMP="/usr/local/spamassassin/automc/tmp/generate-new-scores"
 
-TMP="/tmp/$GENSCORES"
-
-mkdir -p $TMP/$DOW
-cd $TMP/$DOW
+mkdir -p $TMP
+cd $TMP
 
 set -e
 
@@ -37,14 +37,14 @@ rm -rf scores scores-set0 scores-set1 scores-set2 scores-set3 stats-set0 stats-s
 
 if [[ "$DOW" -eq 0 ]]; then
   echo 'Beginning of Week.  Running with 0 first.'
-  $PROGDIR/${GENSCORES}.sh 0 $1
-  $PROGDIR/${GENSCORES}.sh 1 $1
+  $PROGDIR/generate-new-scores.sh 0 $1
+  $PROGDIR/generate-new-scores.sh 1 $1
   SCORESET=1
   REVISION=`grep "revision .*" scores-set$SCORESET | cut -d" " -f9`
 else
   echo 'Not Beginning of Week.  Running with 1 first.'
-  $PROGDIR/${GENSCORES}.sh 1 $1
-  $PROGDIR/${GENSCORES}.sh 0 $1
+  $PROGDIR/generate-new-scores.sh 1 $1
+  $PROGDIR/generate-new-scores.sh 0 $1
   SCORESET=0
   REVISION=`grep "revision .*" scores-set$SCORESET | cut -d" " -f9`
 fi
