@@ -28,6 +28,7 @@ DOW=`date +%w`
 # that it calls below.
 TMP="/usr/local/spamassassin/automc/tmp/generate-new-scores"
 
+rm -rf $TMP
 mkdir -p $TMP
 cd $TMP
 
