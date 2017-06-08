@@ -64,7 +64,7 @@ sub safe_lock {
   $max_retries ||= 30;
   $mode ||= "0700";
   $mode = (oct $mode) & 0666;
-  dbg ("locker: mode is $mode");
+  dbg ("locker: mode is %03o", $mode);
 
   my $lock_file = "$path.lock";
   my $hname = Mail::SpamAssassin::Util::fq_hostname();
@@ -92,6 +92,7 @@ sub safe_lock {
       $is_locked = 1;
       last;
     }
+    warn "locker: creating link $lock_file to $lock_tmp failed: $!";
     # link _may_ return false even if the link _is_ created
     @stat = lstat($lock_tmp);
     @stat  or warn "locker: error accessing $lock_tmp: $!";
@@ -161,7 +162,7 @@ sub safe_unlock {
       warn "locker: safe_unlock: failed to create lock tmpfile $lock_tmp";
       close LTMP  or die "error closing $lock_tmp: $!";
       unlink($lock_tmp)
-        or warn "locker: safe_lock: unlink of lock file failed: $!\n";
+        or warn "locker: safe_lock: unlink of lock file $lock_tmp failed: $!\n";
       return;
     }
   }
@@ -173,7 +174,7 @@ sub safe_unlock {
 
   close LTMP  or die "error closing $lock_tmp: $!";
   unlink($lock_tmp)
-    or warn "locker: safe_lock: unlink of lock file failed: $!\n";
+    or warn "locker: safe_lock: unlink of lock file $lock_tmp failed: $!\n";
 
   # 2. If the ctime hasn't been modified, unlink the file and return. If the
   # lock has expired, sleep the usual random interval before returning. If we
@@ -195,7 +196,7 @@ sub safe_unlock {
   {
     # things are good: the ctimes match so it was our lock
     unlink($lock_file)
-      or warn "locker: safe_unlock: unlink failed: $lock_file\n";
+      or warn "locker: safe_unlock: unlinking $lock_file failed: $!\n";
     dbg("locker: safe_unlock: unlink $lock_file");
 
     if ($ourtmp_ctime >= $lock_ctime + LOCK_MAX_AGE) {
