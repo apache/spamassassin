@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus ena grenier jarif jbrooks mmiroslaw-mails-ham mmiroslaw-mails-spam thendrikx; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus ena grenier jarif jbrooks mmiroslaw-mails-ham mmiroslaw-mails-spam thendrikx; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus ena grenier jarif jbrooks kgolding thendrikx
+# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus ena grenier jarif jbrooks kgolding thendrikx; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus ena grenier jarif jbrooks mmiroslaw-mails-ham mmiroslaw-mails-spam thendrikx; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus ena grenier jarif jbrooks mmiroslaw-mails-ham mmiroslaw-mails-spam thendrikx
 
 # tflags publish
 AC_BR_BONANZA
@@ -164,6 +164,9 @@ COMPENSATION
 CORRUPT_FROM_LINE_IN_HDRS
 
 # good enough
+CTYPE_NULL
+
+# good enough
 DATE_IN_FUTURE_96_Q
 
 # good enough
@@ -216,6 +219,12 @@ DOS_OE_TO_MX
 
 # good enough
 DOS_OUTLOOK_TO_MX
+
+# good enough
+DUP_SUSP_HDR
+
+# good enough
+DX_TEXT_01
 
 # tflags publish
 DX_TEXT_02
@@ -403,6 +412,9 @@ HASHCASH_HIGH
 # good enough
 HDRS_LCASE
 
+# good enough
+HDRS_MISSP
+
 # tflags publish
 HEADER_FROM_DIFFERENT_DOMAINS
 
@@ -431,6 +443,9 @@ HEXHASH_WORD
 HK_NAME_DRUGS
 
 # good enough
+HK_NAME_FM_DR
+
+# good enough
 HK_NAME_MR_MRS
 
 # good enough
@@ -447,6 +462,12 @@ HTML_CHARSET_FARAWAY
 
 # tflags publish
 HTML_OFF_PAGE
+
+# good enough
+IMG_ALT_HSPACE_CID_ALIGN
+
+# good enough
+IMG_DIRECT_TO_MX
 
 # good enough
 KHOP_DYNAMIC
@@ -474,6 +495,9 @@ LOTTO_AGENT
 
 # tflags publish
 LUCRATIVE
+
+# good enough
+MANY_HDRS_LCASE
 
 # tflags publish
 MANY_SPAN_IN_TEXT
@@ -794,10 +818,10 @@ REPLYTO_WITHOUT_TO_CC
 RISK_FREE
 
 # good enough
-SERGIO_SUBJECT_VIAGRA01
+SERGIO_SUBJECT_PORN008
 
 # good enough
-SHARE_50_50
+SERGIO_SUBJECT_VIAGRA01
 
 # tflags publish
 SINGLETS_LOW_CONTRAST
@@ -932,34 +956,7 @@ TVD_VISIT_PHARMA
 TW_GIBBERISH_MANY
 
 # good enough
-CTYPE_NULL
-
-# good enough
-DUP_SUSP_HDR
-
-# good enough
-DX_TEXT_01
-
-# good enough
-HDRS_MISSP
-
-# good enough
-HK_NAME_FM_DR
-
-# good enough
-IMG_ALT_HSPACE_CID_ALIGN
-
-# good enough
-IMG_DIRECT_TO_MX
-
-# good enough
-MANY_HDRS_LCASE
-
-# good enough
-SERGIO_SUBJECT_PORN008
-
-# good enough
-SUBJ_OBFU_LOW_CNTRST
+FAKE_REPLY_A1
 
 # tflags publish
 UC_GIBBERISH_OBFU
