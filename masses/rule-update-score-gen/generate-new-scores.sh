@@ -204,9 +204,12 @@ mv -f rules/72_active.cf-scoreless rules/72_active.cf
 
 date
 echo "[ running log-grep-recent ]"
+pwd
 
 # only use recent spam to generate scores; use a lot of ham history to avoid FPs - Increases Ham to 84 months on 8/8/2012 to try and get a masscheck out the door.
+echo -e "\nmasses/log-grep-recent -m $HAMHISTORY ../corpus/usable-corpus-set$SCORESET/ham-*.log > masses/ham-full.log"
 masses/log-grep-recent -m $HAMHISTORY ../corpus/usable-corpus-set$SCORESET/ham-*.log > masses/ham-full.log
+echo -e "\nmasses/log-grep-recent -m $SPAMHISTORY ../corpus/usable-corpus-set$SCORESET/spam-*.log > masses/spam-full.log"
 masses/log-grep-recent -m $SPAMHISTORY ../corpus/usable-corpus-set$SCORESET/spam-*.log > masses/spam-full.log
 
 # make sure that we have enough mass-check results to actually generate reasonable scores
