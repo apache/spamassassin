@@ -1482,7 +1482,7 @@ score       URI_WP_DIRINDEX    3.000   # limit
 tflags      URI_WP_DIRINDEX    publish
 
 # this has some overlap with URI_WP_HACKED
-uri         __PS_TEST_LOC_WP   m;/(?:wp-content/plugins|wp-content/themes|wp-includes|modules/mod_wdbanners|includes/|google_recommends|mt-static|data/module)/.{1,64}(?!\.gif|\.jpg|\.png|\.bmp|\.ico|\.pdf).{4}$;i
+uri         __PS_TEST_LOC_WP   m;/(?:wp-content/plugins|wp-content/themes|wp-includes|modules/mod_wdbanners|includes/|google_recommends|mt-static|data/module)/.{1,128}(?!\.gif|\.jpg|\.png|\.bmp|\.ico|\.pdf)[^?]{4}(?:\?[^?]{1,5})?$;i
 meta        URI_WP_HACKED_2    (__PS_TEST_LOC_WP && !URI_WP_HACKED) && !__TO_EQ_FROM && !__THREADED 
 describe    URI_WP_HACKED_2    URI for compromised WordPress site, possible malware
 score       URI_WP_HACKED_2    2.000   # limit
