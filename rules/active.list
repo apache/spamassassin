@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus ena grenier jarif jbrooks kgolding mmiroslaw-mails-ham mmiroslaw-mails-spam thendrikx; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus ena grenier jarif jbrooks kgolding thendrikx; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus ena grenier jarif jbrooks kgolding mmiroslaw-mails-ham mmiroslaw-mails-spam thendrikx
+# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus ena grenier jarif jbrooks mmiroslaw-mails-ham mmiroslaw-mails-spam thendrikx; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus ena grenier jarif jbrooks kgolding mmiroslaw-mails-ham mmiroslaw-mails-spam thendrikx; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus ena grenier jarif jbrooks kgolding thendrikx
 
 # tflags publish
 AC_BR_BONANZA
@@ -142,20 +142,17 @@ CN_B2B_SPAMMER
 # tflags publish
 COMMENT_GIBBERISH
 
-# good enough
-COMPENSATION
-
 # tflags publish
 CORRUPT_FROM_LINE_IN_HDRS
-
-# good enough
-CTYPE_NULL
 
 # good enough
 DATE_IN_FUTURE_96_Q
 
 # good enough
 DEAR_BENEFICIARY
+
+# good enough
+DEAR_WINNER
 
 # tflags net
 DIGEST_MULTIPLE
@@ -451,9 +448,6 @@ LOTTO_AGENT
 # tflags publish
 LUCRATIVE
 
-# good enough
-MANY_HDRS_LCASE
-
 # tflags publish
 MANY_SPAN_IN_TEXT
 
@@ -486,9 +480,6 @@ MONEY_FRAUD_8
 
 # good enough
 MONEY_FROM_41
-
-# good enough
-MONEY_FROM_MISSP
 
 # good enough
 MSGID_NOFQDN1
@@ -862,9 +853,6 @@ TO_IN_SUBJ
 # good enough
 TO_NO_BRKTS_DYNIP
 
-# good enough
-TO_NO_BRKTS_FROM_MSSP
-
 # tflags publish
 TO_NO_BRKTS_HTML_IMG
 
@@ -890,19 +878,13 @@ TVD_RCVD_IP4
 TVD_SPACE_ENCODED
 
 # good enough
-TVD_SPACE_ENC_FM_MIME
-
-# good enough
 TVD_SPACE_RATIO_MINFP
 
 # tflags publish
 TW_GIBBERISH_MANY
 
 # good enough
-BIGNUM_EMAILS
-
-# good enough
-MONEY_FORM
+TO_EQ_FM_DIRECT_MX
 
 # tflags publish
 UC_GIBBERISH_OBFU
