@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus ena grenier jarif jbrooks mmiroslaw-mails-ham mmiroslaw-mails-spam thendrikx; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus ena grenier jarif jbrooks kgolding mmiroslaw-mails-ham mmiroslaw-mails-spam thendrikx; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus ena grenier jarif jbrooks kgolding thendrikx
+# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus ena grenier jarif jbrooks mmiroslaw-mails-ham mmiroslaw-mails-spam thendrikx; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus ena grenier jarif jbrooks mmiroslaw-mails-ham mmiroslaw-mails-spam thendrikx; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus ena grenier jarif jbrooks kgolding mmiroslaw-mails-ham mmiroslaw-mails-spam thendrikx
 
 # tflags publish
 AC_BR_BONANZA
@@ -39,9 +39,6 @@ AC_SPAMMY_URI_PATTERNS9
 
 # tflags publish
 ADMAIL
-
-# good enough
-ADMITS_SPAM
 
 # tflags publish
 ADVANCE_FEE_2_NEW_FORM
@@ -884,7 +881,13 @@ TVD_SPACE_RATIO_MINFP
 TW_GIBBERISH_MANY
 
 # good enough
-TO_EQ_FM_DIRECT_MX
+BIGNUM_EMAILS
+
+# good enough
+MONEY_FORM
+
+# good enough
+TVD_SPACE_ENC_FM_MIME
 
 # tflags publish
 UC_GIBBERISH_OBFU
