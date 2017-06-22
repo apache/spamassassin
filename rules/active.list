@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus ena grenier jarif jbrooks kgolding mmiroslaw-mails-ham mmiroslaw-mails-spam thendrikx; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus ena grenier jarif jbrooks mmiroslaw-mails-ham mmiroslaw-mails-spam thendrikx; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus ena grenier jarif jbrooks mmiroslaw-mails-ham mmiroslaw-mails-spam thendrikx
+# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus ena grenier jbrooks kgolding mmiroslaw-mails-ham mmiroslaw-mails-spam thendrikx; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus ena grenier jarif jbrooks kgolding mmiroslaw-mails-ham mmiroslaw-mails-spam thendrikx; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus ena grenier jarif jbrooks mmiroslaw-mails-ham mmiroslaw-mails-spam thendrikx
 
 # tflags publish
 AC_BR_BONANZA
@@ -72,12 +72,6 @@ ALL_TRUSTED
 
 # good enough
 AXB_XMAILER_MIMEOLE_OL_024C2
-
-# good enough
-AXB_XMAILER_MIMEOLE_OL_1ECD5
-
-# good enough
-AXB_X_FF_SEZ_S
 
 # tflags learn
 BAYES_00
@@ -403,9 +397,6 @@ HEXHASH_WORD
 # good enough
 HK_NAME_DRUGS
 
-# good enough
-HK_NAME_MR_MRS
-
 # tflags userconf
 HTML_CHARSET_FARAWAY
 
@@ -459,9 +450,6 @@ MIME_NO_TEXT
 
 # tflags userconf
 MISSING_HB_SEP
-
-# good enough
-MONEY_ATM_CARD
 
 # tflags publish
 MONEY_FRAUD_3
@@ -820,9 +808,6 @@ SURBL_BLOCKED
 # tflags publish
 SYSADMIN
 
-# good enough
-TBIRD_SUSP_MIME_BDRY
-
 # tflags publish
 TEQF_USR_IMAGE
 
@@ -878,7 +863,7 @@ TVD_SPACE_RATIO_MINFP
 TW_GIBBERISH_MANY
 
 # good enough
-TO_EQ_FM_DIRECT_MX
+BIGNUM_EMAILS
 
 # tflags publish
 UC_GIBBERISH_OBFU
