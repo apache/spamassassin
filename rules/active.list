@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus ena grenier jbrooks kgolding mmiroslaw-mails-ham mmiroslaw-mails-spam thendrikx; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus ena grenier jarif jbrooks kgolding mmiroslaw-mails-ham mmiroslaw-mails-spam thendrikx; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus ena grenier jarif jbrooks mmiroslaw-mails-ham mmiroslaw-mails-spam thendrikx
+# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus ena grenier jarif jbrooks kgolding mmiroslaw-mails-ham mmiroslaw-mails-spam thendrikx; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus ena grenier jbrooks kgolding mmiroslaw-mails-ham mmiroslaw-mails-spam thendrikx; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus ena grenier jarif jbrooks kgolding mmiroslaw-mails-ham mmiroslaw-mails-spam thendrikx
 
 # tflags publish
 AC_BR_BONANZA
@@ -199,6 +199,9 @@ DX_TEXT_02
 # tflags publish
 DX_TEXT_03
 
+# good enough
+DYN_RDNS_SHORT_HELO_HTML
+
 # tflags publish
 ENCRYPTED_MESSAGE
 
@@ -282,9 +285,6 @@ FROM_WORDY
 
 # tflags publish
 FROM_WORDY_SHORT
-
-# good enough
-FROM_WSP_TRAIL
 
 # good enough
 FSL_CTYPE_WIN1251
@@ -856,14 +856,14 @@ TVD_RCVD_IP4
 # good enough
 TVD_SPACE_ENCODED
 
-# good enough
-TVD_SPACE_RATIO_MINFP
-
 # tflags publish
 TW_GIBBERISH_MANY
 
 # good enough
-BIGNUM_EMAILS
+FROM_WSP_LEAD
+
+# good enough
+TO_EQ_FM_DIRECT_MX
 
 # tflags publish
 UC_GIBBERISH_OBFU
