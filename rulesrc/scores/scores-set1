@@ -1,50 +1,50 @@
 # Using score set 1 logs for revision 1799737 from:
 # ham-net-axb-coi-bulk.log ham-net-axb-generic.log ham-net-axb-ham-misc.log ham-net-axb-ninja.log ham-net-darxus.log ham-net-dwarren.log ham-net-ena.log ham-net-grenier.log ham-net-jarif.log ham-net-jbrooks.log ham-net-kgolding.log ham-net-mmiroslaw-mails-ham.log ham-net-mmiroslaw-mails-spam.log ham-net-thendrikx.log spam-net-axb-coi-bulk.log spam-net-axb-generic.log spam-net-axb-ham-misc.log spam-net-axb-ninja.log spam-net-darxus.log spam-net-dwarren.log spam-net-ena.log spam-net-grenier.log spam-net-jarif.log spam-net-jbrooks.log spam-net-kgolding.log spam-net-mmiroslaw-mails-ham.log spam-net-mmiroslaw-mails-spam.log spam-net-thendrikx.log
 
-score AC_BR_BONANZA                  0.001
+score AC_BR_BONANZA                  0.001 # force non-zero
 score AC_DIV_BONANZA                 0.001
-score AC_HTML_NONSENSE_TAGS          0.700
-score ADVANCE_FEE_2_NEW_MONEY        0.001 # force non-zero
-score ADVANCE_FEE_3_NEW              0.001
+score AC_HTML_NONSENSE_TAGS          0.699
+score ADVANCE_FEE_2_NEW_MONEY        0.001
+score ADVANCE_FEE_3_NEW              0.001 # force non-zero
 score ADVANCE_FEE_3_NEW_MONEY        3.199
 score ADVANCE_FEE_4_NEW_MONEY        0.001
 score ADVANCE_FEE_5_NEW_FRM_MNY      0.001
 score AXB_XMAILER_MIMEOLE_OL_024C2   0.001 # force non-zero
 score BODY_URI_ONLY                  0.001
-score CK_HELO_DYNAMIC_SPLIT_IP       0.672
-score CK_HELO_GENERIC                3.394
-score DATE_IN_FUTURE_96_Q            3.300
+score CK_HELO_DYNAMIC_SPLIT_IP       0.273
+score CK_HELO_GENERIC                3.395
+score DATE_IN_FUTURE_96_Q            3.299
 score FILL_THIS_FORM                 0.001
 score FORM_FRAUD                     0.001
 score FORM_FRAUD_5                   0.001
-score FREEMAIL_FORGED_FROMDOMAIN     0.001 # force non-zero
-score FROM_IN_TO_AND_SUBJ            0.685
+score FREEMAIL_FORGED_FROMDOMAIN     0.001
+score FROM_IN_TO_AND_SUBJ            1.100
 score FROM_MISSPACED                 0.001
-score FROM_MISSP_FREEMAIL            3.739
-score FROM_MISSP_MSFT                0.001 # force non-zero
-score FROM_MISSP_REPLYTO             0.001 # force non-zero
-score FROM_MISSP_TO_UNDISC           0.001 # force non-zero
+score FROM_MISSP_FREEMAIL            3.595
+score FROM_MISSP_MSFT                0.001
+score FROM_MISSP_REPLYTO             0.001
+score FROM_MISSP_TO_UNDISC           0.001
 score FROM_MISSP_USER                0.001
 score FROM_MISSP_XPRIO               0.001
-score FROM_WORDY                     0.001
-score FROM_WSP_LEAD                  3.400
+score FROM_WORDY                     0.001 # force non-zero
+score FROM_WSP_LEAD                  3.399
 score FSL_CTYPE_WIN1251              0.001 # force non-zero
-score FSL_MID_419                    2.525
+score FSL_MID_419                    2.951
 score FSL_NEW_HELO_USER              0.001
 score HDRS_LCASE                     3.199
 score HEADER_FROM_DIFFERENT_DOMAINS  0.001
-score HELO_MISC_IP                   3.240
+score HELO_MISC_IP                   3.639
 score IMG_DIRECT_TO_MX               2.999
 score KHOP_DYNAMIC                   1.068
 score LONG_HEX_URI                   0.024
-score LONG_IMG_URI                   0.098
+score LONG_IMG_URI                   0.096
 score LOTS_OF_MONEY                  0.001
 score MILLION_USD                    0.001
-score RCVD_IN_MSPIKE_H2              -0.408
+score RCVD_IN_MSPIKE_H2              -0.409
 score RCVD_IN_MSPIKE_L3              0.001
 score RCVD_IN_MSPIKE_L4              2.567
-score RCVD_IN_MSPIKE_L5              3.816
-score RCVD_IN_MSPIKE_ZBI             1.056
+score RCVD_IN_MSPIKE_L5              3.744
+score RCVD_IN_MSPIKE_ZBI             1.057
 score RCVD_IN_MSPIKE_BL              0.010
 score RCVD_IN_MSPIKE_H3              -0.010
 score RCVD_IN_MSPIKE_H4              -0.010
