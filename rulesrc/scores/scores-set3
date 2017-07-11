@@ -1,50 +1,51 @@
 # Using score set 1 logs for revision 1801266 from:
 # ham-net-axb-coi-bulk.log ham-net-axb-generic.log ham-net-axb-ham-misc.log ham-net-axb-ninja.log ham-net-darxus.log ham-net-dwarren.log ham-net-ena-week0.log ham-net-ena-week1.log ham-net-ena-week2.log ham-net-ena-week3.log ham-net-grenier.log ham-net-jarif.log ham-net-jbrooks.log ham-net-mmiroslaw-mails-ham.log ham-net-mmiroslaw-mails-spam.log ham-net-thendrikx.log spam-net-axb-coi-bulk.log spam-net-axb-generic.log spam-net-axb-ham-misc.log spam-net-axb-ninja.log spam-net-darxus.log spam-net-dwarren.log spam-net-ena-week0.log spam-net-ena-week1.log spam-net-ena-week2.log spam-net-ena-week3.log spam-net-grenier.log spam-net-jarif.log spam-net-jbrooks.log spam-net-mmiroslaw-mails-ham.log spam-net-mmiroslaw-mails-spam.log spam-net-thendrikx.log
 
-score AC_BR_BONANZA                  0.001
-score AC_DIV_BONANZA                 0.001
-score AC_HTML_NONSENSE_TAGS          0.001
+score AC_BR_BONANZA                  0.001 # force non-zero
+score AC_DIV_BONANZA                 1.218
+score AC_HTML_NONSENSE_TAGS          0.262
 score ADVANCE_FEE_2_NEW_MONEY        0.001
 score ADVANCE_FEE_3_NEW              1.999
 score ADVANCE_FEE_3_NEW_MONEY        1.065
-score ADVANCE_FEE_4_NEW_MONEY        0.039
-score ADVANCE_FEE_5_NEW_FRM_MNY      0.001
+score ADVANCE_FEE_4_NEW_MONEY        0.304
+score ADVANCE_FEE_5_NEW_FRM_MNY      0.001 # force non-zero
 score AXB_XMAILER_MIMEOLE_OL_024C2   0.001 # force non-zero
-score BODY_URI_ONLY                  0.001
+score BODY_URI_ONLY                  0.001 # force non-zero
+score BOGUS_MSM_HDRS                 0.001
 score CK_HELO_DYNAMIC_SPLIT_IP       0.109
-score CK_HELO_GENERIC                2.393
-score DATE_IN_FUTURE_96_Q            3.099
+score CK_HELO_GENERIC                2.394
+score DATE_IN_FUTURE_96_Q            2.999
 score FILL_THIS_FORM                 0.001
-score FORM_FRAUD                     0.001 # force non-zero
-score FORM_FRAUD_5                   0.457
+score FORM_FRAUD                     0.001
+score FORM_FRAUD_5                   0.192
 score FREEMAIL_FORGED_FROMDOMAIN     0.001
-score FROM_IN_TO_AND_SUBJ            1.199
+score FROM_IN_TO_AND_SUBJ            1.200
 score FROM_MISSPACED                 0.001
-score FROM_MISSP_FREEMAIL            3.302
-score FROM_MISSP_MSFT                0.001
+score FROM_MISSP_FREEMAIL            3.093
+score FROM_MISSP_MSFT                0.001 # force non-zero
 score FROM_MISSP_REPLYTO             0.001
 score FROM_MISSP_TO_UNDISC           0.001
 score FROM_MISSP_USER                0.001
-score FROM_MISSP_XPRIO               0.001 # force non-zero
-score FROM_WORDY                     0.001 # force non-zero
-score FSL_CTYPE_WIN1251              0.001 # force non-zero
-score FSL_MID_419                    2.265
-score FSL_NEW_HELO_USER              0.001 # force non-zero
-score HDRS_LCASE                     2.999
+score FROM_MISSP_XPRIO               0.001
+score FROM_WORDY                     0.001
+score FSL_CTYPE_WIN1251              0.001
+score FSL_MID_419                    1.967
+score FSL_NEW_HELO_USER              0.001
+score HDRS_LCASE                     2.899
 score HEADER_FROM_DIFFERENT_DOMAINS  0.001
 score HELO_MISC_IP                   3.003
-score IMG_DIRECT_TO_MX               3.199
+score IMG_DIRECT_TO_MX               3.100
 score KHOP_DYNAMIC                   1.068
 score LONG_HEX_URI                   0.473
-score LONG_IMG_URI                   0.099
+score LONG_IMG_URI                   0.098
 score LOTS_OF_MONEY                  0.001
-score MANY_SPAN_IN_TEXT              2.599
+score MANY_SPAN_IN_TEXT              2.499
 score MILLION_USD                    0.001
-score RCVD_IN_MSPIKE_H2              -0.001 # force non-zero
-score RCVD_IN_MSPIKE_L3              2.675
+score RCVD_IN_MSPIKE_H2              -0.001
+score RCVD_IN_MSPIKE_L3              2.680
 score RCVD_IN_MSPIKE_L4              3.399
 score RCVD_IN_MSPIKE_L5              4.299
-score RCVD_IN_MSPIKE_ZBI             1.058
+score RCVD_IN_MSPIKE_ZBI             1.056
 score RCVD_IN_MSPIKE_BL              0.010
 score RCVD_IN_MSPIKE_H3              -0.010
 score RCVD_IN_MSPIKE_H4              -0.010
