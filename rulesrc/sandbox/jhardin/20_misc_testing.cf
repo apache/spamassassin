@@ -2224,5 +2224,6 @@ meta       __SUBJECT_PRESENT_EMPTY      __HAS_SUBJECT && __SUBJECT_EMPTY
 body       __BAYES_POISON_NUMS_01       /\s([0-9]{6,})\s(?:.{15,}?\s\1\s){10}/
 
 
+rawbody    __SPAMTOOL_GOOF_01           /^: SMTPHEADER_REPLYTO\#$/m
 
 
