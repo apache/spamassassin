@@ -1,46 +1,47 @@
-# Using score set 0 logs for revision 1801696 from:
-# ham-axb-coi-bulk.log ham-axb-generic.log ham-axb-ham-misc.log ham-axb-ninja.log ham-darxus.log ham-ena-week0.log ham-ena-week1.log ham-ena-week2.log ham-ena-week3.log ham-grenier.log ham-jbrooks.log ham-mmiroslaw-mails-ham.log ham-mmiroslaw-mails-spam.log ham-thendrikx.log spam-axb-coi-bulk.log spam-axb-generic.log spam-axb-ham-misc.log spam-axb-ninja.log spam-darxus.log spam-ena-week0.log spam-ena-week1.log spam-ena-week2.log spam-ena-week3.log spam-grenier.log spam-jbrooks.log spam-mmiroslaw-mails-ham.log spam-mmiroslaw-mails-spam.log spam-thendrikx.log
+# Using score set 0 logs for revision 1801812 from:
+# ham-axb-coi-bulk.log ham-axb-generic.log ham-axb-ham-misc.log ham-axb-ninja.log ham-darxus.log ham-ena-week0.log ham-ena-week1.log ham-ena-week2.log ham-ena-week3.log ham-grenier.log ham-jarif.log ham-jbrooks.log ham-kgolding.log ham-mmiroslaw-mails-ham.log ham-mmiroslaw-mails-spam.log ham-thendrikx.log spam-axb-coi-bulk.log spam-axb-generic.log spam-axb-ham-misc.log spam-axb-ninja.log spam-darxus.log spam-ena-week0.log spam-ena-week1.log spam-ena-week2.log spam-ena-week3.log spam-grenier.log spam-jarif.log spam-jbrooks.log spam-kgolding.log spam-mmiroslaw-mails-ham.log spam-mmiroslaw-mails-spam.log spam-thendrikx.log
 
-score AC_BR_BONANZA                  0.001
-score AC_DIV_BONANZA                 0.001 # force non-zero
-score AC_HTML_NONSENSE_TAGS          0.253
-score ADVANCE_FEE_2_NEW_MONEY        2.499
-score ADVANCE_FEE_3_NEW              1.799
-score ADVANCE_FEE_3_NEW_MONEY        4.499
-score ADVANCE_FEE_4_NEW_MONEY        4.400
+score AC_BR_BONANZA                  1.880
+score AC_DIV_BONANZA                 0.601
+score AC_HTML_NONSENSE_TAGS          0.599
+score ADVANCE_FEE_2_NEW_MONEY        0.751
+score ADVANCE_FEE_3_NEW              2.199
+score ADVANCE_FEE_3_NEW_MONEY        4.500
+score ADVANCE_FEE_4_NEW              0.820
+score ADVANCE_FEE_4_NEW_MONEY        3.800
 score ADVANCE_FEE_5_NEW_FRM_MNY      0.001
-score AXB_XMAILER_MIMEOLE_OL_024C2   2.395
+score AXB_XMAILER_MIMEOLE_OL_024C2   2.598
 score BODY_URI_ONLY                  0.160
-score BOGUS_MSM_HDRS                 2.499
-score CANT_SEE_AD                    2.685
-score CK_HELO_DYNAMIC_SPLIT_IP       2.602
-score CK_HELO_GENERIC                2.799
-score DATE_IN_FUTURE_96_Q            3.099
+score BOGUS_MSM_HDRS                 2.612
+score CANT_SEE_AD                    2.604
+score CK_HELO_DYNAMIC_SPLIT_IP       2.186
+score CK_HELO_GENERIC                3.499
+score DATE_IN_FUTURE_96_Q            3.299
 score FILL_THIS_FORM                 0.001
-score FORM_FRAUD                     2.899
-score FORM_FRAUD_3                   2.657
-score FORM_FRAUD_5                   3.230
-score FREEMAIL_FORGED_FROMDOMAIN     1.599
+score FORM_FRAUD                     2.802
+score FORM_FRAUD_3                   2.184
+score FORM_FRAUD_5                   3.478
+score FREEMAIL_FORGED_FROMDOMAIN     1.786
+score FROM_IN_TO_AND_SUBJ            1.299
 score FROM_MISSPACED                 0.001
-score FROM_MISSP_FREEMAIL            3.099
+score FROM_MISSP_FREEMAIL            3.199
 score FROM_MISSP_MSFT                0.001
-score FROM_MISSP_REPLYTO             0.001 # force non-zero
-score FROM_MISSP_TO_UNDISC           2.827
+score FROM_MISSP_REPLYTO             2.600
+score FROM_MISSP_TO_UNDISC           2.825
 score FROM_MISSP_USER                0.001
 score FROM_MISSP_XPRIO               0.001 # force non-zero
-score FROM_WORDY                     3.699
+score FROM_WORDY                     3.799
 score FSL_CTYPE_WIN1251              0.001
-score FSL_NEW_HELO_USER              2.599
-score HDRS_LCASE                     2.799
+score FSL_NEW_HELO_USER              2.600
+score HDRS_LCASE                     2.802
 score HEADER_FROM_DIFFERENT_DOMAINS  0.001
 score HELO_MISC_IP                   2.602
-score IMG_DIRECT_TO_MX               3.370
+score IMG_DIRECT_TO_MX               2.601
 score KHOP_DYNAMIC                   2.800
-score LIST_PRTL_SAME_USER            0.001
 score LONG_HEX_URI                   0.001
 score LONG_IMG_URI                   0.001
 score LOTS_OF_MONEY                  0.001
-score MILLION_USD                    0.001
+score MILLION_USD                    0.097
 # in active.list but have no hits in recent corpus
 score FROM_MISSP_SPF_FAIL            0.001 # force non-zero
 score OBFU_JVSCR_ESC                 0.001 # force non-zero
@@ -61,11 +62,8 @@ score RCVD_IN_MSPIKE_L5              0.001 # force non-zero
 score RCVD_IN_MSPIKE_WL              0.001 # force non-zero
 score RCVD_IN_MSPIKE_ZBI             0.001 # force non-zero
 score SPOOFED_FREEM_REPTO_CHN        0.001 # force non-zero
-score STOCK_TIP                      0.001 # force non-zero
 score SURBL_BLOCKED                  0.001 # force non-zero
 score SYSADMIN                       0.001 # force non-zero
 score TEQF_USR_MSGID_HEX             0.001 # force non-zero
 score TEQF_USR_MSGID_MALF            0.001 # force non-zero
-score TO_EQ_FM_DOM_SPF_FAIL          0.001 # force non-zero
-score TO_EQ_FM_SPF_FAIL              0.001 # force non-zero
 score TW_GIBBERISH_MANY              0.001 # force non-zero
