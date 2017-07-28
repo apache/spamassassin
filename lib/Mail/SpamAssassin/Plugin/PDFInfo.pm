@@ -415,7 +415,7 @@ sub _find_pdf_mime_parts {
     my $type = $p->{'type'} =~ m@/([\w\-]+)$@;
     my $name = $p->{'name'};
 
-    my $cte = lc $p->get_header('content-transfer-encoding') || '';
+    my $cte = lc( $p->get_header('content-transfer-encoding') || '' );
 
     dbg("pdfinfo: found part, type=".($type ? $type : '')." file=".($name ? $name : '')." cte=".($cte ? $cte : '')."");
 
