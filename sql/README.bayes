@@ -149,7 +149,7 @@ started, please review carefully before putting into production:
 
 GRANT SELECT, UPDATE, DELETE, INSERT ON TABLE bayes_token TO <username>;
 GRANT SELECT, UPDATE, DELETE, INSERT ON TABLE bayes_vars TO <username>;
-GRANT SELECT, DELETE, INSERT ON TABLE bayes_seen TO <username>;
+GRANT SELECT, UPDATE, DELETE, INSERT ON TABLE bayes_seen TO <username>;
 GRANT SELECT, DELETE, INSERT ON TABLE bayes_expire TO <username>;
 GRANT SELECT ON TABLE bayes_global_vars TO <username>;
 GRANT UPDATE, SELECT, INSERT ON bayes_vars_id_seq TO <username>;
