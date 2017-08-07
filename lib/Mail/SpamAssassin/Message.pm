@@ -628,6 +628,9 @@ sub finish {
   delete $self->{'line_ending'};
   delete $self->{'missing_head_body_separator'};
 
+  # Remove the queue variable, in case the body has not been parsed
+  delete $self->{'parse_queue'};
+
   my @toclean = ( $self );
 
   # Go ahead and clean up all of the Message::Node parts
