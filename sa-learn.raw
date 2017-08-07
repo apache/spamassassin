@@ -398,8 +398,11 @@ eval {
     for ($!=0; <F>; $!=0) {
       chomp;
       next if /^\s*$/;
-      if (/^(?:ham|spam):\w*:/) {
-        push ( @targets, $_ );
+      if (/^(ham|spam):(\w*):(.*)/) {
+        my $class  = $1;
+        my $format = $2 || "detect";
+        my $target = $3;
+        push ( @targets, "$class:$format:$target" );
       }
       else {
         target($_);
