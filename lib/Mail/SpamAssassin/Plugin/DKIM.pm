@@ -28,6 +28,7 @@ Taking into account signatures from any signing domains:
  full   DKIM_SIGNED           eval:check_dkim_signed()
  full   DKIM_VALID            eval:check_dkim_valid()
  full   DKIM_VALID_AU         eval:check_dkim_valid_author_sig()
+ full   DKIM_VALID_EF         eval:check_dkim_valid_envelopefrom()
 
 Taking into account signatures from specified signing domains only:
 (quotes may be omitted on domain names consisting only of letters, digits,
@@ -55,6 +56,7 @@ Author Domain Signing Practices (ADSP) from specified author domains only:
  describe DKIM_SIGNED   Message has a DKIM or DK signature, not necessarily valid
  describe DKIM_VALID    Message has at least one valid DKIM or DK signature
  describe DKIM_VALID_AU Message has a valid DKIM or DK signature from author's domain
+ describe DKIM_VALID_EF Message has a valid DKIM or DK signature from envelope-from domain
  describe __DKIM_DEPENDABLE     A validation failure not attributable to truncation
 
  describe DKIM_ADSP_NXDOMAIN    Domain not in DNS and no valid author domain signature
@@ -148,6 +150,7 @@ sub new {
   $self->register_eval_rule("check_dkim_valid");
   $self->register_eval_rule("check_dkim_valid_author_sig");
   $self->register_eval_rule("check_dkim_testing");
+  $self->register_eval_rule("check_dkim_valid_envelopefrom");
 
   # author domain signing practices
   $self->register_eval_rule("check_dkim_adsp");
@@ -551,6 +554,21 @@ sub check_dkim_valid_author_sig {
     # don't bother
   } else {
     $result = $self->_check_dkim_signed_by($pms,1,1,\@acceptable_domains);
+  }
+  return $result;
+}
+
+sub check_dkim_valid_envelopefrom {
+  my ($self, $pms, $full_ref) = @_;
+  my $result = 0;
+  my $envfrom=$self->{'main'}->{'registryboundaries'}->uri_to_domain($pms->get("EnvelopeFrom"));
+  # if no envelopeFrom, it cannot be valid
+  return $result if !$envfrom;
+  $self->_check_dkim_signature($pms)  if !$pms->{dkim_checked_signature};
+  if (!$pms->{dkim_valid}) {
+    # don't bother
+  } else {
+    $result = $self->_check_dkim_signed_by($pms,1,0,[$envfrom]);
   }
   return $result;
 }
