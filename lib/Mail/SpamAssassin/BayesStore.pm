@@ -419,6 +419,7 @@ sub expire_old_tokens_trapped {
     dbg("bayes: $msg: $msg2");
   }
 
+  $self->remove_running_expire_tok();
   return 1;
 }
 
