@@ -391,7 +391,7 @@ sub _check_spf {
 
 	# http://www.openspf.org/RFC_4408#header-field
 	# wtf - for some reason something is sticking an extra space between the header name and field value
-	if ($hdr =~ /^received-spf:\s*(pass|neutral|(?:soft)?fail|none)\b(?:.*\bidentity=(\S+?);?\b)?/i) {
+	if ($hdr =~ /^received-spf:\s*(pass|neutral|(?:soft)?fail|(?:temp|perm)error|none)\b(?:.*\bidentity=(\S+?);?\b)?/i) {
 	  my $result = lc($1);
 
 	  my $identity = '';	# we assume it's a mfrom check if we can't tell otherwise
@@ -418,6 +418,8 @@ sub _check_spf {
 	  $scanner->{"spf_${identity}none"} = 0;
 	  $scanner->{"spf_${identity}fail"} = 0;
 	  $scanner->{"spf_${identity}softfail"} = 0;
+	  $scanner->{"spf_${identity}temperror"} = 0;
+	  $scanner->{"spf_${identity}permerror"} = 0;
 	  $scanner->{"spf_${identity}failure_comment"} = undef;
 
 	  # and the result
@@ -439,7 +441,7 @@ sub _check_spf {
         # Authentication-Results: mail.example.com; SPF=none smtp.mailfrom=example.org (comment)
 
         my $tmphdr = $1;
-        if ($tmphdr =~ /^(pass|neutral|(?:hard|soft)?fail|none)(?:[^;]*?\bsmtp\.(\S+)\s*=[^;]+)?/i) {
+        if ($tmphdr =~ /^(pass|neutral|(?:hard|soft)?fail|(?:temp|perm)error|none)(?:[^;]*?\bsmtp\.(\S+)\s*=[^;]+)?/i) {
           my $result = lc($1);
           $result = 'fail'  if $result eq 'hardfail';  # RFC5451 permits this
 
@@ -467,6 +469,8 @@ sub _check_spf {
           $scanner->{"spf_${identity}none"} = 0;
           $scanner->{"spf_${identity}fail"} = 0;
           $scanner->{"spf_${identity}softfail"} = 0;
+          $scanner->{"spf_${identity}temperror"} = 0;
+          $scanner->{"spf_${identity}permerror"} = 0;
           $scanner->{"spf_${identity}failure_comment"} = undef;
 
           # and the result
