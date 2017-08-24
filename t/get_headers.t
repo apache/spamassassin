@@ -17,6 +17,7 @@ if (-e 'test_dir') {            # running from test directory, not ..
 
 use strict;
 use Test;
+use lib '.'; use lib 't';
 use SATest; sa_t_init("get_headers");
 use Mail::SpamAssassin;
 

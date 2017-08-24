@@ -11,6 +11,7 @@ BEGIN {
   }
 }
 
+use lib '.'; use lib 't';
 use SATest; sa_t_init("relative_scores");
 use Test;
 use strict;
