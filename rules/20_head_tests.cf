@@ -308,9 +308,8 @@ describe X_IP			Message has X-IP header
 header   __HAS_MIMEOLE          exists:X-MimeOLE
 header   __HAS_MSMAIL_PRI       exists:X-MSMail-Priority
 header   __HAS_SQUIRRELMAIL_IN_MAILER	X-Mailer =~ /SquirrelMail\b/
-# Bug 6346
-# 2015-01-22 expanded to Office 15 as well per bug 7122
-header   __HAS_OFFICE1214_IN_MAILER	X-Mailer =~ /^Microsoft (?:Office )?Outlook 1[245]\.0/
+# Ever growing Office version list without X-MimeOLE, bug 6346, 7122, 7463.
+header   __HAS_OFFICE1214_IN_MAILER	X-Mailer =~ /^Microsoft (?:Office )?Outlook 1[2456]\.0/
 meta     MISSING_MIMEOLE	(__HAS_MSMAIL_PRI && !__HAS_MIMEOLE && !__HAS_SQUIRRELMAIL_IN_MAILER && !__HAS_OFFICE1214_IN_MAILER)
 describe MISSING_MIMEOLE	Message has X-MSMail-Priority, but no X-MimeOLE
 
