@@ -16,6 +16,7 @@ if (-e 'test_dir') {            # running from test directory, not ..
 }
 
 use strict;
+use lib '.'; use lib 't';
 use SATest; sa_t_init("debug");
 use Test;
 use Mail::SpamAssassin;

@@ -17,6 +17,7 @@ if (-e 'test_dir') {            # running from test directory, not ..
   $prefix = '..';
 }
 
+use lib '.'; use lib 't';
 use SATest; sa_t_init("priorities");
 use strict;
 use Test; BEGIN { plan tests => NUM_TESTS };
