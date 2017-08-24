@@ -55,7 +55,7 @@ my %tricks = map {; $_ => 1 }
 
 # elements that change text style
 my %elements_text_style = map {; $_ => 1 }
-  qw( body font table tr th td big small basefont marquee span p div ),
+  qw( body font table tr th td big small basefont marquee span p div a ),
 ;
 
 # elements that insert whitespace
@@ -80,13 +80,14 @@ $ok_attributes{basefont}{$_} = 1 for qw( color face size );
 $ok_attributes{body}{$_} = 1 for qw( text bgcolor link alink vlink background );
 $ok_attributes{font}{$_} = 1 for qw( color face size );
 $ok_attributes{marquee}{$_} = 1 for qw( bgcolor background );
-$ok_attributes{table}{$_} = 1 for qw( bgcolor );
-$ok_attributes{td}{$_} = 1 for qw( bgcolor );
-$ok_attributes{th}{$_} = 1 for qw( bgcolor );
-$ok_attributes{tr}{$_} = 1 for qw( bgcolor );
+$ok_attributes{table}{$_} = 1 for qw( bgcolor style );
+$ok_attributes{td}{$_} = 1 for qw( bgcolor style );
+$ok_attributes{th}{$_} = 1 for qw( bgcolor style );
+$ok_attributes{tr}{$_} = 1 for qw( bgcolor style );
 $ok_attributes{span}{$_} = 1 for qw( style );
 $ok_attributes{p}{$_} = 1 for qw( style );
 $ok_attributes{div}{$_} = 1 for qw( style );
+$ok_attributes{a}{$_} = 1 for qw( style );
 
 sub new {
   my ($class, $character_semantics_input, $character_semantics_output) = @_;
