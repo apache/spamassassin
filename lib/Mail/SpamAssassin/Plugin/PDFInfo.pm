@@ -413,7 +413,7 @@ sub _find_pdf_mime_parts {
 
   foreach my $p (@parts) {
     my $type = $p->{'type'} =~ m@/([\w\-]+)$@;
-    my $name = $p->{'name'};
+    my $name = $p->{'name'} || '';
 
     my $cte = lc( $p->get_header('content-transfer-encoding') || '' );
 
