@@ -793,10 +793,10 @@ sub _decode_header {
   $header_field_body =~ s/\015?\012//gs;
 
   if ($header_field_name =~
-       /^ (?: (?: Received | (?:Resent-)? (?: Message-ID | Date ) |
-                  MIME-Version | References | In-Reply-To ) \z
-            | (?: List- | Content- ) ) /xsi ) {
+       /^ (?: Received | (?:Resent-)? (?: Message-ID | Date ) |
+              MIME-Version | References | In-Reply-To | List-.* ) \z /xsi ) {
     # Bug 6945: some header fields must not be processed for MIME encoding
+    # Bug 7466: leave out the Content-*
 
   } else {
     local($1,$2,$3);
