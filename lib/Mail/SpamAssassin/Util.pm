@@ -1122,6 +1122,18 @@ sub parse_content_type {
   my($charset) = $ct =~ /\bcharset\s*=\s*["']?(.*?)["']?(?:;|$)/i;
   my($name) = $ct =~ /\b(?:file)?name\s*=\s*["']?(.*?)["']?(?:;|$)/i;
 
+  # RFC 2231 section 3: Parameter Value Continuations
+  # support continuations for name values
+  #
+  if (!$name && $ct =~ /\b(?:file)?name\*0\s*=/i) {
+
+    my @name;
+    $name[$1] = $2
+      while ($ct =~ /\b(?:file)?name\*(\d+)\s*=\s*["']?(.*?)["']?(?:;|$)/ig);
+
+    $name = join "", grep defined, @name;
+  }
+
   # Get the actual MIME type out ...
   # Note: the header content may not be whitespace unfolded, so make sure the
   # REs do /s when appropriate.
