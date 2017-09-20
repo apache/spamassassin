@@ -419,21 +419,21 @@ exiting with one of these values:
 
 =over 4
 
-=item 0
+=item C<0>
 
 OK: A spamd ping response was received within all threshold times.
 
-=item 1
+=item C<1>
 
 WARNING: A spamd ping response exceeded the warning threshold but not the
 critical threshold.
 
-=item 2
+=item C<2>
 
 CRITICAL: A spamd ping response exceeded either the critical threshold or the
 timeout value.
 
-=item 3
+=item C<3>
 
 UNKNOWN: An error, probably caused by a missing dependency or an invalid
 configuration parameter being supplied, occurred in the sa-check_spamd program.
