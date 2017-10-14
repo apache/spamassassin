@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus ena-week0 ena-week1 ena-week2 ena-week3 grenier jbrooks mmiroslaw-mails-ham mmiroslaw-mails-spam thendrikx; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus ena-week0 ena-week1 ena-week2 ena-week3 jarif jbrooks llanga mmiroslaw-mails-ham mmiroslaw-mails-spam thendrikx; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus ena-week0 ena-week1 ena-week2 ena-week3 jarif jbrooks llanga mmiroslaw-mails-ham mmiroslaw-mails-spam thendrikx
+# with results from: day 1: darxus ena-week0 ena-week1 ena-week2 ena-week3 grenier jarif jbrooks mmiroslaw-mails-ham mmiroslaw-mails-spam thendrikx; day 2: darxus ena-week0 ena-week1 ena-week2 ena-week3 jarif jbrooks llanga mmiroslaw-mails-ham mmiroslaw-mails-spam thendrikx; day 3: darxus ena-week0 ena-week1 ena-week2 ena-week3 jarif jbrooks llanga mmiroslaw-mails-ham mmiroslaw-mails-spam thendrikx
 
 # tflags publish
 AC_BR_BONANZA
@@ -43,6 +43,9 @@ ADMAIL
 # tflags publish
 ADVANCE_FEE_2_NEW_FORM
 
+# good enough
+ADVANCE_FEE_2_NEW_FRM_MNY
+
 # tflags publish
 ADVANCE_FEE_2_NEW_MONEY
 
@@ -74,10 +77,16 @@ AD_PREFS
 ALL_TRUSTED
 
 # good enough
+APOSTROPHE_TOCC
+
+# good enough
 AXB_XMAILER_MIMEOLE_OL_024C2
 
 # good enough
 AXB_XMAILER_MIMEOLE_OL_1ECD5
+
+# good enough
+AXB_X_AOL_SEZ_S
 
 # good enough
 AXB_X_FF_SEZ_S
@@ -157,6 +166,9 @@ CTYPE_NULL
 # good enough
 DEAR_BENEFICIARY
 
+# good enough
+DEAR_WINNER
+
 # tflags net
 DIGEST_MULTIPLE
 
@@ -211,6 +223,9 @@ DX_TEXT_03
 # good enough
 DYN_RDNS_AND_INLINE_IMAGE
 
+# good enough
+DYN_RDNS_SHORT_HELO_HTML
+
 # tflags publish
 ENCRYPTED_MESSAGE
 
@@ -228,6 +243,9 @@ FBI_SPOOF
 
 # tflags publish
 FILL_THIS_FORM
+
+# good enough
+FORGED_RELAY_MUA_TO_MX
 
 # tflags publish
 FORM_FRAUD
@@ -304,6 +322,9 @@ FSL_HELO_BARE_IP_1
 # good enough
 FSL_HELO_DEVICE
 
+# good enough
+FSL_HELO_NON_FQDN_1
+
 # tflags publish
 FSL_NEW_HELO_USER
 
@@ -376,6 +397,9 @@ HASHCASH_2SPEND
 # tflags userconf
 HASHCASH_HIGH
 
+# good enough
+HDRS_MISSP
+
 # tflags publish
 HEADER_FROM_DIFFERENT_DOMAINS
 
@@ -401,10 +425,16 @@ HELO_MISC_IP
 HEXHASH_WORD
 
 # good enough
+HK_LOTTO
+
+# good enough
 HK_NAME_DRUGS
 
 # good enough
 HK_NAME_MR_MRS
+
+# good enough
+HK_RANDOM_ENVFROM
 
 # good enough
 HK_RANDOM_FROM
@@ -761,6 +791,9 @@ RCVD_IN_XBL
 REPLYTO_WITHOUT_TO_CC
 
 # good enough
+S25R_4
+
+# good enough
 SERGIO_SUBJECT_VIAGRA01
 
 # tflags publish
@@ -805,6 +838,12 @@ STOCK_LOW_CONTRAST
 # tflags publish
 STOCK_TIP
 
+# good enough
+STOX_REPLY_TYPE
+
+# good enough
+STOX_REPLY_TYPE_WITHOUT_QUOTES
+
 # tflags publish
 STYLE_GIBBERISH
 
@@ -834,6 +873,9 @@ TEQF_USR_MSGID_MALF
 
 # tflags publish
 THIS_AD
+
+# good enough
+THREAD_INDEX_HEX
 
 # good enough
 TO_EQ_FM_DIRECT_MX
@@ -875,6 +917,9 @@ TVD_QUAL_MEDS
 TVD_RCVD_IP
 
 # good enough
+TVD_RCVD_IP4
+
+# good enough
 TVD_SPACE_ENCODED
 
 # good enough
@@ -890,31 +935,121 @@ TVD_VISIT_PHARMA
 TW_GIBBERISH_MANY
 
 # good enough
-ADVANCE_FEE_2_NEW_FRM_MNY
+ADVANCE_FEE_3_NEW_FRM_MNY
 
 # good enough
-APOSTROPHE_TOCC
+ADVANCE_FEE_4_NEW_FRM_MNY
 
 # good enough
-AXB_X_AOL_SEZ_S
+ADVANCE_FEE_5_NEW
 
 # good enough
-BODY_EMPTY
+DATE_IN_FUTURE_96_Q
 
 # good enough
-FORGED_RELAY_MUA_TO_MX
+DSN_NO_MIMEVERSION
 
 # good enough
-HDRS_MISSP
+DUP_SUSP_HDR
 
 # good enough
-S25R_4
+DX_TEXT_01
 
 # good enough
-SHORTENED_URL_SRC
+EMRCP
 
 # good enough
-THREAD_INDEX_HEX
+FILL_THIS_FORM_FRAUD_PHISH
+
+# good enough
+FILL_THIS_FORM_LOAN
+
+# good enough
+FILL_THIS_FORM_LONG
+
+# good enough
+FROM_MISSP_PHISH
+
+# good enough
+FROM_UNBAL1
+
+# good enough
+FROM_WSP_LEAD
+
+# good enough
+FROM_WSP_TRAIL
+
+# good enough
+FSL_BULK_SIG
+
+# good enough
+FSL_STACKED_TEXT
+
+# good enough
+HDRS_LCASE_IMGONLY
+
+# good enough
+HELO_NO_DOMAIN
+
+# good enough
+HK_NAME_FROM
+
+# good enough
+HK_PNIS
+
+# good enough
+HK_SCAM_N15
+
+# good enough
+HK_SCAM_N4
+
+# good enough
+HK_SCAM_N8
+
+# good enough
+HK_SPAMMY_FILENAME
+
+# good enough
+LIST_PARTIAL_SHORT_MSG
+
+# good enough
+LOTTO_AGENT
+
+# good enough
+MANY_PILL_PRICE
+
+# good enough
+MONEY_BARRISTER
+
+# good enough
+MONEY_FORM
+
+# good enough
+NA_DOLLARS
+
+# good enough
+OBFU_ATTACH_MISSP
+
+# good enough
+SERGIO_SUBJECT_PORN014
+
+# good enough
+SERGIO_SUBJECT_PORN015
+
+# good enough
+SHARE_50_50
+
+# good enough
+TO_EQ_FM_DOM_HTML_IMG
+
+# good enough
+TVD_DOLLARS_US
+
+# good enough
+URI_DOTDOT_LOW_CNTRST
+
+# good enough
+YOU_INHERIT
 
 # tflags publish
 UC_GIBBERISH_OBFU
