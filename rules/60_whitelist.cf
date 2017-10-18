@@ -68,13 +68,16 @@ body      URI_HOST_IN_WHITELIST eval:check_uri_host_in_whitelist()
 describe  URI_HOST_IN_WHITELIST Host or Domain is listed in the user's URI white-list
 tflags    URI_HOST_IN_WHITELIST userconf nice noautolearn
 
-header 	  HEADER_HOST_IN_BLACKLIST eval:check_uri_host_listed('BLACK')
-describe  HEADER_HOST_IN_BLACKLIST Host or Domain in header is listed in the user's URI black-list
-tflags    HEADER_HOST_IN_BLACKLIST userconf noautolearn
+# Bug 7256, using a header rule with an eval() function does not work the way
+# this was intended.
 
-header 	  HEADER_HOST_IN_WHITELIST eval:check_uri_host_listed('WHITE')
-describe  HEADER_HOST_IN_WHITELIST Host or Domain in header is listed in the user's URI white-list
-tflags    HEADER_HOST_IN_WHITELIST userconf nice noautolearn
+# header    HEADER_HOST_IN_BLACKLIST eval:check_uri_host_listed('BLACK')
+# describe  HEADER_HOST_IN_BLACKLIST Host or Domain in header is listed in the user's URI black-list
+# tflags    HEADER_HOST_IN_BLACKLIST userconf noautolearn
+
+# header    HEADER_HOST_IN_WHITELIST eval:check_uri_host_listed('WHITE')
+# describe  HEADER_HOST_IN_WHITELIST Host or Domain in header is listed in the user's URI white-list
+# tflags    HEADER_HOST_IN_WHITELIST userconf nice noautolearn
 endif
 
 ###########################################################################
