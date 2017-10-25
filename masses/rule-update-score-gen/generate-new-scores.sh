@@ -175,7 +175,7 @@ svn up -r $REVISION trunk-new-rules-set${SCORESET}/rulesrc/ || exit $?
 svn up trunk-new-rules-set$SCORESET/masses/
 svn up trunk-new-rules-set$SCORESET/build/
 
-set +x
+#set +x
 
 # we need to patch the Makefile to get it to mangle some data for us
 cd trunk-new-rules-set${SCORESET}/masses
