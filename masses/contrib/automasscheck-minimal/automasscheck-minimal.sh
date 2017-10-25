@@ -59,6 +59,9 @@ setup_checktype() {
   if [[ "$RC" -ne 0 ]]; then
     echo "ERROR: rsync failure $RC, aborting..."
     exit 1
+  else
+    SVNREV=`awk '/Revision:/ {print $2}' $WORKDIR/$TYPE/masses/svninfo.tmp`
+    [[ ! -z "$SVNREV" ]] && echo "SVN revision = $SVNREV"
   fi
 }
 
