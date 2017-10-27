@@ -47,7 +47,11 @@ header DKIM_ADSP_CUSTOM_HIGH	eval:check_dkim_adsp('3')
 tflags DKIM_SIGNED		net
 tflags DKIM_VALID		net nice
 tflags DKIM_VALID_AU		net nice
-tflags DKIM_VALID_EF		net nice
+
+if (version >= 3.004002)
+  tflags DKIM_VALID_EF		net nice
+endif
+
 tflags DKIM_ADSP_NXDOMAIN	net
 tflags DKIM_ADSP_DISCARD	net
 tflags DKIM_ADSP_ALL		net
