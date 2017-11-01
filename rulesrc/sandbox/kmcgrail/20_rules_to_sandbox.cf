@@ -29,32 +29,15 @@ body MILLION_USD                /Million\b.{0,40}\b(?:United States? Dollars?|US
 describe MILLION_USD            Talks about millions of dollars
 #OLD SCORE - SETTING A CEILING OF 2 - score MILLION_USD 3.799 2.477 3.221 3.247
 score MILLION_USD 2
-lang de describe MILLION_USD Erwähnt Millonen von Dollar
-lang fr describe MILLION_USD            Phrase clé d'escroquerie nigérienne (millions of dollars)
-lang nl describe MILLION_USD                     Heeft het over miljoenen dollars
-lang pl describe MILLION_USD            O milionach dolarów
-lang pt_BR describe MILLION_USD Fala sobre milhões de dólares
 
 body NA_DOLLARS                        /\b(?:\d{1,3})?Million\b.{0,40}\b(?:Canadian Dollar?s?|US\$|U\.? ?S\.? Dollar)/i
 describe NA_DOLLARS            Talks about a million North American dollars
 #OLD SCORE - SETTING A CEILING OF 1.5 score NA_DOLLARS 3.599
 score NA_DOLLARS 1.5
-lang de describe NA_DOLLARS Handelt von einer Million Dollar aus den US oder Kanada
-lang fr describe NA_DOLLARS             Parle d'un million de dollars "nord-américains"
-lang nl describe NA_DOLLARS                      Praat over een miljoen Noord-Amerikaanse dollars
-lang pl describe NA_DOLLARS             O milionie Pó³nocno Amerykañskich dolarów
-lang pt_BR describe NA_DOLLARS Fala sobre milhões de dólares norte americanos ou canadenses
-
 
 body US_DOLLARS_3               /(?:\$|usd).?\d{1,3}[,.]\d{3}[,.]\d{3}(?:[,.]\d\d)?/i
 describe US_DOLLARS_3           Mentions millions of $ ($NN,NNN,NNN.NN)
 #OLD SCORE - SETTING A CEILING OF 2 - score US_DOLLARS_3 2.599 2.523 1.780 1.754
 score US_DOLLARS_3 2.0
-lang de describe US_DOLLARS_3 Erwähnt Millonen von Dollar
-lang fr describe US_DOLLARS_3           Escroq. nigérienne, version modifiée, phrase clé ($NN,NNN,NNN.NN)
-lang nl describe US_DOLLARS_3                    Vermeldt miljoenen $ ($NN,NNN,NNN.NN)
-lang pl describe US_DOLLARS_3           Wspomina miliony $ ($NN,NNN,NNN.NN)
-lang pt_BR describe US_DOLLARS_3 Contém $($NN,NNN,NNN.NN)
-
 
 #EOF
