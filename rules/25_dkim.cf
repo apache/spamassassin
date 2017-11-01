@@ -66,7 +66,11 @@ tflags DKIM_ADSP_CUSTOM_HIGH	net userconf
 describe DKIM_SIGNED		Message has a DKIM or DK signature, not necessarily valid
 describe DKIM_VALID		Message has at least one valid DKIM or DK signature
 describe DKIM_VALID_AU		Message has a valid DKIM or DK signature from author's domain
+
+if (version >= 3.004002)
 describe DKIM_VALID_EF		Message has a valid DKIM or DK signature from envelope-from domain
+endif
+
 describe __DKIM_DEPENDABLE	A validation failure not attributable to truncation
 
 describe DKIM_ADSP_NXDOMAIN	No valid author signature and domain not in DNS
