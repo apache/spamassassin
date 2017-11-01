@@ -405,7 +405,7 @@ sub parse_received_line {
   # with HTTP should only be authenticated webmail sessions
   # with HTTPU is used by Communigate Pro with Pronto! webmail interface
   # IANA registry: http://www.iana.org/assignments/mail-parameters/mail-parameters.xhtml
-  if (/ by / && / with ((?:ES|L|UTF8S|UTF8L)MTPS?A|ASMTP|HTTPU?)(?: |;|$)/i) {
+  if (/ by / && / with ((?:ES|L|UTF8S|UTF8L)MTPS?A|ASMTP|HTTP[SU]?)(?: |;|$)/i) {
     $auth = $1;
   }
   # GMail should use ESMTPSA to indicate that it is in fact authenticated,
