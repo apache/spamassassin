@@ -131,10 +131,6 @@ make_rule_update_from_trunk() {
 
   cp trunk-rulesrc-scores/72_scores.cf trunk/rules/72_scores.cf
 
-  # Temp fix to force the last known good 72_scores.cf
-  svn co --revision=1786976 --force https://svn.apache.org/repos/asf/spamassassin/trunk/rulesrc/scores last_known_good
-  cp last_known_good/72_scores.cf trunk/rules/72_scores.cf
-
   # note: one of set0 or set1 stats might be incorrect (not all of their rules
   #       are included in the update) I can't remember if we eliminate dropped
   #       rules in generate-new-scores or not (we run the sets in a particular
