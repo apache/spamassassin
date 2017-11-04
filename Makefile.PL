@@ -10,8 +10,9 @@ use ExtUtils::MakeMaker;
 # avoid stupid 'Argument "6.30_01" isn't numeric in numeric ge (>=)' warnings;
 my $mm_version = eval $ExtUtils::MakeMaker::VERSION;
 
-if ($mm_version < 6.17) {
-  die "SpamAssassin Makefile.PL requires at least ExtUtils::MakeMaker v6.17";
+# raising the version of makemaker to 6.46 per bug 6598 & 6131
+if ($mm_version < 6.46) {
+  die "SpamAssassin Makefile.PL requires at least ExtUtils::MakeMaker v6.46";
 }
 
 use constant RUNNING_ON_WINDOWS => ($^O =~ /^(mswin|dos|os2)/oi);
@@ -235,7 +236,7 @@ my %makefile = (
     },
 
     'AUTHOR'   => 'The Apache SpamAssassin Project <dev at spamassassin.apache.org>',
-    'ABSTRACT' => 'SpamAssassin is an extensible email filter which is used to identify spam',
+    'ABSTRACT' => 'Apache SpamAssassin is an extensible email filter which is used to identify spam',
 
     # We have only this Makefile.PL and this option keeps MakeMaker from
     # asking all questions twice after a 'make dist*'.
@@ -312,7 +313,7 @@ $makefile{'macro'}{'CONTACT_ADDRESS'} = $opt{'contact_address'};
 
 print 
 'NOTE: settings for "make test" are now controlled using "t/config.dist". 
-See that file if you wish to customise what tests are run, and how.
+See that file if you wish to customize what tests are run, and how.
 
 ';
 
@@ -333,15 +334,26 @@ foreach my $file (@FILES_THAT_MUST_EXIST) {
 
 #######################################################################
 
-# bug 6131
-($mm_version >= 6.46) and $makefile{META_MERGE} = {
-  license => 'apache',
+# See Bug 6131 & 6598 for changes to META_MERGE and increased requirement 
+# for MakeMaker version
+#
+$makefile{META_MERGE} = {
+
+  'meta-spec' => {
+    version => '2',
+    url     => 'http://search.cpan.org/perldoc?CPAN::Meta::Spec',
+  },
+
+  license => 'apache_2_0',
 
   resources => {
     license     => 'http://www.apache.org/licenses/LICENSE-2.0.html',
-    homepage    => 'http://spamassassin.apache.com/',
+    homepage    => 'http://spamassassin.apache.org/',
     bugtracker  => 'https://issues.apache.org/SpamAssassin/',
-    repository  => 'http://svn.apache.org/repos/asf/spamassassin/',
+    repository  => { 
+			url=>'http://svn.apache.org/repos/asf/spamassassin/',
+			type=>'svn'
+		   },
     MailingList => 'http://wiki.apache.org/spamassassin/MailingLists',
   },
 
@@ -354,7 +366,7 @@ foreach my $file (@FILES_THAT_MUST_EXIST) {
     'Razor2::Client::Agent' =>     2.61,
     'Net::Ident' =>                0,
     'IO::Socket::INET6' =>         0,
-    'IO::Socket::SSL' =>           0,
+    'IO::Socket::SSL' =>           1.76,
     'Compress::Zlib' =>            0,
     'Mail::DKIM' =>                0.37,
     'DBI' =>                       0,
