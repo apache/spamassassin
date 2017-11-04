@@ -179,7 +179,7 @@ my @OPTIONAL_MODULES = (
 },
 {
   module => 'IO::Socket::SSL',
-  version => 0,
+  version => 1.76,
   desc => 'If you wish to use SSL encryption to communicate between spamc and
   spamd (the --ssl option to spamd), you need to install this
   module. (You will need the OpenSSL libraries and use the
@@ -268,7 +268,9 @@ my $lwp_note = "   Sa-update will use curl, wget or fetch to download updates.
    3.4.0 will use these standard programs to download rule updates
    leaving LWP as a fallback if none of the programs are found.
 
-   *IMPORTANT NOTE*: You only need one of these programs.";
+   *IMPORTANT NOTE*: You only need one of these programs 
+       It's only a concern if you are warned about all 3 
+       i.e. (curl, wget & fetch) missing";
 
 my @OPTIONAL_BINARIES = (
 {
@@ -309,7 +311,7 @@ my @OPTIONAL_BINARIES = (
   binary => 're2c',
   version => '0',
 
-  desc => 'The "re2c" program used by sa-compile to compile rules 
+  desc => 'The "re2c" program is used by sa-compile to compile rules 
   for regular expressions to speed up scanning.',
 }
 );
