@@ -1759,9 +1759,9 @@ sub get_daterev_html_table {
       $colidx = 1;
     }
 
-    # use the rev number as the row key
-    $rows->{$meta->{rev}} ||= [ ];
-    $rows->{$meta->{rev}}->[$colidx] = $meta;
+    # use the daterev number as the row key
+    $rows->{$meta->{daterev}} ||= [ ];
+    $rows->{$meta->{daterev}}->[$colidx] = $meta;
   }
 
   my @rowkeys = sort keys %{$rows};
