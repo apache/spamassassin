@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus ena-week0 ena-week1 ena-week2 ena-week3 grenier jarif mmiroslaw-mails-ham mmiroslaw-mails-spam thendrikx; day 2: darxus ena-week0 ena-week1 ena-week2 ena-week3 jarif jbrooks llanga mmiroslaw-mails-ham mmiroslaw-mails-spam thendrikx; day 3: darxus ena-week0 ena-week1 ena-week2 ena-week3 jarif jbrooks llanga mmiroslaw-mails-ham mmiroslaw-mails-spam thendrikx
+# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus ena-week0 ena-week1 ena-week2 ena-week3 giovanni grenier jbrooks mmiroslaw-mails-ham mmiroslaw-mails-spam thendrikx; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus ena-week0 ena-week1 ena-week2 ena-week3 giovanni jbrooks llanga mmiroslaw-mails-ham mmiroslaw-mails-spam thendrikx; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus ena-week0 ena-week1 ena-week2 ena-week3 giovanni grenier jarif jbrooks llanga mmiroslaw-mails-ham mmiroslaw-mails-spam thendrikx
 
 # tflags publish
 AC_BR_BONANZA
@@ -112,12 +112,6 @@ BAYES_99
 # tflags learn
 BAYES_999
 
-# good enough
-BODY_SINGLE_URI
-
-# good enough
-BODY_SINGLE_WORD
-
 # tflags publish
 BODY_URI_ONLY
 
@@ -149,7 +143,7 @@ COMMENT_GIBBERISH
 CORRUPT_FROM_LINE_IN_HDRS
 
 # good enough
-CTYPE_NULL
+DATE_IN_FUTURE_96_Q
 
 # good enough
 DEAR_BENEFICIARY
@@ -205,17 +199,11 @@ DX_TEXT_02
 # tflags publish
 DX_TEXT_03
 
-# good enough
-DYN_RDNS_AND_INLINE_IMAGE
-
 # tflags publish
 ENCRYPTED_MESSAGE
 
 # tflags userconf
 ENV_AND_HDR_SPF_MATCH
-
-# good enough
-FAKE_REPLY_C
 
 # tflags publish
 FBI_MONEY
@@ -380,12 +368,6 @@ HDRS_MISSP
 HEADER_FROM_DIFFERENT_DOMAINS
 
 # tflags userconf
-HEADER_HOST_IN_BLACKLIST
-
-# tflags userconf
-HEADER_HOST_IN_WHITELIST
-
-# tflags userconf
 HEAD_LONG
 
 # good enough
@@ -409,9 +391,6 @@ HK_RANDOM_FROM
 # good enough
 HK_SCAM_N2
 
-# good enough
-HK_SCAM_N3
-
 # tflags userconf
 HTML_CHARSET_FARAWAY
 
@@ -420,9 +399,6 @@ HTML_OFF_PAGE
 
 # good enough
 IMG_DIRECT_TO_MX
-
-# good enough
-KHOP_DYNAMIC
 
 # tflags publish
 LIST_PRTL_PUMPDUMP
@@ -543,12 +519,6 @@ RAND_HEADER_MANY
 
 # tflags net
 RAZOR2_CF_RANGE_51_100
-
-# tflags net
-RAZOR2_CF_RANGE_E4_51_100
-
-# tflags net
-RAZOR2_CF_RANGE_E8_51_100
 
 # tflags net
 RAZOR2_CHECK
@@ -802,12 +772,6 @@ STOCK_LOW_CONTRAST
 # tflags publish
 STOCK_TIP
 
-# good enough
-STOX_REPLY_TYPE
-
-# good enough
-STOX_REPLY_TYPE_WITHOUT_QUOTES
-
 # tflags publish
 STYLE_GIBBERISH
 
@@ -837,9 +801,6 @@ TEQF_USR_MSGID_MALF
 
 # tflags publish
 THIS_AD
-
-# good enough
-THREAD_INDEX_HEX
 
 # good enough
 TO_EQ_FM_DIRECT_MX
@@ -878,9 +839,6 @@ TVD_QUAL_MEDS
 TVD_RCVD_IP
 
 # good enough
-TVD_RCVD_IP4
-
-# good enough
 TVD_SPACE_ENCODED
 
 # good enough
@@ -896,10 +854,31 @@ TVD_VISIT_PHARMA
 TW_GIBBERISH_MANY
 
 # good enough
-DATE_IN_FUTURE_96_Q
+ADVANCE_FEE_4_NEW_FRM_MNY
 
 # good enough
-LIST_PARTIAL_SHORT_MSG
+ADVANCE_FEE_5_NEW
+
+# good enough
+AXB_X_FF_SEZ_S
+
+# good enough
+BODY_EMPTY
+
+# good enough
+FSL_HELO_FAKE
+
+# good enough
+FSL_MIME_NO_TEXT
+
+# good enough
+SHORTENED_URL_SRC
+
+# tflags publish
+SPOOFED_FREEM_REPTO_RUS
+
+# good enough
+TO_NO_BRKTS_FROM_MSSP
 
 # tflags publish
 UC_GIBBERISH_OBFU
