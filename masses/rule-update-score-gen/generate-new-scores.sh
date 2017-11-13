@@ -120,9 +120,10 @@ fi
 rm -f corpus/usable-corpus-set${SCORESET}/*cthielen.log
 
 # Get the newest SVN revision from the usuable corpus.
-REVISION=`head corpus/usable-corpus-set${SCORESET}/*.log | awk '/SVN revision:/ {print $4}' | sort -run | head -1`
-if [ "$REVISION" == "" ]; then
-  echo "No logs for scoreset"
+echo -e "\nFinding the SVN revision from the majority in the corpus/usable-corpus-set${SCORESET}"
+REVISION=`head -5 corpus/usable-corpus-set${SCORESET}/*.log | awk '/SVN revision:/ {print $4}' | sort -rn | uniq -c | sort -rn | head -1 | awk '{print $2}'`
+if [[ -z "$REVISION" ]]; then
+  echo "Unable to determine \$REVISION"
   exit 1
 fi
 
@@ -131,8 +132,14 @@ fi
 #exit 1
 
 for FILE in `find corpus/usable-corpus-set$SCORESET -type f`; do
-  echo "Checking $FILE for SVN $REVISION..."
-  head $FILE | grep "SVN revision: $REVISION" || (rm $FILE; echo "$FILE does not meet the requirements")
+  echo -e "Checking $FILE for SVN revision $REVISION... \c"
+  FILEREV=`head -5 $FILE | awk '/SVN revision:/ {print $4}'`
+  if [[ "$REVISION" = "$FILEREV" ]]; then
+    echo "GOOD"
+  else
+    echo "BAD - SVN revision: $FILEREV"
+    rm -f $FILE
+  fi
 done
 
 # check to make sure that we have enough corpus submitters
@@ -197,6 +204,9 @@ echo "[ generating active ruleset via make ]"
 
 perl Makefile.PL < /dev/null || exit $?
 make > make.out 2>&1 || exit $?
+
+# temp debug copy (investigate truncation issue)
+cp rules/72_active.cf 72_active_before_grep.cf
 
 # strip scores from new rules so that the garescorer can set them
 grep -v ^score rules/72_active.cf > rules/72_active.cf-scoreless
