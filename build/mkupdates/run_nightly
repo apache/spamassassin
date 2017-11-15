@@ -176,12 +176,14 @@ make_tarball_for_version() {
 
   # Versions >= 3.4.1 are CNAMEd to this DNS record:
   /usr/local/bin/updateDNS.sh 3.3.3.updates TXT ${svnrev}
-
-  # Set older version TXT records for older sa-update
-  /usr/local/bin/updateDNS.sh 0.4.3.updates TXT ${svnrev}
-  /usr/local/bin/updateDNS.sh 2.3.3.updates TXT ${svnrev}
-  /usr/local/bin/updateDNS.sh 1.3.3.updates TXT ${svnrev}
-  /usr/local/bin/updateDNS.sh 0.3.3.updates TXT ${svnrev}
+  RC=$?
+  if [[ "$RC" -ne 2 ]]; then
+    # Set older version TXT records for older sa-update
+    /usr/local/bin/updateDNS.sh 0.4.3.updates TXT ${svnrev}
+    /usr/local/bin/updateDNS.sh 2.3.3.updates TXT ${svnrev}
+    /usr/local/bin/updateDNS.sh 1.3.3.updates TXT ${svnrev}
+    /usr/local/bin/updateDNS.sh 0.3.3.updates TXT ${svnrev}
+  fi
 
 
   # clean up 4-day-old (and older) update tarballs.  This seems as
