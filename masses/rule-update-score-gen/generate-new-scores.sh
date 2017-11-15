@@ -119,12 +119,14 @@ fi
 # cthielen's ham logs seem to have a shitload of spam in them
 rm -f corpus/usable-corpus-set${SCORESET}/*cthielen.log
 
-# Get the newest SVN revision from the usuable corpus.
-REVISION=`head corpus/usable-corpus-set${SCORESET}/*.log | awk '/SVN revision:/ {print $4}' | sort -run | head -1`
-if [ "$REVISION" == "" ]; then
+# Get the majority SVN revision
+REVISION=`head -5 corpus/usable-corpus-set${SCORESET}/*.log | awk '/SVN revision:/ {print $4}' | uniq -c | sort -rn | head -1 | awk '{print $2}'`
+if [[ -z "$REVISION" ]]; then
   echo "No logs for scoreset"
   exit 1
 fi
+ 
+echo -e "\nMajority SVN revision found: $REVISION\n"
 
 # DEBUG
 #echo "test"
