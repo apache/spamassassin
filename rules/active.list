@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus ena-week0 ena-week1 ena-week2 ena-week3 giovanni grenier jarif jbrooks mmiroslaw-mails-ham mmiroslaw-mails-spam thendrikx; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus ena-week0 ena-week1 ena-week2 ena-week3 giovanni jbrooks llanga mmiroslaw-mails-ham mmiroslaw-mails-spam thendrikx; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus ena-week0 ena-week1 ena-week2 ena-week3 giovanni jbrooks llanga mmiroslaw-mails-ham mmiroslaw-mails-spam thendrikx
+# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus ena-week0 ena-week1 ena-week2 ena-week3 giovanni grenier jarif jbrooks mmiroslaw-mails-ham mmiroslaw-mails-spam thendrikx; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus ena-week0 ena-week1 ena-week2 ena-week3 giovanni jarif jbrooks llanga mmiroslaw-mails-ham mmiroslaw-mails-spam thendrikx; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus ena-week0 ena-week1 ena-week2 ena-week3 giovanni jbrooks llanga mmiroslaw-mails-ham mmiroslaw-mails-spam thendrikx
 
 # tflags publish
 AC_BR_BONANZA
@@ -141,9 +141,6 @@ COMMENT_GIBBERISH
 
 # tflags publish
 CORRUPT_FROM_LINE_IN_HDRS
-
-# good enough
-DATE_IN_FUTURE_96_Q
 
 # good enough
 DEAR_BENEFICIARY
@@ -405,6 +402,9 @@ HTML_OFF_PAGE
 
 # good enough
 IMG_DIRECT_TO_MX
+
+# good enough
+KB_DATE_CONTAINS_TAB
 
 # tflags publish
 LIST_PRTL_PUMPDUMP
@@ -869,13 +869,28 @@ TVD_VISIT_PHARMA
 TW_GIBBERISH_MANY
 
 # good enough
-FILL_THIS_FORM_LOAN
+ADVANCE_FEE_5_NEW
 
 # good enough
-MONEY_FORM
+AXB_X_FF_SEZ_S
 
 # good enough
-MONEY_FROM_MISSP
+CTYPE_NULL
+
+# good enough
+FILL_THIS_FORM_LONG
+
+# good enough
+KHOP_DYNAMIC
+
+# good enough
+MONEY_BARRISTER
+
+# good enough
+TAB_IN_FROM
+
+# good enough
+THREAD_INDEX_HEX
 
 # tflags publish
 UC_GIBBERISH_OBFU
