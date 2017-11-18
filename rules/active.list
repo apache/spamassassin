@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus ena-week0 ena-week1 ena-week2 ena-week3 giovanni grenier jarif jbrooks mmiroslaw-mails-ham mmiroslaw-mails-spam thendrikx; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus ena-week0 ena-week1 ena-week2 ena-week3 giovanni jarif jbrooks llanga mmiroslaw-mails-ham mmiroslaw-mails-spam; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus ena-week0 ena-week1 ena-week2 ena-week3 giovanni jarif jbrooks llanga mmiroslaw-mails-ham mmiroslaw-mails-spam thendrikx
+# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus ena-week0 ena-week1 ena-week2 ena-week3 giovanni grenier jarif jbrooks mmiroslaw-mails-ham mmiroslaw-mails-spam thendrikx; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus ena-week0 ena-week1 ena-week2 ena-week3 giovanni jarif jbrooks llanga mmiroslaw-mails-ham mmiroslaw-mails-spam; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus ena-week0 ena-week1 ena-week2 ena-week3 giovanni jarif jbrooks llanga mmiroslaw-mails-ham mmiroslaw-mails-spam
 
 # tflags publish
 AC_BR_BONANZA
@@ -111,6 +111,9 @@ BAYES_99
 
 # tflags learn
 BAYES_999
+
+# good enough
+BODY_SINGLE_WORD
 
 # tflags publish
 BODY_URI_ONLY
@@ -291,9 +294,6 @@ FSL_HELO_DEVICE
 
 # good enough
 FSL_HELO_FAKE
-
-# good enough
-FSL_MIME_NO_TEXT
 
 # tflags publish
 FSL_NEW_HELO_USER
@@ -887,22 +887,31 @@ TVD_VISIT_PHARMA
 TW_GIBBERISH_MANY
 
 # good enough
-BODY_SINGLE_URI
+ADVANCE_FEE_4_NEW_FRM_MNY
 
 # good enough
-BODY_SINGLE_WORD
+ADVANCE_FEE_5_NEW
 
 # good enough
-FILL_THIS_FORM_LOAN
+AXB_X_FF_SEZ_S
 
 # good enough
-LIST_PARTIAL_SHORT_MSG
+FILL_THIS_FORM_LONG
 
 # good enough
-MONEY_FORM
+FROM_MISSP_EH_MATCH
 
 # good enough
-MONEY_FROM_MISSP
+FROM_UNBAL1
+
+# good enough
+HK_SCAM_N8
+
+# good enough
+MONEY_BARRISTER
+
+# good enough
+TO_NO_BRKTS_FROM_MSSP
 
 # tflags publish
 UC_GIBBERISH_OBFU
