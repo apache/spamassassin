@@ -260,9 +260,10 @@ sub parse {
   }
   $self->SUPER::parse($text);
 
-  # bug 7437: deal gracefully with HTML::Parser misbehavior on unclosed <style> tag
+  # bug 7437: deal gracefully with HTML::Parser misbehavior on unclosed <style> and <script> tags
   # (typically from not passing the entire message to spamc, but possibly a DoS attack)
   $self->SUPER::parse("</style>") while exists $self->{inside}{style} && $self->{inside}{style} > 0;
+  $self->SUPER::parse("</script>") while exists $self->{inside}{script} && $self->{inside}{script} > 0;
 
   $self->SUPER::eof;
 
