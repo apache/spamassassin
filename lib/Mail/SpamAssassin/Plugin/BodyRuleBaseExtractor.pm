@@ -528,8 +528,8 @@ sub extract_hints {
   while ( $nread=read(IN,$inbuf,16384) ) { $fullstr .= $inbuf }
   defined $nread  or die "error reading from pipe: $!";
 
-  close IN      or die "error closing pipe: $!";
   unlink $tmpf  or die "cannot unlink $tmpf: $!";
+  close IN      or die "error closing pipe: $!";
   defined $fullstr  or warn "empty result from a pipe";
 
   # now parse the -Mre=debug output.
