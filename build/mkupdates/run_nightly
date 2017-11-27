@@ -165,12 +165,11 @@ make_tarball_for_version() {
     exit 5
   fi
 
-  mv $tmpdir/update.tgz      $UPDDIR/$svnrev.tar.gz            || exit $?
-  mv $tmpdir/update.tgz.sha1 $UPDDIR/$svnrev.tar.gz.sha1       || exit $?
-  mv $tmpdir/update.tgz.asc  $UPDDIR/$svnrev.tar.gz.asc        || exit $?
+  chmod 644 $tmpdir/update.*
 
-  chmod 644 $UPDDIR/$svnrev.*
-
+  mv $tmpdir/update.tgz      $UPDDIR/${svnrev}.tar.gz            || exit $?
+  mv $tmpdir/update.tgz.sha1 $UPDDIR/${svnrev}.tar.gz.sha1       || exit $?
+  mv $tmpdir/update.tgz.asc  $UPDDIR/${svnrev}.tar.gz.asc        || exit $?
 
   # next, create/update the new DNS record....
 
