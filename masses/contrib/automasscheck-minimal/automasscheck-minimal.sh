@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 # Licensed to the Apache Software Foundation (ASF) under one
 # or more contributor license agreements.  See the NOTICE file
@@ -89,11 +89,13 @@ run_masscheck() {
 upload_results() {
   # Occasionally rsync server fails to respond on first attempt,
   # so attempt upload a few times before giving up.
-  [ -z "$RSYNCMOD" ] && return 0
-  if [ -z "$RSYNC_PASSWORD" ] || [ "$RSYNC_PASSWORD" == "YOUR-PASSWORD" ]; then
+  [[ -z "$RSYNCMOD" ]] && return 0
+  if [[ -z "$RSYNC_PASSWORD" ]] || [[ "$RSYNC_PASSWORD" == "YOUR-PASSWORD" ]]; then
     return 0
   fi
-  for TRY in `seq 1 5`; do
+  TRY=0
+  while [[ "$TRY" -le 5 ]]; do
+    ((TRY++))
     ARGS="-qPcvz $LOGLIST $RSYNC_USERNAME@rsync.spamassassin.org::$RSYNCMOD/"
     echo "rsync $ARGS"
     rsync $ARGS && break
