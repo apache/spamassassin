@@ -271,7 +271,7 @@ echo "VERSIONS UPDATE PASSED ON: $TESTED_VERSIONS"
 # publish update
 if [[ ! -z "$TESTED_VERSIONS" ]]; then
   (
-    chmod 544 $TMPDIR/$REVISION.tar.gz* &&
+    chmod 644 $TMPDIR/$REVISION.tar.gz* &&
     cp -a $TMPDIR/$REVISION.tar.gz* $UPDATEDIR/
   ) || exit 5
 
