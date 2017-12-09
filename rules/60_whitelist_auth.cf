@@ -39,15 +39,18 @@ ifplugin Mail::SpamAssassin::Plugin::SPF
 # Whitelist and blacklist addresses are now file-glob-style patterns, so
 # "friend@somewhere.com", "*@isp.com", or "*.domain.net" will all work.
 
-whitelist_auth *@facebookmail.com
-whitelist_auth *@*.walmart.com
-whitelist_auth *@*.usaa.com
-whitelist_auth *@*.citi.com
-whitelist_auth *@*.chase.com
-whitelist_auth *@*.dropboxmail.com
-whitelist_auth *@wellsfargo.com
-whitelist_auth *@*.wellsfargo.com
-whitelist_auth *@*.bankofamerica.com
+def_whitelist_auth *@facebookmail.com
+def_whitelist_auth *@*.walmart.com
+def_whitelist_auth *@*.usaa.com
+def_whitelist_auth *@*.citi.com
+def_whitelist_auth *@*.chase.com
+def_whitelist_auth *@*.dropboxmail.com
+def_whitelist_auth *@wellsfargo.com
+def_whitelist_auth *@*.wellsfargo.com
+def_whitelist_auth *@*.bankofamerica.com
+def_whitelist_auth *@postmaster.aol.com
+def_whitelist_auth *@usbank.com
+def_whitelist_auth *@usps.gov
 whitelist_auth *@*.instagram.com
 whitelist_auth *@ups.com
 whitelist_auth *@*.fedex.com
