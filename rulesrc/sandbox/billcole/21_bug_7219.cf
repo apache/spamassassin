@@ -1,0 +1,9 @@
+# Improvements to jhardin's versions to deal with bugs 7219/7519
+
+body	__BODY_TEXT_LINE_FULL    /^\s*\S/
+tflags	__BODY_TEXT_LINE_FULL    multiple maxhits=3
+header	__SUBJECT_HAS_NON_SPACE  Subject =~ /\S/
+meta	__BODY_TEXT_LINE         __BODY_TEXT_LINE_FULL - __SUBJECT_HAS_NON_SPACE
+meta	__BODY_SINGLE_WORD    __BODY_TEXT_LINE < 2 && !__EMPTY_BODY && !__SMIME_MESSAGE && ((__SINGLE_WORD_LINE && !__SINGLE_WORD_SUBJ) || __SINGLE_WORD_LINE > 1)
+meta	__BODY_URI_ONLY      __BODY_TEXT_LINE < 2 && __HAS_ANY_URI && !__SMIME_MESSAGE
+meta	__EMPTY_BODY         __BODY_TEXT_LINE < 1 && !__SMIME_MESSAGE
