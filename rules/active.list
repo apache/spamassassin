@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus ena-week0 ena-week1 ena-week2 ena-week3 giovanni grenier jarif mmiroslaw-mails-ham mmiroslaw-mails-spam thendrikx; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus ena-week0 ena-week1 ena-week2 ena-week3 giovanni jarif jbrooks llanga mmiroslaw-mails-ham mmiroslaw-mails-spam; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus ena-week0 ena-week1 ena-week2 ena-week3 giovanni jarif jbrooks llanga
+# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus ena-week0 ena-week1 ena-week2 ena-week3 giovanni grenier jarif jbrooks mmiroslaw-mails-ham mmiroslaw-mails-spam thendrikx; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus ena-week0 ena-week1 ena-week2 ena-week3 giovanni jarif llanga mmiroslaw-mails-ham mmiroslaw-mails-spam; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus ena-week0 ena-week1 ena-week2 ena-week3 giovanni jarif jbrooks llanga mmiroslaw-mails-ham mmiroslaw-mails-spam
 
 # tflags publish
 AC_BR_BONANZA
@@ -445,9 +445,6 @@ IMG_ALT_HSPACE_CID_ALIGN
 # good enough
 IMG_DIRECT_TO_MX
 
-# good enough
-KB_DATE_CONTAINS_TAB
-
 # tflags publish
 LIST_PRTL_PUMPDUMP
 
@@ -841,17 +838,11 @@ SUBJECT_IN_BLACKLIST
 # tflags userconf
 SUBJECT_IN_WHITELIST
 
-# good enough
-SUBJECT_NEEDS_ENCODING
-
 # tflags net
 SURBL_BLOCKED
 
 # tflags publish
 SYSADMIN
-
-# good enough
-TAB_IN_FROM
 
 # good enough
 TBIRD_SUSP_MIME_BDRY
@@ -929,37 +920,49 @@ TVD_VISIT_PHARMA
 TW_GIBBERISH_MANY
 
 # good enough
-ADVANCE_FEE_2_NEW_FRM_MNY
+ADVANCE_FEE_3_NEW_FRM_MNY
 
 # good enough
-AXB_XMAILER_MIMEOLE_OL_1ECD5
+ADVANCE_FEE_4_NEW_FRM_MNY
 
 # good enough
-BODY_EMPTY
+ADVANCE_FEE_5_NEW
 
 # good enough
-BODY_SINGLE_URI
+AXB_X_FF_SEZ_S
 
 # good enough
-FILL_THIS_FORM_LOAN
+COMPENSATION
 
 # good enough
-FSL_HELO_BARE_IP_2
+FILL_THIS_FORM_LONG
 
 # good enough
-LIST_PARTIAL_SHORT_MSG
+FSL_MIME_NO_TEXT
 
 # good enough
-LOTTO_AGENT
+FUZZY_SPRM
 
 # good enough
-MONEY_FORM
+HDRS_LCASE
 
 # good enough
-MONEY_FROM_MISSP
+HK_SCAM_N15
 
 # good enough
-OBFU_DOC_ATTACH
+HK_SCAM_N3
+
+# good enough
+MIMEOLE_DIRECT_TO_MX
+
+# good enough
+MONEY_BARRISTER
+
+# good enough
+MSGID_NOFQDN1
+
+# good enough
+TO_NO_BRKTS_FROM_MSSP
 
 # tflags publish
 UC_GIBBERISH_OBFU
