@@ -2,19 +2,19 @@
 
 describe	__HAS_IMG_SRC	Has an img tag on a non-quoted line
 rawbody		__HAS_IMG_SRC	/^[^>].*<img +src="/i
-tflags		multiple
+tflags		__HAS_IMG_SRC	multiple
 
 describe	__HAS_HREF	Has an anchor tag with a href attribute in non-quoted line
 rawbody		__HAS_HREF	/^[^>].*<a +href="/i
-tflags		multiple
+tflags		__HAS_HREF	multiple
 
 describe	__HAS_IMG_SRC_ONECASE	Has an img tag on a non-quoted line with consistent case
 rawbody		__HAS_IMG_SRC_ONECASE	/^[^>].*<(img +src|IMG +SRC)="/i
-tflags		multiple
+tflags		__HAS_IMG_SRC_ONECASE	multiple
 
 describe	__HAS_HREF_ONECASE	Has an anchor tag with a href attribute in non-quoted line with consistent case
 rawbody		__HAS_HREF_ONECASE	/^[^>].*<(a +href|A +HREF)="/i
-tflags		multiple
+tflags		__HAS_HREF_ONECASE	multiple
 
 describe	__MIXED_IMG_CASE	Has img tags with mixed-up cases in non-quoted lines
 meta		__MIXED_IMG_CASE	__HAS_IMG_SRC - __HAS_IMG_SRC_ONECASE > 2
