@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus ena-week0 ena-week1 ena-week2 ena-week3 giovanni grenier jarif jbrooks mmiroslaw-mails-ham mmiroslaw-mails-spam thendrikx; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus ena-week0 ena-week1 ena-week2 ena-week3 giovanni jarif llanga mmiroslaw-mails-ham mmiroslaw-mails-spam; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus ena-week0 ena-week1 ena-week2 ena-week3 giovanni jarif jbrooks llanga mmiroslaw-mails-ham mmiroslaw-mails-spam
+# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus ena-week0 ena-week1 ena-week2 ena-week3 giovanni grenier jarif mmiroslaw-mails-ham mmiroslaw-mails-spam thendrikx; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus ena-week0 ena-week1 ena-week2 ena-week3 giovanni jarif jbrooks llanga mmiroslaw-mails-ham mmiroslaw-mails-spam; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus ena-week0 ena-week1 ena-week2 ena-week3 giovanni jarif llanga mmiroslaw-mails-ham mmiroslaw-mails-spam
 
 # tflags publish
 AC_BR_BONANZA
@@ -75,6 +75,9 @@ ALL_TRUSTED
 
 # good enough
 ANY_PILL_PRICE
+
+# good enough
+APOSTROPHE_FROM
 
 # good enough
 APOSTROPHE_TOCC
@@ -205,9 +208,6 @@ DOS_OUTLOOK_TO_MX
 # good enough
 DUP_SUSP_HDR
 
-# good enough
-DX_TEXT_01
-
 # tflags publish
 DX_TEXT_02
 
@@ -322,6 +322,9 @@ FSL_HELO_DEVICE
 # good enough
 FSL_HELO_FAKE
 
+# good enough
+FSL_MIME_NO_TEXT
+
 # tflags publish
 FSL_NEW_HELO_USER
 
@@ -351,6 +354,9 @@ FUZZY_SAVINGS
 
 # tflags publish
 FUZZY_SECURITY
+
+# good enough
+FUZZY_SPRM
 
 # tflags publish
 FUZZY_UNSUBSCRIBE
@@ -422,13 +428,7 @@ HK_NAME_DRUGS
 HK_RANDOM_ENVFROM
 
 # good enough
-HK_RANDOM_FROM
-
-# good enough
 HK_SCAM_N2
-
-# good enough
-HK_SCAM_N8
 
 # good enough
 HK_SCAM_S7
@@ -838,6 +838,9 @@ SUBJECT_IN_BLACKLIST
 # tflags userconf
 SUBJECT_IN_WHITELIST
 
+# good enough
+SUBJECT_NEEDS_ENCODING
+
 # tflags net
 SURBL_BLOCKED
 
@@ -920,49 +923,37 @@ TVD_VISIT_PHARMA
 TW_GIBBERISH_MANY
 
 # good enough
-ADVANCE_FEE_3_NEW_FRM_MNY
+ADVANCE_FEE_2_NEW_FRM_MNY
 
 # good enough
-ADVANCE_FEE_4_NEW_FRM_MNY
+AXB_XMAILER_MIMEOLE_OL_1ECD5
 
 # good enough
-ADVANCE_FEE_5_NEW
+BODY_EMPTY
 
 # good enough
-AXB_X_FF_SEZ_S
+BODY_SINGLE_URI
 
 # good enough
-COMPENSATION
+FILL_THIS_FORM_LOAN
 
 # good enough
-FILL_THIS_FORM_LONG
+FSL_HELO_BARE_IP_2
 
 # good enough
-FSL_MIME_NO_TEXT
+LIST_PARTIAL_SHORT_MSG
 
 # good enough
-FUZZY_SPRM
+LOTTO_AGENT
 
 # good enough
-HDRS_LCASE
+MONEY_FORM
 
 # good enough
-HK_SCAM_N15
+MONEY_FROM_MISSP
 
 # good enough
-HK_SCAM_N3
-
-# good enough
-MIMEOLE_DIRECT_TO_MX
-
-# good enough
-MONEY_BARRISTER
-
-# good enough
-MSGID_NOFQDN1
-
-# good enough
-TO_NO_BRKTS_FROM_MSSP
+SPELLED_OUT_NUMBER
 
 # tflags publish
 UC_GIBBERISH_OBFU
