@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus ena-week0 ena-week1 ena-week2 ena-week3 giovanni grenier jarif jbrooks mmiroslaw-mails-ham mmiroslaw-mails-spam thendrikx; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus ena-week0 ena-week1 ena-week2 ena-week3 giovanni jarif jbrooks llanga mmiroslaw-mails-ham mmiroslaw-mails-spam; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus ena-week0 ena-week1 ena-week2 ena-week3 giovanni jarif jbrooks llanga mmiroslaw-mails-ham mmiroslaw-mails-spam
+# with results from: day 1: darxus ena-week0 ena-week1 ena-week2 ena-week3 giovanni grenier jarif jbrooks mmiroslaw-mails-ham mmiroslaw-mails-spam thendrikx; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus ena-week0 ena-week1 ena-week2 ena-week3 giovanni jarif jbrooks llanga mmiroslaw-mails-ham mmiroslaw-mails-spam; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus ena-week0 ena-week1 ena-week2 ena-week3 giovanni jarif jbrooks llanga mmiroslaw-mails-ham mmiroslaw-mails-spam
 
 # tflags publish
 AC_BR_BONANZA
@@ -195,9 +195,6 @@ DOS_ANAL_SPAM_MAILER
 
 # good enough
 DOS_OE_TO_MX
-
-# good enough
-DOS_OE_TO_MX_IMAGE
 
 # good enough
 DOS_OUTLOOK_TO_MX
@@ -504,9 +501,6 @@ NSL_RCVD_FROM_USER
 
 # good enough
 NSL_RCVD_HELO_USER
-
-# good enough
-OBFU_DOC_ATTACH
 
 # tflags publish
 OBFU_JVSCR_ESC
@@ -908,46 +902,28 @@ TVD_VISIT_PHARMA
 TW_GIBBERISH_MANY
 
 # good enough
-ADVANCE_FEE_3_NEW_FRM_MNY
+AXB_XMAILER_MIMEOLE_OL_1ECD5
 
 # good enough
-ADVANCE_FEE_4_NEW_FRM_MNY
+BODY_SINGLE_URI
 
 # good enough
-ADVANCE_FEE_5_NEW
+DUP_SUSP_HDR
 
 # good enough
-AXB_X_FF_SEZ_S
+FILL_THIS_FORM_LOAN
 
 # good enough
-BODY_EMPTY
+LIST_PARTIAL_SHORT_MSG
 
 # good enough
-COMPENSATION
+LOTTO_AGENT
 
 # good enough
-FILL_THIS_FORM_LONG
+MONEY_FORM
 
 # good enough
-HDRS_LCASE
-
-# good enough
-HK_SCAM_N15
-
-# good enough
-HK_SCAM_N3
-
-# good enough
-MIMEOLE_DIRECT_TO_MX
-
-# good enough
-MONEY_BARRISTER
-
-# good enough
-MSGID_NOFQDN1
-
-# good enough
-TO_NO_BRKTS_FROM_MSSP
+MONEY_FROM_MISSP
 
 # tflags publish
 UC_GIBBERISH_OBFU
