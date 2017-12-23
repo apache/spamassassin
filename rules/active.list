@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus ena-week0 ena-week1 ena-week2 ena-week3 giovanni grenier jarif jbrooks mmiroslaw-mails-ham mmiroslaw-mails-spam thendrikx; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus ena-week0 ena-week1 ena-week2 ena-week3 giovanni jarif jbrooks llanga mmiroslaw-mails-ham mmiroslaw-mails-spam thendrikx; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus ena-week0 ena-week1 ena-week2 ena-week3 giovanni jarif jbrooks llanga
+# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus ena-week0 ena-week1 ena-week2 ena-week3 giovanni grenier jarif jbrooks mmiroslaw-mails-ham mmiroslaw-mails-spam thendrikx; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus ena-week0 ena-week1 ena-week2 ena-week3 giovanni jarif jbrooks llanga mmiroslaw-mails-ham mmiroslaw-mails-spam; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus ena-week0 ena-week1 ena-week2 ena-week3 giovanni jarif jbrooks llanga mmiroslaw-mails-ham mmiroslaw-mails-spam thendrikx
 
 # tflags publish
 AC_BR_BONANZA
@@ -84,9 +84,6 @@ APOSTROPHE_TOCC
 
 # good enough
 AXB_XMAILER_MIMEOLE_OL_024C2
-
-# good enough
-AXB_X_AOL_SEZ_S
 
 # tflags learn
 BAYES_00
@@ -881,6 +878,9 @@ TO_NO_BRKTS_NORDNS_HTML
 TO_NO_BRKTS_PCNT
 
 # good enough
+TVD_LONG_WORD5
+
+# good enough
 TVD_QUAL_MEDS
 
 # good enough
@@ -905,19 +905,43 @@ TVD_VISIT_PHARMA
 TW_GIBBERISH_MANY
 
 # good enough
-AXB_XMAILER_MIMEOLE_OL_1ECD5
+ADVANCE_FEE_3_NEW_FRM_MNY
 
 # good enough
-BODY_SINGLE_URI
+ADVANCE_FEE_4_NEW_FRM_MNY
 
 # good enough
-LIST_PARTIAL_SHORT_MSG
+ADVANCE_FEE_5_NEW
 
 # good enough
-LOTTO_AGENT
+AXB_X_FF_SEZ_S
 
 # good enough
-TVD_LONG_WORD5
+BODY_EMPTY
+
+# good enough
+COMPENSATION
+
+# good enough
+FILL_THIS_FORM_LONG
+
+# good enough
+FSL_HELO_BARE_IP_2
+
+# good enough
+HK_SCAM_N3
+
+# good enough
+MIMEOLE_DIRECT_TO_MX
+
+# good enough
+MONEY_BARRISTER
+
+# good enough
+MSGID_NOFQDN1
+
+# good enough
+TO_NO_BRKTS_FROM_MSSP
 
 # tflags publish
 UC_GIBBERISH_OBFU
