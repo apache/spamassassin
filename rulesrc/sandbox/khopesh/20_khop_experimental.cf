@@ -56,7 +56,7 @@ uri	 __SHORT_URL	/^http:\/\/[^\/]{3,6}\.\w\w\/[^\/]{3,8}\/?$/
 # anything that ranked 0.1% or more of twitter's traffic that day, plus anything
 # bold below that threshold.
 # 20130113 JHardin: split into __subrule + scored rule to fix dependencies broken by non-promotion
-uri	 __URL_SHORTENER	/^http:\/\/(?:bit\.ly|tinyurl\.com|ow\.ly|is\.gd|tumblr\.com|formspring\.me|ff\.im|youtu\.be|tl\.gd|plurk\.com|migre\.me|j\.mp|cli\.gs|goo\.gl|yfrog\.com|lnk\.ms|su\.pr|fb\.me|alturl\.com|wp\.me|ping\.fm|chatter\.com|post\.ly|twurl\.nl|tiny\.cc|4sq\.com|ustre\.am|short\.to|u\.nu|flic\.kr|budurl\.com|digg\.com|twitvid\.com|gowal\.la|om\.ly|justin\.tv|icio\.us|p\.gs|loopt\.us|tcrn\.ch|xrl\.us|wpo\.st|bkite\.com)\/[^\/]{3}\/?/
+uri	 __URL_SHORTENER	/^http:\/\/(?:bit\.ly|tinyurl\.com|ow\.ly|is\.gd|tumblr\.com|formspring\.me|ff\.im|youtu\.be|tl\.gd|plurk\.com|migre\.me|j\.mp|cli\.gs|goo\.gl|yfrog\.com|lnk\.ms|su\.pr|fb\.me|alturl\.com|wp\.me|ping\.fm|chatter\.com|post\.ly|twurl\.nl|tiny\.cc|4sq\.com|ustre\.am|short\.to|u\.nu|flic\.kr|budurl\.com|digg\.com|twitvid\.com|gowal\.la|om\.ly|justin\.tv|icio\.us|p\.gs|loopt\.us|tcrn\.ch|xrl\.us|wpo\.st|bkite\.com|t\.co)\/[^\/]{3}\/?/
 meta	 URL_SHORTENER	__URL_SHORTENER
 describe URL_SHORTENER	Has a shortened URL (can hide a blacklisted link)
 tflags	 URL_SHORTENER	nopublish
