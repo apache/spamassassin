@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus ena-week0 ena-week1 ena-week2 ena-week3 giovanni grenier jarif jbrooks mmiroslaw-mails-ham mmiroslaw-mails-spam thendrikx; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus ena-week0 ena-week1 ena-week2 ena-week3 giovanni jarif jbrooks llanga mmiroslaw-mails-ham mmiroslaw-mails-spam; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus ena-week0 ena-week1 ena-week2 ena-week3 giovanni jarif jbrooks llanga mmiroslaw-mails-ham mmiroslaw-mails-spam
+# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus ena-week0 ena-week1 ena-week2 ena-week3 giovanni grenier jarif jbrooks mmiroslaw-mails-ham mmiroslaw-mails-spam thendrikx; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja ena-week0 ena-week1 ena-week2 ena-week3 jarif llanga mmiroslaw-mails-ham mmiroslaw-mails-spam; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus ena-week0 ena-week1 ena-week2 ena-week3 giovanni jarif jbrooks llanga mmiroslaw-mails-ham mmiroslaw-mails-spam
 
 # tflags publish
 AC_BR_BONANZA
@@ -60,6 +60,9 @@ ADVANCE_FEE_4_NEW
 
 # good enough
 ADVANCE_FEE_4_NEW_MONEY
+
+# good enough
+ADVANCE_FEE_5_NEW_FORM
 
 # good enough
 ADVANCE_FEE_5_NEW_FRM_MNY
@@ -296,6 +299,9 @@ FROM_WORDY
 FROM_WORDY_SHORT
 
 # good enough
+FROM_WSP_TRAIL
+
+# good enough
 FSL_BULK_SIG
 
 # good enough
@@ -339,6 +345,9 @@ FUZZY_SECURITY
 
 # tflags publish
 FUZZY_UNSUBSCRIBE
+
+# good enough
+GAPPY_PILLS
 
 # tflags publish
 GOOGLE_DOCS_PHISH
@@ -746,6 +755,9 @@ REPLYTO_WITHOUT_TO_CC
 S25R_4
 
 # good enough
+SERGIO_SUBJECT_PORN014
+
+# good enough
 SERGIO_SUBJECT_VIAGRA01
 
 # good enough
@@ -893,43 +905,46 @@ TVD_VISIT_PHARMA
 TW_GIBBERISH_MANY
 
 # good enough
-ADVANCE_FEE_5_NEW_FORM
+ADVANCE_FEE_3_NEW_FRM_MNY
 
 # good enough
-AXB_XMAILER_MIMEOLE_OL_1ECD5
+ADVANCE_FEE_4_NEW_FRM_MNY
 
 # good enough
-BODY_SINGLE_URI
+ADVANCE_FEE_5_NEW
 
 # good enough
-FILL_THIS_FORM_LOAN
+AXB_X_FF_SEZ_S
 
 # good enough
-FROM_WSP_TRAIL
+BODY_EMPTY
 
 # good enough
-GAPPY_PILLS
+COMPENSATION
 
 # good enough
-HK_RANDOM_FROM
+FILL_THIS_FORM_FRAUD_PHISH
 
 # good enough
-HK_SCAM_N15
+FILL_THIS_FORM_LONG
 
 # good enough
-LIST_PARTIAL_SHORT_MSG
+FSL_HELO_BARE_IP_2
 
 # good enough
-LOTTO_AGENT
+HK_SCAM_N3
 
 # good enough
-MONEY_FORM
+MIMEOLE_DIRECT_TO_MX
 
 # good enough
-MONEY_FROM_MISSP
+MONEY_BARRISTER
 
 # good enough
-SERGIO_SUBJECT_PORN014
+MSGID_NOFQDN1
+
+# good enough
+TO_NO_BRKTS_FROM_MSSP
 
 # tflags publish
 UC_GIBBERISH_OBFU
@@ -1011,9 +1026,6 @@ URI_DQ_UNSUB
 
 # tflags publish
 URI_GOOGLE_PROXY
-
-# good enough
-URI_HIDDEN_2
 
 # tflags userconf
 URI_HOST_IN_BLACKLIST
