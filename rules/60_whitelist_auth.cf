@@ -40,6 +40,7 @@ ifplugin Mail::SpamAssassin::Plugin::SPF
 # "friend@somewhere.com", "*@isp.com", or "*.domain.net" will all work.
 
 def_whitelist_auth *@facebookmail.com
+def_whitelist_auth *@walmart.com
 def_whitelist_auth *@*.walmart.com
 def_whitelist_auth *@*.usaa.com
 def_whitelist_auth *@*.citi.com
@@ -51,10 +52,31 @@ def_whitelist_auth *@*.bankofamerica.com
 def_whitelist_auth *@postmaster.aol.com
 def_whitelist_auth *@usbank.com
 def_whitelist_auth *@usps.gov
-whitelist_auth *@*.instagram.com
-whitelist_auth *@ups.com
-whitelist_auth *@*.fedex.com
-whitelist_auth *@*.capitalone.com
+def_whitelist_auth *@*.instagram.com
+def_whitelist_auth *@ups.com
+def_whitelist_auth *@*.fedex.com
+def_whitelist_auth *@*.capitalone.com
+def_whitelist_auth *@*.khanacademy.org
+def_whitelist_auth *@*.wordpress.com
+def_whitelist_auth *@*.visa.com
+def_whitelist_auth *@visapayablesautomation.com
+def_whitelist_auth *@*.pinterest.com
+def_whitelist_auth *@indeed.com
+def_whitelist_auth *@*.hyatt.com
+def_whitelist_auth *@*.google.com
+def_whitelist_auth *@*.sears.com
+def_whitelist_auth *@*.jcpenney.com
+def_whitelist_auth *@*.landsend.com
+def_whitelist_auth *@squaretrade.com
+def_whitelist_auth *@bn.com
+def_whitelist_auth *@emailbedbathandbeyond.com
+def_whitelist_auth *@*.joann.com
+def_whitelist_auth *@*.dollargeneral.com
+def_whitelist_auth *@*.talbots.com
+def_whitelist_auth *@*.wayfair.com
+def_whitelist_auth *@*.nordstrom.com
+def_whitelist_auth *@*.zillow.com
+def_whitelist_auth *@mktgdillards.com
 
 
 endif # Mail::SpamAssassin::Plugin::SPF
