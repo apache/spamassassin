@@ -21,6 +21,7 @@
 #include <string.h>
 #include <assert.h>
 #include <stdlib.h>
+#include <err.h>
 #include "getopt.h"
 
 #ifdef WIN32
