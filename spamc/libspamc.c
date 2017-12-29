@@ -38,6 +38,7 @@
 #define sleep Sleep
 #include <io.h>
 #else
+#include <strings.h>
 #include <syslog.h>
 #include <unistd.h>
 #include <sys/types.h>
