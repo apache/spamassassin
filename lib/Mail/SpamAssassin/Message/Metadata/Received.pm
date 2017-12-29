@@ -84,6 +84,8 @@ sub parse_received_headers {
   $self->{last_trusted_relay_index} = -1;	# last counting from the top,
   $self->{last_internal_relay_index} = -1;	# first in time
 
+  $self->{allow_mailfetch_markers} = 1;         # This needs to be set for the
+                                                # first Received: header
   # now figure out what relays are trusted...
   my $trusted = $permsgstatus->{main}->{conf}->{trusted_networks};
   my $internal = $permsgstatus->{main}->{conf}->{internal_networks};
@@ -238,11 +240,11 @@ sub parse_received_headers {
 
     if ($in_trusted) {
       push (@{$self->{relays_trusted}}, $relay);
-      $self->{allow_fetchmail_markers} = 1;
+      $self->{allow_mailfetch_markers} = 1;
       $self->{last_trusted_relay_index}++;
     } else {
       push (@{$self->{relays_untrusted}}, $relay);
-      $self->{allow_fetchmail_markers} = 0;
+      $self->{allow_mailfetch_markers} = 0;
     }
 
     if ($in_internal) {
@@ -873,12 +875,19 @@ sub parse_received_line {
       $helo = $1; $rdns = $2; $ip = $3; $by = $4; goto enough;
     }
 
+    # Identify fetch-from-server incidents:
+    # Fetchmail:
     # Received: from cabbage.jmason.org [127.0.0.1]
     # by localhost with IMAP (fetchmail-5.9.0)
     # for jm@localhost (single-drop); Thu, 13 Mar 2003 20:39:56 -0800 (PST)
-    if (/fetchmail/&&/^(\S+) (?:\[(${IP_ADDRESS})\] )?by (\S+) with \S+ \(fetchmail/) {
+    #
+    # Getmail:
+    # Received: from pop3.mail.dk (195.41.46.251) by loki.valhalla with POP3;
+    # 14 Apr 2010 11:14:29 -0000
+    #
+    if (/with (?:POP3|IMAP)/) {
       $self->found_pop_fetcher_sig();
-      return 0;		# skip fetchmail handovers
+      return 0;		# skip mail fetcher handovers
     }
 
     # Let's try to support a few qmailish formats in one;
@@ -914,14 +923,6 @@ sub parse_received_line {
     # _bushisevil_@mail.com; Thu, 13 Feb 2003 15:59:28 -0500
     if (/ with http for /&&/^\[(${IP_ADDRESS})\] by (\S+) with http for /) {
       $ip = $1; $by = $2; goto enough;
-    }
-
-    # Received: from po11.mit.edu [18.7.21.73]
-    # by stark.dyndns.tv with POP3 (fetchmail-5.9.7)
-    # for stark@localhost (single-drop); Tue, 18 Feb 2003 10:43:09 -0500 (EST)
-    # by po11.mit.edu (Cyrus v2.1.5) with LMTP; Tue, 18 Feb 2003 09:49:46 -0500
-    if (/ with POP3 /&&/^(\S+) \[(${IP_ADDRESS})\] by (\S+) with POP3 /) {
-      $rdns = $1; $ip = $2; $by = $3; goto enough;
     }
 
     # Received: from snake.corp.yahoo.com(216.145.52.229) by x.x.org via smap (V1.3)
@@ -1378,13 +1379,13 @@ sub make_relay_as_string {
 # spamcop does this, and it's a great idea ;)
 sub found_pop_fetcher_sig {
   my ($self) = @_;
-  if ($self->{allow_fetchmail_markers}) {
-    dbg("received-header: found fetchmail marker, restarting parse");
+  if ($self->{allow_mailfetch_markers}) {
+    dbg("received-header: found mail fetcher marker, restarting parse");
     $self->{relays_trusted} = [ ];
     $self->{relays_internal} = [ ];
     $self->{relays_external} = [ ];
   } else {
-    dbg("received-header: found fetchmail marker outside trusted area, ignored");
+    dbg("received-header: found mail fetcher marker outside trusted area, ignored");
   }
 }
 
