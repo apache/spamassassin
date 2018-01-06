@@ -189,7 +189,7 @@ make_tarball_for_version() {
   # good a place as any to do this!
   # note: for manual updates, the file permissions should be 0444 so let's clean
   # out only 0644 (automatic) updates.  a bit of a kluge, but ...
-  find $UPDDIR -mtime +4 -perm 0644 -type f -name '*.tar.*' -delete
+  #find $UPDDIR -mtime +4 -perm 0644 -type f -name '*.tar.*' -delete
 
 }
 
