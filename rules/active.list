@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus ena-week0 ena-week1 ena-week2 ena-week3 giovanni grenier jarif jbrooks mmiroslaw-mails-ham mmiroslaw-mails-spam thendrikx; day 2: darxus ena-week0 ena-week1 ena-week2 ena-week3 giovanni jbrooks llanga; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus ena-week0 ena-week1 ena-week2 ena-week3 giovanni jbrooks llanga mmiroslaw-mails-ham mmiroslaw-mails-spam thendrikx
+# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus ena-week0 ena-week1 ena-week2 ena-week3 giovanni grenier jarif jbrooks mmiroslaw-mails-ham mmiroslaw-mails-spam thendrikx; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus ena-week0 ena-week1 ena-week2 ena-week3 giovanni jarif jbrooks llanga mmiroslaw-mails-ham mmiroslaw-mails-spam; day 3: darxus ena-week0 ena-week1 ena-week2 ena-week3 giovanni jbrooks llanga
 
 # tflags publish
 AC_BR_BONANZA
@@ -379,9 +379,6 @@ HASHCASH_2SPEND
 # tflags userconf
 HASHCASH_HIGH
 
-# good enough
-HDRS_MISSP
-
 # tflags publish
 HEADER_FROM_DIFFERENT_DOMAINS
 
@@ -489,9 +486,6 @@ NSL_RCVD_FROM_USER
 
 # good enough
 NSL_RCVD_HELO_USER
-
-# good enough
-OBFU_ATTACH_MISSP
 
 # tflags publish
 OBFU_JVSCR_ESC
@@ -797,6 +791,9 @@ STOCK_LOW_CONTRAST
 STOCK_TIP
 
 # good enough
+STOX_REPLY_TYPE
+
+# good enough
 STOX_REPLY_TYPE_WITHOUT_QUOTES
 
 # tflags publish
@@ -884,43 +881,37 @@ TVD_VISIT_PHARMA
 TW_GIBBERISH_MANY
 
 # good enough
-ADVANCE_FEE_3_NEW_FRM_MNY
+AXB_XMAILER_MIMEOLE_OL_1ECD5
 
 # good enough
-ADVANCE_FEE_4_NEW_FRM_MNY
+BODY_SINGLE_URI
 
 # good enough
-ADVANCE_FEE_5_NEW
+FILL_THIS_FORM_LOAN
 
 # good enough
-AXB_X_FF_SEZ_S
+HK_RANDOM_FROM
 
 # good enough
-BIGNUM_EMAILS
+HK_SCAM_N15
 
 # good enough
-BODY_EMPTY
+LIST_PARTIAL_SHORT_MSG
 
 # good enough
-COMPENSATION
+LOTTO_AGENT
 
 # good enough
-FILL_THIS_FORM_LONG
+MONEY_BARRISTER
 
 # good enough
-HDRS_LCASE
+MONEY_FORM
 
 # good enough
-HK_SCAM_N3
+MONEY_FROM_MISSP
 
 # good enough
-MIMEOLE_DIRECT_TO_MX
-
-# good enough
-MSGID_NOFQDN1
-
-# good enough
-TO_NO_BRKTS_FROM_MSSP
+SERGIO_SUBJECT_PORN014
 
 # tflags publish
 UC_GIBBERISH_OBFU
