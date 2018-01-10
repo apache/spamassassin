@@ -171,6 +171,9 @@ make_tarball_for_version() {
   mv $tmpdir/update.tgz.sha1 $UPDDIR/${svnrev}.tar.gz.sha1       || exit $?
   mv $tmpdir/update.tgz.asc  $UPDDIR/${svnrev}.tar.gz.asc        || exit $?
 
+  # Give the mirrors time to pull the new files above
+  sleep 600
+
   # next, create/update the new DNS record....
 
   # Versions >= 3.4.1 are CNAMEd to this DNS record:
