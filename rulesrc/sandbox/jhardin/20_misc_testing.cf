@@ -1638,9 +1638,9 @@ header	    __NO_TRUSTED_RELAY	X-Spam-Relays-Trusted !~ /ip=/i
 #body        CANT_SEE_AD       /\b(?:can(?:no|')?t|(?:aren'?t |not |un)able to) (?:view|read|see|scan|witness|consider|look at|participate in|take in|(?:make|check|scope) out|eye|scrutinize|watch|display|observe) (?:our|this|the) (?:commercial[-. ]|ad(?:v[-.]?ert[i1l]se-?ment)? |images |newsletter |mailing ){1,2}(?:at all|(?:(?:down )?(?:below|underneath))|in (?:your|this) mail|(?:due to|because(?: of)?|as|from) (?:no |missing |unloaded |blocked )?images)\b/i
 body        __CANT_SEE_AD_1   /\b(?:can(?:no|')?t|(?:aren'?t[-,!\s]{1,3}|not[-,!\s]{1,3}|un)able[-,!\s]{1,3}to)[-,!\s]{1,3}(?:(?!our|this|the)\w{1,12}[-,\s]{1,3}){1,2}(?:our|this|the)[-.,\s*]{1,3}(?:commercial[-.,\s]{1,3}|ad(?:v[-.]?ert[i1l]se-?ment)?[-.,\s]{1,3}|images |newsletter |mailing ){1,2}(?:at all|(?:(?:down )?(?:below|underneath))|in (?:your|this) mail|(?:due to|because(?: of)?|as|from) (?:no |missing |unloaded |blocked )?(?:images|graphics))\b/i
 body        __CANT_SEE_AD_2   /\b(?:issue|problem|trouble) (?:getting|viewing|with) (?:(?:our|the) )?(?:message|content|e-?mail|details)(?: below)?[.?] (?:please|go ahead and) (?:click|browse)\b/i
-meta        CANT_SEE_AD       __CANT_SEE_AD_1 || __CANT_SEE_AD_2
+meta        CANT_SEE_AD       (__CANT_SEE_AD_1 || __CANT_SEE_AD_2) && !__DOS_HAS_LIST_UNSUB
 describe    CANT_SEE_AD       You really want to see our spam.
-score       CANT_SEE_AD       3.000	# limit
+score       CANT_SEE_AD       2.500	# limit
 tflags      CANT_SEE_AD       publish
 
 uri         __128_HEX_URI     m,/[0-9a-f]{128},
