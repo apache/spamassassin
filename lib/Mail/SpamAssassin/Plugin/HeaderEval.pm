@@ -53,6 +53,7 @@ sub new {
   $self->register_eval_rule("check_for_forged_eudoramail_received_headers");
   $self->register_eval_rule("check_for_forged_yahoo_received_headers");
   $self->register_eval_rule("check_for_forged_juno_received_headers");
+  $self->register_eval_rule("check_for_forged_gmail_received_headers");
   $self->register_eval_rule("check_for_matching_env_and_hdr_from");
   $self->register_eval_rule("sorted_recipients");
   $self->register_eval_rule("similar_recipients");
@@ -572,6 +573,22 @@ sub check_for_forged_juno_received_headers {
   }
 
   return 0;   
+}
+
+sub check_for_forged_gmail_received_headers {
+  my ($self, $pms) = @_;
+  use constant GOOGLE_MESSAGE_STATE_LENGTH => 102;
+
+  my $from = $pms->get('From:addr');
+  if ($from !~ /\bgmail\.com$/i) { return 0; }
+
+  my $xgms = $pms->get('X-Gm-Message-State');
+  my $xreceived = $pms->get('X-Received');
+
+  if (length($xgms) eq GOOGLE_MESSAGE_STATE_LENGTH) { return 0; }
+  if ($xreceived =~ /by 10\.\S+ with SMTP id \S+/) { return 0; }
+
+  return 1;
 }
 
 sub check_for_matching_env_and_hdr_from {
