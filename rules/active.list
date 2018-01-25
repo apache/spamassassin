@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc darxus ena-week0 ena-week1 ena-week2 ena-week3 giovanni grenier jarif jbrooks mmiroslaw-mails-ham mmiroslaw-mails-spam thendrikx; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus ena-week0 ena-week1 ena-week2 ena-week3 jarif jbrooks llanga mmiroslaw-mails-ham mmiroslaw-mails-spam; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus ena-week0 ena-week1 ena-week2 ena-week3 jarif jbrooks llanga mmiroslaw-mails-ham mmiroslaw-mails-spam
+# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus ena-week0 ena-week1 ena-week2 ena-week3 giovanni grenier jarif jbrooks mmiroslaw-mails-ham mmiroslaw-mails-spam thendrikx; day 2: axb-coi-bulk axb-generic axb-ham-misc darxus ena-week0 ena-week1 ena-week2 ena-week3 jarif jbrooks llanga mmiroslaw-mails-ham mmiroslaw-mails-spam; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus ena-week0 ena-week1 ena-week2 ena-week3 jarif jbrooks llanga mmiroslaw-mails-ham mmiroslaw-mails-spam
 
 # tflags publish
 AC_BR_BONANZA
@@ -239,16 +239,10 @@ FROM_IN_TO_AND_SUBJ
 FROM_LOCAL_NOVOWEL
 
 # good enough
-FROM_MISSPACED
-
-# good enough
 FROM_MISSP_FREEMAIL
 
 # good enough
 FROM_MISSP_MSFT
-
-# good enough
-FROM_MISSP_REPLYTO
 
 # tflags net
 FROM_MISSP_SPF_FAIL
@@ -378,9 +372,6 @@ HK_NAME_DRUGS
 
 # good enough
 HK_SCAM_N2
-
-# good enough
-HK_SCAM_S7
 
 # tflags userconf
 HTML_CHARSET_FARAWAY
@@ -824,9 +815,6 @@ TO_NO_BRKTS_NORDNS_HTML
 TO_NO_BRKTS_PCNT
 
 # good enough
-TVD_PH_SUBJ_META1
-
-# good enough
 TVD_QUAL_MEDS
 
 # good enough
@@ -845,13 +833,22 @@ TVD_VISIT_PHARMA
 TW_GIBBERISH_MANY
 
 # good enough
-BODY_SINGLE_URI
+ADVANCE_FEE_4_NEW_FRM_MNY
 
 # good enough
-FILL_THIS_FORM_LOAN
+CK_HELO_GENERIC
 
 # good enough
-LIST_PARTIAL_SHORT_MSG
+FILL_THIS_FORM_LONG
+
+# good enough
+MIMEOLE_DIRECT_TO_MX
+
+# good enough
+MONEY_FROM_MISSP
+
+# good enough
+TVD_SPACE_RATIO_MINFP
 
 # tflags publish
 UC_GIBBERISH_OBFU
@@ -1005,9 +1002,6 @@ USER_IN_WHITELIST
 
 # tflags userconf
 USER_IN_WHITELIST_TO
-
-# good enough
-XFER_LOTSA_MONEY
 
 # tflags publish
 XM_PHPMAILER_FORGED
