@@ -345,16 +345,23 @@ sub _check_for_forged_hotmail_received_headers {
 
   my $ip = $pms->get('X-Originating-Ip',undef);
   my $IP_ADDRESS = IP_ADDRESS;
+  my $orig = $pms->get('X-OriginatorOrg',undef);
+  my $ORIGINATOR = 'hotmail.com';
 
   if (defined $ip && $ip =~ /$IP_ADDRESS/) { $ip = 1; } else { $ip = 0; }
+  if (defined $orig && $orig =~ /$ORIGINATOR/) { $orig = 1; } else { $orig = 0; }
 
   # Hotmail formats its received headers like this:
   # Received: from hotmail.com (f135.law8.hotmail.com [216.33.241.135])
+  # or like
+  # Received: from EUR01-VE1-obe.outbound.protection.outlook.com (mail-oln040092066056.outbound.protection.outlook.com [40.92.66.56])
   # spammers do not ;)
 
   if ($self->gated_through_received_hdr_remover($pms)) { return; }
 
   if ($rcvd =~ /from (?:\S*\.)?hotmail.com \(\S+\.hotmail(?:\.msn)?\.com[ \)]/ && $ip)
+                { return; }
+  if ($rcvd =~ /from \S*\.outbound\.protection\.outlook\.com \(\S+\.outbound\.protection\.outlook\.com[ \)]/ && $orig)
                 { return; }
   if ($rcvd =~ /from \S*\.hotmail.com \(\[$IP_ADDRESS\][ \):]/ && $ip)
                 { return; }
