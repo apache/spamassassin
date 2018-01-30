@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus ena-week0 ena-week1 ena-week2 ena-week3 giovanni grenier jarif jbrooks mmiroslaw-mails-ham mmiroslaw-mails-spam thendrikx; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus ena-week0 ena-week1 ena-week2 ena-week3 jarif jbrooks llanga mmiroslaw-mails-ham mmiroslaw-mails-spam; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja ena-week0 ena-week1 ena-week2 ena-week3 llanga mmiroslaw-mails-ham mmiroslaw-mails-spam
+# with results from: day 1: darxus ena-week0 ena-week1 ena-week2 ena-week3 giovanni grenier jarif jbrooks mmiroslaw-mails-ham mmiroslaw-mails-spam thendrikx; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus ena-week0 ena-week1 ena-week2 ena-week3 jarif jbrooks llanga mmiroslaw-mails-ham mmiroslaw-mails-spam; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus ena-week0 ena-week1 ena-week2 ena-week3 jarif jbrooks llanga mmiroslaw-mails-ham mmiroslaw-mails-spam
 
 # tflags publish
 AC_BR_BONANZA
@@ -139,6 +139,9 @@ CTYPE_NULL
 # good enough
 DEAR_BENEFICIARY
 
+# good enough
+DEAR_WINNER
+
 # tflags net
 DIGEST_MULTIPLE
 
@@ -198,6 +201,9 @@ ENCRYPTED_MESSAGE
 
 # tflags userconf
 ENV_AND_HDR_SPF_MATCH
+
+# good enough
+FAKE_REPLY_C
 
 # tflags publish
 FBI_MONEY
@@ -363,6 +369,9 @@ HELO_LOCALHOST
 
 # good enough
 HELO_MISC_IP
+
+# good enough
+HELO_OEM
 
 # tflags publish
 HEXHASH_WORD
@@ -836,16 +845,76 @@ TVD_VISIT_PHARMA
 TW_GIBBERISH_MANY
 
 # good enough
-BODY_SINGLE_URI
+ADVANCE_FEE_3_NEW_FRM_MNY
 
 # good enough
-FILL_THIS_FORM_LOAN
+ADVANCE_FEE_4_NEW_FRM_MNY
 
 # good enough
-LIST_PARTIAL_SHORT_MSG
+ADVANCE_FEE_4_NEW_MONEY
 
 # good enough
-TO_NO_BRKTS_FROM_MSSP
+ADVANCE_FEE_5_NEW
+
+# good enough
+APOSTROPHE_TOCC
+
+# good enough
+AXB_XMAILER_MIMEOLE_OL_1ECD5
+
+# good enough
+AXB_X_FF_SEZ_S
+
+# good enough
+COMPENSATION
+
+# good enough
+FILL_THIS_FORM_LONG
+
+# good enough
+FROM_MISSPACED
+
+# good enough
+FROM_MISSP_DYNIP
+
+# good enough
+FROM_MISSP_PHISH
+
+# good enough
+FROM_MISSP_REPLYTO
+
+# good enough
+HK_GOLDDUST
+
+# good enough
+HK_RANDOM_FROM
+
+# good enough
+HK_SCAM_N3
+
+# good enough
+LOTTO_AGENT
+
+# good enough
+MILLION_USD
+
+# good enough
+MIMEOLE_DIRECT_TO_MX
+
+# good enough
+MONEY_BARRISTER
+
+# good enough
+MONEY_FORM
+
+# good enough
+MONEY_FROM_MISSP
+
+# good enough
+TVD_SPACE_RATIO_MINFP
+
+# good enough
+YOU_INHERIT
 
 # tflags publish
 UC_GIBBERISH_OBFU
