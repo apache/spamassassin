@@ -107,7 +107,7 @@ describe MONEY_BACK             Money back guarantee
 body FREE_QUOTE_INSTANT		/free.{0,12}(?:(?:instant|express|online|no.?obligation).{0,4})+.{0,32}\bquote/i
 describe FREE_QUOTE_INSTANT	Free express or no-obligation quote
 
-body BAD_CREDIT		        /\b(?:bad|poor|no\b|eliminate|repair|(?:re)?establish|damag).{0,10} (?:credit|debt)\b/i
+body BAD_CREDIT		        /\b((?:bad|poor|eliminate|repair|(?:re)?establish|damag).{0,10} (?:credit|debt)|no credit (?:check|histor|need))/i
 describe BAD_CREDIT		Eliminate Bad Credit
 
 
