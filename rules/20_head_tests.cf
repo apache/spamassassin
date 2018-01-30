@@ -476,8 +476,10 @@ header __FORGED_EUDORAMAIL_RCVD	eval:check_for_forged_eudoramail_received_header
 header FORGED_YAHOO_RCVD	eval:check_for_forged_yahoo_received_headers()
 describe FORGED_YAHOO_RCVD	'From' yahoo.com does not match 'Received' headers
 
+if (version >= 3.004002)
 header FORGED_GMAIL_RCVD	eval:check_for_forged_gmail_received_headers()
 describe FORGED_GMAIL_RCVD	'From' gmail.com does not match 'Received' headers
+endif
 
 header __FORGED_JUNO_RCVD	eval:check_for_forged_juno_received_headers()
 
