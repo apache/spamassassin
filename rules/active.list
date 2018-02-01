@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus ena-week0 ena-week1 ena-week2 ena-week3 giovanni grenier jarif jbrooks mmiroslaw-mails-ham mmiroslaw-mails-spam thendrikx; day 2: darxus ena-week0 ena-week1 ena-week2 ena-week3 jarif jbrooks llanga mmiroslaw-mails-ham mmiroslaw-mails-spam; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus ena-week0 ena-week1 ena-week2 ena-week3 jarif jbrooks llanga mmiroslaw-mails-ham mmiroslaw-mails-spam
+# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus ena-week0 ena-week1 ena-week2 ena-week3 giovanni grenier jarif jbrooks mmiroslaw-mails-ham mmiroslaw-mails-spam thendrikx; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus ena-week0 ena-week1 ena-week2 ena-week3 jarif jbrooks llanga mmiroslaw-mails-ham mmiroslaw-mails-spam; day 3: darxus ena-week0 ena-week1 ena-week2 ena-week3 jarif jbrooks llanga mmiroslaw-mails-ham mmiroslaw-mails-spam
 
 # tflags publish
 AC_BR_BONANZA
@@ -190,6 +190,12 @@ DOS_OE_TO_MX
 # good enough
 DOS_OUTLOOK_TO_MX
 
+# good enough
+DUP_SUSP_HDR
+
+# good enough
+DX_TEXT_01
+
 # tflags publish
 DX_TEXT_02
 
@@ -251,6 +257,9 @@ FROM_IN_TO_AND_SUBJ
 FROM_LOCAL_NOVOWEL
 
 # good enough
+FROM_MISSP_EH_MATCH
+
+# good enough
 FROM_MISSP_FREEMAIL
 
 # good enough
@@ -279,6 +288,9 @@ FROM_WORDY_SHORT
 
 # good enough
 FROM_WSP_TRAIL
+
+# good enough
+FSL_BULK_SIG
 
 # good enough
 FSL_CTYPE_WIN1251
@@ -364,6 +376,9 @@ HASHCASH_2SPEND
 # tflags userconf
 HASHCASH_HIGH
 
+# good enough
+HDRS_MISSP
+
 # tflags publish
 HEADER_FROM_DIFFERENT_DOMAINS
 
@@ -390,6 +405,12 @@ HK_GOLDDUST
 
 # good enough
 HK_NAME_DRUGS
+
+# good enough
+HK_NAME_FM_DR
+
+# good enough
+HK_NAME_FM_MR_MRS
 
 # good enough
 HK_RANDOM_ENVFROM
@@ -462,6 +483,9 @@ MSM_PRIO_REPTO
 
 # good enough
 MSOE_MID_WRONG_CASE
+
+# good enough
+NA_DOLLARS
 
 # tflags net
 NO_DNS_FOR_FROM
@@ -728,10 +752,16 @@ RCVD_IN_XBL
 REPLYTO_WITHOUT_TO_CC
 
 # good enough
+SERGIO_SUBJECT_PORN015
+
+# good enough
 SERGIO_SUBJECT_VIAGRA01
 
 # tflags publish
 SINGLETS_LOW_CONTRAST
+
+# good enough
+SPELLED_OUT_NUMBER
 
 # tflags net
 SPF_FAIL
@@ -790,11 +820,17 @@ SUBJECT_IN_BLACKLIST
 # tflags userconf
 SUBJECT_IN_WHITELIST
 
+# good enough
+SUBJ_ATTENTION
+
 # tflags net
 SURBL_BLOCKED
 
 # tflags publish
 SYSADMIN
+
+# good enough
+TAB_IN_FROM
 
 # good enough
 TBIRD_SUSP_MIME_BDRY
@@ -860,73 +896,64 @@ TVD_VISIT_PHARMA
 TW_GIBBERISH_MANY
 
 # good enough
-ADVANCE_FEE_2_NEW_FRM_MNY
+ADVANCE_FEE_3_NEW_FRM_MNY
 
 # good enough
-BIGNUM_EMAILS
+ADVANCE_FEE_4_NEW_FRM_MNY
 
 # good enough
-BODY_SINGLE_URI
+ADVANCE_FEE_4_NEW_MONEY
 
 # good enough
-DUP_SUSP_HDR
+ADVANCE_FEE_5_NEW
 
 # good enough
-DX_TEXT_01
+AXB_XMAILER_MIMEOLE_OL_1ECD5
 
 # good enough
-FILL_THIS_FORM_FRAUD_PHISH
+AXB_X_FF_SEZ_S
 
 # good enough
-FILL_THIS_FORM_LOAN
+COMPENSATION
 
 # good enough
-FROM_MISSP_EH_MATCH
+FILL_THIS_FORM_LONG
 
 # good enough
-FSL_BULK_SIG
+FROM_MISSPACED
 
 # good enough
-HDRS_MISSP
+FROM_MISSP_DYNIP
 
 # good enough
-HK_NAME_FM_DR
+FROM_MISSP_REPLYTO
 
 # good enough
-HK_NAME_FM_MR_MRS
+HK_RANDOM_FROM
 
 # good enough
-HK_NAME_MR_MRS
+HK_SCAM_N3
 
 # good enough
-HK_SCAM_N15
+LOTTO_AGENT
 
 # good enough
-IMG_DIRECT_TO_MX
+MILLION_USD
 
 # good enough
-LIST_PARTIAL_SHORT_MSG
+MIMEOLE_DIRECT_TO_MX
 
 # good enough
-NA_DOLLARS
+MONEY_BARRISTER
 
 # good enough
-SERGIO_SUBJECT_PORN015
+MONEY_FORM
 
 # good enough
-SPELLED_OUT_NUMBER
+MONEY_FROM_MISSP
 
 # good enough
-SUBJ_ATTENTION
-
-# good enough
-TAB_IN_FROM
-
-# good enough
-TEQF_USR_POLITE
-
-# good enough
-TO_NO_BRKTS_FROM_MSSP
+TVD_SPACE_RATIO_MINFP
 
 # tflags publish
 UC_GIBBERISH_OBFU
