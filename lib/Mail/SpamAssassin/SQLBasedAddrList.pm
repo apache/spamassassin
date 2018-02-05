@@ -84,9 +84,7 @@ BEGIN { require DBI;  import DBI; }
 use Mail::SpamAssassin::PersistentAddrList;
 use Mail::SpamAssassin::Logger;
 
-use vars qw(@ISA);
-
-@ISA = qw(Mail::SpamAssassin::PersistentAddrList);
+our @ISA = qw(Mail::SpamAssassin::PersistentAddrList);
 
 =head2 new
 

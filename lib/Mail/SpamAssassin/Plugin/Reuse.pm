@@ -29,8 +29,7 @@ use warnings;
 use Mail::SpamAssassin::Conf;
 use Mail::SpamAssassin::Logger;
 
-use vars qw(@ISA);
-@ISA = qw(Mail::SpamAssassin::Plugin);
+our @ISA = qw(Mail::SpamAssassin::Plugin);
 
 # constructor
 sub new {

@@ -24,11 +24,11 @@ use FindBin;
 use Getopt::Long qw(:config bundling auto_help);
 use Pod::Usage;
 
-use vars qw {
-  $opt_c $opt_s $opt_f $opt_a $opt_p $opt_x $opt_m $opt_t $opt_M
-  $opt_X $opt_L $opt_l $opt_i $opt_T $opt_o $opt_S $opt_P $opt_d
-  $opt_g $sorting
-};
+our (
+  $opt_c, $opt_s, $opt_f, $opt_a, $opt_p, $opt_x, $opt_m, $opt_t, $opt_M,
+  $opt_X, $opt_L, $opt_l, $opt_i, $opt_T, $opt_o, $opt_S, $opt_P, $opt_d,
+  $opt_g, $sorting
+);
 
 GetOptions("c|cffile=s" => \$opt_c,
 	   "s|scoreset=i" => \$opt_s, # ,, pacify stupid emacs cperl mode

@@ -46,8 +46,8 @@ use Mail::SpamAssassin::Logger;
 our @ISA = qw();
 
 # obtain timer resolution if possible
+our $timer_resolution;
 BEGIN {
-  use vars qw($timer_resolution);
   eval {
     $timer_resolution = Time::HiRes->can('clock_getres')
       ? Time::HiRes::clock_getres(Time::HiRes::CLOCK_REALTIME())

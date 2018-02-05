@@ -1,6 +1,6 @@
 package Mail::SpamAssassin::Spamd;
 
-use vars qw(%conf_backup %msa_backup);
+our (%conf_backup, %msa_backup);
 
 use Mail::SpamAssassin::Logger;
 eval { use Time::HiRes qw(time); };

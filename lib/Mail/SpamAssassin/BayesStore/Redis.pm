@@ -133,12 +133,8 @@ use Mail::SpamAssassin::Logger;
 use Mail::SpamAssassin::BayesStore;
 use Mail::SpamAssassin::Util::TinyRedis;
 
-use vars qw( @ISA $VERSION );
-
-BEGIN {
-  $VERSION = 0.09;
-  @ISA = qw( Mail::SpamAssassin::BayesStore );
-}
+our $VERSION = 0.09;
+our @ISA = qw( Mail::SpamAssassin::BayesStore );
 
 =head1 METHODS
 

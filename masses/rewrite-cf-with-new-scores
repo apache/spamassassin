@@ -70,7 +70,7 @@ use warnings;
 use Getopt::Long qw(:config auto_help);
 use Pod::Usage;
 
-use vars qw($opt_old $opt_new $opt_scoreset $opt_out $opt_cffile);
+our ($opt_old, $opt_new, $opt_scoreset, $opt_out, $opt_cffile);
 
 GetOptions("old-scores=s" => \$opt_old,
 	   "new-scores=s" => \$opt_new,

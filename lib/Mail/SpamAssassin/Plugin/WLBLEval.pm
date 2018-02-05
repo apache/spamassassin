@@ -27,8 +27,7 @@ use NetAddr::IP 4.000;
 use Mail::SpamAssassin::Plugin;
 use Mail::SpamAssassin::Logger;
 
-use vars qw(@ISA);
-@ISA = qw(Mail::SpamAssassin::Plugin);
+our @ISA = qw(Mail::SpamAssassin::Plugin);
 
 # constructor: register the eval rule
 sub new {

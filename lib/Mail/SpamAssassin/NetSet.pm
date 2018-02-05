@@ -28,10 +28,7 @@ use NetAddr::IP 4.000;
 use Mail::SpamAssassin::Util;
 use Mail::SpamAssassin::Logger;
 
-use vars qw{
-  @ISA $TESTCODE $NUMTESTS $have_patricia
-};
-
+our $have_patricia;
 BEGIN {
   eval {
     require Net::Patricia;

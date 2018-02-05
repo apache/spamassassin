@@ -18,7 +18,7 @@
 # </@LICENSE>
 
 use Getopt::Long;
-use vars qw($opt_lambda $opt_fn $opt_fp $opt_spam $opt_ham);
+our ($opt_lambda, $opt_fn, $opt_fp, $opt_spam, $opt_ham);
 GetOptions("lambda=f", "fn=f", "fp=f", "spam=f", "ham=f");
 
 # lambda value for TCR equation, representing the cost of of an FP vs. the

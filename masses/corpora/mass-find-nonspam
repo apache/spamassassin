@@ -109,8 +109,7 @@ $|++;
 
 my $format = "dir";		# for now. TODO
 
-use vars qw( $opt_single 
-);
+our $opt_single;
 use Getopt::Long;
 GetOptions("single");
 

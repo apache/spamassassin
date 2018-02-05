@@ -87,7 +87,7 @@ use HTTP::Date qw(time2str);
 use Archive::Tar 1.23;
 use IO::Zlib 1.04;
 
-use vars qw($have_lwp $io_socket_module_name $have_inet4 $have_inet6);
+our ($have_lwp, $io_socket_module_name, $have_inet4, $have_inet6);
 
 BEGIN {
   # Deal with optional modules
@@ -101,7 +101,6 @@ BEGIN {
 
   if (eval { require IO::Socket::IP }) {  # handles IPv6 and IPv4
     $io_socket_module_name = 'IO::Socket::IP';
- 
   } elsif (eval { require IO::Socket::INET6 }) {  # handles IPv6 and IPv4
     $io_socket_module_name = 'IO::Socket::INET6';
 
@@ -110,7 +109,7 @@ BEGIN {
   }
 
   $have_inet4 =  # can we create a PF_INET socket?
-    defined $io_socket_module_name && eval {  
+    defined $io_socket_module_name && eval {
       my $sock =
         $io_socket_module_name->new(LocalAddr => '0.0.0.0', Proto => 'tcp');
       $sock->close or die "error closing socket: $!"  if $sock;

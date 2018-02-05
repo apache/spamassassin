@@ -118,8 +118,7 @@ my $gic_have = version->parse(Geo::IP->lib_version());
 my $gip_wanted = version->parse('v1.4.4');
 my $gip_have = version->parse($Geo::IP::VERSION);
 
-use vars qw(@ISA);
-@ISA = qw(Mail::SpamAssassin::Plugin);
+our @ISA = qw(Mail::SpamAssassin::Plugin);
 
 # constructor
 sub new {

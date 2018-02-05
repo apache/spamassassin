@@ -44,9 +44,7 @@ use re 'taint';
 use Mail::SpamAssassin::BayesStore::SQL;
 use Mail::SpamAssassin::Logger;
 
-use vars qw( @ISA );
-
-@ISA = qw( Mail::SpamAssassin::BayesStore::SQL );
+our @ISA = qw( Mail::SpamAssassin::BayesStore::SQL );
 
 use constant HAS_DBI => eval { require DBI; };
 

@@ -111,11 +111,10 @@ my $VERSION = 2.002;
 use Mail::SpamAssassin::Plugin;
 use Mail::SpamAssassin::PerMsgStatus;
 
-use vars qw(@ISA $email_whitelist $skip_replyto_envfrom);
-@ISA = qw(Mail::SpamAssassin::Plugin);
+our @ISA = qw(Mail::SpamAssassin::Plugin);
 
 # default email whitelist
-$email_whitelist = qr/
+our $email_whitelist = qr/
   ^(?:
       abuse|support|sales|info|helpdesk|contact|kontakt
     | (?:post|host|domain)master
@@ -129,8 +128,8 @@ $email_whitelist = qr/
 
 # skip replyto check when envelope sender is
 # allow <> for now
-{ # no re "strict";  # since perl 5.21.8: Ranges of ASCII printables...
-  $skip_replyto_envfrom = qr/
+# no re "strict";  # since perl 5.21.8: Ranges of ASCII printables...
+our $skip_replyto_envfrom = qr/
   (?:
       ^(?:post|host|domain)master
     | ^double-bounce
@@ -140,7 +139,6 @@ $email_whitelist = qr/
     | .+=.+
   )\@
 /xi;
-}
 
 sub dbg { Mail::SpamAssassin::Plugin::dbg ("FreeMail: @_"); }
 

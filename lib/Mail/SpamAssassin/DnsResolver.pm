@@ -53,7 +53,7 @@ use Time::HiRes qw(time);
 
 our @ISA = qw();
 
-use vars qw($io_socket_module_name);
+our $io_socket_module_name;
 BEGIN {
   if (eval { require IO::Socket::IP }) {
     $io_socket_module_name = 'IO::Socket::IP';

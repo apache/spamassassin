@@ -10,12 +10,7 @@ use Time::ParseDate;
 use POSIX qw(nice strftime);
 use Cwd;
 
-
-use vars qw(
-    $opt_dir
-    $opt_override
-    $opt_tag
-);
+our ( $opt_dir, $opt_override, $opt_tag );
 GetOptions(
     "tag=s" => \$opt_tag,
     "dir=s" => \$opt_dir,

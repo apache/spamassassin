@@ -19,7 +19,7 @@
 # limitations under the License.
 # </@LICENSE>
 
-use vars qw($opt_a $opt_b $opt_c $opt_d $opt_h $opt_p $opt_r $opt_l);
+our ($opt_a, $opt_b, $opt_c, $opt_d, $opt_h, $opt_p, $opt_r, $opt_l);
 use Getopt::Std;
 getopts("abcdhprl:");
 

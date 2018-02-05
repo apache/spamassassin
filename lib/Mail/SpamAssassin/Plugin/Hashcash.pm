@@ -102,8 +102,7 @@ BEGIN {
   or do { require Digest::SHA1; import Digest::SHA1 qw(sha1) }
 }
 
-use vars qw(@ISA);
-@ISA = qw(Mail::SpamAssassin::Plugin);
+our @ISA = qw(Mail::SpamAssassin::Plugin);
 
 use constant HAS_DB_FILE => eval { require DB_File; };
 

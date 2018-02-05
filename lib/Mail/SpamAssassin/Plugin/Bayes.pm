@@ -65,20 +65,13 @@ use Mail::SpamAssassin::Bayes::CombineChi;
 
 our @ISA = qw(Mail::SpamAssassin::Plugin);
 
-use vars qw{
-  $IGNORED_HDRS
-  $MARK_PRESENCE_ONLY_HDRS
-  %HEADER_NAME_COMPRESSION
-  $OPPORTUNISTIC_LOCK_VALID
-};
-
 # Which headers should we scan for tokens?  Don't use all of them, as it's easy
 # to pick up spurious clues from some.  What we now do is use all of them
 # *less* these well-known headers; that way we can pick up spammers' tracking
 # headers (which are obviously not well-known in advance!).
 
 # Received is handled specially
-$IGNORED_HDRS = qr{(?: (?:X-)?Sender    # misc noise
+our $IGNORED_HDRS = qr{(?: (?:X-)?Sender    # misc noise
   |Delivered-To |Delivery-Date
   |(?:X-)?Envelope-To
   |X-MIME-Auto[Cc]onverted |X-Converted-To-Plain-Text
@@ -145,7 +138,7 @@ $IGNORED_HDRS = qr{(?: (?:X-)?Sender    # misc noise
 
 # Note only the presence of these headers, in order to reduce the
 # hapaxen they generate.
-$MARK_PRESENCE_ONLY_HDRS = qr{(?: X-Face
+our $MARK_PRESENCE_ONLY_HDRS = qr{(?: X-Face
   |X-(?:Gnu-?PG|PGP|GPG)(?:-Key)?-Fingerprint
   |D(?:KIM|omainKey)-Signature
 )}ix;
@@ -185,7 +178,7 @@ use constant ADD_INVIZ_TOKENS_NO_PREFIX => 0;
 # be 2-way (ie. LHSes that map to the same RHS are not a problem), but mixing
 # tokens from multiple different headers may impact accuracy, so might as well
 # avoid this if possible. These are the top ones from my corpus, BTW (jm).
-%HEADER_NAME_COMPRESSION = (
+our %HEADER_NAME_COMPRESSION = (
   'Message-Id'		=> '*m',
   'Message-ID'		=> '*M',
   'Received'		=> '*r',
@@ -208,7 +201,7 @@ use constant ADD_INVIZ_TOKENS_NO_PREFIX => 0;
 );
 
 # How many seconds should the opportunistic_expire lock be valid?
-$OPPORTUNISTIC_LOCK_VALID = 300;
+our $OPPORTUNISTIC_LOCK_VALID = 300;
 
 # Should we use the Robinson f(w) equation from
 # http://radio.weblogs.com/0101454/stories/2002/09/16/spamDetection.html ?

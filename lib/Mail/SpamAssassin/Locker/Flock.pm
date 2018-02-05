@@ -30,11 +30,7 @@ use File::Spec;
 use IO::File;
 use Fcntl qw(:DEFAULT :flock);
 
-use vars qw{
-  @ISA
-};
-
-@ISA = qw(Mail::SpamAssassin::Locker);
+our @ISA = qw(Mail::SpamAssassin::Locker);
 
 ###########################################################################
 

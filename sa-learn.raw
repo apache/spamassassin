@@ -25,12 +25,8 @@ use Getopt::Long;
 use Pod::Usage;
 use File::Spec;
 
-use vars qw(
-  $spamtest %opt $isspam $forget
-  $messagecount $learnedcount $messagelimit
-  $progress $total_messages $init_results $start_time
-  $synconly $learnprob @targets $bayes_override_path
-);
+our ( $spamtest, %opt, $isspam, $forget, $messagecount, $learnedcount, $messagelimit, $progress,
+      $total_messages, $init_results, $start_time, $synconly, $learnprob, @targets, $bayes_override_path );
 
 my $PREFIX = '@@PREFIX@@';  # substituted at 'make' time
 my $DEF_RULES_DIR = '@@DEF_RULES_DIR@@';  # substituted at 'make' time
