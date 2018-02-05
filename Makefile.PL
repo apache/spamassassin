@@ -67,6 +67,8 @@ my @ATT_KEYS = (
   'SITELOCALSTATEDIR', 
   'VENDORLOCALSTATEDIR',
 
+  'RE2C_BIN',         # hard code the path for re2c if possible
+
   'PERL_BIN',         # Sets the Perl interpreter used by the scripts.
   'PERL_WARN',        # Can be used to disable warnings in the scripts
   'PERL_TAINT',       # "   "  "    "  "    taint mode for the scripts (DON'T)
@@ -111,6 +113,7 @@ my %opt = (
   'enable_ssl'      => undef,
   'contact_address' => undef,
   'destdir'         => undef,
+  're2c_bin'        => 're2c',
 );
 ARGV: foreach (@ARGV) {
   foreach my $key (keys %opt) {
@@ -905,6 +908,7 @@ sub MY::constants {
   {
     set_macro('SYSCONFDIR', "") unless get_macro('SYSCONFDIR');
     set_macro('LOCALSTATEDIR', "") unless get_macro('LOCALSTATEDIR');
+    set_macro('RE2C_BIN', $opt{'re2c_bin'});
 
     # Determine the correct settings for each repository...
     foreach my $r (@REPOSITORIES) {
@@ -965,6 +969,7 @@ sub MY::constants {
     push(@code, macro_def('PREPROCESS'));
     push(@code, macro_def('CONFIGURE'));
     push(@code, macro_def('SYMLINK'));
+    push(@code, macro_def('RE2C_BIN'));
   }
 
   # Set some additional helper/shortcut macros; the B_FOO are the ones which
@@ -1033,7 +1038,8 @@ FIXVARS		= -Mvars \
 		  -DLOCAL_RULES_DIR="$(I_CONFDIR)" \
 		  -DLOCAL_STATE_DIR="$(I_LOCALSTATEDIR)" \
 		  -DINSTALLSITELIB="$(I_LIBDIR)" \
-		  -DCONTACT_ADDRESS="$(CONTACT_ADDRESS)"
+		  -DCONTACT_ADDRESS="$(CONTACT_ADDRESS)" \
+		  -DRE2C_BIN="$(RE2C_BIN)"
 
 FIXBANG		= -Msharpbang \
                   -Mconditional \

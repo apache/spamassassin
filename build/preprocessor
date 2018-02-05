@@ -69,7 +69,7 @@ foreach (keys %ENV) {
 
 foreach (@ARGV) {
   if    (/^-M([a-z]+)$/)       { $modules{$1} = 1; }
-  elsif (/^-D([A-Z_]+)=(.*)$/) { $defines{$1} = $2; }
+  elsif (/^-D([A-Z0-9_]+)=(.*)$/) { $defines{$1} = $2; }
   elsif (/^-D([^=]+)$/)        { read_defs($1); } 
   elsif (/^-i(.+)$/)           { $infile = $1; }
   elsif (/^-o(.+)$/)           { $outfile = $1; }

@@ -25,6 +25,7 @@ my $PREFIX          = '@@PREFIX@@';             # substituted at 'make' time
 my $DEF_RULES_DIR   = '@@DEF_RULES_DIR@@';      # substituted at 'make' time
 my $LOCAL_RULES_DIR = '@@LOCAL_RULES_DIR@@';    # substituted at 'make' time
 my $LOCAL_STATE_DIR = '@@LOCAL_STATE_DIR@@';    # substituted at 'make' time
+my $RE2C_BIN        = '@@RE2C_BIN@@';           # substituted at 'make' time
 use lib '@@INSTALLSITELIB@@';                   # substituted at 'make' time
 
 use Errno qw(EBADF);
@@ -108,8 +109,8 @@ if ($@) {
     or die "error writing: $!";
   exit 1;
 }
-unless (qx(re2c -V)) {
-  print "$0 requires re2c for proper operation.\n"
+unless (qx($RE2C_BIN -V)) {
+  print "$0 requires $RE2C_BIN for proper operation.\n"
     or die "error writing: $!";
   exit 1;
 }
@@ -451,13 +452,13 @@ EOT
   }
 
   for (1..$numscans) {
-    my $cmd = "re2c -i -b -o scanner$_.c scanner$_.re";
+    my $cmd = "$RE2C_BIN -i -b -o scanner$_.c scanner$_.re";
     if (!run($cmd)) {
       # this must be fatal; it can result in corrupt output modules missing
       # scannerN() functions
       my $cwd = `pwd`; chop $cwd;
       die "'$cmd' failed, dying!\n".
-          "Have you got a sufficiently-recent version of re2c?\n".
+          "Have you got a sufficiently-recent version of $RE2C_BIN?\n".
 	  "see $cwd/scanner$_.re\n";
     }
   }
