@@ -38,9 +38,9 @@ BEGIN {
   }                                                 # REMOVEFORINST
 }
 
-use vars qw($have_getaddrinfo_in_core $have_getaddrinfo_legacy
-            $io_socket_module_name $have_inet4 $have_inet6
-            $ai_addrconfig_flag);
+our ($have_getaddrinfo_in_core, $have_getaddrinfo_legacy, $io_socket_module_name,
+     $have_inet4, $have_inet6, $ai_addrconfig_flag);
+
 # don't force requirement on IO::Socket::IP or IO::Socket::INET6
 BEGIN {
   use Socket qw(:DEFAULT IPPROTO_TCP);

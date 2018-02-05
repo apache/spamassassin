@@ -57,9 +57,7 @@ use Mail::SpamAssassin::Message::Metadata;
 use Mail::SpamAssassin::Constants qw(:sa);
 use Mail::SpamAssassin::Logger;
 
-use vars qw(@ISA);
-
-@ISA = qw(Mail::SpamAssassin::Message::Node);
+our @ISA = qw(Mail::SpamAssassin::Message::Node);
 
 # ---------------------------------------------------------------------------
 

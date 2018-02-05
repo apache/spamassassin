@@ -12,8 +12,8 @@ use Getopt::Long;
 
 use DBI;
 
-use DB_File ;
-use vars qw( %h $k $v ) ;
+use DB_File;
+my ( %h $k $v );
 
 sub usage {
   print "This program takes the following required arguments:\n";

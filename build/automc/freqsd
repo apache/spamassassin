@@ -9,11 +9,7 @@ use warnings;
 use Getopt::Long;
 use IPC::DirQueue;
 
-use vars qw(
-    $pidfile
-    $opt_enq
-    $opt_kill
-);
+our ( $pidfile, $opt_enq, $opt_kill);
 GetOptions(
     "pidfile=s" => \$pidfile,
     "enq=s" => \$opt_enq,

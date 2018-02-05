@@ -27,8 +27,7 @@ use warnings;
 
 use Time::HiRes qw(time);
 
-use vars qw(@ISA);
-@ISA = qw(Mail::SpamAssassin::Plugin);
+our @ISA = qw(Mail::SpamAssassin::Plugin);
 
 sub new {
     my $class = shift;

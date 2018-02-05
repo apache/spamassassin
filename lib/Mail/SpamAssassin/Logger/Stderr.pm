@@ -37,8 +37,7 @@ use re 'taint';
 use POSIX ();
 use Time::HiRes ();
 
-use vars qw(@ISA);
-@ISA = ();
+our @ISA = ();
 
 # ADDING OS-DEPENDENT LINE TERMINATOR - BUG 6456
 

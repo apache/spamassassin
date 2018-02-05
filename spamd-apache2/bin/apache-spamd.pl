@@ -297,7 +297,7 @@ sub get_libexecdir_apxs {
 }
 
 # as above, cached version
-use vars '$apache_module_path';
+our $apache_module_path;
 sub apache_module_path {
 	my $modname = shift;
 	$apache_module_path ||= get_libexecdir();    # path is cached

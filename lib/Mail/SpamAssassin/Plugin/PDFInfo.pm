@@ -150,8 +150,7 @@ use warnings;
 use Digest::MD5 qw(md5_hex);
 use MIME::QuotedPrint;
 
-use vars qw(@ISA);
-@ISA = qw(Mail::SpamAssassin::Plugin);
+our @ISA = qw(Mail::SpamAssassin::Plugin);
 
 # constructor: register the eval rule
 sub new {

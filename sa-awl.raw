@@ -48,9 +48,7 @@ usage: sa-awl [--clean] [--min n] [dbfile]
 use Fcntl;
 use Getopt::Long;
 
-use vars qw(
-		$opt_clean $opt_min $opt_help
-	);
+our ( $opt_clean, $opt_min, $opt_help );
 
 GetOptions(
   'clean'		=> \$opt_clean,

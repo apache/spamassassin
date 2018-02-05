@@ -47,8 +47,7 @@ use warnings;
 # use bytes;
 use re 'taint';
 
-use vars qw(@ISA);
-@ISA = qw(Mail::SpamAssassin::Plugin);
+our @ISA = qw(Mail::SpamAssassin::Plugin);
 
 my ($db, $dbv6);
 my $ip_to_cc; # will hold a sub() for the lookup

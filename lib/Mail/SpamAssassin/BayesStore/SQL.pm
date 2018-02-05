@@ -43,9 +43,7 @@ BEGIN {
 use Mail::SpamAssassin::BayesStore;
 use Mail::SpamAssassin::Logger;
 
-use vars qw( @ISA );
-
-@ISA = qw( Mail::SpamAssassin::BayesStore );
+our @ISA = qw( Mail::SpamAssassin::BayesStore );
 
 use constant HAS_DBI => eval { require DBI; };
 

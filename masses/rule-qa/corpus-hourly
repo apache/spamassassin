@@ -5,11 +5,7 @@
 use strict;
 use Getopt::Long;
 
-use vars qw(
-    $corpusdir
-    $opt_override
-    $opt_tag
-);
+our ( $corpusdir, $opt_override, $opt_tag );
 GetOptions(
     "tag=s" => \$opt_tag,
     "dir=s" => \$corpusdir,

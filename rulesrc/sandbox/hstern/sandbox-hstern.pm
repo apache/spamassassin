@@ -23,9 +23,7 @@ use Mail::SpamAssassin::Plugin;
 use Mail::SpamAssassin::Logger;
 use Mail::SpamAssassin::Util;
 
-use vars qw(@ISA);
 our @ISA = qw(Mail::SpamAssassin::Plugin);
-
 
 sub new {
   my $class = shift;

@@ -48,11 +48,7 @@ use warnings;
 # use bytes;
 use re 'taint';
 
-use vars qw{
-  @ISA
-};
-
-@ISA = qw();
+our @ISA = qw();
 
 ###########################################################################
 

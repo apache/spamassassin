@@ -102,11 +102,7 @@ use warnings;
 # use bytes;
 use re 'taint';
 
-use vars qw{
-  @ISA $VERSION
-};
-
-@ISA =                  qw();
+our @ISA = qw();
 #Removed $VERSION per BUG 6422
 #$VERSION =              'bogus';
 

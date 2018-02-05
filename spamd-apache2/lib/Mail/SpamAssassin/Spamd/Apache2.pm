@@ -22,7 +22,7 @@ use constant APACHE24   => have_min_apache_version('2.4.0');
 
 eval { use Time::HiRes qw(time); };
 
-use vars qw($spamtest);
+our $spamtest;
 
 use Mail::SpamAssassin ();
 use Mail::SpamAssassin::Message ();

@@ -123,8 +123,7 @@ use Socket;
 use IO::Socket;
 use Fcntl qw(F_GETFL F_SETFL O_NONBLOCK);
 
-use vars qw(@ISA);
-@ISA = qw(Mail::SpamAssassin::Plugin);
+our @ISA = qw(Mail::SpamAssassin::Plugin);
 
 
 sub new {

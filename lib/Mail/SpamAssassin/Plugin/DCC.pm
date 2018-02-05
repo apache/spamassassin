@@ -88,8 +88,7 @@ use Mail::SpamAssassin::Util qw(untaint_var untaint_file_path
 use Errno qw(ENOENT EACCES);
 use IO::Socket;
 
-use vars qw(@ISA);
-@ISA = qw(Mail::SpamAssassin::Plugin);
+our @ISA = qw(Mail::SpamAssassin::Plugin);
 
 our $io_socket_module_name;
 BEGIN {

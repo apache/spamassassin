@@ -40,13 +40,11 @@ use warnings;
 # use bytes;
 use re 'taint';
 
-BEGIN {
-  use Exporter ();
-  use vars qw(@ISA @EXPORT @EXPORT_OK);
-  @ISA = qw(Exporter);
-  @EXPORT = qw(dbg info would_log);
-  @EXPORT_OK = qw(log_message);
-}
+use Exporter ();
+
+our @ISA = qw(Exporter);
+our @EXPORT = qw(dbg info would_log);
+our @EXPORT_OK = qw(log_message);
 
 use constant ERROR => 0;
 use constant WARNING => 1;

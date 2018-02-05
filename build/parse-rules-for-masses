@@ -36,7 +36,7 @@ scoreset default to 0
 use Getopt::Long;
 use Data::Dumper;
 
-use vars qw(@rulesdirs $outputfile $scoreset $skip_test_rules);
+our (@rulesdirs, $outputfile, $scoreset, $skip_test_rules);
 GetOptions (
                 "d=s" => \@rulesdirs,
                 "o=s" => \$outputfile,

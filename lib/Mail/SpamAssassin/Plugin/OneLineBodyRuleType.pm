@@ -15,7 +15,7 @@ use strict;
 use warnings;
 use re 'taint';
 
-use vars qw(@ISA); @ISA = qw();
+our @ISA = qw();
 
 # constructor
 sub new {
