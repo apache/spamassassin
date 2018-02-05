@@ -2,7 +2,7 @@
 
 use lib '.'; use lib 't';
 use SATest; sa_t_init("metadata");
-use Test; BEGIN { plan tests => 3 };
+use Test::More tests => 3;
 
 # ---------------------------------------------------------------------------
 

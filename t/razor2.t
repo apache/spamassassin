@@ -3,20 +3,14 @@
 use lib '.'; use lib 't';
 use SATest; sa_t_init("razor2");
 
-use constant TEST_ENABLED => conf_bool('run_net_tests');
 use constant HAS_RAZOR2 => eval { require Razor2::Client::Agent; };
 
-use Test;
+use Test::More;
+plan skip_all => "Net tests disabled" unless conf_bool('run_net_tests');
+plan skip_all => "Needs Razor2" unless HAS_RAZOR2;
+plan tests => 2;
 
-BEGIN {
-  plan tests => ((TEST_ENABLED && HAS_RAZOR2) ? 2 : 0),
-  onfail => sub {
-    warn "\n\nNote: this may not be an SpamAssassin bug, as Razor tests can" .
-	"\nfail due to problems with the Razor servers.\n\n";
-  }
-};
-
-exit unless (TEST_ENABLED && HAS_RAZOR2);
+diag('Note: Failures may not be an SpamAssassin bug, as Razor tests can fail due to problems with the Razor servers.');
 
 # ---------------------------------------------------------------------------
 
@@ -44,7 +38,7 @@ loadplugin Mail::SpamAssassin::Plugin::Razor2
             );
 
 sarun ("-t < data/spam/001", \&patterns_run_cb);
-skip_all_patterns($razor_not_available);
+plan skip_all_patterns($razor_not_available);
 
 #TESTING FOR HAM
 %patterns = ();
@@ -53,4 +47,4 @@ skip_all_patterns($razor_not_available);
 		 );
 
 sarun ("-t < data/nice/001", \&patterns_run_cb);
-skip_all_patterns($razor_not_available);
+plan skip_all_patterns($razor_not_available);

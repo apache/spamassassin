@@ -3,11 +3,9 @@
 use lib '.'; use lib 't';
 use SATest; sa_t_init("whitelist_from");
 
-use constant TEST_ENABLED => conf_bool('run_long_tests');
-
-use Test;
-BEGIN { plan tests => TEST_ENABLED ? 32 : 0 };
-exit unless TEST_ENABLED;
+use Test::More;
+plan skip_all => 'Long running tests disabled' unless conf_bool('run_long_tests');
+plan tests => 32;
 
 # ---------------------------------------------------------------------------
 

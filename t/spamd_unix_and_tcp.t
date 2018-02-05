@@ -3,9 +3,10 @@
 use lib '.'; use lib 't';
 use SATest; sa_t_init("spamd_unix_and_tcp");
 
-use Test; BEGIN { plan tests => ((!$SKIP_SPAMD_TESTS && !$RUNNING_ON_WINDOWS)? 10 : 0) };
-
-exit unless (!$SKIP_SPAMD_TESTS && !$RUNNING_ON_WINDOWS);
+use Test::More;
+plan skip_all => "Spamd tests disabled"        if $SKIP_SPAMD_TESTS;
+plan skip_all => "Tests don't work on windows" if $RUNNING_ON_WINDOWS;
+plan tests => 10;
 
 # ---------------------------------------------------------------------------
 

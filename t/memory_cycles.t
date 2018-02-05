@@ -20,13 +20,9 @@ if (-e 'test_dir') {            # running from test directory, not ..
 use lib '.'; use lib 't';
 use SATest; sa_t_init("memory_cycles");
 
-use Test; BEGIN {
-  plan tests => (HAVE_DEVEL_CYCLE ? 4 : 0);
-}
-unless (HAVE_DEVEL_CYCLE) {
-  print "# Devel::Cycle module required for this test, skipped\n";
-  exit 0;
-}
+use Test::More;
+plan skip_all => "Devel::Cycle module required for this test" unless HAVE_DEVEL_CYCLE;
+plan tests => 4;
 
 use strict;
 use Mail::SpamAssassin;

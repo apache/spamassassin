@@ -3,17 +3,10 @@
 use lib '.'; use lib 't';
 use SATest;
 
-use constant TEST_ENABLED => conf_bool('run_awl_sql_tests');
-
-use Test;
-
-BEGIN { plan tests => (TEST_ENABLED ? 11 : 0),
-        onfail => sub {
-            warn "\n\nNote: Failure may be due to an incorrect config";
-        }
-    };
-
-exit unless TEST_ENABLED;
+use Test::More;
+plan skip_all => 'AWL SQL Tests not enabled.' if conf_bool('run_awl_sql_tests');
+plan tests => 11;
+diag "Note: Failure may be due to an incorrect config";
 
 sa_t_init("sql_based_whitelist");
 

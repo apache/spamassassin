@@ -23,7 +23,7 @@ if (-e 'test_dir') {            # running from test directory, not ..
 
 use lib '.'; use lib 't';
 use SATest; sa_t_init("basic_obj_api");
-use Test; BEGIN { plan tests => 4 };
+use Test::More tests => 4;
 
 # ---------------------------------------------------------------------------
 

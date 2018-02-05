@@ -3,7 +3,7 @@
 use Data::Dumper;
 use lib '.'; use lib 't';
 use SATest; sa_t_init("recreate");
-use Test;
+use Test::More tests => 9;
 
 BEGIN { 
   if (-e 't/test_dir') {
@@ -13,8 +13,6 @@ BEGIN {
   if (-e 'test_dir') {
     unshift(@INC, '../blib/lib');
   }
-
-  plan tests => 9;
 };
 
 use strict;

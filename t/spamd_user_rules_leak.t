@@ -3,13 +3,10 @@
 
 use lib '.'; use lib 't';
 use SATest; sa_t_init("spamd_user_rules_leak");
-use Test;
-BEGIN { 
 
-  plan tests => ($SKIP_SPAMD_TESTS ? 0 : 28)
-
-};
-exit if $SKIP_SPAMD_TESTS;
+use Test::More;
+plan skip_all => 'Spamd tests disabled' if $SKIP_SPAMD_TESTS;
+plan tests => 28;
 
 # ---------------------------------------------------------------------------
 # If user A defines a user rule (when allow_user_rules is enabled) it affects

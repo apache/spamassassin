@@ -3,14 +3,11 @@
 use lib '.'; use lib 't';
 use SATest; sa_t_init("spamc_H");
 
-# only run for localhost!
-our $DO_RUN = conf_bool('run_net_tests')
-                    && !$SKIP_SPAMD_TESTS
-                    && ($spamdhost eq '127.0.0.1');
-
-use Test; plan tests => ($DO_RUN ? 5 : 0);
-
-exit unless $DO_RUN;
+use Test::More;
+plan skip_all => "Spamd tests disabled" if $SKIP_SPAMD_TESTS;
+plan skip_all => "Net tests disabled" unless conf_bool('run_net_tests');
+plan skip_all => "Spam host is not loopback" if $spamdhost ne '127.0.0.1';
+plan tests => 5;
 
 # ---------------------------------------------------------------------------
 

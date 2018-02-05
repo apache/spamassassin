@@ -18,19 +18,14 @@ if (-e 'test_dir') {            # running from test directory, not ..
 use strict;
 use lib '.'; use lib 't';
 use SATest; sa_t_init("reuse");
-use Test;
 
 use vars qw(%patterns %anti_patterns $perl_path &patterns_run_cb);
 
 use Mail::SpamAssassin;
 
-if (-e '../masses/mass-check') {
-  plan tests => 37;
-}
-else {
-  plan tests => 0;
-  exit;
-}
+use Test::More;
+plan skip_all => "no mass check" unless (-e '../masses/mass-check');
+plan tests => 37;
 
 # Tests the following cases:
 # - No reuse: no change

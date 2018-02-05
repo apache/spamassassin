@@ -8,17 +8,9 @@ use re 'taint';
 use lib '.'; use lib 't';
 
 use SATest; sa_t_init("dnsbl_subtests");
-use Test;
 
 use vars qw(%patterns %anti_patterns);
-use constant num_tests => 46;
-use constant DO_RUN => 1;
-
-BEGIN {
-  plan tests => (DO_RUN ? num_tests : 0);
-};
-
-exit unless DO_RUN;
+use Test::More tests => 46;
 
 my $prefix = '.';
 if (-e 'test_dir') {            # running from test directory, not ..

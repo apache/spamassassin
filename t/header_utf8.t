@@ -3,16 +3,14 @@
 use lib '.'; use lib 't';
 use SATest; sa_t_init("header_utf8.t");
 
-use constant TEST_ENABLED => ($] >= 5.008);
-
-our $have_libidn;
+my $have_libidn;
 BEGIN {
   eval { require Net::LibIDN } and do { $have_libidn = 1 };
 }
 
-use Test; BEGIN { plan tests => (TEST_ENABLED ? 156 : 0) };
-
-exit unless (TEST_ENABLED);
+use Test::More;
+plan skip_all => "Test requires Perl 5.8" unless $] > 5.008; # TODO: SA already doesn't support anything below 5.8.1
+plan tests => 156;
 
 # ---------------------------------------------------------------------------
 

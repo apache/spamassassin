@@ -2,19 +2,14 @@
 
 use lib '.'; use lib 't';
 use SATest; sa_t_init("spamd_prefork_stress_3");
-use Test;
 
-our $RUN_THIS_TEST;
-BEGIN {
-  $RUN_THIS_TEST = conf_bool('run_spamd_prefork_stress_test') &&
-                        conf_bool('run_long_tests');
-  plan tests => ($SKIP_SPAMD_TESTS || !$RUN_THIS_TEST ? 0 : 291)
-};
-exit if $SKIP_SPAMD_TESTS;
+use Test::More;
+diag("NOTE: this test requires both 'run_spamd_prefork_stress_test' and 'run_long_tests' set to 'y'.");
 
-print "NOTE: this test requires both 'run_spamd_prefork_stress_test'\n".
-    "and 'run_long_tests' set to 'y'.\n";
-exit unless $RUN_THIS_TEST;
+plan skip_all => "Spamd tests disabled" if $SKIP_SPAMD_TESTS;
+plan skip_all => "Long running tests disabled" unless conf_bool('run_long_tests');
+plan skip_all => "Spamd prefork stress tests disabled" unless conf_bool('run_spamd_prefork_stress_test');
+plan tests => 291;
 
 # ---------------------------------------------------------------------------
 

@@ -16,11 +16,11 @@ if (-e 'test_dir') {            # running from test directory, not ..
 }
 
 use strict;
-use Test;
+
 use Mail::SpamAssassin;
 use Mail::SpamAssassin::Util;
 
-plan tests => 14;
+use Test::More tests => 14;
 
 sub try {
   my ($data, $want) = @_;

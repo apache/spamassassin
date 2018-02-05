@@ -1,7 +1,5 @@
 #!/usr/bin/perl
 
-use constant NUM_TESTS => 10;
-
 BEGIN {
   if (-e 't/test_dir') { # if we are running "t/priorities.t", kluge around ...
     chdir 't';
@@ -20,7 +18,7 @@ if (-e 'test_dir') {            # running from test directory, not ..
 use lib '.'; use lib 't';
 use SATest; sa_t_init("priorities");
 use strict;
-use Test; BEGIN { plan tests => NUM_TESTS };
+use Test::More tests => 10;
 
 use Mail::SpamAssassin;
 

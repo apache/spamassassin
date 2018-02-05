@@ -12,6 +12,10 @@ use File::Basename;
 use File::Copy;
 use File::Path;
 use File::Spec;
+
+use Test::Builder ();
+use Test::More    ();
+
 use POSIX qw(WIFEXITED WIFSIGNALED WIFSTOPPED WEXITSTATUS WTERMSIG WSTOPSIG);
 
 use vars qw($RUNNING_ON_WINDOWS $SSL_AVAILABLE
@@ -338,10 +342,13 @@ sub sarun {
   $scrargs =~ s!/!\\!g if ($^O =~ /^MS(DOS|Win)/i);
   print ("\t$scrargs\n");
   (-d "log/d.$testname") or mkdir ("log/d.$testname", 0755);
-  system ("$scrargs > log/d.$testname/${Test::ntest} $post_redir");
+  
+  my $test_number = test_number();
+
+  system ("$scrargs > log/d.$testname/$test_number $post_redir");
   $sa_exitcode = ($?>>8);
   if ($sa_exitcode != 0) { return undef; }
-  &checkfile ("d.$testname/${Test::ntest}", $read_sub) if (defined $read_sub);
+  &checkfile ("d.$testname/$test_number", $read_sub) if (defined $read_sub);
   1;
 }
 
@@ -372,10 +379,13 @@ sub salearnrun {
   $salearnargs =~ s!/!\\!g if ($^O =~ /^MS(DOS|Win)/i);
   print ("\t$salearnargs\n");
   (-d "log/d.$testname") or mkdir ("log/d.$testname", 0755);
-  system ("$salearnargs > log/d.$testname/${Test::ntest}");
+
+  my $test_number = test_number();
+
+  system ("$salearnargs > log/d.$testname/$test_number");
   $salearn_exitcode = ($?>>8);
   if ($salearn_exitcode != 0) { return undef; }
-  &checkfile ("d.$testname/${Test::ntest}", $read_sub) if (defined $read_sub);
+  &checkfile ("d.$testname/$test_number", $read_sub) if (defined $read_sub);
   1;
 }
 
@@ -416,10 +426,13 @@ sub spamcrun {
 
   print ("\t$spamcargs\n");
   (-d "log/d.$testname") or mkdir ("log/d.$testname", 0755);
+
+  my $test_number = test_number();
+
   if ($capture_stderr) {
-    system ("$spamcargs > log/d.$testname/out.${Test::ntest} 2>&1");
+    system ("$spamcargs > log/d.$testname/out.$test_number 2>&1");
   } else {
-    system ("$spamcargs > log/d.$testname/out.${Test::ntest}");
+    system ("$spamcargs > log/d.$testname/out.$test_number");
   }
 
   $sa_exitcode = ($?>>8);
@@ -429,7 +442,7 @@ sub spamcrun {
 
   %found = ();
   %found_anti = ();
-  &checkfile ("d.$testname/out.${Test::ntest}", $read_sub) if (defined $read_sub);
+  &checkfile ("d.$testname/out.$test_number", $read_sub) if (defined $read_sub);
 
   if ($expect_failure) {
     ($sa_exitcode != 0);
@@ -459,7 +472,9 @@ sub spamcrun_background {
 
   print ("\t$spamcargs &\n");
   (-d "log/d.$testname") or mkdir ("log/d.$testname", 0755);
-  system ("$spamcargs > log/d.$testname/bg.${Test::ntest} &") and return 0;
+  
+  my $test_number = test_number();
+  system ("$spamcargs > log/d.$testname/bg.$test_number &") and return 0;
 
   1;
 }
@@ -531,9 +546,11 @@ sub start_spamd {
   }
 
   (-d "log/d.$testname") or mkdir ("log/d.$testname", 0755);
-  my $spamd_stdout = "log/d.$testname/spamd.out.${Test::ntest}";
-     $spamd_stderr = "log/d.$testname/spamd.err.${Test::ntest}";    #  global
-  my $spamd_stdlog = "log/d.$testname/spamd.log.${Test::ntest}";
+  
+  my $test_number = test_number();
+  my $spamd_stdout = "log/d.$testname/spamd.out.$test_number";
+     $spamd_stderr = "log/d.$testname/spamd.err.$test_number";    #  global
+  my $spamd_stdlog = "log/d.$testname/spamd.log.$test_number";
 
   my $spamd_forker = $ENV{'SPAMD_FORKER'}   ?
                        $ENV{'SPAMD_FORKER'} :
@@ -555,7 +572,7 @@ sub start_spamd {
 
   # DEBUG instrumentation to trace spamd processes. See bug 5731 for history
   # if (-f "/home/jm/capture_spamd_straces") {
-  # $spamd_cmd = "strace -ttt -fo log/d.$testname/spamd.strace.${Test::ntest} $spamd_cmd";
+  # $spamd_cmd = "strace -ttt -fo log/d.$testname/spamd.strace.$test_number $spamd_cmd";
   # }
 
   unlink ($spamd_stdout, $spamd_stderr, $spamd_stdlog);
@@ -1070,6 +1087,10 @@ sub debug_array {
     }
   }
   return $string;
+}
+
+sub test_number {
+  return Test::More->builder->current_test;
 }
 
 1;

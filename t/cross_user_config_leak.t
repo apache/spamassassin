@@ -18,7 +18,7 @@ if (-e 'test_dir') {            # running from test directory, not ..
 
 use lib '.'; use lib 't';
 use SATest; sa_t_init("cross_user_config_leak");
-use Test; BEGIN { plan tests => 6 };
+use Test::More tests => 6;
 
 # ---------------------------------------------------------------------------
 # bug 6003

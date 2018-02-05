@@ -2,7 +2,7 @@
 
 use lib '.'; use lib 't';
 use SATest; sa_t_init("desc_wrap");
-use Test; BEGIN { plan tests => 10 };
+use Test::More tests => 10;
 
 # ---------------------------------------------------------------------------
 

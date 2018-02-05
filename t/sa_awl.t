@@ -2,7 +2,8 @@
 
 use lib '.'; use lib 't';
 use SATest; sa_t_init("sa_awl");
-use Test; BEGIN { plan tests => 1 };
+
+use Test::More tests => 1;
 
 # ---------------------------------------------------------------------------
 

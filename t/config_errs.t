@@ -1,13 +1,10 @@
 #!/usr/bin/perl -w
 
-# TODO: this script does not work yet.  There are (a) lots of failures
-# and (b) the 'plan' line means all tests are effectively ignored from
-# 'make test'.
+use Test::More;
 
-use Test;
-
-plan tests => 0;
-exit 0;     
+# TODO: Now we're using Test::More, we could choose to make the failing tests TODO tests so we know if they start passing.
+plan skip_all => q{This script does not work yet. There are (a) lots of failures and (b) the 'plan' line means all tests are effectively ignored from 'make test'.};
+exit 0;
 
 # ---------------------------------------------------------------------------
 
@@ -43,7 +40,6 @@ if (-e 'test_dir') {            # running from test directory, not ..
 use strict;
 use lib '.'; use lib 't';
 use SATest; sa_t_init("config_errs");
-use Test;
 use Mail::SpamAssassin;
 
 # initialize SpamAssassin

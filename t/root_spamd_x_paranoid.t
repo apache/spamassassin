@@ -2,14 +2,11 @@
 
 use lib '.'; use lib 't';
 use SATest; sa_t_init("root_spamd_x_paranoid");
-use Test;
 
-use constant TEST_ENABLED => conf_bool('run_root_tests');
-use constant IS_ROOT => eval { ($> == 0); };
-use constant RUN_TESTS => (TEST_ENABLED && IS_ROOT);
-
-BEGIN { plan tests => (RUN_TESTS ? 14 : 0) };
-exit unless RUN_TESTS;
+use Test::More;
+plan skip_all => "root tests disabled" unless conf_bool('run_root_tests');
+plan skip_all => "not running tests as root" unless eval { ($> == 0); };
+plan tests => 14;
 
 # ---------------------------------------------------------------------------
 

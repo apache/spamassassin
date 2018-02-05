@@ -2,7 +2,7 @@
 
 use lib '.'; use lib 't';
 use SATest; sa_t_init("whitelist_to");
-use Test; BEGIN { plan tests => 1 };
+use Test::More tests => 1;
 
 # ---------------------------------------------------------------------------
 

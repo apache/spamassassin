@@ -17,7 +17,7 @@ if (-e 'test_dir') {            # running from test directory, not ..
 }
 
 use strict;
-use Test;
+use Test::More tests => 105;
 use Mail::SpamAssassin;
 
 use Mail::SpamAssassin::NetSet;
@@ -25,8 +25,6 @@ use Mail::SpamAssassin::NetSet;
 my $sa = Mail::SpamAssassin->new({
     rules_filename => "$prefix/rules",
 });
-
-plan tests => 105;
 
 sub tryone ($$) {
   my ($pat, $testip) = @_;
