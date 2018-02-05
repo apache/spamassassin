@@ -5,15 +5,12 @@
 
 use lib '.'; use lib 't';
 use SATest; sa_t_init("root_spamd_u_dcc");
-use Test;
 
-use constant TEST_ENABLED => conf_bool('run_root_tests');
-use constant DCC_TEST_ENABLED => conf_bool('run_dcc_tests');
-use constant IS_ROOT => eval { ($> == 0); };
-use constant RUN_TESTS => (TEST_ENABLED && DCC_TEST_ENABLED && IS_ROOT);
-
-BEGIN { plan tests => (RUN_TESTS ? 23 : 0) };
-exit unless RUN_TESTS;
+use Test::More;
+plan skip_all => "root tests disabled" unless conf_bool('run_root_tests');
+plan skip_all => "DCC tests disabled" unless conf_bool('run_dcc_tests');
+plan skip_all => "not running tests as root" unless eval { ($> == 0); };
+plan tests => 23;
 
 # ---------------------------------------------------------------------------
 

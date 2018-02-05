@@ -13,7 +13,7 @@ BEGIN {
 
 use lib '.'; use lib 't';
 use SATest; sa_t_init("relative_scores");
-use Test;
+
 use strict;
 use vars qw/ $error /;
 
@@ -39,7 +39,7 @@ my $sa = create_saobj();
 
 $sa->init(0); # parse rules
 
-plan tests => 4;
+use Test::More tests => 4;
 
 ok($sa);
 

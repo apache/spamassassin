@@ -16,15 +16,13 @@ if (-e 'test_dir') {            # running from test directory, not ..
 }
 
 use strict;
-use Test;
+use Test::More tests => 95;
 use lib '.'; use lib 't';
 use SATest; sa_t_init("uri");
 
 use Mail::SpamAssassin;
 use Mail::SpamAssassin::HTML;
 use Mail::SpamAssassin::Util;
-
-plan tests => 95;
 
 ##############################################
 

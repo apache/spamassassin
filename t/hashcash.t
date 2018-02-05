@@ -4,11 +4,11 @@ use lib '.'; use lib 't';
 use SATest; sa_t_init("hashcash");
 
 # we need DB_File to support the double-spend db.
-use constant HAS_DB_FILE => eval { require DB_File; };
+use constant HAS_DB_FILE => eval { require DB_File };
 
-use Test; BEGIN { plan tests => HAS_DB_FILE ? 4 : 0 };
-
-exit unless HAS_DB_FILE;
+use Test::More;
+plan skip_all => "This test requires DB_File" unless HAS_DB_FILE;
+plan tests => 4;
 
 # ---------------------------------------------------------------------------
 

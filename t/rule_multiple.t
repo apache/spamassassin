@@ -2,7 +2,7 @@
 
 use lib '.'; use lib 't';
 use SATest; sa_t_init("rule_multiple");
-use Test; BEGIN { plan tests => 20 };
+use Test::More tests => 20;
 
 # ---------------------------------------------------------------------------
 

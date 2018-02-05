@@ -6,19 +6,18 @@ use re 'taint';
 use lib '.'; use lib 't';
 
 use SATest; sa_t_init("dkim");
-use Test;
 
 use vars qw(%patterns %anti_patterns);
 
-use constant num_tests => 199;
-
-use constant TEST_ENABLED => conf_bool('run_net_tests');
-use constant HAS_MODULES => eval {
+use constant HAS_DKIM_VERIFIER => eval {
   require Mail::DKIM::Verifier;
   Mail::DKIM::Verifier->VERSION >= 0.31;
 };
 
-use constant DO_RUN => TEST_ENABLED && HAS_MODULES;
+use Test::More;
+plan skip_all => "Net tests disabled" unless conf_bool('run_net_tests');
+plan skip_all => "Needs Mail::DKIM::Verifier >= 0.31" unless HAS_DKIM_VERIFIER ;
+plan tests => 199;
 
 BEGIN {
   if (-e 't/test_dir') {
@@ -28,11 +27,7 @@ BEGIN {
   if (-e 'test_dir') {
     unshift(@INC, '../blib/lib');
   }
-  
-  plan tests => (DO_RUN ? num_tests : 0);
-};
-
-exit unless (DO_RUN);
+}
 
 my $prefix = '.';
 if (-e 'test_dir') {            # running from test directory, not ..

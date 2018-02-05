@@ -2,7 +2,7 @@
 
 use lib '.'; use lib 't';
 use SATest; sa_t_init("db_awl_path");
-use Test; BEGIN { plan tests => 4 };
+use Test::More tests => 4;
 use IO::File;
 
 # ---------------------------------------------------------------------------
@@ -36,8 +36,8 @@ my $error = do {
   <$fh>;
 };
 
-print "# $error\n";
-ok($error, qr/(cannot create tmp lockfile)|(unlink of lock file.*failed)/, "Check we get the right error back");
+diag $error;
+like($error, qr/(cannot create tmp lockfile)|(unlink of lock file.*failed)/, "Check we get the right error back");
 
 # and this mail should *not* be whitelisted as a result.
 %patterns = %is_spam_patterns;

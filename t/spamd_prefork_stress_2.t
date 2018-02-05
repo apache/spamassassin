@@ -5,28 +5,22 @@
 
 use lib '.'; use lib 't';
 use SATest; sa_t_init("spamd_prefork_stress_2");
-use Test;
+use Test::More;
 
-use constant TEST_ENABLED => conf_bool('run_long_tests');
-our $RUN_THIS_TEST;
-
-my $pgrep;
-my $pkill;
+plan skip_all => "Long running tests disabled" unless conf_bool('run_long_tests');
+plan skip_all => "Spamd tests disabled" if $SKIP_SPAMD_TESTS;
+plan skip_all => "Spamd prefork stress tests disabled" unless conf_bool('run_spamd_prefork_stress_test');
 
 # require pkill and pgrep be installed to run this test
-BEGIN {
-  $RUN_THIS_TEST = conf_bool('run_spamd_prefork_stress_test') && TEST_ENABLED;
-  $pkill = locate_command("pkill");
-  $pgrep = locate_command("pgrep");
-  $RUN_THIS_TEST = 0 if !$pkill || !$pgrep;
-  plan tests => ($SKIP_SPAMD_TESTS || !$RUN_THIS_TEST ? 0 : 14)
-};
+my $note = "NOTE: this test requires /usr/bin/pkill, /usr/bin/pgrep, and both\n".
+           "'run_spamd_prefork_stress_test' and 'run_long_tests' set to 'y'.\n";
 
-exit if $SKIP_SPAMD_TESTS;
+my $pkill = locate_command("pkill");
+my $pgrep = locate_command("pgrep");
+plan skip_all => "No pkill available - $note" unless $pkill;
+plan skip_all => "No pgrep available - $note" unless $pgrep;
 
-print "NOTE: this test requires /usr/bin/pkill, /usr/bin/pgrep, and both\n".
-    "'run_spamd_prefork_stress_test' and 'run_long_tests' set to 'y'.\n";
-exit unless $RUN_THIS_TEST;
+plan tests => 14;
 
 system($pgrep, "spamd child");
 if ($? >> 8 == 0) {

@@ -15,15 +15,15 @@ if (-e 'test_dir') {            # running from test directory, not ..
   $prefix = '..';
 }
 
-use SATest; 
+use lib '.';
+use SATest;
 sa_t_init("rule_tests");
 
 use strict;
-use Test;
+use Test::More;
 use Mail::SpamAssassin;
-use vars qw($num_tests);
 
-$num_tests = 1;
+my $num_tests = 1;
 
 $Mail::SpamAssassin::Conf::COLLECT_REGRESSION_TESTS = 1;
 
@@ -160,7 +160,6 @@ foreach my $tests (@tests) {
     # debugging, what rule hits actually occurred
     #print $symbol, ": ", join(", ", keys(%rules_hit), "\n");
 
-    print "Test for '$symbol' (type: $test_type) against '$string'\n";
-    ok( (exists $rules_hit{$symbol} ? 1 : 0), ($ok_or_fail eq 'ok' ? 1 : 0), "Test for '$symbol' (type: $test_type) against '$string'" );
+    is( (exists $rules_hit{$symbol} ? 1 : 0), ($ok_or_fail eq 'ok' ? 1 : 0), "Test for '$symbol' (type: $test_type) against '$string'" );
 }
 

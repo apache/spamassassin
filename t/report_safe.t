@@ -2,7 +2,8 @@
 
 use lib '.'; use lib 't';
 use SATest; sa_t_init("report_safe");
-use Test; BEGIN { plan tests => 8 };
+
+use Test::More tests => 8;
 
 # ---------------------------------------------------------------------------
 

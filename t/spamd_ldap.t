@@ -5,11 +5,9 @@
 use lib '.'; use lib 't';
 use SATest; sa_t_init("spamd_ldap");
 
-use constant TEST_ENABLED => (-e 't/do_ldap' || -e 'do_ldap');
-
-use Test; BEGIN { plan tests => (TEST_ENABLED ? 8 : 0) };
-
-exit unless (TEST_ENABLED);
+use Test::More;
+plan skip_all => "LDAP tests disabled" unless (-e 't/do_ldap' || -e 'do_ldap');
+plan tests => 8;
 
 # ---------------------------------------------------------------------------
 

@@ -3,11 +3,10 @@
 use Data::Dumper;
 use lib '.'; use lib 't';
 use SATest; sa_t_init("bayes");
-use Test;
 
-use constant TEST_ENABLED => conf_bool('run_long_tests') &&
-                            eval { require DB_File; };
-
+use constant HAS_DB_FILE => eval { require DB_File };
+ 
+use Test::More;
 BEGIN { 
   if (-e 't/test_dir') {
     chdir 't';
@@ -16,11 +15,11 @@ BEGIN {
   if (-e 'test_dir') {
     unshift(@INC, '../blib/lib');
   }
+}
 
-  plan tests => (TEST_ENABLED ? 48 : 0);
-};
-
-exit unless TEST_ENABLED;
+plan skip_all => "Long running tests disabled" unless conf_bool('run_long_tests');
+plan skip_all => "DB_File is unavailable" unless HAS_DB_FILE;
+plan tests => 48;
 
 tstlocalrules ("
         bayes_learn_to_journal 0

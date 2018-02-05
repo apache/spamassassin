@@ -18,8 +18,7 @@ if (-e 'test_dir') {            # running from test directory, not ..
 
 use lib '.'; use lib 't';
 use SATest; sa_t_init("util_wrap");
-use Test; BEGIN { plan tests => 5 };
-
+use Test::More tests => 5;
 
 use strict;
 require Mail::SpamAssassin::Util;

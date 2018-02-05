@@ -3,11 +3,9 @@
 use lib '.'; use lib 't';
 use SATest; sa_t_init("html_obfu");
 
-use constant TEST_ENABLED => ($] > 5.008004);
-
-use Test; BEGIN { plan tests => (TEST_ENABLED ? 2 : 0) };
-
-exit unless (TEST_ENABLED);
+use Test::More;
+plan skip_all => "Test requires Perl 5.8.5" unless $] > 5.008004;
+plan tests => 2;
 
 # ---------------------------------------------------------------------------
 

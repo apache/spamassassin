@@ -2,9 +2,11 @@
 
 use lib '.'; use lib 't';
 use SATest; sa_t_init("spamc");
-use Test; plan tests => ($NO_SPAMC_EXE ? 0 : 2);
 
-exit if $NO_SPAMC_EXE;
+use Test::More;
+plan skip_all => "No SPAMC exe" if $SKIP_SPAMC_TESTS;
+plan tests => 2;
+
 # ---------------------------------------------------------------------------
 
 %patterns = (

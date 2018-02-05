@@ -3,14 +3,13 @@
 use lib '.'; use lib 't';
 use SATest; sa_t_init("spamd_kill_restart_rr");
 
-use constant TEST_ENABLED => conf_bool('run_long_tests') &&
-                                !$SKIP_SPAMD_TESTS && !$RUNNING_ON_WINDOWS;
-
-use Test; BEGIN { plan tests => (TEST_ENABLED? 93 : 0) };
+use Test::More;
+plan skip_all => "Spamd tests disabled" if $SKIP_SPAMD_TESTS;
+plan skip_all => "Long running tests disabled" unless conf_bool('run_long_tests');
+plan skip_all => "Tests don't work on windows" if $RUNNING_ON_WINDOWS;
+plan tests => 93;
 
 use File::Spec;
-
-exit unless TEST_ENABLED;
 
 # ---------------------------------------------------------------------------
 

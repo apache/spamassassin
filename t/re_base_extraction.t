@@ -5,7 +5,7 @@
 
 use lib '.'; use lib 't'; use lib '../lib';
 use SATest; sa_t_init("re_base_extraction");
-use Test;
+
 use strict;
 use warnings;
 
@@ -21,10 +21,9 @@ close STDIN;    # inhibits noise from sa-compile
 BEGIN { 
   if (-e 't/test_dir') { chdir 't'; } 
   if (-e 'test_dir') { unshift(@INC, '../blib/lib'); }
+}
 
-  plan tests => 128;
-
-};
+use Test::More tests => 128;
 use lib '../lib';
 
 # ---------------------------------------------------------------------------

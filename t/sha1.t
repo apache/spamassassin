@@ -16,7 +16,7 @@ if (-e 'test_dir') {            # running from test directory, not ..
 }
 
 use strict;
-use Test;
+
 use Mail::SpamAssassin;
 
 BEGIN {
@@ -24,7 +24,7 @@ BEGIN {
   or do { require Digest::SHA1; import Digest::SHA1 qw(sha1_hex) }
 }
 
-plan tests => 15;
+use Test::More tests => 15;
 
 sub try {
   my ($data, $want) = @_;
