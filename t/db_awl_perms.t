@@ -2,7 +2,7 @@
 
 use lib '.'; use lib 't';
 use SATest; sa_t_init("db_awl_perms");
-use Test; BEGIN { plan tests => 5 };
+use Test::More tests => 5;
 use IO::File;
 
 # ---------------------------------------------------------------------------

@@ -17,7 +17,8 @@ if (-e 'test_dir') {            # running from test directory, not ..
 }
 
 use strict;
-use Test;
+
+use Test::More tests => 33;
 use Mail::SpamAssassin;
 
 BEGIN {
@@ -106,13 +107,6 @@ my $sa = Mail::SpamAssassin->new({
     debug             => 0,
     dont_copy_prefs   => 1,
 });
-
-my $numtests = 5;
-while ( my($k,$v) = each %files ) {
-  $numtests += @{$v};
-}
-
-plan tests => $numtests;
 
 foreach my $k ( sort keys %files ) {
   open(INP, $k) || die "Can't find $k:$!";

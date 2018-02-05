@@ -13,7 +13,7 @@ BEGIN {
 
 use lib '.'; use lib 't';
 use SATest; sa_t_init("stop_always_matching_regexps");
-use Test; BEGIN { plan tests => 13 };
+use Test::More tests => 13;
 
 # ---------------------------------------------------------------------------
 

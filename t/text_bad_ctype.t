@@ -2,7 +2,7 @@
 
 use lib '.'; use lib 't';
 use SATest; sa_t_init("text_bad_ctype");
-use Test; BEGIN { plan tests => 2 };
+use Test::More tests => 2;
 
 # ---------------------------------------------------------------------------
 

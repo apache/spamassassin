@@ -3,11 +3,11 @@
 use lib '.'; use lib 't';
 use SATest; sa_t_init("spamd_plugin");
 
-use constant numtests => 6;
-use Test; plan tests => (($SKIP_SPAMD_TESTS || $RUNNING_ON_WINDOWS || $SKIP_SETUID_NOBODY_TESTS) ?
-                        0 : numtests);
-
-exit unless !($SKIP_SPAMD_TESTS || $RUNNING_ON_WINDOWS || $SKIP_SETUID_NOBODY_TESTS);
+use Test::More;
+plan skip_all => "Spamd tests disabled" if $SKIP_SPAMD_TESTS;
+plan skip_all => "Tests don't work on windows" if $RUNNING_ON_WINDOWS;
+plan skip_all => "UID nobody tests" if $SKIP_SETUID_NOBODY_TESTS;
+plan tests => 6;
 
 # ---------------------------------------------------------------------------
 

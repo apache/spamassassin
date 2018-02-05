@@ -2,11 +2,10 @@
 
 use lib '.'; use lib 't';
 use SATest; sa_t_init("spamc_y");
-use Test; plan tests => ($NO_SPAMC_EXE ? 0 : 2),
-               onfail => sub { warn "FAIL: Some other process running on port 8?  Test assumes nothing is listening on port 8." };
 
-
-exit if $NO_SPAMC_EXE;
+use Test::More;
+plan skip_all => "No SPAMC exe" if $NO_SPAMC_EXE;
+plan tests => 2;
 
 # ---------------------------------------------------------------------------
 

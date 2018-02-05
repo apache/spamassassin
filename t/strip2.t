@@ -2,12 +2,10 @@
 
 use lib '.'; use lib 't';
 use SATest; sa_t_init("strip2");
-use Test;
 
-use constant TEST_ENABLED => conf_bool('run_long_tests');
-
-BEGIN { plan tests => TEST_ENABLED ? 98 : 0 };
-exit unless TEST_ENABLED;
+use Test::More;
+plan skip_all => 'Long running tests disabled' if conf_bool('run_long_tests');
+plan tests => 98;
 
 # ---------------------------------------------------------------------------
 
@@ -37,7 +35,8 @@ foreach $input (@files) {
 	");
 
   # create report_safe 0 output
-  my $d_input = "log/d.$testname/${Test::ntest}";
+  my $test_number = test_number();
+  my $d_input = "log/d.$testname/$test_number";
   unlink $d_input;
   ok sarun ("-L < $input");
 
@@ -46,7 +45,8 @@ foreach $input (@files) {
 
   {
     print "output: $d_input\n";
-    my $d_output = "log/d.$testname/${Test::ntest}";
+		$test_number = test_number();
+    my $d_output = "log/d.$testname/$test_number";
     unlink $d_output;
     ok sarun ("-d < $d_input");
     ok (-f $d_output);
@@ -62,13 +62,15 @@ foreach $input (@files) {
 	");
 
   # create report_safe 1 and -t output
-  $d_input = "log/d.$testname/${Test::ntest}";
+	$test_number = test_number();
+  $d_input = "log/d.$testname/$test_number";
   unlink $d_input;
   ok sarun ("-L -t < $input");
   ok (-f $d_input);
   {
     print "output: $d_input\n";
-    my $d_output = "log/d.$testname/${Test::ntest}";
+		$test_number = test_number();
+    my $d_output = "log/d.$testname/$test_number";
     unlink $d_output;
     ok sarun ("-d < $d_input");
     ok (-f $d_output);
@@ -89,13 +91,15 @@ tstprefs ("
 	");
 
 # create report_safe 2 output
-$d_input = "log/d.$testname/${Test::ntest}";
+my $test_number = test_number();
+$d_input = "log/d.$testname/$test_number";
 unlink $d_input;
 ok sarun ("-L < $input");
 ok (-f $d_input);
 {
   print "output: $d_input\n";
-  my $d_output = "log/d.$testname/${Test::ntest}";
+  $test_number = test_number();
+  my $d_output = "log/d.$testname/$test_number";
   unlink $d_output;
   ok sarun ("-d < $d_input");
   ok (-f $d_output);
@@ -104,7 +108,8 @@ ok (-f $d_input);
 }
 
 # Work directly on regular message, as though it was not spam
-my $d_output = "log/d.$testname/${Test::ntest}";
+$test_number = test_number();
+my $d_output = "log/d.$testname/$test_number";
 unlink $d_output;
 ok sarun ("-d < $input");
 ok (-f $d_output);

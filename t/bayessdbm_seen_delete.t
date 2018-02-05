@@ -3,12 +3,15 @@
 use Data::Dumper;
 use lib '.'; use lib 't';
 use SATest; sa_t_init("bayessdbm_seen_delete");
-use Test;
 
-use constant TEST_ENABLED => conf_bool('run_long_tests') &&
-                    eval { require SDBM_File; };
+use constant HAS_SDBM_FILE => eval { require SDBM_File };
 
-BEGIN { 
+use Test::More;
+plan skip_all => "Long running tests disabled" unless conf_bool('run_long_tests');
+plan skip_all => "No SDBM_File" unless HAS_SDBM_FILE;
+plan tests => 54;
+
+BEGIN {
   if (-e 't/test_dir') {
     chdir 't';
   }
@@ -16,11 +19,7 @@ BEGIN {
   if (-e 'test_dir') {
     unshift(@INC, '../blib/lib');
   }
-
-  plan tests => (TEST_ENABLED ? 54 : 0);
-};
-
-exit unless TEST_ENABLED;
+}
 
 tstlocalrules ("
         bayes_store_module Mail::SpamAssassin::BayesStore::SDBM

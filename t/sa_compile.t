@@ -3,7 +3,7 @@
 use lib '.'; use lib 't';
 $ENV{'TEST_PERL_TAINT'} = 'no';     # inhibit for this test
 use SATest; sa_t_init("sa_compile");
-use Test;
+
 use Config;
 use File::Basename;
 use File::Path qw/mkpath/;
@@ -26,21 +26,20 @@ sub re2c_version_new_enough {
   return $newenough;
 }
 
-use constant TEST_ENABLED => conf_bool('run_long_tests')
-                                && re2c_version_new_enough();
+use Test::More;
+plan skip_all => "Long running tests disabled" unless conf_bool('run_long_tests');
+plan skip_all => "Tests don't work on windows" if $RUNNING_ON_WINDOWS;
+plan skip_all => "RE2C isn't new enough" unless re2c_version_new_enough();
+plan tests => 5;
 
-BEGIN { 
+BEGIN {
   if (-e 't/test_dir') {
     chdir 't';
   }
   if (-e 'test_dir') {
     unshift(@INC, '../blib/lib');
   }
-
-  plan tests => ((TEST_ENABLED && !$RUNNING_ON_WINDOWS) ? 5 : 0);
-};
-
-exit unless (TEST_ENABLED && !$RUNNING_ON_WINDOWS);
+}
 
 # -------------------------------------------------------------------
 

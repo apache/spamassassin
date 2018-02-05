@@ -18,15 +18,12 @@ if (-e 'test_dir') {            # running from test directory, not ..
 use strict;
 use lib '.'; use lib 't';
 use SATest; sa_t_init("debug");
-use Test;
+
 use Mail::SpamAssassin;
 
-use constant TEST_ENABLED => conf_bool('run_long_tests');
-
-BEGIN { 
-  plan tests => (TEST_ENABLED ? 3 : 0);
-};
-exit unless TEST_ENABLED;
+use Test::More;
+plan skip_all => "Long running tests disabled" unless conf_bool('run_long_tests');
+plan tests => 3;
 
 # list of known debug facilities
 my %facility = map( ($_, 1),

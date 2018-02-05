@@ -21,12 +21,10 @@ if (-e 'test_dir') {            # running from test directory, not ..
 
 use lib '.'; use lib 't';
 use SATest; sa_t_init("check_implemented");
-use Test;
+
 use Carp qw(croak);
 
-BEGIN {
-  plan tests => 2;
-};
+use Test::More tests => 2;
 
 # ---------------------------------------------------------------------------
 

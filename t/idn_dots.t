@@ -20,12 +20,9 @@ if (-e 'test_dir') {            # running from test directory, not ..
 use strict;
 use lib '.'; use lib 't';
 use SATest; sa_t_init("normalize_utf8_dots.t");
-use Test;
+use Test::More tests => 6;
 use Mail::SpamAssassin;
 use vars qw(%patterns %anti_patterns);
-
-# settings
-plan tests => 6;
 
 # initialize SpamAssassin
 my $sa = create_saobj({dont_copy_prefs => 1});

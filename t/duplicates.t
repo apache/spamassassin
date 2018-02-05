@@ -2,7 +2,7 @@
 
 use lib '.'; use lib 't';
 use SATest; sa_t_init("duplicates");
-use Test; BEGIN { plan tests => 21 };
+use Test::More tests => 21;
 
 $ENV{'LANGUAGE'} = $ENV{'LC_ALL'} = 'C';             # a cheat, but we need the patterns to work
 

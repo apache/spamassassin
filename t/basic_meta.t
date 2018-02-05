@@ -18,18 +18,19 @@ if (-e 'test_dir') {            # running from test directory, not ..
 use strict;
 use lib '.'; use lib 't';
 use SATest; sa_t_init("meta");
-use Test;
+
 use Mail::SpamAssassin;
 
 use vars qw( %rules %scores $perl_path);
 
 # "parse-rules-for-masses" requires Data::Dumper
 use constant HAS_DATADUMPER => eval 'use Data::Dumper; 1;';
-use constant IS_WINDOWS => ($^O =~ /^(mswin|dos|os2)/oi);
-use constant DO_RUN     => HAS_DATADUMPER && !IS_WINDOWS;
 
-plan tests => (DO_RUN ? 2 : 0);
-exit unless DO_RUN;
+use Test::More;
+
+plan skip_all => "Needs Data::Dumper" unless HAS_DATADUMPER;
+plan skip_all => "Tests don't work on Windows" if $^O =~ /^(mswin|dos|os2)/i;
+plan tests => 2;
 
 # meta failures
 my $meta_dependency_disabled = 0;

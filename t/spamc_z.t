@@ -8,9 +8,11 @@ use SATest; sa_t_init("spamc_z");
 system("$spamc -z < /dev/null");
 my $SPAMC_Z_AVAILABLE = ($? >> 8 == 0);
 
-use Test;
-plan tests => (($SKIP_SPAMD_TESTS || !HAVE_ZLIB || !$SPAMC_Z_AVAILABLE) ? 0 : 9);
-exit if ($SKIP_SPAMD_TESTS || !HAVE_ZLIB || !$SPAMC_Z_AVAILABLE);
+use Test::More;
+plan skip_all => "Spamd tests disabled" if $SKIP_SPAMD_TESTS;
+plan skip_all => "ZLIB REQUIRED" unless HAVE_ZLIB;
+plan skip_all => "SPAMC Z unavailable" unless $SPAMC_Z_AVAILABLE;
+plan tests => 9;
 
 # ---------------------------------------------------------------------------
 

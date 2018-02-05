@@ -2,7 +2,8 @@
 
 use lib '.'; use lib 't';
 use SATest; sa_t_init("shortcircuit");
-use Test; BEGIN { plan tests => 18 };
+
+use Test::More tests => 18;
 
 # ---------------------------------------------------------------------------
 

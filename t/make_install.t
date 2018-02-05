@@ -7,8 +7,7 @@ use SATest;
 sa_t_init("make_install");
 
 use Config;
-use Test; 
-plan tests => 25;
+use Test::More tests => 25;
 
 BEGIN { 
   if (-e 't/test_dir') {

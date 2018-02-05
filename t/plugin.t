@@ -2,7 +2,7 @@
 
 use lib '.'; use lib 't';
 use SATest; sa_t_init("plugin");
-use Test; BEGIN { plan tests => 6 };
+use Test::More tests => 6;
 
 # ---------------------------------------------------------------------------
 

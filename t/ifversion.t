@@ -2,7 +2,7 @@
 
 use lib '.'; use lib 't';
 use SATest; sa_t_init("ifversion");
-use Test; BEGIN { plan tests => 4 };
+use Test::More tests => 4;
 
 # ---------------------------------------------------------------------------
 

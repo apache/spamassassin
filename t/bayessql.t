@@ -2,12 +2,15 @@
 
 use lib '.'; use lib 't';
 use SATest;
-use Test;
 
-use constant TEST_ENABLED => conf_bool('run_bayes_sql_tests');
 use constant HAS_DBI => eval { require DBI; }; # for our cleanup stuff
 
-BEGIN { 
+use Test::More;
+plan skip_all => "Bayes SQL tests are disabled" unless conf_bool('run_bayes_sql_tests');
+plan skip_all => "DBI is unavailable on this system" unless HAS_DBI;
+plan tests => 53;
+
+BEGIN {
   if (-e 't/test_dir') {
     chdir 't';
   }
@@ -15,15 +18,9 @@ BEGIN {
   if (-e 'test_dir') {
     unshift(@INC, '../blib/lib');
   }
+}
 
-  plan tests => ((TEST_ENABLED && HAS_DBI) ? 53 : 0);
-
-  onfail => sub {
-    warn "\n\nNote: Failure may be due to an incorrect config.";
-  }
-};
-
-exit unless TEST_ENABLED;
+diag "Note: Failure may be due to an incorrect config.";
 
 my $dbdsn = conf('bayes_sql_dsn');
 my $dbusername = conf('bayes_sql_username');

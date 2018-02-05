@@ -18,7 +18,7 @@ if (-e 'test_dir') {            # running from test directory, not ..
 
 use lib '.'; use lib 't';
 use SATest; sa_t_init("timeout");
-use Test; BEGIN { plan tests => 33 };
+use Test::More tests => 33;
 
 use strict;
 use Time::HiRes qw(time);

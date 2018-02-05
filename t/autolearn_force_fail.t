@@ -2,17 +2,13 @@
 
 use lib '.'; use lib 't';
 use SATest; sa_t_init("autolearn_force_fail");
-use Test; 
 
-use Test;
+use constant HAS_DB_FILE => eval { require DB_File; };
 
-use constant TEST_ENABLED => eval { require DB_File; };
+use Test::More;
 
-BEGIN {
-  plan tests => (TEST_ENABLED ? 3 : 0);
-};
-
-exit unless TEST_ENABLED;
+plan skip_all => 'Need DB_File for this test' unless HAS_DB_FILE;
+plan tests => 3;
 
 # ---------------------------------------------------------------------------
 

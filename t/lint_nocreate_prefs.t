@@ -2,7 +2,7 @@
 
 use lib '.'; use lib 't';
 use SATest; sa_t_init("lint_nocreate_prefs");
-use Test; BEGIN { plan tests => 2 };
+use Test::More tests => 2;
 
 # ---------------------------------------------------------------------------
 

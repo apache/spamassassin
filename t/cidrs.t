@@ -16,9 +16,8 @@ if (-e 'test_dir') {            # running from test directory, not ..
 }
 
 use strict;
-use Test;
 
-plan tests => 51;
+use Test::More tests => 51;
 
 use Mail::SpamAssassin;
 use Mail::SpamAssassin::NetSet;

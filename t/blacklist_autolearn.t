@@ -2,7 +2,7 @@
 
 use lib '.'; use lib 't';
 use SATest; sa_t_init("blacklist_autolearn");
-use Test; BEGIN { plan tests => 3 };
+use Test::More tests => 3;
 
 # ---------------------------------------------------------------------------
 

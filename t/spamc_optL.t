@@ -4,9 +4,10 @@ use lib '.'; use lib 't';
 use SATest; sa_t_init("spamc_optL");
 use constant HAS_SDBM_FILE => eval { require SDBM_File; };
 
-use Test; plan tests => (!HAS_SDBM_FILE || $SKIP_SPAMC_TESTS ? 0 : 16);
-
-exit if (!HAS_SDBM_FILE || $SKIP_SPAMC_TESTS);
+use Test::More;
+plan skip_all => "No SPAMC exe" if $SKIP_SPAMC_TESTS;
+plan skip_all => "No SDBM_File" unless HAS_SDBM_FILE;
+plan tests => 16;
 
 # ---------------------------------------------------------------------------
 
