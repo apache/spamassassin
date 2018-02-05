@@ -24,7 +24,7 @@ sub mywarn;
 
 use Getopt::Long qw(:config bundling auto_help);
 use Pod::Usage;
-use vars qw($opt_noannotate $opt_h $opt_ids);
+our ($opt_noannotate, $opt_h, $opt_ids);
 GetOptions("noannotate" => \$opt_noannotate,
            "ids" => \$opt_ids,
 	   "h|headers" => \$opt_h

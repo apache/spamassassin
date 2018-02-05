@@ -63,21 +63,17 @@ use Mail::SpamAssassin::Util qw(untaint_var uri_list_canonicalize);
 use Mail::SpamAssassin::Timeout;
 use Mail::SpamAssassin::Logger;
 
-use vars qw{
-  @ISA @TEMPORARY_METHODS %TEMPORARY_EVAL_GLUE_METHODS
-};
-
-@ISA = qw();
+our @ISA = qw();
 
 # methods defined by the compiled ruleset; deleted in finish_tests()
-@TEMPORARY_METHODS = ();
+our @TEMPORARY_METHODS;
 
 # methods defined by register_plugin_eval_glue(); deleted in finish_tests()
-%TEMPORARY_EVAL_GLUE_METHODS = ();
+our %TEMPORARY_EVAL_GLUE_METHODS;
 
 ###########################################################################
 
-use vars qw( %common_tags );
+our %common_tags;
 
 BEGIN {
   %common_tags = (

@@ -15,8 +15,7 @@ BEGIN { require 'constants.pl'; }
 # or: draw-bayes-histogram spam.log nonspam.log   (backwards compatible)
 
 use Getopt::Long;
-use vars qw($opt_spam $opt_nonspam $opt_nocollapse $opt_nozoom
-        $opt_buckets);
+our ($opt_spam, $opt_nonspam, $opt_nocollapse, $opt_nozoom, $opt_buckets);
 
 GetOptions("spam=s", "nonspam=s", "nocollapse", "nozoom", "buckets=i");
 

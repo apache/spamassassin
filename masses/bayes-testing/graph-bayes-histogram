@@ -24,7 +24,7 @@
 
 
 use Getopt::Long;
-use vars qw($opt_buckets);
+our $opt_buckets;
 
 GetOptions("buckets=i");
 

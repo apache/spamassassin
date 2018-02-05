@@ -192,15 +192,16 @@ use Mail::SpamAssassin::Plugin;
 use Mail::SpamAssassin::Util qw(decode_dns_question_entry);
 use Mail::SpamAssassin::Logger;
 
-use vars qw(@ISA %rcode_value $txtdata_can_provide_a_list);
-@ISA = qw(Mail::SpamAssassin::Plugin);
+our @ISA = qw(Mail::SpamAssassin::Plugin);
 
-%rcode_value = (  # http://www.iana.org/assignments/dns-parameters, RFC 6195
+our %rcode_value = (  # http://www.iana.org/assignments/dns-parameters, RFC 6195
   NOERROR => 0,  FORMERR => 1, SERVFAIL => 2, NXDOMAIN => 3, NOTIMP => 4,
   REFUSED => 5,  YXDOMAIN => 6, YXRRSET => 7, NXRRSET => 8, NOTAUTH => 9,
   NOTZONE => 10, BADVERS => 16, BADSIG => 16, BADKEY => 17, BADTIME => 18,
   BADMODE => 19, BADNAME => 20, BADALG => 21, BADTRUNC => 22,
 );
+
+our $txtdata_can_provide_a_list;
 
 sub new {
   my($class,$sa_main) = @_;

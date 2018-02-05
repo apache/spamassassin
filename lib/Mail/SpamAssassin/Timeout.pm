@@ -61,11 +61,7 @@ use re 'taint';
 use Time::HiRes qw(time);
 use Mail::SpamAssassin::Logger;
 
-use vars qw{
-  @ISA
-};
-
-@ISA = qw();
+our @ISA = qw();
 
 ###########################################################################
 
@@ -90,9 +86,9 @@ be applied. If both are specified, the shorter interval of the two prevails.
 
 =cut
 
-use vars qw($id_gen);
-BEGIN { $id_gen = 0 }  # unique generator of IDs for timer objects
-use vars qw(@expiration);  # stack of expected expiration times, top at [0]
+our $id_gen;
+BEGIN { $id_gen = 0 } # unique generator of IDs for timer objects
+our @expiration;      # stack of expected expiration times, top at [0]
 
 sub new {
   my ($class, $opts) = @_;

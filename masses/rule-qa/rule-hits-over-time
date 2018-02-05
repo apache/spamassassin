@@ -45,11 +45,8 @@ usage: rule-hits-over-time [options] --rule rulename log1 [log2 ...]
 };
 }
 
-use vars qw(
-        $opt_rule $opt_size_x $opt_size_y $opt_text $opt_cgi
-        $opt_period $opt_scale_period $opt_ignore_older
-        $opt_debug
-);
+our ( $opt_rule, $opt_size_x, $opt_size_y, $opt_text, $opt_cgi,
+      $opt_period, $opt_scale_period, $opt_ignore_older, $opt_debug );
 
 GetOptions(
         'rule=s',

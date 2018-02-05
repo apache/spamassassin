@@ -26,11 +26,7 @@ use Time::HiRes ();
 
 use Mail::SpamAssassin;
 
-use vars qw{
-  @ISA
-};
-
-@ISA = qw();
+our @ISA = qw();
 
 ###########################################################################
 

@@ -33,14 +33,9 @@ use Mail::SpamAssassin::AICache;
 # 256 KiB is a big email, unless stated otherwise
 use constant BIG_BYTES => 256*1024;
 
-use vars qw {
-  $MESSAGES
-  $AICache
-  %class_opts
-  @ISA
-};
+our ( $MESSAGES, $AICache, %class_opts );
 
-@ISA = qw();
+our @ISA = qw();
 
 =head1 NAME
 

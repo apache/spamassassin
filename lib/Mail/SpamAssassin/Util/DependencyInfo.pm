@@ -34,11 +34,9 @@ use warnings;
 # use bytes;
 use re 'taint';
 
-use vars qw (
-  @MODULES @OPTIONAL_MODULES $EXIT_STATUS $WARNINGS @OPTIONAL_BINARIES @BINARIES
-);
+our ( $EXIT_STATUS, $WARNINGS );
 
-@MODULES = (
+our @MODULES = (
 {
   'module' => 'Digest::SHA',
   'version' => 0,
@@ -94,7 +92,7 @@ use vars qw (
 },
 );
 
-my @OPTIONAL_MODULES = (
+our @OPTIONAL_MODULES = (
 {
   'module' => 'Digest::SHA1',
   'version' => 0,
@@ -261,7 +259,7 @@ my @OPTIONAL_MODULES = (
 },
 );
 
-my @BINARIES = ();
+our @BINARIES = ();
 
 my $lwp_note = "   Sa-update will use curl, wget or fetch to download updates.  
    Because perl module LWP does not support IPv6, sa-update as of
@@ -272,7 +270,7 @@ my $lwp_note = "   Sa-update will use curl, wget or fetch to download updates.
        It's only a concern if you are warned about all 3 
        i.e. (curl, wget & fetch) missing";
 
-my @OPTIONAL_BINARIES = (
+our @OPTIONAL_BINARIES = (
 {
   binary => 'gpg',
   version => '0',

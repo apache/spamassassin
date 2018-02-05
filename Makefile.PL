@@ -395,17 +395,13 @@ print "Makefile written by ExtUtils::MakeMaker $mm_version\n";
 
 package MY;
 
-use vars qw(
-  $MY_GLOBALS_ARE_SANE
-  $RUNNING_ON_WINDOWS
-  @REPOSITORIES
-
-  $MACRO_RE
-  $EQ_RE
-  $EQ
-
-  $SELF
-);
+our ($MY_GLOBALS_ARE_SANE,
+  $RUNNING_ON_WINDOWS,
+  @REPOSITORIES,
+  $MACRO_RE,
+  $EQ_RE,
+  $EQ,
+  $SELF);
 
 # For some reason initializing the vars on the global scope doesn't work;
 # guess its some weird Perl behaviour in combination with bless().

@@ -51,12 +51,11 @@ L<mass-check(1)>, L<perceptron(1)>
 
 use Getopt::Long qw(:config auto_help bundling);
 use strict;
-use vars qw($opt_cffile $opt_spam $opt_ham $opt_scoreset);
 
-$opt_cffile = "../rules";
-$opt_spam = 'spam.log';
-$opt_ham = 'ham.log';
-$opt_scoreset = 0;
+our $opt_cffile = "../rules";
+our $opt_spam = 'spam.log';
+our $opt_ham = 'ham.log';
+our $opt_scoreset = 0;
 
 GetOptions("cffile=s", "spam=s", "ham=s", "scoreset=i");
 
@@ -64,7 +63,7 @@ my $is_spam = '';		# vec aligned with @tests_hit
 my @tests_hit = ();
 my %mutable_tests = ();
 
-use vars qw(%rules %allrules %scores);
+our (%rules, %allrules, %scores);
 
 my (%ignored_rule, %range_lo, %range_hi);
 my %rule_to_index;

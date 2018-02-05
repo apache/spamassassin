@@ -26,7 +26,7 @@ use Getopt::Std;
 use Lingua::Translate;
 
 # %rules and %scores from tmp/rules.pl
-use vars qw { $opt_c $opt_e $opt_h $opt_n $opt_r %rules %scores };
+our ($opt_c, $opt_e, $opt_h, $opt_n, $opt_r, %rules, %scores);
 
 sub usage {
   die "generate-translation language output_file

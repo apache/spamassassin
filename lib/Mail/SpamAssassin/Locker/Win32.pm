@@ -30,11 +30,7 @@ use Mail::SpamAssassin::Logger;
 use File::Spec;
 use Time::Local;
 
-use vars qw{
-  @ISA 
-};
-
-@ISA = qw(Mail::SpamAssassin::Locker);
+our @ISA = qw(Mail::SpamAssassin::Locker);
 
 ###########################################################################
 

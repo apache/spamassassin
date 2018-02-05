@@ -5,10 +5,7 @@
 use strict;
 use Getopt::Long;
 
-use vars qw(
-    $opt_override
-    $opt_tag
-);
+our ( $opt_override, $opt_tag );
 GetOptions(
     "tag=s" => \$opt_tag,
     "override=s" => \$opt_override,

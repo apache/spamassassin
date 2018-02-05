@@ -21,9 +21,7 @@
 use Getopt::Std;
 getopts("l:L:h");
 
-use vars qw {
-  $opt_h $opt_l $opt_L
-};
+our ($opt_h, $opt_l, $opt_L);
 
 sub usage {
   die "find-extremes [-l LC] [-L LC] [spam log] [nonspam log]

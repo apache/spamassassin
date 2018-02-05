@@ -210,8 +210,7 @@ use Mail::SpamAssassin::Plugin::Bayes;
 use Mail::SpamAssassin::Util qw(untaint_var);
 use Mail::SpamAssassin::Logger;
 
-use vars qw(@ISA);
-@ISA = qw(Mail::SpamAssassin::Plugin);
+our @ISA = qw(Mail::SpamAssassin::Plugin);
 
 
 ###########################################################################

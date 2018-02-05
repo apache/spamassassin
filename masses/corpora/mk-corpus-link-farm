@@ -65,11 +65,7 @@ my $mbox_tmpdir = $ENV{TMPDIR} || "/tmp";
 sub dbg;
 
 use Getopt::Long;
-use vars qw(
-
-  $opt_most_recent $opt_after $opt_before
-
-);
+our ($opt_most_recent, $opt_after, $opt_before);
 
 $opt_most_recent = 0;
 tz_init();

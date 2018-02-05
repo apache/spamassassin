@@ -31,7 +31,6 @@ use warnings;
 use re 'taint';
 
 our @ISA = qw();
-use vars qw(%US_STATES);
 
 # called from SpamAssassin->init() to create $self->{util_rb}
 sub new {
@@ -60,13 +59,11 @@ sub new {
 }
 
 # This is required because the .us domain is nuts. See split_domain.
-foreach (qw/
-  ak al ar az ca co ct dc de fl ga gu hi ia id il in ks ky la ma md me mi
-  mn mo ms mt nc nd ne nh nj nm nv ny oh ok or pa pr ri sc sd tn tx ut va vi
-  vt wa wi wv wy
-  /) {
-  $US_STATES{$_} = 1;
-}
+our %US_STATES = qw(
+  ak 1 al 1 ar 1 az 1 ca 1 co 1 ct 1 dc 1 de 1 fl 1 ga 1 gu 1 hi 1 ia 1 id 1 il 1 in 1 ks 1 ky 1 la 1 ma 1 md 1 me 1 mi 1
+  mn 1 mo 1 ms 1 mt 1 nc 1 nd 1 ne 1 nh 1 nj 1 nm 1 nv 1 ny 1 oh 1 ok 1 or 1 pa 1 pr 1 ri 1 sc 1 sd 1 tn 1 tx 1 ut 1 va 1
+  vi 1 vt 1 wa 1 wi 1 wv 1 wy 1
+  );
 
 ###########################################################################
 

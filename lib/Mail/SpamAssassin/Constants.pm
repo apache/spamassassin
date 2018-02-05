@@ -25,16 +25,14 @@ use strict;
 use warnings;
 use re 'taint';
 
-BEGIN {
-  use Exporter ();
-  use vars qw(@ISA);
-  @ISA = qw(Exporter);
+use Exporter ();
+our  @ISA = qw(Exporter);
 
-  use vars qw (
-	@BAYES_VARS @IP_VARS @SA_VARS %EXPORT_TAGS @EXPORT_OK
-  );
+our(@BAYES_VARS, @IP_VARS, @SA_VARS, %EXPORT_TAGS, @EXPORT_OK);
 
-  @IP_VARS = qw(
+# NOTE: Unless you need these to be available at BEGIN time, you're better with this out of a BEGIN block with a simple our statement.
+BEGIN { 
+    @IP_VARS = qw(
 	IP_IN_RESERVED_RANGE IP_PRIVATE LOCALHOST IPV4_ADDRESS IP_ADDRESS
   );
   @BAYES_VARS = qw(

@@ -25,10 +25,7 @@ use Cwd;
 my $perl = $^X;
 my $EARLIEST_REV = 428771;             # before this, mkrules won't work
 
-use vars qw(
-    $opt_outputdir
-    $opt_rev
-);
+our ( $opt_outputdir, $opt_rev );
 GetOptions(
     "rev=s" => \$opt_rev,
     "outputdir=s" => \$opt_outputdir,

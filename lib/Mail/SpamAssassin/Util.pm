@@ -49,24 +49,17 @@ require 5.008001;  # needs utf8::is_utf8()
 
 use Mail::SpamAssassin::Logger;
 
-BEGIN {
-  use Exporter ();
+use Exporter ();
 
-  use vars qw (
-    @ISA @EXPORT @EXPORT_OK
-    $AM_TAINTED
-  );
-
-  @ISA = qw(Exporter);
-  @EXPORT = ();
-  @EXPORT_OK = qw(&local_tz &base64_decode &untaint_var &untaint_file_path
+our @ISA = qw(Exporter);
+our @EXPORT = ();
+our @EXPORT_OK = qw(&local_tz &base64_decode &untaint_var &untaint_file_path
                   &exit_status_str &proc_status_ok &am_running_on_windows
                   &reverse_ip_address &decode_dns_question_entry
                   &get_my_locales &parse_rfc822_date
                   &secure_tmpfile &secure_tmpdir &uri_list_canonicalize);
-}
 
-use Mail::SpamAssassin;
+our $AM_TAINTED;
 
 use Config;
 use IO::Handle;

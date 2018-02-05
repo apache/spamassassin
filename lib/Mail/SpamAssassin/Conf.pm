@@ -91,40 +91,25 @@ use Mail::SpamAssassin::Util::TieOneStringHash;
 use Mail::SpamAssassin::Util qw(untaint_var);
 use File::Spec;
 
-use vars qw{
-  @ISA 
-  $CONF_TYPE_STRING $CONF_TYPE_BOOL
-  $CONF_TYPE_NUMERIC $CONF_TYPE_HASH_KEY_VALUE
-  $CONF_TYPE_ADDRLIST $CONF_TYPE_TEMPLATE
-  $CONF_TYPE_STRINGLIST $CONF_TYPE_IPADDRLIST
-  $CONF_TYPE_DURATION $CONF_TYPE_NOARGS
-  $MISSING_REQUIRED_VALUE $INVALID_VALUE $INVALID_HEADER_FIELD_NAME
-  @MIGRATED_SETTINGS
-  $COLLECT_REGRESSION_TESTS
+our @ISA = qw();
 
-$TYPE_HEAD_TESTS $TYPE_HEAD_EVALS
-$TYPE_BODY_TESTS $TYPE_BODY_EVALS $TYPE_FULL_TESTS $TYPE_FULL_EVALS
-$TYPE_RAWBODY_TESTS $TYPE_RAWBODY_EVALS $TYPE_URI_TESTS $TYPE_URI_EVALS
-$TYPE_META_TESTS $TYPE_RBL_EVALS $TYPE_EMPTY_TESTS
-};
-
-@ISA = qw();
+our $COLLECT_REGRESSION_TESTS; # Used only for unit tests.
 
 # odd => eval test.  Not constants so they can be shared with Parser
 # TODO: move to Constants.pm?
-$TYPE_HEAD_TESTS    = 0x0008;
-$TYPE_HEAD_EVALS    = 0x0009;
-$TYPE_BODY_TESTS    = 0x000a;
-$TYPE_BODY_EVALS    = 0x000b;
-$TYPE_FULL_TESTS    = 0x000c;
-$TYPE_FULL_EVALS    = 0x000d;
-$TYPE_RAWBODY_TESTS = 0x000e;
-$TYPE_RAWBODY_EVALS = 0x000f;
-$TYPE_URI_TESTS     = 0x0010;
-$TYPE_URI_EVALS     = 0x0011;
-$TYPE_META_TESTS    = 0x0012;
-$TYPE_RBL_EVALS     = 0x0013;
-$TYPE_EMPTY_TESTS   = 0x0014;
+our $TYPE_HEAD_TESTS    = 0x0008;
+our $TYPE_HEAD_EVALS    = 0x0009;
+our $TYPE_BODY_TESTS    = 0x000a;
+our $TYPE_BODY_EVALS    = 0x000b;
+our $TYPE_FULL_TESTS    = 0x000c;
+our $TYPE_FULL_EVALS    = 0x000d;
+our $TYPE_RAWBODY_TESTS = 0x000e;
+our $TYPE_RAWBODY_EVALS = 0x000f;
+our $TYPE_URI_TESTS     = 0x0010;
+our $TYPE_URI_EVALS     = 0x0011;
+our $TYPE_META_TESTS    = 0x0012;
+our $TYPE_RBL_EVALS     = 0x0013;
+our $TYPE_EMPTY_TESTS   = 0x0014;
 
 my @rule_types = ("body_tests", "uri_tests", "uri_evals",
                   "head_tests", "head_evals", "body_evals", "full_tests",
@@ -137,19 +122,19 @@ my @rule_types = ("body_tests", "uri_tests", "uri_evals",
 # these are variables instead of constants so that other classes can
 # access them; if they're constants, they'd have to go in Constants.pm
 # TODO: move to Constants.pm?
-$CONF_TYPE_STRING           =  1;
-$CONF_TYPE_BOOL             =  2;
-$CONF_TYPE_NUMERIC          =  3;
-$CONF_TYPE_HASH_KEY_VALUE   =  4;
-$CONF_TYPE_ADDRLIST         =  5;
-$CONF_TYPE_TEMPLATE         =  6;
-$CONF_TYPE_NOARGS           =  7;
-$CONF_TYPE_STRINGLIST       =  8;
-$CONF_TYPE_IPADDRLIST       =  9;
-$CONF_TYPE_DURATION         = 10;
-$MISSING_REQUIRED_VALUE     = '-99999999999999';  # string expected by parser
-$INVALID_VALUE              = '-99999999999998';
-$INVALID_HEADER_FIELD_NAME  = '-99999999999997';
+our $CONF_TYPE_STRING           =  1;
+our $CONF_TYPE_BOOL             =  2;
+our $CONF_TYPE_NUMERIC          =  3;
+our $CONF_TYPE_HASH_KEY_VALUE   =  4;
+our $CONF_TYPE_ADDRLIST         =  5;
+our $CONF_TYPE_TEMPLATE         =  6;
+our $CONF_TYPE_NOARGS           =  7;
+our $CONF_TYPE_STRINGLIST       =  8;
+our $CONF_TYPE_IPADDRLIST       =  9;
+our $CONF_TYPE_DURATION         = 10;
+our $MISSING_REQUIRED_VALUE     = '-99999999999999';  # string expected by parser
+our $INVALID_VALUE              = '-99999999999998';
+our $INVALID_HEADER_FIELD_NAME  = '-99999999999997';
 
 # set to "1" by the test suite code, to record regression tests
 # $Mail::SpamAssassin::Conf::COLLECT_REGRESSION_TESTS = 1;
@@ -4502,7 +4487,7 @@ distances that are greater than 9.)
 # bundled plugins. These will be warned about, but do not generate a fatal
 # error when "spamassassin --lint" is run like a normal syntax error would.
 
-@MIGRATED_SETTINGS = qw{
+our @MIGRATED_SETTINGS = qw{
   ok_languages
 };
 

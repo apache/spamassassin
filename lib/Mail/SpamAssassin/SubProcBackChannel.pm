@@ -28,10 +28,7 @@ use IO::Socket;
 use Mail::SpamAssassin::Util;
 use Mail::SpamAssassin::Constants qw(:sa);
 
-use vars qw {
-};
-
-my @ISA = qw();
+our @ISA = qw();
 
 =head1 NAME
 

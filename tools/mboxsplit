@@ -22,7 +22,7 @@
 my $prog = $0;
 $prog =~ s@.*/@@;
 
-use vars qw($opt_h $opt_f $opt_i $opt_n);
+our ($opt_h, $opt_f, $opt_i, $opt_n);
 use Getopt::Std;
 getopts("hf:in:");
 

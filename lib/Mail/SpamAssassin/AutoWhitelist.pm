@@ -52,11 +52,7 @@ use Mail::SpamAssassin;
 use Mail::SpamAssassin::Logger;
 use Mail::SpamAssassin::Util qw(untaint_var);
 
-use vars	qw{
-  	@ISA
-};
-
-@ISA = qw();
+our @ISA = qw();
 
 ###########################################################################
 

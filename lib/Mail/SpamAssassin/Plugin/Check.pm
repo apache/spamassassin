@@ -26,11 +26,10 @@ use Mail::SpamAssassin::Util qw(untaint_var);
 use Mail::SpamAssassin::Timeout;
 use Mail::SpamAssassin::Constants qw(:sa);
 
-use vars qw(@ISA @TEMPORARY_METHODS);
-@ISA = qw(Mail::SpamAssassin::Plugin);
+our @ISA = qw(Mail::SpamAssassin::Plugin);
 
-# methods defined by the compiled ruleset; deleted in finish_tests() 
-@TEMPORARY_METHODS = (); 
+# methods defined by the compiled ruleset; deleted in finish_tests()
+our @TEMPORARY_METHODS;
 
 # constructor
 sub new {

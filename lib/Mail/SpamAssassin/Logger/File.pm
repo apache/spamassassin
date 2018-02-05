@@ -39,8 +39,7 @@ use Time::HiRes ();
 use Mail::SpamAssassin::Logger;
 use Mail::SpamAssassin::Util qw(am_running_on_windows);
 
-use vars qw(@ISA);
-@ISA = ();
+our @ISA = ();
 
 # ADDING OS-DEPENDENT LINE TERMINATOR - BUG 6456
 my $eol = "\n";

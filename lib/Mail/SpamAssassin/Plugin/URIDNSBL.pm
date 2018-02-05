@@ -301,8 +301,7 @@ use warnings;
 # use bytes;
 use re 'taint';
 
-use vars qw(@ISA);
-@ISA = qw(Mail::SpamAssassin::Plugin);
+our @ISA = qw(Mail::SpamAssassin::Plugin);
 
 use constant LOG_COMPLETION_TIMES => 0;
 

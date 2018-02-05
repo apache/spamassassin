@@ -35,13 +35,13 @@ use File::Spec;
 use IO::Socket;
 use POSIX ":sys_wait_h";
 
-use vars qw{
-  $KNOWN_BAD_DIALUP_RANGES @EXISTING_DOMAINS $IS_DNS_AVAILABLE $LAST_DNS_CHECK 
-};
+
+our $KNOWN_BAD_DIALUP_RANGES; # Nothing uses this var???
+our $LAST_DNS_CHECK;
 
 # use very well-connected domains (fast DNS response, many DNS servers,
 # geographical distribution is a plus, TTL of at least 3600s)
-@EXISTING_DOMAINS = qw{
+our @EXISTING_DOMAINS = qw{
   adelphia.net
   akamai.com
   apache.org
@@ -64,7 +64,7 @@ use vars qw{
   yahoo.com
 };
 
-$IS_DNS_AVAILABLE = undef;
+our $IS_DNS_AVAILABLE = undef;
 
 #Removed $VERSION per BUG 6422
 #$VERSION = 'bogus';     # avoid CPAN.pm picking up razor ver

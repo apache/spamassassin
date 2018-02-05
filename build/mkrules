@@ -47,12 +47,11 @@ use Getopt::Long;
 use lib 'lib';
 use Mail::SpamAssassin;
 
-use vars qw(
-    @opt_srcs $opt_out $opt_sandboxout $opt_manifest
-    $opt_manifestskip $opt_listpromotable $opt_active
-    $opt_activeout $default_file_header
-    $opt_rulemetadata $opt_exit_on_no_src
-);
+our ( @opt_srcs, $opt_out, $opt_sandboxout, $opt_manifest,
+    $opt_manifestskip, $opt_listpromotable, $opt_active,
+    $opt_activeout, $default_file_header,
+    $opt_rulemetadata, $opt_exit_on_no_src);
+
 GetOptions("src=s" => \@opt_srcs,
     "out=s",
     "sandboxout=s",
@@ -115,7 +114,7 @@ my $current_src;
 my $newest_src_mtime = 0;
 my $newest_out_mtime = 0;
 
-my $default_file_header = join('', <DATA>);
+$default_file_header = join('', <DATA>);
 compile_utf8ify_function();
 
 foreach my $src (@opt_srcs) {
