@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus ena-week0 ena-week1 ena-week2 ena-week3 giovanni grenier jarif jbrooks mmiroslaw-mails-ham mmiroslaw-mails-spam thendrikx; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus ena-week0 ena-week1 ena-week2 ena-week3 jarif jbrooks llanga mmiroslaw-mails-ham mmiroslaw-mails-spam; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus ena-week0 ena-week1 ena-week2 ena-week3 giovanni jarif jbrooks llanga mmiroslaw-mails-ham mmiroslaw-mails-spam
+# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus ena-week0 ena-week1 ena-week2 ena-week3 giovanni grenier jarif jbrooks mmiroslaw-mails-ham mmiroslaw-mails-spam thendrikx; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus ena-week0 ena-week1 ena-week2 ena-week3 jarif jbrooks llanga mmiroslaw-mails-ham mmiroslaw-mails-spam; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus ena-week0 ena-week1 ena-week2 ena-week3 jarif jbrooks llanga mmiroslaw-mails-ham mmiroslaw-mails-spam
 
 # tflags publish
 AC_BR_BONANZA
@@ -201,9 +201,6 @@ DX_TEXT_02
 
 # tflags publish
 DX_TEXT_03
-
-# good enough
-DYN_RDNS_AND_INLINE_IMAGE
 
 # good enough
 DYN_RDNS_SHORT_HELO_HTML
@@ -418,9 +415,6 @@ HK_RANDOM_REPLYTO_NAME
 # good enough
 HK_SCAM_N2
 
-# good enough
-HK_SCAM_N4
-
 # tflags userconf
 HTML_CHARSET_FARAWAY
 
@@ -486,9 +480,6 @@ MSM_PRIO_REPTO
 
 # good enough
 MSOE_MID_WRONG_CASE
-
-# good enough
-NA_DOLLARS
 
 # tflags net
 NO_DNS_FOR_FROM
@@ -899,34 +890,64 @@ TVD_VISIT_PHARMA
 TW_GIBBERISH_MANY
 
 # good enough
-ADVANCE_FEE_2_NEW_FRM_MNY
+ADVANCE_FEE_3_NEW_FRM_MNY
 
 # good enough
-BODY_SINGLE_URI
+ADVANCE_FEE_4_NEW_FRM_MNY
 
 # good enough
-FILL_THIS_FORM_FRAUD_PHISH
+ADVANCE_FEE_4_NEW_MONEY
 
 # good enough
-FILL_THIS_FORM_LOAN
+ADVANCE_FEE_5_NEW
 
 # good enough
-HDRS_LCASE
+AXB_XMAILER_MIMEOLE_OL_1ECD5
 
 # good enough
-HK_NAME_MR_MRS
+AXB_X_FF_SEZ_S
 
 # good enough
-HK_SCAM_N15
+COMPENSATION
 
 # good enough
-LIST_PARTIAL_SHORT_MSG
+FILL_THIS_FORM_LONG
 
 # good enough
-TO_EQ_FM_DIRECT_MX
+FROM_MISSPACED
 
 # good enough
-TO_NO_BRKTS_FROM_MSSP
+FROM_MISSP_DYNIP
+
+# good enough
+FROM_MISSP_REPLYTO
+
+# good enough
+HK_RANDOM_FROM
+
+# good enough
+HK_SCAM_N3
+
+# good enough
+LOTTO_AGENT
+
+# good enough
+MILLION_USD
+
+# good enough
+MIMEOLE_DIRECT_TO_MX
+
+# good enough
+MONEY_BARRISTER
+
+# good enough
+MONEY_FORM
+
+# good enough
+MONEY_FROM_MISSP
+
+# good enough
+TVD_SPACE_RATIO_MINFP
 
 # tflags publish
 UC_GIBBERISH_OBFU
