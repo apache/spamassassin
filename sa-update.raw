@@ -648,8 +648,9 @@ foreach my $channel (@channels) {
       }
       foreach my $mirror (@mirrors) {
         my $result_fname;
-        ($mirby, $result_fname) =
+        $result_fname =
           http_get($mirror, $UPDDir, $mirby_path, $mirby_force_reload);
+        $mirby = read_content($result_fname, 0);
 
         if ($mirby) {
           dbg("channel: MIRRORED.BY file for channel %s retrieved", $channel);
@@ -752,21 +753,21 @@ foreach my $channel (@channels) {
       dbg("channel: selected mirror $mirror");
 
       # Actual archive file
-      ($content, $result_fname) =
-        http_get("$mirror/$newV.tar.gz", $UPDDir);
+      $result_fname = http_get("$mirror/$newV.tar.gz", $UPDDir);
+      $content = read_content($result_fname, 1);
       next unless $content;
       $preserve_files{$result_fname} = 1;
 
       # SHA1 of the archive file
-      ($SHA1, $result_fname) =
-        http_get("$mirror/$newV.tar.gz.sha1", $UPDDir);
+      $result_fname = http_get("$mirror/$newV.tar.gz.sha1", $UPDDir);
+      $SHA1 = read_content($result_fname, 0);
       last unless $SHA1;
       $preserve_files{$result_fname} = 1;
 
       # if GPG is enabled, the GPG detached signature of the archive file
       if ($GPG_ENABLED) {
-        ($GPG, $result_fname) =
-          http_get("$mirror/$newV.tar.gz.asc", $UPDDir);
+        $result_fname = http_get("$mirror/$newV.tar.gz.asc", $UPDDir);
+        $GPG = read_content($result_fname, 0);
         last unless $GPG;
         $preserve_files{$result_fname} = 1;
       }
@@ -1507,7 +1508,7 @@ sub http_get {
       $out_fh->print($content) or die "Error writing to $out_fname: $!";
     }
     $out_fh->close or die "Error closing file $out_fname: $!";
-    return ($content, $out_fname);
+    return $out_fname;
   } else {
     die "http: no downloading tool available";
   }
@@ -1550,16 +1551,31 @@ sub http_get {
            $ext_prog, $url, exit_status_str($child_stat,0));
   }
 
-  if ($child_stat == 0) {
-    my $inp = IO::File->new;
-    $inp->open($out_fname,'<') or die "Cannot open file $out_fname: $!";
-    my($nbytes,$buff); $content = '';
-    while (($nbytes=$inp->read($buff,16384)) > 0) { $content .= $buff }
-    defined $nbytes or die "Error reading from file $out_fname: $!";
-    $inp->close or die "Error closing $out_fname: $!";
-  }
+  return $out_fname;
+}
 
-  return ($content, $out_fname);
+# Read the content of a (downloaded) file. The subroutine expects a file name
+# and a boolean value. The boolean value indicates whether the file should be
+# opened in "text" mode or in "binary" mode. Pass 0 for text mode, 1 for binary
+# mode. Returns the content of the file as a string.
+sub read_content {
+  my ($file_name, $binary_mode) = @_;
+  my $content;
+
+  my $file = IO::File->new;
+  $file->open($file_name, '<') or die "Cannot open file $file_name: $!";
+  if ($binary_mode) {
+    binmode $file;
+  }
+  my($number_of_bytes,$buffer);
+  $content = '';
+  while (($number_of_bytes = $file->read($buffer, 16384)) > 0) {
+    $content .= $buffer;
+  }
+  defined $number_of_bytes or die "Error reading from file $file_name: $!";
+  $file->close or die "Error closing $file_name: $!";
+
+  return $content;
 }
 
 ##############################################################################
