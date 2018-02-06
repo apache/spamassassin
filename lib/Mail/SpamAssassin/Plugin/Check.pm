@@ -533,7 +533,7 @@ sub do_meta_tests {
 
     # Lex the rule into tokens using a rather simple RE method ...
     my $lexer = ARITH_EXPRESSION_LEXER;
-    my @tokens = ($rule =~ m/$lexer/g);
+    my @tokens = ($rule =~ m/$lexer/og);
 
     # Set the rule blank to start
     $meta{$rulename} = "";
@@ -545,8 +545,7 @@ sub do_meta_tests {
     foreach my $token (@tokens) {
 
       # Numbers can't be rule names
-    # if ($token =~ /^(?:\W+|[+-]?\d+(?:\.\d+)?)$/) {
-      if ($token !~ /^[A-Za-z_][A-Za-z0-9_]*\z/s) {  # faster
+      if ($token =~ tr{A-Za-z0-9_}{}c || substr($token,0,1) =~ tr{A-Za-z_}{}c) {
         $meta{$rulename} .= "$token ";
       }
       else {  # token is a rule name
@@ -612,7 +611,7 @@ sub do_meta_tests {
           warn "no meta_dependencies defined for $metas[$i]";
         }
         my $alldeps = join ' ', grep {
-                ($tflags->{$_}||'') =~ /\bnet\b/
+                index( ($tflags->{$_}||''),'net') > -1 && ($tflags->{$_}||'') =~ /\bnet\b/
               } split (' ', $conf->{meta_dependencies}->{ $metas[$i] } );
 
         if ($alldeps ne '') {

@@ -259,6 +259,7 @@ sub parse {
   while (defined ($line = shift @conf_lines)) {
     local ($1);         # bug 3838: prevent random taint flagging of $1
 
+   if (index($line,'#') > -1) {
     # bug 5545: used to support testing rules in the ruleqa system
     if ($keepmetadata && $line =~ /^\#testrules/) {
       $self->{file_scoped_attrs}->{testrules}++;
@@ -274,8 +275,12 @@ sub parse {
 
     $line =~ s/(?<!\\)#.*$//; # remove comments
     $line =~ s/\\#/#/g; # hash chars are escaped, so unescape them
+   }
+
+   if ($line =~ tr{ \t\r\n\f}{}) {
     $line =~ s/^\s+//;  # remove leading whitespace
     $line =~ s/\s+$//;  # remove tailing whitespace
+  }
     next unless($line); # skip empty lines
 
     # handle i18n
@@ -284,7 +289,7 @@ sub parse {
     my($key, $value) = split(/\s+/, $line, 2);
     $key = lc $key;
     # convert all dashes in setting name to underscores.
-    $key =~ s/-/_/g;
+    $key =~ tr/-/_/;
     $value = '' unless defined($value);
 
 #   # Do a better job untainting this info ...
@@ -334,26 +339,26 @@ sub parse {
     }
 
     # now handle the commands.
-    if ($key eq 'include') {
+    elsif ($key eq 'include') {
       $value = $self->fix_path_relative_to_current_file($value);
       my $text = $conf->{main}->read_cf($value, 'included file');
       unshift (@conf_lines, split (/\n/, $text));
       next;
     }
 
-    if ($key eq 'ifplugin') {
+    elsif ($key eq 'ifplugin') {
       $self->handle_conditional ($key, "plugin ($value)",
                         \@if_stack, \$skip_parsing);
       next;
     }
 
-    if ($key eq 'if') {
+    elsif ($key eq 'if') {
       $self->handle_conditional ($key, $value,
                         \@if_stack, \$skip_parsing);
       next;
     }
 
-    if ($key eq 'else') {
+    elsif ($key eq 'else') {
       # TODO: if/else/else won't get flagged here :(
       if (!@if_stack) {
         $parse_error = "config: found else without matching conditional";
@@ -365,7 +370,7 @@ sub parse {
     }
 
     # and the endif statement:
-    if ($key eq 'endif') {
+    elsif ($key eq 'endif') {
       my $lastcond = pop @if_stack;
       if (!defined $lastcond) {
         $parse_error = "config: found endif without matching conditional";
@@ -504,7 +509,7 @@ sub handle_conditional {
   my $conf = $self->{conf};
 
   my $lexer = ARITH_EXPRESSION_LEXER;
-  my @tokens = ($value =~ m/($lexer)/g);
+  my @tokens = ($value =~ m/($lexer)/og);
 
   my $eval = '';
   my $bad = 0;
@@ -980,14 +985,14 @@ sub _meta_deps_recurse {
 
   # Lex the rule into tokens using a rather simple RE method ...
   my $lexer = ARITH_EXPRESSION_LEXER;
-  my @tokens = ($rule =~ m/$lexer/g);
+  my @tokens = ($rule =~ m/$lexer/og);
 
   # Go through each token in the meta rule
   my $conf_tests = $conf->{tests};
   foreach my $token (@tokens) {
     # has to be an alpha+numeric token
-  # next if $token =~ /^(?:\W+|[+-]?\d+(?:\.\d+)?)$/;
-    next if $token !~ /^[A-Za-z_][A-Za-z0-9_]*\z/s;  # faster
+    next if $token =~ tr{A-Za-z0-9_}{}c || substr($token,0,1) =~ tr{A-Za-z_}{}c; # even faster
+
     # and has to be a rule name
     next unless exists $conf_tests->{$token};
 
@@ -1287,7 +1292,7 @@ sub is_meta_valid {
 
   # Lex the rule into tokens using a rather simple RE method ...
   my $lexer = ARITH_EXPRESSION_LEXER;
-  my @tokens = ($rule =~ m/$lexer/g);
+  my @tokens = ($rule =~ m/$lexer/og);
   if (length($name) == 1) {
     for (@tokens) {
       print "$name $_\n "  or die "Error writing token: $!";
