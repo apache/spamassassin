@@ -9,6 +9,7 @@ ifplugin Mail::SpamAssassin::Plugin::DNSEval
 # tflags RCVD_IN_BRBL net
 # score RCVD_IN_BRBL 2.0
 
+#Disabled 7417
 #header RCVD_IN_BRBL_LASTEXT   eval:check_rbl('brbl-lastexternal','bb.barracudacentral.org')
 #tflags RCVD_IN_BRBL_LASTEXT   net
 # score RCVD_IN_BRBL_LASTEXT 2.0
