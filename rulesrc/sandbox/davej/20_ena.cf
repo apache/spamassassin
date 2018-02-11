@@ -1,0 +1,7 @@
+rawbody		__ENA_BAD_OPTOUT1	/(unsubscribe|\breply)\s.{1,30}(mailto:|opt.out|remove)/i
+body		__ENA_BAD_OPTOUT2	/(reply\bwith|unsubscribe|please\b(email|reply|write)).{1,60}subject/i
+body		__ENA_BAD_OPTOUT3	/(opt.out|stop|receive).{1,80}(answer|write|back|reply|respond).{1,60}(unsubscribe|leave.out|remove)/i
+body		__ENA_BAD_OPTOUT4	/(please|reply).{1,30}(unsubscribe|leave.out|remove|not interested).{1,40}(subject|body|stop|communicat|list)/i
+meta		T_ENA_BAD_OPTOUT	__ENA_BAD_OPTOUT1 || __ENA_BAD_OPTOUT2 || __ENA_BAD_OPTOUT3 || __ENA_BAD_OPTOUT4
+describe	T_ENA_BAD_OPTOUT	Bad unsubscribe by replying to an email address with a specific subject
+score		T_ENA_BAD_OPTOUT	0.1
