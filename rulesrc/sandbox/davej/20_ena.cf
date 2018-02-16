@@ -8,7 +8,11 @@ score		T_ENA_BAD_OPTOUT	0.1
 
 header		__RCVD_OFFICE365	Received =~ /\.outbound\.protection\.outlook\.com/
 header		__RCVD_OFFICE365_PROXY	X-ClientProxiedBy =~ /\.outlook\.com \(/
-meta		ENA_RCVD_O365_PROXY	__RCVD_OFFICE365_PROXY && __RCVD_OFFICE365
-describe	ENA_RCVD_O365_PROXY	Email sent through Office 365 proxy via a mail client using authenticated SMTP.
-score		ENA_RCVD_O365_PROXY	0.1
+meta		T_ENA_RCVD_O365_PROXY	__RCVD_OFFICE365_PROXY && __RCVD_OFFICE365
+describe	T_ENA_RCVD_O365_PROXY	Email sent through Office 365 proxy via a mail client using authenticated SMTP.
+score		T_ENA_RCVD_O365_PROXY	0.1
+
+header		T_ENA_MSGID_NOTRUST	Message-ID =~ /\@(email\.android\.com)\>/
+describe	T_ENA_MSGID_NOTRUST	Message-IDs from spam not trusted
+score		T_ENA_MSGID_NOTRUST	0.1
 
