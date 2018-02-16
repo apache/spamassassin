@@ -12,6 +12,7 @@ use constant HAS_MAILSPF => eval { require Mail::SPF; };
 # on non-Linux unices as root, due to a bug in Sys::Hostname::Long
 # (it is used by Mail::SPF::Query, which is now obsoleted by Mail::SPF)
 use constant IS_LINUX   => $^O eq 'linux';
+use constant IS_OPENBSD => $^O eq 'openbsd';
 use constant IS_WINDOWS => ($^O =~ /^(mswin|dos|os2)/i);
 use constant AM_ROOT    => $< == 0;
 
@@ -23,7 +24,7 @@ plan skip_all => "Net tests disabled" unless conf_bool('run_net_tests');
 plan skip_all => "Need Mail::SPF or Mail::SPF::Query" unless (HAS_SPFQUERY || HAS_MAILSPF);
 plan skip_all => "root required" unless AM_ROOT;
 plan skip_all => "Sys::Hostname::Long > 1.4 required." if HAS_UNSAFE_HOSTNAME;
-plan skip_all => "Test only designed for Windows or Linux" unless (IS_LINUX || IS_WINDOWS);
+plan skip_all => "Test only designed for Windows, Linux or OpenBSD" unless (IS_LINUX || IS_OPENBSD || IS_WINDOWS);
 
 if(HAS_SPFQUERY && HAS_MAILSPF) {
   plan tests => 106;
