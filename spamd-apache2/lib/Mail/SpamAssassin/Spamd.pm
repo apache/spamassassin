@@ -45,7 +45,7 @@ An instance should have lifetime of a single request.
 
 Interface is likely to change.
 
-See the source code of L<spamd(1)> and L<Mail::SpamAssassin::Spamd::Apache2(3)>.
+See the source code of C<spamd(1)> and C<Mail::SpamAssassin::Spamd::Apache2(3)>.
 
 =head1 AUTHORS
 
