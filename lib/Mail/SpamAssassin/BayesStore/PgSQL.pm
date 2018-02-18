@@ -19,8 +19,6 @@
 
 Mail::SpamAssassin::BayesStore::PgSQL - PostgreSQL Specific Bayesian Storage Module Implementation
 
-=head1 SYNOPSIS
-
 =head1 DESCRIPTION
 
 This module implements a PostgreSQL specific bayesian storage module.

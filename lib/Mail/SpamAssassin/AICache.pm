@@ -20,8 +20,6 @@
 Mail::SpamAssassin::AICache - provide access to cached information for
 ArchiveIterator
 
-=head1 SYNOPSIS
-
 =head1 DESCRIPTION
 
 This module allows ArchiveIterator to use cached atime information instead of

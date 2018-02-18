@@ -26,10 +26,10 @@ Mail::SpamAssassin::Spamd::Apache2::Config -- configure Apache with SpamAssassin
 =head1 DESCRIPTION
 
 Provides Apache config directives for configuring spamd.  Initializes the
-L<Mail::SpamAssassin> object.
+C<Mail::SpamAssassin> object.
 
-Note, that the defaults here apply to *this* code; L<apache-spamd.pl(1)>
-sets different ones to be compatible with L<spamd(1)>.
+Note, that the defaults here apply to *this* code; C<apache-spamd.pl(1)>
+sets different ones to be compatible with C<spamd(1)>.
 
 =head1 DIRECTIVES
 
@@ -84,7 +84,7 @@ push @directives, {    # inherited
 
 Enables RFC 1413 (ident) checks incoming connections.  Note, that checking
 if a *remote* login matches a *local* one is usually pointless.  See
-L<Mail::SpamAssassin::Apache2::AclRFC1413(3)> for more details.
+C<Mail::SpamAssassin::Apache2::AclRFC1413(3)> for more details.
 
 Adds a handler:
 
@@ -162,7 +162,7 @@ push @directives, {    # inherited
 =item C<SANew key "value">
 
 Additional arguments to C<Mail::SpamAssassin->new()>.  Refer to
-L<Mail::SpamAssassin(3)>.
+C<Mail::SpamAssassin(3)>.
 
 =cut
 
@@ -563,12 +563,12 @@ See <http://bugzilla.spamassassin.org/>.
 
 =head1 SEE ALSO
 
-L<httpd(8)>,
-L<spamd(1)>,
-L<apache-spamd(1)>,
-L<Mail::SpamAssassin::Spamd::Apache2(3)>,
-L<Mail::SpamAssassin::Spamd::Apache2::AclIP(3)>,
-L<Mail::SpamAssassin::Spamd::Apache2::AclRFC1413(3)>
+C<httpd(8)>,
+C<spamd(1)>,
+C<apache-spamd(1)>,
+C<Mail::SpamAssassin::Spamd::Apache2(3)>,
+C<Mail::SpamAssassin::Spamd::Apache2::AclIP(3)>,
+C<Mail::SpamAssassin::Spamd::Apache2::AclRFC1413(3)>
 
 =cut
 
