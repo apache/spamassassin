@@ -26,14 +26,14 @@ This module uses Getopt::Long to parse and validate spamd command line options.
 Returns blessed hash reference, containing coherent set of options.
 Dies on error.
 
-See source and L<spamd(1)> for list of valid options.
+See source and C<spamd(1)> for list of valid options.
 
 =head1 WARNING
 
 This interface is considered experimental and likely to change.  Notify the dev
 list if you're planning to rely on it.
 
-Getopt::Long::Configure is used to modify global L<Getopt::Long(3)>
+Getopt::Long::Configure is used to modify global C<Getopt::Long(3)>
 configuration.  If you don't want C<:bundling> and / or wish to enable /
 disable something else for whatever reason... well, keep that in mind.
 
@@ -45,8 +45,8 @@ See <http://bugzilla.spamassassin.org/>
 
 =head1 SEE ALSO
 
-L<spamd(1)>,
-L<apache-spamd(1)>
+C<spamd(1)>,
+C<apache-spamd(1)>
 
 =cut
 

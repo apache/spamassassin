@@ -381,10 +381,10 @@ See <http://bugzilla.spamassassin.org/>.
 
 =head1 SEE ALSO
 
-L<httpd(8)>,
-L<spamd(1)>,
-L<apache-spamd(1)>,
-L<Mail::SpamAssassin::Spamd::Apache2::Config(3)>
+C<httpd(8)>,
+C<spamd(1)>,
+C<apache-spamd(1)>,
+C<Mail::SpamAssassin::Spamd::Apache2::Config(3)>
 
 =cut
 

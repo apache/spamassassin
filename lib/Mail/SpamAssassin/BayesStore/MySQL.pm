@@ -19,8 +19,6 @@
 
 Mail::SpamAssassin::BayesStore::MySQL - MySQL Specific Bayesian Storage Module Implementation
 
-=head1 SYNOPSIS
-
 =head1 DESCRIPTION
 
 This module implements a MySQL specific based bayesian storage module.  It

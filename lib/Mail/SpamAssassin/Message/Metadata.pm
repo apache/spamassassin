@@ -19,8 +19,6 @@
 
 Mail::SpamAssassin::Message::Metadata - extract metadata from a message
 
-=head1 SYNOPSIS
-
 =head1 DESCRIPTION
 
 This class is tasked with extracting "metadata" from messages for use as

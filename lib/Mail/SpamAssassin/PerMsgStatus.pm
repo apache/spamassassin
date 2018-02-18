@@ -726,6 +726,7 @@ return a pointer to a hash for rule & score pairs for all the symbolic
 test names and individual scores of the tests which were triggered by the mail.
 
 =cut
+
 sub get_names_of_tests_hit_with_scores_hash {
   my ($self) = @_;
 
@@ -743,6 +744,7 @@ return a comma-separated string of rule=score pairs for all the symbolic
 test names and individual scores of the tests which were triggered by the mail.
 
 =cut
+
 sub get_names_of_tests_hit_with_scores {
   my ($self) = @_;
 

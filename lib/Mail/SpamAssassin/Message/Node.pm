@@ -19,8 +19,6 @@
 
 Mail::SpamAssassin::Message::Node - decode, render, and make available MIME message parts
 
-=head1 SYNOPSIS
-
 =head1 DESCRIPTION
 
 This module will encapsulate an email message and allow access to

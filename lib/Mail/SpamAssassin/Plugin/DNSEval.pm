@@ -327,6 +327,7 @@ This checks all the from addrs domain names as an alternate to check_rbl_from_ho
 =back
 
 =cut
+
 sub check_rbl_from_domain {
   my ($self, $pms, $rule, $set, $rbl_server, $subtest) = @_;
   _check_rbl_addresses($self, $pms, $rule, $set, $rbl_server, $subtest, $_[1]->all_from_addrs_domains());

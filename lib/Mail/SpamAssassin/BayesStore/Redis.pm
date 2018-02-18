@@ -19,8 +19,6 @@
 
 Mail::SpamAssassin::BayesStore::Redis - Redis Bayesian Storage Module Implementation
 
-=head1 SYNOPSIS
-
 =head1 DESCRIPTION
 
 This module implementes a Redis based bayesian storage module.

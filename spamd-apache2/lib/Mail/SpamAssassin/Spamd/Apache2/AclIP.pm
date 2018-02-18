@@ -43,7 +43,7 @@ See <http://bugzilla.spamassassin.org/>
 
 =head1 SEE ALSO
 
-L<Mail::SpamAssassin::Spamd::Apache2::Config(3)>
+C<Mail::SpamAssassin::Spamd::Apache2::Config(3)>
 
 =cut
 
