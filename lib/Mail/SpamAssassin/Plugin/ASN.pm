@@ -54,6 +54,8 @@ Autonomous System Number (ASN) of the connecting IP address.
 
  add_header all ASN _ASN_ _ASNCIDR_
 
+ header TEST_AS1234 X-ASN =~ /^1234$/
+
 =head1 DESCRIPTION
 
 This plugin uses DNS lookups to the services of an external DNS zone such
