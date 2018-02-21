@@ -246,7 +246,8 @@ use Mail::SpamAssassin::SubProcBackChannel;
 use Mail::SpamAssassin::SpamdForkScaling qw(:pfstates);
 use Mail::SpamAssassin::Logger qw(:DEFAULT log_message);
 use Mail::SpamAssassin::Util qw(untaint_var untaint_file_path secure_tmpdir
-                                exit_status_str am_running_on_windows);
+                                exit_status_str am_running_on_windows
+                                get_user_groups);
 use Mail::SpamAssassin::Timeout;
 
 use Getopt::Long;
@@ -1368,9 +1369,19 @@ sub spawn {
       # bug 5518: assignments to $) and $( don't always work on all platforms
       # bug 3900: assignments to $> and $< problems with BSD perl bug
       # use the POSIX functions to hide the platform specific workarounds 
+      dbg("spamd: Privilege de-escalation from user $< and groups $(\n");
+      $! = 0;
       POSIX::setgid($ugid);  # set effective and real gid
+      dbg("spamd: setgid ERRNO is $!\n");
+      $( = $ugid;
+      $) = "$ugid ".(get_user_groups($uuid));  # set effective and real gid/grouplist another way because we lack initgroups in Perl
+      dbg("spamd: group assignment ERRNO is $!\n");
       POSIX::setuid($uuid);  # set effective and real UID
+      dbg("spamd: setuid ERRNO is $!\n");
       $< = $uuid; $> = $uuid;   # bug 5574
+      dbg("spamd: uid assignment ERRNO is $!\n");
+      dbg("spamd: real user is $< \neff user is $> \nreal groups are $( \neff groups are $) \n");
+
 
       # keep the sanity check to catch problems like bug 3900 just in case
       if ( $> != $uuid and $> != ( $uuid - 2**32 ) ) {
@@ -1730,7 +1741,7 @@ sub handle_setuid_to_user {
     my ($name, $pwd, $uid, $gid, $quota, $comment, $gcos, $dir, $etc) =
         getpwnam('nobody');
   
-    $) = "$gid $gid";                   # eGID
+    $) = (get_user_groups($uid));       # eGID
     $> = $uid;                          # eUID
     if (!defined($uid) || ($> != $uid and $> != ($uid - 2**32))) {
       die("spamd: setuid to nobody failed");
@@ -2493,7 +2504,7 @@ sub handle_user_setuid_basic {
   }
 
   if ($setuid_to_user) {
-    $) = "$gid $gid";                 # change eGID
+    $) = (get_user_groups($uid));     # change eGID
     $> = $uid;                        # change eUID
     if ( !defined($uid) || ( $> != $uid and $> != ( $uid - 2**32 ) ) ) {
       # make it fatal to avoid security breaches
@@ -2715,7 +2726,7 @@ sub handle_user_setuid_with_sql {
   }
 
   if ($setuid_to_user) {
-    $) = "$gid $gid";                 # change eGID
+    $) = (get_user_groups($uid));     # change eGID
     $> = $uid;                        # change eUID
     if (!defined($uid) || ($> != $uid and $> != ($uid - 2**32))) {
       # make it fatal to avoid security breaches
@@ -2760,7 +2771,7 @@ sub handle_user_setuid_with_ldap {
   }
 
   if ($setuid_to_user) {
-    $) = "$gid $gid";    # change eGID
+    $) = (get_user_groups($uid));    # change eGID
     $> = $uid;           # change eUID
     if (!defined($uid) || ($> != $uid and $> != ($uid - 2**32))) {
       # make it fatal to avoid security breaches
