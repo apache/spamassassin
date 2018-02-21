@@ -59,7 +59,7 @@ our @EXPORT_OK = qw(&local_tz &base64_decode &base64_encode
                   &reverse_ip_address &decode_dns_question_entry
                   &secure_tmpfile &secure_tmpdir &uri_list_canonicalize
                   &get_my_locales &parse_rfc822_date &idn_to_ascii
-                  &is_valid_utf_8);
+                  &is_valid_utf_8 &get_user_groups);
 
 our $AM_TAINTED;
 
@@ -1586,13 +1586,43 @@ sub receive_date {
 }
 
 ###########################################################################
+sub get_user_groups {
+  my $suid = shift;
+  dbg("get_user_groups: uid is $suid\n");
+  my ( $user, $passwd, $uid, $gid, $quota, $comment, $gcos, $dir, $shell, $expire ) = getpwuid($suid);
+  my $rgids="$gid ";
+  while ( my($name,$pw,$gid,$members) = getgrent() ) {
+    if ( $members =~ m/\b$user\b/ ) {
+      $rgids .= "$gid ";
+      dbg("get_user_groups: added $gid ($name) to group list which is now: $rgids\n");
+    }
+  }
+  endgrent;
+  chop $rgids;
+  return ($rgids);
+}
+
+
 
 sub setuid_to_euid {
   return if (RUNNING_ON_WINDOWS);
 
   # remember the target uid, the first number is the important one
   my $touid = $>;
-
+  my $gids = get_user_groups($touid);
+  my ( $pgid, $supgs ) = split (' ',$gids,2);
+  defined $supgs or $supgs=$pgid;
+  if ($( != $pgid) {
+    # Gotta be root for any of this to work
+    $> = 0 ;
+    dbg("util: changing real primary gid from $( to $pgid and supplemental groups to $supgs to match effective uid $touid");
+    POSIX::setgid($pgid);
+    dbg("util: POSIX::setgid($pgid) set errno to $!");  
+    $! = 0;
+    $( = $pgid;
+    $) = "$pgid $supgs";
+    dbg("util: assignment  \$) = $pgid $supgs set errno to $!");  
+  }
   if ($< != $touid) {
     dbg("util: changing real uid from $< to match effective uid $touid");
     # bug 3586: kludges needed to work around platform dependent behavior assigning to $<
@@ -1667,7 +1697,7 @@ sub helper_app_pipe_open_unix {
   eval {
     # go setuid...
     setuid_to_euid();
-    dbg("util: setuid: ruid=$< euid=$>");
+    info("util: setuid: ruid=$< euid=$> rgid=$( egid=$) ");
 
     # now set up the fds.  due to some wierdness, we may have to ensure that
     # we *really* close the correct fd number, since some other code may have
