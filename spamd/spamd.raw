@@ -1559,10 +1559,16 @@ sub accept_from_any_server_socket {
     flock($sockets_access_lock_fh, LOCK_UN)
       or die "Can't release sockets-access lock: $!";
   }
-  $client or die sprintf("accept_a_conn: %s accept failed: %s",
+  if(!defined $client) {
+    if(defined($socket)) {
+      die sprintf("accept_a_conn: %s accept failed: %s",
                          ref $socket,
                          !$socket->isa('IO::Socket::SSL') ? $!
                            : $socket->errstr.", $!");
+    } else {
+      die sprintf("accept_a_conn: no socket available");
+    }
+  }
   return ($client, $selected_socket_info);
 }
 
