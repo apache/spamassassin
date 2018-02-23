@@ -299,13 +299,13 @@ sub pyzor_lookup {
 
     if (!@response) {
       # this exact string is needed below
-      die("no response\n");	# yes, this is possible
+      warn("no response\n");	# yes, this is possible
     }
     chomp for @response;
     dbg("pyzor: got response: " . join("\\n", @response));
 
     if ($response[0] =~ /^Traceback/) {
-      die("internal error, python traceback seen in response\n");
+      warn("internal error, python traceback seen in response\n");
     }
 
   });
