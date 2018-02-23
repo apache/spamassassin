@@ -424,24 +424,26 @@ sub check_freemail_header {
         }
     }
 
-    my $email = lc($pms->get(index($header,':') >= 0 ? $header : $header.":addr"));
+    my @emails = map (lc, $pms->{main}->find_all_addrs_in_line ($pms->get($header)));
 
-    if ($email eq '') {
-        dbg("header $header not found from mail");
-        return 0;
+    if (!scalar (@emails)) {
+         dbg("header $header not found from mail");
+         return 0;
     }
-    dbg("address from header $header: $email");
+    dbg("addresses from header $header: ".join(';',@emails));
 
-    if ($self->_is_freemail($email)) {
-        if (defined $re) {
-            return 0 unless $email =~ $re;
-            dbg("HIT! $email is freemail and matches regex");
-        }
-        else {
-            dbg("HIT! $email is freemail");
-        }
-        $self->_got_hit($pms, $email, "Header $header is freemail");
-        return 0;
+    foreach my $email (@emails) {    
+        if ($self->_is_freemail($email)) {
+            if (defined $re) {
+                next unless $email =~ $re;
+                dbg("HIT! $email is freemail and matches regex");
+            }
+            else {
+                dbg("HIT! $email is freemail");
+            }
+            $self->_got_hit($pms, $email, "Header $header is freemail");
+            return 1;
+         }
     }
 
     return 0;
