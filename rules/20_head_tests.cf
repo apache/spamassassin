@@ -158,8 +158,8 @@ header INVALID_DATE		Date !~ /^\s*(?:(?i:Mon|Tue|Wed|Thu|Fri|Sat|Sun),\s)?\s*(?:
 describe INVALID_DATE		Invalid Date: header (not RFC 2822)
 test INVALID_DATE fail    Sat, 31 Dec 2005 23:59:60 -0500
 test INVALID_DATE fail    Wed, 31 Jul 2002 16:41:57 +0200
+test INVALID_DATE fail    Sat, 31 Dec 2005 23:00:00 
 test INVALID_DATE ok      Sat, 31 Dec 2005 24:00:00 -0500
-#test INVALID_DATE ok      Sat, 31 Dec 2005 23:00:00 
 test INVALID_DATE ok      Thurs, 31 Jul 2002 16:41:57 +0200
 
 # allow +1300, NZ timezone
