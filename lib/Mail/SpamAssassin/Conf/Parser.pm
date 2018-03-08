@@ -592,7 +592,7 @@ sub cond_clause_can_or_has {
   } elsif ($method =~ /^(.*)::([^:]+)$/) {
     no strict "refs";
     my($module, $meth) = ($1, $2);
-    return 1  if UNIVERSAL::can($module,$meth) &&
+    return 1  if $module->can($meth) &&
                  ( $fn_name eq 'has' || &{$method}() );
   } else {
     $self->lint_warn("bad 'if' line, cannot find '::' in $fn_name($method), ".
@@ -1179,25 +1179,25 @@ sub add_test {
   my $conf = $self->{conf};
 
   # Don't allow invalid names ...
-  if ($name !~ /^\D\w*$/) {
+  if ($name !~ /^[_[:alpha:]]\w*$/) {
     $self->lint_warn("config: error: rule '$name' has invalid characters ".
 	   "(not Alphanumeric + Underscore + starting with a non-digit)\n", $name);
     return;
   }
 
-  # Also set a hard limit for ALL rules (rule names longer than 242
+  # Also set a hard limit for ALL rules (rule names longer than 40
   # characters throw warnings).  Check this separately from the above
   # pattern to avoid vague error messages.
-  if (length $name > 200) {
-    $self->lint_warn("config: error: rule '$name' is way too long ".
+  if (length $name > 100) {
+    $self->lint_warn("config: error: rule '$name' is too long ".
 	   "(recommended maximum length is 22 characters)\n", $name);
     return;
   }
 
   # Warn about, but use, long rule names during --lint
   if ($conf->{lint_rules}) {
-    if (length($name) > 50 && $name !~ /^__/ && $name !~ /^T_/) {
-      $self->lint_warn("config: warning: rule name '$name' is over 50 chars ".
+    if (length($name) > 40 && $name !~ /^__/ && $name !~ /^T_/) {
+      $self->lint_warn("config: warning: rule name '$name' is over 40 chars ".
 	     "(recommended maximum length is 22 characters)\n", $name);
     }
   }
@@ -1287,8 +1287,14 @@ sub add_regression_test {
 sub is_meta_valid {
   my ($self, $name, $rule) = @_;
 
+  # $meta is a degenerate translation of the rule, replacing all variables (i.e. rule names) with 0. 
   my $meta = '';
   $rule = untaint_var($rule);  # must be careful below
+  # Bug #7557 code injection
+  if ( $rule =~ /\S(::|->)\S/ )  {
+    warn("is_meta_valid: Bogus rule $name: $rule") ;
+    return 0;
+  }
 
   # Lex the rule into tokens using a rather simple RE method ...
   my $lexer = ARITH_EXPRESSION_LEXER;
@@ -1300,16 +1306,20 @@ sub is_meta_valid {
   }
   # Go through each token in the meta rule
   foreach my $token (@tokens) {
-    # Numbers can't be rule names
-    if ($token !~ /^[A-Za-z_][A-Za-z0-9_]*\z/s) {
-      $meta .= "$token ";
-    }
-    # Zero will probably cause more errors
-    else {
+    # If the token is a syntactically legal rule name, make it zero
+    if ($token =~ /^[_[:alpha:]]\w+\z/s) {
       $meta .= "0 ";
     }
+    # if it is a number or a string of 1 or 2 punctuation characters (i.e. operators) tack it onto the degenerate rule
+    elsif ( $token =~ /^(\d+|[[:punct:]]{1,2})\z/s ) {
+      $meta .= "$token ";
+    }
+    # WTF is it? Just warn, for now. Bug #7557
+    else {
+      $self->lint_warn("config: Strange rule token: $token", $name);
+      $meta .= "$token ";
+    }
   }
-
   my $evalstr = 'my $x = ' . $meta . '; 1;';
   if (eval $evalstr) {
     return 1;
