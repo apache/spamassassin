@@ -1,26 +1,26 @@
 # These are oddities seen in Other People's Spam, i.e. I have no hits in my test corpora 
 
 describe	__HAS_IMG_SRC	Has an img tag on a non-quoted line
-rawbody		__HAS_IMG_SRC	/^[^>].*<img +src="/i
+rawbody		__HAS_IMG_SRC	/^[^>].*<img src=/i
 tflags		__HAS_IMG_SRC	multiple
 
 describe	__HAS_HREF	Has an anchor tag with a href attribute in non-quoted line
-rawbody		__HAS_HREF	/^[^>].*<a +href="/i
+rawbody		__HAS_HREF	/^[^>].*<a href=/i
 tflags		__HAS_HREF	multiple
 
 describe	__HAS_IMG_SRC_ONECASE	Has an img tag on a non-quoted line with consistent case
-rawbody		__HAS_IMG_SRC_ONECASE	/^[^>].*<(img +src|IMG +SRC)="/i
+rawbody		__HAS_IMG_SRC_ONECASE	/^[^>].*<(img src|IMG SRC)=/
 tflags		__HAS_IMG_SRC_ONECASE	multiple
 
 describe	__HAS_HREF_ONECASE	Has an anchor tag with a href attribute in non-quoted line with consistent case
-rawbody		__HAS_HREF_ONECASE	/^[^>].*<(a +href|A +HREF)="/i
+rawbody		__HAS_HREF_ONECASE	/^[^>].*<(a href|A HREF)=/
 tflags		__HAS_HREF_ONECASE	multiple
 
 describe	__MIXED_IMG_CASE	Has img tags with mixed-up cases in non-quoted lines
-meta		__MIXED_IMG_CASE	__HAS_IMG_SRC - __HAS_IMG_SRC_ONECASE > 2
+meta		__MIXED_IMG_CASE	__HAS_IMG_SRC - __HAS_IMG_SRC_ONECASE > 0
 
 describe	__MIXED_HREF_CASE	Has anchor tags with mixed-up cases in non-quoted lines
-meta		__MIXED_HREF_CASE	__HAS_HREF - __HAS_HREF_ONECASE > 2
+meta		__MIXED_HREF_CASE	__HAS_HREF - __HAS_HREF_ONECASE > 0
 
 describe	T_MIXED_TAG_CASE	Has multiple mixed-case tags in non-quoted lines.
 meta		T_MIXED_TAG_CASE	__MIXED_IMG_CASE && __MIXED_HREF_CASE
