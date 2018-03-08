@@ -253,10 +253,13 @@ sub parse {
     warn "message: cannot set utf8_mode, module HTML::Parser is too old\n"
       if !$self->{SA_character_semantics_input};
   } else {
-    $self->SUPER::utf8_mode($self->{SA_character_semantics_input} ? 0 : 1);
+    my $utf8_enable = $self->SUPER::utf8_mode($self->{SA_character_semantics_input} ? 0 : 1);
     dbg("message: HTML::Parser utf8_mode %s",
         $self->SUPER::utf8_mode ? "on (assumed UTF-8 octets)"
                                 : "off (default, assumed Unicode characters)");
+    if (!$utf8_enable) {
+	$text = utf8::decode($text);
+    }
   }
   $self->SUPER::parse($text);
 
