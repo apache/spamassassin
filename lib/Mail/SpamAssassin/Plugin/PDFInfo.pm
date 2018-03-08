@@ -31,7 +31,7 @@ This plugin helps detected spam using attached PDF files
 
 =item See "Usage:" below - more documentation see 20_pdfinfo.cf
 
- Original info kept for history.
+ Original info kept for history. For later changes see SVN repo
  -------------------------------------------------------
  PDFInfo Plugin for SpamAssassin
  Version: 0.8
@@ -39,7 +39,6 @@ This plugin helps detected spam using attached PDF files
  Created: 2007-08-10
  Modified: 2007-08-10
  By: Dallas Engelken
-
 
  Changes:
    0.8 - added .fdf detection (thanks John Lundin) [axb]
@@ -75,7 +74,6 @@ This plugin helps detected spam using attached PDF files
    0.1 - just ported over the imageinfo code, and renamed to pdfinfo.
          - removed all support for png, gif, and jpg from the code.
          - prepended pdf_ to all function names to avoid conflicts with ImageInfo in SA 3.2.
-
 
  Usage:
 
@@ -144,6 +142,7 @@ package Mail::SpamAssassin::Plugin::PDFInfo;
 
 use Mail::SpamAssassin::Plugin;
 use Mail::SpamAssassin::Logger;
+use Mail::SpamAssassin::Util;
 use strict;
 use warnings;
 # use bytes;
@@ -440,7 +439,6 @@ sub _find_pdf_mime_parts {
 
 }
 
-
 # ----------------------------------------
 
 sub pdf_named {
@@ -475,8 +473,12 @@ sub pdf_name_regex {
 
   my $hit = 0;
   foreach my $name (keys %{$pms->{'pdfinfo'}->{"names_pdf"}}) {
-    my $eval = 'if (q{'.$name.'} =~  '.$re.') {  $hit = 1; } ';
-    eval $eval;
+    eval {
+        my $regex = Mail::SpamAssassin::Util::make_qr($re);
+        if ( $name =~ m/$regex/ ) {
+            $hit = 1;
+        }
+    };
     dbg("pdfinfo: error in regex $re - $@") if $@;
     if ($hit) {
       dbg("pdfinfo: pdf_name_regex hit on $name");
@@ -721,9 +723,12 @@ sub pdf_match_details {
   return unless $check_value;
 
   my $hit = 0;
-  $check_value =~ s/[\{\}\\]//g;
-  my $eval = 'if (q{'.$check_value.'} =~ '.$regex.') { $hit = 1; }';
-  eval $eval;
+  eval {
+      my $re = Mail::SpamAssassin::Util::make_qr($regex);
+      if ( $check_value =~ m/$re/ ) {
+          $hit = 1;
+      }
+  };
   dbg("pdfinfo: error in regex $regex - $@") if $@;
   if ($hit) {
     dbg("pdfinfo: pdf_match_details $detail $regex matches $check_value");
