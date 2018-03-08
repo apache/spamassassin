@@ -867,6 +867,10 @@ sub ask_dcc {
 	# learn or report spam
 	unshift(@opts, '-t', 'many');
       }
+      if ($conf->{dcc_home}) {
+        # set home directory explicitly
+        unshift(@opts, '-h', $conf->{dcc_home});
+      };
 
       defined $path  or die "no dcc_path found\n";
       dbg("$tag opening pipe to " .
