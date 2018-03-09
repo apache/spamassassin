@@ -574,6 +574,10 @@ sub cond_clause_plugin_loaded {
 
 sub cond_clause_can {
   my ($self, $method) = @_;
+  if ($self->{currentfile} =~ q!/user_prefs$! ) {
+    warn "config: 'if can $method' not available in user_prefs";
+    return 0
+  }
   $self->cond_clause_can_or_has('can', $method);
 }
 
