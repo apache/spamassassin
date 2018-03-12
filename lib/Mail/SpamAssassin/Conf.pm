@@ -2825,8 +2825,8 @@ C<header SYMBOLIC_TEST_NAME header =~ /\S/> rule as described above.
 =item header SYMBOLIC_TEST_NAME eval:name_of_eval_method([arguments])
 
 Define a header eval test.  C<name_of_eval_method> is the name of
-a method on the C<Mail::SpamAssassin::EvalTests> object.  C<arguments>
-are optional arguments to the function call.
+a method registered by a C<Mail::SpamAssassin::Plugin> object.
+C<arguments> are optional arguments to the function call.
 
 =item header SYMBOLIC_TEST_NAME eval:check_rbl('set', 'zone' [, 'sub-test'])
 
@@ -2939,7 +2939,10 @@ name.
       local ($1,$2);
       if ($value =~ /^(\S+)\s+(?:rbl)?eval:(.*)$/) {
         my ($rulename, $fn) = ($1, $2);
-
+        dbg("config: header eval rule name is $rulename function is $fn");
+        if ($fn !~ /^\w+(\(.*\))?$/) {
+          return $INVALID_VALUE;
+        }
         if ($fn =~ /^check_(?:rbl|dns)/) {
           $self->{parser}->add_test ($rulename, $fn, $TYPE_RBL_EVALS);
         }
@@ -2997,7 +3000,13 @@ Define a body eval test.  See above.
       my ($self, $key, $value, $line) = @_;
       local ($1,$2);
       if ($value =~ /^(\S+)\s+eval:(.*)$/) {
-        $self->{parser}->add_test ($1, $2, $TYPE_BODY_EVALS);
+        my ($rulename, $fn) = ($1, $2);
+        dbg("config: body eval rule name is $rulename function is $fn");
+
+        if ($fn !~ /^\w+(\(.*\))?$/) {
+          return $INVALID_VALUE;
+        }
+        $self->{parser}->add_test ($rulename, $fn, $TYPE_BODY_EVALS);
       }
       else {
 	my @values = split(/\s+/, $value, 2);
