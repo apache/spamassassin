@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus ena-week0 ena-week1 ena-week2 ena-week3 ena-week4 giovanni grenier jarif jbrooks mmiroslaw-mails-ham mmiroslaw-mails-spam thendrikx; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus ena-week0 ena-week1 ena-week2 ena-week3 ena-week4 giovanni jarif jbrooks llanga mmiroslaw-mails-ham mmiroslaw-mails-spam; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus ena-week2 jarif llanga mmiroslaw-mails-ham mmiroslaw-mails-spam
+# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus ena-week0 ena-week1 ena-week2 ena-week3 ena-week4 giovanni grenier jarif jbrooks mmiroslaw-mails-ham mmiroslaw-mails-spam thendrikx; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus ena-week0 ena-week1 ena-week2 ena-week3 ena-week4 giovanni jarif jbrooks llanga mmiroslaw-mails-ham mmiroslaw-mails-spam; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus ena-week0 ena-week1 ena-week2 ena-week3 ena-week4 giovanni jarif jbrooks llanga mmiroslaw-mails-ham mmiroslaw-mails-spam
 
 # tflags publish
 AC_BR_BONANZA
@@ -275,9 +275,6 @@ FROM_WORDY_SHORT
 FROM_WSP_TRAIL
 
 # good enough
-FSL_BULK_SIG
-
-# good enough
 FSL_CTYPE_WIN1251
 
 # good enough
@@ -379,6 +376,9 @@ HELO_LOCALHOST
 # good enough
 HELO_MISC_IP
 
+# good enough
+HELO_OEM
+
 # tflags publish
 HEXHASH_WORD
 
@@ -474,9 +474,6 @@ NSL_RCVD_FROM_USER
 
 # good enough
 NSL_RCVD_HELO_USER
-
-# good enough
-OBFU_HTML_ATTACH
 
 # tflags publish
 OBFU_JVSCR_ESC
@@ -820,9 +817,6 @@ TO_EQ_FM_SPF_FAIL
 # tflags publish
 TO_IN_SUBJ
 
-# good enough
-TO_NO_BRKTS_DYNIP
-
 # tflags publish
 TO_NO_BRKTS_HTML_IMG
 
@@ -860,13 +854,13 @@ TVD_VISIT_PHARMA
 TW_GIBBERISH_MANY
 
 # good enough
-COMPENSATION
+FILL_THIS_FORM_LOAN
 
 # good enough
-DATE_IN_FUTURE_96_Q
+FILL_THIS_FORM_LONG
 
 # good enough
-LOTTO_AGENT
+HDRS_LCASE
 
 # tflags publish
 UC_GIBBERISH_OBFU
