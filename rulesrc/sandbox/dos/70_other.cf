@@ -173,7 +173,7 @@ describe DOS_URI_ASTERISK       Found an asterisk in a URI
 header __DOS_SINGLE_EXT_RELAY   X-Spam-Relays-External =~ /^\[ [^\]]+ \]$/
 body __DOS_HI                   /^Hi,$/
 body __DOS_LINK                 /\blink\b/
-uri __DOS_HAS_ANY_URI		/./
+uri __DOS_HAS_ANY_URI		/^\w+:\/\//
 
 meta DOS_FIX_MY_URI             __MIMEOLE_1106 && __DOS_HAS_ANY_URI && __DOS_SINGLE_EXT_RELAY && __DOS_HI && __DOS_LINK
 describe DOS_FIX_MY_URI         Looks like a "fix my obfu'd URI please" spam

@@ -162,7 +162,7 @@ meta STOCK_IMG_CTYPE (__ANY_IMAGE_ATTACH&&__ENV_AND_HDR_FROM_MATCH&&__CTYPE_ONET
 describe STOCK_IMG_CTYPE  Stock spam image part, with distinctive Content-Type header
 
 # this is a trick from Spambouncer -- thx Catherine!
-uri __HAS_ANY_URI   /./
+uri __HAS_ANY_URI   /^\w+:\/\//
 body __HAS_ANY_EMAIL /\w@\S+\.\w/
 meta SB_GIF_AND_NO_URIS (__GIF_ATTACH&&!__HAS_ANY_URI&&!__HAS_ANY_EMAIL)
 
