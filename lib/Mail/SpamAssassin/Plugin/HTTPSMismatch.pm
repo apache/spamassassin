@@ -58,7 +58,8 @@ sub check_https_http_mismatch {
     $permsgstatus->{chhm_anchors} = 0;
 
     foreach my $k ( keys %{$permsgstatus->{html}->{uri_detail}} ) {
-      my $v = %{$permsgstatus->{html}->{uri_detail}}{$k};
+      my %uri_detail = %{$permsgstatus->{html}->{uri_detail}};
+      my $v = ${uri_detail}{$k};
       # if the URI wasn't used for an anchor tag, or the anchor text didn't
       # exist, skip this.
       next unless (exists $v->{anchor_text} && @{$v->{anchor_text}});
