@@ -221,7 +221,11 @@ foreach my $plistkey (sort keys %{$plist->[1]}) {
   my $tfs = $mailsa->{conf}->{tflags}->{$name} || '';
 
   my $src = $mailsa->{conf}->{source_file}->{$name};
-  $count_rules{$src}++;
+  if ( defined $src ) {
+    $count_rules{$src}++;
+  } else {
+    $count_rules{'not_present'}++;
+  }
 
   # skip rules of these tflags, we cannot judge them without more data
   if ($tfs =~ /\b(?:userconf|learn|net)\b/) {
@@ -303,7 +307,11 @@ exit;
 sub badrule {
   my ($name, $reason) = @_;
   my $src = $mailsa->{conf}->{source_file}->{$name};
-  $killed_rules{$src}->{$name} = $reason;
+  if ( defined $src ) {
+    $killed_rules{$src}->{$name} = $reason;
+  } else {
+    $killed_rules{'not_present'}->{$name} = $reason;
+  }
 
   # if it's a subrule in a meta rule, note this
   # TODO: this only works reliably for lexically-previous meta rules;
