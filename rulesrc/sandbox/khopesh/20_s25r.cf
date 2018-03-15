@@ -42,9 +42,9 @@ tflags	 S25R	nopublish
 
 
 # Early poor-mani's botnet attempts (replaced by KHOP_DYNAMIC and KHOP_DYNAMIC2)
-meta	 KHOP_BOTNET_4	__LAST_EXTERNAL_RELAY_NO_AUTH && !(__FROM_FREEMAIL || __NOT_SPOOFED || __GREYLISTING) && (__S25R_3 || __S25R_4 || __S25R_5 || __S25R_6 || RDNS_DYNAMIC + __S25R_1*.8 + __S25R_2*.8 > 1.7)
-describe KHOP_BOTNET_4	Relay looks like a dynamic address
-tflags	 KHOP_BOTNET_4	nopublish
+# meta	 KHOP_BOTNET_4	__LAST_EXTERNAL_RELAY_NO_AUTH && !(__FROM_FREEMAIL || __NOT_SPOOFED || __GREYLISTING) && (__S25R_3 || __S25R_4 || __S25R_5 || __S25R_6 || RDNS_DYNAMIC + __S25R_1*.8 + __S25R_2*.8 > 1.7)
+# describe KHOP_BOTNET_4	Relay looks like a dynamic address
+# tflags	 KHOP_BOTNET_4	nopublish
 
 meta	 KHOP_BOTNET_7	!(__FROM_FREEMAIL || __NOT_SPOOFED || __GREYLISTING) && (__S25R_4 || __S25R_5 || __S25R_6 || __RDNS_HEX || __S25R_1 + __S25R_2 + __S25R_3 + __IP_IN_RELAY > 2)
 describe KHOP_BOTNET_7	Relay looks like a dynamic address
