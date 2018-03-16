@@ -86,16 +86,17 @@ use Net::DNS;
 use HTTP::Date qw(time2str);
 use Archive::Tar 1.23;
 use IO::Zlib 1.04;
+use Mail::SpamAssassin::Logger qw(:DEFAULT info log_message);
 
-our ($have_lwp, $io_socket_module_name, $have_inet4, $have_inet6);
+our ($have_lwp, $io_socket_module_name, $have_inet4, $have_inet6, $have_sha256);
 
 BEGIN {
   # Deal with optional modules
 
-  eval { require Digest::SHA; import Digest::SHA qw(sha1_hex); 1 }
+  eval { require Digest::SHA; import Digest::SHA qw(sha1_hex sha256_hex); 1 } and do { $have_sha256=1 }
   or do { require Digest::SHA1; import Digest::SHA1 qw(sha1_hex) };
-
-  $have_lwp = eval {
+  
+    $have_lwp = eval {
     require LWP::UserAgent;
   };
 
@@ -136,6 +137,7 @@ use Mail::SpamAssassin::Util qw(untaint_var untaint_file_path
 # Make the main dbg() accessible in our package w/o an extra function
 *dbg=\&Mail::SpamAssassin::dbg;
 sub dbg;
+
 
 $| = 1;  # autoflushing STDOUT makes verbose output consistent with warnings
 
@@ -236,7 +238,6 @@ else {
 }
 my $RevSAVersion = join(".", reverse split(/\./, $SAVersion));
 
-  
 # set debug areas, if any specified (only useful for command-line tools)
 $SAVersion =~ /^(\d+\.\d+)/;
 if ($1+0 > 3.0) {
@@ -245,7 +246,6 @@ if ($1+0 > 3.0) {
 else {
   $opt{'debug'} = defined $opt{'debug'};
 }
-
 
 # Find the default site rule directory, also setup debugging and other M::SA bits
 my $SA = Mail::SpamAssassin->new({
@@ -593,13 +593,15 @@ foreach my $channel (@channels) {
   }
 
   my $content;
+  my $SHA256;
   my $SHA1;
   my $GPG;
 
   if ($instfile) {
-    dbg("channel: using --install files $instfile\{,.sha1,.asc\}");
+    dbg("channel: using --install files $instfile\{,.sha1,.sha256,.asc\}");
     $content = read_install_file($instfile);
-    $SHA1 = read_install_file($instfile.".sha1");
+    if ( -s "$instfile.sha256" ) { $SHA256 = read_install_file($instfile.".sha256"); }
+    if ( -s "$instfile.sha1" ) { $SHA1 = read_install_file($instfile.".sha1"); }
     $GPG = read_install_file($instfile.".asc") if $GPG_ENABLED;
 
   } else {  # not an install file, obtain fresh rules from network
@@ -758,11 +760,28 @@ foreach my $channel (@channels) {
       next unless $content;
       $preserve_files{$result_fname} = 1;
 
+      # SHA256 of the archive file
+      $result_fname = http_get("$mirror/$newV.tar.gz.sha256", $UPDDir);
+      if ( -s $result_fname) {
+        $SHA256 = read_content($result_fname, 0);
+        last unless $SHA256;
+        $preserve_files{$result_fname} = 1;
+      } else {
+        undef $SHA256;
+        dbg("channel: No sha256 file available from $mirror");
+      }
+
+
       # SHA1 of the archive file
       $result_fname = http_get("$mirror/$newV.tar.gz.sha1", $UPDDir);
-      $SHA1 = read_content($result_fname, 0);
-      last unless $SHA1;
-      $preserve_files{$result_fname} = 1;
+      if ( -s $result_fname) {
+        $SHA1 = read_content($result_fname, 0);
+        last unless $SHA1;
+        $preserve_files{$result_fname} = 1;
+      } else {
+        undef $SHA1;
+        dbg("channel: No sha1 file available from $mirror");
+      }
 
       # if GPG is enabled, the GPG detached signature of the archive file
       if ($GPG_ENABLED) {
@@ -777,24 +796,40 @@ foreach my $channel (@channels) {
 
   }
 
-  unless ($content && $SHA1 && (!$GPG_ENABLED || $GPG)) {
+  unless ($content && ( $SHA256 || $SHA1 ) && (!$GPG_ENABLED || $GPG)) {
     channel_failed("channel: could not find working mirror");
     next;
   }
-
-  # Validate the SHA1 signature before going forward with more complicated
-  # operations.
-  # The SHA1 file may be "signature filename" ala sha1sum, just use the signature
-  { local($1);
-    $SHA1 =~ /^([a-fA-F0-9]{40})/;
-    $SHA1 = $1 || 'INVALID';
+  if ( $SHA1 ) {
+    # Validate the SHA1 signature before going forward with more complicated
+    # operations.
+    # The SHA1 file may be "signature filename" ala sha1sum, just use the signature
+    { local($1);
+      $SHA1 =~ /^([a-fA-F0-9]{40})/;
+      $SHA1 = $1 || 'INVALID';
+    }
+    my $digest = sha1_hex($content);
+    dbg("sha1: verification wanted: $SHA1");
+    dbg("sha1: verification result: $digest");
+    unless ($digest eq $SHA1) {
+      channel_failed("channel: SHA1 verification failed");
+      next;
+    }
   }
-  my $digest = sha1_hex($content);
-  dbg("sha1: verification wanted: $SHA1");
-  dbg("sha1: verification result: $digest");
-  unless ($digest eq $SHA1) {
-    channel_failed("channel: SHA1 verification failed");
-    next;
+
+  if ( $SHA256 ) {
+    # Validate the SHA256 signature
+    { local($1);
+      $SHA256 =~ /^([a-fA-F0-9]{64})/;
+      $SHA256 = $1 || 'INVALID';
+    }
+    my $digest = sha256_hex($content);
+    dbg("sha256: verification wanted: $SHA256");
+    dbg("sha256: verification result: $digest");
+    unless ($digest eq $SHA256) {
+      channel_failed("channel: SHA256 verification failed");
+      next;
+    }
   }
 
   # Write the content out to a temp file for GPG/Archive::Tar interaction
