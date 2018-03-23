@@ -185,7 +185,7 @@ header __SUBJECT_ENCODED_B64	Subject:raw =~ /=\?\S+\?B\?/i
 
 
 
-header __FROM_NEEDS_MIME	From =~ /[\x00-\x08\x0b\x0c\x0e-\x1f\x7f-\xff]/
+header __FROM_NEEDS_MIME	From:name:raw =~ /[\x00-\x08\x0b\x0c\x0e-\x1f\x7f-\xff]/
 header __FROM_ENCODED_QP	From:raw =~ /=\?\S+\?Q\?/i
 header __FROM_ENCODED_B64	From:raw =~ /=\?\S+\?B\?/i
 
