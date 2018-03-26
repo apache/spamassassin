@@ -1,6 +1,6 @@
 #!/bin/bash
 
-PERL=/usr/bin/perl
+PERL=`which perl`
 
 LOGDIR="/var/www/automc.spamassassin.org/mkupdates"
 REPDIR="/var/www/ruleqa.spamassassin.org/reports"
@@ -69,7 +69,7 @@ make_tarball_for_version() {
   # "tflags nopublish" leakage (bug 6297)
   make test \
     TEST_FILES="t/basic_lint.t t/basic_lint_without_sandbox.t t/basic_meta.t" \
-    || exit $?
+    TEST_VERBOSE=1 || exit $?
 
   # remove the rules files for rules we won't be shipping
   rm rules/70_sandbox.cf rules/70_inactive.cf
@@ -94,7 +94,7 @@ make_tarball_for_version() {
     tar cvf - *.cf                         || exit $?
 
   ) | gzip -9 > $tmpdir/update.tgz         || exit $?
-
+  
   # ensure non-empty
   [ -s $tmpdir/update.tgz ] || exit 3
 
@@ -122,7 +122,8 @@ make_tarball_for_version() {
   gpg --batch --homedir $HOME/key \
         -bas $tmpdir/update.tgz                 || exit $?
 
-  $PERL build/sha1sum.pl $tmpdir/update.tgz > $tmpdir/update.tgz.sha1  || exit $?
+  shasum -a 1  $tmpdir/update.tgz > $tmpdir/update.tgz.sha1  || exit $?
+  shasum -a 256  $tmpdir/update.tgz > $tmpdir/update.tgz.sha256  || exit $?
 
 
   # get SVN revision number.
@@ -169,6 +170,7 @@ make_tarball_for_version() {
 
   mv $tmpdir/update.tgz      $UPDDIR/${svnrev}.tar.gz            || exit $?
   mv $tmpdir/update.tgz.sha1 $UPDDIR/${svnrev}.tar.gz.sha1       || exit $?
+  mv $tmpdir/update.tgz.sha256 $UPDDIR/${svnrev}.tar.gz.sha256       || exit $?
   mv $tmpdir/update.tgz.asc  $UPDDIR/${svnrev}.tar.gz.asc        || exit $?
 
   # Give the mirrors time to pull the new files above
