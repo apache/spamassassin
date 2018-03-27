@@ -54,7 +54,8 @@ cd /var/www/buildbot.spamassassin.org/updatestage
 rm -f $V.tar.gz*
 mv /tmp/$V.tar.gz .
 /local/gnupg-1.4.2/bin/gpg --batch --homedir /home/updatesd/key -bas $V.tar.gz
-/local/perl586/bin/perl /home/updatesd/svn/spamassassin/build/sha1sum.pl $V.tar.gz > $V.tar.gz.sha1
+shasum -a 1 $V.tar.gz > $V.tar.gz.sha1
+shasum -a 256 $V.tar.gz > $V.tar.gz.sha256
 chmod 0444 $V.tar.* 
 
 if [ $VERS = 3.1 ]; then

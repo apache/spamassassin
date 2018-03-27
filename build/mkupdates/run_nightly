@@ -16,10 +16,10 @@ cd /usr/local/spamassassin/automc/svn/trunk
 
 promote_active_rules() {
   pwd
-  
+
   $PERL build/mkupdates/listpromotable > rules/active.list.new || exit $?
   mv rules/active.list.new rules/active.list
-  
+
   svn diff rules > $REPDIR/LATEST
 
   cat $REPDIR/LATEST
@@ -122,7 +122,8 @@ make_tarball_for_version() {
   gpg --batch --homedir $HOME/key \
         -bas $tmpdir/update.tgz                 || exit $?
 
-  $PERL build/sha1sum.pl $tmpdir/update.tgz > $tmpdir/update.tgz.sha1  || exit $?
+  shasum -a 1  $tmpdir/update.tgz > $tmpdir/update.tgz.sha1  || exit $?
+  shasum -a 256  $tmpdir/update.tgz > $tmpdir/update.tgz.sha256  || exit $?
 
 
   # get SVN revision number.
@@ -169,6 +170,7 @@ make_tarball_for_version() {
 
   mv $tmpdir/update.tgz      $UPDDIR/${svnrev}.tar.gz            || exit $?
   mv $tmpdir/update.tgz.sha1 $UPDDIR/${svnrev}.tar.gz.sha1       || exit $?
+  mv $tmpdir/update.tgz.sha256 $UPDDIR/${svnrev}.tar.gz.sha256       || exit $?
   mv $tmpdir/update.tgz.asc  $UPDDIR/${svnrev}.tar.gz.asc        || exit $?
 
   # Give the mirrors time to pull the new files above
@@ -232,7 +234,7 @@ ls -l $UPDDIR/MIRRORED.BY
 ls -ltr $UPDDIR/*.tar.* | tail -20
 
 cycle_logfiles
-  
+
 rm -rf ruleqa.cache.* 
-  
+
 exit
