@@ -2236,7 +2236,7 @@ rawbody    __SPAMTOOL_GOOF_01           /^: SMTPHEADER_REPLYTO\#$/m
 
 body       __PHOTO_RETOUCHING           /\b(?:retouching|(?:image|photo) edit(?:ing|ors))\b/i
 tflags     __PHOTO_RETOUCHING           multiple maxhits=5
-meta       PHOTO_EDITING_CHN            __REPTO_CHN_FREEM && __PHOTO_RETOUCHING > 4
-describe   PHOTO_EDITING_CHN            Image editing service, CHN replyto
+meta       PHOTO_EDITING_FREEM          __PHOTO_RETOUCHING > 4 && (__REPTO_CHN_FREEM || __freemail_hdr_replyto)
+describe   PHOTO_EDITING_FREEM          Image editing service, freemail or CHN replyto
 
 
