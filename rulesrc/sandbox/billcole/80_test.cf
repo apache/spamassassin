@@ -24,3 +24,6 @@ meta		__MIXED_HREF_CASE	__HAS_HREF - __HAS_HREF_ONECASE > 0
 
 describe	T_MIXED_TAG_CASE	Has multiple mixed-case tags in non-quoted lines.
 meta		T_MIXED_TAG_CASE	__MIXED_IMG_CASE && __MIXED_HREF_CASE
+
+describe	T_SCC_THREE_WORD_MONTY	Are you POTUS or a mass murderer? 
+header		T_SCC_THREE_WORD_MONTY	From =~ /(\w{2,}) (\w{2,}) (\w{2,}) <\1.\2.\3/
