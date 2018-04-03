@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus ena-week0 ena-week1 ena-week2 ena-week3 ena-week4 grenier jbrooks mmiroslaw-mails-ham mmiroslaw-mails-spam sihde thendrikx; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus ena-week0 ena-week1 ena-week2 ena-week3 ena-week4 giovanni jarif jbrooks llanga mmiroslaw-mails-ham mmiroslaw-mails-spam sihde thendrikx; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus ena-week0 ena-week1 ena-week2 ena-week3 ena-week4 giovanni grenier jarif jbrooks llanga mmiroslaw-mails-ham mmiroslaw-mails-spam sihde thendrikx
+# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus ena-week0 ena-week1 ena-week2 ena-week3 ena-week4 grenier jarif jbrooks mmiroslaw-mails-ham mmiroslaw-mails-spam sihde thendrikx; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus ena-week0 ena-week1 ena-week2 ena-week3 ena-week4 giovanni jbrooks llanga mmiroslaw-mails-ham mmiroslaw-mails-spam sihde thendrikx; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus ena-week0 ena-week1 ena-week2 ena-week3 ena-week4 giovanni jarif jbrooks llanga mmiroslaw-mails-ham mmiroslaw-mails-spam sihde thendrikx
 
 # tflags publish
 AC_BR_BONANZA
@@ -196,6 +196,9 @@ DX_TEXT_02
 # tflags publish
 DX_TEXT_03
 
+# good enough
+DYN_RDNS_AND_INLINE_IMAGE
+
 # tflags publish
 ENCRYPTED_MESSAGE
 
@@ -245,6 +248,9 @@ FROM_IN_TO_AND_SUBJ
 FROM_LOCAL_NOVOWEL
 
 # good enough
+FROM_MISSP_EH_MATCH
+
+# good enough
 FROM_MISSP_FREEMAIL
 
 # good enough
@@ -273,6 +279,9 @@ FROM_WSP_TRAIL
 
 # good enough
 FSL_CTYPE_WIN1251
+
+# good enough
+FSL_HELO_BARE_IP_1
 
 # good enough
 FSL_HELO_FAKE
@@ -471,6 +480,9 @@ OBFU_JVSCR_ESC
 
 # tflags publish
 OBFU_TEXT_ATTACH
+
+# good enough
+PHOTO_EDITING_FREEM
 
 # tflags publish
 PHP_NOVER_MUA
@@ -719,6 +731,9 @@ REPLYTO_WITHOUT_TO_CC
 S25R_4
 
 # good enough
+SERGIO_SUBJECT_PORN015
+
+# good enough
 SERGIO_SUBJECT_VIAGRA01
 
 # tflags publish
@@ -765,9 +780,6 @@ STOCK_LOW_CONTRAST
 
 # tflags publish
 STOCK_TIP
-
-# good enough
-STOX_REPLY_TYPE
 
 # good enough
 STOX_REPLY_TYPE_WITHOUT_QUOTES
@@ -845,6 +857,12 @@ TVD_NOT_SATISFIED
 TVD_QUAL_MEDS
 
 # good enough
+TVD_RCVD_IP
+
+# good enough
+TVD_RCVD_IP4
+
+# good enough
 TVD_SPACE_ENCODED
 
 # good enough
@@ -854,79 +872,40 @@ TVD_VISIT_PHARMA
 TW_GIBBERISH_MANY
 
 # good enough
-ADVANCE_FEE_2_NEW_FRM_MNY
+ADVANCE_FEE_3_NEW_FRM_MNY
 
 # good enough
-ADVANCE_FEE_4_NEW_FRM_MNY
+AXB_XMAILER_MIMEOLE_OL_1ECD5
 
 # good enough
-ADVANCE_FEE_4_NEW_MONEY
+COMPENSATION
 
 # good enough
-ADVANCE_FEE_5_NEW
+DATE_IN_FUTURE_96_Q
 
 # good enough
-AXB_X_FF_SEZ_S
+DUP_SUSP_HDR
 
 # good enough
-BODY_SINGLE_URI
+FROM_MISSP_DYNIP
 
 # good enough
-FILL_THIS_FORM_LOAN
+FROM_MISSP_PHISH
 
 # good enough
-FILL_THIS_FORM_LONG
+HK_SCAM_N3
 
 # good enough
-FROM_MISSPACED
+HTML_TAG_BALANCE_CENTER
 
 # good enough
-FROM_MISSP_EH_MATCH
+LOTTO_AGENT
 
 # good enough
-FROM_MISSP_REPLYTO
+NA_DOLLARS
 
 # good enough
-FSL_HELO_BARE_IP_2
-
-# good enough
-HDRS_LCASE
-
-# good enough
-HK_RANDOM_FROM
-
-# good enough
-MILLION_USD
-
-# good enough
-MIMEOLE_DIRECT_TO_MX
-
-# good enough
-MONEY_BARRISTER
-
-# good enough
-MONEY_FORM
-
-# good enough
-MONEY_FROM_MISSP
-
-# good enough
-PHOTO_EDITING_FREEM
-
-# good enough
-RISK_FREE
-
-# good enough
-SERGIO_SUBJECT_PORN015
-
-# good enough
-TO_EQ_FM_DIRECT_MX
-
-# good enough
-TO_NO_BRKTS_FROM_MSSP
-
-# good enough
-TVD_SPACE_RATIO_MINFP
+SUBJ_OBFU_LOW_CNTRST
 
 # tflags publish
 UC_GIBBERISH_OBFU
