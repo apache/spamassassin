@@ -18,7 +18,7 @@ tflags	 S25R_3 nopublish
 
 describe S25R_4 S25R: Bottom of rDNS ends w/ num, next lvl has num-num
 meta	 S25R_4 __S25R_4 && !(__S25R_1||__S25R_2||__S25R_3||__S25R_5||__S25R_6 || __NOT_SPOOFED || __GREYLISTING)
-#tflags	 S25R_4 nopublish
+tflags	 S25R_4 nopublish
 #score	 S25R_4 0.1
 
 describe S25R_5 S25R: rDNS has 5+ layers, bottom 2 end in numbers
@@ -28,7 +28,7 @@ tflags	 S25R_5 nopublish
 
 describe S25R_6 S25R: rDNS looks dynamic or customer-facing
 meta	 S25R_6 __S25R_6 && !(__S25R_1||__S25R_2||__S25R_3||__S25R_4||__S25R_5 || __NOT_SPOOFED || __GREYLISTING)
-#tflags	 S25R_6 nopublish
+tflags	 S25R_6 nopublish
 #score	 S25R_6 0.1
 
 # Testing the union.  Limits S25R_0 (RDNS_NONE) for high FPs.
