@@ -102,6 +102,15 @@ header __OIMO_MSGID		MESSAGEID =~ /^<[A-P]{28}\.[-\w.]+\@\S+>$/m
 meta FORGED_MUA_OIMO		(__OIMO_MUA && !__OIMO_MSGID && !__OE_MSGID_2 && !__UNUSABLE_MSGID)
 describe FORGED_MUA_OIMO	Forged mail pretending to be from MS Outlook IMO
 
+# Not Ratware...
+
+header __HAS_X_LOOP		exists:X-Loop
+header __HAS_X_MAILING_LIST	exists:X-Mailing-List
+header __HAS_X_MAILMAN_VERSION	exists:X-Mailman-Version
+describe MAILING_LIST_MULTI	Multiple indicators imply a widely-seen list manager
+meta   MAILING_LIST_MULTI	__HAS_X_LOOP + __HAS_X_MAILING_LIST + __HAS_X_MAILMAN_VERSION + __HAS_LIST_ID + __HAS_X_BEEN_THERE +__DOS_HAS_LIST_UNSUB + __ML1 + __ML2 + __ML3 + __ML4 + __ML5 > 2
+tflags MAILING_LIST_MULTI	nice
+
 # QUALCOMM Eudora
 # Note: uses X_LOOP and X_MAILING_LIST as subrules
 # X-Mailer: QUALCOMM Windows Eudora Version 5.0   (and 5.1)
@@ -109,14 +118,9 @@ describe FORGED_MUA_OIMO	Forged mail pretending to be from MS Outlook IMO
 # updated to fix bugs 2047, 2598, 2654
 # NOTE: this is the *only* spammish Eudora MUA pattern that wasn't
 # ignored using __OLD_EUDORA1 and __OLD_EUDORA2 under previous rules.
-header __EUDORA_MUA             X-Mailer =~ /^QUALCOMM Windows Eudora (?:Pro |Light )?Version [3456]\./
+header __EUDORA_MUA             X-Mailer =~ /^QUALCOMM Windows Eudora (?:Pro |Light )?Version [34567]\./
 header __EUDORA_MSGID		MESSAGEID =~ /^<(?:\d\d?\.){3,5}\d{14}\.[a-f0-9]{8}\@\S+(?:\sport\s\d+)?>$/m
-header __EUDORA_MUA7            X-Mailer =~ /^QUALCOMM Windows Eudora (?:Pro |Light )?Version [7]\./
-header __EUDORA_MSGID7          MESSAGEID =~ /^<\d{12}\.[a-z0-9]{14}\@\S+(?:\sport\s\d+)?>$/mi
-header __HAS_X_LOOP		exists:X-Loop
-header __HAS_X_MAILING_LIST	exists:X-Mailing-List
-header __HAS_X_MAILMAN_VERSION	exists:X-Mailman-Version
-meta FORGED_MUA_EUDORA          ( (__EUDORA_MUA && !__EUDORA_MSGID && !__UNUSABLE_MSGID && !__HAS_X_LOOP && !__HAS_X_MAILING_LIST) || (__EUDORA_MUA7 && !__EUDORA_MSGID7) )
+meta FORGED_MUA_EUDORA          __EUDORA_MUA && !( __EUDORA_MSGID || __UNUSABLE_MSGID || MAILING_LIST_MULTI || MSGID_FROM_MTA_HEADER )
 describe FORGED_MUA_EUDORA	Forged mail pretending to be from Eudora
   
 # From private mail with developers.  Some top tips here!
