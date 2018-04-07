@@ -948,17 +948,6 @@ uri         __UPPERCASE_URI        /^[^:A-Z]+[A-Z]/
 # __ version of khopesh SINGLE_HEADER_1K, for use in metas
 #header      __SINGLE_HEADER_1K     ALL:raw =~ /(?-xim:(?=(?!X-Spam|X-MailScan)(?:^|\n)[^\s\n]+:(?:.(?!\n\S)){1024,2047}.(?:\n\S|$)))/s
 
-# __ version of mmartinec RP_MATCHES_RCVD, for use in metas
-if version >= 3.003000
-ifplugin Mail::SpamAssassin::Plugin::WLBLEval
-  header      __RP_MATCHES_RCVD      eval:check_mailfrom_matches_rcvd()
-else
-  meta        __RP_MATCHES_RCVD      0
-endif
-else
-  meta        __RP_MATCHES_RCVD      0
-endif
-
 # for sale newsletters
 if can(Mail::SpamAssassin::Conf::feature_bug6558_free)
   body        __FOR_SALE_OBO            /\bor best offer\b/i
