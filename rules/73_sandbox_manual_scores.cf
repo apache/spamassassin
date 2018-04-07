@@ -26,6 +26,7 @@ require_version @@VERSION@@
 
 # jhardin
 # things depend on these
+# score as informative just for the hits header
 score LOTS_OF_MONEY            0.001
 score FILL_THIS_FORM           0.001
 
@@ -77,4 +78,9 @@ score FILL_THIS_FORM_LONG      2.00
 # reduce score until that's resolved
 # score HK_FAKENAME_MICROSOFT    2.50
 # RULE DISABLED IN 20_hk.cf
+
+# jhardin for mmartinec
+# Lots of hate; score as informative hammy, may override locally
+score RP_MATCHES_RCVD           -0.001
+
 
