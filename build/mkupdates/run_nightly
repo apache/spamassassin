@@ -168,27 +168,42 @@ make_tarball_for_version() {
 
   chmod 644 $tmpdir/update.*
 
-  mv $tmpdir/update.tgz      $UPDDIR/${svnrev}.tar.gz            || exit $?
-  mv $tmpdir/update.tgz.sha1 $UPDDIR/${svnrev}.tar.gz.sha1       || exit $?
-  mv $tmpdir/update.tgz.sha256 $UPDDIR/${svnrev}.tar.gz.sha256       || exit $?
-  mv $tmpdir/update.tgz.asc  $UPDDIR/${svnrev}.tar.gz.asc        || exit $?
+  # Integrate with masscheck ruleset updates to prevent duplicates
+  RECENT=`find $HOME/tmp/mkupdate-with-scores -name \*.tar.gz -mmin -480`
 
-  # Give the mirrors time to pull the new files above
-  sleep 600
+  if [[ ! -z "$RECENT" ]]; then
 
-  # next, create/update the new DNS record....
+    echo "Recent ruleset from mkupdate-with-scores (massheck) NOT found."
+    echo "Proceeding with a ruleset publish..."
 
-  # Versions >= 3.4.1 are CNAMEd to this DNS record:
-  /usr/local/bin/updateDNS.sh 3.3.3.updates TXT ${svnrev}
-  RC=$?
-  if [[ "$RC" -ne 2 ]]; then
-    # Set older version TXT records for older sa-update
-    /usr/local/bin/updateDNS.sh 0.4.3.updates TXT ${svnrev}
-    /usr/local/bin/updateDNS.sh 2.3.3.updates TXT ${svnrev}
-    /usr/local/bin/updateDNS.sh 1.3.3.updates TXT ${svnrev}
-    /usr/local/bin/updateDNS.sh 0.3.3.updates TXT ${svnrev}
+    mv $tmpdir/update.tgz      $UPDDIR/${svnrev}.tar.gz            || exit $?
+    mv $tmpdir/update.tgz.sha1 $UPDDIR/${svnrev}.tar.gz.sha1       || exit $?
+    mv $tmpdir/update.tgz.sha256 $UPDDIR/${svnrev}.tar.gz.sha256       || exit $?
+    mv $tmpdir/update.tgz.asc  $UPDDIR/${svnrev}.tar.gz.asc        || exit $?
+
+    # Give the mirrors time to pull the new files above
+    sleep 600
+
+    # next, create/update the new DNS record....
+
+    # Versions >= 3.4.1 are CNAMEd to this DNS record:
+    /usr/local/bin/updateDNS.sh 3.3.3.updates TXT ${svnrev}
+    RC=$?
+    if [[ "$RC" -ne 2 ]]; then
+      # Set older version TXT records for older sa-update
+      /usr/local/bin/updateDNS.sh 0.4.3.updates TXT ${svnrev}
+      /usr/local/bin/updateDNS.sh 2.3.3.updates TXT ${svnrev}
+      /usr/local/bin/updateDNS.sh 1.3.3.updates TXT ${svnrev}
+      /usr/local/bin/updateDNS.sh 0.3.3.updates TXT ${svnrev}
+    fi
+
+  else
+
+    echo "Recent ruleset from mkupdate-with-scores (massheck) found:"
+    ls -l $RECENT
+    echo ""
+
   fi
-
 
   # clean up 4-day-old (and older) update tarballs.  This seems as
   # good a place as any to do this!
