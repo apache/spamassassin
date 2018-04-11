@@ -37,3 +37,5 @@ describe SCC_MAJORDOMO Multiple indications of the majordomo list manager
 meta SCC_MAJORDOMO __SCC_MD_UNSUB + __SCC_MD_SUB + __SCC_MD_SENDER + __SCC_MD_RCVD_OUT > 1
 tflags SCC_MAJORDOMO nice
 
+describe  T_SCC_ODD_MUA  Unlikely MUA for a modern human
+header    T_SCC_ODD_MUA  X-Mailer =~ /^X-Mailer: Microsoft Outlook 14.0$/
