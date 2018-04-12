@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus ena-week1 ena-week2 ena-week3 ena-week4 grenier jarif jbrooks mmiroslaw-mails-ham mmiroslaw-mails-spam sihde thendrikx; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus ena-week0 ena-week1 ena-week2 ena-week3 ena-week4 giovanni jarif jbrooks llanga mmiroslaw-mails-ham mmiroslaw-mails-spam sihde; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus ena-week0 ena-week1 ena-week2 ena-week3 ena-week4 giovanni jarif jbrooks llanga mmiroslaw-mails-ham mmiroslaw-mails-spam sihde thendrikx
+# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus ena-week0 ena-week1 ena-week2 ena-week3 ena-week4 grenier jbrooks mmiroslaw-mails-ham mmiroslaw-mails-spam sihde thendrikx; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus ena-week1 ena-week2 ena-week3 ena-week4 giovanni jarif jbrooks llanga mmiroslaw-mails-ham mmiroslaw-mails-spam sihde; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus ena-week0 ena-week1 ena-week2 ena-week3 ena-week4 giovanni jarif jbrooks llanga mmiroslaw-mails-ham mmiroslaw-mails-spam sihde
 
 # tflags publish
 AC_BR_BONANZA
@@ -71,10 +71,10 @@ AD_PREFS
 ALL_TRUSTED
 
 # good enough
-APOSTROPHE_TOCC
+AXB_XMAILER_MIMEOLE_OL_024C2
 
 # good enough
-AXB_XMAILER_MIMEOLE_OL_024C2
+AXB_X_AOL_SEZ_S
 
 # tflags learn
 BAYES_00
@@ -201,9 +201,6 @@ DX_TEXT_03
 
 # good enough
 DYN_RDNS_AND_INLINE_IMAGE
-
-# good enough
-DYN_RDNS_SHORT_HELO_HTML
 
 # tflags publish
 ENCRYPTED_MESSAGE
@@ -414,9 +411,6 @@ HTML_CHARSET_FARAWAY
 
 # tflags publish
 HTML_OFF_PAGE
-
-# good enough
-HTML_TAG_BALANCE_CENTER
 
 # tflags publish
 LIST_PRTL_PUMPDUMP
@@ -809,7 +803,7 @@ SUBJECT_IN_BLACKLIST
 SUBJECT_IN_WHITELIST
 
 # good enough
-SUBJ_OBFU_LOW_CNTRST
+SUBJ_ATTENTION
 
 # tflags net
 SURBL_BLOCKED
@@ -878,12 +872,6 @@ TVD_PH_BODY_META_ALL
 TVD_QUAL_MEDS
 
 # good enough
-TVD_RCVD_IP
-
-# good enough
-TVD_RCVD_IP4
-
-# good enough
 TVD_SPACE_ENCODED
 
 # good enough
@@ -896,79 +884,25 @@ TVD_VISIT_PHARMA
 TW_GIBBERISH_MANY
 
 # good enough
-ADVANCE_FEE_2_NEW_FRM_MNY
+ADVANCE_FEE_3_NEW_FRM_MNY
 
 # good enough
-ADVANCE_FEE_4_NEW_FRM_MNY
+AXB_XMAILER_MIMEOLE_OL_1ECD5
 
 # good enough
-ADVANCE_FEE_4_NEW_MONEY
+COMPENSATION
 
 # good enough
-ADVANCE_FEE_5_NEW
+DATE_IN_FUTURE_96_Q
 
 # good enough
-AXB_X_AOL_SEZ_S
+FROM_MISSP_DYNIP
 
 # good enough
-AXB_X_FF_SEZ_S
+HK_SCAM_N3
 
 # good enough
-BIGNUM_EMAILS
-
-# good enough
-BODY_SINGLE_URI
-
-# good enough
-FILL_THIS_FORM_LOAN
-
-# good enough
-FILL_THIS_FORM_LONG
-
-# good enough
-FROM_MISSPACED
-
-# good enough
-FROM_MISSP_REPLYTO
-
-# good enough
-FSL_HELO_BARE_IP_2
-
-# good enough
-HDRS_LCASE
-
-# good enough
-HK_RANDOM_FROM
-
-# good enough
-KHOP_DYNAMIC
-
-# good enough
-LOTTO_DEPT
-
-# good enough
-MILLION_USD
-
-# good enough
-MIMEOLE_DIRECT_TO_MX
-
-# good enough
-MONEY_BARRISTER
-
-# good enough
-MONEY_FORM
-
-# good enough
-MONEY_FROM_MISSP
-
-# good enough
-SUBJ_ATTENTION
-
-# good enough
-TO_EQ_FM_DIRECT_MX
-
-# good enough
-TO_NO_BRKTS_FROM_MSSP
+LOTTO_AGENT
 
 # tflags publish
 UC_GIBBERISH_OBFU
