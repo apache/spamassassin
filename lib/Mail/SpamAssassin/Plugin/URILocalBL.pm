@@ -55,6 +55,10 @@ The format for defining a rule is as follows:
 
 or:
 
+  uri_block_cont SYMBOLIC_TEST_NAME co1 co2 co3 co4
+
+or:
+
   uri_block_cidr SYMBOLIC_TEST_NAME a.a.a.a b.b.b.b/cc d.d.d.d-e.e.e.e
 
 or:
@@ -205,6 +209,47 @@ sub set_config {
     }
   }) if (defined $self->{geoip});
 
+  push (@cmds, {
+    setting => 'uri_block_cont',
+    is_priv => 1,
+    code => sub {
+      my ($self, $key, $value, $line) = @_;
+
+      if ($value !~ /^(\S+)\s+(.+)$/) {
+	return $Mail::SpamAssassin::Conf::INVALID_VALUE;
+      }
+      my $name = $1;
+      my $def = $2;
+      my $added_criteria = 0;
+
+      $conf->{parser}->{conf}->{uri_local_bl}->{$name}->{continents} = {};
+
+      # this should match all continent codes
+      while ($def =~ m/^\s*([a-z]{2})(\s+(.*)|)$/) {
+	my $cont = $1;
+	my $rest = $2;
+
+	# dbg("config: uri_block_cont adding %s to %s\n", $cont, $name);
+        $conf->{parser}->{conf}->{uri_local_bl}->{$name}->{continents}->{uc($cont)} = 1;
+	$added_criteria = 1;
+
+        $def = $rest;
+      }
+
+      if ($added_criteria == 0) {
+        warn "config: no arguments";
+	return $Mail::SpamAssassin::Conf::MISSING_REQUIRED_VALUE;
+      } elsif ($def ne '') {
+        warn "config: failed to add invalid rule $name";
+	return $Mail::SpamAssassin::Conf::INVALID_VALUE;
+      }
+
+      dbg("config: uri_block_cont added %s\n", $name);
+
+      $conf->{parser}->add_test($name, 'check_uri_local_bl()', $Mail::SpamAssassin::Conf::TYPE_BODY_EVALS);
+    }
+  }) if (defined $self->{geoip});
+  
   push (@cmds, {
     setting => 'uri_block_isp',
     is_priv => 1,
@@ -393,6 +438,36 @@ sub check_uri_local_bl {
           }
       
           $permsg->test_log("Host: $host in $cc");
+          $permsg->got_hit($test);
+
+          # reset hash
+          keys %uri_detail;
+
+          return 0;
+        }
+
+        if (exists $rule->{continents}) {
+          dbg("check: uri_local_bl continents %s\n", join(' ', sort keys %{$rule->{continents}}));
+
+          my $cc = $self->{geoip}->country_code_by_addr($ip);
+          my $cont = $self->{geoip}->continent_code_by_country_code($cc);
+          
+          dbg("check: uri_local_bl host %s(%s) maps to %s\n", $host, $ip, (defined $cont ? $cont : "(undef)"));
+
+          # handle there being no associated continent (yes, there are holes in
+          # the database).
+          next unless defined $cont;
+
+          # not in blacklist
+          next unless (exists $rule->{continents}->{$cont});
+
+          dbg("check: uri_block_cont host %s(%s) matched\n", $host, $ip);
+
+          if (would_log('dbg', 'rules') > 1) {
+            dbg("check: uri_block_cont criteria for $test met");
+          }
+
+          $permsg->test_log("Host: $host in $cont");
           $permsg->got_hit($test);
 
           # reset hash
