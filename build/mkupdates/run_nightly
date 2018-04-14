@@ -171,7 +171,7 @@ make_tarball_for_version() {
   # Integrate with masscheck ruleset updates to prevent duplicates
   RECENT=`find $HOME/tmp/mkupdate-with-scores -name \*.tar.gz -mmin -480`
 
-  if [[ ! -z "$RECENT" ]]; then
+  if [[ -z "$RECENT" ]]; then
 
     echo "Recent ruleset from mkupdate-with-scores (massheck) NOT found."
     echo "Proceeding with a ruleset publish..."
