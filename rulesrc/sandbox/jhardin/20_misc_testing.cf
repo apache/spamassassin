@@ -2230,7 +2230,14 @@ describe   PHOTO_EDITING_FREEM          Image editing service, freemail or CHN r
 
 body       __GENERATE_LEADS             /\b(?:new (?:customer|client)s|(?:customer|client|business|new) leads|y?our (?:marketing|business)|(?:marketing|ad(?:vertising)) services?)\b/i
 tflags     __GENERATE_LEADS             multiple maxhits=5
-meta       MARKETING_FREEM              __GENERATE_LEADS > 4 && (__REPTO_CHN_FREEM || __freemail_hdr_replyto)
+meta       __GENERATE_LEADS_2           __GENERATE_LEADS > 2	# for masscheck analysis
+meta       __GENERATE_LEADS_3           __GENERATE_LEADS > 3	# for masscheck analysis
+meta       __GENERATE_LEADS_4           __GENERATE_LEADS > 4	# for masscheck analysis
+meta       MARKETING_FREEM              __GENERATE_LEADS_4 && (__REPTO_CHN_FREEM || __freemail_hdr_replyto)
 describe   MARKETING_FREEM              Marketing service, freemail or CHN replyto
+
+meta       MARKETING_SHORT              __GENERATE_LEADS_4 && __LCL__KAM_BODY_LENGTH_LT_1024
+describe   MARKETING_SHORT              Marketing service, short message
+score      MARKETING_SHORT              2.500	# limit
 
 
