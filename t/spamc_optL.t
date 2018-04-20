@@ -7,7 +7,7 @@ use constant HAS_SDBM_FILE => eval { require SDBM_File; };
 use Test::More;
 plan skip_all => "No SPAMC exe" if $SKIP_SPAMC_TESTS;
 plan skip_all => "No SDBM_File" unless HAS_SDBM_FILE;
-plan tests => 16;
+plan tests => 18;
 
 # ---------------------------------------------------------------------------
 
@@ -27,6 +27,11 @@ ok_all_patterns();
 
 %patterns = ( '1 0  non-token data: nspam' => 'spam in database' );
 ok(salearnrun("--dump magic", \&patterns_run_cb));
+ok_all_patterns();
+
+# Test option=value
+%patterns = ( '1 0  non-token data: nspam' => 'spam in database' );
+ok(salearnrun("--dump=magic", \&patterns_run_cb));
 ok_all_patterns();
 
 %patterns = ( 'Message successfully un/learned' => 'forget spam' );
