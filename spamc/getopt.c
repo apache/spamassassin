@@ -280,7 +280,6 @@ spamc_getopt_long(int argc, char * const argv[],
                   }
                }
             }
-            free(opt);
             if(longopts[i].flag == NULL) {
                return(longopts[i].val);
             } else {
