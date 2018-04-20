@@ -2228,7 +2228,7 @@ tflags     __PHOTO_RETOUCHING           multiple maxhits=5
 meta       PHOTO_EDITING_FREEM          __PHOTO_RETOUCHING > 4 && (__REPTO_CHN_FREEM || __freemail_hdr_replyto)
 describe   PHOTO_EDITING_FREEM          Image editing service, freemail or CHN replyto
 
-body       __GENERATE_LEADS             /\b(?:new (?:customer|client)s|(?:customer|client|business|new) leads|y?our (?:marketing|business)|(?:marketing|ad(?:vertising)) services?)\b/i
+body       __GENERATE_LEADS             /\b(?:new (?:customer|client)s|(?:customer|client|business|new) leads|y?our marketing|(?:marketing|ad(?:vertising)) services?)\b/i
 tflags     __GENERATE_LEADS             multiple maxhits=5
 meta       __GENERATE_LEADS_2           __GENERATE_LEADS > 2	# for masscheck analysis
 meta       __GENERATE_LEADS_3           __GENERATE_LEADS > 3	# for masscheck analysis
