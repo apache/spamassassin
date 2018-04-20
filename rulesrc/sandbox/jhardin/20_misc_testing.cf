@@ -2223,31 +2223,35 @@ body       __BAYES_POISON_NUMS_01       /\s([0-9]{6,})\s(?:.{15,}?\s\1\s){10}/
 rawbody    __SPAMTOOL_GOOF_01           /^: SMTPHEADER_REPLYTO\#$/m
 
 
-body       __PHOTO_RETOUCHING           /\b(?:retouching|(?:image|photo)s? (?:edit(?:ing|ors)|(?:cutt|mask|clipp)ing|cut\s?out|color correction)|your imag(?:es|ing)|photo\s?shop experts?|send us (?:(?:a|one|your|some|sample|test|example) )+(?:image|photo)s?)\b/i
-tflags     __PHOTO_RETOUCHING           multiple maxhits=5
-meta       PHOTO_EDITING_FREEM          __PHOTO_RETOUCHING > 4 && (__REPTO_CHN_FREEM || __freemail_hdr_replyto)
-describe   PHOTO_EDITING_FREEM          Image editing service, freemail or CHN replyto
+if can(Mail::SpamAssassin::Conf::feature_bug6558_free)
+  body       __PHOTO_RETOUCHING         /\b(?:retouching|(?:image|photo)s? (?:edit(?:ing|ors)|(?:cutt|mask|clipp)ing|cut\s?out|color correction)|your imag(?:es|ing)|photo\s?shop experts?|send us (?:(?:a|one|your|some|sample|test|example) )+(?:image|photo)s?)\b/i
+  tflags     __PHOTO_RETOUCHING         multiple maxhits=5
+  meta       PHOTO_EDITING_FREEM        __PHOTO_RETOUCHING > 4 && (__REPTO_CHN_FREEM || __freemail_hdr_replyto)
+  describe   PHOTO_EDITING_FREEM        Image editing service, freemail or CHN replyto
+endif
 
-body       __GENERATE_LEADS             /\b(?:new (?:customer|client)s|(?:customer|client|business|new) leads|y?our marketing|(?:marketing|ad(?:vertising)) services?)\b/i
-tflags     __GENERATE_LEADS             multiple maxhits=5
-meta       __GENERATE_LEADS_2           __GENERATE_LEADS > 2	# for masscheck analysis
-meta       __GENERATE_LEADS_3           __GENERATE_LEADS > 3	# for masscheck analysis
-meta       __GENERATE_LEADS_4           __GENERATE_LEADS > 4	# for masscheck analysis
 
-meta       MARKETING_FREEM              __GENERATE_LEADS_2 && (__REPTO_CHN_FREEM || __freemail_hdr_replyto)
-describe   MARKETING_FREEM              Marketing service, freemail or CHN replyto
-score      MARKETING_FREEM              2.500	# limit
+if can(Mail::SpamAssassin::Conf::feature_bug6558_free)
+  body       __GENERATE_LEADS           /\b(?:new (?:customer|client)s|(?:customer|client|business|new) leads|y?our marketing|(?:marketing|ad(?:vertising)) services?)\b/i
+  tflags     __GENERATE_LEADS           multiple maxhits=5
+  meta       __GENERATE_LEADS_2         __GENERATE_LEADS > 2	# for masscheck analysis
+  meta       __GENERATE_LEADS_3         __GENERATE_LEADS > 3	# for masscheck analysis
+  meta       __GENERATE_LEADS_4         __GENERATE_LEADS > 4	# for masscheck analysis
 
-meta       MARKETING_SHORT              __GENERATE_LEADS_2 && __LCL__KAM_BODY_LENGTH_LT_1024
-describe   MARKETING_SHORT              Marketing service, short message
-score      MARKETING_SHORT              2.500	# limit
+  meta       MARKETING_FREEM            __GENERATE_LEADS_2 && (__REPTO_CHN_FREEM || __freemail_hdr_replyto)
+  describe   MARKETING_FREEM            Marketing service, freemail or CHN replyto
+  score      MARKETING_FREEM            2.500	# limit
 
-meta       MARKETING_HELO_IP            __GENERATE_LEADS_2 && __FSL_HELO_BARE_IP_2
-describe   MARKETING_HELO_IP            Marketing service, HELO without hostname
-score      MARKETING_HELO_IP            2.500	# limit
+  meta       MARKETING_SHORT            __GENERATE_LEADS_2 && __LCL__KAM_BODY_LENGTH_LT_1024
+  describe   MARKETING_SHORT            Marketing service, short message
+  score      MARKETING_SHORT            2.500	# limit
 
-meta       MARKETING_NO_RDNS            __GENERATE_LEADS_2 && __RDNS_NONE
-describe   MARKETING_NO_RDNS            Marketing service, no RDNS
-score      MARKETING_NO_RDNS            2.500	# limit
+  meta       MARKETING_HELO_IP          __GENERATE_LEADS_2 && __FSL_HELO_BARE_IP_2
+  describe   MARKETING_HELO_IP          Marketing service, HELO without hostname
+  score      MARKETING_HELO_IP          2.500	# limit
 
+  meta       MARKETING_NO_RDNS          __GENERATE_LEADS_2 && __RDNS_NONE
+  describe   MARKETING_NO_RDNS          Marketing service, no RDNS
+  score      MARKETING_NO_RDNS          2.500	# limit
+endif
 
