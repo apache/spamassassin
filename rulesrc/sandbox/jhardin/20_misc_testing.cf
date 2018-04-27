@@ -2224,7 +2224,7 @@ rawbody    __SPAMTOOL_GOOF_01           /^: SMTPHEADER_REPLYTO\#$/m
 
 
 if can(Mail::SpamAssassin::Conf::feature_bug6558_free)
-  body       __PHOTO_RETOUCHING         /\b(?:retouching|(?:image|photo)s? (?:edit(?:ing|ors)|(?:cutt|mask|clipp)ing|cut\s?out|color correction)|your imag(?:es|ing)|photo\s?shop experts?|send us (?:(?:a|one|your|some|sample|test|example) )+(?:image|photo)s?)\b/i
+  body       __PHOTO_RETOUCHING         /\b(?:retouching|(?:image|photo)s? (?:edit(?:ing|ors)|(?:cutt|mask|clipp|clean)ing|cut\s?out|color correction|solution|services?)|your imag(?:es|ing)|photo\s?shop experts?|send us (?:(?:a|one|your|some|sample|test|example) )+(?:image|photo)s?)\b/i
   tflags     __PHOTO_RETOUCHING         multiple maxhits=5
   meta       PHOTO_EDITING_FREEM        __PHOTO_RETOUCHING > 4 && (__REPTO_CHN_FREEM || __freemail_hdr_replyto)
   describe   PHOTO_EDITING_FREEM        Image editing service, freemail or CHN replyto
