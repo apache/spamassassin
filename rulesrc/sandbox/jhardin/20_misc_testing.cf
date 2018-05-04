@@ -2254,4 +2254,8 @@ if can(Mail::SpamAssassin::Conf::feature_bug6558_free)
   score      MARKETING_NO_RDNS          3.500	# limit
 endif
 
+meta       HDR_ORDER_FTSDMCXX_DIRECT  (__HDR_ORDER_FTSDMCXXXX && __DOS_SINGLE_EXT_RELAY)
+describe   HDR_ORDER_FTSDMCXX_DIRECT  Header order similar to spam (FTSDMCXX/boundary variant) direct-to-MX
+score      HDR_ORDER_FTSDMCXX_DIRECT  2.500	# limit
+
 
