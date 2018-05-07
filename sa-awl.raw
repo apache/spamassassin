@@ -47,6 +47,9 @@ usage: sa-awl [--clean] [--min n] [dbfile]
 
 use Fcntl;
 use Getopt::Long;
+use POSIX qw(locale_h setsid sigprocmask _exit);
+
+POSIX::setlocale(LC_TIME,'C');
 
 our ( $opt_clean, $opt_min, $opt_help );
 

@@ -55,6 +55,9 @@ use File::Path;
 use Getopt::Long;
 use Pod::Usage;
 use Config;
+use POSIX qw(locale_h setsid sigprocmask _exit);
+ 
+POSIX::setlocale(LC_TIME,'C');
 
 BEGIN {                          # see comments in "spamassassin.raw" for doco
   my @bin = File::Spec->splitpath($0);
