@@ -75,6 +75,7 @@ BEGIN {
 
 use Getopt::Long;
 use Pod::Usage;
+use POSIX qw(locale_h setsid sigprocmask _exit);
 use Mail::SpamAssassin;
 use Mail::SpamAssassin::ArchiveIterator;
 use Mail::SpamAssassin::Util::Progress;
@@ -89,6 +90,8 @@ BEGIN {
     log_message("warn", $_[0]);
   };
 };
+
+POSIX::setlocale(LC_TIME,'C');
 
 my %resphash = (
   EX_OK          => 0,     # no problems

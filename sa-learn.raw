@@ -24,6 +24,9 @@ use Errno qw(EBADF);
 use Getopt::Long;
 use Pod::Usage;
 use File::Spec;
+use POSIX qw(locale_h setsid sigprocmask _exit);
+
+POSIX::setlocale(LC_TIME,'C');
 
 our ( $spamtest, %opt, $isspam, $forget, $messagecount, $learnedcount, $messagelimit, $progress,
       $total_messages, $init_results, $start_time, $synconly, $learnprob, @targets, $bayes_override_path );
