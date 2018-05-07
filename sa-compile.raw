@@ -31,6 +31,9 @@ use lib '@@INSTALLSITELIB@@';                   # substituted at 'make' time
 use Errno qw(EBADF);
 use File::Spec;
 use Config;
+use POSIX qw(locale_h setsid sigprocmask _exit);
+
+POSIX::setlocale(LC_TIME,'C');
 
 BEGIN {                          # see comments in "spamassassin.raw" for doco
   my @bin = File::Spec->splitpath($0);
@@ -806,12 +809,13 @@ See <http://issues.apache.org/SpamAssassin/>
 
 The Apache SpamAssassin(tm) Project <http://spamassassin.apache.org/>
 
-=head1 COPYRIGHT AND LICENSE
+=head1 LICENSE AND COPYRIGHT
 
 SpamAssassin is distributed under the Apache License, Version 2.0, as
 described in the file C<LICENSE> included with the distribution.
 
 Copyright (C) 2015 The Apache Software Foundation
+
 
 =cut
 

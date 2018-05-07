@@ -37,6 +37,9 @@ use lib '@@INSTALLSITELIB@@';                   # substituted at 'make' time
 use Errno qw(EBADF);
 use File::Spec;
 use Config;
+use POSIX qw(locale_h setsid sigprocmask _exit);
+
+POSIX::setlocale(LC_TIME,'C');
 
 BEGIN {                          # see comments in "spamassassin.raw" for doco
   my @bin = File::Spec->splitpath($0);
