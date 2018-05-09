@@ -596,7 +596,7 @@ sub start_spamd {
 	/server pid: (\d+)/ and $spamd_pid = $1;
 
         if (/ERROR/) {
-          warn "spamd error! $_";
+          warn "spamd start failed - spamd error! $_\nExiting test with debug output";
           $retries = 0; last;
         }
 
@@ -606,12 +606,15 @@ sub start_spamd {
       last if ($spamd_pid);
     }
 
-    sleep (int($wait++ / 4) + 1) if $retries > 0;
+    my $sleep = (int($wait++ / 4) + 1);
+    warn "spam_pid not found: Sleeping $sleep - Retry # $retries\n";
+
+    sleep $sleep if $retries > 0;
 
     if ($retries-- <= 0) {
-      warn "spamd start failed: log: $spamdlog";
+      warn "spamd start failed - Could not find a valid PID.\nEnd Debug log -------------------\n$spamdlog\nEnd Debug log -------------------";
       warn "\n\nMaybe you need to kill a running spamd process?\n";
-      warn "started at $startat, gave up at ".time."\n\n";
+      warn "Or the start took too long. Started at $startat, gave up at ".time."\n\n";
       return 0;
     }
   }
