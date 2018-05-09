@@ -551,7 +551,7 @@ sub start_spamd {
   my $spamd_stdout = "log/d.$testname/spamd.out.$test_number";
      $spamd_stderr = "log/d.$testname/spamd.err.$test_number";    #  global
   my $spamd_stdlog = "log/d.$testname/spamd.log.$test_number";
-
+  my $spamd_pidfile = "log/spamd.pid";
   my $spamd_forker = $ENV{'SPAMD_FORKER'}   ?
                        $ENV{'SPAMD_FORKER'} :
                      $RUNNING_ON_WINDOWS    ?
@@ -567,6 +567,7 @@ sub start_spamd {
                        @spamd_args,
                        $spamd_extra_args,
                        qq{-s ${spamd_stderr}.timestamped},
+                       qq{-r ${spamd_pidfile}},
                        qq{&},
                     );
 
@@ -575,27 +576,34 @@ sub start_spamd {
   # $spamd_cmd = "strace -ttt -fo log/d.$testname/spamd.strace.$test_number $spamd_cmd";
   # }
 
-  unlink ($spamd_stdout, $spamd_stderr, $spamd_stdlog);
+  unlink ($spamd_stdout, $spamd_stderr, $spamd_stdlog, $spamd_pidfile);
   print ("\t${spamd_cmd}\n");
   my $startat = time;
   system ($spamd_cmd);
 
-  # now find the PID
   $spamd_pid = 0;
+  # Find the PID, either in the pidfile or the log... 
   # note that the wait period increases the longer it takes,
   # 20 retries works out to a total of 60 seconds
   my $retries = 30;
-  my $wait = 0;
+  my $wait = 7;
+  sleep $wait ;
   while ($spamd_pid <= 0) {
     my $spamdlog = '';
-
+    my $pidstr = `cat $spamd_pidfile 2>/dev/null` ;
+    if ($pidstr) {
+       chomp $pidstr;
+       $spamd_pid = $pidstr;
+       dbgprint("Found PID $spamd_pid in pidfile\n");
+       last
+    }
     if (open (IN, "<${spamd_stderr}")) {
       while (<IN>) {
         # Yes, DO retry on this error. I'm getting test failures otherwise
         # /Address already in use/ and $retries = 0;
-	/server pid: (\d+)/ and $spamd_pid = $1;
+	/server pid: (\d+)/ and $spamd_pid = "$1" and dbgprint("Found PID $spamd_pid in stderr logfile\n");
 
-        if (/ERROR/) {
+        if ( !(/dbg: config: .*rulename/) && (/\bERROR/) ){
           warn "spamd start failed - spamd error! $_\nExiting test with debug output";
           $retries = 0; last;
         }
