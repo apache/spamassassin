@@ -1,8 +1,12 @@
 #!/usr/bin/perl
 
-use lib '.'; use lib 't';
+use lib '.'; 
+use lib 't';
+
 $ENV{'TEST_PERL_TAINT'} = 'no';     # inhibit for this test
-use SATest; sa_t_init("sa_compile");
+use SATest; 
+
+sa_t_init("sa_compile");
 
 use Config;
 use File::Basename;
@@ -10,21 +14,6 @@ use File::Path qw/mkpath/;
 
 my $temp_binpath = $Config{sitebinexp};
 $temp_binpath =~ s|^\Q$Config{siteprefixexp}\E/||;
-
-# called from BEGIN
-sub re2c_version_new_enough {
-
-  my $re2c_ver = `re2c -V 2>&1`;
-  if (!defined $re2c_ver || $re2c_ver =~ /^$/) {
-    print "re2c not found, or 're2c -V' not supported, skipping test\n";
-    return;
-  }
-
-  chop $re2c_ver;
-  my $newenough = ($re2c_ver+0 >= 001200);   # 0.12.0 seems safe enough as a baseline
-  print "re2c version ($re2c_ver) new enough? ".($newenough ? "yes" : "no")."\n";
-  return $newenough;
-}
 
 use Test::More;
 plan skip_all => "Long running tests disabled" unless conf_bool('run_long_tests');
@@ -43,35 +32,98 @@ BEGIN {
 
 # -------------------------------------------------------------------
 
-my $INST_FROM_SCRATCH = 1;      # set to 0 to short-circuit
-#my $INST_FROM_SCRATCH = 0;      # set to 0 to short-circuit
-
-sub system_or_die;
 use Cwd;
 my $cwd = getcwd;
 my $builddir = "$cwd/log/d.$testname/build";
 my $instbase = "$cwd/log/d.$testname/inst";
 
-if ($INST_FROM_SCRATCH) {
-  system_or_die "cd .. && make tardist";
-  system("rm -rf $builddir");
-  system("mkdir -p $builddir");
-  system_or_die "cd $builddir && gunzip -c $cwd/../Mail-SpamAssassin-*.tar.gz | tar xf -";
-  system_or_die "cd $builddir && mv Mail-SpamAssassin-* x";
+print "\nMaking tar dist file and then untarring it.\n";
+
+system_or_die "cd .. && make tardist 2>&1 > /dev/null";
+system("rm -rf $builddir");
+system("mkdir -p $builddir");
+system_or_die "cd $builddir && gunzip -c $cwd/../Mail-SpamAssassin-*.tar.gz | tar xf - ";
+system_or_die "cd $builddir && mv Mail-SpamAssassin-* x";
+
+&new_instdir("basic");
+&run_makefile_pl ("PREFIX=$instdir SYSCONFDIR=$instdir/etc DATADIR=$instdir/share/spamassassin LOCALSTATEDIR=$instdir/var/spamassassin CONFDIR=$instdir/etc/mail/spamassassin");
+
+# we now have an "installed" version we can run sa-compile with.  Ensure
+# sarun() will use it appropriately
+$scr = "$instdir/$temp_binpath/spamassassin";
+$scr_localrules_args = $scr_cf_args = "";      # use the default rules dir, from our "install"
+
+&set_rules("body FOO /You have been selected to receive/");
+
+# ensure we don't use compiled rules
+system("rm -rf $instdir/var/spamassassin/compiled");
+
+%patterns = (
+
+  q{ check: tests=FOO }, 'FOO'
+
+);
+
+print "\nRunning spam checks uncompiled\n";
+ok sarun ("-D -Lt < $cwd/data/spam/001 2>&1", \&patterns_run_cb);
+ok_all_patterns();
+
+clear_pattern_counters();
+
+# -------------------------------------------------------------------
+
+print "\nRunning spam checks compiled\n";
+system_or_die "$instdir/$temp_binpath/sa-compile --keep-tmps 2>&1";  # --debug
+%patterns = (
+
+  q{ able to use 1/1 'body_0' compiled rules }, 'able-to-use',
+  q{ check: tests=FOO }, 'FOO'
+
+);
+$scr = "$instdir/$temp_binpath/spamassassin";
+$scr_localrules_args = $scr_cf_args = "";      # use the default rules dir, from our "install"
+
+ok sarun ("-D -Lt < $cwd/data/spam/001 2>&1", \&patterns_run_cb);
+ok_all_patterns();
+
+# -------------------------------------------------------------------
+
+sub re2c_version_new_enough {
+  #check if re2c exiss and if it is 0.12.0 or greater
+
+  my $re2c_ver = `re2c -V 2>&1`;
+  if (!defined $re2c_ver || $re2c_ver =~ /^$/) {
+    print "re2c not found, or 're2c -V' not supported, skipping test\n";
+    return;
+  }
+
+  chop $re2c_ver;
+  my $newenough = ($re2c_ver+0 >= 001200);   # 0.12.0 seems safe enough as a baseline
+  print "re2c version ($re2c_ver) new enough? ".($newenough ? "yes" : "no")."\n";
+  return $newenough;
 }
 
 sub new_instdir {
   $instdir = $instbase.".".(shift);
   print "\nsetting new instdir: $instdir\n";
-  $INST_FROM_SCRATCH and system("rm -rf $instdir; mkdir $instdir");
+  system("rm -rf $instdir; mkdir $instdir");
 }
 
 sub run_makefile_pl {
   my $args = $_[0];
-  system_or_die "cd $builddir/x && $perl_cmd Makefile.PL ".
-          "$args < /dev/null 2>&1";
-  system_or_die "cd $builddir/x && make install 2>&1";
-  print "current instdir: $instdir\n";
+
+  foreach (sort keys %ENV) { 
+    print "ENV: $_  =  $ENV{$_}\n"; 
+  }
+
+  print "DEBUG: Arguments are $args\n";
+  &system_or_die("cd $builddir/x && $perl_cmd Makefile.PL $args < /dev/null 2>&1");
+  print "DEBUG: making\n";
+  &system_or_die("cd $builddir/x && MAKEFLAGS='' make 2>&1");
+  print "DEBUG: Install\n";
+  &system_or_die("cd $builddir/x && MAKEFLAGS='' make install 2>&1");
+
+  
 }
 
 sub set_rules {
@@ -94,6 +146,7 @@ sub set_rules {
   close RULES or die;
 
   #Create the dir for the pre file
+
   $file = "$instdir/etc/mail/spamassassin/v330.pre";
   $dir = dirname($file);
   mkpath($dir);
@@ -121,47 +174,3 @@ sub set_rules {
   };
   close RULES or die;
 }
-
-# -------------------------------------------------------------------
-
-new_instdir("basic");
-$INST_FROM_SCRATCH and run_makefile_pl "PREFIX=$instdir SYSCONFDIR=$instdir/etc DATADIR=$instdir/share/spamassassin LOCALSTATEDIR=$instdir/var/spamassassin CONFDIR=$instdir/etc/mail/spamassassin";
-
-# we now have an "installed" version we can run sa-compile with.  Ensure
-# sarun() will use it appropriately
-$scr = "$instdir/$temp_binpath/spamassassin";
-$scr_localrules_args = $scr_cf_args = "";      # use the default rules dir, from our "install"
-
-set_rules q{
-
-  body FOO /You have been selected to receive/
-
-};
-
-# ensure we don't use compiled rules
-system("rm -rf $instdir/var/spamassassin/compiled");
-%patterns = (
-
-  q{ check: tests=FOO }, 'FOO'
-
-);
-ok sarun ("-D -Lt < $cwd/data/spam/001 2>&1", \&patterns_run_cb);
-ok_all_patterns();
-clear_pattern_counters();
-
-# -------------------------------------------------------------------
-
-system_or_die "$instdir/$temp_binpath/sa-compile --keep-tmps";  # --debug
-%patterns = (
-
-  q{ able to use 1/1 'body_0' compiled rules }, 'able-to-use',
-  q{ check: tests=FOO }, 'FOO'
-
-);
-$scr = "$instdir/$temp_binpath/spamassassin";
-$scr_localrules_args = $scr_cf_args = "";      # use the default rules dir, from our "install"
-ok sarun ("-D -Lt < $cwd/data/spam/001 2>&1", \&patterns_run_cb);
-ok_all_patterns();
-
-# -------------------------------------------------------------------
-
