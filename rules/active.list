@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus ena-week0 ena-week1 ena-week2 ena-week3 ena-week4 grenier jarif jbrooks mmiroslaw-mails-ham mmiroslaw-mails-spam sihde thendrikx; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus ena-week0 ena-week1 ena-week2 ena-week3 ena-week4 giovanni jarif jbrooks llanga mmiroslaw-mails-ham mmiroslaw-mails-spam sihde; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus ena-week0 ena-week1 ena-week2 ena-week3 ena-week4 giovanni jarif jbrooks llanga mmiroslaw-mails-ham mmiroslaw-mails-spam sihde
+# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus ena-week0 ena-week1 ena-week2 ena-week3 ena-week4 giovanni grenier jarif jbrooks llanga mmiroslaw-mails-ham mmiroslaw-mails-spam sihde thendrikx; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus ena-week0 ena-week1 ena-week2 ena-week3 ena-week4 giovanni grenier jarif jbrooks llanga mmiroslaw-mails-ham mmiroslaw-mails-spam sihde thendrikx; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus ena-week0 ena-week1 ena-week2 ena-week3 ena-week4 giovanni jarif jbrooks llanga mmiroslaw-mails-ham mmiroslaw-mails-spam sihde
 
 # tflags publish
 AC_BR_BONANZA
@@ -183,6 +183,9 @@ DOS_ANAL_SPAM_MAILER
 
 # good enough
 DOS_OE_TO_MX
+
+# good enough
+DOS_OE_TO_MX_IMAGE
 
 # good enough
 DOS_OUTLOOK_TO_MX
@@ -405,6 +408,9 @@ HK_PNIS
 
 # good enough
 HK_PNISES
+
+# good enough
+HK_RANDOM_ENVFROM
 
 # good enough
 HK_SCAM_N1
@@ -899,6 +905,9 @@ TVD_NOT_SATISFIED
 TVD_QUAL_MEDS
 
 # good enough
+TVD_RCVD_IP
+
+# good enough
 TVD_RCVD_IP4
 
 # good enough
@@ -923,7 +932,16 @@ AXB_XMAILER_MIMEOLE_OL_1ECD5
 DATE_IN_FUTURE_96_Q
 
 # good enough
+DATE_IN_FUTURE_Q_PLUS
+
+# good enough
 FROM_MISSP_DYNIP
+
+# good enough
+FSL_BULK_SIG
+
+# good enough
+HK_RANDOM_FROM
 
 # good enough
 HK_SCAM_N15
@@ -932,7 +950,25 @@ HK_SCAM_N15
 HK_SCAM_N3
 
 # good enough
+HTML_TAG_BALANCE_CENTER
+
+# good enough
 LOTTO_AGENT
+
+# good enough
+MANY_PILL_PRICE
+
+# good enough
+OBFU_HTML_ATTACH
+
+# good enough
+SUBJ_OBFU_LOW_CNTRST
+
+# good enough
+TVD_PH_BODY_META
+
+# good enough
+URI_HIDDEN_2
 
 # tflags publish
 UC_GIBBERISH_OBFU
