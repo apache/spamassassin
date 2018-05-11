@@ -595,16 +595,25 @@ sub check_for_forged_juno_received_headers {
 
 sub check_for_forged_gmail_received_headers {
   my ($self, $pms) = @_;
-  use constant GOOGLE_MESSAGE_STATE_LENGTH => 102;
+  use constant GOOGLE_MESSAGE_STATE_LENGTH_MIN => 80;
+  use constant GOOGLE_SMTP_SOURCE_LENGTH_MIN => 90;
 
   my $from = $pms->get('From:addr');
   if ($from !~ /\bgmail\.com$/i) { return 0; }
 
   my $xgms = $pms->get('X-Gm-Message-State');
+  my $xss = $pms->get('X-Google-Smtp-Source');
   my $xreceived = $pms->get('X-Received');
+  my $received = $pms->get('Received');
 
-  if (length($xgms) eq GOOGLE_MESSAGE_STATE_LENGTH) { return 0; }
   if ($xreceived =~ /by 10\.\S+ with SMTP id \S+/) { return 0; }
+  if ($received =~ /by smtp\.googlemail\.com with ESMTPSA id \S+/) {
+    return 0;
+  }
+  if ( (length($xgms) gt GOOGLE_MESSAGE_STATE_LENGTH_MIN) && 
+    (length($xss) gt GOOGLE_SMTP_SOURCE_LENGTH_MIN)) {
+      return 0;
+  }
 
   return 1;
 }
