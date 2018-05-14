@@ -2260,7 +2260,13 @@ score      HDR_ORDER_FTSDMCXX_DIRECT  2.500	# limit
 tflags     HDR_ORDER_FTSDMCXX_DIRECT  publish
 
 body       __UNICODE_OBFU_URI_DOM     /[0-9a-z]\xe3\x80\x82(?:com|net|info|biz|cn)\b/i
+meta       UNICODE_OBFU_DOM_NO_BODY   __UNICODE_OBFU_URI_DOM && __EMPTY_BODY
+score      UNICODE_OBFU_DOM_NO_BODY   3.250	# limit
+describe   UNICODE_OBFU_DOM_NO_BODY   Unicode-obfuscated domain + no body
 
 header     __REPTO_MULTI_ADDR         Reply-To:address =~ /,/
+meta       MULTI_REPTO_NO_RDNS        __REPTO_MULTI_ADDR && __RDNS_NONE
+score      MULTI_REPTO_NO_RDNS        2.250	# limit
+describe   MULTI_REPTO_NO_RDNS        Multiple Reply-to addresses + no RDNS
 
 
