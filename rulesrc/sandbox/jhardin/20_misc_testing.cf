@@ -2265,8 +2265,8 @@ score      UNICODE_OBFU_DOM_NO_BODY   3.250	# limit
 describe   UNICODE_OBFU_DOM_NO_BODY   Unicode-obfuscated domain + no body
 
 header     __REPTO_MULTI_ADDR         Reply-To:address =~ /,/
-meta       MULTI_REPTO_NO_RDNS        __REPTO_MULTI_ADDR && __RDNS_NONE
-score      MULTI_REPTO_NO_RDNS        2.250	# limit
+meta       MULTI_REPTO_NO_RDNS        __REPTO_MULTI_ADDR && __RDNS_NONE && !__DOS_HAS_LIST_UNSUB 
+score      MULTI_REPTO_NO_RDNS        2.500	# limit
 describe   MULTI_REPTO_NO_RDNS        Multiple Reply-to addresses + no RDNS
 
 uri        __PHISH_PHP_LOGIN          /\blogin\.php/i
