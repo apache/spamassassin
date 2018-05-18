@@ -612,8 +612,8 @@ sub check_for_forged_gmail_received_headers {
     return 0;
   }
 
-  if ( (length($xgms) lt GOOGLE_MESSAGE_STATE_LENGTH_MIN) && 
-    (length($xss) lt GOOGLE_SMTP_SOURCE_LENGTH_MIN)) {
+  if ( (length($xgms) >= GOOGLE_MESSAGE_STATE_LENGTH_MIN) && 
+    (length($xss) >= GOOGLE_SMTP_SOURCE_LENGTH_MIN)) {
       return 0;
   }
 
