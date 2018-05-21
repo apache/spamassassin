@@ -1,0 +1,3 @@
+uri  __MALWARE_DROPBOX_JAR_URI   m;^https?://[^.]+\.dropbox\.com/(\w+)/(\w+)/(\w+)\.jar\?dl\=1;i
+meta MALWARE_DROPBOX_JAR_URI	( __MALWARE_DROPBOX_JAR_URI && (HTML_SHORT_LINK_IMG_1 || HTML_SHORT_LINK_IMG_2 || HTML_SHORT_LINK_IMG_3) )
+describe MALWARE_DROPBOX_JAR_URI Dropbox that forces user to download jar file
