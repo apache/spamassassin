@@ -607,7 +607,7 @@ sub check_for_forged_gmail_received_headers {
   my $received = $pms->get('Received');
 
   if ($xreceived =~ /by 10\.\S+ with SMTP id \S+/) { return 0; }
-  if ($xreceived =~ /by 2002\:a19\:\S+ with SMTP id \S+/) { return 0; }
+  if ($xreceived =~ /by 2002\:\w\:\S+ with SMTP id \S+/) { return 0; }
   if ($received =~ /by smtp\.googlemail\.com with ESMTPSA id \S+/) {
     return 0;
   }
