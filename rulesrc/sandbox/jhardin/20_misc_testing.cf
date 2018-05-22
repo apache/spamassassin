@@ -2264,7 +2264,7 @@ meta       UNICODE_OBFU_DOM_NO_BODY   __UNICODE_OBFU_URI_DOM && __EMPTY_BODY
 score      UNICODE_OBFU_DOM_NO_BODY   3.750	# limit
 describe   UNICODE_OBFU_DOM_NO_BODY   Unicode/chinese obfuscated domain + no body
 
-header     __REPTO_MULTI_ADDR         Reply-To:address =~ /,/
+header     __REPTO_MULTI_ADDR         Reply-To:addr =~ /,/
 meta       MULTI_REPTO_NO_RDNS        __REPTO_MULTI_ADDR && __RDNS_NONE && !__DOS_HAS_LIST_UNSUB 
 score      MULTI_REPTO_NO_RDNS        2.500	# limit
 describe   MULTI_REPTO_NO_RDNS        Multiple Reply-to addresses + no RDNS
