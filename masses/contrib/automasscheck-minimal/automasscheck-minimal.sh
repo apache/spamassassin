@@ -95,7 +95,7 @@ upload_results() {
   fi
   TRY=0
   while [[ "$TRY" -le 5 ]]; do
-    ((TRY++))
+    TRY=$((TRY+1))
     ARGS="-qPcvz $LOGLIST $RSYNC_USERNAME@rsync.spamassassin.org::$RSYNCMOD/"
     echo "rsync $ARGS"
     rsync $ARGS && break
