@@ -27,11 +27,16 @@
 bayes_store_module  Mail::SpamAssassin::BayesStore::Redis
 
 
+# Redis bayes_sql_dsn DSN values, semicolon-delimited:
+#  server={redis.server.ip.addr OR hostname}[:port]
+#  database={redis_db_id}
+#  password={redis_db_passwd}
+#
 # NOTE: In this example, we're not using Redis authentication assuming
 # the Redis server/port will not be reachable from the "outside".
 # See Redis docs for authentication syntax
 
-bayes_sql_dsn  server=192.168.1.2:6379,database=0
+bayes_sql_dsn  server=192.168.1.2:6379;database=0
 
 use_bayes 1
 use_bayes_rules 1
