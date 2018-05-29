@@ -2271,8 +2271,15 @@ describe   UNICODE_OBFU_DOM_NO_BODY   Unicode/chinese obfuscated domain + no bod
 
 #uri        __URI_PHP_LOGIN            /\blogin\.php/i
 
-meta       FRNUM_UNICD_EMPTY          __FROM_ALL_NUMS && __FROM_ENCODED_B64 && __SUBJECT_ENCODED_B64 && __EMPTY_BODY
-describe   FRNUM_UNICD_EMPTY          Numeric From address, unicode From name and Subject, empty body
-score      FRNUM_UNICD_EMPTY          2.000	# limit
+meta       __FREEM_FRNUM_UNICD_EMPTY  FREEMAIL_FROM && __FROM_ALL_NUMS && __FROM_ENCODED_B64 && __SUBJECT_ENCODED_B64 && __EMPTY_BODY
+header     __SUB_END_NUMSCOM          Subject =~ /[0-9]{6,}c[0o]m$/i
 
+meta       FREEM_FRNUM_UNICD_EMPTY    __FREEM_FRNUM_UNICD_EMPTY && !__SUB_END_NUMSCOM
+describe   FREEM_FRNUM_UNICD_EMPTY    Numeric freemail From address, unicode From name and Subject, empty body
+score      FREEM_FRNUM_UNICD_EMPTY    2.500	# limit
+tflags     FREEM_FRNUM_UNICD_EMPTY    publish
+
+meta       FREEM_FRNUM_EMPTY_NUMSCOM  __FREEM_FRNUM_UNICD_EMPTY && __SUB_END_NUMSCOM
+describe   FREEM_FRNUM_EMPTY_NUMSCOM  Numeric freemail From address, unicode From name and Subject, empty body, obfuscated domain name
+score      FREEM_FRNUM_EMPTY_NUMSCOM  2.500	# limit
 
