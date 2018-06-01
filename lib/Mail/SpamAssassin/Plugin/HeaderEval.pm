@@ -583,8 +583,8 @@ sub check_for_forged_juno_received_headers {
 
 sub check_for_forged_gmail_received_headers {
   my ($self, $pms) = @_;
-  use constant GOOGLE_MESSAGE_STATE_LENGTH_MIN => 80;
-  use constant GOOGLE_SMTP_SOURCE_LENGTH_MIN => 90;
+  use constant GOOGLE_MESSAGE_STATE_LENGTH_MIN => 60;
+  use constant GOOGLE_SMTP_SOURCE_LENGTH_MIN => 60;
 
   my $from = $pms->get('From:addr');
   if ($from !~ /\bgmail\.com$/i) { return 0; }
