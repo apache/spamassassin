@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus ena-week0 ena-week1 ena-week2 ena-week3 ena-week4 grenier jarif jbrooks mmiroslaw-mails-ham mmiroslaw-mails-spam sihde thendrikx; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja ena-week1 ena-week2 ena-week3 giovanni llanga mmiroslaw-mails-ham mmiroslaw-mails-spam; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus ena-week0 ena-week1 ena-week2 ena-week3 ena-week4 giovanni jarif jbrooks llanga mmiroslaw-mails-ham mmiroslaw-mails-spam sihde
+# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus ena-week0 ena-week1 ena-week2 ena-week3 ena-week4 grenier jarif mmiroslaw-mails-ham mmiroslaw-mails-spam sihde thendrikx; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus ena-week0 ena-week1 ena-week2 ena-week3 ena-week4 giovanni jarif jbrooks llanga mmiroslaw-mails-ham mmiroslaw-mails-spam sihde; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja ena-week1 ena-week2 ena-week3 giovanni llanga mmiroslaw-mails-ham mmiroslaw-mails-spam
 
 # tflags publish
 AC_BR_BONANZA
@@ -187,6 +187,9 @@ DX_TEXT_02
 # tflags publish
 DX_TEXT_03
 
+# good enough
+DYN_RDNS_AND_INLINE_IMAGE
+
 # tflags publish
 ENCRYPTED_MESSAGE
 
@@ -267,6 +270,9 @@ FROM_WORDY
 
 # tflags publish
 FROM_WORDY_SHORT
+
+# good enough
+FROM_WSP_TRAIL
 
 # good enough
 FSL_CTYPE_WIN1251
@@ -411,9 +417,6 @@ LOTS_OF_MONEY
 
 # tflags publish
 LUCRATIVE
-
-# good enough
-MANY_HDRS_LCASE
 
 # tflags publish
 MANY_SPAN_IN_TEXT
@@ -821,67 +824,67 @@ TO_NO_BRKTS_NORDNS_HTML
 TO_NO_BRKTS_PCNT
 
 # good enough
+TVD_PH_BODY_META
+
+# good enough
 TVD_SPACE_ENCODED
 
 # tflags publish
 TW_GIBBERISH_MANY
 
 # good enough
-ADMITS_SPAM
+ADVANCE_FEE_2_NEW_FRM_MNY
 
 # good enough
-ADVANCE_FEE_3_NEW_FRM_MNY
+ADVANCE_FEE_4_NEW_FRM_MNY
 
 # good enough
-ADVANCE_FEE_5_NEW_FRM_MNY
+ADVANCE_FEE_4_NEW_MONEY
 
 # good enough
-AXB_XMAILER_MIMEOLE_OL_1ECD5
+ADVANCE_FEE_5_NEW
 
 # good enough
-BIGNUM_EMAILS
+CK_HELO_GENERIC
 
 # good enough
-BODY_SINGLE_URI
+DATE_IN_FUTURE_96_Q
 
 # good enough
-DEAR_BENEFICIARY
+FILL_THIS_FORM_FRAUD_PHISH
 
 # good enough
-FROM_MISSP_DYNIP
+FILL_THIS_FORM_LOAN
 
 # good enough
-FROM_MISSP_TO_UNDISC
+FROM_MISSPACED
 
 # good enough
-FROM_WSP_TRAIL
+FROM_MISSP_REPLYTO
 
 # good enough
-HK_NAME_MR_MRS
+HDRS_LCASE
 
 # good enough
-HK_RANDOM_FROM
+HK_SCAM_N15
 
 # good enough
-HK_SCAM_N3
+MILLION_USD
 
 # good enough
-LOTTO_AGENT
+MIMEOLE_DIRECT_TO_MX
 
 # good enough
-MONEY_ATM_CARD
+MONEY_BARRISTER
 
 # good enough
-NSL_RCVD_HELO_USER
+MONEY_FORM
 
 # good enough
-OBFU_HTML_ATTACH
+TO_EQ_FM_DIRECT_MX
 
 # good enough
-TVD_PH_BODY_META
-
-# good enough
-TVD_SPACE_RATIO_MINFP
+TO_NO_BRKTS_FROM_MSSP
 
 # tflags publish
 UC_GIBBERISH_OBFU
