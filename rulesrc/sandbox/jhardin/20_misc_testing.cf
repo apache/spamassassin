@@ -2284,3 +2284,10 @@ tflags     FREEM_FRNUM_UNICD_EMPTY    publish
 #describe   FREEM_FRNUM_EMPTY_NUMSCOM  Numeric freemail From address, unicode From name and Subject, empty body, obfuscated domain name
 #score      FREEM_FRNUM_EMPTY_NUMSCOM  2.500	# limit
 
+
+rawbody    __JS_HTML_OBFU_01          /\bdocument\.write\('(?:\\u00[0-9a-f]{2}){30}/i
+
+
+
+
+
