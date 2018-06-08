@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus ena-week0 ena-week1 ena-week2 ena-week3 ena-week4 grenier jarif mmiroslaw-mails-ham mmiroslaw-mails-spam sihde thendrikx; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus ena-week0 ena-week1 ena-week2 ena-week3 ena-week4 giovanni jarif llanga mmiroslaw-mails-ham mmiroslaw-mails-spam sihde; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus ena-week0 ena-week1 ena-week2 ena-week3 ena-week4 giovanni jarif llanga mmiroslaw-mails-ham mmiroslaw-mails-spam sihde
+# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus ena-week0 ena-week1 ena-week2 ena-week3 ena-week4 grenier jarif mmiroslaw-mails-ham mmiroslaw-mails-spam sihde thendrikx; day 2: ena-week1 ena-week2 ena-week3 ena-week4 giovanni jarif llanga mmiroslaw-mails-ham mmiroslaw-mails-spam; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus ena-week0 ena-week1 ena-week2 ena-week3 ena-week4 giovanni jarif llanga mmiroslaw-mails-ham mmiroslaw-mails-spam sihde
 
 # tflags publish
 AC_BR_BONANZA
@@ -845,61 +845,52 @@ TVD_SPACE_ENCODED
 TW_GIBBERISH_MANY
 
 # good enough
-ADVANCE_FEE_2_NEW_FRM_MNY
+ADMITS_SPAM
 
 # good enough
-ADVANCE_FEE_4_NEW_FRM_MNY
+ADVANCE_FEE_3_NEW_FRM_MNY
 
 # good enough
-ADVANCE_FEE_4_NEW_MONEY
+ADVANCE_FEE_5_NEW_FRM_MNY
 
 # good enough
-ADVANCE_FEE_5_NEW
+AXB_XMAILER_MIMEOLE_OL_1ECD5
 
 # good enough
-FILL_THIS_FORM_FRAUD_PHISH
+BIGNUM_EMAILS
 
 # good enough
-FILL_THIS_FORM_LOAN
+BODY_SINGLE_URI
 
 # good enough
-FROM_MISSPACED
+DEAR_BENEFICIARY
 
 # good enough
-FROM_MISSP_REPLYTO
+FROM_MISSP_DYNIP
 
 # good enough
-HDRS_LCASE
+FROM_MISSP_TO_UNDISC
 
 # good enough
-HK_SCAM_N15
+HK_NAME_MR_MRS
 
 # good enough
-MILLION_USD
+HK_SCAM_N3
 
 # good enough
-MIMEOLE_DIRECT_TO_MX
+LOTTO_AGENT
 
 # good enough
-MONEY_BARRISTER
+MONEY_ATM_CARD
 
 # good enough
-MONEY_FORM
+MONEY_FROM_MISSP
 
 # good enough
-OBFU_HTML_ATTACH
+NSL_RCVD_HELO_USER
 
 # good enough
-SHARE_50_50
-
-# good enough
-TO_EQ_FM_DIRECT_MX
-
-# good enough
-TO_NO_BRKTS_FROM_MSSP
-
-# good enough
-XFER_LOTSA_MONEY
+TVD_SPACE_RATIO_MINFP
 
 # tflags publish
 UC_GIBBERISH_OBFU
@@ -1059,6 +1050,9 @@ USER_IN_WHITELIST_TO
 
 # good enough
 US_DOLLARS_3
+
+# good enough
+XFER_LOTSA_MONEY
 
 # tflags publish
 XM_PHPMAILER_FORGED
