@@ -1672,7 +1672,7 @@ tflags      LONG_IMG_URI        publish
 rawbody     __HTML_OFF_PAGE   /;(?:top|left):-\d{3,9}px;/i
 meta        HTML_OFF_PAGE     __HTML_OFF_PAGE && !__RP_MATCHES_RCVD && !__LONGLINE && !__DKIM_EXISTS
 describe    HTML_OFF_PAGE     HTML element rendered well off the displayed page
-score       HTML_OFF_PAGE     2.500	# limit
+score       HTML_OFF_PAGE     3.000	# limit
 tflags      HTML_OFF_PAGE     publish
 
 
