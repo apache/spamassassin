@@ -28,7 +28,7 @@ Mail::SpamAssassin::Plugin::Pyzor - perform Pyzor check of messages
 Pyzor is a collaborative, networked system to detect and block spam
 using identifying digests of messages.
 
-See http://pyzor.sourceforge.net/ for more information about Pyzor.
+See http://pyzor.org/ for more information about Pyzor.
 
 =cut
 
