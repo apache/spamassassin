@@ -276,8 +276,8 @@ sub compile_base_strings {
 
     rule2xs($basespath);
 
-    my $log = ">>$dirpath/log";
-    if (!$quiet) {
+    my $log = "";
+    if ($quiet) {
       $log = ">>$dirpath/log";
       # empty it
       open(ZERO, ">$dirpath/log")  or die "cannot create $dirpath/log: $!";
