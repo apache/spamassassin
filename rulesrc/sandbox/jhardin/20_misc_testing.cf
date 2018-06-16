@@ -2288,6 +2288,10 @@ tflags     FREEM_FRNUM_UNICD_EMPTY    publish
 rawbody    __JS_HTML_OBFU_01          /\bdocument\.write\('(?:\\u00[0-9a-f]{2}){30}/i
 
 
+header     __SUBJ_USB_DRIVES          Subject =~ /\bUSB (?:[Ff]lash )?[Dd]rives\b/
+header     __SUBJ_YOUR_LOGO           Subject =~ /\b(?:with|having) your logos?\b/i
+header     __SUBJ_CUSTOM_WITH_LOGO    Subject =~ /^(?=.*\bcustom\b).*(?:printed |with )+(?:your )?logos?\b/i
+
 
 
 
