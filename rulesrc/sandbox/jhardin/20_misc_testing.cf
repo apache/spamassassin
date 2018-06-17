@@ -2285,17 +2285,26 @@ tflags     FREEM_FRNUM_UNICD_EMPTY    publish
 #score      FREEM_FRNUM_EMPTY_NUMSCOM  2.500	# limit
 
 
-rawbody    __JS_HTML_OBFU_01          /\bdocument\.write\('(?:\\u00[0-9a-f]{2}){30}/i
+# masscheck just doesn't see this one for some reason
+#rawbody    __JS_HTML_OBFU_01          /\bdocument\.write\('(?:\\u00[0-9a-f]{2}){30}/i
 
 
+# very little spam in corpus even though they are bombarding *me* with it
 header     __SUBJ_USB_DRIVES          Subject =~ /\bUSB (?:[Ff]lash )?[Dd]rives\b/
-header     __SUBJ_YOUR_LOGO           Subject =~ /\b(?:with|having) your logos?\b/i
-header     __SUBJ_CUSTOM_WITH_LOGO    Subject =~ /^(?=.*\bcustom\b).*(?:printed |with )+(?:your )?logos?\b/i
+meta       USB_DRIVES                 __SUBJ_USB_DRIVES
+describe   USB_DRIVES                 Trying to sell custom USB flash drives
+score      USB_DRIVES                 3.500	# limit
+
+#header     __SUBJ_YOUR_LOGO           Subject =~ /\b(?:with|having) your logos?\b/i
+#header     __SUBJ_CUSTOM_WITH_LOGO    Subject =~ /^(?=.*\bcustom\b).*(?:printed |with )+(?:your )?logos?\b/i
 
 full       __FROM_NAME_IN_MSG         /^From:\s+([^<]\S+\s\S+)\s(?=.{1,1024}^\1$)/sm
-
-
-
+meta       FRNAME_IN_MSG_XPRIO        __FROM_NAME_IN_MSG && __XPRIO
+describe   FRNAME_IN_MSG_XPRIO        From name in message + X-Priority
+score      FRNAME_IN_MSG_XPRIO        3.500	# limit
+meta       FRNAME_IN_MSG_NO_SUBJ      __FROM_NAME_IN_MSG && (__SUBJECT_EMPTY || __XPRIO_SHORT_SUBJ)
+describe   FRNAME_IN_MSG_NO_SUBJ      From name in message + short or no subject
+score      FRNAME_IN_MSG_NO_SUBJ      3.500	# limit
 
 
 
