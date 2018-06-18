@@ -118,6 +118,9 @@ CHARSET_FARAWAY_HEADER
 # good enough
 CK_HELO_DYNAMIC_SPLIT_IP
 
+# good enough
+CK_HELO_GENERIC
+
 # tflags publish
 CN_B2B_SPAMMER
 
@@ -242,6 +245,9 @@ FROM_IN_TO_AND_SUBJ
 FROM_LOCAL_NOVOWEL
 
 # good enough
+FROM_MISSPACED
+
+# good enough
 FROM_MISSP_EH_MATCH
 
 # good enough
@@ -252,6 +258,9 @@ FROM_MISSP_MSFT
 
 # good enough
 FROM_MISSP_PHISH
+
+# good enough
+FROM_MISSP_REPLYTO
 
 # tflags net
 FROM_MISSP_SPF_FAIL
@@ -389,9 +398,6 @@ HEXHASH_WORD
 HK_NAME_FM_MR_MRS
 
 # good enough
-HK_NAME_FROM
-
-# good enough
 HK_SCAM_N2
 
 # good enough
@@ -433,6 +439,9 @@ MANY_HDRS_LCASE
 # tflags publish
 MANY_SPAN_IN_TEXT
 
+# good enough
+MILLION_USD
+
 # tflags userconf
 MIME_CHARSET_FARAWAY
 
@@ -441,6 +450,9 @@ MIME_NO_TEXT
 
 # tflags userconf
 MISSING_HB_SEP
+
+# good enough
+MONEY_FORM
 
 # good enough
 MONEY_FORM_SHORT
@@ -456,6 +468,9 @@ MONEY_FRAUD_8
 
 # good enough
 MONEY_FROM_41
+
+# good enough
+MONEY_FROM_MISSP
 
 # tflags publish
 MSM_PRIO_REPTO
@@ -781,9 +796,6 @@ STOCK_LOW_CONTRAST
 # tflags publish
 STOCK_TIP
 
-# good enough
-STOX_REPLY_TYPE_WITHOUT_QUOTES
-
 # tflags publish
 STYLE_GIBBERISH
 
@@ -823,6 +835,9 @@ TO_EQ_FM_SPF_FAIL
 # tflags publish
 TO_IN_SUBJ
 
+# good enough
+TO_NO_BRKTS_FROM_MSSP
+
 # tflags publish
 TO_NO_BRKTS_HTML_IMG
 
@@ -845,70 +860,22 @@ TVD_SPACE_ENCODED
 TW_GIBBERISH_MANY
 
 # good enough
-ADVANCE_FEE_2_NEW_FRM_MNY
+ADVANCE_FEE_5_NEW_FRM_MNY
 
 # good enough
-ADVANCE_FEE_4_NEW_FRM_MNY
+FROM_MISSP_TO_UNDISC
 
 # good enough
-ADVANCE_FEE_4_NEW_MONEY
+HK_NAME_MR_MRS
 
 # good enough
-ADVANCE_FEE_5_NEW
+NSL_RCVD_HELO_USER
 
 # good enough
-AXB_X_OUTLOOKPROT_ENVSDR
+OBFU_HTML_ATTACH
 
 # good enough
-CK_HELO_GENERIC
-
-# good enough
-FILL_THIS_FORM_LOAN
-
-# good enough
-FROM_MISSPACED
-
-# good enough
-FROM_MISSP_REPLYTO
-
-# good enough
-HDRS_LCASE
-
-# good enough
-HK_SCAM_N15
-
-# good enough
-HTML_TAG_BALANCE_CENTER
-
-# good enough
-MILLION_USD
-
-# good enough
-MIMEOLE_DIRECT_TO_MX
-
-# good enough
-MONEY_BARRISTER
-
-# good enough
-MONEY_FORM
-
-# good enough
-MONEY_FROM_MISSP
-
-# good enough
-RISK_FREE
-
-# good enough
-SERGIO_SUBJECT_PORN014
-
-# good enough
-TO_EQ_FM_DIRECT_MX
-
-# good enough
-TO_NO_BRKTS_FROM_MSSP
-
-# good enough
-TVD_PH_BODY_META
+TVD_SPACE_RATIO_MINFP
 
 # tflags publish
 UC_GIBBERISH_OBFU
