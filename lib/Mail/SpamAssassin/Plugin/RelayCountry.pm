@@ -163,7 +163,11 @@ sub extract_metadata {
     # Private IPs will always be returned as '**'
     if ( $conf_country_db_type eq "GeoIP" ) {
 	  if ( $ip !~ /^$IPV4_ADDRESS$/o ) {
-	    $geo = $dbv6->country_code_by_addr_v6($ip) || "XX";
+	    if ( defined $dbv6 ) {
+	    	$geo = $dbv6->country_code_by_addr_v6($ip) || "XX";
+	    } else {
+		$geo = "XX";
+	    }
 	  } else {
 	    $geo = $db->country_code_by_addr($ip) || "XX";
 	  }
