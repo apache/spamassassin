@@ -19,7 +19,7 @@ if (-e 'test_dir') {            # running from test directory, not ..
 
 use strict;
 use lib '.'; use lib 't';
-use SATest; sa_t_init("normalize_utf8_dots.t");
+use SATest; sa_t_init("idn_dots.t");
 use Test::More tests => 6;
 use Mail::SpamAssassin;
 use vars qw(%patterns %anti_patterns);
@@ -44,6 +44,8 @@ for my $pattern (keys %patterns) {
   if (!ok($uris =~ /${pattern}/m)) {
     warn "failure: did not find /$pattern/\n";
     $failures++;
+  #} else {
+  #  warn "OK: did find /$pattern/\n";
   }
 }
 
@@ -55,7 +57,7 @@ for my $anti_pattern (keys %anti_patterns) {
 }
 
 if ($failures) {
-  print "URIs found:\n$uris";
+  print "URIs in email from get_uri_list:\n$uris";
 }
 
 # function to write test email
@@ -76,11 +78,12 @@ EOF
   my @delims = split(//, "\x{002E}\x{3002}\x{FF0E}\x{FF61}\x{FE52}\x{2024}");
   my $i = 0;
 
-  foreach my $delim_char (@delims) {
+  foreach my $delim (@delims) {
     $i++;
-    my $delim = $delim_char; utf8::encode($delim);  # to UTF-8 octets
+    utf8::encode($delim);  # to UTF-8 octets
     my $string = "http://utf$i" . $delim . "example" . $delim . "com";
     my @patterns = ("^http://utf$i\\.example\\.com\$");
+
     if ($string && @patterns) {
       $message .= "$string\n";
       for my $pattern (@patterns) {
