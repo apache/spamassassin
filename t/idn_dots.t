@@ -1,6 +1,7 @@
 #!/usr/bin/perl -w
 
 # test URIs with UTF8 IDNA-equivalent dots between domains instead of ordinary '.'
+use utf8;
 
 BEGIN {
   if (-e 't/test_dir') { # if we are running "t/rule_names.t", kluge around ...
