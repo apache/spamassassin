@@ -1981,14 +1981,25 @@ score     GOOG_REDIR_HTML_ONLY          2.000	# limit
 
 
 # low S/O, apparently lots of invisible ham...
-rawbody   __STY_INVIS                   /\bstyle\s*=(?:3d)?\s*"\s*(?:visibility\s*:\s*hidden\s*;|display\s*:\s*none\s*;|background\s*:)/i
-tflags    __STY_INVIS                   multiple, maxhits=6
-meta      __STY_INVIS_MANY              __STY_INVIS > 5
-#meta      HTML_TEXT_INVISIBLE           __STY_INVIS_MANY
-#describe  HTML_TEXT_INVISIBLE           Hidden text
-#score     HTML_TEXT_INVISIBLE           2.000   # limit
+if can(Mail::SpamAssassin::Conf::feature_bug6558_free)
+  rawbody   __STY_INVIS                   /\bstyle\s*=\s*"[^">]{0,80}(?:visibility\s*:\s*hidden\s*;|display\s*:\s*none\s*;)/i
+  tflags    __STY_INVIS                   multiple, maxhits=6
+  meta      __STY_INVIS_MANY              __STY_INVIS > 5
+  #meta      HTML_TEXT_INVISIBLE           __STY_INVIS_MANY
+  #describe  HTML_TEXT_INVISIBLE           Hidden text
+  #score     HTML_TEXT_INVISIBLE           2.000   # limit
+endif
 # try it on span tags only...
-rawbody   __SPAN_INVIS                  /<span\s[^>]{0,80}style\s*=(?:3d)?\s*"\s*(?:visibility\s*:\s*hidden\s*;|display\s*:\s*none\s*;|background\s*:)/i
+rawbody   __SPAN_INVIS                  /<span\s[^>]{0,200}style\s*=\s*"[^">]{0,80}(?:visibility\s*:\s*hidden\s*;|display\s*:\s*none\s*;)[^>]{1,200}>\w/i
+
+if can(Mail::SpamAssassin::Conf::feature_bug6558_free)
+  rawbody   __FONT_INVIS                  /<font\s[^>]{1,80}(?:font-size\s*:\s*[01]px\s*;|color\s*:\s*transparent\s*;)[^>]{1,80}>\w/i
+  tflags    __FONT_INVIS                  multiple, maxhits=6
+  meta      __FONT_INVIS_MANY             __FONT_INVIS > 5
+  #meta      HTML_TEXT_INVISIBLE           __FONT_INVIS
+  #describe  HTML_TEXT_INVISIBLE           Hidden text
+  #score     HTML_TEXT_INVISIBLE           2.000   # limit
+endif
 
 # Adapted from SARE rules __SARE_HTML_SINGLET*
 rawbody   __HTML_SINGLET                />\s*(?:[a-z"]|&\#(?:\d+|x[0-9a-f]+);)\s*</i
