@@ -1828,7 +1828,19 @@ ifplugin Mail::SpamAssassin::Plugin::ReplaceTags
   describe      FUZZY_CLICK_HERE    Obfuscated "click here"
   tflags        FUZZY_CLICK_HERE    publish
 
+  body          FUZZY_BITCOIN       /<B>(?!itcoin)<I><T><C><O><I><N>/i
+  replace_rules FUZZY_BITCOIN   
+  describe      FUZZY_BITCOIN       Obfuscated "Bitcoin"
+  tflags        FUZZY_BITCOIN       publish
+
+  body          FUZZY_WALLET        /<W>(?!allet)<A><L><L><E><T>/i
+  replace_rules FUZZY_WALLET    
+  describe      FUZZY_WALLET        Obfuscated "Wallet"
+  tflags        FUZZY_WALLET        publish
+
 endif
+
+body           __BITCOIN_ID     /\b[13][a-km-zA-HJ-NP-Z1-9]{25,34}\b/
 
 
 #body          NUM_FREE         /\b\d+free/i
