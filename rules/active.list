@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus ena-week0 ena-week1 ena-week2 ena-week3 ena-week4 grenier jarif mmiroslaw-mails-ham mmiroslaw-mails-spam sihde thendrikx; day 2: ena-week1 ena-week2 giovanni llanga; day 3: axb-generic axb-ham-misc axb-ninja ena-week1 ena-week2 ena-week3 ena-week4 giovanni llanga mmiroslaw-mails-ham mmiroslaw-mails-spam
+# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus ena-week0 ena-week1 ena-week2 ena-week3 ena-week4 grenier jarif mmiroslaw-mails-ham mmiroslaw-mails-spam sihde thendrikx; day 2: ena-week1 ena-week2 giovanni llanga; day 3: ena-week1 ena-week2 giovanni llanga
 
 # tflags publish
 AC_BR_BONANZA
@@ -293,6 +293,9 @@ FROM_WSP_TRAIL
 FSL_CTYPE_WIN1251
 
 # good enough
+FSL_HAS_TINYURL
+
+# good enough
 FSL_HELO_BARE_IP_1
 
 # good enough
@@ -421,6 +424,9 @@ HK_SCAM_S7
 # tflags userconf
 HTML_CHARSET_FARAWAY
 
+# good enough
+HTML_FONT_TINY
+
 # tflags publish
 HTML_OFF_PAGE
 
@@ -444,9 +450,6 @@ LOTS_OF_MONEY
 
 # tflags publish
 LUCRATIVE
-
-# good enough
-MAILER_EQ_ORG
 
 # good enough
 MANY_HDRS_LCASE
@@ -872,49 +875,70 @@ TO_NO_BRKTS_NORDNS_HTML
 TO_NO_BRKTS_PCNT
 
 # good enough
+TVD_QUAL_MEDS
+
+# good enough
 TVD_SPACE_ENCODED
 
 # tflags publish
 TW_GIBBERISH_MANY
 
 # good enough
-ADVANCE_FEE_2_NEW_FRM_MNY
+ADMITS_SPAM
 
 # good enough
-ADVANCE_FEE_4_NEW_FRM_MNY
+ADVANCE_FEE_3_NEW_FRM_MNY
 
 # good enough
-ADVANCE_FEE_4_NEW_MONEY
+ADVANCE_FEE_5_NEW_FRM_MNY
 
 # good enough
-ADVANCE_FEE_5_NEW
+AXB_XMAILER_MIMEOLE_OL_1ECD5
 
 # good enough
-FILL_THIS_FORM_LOAN
+BIGNUM_EMAILS
 
 # good enough
-FSL_HAS_TINYURL
+BODY_SINGLE_URI
 
 # good enough
-HDRS_LCASE
+BODY_SINGLE_WORD
 
 # good enough
-HK_SCAM_N15
+DATE_IN_FUTURE_96_Q
 
 # good enough
-HTML_FONT_TINY
+DEAR_BENEFICIARY
 
 # good enough
-MIMEOLE_DIRECT_TO_MX
+FROM_MISSP_DYNIP
 
 # good enough
-MONEY_BARRISTER
+FROM_MISSP_TO_UNDISC
 
 # good enough
-OBFU_HTML_ATTACH
+HK_NAME_MR_MRS
 
 # good enough
-RISK_FREE
+HK_SCAM_N3
+
+# good enough
+LOTTO_AGENT
+
+# good enough
+MONEY_ATM_CARD
+
+# good enough
+NSL_RCVD_HELO_USER
+
+# good enough
+SHORT_URL
+
+# good enough
+TVD_PH_BODY_META
+
+# good enough
+TVD_SPACE_RATIO_MINFP
 
 # tflags publish
 UC_GIBBERISH_OBFU
