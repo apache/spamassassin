@@ -1840,7 +1840,7 @@ ifplugin Mail::SpamAssassin::Plugin::ReplaceTags
 
 endif
 
-body           __BITCOIN_ID     /\b[13][a-km-zA-HJ-NP-Z1-9]{25,34}\b/
+body           __BITCOIN_ID     /\b(?<!=)[13][a-km-zA-HJ-NP-Z1-9]{25,34}\b/
 
 
 #body          NUM_FREE         /\b\d+free/i
