@@ -1191,7 +1191,6 @@ sub get_decoded_body_text_array {
     # and not displayed
     next if ($parts[$pt]->{'type'} eq 'text/calendar');
 
-    push(@{$self->{text_decoded}}, "\n") if ( @{$self->{text_decoded}} );
     push(@{$self->{text_decoded}},
          split_into_array_of_short_paragraphs($parts[$pt]->decode()));
   }
