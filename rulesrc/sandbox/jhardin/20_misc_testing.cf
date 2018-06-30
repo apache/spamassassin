@@ -1840,12 +1840,14 @@ ifplugin Mail::SpamAssassin::Plugin::ReplaceTags
 
   meta          FUZZY_BTC_WALLET    FUZZY_BITCOIN && FUZZY_WALLET
   describe      FUZZY_BTC_WALLET    Heavily obfuscated "bitcoin wallet"
+  tflags        FUZZY_BTC_WALLET    publish
 
 endif
 
 body           __BITCOIN_ID     /\b(?<!=)[13][a-km-zA-HJ-NP-Z1-9]{25,34}\b/
 
-meta           __BTC_ORG        __BITCOIN_ID && __HAS_ORGANIZATION
+meta           BTC_ORG          __BITCOIN_ID && __HAS_ORGANIZATION
+describe       BTC_ORG          Bitcoin wallet ID + unusual header
 
 
 #body          NUM_FREE         /\b\d+free/i
