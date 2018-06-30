@@ -3347,7 +3347,7 @@ settings can be used by local programs run directly by the user.
 =item version_tag string
 
 This tag is appended to the SA version in the X-Spam-Status header. You should
-include it when modify your ruleset, especially if you plan to distribute it.
+include it when you modify your ruleset, especially if you plan to distribute it.
 A good choice for I<string> is your last name or your initials followed by a
 number which you increase with each change.
 
