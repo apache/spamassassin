@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus ena-week0 ena-week1 ena-week2 ena-week3 ena-week4 grenier jarif mmiroslaw-mails-ham mmiroslaw-mails-spam sihde thendrikx; day 2: ena-week1 ena-week2 giovanni llanga; day 3: ena-week1 ena-week2 giovanni llanga
+# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus ena-week0 ena-week1 ena-week2 ena-week3 ena-week4 grenier jarif mmiroslaw-mails-ham mmiroslaw-mails-spam sihde thendrikx; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus ena-week0 ena-week1 ena-week2 ena-week3 ena-week4 giovanni jarif llanga mmiroslaw-mails-ham mmiroslaw-mails-spam sihde; day 3: ena-week1 ena-week2 giovanni llanga
 
 # tflags publish
 AC_BR_BONANZA
@@ -73,9 +73,6 @@ APOSTROPHE_FROM
 # good enough
 AXB_XMAILER_MIMEOLE_OL_024C2
 
-# good enough
-AXB_X_OUTLOOKPROT_ENVSDR
-
 # tflags learn
 BAYES_00
 
@@ -111,6 +108,9 @@ BODY_URI_ONLY
 
 # tflags publish
 BOGUS_MSM_HDRS
+
+# good enough
+BTC_ORG
 
 # tflags publish
 CANT_SEE_AD
@@ -314,6 +314,9 @@ FUZZY_BITCOIN
 FUZZY_BROWSER
 
 # tflags publish
+FUZZY_BTC_WALLET
+
+# tflags publish
 FUZZY_CLICK_HERE
 
 # tflags publish
@@ -407,9 +410,6 @@ HELO_MISC_IP
 HEXHASH_WORD
 
 # good enough
-HK_NAME_FM_DR
-
-# good enough
 HK_NAME_FM_MR_MRS
 
 # good enough
@@ -426,9 +426,6 @@ HK_SCAM_S7
 
 # tflags userconf
 HTML_CHARSET_FARAWAY
-
-# good enough
-HTML_FONT_TINY
 
 # tflags publish
 HTML_OFF_PAGE
@@ -474,9 +471,6 @@ MISSING_HB_SEP
 
 # good enough
 MONEY_FORM
-
-# good enough
-MONEY_FORM_SHORT
 
 # tflags publish
 MONEY_FRAUD_3
@@ -884,58 +878,40 @@ TVD_SPACE_ENCODED
 TW_GIBBERISH_MANY
 
 # good enough
-ADMITS_SPAM
+ADVANCE_FEE_2_NEW_FRM_MNY
 
 # good enough
-ADVANCE_FEE_3_NEW_FRM_MNY
+ADVANCE_FEE_4_NEW_FRM_MNY
 
 # good enough
-ADVANCE_FEE_5_NEW_FRM_MNY
+ADVANCE_FEE_4_NEW_MONEY
 
 # good enough
-AXB_XMAILER_MIMEOLE_OL_1ECD5
+ADVANCE_FEE_5_NEW
 
 # good enough
-BIGNUM_EMAILS
+FILL_THIS_FORM_LOAN
 
 # good enough
-BODY_SINGLE_URI
+HDRS_LCASE
 
 # good enough
-BTC_ORG
+HK_SCAM_N15
 
 # good enough
-DATE_IN_FUTURE_96_Q
+MIMEOLE_DIRECT_TO_MX
 
 # good enough
-DEAR_BENEFICIARY
+MONEY_BARRISTER
 
 # good enough
-FROM_MISSP_DYNIP
+OBFU_HTML_ATTACH
 
 # good enough
-FROM_MISSP_TO_UNDISC
-
-# tflags publish
-FUZZY_BTC_WALLET
+RISK_FREE
 
 # good enough
-HK_NAME_MR_MRS
-
-# good enough
-HK_SCAM_N3
-
-# good enough
-LOTTO_AGENT
-
-# good enough
-MONEY_ATM_CARD
-
-# good enough
-NSL_RCVD_HELO_USER
-
-# good enough
-TVD_SPACE_RATIO_MINFP
+USB_DRIVES
 
 # tflags publish
 UC_GIBBERISH_OBFU
@@ -1092,9 +1068,6 @@ USER_IN_WHITELIST
 
 # tflags userconf
 USER_IN_WHITELIST_TO
-
-# good enough
-XFER_LOTSA_MONEY
 
 # tflags publish
 XM_PHPMAILER_FORGED
