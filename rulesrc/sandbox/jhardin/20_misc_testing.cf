@@ -1158,6 +1158,11 @@ body        NOT_SPAM           /\b(?:this mail cannot be considered Spam|ESTE CO
 describe    NOT_SPAM           I'm not spam! Really! I'm not, I'm not, I'm not!
 
 
+# see https://posts.specterops.io/the-tale-of-settingcontent-ms-files-f1ea253e4d39?gi=7ec45f2481ce
+uri         URI_MALWARE_SCMS   /\.SettingContent-ms\b/i
+describe    URI_MALWARE_SCMS   Link to malware exploit download (.SettingContent-ms file)
+tflags      URI_MALWARE_SCMS   publish
+
 # suggested by http://isc.sans.edu/diary.html?storyid=13921
 uri         URI_MALWARE_BH     /\.\w{2,4}\/[\d\w]{8}\/index\.html/i
 describe    URI_MALWARE_BH     Possible BlackHole malware links / phishing
