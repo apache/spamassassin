@@ -118,6 +118,12 @@ ifplugin Mail::SpamAssassin::Plugin::MIMEHeader
   describe     DOC_ATTACH_NO_EXT   Document attachment with suspicious name
 
   mimeheader   __ZIP_ATTACH_MT     Content-Type =~ m,\bapplication/(?:zip|x-(?:zip-)?compress(?:ed)?)\b,i
+
+  # see https://posts.specterops.io/the-tale-of-settingcontent-ms-files-f1ea253e4d39?gi=7ec45f2481ce
+  mimeheader   __MALW_ATTACH_01_01 Content-Disposition =~ /\bfilename="?[^"]+\.SettingContent-ms\b/i
+  mimeheader   __MALW_ATTACH_01_02 Content-Type =~ /\bname="?[^"]+\.SettingContent-ms\b/i
+  meta         MALW_ATTACH         __MALW_ATTACH_01_01 || __MALW_ATTACH_01_02
+  describe     MALW_ATTACH         Attachment filename suspicious, probable malware exploit
 else
   meta         __HTML_ATTACH_01    0
   meta         __HTML_ATTACH_02    0
@@ -126,6 +132,8 @@ else
   meta         __PDF_ATTACH        0
   meta         __ATTACH_NAME_NO_EXT 0
   meta         __ZIP_ATTACH_MT     0
+  meta         __MALW_ATTACH_01_01 0
+  meta         __MALW_ATTACH_01_02 0
 endif
 
 # general case of spample observation
