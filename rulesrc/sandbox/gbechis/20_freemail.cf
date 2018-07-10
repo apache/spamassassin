@@ -1,11 +1,7 @@
-
-# JHardin: disabling temporarily, generates the following error:
-# Jul 10 10:43:22.343 [13247] warn: invalid check_freemail_replyto option: Disposition-Notification-To at lib/Mail/SpamAssassin/Plugin/FreeMail.pm line 543.
-# 
-#ifplugin Mail::SpamAssassin::Plugin::FreeMail
-#  header   __freemail_dispto  eval:check_freemail_replyto('Disposition-Notification-To')
-#  meta     FREEMAIL_DISPTO  ( __freemail_dispto && !__freemail_safe )
-#  describe FREEMAIL_DISPTO  Disposition-Notification-To/From or Disposition-Notification-To/body contain different freemails
-#  score    FREEMAIL_DISPTO  0.25
-#endif 
+ifplugin Mail::SpamAssassin::Plugin::FreeMail
+  header   __freemail_dispto  eval:check_freemail_header('Disposition-Notification-To')
+  meta     FREEMAIL_DISPTO  ( __freemail_dispto && !__freemail_safe )
+  describe FREEMAIL_DISPTO  Disposition-Notification-To/From or Disposition-Notification-To/body contain different freemails
+  score    FREEMAIL_DISPTO  0.25
+endif 
 
