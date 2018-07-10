@@ -2353,5 +2353,10 @@ score      FRNAME_IN_MSG_NO_SUBJ      3.500	# limit
 rawbody    __HTTP_REFRESH             /<meta\s[^>]{0,200}"refresh"/ism
 tflags     __HTTP_REFRESH             publish
 
+meta       RATWARE_NO_RDNS            __RATWARE_BOUND_A && __RDNS_NONE && __MIME_HTML && __MISSING_REF 
+describe   RATWARE_NO_RDNS            Suspicious MsgID and MIME boundary + no rDNS
+score      RATWARE_NO_RDNS            3.000	# limit
+
+
 
 
