@@ -2357,6 +2357,9 @@ meta       RATWARE_NO_RDNS            __RATWARE_BOUND_A && __RDNS_NONE && __MIME
 describe   RATWARE_NO_RDNS            Suspicious MsgID and MIME boundary + no rDNS
 score      RATWARE_NO_RDNS            3.000	# limit
 
+meta       BAT_BDRY_TO_MALF           __BAT_BOUNDARY && __TO_NO_ARROWS_R 
+describe   BAT_BDRY_TO_MALF           Bat boundary + misformatted To: address
+score      BAT_BDRY_TO_MALF           2.500	# limit
 
 
 
