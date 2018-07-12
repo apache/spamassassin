@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus ena-week0 ena-week1 ena-week2 ena-week3 ena-week4 giovanni grenier jarif mmiroslaw-mails-ham mmiroslaw-mails-spam sihde thendrikx; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja ena-week0 ena-week1 ena-week2 ena-week3 ena-week4 llanga mmiroslaw-mails-ham mmiroslaw-mails-spam sihde; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus ena-week0 ena-week1 ena-week2 ena-week3 ena-week4 giovanni jarif llanga mmiroslaw-mails-ham mmiroslaw-mails-spam sihde
+# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus ena-week0 ena-week1 ena-week2 ena-week3 ena-week4 giovanni grenier jarif mmiroslaw-mails-ham mmiroslaw-mails-spam sihde thendrikx; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus ena-week0 ena-week1 ena-week2 ena-week3 ena-week4 giovanni jarif llanga mmiroslaw-mails-ham mmiroslaw-mails-spam sihde; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja ena-week0 ena-week1 ena-week2 ena-week3 ena-week4 llanga mmiroslaw-mails-ham mmiroslaw-mails-spam sihde
 
 # tflags publish
 AC_BR_BONANZA
@@ -135,6 +135,9 @@ COMMENT_GIBBERISH
 
 # tflags publish
 CORRUPT_FROM_LINE_IN_HDRS
+
+# good enough
+DATE_IN_FUTURE_Q_PLUS
 
 # good enough
 DEAR_NOBODY
@@ -415,6 +418,9 @@ HK_SCAM_N8
 # tflags userconf
 HTML_CHARSET_FARAWAY
 
+# good enough
+HTML_FONT_TINY
+
 # tflags publish
 HTML_OFF_PAGE
 
@@ -438,6 +444,9 @@ LOTS_OF_MONEY
 
 # tflags publish
 LUCRATIVE
+
+# good enough
+MAILER_EQ_ORG
 
 # tflags publish
 MANY_SPAN_IN_TEXT
@@ -857,70 +866,43 @@ TVD_SPACE_ENCODED
 TW_GIBBERISH_MANY
 
 # good enough
-ADMITS_SPAM
+ADVANCE_FEE_2_NEW_FRM_MNY
 
 # good enough
-ADVANCE_FEE_3_NEW_FRM_MNY
+ADVANCE_FEE_4_NEW_FRM_MNY
 
 # good enough
-ADVANCE_FEE_5_NEW_FRM_MNY
+ADVANCE_FEE_4_NEW_MONEY
 
 # good enough
-AXB_XMAILER_MIMEOLE_OL_1ECD5
+ADVANCE_FEE_5_NEW
 
 # good enough
-BIGNUM_EMAILS
+FILL_THIS_FORM_LOAN
 
 # good enough
-BODY_SINGLE_URI
+FILL_THIS_FORM_LONG
 
 # good enough
-DATE_IN_FUTURE_96_Q
+FREEMAIL_DISPTO
 
 # good enough
-DATE_IN_FUTURE_Q_PLUS
+HDRS_LCASE
 
 # good enough
-DEAR_BENEFICIARY
+HK_SCAM_N15
 
 # good enough
-FROM_MISSP_DYNIP
+MIMEOLE_DIRECT_TO_MX
 
 # good enough
-FROM_MISSP_TO_UNDISC
+MONEY_BARRISTER
 
 # good enough
-HK_NAME_MR_MRS
+RATWARE_NO_RDNS
 
 # good enough
-HK_SCAM_N3
-
-# good enough
-HTML_FONT_TINY
-
-# good enough
-LOTTO_AGENT
-
-# good enough
-MAILER_EQ_ORG
-
-# good enough
-MONEY_ATM_CARD
-
-# good enough
-NA_DOLLARS
-
-# good enough
-NSL_RCVD_HELO_USER
-
-# good enough
-SHARE_50_50
-
-# good enough
-STOX_BOUND_090909_B
-
-# good enough
-TVD_SPACE_RATIO_MINFP
+RISK_FREE
 
 # tflags publish
 UC_GIBBERISH_OBFU
@@ -1092,6 +1074,9 @@ YOU_INHERIT
 
 # tflags net
 __DKIMDOMAIN_IN_DWL_ANY
+
+# tflags publish
+__HTTP_REFRESH
 
 # tflags net
 __RCVD_IN_DNSWL
