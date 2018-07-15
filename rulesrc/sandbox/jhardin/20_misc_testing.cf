@@ -2302,6 +2302,11 @@ describe   HDR_ORDER_FTSDMCXX_DIRECT  Header order similar to spam (FTSDMCXX/bou
 score      HDR_ORDER_FTSDMCXX_DIRECT  3.500	# limit
 tflags     HDR_ORDER_FTSDMCXX_DIRECT  publish
 
+meta       HDR_ORDER_FTSDMCXX_NORDNS  (__HDR_ORDER_FTSDMCXXXX && __RDNS_NONE)
+describe   HDR_ORDER_FTSDMCXX_NORDNS  Header order similar to spam (FTSDMCXX/boundary variant) + no rDNS
+score      HDR_ORDER_FTSDMCXX_NORDNS  3.500	# limit
+tflags     HDR_ORDER_FTSDMCXX_NORDNS  publish
+
 body       __UNICODE_OBFU_URI_DOM     /[0-9a-z]{3,10}(?:\xe3\x80\x82|\xe7\x82\xb9)(?:c[o0]m|net|inf[o0]|biz|cn)\b/i
 meta       UNICODE_OBFU_DOM_NO_BODY   __UNICODE_OBFU_URI_DOM && __EMPTY_BODY
 score      UNICODE_OBFU_DOM_NO_BODY   3.750	# limit
