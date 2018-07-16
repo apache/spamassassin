@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus ena-week0 ena-week1 ena-week2 ena-week3 ena-week4 giovanni grenier jarif mmiroslaw-mails-ham mmiroslaw-mails-spam sihde thendrikx; day 2: ena-week2 ena-week3 llanga; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja ena-week0 ena-week1 ena-week2 ena-week3 ena-week4 llanga mmiroslaw-mails-ham mmiroslaw-mails-spam sihde
+# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus ena-week0 ena-week1 ena-week2 ena-week3 ena-week4 giovanni grenier jarif mmiroslaw-mails-ham mmiroslaw-mails-spam sihde thendrikx; day 2: ena-week2 ena-week3 llanga; day 3: ena-week2 ena-week3 llanga
 
 # tflags publish
 AC_BR_BONANZA
@@ -137,9 +137,6 @@ COMMENT_GIBBERISH
 CORRUPT_FROM_LINE_IN_HDRS
 
 # good enough
-DATE_IN_FUTURE_Q_PLUS
-
-# good enough
 DEAR_NOBODY
 
 # good enough
@@ -205,9 +202,6 @@ ENCRYPTED_MESSAGE
 # tflags userconf
 ENV_AND_HDR_SPF_MATCH
 
-# good enough
-FAKE_REPLY_C
-
 # tflags publish
 FBI_MONEY
 
@@ -243,12 +237,6 @@ FREEMAIL_FORGED_FROMDOMAIN
 
 # tflags publish
 FREEM_FRNUM_UNICD_EMPTY
-
-# good enough
-FRNAME_IN_MSG_NO_SUBJ
-
-# good enough
-FRNAME_IN_MSG_XPRIO
 
 # tflags userconf
 FROM_DOMAIN_NOVOWEL
@@ -878,37 +866,64 @@ TVD_SPACE_ENCODED
 TW_GIBBERISH_MANY
 
 # good enough
-ADVANCE_FEE_2_NEW_FRM_MNY
+ADMITS_SPAM
 
 # good enough
-ADVANCE_FEE_4_NEW_FRM_MNY
+ADVANCE_FEE_3_NEW_FRM_MNY
 
 # good enough
-ADVANCE_FEE_4_NEW_MONEY
+ADVANCE_FEE_5_NEW_FRM_MNY
 
 # good enough
-ADVANCE_FEE_5_NEW
+AXB_XMAILER_MIMEOLE_OL_1ECD5
 
 # good enough
-FILL_THIS_FORM_FRAUD_PHISH
+BIGNUM_EMAILS
 
 # good enough
-FILL_THIS_FORM_LOAN
+BODY_SINGLE_URI
 
 # good enough
-FILL_THIS_FORM_LONG
+DATE_IN_FUTURE_96_Q
 
 # good enough
-HDRS_LCASE
+DEAR_BENEFICIARY
 
 # good enough
-HK_SCAM_N15
+FROM_MISSP_DYNIP
 
 # good enough
-MIMEOLE_DIRECT_TO_MX
+FROM_MISSP_TO_UNDISC
 
 # good enough
-MONEY_BARRISTER
+HK_NAME_MR_MRS
+
+# good enough
+HK_SCAM_N3
+
+# good enough
+LOTTO_AGENT
+
+# good enough
+MONEY_ATM_CARD
+
+# good enough
+NA_DOLLARS
+
+# good enough
+NSL_RCVD_HELO_USER
+
+# good enough
+SERGIO_SUBJECT_VIAGRA01
+
+# good enough
+SHARE_50_50
+
+# good enough
+TVD_SPACE_RATIO_MINFP
+
+# good enough
+XFER_LOTSA_MONEY
 
 # tflags publish
 UC_GIBBERISH_OBFU
