@@ -2366,5 +2366,12 @@ meta       BAT_BDRY_TO_MALF           __BAT_BOUNDARY && __TO_NO_ARROWS_R
 describe   BAT_BDRY_TO_MALF           Bat boundary + misformatted To: address
 score      BAT_BDRY_TO_MALF           2.500	# limit
 
+meta       __IMG_ONLY_FM_DOM_INFO       __HTML_IMG_ONLY && __FROM_DOM_INFO
+#describe   IMG_ONLY_FM_DOM_INFO       HTML image-only message from .info domain
+#score      IMG_ONLY_FM_DOM_INFO       2.500	# limit
+
+meta       __NO_FM_NAME_IP_RELAY        __KHOP_NO_FULL_NAME && __IP_IN_RELAY 
+#describe   NO_FM_NAME_IP_RELAY        No From name + relay using bare IP address
+#score      NO_FM_NAME_IP_RELAY        2.500	# limit
 
 
