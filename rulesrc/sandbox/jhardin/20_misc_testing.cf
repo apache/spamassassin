@@ -2368,29 +2368,32 @@ meta       BAT_BDRY_TO_MALF           __BAT_BOUNDARY && __TO_NO_ARROWS_R
 describe   BAT_BDRY_TO_MALF           Bat boundary + misformatted To: address
 score      BAT_BDRY_TO_MALF           2.500	# limit
 
-meta       __IMG_ONLY_FM_DOM_INFO       __HTML_IMG_ONLY && __FROM_DOM_INFO
-#describe   IMG_ONLY_FM_DOM_INFO       HTML image-only message from .info domain
-#score      IMG_ONLY_FM_DOM_INFO       2.500	# limit
+meta       IMG_ONLY_FM_DOM_INFO       __HTML_IMG_ONLY && __FROM_DOM_INFO
+describe   IMG_ONLY_FM_DOM_INFO       HTML image-only message from .info domain
+score      IMG_ONLY_FM_DOM_INFO       2.500	# limit
 
-meta       __NO_FM_NAME_IP_RELAY        __KHOP_NO_FULL_NAME && __IP_IN_RELAY 
-#describe   NO_FM_NAME_IP_RELAY        No From name + relay using bare IP address
-#score      NO_FM_NAME_IP_RELAY        2.500	# limit
+meta       NO_FM_NAME_IP_HOSTN        (__KHOP_NO_FULL_NAME && __IP_IN_RELAY) && !__DOS_RELAYED_EXT 
+describe   NO_FM_NAME_IP_HOSTN        No From name + hostname using IP address
+score      NO_FM_NAME_IP_HOSTN        2.500	# limit
 
 header     FROM_NUMERIC_TLD            From:addr =~ /\.\d+$/
 describe   FROM_NUMERIC_TLD            From: address has numeric TLD
 score      FROM_NUMERIC_TLD            3.000	# limit
 
-header     RDNS_NUMERIC_TLD            X-Spam-Relays-External =~ /\srdns=\S+\.\d+\s/
+header     __RDNS_NUMERIC_TLD          X-Spam-Relays-External =~ /\srdns=\S+\.\d+\s/
+meta       RDNS_NUMERIC_TLD            __RDNS_NUMERIC_TLD && !__LYRIS_EZLM_REMAILER && !__DOS_HAS_MAILING_LIST
 describe   RDNS_NUMERIC_TLD            Relay rDNS has numeric TLD
 score      RDNS_NUMERIC_TLD            2.500	# limit
 
 meta       MALF_HTML_B64               MIME_BASE64_TEXT && HTML_MIME_NO_HTML_TAG 
 describe   MALF_HTML_B64               Malformatted base64-encoded HTML content
 score      MALF_HTML_B64               3.500	# limit
+tflags     MALF_HTML_B64               publish
 
 meta       TO_NAME_SUBJ_NO_RDNS        LOCALPART_IN_SUBJECT && __RDNS_NONE 
 describe   TO_NAME_SUBJ_NO_RDNS        Recipient username in subject + no rDNS
 score      TO_NAME_SUBJ_NO_RDNS        3.000	# limit
+tflags     TO_NAME_SUBJ_NO_RDNS        publish
 
 if can(Mail::SpamAssassin::Conf::feature_bug6558_free)
   # more-precise version of __OBFUSCATING_COMMENT_A
