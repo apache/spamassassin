@@ -2350,9 +2350,11 @@ full       __FROM_NAME_IN_MSG         /^From:\s+([^<]\S+\s\S+)\s(?=.{1,1024}^\1$
 meta       FRNAME_IN_MSG_XPRIO        __FROM_NAME_IN_MSG && __XPRIO
 describe   FRNAME_IN_MSG_XPRIO        From name in message + X-Priority
 score      FRNAME_IN_MSG_XPRIO        3.500	# limit
+tflags     FRNAME_IN_MSG_XPRIO        publish
 meta       FRNAME_IN_MSG_NO_SUBJ      __FROM_NAME_IN_MSG && (__SUBJECT_EMPTY || __XPRIO_SHORT_SUBJ)
 describe   FRNAME_IN_MSG_NO_SUBJ      From name in message + short or no subject
 score      FRNAME_IN_MSG_NO_SUBJ      3.500	# limit
+tflags     FRNAME_IN_MSG_NO_SUBJ      publish
 
 
 rawbody    __HTTP_REFRESH             /<meta\s[^>]{0,200}"refresh"/ism
@@ -2373,5 +2375,28 @@ meta       __IMG_ONLY_FM_DOM_INFO       __HTML_IMG_ONLY && __FROM_DOM_INFO
 meta       __NO_FM_NAME_IP_RELAY        __KHOP_NO_FULL_NAME && __IP_IN_RELAY 
 #describe   NO_FM_NAME_IP_RELAY        No From name + relay using bare IP address
 #score      NO_FM_NAME_IP_RELAY        2.500	# limit
+
+header     FROM_NUMERIC_TLD            From:addr =~ /\.\d+$/
+describe   FROM_NUMERIC_TLD            From: address has numeric TLD
+score      FROM_NUMERIC_TLD            3.000	# limit
+
+header     RDNS_NUMERIC_TLD            X-Spam-Relays-External =~ /\srdns=\S+\.\d+\s/
+describe   RDNS_NUMERIC_TLD            Relay rDNS has numeric TLD
+score      RDNS_NUMERIC_TLD            2.500	# limit
+
+meta       MALF_HTML_B64               MIME_BASE64_TEXT && HTML_MIME_NO_HTML_TAG 
+describe   MALF_HTML_B64               Malformatted base64-encoded HTML content
+score      MALF_HTML_B64               3.500	# limit
+
+meta       TO_NAME_SUBJ_NO_RDNS        LOCALPART_IN_SUBJECT && __RDNS_NONE 
+describe   TO_NAME_SUBJ_NO_RDNS        Recipient username in subject + no rDNS
+score      TO_NAME_SUBJ_NO_RDNS        3.000	# limit
+
+if can(Mail::SpamAssassin::Conf::feature_bug6558_free)
+  # more-precise version of __OBFUSCATING_COMMENT_A
+  rawbody    __HTML_SHRT_CMNT_OBFU       /\w<!--\s*\w+\s*-->\w/
+  tflags     __HTML_SHRT_CMNT_OBFU       multiple maxhits=10
+  meta       __HTML_SHRT_CMNT_OBFU_MANY  __HTML_SHRT_CMNT_OBFU > 9 && HTML_MESSAGE
+endif
 
 
