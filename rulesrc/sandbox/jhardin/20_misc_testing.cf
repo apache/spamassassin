@@ -2371,19 +2371,27 @@ score      BAT_BDRY_TO_MALF           2.500	# limit
 meta       IMG_ONLY_FM_DOM_INFO       __HTML_IMG_ONLY && __FROM_DOM_INFO
 describe   IMG_ONLY_FM_DOM_INFO       HTML image-only message from .info domain
 score      IMG_ONLY_FM_DOM_INFO       2.500	# limit
+tflags     IMG_ONLY_FM_DOM_INFO       publish
 
 meta       NO_FM_NAME_IP_HOSTN        (__KHOP_NO_FULL_NAME && __IP_IN_RELAY) && !__DOS_RELAYED_EXT 
 describe   NO_FM_NAME_IP_HOSTN        No From name + hostname using IP address
 score      NO_FM_NAME_IP_HOSTN        2.500	# limit
+tflags     NO_FM_NAME_IP_HOSTN        publish
 
 header     FROM_NUMERIC_TLD            From:addr =~ /\.\d+$/
 describe   FROM_NUMERIC_TLD            From: address has numeric TLD
 score      FROM_NUMERIC_TLD            3.000	# limit
 
 header     __RDNS_NUMERIC_TLD          X-Spam-Relays-External =~ /\srdns=\S+\.\d+\s/
-meta       RDNS_NUMERIC_TLD            __RDNS_NUMERIC_TLD && !__LYRIS_EZLM_REMAILER && !__DOS_HAS_MAILING_LIST
-describe   RDNS_NUMERIC_TLD            Relay rDNS has numeric TLD
-score      RDNS_NUMERIC_TLD            2.500	# limit
+header     __RDNS_NUMERIC_TLD_NODQ     X-Spam-Relays-External =~ /\srdns=(?!\d+\.\d+\.\d+\.\d+\s)\S+\.\d+\s/
+
+meta       RDNS_NUM_TLD_XM             __RDNS_NUMERIC_TLD && (__HAS_XM_SID || __HAS_XM_LID || __HAS_XM_RECPTID || __HAS_XM_SENTBY)
+describe   RDNS_NUM_TLD_XM             Relay rDNS has numeric TLD + suspicious headers
+score      RDNS_NUM_TLD_XM             3.000	# limit
+
+meta       RDNS_NUM_TLD_ATCHNX         __RDNS_NUMERIC_TLD && __ATTACH_NAME_NO_EXT
+describe   RDNS_NUM_TLD_ATCHNX         Relay rDNS has numeric TLD + suspicious attachment
+score      RDNS_NUM_TLD_ATCHNX         3.000	# limit
 
 meta       MALF_HTML_B64               MIME_BASE64_TEXT && HTML_MIME_NO_HTML_TAG 
 describe   MALF_HTML_B64               Malformatted base64-encoded HTML content
