@@ -2388,10 +2388,12 @@ header     __RDNS_NUMERIC_TLD_NODQ     X-Spam-Relays-External =~ /\srdns=(?!\d+\
 meta       RDNS_NUM_TLD_XM             __RDNS_NUMERIC_TLD && (__HAS_XM_SID || __HAS_XM_LID || __HAS_XM_RECPTID || __HAS_XM_SENTBY)
 describe   RDNS_NUM_TLD_XM             Relay rDNS has numeric TLD + suspicious headers
 score      RDNS_NUM_TLD_XM             3.000	# limit
+tflags     RDNS_NUM_TLD_XM             publish
 
 meta       RDNS_NUM_TLD_ATCHNX         __RDNS_NUMERIC_TLD && __ATTACH_NAME_NO_EXT
 describe   RDNS_NUM_TLD_ATCHNX         Relay rDNS has numeric TLD + suspicious attachment
 score      RDNS_NUM_TLD_ATCHNX         3.000	# limit
+tflags     RDNS_NUM_TLD_ATCHNX         publish
 
 meta       MALF_HTML_B64               MIME_BASE64_TEXT && HTML_MIME_NO_HTML_TAG 
 describe   MALF_HTML_B64               Malformatted base64-encoded HTML content
