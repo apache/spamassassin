@@ -2347,7 +2347,7 @@ score      USB_DRIVES                 3.500	# limit
 #header     __SUBJ_CUSTOM_WITH_LOGO    Subject =~ /^(?=.*\bcustom\b).*(?:printed |with )+(?:your )?logos?\b/i
 
 full       __FROM_NAME_IN_MSG         /^From:\s+([^<]\S+\s\S+)\s(?=.{1,1024}^\1$)/sm
-meta       FRNAME_IN_MSG_XPRIO        __FROM_NAME_IN_MSG && __XPRIO
+meta       FRNAME_IN_MSG_XPRIO        (__FROM_NAME_IN_MSG && __XPRIO) && !__DKIM_EXISTS 
 describe   FRNAME_IN_MSG_XPRIO        From name in message + X-Priority
 score      FRNAME_IN_MSG_XPRIO        3.500	# limit
 tflags     FRNAME_IN_MSG_XPRIO        publish
