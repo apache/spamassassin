@@ -2412,4 +2412,6 @@ if can(Mail::SpamAssassin::Conf::feature_bug6558_free)
   meta       __HTML_SHRT_CMNT_OBFU_MANY  __HTML_SHRT_CMNT_OBFU > 9 && HTML_MESSAGE
 endif
 
+header     __FROM_ADDR_WS              From:addr =~ /\s/
+
 
