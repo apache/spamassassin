@@ -19,7 +19,7 @@ use constant HAS_COUNTRY_FAST => eval { require IP::Country::Fast; };
 use Test::More;
 
 plan skip_all => "IP::Country::Fast not installed" unless HAS_COUNTRY_FAST;
-plan tests => 1;
+plan tests => 2;
 
 # ---------------------------------------------------------------------------
 
@@ -39,3 +39,4 @@ tstprefs ("
             );
 
 ok sarun ("-t < data/spam/relayUS.eml", \&patterns_run_cb);
+ok_all_patterns();
