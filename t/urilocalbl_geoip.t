@@ -40,5 +40,5 @@ tstlocalrules (q{
   describe X_URIBL_NA uri located in north America
 });
 
-ok sarun ("-t < data/spam/009", \&patterns_run_cb);
+ok sarun ("-t < data/spam/relayUS.eml", \&patterns_run_cb);
 ok_all_patterns();

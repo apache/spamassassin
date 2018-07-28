@@ -15,9 +15,6 @@
 # limitations under the License.
 # </@LICENSE>
 
-
-# TODO: where are the tests?
-
 =head1 NAME
 
 URILocalBL - blacklist URIs using local information (ISP names, address lists, and country codes)
@@ -385,6 +382,9 @@ sub check_uri_local_bl {
   my $test = $permsg->{current_rule_name}; 
   my $rule = $permsg->{conf}->{uri_local_bl}->{$test};
 
+  my %hit_tests;
+  my $got_hit = 0;
+
   dbg("check: uri_local_bl evaluating rule %s\n", $test);
 
   while (my ($raw, $info) = each %uri_detail) {
@@ -438,12 +438,10 @@ sub check_uri_local_bl {
           }
       
           $permsg->test_log("Host: $host in $cc");
-          $permsg->got_hit($test);
+          $hit_tests{$test} = 1;
 
           # reset hash
           keys %uri_detail;
-
-          return 0;
         }
 
         if (exists $rule->{continents}) {
@@ -468,12 +466,10 @@ sub check_uri_local_bl {
           }
 
           $permsg->test_log("Host: $host in $cont");
-          $permsg->got_hit($test);
+          $hit_tests{$test} = 1;
 
           # reset hash
           keys %uri_detail;
-
-          return 0;
         }
 
         if (exists $rule->{isps}) {
@@ -496,12 +492,10 @@ sub check_uri_local_bl {
           }
       
           $permsg->test_log("Host: $host in \"$isp\"");
-          $permsg->got_hit($test);
+          $hit_tests{$test} = 1;
 
           # reset hash
           keys %uri_detail;
-
-          return 0;
         }
 
         if (exists $rule->{cidr}) {
@@ -516,14 +510,22 @@ sub check_uri_local_bl {
           }
 
           $permsg->test_log("Host: $host as $ip");
-          $permsg->got_hit($test);
+          $hit_tests{$test} = 1;
 
           # reset hash
           keys %uri_detail;
-
-          return 0;
         }
       }
+    }
+    # cycle through all tests hitted by the uri
+    while((my $test_ok) = each %hit_tests) {
+      $permsg->got_hit($test_ok);
+      $got_hit = 1;
+    }
+    if($got_hit == 1) {
+      return 1;
+    } else {
+      keys %hit_tests;
     }
   }
 
