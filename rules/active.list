@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus ena-week0 ena-week1 ena-week2 ena-week3 ena-week4 giovanni grenier jarif mmiroslaw-mails-ham mmiroslaw-mails-spam sihde thendrikx; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja ena-week0 ena-week1 ena-week2 ena-week3 ena-week4 llanga mmiroslaw-mails-ham mmiroslaw-mails-spam sihde; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja ena-week0 ena-week1 ena-week2 ena-week3 ena-week4 llanga mmiroslaw-mails-ham mmiroslaw-mails-spam sihde
+# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus ena-week0 ena-week1 ena-week2 ena-week3 ena-week4 giovanni grenier jarif jbrooks mmiroslaw-mails-ham mmiroslaw-mails-spam sihde thendrikx; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja ena-week0 ena-week1 ena-week2 ena-week3 ena-week4 llanga mmiroslaw-mails-ham mmiroslaw-mails-spam sihde; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja ena-week0 ena-week1 ena-week2 ena-week3 ena-week4 llanga mmiroslaw-mails-ham mmiroslaw-mails-spam sihde
 
 # tflags publish
 AC_BR_BONANZA
@@ -66,9 +66,6 @@ AD_PREFS
 
 # tflags userconf
 ALL_TRUSTED
-
-# good enough
-APOSTROPHE_FROM
 
 # good enough
 AXB_XMAILER_MIMEOLE_OL_024C2
@@ -201,6 +198,9 @@ ENCRYPTED_MESSAGE
 
 # tflags userconf
 ENV_AND_HDR_SPF_MATCH
+
+# good enough
+FAKE_REPLY_C
 
 # tflags publish
 FBI_MONEY
@@ -881,55 +881,34 @@ TVD_SPACE_ENCODED
 TW_GIBBERISH_MANY
 
 # good enough
-ADMITS_SPAM
+ADVANCE_FEE_2_NEW_FRM_MNY
 
 # good enough
-ADVANCE_FEE_3_NEW_FRM_MNY
+ADVANCE_FEE_4_NEW_FRM_MNY
 
 # good enough
-ADVANCE_FEE_5_NEW_FRM_MNY
+ADVANCE_FEE_4_NEW_MONEY
 
 # good enough
-AXB_XMAILER_MIMEOLE_OL_1ECD5
+ADVANCE_FEE_5_NEW
 
 # good enough
-BIGNUM_EMAILS
+FILL_THIS_FORM_FRAUD_PHISH
 
 # good enough
-BODY_SINGLE_URI
+FILL_THIS_FORM_LOAN
 
 # good enough
-DATE_IN_FUTURE_96_Q
+HDRS_LCASE
 
 # good enough
-DEAR_BENEFICIARY
+MIMEOLE_DIRECT_TO_MX
 
 # good enough
-FROM_MISSP_DYNIP
+MONEY_BARRISTER
 
 # good enough
-FROM_MISSP_TO_UNDISC
-
-# good enough
-HK_NAME_MR_MRS
-
-# good enough
-HK_SCAM_N3
-
-# good enough
-LOTTO_AGENT
-
-# good enough
-MONEY_ATM_CARD
-
-# good enough
-NSL_RCVD_HELO_USER
-
-# good enough
-SHARE_50_50
-
-# good enough
-TVD_SPACE_RATIO_MINFP
+STOX_BOUND_090909_B
 
 # tflags publish
 UC_GIBBERISH_OBFU
