@@ -2413,7 +2413,7 @@ if can(Mail::SpamAssassin::Conf::feature_bug6558_free)
 endif
 
 header     __FROM_ADDR_WS              From:addr =~ /\s/
-meta       FROM_ADDR_WS                __FROM_ADDR_WS && !__RCD_RDNS_MTA_MESSY && !ANY_BOUNCE_MESSAGE
+meta       FROM_ADDR_WS                __FROM_ADDR_WS && !__RCD_RDNS_MTA_MESSY && !ANY_BOUNCE_MESSAGE && !__FROM_ENCODED_QP
 describe   FROM_ADDR_WS                Malformed From address
 score      FROM_ADDR_WS                3.000	# limit
 
