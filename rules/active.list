@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus ena-week0 ena-week1 ena-week3 ena-week4 giovanni grenier jarif jbrooks mmiroslaw-mails-ham mmiroslaw-mails-spam sihde thendrikx; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja ena-week0 ena-week1 ena-week2 ena-week3 ena-week4 jarif llanga mmiroslaw-mails-ham mmiroslaw-mails-spam sihde; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja ena-week0 ena-week1 ena-week2 ena-week3 ena-week4 llanga mmiroslaw-mails-ham mmiroslaw-mails-spam sihde
+# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus ena-week0 ena-week1 ena-week2 ena-week3 ena-week4 giovanni grenier jarif jbrooks mmiroslaw-mails-ham mmiroslaw-mails-spam sihde thendrikx; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja ena-week0 ena-week1 ena-week2 ena-week3 ena-week4 llanga mmiroslaw-mails-ham mmiroslaw-mails-spam sihde; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja ena-week0 ena-week1 ena-week2 ena-week3 ena-week4 jarif llanga mmiroslaw-mails-ham mmiroslaw-mails-spam sihde
 
 # tflags publish
 AC_BR_BONANZA
@@ -238,6 +238,9 @@ FRNAME_IN_MSG_NO_SUBJ
 # tflags publish
 FRNAME_IN_MSG_XPRIO
 
+# good enough
+FROMSPACE
+
 # tflags publish
 FROM_ADDR_WS
 
@@ -339,9 +342,6 @@ GOOGLE_DOCS_PHISH_MANY
 
 # tflags publish
 GOOG_MALWARE_DNLD
-
-# good enough
-GOOG_REDIR_NORDNS
 
 # tflags publish
 GOOG_REDIR_SHORT
@@ -755,6 +755,9 @@ RDNS_NUM_TLD_XM
 REPLYTO_WITHOUT_TO_CC
 
 # good enough
+SERGIO_SUBJECT_PORN011
+
+# good enough
 SHORTENED_URL_SRC
 
 # tflags publish
@@ -869,34 +872,46 @@ TVD_SPACE_ENCODED
 TW_GIBBERISH_MANY
 
 # good enough
-ADVANCE_FEE_2_NEW_FRM_MNY
+ADMITS_SPAM
 
 # good enough
-ADVANCE_FEE_4_NEW_FRM_MNY
+ADVANCE_FEE_5_NEW_FRM_MNY
 
 # good enough
-ADVANCE_FEE_4_NEW_MONEY
+AXB_XMAILER_MIMEOLE_OL_1ECD5
 
 # good enough
-ADVANCE_FEE_5_NEW
+BIGNUM_EMAILS
 
 # good enough
-FILL_THIS_FORM_LOAN
+BODY_SINGLE_URI
 
 # good enough
-FROMSPACE
+DATE_IN_FUTURE_96_Q
 
 # good enough
-HDRS_LCASE
+DEAR_BENEFICIARY
 
 # good enough
-MIMEOLE_DIRECT_TO_MX
+FROM_MISSP_DYNIP
 
 # good enough
-MONEY_BARRISTER
+FROM_MISSP_TO_UNDISC
 
 # good enough
-SERGIO_SUBJECT_PORN011
+HK_SCAM_N3
+
+# good enough
+LOTTO_AGENT
+
+# good enough
+MONEY_ATM_CARD
+
+# good enough
+NSL_RCVD_HELO_USER
+
+# good enough
+SHARE_50_50
 
 # tflags publish
 UC_GIBBERISH_OBFU
