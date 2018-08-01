@@ -1520,12 +1520,12 @@ tflags      XPRIO              publish
 # some no-ham combinations
 
 meta        __XPRIO_SHORT_SUBJ __XPRIO && __SUBJ_SHORT 
-meta        XPRIO_SHORT_SUBJ   __XPRIO_SHORT_SUBJ && !__UNPARSEABLE_RELAY_COUNT && !__DKIM_EXISTS && !__RP_MATCHES_RCVD && !__SUBSCRIPTION_INFO 
+meta        XPRIO_SHORT_SUBJ   __XPRIO_SHORT_SUBJ && !__UNPARSEABLE_RELAY_COUNT && !__DKIM_EXISTS && !__RP_MATCHES_RCVD && !__SUBSCRIPTION_INFO && !__FROM_ENCODED_QP 
 describe    XPRIO_SHORT_SUBJ   Has X-Priority header + short subject
 score       XPRIO_SHORT_SUBJ   2.500	# limit
 tflags      XPRIO_SHORT_SUBJ   publish
 
-meta        FROM_MISSP_XPRIO   __XPRIO && __FROM_MISSPACED 
+meta        FROM_MISSP_XPRIO   (__XPRIO && __FROM_MISSPACED) && !__LYRIS_EZLM_REMAILER 
 describe    FROM_MISSP_XPRIO   Misspaced FROM + X-Priority
 score       FROM_MISSP_XPRIO   2.500   # limit
 
