@@ -1501,7 +1501,7 @@ header      __DATE_LOWER       ALL =~ /date:\s\S{5}/
 
 # duplicates __XPRIO
 #header      __FH_HAS_XPRIORITY exists:X-Priority
-meta        __XPRIO_MINFP      __XPRIO && !__CT_ENCRYPTED && !ALL_TRUSTED && !__HAS_ERRORS_TO && !__THREADED && !__LONGLINE && !__MAIL_LINK && !__RCD_RDNS_SMTP && !__PDF_ATTACH && !__USING_VERP1 && !__HAS_DOMAINKEY_SIG && !__LIST_PARTIAL && !__RCD_RDNS_MX_MESSY && !__XM_VBULLETIN && !__PHPMAILER_MUA && !__HAS_HREF && !__HAS_IMG_SRC && !__SURVEY 
+meta        __XPRIO_MINFP      __XPRIO && !__CT_ENCRYPTED && !ALL_TRUSTED && !__HAS_ERRORS_TO && !__THREADED && !__LONGLINE && !__MAIL_LINK && !__RCD_RDNS_SMTP && !__PDF_ATTACH && !__USING_VERP1 && !__HAS_DOMAINKEY_SIG && !__LIST_PARTIAL && !__RCD_RDNS_MX_MESSY && !__XM_VBULLETIN && !__PHPMAILER_MUA && !__HAS_HREF && !__HAS_IMG_SRC && !__SURVEY && !__RCD_RDNS_MAIL_MESSY && !__HAS_DKIM_SIGHD && !__SUBSCRIPTION_INFO 
 
 ifplugin Mail::SpamAssassin::Plugin::DKIM
   ifplugin Mail::SpamAssassin::Plugin::SPF
@@ -1520,7 +1520,7 @@ tflags      XPRIO              publish
 # some no-ham combinations
 
 meta        __XPRIO_SHORT_SUBJ __XPRIO && __SUBJ_SHORT 
-meta        XPRIO_SHORT_SUBJ   __XPRIO_SHORT_SUBJ && !__HAS_ANY_URI && !__TO_NO_ARROWS_R && !__ENV_AND_HDR_FROM_MATCH && !__VISTA_MSGID 
+meta        XPRIO_SHORT_SUBJ   __XPRIO_SHORT_SUBJ && !__UNPARSEABLE_RELAY_COUNT && !__DKIM_EXISTS && !__RP_MATCHES_RCVD && !__SUBSCRIPTION_INFO 
 describe    XPRIO_SHORT_SUBJ   Has X-Priority header + short subject
 score       XPRIO_SHORT_SUBJ   2.500	# limit
 tflags      XPRIO_SHORT_SUBJ   publish
