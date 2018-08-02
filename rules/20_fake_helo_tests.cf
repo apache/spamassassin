@@ -37,8 +37,11 @@ header __HELO_STATIC_ROGERS X-Spam-Relays-External =~ /^[^\]]+ helo=cmr-\d{1,3}-
 # o167-89-97-77.outbound-mail.sendgrid.net (bug 7592)
 header __HELO_STATIC_SENDGRID X-Spam-Relays-External =~ /^[^\]]+ helo=o\d{1,3}-\d{1,3}-\d{1,3}-\d{1,3}\.outbound-mail\.sendgrid\.net\s[^\]]+ auth= /i
 
+# 50-203-126-142-static.hfc.comcastbusiness.net
+header __HELO_STATIC_COMCAST X-Spam-Relays-External =~ /^[^\]]+ helo=\d{1,3}-\d{1,3}-\d{1,3}-\d{1,3}-static\.hfc\.comcastbusiness\.net\s[^\]]+ auth= /i
+
 describe HELO_STATIC_HOST Relay HELO'd using static hostname
-meta HELO_STATIC_HOST (__HELO_STATIC_ROGERS || __HELO_STATIC_SENDGRID)
+meta HELO_STATIC_HOST (__HELO_STATIC_ROGERS || __HELO_STATIC_SENDGRID || __HELO_STATIC_COMCAST)
 
 # ---------------------------------------------------------------------------
 
@@ -83,7 +86,7 @@ meta HELO_STATIC_HOST (__HELO_STATIC_ROGERS || __HELO_STATIC_SENDGRID)
 # 74.67-201-80.adsl.skynet.be [80.201.67.74]
 # 12-218-225-223.client.mchsi.com [12.218.225.223]
 # (require an alpha first, as legit HELO'ing-as-IP-address is hit otherwise)
-header __HELO_DYNAMIC_IPADDR X-Spam-Relays-External =~ /^[^\]]+ helo=[a-z]\S*\d+[^\d\s]\d+[^\d\s]\d+[^\d\s]\d+[^\d\s][^\.]*\.\S+\.\S+[^\]]+ auth= /i
+header __HELO_DYNAMIC_IPADDR X-Spam-Relays-External =~ /^[^\]]+ helo=(?![^\s\]]+[-.]static[-.])[a-z]\S*\d+[^\d\s]\d+[^\d\s]\d+[^\d\s]\d+[^\d\s][^\.]*\.\S+\.\S+[^\]]+ auth= /i
 meta HELO_DYNAMIC_IPADDR (__HELO_DYNAMIC_IPADDR && !HELO_STATIC_HOST)
 describe HELO_DYNAMIC_IPADDR Relay HELO'd using suspicious hostname (IP addr 1)
 
@@ -130,7 +133,7 @@ describe HELO_DYNAMIC_SPLIT_IP Relay HELO'd using suspicious hostname (Split IP)
 # 113x35x70x11.ap113.ftth.ucom.ne.jp [113.35.70.11]
 # 98x9x3p5siouq.kvknv3sv1quk.3ejp4xzv.com [213.250.20.156]
 # 1.0/24.137.95.202.in-addr.arpa [202.95.137.1]
-header __HELO_DYNAMIC_IPADDR2 X-Spam-Relays-External =~ /^[^\]]+ helo=\d{1,3}(?:[\Wx_]\d{1,3}){3}[^\d\s][^\s.]*\.\S+\.\S+[^\]]+ auth= /i
+header __HELO_DYNAMIC_IPADDR2 X-Spam-Relays-External =~ /^[^\]]+ helo=(?![^\s\]]+[-.]static[-.])\d{1,3}(?:[\Wx_]\d{1,3}){3}[^\d\s][^\s.]*\.\S+\.\S+[^\]]+ auth= /i
 meta HELO_DYNAMIC_IPADDR2  (__HELO_DYNAMIC_IPADDR2 && !HELO_DYNAMIC_SPLIT_IP)
 describe HELO_DYNAMIC_IPADDR2 Relay HELO'd using suspicious hostname (IP addr 2)
 
