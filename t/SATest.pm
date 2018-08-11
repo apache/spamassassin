@@ -1021,7 +1021,7 @@ sub system_or_die {
 
 # (sub exit_status_str copied from Util.pm)
 # map process termination status number to an informative string, and
-# append optional mesage (dual-valued errno or a string or a number),
+# append optional message (dual-valued errno or a string or a number),
 # returning the resulting string
 #
 sub exit_status_str($;$) {
