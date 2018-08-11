@@ -426,7 +426,7 @@ number of messages that the sender already has in the TxRep database.
 
  range [0..5]                   (default: 0)
 
-When SpamAssassin declares a message a clear spam resp. ham during the mesage
+When SpamAssassin declares a message a clear spam resp. ham during the message
 scan, and launches the auto-learn process, sender reputation scores of given
 message will be adjusted by the value of the option L</C<txrep_learn_penalty>>,
 resp. the L</C<txrep_learn_bonus>> in the same way as during the manual learning.
@@ -1510,7 +1510,7 @@ sub check_reputation {
         $self->{checker}->remove_entry($self->{entry}); #forgetting the message ID
     }
   }
-  if (defined $storage) {
+  if (!defined $storage) {
     $self->{checker} = $self->{default_storage};
   }
 
@@ -1633,6 +1633,8 @@ sub open_storages {
   # disabled per bug 7191
   #return 1 unless (!defined $self->{default_storage});
 
+  return 1 if defined ($self->{checker});
+
   my $factory;
   if ($self->{main}->{pers_addr_list_factory}) {
     $factory = $self->{main}->{pers_addr_list_factory};
@@ -1721,8 +1723,8 @@ sub finish {
     $self->{global_storage} = undef;
   } elsif (defined $self->{default_storage}) {
     $self->{default_storage}->finish();
-    $self->{default_storage} = $self->{checker} = undef;
   }
+ $self->{default_storage} = $self->{checker} = undef;
  $self->{factory} = undef;
 }
 
@@ -1812,7 +1814,7 @@ sub learner_new {
 ###########################################################################
   my ($self) = @_;
 
-  $self->{txKeepStoreTied} = 1;
+  $self->{txKeepStoreTied} = undef;
   return $self;
 }
 
