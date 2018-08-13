@@ -2275,28 +2275,28 @@ if can(Mail::SpamAssassin::Conf::feature_bug6558_free)
   score      PHOTO_EDITING_FREEM        3.750	# limit
 endif
 
-
-if can(Mail::SpamAssassin::Conf::feature_bug6558_free)
-  body       __GENERATE_LEADS           /\b(?:new (?:customer|client)s|(?:customer|client|business|new) leads|y?our marketing|(?:marketing|ad(?:vertising)) services?)\b/i
-  tflags     __GENERATE_LEADS           multiple maxhits=5
-  meta       __GENERATE_LEADS_1         __GENERATE_LEADS > 1	# for masscheck analysis
-  meta       __GENERATE_LEADS_2         __GENERATE_LEADS > 2	# for masscheck analysis
-  meta       __GENERATE_LEADS_3         __GENERATE_LEADS > 3	# for masscheck analysis
-  meta       __GENERATE_LEADS_4         __GENERATE_LEADS > 4	# for masscheck analysis
-  meta       __GENERATE_LEADS_MINFP     __GENERATE_LEADS && !__RCD_RDNS_MTA && !__RCD_RDNS_MTA_MESSY && !__RCD_RDNS_SMTP && !__RCD_RDNS_SMTP_MESSY
-
-  meta       MARKETING_FREEM            __GENERATE_LEADS_MINFP && (__REPTO_CHN_FREEM || __freemail_hdr_replyto)
-  describe   MARKETING_FREEM            Marketing service, freemail or CHN replyto
-  score      MARKETING_FREEM            3.500	# limit
-
-  meta       MARKETING_SHORT            __GENERATE_LEADS_MINFP && __LCL__KAM_BODY_LENGTH_LT_1024
-  describe   MARKETING_SHORT            Marketing service, short message
-  score      MARKETING_SHORT            3.500	# limit
-
-  meta       MARKETING_NO_RDNS          __GENERATE_LEADS_MINFP && __RDNS_NONE
-  describe   MARKETING_NO_RDNS          Marketing service, no RDNS
-  score      MARKETING_NO_RDNS          3.500	# limit
-endif
+## not performing well in masscheck
+#if can(Mail::SpamAssassin::Conf::feature_bug6558_free)
+#  body       __GENERATE_LEADS           /\b(?:new (?:customer|client)s|(?:customer|client|business|new) leads|y?our marketing|(?:marketing|ad(?:vertising)) services?)\b/i
+#  tflags     __GENERATE_LEADS           multiple maxhits=5
+#  meta       __GENERATE_LEADS_1         __GENERATE_LEADS > 1	# for masscheck analysis
+#  meta       __GENERATE_LEADS_2         __GENERATE_LEADS > 2	# for masscheck analysis
+#  meta       __GENERATE_LEADS_3         __GENERATE_LEADS > 3	# for masscheck analysis
+#  meta       __GENERATE_LEADS_4         __GENERATE_LEADS > 4	# for masscheck analysis
+#  meta       __GENERATE_LEADS_MINFP     __GENERATE_LEADS && !__RCD_RDNS_MTA && !__RCD_RDNS_MTA_MESSY && !__RCD_RDNS_SMTP && !__RCD_RDNS_SMTP_MESSY
+#
+#  meta       MARKETING_FREEM            __GENERATE_LEADS_MINFP && (__REPTO_CHN_FREEM || __freemail_hdr_replyto)
+#  describe   MARKETING_FREEM            Marketing service, freemail or CHN replyto
+#  score      MARKETING_FREEM            3.500	# limit
+#
+#  meta       MARKETING_SHORT            __GENERATE_LEADS_MINFP && __LCL__KAM_BODY_LENGTH_LT_1024
+#  describe   MARKETING_SHORT            Marketing service, short message
+#  score      MARKETING_SHORT            3.500	# limit
+#
+#  meta       MARKETING_NO_RDNS          __GENERATE_LEADS_MINFP && __RDNS_NONE
+#  describe   MARKETING_NO_RDNS          Marketing service, no RDNS
+#  score      MARKETING_NO_RDNS          3.500	# limit
+#endif
 
 meta       HDR_ORDER_FTSDMCXX_DIRECT  (__HDR_ORDER_FTSDMCXXXX && __DOS_SINGLE_EXT_RELAY)
 describe   HDR_ORDER_FTSDMCXX_DIRECT  Header order similar to spam (FTSDMCXX/boundary variant) direct-to-MX
@@ -2426,5 +2426,18 @@ if can(Mail::SpamAssassin::Conf::feature_bug6558_free)
   body       __GAPPY_SALES_LEADS         /\b(?:business|e?-?mail|your|marketing|advertising)\s(?!sales|leads|campaign)(?:s\s?a\s?l\s?e\s?s|l\s?e\s?a\s?d\s?s|c\s?a\s?m\s?p\s?a\s?i\s?g\s?n)\b/i
   tflags     __GAPPY_SALES_LEADS         multiple maxhits=3
   meta       __GAPPY_SALES_LEADS_MANY    __GAPPY_SALES_LEADS > 2
+  meta       GAPPY_SALES_LEADS_FREEM     __GAPPY_SALES_LEADS_MANY && (__REPTO_CHN_FREEM || __freemail_hdr_replyto)
+  describe   GAPPY_SALES_LEADS_FREEM     Obfuscated marketing text, freemail or CHN replyto
+  score      GAPPY_SALES_LEADS_FREEM     2.000	# limit
+endif
+
+
+if can(Mail::SpamAssassin::Conf::feature_bug6558_free)
+  body       __APP_DEVELOPMENT           /\b(?:mobile apps|(?:apps?|portal) (?:dev(?:elop(?:ment|ed))?|design|test(?:ing)?|U[IX]|maintenance|support))\b/i
+  tflags     __APP_DEVELOPMENT           multiple maxhits=6
+  meta       __APP_DEVELOPMENT_MANY      __APP_DEVELOPMENT > 5
+  meta       APP_DEVELOPMENT_FREEM       __APP_DEVELOPMENT_MANY && (__REPTO_CHN_FREEM || __freemail_hdr_replyto)
+  describe   APP_DEVELOPMENT_FREEM       App development pitch, freemail or CHN replyto
+  score      APP_DEVELOPMENT_FREEM       2.000	# limit
 endif
 
