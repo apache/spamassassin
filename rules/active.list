@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus ena-week0 ena-week1 ena-week2 ena-week3 ena-week4 giovanni grenier jarif jbrooks mmiroslaw-mails-ham mmiroslaw-mails-spam sihde thendrikx; day 2: axb-generic axb-ham-misc axb-ninja ena-week2 llanga; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja ena-week0 ena-week1 ena-week2 ena-week3 ena-week4 llanga mmiroslaw-mails-ham mmiroslaw-mails-spam sihde
+# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus ena-week0 ena-week1 ena-week2 ena-week3 ena-week4 giovanni grenier jarif jbrooks mmiroslaw-mails-ham mmiroslaw-mails-spam sihde thendrikx; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja ena-week0 ena-week1 ena-week2 ena-week3 ena-week4 llanga mmiroslaw-mails-ham mmiroslaw-mails-spam sihde; day 3: axb-generic axb-ham-misc axb-ninja ena-week2 llanga
 
 # tflags publish
 AC_BR_BONANZA
@@ -132,9 +132,6 @@ COMMENT_GIBBERISH
 
 # tflags publish
 CORRUPT_FROM_LINE_IN_HDRS
-
-# good enough
-DATE_IN_FUTURE_Q_PLUS
 
 # tflags net
 DIGEST_MULTIPLE
@@ -872,25 +869,58 @@ TVD_SPACE_ENCODED
 TW_GIBBERISH_MANY
 
 # good enough
-ADVANCE_FEE_4_NEW_FRM_MNY
+ADVANCE_FEE_3_NEW_FRM_MNY
 
 # good enough
-ADVANCE_FEE_4_NEW_MONEY
+ADVANCE_FEE_5_NEW_FRM_MNY
 
 # good enough
-ADVANCE_FEE_5_NEW
+AXB_XMAILER_MIMEOLE_OL_1ECD5
 
 # good enough
-FILL_THIS_FORM_LOAN
+BIGNUM_EMAILS
 
 # good enough
-HDRS_LCASE
+BODY_SINGLE_URI
 
 # good enough
-TO_EQ_FM_DIRECT_MX
+DATE_IN_FUTURE_96_Q
 
 # good enough
-TVD_SPACE_RATIO_MINFP
+DEAR_BENEFICIARY
+
+# good enough
+FILL_THIS_FORM_LONG
+
+# good enough
+FROM_MISSP_DYNIP
+
+# good enough
+FROM_MISSP_TO_UNDISC
+
+# good enough
+FROM_MISSP_USER
+
+# good enough
+LOTTO_AGENT
+
+# good enough
+MONEY_ATM_CARD
+
+# good enough
+MONEY_BARRISTER
+
+# good enough
+NSL_RCVD_FROM_USER
+
+# good enough
+NSL_RCVD_HELO_USER
+
+# good enough
+SERGIO_SUBJECT_VIAGRA01
+
+# good enough
+SHORTENED_URL_SRC
 
 # tflags publish
 UC_GIBBERISH_OBFU
