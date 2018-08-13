@@ -2423,7 +2423,7 @@ header     __XM_MSWINLIVE              X-Mailer =~ /^Microsoft Windows Live Mail
 
 
 if can(Mail::SpamAssassin::Conf::feature_bug6558_free)
-  body       __GAPPY_SALES_LEADS         /\b(?:business|e?-?mail|your|marketing|advertising)\s(?:s\s?a\s?l\s?e\s?s|l\s?e\s?a\s?d\s?s|c\s?a\s?m\s?p\s?a\s?i\s?g\s?n)\b/i
+  body       __GAPPY_SALES_LEADS         /\b(?:business|e?-?mail|your|marketing|advertising)\s(?!sales|leads|campaign)(?:s\s?a\s?l\s?e\s?s|l\s?e\s?a\s?d\s?s|c\s?a\s?m\s?p\s?a\s?i\s?g\s?n)\b/i
   tflags     __GAPPY_SALES_LEADS         multiple maxhits=3
   meta       __GAPPY_SALES_LEADS_MANY    __GAPPY_SALES_LEADS > 2
 endif
