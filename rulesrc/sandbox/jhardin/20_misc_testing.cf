@@ -2352,7 +2352,7 @@ meta       FRNAME_IN_MSG_XPRIO        (__FROM_NAME_IN_MSG && __XPRIO) && !__DKIM
 describe   FRNAME_IN_MSG_XPRIO        From name in message + X-Priority
 score      FRNAME_IN_MSG_XPRIO        3.500	# limit
 tflags     FRNAME_IN_MSG_XPRIO        publish
-meta       FRNAME_IN_MSG_NO_SUBJ      __FROM_NAME_IN_MSG && (__SUBJECT_EMPTY || __XPRIO_SHORT_SUBJ)
+meta       FRNAME_IN_MSG_NO_SUBJ      __FROM_NAME_IN_MSG && (__SUBJECT_EMPTY || __XPRIO_SHORT_SUBJ) && !__DKIM_EXISTS 
 describe   FRNAME_IN_MSG_NO_SUBJ      From name in message + short or no subject
 score      FRNAME_IN_MSG_NO_SUBJ      3.500	# limit
 tflags     FRNAME_IN_MSG_NO_SUBJ      publish
