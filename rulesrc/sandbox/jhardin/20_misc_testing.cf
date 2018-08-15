@@ -2348,13 +2348,13 @@ score      USB_DRIVES                 3.500	# limit
 #header     __SUBJ_CUSTOM_WITH_LOGO    Subject =~ /^(?=.*\bcustom\b).*(?:printed |with )+(?:your )?logos?\b/i
 
 full       __FROM_NAME_IN_MSG         /^From:\s+([^<]\S+\s\S+)\s(?=.{1,1024}^\1$)/sm
-meta       FRNAME_IN_MSG_XPRIO        (__FROM_NAME_IN_MSG && __XPRIO) && !__DKIM_EXISTS 
+meta       FRNAME_IN_MSG_XPRIO        (__FROM_NAME_IN_MSG && __XPRIO) && !__DKIM_EXISTS  && !__SUBJ_NOT_SHORT 
 describe   FRNAME_IN_MSG_XPRIO        From name in message + X-Priority
-score      FRNAME_IN_MSG_XPRIO        3.500	# limit
+score      FRNAME_IN_MSG_XPRIO        2.500	# limit
 tflags     FRNAME_IN_MSG_XPRIO        publish
-meta       FRNAME_IN_MSG_NO_SUBJ      __FROM_NAME_IN_MSG && (__SUBJECT_EMPTY || __XPRIO_SHORT_SUBJ) && !__DKIM_EXISTS 
+meta       FRNAME_IN_MSG_NO_SUBJ      __FROM_NAME_IN_MSG && (__SUBJECT_EMPTY || __XPRIO_SHORT_SUBJ) && !__DKIM_EXISTS && !__ANY_IMAGE_ATTACH 
 describe   FRNAME_IN_MSG_NO_SUBJ      From name in message + short or no subject
-score      FRNAME_IN_MSG_NO_SUBJ      3.500	# limit
+score      FRNAME_IN_MSG_NO_SUBJ      2.500	# limit
 tflags     FRNAME_IN_MSG_NO_SUBJ      publish
 
 
@@ -2420,6 +2420,8 @@ score      FROM_ADDR_WS                3.000	# limit
 tflags     FROM_ADDR_WS                publish
 
 header     __XM_MSWINLIVE              X-Mailer =~ /^Microsoft Windows Live Mail \d+\.\d+\.\d+\.\d+/
+header     __XM_IPADMAIL               X-Mailer =~ /^iPad Mail \([0-9A-F]{4,8}\)/
+header     __XM_IPHONEMAIL             X-Mailer =~ /^iPhone Mail \([0-9A-F]{4,8}\)/
 
 
 if can(Mail::SpamAssassin::Conf::feature_bug6558_free)
@@ -2428,7 +2430,8 @@ if can(Mail::SpamAssassin::Conf::feature_bug6558_free)
   meta       __GAPPY_SALES_LEADS_MANY    __GAPPY_SALES_LEADS > 2
   meta       GAPPY_SALES_LEADS_FREEM     __GAPPY_SALES_LEADS_MANY && (__REPTO_CHN_FREEM || __freemail_hdr_replyto)
   describe   GAPPY_SALES_LEADS_FREEM     Obfuscated marketing text, freemail or CHN replyto
-  score      GAPPY_SALES_LEADS_FREEM     2.000	# limit
+  score      GAPPY_SALES_LEADS_FREEM     3.500	# limit
+  tflags     GAPPY_SALES_LEADS_FREEM     publish
 endif
 
 
@@ -2438,6 +2441,8 @@ if can(Mail::SpamAssassin::Conf::feature_bug6558_free)
   meta       __APP_DEVELOPMENT_MANY      __APP_DEVELOPMENT > 5
   meta       APP_DEVELOPMENT_FREEM       __APP_DEVELOPMENT_MANY && (__REPTO_CHN_FREEM || __freemail_hdr_replyto)
   describe   APP_DEVELOPMENT_FREEM       App development pitch, freemail or CHN replyto
-  score      APP_DEVELOPMENT_FREEM       2.000	# limit
+  score      APP_DEVELOPMENT_FREEM       3.500	# limit
+  tflags     APP_DEVELOPMENT_FREEM       publish
 endif
+
 
