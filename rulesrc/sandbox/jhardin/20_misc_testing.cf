@@ -2439,10 +2439,16 @@ if can(Mail::SpamAssassin::Conf::feature_bug6558_free)
   body       __APP_DEVELOPMENT           /\b(?:mobile apps|(?:apps?|portal) (?:dev(?:elop(?:ment|ed))?|design|test(?:ing)?|U[IX]|maintenance|support))\b/i
   tflags     __APP_DEVELOPMENT           multiple maxhits=6
   meta       __APP_DEVELOPMENT_MANY      __APP_DEVELOPMENT > 5
+
   meta       APP_DEVELOPMENT_FREEM       __APP_DEVELOPMENT_MANY && (__REPTO_CHN_FREEM || __freemail_hdr_replyto)
   describe   APP_DEVELOPMENT_FREEM       App development pitch, freemail or CHN replyto
   score      APP_DEVELOPMENT_FREEM       3.500	# limit
   tflags     APP_DEVELOPMENT_FREEM       publish
+
+  meta       APP_DEVELOPMENT_NORDNS      __APP_DEVELOPMENT && __RDNS_NONE 
+  describe   APP_DEVELOPMENT_NORDNS      App development pitch, no rDNS
+  score      APP_DEVELOPMENT_NORDNS      2.000	# limit
+  tflags     APP_DEVELOPMENT_NORDNS      publish
 endif
 
 
