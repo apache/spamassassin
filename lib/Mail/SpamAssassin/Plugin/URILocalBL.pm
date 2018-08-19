@@ -420,12 +420,14 @@ sub check_uri_local_bl {
   my $cont;
   my $db_info;
   my $isp;
+ 
+  use constant HAS_GEOIP => eval { require Geo::IP; };
+  use constant HAS_GEOIP2 => eval { require GeoIP2::Database::Reader; };
 
   my $conf_country_db_path = $self->{'main'}{'resolver'}{'conf'}->{uri_country_db_path};
   my $conf_country_db_isp_path = $self->{'main'}{'resolver'}{'conf'}->{uri_country_db_isp_path};
   # If country_db_path is set I am using GeoIP2 api
-  if ( ( defined $conf_country_db_path ) || ( defined $conf_country_db_isp_path ) ) {
-    use GeoIP2::Database::Reader;
+  if ( HAS_GEOIP2 and ( ( defined $conf_country_db_path ) or ( defined $conf_country_db_isp_path ) ) ) {
 
     $self->{geoip} = GeoIP2::Database::Reader->new(
   		file	=> $conf_country_db_path,
@@ -444,8 +446,10 @@ sub check_uri_local_bl {
       warn "$conf_country_db_isp_path not found" unless $self->{geoisp};
     }
     $self->{use_geoip2} = 1;
-  } else {
-    use Geo::IP;
+  } elsif ( HAS_GEOIP ) {
+    BEGIN {
+      Geo::IP->import( qw(GEOIP_MEMORY_CACHE GEOIP_CHECK_CACHE GEOIP_ISP_EDITION) );
+    }
     $self->{use_geoip2} = 0;
     # need GeoIP C library 1.6.3 and GeoIP perl API 1.4.4 or later to avoid messages leaking - Bug 7153
     my $gic_wanted = version->parse('v1.6.3');
@@ -469,6 +473,9 @@ sub check_uri_local_bl {
       close(OLDERR);
     }
   $db_info = sub { return "Geo::IP " . ($self->{geoip}->database_info || '?') };
+  } else {
+    dbg("No GeoIP module available");
+    return 0;
   }
 
   my %uri_detail = %{ $permsg->get_uri_detail_list() };
