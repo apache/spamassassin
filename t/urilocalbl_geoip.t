@@ -15,10 +15,12 @@ use lib '.'; use lib 't';
 use SATest; sa_t_init("urilocalbl");
 
 use constant HAS_GEOIP => eval { require Geo::IP; };
+use constant HAS_GEOIP_CONF => eval { Geo::IP->new(GEOIP_MEMORY_CACHE | GEOIP_CHECK_CACHE); };
 
 use Test::More;
 
 plan skip_all => "Geo::IP not installed" unless HAS_GEOIP;
+plan skip_all => "Geo::IP not configured" unless HAS_GEOIP_CONF;
 plan tests => 3;
 
 # ---------------------------------------------------------------------------
