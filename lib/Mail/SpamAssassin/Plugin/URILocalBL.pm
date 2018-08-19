@@ -114,6 +114,9 @@ use version;
 
 our @ISA = qw(Mail::SpamAssassin::Plugin);
 
+use constant HAS_GEOIP => eval { require Geo::IP; };
+use constant HAS_GEOIP2 => eval { require GeoIP2::Database::Reader; };
+
 # constructor
 sub new {
   my $class = shift;
@@ -421,9 +424,6 @@ sub check_uri_local_bl {
   my $db_info;
   my $isp;
  
-  use constant HAS_GEOIP => eval { require Geo::IP; };
-  use constant HAS_GEOIP2 => eval { require GeoIP2::Database::Reader; };
-
   my $conf_country_db_path = $self->{'main'}{'resolver'}{'conf'}->{uri_country_db_path};
   my $conf_country_db_isp_path = $self->{'main'}{'resolver'}{'conf'}->{uri_country_db_isp_path};
   # If country_db_path is set I am using GeoIP2 api
