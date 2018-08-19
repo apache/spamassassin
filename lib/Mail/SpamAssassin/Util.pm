@@ -278,9 +278,16 @@ sub untaint_hostname {
 #  untaint_var(\%ENV);
 #
 sub untaint_var {
-# my $arg = $_[0];  # avoid copying unnecessarily
+  # my $arg = $_[0];  # avoid copying unnecessarily
   if (!ref $_[0]) { # optimized by-far-the-most-common case
-    return defined $_[0] ? scalar each %{ { $_[0] => undef } } : undef; ## no critic (ProhibitExplicitReturnUndef)  - See Bug 7120 - fast untaint (hash keys cannot be tainted)
+    # Bug 7591 not using this faster untaint. https://bz.apache.org/SpamAssassin/show_bug.cgi?id=7591 
+      #return defined $_[0] ? scalar each %{ { $_[0] => undef } } : undef; ## no critic (ProhibitExplicitReturnUndef)  - See Bug 7120 - fast untaint (hash keys cannot be tainted)
+    no re 'taint';  # override a  "use re 'taint'"  from outer scope
+    return undef if !defined $_[0]; ## no critic (ProhibitExplicitReturnUndef)  - See Bug 7120
+    local($1); # avoid Perl taint bug: tainted global $1 propagates taintedness
+    $_[0] =~ /^(.*)\z/s;
+    return $1;
+
   } else {
     my $r = ref $_[0];
     if ($r eq 'ARRAY') {
