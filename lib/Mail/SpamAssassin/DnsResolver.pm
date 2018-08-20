@@ -733,7 +733,7 @@ if successful.  Dies on error.
 
 =cut
 
-sub bgread() {
+sub bgread {
   my ($self) = @_;
   my $sock = $self->{sock};
   my $packetsize = $self->{res}->udppacketsize;
