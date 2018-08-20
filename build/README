@@ -1,51 +1,39 @@
-SPAMASSASSIN DEVELOPMENT SNAPSHOT PROCEDURE
-===========================================
-
-- cd to the directory for the codebase you want the devel tree to
-  come from
-
-    ssh spamassassin.zones.apache.org
-    cd [checkedoutdir]
-
-  NOTE: SpamAssassin.Zones is a crashed box replaced by SpamAssassin-vm.
-  A copy of the sabuildtools is in
-  /root/zonestorage-restore/spamassassin/export/home/kmcgrail/sabuildtools
-
-- ensure the required code and data is available for the build scripts:
-
-    $HOME/sabuildtools
-
-  All can be copied (or symlinked) from ~jm on spamassassin.zones.apache.org if
-  required.
-
-- ensure your PATH is correct:
-
-    PATH=$HOME/sabuildtools/bin:$PATH
-
-- run "./build/update_devel" to build the tar.gz files.
-
-- next run "./build/update_devel_rules" to build the rules tarball,
-  or run "./build/repackage_latest_update_rules" to repackage the
-  latest file on updates.spamassassin.org.
-
-- by default, they're written to ~/public_html/devel/ . 
-  Copy them to wherever you want, yourself.
-
-- KAM has included all of these on one of his devel systems with perl
-  5.8.6 (the earliest supported version of Perl as of 4/28/2015).  One
-  note is that you need webmake 2.4 from
-    http://webmake.taint.org/devel/HTML-WebMake-2.4.tar.gz
-  
-  Also, a copy is mirrored at www.pccc.com/downloads/SpamAssassin
-
-
-SPAMASSASSIN RELEASE PROCEDURE
-==============================
+APACHE SPAMASSASSIN RELEASE PROCEDURE
+=====================================
 
 - First off, checkout the branch or trunk you wish to build.
 
+- To build a release you need gpg, a few perl modules, re2c
+  and the signing key for the project. For CentOS 7.5, the following worked:
+
+  - yum install perl* 
+  - yum remover perl-homedir
+
+  - using source and CPAN as root
+    - compiled razor-agents
+    - cpan install Net::Patricia
+    - cpan install Geo::IP
+    - cpan install Devel::SawAmpersand
+    - custom compiled re2c with  ./configure --prefix=/usr/local
+
+  - when you run perl Makefile.PL, you want full depencies such as this
+    snippet:
+
+    checking module dependencies and their versions...
+    checking binary dependencies and their versions...
+    <snip>
+    dependency check complete...
+
+    optional binary missing or nonfunctional: fetch
+
+  - NOTE: Missing Fetch is ok if we have wget or curl
+
+  - You need ~/sabuildtools/bin with a symlink to gpg
+
+  - You need ~/sabuildtoosl/sasigningkey with chmod 700 
+
 - Ensure ExtUtils::MakeMaker is version 6.46 or later, to create
-  a detailed-enough META.yml (TODO: this should not be required.)
+  a detailed-enough META.yml 
 
     perl -MExtUtils::MakeMaker -e 'print $ExtUtils::MakeMaker::VERSION'
 
@@ -55,14 +43,44 @@ SPAMASSASSIN RELEASE PROCEDURE
     cd [checkedoutdir]
     svn status
 
-  The output should be blanke or look like this:
+  The output should be blank or look like this:
 
+  ?      rulesrc
   ?      rules/SIQ.pm
   ?      rules/sandbox-hstern.pm
   ?      rules/sandbox-felicity.pm
 
   (ie., no "M" or "C" files; any files marked "M" have been locally
   modified, and should be "svn revert"ed before you continue.)
+
+- Rule Source is only in trunk.  If you are building a branch, checkout 
+  trunk as well and symlink it, i.e. rulesrc -> ../trunk/rulesrc/
+
+- Rules are ONLY published from trunk.  Rule development should use plugin
+  and version conditions to make it so one ruleset works on all modern
+  versions of SA. If you are building a branch, checkout trunk as well and
+  symlink the rules from trunk, i.e. rules -> ../trunk/rules/
+
+  With the rules in trunk symlinked, you can expect MANIFEST warnings when
+  running things such as make distclean such as:
+
+    No such file: rules/20_aux_tlds.cf
+    No such file: rules/active.list
+    No such file: rules/init.pre
+    No such file: rules/languages
+    No such file: rules/local.cf
+    No such file: rules/regression_tests.cf
+    No such file: rules/sa-update-pubkey.txt
+    No such file: rules/user_prefs.template
+    No such file: rules/v310.pre
+    No such file: rules/v312.pre
+    No such file: rules/v320.pre
+    No such file: rules/v330.pre
+    No such file: rules/v340.pre
+    No such file: rules/v341.pre
+    No such file: rules/v342.pre
+
+  Don't remove the lines from the MANIFEST though!
 
 - Consider updating the TLD list in 20_aux_tlds.cf.  As of 4/6/2015,
   this is not automated but bug 7165 is open for this purpose.
