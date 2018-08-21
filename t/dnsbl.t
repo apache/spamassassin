@@ -160,5 +160,6 @@ describe DNSBL_SB_MISS	DNSBL SenderBase miss
 tflags DNSBL_SB_MISS	net
 ");
 
+#note: don't leave -D here, it causes spurious passes
 sarun ("-D -t < data/spam/dnsbl.eml 2>&1", \&patterns_run_cb);
 ok_all_patterns();
