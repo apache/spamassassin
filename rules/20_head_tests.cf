@@ -578,9 +578,6 @@ describe UNPARSEABLE_RELAY      Informational: message has unparseable relay lin
 header RCVD_HELO_IP_MISMATCH	eval:helo_ip_mismatch()
 describe RCVD_HELO_IP_MISMATCH	Received: HELO and IP do not match, but should
 
-header RCVD_NUMERIC_HELO	eval:check_for_numeric_helo()
-describe RCVD_NUMERIC_HELO	Received: contains an IP address used for HELO
-
 # not used directly right now due to FPs; but CONFIRMED_FORGED turns it
 # into a 1.0 S/O rule anyway, so that's not a problem ;)
 # 2.626   3.6340   1.5251    0.704   0.34    1.44  FORGED_RCVD_TRAIL

@@ -25,7 +25,7 @@
 
 #TESTING OF RULES FOR https://issues.apache.org/SpamAssassin/show_bug.cgi?id=6487
 
-#rule that excludes the dotted-quad HELOs caught by RCVD_NUMERIC_HELO
+#rule that excludes the dotted-quad HELOs caught by old rule RCVD_NUMERIC_HELO
 header 		CK_HELO_DYNAMIC_SPLIT_IP 	X-Spam-Relays-Untrusted =~ /^[^\]]+helo=(?!(?:\d+\.){4})\d+[^\d\s]+\d+[^\d\s]\d+[^\d\s]\d+[^\d\s]/i
 describe 	CK_HELO_DYNAMIC_SPLIT_IP	Relay HELO'd using suspicious hostname (Split IP)
 score		CK_HELO_DYNAMIC_SPLIT_IP	1.5
