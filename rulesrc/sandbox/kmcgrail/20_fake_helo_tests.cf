@@ -36,7 +36,7 @@ score		CK_HELO_GENERIC		0.25
 
 header   __HELO_MISC_IP        	X-Spam-Relays-Untrusted =~ /^[^\]]+ helo=[^a-z\?]\S{0,30}(?:\d{1,3}[^\d]){4}[^\]]+ auth= /i
 
-meta     	HELO_MISC_IP          	(__HELO_MISC_IP && !HELO_DYNAMIC_IPADDR && !HELO_DYNAMIC_IPADDR2 && !HELO_DYNAMIC_SPLIT_IP && !HELO_DYNAMIC_HCC && !HELO_DYNAMIC_DIALIN && ((TVD_RCVD_IP4 + TVD_RCVD_IP + RCVD_NUMERIC_HELO) <2))
+meta     	HELO_MISC_IP          	(__HELO_MISC_IP && !HELO_DYNAMIC_IPADDR && !HELO_DYNAMIC_IPADDR2 && !HELO_DYNAMIC_SPLIT_IP && !HELO_DYNAMIC_HCC && !HELO_DYNAMIC_DIALIN && ((TVD_RCVD_IP4 + TVD_RCVD_IP) <2))
 describe	HELO_MISC_IP		Looking for more Dynamic IP Relays
 score		HELO_MISC_IP		0.25
 
