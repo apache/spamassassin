@@ -3,6 +3,9 @@ APACHE SPAMASSASSIN RELEASE PROCEDURE
 
 - First off, checkout the branch or trunk you wish to build.
 
+- Using DNS resolvers like 8.8.8.8 did NOT work.  It causes spurious
+  failures on things like dnsbl.t.  Use a real DNS server.
+
 - To build a release you need gpg, a few perl modules, re2c
   and the signing key for the project. For CentOS 7.5, the following worked:
 
@@ -56,6 +59,9 @@ APACHE SPAMASSASSIN RELEASE PROCEDURE
 - Rule Source is only in trunk.  If you are building a branch, checkout 
   trunk as well and symlink it, i.e. rulesrc -> ../trunk/rulesrc/
 
+- t.rule Source is only in trunk.  If you are building a branch, checkout
+  trunk as well and symlink it, i.e. t.rules -> ../trunk/t.rules/
+
 - Rules are ONLY published from trunk.  Rule development should use plugin
   and version conditions to make it so one ruleset works on all modern
   versions of SA. If you are building a branch, checkout trunk as well and
@@ -80,23 +86,25 @@ APACHE SPAMASSASSIN RELEASE PROCEDURE
     No such file: rules/v341.pre
     No such file: rules/v342.pre
 
-  Don't remove the lines from the MANIFEST though!
+  NOTE: Don't remove the lines from the MANIFEST though!
 
 - Consider updating the TLD list in 20_aux_tlds.cf.  As of 4/6/2015,
   this is not automated but bug 7165 is open for this purpose.
 
-- edit lib/Mail/SpamAssassin.pm and comment the $IS_DEVEL_BUILD
-  line.   Ensure the correct version number is present in $VERSION
+- edit lib/Mail/SpamAssassin.pm and comment out the $IS_DEVEL_BUILD
+  line as noted. Ensure the correct version number is present in $VERSION
   and @EXTRA_VERSION.
 
   Prereleases: formatted like this: "pre4" -- in $EXTRA_VERSION, and
-  $IS_DEVEL_BUILD is left as 1 instead of commented. When referred to in
-  full, it's "3.1.0-pre4".
+  $IS_DEVEL_BUILD is 0. When referred to in full, it's "3.1.0-pre4".
 
   Release candidates: formatted like this: "rc2" -- in $EXTRA_VERSION, and
-  $IS_DEVEL_BUILD is commented. When referred to in full, it's "3.1.0-rc2".
+  $IS_DEVEL_BUILD is 0. When referred to in full, it's "3.1.0-rc2".
 
-  Full releases: comment out @EXTRA_VERSION
+  $IS_DEVEL_BUILD is 0 even with rc and pre versions because rc and pre
+  numbers are never reused.  Just increment higher each time.
+
+  Full releases: no @EXTRA_VERSION is needed and IS_DEVEL_BUILD is 0.
 
 - Ensure the new version number takes hold:
 
@@ -109,8 +117,11 @@ APACHE SPAMASSASSIN RELEASE PROCEDURE
   NOTE: If the date is old, don't worry, it will change later with the
         relbuild checkout.
 
-- create the Changes file.  Do this step on your own checkout, as
-  the release checkout is read-only.   
+  Also, a warning about "warn: config: could not find site rules
+  directory" is ok too.  It's because no init.pre exists in the default
+  rules location.
+
+- create the Changes file.  
 
   MAKE CERTAIN THIS IS RUN IN THE ROOT OF YOUR CHECKOUT!
 
@@ -160,6 +171,27 @@ APACHE SPAMASSASSIN RELEASE PROCEDURE
 
     make distcheck
 
+  With the rules in trunk symlinked, you can expect MANIFEST warnings when
+  running things such as make distclean such as:
+
+    No such file: rules/20_aux_tlds.cf
+    No such file: rules/active.list
+    No such file: rules/init.pre
+    No such file: rules/languages
+    No such file: rules/local.cf
+    No such file: rules/regression_tests.cf
+    No such file: rules/sa-update-pubkey.txt
+    No such file: rules/user_prefs.template
+    No such file: rules/v310.pre
+    No such file: rules/v312.pre
+    No such file: rules/v320.pre
+    No such file: rules/v330.pre
+    No such file: rules/v340.pre
+    No such file: rules/v341.pre
+    No such file: rules/v342.pre
+
+  NOTE: Don't remove the lines from the MANIFEST though!
+
 - run "make disttest" to ensure all default tests pass once the
   distribution is fully packaged.  (this takes ~7 minutes on my system
   2017-04-22)
@@ -178,11 +210,19 @@ APACHE SPAMASSASSIN RELEASE PROCEDURE
   kill all running spamd processes.  This release test suite is intended
   for a development environment.
 
+    NOTE: These likely must run as root.
+
     make test TEST_FILES="xt/*.t"
 
-    Note: As of 2014-02-04, all of these tests can pass test 
-          with no tests skipped except dcc.t which doesn't
-          properly test if dcc is not available - Bug 6944.
+    FAILURE NOTES: 
+
+          50_dcc.t - not tested and dcc.t which doesn't
+          properly test if dcc is available - Bug 6944.
+
+	  50_razor2.t - you need to register for razor
+          and the sample of a bad email may have fallen
+          out of their database.
+
 
 - Check in the updated Changes file, and SpamAssassin.pm.
 

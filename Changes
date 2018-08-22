@@ -1,4 +1,709 @@
 ------------------------------------------------------------------------
+r1838429 | kmcgrail | 2018-08-20 14:20:05 +0000 (Mon, 20 Aug 2018) | 1 
+line
+ 
+ framework for 3.4.2 announcement
+------------------------------------------------------------------------
+r1838390 | kmcgrail | 2018-08-19 16:14:03 +0000 (Sun, 19 Aug 2018) | 1 
+line
+ 
+ Fixing the MANIFEST
+------------------------------------------------------------------------
+r1838387 | kmcgrail | 2018-08-19 16:13:01 +0000 (Sun, 19 Aug 2018) | 1 
+line
+ 
+  Bug 7591 not using this faster untaint
+------------------------------------------------------------------------
+r1838374 | gbechis | 2018-08-19 10:10:16 +0000 (Sun, 19 Aug 2018) | 2 
+lines
+ 
+ refactor some "require" code
+ 
+------------------------------------------------------------------------
+r1838365 | gbechis | 2018-08-19 08:54:59 +0000 (Sun, 19 Aug 2018) | 2 
+lines
+ 
+ skip tests if GeoIP is installed but there are no databases available
+ 
+------------------------------------------------------------------------
+r1838364 | gbechis | 2018-08-19 08:52:11 +0000 (Sun, 19 Aug 2018) | 2 
+lines
+ 
+ better detection of GeoIP installed modules
+ 
+------------------------------------------------------------------------
+r1837877 | gbechis | 2018-08-11 18:33:18 +0000 (Sat, 11 Aug 2018) | 2 
+lines
+ 
+ typo
+ 
+------------------------------------------------------------------------
+r1837876 | gbechis | 2018-08-11 18:23:51 +0000 (Sat, 11 Aug 2018) | 3 
+lines
+ 
+ close file descriptors when they are no more needed
+ probably only partial fix for #7587
+ 
+------------------------------------------------------------------------
+r1837466 | gbechis | 2018-08-05 13:39:41 +0000 (Sun, 05 Aug 2018) | 4 
+lines
+ 
+ Starting from 04/01/2018 GeoLite Legacy databases have been 
+discontinued.      
+ Add optional support to new Maxmind database type (GeoIP2).
+ fixes bz #7529
+ 
+------------------------------------------------------------------------
+r1837465 | gbechis | 2018-08-05 13:38:31 +0000 (Sun, 05 Aug 2018) | 8 
+lines
+ 
+ Starting from 04/01/2018 GeoLite Legacy databases have been 
+discontinued.      
+ Add optional support to new Maxmind database type (GeoIP2).
+ In addiction to that add support also to IP::Country::DB_File database;
+ IP::Country::DB_File database is created from official 
+Ripe/Arin/Afrinic/... 
+ data, it's faster than IP::Country::Fast on updating a database and it 
+supports ipv6.
+ 
+ fixes bz #7529
+ 
+------------------------------------------------------------------------
+r1836883 | gbechis | 2018-07-28 09:38:39 +0000 (Sat, 28 Jul 2018) | 3 
+lines
+ 
+ Add possibility to match multiple rules
+ for a single uri, bz #7595
+ 
+------------------------------------------------------------------------
+r1836855 | gbechis | 2018-07-27 18:03:13 +0000 (Fri, 27 Jul 2018) | 2 
+lines
+ 
+ improve tests
+ 
+------------------------------------------------------------------------
+r1836516 | gbechis | 2018-07-23 21:23:37 +0000 (Mon, 23 Jul 2018) | 2 
+lines
+ 
+ Add Mail::SpamAssassin::Plugin::URILocalBL regression tests
+ 
+------------------------------------------------------------------------
+r1836275 | gbechis | 2018-07-19 14:19:48 +0000 (Thu, 19 Jul 2018) | 2 
+lines
+ 
+ Mail::SpamAssassin::Plugin::RelayCountry regression tests
+ 
+------------------------------------------------------------------------
+r1835030 | gbechis | 2018-07-03 22:20:19 +0000 (Tue, 03 Jul 2018) | 2 
+lines
+ 
+ make it work even if SA is not installed
+ 
+------------------------------------------------------------------------
+r1834725 | gbechis | 2018-06-30 07:01:43 +0000 (Sat, 30 Jun 2018) | 2 
+lines
+ 
+ typo in man page
+ 
+------------------------------------------------------------------------
+r1834723 | gbechis | 2018-06-30 06:37:15 +0000 (Sat, 30 Jun 2018) | 3 
+lines
+ 
+ correct syntax for GRANT with PostgreSQL
+ bz 7281
+ 
+------------------------------------------------------------------------
+r1834722 | gbechis | 2018-06-30 06:12:21 +0000 (Sat, 30 Jun 2018) | 5 
+lines
+ 
+ remove an extra blank line put on the MIME-parts
+ array. That way the resultant email analized
+ by SA was a bit different from the original one.
+ bz 6708
+ 
+------------------------------------------------------------------------
+r1834452 | billcole | 2018-06-26 17:37:23 +0000 (Tue, 26 Jun 2018) | 1 
+line
+ 
+ Test for bug 7591
+------------------------------------------------------------------------
+r1834327 | billcole | 2018-06-25 13:34:44 +0000 (Mon, 25 Jun 2018) | 1 
+line
+ 
+ REALLY revert whitewash fix of t/idn_dots.t
+------------------------------------------------------------------------
+r1834325 | billcole | 2018-06-25 13:30:17 +0000 (Mon, 25 Jun 2018) | 1 
+line
+ 
+ Revert whitewash fix of t/idn_dots.t
+------------------------------------------------------------------------
+r1834218 | billcole | 2018-06-23 17:21:42 +0000 (Sat, 23 Jun 2018) | 1 
+line
+ 
+ add 'use utf8' for older Perl
+------------------------------------------------------------------------
+r1834151 | kmcgrail | 2018-06-22 18:09:19 +0000 (Fri, 22 Jun 2018) | 1 
+line
+ 
+ Working on idn_dots.t test failures for RC4
+------------------------------------------------------------------------
+r1833929 | gbechis | 2018-06-20 17:16:33 +0000 (Wed, 20 Jun 2018) | 3 
+lines
+ 
+ silence a warning if GeoIP v6 database is not installed
+ but a v6 address is on relay headers
+ 
+------------------------------------------------------------------------
+r1833660 | gbechis | 2018-06-17 09:41:02 +0000 (Sun, 17 Jun 2018) | 11 
+lines
+ 
+ partial fix for bz 7529
+ starting from 04/01/2018, Geolite legacy databases has been
+ discontinued and they will be no more updates.
+ Add a "country_db_type" option that will let the user choose
+ between GeoIP and IP::Country::Fast databases.
+ By default GeoIP is enabled and there is still a fallback
+ on IP::Country::Fast as in previuos implementation.
+ 
+ IP::Country::Fast has no ipv6 support, so a better api
+ should be adopted sooner or later.
+ 
+------------------------------------------------------------------------
+r1833617 | billcole | 2018-06-15 17:33:15 +0000 (Fri, 15 Jun 2018) | 1 
+line
+ 
+ Reverting prematurely-committed changes
+------------------------------------------------------------------------
+r1833615 | billcole | 2018-06-15 17:23:05 +0000 (Fri, 15 Jun 2018) | 1 
+line
+ 
+ Corrected link to Pyzor documentation site, replacing OTHER dead SF link.
+------------------------------------------------------------------------
+r1832678 | gbechis | 2018-06-01 11:15:23 +0000 (Fri, 01 Jun 2018) | 2 
+lines
+ 
+ fix custom headers length, fix another fp via Google Groups
+ 
+------------------------------------------------------------------------
+r1831955 | gbechis | 2018-05-21 06:24:55 +0000 (Mon, 21 May 2018) | 2 
+lines
+ 
+ more generic regexp to match ipv6
+ 
+------------------------------------------------------------------------
+r1831837 | gbechis | 2018-05-18 09:04:10 +0000 (Fri, 18 May 2018) | 2 
+lines
+ 
+ Unbreak FORGED_GMAIL_RCVD
+ 
+------------------------------------------------------------------------
+r1831826 | gbechis | 2018-05-18 07:13:02 +0000 (Fri, 18 May 2018) | 2 
+lines
+ 
+ Fix another fp on FORGED_GMAIL_RCVD rule
+ 
+------------------------------------------------------------------------
+r1831443 | gbechis | 2018-05-11 19:44:30 +0000 (Fri, 11 May 2018) | 2 
+lines
+ 
+ fix fp for FORGED_GMAIL_RCVD rule
+ 
+------------------------------------------------------------------------
+r1831329 | billcole | 2018-05-10 12:08:55 +0000 (Thu, 10 May 2018) | 1 
+line
+ 
+ revert r1823175
+------------------------------------------------------------------------
+r1831273 | billcole | 2018-05-09 17:37:07 +0000 (Wed, 09 May 2018) | 1 
+line
+ 
+ Improve spamd PID detection with a fixed pidfile
+------------------------------------------------------------------------
+r1831272 | billcole | 2018-05-09 17:35:07 +0000 (Wed, 09 May 2018) | 1 
+line
+ 
+ Decouple mass-check from "base" perl
+------------------------------------------------------------------------
+r1831073 | gbechis | 2018-05-07 06:37:50 +0000 (Mon, 07 May 2018) | 3 
+lines
+ 
+ Enforce a C locale when logging to stder
+ bz #7305
+ 
+------------------------------------------------------------------------
+r1829671 | gbechis | 2018-04-20 17:45:03 +0000 (Fri, 20 Apr 2018) | 2 
+lines
+ 
+ Test spamc also with --option=value case
+ 
+------------------------------------------------------------------------
+r1829628 | gbechis | 2018-04-20 06:48:21 +0000 (Fri, 20 Apr 2018) | 3 
+lines
+ 
+ too much free(3) will kill --reporttype=option handling
+ problem spotted by Reio Remma, thanks
+ 
+------------------------------------------------------------------------
+r1829033 | gbechis | 2018-04-13 06:45:35 +0000 (Fri, 13 Apr 2018) | 5 
+lines
+ 
+ Add an option to score uris per continent.
+ Possible continent codes are:
+ af, as, eu, na, oc, sa for Africa, Asia, Europe, North America, 
+ Oceania  and South America.
+ 
+------------------------------------------------------------------------
+r1828218 | kmcgrail | 2018-04-03 11:28:11 +0000 (Tue, 03 Apr 2018) | 1 
+line
+ 
+ Adding Manifest items fo3 3.42
+------------------------------------------------------------------------
+r1826916 | billcole | 2018-03-16 03:15:19 +0000 (Fri, 16 Mar 2018) | 1 
+line
+ 
+ added optional support for SHA256 in addition to or instead of SHA1 
+validation
+------------------------------------------------------------------------
+r1826822 | gbechis | 2018-03-15 14:27:09 +0000 (Thu, 15 Mar 2018) | 2 
+lines
+ 
+ fix for perl older than 5.24
+ 
+------------------------------------------------------------------------
+r1826771 | gbechis | 2018-03-15 07:33:00 +0000 (Thu, 15 Mar 2018) | 4 
+lines
+ 
+ If there are rules present in score but not in .cf files a warning is 
+printed,
+ shut up the warning.
+ bz 7535
+ 
+------------------------------------------------------------------------
+r1826742 | gbechis | 2018-03-14 17:36:30 +0000 (Wed, 14 Mar 2018) | 3 
+lines
+ 
+ detect more http[s] url mismatches
+ bz 6977
+ 
+------------------------------------------------------------------------
+r1826740 | gbechis | 2018-03-14 17:26:02 +0000 (Wed, 14 Mar 2018) | 2 
+lines
+ 
+ fix utf8 mode
+ 
+------------------------------------------------------------------------
+r1826582 | billcole | 2018-03-12 17:49:59 +0000 (Mon, 12 Mar 2018) | 1 
+line
+ 
+ Update documentation of 'eval' rule method source, sanity-check method 
+calls. Fixes Bug #7558
+------------------------------------------------------------------------
+r1826356 | billcole | 2018-03-09 16:02:43 +0000 (Fri, 09 Mar 2018) | 1 
+line
+ 
+ Partial fix for bug 7558
+------------------------------------------------------------------------
+r1826202 | gbechis | 2018-03-08 10:48:04 +0000 (Thu, 08 Mar 2018) | 3 
+lines
+ 
+ add homedir parameter in dccproc call
+ RedHat bz 1532139 
+ 
+------------------------------------------------------------------------
+r1826187 | gbechis | 2018-03-08 08:17:53 +0000 (Thu, 08 Mar 2018) | 3 
+lines
+ 
+ fix utf8 decoding in some corner cases
+ bz 7520
+ 
+------------------------------------------------------------------------
+r1826179 | billcole | 2018-03-08 06:41:57 +0000 (Thu, 08 Mar 2018) | 1 
+line
+ 
+ Fix for Bug #7557
+------------------------------------------------------------------------
+r1826177 | billcole | 2018-03-08 05:33:13 +0000 (Thu, 08 Mar 2018) | 1 
+line
+ 
+ Fix for bug #7556
+------------------------------------------------------------------------
+r1825725 | gbechis | 2018-03-02 13:57:33 +0000 (Fri, 02 Mar 2018) | 2 
+lines
+ 
+ Add HashBL (Email Blocklist (EBL), http://msbl.org/ebl.html) plugin, bz 
+#7548
+ 
+------------------------------------------------------------------------
+r1825185 | gbechis | 2018-02-24 00:37:46 +0000 (Sat, 24 Feb 2018) | 4 
+lines
+ 
+ As per rfc 5322 the time zone is a required field,
+ so a date without time zone should be considered as invalid
+ bz #6894
+ 
+------------------------------------------------------------------------
+r1825177 | gbechis | 2018-02-23 22:50:32 +0000 (Fri, 23 Feb 2018) | 3 
+lines
+ 
+ document when --mbox or --mbx parameters are needed
+ bz #6857
+ 
+------------------------------------------------------------------------
+r1825175 | gbechis | 2018-02-23 22:44:45 +0000 (Fri, 23 Feb 2018) | 4 
+lines
+ 
+ In OpenBSD /usr/sbin/sysctl is a symlink to /sbin/sysctl
+ fix path, no functional change
+ bz #7545
+ 
+------------------------------------------------------------------------
+r1825157 | gbechis | 2018-02-23 18:25:25 +0000 (Fri, 23 Feb 2018) | 5 
+lines
+ 
+ Change a couple of die calls into warnings,
+ this way  pyzor throws a python error, 
+ all other async lookups are not aborted.
+ bz #7026
+ 
+------------------------------------------------------------------------
+r1825154 | gbechis | 2018-02-23 18:17:29 +0000 (Fri, 23 Feb 2018) | 3 
+lines
+ 
+ check for freemail for all emails in a Reply-To header
+ bz #6664
+ 
+------------------------------------------------------------------------
+r1825032 | gbechis | 2018-02-22 08:20:37 +0000 (Thu, 22 Feb 2018) | 3 
+lines
+ 
+ Check if $socket is defined and print error accordingly
+ bz 7380
+ 
+------------------------------------------------------------------------
+r1825018 | billcole | 2018-02-21 23:46:08 +0000 (Wed, 21 Feb 2018) | 1 
+line
+ 
+ Group switching code for bugs #7554 and #7555
+------------------------------------------------------------------------
+r1824931 | gbechis | 2018-02-21 07:33:02 +0000 (Wed, 21 Feb 2018) | 2 
+lines
+ 
+ Add an example of a rule that matches an ASN, bz 6929
+ 
+------------------------------------------------------------------------
+r1824688 | gbechis | 2018-02-18 18:35:40 +0000 (Sun, 18 Feb 2018) | 2 
+lines
+ 
+ fix all pod errors spotted in bz 7168 and many more
+ 
+------------------------------------------------------------------------
+r1824577 | gbechis | 2018-02-17 09:47:43 +0000 (Sat, 17 Feb 2018) | 2 
+lines
+ 
+ Fix some regression tests on OpenBSD, bz 7499
+ 
+------------------------------------------------------------------------
+r1823276 | kmcgrail | 2018-02-06 06:05:37 +0000 (Tue, 06 Feb 2018) | 1 
+line
+ 
+ Bug 7418 - sa-update change to handle cross platform newline better
+------------------------------------------------------------------------
+r1823274 | kmcgrail | 2018-02-06 05:10:42 +0000 (Tue, 06 Feb 2018) | 1 
+line
+ 
+ Bug 7496 - speed up startup code
+------------------------------------------------------------------------
+r1823205 | kmcgrail | 2018-02-05 16:13:03 +0000 (Mon, 05 Feb 2018) | 1 
+line
+ 
+ Clean-up of unmaintained tools and files that are only maintained in 
+trunk - see trunk-only/
+------------------------------------------------------------------------
+r1823175 | kmcgrail | 2018-02-05 14:10:22 +0000 (Mon, 05 Feb 2018) | 1 
+line
+ 
+ Bug 7492 - switch from use vars to our cleanup
+------------------------------------------------------------------------
+r1823171 | davej | 2018-02-05 13:34:29 +0000 (Mon, 05 Feb 2018) | 1 line
+ 
+ Bug 7417
+------------------------------------------------------------------------
+r1823142 | kmcgrail | 2018-02-05 09:10:12 +0000 (Mon, 05 Feb 2018) | 1 
+line
+ 
+ Bug 7491 switch test framework to Test::More
+------------------------------------------------------------------------
+r1823126 | kmcgrail | 2018-02-05 06:20:06 +0000 (Mon, 05 Feb 2018) | 1 
+line
+ 
+ Bug 7481 - Adding build time specification of re2c binary
+------------------------------------------------------------------------
+r1822650 | davej | 2018-01-30 14:19:37 +0000 (Tue, 30 Jan 2018) | 1 line
+ 
+ Bug 6222
+------------------------------------------------------------------------
+r1822649 | davej | 2018-01-30 14:17:16 +0000 (Tue, 30 Jan 2018) | 1 line
+ 
+ Bug 7540
+------------------------------------------------------------------------
+r1822483 | davej | 2018-01-28 22:40:16 +0000 (Sun, 28 Jan 2018) | 1 line
+ 
+ Bug 7534
+------------------------------------------------------------------------
+r1822467 | davej | 2018-01-28 16:03:13 +0000 (Sun, 28 Jan 2018) | 1 line
+ 
+ Bug 6946.
+------------------------------------------------------------------------
+r1821749 | davej | 2018-01-20 15:26:02 +0000 (Sat, 20 Jan 2018) | 1 line
+ 
+ Bug 6946
+------------------------------------------------------------------------
+r1819502 | davej | 2017-12-29 18:37:34 +0000 (Fri, 29 Dec 2017) | 1 line
+ 
+ Bug 6420
+------------------------------------------------------------------------
+r1819497 | kmcgrail | 2017-12-29 15:20:04 +0000 (Fri, 29 Dec 2017) | 1 
+line
+ 
+ Bug 7525 - missing includes declarations in spamc
+------------------------------------------------------------------------
+r1819449 | kmcgrail | 2017-12-28 23:14:24 +0000 (Thu, 28 Dec 2017) | 1 
+line
+ 
+ bug 7524 logic patch for getoptlong issues in spamc
+------------------------------------------------------------------------
+r1819447 | kmcgrail | 2017-12-28 22:49:03 +0000 (Thu, 28 Dec 2017) | 1 
+line
+ 
+ Bug 6970 - adding t.co url shortener
+------------------------------------------------------------------------
+r1819442 | kmcgrail | 2017-12-28 22:20:16 +0000 (Thu, 28 Dec 2017) | 1 
+line
+ 
+ bug 7524 - opt cant be freed here or getoptlong fails
+------------------------------------------------------------------------
+r1816710 | kmcgrail | 2017-11-30 12:46:21 +0000 (Thu, 30 Nov 2017) | 1 
+line
+ 
+ Bug 7509 - free for spamc opt
+------------------------------------------------------------------------
+r1815854 | jhardin | 2017-11-20 20:54:17 +0000 (Mon, 20 Nov 2017) | 1 line
+ 
+ Bug 7437 - fix issues with parsing a message having an unclosed HTML 
+<style> and <script> tag (e.g. due to spamc size limits)
+------------------------------------------------------------------------
+r1815828 | jhardin | 2017-11-20 18:21:15 +0000 (Mon, 20 Nov 2017) | 1 line
+ 
+ Bug 7437 - fix issues with parsing a message having an unclosed HTML 
+<style> tag (e.g. due to spamc size limits)
+------------------------------------------------------------------------
+r1815773 | billcole | 2017-11-20 05:09:20 +0000 (Mon, 20 Nov 2017) | 1 
+line
+ 
+ Prevent BodyRuleBaseExtractor from orphaning files in sa-compile runs
+------------------------------------------------------------------------
+r1814251 | kmcgrail | 2017-11-04 04:13:10 +0000 (Sat, 04 Nov 2017) | 1 
+line
+ 
+ Remove META.yml file from MANIFEST. It is added with make dist 
+automatically.  Added .gitignore and build/pga dir to MANIFEST.SKIP.  
+Removed META.yml from svn, it is created from make dist.  Requiring 
+MakeMaker v6.17 to make.  Cleaned up some meta file information.  Set the 
+minimum version for IO::Socket::SSL to 1.76.
+------------------------------------------------------------------------
+r1814016 | billcole | 2017-11-01 22:40:24 +0000 (Wed, 01 Nov 2017) | 1 
+line
+ 
+ Recognize Horde HTTPS protocol in Received header
+------------------------------------------------------------------------
+r1813995 | kmcgrail | 2017-11-01 20:46:34 +0000 (Wed, 01 Nov 2017) | 1 
+line
+ 
+ Adding .gitignore file
+------------------------------------------------------------------------
+r1812595 | kb | 2017-10-18 23:19:59 +0000 (Wed, 18 Oct 2017) | 6 lines
+ 
+ Bug 7256, using a header rule with an eval() function does not work the 
+way
+ this was intended.
+ 
+ Remove HEADER_HOST_IN_BLACKLIST and *_WHITELIST rules.
+ 
+ 
+------------------------------------------------------------------------
+r1812589 | kb | 2017-10-18 22:48:31 +0000 (Wed, 18 Oct 2017) | 3 lines
+ 
+ clarify (URI|HEADER)_HOST_IN_(BLACK|WHITE)LIST descriptions
+ 
+ 
+------------------------------------------------------------------------
+r1808962 | kb | 2017-09-20 00:15:45 +0000 (Wed, 20 Sep 2017) | 1 line
+ 
+ bug 7472: Fix POD errors with perl >= 5.18, wrap exit code items in C<> 
+to avoid parser complaints
+------------------------------------------------------------------------
+r1808358 | billcole | 2017-09-14 15:23:26 +0000 (Thu, 14 Sep 2017) | 1 
+line
+ 
+ Corrected alphabetization of patch contributor credits
+------------------------------------------------------------------------
+r1808350 | billcole | 2017-09-14 15:01:42 +0000 (Thu, 14 Sep 2017) | 2 
+lines
+ 
+ Corrected Dianne Skoll's name in CREDITS
+ 
+------------------------------------------------------------------------
+r1806880 | kb | 2017-09-01 00:10:12 +0000 (Fri, 01 Sep 2017) | 6 lines
+ 
+ RFC 2231 section 3: Parameter Value Continuations
+ 
+ Support MIME parameter value continuations for the filename value, which 
+is
+ actually used by plugins and rules.
+ 
+ 
+------------------------------------------------------------------------
+r1806756 | kb | 2017-08-31 01:41:06 +0000 (Thu, 31 Aug 2017) | 3 lines
+ 
+ bug 7466: decode Content-* header
+ 
+ 
+------------------------------------------------------------------------
+r1806555 | kb | 2017-08-29 10:45:10 +0000 (Tue, 29 Aug 2017) | 3 lines
+ 
+ bug 7361: Allow building against OpenSSL 1.1.0
+ 
+ 
+------------------------------------------------------------------------
+r1806518 | kb | 2017-08-29 00:41:13 +0000 (Tue, 29 Aug 2017) | 3 lines
+ 
+ bug 7453: Fix "use of uninitialized value in pattern match" warning.
+ 
+ 
+------------------------------------------------------------------------
+r1806114 | kb | 2017-08-24 23:50:59 +0000 (Thu, 24 Aug 2017) | 3 lines
+ 
+ bug 7462: "use lib '.'" before "use SATest" for Perl 5.26 compatibility
+ 
+ 
+------------------------------------------------------------------------
+r1806023 | kb | 2017-08-24 10:52:44 +0000 (Thu, 24 Aug 2017) | 3 lines
+ 
+ bug 7441: handle Received-SPF temperror and permerror
+ 
+ 
+------------------------------------------------------------------------
+r1806020 | kb | 2017-08-24 10:32:59 +0000 (Thu, 24 Aug 2017) | 3 lines
+ 
+ bug 7443: handle inline style attributes in table and anchor tags
+ 
+ 
+------------------------------------------------------------------------
+r1805349 | kb | 2017-08-17 23:24:36 +0000 (Thu, 17 Aug 2017) | 3 lines
+ 
+ bug 7340: remove expire flag after token expiration is done
+ 
+ 
+------------------------------------------------------------------------
+r1804611 | kmcgrail | 2017-08-09 21:51:29 +0000 (Wed, 09 Aug 2017) | 1 
+line
+ 
+ Bug 7416 patch from Dave Jones
+------------------------------------------------------------------------
+r1804346 | kb | 2017-08-07 15:57:21 +0000 (Mon, 07 Aug 2017) | 3 lines
+ 
+ bug 7296: sa-learn --folders option: default to type "detect", if not 
+explicitely specified
+ 
+ 
+------------------------------------------------------------------------
+r1804338 | kb | 2017-08-07 14:13:56 +0000 (Mon, 07 Aug 2017) | 3 lines
+ 
+ bug 7447: Delete parse_queue in Message::finish() to prevent memory leak.
+ 
+ 
+------------------------------------------------------------------------
+r1804327 | kb | 2017-08-07 12:43:37 +0000 (Mon, 07 Aug 2017) | 3 lines
+ 
+ bug 7304, replace memcmp with strncmp
+ 
+ 
+------------------------------------------------------------------------
+r1804260 | kb | 2017-08-06 19:20:50 +0000 (Sun, 06 Aug 2017) | 3 lines
+ 
+ fix typo
+ 
+ 
+------------------------------------------------------------------------
+r1803384 | kb | 2017-07-29 17:56:31 +0000 (Sat, 29 Jul 2017) | 3 lines
+ 
+ bug 7155: Fix spamc longoptions prefix-substring handling.
+ 
+ 
+------------------------------------------------------------------------
+r1803335 | kb | 2017-07-28 20:22:06 +0000 (Fri, 28 Jul 2017) | 3 lines
+ 
+ bug 7442: SQL grants, add missing UPDATE privilege
+ 
+ 
+------------------------------------------------------------------------
+r1803310 | kb | 2017-07-28 17:33:10 +0000 (Fri, 28 Jul 2017) | 3 lines
+ 
+ bug 7303, fix "uninitialized value" warning
+ 
+ 
+------------------------------------------------------------------------
+r1796723 | jhardin | 2017-05-30 01:32:39 +0000 (Tue, 30 May 2017) | 3 
+lines
+ 
+ Update __MOZILLA_MSGID per users list discussion, tbird using new format 
+- 8-4-4-4-12 lc hex, was 8.8 UC hex. Recognize both.
+ N.B.: 8-4-4-4-12 UC hex is Apple Mail MUA.
+ Copy from trunk
+------------------------------------------------------------------------
+r1795107 | kmcgrail | 2017-05-14 14:37:05 +0000 (Sun, 14 May 2017) | 1 
+line
+ 
+ More prep work on the build with infrastructure for 3.4.2
+------------------------------------------------------------------------
+r1793220 | davej | 2017-04-29 17:00:44 +0000 (Sat, 29 Apr 2017) | 1 line
+ 
+ Corrected ordering by last name of committers list
+------------------------------------------------------------------------
+r1793217 | davej | 2017-04-29 16:58:22 +0000 (Sat, 29 Apr 2017) | 1 line
+ 
+ Added Dave Jones to committers list
+------------------------------------------------------------------------
+r1792371 | kmcgrail | 2017-04-23 15:19:46 +0000 (Sun, 23 Apr 2017) | 1 
+line
+ 
+ Continued tweaks on the build process
+------------------------------------------------------------------------
+r1792309 | kmcgrail | 2017-04-22 17:42:58 +0000 (Sat, 22 Apr 2017) | 1 
+line
+ 
+ preparing to release 3.4.2 pre3
+------------------------------------------------------------------------
+r1792301 | kmcgrail | 2017-04-22 16:37:41 +0000 (Sat, 22 Apr 2017) | 1 
+line
+ 
+ Bug 7411 FORGED_MUA_MOZILLA
+------------------------------------------------------------------------
+r1792295 | kmcgrail | 2017-04-22 15:43:11 +0000 (Sat, 22 Apr 2017) | 1 
+line
+ 
+ working through bugs in the release process
+------------------------------------------------------------------------
+r1792266 | kmcgrail | 2017-04-22 06:08:20 +0000 (Sat, 22 Apr 2017) | 1 
+line
+ 
+ preparing to release 3.4.2-pre1
+------------------------------------------------------------------------
+r1792260 | kmcgrail | 2017-04-22 05:20:27 +0000 (Sat, 22 Apr 2017) | 1 
+line
+ 
+ Unifying small rule changes between 3.4 and trunk
+------------------------------------------------------------------------
 r1791591 | sidney | 2017-04-16 10:19:00 +0000 (Sun, 16 Apr 2017) | 2 lines
  
  Bug 7225: A regexp for parsing an IPv4 address inconsistently 
