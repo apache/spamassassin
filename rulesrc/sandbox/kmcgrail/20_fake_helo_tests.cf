@@ -25,7 +25,7 @@
 
 #TESTING OF RULES FOR https://issues.apache.org/SpamAssassin/show_bug.cgi?id=6487
 
-#rule that excludes the dotted-quad HELOs caught by old rule RCVD_NUMERIC_HELO
+#rule that excludes the dotted-quad HELOs caught by rule __FSL_HELO_BARE_IP_2
 header 		CK_HELO_DYNAMIC_SPLIT_IP 	X-Spam-Relays-Untrusted =~ /^[^\]]+helo=(?!(?:\d+\.){4})\d+[^\d\s]+\d+[^\d\s]\d+[^\d\s]\d+[^\d\s]/i
 describe 	CK_HELO_DYNAMIC_SPLIT_IP	Relay HELO'd using suspicious hostname (Split IP)
 score		CK_HELO_DYNAMIC_SPLIT_IP	1.5
@@ -36,7 +36,7 @@ score		CK_HELO_GENERIC		0.25
 
 header   __HELO_MISC_IP        	X-Spam-Relays-Untrusted =~ /^[^\]]+ helo=[^a-z\?]\S{0,30}(?:\d{1,3}[^\d]){4}[^\]]+ auth= /i
 
-meta     	HELO_MISC_IP          	(__HELO_MISC_IP && !HELO_DYNAMIC_IPADDR && !HELO_DYNAMIC_IPADDR2 && !HELO_DYNAMIC_SPLIT_IP && !HELO_DYNAMIC_HCC && !HELO_DYNAMIC_DIALIN && ((TVD_RCVD_IP4 + TVD_RCVD_IP) <2))
+meta     	HELO_MISC_IP          	(__HELO_MISC_IP && !HELO_DYNAMIC_IPADDR && !HELO_DYNAMIC_IPADDR2 && !HELO_DYNAMIC_SPLIT_IP && !HELO_DYNAMIC_HCC && !HELO_DYNAMIC_DIALIN && ((TVD_RCVD_IP4 + TVD_RCVD_IP + __FSL_HELO_BARE_IP_2) <2))
 describe	HELO_MISC_IP		Looking for more Dynamic IP Relays
 score		HELO_MISC_IP		0.25
 
