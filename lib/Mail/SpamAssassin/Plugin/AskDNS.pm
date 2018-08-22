@@ -191,6 +191,7 @@ use re 'taint';
 use Mail::SpamAssassin::Plugin;
 use Mail::SpamAssassin::Util qw(decode_dns_question_entry idn_to_ascii);
 use Mail::SpamAssassin::Logger;
+use version 0.77;
 
 our @ISA = qw(Mail::SpamAssassin::Plugin);
 
@@ -212,7 +213,9 @@ sub new {
 
   $self->set_config($sa_main->{conf});
 
-  $txtdata_can_provide_a_list = Net::DNS->VERSION >= 0.69;
+  #$txtdata_can_provide_a_list = Net::DNS->VERSION >= 0.69;
+  #more robust version check from Damyan Ivanov - Bug 7095
+  $txtdata_can_provide_a_list = version->parse(Net::DNS->VERSION) >= version->parse('0.69');
 
   return $self;
 }
