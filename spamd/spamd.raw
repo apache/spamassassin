@@ -690,21 +690,25 @@ if ( defined $opt{'max-conn-per-child'} ) {
   $clients_per_child = undef if ( $clients_per_child < 1 );
 }
 
-if (defined $opt{'timeout-tcp'}) {
-  $timeout_tcp = $opt{'timeout-tcp'};
-  $timeout_tcp = undef if ($timeout_tcp < 1);
-}
-
-if (defined $opt{'timeout-child'}) {
-  $timeout_child = $opt{'timeout-child'};
-  $timeout_child = undef if ($timeout_child < 1);
-}
-
 # Set some "sane" limits for defaults
 $childlimit        ||= 5;
 $clients_per_child ||= 200;
-$timeout_child     ||= 300;
-$timeout_tcp       ||= 30;
+
+if (defined $opt{'timeout-tcp'} && $opt{'timeout-tcp'} >= 0) {
+  $timeout_tcp = $opt{'timeout-tcp'};
+  $timeout_tcp = undef if ($timeout_tcp == 0);
+}
+else {
+  $timeout_tcp = 30;
+}
+
+if (defined $opt{'timeout-child'} && $opt{'timeout-child'} >= 0) {
+  $timeout_child = $opt{'timeout-child'};
+  $timeout_child = undef if ($timeout_child == 0);
+}
+else {
+  $timeout_child = 300;
+}
 
 # ensure scaling parameters are logical
 if ($opt{'min-children'} < 1) {
