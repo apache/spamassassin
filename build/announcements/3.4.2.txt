@@ -30,7 +30,7 @@ Notable features:
 
 New plugins
 -----------
-There is one new plugin added with this release:
+There are two new plugins added with this release:
 
   Mail::SpamAssassin::Plugin::HashBL
 
@@ -39,7 +39,13 @@ The EBL is intended to filter spam that is sent from IP addresses
 and domains that cannot be blocked without causing significant 
 numbers of false positives.
 
-This plugin is disabled by default. To enable, uncomment
+  Mail::SpamAssassin::Plugin::ResourceLimits
+
+This module leverages BSD::Resource to assure your spamd child processes
+do not exceed specified CPU or memory limit. If this happens, the child
+process will die. See the BSD::Resource for more details.
+
+Those plugins are disabled by default. To enable, uncomment
 the loadplugin configuration options in file v342.pre, or add it to
 some local .pre file such as local.pre .
 
@@ -75,6 +81,13 @@ in future releases.
 
 A config option 'uri_country_db_path' has been added to be able to choose 
 in URILocalBL plugin between GeoIP legacy and new GeoIP2 api.
+
+A config option 'resource_limit_cpu' (default: 0 or no limit) has been added
+to configure how many cpu cycles are allowed on a child process before it dies.
+
+A config option 'resource_limit_mem' (default: 0 or no limit) has been added
+to configure the maximum number of bytes of memory allowed both for 
+(virtual) address space bytes and resident set size.
 
 Notable Internal changes
 ------------------------
