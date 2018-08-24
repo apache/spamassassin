@@ -159,11 +159,6 @@ describe __RDNS_DYNAMIC_VELOX Relay HELO'd using suspicious hostname (Veloxzone)
 header __RDNS_DYNAMIC_NTL  X-Spam-Relays-External =~ /^[^\]]+ rdns=\S+\d+-\d+-cust\d+\.[a-z]{4,6}\.broadband\.ntl\.com/i
 describe __RDNS_DYNAMIC_NTL Relay HELO'd using suspicious hostname (NTL)
 
-# cp160000-a.mill1.nb.home.nl
-# cp341468-b.venra1.lb.home.nl
-header __RDNS_DYNAMIC_HOME_NL  X-Spam-Relays-External =~ /^[^\]]+ rdns=[a-z]{2}\d+-\S\.\S+\d\.[a-z]{2}\.home\.nl/i
-describe __RDNS_DYNAMIC_HOME_NL Relay HELO'd using suspicious hostname (Home.nl)
-
 # (I'm quite sure these may be a good spamsign in future)
 # nwblwi-nrp3-l10-a671.nwblwi.tds.net
 header __RDNS_DYNAMIC_TDS X-Spam-Relays-External =~ /^[^\]]+ rdns=\S+-[a-z]\d+\.[a-z]{6}\.tds\.net/i
@@ -209,7 +204,7 @@ header __RDNS_NONE  X-Spam-Relays-External =~ /^[^\]]+ rdns= /
 
 ###########################################################################
 
-meta RDNS_DYNAMIC   (__LAST_EXTERNAL_RELAY_NO_AUTH && !__RDNS_STATIC && (__RDNS_DYNAMIC_IPADDR || __RDNS_DYNAMIC_DHCP || __RDNS_DYNAMIC_HCC || __RDNS_DYNAMIC_ATTBI || __RDNS_DYNAMIC_ROGERS || __RDNS_DYNAMIC_ADELPHIA || __RDNS_DYNAMIC_DIALIN || __RDNS_DYNAMIC_HEXIP || __RDNS_DYNAMIC_SPLIT_IP || __RDNS_DYNAMIC_YAHOOBB || __RDNS_DYNAMIC_OOL || __RDNS_DYNAMIC_RR2   || __RDNS_DYNAMIC_COMCAST || __RDNS_DYNAMIC_TELIA || __RDNS_DYNAMIC_VTR || __RDNS_DYNAMIC_CHELLO_NO  || __RDNS_DYNAMIC_CHELLO_NL  || __RDNS_DYNAMIC_VELOX  || __RDNS_DYNAMIC_NTL  || __RDNS_DYNAMIC_HOME_NL  || __RDNS_DYNAMIC_TDS || __RDNS_DYNAMIC_VIRTUA || __RDNS_DYNAMIC_SPACELAN || __RDNS_INDICATOR_DYN || __RDNS_INDICATOR_RES || __RDNS_INDICATOR_TYPE2 || __RDNS_DYNAMIC_TTNET || __RDNS_DYNAMIC_ASAHI))
+meta RDNS_DYNAMIC   (__LAST_EXTERNAL_RELAY_NO_AUTH && !__RDNS_STATIC && (__RDNS_DYNAMIC_IPADDR || __RDNS_DYNAMIC_DHCP || __RDNS_DYNAMIC_HCC || __RDNS_DYNAMIC_ATTBI || __RDNS_DYNAMIC_ROGERS || __RDNS_DYNAMIC_ADELPHIA || __RDNS_DYNAMIC_DIALIN || __RDNS_DYNAMIC_HEXIP || __RDNS_DYNAMIC_SPLIT_IP || __RDNS_DYNAMIC_YAHOOBB || __RDNS_DYNAMIC_OOL || __RDNS_DYNAMIC_RR2   || __RDNS_DYNAMIC_COMCAST || __RDNS_DYNAMIC_TELIA || __RDNS_DYNAMIC_VTR || __RDNS_DYNAMIC_CHELLO_NO  || __RDNS_DYNAMIC_CHELLO_NL  || __RDNS_DYNAMIC_VELOX  || __RDNS_DYNAMIC_NTL  || __RDNS_DYNAMIC_TDS || __RDNS_DYNAMIC_VIRTUA || __RDNS_DYNAMIC_SPACELAN || __RDNS_INDICATOR_DYN || __RDNS_INDICATOR_RES || __RDNS_INDICATOR_TYPE2 || __RDNS_DYNAMIC_TTNET || __RDNS_DYNAMIC_ASAHI))
 describe RDNS_DYNAMIC Delivered to internal network by host with dynamic-looking rDNS
 
 meta RDNS_NONE      (__RDNS_NONE && !__CGATE_RCVD && !__DOMINO_RCVD)
