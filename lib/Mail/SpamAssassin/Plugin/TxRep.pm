@@ -1630,8 +1630,8 @@ sub open_storages {
 ###########################################################################
   my $self = shift;
 
-  # disabled per bug 7191
-  #return 1 unless (!defined $self->{default_storage});
+  # Enabled per bug 7191 comment 18
+  return 1 unless (!defined $self->{default_storage});
 
   return 1 if defined ($self->{checker});
 
