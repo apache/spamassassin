@@ -265,6 +265,12 @@ our @OPTIONAL_MODULES = (
   check for both Net::DNS and Net::DNS::Nameserver.  However, 
   Net::DNS::Nameserver is only used in make test as of June 2014.',
 },
+{
+  module => 'BSD::Resources',
+  version => 0,
+  desc => 'BSD::Resources provides BSD process resource limit and priority 
+  functions.  It is used by the optional ResourceLimits Plugin.',
+},
 );
 
 our @BINARIES = ();
