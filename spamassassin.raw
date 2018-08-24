@@ -37,7 +37,7 @@ BEGIN {
   my @bin = File::Spec->splitpath($0);
   my $bin = (
     $bin[0]
-    ? File::Spec->catpath( @bin[ 0 .. 1 ] )
+    ? File::Spec->catpath( @bin[ 0 .. 1 ], '' )
     : $bin[1]
     )                                           # /home/jm/foo -> /home/jm
     || File::Spec->curdir;                      # foo          -> .
