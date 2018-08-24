@@ -18,3 +18,7 @@
 
 # HashBL - Use EBL email blocklist
 # loadplugin Mail::SpamAssassin::Plugin::HashBL
+
+# ResourceLimits - assure your spamd child processes
+# do not exceed specified CPU or memory limit
+# loadplugin Mail::SpamAssassin::Plugin::ResourceLimits
