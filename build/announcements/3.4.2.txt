@@ -11,9 +11,18 @@ past three and 1/2 years.  As we release 3.4.2, we are preparing 4.0.0 which
 will move us into a full UTF-8 environment.  We expect one final 3.4.3
 release.
 
-Highlights include: 
+As with any release there are a number of functional patches, improvements as
+well as security reasons to upgrade to 3.4.2.  In this case we have over 3 
+years of issues being resolved at once.  And we are laying thr groundwork for
+version 4.0 which is is designed to more natively handle UTF-8.
 
-XXX
+However, there is one specific pressing reason to upgrade.  Specifically, we 
+will stop producing sha-1 signatures for rule updates.  This means that while 
+we produce rule updates with the focus on them working for any release from 
+v3.3.3 forward, they will start falling sha-1 validation for sa-update.  
+
+*** If you do not update to 3.4.2, you will be stuck at the last ruleset 
+    with sha-1 signatures in the near future. ***
 
 Many thanks to the committers, contributors, rule testers, mass checkers,
 and code testers who have made this release possible.  
