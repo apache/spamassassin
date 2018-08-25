@@ -202,7 +202,7 @@ sub _convert_ipv4_cidr_to_ipv6 {
 
   # else we have a CIDR mask specified. use new6() to do this
   #
-  my $ip6 = ""+(NetAddr::IP->new6($cidr));
+  my $ip6 = NetAddr::IP->new6($cidr)->cidr;
   # 127.0.0.1 -> 0:0:0:0:0:0:7F00:0001/128
   # 127/8 -> 0:0:0:0:0:0:7F00:0/104
 
