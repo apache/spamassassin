@@ -258,9 +258,6 @@ sub parse {
     dbg("message: HTML::Parser utf8_mode %s",
         $utf8_mode ? "on (assumed UTF-8 octets)"
                    : "off (default, assumed Unicode characters)");
-    if (!$utf8_mode) {
-	$text = utf8::decode($text);
-    }
   }
   $self->SUPER::parse($text);
 
