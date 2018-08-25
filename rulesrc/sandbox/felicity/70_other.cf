@@ -345,7 +345,7 @@ uri TVD_IP_OCT  m@^https?://(?:(?:0x[0-9a-f]+|\d+)\.){0,3}0+(?:[1-3][0-7]{0,2}|[
 # Received: from localhost (localhost [[UNIX: localhost]])
 # Received: .* [ConcentricHost ... ]
 # Received: .* [XMail ... ]
-header TVD_RCVD_SPACE_BRACKET Received =~ /\(\[(?!UNIX:)[^\[\]]*\s/
+header TVD_RCVD_SPACE_BRACKET Received =~ /\(\[(?!unix)[^\[\]]*\s/i
 
 #  12.405  14.5584   0.0000    1.000   1.00    1.00  TVD_RCVD_IP
 #   6.088   7.1444   0.0000    1.000   0.50    1.00  TVD_RCVD_IP4
