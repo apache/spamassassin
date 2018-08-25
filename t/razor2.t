@@ -11,7 +11,7 @@ use constant HAS_RAZOR2_IDENT => eval { -r $ENV{'HOME'}.'/.razor/identity'; };
 use Test::More;
 plan skip_all => "Net tests disabled" unless conf_bool('run_net_tests');
 plan skip_all => "Needs Razor2" unless HAS_RAZOR2;
-plan skip_all => "Needs Razor2 Identity File Needed. razor-register / razor-admin -register has not been run, or $ident is unreadable." unless HAS_RAZOR2_IDENT;
+plan skip_all => "Needs Razor2 Identity File Needed. razor-register / razor-admin -register has not been run, or idenitit file ($ENV{'HOME'}/.razor/identity) is unreadable." unless HAS_RAZOR2_IDENT;
 plan tests => 2;
 
 diag('Note: Failures may not be an SpamAssassin bug, as Razor tests can fail due to problems with the Razor servers.');
