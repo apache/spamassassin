@@ -1716,6 +1716,10 @@ sub extract_message_metadata {
   $self->set_tag('RELAYSUNTRUSTED', $self->{relays_untrusted_str});
   $self->set_tag('RELAYSINTERNAL',  $self->{relays_internal_str});
   $self->set_tag('RELAYSEXTERNAL',  $self->{relays_external_str});
+  my $lasthop = $self->{relays_external}->[0];
+  if ($lasthop) {
+    $self->set_tag('LASTEXTERNALIP',  $lasthop->{ip});
+  }
   $self->set_tag('LANGUAGES', $self->{msg}->get_metadata("X-Languages"));
 
   # This should happen before we get called, but just in case.
