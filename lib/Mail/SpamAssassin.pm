@@ -156,6 +156,8 @@ our @default_prefs_path = (
   '__local_rules_dir__/user_prefs.template',
   '__prefix__/etc/mail/spamassassin/user_prefs.template',
   '__prefix__/share/spamassassin/user_prefs.template',
+  '__local_state_dir__/__version__/updates_spamassassin_org/user_prefs.template',
+  '__def_rules_dir__/user_prefs.template',
   '/etc/spamassassin/user_prefs.template',
   '/etc/mail/spamassassin/user_prefs.template',
   '/usr/local/share/spamassassin/user_prefs.template',
