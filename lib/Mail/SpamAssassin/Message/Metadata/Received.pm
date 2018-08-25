@@ -406,6 +406,8 @@ sub parse_received_line {
   # with ASMTP (Authenticated SMTP) is used by Earthlink, Exim 4.34, and others
   # with HTTP should only be authenticated webmail sessions
   # with HTTPU is used by Communigate Pro with Pronto! webmail interface
+  # with HTTPS is used by Horde adjusts the Received header to say "HTTPS" when
+  # a connection is made over HTTPS
   # IANA registry: http://www.iana.org/assignments/mail-parameters/mail-parameters.xhtml
   if (/ by / && / with ((?:ES|L|UTF8S|UTF8L)MTPS?A|ASMTP|HTTP[SU]?)(?: |;|$)/i) {
     $auth = $1;
