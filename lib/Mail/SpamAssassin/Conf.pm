@@ -4421,6 +4421,13 @@ If a tag reference uses the name of a tag which is not in this list or defined
 by a loaded plugin, the reference will be left intact and not replaced by any
 value.
 
+Additional, plugin specific, template tags can be found in the documentation for
+the following plugins:
+
+ L<Mail::SpamAssassin::Plugin::ASN>
+ L<Mail::SpamAssassin::Plugin::AWL>
+ L<Mail::SpamAssassin::Plugin::TxRep>
+
 The C<HAMMYTOKENS> and C<SPAMMYTOKENS> tags have an optional second argument
 which specifies a format.  See the B<HAMMYTOKENS/SPAMMYTOKENS TAG FORMAT>
 section, below, for details.
