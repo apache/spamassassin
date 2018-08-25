@@ -287,8 +287,8 @@ sub compile_base_strings {
     run(get_perl()." Makefile.PL ".
           "PREFIX=$dirpath/ignored INSTALLSITEARCH=$installdir $log");
 
-    run("make PREFIX=$dirpath/ignored INSTALLSITEARCH=$installdir $log");
-    run($sudo."make install PREFIX=$dirpath/ignored INSTALLSITEARCH=$installdir $log");	# into $installdir
+    run($Config{make}." PREFIX=$dirpath/ignored INSTALLSITEARCH=$installdir $log"); #change to $Config{make}. bug 7294
+    run($sudo.$Config{make}." install PREFIX=$dirpath/ignored INSTALLSITEARCH=$installdir $log");	# into $installdir
 
     # and generate the bases.pl file, for perl consumers
 
