@@ -22,3 +22,7 @@
 # ResourceLimits - assure your spamd child processes
 # do not exceed specified CPU or memory limit
 # loadplugin Mail::SpamAssassin::Plugin::ResourceLimits
+#
+
+# allow URI rules to look at DKIM headers if they exist
+parse_dkim_uris 1
