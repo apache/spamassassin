@@ -43,11 +43,6 @@ our ($have_getaddrinfo_in_core, $have_getaddrinfo_legacy, $io_socket_module_name
 
 # don't force requirement on IO::Socket::IP or IO::Socket::INET6
 BEGIN {
-  use Socket qw(:DEFAULT IPPROTO_TCP);
-
-  # AUTOLOADing 'constants' here enables inlining - see Exporter man page
-  &SOCK_STREAM; &IPPROTO_TCP; &SOMAXCONN;
-
   $have_getaddrinfo_in_core = eval {
     # The Socket module (1.94) bundled with Perl 5.14.* provides
     # new affordances for IPv6, including implementations of the
@@ -59,7 +54,9 @@ BEGIN {
     Socket->VERSION(1.96);  # provides NIx_NOSERV, and Exporter tag :addrinfo
   # Socket->VERSION(1.97);  # IO::Socket::IP depends on Socket 1.97
     import Socket qw(/^(?:AI|NI|NIx|EAI)_/);
-    &AI_ADDRCONFIG; &AI_PASSIVE;  # enable inlining
+
+    # AUTOLOADing 'constants' here enables inlining - see Exporter man page
+    &AI_ADDRCONFIG; &AI_PASSIVE;
     &NI_NUMERICHOST, &NI_NUMERICSERV; &NIx_NOSERV; 1;
   };
 
@@ -71,6 +68,11 @@ BEGIN {
     &AI_ADDRCONFIG; &AI_PASSIVE;  # enable inlining
     &NI_NUMERICHOST; &NI_NUMERICSERV; &NI_NAMEREQD; 1;
   };
+
+  require Socket;
+  import Socket qw(:DEFAULT IPPROTO_TCP);
+
+  &SOCK_STREAM; &IPPROTO_TCP; &SOMAXCONN; # enable inlining
 
   &AF_UNSPEC; &AF_INET; &AF_INET6;  # enable inlining
 
