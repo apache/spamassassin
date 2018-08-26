@@ -48,7 +48,9 @@ def_whitelist_auth *@listserv.syr.edu
 def_whitelist_auth *@list.indiana.edu
 def_whitelist_auth *@lists.asu.edu
 def_whitelist_auth *@lists.mailscanner.info
+def_whitelist_auth *@lists.wisc.edu
 
+# High profile targets for spoofing
 def_whitelist_auth *@facebookmail.com
 def_whitelist_auth *@*.facebookmail.com
 def_whitelist_auth *@google.com
@@ -75,6 +77,7 @@ def_whitelist_auth *@usps.gov
 def_whitelist_auth *@*.usda.gov
 def_whitelist_auth *@instagram.com
 def_whitelist_auth *@*.instagram.com
+def_whitelist_auth *@indeedemail.com
 def_whitelist_auth *=pkginfo@ups.com
 def_whitelist_auth *@fedex.com
 def_whitelist_auth *@*.fedex.com
@@ -83,11 +86,17 @@ def_whitelist_auth *@*.capitalone.com
 def_whitelist_auth *@*.capitaloneemail.com
 def_whitelist_auth *@*.khanacademy.org
 def_whitelist_auth *@*.wordpress.com
+def_whitelist_auth *@statefarm.com
+def_whitelist_auth *@*.statefarminfo.com
 def_whitelist_auth *@*.visa.com
 def_whitelist_auth *@visapayablesautomation.com
 def_whitelist_auth *@visadpsmessage.com
 def_whitelist_auth *@*.pinterest.com
 def_whitelist_auth *@indeed.com
+def_whitelist_auth *@docusign.net
+def_whitelist_auth *@*.docusign.com
+
+# Senders consistently scoring low with advanced tuned SA to help default SA configurations
 def_whitelist_auth *@*.indeed.com
 def_whitelist_auth *@*.hyatt.com
 def_whitelist_auth *@*.sears.com
@@ -334,8 +343,6 @@ def_whitelist_auth *@*.dollywood.com
 def_whitelist_auth *@*.sears-optical.com
 def_whitelist_auth *@*.e-lenscrafters.com
 def_whitelist_auth *@*.email-advanceautoparts.com
-def_whitelist_auth *@docusign.net
-def_whitelist_auth *@*.docusign.com
 def_whitelist_auth *@*.evernote.com
 def_whitelist_auth *@*.ebates.com
 def_whitelist_auth *@*.sylvanlearning.com
@@ -594,6 +601,79 @@ def_whitelist_auth *@*.nickjr.com
 def_whitelist_auth *@*.eschoolnews.com
 def_whitelist_auth *@*.motosnap.com
 def_whitelist_auth *@*.gsnutsandmags.com
+def_whitelist_auth *@*.shutterfly.com
+def_whitelist_auth *@*.edgenuity.com
+def_whitelist_auth *@*.goodreads.com
+def_whitelist_auth *@*.shrm.org
+def_whitelist_auth *@*.mtshrm.org
+def_whitelist_auth *@*.gynzy.com
+def_whitelist_auth *@*.actionnetwork.org
+def_whitelist_auth *@*.teacherfindr.com
+def_whitelist_auth *@*.tladoonline.com
+def_whitelist_auth *@*.aaa.com
+def_whitelist_auth *@*.woot.com
+def_whitelist_auth *@*.nsba.org
+def_whitelist_auth *@*.teamapp.com
+def_whitelist_auth *@*.act.org
+def_whitelist_auth *@*.vetsandfamily.com
+def_whitelist_auth *@*.jeansforvets.org
+def_whitelist_auth *@*.welcomehomevet.org
+def_whitelist_auth *@*.readingeggs.com
+def_whitelist_auth *@*.myschoolcast.com
+def_whitelist_auth *@*.takethemameal.com
+def_whitelist_auth *@*.shape.com
+def_whitelist_auth *@*.videoblocks.com
+def_whitelist_auth *@*.wifeteachermommy.com
+def_whitelist_auth *@*.darice.com
+def_whitelist_auth *@*.everfi.net
+def_whitelist_auth *@godvinemail.com
+def_whitelist_auth *@*.doheny.com
+def_whitelist_auth *@*.nyansa.com
+def_whitelist_auth *@*.submittable.com
+def_whitelist_auth *@*.slideshare.net
+def_whitelist_auth *@*.ocm.com
+def_whitelist_auth *@*.dji.com
+def_whitelist_auth *@*.zyngamail.com
+def_whitelist_auth *@*.costasunglasses.com
+def_whitelist_auth *@*.baseballexpress.com
+def_whitelist_auth *@dishemail.com
+def_whitelist_auth *@*.promgirl.com
+def_whitelist_auth *@*.ed.gov
+def_whitelist_auth *@*.carecredit.com
+def_whitelist_auth *@*.trello.com
+def_whitelist_auth *@*.shopify.com
+def_whitelist_auth *@*.iclasspro.com
+def_whitelist_auth *@mail-fellowesbrands.com
+def_whitelist_auth *@*.planetfitness.com
+def_whitelist_auth *@*.shoppinkblush.com
+def_whitelist_auth *@*.webmdprofessional.com
+def_whitelist_auth *@*.omadahealth.com
+def_whitelist_auth *@*.vividseats.com
+def_whitelist_auth *@*.avis.com
+def_whitelist_auth *@*.square.com
+def_whitelist_auth *@*.ruthschris-email.com
+def_whitelist_auth *@*.zearn.org
+def_whitelist_auth *@*.careerbuilder.com
+def_whitelist_auth *@*.kelloggs.com
+def_whitelist_auth *@*.wunderground.com
+def_whitelist_auth *@*.silpada.com
+def_whitelist_auth *@*.toofaced.com
+def_whitelist_auth *@*.sonicwall.com
+def_whitelist_auth *@*.bebe.com
+def_whitelist_auth *@*.discoveryeducation.com
+def_whitelist_auth *@*.alison.com
+def_whitelist_auth *@*.livestream.com
+def_whitelist_auth *@*.rockauto.com
+def_whitelist_auth *@*.elfcosmetics.com
+def_whitelist_auth *@*.cars.com
+def_whitelist_auth *@*.puritan.com
+def_whitelist_auth *@*.cheddars.com
+def_whitelist_auth *@*.schoolmessenger.com
+def_whitelist_auth *@*.pinchme.com
+def_whitelist_auth *@*.clarksusa.com
+def_whitelist_auth *@*.smore.com
+def_whitelist_auth *@*.softball.com
+
 
 endif # Mail::SpamAssassin::Plugin::SPF
 
