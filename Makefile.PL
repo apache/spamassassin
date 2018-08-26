@@ -74,8 +74,8 @@ my @ATT_KEYS = (
   'PERL_TAINT',       # "   "  "    "  "    taint mode for the scripts (DON'T)
 
 
-  'BUILD_SPAMC'  ,    # Set to 'no' to skip build of spamc.
-  'BUILD_SPAMD',      # Set to 'no' to skip build of spamd.
+  'BUILD_SPAMC'  ,    # Set to 'no' to skip build of spamc on Windows.
+  'BUILD_SPAMD',      # Set to 'no' to skip build of spamd on Windows.
   'ENABLE_SSL',       # Set to 'yes' to build spamc with SSL support.
   'CONTACT_ADDRESS',  # To not ask for the contact address, use this.
 );
