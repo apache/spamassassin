@@ -2596,7 +2596,7 @@ sub _wrap_desc {
   my ($self, $desc, $firstlinelength, $prefix) = @_;
 
   my $firstline = " " x $firstlinelength;
-  my $wrapped = Mail::SpamAssassin::Util::wrap($desc, $prefix, $firstline, 75, 0);
+  my $wrapped = Mail::SpamAssassin::Util::wrap($desc, $prefix, $firstline, $self->{conf}->{report_wrap_width}, 0);
   $wrapped =~ s/^\s+//s;
   $wrapped;
 }
