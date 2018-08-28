@@ -46,6 +46,7 @@ sub new {
   $self->register_eval_rule("check_to_in_more_spam");
   $self->register_eval_rule("check_to_in_all_spam");
   $self->register_eval_rule("check_from_in_list");
+  $self->register_eval_rule("check_replyto_in_list");
   $self->register_eval_rule("check_to_in_list");
   $self->register_eval_rule("check_from_in_whitelist");
   $self->register_eval_rule("check_forged_in_whitelist");
@@ -118,6 +119,24 @@ sub check_from_in_list {
     if ($self->_check_whitelist ($list_ref, $addr)) {
       return 1;
     }
+  }
+
+  return 0;
+}
+
+sub check_replyto_in_list {
+  my ($self, $pms, $list) = @_;
+  my $list_ref = $self->{main}{conf}{$list};
+  unless (defined $list_ref) {
+    warn "eval: could not find list $list";
+    return;
+  }
+
+  my $replyto = $pms->get("Reply-To:addr");
+  return 0  if $replyto eq '';
+
+  if ($self->_check_whitelist ($list_ref, $replyto)) {
+    return 1;
   }
 
   return 0;
