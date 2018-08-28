@@ -2654,7 +2654,7 @@ mbox_format_from_regex /^From \S+  ?[[:upper:]][[:lower:]]{2}(?:, \d\d [[:upper:
   });
 
 
-=item parse_dkim_uris ( 0 | 1 ) (default: 0)
+=item parse_dkim_uris ( 0 | 1 ) (default: 1)
 
 If this option is set to 1 and the message contains DKIM headers, the headers will be parsed for URIs to process alongside URIs found in the body with some rules and modules (ex. URIDNSBL)
 
@@ -2662,7 +2662,7 @@ If this option is set to 1 and the message contains DKIM headers, the headers wi
 
   push (@cmds, {
     setting => 'parse_dkim_uris',
-    default => 0,
+    default => 1,
     type => $CONF_TYPE_BOOL,
   });
 
