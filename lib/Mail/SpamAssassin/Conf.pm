@@ -1095,16 +1095,16 @@ the original mail into tagged messages.
     }
   });
 
-=item report_wrap_width (default: 75) 
+=item report_wrap_width (default: 70) 
 
 This option sets the wrap width for description lines in the X-Spam-Report 
-header. 
+header, not accounting for tab width. 
 
 =cut
 
   push (@cmds, {
     setting => 'report_wrap_width',
-    default => '75',
+    default => '70',
     type => $CONF_TYPE_NUMERIC,
   });
 
