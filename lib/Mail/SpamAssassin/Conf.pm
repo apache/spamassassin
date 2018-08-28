@@ -742,6 +742,58 @@ name and has no meaning here.
     }
   });
 
+=item enlist_addrlist (listname) user@example.com
+
+Adds one or more addresses to a named list of addresses.
+The named list can then be consulted through a check_from_in_list() or a 
+check_to_in_list() eval rule implemented by the WLBLEval plugin, which takes 
+the list name as an argument. Parenthesis around a list name are literal - a 
+required syntax.
+
+Listed addresses are file-glob-style patterns, so C<friend@somewhere.com>, 
+C<*@isp.com>, or C<*.domain.net> will all work.
+Specifically, C<*> and C<?> are allowed, but all other metacharacters
+are not. Regular expressions are not used for security reasons.
+Matching is case-insensitive.
+
+Multiple addresses per line, separated by spaces, is OK.  Multiple
+C<enlist_addrlist> lines are also OK.
+
+Enlisting an address to the list named blacklist_to is synonymous to using the
+directive blacklist_to 
+
+Enlisting an address to the list named blacklist_from is synonymous to using the
+directive blacklist_from
+
+Enlisting an address to the list named whitelist_to is synonymous to using the
+directive whitelist_to 
+
+Enlisting an address to the list named whitelist_from is synonymous to using the
+directive whitelist_from
+
+e.g.
+
+  enlist_addrlist (PAYPAL_ADDRESS) service@paypal.com
+  enlist_addrlist (PAYPAL_ADDRESS) *@paypal.co.uk
+
+=cut
+
+  push (@cmds, {
+    setting => 'enlist_addrlist',
+    type => $CONF_TYPE_ADDRLIST,
+    code => sub {
+      my($conf, $key, $value, $line) = @_;
+      local($1,$2);
+      if ($value !~ /^ \( (.*?) \) \s+ (.*) \z/sx) {
+        return $MISSING_REQUIRED_VALUE;
+      }
+      my $listname = $1;  # corresponds to arg in check_uri_host_in_wblist()
+      # note: must not factor out dereferencing, as otherwise
+      # subhashes would spring up in a copy and be lost
+      $conf->{parser}->add_to_addrlist ($listname, split(/\s+/, $value));
+    }
+  });
+
 =item blacklist_uri_host host-or-domain ...
 
 Is a shorthand for a directive:  enlist_uri_host (BLACK) host ...
