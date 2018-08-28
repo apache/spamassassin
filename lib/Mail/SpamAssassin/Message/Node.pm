@@ -377,6 +377,56 @@ sub decode {
   }
 }
 
+# Detect endianness of UTF-16 encoded data
+sub detect_utf16 {
+	use Data::Dumper;
+	my $data = $_[0];  # could not avoid copying large strings
+	my $utf16le_clues = 0;
+	my $utf16be_clues = 0;
+	my $sum_h_e = 0;
+	my $sum_h_o = 0;
+	my $sum_l_e = 0;
+	my $sum_l_o = 0;
+	my $decoder = undef;
+
+	my @msg_h = unpack 'H' x length( $data ), $data;
+	my @msg_l = unpack 'h' x length( $data ), $data;
+
+	for( my $i = 0; $i < length( $data ); $i+=2 ) {
+		my $check_char = sprintf( "%01X%01X %01X%01X", hex $msg_h[$i], hex $msg_l[$i], hex $msg_h[$i+1], hex $msg_l[$i+1] );
+		$sum_h_e += hex $msg_h[$i];
+		$sum_h_o += hex $msg_h[$i+1];
+		$sum_l_e += hex $msg_l[$i];
+		$sum_l_o += hex $msg_l[$i+1];
+		if( $check_char =~ /20 00/ ) {
+			# UTF-16LE space char detected
+			$utf16le_clues++;
+		}
+		if( $check_char =~ /00 20/ ) {
+			# UTF-16BE space char detected
+			$utf16be_clues++;
+		}
+	}
+
+	# If we have 4x as many non-null characters in the odd bytes, we're probably UTF-16LE
+	$utf16le_clues++ if( ($sum_h_e + $sum_l_e) > ($sum_h_o + $sum_l_o)*4 );
+
+	# If we have 4x as many non-null characters in the even bytes, we're probably UTF-16BE
+	$utf16be_clues++ if( ($sum_h_o + $sum_l_o)*4 > ($sum_h_e + $sum_l_e) );
+
+	if( $utf16le_clues > $utf16be_clues ) {
+		dbg( "message: detect_utf16: UTF-16LE" );
+		$decoder = Encode::find_encoding("UTF-16LE");
+	} elsif( $utf16le_clues > $utf16be_clues ) {
+		dbg( "message: detect_utf16: UTF-16BE" );
+		$decoder = Encode::find_encoding("UTF-16BE");
+	} else {
+		dbg( "message: detect_utf16: Could not detect UTF-16 endianness" );
+	}
+
+	return $decoder;
+}
+
 # Look at a text scalar and determine whether it should be rendered
 # as text/html.
 #
@@ -450,6 +500,20 @@ sub _normalize {
     # declared as US-ASCII but contains 8-bit characters, makes no sense
     # to attempt decoding first as strict US-ASCII as we know it would fail
 
+  } elsif ($charset_declared =~ /^UTF[ -]?16/i) {
+    # Handle cases where spammers use UTF-16 encoding without including a BOM
+    # or declaring endianness as reported at:
+    # https://bz.apache.org/SpamAssassin/show_bug.cgi?id=7252
+
+    my $decoder = detect_utf16( $_[0] );
+    if (eval { $rv = $decoder->decode($_[0], 1|8); defined $rv }) {
+      dbg("message: declared charset %s decoded as charset %s", $charset_declared, $decoder->name);
+      return $_[0]  if !$return_decoded;
+      $rv .= $data_taint;  # carry taintedness over, avoid Encode bug
+      return $rv;  # decoded
+    } else {
+      dbg("message: failed decoding as declared charset $charset_declared");
+    };
   } else {
     # try decoding as a declared character set
 
