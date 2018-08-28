@@ -767,7 +767,7 @@ sub wrap {
   my $pos = 0;
   my $pos_mod = 0;
   while ($#arr > $pos) {
-    my $len = length $arr[$pos];
+    my $len = length ($arr[$pos] =~ s/\t/        /gr);
 
     # if we don't want to have lines > $length (overflow==0), we
     # need to verify what will happen with the next line.  if we don't
@@ -775,7 +775,7 @@ sub wrap {
     # line.
     # we also want this to be true for the first entry on the line
     if ($pos_mod != 0 && $overflow == 0) {
-      $len += length $arr[$pos+1];
+      $len += length ($arr[$pos+1] =~ s/\t/        /gr);
     }
 
     if ($len <= $length) {
