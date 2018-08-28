@@ -49,7 +49,7 @@ print "Removing scores for base release rules from newly generated scores\n";
 
 open(ORIG, "../rules/50_scores.cf") or die "Cannot open original score file: $!";
 while(<ORIG>) {
-  if (/^score\s+(\S+)/) {
+  if (/^\s*score\s+(\S+)/) {
     $original_rules{$1} = undef;
   }
 }
