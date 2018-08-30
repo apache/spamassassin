@@ -39,7 +39,7 @@ Notable features:
 
 New plugins
 -----------
-There are three new plugins added with this release:
+There are four new plugins added with this release:
 
   Mail::SpamAssassin::Plugin::HashBL
 
@@ -61,6 +61,10 @@ recipients into thinking an email is from another address.  The man page
 includes examples and we expect to put test rules for this plugin into 
 rulesrc soon!
 
+  Mail::SpamAssassin::Plugin::Phishing
+
+This plugin finds uris used in phishing campaigns detected by
+OpenPhish (https://openphish.com) or PhishTank (https://phishtank.com) feeds.
 
 These plugins are disabled by default. To enable, uncomment
 the loadplugin configuration options in file v342.pre, or add it to
