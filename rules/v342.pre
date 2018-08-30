@@ -28,5 +28,9 @@
 # the from name
 # loadplugin Mail::SpamAssassin::Plugin::FromNameSpoof
 
+# Phishing - finds uris used in phishing campaigns detected by
+# OpenPhish or PhishTank feeds.
+# loadplugin Mail::SpamAssassin::Plugin::Phishing
+
 # allow URI rules to look at DKIM headers if they exist
 parse_dkim_uris 1
