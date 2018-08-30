@@ -37,7 +37,7 @@ Mail::SpamAssassin::Plugin::Phishing - check uris against phishing feed
 
 =head1 DESCRIPTION
 
-This phishing plugin finds uris used in phishing campaigns detected by 
+This plugin finds uris used in phishing campaigns detected by 
 OpenPhish or PhishTank feeds.
 
 The Openphish free feed is updated every 6 hours and can be downloaded from
