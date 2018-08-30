@@ -4,48 +4,44 @@
 score AC_BR_BONANZA                  0.001
 score AC_DIV_BONANZA                 0.001
 score ADVANCE_FEE_2_NEW_MONEY        1.999
-score ADVANCE_FEE_3_NEW              3.466
-score ADVANCE_FEE_3_NEW_MONEY        1.340
-score ADVANCE_FEE_4_NEW              0.001
-score ADVANCE_FEE_4_NEW_FRM_MNY      0.001
-score ADVANCE_FEE_4_NEW_MONEY        0.001 # force non-zero
-score ADVANCE_FEE_5_NEW              2.999
+score ADVANCE_FEE_3_NEW              3.468
+score ADVANCE_FEE_3_NEW_MONEY        1.342
+score ADVANCE_FEE_4_NEW              0.001 # force non-zero
 score ADVANCE_FEE_5_NEW_MONEY        0.012
-score APP_DEVELOPMENT_FREEM          2.867
+score APP_DEVELOPMENT_FREEM          3.473
 score APP_DEVELOPMENT_NORDNS         1.999
 score AXB_XMAILER_MIMEOLE_OL_024C2   0.001
-score BODY_URI_ONLY                  0.814
+score BODY_URI_ONLY                  0.815
 score BOGUS_MSM_HDRS                 2.999
 score BTC_ORG                        2.999
-score CK_HELO_DYNAMIC_SPLIT_IP       1.285
+score CK_HELO_DYNAMIC_SPLIT_IP       1.320
 score CK_HELO_GENERIC                0.249
 score FBI_MONEY                      0.001
-score FBI_SPOOF                      0.001 # force non-zero
-score FILL_THIS_FORM                 0.001 # force non-zero
+score FBI_SPOOF                      0.001
+score FILL_THIS_FORM                 0.001
 score FORM_FRAUD_5                   0.001
-score FOUND_YOU                      3.250
-score FREEMAIL_DISPTO                0.249
-score FREEMAIL_FORGED_FROMDOMAIN     0.001
+score FOUND_YOU                      3.249
+score FREEMAIL_DISPTO                0.250
+score FREEMAIL_FORGED_FROMDOMAIN     0.001 # force non-zero
 score FREEM_FRNUM_UNICD_EMPTY        3.749
 score FRNAME_IN_MSG_NO_SUBJ          2.499
 score FRNAME_IN_MSG_XPRIO            2.499
 score FROM_ADDR_WS                   2.497
-score FROM_MISSPACED                 0.001 # force non-zero
 score FROM_MISSP_FREEMAIL            0.001
-score FROM_MISSP_MSFT                0.001
+score FROM_MISSP_MSFT                0.001 # force non-zero
 score FROM_MISSP_PHISH               0.001
 score FROM_MISSP_REPLYTO             0.001 # force non-zero
-score FROM_MISSP_XPRIO               0.001 # force non-zero
+score FROM_MISSP_XPRIO               0.001
 score FSL_CTYPE_WIN1251              0.001
-score FSL_HELO_FAKE                  3.462
+score FSL_HELO_FAKE                  3.461
 score FSL_NEW_HELO_USER              0.001
 score FUZZY_WALLET                   2.499
 score HDRS_LCASE_IMGONLY             0.100
 score HDR_ORDER_FTSDMCXX_DIRECT      1.999
-score HDR_ORDER_FTSDMCXX_NORDNS      2.375
+score HDR_ORDER_FTSDMCXX_NORDNS      3.500
 score HEADER_FROM_DIFFERENT_DOMAINS  0.250
 score HELO_MISC_IP                   0.250
-score HK_NAME_FM_DR                  1.478
+score HK_NAME_FM_DR                  1.477
 score HK_NAME_FM_MR_MRS              1.499
 score HK_SCAM_N2                     0.001
 score HK_SCAM_N8                     0.001
@@ -55,49 +51,46 @@ score LIST_PRTL_SAME_USER            0.001
 score LONG_HEX_URI                   0.001
 score LONG_IMG_URI                   0.024
 score LOTS_OF_MONEY                  0.010
-score MALF_HTML_B64                  3.499
-score MILLION_USD                    0.001
-score MIMEOLE_DIRECT_TO_MX           0.298
-score MIME_NO_TEXT                   1.941
-score MONEY_FORM                     0.001
-score MONEY_FRAUD_3                  0.921
+score MALF_HTML_B64                  3.267
+score MIMEOLE_DIRECT_TO_MX           0.293
+score MIME_NO_TEXT                   1.759
+score MONEY_FORM                     0.001 # force non-zero
+score MONEY_FRAUD_3                  0.950
 score MONEY_FRAUD_5                  0.001
-score MONEY_FRAUD_8                  0.001
-score MONEY_FROM_41                  1.999
+score MONEY_FRAUD_8                  0.001 # force non-zero
+score MONEY_FROM_41                  2.000
 score MONEY_FROM_MISSP               0.001
-score MSM_PRIO_REPTO                 2.275
+score MSM_PRIO_REPTO                 1.261
 score NO_FM_NAME_IP_HOSTN            2.500
-score NSL_RCVD_FROM_USER             0.001 # force non-zero
-score PHOTO_EDITING_FREEM            2.537
-score PHP_ORIG_SCRIPT                1.016
+score PHOTO_EDITING_FREEM            2.734
+score PHP_ORIG_SCRIPT                1.013
 score PP_MIME_FAKE_ASCII_TEXT        0.999
 score RATWARE_NO_RDNS                2.999
 score RCVD_IN_MSPIKE_H2              -0.001
-score SERGIO_SUBJECT_PORN011         2.366
-score SERGIO_SUBJECT_PORN014         4.344
-score SINGLETS_LOW_CONTRAST          0.650
-score SPOOFED_FREEM_REPTO            2.499
+score SERGIO_SUBJECT_PORN011         2.054
+score SERGIO_SUBJECT_PORN014         3.880
+score SINGLETS_LOW_CONTRAST          1.720
+score SPOOFED_FREEM_REPTO            2.500
 score STATIC_XPRIO_OLE               1.999
 score STYLE_GIBBERISH                3.499
-score THIS_AD                        1.777
+score THIS_AD                        1.748
 score TO_IN_SUBJ                     0.100
-score TO_NO_BRKTS_FROM_MSSP          0.001 # force non-zero
-score TO_NO_BRKTS_HTML_IMG           1.955
-score TO_NO_BRKTS_HTML_ONLY          1.259
+score TO_NO_BRKTS_FROM_MSSP          0.001
+score TO_NO_BRKTS_HTML_IMG           1.973
+score TO_NO_BRKTS_HTML_ONLY          1.255
 score TO_NO_BRKTS_MSFT               0.001
 score TO_NO_BRKTS_NORDNS_HTML        0.650
 score TVD_SPACE_ENCODED              2.499
 score URI_DQ_UNSUB                   3.299
-score URI_GOOGLE_PROXY               0.883
-score URI_ONLY_MSGID_MALF            2.000
-score URI_PHISH                      3.722
+score URI_GOOGLE_PROXY               0.884
+score URI_ONLY_MSGID_MALF            1.999
 score URI_TRY_3LD                    0.001
-score URI_WPADMIN                    3.599
-score URI_WP_HACKED                  3.499
+score URI_WPADMIN                    3.600
+score URI_WP_HACKED                  3.500
 score URI_WP_HACKED_2                2.499
 score USB_DRIVES                     1.999
-score XPRIO                          2.244
-score XPRIO_SHORT_SUBJ               2.499
+score XPRIO                          2.245
+score XPRIO_SHORT_SUBJ               2.500
 score YOU_INHERIT                    2.699
 score AC_HTML_NONSENSE_TAGS          1.000
 score AC_SPAMMY_URI_PATTERNS1        1.000
@@ -146,4 +139,5 @@ score TW_GIBBERISH_MANY              1.000
 score UC_GIBBERISH_OBFU              1.000
 score URI_DATA                       1.000
 score URI_OPTOUT_3LD                 1.000
+score URI_PHISH                      1.000
 score URI_WP_DIRINDEX                1.000
