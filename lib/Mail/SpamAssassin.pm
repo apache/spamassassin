@@ -840,7 +840,7 @@ sub signal_user_changed {
   $self->{'learn_to_journal'} = $self->{conf}->{bayes_learn_to_journal};
 
   $set |= 1 unless $self->{local_tests_only};
-  $set |= 2 if $self->{bayes_scanner} && $self->{bayes_scanner}->is_scan_available();
+  $set |= 2 if $self->{bayes_scanner} && $self->{bayes_scanner}->is_scan_available() && $self->{conf}->{use_bayes_rules};
 
   $self->{conf}->set_score_set ($set);
 
@@ -1777,7 +1777,7 @@ sub init {
   # Figure out/set our initial scoreset
   my $set = 0;
   $set |= 1 unless $self->{local_tests_only};
-  $set |= 2 if $self->{bayes_scanner} && $self->{bayes_scanner}->is_scan_available();
+  $set |= 2 if $self->{bayes_scanner} && $self->{bayes_scanner}->is_scan_available() && $self->{conf}->{use_bayes_rules};
   $self->{conf}->set_score_set ($set);
 
   if ($self->{only_these_rules}) {
