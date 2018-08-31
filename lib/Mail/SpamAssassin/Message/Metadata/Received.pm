@@ -1199,6 +1199,11 @@ sub parse_received_line {
     # id 18tOsg-0008FX-00; Thu, 13 Mar 2003 09:20:06 +0000
     if (/^\S+ by \S+ with local/) { return 0; }
 
+    # Local unix socket handover from Cyrus, tested with v2.3.14
+    # Received: from testintranator.net.vm ([unix socket])_ by testintranator.net.vm (Cyrus v2.3.14) with LMTPA;_ Tue, 21 Jul 2009 14:34:14 +0200
+    # Attention: Actually the received header is parsed as "testintranator.net.vm ([unix socket]) by testintranator.net.vm (Cyrus v2.3.14) with LMTPA", "from" is ommited.
+    if (/^\S+ \(\[unix socket\]\) by \S+ \(Cyrus v[0-9]*?\.[0-9]*?\.[0-9]*?\) with LMTPA/) { return 0; }
+
     # HANDOVERS WE KNOW WE CAN'T DEAL WITH: TCP transmission, but to MTAs that
     # just don't log enough info for us to use (ie. no IP address present).
     # Note: "return 0" is strongly recommended here, unless you're sure
