@@ -2304,12 +2304,12 @@ endif
 #  score      MARKETING_NO_RDNS          3.500	# limit
 #endif
 
-meta       HDR_ORDER_FTSDMCXX_DIRECT  (__HDR_ORDER_FTSDMCXXXX && __DOS_SINGLE_EXT_RELAY)
+meta       HDR_ORDER_FTSDMCXX_DIRECT  (__HDR_ORDER_FTSDMCXXXX && __DOS_SINGLE_EXT_RELAY) && __ANY_EXTERNAL
 describe   HDR_ORDER_FTSDMCXX_DIRECT  Header order similar to spam (FTSDMCXX/boundary variant) direct-to-MX
 score      HDR_ORDER_FTSDMCXX_DIRECT  2.000	# limit
 tflags     HDR_ORDER_FTSDMCXX_DIRECT  publish
 
-meta       HDR_ORDER_FTSDMCXX_NORDNS  (__HDR_ORDER_FTSDMCXXXX && __RDNS_NONE)
+meta       HDR_ORDER_FTSDMCXX_NORDNS  (__HDR_ORDER_FTSDMCXXXX && __RDNS_NONE) && __ANY_EXTERNAL
 describe   HDR_ORDER_FTSDMCXX_NORDNS  Header order similar to spam (FTSDMCXX/boundary variant) + no rDNS
 score      HDR_ORDER_FTSDMCXX_NORDNS  3.500	# limit
 tflags     HDR_ORDER_FTSDMCXX_NORDNS  publish
