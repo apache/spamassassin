@@ -1,4 +1,303 @@
 ------------------------------------------------------------------------
+r1839797 | billcole | 2018-08-31 23:43:25 +0000 (Fri, 31 Aug 2018) | 1 
+line
+ 
+ skip unparseable Cyrus LMTPA over unix socket Received header 
+------------------------------------------------------------------------
+r1839792 | billcole | 2018-08-31 22:04:32 +0000 (Fri, 31 Aug 2018) | 1 
+line
+ 
+ Actually implementing use_bayes_rules distinct from use_bayes. Bug #7110
+------------------------------------------------------------------------
+r1839684 | kmcgrail | 2018-08-30 15:26:34 +0000 (Thu, 30 Aug 2018) | 1 
+line
+ 
+ Fix warnings on Windows platform in 3.4 - bug 7259
+------------------------------------------------------------------------
+r1839641 | gbechis | 2018-08-30 07:32:41 +0000 (Thu, 30 Aug 2018) | 2 
+lines
+ 
+ typo in man page
+ 
+------------------------------------------------------------------------
+r1839639 | gbechis | 2018-08-30 07:30:54 +0000 (Thu, 30 Aug 2018) | 2 
+lines
+ 
+ Phishing plugin
+ 
+------------------------------------------------------------------------
+r1839638 | gbechis | 2018-08-30 07:27:29 +0000 (Thu, 30 Aug 2018) | 6 
+lines
+ 
+ Add  Mail::SpamAssassin::Plugin::Phishing
+ This phishing plugin finds uris used in phishing campaigns detected by
+ OpenPhish or PhishTank feeds.
+ 
+ bz 7564
+ 
+------------------------------------------------------------------------
+r1839529 | kmcgrail | 2018-08-29 01:29:54 +0000 (Wed, 29 Aug 2018) | 1 
+line
+ 
+ Fixing small perlcritic issue
+------------------------------------------------------------------------
+r1839517 | kmcgrail | 2018-08-29 00:27:22 +0000 (Wed, 29 Aug 2018) | 1 
+line
+ 
+ small spelling error
+------------------------------------------------------------------------
+r1839515 | billcole | 2018-08-28 23:55:29 +0000 (Tue, 28 Aug 2018) | 1 
+line
+ 
+ Detect UTF-16 flavor
+------------------------------------------------------------------------
+r1839514 | billcole | 2018-08-28 23:44:51 +0000 (Tue, 28 Aug 2018) | 1 
+line
+ 
+ switch default for parse_dkim_uris
+------------------------------------------------------------------------
+r1839511 | billcole | 2018-08-28 23:12:05 +0000 (Tue, 28 Aug 2018) | 1 
+line
+ 
+ Fixing t/util_wrap.t for new tab=>8 spaces accounting
+------------------------------------------------------------------------
+r1839487 | billcole | 2018-08-28 17:16:00 +0000 (Tue, 28 Aug 2018) | 1 
+line
+ 
+ Making allowance for tabs in M::SA::Util=>wrap(), tweaking default wrap 
+width
+------------------------------------------------------------------------
+r1839410 | gbechis | 2018-08-28 07:45:52 +0000 (Tue, 28 Aug 2018) | 4 
+lines
+ 
+ Fix indented rules to be rescored
+ Give a chance to RCVD_IN_MSPIKE rules.
+ bz #6400
+ 
+------------------------------------------------------------------------
+r1839409 | gbechis | 2018-08-28 07:35:13 +0000 (Tue, 28 Aug 2018) | 2 
+lines
+ 
+ Mention 'report_wrap_width' new option
+ 
+------------------------------------------------------------------------
+r1839390 | kmcgrail | 2018-08-28 02:48:28 +0000 (Tue, 28 Aug 2018) | 1 
+line
+ 
+ Adding more features to WLBLEval - Bug 7354
+------------------------------------------------------------------------
+r1839388 | kmcgrail | 2018-08-28 02:39:26 +0000 (Tue, 28 Aug 2018) | 1 
+line
+ 
+ Adding FromNameSpoof plugin - bug 7606
+------------------------------------------------------------------------
+r1839367 | billcole | 2018-08-27 19:18:16 +0000 (Mon, 27 Aug 2018) | 1 
+line
+ 
+ Adding configurable wrap width for X-Spam-Report header. Bug #6104
+------------------------------------------------------------------------
+r1839294 | gbechis | 2018-08-27 10:41:59 +0000 (Mon, 27 Aug 2018) | 2 
+lines
+ 
+ detect Sympa mailinglists, bz #7523
+ 
+------------------------------------------------------------------------
+r1839260 | kmcgrail | 2018-08-26 21:55:00 +0000 (Sun, 26 Aug 2018) | 1 
+line
+ 
+ build_spamc & build_spamd are options for win32 only - bug 7376
+------------------------------------------------------------------------
+r1839147 | kmcgrail | 2018-08-25 23:31:00 +0000 (Sat, 25 Aug 2018) | 1 
+line
+ 
+ Addig tag for LASTEXTERNALIP - Bug 7334
+------------------------------------------------------------------------
+r1839143 | kmcgrail | 2018-08-25 23:17:51 +0000 (Sat, 25 Aug 2018) | 1 
+line
+ 
+ allow font names in tickmarks - bug 7312
+------------------------------------------------------------------------
+r1839141 | kmcgrail | 2018-08-25 23:11:53 +0000 (Sat, 25 Aug 2018) | 1 
+line
+ 
+ changing socket handling for spamd - bug 7274
+------------------------------------------------------------------------
+r1839140 | kmcgrail | 2018-08-25 23:04:42 +0000 (Sat, 25 Aug 2018) | 1 
+line
+ 
+ Improving razor2 test
+------------------------------------------------------------------------
+r1839137 | kmcgrail | 2018-08-25 22:49:01 +0000 (Sat, 25 Aug 2018) | 1 
+line
+ 
+ changing make to $Config{make} for sa-compile - bug 7294
+------------------------------------------------------------------------
+r1839132 | kmcgrail | 2018-08-25 22:35:14 +0000 (Sat, 25 Aug 2018) | 1 
+line
+ 
+ Add references to plugins - bug 7280
+------------------------------------------------------------------------
+r1839127 | kmcgrail | 2018-08-25 22:08:33 +0000 (Sat, 25 Aug 2018) | 1 
+line
+ 
+ Adding information rule updates and sha1 to announcement
+------------------------------------------------------------------------
+r1839085 | gbechis | 2018-08-25 17:20:14 +0000 (Sat, 25 Aug 2018) | 2 
+lines
+ 
+ revert r1826179, fixes bz #7602
+ 
+------------------------------------------------------------------------
+r1839015 | billcole | 2018-08-25 05:15:19 +0000 (Sat, 25 Aug 2018) | 1 
+line
+ 
+ Really skip Devel::SawAmpersand test when it's unneeded
+------------------------------------------------------------------------
+r1839005 | kmcgrail | 2018-08-25 01:44:30 +0000 (Sat, 25 Aug 2018) | 1 
+line
+ 
+ adding a description of why the change exists
+------------------------------------------------------------------------
+r1839002 | kmcgrail | 2018-08-25 01:22:03 +0000 (Sat, 25 Aug 2018) | 1 
+line
+ 
+ Adding more cases for user_prefs.template to be found - bug 7298
+------------------------------------------------------------------------
+r1838999 | kmcgrail | 2018-08-25 00:47:02 +0000 (Sat, 25 Aug 2018) | 1 
+line
+ 
+ Small fix for new6 bug - reported by ToddR, cPanel
+------------------------------------------------------------------------
+r1838992 | kmcgrail | 2018-08-24 23:58:13 +0000 (Fri, 24 Aug 2018) | 1 
+line
+ 
+ fixing Use of uninitialized value $file in File::Spec->catpath bug 7272
+------------------------------------------------------------------------
+r1838856 | gbechis | 2018-08-24 13:39:02 +0000 (Fri, 24 Aug 2018) | 2 
+lines
+ 
+ typo in optional module
+ 
+------------------------------------------------------------------------
+r1838854 | gbechis | 2018-08-24 13:29:27 +0000 (Fri, 24 Aug 2018) | 2 
+lines
+ 
+ Mention Mail::SpamAssassin::Plugin::ResourceLimit
+ 
+------------------------------------------------------------------------
+r1838779 | kmcgrail | 2018-08-24 01:53:14 +0000 (Fri, 24 Aug 2018) | 1 
+line
+ 
+ fixing an opt not freed. bug 7509
+------------------------------------------------------------------------
+r1838777 | kmcgrail | 2018-08-24 01:45:57 +0000 (Fri, 24 Aug 2018) | 1 
+line
+ 
+ Reverting previous comment of return - bug 7191 comment 18
+------------------------------------------------------------------------
+r1838775 | kmcgrail | 2018-08-24 01:35:46 +0000 (Fri, 24 Aug 2018) | 1 
+line
+ 
+ logic switch on spamd to fix the unlimited timeout option.  bug 6748
+------------------------------------------------------------------------
+r1838771 | kmcgrail | 2018-08-24 00:45:27 +0000 (Fri, 24 Aug 2018) | 1 
+line
+ 
+ Adding ResourceLimits.pm plugin and dependency test for BSD::Resources
+------------------------------------------------------------------------
+r1838645 | billcole | 2018-08-22 15:24:51 +0000 (Wed, 22 Aug 2018) | 1 
+line
+ 
+ Restoring required -D flag so that the patterns & antipatterns can 
+actually work
+------------------------------------------------------------------------
+r1838604 | kmcgrail | 2018-08-22 04:41:03 +0000 (Wed, 22 Aug 2018) | 1 
+line
+ 
+ Minor version check robustness bug 7095
+------------------------------------------------------------------------
+r1838601 | kmcgrail | 2018-08-22 04:15:31 +0000 (Wed, 22 Aug 2018) | 1 
+line
+ 
+ Adding info about rules being in root to manifest
+------------------------------------------------------------------------
+r1838598 | kmcgrail | 2018-08-22 04:06:35 +0000 (Wed, 22 Aug 2018) | 1 
+line
+ 
+ Commenting a change accidentally committed for Bug 7095
+------------------------------------------------------------------------
+r1838597 | kmcgrail | 2018-08-22 03:56:32 +0000 (Wed, 22 Aug 2018) | 1 
+line
+ 
+ rules, rulesrc and t.rules are only in trunk now
+------------------------------------------------------------------------
+r1838596 | kmcgrail | 2018-08-22 03:55:49 +0000 (Wed, 22 Aug 2018) | 1 
+line
+ 
+ prepping for 3.4.2 release
+------------------------------------------------------------------------
+r1838594 | kmcgrail | 2018-08-22 02:27:45 +0000 (Wed, 22 Aug 2018) | 1 
+line
+ 
+ Removing 3 experimental/devel plugins
+------------------------------------------------------------------------
+r1838591 | kmcgrail | 2018-08-21 23:53:30 +0000 (Tue, 21 Aug 2018) | 1 
+line
+ 
+ Remove pretty command line in ps so pkill can work
+------------------------------------------------------------------------
+r1838588 | kmcgrail | 2018-08-21 23:22:01 +0000 (Tue, 21 Aug 2018) | 1 
+line
+ 
+ Reminder not to leave -D
+------------------------------------------------------------------------
+r1838586 | billcole | 2018-08-21 21:34:03 +0000 (Tue, 21 Aug 2018) | 1 
+line
+ 
+ tighten up patterns in t/dnsbl.t
+------------------------------------------------------------------------
+r1838522 | gbechis | 2018-08-21 07:51:57 +0000 (Tue, 21 Aug 2018) | 2 
+lines
+ 
+ Describe some of the code developed and to be released in 3.4.2
+ 
+------------------------------------------------------------------------
+r1838511 | billcole | 2018-08-20 23:48:03 +0000 (Mon, 20 Aug 2018) | 1 
+line
+ 
+ Check for rules before using them in test
+------------------------------------------------------------------------
+r1838509 | kmcgrail | 2018-08-20 23:32:03 +0000 (Mon, 20 Aug 2018) | 1 
+line
+ 
+ Updated committer and pmc list
+------------------------------------------------------------------------
+r1838499 | billcole | 2018-08-20 21:45:37 +0000 (Mon, 20 Aug 2018) | 1 
+line
+ 
+ backport trunk sa-compile and t/sa_compile.t fixes
+------------------------------------------------------------------------
+r1838491 | kmcgrail | 2018-08-20 20:52:44 +0000 (Mon, 20 Aug 2018) | 1 
+line
+ 
+ rewrite of razor2 test and a sample email for testing
+------------------------------------------------------------------------
+r1838489 | kmcgrail | 2018-08-20 20:52:11 +0000 (Mon, 20 Aug 2018) | 1 
+line
+ 
+ rewrite of razor2 test and a sample email for testing
+------------------------------------------------------------------------
+r1838485 | kmcgrail | 2018-08-20 20:07:49 +0000 (Mon, 20 Aug 2018) | 1 
+line
+ 
+ removing prototype on bgread for PerlCritic
+------------------------------------------------------------------------
+r1838443 | kmcgrail | 2018-08-20 17:39:25 +0000 (Mon, 20 Aug 2018) | 1 
+line
+ 
+ moved rules and rules-extra to trunk-only for 3.4 and continue 
+streamlining build process
+------------------------------------------------------------------------
 r1838429 | kmcgrail | 2018-08-20 14:20:05 +0000 (Mon, 20 Aug 2018) | 1 
 line
  
