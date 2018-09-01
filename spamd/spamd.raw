@@ -2660,13 +2660,33 @@ sub handle_virtual_config_dir {
     my $domain    = '';
     if ( $safename =~ /^(.*)\@(.*)$/ ) { $localpart = $1; $domain = $2; }
 
-    $dir =~ s/\%u/${safename}/g;
-    $dir =~ s/\%l/${localpart}/g;
-    $dir =~ s/\%d/${domain}/g;
-    $dir =~ s/\%\%/\%/g;
+    # Do userdir lookup exim-style. 
+    # If a config for the full address exists, use that one
+    # else look for a domain default
+    if ($dir=~/%x/) {
+      ($userdir=$dir)=~s/%x/${safename}/g;
 
-    $userdir   = $dir;
-    $prefsfile = $dir . '/user_prefs';
+      $prefsfile=$userdir.'/user_prefs';
+      if (-f $prefsfile) {
+        $dir = $userdir;
+
+      } else {
+        $dir =~ s/%x/${domain}/g;
+
+        $prefsfile = $dir.'/user_prefs';
+        $userdir   = $dir;
+      }
+
+    # Use the normal escaping
+    } else { 
+      $dir =~ s/\%u/${safename}/g;
+      $dir =~ s/\%l/${localpart}/g;
+      $dir =~ s/\%d/${domain}/g;
+      $dir =~ s/\%\%/\%/g;
+
+      $userdir   = $dir;
+      $prefsfile = $dir . '/user_prefs';
+    }
 
     # Log that the default configuration is being used for a user.
     info("spamd: using default config for $username: $prefsfile");
