@@ -38,7 +38,9 @@ APACHE SPAMASSASSIN RELEASE PROCEDURE
   - You need ~/sabuildtools/bin with a symlink to gpg
 
   - You need ~/sabuildtoosl/sasigningkey with chmod 700 
- 
+
+  - You need the passphrase to the sasigning key
+
 - Ensure ExtUtils::MakeMaker is version 6.46 or later, to create
   a detailed-enough META.yml 
 
@@ -256,14 +258,13 @@ APACHE SPAMASSASSIN RELEASE PROCEDURE
 
   - For a maintainance release candidate(x.y.1-rc1), pre-release (x.y.1-preZ) or alpha (x.y.1-alphaZ):
 
-    vers=3_4_2_pre_4
+    vers=3_4_2_pre_5
 
     #Then run:
 
     repo=https://svn.apache.org/repos/asf/spamassassin
     svn delete -m "replaced old tag" $repo/tags/spamassassin_release_$vers
-    svn copy -m "creating tag for release $vers" \
-        $repo/branches/3.4 $repo/tags/spamassassin_release_$vers
+    svn copy -m "creating tag for release $vers" $repo/branches/3.4 $repo/tags/spamassassin_release_$vers
 
 
   - For a trunk release (x.y.0):
@@ -283,8 +284,7 @@ APACHE SPAMASSASSIN RELEASE PROCEDURE
 
     repo=https://svn.apache.org/repos/asf/spamassassin
     svn delete -m "replaced old tag" $repo/tags/spamassassin_release_$vers
-    svn copy -m "creating tag for release $vers" \
-        $repo/trunk $repo/tags/spamassassin_release_$vers
+    svn copy -m "creating tag for release $vers" $repo/trunk $repo/tags/spamassassin_release_$vers
 
     
   This will do a completely server-side tagging (which is the same as
@@ -312,7 +312,13 @@ APACHE SPAMASSASSIN RELEASE PROCEDURE
 
 - run "./build/update_stable" to build the tar.gz, tar.bz2 and zip files.
 
+    NOTE: link rules, t.rules and rulesrc to a trunk checkout if needed!
+
     killall gpg-agent
+    #THESE ARE NOT NEEDED FOR A TRUNK RELEASE
+    ln -s ~/usr/src/Mail-SpamAssassin/trunk/rules
+    ln -s ~/usr/src/Mail-SpamAssassin/trunk/rulesrc
+    ln -s ~/usr/src/Mail-SpamAssassin/trunk/t.rules
     ./build/update_stable
 
   NOTE: running gpg-agent with the proper homedir is needed for
