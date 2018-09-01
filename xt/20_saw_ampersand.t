@@ -44,7 +44,7 @@ BEGIN {
     print "NOTE: This test is unnecessary as of perl 5.17.7.\n";
     exit;
   } 
-  if ( HAS_DSA ) {
+  if ( !HAS_DSA ) {
     print "NOTE: This test requires Devel::SawAmpersand\n"; 
     exit;
   } 
