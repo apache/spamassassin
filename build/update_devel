@@ -52,8 +52,11 @@ gpg-agent --homedir $HOME/sabuildtools/sasigningkey --daemon --write-env-file "$
 for ext in tar.bz2 tar.gz zip ; do
   cp $DISTVNAME.$ext $RELDIR
 
-  perl build/md5sum.pl $DISTVNAME.$ext > $RELDIR/$DISTVNAME.$ext.md5  || exit $?
-  perl build/sha1sum.pl $DISTVNAME.$ext > $RELDIR/$DISTVNAME.$ext.sha1 || exit $?
+  #NO LONGER SIGNING WITH SHA1 OR MD5
+  #perl build/md5sum.pl $DISTVNAME.$ext > $RELDIR/$DISTVNAME.$ext.md5  || exit $?
+  #perl build/sha1sum.pl $DISTVNAME.$ext > $RELDIR/$DISTVNAME.$ext.sha1 || exit $?
+  perl build/sha256sum.pl $DISTVNAME.$ext > $RELDIR/$DISTVNAME.$ext.sha256 || exit $?
+  perl build/sha512sum.pl $DISTVNAME.$ext > $RELDIR/$DISTVNAME.$ext.sha512 || exit $?
 
   rm -f $DISTVNAME.$ext.asc*
   if [ -d $HOME/sabuildtools/sasigningkey ]; then
@@ -67,5 +70,5 @@ done
 test -f Makefile && make distclean
 rm -f $DISTVNAME.*
 
-chgrp -R spamassassin $RELDIR
+#chgrp -R spamassassin $RELDIR
 ls -l $RELDIR
