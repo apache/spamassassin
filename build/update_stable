@@ -14,13 +14,16 @@ tar cf - --exclude='.#*' doc | ( cd $WEBDIR ; tar xf - )
 set +x
 echo
 
-echo "md5sum of archive files:"
 echo
-cat $RELDIR/$MAINDISTVNAME.*.md5 | sed -e 's/^/  /'
-cat $RELDIR/$DISTVNAME.*.md5 | sed -e 's/^/  /'
+echo "sha256sum of archive files:"
 echo
-echo "sha1sum of archive files:"
+cat $RELDIR/$MAINDISTVNAME.*.sha256 | sed -e 's/^/  /'
+cat $RELDIR/$DISTVNAME.*.sha256 | sed -e 's/^/  /'
+
 echo
-cat $RELDIR/$MAINDISTVNAME.*.sha1 | sed -e 's/^/  /'
-cat $RELDIR/$DISTVNAME.*.sha1 | sed -e 's/^/  /'
+echo "sha512sum of archive files:"
+echo
+cat $RELDIR/$MAINDISTVNAME.*.sha512 | sed -e 's/^/  /'
+cat $RELDIR/$DISTVNAME.*.sha512 | sed -e 's/^/  /'
+
 
