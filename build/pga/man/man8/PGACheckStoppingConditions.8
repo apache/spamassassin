@@ -1,0 +1,33 @@
+.TH PGACheckStoppingConditions 8 "05/01/95" " " "PGAPack"
+.SH NAME
+PGACheckStoppingConditions \- returns boolean to indicate if the PGAPack
+termination conditions -- PGA_STOP_MAXITER, PGA_STOP_TOOSIMILAR, 
+PGA_STOP_NOCHANGE -- have been met.
+.SH INPUT PARAMETERS
+.PD 0
+.TP
+ctx
+- context variable
+.PD 1
+.SH OUTPUT PARAMETERS
+.PD 0
+.TP
+none
+
+.PD 1
+.SH SYNOPSIS
+.nf
+#include "pgapack.h"
+int  PGACheckStoppingConditions(ctx)
+PGAContext *ctx
+.fi
+.SH LOCATION
+stop.c
+.SH EXAMPLE
+.nf
+Example:
+PGAContext *ctx;
+:
+PGACheckStoppingConditions(ctx);
+
+.fi

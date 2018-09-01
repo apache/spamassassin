@@ -1,0 +1,67 @@
+.TH PGAGetRealFromGrayCode 1 "05/01/95" " " "PGAPack"
+.SH NAME
+PGAGetRealFromGrayCode \- interpets a binary reflected Gray code sequence in
+a binary string as encoding a real value and returns the real value it
+represents.
+.SH INPUT PARAMETERS
+.PD 0
+.TP
+ctx
+- context variable
+.PD 0
+.TP
+p
+- string index
+.PD 0
+.TP
+pop
+- symbolic constant of the population the string is in
+.PD 0
+.TP
+start
+- starting bit position in the binary representation
+.PD 0
+.TP
+end
+- ending bit position in the binary representation
+.PD 0
+.TP
+lower
+- lower bound of the interval the real number is defined on
+.PD 0
+.TP
+upper
+- lower bound of the interval the real number is defined on
+.PD 1
+.SH OUTPUT PARAMETERS
+.PD 0
+.TP
+none
+
+.PD 1
+.SH SYNOPSIS
+.nf
+#include "pgapack.h"
+double  PGAGetRealFromGrayCode(ctx, p, pop, start, end, lower, upper)
+PGAContext *ctx
+int p
+int pop
+int start
+int end
+double lower
+double upper
+.fi
+.SH LOCATION
+evaluate.c
+.SH EXAMPLE
+.nf
+Example:
+Decode a real value from the string p in population PGA_NEWPOP.  The
+value to decode lies on the interval [-10,20] and is represented
+using the 20 bits in bit positions 10--29.
+
+double x;
+:
+x = PGAGetRealFromGrayCode(ctx, p, PGA_NEWPOP, 10, 29, -10.0, 20.0);
+
+.fi

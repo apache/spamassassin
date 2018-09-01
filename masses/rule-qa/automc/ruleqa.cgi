@@ -1,5 +1,5 @@
-#!/local/perl586/bin/perl
-my $automcdir = "/export/home/svn-trunk/masses/rule-qa/automc";
+#!/usr/bin/perl
+my $automcdir = "/usr/local/spamassassin/automc/svn/masses/rule-qa/automc";
 
 ###!/usr/bin/perl
 ##my $automcdir = "/home/jm/ftp/spamassassin/masses/rule-qa/automc";
@@ -304,8 +304,8 @@ sub show_default_header {
   <link rel="icon" href="http://spamassassin.apache.org/images/favicon.ico">
   <title>}.$title.q{: SpamAssassin Rule QA</title>
 
-  <link href="http://SpamAssassin.apache.org/ruleqa/ruleqa.css" rel="stylesheet" type="text/css">
-  <script src="http://SpamAssassin.apache.org/ruleqa/sorttable.js"></script>
+  <link href="http://ruleqa.spamassassin.org/ruleqa.css" rel="stylesheet" type="text/css">
+  <script src="http://ruleqa.spamassassin.org/sorttable.js"></script>
 
   <script type="text/javascript"><!--
 
@@ -1759,9 +1759,9 @@ sub get_daterev_html_table {
       $colidx = 1;
     }
 
-    # use the rev number as the row key
-    $rows->{$meta->{rev}} ||= [ ];
-    $rows->{$meta->{rev}}->[$colidx] = $meta;
+    # use the daterev number as the row key
+    $rows->{$meta->{daterev}} ||= [ ];
+    $rows->{$meta->{daterev}}->[$colidx] = $meta;
   }
 
   my @rowkeys = sort keys %{$rows};

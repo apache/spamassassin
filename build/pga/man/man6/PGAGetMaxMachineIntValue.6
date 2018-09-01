@@ -1,0 +1,33 @@
+.TH PGAGetMaxMachineIntValue 6 "05/01/95" " " "PGAPack"
+.SH NAME
+PGAGetMaxMachineIntValue \- returns the largest integer of the current
+machine
+.SH INPUT PARAMETERS
+.PD 0
+.TP
+ctx
+- context variable
+.PD 1
+.SH OUTPUT PARAMETERS
+.PD 0
+.TP
+none
+
+.PD 1
+.SH SYNOPSIS
+.nf
+#include "pgapack.h"
+int  PGAGetMaxMachineIntValue(ctx)
+PGAContext *ctx
+.fi
+.SH LOCATION
+system.c
+.SH EXAMPLE
+.nf
+Example:
+PGAContext *ctx;
+int intmax;
+:
+intmax = PGAGetMaxMachineIntValue(ctx);
+
+.fi

@@ -55,11 +55,13 @@ use re 'taint';
 
 use Errno qw(ENOENT);
 use Time::HiRes qw(time);
+use Encode;
 
 use Mail::SpamAssassin::Constants qw(:sa);
 use Mail::SpamAssassin::AsyncLoop;
 use Mail::SpamAssassin::Conf;
-use Mail::SpamAssassin::Util qw(untaint_var uri_list_canonicalize);
+use Mail::SpamAssassin::Util qw(untaint_var base64_encode idn_to_ascii
+                                uri_list_canonicalize);
 use Mail::SpamAssassin::Timeout;
 use Mail::SpamAssassin::Logger;
 
@@ -1002,7 +1004,7 @@ sub _get_added_headers {
   foreach my $hf_ref (@{$self->{conf}->{$which}}) {
     my($hfname, $hfbody) = @$hf_ref;
     my $line = $self->_process_header($hfname,$hfbody);
-    $line = $self->qp_encode_header($line);
+    $line = $self->mime_encode_header($line);
     $str .= "X-Spam-$hfname: $line\n";
   }
   return $str;
@@ -1022,21 +1024,23 @@ sub rewrite_report_safe {
   # This is the new message.
   my $newmsg = '';
 
-  # the report charset
-  my $report_charset = "; charset=iso-8859-1";
-  if ($self->{conf}->{report_charset}) {
-    $report_charset = "; charset=" . $self->{conf}->{report_charset};
-  }
+  # the character set of a report
+  my $report_charset = $self->{conf}->{report_charset} || "UTF-8";
 
   # the SpamAssassin report
   my $report = $self->get_report();
 
-  # If there are any wide characters, need to MIME-encode in UTF-8
-  # TODO: If $report_charset is something other than iso-8859-1/us-ascii, then
-  # we could try converting to that charset if possible
-  unless ($] < 5.008 || utf8::downgrade($report, 1)) {
-      $report_charset = "; charset=utf-8";
-      utf8::encode($report);
+  if (!utf8::is_utf8($report)) {
+    # already in octets
+  } else {
+    # encode to octets
+    if (uc $report_charset eq 'UTF-8') {
+      dbg("check: encoding report to $report_charset");
+      utf8::encode($report);  # very fast
+    } else {
+      dbg("check: encoding report to $report_charset. Slow, to be avoided!");
+      $report = Encode::encode($report_charset, $report);  # slow
+    }
   }
 
   # get original headers, "pristine" if we can do it
@@ -1149,7 +1153,7 @@ Content-Type: multipart/mixed; boundary="$boundary"
 This is a multi-part message in MIME format.
 
 --$boundary
-Content-Type: text/plain$report_charset
+Content-Type: text/plain; charset=$report_charset
 Content-Disposition: inline
 Content-Transfer-Encoding: 8bit
 
@@ -1264,35 +1268,59 @@ sub rewrite_no_report_safe {
   return $newmsg.$self->{msg}->get_pristine_body();
 }
 
-sub qp_encode_header {
+# encode a header field body into ASCII as per RFC 2047
+#
+sub mime_encode_header {
   my ($self, $text) = @_;
 
-  # return unchanged if there are no 8-bit characters
-  return $text  if $text !~ tr/\x00-\x7F//c;
+  utf8::encode($text)  if utf8::is_utf8($text);
 
-  my $cs = 'ISO-8859-1';
-  if ($self->{report_charset}) {
-    $cs = $self->{report_charset};
+  my $result = '';
+  for my $line (split(/^/, $text)) {
+
+    if ($line =~ /^[\x09\x20-\x7E]*\r?\n\z/s) {
+      $result .= $line;  # no need for encoding
+
+    } else {
+      my $prefix = '';
+      my $suffix = '';
+
+      local $1;
+      if ($line =~ s/( (?: ^ | [ \t] ) [\x09\x20-\x7E]* (?: \r?\n )? ) \z//xs) {
+        $suffix = $1;
+      } elsif ($line =~ s/(\r?\n)\z//s) {
+        $suffix = $1;
+      }
+
+      if ($line =~ s/^ ( [\x09\x20-\x7E]* (?: [ \t] | \z ) )//xs) {
+        $prefix = $1;
+      }
+
+      if ($line eq '') {
+        $result .= $prefix . $suffix;
+      } else {
+        my $qp_enc_count = $line =~ tr/=?_\x00-\x1F\x7F-\xFF//;
+        if (length($line) + $qp_enc_count*2 <= 4 * int(length($line)+2)/3) {
+          # RFC 2047: Upper case should be used for hex digits A through F
+          $line =~ s{ ( [=?_\x00-\x20\x7F-\xFF] ) }
+                    { $1 eq ' ' ? '_' : sprintf("=%02X", ord $1) }xges;
+          $result .= $prefix . '=?UTF-8?Q?' . $line;
+        } else {
+          $result .= $prefix . '=?UTF-8?B?' . base64_encode($line);
+        }
+        $result .= '?=' . $suffix;
+      }
+    }
   }
 
-  my @hexchars = split('', '0123456789abcdef');
-  my $ord;
-  local $1;
-  $text =~ s{([\x80-\xff])}{
-		$ord = ord $1;
-		'='.$hexchars[($ord & 0xf0) >> 4].$hexchars[$ord & 0x0f]
-	}ges;
-
-  $text = '=?'.$cs.'?Q?'.$text.'?=';
-
-  dbg("markup: encoding header in $cs: $text");
-  return $text;
+  dbg("markup: mime_encode_header: %s", $result);
+  return $result;
 }
 
 sub _process_header {
   my ($self, $hdr_name, $hdr_data) = @_;
 
-  $hdr_data = $self->_replace_tags($hdr_data);
+  $hdr_data = $self->_replace_tags($hdr_data);  # as octets
   $hdr_data =~ s/(?:\r?\n)+$//; # make sure there are no trailing newlines ...
 
   if ($self->{conf}->{fold_headers}) {
@@ -1330,7 +1358,13 @@ sub _replace_tags {
           # _get_tag on an attempt to use such tag in add_header template
         } else {
           $result = $self->get_tag_raw($tag,$3);
-          $result = join(' ',@$result)  if ref $result eq 'ARRAY';
+          if (!ref $result) {
+            utf8::encode($result) if utf8::is_utf8($result);
+          } elsif (ref $result eq 'ARRAY') {
+            my @values = @$result;  # avoid modifying referenced array
+            for (@values) { utf8::encode($_) if utf8::is_utf8($_) }
+            $result = join(' ', @values);
+          }
         }
         defined $result ? $result : $full;
       }ge;
@@ -1692,23 +1726,28 @@ sub extract_message_metadata {
     $self->{$item} = $self->{msg}->{metadata}->{$item};
   }
 
-  # TODO: International domain names (UTF-8) must be converted to
-  # ASCII-compatible encoding (ACE) for the purpose of setting the
-  # SENDERDOMAIN and AUTHORDOMAIN tags (and probably for other uses too).
-  # (explicitly required for DMARC, draft-kucherawy-dmarc-base sect. 5.6.1)
+  # International domain names (UTF-8) must be converted to ASCII-compatible
+  # encoding (ACE) for the purpose of setting the SENDERDOMAIN and AUTHORDOMAIN
+  # tags (explicitly required for DMARC, RFC 7489)
   #
   { local $1;
     my $addr = $self->get('EnvelopeFrom:addr', undef);
     # collect a FQDN, ignoring potential trailing WSP
     if (defined $addr && $addr =~ /\@([^@. \t]+\.[^@ \t]+?)[ \t]*\z/s) {
-      $self->set_tag('SENDERDOMAIN', lc $1);
+      my $d = idn_to_ascii($1);
+      $self->set_tag('SENDERDOMAIN', $d);
+      $self->{msg}->put_metadata("X-SenderDomain", $d);
+      dbg("metadata: X-SenderDomain: %s", $d);
     }
     # TODO: the get ':addr' only returns the first address; this should be
     # augmented to be able to return all addresses in a header field, multiple
     # addresses in a From header field are allowed according to RFC 5322
     $addr = $self->get('From:addr', undef);
     if (defined $addr && $addr =~ /\@([^@. \t]+\.[^@ \t]+?)[ \t]*\z/s) {
-      $self->set_tag('AUTHORDOMAIN', lc $1);
+      my $d = idn_to_ascii($1);
+      $self->set_tag('AUTHORDOMAIN', $d);
+      $self->{msg}->put_metadata("X-AuthorDomain", $d);
+      dbg("metadata: X-AuthorDomain: %s", $d);
     }
   }
 

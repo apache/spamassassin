@@ -1,0 +1,42 @@
+.TH PGARandomFlip 5 "05/01/95" " " "PGAPack"
+.SH NAME
+PGARandomFlip \- flip a biased coin and return PGA_TRUE if the coin is
+a "winner."  
+.SH DESCRIPTION
+Otherwise, return PGA_FALSE.
+.SH INPUT PARAMETERS
+.PD 0
+.TP
+ctx
+- context variable
+.PD 0
+.TP
+p
+- biased probability (.5 is a fair coin)
+.PD 1
+.SH OUTPUT PARAMETERS
+.PD 0
+.TP
+none
+
+.PD 1
+.SH SYNOPSIS
+.nf
+#include "pgapack.h"
+int  PGARandomFlip(ctx, p)
+PGAContext *ctx
+double p
+.fi
+.SH LOCATION
+random.c
+.SH EXAMPLE
+.nf
+Example:
+To return PGA_TRUE approximately seventy percent of the time, use
+
+PGAContext *ctx;
+int p;
+:
+PGARandomFlip(ctx, 0.7)
+
+.fi

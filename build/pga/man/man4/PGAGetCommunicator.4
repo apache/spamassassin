@@ -1,0 +1,37 @@
+.TH PGAGetCommunicator 4 "05/01/95" " " "PGAPack"
+.SH NAME
+PGAGetCommunicator \- Returns the default communicator used when PGARun is
+called.
+.SH INPUT PARAMETERS
+.PD 0
+.TP
+ctx
+- context variable
+.PD 1
+.SH OUTPUT PARAMETERS
+.PD 0
+.TP
+none
+
+.PD 1
+.SH SYNOPSIS
+.nf
+#include "pgapack.h"
+MPI_Comm  PGAGetCommunicator(ctx)
+PGAContext *ctx
+.fi
+.SH LOCATION
+parallel.c
+.SH EXAMPLE
+.nf
+Example:
+MPI_Comm comm;
+PGAContext *ctx,
+double f(PGAContext *ctx, int p, int pop);
+:
+ctx = PGACreate(&argc, argv, PGA_DATATYPE_BINARY, 100, PGA_MAXIMIZE);
+PGASetUp(ctx);
+comm = PGAGetCommunicator(ctx);
+
+
+.fi

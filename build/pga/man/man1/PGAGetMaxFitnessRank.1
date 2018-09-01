@@ -1,0 +1,32 @@
+.TH PGAGetMaxFitnessRank 1 "05/01/95" " " "PGAPack"
+.SH NAME
+PGAGetMaxFitnessRank \- returns the maximum value used in rank-based
+fitness.
+.SH INPUT PARAMETERS
+.PD 0
+.TP
+ctx
+- context variable
+.PD 1
+.SH OUTPUT PARAMETERS
+.PD 0
+.TP
+rank
+-based fitness
+.PD 1
+.SH SYNOPSIS
+.nf
+#include "pgapack.h"
+double  PGAGetMaxFitnessRank(ctx)
+PGAContext *ctx
+.fi
+.SH LOCATION
+fitness.c
+.SH EXAMPLE
+.nf
+PGAContext *ctx;
+double max;
+:
+max = PGAGetMaxFitnessRank(ctx);
+
+.fi

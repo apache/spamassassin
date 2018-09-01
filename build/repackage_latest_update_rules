@@ -4,7 +4,8 @@ umask 002
 
 srcdir=`pwd`
 tmpdir=$srcdir/tmp/rulesdir.$$
-rm -rf $tmpdir; mkdir -p $tmpdir         || exit $?
+rm -rf $tmpdir; 
+mkdir -p $tmpdir         || exit $?
 
 
 PERL=${PERL:-perl}
@@ -34,11 +35,13 @@ fi
 DISTVNAME=$DISTNAME-$VERSION.r$SVNVER
 DISTVBASE=$DISTNAME-$VERSION
 
-MIRROR=http://buildbot.spamassassin.org/updatestage/
+MIRROR="http://bbmass.spamassassin.org/updates"
 
-wget -O $tmpdir/rules.tgz      $MIRROR/$SVNVER.tar.gz
-wget -O $tmpdir/rules.tgz.sha1 $MIRROR/$SVNVER.tar.gz.sha1
-wget -O $tmpdir/rules.tgz.asc  $MIRROR/$SVNVER.tar.gz.asc
+echo $SVNVER
+
+wget -O $tmpdir/rules.tgz        $MIRROR/$SVNVER.tar.gz
+wget -O $tmpdir/rules.tgz.sha256 $MIRROR/$SVNVER.tar.gz.sha256
+wget -O $tmpdir/rules.tgz.asc    $MIRROR/$SVNVER.tar.gz.asc
 
 # ensure non-empty
 [ -s $tmpdir/rules.tgz ] || exit 3
@@ -63,20 +66,20 @@ cp rules/*.pre $sitetmp
                -p /dev/null --lint \
                 || exit $?
 
-awk '{print $1}' $tmpdir/rules.tgz.sha1 > $tmpdir/sha.orig
+awk '{print $1}' $tmpdir/rules.tgz.sha256 > $tmpdir/sha.orig
 
 (
   cd $tmpdir
   ln rules.tgz $DISTVNAME.tgz
-  $PERL $srcdir/build/md5sum.pl $DISTVNAME.tgz > rules.tgz.md5    || exit $?
-  # rebuild the SHA1 sum
-  $PERL $srcdir/build/sha1sum.pl $DISTVNAME.tgz > rules.tgz.sha1  || exit $?
+  # rebuild the SHA sums
+  $PERL $srcdir/build/sha256sum.pl $DISTVNAME.tgz > rules.tgz.sha256  || exit $?
+  $PERL $srcdir/build/sha512sum.pl $DISTVNAME.tgz > rules.tgz.sha512  || exit $?
 )
 
-awk '{print $1}' $tmpdir/rules.tgz.sha1 > $tmpdir/sha.new
+awk '{print $1}' $tmpdir/rules.tgz.sha256 > $tmpdir/sha.new
 cmp $tmpdir/sha.orig $tmpdir/sha.new                              || exit $?
 
-for ext in tgz tgz.md5 tgz.sha1 tgz.asc ; do
+for ext in tgz tgz.sha256 tgz.sha512 tgz.asc ; do
   rm -f $RELDIR/$DISTVBASE.*.$ext
   if [ -f $tmpdir/rules.$ext ] ; then
     mv $tmpdir/rules.$ext $RELDIR/$DISTVNAME.$ext
@@ -84,6 +87,6 @@ for ext in tgz tgz.md5 tgz.sha1 tgz.asc ; do
   fi
 done
 
-chgrp -R spamassassin $RELDIR || true
+#chgrp -R spamassassin $RELDIR || true
 rm -rf $tmpdir
 

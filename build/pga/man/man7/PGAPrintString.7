@@ -1,0 +1,47 @@
+.TH PGAPrintString 7 "05/01/95" " " "PGAPack"
+.SH NAME
+PGAPrintString \- write the allele values in a string to a file
+.SH INPUT PARAMETERS
+.PD 0
+.TP
+ctx
+- context variable
+.PD 0
+.TP
+fp
+- pointer to file to write the string to
+.PD 0
+.TP
+p
+- index of the string to write out
+.PD 0
+.TP
+pop
+- symbolic constant of the population string p is in
+.PD 1
+.SH OUTPUT PARAMETERS
+.PD 0
+.TP
+none
+
+.PD 1
+.SH SYNOPSIS
+.nf
+#include "pgapack.h"
+void  PGAPrintString(ctx, file, p, pop)
+PGAContext *ctx
+FILE *file
+int p
+int pop
+.fi
+.SH LOCATION
+report.c
+.SH EXAMPLE
+.nf
+Example:
+PGAContext *ctx;
+int p;
+:
+PGAPrintString(ctx, stdout, p, PGA_OLDPOP);
+
+.fi

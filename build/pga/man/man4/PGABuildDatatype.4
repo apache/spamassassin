@@ -1,0 +1,43 @@
+.TH PGABuildDatatype 4 "05/01/95" " " "PGAPack"
+.SH NAME
+PGABuildDatatype \- Build an MPI datatype for string p in population pop.
+.SH INPUT PARAMETERS
+.PD 0
+.TP
+ctx
+- context variable
+.PD 0
+.TP
+p
+- index of an individual
+.PD 0
+.TP
+pop
+- symbolic constant of the population
+.PD 1
+.SH OUTPUT PARAMETERS
+.PD 0
+.TP
+none
+
+.PD 1
+.SH SYNOPSIS
+.nf
+#include "pgapack.h"
+MPI_Datatype  PGABuildDatatype(ctx, p, pop)
+PGAContext *ctx
+int p
+int pop
+.fi
+.SH LOCATION
+parallel.c
+.SH EXAMPLE
+.nf
+Example:
+PGAContext *ctx;
+int p;
+MPI_Datatype dt;
+:
+dt = PGABuildDatatype(ctx, p, PGA_NEWPOP);
+
+.fi

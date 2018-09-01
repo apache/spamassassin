@@ -25,7 +25,8 @@ use Errno qw(EBADF);
 
 use Mail::SpamAssassin::Plugin;
 use Mail::SpamAssassin::Locales;
-use Mail::SpamAssassin::Util qw(get_my_locales parse_rfc822_date);
+use Mail::SpamAssassin::Util qw(get_my_locales parse_rfc822_date
+                                idn_to_ascii is_valid_utf_8);
 use Mail::SpamAssassin::Logger;
 use Mail::SpamAssassin::Constants qw(:sa :ip);
 
@@ -275,6 +276,17 @@ sub check_illegal_chars {
     # fix continuation lines, then remove Subject and From
     $str =~ s/\n[ \t]+/  /gs;
     $str =~ s/^(?:Subject|From):.*$//gmi;
+  }
+
+  if ($str =~ tr/\x00-\x7F//c && is_valid_utf_8($str)) {
+    # is non-ASCII and is valid UTF-8
+    if ($str =~ tr/\x00-\x08\x0B\x0C\x0E-\x1F//) {
+      dbg("eval: %s is valid UTF-8 but contains controls: %s", $header, $str);
+    } else {
+      # todo: only with a SMTPUTF8 mail
+      dbg("eval: %s is valid UTF-8: %s", $header, $str);
+      return 0;
+    }
   }
 
   # count illegal substrings (RFC 2045)
@@ -599,6 +611,7 @@ sub check_for_forged_gmail_received_headers {
   if ($received =~ /by smtp\.googlemail\.com with ESMTPSA id \S+/) {
     return 0;
   }
+
   if ( (length($xgms) >= GOOGLE_MESSAGE_STATE_LENGTH_MIN) && 
     (length($xss) >= GOOGLE_SMTP_SOURCE_LENGTH_MIN)) {
       return 0;
@@ -1069,7 +1082,7 @@ sub check_ratware_envelope_from {
   return 0 if $from eq '' || $to eq '';
   return 0 if $from =~ /^SRS\d=/;
 
-  if ($to =~ /^([^@]+)@(.+)$/) {
+  if ($to =~ /^([^@]+)\@(.+)$/) {
     my($user,$dom) = ($1,$2);
     $dom = $self->{main}->{registryboundaries}->trim_domain($dom);
     return unless

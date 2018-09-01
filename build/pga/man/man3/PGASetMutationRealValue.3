@@ -1,0 +1,40 @@
+.TH PGASetMutationRealValue 3 "05/01/95" " " "PGAPack"
+.SH NAME
+PGASetMutationRealValue \- Set multiplier to mutate PGA_DATATYPE_REAL
+strings with.  
+.SH DESCRIPTION
+The use of this value depends on the type of mutation
+being used.  The default value is 0.1.  See the user guide for more details.
+.SH INPUT PARAMETERS
+.PD 0
+.TP
+ctx
+- context variable
+.PD 0
+.TP
+val
+- the mutation value to use for Real mutation
+.PD 1
+.SH OUTPUT PARAMETERS
+.PD 0
+.TP
+none
+
+.PD 1
+.SH SYNOPSIS
+.nf
+#include "pgapack.h"
+void  PGASetMutationRealValue(ctx, val)
+PGAContext *ctx
+double val
+.fi
+.SH LOCATION
+mutation.c
+.SH EXAMPLE
+.nf
+Example:
+PGAContext *ctx;
+:
+PGASetMutationRealValue(ctx,50.0);
+
+.fi

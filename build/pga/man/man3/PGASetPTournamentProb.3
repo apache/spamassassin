@@ -1,0 +1,41 @@
+.TH PGASetPTournamentProb 3 "05/01/95" " " "PGAPack"
+.SH NAME
+PGASetPTournamentProb \- Specifies the probability that the string that wins
+a binary tournament will be selected.  
+.SH DESCRIPTION
+This function will have no effect
+unless PGA_SELECT_PTOURNAMENT was specified as the type of selection to
+use with PGASetSelectType.  The default value is 0.6.
+.SH INPUT PARAMETERS
+.PD 0
+.TP
+ctx
+- context variable
+.PD 0
+.TP
+p
+- the probability of selecting the better string
+.PD 1
+.SH OUTPUT PARAMETERS
+.PD 0
+.TP
+none
+
+.PD 1
+.SH SYNOPSIS
+.nf
+#include "pgapack.h"
+void  PGASetPTournamentProb(ctx, ptournament_prob)
+PGAContext *ctx
+double ptournament_prob
+.fi
+.SH LOCATION
+select.c
+.SH EXAMPLE
+.nf
+Example:
+PGAContext *ctx;
+:
+PGASetPTournamentProb(ctx,0.8);
+
+.fi

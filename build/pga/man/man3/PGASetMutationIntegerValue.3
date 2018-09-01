@@ -1,0 +1,40 @@
+.TH PGASetMutationIntegerValue 3 "05/01/95" " " "PGAPack"
+.SH NAME
+PGASetMutationIntegerValue \- Set multiplier to mutate PGA_DATATYPE_INTEGER
+strings with.  
+.SH DESCRIPTION
+The use of this value depends on the type of mutation
+being used.  The default value is 1.  See the user guide for more details.
+.SH INPUT PARAMETERS
+.PD 0
+.TP
+ctx
+- context variable
+.PD 0
+.TP
+val
+- the mutation value to use for Integer mutation
+.PD 1
+.SH OUTPUT PARAMETERS
+.PD 0
+.TP
+none
+
+.PD 1
+.SH SYNOPSIS
+.nf
+#include "pgapack.h"
+void  PGASetMutationIntegerValue(ctx, val)
+PGAContext *ctx
+int val
+.fi
+.SH LOCATION
+mutation.c
+.SH EXAMPLE
+.nf
+Example:
+PGAContext *ctx;
+:
+PGASetMutationIntegerValue(ctx, 5);
+
+.fi

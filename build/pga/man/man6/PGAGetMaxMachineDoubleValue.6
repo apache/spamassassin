@@ -1,0 +1,33 @@
+.TH PGAGetMaxMachineDoubleValue 6 "05/01/95" " " "PGAPack"
+.SH NAME
+PGAGetMaxMachineDoubleValue \- returns the largest double of the current
+machine
+.SH INPUT PARAMETERS
+.PD 0
+.TP
+ctx
+- context variable
+.PD 1
+.SH OUTPUT PARAMETERS
+.PD 0
+.TP
+none
+
+.PD 1
+.SH SYNOPSIS
+.nf
+#include "pgapack.h"
+double  PGAGetMaxMachineDoubleValue(ctx)
+PGAContext *ctx
+.fi
+.SH LOCATION
+system.c
+.SH EXAMPLE
+.nf
+Example:
+PGAContext *ctx;
+double big;
+:
+big = PGAGetMaxMachineDoubleValue(ctx);
+
+.fi

@@ -1,0 +1,55 @@
+.TH PGAGetIntegerFromBinary 1 "05/01/95" " " "PGAPack"
+.SH NAME
+PGAGetIntegerFromBinary \- interpets a binary string as encoding an integer
+value and returns the integer value it represents.
+.SH INPUT PARAMETERS
+.PD 0
+.TP
+ctx
+- context variable
+.PD 0
+.TP
+p
+- string index
+.PD 0
+.TP
+pop
+- symbolic constant of the population the string is in
+.PD 0
+.TP
+start
+- starting bit position in the binary representation
+.PD 0
+.TP
+end
+- ending bit position in the binary representation
+.PD 1
+.SH OUTPUT PARAMETERS
+.PD 0
+.TP
+none
+
+.PD 1
+.SH SYNOPSIS
+.nf
+#include "pgapack.h"
+int  PGAGetIntegerFromBinary(ctx, p, pop, start, end)
+PGAContext *ctx
+int p
+int pop
+int start
+int end
+.fi
+.SH LOCATION
+evaluate.c
+.SH EXAMPLE
+.nf
+Example:
+Get an integer j from bits 10--29 of string p in population PGA_NEWPOP.
+
+PGAContext *ctx;
+int j, p;
+:
+j = PGAGetIntegerFromBinary(ctx, p, PGA_NEWPOP, 10, 29);
+
+.fi

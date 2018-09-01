@@ -45,7 +45,7 @@ require 5.008001;  # needs utf8::is_utf8()
 use Mail::SpamAssassin;
 use Mail::SpamAssassin::Logger;
 use Mail::SpamAssassin::Constants qw(:ip);
-use Mail::SpamAssassin::Util qw(untaint_var decode_dns_question_entry);
+use Mail::SpamAssassin::Util qw(untaint_var decode_dns_question_entry idn_to_ascii);
 
 use Socket;
 use Errno qw(EADDRINUSE EACCES);
@@ -674,7 +674,7 @@ be used, like so:
 
   my $id = $self->{resolver}->bgsend($domain, $type, undef, sub {
         my ($reply, $reply_id, $timestamp) = @_;
-        $self->got_a_reply ($reply, $reply_id);
+        $self->got_a_reply($reply, $reply_id);
       });
 
 The callback can ignore the reply as an invalid packet sent to the listening
@@ -920,8 +920,9 @@ sub send {
   # using some arbitrary encoding (they are normally just 7-bit ascii
   # characters anyway, just need to get rid of the utf8 flag).  Bug 6959
   # Most if not all af these come from a SPF plugin.
+  #   (was a call to utf8::encode($name), now we prefer a proper idn_to_ascii)
   #
-  utf8::encode($name);
+  $name = idn_to_ascii($name);
 
   my $retrans = $self->{retrans};
   my $retries = $self->{retry};

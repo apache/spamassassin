@@ -1,0 +1,52 @@
+.TH PGAMutate 3 "05/01/95" " " "PGAPack"
+.SH NAME
+PGAMutate \- This routine performs mutation on a string.  
+.SH DESCRIPTION
+The type of mutation
+depends on the data type.  Refer to the user guide for data-specific
+examples.
+.SH INPUT PARAMETERS
+.PD 0
+.TP
+ctx
+- context variable
+.PD 0
+.TP
+p
+- index of string to mutate
+.PD 0
+.TP
+pop
+- symbolic constant of the population containing p
+.PD 1
+.SH OUTPUT PARAMETERS
+.PD 0
+.TP
+none
+
+.PD 1
+.SH SYNOPSIS
+.nf
+#include "pgapack.h"
+int  PGAMutate(ctx, p, pop)
+PGAContext *ctx
+int p
+int pop
+.fi
+.SH LOCATION
+mutation.c
+.SH EXAMPLE
+.nf
+Example:
+Mutate the best string in the population, until 10 or more mutations
+have occured.
+
+PGAContext *ctx;
+int p, count = 0;
+:
+p = PGAGetBestIndex(ctx, PGA_NEWPOP);
+while (count < 10) {
+count += PGAMutate(ctx, p, PGA_NEWPOP);
+}
+
+.fi

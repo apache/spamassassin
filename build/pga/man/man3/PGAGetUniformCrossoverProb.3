@@ -1,0 +1,33 @@
+.TH PGAGetUniformCrossoverProb 3 "05/01/95" " " "PGAPack"
+.SH NAME
+PGAGetUniformCrossoverProb \- returns the probability of a bit being
+selected from the first child string in uniform crossover
+.SH INPUT PARAMETERS
+.PD 0
+.TP
+ctx
+- context variable
+.PD 1
+.SH OUTPUT PARAMETERS
+.PD 0
+.TP
+none
+
+.PD 1
+.SH SYNOPSIS
+.nf
+#include "pgapack.h"
+double  PGAGetUniformCrossoverProb(ctx)
+PGAContext *ctx
+.fi
+.SH LOCATION
+cross.c
+.SH EXAMPLE
+.nf
+Example:
+PGAContext *ctx;
+double pu;
+:
+pu = PGAGetUniformCrossoverProb(ctx);
+
+.fi

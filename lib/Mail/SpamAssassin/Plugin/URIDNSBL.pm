@@ -294,7 +294,7 @@ package Mail::SpamAssassin::Plugin::URIDNSBL;
 
 use Mail::SpamAssassin::Plugin;
 use Mail::SpamAssassin::Constants qw(:ip);
-use Mail::SpamAssassin::Util;
+use Mail::SpamAssassin::Util qw(idn_to_ascii);
 use Mail::SpamAssassin::Logger;
 use strict;
 use warnings;
@@ -900,6 +900,7 @@ sub query_hosts_or_domains {
 sub lookup_domain_ns {
   my ($self, $pms, $obj, $dom, $rulename) = @_;
 
+  $dom = idn_to_ascii($dom);
   my $key = "NS:" . $dom;
   my $ent = {
     key => $key, zone => $dom, obj => $obj, type => "URI-NS",
@@ -985,6 +986,7 @@ sub complete_ns_lookup {
 sub lookup_a_record {
   my ($self, $pms, $obj, $hname, $rulename) = @_;
 
+  $hname = idn_to_ascii($hname);
   my $key = "A:" . $hname;
   my $ent = {
     key => $key, zone => $hname, obj => $obj, type => "URI-A",
@@ -1009,23 +1011,18 @@ sub complete_a_lookup {
     return;
   }
   dbg("uridnsbl: complete_a_lookup %s", $ent->{key});
+  $hname = ''  if !defined $hname;
   my $j = 0;
   my @answer = $pkt->answer;
   foreach my $rr (@answer) {
     $j++;
-    my $str = $rr->string;
-    if (!defined $hname) {
-      warn "complete_a_lookup-1: $j, (hname is undef), $str";
-    } elsif (!defined $str) {
-      warn "complete_a_lookup-2: $j, $hname, (str is undef)";
-      next;
-    }
-    dbg("uridnsbl: complete_a_lookup got(%d) A for %s: %s", $j,$hname,$str);
-
-    if ($rr->type eq 'A') {
-      my $ip_address = $rr->rdatastr;
-      $self->lookup_dnsbl_for_ip($pms, $ent->{obj}, $ip_address);
-    }
+    next if $rr->type ne 'A';
+    # Net::DNS::RR::A::address() is available since Net::DNS 0.69
+    my $ip_address = $rr->UNIVERSAL::can('address') ? $rr->address
+                                                    : $rr->rdatastr;
+    dbg("uridnsbl: complete_a_lookup got(%d) A for %s: %s",
+        $j, $hname, $ip_address);
+    $self->lookup_dnsbl_for_ip($pms, $ent->{obj}, $ip_address);
   }
 }
 
@@ -1035,7 +1032,8 @@ sub lookup_dnsbl_for_ip {
   my ($self, $pms, $obj, $ip) = @_;
 
   local($1,$2,$3,$4);
-  $ip =~ /^(\d+)\.(\d+)\.(\d+)\.(\d+)$/;
+  $ip =~ /^(\d+)\.(\d+)\.(\d+)\.(\d+)$/
+    or warn "lookup_dnsbl_for_ip: not an IPv4 address: $ip\n";
   my $revip = "$4.$3.$2.$1";
 
   my $conf = $pms->{conf};
@@ -1056,6 +1054,9 @@ sub lookup_dnsbl_for_ip {
 
 sub lookup_single_dnsbl {
   my ($self, $pms, $obj, $rulename, $lookupstr, $dnsbl, $qtype) = @_;
+
+  $lookupstr = idn_to_ascii($lookupstr);
+  $dnsbl = idn_to_ascii($dnsbl);
 
   my $key = "DNSBL:" . $lookupstr . ':' . $dnsbl;
   my $ent = {
@@ -1104,10 +1105,11 @@ sub complete_dnsbl_lookup {
         $rdatanum = Mail::SpamAssassin::Util::my_inet_aton($rdatastr);
       }
     } elsif ($rr_type eq 'TXT') {
-      # txtdata returns a non- zone-file-format encoded result, unlike rdatastr;
+      # txtdata returns a non- zone-file-format encoded result, unlike rdstring;
       # avoid space-separated RDATA <character-string> fields if possible;
       # txtdata provides a list of strings in list context since Net::DNS 0.69
       $rdatastr = join('',$rr->txtdata);
+      utf8::encode($rdatastr)  if utf8::is_utf8($rdatastr);
     } else {
       next;
     }

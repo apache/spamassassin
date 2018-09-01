@@ -1,0 +1,46 @@
+.TH PGAGetSelectType 3 "05/01/95" " " "PGAPack"
+.SH NAME
+PGAGetSelectType \- Returns the type of selection selected
+.SH INPUT PARAMETERS
+.PD 0
+.TP
+ctx
+- context variable
+.PD 1
+.SH OUTPUT PARAMETERS
+.PD 0
+.TP
+none
+
+.PD 1
+.SH SYNOPSIS
+.nf
+#include "pgapack.h"
+int  PGAGetSelectType(ctx)
+PGAContext *ctx
+.fi
+.SH LOCATION
+select.c
+.SH EXAMPLE
+.nf
+Example:
+PGAContext *ctx;
+int selecttype;
+:
+selecttype = PGAGetSelectType(ctx);
+switch (selecttype) {
+case PGA_SELECT_PROPORTIONAL:
+printf("Selection Type = PGA_SELECT_PROPORTIONAL\n");
+break;
+case PGA_SELECT_SUS:
+printf("Selection Type = PGA_SELECT_SUS\n");
+break;
+case PGA_SELECT_TOURNAMENT:
+printf("Selection Type = PGA_SELECT_TOURNAMENT\n");
+break;
+case PGA_SELECT_PTOURNAMENT:
+printf("Selection Type = PGA_SELECT_PTOURNAMENT\n");
+break;
+}
+
+.fi

@@ -189,7 +189,7 @@ use warnings;
 use re 'taint';
 
 use Mail::SpamAssassin::Plugin;
-use Mail::SpamAssassin::Util qw(decode_dns_question_entry);
+use Mail::SpamAssassin::Util qw(decode_dns_question_entry idn_to_ascii);
 use Mail::SpamAssassin::Logger;
 use version 0.77;
 
@@ -324,8 +324,9 @@ sub set_config {
         my @answer_types = split(/,/, $query_type);
         # http://www.iana.org/assignments/dns-parameters/dns-parameters.xml
         if (grep(!/^(?:ANY|A|AAAA|MX|TXT|PTR|NAPTR|NS|SOA|CERT|CNAME|DNAME|
-                       DHCID|HINFO|MINFO|RP|HIP|IPSECKEY|KX|LOC|SRV|
-                       SSHFP|SPF)\z/x, @answer_types)) {
+                       DHCID|HINFO|MINFO|RP|HIP|IPSECKEY|KX|LOC|GPOS|SRV|
+                       OPENPGPKEY|SSHFP|SPF|TLSA|URI|CAA|CSYNC)\z/x,
+                 @answer_types)) {
           return $Mail::SpamAssassin::Conf::INVALID_VALUE;
         }
         $query_type = 'ANY' if @answer_types > 1 || $answer_types[0] eq 'ANY';
@@ -469,6 +470,7 @@ OUTER:
       $query_domain =~ s{_([A-Z][A-Z0-9]*)_}
                         { defined $current_tag_val{$1} ? $current_tag_val{$1}
                                                        : '' }ge;
+      $query_domain = idn_to_ascii($query_domain);
 
       # the $dnskey identifies this query in AsyncLoop's pending_lookups
       my $dnskey = join(':', 'askdns', $query_type, $query_domain);
@@ -561,7 +563,7 @@ sub process_response_packet {
   # the code handling such reply from DNS MUST assemble all of these
   # marshaled text blocks into a single one before any syntactical
   # verification takes place.
-  # The same goes for RFC 4408 (SPF), RFC 4871 (DKIM), RFC 5617 (ADSP),
+  # The same goes for RFC 7208 (SPF), RFC 4871 (DKIM), RFC 5617 (ADSP),
   # draft-kucherawy-dmarc-base (DMARC), ...
 
   for my $rr (@answer) {
@@ -585,6 +587,17 @@ sub process_response_packet {
         } else {  # char_str_list() is only available for TXT records
           $rr_rdatastr = join('', $rr->char_str_list);  # historical
         }
+        # Net::DNS attempts to decode text strings in a TXT record as UTF-8,
+        # which is undesired: octets failing the UTF-8 decoding are converted
+        # to a Unicode "replacement character" U+FFFD (encoded as octets
+        # \x{EF}\x{BF}\x{BD} in UTF-8), and ASCII text is unnecessarily
+        # flagged as perl native characters (utf8 flag on), which can be
+        # disruptive on later processing, e.g. implicitly upgrading strings
+        # on concatenation. Unfortunately there is no way of legally bypassing
+        # the UTF-8 decoding by Net::DNS::RR::TXT in Net::DNS::RR::Text.
+        # Try to minimize damage by encoding back to UTF-8 octets:
+        utf8::encode($rr_rdatastr)  if utf8::is_utf8($rr_rdatastr);
+
       } else {
         # rdatastr() is historical, use rdstring() since Net::DNS 0.69
         $rr_rdatastr = $rr->UNIVERSAL::can('rdstring') ? $rr->rdstring

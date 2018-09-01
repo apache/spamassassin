@@ -19,13 +19,14 @@
 
 
 # automasscheck-minimal configuration file
-# axb 0.02
+# davej 0.03
 
-
-# COPY THIS TO ~/.automasscheck-minimal.cf
+# See https://wiki.apache.org/spamassassin/NightlyMassCheck 
 
 ### BEGIN CONFIGURATION ###
 
+# request an RSYNC account to help with the ruleqa processing.
+#
 LOGPREFIX="YOUR-USERNAME"
 RSYNC_USERNAME="YOUR-USERNAME"
 RSYNC_PASSWORD="YOUR-PASSWORD"
@@ -48,25 +49,21 @@ TRUSTED_NETWORKS=
 INTERNAL_NETWORKS=
 
 run_all_masschecks() {
-### sample: single corpus ###
-#run_masscheck single-corpus \
-#        ham:dir:/home/user1/Maildir/.Sorted.Saved/ \
-#        spam:dir:/home/user1/Maildir/.Sorted.Spam/
+  ### sample: single corpus ###
+  run_masscheck single-corpus \
+          ham:dir:/path/to/Maildir/.Ham/ \
+          spam:dir:/path/to/Maildir/.Spam/
 
-# If you have multiple separate corpuses, you can specify as many run_masscheck lines as you want below.
-### user2 ###
-#run_masscheck user2 \
-#             ham:mbox:/home/user2/mail/HAM
-#             spam:mbox:/home/user2/mail/SPAM
-# This is an example of Maildir instead of mbox
-### user3 ###
-#run_masscheck user3 \
-#             ham:dir:/home/user3/mail/HAM/cur \
-#             spam:dir:/home/user3/mail/SPAM/cur \
-
-
-
+  # If you have multiple separate corpuses, you can specify as many run_masscheck lines as you want below.
+  ### user2 ###
+  #run_masscheck user2 \
+  #             ham:mbox:/home/user2/mail/HAM
+  #             spam:mbox:/home/user2/mail/SPAM
+  # This is an example of Maildir instead of mbox
+  ### user3 ###
+  #run_masscheck user3 \
+  #             ham:dir:/home/user3/mail/HAM/cur \
+  #             spam:dir:/home/user3/mail/SPAM/cur \
 }
-
 
 ### END CONFIGURATION ###

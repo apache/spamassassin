@@ -1,0 +1,43 @@
+.TH PGACheckSum 5 "05/01/95" " " "PGAPack"
+.SH NAME
+PGACheckSum \- maps a string to a number to be used a verification check
+PGA_DATATYPE_USER is not supported.
+.SH INPUT PARAMETERS
+.PD 0
+.TP
+ctx
+- context variable
+.PD 0
+.TP
+p
+- string index
+.PD 0
+.TP
+pop
+- symbolic constant for the population
+.PD 1
+.SH OUTPUT PARAMETERS
+.PD 0
+.TP
+none
+
+.PD 1
+.SH SYNOPSIS
+.nf
+#include "pgapack.h"
+int  PGACheckSum(ctx, p, pop)
+PGAContext *ctx
+int p
+int pop
+.fi
+.SH LOCATION
+utility.c
+.SH EXAMPLE
+.nf
+Example:
+PGAContext *ctx;
+int p, sum;
+:
+sum = PGACheckSum(ctx, p, PGA_NEWPOP);
+
+.fi

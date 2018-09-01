@@ -84,10 +84,10 @@ lib/Mail/SpamAssassin/Plugin/DKIM.pm
 lib/Mail/SpamAssassin/Plugin/DNSEval.pm
 lib/Mail/SpamAssassin/Plugin/FreeMail.pm
 lib/Mail/SpamAssassin/Plugin/FromNameSpoof.pm
+lib/Mail/SpamAssassin/Plugin/HashBL.pm
 lib/Mail/SpamAssassin/Plugin/HTMLEval.pm
 lib/Mail/SpamAssassin/Plugin/HTTPSMismatch.pm
 lib/Mail/SpamAssassin/Plugin/Hashcash.pm
-lib/Mail/SpamAssassin/Plugin/HashBL.pm
 lib/Mail/SpamAssassin/Plugin/HeaderEval.pm
 lib/Mail/SpamAssassin/Plugin/ImageInfo.pm
 lib/Mail/SpamAssassin/Plugin/MIMEEval.pm
@@ -131,7 +131,6 @@ lib/Mail/SpamAssassin/Util/ScopedTimer.pm
 lib/Mail/SpamAssassin/Util/TieOneStringHash.pm
 lib/spamassassin-run.pod
 procmailrc.example
-rules.README
 rules/active.list
 rules/init.pre
 rules/languages
@@ -147,6 +146,8 @@ rules/v340.pre
 rules/v341.pre
 rules/v342.pre
 rules/20_aux_tlds.cf
+rules-extras/README.txt
+rules-extras/10_uridnsbl_skip_financial.cf
 sa-awl.raw
 sa-check_spamd.raw
 sa-compile.raw
@@ -342,6 +343,8 @@ t/data/nice/spf1
 t/data/nice/spf2
 t/data/nice/spf3
 t/data/nice/spf3-received-spf
+t/data/nice/unicode1
+t/data/nice/unicode2
 t/data/reporterplugin.pm
 t/data/spam/001
 t/data/spam/002
@@ -423,6 +426,7 @@ t/get_all_headers.t
 t/get_headers.t
 t/gtube.t
 t/hashcash.t
+t/header_utf8.t
 t/html_colors.t
 t/html_obfu.t
 t/html_utf8.t
@@ -540,6 +544,7 @@ t/timeout.t
 t/trust_path.t
 t/uri.t
 t/uri_html.t
+t/uri_list.t
 t/uri_text.t
 t/uribl.t
 t/urilocalbl_geoip.t
@@ -556,7 +561,6 @@ t/uribl_domains_only.t
 t/data/spam/dnsbl_ipsonly.eml
 t/uribl_all_types.t
 t/uribl_ips_only.t
-t/uri_list.t
 t/dnsbl_subtests.t
 powered_by/128-powered-by-spamassassin.png
 powered_by/256-powered-by-spamassassin.png

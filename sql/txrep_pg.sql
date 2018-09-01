@@ -19,7 +19,7 @@ BEGIN
 END;
 $$ language 'plpgsql';
 
-create TRIGGER update_txrep_update_last_hit BEFORE UPDATE
+create TRIGGER update_txrep_update_last_hit BEFORE UPDATE 
 ON txrep FOR EACH ROW EXECUTE PROCEDURE
 update_txrep_last_hit();
 

@@ -1,0 +1,59 @@
+.TH PGAEncodeIntegerAsBinary 1 "05/01/95" " " "PGAPack"
+.SH NAME
+PGAEncodeIntegerAsBinary \- encodes an integer value as a binary string
+.SH INPUT PARAMETERS
+.PD 0
+.TP
+ctx
+- context variable
+.PD 0
+.TP
+p
+- string index
+.PD 0
+.TP
+pop
+- symbolic constant of the population the string is in
+.PD 0
+.TP
+start
+- starting bit position in p to encode val in
+.PD 0
+.TP
+end
+- ending bit position in p to encode val in
+.PD 0
+.TP
+val
+- the integer value to be represented as a binary string
+.PD 1
+.SH OUTPUT PARAMETERS
+.PD 0
+.TP
+side
+-effect.
+.PD 1
+.SH SYNOPSIS
+.nf
+#include "pgapack.h"
+void  PGAEncodeIntegerAsBinary(ctx, p, pop, start, end, val)
+PGAContext *ctx
+int p
+int pop
+int start
+int end
+int val
+.fi
+.SH LOCATION
+evaluate.c
+.SH EXAMPLE
+.nf
+Encode an integer v in 20 bits in bit positions 0--19 in string p
+in population PGA_NEWPOP.
+
+PGAContext *ctx;
+int v, p;
+:
+PGAEncodeIntegerAsBinary(ctx, p, PGA_NEWPOP, 0, 19, v);
+
+.fi

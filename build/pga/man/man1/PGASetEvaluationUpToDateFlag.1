@@ -1,0 +1,56 @@
+.TH PGASetEvaluationUpToDateFlag 1 "05/01/95" " " "PGAPack"
+.SH NAME
+PGASetEvaluationUpToDateFlag \- sets the flag associated with a
+string to PGA_TRUE or PGA_FLASE to indicate whether the evaluate
+function value is out-of-date or not.  
+.SH DESCRIPTION
+Note that this flag is always
+set to PGA_TRUE when PGASetEvaluation is called.
+.SH INPUT PARAMETERS
+.PD 0
+.TP
+ctx
+- context variable
+.PD 0
+.TP
+p
+- string index
+.PD 0
+.TP
+pop
+- symbolic constant of the population string p is in
+.PD 0
+.TP
+status
+- boolean for whether up-to-date
+.PD 1
+.SH OUTPUT PARAMETERS
+.PD 0
+.TP
+none
+
+.PD 1
+.SH SYNOPSIS
+.nf
+#include "pgapack.h"
+void  PGASetEvaluationUpToDateFlag(ctx, p, pop, status)
+PGAContext *ctx
+int p
+int pop
+int status
+.fi
+.SH LOCATION
+evaluate.c
+.SH EXAMPLE
+.nf
+Example:
+Set the evaluation function flag for string p in population PGA_NEWPOP
+to PGA_FALSE (as might happen after, for example, calling a hill-climbing
+routine that modified this string).
+
+PGAContext *ctx;
+int p;
+:
+PGASetEvaluationUpToDateFlag(ctx, p, PGA_NEWPOP, PGA_FALSE);
+
+.fi

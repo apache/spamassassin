@@ -1,0 +1,46 @@
+.TH PGASetCommunicator 4 "05/01/95" " " "PGAPack"
+.SH NAME
+PGASetCommunicator \- Set the default communicator to use when PGARun is
+called.  
+.SH DESCRIPTION
+Does not necessarily need to be the same as the number of
+processes in MPI_COMM_WORLD (which is the default).
+.SH INPUT PARAMETERS
+.PD 0
+.TP
+ctx
+- context variable
+.PD 0
+.TP
+comm
+- communicator to use
+.PD 1
+.SH OUTPUT PARAMETERS
+.PD 0
+.TP
+none
+
+.PD 1
+.SH SYNOPSIS
+.nf
+#include "pgapack.h"
+void  PGASetCommunicator(ctx, comm)
+PGAContext *ctx
+MPI_Comm comm
+.fi
+.SH LOCATION
+parallel.c
+.SH EXAMPLE
+.nf
+Example:
+MPI_Comm mycomm;
+PGAContext *ctx,
+double f(PGAContext *ctx, int p, int pop);
+:
+ctx = PGACreate(&argc, argv, PGA_DATATYPE_BINARY, 100, PGA_MAXIMIZE);
+PGASetCommunicator(ctx, mycomm);
+PGASetUp(ctx);
+PGARun(ctx, f);
+PGADestroy(ctx);
+
+.fi

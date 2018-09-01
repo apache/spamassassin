@@ -1,0 +1,41 @@
+.TH PGASetCrossoverProb 3 "05/01/95" " " "PGAPack"
+.SH NAME
+PGASetCrossoverProb \- Probability that a selected string will undergo
+crossover.  
+.SH DESCRIPTION
+The default is 0.85.
+.SH INPUT PARAMETERS
+.PD 0
+.TP
+ctx
+- context variable
+.PD 0
+.TP
+p
+- the crossover probability
+.PD 1
+.SH OUTPUT PARAMETERS
+.PD 0
+.TP
+none
+
+.PD 1
+.SH SYNOPSIS
+.nf
+#include "pgapack.h"
+void  PGASetCrossoverProb(ctx, crossover_prob)
+PGAContext *ctx
+double crossover_prob
+.fi
+.SH LOCATION
+cross.c
+.SH EXAMPLE
+.nf
+Example:
+Make crossover happen infrequently.
+
+PGAContext *ctx;
+:
+PGASetCrossoverProb(ctx,0.001);
+
+.fi

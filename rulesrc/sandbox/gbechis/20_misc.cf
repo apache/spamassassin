@@ -1,0 +1,6 @@
+uri  __MALWARE_DROPBOX_JAR_URI   m;^https?://[^.]+\.dropbox\.com/(\w+)/(\w+)/(\w+)\.jar\?dl\=1;i
+meta MALWARE_DROPBOX_JAR_URI	( __MALWARE_DROPBOX_JAR_URI && (HTML_SHORT_LINK_IMG_1 || HTML_SHORT_LINK_IMG_2 || HTML_SHORT_LINK_IMG_3) )
+describe MALWARE_DROPBOX_JAR_URI Dropbox that forces user to download jar file
+
+uri GOOGLE_OBFU	/^https:\/\/www\.google\.([a-z]{2,3})\/url\?sa=t\&rct=j\&q=\&esrc=s\&source=web\&cd=([0-9])+\&cad=rja\&uact=([0-9]+)\&ved=(.*)\&url=https?:\/\/(.*)&usg=(.*)/
+describe GOOGLE_OBFU	Obfuscate url through Google redirect

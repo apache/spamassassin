@@ -1,0 +1,38 @@
+.TH PGAGetWorstIndex 5 "05/01/95" " " "PGAPack"
+.SH NAME
+PGAGetWorstIndex \- returns the index of the string with the worst
+evaluation function value in population pop
+.SH INPUT PARAMETERS
+.PD 0
+.TP
+ctx
+- context variable
+.PD 0
+.TP
+pop
+- symbolic constant of the population to find the worst string in
+.PD 1
+.SH OUTPUT PARAMETERS
+.PD 0
+.TP
+none
+
+.PD 1
+.SH SYNOPSIS
+.nf
+#include "pgapack.h"
+int  PGAGetWorstIndex(ctx, pop)
+PGAContext *ctx
+int pop
+.fi
+.SH LOCATION
+utility.c
+.SH EXAMPLE
+.nf
+Example:
+PGAContext *ctx;
+int worst;
+:
+worst = PGAGetWorstIndex(ctx,PGA_OLDPOP);
+
+.fi

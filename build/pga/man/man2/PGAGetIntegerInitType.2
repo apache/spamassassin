@@ -1,0 +1,41 @@
+.TH PGAGetIntegerInitType 2 "05/01/95" " " "PGAPack"
+.SH NAME
+PGAGetIntegerInitType \- returns the type of scheme used to randomly
+initialize strings of data type PGA_DATATYPE_INTEGER.
+.SH INPUT PARAMETERS
+.PD 0
+.TP
+ctx
+- context variable
+.PD 1
+.SH OUTPUT PARAMETERS
+.PD 0
+.TP
+none
+
+.PD 1
+.SH SYNOPSIS
+.nf
+#include "pgapack.h"
+int  PGAGetIntegerInitType(ctx)
+PGAContext *ctx
+.fi
+.SH LOCATION
+integer.c
+.SH EXAMPLE
+.nf
+Example:
+PGAContext *ctx;
+int inittype;
+:
+inittype = PGAGetIntegerInitType(ctx);
+switch (inittype) {
+case PGA_IINIT_PERMUTE:
+printf("Data Type = PGA_IINIT_PERMUTE\n");
+break;
+case PGA_IINIT_RANGE:
+printf("Data Type = PGA_IINIT_RANGE\n");
+break;
+}
+
+.fi

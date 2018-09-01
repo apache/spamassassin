@@ -1,0 +1,55 @@
+.TH PGASetRealAllele 1 "05/01/95" " " "PGAPack"
+.SH NAME
+PGASetRealAllele \- sets the value of real-valued allele i in string p
+in population pop
+.SH INPUT PARAMETERS
+.PD 0
+.TP
+ctx
+- context variable
+.PD 0
+.TP
+p
+- string index
+.PD 0
+.TP
+pop
+- symbolic constant of the population the string is in
+.PD 0
+.TP
+i
+- allele index
+.PD 0
+.TP
+val
+- real value to set the allele to
+.PD 1
+.SH OUTPUT PARAMETERS
+.PD 0
+.TP
+side
+-effect.
+.PD 1
+.SH SYNOPSIS
+.nf
+#include "pgapack.h"
+void  PGASetRealAllele(ctx, p, pop, i, value)
+PGAContext *ctx
+int p
+int pop
+int i
+double value
+.fi
+.SH LOCATION
+real.c
+.SH EXAMPLE
+.nf
+Sets the value of the ith allele of string p in population PGA_NEWPOP
+to 1.57
+
+PGAContext *ctx;
+int i, p;
+:
+PGASetRealAllele ( ctx, p, PGA_NEWPOP, i, 1.57)
+
+.fi

@@ -1,0 +1,49 @@
+.TH PGAGetDataType 8 "05/01/95" " " "PGAPack"
+.SH NAME
+PGAGetDataType \- Returns the data type used by the given context.
+.SH INPUT PARAMETERS
+.PD 0
+.TP
+ctx
+- context variable
+.PD 1
+.SH OUTPUT PARAMETERS
+.PD 0
+.TP
+none
+
+.PD 1
+.SH SYNOPSIS
+.nf
+#include "pgapack.h"
+int  PGAGetDataType(ctx)
+PGAContext *ctx
+.fi
+.SH LOCATION
+pga.c
+.SH EXAMPLE
+.nf
+Example:
+PGAContext *ctx;
+int datatype;
+:
+datatype = PGAGetDataType(ctx);
+switch (datatype) {
+case PGA_DATATYPE_BINARY:
+printf("Data Type = PGA_DATATYPE_BINARY\n");
+break;
+case PGA_DATATYPE_CHARACTER:
+printf("Data Type = PGA_DATATYPE_CHARACTER\n");
+break;
+case PGA_DATATYPE_INTEGER:
+printf("Data Type = PGA_DATATYPE_INTEGER\n");
+break;
+case PGA_DATATYPE_REAL:
+printf("Data Type = PGA_DATATYPE_REAL\n");
+break;
+case PGA_DATATYPE_USER:
+printf("Data Type = PGA_DATATYPE_USER\n");
+break;
+}
+
+.fi

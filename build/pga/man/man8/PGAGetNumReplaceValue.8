@@ -1,0 +1,33 @@
+.TH PGAGetNumReplaceValue 8 "05/01/95" " " "PGAPack"
+.SH NAME
+PGAGetNumReplaceValue \- Returns the maximum number of strings to replace
+each generation.
+.SH INPUT PARAMETERS
+.PD 0
+.TP
+ctx
+- context variable
+.PD 1
+.SH OUTPUT PARAMETERS
+.PD 0
+.TP
+none
+
+.PD 1
+.SH SYNOPSIS
+.nf
+#include "pgapack.h"
+int  PGAGetNumReplaceValue(ctx)
+PGAContext *ctx
+.fi
+.SH LOCATION
+pop.c
+.SH EXAMPLE
+.nf
+Example:
+PGAContext *ctx;
+int numreplace;
+:
+numreplace = PGAGetNumReplaceValue(ctx);
+
+.fi

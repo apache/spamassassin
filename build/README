@@ -3,6 +3,9 @@ APACHE SPAMASSASSIN RELEASE PROCEDURE
 
 - First off, checkout the branch or trunk you wish to build.
 
+- As the release gets close, consider switching to R-T-C development
+  mode: https://wiki.apache.org/spamassassin/DevelopmentMode
+
 - Using DNS resolvers like 8.8.8.8 did NOT work.  It causes spurious
   failures on things like dnsbl.t.  Use a real DNS server.
 
@@ -19,7 +22,7 @@ APACHE SPAMASSASSIN RELEASE PROCEDURE
     - cpan install Devel::SawAmpersand
     - custom compiled re2c with  ./configure --prefix=/usr/local
 
-  - when you run perl Makefile.PL, you want full depencies such as this
+  - when you run perl Makefile.PL, you want full dependencies such as this
     snippet:
 
     checking module dependencies and their versions...
@@ -29,12 +32,13 @@ APACHE SPAMASSASSIN RELEASE PROCEDURE
 
     optional binary missing or nonfunctional: fetch
 
-  - NOTE: Missing Fetch is ok if we have wget or curl
+  - NOTE: Missing Fetch is ok if we have wget or curl.  You just need 1 of
+    the 3.
 
   - You need ~/sabuildtools/bin with a symlink to gpg
 
   - You need ~/sabuildtoosl/sasigningkey with chmod 700 
-
+ 
 - Ensure ExtUtils::MakeMaker is version 6.46 or later, to create
   a detailed-enough META.yml 
 
@@ -193,8 +197,8 @@ APACHE SPAMASSASSIN RELEASE PROCEDURE
   NOTE: Don't remove the lines from the MANIFEST though!
 
 - run "make disttest" to ensure all default tests pass once the
-  distribution is fully packaged.  (this takes ~7 minutes on my system
-  2017-04-22)
+  distribution is fully packaged.  (this takes ~12 1/2 minutes on my system
+  2018-09-01)
 
     make disttest < /dev/null
 
@@ -210,7 +214,7 @@ APACHE SPAMASSASSIN RELEASE PROCEDURE
   kill all running spamd processes.  This release test suite is intended
   for a development environment.
 
-    NOTE: These likely must run as root.
+    NOTE: These likely must run as root. Some tests prompt for sudo.
 
     make test TEST_FILES="xt/*.t"
 
@@ -222,6 +226,10 @@ APACHE SPAMASSASSIN RELEASE PROCEDURE
 	  50_razor2.t - you need to register for razor
           and the sample of a bad email may have fallen
           out of their database.
+
+    A failure on the xt/ tests does not necessarily block a release.  
+    The xt tests are intended for people rolling an SA release or custom 
+    package.  Expect the DCC tests to fail if DCC is not installed, etc.
 
 
 - Check in the updated Changes file, and SpamAssassin.pm.
@@ -248,9 +256,9 @@ APACHE SPAMASSASSIN RELEASE PROCEDURE
 
   - For a maintainance release candidate(x.y.1-rc1), pre-release (x.y.1-preZ) or alpha (x.y.1-alphaZ):
 
-    vers=3_4_2_pre_3
+    vers=3_4_2_pre_4
 
-    Then run:
+    #Then run:
 
     repo=https://svn.apache.org/repos/asf/spamassassin
     svn delete -m "replaced old tag" $repo/tags/spamassassin_release_$vers
@@ -307,20 +315,17 @@ APACHE SPAMASSASSIN RELEASE PROCEDURE
     killall gpg-agent
     ./build/update_stable
 
+  NOTE: running gpg-agent with the proper homedir is needed for
+  non-privileged users.
+
+- run "./build/repackage_latest_update_rules" package a rule file for 
+  people who can't run sa-update:
+
+    ./build/repackage_latest_update_rules
+
   WARNING: this will use the most recently-created "sa-update" tarball for
   the rules tgz, so if changes have been committed to the "rules" dir in
   SVN since then, they will not be released!
-
-  OLD: if you get "gpg-agent" errors about not connecting to the PIN entry
-  module, you didn't update your $PATH.  
-  NEW: running gpg-agent with the proper homedir is needed for
-  non-privileged users.
-
-- run "./build/repackage_latest_update_rules" to repackage the
-  latest rules file for the purpose of publishing a starter rule file 
-  for people who can't run sa-update:
-
-    ./build/repackage_latest_update_rules
 
 - test the files!  redo until they work!! ;)
 
@@ -333,32 +338,29 @@ APACHE SPAMASSASSIN RELEASE PROCEDURE
     svn add !$
     vi !$
 
-  NOTE: Here's a quick example to concat the MD5 or SHA1 checksums:
-        ls *3.4.2* | grep md5 | xargs cat --
-        ls *3.4.2* | grep sha1 | xargs cat --
+  NOTE: Here's a quick example to concat the checksums:
+        ls *3.4.2* | grep sha | xargs cat --
 
 - If there are any issues to note, make sure to edit the UPGRADE file.
   Every x.x.0 release at a minimum should include a section.
 
 - Check the README file for any items to change.
 
+- Review the CREDITS to update Committers - http://whimsy.apache.org/
+  can help with this.
+
+- Review the CREDITS to update Copyright
+
+- Review the Project Branding Report Checklist at
+  https://www.apache.org/foundation/marks/pmcs
+
 - (for any rc, prerelease, or full release) Place the tarballs in a
   discreet location (discreet means not linked from the "downloads" page
   of the website, but included in the vote mail) and request a vote on the
   development mailing list to make the release.  Post the URL,
-  md5sums/sha1sums, and proposed release announcement mail to the dev
-  list.  The default location -- ~/public_html/devel/ , or
-  http://people.apache.org/~jm/devel/ , qualifies as "discreet".
+  SHA sums, and proposed release announcement mail to the dev list.  
 
-  If you build on the zone, you will need to scp them over:
-
-    scp ~/public_html/devel/Mail-SpamAssassin-* people.apache.org:public_html/devel/
-
-  While doing this, also upload a copy of the proposed release
-  announcement to the website.  
-
-  As of 2014-02-04, this is done by adding announcement to the devel 
-  directory for the website and running webmake. See main.wmk in site svn.
+    http://people.apache.org/~kmcgrail/devel/ qualifies as "discreet".
 
   Pre-releases and RCs require just lazy consensus -- ie. no objections.
 
@@ -376,8 +378,10 @@ APACHE SPAMASSASSIN RELEASE PROCEDURE
 
         Mail-SpamAssassin-3.4.1-rc2-TRIAL.tar.gz
 
+**** TESTED TO HERE
+
 - (for a full release) 3 +1's votes from PMC members are required to 
-  proceed with an official (not pre-release) ASF software release.
+  proceed with an official, non pre-release ASF software release.
 
 - If you've been doing some steps in private, for a security release,
   now's the time to perform them publicly; tagging etc.
@@ -477,7 +481,7 @@ APACHE SPAMASSASSIN RELEASE PROCEDURE
   below but using the SVN repository at:
 
     https://dist.apache.org/repos/dist/dev/SpamAssassin
- 
+
   The choice is up to the Release Manager for these test builds.
 
 
@@ -509,27 +513,17 @@ APACHE SPAMASSASSIN RELEASE PROCEDURE
   run, so the old downloads page will stick around for a while before it's
   safe to do so.)
 
-- (for full release builds) update the main website "downloads" page:
+- (for full release builds) update the main website "downloads" page in
+  svn:
 
-        ssh spamassassin.zones.apache.org
-        cd /var/www/buildbot.spamassassin.org/staging/website
-        vi main.wmk
+    https://svn.apache.org/repos/asf/spamassassin/site
 
-  See the comment at the top of the file; you'll need to change at
-  least one variable ("relversion") to the new version number, and
-  possibly more, depending on if this is the first release of a new
-  release line.
+  2018-09-01: Not sure what this warning means:
 
   When changing the timestamp in the downloads.cgi link URL, ensure you
   use a time 2 hours from now.  The ASF websites are synced internally to
   the public HTTP servers on a bi-hourly basis, so it may take up to this
   long for a file-download link to become valid and not a 404.
-
-- rebuild the SpamAssassin website with webmake:
-
-        PATH=$HOME/sabuildtools/bin:$PATH
-        cd /var/www/buildbot.spamassassin.org/staging/website
-        webmake -F
 
 - update the 'doc' tree in the SpamAssassin website 
 
@@ -556,7 +550,7 @@ APACHE SPAMASSASSIN RELEASE PROCEDURE
 
 - and check the entire website into SVN (see bug 4998 for reasons why).
   Note that you may need to resolve conflicts and ensure the contents of
-  'full/3.3.x' are all added successfully:
+  'full/3.4.x' are all added successfully:
 
         svn up
         svn commit -m "added new release to website"
@@ -565,7 +559,7 @@ APACHE SPAMASSASSIN RELEASE PROCEDURE
 
     repo=https://svn.apache.org/repos/asf/spamassassin
     svn delete -m "updating for new release"  $repo/tags/spamassassin_current_release_3.4.x
-    svn copy -m "updating for new release" $repo/tags/spamassassin_release_3_4_1 $repo/tags/spamassassin_current_release_3.4.x
+    svn copy -m "updating for new release" $repo/tags/spamassassin_release_3_4_2 $repo/tags/spamassassin_current_release_3.4.x
 
 - upload release .tar.gz (not .bz2) tarball to CPAN at http://pause.cpan.org/:
 
@@ -591,21 +585,6 @@ APACHE SPAMASSASSIN RELEASE PROCEDURE
   otherwise it'll be bounced by the ASF's custom spam filtering
   rules.  See [1] below for more requirements for the announce email.
 
-# IGNORING 2014-02-11 - NOT BOTHERING WITH FRESHMEAT - TOO OUT OF DATE AND
-# NOW FREECODE
-#
-#- Before doing the next step, run through the release summary mail, and
-#  write up a really short summary of the important changes in
-#  human-readable format.  This should be less than 600 chars to fit into
-#  Freshmeat's format, and to be easily understandable.
-
-#- announce to Freshmeat at http://freshmeat.net/:
-#
-#        http://freshmeat.net/projects/spamassassin/releases/new
-
-- SourceForge - We have an account with SF and haven't published to it in
-  some time.  Need to consider doing so.
-
 - Approve the posting to the announce list (the list admins will get a
   mail indicating how to do this.)
 
@@ -618,33 +597,27 @@ APACHE SPAMASSASSIN RELEASE PROCEDURE
         https://issues.apache.org/SpamAssassin/editmilestones.cgi?action=add&product=Spamassassin
         (use a sortkey of "0")
 
+- Confirm with SpamAssassin SysAdmins group that we are ready in DNS for
+  masscheck and rule updates for the next version
+
+  For many years all releases since 3.3.3 use the same ruleset.  
+    3.4.2 already has a cname for this.  
+    3.3.2 and before are set to a static ruleset.  
+
+  We have been good on using version specific and plugin conditions to 
+  allow one ruleset to rule them all.  
+
+  Since we plan to release rules that continue to be version compatible 
+  back to 3.3.3, only a CNAME is needed for newer releases to point at 
+  3.3.3.
+
 - Change the sortkey for the previous release's milestone from "0" to "10":
 
         https://issues.apache.org/SpamAssassin/editmilestones.cgi?product=Spamassassin
 
-- When releasing 3.4.0, we also did the following tasks which are less
-  documented in this README:
-
- - Reviewed the CREDITS to update inactive Committers
- - Reviewed the CREDITS to update Copyright
- - Reviewed the website and wiki for less obvious items like:
-	- updating things that refered to 3.3 to 3.4 such as SVN Checkout
-	  instructions.
-	- The how to Upgrade Instructions
- - Updated http://en.wikipedia.org/wiki/SpamAssassin
- - Reviewed the Project Branding Report Checklist
+- Update http://en.wikipedia.org/wiki/SpamAssassin
 
 
-- Issues not resolved with the release of 3.4.0 2014-02-11 and still not
-  resolved with the release of 3.4.1 2015-04-28
-
- - We updated to 3.4.0 and 3.4.1 is the current trunk version.  Need to
-   confirm what needs to change on the updatesd scripts to make this
-   happen.
-
- - Do we stop 3.3.X update releases?  Or do we just make sure we aren't
-   running masscheck for that version and release the updates with proper
-   ifplugin loops for any new features? 
 
 
 -------------

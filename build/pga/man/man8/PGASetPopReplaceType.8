@@ -1,0 +1,44 @@
+.TH PGASetPopReplaceType 8 "05/01/95" " " "PGAPack"
+.SH NAME
+PGASetPopReplaceType \- Choose method of sorting strings to copy from old
+population to new population.  
+.SH DESCRIPTION
+Valid choices are PGA_POPREPL_BEST,
+PGA_POPREPL_RANDOM_NOREP, or PGA_POPREPL_RANDOM_REP for copying the best
+strings, or  random string, with or without replacement, respectively,
+from the old population into the new population. The default is
+PGA_POPREPL_BEST.
+.SH INPUT PARAMETERS
+.PD 0
+.TP
+ctx
+- context variable
+.PD 0
+.TP
+pop_replace
+- symbolic constant to specify the population replacement
+strategy
+.PD 1
+.SH OUTPUT PARAMETERS
+.PD 0
+.TP
+none
+
+.PD 1
+.SH SYNOPSIS
+.nf
+#include "pgapack.h"
+void  PGASetPopReplaceType(ctx, pop_replace)
+PGAContext *ctx
+int pop_replace
+.fi
+.SH LOCATION
+pop.c
+.SH EXAMPLE
+.nf
+Example:
+PGAContext *ctx;
+:
+PGASetPopReplaceType(ctx, PGA_POPREPL_RANDOM_NOREP);
+
+.fi

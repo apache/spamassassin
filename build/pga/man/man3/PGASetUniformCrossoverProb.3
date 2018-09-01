@@ -1,0 +1,42 @@
+.TH PGASetUniformCrossoverProb 3 "05/01/95" " " "PGAPack"
+.SH NAME
+PGASetUniformCrossoverProb \- Probability used in uniform crossover
+to specify that an allele value value be selected from a particular
+parent. 
+.SH DESCRIPTION
+The default is 0.6.  The crossover type must have been set
+to PGA_CROSSOVER_UNIFORM with PGASetCrossoverType for this function
+call to have any effect.
+.SH INPUT PARAMETERS
+.PD 0
+.TP
+ctx
+- context variable
+.PD 0
+.TP
+p
+- the crossover probability
+.PD 1
+.SH OUTPUT PARAMETERS
+.PD 0
+.TP
+none
+
+.PD 1
+.SH SYNOPSIS
+.nf
+#include "pgapack.h"
+void  PGASetUniformCrossoverProb(ctx, uniform_cross_prob)
+PGAContext *ctx
+double uniform_cross_prob
+.fi
+.SH LOCATION
+cross.c
+.SH EXAMPLE
+.nf
+Example:
+PGAContext *ctx;
+:
+PGASetUniformCrossoverProb(ctx,0.9);
+
+.fi

@@ -1,0 +1,47 @@
+.TH PGAGetSortedPopIndex 8 "05/01/95" " " "PGAPack"
+.SH NAME
+PGAGetSortedPopIndex \- returns a population string index from the array
+created by PGASortPop().
+.SH INPUT PARAMETERS
+.PD 0
+.TP
+ctx
+- context variable
+.PD 0
+.TP
+n
+- specified which index element is to be returned.
+.PD 1
+.SH OUTPUT PARAMETERS
+.PD 0
+.TP
+none
+
+.PD 1
+.SH SYNOPSIS
+.nf
+#include "pgapack.h"
+int  PGAGetSortedPopIndex(ctx, n)
+PGAContext *ctx
+int n
+.fi
+.SH LOCATION
+pop.c
+.SH EXAMPLE
+.nf
+Example:
+Copy the five best strings from the old population into the new
+population.  The rest of the new population will be created by
+recombination, and is not shown.
+
+PGAContext *ctx;
+int i,j;
+:
+PGASetPopReplaceType(ctx,PGA_POPREPL_BEST)
+PGASortPop(ctx, PGA_OLDPOP);
+for ( i=0; i < 5; i++) {
+j = PGAGetSortedPopIndex(ctx, i);
+PGACopyIndividual (ctx, j, PGA_OLDPOP, i, PGA_NEWPOP);
+:
+
+.fi

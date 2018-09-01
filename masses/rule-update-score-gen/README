@@ -15,13 +15,13 @@ Steps for generating scores for rules promoted post 3.2.0 release
 
  - if the newest mass-check logs are set0 logs run this:
 
-    ./generate-new-scores 1
-    ./generate-new-scores 0
+    ./generate-new-scores.sh 1
+    ./generate-new-scores.sh 0
 
  - if the newest mass-check logs are set1 logs run this:
 
-    ./generate-new-scores 0
-    ./generate-new-scores 1
+    ./generate-new-scores.sh 0
+    ./generate-new-scores.sh 1
 
 
 
@@ -38,7 +38,7 @@ Steps for using set0 scores for set2 and set1 scores for set3
 
 
 
-The "do-nightly-rescore-example" script is what I currently use to generate
+The "do-nightly-rescore-example.sh" script is what I currently use to generate
 and commit updates each day.
 
  (less sparse documentation goes here)

@@ -1,0 +1,5 @@
+header __EMPTY_FROM From =~ /^\s*$/m
+header __EMPTY_TO   To =~ /^\s*$/m
+header __EMPTY_CC   Cc =~ /^\s*$/m
+meta T_EMPTY_FROM_OR_TO_OR_CC (__EMPTY_FROM && __HAS_FROM) || (__EMPTY_TO && __HAS_TO) || (__EMPTY_CC && __HAS_CC)
+describe T_EMPTY_FROM_OR_TO_OR_CC  Contains a header field that is blank and shouldn't be.

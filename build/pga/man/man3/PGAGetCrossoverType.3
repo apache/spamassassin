@@ -1,0 +1,43 @@
+.TH PGAGetCrossoverType 3 "05/01/95" " " "PGAPack"
+.SH NAME
+PGAGetCrossoverType \- Returns the type of crossover selected
+.SH INPUT PARAMETERS
+.PD 0
+.TP
+ctx
+- context variable
+.PD 1
+.SH OUTPUT PARAMETERS
+.PD 0
+.TP
+none
+
+.PD 1
+.SH SYNOPSIS
+.nf
+#include "pgapack.h"
+int  PGAGetCrossoverType(ctx)
+PGAContext *ctx
+.fi
+.SH LOCATION
+cross.c
+.SH EXAMPLE
+.nf
+Example:
+PGAContext *ctx;
+int crosstype;
+:
+crosstype = PGAGetCrossoverType(ctx);
+switch (crosstype) {
+case PGA_CROSSOVER_ONEPT:
+printf("Crossover Type = PGA_CROSSOVER_ONEPT\n");
+break;
+case PGA_CROSSOVER_TWOPT:
+printf("Crossover Type = PGA_CROSSOVER_TWOPT\n");
+break;
+case PGA_CROSSOVER_UNIFORM:
+printf("Crossover Type = PGA_CROSSOVER_UNIFORM\n");
+break;
+}
+
+.fi

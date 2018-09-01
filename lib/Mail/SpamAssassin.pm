@@ -87,15 +87,14 @@ use Time::HiRes qw(time);
 use Cwd;
 use Config;
 
-our $VERSION = "3.004002";      # update after release (same format as perl $])
-#our $IS_DEVEL_BUILD = 1;        # 1 for devel build 
-our $IS_DEVEL_BUILD = 0;        # 0 for release versions including rc & pre releases
-
+our $VERSION = "4.000000";      # update after release (same format as perl $])
+our $IS_DEVEL_BUILD = 1;        # 1 for devel build 
+#our $IS_DEVEL_BUILD = 0;        # 0 for release versions including rc & pre releases
 
 # Used during the prerelease/release-candidate part of the official release
 # process. If you hacked up your SA, you should add a version_tag to your .cf
 # files; this variable should not be modified.
-our @EXTRA_VERSION = qw(pre4);
+our @EXTRA_VERSION = qw();
 
 our @ISA = qw();
 

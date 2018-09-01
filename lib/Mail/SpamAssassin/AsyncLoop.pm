@@ -257,6 +257,21 @@ filled-in with a query ID.
 
 sub bgsend_and_start_lookup {
   my($self, $domain, $type, $class, $ent, $cb, %options) = @_;
+
+  # At this point the $domain should already be encoded to UTF-8 and
+  # IDN converted to ASCII-compatible encoding (ACE).  Make sure this is
+  # really the case in order to be able to catch any leftover omissions.
+  if (utf8::is_utf8($domain)) {
+    utf8::encode($domain);
+    my($package, $filename, $line) = caller;
+    info("bgsend_and_start_lookup: Unicode domain name, expected octets: %s, ".
+         "called from %s line %d", $domain, $package, $line);
+  } elsif ($domain =~ tr/\x00-\x7F//c) {  # is not all-ASCII
+    my($package, $filename, $line) = caller;
+    info("bgsend_and_start_lookup: non-ASCII domain name: %s, ".
+         "called from %s line %d", $domain, $package, $line);
+  }
+
   $ent = {}  if !$ent;
   $domain =~ s/\.+\z//s;  # strip trailing dots, these sometimes still sneak in
   $ent->{id} = undef;
