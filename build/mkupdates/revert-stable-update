@@ -50,7 +50,7 @@ if [ ! $1 ]; then
   echo "Usage: ./revert-stable-update 1234567"
 fi
 
-if [ ! -f $UPDATEDIR/$1.tar.gz -a ! -f $UPDATEDIR/$1.tar.gz.asc -a ! -f $UPDATEDIR/$1.tar.gz.sha1 -a ! -f $UPDATEDIR/$1.tar.gz.sha256 ]; then
+if [ ! -f $UPDATEDIR/$1.tar.gz -a ! -f $UPDATEDIR/$1.tar.gz.asc -a ! -f $UPDATEDIR/$1.tar.gz.sha1 -a ! -f $UPDATEDIR/$1.tar.gz.sha256 -a ! -f $UPDATEDIR/$1.tar.gz.sha512 ]; then
   echo "Could not find update files for update revision $1"
 fi
 

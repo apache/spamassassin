@@ -124,6 +124,7 @@ make_tarball_for_version() {
 
   shasum -a 1  $tmpdir/update.tgz > $tmpdir/update.tgz.sha1  || exit $?
   shasum -a 256  $tmpdir/update.tgz > $tmpdir/update.tgz.sha256  || exit $?
+  shasum -a 512  $tmpdir/update.tgz > $tmpdir/update.tgz.sha512  || exit $?
 
 
   # get SVN revision number.
@@ -179,6 +180,7 @@ make_tarball_for_version() {
     mv $tmpdir/update.tgz      $UPDDIR/${svnrev}.tar.gz            || exit $?
     mv $tmpdir/update.tgz.sha1 $UPDDIR/${svnrev}.tar.gz.sha1       || exit $?
     mv $tmpdir/update.tgz.sha256 $UPDDIR/${svnrev}.tar.gz.sha256       || exit $?
+    mv $tmpdir/update.tgz.sha512 $UPDDIR/${svnrev}.tar.gz.sha512       || exit $?
     mv $tmpdir/update.tgz.asc  $UPDDIR/${svnrev}.tar.gz.asc        || exit $?
 
     # Give the mirrors time to pull the new files above

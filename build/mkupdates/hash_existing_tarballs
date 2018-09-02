@@ -21,6 +21,9 @@ cd ${UPDDIR:=/var/www/automc.spamassassin.org/updates} || {
 for UPF in +([0-9]).tar.gz
 do
   [[ -s $UPF.sha256 ]] && continue
-  echo "Hashing $UPF" >&2
+  echo "Hashing $UPF with SHA256" >&2
   shasum -a 256 $UPF > $UPF.sha256
+  [[ -s $UPF.sha512 ]] && continue
+  echo "Hashing $UPF with SHA512" >&2
+  shasum -a 512 $UPF > $UPF.sha512
 done

@@ -92,6 +92,7 @@ make_tarball_for_version () {
 
   shasum -a 1 $tmpdir/update.tgz > $tmpdir/update.tgz.sha1  || exit $?
   shasum -a 256 $tmpdir/update.tgz > $tmpdir/update.tgz.sha256  || exit $?
+  shasum -a 512 $tmpdir/update.tgz > $tmpdir/update.tgz.sha512  || exit $?
 
   # get SVN revision number.
   # note: use 'Last Changed Rev' instead of 'Revision'.  Because we share
@@ -131,6 +132,7 @@ make_tarball_for_version () {
   mv $tmpdir/update.tgz      $stagedir/$svnrev.tar.gz            || exit $?
   mv $tmpdir/update.tgz.sha1 $stagedir/$svnrev.tar.gz.sha1       || exit $?
   mv $tmpdir/update.tgz.sha256 $stagedir/$svnrev.tar.gz.sha256       || exit $?
+  mv $tmpdir/update.tgz.sha512 $stagedir/$svnrev.tar.gz.sha512       || exit $?
   mv $tmpdir/update.tgz.asc  $stagedir/$svnrev.tar.gz.asc        || exit $?
 
   chmod 644 $stagedir/$svnrev.*

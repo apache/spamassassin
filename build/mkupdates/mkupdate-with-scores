@@ -7,7 +7,7 @@
 #
 # - retrieves the latest gernerated scores for new active.list rules
 # - checks out the trunk revision of code that those scores were generated for
-# - generates an update tarball and associated sha1, sha256, and asc files
+# - generates an update tarball and associated sha1, sha256, sha512, and asc files
 # - checks out each of the 3.3 stable release tagged versions, builds and
 #   installs that version (in a tmp dir) and then installs the above generated
 #   update using sa-update --install to make sure it works with each version
@@ -159,6 +159,7 @@ make_rule_update_from_trunk() {
 
   shasum  -a 1 $TMPDIR/${REVISION}.tar.gz > $TMPDIR/${REVISION}.tar.gz.sha1
   shasum  -a 256 $TMPDIR/${REVISION}.tar.gz > $TMPDIR/${REVISION}.tar.gz.sha256
+  shasum  -a 512 $TMPDIR/${REVISION}.tar.gz > $TMPDIR/${REVISION}.tar.gz.sha512
   gpg --batch --homedir $KEYDIR -bas $TMPDIR/${REVISION}.tar.gz || exit $?
 
   tar -ztvf $TMPDIR/${REVISION}.tar.gz
@@ -171,6 +172,7 @@ copy_existing_update_for_reversion_testing() {
     copy_update_paranoid "$UPDATEDIR/$REVERT_REVISION.tar.gz.asc"  "$TMPDIR/$REVISION.tar.gz.asc" &&
     copy_update_paranoid "$UPDATEDIR/$REVERT_REVISION.tar.gz.sha1" "$TMPDIR/$REVISION.tar.gz.sha1" &&
     copy_update_paranoid "$UPDATEDIR/$REVERT_REVISION.tar.gz.sha256" "$TMPDIR/$REVISION.tar.gz.sha256"
+    copy_update_paranoid "$UPDATEDIR/$REVERT_REVISION.tar.gz.sha512" "$TMPDIR/$REVISION.tar.gz.sha512"
   ) || EXIT=6
 
   # copying the update files went wrong exit
@@ -236,7 +238,7 @@ if [ $REVERT_REVISION -eq 0 ]; then
   # that we have generated scores for
   make_rule_update_from_trunk
 else
-  if [ ! -f $UPDATEDIR/$REVERT_REVISION.tar.gz -a ! -f $UPDATEDIR/$REVERT_REVISION.tar.gz.asc -a ! -f $UPDATEDIR/$REVERT_REVISION.tar.gz.sha1 -a ! -f $UPDATEDIR/$REVERT_REVISION.tar.gz.sha256 ]; then
+  if [ ! -f $UPDATEDIR/$REVERT_REVISION.tar.gz -a ! -f $UPDATEDIR/$REVERT_REVISION.tar.gz.asc -a ! -f $UPDATEDIR/$REVERT_REVISION.tar.gz.sha1 -a ! -f $UPDATEDIR/$REVERT_REVISION.tar.gz.sha256 -a ! $UPDATEDIR/$REVERT_REVISION.tar.gz.sha512 ]; then
     echo "Could not find update files for update revision $REVERT_REVISION, aborting."
     exit 8
   fi
