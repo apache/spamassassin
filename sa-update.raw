@@ -836,7 +836,7 @@ foreach my $channel (@channels) {
   if ( $SHA512 ) {
     # Validate the SHA512 signature
     { local($1);
-      $SHA512 =~ /^([a-fA-F0-9]{64})/;
+      $SHA512 =~ /^([a-fA-F0-9]{128})/;
       $SHA512 = $1 || 'INVALID';
     }
     my $digest = sha512_hex($content);
