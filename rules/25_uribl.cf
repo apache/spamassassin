@@ -173,6 +173,7 @@ urirhssub       SURBL_BLOCKED   multi.surbl.org.        A   1
 body            SURBL_BLOCKED   eval:check_uridnsbl('SURBL_BLOCKED')
 describe        SURBL_BLOCKED   ADMINISTRATOR NOTICE: The query to SURBL was blocked.  See http://wiki.apache.org/spamassassin/DnsBlocklists\#dnsbl-block for more information.
 tflags          SURBL_BLOCKED   net noautolearn
+reuse           SURBL_BLOCKED
 
 ###########################################################################
 ## URIBL
@@ -200,6 +201,7 @@ urirhssub       URIBL_BLOCKED   multi.uribl.com.        A   1
 body            URIBL_BLOCKED   eval:check_uridnsbl('URIBL_BLOCKED')
 describe        URIBL_BLOCKED   ADMINISTRATOR NOTICE: The query to URIBL was blocked.  See http://wiki.apache.org/spamassassin/DnsBlocklists\#dnsbl-block for more information.
 tflags          URIBL_BLOCKED   net noautolearn
+reuse           URIBL_BLOCKED
 
 
 ###########################################################################

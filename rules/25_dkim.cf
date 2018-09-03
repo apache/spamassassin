@@ -36,6 +36,7 @@ full   DKIM_VALID_EF		eval:check_dkim_valid_envelopefrom()
 endif
 
 full   __DKIM_DEPENDABLE	eval:check_dkim_dependable()
+reuse __DKIM_DEPENDABLE
 
 header DKIM_ADSP_NXDOMAIN	eval:check_dkim_adsp('N')
 header DKIM_ADSP_DISCARD	eval:check_dkim_adsp('D')
