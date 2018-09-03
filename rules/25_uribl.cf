@@ -46,6 +46,7 @@ if (version >= 3.004000)
     body            URIBL_SBL_A    eval:check_uridnsbl('URIBL_SBL_A')
     describe        URIBL_SBL_A    Contains URL's A record listed in the Spamhaus SBL blocklist
     tflags          URIBL_SBL_A    net a
+    reuse           URIBL_SBL_A
   endif
 endif
 
@@ -58,46 +59,55 @@ urirhssub       URIBL_DBL_SPAM   	dbl.spamhaus.org.       A   127.0.1.2
 body            URIBL_DBL_SPAM   	eval:check_uridnsbl('URIBL_DBL_SPAM')
 describe        URIBL_DBL_SPAM   	Contains a spam URL listed in the Spamhaus DBL blocklist
 tflags          URIBL_DBL_SPAM   	net domains_only
+reuse           URIBL_DBL_SPAM
 
 urirhssub       URIBL_DBL_PHISH  	dbl.spamhaus.org.       A   127.0.1.4
 body            URIBL_DBL_PHISH	 	eval:check_uridnsbl('URIBL_DBL_PHISH')
 describe        URIBL_DBL_PHISH	 	Contains a Phishing URL listed in the Spamhaus DBL blocklist
 tflags          URIBL_DBL_PHISH  	net domains_only
+reuse           URIBL_DBL_PHISH
 
 urirhssub       URIBL_DBL_MALWARE  	dbl.spamhaus.org.       A   127.0.1.5
 body            URIBL_DBL_MALWARE  	eval:check_uridnsbl('URIBL_DBL_MALWARE')
 describe        URIBL_DBL_MALWARE  	Contains a malware URL listed in the Spamhaus DBL blocklist
 tflags          URIBL_DBL_MALWARE  	net domains_only
+reuse           URIBL_DBL_MALWARE
 
 urirhssub       URIBL_DBL_BOTNETCC  	dbl.spamhaus.org.       A   127.0.1.6
 body            URIBL_DBL_BOTNETCC	eval:check_uridnsbl('URIBL_DBL_BOTNETCC')
 describe        URIBL_DBL_BOTNETCC	Contains a botned C&C URL listed in the Spamhaus DBL blocklist
 tflags          URIBL_DBL_BOTNETCC	net domains_only
+reuse           URIBL_DBL_BOTNETCC
 
 urirhssub       URIBL_DBL_ABUSE_SPAM  	dbl.spamhaus.org.       A   127.0.1.102
 body            URIBL_DBL_ABUSE_SPAM	eval:check_uridnsbl('URIBL_DBL_ABUSE_SPAM')
 describe        URIBL_DBL_ABUSE_SPAM	Contains an abused spamvertized URL listed in the Spamhaus DBL blocklist
 tflags          URIBL_DBL_ABUSE_SPAM	net domains_only
+reuse           URIBL_DBL_ABUSE_SPAM
 
 urirhssub       URIBL_DBL_ABUSE_REDIR  	dbl.spamhaus.org.       A   127.0.1.103
 body            URIBL_DBL_ABUSE_REDIR  	eval:check_uridnsbl('URIBL_DBL_ABUSE_REDIR')
 describe        URIBL_DBL_ABUSE_REDIR  	Contains an abused redirector URL listed in the Spamhaus DBL blocklist
 tflags          URIBL_DBL_ABUSE_REDIR  	net domains_only
+reuse           URIBL_DBL_ABUSE_REDIR
 
 urirhssub       URIBL_DBL_ABUSE_PHISH  	dbl.spamhaus.org.       A   127.0.1.104
 body            URIBL_DBL_ABUSE_PHISH	eval:check_uridnsbl('URIBL_DBL_ABUSE_PHISH')
 describe        URIBL_DBL_ABUSE_PHISH	Contains an abused phishing URL listed in the Spamhaus DBL blocklist
 tflags          URIBL_DBL_ABUSE_PHISH	net domains_only
+reuse           URIBL_DBL_ABUSE_PHISH
 
 urirhssub       URIBL_DBL_ABUSE_MALW  	dbl.spamhaus.org.       A   127.0.1.105
 body            URIBL_DBL_ABUSE_MALW	eval:check_uridnsbl('URIBL_DBL_ABUSE_MALW')
 describe        URIBL_DBL_ABUSE_MALW	Contains an abused malware URL listed in the Spamhaus DBL blocklist
 tflags          URIBL_DBL_ABUSE_MALW	net domains_only
+reuse           URIBL_DBL_ABUSE_MALW
 
 urirhssub       URIBL_DBL_ABUSE_BOTCC  	dbl.spamhaus.org.       A   127.0.1.106
 body            URIBL_DBL_ABUSE_BOTCC  	eval:check_uridnsbl('URIBL_DBL_ABUSE_BOTCC')
 describe        URIBL_DBL_ABUSE_BOTCC  	Contains an abused botnet C&C URL listed in the Spamhaus DBL blocklist
 tflags          URIBL_DBL_ABUSE_BOTCC  	net domains_only
+reuse           URIBL_DBL_ABUSE_BOTCC
 
 
 # this indicates that IP-address queries were sent to DBL, and should
@@ -106,6 +116,8 @@ urirhssub       URIBL_DBL_ERROR  dbl.spamhaus.org.       A   127.0.1.255
 body            URIBL_DBL_ERROR  eval:check_uridnsbl('URIBL_DBL_ERROR')
 describe        URIBL_DBL_ERROR  Error: queried the Spamhaus DBL blocklist for an IP
 tflags          URIBL_DBL_ERROR  net domains_only
+reuse           URIBL_DBL_ERROR
+
 endif
 
 ###########################################################################

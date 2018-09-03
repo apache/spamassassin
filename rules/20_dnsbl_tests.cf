@@ -148,23 +148,28 @@ reuse  RCVD_IN_BL_SPAMCOP_NET
 header RCVD_IN_MAPS_RBL         eval:check_rbl('rblplus', 'activationcode.r.mail-abuse.com.', '1')
 describe RCVD_IN_MAPS_RBL       Relay in RBL, http://www.mail-abuse.com/enduserinfo_rbl.html
 tflags RCVD_IN_MAPS_RBL         net
+reuse RCVD_IN_MAPS_RBL
 
 header RCVD_IN_MAPS_DUL         eval:check_rbl('rblplus-lastexternal', 'activationcode.r.mail-abuse.com.', '2')
 describe RCVD_IN_MAPS_DUL       Relay in DUL, http://www.mail-abuse.com/enduserinfo_dul.html
 tflags RCVD_IN_MAPS_DUL         net
+reuse RCVD_IN_MAPS_DUL
 
 header RCVD_IN_MAPS_RSS         eval:check_rbl_sub('rblplus', '4')
 describe RCVD_IN_MAPS_RSS       Relay in RSS, http://www.mail-abuse.com/enduserinfo_rss.html
 tflags RCVD_IN_MAPS_RSS         net
+reuse RCVD_IN_MAPS_RSS
 
 header RCVD_IN_MAPS_OPS         eval:check_rbl_sub('rblplus', '8')
 describe RCVD_IN_MAPS_OPS       Relay in OPS, http://www.mail-abuse.com/enduserinfo_ops.html
 tflags RCVD_IN_MAPS_OPS         net
+reuse RCVD_IN_MAPS_OPS
 
 # The NML isn't part of the RBL+ and I find any documentation for it - is it dead?
 header RCVD_IN_MAPS_NML         eval:check_rbl('nml', 'nonconfirm.mail-abuse.com.')
 describe RCVD_IN_MAPS_NML       Relay in NML, http://www.mail-abuse.com/enduserinfo_nml.html
 tflags RCVD_IN_MAPS_NML         net
+reuse RCVD_IN_MAPS_NML
 
 # ---------------------------------------------------------------------------
 # Section for DNS WL related lookups below.
@@ -172,10 +177,12 @@ tflags RCVD_IN_MAPS_NML         net
 # IADB support ...
 header __RCVD_IN_IADB           eval:check_rbl('iadb-firsttrusted', 'iadb.isipp.com.')
 tflags __RCVD_IN_IADB           net nice
+reuse __RCVD_IN_IADB
 
 header RCVD_IN_IADB_VOUCHED     eval:check_rbl_sub('iadb-firsttrusted', '127.0.1.255')
 describe RCVD_IN_IADB_VOUCHED   ISIPP IADB lists as vouched-for sender
 tflags RCVD_IN_IADB_VOUCHED     net nice
+reuse RCVD_IN_IADB_VOUCHED
 
 # ---------------------------------------------------------------------------
 # Return Path Certified:
@@ -184,6 +191,7 @@ tflags RCVD_IN_IADB_VOUCHED     net nice
 header RCVD_IN_RP_CERTIFIED     eval:check_rbl_txt('ssc-firsttrusted', 'sa-trusted.bondedsender.org.')
 describe RCVD_IN_RP_CERTIFIED   Sender in ReturnPath Certified - Contact cert-sa@returnpath.net
 tflags RCVD_IN_RP_CERTIFIED     net nice
+reuse RCVD_IN_RP_CERTIFIED
 
 # Return Path Safe:
 # http://www.returnpath.net/internetserviceprovider/certification/
@@ -191,13 +199,14 @@ tflags RCVD_IN_RP_CERTIFIED     net nice
 header RCVD_IN_RP_SAFE     eval:check_rbl_txt('ssc-firsttrusted','sa-accredit.habeas.com.')
 describe RCVD_IN_RP_SAFE   Sender in ReturnPath Safe - Contact safe-sa@returnpath.net
 tflags RCVD_IN_RP_SAFE     net nice
+reuse RCVD_IN_RP_SAFE
 
 # Return Path Reputation Network Blacklist (RNBL):
 # https://senderscore.org/blacklistlookup/
 header RCVD_IN_RP_RNBL         eval:check_rbl('rnbl-lastexternal','bl.score.senderscore.com.')
 describe RCVD_IN_RP_RNBL       Relay in RNBL, https://senderscore.org/blacklistlookup/
 tflags RCVD_IN_RP_RNBL         net
-
+reuse RCVD_IN_RP_RNBL
 
 endif
 
@@ -207,12 +216,14 @@ ifplugin Mail::SpamAssassin::Plugin::AskDNS
 askdns   DKIMDOMAIN_IN_DWL  _DKIMDOMAIN_._vouch.dwl.spamhaus.org TXT /^([a-z]+ )*(transaction|list|all)( [a-z]+)*$/
 tflags   DKIMDOMAIN_IN_DWL  net nice
 describe DKIMDOMAIN_IN_DWL  Signing domain listed in Spamhaus DWL
+reuse    DKIMDOMAIN_IN_DWL
 
 askdns   __DKIMDOMAIN_IN_DWL_ANY  _DKIMDOMAIN_._vouch.dwl.spamhaus.org TXT
 tflags   __DKIMDOMAIN_IN_DWL_ANY  net nice
 describe __DKIMDOMAIN_IN_DWL_ANY  Any TXT response received from a Spamhaus DWL
+reuse    __DKIMDOMAIN_IN_DWL_ANY
 
-meta DKIMDOMAIN_IN_DWL_UNKNOWN    __DKIMDOMAIN_IN_DWL_ANY && !DKIMDOMAIN_IN_DWL
+meta     DKIMDOMAIN_IN_DWL_UNKNOWN  __DKIMDOMAIN_IN_DWL_ANY && !DKIMDOMAIN_IN_DWL
 tflags   DKIMDOMAIN_IN_DWL_UNKNOWN  net nice
 describe DKIMDOMAIN_IN_DWL_UNKNOWN  Unrecognized response from Spamhaus DWL
 
