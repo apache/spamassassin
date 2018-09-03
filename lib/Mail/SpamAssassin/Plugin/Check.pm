@@ -1382,7 +1382,8 @@ sub hit_rule_plugin_code {
     $match = '"<YES>"'; # nothing better to report, $& is not set by this rule
   } else {
     # simple, but suffers from 'user data interpreted as a boolean', Bug 6360
-    $match = '($' . '&' . '|| "negative match")';
+    # ... which is fixed now with "defined $&" stanza
+    $match = '(defined $' . '& ? $' . '& : "negative match")';
   }
 
   my $debug_code = '';
