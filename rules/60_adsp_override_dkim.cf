@@ -123,6 +123,10 @@ adsp_override yahoo.no       custom_med
 adsp_override yahoo.pl       custom_med
 adsp_override yahoo.se       custom_med
 
+
+# Ignore linting, makes unnecessary lookups
+adsp_override compiling.spamassassin.taint.org unknown
+
 # To effectively disable ADSP network DNS lookups for all other domains:
 # adsp_override *            unknown
 
