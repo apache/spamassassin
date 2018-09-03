@@ -2304,8 +2304,8 @@ endif
 #  score      MARKETING_NO_RDNS          3.500	# limit
 #endif
 
-meta       HDR_ORDER_FTSDMCXX_DIRECT  (__HDR_ORDER_FTSDMCXXXX && __DOS_SINGLE_EXT_RELAY) && !ALL_TRUSTED
-describe   HDR_ORDER_FTSDMCXX_DIRECT  Header order similar to spam (FTSDMCXX/boundary variant) direct-to-MX
+meta       HDR_ORDER_FTSDMCXX_DIRECT  (__HDR_ORDER_FTSDMCXXXX && __DOS_SINGLE_EXT_RELAY) && !ALL_TRUSTED && !__VIA_ML
+describe   HDR_ORDER_FTSDMCXX_DIRECT  Header order similar to spam (FTSDMCXX/boundary variant) + direct-to-MX
 score      HDR_ORDER_FTSDMCXX_DIRECT  2.000	# limit
 tflags     HDR_ORDER_FTSDMCXX_DIRECT  publish
 
