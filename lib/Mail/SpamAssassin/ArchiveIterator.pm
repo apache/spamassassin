@@ -179,7 +179,7 @@ This setting allows for flexibility in specifying the mbox format From separator
 
 It defaults to the regular expression:
 
-/^From \S+  ?(\S\S\S \S\S\S .\d .\d:\d\d:\d\d \d{4}|.\d-\d\d-\d{4}_\d\d:\d\d:\d\d_)/
+/^From \S+  ?(\S\S\S \S\S\S .?\d .?\d:\d\d:\d\d \d{4}|.?\d-\d\d-\d{4}_\d\d:\d\d:\d\d_)/
 
 Some SpamAssassin programs such as sa-learn will use the configuration option 
 'mbox_format_from_regex' to override the default regular expression.
@@ -663,7 +663,7 @@ sub _set_default_message_selection_opts {
   $self->{opt_want_date} = 1 unless (defined $self->{opt_want_date});
   $self->{opt_cache} = 0 unless (defined $self->{opt_cache});
   #Changed Regex to include boundaries for Communigate Pro versions (5.2.x and later). per Bug 6413
-  $self->{opt_from_regex} = '^From \S+  ?(\S\S\S \S\S\S .\d .\d:\d\d:\d\d \d{4}|.\d-\d\d-\d{4}_\d\d:\d\d:\d\d_)' unless (defined $self->{opt_from_regex});
+  $self->{opt_from_regex} = '^From \S+  ?(\S\S\S \S\S\S .?\d .?\d:\d\d:\d\d \d{4}|.?\d-\d\d-\d{4}_\d\d:\d\d:\d\d_)' unless (defined $self->{opt_from_regex});
 
   #STRIP LEADING AND TRAILING / FROM REGEX FOR OPTION
   $self->{opt_from_regex} =~ s/^\///;
