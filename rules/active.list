@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus ena-week0 ena-week1 ena-week2 ena-week3 ena-week4 giovanni grenier jarif jbrooks mmiroslaw-mails-ham mmiroslaw-mails-spam sihde thendrikx; day 2: ena-week0 ena-week1 ena-week4 jbrooks llanga mmiroslaw-mails-ham mmiroslaw-mails-spam sihde; day 3: ena-week0 ena-week1 ena-week4 jbrooks llanga mmiroslaw-mails-ham mmiroslaw-mails-spam sihde
+# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus ena-week0 ena-week1 ena-week2 ena-week3 ena-week4 giovanni grenier hege jarif jbrooks mmiroslaw-mails-ham mmiroslaw-mails-spam sihde thendrikx; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja ena-week0 ena-week1 ena-week2 ena-week3 ena-week4 jbrooks llanga mmiroslaw-mails-ham mmiroslaw-mails-spam sihde; day 3: ena-week0 ena-week1 ena-week4 jbrooks llanga mmiroslaw-mails-ham mmiroslaw-mails-spam sihde
 
 # tflags publish
 AC_BR_BONANZA
@@ -105,6 +105,9 @@ BAYES_99
 
 # tflags learn
 BAYES_999
+
+# good enough
+BODY_SINGLE_WORD
 
 # tflags publish
 BODY_URI_ONLY
@@ -287,9 +290,6 @@ FROM_WORDY
 FROM_WORDY_SHORT
 
 # good enough
-FROM_WSP_TRAIL
-
-# good enough
 FSL_CTYPE_WIN1251
 
 # good enough
@@ -339,6 +339,9 @@ FUZZY_UNSUBSCRIBE
 
 # tflags publish
 FUZZY_WALLET
+
+# tflags publish
+GAPPY_SALES_LEADS_FREEM
 
 # tflags publish
 GOOGLE_DOCS_PHISH
@@ -881,55 +884,34 @@ TVD_VISIT_PHARMA
 TW_GIBBERISH_MANY
 
 # good enough
-ADVANCE_FEE_3_NEW_FRM_MNY
+ADMITS_SPAM
 
 # good enough
-ADVANCE_FEE_5_NEW_FRM_MNY
+ADVANCE_FEE_4_NEW_FRM_MNY
 
 # good enough
-AXB_XMAILER_MIMEOLE_OL_1ECD5
+ADVANCE_FEE_4_NEW_MONEY
 
 # good enough
-BIGNUM_EMAILS
+ADVANCE_FEE_5_NEW
 
 # good enough
-BODY_EMPTY
+FILL_THIS_FORM_LOAN
 
 # good enough
-BODY_SINGLE_WORD
+FROM_MISSPACED
 
 # good enough
-DATE_IN_FUTURE_96_Q
+FROM_MISSP_USER
 
 # good enough
-DEAR_BENEFICIARY
+LIST_PARTIAL_SHORT_MSG
 
 # good enough
-FILL_THIS_FORM_LONG
+MILLION_USD
 
 # good enough
-FROM_MISSP_DYNIP
-
-# good enough
-FROM_MISSP_TO_UNDISC
-
-# tflags publish
-GAPPY_SALES_LEADS_FREEM
-
-# good enough
-LOTTO_AGENT
-
-# good enough
-MONEY_ATM_CARD
-
-# good enough
-NSL_RCVD_HELO_USER
-
-# good enough
-SERGIO_SUBJECT_VIAGRA01
-
-# good enough
-TVD_SPACE_RATIO_MINFP
+NSL_RCVD_FROM_USER
 
 # tflags publish
 UC_GIBBERISH_OBFU
