@@ -3450,6 +3450,10 @@ sign.
 words, if the username is an email address, this is the part after the C<@>
 sign.
 
+=item %x -- replaced with the full name of the current user, as sent by spamc.
+If the resulting config directory does not exist, replace with the domain part 
+to use a domain-wide default.   
+
 =item %% -- replaced with a single percent sign (%).
 
 =back
