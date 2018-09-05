@@ -74,13 +74,27 @@ Notable changes
 ---------------
 
 For security reasons SSLv3 support has been removed from spamc(1).
+
 The spamd(1) daemon now is faster to start, thanks to code optimizations.
-Three security bugs for PDFInfo plugin and for SA core has been fixed.
-In sa-update script, optional support for SHA256 in addition to or instead 
-of SHA1 has been added for better validation of rules.
+
+Four CVE security bugs are included in this release for PDFInfo.pm and the 
+SA core: 
+ CVE-2017-15705, CVE-2016-1238, CVE-2018-11780 & CVE-2018-11781 
+
+In sa-update script, optional support for SHA-256 / SHA-512 in addition 
+to or instead of SHA1 has been added for better validation of rules.
+See https://bz.apache.org/SpamAssassin/show_bug.cgi?id=7614 for information
+on the end of SHA-1 signatures which will be the end of rule updates for 
+releases prior to 3.4.2.
+
+Security updates include security improvements for TxRep, tmp file creation
+was hardened, the group list and setuid is hardened for spamd workers, 
+eval tests have been hardened (Thanks to the cPanel Security Team!), 
+a bug in earlier Perl versions that caused URIs to be skipped has been 
+identified, and UTF-16 support is improved.
 
 GeoIP2 support has been added to RelayCountry and URILocalBL plugins due
-to GeoIP legacy api deprecations.
+to GeoIP legacy API deprecations.
 
 New configuration options
 -------------------------
@@ -122,9 +136,6 @@ better utf-8 compatibility, there has been also some other utf-8 related fixes.
 The spamc(1) client can now be build against OpenSSL 1.1.0.
 The test framework has been switched to Test::More module.
 
-Rule updates
-------------
-
 Other updates
 -------------
 
@@ -133,17 +144,11 @@ hosts and tools running on the ASF infrastructure were updated.
 
 A list of top-level domains in registrar boundaries was updated.
 
-Improvements
-------------
-
 Optimizations
 -------------
 
 Faster startup of the SpamAssassin daemon.
 Spamc client now correctly free(3) all the memory it uses.
-
-Notable bug fixes
------------------
 
 Downloading and availability
 ----------------------------
