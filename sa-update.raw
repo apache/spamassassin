@@ -26,7 +26,7 @@ if ('$Id$' =~ ':') {
   # Subversion keyword "$Id$" has been successfully expanded.
   # Doesn't happen with automated launchpad builds:
   # https://bugs.launchpad.net/launchpad/+bug/780916
-  $VERSION = 'svn' . (split(/\s+/, '$Id$'))[2];
+  $VERSION = &Mail::SpamAssassin::Version . ' / svn' . (split(/\s+/, '$Id$'))[2];
 }
 
 my $PREFIX          = '@@PREFIX@@';             # substituted at 'make' time
