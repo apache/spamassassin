@@ -12,7 +12,7 @@ my $mm_version = eval $ExtUtils::MakeMaker::VERSION;
 
 # raising the version of makemaker to 6.46 per bug 6598 & 6131
 if ($mm_version < 6.46) {
-  die "SpamAssassin Makefile.PL requires at least ExtUtils::MakeMaker v6.46";
+  die "Apache SpamAssassin Makefile.PL requires at least ExtUtils::MakeMaker v6.46";
 }
 
 use constant RUNNING_ON_WINDOWS => ($^O =~ /^(mswin|dos|os2)/oi);
@@ -26,7 +26,7 @@ my @ATT_KEYS = (
   # 'vendor' to choose one explicitly (the default is 'site'). They have the
   # following meaning:
   #  * PERL:    Only essential modules shipped with Perl should be installed
-  #             there. Don't put SpamAssassin there.
+  #             there. Don't put Apache SpamAssassin there.
   #  * SITE:    The default. Normal installations via CPAN or from the sources
   #             should use these dirs.
   #  * VENDOR:  A special set of paths for packaged (RPM, deb, portage, ...)

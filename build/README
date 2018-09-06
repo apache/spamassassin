@@ -54,10 +54,9 @@ APACHE SPAMASSASSIN RELEASE PROCEDURE
 
   The output should be blank or look like this:
 
-  ?      rulesrc
-  ?      rules/SIQ.pm
-  ?      rules/sandbox-hstern.pm
-  ?      rules/sandbox-felicity.pm
+  ?       rules
+  ?       rulesrc
+  ?       t.rules
 
   (ie., no "M" or "C" files; any files marked "M" have been locally
   modified, and should be "svn revert"ed before you continue.)
@@ -110,7 +109,7 @@ APACHE SPAMASSASSIN RELEASE PROCEDURE
   $IS_DEVEL_BUILD is 0 even with rc and pre versions because rc and pre
   numbers are never reused.  Just increment higher each time.
 
-  Full releases: no @EXTRA_VERSION is needed and IS_DEVEL_BUILD is 0.
+  Full releases: @EXTRA_VERSION is blank and IS_DEVEL_BUILD is 0.
 
 - Ensure the new version number takes hold:
 
@@ -128,6 +127,10 @@ APACHE SPAMASSASSIN RELEASE PROCEDURE
   rules location.
 
 - create the Changes file.  
+
+  NOTE: If you do not use a fresh checkout, you may miss recent entries if
+  you also did development on the same checkout.  Use a fresh checkout
+  when making your builds to avoid this issue.
 
   MAKE CERTAIN THIS IS RUN IN THE ROOT OF YOUR CHECKOUT!
 
