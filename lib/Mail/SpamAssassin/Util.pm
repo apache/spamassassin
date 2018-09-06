@@ -643,15 +643,18 @@ sub wrap {
   my $pos = 0;
   my $pos_mod = 0;
   while ($#arr > $pos) {
-    my $len = length ($arr[$pos] =~ s/\t/        /g);
-
+    my $tmpline = $arr[$pos] ;
+    $tmpline =~ s/\t/        /g;
+    my $len = length ($tmpline);
     # if we don't want to have lines > $length (overflow==0), we
     # need to verify what will happen with the next line.  if we don't
     # care if a single line goes longer, don't care about the next
     # line.
     # we also want this to be true for the first entry on the line
     if ($pos_mod != 0 && $overflow == 0) {
-      $len += length ($arr[$pos+1] =~ s/\t/        /g);
+      my $tmpnext = $arr[$pos+1] ;
+      $tmpnext =~ s/\t/        /g;
+      $len += length ($tmpnext);
     }
 
     if ($len <= $length) {
