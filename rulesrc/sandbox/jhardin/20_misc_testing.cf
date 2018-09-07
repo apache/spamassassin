@@ -2430,7 +2430,7 @@ header     __XM_MSWINLIVE              X-Mailer =~ /^Microsoft Windows Live Mail
 header     __XM_IPADMAIL               X-Mailer =~ /^iPad Mail \([0-9A-F]{4,8}\)/
 header     __XM_IPHONEMAIL             X-Mailer =~ /^iPhone Mail \([0-9A-F]{4,8}\)/
 
-header     __ANY_EXTERNAL              X-Spam-Relays-External =~ /\S/
+meta       __ANY_EXTERNAL              __FSL_COUNT_EXTERN > 0
 
 
 if can(Mail::SpamAssassin::Conf::feature_bug6558_free)
