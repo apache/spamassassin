@@ -261,7 +261,7 @@ APACHE SPAMASSASSIN RELEASE PROCEDURE
 
   - For a maintainance release candidate(x.y.1-rc1), pre-release (x.y.1-preZ) or alpha (x.y.1-alphaZ):
 
-    vers=3_4_2_pre_5
+    vers=3_4_2_rc_1
 
     #Then run:
 
@@ -327,14 +327,17 @@ APACHE SPAMASSASSIN RELEASE PROCEDURE
   NOTE: running gpg-agent with the proper homedir is needed for
   non-privileged users.
 
-- run "./build/repackage_latest_update_rules" package a rule file for 
-  people who can't run sa-update:
-
-    ./build/repackage_latest_update_rules
-
-  WARNING: this will use the most recently-created "sa-update" tarball for
-  the rules tgz, so if changes have been committed to the "rules" dir in
-  SVN since then, they will not be released!
+# This step is part of the step above already
+#
+#- run "./build/repackage_latest_update_rules" package a rule file for 
+#  people who can't run sa-update:
+#
+#    ./build/repackage_latest_update_rules
+#
+#  WARNING: this will use the most recently-created "sa-update" tarball for
+#  the rules tgz, so if changes have been committed to the "rules" dir in
+#  SVN since then, they will not be released!
+#
 
 - test the files!  redo until they work!! ;)
 
