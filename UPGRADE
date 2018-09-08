@@ -1,3 +1,104 @@
+Note for Users Upgrading to SpamAssassin 3.4.2
+----------------------------------------------
+
+- We now support SHA-512 and SHA-256 signatures for our rules updates.
+
+- We may stop producing SHA-1 signatures in the near future so upgrading
+to 3.4.2 is important.  sa-update no longer uses these signatures.
+
+See https://bz.apache.org/SpamAssassin/show_bug.cgi?id=7614
+
+New plugins
+-----------
+
+There are four new plugins added with this release:
+
+  Mail::SpamAssassin::Plugin::HashBL
+
+The HashBL plugin is the interface to The Email Blocklist (EBL).
+The EBL is intended to filter spam that is sent from IP addresses 
+and domains that cannot be blocked without causing significant 
+numbers of false positives.
+
+  Mail::SpamAssassin::Plugin::ResourceLimits
+
+This plugin leverages BSD::Resource to assure your spamd child processes
+do not exceed specified CPU or memory limit. If this happens, the child
+process will die. See the BSD::Resource for more details.
+
+  Mail::SpamAssassin::Plugin::FromNameSpoof
+
+This plugin allows for detection of the From:name field being used to mislead 
+recipients into thinking an email is from another address.  The man page 
+includes examples and we expect to put test rules for this plugin into 
+rulesrc soon!
+
+  Mail::SpamAssassin::Plugin::Phishing
+
+This plugin finds uris used in phishing campaigns detected by
+OpenPhish (https://openphish.com) or PhishTank (https://phishtank.com) feeds.
+
+These plugins are disabled by default. To enable, uncomment
+the loadplugin configuration options in file v342.pre, or add it to
+some local .pre file such as local.pre .
+
+Notable changes
+---------------
+
+For security reasons SSLv3 support has been removed from spamc(1).
+
+GeoIP2 support has been added to RelayCountry and URILocalBL plugins due
+to GeoIP legacy api deprecations.
+
+New configuration options
+-------------------------
+
+A new template tag _DKIMSELECTOR_ that maps to the DKIM selector (the 's' tag) 
+from valid signatures has been added.
+
+A 'uri_block_cont' option to URILocalBL plugin to score uris per continent has been added.
+Possible continent codes are:
+af, as, eu, na, oc, sa for Africa, Asia, Europe, North America, 
+Oceania and South America.
+
+The 'country_db_type' and 'country_db_path' options has been added to be able 
+to choose in RelayCountry plugin between GeoIP legacy 
+(discontinued from 04/01/2018), GeoIP2, IP::Country::Fast 
+and IP::Country::DB_File.
+GeoIP legacy is still the default option but it will be deprecated 
+in future releases.
+
+A config option 'uri_country_db_path' has been added to be able to choose 
+in URILocalBL plugin between GeoIP legacy and new GeoIP2 api.
+
+A config option 'resource_limit_cpu' (default: 0 or no limit) has been added
+to configure how many cpu cycles are allowed on a child process before it dies.
+
+A config option 'resource_limit_mem' (default: 0 or no limit) has been added
+to configure the maximum number of bytes of memory allowed both for 
+(virtual) address space bytes and resident set size.
+
+A new config option 'report_wrap_width' (default: 70) has been added
+to set the wrap width for description lines in the X-Spam-Report header.
+
+Notable Internal changes
+------------------------
+
+SpamAssassin can cope with new Net::DNS module versions.
+
+The "bytes" pragma has been remove from both core modules and plugins for
+better utf-8 compatibility, there has been also some other utf-8 related fixes.
+
+The spamc(1) client can now be build against OpenSSL 1.1.0.
+
+The test framework has been switched to Test::More module.
+
+Other updates
+-------------
+
+A list of top-level domains in registrar boundaries was updated.
+
+
 Note for Users Upgrading to SpamAssassin 3.4.1
 ----------------------------------------------
 
