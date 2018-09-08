@@ -107,9 +107,12 @@ endif
 # Implementing the Sender Check for No SPF REcord defaulting to disabled so Admins can override
 header		SPF_NONE    eval:check_for_spf_none()
 describe	SPF_NONE    SPF: sender does not publish an SPF Record
+tflags		SPF_NONE    net
+reuse		SPF_NONE
 
 header		SPF_HELO_NONE	eval:check_for_spf_helo_none()
 describe	SPF_HELO_NONE	SPF: HELO does not publish an SPF Record
-
+tflags		SPF_HELO_NONE   net
+reuse		SPF_HELO_NONE
 
 endif   # Mail::SpamAssassin::Plugin::SPF
