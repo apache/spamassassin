@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: darxus ena-week0 ena-week1 ena-week4 giovanni grenier hege jarif jbrooks mmiroslaw-mails-ham mmiroslaw-mails-spam sihde thendrikx; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja ena-week0 ena-week1 ena-week2 ena-week3 ena-week4 jbrooks llanga mmiroslaw-mails-ham mmiroslaw-mails-spam sihde; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja ena-week0 ena-week1 ena-week2 ena-week3 ena-week4 jbrooks llanga mmiroslaw-mails-ham mmiroslaw-mails-spam sihde
+# with results from: day 1: darxus ena-week0 ena-week1 ena-week4 giovanni grenier hege jarif jbrooks mmiroslaw-mails-ham mmiroslaw-mails-spam sihde thendrikx; day 2: ena-week0 ena-week1 ena-week4 jarif jbrooks llanga mmiroslaw-mails-ham mmiroslaw-mails-spam sihde; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja ena-week0 ena-week1 ena-week2 ena-week3 ena-week4 jbrooks llanga mmiroslaw-mails-ham mmiroslaw-mails-spam sihde
 
 # tflags publish
 AC_BR_BONANZA
@@ -114,9 +114,6 @@ BODY_URI_ONLY
 
 # tflags publish
 BOGUS_MSM_HDRS
-
-# good enough
-BTC_ORG
 
 # tflags publish
 CANT_SEE_AD
@@ -252,9 +249,6 @@ FRNAME_IN_MSG_NO_SUBJ
 
 # tflags publish
 FRNAME_IN_MSG_XPRIO
-
-# good enough
-FROMSPACE
 
 # tflags publish
 FROM_ADDR_WS
@@ -784,6 +778,9 @@ SPF_HELO_FAIL
 # tflags net
 SPF_HELO_NEUTRAL
 
+# tflags net
+SPF_HELO_NONE
+
 # tflags userconf
 SPF_HELO_PASS
 
@@ -792,6 +789,9 @@ SPF_HELO_SOFTFAIL
 
 # tflags net
 SPF_NEUTRAL
+
+# tflags net
+SPF_NONE
 
 # tflags userconf
 SPF_PASS
@@ -825,6 +825,9 @@ SUBJECT_IN_BLACKLIST
 
 # tflags userconf
 SUBJECT_IN_WHITELIST
+
+# good enough
+SUBJ_ATTENTION
 
 # tflags net
 SURBL_BLOCKED
@@ -884,37 +887,58 @@ TVD_SPACE_ENCODED
 TW_GIBBERISH_MANY
 
 # good enough
-ADMITS_SPAM
+ADVANCE_FEE_3_NEW_FRM_MNY
 
 # good enough
-ADVANCE_FEE_4_NEW_FRM_MNY
+ADVANCE_FEE_5_NEW_FRM_MNY
 
 # good enough
-ADVANCE_FEE_4_NEW_MONEY
+AXB_XMAILER_MIMEOLE_OL_1ECD5
 
 # good enough
-ADVANCE_FEE_5_NEW
+BIGNUM_EMAILS
 
 # good enough
-FILL_THIS_FORM_LOAN
+DATE_IN_FUTURE_96_Q
 
 # good enough
-FROM_MISSPACED
+DEAR_BENEFICIARY
+
+# tflags net
+DKIMWL_BL
+
+# tflags net
+DKIMWL_WL_HIGH
+
+# tflags net
+DKIMWL_WL_MED
 
 # good enough
-FROM_MISSP_USER
+FILL_THIS_FORM_LONG
 
 # good enough
-LIST_PARTIAL_SHORT_MSG
+FROM_MISSP_DYNIP
 
 # good enough
-MILLION_USD
+FROM_MISSP_TO_UNDISC
 
 # good enough
-NSL_RCVD_FROM_USER
+LOTTO_AGENT
 
 # good enough
-SUBJ_ATTENTION
+MONEY_ATM_CARD
+
+# good enough
+NSL_RCVD_HELO_USER
+
+# good enough
+SERGIO_SUBJECT_VIAGRA01
+
+# good enough
+TVD_PH_BODY_META
+
+# good enough
+TVD_SPACE_RATIO_MINFP
 
 # tflags publish
 UC_GIBBERISH_OBFU
