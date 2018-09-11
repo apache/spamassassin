@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: darxus ena-week0 ena-week1 ena-week4 giovanni grenier hege jarif jbrooks mmiroslaw-mails-ham mmiroslaw-mails-spam sihde thendrikx; day 2: ena-week0 ena-week1 ena-week4 jarif jbrooks llanga mmiroslaw-mails-ham mmiroslaw-mails-spam sihde; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja ena-week0 ena-week1 ena-week2 ena-week3 ena-week4 jbrooks llanga mmiroslaw-mails-ham mmiroslaw-mails-spam sihde
+# with results from: day 1: darxus ena-week0 ena-week1 ena-week4 giovanni grenier hege jarif jbrooks mmiroslaw-mails-ham mmiroslaw-mails-spam sihde thendrikx; day 2: ena-week0 ena-week1 ena-week4 jbrooks llanga mmiroslaw-mails-ham mmiroslaw-mails-spam sihde; day 3: ena-week0 ena-week1 ena-week4 jarif jbrooks llanga mmiroslaw-mails-ham mmiroslaw-mails-spam sihde
 
 # tflags publish
 AC_BR_BONANZA
@@ -402,6 +402,9 @@ HELO_MISC_IP
 
 # tflags publish
 HEXHASH_WORD
+
+# good enough
+HK_LOTTO
 
 # good enough
 HK_NAME_FM_MR_MRS
@@ -826,9 +829,6 @@ SUBJECT_IN_BLACKLIST
 # tflags userconf
 SUBJECT_IN_WHITELIST
 
-# good enough
-SUBJ_ATTENTION
-
 # tflags net
 SURBL_BLOCKED
 
@@ -878,6 +878,9 @@ TO_NO_BRKTS_NORDNS_HTML
 TO_NO_BRKTS_PCNT
 
 # good enough
+TVD_PH_BODY_META
+
+# good enough
 TVD_RCVD_IP
 
 # good enough
@@ -887,58 +890,64 @@ TVD_SPACE_ENCODED
 TW_GIBBERISH_MANY
 
 # good enough
-ADVANCE_FEE_3_NEW_FRM_MNY
+ADMITS_SPAM
 
 # good enough
-ADVANCE_FEE_5_NEW_FRM_MNY
+ADVANCE_FEE_4_NEW_FRM_MNY
 
 # good enough
-AXB_XMAILER_MIMEOLE_OL_1ECD5
+ADVANCE_FEE_4_NEW_MONEY
 
 # good enough
-BIGNUM_EMAILS
+ADVANCE_FEE_5_NEW
 
 # good enough
-DATE_IN_FUTURE_96_Q
+BTC_ORG
 
 # good enough
-DEAR_BENEFICIARY
-
-# tflags net
-DKIMWL_BL
-
-# tflags net
-DKIMWL_WL_HIGH
-
-# tflags net
-DKIMWL_WL_MED
+FILL_THIS_FORM_LOAN
 
 # good enough
-FILL_THIS_FORM_LONG
+FROM_MISSPACED
 
 # good enough
-FROM_MISSP_DYNIP
+FROM_MISSP_USER
 
 # good enough
-FROM_MISSP_TO_UNDISC
+FROM_WSP_TRAIL
 
 # good enough
-LOTTO_AGENT
+HDRS_LCASE_IMGONLY
 
 # good enough
-MONEY_ATM_CARD
+HELO_LH_HOME
 
 # good enough
-NSL_RCVD_HELO_USER
+HK_NAME_FROM
 
 # good enough
-SERGIO_SUBJECT_VIAGRA01
+HK_NAME_MR_MRS
 
 # good enough
-TVD_PH_BODY_META
+HK_PNIS
 
 # good enough
-TVD_SPACE_RATIO_MINFP
+HK_SCAM_S7
+
+# good enough
+LIST_PARTIAL_SHORT_MSG
+
+# good enough
+MILLION_USD
+
+# good enough
+MONEY_BARRISTER
+
+# good enough
+NSL_RCVD_FROM_USER
+
+# good enough
+SHARE_50_50
 
 # tflags publish
 UC_GIBBERISH_OBFU
