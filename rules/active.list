@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: darxus ena-week0 ena-week1 ena-week4 giovanni grenier hege jarif jbrooks mmiroslaw-mails-ham mmiroslaw-mails-spam sihde thendrikx; day 2: ena-week0 ena-week1 ena-week4 jbrooks llanga mmiroslaw-mails-ham mmiroslaw-mails-spam sihde; day 3: ena-week0 ena-week1 ena-week4 jarif jbrooks llanga mmiroslaw-mails-ham mmiroslaw-mails-spam sihde
+# with results from: day 1: darxus ena-week0 ena-week1 ena-week4 giovanni grenier hege jarif jbrooks mmiroslaw-mails-ham mmiroslaw-mails-spam sihde thendrikx; day 2: ena-week0 ena-week1 ena-week4 jbrooks llanga mmiroslaw-mails-ham mmiroslaw-mails-spam sihde; day 3: ena-week0 ena-week1 ena-week4 jbrooks llanga mmiroslaw-mails-ham mmiroslaw-mails-spam sihde
 
 # tflags publish
 AC_BR_BONANZA
@@ -114,6 +114,9 @@ BODY_URI_ONLY
 
 # tflags publish
 BOGUS_MSM_HDRS
+
+# good enough
+BTC_ORG
 
 # tflags publish
 CANT_SEE_AD
@@ -290,6 +293,9 @@ FROM_WORDY
 FROM_WORDY_SHORT
 
 # good enough
+FROM_WSP_TRAIL
+
+# good enough
 FSL_CTYPE_WIN1251
 
 # good enough
@@ -395,6 +401,9 @@ HEADER_FROM_DIFFERENT_DOMAINS
 HEAD_LONG
 
 # good enough
+HELO_LH_HOME
+
+# good enough
 HELO_LOCALHOST
 
 # good enough
@@ -410,6 +419,9 @@ HK_LOTTO
 HK_NAME_FM_MR_MRS
 
 # good enough
+HK_NAME_FROM
+
+# good enough
 HK_RANDOM_ENVFROM
 
 # good enough
@@ -417,6 +429,9 @@ HK_SCAM_N2
 
 # good enough
 HK_SCAM_N8
+
+# good enough
+HK_SCAM_S7
 
 # tflags userconf
 HTML_CHARSET_FARAWAY
@@ -884,70 +899,73 @@ TVD_PH_BODY_META
 TVD_RCVD_IP
 
 # good enough
+TVD_RCVD_SPACE_BRACKET
+
+# good enough
 TVD_SPACE_ENCODED
 
 # tflags publish
 TW_GIBBERISH_MANY
 
 # good enough
-ADMITS_SPAM
+ADVANCE_FEE_3_NEW_FRM_MNY
 
 # good enough
-ADVANCE_FEE_4_NEW_FRM_MNY
+ADVANCE_FEE_5_NEW_FRM_MNY
 
 # good enough
-ADVANCE_FEE_4_NEW_MONEY
+AXB_XMAILER_MIMEOLE_OL_1ECD5
 
 # good enough
-ADVANCE_FEE_5_NEW
+BIGNUM_EMAILS
 
 # good enough
-BTC_ORG
+DATE_IN_FUTURE_96_Q
 
 # good enough
-FILL_THIS_FORM_LOAN
+DEAR_BENEFICIARY
+
+# tflags net
+DKIMWL_BL
+
+# tflags net
+DKIMWL_WL_HIGH
+
+# tflags net
+DKIMWL_WL_MED
 
 # good enough
-FROM_MISSPACED
+FILL_THIS_FORM_LONG
 
 # good enough
-FROM_MISSP_USER
+FROM_MISSP_DYNIP
 
 # good enough
-FROM_WSP_TRAIL
+FROM_MISSP_TO_UNDISC
+
+# tflags publish
+GAPPY_SALES_LEADS_FREEM
 
 # good enough
-HDRS_LCASE_IMGONLY
+KHOP_DYNAMIC
 
 # good enough
-HELO_LH_HOME
+LOTTO_AGENT
 
 # good enough
-HK_NAME_FROM
+MONEY_ATM_CARD
 
 # good enough
-HK_NAME_MR_MRS
+NSL_RCVD_HELO_USER
 
 # good enough
-HK_PNIS
+PDS_FROM_2_EMAILS
 
 # good enough
-HK_SCAM_S7
+SERGIO_SUBJECT_VIAGRA01
 
 # good enough
-LIST_PARTIAL_SHORT_MSG
-
-# good enough
-MILLION_USD
-
-# good enough
-MONEY_BARRISTER
-
-# good enough
-NSL_RCVD_FROM_USER
-
-# good enough
-SHARE_50_50
+TVD_SPACE_RATIO_MINFP
 
 # tflags publish
 UC_GIBBERISH_OBFU
