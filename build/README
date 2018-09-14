@@ -136,7 +136,7 @@ APACHE SPAMASSASSIN RELEASE PROCEDURE
 
   There are two options here:
 
-  - For releases on a maintainance branch (e.g. 3.0.1, .2, etc.):
+  - For releases on a maintenance branch (e.g. 3.0.1, .2, etc.):
 
       TZ=UTC svn log --non-interactive --stop-on-copy > Changes
 
@@ -247,7 +247,7 @@ APACHE SPAMASSASSIN RELEASE PROCEDURE
 
 - SVN tag the release files.  This is done using "svn copy".
 
-  - For a maintainance release (x.y.1, x.y.2):
+  - For a maintenance release (x.y.1, x.y.2):
 
     vers=3_4_2
 
@@ -255,11 +255,10 @@ APACHE SPAMASSASSIN RELEASE PROCEDURE
 
     repo=https://svn.apache.org/repos/asf/spamassassin
     svn delete -m "replaced old tag" $repo/tags/spamassassin_release_$vers
-    svn copy -m "creating tag for release $vers" \
-	$repo/branches/3.4 $repo/tags/spamassassin_release_$vers
+    svn copy -m "creating tag for release $vers" $repo/branches/3.4 $repo/tags/spamassassin_release_$vers
 
 
-  - For a maintainance release candidate(x.y.1-rc1), pre-release (x.y.1-preZ) or alpha (x.y.1-alphaZ):
+  - For a maintenance release candidate(x.y.1-rc1), pre-release (x.y.1-preZ) or alpha (x.y.1-alphaZ):
 
     vers=3_4_2_rc_1
 
