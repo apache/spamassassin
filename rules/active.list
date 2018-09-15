@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: darxus ena-week0 ena-week1 ena-week4 giovanni grenier hege jarif jbrooks mmiroslaw-mails-ham mmiroslaw-mails-spam sihde thendrikx; day 2: ena-week0 ena-week1 ena-week4 jbrooks llanga mmiroslaw-mails-ham mmiroslaw-mails-spam sihde; day 3: ena-week0 ena-week1 ena-week4 jarif jbrooks llanga mmiroslaw-mails-ham mmiroslaw-mails-spam sihde
+# with results from: day 1: darxus ena-week0 ena-week1 ena-week4 giovanni grenier hege jarif jbrooks mmiroslaw-mails-ham mmiroslaw-mails-spam sihde thendrikx; day 2: ena-week0 ena-week1 ena-week4 jarif jbrooks llanga mmiroslaw-mails-ham mmiroslaw-mails-spam sihde; day 3: ena-week0 ena-week1 ena-week4 jbrooks llanga mmiroslaw-mails-ham mmiroslaw-mails-spam sihde
 
 # tflags publish
 AC_BR_BONANZA
@@ -156,6 +156,15 @@ DKIMDOMAIN_IN_DWL
 
 # tflags net
 DKIMDOMAIN_IN_DWL_UNKNOWN
+
+# tflags net
+DKIMWL_BL
+
+# tflags net
+DKIMWL_WL_HIGH
+
+# tflags net
+DKIMWL_WL_MED
 
 # tflags net
 DKIM_ADSP_ALL
@@ -431,6 +440,9 @@ HTML_OFF_PAGE
 IMG_ONLY_FM_DOM_INFO
 
 # good enough
+KB_FORGED_MOZ4
+
+# good enough
 KHOP_DYNAMIC
 
 # tflags publish
@@ -453,6 +465,9 @@ LUCRATIVE
 
 # tflags publish
 MALF_HTML_B64
+
+# good enough
+MANY_PILL_PRICE
 
 # tflags publish
 MANY_SPAN_IN_TEXT
@@ -899,58 +914,52 @@ TVD_SPACE_ENCODED
 TW_GIBBERISH_MANY
 
 # good enough
-ADVANCE_FEE_3_NEW_FRM_MNY
+ADMITS_SPAM
 
 # good enough
-ADVANCE_FEE_5_NEW_FRM_MNY
+ADVANCE_FEE_2_NEW_FRM_MNY
 
 # good enough
-AXB_XMAILER_MIMEOLE_OL_1ECD5
+ADVANCE_FEE_4_NEW_FRM_MNY
 
 # good enough
-BIGNUM_EMAILS
+ADVANCE_FEE_4_NEW_MONEY
 
 # good enough
-DATE_IN_FUTURE_96_Q
+ADVANCE_FEE_5_NEW
 
 # good enough
-DEAR_BENEFICIARY
-
-# tflags net
-DKIMWL_BL
-
-# tflags net
-DKIMWL_WL_HIGH
-
-# tflags net
-DKIMWL_WL_MED
+FILL_THIS_FORM_LOAN
 
 # good enough
-FILL_THIS_FORM_LONG
+FROMSPACE
 
 # good enough
-FROM_MISSP_DYNIP
+FROM_MISSPACED
 
 # good enough
-FROM_MISSP_TO_UNDISC
+FROM_MISSP_USER
 
 # good enough
-KB_FORGED_MOZ4
+HDRS_LCASE_IMGONLY
 
 # good enough
-LOTTO_AGENT
+HK_NAME_MR_MRS
 
 # good enough
-MANY_PILL_PRICE
+HK_SCAM_N3
 
 # good enough
-MONEY_ATM_CARD
+LIST_PARTIAL_SHORT_MSG
 
 # good enough
-NSL_RCVD_HELO_USER
+MILLION_USD
 
 # good enough
-SERGIO_SUBJECT_VIAGRA01
+NSL_RCVD_FROM_USER
+
+# good enough
+SHARE_50_50
 
 # tflags publish
 UC_GIBBERISH_OBFU
