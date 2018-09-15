@@ -375,6 +375,11 @@ APACHE SPAMASSASSIN RELEASE PROCEDURE
 
   Pre-releases and RCs require just lazy consensus -- ie. no objections.
 
+  NOTE: It's also feasible that you could publish via SVNPubSub as noted
+  below but using the SVN repository at:
+
+    https://dist.apache.org/repos/dist/dev/SpamAssassin
+
 - (for a pre or rc release), - upload .tar.gz (not .bz2) tarball to CPAN
   at http://pause.cpan.org/:
 
@@ -388,8 +393,6 @@ APACHE SPAMASSASSIN RELEASE PROCEDURE
   As of 2014-02-05, adding -TRIAL to the filename should work. For example:
 
         Mail-SpamAssassin-3.4.1-rc2-TRIAL.tar.gz
-
-**** TESTED TO HERE
 
 - (for a full release) 3 +1's votes from PMC members are required to 
   proceed with an official, non pre-release ASF software release.
@@ -431,13 +434,14 @@ APACHE SPAMASSASSIN RELEASE PROCEDURE
   - lib/Mail/SpamAssassin.pm
 
 
-- In build/mkupdates/run_part2 change versions="X.Y.Z" to the new
-  development version (A.B.C).
+#- In build/mkupdates/run_part2 change versions="X.Y.Z" to the new
+#  development version (A.B.C).
 
+- DNS Steps TBD - Talk to sysadmins@spamassassin.apache.org
 
-- [X.Y.0 RELEASES ONLY]: NOTE: This may change, make sure this info is
-  still accurate before changing this (preferrably find out BEFORE doing
-  an X.Y.0 release.  Update the mkupdates stuff:
+#- [X.Y.0 RELEASES ONLY]: NOTE: This may change, make sure this info is
+#  still accurate before changing this (preferrably find out BEFORE doing
+#  an X.Y.0 release.  Update the mkupdates stuff:
 
 #  - Create an empty file for the new version number in
 #    /var/named/updates.dev.spamassassin.org.d/ on the zone and chown to
@@ -446,13 +450,13 @@ APACHE SPAMASSASSIN RELEASE PROCEDURE
 #    NOTE: I don't believe this does anything KAM: 2014-02-11 and the
 #    directory doesn't exist.
 
-  - Add "$INCLUDE /var/named/updates.spamassassin.org.d/X.Y+1.0" to the
-    /var/named/spamassassin.org zone file OR use a CNAME (see below)
+#  - Add "$INCLUDE /var/named/updates.spamassassin.org.d/X.Y+1.0" to the
+#    /var/named/spamassassin.org zone file OR use a CNAME (see below)
+#
+#    NOTE: Per bug 6644, using a CNAME for 3.4.1, 3.4.2, 4.0.0 to 3.3.2
 
-    NOTE: Per bug 6644, using a CNAME for 3.4.1, 3.4.2, 4.0.0 to 3.3.2
-
-  - commit the changes, update the zone (if not doing above on the zone -
-    NOTE: See /var/named/README) and tick the zone file using build/mkupdates/tick_zone_serial
+#  - commit the changes, update the zone (if not doing above on the zone -
+#    NOTE: See /var/named/README) and tick the zone file using build/mkupdates/tick_zone_serial
 
 - !WARNING! After the next step, the version number will be considered
   "burned". The number is locked for this particular code.  The same
@@ -467,17 +471,17 @@ APACHE SPAMASSASSIN RELEASE PROCEDURE
 
     svn commit -m "oops, had to redo: THIS IS THE REAL X.Y.Z RELEASE"
 
-- Release a new rules update matching the released code:
-  #2014-02-11 switched to su - instead of sudo because of .ssh and .svn
-  stored config items
-
-        ssh spamassassin.zones.apache.org
-        su - updatesd
-        cd /home/updatesd/svn/spamassassin/build/mkupdates
-        ./update-rules-3.3 3.4
-
-  NOTE: Is this needed with our rule update process?  not convinced it
-  is... 2015-04-28
+#- Release a new rules update matching the released code:
+#  #2014-02-11 switched to su - instead of sudo because of .ssh and .svn
+#  stored config items
+#
+#        ssh spamassassin.zones.apache.org
+#        su - updatesd
+#        cd /home/updatesd/svn/spamassassin/build/mkupdates
+#        ./update-rules-3.3 3.4
+#
+#  NOTE: Is this needed with our rule update process?  not convinced it
+#  is... 2015-04-28
 
 - publish the tarballs
 
@@ -499,7 +503,7 @@ APACHE SPAMASSASSIN RELEASE PROCEDURE
   For full release builds, you need to publish using SVNPubSub.
  
   This is a simple matter of committing the new artifacts and signature 
-  files to https://dist.apache.org/repos/dist/spamassassin once a
+  files to https://dist.apache.org/repos/dist/release/spamassassin/ once a
   release vote passes. 
 
   [note: Symlinks may not work on all mirrors even though there may be 
@@ -523,6 +527,8 @@ APACHE SPAMASSASSIN RELEASE PROCEDURE
   take a while for the spamassassin.apache.org website mirror script to
   run, so the old downloads page will stick around for a while before it's
   safe to do so.)
+
+#HERE
 
 - (for full release builds) update the main website "downloads" page in
   svn:
