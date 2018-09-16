@@ -3,12 +3,10 @@
 use Data::Dumper;
 use lib '.'; use lib 't';
 use SATest; sa_t_init("bayes");
-use Test;
 
-use constant TEST_ENABLED => conf_bool('run_long_tests') && eval {
-  require BerkeleyDB; no warnings qw(once); $BerkeleyDB::db_version >= 4.6;
-};
+use constant HAS_BDB => eval { require BerkeleyDB };
 
+use Test::More;
 BEGIN { 
   if (-e 't/test_dir') {
     chdir 't';
@@ -17,11 +15,18 @@ BEGIN {
   if (-e 'test_dir') {
     unshift(@INC, '../blib/lib');
   }
+}
 
-  plan tests => (TEST_ENABLED ? 42 : 0);
-};
+plan skip_all => "Long running tests disabled" unless conf_bool('run_long_tests');
+plan skip_all => "BerkeleyDB is unavailable" unless HAS_BDB;
 
-exit unless TEST_ENABLED;
+{
+  no warnings 'once';
+  plan skip_all => "BerkeleyDB >= 4.6 is required" unless $BerkeleyDB::db_version >= 4.6;
+}
+
+plan tests => 42;
+
 
 tstlocalrules ("
         bayes_store_module Mail::SpamAssassin::BayesStore::BDB

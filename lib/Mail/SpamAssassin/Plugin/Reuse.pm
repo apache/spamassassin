@@ -22,15 +22,14 @@ mass-check output.
 
 package Mail::SpamAssassin::Plugin::Reuse;
 
-use bytes;
+# use bytes;
 use strict;
 use warnings;
 
 use Mail::SpamAssassin::Conf;
 use Mail::SpamAssassin::Logger;
 
-use vars qw(@ISA);
-@ISA = qw(Mail::SpamAssassin::Plugin);
+our @ISA = qw(Mail::SpamAssassin::Plugin);
 
 # constructor
 sub new {
@@ -187,6 +186,7 @@ sub _add_hits {
   my ($self, $pms, $priority, $stage) = @_;
 
   return unless exists $pms->{reuse_hits_to_add}->{"$priority $stage"};
+  return if exists $pms->{reuse_hits_done}->{"$priority $stage"};
   foreach my $rule (@{$pms->{reuse_hits_to_add}->{"$priority $stage"}}) {
     # Add hit even if rule was originally disabled
     my $ss = $pms->{conf}->get_score_set();
@@ -199,6 +199,7 @@ sub _add_hits {
 
     $pms->{conf}->{scores}->{$rule} = 0;
   }
+  $pms->{reuse_hits_done}->{"$priority $stage"} = 1;
 }
 
 my %type_to_stage = (

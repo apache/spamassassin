@@ -63,21 +63,17 @@ use Mail::SpamAssassin::Util qw(untaint_var uri_list_canonicalize);
 use Mail::SpamAssassin::Timeout;
 use Mail::SpamAssassin::Logger;
 
-use vars qw{
-  @ISA @TEMPORARY_METHODS %TEMPORARY_EVAL_GLUE_METHODS
-};
-
-@ISA = qw();
+our @ISA = qw();
 
 # methods defined by the compiled ruleset; deleted in finish_tests()
-@TEMPORARY_METHODS = ();
+our @TEMPORARY_METHODS;
 
 # methods defined by register_plugin_eval_glue(); deleted in finish_tests()
-%TEMPORARY_EVAL_GLUE_METHODS = ();
+our %TEMPORARY_EVAL_GLUE_METHODS;
 
 ###########################################################################
 
-use vars qw( %common_tags );
+our %common_tags;
 
 BEGIN {
   %common_tags = (
@@ -190,26 +186,21 @@ BEGIN {
     TESTS => sub {
       my $pms = shift;
       my $arg = (shift || ',');
-      join($arg, sort(@{$pms->{test_names_hit}})) || "none";
+      join($arg, sort @{$pms->{test_names_hit}}) || "none";
     },
 
     SUBTESTS => sub {
       my $pms = shift;
       my $arg = (shift || ',');
-      join($arg, sort(@{$pms->{subtest_names_hit}})) || "none";
+      join($arg, sort @{$pms->{subtest_names_hit}}) || "none";
     },
 
     TESTSSCORES => sub {
       my $pms = shift;
       my $arg = (shift || ",");
-      my $line = '';
-      foreach my $test (sort @{$pms->{test_names_hit}}) {
-        my $score = $pms->{conf}->{scores}->{$test};
-        $score = '0'  if !defined $score;
-        $line .= $arg  if $line ne '';
-        $line .= $test . "=" . $score;
-      }
-      $line ne '' ? $line : 'none';
+      my $scores = $pms->{conf}->{scores};
+      join($arg, map($_ . "=" . ($scores->{$_} || '0'),
+                     sort @{$pms->{test_names_hit}})) || "none";
     },
 
     PREVIEW => sub {
@@ -376,11 +367,11 @@ sub check_timed {
   # to see if we should go from {0,1} to {2,3}.  We of course don't need
   # to do this switch if we're already using bayes ... ;)
   my $set = $self->{conf}->get_score_set();
-  if (($set & 2) == 0 && $self->{main}->{bayes_scanner} && $self->{main}->{bayes_scanner}->is_scan_available()) {
+  if (($set & 2) == 0 && $self->{main}->{bayes_scanner} && $self->{main}->{bayes_scanner}->is_scan_available() && $self->{conf}->{use_bayes_rules}) {
     dbg("check: scoreset $set but bayes is available, switching scoresets");
     $self->{conf}->set_score_set ($set|2);
   }
-
+  dbg("check: using scoreset $set in M:S:Pms"); 
   # The primary check functionality occurs via a plugin call.  For more
   # information, please see: Mail::SpamAssassin::Plugin::Check
   if (!$self->{main}->call_plugins ("check_main", { permsgstatus => $self }))
@@ -725,7 +716,7 @@ of the tests which were triggered by the mail.
 sub get_names_of_tests_hit {
   my ($self) = @_;
 
-  return join(',', sort(@{$self->{test_names_hit}}));
+  return join(',', sort @{$self->{test_names_hit}});
 }
 
 =item $list = $status->get_names_of_tests_hit_with_scores_hash ()
@@ -735,19 +726,14 @@ return a pointer to a hash for rule & score pairs for all the symbolic
 test names and individual scores of the tests which were triggered by the mail.
 
 =cut
+
 sub get_names_of_tests_hit_with_scores_hash {
   my ($self) = @_;
 
-  my ($line, %testsscores);
-
-  #BASED ON CODE FOR TESTSSCORES TAG - KAM 2014-04-24
-  foreach my $test (@{$self->{test_names_hit}}) {
-    my $score = $self->{conf}->{scores}->{$test};
-    $score = '0'  if !defined $score;
-
-    $testsscores{$test} = $score;
-  }
-
+  #BASED ON CODE FOR TESTSSCORES TAG
+  my $scores = $self->{conf}->{scores};
+  my %testsscores;
+  $testsscores{$_} = $scores->{$_} || '0'  for @{$self->{test_names_hit}};
   return \%testsscores;
 }
 
@@ -758,22 +744,14 @@ return a comma-separated string of rule=score pairs for all the symbolic
 test names and individual scores of the tests which were triggered by the mail.
 
 =cut
+
 sub get_names_of_tests_hit_with_scores {
   my ($self) = @_;
 
-  my ($line, %testsscores);
-
-  #BASED ON CODE FOR TESTSSCORES TAG - KAM 2014-04-24
-  foreach my $test (sort @{$self->{test_names_hit}}) {
-    my $score = $self->{conf}->{scores}->{$test};
-    $score = '0'  if !defined $score;
-    $line .= ','  if $line ne '';
-    $line .= $test . '=' . $score;
-  }
-
-  $line ||= 'none';
-
-  return $line;
+  #BASED ON CODE FOR TESTSSCORES TAG
+  my $scores = $self->{conf}->{scores};
+  return join(',', map($_ . '=' . ($scores->{$_} || '0'),
+                       sort @{$self->{test_names_hit}})) || "none";
 }
 
 
@@ -792,7 +770,7 @@ underscores, used in meta rules.
 sub get_names_of_subtests_hit {
   my ($self) = @_;
 
-  return join(',', sort(@{$self->{subtest_names_hit}}));
+  return join(',', sort @{$self->{subtest_names_hit}});
 }
 
 ###########################################################################
@@ -914,16 +892,16 @@ sub get_content_preview {
     $str .= shift @{$ary};
   }
   undef $ary;
-  chomp ($str); $str .= " [...]\n";
 
   # in case the last line was huge, trim it back to around 200 chars
   local $1;
-  $str =~ s/^(.{,200}).*$/$1/gs;
+  $str =~ s/^(.{200}).+$/$1 [...]/gm;
+  chomp ($str); $str .= "\n";
 
   # now, some tidy-ups that make things look a bit prettier
-  $str =~ s/-----Original Message-----.*$//gs;
+  $str =~ s/-----Original Message-----.*$//gm;
   $str =~ s/This is a multi-part message in MIME format\.//gs;
-  $str =~ s/[-_\*\.]{10,}//gs;
+  $str =~ s/[-_*.]{10,}//gs;
   $str =~ s/\s+/ /gs;
 
   # add "Content preview:" ourselves, so that the text aligns
@@ -1289,8 +1267,8 @@ sub rewrite_no_report_safe {
 sub qp_encode_header {
   my ($self, $text) = @_;
 
-  # do nothing unless there's an 8-bit char
-  return $text unless ($text =~ /[\x80-\xff]/);
+  # return unchanged if there are no 8-bit characters
+  return $text  if $text !~ tr/\x00-\x7F//c;
 
   my $cs = 'ISO-8859-1';
   if ($self->{report_charset}) {
@@ -1738,6 +1716,10 @@ sub extract_message_metadata {
   $self->set_tag('RELAYSUNTRUSTED', $self->{relays_untrusted_str});
   $self->set_tag('RELAYSINTERNAL',  $self->{relays_internal_str});
   $self->set_tag('RELAYSEXTERNAL',  $self->{relays_external_str});
+  my $lasthop = $self->{relays_external}->[0];
+  if ($lasthop) {
+    $self->set_tag('LASTEXTERNALIP',  $lasthop->{ip});
+  }
   $self->set_tag('LANGUAGES', $self->{msg}->get_metadata("X-Languages"));
 
   # This should happen before we get called, but just in case.
@@ -1980,7 +1962,8 @@ sub _get {
   else {
     my @results = $getraw ? $self->{msg}->raw_header($request)
                           : $self->{msg}->get_header($request);
-  # dbg("message: get(%s) = %s", $request, join(", ",@results));
+  # dbg("message: get(%s)%s = %s",
+  #     $request, $getraw?'raw':'', join(", ",@results));
     if (@results) {
       $result = join('', @results);
     } else {  # metadata
@@ -2613,7 +2596,7 @@ sub _wrap_desc {
   my ($self, $desc, $firstlinelength, $prefix) = @_;
 
   my $firstline = " " x $firstlinelength;
-  my $wrapped = Mail::SpamAssassin::Util::wrap($desc, $prefix, $firstline, 75, 0);
+  my $wrapped = Mail::SpamAssassin::Util::wrap($desc, $prefix, $firstline, $self->{conf}->{report_wrap_width}, 0);
   $wrapped =~ s/^\s+//s;
   $wrapped;
 }
@@ -3073,24 +3056,25 @@ sub all_from_addrs_domains {
 
   #TEST POINT - my @addrs = ("test.voipquotes2.net","test.voipquotes2.co.uk");
   #Start with all the normal from addrs
-  my @addrs = &all_from_addrs($self);
+  my @addrs = all_from_addrs($self);
 
   dbg("eval: all '*From' addrs domains (before): " . join(" ", @addrs));
 
-  #loop through and limit to just the domain with a dummy address
-  for (my $i = 0; $i < scalar(@addrs); $i++) {
-    $addrs[$i] = 'dummy@'.$self->{main}->{registryboundaries}->uri_to_domain($addrs[$i]);
+  #Take just the domain with a dummy localpart
+  #removing invalid and duplicate domains
+  my(%addrs_seen, @addrs_filtered);
+  foreach my $a (@addrs) {
+    my $domain = $self->{main}->{registryboundaries}->uri_to_domain($a);
+    next if !defined $domain || $addrs_seen{lc $domain}++;
+    push(@addrs_filtered, 'dummy@'.$domain);
   }
 
-  #Remove duplicate domains
-  my %addrs = map { $_ => 1 } @addrs;
-  @addrs = keys %addrs;
+  dbg("eval: all '*From' addrs domains (after uri to domain): " .
+      join(" ", @addrs_filtered));
 
-  dbg("eval: all '*From' addrs domains (after uri to domain): " . join(" ", @addrs));
+  $self->{all_from_addrs_domains} = \@addrs_filtered;
 
-  $self->{all_from_addrs_domains} = \@addrs;
-
-  return @addrs;
+  return @addrs_filtered;
 }
 
 sub all_to_addrs {

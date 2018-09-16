@@ -3,19 +3,12 @@
 use lib '.'; use lib 't';
 use SATest; sa_t_init("dcc");
 
-use constant TEST_ENABLED => conf_bool('run_dcc_tests');
+use Test::More;
+plan skip_all => "DCC tests disabled" unless conf_bool('run_dcc_tests');
+plan tests => 4;
 
-use Test;
+diag('Note: Failure may not be an SpamAssassin bug, as DCC tests can fail due to problems with the DCC servers.');
 
-BEGIN {
-  plan tests => (TEST_ENABLED ? 4 : 0),
-  onfail => sub {
-    warn "\n\nNote: this may not be an SpamAssassin bug, as DCC tests can" .
-	"\nfail due to problems with the DCC servers.\n\n";
-  }
-};
-
-exit unless TEST_ENABLED;
 
 # ---------------------------------------------------------------------------
 

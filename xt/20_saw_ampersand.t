@@ -37,14 +37,19 @@ BEGIN {
   if ($] >= 5.017007) {
     $RUN_THIS_TEST = 0;
   }
+  use constant HAS_DSA => eval 'use Devel::SawAmpersand; 1;';
+  plan tests => 0 if ! ( $RUN_THIS_TEST and HAS_DSA) ;
 
-  plan tests => 0 if !$RUN_THIS_TEST;
+  if (!$RUN_THIS_TEST) {
+    print "NOTE: This test is unnecessary as of perl 5.17.7.\n";
+    exit;
+  } 
+  if ( !HAS_DSA ) {
+    print "NOTE: This test requires Devel::SawAmpersand\n"; 
+    exit;
+  } 
 }
 
-if (!$RUN_THIS_TEST) {
-  print "NOTE: This test is unnecessary as of perl 5.17.7.\n";
-  exit;
-}
 
 plan tests => 37;
 
@@ -219,4 +224,3 @@ sub tryone {
   $mail->finish();
   $status->finish();
 }
-

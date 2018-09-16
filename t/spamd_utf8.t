@@ -2,10 +2,12 @@
 
 use lib '.'; use lib 't';
 use SATest; sa_t_init("spamd_utf8");
-my $am_running;
+
 my $testlocale;
 
-use Test; BEGIN {
+use Test::More;
+
+BEGIN {
   $testlocale = 'en_US.UTF-8';
 
   my $havelocale = 1;
@@ -15,11 +17,12 @@ use Test; BEGIN {
   }
   close IN;
 
-  $am_running = (!$SKIP_SPAMD_TESTS && $havelocale);
-  plan tests => ($am_running ? 3 : 0);
+  plan skip_all => "Spamd tests disabled" if $SKIP_SPAMD_TESTS;
+  plan skip_all => "No locale?"           unless $havelocale;
+
+  plan tests => 3;
 };
 
-exit unless $am_running;
 $ENV{'LANG'} = $testlocale;
 
 # ---------------------------------------------------------------------------

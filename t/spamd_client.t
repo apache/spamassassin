@@ -19,11 +19,13 @@ if (-e 'test_dir') {            # running from test directory, not ..
 use lib '.'; use lib 't';
 use SATest; sa_t_init("spamd_client");
 
-use constant TEST_ENABLED => conf_bool('run_long_tests');
 use constant HAS_SDBM_FILE => eval { require SDBM_File; };
 
-our $DO_RUN = !$SKIP_SPAMD_TESTS && TEST_ENABLED;
+use Test::More;
+plan skip_all => "Spamd tests disabled" if $SKIP_SPAMD_TESTS;
+plan skip_all => "Long running tests disabled" unless conf_bool('run_long_tests');
 
+# TODO: These should be skips down in the code, not changing the test count.
 my $num_tests = 18;
 
 # UNIX socket tests
@@ -36,9 +38,7 @@ if (HAS_SDBM_FILE) {
   $num_tests += 21;
 }
 
-use Test; plan tests => ($DO_RUN ? $num_tests : 0);
-
-exit unless $DO_RUN;
+plan tests => $num_tests;
 
 # ---------------------------------------------------------------------------
 

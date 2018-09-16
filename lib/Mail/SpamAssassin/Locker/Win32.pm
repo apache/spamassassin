@@ -19,7 +19,7 @@ package Mail::SpamAssassin::Locker::Win32;
 
 use strict;
 use warnings;
-use bytes;
+# use bytes;
 use re 'taint';
 use Fcntl;
 
@@ -30,11 +30,7 @@ use Mail::SpamAssassin::Logger;
 use File::Spec;
 use Time::Local;
 
-use vars qw{
-  @ISA 
-};
-
-@ISA = qw(Mail::SpamAssassin::Locker);
+our @ISA = qw(Mail::SpamAssassin::Locker);
 
 ###########################################################################
 

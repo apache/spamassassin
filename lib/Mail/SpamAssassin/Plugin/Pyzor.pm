@@ -28,7 +28,7 @@ Mail::SpamAssassin::Plugin::Pyzor - perform Pyzor check of messages
 Pyzor is a collaborative, networked system to detect and block spam
 using identifying digests of messages.
 
-See http://pyzor.sourceforge.net/ for more information about Pyzor.
+See http://pyzor.org/ for more information about Pyzor.
 
 =cut
 
@@ -41,11 +41,10 @@ use Mail::SpamAssassin::Util qw(untaint_var untaint_file_path
                                 proc_status_ok exit_status_str);
 use strict;
 use warnings;
-use bytes;
+# use bytes;
 use re 'taint';
 
-use vars qw(@ISA);
-@ISA = qw(Mail::SpamAssassin::Plugin);
+our @ISA = qw(Mail::SpamAssassin::Plugin);
 
 sub new {
   my $class = shift;
@@ -300,13 +299,13 @@ sub pyzor_lookup {
 
     if (!@response) {
       # this exact string is needed below
-      die("no response\n");	# yes, this is possible
+      warn("no response\n");	# yes, this is possible
     }
     chomp for @response;
     dbg("pyzor: got response: " . join("\\n", @response));
 
     if ($response[0] =~ /^Traceback/) {
-      die("internal error, python traceback seen in response\n");
+      warn("internal error, python traceback seen in response\n");
     }
 
   });

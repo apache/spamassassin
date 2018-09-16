@@ -21,17 +21,14 @@ package Mail::SpamAssassin::SubProcBackChannel;
 
 use strict;
 use warnings;
-use bytes;
+# use bytes;
 use re 'taint';
 
 use IO::Socket;
 use Mail::SpamAssassin::Util;
 use Mail::SpamAssassin::Constants qw(:sa);
 
-use vars qw {
-};
-
-my @ISA = qw();
+our @ISA = qw();
 
 =head1 NAME
 

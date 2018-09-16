@@ -19,12 +19,8 @@ package Mail::SpamAssassin::Locales;
 
 use strict;
 use warnings;
-use bytes;
+# use bytes;
 use re 'taint';
-
-use vars qw{
-  %charsets_for_locale
-};
 
 ###########################################################################
 
@@ -36,7 +32,7 @@ use vars qw{
 #
 # A good listing is in /usr/share/config/charsets from KDE 2.2.1
 #
-%charsets_for_locale = (
+our %charsets_for_locale = (
 
   # Japanese: Peter Evans writes: iso-2022-jp = rfc approved, rfc 1468, created
   # by Jun Murai in 1993 back when he didnt have white hair!  rfc approved.

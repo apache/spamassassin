@@ -20,20 +20,23 @@
 
 Mail::SpamAssassin::Plugin::TxRep - Normalize scores with sender reputation records
 
-
 =head1 SYNOPSIS
 
 The TxRep (Reputation) plugin is designed as an improved replacement of the AWL
-(Auto-Whitelist) plugin. It adjusts the final message spam score by looking up and
-taking in consideration the reputation of the sender.
+(Auto-Whitelist) plugin. It adjusts the final message spam score by looking up 
+and taking in consideration the reputation of the sender.
 
-To try TxRep out, you B<have to> disable the AWL plugin (if present), back up its
-database and add a line loading this module in init.pre (AWL may be enabled in v310.pre):
+To try TxRep out, you B<have to> first disable the AWL plugin (if enabled), and
+back up its database. AWL is loaded in v310.pre and can be disabled by
+commenting out the loadplugin line:
 
  # loadplugin   Mail::SpamAssassin::Plugin::AWL
-   loadplugin   Mail::SpamAssassin::Plugin::TxRep
 
 When AWL is not disabled, TxRep will refuse to run.
+
+TxRep should be enabled by uncommenting the following line in v341.pre:
+
+  loadplugin   Mail::SpamAssassin::Plugin::TxRep
 
 Use the supplied 60_txreputation.cf file or add these lines to a .cf file:
 
@@ -113,12 +116,12 @@ description of the factor below.
 through SpamAssassin's API, AWL adjusts the historical total score of the plain email
 address without IP (and deleted records bound to an IP), but since during the reception 
 new records with IP will be added, the blacklisted entry would cease acting during 
-scanning. TxRep always uses the record of th plain email address without IP together 
+scanning. TxRep always uses the record of the plain email address without IP together 
 with the one bound to an IP address, DKIM signature, or SPF pass (unless the weight 
 factor for the EMAIL reputation is set to zero). AWL uses the score of 100 (resp. -100) 
 for the blacklisting (resp. whitelisting) purposes. TxRep increases the value 
 proportionally to the weight factor of the EMAIL reputation. It is explained in details 
-in the section L</BLACKLISTING / WHITELISTING>. TxRep can blacklist or whitelist also
+in the section L<BLACKLISTING / WHITELISTING>. TxRep can blacklist or whitelist also
 IP addresses, domain names, and dotless HELO names.
 
 7. B<Sender Identification> - AWL identifies a sender on the basis of the email address
@@ -192,12 +195,13 @@ on the reputation checked: EMAIL, EMAIL_IP, IP, DOMAIN, or HELO. The _Y appendix
 ID is used only in the case of dual storage, and takes the form of either _U (for
 user storage reputations), or _G (for global storage reputations).
 
-=cut # ....................................................................
+=cut
+
 package Mail::SpamAssassin::Plugin::TxRep;
 
 use strict;
 use warnings;
-use bytes;
+# use bytes;
 use re 'taint';
 
 use NetAddr::IP 4.000;                          # qw(:upper);
@@ -206,8 +210,7 @@ use Mail::SpamAssassin::Plugin::Bayes;
 use Mail::SpamAssassin::Util qw(untaint_var);
 use Mail::SpamAssassin::Logger;
 
-use vars qw(@ISA);
-@ISA = qw(Mail::SpamAssassin::Plugin);
+our @ISA = qw(Mail::SpamAssassin::Plugin);
 
 
 ###########################################################################
@@ -262,7 +265,8 @@ Note that certain tests are ignored when determining the final message score:
 
  - rules with tflags set to 'noautolearn'
 
-=cut  # ...................................................................
+=cut
+
   push (@cmds, {
     setting     => 'use_txrep',
     default     => 0,
@@ -270,7 +274,6 @@ Note that certain tests are ignored when determining the final message score:
   });
 
 
-# -------------------------------------------------------------------------
 =item B<txrep_factor>
 
  range [0..1]           (default: 0.5)
@@ -290,7 +293,8 @@ long-term mean including also the new unadjusted score; C<factor> = 0 mean
 just use the calculated score, disabling so the score averaging, though still
 recording the reputation to the database.
 
-=cut  # ...................................................................
+=cut
+
   push (@cmds, {
     setting     => 'txrep_factor',
     default     => 0.5,
@@ -303,7 +307,6 @@ recording the reputation to the database.
   });
 
 
-# -------------------------------------------------------------------------
 =item B<txrep_dilution_factor>
 
  range [0.7..1.0]               (default: 0.98)
@@ -334,7 +337,8 @@ lower factors will help the reputation to quicker adapt any modifications. In
 the same time, it will also reduce the impact of the historical reputation
 though.
 
-=cut  # ...................................................................
+=cut
+
   push (@cmds, {
     setting     => 'txrep_dilution_factor',
     default     => 0.98,
@@ -372,7 +376,6 @@ though.
   });
 
 
-# -------------------------------------------------------------------------
 =item B<txrep_learn_penalty>
 
  range [0..200]         (default: 20)
@@ -382,7 +385,8 @@ be added to the total reputation score of the sender, regardless of the real
 spam score. The impact of the penalty will be the smaller the higher is the
 number of messages that the sender already has in the TxRep database.
 
-=cut  # ...................................................................
+=cut
+
   push (@cmds, {
     setting     => 'txrep_learn_penalty',
     default     => 20,
@@ -395,7 +399,6 @@ number of messages that the sender already has in the TxRep database.
   });
 
 
-# -------------------------------------------------------------------------
 =item B<txrep_learn_bonus>
 
  range [0..200]         (default: 20)
@@ -405,7 +408,8 @@ deduced from the total reputation score of the sender, regardless of the real
 spam score. The impact of the penalty will be the smaller the higher is the
 number of messages that the sender already has in the TxRep database.
 
-=cut  # ...................................................................
+=cut
+
   push (@cmds, {
     setting     => 'txrep_learn_bonus',
     default     => 20,
@@ -418,19 +422,19 @@ number of messages that the sender already has in the TxRep database.
   });
 
 
-# -------------------------------------------------------------------------
 =item B<txrep_autolearn>
 
  range [0..5]                   (default: 0)
 
-When SpamAssassin declares a message a clear spam resp. ham during the mesage
+When SpamAssassin declares a message a clear spam resp. ham during the message
 scan, and launches the auto-learn process, sender reputation scores of given
 message will be adjusted by the value of the option L</C<txrep_learn_penalty>>,
 resp. the L</C<txrep_learn_bonus>> in the same way as during the manual learning.
 Value 0 at this option disables the auto-learn reputation adjustment - only the
 score calculated before the auto-learn will be stored to the reputation database.
 
-=cut  # ...................................................................
+=cut
+
   push (@cmds, {
     setting     => 'txrep_autolearn',
     default     => 0,
@@ -443,7 +447,6 @@ score calculated before the auto-learn will be stored to the reputation database
   });
 
 
-# -------------------------------------------------------------------------
 =item B<txrep_track_messages>
 
   0 | 1                 (default: 1)
@@ -454,7 +457,8 @@ to avoid false score adjustments due to repeated scanning of the same message,
 and to allow proper relearning of messages that were either previously wrongly
 learned, or need to be relearned after modifying the learn penalty or bonus.
 
-=cut  # ...................................................................
+=cut
+
   push (@cmds, {
     setting     => 'txrep_track_messages',
     default     => 1,
@@ -462,7 +466,6 @@ learned, or need to be relearned after modifying the learn penalty or bonus.
   });
 
 
-# -------------------------------------------------------------------------
 =item B<txrep_whitelist_out>
 
  range [0..200]         (default: 10)
@@ -479,7 +482,8 @@ reputation happens at every message sent from internal networks, so the more mes
 being sent to the recipient, the better reputation his email address will have.
 
 
-=cut  # ...................................................................
+=cut
+
   push (@cmds, {
     setting     => 'txrep_whitelist_out',
     default     => 10,
@@ -492,7 +496,6 @@ being sent to the recipient, the better reputation his email address will have.
   });
 
 
-# -------------------------------------------------------------------------
 =item B<txrep_ipv4_mask_len>
 
  range [0..32]          (default: 16)
@@ -508,7 +511,8 @@ A value 0 is allowed but is not particularly useful, as it would treat the
 whole internet as a single organization. The number need not be a multiple
 of 8, any split is allowed.
 
-=cut  # ...................................................................
+=cut
+
   push (@cmds, {
     setting     => 'txrep_ipv4_mask_len',
     default     => 16,
@@ -524,7 +528,6 @@ of 8, any split is allowed.
   });
 
 
-# -------------------------------------------------------------------------
 =item B<txrep_ipv6_mask_len>
 
  range [0..128]         (default: 48)
@@ -541,7 +544,8 @@ allowed but is not particularly useful, as it would treat the whole internet
 as a single organization. The number need not be a multiple of 4, any split
 is allowed.
 
-=cut  # ...................................................................
+=cut
+
   push (@cmds, {
     setting     => 'txrep_ipv6_mask_len',
     default     => 48,
@@ -557,7 +561,6 @@ is allowed.
   });
 
 
-# -------------------------------------------------------------------------
 =item B<user_awl_sql_override_username>
 
   string                (default: undefined)
@@ -568,7 +571,8 @@ If this option is set the SQLBasedAddrList module will override the set
 username with the value given.  This can be useful for implementing global
 or group based TxRep databases.
 
-=cut  # ...................................................................
+=cut
+
   push (@cmds, {
     setting     => 'user_awl_sql_override_username',
     default     => '',
@@ -576,7 +580,6 @@ or group based TxRep databases.
   });
 
 
-# -------------------------------------------------------------------------
 =item B<txrep_user2global_ratio>
 
  range [0..10]          (default: 0)
@@ -626,7 +629,9 @@ ID. In such case it is pointless enabling the dual storage, because it would
 maximally lead to two identical global storages in different locations.
 
 This feature is disabled by default.
-=cut  # ...................................................................
+
+=cut
+
   push (@cmds, {
     setting     => 'txrep_user2global_ratio',
     default     => 0,
@@ -639,7 +644,6 @@ This feature is disabled by default.
   });
 
 
-# -------------------------------------------------------------------------
 =item B<auto_whitelist_distinguish_signed>
 
  (default: 1 - enabled)
@@ -648,13 +652,19 @@ Used by the SQLBasedAddrList storage implementation.
 
 If this option is set the SQLBasedAddrList module will keep separate
 database entries for DKIM-validated e-mail addresses and for non-validated
-ones. A pre-requisite when setting this option is that a field awl.signedby
-exists in a SQL table, otherwise SQL operations will fail (which is why we
-need this option at all - for compatibility with pre-3.3.0 database schema).
-A plugin DKIM should also be enabled, as otherwise there is no benefit from
-turning on this option.
+ones. Without this option, or for domains that do not use a DKIM signature,
+the reputation of legitimate email can get mixed with the reputation of
+forgeries. A pre-requisite when setting this option is that a field
+txrep.signedby exists in a SQL table, otherwise SQL operations will fail.
+A DKIM plugin must also be enabled in order for this option to take effect.
+This option is highly recommended. Unless you are using a pre-3.3.0 database
+schema and cannot upgrade, there is no reason to disable this option. If
+you are upgrading from AWL and using a pre-3.3.0 schema, the txrep.signedby
+column will not exist. It is recommended that you add this column, but if
+that is not possible you must set this option to 0 to avoid SQL errors.
 
-=cut  # ...................................................................
+=cut
+
   push (@cmds, {
     setting     => 'auto_whitelist_distinguish_signed',
     default     => 1,
@@ -677,7 +687,8 @@ domains are hopefuly rare, and ask for this kind of treatment anyway.
 
 =back
 
-=cut  # ...................................................................
+=cut
+
   push (@cmds, {
     setting     => 'txrep_spf',
     default     => 1,
@@ -685,7 +696,6 @@ domains are hopefuly rare, and ask for this kind of treatment anyway.
   });
 
 
-# -------------------------------------------------------------------------
 =head2 REPUTATION WEIGHTS
 
 The overall reputation of the sender comprises several elements:
@@ -742,7 +752,8 @@ without regarding the originating IP has some sense too.
 
 We recommend using a relatively low value for this partial reputation.
 
-=cut  # ...................................................................
+=cut
+
   push (@cmds, {
     setting     => 'txrep_weight_email',
     default     => 3,
@@ -754,7 +765,6 @@ We recommend using a relatively low value for this partial reputation.
     }
   });
 
-# -------------------------------------------------------------------------
 =item B<txrep_weight_email_ip>
 
  range [0..10]          (default: 10)
@@ -776,7 +786,8 @@ the sender more reliably than the IP address (which can also vary).
 This is by design the most relevant reputation, and its weight should be kept
 high.
 
-=cut  # ...................................................................
+=cut
+
   push (@cmds, {
     setting     => 'txrep_weight_email_ip',
     default     => 10,
@@ -788,7 +799,6 @@ high.
     }
   });
 
-# -------------------------------------------------------------------------
 =item B<txrep_weight_domain>
 
  range [0..10]          (default: 2)
@@ -815,7 +825,8 @@ because both ham and spam may be sent by their users.
 The default value is set relatively low. Higher weight values may be useful,
 but we recommend caution and observing the scores before increasing it.
 
-=cut  # ...................................................................
+=cut
+
   push (@cmds, {
     setting     => 'txrep_weight_domain',
     default     => 2,
@@ -827,7 +838,6 @@ but we recommend caution and observing the scores before increasing it.
     }
   });
 
-# -------------------------------------------------------------------------
 =item B<txrep_weight_ip>
 
  range [0..10]          (default: 4)
@@ -841,7 +851,8 @@ there may be cases when the same IP address hosts both spammers and acceptable
 senders (for example the marketing department of a company sends you spam, but
 you still need to get messages from their billing address).
 
-=cut  # ...................................................................
+=cut
+
   push (@cmds, {
     setting     => 'txrep_weight_ip',
     default     => 4,
@@ -853,7 +864,6 @@ you still need to get messages from their billing address).
     }
   });
 
-# -------------------------------------------------------------------------
 =item B<txrep_weight_helo>
 
  range [0..10]          (default: 0.5)
@@ -872,7 +882,8 @@ some of the HELO names.
 This option is still considered experimental, hence the low weight value, but after
 some testing it could be likely at least slightly increased.
 
-=cut  # ...................................................................
+=cut
+
   push (@cmds, {
     setting     => 'txrep_weight_helo',
     default     => 0.5,
@@ -885,7 +896,6 @@ some testing it could be likely at least slightly increased.
   });
 
 
-# -------------------------------------------------------------------------
 =back
 
 =head1 ADMINISTRATOR SETTINGS
@@ -903,7 +913,8 @@ user's C<user_prefs> file.
 
 Select alternative database factory module for the TxRep database.
 
-=cut  # ...................................................................
+=cut
+
   push (@cmds, {
     setting      => 'txrep_factory',
     is_admin     => 1,
@@ -912,7 +923,6 @@ Select alternative database factory module for the TxRep database.
   });
 
 
-# -------------------------------------------------------------------------
 =item B<auto_whitelist_path /path/filename>
 
  (default: ~/.spamassassin/tx-reputation)
@@ -922,7 +932,8 @@ has their own reputation database in their C<~/.spamassassin> directory with
 mode 0700.  For system-wide SpamAssassin use, you may want to share this
 across all users.
 
-=cut  # ...................................................................
+=cut
+
   push (@cmds, {
     setting      => 'auto_whitelist_path',
     is_admin     => 1,
@@ -937,7 +948,6 @@ across all users.
   });
 
 
-# -------------------------------------------------------------------------
 =item B<auto_whitelist_db_modules Module ...>
 
  (default: see below)
@@ -954,7 +964,8 @@ ie. a space-separated list of Perl module names.  The default is:
 
 NDBM_File is not supported (see SpamAssassin bug 4353).
 
-=cut  # ...................................................................
+=cut
+
   push (@cmds, {
     setting      => 'auto_whitelist_db_modules',
     is_admin     => 1,
@@ -963,7 +974,6 @@ NDBM_File is not supported (see SpamAssassin bug 4353).
   });
 
 
-# -------------------------------------------------------------------------
 =item B<auto_whitelist_file_mode>
 
  (default: 0700)
@@ -974,7 +984,8 @@ Make sure you specify this using the 'x' mode bits set, as it may also be used
 to create directories.  However, if a file is created, the resulting file will
 not have any execute bits set (the umask is set to 0111).
 
-=cut  # ...................................................................
+=cut
+
   push (@cmds, {
     setting      => 'auto_whitelist_file_mode',
     is_admin     => 1,
@@ -990,7 +1001,6 @@ not have any execute bits set (the umask is set to 0111).
   });
 
 
-# -------------------------------------------------------------------------
 =item B<user_awl_dsn DBI:databasetype:databasename:hostname:port>
 
 Used by the SQLBasedAddrList storage implementation.
@@ -998,7 +1008,8 @@ Used by the SQLBasedAddrList storage implementation.
 This will set the DSN used to connect.  Example:
 C<DBI:mysql:spamassassin:localhost>
 
-=cut  # ...................................................................
+=cut
+
   push (@cmds, {
     setting      => 'user_awl_dsn',
     is_admin     => 1,
@@ -1006,14 +1017,14 @@ C<DBI:mysql:spamassassin:localhost>
   });
 
 
-# -------------------------------------------------------------------------
 =item B<user_awl_sql_username username>
 
 Used by the SQLBasedAddrList storage implementation.
 
 The authorized username to connect to the above DSN.
 
-=cut  # ...................................................................
+=cut
+
   push (@cmds, {
     setting      => 'user_awl_sql_username',
     is_admin     => 1,
@@ -1021,14 +1032,14 @@ The authorized username to connect to the above DSN.
   });
 
 
-# -------------------------------------------------------------------------
 =item B<user_awl_sql_password password>
 
 Used by the SQLBasedAddrList storage implementation.
 
 The password for the database username, for the above DSN.
 
-=cut  # ...................................................................
+=cut
+
   push (@cmds, {
     setting      => 'user_awl_sql_password',
     is_admin     => 1,
@@ -1036,7 +1047,6 @@ The password for the database username, for the above DSN.
   });
 
 
-# -------------------------------------------------------------------------
 =item B<user_awl_sql_table tablename>
 
  (default: txrep)
@@ -1047,7 +1057,8 @@ The table name where reputation is to be stored in, for the above DSN.
 
 =back
 
-=cut  # ...................................................................
+=cut
+
   push (@cmds, {
     setting      => 'user_awl_sql_table',
     is_admin     => 1,
@@ -1125,8 +1136,6 @@ sub _fn_envelope {
 }
 
 
-
-# -------------------------------------------------------------------------
 =head1 BLACKLISTING / WHITELISTING
 
 When asked by SpamAssassin to blacklist or whitelist a user, the TxRep
@@ -1163,6 +1172,7 @@ In case of dual storage, the black/whitelisting is performed only in the
 default storage.
 
 =cut
+
 ######################################################## plugin hooks #####
 sub blacklist_address {my $self=shift; return $self->_fn_envelope(@_,  100, "blacklisting address");}
 sub whitelist_address {my $self=shift; return $self->_fn_envelope(@_, -100, "whitelisting address");}
@@ -1170,7 +1180,6 @@ sub remove_address    {my $self=shift; return $self->_fn_envelope(@_,undef, "rem
 ###########################################################################
 
 
-# -------------------------------------------------------------------------
 =head1 REPUTATION LOGICS
 
 1. The most significant sender identificator is equally as at AWL, the
@@ -1206,6 +1215,7 @@ sub remove_address    {my $self=shift; return $self->_fn_envelope(@_,undef, "rem
     IP field) for the standalone IP reputation
 
 =cut
+
 ###########################################################################
 sub check_senders_reputation {
 ###########################################################################
@@ -1218,6 +1228,7 @@ sub check_senders_reputation {
   my $autolearn = defined $self->{autolearn};
   $self->{last_pms} = $self->{autolearn} = undef;
 
+  # Cases where we would not be able to use TxRep
   return 0 unless ($self->{conf}->{use_txrep});
   if ($self->{conf}->{use_auto_whitelist}) {
     warn("TxRep: cannot run when Auto-Whitelist is enabled. Please disable it!\n");
@@ -1246,13 +1257,17 @@ sub check_senders_reputation {
   my $domain = $from;
   $domain =~ s/^.+@//;
 
+  # Find the last untrusted relay and populate helo and original IP
   my ($origip, $helo);
   if (defined $pms->{relays_trusted} || defined $pms->{relays_untrusted}) {
     my $trusteds = @{$pms->{relays_trusted}};
     foreach my $rly ( @{$pms->{relays_trusted}}, @{$pms->{relays_untrusted}} ) {
 	# Get the last found HELO, regardless of private/public or trusted/untrusted
 	# Avoiding a redundant duplicate entry if HELO is equal/similar to another identificator
-	if (defined $rly->{helo} && $rly->{helo} !~ /^\[?$rly->{ip}\]?$/ && $rly->{helo} !~ /$domain/i && $rly->{helo} !~ /$from/i ) {
+	if (defined $rly->{helo} &&
+            $rly->{helo} !~ /^\[?\Q$rly->{ip}\E\]?$/ &&
+            $rly->{helo} !~ /^\Q$domain\E$/i &&
+            $rly->{helo} !~ /^\Q$from\E$/i ) {
 	    $helo   = $rly->{helo};
 	}
 	# use only trusted ID, but use the first untrusted IP (if available) (AWL bug 6908)
@@ -1264,6 +1279,7 @@ sub check_senders_reputation {
     }
   }
 
+  # Look for previous scores of the same message, for instance when doing re-learning
   if ($self->{conf}->{txrep_track_messages}) {
     if ($msg_id) {
         my $msg_rep = $self->check_reputations($pms, 'MSG_ID', $msg_id, undef, $date, undef);
@@ -1304,7 +1320,10 @@ sub check_senders_reputation {
     }
   }
 
+  # Get the signing domain
   my $signedby = ($self->{conf}->{auto_whitelist_distinguish_signed})? $pms->get_tag('DKIMDOMAIN') : undef;
+
+  # Summary of all information we've gathered so far
   dbg("TxRep: active, %s pre-score: %s, autolearn score: %s, IP: %s, address: %s %s",
     $msg_id       || '',
     $pms->{score} || '?',
@@ -1326,28 +1345,41 @@ sub check_senders_reputation {
   my $totalweight      = 0;
   $self->{totalweight} = $totalweight;
 
-                     $delta += $self->check_reputations($pms, 'EMAIL_IP', $from,   $ip,   $signedby, $msgscore);
-  if ($domain)      {$delta += $self->check_reputations($pms, 'DOMAIN',   $domain, $ip,   $signedby, $msgscore);}
-  if ($helo)        {$delta += $self->check_reputations($pms, 'HELO',     $helo,   undef, 'HELO',    $msgscore);}
+  # Get current reputation info
+  $delta += $self->check_reputations($pms, 'EMAIL_IP', $from, $ip, $signedby, $msgscore);
+
+  if ($domain) {
+    $delta += $self->check_reputations($pms, 'DOMAIN', $domain, $ip, $signedby, $msgscore);
+  }
+  if ($helo) {
+    $delta += $self->check_reputations($pms, 'HELO', $helo, undef, 'HELO', $msgscore);
+  }
   if ($origip) {
-    if (!$signedby) {$delta += $self->check_reputations($pms, 'EMAIL',    $from,   undef, undef,     $msgscore);}
-                     $delta += $self->check_reputations($pms, 'IP',       $origip, undef, undef,     $msgscore);
+    if (!$signedby) {
+      $delta += $self->check_reputations($pms, 'EMAIL', $from, undef, undef, $msgscore);
+    }
+    $delta += $self->check_reputations($pms, 'IP', $origip, undef, undef, $msgscore);
   }
 
+  # Learn against this message and store reputation
   if (!defined $self->{learning}) {
     $delta = ($self->{totalweight})? $self->{conf}->{txrep_factor} * $delta / $self->{totalweight}  :  0;
     if ($delta) {
-        $pms->got_hit("TXREP", "TXREP: ", ruletype => 'eval', score => sprintf("%0.3f", $delta));
+      $pms->got_hit("TXREP", "TXREP: ", ruletype => 'eval', score => sprintf("%0.3f", $delta));
     }
     $msgscore += $delta;
     if (defined $pms->{score}) {
-        dbg("TxRep: post-TxRep score: %.3f", $pms->{score});
+      dbg("TxRep: post-TxRep score: %.3f", $pms->{score});
     }
   }
+  # Track message ID
   if ($self->{conf}->{txrep_track_messages} && $msg_id) {
     $self->check_reputations($pms, 'MSG_ID', $msg_id, undef, $date, $msgscore);
   }
-  if (!defined $self->{txKeepStoreTied}) {$self->finish();}
+  # Close any open resources
+  if (!defined $self->{txKeepStoreTied}) {
+    $self->finish();
+  }
 
   return 0;
 }
@@ -1361,14 +1393,16 @@ sub check_reputations {
 
   if ($self->open_storages()) {
     if ($self->{conf}->{txrep_user2global_ratio} && $self->{user_storage} != $self->{global_storage}) {
-        my $user   = $self->check_reputation('user_storage',  @_);
-        my $global = $self->check_reputation('global_storage',@_);
+      my $user   = $self->check_reputation('user_storage',  @_);
+      my $global = $self->check_reputation('global_storage',@_);
 
-        $delta = (defined $user && $user==$user) ?
-            ( $self->{conf}->{txrep_user2global_ratio} * $user + $global ) / ( 1 + $self->{conf}->{txrep_user2global_ratio} ) :
-            $global;
+      if (defined $user and $user == $user) {
+        $delta = ( $self->{conf}->{txrep_user2global_ratio} * $user + $global ) / ( 1 + $self->{conf}->{txrep_user2global_ratio} );
+      } else {
+        $delta = $global;
+      }
     } else {
-        $delta = $self->check_reputation(undef,@_);
+      $delta = $self->check_reputation(undef,@_);
     }
   }
   return $delta;
@@ -1382,6 +1416,29 @@ sub check_reputation {
 
   my $delta  = 0;
   my $weight = ($key eq 'MSG_ID')? 1 : eval('$pms->{main}->{conf}->{txrep_weight_'.lc($key).'}');
+
+#  {
+#    #Bug 7164, trying to find out reason for these: _WARN: Use of uninitialized value $msgscore in addition (+) at /usr/share/perl5/vendor_perl/Mail/SpamAssassin/Plugin/TxRep.pm line 1415.
+#    no warnings;
+#
+#    unless (defined $msgscore) {
+#      #Output some params and the calling function so we can identify more about this bug
+#      dbg("TxRep: MsgScore Undefined (bug 7164) - check_reputation Parameters: self: $self storage: $storage pms: $pms, key: $key, id: $id, ip: $ip, signedby: $signedby, msgscore: $msgscore");
+#      dbg("TxRep: MsgScore Undefined (bug 7164) - weight: $weight");
+#
+#      my ($package, $filename, $line) = caller();
+#
+#      chomp($package);
+#      chomp($filename);
+#      chomp($line);
+#
+#      dbg("TxRep: MsgScore Undefined (bug 7164) - Caller Info: Package: $package - Filename: $filename - Line: $line");
+#
+#      #Define $msgscore as a triage to hide warnings while we find the root cause
+#      #$msgscore = 0;
+#    }
+#  }
+
 
   if (defined $weight && $weight) {
     my $meanrep;
@@ -1410,11 +1467,16 @@ sub check_reputation {
         $self->{totalweight} += $weight;
         if ($key eq 'MSG_ID' && $self->count() > 0) {
             $delta = $self->total() / $self->count();
-	    $pms->set_tag('TXREP'.$tag_id,              sprintf("%2.1f",$delta));
+	    $pms->set_tag('TXREP'.$tag_id,              sprintf("%2.1f", $delta));
         } elsif (defined $self->total()) {
-            $delta = ($self->total() + $msgscore) / (1 + $self->count()) - $msgscore;
+            #Bug 7164 - $msgscore undefined
+            if (defined $msgscore) {
+              $delta = ($self->total() + $msgscore) / (1 + $self->count()) - $msgscore;
+            } else {
+              $delta = ($self->total()) / (1 + $self->count());
+            }
 
-            $pms->set_tag('TXREP_'.$tag_id,             sprintf("%2.1f",$delta));
+            $pms->set_tag('TXREP_'.$tag_id,             sprintf("%2.1f", $delta));
             if (defined $meanrep) {
                 $pms->set_tag('TXREP_'.$tag_id.'_MEAN', sprintf("%2.1f", $meanrep));
             }
@@ -1448,7 +1510,9 @@ sub check_reputation {
         $self->{checker}->remove_entry($self->{entry}); #forgetting the message ID
     }
   }
-  if (defined $storage) {$self->{checker} = $self->{default_storage};}
+  if (!defined $storage) {
+    $self->{checker} = $self->{default_storage};
+  }
 
   return ($weight || 0) * ($delta || 0);
 }
@@ -1566,7 +1630,10 @@ sub open_storages {
 ###########################################################################
   my $self = shift;
 
+  # Enabled per bug 7191 comment 18
   return 1 unless (!defined $self->{default_storage});
+
+  return 1 if defined ($self->{checker});
 
   my $factory;
   if ($self->{main}->{pers_addr_list_factory}) {
@@ -1594,7 +1661,7 @@ sub open_storages {
 	# TODO: add an a method to the handler class instead
 	my ($storage_type, $is_global);
 	
-	if (ref($factory) =~ /SQLasedAddrList/) {
+	if (ref($factory) =~ /SQLBasedAddrList/) {
 	    $is_global    = defined $self->{conf}->{user_awl_sql_override_username};
 	    $storage_type = 'SQL';
 	    if ($is_global && $self->{conf}->{user_awl_sql_override_username} eq $self->{main}->{username}) {
@@ -1656,8 +1723,8 @@ sub finish {
     $self->{global_storage} = undef;
   } elsif (defined $self->{default_storage}) {
     $self->{default_storage}->finish();
-    $self->{default_storage} = $self->{checker} = undef;
   }
+ $self->{default_storage} = $self->{checker} = undef;
  $self->{factory} = undef;
 }
 
@@ -1724,8 +1791,6 @@ sub pack_addr {
 }
 
 
-
-# -------------------------------------------------------------------------
 =head1 LEARNING SPAM / HAM
 
 When SpamAssassin is told to learn (or relearn) a given message as spam or
@@ -1743,12 +1808,13 @@ does not detect when you learn the message repeatedly. It will add/subtract
 the penalty/bonus score each time the message is fed to the spam learner.
 
 =cut
+
 ######################################################### plugin hook #####
 sub learner_new {
 ###########################################################################
   my ($self) = @_;
 
-  $self->{txKeepStoreTied} = 1;
+  $self->{txKeepStoreTied} = undef;
   return $self;
 }
 
@@ -1827,7 +1893,6 @@ sub learner_close {
 }
 
 
-# -------------------------------------------------------------------------
 =head1 OPTIMIZING TXREP
 
 TxRep can be optimized for speed and simplicity, or for the precision in
@@ -1839,8 +1904,7 @@ C<user_prefs>. Disabling TxRep will not destroy the database, so it can be
 re-enabled any time later again.
 
 On many systems, SQL-based storage may perform faster than the default
-Berkeley DB storage, so you should consider setting it up. See the section
-L</SQL-BASED STORAGE> for instructions.
+Berkeley DB storage, so you should consider setting it up.
 
 Then there are multiple settings that can reduce the number of records stored
 in the database, hence reducing the size of the storage, and also the processing

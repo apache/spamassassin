@@ -17,10 +17,12 @@ use APR::Pool     ();    # cleanup_register
 use APR::SockAddr ();
 use APR::Socket   ();
 use APR::Status   ();
+use Apache::Test;
+use constant APACHE24   => have_min_apache_version('2.4.0');
 
 eval { use Time::HiRes qw(time); };
 
-use vars qw($spamtest);
+our $spamtest;
 
 use Mail::SpamAssassin ();
 use Mail::SpamAssassin::Message ();
@@ -159,8 +161,8 @@ sub out     { $_[0]->{out} }        # -: a
 
 sub _server      { $_[0]->c->base_server }          # -: a
 sub _remote_host { $_[0]->c->get_remote_host }      # -: a
-sub _remote_ip   { $_[0]->c->remote_ip }            # -: a
-sub _remote_port { $_[0]->c->remote_addr->port }    # -: a
+sub _remote_ip   { APACHE24 ? $_[0]->c->client_ip : $_[0]->c->remote_ip; }            # -: a
+sub _remote_port { APACHE24 ? $_[0]->c->client_addr->port : $_[0]->c->remote_addr->port }    # -: a
 
 
 sub send_buffer { # -: A
@@ -379,10 +381,10 @@ See <http://bugzilla.spamassassin.org/>.
 
 =head1 SEE ALSO
 
-L<httpd(8)>,
-L<spamd(1)>,
-L<apache-spamd(1)>,
-L<Mail::SpamAssassin::Spamd::Apache2::Config(3)>
+C<httpd(8)>,
+C<spamd(1)>,
+C<apache-spamd(1)>,
+C<Mail::SpamAssassin::Spamd::Apache2::Config(3)>
 
 =cut
 

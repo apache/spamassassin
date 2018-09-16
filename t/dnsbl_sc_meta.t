@@ -3,15 +3,10 @@
 use lib '.'; use lib 't';
 use SATest; sa_t_init("dnsbl_sc_meta");
 
-use constant TEST_ENABLED => conf_bool('run_net_tests');
-use constant DO_RUN => TEST_ENABLED && can_use_net_dns_safely();
-use Test;
-
-BEGIN {
-  plan tests => (DO_RUN ? 2 : 0),
-};
-
-exit unless (DO_RUN);
+use Test::More;
+plan skip_all => "Net tests disabled" unless conf_bool('run_net_tests');
+plan skip_all => "Can't use Net::DNS Safely" unless can_use_net_dns_safely();
+plan tests => 2;
 
 # ---------------------------------------------------------------------------
 

@@ -31,23 +31,13 @@ package Mail::SpamAssassin::Util::DependencyInfo;
 
 use strict;
 use warnings;
-use bytes;
+# use bytes;
 use re 'taint';
 
-use vars qw (
-  @MODULES @OPTIONAL_MODULES $EXIT_STATUS $WARNINGS @OPTIONAL_BINARIES @BINARIES
-);
+our ( $EXIT_STATUS, $WARNINGS );
 
-my $have_sha  = eval { require Digest::SHA  };
-my $have_sha1 = eval { require Digest::SHA1 };
-
-@MODULES = (
-$have_sha1 ? {
-  'module' => 'Digest::SHA1',
-  'version' => 0,
-  'desc' => 'The Digest::SHA1 module is used as a cryptographic hash for some
-  tests and the Bayes subsystem.  It is also required by the Razor2 plugin.',
-} : {
+our @MODULES = (
+{
   'module' => 'Digest::SHA',
   'version' => 0,
   'desc' => 'The Digest::SHA module is used as a cryptographic hash for some
@@ -102,15 +92,12 @@ $have_sha1 ? {
 },
 );
 
-my @OPTIONAL_MODULES = (
-$have_sha ? {
+our @OPTIONAL_MODULES = (
+{
   'module' => 'Digest::SHA1',
   'version' => 0,
-  'desc' => 'The Digest::SHA1 module is required by the Razor2 plugin.',
-} : {
-  'module' => 'Digest::SHA',
-  'version' => 0,
-  'desc' => 'The Digest::SHA module is required by the DKIM plugin.',
+  'desc' => 'The Digest::SHA1 module is still required by the Razor2 plugin.
+  Other modules prefer Digest::SHA, which is a Perl base module.',
 },
 {
   module => 'MIME::Base64',
@@ -190,7 +177,7 @@ $have_sha ? {
 },
 {
   module => 'IO::Socket::SSL',
-  version => 0,
+  version => 1.76,
   desc => 'If you wish to use SSL encryption to communicate between spamc and
   spamd (the --ssl option to spamd), you need to install this
   module. (You will need the OpenSSL libraries and use the
@@ -270,18 +257,26 @@ $have_sha ? {
   check for both Net::DNS and Net::DNS::Nameserver.  However, 
   Net::DNS::Nameserver is only used in make test as of June 2014.',
 },
+{
+  module => 'BSD::Resource',
+  version => 0,
+  desc => 'BSD::Resource provides BSD process resource limit and priority 
+  functions.  It is used by the optional ResourceLimits Plugin.',
+},
 );
 
-my @BINARIES = ();
+our @BINARIES = ();
 
 my $lwp_note = "   Sa-update will use curl, wget or fetch to download updates.  
    Because perl module LWP does not support IPv6, sa-update as of
    3.4.0 will use these standard programs to download rule updates
    leaving LWP as a fallback if none of the programs are found.
 
-   *IMPORTANT NOTE*: You only need one of these programs.";
+   *IMPORTANT NOTE*: You only need one of these programs 
+       It's only a concern if you are warned about all 3 
+       i.e. (curl, wget & fetch) missing";
 
-my @OPTIONAL_BINARIES = (
+our @OPTIONAL_BINARIES = (
 {
   binary => 'gpg',
   version => '0',
@@ -315,6 +310,13 @@ my @OPTIONAL_BINARIES = (
   version => '0',
   
   desc => $lwp_note,
+},
+{
+  binary => 're2c',
+  version => '0',
+
+  desc => 'The "re2c" program is used by sa-compile to compile rules 
+  for regular expressions to speed up scanning.',
 }
 );
 

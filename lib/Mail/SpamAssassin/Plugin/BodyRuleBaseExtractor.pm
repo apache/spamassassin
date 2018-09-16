@@ -37,11 +37,10 @@ use Data::Dumper;
 
 use strict;
 use warnings;
-use bytes;
+# use bytes;
 use re 'taint';
 
-use vars qw(@ISA);
-@ISA = qw(Mail::SpamAssassin::Plugin);
+our @ISA = qw(Mail::SpamAssassin::Plugin);
 
 use constant DEBUG_RE_PARSING => 0;     # noisy!
 
@@ -528,8 +527,8 @@ sub extract_hints {
   while ( $nread=read(IN,$inbuf,16384) ) { $fullstr .= $inbuf }
   defined $nread  or die "error reading from pipe: $!";
 
-  close IN      or die "error closing pipe: $!";
   unlink $tmpf  or die "cannot unlink $tmpf: $!";
+  close IN      or die "error closing pipe: $!";
   defined $fullstr  or warn "empty result from a pipe";
 
   # now parse the -Mre=debug output.

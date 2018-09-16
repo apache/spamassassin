@@ -46,14 +46,13 @@ use Mail::SpamAssassin::Logger;
 use IO::Socket;
 use strict;
 use warnings;
-use bytes;
+# use bytes;
 use re 'taint';
 
 use constant HAS_NET_DNS => eval { require Net::DNS; };
 use constant HAS_NET_SMTP => eval { require Net::SMTP; };
 
-use vars qw(@ISA);
-@ISA = qw(Mail::SpamAssassin::Plugin);
+our @ISA = qw(Mail::SpamAssassin::Plugin);
 
 sub new {
   my $class = shift;

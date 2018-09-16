@@ -64,13 +64,13 @@ AC_CHECK_LIB(socket, socket)
 SSLLIBS=""
 SSLCFLAGS=""
 if test yes = "$sa_ssl_enabled"; then
-	AC_CHECK_LIB(crypto, CRYPTO_lock,[SSLLIBS="-lcrypto $SSLLIBS"])
+	AC_CHECK_LIB(crypto, CRYPTO_malloc,[SSLLIBS="-lcrypto $SSLLIBS"])
 	AC_CHECK_LIB(ssl, SSL_CTX_free,[SSLLIBS="-lssl $SSLLIBS"],,-lcrypto)
 
 	# before defining SPAMC_SSL check that all its requirements are
 	# actually available
 	if test yes = "$ac_cv_header_openssl_crypto_h" && \
-	   test yes = "$ac_cv_lib_crypto_CRYPTO_lock" && \
+	   test yes = "$ac_cv_lib_crypto_CRYPTO_malloc" && \
 	   test yes = "$ac_cv_lib_ssl_SSL_CTX_free"; then
 		SSLCFLAGS="-DSPAMC_SSL"
 	else

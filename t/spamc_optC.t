@@ -3,9 +3,9 @@
 use lib '.'; use lib 't';
 use SATest; sa_t_init("spamc_optC");
 
-use Test; plan tests => $SKIP_SPAMC_TESTS ? 0 : 9;
-
-exit if $SKIP_SPAMC_TESTS;
+use Test::More;
+plan skip_all => "No SPAMC exe" if $SKIP_SPAMC_TESTS;
+plan tests => 9;
 
 # ---------------------------------------------------------------------------
 

@@ -77,7 +77,7 @@ package Mail::SpamAssassin::Plugin::DCC;
 
 use strict;
 use warnings;
-use bytes;
+# use bytes;
 use re 'taint';
 
 use Mail::SpamAssassin::Plugin;
@@ -88,8 +88,7 @@ use Mail::SpamAssassin::Util qw(untaint_var untaint_file_path
 use Errno qw(ENOENT EACCES);
 use IO::Socket;
 
-use vars qw(@ISA);
-@ISA = qw(Mail::SpamAssassin::Plugin);
+our @ISA = qw(Mail::SpamAssassin::Plugin);
 
 our $io_socket_module_name;
 BEGIN {
@@ -868,6 +867,10 @@ sub ask_dcc {
 	# learn or report spam
 	unshift(@opts, '-t', 'many');
       }
+      if ($conf->{dcc_home}) {
+        # set home directory explicitly
+        unshift(@opts, '-h', $conf->{dcc_home});
+      };
 
       defined $path  or die "no dcc_path found\n";
       dbg("$tag opening pipe to " .

@@ -28,17 +28,8 @@ BEGIN {
 
 our $RUN_THIS_TEST;
 
-use Test;
-BEGIN {
-  $RUN_THIS_TEST = conf_bool('run_rule_name_tests');
-
-  plan tests => 0  if !$RUN_THIS_TEST;
-};
-
-if (!$RUN_THIS_TEST) {
-  print "NOTE: this test requires 'run_rule_name_tests' set to 'y'.\n";
-  exit;
-}
+use Test::More;
+plan skip_all => "This test requires 'run_rule_name_tests' set to 'y'." unless conf_bool('run_rule_name_tests');
 
 use vars qw(%patterns %anti_patterns);
 
@@ -77,12 +68,9 @@ for my $test (@tests) {
 { # couldn't call Test::plan in a BEGIN phase, the %patterns and %anti_patterns
   # must be assembled first in order to get the planned test count
 
-  plan tests => scalar(keys %anti_patterns) + scalar(keys %patterns),
+  plan tests => scalar(keys %anti_patterns) + scalar(keys %patterns);
 
-  onfail => sub {
-      warn "\n\n   Note: rule_name failures may be only cosmetic" .
-      "\n        but must be fixed before release\n\n";
-  };
+  diag "Note: rule_name failures may be only cosmetic but must be fixed before release";
 };
 
 # ---------------------------------------------------------------------------

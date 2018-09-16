@@ -1,0 +1,33 @@
+From build/README:
+
+- Rule Source is only in trunk.  If you are building a branch, checkout
+  trunk as well and symlink it, i.e. rulesrc -> ../trunk/rulesrc/
+
+- t.rule Source is only in trunk.  If you are building a branch, checkout
+  trunk as well and symlink it, i.e. t.rules -> ../trunk/t.rules/
+
+- Rules are ONLY published from trunk.  Rule development should use plugin
+  and version conditions to make it so one ruleset works on all modern
+  versions of SA. If you are building a branch, checkout trunk as well and
+  symlink the rules from trunk, i.e. rules -> ../trunk/rules/
+
+  With the rules in trunk symlinked, you can expect MANIFEST warnings when
+  running things such as make distclean such as:
+
+    No such file: rules/20_aux_tlds.cf
+    No such file: rules/active.list
+    No such file: rules/init.pre
+    No such file: rules/languages
+    No such file: rules/local.cf
+    No such file: rules/regression_tests.cf
+    No such file: rules/sa-update-pubkey.txt
+    No such file: rules/user_prefs.template
+    No such file: rules/v310.pre
+    No such file: rules/v312.pre
+    No such file: rules/v320.pre
+    No such file: rules/v330.pre
+    No such file: rules/v340.pre
+    No such file: rules/v341.pre
+    No such file: rules/v342.pre
+
+  NOTE: Don't remove the lines from the MANIFEST though!

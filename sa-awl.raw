@@ -16,7 +16,7 @@ use Config;
 
 BEGIN {                          # see comments in "spamassassin.raw" for doco
   my @bin = File::Spec->splitpath($0);
-  my $bin = ($bin[0] ? File::Spec->catpath(@bin[0..1]) : $bin[1])
+  my $bin = ($bin[0] ? File::Spec->catpath(@bin[0..1], '') : $bin[1])
             || File::Spec->curdir;
 
   if (-e $bin.'/lib/Mail/SpamAssassin.pm'
@@ -47,10 +47,11 @@ usage: sa-awl [--clean] [--min n] [dbfile]
 
 use Fcntl;
 use Getopt::Long;
+use POSIX qw(locale_h setsid sigprocmask _exit);
 
-use vars qw(
-		$opt_clean $opt_min $opt_help
-	);
+POSIX::setlocale(LC_TIME,'C');
+
+our ( $opt_clean, $opt_min, $opt_help );
 
 GetOptions(
   'clean'		=> \$opt_clean,

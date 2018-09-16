@@ -45,11 +45,10 @@ use Mail::SpamAssassin::Logger;
 use Mail::SpamAssassin::Timeout;
 use strict;
 use warnings;
-use bytes;
+# use bytes;
 use re 'taint';
 
-use vars qw(@ISA);
-@ISA = qw(Mail::SpamAssassin::Plugin);
+our @ISA = qw(Mail::SpamAssassin::Plugin);
 
 sub new {
   my $class = shift;
@@ -368,11 +367,11 @@ sub plugin_revoke {
 
   if ($self->razor2_access($options->{text}, 'revoke', undef)) {
     $options->{revoke}->{revoke_available} = 1;
-    dbg('reporter: spam revoked from Razor');
+    info('reporter: spam revoked from Razor');
     $options->{revoke}->{revoke_return} = 1;
   }
   else {
-    dbg('reporter: could not revoke spam from Razor');
+    info('reporter: could not revoke spam from Razor');
   }
 }
 

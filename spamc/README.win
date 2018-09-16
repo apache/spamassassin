@@ -3,7 +3,11 @@ Building spamd/spamc under Windows
 
 Spamd currently does not run under Windows, but spamc does.
 
-Spamd does work when built and run in the Cygwin unix emulation
+With SpamAssassin 3.4.2, spamd has been made available for Windows. Note
+that this is still experimental. In terms of stability and perfomance it
+heavily depends on which Perl distribution and/or module versions you
+are using. So do not use it in a production environment. Alternatively,
+spamd also works when built and run in the Cygwin Unix emulation
 environment, and a pure Windows spamc can be used with it. You can also
 run a pure Windows spamc that communicates with spamd running on any
 network accessible computer. The unix sockets option is not supported
@@ -27,8 +31,7 @@ suitable C compiler.
 
 To build SpamAssassin you must have installed a Windows version of Perl
 and the modules that are listed as required in the general SpamAssassin
-documentation. So far the only Windows version of perl this has been
-tested with is ActivePerl.
+documentation.
 
 Building spamc for Windows has been tested with Microsoft Visual C++ 6.0
 and with Microsoft Visual C++ Toolkit 2003. It will probably just work

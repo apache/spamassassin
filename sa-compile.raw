@@ -25,15 +25,19 @@ my $PREFIX          = '@@PREFIX@@';             # substituted at 'make' time
 my $DEF_RULES_DIR   = '@@DEF_RULES_DIR@@';      # substituted at 'make' time
 my $LOCAL_RULES_DIR = '@@LOCAL_RULES_DIR@@';    # substituted at 'make' time
 my $LOCAL_STATE_DIR = '@@LOCAL_STATE_DIR@@';    # substituted at 'make' time
+my $RE2C_BIN        = '@@RE2C_BIN@@';           # substituted at 'make' time
 use lib '@@INSTALLSITELIB@@';                   # substituted at 'make' time
 
 use Errno qw(EBADF);
 use File::Spec;
 use Config;
+use POSIX qw(locale_h setsid sigprocmask _exit);
+
+POSIX::setlocale(LC_TIME,'C');
 
 BEGIN {                          # see comments in "spamassassin.raw" for doco
   my @bin = File::Spec->splitpath($0);
-  my $bin = ($bin[0] ? File::Spec->catpath(@bin[0..1]) : $bin[1])
+  my $bin = ($bin[0] ? File::Spec->catpath(@bin[0..1], '') : $bin[1])
             || File::Spec->curdir;
 
   if (-e $bin.'/lib/Mail/SpamAssassin.pm'
@@ -65,7 +69,7 @@ use File::Path;
 use Pod::Usage;
 use Data::Dumper;
 
-use vars qw( %opt );
+our %opt;
 Mail::SpamAssassin::Util::clean_path_in_taint_mode();
 untaint_var( \%ENV );
 
@@ -108,8 +112,8 @@ if ($@) {
     or die "error writing: $!";
   exit 1;
 }
-unless (qx(re2c -V)) {
-  print "$0 requires re2c for proper operation.\n"
+unless (qx($RE2C_BIN -V)) {
+  print "$0 requires $RE2C_BIN for proper operation.\n"
     or die "error writing: $!";
   exit 1;
 }
@@ -283,8 +287,8 @@ sub compile_base_strings {
     run(get_perl()." Makefile.PL ".
           "PREFIX=$dirpath/ignored INSTALLSITEARCH=$installdir $log");
 
-    run("make $log");
-    run($sudo."make install $log");	# into $installdir
+    run($Config{make}." PREFIX=$dirpath/ignored INSTALLSITEARCH=$installdir $log"); #change to $Config{make}. bug 7294
+    run($sudo.$Config{make}." install PREFIX=$dirpath/ignored INSTALLSITEARCH=$installdir $log");	# into $installdir
 
     # and generate the bases.pl file, for perl consumers
 
@@ -451,13 +455,13 @@ EOT
   }
 
   for (1..$numscans) {
-    my $cmd = "re2c -i -b -o scanner$_.c scanner$_.re";
+    my $cmd = "$RE2C_BIN -i -b -o scanner$_.c scanner$_.re";
     if (!run($cmd)) {
       # this must be fatal; it can result in corrupt output modules missing
       # scannerN() functions
       my $cwd = `pwd`; chop $cwd;
       die "'$cmd' failed, dying!\n".
-          "Have you got a sufficiently-recent version of re2c?\n".
+          "Have you got a sufficiently-recent version of $RE2C_BIN?\n".
 	  "see $cwd/scanner$_.re\n";
     }
   }
@@ -602,14 +606,13 @@ EOT
 package $modname;
 
 use strict;
-use vars qw(\$VERSION \@ISA \@EXPORT_OK);
 
 use XSLoader ();
 
 BEGIN {
-\$VERSION = '1.0';
-\@ISA = qw(XSLoader);
-\@EXPORT_OK = qw();
+our \$VERSION = '1.0';
+our \@ISA = qw(XSLoader);
+our \@EXPORT_OK = qw();
 
 our \$HAS_RULES = {
   $has_rules
@@ -675,7 +678,7 @@ Options:
   -p prefs, --prefspath=file, --prefs-file=file
                                 Set user preferences file
   --siteconfigpath=path         Path for site configs
-                                (default: /etc/mail/spamassassin)
+                                (default: @@PREFIX@@/etc/mail/spamassassin)
   --updatedir=path              Directory to place updates
           (default: @@LOCAL_STATE_DIR@@/compiled/<perlversion>/@@VERSION@@)
   --cf='config line'            Additional line of configuration
@@ -806,10 +809,13 @@ See <http://issues.apache.org/SpamAssassin/>
 
 The Apache SpamAssassin(tm) Project <http://spamassassin.apache.org/>
 
-=head1 COPYRIGHT
+=head1 LICENSE AND COPYRIGHT
 
 SpamAssassin is distributed under the Apache License, Version 2.0, as
 described in the file C<LICENSE> included with the distribution.
+
+Copyright (C) 2015 The Apache Software Foundation
+
 
 =cut
 

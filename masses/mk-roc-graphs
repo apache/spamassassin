@@ -24,7 +24,7 @@
 # </@LICENSE>
 
 use Getopt::Long;
-use vars qw($opt_cffile $opt_spam $opt_ham $opt_count $opt_lambda);
+our ($opt_cffile, $opt_spam, $opt_ham, $opt_count, $opt_lambda);
 
 GetOptions("cffile=s", "count", "threshold=f", "spam=s",
 	   "ham=s", "scoreset=i", "lambda=f");
@@ -38,7 +38,7 @@ $opt_scoreset = 0 if (!defined $opt_scoreset);
 
 my $msgline;
 
-use vars qw(%rules %allrules);
+our (%rules, %allrules);
 
 my %spam_points = ();
 my %ham_points = ();

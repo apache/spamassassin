@@ -21,15 +21,11 @@ package Mail::SpamAssassin::Reporter;
 
 use strict;
 use warnings;
-use bytes;
+# use bytes;
 use re 'taint';
 use Mail::SpamAssassin::Logger;
 
-use vars qw{
-  @ISA 
-};
-
-@ISA = qw();
+our @ISA = qw();
 
 #Removed $VERSION per BUG 6422
 #$VERSION = 'bogus';	# avoid CPAN.pm picking up razor ver

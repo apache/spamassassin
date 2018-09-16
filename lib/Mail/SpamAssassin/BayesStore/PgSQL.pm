@@ -19,8 +19,6 @@
 
 Mail::SpamAssassin::BayesStore::PgSQL - PostgreSQL Specific Bayesian Storage Module Implementation
 
-=head1 SYNOPSIS
-
 =head1 DESCRIPTION
 
 This module implements a PostgreSQL specific bayesian storage module.
@@ -41,15 +39,13 @@ package Mail::SpamAssassin::BayesStore::PgSQL;
 
 use strict;
 use warnings;
-use bytes;
+# use bytes;
 use re 'taint';
 
 use Mail::SpamAssassin::BayesStore::SQL;
 use Mail::SpamAssassin::Logger;
 
-use vars qw( @ISA );
-
-@ISA = qw( Mail::SpamAssassin::BayesStore::SQL );
+our @ISA = qw( Mail::SpamAssassin::BayesStore::SQL );
 
 use constant HAS_DBI => eval { require DBI; };
 

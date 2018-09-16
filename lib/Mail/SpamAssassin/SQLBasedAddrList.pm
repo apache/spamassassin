@@ -75,7 +75,7 @@ package Mail::SpamAssassin::SQLBasedAddrList;
 
 use strict;
 use warnings;
-use bytes;
+# use bytes;
 use re 'taint';
 
 # Do this silliness to stop RPM from finding DBI as required
@@ -84,9 +84,7 @@ BEGIN { require DBI;  import DBI; }
 use Mail::SpamAssassin::PersistentAddrList;
 use Mail::SpamAssassin::Logger;
 
-use vars qw(@ISA);
-
-@ISA = qw(Mail::SpamAssassin::PersistentAddrList);
+our @ISA = qw(Mail::SpamAssassin::PersistentAddrList);
 
 =head2 new
 
@@ -220,6 +218,7 @@ sub get_addr_entry {
     }
     push(@args, @signedby);
   }
+  $sql .= " ORDER BY last_hit";
   my $sth = $self->{dbh}->prepare($sql);
   my $rc = $sth->execute($self->{_username}, @args);
 
@@ -236,8 +235,8 @@ sub get_addr_entry {
     # an author domain and by a remailer)?  for now just take an average
     while ( defined($aryref = $sth->fetchrow_arrayref()) ) {
       if (defined $entry->{count} && defined $aryref->[1]) {
-        $entry->{count} += $aryref->[0];
-        $entry->{totscore} += $aryref->[1];
+        $entry->{count} = $aryref->[0];
+        $entry->{totscore} = $aryref->[1];
       }
       $entry->{exists_p} = 1;
       $cnt++;

@@ -31,15 +31,21 @@ package Mail::SpamAssassin::Logger::File;
 
 use strict;
 use warnings;
-use bytes;
+# use bytes;
 use re 'taint';
 
 use POSIX ();
 use Time::HiRes ();
 use Mail::SpamAssassin::Logger;
+use Mail::SpamAssassin::Util qw(am_running_on_windows);
 
-use vars qw(@ISA);
-@ISA = ();
+our @ISA = ();
+
+# ADDING OS-DEPENDENT LINE TERMINATOR - BUG 6456
+my $eol = "\n";
+if (am_running_on_windows()) {
+  $eol = "\r\n";
+}
 
 sub new {
   my $class = shift;
@@ -54,7 +60,7 @@ sub new {
   $self->{timestamp_fmt} = $params{timestamp_fmt};
 
   if (! $self->init()) {
-    die "logger: file initialization failed\n";
+    die "logger: file initialization failed$eol";
   }
 
   return($self);
@@ -75,7 +81,7 @@ sub init {
     return 1;
   }
   else {
-    warn "logger: failed to open file $self->{filename}: $!\n";
+    warn "logger: failed to open file $self->{filename}: $!$eol";
     return 0;
   }
 }
@@ -94,8 +100,8 @@ sub log_message {
   }
   $timestamp .= ' '  if $timestamp ne '';
 
-  my($nwrite) = syswrite(STDLOG, sprintf("%s[%s] %s: %s\n",
-                                         $timestamp, $$, $level, $msg));
+  my($nwrite) = syswrite(STDLOG, sprintf("%s[%s] %s: %s%s",
+                                         $timestamp, $$, $level, $msg, $eol));
   defined $nwrite  or warn "error writing to log file: $!";
 }
 

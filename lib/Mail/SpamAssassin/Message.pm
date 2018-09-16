@@ -57,9 +57,7 @@ use Mail::SpamAssassin::Message::Metadata;
 use Mail::SpamAssassin::Constants qw(:sa);
 use Mail::SpamAssassin::Logger;
 
-use vars qw(@ISA);
-
-@ISA = qw(Mail::SpamAssassin::Message::Node);
+our @ISA = qw(Mail::SpamAssassin::Message::Node);
 
 # ---------------------------------------------------------------------------
 
@@ -628,6 +626,9 @@ sub finish {
   delete $self->{'line_ending'};
   delete $self->{'missing_head_body_separator'};
 
+  # Remove the queue variable, in case the body has not been parsed
+  delete $self->{'parse_queue'};
+
   my @toclean = ( $self );
 
   # Go ahead and clean up all of the Message::Node parts
@@ -1040,11 +1041,14 @@ sub _parse_normal {
 
   # attempt to figure out a name for this attachment if there is one ...
   my $disp = $msg->header('content-disposition') || '';
-  if ($disp =~ /name="?([^\";]+)"?/i) {
+  if ($disp =~ /name=\s*"?([^";]+)"?/i) {
     $msg->{'name'} = $1;
   }
   elsif ($ct[3]) {
     $msg->{'name'} = $ct[3];
+  }
+  if ($msg->{'name'}) {
+    $msg->{'name'} = Encode::decode("MIME-Header", $msg->{'name'});
   }
 
   $msg->{'boundary'} = $boundary;
@@ -1187,7 +1191,6 @@ sub get_decoded_body_text_array {
     # and not displayed
     next if ($parts[$pt]->{'type'} eq 'text/calendar');
 
-    push(@{$self->{text_decoded}}, "\n") if ( @{$self->{text_decoded}} );
     push(@{$self->{text_decoded}},
          split_into_array_of_short_paragraphs($parts[$pt]->decode()));
   }

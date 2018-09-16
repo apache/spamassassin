@@ -79,7 +79,7 @@ package Mail::SpamAssassin::Conf;
 
 use strict;
 use warnings;
-use bytes;
+# use bytes;
 use re 'taint';
 
 use Mail::SpamAssassin::Util;
@@ -91,40 +91,25 @@ use Mail::SpamAssassin::Util::TieOneStringHash;
 use Mail::SpamAssassin::Util qw(untaint_var);
 use File::Spec;
 
-use vars qw{
-  @ISA 
-  $CONF_TYPE_STRING $CONF_TYPE_BOOL
-  $CONF_TYPE_NUMERIC $CONF_TYPE_HASH_KEY_VALUE
-  $CONF_TYPE_ADDRLIST $CONF_TYPE_TEMPLATE
-  $CONF_TYPE_STRINGLIST $CONF_TYPE_IPADDRLIST
-  $CONF_TYPE_DURATION $CONF_TYPE_NOARGS
-  $MISSING_REQUIRED_VALUE $INVALID_VALUE $INVALID_HEADER_FIELD_NAME
-  @MIGRATED_SETTINGS
-  $COLLECT_REGRESSION_TESTS
+our @ISA = qw();
 
-$TYPE_HEAD_TESTS $TYPE_HEAD_EVALS
-$TYPE_BODY_TESTS $TYPE_BODY_EVALS $TYPE_FULL_TESTS $TYPE_FULL_EVALS
-$TYPE_RAWBODY_TESTS $TYPE_RAWBODY_EVALS $TYPE_URI_TESTS $TYPE_URI_EVALS
-$TYPE_META_TESTS $TYPE_RBL_EVALS $TYPE_EMPTY_TESTS
-};
-
-@ISA = qw();
+our $COLLECT_REGRESSION_TESTS; # Used only for unit tests.
 
 # odd => eval test.  Not constants so they can be shared with Parser
 # TODO: move to Constants.pm?
-$TYPE_HEAD_TESTS    = 0x0008;
-$TYPE_HEAD_EVALS    = 0x0009;
-$TYPE_BODY_TESTS    = 0x000a;
-$TYPE_BODY_EVALS    = 0x000b;
-$TYPE_FULL_TESTS    = 0x000c;
-$TYPE_FULL_EVALS    = 0x000d;
-$TYPE_RAWBODY_TESTS = 0x000e;
-$TYPE_RAWBODY_EVALS = 0x000f;
-$TYPE_URI_TESTS     = 0x0010;
-$TYPE_URI_EVALS     = 0x0011;
-$TYPE_META_TESTS    = 0x0012;
-$TYPE_RBL_EVALS     = 0x0013;
-$TYPE_EMPTY_TESTS   = 0x0014;
+our $TYPE_HEAD_TESTS    = 0x0008;
+our $TYPE_HEAD_EVALS    = 0x0009;
+our $TYPE_BODY_TESTS    = 0x000a;
+our $TYPE_BODY_EVALS    = 0x000b;
+our $TYPE_FULL_TESTS    = 0x000c;
+our $TYPE_FULL_EVALS    = 0x000d;
+our $TYPE_RAWBODY_TESTS = 0x000e;
+our $TYPE_RAWBODY_EVALS = 0x000f;
+our $TYPE_URI_TESTS     = 0x0010;
+our $TYPE_URI_EVALS     = 0x0011;
+our $TYPE_META_TESTS    = 0x0012;
+our $TYPE_RBL_EVALS     = 0x0013;
+our $TYPE_EMPTY_TESTS   = 0x0014;
 
 my @rule_types = ("body_tests", "uri_tests", "uri_evals",
                   "head_tests", "head_evals", "body_evals", "full_tests",
@@ -137,19 +122,19 @@ my @rule_types = ("body_tests", "uri_tests", "uri_evals",
 # these are variables instead of constants so that other classes can
 # access them; if they're constants, they'd have to go in Constants.pm
 # TODO: move to Constants.pm?
-$CONF_TYPE_STRING           =  1;
-$CONF_TYPE_BOOL             =  2;
-$CONF_TYPE_NUMERIC          =  3;
-$CONF_TYPE_HASH_KEY_VALUE   =  4;
-$CONF_TYPE_ADDRLIST         =  5;
-$CONF_TYPE_TEMPLATE         =  6;
-$CONF_TYPE_NOARGS           =  7;
-$CONF_TYPE_STRINGLIST       =  8;
-$CONF_TYPE_IPADDRLIST       =  9;
-$CONF_TYPE_DURATION         = 10;
-$MISSING_REQUIRED_VALUE     = '-99999999999999';  # string expected by parser
-$INVALID_VALUE              = '-99999999999998';
-$INVALID_HEADER_FIELD_NAME  = '-99999999999997';
+our $CONF_TYPE_STRING           =  1;
+our $CONF_TYPE_BOOL             =  2;
+our $CONF_TYPE_NUMERIC          =  3;
+our $CONF_TYPE_HASH_KEY_VALUE   =  4;
+our $CONF_TYPE_ADDRLIST         =  5;
+our $CONF_TYPE_TEMPLATE         =  6;
+our $CONF_TYPE_NOARGS           =  7;
+our $CONF_TYPE_STRINGLIST       =  8;
+our $CONF_TYPE_IPADDRLIST       =  9;
+our $CONF_TYPE_DURATION         = 10;
+our $MISSING_REQUIRED_VALUE     = '-99999999999999';  # string expected by parser
+our $INVALID_VALUE              = '-99999999999998';
+our $INVALID_HEADER_FIELD_NAME  = '-99999999999997';
 
 # set to "1" by the test suite code, to record regression tests
 # $Mail::SpamAssassin::Conf::COLLECT_REGRESSION_TESTS = 1;
@@ -360,24 +345,24 @@ for the whitelisting rule to fire. The first parameter is a sender's e-mail
 address to whitelist, and the second is a string to match the relay's rDNS,
 or its IP address. Matching is case-insensitive.
 
-This second parameter is matched against the TCP-info information field as
-provided in a FROM clause of a trace information (i.e. the Received header
+This second parameter is matched against a TCP-info information field as
+provided in a FROM clause of a trace information (i.e. in a Received header
 field, see RFC 5321). Only the Received header fields inserted by trusted
-hosts are considered. This parameter can either be a full hostname, or the
-domain component of that hostname, or an IP address in square brackets.
-The reverse DNS lookup is done by a MTA, not by SpamAssassin.
+hosts are considered. This parameter can either be a full hostname, or a
+domain component of that hostname, or an IP address (optionally followed
+by a slash and a prefix length) in square brackets. The address prefix
+(mask) length with a slash may stand within brackets along with an address,
+or may follow the bracketed address. Reverse DNS lookup is done by an MTA,
+not by SpamAssassin.
 
-In case of an IPv4 address in brackets, it may be truncated on classful
-boundaries to cover whole subnets, e.g. C<[10.1.2.3]>, C<[10.1.2]>,
-C<[10.1]>, C<[10]>.  CIDR notation is currently not supported, nor is
-IPv6. The matching on IP address is mainly provided to cover rare cases
-where whitelisting of a sending MTA is desired which does not have a
-correct reverse DNS configured.
+For backward compatibility as an alternative to a CIDR notation, an IPv4
+address in brackets may be truncated on classful boundaries to cover whole
+subnets, e.g. C<[10.1.2.3]>, C<[10.1.2]>, C<[10.1]>, C<[10]>.
 
 In other words, if the host that connected to your MX had an IP address
 192.0.2.123 that mapped to 'sendinghost.example.org', you should specify
-C<sendinghost.example.org>, or C<example.org>, or C<[192.0.2.123]> or
-C<[192.0.2]> here.
+C<sendinghost.example.org>, or C<example.org>, or C<[192.0.2.123]>, or
+C<[192.0.2.0/24]>, or C<[192.0.2]> here.
 
 Note that this requires that C<internal_networks> be correct.  For simple
 cases, it will be, but for a complex network you may get better results
@@ -390,8 +375,12 @@ result in the generated Received header field according to RFC 5321.
 e.g.
 
   whitelist_from_rcvd joe@example.com  example.com
-  whitelist_from_rcvd *@axkit.org      sergeant.org
+  whitelist_from_rcvd *@*              mail.example.org
   whitelist_from_rcvd *@axkit.org      [192.0.2.123]
+  whitelist_from_rcvd *@axkit.org      [192.0.2.0/24]
+  whitelist_from_rcvd *@axkit.org      [192.0.2.0]/24
+  whitelist_from_rcvd *@axkit.org      [2001:db8:1234::/48]
+  whitelist_from_rcvd *@axkit.org      [2001:db8:1234::]/48
 
 =item def_whitelist_from_rcvd addr@lists.sourceforge.net sourceforge.net
 
@@ -754,6 +743,58 @@ name and has no meaning here.
     }
   });
 
+=item enlist_addrlist (listname) user@example.com
+
+Adds one or more addresses to a named list of addresses.
+The named list can then be consulted through a check_from_in_list() or a 
+check_to_in_list() eval rule implemented by the WLBLEval plugin, which takes 
+the list name as an argument. Parenthesis around a list name are literal - a 
+required syntax.
+
+Listed addresses are file-glob-style patterns, so C<friend@somewhere.com>, 
+C<*@isp.com>, or C<*.domain.net> will all work.
+Specifically, C<*> and C<?> are allowed, but all other metacharacters
+are not. Regular expressions are not used for security reasons.
+Matching is case-insensitive.
+
+Multiple addresses per line, separated by spaces, is OK.  Multiple
+C<enlist_addrlist> lines are also OK.
+
+Enlisting an address to the list named blacklist_to is synonymous to using the
+directive blacklist_to 
+
+Enlisting an address to the list named blacklist_from is synonymous to using the
+directive blacklist_from
+
+Enlisting an address to the list named whitelist_to is synonymous to using the
+directive whitelist_to 
+
+Enlisting an address to the list named whitelist_from is synonymous to using the
+directive whitelist_from
+
+e.g.
+
+  enlist_addrlist (PAYPAL_ADDRESS) service@paypal.com
+  enlist_addrlist (PAYPAL_ADDRESS) *@paypal.co.uk
+
+=cut
+
+  push (@cmds, {
+    setting => 'enlist_addrlist',
+    type => $CONF_TYPE_ADDRLIST,
+    code => sub {
+      my($conf, $key, $value, $line) = @_;
+      local($1,$2);
+      if ($value !~ /^ \( (.*?) \) \s+ (.*) \z/sx) {
+        return $MISSING_REQUIRED_VALUE;
+      }
+      my $listname = $1;  # corresponds to arg in check_uri_host_in_wblist()
+      # note: must not factor out dereferencing, as otherwise
+      # subhashes would spring up in a copy and be lost
+      $conf->{parser}->add_to_addrlist ($listname, split(/\s+/, $value));
+    }
+  });
+
 =item blacklist_uri_host host-or-domain ...
 
 Is a shorthand for a directive:  enlist_uri_host (BLACK) host ...
@@ -1052,6 +1093,19 @@ the original mail into tagged messages.
         push(@{$self->{headers_spam}}, ["Report", "_REPORT_"]);
       }
     }
+  });
+
+=item report_wrap_width (default: 70) 
+
+This option sets the wrap width for description lines in the X-Spam-Report 
+header, not accounting for tab width. 
+
+=cut
+
+  push (@cmds, {
+    setting => 'report_wrap_width',
+    default => '70',
+    type => $CONF_TYPE_NUMERIC,
   });
 
 =back
@@ -2601,15 +2655,15 @@ mbox_format_from_regex /^From \S+  ?[[:upper:]][[:lower:]]{2}(?:, \d\d [[:upper:
   });
 
 
-=item parse_dkim_uris ( 0 | 1 ) (default: 0)
+=item parse_dkim_uris ( 0 | 1 ) (default: 1)
 
-If this option is set to 1 and the message contains DKIM headers, the headers will be parsed for URIs to process alongside URIs found in the body with some rules and moduels (ex. URIDNSBL)
+If this option is set to 1 and the message contains DKIM headers, the headers will be parsed for URIs to process alongside URIs found in the body with some rules and modules (ex. URIDNSBL)
 
 =cut
 
   push (@cmds, {
     setting => 'parse_dkim_uris',
-    default => 0,
+    default => 1,
     type => $CONF_TYPE_BOOL,
   });
 
@@ -2836,8 +2890,8 @@ C<header SYMBOLIC_TEST_NAME header =~ /\S/> rule as described above.
 =item header SYMBOLIC_TEST_NAME eval:name_of_eval_method([arguments])
 
 Define a header eval test.  C<name_of_eval_method> is the name of
-a method on the C<Mail::SpamAssassin::EvalTests> object.  C<arguments>
-are optional arguments to the function call.
+a method registered by a C<Mail::SpamAssassin::Plugin> object.
+C<arguments> are optional arguments to the function call.
 
 =item header SYMBOLIC_TEST_NAME eval:check_rbl('set', 'zone' [, 'sub-test'])
 
@@ -2950,7 +3004,10 @@ name.
       local ($1,$2);
       if ($value =~ /^(\S+)\s+(?:rbl)?eval:(.*)$/) {
         my ($rulename, $fn) = ($1, $2);
-
+        dbg("config: header eval rule name is $rulename function is $fn");
+        if ($fn !~ /^\w+(\(.*\))?$/) {
+          return $INVALID_VALUE;
+        }
         if ($fn =~ /^check_(?:rbl|dns)/) {
           $self->{parser}->add_test ($rulename, $fn, $TYPE_RBL_EVALS);
         }
@@ -3008,7 +3065,13 @@ Define a body eval test.  See above.
       my ($self, $key, $value, $line) = @_;
       local ($1,$2);
       if ($value =~ /^(\S+)\s+eval:(.*)$/) {
-        $self->{parser}->add_test ($1, $2, $TYPE_BODY_EVALS);
+        my ($rulename, $fn) = ($1, $2);
+        dbg("config: body eval rule name is $rulename function is $fn");
+
+        if ($fn !~ /^\w+(\(.*\))?$/) {
+          return $INVALID_VALUE;
+        }
+        $self->{parser}->add_test ($rulename, $fn, $TYPE_BODY_EVALS);
       }
       else {
 	my @values = split(/\s+/, $value, 2);
@@ -3349,7 +3412,7 @@ settings can be used by local programs run directly by the user.
 =item version_tag string
 
 This tag is appended to the SA version in the X-Spam-Status header. You should
-include it when modify your ruleset, especially if you plan to distribute it.
+include it when you modify your ruleset, especially if you plan to distribute it.
 A good choice for I<string> is your last name or your initials followed by a
 number which you increase with each change.
 
@@ -4417,6 +4480,13 @@ If a tag reference uses the name of a tag which is not in this list or defined
 by a loaded plugin, the reference will be left intact and not replaced by any
 value.
 
+Additional, plugin specific, template tags can be found in the documentation for
+the following plugins:
+
+ L<Mail::SpamAssassin::Plugin::ASN>
+ L<Mail::SpamAssassin::Plugin::AWL>
+ L<Mail::SpamAssassin::Plugin::TxRep>
+
 The C<HAMMYTOKENS> and C<SPAMMYTOKENS> tags have an optional second argument
 which specifies a format.  See the B<HAMMYTOKENS/SPAMMYTOKENS TAG FORMAT>
 section, below, for details.
@@ -4498,7 +4568,7 @@ distances that are greater than 9.)
 # bundled plugins. These will be warned about, but do not generate a fatal
 # error when "spamassassin --lint" is run like a normal syntax error would.
 
-@MIGRATED_SETTINGS = qw{
+our @MIGRATED_SETTINGS = qw{
   ok_languages
 };
 
@@ -4615,12 +4685,12 @@ sub mtime {
 
 sub parse_scores_only {
   my ($self) = @_;
-  $_[0]->{parser}->parse ($_[1], 1);
+  $self->{parser}->parse ($_[1], 1);
 }
 
 sub parse_rules {
   my ($self) = @_;
-  $_[0]->{parser}->parse ($_[1], 0);
+  $self->{parser}->parse ($_[1], 0);
 }
 
 ###########################################################################

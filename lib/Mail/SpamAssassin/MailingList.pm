@@ -24,7 +24,7 @@ package Mail::SpamAssassin::PerMsgStatus;
 
 use strict;
 use warnings;
-use bytes;
+# use bytes;
 use re 'taint';
 
 sub detect_mailing_list {
@@ -104,11 +104,14 @@ sub detect_ml_mailman {
 # List-Unsubscribe: <mailto:sympa@somedomain.com?subject=unsubscribe%somelist>
 # List-Post: <mailto:somelist@somedomain.com>
 # List-Owner: <mailto:somelist-request@somedomain.com>
+# X-Mailer: Sympa 6.2.22
+# X-Sympa-To: somelist@somedomain.com
 # [and optionally] List-Archive: <http://www.somedomain.com/wws/arc/somelist>
 
-# NB: This isn't implemented, since there is nothing here saying "Sympa".
 sub detect_ml_sympa {
     my ($self) = @_;
+    return 1 if $self->get('X-Mailer') =~ /^Sympa \d\.\d\.\d/;
+    return 1 if defined ($self->get('X-Sympa-To',undef));
     return 0;
 }
 

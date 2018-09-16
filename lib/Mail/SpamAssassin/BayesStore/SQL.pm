@@ -19,8 +19,6 @@
 
 Mail::SpamAssassin::BayesStore::SQL - SQL Bayesian Storage Module Implementation
 
-=head1 SYNOPSIS
-
 =head1 DESCRIPTION
 
 This module implementes a SQL based bayesian storage module.
@@ -31,7 +29,7 @@ package Mail::SpamAssassin::BayesStore::SQL;
 
 use strict;
 use warnings;
-use bytes;
+# use bytes;
 use re 'taint';
 use Errno qw(EBADF);
 
@@ -43,9 +41,7 @@ BEGIN {
 use Mail::SpamAssassin::BayesStore;
 use Mail::SpamAssassin::Logger;
 
-use vars qw( @ISA );
-
-@ISA = qw( Mail::SpamAssassin::BayesStore );
+our @ISA = qw( Mail::SpamAssassin::BayesStore );
 
 use constant HAS_DBI => eval { require DBI; };
 

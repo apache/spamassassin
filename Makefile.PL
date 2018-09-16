@@ -10,8 +10,9 @@ use ExtUtils::MakeMaker;
 # avoid stupid 'Argument "6.30_01" isn't numeric in numeric ge (>=)' warnings;
 my $mm_version = eval $ExtUtils::MakeMaker::VERSION;
 
-if ($mm_version < 6.17) {
-  die "SpamAssassin Makefile.PL requires at least ExtUtils::MakeMaker v6.17";
+# raising the version of makemaker to 6.46 per bug 6598 & 6131
+if ($mm_version < 6.46) {
+  die "Apache SpamAssassin Makefile.PL requires at least ExtUtils::MakeMaker v6.46";
 }
 
 use constant RUNNING_ON_WINDOWS => ($^O =~ /^(mswin|dos|os2)/oi);
@@ -25,7 +26,7 @@ my @ATT_KEYS = (
   # 'vendor' to choose one explicitly (the default is 'site'). They have the
   # following meaning:
   #  * PERL:    Only essential modules shipped with Perl should be installed
-  #             there. Don't put SpamAssassin there.
+  #             there. Don't put Apache SpamAssassin there.
   #  * SITE:    The default. Normal installations via CPAN or from the sources
   #             should use these dirs.
   #  * VENDOR:  A special set of paths for packaged (RPM, deb, portage, ...)
@@ -66,12 +67,15 @@ my @ATT_KEYS = (
   'SITELOCALSTATEDIR', 
   'VENDORLOCALSTATEDIR',
 
+  'RE2C_BIN',         # hard code the path for re2c if possible
+
   'PERL_BIN',         # Sets the Perl interpreter used by the scripts.
   'PERL_WARN',        # Can be used to disable warnings in the scripts
   'PERL_TAINT',       # "   "  "    "  "    taint mode for the scripts (DON'T)
 
 
-  'BUILD_SPAMC'  ,    # Set to 'no' to skip build of spamc.
+  'BUILD_SPAMC'  ,    # Set to 'no' to skip build of spamc on Windows.
+  'BUILD_SPAMD',      # Set to 'no' to skip build of spamd on Windows.
   'ENABLE_SSL',       # Set to 'yes' to build spamc with SSL support.
   'CONTACT_ADDRESS',  # To not ask for the contact address, use this.
 );
@@ -105,9 +109,11 @@ sub yesno {
 
 my %opt = (
   'build_spamc'     => undef,
+  'build_spamd'     => undef,
   'enable_ssl'      => undef,
   'contact_address' => undef,
   'destdir'         => undef,
+  're2c_bin'        => 're2c',
 );
 ARGV: foreach (@ARGV) {
   foreach my $key (keys %opt) {
@@ -183,6 +189,7 @@ my %makefile = (
         'Net::DNS'             => (RUNNING_ON_WINDOWS ? 0.46 : 0.34), # bugs in older revs
         'NetAddr::IP'          => 4.010,
         'Sys::Hostname'        => 0,
+        'Test::More'           => 0,
         'Time::HiRes'          => 0,
         'Time::Local'          => 0,
         'Errno'                => 0,
@@ -233,7 +240,7 @@ my %makefile = (
     },
 
     'AUTHOR'   => 'The Apache SpamAssassin Project <dev at spamassassin.apache.org>',
-    'ABSTRACT' => 'SpamAssassin is an extensible email filter which is used to identify spam',
+    'ABSTRACT' => 'Apache SpamAssassin is an extensible email filter which is used to identify spam',
 
     # We have only this Makefile.PL and this option keeps MakeMaker from
     # asking all questions twice after a 'make dist*'.
@@ -267,9 +274,19 @@ unless($Config{installman1dir}
 
 # Windows platforms need some adjustments
 if (RUNNING_ON_WINDOWS) {
-  # Don't build spamd
-  delete $makefile{EXE_FILES}{'spamd/spamd.raw'};
-  delete $makefile{MAN1PODS}{'spamd/spamd'};
+  # Building spamd is optional on Windows because it still is somewhat
+  # experimental.
+  if (!defined $opt{'build_spamd'}) {
+    $opt{'build_spamd'} = bool(prompt(
+      "Build spamd.exe (experimental on windows platforms)? (y/n)",
+      'n'));
+  } else {
+    $opt{'build_spamd'} = bool($opt{'build_spamd'});
+  }
+  if (!$opt{'build_spamd'}) {
+    delete $makefile{EXE_FILES}{'spamd/spamd.raw'};
+    delete $makefile{MAN1PODS}{'spamd/spamd'};
+  }
   # building spamc is optional under Win32 because not everyone has compiler
   if (!defined $opt{'build_spamc'}) {
     $opt{'build_spamc'} = bool(prompt(
@@ -300,7 +317,7 @@ $makefile{'macro'}{'CONTACT_ADDRESS'} = $opt{'contact_address'};
 
 print 
 'NOTE: settings for "make test" are now controlled using "t/config.dist". 
-See that file if you wish to customise what tests are run, and how.
+See that file if you wish to customize what tests are run, and how.
 
 ';
 
@@ -321,15 +338,26 @@ foreach my $file (@FILES_THAT_MUST_EXIST) {
 
 #######################################################################
 
-# bug 6131
-($mm_version >= 6.46) and $makefile{META_MERGE} = {
-  license => 'apache',
+# See Bug 6131 & 6598 for changes to META_MERGE and increased requirement 
+# for MakeMaker version
+#
+$makefile{META_MERGE} = {
+
+  'meta-spec' => {
+    version => '2',
+    url     => 'http://search.cpan.org/perldoc?CPAN::Meta::Spec',
+  },
+
+  license => 'apache_2_0',
 
   resources => {
     license     => 'http://www.apache.org/licenses/LICENSE-2.0.html',
-    homepage    => 'http://spamassassin.apache.com/',
+    homepage    => 'http://spamassassin.apache.org/',
     bugtracker  => 'https://issues.apache.org/SpamAssassin/',
-    repository  => 'http://svn.apache.org/repos/asf/spamassassin/',
+    repository  => { 
+			url=>'http://svn.apache.org/repos/asf/spamassassin/',
+			type=>'svn'
+		   },
     MailingList => 'http://wiki.apache.org/spamassassin/MailingLists',
   },
 
@@ -342,7 +370,7 @@ foreach my $file (@FILES_THAT_MUST_EXIST) {
     'Razor2::Client::Agent' =>     2.61,
     'Net::Ident' =>                0,
     'IO::Socket::INET6' =>         0,
-    'IO::Socket::SSL' =>           0,
+    'IO::Socket::SSL' =>           1.76,
     'Compress::Zlib' =>            0,
     'Mail::DKIM' =>                0.37,
     'DBI' =>                       0,
@@ -367,17 +395,13 @@ print "Makefile written by ExtUtils::MakeMaker $mm_version\n";
 
 package MY;
 
-use vars qw(
-  $MY_GLOBALS_ARE_SANE
-  $RUNNING_ON_WINDOWS
-  @REPOSITORIES
-
-  $MACRO_RE
-  $EQ_RE
-  $EQ
-
-  $SELF
-);
+our ($MY_GLOBALS_ARE_SANE,
+  $RUNNING_ON_WINDOWS,
+  @REPOSITORIES,
+  $MACRO_RE,
+  $EQ_RE,
+  $EQ,
+  $SELF);
 
 # For some reason initializing the vars on the global scope doesn't work;
 # guess its some weird Perl behaviour in combination with bless().
@@ -881,6 +905,7 @@ sub MY::constants {
   {
     set_macro('SYSCONFDIR', "") unless get_macro('SYSCONFDIR');
     set_macro('LOCALSTATEDIR', "") unless get_macro('LOCALSTATEDIR');
+    set_macro('RE2C_BIN', $opt{'re2c_bin'});
 
     # Determine the correct settings for each repository...
     foreach my $r (@REPOSITORIES) {
@@ -941,6 +966,7 @@ sub MY::constants {
     push(@code, macro_def('PREPROCESS'));
     push(@code, macro_def('CONFIGURE'));
     push(@code, macro_def('SYMLINK'));
+    push(@code, macro_def('RE2C_BIN'));
   }
 
   # Set some additional helper/shortcut macros; the B_FOO are the ones which
@@ -1009,7 +1035,8 @@ FIXVARS		= -Mvars \
 		  -DLOCAL_RULES_DIR="$(I_CONFDIR)" \
 		  -DLOCAL_STATE_DIR="$(I_LOCALSTATEDIR)" \
 		  -DINSTALLSITELIB="$(I_LIBDIR)" \
-		  -DCONTACT_ADDRESS="$(CONTACT_ADDRESS)"
+		  -DCONTACT_ADDRESS="$(CONTACT_ADDRESS)" \
+		  -DRE2C_BIN="$(RE2C_BIN)"
 
 FIXBANG		= -Msharpbang \
                   -Mconditional \
@@ -1057,7 +1084,7 @@ spamc_has_moved:
 	$(NOECHO) echo "*** spamc now has its own directory: $(TARGET) is $(SOURCE)"
 	$(NOECHO) echo "***"
 	$(PERL) -MFile::Spec -MFile::Copy \
-	  -e "copy(q{$(SOURCE)}, q{$(TARGET)});"
+	  -e "copy(q[$(SOURCE)], q{$(TARGET)});"
 
 spamc/libspamc.so: $(SPAMC_MAKEFILE) $(LIBSPAMC_SRC)
 	$(MAKE_SPAMC) $@
@@ -1093,14 +1120,15 @@ qmail/qmail-spamc$(EXE_EXT): spamc/qmail-spamc$(EXE_EXT)
 
 conf__install:
 	-$(MKPATH) $(B_CONFDIR)
-	$(PERL) -MFile::Copy -e "copy(q{rules/local.cf}, q{$(B_CONFDIR)/local.cf}) unless -f q{$(B_CONFDIR)/local.cf}"
-	$(PERL) -MFile::Copy -e "copy(q{rules/init.pre}, q{$(B_CONFDIR)/init.pre}) unless -f q{$(B_CONFDIR)/init.pre}"
-	$(PERL) -MFile::Copy -e "copy(q{rules/v310.pre}, q{$(B_CONFDIR)/v310.pre}) unless -f q{$(B_CONFDIR)/v310.pre}"
-	$(PERL) -MFile::Copy -e "copy(q{rules/v312.pre}, q{$(B_CONFDIR)/v312.pre}) unless -f q{$(B_CONFDIR)/v312.pre}"
-	$(PERL) -MFile::Copy -e "copy(q{rules/v320.pre}, q{$(B_CONFDIR)/v320.pre}) unless -f q{$(B_CONFDIR)/v320.pre}"
-	$(PERL) -MFile::Copy -e "copy(q{rules/v330.pre}, q{$(B_CONFDIR)/v330.pre}) unless -f q{$(B_CONFDIR)/v330.pre}"
-	$(PERL) -MFile::Copy -e "copy(q{rules/v340.pre}, q{$(B_CONFDIR)/v340.pre}) unless -f q{$(B_CONFDIR)/v340.pre}"
-	$(PERL) -MFile::Copy -e "copy(q{rules/v341.pre}, q{$(B_CONFDIR)/v341.pre}) unless -f q{$(B_CONFDIR)/v341.pre}"
+	$(PERL) -MFile::Copy -e "copy(q[rules/local.cf], q{$(B_CONFDIR)/local.cf}) unless -f q{$(B_CONFDIR)/local.cf}"
+	$(PERL) -MFile::Copy -e "copy(q[rules/init.pre], q{$(B_CONFDIR)/init.pre}) unless -f q{$(B_CONFDIR)/init.pre}"
+	$(PERL) -MFile::Copy -e "copy(q[rules/v310.pre], q{$(B_CONFDIR)/v310.pre}) unless -f q{$(B_CONFDIR)/v310.pre}"
+	$(PERL) -MFile::Copy -e "copy(q[rules/v312.pre], q{$(B_CONFDIR)/v312.pre}) unless -f q{$(B_CONFDIR)/v312.pre}"
+	$(PERL) -MFile::Copy -e "copy(q[rules/v320.pre], q{$(B_CONFDIR)/v320.pre}) unless -f q{$(B_CONFDIR)/v320.pre}"
+	$(PERL) -MFile::Copy -e "copy(q[rules/v330.pre], q{$(B_CONFDIR)/v330.pre}) unless -f q{$(B_CONFDIR)/v330.pre}"
+	$(PERL) -MFile::Copy -e "copy(q[rules/v340.pre], q{$(B_CONFDIR)/v340.pre}) unless -f q{$(B_CONFDIR)/v340.pre}"
+	$(PERL) -MFile::Copy -e "copy(q[rules/v341.pre], q{$(B_CONFDIR)/v341.pre}) unless -f q{$(B_CONFDIR)/v341.pre}"
+	$(PERL) -MFile::Copy -e "copy(q[rules/v342.pre], q{$(B_CONFDIR)/v342.pre}) unless -f q{$(B_CONFDIR)/v342.pre}"
   
 
 data__install:

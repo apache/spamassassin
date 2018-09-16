@@ -38,16 +38,11 @@ BEGIN {
   }                                                 # REMOVEFORINST
 }
 
-use vars qw($have_getaddrinfo_in_core $have_getaddrinfo_legacy
-            $io_socket_module_name $have_inet4 $have_inet6
-            $ai_addrconfig_flag);
+our ($have_getaddrinfo_in_core, $have_getaddrinfo_legacy, $io_socket_module_name,
+     $have_inet4, $have_inet6, $ai_addrconfig_flag);
+
 # don't force requirement on IO::Socket::IP or IO::Socket::INET6
 BEGIN {
-  use Socket qw(:DEFAULT IPPROTO_TCP);
-
-  # AUTOLOADing 'constants' here enables inlining - see Exporter man page
-  &SOCK_STREAM; &IPPROTO_TCP; &SOMAXCONN;
-
   $have_getaddrinfo_in_core = eval {
     # The Socket module (1.94) bundled with Perl 5.14.* provides
     # new affordances for IPv6, including implementations of the
@@ -59,7 +54,9 @@ BEGIN {
     Socket->VERSION(1.96);  # provides NIx_NOSERV, and Exporter tag :addrinfo
   # Socket->VERSION(1.97);  # IO::Socket::IP depends on Socket 1.97
     import Socket qw(/^(?:AI|NI|NIx|EAI)_/);
-    &AI_ADDRCONFIG; &AI_PASSIVE;  # enable inlining
+
+    # AUTOLOADing 'constants' here enables inlining - see Exporter man page
+    &AI_ADDRCONFIG; &AI_PASSIVE;
     &NI_NUMERICHOST, &NI_NUMERICSERV; &NIx_NOSERV; 1;
   };
 
@@ -71,6 +68,11 @@ BEGIN {
     &AI_ADDRCONFIG; &AI_PASSIVE;  # enable inlining
     &NI_NUMERICHOST; &NI_NUMERICSERV; &NI_NAMEREQD; 1;
   };
+
+  require Socket;
+  import Socket qw(:DEFAULT IPPROTO_TCP);
+
+  &SOCK_STREAM; &IPPROTO_TCP; &SOMAXCONN; # enable inlining
 
   &AF_UNSPEC; &AF_INET; &AF_INET6;  # enable inlining
 
@@ -245,8 +247,9 @@ use Mail::SpamAssassin::NetSet;
 use Mail::SpamAssassin::SubProcBackChannel;
 use Mail::SpamAssassin::SpamdForkScaling qw(:pfstates);
 use Mail::SpamAssassin::Logger qw(:DEFAULT log_message);
-use Mail::SpamAssassin::Util qw(untaint_var untaint_file_path
-                                exit_status_str am_running_on_windows);
+use Mail::SpamAssassin::Util qw(untaint_var untaint_file_path secure_tmpdir
+                                exit_status_str am_running_on_windows
+                                get_user_groups);
 use Mail::SpamAssassin::Timeout;
 
 use Getopt::Long;
@@ -409,12 +412,12 @@ GetOptions(
   'sql-config!'              => \$opt{'sql-config'},
   'ssl'                      => \$opt{'ssl'},
   'ssl-port=s'               => \$opt{'ssl-port'},
-  'ssl-version=s'            => \$opt{'ssl-version'},
   'syslog-socket=s'          => \$opt{'syslog-socket'},
   'syslog|s=s'               => \$opt{'syslog'},
   'log-timestamp-fmt:s'      => \$opt{'log-timestamp-fmt'},
   'timeout-tcp|T=i'          => \$opt{'timeout-tcp'},
   'timeout-child|t=i'        => \$opt{'timeout-child'},
+  'timing'                   => \$opt{'timing'},
   'user-config'              => \$opt{'user-config'},
   'username|u=s'             => \$opt{'username'},
   'version|V'                => \$opt{'version'},
@@ -689,21 +692,25 @@ if ( defined $opt{'max-conn-per-child'} ) {
   $clients_per_child = undef if ( $clients_per_child < 1 );
 }
 
-if (defined $opt{'timeout-tcp'}) {
-  $timeout_tcp = $opt{'timeout-tcp'};
-  $timeout_tcp = undef if ($timeout_tcp < 1);
-}
-
-if (defined $opt{'timeout-child'}) {
-  $timeout_child = $opt{'timeout-child'};
-  $timeout_child = undef if ($timeout_child < 1);
-}
-
 # Set some "sane" limits for defaults
 $childlimit        ||= 5;
 $clients_per_child ||= 200;
-$timeout_child     ||= 300;
-$timeout_tcp       ||= 30;
+
+if (defined $opt{'timeout-tcp'} && $opt{'timeout-tcp'} >= 0) {
+  $timeout_tcp = $opt{'timeout-tcp'};
+  $timeout_tcp = undef if ($timeout_tcp == 0);
+}
+else {
+  $timeout_tcp = 30;
+}
+
+if (defined $opt{'timeout-child'} && $opt{'timeout-child'} >= 0) {
+  $timeout_child = $opt{'timeout-child'};
+  $timeout_child = undef if ($timeout_child == 0);
+}
+else {
+  $timeout_child = 300;
+}
 
 # ensure scaling parameters are logical
 if ($opt{'min-children'} < 1) {
@@ -742,11 +749,6 @@ if ( defined $ENV{'HOME'} ) {
 }
 
 # Do whitelist later in tmp dir. Side effect: this will be done as -u user.
-
-my $sslversion = $opt{'ssl-version'} || 'sslv3';
-if ($sslversion !~ /^(?:sslv3|tlsv1)$/) {
-  die "spamd: invalid ssl-version: $opt{'ssl-version'}\n";
-}
 
 $opt{'server-key'}  ||= "$LOCAL_RULES_DIR/certs/server-key.pem";
 $opt{'server-cert'} ||= "$LOCAL_RULES_DIR/certs/server-cert.pem";
@@ -898,9 +900,8 @@ sub compose_listen_info_string {
                       $socket_info->{ip_addr}, $socket_info->{port}));
 
     } elsif ($socket->isa('IO::Socket::SSL')) {
-      push(@listeninfo, sprintf("SSL [%s]:%s, ssl version %s",
-                      $socket_info->{ip_addr}, $socket_info->{port},
-                      $opt{'ssl-version'}||'sslv3'));
+      push(@listeninfo, sprintf("SSL [%r]:%s", $socket_info->{ip_addr},
+                      $socket_info->{port}));
     }
   }
 
@@ -1071,7 +1072,6 @@ sub server_sock_setup_inet {
     $sockopt{V6Only} = 1  if $io_socket_module_name eq 'IO::Socket::IP'
                              && IO::Socket::IP->VERSION >= 0.09;
     %sockopt = (%sockopt, (
-      SSL_version     => $sslversion,
       SSL_verify_mode => 0x00,
       SSL_key_file    => $opt{'server-key'},
       SSL_cert_file   => $opt{'server-cert'},
@@ -1092,7 +1092,8 @@ sub server_sock_setup_inet {
     if (!$server_inet) {
       $diag = sprintf("could not create %s socket on [%s]:%s: %s",
                       $ssl ? 'IO::Socket::SSL' : $io_socket_module_name,
-                      $adr, $port, $!);
+                      $adr, $port, $ssl && $IO::Socket::SSL::SSL_ERROR ?
+                      "$!,$IO::Socket::SSL::SSL_ERROR" : $!);
       push(@diag_fail, $diag);
     } else {
       $diag = sprintf("created %s socket on [%s]:%s",
@@ -1170,6 +1171,11 @@ my $spamtest = Mail::SpamAssassin->new(
     LOCAL_STATE_DIR => $LOCAL_STATE_DIR
   }
 );
+
+#Enable Timing?
+if ($opt{'timing'}) {
+  $spamtest->timer_enable();
+}
 
 # if $clients_per_child == 1, there's no point in copying configs around
 unless ($clients_per_child > 1) {
@@ -1369,9 +1375,19 @@ sub spawn {
       # bug 5518: assignments to $) and $( don't always work on all platforms
       # bug 3900: assignments to $> and $< problems with BSD perl bug
       # use the POSIX functions to hide the platform specific workarounds 
+      dbg("spamd: Privilege de-escalation from user $< and groups $(\n");
+      $! = 0;
       POSIX::setgid($ugid);  # set effective and real gid
+      dbg("spamd: setgid ERRNO is $!\n");
+      $( = $ugid;
+      $) = "$ugid ".(get_user_groups($uuid));  # set effective and real gid/grouplist another way because we lack initgroups in Perl
+      dbg("spamd: group assignment ERRNO is $!\n");
       POSIX::setuid($uuid);  # set effective and real UID
+      dbg("spamd: setuid ERRNO is $!\n");
       $< = $uuid; $> = $uuid;   # bug 5574
+      dbg("spamd: uid assignment ERRNO is $!\n");
+      dbg("spamd: real user is $< \neff user is $> \nreal groups are $( \neff groups are $) \n");
+
 
       # keep the sanity check to catch problems like bug 3900 just in case
       if ( $> != $uuid and $> != ( $uuid - 2**32 ) ) {
@@ -1456,7 +1472,12 @@ sub spawn {
       }
       undef $current_user;
 
-      dbg("timing: " . $spamtest->timer_report()) if would_log('dbg', 'timing');
+      #LOG TIMING
+      if ($opt{'timing'}) {
+        info("timing: " . $spamtest->timer_report());
+      } else {
+        dbg("timing: " . $spamtest->timer_report()) if would_log('dbg', 'timing');
+      }
     }
 
     # If the child lives to get here, it will die ...  Muhaha.
@@ -1544,10 +1565,16 @@ sub accept_from_any_server_socket {
     flock($sockets_access_lock_fh, LOCK_UN)
       or die "Can't release sockets-access lock: $!";
   }
-  $client or die sprintf("accept_a_conn: %s accept failed: %s",
+  if(!defined $client) {
+    if(defined($socket)) {
+      die sprintf("accept_a_conn: %s accept failed: %s",
                          ref $socket,
                          !$socket->isa('IO::Socket::SSL') ? $!
                            : $socket->errstr.", $!");
+    } else {
+      die sprintf("accept_a_conn: no socket available");
+    }
+  }
   return ($client, $selected_socket_info);
 }
 
@@ -1726,7 +1753,7 @@ sub handle_setuid_to_user {
     my ($name, $pwd, $uid, $gid, $quota, $comment, $gcos, $dir, $etc) =
         getpwnam('nobody');
   
-    $) = "$gid $gid";                   # eGID
+    $) = (get_user_groups($uid));       # eGID
     $> = $uid;                          # eUID
     if (!defined($uid) || ($> != $uid and $> != ($uid - 2**32))) {
       die("spamd: setuid to nobody failed");
@@ -2417,6 +2444,7 @@ sub got_compress_header {
       return 0;
     }
     $hdrs->{compress_zlib} = 1;
+    dbg("spamd: compress header received\n");
   }
   else {
     protocol_error("(compression type not supported)");
@@ -2488,7 +2516,7 @@ sub handle_user_setuid_basic {
   }
 
   if ($setuid_to_user) {
-    $) = "$gid $gid";                 # change eGID
+    $) = (get_user_groups($uid));     # change eGID
     $> = $uid;                        # change eUID
     if ( !defined($uid) || ( $> != $uid and $> != ( $uid - 2**32 ) ) ) {
       # make it fatal to avoid security breaches
@@ -2632,13 +2660,33 @@ sub handle_virtual_config_dir {
     my $domain    = '';
     if ( $safename =~ /^(.*)\@(.*)$/ ) { $localpart = $1; $domain = $2; }
 
-    $dir =~ s/\%u/${safename}/g;
-    $dir =~ s/\%l/${localpart}/g;
-    $dir =~ s/\%d/${domain}/g;
-    $dir =~ s/\%\%/\%/g;
+    # Do userdir lookup exim-style. 
+    # If a config for the full address exists, use that one
+    # else look for a domain default
+    if ($dir=~/%x/) {
+      ($userdir=$dir)=~s/%x/${safename}/g;
 
-    $userdir   = $dir;
-    $prefsfile = $dir . '/user_prefs';
+      $prefsfile=$userdir.'/user_prefs';
+      if (-f $prefsfile) {
+        $dir = $userdir;
+
+      } else {
+        $dir =~ s/%x/${domain}/g;
+
+        $prefsfile = $dir.'/user_prefs';
+        $userdir   = $dir;
+      }
+
+    # Use the normal escaping
+    } else { 
+      $dir =~ s/\%u/${safename}/g;
+      $dir =~ s/\%l/${localpart}/g;
+      $dir =~ s/\%d/${domain}/g;
+      $dir =~ s/\%\%/\%/g;
+
+      $userdir   = $dir;
+      $prefsfile = $dir . '/user_prefs';
+    }
 
     # Log that the default configuration is being used for a user.
     info("spamd: using default config for $username: $prefsfile");
@@ -2710,7 +2758,7 @@ sub handle_user_setuid_with_sql {
   }
 
   if ($setuid_to_user) {
-    $) = "$gid $gid";                 # change eGID
+    $) = (get_user_groups($uid));     # change eGID
     $> = $uid;                        # change eUID
     if (!defined($uid) || ($> != $uid and $> != ($uid - 2**32))) {
       # make it fatal to avoid security breaches
@@ -2755,7 +2803,7 @@ sub handle_user_setuid_with_ldap {
   }
 
   if ($setuid_to_user) {
-    $) = "$gid $gid";    # change eGID
+    $) = (get_user_groups($uid));    # change eGID
     $> = $uid;           # change eUID
     if (!defined($uid) || ($> != $uid and $> != ($uid - 2**32))) {
       # make it fatal to avoid security breaches
@@ -2958,8 +3006,8 @@ sub serverstarted {
 }
 
 sub daemonize {
-  # Pretty command line in ps
-  $0 = join (' ', $ORIG_ARG0, @ORIG_ARGV) unless would_log("dbg");
+  # removed bug 7594 # Pretty command line in ps
+    #$0 = join (' ', $ORIG_ARG0, @ORIG_ARGV) unless would_log("dbg");
 
   # be a nice daemon and chdir to the root so we don't block any
   # unmount attempts
@@ -3021,33 +3069,27 @@ sub ip_is_allowed {
 
 sub preload_modules_with_tmp_homedir {
 
-  # set $ENV{HOME} in /tmp while we compile and preload everything.
-  # File::Spec->tmpdir uses TMPDIR, TMP, TEMP, C:/temp, /tmp etc.
-  my $tmpdir = File::Spec->tmpdir();
-  if ( !$tmpdir ) {
-    die "spamd: cannot find writable tmp dir, set TMP or TMPDIR in environment";
-  }
+  # set $ENV{HOME} in a temp directory while we compile and preload everything.
+  my $tmphome = secure_tmpdir();
 
-  # If TMPDIR isn't set, File::Spec->tmpdir() will set it to undefined.
+  # If TMPDIR isn't set, File::Spec->tmpdir() called by secure_tmpdir() may set it to undefined.
   # that then breaks other things ...
+  # If this is really necessary shouldn't secure_tmpdir() be doing it?
   delete $ENV{'TMPDIR'} if ( !defined $ENV{'TMPDIR'} );
-
-  my $tmphome = File::Spec->catdir( $tmpdir, "spamd-$$-init" );
-  $tmphome = untaint_file_path($tmphome);
 
   my $tmpsadir = File::Spec->catdir( $tmphome, ".spamassassin" );
 
   dbg("spamd: Preloading modules with HOME=$tmphome");
 
-  # bug 5379: spamd won't start if the temp preloading dir exists;
-  # be sure to remove it just in case 
+  if (!-d $tmphome) {
+    die "spamd: cannot create temp directory $tmphome: $!";
+  }
+
+  # bug 5379: spamd won't start if the temp preloading dir exists; check if exists and remove it
+  # This check should be unnecessary now that $tmphome created using File::Temp, but leave it just in case
   if (-d $tmpsadir) {
     rmdir( $tmpsadir ) or die "spamd: $tmpsadir not empty: $!";
   }
-  if (-d $tmphome) {
-    rmdir( $tmphome ) or die "spamd: $tmphome not empty: $!";
-  }
-  mkdir( $tmphome,  0700 ) or die "spamd: cannot create $tmphome: $!";
   mkdir( $tmpsadir, 0700 ) or die "spamd: cannot create $tmpsadir: $!";
   $ENV{HOME} = $tmphome;
 
@@ -3232,13 +3274,13 @@ Options:
  -H [dir], --helper-home-dir[=dir] Specify a different HOME directory
  --ssl                             Enable SSL on TCP connections
  --ssl-port port                   Override --port setting for SSL connections
- --ssl-version sslversion          Specify SSL protocol version to use
  --server-key keyfile              Specify an SSL keyfile
  --server-cert certfile            Specify an SSL certificate
  --socketpath=path                 Listen on a given UNIX domain socket
  --socketowner=name                Set UNIX domain socket file's owner
  --socketgroup=name                Set UNIX domain socket file's group
  --socketmode=mode                 Set UNIX domain socket file's mode
+ --timing                          Enable timing and logging
  -V, --version                     Print version and exit
 
 The --listen option (or -i) may be specified multiple times, its syntax
@@ -3407,6 +3449,10 @@ sign.
 =item %d -- replaced with the 'domain' of the current username.  In other
 words, if the username is an email address, this is the part after the C<@>
 sign.
+
+=item %x -- replaced with the full name of the current user, as sent by spamc.
+If the resulting config directory does not exist, replace with the domain part 
+to use a domain-wide default.   
 
 =item %% -- replaced with a single percent sign (%).
 
@@ -3720,14 +3766,6 @@ Optionally specifies the port number for the server to listen on for
 SSL connections (default: whatever --port uses).  See B<--ssl> for
 more details.
 
-=item B<--ssl-version>=I<sslversion>
-
-Specify the SSL protocol version to use, one of B<sslv3> or B<tlsv1>.
-The default, B<sslv3>, is the most flexible, accepting a SSLv3 or
-higher hello handshake, then negotiating use of SSLv3 or TLSv1
-protocol if the client can accept it.  Specifying B<--ssl-version>
-implies B<--ssl>.
-
 =item B<--server-key> I<keyfile>
 
 Specify the SSL key file to use for SSL connections.
@@ -3773,6 +3811,12 @@ C<--socketowner> for notes on ownership and permissions.
 Set UNIX domain socket to use the octal mode I<mode>.  Note that if C<-u> is
 used, that user should have write permissions to unlink the file later, for
 when the C<spamd> server is killed.
+
+
+=item B<--timing>
+
+  Enable timing measurements and output the information for logging.  This
+  is the same information as provided by the TIMING tag.
 
 =back
 

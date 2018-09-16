@@ -21,6 +21,7 @@
 #include <string.h>
 #include <assert.h>
 #include <stdlib.h>
+#include <err.h>
 #include "getopt.h"
 
 #ifdef WIN32
@@ -244,19 +245,26 @@ spamc_getopt_long(int argc, char * const argv[],
       longoptlen = strlen(longopt) - 2;
       if((bp = strchr(longopt, '='))) {
          opt = strdup(bp+1);
+         if (opt == NULL) {
+            err(1, NULL);
+         }  
          longoptlen -= strlen(bp);
       }
 
       for(i=0; ; i++) {
 	 /* changed to longopts[i].name[0] == 0 - bug 7148 */
-         if((longopts[i].name == NULL) || (longopts[i].name[0] == 0))
+         if((longopts[i].name == NULL) || (longopts[i].name[0] == 0)) {
+            free(opt);
             return(longoptiserr(argc, argv, spamc_optind-1, OPTERRNF));
-         if((memcmp(longopt+2, longopts[i].name, longoptlen)) == 0) {
+         }
+         if(((strncmp(longopt+2, longopts[i].name, longoptlen)) == 0) && (strlen(longopts[i].name) == longoptlen)) {
             *longindex = i;
             if(longopts[i].has_arg == required_argument) {
                if(((spamc_optind >= argc) || (!argv[spamc_optind]) || (argv[spamc_optind][0] == '-')) && 
-                   (opt == NULL))
+                   (opt == NULL)) {
+                  free(opt);
                   return(longoptiserr(argc, argv, spamc_optind-1, OPTERRARG));
+               }
                if(opt != NULL) {
                   spamc_optarg = opt;
                } else {
@@ -265,6 +273,7 @@ spamc_getopt_long(int argc, char * const argv[],
             } else if(longopts[i].has_arg == optional_argument) {
                if(((spamc_optind < argc) && (argv[spamc_optind]) && (argv[spamc_optind][0] != '-')) || 
                      (opt != NULL)) {
+		  free(opt);
                   if(opt != NULL) {
                      spamc_optarg = opt;
                   } else {

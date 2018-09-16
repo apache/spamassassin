@@ -60,8 +60,7 @@ the wheel?
 use Getopt::Long;
 use strict;
 
-use vars qw($opt_cffile $opt_lambda $opt_threshold $opt_scoreset
-	    $opt_spam $opt_ham $opt_fplog $opt_fnlog);
+our ($opt_cffile, $opt_lambda, $opt_threshold, $opt_scoreset, $opt_spam, $opt_ham, $opt_fplog, $opt_fnlog);
 
 $opt_cffile = "../rules";
 $opt_threshold = 5;
@@ -92,7 +91,7 @@ if (defined $opt_fplog) { open (FPLOG, ">$opt_fplog"); }
 my $lambda = 50;
 if ($opt_lambda) { $lambda = $opt_lambda; }
 
-use vars qw(%scores %allrules %rules);
+our (%scores, %allrules, %rules);
 
 readscores();
 

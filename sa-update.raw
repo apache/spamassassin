@@ -26,7 +26,7 @@ if ('$Id$' =~ ':') {
   # Subversion keyword "$Id$" has been successfully expanded.
   # Doesn't happen with automated launchpad builds:
   # https://bugs.launchpad.net/launchpad/+bug/780916
-  $VERSION = 'svn' . (split(/\s+/, '$Id$'))[2];
+  $VERSION = &Mail::SpamAssassin::Version . ' / svn' . (split(/\s+/, '$Id$'))[2];
 }
 
 my $PREFIX          = '@@PREFIX@@';             # substituted at 'make' time
@@ -55,10 +55,13 @@ use File::Path;
 use Getopt::Long;
 use Pod::Usage;
 use Config;
+use POSIX qw(locale_h setsid sigprocmask _exit);
+ 
+POSIX::setlocale(LC_TIME,'C');
 
 BEGIN {                          # see comments in "spamassassin.raw" for doco
   my @bin = File::Spec->splitpath($0);
-  my $bin = ($bin[0] ? File::Spec->catpath(@bin[0..1]) : $bin[1])
+  my $bin = ($bin[0] ? File::Spec->catpath(@bin[0..1], '') : $bin[1])
             || File::Spec->curdir;
 
   if (-e $bin.'/lib/Mail/SpamAssassin.pm'
@@ -86,22 +89,22 @@ use Net::DNS;
 use HTTP::Date qw(time2str);
 use Archive::Tar 1.23;
 use IO::Zlib 1.04;
+use Mail::SpamAssassin::Logger qw(:DEFAULT info log_message);
 
-use vars qw($have_lwp $io_socket_module_name $have_inet4 $have_inet6);
+our ($have_lwp, $io_socket_module_name, $have_inet4, $have_inet6, $have_sha256, $have_sha512);
 
 BEGIN {
   # Deal with optional modules
 
-  eval { require Digest::SHA; import Digest::SHA qw(sha1_hex); 1 }
-  or do { require Digest::SHA1; import Digest::SHA1 qw(sha1_hex) };
-
-  $have_lwp = eval {
+  eval { require Digest::SHA; import Digest::SHA qw(sha256_hex sha512_hex); 1 } and do { $have_sha256=1; $have_sha512=1 }
+  or die "Unable to verify file hashes! You must install a modern version of Digest::SHA.";
+  
+    $have_lwp = eval {
     require LWP::UserAgent;
   };
 
   if (eval { require IO::Socket::IP }) {  # handles IPv6 and IPv4
     $io_socket_module_name = 'IO::Socket::IP';
- 
   } elsif (eval { require IO::Socket::INET6 }) {  # handles IPv6 and IPv4
     $io_socket_module_name = 'IO::Socket::INET6';
 
@@ -110,7 +113,7 @@ BEGIN {
   }
 
   $have_inet4 =  # can we create a PF_INET socket?
-    defined $io_socket_module_name && eval {  
+    defined $io_socket_module_name && eval {
       my $sock =
         $io_socket_module_name->new(LocalAddr => '0.0.0.0', Proto => 'tcp');
       $sock->close or die "error closing socket: $!"  if $sock;
@@ -137,6 +140,7 @@ use Mail::SpamAssassin::Util qw(untaint_var untaint_file_path
 # Make the main dbg() accessible in our package w/o an extra function
 *dbg=\&Mail::SpamAssassin::dbg;
 sub dbg;
+
 
 $| = 1;  # autoflushing STDOUT makes verbose output consistent with warnings
 
@@ -237,7 +241,6 @@ else {
 }
 my $RevSAVersion = join(".", reverse split(/\./, $SAVersion));
 
-  
 # set debug areas, if any specified (only useful for command-line tools)
 $SAVersion =~ /^(\d+\.\d+)/;
 if ($1+0 > 3.0) {
@@ -246,7 +249,6 @@ if ($1+0 > 3.0) {
 else {
   $opt{'debug'} = defined $opt{'debug'};
 }
-
 
 # Find the default site rule directory, also setup debugging and other M::SA bits
 my $SA = Mail::SpamAssassin->new({
@@ -594,13 +596,15 @@ foreach my $channel (@channels) {
   }
 
   my $content;
-  my $SHA1;
+  my $SHA512;
+  my $SHA256;
   my $GPG;
 
   if ($instfile) {
-    dbg("channel: using --install files $instfile\{,.sha1,.asc\}");
+    dbg("channel: using --install files $instfile\{,.sha256,.sha512,.asc\}");
     $content = read_install_file($instfile);
-    $SHA1 = read_install_file($instfile.".sha1");
+    if ( -s "$instfile.sha512" ) { $SHA512 = read_install_file($instfile.".sha512"); }
+    if ( -s "$instfile.sha256" ) { $SHA256 = read_install_file($instfile.".sha256"); }
     $GPG = read_install_file($instfile.".asc") if $GPG_ENABLED;
 
   } else {  # not an install file, obtain fresh rules from network
@@ -649,8 +653,9 @@ foreach my $channel (@channels) {
       }
       foreach my $mirror (@mirrors) {
         my $result_fname;
-        ($mirby, $result_fname) =
+        $result_fname =
           http_get($mirror, $UPDDir, $mirby_path, $mirby_force_reload);
+        $mirby = read_content($result_fname, 0);
 
         if ($mirby) {
           dbg("channel: MIRRORED.BY file for channel %s retrieved", $channel);
@@ -733,58 +738,98 @@ foreach my $channel (@channels) {
 
     # Loop through all available mirrors, choose from them randomly
     # if the archive get fails, choose another mirror,
-    # if the get for the sha1 or gpg signature files, the channel fails
+    # if the get for the hash or gpg signature files fails, the channel fails
     while (my $mirror = choose_mirror(\%mirrors)) {
       my $result_fname;
       # Grab the data hash for this mirror, then remove it from the list
       my $mirror_info = $mirrors{$mirror};
       delete $mirrors{$mirror};
 
+      if (!check_mirror_af($mirror)) {
+        my @my_af;
+        push(@my_af, "IPv4") if $have_inet4;
+        push(@my_af, "IPv6") if $have_inet6;
+        push(@my_af, "no IP service") if !@my_af;
+        dbg("reject mirror %s: no common address family (%s)",
+            $mirror, join(" ", @my_af));
+        next;
+      }
+
       dbg("channel: selected mirror $mirror");
 
       # Actual archive file
-      ($content, $result_fname) =
-        http_get("$mirror/$newV.tar.gz", $UPDDir);
+      $result_fname = http_get("$mirror/$newV.tar.gz", $UPDDir);
+      $content = read_content($result_fname, 1);
       next unless $content;
       $preserve_files{$result_fname} = 1;
 
-      # SHA1 of the archive file
-      ($SHA1, $result_fname) =
-        http_get("$mirror/$newV.tar.gz.sha1", $UPDDir);
-      last unless $SHA1;
-      $preserve_files{$result_fname} = 1;
+      # SHA512 of the archive file
+      $result_fname = http_get("$mirror/$newV.tar.gz.sha512", $UPDDir);
+      if ( -s $result_fname) {
+        $SHA512 = read_content($result_fname, 0);
+        last unless $SHA512;
+        $preserve_files{$result_fname} = 1;
+      } else {
+        undef $SHA512;
+        dbg("channel: No sha512 file available from $mirror");
+      }
+
+      # SHA256 of the archive file
+      $result_fname = http_get("$mirror/$newV.tar.gz.sha256", $UPDDir);
+      if ( -s $result_fname) {
+        $SHA256 = read_content($result_fname, 0);
+        last unless $SHA256;
+        $preserve_files{$result_fname} = 1;
+      } else {
+        undef $SHA256;
+        dbg("channel: No sha256 file available from $mirror");
+      }
 
       # if GPG is enabled, the GPG detached signature of the archive file
       if ($GPG_ENABLED) {
-        ($GPG, $result_fname) =
-          http_get("$mirror/$newV.tar.gz.asc", $UPDDir);
+        $result_fname = http_get("$mirror/$newV.tar.gz.asc", $UPDDir);
+        $GPG = read_content($result_fname, 0);
         last unless $GPG;
         $preserve_files{$result_fname} = 1;
       }
-
       last;
     }
 
   }
 
-  unless ($content && $SHA1 && (!$GPG_ENABLED || $GPG)) {
+  unless ($content && ( $SHA512 || $SHA256 ) && (!$GPG_ENABLED || $GPG)) {
     channel_failed("channel: could not find working mirror");
     next;
   }
 
-  # Validate the SHA1 signature before going forward with more complicated
-  # operations.
-  # The SHA1 file may be "signature filename" ala sha1sum, just use the signature
-  { local($1);
-    $SHA1 =~ /^([a-fA-F0-9]{40})/;
-    $SHA1 = $1 || 'INVALID';
+  if ( $SHA512 ) {
+    # Validate the SHA512 signature
+    { local($1);
+      $SHA512 =~ /^([a-fA-F0-9]{128})/;
+      $SHA512 = $1 || 'INVALID';
+    }
+    my $digest = sha512_hex($content);
+    dbg("sha512: verification wanted: $SHA512");
+    dbg("sha512: verification result: $digest");
+    unless ($digest eq $SHA512) {
+      channel_failed("channel: SHA512 verification failed");
+      next;
+    }
   }
-  my $digest = sha1_hex($content);
-  dbg("sha1: verification wanted: $SHA1");
-  dbg("sha1: verification result: $digest");
-  unless ($digest eq $SHA1) {
-    channel_failed("channel: SHA1 verification failed");
-    next;
+
+  if ( $SHA256 ) {
+    # Validate the SHA256 signature
+    { local($1);
+      $SHA256 =~ /^([a-fA-F0-9]{64})/;
+      $SHA256 = $1 || 'INVALID';
+    }
+    my $digest = sha256_hex($content);
+    dbg("sha256: verification wanted: $SHA256");
+    dbg("sha256: verification result: $digest");
+    unless ($digest eq $SHA256) {
+      channel_failed("channel: SHA256 verification failed");
+      next;
+    }
   }
 
   # Write the content out to a temp file for GPG/Archive::Tar interaction
@@ -856,7 +901,7 @@ foreach my $channel (@channels) {
       }
 
       # use the longest match we can find
-      $signer = $key if (length $key > length $signer);
+      $signer = $key if length $key > length $signer;
     }
 
     my $errno = 0;  close CMD or $errno = $!;
@@ -1075,7 +1120,7 @@ ENDOFVALIDATIONERR
           return 0;
         }
 
-        # if all went fine, remove the .tar.gz, .sha1 and .asc files
+        # if all went fine, remove the .tar.gz, .sha* and .asc files
         delete_files( grep(!m{/\QMIRRORED.BY\E\z}, keys %preserve_files) );
 
         $channel_successes++;
@@ -1498,7 +1543,7 @@ sub http_get {
       $out_fh->print($content) or die "Error writing to $out_fname: $!";
     }
     $out_fh->close or die "Error closing file $out_fname: $!";
-    return ($content, $out_fname);
+    return $out_fname;
   } else {
     die "http: no downloading tool available";
   }
@@ -1541,16 +1586,31 @@ sub http_get {
            $ext_prog, $url, exit_status_str($child_stat,0));
   }
 
-  if ($child_stat == 0) {
-    my $inp = IO::File->new;
-    $inp->open($out_fname,'<') or die "Cannot open file $out_fname: $!";
-    my($nbytes,$buff); $content = '';
-    while (($nbytes=$inp->read($buff,16384)) > 0) { $content .= $buff }
-    defined $nbytes or die "Error reading from file $out_fname: $!";
-    $inp->close or die "Error closing $out_fname: $!";
-  }
+  return $out_fname;
+}
 
-  return ($content, $out_fname);
+# Read the content of a (downloaded) file. The subroutine expects a file name
+# and a boolean value. The boolean value indicates whether the file should be
+# opened in "text" mode or in "binary" mode. Pass 0 for text mode, 1 for binary
+# mode. Returns the content of the file as a string.
+sub read_content {
+  my ($file_name, $binary_mode) = @_;
+  my $content;
+
+  my $file = IO::File->new;
+  $file->open($file_name, '<') or die "Cannot open file $file_name: $!";
+  if ($binary_mode) {
+    binmode $file;
+  }
+  my($number_of_bytes,$buffer);
+  $content = '';
+  while (($number_of_bytes = $file->read($buffer, 16384)) > 0) {
+    $content .= $buffer;
+  }
+  defined $number_of_bytes or die "Error reading from file $file_name: $!";
+  $file->close or die "Error closing $file_name: $!";
+
+  return $content;
 }
 
 ##############################################################################
@@ -1590,6 +1650,18 @@ sub choose_mirror {
   }
 
   return $mirrors[0];
+}
+
+##############################################################################
+
+sub check_mirror_af {
+    my ($mirror) = @_;
+    my($a_rr, $aaaa_rr);
+      # RFC 3986:  scheme = ALPHA *( ALPHA / DIGIT / "+" / "-" / "." )
+    $mirror =~ s{^[a-z][a-z0-9.+-]*://}{}si;  # strip scheme like http://
+    return 1 if $have_inet4 && do_dns_query($mirror, "A");
+    return 1 if $have_inet6 && do_dns_query($mirror, "AAAA");
+    return 0;
 }
 
 ##############################################################################
@@ -1794,7 +1866,8 @@ Options:
   --channelfile file      Retrieve updates from the channels in the file
   --checkonly             Check for update availability, do not install
   --install filename      Install updates directly from this file. Signature
-                          verification will use "file.asc" and "file.sha1"
+                          verification will use "file.asc", "file.sha256",
+                          and "file.sha512".
   --allowplugins          Allow updates to load plugin code
   --gpgkey key            Trust the key id to sign releases
                           Use multiple times for multiple keys
@@ -1824,7 +1897,8 @@ configuration, based on channels.  The default channel is
 I<updates.spamassassin.org>, which has updated rules since the previous
 release.
 
-Update archives are verified using SHA1 hashes and GPG signatures, by default.
+Update archives are verified using SHA256 and SHA512 hashes and GPG signatures,
+by default.
 
 Note that C<sa-update> will not restart C<spamd> or otherwise cause
 a scanner to reload the now-updated ruleset automatically.  Instead,
@@ -1872,10 +1946,10 @@ The exit code will be C<0> or C<1> as described below.
 Install updates "offline", from the named tar.gz file, instead of performing
 DNS lookups and HTTP invocations.
 
-Files named B<file>.sha1 and B<file>.asc will be used for the SHA-1 and GPG
-signature, respectively.  The filename provided must contain a version number
-of at least 3 digits, which will be used as the channel's update version
-number.
+Files named B<file>.sha256, B<file>.sha512, and B<file>.asc will be used for
+the SHA256 and SHA512 hashes and the GPG signature, respectively.  The filename
+provided must contain a version number of at least 3 digits, which will be used
+as the channel's update version number.
 
 Multiple B<--channel> switches cannot be used with B<--install>.  To install
 multiple channels from tarballs, run C<sa-update> multiple times with different
@@ -1892,11 +1966,11 @@ in the downloaded update rules files.
 
 =item B<--gpg>, B<--nogpg>
 
-sa-update by default will verify update archives by use of a SHA1 checksum
-and GPG signature.  SHA1 hashes can verify whether or not the downloaded
-archive has been corrupted, but it does not offer any form of security
-regarding whether or not the downloaded archive is legitimate (aka:
-non-modifed by evildoers).  GPG verification of the archive is used to
+sa-update by default will verify update archives by use of SHA256 and SHA512
+checksums and GPG signature.  SHA* hashes can verify whether or not the
+downloaded archive has been corrupted, but it does not offer any form of
+security regarding whether or not the downloaded archive is legitimate
+(aka: non-modifed by evildoers).  GPG verification of the archive is used to
 solve that problem.
 
 If you wish to skip GPG verification, you can use the B<--nogpg> option
@@ -2034,10 +2108,13 @@ See <http://issues.apache.org/SpamAssassin/>
 
 The Apache SpamAssassin(tm) Project <http://spamassassin.apache.org/>
 
-=head1 COPYRIGHT
+=head1 LICENSE AND COPYRIGHT
 
 SpamAssassin is distributed under the Apache License, Version 2.0, as
 described in the file C<LICENSE> included with the distribution.
+
+Copyright (C) 2015 The Apache Software Foundation
+
 
 =cut
 

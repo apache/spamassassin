@@ -162,6 +162,7 @@ sub _relay_is_in_whitelist_bounce_relays {
 sub _relay_is_in_list {
   my ($self, $list, $pms, $relay) = @_;
   $relay = lc $relay;
+  utf8::encode($relay) if utf8::is_utf8($relay);  # encode chars to UTF-8
 
   if (defined $list->{$relay}) { return 1; }
 

@@ -19,18 +19,14 @@ package Mail::SpamAssassin::Locker;
 
 use strict;
 use warnings;
-use bytes;
+# use bytes;
 use re 'taint';
 use Fcntl;
 use Time::HiRes ();
 
 use Mail::SpamAssassin;
 
-use vars qw{
-  @ISA
-};
-
-@ISA = qw();
+our @ISA = qw();
 
 ###########################################################################
 

@@ -45,28 +45,20 @@ available separately on CPAN.
 
 
 BUGS
+  
+See <http://issues.apache.org/SpamAssassin/> to report a bug.
 
-For now, report to me directly or to the SpamAssassin dev list.
+Please include perl, Apache and mod_perl versions. 
 
-Include perl, Apache and mod_perl versions.  `httpd -V` shouldn't hurt
-(unless you know it doesn't matter in your case).  `httpd -l` might also
-be handy, if you're reporting an apache-spamd.pl issue.  Don't forget
-relevant lines from logs/error_log.
+`httpd -V` shouldn't hurt (unless you know it doesn't matter in your case).  
+`httpd -l` might also be handy, if you're reporting an apache-spamd.pl issue.
+Don't forget relevant lines from logs/error_log.
 
-Known bugs: worker (and other threading MPMs) probably will cause
+Known bugs: 
+
+Worker (and other threading MPMs) probably will cause
 problems.  SA isn't really thread-safe; one example is using umask().
 Some helpers like Razor / Pyzor / DCC probably do chdir().  I consider
 this a problem of SA, not this code.
-
-
-COPYRIGHT AND LICENCE
-
-Copyright (C) 2006 by Radosław Zieliński <radek@pld-linux.org>
-
-Based on spamd code, (C) by The SpamAssassin(tm) Project
-
-This library is free software; you can redistribute it and/or modify it
-under the terms of the Apache License, Version 2.0.
-
 
 # vim: encoding=utf8

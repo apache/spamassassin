@@ -298,11 +298,10 @@ use Mail::SpamAssassin::Util;
 use Mail::SpamAssassin::Logger;
 use strict;
 use warnings;
-use bytes;
+# use bytes;
 use re 'taint';
 
-use vars qw(@ISA);
-@ISA = qw(Mail::SpamAssassin::Plugin);
+our @ISA = qw(Mail::SpamAssassin::Plugin);
 
 use constant LOG_COMPLETION_TIMES => 0;
 
@@ -942,9 +941,8 @@ sub complete_ns_lookup {
     next unless (defined($str) && defined($dom));
     dbg("uridnsbl: got($j) NS for $dom: $str");
 
-    if ($str =~ /IN\s+NS\s+(\S+)/) {
-      my $nsmatch = lc $1;
-      $nsmatch =~ s/\.$//;
+    if ($rr->type eq 'NS') {
+      my $nsmatch = lc $rr->nsdname;  # available since at least Net::DNS 0.14
       my $nsrhblstr = $nsmatch;
       my $fullnsrhblstr = $nsmatch;
 
@@ -1010,10 +1008,9 @@ sub complete_a_lookup {
     dbg("uridnsbl: complete_a_lookup aborted %s", $ent->{key});
     return;
   }
-
   dbg("uridnsbl: complete_a_lookup %s", $ent->{key});
-  my @answer = $pkt->answer;
   my $j = 0;
+  my @answer = $pkt->answer;
   foreach my $rr (@answer) {
     $j++;
     my $str = $rr->string;
@@ -1025,9 +1022,9 @@ sub complete_a_lookup {
     }
     dbg("uridnsbl: complete_a_lookup got(%d) A for %s: %s", $j,$hname,$str);
 
-    local $1;
-    if ($str =~ /IN\s+A\s+(\S+)/) {
-      $self->lookup_dnsbl_for_ip($pms, $ent->{obj}, $1);
+    if ($rr->type eq 'A') {
+      my $ip_address = $rr->rdatastr;
+      $self->lookup_dnsbl_for_ip($pms, $ent->{obj}, $ip_address);
     }
   }
 }
@@ -1100,7 +1097,9 @@ sub complete_dnsbl_lookup {
     my $rr_type = $rr->type;
 
     if ($rr_type eq 'A') {
-      $rdatastr = $rr->rdatastr;
+      # Net::DNS::RR::A::address() is available since Net::DNS 0.69
+      $rdatastr = $rr->UNIVERSAL::can('address') ? $rr->address
+                                                 : $rr->rdatastr;
       if ($rdatastr =~ m/^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/) {
         $rdatanum = Mail::SpamAssassin::Util::my_inet_aton($rdatastr);
       }

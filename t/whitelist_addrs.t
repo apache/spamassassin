@@ -4,16 +4,9 @@ use lib '.'; use lib 't';
 use SATest; sa_t_init("whitelist_addrs");
 use IO::File;
 
-use constant HAS_MODULES => eval {
-  require DB_File;
-};
+use constant HAS_DB_FILE => eval { require DB_File };
 
-use constant TEST_ENABLED => conf_bool('run_long_tests');
-
-use constant DO_RUN => TEST_ENABLED && HAS_MODULES;
-
-use Test;
-BEGIN { 
+BEGIN {
   if (-e 't/test_dir') {
     chdir 't';
   }
@@ -21,11 +14,12 @@ BEGIN {
   if (-e 'test_dir') {
     unshift(@INC, '../blib/lib');
   }
+}
 
-  plan tests => (DO_RUN ? 35 : 0);
- };
-
-exit unless DO_RUN;
+use Test::More;
+plan skip_all => 'Long running tests disabled' unless conf_bool('run_long_tests');
+plan skip_all => 'Need DB_File for this test'  unless HAS_DB_FILE;
+plan tests => 35;
 
 # ---------------------------------------------------------------------------
 

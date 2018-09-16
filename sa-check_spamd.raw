@@ -37,10 +37,13 @@ use lib '@@INSTALLSITELIB@@';                   # substituted at 'make' time
 use Errno qw(EBADF);
 use File::Spec;
 use Config;
+use POSIX qw(locale_h setsid sigprocmask _exit);
+
+POSIX::setlocale(LC_TIME,'C');
 
 BEGIN {                          # see comments in "spamassassin.raw" for doco
   my @bin = File::Spec->splitpath($0);
-  my $bin = ($bin[0] ? File::Spec->catpath(@bin[0..1]) : $bin[1])
+  my $bin = ($bin[0] ? File::Spec->catpath(@bin[0..1], '') : $bin[1])
             || File::Spec->curdir;
 
   if (-e $bin.'/lib/Mail/SpamAssassin.pm'
@@ -419,21 +422,21 @@ exiting with one of these values:
 
 =over 4
 
-=item 0
+=item C<0>
 
 OK: A spamd ping response was received within all threshold times.
 
-=item 1
+=item C<1>
 
 WARNING: A spamd ping response exceeded the warning threshold but not the
 critical threshold.
 
-=item 2
+=item C<2>
 
 CRITICAL: A spamd ping response exceeded either the critical threshold or the
 timeout value.
 
-=item 3
+=item C<3>
 
 UNKNOWN: An error, probably caused by a missing dependency or an invalid
 configuration parameter being supplied, occurred in the sa-check_spamd program.
@@ -454,10 +457,12 @@ C<Mail::SpamAssassin> version 3.1.1 or higher (3.1.6 or higher recommended)
 
 Daryl C. W. O'Shea, DOS Technologies <spamassassin@dostech.ca>
 
-=head1 LICENSE
+=head1 COPYRIGHT AND LICENSE
 
 sa-check_spamd is distributed under the Apache License, Version 2.0, as
 described in the file C<LICENSE> included with the Apache SpamAssassin
 distribution and available at http://www.apache.org/licenses/LICENSE-2.0
+
+Copyright (C) 2015 The Apache Software Foundation
 
 =cut

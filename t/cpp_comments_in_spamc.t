@@ -2,7 +2,7 @@
 
 use lib '.'; use lib 't';
 use SATest; sa_t_init("cpp_comments_in_spamc");
-use Test; BEGIN { plan tests => 1 };
+use Test::More tests => 1;
 
 # ---------------------------------------------------------------------------
 # by simply reading the files directly in perl, we avoid all sorts

@@ -30,15 +30,11 @@ use Mail::SpamAssassin::Logger;
 
 use strict;
 use warnings;
-use bytes;
+# use bytes;
 use re 'taint';
 use File::Spec;
 
-use vars qw{
-  @ISA @CONFIG_TIME_HOOKS
-};
-
-@ISA = qw();
+our @ISA = qw();
 
 #Removed $VERSION per BUG 6422
 #$VERSION = 'bogus';     # avoid CPAN.pm picking up version strings later
@@ -56,7 +52,7 @@ use vars qw{
 # Any other such hooks that may be compiled at config-parse-time should be
 # listed here.
 
-@CONFIG_TIME_HOOKS = qw( parse_config );
+our @CONFIG_TIME_HOOKS = qw( parse_config );
 
 ###########################################################################
 

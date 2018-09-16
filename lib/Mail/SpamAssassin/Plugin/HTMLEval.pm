@@ -19,15 +19,14 @@ package Mail::SpamAssassin::Plugin::HTMLEval;
 
 use strict;
 use warnings;
-use bytes;
+# use bytes;
 use re 'taint';
 
 use Mail::SpamAssassin::Plugin;
 use Mail::SpamAssassin::Locales;
 use Mail::SpamAssassin::Util qw(untaint_var);
 
-use vars qw(@ISA);
-@ISA = qw(Mail::SpamAssassin::Plugin);
+our @ISA = qw(Mail::SpamAssassin::Plugin);
 
 # constructor: register the eval rule
 sub new {

@@ -3,11 +3,10 @@
 use lib '.'; use lib 't';
 use SATest; sa_t_init("spamc_x_E_R");
 
-use constant TEST_ENABLED => conf_bool('run_long_tests');
-our $DO_RUN = !$SKIP_SPAMD_TESTS && TEST_ENABLED;
-
-use Test; plan tests => ($DO_RUN ? 49 : 0);
-exit unless $DO_RUN;
+use Test::More;
+plan skip_all => "Long running tests disabled" unless conf_bool('run_long_tests');
+plan skip_all => "Spamd tests disabled" if $SKIP_SPAMD_TESTS;
+plan tests => 49;
 
 # ---------------------------------------------------------------------------
 # test case for bug 5412; exit status with -x/-E/-R combos

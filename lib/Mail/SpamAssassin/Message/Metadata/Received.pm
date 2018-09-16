@@ -43,7 +43,7 @@ package Mail::SpamAssassin::Message::Metadata::Received; 1;
 package Mail::SpamAssassin::Message::Metadata;
 use strict;
 use warnings;
-use bytes;
+# use bytes;
 use re 'taint';
 
 use Mail::SpamAssassin::Dns;
@@ -84,6 +84,8 @@ sub parse_received_headers {
   $self->{last_trusted_relay_index} = -1;	# last counting from the top,
   $self->{last_internal_relay_index} = -1;	# first in time
 
+  $self->{allow_mailfetch_markers} = 1;         # This needs to be set for the
+                                                # first Received: header
   # now figure out what relays are trusted...
   my $trusted = $permsgstatus->{main}->{conf}->{trusted_networks};
   my $internal = $permsgstatus->{main}->{conf}->{internal_networks};
@@ -238,11 +240,11 @@ sub parse_received_headers {
 
     if ($in_trusted) {
       push (@{$self->{relays_trusted}}, $relay);
-      $self->{allow_fetchmail_markers} = 1;
+      $self->{allow_mailfetch_markers} = 1;
       $self->{last_trusted_relay_index}++;
     } else {
       push (@{$self->{relays_untrusted}}, $relay);
-      $self->{allow_fetchmail_markers} = 0;
+      $self->{allow_mailfetch_markers} = 0;
     }
 
     if ($in_internal) {
@@ -404,8 +406,10 @@ sub parse_received_line {
   # with ASMTP (Authenticated SMTP) is used by Earthlink, Exim 4.34, and others
   # with HTTP should only be authenticated webmail sessions
   # with HTTPU is used by Communigate Pro with Pronto! webmail interface
+  # with HTTPS is used by Horde adjusts the Received header to say "HTTPS" when
+  # a connection is made over HTTPS
   # IANA registry: http://www.iana.org/assignments/mail-parameters/mail-parameters.xhtml
-  if (/ by / && / with ((?:ES|L|UTF8S|UTF8L)MTPS?A|ASMTP|HTTPU?)(?: |;|$)/i) {
+  if (/ by / && / with ((?:ES|L|UTF8S|UTF8L)MTPS?A|ASMTP|HTTP[SU]?)(?: |;|$)/i) {
     $auth = $1;
   }
   # GMail should use ESMTPSA to indicate that it is in fact authenticated,
@@ -434,7 +438,8 @@ sub parse_received_line {
     $auth = 'Postfix';
   }
   # Communigate Pro - Bug 6495 adds HTTP as possible transmission method
-  elsif (/CommuniGate Pro (HTTP|SMTP)/ && / \(account /) {
+  # 	Bug 7277: XIMSS used by Pronto and other custom apps, IMAP supports XMIT extension
+  elsif (/CommuniGate Pro (HTTP|SMTP|XIMSS|IMAP)/ && / \(account /) {
     $auth = 'Communigate';
   }
   # Microsoft Exchange (complete with syntax error)
@@ -717,6 +722,11 @@ sub parse_received_line {
       $rdns = $1; $helo = $2; $ip = $3; $by = $4; goto enough;
     }
 
+    # Received: from mail-backend.DDDD.com (LHLO mail-backend.DDDD.com) (10.2.2.20) by mail-backend.DDDD.com with LMTP; Thu, 18 Jun 2015 16:50:56 -0700 (PDT)
+    if (/^(\S+) \(LHLO (\S*)\) \((${IP_ADDRESS})\) by (\S+) with LMTP/) {
+      $rdns = $1; $helo = $2; $ip = $3; $by = $4; goto enough;
+    }
+
     # from dslb-082-083-045-064.pools.arcor-ip.net (EHLO homepc) [82.83.45.64] by mail.gmx.net (mp010) with SMTP; 03 Feb 2007 13:13:47 +0100
     if (/^(\S+) \((?:HELO|EHLO) (\S*)\) \[(${IP_ADDRESS})\] by (\S+) \([^\)]+\) with (?:ESMTP|SMTP)/) {
       $rdns = $1; $helo = $2; $ip = $3; $by = $4; goto enough;
@@ -867,12 +877,19 @@ sub parse_received_line {
       $helo = $1; $rdns = $2; $ip = $3; $by = $4; goto enough;
     }
 
+    # Identify fetch-from-server incidents:
+    # Fetchmail:
     # Received: from cabbage.jmason.org [127.0.0.1]
     # by localhost with IMAP (fetchmail-5.9.0)
     # for jm@localhost (single-drop); Thu, 13 Mar 2003 20:39:56 -0800 (PST)
-    if (/fetchmail/&&/^(\S+) (?:\[(${IP_ADDRESS})\] )?by (\S+) with \S+ \(fetchmail/) {
+    #
+    # Getmail:
+    # Received: from pop3.mail.dk (195.41.46.251) by loki.valhalla with POP3;
+    # 14 Apr 2010 11:14:29 -0000
+    #
+    if (/with (?:POP3|IMAP)/) {
       $self->found_pop_fetcher_sig();
-      return 0;		# skip fetchmail handovers
+      return 0;		# skip mail fetcher handovers
     }
 
     # Let's try to support a few qmailish formats in one;
@@ -908,14 +925,6 @@ sub parse_received_line {
     # _bushisevil_@mail.com; Thu, 13 Feb 2003 15:59:28 -0500
     if (/ with http for /&&/^\[(${IP_ADDRESS})\] by (\S+) with http for /) {
       $ip = $1; $by = $2; goto enough;
-    }
-
-    # Received: from po11.mit.edu [18.7.21.73]
-    # by stark.dyndns.tv with POP3 (fetchmail-5.9.7)
-    # for stark@localhost (single-drop); Tue, 18 Feb 2003 10:43:09 -0500 (EST)
-    # by po11.mit.edu (Cyrus v2.1.5) with LMTP; Tue, 18 Feb 2003 09:49:46 -0500
-    if (/ with POP3 /&&/^(\S+) \[(${IP_ADDRESS})\] by (\S+) with POP3 /) {
-      $rdns = $1; $ip = $2; $by = $3; goto enough;
     }
 
     # Received: from snake.corp.yahoo.com(216.145.52.229) by x.x.org via smap (V1.3)
@@ -1190,6 +1199,11 @@ sub parse_received_line {
     # id 18tOsg-0008FX-00; Thu, 13 Mar 2003 09:20:06 +0000
     if (/^\S+ by \S+ with local/) { return 0; }
 
+    # Local unix socket handover from Cyrus, tested with v2.3.14
+    # Received: from testintranator.net.vm ([unix socket])_ by testintranator.net.vm (Cyrus v2.3.14) with LMTPA;_ Tue, 21 Jul 2009 14:34:14 +0200
+    # Attention: Actually the received header is parsed as "testintranator.net.vm ([unix socket]) by testintranator.net.vm (Cyrus v2.3.14) with LMTPA", "from" is ommited.
+    if (/^\S+ \(\[unix socket\]\) by \S+ \(Cyrus v[0-9]*?\.[0-9]*?\.[0-9]*?\) with LMTPA/) { return 0; }
+
     # HANDOVERS WE KNOW WE CAN'T DEAL WITH: TCP transmission, but to MTAs that
     # just don't log enough info for us to use (ie. no IP address present).
     # Note: "return 0" is strongly recommended here, unless you're sure
@@ -1372,13 +1386,13 @@ sub make_relay_as_string {
 # spamcop does this, and it's a great idea ;)
 sub found_pop_fetcher_sig {
   my ($self) = @_;
-  if ($self->{allow_fetchmail_markers}) {
-    dbg("received-header: found fetchmail marker, restarting parse");
+  if ($self->{allow_mailfetch_markers}) {
+    dbg("received-header: found mail fetcher marker, restarting parse");
     $self->{relays_trusted} = [ ];
     $self->{relays_internal} = [ ];
     $self->{relays_external} = [ ];
   } else {
-    dbg("received-header: found fetchmail marker outside trusted area, ignored");
+    dbg("received-header: found mail fetcher marker outside trusted area, ignored");
   }
 }
 

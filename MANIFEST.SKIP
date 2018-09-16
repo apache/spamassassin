@@ -10,6 +10,7 @@
 \.pid$
 \.so$
 \.svn/
+\.gitignore$
 \.swp$
 \.tmp$
 \.tst$
@@ -31,6 +32,8 @@
 ^build/replace_license_blocks$
 ^build/tag_.*$
 ^build/update_.*$
+^build/pga.*$
+^build/old/.*$
 ^debian/
 ^doc/
 ^lib/Mail/SpamAssassin/Plugin/NetCache\.pm$
@@ -115,3 +118,4 @@
 ^build/rebuild_xt$
 ^build/repackage_latest_update_rules$
 ^MYMETA.(json|yml)$
+^trunk-only.*

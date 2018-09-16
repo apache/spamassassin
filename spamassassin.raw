@@ -37,7 +37,7 @@ BEGIN {
   my @bin = File::Spec->splitpath($0);
   my $bin = (
     $bin[0]
-    ? File::Spec->catpath( @bin[ 0 .. 1 ] )
+    ? File::Spec->catpath( @bin[ 0 .. 1 ], '' )
     : $bin[1]
     )                                           # /home/jm/foo -> /home/jm
     || File::Spec->curdir;                      # foo          -> .
@@ -75,6 +75,7 @@ BEGIN {
 
 use Getopt::Long;
 use Pod::Usage;
+use POSIX qw(locale_h setsid sigprocmask _exit);
 use Mail::SpamAssassin;
 use Mail::SpamAssassin::ArchiveIterator;
 use Mail::SpamAssassin::Util::Progress;
@@ -89,6 +90,8 @@ BEGIN {
     log_message("warn", $_[0]);
   };
 };
+
+POSIX::setlocale(LC_TIME,'C');
 
 my %resphash = (
   EX_OK          => 0,     # no problems
@@ -476,7 +479,10 @@ sub wanted {
 
     # If we're not going to retest, just remove the markup and print it out
     if ( !$opt{'test-mode'} ) {
-      print $spamtest->remove_spamassassin_markup ($mail);
+      my $report = $spamtest->remove_spamassassin_markup ($mail);
+      # encode Unicode characters to UTF-8 octets
+      utf8::encode($report) if utf8::is_utf8($report);
+      print $report;
       $mail->finish();
       $mail = undef;
       return 1;
@@ -525,11 +531,17 @@ sub wanted {
 
   # OK, do checks and put out the message.
   my $status = $spamtest->check($mail);
-  print $status->rewrite_mail()  or die "error writing: $!";
+  { my $report = $status->rewrite_mail();
+    # encode Unicode characters to UTF-8 octets
+    utf8::encode($report) if utf8::is_utf8($report);
+    print $report  or die "error writing: $!";
+  }
 
   if ( $opt{'test-mode'} ) {
-    use bytes;
-    print $status->get_report()  or die "error writing: $!";
+    my $report = $status->get_report();
+    # encode Unicode characters to UTF-8 octets
+    utf8::encode($report) if utf8::is_utf8($report);
+    print $report  or die "error writing: $!";
   }
 
   # if this message was spam, set the exit value appropriately.
@@ -889,8 +901,10 @@ See <http://issues.apache.org/SpamAssassin/>
 
 The SpamAssassin(tm) Project <http://spamassassin.apache.org/>
 
-=head1 COPYRIGHT
+=head1 COPYRIGHT AND LICENSE
 
 SpamAssassin is distributed under the Apache License, Version 2.0, as
 described in the file C<LICENSE> included with the distribution.
+
+Copyright (C) 2015 The Apache Software Foundation
 

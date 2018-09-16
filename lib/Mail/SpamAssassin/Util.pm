@@ -42,30 +42,24 @@ package Mail::SpamAssassin::Util;
 
 use strict;
 use warnings;
-use bytes;
+# use bytes;
 use re 'taint';
 
 require 5.008001;  # needs utf8::is_utf8()
 
 use Mail::SpamAssassin::Logger;
 
-BEGIN {
-  use Exporter ();
+use Exporter ();
 
-  use vars qw (
-    @ISA @EXPORT @EXPORT_OK
-    $AM_TAINTED
-  );
-
-  @ISA = qw(Exporter);
-  @EXPORT = ();
-  @EXPORT_OK = qw(&local_tz &base64_decode &untaint_var &untaint_file_path
+our @ISA = qw(Exporter);
+our @EXPORT = ();
+our @EXPORT_OK = qw(&local_tz &base64_decode &untaint_var &untaint_file_path
                   &exit_status_str &proc_status_ok &am_running_on_windows
                   &reverse_ip_address &decode_dns_question_entry
+                  &get_my_locales &parse_rfc822_date &get_user_groups
                   &secure_tmpfile &secure_tmpdir &uri_list_canonicalize);
-}
 
-use Mail::SpamAssassin;
+our $AM_TAINTED;
 
 use Config;
 use IO::Handle;
@@ -84,12 +78,17 @@ use POSIX qw(:sys_wait_h WIFEXITED WIFSIGNALED WIFSTOPPED WEXITSTATUS
 use constant HAS_MIME_BASE64 => eval { require MIME::Base64; };
 use constant RUNNING_ON_WINDOWS => ($^O =~ /^(?:mswin|dos|os2)/oi);
 
-# These are not implemented on windows (see bug 6798 and 6470)
+# These are only defined as stubs on Windows (see bugs 6798 and 6470).
 BEGIN {
   if (RUNNING_ON_WINDOWS) {
+    no warnings 'redefine';
+
+    # See the section on $? at
+    # http://perldoc.perl.org/perlvar.html#Error-Variables for some
+    # hints on the magic numbers that are used here.
     *WIFEXITED   = sub { not $_[0] & 127 };
     *WEXITSTATUS = sub { $_[0] >> 8 };
-    *WIFSIGNALED = sub { ($_[0] & 127) && ($_[0] & 127 != 127) };
+    *WIFSIGNALED = sub { ($_[0] & 127) && (($_[0] & 127) != 127) };
     *WTERMSIG    = sub { $_[0] & 127 };
   }
 }
@@ -223,7 +222,7 @@ sub am_running_on_windows {
 ###########################################################################
 
 # untaint a path to a file, e.g. "/home/jm/.spamassassin/foo",
-# "C:\Program Files\SpamAssassin\tmp\foo", "/home/õüt/etc".
+# "C:\Program Files\SpamAssassin\tmp\foo", "/home/ï¿½ï¿½t/etc".
 #
 # TODO: this does *not* handle locales well.  We cannot use "use locale"
 # and \w, since that will not detaint the data.  So instead just allow the
@@ -237,10 +236,11 @@ sub untaint_file_path {
   return '' if ($path eq '');
 
   local ($1);
-  # Barry Jaspan: allow ~ and spaces, good for Windows.  Also return ''
-  # if input is '', as it is a safe path.
-  my $chars = '-_A-Za-z0-9\xA0-\xFF\.\%\@\=\+\,\/\\\:';
-  my $re = qr/^\s*([$chars][${chars}~ ]*)$/o;
+  # Barry Jaspan: allow ~ and spaces, good for Windows.
+  # Also return '' if input is '', as it is a safe path.
+  # Bug 7264: allow also parenthesis, e.g. "C:\Program Files (x86)"
+  my $chars = '-_A-Za-z0-9.%=+,/:()\\@\\xA0-\\xFF\\\\';
+  my $re = qr{^\s*([$chars][${chars}~ ]*)\z}o;
 
   if ($path =~ $re) {
     $path = $1;
@@ -283,13 +283,16 @@ sub untaint_hostname {
 #  untaint_var(\%ENV);
 #
 sub untaint_var {
-# my $arg = $_[0];  # avoid copying unnecessarily
+  # my $arg = $_[0];  # avoid copying unnecessarily
   if (!ref $_[0]) { # optimized by-far-the-most-common case
+    # Bug 7591 not using this faster untaint. https://bz.apache.org/SpamAssassin/show_bug.cgi?id=7591 
+      #return defined $_[0] ? scalar each %{ { $_[0] => undef } } : undef; ## no critic (ProhibitExplicitReturnUndef)  - See Bug 7120 - fast untaint (hash keys cannot be tainted)
     no re 'taint';  # override a  "use re 'taint'"  from outer scope
     return undef if !defined $_[0]; ## no critic (ProhibitExplicitReturnUndef)  - See Bug 7120
     local($1); # avoid Perl taint bug: tainted global $1 propagates taintedness
     $_[0] =~ /^(.*)\z/s;
     return $1;
+
   } else {
     my $r = ref $_[0];
     if ($r eq 'ARRAY') {
@@ -339,7 +342,7 @@ sub taint_var {
 ###########################################################################
 
 # map process termination status number to an informative string, and
-# append optional mesage (dual-valued errno or a string or a number),
+# append optional message (dual-valued errno or a string or a number),
 # returning the resulting string
 #
 sub exit_status_str {
@@ -640,15 +643,18 @@ sub wrap {
   my $pos = 0;
   my $pos_mod = 0;
   while ($#arr > $pos) {
-    my $len = length $arr[$pos];
-
+    my $tmpline = $arr[$pos] ;
+    $tmpline =~ s/\t/        /g;
+    my $len = length ($tmpline);
     # if we don't want to have lines > $length (overflow==0), we
     # need to verify what will happen with the next line.  if we don't
     # care if a single line goes longer, don't care about the next
     # line.
     # we also want this to be true for the first entry on the line
     if ($pos_mod != 0 && $overflow == 0) {
-      $len += length $arr[$pos+1];
+      my $tmpnext = $arr[$pos+1] ;
+      $tmpnext =~ s/\t/        /g;
+      $len += length ($tmpnext);
     }
 
     if ($len <= $length) {
@@ -691,6 +697,7 @@ sub base64_decode {
       m|^(?:[A-Za-z0-9+/=]{2,}={0,2})$|s)
   {
     # only use MIME::Base64 when the XS and Perl are both correct and quiet
+    local $1;
     s/(=+)(?!=*$)/'A' x length($1)/ge;
 
     # If only a certain number of bytes are requested, truncate the encoded
@@ -706,7 +713,7 @@ sub base64_decode {
   }
   tr{A-Za-z0-9+/=}{}cd;			# remove non-base64 characters
   s/=+$//;				# remove terminating padding
-  tr{A-Za-z0-9+/=}{ -_`};		# translate to uuencode
+  tr{A-Za-z0-9+/=}{ -_};		# translate to uuencode
   s/.$// if (length($_) % 4 == 1);	# unpack cannot cope with extra byte
 
   my $length;
@@ -727,19 +734,20 @@ sub base64_decode {
 }
 
 sub qp_decode {
-  local $_ = shift;
+  my $str = $_[0];
 
   # RFC 2045: when decoding a Quoted-Printable body, any trailing
   # white space on a line must be deleted
-  s/[ \t]+(?=\r?\n)//gs;
+  $str =~ s/[ \t]+(?=\r?\n)//gs;
 
-  s/=\r?\n//gs;  # soft line breaks
+  $str =~ s/=\r?\n//gs;  # soft line breaks
 
   # RFC 2045 explicitly prohibits lowercase characters a-f in QP encoding
   # do we really want to allow them???
-  s/=([0-9a-fA-F]{2})/chr(hex($1))/ge;
+  local $1;
+  $str =~ s/=([0-9a-fA-F]{2})/chr(hex($1))/ge;
 
-  return $_;
+  return $str;
 }
 
 sub base64_encode {
@@ -805,10 +813,10 @@ sub extract_ipv4_addr_from_string {
   return unless defined($str);
 
   if ($str =~ /\b(
-			(?:1\d\d|2[0-4]\d|25[0-5]|\d\d|\d)\.
-			(?:1\d\d|2[0-4]\d|25[0-5]|\d\d|\d)\.
-			(?:1\d\d|2[0-4]\d|25[0-5]|\d\d|\d)\.
-			(?:1\d\d|2[0-4]\d|25[0-5]|\d\d|\d)
+			(?:1\d\d|2[0-4]\d|25[0-5]|[1-9]\d|\d)\.
+			(?:1\d\d|2[0-4]\d|25[0-5]|[1-9]\d|\d)\.
+			(?:1\d\d|2[0-4]\d|25[0-5]|[1-9]\d|\d)\.
+			(?:1\d\d|2[0-4]\d|25[0-5]|[1-9]\d|\d)
 		      )\b/ix)
   {
     if (defined $1) { return $1; }
@@ -987,6 +995,18 @@ sub parse_content_type {
   #
   my($charset) = $ct =~ /\bcharset\s*=\s*["']?(.*?)["']?(?:;|$)/i;
   my($name) = $ct =~ /\b(?:file)?name\s*=\s*["']?(.*?)["']?(?:;|$)/i;
+
+  # RFC 2231 section 3: Parameter Value Continuations
+  # support continuations for name values
+  #
+  if (!$name && $ct =~ /\b(?:file)?name\*0\s*=/i) {
+
+    my @name;
+    $name[$1] = $2
+      while ($ct =~ /\b(?:file)?name\*(\d+)\s*=\s*["']?(.*?)["']?(?:;|$)/ig);
+
+    $name = join "", grep defined, @name;
+  }
 
   # Get the actual MIME type out ...
   # Note: the header content may not be whitespace unfolded, so make sure the
@@ -1204,45 +1224,9 @@ sub secure_tmpdir {
 ###########################################################################
 
 ##
-## DEPRECATED FUNCTION, only left for third party plugins as fallback.
+## DEPRECATED FUNCTION, sub uri_to_domain removed.
 ## Replaced with Mail::SpamAssassin::RegistryBoundaries::uri_to_domain.
 ##
-sub uri_to_domain {
-  my ($uri) = @_;
-
-  # Javascript is not going to help us, so return.
-  return if ($uri =~ /^javascript:/i);
-
-  $uri =~ s{\#.*$}{}gs;			# drop fragment
-  $uri =~ s{^[a-z]+:/{0,2}}{}gsi;	# drop the protocol
-  $uri =~ s{^[^/]*\@}{}gs;		# username/passwd
-
-  # strip path and CGI params.  note: bug 4213 shows that "&" should
-  # *not* be likewise stripped here -- it's permitted in hostnames by
-  # some common MUAs!
-  $uri =~ s{[/?].*$}{}gs;              
-
-  $uri =~ s{:\d*$}{}gs;		# port, bug 4191: sometimes the # is missing
-
-  # skip undecoded URIs if the encoded bits shouldn't be.
-  # we'll see the decoded version as well.  see url_encode()
-  return if $uri =~ /\%(?:2[1-9a-fA-F]|[3-6][0-9a-fA-F]|7[0-9a-eA-E])/;
-
-  my $host = $uri;  # unstripped/full domain name
-
-  # keep IPs intact
-  if ($uri !~ /^\d+\.\d+\.\d+\.\d+$/) { 
-    # get rid of hostname part of domain, understanding delegation
-    $uri = Mail::SpamAssassin::Util::RegistrarBoundaries::trim_domain($uri);
-
-    # ignore invalid domains
-    return unless
-        (Mail::SpamAssassin::Util::RegistrarBoundaries::is_domain_valid($uri));
-  }
-  
-  # $uri is now the domain only, optionally return unstripped host name
-  return !wantarray ? lc $uri : (lc $uri, lc $host);
-}
 
 *uri_list_canonify = \&uri_list_canonicalize;  # compatibility alias
 sub uri_list_canonicalize {
@@ -1340,23 +1324,27 @@ sub uri_list_canonicalize {
       # deal with http redirectors.  strip off one level of redirector
       # and add back to the array.  the foreach loop will go over those
       # and deal appropriately.
-      # bug 3308: redirectors like yahoo only need one '/' ... <grrr>
-      if ($rest =~ m{(https?:/{0,2}.+)$}i) {
-        push(@uris, $1);
-      }
 
-      # resort to redirector pattern matching if the generic https? check
-      # doesn't result in a match -- bug 4176
-      else {
-	foreach (@{$redirector_patterns}) {
-	  if ("$proto$host$rest" =~ $_) {
-	    next unless defined $1;
-	    dbg("uri: parsed uri pattern: $_");
-	    dbg("uri: parsed uri found: $1 in redirector: $proto$host$rest");
-	    push (@uris, $1);
-	    last;
-	  }
-	}
+      # Bug 7278: try redirector pattern matching first
+      # (but see also Bug 4176)
+      my $found_redirector_match;
+      foreach my $re (@{$redirector_patterns}) {
+        if ("$proto$host$rest" =~ $re) {
+          next unless defined $1;
+          dbg("uri: parsed uri pattern: $re");
+          dbg("uri: parsed uri found: $1 in redirector: $proto$host$rest");
+          push (@uris, $1);
+          $found_redirector_match = 1;
+          last;
+        }
+      }
+      if (!$found_redirector_match) {
+        # try generic https? check if redirector pattern matching failed
+        # bug 3308: redirectors like yahoo only need one '/' ... <grrr>
+        if ($rest =~ m{(https?:/{0,2}.+)$}i) {
+          push(@uris, $1);
+          dbg("uri: parsed uri found: $1 in hard-coded redirector");
+        }
       }
 
       ########################
@@ -1493,13 +1481,43 @@ sub receive_date {
 }
 
 ###########################################################################
+sub get_user_groups {
+  my $suid = shift;
+  dbg("get_user_groups: uid is $suid\n");
+  my ( $user, $passwd, $uid, $gid, $quota, $comment, $gcos, $dir, $shell, $expire ) = getpwuid($suid);
+  my $rgids="$gid ";
+  while ( my($name,$pw,$gid,$members) = getgrent() ) {
+    if ( $members =~ m/\b$user\b/ ) {
+      $rgids .= "$gid ";
+      dbg("get_user_groups: added $gid ($name) to group list which is now: $rgids\n");
+    }
+  }
+  endgrent;
+  chop $rgids;
+  return ($rgids);
+}
+
+
 
 sub setuid_to_euid {
   return if (RUNNING_ON_WINDOWS);
 
   # remember the target uid, the first number is the important one
   my $touid = $>;
-
+  my $gids = get_user_groups($touid);
+  my ( $pgid, $supgs ) = split (' ',$gids,2);
+  defined $supgs or $supgs=$pgid;
+  if ($( != $pgid) {
+    # Gotta be root for any of this to work
+    $> = 0 ;
+    dbg("util: changing real primary gid from $( to $pgid and supplemental groups to $supgs to match effective uid $touid");
+    POSIX::setgid($pgid);
+    dbg("util: POSIX::setgid($pgid) set errno to $!");  
+    $! = 0;
+    $( = $pgid;
+    $) = "$pgid $supgs";
+    dbg("util: assignment  \$) = $pgid $supgs set errno to $!");  
+  }
   if ($< != $touid) {
     dbg("util: changing real uid from $< to match effective uid $touid");
     # bug 3586: kludges needed to work around platform dependent behavior assigning to $<
@@ -1574,7 +1592,7 @@ sub helper_app_pipe_open_unix {
   eval {
     # go setuid...
     setuid_to_euid();
-    dbg("util: setuid: ruid=$< euid=$>");
+    info("util: setuid: ruid=$< euid=$> rgid=$( egid=$) ");
 
     # now set up the fds.  due to some wierdness, we may have to ensure that
     # we *really* close the correct fd number, since some other code may have

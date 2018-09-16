@@ -19,13 +19,13 @@ package Mail::SpamAssassin::Plugin::HTTPSMismatch;
 
 use Mail::SpamAssassin::Plugin;
 use Mail::SpamAssassin::Logger;
+use Mail::SpamAssassin::Constants qw(:ip);
 use strict;
 use warnings;
-use bytes;
+# use bytes;
 use re 'taint';
 
-use vars qw(@ISA);
-@ISA = qw(Mail::SpamAssassin::Plugin);
+our @ISA = qw(Mail::SpamAssassin::Plugin);
 
 # constructor: register the eval rule
 sub new {
@@ -49,35 +49,33 @@ sub new {
 sub check_https_http_mismatch {
   my ($self, $permsgstatus, undef, $minanchors, $maxanchors) = @_;
 
+  my $IP_ADDRESS = IP_ADDRESS;
+
   $minanchors ||= 1;
 
   if (!exists $permsgstatus->{chhm_hit}) {
     $permsgstatus->{chhm_hit} = 0;
     $permsgstatus->{chhm_anchors} = 0;
 
-    foreach my $v ( values %{$permsgstatus->{html}->{uri_detail}} ) {
+    foreach my $k ( keys %{$permsgstatus->{html}->{uri_detail}} ) {
+      my %uri_detail = %{$permsgstatus->{html}->{uri_detail}};
+      my $v = ${uri_detail}{$k};
       # if the URI wasn't used for an anchor tag, or the anchor text didn't
       # exist, skip this.
       next unless (exists $v->{anchor_text} && @{$v->{anchor_text}});
 
       my $uri;
-      foreach (@{$v->{cleaned}}) {
-        if (m@^https?://([^/:]+)@i) {
-	  $uri = $1;
-
-	  # Skip IPs since there's another rule to catch that already
-          if ($uri =~ /^\d+\.\d+\.\d+\.\d+$/) {
-            undef $uri;
-            next;
-          }
-
-	  # want to compare whole hostnames instead of domains?
-	  # comment this next section to the blank line.
-	  $uri = $self->{main}->{registryboundaries}->trim_domain($uri);
-          undef $uri unless ($self->{main}->{registryboundaries}->is_domain_valid($uri));
-
-	  last if $uri;
-        }
+      if ($k =~ m@^https?://([^/:]+)@i) {
+        $uri = $1;
+        # Skip IPs since there's another rule to catch that already
+        if ($uri =~ /^$IP_ADDRESS+$/) {
+          undef $uri;
+          next;
+        } 
+        # want to compare whole hostnames instead of domains?
+        # comment this next section to the blank line.
+        $uri = $self->{main}->{registryboundaries}->trim_domain($uri);
+        undef $uri unless ($self->{main}->{registryboundaries}->is_domain_valid($uri));
       }
 
       next unless $uri;
@@ -89,7 +87,7 @@ sub check_https_http_mismatch {
 
 	  # want to compare whole hostnames instead of domains?
 	  # comment this next section to the blank line.
-          if ($https !~ /^\d+\.\d+\.\d+\.\d+$/) {
+          if ($https !~ /^$IP_ADDRESS+$/) {
 	    $https = $self->{main}->{registryboundaries}->trim_domain($https);
             undef $https unless ($self->{main}->{registryboundaries}->is_domain_valid($https));
           }

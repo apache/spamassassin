@@ -28,6 +28,7 @@ Taking into account signatures from any signing domains:
  full   DKIM_SIGNED           eval:check_dkim_signed()
  full   DKIM_VALID            eval:check_dkim_valid()
  full   DKIM_VALID_AU         eval:check_dkim_valid_author_sig()
+ full   DKIM_VALID_EF         eval:check_dkim_valid_envelopefrom()
 
 Taking into account signatures from specified signing domains only:
 (quotes may be omitted on domain names consisting only of letters, digits,
@@ -55,6 +56,7 @@ Author Domain Signing Practices (ADSP) from specified author domains only:
  describe DKIM_SIGNED   Message has a DKIM or DK signature, not necessarily valid
  describe DKIM_VALID    Message has at least one valid DKIM or DK signature
  describe DKIM_VALID_AU Message has a valid DKIM or DK signature from author's domain
+ describe DKIM_VALID_EF Message has a valid DKIM or DK signature from envelope-from domain
  describe __DKIM_DEPENDABLE     A validation failure not attributable to truncation
 
  describe DKIM_ADSP_NXDOMAIN    Domain not in DNS and no valid author domain signature
@@ -99,6 +101,9 @@ header fields, other plugins, etc.:
   _DKIMDOMAIN_
     Signing Domain Identifier (SDID) (the 'd' tag) from valid signatures;
 
+  _DKIMSELECTOR_
+    DKIM selector (the 's' tag) from valid signatures;
+
 Identities and domains from signatures which failed verification are not
 included in these tags. Duplicates are eliminated (e.g. when there are two or
 more valid signatures from the same signer, only one copy makes it into a tag).
@@ -125,11 +130,10 @@ use Mail::SpamAssassin::Timeout;
 
 use strict;
 use warnings;
-use bytes;
+# use bytes;
 use re 'taint';
 
-use vars qw(@ISA);
-@ISA = qw(Mail::SpamAssassin::Plugin);
+our @ISA = qw(Mail::SpamAssassin::Plugin);
 
 # constructor: register the eval rule
 sub new {
@@ -145,6 +149,7 @@ sub new {
   $self->register_eval_rule("check_dkim_valid");
   $self->register_eval_rule("check_dkim_valid_author_sig");
   $self->register_eval_rule("check_dkim_testing");
+  $self->register_eval_rule("check_dkim_valid_envelopefrom");
 
   # author domain signing practices
   $self->register_eval_rule("check_dkim_adsp");
@@ -178,13 +183,18 @@ sub set_config {
 
 Works similarly to whitelist_from, except that in addition to matching
 an author address (From) to the pattern in the first parameter, the message
-must also carry a Domain Keys Identified Mail (DKIM) signature made by a
-signing domain (SDID, i.e. the d= tag) that is acceptable to us.
+must also carry a valid Domain Keys Identified Mail (DKIM) signature made by
+a signing domain (SDID, i.e. the d= tag) that is acceptable to us.
 
 Only one whitelist entry is allowed per line, as in C<whitelist_from_rcvd>.
 Multiple C<whitelist_from_dkim> lines are allowed. File-glob style characters
 are allowed for the From address (the first parameter), just like with
-C<whitelist_from_rcvd>. The second parameter does not accept wildcards.
+C<whitelist_from_rcvd>.
+
+The second parameter (the signing-domain) does not accept full file-glob style
+wildcards, although a simple '*.' (or just a '.') prefix to a domain name
+is recognized and implies any subdomain of the specified domain (but not
+the domain itself).
 
 If no signing-domain parameter is specified, the only acceptable signature
 will be an Author Domain Signature (sometimes called first-party signature)
@@ -205,7 +215,8 @@ Examples of whitelisting based on third-party signatures:
   whitelist_from_dkim jane@example.net      example.org
   whitelist_from_dkim rick@info.example.net example.net
   whitelist_from_dkim *@info.example.net    example.net
-  whitelist_from_dkim *@*                   remailer.example.com
+  whitelist_from_dkim *@*                   mail7.remailer.example.com
+  whitelist_from_dkim *@*                   *.remailer.example.com
 
 =item def_whitelist_from_dkim author@example.com [signing-domain]
 
@@ -376,7 +387,8 @@ some valid signature on a message has no reputational value (without being
 associated with a particular domain), regardless of its key size - anyone can
 prepend its own signature on a copy of some third party mail and re-send it,
 which makes it no more trustworthy than without such signature. This is also
-a reason for a rule DKIM_VALID to have a near-zero score.
+a reason for a rule DKIM_VALID to have a near-zero score, i.e. a rule hit
+is only informational.
 
 =cut
 
@@ -541,6 +553,21 @@ sub check_dkim_valid_author_sig {
     # don't bother
   } else {
     $result = $self->_check_dkim_signed_by($pms,1,1,\@acceptable_domains);
+  }
+  return $result;
+}
+
+sub check_dkim_valid_envelopefrom {
+  my ($self, $pms, $full_ref) = @_;
+  my $result = 0;
+  my $envfrom=$self->{'main'}->{'registryboundaries'}->uri_to_domain($pms->get("EnvelopeFrom"));
+  # if no envelopeFrom, it cannot be valid
+  return $result if !$envfrom;
+  $self->_check_dkim_signature($pms)  if !$pms->{dkim_checked_signature};
+  if (!$pms->{dkim_valid}) {
+    # don't bother
+  } else {
+    $result = $self->_check_dkim_signed_by($pms,1,0,[$envfrom]);
   }
   return $result;
 }
@@ -786,7 +813,8 @@ sub _check_dkim_signature {
         # Only do so if EDNS0 provides a reasonably-sized UDP payload size,
         # as our interface does not provide a DNS fallback to TCP, unlike
         # the Net::DNS::Resolver::send which does provide it.
-        my $res = $self->{main}->{resolver}->get_resolver;
+        my $res = $self->{main}->{resolver};
+        dbg("dkim: providing our own resolver: %s", ref $res);
         Mail::DKIM::DNS::resolver($res);
       }
     }
@@ -892,13 +920,13 @@ sub _check_dkim_signature {
         }
       }
       if (would_log("dbg","dkim")) {
-        dbg("dkim: %s %s, i=%s, d=%s, s=%s, a=%s, c=%s, %s, %s",
+        dbg("dkim: %s %s, i=%s, d=%s, s=%s, a=%s, c=%s, %s, %s, %s",
           $info,
           $signature->isa('Mail::DKIM::DkSignature') ? 'DK' : 'DKIM',
           map(!defined $_ ? '(undef)' : $_,
             $signature->identity, $d, $signature->selector,
             $signature->algorithm, scalar($signature->canonicalization),
-            $key_size ? "key_bits=$key_size" : (),
+            $key_size ? "key_bits=$key_size" : "unknown key size",
             ($sig_result_supported ? $signature : $verifier)->result ),
           defined $d && $pms->{dkim_author_domains}->{$d}
             ? 'matches author domain'
@@ -915,15 +943,19 @@ sub _check_dkim_signature {
       dbg("dkim: signature verification result: %s", uc($sig_res));
 
       # supply values for both tags
-      my(%seen1, %seen2, @identity_list, @domain_list);
+      my(%seen1, %seen2, %seen3, @identity_list, @domain_list, @selector_list);
       @identity_list = grep(defined $_ && $_ ne '' && !$seen1{$_}++,
                             map($_->identity, @valid_signatures));
       @domain_list =   grep(defined $_ && $_ ne '' && !$seen2{$_}++,
                             map($_->domain, @valid_signatures));
+      @selector_list = grep(defined $_ && $_ ne '' && !$seen3{$_}++,
+                            map($_->selector, @valid_signatures));
       $pms->set_tag('DKIMIDENTITY',
                     @identity_list == 1 ? $identity_list[0] : \@identity_list);
       $pms->set_tag('DKIMDOMAIN',
                     @domain_list == 1   ? $domain_list[0]   : \@domain_list);
+      $pms->set_tag('DKIMSELECTOR',
+                    @selector_list == 1   ? $selector_list[0]   : \@selector_list);
     } elsif (@signatures) {
       $pms->{dkim_signed} = 1;
       my $sig = $signatures[0];
@@ -1257,8 +1289,12 @@ sub _wlcheck_list {
         # identity (AUID). Nevertheless, be prepared to accept the full e-mail
         # address there for compatibility, and just ignore its local-part.
 
-        $acceptable_sdid = $1  if $acceptable_sdid =~ /\@([^\@]*)\z/;
-        $matches = 1  if $sdid eq lc $acceptable_sdid;
+        $acceptable_sdid = $1  if $acceptable_sdid =~ /\@([^\@]*)\z/s;
+        if ($acceptable_sdid =~ s/^\*?\.//s) {
+          $matches = 1  if $sdid =~ /\.\Q$acceptable_sdid\E\z/si;
+        } else {
+          $matches = 1  if $sdid eq lc $acceptable_sdid;
+        }
       }
       if ($matches) {
         if (would_log("dbg","dkim")) {

@@ -55,7 +55,7 @@ my %tricks = map {; $_ => 1 }
 
 # elements that change text style
 my %elements_text_style = map {; $_ => 1 }
-  qw( body font table tr th td big small basefont marquee span p div ),
+  qw( body font table tr th td big small basefont marquee span p div a ),
 ;
 
 # elements that insert whitespace
@@ -80,13 +80,14 @@ $ok_attributes{basefont}{$_} = 1 for qw( color face size );
 $ok_attributes{body}{$_} = 1 for qw( text bgcolor link alink vlink background );
 $ok_attributes{font}{$_} = 1 for qw( color face size );
 $ok_attributes{marquee}{$_} = 1 for qw( bgcolor background );
-$ok_attributes{table}{$_} = 1 for qw( bgcolor );
-$ok_attributes{td}{$_} = 1 for qw( bgcolor );
-$ok_attributes{th}{$_} = 1 for qw( bgcolor );
-$ok_attributes{tr}{$_} = 1 for qw( bgcolor );
+$ok_attributes{table}{$_} = 1 for qw( bgcolor style );
+$ok_attributes{td}{$_} = 1 for qw( bgcolor style );
+$ok_attributes{th}{$_} = 1 for qw( bgcolor style );
+$ok_attributes{tr}{$_} = 1 for qw( bgcolor style );
 $ok_attributes{span}{$_} = 1 for qw( style );
 $ok_attributes{p}{$_} = 1 for qw( style );
 $ok_attributes{div}{$_} = 1 for qw( style );
+$ok_attributes{a}{$_} = 1 for qw( style );
 
 sub new {
   my ($class, $character_semantics_input, $character_semantics_output) = @_;
@@ -253,11 +254,18 @@ sub parse {
       if !$self->{SA_character_semantics_input};
   } else {
     $self->SUPER::utf8_mode($self->{SA_character_semantics_input} ? 0 : 1);
+    my $utf8_mode = $self->SUPER::utf8_mode;
     dbg("message: HTML::Parser utf8_mode %s",
-        $self->SUPER::utf8_mode ? "on (assumed UTF-8 octets)"
-                                : "off (default, assumed Unicode characters)");
+        $utf8_mode ? "on (assumed UTF-8 octets)"
+                   : "off (default, assumed Unicode characters)");
   }
   $self->SUPER::parse($text);
+
+  # bug 7437: deal gracefully with HTML::Parser misbehavior on unclosed <style> and <script> tags
+  # (typically from not passing the entire message to spamc, but possibly a DoS attack)
+  $self->SUPER::parse("</style>") while exists $self->{inside}{style} && $self->{inside}{style} > 0;
+  $self->SUPER::parse("</script>") while exists $self->{inside}{script} && $self->{inside}{script} > 0;
+
   $self->SUPER::eof;
 
   return $self->{text};
@@ -608,7 +616,7 @@ sub html_tests {
   my ($self, $tag, $attr, $num) = @_;
 
   if ($tag eq "font" && exists $attr->{face}) {
-    if ($attr->{face} !~ /^[a-z ][a-z -]*[a-z](?:,\s*[a-z][a-z -]*[a-z])*$/i) {
+    if ($attr->{face} !~ /^'?[a-z ][a-z -]*[a-z](?:,\s*[a-z][a-z -]*[a-z])*'?$/i) {
       $self->put_results(font_face_bad => 1);
     }
   }

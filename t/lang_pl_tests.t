@@ -1,16 +1,13 @@
 #!/usr/bin/perl
 
-use lib '.'; 
+use lib '.';
 use lib 't';
-use SATest; 
+use SATest;
 sa_t_init("lang_pl_tests");
-use Test; 
 
-use constant TEST_ENABLED => conf_bool('run_pl_tests');
-
-BEGIN { plan tests => (TEST_ENABLED ? 1 : 0) };
-
-exit unless TEST_ENABLED;
+use Test::More;
+plan skip_all => "pl tests disabled" unless conf_bool('run_pl_tests');
+plan tests => 1;
 
 # ---------------------------------------------------------------------------
 

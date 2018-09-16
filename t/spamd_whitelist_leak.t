@@ -3,13 +3,10 @@
 
 use lib '.'; use lib 't';
 use SATest; sa_t_init("spamd_whitelist_leak");
-use Test;
-BEGIN { 
 
-  plan tests => ($SKIP_SPAMD_TESTS ? 0 : 8)
-
-};
-exit if $SKIP_SPAMD_TESTS;
+use Test::More;
+plan skip_all => 'Spamd tests disabled.' if $SKIP_SPAMD_TESTS;
+plan tests => 8;
 
 # ---------------------------------------------------------------------------
 # bug 6003

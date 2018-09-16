@@ -19,16 +19,15 @@ package Mail::SpamAssassin::BayesStore::SDBM;
 
 use strict;
 use warnings;
-use bytes;
+# use bytes;
 use re 'taint';
 use Fcntl;
 
 use Mail::SpamAssassin::BayesStore::DBM;
 use Mail::SpamAssassin::Logger;
 
-use vars qw{ @ISA @DBNAMES };
-
-@ISA = qw( Mail::SpamAssassin::BayesStore::DBM );
+# our @DBNAMES; # <---- unused!
+our @ISA = qw( Mail::SpamAssassin::BayesStore::DBM );
 
 sub HAS_DBM_MODULE {
   my ($self) = @_;

@@ -2,12 +2,11 @@
 
 use lib '.'; use lib 't';
 use SATest; sa_t_init("spamd_ssl");
-use Test; plan tests => (($SKIP_SPAMD_TESTS || !$SSL_AVAILABLE) ? 0 : 9),
-    onfail => sub {
-	warn "\n\nNote: This may not be a SpamAssassin bug, as some platforms require that you" .
-	    "\nspecify a protocol in spamc --ssl option, and possibly in spamd --ssl-version.\n\n" };
 
-exit if ($SKIP_SPAMD_TESTS || !$SSL_AVAILABLE);
+use Test::More;
+plan skip_all => "Spamd tests disabled" if $SKIP_SPAMD_TESTS;
+plan skip_all => "SSL is unavailble" unless $SSL_AVAILABLE;
+plan tests => 9;
 
 # ---------------------------------------------------------------------------
 

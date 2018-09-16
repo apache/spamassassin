@@ -1,6 +1,6 @@
 package Mail::SpamAssassin::Spamd;
 
-use vars qw(%conf_backup %msa_backup);
+our (%conf_backup, %msa_backup);
 
 use Mail::SpamAssassin::Logger;
 eval { use Time::HiRes qw(time); };
@@ -45,7 +45,16 @@ An instance should have lifetime of a single request.
 
 Interface is likely to change.
 
-See the source code of L<spamd(1)> and L<Mail::SpamAssassin::Spamd::Apache2(3)>.
+See the source code of C<spamd(1)> and C<Mail::SpamAssassin::Spamd::Apache2(3)>.
+
+=head1 AUTHORS
+
+The SpamAssassin(tm) Project E<lt>http://spamassassin.apache.org/E<gt>
+
+=head1 COPYRIGHT
+
+SpamAssassin is distributed under the Apache License, Version 2.0, as
+described in the file C<LICENSE> included with the distribution.
 
 =head2 METHODS
 

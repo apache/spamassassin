@@ -2,7 +2,7 @@
 
 use lib '.'; use lib 't';
 use SATest; sa_t_init("mkrules");
-use Test; BEGIN { plan tests => 97 };
+use Test::More tests => 97;
 use File::Copy;
 use File::Path;
 
@@ -455,17 +455,21 @@ sub mkrun {
 
   my $scrargs = "$perl_path -I../lib ../build/mkrules $args";
   print ("\t$scrargs\n");
-  system ("$scrargs > log/$testname.${Test::ntest} $post_redir");
+
+  my $test_number = test_number();
+  system ("$scrargs > log/$testname.$test_number $post_redir");
   $mk_exitcode = ($?>>8);
   if ($mk_exitcode != 0) { return undef; }
-  &checkfile ("$testname.${Test::ntest}", $read_sub) if (defined $read_sub);
+  &checkfile ("$testname.$test_number", $read_sub) if (defined $read_sub);
   1;
 }
 
 sub save_tdir {
-  rmtree("$tdir.${Test::ntest}");
-  if (move( "$tdir", "$tdir.${Test::ntest}")) {
-    print "\ttest output tree copied to $tdir.${Test::ntest}\n";
+  my $test_number = test_number();
+
+  rmtree("$tdir.$test_number");
+  if (move( "$tdir", "$tdir.$test_number")) {
+    print "\ttest output tree copied to $tdir.$test_number\n";
   }
 }
 

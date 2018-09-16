@@ -111,11 +111,10 @@ my $VERSION = 2.002;
 use Mail::SpamAssassin::Plugin;
 use Mail::SpamAssassin::PerMsgStatus;
 
-use vars qw(@ISA $email_whitelist $skip_replyto_envfrom);
-@ISA = qw(Mail::SpamAssassin::Plugin);
+our @ISA = qw(Mail::SpamAssassin::Plugin);
 
 # default email whitelist
-$email_whitelist = qr/
+our $email_whitelist = qr/
   ^(?:
       abuse|support|sales|info|helpdesk|contact|kontakt
     | (?:post|host|domain)master
@@ -129,8 +128,8 @@ $email_whitelist = qr/
 
 # skip replyto check when envelope sender is
 # allow <> for now
-{ # no re "strict";  # since perl 5.21.8: Ranges of ASCII printables...
-  $skip_replyto_envfrom = qr/
+# no re "strict";  # since perl 5.21.8: Ranges of ASCII printables...
+our $skip_replyto_envfrom = qr/
   (?:
       ^(?:post|host|domain)master
     | ^double-bounce
@@ -140,7 +139,6 @@ $email_whitelist = qr/
     | .+=.+
   )\@
 /xi;
-}
 
 sub dbg { Mail::SpamAssassin::Plugin::dbg ("FreeMail: @_"); }
 
@@ -342,20 +340,21 @@ sub _parse_body {
         my $body = $pms->get_decoded_stripped_body_text_array();
         BODY: foreach (@$body) {
             # strip urls with possible emails inside
-            s#<?https?://\S{0,255}(?:\@|%40)\S{0,255}# #gi;
+            s{<?https?://\S{0,255}(?:\@|%40)\S{0,255}}{ }gi;
             # strip emails contained in <>, not mailto:
             # also strip ones followed by quote-like "wrote:" (but not fax: and tel: etc)
-            s#<?(?<!mailto:)$self->{email_regex}(?:>|\s{1,10}(?!(?:fa(?:x|csi)|tel|phone|e?-?mail))[a-z]{2,11}:)# #gi;
+            s{<?(?<!mailto:)$self->{email_regex}(?:>|\s{1,10}(?!(?:fa(?:x|csi)|tel|phone|e?-?mail))[a-z]{2,11}:)}{ }gi;
             while (/$self->{email_regex}/g) {
                 my $email = lc($1);
-                push(@body_emails, $email) unless defined $seen{$email};
+                utf8::encode($email) if utf8::is_utf8($email); # chars to UTF-8
+                push(@body_emails, $email) unless $seen{$email};
                 $seen{$email} = 1;
-                last BODY if scalar @body_emails >= 40; # sanity
+                last BODY if @body_emails >= 40; # sanity
             }
         }
         my $count_all = 0;
         my $count_fm = 0;
-        foreach my $email (@body_emails) {
+        foreach my $email (@body_emails) {  # as UTF-8 octets
             if (++$count_all == $pms->{main}->{conf}->{freemail_max_body_emails}) {
                 if ($pms->{main}->{conf}->{freemail_skip_when_over_max}) {
                     $pms->{freemail_skip_body} = 1;
@@ -425,24 +424,26 @@ sub check_freemail_header {
         }
     }
 
-    my $email = lc($pms->get(index($header,':') >= 0 ? $header : $header.":addr"));
+    my @emails = map (lc, $pms->{main}->find_all_addrs_in_line ($pms->get($header)));
 
-    if ($email eq '') {
-        dbg("header $header not found from mail");
-        return 0;
+    if (!scalar (@emails)) {
+         dbg("header $header not found from mail");
+         return 0;
     }
-    dbg("address from header $header: $email");
+    dbg("addresses from header $header: ".join(';',@emails));
 
-    if ($self->_is_freemail($email)) {
-        if (defined $re) {
-            return 0 unless $email =~ $re;
-            dbg("HIT! $email is freemail and matches regex");
-        }
-        else {
-            dbg("HIT! $email is freemail");
-        }
-        $self->_got_hit($pms, $email, "Header $header is freemail");
-        return 0;
+    foreach my $email (@emails) {    
+        if ($self->_is_freemail($email)) {
+            if (defined $re) {
+                next unless $email =~ $re;
+                dbg("HIT! $email is freemail and matches regex");
+            }
+            else {
+                dbg("HIT! $email is freemail");
+            }
+            $self->_got_hit($pms, $email, "Header $header is freemail");
+            return 1;
+         }
     }
 
     return 0;

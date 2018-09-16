@@ -18,19 +18,18 @@
 
 use strict;
 use warnings;
-use bytes;
+# use bytes;
 
 use Errno qw(EBADF);
 use Getopt::Long;
 use Pod::Usage;
 use File::Spec;
+use POSIX qw(locale_h setsid sigprocmask _exit);
 
-use vars qw(
-  $spamtest %opt $isspam $forget
-  $messagecount $learnedcount $messagelimit
-  $progress $total_messages $init_results $start_time
-  $synconly $learnprob @targets $bayes_override_path
-);
+POSIX::setlocale(LC_TIME,'C');
+
+our ( $spamtest, %opt, $isspam, $forget, $messagecount, $learnedcount, $messagelimit, $progress,
+      $total_messages, $init_results, $start_time, $synconly, $learnprob, @targets, $bayes_override_path );
 
 my $PREFIX = '@@PREFIX@@';  # substituted at 'make' time
 my $DEF_RULES_DIR = '@@DEF_RULES_DIR@@';  # substituted at 'make' time
@@ -40,7 +39,7 @@ use lib '@@INSTALLSITELIB@@';                # substituted at 'make' time
 
 BEGIN {                          # see comments in "spamassassin.raw" for doco
   my @bin = File::Spec->splitpath($0);
-  my $bin = ($bin[0] ? File::Spec->catpath(@bin[0..1]) : $bin[1])
+  my $bin = ($bin[0] ? File::Spec->catpath(@bin[0..1], '') : $bin[1])
             || File::Spec->curdir;
 
   if (-e $bin.'/lib/Mail/SpamAssassin.pm'
@@ -398,8 +397,11 @@ eval {
     for ($!=0; <F>; $!=0) {
       chomp;
       next if /^\s*$/;
-      if (/^(?:ham|spam):\w*:/) {
-        push ( @targets, $_ );
+      if (/^(ham|spam):(\w*):(.*)/) {
+        my $class  = $1;
+        my $format = $2 || "detect";
+        my $target = $3;
+        push ( @targets, "$class:$format:$target" );
       }
       else {
         target($_);
@@ -653,7 +655,7 @@ Options:
  -p prefs, --prefspath=file, --prefs-file=file
                        Set user preferences file
  --siteconfigpath=path Path for site configs
-                       (default: /etc/mail/spamassassin)
+                       (default:  @@PREFIX@@/etc/mail/spamassassin)
  --cf='config line'    Additional line of configuration
  -D, --debug [area=n,...]  Print debugging messages
  -V, --version         Print version
@@ -672,6 +674,9 @@ Simply run this command once for each of your mail folders, and it will
 Note that csh-style I<globbing> in the mail folder names is supported;
 in other words, listing a folder name as C<*> will scan every folder
 that matches.  See C<Mail::SpamAssassin::ArchiveIterator> for more details.
+
+If you are using mail boxes in format other than maildir you should use
+the B<--mbox> or B<--mbx> parameters.
 
 SpamAssassin remembers which mail messages it has learnt already, and will not
 re-learn those messages again, unless you use the B<--forget> option. Messages

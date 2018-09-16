@@ -23,11 +23,10 @@ use Mail::SpamAssassin::Plugin::OneLineBodyRuleType;
 
 use strict;
 use warnings;
-use bytes;
+# use bytes;
 use re 'taint';
 
-use vars qw(@ISA);
-@ISA = qw(Mail::SpamAssassin::Plugin);
+our @ISA = qw(Mail::SpamAssassin::Plugin);
 
 sub new {
   my $class = shift;

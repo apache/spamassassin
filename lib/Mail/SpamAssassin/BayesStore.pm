@@ -30,7 +30,7 @@ package Mail::SpamAssassin::BayesStore;
 
 use strict;
 use warnings;
-use bytes;
+# use bytes;
 use re 'taint';
 use Mail::SpamAssassin::Logger;
 
@@ -419,6 +419,7 @@ sub expire_old_tokens_trapped {
     dbg("bayes: $msg: $msg2");
   }
 
+  $self->remove_running_expire_tok();
   return 1;
 }
 

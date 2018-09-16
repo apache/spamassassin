@@ -25,12 +25,12 @@ elsif ( $^O eq "linux" ) {
 	}
 	print "$ncpu\n";
 }
-elsif (( $^O eq "darwin" ) || ( $^O eq "openbsd" )) {
+elsif (( $^O eq "darwin" ) ) {
 	open(CPU,"/usr/sbin/sysctl -n hw.ncpu|") || die "Can't read sysctl:$!";
 	print <CPU>;
 	close(CPU);
 }
-elsif (( $^O eq "freebsd" ) || ( $^O eq "netbsd" )) {
+elsif (( $^O eq "freebsd" ) || ( $^O eq "netbsd" ) || ( $^O eq "openbsd" )) {
 	open(CPU,"/sbin/sysctl -n hw.ncpu|") || die "Can't read sysctl:$!";
 	print <CPU>;
 	close(CPU);

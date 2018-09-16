@@ -19,8 +19,6 @@
 
 Mail::SpamAssassin::BayesStore::BDB - BerkeleyDB Bayesian Storage Module Implementation
 
-=head1 SYNOPSIS
-
 =head1 DESCRIPTION
 
 This module implementes a BDB based bayesian storage module.
@@ -31,7 +29,7 @@ package Mail::SpamAssassin::BayesStore::BDB;
 
 use strict;
 use warnings;
-use bytes;
+# use bytes;
 use re 'taint';
 use Errno qw(EBADF);
 #use Data::Dumper;
@@ -46,9 +44,7 @@ BEGIN {
 use Mail::SpamAssassin::BayesStore;
 use Mail::SpamAssassin::Logger;
 
-use vars qw( @ISA );
-
-@ISA = qw( Mail::SpamAssassin::BayesStore );
+our @ISA = qw( Mail::SpamAssassin::BayesStore );
 
 use constant HAS_BDB => eval { require BerkeleyDB; BerkeleyDB->import; };
 

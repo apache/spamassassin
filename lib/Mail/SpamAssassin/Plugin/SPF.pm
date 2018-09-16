@@ -38,11 +38,10 @@ use Mail::SpamAssassin::Logger;
 use Mail::SpamAssassin::Timeout;
 use strict;
 use warnings;
-use bytes;
+# use bytes;
 use re 'taint';
 
-use vars qw(@ISA);
-@ISA = qw(Mail::SpamAssassin::Plugin);
+our @ISA = qw(Mail::SpamAssassin::Plugin);
 
 # constructor: register the eval rule
 sub new {
@@ -232,7 +231,7 @@ working downwards until results are successfully parsed.
 =item has_check_for_spf_errors
 
 Adds capability check for "if can()" for check_for_spf_permerror, check_for_spf_temperror, check_for_spf_helo_permerror and check_for_spf_helo_permerror
-  
+
 =cut 
 
 sub has_check_for_spf_errors { 1 }
@@ -391,7 +390,7 @@ sub _check_spf {
 
 	# http://www.openspf.org/RFC_4408#header-field
 	# wtf - for some reason something is sticking an extra space between the header name and field value
-	if ($hdr =~ /^received-spf:\s*(pass|neutral|(?:soft)?fail|none)\b(?:.*\bidentity=(\S+?);?\b)?/i) {
+	if ($hdr =~ /^received-spf:\s*(pass|neutral|(?:soft)?fail|(?:temp|perm)error|none)\b(?:.*\bidentity=(\S+?);?\b)?/i) {
 	  my $result = lc($1);
 
 	  my $identity = '';	# we assume it's a mfrom check if we can't tell otherwise
@@ -418,6 +417,8 @@ sub _check_spf {
 	  $scanner->{"spf_${identity}none"} = 0;
 	  $scanner->{"spf_${identity}fail"} = 0;
 	  $scanner->{"spf_${identity}softfail"} = 0;
+	  $scanner->{"spf_${identity}temperror"} = 0;
+	  $scanner->{"spf_${identity}permerror"} = 0;
 	  $scanner->{"spf_${identity}failure_comment"} = undef;
 
 	  # and the result
@@ -439,7 +440,7 @@ sub _check_spf {
         # Authentication-Results: mail.example.com; SPF=none smtp.mailfrom=example.org (comment)
 
         my $tmphdr = $1;
-        if ($tmphdr =~ /^(pass|neutral|(?:hard|soft)?fail|none)(?:[^;]*?\bsmtp\.(\S+)\s*=[^;]+)?/i) {
+        if ($tmphdr =~ /^(pass|neutral|(?:hard|soft)?fail|(?:temp|perm)error|none)(?:[^;]*?\bsmtp\.(\S+)\s*=[^;]+)?/i) {
           my $result = lc($1);
           $result = 'fail'  if $result eq 'hardfail';  # RFC5451 permits this
 
@@ -467,6 +468,8 @@ sub _check_spf {
           $scanner->{"spf_${identity}none"} = 0;
           $scanner->{"spf_${identity}fail"} = 0;
           $scanner->{"spf_${identity}softfail"} = 0;
+          $scanner->{"spf_${identity}temperror"} = 0;
+          $scanner->{"spf_${identity}permerror"} = 0;
           $scanner->{"spf_${identity}failure_comment"} = undef;
 
           # and the result
@@ -506,9 +509,9 @@ sub _check_spf {
       $self->{spf_server} = Mail::SPF::Server->new(
 				hostname     => $scanner->get_tag('HOSTNAME'),
 				dns_resolver => $self->{main}->{resolver},
-				max_dns_interactive_terms => 15);
+				max_dns_interactive_terms => 20);
       # Bug 7112: max_dns_interactive_terms defaults to 10, but even 14 is
-      # not enough for ebay.com, setting it to 15
+      # not enough for ebay.com, setting it to 15 NOTE: raising to 20 per bug 7182
       1;
     } or do {
       $eval_stat = $@ ne '' ? $@ : "errno=$!";  chomp $eval_stat;
@@ -727,7 +730,7 @@ sub _check_spf {
     elsif ($result eq 'temperror') { $scanner->{spf_helo_temperror} = 1; }
     elsif ($result eq 'error') { $scanner->{spf_helo_temperror} = 1; }
 
-    if ($result eq 'fail') {	# RFC 4408 6.2
+    if ($result eq 'fail') {	# RFC 7208 6.2
       $scanner->{spf_helo_failure_comment} = "SPF failed: $comment";
     }
   } else {
@@ -740,7 +743,7 @@ sub _check_spf {
     elsif ($result eq 'temperror') { $scanner->{spf_temperror} = 1; }
     elsif ($result eq 'error') { $scanner->{spf_temperror} = 1; }
 
-    if ($result eq 'fail') {	# RCF 4408 6.2
+    if ($result eq 'fail') {	# RFC 7208 6.2
       $scanner->{spf_failure_comment} = "SPF failed: $comment";
     }
   }

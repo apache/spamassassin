@@ -59,7 +59,7 @@ package Mail::SpamAssassin::Plugin::MIMEHeader;
 
 use strict;
 use warnings;
-use bytes;
+# use bytes;
 use re 'taint';
 
 use Mail::SpamAssassin::Plugin;
@@ -67,10 +67,9 @@ use Mail::SpamAssassin::Conf;
 use Mail::SpamAssassin::Logger;
 use Mail::SpamAssassin::Util qw(untaint_var);
 
-use vars qw(@ISA @TEMPORARY_METHODS);
-@ISA = qw(Mail::SpamAssassin::Plugin);
+our @ISA = qw(Mail::SpamAssassin::Plugin);
 
-@TEMPORARY_METHODS = (); 
+our @TEMPORARY_METHODS;
 
 # ---------------------------------------------------------------------------
 

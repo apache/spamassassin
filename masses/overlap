@@ -20,7 +20,7 @@
 use strict;
 use warnings;
 
-use vars qw($opt_a $opt_t);
+our ($opt_a, $opt_t);
 use Getopt::Long qw(:config auto_help bundling);
 
 GetOptions("a|all" => \$opt_a,

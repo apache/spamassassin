@@ -21,7 +21,7 @@ package Mail::SpamAssassin::SpamdForkScaling;
 
 use strict;
 use warnings;
-use bytes;
+# use bytes;
 use re 'taint';
 use Errno qw();
 
@@ -29,21 +29,17 @@ use Mail::SpamAssassin::Util qw(am_running_on_windows);
 use Mail::SpamAssassin::Logger;
 use Mail::SpamAssassin::Timeout;
 
-use vars qw {
-  @PFSTATE_VARS %EXPORT_TAGS @EXPORT_OK
-};
-
 use base qw( Exporter );
 
-@PFSTATE_VARS = qw(
+our @PFSTATE_VARS = qw(
   PFSTATE_ERROR PFSTATE_STARTING PFSTATE_IDLE PFSTATE_BUSY PFSTATE_KILLED
   PFORDER_ACCEPT PFSTATE_GOT_SIGCHLD
 );
 
-%EXPORT_TAGS = (
+our %EXPORT_TAGS = (
   'pfstates' => [ @PFSTATE_VARS ]
 );
-@EXPORT_OK = ( @PFSTATE_VARS );
+our @EXPORT_OK = ( @PFSTATE_VARS );
 
 use constant PFSTATE_ERROR       => -1;
 use constant PFSTATE_STARTING    => 0;

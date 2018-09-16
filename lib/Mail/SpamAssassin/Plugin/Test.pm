@@ -36,11 +36,10 @@ package Mail::SpamAssassin::Plugin::Test;
 use Mail::SpamAssassin::Plugin;
 use strict;
 use warnings;
-use bytes;
+# use bytes;
 use re 'taint';
 
-use vars qw(@ISA);
-@ISA = qw(Mail::SpamAssassin::Plugin);
+our @ISA = qw(Mail::SpamAssassin::Plugin);
 
 # constructor: register the eval rule
 sub new {

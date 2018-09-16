@@ -18,8 +18,7 @@ if (-e 'test_dir') {            # running from test directory, not ..
 
 use lib '.'; use lib 't';
 use SATest; sa_t_init("util_wrap");
-use Test; BEGIN { plan tests => 5 };
-
+use Test::More tests => 5;
 
 use strict;
 require Mail::SpamAssassin::Util;
@@ -97,7 +96,7 @@ my @data = (
 
   }, q{
     
-    X-Spam-Relays-External!![ ip=209.226.175.110 rdns=tomts43-srv.bellnexxia.net\n\thelo=tomts43-srv.bellnexxia.net by=dogma.boxhost.net ident= envfrom= intl=0\n\tid=0A3C83100DF auth= ] [ ip=70.51.181.195 rdns=\n\thelo=bas1-montreal45-1177793987.dsl.bell.ca by=tomts43-srv.bellnexxia.net\n\tident= envfrom= intl=0\n\tid=20070103201045.LPQE11361.tomts43-srv.bellnexxia.net@bas1-montreal45-1177793987.dsl.bell.ca\n\tauth= ]
+    X-Spam-Relays-External!![ ip=209.226.175.110 rdns=tomts43-srv.bellnexxia.net\n\thelo=tomts43-srv.bellnexxia.net by=dogma.boxhost.net ident= envfrom=\n\tintl=0 id=0A3C83100DF auth= ] [ ip=70.51.181.195 rdns=\n\thelo=bas1-montreal45-1177793987.dsl.bell.ca\n\tby=tomts43-srv.bellnexxia.net ident= envfrom= intl=0\n\tid=20070103201045.LPQE11361.tomts43-srv.bellnexxia.net@bas1-montreal45-1177793987.dsl.bell.ca\n\tauth= ]
 
   },
 

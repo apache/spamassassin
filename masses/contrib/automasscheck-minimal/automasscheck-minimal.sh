@@ -46,7 +46,7 @@ if [ "$1" == "--nightly" ]; then
         echo "Syncing $TYPE"
         rsync -qrz --delete rsync://rsync.spamassassin.org/tagged_builds/$TYPE/ $WORKDIR/$TYPE/
         retval=$?
-        JOBS=8
+        JOBS=${JOBS}
         LOGTYPE=
         RSYNCMOD=corpus
    elif date +%w |grep -q ^6; then
@@ -55,7 +55,7 @@ if [ "$1" == "--nightly" ]; then
         echo "Syncing $TYPE"
         rsync -qrz --delete rsync://rsync.spamassassin.org/tagged_builds/$TYPE/ $WORKDIR/$TYPE/
         retval=$?
-        JOBS=8
+        JOBS=${JOBS}
         NET=--net
         LOGTYPE=net-
         RSYNCMOD=corpus
@@ -65,7 +65,7 @@ if [ "$1" == "--nightly" ]; then
         echo "Syncing $TYPE"
         rsync -qrz --delete rsync://rsync.spamassassin.org/tagged_builds/$TYPE/ $WORKDIR/$TYPE/
         retval=$?
-        JOBS=8
+        JOBS=${JOBS}
         LOGTYPE=
         RSYNCMOD=corpus
     fi
@@ -92,7 +92,8 @@ run_masscheck() {
              "$@"
     LOGLIST="$LOGLIST ham-${LOGNAME} spam-${LOGNAME}"
     set +x
-
+    ln -s ham-${LOGNAME} ham.log
+    ln -s spam-${LOGNAME} spam.log
 }
 
 upload_results() {
@@ -131,6 +132,7 @@ else
 fi
 
 # Run
+JOBS=${JOBS:=8}
 setup_checktype $@
 mkdir -p $WORKDIR/$TYPE
 cd $WORKDIR/$TYPE

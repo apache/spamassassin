@@ -147,20 +147,20 @@ EOF
 
 ###########################################################################
 
-use vars qw($opt_c $opt_p $opt_f $opt_j $opt_n $opt_o $opt_all $opt_bayes
-	    $opt_debug $opt_format $opt_hamlog $opt_head $opt_loghits
-	    $opt_mid $opt_net $opt_nosort $opt_progress $opt_showdots
-	    $opt_spamlog $opt_tail $opt_rules $opt_restart $opt_loguris
-	    $opt_logmem $opt_after $opt_before $opt_rewrite $opt_deencap
-	    $opt_learn $opt_reuse $opt_lint $opt_cache $opt_noisy $opt_cf
-	    $total_messages $statusevery $opt_cachedir $opt_scanprob
-	    $opt_client $opt_cs_conn_retries $opt_cs_max $opt_cs_timeout
-	    $opt_cs_paths_only $opt_server %postdata %real $svn_revision
-            $opt_cs_ssl $opt_run_post_scan $opt_cs_verbose %client_caches
-            %server_caches @cache_tmp_files %min_other_caches
-            %unique_cache_completed $opt_cs_schedule_cache $opt_cs_cache
-            $opt_cs_cachedir $opt_cs_max_tries $opt_pre
-	    $tmpfd);
+our ($opt_c, $opt_p, $opt_f, $opt_j, $opt_n, $opt_o, $opt_all, $opt_bayes,
+     $opt_debug, $opt_format, $opt_hamlog, $opt_head, $opt_loghits,
+     $opt_mid, $opt_net, $opt_nosort, $opt_progress, $opt_showdots,
+     $opt_spamlog, $opt_tail, $opt_rules, $opt_restart, $opt_loguris,
+     $opt_logmem, $opt_after, $opt_before, $opt_rewrite, $opt_deencap,
+     $opt_learn, $opt_reuse, $opt_lint, $opt_cache, $opt_noisy, $opt_cf,
+     $total_messages, $statusevery, $opt_cachedir, $opt_scanprob,
+     $opt_client, $opt_cs_conn_retries, $opt_cs_max, $opt_cs_timeout,
+     $opt_cs_paths_only, $opt_server, %postdata, %real, $svn_revision,
+     $opt_cs_ssl, $opt_run_post_scan, $opt_cs_verbose, %client_caches,
+     %server_caches, @cache_tmp_files, %min_other_caches,
+     %unique_cache_completed, $opt_cs_schedule_cache, $opt_cs_cache,
+     $opt_cs_cachedir, $opt_cs_max_tries, $opt_pre,
+     $tmpfd);
 
 use FindBin;
 

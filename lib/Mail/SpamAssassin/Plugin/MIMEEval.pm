@@ -15,11 +15,38 @@
 # limitations under the License.
 # </@LICENSE>
 
+=head1 NAME
+
+MIMEEval - perform various tests against MIME structure and body
+
+=head1 SYNOPSIS
+
+  loadplugin    Mail::SpamAssassin::Plugin::MIMEEval
+
+  body NAME_OF_RULE  eval:check_for_mime
+  body NAME_OF_RULE  eval:check_for_mime_html
+  body NAME_OF_RULE  eval:check_for_mime_html_only
+  body NAME_OF_RULE  eval:check_mime_multipart_ratio
+  body NAME_OF_RULE  eval:check_msg_parse_flags
+  body NAME_OF_RULE  eval:check_for_ascii_text_illegal
+  body NAME_OF_RULE  eval:check_abundant_unicode_ratio
+  body NAME_OF_RULE  eval:check_for_faraway_charset
+  body NAME_OF_RULE  eval:check_for_uppercase
+  body NAME_OF_RULE  eval:check_ma_non_text
+  body NAME_OF_RULE  eval:check_base64_length
+  body NAME_OF_RULE  eval:check_qp_ratio
+
+=head1 DESCRIPTION
+
+Perform various tests against MIME structure and body.
+
+=cut
+
 package Mail::SpamAssassin::Plugin::MIMEEval;
 
 use strict;
 use warnings;
-use bytes;
+# use bytes;
 use re 'taint';
 
 use Mail::SpamAssassin::Plugin;
@@ -28,8 +55,7 @@ use Mail::SpamAssassin::Constants qw(:sa CHARSETS_LIKELY_TO_FP_AS_CAPS);
 use Mail::SpamAssassin::Util qw(untaint_var);
 use Mail::SpamAssassin::Logger;
 
-use vars qw(@ISA);
-@ISA = qw(Mail::SpamAssassin::Plugin);
+our @ISA = qw(Mail::SpamAssassin::Plugin);
 
 # constructor: register the eval rule
 sub new {
@@ -69,6 +95,7 @@ sub are_more_high_bits_set {
 
   ($numlos <= $numhis && $numhis > 3);
 }
+
 =over 4
 
 =item has_check_for_ascii_text_illegal
@@ -474,6 +501,7 @@ sub _check_attachments {
 Adds capability check for "if can()" for check_qp_ratio
 
 =cut
+
 sub has_check_qp_ratio { 1 }
 
 =item check_qp_ratio
@@ -484,6 +512,7 @@ quoted printable to total bytes in an email.
 =back
 
 =cut
+
 sub check_qp_ratio {
   my ($self, $pms, undef, $min) = @_;
 

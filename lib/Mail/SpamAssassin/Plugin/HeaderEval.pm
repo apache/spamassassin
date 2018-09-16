@@ -19,17 +19,17 @@ package Mail::SpamAssassin::Plugin::HeaderEval;
 
 use strict;
 use warnings;
-use bytes;
+# use bytes;
 use re 'taint';
 use Errno qw(EBADF);
 
 use Mail::SpamAssassin::Plugin;
 use Mail::SpamAssassin::Locales;
+use Mail::SpamAssassin::Util qw(get_my_locales parse_rfc822_date);
 use Mail::SpamAssassin::Logger;
 use Mail::SpamAssassin::Constants qw(:sa :ip);
 
-use vars qw(@ISA);
-@ISA = qw(Mail::SpamAssassin::Plugin);
+our @ISA = qw(Mail::SpamAssassin::Plugin);
 
 # constructor: register the eval rule
 sub new {
@@ -52,6 +52,7 @@ sub new {
   $self->register_eval_rule("check_for_forged_eudoramail_received_headers");
   $self->register_eval_rule("check_for_forged_yahoo_received_headers");
   $self->register_eval_rule("check_for_forged_juno_received_headers");
+  $self->register_eval_rule("check_for_forged_gmail_received_headers");
   $self->register_eval_rule("check_for_matching_env_and_hdr_from");
   $self->register_eval_rule("sorted_recipients");
   $self->register_eval_rule("similar_recipients");
@@ -116,7 +117,7 @@ sub check_for_faraway_charset_in_headers {
   my ($self, $pms) = @_;
   my $hdr;
 
-  my @locales = Mail::SpamAssassin::Util::get_my_locales($self->{main}->{conf}->{ok_locales});
+  my @locales = get_my_locales($self->{main}->{conf}->{ok_locales});
 
   return 0 if grep { $_ eq "all" } @locales;
 
@@ -343,16 +344,23 @@ sub _check_for_forged_hotmail_received_headers {
 
   my $ip = $pms->get('X-Originating-Ip',undef);
   my $IP_ADDRESS = IP_ADDRESS;
+  my $orig = $pms->get('X-OriginatorOrg',undef);
+  my $ORIGINATOR = 'hotmail.com';
 
   if (defined $ip && $ip =~ /$IP_ADDRESS/) { $ip = 1; } else { $ip = 0; }
+  if (defined $orig && $orig =~ /$ORIGINATOR/) { $orig = 1; } else { $orig = 0; }
 
   # Hotmail formats its received headers like this:
   # Received: from hotmail.com (f135.law8.hotmail.com [216.33.241.135])
+  # or like
+  # Received: from EUR01-VE1-obe.outbound.protection.outlook.com (mail-oln040092066056.outbound.protection.outlook.com [40.92.66.56])
   # spammers do not ;)
 
   if ($self->gated_through_received_hdr_remover($pms)) { return; }
 
   if ($rcvd =~ /from (?:\S*\.)?hotmail.com \(\S+\.hotmail(?:\.msn)?\.com[ \)]/ && $ip)
+                { return; }
+  if ($rcvd =~ /from \S*\.outbound\.protection\.outlook\.com \(\S+\.outbound\.protection\.outlook\.com[ \)]/ && $orig)
                 { return; }
   if ($rcvd =~ /from \S*\.hotmail.com \(\[$IP_ADDRESS\][ \):]/ && $ip)
                 { return; }
@@ -573,6 +581,32 @@ sub check_for_forged_juno_received_headers {
   return 0;   
 }
 
+sub check_for_forged_gmail_received_headers {
+  my ($self, $pms) = @_;
+  use constant GOOGLE_MESSAGE_STATE_LENGTH_MIN => 60;
+  use constant GOOGLE_SMTP_SOURCE_LENGTH_MIN => 60;
+
+  my $from = $pms->get('From:addr');
+  if ($from !~ /\bgmail\.com$/i) { return 0; }
+
+  my $xgms = $pms->get('X-Gm-Message-State');
+  my $xss = $pms->get('X-Google-Smtp-Source');
+  my $xreceived = $pms->get('X-Received');
+  my $received = $pms->get('Received');
+
+  if ($xreceived =~ /by 10\.\S+ with SMTP id \S+/) { return 0; }
+  if ($xreceived =~ /by 2002\:\w\:\S+ with SMTP id \S+/) { return 0; }
+  if ($received =~ /by smtp\.googlemail\.com with ESMTPSA id \S+/) {
+    return 0;
+  }
+  if ( (length($xgms) >= GOOGLE_MESSAGE_STATE_LENGTH_MIN) && 
+    (length($xss) >= GOOGLE_SMTP_SOURCE_LENGTH_MIN)) {
+      return 0;
+  }
+
+  return 1;
+}
+
 sub check_for_matching_env_and_hdr_from {
   my ($self, $pms) =@_;
   # two blank headers match so don't bother checking
@@ -722,7 +756,7 @@ sub _get_date_header_time {
     for my $date (@dates) {
       if (defined($date) && length($date)) {
         chomp($date);
-        $time = Mail::SpamAssassin::Util::parse_rfc822_date($date);
+        $time = parse_rfc822_date($date);
       }
       last DATE if defined($time);
     }
@@ -773,7 +807,7 @@ sub _get_received_header_times {
       if ($rcvd =~ m/(\s.?\d+ \S\S\S \d+ \d+:\d+:\d+ \S+)/) {
 	my $date = $1;
         dbg2("eval: trying Received fetchmail header date for real time: $date");
-	my $time = Mail::SpamAssassin::Util::parse_rfc822_date($date);
+	my $time = parse_rfc822_date($date);
 	if (defined($time) && (time() >= $time)) {
           dbg2("eval: time_t from date=$time, rcvd=$date");
 	  push @fetchmail_times, $time;
@@ -793,7 +827,7 @@ sub _get_received_header_times {
     if ($rcvd =~ m/(\s.?\d+ \S\S\S \d+ \d+:\d+:\d+ \S+)/) {
       my $date = $1;
       dbg2("eval: trying Received header date for real time: $date");
-      my $time = Mail::SpamAssassin::Util::parse_rfc822_date($date);
+      my $time = parse_rfc822_date($date);
       if (defined($time)) {
         dbg2("eval: time_t from date=$time, rcvd=$date");
 	push @header_times, $time;
@@ -953,14 +987,14 @@ sub check_outlook_message_id {
   my $fudge = 250;
 
   $_ = $pms->get('Date');
-  $_ = Mail::SpamAssassin::Util::parse_rfc822_date($_) || 0;
+  $_ = parse_rfc822_date($_) || 0;
   my $expected = int (($_ * $x) + $y);
   my $diff = $timetoken - $expected;
   return 0 if (abs($diff) < $fudge);
 
   $_ = $pms->get('Received');
   /(\s.?\d+ \S\S\S \d+ \d+:\d+:\d+ \S+).*?$/;
-  $_ = Mail::SpamAssassin::Util::parse_rfc822_date($_) || 0;
+  $_ = parse_rfc822_date($_) || 0;
   $expected = int(($_ * $x) + $y);
   $diff = $timetoken - $expected;
 

@@ -40,6 +40,9 @@ L<Mail::SpamAssassin::Conf> for details.
 Note: the language cannot always be recognized with sufficient confidence.
 In that case, no action is taken.
 
+You can use _TEXTCATRESULTS_ tag to view the internal ngram-scoring, it
+might help fine-tuning settings.
+
 =cut
 
 package Mail::SpamAssassin::Plugin::TextCat;
@@ -48,11 +51,10 @@ use Mail::SpamAssassin::Plugin;
 use Mail::SpamAssassin::Logger;
 use strict;
 use warnings;
-use bytes;
+# use bytes;
 use re 'taint';
 
-use vars qw(@ISA);
-@ISA = qw(Mail::SpamAssassin::Plugin);
+our @ISA = qw(Mail::SpamAssassin::Plugin);
 
 # language models
 my @nm;
@@ -297,7 +299,14 @@ Rhaeto-Romance, Sanskrit, Scots, Slovenian, and Yiddish.
 =item textcat_max_languages N (default: 3)
 
 The maximum number of languages any one message can simultaneously match
-before its classification is considered unknown.
+before its classification is considered unknown.  You can try reducing this
+to 2 or possibly even 1 for more confident results, as it's unusual for a
+message to contain multiple languages.
+
+Read description for textcat_acceptable_score also, as these settings are
+closely related.  Scoring affects how many languages might be matched and
+here we set the "false positive limit" where we think the engine can't
+decide what languages message really contain.
 
 =cut
 
@@ -337,7 +346,20 @@ models (note that each of those models is used completely).
 =item textcat_acceptable_score N (default: 1.02)
 
 Include any language that scores at least C<textcat_acceptable_score> in the
-returned list of languages. 
+returned list of languages.
+
+This setting is basically a percentile range. Any language having internal
+ngram-score within N-percent of the best score is included into results. 
+Larger values than 1.05 are not recommended as it can generate many false
+matches.  A setting of 1.00 would mean a single best scoring language is
+always forcibly selected, but this is not recommended as then
+textcat_max_languages can't do its job classifying language as uncertain.
+
+Read the description for textcat_max_languages, as these are settings are
+closely related.
+
+You can use _TEXTCATRESULTS_ tag to view the internal ngram-scoring, it
+might help fine-tuning settings.
 
 =cut
 
@@ -394,8 +416,9 @@ sub load_models {
 }
 
 sub classify {
-  my ($inputptr, $conf, %skip) = @_;
+  my ($inputptr, $opts, %skip) = @_;
   my %results;
+  my $conf = $opts->{conf};
   my $maxp = $conf->{textcat_max_ngrams};
 
   # create ngrams for input
@@ -422,6 +445,14 @@ sub classify {
 
   my $best = $results{$results[0]};
 
+  # Insert first 20 results in tag for debugging purposes
+  my @results_tag;
+  foreach (@results[0..19]) {
+    last unless defined $_;
+    push @results_tag, sprintf "%s:%s(%.02f)", $_, $results{$_}, $results{$_} / $best;
+  }
+  $opts->{permsgstatus}->set_tag('TEXTCATRESULTS', join(' ', @results_tag));
+
   my @answers = (shift(@results));
   while (@results && $results{$results[0]} < ($conf->{textcat_acceptable_score} * $best)) {
     @answers = (@answers, shift(@results));
@@ -441,14 +472,22 @@ sub create_lm {
   my %ngram;
   my @sorted;
 
+  # Note that $$inputptr may or may not be in perl characters (utf8 flag set)
+  my $is_unicode = utf8::is_utf8($$inputptr);
+
   # my $non_word_characters = qr/[0-9\s]/;
-  for my $word (split(/[0-9\s]+/, ${$_[0]}))
+  for my $word (split(/[0-9\s]+/, $$inputptr))
   {
-    # Bug 6229: Current TextCat database only works well with
-    # lowercase input, lets work around it until it's properly
-    # generated and/or locale issues are resolved..
-    $word =~ tr/A-Z\xc0-\xd6\xd8-\xde/a-z\xe0-\xf6\xf8-\xfe/
-        if $word =~ /[A-Z]/ && $word =~ /[a-zA-Z\xc0-\xd6\xd8-\xde\xe0-\xf6\xf8-\xfe]{4}/;
+    # Bug 6229: Current TextCat database only works well with lowercase input
+    if ($is_unicode) {
+      # Unicode rules are used for the case change
+      $word = lc $word  if $word =~ /\w{4}/;
+      utf8::encode($word);  # encode Unicode characters to UTF-8 octets
+    } elsif ($word =~ /[A-Z]/ &&
+             $word =~ /[a-zA-Z\xc0-\xd6\xd8-\xde\xe0-\xf6\xf8-\xfe]{4}/) {
+      # assume ISO 8859-1 / Windows-1252
+      $word =~ tr/A-Z\xc0-\xd6\xd8-\xde/a-z\xe0-\xf6\xf8-\xfe/;
+    }
     $word = "\000" . $word . "\000";
     my $len = length($word);
     my $flen = $len;
@@ -506,7 +545,7 @@ sub extract_metadata {
     $skip{$_} = 1 for split(' ', $opts->{conf}->{inactive_languages});
     delete $skip{$_} for split(' ', $opts->{conf}->{ok_languages});
     dbg("textcat: classifying, skipping: " . join(" ", keys %skip));
-    @matches = classify(\$body, $opts->{conf}, %skip);
+    @matches = classify(\$body, $opts, %skip);
   }
   else {
     dbg("textcat: message too short for language analysis");

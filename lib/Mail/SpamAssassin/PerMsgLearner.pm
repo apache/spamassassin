@@ -48,7 +48,7 @@ package Mail::SpamAssassin::PerMsgLearner;
 
 use strict;
 use warnings;
-use bytes;
+# use bytes;
 use re 'taint';
 
 use Mail::SpamAssassin;
@@ -56,11 +56,7 @@ use Mail::SpamAssassin::PerMsgStatus;
 use Mail::SpamAssassin::Bayes;
 use Mail::SpamAssassin::Logger;
 
-use vars qw{
-  @ISA
-};
-
-@ISA = qw();
+our @ISA = qw();
 
 ###########################################################################
 

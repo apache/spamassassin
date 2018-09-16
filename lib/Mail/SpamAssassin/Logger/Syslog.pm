@@ -31,7 +31,7 @@ package Mail::SpamAssassin::Logger::Syslog;
 
 use strict;
 use warnings;
-use bytes;
+# use bytes;
 use re 'taint';
 
 use POSIX qw(:sys_wait_h setsid sigprocmask);
@@ -39,22 +39,19 @@ use Time::HiRes ();
 use Sys::Syslog qw(:DEFAULT setlogsock);
 use Mail::SpamAssassin::Logger;
 
-use vars qw(@ISA %prio_map $syslog_open);
-@ISA = ();
+our @ISA = ();
 
-BEGIN {
-  # %prio_map maps Logger.pm log level names (warn, error, info, dbg)
-  # into standard Sys::Syslog::syslog() log level names
-  #
-  %prio_map = (dbg => 'debug', debug => 'debug', info => 'info',
-               notice => 'notice', warn => 'warning', warning => 'warning',
-               error => 'err', err => 'err', crit => 'crit', alert => 'alert',
-               emerg => 'emerg');
+# %prio_map maps Logger.pm log level names (warn, error, info, dbg)
+# into standard Sys::Syslog::syslog() log level names
+#
+our  %prio_map = (dbg => 'debug', debug => 'debug', info => 'info',
+                  notice => 'notice', warn => 'warning', warning => 'warning',
+                  error => 'err', err => 'err', crit => 'crit', alert => 'alert',
+                  emerg => 'emerg');
 
-  # make sure never to hit the CPAN-RT#56826 bug (memory corruption
-  # when closelog() is called twice), fixed in Sys-Syslog 0.28
-  $syslog_open = 0;
-}
+# make sure never to hit the CPAN-RT#56826 bug (memory corruption
+# when closelog() is called twice), fixed in Sys-Syslog 0.28
+our $syslog_open = 0;
 
 sub new {
   my $class = shift;

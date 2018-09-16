@@ -61,7 +61,7 @@ or the C<spamd>/C<spamc> tools provided.
 package Mail::SpamAssassin;
 use strict;
 use warnings;
-use bytes;
+# use bytes;
 use re 'taint';
 
 require 5.006_001;
@@ -87,25 +87,20 @@ use Time::HiRes qw(time);
 use Cwd;
 use Config;
 
-use vars qw{
-  @ISA $VERSION $SUB_VERSION @EXTRA_VERSION $IS_DEVEL_BUILD $HOME_URL
-  @default_rules_path @default_prefs_path
-  @default_userprefs_path @default_userstate_dir
-  @site_rules_path
-};
+our $VERSION = "3.004002";      # update after release (same format as perl $])
+#our $IS_DEVEL_BUILD = 1;        # 1 for devel build 
+our $IS_DEVEL_BUILD = 0;        # 0 for release versions including rc & pre releases
 
-$VERSION = "3.004001";      # update after release (same format as perl $])
-#$IS_DEVEL_BUILD = 1;        # change for release versions
 
 # Used during the prerelease/release-candidate part of the official release
 # process. If you hacked up your SA, you should add a version_tag to your .cf
 # files; this variable should not be modified.
-#@EXTRA_VERSION = qw();
+our @EXTRA_VERSION = qw();
 
-@ISA = qw();
+our @ISA = qw();
 
 # SUB_VERSION is now just <yyyy>-<mm>-<dd>
-$SUB_VERSION = 'svnunknown';
+our $SUB_VERSION = 'svnunknown';
 if ('$LastChangedDate$' =~ ':') {
   # Subversion keyword "$LastChangedDate$" has been successfully expanded.
   # Doesn't happen with automated launchpad builds:
@@ -128,13 +123,14 @@ sub Version {
   return join('-', sprintf("%d.%d.%d", $1, $2, $3), @EXTRA_VERSION);
 }
 
-$HOME_URL = "http://spamassassin.apache.org/";
+our $HOME_URL = "http://spamassassin.apache.org/";
 
 # note that the CWD takes priority.  This is required in case a user
 # is testing a new version of SpamAssassin on a machine with an older
 # version installed.  Unless you can come up with a fix for this that
 # allows "make test" to work, don't change this.
-@default_rules_path = (
+
+our @default_rules_path = (
   './rules',              # REMOVEFORINST
   '../rules',             # REMOVEFORINST
   '__local_state_dir__/__version__',
@@ -145,7 +141,7 @@ $HOME_URL = "http://spamassassin.apache.org/";
 );
 
 # first 3 are BSDish, latter 2 Linuxish
-@site_rules_path = (
+our @site_rules_path = (
   '__local_rules_dir__',
   '__prefix__/etc/mail/spamassassin',
   '__prefix__/etc/spamassassin',
@@ -156,21 +152,23 @@ $HOME_URL = "http://spamassassin.apache.org/";
   '/etc/spamassassin',
 );
 
-@default_prefs_path = (
+our @default_prefs_path = (
   '__local_rules_dir__/user_prefs.template',
   '__prefix__/etc/mail/spamassassin/user_prefs.template',
   '__prefix__/share/spamassassin/user_prefs.template',
+  '__local_state_dir__/__version__/updates_spamassassin_org/user_prefs.template',
+  '__def_rules_dir__/user_prefs.template',
   '/etc/spamassassin/user_prefs.template',
   '/etc/mail/spamassassin/user_prefs.template',
   '/usr/local/share/spamassassin/user_prefs.template',
   '/usr/share/spamassassin/user_prefs.template',
 );
 
-@default_userprefs_path = (
+our @default_userprefs_path = (
   '~/.spamassassin/user_prefs',
 );
 
-@default_userstate_dir = (
+our @default_userstate_dir = (
   '~/.spamassassin',
 );
 
@@ -842,7 +840,7 @@ sub signal_user_changed {
   $self->{'learn_to_journal'} = $self->{conf}->{bayes_learn_to_journal};
 
   $set |= 1 unless $self->{local_tests_only};
-  $set |= 2 if $self->{bayes_scanner} && $self->{bayes_scanner}->is_scan_available();
+  $set |= 2 if $self->{bayes_scanner} && $self->{bayes_scanner}->is_scan_available() && $self->{conf}->{use_bayes_rules};
 
   $self->{conf}->set_score_set ($set);
 
@@ -1779,7 +1777,7 @@ sub init {
   # Figure out/set our initial scoreset
   my $set = 0;
   $set |= 1 unless $self->{local_tests_only};
-  $set |= 2 if $self->{bayes_scanner} && $self->{bayes_scanner}->is_scan_available();
+  $set |= 2 if $self->{bayes_scanner} && $self->{bayes_scanner}->is_scan_available() && $self->{conf}->{use_bayes_rules};
   $self->{conf}->set_score_set ($set);
 
   if ($self->{only_these_rules}) {

@@ -19,8 +19,6 @@
 
 Mail::SpamAssassin::BayesStore::Redis - Redis Bayesian Storage Module Implementation
 
-=head1 SYNOPSIS
-
 =head1 DESCRIPTION
 
 This module implementes a Redis based bayesian storage module.
@@ -118,7 +116,7 @@ package Mail::SpamAssassin::BayesStore::Redis;
 
 use strict;
 use warnings;
-use bytes;
+# use bytes;
 use re 'taint';
 use Errno qw(EBADF);
 use Mail::SpamAssassin::Util qw(untaint_var);
@@ -133,12 +131,8 @@ use Mail::SpamAssassin::Logger;
 use Mail::SpamAssassin::BayesStore;
 use Mail::SpamAssassin::Util::TinyRedis;
 
-use vars qw( @ISA $VERSION );
-
-BEGIN {
-  $VERSION = 0.09;
-  @ISA = qw( Mail::SpamAssassin::BayesStore );
-}
+our $VERSION = 0.09;
+our @ISA = qw( Mail::SpamAssassin::BayesStore );
 
 =head1 METHODS
 

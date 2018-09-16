@@ -19,8 +19,6 @@
 
 Mail::SpamAssassin::BayesStore::MySQL - MySQL Specific Bayesian Storage Module Implementation
 
-=head1 SYNOPSIS
-
 =head1 DESCRIPTION
 
 This module implements a MySQL specific based bayesian storage module.  It
@@ -38,15 +36,13 @@ package Mail::SpamAssassin::BayesStore::MySQL;
 
 use strict;
 use warnings;
-use bytes;
+# use bytes;
 use re 'taint';
 
 use Mail::SpamAssassin::BayesStore::SQL;
 use Mail::SpamAssassin::Logger;
 
-use vars qw( @ISA );
-
-@ISA = qw( Mail::SpamAssassin::BayesStore::SQL );
+our @ISA = qw( Mail::SpamAssassin::BayesStore::SQL );
 
 use constant HAS_DBI => eval { require DBI; };
 

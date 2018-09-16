@@ -94,3 +94,8 @@ schedule is below:
 
 DELETE FROM txrep WHERE last_hit <= (now() - INTERVAL 120 day);
 
+For PostgreSQL, use the following:
+
+DELETE FROM txrep WHERE last_hit <= (now() - INTERVAL '120 day');
+
+

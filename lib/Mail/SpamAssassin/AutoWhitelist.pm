@@ -43,7 +43,7 @@ package Mail::SpamAssassin::AutoWhitelist;
 
 use strict;
 use warnings;
-use bytes;
+# use bytes;
 use re 'taint';
 
 use NetAddr::IP 4.000;
@@ -52,11 +52,7 @@ use Mail::SpamAssassin;
 use Mail::SpamAssassin::Logger;
 use Mail::SpamAssassin::Util qw(untaint_var);
 
-use vars	qw{
-  	@ISA
-};
-
-@ISA = qw();
+our @ISA = qw();
 
 ###########################################################################
 

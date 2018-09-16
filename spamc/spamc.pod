@@ -74,6 +74,18 @@ all addresses of one host before it tries the next one in the list.
 Note that this fail-over behaviour is incompatible with B<-x>; if that
 switch is used, fail-over will not occur.
 
+=item B<-4>
+
+Use IPv4 only for connecting to server. Restricts domain name resolution of
+spamd server host(s) to address family AF_INET through the C<hints.ai_family>
+flag in the call to getaddrinfo(3).
+
+=item B<-6>
+
+Use IPv6 only for connecting to server. Restricts domain name resolution of
+spamd server host(s) to address family AF_INET6 through the C<hints.ai_family>
+flag in the call to getaddrinfo(3).
+
 =item B<-e> I<command> I<[args]>, B<--pipe-to> I<command> I<[args]>
 
 Instead of writing to stdout, pipe the output to I<command>'s standard input.
@@ -177,12 +189,10 @@ The default is 1 time (ie. one attempt and no retries).
 Sleep for I<sleep> seconds between failed spamd filtering attempts.
 The default is 1 second.
 
-=item B<-S>, B<--ssl>, B<--ssl>=I<sslversion>
+=item B<-S>, B<--ssl>, B<--ssl>
 
 If spamc was built with support for SSL, encrypt data to and from the
 spamd process with SSL; spamd must support SSL as well.
-I<sslversion> specifies the SSL protocol version to use, either
-C<sslv3>, or C<tlsv1>. The default, is C<sslv3>.
 
 =item B<-t> I<timeout>, B<--timeout>=I<timeout>
 

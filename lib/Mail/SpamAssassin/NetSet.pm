@@ -20,7 +20,7 @@ package Mail::SpamAssassin::NetSet;
 
 use strict;
 use warnings;
-use bytes;
+# use bytes;
 use re 'taint';
 use Time::HiRes qw(time);
 use NetAddr::IP 4.000;
@@ -28,10 +28,7 @@ use NetAddr::IP 4.000;
 use Mail::SpamAssassin::Util;
 use Mail::SpamAssassin::Logger;
 
-use vars qw{
-  @ISA $TESTCODE $NUMTESTS $have_patricia
-};
-
+our $have_patricia;
 BEGIN {
   eval {
     require Net::Patricia;
@@ -205,7 +202,7 @@ sub _convert_ipv4_cidr_to_ipv6 {
 
   # else we have a CIDR mask specified. use new6() to do this
   #
-  my $ip6 = ""+(NetAddr::IP->new6($cidr));
+  my $ip6 = NetAddr::IP->new6($cidr)->cidr;
   # 127.0.0.1 -> 0:0:0:0:0:0:7F00:0001/128
   # 127/8 -> 0:0:0:0:0:0:7F00:0/104
 

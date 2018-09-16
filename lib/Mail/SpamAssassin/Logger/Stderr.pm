@@ -31,14 +31,24 @@ package Mail::SpamAssassin::Logger::Stderr;
 
 use strict;
 use warnings;
-use bytes;
+# use bytes;
 use re 'taint';
 
 use POSIX ();
 use Time::HiRes ();
 
-use vars qw(@ISA);
-@ISA = ();
+our @ISA = ();
+
+# ADDING OS-DEPENDENT LINE TERMINATOR - BUG 6456
+
+# Using Mail::SpamAssassin::Util::am_running_on_windows() leads to circular
+# dependencies. So, we are duplicating the code instead.
+use constant RUNNING_ON_WINDOWS => ($^O =~ /^(?:mswin|dos|os2)/oi);
+
+my $eol = "\n";
+if (RUNNING_ON_WINDOWS) {
+  $eol = "\r\n";
+}
 
 sub new {
   my $class = shift;
@@ -61,8 +71,9 @@ sub log_message {
   if (!defined $fmt) {
     # default since 3.3.0
     my $now = Time::HiRes::time;
-    $timestamp = sprintf("%s:%06.3f",
-      POSIX::strftime("%b %d %H:%M", localtime($now)), $now-int($now/60)*60);
+    my $datetime = POSIX::strftime("%b %d %H:%M", localtime($now));
+    utf8::encode($datetime)  if utf8::is_utf8($datetime);  # Bug 7305
+    $timestamp = sprintf("%s:%06.3f", $datetime, $now-int($now/60)*60);
     # Bug 6329: %e is not in a POSIX standard, use %d instead and edit
     local $1; $timestamp =~ s/^(\S+\s+)0/$1 /;
   } elsif ($fmt eq '') {
@@ -72,8 +83,8 @@ sub log_message {
   }
   $timestamp .= ' '  if $timestamp ne '';
 
-  my($nwrite) = syswrite(STDERR, sprintf("%s[%d] %s: %s\n",
-                                         $timestamp, $$, $level, $msg));
+  my($nwrite) = syswrite(STDERR, sprintf("%s[%d] %s: %s%s",
+                                         $timestamp, $$, $level, $msg, $eol));
   defined $nwrite  or warn "error writing to log file: $!";
 }
 
