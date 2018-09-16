@@ -528,52 +528,41 @@ APACHE SPAMASSASSIN RELEASE PROCEDURE
   run, so the old downloads page will stick around for a while before it's
   safe to do so.)
 
-#HERE
-
-- (for full release builds) update the main website "downloads" page in
-  svn:
+- (for full release builds) update the main website "downloads.html" and
+  all the links to downloads.cgi on all the pages in svn:
 
     https://svn.apache.org/repos/asf/spamassassin/site
-
-  2018-09-01: Not sure what this warning means:
 
   When changing the timestamp in the downloads.cgi link URL, ensure you
   use a time 2 hours from now.  The ASF websites are synced internally to
   the public HTTP servers on a bi-hourly basis, so it may take up to this
   long for a file-download link to become valid and not a 404.
 
+- Update the "news.html" and the announcement on the home page.
+
 - Log on to: https://reporter.apache.org/addrelease.html?spamassassin
   and add your release data (version and date) to the database.
 
 - update the 'doc' tree in the SpamAssassin website 
 
-  WARNING: if you're moving to a new major release, x.y.0, you need to edit
-  'build/update_website_docs' beforehand and set the "vers" line.  And if 
-  you are running on a server other than buildbot (NOTE: this works on the 
-  spamassassin-vm.apache.org box), the PERL and WEBDIR
-  vars may need tweaking:
+  WARNING: edit 'build/update_website_docs' beforehand and set the "PERL"
+  "WEBDIR" and "vers" lines.  On my build system, the website checkout is
+  in ~/asf/spamassassin/site and perl is in the path so nothing special is
+  needed.
 
-        cd /var/www/buildbot.spamassassin.org/staging/website
+        cd ~/asf/spamassassin/site
         svn up
         svn delete --force full/3.4.x
-        svn commit -m "removing old doc tree from website" full
 
         #Checkout the current release
         cd /tmp
-        svn checkout http://svn.apache.org/repos/asf/spamassassin/tags/spamassassin_release_3_4_1/ release
+        svn checkout http://svn.apache.org/repos/asf/spamassassin/tags/spamassassin_release_3_4_2/ release
         cd /tmp/release
         build/update_website_docs
 
         cd /var/www/buildbot.spamassassin.org/staging/website
         svn add full/3.4.x
         svn commit -m "updating new doc tree on website" full
-
-- and check the entire website into SVN (see bug 4998 for reasons why).
-  Note that you may need to resolve conflicts and ensure the contents of
-  'full/3.4.x' are all added successfully:
-
-        svn up
-        svn commit -m "added new release to website"
 
 - update the tag used to point to "current release":
 
