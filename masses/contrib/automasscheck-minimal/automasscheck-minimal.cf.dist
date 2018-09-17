@@ -19,7 +19,7 @@
 
 
 # automasscheck-minimal configuration file
-# davej 0.03
+# davej 0.04
 
 # See https://wiki.apache.org/spamassassin/NightlyMassCheck 
 
@@ -31,22 +31,42 @@ LOGPREFIX="YOUR-USERNAME"
 RSYNC_USERNAME="YOUR-USERNAME"
 RSYNC_PASSWORD="YOUR-PASSWORD"
 
+# Path to perl executable
+PERL=/usr/bin/perl
+
 # If your corpus is huge, to speed up processing you can use a ramdisk for WORKDIR
 # It doesn't need to survive a reboot - it will be automagically recreated
-WORKDIR=~/masscheckwork
+WORKDIR=$HOME/masscheckwork
 
 # HOW MANY MASSCHECK SIMULTANEOUS THREADS CAN YOUR BOX HANDLE?
 # Default = 8
 # If using on an older PC you may want to lower to 6 or less
 # If load is still too high - decrease some more.
 # A well equipped 8 core server can easily handle 10 or more.
-# In automasscheck-minimal.sh change to
-# JOBS=10
+JOBS=8
 
-# Leave these blank if you do not want trusted_networks
-# and/or internal_networks to be set
-TRUSTED_NETWORKS=
-INTERNAL_NETWORKS=
+# Leave blank if you do not want trusted_networks or internal_networks to be set
+# Normally both should atleast include IP of your MX server(s)
+# https://wiki.apache.org/spamassassin/TrustPath
+TRUSTED_NETWORKS=""
+INTERNAL_NETWORKS=""
+
+# Uncomment to enable --reuse for net mass-checks.  Mails MUST have been
+# processed at receive time with all network tests enabled, without any
+# major shortcircuiting and having the X-Spam-Status result header added. 
+# This results in much faster mass-checking as there is no need to run
+# network tests (dnsbl/spf/dkim/etc lookups) needlessly again.  It also
+# results in more accurate stats/scores, since dynamic dns data can change
+# hourly - results will be different days or even months later when
+# mass-check is run.
+#REUSE=--reuse
+
+# Custom rules/config files for mass-check
+# Specified file (multiples files separated by space) will be..
+# .. added to runtime spamassassin/user_prefs
+#CUSTOM_PREFS="$HOME/custom_prefs.cf"
+# .. created as runtime rules/99_custom.cf
+#CUSTOM_RULES="$HOME/custom_rules.cf"
 
 run_all_masschecks() {
   ### sample: single corpus ###
@@ -57,13 +77,13 @@ run_all_masschecks() {
   # If you have multiple separate corpuses, you can specify as many run_masscheck lines as you want below.
   ### user2 ###
   #run_masscheck user2 \
-  #             ham:mbox:/home/user2/mail/HAM
-  #             spam:mbox:/home/user2/mail/SPAM
+  #             ham:mbox:/home/user2/mail/HAM \
+  #             spam:mbox:/home/user2/mail/SPAM \
   # This is an example of Maildir instead of mbox
   ### user3 ###
   #run_masscheck user3 \
   #             ham:dir:/home/user3/mail/HAM/cur \
-  #             spam:dir:/home/user3/mail/SPAM/cur \
+  #             spam:dir:/home/user3/mail/SPAM/cur
 }
 
 ### END CONFIGURATION ###
