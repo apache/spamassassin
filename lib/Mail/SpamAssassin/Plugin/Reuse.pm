@@ -10,6 +10,8 @@ Mail::SpamAssassin::Plugin::Reuse - For reusing old rule hits during a mass-chec
 
   reuse NETWORK_RULE [ NETWORK_RULE_OLD_NAME ]
 
+  run_reuse_tests_only 0/1
+
   endif
 
 =head1 DESCRIPTION
@@ -17,6 +19,15 @@ Mail::SpamAssassin::Plugin::Reuse - For reusing old rule hits during a mass-chec
 The purpose of this plugin is to work in conjunction with B<mass-check
 --reuse> to map rules hit in input messages to rule hits in the
 mass-check output.
+
+run_reuse_tests_only 1 is special option for spamassassin/spamd use.
+Only reuse flagged tests will be run. It will also _enable_ network/DNS
+lookups. This is mainly intended for fast mass processing of corpus
+messages, so they can be properly reused later. For example:
+  spamd --pre="loadmodule Mail::SpamAssassin::Plugin::Reuse" \
+    --pre="run_reuse_tests_only 1" ...
+Such dedicated spamd could be scripted to add X-Spam-Status header to
+messages efficiently.
 
 =cut
 
@@ -75,8 +86,14 @@ sub set_config {
                    foreach my $old (@old_names) {
                      push @{$conf->{reuse_tests}->{$new_name}}, $old;
                    }
-
-               }});
+                 }
+               },
+               { setting => 'run_reuse_tests_only',
+                 code => sub {
+                   my ($conf, $key, $value, $line) = @_;
+                   $conf->{run_reuse_tests_only} = 1 if $value;
+                 }
+               });
 
 
   $conf->{parser}->register_commands(\@cmds);
@@ -90,6 +107,16 @@ sub finish_parsing_start {
   dbg("reuse: finish_parsing_start called");
 
   return 0 if (!exists $conf->{reuse_tests});
+
+  if ($conf->{run_reuse_tests_only}) {
+    # simply delete all rules not reuse
+    foreach (keys %{$conf->{tests}}) {
+      if (!defined $conf->{reuse_tests}->{$_}) {
+        delete $conf->{tests}->{$_};
+      }
+    }
+    return 0;
+  }
 
   foreach my $rule_name (keys %{$conf->{reuse_tests}}) {
 
@@ -118,6 +145,8 @@ sub check_start {
   my ($self, $opts) = @_;
 
   my $pms = $opts->{permsgstatus};
+
+  return 0 if $pms->{conf}->{run_reuse_tests_only};
 
   # Can we reuse?
   my $msg = $pms->get_message();
@@ -164,6 +193,8 @@ sub check_end {
 
   my $pms = $opts->{permsgstatus};
 
+  return 0 if $pms->{conf}->{run_reuse_tests_only};
+
   foreach my $disabled_rule (keys %{$pms->{reuse_old_scores}}) {
     foreach my $ss (0..3) {
       next unless exists $pms->{conf}->{scoreset}->[$ss]->{$disabled_rule};
@@ -178,8 +209,11 @@ sub check_end {
 sub start_rules {
   my ($self, $opts) = @_;
 
-  return $self->_add_hits($opts->{permsgstatus}, $opts->{priority},
-			  $opts->{ruletype});
+  my $pms = $opts->{permsgstatus};
+
+  return 0 if $pms->{conf}->{run_reuse_tests_only};
+
+  return $self->_add_hits($pms, $opts->{priority}, $opts->{ruletype});
 }
 
 sub _add_hits {
