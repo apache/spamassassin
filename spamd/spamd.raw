@@ -332,6 +332,7 @@ my %opt = (
   'min-children'  => 1,         # min kids to have running
   'min-spare'     => 1,         # min kids that must be spare
   'max-spare'     => 2,         # max kids that should be spare
+  'pre'           => [],        # extra .pre lines
   'cf'            => [],        # extra config lines
 );
 
@@ -404,6 +405,7 @@ GetOptions(
   'setuid-with-ldap'         => \$opt{'setuid-with-ldap'},
   'setuid-with-sql'          => \$opt{'setuid-with-sql'},
   'siteconfigpath=s'         => \$opt{'siteconfigpath'},
+  'pre=s'                    => \@{$opt{'pre'}},
   'cf=s'                     => \@{$opt{'cf'}},
   'socketgroup=s'            => \$opt{'socketgroup'},
   'socketmode=s'             => \$opt{'socketmode'},
@@ -1153,6 +1155,7 @@ my $spamtest = Mail::SpamAssassin->new(
     dont_copy_prefs      => $dontcopy,
     rules_filename       => ( $opt{'configpath'} || 0 ),
     site_rules_filename  => ( $opt{'siteconfigpath'} || 0 ),
+    pre_config_text      => join("\n", @{$opt{'pre'}})."\n",
     post_config_text     => join("\n", @{$opt{'cf'}})."\n",
     force_ipv4           => ( $opt{'force_ipv4'} || 0 ),
     local_tests_only     => ( $opt{'local'} || 0 ),
@@ -3233,6 +3236,7 @@ Options:
  -C path, --configpath=path        Path for default config files
  --siteconfigpath=path             Path for site configs
  --cf='config line'                Additional line of configuration
+ --pre='config line'               Additional line of ".pre" (prepended to configuration)
  -d, --daemonize                   Daemonize
  -h, --help                        Print usage message
  -i [ip_or_name[:port]], --listen=[ip_or_name[:port]] Listen on IP addr and port
