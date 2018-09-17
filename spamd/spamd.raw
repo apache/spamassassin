@@ -3364,6 +3364,12 @@ Add additional lines of configuration directly from the command-line, parsed
 after the configuration files are read.   Multiple B<--cf> arguments can be
 used, and each will be considered a separate line of configuration.
 
+=item B<--pre='config line'>
+
+Add additional lines of .pre configuration directly from the command-line,
+parsed before the configuration files are read.  Multiple B<--pre> arguments
+can be used, and each will be considered a separate line of configuration.
+
 =item B<-d>, B<--daemonize>
 
 Detach from starting process and run in background (daemonize).
