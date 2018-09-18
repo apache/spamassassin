@@ -97,7 +97,7 @@ Valid database types are GeoIP, GeoIP2, DB_File and Fast.
     type => $Mail::SpamAssassin::Conf::CONF_TYPE_STRING,
     code => sub {
       my ($self, $key, $value, $line) = @_;
-      if ( $value !~ /GeoIP|GeoIP2|DB_File|Fast/) {
+      if ( $value !~ /^(?:GeoIP|GeoIP2|DB_File|Fast)$/) {
         return $Mail::SpamAssassin::Conf::INVALID_VALUE;
       }
 
