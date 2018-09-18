@@ -21,6 +21,7 @@ use Test::More;
 
 plan skip_all => "Geo::IP not installed" unless HAS_GEOIP;
 plan skip_all => "Geo::IP not configured" unless HAS_GEOIP_CONF;
+plan skip_all => "Net tests disabled"          unless conf_bool('run_net_tests');
 
 plan tests => 2;
 
