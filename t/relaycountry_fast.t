@@ -19,7 +19,6 @@ use constant HAS_COUNTRY_FAST => eval { require IP::Country::Fast; };
 use Test::More;
 
 plan skip_all => "IP::Country::Fast not installed" unless HAS_COUNTRY_FAST;
-plan skip_all => "Net tests disabled"          unless conf_bool('run_net_tests');
 plan tests => 2;
 
 # ---------------------------------------------------------------------------
@@ -29,7 +28,7 @@ loadplugin Mail::SpamAssassin::Plugin::RelayCountry
 ");
 
 tstprefs ("
-        $default_cf_lines
+        dns_available no
         country_db_type Fast
         add_header all Relay-Country _RELAYCOUNTRY_
         ");
