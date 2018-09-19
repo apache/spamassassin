@@ -101,6 +101,7 @@ required.
 package Mail::SpamAssassin::Plugin::URILocalBL;
 use Mail::SpamAssassin::Plugin;
 use Mail::SpamAssassin::Logger;
+use Mail::SpamAssassin::Constants qw(:ip);
 use Mail::SpamAssassin::Util qw(untaint_var);
 
 use Net::CIDR::Lite;
@@ -484,6 +485,8 @@ sub check_uri_local_bl {
 
   my %hit_tests;
   my $got_hit = 0;
+  my @addrs;
+  my $IP_ADDRESS = IP_ADDRESS;
   
   if ( defined $self->{geoip} ) {
     dbg("check: uri_local_bl evaluating rule %s using database %s\n", $test, $db_info->());
@@ -506,11 +509,14 @@ sub check_uri_local_bl {
         next;
       }
 
-      # this would be best cached from prior lookups
-      my @addrs = gethostbyname($host);
-
-      # convert to string values address list
-      @addrs = map { inet_ntoa($_); } @addrs[4..$#addrs];
+      if($host !~ /$IP_ADDRESS/) {
+       # this would be best cached from prior lookups
+       @addrs = gethostbyname($host);
+       # convert to string values address list
+       @addrs = map { inet_ntoa($_); } @addrs[4..$#addrs];
+      } else {
+       @addrs = ($host);
+      }
 
       dbg("check: uri_local_bl %s addrs %s\n", $host, join(', ', @addrs));
 

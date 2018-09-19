@@ -21,7 +21,6 @@ use Test::More;
 
 plan skip_all => "Geo::IP not installed" unless HAS_GEOIP;
 plan skip_all => "Geo::IP not configured" unless HAS_GEOIP_CONF;
-plan skip_all => "Net tests disabled"          unless conf_bool('run_net_tests');
 plan tests => 3;
 
 # ---------------------------------------------------------------------------
@@ -36,6 +35,7 @@ loadplugin Mail::SpamAssassin::Plugin::URILocalBL
 );
 
 tstlocalrules (q{
+  dns_available no
   uri_block_cc X_URIBL_USA us
   describe X_URIBL_USA uri located in USA
   
