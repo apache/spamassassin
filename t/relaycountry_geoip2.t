@@ -14,13 +14,18 @@ BEGIN {
 use lib '.'; use lib 't';
 use SATest; sa_t_init("relaycountry");
 
-use constant HAS_GEOIP => eval { require Geo::IP; };
-use constant HAS_GEOIP_CONF => eval { Geo::IP->new(Geo::IP::GEOIP_STANDARD); };
+use constant HAS_GEOIP2 => eval { require GeoIP2::Database::Reader; };
+use constant HAS_GEOIP2_DB => eval {
+  -f "/usr/local/share/GeoIP/GeoIP2-Country.mmdb" or
+  -f "/usr/share/GeoIP/GeoIP2-Country.mmdb" or
+  -f "/usr/local/share/GeoIP/GeoLite2-Country.mmdb" or
+  -f "/usr/share/GeoIP/GeoLite2-Country.mmdb"
+};
 
 use Test::More;
 
-plan skip_all => "Geo::IP not installed" unless HAS_GEOIP;
-plan skip_all => "Geo::IP not configured" unless HAS_GEOIP_CONF;
+plan skip_all => "GeoIP2::Database::Reader not installed" unless HAS_GEOIP2;
+plan skip_all => "GeoIP2 database not found from default locations" unless HAS_GEOIP2_DB;
 
 plan tests => 2;
 
@@ -32,7 +37,7 @@ loadplugin Mail::SpamAssassin::Plugin::RelayCountry
 
 tstprefs ("
         dns_available no
-        country_db_type GeoIP
+        country_db_type GeoIP2
         add_header all Relay-Country _RELAYCOUNTRY_
         ");
 
