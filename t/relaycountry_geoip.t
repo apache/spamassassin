@@ -41,5 +41,5 @@ tstprefs ("
         q{ X-Spam-Relay-Country: US },
             );
 
-ok sarun ("-t < data/spam/relayUS.eml", \&patterns_run_cb);
+ok sarun ("-L -t < data/spam/relayUS.eml", \&patterns_run_cb);
 ok_all_patterns();
