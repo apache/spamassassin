@@ -509,7 +509,7 @@ sub check_uri_local_bl {
         next;
       }
 
-      if($host !~ /$IP_ADDRESS/) {
+      if($host !~ /^$IP_ADDRESS$/) {
        # this would be best cached from prior lookups
        @addrs = gethostbyname($host);
        # convert to string values address list
