@@ -711,7 +711,7 @@ sub parse_received_line {
     # Wed, 24 Jul 2002 16:36:44 GMT
     if (/by (\S+\.hotmail\.msn\.com) /) {
       $by = $1;
-      /^(\S+) / and $ip = $1;
+      /^(${IP_ADDRESS}) / and $ip = $1;
       goto enough;
     }
 
@@ -977,10 +977,10 @@ sub parse_received_line {
     # Received: from customer254-217.iplannetworks.net (HELO AGAMENON) 
     # (baldusi@200.69.254.217 with plain) by smtp.mail.vip.sc5.yahoo.com with
     # SMTP; 11 Mar 2003 21:03:28 -0000
-    if (/^(\S+) \((?:HELO|EHLO) (\S*)\) \((\S+).*?\) by (\S+) with /) {
+    if (/^(\S+) \((?:HELO|EHLO) (\S*)\) \((\S+\@)?(${IP_ADDRESS}).*?\) by (\S+) with /) {
       $mta_looked_up_dns = 1;
-      $rdns = $1; $helo = $2; $ip = $3; $by = $4;
-      $ip =~ s/([^\@]*)\@//g and $ident = $1;	# remove IDENT lookups
+      $rdns = $1; $helo = $2; $ip = $4; $by = $5;
+      $ident = $3 if defined $3;
       goto enough;
     }
 
@@ -1019,7 +1019,7 @@ sub parse_received_line {
 
     # Received: from 01al10015010057.ad.bls.com ([90.152.5.141] [90.152.5.141])
     # by aismtp3g.bls.com with ESMTP; Mon, 10 Mar 2003 11:10:41 -0500
-    if (/^(\S+) \(\[(\S+)\] \[(\S+)\]\) by (\S+) with /) {
+    if (/^(\S+) \(\[(${IP_ADDRESS})\] \[(\S+)\]\) by (\S+) with /) {
       # not sure what $3 is ;)
       $helo = $1; $ip = $2; $by = $4;
       goto enough;
@@ -1120,7 +1120,7 @@ sub parse_received_line {
 
     # a synthetic header, generated internally:
     # Received: X-Originating-IP: 1.2.3.4
-    if (/^X-Originating-IP: (\S+)$/) {
+    if (/^X-Originating-IP: (${IP_ADDRESS})$/) {
       $ip = $1; $by = ''; goto enough;
     }
 
