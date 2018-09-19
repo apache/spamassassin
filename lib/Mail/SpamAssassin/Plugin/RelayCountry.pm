@@ -97,10 +97,9 @@ Valid database types are GeoIP, GeoIP2, DB_File and Fast.
     type => $Mail::SpamAssassin::Conf::CONF_TYPE_STRING,
     code => sub {
       my ($self, $key, $value, $line) = @_;
-      if ( $value !~ /GeoIP|GeoIP2|DB_File|Fast/) {
+      if ($value !~ /^(?:GeoIP|GeoIP2|DB_File|Fast)$/) {
         return $Mail::SpamAssassin::Conf::INVALID_VALUE;
       }
-
       $self->{country_db_type} = $value;
     }
   });
@@ -124,12 +123,11 @@ This option tells SpamAssassin where to find MaxMind GeoIP2 or IP::Country::DB_F
       if (!defined $value || !length $value) {
         return $Mail::SpamAssassin::Conf::MISSING_REQUIRED_VALUE;
       }
-      if (!-f $value) {
+      if (!-e $value) {
         info("config: country_db_path \"$value\" is not accessible");
         $self->{country_db_path} = $value;
         return $Mail::SpamAssassin::Conf::INVALID_VALUE;
       }
-
       $self->{country_db_path} = $value;
     }
   });
@@ -139,69 +137,80 @@ This option tells SpamAssassin where to find MaxMind GeoIP2 or IP::Country::DB_F
 
 sub extract_metadata {
   my ($self, $opts) = @_;
-  my $geo;
-  my $cc;
 
   my $conf_country_db_type = $self->{'main'}{'resolver'}{'conf'}->{country_db_type};
   my $conf_country_db_path = $self->{'main'}{'resolver'}{'conf'}->{country_db_path};
 
-  if ( $conf_country_db_type eq "GeoIP") {
+  if ($conf_country_db_type eq "GeoIP") {
     eval {
       require Geo::IP;
       $db = Geo::IP->open_type(Geo::IP->GEOIP_COUNTRY_EDITION, Geo::IP->GEOIP_STANDARD);
       die "GeoIP.dat not found" unless $db;
       # IPv6 requires version Geo::IP 1.39+ with GeoIP C API 1.4.7+
       if (Geo::IP->VERSION >= 1.39 && Geo::IP->api eq 'CAPI') {
-       $dbv6 = Geo::IP->open_type(Geo::IP->GEOIP_COUNTRY_EDITION_V6, Geo::IP->GEOIP_STANDARD);
-       if (!$dbv6) {
-         dbg("metadata: RelayCountry: IPv6 support not enabled, GeoIPv6.dat not found");
-       }
-       $db_info = sub { return "Geo::IP " . ($db->database_info || '?') };
+        $dbv6 = Geo::IP->open_type(Geo::IP->GEOIP_COUNTRY_EDITION_V6, Geo::IP->GEOIP_STANDARD);
+        if (!$dbv6) {
+          dbg("metadata: RelayCountry: GeoIP: IPv6 support not enabled, GeoIPv6.dat not found");
+        }
       } else {
-       dbg("metadata: RelayCountry: IPv6 support not enabled, versions Geo::IP 1.39, GeoIP C API 1.4.7 required");
+        dbg("metadata: RelayCountry: GeoIP: IPv6 support not enabled, versions Geo::IP 1.39, GeoIP C API 1.4.7 required");
       }
-   } or do {
-     # Fallback to IP::Country::Fast
-     dbg("metadata: RelayCountry: GeoIP.dat not found, IP::Country::Fast enabled as fallback");
-     $conf_country_db_type = "Fast";
-   }
-  } elsif ( $conf_country_db_type eq "GeoIP2" ) {
-     if ( -f $conf_country_db_path ) {
-       eval {
-         require GeoIP2::Database::Reader;
-         $db = GeoIP2::Database::Reader->new(
-            file => $conf_country_db_path,
-            locales	=> [ 'en' ]
-	   );
-         die "${conf_country_db_path} not found" unless $db;
-         $db_info = sub { return "GeoIP2 " . ($db->metadata()->description()->{en} || '?') };
-         1;
-       } or do {
-         # Fallback to IP::Country::Fast
-         dbg("metadata: RelayCountry: ${conf_country_db_path} not found, IP::Country::Fast enabled as fallback");
-         $conf_country_db_type = "Fast";
-       }
-     } else {
-         # Fallback to IP::Country::Fast
-         dbg("metadata: RelayCountry: ${conf_country_db_path} not found, IP::Country::Fast enabled as fallback");
-         $conf_country_db_type = "Fast";
-     }
-  } elsif ( $conf_country_db_type eq "DB_File") {
-    if ( -f $conf_country_db_path ) {
-      require IP::Country::DB_File;
-      $db = IP::Country::DB_File->new($conf_country_db_path);
-      die "Country db not found, please see build_ipcc.pl(1)" unless $db;
-      $db_info = sub { return "IP::Country::DB_File ".localtime($db->db_time()); };
-      1;     
+      $db_info = sub { return "Geo::IP IPv4: " . ($db->database_info || '?')." / IPv6: ".($dbv6 ? $dbv6->database_info || '?' : '?') };
+      1;
+    } or do {
+      # Fallback to IP::Country::Fast
+      dbg("metadata: RelayCountry: GeoIP: GeoIP.dat not found, trying IP::Country::Fast as fallback");
+      $conf_country_db_type = "Fast";
+    }
+  }
+  elsif ($conf_country_db_type eq "GeoIP2") {
+    if (-f $conf_country_db_path) {
+      eval {
+        require GeoIP2::Database::Reader;
+        $db = GeoIP2::Database::Reader->new(
+          file => $conf_country_db_path,
+          locales => [ 'en' ]
+        );
+        die "unknown error" unless $db;
+        $db_info = sub {
+          my $m = $db->metadata();
+          return "GeoIP2 ".$m->description()->{en}." / ".localtime($m->build_epoch());
+        };
+        1;
+      } or do {
+        # Fallback to IP::Country::Fast
+        $@ =~ s/\s+Trace begun.*//s;
+        dbg("metadata: RelayCountry: GeoIP2: ${conf_country_db_path} load failed: $@, trying IP::Country::Fast as fallback");
+        $conf_country_db_type = "Fast";
+      }
     } else {
       # Fallback to IP::Country::Fast
-      dbg("metadata: RelayCountry: ${conf_country_db_path} not found, IP::Country::Fast enabled as fallback");
+      dbg("metadata: RelayCountry: GeoIP2: ${conf_country_db_path} not found, trying IP::Country::Fast as fallback");
+      $conf_country_db_type = "Fast";
+    }
+  }
+  elsif ($conf_country_db_type eq "DB_File") {
+    if (-f $conf_country_db_path) {
+      eval {
+        require IP::Country::DB_File;
+        $db = IP::Country::DB_File->new($conf_country_db_path);
+        die "unknown error" unless $db;
+        $db_info = sub { return "IP::Country::DB_File ".localtime($db->db_time()); };
+        1;
+      } or do {
+        # Fallback to IP::Country::Fast
+        dbg("metadata: RelayCountry: DB_File: ${conf_country_db_path} load failed: $@, trying IP::Country::Fast as fallback");
+        $conf_country_db_type = "Fast";
+      }
+    } else {
+      # Fallback to IP::Country::Fast
+      dbg("metadata: RelayCountry: DB_File: ${conf_country_db_path} not found, trying IP::Country::Fast as fallback");
       $conf_country_db_type = "Fast";
     }
   } 
-  if( $conf_country_db_type eq "Fast") {
+
+  if ($conf_country_db_type eq "Fast") {
     my $eval_stat = $@ ne '' ? $@ : "errno=$!";  chomp $eval_stat;
-    # Try IP::Country::Fast as backup
     eval {
       require IP::Country::Fast;
       $db = IP::Country::Fast->new();
@@ -211,8 +220,8 @@ sub extract_metadata {
       my $eval_stat = $@ ne '' ? $@ : "errno=$!";  chomp $eval_stat;
       dbg("metadata: RelayCountry: failed to load 'IP::Country::Fast', skipping: $eval_stat");
       return 1;
-    };
-  };
+    }
+  }
 
   return 1 unless $db;
 
@@ -224,36 +233,43 @@ sub extract_metadata {
   my $IPV4_ADDRESS = IPV4_ADDRESS;
   foreach my $relay (@{$msg->{metadata}->{relays_untrusted}}) {
     my $ip = $relay->{ip};
+    my $cc;
+
     # Private IPs will always be returned as '**'
-    if ( $conf_country_db_type eq "GeoIP" ) {
-	  if ( $ip !~ /^$IPV4_ADDRESS$/o ) {
-	    if ( defined $dbv6 ) {
-	    	$geo = $dbv6->country_code_by_addr_v6($ip) || "XX";
-	    } else {
-		$geo = "XX";
-	    }
-	  } else {
-	    $geo = $db->country_code_by_addr($ip) || "XX";
-	  }
-    } elsif ($conf_country_db_type eq "GeoIP2" ) {
-      if ( $ip !~ /^$IP_PRIVATE$/o ) {
-        my $country = $db->country( ip => $ip );
-        my $country_rec = $country->country();
-        $geo = $country_rec->iso_code() || "XX";
-        $cc = $ip =~ /^$IP_PRIVATE$/o ? '**' : $geo;
-      } else {
-        $cc = '**';
-      }
-    } elsif ( $conf_country_db_type eq "DB_File" ) {
-      if ( $ip !~ /^$IPV4_ADDRESS$/o ) {
-        $geo = $db->inet6_atocc($ip) || "XX";
-      } else {
-        $geo = $db->inet_atocc($ip) || "XX";
-      }		        
-    } elsif ( $conf_country_db_type eq "Fast" ) {
-        $geo = $db->inet_atocc($ip) || "XX";
+    if ($ip =~ /^$IP_PRIVATE$/o) {
+      $cc = "**";
     }
-    $cc = $ip =~ /^$IP_PRIVATE$/o ? '**' : $geo;
+    elsif ($conf_country_db_type eq "GeoIP") {
+      if ($ip =~ /^$IPV4_ADDRESS$/o) {
+        $cc = $db->country_code_by_addr($ip);
+      } elsif (defined $dbv6) {
+        $cc = $dbv6->country_code_by_addr_v6($ip);
+      }
+    }
+    elsif ($conf_country_db_type eq "GeoIP2") {
+      my ($country, $country_rec);
+      eval {
+        $country = $db->country( ip => $ip );
+        $country_rec = $country->country();
+        $cc = $country_rec->iso_code();
+        1;
+      } or do {
+        $@ =~ s/\s+Trace begun.*//s;
+        dbg("metadata: RelayCountry: GeoIP2 failed: $@");
+      }
+    }
+    elsif ($conf_country_db_type eq "DB_File") {
+      if ($ip =~ /^$IPV4_ADDRESS$/o ) {
+        $cc = $db->inet_atocc($ip);
+      } else {
+        $cc = $db->inet6_atocc($ip);
+      }
+    }
+    elsif ($conf_country_db_type eq "Fast") {
+      $cc = $db->inet_atocc($ip);
+    }
+
+    $cc ||= 'XX';
     $countries .= $cc." ";
   }
 
