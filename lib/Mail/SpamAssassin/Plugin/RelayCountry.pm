@@ -110,6 +110,12 @@ Valid database types are GeoIP, GeoIP2, DB_File and Fast.
 
 This option tells SpamAssassin where to find MaxMind GeoIP2 or IP::Country::DB_File database.
 
+If not defined, GeoIP2 default search includes:
+ /usr/local/share/GeoIP/GeoIP2-Country.mmdb
+ /usr/share/GeoIP/GeoIP2-Country.mmdb
+ /usr/local/share/GeoIP/GeoLite2-Country.mmdb
+ /usr/share/GeoIP/GeoLite2-Country.mmdb
+
 =back
 
 =cut
@@ -164,6 +170,18 @@ sub extract_metadata {
     }
   }
   elsif ($conf_country_db_type eq "GeoIP2") {
+    if (!$conf_country_db_path) {
+      # Try some default locations
+      foreach (("/usr/local/share/GeoIP/GeoIP2-Country.mmdb",
+                "/usr/share/GeoIP/GeoIP2-Country.mmdb",
+                "/usr/local/share/GeoIP/GeoLite2-Country.mmdb",
+                "/usr/share/GeoIP/GeoLite2-Country.mmdb")) {
+        if (-f $_) {
+          $conf_country_db_path = $_;
+          last;
+        }
+      }
+    }
     if (-f $conf_country_db_path) {
       eval {
         require GeoIP2::Database::Reader;
@@ -185,7 +203,9 @@ sub extract_metadata {
       }
     } else {
       # Fallback to IP::Country::Fast
-      dbg("metadata: RelayCountry: GeoIP2: ${conf_country_db_path} not found, trying IP::Country::Fast as fallback");
+      my $err = $conf_country_db_path ?
+        "$conf_country_db_path not found" : "database not found from default locations";
+      dbg("metadata: RelayCountry: GeoIP2: $err, trying IP::Country::Fast as fallback");
       $conf_country_db_type = "Fast";
     }
   }
