@@ -274,7 +274,6 @@ spamc_getopt_long(int argc, char * const argv[],
             } else if(longopts[i].has_arg == optional_argument) {
                if(((spamc_optind < argc) && (argv[spamc_optind]) && (argv[spamc_optind][0] != '-')) || 
                      (opt != NULL)) {
-		  free(opt);
                   if(opt != NULL) {
                      spamc_optarg = opt;
                   } else {
