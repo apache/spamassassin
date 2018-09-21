@@ -523,6 +523,7 @@ sub check_for_forged_yahoo_received_headers {
             { return 0; }
 
   if ($rcvd =~ /by web\S+\.mail\S*\.yahoo\.com via HTTP/) { return 0; }
+  if ($rcvd =~ /by sonic\S+\.consmr\.mail\S*\.yahoo\.com with HTTP/) { return 0; }
   if ($rcvd =~ /by smtp\S+\.yahoo\.com with SMTP/) { return 0; }
   my $IP_ADDRESS = IP_ADDRESS;
   if ($rcvd =~
