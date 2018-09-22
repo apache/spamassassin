@@ -4383,7 +4383,7 @@ GeoIP/GeoIP2 searches these files/directories:
     code => sub {
       my ($self, $key, $value, $line) = @_;
       foreach my $option (split (/\s+/, lc $value)) {
-        my ($opt, $db) = split(/:/, $option, 2);        
+        my ($option, $db) = split(/:/, $option, 2);        
         if ($option eq 'reset') {
           $self->{geodb}->{options} = {};
         } elsif ($option eq 'country') {

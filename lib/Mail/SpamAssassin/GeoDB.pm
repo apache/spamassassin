@@ -494,17 +494,23 @@ sub init_database {
 
   # Only try if geodb_module and path to ipcc.db specified
   if (!$db && $geodb_module eq 'dbfile') {
-    if (defined $geodb_dbs->{country} && -f $geodb_dbs->{country}) {
-      eval {
-        require IP::Country::DB_File;
-        $db->{country} = IP::Country::DB_File->new($geodb_dbs->{country});
-        1;
-      };
-      if ($@ || !$db->{country}) {
-        dbg("geodb: IP::Country::DB_File load failed: $@");
+    if (defined $geodb_dbs->{country}) {
+      if (-f $geodb_dbs->{country}) {
+        eval {
+          require IP::Country::DB_File;
+          $db->{country} = IP::Country::DB_File->new($geodb_dbs->{country});
+          1;
+        };
+        if ($@ || !$db->{country}) {
+          dbg("geodb: IP::Country::DB_File country load failed: $@");
+        } else {
+          dbg("geodb: IP::Country::DB_File loaded country from ".$geodb_dbs->{country});
+        }
+      } else {
+        dbg("geodb: IP::Country::DB_File database not found: ".$geodb_dbs->{country});
       }
     } else {
-      dbg("IP::Country::DB_File requires geodb_options country:/path/to/ipcc.db\n");
+      dbg("geodb: IP::Country::DB_File requires geodb_options country:/path/to/ipcc.db");
     }
 
     # dbinfo_DBTYPE()
@@ -521,6 +527,10 @@ sub init_database {
       } else {
         $country = $_[0]->{db}->{country}->inet6_atocc($_[1]);
       }
+      if (!defined $country) {
+        dbg("geodb: IP::Country::DB_File country query failed for $_[1]");
+        return $res;
+      };
       $res->{country} = $country;
       $res->{continent} = $country_to_continent{$country} || 'XX';
       return $res;
