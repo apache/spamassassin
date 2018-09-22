@@ -54,7 +54,7 @@ setup_checktype() {
     rsync -qrz --delete rsync://rsync.spamassassin.org/tagged_builds/$TYPE/ "$WORKDIR/$TYPE/"
     RC=$?
     NET=--net
-    [ -z "$REUSE" ] && NET="$REUSE $NET"
+    [ ! -z "$REUSE" ] && NET="$REUSE $NET"
     LOGTYPE=net-
   fi
   if [ "$RC" -ne 0 ]; then
