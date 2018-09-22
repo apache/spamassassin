@@ -282,6 +282,8 @@ if [[ ! -z "$TESTED_VERSIONS" ]]; then
   if [ $AUTOUPDATESDISABLED -eq 1 -a $REVERT_REVISION -eq 0 ]; then
     echo "DNS updating disabled (auto update publishing disabled), skipping DNS reload"
   else
+    # Wait 20 minutes for the mirrors to update via rsync
+    sleep 1200
     # Newer versions >= 3.4.1 of SpamAssassin are CNAME'd to 3.3.3
     /usr/local/bin/updateDNS.sh 3.3.3.updates TXT $REVISION
     RC=$?
