@@ -1,0 +1,17 @@
+
+Instructions:
+
+git clone https://github.com/mteodoro/mmutils.git
+cd mmutils
+virtualenv env
+source env/bin/activate
+pip install -r requirements.txt
+
+python -c 'exec("import sys,socket\nfor ip in sys.argv[1:]:\n print ip, int(socket.inet_aton(ip).encode(\"hex\"),16)\n")' 8.8.8.8
+
+echo 'startIP,endIP,isp
+0,0,"SpamAssassin test data"
+134744072,134744072,"Level 3 Communications"' >GeoIPISP.csv
+
+python csv2dat.py -w GeoIPISP.dat mmisp GeoIPISP.csv
+

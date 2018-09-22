@@ -14,11 +14,12 @@ BEGIN {
 use lib '.'; use lib 't';
 use SATest; sa_t_init("urilocalbl");
 
-use constant HAS_GEOIP => eval { require Geo::IP; };
+use constant HAS_GEOIP => eval { require GeoIP2::Database::Reader; };
 
 use Test::More;
 
-plan skip_all => "Geo::IP not installed" unless HAS_GEOIP;
+plan skip_all => "GeoIP2::Database::Reader not installed" unless HAS_GEOIP;
+#plan skip_all => "Net tests disabled"          unless conf_bool('run_net_tests');
 plan tests => 4;
 
 # ---------------------------------------------------------------------------
@@ -34,7 +35,7 @@ loadplugin Mail::SpamAssassin::Plugin::URILocalBL
 );
 
 tstlocalrules ("
-  geodb_module GeoIP
+  geodb_module GeoIP2
   geoip_search_path data/geodb
 
   uri_block_cc X_URIBL_USA us

@@ -100,12 +100,13 @@ required.
 
 package Mail::SpamAssassin::Plugin::URILocalBL;
 use Mail::SpamAssassin::Plugin;
-use Mail::SpamAssassin::Logger;
 use Mail::SpamAssassin::Constants qw(:ip);
 use Mail::SpamAssassin::Util qw(untaint_var);
+use Mail::SpamAssassin::GeoDB;
 
-use Net::CIDR::Lite;
+use Net::CIDR::Lite; #TODO: use SA internal NetSet or such
 use Socket;
+use Data::Dumper;
 
 use strict;
 use warnings;
@@ -115,8 +116,7 @@ use version;
 
 our @ISA = qw(Mail::SpamAssassin::Plugin);
 
-use constant HAS_GEOIP => eval { require Geo::IP; };
-use constant HAS_GEOIP2 => eval { require GeoIP2::Database::Reader; };
+sub dbg { Mail::SpamAssassin::Plugin::dbg ("URILocalBL: @_"); }
 
 # constructor
 sub new {
@@ -128,13 +128,7 @@ sub new {
   my $self = $class->SUPER::new($mailsaobject);
   bless ($self, $class);
 
-  # how to handle failure to get the database handle?
-  # and we don't really have a valid return value...
-  # can we defer getting this handle until we actually see
-  # a uri_block_cc rule?
-
   $self->register_eval_rule("check_uri_local_bl");
-
   $self->set_config($mailsaobject->{conf});
 
   return $self;
@@ -144,8 +138,6 @@ sub set_config {
   my ($self, $conf) = @_;
   my @cmds;
 
-  my $pluginobj = $self;        # allow use inside the closure below
-
   push (@cmds, {
     setting => 'uri_block_cc',
     is_priv => 1,
@@ -153,35 +145,35 @@ sub set_config {
       my ($self, $key, $value, $line) = @_;
 
       if ($value !~ /^(\S+)\s+(.+)$/) {
-	return $Mail::SpamAssassin::Conf::INVALID_VALUE;
+        return $Mail::SpamAssassin::Conf::INVALID_VALUE;
       }
       my $name = $1;
       my $def = $2;
       my $added_criteria = 0;
 
-      $conf->{parser}->{conf}->{uri_local_bl}->{$name}->{countries} = {};
+      $conf->{parser}->{conf}->{urilocalbl}->{$name}->{countries} = {};
 
       # this should match all country codes including satellite providers
       while ($def =~ m/^\s*([a-z][a-z0-9])(\s+(.*)|)$/) {
-	my $cc = $1;
-	my $rest = $2;
+        my $cc = $1;
+        my $rest = $2;
 
-	#dbg("config: uri_block_cc adding %s to %s\n", $cc, $name);
-        $conf->{parser}->{conf}->{uri_local_bl}->{$name}->{countries}->{uc($cc)} = 1;
-	$added_criteria = 1;
+        #dbg("config: uri_block_cc adding $cc to $name");
+        $conf->{parser}->{conf}->{urilocalbl}->{$name}->{countries}->{uc($cc)} = 1;
+        $added_criteria = 1;
 
         $def = $rest;
       }
 
       if ($added_criteria == 0) {
         warn "config: no arguments";
-	return $Mail::SpamAssassin::Conf::MISSING_REQUIRED_VALUE;
+        return $Mail::SpamAssassin::Conf::MISSING_REQUIRED_VALUE;
       } elsif ($def ne '') {
         warn "config: failed to add invalid rule $name";
-	return $Mail::SpamAssassin::Conf::INVALID_VALUE;
+        return $Mail::SpamAssassin::Conf::INVALID_VALUE;
       }
 
-      dbg("config: uri_block_cc added %s\n", $name);
+      dbg("config: uri_block_cc added $name");
 
       $conf->{parser}->add_test($name, 'check_uri_local_bl()', $Mail::SpamAssassin::Conf::TYPE_BODY_EVALS);
     }
@@ -194,35 +186,35 @@ sub set_config {
       my ($self, $key, $value, $line) = @_;
 
       if ($value !~ /^(\S+)\s+(.+)$/) {
-	return $Mail::SpamAssassin::Conf::INVALID_VALUE;
+        return $Mail::SpamAssassin::Conf::INVALID_VALUE;
       }
       my $name = $1;
       my $def = $2;
       my $added_criteria = 0;
 
-      $conf->{parser}->{conf}->{uri_local_bl}->{$name}->{continents} = {};
+      $conf->{parser}->{conf}->{urilocalbl}->{$name}->{continents} = {};
 
       # this should match all continent codes
       while ($def =~ m/^\s*([a-z]{2})(\s+(.*)|)$/) {
-	my $cont = $1;
-	my $rest = $2;
+        my $cont = $1;
+        my $rest = $2;
 
-	# dbg("config: uri_block_cont adding %s to %s\n", $cont, $name);
-        $conf->{parser}->{conf}->{uri_local_bl}->{$name}->{continents}->{uc($cont)} = 1;
-	$added_criteria = 1;
+        # dbg("config: uri_block_cont adding $cont to $name");
+        $conf->{parser}->{conf}->{urilocalbl}->{$name}->{continents}->{uc($cont)} = 1;
+        $added_criteria = 1;
 
         $def = $rest;
       }
 
       if ($added_criteria == 0) {
         warn "config: no arguments";
-	return $Mail::SpamAssassin::Conf::MISSING_REQUIRED_VALUE;
+        return $Mail::SpamAssassin::Conf::MISSING_REQUIRED_VALUE;
       } elsif ($def ne '') {
         warn "config: failed to add invalid rule $name";
-	return $Mail::SpamAssassin::Conf::INVALID_VALUE;
+        return $Mail::SpamAssassin::Conf::INVALID_VALUE;
       }
 
-      dbg("config: uri_block_cont added %s\n", $name);
+      dbg("config: uri_block_cont added $name");
 
       $conf->{parser}->add_test($name, 'check_uri_local_bl()', $Mail::SpamAssassin::Conf::TYPE_BODY_EVALS);
     }
@@ -235,32 +227,33 @@ sub set_config {
       my ($self, $key, $value, $line) = @_;
 
       if ($value !~ /^(\S+)\s+(.+)$/) {
-	return $Mail::SpamAssassin::Conf::INVALID_VALUE;
+        return $Mail::SpamAssassin::Conf::INVALID_VALUE;
       }
       my $name = $1;
       my $def = $2;
       my $added_criteria = 0;
 
-      $conf->{parser}->{conf}->{uri_local_bl}->{$name}->{isps} = {};
+      $conf->{parser}->{conf}->{urilocalbl}->{$name}->{isps} = {};
 
       # gather up quoted strings
       while ($def =~ m/^\s*"([^"]*)"(\s+(.*)|)$/) {
-	my $isp = $1;
-	my $rest = $2;
+        my $isp = $1;
+        my $rest = $2;
 
-	dbg("config: uri_block_isp adding \"%s\" to %s\n", $isp, $name);
-        $conf->{parser}->{conf}->{uri_local_bl}->{$name}->{isps}->{$isp} = 1;
-	$added_criteria = 1;
+        dbg("config: uri_block_isp adding \"$isp\" to $name");
+        my $ispkey = uc($isp); $ispkey =~ s/\s+//gs;
+        $conf->{parser}->{conf}->{urilocalbl}->{$name}->{isps}->{$ispkey} = $isp;
+        $added_criteria = 1;
 
         $def = $rest;
       }
 
       if ($added_criteria == 0) {
         warn "config: no arguments";
-	return $Mail::SpamAssassin::Conf::MISSING_REQUIRED_VALUE;
+        return $Mail::SpamAssassin::Conf::MISSING_REQUIRED_VALUE;
       } elsif ($def ne '') {
         warn "config: failed to add invalid rule $name";
-	return $Mail::SpamAssassin::Conf::INVALID_VALUE;
+        return $Mail::SpamAssassin::Conf::INVALID_VALUE;
       }
 
       $conf->{parser}->add_test($name, 'check_uri_local_bl()', $Mail::SpamAssassin::Conf::TYPE_BODY_EVALS);
@@ -274,39 +267,39 @@ sub set_config {
       my ($self, $key, $value, $line) = @_;
 
       if ($value !~ /^(\S+)\s+(.+)$/) {
-	return $Mail::SpamAssassin::Conf::INVALID_VALUE;
+        return $Mail::SpamAssassin::Conf::INVALID_VALUE;
       }
       my $name = $1;
       my $def = $2;
       my $added_criteria = 0;
 
-      $conf->{parser}->{conf}->{uri_local_bl}->{$name}->{cidr} = new Net::CIDR::Lite;
+      $conf->{parser}->{conf}->{urilocalbl}->{$name}->{cidr} = new Net::CIDR::Lite;
 
       # match individual IP's, subnets, and ranges
       while ($def =~ m/^\s*(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}(\/\d{1,2}|-\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})?)(\s+(.*)|)$/) {
-	my $addr = $1;
-	my $rest = $3;
+        my $addr = $1;
+        my $rest = $3;
 
-	dbg("config: uri_block_cidr adding %s to %s\n", $addr, $name);
+        dbg("config: uri_block_cidr adding $addr to $name");
 
-        eval { $conf->{parser}->{conf}->{uri_local_bl}->{$name}->{cidr}->add_any($addr) };
+        eval { $conf->{parser}->{conf}->{urilocalbl}->{$name}->{cidr}->add_any($addr) };
         last if ($@);
 
-	$added_criteria = 1;
+        $added_criteria = 1;
 
         $def = $rest;
       }
 
       if ($added_criteria == 0) {
         warn "config: no arguments";
-	return $Mail::SpamAssassin::Conf::MISSING_REQUIRED_VALUE;
+        return $Mail::SpamAssassin::Conf::MISSING_REQUIRED_VALUE;
       } elsif ($def ne '') {
         warn "config: failed to add invalid rule $name";
-	return $Mail::SpamAssassin::Conf::INVALID_VALUE;
+        return $Mail::SpamAssassin::Conf::INVALID_VALUE;
       }
 
       # optimize the ranges
-      $conf->{parser}->{conf}->{uri_local_bl}->{$name}->{cidr}->clean();
+      $conf->{parser}->{conf}->{urilocalbl}->{$name}->{cidr}->clean();
 
       $conf->{parser}->add_test($name, 'check_uri_local_bl()', $Mail::SpamAssassin::Conf::TYPE_BODY_EVALS);
     }
@@ -319,346 +312,178 @@ sub set_config {
       my ($self, $key, $value, $line) = @_;
 
       if ($value !~ /^(\S+)\s+(.+)$/) {
-	return $Mail::SpamAssassin::Conf::INVALID_VALUE;
+        return $Mail::SpamAssassin::Conf::INVALID_VALUE;
       }
       my $name = $1;
       my $def = $2;
       my $added_criteria = 0;
 
-      $conf->{parser}->{conf}->{uri_local_bl}->{$name}->{exclusions} = {};
+      $conf->{parser}->{conf}->{urilocalbl}->{$name}->{exclusions} = {};
 
       # match individual IP's, or domain names
       while ($def =~ m/^\s*((\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})|(([a-z0-9][-a-z0-9]*[a-z0-9](\.[a-z0-9][-a-z0-9]*[a-z0-9]){1,})))(\s+(.*)|)$/) {
-	my $addr = $1;
-	my $rest = $6;
+        my $addr = $1;
+        my $rest = $6;
 
-	dbg("config: uri_block_exclude adding %s to %s\n", $addr, $name);
+        dbg("config: uri_block_exclude adding $addr to $name");
 
-        $conf->{parser}->{conf}->{uri_local_bl}->{$name}->{exclusions}->{$addr} = 1;
+        $conf->{parser}->{conf}->{urilocalbl}->{$name}->{exclusions}->{$addr} = 1;
 
-	$added_criteria = 1;
+        $added_criteria = 1;
 
         $def = $rest;
       }
 
       if ($added_criteria == 0) {
         warn "config: no arguments";
-	return $Mail::SpamAssassin::Conf::MISSING_REQUIRED_VALUE;
+        return $Mail::SpamAssassin::Conf::MISSING_REQUIRED_VALUE;
       } elsif ($def ne '') {
         warn "config: failed to add invalid rule $name";
-	return $Mail::SpamAssassin::Conf::INVALID_VALUE;
+        return $Mail::SpamAssassin::Conf::INVALID_VALUE;
       }
 
       $conf->{parser}->add_test($name, 'check_uri_local_bl()', $Mail::SpamAssassin::Conf::TYPE_BODY_EVALS);
     }
   });
 
-=over 2  
-
-=item uri_country_db_path STRING
-
-This option tells SpamAssassin where to find the MaxMind country GeoIP2 
-database.
-
-=back
-
-=cut
-
-  push (@cmds, {
-    setting => 'uri_country_db_path',
-    is_priv => 1,
-    default => undef,
-    type => $Mail::SpamAssassin::Conf::CONF_TYPE_STRING,
-    code => sub {
-      my ($self, $key, $value, $line) = @_;
-      if (!defined $value || !length $value) {
-        return $Mail::SpamAssassin::Conf::MISSING_REQUIRED_VALUE;
-      }
-      if (!-f $value) {
-        info("config: uri_country_db_path \"$value\" is not accessible");
-        $self->{uri_country_db_path} = $value;
-        return $Mail::SpamAssassin::Conf::INVALID_VALUE;
-      }
-
-      $self->{uri_country_db_path} = $value;
-    }
-  });
-
-=over 2
-
-=item uri_country_db_isp_path STRING
-
-This option tells SpamAssassin where to find the MaxMind isp GeoIP2 database.
-
-=back
-
-=cut
-
-  push (@cmds, {
-    setting => 'uri_country_db_isp_path',
-    is_priv => 1,
-    default => undef,
-    type => $Mail::SpamAssassin::Conf::CONF_TYPE_STRING,
-    code => sub {
-      my ($self, $key, $value, $line) = @_;
-      if (!defined $value || !length $value) {
-        return $Mail::SpamAssassin::Conf::MISSING_REQUIRED_VALUE;
-      }
-      if (!-f $value) {
-        info("config: uri_country_db_isp_path \"$value\" is not accessible");
-        $self->{uri_country_db_isp_path} = $value;
-        return $Mail::SpamAssassin::Conf::INVALID_VALUE;
-      }
-
-      $self->{uri_country_db_isp_path} = $value;
-    }
-  });  
- 
   $conf->{parser}->register_commands(\@cmds);
-}  
+}
 
 sub check_uri_local_bl {
-  my ($self, $permsg) = @_;
+  my ($self, $pms) = @_;
 
-  my $cc;
-  my $cont;
-  my $db_info;
-  my $isp;
- 
-  my $conf_country_db_path = $self->{'main'}{'resolver'}{'conf'}->{uri_country_db_path};
-  my $conf_country_db_isp_path = $self->{'main'}{'resolver'}{'conf'}->{uri_country_db_isp_path};
-  # If country_db_path is set I am using GeoIP2 api
-  if ( HAS_GEOIP2 and ( ( defined $conf_country_db_path ) or ( defined $conf_country_db_isp_path ) ) ) {
+  return 0 if $self->{urilocalbl_disabled};
 
-    $self->{geoip} = GeoIP2::Database::Reader->new(
-  		file	=> $conf_country_db_path,
-  		locales	=> [ 'en' ]
-    ) if (( defined $conf_country_db_path ) && ( -f $conf_country_db_path));
-    if ( defined ($conf_country_db_path) ) {
-      $db_info = sub { return "GeoIP2 " . ($self->{geoip}->metadata()->description()->{en} || '?') };
-      warn "$conf_country_db_path not found" unless $self->{geoip};
+  if (!$self->{geodb}) {
+    eval {
+      $self->{geodb} = Mail::SpamAssassin::GeoDB->new({
+        conf => $pms->{conf}->{geodb},
+        wanted => { country => 1, city => 1, isp => 1 },
+      });
+    };
+    if (!$self->{geodb}) {
+      dbg("plugin disabled: $@");
+      $self->{urilocalbl_disabled} = 1;
+      return 0;
     }
-
-    $self->{geoisp} = GeoIP2::Database::Reader->new(
-  		file	=> $conf_country_db_isp_path,
-  		locales	=> [ 'en' ]
-    ) if (( defined $conf_country_db_isp_path ) && ( -f $conf_country_db_isp_path));
-    if ( defined ($conf_country_db_isp_path) ) {
-      warn "$conf_country_db_isp_path not found" unless $self->{geoisp};
-    }
-    $self->{use_geoip2} = 1;
-  } elsif ( HAS_GEOIP ) {
-    BEGIN {
-      Geo::IP->import( qw(GEOIP_MEMORY_CACHE GEOIP_CHECK_CACHE GEOIP_ISP_EDITION) );
-    }
-    $self->{use_geoip2} = 0;
-    # need GeoIP C library 1.6.3 and GeoIP perl API 1.4.4 or later to avoid messages leaking - Bug 7153
-    my $gic_wanted = version->parse('v1.6.3');
-    my $gic_have = version->parse(Geo::IP->lib_version());
-    my $gip_wanted = version->parse('v1.4.4');
-    my $gip_have = version->parse($Geo::IP::VERSION);
-
-    # this code burps an ugly message if it fails, but that's redirected elsewhere
-    my $flags = 0;
-    eval '$flags = Geo::IP::GEOIP_SILENCE' if ($gip_wanted >= $gip_have);
-
-    if ($flags && $gic_wanted >= $gic_have) {
-      $self->{geoip} = Geo::IP->new(GEOIP_MEMORY_CACHE | GEOIP_CHECK_CACHE | $flags);
-      $self->{geoisp} = Geo::IP->open_type(GEOIP_ISP_EDITION, GEOIP_MEMORY_CACHE | GEOIP_CHECK_CACHE | $flags);
-    } else {
-      open(OLDERR, ">&STDERR");
-      open(STDERR, ">", "/dev/null");
-      $self->{geoip} = Geo::IP->new(GEOIP_MEMORY_CACHE | GEOIP_CHECK_CACHE);
-      $self->{geoisp} = Geo::IP->open_type(GEOIP_ISP_EDITION, GEOIP_MEMORY_CACHE | GEOIP_CHECK_CACHE);
-      open(STDERR, ">&OLDERR");
-      close(OLDERR);
-    }
-  $db_info = sub { return "Geo::IP " . ($self->{geoip}->database_info || '?') };
-  } else {
-    dbg("No GeoIP module available");
-    return 0;
   }
+  my $geodb = $self->{geodb};
 
-  my %uri_detail = %{ $permsg->get_uri_detail_list() };
-  my $test = $permsg->{current_rule_name}; 
-  my $rule = $permsg->{conf}->{uri_local_bl}->{$test};
+  my $test = $pms->get_current_eval_rule_name();
+  my $rule = $pms->{conf}->{urilocalbl}->{$test};
 
-  my %hit_tests;
-  my $got_hit = 0;
+  dbg("running $test");
+
   my @addrs;
   my $IP_ADDRESS = IP_ADDRESS;
-  
-  if ( defined $self->{geoip} ) {
-    dbg("check: uri_local_bl evaluating rule %s using database %s\n", $test, $db_info->());
-  } else {
-    dbg("check: uri_local_bl evaluating rule %s\n", $test);
-  }
 
-  while (my ($raw, $info) = each %uri_detail) {
-
+  foreach my $info (values %{$pms->get_uri_detail_list()}) {
     next unless $info->{hosts};
 
     # look for W3 links only
-    next unless (defined $info->{types}->{a});
+    next unless defined $info->{types}->{a};
 
-    while (my($host, $domain) = each %{$info->{hosts}}) {
-
-      # skip if the domain name was matched
-      if (exists $rule->{exclusions} && exists $rule->{exclusions}->{$domain}) {
-        dbg("check: uri_local_bl excludes %s as *.%s\n", $host, $domain);
-        next;
+    my %hosts = %{$info->{hosts}}; # evade hash reset by copy
+    HOST: while (my($host, $domain) = each %hosts) {
+      if (defined $rule->{exclusions}->{$domain}) {
+        dbg("excluded $host, domain $domain matches");
+        next HOST;
       }
 
-      if($host !~ /^$IP_ADDRESS$/) {
-       # this would be best cached from prior lookups
-       @addrs = gethostbyname($host);
-       # convert to string values address list
-       @addrs = map { inet_ntoa($_); } @addrs[4..$#addrs];
+      if ($host !~ /^$IP_ADDRESS$/o) {
+        # this would be best cached from prior lookups
+        # TODO async extract_metadata lookup
+        @addrs = gethostbyname($host);
+        # convert to string values address list
+        @addrs = map { inet_ntoa($_); } @addrs[4..$#addrs];
+        if (@addrs) {
+          dbg("$host IP-addresses: ".join(', ', @addrs));
+        } else {
+          dbg("$host failed to resolve IP-addresses");
+        }
       } else {
-       @addrs = ($host);
+        @addrs = ($host);
       }
 
-      dbg("check: uri_local_bl %s addrs %s\n", $host, join(', ', @addrs));
+      next HOST unless @addrs;
 
-      for my $ip (@addrs) {
-        # skip if the address was matched
-        if (exists $rule->{exclusions} && exists $rule->{exclusions}->{$ip}) {
-          dbg("check: uri_local_bl excludes %s(%s)\n", $host, $ip);
-          next;
-        }
-
-        if (exists $rule->{countries}) {
-          dbg("check: uri_local_bl countries %s\n", join(' ', sort keys %{$rule->{countries}}));
-
-          if ( $self->{use_geoip2} == 1 ) {
-            my $country = $self->{geoip}->country( ip => $ip );
-            my $country_rec = $country->country();
-            $cc = $country_rec->iso_code();
-          } else {
-            $cc = $self->{geoip}->country_code_by_addr($ip);
-          }
-
-          dbg("check: uri_local_bl host %s(%s) maps to %s\n", $host, $ip, (defined $cc ? $cc : "(undef)"));
-
-          # handle there being no associated country (yes, there are holes in
-          # the database).
-          next unless defined $cc;
-
-          # not in blacklist
-          next unless (exists $rule->{countries}->{$cc});
-
-          dbg("check: uri_block_cc host %s(%s) matched\n", $host, $ip);
-
-          if (would_log('dbg', 'rules') > 1) {
-            dbg("check: uri_block_cc criteria for $test met");
-          }
-      
-          $permsg->test_log("Host: $host in $cc");
-          $hit_tests{$test} = 1;
-
-          # reset hash
-          keys %uri_detail;
-        }
-
-        if (exists $rule->{continents}) {
-          dbg("check: uri_local_bl continents %s\n", join(' ', sort keys %{$rule->{continents}}));
-
-          if ( $self->{use_geoip2} == 1 ) {
-            my $country = $self->{geoip}->country( ip => $ip );
-            my $cont_rec = $country->continent();
-            $cont = $cont_rec->{code};
-          } else {
-            $cc = $self->{geoip}->country_code_by_addr($ip);
-            $cont = $self->{geoip}->continent_code_by_country_code($cc);
-          }
-          
-          dbg("check: uri_local_bl host %s(%s) maps to %s\n", $host, $ip, (defined $cont ? $cont : "(undef)"));
-
-          # handle there being no associated continent (yes, there are holes in
-          # the database).
-          next unless defined $cont;
-
-          # not in blacklist
-          next unless (exists $rule->{continents}->{$cont});
-
-          dbg("check: uri_block_cont host %s(%s) matched\n", $host, $ip);
-
-          if (would_log('dbg', 'rules') > 1) {
-            dbg("check: uri_block_cont criteria for $test met");
-          }
-
-          $permsg->test_log("Host: $host in $cont");
-          $hit_tests{$test} = 1;
-
-          # reset hash
-          keys %uri_detail;
-        }
-
-        if (exists $rule->{isps}) {
-          dbg("check: uri_local_bl isps %s\n", join(' ', map { '"' . $_ . '"'; } sort keys %{$rule->{isps}}));
-
-          if ( $self->{use_geoip2} == 1 ) {
-            $isp = $self->{geoisp}->isp(ip => $ip);
-          } else {
-            $isp = $self->{geoisp}->isp_by_name($ip);
-          }
-
-          dbg("check: uri_local_bl isp %s(%s) maps to %s\n", $host, $ip, (defined $isp ? '"' . $isp . '"' : "(undef)"));
-
-          # handle there being no associated country
-          next unless defined $isp;
-
-          # not in blacklist
-          next unless (exists $rule->{isps}->{$isp});
-
-          dbg("check: uri_block_isp host %s(%s) matched\n", $host, $ip);
-
-          if (would_log('dbg', 'rules') > 1) {
-            dbg("check: uri_block_isp criteria for $test met");
-          }
-      
-          $permsg->test_log("Host: $host in \"$isp\"");
-          $hit_tests{$test} = 1;
-
-          # reset hash
-          keys %uri_detail;
-        }
-
-        if (exists $rule->{cidr}) {
-          dbg("check: uri_block_cidr list %s\n", join(' ', $rule->{cidr}->list_range()));
-
-          next unless ($rule->{cidr}->find($ip));
-
-          dbg("check: uri_block_cidr host %s(%s) matched\n", $host, $ip);
-
-          if (would_log('dbg', 'rules') > 1) {
-            dbg("check: uri_block_cidr criteria for $test met");
-          }
-
-          $permsg->test_log("Host: $host as $ip");
-          $hit_tests{$test} = 1;
-
-          # reset hash
-          keys %uri_detail;
+      foreach my $ip (@addrs) {
+        if (defined $rule->{exclusions}->{$ip}) {
+          dbg("excluded $host, ip $ip matches");
+          next HOST;
         }
       }
-    }
-    # cycle through all tests hitted by the uri
-    while((my $test_ok) = each %hit_tests) {
-      $permsg->got_hit($test_ok);
-      $got_hit = 1;
-    }
-    if($got_hit == 1) {
-      return 1;
-    } else {
-      keys %hit_tests;
+
+      if (defined $rule->{countries}) {
+        my $testcc = join(',', sort keys %{$rule->{countries}});
+        dbg("checking $host for countries: $testcc");
+        foreach my $ip (@addrs) {
+          my $cc = $geodb->get_country($ip);
+          if (defined $rule->{countries}->{$cc}) {
+            dbg("$host ($ip) country $cc - HIT");
+            $pms->test_log("Host: $host in country $cc");
+            return 1; # hit
+          } else {
+            dbg("$host ($ip) country $cc - no match");
+          }
+        }
+      }
+
+      if (defined $rule->{continents}) {
+        my $testcont = join(',', sort keys %{$rule->{continents}});
+        dbg("checking $host for continents: $testcont");
+        foreach my $ip (@addrs) {
+          my $cc = $geodb->get_continent($ip);
+          if (defined $rule->{continents}->{$cc}) {
+            dbg("$host ($ip) continent $cc - HIT");
+            $pms->test_log("Host: $host in continent $cc");
+            return 1; # hit
+          } else {
+            dbg("$host ($ip) continent $cc - no match");
+          }
+        }
+      }
+
+      if (defined $rule->{isps}) {
+        if ($geodb->can('isp')) {
+          my $testisp = join(', ', map {"\"$_\""} sort values %{$rule->{isps}});
+          dbg("checking $host for isps: $testisp");
+
+          foreach my $ip (@addrs) {
+            my $isp = $geodb->get_isp($ip);
+            next unless defined $isp;
+            my $ispkey = uc($isp); $ispkey =~ s/\s+//gs;
+            if (defined $rule->{isps}->{$ispkey}) {
+              dbg("$host ($ip) isp \"$isp\" - HIT");
+              $pms->test_log("Host: $host in isp $isp");
+              return 1; # hit
+            } else {
+              dbg("$host ($ip) isp $isp - no match");
+            }
+          }
+        } else {
+          dbg("skipping ISP check, GeoDB database not loaded");
+        }
+      }
+
+      if (defined $rule->{cidr}) {
+        my $testcidr = join(' ', $rule->{cidr}->list_range());
+        dbg("checking $host for cidrs: $testcidr");
+
+        foreach my $ip (@addrs) {
+          if ($rule->{cidr}->find($ip)) {
+            dbg("$host ($ip) matches cidr - HIT");
+            $pms->test_log("Host: $host in cidr");
+            return 1; # hit
+          } else {
+            dbg("$host ($ip) not matching cidr");
+          }
+        }
+      }
     }
   }
-
-  dbg("check: uri_local_bl %s no match\n", $test);
 
   return 0;
 }
 
 1;
-

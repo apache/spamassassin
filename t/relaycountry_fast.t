@@ -28,8 +28,8 @@ loadplugin Mail::SpamAssassin::Plugin::RelayCountry
 ");
 
 tstprefs ("
-        dns_available no
-        country_db_type Fast
+        geodb_module Fast
+
         add_header all Relay-Country _RELAYCOUNTRY_
         ");
 

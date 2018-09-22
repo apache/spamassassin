@@ -49,6 +49,7 @@ lib/Mail/SpamAssassin/Constants.pm
 lib/Mail/SpamAssassin/DBBasedAddrList.pm
 lib/Mail/SpamAssassin/Dns.pm
 lib/Mail/SpamAssassin/DnsResolver.pm
+lib/Mail/SpamAssassin/GeoDB.pm
 lib/Mail/SpamAssassin/HTML.pm
 lib/Mail/SpamAssassin/Locales.pm
 lib/Mail/SpamAssassin/Locker.pm
@@ -297,6 +298,13 @@ t/data/dkim/test-pass-19.msg
 t/data/etc/hello.txt
 t/data/etc/testhost.cert
 t/data/etc/testhost.key
+t/data/geodb/create_GeoIPCity.README
+t/data/geodb/create_GeoIPISP.README
+t/data/geodb/GeoIP2-City.mmdb
+t/data/geodb/GeoIP2-Country.mmdb
+t/data/geodb/GeoIP2-ISP.mmdb
+t/data/geodb/GeoIPCity.dat
+t/data/geodb/GeoIPISP.dat
 t/data/mime-subject.txt
 t/data/nice/001
 t/data/nice/002
@@ -548,7 +556,9 @@ t/uri_html.t
 t/uri_list.t
 t/uri_text.t
 t/uribl.t
+t/urilocalbl_fast.t
 t/urilocalbl_geoip.t
+t/urilocalbl_geoip2.t
 t/utf8.t
 t/util_wrap.t
 t/whitelist_addrs.t

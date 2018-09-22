@@ -15,13 +15,10 @@ use lib '.'; use lib 't';
 use SATest; sa_t_init("relaycountry");
 
 use constant HAS_GEOIP => eval { require Geo::IP; };
-use constant HAS_GEOIP_CONF => eval { Geo::IP->new(Geo::IP::GEOIP_STANDARD); };
 
 use Test::More;
 
 plan skip_all => "Geo::IP not installed" unless HAS_GEOIP;
-plan skip_all => "Geo::IP not configured" unless HAS_GEOIP_CONF;
-
 plan tests => 2;
 
 # ---------------------------------------------------------------------------
@@ -31,8 +28,9 @@ loadplugin Mail::SpamAssassin::Plugin::RelayCountry
 ");
 
 tstprefs ("
-        dns_available no
-        country_db_type GeoIP
+        geodb_module GeoIP
+        geoip_search_path data/geodb
+
         add_header all Relay-Country _RELAYCOUNTRY_
         ");
 

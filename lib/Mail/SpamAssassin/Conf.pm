@@ -4288,6 +4288,186 @@ end with a '|'.  Also ignore rules with C<some> combinatorial explosions.
     type     => $CONF_TYPE_BOOL,
   });
 
+=item geodb_module STRING
+
+This option tells SpamAssassin which geolocation module to use. 
+If not specified, all supported ones are tried in this order:
+
+Plugins can override this internally if required.
+
+ GeoIP2::Database::Reader
+ Geo::IP
+ IP::Country::DB_File  (not used unless geodb_options path set)
+ IP::Country::Fast
+
+=cut
+
+  push (@cmds, {
+    setting => 'geodb_module',
+    default => undef,
+    type => $Mail::SpamAssassin::Conf::CONF_TYPE_STRING,
+    code => sub {
+      my ($self, $key, $value, $line) = @_;
+      if ($value eq 'GeoIP2::Database::Reader' || $value eq 'GeoIP2') {
+        $self->{geodb}->{module} = 'geoip2';
+      } elsif ($value eq 'Geo::IP' || $value eq 'GeoIP') {
+        $self->{geodb}->{module} = 'geoip';
+      } elsif ($value eq 'IP::Country::DB_File' || $value eq 'DB_File') {
+        $self->{geodb}->{module} = 'dbfile';
+      } elsif ($value eq 'IP::Country::Fast' || $value eq 'Fast') {
+        $self->{geodb}->{module} = 'fast';
+      } else {
+        return $Mail::SpamAssassin::Conf::INVALID_VALUE;
+      }
+    }
+  });
+
+  # support deprecated RelayCountry setting
+  push (@cmds, {
+    setting => 'country_db_type',
+    default => undef,
+    type => $Mail::SpamAssassin::Conf::CONF_TYPE_STRING,
+    code => sub {
+      my ($self, $key, $value, $line) = @_;
+      warn("deprecated setting used, change country_db_type to geodb_module");
+      if ($value =~ /GeoIP2/i) {
+        $self->{geodb}->{module} = 'geoip2';
+      } elsif ($value =~ /Geo/i) {
+        $self->{geodb}->{module} = 'geoip';
+      } elsif ($value =~ /Fast/i) {
+        $self->{geodb}->{module} = 'fast';
+      } else {
+        return $Mail::SpamAssassin::Conf::INVALID_VALUE;
+      }
+    }
+  });
+
+=item geodb_options dbtype:/path/to/db ...
+
+Supported dbtypes:
+
+I<city> - use City database
+I<country> - use Country database
+I<isp> - try loading ISP database
+I<asn> - try loading ASN database
+
+Append full database path with colon, for example:
+I<isp:/opt/geoip/isp.mmdb>
+
+Plugins can internally request all types they require, geoip_options is only
+needed if the default location search (described below) does not work.
+
+GeoIP/GeoIP2 searches these files/directories:
+
+ country:
+   GeoIP2-Country.mmdb, GeoLite2-Country.mmdb
+   GeoIP.dat (and v6 version)
+ city:
+   GeoIP2-City.mmdb, GeoLite2-City.mmdb
+   GeoIPCity.dat, GeoLiteCity.dat (and v6 versions)
+ isp:
+   GeoIP2-ISP.mmdb
+   GeoIPISP.dat, GeoLiteISP.dat (and v6 versions)
+ directories:
+   /usr/local/share/GeoIP
+   /usr/share/GeoIP
+   /var/lib/GeoIP
+   /opt/share/GeoIP
+
+=cut
+
+  push (@cmds, {
+    setting => 'geodb_options',
+    type => $CONF_TYPE_HASH_KEY_VALUE,
+    default => {},
+    code => sub {
+      my ($self, $key, $value, $line) = @_;
+      foreach my $option (split (/\s+/, lc $value)) {
+        my ($opt, $db) = split(/:/, $option, 2);        
+        if ($option eq 'reset') {
+          $self->{geodb}->{options} = {};
+        } elsif ($option eq 'country') {
+          $self->{geodb}->{options}->{country} = $db || undef;
+        } elsif ($option eq 'city') {
+          $self->{geodb}->{options}->{city} = $db || undef;
+        } elsif ($option eq 'isp') {
+          $self->{geodb}->{options}->{isp} = $db || undef;
+        } else {
+          return $INVALID_VALUE;
+        }
+      }
+    }
+  });
+
+=item geodb_search_path /path/to/GeoIP ...
+
+Alternative to geoip_options. Overrides the default list of directories to
+search for default filenames.
+
+=cut
+
+  push (@cmds, {
+    setting => 'geoip_search_path',
+    default => [],
+    type => $CONF_TYPE_STRINGLIST,
+    code => sub {
+      my ($self, $key, $value, $line) = @_;
+      if ($value eq 'reset') {
+        $self->{geodb}->{geoip_search_path} = [];
+      } elsif ($value eq '') {
+        return $MISSING_REQUIRED_VALUE;
+      } else {
+        push(@{$self->{geodb}->{geoip_search_path}}, split(/\s+/, $value));
+      }
+    }
+  });
+
+  # support deprecated RelayCountry setting
+  push (@cmds, {
+    setting => 'country_db_path',
+    default => undef,
+    type => $Mail::SpamAssassin::Conf::CONF_TYPE_STRING,
+    code => sub {
+      my ($self, $key, $value, $line) = @_;
+      warn("deprecated setting used, change country_db_path to geodb_options");
+      if ($value ne '') {
+        $self->{geodb}->{options}->{country} = $value;
+      } else {
+        return $Mail::SpamAssassin::Conf::INVALID_VALUE;
+      }
+    }
+  });
+  # support deprecated URILocalBL setting
+  push (@cmds, {
+    setting => 'uri_country_db_path',
+    default => undef,
+    type => $Mail::SpamAssassin::Conf::CONF_TYPE_STRING,
+    code => sub {
+      my ($self, $key, $value, $line) = @_;
+      warn("deprecated setting used, change uri_country_db_path to geodb_options");
+      if ($value ne '') {
+        $self->{geodb}->{options}->{country} = $value;
+      } else {
+        return $Mail::SpamAssassin::Conf::INVALID_VALUE;
+      }
+    }
+  });
+  # support deprecated URILocalBL setting
+  push (@cmds, {
+    setting => 'uri_country_db_isp_path',
+    default => undef,
+    type => $Mail::SpamAssassin::Conf::CONF_TYPE_STRING,
+    code => sub {
+      my ($self, $key, $value, $line) = @_;
+      warn("deprecated setting used, change uri_country_db_isp_path to geodb_options");
+      if ($value ne '') {
+        $self->{geodb}->{options}->{isp} = $value;
+      } else {
+        return $Mail::SpamAssassin::Conf::INVALID_VALUE;
+      }
+    }
+  });
+
 =back
 
 =head1 PREPROCESSING OPTIONS
@@ -5232,6 +5412,7 @@ sub feature_bug6558_free { 1 }
 sub feature_edns { 1 }  # supports 'dns_options edns' config option
 sub feature_dns_query_restriction { 1 }  # supported config option
 sub feature_registryboundaries { 1 } # replaces deprecated registrarboundaries
+sub feature_geodb { 1 } # if needed for some reason
 sub perl_min_version_5010000 { return $] >= 5.010000 }  # perl version check ("perl_version" not neatly backwards-compatible)
 
 ###########################################################################
