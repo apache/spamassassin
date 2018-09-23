@@ -47,13 +47,13 @@ tstlocalrules ("
   describe X_URIBL_USA uri located in USA
   
   uri_block_cc X_URIBL_FINEG !fi
-  describe X_URIBL_NA uri located anywhere except Finland
+  describe X_URIBL_FINEG uri located anywhere except Finland
 
   uri_block_cont X_URIBL_NA na
   describe X_URIBL_NA uri located in north America
 
   uri_block_cont X_URIBL_EUNEG !eu !af
-  describe X_URIBL_NA uri located anywhere except Europe/Africa
+  describe X_URIBL_EUNEG uri located anywhere except Europe/Africa
 
   uri_block_isp X_URIBL_ISP \"Level 3 Communications\" Google \"Foo Bar\" \"x y z\"
   describe X_URIBL_ISP isp is Level 3 Communications
