@@ -57,7 +57,7 @@ tstlocalrules ("
   uri_block_isp X_URIBL_ISP \"Level 3 Communications\" Google \"Foo Bar\" \"x y z\"
   describe X_URIBL_ISP isp is Level 3 Communications
 
-  uri_block_cidr X_URIBL_CIDR1 8.0.0.0-255.255.255.0
+  uri_block_cidr X_URIBL_CIDR1 8.0.0.0/8 8.8.0.0/16
   describe X_URIBL_CIDR1 uri is our TestIP1
 
   uri_block_cidr X_URIBL_CIDR2 8.8.8.8

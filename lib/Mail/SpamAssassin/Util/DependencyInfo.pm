@@ -140,11 +140,6 @@ our @OPTIONAL_MODULES = (
   the URILocalBL plugin to provide ISP and Country code based filtering.',
 },
 {
-  module => 'Net::CIDR::Lite',
-  version => 0,
-  desc => 'Used by the URILocalBL plugin to process IP address ranges.',
-},
-{
   module => 'Razor2::Client::Agent',
   alt_name => 'Razor2',
   version => '2.61',

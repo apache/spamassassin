@@ -58,7 +58,7 @@ or:
 
 or:
 
-  uri_block_cidr SYMBOLIC_TEST_NAME a.a.a.a b.b.b.b/cc d.d.d.d-e.e.e.e
+  uri_block_cidr SYMBOLIC_TEST_NAME a.a.a.a b.b.b.b/cc
 
 or:
 
@@ -109,8 +109,8 @@ use Mail::SpamAssassin::Plugin;
 use Mail::SpamAssassin::Constants qw(:ip);
 use Mail::SpamAssassin::Util qw(untaint_var);
 use Mail::SpamAssassin::GeoDB;
+use Mail::SpamAssassin::NetSet;
 
-use Net::CIDR::Lite; #TODO: use SA internal NetSet or such
 use Socket;
 use Data::Dumper;
 
@@ -163,10 +163,10 @@ sub set_config {
         # this should match all country codes including satellite providers
         if ($cc =~ /^((\!)?([a-z][a-z0-9]))$/i) {
           if (defined $2) {
-            $self->{urilocalbl}{$name}{countries_neg} = 1;
-            $self->{urilocalbl}{$name}{countries}{$3} = 0;
+            $self->{urilocalbl}->{$name}{countries_neg} = 1;
+            $self->{urilocalbl}->{$name}{countries}{$3} = 0;
           } else {
-            $self->{urilocalbl}{$name}{countries}{$3} = 1;
+            $self->{urilocalbl}->{$name}{countries}{$3} = 1;
           }
           push @added, $1;
         } else {
@@ -174,7 +174,7 @@ sub set_config {
         }
       }
 
-      my %checkneg = map { $_ => 1 } values %{$self->{urilocalbl}{$name}{countries}};
+      my %checkneg = map { $_ => 1 } values %{$self->{urilocalbl}->{$name}{countries}};
       if (scalar keys %checkneg > 1) {
         dbg("config: uri_block_cc $name failed: trying to combine negations and non-negations");
         return $Mail::SpamAssassin::Conf::INVALID_VALUE;
@@ -203,10 +203,10 @@ sub set_config {
         # this should match all continent codes
         if ($cc =~ /^((\!)?([a-z]{2}))$/i) {
           if (defined $2) {
-            $self->{urilocalbl}{$name}{continents_neg} = 1;
-            $self->{urilocalbl}{$name}{continents}{$3} = 0;
+            $self->{urilocalbl}->{$name}{continents_neg} = 1;
+            $self->{urilocalbl}->{$name}{continents}{$3} = 0;
           } else {
-            $self->{urilocalbl}{$name}{continents}{$3} = 1;
+            $self->{urilocalbl}->{$name}{continents}{$3} = 1;
           }
           push @added, $1;
         } else {
@@ -214,7 +214,7 @@ sub set_config {
         }
       }
 
-      my %checkneg = map { $_ => 1 } values %{$self->{urilocalbl}{$name}{continents}};
+      my %checkneg = map { $_ => 1 } values %{$self->{urilocalbl}->{$name}{continents}};
       if (scalar keys %checkneg > 1) {
         dbg("config: uri_block_cont $name failed: trying to combine negations and non-negations");
         return $Mail::SpamAssassin::Conf::INVALID_VALUE;
@@ -244,11 +244,11 @@ sub set_config {
         my $isp = $1;
         $isp =~ s/"//g;
         my $ispkey = uc($isp); $ispkey =~ s/\s+//gs;
-        $self->{urilocalbl}{$name}{isps}{$ispkey} = $isp;
+        $self->{urilocalbl}->{$name}{isps}{$ispkey} = $isp;
         push @added, "\"$isp\"";
       }
 
-      if (!defined $self->{urilocalbl}{$name}{isps}) {
+      if (!defined $self->{urilocalbl}->{$name}{isps}) {
         return $Mail::SpamAssassin::Conf::INVALID_VALUE;
       }
 
@@ -270,29 +270,13 @@ sub set_config {
       my $name = $1;
       my $args = $2;
 
-      $self->{urilocalbl}{$name}{cidr} = new Net::CIDR::Lite;
-
-      # match individual IP's, subnets, and ranges
-      while ($args =~ /(?:^|\s+)(\S+)/g) {
-        my $addr = $1;
-
-        if ($addr =~ m!^$IP_ADDRESS(?:/\d{2,3}|-$IP_ADDRESS)?$!o) {
-          eval {
-            $self->{urilocalbl}{$name}{cidr}->add_any($addr);
-          };
-          if ($@) {
-            dbg("config: uri_block_cidr $name add $addr failed: $@");
-            return $Mail::SpamAssassin::Conf::INVALID_VALUE;
-          } else {
-            dbg("config: uri_block_cidr $name added: $addr");
-          }
+      foreach my $addr (split(/\s+/, $args)) {
+        if ($addr =~ m!^$IP_ADDRESS(?:/\d{1,3})?$!o) {
+          $self->{urilocalbl}->{$name}{cidr}{$addr} = 1;
         } else {
           return $Mail::SpamAssassin::Conf::INVALID_VALUE;
         }
       }
-
-      # optimize the ranges
-      $self->{urilocalbl}{$name}{cidr}->clean();
 
       $self->{parser}->add_test($name, 'check_uri_local_bl()',
         $Mail::SpamAssassin::Conf::TYPE_BODY_EVALS);
@@ -312,7 +296,7 @@ sub set_config {
       my $args = $2;
 
       foreach my $arg (split(/\s+/, $args)) {
-        $self->{urilocalbl}{$name}{exclusions}{lc($arg)} = 1;
+        $self->{urilocalbl}->{$name}{exclusions}{lc($arg)} = 1;
       }
 
       $self->{parser}->add_test($name, 'check_uri_local_bl()',
@@ -321,6 +305,30 @@ sub set_config {
   });
 
   $conf->{parser}->register_commands(\@cmds);
+}
+
+sub finish_parsing_end {
+  my ($self, $opts) = @_;
+
+  my $conf = $opts->{conf};
+
+  # compile cidrs now
+  foreach my $rulename (keys %{$conf->{urilocalbl}}) {
+    my $ruleconf = $conf->{urilocalbl}->{$rulename};
+    next if defined $ruleconf->{netset};
+    next if !defined $ruleconf->{cidr};
+    my $netset = Mail::SpamAssassin::NetSet->new($rulename);
+    foreach my $addr (keys %{$ruleconf->{cidr}}) {
+      if ($netset->add_cidr($addr)) {
+        dbg("config: uri_block_cidr $rulename added: $addr");
+      } else {
+        dbg("config: uri_block_cidr $rulename add failed: $addr");
+      }
+    }
+    if ($netset->get_num_nets()) {
+      $ruleconf->{netset} = $netset;
+    }
+  }
 }
 
 sub check_uri_local_bl {
@@ -344,7 +352,7 @@ sub check_uri_local_bl {
   my $geodb = $self->{geodb};
 
   my $rulename = $pms->get_current_eval_rule_name();
-  my %ruleconf = %{$pms->{conf}->{urilocalbl}{$rulename}};
+  my $ruleconf = $pms->{conf}->{urilocalbl}->{$rulename};
 
   dbg("running $rulename");
 
@@ -358,7 +366,7 @@ sub check_uri_local_bl {
 
     my %hosts = %{$info->{hosts}}; # evade hash reset by copy
     HOST: while (my($host, $domain) = each %hosts) {
-      if (defined $ruleconf{exclusions}{lc($domain)}) {
+      if (defined $ruleconf->{exclusions}{lc($domain)}) {
         dbg("excluded $host, domain $domain matches");
         next HOST;
       }
@@ -381,15 +389,15 @@ sub check_uri_local_bl {
       next HOST unless @addrs;
 
       foreach my $ip (@addrs) {
-        if (defined $ruleconf{exclusions}{$ip}) {
+        if (defined $ruleconf->{exclusions}{$ip}) {
           dbg("excluded $host, IP $ip matches");
           next HOST;
         }
       }
 
-      if (defined $ruleconf{countries}) {
-        my $neg = defined $ruleconf{countries_neg};
-        my $testcc = join(' ', sort keys %{$ruleconf{countries}});
+      if (defined $ruleconf->{countries}) {
+        my $neg = defined $ruleconf->{countries_neg};
+        my $testcc = join(' ', sort keys %{$ruleconf->{countries}});
         if ($neg) {
           dbg("checking $host for any country except: $testcc");
         } else {
@@ -397,8 +405,8 @@ sub check_uri_local_bl {
         }
         foreach my $ip (@addrs) {
           my $cc = $geodb->get_country($ip);
-          if ( (!$neg && defined $ruleconf{countries}{$cc}) ||
-               ($neg && !defined $ruleconf{countries}{$cc}) ) {
+          if ( (!$neg && defined $ruleconf->{countries}{$cc}) ||
+               ($neg && !defined $ruleconf->{countries}{$cc}) ) {
             dbg("$host ($ip) country $cc - HIT");
             $pms->test_log("Host: $host in country $cc");
             return 1; # hit
@@ -408,9 +416,9 @@ sub check_uri_local_bl {
         }
       }
 
-      if (defined $ruleconf{continents}) {
-        my $neg = defined $ruleconf{continents_neg};
-        my $testcont = join(' ', sort keys %{$ruleconf{continents}});
+      if (defined $ruleconf->{continents}) {
+        my $neg = defined $ruleconf->{continents_neg};
+        my $testcont = join(' ', sort keys %{$ruleconf->{continents}});
         if ($neg) {
           dbg("checking $host for any continent except: $testcont");
         } else {
@@ -418,8 +426,8 @@ sub check_uri_local_bl {
         }
         foreach my $ip (@addrs) {
           my $cc = $geodb->get_continent($ip);
-          if ( (!$neg && defined $ruleconf{continents}{$cc}) ||
-               ($neg && !defined $ruleconf{continents}{$cc}) ) {
+          if ( (!$neg && defined $ruleconf->{continents}{$cc}) ||
+               ($neg && !defined $ruleconf->{continents}{$cc}) ) {
             dbg("$host ($ip) continent $cc - HIT");
             $pms->test_log("Host: $host in continent $cc");
             return 1; # hit
@@ -429,16 +437,16 @@ sub check_uri_local_bl {
         }
       }
 
-      if (defined $ruleconf{isps}) {
+      if (defined $ruleconf->{isps}) {
         if ($geodb->can('isp')) {
-          my $testisp = join(', ', map {"\"$_\""} sort values %{$ruleconf{isps}});
+          my $testisp = join(', ', map {"\"$_\""} sort values %{$ruleconf->{isps}});
           dbg("checking $host for isps: $testisp");
 
           foreach my $ip (@addrs) {
             my $isp = $geodb->get_isp($ip);
             next unless defined $isp;
             my $ispkey = uc($isp); $ispkey =~ s/\s+//gs;
-            if (defined $ruleconf{isps}{$ispkey}) {
+            if (defined $ruleconf->{isps}{$ispkey}) {
               dbg("$host ($ip) isp \"$isp\" - HIT");
               $pms->test_log("Host: $host in isp $isp");
               return 1; # hit
@@ -451,12 +459,9 @@ sub check_uri_local_bl {
         }
       }
 
-      if (defined $ruleconf{cidr}) {
-        my $testcidr = join(' ', $ruleconf{cidr}->list_range());
-        dbg("checking $host for cidrs: $testcidr");
-
+      if (defined $ruleconf->{netset}) {
         foreach my $ip (@addrs) {
-          if ($ruleconf{cidr}->find($ip)) {
+          if ($ruleconf->{netset}->contains_ip($ip)) {
             dbg("$host ($ip) matches cidr - HIT");
             $pms->test_log("Host: $host in cidr");
             return 1; # hit
