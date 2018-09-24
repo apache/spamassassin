@@ -35,84 +35,104 @@ ifplugin Mail::SpamAssassin::Plugin::SPF
 #   "permerror" is very bad, and means the domain doesn't have a valid spf record
 # These are more trustworthy results than the SPF_HELO rules.
 
-header SPF_PASS			eval:check_for_spf_pass()
-header SPF_NEUTRAL		eval:check_for_spf_neutral()
-header SPF_FAIL			eval:check_for_spf_fail()
-header SPF_SOFTFAIL		eval:check_for_spf_softfail()
-if can(Mail::SpamAssassin::Plugin::SPF::has_check_for_spf_errors)
-  header T_SPF_PERMERROR		eval:check_for_spf_permerror()
-  header T_SPF_TEMPERROR		eval:check_for_spf_temperror()
-endif
+# some are "userconf" so that scores are set by hand?
+
+header   SPF_PASS	eval:check_for_spf_pass()
+describe SPF_PASS	SPF: sender matches SPF record
+tflags   SPF_PASS	nice userconf net
+priority SPF_PASS	-100
+reuse    SPF_PASS
+
+header   SPF_NEUTRAL	eval:check_for_spf_neutral()
+describe SPF_NEUTRAL	SPF: sender does not match SPF record (neutral)
+tflags   SPF_NEUTRAL	net
+priority SPF_NEUTRAL	-100
+reuse    SPF_NEUTRAL
+
+header   SPF_FAIL	eval:check_for_spf_fail()
+describe SPF_FAIL	SPF: sender does not match SPF record (fail)
+tflags   SPF_FAIL	net
+priority SPF_FAIL	-100
+reuse    SPF_FAIL
+
+header   SPF_SOFTFAIL	eval:check_for_spf_softfail()
+describe SPF_SOFTFAIL	SPF: sender does not match SPF record (softfail)
+tflags   SPF_SOFTFAIL	net
+priority SPF_SOFTFAIL	-100
+reuse    SPF_SOFTFAIL
+
 
 # NOTE: SPF_HELO_PASS is not incredibly hard to fake, so shouldn't
 # provide much in the way of points compared to SPF_PASS et al.
 # However, a *failure* is still a very good spamsign.
 
-header SPF_HELO_PASS		eval:check_for_spf_helo_pass()
-header SPF_HELO_NEUTRAL		eval:check_for_spf_helo_neutral()
-header SPF_HELO_FAIL		eval:check_for_spf_helo_fail()
-header SPF_HELO_SOFTFAIL	eval:check_for_spf_helo_softfail()
-if can(Mail::SpamAssassin::Plugin::SPF::has_check_for_spf_errors)
-  header T_SPF_HELO_PERMERROR	eval:check_for_spf_helo_permerror()
-  header T_SPF_HELO_TEMPERROR	eval:check_for_spf_helo_temperror()
-endif
-
-describe SPF_PASS		SPF: sender matches SPF record
-describe SPF_NEUTRAL		SPF: sender does not match SPF record (neutral)
-describe SPF_FAIL		SPF: sender does not match SPF record (fail)
-describe SPF_SOFTFAIL		SPF: sender does not match SPF record (softfail)
+header   SPF_HELO_PASS		eval:check_for_spf_helo_pass()
 describe SPF_HELO_PASS		SPF: HELO matches SPF record
+tflags   SPF_HELO_PASS		nice userconf net
+priority SPF_HELO_PASS		-100
+reuse    SPF_HELO_PASS
+
+header   SPF_HELO_NEUTRAL	eval:check_for_spf_helo_neutral()
 describe SPF_HELO_NEUTRAL	SPF: HELO does not match SPF record (neutral)
+tflags   SPF_HELO_NEUTRAL	net
+priority SPF_HELO_NEUTRAL	-100
+reuse    SPF_HELO_NEUTRAL
+
+header   SPF_HELO_FAIL		eval:check_for_spf_helo_fail()
 describe SPF_HELO_FAIL		SPF: HELO does not match SPF record (fail)
+tflags   SPF_HELO_FAIL		net
+priority SPF_HELO_FAIL		-100
+reuse    SPF_HELO_FAIL
+
+header   SPF_HELO_SOFTFAIL	eval:check_for_spf_helo_softfail()
 describe SPF_HELO_SOFTFAIL	SPF: HELO does not match SPF record (softfail)
-if can(Mail::SpamAssassin::Plugin::SPF::has_check_for_spf_errors)
-  describe T_SPF_PERMERROR        SPF: test of record failed (permerror)
-  describe T_SPF_TEMPERROR        SPF: test of record failed (temperror)
-  describe T_SPF_HELO_PERMERROR	SPF: test of HELO record failed (permerror)
-  describe T_SPF_HELO_TEMPERROR	SPF: test of HELO record failed (temperror)
-endif
-
-# these are "userconf" so that scores are set by hand
-tflags SPF_PASS			nice userconf net
-tflags SPF_HELO_PASS		nice userconf net
-tflags SPF_NEUTRAL		net
-tflags SPF_FAIL		        net
-tflags SPF_SOFTFAIL		net
-tflags SPF_HELO_NEUTRAL	        net
-tflags SPF_HELO_FAIL		net
-tflags SPF_HELO_SOFTFAIL	net
-if can(Mail::SpamAssassin::Plugin::SPF::has_check_for_spf_errors)
-  tflags T_SPF_HELO_PERMERROR	net
-  tflags T_SPF_HELO_TEMPERROR	net
-  tflags T_SPF_PERMERROR          net
-  tflags T_SPF_TEMPERROR          net
-endif
-
-# rules from earlier than current release that can be reused
-reuse  SPF_PASS
-reuse  SPF_FAIL
-reuse  SPF_SOFTFAIL
-reuse  SPF_HELO_PASS
-reuse  SPF_HELO_FAIL
-reuse  SPF_HELO_SOFTFAIL
-reuse  SPF_NEUTRAL
-reuse  SPF_HELO_NEUTRAL
-if can(Mail::SpamAssassin::Plugin::SPF::has_check_for_spf_errors)
-  reuse  T_SPF_PERMERROR
-  reuse  T_SPF_TEMPERROR
-  reuse  T_SPF_HELO_PERMERROR
-  reuse  T_SPF_HELO_TEMPERROR
-endif
+tflags   SPF_HELO_SOFTFAIL	net
+priority SPF_HELO_SOFTFAIL	-100
+reuse    SPF_HELO_SOFTFAIL
 
 # Implementing the Sender Check for No SPF REcord defaulting to disabled so Admins can override
-header		SPF_NONE    eval:check_for_spf_none()
-describe	SPF_NONE    SPF: sender does not publish an SPF Record
-tflags		SPF_NONE    net
-reuse		SPF_NONE
+header   SPF_NONE		eval:check_for_spf_none()
+describe SPF_NONE		SPF: sender does not publish an SPF Record
+tflags   SPF_NONE		net
+priority SPF_NONE		-100
+reuse    SPF_NONE
 
-header		SPF_HELO_NONE	eval:check_for_spf_helo_none()
-describe	SPF_HELO_NONE	SPF: HELO does not publish an SPF Record
-tflags		SPF_HELO_NONE   net
-reuse		SPF_HELO_NONE
+header   SPF_HELO_NONE		eval:check_for_spf_helo_none()
+describe SPF_HELO_NONE		SPF: HELO does not publish an SPF Record
+tflags   SPF_HELO_NONE		net
+priority SPF_HELO_NONE		-100
+reuse    SPF_HELO_NONE
+
+
+
+if can(Mail::SpamAssassin::Plugin::SPF::has_check_for_spf_errors)
+
+header   T_SPF_PERMERROR	eval:check_for_spf_permerror()
+describe T_SPF_PERMERROR	SPF: test of record failed (permerror)
+tflags   T_SPF_PERMERROR	net
+priority T_SPF_PERMERROR	-100
+reuse    T_SPF_PERMERROR
+
+header   T_SPF_TEMPERROR	eval:check_for_spf_temperror()
+describe T_SPF_TEMPERROR	SPF: test of record failed (temperror)
+tflags   T_SPF_TEMPERROR	net
+priority T_SPF_TEMPERROR	-100
+reuse    T_SPF_TEMPERROR
+
+header   T_SPF_HELO_PERMERROR	eval:check_for_spf_helo_permerror()
+describe T_SPF_HELO_PERMERROR	SPF: test of HELO record failed (permerror)
+tflags   T_SPF_HELO_PERMERROR	net
+priority T_SPF_HELO_PERMERROR	-100
+reuse    T_SPF_HELO_PERMERROR
+
+header   T_SPF_HELO_TEMPERROR	eval:check_for_spf_helo_temperror()
+describe T_SPF_HELO_TEMPERROR	SPF: test of HELO record failed (temperror)
+tflags   T_SPF_HELO_TEMPERROR	net
+priority T_SPF_HELO_TEMPERROR	-100
+reuse    T_SPF_HELO_TEMPERROR
+
+endif
+
+
 
 endif   # Mail::SpamAssassin::Plugin::SPF

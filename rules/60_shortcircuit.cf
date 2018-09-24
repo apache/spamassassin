@@ -21,6 +21,10 @@
 # limitations under the License.
 # </@LICENSE>
 
+# SpamAssassin tries hard not to launch DNS queries before priority -100. 
+# If you want to shortcircuit without launching unneeded queries, make sure
+# such rule priority is below -100.
+
 ###########################################################################
 
 priority USER_IN_WHITELIST     -1000
@@ -33,8 +37,6 @@ priority ALL_TRUSTED            -950
 priority SUBJECT_IN_BLACKLIST   -900
 priority USER_IN_BLACKLIST_TO   -900
 priority USER_IN_BLACKLIST      -900
-
-priority BAYES_99               -400
 
 ###########################################################################
 

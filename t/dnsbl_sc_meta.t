@@ -18,6 +18,10 @@ plan tests => 2;
 %anti_patterns = (
 );
 
+# What is this designed to test?  Was there some bug regarding
+# shortcircuiting and meta/dns rules?  Adjusted prio -700 to -100, since
+# that's when DNS lookups launch after Bug 5930
+
 tstprefs("
 
   loadplugin Mail::SpamAssassin::Plugin::Shortcircuit
@@ -32,7 +36,7 @@ tstprefs("
   header DNSBL_TEST_TOP	eval:check_rbl('test', 'dnsbltest.spamassassin.org.')
   tflags DNSBL_TEST_TOP	net
   meta SC_DNSBL (DNSBL_TEST_TOP)
-  priority SC_DNSBL -700
+  priority SC_DNSBL -100
   shortcircuit SC_DNSBL on
 
 ");

@@ -65,6 +65,10 @@ ifplugin Mail::SpamAssassin::Plugin::Shortcircuit
 #   shortcircuiting plugin is active, causing early exit to save CPU load.
 #   Uncomment to turn this on
 #
+#   SpamAssassin tries hard not to launch DNS queries before priority -100. 
+#   If you want to shortcircuit without launching unneeded queries, make
+#   sure such rule priority is below -100. These examples are already:
+#
 # shortcircuit USER_IN_WHITELIST       on
 # shortcircuit USER_IN_DEF_WHITELIST   on
 # shortcircuit USER_IN_ALL_SPAM_TO     on

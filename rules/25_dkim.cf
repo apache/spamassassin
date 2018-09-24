@@ -35,64 +35,77 @@ ifplugin Mail::SpamAssassin::Plugin::DKIM
 full     DKIM_SIGNED		eval:check_dkim_signed()
 describe DKIM_SIGNED		Message has a DKIM or DK signature, not necessarily valid
 tflags   DKIM_SIGNED		net
+priority DKIM_SIGNED		-100
 reuse    DKIM_SIGNED
 
 full     DKIM_VALID		eval:check_dkim_valid()
 describe DKIM_VALID		Message has at least one valid DKIM or DK signature
 tflags   DKIM_VALID		net nice
+priority DKIM_VALID		-100
 reuse    DKIM_VALID
 
 full     DKIM_VALID_AU		eval:check_dkim_valid_author_sig()
 describe DKIM_VALID_AU		Message has a valid DKIM or DK signature from author's domain
 tflags   DKIM_VALID_AU		net nice
+priority DKIM_VALID_AU		-100
 reuse    DKIM_VALID_AU
 
 if (version >= 3.004002)
 full     DKIM_VALID_EF		eval:check_dkim_valid_envelopefrom()
 describe DKIM_VALID_EF		Message has a valid DKIM or DK signature from envelope-from domain
 tflags   DKIM_VALID_EF		net nice
+priority DKIM_VALID_EF		-100
 reuse    DKIM_VALID_EF
 endif
 
 full     __DKIM_DEPENDABLE	eval:check_dkim_dependable()
 describe __DKIM_DEPENDABLE	A validation failure not attributable to truncation
+priority __DKIM_DEPENDABLE      -100
 reuse    __DKIM_DEPENDABLE
 
 header   DKIM_ADSP_NXDOMAIN	eval:check_dkim_adsp('N')
 describe DKIM_ADSP_NXDOMAIN	No valid author signature and domain not in DNS
 tflags   DKIM_ADSP_NXDOMAIN	net
+priority DKIM_ADSP_NXDOMAIN     -100
 reuse    DKIM_ADSP_NXDOMAIN
 
 header   DKIM_ADSP_DISCARD	eval:check_dkim_adsp('D')
 describe DKIM_ADSP_DISCARD	No valid author signature, domain signs all mail and suggests discarding the rest
 tflags   DKIM_ADSP_DISCARD	net
+priority DKIM_ADSP_DISCARD      -100
 reuse    DKIM_ADSP_DISCARD
 
 header   DKIM_ADSP_ALL		eval:check_dkim_adsp('A')
 describe DKIM_ADSP_ALL		No valid author signature, domain signs all mail
 tflags   DKIM_ADSP_ALL		net
+priority DKIM_ADSP_ALL		-100
 reuse    DKIM_ADSP_ALL
 
 header   DKIM_ADSP_CUSTOM_LOW	eval:check_dkim_adsp('1')
 describe DKIM_ADSP_CUSTOM_LOW	No valid author signature, adsp_override is CUSTOM_LOW
 tflags   DKIM_ADSP_CUSTOM_LOW	net userconf
+priority DKIM_ADSP_CUSTOM_LOW   -100
 reuse    DKIM_ADSP_CUSTOM_LOW
 
 header   DKIM_ADSP_CUSTOM_MED	eval:check_dkim_adsp('2')
 describe DKIM_ADSP_CUSTOM_MED	No valid author signature, adsp_override is CUSTOM_MED
 tflags   DKIM_ADSP_CUSTOM_MED	net userconf
+priority DKIM_ADSP_CUSTOM_MED   -100
 reuse    DKIM_ADSP_CUSTOM_MED
 
 header   DKIM_ADSP_CUSTOM_HIGH	eval:check_dkim_adsp('3')
 describe DKIM_ADSP_CUSTOM_HIGH	No valid author signature, adsp_override is CUSTOM_HIGH
 tflags   DKIM_ADSP_CUSTOM_HIGH	net userconf
+priority DKIM_ADSP_CUSTOM_HIGH  -100
 reuse    DKIM_ADSP_CUSTOM_HIGH
 
 full     __RESIGNER1     eval:check_dkim_valid('linkedin.com')
 tflags   __RESIGNER1     net
+priority __RESIGNER1     -100
 reuse    __RESIGNER1
 full     __RESIGNER2     eval:check_dkim_valid('googlegroups.com','yahoogroups.com','yahoogroups.de')
 tflags   __RESIGNER2     net
+priority __RESIGNER2     -100
 reuse    __RESIGNER2
 meta     __VIA_RESIGNER  __RESIGNER1 || __RESIGNER2
 describe __VIA_RESIGNER  Mail through a popular signing remailer
@@ -112,18 +125,22 @@ describe NML_ADSP_CUSTOM_HIGH   ADSP custom_high hit, and not from a mailing lis
 
 full   DKIM_VERIFIED		eval:check_dkim_valid()
 tflags DKIM_VERIFIED		net nice
+priority DKIM_VERIFIED          -100
 reuse  DKIM_VERIFIED
 
 header DKIM_POLICY_TESTING	eval:check_dkim_testing()
 tflags DKIM_POLICY_TESTING	net nice
+priority DKIM_POLICY_TESTING    -100
 reuse  DKIM_POLICY_TESTING
 
 header DKIM_POLICY_SIGNSOME	eval:check_dkim_signsome()
 tflags DKIM_POLICY_SIGNSOME	net nice
+priority DKIM_POLICY_SIGNSOME   -100
 reuse  DKIM_POLICY_SIGNSOME
 
 header DKIM_POLICY_SIGNALL	eval:check_dkim_signall()
 tflags DKIM_POLICY_SIGNALL	net nice
+priority DKIM_POLICY_SIGNALL    -100
 reuse  DKIM_POLICY_SIGNALL
 
 endif   # Mail::SpamAssassin::Plugin::DKIM

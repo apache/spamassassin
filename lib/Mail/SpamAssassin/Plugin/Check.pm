@@ -76,10 +76,8 @@ sub check_main {
   # rbl calls.
   $pms->extract_message_metadata();
 
-  # Here, we launch all the DNS RBL queries and let them run while we
-  # inspect the message
-  $self->run_rbl_eval_tests($pms);
   my $needs_dnsbl_harvest_p = 1; # harvest needs to be run
+  my $rbls_running = 0;
 
   my $decoded = $pms->get_decoded_stripped_body_text_array();
   my $bodytext = $pms->get_decoded_body_text_array();
@@ -105,6 +103,15 @@ sub check_main {
                                          { permsgstatus => $pms })) {
       # if shortcircuiting is hit, we skip all other priorities...
       last;
+    }
+
+    # Here, we launch all the DNS RBL queries and let them run while we
+    # inspect the message.  We try to launch all DNS queries at priority
+    # -100, so one can shortcircuit tests at lower priority and not launch
+    # unneeded DNS queries.
+    if (!$rbls_running && $priority >= -100) {
+      $rbls_running = 1;
+      $self->run_rbl_eval_tests($pms);
     }
 
     my $timer = $self->{main}->time_method("tests_pri_".$priority);
