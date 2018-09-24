@@ -57,6 +57,22 @@
 #
 # normalize_charset 1
 
+#   Textual body scan limit    (default: 50000)
+#
+#   Amount of data per email text/* mimepart, that will be run through body
+#   rules.  This enables safer and faster scanning of large messages,
+#   perhaps having very large textual attachments.  There should be no need
+#   to change this well tested default.
+#
+# body_part_scan_size 50000
+
+#   Textual rawbody data scan limit    (default: 500000)
+#
+#   Amount of data per email text/* mimepart, that will be run through
+#   rawbody rules.
+#
+# rawbody_part_scan_size 500000
+
 #   Some shortcircuiting, if the plugin is enabled
 # 
 ifplugin Mail::SpamAssassin::Plugin::Shortcircuit

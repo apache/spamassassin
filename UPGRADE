@@ -15,6 +15,8 @@ Note for Users Upgrading to SpamAssassin 4.0.0
 
 - freemail_import_whitelist_auth, freemail_import_def_whitelist_auth added (Bug 6451)
 
+- body_part_scan_size 50000, rawbody_part_scan_size 500000 defaults added (Bug 6582)
+  These enable safer and faster scanning of large emails.
 
 
 
