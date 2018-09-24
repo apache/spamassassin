@@ -294,17 +294,17 @@ sub show_default_header {
   my ($self, $title) = @_;
 
   # replaced with use of main, off-zone host:
-  # <!-- <link href="/ruleqa.css" rel="stylesheet" type="text/css"> <script src="http://ruleqa.spamassassin.org/sorttable.js"></script> --> 
+  # <!-- <link href="/ruleqa.css" rel="stylesheet" type="text/css"> <script src="https://ruleqa.spamassassin.org/sorttable.js"></script> --> 
 
   my $hdr = q{<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"
-                    "http://www.w3.org/TR/html4/strict.dtd">
-  <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+                    "https://www.w3.org/TR/html4/strict.dtd">
+  <html xmlns="https://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
   <head><meta http-equiv="Content-type" content="text/html; charset=utf-8">
-  <link rel="icon" href="http://spamassassin.apache.org/images/favicon.ico">
+  <link rel="icon" href="https://spamassassin.apache.org/images/favicon.ico">
   <title>}.$title.q{: SpamAssassin Rule QA</title>
 
-  <link href="http://ruleqa.spamassassin.org/ruleqa.css" rel="stylesheet" type="text/css">
-  <script src="http://ruleqa.spamassassin.org/sorttable.js"></script>
+  <link href="https://ruleqa.spamassassin.org/ruleqa.css" rel="stylesheet" type="text/css">
+  <script src="https://ruleqa.spamassassin.org/sorttable.js"></script>
 
   <script type="text/javascript"><!--
 
@@ -320,12 +320,12 @@ sub show_default_header {
           <h1>SpamAssassin Rule QA</h1>
         </td> <td valign=top>
           <p align="right">
-            <a href="http://wiki.apache.org/spamassassin/RuleQaApp">help</a>
+            <a href="https://wiki.apache.org/spamassassin/RuleQaApp">help</a>
           </p>
         </td> </tr> </table>
 
   };
-  #<br> <a href="http://bbmass.spamassassin.org:8011/">preflight mass-check progress</a>
+  #<br> <a href="https://bbmass.spamassassin.org:8011/">preflight mass-check progress</a>
   return $hdr;
 }
 
@@ -373,7 +373,7 @@ sub show_default_view {
   <tr>
   <td width='100%'>
   <div class='ui_label'>
-    Or, <a href="http://wiki.apache.org/spamassassin/DateRev">DateRev</a>
+    Or, <a href="https://wiki.apache.org/spamassassin/DateRev">DateRev</a>
     to display: <input type='textfield' name='daterev' value="!daterev!">
   </div>
   <div class='ui_label'>
@@ -527,7 +527,7 @@ sub show_default_view {
     my $rev = $self->get_rev_for_daterev($self->{daterev});
     my $md = $self->get_rule_metadata($rev);
     my $src = eval { $md->{rulemds}->{$self->{rule}}->{src} } || '(not found)';
-    my $srchref = "http://svn.apache.org/viewvc/spamassassin/trunk/$src?revision=$rev\&view=markup";
+    my $srchref = "https://svn.apache.org/viewvc/spamassassin/trunk/$src?revision=$rev\&view=markup";
 
     my $lastmod = eval {
           POSIX::strftime "%Y-%m-%d %H:%M:%S UTC", gmtime $md->{rulemds}->{$self->{rule}}->{srcmtime}
@@ -633,7 +633,7 @@ sub show_default_view {
       <div class='ui_label'>
       <p>Note: the freqs tables are sortable.  Click on the headers to resort them
       by that column.  <a
-      href="http://www.kryogenix.org/code/browser/sorttable/">(thanks!)</a></p>
+      href="https://www.kryogenix.org/code/browser/sorttable/">(thanks!)</a></p>
       </div>
 
   </body></html>
@@ -1421,7 +1421,7 @@ sub generate_scoremap_chart {
   my $xgrid = (100/($max_x||0.0001)) * 5;
   my $ygrid = (100/($max_y||0.0001)) * 10;
 
-  # http://code.google.com/apis/chart/ , woo
+  # https://code.google.com/apis/chart/ , woo
   my $chartsetup = 
       "cht=lxy"             # line chart with x- and y-axis coords
       ."\&amp;chs=400x200"
@@ -1435,7 +1435,7 @@ sub generate_scoremap_chart {
       ."\&amp;chxt=x,y";
 
   $$outref .= "<div class='scoremap_chart'>
-       <img src='http://chart.apis.google.com/chart?$chartsetup'
+       <img src='https://chart.apis.google.com/chart?$chartsetup'
          class='scoremap_chart' width='400' height='200' align='right'
        /></div>\n";
 }
@@ -1571,7 +1571,7 @@ sub get_rev_for_daterev {
 sub assemble_url {
   my ($self, @orig) = @_;
 
-  # e.g. http://buildbot.spamassassin.org/ruleqa?
+  # e.g. https://buildbot.spamassassin.org/ruleqa?
   #     daterev=20060120-r370897-b&rule=T_PH_SEC&s_detail=1
 
   # we support special treatment for 'daterev' and 'rule'
@@ -1611,7 +1611,7 @@ sub assemble_url {
   $url =~ s,^/+,/,;
 
   # now, a much more readable
-  # http://ruleqa.spamassassin.org/
+  # https://ruleqa.spamassassin.org/
   #      20060120-r370897-b/T_PH_SEC/detail
 
   return $url;
