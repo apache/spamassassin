@@ -192,13 +192,15 @@ describe UPPERCASE_URI	Link protocol has unexpected mixed case
 # score	 KHOP_GREYED	0.1
 
 
+# DKIM_INVALID has been moved to 25_dkim.cf!
+#
 # This is useless while __DKIM_EXISTS continues to perform so well.
 # This is useless while ruleqa continues to lack DKIM support.
-ifplugin Mail::SpamAssassin::Plugin::DKIM
-  meta	   DKIM_INVALID	__DKIM_EXISTS && !DKIM_VALID
-  describe DKIM_INVALID	DKIM-Signature header exists but is not valid
-  # masscheck ignores ifplugins and thus always has DKIM_INVALID==__DKIM_EXISTS
-endif
+#ifplugin Mail::SpamAssassin::Plugin::DKIM
+#  meta	   DKIM_INVALID	__DKIM_EXISTS && !DKIM_VALID
+#  describe DKIM_INVALID	DKIM-Signature header exists but is not valid
+#  # masscheck ignores ifplugins and thus always has DKIM_INVALID==__DKIM_EXISTS
+#endif
 
 ifplugin Mail::SpamAssassin::Plugin::MIMEHeader # {
   # probably all over the place, indicating only a MS document is attached,

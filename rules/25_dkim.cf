@@ -44,6 +44,9 @@ tflags   DKIM_VALID		net nice
 priority DKIM_VALID		-100
 reuse    DKIM_VALID
 
+meta     DKIM_INVALID		DKIM_SIGNED && !DKIM_VALID
+describe DKIM_INVALID		DKIM or DK signature exists, but is not valid
+
 full     DKIM_VALID_AU		eval:check_dkim_valid_author_sig()
 describe DKIM_VALID_AU		Message has a valid DKIM or DK signature from author's domain
 tflags   DKIM_VALID_AU		net nice
