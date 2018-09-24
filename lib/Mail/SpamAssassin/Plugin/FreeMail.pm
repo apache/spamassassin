@@ -18,7 +18,7 @@
 package Mail::SpamAssassin::Plugin::FreeMail;
 use strict;
 use warnings;
-my $VERSION = 2.002;
+my $VERSION = 2.003;
 
 =head1 NAME
 
@@ -50,6 +50,16 @@ freemail_whitelist email/domain ...
 
    Emails or domains listed here are ignored (pretend they arent
    freemail). No wildcards!
+
+freemail_import_whitelist_auth 1/0
+
+   Entries in whitelist_auth will also be used to whitelist emails
+   or domains from being freemail.  Default is 0.
+
+freemail_import_def_whitelist_auth 1/0
+
+   Entries in def_whitelist_auth will also be used to whitelist emails
+   or domains from being freemail.  Default is 0.
 
 header FREEMAIL_REPLYTO eval:check_freemail_replyto(['option'])
 
@@ -93,6 +103,7 @@ header FREEMAIL_BODY eval:check_freemail_body(['regex'])
  2.000 - some cleaning up
  2.001 - fix freemail_whitelist
  2.002 - _add_desc -> _got_hit, fix description email append bug
+ 2.003 - freemail_import_(def_)whitelist_auth
 
 =cut
 
@@ -196,6 +207,18 @@ sub set_config {
         type => $Mail::SpamAssassin::Conf::CONF_TYPE_NUMERIC,
         }
     );
+    push(@cmds, {
+        setting => 'freemail_import_whitelist_auth',
+        default => 0,
+        type => $Mail::SpamAssassin::Conf::CONF_TYPE_NUMERIC,
+        }
+    );
+    push(@cmds, {
+        setting => 'freemail_import_def_whitelist_auth',
+        default => 0,
+        type => $Mail::SpamAssassin::Conf::CONF_TYPE_NUMERIC,
+        }
+    );
     $conf->{parser}->register_commands(\@cmds);
 }
 
@@ -274,7 +297,7 @@ sub finish_parsing_end {
 }
 
 sub _is_freemail {
-    my ($self, $email) = @_;
+    my ($self, $email, $pms) = @_;
 
     return 0 if $email eq '';
 
@@ -290,10 +313,23 @@ sub _is_freemail {
         dbg("whitelisted domain: $domain");
         return 0;
     }
+
     if ($email =~ $email_whitelist) {
         dbg("whitelisted email, default: $email");
         return 0;
     }
+
+    foreach my $list ('whitelist_auth','def_whitelist_auth') {
+        if ($pms->{conf}->{"freemail_import_$list"}) {
+            foreach my $regexp (values %{$pms->{conf}->{$list}}) {
+                if ($email =~ /$regexp/) {
+                    dbg("whitelisted email, $list: $email");
+                    return 0;
+                }
+            }
+        }
+    }
+ 
     if (defined $self->{freemail_domains}{$domain}
         or ( defined $self->{freemail_domains_re}
              and $email =~ $self->{freemail_domains_re} )) {
@@ -350,7 +386,7 @@ sub _parse_body {
                     return 0;
                 }
             }
-            next unless $self->_is_freemail($email);
+            next unless $self->_is_freemail($email, $pms);
             if (++$count_fm == $pms->{main}->{conf}->{freemail_max_body_freemails}) {
                 if ($pms->{main}->{conf}->{freemail_skip_when_over_max}) {
                     $pms->{freemail_skip_body} = 1;
@@ -421,7 +457,7 @@ sub check_freemail_header {
     dbg("addresses from header $header: ".join(';',@emails));
 
     foreach my $email (@emails) {    
-        if ($self->_is_freemail($email)) {
+        if ($self->_is_freemail($email, $pms)) {
             if (defined $re) {
                 next unless $email =~ $re;
                 dbg("HIT! $email is freemail and matches regex");
@@ -503,7 +539,7 @@ sub check_freemail_from {
     dbg("all from-addresses: ".join(', ', keys %from_addrs));
 
     foreach my $email (keys %from_addrs) {
-        next unless $self->_is_freemail($email);
+        next unless $self->_is_freemail($email, $pms);
         if (defined $re) {
             next unless $email =~ $re;
             dbg("HIT! $email is freemail and matches regex");
@@ -547,8 +583,8 @@ sub check_freemail_replyto {
 
     my $from = lc($pms->get("From:addr"));
     my $replyto = lc($pms->get("Reply-To:addr"));
-    my $from_is_fm = $self->_is_freemail($from);
-    my $replyto_is_fm = $self->_is_freemail($replyto);
+    my $from_is_fm = $self->_is_freemail($from, $pms);
+    my $replyto_is_fm = $self->_is_freemail($replyto, $pms);
 
     dbg("From address: $from") if $from ne '';
     dbg("Reply-To address: $replyto") if $replyto ne '';
