@@ -1,95 +1,3 @@
-package Mail::SpamAssassin::Plugin::FreeMail;
-use strict;
-use warnings;
-my $VERSION = 2.002;
-
-### About:
-#
-# If From-address is freemail, and Reply-To or address found in mail body is
-# a different freemail address, return success. Good sign of Nigerian scams
-# etc. Test idea from Marc Perkel.
-#
-# Also separate functions to check various portions of message for freemails.
-#
-
-### Install:
-#
-# Please add loadplugin to init.pre (so it's loaded before cf files!):
-#
-# loadplugin Mail::SpamAssassin::Plugin::FreeMail FreeMail.pm
-#
-
-### Supported .cf clauses:
-#
-# freemail_domains domain ...
-#
-#    List of domains to be used in checks.
-#
-#    Regexp is not supported, but following wildcards work:
-#
-#    ? for single character (does not match a dot)
-#    * for multiple characters (does not match a dot)
-#
-#    For example:
-#    freemail_domains hotmail.com hotmail.co.?? yahoo.* yahoo.*.*
-#
-# freemail_whitelist email/domain ...
-#
-#    Emails or domains listed here are ignored (pretend they arent
-#    freemail). No wildcards!
-#
-# header FREEMAIL_REPLYTO eval:check_freemail_replyto(['option'])
-#
-#    Checks/compares freemail addresses found from headers and body.
-#
-#    Possible options:
-#
-#    replyto	From: or body address is different than Reply-To
-#		(this is the default)
-#    reply	as above, but if no Reply-To header is found,
-#		compares From: and body
-#
-# header FREEMAIL_FROM eval:check_freemail_from(['regex'])
-#
-#    Checks all possible "from" headers to see if sender is freemail.
-#    Uses SA all_from_addrs() function (includes 'Resent-From', 'From',
-#    'EnvelopeFrom' etc).
-#
-#    Add optional regex to match the found email address(es). For example,
-#    to see if user ends in digit: check_freemail_from('\d@')
-#
-#    If you use multiple check_freemail_from rules with regexes, remember
-#    that they might hit different emails from different heades. To match
-#    a certain header only, use check_freemail_header.
-#
-# header FREEMAIL_HDRX eval:check_freemail_header('header' [, 'regex'])
-#
-#    Searches defined header for freemail address. Optional regex to match
-#    the found address (like in check_freemail_from).
-#
-# header FREEMAIL_BODY eval:check_freemail_body(['regex'])
-#
-#    Searches body for freemail address. With optional regex to match.
-#
-
-### Changelog:
-#
-# 1.995 - public beta version, revamped whole code, moved default
-#         domains to separate file: http://sa.hege.li/freemail_domains.cf
-# 1.996 - fix freemail_skip_bulk_envfrom
-# 1.997 - set freemail_skip_when_over_max to 1 by default
-# 1.998 - don't warn about missing freemail_domains when linting
-# 1.999 - default whitelist undisclosed-recipient@yahoo.com etc
-# 2.000 - some cleaning up
-# 2.001 - fix freemail_whitelist
-# 2.002 - _add_desc -> _got_hit, fix description email append bug
-#
-
-### Blah:
-#
-# Author: Henrik Krohns <sa@hege.li>
-# Copyright 2009 Henrik Krohns
-#
 # <@LICENSE>
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
@@ -106,7 +14,87 @@ my $VERSION = 2.002;
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # </@LICENSE>
-#
+
+package Mail::SpamAssassin::Plugin::FreeMail;
+use strict;
+use warnings;
+my $VERSION = 2.002;
+
+=head1 NAME
+
+FreeMail - check message headers/body for freemail-domains
+
+=head1 SYNOPSIS
+
+If for example From-address is freemail, and Reply-To or address found in mail body is
+different freemail address, return success.  Good sign of Nigerian scams
+etc.  Test idea from Marc Perkel.
+
+Also separate functions to check various portions of message for freemails.
+
+=head1 CONFIGURATION
+
+freemail_domains domain ...
+
+   List of domains to be used in checks.
+
+   Regexp is not supported, but following wildcards work:
+
+   ? for single character (does not match a dot)
+   * for multiple characters (does not match a dot)
+
+   For example:
+   freemail_domains hotmail.com hotmail.co.?? yahoo.* yahoo.*.*
+
+freemail_whitelist email/domain ...
+
+   Emails or domains listed here are ignored (pretend they arent
+   freemail). No wildcards!
+
+header FREEMAIL_REPLYTO eval:check_freemail_replyto(['option'])
+
+   Checks/compares freemail addresses found from headers and body.
+
+   Possible options:
+
+   replyto	From: or body address is different than Reply-To
+		(this is the default)
+   reply	as above, but if no Reply-To header is found,
+		compares From: and body
+
+header FREEMAIL_FROM eval:check_freemail_from(['regex'])
+
+   Checks all possible "from" headers to see if sender is freemail.
+   Uses SA all_from_addrs() function (includes 'Resent-From', 'From',
+   'EnvelopeFrom' etc).
+
+   Add optional regex to match the found email address(es). For example,
+   to see if user ends in digit: check_freemail_from('\d@')
+
+   If you use multiple check_freemail_from rules with regexes, remember
+   that they might hit different emails from different heades. To match
+   a certain header only, use check_freemail_header.
+
+header FREEMAIL_HDRX eval:check_freemail_header('header' [, 'regex'])
+
+   Searches defined header for freemail address. Optional regex to match
+   the found address (like in check_freemail_from).
+
+header FREEMAIL_BODY eval:check_freemail_body(['regex'])
+
+   Searches body for freemail address. With optional regex to match.
+
+=head1 CHANGELOG
+
+ 1.996 - fix freemail_skip_bulk_envfrom
+ 1.997 - set freemail_skip_when_over_max to 1 by default
+ 1.998 - don't warn about missing freemail_domains when linting
+ 1.999 - default whitelist undisclosed-recipient@yahoo.com etc
+ 2.000 - some cleaning up
+ 2.001 - fix freemail_whitelist
+ 2.002 - _add_desc -> _got_hit, fix description email append bug
+
+=cut
 
 use Mail::SpamAssassin::Plugin;
 use Mail::SpamAssassin::PerMsgStatus;
