@@ -277,10 +277,8 @@ sub parse {
       $line =~ s/\\#/#/g; # hash chars are escaped, so unescape them
     }
 
-    if ($line =~ tr{ \t\r\n\f}{}) {
-      $line =~ s/^\s+//;  # remove leading whitespace
-      $line =~ s/\s+$//;  # remove tailing whitespace
-    }
+    $line =~ s/^\s+//;  # remove leading whitespace
+    $line =~ s/\s+$//;  # remove tailing whitespace
     next unless($line); # skip empty lines
 
     # handle i18n
