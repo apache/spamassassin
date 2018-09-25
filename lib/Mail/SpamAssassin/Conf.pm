@@ -1230,6 +1230,7 @@ skip them completely. Disabled with 0.
 
   push (@cmds, {
     setting => 'body_part_scan_size',
+    is_admin => 1,
     default => 50000,
     type => $CONF_TYPE_NUMERIC,
   });
@@ -1243,6 +1244,7 @@ Like body_part_scan_size, for "rawbody" type rules.
 
   push (@cmds, {
     setting => 'rawbody_part_scan_size',
+    is_admin => 1,
     default => 500000,
     type => $CONF_TYPE_NUMERIC,
   });
@@ -4304,6 +4306,7 @@ Plugins can override this internally if required.
 
   push (@cmds, {
     setting => 'geodb_module',
+    is_admin => 1,
     default => undef,
     type => $Mail::SpamAssassin::Conf::CONF_TYPE_STRING,
     code => sub {
@@ -4325,6 +4328,7 @@ Plugins can override this internally if required.
   # support deprecated RelayCountry setting
   push (@cmds, {
     setting => 'country_db_type',
+    is_admin => 1,
     default => undef,
     type => $Mail::SpamAssassin::Conf::CONF_TYPE_STRING,
     code => sub {
@@ -4378,6 +4382,7 @@ GeoIP/GeoIP2 searches these files/directories:
 
   push (@cmds, {
     setting => 'geodb_options',
+    is_admin => 1,
     type => $CONF_TYPE_HASH_KEY_VALUE,
     default => {},
     code => sub {
@@ -4408,6 +4413,7 @@ search for default filenames.
 
   push (@cmds, {
     setting => 'geoip_search_path',
+    is_admin => 1,
     default => [],
     type => $CONF_TYPE_STRINGLIST,
     code => sub {
@@ -4425,6 +4431,7 @@ search for default filenames.
   # support deprecated RelayCountry setting
   push (@cmds, {
     setting => 'country_db_path',
+    is_admin => 1,
     default => undef,
     type => $Mail::SpamAssassin::Conf::CONF_TYPE_STRING,
     code => sub {
@@ -4440,6 +4447,7 @@ search for default filenames.
   # support deprecated URILocalBL setting
   push (@cmds, {
     setting => 'uri_country_db_path',
+    is_admin => 1,
     default => undef,
     type => $Mail::SpamAssassin::Conf::CONF_TYPE_STRING,
     code => sub {
@@ -4455,6 +4463,7 @@ search for default filenames.
   # support deprecated URILocalBL setting
   push (@cmds, {
     setting => 'uri_country_db_isp_path',
+    is_admin => 1,
     default => undef,
     type => $Mail::SpamAssassin::Conf::CONF_TYPE_STRING,
     code => sub {
