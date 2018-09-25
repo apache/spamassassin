@@ -259,28 +259,28 @@ sub parse {
   while (defined ($line = shift @conf_lines)) {
     local ($1);         # bug 3838: prevent random taint flagging of $1
 
-   if (index($line,'#') > -1) {
-    # bug 5545: used to support testing rules in the ruleqa system
-    if ($keepmetadata && $line =~ /^\#testrules/) {
-      $self->{file_scoped_attrs}->{testrules}++;
-      next;
-    }
-
-    # bug 6800: let X-Spam-Checker-Version also show what sa-update we are at
-    if ($line =~ /^\# UPDATE version (\d+)$/) {
-      for ($self->{currentfile}) {  # just aliasing, not a loop
-        $conf->{update_version}{$_} = $1  if defined $_ && $_ ne '(no file)';
+    if (index($line,'#') > -1) {
+      # bug 5545: used to support testing rules in the ruleqa system
+      if ($keepmetadata && $line =~ /^\#testrules/) {
+        $self->{file_scoped_attrs}->{testrules}++;
+        next;
       }
+
+      # bug 6800: let X-Spam-Checker-Version also show what sa-update we are at
+      if ($line =~ /^\# UPDATE version (\d+)$/) {
+        for ($self->{currentfile}) {  # just aliasing, not a loop
+          $conf->{update_version}{$_} = $1  if defined $_ && $_ ne '(no file)';
+        }
+      }
+
+      $line =~ s/(?<!\\)#.*$//; # remove comments
+      $line =~ s/\\#/#/g; # hash chars are escaped, so unescape them
     }
 
-    $line =~ s/(?<!\\)#.*$//; # remove comments
-    $line =~ s/\\#/#/g; # hash chars are escaped, so unescape them
-   }
-
-   if ($line =~ tr{ \t\r\n\f}{}) {
-    $line =~ s/^\s+//;  # remove leading whitespace
-    $line =~ s/\s+$//;  # remove tailing whitespace
-  }
+    if ($line =~ tr{ \t\r\n\f}{}) {
+      $line =~ s/^\s+//;  # remove leading whitespace
+      $line =~ s/\s+$//;  # remove tailing whitespace
+    }
     next unless($line); # skip empty lines
 
     # handle i18n
