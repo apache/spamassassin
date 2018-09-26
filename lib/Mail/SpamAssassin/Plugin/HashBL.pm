@@ -66,7 +66,14 @@ sub new {
     my $self = $class->SUPER::new($mailsa);
     bless ($self, $class);
 
-    $self->{hashbl_available} = 1;
+    # are network tests enabled?
+    if ($mailsa->{local_tests_only}) {
+      $self->{hashbl_available} = 0;
+      dbg("local tests only, disabling HashBL");
+    } else {
+      $self->{hashbl_available} = 1;
+    }
+
     $self->set_config($mailsa->{conf});
     $self->register_eval_rule("check_hashbl_emails");
 
