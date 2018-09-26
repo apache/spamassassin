@@ -130,8 +130,8 @@ sub init_database {
   my $geodb_dbs = $opts->{conf}->{options} || {};
   my $geodb_wanted = $opts->{wanted} || {};
 
-  my @geoip_search_path = defined $opts->{conf}->{geoip_search_path} ?
-    @{$opts->{conf}->{geoip_search_path}} : @geoip_default_path;
+  my @geoip_search_path = defined $opts->{conf}->{geodb_search_path} ?
+    @{$opts->{conf}->{geodb_search_path}} : @geoip_default_path;
 
   my $db;
   my $dbapi;

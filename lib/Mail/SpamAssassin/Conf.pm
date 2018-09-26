@@ -4358,7 +4358,7 @@ I<asn> - try loading ASN database
 Append full database path with colon, for example:
 I<isp:/opt/geoip/isp.mmdb>
 
-Plugins can internally request all types they require, geoip_options is only
+Plugins can internally request all types they require, geodb_options is only
 needed if the default location search (described below) does not work.
 
 GeoIP/GeoIP2 searches these files/directories:
@@ -4406,24 +4406,24 @@ GeoIP/GeoIP2 searches these files/directories:
 
 =item geodb_search_path /path/to/GeoIP ...
 
-Alternative to geoip_options. Overrides the default list of directories to
+Alternative to geodb_options. Overrides the default list of directories to
 search for default filenames.
 
 =cut
 
   push (@cmds, {
-    setting => 'geoip_search_path',
+    setting => 'geodb_search_path',
     is_admin => 1,
     default => [],
     type => $CONF_TYPE_STRINGLIST,
     code => sub {
       my ($self, $key, $value, $line) = @_;
       if ($value eq 'reset') {
-        $self->{geodb}->{geoip_search_path} = [];
+        $self->{geodb}->{geodb_search_path} = [];
       } elsif ($value eq '') {
         return $MISSING_REQUIRED_VALUE;
       } else {
-        push(@{$self->{geodb}->{geoip_search_path}}, split(/\s+/, $value));
+        push(@{$self->{geodb}->{geodb_search_path}}, split(/\s+/, $value));
       }
     }
   });

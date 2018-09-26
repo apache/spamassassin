@@ -21,7 +21,8 @@ Note for Users Upgrading to SpamAssassin 4.0.0
 
 - New internal Mail::SpamAssassin::GeoDB module that provides unified interface to
   modules GeoIP2::Database::Reader, Geo::IP, IP::Country::DB_File, IP::Country::Fast.
-  Utilized by RelayCountry and URILocalBL.
+  Utilized by RelayCountry and URILocalBL. Settings geodb_module, geodb_options,
+  geodb_search_path.
 
 
 
