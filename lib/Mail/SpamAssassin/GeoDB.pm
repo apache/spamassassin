@@ -582,10 +582,10 @@ sub init_database {
   }
 
   # country can be aliased to city
-  if (!$self->{country} && $dbapi->{city}) {
+  if (!$dbapi->{country} && $dbapi->{city}) {
     $dbapi->{country} = $dbapi->{city};
   }
-  if (!$self->{country_v6} && $dbapi->{city_v6}) {
+  if (!$dbapi->{country_v6} && $dbapi->{city_v6}) {
     $dbapi->{country_v6} = $dbapi->{city_v6}
   }
 
