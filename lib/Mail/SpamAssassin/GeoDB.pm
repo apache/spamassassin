@@ -222,7 +222,7 @@ sub init_database {
     };
 
     # city()
-    $db->{city} and $dbapi->{city} = sub {
+    $db->{city} and $dbapi->{city} = $dbapi->{city_v6} = sub {
       my $res = {};
       my $city;
       eval {
@@ -245,7 +245,7 @@ sub init_database {
     };
 
     # country()
-    $db->{country} and $dbapi->{country} = sub {
+    $db->{country} and $dbapi->{country} = $dbapi->{country_v6} = sub {
       my $res = {};
       my $country;
       eval {
@@ -267,7 +267,7 @@ sub init_database {
     };
 
     # isp()
-    $db->{isp} and $dbapi->{isp} = sub {
+    $db->{isp} and $dbapi->{isp} = $dbapi->{isp_v6} = sub {
       my $res = {};
       my $isp;
       eval {
@@ -289,7 +289,7 @@ sub init_database {
     };
 
     # asn()
-    $db->{asn} and $dbapi->{asn} = sub {
+    $db->{asn} and $dbapi->{asn} = $dbapi->{asn_v6} = sub {
       my $res = {};
       my $asn;
       eval {
@@ -444,6 +444,7 @@ sub init_database {
       $res->{continent} = $city->continent_code;
       return $res;
     };
+    $dbapi->{city_v6} = $dbapi->{city} if $db->{city_v6};
 
     # country()
     $db->{country} and $dbapi->{country} = sub {
@@ -465,6 +466,7 @@ sub init_database {
       $res->{continent} = $country_to_continent{$country} || 'XX';
       return $res;
     };
+    $dbapi->{country_v6} = $dbapi->{country} if $db->{country_v6};
 
     # isp()
     $db->{isp} and $dbapi->{isp} = sub {
@@ -519,7 +521,7 @@ sub init_database {
     };
 
     # country();
-    $db->{country} and $dbapi->{country} = sub {
+    $db->{country} and $dbapi->{country} = $dbapi->{country_v6} = sub {
       my $res = {};
       my $country;
       if ($_[1] =~ /^$IPV4_ADDRESS$/o) {
@@ -577,6 +579,14 @@ sub init_database {
   if (!%$db) {
     dbg("geodb: No supported database could be loaded");
     die("No supported GeoDB database could be loaded\n");
+  }
+
+  # country can be aliased to city
+  if (!$self->{country} && $dbapi->{city}) {
+    $dbapi->{country} = $dbapi->{city};
+  }
+  if (!$self->{country_v6} && $dbapi->{city_v6}) {
+    $dbapi->{country_v6} = $dbapi->{city_v6}
   }
 
   $self->{db} = $db;
@@ -700,17 +710,21 @@ sub get_all {
 
 sub can {
   my ($self, $check) = @_;
-  return $self->{dbapi}->{$check};
+
+  return defined $self->{dbapi}->{$check};
 }
 
-# TODO: use SA internal dns
+# TODO: use SA internal dns synchronously?
 # This shouldn't be called much, as plugins
 # should do their own resolving if needed
 sub name_to_ip {
   my $name = shift;
   if (my $ip = inet_aton($name)) {
-    return inet_ntoa($ip);
+    $ip = inet_ntoa($ip);
+    dbg("geodb: resolved internally $name: $ip");
+    return $ip;
   }
+  dbg("geodb: failed to internally resolve $name");
   return undef;
 }
 
