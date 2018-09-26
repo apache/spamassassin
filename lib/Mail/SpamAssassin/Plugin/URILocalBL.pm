@@ -122,7 +122,10 @@ use version;
 
 our @ISA = qw(Mail::SpamAssassin::Plugin);
 
-sub dbg { Mail::SpamAssassin::Plugin::dbg ("URILocalBL: @_"); }
+sub dbg {
+  my $str = shift;
+  Mail::SpamAssassin::Plugin::dbg ("URILocalBL: $str", @_);
+}
 
 my $IP_ADDRESS = IP_ADDRESS;
 
@@ -331,11 +334,8 @@ sub finish_parsing_end {
   }
 }
 
-sub check_uri_local_bl {
+sub _init_geodb {
   my ($self, $pms) = @_;
-
-  return 0 if $self->{urilocalbl_disabled};
-
   if (!$self->{geodb}) {
     eval {
       $self->{geodb} = Mail::SpamAssassin::GeoDB->new({
@@ -349,14 +349,21 @@ sub check_uri_local_bl {
       return 0;
     }
   }
-  my $geodb = $self->{geodb};
+  return 1;
+}
+
+sub check_uri_local_bl {
+  my ($self, $pms) = @_;
+
+  return 0 if $self->{urilocalbl_disabled};
+  return 0 if !$self->_init_geodb($pms);
 
   my $rulename = $pms->get_current_eval_rule_name();
   my $ruleconf = $pms->{conf}->{urilocalbl}->{$rulename};
 
   dbg("running $rulename");
 
-  my @addrs;
+  my %found_hosts;
 
   foreach my $info (values %{$pms->get_uri_detail_list()}) {
     next unless $info->{hosts};
@@ -370,105 +377,160 @@ sub check_uri_local_bl {
         dbg("excluded $host, domain $domain matches");
         next HOST;
       }
-
-      if ($host !~ /^$IP_ADDRESS$/o) {
-        # this would be best cached from prior lookups
-        # TODO async extract_metadata lookup
-        @addrs = gethostbyname($host);
-        # convert to string values address list
-        @addrs = map { inet_ntoa($_); } @addrs[4..$#addrs];
-        if (@addrs) {
-          dbg("$host IP-addresses: ".join(', ', @addrs));
-        } else {
-          dbg("$host failed to resolve IP-addresses");
+      if ($host =~ /^$IP_ADDRESS$/o) {
+        if ($self->_check_host($pms, $rulename, $host, [$host])) {
+          # if hit, rule is done
+          return 0;
         }
       } else {
-        @addrs = ($host);
+        # do host lookups only after all IPs are checked, since they
+        # don't need resolving..
+        $found_hosts{$host} = 1;
       }
+    }
+  }
 
-      next HOST unless @addrs;
+  foreach my $host (keys %found_hosts) {
+    # launch dns
+    $pms->{async}->bgsend_and_start_lookup("$host.", 'A', undef,
+      { key => "urilocalbl:$host:A", host => $host, rulename => $rulename },
+      sub { my($ent, $pkt) = @_;
+            $self->_finish_lookup($pms, $ent, $pkt); },
+      master_deadline => $pms->{master_deadline}
+    );
+    # also IPv6 if database supports
+    $pms->{async}->bgsend_and_start_lookup("$host.", 'AAAA', undef,
+      { key => "urilocalbl:$host:AAAA", host => $host, rulename => $rulename },
+      sub { my($ent, $pkt) = @_;
+            $self->_finish_lookup($pms, $ent, $pkt); },
+      master_deadline => $pms->{master_deadline}
+    ) if $self->{geodb}->can('country_v6');
+  }
+}
 
-      foreach my $ip (@addrs) {
-        if (defined $ruleconf->{exclusions}{$ip}) {
-          dbg("excluded $host, IP $ip matches");
-          next HOST;
-        }
+sub _finish_lookup {
+  my ($self, $pms, $ent, $pkt) = @_;
+
+  my $rulename = $ent->{rulename};
+  my $host = $ent->{host};
+
+  # Skip duplicate A / AAAA matches
+  return if $pms->{urilocalbl_finished}->{$rulename};
+
+  if (!$pkt) {
+      # $pkt will be undef if the DNS query was aborted (e.g. timed out)
+      dbg("host lookup failed: $rulename $host");
+      return;
+  }
+
+  my @answer = $pkt->answer;
+  my @addrs;
+  foreach my $rr (@answer) {
+    if ($rr->type eq 'A' || $rr->type eq 'AAAA') {
+      push @addrs, $rr->address;
+    }
+  }
+
+  if (@addrs) {
+    if ($self->_check_host($pms, $rulename, $host, \@addrs)) {
+      $pms->register_async_rule_finish($rulename);
+      $pms->{urilocalbl_finished}->{$rulename} = 1;
+    }
+  }
+}
+
+sub _check_host {
+  my ($self, $pms, $rulename, $host, $addrs) = @_;
+
+  my $ruleconf = $pms->{conf}->{urilocalbl}->{$rulename};
+
+  if ($host ne $addrs->[0]) {
+    dbg("resolved $host: ".join(', ', @$addrs));
+  }
+
+  foreach my $ip (@$addrs) {
+    if (defined $ruleconf->{exclusions}{$ip}) {
+      dbg("excluded $host, IP $ip matches");
+      return 1;
+    }
+  }
+
+  if (defined $ruleconf->{countries}) {
+    my $neg = defined $ruleconf->{countries_neg};
+    my $testcc = join(' ', sort keys %{$ruleconf->{countries}});
+    if ($neg) {
+      dbg("checking $host for any country except: $testcc");
+    } else {
+      dbg("checking $host for countries: $testcc");
+    }
+    foreach my $ip (@$addrs) {
+      my $cc = $self->{geodb}->get_country($ip);
+      if ( (!$neg && defined $ruleconf->{countries}{$cc}) ||
+           ($neg && !defined $ruleconf->{countries}{$cc}) ) {
+        dbg("$host ($ip) country $cc - HIT");
+        $pms->test_log("Host: $host in country $cc");
+        $pms->got_hit($rulename, "");
+        return 1;
+      } else {
+        dbg("$host ($ip) country $cc - ".($neg ? "excluded" : "no match"));
       }
+    }
+  }
 
-      if (defined $ruleconf->{countries}) {
-        my $neg = defined $ruleconf->{countries_neg};
-        my $testcc = join(' ', sort keys %{$ruleconf->{countries}});
-        if ($neg) {
-          dbg("checking $host for any country except: $testcc");
+  if (defined $ruleconf->{continents}) {
+    my $neg = defined $ruleconf->{continents_neg};
+    my $testcont = join(' ', sort keys %{$ruleconf->{continents}});
+    if ($neg) {
+      dbg("checking $host for any continent except: $testcont");
+    } else {
+      dbg("checking $host for continents: $testcont");
+    }
+    foreach my $ip (@$addrs) {
+      my $cc = $self->{geodb}->get_continent($ip);
+      if ( (!$neg && defined $ruleconf->{continents}{$cc}) ||
+           ($neg && !defined $ruleconf->{continents}{$cc}) ) {
+        dbg("$host ($ip) continent $cc - HIT");
+        $pms->test_log("Host: $host in continent $cc");
+        $pms->got_hit($rulename, "");
+        return 1;
+      } else {
+        dbg("$host ($ip) continent $cc - ".($neg ? "excluded" : "no match"));
+      }
+    }
+  }
+
+  if (defined $ruleconf->{isps}) {
+    if ($self->{geodb}->can('isp')) {
+      my $testisp = join(', ', map {"\"$_\""} sort values %{$ruleconf->{isps}});
+      dbg("checking $host for isps: $testisp");
+
+      foreach my $ip (@$addrs) {
+        my $isp = $self->{geodb}->get_isp($ip);
+        next unless defined $isp;
+        my $ispkey = uc($isp); $ispkey =~ s/\s+//gs;
+        if (defined $ruleconf->{isps}{$ispkey}) {
+          dbg("$host ($ip) isp \"$isp\" - HIT");
+          $pms->test_log("Host: $host in isp $isp");
+          $pms->got_hit($rulename, "");
+          return 1;
         } else {
-          dbg("checking $host for countries: $testcc");
-        }
-        foreach my $ip (@addrs) {
-          my $cc = $geodb->get_country($ip);
-          if ( (!$neg && defined $ruleconf->{countries}{$cc}) ||
-               ($neg && !defined $ruleconf->{countries}{$cc}) ) {
-            dbg("$host ($ip) country $cc - HIT");
-            $pms->test_log("Host: $host in country $cc");
-            return 1; # hit
-          } else {
-            dbg("$host ($ip) country $cc - ".($neg ? "excluded" : "no match"));
-          }
+          dbg("$host ($ip) isp $isp - no match");
         }
       }
+    } else {
+      dbg("skipping ISP check, GeoDB database not loaded");
+    }
+  }
 
-      if (defined $ruleconf->{continents}) {
-        my $neg = defined $ruleconf->{continents_neg};
-        my $testcont = join(' ', sort keys %{$ruleconf->{continents}});
-        if ($neg) {
-          dbg("checking $host for any continent except: $testcont");
-        } else {
-          dbg("checking $host for continents: $testcont");
-        }
-        foreach my $ip (@addrs) {
-          my $cc = $geodb->get_continent($ip);
-          if ( (!$neg && defined $ruleconf->{continents}{$cc}) ||
-               ($neg && !defined $ruleconf->{continents}{$cc}) ) {
-            dbg("$host ($ip) continent $cc - HIT");
-            $pms->test_log("Host: $host in continent $cc");
-            return 1; # hit
-          } else {
-            dbg("$host ($ip) continent $cc - ".($neg ? "excluded" : "no match"));
-          }
-        }
-      }
-
-      if (defined $ruleconf->{isps}) {
-        if ($geodb->can('isp')) {
-          my $testisp = join(', ', map {"\"$_\""} sort values %{$ruleconf->{isps}});
-          dbg("checking $host for isps: $testisp");
-
-          foreach my $ip (@addrs) {
-            my $isp = $geodb->get_isp($ip);
-            next unless defined $isp;
-            my $ispkey = uc($isp); $ispkey =~ s/\s+//gs;
-            if (defined $ruleconf->{isps}{$ispkey}) {
-              dbg("$host ($ip) isp \"$isp\" - HIT");
-              $pms->test_log("Host: $host in isp $isp");
-              return 1; # hit
-            } else {
-              dbg("$host ($ip) isp $isp - no match");
-            }
-          }
-        } else {
-          dbg("skipping ISP check, GeoDB database not loaded");
-        }
-      }
-
-      if (defined $ruleconf->{netset}) {
-        foreach my $ip (@addrs) {
-          if ($ruleconf->{netset}->contains_ip($ip)) {
-            dbg("$host ($ip) matches cidr - HIT");
-            $pms->test_log("Host: $host in cidr");
-            return 1; # hit
-          } else {
-            dbg("$host ($ip) not matching cidr");
-          }
-        }
+  if (defined $ruleconf->{netset}) {
+    foreach my $ip (@$addrs) {
+      if ($ruleconf->{netset}->contains_ip($ip)) {
+        dbg("$host ($ip) matches cidr - HIT");
+        $pms->test_log("Host: $host in cidr");
+        $pms->got_hit($rulename, "");
+        return 1;
+      } else {
+        dbg("$host ($ip) not matching cidr");
       }
     }
   }
