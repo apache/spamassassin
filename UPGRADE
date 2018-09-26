@@ -8,6 +8,8 @@ Note for Users Upgrading to SpamAssassin 4.0.0
   supported anymore (Net::CIDR::Lite -> Mail::SpamAssassin::NetSet)
   (maybe fixable in NetSet before 4.0.0 released)
 
+- URILocalBL: IPv6 lookups for hosts, if supported by used database
+
 - DNS lookups are launched when priority -100 reached. This allows
   shortcircuiting at lower priority without sending unneeded DNS queries.
   NOTE: Don't use shortcircuiting for meta rules with priority <-100,
