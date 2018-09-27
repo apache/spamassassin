@@ -440,6 +440,15 @@ sub new {
     $self->{username} = (Mail::SpamAssassin::Util::portable_getpwuid ($>))[0];
   }
 
+  # Try if our localstate_dir is writable (useful info for some plugins etc)
+  {  
+    my $n = ".sawritetest$$".Mail::SpamAssassin::Util::pseudo_random_string(6);
+    my $file = File::Spec->catdir($self->{LOCAL_STATE_DIR}, $n);
+    $self->{local_state_is_writable} =
+      Mail::SpamAssassin::Util::touch_file($file, { create_exclusive => 1 });
+    unlink($file);
+  }
+
   $self->create_locker();
 
   $self;
@@ -1910,6 +1919,14 @@ sub get_and_create_userstate_dir {
   $fname;
 }
 
+# try to find the most global writable state dir available
+sub get_writable_state_dir {
+  my ($self) = @_;
+  return $self->{local_state_is_writable} ?
+      $self->{LOCAL_STATE_DIR} :
+      $self->get_and_create_userstate_dir() || '';
+}
+
 =item $fullpath = $f->find_rule_support_file ($filename)
 
 Find a rule-support file, such as C<languages> or C<triplets.txt>,
@@ -2037,6 +2054,7 @@ sub sed_path {
   $path =~ s{__userstate__}{$self->get_and_create_userstate_dir() || ''}ges;
   $path =~ s{__perl_major_ver__}{$self->get_perl_major_version()}ges;
   $path =~ s/__version__/${VERSION}/gs;
+  $path =~ s/__writable_state_dir__/$self->get_writable_state_dir()/ges;
   $path =~ s/^\~([^\/]*)/$self->expand_name($1)/es;
 
   $path = Mail::SpamAssassin::Util::untaint_file_path ($path);

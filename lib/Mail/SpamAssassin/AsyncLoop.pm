@@ -342,7 +342,7 @@ sub bgsend_and_start_lookup {
     }
     if (!$blocked && $check_dbrdom) {
       my $blockfile =
-        $self->{main}->sed_path("__userstate__/dnsblock_${check_dbrdom}");
+        $self->{main}->sed_path("__writable_state_dir__/dnsblock_${check_dbrdom}");
       if (my $mtime = (stat($blockfile))[9]) {
         if (time - $mtime <= $self->{main}->{conf}->{dns_block_time}) {
           $blocked = 1;
