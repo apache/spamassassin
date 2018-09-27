@@ -1267,6 +1267,15 @@ sub touch_file {
 
 ###########################################################################
 
+sub pseudo_random_string {
+  my $len = shift || 6;
+  my $str = '';
+  $str .= (0..9,'A'..'Z','a'..'z')[rand 62] for (1 .. $len);
+  return $str;
+}
+
+###########################################################################
+
 =item my ($filepath, $filehandle) = secure_tmpfile();
 
 Generates a filename for a temporary file, opens it exclusively and
@@ -1290,8 +1299,7 @@ sub secure_tmpfile {
   for (my $retries = 20; $retries > 0; $retries--) {
     # we do not rely on the obscurity of this name for security,
     # we use a average-quality PRG since this is all we need
-    my $suffix = join('', (0..9,'A'..'Z','a'..'z')[rand 62, rand 62, rand 62,
-						   rand 62, rand 62, rand 62]);
+    my $suffix = pseudo_random_string(6);
     $reportfile = File::Spec->catfile($tmpdir,".spamassassin${$}${suffix}tmp");
 
     # instead, we require O_EXCL|O_CREAT to guarantee us proper
