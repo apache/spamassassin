@@ -68,22 +68,25 @@ INTERNAL_NETWORKS=""
 # .. created as runtime rules/99_custom.cf
 #CUSTOM_RULES="$HOME/custom_rules.cf"
 
+# Use --after selector for corpus to prevent unnecessary processing.
+# Current ruleqa settings: ham 6 years, spam 2 months
+# Anything older than that will be ignored by ruleqa regardless.
 run_all_masschecks() {
   ### sample: single corpus ###
   run_masscheck single-corpus \
-          ham:dir:/path/to/Maildir/.Ham/ \
-          spam:dir:/path/to/Maildir/.Spam/
+          --after=-174182400 ham:dir:/path/to/Maildir/.Ham/ \
+          --after=-4838400 spam:dir:/path/to/Maildir/.Spam/
 
   # If you have multiple separate corpuses, you can specify as many run_masscheck lines as you want below.
   ### user2 ###
   #run_masscheck user2 \
-  #             ham:mbox:/home/user2/mail/HAM \
-  #             spam:mbox:/home/user2/mail/SPAM \
+  #             --after=-174182400 ham:mbox:/home/user2/mail/HAM \
+  #             --after=-4838400 spam:mbox:/home/user2/mail/SPAM \
   # This is an example of Maildir instead of mbox
   ### user3 ###
   #run_masscheck user3 \
-  #             ham:dir:/home/user3/mail/HAM/cur \
-  #             spam:dir:/home/user3/mail/SPAM/cur
+  #             --after=-174182400 ham:dir:/home/user3/mail/HAM/cur \
+  #             --after=-4838400 spam:dir:/home/user3/mail/SPAM/cur
 }
 
 ### END CONFIGURATION ###
