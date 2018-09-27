@@ -56,7 +56,7 @@ our @EXPORT = ();
 our @EXPORT_OK = qw(&local_tz &base64_decode &base64_encode
                   &untaint_var &untaint_file_path
                   &exit_status_str &proc_status_ok &am_running_on_windows
-                  &reverse_ip_address &decode_dns_question_entry
+                  &reverse_ip_address &decode_dns_question_entry &touch_file
                   &secure_tmpfile &secure_tmpdir &uri_list_canonicalize
                   &get_my_locales &parse_rfc822_date &idn_to_ascii
                   &is_valid_utf_8 &get_user_groups);
@@ -1224,6 +1224,45 @@ sub first_available_module {
     }
   }
   undef;
+}
+
+###########################################################################
+
+=item touch_file(file, { args });
+
+Touch or create a file.
+
+Possible args:
+
+create_exclusive => 1
+  Create a new empty file safely, only if not existing before
+
+=cut
+
+sub touch_file {
+  my ($file, $args) = @_;
+
+  $file = untaint_file_path($file);
+  $args ||= {};
+
+  return unless defined $file && $file ne '';
+
+  if ($args->{create_exclusive}) {
+    if (sysopen(my $fh, $file, O_CREAT|O_EXCL)) {
+      close $fh;
+      return 1;
+    }
+    return 1 if $! == EEXIST; # fine if it exists already
+    dbg("util: exclusive touch_file failed: $file: $!");
+    return 0;
+  }
+
+  if (!utime(undef,undef,$file)) {
+    dbg("util: touch_file failed: $file: $!");
+    return 0;
+  }
+
+  return 1;
 }
 
 ###########################################################################
